@@ -1,11 +1,13 @@
 @doc raw"""
-    change_gradient(M::Hyperbolic, ::EuclideanMetric, p, X)
+    change_representer(M::Hyperbolic, ::EuclideanMetric, p, X)
 
 Change a Eucliden gradient from the embedding that was already projected onto the tangent space at `p`.
 We only have to correct for the metric, which means that the sign of the last entry changes.
 """
-function change_gradient(::Hyperbolic, ::EuclideanMetric, p, X)
-    Y = copy(M, p, X)
+change_representer(::Hyperbolic, ::EuclideanMetric, ::Any, ::Any)
+
+function change_representer!(::Hyperbolic, Y, ::EuclideanMetric, p, X)
+    copyto!(M, Y, p, X)
     Y[end] *= -1
     return Y
 end

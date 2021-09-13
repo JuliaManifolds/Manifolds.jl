@@ -136,19 +136,21 @@ function ProductVectorTransport(methods::AbstractVectorTransportMethod...)
 end
 
 """
-    change_gradient(M::ProductManifold, ::AbstractMetric, p, X)
+    change_representer(M::ProductManifold, ::AbstractMetric, p, X)
 
 Since the metric on a product manifold decouples, the change of a representer can be done elementwise
 """
-function change_gradient(M::ProductManifold, G::AbstractMetric, p, X)
-    return ProductRepr(
-        map(
-            (Mc, pc, Cx) -> change_gradient(Mc, G, pc, Xc),
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-        )...,
+change_representer(::ProductManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_representer!(M::ProductManifold, Y, G::AbstractMetric, p, X)
+    map(
+        (m, y, P, x) -> change_representer!(m, y, G, P, x),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
     )
+    return Y
 end
 
 """
@@ -156,15 +158,17 @@ end
 
 Since the metric on a product manifold decouples, the change of a representer can be done elementwise
 """
-function change_metric(M::ProductManifold, G::AbstractMetric, p, X)
-    return ProductRepr(
-        map(
-            (Mc, pc, Cx) -> change_metric(Mc, G, pc, Xc),
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-        )...,
+change_metric(::ProductManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_metric!(M::ProductManifold, Y, G::AbstractMetric, p, X)
+    map(
+        (m, y, P, x) -> change_metric!(m, y, G, P, x),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
     )
+    return Y
 end
 
 """

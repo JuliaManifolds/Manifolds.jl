@@ -52,18 +52,11 @@ inner product ``g(X, X) > 0`` whenever ``X`` is not the zero vector.
 abstract type RiemannianMetric <: AbstractMetric end
 
 @doc raw"""
-    change_gradient(M::AbstractManifold, G2::AbstractMetric, p, X)
+    change_representer(M::AbstractManifold, G2::AbstractMetric, p, X)
 
-Convert the gradient `X` at `p` on the[`AbstractManifold`](@ref) `M` from one metric to another.
-
-Assume that for a real-valued function ``f: \mathcal M \to ℝ`` the input `X` is the gradient or in
-other words the [Riesz representer](https://en.wikipedia.org/wiki/Riesz_representation_theorem#Riesz_representation_theorem) of the differential ``Df(p)``` with respect to the metric ``g_2`` i.e.
-
-```math
-    g_2(X,Y) = Df(p)[Y] \quad \text{for all } Y ∈ T_p\mathcal M.
-```
-
-(It could actually also be the Riesz representer of _any_ linear function, not just ``Df(p)``).
+Convert the representer `X` of a linear function (in other words a cotangent vector at `p`)
+in the tangent space at `p` on the[`AbstractManifold`](@ref) `M` given with respect to the
+[`AbstractMetric`](@ref) `G2` into the representer with respect to the (implicit) metric of `M`.
 
 In order to convert this into the gradient with respect to the (implicitly given) metric ``g_1`` of `M`,
 we have to find the conversion function ``c: T_p\mathcal M \to \T_p\mathcal M`` such that
@@ -80,31 +73,50 @@ the same basis of the tangent space, the equation reads
    x^{\mathrm{H}}G_2y = c(x)^{\mathrm{H}}G_1 y \quad \text{for all } y \in ℝ^d,
 ```
 where `\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
+We obtain ``c(X) = (G_1\backslash G_2)^{\mathrm{H}X``
 
-and we obtain ``c(X) = (G_1\backslash G_2)^{\mathrm{H}X``
+For example `X` could be the gradient ``\operatorname{grad}f`` of a real-valued function
+``f: \mathcal M \to ℝ``, i.e.
+
+```math
+    g_2(X,Y) = Df(p)[Y] \quad \text{for all } Y ∈ T_p\mathcal M.
+```
+
+and we would change the Riesz representer of the gradient to the representer with respect to the metric ``g_1``.
 
 # Examples
 
-    change_gradient(Sphere(2), EuclideanMetric(), p, X)
+    change_representer(Sphere(2), EuclideanMetric(), p, X)
 
 Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
 
-    change_gradient(SymmetricPOsitiveDefinite(3), EuclideanMetric(), p, X)
+    change_representer(SymmetricPositiveDefinite(3), EuclideanMetric(), p, X)
 
-Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``pXp``
+Here, the default metric in ``\mathcal P(3)`` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``pXp``
 """
-change_gradient(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
+change_representer(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
 
-function change_gradient(M::AbstractManifold, G::AbstractMetric, p, X)
-    Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
-    change_gradient!(M, G, Y, p, X)
+function change_representer(M::AbstractManifold, G::AbstractMetric, p, X)
+    Y = allocate_result(M, change_representer, X, p) # this way we allocate a tangent
+    return change_representer!(M, G, Y, p, X)
 end
 
-@decorator_transparent_signature change_gradient(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
-@decorator_transparent_signature change_gradient!(M::AbstractDecoratorManifold, Y, G::AbstractMetric, X, p)
+@decorator_transparent_signature change_representer(
+    M::AbstractDecoratorManifold,
+    G::AbstractMetric,
+    X,
+    p,
+)
+@decorator_transparent_signature change_representer!(
+    M::AbstractDecoratorManifold,
+    Y,
+    G::AbstractMetric,
+    X,
+    p,
+)
 
-
-function change_gradient(M::AbstractManifold, G::AbstractMetric, p, X)
+# Default fallback I: compute in local metric representations
+function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     is_default_metric(M, G) && return copyto!(M, Y, p, X)
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
@@ -115,7 +127,8 @@ function change_gradient(M::AbstractManifold, G::AbstractMetric, p, X)
     return get_vector!(M, Y, p, z, B)
 end
 
-function change_gradient!(
+# Default fallback II: Identity if the metric is the same
+function change_representer!(
     ::MetricManifold{𝔽,M,G},
     Y,
     ::G,
@@ -151,14 +164,13 @@ Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embeddin
 
     change_metric(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
 
-Here, the default metric in `\mathcal P(3)` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``B=p``
-
+Here, the default metric in ``\mathcal P(3)`` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``B=p``
 """
 change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
 
 function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
     Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
-    change_metric!(M, G, Y, p, X)
+    return change_metric!(M, G, Y, p, X)
 end
 function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     is_default_metric(M, G) && return copyto!(M, Y, p, X)
@@ -173,8 +185,19 @@ function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     return get_vector!(M, Y, p, z, B)
 end
 
-@decorator_transparent_signature change_metric(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
-@decorator_transparent_signature change_metric!(M::AbstractDecoratorManifold, Y, G::AbstractMetric, X, p)
+@decorator_transparent_signature change_metric(
+    M::AbstractDecoratorManifold,
+    G::AbstractMetric,
+    X,
+    p,
+)
+@decorator_transparent_signature change_metric!(
+    M::AbstractDecoratorManifold,
+    Y,
+    G::AbstractMetric,
+    X,
+    p,
+)
 
 function change_metric!(
     ::MetricManifold{<:M,<:G},

@@ -54,22 +54,35 @@ function check_point(M::PositiveNumbers, p; kwargs...)
 end
 
 @doc raw"""
-    change_metric(M::PositiveNumbers, E::EuclideanMetric, p, X)
+    change_representer(M::PositiveNumbers, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal M``representing a gradient with respect to the [`EuclideanMetric`](@ref) `g_E`,
-this function changes into the positivity metric representation of
-[`PositiveNumbers`](@ref) `M` for the same gradient.
+Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect
+to the [`EuclideanMetric`](@ref) `g_E`, this function changes the representer into the one
+with respect to the positivity metric representation of
+[`PositiveNumbers`](@ref) `M`. It computes ``pX``.
 """
-change_gradient(::PositiveNumbers, ::EuclideanMetric, p, X) = p .* X .* p
+change_representer(::PositiveNumbers, ::EuclideanMetric, ::Any, ::Any)
+change_representer(::PositiveNumbers, p::Real, X::Real) = p * X
+
+function change_representer!(::PositiveNumbers, Y, ::EuclideanMetric, p, X)
+    Y .= p .* X .* p
+    return Y
+end
 
 @doc raw"""
-    change_metric(M::SymmetricPOsitiveDefinite, E::EuclideanMetric, p, X)
+    change_metric(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal M`` with respect to the [`EuclideanMetric`](@ref) `g_E`,
-this function changes into the positivity metric of [`PositiveNumbers`](@ref) `M` for the same gradient.
+Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect to
+the [`EuclideanMetric`](@ref) `g_E`,
+this function changes the representer into the one with respect to the positivity metric
+of [`PositiveNumbers`](@ref) `M`.
 """
-change_metric(::PositiveNumbers, ::EuclideanMetric, p, X) = p .* X
+change_metric(::PositiveNumbers, ::EuclideanMetric, ::Any, ::Any)
 
+function change_metric!(::PositiveNumbers, Y, ::EuclideanMetric, p, X)
+    Y .= p .* X
+    return Y
+end
 """
     check_vector(M::PositiveNumbers, p, X; kwargs...)
 

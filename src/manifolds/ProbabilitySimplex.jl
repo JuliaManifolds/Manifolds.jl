@@ -59,13 +59,17 @@ See for example the [`ProbabilitySimplex`](@ref).
 struct FisherRaoMetric <: AbstractMetric end
 
 """
-    change_gradient(M::ProbabilitySimplex, ::EuclideanMetric, ü, X)
+    change_representer(M::ProbabilitySimplex, ::EuclideanMetric, ü, X)
 
 Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](@ref),
 the representer of a linear functional on the tangent space is adapted as ``Z = p .* X``, since
 this “compensates” for the divsion by ``p`` in the Riemannian metric on the [`ProbabilitySimplex`](@ref)
 """
-change_gradient(::ProbabilitySimplex, ::EuclideanMetric, p, X) = p .* X
+change_representer(::ProbabilitySimplex, ::EuclideanMetric, ::Any, ::Any)
+
+function change_representer!(::ProbabilitySimplex, Y, ::EuclideanMetric, p, X)
+    return Y .= p .* X
+end
 
 """
     check_point(M::ProbabilitySimplex, p; kwargs...)

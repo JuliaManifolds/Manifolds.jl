@@ -1,33 +1,46 @@
 @doc raw"""
-    change_gradient(M::Hyperbolic{n}, ::EuclideanMetric, p::PoincareBallPoint, X::PoincareBallTVector)
+    change_representer(M::Hyperbolic{n}, ::EuclideanMetric, p::PoincareBallPoint, X::PoincareBallTVector)
 
 Since in the metric we always have the term `` α = \frac{2}{1-\sum_{i=1}^n p_i^2}`` per element,
 the correction for the gradient reads `` Z = \frac{1}{α^2}X``.
 """
-function change_gradient(
+change_representer(
     ::Hyperbolic,
+    ::EuclideanMetric,
+    ::PoincareBallPoint,
+    ::PoincareBallTVector,
+)
+
+function change_representer!(
+    ::Hyperbolic,
+    Y::PoincareBallTVector,
     ::EuclideanMetric,
     p::PoincareBallPoint,
     X::PoincareBallTVector,
 )
     α = 2 / (1 - norm(p.value)^2)
-    return PoincareBallTVector(X.value ./ α^2)
+    Y.value .= X.value ./ α^2
+    return Y
 end
 
 @doc raw"""
     change_metric(M::Hyperbolic{n}, ::EuclideanMetric, p::PoincareBallPoint, X::PoincareBallTVector)
 
 Since in the metric we always have the term `` α = \frac{2}{1-\sum_{i=1}^n p_i^2}`` per element,
-the correction for the metric reads `` Z = \frac{1}{α}X``.
+the correction for the metric reads ``Z = \frac{1}{α}X``.
 """
-function change_metric(
+change_metric(::Hyperbolic, ::EuclideanMetric, ::PoincareBallPoint, ::PoincareBallTVector)
+
+function change_metric!(
     ::Hyperbolic,
+    Y::PoincareBallTVector,
     ::EuclideanMetric,
     p::PoincareBallPoint,
     X::PoincareBallTVector,
 )
     α = 2 / (1 - norm(p.value)^2)
-    return PoincareBallTVector(X.value ./ α)
+    Y.value .= X.value ./ α
+    return Y
 end
 
 function check_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...) where {N}

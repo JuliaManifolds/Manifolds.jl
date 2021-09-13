@@ -7,13 +7,19 @@ matrix logarithms and exponentials, which yields a linear and affine metric.
 struct LinearAffineMetric <: RiemannianMetric end
 
 @doc raw"""
-    change_metric(M::SymmetricPOsitiveDefinite, E::EuclideanMetric, p, X)
+    change_representer(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal M``representing a gradient with respect to the [`EuclideanMetric`](@ref) `g_E`,
-this function changes into the [`LinearAffine`](@ref) (default) metric representation of
-[`SymmetricPOsitiveDefinite`](@ref) `M` for the same gradient.
+Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
+space at `p` with respect to the [`EuclideanMetric`](@ref) `g_E`,
+this is turned into the representer with respect to the (default) metric,
+the [`LinearAffineMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
 """
-change_gradient(::SymmetricPositiveDefinite, ::EuclideanMetric, p, X) = p * X * p
+change_representer(::SymmetricPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
+
+function change_representer!(::SymmetricPositiveDefinite, Y, ::EuclideanMetric, p, X)
+    Y .= p * X * p
+    return Y
+end
 
 @doc raw"""
     change_metric(M::SymmetricPOsitiveDefinite, E::EuclideanMetric, p, X)
@@ -22,7 +28,12 @@ Given a tangent vector ``X ∈ T_p\mathcal M`` with respect to the [`EuclideanMe
 this function changes into the [`LinearAffine`](@ref) (default) metric on the
 [`SymmetricPOsitiveDefinite`](@ref) `M`.
 """
-change_metric(::SymmetricPositiveDefinite, ::EuclideanMetric, p, X) = p * X
+change_metric(::SymmetricPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
+
+function change_metric!(::SymmetricPositiveDefinite, Y, ::EuclideanMetric, p, X)
+    Y .= p * X
+    return Y
+end
 
 default_metric_dispatch(::SymmetricPositiveDefinite, ::LinearAffineMetric) = Val(true)
 

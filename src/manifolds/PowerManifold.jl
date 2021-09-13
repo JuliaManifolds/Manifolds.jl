@@ -79,14 +79,22 @@ end
 default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
 
 """
-    change_gradient(M::AbstractPowerManifold, ::AbstractMetric, p, X)
+    change_representer(M::AbstractPowerManifold, ::AbstractMetric, p, X)
 
 Since the metric on a power manifold decouples, the change of a representer can be done elementwise
 """
-function change_gradient(M::AbstractPowerManifold, G::AbstractMetric, p, X)
-    Z = copy(M, p, X)
+change_representer(::AbstractPowerManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_representer!(M::AbstractPowerManifold, Y, G::AbstractMetric, p, X)
+    rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        Z[i...] = change_gradient(M.manifold, G, p[i...], X[i...])
+        change_representer!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            G,
+            _read(M, rep_size, P, i),
+            _read(M, rep_size, X, i),
+        )
     end
 end
 
@@ -95,10 +103,18 @@ end
 
 Since the metric on a power manifold decouples, the change of a representer can be done elementwise
 """
-function change_metric(::AbstractPowerManifold, M::AbstractMetric, p, X)
-    Z = copy(M, p, X)
+change_metric(M::AbstractPowerManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_metric!(M::AbstractPowerManifold, Y, ::AbstractMetric, p, X)
+    rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
-        Z[i...] = change_gradient(M.manifold, G, p[i...], X[i...])
+        change_metric!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            G,
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+        )
     end
 end
 
