@@ -59,7 +59,7 @@ in the tangent space at `p` on the[`AbstractManifold`](@ref) `M` given with resp
 [`AbstractMetric`](@ref) `G2` into the representer with respect to the (implicit) metric of `M`.
 
 In order to convert this into the gradient with respect to the (implicitly given) metric ``g_1`` of `M`,
-we have to find the conversion function ``c: T_p\mathcal M \to \T_p\mathcal M`` such that
+we have to find the conversion function ``c: T_p\mathcal M \to T_p\mathcal M`` such that
 
 ```math
     g_2(X,Y) = g_1(c(X),Y)
@@ -72,7 +72,7 @@ the same basis of the tangent space, the equation reads
 ```math
    x^{\mathrm{H}}G_2y = c(x)^{\mathrm{H}}G_1 y \quad \text{for all } y \in ℝ^d,
 ```
-where `\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
+where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
 We obtain ``c(X) = (G_1\backslash G_2)^{\mathrm{H}X``
 
 For example `X` could be the gradient ``\operatorname{grad}f`` of a real-valued function
