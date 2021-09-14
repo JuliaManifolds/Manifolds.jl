@@ -43,9 +43,6 @@ include("../utils.jl")
             @test Z == X
         end
         @testset "gradient and metric conversion" begin
-            B = [3.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 2.0]
-            M = GeneralizedGrassmann(3, 2, B)
-            p = [1.0 0.0; 0.0 0.5; 0.0 0.0]
             L = cholesky(B).L
             X = [0.0 0.0; 0.0 0.0; 1.0 -1.0]
             Y = change_metric(M, EuclideanMetric(), p, X)
@@ -57,28 +54,28 @@ include("../utils.jl")
         TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})
         X = [0.0 0.0; 1.0 0.0; 0.0 2.0]
         Y = [0.0 0.0; -1.0 0.0; 0.0 2.0]
-        @test inner(M, x, X, Y) == 0
-        y = retract(M, x, X)
-        z = retract(M, x, Y)
-        @test is_point(M, y)
-        @test is_point(M, z)
-        @test retract(M, x, X) == exp(M, x, X)
+        @test inner(M, p, X, Y) == 0
+        q = retract(M, p, X)
+        r = retract(M, p, Y)
+        @test is_point(M, q)
+        @test is_point(M, r)
+        @test retract(M, p, X) == exp(M, p, X)
 
-        a = project(M, x + X)
-        c = retract(M, x, X, ProjectionRetraction())
-        d = retract(M, x, X, PolarRetraction())
+        a = project(M, p + X)
+        c = retract(M, p, X, ProjectionRetraction())
+        d = retract(M, p, X, PolarRetraction())
         @test a == c
         @test c == d
         e = similar(a)
-        retract!(M, e, x, X)
-        @test e == exp(M, x, X)
-        @test vector_transport_to(M, x, X, y, ProjectionTransport()) == project(M, y, X)
+        retract!(M, e, p, X)
+        @test e == exp(M, p, X)
+        @test vector_transport_to(M, p, X, q, ProjectionTransport()) == project(M, q, X)
         @testset "Type $T" for T in types
-            pts = convert.(T, [x, y, z])
-            @test !is_point(M, 2 * x)
-            @test_throws DomainError !is_point(M, 2 * x, true)
-            @test !is_vector(M, x, y)
-            @test_throws DomainError is_vector(M, x, y, true)
+            pts = convert.(T, [p, q, r])
+            @test !is_point(M, 2 * p)
+            @test_throws DomainError !is_point(M, 2 * r, true)
+            @test !is_vector(M, p, q)
+            @test_throws DomainError is_vector(M, p, q, true)
             test_manifold(
                 M,
                 pts,

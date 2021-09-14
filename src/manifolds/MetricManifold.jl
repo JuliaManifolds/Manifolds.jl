@@ -610,7 +610,7 @@ for f in [
     )
 end
 
-for f in [change_metric, change_representer]
+for f in [change_metric, change_representer, change_metric!, change_representer!]
     eval(
         quote
             function decorator_transparent_dispatch(
@@ -623,7 +623,6 @@ for f in [change_metric, change_representer]
         end,
     )
 end
-
 function decorator_transparent_dispatch(
     ::typeof(christoffel_symbols_second),
     ::MetricManifold,

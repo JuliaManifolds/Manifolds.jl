@@ -6,7 +6,7 @@ We only have to correct for the metric, which means that the sign of the last en
 """
 change_representer(::Hyperbolic, ::EuclideanMetric, ::Any, ::Any)
 
-function change_representer!(::Hyperbolic, Y, ::EuclideanMetric, p, X)
+function change_representer!(M::Hyperbolic, Y, ::EuclideanMetric, p, X)
     copyto!(M, Y, p, X)
     Y[end] *= -1
     return Y

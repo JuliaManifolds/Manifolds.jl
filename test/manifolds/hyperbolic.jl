@@ -261,4 +261,11 @@ include("../utils.jl")
         @test isa(Z2, PoincareHalfSpaceTVector)
         @test Z2 == X2
     end
+    @testset "Metric conversion on Hyperboloid" begin
+        M = Hyperbolic(2)
+        p = [1.0, 1.0, sqrt(3)]
+        X = [1.0, 2.0, sqrt(3)]
+        Y = change_representer(M, EuclideanMetric(), p, X)
+        @test inner(M, p, X, Y) == inner(Euclidean(3), p, X, X)
+    end
 end
