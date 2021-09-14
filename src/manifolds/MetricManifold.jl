@@ -73,7 +73,7 @@ the same basis of the tangent space, the equation reads
    x^{\mathrm{H}}G_2y = c(x)^{\mathrm{H}}G_1 y \quad \text{for all } y \in ℝ^d,
 ```
 where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
-We obtain ``c(X) = (G_1\backslash G_2)^{\mathrm{H}X``
+We obtain ``c(X) = (G_1\backslash G_2)^{\mathrm{H}}X``
 
 For example `X` could be the gradient ``\operatorname{grad}f`` of a real-valued function
 ``f: \mathcal M \to ℝ``, i.e.
@@ -98,7 +98,7 @@ change_representer(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
 
 function change_representer(M::AbstractManifold, G::AbstractMetric, p, X)
     Y = allocate_result(M, change_representer, X, p) # this way we allocate a tangent
-    return change_representer!(M, G, Y, p, X)
+    return change_representer!(M, Y, G, p, X)
 end
 
 @decorator_transparent_signature change_representer(
@@ -170,7 +170,7 @@ change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
 
 function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
     Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
-    return change_metric!(M, G, Y, p, X)
+    return change_metric!(M, Y, G, p, X)
 end
 function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     is_default_metric(M, G) && return copyto!(M, Y, p, X)
@@ -602,6 +602,20 @@ for f in [
             function decorator_transparent_dispatch(
                 ::typeof($f),
                 ::AbstractConnectionManifold,
+                args...,
+            )
+                return Val(:parent)
+            end
+        end,
+    )
+end
+
+for f in [change_metric, change_representer]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractManifold,
                 args...,
             )
                 return Val(:parent)
