@@ -61,7 +61,14 @@ end
     change_representer(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
 
 Change `X` to the corresponding representer of the gradient with respect to the scaled metric
-of the [`GeneralizedGrassmann`](@ref) `M`, i.e. `M.B\X`.
+of the [`GeneralizedGrassmann`](@ref) `M`, i.e, since
+
+```math
+g_p(X,Y) = \operatorname{tr}(Y^{\mathrm{H}}BZ) = \operatorname{tr}(X^{\mathrm{H}}Z) = ⟨X,Z⟩
+```
+
+has to hold for all ``Z``, where the repreenter `X` is given, the resulting representer with
+respect to the metric on the [`GeneralizedGrassmann`](@ref) is given by ``Y = B^{-1}X``.
 """
 change_representer(::GeneralizedGrassmann, ::EuclideanMetric, ::Any, ::Any)
 
@@ -74,7 +81,6 @@ end
 
 Change `X` to the corresponding vector with respect to the metric of the [`GeneralizedGrassmann`](@ref) `M`,
 i.e. let ``B=LL'`` be the Cholesky decomposition of the matrix `M.B`, then the corresponding vector is ``L\X``.
-
 """
 change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, ::Any, ::Any)
 

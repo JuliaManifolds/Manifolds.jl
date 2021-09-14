@@ -4,7 +4,7 @@ include("../utils.jl")
     @testset "Real" begin
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
         M = GeneralizedGrassmann(3, 2, B)
-        x = [1.0 0.0; 0.0 0.5; 0.0 0.0]
+        p = [1.0 0.0; 0.0 0.5; 0.0 0.0]
         @testset "Basics" begin
             @test repr(M) ==
                   "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
@@ -13,36 +13,46 @@ include("../utils.jl")
             @test base_manifold(M) === M
             @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
             @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
-            @test !is_vector(M, x, [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_vector(M, x, [0.0, 0.0, 1.0, 0.0], true)
-            @test_throws DomainError is_vector(M, x, 1 * im * zero_vector(M, x), true)
+            @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
+            @test_throws DomainError is_vector(M, p, [0.0, 0.0, 1.0, 0.0], true)
+            @test_throws DomainError is_vector(M, p, 1 * im * zero_vector(M, p), true)
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
-            @test injectivity_radius(M, x) == π / 2
-            @test injectivity_radius(M, x, ExponentialRetraction()) == π / 2
-            @test mean(M, [x, x, x]) == x
+            @test injectivity_radius(M, p) == π / 2
+            @test injectivity_radius(M, p, ExponentialRetraction()) == π / 2
+            @test mean(M, [p, p, p]) == p
         end
         @testset "Embedding and Projection" begin
-            y = similar(x)
-            z = embed(M, x)
-            @test z == x
-            embed!(M, y, x)
-            @test y == z
+            q = similar(p)
+            p2 = embed(M, p)
+            @test p2 == p
+            embed!(M, q, p)
+            @test q == p2
             a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
             @test !is_point(M, a)
             b = similar(a)
             c = project(M, a)
-            @test c == x
+            @test c == p
             project!(M, b, a)
-            @test b == x
+            @test b == p
             X = [0.0 0.0; 0.0 0.0; -1.0 1.0]
             Y = similar(X)
-            Z = embed(M, x, X)
-            embed!(M, Y, x, X)
+            Z = embed(M, p, X)
+            embed!(M, Y, p, X)
             @test Y == X
             @test Z == X
         end
-
+        @testset "gradient and metric conversion" begin
+            B = [3.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 2.0]
+            M = GeneralizedGrassmann(3, 2, B)
+            p = [1.0 0.0; 0.0 0.5; 0.0 0.0]
+            L = cholesky(B).L
+            X = [0.0 0.0; 0.0 0.0; 1.0 -1.0]
+            Y = change_metric(M, EuclideanMetric(), p, X)
+            @test Y == L \ X
+            Z = change_representer(M, EuclideanMetric(), p, X)
+            @test Z == B \ X
+        end
         types = [Matrix{Float64}]
         TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})
         X = [0.0 0.0; 1.0 0.0; 0.0 2.0]
