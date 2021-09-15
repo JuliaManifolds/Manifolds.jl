@@ -272,4 +272,15 @@ include("../utils.jl")
         # but if we come from the same metric, we have the identity
         @test change_metric(M, MinkowskiMetric(), p, X) == X
     end
+    @testset "Metric conversion on Poincare Ball" begin
+        M = Hyperbolic(2)
+        p = convert(PoincareBallPoint, [1.0, 1.0, sqrt(3)])
+        X = convert(PoincareBallTVector, [1.0, 1.0, sqrt(3)], [1.0, 2.0, sqrt(3)])
+        Y = change_representer(M, EuclideanMetric(), p, X)
+        @test inner(M, p, X, Y) == inner(Euclidean(3), p, X.value, X.value)
+        α = 2 / (1 - norm(p.value)^2)
+        @test Y.value == X.value ./ α^2
+        Z = change_metric(M, EuclideanMetric(), p, X)
+        @test Z.value == X.value ./ α
+    end
 end

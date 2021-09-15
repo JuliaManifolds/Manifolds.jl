@@ -1,8 +1,8 @@
 @doc raw"""
     change_representer(M::Hyperbolic{n}, ::EuclideanMetric, p::PoincareBallPoint, X::PoincareBallTVector)
 
-Since in the metric we always have the term `` α = \frac{2}{1-\sum_{i=1}^n p_i^2}`` per element,
-the correction for the gradient reads `` Z = \frac{1}{α^2}X``.
+Since in the metric we have the term `` α = \frac{2}{1-\sum_{i=1}^n p_i^2}`` per element,
+the correction for the gradient reads `` Y = \frac{1}{α^2}X``.
 """
 change_representer(
     ::Hyperbolic,

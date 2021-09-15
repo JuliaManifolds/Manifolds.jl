@@ -1,8 +1,15 @@
 @doc raw"""
-    change_representer(M::Hyperbolic, ::EuclideanMetric, p, X)
+    change_representer(M::Hyperbolic{n}, ::EuclideanMetric, p, X)
 
 Change a Eucliden gradient from the embedding that was already projected onto the tangent space at `p`.
-We only have to correct for the metric, which means that the sign of the last entry changes.
+We only have to correct for the metric, which means that the sign of the last entry changes, since
+for the result ``Y``  we are looking for a tangent vector such that
+
+```math
+    g_p(Y,Z) = -y_{n+1}z_{n+1} + \sum_{i=1}^n y_iz_i = \sum_{i=1}^{n+1} z_ix_i
+```
+
+holds, which directly yields ``y_i=x_i`` for ``i=1,\ldots,n`` and ``y_{n+1}=-x_{n+1}``.
 """
 change_representer(::Hyperbolic, ::EuclideanMetric, ::Any, ::Any)
 
