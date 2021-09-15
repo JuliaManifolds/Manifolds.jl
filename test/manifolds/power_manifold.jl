@@ -413,4 +413,23 @@ end
         @test isapprox(a, a2)
         @test_throws ErrorException get_point(M, A2, p, a2)
     end
+
+    @testset "metric conversion" begin
+        M = SymmetricPositiveDefinite(3)
+        N = PowerManifold(M, NestedPowerRepresentation(), 2)
+        e = EuclideanMetric()
+        p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
+        q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+        P = [p, q]
+        X = [log(M, p, q), log(M, q, p)]
+        Y = change_metric(N, e, P, X)
+        Yc = [change_metric(M, e, p, log(M, p, q)), change_metric(M, e, q, log(M, q, p))]
+        @test norm(N, P, Y .- Yc) ≈ 0
+        Z = change_representer(N, e, P, X)
+        Zc = [
+            change_representer(M, e, p, log(M, p, q)),
+            change_representer(M, e, q, log(M, q, p)),
+        ]
+        @test norm(N, P, Z .- Zc) ≈ 0
+    end
 end
