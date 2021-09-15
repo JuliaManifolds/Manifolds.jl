@@ -87,35 +87,35 @@ using Manifolds: default_metric_dispatch
             end
         end
     end
-    x = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
-    y = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+    p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
+    q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
     @testset "Convert SPD to Cholesky" begin
-        v = log(M1, x, y)
-        (l, w) = Manifolds.spd_to_cholesky(x, v)
+        v = log(M1, p, q)
+        (l, w) = Manifolds.spd_to_cholesky(p, v)
         (xs, vs) = Manifolds.cholesky_to_spd(l, w)
-        @test isapprox(xs, x)
+        @test isapprox(xs, p)
         @test isapprox(vs, v)
     end
     @testset "Preliminary tests for LogEuclidean" begin
         @test representation_size(M4) == (3, 3)
-        @test isapprox(distance(M4, x, y), sqrt(2) * log(2))
+        @test isapprox(distance(M4, p, q), sqrt(2) * log(2))
         @test manifold_dimension(M4) == manifold_dimension(M1)
     end
     @testset "Test for tangent ONB on LinearAffineMetric" begin
-        v = log(M2, x, y)
-        donb = get_basis(base_manifold(M2), x, DiagonalizingOrthonormalBasis(v))
-        X = get_vectors(base_manifold(M2), x, donb)
+        v = log(M2, p, q)
+        donb = get_basis(base_manifold(M2), p, DiagonalizingOrthonormalBasis(v))
+        X = get_vectors(base_manifold(M2), p, donb)
         k = donb.data.eigenvalues
         @test isapprox(0.0, first(k))
         for i in 1:length(X)
-            @test isapprox(1.0, norm(M2, x, X[i]))
+            @test isapprox(1.0, norm(M2, p, X[i]))
             for j in (i + 1):length(X)
-                @test isapprox(0.0, inner(M2, x, X[i], X[j]))
+                @test isapprox(0.0, inner(M2, p, X[i], X[j]))
             end
         end
-        d2onb = get_basis(M2, x, DiagonalizingOrthonormalBasis(v))
+        d2onb = get_basis(M2, p, DiagonalizingOrthonormalBasis(v))
         @test donb.data.eigenvalues == d2onb.data.eigenvalues
-        @test get_vectors(base_manifold(M2), x, donb) == get_vectors(M2, x, d2onb)
+        @test get_vectors(base_manifold(M2), p, donb) == get_vectors(M2, p, d2onb)
     end
     @testset "Vector transport and transport along with Schild and Pole ladder" begin
         A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
@@ -140,5 +140,12 @@ using Manifolds: default_metric_dispatch
         Y5 = vector_transport_to(M, p1, X2, p2, PoleLadderTransport())
         @test inner(M, p1, X1, X2) ≈ inner(M, p2, Y1, Y4) # parallel transport isometric
         @test inner(M, p1, X1, X2) ≈ inner(M, p2, Y2, Y5) # pole ladder transport isometric
+    end
+    @testset "Metric change for Linear Affine Metric" begin
+        X = log(M1, p, q)
+        Y = change_metric(M1, EuclideanMetric(), p, X)
+        @test Y == p * X
+        Z = change_representer(M1, EuclideanMetric(), p, X)
+        @test Z == p * X * p
     end
 end

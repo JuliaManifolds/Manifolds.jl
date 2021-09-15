@@ -13,6 +13,16 @@ Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on
 space at `p` with respect to the [`EuclideanMetric`](@ref) `g_E`,
 this is turned into the representer with respect to the (default) metric,
 the [`LinearAffineMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
+
+To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)```
+it holds
+
+```math
+⟨X,Y⟩ = \operatorname{tr}(XY) = \operatorname{tr}(p^{-1}Zp^{-1}Y) = g_p(Z,Y)
+
+and hence ``Z = pXp``.
+```
+
 """
 change_representer(::SymmetricPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
 
@@ -22,11 +32,20 @@ function change_representer!(::SymmetricPositiveDefinite, Y, ::EuclideanMetric, 
 end
 
 @doc raw"""
-    change_metric(M::SymmetricPOsitiveDefinite, E::EuclideanMetric, p, X)
+    change_metric(M::SymmetricPositiveDefinite{n}, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal M`` with respect to the [`EuclideanMetric`](@ref) `g_E`,
+Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`EuclideanMetric`](@ref) `g_E`,
 this function changes into the [`LinearAffine`](@ref) (default) metric on the
 [`SymmetricPOsitiveDefinite`](@ref) `M`.
+
+To be precise we are looking for ``c\colon T_p\mathcal P(n) \to T_p\mathcal P(n) ``
+such that for all ``Y,Z ∈ T_p\mathcal P(n)``` it holds
+
+```math
+⟨Y,Z⟩ = \operatorname{tr}(YZ) = \operatorname{tr}(p^{-1}c(Y)p^{-1}c(Z)) = g_p(c(Z),c(Y))
+
+and hence ``c(X) = pX`` is computed.
+```
 """
 change_metric(::SymmetricPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
 
