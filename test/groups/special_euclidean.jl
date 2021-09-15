@@ -156,35 +156,33 @@ Random.seed!(10)
         end
 
         @testset "hat/vee" begin
-            shape_se =
-                Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M.manifolds...)
-            p = Manifolds.prod_point(shape_se, tuple_pts[1]...)
-            V = Manifolds.prod_point(shape_se, tuple_X[1]...)
-            vexp = [V.parts[1]; vee(Rn, p.parts[2], V.parts[2])]
-            v = vee(G, p, V)
-            @test v ≈ vexp
-            @test hat(G, p, v) ≈ V
+            p = ProductRepr(tuple_pts[1]...)
+            X = ProductRepr(tuple_X[1]...)
+            Xexp = [X.parts[1]; vee(Rn, p.parts[2], X.parts[2])]
+            Xc = vee(G, p, X)
+            @test Xc ≈ Xexp
+            @test isapprox(G, p, hat(G, p, Xc), X)
 
-            v = vee(G, affine_matrix(G, p), screw_matrix(G, V))
-            @test v ≈ vexp
-            @test hat(G, affine_matrix(G, p), v) ≈ screw_matrix(G, V)
+            Xc = vee(G, affine_matrix(G, p), screw_matrix(G, X))
+            @test Xc ≈ Xexp
+            @test hat(G, affine_matrix(G, p), Xc) ≈ screw_matrix(G, X)
 
             e = Identity(G)
-            Ve = log_lie(G, p)
-            v = vee(G, e, Ve)
-            @test_throws ErrorException vee(M, e, Ve)
-            w = similar(v)
-            vee!(G, w, e, Ve)
-            @test isapprox(v, w)
-            @test_throws ErrorException vee!(M, w, e, Ve)
+            Xe = log_lie(G, p)
+            Xc = vee(G, e, Xe)
+            @test_throws ErrorException vee(M, e, Xe)
+            w = similar(Xc)
+            vee!(G, w, e, Xe)
+            @test isapprox(Xc, w)
+            @test_throws ErrorException vee!(M, w, e, Xe)
 
-            We = hat(G, e, v)
-            @test_throws ErrorException hat(M, e, v)
-            isapprox(G, e, Ve, We)
-            We2 = copy(G, p, V)
-            hat!(G, We2, e, v)
-            @test_throws ErrorException hat!(M, We, e, v)
-            @test isapprox(G, e, We, We2)
+            Ye = hat(G, e, Xc)
+            @test_throws ErrorException hat(M, e, Xc)
+            isapprox(G, e, Xe, Ye)
+            Ye2 = copy(G, p, X)
+            hat!(G, Ye2, e, Xc)
+            @test_throws ErrorException hat!(M, Ye, e, Xc)
+            @test isapprox(G, e, Ye, Ye2)
         end
     end
 

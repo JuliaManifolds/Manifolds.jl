@@ -1,5 +1,7 @@
 include("../utils.jl")
 
+using RecursiveArrayTools: ArrayPartition
+
 struct NotImplementedReshaper <: Manifolds.AbstractReshaper end
 
 function parray(M, x)
@@ -80,6 +82,23 @@ end
         @test get_component(Mse, p1, Val(2)) == p3
         p1[Mse, Val(2)] = 2 * p3
         @test p1[Mse, Val(2)] == 2 * p3
+
+        p1ap = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
+        @test get_component(Mse, p1ap, 1) == p1ap.x[1]
+        @test get_component(Mse, p1ap, Val(1)) == p1ap.x[1]
+        @test p1ap[Mse, 1] == p1ap.x[1]
+        @test p1ap[Mse, Val(1)] == p1ap.x[1]
+        @test p1ap[Mse, 1] isa Vector
+        @test p1ap[Mse, Val(1)] isa Vector
+        set_component!(Mse, p1ap, p2, 2)
+        @test get_component(Mse, p1ap, 2) == p2
+        p1ap[Mse, 2] = 2 * p2
+        @test p1ap[Mse, 2] == 2 * p2
+        p3 = [11.0, 15.0]
+        set_component!(Mse, p1ap, p3, Val(2))
+        @test get_component(Mse, p1ap, Val(2)) == p3
+        p1ap[Mse, Val(2)] = 2 * p3
+        @test p1ap[Mse, Val(2)] == 2 * p3
 
         shape_a_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M1, M2)
         pra1 = Manifolds.ProductArray(shape_a_se, [0.0, 1.0, 0.0, 0.0, 0.0])
@@ -527,59 +546,85 @@ end
     end
 
     @testset "ProductRepr" begin
-        Ts = SizedVector{3,Float64}
-        Tr2 = SizedVector{2,Float64}
-        pts_sphere = [
-            convert(Ts, [1.0, 0.0, 0.0]),
-            convert(Ts, [0.0, 1.0, 0.0]),
-            convert(Ts, [0.0, 0.0, 1.0]),
-        ]
-        pts_r2 =
-            [convert(Tr2, [0.0, 0.0]), convert(Tr2, [1.0, 0.0]), convert(Tr2, [0.0, 0.1])]
-
-        pts = [ProductRepr(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
-        basis_types = (
-            DefaultOrthonormalBasis(),
-            ProjectedOrthonormalBasis(:svd),
-            get_basis(Mse, pts[1], DefaultOrthonormalBasis()),
-            DiagonalizingOrthonormalBasis(ProductRepr([0.0, 1.0, 0.0], [1.0, 0.0])),
-        )
-
         @test (@inferred convert(
             ProductRepr{Tuple{T,Float64,T} where T},
             ProductRepr(9, 10, 11),
         )) == ProductRepr(9, 10.0, 11)
 
-        test_manifold(
-            Mse,
-            pts,
-            test_injectivity_radius=false,
-            test_musical_isomorphisms=true,
-            test_tangent_vector_broadcasting=false,
-            test_forward_diff=false,
-            test_reverse_diff=false,
-            test_project_tangent=true,
-            test_project_point=true,
-            test_riesz_representer=true,
-            test_default_vector_transport=true,
-            vector_transport_methods=[
-                ProductVectorTransport(ParallelTransport(), ParallelTransport()),
-                ProductVectorTransport(SchildsLadderTransport(), SchildsLadderTransport()),
-                ProductVectorTransport(PoleLadderTransport(), PoleLadderTransport()),
-            ],
-            basis_types_vecs=(basis_types[1], basis_types[3], basis_types[4]),
-            basis_types_to_from=basis_types,
-            is_tangent_atol_multiplier=1,
-            exp_log_atol_multiplier=1,
-        )
-        @test number_eltype(pts[1]) === Float64
-        @test submanifold_component(Mse, pts[1], 1) === pts[1].parts[1]
-        @test submanifold_component(Mse, pts[1], Val(1)) === pts[1].parts[1]
-        @test submanifold_component(pts[1], 1) === pts[1].parts[1]
-        @test submanifold_component(pts[1], Val(1)) === pts[1].parts[1]
-        @test submanifold_components(Mse, pts[1]) === pts[1].parts
-        @test submanifold_components(pts[1]) === pts[1].parts
-        @test (@inferred ManifoldsBase._get_vector_cache_broadcast(pts[1])) === Val(false)
+        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        @test submanifold_component(Mse, p, 1) === p.parts[1]
+        @test submanifold_component(Mse, p, Val(1)) === p.parts[1]
+        @test submanifold_component(p, 1) === p.parts[1]
+        @test submanifold_component(p, Val(1)) === p.parts[1]
+        @test submanifold_components(Mse, p) === p.parts
+        @test submanifold_components(p) === p.parts
+    end
+
+    @testset "ArrayPartition" begin
+        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
+        @test submanifold_component(Mse, p, 1) === p.x[1]
+        @test submanifold_component(Mse, p, Val(1)) === p.x[1]
+        @test submanifold_component(p, 1) === p.x[1]
+        @test submanifold_component(p, Val(1)) === p.x[1]
+        @test submanifold_components(Mse, p) === p.x
+        @test submanifold_components(p) === p.x
+    end
+
+    for TP in [ProductRepr, ArrayPartition]
+        @testset "TP=$TP" begin
+            Ts = SizedVector{3,Float64}
+            Tr2 = SizedVector{2,Float64}
+            pts_sphere = [
+                convert(Ts, [1.0, 0.0, 0.0]),
+                convert(Ts, [0.0, 1.0, 0.0]),
+                convert(Ts, [0.0, 0.0, 1.0]),
+            ]
+            pts_r2 = [
+                convert(Tr2, [0.0, 0.0]),
+                convert(Tr2, [1.0, 0.0]),
+                convert(Tr2, [0.0, 0.1]),
+            ]
+
+            pts = [TP(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
+            basis_types = (
+                DefaultOrthonormalBasis(),
+                ProjectedOrthonormalBasis(:svd),
+                get_basis(Mse, pts[1], DefaultOrthonormalBasis()),
+                DiagonalizingOrthonormalBasis(
+                    TP(SizedVector{3}([0.0, 1.0, 0.0]), SizedVector{2}([1.0, 0.0])),
+                ),
+            )
+
+            test_manifold(
+                Mse,
+                pts,
+                test_injectivity_radius=false,
+                test_musical_isomorphisms=true,
+                test_tangent_vector_broadcasting=false,
+                test_forward_diff=false,
+                test_reverse_diff=false,
+                test_project_tangent=true,
+                test_project_point=true,
+                test_riesz_representer=true,
+                test_default_vector_transport=true,
+                vector_transport_methods=[
+                    ProductVectorTransport(ParallelTransport(), ParallelTransport()),
+                    ProductVectorTransport(
+                        SchildsLadderTransport(),
+                        SchildsLadderTransport(),
+                    ),
+                    ProductVectorTransport(PoleLadderTransport(), PoleLadderTransport()),
+                ],
+                basis_types_vecs=(basis_types[1], basis_types[3], basis_types[4]),
+                basis_types_to_from=basis_types,
+                is_tangent_atol_multiplier=1,
+                exp_log_atol_multiplier=1,
+            )
+            @test number_eltype(pts[1]) === Float64
+
+            @test (@inferred ManifoldsBase._get_vector_cache_broadcast(pts[1])) ===
+                  Val(false)
+        end
     end
 
     @testset "vee/hat" begin
@@ -613,7 +658,7 @@ end
         Bc = get_basis(Mse, p, B)
         Bc_components_s = sprint.(show, "text/plain", Bc.data.parts)
         @test sprint(show, "text/plain", Bc) == """
-        DefaultOrthonormalBasis(ℝ) for a product manifold
+        $(typeof(B)) for a product manifold
         Basis for component 1:
         $(Bc_components_s[1])
         Basis for component 2:
