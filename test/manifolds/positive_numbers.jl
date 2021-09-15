@@ -23,6 +23,9 @@ include("../utils.jl")
         X = similar([1.0])
         zero_vector!(M, X, 1.0)
         @test X == [0.0]
+
+        @test change_metric(M, EuclideanMetric(), 2, 3) == 3 * 2
+        @test change_representer(M, EuclideanMetric(), 2, 3) == 3 * 2^2
     end
     types = [Float64]
     TEST_FLOAT32 && push!(types, Float32)

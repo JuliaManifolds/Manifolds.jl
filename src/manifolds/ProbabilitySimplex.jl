@@ -58,7 +58,7 @@ See for example the [`ProbabilitySimplex`](@ref).
 """
 struct FisherRaoMetric <: AbstractMetric end
 
-"""
+@doc raw"""
     change_representer(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
 Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](@ref),
@@ -79,8 +79,7 @@ function change_representer!(::ProbabilitySimplex, Y, ::EuclideanMetric, p, X)
     return Y .= p .* X
 end
 
-
-"""
+@doc raw"""
     change_metric(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
 To change the metric, we are looking for a function ``c\colon T_pΔ^n \to T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
