@@ -44,8 +44,9 @@ include("../utils.jl")
             copyto!(M, pC, p)
             @test pC.value == p.value
             XC = allocate(X)
-            copyto!(M, XC, p, X)
-            @test XC.value == X.value
+            @test copyto!(M, XC, p, X) == X # does copyto return the right value?
+            @test XC == X # does copyto store the right value?
+            @test XC.value == X.value # another check
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin
@@ -282,5 +283,7 @@ include("../utils.jl")
         @test Y.value == X.value ./ α^2
         Z = change_metric(M, EuclideanMetric(), p, X)
         @test Z.value == X.value ./ α
+        A = change_metric(M, MinkowskiMetric(), p, X)
+        @test A == X
     end
 end
