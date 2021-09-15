@@ -59,16 +59,42 @@ See for example the [`ProbabilitySimplex`](@ref).
 struct FisherRaoMetric <: AbstractMetric end
 
 """
-    change_representer(M::ProbabilitySimplex, ::EuclideanMetric, ü, X)
+    change_representer(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
 Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](@ref),
 the representer of a linear functional on the tangent space is adapted as ``Z = p .* X``, since
-this “compensates” for the divsion by ``p`` in the Riemannian metric on the [`ProbabilitySimplex`](@ref)
+this “compensates” for the divsion by ``p`` in the Riemannian metric on the [`ProbabilitySimplex`](@ref).
+
+To be precise for any ``Y ∈ T_pΔ^n`` we are looking for ``Z ∈ T_pΔ^n`` such that
+
+```math
+    ⟨X,Y⟩ = X^\mathrm{T}Y = \sum_{i=1}^{n+1}\frac{Z_iY_i}{p_i} = g_p(Z,Y)
+```
+
+and hence ``Z_i = X_ip_i, i=1,…,n+1``.
 """
 change_representer(::ProbabilitySimplex, ::EuclideanMetric, ::Any, ::Any)
 
 function change_representer!(::ProbabilitySimplex, Y, ::EuclideanMetric, p, X)
     return Y .= p .* X
+end
+
+
+"""
+    change_metric(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
+
+To change the metric, we are looking for a function ``c\colon T_pΔ^n \to T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
+
+```math
+    ⟨X,Y⟩ = X^\mathrm{T}Y = \sum_{i=1}^{n+1}\frac{c(X)_ic(Y)_i}{p_i} = g_p(X,Y)
+```
+
+and hence ``C(X)_i = X_i\sqrt{p_i}, i=1,…,n+1``.
+"""
+change_metric(::ProbabilitySimplex, ::EuclideanMetric, ::Any, ::Any)
+
+function change_metric!(::ProbabilitySimplex, Y, ::EuclideanMetric, p, X)
+    return Y .= sqrt.(p) .* X
 end
 
 """
