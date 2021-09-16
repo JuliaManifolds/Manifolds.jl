@@ -153,6 +153,7 @@ using StaticArrays
 using Statistics
 using StatsBase
 using StatsBase: AbstractWeights
+using RecursiveArrayTools: ArrayPartition
 
 include("utils.jl")
 

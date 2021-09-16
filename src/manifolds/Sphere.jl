@@ -144,7 +144,9 @@ end
 function decorated_manifold(M::AbstractSphere{𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field=𝔽)
 end
-get_embedding(M::AbstractSphere{𝔽}) where {𝔽} = decorated_manifold(M)
+
+# Since on every tangent space the Euclidean matric (restricted to this space) is used, this should be fine
+default_metric_dispatch(::AbstractSphere, ::EuclideanMetric) = Val(true)
 
 @doc raw"""
     distance(M::AbstractSphere, p, q)
@@ -187,10 +189,11 @@ function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) w
     κ = ones(n)
     if !iszero(B.frame_direction)
         # if we have a nonzero direction for the geodesic, add it and it gets curvature zero from the tensor
-        V = cat(B.frame_direction / norm(M, p, B.frame_direction), V; dims=2)
+        V = hcat(B.frame_direction / norm(M, p, B.frame_direction), V)
         κ[1] = 0 # no curvature along the geodesic direction, if x!=y
     end
-    Ξ = [V[:, i] for i in 1:n]
+    T = typeof(similar(B.frame_direction))
+    Ξ = [convert(T, V[:, i]) for i in 1:n]
     return CachedBasis(B, κ, Ξ)
 end
 
@@ -225,6 +228,8 @@ function get_coordinates!(
     Y .= Xend .- pend .* factor
     return Y
 end
+
+get_embedding(M::AbstractSphere{𝔽}) where {𝔽} = decorated_manifold(M)
 
 @doc raw"""
     get_vector(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)

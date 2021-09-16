@@ -92,20 +92,21 @@ function change_representer!(M::AbstractPowerManifold, Y, G::AbstractMetric, p, 
             M.manifold,
             _write(M, rep_size, Y, i),
             G,
-            _read(M, rep_size, P, i),
+            _read(M, rep_size, p, i),
             _read(M, rep_size, X, i),
         )
     end
+    return Y
 end
 
 """
     change_metric(M::AbstractPowerManifold, ::AbstractMetric, p, X)
 
-Since the metric on a power manifold decouples, the change of a representer can be done elementwise
+Since the metric on a power manifold decouples, the change of metric can be done elementwise.
 """
 change_metric(M::AbstractPowerManifold, ::AbstractMetric, ::Any, ::Any)
 
-function change_metric!(M::AbstractPowerManifold, Y, ::AbstractMetric, p, X)
+function change_metric!(M::AbstractPowerManifold, Y, G::AbstractMetric, p, X)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         change_metric!(
@@ -116,6 +117,7 @@ function change_metric!(M::AbstractPowerManifold, Y, ::AbstractMetric, p, X)
             _read(M, rep_size, X, i),
         )
     end
+    return Y
 end
 
 @doc raw"""

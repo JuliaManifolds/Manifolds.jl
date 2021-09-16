@@ -19,10 +19,9 @@ it holds
 
 ```math
 ⟨X,Y⟩ = \operatorname{tr}(XY) = \operatorname{tr}(p^{-1}Zp^{-1}Y) = g_p(Z,Y)
-
-and hence ``Z = pXp``.
 ```
 
+and hence ``Z = pXp``.
 """
 change_representer(::SymmetricPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
 
@@ -43,9 +42,9 @@ such that for all ``Y,Z ∈ T_p\mathcal P(n)``` it holds
 
 ```math
 ⟨Y,Z⟩ = \operatorname{tr}(YZ) = \operatorname{tr}(p^{-1}c(Y)p^{-1}c(Z)) = g_p(c(Z),c(Y))
+```
 
 and hence ``c(X) = pX`` is computed.
-```
 """
 change_metric(::SymmetricPositiveDefinite, ::EuclideanMetric, ::Any, ::Any)
 
