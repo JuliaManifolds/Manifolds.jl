@@ -617,6 +617,7 @@ end
         G = TestScaledEuclideanMetric()
         p = ones(2)
         X = 2 * ones(2)
-        Y = change_metric(M, G, p, X)
+        @test change_metric(M, TestEuclideanMetric(), p, X) == X
+        Y = change_metric(M, G, p, X) # should scale
     end
 end

@@ -34,8 +34,8 @@ end
     change_metric(M::SymmetricPositiveDefinite{n}, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`EuclideanMetric`](@ref) `g_E`,
-this function changes into the [`LinearAffine`](@ref) (default) metric on the
-[`SymmetricPOsitiveDefinite`](@ref) `M`.
+this function changes into the [`LinearAffineMetric`](@ref) (default) metric on the
+[`SymmetricPositiveDefinite`](@ref) `M`.
 
 To be precise we are looking for ``c\colon T_p\mathcal P(n) \to T_p\mathcal P(n) ``
 such that for all ``Y,Z ∈ T_p\mathcal P(n)``` it holds

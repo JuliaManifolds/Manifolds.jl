@@ -108,7 +108,6 @@ using ManifoldsBase:
     AbstractLinearVectorTransportMethod,
     ApproximateInverseRetraction,
     ApproximateRetraction,
-    DifferentiatedRetractionVectorTransport,
     ComponentManifoldError,
     CompositeManifoldError,
     CotangentSpaceType,
