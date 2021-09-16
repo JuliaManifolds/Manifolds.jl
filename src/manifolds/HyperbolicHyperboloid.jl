@@ -19,7 +19,11 @@ function change_representer!(M::Hyperbolic, Y, ::EuclideanMetric, p, X)
     return Y
 end
 
-# a metric change does not seem possible here
+function change_metric(::Hyperbolic, ::EuclideanMetric, ::Any, ::Any)
+    return error(
+        "Changing metric from Euclidean to Hyperbolic is not possible (see Sylvester's law of inertia).",
+    )
+end
 
 function check_point(M::Hyperbolic, p; kwargs...)
     mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)

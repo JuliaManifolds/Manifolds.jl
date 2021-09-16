@@ -269,7 +269,7 @@ include("../utils.jl")
         Y = change_representer(M, EuclideanMetric(), p, X)
         @test inner(M, p, X, Y) == inner(Euclidean(3), p, X, X)
         # change metric not possible from Euclidean, since the embedding is Lorenzian
-        @test_throws MethodError change_metric(M, EuclideanMetric(), p, X)
+        @test_throws ErrorException change_metric(M, EuclideanMetric(), p, X)
         # but if we come from the same metric, we have the identity
         @test change_metric(M, MinkowskiMetric(), p, X) == X
     end

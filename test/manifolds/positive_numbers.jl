@@ -26,6 +26,9 @@ include("../utils.jl")
 
         @test change_metric(M, EuclideanMetric(), 2, 3) == 3 * 2
         @test change_representer(M, EuclideanMetric(), 2, 3) == 3 * 2^2
+        N = PositiveVectors(2)
+        @test change_metric(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2]
+        @test change_representer(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2^2]
     end
     types = [Float64]
     TEST_FLOAT32 && push!(types, Float32)

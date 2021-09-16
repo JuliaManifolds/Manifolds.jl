@@ -177,7 +177,7 @@ function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
     G1 = local_metric(M, p, B)
-    G2 = localMetric(G(M), p, B)
+    G2 = local_metric(G(M), p, B)
     x = get_coordinates(M, p, X, B)
     C1 = cholesky(G1).L
     C2 = cholesky(G2).L

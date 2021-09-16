@@ -7,6 +7,7 @@ include("utils.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
 struct TestEuclideanMetric <: AbstractMetric end
+struct TestScaledEuclideanMetric <: AbstractMetric end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
@@ -19,9 +20,16 @@ end
 function Manifolds.local_metric(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
     ::Any,
-    ::InducedBasis,
+    ::DefaultOrthonormalBasis,
 )
     return Diagonal(1.0:manifold_dimension(M))
+end
+function Manifolds.local_metric(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
+    ::Any,
+    ::DefaultOrthonormalBasis,
+)
+    return 2 .* Diagonal(1.0:manifold_dimension(M))
 end
 
 struct TestSphere{N,T} <: AbstractManifold{ℝ}
@@ -602,5 +610,13 @@ end
             x,
             ExponentialRetraction(),
         ) === Val{:parent}()
+    end
+
+    @testset "change metric and representer" begin
+        M = MetricManifold(TestEuclidean{2}(), TestEuclideanMetric())
+        G = TestScaledEuclideanMetric()
+        p = ones(2)
+        X = 2 * ones(2)
+        Y = change_metric(M, G, p, X)
     end
 end
