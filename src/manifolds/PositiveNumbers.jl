@@ -64,7 +64,7 @@ function change_representer!(::PositiveNumbers, Y, ::EuclideanMetric, p, X)
 end
 
 @doc raw"""
-    change_metric(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
+    change_metric(M::PositiveNumbers, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect to
 the [`EuclideanMetric`](@ref) `g_E`,
