@@ -37,7 +37,7 @@ function Manifolds.get_coordinates!(
     ::Any,
     X,
     ::DefaultOrthogonalBasis,
-    )
+)
     c .= 1 ./ [1.0:manifold_dimension(M)...] .* X
     return c
 end

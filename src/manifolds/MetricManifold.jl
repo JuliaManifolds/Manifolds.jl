@@ -47,7 +47,6 @@ end
 (metric::AbstractMetric)(M::MetricManifold) = MetricManifold(M.manifold, metric)
 (::Type{T})(M::MetricManifold) where {T<:AbstractMetric} = MetricManifold(M.manifold, T())
 
-
 @doc raw"""
     RiemannianMetric <: AbstractMetric
 
@@ -363,7 +362,11 @@ end
     p,
     B::AbstractBasis,
 )
-function decorator_transparent_dispatch(::typeof(inverse_local_metric), ::AbstractManifold, args...)
+function decorator_transparent_dispatch(
+    ::typeof(inverse_local_metric),
+    ::AbstractManifold,
+    args...,
+)
     return Val(:intransparent)
 end
 
@@ -502,7 +505,11 @@ end
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(::typeof(local_metric_jacobian), ::AbstractManifold, args...)
+function decorator_transparent_dispatch(
+    ::typeof(local_metric_jacobian),
+    ::AbstractManifold,
+    args...,
+)
     return Val(:intransparent)
 end
 
@@ -532,7 +539,11 @@ end
     p,
     B::AbstractBasis,
 )
-function decorator_transparent_dispatch(::typeof(log_local_metric_density), ::AbstractManifold, args...)
+function decorator_transparent_dispatch(
+    ::typeof(log_local_metric_density),
+    ::AbstractManifold,
+    args...,
+)
     return Val(:intransparent)
 end
 
@@ -606,26 +617,26 @@ end
 # Introduce transparency
 # (a) new functions & other parents
 for f in [
-   christoffel_symbols_first,
-   det_local_metric,
-   einstein_tensor,
-   inverse_local_metric,
-   local_metric,
-   local_metric_jacobian,
-   log_local_metric_density,
-   ricci_curvature,
+    christoffel_symbols_first,
+    det_local_metric,
+    einstein_tensor,
+    inverse_local_metric,
+    local_metric,
+    local_metric_jacobian,
+    log_local_metric_density,
+    ricci_curvature,
 ]
-   eval(
-       quote
-           function decorator_transparent_dispatch(
-               ::typeof($f),
-               M::AbstractConnectionManifold,
-               args...,
-           )
-               return Val(:parent)
-           end
-       end,
-   )
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                M::AbstractConnectionManifold,
+                args...,
+            )
+                return Val(:parent)
+            end
+        end,
+    )
 end
 
 for f in [change_metric, change_representer, change_metric!, change_representer!]
