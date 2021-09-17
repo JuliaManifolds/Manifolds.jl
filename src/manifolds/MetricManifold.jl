@@ -6,11 +6,13 @@ varying inner products on the tangent space. See [`inner`](@ref).
 
 # Functor
 
-    (metric::Metric)(M::Manifold)
+    (metric::Metric)(M::AbstractManifold)
+    (metric::Metric)(M::MetricManifold)
 
 Generate the `MetricManifold` that wraps the manifold `M` with given `metric`.
 This works for both a variable containing the metric as well as a subtype `T<:AbstractMetric`,
 where a zero parameter constructor `T()` is availabe.
+If `M` is already a metric manifold, the inner manifold with the new `metric` is returned.
 """
 abstract type AbstractMetric end
 
@@ -41,6 +43,10 @@ struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <:
     manifold::M
     metric::G
 end
+# remetricise instead of double-decorating
+(metric::AbstractMetric)(M::MetricManifold) = MetricManifold(M.manifold, metric)
+(::Type{T})(M::MetricManifold) where {T<:AbstractMetric} = MetricManifold(M.manifold, T())
+
 
 @doc raw"""
     RiemannianMetric <: AbstractMetric
@@ -357,6 +363,9 @@ end
     p,
     B::AbstractBasis,
 )
+function decorator_transparent_dispatch(::typeof(inverse_local_metric), ::AbstractManifold, args...)
+    return Val(:intransparent)
+end
 
 default_decorator_dispatch(M::MetricManifold) = default_metric_dispatch(M)
 
@@ -460,6 +469,9 @@ local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
     B::AbstractBasis;
     kwargs...,
 )
+function decorator_transparent_dispatch(::typeof(local_metric), ::AbstractManifold, args...)
+    return Val(:intransparent)
+end
 
 @doc raw"""
     local_metric_jacobian(
@@ -490,6 +502,9 @@ end
     B::AbstractBasis;
     kwargs...,
 )
+function decorator_transparent_dispatch(::typeof(local_metric_jacobian), ::AbstractManifold, args...)
+    return Val(:intransparent)
+end
 
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
@@ -517,6 +532,9 @@ end
     p,
     B::AbstractBasis,
 )
+function decorator_transparent_dispatch(::typeof(log_local_metric_density), ::AbstractManifold, args...)
+    return Val(:intransparent)
+end
 
 @doc raw"""
     metric(M::MetricManifold)
@@ -588,26 +606,26 @@ end
 # Introduce transparency
 # (a) new functions & other parents
 for f in [
-    christoffel_symbols_first,
-    det_local_metric,
-    einstein_tensor,
-    inverse_local_metric,
-    local_metric,
-    local_metric_jacobian,
-    log_local_metric_density,
-    ricci_curvature,
+   christoffel_symbols_first,
+   det_local_metric,
+   einstein_tensor,
+   inverse_local_metric,
+   local_metric,
+   local_metric_jacobian,
+   log_local_metric_density,
+   ricci_curvature,
 ]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractConnectionManifold,
-                args...,
-            )
-                return Val(:parent)
-            end
-        end,
-    )
+   eval(
+       quote
+           function decorator_transparent_dispatch(
+               ::typeof($f),
+               M::AbstractConnectionManifold,
+               args...,
+           )
+               return Val(:parent)
+           end
+       end,
+   )
 end
 
 for f in [change_metric, change_representer, change_metric!, change_representer!]

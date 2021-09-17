@@ -20,18 +20,57 @@ end
 function Manifolds.local_metric(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
     ::Any,
-    ::DefaultOrthonormalBasis,
-)
+    ::T,
+) where {T<:ManifoldsBase.AbstractOrthogonalBasis}
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
     ::Any,
-    ::DefaultOrthonormalBasis,
-)
+    ::T,
+) where {T<:ManifoldsBase.AbstractOrthogonalBasis}
     return 2 .* Diagonal(1.0:manifold_dimension(M))
 end
-
+function Manifolds.get_coordinates!(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
+    c,
+    ::Any,
+    X,
+    ::DefaultOrthogonalBasis,
+    )
+    c .= 1 ./ [1.0:manifold_dimension(M)...] .* X
+    return c
+end
+function Manifolds.get_vector!(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
+    X,
+    ::Any,
+    c,
+    ::DefaultOrthogonalBasis,
+)
+    X .= [1.0:manifold_dimension(M)...] .* c
+    return X
+end
+function Manifolds.get_coordinates!(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
+    c,
+    ::Any,
+    X,
+    ::DefaultOrthogonalBasis,
+)
+    c .= 1 ./ (2 .* [1.0:manifold_dimension(M)...]) .* X
+    return c
+end
+function Manifolds.get_vector!(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
+    X,
+    ::Any,
+    c,
+    ::DefaultOrthogonalBasis,
+)
+    X .= 2 .* [1.0:manifold_dimension(M)...] .* c
+    return X
+end
 struct TestSphere{N,T} <: AbstractManifold{ℝ}
     r::T
 end
