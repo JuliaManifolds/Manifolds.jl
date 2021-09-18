@@ -19,7 +19,7 @@ function change_representer!(M::Hyperbolic, Y, ::EuclideanMetric, p, X)
     return Y
 end
 
-function change_metric(::Hyperbolic, ::EuclideanMetric, ::Any, ::Any)
+function change_metric!(::Hyperbolic, ::Any, ::EuclideanMetric, ::Any, ::Any)
     return error(
         "Changing metric from Euclidean to Hyperbolic is not possible (see Sylvester's law of inertia).",
     )
