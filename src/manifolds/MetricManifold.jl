@@ -343,13 +343,6 @@ end
     p,
     B::AbstractBasis,
 )
-function decorator_transparent_dispatch(
-    ::typeof(inverse_local_metric),
-    ::AbstractManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
 
 default_decorator_dispatch(M::MetricManifold) = default_metric_dispatch(M)
 
@@ -453,9 +446,6 @@ local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(::typeof(local_metric), ::AbstractManifold, args...)
-    return Val(:intransparent)
-end
 
 @doc raw"""
     local_metric_jacobian(
@@ -486,13 +476,6 @@ end
     B::AbstractBasis;
     kwargs...,
 )
-function decorator_transparent_dispatch(
-    ::typeof(local_metric_jacobian),
-    ::AbstractManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
 
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
@@ -520,13 +503,6 @@ end
     p,
     B::AbstractBasis,
 )
-function decorator_transparent_dispatch(
-    ::typeof(log_local_metric_density),
-    ::AbstractManifold,
-    args...,
-)
-    return Val(:intransparent)
-end
 
 @doc raw"""
     metric(M::MetricManifold)

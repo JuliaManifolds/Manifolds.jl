@@ -654,6 +654,9 @@ end
     @testset "change metric and representer" begin
         M = MetricManifold(TestEuclidean{2}(), TestEuclideanMetric())
         G = TestScaledEuclideanMetric()
+        M2 = TestScaledEuclideanMetric(M)
+        @test M2.manifold === M.manifold
+        @test M2.metric == G
         p = ones(2)
         X = 2 * ones(2)
         @test change_metric(M, TestEuclideanMetric(), p, X) == X
