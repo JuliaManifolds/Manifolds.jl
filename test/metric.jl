@@ -36,7 +36,7 @@ function Manifolds.get_coordinates!(
     c,
     ::Any,
     X,
-    ::DefaultOrthogonalBasis,
+    ::DefaultOrthogonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
 )
     c .= 1 ./ [1.0:manifold_dimension(M)...] .* X
     return c
@@ -46,7 +46,7 @@ function Manifolds.get_vector!(
     X,
     ::Any,
     c,
-    ::DefaultOrthogonalBasis,
+    ::DefaultOrthogonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
 )
     X .= [1.0:manifold_dimension(M)...] .* c
     return X
