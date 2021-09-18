@@ -57,6 +57,68 @@ inner product ``g(X, X) > 0`` whenever ``X`` is not the zero vector.
 abstract type RiemannianMetric <: AbstractMetric end
 
 @doc raw"""
+    change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
+
+On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
+and a second [`AbstractMetric`](@ref) ``g_2`` this function performs a change of metric in the
+sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B`` fulfills
+
+````math
+g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
+````
+
+If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
+representations ``G_1 = C_1C_1^{\mathrm{H}}`` and ``G_2 = C_2C_2^{\mathrm{H}}``, where ``C_1,C_2`` denote their
+Cholesky factor, then solving ``C_2C_2^{\mathrm{H}} = G_2 = B^{\mathrm{H}}G_1B = B^{\mathrm{H}}C_1C_1^{\mathrm{H}}B`` yields ``B = (C_1 \backslash C_2)^{\mathrm{H}}``,
+where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
+
+This function returns `Z = BX`.
+
+# Examples
+
+    change_metric(Sphere(2), EuclideanMetric(), p, X)
+
+Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
+
+    change_metric(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
+
+Here, the default metric in ``\mathcal P(3)`` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``B=p``
+"""
+change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
+    Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
+    return change_metric!(M, Y, G, p, X)
+end
+function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
+    is_default_metric(M, G) && return copyto!(M, Y, p, X)
+    M.metric === G && return copyto!(M, Y, p, X) # no metric change
+    # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
+    B = DefaultOrthogonalBasis()
+    G1 = local_metric(M, p, B)
+    G2 = local_metric(G(M), p, B)
+    x = get_coordinates(M, p, X, B)
+    C1 = cholesky(G1).L
+    C2 = cholesky(G2).L
+    z = (C1 \ C2)'x
+    return get_vector!(M, Y, p, z, B)
+end
+
+@decorator_transparent_signature change_metric(
+    M::AbstractDecoratorManifold,
+    G::AbstractMetric,
+    X,
+    p,
+)
+@decorator_transparent_signature change_metric!(
+    M::AbstractDecoratorManifold,
+    Y,
+    G::AbstractMetric,
+    X,
+    p,
+)
+
+@doc raw"""
     change_representer(M::AbstractManifold, G2::AbstractMetric, p, X)
 
 Convert the representer `X` of a linear function (in other words a cotangent vector at `p`)
@@ -123,95 +185,14 @@ end
 # Default fallback I: compute in local metric representations
 function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     is_default_metric(M, G) && return copyto!(M, Y, p, X)
+    M.metric === G && return copyto!(M, Y, p, X) # no metric change
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
     G1 = local_metric(M, p, B)
     G2 = local_metric(G(M), p, B)
     x = get_coordinates(M, p, X, B)
-    z = (G2 \ G1)'x
+    z = (G1 \ G2)'x
     return get_vector!(M, Y, p, z, B)
-end
-
-# Default fallback II: Identity if the metric is the same
-function change_representer!(
-    ::MetricManifold{𝔽,M,G},
-    Y,
-    ::G,
-    p,
-    X,
-) where {𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric}
-    return copyto!(M, Y, p, X)
-end
-
-@doc raw"""
-    change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
-
-On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
-and a second [`AbstractMetric`](@ref) ``g_2`` this function performs a change of metric in the
-sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B`` fulfills
-
-````math
-g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
-````
-
-If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
-representations ``G_1 = C_1C_1^{\mathrm{H}}`` and ``G_2 = C_2C_2^{\mathrm{H}}``, where ``C_1,C_2`` denote their
-Cholesky factor, then solving ``C_2C_2^{\mathrm{H}} = G_2 = B^{\mathrm{H}}G_1B = B^{\mathrm{H}}C_1C_1^{\mathrm{H}}B`` yields ``B = (C_1 \backslash C_2)^{\mathrm{H}}``,
-where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
-
-This function returns `Z = BX`.
-
-# Examples
-
-    change_metric(Sphere(2), EuclideanMetric(), p, X)
-
-Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
-
-    change_metric(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
-
-Here, the default metric in ``\mathcal P(3)`` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``B=p``
-"""
-change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
-
-function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
-    Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
-    return change_metric!(M, Y, G, p, X)
-end
-function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
-    is_default_metric(M, G) && return copyto!(M, Y, p, X)
-    # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
-    B = DefaultOrthogonalBasis()
-    G1 = local_metric(M, p, B)
-    G2 = local_metric(G(M), p, B)
-    x = get_coordinates(M, p, X, B)
-    C1 = cholesky(G1).L
-    C2 = cholesky(G2).L
-    z = (C1 \ C2)'x
-    return get_vector!(M, Y, p, z, B)
-end
-
-@decorator_transparent_signature change_metric(
-    M::AbstractDecoratorManifold,
-    G::AbstractMetric,
-    X,
-    p,
-)
-@decorator_transparent_signature change_metric!(
-    M::AbstractDecoratorManifold,
-    Y,
-    G::AbstractMetric,
-    X,
-    p,
-)
-
-function change_metric!(
-    ::MetricManifold{<:M,<:G},
-    Y,
-    ::G,
-    p,
-    X,
-) where {M<:AbstractManifold,G<:AbstractMetric}
-    return copyto!(M, Y, p, X)
 end
 
 @doc raw"""

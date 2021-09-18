@@ -657,6 +657,10 @@ end
         p = ones(2)
         X = 2 * ones(2)
         @test change_metric(M, TestEuclideanMetric(), p, X) == X
-        Y = change_metric(M, G, p, X) # should scale
+        Y = change_metric(M, G, p, X)
+        @test Y ≈ sqrt(2) .* X #scaled metric has a factor 2, removing introduces this factor
+        @test change_representer(M, TestEuclideanMetric(), p, X) == X
+        Y2 = change_representer(M, G, p, X)
+        @test Y2 ≈ 2 .* X #scaled metric has a factor 2, removing introduces this factor
     end
 end
