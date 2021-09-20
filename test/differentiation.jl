@@ -17,7 +17,7 @@ using LinearAlgebra: Diagonal, dot
     fd51 = Manifolds.FiniteDifferencesBackend()
     @testset "diff_backend" begin
         @test diff_backend() isa Manifolds.FiniteDifferencesBackend
-        @test length(diff_backends()) == 2
+        @test length(diff_backends()) == 3
         @test diff_backends()[1] isa Manifolds.FiniteDifferencesBackend
 
         @test length(fd51.method.grid) == 5
@@ -33,7 +33,7 @@ using LinearAlgebra: Diagonal, dot
     fwd_diff = Manifolds.ForwardDiffBackend()
     @testset "ForwardDiff" begin
         @test diff_backend() isa Manifolds.FiniteDifferencesBackend
-        @test length(diff_backends()) == 2
+        @test length(diff_backends()) == 3
         @test diff_backends()[1] isa Manifolds.FiniteDifferencesBackend
         @test diff_backends()[2] == fwd_diff
 
@@ -52,8 +52,8 @@ using LinearAlgebra: Diagonal, dot
     finite_diff = Manifolds.FiniteDiffBackend()
     @testset "FiniteDiff" begin
         @test diff_backend() isa Manifolds.FiniteDifferencesBackend
-        @test length(diff_backends()) == 3
-        @test diff_backends()[3] == finite_diff
+        @test length(diff_backends()) == 4
+        @test diff_backends()[4] == finite_diff
 
         @test diff_backend!(finite_diff) == finite_diff
         @test diff_backend() == finite_diff
@@ -62,6 +62,42 @@ using LinearAlgebra: Diagonal, dot
 
         diff_backend!(finite_diff)
         @test diff_backend() == finite_diff
+        diff_backend!(fd51)
+    end
+
+    using ReverseDiff
+
+    reverse_diff = Manifolds.ReverseDiffBackend()
+    @testset "ReverseDiff" begin
+        @test diff_backend() isa Manifolds.FiniteDifferencesBackend
+        @test length(diff_backends()) == 4
+        @test diff_backends()[3] == reverse_diff
+
+        @test diff_backend!(reverse_diff) == reverse_diff
+        @test diff_backend() == reverse_diff
+        @test diff_backend!(fd51) isa Manifolds.FiniteDifferencesBackend
+        @test diff_backend() isa Manifolds.FiniteDifferencesBackend
+
+        diff_backend!(reverse_diff)
+        @test diff_backend() == reverse_diff
+        diff_backend!(fd51)
+    end
+
+    using Zygote: Zygote
+
+    zygote_diff = Manifolds.ZygoteDiffBackend()
+    @testset "Zygote" begin
+        @test diff_backend() isa Manifolds.FiniteDifferencesBackend
+        @test length(diff_backends()) == 5
+        @test diff_backends()[5] == zygote_diff
+
+        @test diff_backend!(zygote_diff) == zygote_diff
+        @test diff_backend() == zygote_diff
+        @test diff_backend!(fd51) isa Manifolds.FiniteDifferencesBackend
+        @test diff_backend() isa Manifolds.FiniteDifferencesBackend
+
+        diff_backend!(zygote_diff)
+        @test diff_backend() == zygote_diff
         diff_backend!(fd51)
     end
 
@@ -74,11 +110,11 @@ using LinearAlgebra: Diagonal, dot
         f2(x) = 3 * x[1] * x[2] + x[2]^3
 
         @testset "Inference" begin
-            v = [-1.0, -1.0]
+            X = [-1.0, -1.0]
             @test (@inferred _derivative(c1, 0.0, Manifolds.ForwardDiffBackend())) ≈
                   [1.0, 0.0]
-            @test (@inferred _derivative!(c1, v, 0.0, Manifolds.ForwardDiffBackend())) === v
-            @test v ≈ [1.0, 0.0]
+            @test (@inferred _derivative!(c1, X, 0.0, Manifolds.ForwardDiffBackend())) === X
+            @test X ≈ [1.0, 0.0]
 
             @test (@inferred _derivative(c1, 0.0, finite_diff)) ≈ [1.0, 0.0]
             @test (@inferred _gradient(f1, [1.0, -1.0], finite_diff)) ≈ [1.0, -2.0]
@@ -87,12 +123,15 @@ using LinearAlgebra: Diagonal, dot
         @testset for backend in [fd51, fwd_diff, finite_diff]
             diff_backend!(backend)
             @test _derivative(c1, 0.0) ≈ [1.0, 0.0]
-            v = [-1.0, -1.0]
-            @test _derivative!(c1, v, 0.0) === v
-            @test isapprox(v, [1.0, 0.0])
+            X = [-1.0, -1.0]
+            @test _derivative!(c1, X, 0.0) === X
+            @test isapprox(X, [1.0, 0.0])
+        end
+        @testset for backend in [fd51, fwd_diff, finite_diff, reverse_diff, zygote_diff]
+            X = [-1.0, -1.0]
             @test _gradient(f1, [1.0, -1.0]) ≈ [1.0, -2.0]
-            @test _gradient!(f1, v, [1.0, -1.0]) === v
-            @test v ≈ [1.0, -2.0]
+            @test _gradient!(f1, X, [1.0, -1.0]) === X
+            @test X ≈ [1.0, -2.0]
         end
         diff_backend!(Manifolds.NoneDiffBackend())
         @testset for backend in [fd51, Manifolds.ForwardDiffBackend()]
