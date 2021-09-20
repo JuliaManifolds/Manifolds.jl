@@ -128,6 +128,7 @@ using LinearAlgebra: Diagonal, dot
             @test isapprox(X, [1.0, 0.0])
         end
         @testset for backend in [fd51, fwd_diff, finite_diff, reverse_diff, zygote_diff]
+            diff_backend!(backend)
             X = [-1.0, -1.0]
             @test _gradient(f1, [1.0, -1.0]) ≈ [1.0, -2.0]
             @test _gradient!(f1, X, [1.0, -1.0]) === X
