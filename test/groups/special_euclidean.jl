@@ -78,6 +78,7 @@ Random.seed!(10)
                     X_pts;
                     test_diff=true,
                     diff_convs=[(), (LeftAction(),), (RightAction(),)],
+                    atol=1e-9,
                 )
             end
         end
