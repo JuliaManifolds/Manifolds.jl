@@ -55,7 +55,6 @@ function _inverse_retract_nlsolve(
         retract!(M, F, p, project(M, p, X), retraction; kwargs...)
         project_point && project!(M, q, q)
         F .-= q
-        project_point && project!(M, F, F)
         return F
     end
     isdefined(Manifolds, :NLsolve) ||
