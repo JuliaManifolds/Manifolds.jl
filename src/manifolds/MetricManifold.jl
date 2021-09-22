@@ -68,8 +68,8 @@ g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
 ````
 
 If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
-representations ``G_1 = C_1C_1^{\mathrm{H}}`` and ``G_2 = C_2C_2^{\mathrm{H}}``, where ``C_1,C_2`` denote their
-Cholesky factor, then solving ``C_2C_2^{\mathrm{H}} = G_2 = B^{\mathrm{H}}G_1B = B^{\mathrm{H}}C_1C_1^{\mathrm{H}}B`` yields ``B = (C_1 \backslash C_2)^{\mathrm{H}}``,
+representations ``G_1 = C_1C_1^{\mathrm{H}}`` and ``G_2 = C_2C_2^{\mathrm{H}}``, where ``C_1,C_2`` denote their respective
+Cholesky factors, then solving ``C_2C_2^{\mathrm{H}} = G_2 = B^{\mathrm{H}}G_1B = B^{\mathrm{H}}C_1C_1^{\mathrm{H}}B`` yields ``B = (C_1 \backslash C_2)^{\mathrm{H}}``,
 where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
 
 This function returns `Z = BX`.
@@ -434,7 +434,7 @@ Return the local matrix representation at the point `p` of the metric tensor ``g
 respect to the [`AbstractBasis`](@ref) `B` on the [`AbstractManifold`](@ref) `M`.
 Let ``d``denote the dimension of the manifold and $b_1,\ldots,b_d$ the basis vectors.
 Then the local matrix representation is a matrix ``G\in 𝔽^{n\times n}`` whose entries are
-given by ``g_{ij} = g_p(b_i,b_j)_p, i,j\in\{1,…,d\}``.
+given by ``g_{ij} = g_p(b_i,b_j), i,j\in\{1,…,d\}``.
 
 This yields the property for two tangent vectors (using Einstein summation convention)
 ``X = X^ib_i, Y=Y^ib_i \in T_p\mathcal M`` we get ``g_p(X, Y) = g_{ij} X^i Y^j``.

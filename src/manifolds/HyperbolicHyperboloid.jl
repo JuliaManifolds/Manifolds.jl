@@ -1,7 +1,7 @@
 @doc raw"""
     change_representer(M::Hyperbolic{n}, ::EuclideanMetric, p, X)
 
-Change a Eucliden gradient from the embedding that was already projected onto the tangent space at `p`.
+Change the Eucliden representer `X` of a cotangent vector at point `p`.
 We only have to correct for the metric, which means that the sign of the last entry changes, since
 for the result ``Y``  we are looking for a tangent vector such that
 

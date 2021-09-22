@@ -60,7 +60,7 @@ end
 @doc raw"""
     change_representer(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
 
-Change `X` to the corresponding representer of the gradient with respect to the scaled metric
+Change `X` to the corresponding representer of a cotangent vector at `p` with respect to the scaled metric
 of the [`GeneralizedGrassmann`](@ref) `M`, i.e, since
 
 ```math
