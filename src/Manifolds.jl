@@ -230,6 +230,7 @@ include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Tucker.jl")
+include("manifolds/RealSymplectic.jl")
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -374,7 +375,8 @@ export Euclidean,
     SymmetricPositiveDefinite,
     SymmetricPositiveSemidefiniteFixedRank,
     Torus,
-    Tucker
+    Tucker,
+    RealSymplectic
 export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
 export HyperboloidTVector,
     PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
