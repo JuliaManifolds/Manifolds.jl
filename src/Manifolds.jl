@@ -108,7 +108,6 @@ using ManifoldsBase:
     AbstractLinearVectorTransportMethod,
     ApproximateInverseRetraction,
     ApproximateRetraction,
-    DifferentiatedRetractionVectorTransport,
     ComponentManifoldError,
     CompositeManifoldError,
     CotangentSpaceType,
@@ -471,6 +470,10 @@ export ×,
     allocate_result,
     base_manifold,
     bundle_projection,
+    change_metric,
+    change_metric!,
+    change_representer,
+    change_representer!,
     check_point,
     check_vector,
     christoffel_symbols_first,
@@ -659,7 +662,10 @@ export get_basis,
     get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
 # differentiation
 export AbstractDiffBackend,
-    AbstractRiemannianDiffBackend, FiniteDifferencesBackend, RiemannianONBDiffBackend
+    AbstractRiemannianDiffBackend,
+    FiniteDifferencesBackend,
+    RiemannianONBDiffBackend,
+    RiemannianProjectionGradientBackend
 export diff_backend, diff_backend!, diff_backends
 # atlases and charts
 export get_point, get_point!, get_parameters, get_parameters!

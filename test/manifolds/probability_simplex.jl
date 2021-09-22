@@ -72,6 +72,12 @@ include("../utils.jl")
         Y = project(M, p, X2)
         @test isapprox(M, p, X, Y)
 
+        # Check adaption of metric and representer
+        Y1 = change_metric(M, EuclideanMetric(), p, X)
+        @test Y1 == X .* sqrt.(p)
+        Y2 = change_representer(M, EuclideanMetric(), p, X)
+        @test Y2 == X .* p
+
         X = log(M, q, p)
         X2 = X + [1, 2, 3]
         Y = project(M, q, X2)

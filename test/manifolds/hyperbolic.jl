@@ -44,8 +44,9 @@ include("../utils.jl")
             copyto!(M, pC, p)
             @test pC.value == p.value
             XC = allocate(X)
-            copyto!(M, XC, p, X)
-            @test XC.value == X.value
+            @test copyto!(M, XC, p, X) == X # does copyto return the right value?
+            @test XC == X # does copyto store the right value?
+            @test XC.value == X.value # another check
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin
@@ -260,5 +261,29 @@ include("../utils.jl")
         Z2 = project(M, p2, X2)
         @test isa(Z2, PoincareHalfSpaceTVector)
         @test Z2 == X2
+    end
+    @testset "Metric conversion on Hyperboloid" begin
+        M = Hyperbolic(2)
+        p = [1.0, 1.0, sqrt(3)]
+        X = [1.0, 2.0, sqrt(3)]
+        Y = change_representer(M, EuclideanMetric(), p, X)
+        @test inner(M, p, X, Y) == inner(Euclidean(3), p, X, X)
+        # change metric not possible from Euclidean, since the embedding is Lorenzian
+        @test_throws ErrorException change_metric(M, EuclideanMetric(), p, X)
+        # but if we come from the same metric, we have the identity
+        @test change_metric(M, MinkowskiMetric(), p, X) == X
+    end
+    @testset "Metric conversion on Poincare Ball" begin
+        M = Hyperbolic(2)
+        p = convert(PoincareBallPoint, [1.0, 1.0, sqrt(3)])
+        X = convert(PoincareBallTVector, [1.0, 1.0, sqrt(3)], [1.0, 2.0, sqrt(3)])
+        Y = change_representer(M, EuclideanMetric(), p, X)
+        @test inner(M, p, X, Y) == inner(Euclidean(3), p, X.value, X.value)
+        α = 2 / (1 - norm(p.value)^2)
+        @test Y.value == X.value ./ α^2
+        Z = change_metric(M, EuclideanMetric(), p, X)
+        @test Z.value == X.value ./ α
+        A = change_metric(M, MinkowskiMetric(), p, X)
+        @test A == X
     end
 end

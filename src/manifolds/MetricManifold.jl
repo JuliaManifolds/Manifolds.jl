@@ -6,11 +6,13 @@ varying inner products on the tangent space. See [`inner`](@ref).
 
 # Functor
 
-    (metric::Metric)(M::Manifold)
+    (metric::Metric)(M::AbstractManifold)
+    (metric::Metric)(M::MetricManifold)
 
 Generate the `MetricManifold` that wraps the manifold `M` with given `metric`.
 This works for both a variable containing the metric as well as a subtype `T<:AbstractMetric`,
 where a zero parameter constructor `T()` is availabe.
+If `M` is already a metric manifold, the inner manifold with the new `metric` is returned.
 """
 abstract type AbstractMetric end
 
@@ -41,6 +43,9 @@ struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <:
     manifold::M
     metric::G
 end
+# remetricise instead of double-decorating
+(metric::AbstractMetric)(M::MetricManifold) = MetricManifold(M.manifold, metric)
+(::Type{T})(M::MetricManifold) where {T<:AbstractMetric} = MetricManifold(M.manifold, T())
 
 @doc raw"""
     RiemannianMetric <: AbstractMetric
@@ -50,6 +55,145 @@ products. The positive definite property means that for ``X  ∈ T_p \mathcal M`
 inner product ``g(X, X) > 0`` whenever ``X`` is not the zero vector.
 """
 abstract type RiemannianMetric <: AbstractMetric end
+
+@doc raw"""
+    change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
+
+On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
+and a second [`AbstractMetric`](@ref) ``g_2`` this function performs a change of metric in the
+sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B`` fulfills
+
+````math
+g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
+````
+
+If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
+representations ``G_1 = C_1C_1^{\mathrm{H}}`` and ``G_2 = C_2C_2^{\mathrm{H}}``, where ``C_1,C_2`` denote their respective
+Cholesky factors, then solving ``C_2C_2^{\mathrm{H}} = G_2 = B^{\mathrm{H}}G_1B = B^{\mathrm{H}}C_1C_1^{\mathrm{H}}B`` yields ``B = (C_1 \backslash C_2)^{\mathrm{H}}``,
+where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
+
+This function returns `Z = BX`.
+
+# Examples
+
+    change_metric(Sphere(2), EuclideanMetric(), p, X)
+
+Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
+
+    change_metric(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
+
+Here, the default metric in ``\mathcal P(3)`` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``B=p``
+"""
+change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
+    Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
+    return change_metric!(M, Y, G, p, X)
+end
+function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
+    is_default_metric(M, G) && return copyto!(M, Y, p, X)
+    M.metric === G && return copyto!(M, Y, p, X) # no metric change
+    # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
+    B = DefaultOrthogonalBasis()
+    G1 = local_metric(M, p, B)
+    G2 = local_metric(G(M), p, B)
+    x = get_coordinates(M, p, X, B)
+    C1 = cholesky(G1).L
+    C2 = cholesky(G2).L
+    z = (C1 \ C2)'x
+    return get_vector!(M, Y, p, z, B)
+end
+
+@decorator_transparent_signature change_metric(
+    M::AbstractDecoratorManifold,
+    G::AbstractMetric,
+    X,
+    p,
+)
+@decorator_transparent_signature change_metric!(
+    M::AbstractDecoratorManifold,
+    Y,
+    G::AbstractMetric,
+    X,
+    p,
+)
+
+@doc raw"""
+    change_representer(M::AbstractManifold, G2::AbstractMetric, p, X)
+
+Convert the representer `X` of a linear function (in other words a cotangent vector at `p`)
+in the tangent space at `p` on the [`AbstractManifold`](@ref) `M` given with respect to the
+[`AbstractMetric`](@ref) `G2` into the representer with respect to the (implicit) metric of `M`.
+
+In order to convert `X` into the representer with respect to the (implicitly given) metric ``g_1`` of `M`,
+we have to find the conversion function ``c: T_p\mathcal M \to T_p\mathcal M`` such that
+
+```math
+    g_2(X,Y) = g_1(c(X),Y)
+```
+
+If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
+representations ``G_1`` and ``G_2`` and ``x,y`` are the local coordinates with respect to
+the same basis of the tangent space, the equation reads
+
+```math
+   x^{\mathrm{H}}G_2y = c(x)^{\mathrm{H}}G_1 y \quad \text{for all } y \in ℝ^d,
+```
+where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
+We obtain ``c(X) = (G_1\backslash G_2)^{\mathrm{H}}X``
+
+For example `X` could be the gradient ``\operatorname{grad}f`` of a real-valued function
+``f: \mathcal M \to ℝ``, i.e.
+
+```math
+    g_2(X,Y) = Df(p)[Y] \quad \text{for all } Y ∈ T_p\mathcal M.
+```
+
+and we would change the Riesz representer `X` to the representer with respect to the metric ``g_1``.
+
+# Examples
+
+    change_representer(Sphere(2), EuclideanMetric(), p, X)
+
+Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
+
+    change_representer(SymmetricPositiveDefinite(3), EuclideanMetric(), p, X)
+
+Here, the default metric in ``\mathcal P(3)`` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``pXp``
+"""
+change_representer(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_representer(M::AbstractManifold, G::AbstractMetric, p, X)
+    Y = allocate_result(M, change_representer, X, p) # this way we allocate a tangent
+    return change_representer!(M, Y, G, p, X)
+end
+
+@decorator_transparent_signature change_representer(
+    M::AbstractDecoratorManifold,
+    G::AbstractMetric,
+    X,
+    p,
+)
+@decorator_transparent_signature change_representer!(
+    M::AbstractDecoratorManifold,
+    Y,
+    G::AbstractMetric,
+    X,
+    p,
+)
+
+# Default fallback I: compute in local metric representations
+function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
+    is_default_metric(M, G) && return copyto!(M, Y, p, X)
+    M.metric === G && return copyto!(M, Y, p, X) # no metric change
+    # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
+    B = DefaultOrthogonalBasis()
+    G1 = local_metric(M, p, B)
+    G2 = local_metric(G(M), p, B)
+    x = get_coordinates(M, p, X, B)
+    z = (G1 \ G2)'x
+    return get_vector!(M, Y, p, z, B)
+end
 
 @doc raw"""
     christoffel_symbols_first(
@@ -62,9 +206,9 @@ abstract type RiemannianMetric <: AbstractMetric end
 Compute the Christoffel symbols of the first kind in local coordinates of basis `B`.
 The Christoffel symbols are (in Einstein summation convention)
 
-```math
+````math
 Γ_{ijk} = \frac{1}{2} \Bigl[g_{kj,i} + g_{ik,j} - g_{ij,k}\Bigr],
-```
+````
 
 where ``g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}`` is the coordinate
 derivative of the local representation of the metric tensor. The dimensions of
@@ -179,12 +323,16 @@ flat(::MetricManifold, ::Any...)
 end
 
 @doc raw"""
-    inverse_local_metric(M::AbstractcManifold, p, B::AbstractBasis)
+    inverse_local_metric(M::AbstractcManifold{𝔽}, p, B::AbstractBasis)
 
-Return the local matrix representation of the inverse metric (cometric) tensor, usually
-written ``g^{ij}``.
+Return the local matrix representation of the inverse metric (cometric) tensor
+of the tangent space at `p` on the [`AbstractManifold`](@ref) `M` with respect
+to the [`AbstractBasis`](@ref) basis `B`.
 
-See also [`local_metric`](@ref)
+The metric tensor (see [`local_metric`](@ref)) is usually denoted by ``G = (g_{ij}) ∈ 𝔽^{d×d}``,
+where ``d`` is the dimension of the manifold.
+
+Then the inverse local metric is denoted by ``G^{-1} = g^{ij}``.
 """
 inverse_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 function inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)
@@ -280,13 +428,16 @@ inner(::MetricManifold, ::Any, ::Any, ::Any)
 end
 
 @doc raw"""
-    local_metric(M::AbstractManifold, p, B::AbstractBasis)
+    local_metric(M::AbstractManifold{𝔽}, p, B::AbstractBasis)
 
 Return the local matrix representation at the point `p` of the metric tensor ``g`` with
-respect to the [`AbstractBasis`](@ref) `B` on the [`AbstractManifold`](@ref) `M`, usually written ``g_{ij}``.
-The matrix has the property that ``g(X, Y)=X^\mathrm{T} [g_{ij}] Y = g_{ij} X^i Y^j``,
-where the latter expression uses Einstein summation convention.
-The metric tensor is such that the formula works for the given [`AbstractBasis`](@ref) `B`.
+respect to the [`AbstractBasis`](@ref) `B` on the [`AbstractManifold`](@ref) `M`.
+Let ``d``denote the dimension of the manifold and $b_1,\ldots,b_d$ the basis vectors.
+Then the local matrix representation is a matrix ``G\in 𝔽^{n\times n}`` whose entries are
+given by ``g_{ij} = g_p(b_i,b_j), i,j\in\{1,…,d\}``.
+
+This yields the property for two tangent vectors (using Einstein summation convention)
+``X = X^ib_i, Y=Y^ib_i \in T_p\mathcal M`` we get ``g_p(X, Y) = g_{ij} X^i Y^j``.
 """
 local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 @decorator_transparent_signature local_metric(
@@ -436,7 +587,7 @@ for f in [
         quote
             function decorator_transparent_dispatch(
                 ::typeof($f),
-                ::AbstractConnectionManifold,
+                M::AbstractConnectionManifold,
                 args...,
             )
                 return Val(:parent)
@@ -445,6 +596,19 @@ for f in [
     )
 end
 
+for f in [change_metric, change_representer, change_metric!, change_representer!]
+    eval(
+        quote
+            function decorator_transparent_dispatch(
+                ::typeof($f),
+                ::AbstractManifold,
+                args...,
+            )
+                return Val(:parent)
+            end
+        end,
+    )
+end
 function decorator_transparent_dispatch(
     ::typeof(christoffel_symbols_second),
     ::MetricManifold,
