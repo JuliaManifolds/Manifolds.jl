@@ -144,7 +144,9 @@ end
 function decorated_manifold(M::AbstractSphere{𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field=𝔽)
 end
-get_embedding(M::AbstractSphere{𝔽}) where {𝔽} = decorated_manifold(M)
+
+# Since on every tangent space the Euclidean matric (restricted to this space) is used, this should be fine
+default_metric_dispatch(::AbstractSphere, ::EuclideanMetric) = Val(true)
 
 @doc raw"""
     distance(M::AbstractSphere, p, q)
@@ -226,6 +228,8 @@ function get_coordinates!(
     Y .= Xend .- pend .* factor
     return Y
 end
+
+get_embedding(M::AbstractSphere{𝔽}) where {𝔽} = decorated_manifold(M)
 
 @doc raw"""
     get_vector(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)

@@ -53,6 +53,7 @@ function check_point(M::MultinomialMatrices{n,m}, p; kwargs...) where {n,m}
     end
     return check_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
+
 @doc raw"""
     check_vector(M::MultinomialMatrices p, X; kwargs...)
 

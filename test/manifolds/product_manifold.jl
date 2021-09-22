@@ -693,4 +693,26 @@ end
         p2 = get_point(M, A, p, a)
         @test all(p2.parts .== p.parts)
     end
+
+    @testset "metric conversion" begin
+        M = SymmetricPositiveDefinite(3)
+        N = ProductManifold(M, M)
+        e = EuclideanMetric()
+        p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
+        q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+        P = ProductRepr(p, q)
+        X = ProductRepr(log(M, p, q), log(M, q, p))
+        Y = change_metric(N, e, P, X)
+        Yc = ProductRepr(
+            change_metric(M, e, p, log(M, p, q)),
+            change_metric(M, e, q, log(M, q, p)),
+        )
+        @test norm(N, P, Y - Yc) ≈ 0
+        Z = change_representer(N, e, P, X)
+        Zc = ProductRepr(
+            change_representer(M, e, p, log(M, p, q)),
+            change_representer(M, e, q, log(M, q, p)),
+        )
+        @test norm(N, P, Z - Zc) ≈ 0
+    end
 end

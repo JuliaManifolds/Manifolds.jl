@@ -133,7 +133,10 @@ for T in _HyperbolicTypes
         allocate(p::$T, ::Type{P}, dims::Tuple) where {P} = $T(allocate(p.value, P, dims))
 
         @inline Base.copy(p::$T) = $T(copy(p.value))
-        Base.copyto!(q::$T, p::$T) = copyto!(q.value, p.value)
+        function Base.copyto!(q::$T, p::$T)
+            copyto!(q.value, p.value)
+            return q
+        end
 
         Base.similar(p::$T) = $T(similar(p.value))
 

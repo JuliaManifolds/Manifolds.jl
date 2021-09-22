@@ -232,7 +232,7 @@ end
 
 function gradient(M::AbstractManifold, f, p, backend::RiemannianProjectionGradientBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
-    return project(M, p, amb_grad)
+    return change_representer(M, EuclideanMetric(), p, project(M, p, amb_grad))
 end
 
 function gradient!(
@@ -244,5 +244,6 @@ function gradient!(
 )
     amb_grad = embed(M, p, X)
     _gradient!(f, amb_grad, p, backend.diff_backend)
-    return project!(M, X, p, amb_grad)
+    project!(M, X, p, amb_grad)
+    return change_representer!(M, X, EuclideanMetric(), p, X)
 end
