@@ -129,6 +129,7 @@ Random.seed!(10)
                 test_diff=true,
                 test_lie_bracket=true,
                 diff_convs=[(), (LeftAction(),), (RightAction(),)],
+                atol=1e-9,
             )
             # specific affine tests
             p = copy(G, pts[1])
