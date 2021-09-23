@@ -157,8 +157,8 @@ using RecursiveArrayTools: ArrayPartition
 include("utils.jl")
 
 include("product_representations.jl")
-include("differentiation.jl")
-include("riemannian_diff.jl")
+include("differentiation/differentiation.jl")
+include("differentiation/riemannian_diff.jl")
 
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
@@ -284,12 +284,12 @@ end
 function __init__()
     @require FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41" begin
         using .FiniteDiff
-        include("finite_diff.jl")
+        include("differentiation/finite_diff.jl")
     end
 
     @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
         using .ForwardDiff
-        include("forward_diff.jl")
+        include("differentiation/forward_diff.jl")
     end
 
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
@@ -300,6 +300,11 @@ function __init__()
     @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
         using .NLsolve: NLsolve
         include("nlsolve.jl")
+    end
+
+    @require ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267" begin
+        using .ReverseDiff: ReverseDiff
+        include("differentiation/reverse_diff.jl")
     end
 
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
@@ -332,6 +337,12 @@ function __init__()
             include("recipes.jl")
         end
     end
+
+    @require Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f" begin
+        using .Zygote: Zygote
+        include("differentiation/zygote.jl")
+    end
+
     return nothing
 end
 

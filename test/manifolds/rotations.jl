@@ -116,7 +116,7 @@ include("../utils.jl")
                 point_distributions=[ptd],
                 tvector_distributions=[tvd],
                 basis_types_to_from=basis_types,
-                exp_log_atol_multiplier=20,
+                exp_log_atol_multiplier=250,
                 retraction_atol_multiplier=12,
                 test_inplace=true,
             )
