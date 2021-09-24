@@ -5,7 +5,7 @@ function solve_exp_ode(
     tspan,
     B::AbstractBasis;
     solver=AutoVern9(Rodas5()),
-    backend=diff_backend(),
+    backend=default_differential_backend(),
     kwargs...,
 )
     n = length(x)

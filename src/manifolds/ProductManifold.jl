@@ -136,6 +136,42 @@ function ProductVectorTransport(methods::AbstractVectorTransportMethod...)
 end
 
 """
+    change_representer(M::ProductManifold, ::AbstractMetric, p, X)
+
+Since the metric on a product manifold decouples, the change of a representer can be done elementwise
+"""
+change_representer(::ProductManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_representer!(M::ProductManifold, Y, G::AbstractMetric, p, X)
+    map(
+        (m, y, P, x) -> change_representer!(m, y, G, P, x),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return Y
+end
+
+"""
+    change_metric(M::ProductManifold, ::AbstractMetric, p, X)
+
+Since the metric on a product manifold decouples, the change of metric can be done elementwise.
+"""
+change_metric(::ProductManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_metric!(M::ProductManifold, Y, G::AbstractMetric, p, X)
+    map(
+        (m, y, P, x) -> change_metric!(m, y, G, P, x),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return Y
+end
+
+"""
     check_point(M::ProductManifold, p; kwargs...)
 
 Check whether `p` is a valid point on the [`ProductManifold`](@ref) `M`.

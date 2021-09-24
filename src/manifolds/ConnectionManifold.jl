@@ -59,7 +59,7 @@ end
         M::AbstractManifold,
         p,
         B::AbstractBasis;
-        backend::AbstractDiffBackend = diff_backend(),
+        backend::AbstractDiffBackend = default_differential_backend(),
     )
 
 Compute the Christoffel symbols of the second kind in local coordinates of basis `B`.
@@ -89,7 +89,7 @@ christoffel_symbols_second(::AbstractManifold, ::Any, ::AbstractBasis)
         M::AbstractManifold,
         p,
         B::AbstractBasis;
-        backend::AbstractDiffBackend = diff_backend(),
+        backend::AbstractDiffBackend = default_differential_backend(),
     )
 
 Get partial derivatives of the Christoffel symbols of the second kind
@@ -106,15 +106,25 @@ function christoffel_symbols_second_jacobian(
     M::AbstractManifold,
     p,
     B::AbstractBasis;
-    backend::AbstractDiffBackend=diff_backend(),
+    backend::AbstractDiffBackend=default_differential_backend(),
+    retraction::AbstractRetractionMethod=ManifoldsBase.default_retraction_method(M),
 )
-    n = size(p, 1)
+    d = manifold_dimension(M)
     ∂Γ = reshape(
-        _jacobian(q -> christoffel_symbols_second(M, q, B; backend=backend), p, backend),
-        n,
-        n,
-        n,
-        n,
+        _jacobian(
+            c -> christoffel_symbols_second(
+                M,
+                retract(M, p, get_vector(M, p, c, B), retraction),
+                B;
+                backend=backend,
+            ),
+            p,
+            backend,
+        ),
+        d,
+        d,
+        d,
+        d,
     )
     return ∂Γ
 end
@@ -162,7 +172,7 @@ exp(::AbstractConnectionManifold, ::Any...)
 end
 
 """
-    gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
+    gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
 
 Compute the Gaussian curvature of the manifold `M` at the point `p` using basis `B`.
 This is equal to half of the scalar Ricci curvature, see [`ricci_curvature`](@ref).
@@ -195,7 +205,7 @@ function injectivity_radius(M::AbstractConnectionManifold, p, m::ExponentialRetr
 end
 
 """
-    ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
+    ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
 
 Compute the Ricci tensor, also known as the Ricci curvature tensor,
 of the manifold `M` at the point `p` using basis `B`,
@@ -217,7 +227,7 @@ end
 )
 
 @doc raw"""
-    riemann_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend=diff_backend())
+    riemann_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend=default_differential_backend())
 
 Compute the Riemann tensor ``R^l_{ijk}``, also known as the Riemann curvature
 tensor, at the point `p` in local coordinates defined by `B`. The dimensions of the
@@ -236,7 +246,7 @@ function riemann_tensor(
     M::AbstractManifold,
     p,
     B::AbstractBasis;
-    backend::AbstractDiffBackend=diff_backend(),
+    backend::AbstractDiffBackend=default_differential_backend(),
 )
     n = size(p, 1)
     Γ = christoffel_symbols_second(M, p, B; backend=backend)
@@ -260,7 +270,7 @@ end
         X,
         tspan,
         B::AbstractBasis;
-        backend::AbstractDiffBackend = diff_backend(),
+        backend::AbstractDiffBackend = default_differential_backend(),
         solver = AutoVern9(Rodas5()),
         kwargs...,
     )

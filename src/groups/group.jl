@@ -404,7 +404,7 @@ end
 
 Compose elements ``p,q ∈ \mathcal{G}`` using the group operation ``p \circ q``.
 
-For implementing composition on a new group manifold, please overload [`_compose`](@ref)
+For implementing composition on a new group manifold, please overload `_compose`
 instead so that methods with [`Identity`](@ref) arguments are not ambiguous.
 """
 compose(::AbstractGroupManifold, ::Any...)
