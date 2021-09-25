@@ -1,13 +1,21 @@
 using FiniteDifferences, ForwardDiff
 using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
-import Manifolds: mean!, median!, InducedBasis, induced_basis, get_chart_index, connection
+import Manifolds: mean!, median!, InducedBasis, induced_basis, get_chart_index, connection, retract!
 
 include("utils.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
 struct TestEuclideanMetric <: AbstractMetric end
 struct TestScaledEuclideanMetric <: AbstractMetric end
+struct TestRetraction <: AbstractRetractionMethod end
+
+ManifoldsBase.default_retraction_method(::TestEuclidean) = TestRetraction()
+function ManifoldsBase.default_retraction_method(
+    ::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
+)
+    return TestRetraction()
+end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
@@ -36,7 +44,7 @@ function Manifolds.get_coordinates!(
     c,
     ::Any,
     X,
-    ::DefaultOrthogonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+    ::DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
 )
     c .= 1 ./ [1.0:manifold_dimension(M)...] .* X
     return c
@@ -46,7 +54,7 @@ function Manifolds.get_vector!(
     X,
     ::Any,
     c,
-    ::DefaultOrthogonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+    ::DefaultOrthonormalgonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
 )
     X .= [1.0:manifold_dimension(M)...] .* c
     return X
@@ -56,7 +64,7 @@ function Manifolds.get_coordinates!(
     c,
     ::Any,
     X,
-    ::DefaultOrthogonalBasis,
+    ::DefaultOrthonormalBasis,
 )
     c .= 1 ./ (2 .* [1.0:manifold_dimension(M)...]) .* X
     return c
@@ -66,11 +74,13 @@ function Manifolds.get_vector!(
     X,
     ::Any,
     c,
-    ::DefaultOrthogonalBasis,
+    ::DefaultOrthonormalBasis,
 )
     X .= 2 .* [1.0:manifold_dimension(M)...] .* c
     return X
 end
+retract!(::TestEuclidean, q, p, X, ::TestRetraction) = p + X
+
 struct TestSphere{N,T} <: AbstractManifold{ℝ}
     r::T
 end

@@ -77,25 +77,25 @@ struct ODEExponentialRetraction{T<:AbstractRetractionMethod,B<:AbstractBasis} <:
     basis::B
 end
 function ODEExponentialRetraction(r::T) where {T<:AbstractRetractionMethod}
-    return ODEExponentialRetraction{T,DefaultOrthonormalBasis}(r, DefaultOrthonormalBasis())
+    return ODEExponentialRetraction(r, DefaultOrthonormalBasis())
 end
 function ODEExponentialRetraction(r::T, ::CachedBasis) where {T<:AbstractRetractionMethod}
-    return DomainError(
+    throw(DomainError(
         r,
         "Cached Bases are currently not supported, since the basis has to be implemented in a surrounding of the start point as well.",
-    )
+    ))
 end
 function ODEExponentialRetraction(r::ExponentialRetraction, ::AbstractBasis)
-    return DomainError(
+    throw(DomainError(
         r,
         "You can not use the exponential map as an inner method to solve the ode for the exponential map.",
-    )
+    ))
 end
 function ODEExponentialRetraction(r::ExponentialRetraction, ::CachedBasis)
-    return DomainError(
+    throw(DomainError(
         r,
         "Neither the exponential map nor a Cached Basis can be used with this retraction type.",
-    )
+    ))
 end
 
 @doc raw"""
@@ -316,9 +316,9 @@ end
     kwargs...,
 )
 
-function retract(::AbstractConnectionManifold, q, p, X, r::ODEExponentialRetraction)
+function retract!(M::AbstractConnectionManifold, q, p, X, r::ODEExponentialRetraction)
     sol =
-        solve_exp_ode(M, p, X, r.basis; retraction=r.retraction, dense=false, saveat=[1.0])
+        solve_exp_ode(M, p, X; basis=r.basis, retraction=r.retraction, dense=false, saveat=[1.0])
     return copyto!(q, sol)
 end
 
@@ -357,9 +357,9 @@ provides a basis for tangent spaces around the start point `p`.
     using OrdinaryDiffEq
     ```
 """
-function solve_exp_ode(M, p, X, tspan, B::AbstractBasis; kwargs...)
+function solve_exp_ode(M, p, X; kwargs...)
     return error(
-        "solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq` on Julia 1.1 or greater.",
+        "solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)). For a suitable default, enter `using OrdinaryDiffEq` on Julia 1.1 or greater.",
     )
 end
 
