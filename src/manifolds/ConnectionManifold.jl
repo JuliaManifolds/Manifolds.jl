@@ -202,7 +202,7 @@ exp(::AbstractConnectionManifold, ::Any...)
         q,
         p,
         X,
-        ODEExponentialRetration(ManifoldsBase.default_retraction_method(M)),
+        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
     )
 end
 

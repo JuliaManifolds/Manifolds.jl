@@ -444,6 +444,7 @@ export AbstractRetractionMethod,
     PolarRetraction,
     ProjectionRetraction,
     SoftmaxRetraction,
+    ODEExponentialRetraction,
     PadeRetraction,
     ProductRetraction,
     PowerRetraction

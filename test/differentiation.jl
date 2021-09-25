@@ -75,7 +75,8 @@ using LinearAlgebra: Diagonal, dot
         set_default_differential_backend!(fd51)
     end
 
-    zygote_diff = Manifold.ZygoteDiffBackend()
+    using Zygote
+    zygote_diff = Manifolds.ZygoteDiffBackend()
 
     @testset "gradient" begin
         set_default_differential_backend!(fd51)
