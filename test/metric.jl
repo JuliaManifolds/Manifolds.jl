@@ -1,7 +1,8 @@
 using FiniteDifferences, ForwardDiff
 using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
-import Manifolds: mean!, median!, InducedBasis, induced_basis, get_chart_index, connection, retract!
+import Manifolds:
+    mean!, median!, InducedBasis, induced_basis, get_chart_index, connection, retract!
 
 include("utils.jl")
 
