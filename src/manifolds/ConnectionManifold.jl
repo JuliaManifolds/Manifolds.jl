@@ -80,22 +80,28 @@ function ODEExponentialRetraction(r::T) where {T<:AbstractRetractionMethod}
     return ODEExponentialRetraction(r, DefaultOrthonormalBasis())
 end
 function ODEExponentialRetraction(r::T, ::CachedBasis) where {T<:AbstractRetractionMethod}
-    throw(DomainError(
-        r,
-        "Cached Bases are currently not supported, since the basis has to be implemented in a surrounding of the start point as well.",
-    ))
+    return throw(
+        DomainError(
+            r,
+            "Cached Bases are currently not supported, since the basis has to be implemented in a surrounding of the start point as well.",
+        ),
+    )
 end
 function ODEExponentialRetraction(r::ExponentialRetraction, ::AbstractBasis)
-    throw(DomainError(
-        r,
-        "You can not use the exponential map as an inner method to solve the ode for the exponential map.",
-    ))
+    return throw(
+        DomainError(
+            r,
+            "You can not use the exponential map as an inner method to solve the ode for the exponential map.",
+        ),
+    )
 end
 function ODEExponentialRetraction(r::ExponentialRetraction, ::CachedBasis)
-    throw(DomainError(
-        r,
-        "Neither the exponential map nor a Cached Basis can be used with this retraction type.",
-    ))
+    return throw(
+        DomainError(
+            r,
+            "Neither the exponential map nor a Cached Basis can be used with this retraction type.",
+        ),
+    )
 end
 
 @doc raw"""
@@ -317,8 +323,15 @@ end
 )
 
 function retract!(M::AbstractConnectionManifold, q, p, X, r::ODEExponentialRetraction)
-    sol =
-        solve_exp_ode(M, p, X; basis=r.basis, retraction=r.retraction, dense=false, saveat=[1.0])
+    sol = solve_exp_ode(
+        M,
+        p,
+        X;
+        basis=r.basis,
+        retraction=r.retraction,
+        dense=false,
+        saveat=[1.0],
+    )
     return copyto!(q, sol)
 end
 

@@ -55,7 +55,7 @@ function Manifolds.get_vector!(
     X,
     ::Any,
     c,
-    ::DefaultOrthonormalgonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+    ::DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
 )
     X .= [1.0:manifold_dimension(M)...] .* c
     return X
@@ -80,7 +80,15 @@ function Manifolds.get_vector!(
     X .= 2 .* [1.0:manifold_dimension(M)...] .* c
     return X
 end
-retract!(::TestEuclidean, q, p, X, ::TestRetraction) = p + X
+function retract!(
+    ::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
+    q,
+    p,
+    X,
+    ::TestRetraction,
+)
+    return p + X
+end
 
 struct TestSphere{N,T} <: AbstractManifold{ℝ}
     r::T
