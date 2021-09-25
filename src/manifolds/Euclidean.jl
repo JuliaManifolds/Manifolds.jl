@@ -199,7 +199,16 @@ function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates!(M::Euclidean, Y, p, X, ::DefaultOrDiagonalizingBasis{ℝ})
+function get_coordinates!(
+    M::Euclidean,
+    Y,
+    p,
+    X,
+    ::Union{
+        DefaultOrDiagonalizingBasis{ℝ},
+        InducedBasis{ℝ,TangentSpaceType,<:RetractionAtlas},
+    },
+)
     S = representation_size(M)
     PS = prod(S)
     copyto!(Y, reshape(X, PS))
@@ -218,7 +227,16 @@ function get_coordinates!(
     return Y
 end
 
-function get_vector!(M::Euclidean, Y, ::Any, X, ::DefaultOrDiagonalizingBasis{ℝ})
+function get_vector!(
+    M::Euclidean,
+    Y,
+    ::Any,
+    X,
+    ::Union{
+        DefaultOrDiagonalizingBasis{ℝ},
+        InducedBasis{ℝ,TangentSpaceType,<:RetractionAtlas},
+    },
+)
     S = representation_size(M)
     copyto!(Y, reshape(X, S))
     return Y
@@ -239,7 +257,6 @@ function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, ::Any, X, ::DefaultOrDiagonal
     copyto!(Y, reshape(X[1:N] + im * X[(N + 1):end], S))
     return Y
 end
-
 @doc raw"""
     injectivity_radius(M::Euclidean)
 

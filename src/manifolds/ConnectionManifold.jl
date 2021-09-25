@@ -77,15 +77,24 @@ struct ODEExponentialRetraction{T<:AbstractRetractionMethod,B<:AbstractBasis} <:
     basis::B
 end
 function ODEExponentialRetraction(r::T) where {T<:AbstractRetractionMethod}
-    return ODEExponentialRetraction{T,ODefaultOrthonormalBasis}(
+    return ODEExponentialRetraction{T,DefaultOrthonormalBasis}(r, DefaultOrthonormalBasis())
+end
+function ODEExponentialRetraction(r::T, ::CachedBasis) where {T<:AbstractRetractionMethod}
+    return DomainError(
         r,
-        ODefaultOrthonormalBasis(),
+        "Cached Bases are currently not supported, since the basis has to be implemented in a surrounding of the start point as well.",
     )
 end
 function ODEExponentialRetraction(r::ExponentialRetraction, ::AbstractBasis)
     return DomainError(
         r,
         "You can not use the exponential map as an inner method to solve the ode for the exponential map.",
+    )
+end
+function ODEExponentialRetraction(r::ExponentialRetraction, ::CachedBasis)
+    return DomainError(
+        r,
+        "Neither the exponential map nor a Cached Basis can be used with this retraction type.",
     )
 end
 
@@ -109,6 +118,7 @@ where ``Γ_{ijk}`` are the Christoffel symbols of the first kind
 (see [`christoffel_symbols_first`](@ref)), and ``g^{kl}`` is the inverse of the local
 representation of the metric tensor. The dimensions of the resulting multi-dimensional array
 are ordered ``(l,i,j)``.
+
 """
 christoffel_symbols_second(::AbstractManifold, ::Any, ::AbstractBasis)
 
@@ -307,19 +317,9 @@ end
 )
 
 function retract(::AbstractConnectionManifold, q, p, X, r::ODEExponentialRetraction)
-    tspan = (0.0, 1.0)
-    sol = solve_exp_ode(
-        M,
-        p,
-        X,
-        tspan,
-        r.basis;
-        retraction=r.retraction,
-        dense=false,
-        saveat=[1.0],
-    )
-    n = length(p)
-    return copyto!(q, sol.u[1][(n + 1):end])
+    sol =
+        solve_exp_ode(M, p, X, r.basis; retraction=r.retraction, dense=false, saveat=[1.0])
+    return copyto!(q, sol)
 end
 
 @doc raw"""
@@ -327,14 +327,14 @@ end
         M::AbstractConnectionManifold,
         p,
         X,
-        tspan,
         B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
         solver = AutoVern9(Rodas5()),
+        retraction = ManifoldsBase.default_retraction_method(M),
         kwargs...,
     )
 
-Approximate the exponential map on the manifold over the provided timespan
+Approximate the exponential map on the manifold by evaluating the ODE descripting the geodesic at 1,
 assuming the default connection of the given manifold by solving the ordinary differential
 equation
 
@@ -347,9 +347,8 @@ the Einstein summation convention is assumed. The arguments `tspan` and
 `solver` follow the `OrdinaryDiffEq` conventions. `kwargs...` specify keyword
 arguments that will be passed to `OrdinaryDiffEq.solve`.
 
-Currently, the numerical integration is only accurate when using a single
-coordinate chart that covers the entire manifold. This excludes coordinates
-in an embedded space.
+Using a retraction and a basis, the solver works on any intrinsic manifold that
+provides a basis for tangent spaces around the start point `p`.
 
 !!! note
     This function only works when
