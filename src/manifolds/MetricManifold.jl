@@ -220,8 +220,9 @@ function christoffel_symbols_first(
     p,
     B::AbstractBasis;
     backend::AbstractDiffBackend=default_differential_backend(),
+    retraction::AbstractRetractionMethod=ManifoldsBase.default_retraction_method(M),
 )
-    ∂g = local_metric_jacobian(M, p, B; backend=backend)
+    ∂g = local_metric_jacobian(M, p, B; backend=backend, retraction=retraction)
     n = size(∂g, 1)
     Γ = allocate(∂g, Size(n, n, n))
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
@@ -239,9 +240,10 @@ function christoffel_symbols_second(
     p,
     B::AbstractBasis;
     backend::AbstractDiffBackend=default_differential_backend(),
+    retraction::AbstractRetractionMethod=ManifoldsBase.default_retraction_method(M),
 )
     Ginv = inverse_local_metric(M, p, B)
-    Γ₁ = christoffel_symbols_first(M, p, B; backend=backend)
+    Γ₁ = christoffel_symbols_first(M, p, B; backend=backend, retraction=retraction)
     Γ₂ = allocate(Γ₁)
     @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
@@ -542,9 +544,10 @@ function ricci_curvature(
     p,
     B::AbstractBasis;
     backend::AbstractDiffBackend=default_differential_backend(),
+    retraction::AbstractRetractionMethod=ManifoldsBase.default_retraction_method(M),
 )
     Ginv = inverse_local_metric(M, p, B)
-    Ric = ricci_tensor(M, p, B; backend=backend)
+    Ric = ricci_tensor(M, p, B; backend=backend, retraction=retraction)
     S = sum(Ginv .* Ric)
     return S
 end

@@ -55,6 +55,41 @@ struct ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnec
 end
 
 @doc raw"""
+    ODEExponentialRetraction{T<:AbstractRetractionMethod, B<: AbstractBasis} <: AbstractRetractionMethod
+
+This retraction approximates the exponential map by solving the correspondig ODE.
+Let ``p\in\mathal M`` and ``X\in T_p\mathcal M`` denote the input for the exponential map
+and ``d`` denote the [`manifold_dimension`](@ref) of `M`.
+
+This the ODE is formulated in a chart constructed using an [`AbstractBasis`](@ref) `B` and an
+[`AbstractRetractionMethod`](@ref) `R` as follows.
+Given some coordinates ``c\in ℝ^d`` - these can be used to form a tangent vector
+with restect to th basis `B, i.e. ``c \mapsto Y=``[`get_vector`](@ref)`(M, p, c, B)`.
+Further, using the retraction we can map ``Y`` to a point on the manifold
+``Y \mapsto q =``[`retract`](@ref)`(M, p, X, R)`.
+
+Hence the ODE can be formulated in a curve ``c(t)`` in parameter space.
+This is – for sure – only possible locally as fas as the retraction is well-defined.
+"""
+struct ODEExponentialRetraction{T<:AbstractRetractionMethod,B<:AbstractBasis} <:
+       AbstractRetractionMethod
+    retraction::T
+    basis::B
+end
+function ODEExponentialRetraction(r::T) where {T<:AbstractRetractionMethod}
+    return ODEExponentialRetraction{T,ODefaultOrthonormalBasis}(
+        r,
+        ODefaultOrthonormalBasis(),
+    )
+end
+function ODEExponentialRetraction(r::ExponentialRetraction, ::AbstractBasis)
+    return DomainError(
+        r,
+        "You can not use the exponential map as an inner method to solve the ode for the exponential map.",
+    )
+end
+
+@doc raw"""
     christoffel_symbols_second(
         M::AbstractManifold,
         p,
@@ -162,13 +197,13 @@ in an embedded space.
 exp(::AbstractConnectionManifold, ::Any...)
 
 @decorator_transparent_fallback function exp!(M::AbstractConnectionManifold, q, p, X)
-    tspan = (0.0, 1.0)
-    A = get_default_atlas(M)
-    i = get_chart_index(M, A, p)
-    B = induced_basis(M, A, i, TangentSpace)
-    sol = solve_exp_ode(M, p, X, tspan, B; dense=false, saveat=[1.0])
-    n = length(p)
-    return copyto!(q, sol.u[1][(n + 1):end])
+    return retract!(
+        M,
+        q,
+        p,
+        X,
+        ODEXxponentialRetration(ManifoldsBase.default_retraction_method(M)),
+    )
 end
 
 """
@@ -247,10 +282,18 @@ function riemann_tensor(
     p,
     B::AbstractBasis;
     backend::AbstractDiffBackend=default_differential_backend(),
+    retraction::AbstractRetractionMethod=ManifoldsBase.default_retraction_method(M),
 )
     n = size(p, 1)
-    Γ = christoffel_symbols_second(M, p, B; backend=backend)
-    ∂Γ = christoffel_symbols_second_jacobian(M, p, B; backend=backend) ./ n
+    Γ = christoffel_symbols_second(M, p, B; backend=backend, retraction=retraction)
+    ∂Γ =
+        christoffel_symbols_second_jacobian(
+            M,
+            p,
+            B;
+            backend=backend,
+            retraction=retraction,
+        ) ./ n
     R = allocate(∂Γ, Size(n, n, n, n))
     @einsum R[l, i, j, k] =
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
@@ -262,6 +305,22 @@ end
     B::AbstractBasis;
     kwargs...,
 )
+
+function retract(::AbstractConnectionManifold, q, p, X, r::ODEExponentialRetraction)
+    tspan = (0.0, 1.0)
+    sol = solve_exp_ode(
+        M,
+        p,
+        X,
+        tspan,
+        r.basis;
+        retraction=r.retraction,
+        dense=false,
+        saveat=[1.0],
+    )
+    n = length(p)
+    return copyto!(q, sol.u[1][(n + 1):end])
+end
 
 @doc raw"""
     solve_exp_ode(

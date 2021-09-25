@@ -1,3 +1,6 @@
+@doc """
+
+ """
 function solve_exp_ode(
     M::MetricManifold,
     x,
@@ -6,6 +9,7 @@ function solve_exp_ode(
     B::AbstractBasis;
     solver=AutoVern9(Rodas5()),
     backend=default_differential_backend(),
+    retraction::AbstractRetractionMethod=ManifoldsBase.default_retraction_method(M),
     kwargs...,
 )
     n = length(x)
@@ -21,7 +25,7 @@ function solve_exp_ode(
         x = u[ix]
         ddx = allocate(u, Size(n))
         du = allocate(u)
-        Γ = christoffel_symbols_second(M, x, B; backend=backend)
+        Γ = christoffel_symbols_second(M, x, B; backend=backend, retraction=retraction)
         @einsum ddx[k] = -Γ[k, i, j] * dx[i] * dx[j]
         du[iv] .= ddx
         du[ix] .= dx
