@@ -55,7 +55,10 @@ function Manifolds.get_vector!(
     X,
     ::Any,
     c,
-    ::DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+    ::Union{
+        DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+        InducedBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+    },
 )
     X .= [1.0:manifold_dimension(M)...] .* c
     return X
@@ -87,7 +90,8 @@ function retract!(
     X,
     ::TestRetraction,
 )
-    return p + X
+    copyto!(q, p + X)
+    return q
 end
 
 struct TestSphere{N,T} <: AbstractManifold{ℝ}
@@ -95,6 +99,20 @@ struct TestSphere{N,T} <: AbstractManifold{ℝ}
 end
 
 struct TestSphericalMetric <: AbstractMetric end
+
+function retract!(
+    ::MetricManifold{ℝ,<:TestSphere,<:TestSphericalMetric},
+    q,
+    p,
+    X,
+    ::ProjectionRetraction,
+)
+    copyto(q, (p + X) ./ norm(p + X))
+    return q
+end
+function default_retraction_method(::MetricManifold{ℝ,<:TestSphere,<:TestSphericalMetric})
+    return ProjectionRetraction()
+end
 
 Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
 function Manifolds.local_metric(
@@ -275,8 +293,13 @@ end
 
         i_zeros = get_chart_index(M, A, zeros(3))
         B_i_zeros = induced_basis(M, A, i_zeros, TangentSpace)
-        @test_throws MethodError local_metric_jacobian(E, zeros(3), B_i_zeros)
-        @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3), B_i_zeros)
+        # get_vector! not implemented -> ErrorException
+        @test_throws ErrorException local_metric_jacobian(E, zeros(3), B_i_zeros)
+        @test_throws ErrorException christoffel_symbols_second_jacobian(
+            E,
+            zeros(3),
+            B_i_zeros,
+        )
 
         for vtype in (Vector, MVector{n})
             p, X, Y = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
