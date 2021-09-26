@@ -3,6 +3,7 @@ using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
 import Manifolds:
     mean!, median!, InducedBasis, induced_basis, get_chart_index, connection, retract!
+import ManifoldsBase: default_retraction_method
 
 include("utils.jl")
 
@@ -45,7 +46,10 @@ function Manifolds.get_coordinates!(
     c,
     ::Any,
     X,
-    ::DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+    ::Union{
+        DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+        DefaultOrthogonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+    },
 )
     c .= 1 ./ [1.0:manifold_dimension(M)...] .* X
     return c
@@ -57,6 +61,7 @@ function Manifolds.get_vector!(
     c,
     ::Union{
         DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+        DefaultOrthogonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
         InducedBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
     },
 )
@@ -110,7 +115,9 @@ function retract!(
     copyto(q, (p + X) ./ norm(p + X))
     return q
 end
-function default_retraction_method(::MetricManifold{ℝ,<:TestSphere,<:TestSphericalMetric})
+function ManifoldsBase.default_retraction_method(
+    ::MetricManifold{ℝ,<:TestSphere,<:TestSphericalMetric},
+)
     return ProjectionRetraction()
 end
 
