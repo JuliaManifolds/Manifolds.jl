@@ -19,22 +19,33 @@ with $0_n$ and $I_n$ denoting the $n × n$ zero-matrix and indentity matrix resp
 # Constructor:
     RealSymplectic(n)
 """
-struct RealSymplectic{n} <: AbstractEmbeddedManifold{ManifoldsBase.ℝ, DefaultIsometricEmbeddingType} where {n}
+struct RealSymplectic{n, ℝ} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
 end
+
+RealSymplectic(n::Int, field::AbstractNumbers=ℝ) = RealSymplectic{n, ℝ}()
 
 function check_point(M::RealSymplectic{n}, p; kwargs...) where {n}
     p_valid = invoke(check_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
     p_valid === nothing || return p_valid
     
     # Perform check that the matrix lives on the real symplectic manifold
-    
+    expected_identity = symplectic_inverse(p) * p
+    p_identity = one(p)
+    if !isapprox(expected_identity, p_identity, kwargs...)
+        return DomainError(
+            norm(expected_identity - p_identity),
+            "The point $(p) does not lie on $(M) because its symplectic inverse composed with itself is not the identity."
+        )
+    end
+    return nothing
 end
 
+decorated_manifold(::RealSymplectic{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
 
 @doc raw"""
     symplectic_inverse(A)
 
-Apply the symplectic inverse $A^+$ to matrix 
+Compute the symplectic inverse $A^+$ of matrix A, returning the result.
 ````math 
 A ∈ ℝ^{2n × 2n},\quad 
 A = 
@@ -43,7 +54,7 @@ A_{1,1} & A_{1,2} \\
 A_{2,1} & A_{2, 2}
 \end{bmatrix}
 ````
-inplace, with the symplectic inverse defined as:
+Here the symplectic inverse is defined as:
 ````math
 A^{+} := Q_{2n}^T A^T Q_{2n}
 ````
@@ -56,7 +67,7 @@ Q_{2n} =
 \end{bmatrix}
 ````
 
-As a result A is transformed to:
+In total the symplectic inverse of A is:
 ````math
 A^{+} = 
 \begin{bmatrix}
@@ -65,23 +76,21 @@ A^{+} =
 \end{bmatrix}
 ````
 """
-function symplectic_inverse!(A)
-    # Check that A is an even dimension, square matrix. 
+function symplectic_inverse(A)
+    # Check that A is of an even dimension, square matrix. 
     two_n = LinearAlgebra.checksquare(A)
     two_n % 2 == 0 || throw(DomainError(size(A), ("The size of matrix $A must be of type " *
                                                  "(2n, 2n), n ∈ ℕ, not $(size(A))."))) 
     n = div(two_n, 2)
-    # Allocate temporary storage for block matrices in A:
-    block_storage = zeros(eltype(A), (n, n))
+
+    # Allocate memory for A_star, the symplectic inverse:
+    A_star = zeros(eltype(A), (two_n, two_n))
     
-    # Switch and transpose block diagonals:
-    block_storage[:, :] = A[1:n, 1:n]  # Store top left diagonal block.
-    
-    A[1:n, 1:n] = (A[(n+1):2n, (n+1):2n])'
-    A[(n+1):2n, (n+1):2n] = block_storage'
+    A_star[1:n, 1:n] = (A[(n+1):2n, (n+1):2n])'
+    A_star[(n+1):2n, (n+1):2n] = (A[1:n, 1:n])'
 
     # Invert sign and transpose off-diagonal blocks:
-    A[1:n, (n+1):2n] = (-1) .* A[1:n, (n+1):2n]'
-    A[(n+1):2n, 1:n] = (-1) .* A[(n+1):2n, 1:n]'
-    return nothing
+    A_star[1:n, (n+1):2n] = (-1) .* A[1:n, (n+1):2n]'
+    A_star[(n+1):2n, 1:n] = (-1) .* A[(n+1):2n, 1:n]'
+    return A_star
 end
