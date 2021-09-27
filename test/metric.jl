@@ -125,7 +125,7 @@ Manifolds.manifold_dimension(::TestSphere{N}) where {N} = N
 function Manifolds.local_metric(
     M::MetricManifold{ℝ,<:TestSphere,<:TestSphericalMetric},
     p,
-    ::InducedBasis,
+    ::Union{InducedBasis,DefaultOrthonormalBasis},
 )
     r = base_manifold(M).r
     d = allocate(p)
@@ -133,21 +133,14 @@ function Manifolds.local_metric(
     d[2] = d[1] * sin(p[1])^2
     return Diagonal(d)
 end
-function Manifolds.inverse_local_metric(
-    ::MetricManifold{ℝ,<:TestSphere{N},<:TestSphericalMetric},
-    p,
-    ::DefaultOrthonormalBasis,
-) where {N}
-    return Diagonal(ones(N))
-end
 function Manifolds.get_vector!(
     ::MetricManifold{ℝ,<:TestSphere{N},<:TestSphericalMetric},
     Y,
     p,
     c,
     ::Union{
-        DefaultOrthonormalBasis{ℝ, <:ManifoldsBase.TangentSpaceType},
-        InducedBasis{ℝ, <:ManifoldsBase.TangentSpaceType},
+        DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+        InducedBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
     }
 ) where {N}
     Y .= 1
