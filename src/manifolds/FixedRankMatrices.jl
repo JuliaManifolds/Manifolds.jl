@@ -479,6 +479,19 @@ function Base.show(io::IO, ::MIME"text/plain", X::UMVTVector)
 end
 
 @doc raw"""
+    vector_transport_to(M::FixedRankMatrices, p, X, q, ::ProjectionTransport)
+
+Compute the vector transport of the tangent vector `X` at `p` to `q`,
+using the [`project`](@ref project(::FixedRankMatrices, ::Any...))
+of `X` to `q`.
+"""
+vector_transport_to!(::FixedRankMatrices, ::Any, ::Any, ::Any, ::ProjectionTransport)
+
+function vector_transport_to!(M::FixedRankMatrices, Y, p, X, q, ::ProjectionTransport)
+    return project!(M, Y, q, embed(M, p, X))
+end
+
+@doc raw"""
     zero_vector(M::FixedRankMatrices, p::SVDMPoint)
 
 Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangent space of
