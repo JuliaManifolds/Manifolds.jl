@@ -112,7 +112,7 @@ function retract!(
     X,
     ::ProjectionRetraction,
 )
-    copyto(q, (p + X) ./ norm(p + X))
+    copyto!(q, (p + X) ./ norm(p + X))
     return q
 end
 function ManifoldsBase.default_retraction_method(
@@ -132,6 +132,26 @@ function Manifolds.local_metric(
     d[1] = r^2
     d[2] = d[1] * sin(p[1])^2
     return Diagonal(d)
+end
+function Manifolds.inverse_local_metric(
+    ::MetricManifold{ℝ,<:TestSphere{N},<:TestSphericalMetric},
+    p,
+    ::DefaultOrthonormalBasis,
+) where {N}
+    return Diagonal(ones(N))
+end
+function Manifolds.get_vector!(
+    ::MetricManifold{ℝ,<:TestSphere{N},<:TestSphericalMetric},
+    Y,
+    p,
+    c,
+    ::Union{
+        DefaultOrthonormalBasis{ℝ, <:ManifoldsBase.TangentSpaceType},
+        InducedBasis{ℝ, <:ManifoldsBase.TangentSpaceType},
+    }
+) where {N}
+    Y .= 1
+    return Y # this is just a dummy to check that dispatch works
 end
 sph_to_cart(θ, ϕ) = [cos(ϕ) * sin(θ), sin(ϕ) * sin(θ), cos(θ)]
 
