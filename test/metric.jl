@@ -549,8 +549,9 @@ end
         chart_p = get_chart_index(MM2, A, p)
         B_p = induced_basis(MM2, A, chart_p, TangentSpace)
         @test_throws MethodError local_metric(MM2, p, B_p)
-        @test_throws MethodError local_metric_jacobian(MM2, p, B_p)
-        @test_throws MethodError christoffel_symbols_second_jacobian(MM2, p, B_p)
+        # the following two default to solving the ODE, but fail since get_vector is not implemented
+        @test_throws ErrorException local_metric_jacobian(MM2, p, B_p)
+        @test_throws ErrorException christoffel_symbols_second_jacobian(MM2, p, B_p)
         # MM falls back to nondefault error
         @test_throws MethodError projected_distribution(MM, 1, p)
         @test_throws MethodError projected_distribution(MM, 1)
