@@ -309,6 +309,17 @@ function inverse_retract!(::AbstractSphere, X, p, q, ::ProjectionInverseRetracti
 end
 
 @doc raw"""
+    local_metric(M::Sphere{n}, p, ::DefaultOrthonormalBasis)
+
+return the local representation of the metric in a [`DefaultOrthonormalBasis`](@ref), namely
+the diagonal matrix of size ``n×n`` with ones on the diagonal, since the metric is obtained
+from the embedding by restriction to the tangent space ``T_p\mathcal M`` at ``p``.
+"""
+function local_metric(::Sphere{n,ℝ}, p, B::DefaultOrthonormalBasis) where {n}
+    return Diagonal(ones(SVector{n,eltype(p)}))
+end
+
+@doc raw"""
     log(M::AbstractSphere, p, q)
 
 Compute the logarithmic map on the [`AbstractSphere`](@ref) `M`, i.e. the tangent vector,
