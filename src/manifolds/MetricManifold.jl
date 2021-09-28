@@ -473,7 +473,7 @@ function local_metric_jacobian(
     ∂g = reshape(
         _jacobian(
             c -> local_metric(M, retract(M, p, get_vector(M, p, c, B), retraction), B),
-            p,
+            zeros(d),
             backend,
         ),
         d,

@@ -28,6 +28,15 @@ function Manifolds.local_metric(
 ) where {n}
     return Manifolds.local_metric(MetricManifold(Sphere(n), EuclideanMetric()), p, B)
 end
+function Manifolds.get_coordinates!(
+    ::MetricManifold{ℝ,<:TestSphere{N},<:TestSphericalMetric},
+    c,
+    p,
+    X,
+    B::DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+) where {N}
+    return get_coordinates!(Sphere(N), c, p, X, B)
+end
 function Manifolds.get_vector!(
     ::MetricManifold{ℝ,<:TestSphere{N},<:TestSphericalMetric},
     Y,
