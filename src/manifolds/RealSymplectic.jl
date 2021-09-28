@@ -143,3 +143,8 @@ function check_even_dimension_square(A)
                             ) 
     return two_n
 end
+
+function exp!(::RealSymplectic, q, p, X)
+    p_inv = inv(p)
+    q .= p*LinearAlgebra.exp(p_inv * X)
+end
