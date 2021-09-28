@@ -141,7 +141,7 @@ function Manifolds.get_vector!(
     ::Union{
         DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
         InducedBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
-    }
+    },
 ) where {N}
     Y .= 1
     return Y # this is just a dummy to check that dispatch works
