@@ -13,7 +13,13 @@ function default_retraction_method(::MetricManifold{ℝ,<:TestSphere,<:TestSpher
 end
 manifold_dimension(::TestSphere{n}) where {n} = n
 retract!(::TestSphere{n}, q, p, X) where {n} = retract!(Sphere(n), q, p, X)
-
+function local_metric(
+    ::TestSphere{n},
+    p,
+    B::DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+) where {n}
+    return local_metric(Sphere(n), p, B)
+end
 @testset "Test ODE setup for computing geodesics" begin
     M = TestSphere{2}()
     p = [0.0, 0.0, 1.0]

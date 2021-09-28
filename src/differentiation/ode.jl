@@ -8,7 +8,8 @@ function solve_exp_ode(
     retraction::AbstractRetractionMethod=ManifoldsBase.default_retraction_method(M),
     kwargs...,
 )
-    d = manifold_dimension(M)
+    # d = manifold_dimension(M)
+    d = length(p)
     iv = SVector{d}(1:d)
     ix = SVector{d}((d + 1):(2 * d))
     u0 = allocate(p, 2 * d)

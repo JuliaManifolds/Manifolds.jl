@@ -273,17 +273,6 @@ end
         @test length(methods(is_default_metric)) == 2
     end
 
-    @testset "solve_exp_ode error message" begin
-        E = TestEuclidean{3}()
-        g = TestEuclideanMetric()
-        M = MetricManifold(E, g)
-
-        p = [1.0, 2.0, 3.0]
-        X = [2.0, 3.0, 4.0]
-        @test_throws ErrorException exp(M, p, X)
-        using OrdinaryDiffEq
-        exp(M, p, X)
-    end
     @testset "Local Metric Error message" begin
         M = MetricManifold(BaseManifold{2}(), NotImplementedMetric())
         A = Manifolds.get_default_atlas(M)
