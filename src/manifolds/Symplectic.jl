@@ -1,16 +1,12 @@
 @doc raw"""
-    Symplectic{N, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+    abstract type AbstractSymplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
-This structure describes the symplectic manifolds without reference to a specific field, and 
+This abstract describes the base type for symplectic manifolds with reference to a specific field, and 
 can thus be extended to work over both real and complex fields.
-
-# Constructor:
-    Symplectic(n, 𝔽) -> Symplectic{n, 𝔽}()
 """
-abstract type Symplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+abstract type AbstractSymplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 end
-
-Symplectic(n::Int, 𝔽::AbstractNumbers) = Symplectic{n, 𝔽}()
+# Took inspiration from 'AbstractMultinomialDoubleStochastic' for the abstract type inheritance.
 
 @doc raw"""
     RealSymplectic{N} <: Symplectic{N, ℝ} where {N}
@@ -41,10 +37,10 @@ of a matrix ``A ∈ ℝ^{2n × 2n}`` where we consider it as consisting of four 
 The constructor accepts the number of dimensions in ``ℝ^{2n × 2n}`` as the embedding for the RealSymplectic manifold, 
 but internally stores the integer ``n`` denoting half the dimension of the embedding. 
 """
-struct RealSymplectic{n} <: Symplectic{n, ℝ} where {n}
+struct RealSymplectic{n} <: AbstractSymplectic{n, ℝ} #  where {n, ℝ}
 end
 
-RealSymplectic(two_n::Int) = begin @assert two_n % 2 == 0; Symplectic{div(two_n, 2), ℝ}() end
+RealSymplectic(embedding_dimension::Int) = begin @assert embedding_dimension % 2 == 0; RealSymplectic{div(embedding_dimension, 2)}() end
 
 function check_point(M::RealSymplectic{n}, p; kwargs...) where {n}
     mpv = invoke(check_point, Tuple{supertype(typeof(M)), typeof(p)}, M, p; kwargs...)
@@ -62,11 +58,11 @@ function check_point(M::RealSymplectic{n}, p; kwargs...) where {n}
     return nothing
 end
 
-# Document 'is_vector'.
+# Document 'check_vector'.
 @doc raw"""
     Reference: 
 """
-check_point(::RealSymplectic, ::Any...)
+check_vector(::RealSymplectic, ::Any...)
 
 function check_vector(M::RealSymplectic{n}, p, X; kwargs...) where {n}
     mpv = invoke(
@@ -165,11 +161,5 @@ function check_even_dimension_square(A)
     return two_n
 end
 
-function exp!(::RealSymplectic, q, p, X)
-    p_inv = inv(p)
-    q .= p*LinearAlgebra.exp(p_inv * X)
-end
-
-# implement Pseudo-Riemannian metric as subtyupe of AbstracMetric, look at SPD-s.
-# implement logarithmic map.
-# Implement internally as storing the 'n' of the '2n' dimensions embebbed.
+# TODO: implement logarithmic map.
+# DOME: Implement internally as storing the 'n' of the '2n' dimensions embebbed.

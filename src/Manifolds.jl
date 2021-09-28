@@ -231,6 +231,7 @@ include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Tucker.jl")
 include("manifolds/Symplectic.jl")
+include("manifolds/SymplecticPseudoRiemannian.jl")
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
