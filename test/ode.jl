@@ -12,13 +12,31 @@ function default_retraction_method(::MetricManifold{ℝ,<:TestSphere,<:TestSpher
     return ProjectionRetraction()
 end
 manifold_dimension(::TestSphere{n}) where {n} = n
-retract!(::TestSphere{n}, q, p, X) where {n} = retract!(Sphere(n), q, p, X)
-function local_metric(
-    ::TestSphere{n},
+function Manifolds.retract!(
+    ::MetricManifold{ℝ,TestSphere{n},<:TestSphericalMetric},
+    q,
+    p,
+    X,
+    ::ProjectionRetraction,
+) where {n}
+    return retract!(Sphere(n), q, p, X)
+end
+function Manifolds.local_metric(
+    ::MetricManifold{ℝ,TestSphere{n},<:TestSphericalMetric},
     p,
     B::DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
 ) where {n}
-    return local_metric(Sphere(n), p, B)
+    return Diagonal(ones(n)) # TODO: fix?
+end
+function Manifolds.get_vector!(
+    ::MetricManifold{ℝ,<:TestSphere{N},<:TestSphericalMetric},
+    Y,
+    p,
+    c,
+    ::DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+) where {N}
+    Y .= 1
+    return Y # this is just a dummy to check that dispatch works
 end
 @testset "Test ODE setup for computing geodesics" begin
     M = TestSphere{2}()
