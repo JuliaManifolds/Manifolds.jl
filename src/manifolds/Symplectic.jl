@@ -21,7 +21,7 @@ where
 ````math
 Q_{2n} = 
 \begin{bmatrix}
-0_n & I_n \\
+  0_n & I_n \\
  -I_n & 0_n 
 \end{bmatrix}
 ```` 
@@ -38,20 +38,29 @@ of a matrix ``A ∈ ℝ^{2n × 2n}`` where we consider it as consisting of four 
 The constructor accepts the number of dimensions in ``ℝ^{2n × 2n}`` as the embedding for the RealSymplectic manifold, 
 but internally stores the integer ``n`` denoting half the dimension of the embedding. 
 """
-abstract type AbstractRealSymplectic{n} <: AbstractSymplectic{n, ℝ} #  where {n, ℝ}
-end
-# Here I make 'RealSymplectic' an abstract type as well. Thus we can dispatch on '::AbstractRealSymplectic{n}' manifolds.
-
-struct RealSymplecticRiemannian{n} <: AbstractRealSymplectic{n} 
+struct RealSymplectic{n} <: AbstractSymplectic{n, ℝ} 
 end
 
-RealSymplecticRiemannian(embedding_dimension::Int) = begin @assert embedding_dimension % 2 == 0; RealSymplecticRiemannian{div(embedding_dimension, 2)}() end
+@doc """
+    #TODO: 
+"""
+RealSymplectic(embedding_dimension::Int) = begin 
+    @assert embedding_dimension % 2 == 0; RealSymplectic{div(embedding_dimension, 2)}() 
+end
 
-function check_point(M::AbstractRealSymplectic{n}, p; kwargs...) where {n}
+@doc """
+    #TODO: Document The Riemannian Symplectic metric used.
+"""
+struct RealSymplecticMetric <: RiemannianMetric 
+end
+
+default_metric_dispatch(::RealSymplectic, ::RealSymplecticMetric) = Val(true)
+
+function check_point(M::RealSymplectic{n}, p; kwargs...) where {n}
     # This 'nested' supertype call was needed to avoid StackOverflow (the error, not the website :P ) 
     # Does not look very pretty though, is there any prettier way to achieve the desired levels of abstraction, 
     # whilst keeping the advantages from using an 'AbstractEmbeddedManifold' as the supertype?
-    abstract_embedding_type = supertype(supertype(typeof(M)))
+    abstract_embedding_type = supertype(typeof(M))
     
     mpv = invoke(check_point, Tuple{abstract_embedding_type, typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
@@ -72,13 +81,13 @@ end
 @doc raw"""
     Reference: 
 """
-check_vector(::AbstractRealSymplectic, ::Any...)
+check_vector(::RealSymplectic, ::Any...)
 
-function check_vector(M::AbstractRealSymplectic{n}, p, X; kwargs...) where {n}
+function check_vector(M::RealSymplectic{n}, p, X; kwargs...) where {n}
     # This 'nested' supertype call was needed to avoid StackOverflow (the error, not the website :P ) 
     # Does not look very pretty though, is there any prettier way to achieve the desired levels of abstraction, 
     # whilst keeping the advantages from using an 'AbstractEmbeddedManifold' as the supertype?
-    abstract_embedding_type = supertype(supertype(typeof(M)))
+    abstract_embedding_type = supertype(typeof(M))
 
     mpv = invoke(
         check_vector,
@@ -98,7 +107,9 @@ function check_vector(M::AbstractRealSymplectic{n}, p, X; kwargs...) where {n}
     return nothing
 end
 
-decorated_manifold(M::T) where {T<:AbstractRealSymplectic{N}} where {N} = Euclidean(2N, 2N; field=ℝ)
+decorated_manifold(::RealSymplectic{n}) where {n} = Euclidean(2n, 2n; field=ℝ)
+
+Base.show(io::IO, ::RealSymplectic{n}) where {n} = print(io, "RealSymplectic{$(2n)}()")
 
 @doc raw"""
     symplectic_inverse(M::RealSymplectic{n}, A) where {n}
@@ -134,7 +145,7 @@ A^{+} =
 \end{bmatrix}
 ````
 """
-function symplectic_inverse(::AbstractRealSymplectic{n}, A) where {n}
+function symplectic_inverse(::RealSymplectic{n}, A) where {n}
     # Allocate memory for A_star, the symplectic inverse:
     A_star = similar(A)
     
@@ -150,7 +161,7 @@ end
 @doc raw"""
     TODO:
 """
-function symplectic_multiply(::AbstractRealSymplectic{n}, A; left=true, transposed=false) where {n}
+function symplectic_multiply(::RealSymplectic{n}, A; left=true, transposed=false) where {n}
     # Flip sign if the Q-matrix to be multiplied with A is transposed:
     sign = transposed ? (-1.0) : (1.0) 
 

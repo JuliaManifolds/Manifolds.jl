@@ -377,9 +377,7 @@ export Euclidean,
     SymmetricPositiveSemidefiniteFixedRank,
     Torus,
     Tucker,
-    AbstractRealSymplectic, # TODO: Is it okay to export abstract types?
-    RealSymplecticRiemannian,
-    RealSymplecticPseudoRiemannian
+    RealSymplectic
 export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
 export HyperboloidTVector,
     PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
@@ -422,6 +420,8 @@ export AbstractMetric,
     MinkowskiMetric,
     PowerMetric,
     ProductMetric,
+    PseudoRiemannianMetric,
+    RealSymplecticMetric,
     CanonicalMetric,
     MetricManifold
 export AbstractAtlas, RetractionAtlas
