@@ -6,8 +6,6 @@ can thus be extended to work over both real and complex fields.
 """
 abstract type AbstractSymplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 end
-# Took inspiration from 'AbstractMultinomialDoubleStochastic' for the abstract type inheritance.
-# Want to facilitate easy extension to the complex field case.
 
 @doc raw"""
     RealSymplectic{N} <: Symplectic{N, ℝ} where {N}
@@ -101,7 +99,8 @@ function check_vector(M::RealSymplectic{n}, p, X; kwargs...) where {n}
     if !isapprox(tangent_requirement_norm, 0.0, kwargs...)
         return DomainError(
             tangent_requirement_norm,
-            "The matrix $(X) is not in the tangent space at point $p of the RealSymplectic($(2n)) manifold , as X'Qp + p'QX is not the zero matrix"
+            ("The matrix $(X) is not in the tangent space at point $p of the"
+           * " RealSymplectic($(2n)) manifold, as X'Qp + p'QX is not the zero matrix")
         )
     end
     return nothing
@@ -140,7 +139,7 @@ In total the symplectic inverse of A is computed as:
 ````math
 A^{+} = 
 \begin{bmatrix}
- A_{2, 2}^T & -A_{1, 2}^T \\
+  A_{2, 2}^T & -A_{1, 2}^T \\
  -A_{2, 1}^T &  A_{2, 2}^T 
 \end{bmatrix}
 ````
@@ -174,17 +173,6 @@ function symplectic_multiply(::RealSymplectic{n}, A; left=true, transposed=false
         QA[:, (n+1):end] = sign.*A[:, 1:n]
     end
     return QA
-end
-
-@doc """Deprecated in favor of more explicit Manifold typing."""
-function check_even_dimension_square(A)
-    # Check that A is an even dimension, square, matrix. 
-    two_n = LinearAlgebra.checksquare(A)
-    two_n % 2 == 0 || throw(DomainError(size(A), 
-                            ("The size of matrix $A must be of type " *
-                             "(2n, 2n), n ∈ ℕ to apply symplectic operations, not $(size(A))."))
-                            ) 
-    return two_n
 end
 
 # TODO: implement logarithmic map.
