@@ -329,11 +329,6 @@ end
             @test inner(M, p, fX, fY) ≈ dot(X, G * Y) atol = 1e-6
             @test norm(M, p, fX) ≈ sqrt(dot(X, G * X)) atol = 1e-6
 
-            if VERSION ≥ v"1.1"
-                T = 0:0.5:10
-                @test geodesic(M, p, X, T) ≈ [p + t * X for t in T] atol = 1e-6
-            end
-
             @test christoffel_symbols_first(M, p, B_chart_p) ≈ zeros(n, n, n) atol = 1e-6
             @test christoffel_symbols_second(M, p, B_chart_p) ≈ zeros(n, n, n) atol = 1e-6
             @test riemann_tensor(M, p, B_chart_p) ≈ zeros(n, n, n, n) atol = 1e-6
@@ -406,18 +401,6 @@ end
                 sin(ϕ)*cos(θ) cos(ϕ)*sin(θ)
                 -sin(θ) 0
             ] * X
-
-            if !Sys.iswindows() || Sys.ARCH == :x86_64
-                @testset "numerically integrated geodesics for $vtype" begin
-                    T = 0:0.1:1
-                    @test isapprox(
-                        [sph_to_cart(yi...) for yi in geodesic(M, p, X, T)],
-                        geodesic(S, pcart, Xcart, T);
-                        atol=1e-3,
-                        rtol=1e-3,
-                    )
-                end
-            end
 
             Γ₁ = christoffel_symbols_first(M, p, B_p)
             for i in 1:n, j in 1:n, k in 1:n

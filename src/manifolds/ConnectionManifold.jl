@@ -55,56 +55,6 @@ struct ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnec
 end
 
 @doc raw"""
-    ODEExponentialRetraction{T<:AbstractRetractionMethod, B<: AbstractBasis} <: AbstractRetractionMethod
-
-This retraction approximates the exponential map by solving the correspondig ODE.
-Let ``p\in\mathal M`` and ``X\in T_p\mathcal M`` denote the input for the exponential map
-and ``d`` denote the [`manifold_dimension`](@ref) of `M`.
-
-This the ODE is formulated in a chart constructed using an [`AbstractBasis`](@ref) `B` and an
-[`AbstractRetractionMethod`](@ref) `R` as follows.
-Given some coordinates ``c\in ℝ^d`` - these can be used to form a tangent vector
-with restect to th basis `B, i.e. ``c \mapsto Y=``[`get_vector`](@ref)`(M, p, c, B)`.
-Further, using the retraction we can map ``Y`` to a point on the manifold
-``Y \mapsto q =``[`retract`](@ref)`(M, p, X, R)`.
-
-Hence the ODE can be formulated in a curve ``c(t)`` in parameter space.
-This is – for sure – only possible locally as fas as the retraction is well-defined.
-"""
-struct ODEExponentialRetraction{T<:AbstractRetractionMethod,B<:AbstractBasis} <:
-       AbstractRetractionMethod
-    retraction::T
-    basis::B
-end
-function ODEExponentialRetraction(r::T) where {T<:AbstractRetractionMethod}
-    return ODEExponentialRetraction(r, DefaultOrthonormalBasis())
-end
-function ODEExponentialRetraction(r::T, ::CachedBasis) where {T<:AbstractRetractionMethod}
-    return throw(
-        DomainError(
-            r,
-            "Cached Bases are currently not supported, since the basis has to be implemented in a surrounding of the start point as well.",
-        ),
-    )
-end
-function ODEExponentialRetraction(r::ExponentialRetraction, ::AbstractBasis)
-    return throw(
-        DomainError(
-            r,
-            "You can not use the exponential map as an inner method to solve the ode for the exponential map.",
-        ),
-    )
-end
-function ODEExponentialRetraction(r::ExponentialRetraction, ::CachedBasis)
-    return throw(
-        DomainError(
-            r,
-            "Neither the exponential map nor a Cached Basis can be used with this retraction type.",
-        ),
-    )
-end
-
-@doc raw"""
     christoffel_symbols_second(
         M::AbstractManifold,
         p,
@@ -322,22 +272,9 @@ end
     kwargs...,
 )
 
-function retract!(M::AbstractConnectionManifold, q, p, X, r::ODEExponentialRetraction)
-    sol = solve_exp_ode(
-        M,
-        p,
-        X;
-        basis=r.basis,
-        retraction=r.retraction,
-        dense=false,
-        saveat=[1.0],
-    )
-    return copyto!(q, sol)
-end
-
 @doc raw"""
     solve_exp_ode(
-        M::AbstractConnectionManifold,
+        M::AbstractManifold,
         p,
         X,
         B::AbstractBasis;

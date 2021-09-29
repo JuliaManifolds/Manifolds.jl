@@ -1,5 +1,5 @@
 function solve_exp_ode(
-    M::AbstractConnectionManifold,
+    M::AbstractManifold,
     p,
     X;
     basis::AbstractBasis=DefaultOrthonormalBasis(),
@@ -9,11 +9,10 @@ function solve_exp_ode(
     kwargs...,
 )
     d = manifold_dimension(M)
-    n = length(p)
-    iv = SVector{n}(1:n)
-    ix = SVector{n}((n + 1):(2 * n))
-    u0 = allocate(p, 2 * n)
-    u0[iv] .= X
+    iv = SVector{n}(1:d)
+    ix = SVector{n}((d + 1):(2 * d))
+    u0 = allocate(p, 2 * d)
+    u0[iv] .= get_get_coordinates!(M, u0[iv])
     u0[ix] .= p
 
     function exp_problem(u, params, t)
@@ -26,6 +25,7 @@ function solve_exp_ode(
         @einsum ddx[k] = -Γ[k, i, j] * dx[i] * dx[j]
         du[iv] .= get_vector(M, q, ddx, basis)
         du[ix] .= u[iv]
+        1 / 0
         return Base.convert(typeof(u), du)
     end
     params = (M,)

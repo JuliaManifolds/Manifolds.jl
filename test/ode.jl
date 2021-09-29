@@ -1,35 +1,46 @@
 include("utils.jl")
 
-struct TestSphere{N} <: AbstractManifold{ℝ} end
-struct TestSphericalMetric <: AbstractMetric end
-
 using FiniteDifferences, ForwardDiff
 using LinearAlgebra: I
 import Manifolds: retract!
 import ManifoldsBase: manifold_dimension, default_retraction_method
 
-function default_retraction_method(::MetricManifold{ℝ,<:TestSphere,<:TestSphericalMetric})
+#
+# Part I: Euclidean
+#
+struct TestODEEuclidean{N} <: AbstractManifold{ℝ} end
+struct TestODEEuclideanMetric <: AbstractMetric end
+#
+# Part II Spherical
+#
+struct TestODESphere{N} <: AbstractManifold{ℝ} end
+struct TestODESphericalMetric <: AbstractMetric end
+
+function default_retraction_method(
+    ::MetricManifold{ℝ,<:TestODESphere,<:TestODESphericalMetric},
+)
     return ProjectionRetraction()
 end
-manifold_dimension(::TestSphere{n}) where {n} = n
+
+manifold_dimension(::TestODESphere{N}) where {N} = N
 function Manifolds.retract!(
-    ::MetricManifold{ℝ,TestSphere{n},<:TestSphericalMetric},
+    ::MetricManifold{ℝ,<:TestODESphere{N},<:TestODESphericalMetric},
     q,
     p,
     X,
     ::ProjectionRetraction,
-) where {n}
-    return retract!(Sphere(n), q, p, X)
+) where {N}
+    return retract!(Sphere(N), q, p, X)
 end
 function Manifolds.local_metric(
-    ::MetricManifold{ℝ,TestSphere{n},<:TestSphericalMetric},
+    ::MetricManifold{ℝ,<:TestODESphere{N},<:TestODESphericalMetric},
     p,
     B::DefaultOrthonormalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
-) where {n}
-    return Manifolds.local_metric(MetricManifold(Sphere(n), EuclideanMetric()), p, B)
+) where {N}
+    return Manifolds.local_metric(MetricManifold(Sphere(N), EuclideanMetric()), p, B)
 end
 function Manifolds.get_coordinates!(
-    ::MetricManifold{ℝ,<:TestSphere{N},<:TestSphericalMetric},
+    ::MetricManifold{ℝ,<:TestODESphere{N},<:TestODESphericalMetric},
     c,
     p,
     X,
@@ -38,7 +49,7 @@ function Manifolds.get_coordinates!(
     return get_coordinates!(Sphere(N), c, p, X, B)
 end
 function Manifolds.get_vector!(
-    ::MetricManifold{ℝ,<:TestSphere{N},<:TestSphericalMetric},
+    ::MetricManifold{ℝ,<:TestODESphere{N},<:TestODESphericalMetric},
     Y,
     p,
     c,
@@ -47,10 +58,10 @@ function Manifolds.get_vector!(
     return get_vector!(Sphere(N), Y, p, c, B)
 end
 #@testset "Test ODE setup for computing geodesics" begin
-M = TestSphere{2}()
+M = TestODESphere{2}()
 p = [0.0, 0.0, 1.0]
 X = π / (2 * sqrt(2)) .* [0.0, 1.0, 1.0]
-M2 = MetricManifold(M, TestSphericalMetric())
+M2 = MetricManifold(M, TestODESphericalMetric())
 #    @test_throws ErrorException exp(M, p, X)
 #    @test_throws ErrorException exp(M2, p, X)
 using OrdinaryDiffEq
