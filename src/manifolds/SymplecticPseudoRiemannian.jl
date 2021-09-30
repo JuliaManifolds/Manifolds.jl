@@ -1,10 +1,10 @@
 # Implement Pseudo-Riemannian Metric Symplectic Manifold.
 
 # Implemented Pseudo-Riemannian metric as subtyupe of AbstracMetric, taking inspiration from SPD-manifolds.
-struct PseudoRiemannianMetric <: AbstractMetric 
+struct SymplecticPseudoRiemannianMetric <: AbstractMetric 
 end
 
-function exp!(::MetricManifold{ℝ, <:AbstractSymplectic{n, ℝ}, PseudoRiemannianMetric}, q, p, X) where {n, ℝ}
+function exp!(::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, q, p, X) where {n, ℝ}
     p_inv = inv(p)
     q .= p*LinearAlgebra.exp(p_inv * X)
 end

@@ -377,7 +377,7 @@ export Euclidean,
     SymmetricPositiveSemidefiniteFixedRank,
     Torus,
     Tucker,
-    RealSymplectic
+    Symplectic
 export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
 export HyperboloidTVector,
     PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
@@ -420,7 +420,7 @@ export AbstractMetric,
     MinkowskiMetric,
     PowerMetric,
     ProductMetric,
-    PseudoRiemannianMetric,
+    SymplecticPseudoRiemannianMetric,
     RealSymplecticMetric,
     CanonicalMetric,
     MetricManifold

@@ -4,14 +4,13 @@
 This abstract describes the base type for symplectic manifolds with reference to a specific field, and 
 can thus be extended to work over both real and complex fields.
 """
-abstract type AbstractSymplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
-end
+# abstract type AbstractSymplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+# end
 
 @doc raw"""
-    RealSymplectic{N} <: Symplectic{N, ℝ} where {N}
+    Symplectic{n, ℝ} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
 
-The Real Symplectic Manifold consists of all $2n × 2n$ matrices defined as 
-
+Over the field ℝ, the Real Symplectic Manifold consists of all $2n × 2n$ matrices defined as 
 ````math
 \operatorname{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2n} \bigr\}
 ```` 
@@ -27,23 +26,23 @@ with $0_n$ and $I_n$ denoting the $n × n$ zero-matrix and indentity matrix resp
 This way of embedding a symplectic manifold in a real matrix space with twice the dimensions 
 along the rows and columns can be seen the 'realification' of an underlying complex structure. 
 Internally the dimensionality of the structure is stored as half of the even dimension supplied to the constructor, 
-``2n -> n``, as most computations with points on a RealSymplectic manifold takes advantage of the natural block structure
+``2n -> n``, as most computations with points on a Real Symplectic manifold takes advantage of the natural block structure
 of a matrix ``A ∈ ℝ^{2n × 2n}`` where we consider it as consisting of four smaller matrices in ``ℝ^{n × n}``.
 
 # Constructor:
-    RealSymplectic(two_n) -> Symplectic{two_n/2, ℝ}
+    Symplectic(2*n, field::AbstractNumbers=ℝ) -> Symplectic{n, ℝ}()
 
-The constructor accepts the number of dimensions in ``ℝ^{2n × 2n}`` as the embedding for the RealSymplectic manifold, 
+The constructor accepts the number of dimensions in ``ℝ^{2n × 2n}`` as the embedding for the Real Symplectic manifold, 
 but internally stores the integer ``n`` denoting half the dimension of the embedding. 
 """
-struct RealSymplectic{n} <: AbstractSymplectic{n, ℝ} 
+struct Symplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType} 
 end
 
 @doc """
     #TODO: 
 """
-RealSymplectic(embedding_dimension::Int) = begin 
-    @assert embedding_dimension % 2 == 0; RealSymplectic{div(embedding_dimension, 2)}() 
+Symplectic(embedding_dimension::Int, field::AbstractNumbers=ℝ) = begin 
+    @assert embedding_dimension % 2 == 0; Symplectic{div(embedding_dimension, 2), field}()
 end
 
 @doc """
@@ -52,12 +51,9 @@ end
 struct RealSymplecticMetric <: RiemannianMetric 
 end
 
-default_metric_dispatch(::RealSymplectic, ::RealSymplecticMetric) = Val(true)
+default_metric_dispatch(::Symplectic{n, ℝ}, ::RealSymplecticMetric) where {n, ℝ} = Val(true)
 
-function check_point(M::RealSymplectic{n}, p; kwargs...) where {n}
-    # This 'nested' supertype call was needed to avoid StackOverflow (the error, not the website :P ) 
-    # Does not look very pretty though, is there any prettier way to achieve the desired levels of abstraction, 
-    # whilst keeping the advantages from using an 'AbstractEmbeddedManifold' as the supertype?
+function check_point(M::Symplectic{n, ℝ}, p; kwargs...) where {n, ℝ}
     abstract_embedding_type = supertype(typeof(M))
     
     mpv = invoke(check_point, Tuple{abstract_embedding_type, typeof(p)}, M, p; kwargs...)
@@ -69,7 +65,8 @@ function check_point(M::RealSymplectic{n}, p; kwargs...) where {n}
     if !isapprox(expected_identity, p_identity, kwargs...)
         return DomainError(
             norm(expected_identity - p_identity),
-            "The point $(p) does not lie on $(M) because its symplectic inverse composed with itself is not the identity."
+            ("The point $(p) does not lie on $(M) because its symplectic" 
+           * " inverse composed with itself is not the identity.")
         )
     end
     return nothing
@@ -79,12 +76,9 @@ end
 @doc raw"""
     Reference: 
 """
-check_vector(::RealSymplectic, ::Any...)
+check_vector(::Symplectic, ::Any...)
 
-function check_vector(M::RealSymplectic{n}, p, X; kwargs...) where {n}
-    # This 'nested' supertype call was needed to avoid StackOverflow (the error, not the website :P ) 
-    # Does not look very pretty though, is there any prettier way to achieve the desired levels of abstraction, 
-    # whilst keeping the advantages from using an 'AbstractEmbeddedManifold' as the supertype?
+function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     abstract_embedding_type = supertype(typeof(M))
 
     mpv = invoke(
@@ -100,18 +94,18 @@ function check_vector(M::RealSymplectic{n}, p, X; kwargs...) where {n}
         return DomainError(
             tangent_requirement_norm,
             ("The matrix $(X) is not in the tangent space at point $p of the"
-           * " RealSymplectic($(2n)) manifold, as X'Qp + p'QX is not the zero matrix")
+           * " $(M) manifold, as X'Qp + p'QX is not the zero matrix")
         )
     end
     return nothing
 end
 
-decorated_manifold(::RealSymplectic{n}) where {n} = Euclidean(2n, 2n; field=ℝ)
+decorated_manifold(::Symplectic{n, ℝ}) where {n, ℝ} = Euclidean(2n, 2n; field=ℝ)
 
-Base.show(io::IO, ::RealSymplectic{n}) where {n} = print(io, "RealSymplectic{$(2n)}()")
+Base.show(io::IO, ::Symplectic{n, ℝ}) where {n, ℝ} = print(io, "Symplectic{$(2n)}()")
 
 @doc raw"""
-    symplectic_inverse(M::RealSymplectic{n}, A) where {n}
+    symplectic_inverse(M::Symplectic{n, ℝ}, A) where {n, ℝ}
 
 Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2n}``, returning the result.
 ````math 
@@ -144,7 +138,7 @@ A^{+} =
 \end{bmatrix}
 ````
 """
-function symplectic_inverse(::RealSymplectic{n}, A) where {n}
+function symplectic_inverse(::Symplectic{n, ℝ}, A) where {n, ℝ}
     # Allocate memory for A_star, the symplectic inverse:
     A_star = similar(A)
     
@@ -160,7 +154,7 @@ end
 @doc raw"""
     TODO:
 """
-function symplectic_multiply(::RealSymplectic{n}, A; left=true, transposed=false) where {n}
+function symplectic_multiply(::Symplectic{n, ℝ}, A; left=true, transposed=false) where {n, ℝ}
     # Flip sign if the Q-matrix to be multiplied with A is transposed:
     sign = transposed ? (-1.0) : (1.0) 
 
