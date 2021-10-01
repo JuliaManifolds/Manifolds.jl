@@ -166,13 +166,7 @@ function ODEExponentialRetraction(r::ExponentialRetraction, ::CachedBasis)
     )
 end
 
-function retract!(
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    r::ODEExponentialRetraction,
-)
+function retract!(M::AbstractManifold, q, p, X, r::ODEExponentialRetraction)
     sol = solve_exp_ode(
         M,
         p,
