@@ -86,6 +86,10 @@ using LinearAlgebra: Diagonal, dot
 
         c1(t) = [sin(t), cos(t)]
         f1(x) = x[1] + x[2]^2
+        function f1!(y, x)
+            y .= x[1] + x[2]^2
+            return y
+        end
         f2(x) = 3 * x[1] * x[2] + x[2]^3
 
         @testset "Inference" begin
@@ -117,8 +121,9 @@ using LinearAlgebra: Diagonal, dot
             set_default_differential_backend!(backend)
             X = [-0.0 -0.0]
             @test _jacobian(f1, [1.0, -1.0]) ≈ [1.0 -2.0]
-            # no docs for the jacobian! of FiniteDiff :/ how to pass this properly?
-            @test_broken _jacobian!(f1, X, [1.0, -1.0]) === X
+            # The following seems not to worf for :central, but it does for forward
+            fdf = Manifolds.FiniteDiffBackend(Val(:forward))
+            @test_broken _jacobian!(f1!, X, [1.0, -1.0], fdf) === X
             @test_broken X ≈ [1.0 -2.0]
         end
         set_default_differential_backend!(Manifolds.NoneDiffBackend())
