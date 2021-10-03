@@ -141,10 +141,10 @@ end
 function ODEExponentialRetraction(r::T) where {T<:AbstractRetractionMethod}
     return ODEExponentialRetraction(r, DefaultOrthonormalBasis())
 end
-function ODEExponentialRetraction(r::T, ::CachedBasis) where {T<:AbstractRetractionMethod}
+function ODEExponentialRetraction(::T, b::CachedBasis) where {T<:AbstractRetractionMethod}
     return throw(
         DomainError(
-            r,
+            b,
             "Cached Bases are currently not supported, since the basis has to be implemented in a surrounding of the start point as well.",
         ),
     )

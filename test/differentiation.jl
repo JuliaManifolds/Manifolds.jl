@@ -8,7 +8,9 @@ using Manifolds:
     gradient,
     gradient!,
     _gradient,
-    _gradient!
+    _gradient!,
+    _jacobian,
+    _jacobian!
 
 using FiniteDifferences, FiniteDiff
 using LinearAlgebra: Diagonal, dot
@@ -111,6 +113,14 @@ using LinearAlgebra: Diagonal, dot
             @test _gradient!(f1, X, [1.0, -1.0]) === X
             @test X ≈ [1.0, -2.0]
         end
+        @testset for backend in [finite_diff]
+            set_default_differential_backend!(backend)
+            X = [-0.0 -0.0]
+            @test _jacobian(f1, [1.0, -1.0]) ≈ [1.0 -2.0]
+            # no docs for the jacobian! of FiniteDiff :/ how to pass this properly?
+            @test_broken _jacobian!(f1, X, [1.0, -1.0]) === X
+            @test_broken X ≈ [1.0 -2.0]
+        end
         set_default_differential_backend!(Manifolds.NoneDiffBackend())
         @testset for backend in [fd51, Manifolds.ForwardDiffBackend()]
             @test _derivative(c1, 0.0, backend) ≈ [1.0, 0.0]
@@ -128,32 +138,15 @@ rb_onb_default = TangentDiffBackend(
     DefaultOrthonormalBasis(),
 )
 
-rb_onb_fd51 = TangentDiffBackend(
-    Manifolds.FiniteDifferencesBackend(),
-    Manifolds.ExponentialRetraction(),
-    Manifolds.LogarithmicInverseRetraction(),
-    DefaultOrthonormalBasis(),
-)
+rb_onb_fd51 = TangentDiffBackend(Manifolds.FiniteDifferencesBackend())
 
-rb_onb_fwd_diff = TangentDiffBackend(
-    Manifolds.ForwardDiffBackend(),
-    Manifolds.ExponentialRetraction(),
-    Manifolds.LogarithmicInverseRetraction(),
-    DefaultOrthonormalBasis(),
-)
+rb_onb_fwd_diff = TangentDiffBackend(Manifolds.ForwardDiffBackend())
 
-rb_onb_finite_diff = TangentDiffBackend(
-    Manifolds.FiniteDiffBackend(),
-    Manifolds.ExponentialRetraction(),
-    Manifolds.LogarithmicInverseRetraction(),
-    DefaultOrthonormalBasis(),
-)
+rb_onb_finite_diff = TangentDiffBackend(Manifolds.FiniteDiffBackend())
 
 rb_onb_default2 = TangentDiffBackend(
-    default_differential_backend(),
-    Manifolds.ExponentialRetraction(),
-    Manifolds.LogarithmicInverseRetraction(),
-    CachedBasis(
+    default_differential_backend();
+    basis=CachedBasis(
         DefaultOrthonormalBasis(),
         [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
     ),
@@ -186,12 +179,26 @@ end
     f1(p) = p[1]
 
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
+    X = similar(q)
     for backend in [rb_onb_default, rb_proj]
         @test isapprox(s2, q, gradient(s2, f1, q, backend), [0.5, 0.0, -0.5])
+        @test gradient!(s2, f1, X, q, backend) === X
+        @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
     end
     X = similar(q)
     for backend in [rb_onb_default, rb_proj]
         gradient!(s2, f1, X, q, backend)
         @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
     end
+end
+
+@testset "Default Errors for the ODEExponentialRetraction" begin
+    @test_throws DomainError ODEExponentialRetraction(
+        ProjectionRetraction(),
+        CachedBasis(DefaultOrthogonalBasis(), []), # not yet supported
+    )
+    @test_throws DomainError ODEExponentialRetraction(
+        ExponentialRetraction(), # not possible
+        DefaultOrthogonalBasis(),
+    )
 end
