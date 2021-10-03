@@ -284,7 +284,7 @@ end
             fX = ManifoldsBase.TFVector(X, B_chart_p)
             fY = ManifoldsBase.TFVector(Y, B_chart_p)
             @test inner(M, p, fX, fY) ≈ dot(X, G * Y) atol = 1e-6
-            @test norm(M, p, fX) ≈ sqrt(dot(X, G * X)) atol = 1e-6 .
+            @test norm(M, p, fX) ≈ sqrt(dot(X, G * X)) atol = 1e-6
 
             @test christoffel_symbols_first(M, p, B_chart_p) ≈ zeros(n, n, n) atol = 1e-6
             @test christoffel_symbols_second(M, p, B_chart_p) ≈ zeros(n, n, n) atol = 1e-6
