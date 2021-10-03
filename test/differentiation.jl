@@ -201,4 +201,8 @@ end
         ExponentialRetraction(), # not possible
         DefaultOrthogonalBasis(),
     )
+    @test_throws DomainError ODEExponentialRetraction(
+        ExponentialRetraction(), # not possible
+        CachedBasis(DefaultOrthogonalBasis(), []), # combination not possible
+    )
 end
