@@ -21,4 +21,6 @@ function _jacobian(f, p, ::ForwardDiffBackend)
     return ForwardDiff.jacobian(f, p)
 end
 
-push!(_diff_backends, ForwardDiffBackend())
+if default_differential_backend() === NoneDiffBackend()
+    set_default_differential_backend!(ForwardDiffBackend())
+end

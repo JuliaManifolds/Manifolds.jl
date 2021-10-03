@@ -200,7 +200,7 @@ end
         M::MetricManifold,
         p,
         B::AbstractBasis;
-        backend::AbstractDiffBackend = diff_backend(),
+        backend::AbstractDiffBackend = default_differential_backend(),
     )
 
 Compute the Christoffel symbols of the first kind in local coordinates of basis `B`.
@@ -219,7 +219,7 @@ function christoffel_symbols_first(
     M::AbstractManifold,
     p,
     B::AbstractBasis;
-    backend::AbstractDiffBackend=diff_backend(),
+    backend::AbstractDiffBackend=default_differential_backend(),
 )
     ∂g = local_metric_jacobian(M, p, B; backend=backend)
     n = size(∂g, 1)
@@ -238,7 +238,7 @@ function christoffel_symbols_second(
     M::AbstractManifold,
     p,
     B::AbstractBasis;
-    backend::AbstractDiffBackend=diff_backend(),
+    backend::AbstractDiffBackend=default_differential_backend(),
 )
     Ginv = inverse_local_metric(M, p, B)
     Γ₁ = christoffel_symbols_first(M, p, B; backend=backend)
@@ -272,7 +272,7 @@ end
     B::AbstractBasis,
 )
 """
-    einstein_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
+    einstein_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_badefault_differential_backendckend())
 
 Compute the Einstein tensor of the manifold `M` at the point `p`, see [https://en.wikipedia.org/wiki/Einstein_tensor](https://en.wikipedia.org/wiki/Einstein_tensor)
 """
@@ -281,7 +281,7 @@ function einstein_tensor(
     M::AbstractManifold,
     p,
     B::AbstractBasis;
-    backend::AbstractDiffBackend=diff_backend(),
+    backend::AbstractDiffBackend=default_differential_backend(),
 )
     Ric = ricci_tensor(M, p, B; backend=backend)
     g = local_metric(M, p, B)
@@ -452,19 +452,19 @@ local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
         M::AbstractManifold,
         p,
         B::AbstractBasis;
-        backend::AbstractDiffBackend = diff_backend(),
+        backend::AbstractDiffBackend,
     )
 
 Get partial derivatives of the local metric of `M` at `p` in basis `B` with respect to the
 coordinates of `p`, ``\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}``. The
 dimensions of the resulting multi-dimensional array are ordered ``(i,j,k)``.
 """
-local_metric_jacobian(::AbstractManifold, ::Any, B::AbstractBasis)
+local_metric_jacobian(::AbstractManifold, ::Any, B::AbstractBasis, ::AbstractDiffBackend)
 function local_metric_jacobian(
     M::AbstractManifold,
     p,
     B::AbstractBasis;
-    backend::AbstractDiffBackend=diff_backend(),
+    backend::AbstractDiffBackend=default_differential_backend(),
 )
     n = size(p, 1)
     ∂g = reshape(_jacobian(q -> local_metric(M, q, B), p, backend), n, n, n)
@@ -516,7 +516,7 @@ function metric(M::MetricManifold)
 end
 
 @doc raw"""
-    ricci_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
+    ricci_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
 
 Compute the Ricci scalar curvature of the manifold `M` at the point `p` using basis `B`.
 The curvature is computed as the trace of the Ricci curvature tensor with respect to
@@ -531,7 +531,7 @@ function ricci_curvature(
     M::AbstractManifold,
     p,
     B::AbstractBasis;
-    backend::AbstractDiffBackend=diff_backend(),
+    backend::AbstractDiffBackend=default_differential_backend(),
 )
     Ginv = inverse_local_metric(M, p, B)
     Ric = ricci_tensor(M, p, B; backend=backend)

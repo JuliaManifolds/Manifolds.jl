@@ -59,7 +59,7 @@ end
         M::AbstractManifold,
         p,
         B::AbstractBasis;
-        backend::AbstractDiffBackend = diff_backend(),
+        backend::AbstractDiffBackend = default_differential_backend(),
     )
 
 Compute the Christoffel symbols of the second kind in local coordinates of basis `B`.
@@ -89,7 +89,7 @@ christoffel_symbols_second(::AbstractManifold, ::Any, ::AbstractBasis)
         M::AbstractManifold,
         p,
         B::AbstractBasis;
-        backend::AbstractDiffBackend = diff_backend(),
+        backend::AbstractDiffBackend = default_differential_backend(),
     )
 
 Get partial derivatives of the Christoffel symbols of the second kind
@@ -106,7 +106,7 @@ function christoffel_symbols_second_jacobian(
     M::AbstractManifold,
     p,
     B::AbstractBasis;
-    backend::AbstractDiffBackend=diff_backend(),
+    backend::AbstractDiffBackend=default_differential_backend(),
 )
     n = size(p, 1)
     ∂Γ = reshape(
@@ -152,17 +152,17 @@ in an embedded space.
 exp(::AbstractConnectionManifold, ::Any...)
 
 @decorator_transparent_fallback function exp!(M::AbstractConnectionManifold, q, p, X)
-    tspan = (0.0, 1.0)
-    A = get_default_atlas(M)
-    i = get_chart_index(M, A, p)
-    B = induced_basis(M, A, i, TangentSpace)
-    sol = solve_exp_ode(M, p, X, tspan, B; dense=false, saveat=[1.0])
-    n = length(p)
-    return copyto!(q, sol.u[1][(n + 1):end])
+    return retract!(
+        M,
+        q,
+        p,
+        X,
+        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
+    )
 end
 
 """
-    gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
+    gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
 
 Compute the Gaussian curvature of the manifold `M` at the point `p` using basis `B`.
 This is equal to half of the scalar Ricci curvature, see [`ricci_curvature`](@ref).
@@ -194,8 +194,13 @@ function injectivity_radius(M::AbstractConnectionManifold, p, m::ExponentialRetr
     return injectivity_radius(base_manifold(M), p, m)
 end
 
+function retract!(M::AbstractDecoratorManifold, q, p, X, r::ODEExponentialRetraction)
+    sol = solve_exp_ode(M, p, X; basis=r.basis, dense=false)
+    return copyto!(q, sol)
+end
+
 """
-    ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_backend())
+    ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
 
 Compute the Ricci tensor, also known as the Ricci curvature tensor,
 of the manifold `M` at the point `p` using basis `B`,
@@ -217,7 +222,7 @@ end
 )
 
 @doc raw"""
-    riemann_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend=diff_backend())
+    riemann_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend=default_differential_backend())
 
 Compute the Riemann tensor ``R^l_{ijk}``, also known as the Riemann curvature
 tensor, at the point `p` in local coordinates defined by `B`. The dimensions of the
@@ -236,7 +241,7 @@ function riemann_tensor(
     M::AbstractManifold,
     p,
     B::AbstractBasis;
-    backend::AbstractDiffBackend=diff_backend(),
+    backend::AbstractDiffBackend=default_differential_backend(),
 )
     n = size(p, 1)
     Γ = christoffel_symbols_second(M, p, B; backend=backend)
@@ -258,14 +263,13 @@ end
         M::AbstractConnectionManifold,
         p,
         X,
-        tspan,
         B::AbstractBasis;
-        backend::AbstractDiffBackend = diff_backend(),
+        backend::AbstractDiffBackend = default_differential_backend(),
         solver = AutoVern9(Rodas5()),
         kwargs...,
     )
 
-Approximate the exponential map on the manifold over the provided timespan
+Approximate the exponential map on the manifold by evaluating the ODE descripting the geodesic at 1,
 assuming the default connection of the given manifold by solving the ordinary differential
 equation
 
@@ -289,9 +293,12 @@ in an embedded space.
     using OrdinaryDiffEq
     ```
 """
-function solve_exp_ode(M, p, X, tspan, B::AbstractBasis; kwargs...)
+function solve_exp_ode(M, p, X; kwargs...)
     return error(
-        "solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)), and timespan $(typeof(tspan)). For a suitable default, enter `using OrdinaryDiffEq` on Julia 1.1 or greater.",
+        """
+        solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)).
+        For a suitable default, enter `using OrdinaryDiffEq`.
+        """,
     )
 end
 
