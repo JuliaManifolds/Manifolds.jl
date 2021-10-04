@@ -119,19 +119,29 @@ end
 @doc raw"""
     ODEExponentialRetraction{T<:AbstractRetractionMethod, B<: AbstractBasis} <: AbstractRetractionMethod
 
-This retraction approximates the exponential map by solving the correspondig ODE.
-Let ``p\in\mathal M`` and ``X\in T_p\mathcal M`` denote the input for the exponential map
-and ``d`` denote the [`manifold_dimension`](@ref) of `M`.
+A retraction approximates the exponential map by solving the correspondig ODE,
+Approximate the exponential map on the manifold by evaluating the ODE descripting the geodesic at 1,
+assuming the default connection of the given manifold by solving the ordinary differential
+equation
 
-This the ODE is formulated in a chart constructed using an [`AbstractBasis`](@ref) `B` and
-and using either an embedding or a [`AbstractRetractionMethod`](@ref) `R` as follows.
-Given some coordinates ``c\in ℝ^d`` - these can be used to form a tangent vector
-with restect to th basis `B, i.e. ``c \mapsto Y=``[`get_vector`](@ref)`(M, p, c, B)`.
-Further, using the retraction we can map ``Y`` to a point on the manifold
-``Y \mapsto q =``[`retract`](@ref)`(M, p, X, R)`.
+```math
+\frac{d^2}{dt^2} p^k + Γ^k_{ij} \frac{d}{dt} p_i \frac{d}{dt} p_j = 0,
+```
 
-Hence the ODE can be formulated in a curve ``c(t)`` in parameter space.
-This is – for sure – only possible locally as fas as the retraction is well-defined.
+where ``Γ^k_{ij}`` are the Christoffel symbols of the second kind, and
+the Einstein summation convention is assumed.
+
+see [`solve_exp_ode`](@ref) for further details.
+
+# Constructor
+
+    ODEExponentialRetraction(
+        r::AbstractRetractionMethod,
+        b::AbstractBasis=DefaultOrthogonalBasis(),
+    )
+
+Generate the retraction with a retraction to use internally (for some approaches)
+and a basis for the tangent space(s).
 """
 struct ODEExponentialRetraction{T<:AbstractRetractionMethod,B<:AbstractBasis} <:
        AbstractRetractionMethod

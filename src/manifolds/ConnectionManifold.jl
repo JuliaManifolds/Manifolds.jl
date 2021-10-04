@@ -278,8 +278,8 @@ equation
 ```
 
 where ``Γ^k_{ij}`` are the Christoffel symbols of the second kind, and
-the Einstein summation convention is assumed. The arguments `tspan` and
-`solver` follow the `OrdinaryDiffEq` conventions. `kwargs...` specify keyword
+the Einstein summation convention is assumed. The argument `solver` follows
+the `OrdinaryDiffEq` conventions. `kwargs...` specify keyword
 arguments that will be passed to `OrdinaryDiffEq.solve`.
 
 Currently, the numerical integration is only accurate when using a single
