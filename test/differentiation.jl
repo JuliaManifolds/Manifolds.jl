@@ -12,6 +12,13 @@ using Manifolds:
     _jacobian,
     _jacobian!
 
+import Manifolds: gradient
+
+struct TestRiemannianBackend <: AbstractRiemannianDiffBackend end
+function Manifolds.gradient(::AbstractManifold, f, p, ::TestRiemannianBackend)
+    return collect(1.0:length(p))
+end
+
 using FiniteDifferences, FiniteDiff
 using LinearAlgebra: Diagonal, dot
 
@@ -195,6 +202,12 @@ end
         gradient!(s2, f1, X, q, backend)
         @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
     end
+
+    # Test the gradient fallback
+    @test gradient(s2, f1, q, TestRiemannianBackend()) == [1.0, 2.0, 3.0]
+    X = similar(q)
+    @test gradient!(s2, f1, X, q, TestRiemannianBackend()) === X
+    @test X == [1.0, 2.0, 3.0]
 end
 
 @testset "Default Errors for the ODEExponentialRetraction" begin
