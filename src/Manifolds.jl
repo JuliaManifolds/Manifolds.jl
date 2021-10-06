@@ -86,7 +86,6 @@ import Base:
 using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
-using FiniteDifferences
 using HybridArrays
 using Kronecker
 using LightGraphs
@@ -287,6 +286,11 @@ function __init__()
         include("differentiation/finite_diff.jl")
     end
 
+    @require FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000" begin
+        using .FiniteDifferences
+        include("differentiation/finite_differences.jl")
+    end
+
     @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
         using .ForwardDiff
         include("differentiation/forward_diff.jl")
@@ -294,7 +298,7 @@ function __init__()
 
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
         using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
-        include("ode.jl")
+        include("differentiation/ode.jl")
     end
 
     @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
@@ -440,6 +444,7 @@ export AbstractRetractionMethod,
     PolarRetraction,
     ProjectionRetraction,
     SoftmaxRetraction,
+    ODEExponentialRetraction,
     PadeRetraction,
     ProductRetraction,
     PowerRetraction
@@ -664,9 +669,9 @@ export get_basis,
 export AbstractDiffBackend,
     AbstractRiemannianDiffBackend,
     FiniteDifferencesBackend,
-    RiemannianONBDiffBackend,
-    RiemannianProjectionGradientBackend
-export diff_backend, diff_backend!, diff_backends
+    TangentDiffBackend,
+    RiemannianProjectionBackend
+export default_differential_backend, set_default_differential_backend!
 # atlases and charts
 export get_point, get_point!, get_parameters, get_parameters!
 

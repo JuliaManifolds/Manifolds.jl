@@ -8,4 +8,6 @@ function Manifolds._gradient!(f, X, p, ::ReverseDiffBackend)
     return ReverseDiff.gradient!(X, f, p)
 end
 
-push!(Manifolds._diff_backends, ReverseDiffBackend())
+if default_differential_backend() === NoneDiffBackend()
+    set_default_differential_backend!(ReverseDiffBackend())
+end

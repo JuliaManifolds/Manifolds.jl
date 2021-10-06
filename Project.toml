@@ -1,13 +1,12 @@
 name = "Manifolds"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.6.9"
+version = "0.7.0"
 
 [deps]
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Einsum = "b7d42ee7-0b51-5a75-98ca-779d3107e4c0"
-FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
 Kronecker = "2c470bb0-bcc8-11e8-3dad-c9649493f05e"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
@@ -29,7 +28,6 @@ Colors = "0.12"
 Distributions = "0.22.6, 0.23, 0.24, 0.25"
 Einsum = "0.4"
 FiniteDiff = "2"
-FiniteDifferences = "0.12"
 HybridArrays = "0.4"
 Kronecker = "0.4, 0.5"
 LightGraphs = "1"
@@ -48,6 +46,7 @@ julia = "1.5"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
 FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41"
+FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
 ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
@@ -65,4 +64,4 @@ VisualRegressionTests = "34922c18-7c2a-561c-bac1-01e79b2c4c92"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["Test", "Colors", "DoubleFloats", "FiniteDiff", "ForwardDiff", "Gtk", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "NLsolve", "Plots", "PyPlot", "Quaternions", "QuartzImageIO", "RecipesBase", "ReverseDiff", "Zygote"]
+test = ["Test", "Colors", "DoubleFloats", "FiniteDiff", "FiniteDifferences", "ForwardDiff", "Gtk", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "NLsolve", "Plots", "PyPlot", "Quaternions", "QuartzImageIO", "RecipesBase", "ReverseDiff", "Zygote"]

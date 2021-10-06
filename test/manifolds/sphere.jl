@@ -222,5 +222,6 @@ using ManifoldsBase: TFVector
         @test Y == X
         Z = change_metric(M, EuclideanMetric(), p, X)
         @test Z == X
+        @test local_metric(M, p, DefaultOrthonormalBasis()) == Diagonal([1.0, 1.0])
     end
 end
