@@ -86,7 +86,7 @@ constant [`_current_default_differential_backend`](@ref).
 
 # See also
 
-[`AbstractDiffBackend`](@ref), [`default_differential_backend`](@ref), [`set_default_differential_backend`](@ref)
+[`AbstractDiffBackend`](@ref), [`default_differential_backend`](@ref), [`set_default_differential_backend!`](@ref)
 """
 mutable struct CurrentDiffBackend
     backend::AbstractDiffBackend
@@ -117,9 +117,8 @@ function set_default_differential_backend!(backend::AbstractDiffBackend)
 end
 
 @doc raw"""
-    ODEExponentialRetraction{T<:AbstractRetractionMethod, B<: AbstractBasis} <: AbstractRetractionMethod
+    ODEExponentialRetraction{T<:AbstractRetractionMethod, B<:AbstractBasis} <: AbstractRetractionMethod
 
-A retraction approximates the exponential map by solving the correspondig ODE,
 Approximate the exponential map on the manifold by evaluating the ODE descripting the geodesic at 1,
 assuming the default connection of the given manifold by solving the ordinary differential
 equation
@@ -131,7 +130,7 @@ equation
 where ``Γ^k_{ij}`` are the Christoffel symbols of the second kind, and
 the Einstein summation convention is assumed.
 
-see [`solve_exp_ode`](@ref) for further details.
+See [`solve_exp_ode`](@ref) for further details.
 
 # Constructor
 

@@ -23,7 +23,7 @@ differential(::AbstractManifold, ::Any, ::Real, ::AbstractRiemannianDiffBackend)
     gradient!(M::AbstractManifold, f, X, p, backend::AbstractRiemannianDiffBackend)
 
 Compute the Riemannian gradient ``∇f(p)`` of a real-valued function ``f:\mathcal M \to ℝ``
-at at point `p` on the manifold `M` using the specified [`AbstractRiemannianDiffBackend`](@ref).
+at point `p` on the manifold `M` using the specified [`AbstractRiemannianDiffBackend`](@ref).
 
 The mutating variant computes the gradient in place of `X`.
 """
@@ -63,9 +63,9 @@ where `diff_backend` is an [`AbstractDiffBackend`](@ref) to be used on the tange
 
 With the keyword arguments
 
-* `retraction` an [`AbstractRetractionMethod`](@ref) ([`ExponentialRetraction`]('ref) by default)
-* `inverse_retraction` an [`AbstractInverseRetractionMethod`](@ref) ([`LogarithmicInverseRetraction`]('ref) by default)
-* `basis` an [`AbstractBasis`](@ref) ([`DefaultOrthogonalBasis`]('ref) by default)
+* `retraction` an [`AbstractRetractionMethod`](@ref) ([`ExponentialRetraction`](@ref) by default)
+* `inverse_retraction` an [`AbstractInverseRetractionMethod`](@ref) ([`LogarithmicInverseRetraction`](@ref) by default)
+* `basis` an [`AbstractBasis`](@ref) ([`DefaultOrthogonalBasis`](@ref) by default)
 """
 struct TangentDiffBackend{
     TAD<:AbstractDiffBackend,
@@ -177,7 +177,7 @@ Then we require three tools
 
 * A function ``f̃: ℝ^m → ℝ`` such that its restriction to the manifold yields the cost
   function ``f`` of interest.
-* A [`project`](@ref) function to project tangent vectors from the embedding (at `T_pℝ^m``)
+* A [`project`](@ref) function to project tangent vectors from the embedding (at ``T_pℝ^m``)
   back onto the tangent space ``T_p\mathcal M``. This also includes possible changes
   of the representation of the tangent vector (e.g. in the Lie algebra or in a different data format).
 * A [`change_representer`](@ref) for non-isometrically embedded manifolds,
