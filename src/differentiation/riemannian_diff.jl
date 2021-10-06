@@ -47,7 +47,7 @@ end
     TangentDiffBackend <: AbstractRiemannianDiffBackend
 
 A backend that uses a tangent space and a basis therein to derive an
-(intrinsic, approximate) differentiation scheme.
+intrinsic differentiation scheme.
 
 Since it works in a tangent space, methods might require a retraction and an
 inverse retraction as well as a basis.
