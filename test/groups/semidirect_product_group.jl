@@ -19,9 +19,7 @@ include("group_utils.jl")
     tuple_pts = [zip(ts1, ts2)...]
     tuple_v = ([-1.0, 1.0], [2.0, 3.0])
 
-    shape_se = Manifolds.ShapeSpecification(Manifolds.ArrayReshaper(), M.manifolds...)
-    pts = [Manifolds.prod_point(shape_se, tp...) for tp in tuple_pts]
-    v_pts = [Manifolds.prod_point(shape_se, tuple_v...)]
+    pts = [ProductRepr(tp...) for tp in tuple_pts]
 
     X = log(G, pts[1], pts[1])
     Y = zero_vector(G, pts[1])

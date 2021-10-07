@@ -44,44 +44,6 @@ Random.seed!(10)
             ]
         end
 
-        @testset "product point" begin
-            reshapers = (Manifolds.ArrayReshaper(), Manifolds.StaticReshaper())
-            for reshaper in reshapers
-                shape_se = Manifolds.ShapeSpecification(reshaper, M.manifolds...)
-                pts = [Manifolds.prod_point(shape_se, tp...) for tp in tuple_pts]
-                X_pts = [Manifolds.prod_point(shape_se, tX...) for tX in tuple_X]
-
-                g1, g2 = pts[1:2]
-                t1, R1 = g1.parts
-                t2, R2 = g2.parts
-                g1g2 = Manifolds.prod_point(shape_se, R1 * t2 + t1, R1 * R2)
-                @test isapprox(G, compose(G, g1, g2), g1g2)
-                @test affine_matrix(G, g1g2) ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
-                tmp = copy(g1)
-                Manifolds._padpoint!(G, tmp)
-                @test tmp == g1
-                tmp = copy(X_pts[1])
-                Manifolds._padvector!(G, tmp)
-                @test tmp == X_pts[1]
-
-                w = translate_diff(G, pts[1], Identity(G), X_pts[1])
-                w2 = allocate(w)
-                w2.parts[1] .= w.parts[1]
-                w2.parts[2] .= pts[1].parts[2] * w.parts[2]
-                @test screw_matrix(G, w2) ≈
-                      affine_matrix(G, pts[1]) * screw_matrix(G, X_pts[1])
-
-                test_group(
-                    G,
-                    pts,
-                    X_pts,
-                    X_pts;
-                    test_diff=true,
-                    diff_convs=[(), (LeftAction(),), (RightAction(),)],
-                )
-            end
-        end
-
         @testset "product repr" begin
             pts = [ProductRepr(tp...) for tp in tuple_pts]
             X_pts = [ProductRepr(tX...) for tX in tuple_X]
