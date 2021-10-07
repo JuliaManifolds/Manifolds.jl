@@ -363,17 +363,38 @@ using RecursiveArrayTools: ArrayPartition
                     TP(SizedVector{3}([0.0, 1.0, 0.0]), SizedVector{2}([1.0, 0.0])),
                 ),
             )
+            distr_M1 = Manifolds.uniform_distribution(M1, pts_sphere[1])
+            distr_M2 = Manifolds.projected_distribution(
+                M2,
+                Distributions.MvNormal(zero(pts_r2[1]), 1.0),
+            )
+            distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_sphere[1], 1.0)
+            distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_r2[1], 1.0)
+            @test injectivity_radius(Mse, pts[1]) ≈ π
+            @test injectivity_radius(Mse) ≈ π
+            @test injectivity_radius(Mse, pts[1], ExponentialRetraction()) ≈ π
+            @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
 
             test_manifold(
                 Mse,
-                pts,
-                test_injectivity_radius=false,
+                pts;
+                point_distributions=[
+                    Manifolds.ProductPointDistribution(distr_M1, distr_M2),
+                ],
+                tvector_distributions=[
+                    Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
+                ],
+                test_injectivity_radius=true,
                 test_musical_isomorphisms=true,
-                test_tangent_vector_broadcasting=false,
-                test_forward_diff=false,
-                test_reverse_diff=false,
+                musical_isomorphism_bases=[DefaultOrthonormalBasis()],
+                test_tangent_vector_broadcasting=true,
+                test_forward_diff=true,
+                test_reverse_diff=true,
                 test_project_tangent=true,
                 test_project_point=true,
+                test_mutating_rand=false,
+                retraction_methods=retraction_methods,
+                inverse_retraction_methods=inverse_retraction_methods,
                 test_riesz_representer=true,
                 test_default_vector_transport=true,
                 vector_transport_methods=[

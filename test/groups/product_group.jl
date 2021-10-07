@@ -33,14 +33,50 @@ include("group_utils.jl")
 
     @testset "product repr" begin
         pts = [ProductRepr(tp...) for tp in tuple_pts]
-        v_pts = [ProductRepr(tuple_v...)]
+        X_pts = [ProductRepr(tuple_v...)]
+
         @test compose(G, pts[1], Identity(G)) == pts[1]
         @test compose(G, Identity(G), pts[1]) == pts[1]
-        test_group(G, pts, v_pts, v_pts; test_diff=true, test_mutating=false)
+        test_group(G, pts, X_pts, X_pts; test_diff=true)
         @test isapprox(
             G,
-            exp_lie(G, v_pts[1]),
-            ProductRepr(exp_lie(SOn, v_pts[1].parts[1]), exp_lie(Tn, v_pts[1].parts[2])),
+            Identity(G),
+            exp_lie(G, X_pts[1]),
+            ProductRepr(exp_lie(SOn, X_pts[1].parts[1]), exp_lie(Tn, X_pts[1].parts[2])),
+        )
+        @test isapprox(
+            G,
+            Identity(G),
+            log_lie(G, pts[1]),
+            ProductRepr(log_lie(SOn, pts[1].parts[1]), log_lie(Tn, pts[1].parts[2])),
+        )
+        X = log_lie(G, pts[1])
+        Z = zero_vector(G, pts[1])
+        log_lie!(G, Z, pts[1])
+        @test isapprox(G, pts[1], X, Z)
+        p = exp_lie(G, X)
+        q = identity_element(G)
+        @test is_identity(G, q)
+        @test isapprox(G, q, Identity(G))
+        @test isapprox(G, Identity(G), q)
+        exp_lie!(G, q, X)
+        @test isapprox(G, p, q)
+        log_lie!(G, Z, Identity(G))
+        @test isapprox(G, Identity(G), Z, zero_vector(G, identity_element(G)))
+        @test isapprox(
+            G,
+            Identity(G),
+            log_lie(G, Identity(G)),
+            zero_vector(G, identity_element(G)),
+        )
+
+        @test compose(G, pts[1], Identity(G)) == pts[1]
+        @test compose(G, Identity(G), pts[1]) == pts[1]
+        test_group(G, pts, X_pts, X_pts; test_diff=true, test_mutating=false)
+        @test isapprox(
+            G,
+            exp_lie(G, X_pts[1]),
+            ProductRepr(exp_lie(SOn, X_pts[1].parts[1]), exp_lie(Tn, X_pts[1].parts[2])),
         )
         @test isapprox(
             G,
