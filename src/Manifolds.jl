@@ -171,7 +171,10 @@ using ManifoldsBase:
     is_decorator_transparent,
     is_default_decorator,
     manifold_function_not_implemented_message,
+    number_system,
+    real_dimension,
     rep_size_to_colons,
+    shortest_geodesic,
     size_to_tuple,
     vector_transport_along,
     vector_transport_along!

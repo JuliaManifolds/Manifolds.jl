@@ -590,10 +590,6 @@ for TP in [ProductRepr, ArrayPartition]
         end,
     )
 end
-function get_vector(M::ProductManifold, p, Xⁱ, B::VeeOrthogonalBasis)
-    X = allocate_result(M, hat, p, Xⁱ)
-    return get_vector!(M, X, p, Xⁱ, B)
-end
 
 function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
     dims = map(manifold_dimension, M.manifolds)

@@ -36,7 +36,8 @@ include("utils.jl")
             A2_fail = Q * T_fail * Q'
             @test_throws DomainError Manifolds.log_safe!(similar(A2_fail), A2_fail)
 
-            A3 = exp(randn(n, n))
+            A3 = exp(SizedMatrix{n,n}(randn(n, n)))
+            @test A3 isa SizedMatrix
             @test exp(Manifolds.log_safe!(similar(A3), A3)) ≈ A3 atol = 1e-6
 
             A3_fail = Float64[1 2; 3 1]
@@ -98,6 +99,7 @@ include("utils.jl")
         @testset "allocation" begin
             @test allocate([1 2; 3 4], Float64, Size(3, 3)) isa Matrix{Float64}
             @test allocate(SA[1 2; 3 4], Float64, Size(3, 3)) isa MMatrix{3,3,Float64}
+            @test allocate(SA[1 2; 3 4], Size(3, 3)) isa MMatrix{3,3,Int}
         end
         @testset "eigen_safe" begin
             @test Manifolds.eigen_safe(SA[1.0 0.0; 0.0 1.0]) isa
