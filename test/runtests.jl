@@ -39,6 +39,7 @@ include("utils.jl")
             A3 = exp(SizedMatrix{n,n}(randn(n, n)))
             @test A3 isa SizedMatrix
             @test exp(Manifolds.log_safe!(similar(A3), A3)) ≈ A3 atol = 1e-6
+            @test exp(Manifolds.log_safe(A3)) ≈ A3 atol = 1e-6
 
             A3_fail = Float64[1 2; 3 1]
             @test_throws DomainError Manifolds.log_safe!(similar(A3_fail), A3_fail)
