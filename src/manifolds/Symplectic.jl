@@ -1,13 +1,4 @@
 @doc raw"""
-    abstract type AbstractSymplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
-
-This abstract describes the base type for symplectic manifolds with reference to a specific field, and 
-can thus be extended to work over both real and complex fields.
-"""
-# abstract type AbstractSymplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
-# end
-
-@doc raw"""
     Symplectic{n, ℝ} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
 
 Over the field ℝ, the Real Symplectic Manifold consists of all $2n × 2n$ matrices defined as 
@@ -39,10 +30,11 @@ struct Symplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmb
 end
 
 @doc """
-    #TODO: 
+    Document difference between real and complex.
+    You are given a manifold of embedding dimension 2nX2n.
 """
-Symplectic(embedding_dimension::Int, field::AbstractNumbers=ℝ) = begin 
-    @assert embedding_dimension % 2 == 0; Symplectic{div(embedding_dimension, 2), field}()
+Symplectic(n::Int, field::AbstractNumbers=ℝ) = begin 
+    Symplectic{n, field}()
 end
 
 @doc """
@@ -170,4 +162,29 @@ function symplectic_multiply(::Symplectic{n, ℝ}, A; left=true, transposed=fals
 end
 
 # TODO: implement logarithmic map.
-# DOME: Implement internally as storing the 'n' of the '2n' dimensions embebbed.
+@doc raw"""
+    inner(::Symplectic{n, ℝ}, p, X, Y)
+
+Riemannian
+"""
+function inner(::Symplectic{n, ℝ}, p, X, Y)
+    p_inv = inv(p)
+    return tr((p_inv * X)' * (p_inv * Y))
+end
+
+
+# Fiori log and retraction.
+
+# Log for symplectic manifolds.
+# retraction for symplectic manifolds.
+# E_grad_2_M_grad:
+
+# Project report:
+#   - Present Manifold Theory
+#   - Presenting specific Symplectic Tailored to Optim.
+#   - Present Gradient conversion scheme.
+#   - Can compute Euclidian Gradient -> Riemannian
+# 
+
+# change_representer. !
+# change_metric
