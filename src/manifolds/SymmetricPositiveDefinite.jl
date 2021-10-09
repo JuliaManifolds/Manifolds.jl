@@ -152,7 +152,7 @@ end
 project a matrix from the embedding onto the tangent space $T_p\mathcal P(n)$ of the
 [SymmetricPositiveDefinite](@ref) matrices, i.e. the set of symmetric matrices.
 """
-project!(::SymmetricPositiveDefinite, Y, p, X) = (Y .= Symmetric(0.5(X + X')))
+project!(::SymmetricPositiveDefinite, Y, p, X) = (Y .= Symmetric((X + X') / 2))
 
 @doc raw"""
     representation_size(M::SymmetricPositiveDefinite)
