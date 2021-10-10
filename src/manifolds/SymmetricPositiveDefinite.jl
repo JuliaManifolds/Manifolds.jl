@@ -10,6 +10,16 @@ p ∈ ℝ^{n × n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\bac
 \bigr\}
 ````
 
+The tangent space at ``T_p\mathcal P(n)`` reads
+
+```math
+    T_p\mathcal P(n) =
+    \bigl\{
+        X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T}
+    \bigr\},
+```
+i.e. the set of symmetric matrices,
+
 # Constructor
 
     SymmetricPositiveDefinite(n)
@@ -135,6 +145,16 @@ function Statistics.mean!(
 )
     return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
 end
+
+@doc raw"""
+    project(M::SymmetricPositiveDefinite, p, X)
+
+project a matrix from the embedding onto the tangent space $T_p\mathcal P(n)$ of the
+[SymmetricPositiveDefinite](@ref) matrices, i.e. the set of symmetric matrices.
+"""
+project(::SymmetricPositiveDefinite, p, X)
+
+project!(::SymmetricPositiveDefinite, Y, p, X) = (Y .= Symmetric((X + X') / 2))
 
 @doc raw"""
     representation_size(M::SymmetricPositiveDefinite)

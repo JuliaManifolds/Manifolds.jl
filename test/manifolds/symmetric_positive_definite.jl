@@ -148,4 +148,10 @@ using Manifolds: default_metric_dispatch
         Z = change_representer(M1, EuclideanMetric(), p, X)
         @test Z == p * X * p
     end
+    @testset "Projection on Tangent space" begin
+        p = Matrix{Float64}(I, 3, 3)
+        X = [1.0 2.0 1.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
+        Y = project(M1, p, X)
+        @test is_vector(M1, p, Y)
+    end
 end
