@@ -12,7 +12,7 @@ p ∈ ℝ^{n × n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\bac
 
 The tangent space at ``T_p\mathcal P(n)`` reads
 
-```
+```math
     T_p\mathcal P(n) =
     \bigl\{
         X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T}
