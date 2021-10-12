@@ -54,7 +54,7 @@ function check_point(M::Symplectic{n, ℝ}, p; kwargs...) where {n, ℝ}
     # Perform check that the matrix lives on the real symplectic manifold
     expected_identity = symplectic_inverse(M, p) * p
     p_identity = one(p)
-    if !isapprox(expected_identity, p_identity, kwargs...)
+    if !isapprox(expected_identity, p_identity; kwargs...)
         return DomainError(
             norm(expected_identity - p_identity),
             ("The point $(p) does not lie on $(M) because its symplectic" 
@@ -83,7 +83,7 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
 
     # Big oopsie! (X')
     tangent_requirement_norm = norm(X' * symplectic_multiply(M, p) + p' * symplectic_multiply(M, X), 2)
-    if !isapprox(tangent_requirement_norm, 0.0, kwargs...)
+    if !isapprox(tangent_requirement_norm, 0.0; kwargs...)
         return DomainError(
             tangent_requirement_norm,
             ("The matrix $(X) is not in the tangent space at point $p of the"
@@ -169,9 +169,10 @@ end
 Riemannian: Test Test. Reference to Fiori.
 
 """
-function inner(::Symplectic{n, ℝ}, p, X, Y) where {n}
-    c = cholesky(p)
-    return tr((c \ X)' * (c \ Y))
+function inner(M::Symplectic{n, ℝ}, p, X, Y) where {n}
+    # For symplectic matrices, the 'symplectic inverse' p^+ is the actual inverse.
+    p_star = symplectic_inverse(M, p)
+    return tr((p_star * X)' * (p_star * Y))
 end
 
 

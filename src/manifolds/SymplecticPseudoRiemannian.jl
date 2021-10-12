@@ -22,9 +22,9 @@ known as the Khvedelidze–Mladenov metric. As referenced in Simone Fiori[^Fiori
     > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
-function inner(::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, X, Y) where {n}
-    c = cholesky(p)
-    return tr((c \ X) * (c \ Y))
+function inner(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, X, Y) where {n}
+    p_star = symplectic_inverse(M, p)
+    return tr((p_star * X) * (p_star * Y))
 end
 
 @doc """
