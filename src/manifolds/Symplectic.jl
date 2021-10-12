@@ -81,7 +81,8 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     )
     mpv === nothing || return mpv
 
-    tangent_requirement_norm = norm(X * symplectic_multiply(M, p) + p' * symplectic_multiply(M, X), 2)
+    # Big oopsie! (X')
+    tangent_requirement_norm = norm(X' * symplectic_multiply(M, p) + p' * symplectic_multiply(M, X), 2)
     if !isapprox(tangent_requirement_norm, 0.0, kwargs...)
         return DomainError(
             tangent_requirement_norm,
@@ -130,7 +131,7 @@ A^{+} =
 \end{bmatrix}
 ````
 """
-function symplectic_inverse(::Symplectic{n, ℝ}, A) where {n, ℝ}
+function symplectic_inverse(::Symplectic{n, ℝ}, A) where {n}
     # Allocate memory for A_star, the symplectic inverse:
     A_star = similar(A)
     
@@ -146,7 +147,7 @@ end
 @doc raw"""
     TODO:
 """
-function symplectic_multiply(::Symplectic{n, ℝ}, A; left=true, transposed=false) where {n, ℝ}
+function symplectic_multiply(::Symplectic{n, ℝ}, A; left=true, transposed=false) where {n}
     # Flip sign if the Q-matrix to be multiplied with A is transposed:
     sign = transposed ? (-1.0) : (1.0) 
 
@@ -165,26 +166,34 @@ end
 @doc raw"""
     inner(::Symplectic{n, ℝ}, p, X, Y)
 
-Riemannian
+Riemannian: Test Test. Reference to Fiori.
+
 """
-function inner(::Symplectic{n, ℝ}, p, X, Y)
-    p_inv = inv(p)
-    return tr((p_inv * X)' * (p_inv * Y))
+function inner(::Symplectic{n, ℝ}, p, X, Y) where {n}
+    c = cholesky(p)
+    return tr((c \ X)' * (c \ Y))
 end
 
 
-# Fiori log and retraction.
+@doc """
+    grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇_Euclidian_f)
 
-# Log for symplectic manifolds.
-# retraction for symplectic manifolds.
-# E_grad_2_M_grad:
+Compute the transformation of the euclidian gradient of a function `f` onto the tangent space of the point p ∈ Sn(ℝ, 2n)[^FioriSimone2011].
+The transformation is found by requireing that the gradient element in the tangent space solves the metric compatibility for the Riemannian default_metric_dispatch
+along with the defining equation for a tangent vector ``X ∈ T_pSn(ℝ)``at a point ``p ∈ Sn(ℝ)``.    
 
-# Project report:
-#   - Present Manifold Theory
-#   - Presenting specific Symplectic Tailored to Optim.
-#   - Present Gradient conversion scheme.
-#   - Can compute Euclidian Gradient -> Riemannian
-# 
+# Could reproduce more explicit formulas?
+(f needs to be defined on a neighborhood of the point p in the embedding space ℰ?)
 
-# change_representer. !
-# change_metric
+[^FioriSimone2011]:
+    > Simone Fiori:
+    > Solving minimal-distance problems over the manifold of real-symplectic matrices,
+    > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
+    > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
+"""
+function grad_euclidian_to_manifold(M::Symplectic, p, ∇f_euc)
+    inner_expression = ∇f_euc' * symplectic_multiply(M, p; left=false) - symplectic_multiply(M, p') * ∇f_euc
+    ∇f_man = (1/2) .* p * symplectic_multiply(M, inner_expression)
+    return ∇f_man
+end
+
