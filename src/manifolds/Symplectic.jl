@@ -198,3 +198,56 @@ function grad_euclidian_to_manifold(M::Symplectic, p, ∇f_euc)
     return ∇f_man
 end
 
+@doc raw"""
+    project!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
+
+Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n, ℝ)``, stored inplace in Y.
+Adapted from projection onto tangent spaces of Symplectic Stiefal manifolds ``\operatorname{Sp}(2p, 2n)`` with
+``p = n``[^Gao2021riemannian].  
+
+# Full defining equations possibly:
+
+[^Gao2021riemannian]:
+    > Gao, Bin and Son, Nguyen Thanh and Absil, P-A and Stykel, Tatjana:
+    > Riemannian optimization on the symplectic Stiefel manifold,
+    > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
+    > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
+"""
+function project!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
+    pQ = symplectic_multiply(M, p; left=false)
+        
+    pT_QT_X = symplectic_multiply(M, p'; left=false, transposed=true) * X 
+
+    symmetrized_pT_QT_X = (1.0/2) .* (pT_QT_X + pT_QT_X')
+
+    Y[:, :] = pQ*(symmetrized_pT_QT_X .- pT_QT_X) + X
+
+    # Suspected slower, but equivalent formulation direct from paper:
+    # pT_QT = symplectic_multiply(M, p'; left=false, transposed=true)
+    # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*pT_QT) * X
+    return nothing
+end
+
+
+@doc raw"""
+    project_normal!(M::Symplectic{n, ℝ}, Y, p, X)
+
+
+Project onto the normal space relative to the tangent space at a point ``p ∈ \operatorname{Sp}(2n)``, as found in Gao et al.[^Gao2021riemannian].
+
+# Defining equations:
+
+[^Gao2021riemannian]:
+    > Gao, Bin and Son, Nguyen Thanh and Absil, P-A and Stykel, Tatjana:
+    > Riemannian optimization on the symplectic Stiefel manifold,
+    > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
+    > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
+"""
+function project_normal!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
+    pQ = symplectic_multiply(M, p; left=false)
+    pT_QT_X = symplectic_multiply(M, p'; left=false, transposed=true) * X
+    skew_pT_QT_X = (1.0/2) .* (pT_QT_X .- pT_QT_X')
+    Y[:, :] = pQ * skew_pT_QT_X
+    return nothing
+end
+
