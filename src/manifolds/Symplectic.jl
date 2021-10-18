@@ -162,7 +162,6 @@ function symplectic_multiply(::Symplectic{n, ℝ}, A; left=true, transposed=fals
     return QA
 end
 
-# TODO: implement logarithmic map.
 @doc raw"""
     inner(::Symplectic{n, ℝ}, p, X, Y)
 
@@ -176,15 +175,15 @@ function inner(M::Symplectic{n, ℝ}, p, X, Y) where {n}
 end
 
 
-@doc """
+@doc raw"""
     grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇_Euclidian_f)
 
 Compute the transformation of the euclidian gradient of a function `f` onto the tangent space of the point p ∈ Sn(ℝ, 2n)[^FioriSimone2011].
 The transformation is found by requireing that the gradient element in the tangent space solves the metric compatibility for the Riemannian default_metric_dispatch
 along with the defining equation for a tangent vector ``X ∈ T_pSn(ℝ)``at a point ``p ∈ Sn(ℝ)``.    
 
-# Could reproduce more explicit formulas?
-(f needs to be defined on a neighborhood of the point p in the embedding space ℰ?)
+First we change the representation of the gradient from the Euclidean metric to the RealSymplecticMetric at p,
+and then we project the result onto the tangent space ``T_p\operatorname{Sp}(2n, ℝ)`` at p.
 
 [^FioriSimone2011]:
     > Simone Fiori:
@@ -193,12 +192,28 @@ along with the defining equation for a tangent vector ``X ∈ T_pSn(ℝ)``at a p
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
 function grad_euclidian_to_manifold(M::Symplectic, p, ∇f_euc)
-    metric_compatible_grad_f = p * p' * ∇f_euc
-    # inner_expression = ∇f_euc' * symplectic_multiply(M, p; left=false) - symplectic_multiply(M, p') * ∇f_euc
-    # ∇f_man = (1/2) .* p * symplectic_multiply(M, inner_expression)
-
+    # metric_compatible_grad_f = p * p' * ∇f_euc
+    Y = similar(∇f_euc)
+    metric_compatible_grad_f =  change_representer!(M, Y, EuclideanMetric(), p, ∇f_euc)
     return project(M, p, metric_compatible_grad_f)
 end
+
+function direct_grad_euclidian_to_manifold(M::Symplectic, p, ∇f_euc)
+    inner_expression = ∇f_euc' * symplectic_multiply(M, p; left=false) - symplectic_multiply(M, p') * ∇f_euc
+    ∇f_man = (1/2) .* p * symplectic_multiply(M, inner_expression)
+    return ∇f_man
+end
+
+@doc raw"""
+    change_representer!(::Symplectic, Y, p, X)
+
+Change the representation of 
+"""
+function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
+    Y .= p * p' * X
+    return Y
+end
+
 
 @doc raw"""
     project!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
