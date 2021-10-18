@@ -1,3 +1,29 @@
+@doc raw"""
+    change_representer(M::Hyperbolic{n}, ::EuclideanMetric, p, X)
+
+Change the Eucliden representer `X` of a cotangent vector at point `p`.
+We only have to correct for the metric, which means that the sign of the last entry changes, since
+for the result ``Y``  we are looking for a tangent vector such that
+
+```math
+    g_p(Y,Z) = -y_{n+1}z_{n+1} + \sum_{i=1}^n y_iz_i = \sum_{i=1}^{n+1} z_ix_i
+```
+
+holds, which directly yields ``y_i=x_i`` for ``i=1,\ldots,n`` and ``y_{n+1}=-x_{n+1}``.
+"""
+change_representer(::Hyperbolic, ::EuclideanMetric, ::Any, ::Any)
+
+function change_representer!(M::Hyperbolic, Y, ::EuclideanMetric, p, X)
+    copyto!(M, Y, p, X)
+    Y[end] *= -1
+    return Y
+end
+
+function change_metric!(::Hyperbolic, ::Any, ::EuclideanMetric, ::Any, ::Any)
+    return error(
+        "Changing metric from Euclidean to Hyperbolic is not possible (see Sylvester's law of inertia).",
+    )
+end
 
 function check_point(M::Hyperbolic, p; kwargs...)
     mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
@@ -325,7 +351,7 @@ component such that for the
 resulting `p` we have that its [`minkowski_metric`](@ref) is $⟨p,X⟩_{\mathrm{M}} = 0$,
 i.e. $X_{n+1} = \frac{⟨\tilde p, Y⟩}{p_{n+1}}$, where $\tilde p = (p_1,\ldots,p_n)$.
 """
-_hyperbolize(M::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
+_hyperbolize(::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
 
 @doc raw"""
     inner(M::Hyperbolic{n}, p, X, Y)

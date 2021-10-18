@@ -144,7 +144,9 @@ end
 function decorated_manifold(M::AbstractSphere{𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field=𝔽)
 end
-get_embedding(M::AbstractSphere{𝔽}) where {𝔽} = decorated_manifold(M)
+
+# Since on every tangent space the Euclidean matric (restricted to this space) is used, this should be fine
+default_metric_dispatch(::AbstractSphere, ::EuclideanMetric) = Val(true)
 
 @doc raw"""
     distance(M::AbstractSphere, p, q)
@@ -227,6 +229,8 @@ function get_coordinates!(
     return Y
 end
 
+get_embedding(M::AbstractSphere{𝔽}) where {𝔽} = decorated_manifold(M)
+
 @doc raw"""
     get_vector(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
 
@@ -302,6 +306,17 @@ inverse_retract(::AbstractSphere, ::Any, ::Any, ::ProjectionInverseRetraction)
 
 function inverse_retract!(::AbstractSphere, X, p, q, ::ProjectionInverseRetraction)
     return (X .= q ./ real(dot(p, q)) .- p)
+end
+
+@doc raw"""
+    local_metric(M::Sphere{n}, p, ::DefaultOrthonormalBasis)
+
+return the local representation of the metric in a [`DefaultOrthonormalBasis`](@ref), namely
+the diagonal matrix of size ``n×n`` with ones on the diagonal, since the metric is obtained
+from the embedding by restriction to the tangent space ``T_p\mathcal M`` at ``p``.
+"""
+function local_metric(::Sphere{n,ℝ}, p, B::DefaultOrthonormalBasis) where {n}
+    return Diagonal(ones(SVector{n,eltype(p)}))
 end
 
 @doc raw"""

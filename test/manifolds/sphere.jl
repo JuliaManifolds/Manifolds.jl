@@ -214,4 +214,14 @@ using ManifoldsBase: TFVector
             end
         end
     end
+
+    @testset "Metric conversion is the identity" begin
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 1.0, 1.0]
+        Y = change_representer(M, EuclideanMetric(), p, X)
+        @test Y == X
+        Z = change_metric(M, EuclideanMetric(), p, X)
+        @test Z == X
+        @test local_metric(M, p, DefaultOrthonormalBasis()) == Diagonal([1.0, 1.0])
+    end
 end

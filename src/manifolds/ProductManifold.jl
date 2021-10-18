@@ -136,6 +136,42 @@ function ProductVectorTransport(methods::AbstractVectorTransportMethod...)
 end
 
 """
+    change_representer(M::ProductManifold, ::AbstractMetric, p, X)
+
+Since the metric on a product manifold decouples, the change of a representer can be done elementwise
+"""
+change_representer(::ProductManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_representer!(M::ProductManifold, Y, G::AbstractMetric, p, X)
+    map(
+        (m, y, P, x) -> change_representer!(m, y, G, P, x),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return Y
+end
+
+"""
+    change_metric(M::ProductManifold, ::AbstractMetric, p, X)
+
+Since the metric on a product manifold decouples, the change of metric can be done elementwise.
+"""
+change_metric(::ProductManifold, ::AbstractMetric, ::Any, ::Any)
+
+function change_metric!(M::ProductManifold, Y, G::AbstractMetric, p, X)
+    map(
+        (m, y, P, x) -> change_metric!(m, y, G, P, x),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return Y
+end
+
+"""
     check_point(M::ProductManifold, p; kwargs...)
 
 Check whether `p` is a valid point on the [`ProductManifold`](@ref) `M`.
@@ -144,11 +180,7 @@ components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_point(
-    M::ProductManifold,
-    p::Union{ProductRepr,ProductArray,ArrayPartition};
-    kwargs...,
-)
+function check_point(M::ProductManifold, p::Union{ProductRepr,ArrayPartition}; kwargs...)
     ts = ziptuples(Tuple(1:length(M.manifolds)), M.manifolds, submanifold_components(M, p))
     e = [(t[1], check_point(t[2:end]...; kwargs...)) for t in ts]
     errors = filter((x) -> !(x[2] === nothing), e)
@@ -160,7 +192,7 @@ end
 function check_point(M::ProductManifold, p; kwargs...)
     return DomainError(
         typeof(p),
-        "The point $p is not a point on $M, since currently only ProductRepr, ProductArray and ArrayPartition are supported types for points on arbitrary product manifolds",
+        "The point $p is not a point on $M, since currently only ProductRepr and ArrayPartition are supported types for points on arbitrary product manifolds",
     )
 end
 
@@ -176,8 +208,8 @@ The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(
     M::ProductManifold,
-    p::Union{ProductRepr,ProductArray,ArrayPartition},
-    X::Union{ProductRepr,ProductArray,ArrayPartition};
+    p::Union{ProductRepr,ArrayPartition},
+    X::Union{ProductRepr,ArrayPartition};
     kwargs...,
 )
     ts = ziptuples(
@@ -196,7 +228,7 @@ end
 function check_vector(M::ProductManifold, p, X; kwargs...)
     return DomainError(
         typeof(X),
-        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ProductRepr, ProductArray and ArrayPartition are supported types for tangent vectors on arbitrary product manifolds",
+        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ProductRepr and ArrayPartition are supported types for tangent vectors on arbitrary product manifolds",
     )
 end
 
@@ -558,10 +590,6 @@ for TP in [ProductRepr, ArrayPartition]
         end,
     )
 end
-function get_vector(M::ProductManifold, p, Xⁱ, B::VeeOrthogonalBasis)
-    X = allocate_result(M, hat, p, Xⁱ)
-    return get_vector!(M, X, p, Xⁱ, B)
-end
 
 function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
     dims = map(manifold_dimension, M.manifolds)
@@ -675,13 +703,6 @@ Base.@propagate_inbounds function Base.getindex(
     i::Union{Integer,Colon,AbstractVector,Val},
 )
     return get_component(M, p, i)
-end
-Base.@propagate_inbounds function Base.getindex(
-    p::ProductArray,
-    M::ProductManifold,
-    i::Union{Integer,Colon,AbstractVector,Val},
-)
-    return collect(get_component(M, p, i))
 end
 Base.@propagate_inbounds function Base.getindex(
     p::ArrayPartition,
@@ -1058,7 +1079,7 @@ set the element `[i...]` of a point `q` on a [`ProductManifold`](@ref) by linear
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 Base.@propagate_inbounds function Base.setindex!(
-    q::Union{ProductArray,ProductRepr,ArrayPartition},
+    q::Union{ProductRepr,ArrayPartition},
     p,
     M::ProductManifold,
     i::Union{Integer,Colon,AbstractVector,Val},

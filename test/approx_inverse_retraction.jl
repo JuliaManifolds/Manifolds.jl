@@ -3,6 +3,8 @@ using LinearAlgebra
 
 include("utils.jl")
 
+Random.seed!(10)
+
 @testset "approximate inverse retractions" begin
     @testset "NLsolveInverseRetraction" begin
         @testset "constructor" begin
@@ -62,7 +64,7 @@ include("utils.jl")
                 NLsolveInverseRetraction(ProjectionRetraction(), X0; project_point=true)
             X = inverse_retract(M, p, q, inv_retr_method)
             @test is_vector(M, p, X; atol=1e-9)
-            @test X ≈ X_exp
+            @test X ≈ X_exp atol = 1e-8
             @test_throws OutOfInjectivityRadiusError inverse_retract(
                 M,
                 p,

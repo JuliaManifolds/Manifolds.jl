@@ -86,48 +86,81 @@ import Base:
 using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
-using FiniteDifferences
 using HybridArrays
 using Kronecker
 using LightGraphs
 using LinearAlgebra
-using ManifoldsBase
 using ManifoldsBase:
     ℝ,
     ℂ,
     ℍ,
     AbstractBasis,
+    AbstractDecoratorManifold,
     AbstractDecoratorType,
+    AbstractEmbeddedManifold,
+    AbstractInverseRetractionMethod,
     AbstractIsometricEmbeddingType,
+    AbstractManifold,
+    AbstractManifoldPoint,
     AbstractNumbers,
     AbstractOrthogonalBasis,
     AbstractOrthonormalBasis,
     AbstractPowerManifold,
     AbstractPowerRepresentation,
+    AbstractRetractionMethod,
     AbstractVectorTransportMethod,
     AbstractLinearVectorTransportMethod,
     ApproximateInverseRetraction,
     ApproximateRetraction,
-    DifferentiatedRetractionVectorTransport,
+    CachedBasis,
     ComponentManifoldError,
     CompositeManifoldError,
     CotangentSpaceType,
     CoTFVector,
+    DefaultBasis,
+    DefaultEmbeddingType,
+    DefaultIsometricEmbeddingType,
     DefaultManifold,
+    DefaultOrthogonalBasis,
+    DefaultOrthonormalBasis,
     DefaultOrDiagonalizingBasis,
     DiagonalizingBasisData,
+    DiagonalizingOrthonormalBasis,
     DifferentiatedRetractionVectorTransport,
+    EmbeddedManifold,
+    ExponentialRetraction,
     FVector,
-    NLsolveInverseRetraction,
     InversePowerRetraction,
+    LogarithmicInverseRetraction,
+    ManifoldsBase,
+    NestedPowerRepresentation,
+    NLsolveInverseRetraction,
+    OutOfInjectivityRadiusError,
+    ParallelTransport,
+    PolarInverseRetraction,
+    PolarRetraction,
+    PoleLadderTransport,
     PowerManifold,
     PowerManifoldNested,
     PowerManifoldNestedReplacing,
     PowerRetraction,
     PowerVectorTransport,
+    ProjectedOrthonormalBasis,
+    ProjectionInverseRetraction,
+    ProjectionRetraction,
+    ProjectionTransport,
+    QRInverseRetraction,
+    QRRetraction,
+    ScaledVectorTransport,
+    SchildsLadderTransport,
     TangentSpaceType,
     TCoTSpaceType,
     TFVector,
+    TransparentIsometricEmbedding,
+    TVector,
+    ValidationManifold,
+    ValidationMPoint,
+    ValidationTVector,
     VectorSpaceType,
     VeeOrthogonalBasis,
     @decorator_transparent_fallback,
@@ -137,11 +170,17 @@ using ManifoldsBase:
     _euclidean_basis_vector,
     _extract_val,
     combine_allocation_promotion_functions,
+    default_inverse_retraction_method,
     is_decorator_transparent,
     is_default_decorator,
     manifold_function_not_implemented_message,
+    number_system,
+    real_dimension,
     rep_size_to_colons,
-    size_to_tuple
+    shortest_geodesic,
+    size_to_tuple,
+    vector_transport_along,
+    vector_transport_along!
 using Markdown: @doc_str
 using Random
 using RecipesBase
@@ -158,8 +197,8 @@ using RecursiveArrayTools: ArrayPartition
 include("utils.jl")
 
 include("product_representations.jl")
-include("differentiation.jl")
-include("riemannian_diff.jl")
+include("differentiation/differentiation.jl")
+include("differentiation/riemannian_diff.jl")
 
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
@@ -287,22 +326,32 @@ end
 function __init__()
     @require FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41" begin
         using .FiniteDiff
-        include("finite_diff.jl")
+        include("differentiation/finite_diff.jl")
+    end
+
+    @require FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000" begin
+        using .FiniteDifferences
+        include("differentiation/finite_differences.jl")
     end
 
     @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
         using .ForwardDiff
-        include("forward_diff.jl")
+        include("differentiation/forward_diff.jl")
     end
 
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
         using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
-        include("ode.jl")
+        include("differentiation/ode.jl")
     end
 
     @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
         using .NLsolve: NLsolve
         include("nlsolve.jl")
+    end
+
+    @require ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267" begin
+        using .ReverseDiff: ReverseDiff
+        include("differentiation/reverse_diff.jl")
     end
 
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
@@ -335,6 +384,12 @@ function __init__()
             include("recipes.jl")
         end
     end
+
+    @require Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f" begin
+        using .Zygote: Zygote
+        include("differentiation/zygote.jl")
+    end
+
     return nothing
 end
 
@@ -435,6 +490,7 @@ export AbstractRetractionMethod,
     PolarRetraction,
     ProjectionRetraction,
     SoftmaxRetraction,
+    ODEExponentialRetraction,
     PadeRetraction,
     ProductRetraction,
     PowerRetraction
@@ -465,6 +521,10 @@ export ×,
     allocate_result,
     base_manifold,
     bundle_projection,
+    change_metric,
+    change_metric!,
+    change_representer,
+    change_representer!,
     check_point,
     check_vector,
     christoffel_symbols_first,
@@ -654,8 +714,11 @@ export get_basis,
     get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
 # differentiation
 export AbstractDiffBackend,
-    AbstractRiemannianDiffBackend, FiniteDifferencesBackend, RiemannianONBDiffBackend
-export diff_backend, diff_backend!, diff_backends
+    AbstractRiemannianDiffBackend,
+    FiniteDifferencesBackend,
+    TangentDiffBackend,
+    RiemannianProjectionBackend
+export default_differential_backend, set_default_differential_backend!
 # atlases and charts
 export get_point, get_point!, get_parameters, get_parameters!
 

@@ -7,6 +7,15 @@ include("utils.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
 struct TestEuclideanMetric <: AbstractMetric end
+struct TestScaledEuclideanMetric <: AbstractMetric end
+struct TestRetraction <: AbstractRetractionMethod end
+
+ManifoldsBase.default_retraction_method(::TestEuclidean) = TestRetraction()
+function ManifoldsBase.default_retraction_method(
+    ::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
+)
+    return TestRetraction()
+end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
@@ -19,11 +28,57 @@ end
 function Manifolds.local_metric(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
     ::Any,
-    ::InducedBasis,
-)
+    ::T,
+) where {T<:ManifoldsBase.AbstractOrthogonalBasis}
     return Diagonal(1.0:manifold_dimension(M))
 end
-
+function Manifolds.local_metric(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
+    ::Any,
+    ::T,
+) where {T<:ManifoldsBase.AbstractOrthogonalBasis}
+    return 2 .* Diagonal(1.0:manifold_dimension(M))
+end
+function Manifolds.get_coordinates!(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
+    c,
+    ::Any,
+    X,
+    ::DefaultOrthogonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+)
+    c .= 1 ./ [1.0:manifold_dimension(M)...] .* X
+    return c
+end
+function Manifolds.get_vector!(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
+    X,
+    ::Any,
+    c,
+    ::DefaultOrthogonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+)
+    X .= [1.0:manifold_dimension(M)...] .* c
+    return X
+end
+function Manifolds.get_coordinates!(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
+    c,
+    ::Any,
+    X,
+    ::DefaultOrthogonalBasis,
+)
+    c .= 1 ./ (2 .* [1.0:manifold_dimension(M)...]) .* X
+    return c
+end
+function Manifolds.get_vector!(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
+    X,
+    ::Any,
+    c,
+    ::DefaultOrthogonalBasis,
+)
+    X .= 2 .* [1.0:manifold_dimension(M)...] .* c
+    return X
+end
 struct TestSphere{N,T} <: AbstractManifold{ℝ}
     r::T
 end
@@ -231,11 +286,6 @@ end
             @test inner(M, p, fX, fY) ≈ dot(X, G * Y) atol = 1e-6
             @test norm(M, p, fX) ≈ sqrt(dot(X, G * X)) atol = 1e-6
 
-            if VERSION ≥ v"1.1"
-                T = 0:0.5:10
-                @test geodesic(M, p, X, T) ≈ [p + t * X for t in T] atol = 1e-6
-            end
-
             @test christoffel_symbols_first(M, p, B_chart_p) ≈ zeros(n, n, n) atol = 1e-6
             @test christoffel_symbols_second(M, p, B_chart_p) ≈ zeros(n, n, n) atol = 1e-6
             @test riemann_tensor(M, p, B_chart_p) ≈ zeros(n, n, n, n) atol = 1e-6
@@ -308,18 +358,6 @@ end
                 sin(ϕ)*cos(θ) cos(ϕ)*sin(θ)
                 -sin(θ) 0
             ] * X
-
-            if !Sys.iswindows() || Sys.ARCH == :x86_64
-                @testset "numerically integrated geodesics for $vtype" begin
-                    T = 0:0.1:1
-                    @test isapprox(
-                        [sph_to_cart(yi...) for yi in geodesic(M, p, X, T)],
-                        geodesic(S, pcart, Xcart, T);
-                        atol=1e-3,
-                        rtol=1e-3,
-                    )
-                end
-            end
 
             Γ₁ = christoffel_symbols_first(M, p, B_p)
             for i in 1:n, j in 1:n, k in 1:n
@@ -602,5 +640,21 @@ end
             x,
             ExponentialRetraction(),
         ) === Val{:parent}()
+    end
+
+    @testset "change metric and representer" begin
+        M = MetricManifold(TestEuclidean{2}(), TestEuclideanMetric())
+        G = TestScaledEuclideanMetric()
+        M2 = TestScaledEuclideanMetric(M)
+        @test M2.manifold === M.manifold
+        @test M2.metric == G
+        p = ones(2)
+        X = 2 * ones(2)
+        @test change_metric(M, TestEuclideanMetric(), p, X) == X
+        Y = change_metric(M, G, p, X)
+        @test Y ≈ sqrt(2) .* X #scaled metric has a factor 2, removing introduces this factor
+        @test change_representer(M, TestEuclideanMetric(), p, X) == X
+        Y2 = change_representer(M, G, p, X)
+        @test Y2 ≈ 2 .* X #scaled metric has a factor 2, removing introduces this factor
     end
 end

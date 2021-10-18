@@ -106,10 +106,6 @@ function _compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
         )...,
     )
 end
-function _compose(M::ProductManifold, p, q)
-    x = allocate_result(M, compose, p, q)
-    return _compose!(M, x, p, q)
-end
 
 _compose!(G::ProductGroup, x, p, q) = _compose!(G.manifold, x, p, q)
 function _compose!(M::ProductManifold, x, p, q)
@@ -139,10 +135,6 @@ function translate(
             repeated(conv),
         )...,
     )
-end
-function translate(M::ProductManifold, p, q, conv::ActionDirection)
-    x = allocate_result(M, translate, p, q)
-    return translate!(M, x, p, q, conv)
 end
 
 function translate!(G::ProductGroup, x, p, q, conv::ActionDirection)
