@@ -93,6 +93,23 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     return nothing
 end
 
+@doc raw"""
+    Q(::Symplectic{n})
+
+Convenience function in order to explicitly construct the Canonical symplectic form.
+````math
+Q_{2n} = 
+\begin{bmatrix}
+  0_n & I_n \\
+ -I_n & 0_n 
+\end{bmatrix}.
+````
+"""
+function Q(::Symplectic{n}) where {n}
+    return [zeros(n, n)     I(n);
+               -I(n)    zeros(n, n)]
+end
+
 decorated_manifold(::Symplectic{n, ℝ}) where {n, ℝ} = Euclidean(2n, 2n; field=ℝ)
 
 Base.show(io::IO, ::Symplectic{n, ℝ}) where {n, ℝ} = print(io, "Symplectic{$(2n)}()")
@@ -144,6 +161,8 @@ function symplectic_inverse(::Symplectic{n, ℝ}, A) where {n}
     return A_star
 end
 
+Base.inv(M::Symplectic, p) = symplectic_inverse(M, p)
+
 @doc raw"""
     TODO:
 """
@@ -174,7 +193,6 @@ function inner(M::Symplectic{n, ℝ}, p, X, Y) where {n}
     return tr((p_star * X)' * (p_star * Y))
 end
 
-
 @doc raw"""
     grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇_Euclidian_f)
 
@@ -192,16 +210,8 @@ and then we project the result onto the tangent space ``T_p\operatorname{Sp}(2n,
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
 function grad_euclidian_to_manifold(M::Symplectic, p, ∇f_euc)
-    # metric_compatible_grad_f = p * p' * ∇f_euc
-    Y = similar(∇f_euc)
-    metric_compatible_grad_f =  change_representer!(M, Y, EuclideanMetric(), p, ∇f_euc)
+    metric_compatible_grad_f = change_representer(M, EuclideanMetric(), p, ∇f_euc)
     return project(M, p, metric_compatible_grad_f)
-end
-
-function direct_grad_euclidian_to_manifold(M::Symplectic, p, ∇f_euc)
-    inner_expression = ∇f_euc' * symplectic_multiply(M, p; left=false) - symplectic_multiply(M, p') * ∇f_euc
-    ∇f_man = (1/2) .* p * symplectic_multiply(M, inner_expression)
-    return ∇f_man
 end
 
 @doc raw"""
@@ -235,10 +245,9 @@ function project!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
     # pT_QT = symplectic_multiply(M, p'; left=false, transposed=true)
     # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*pT_QT) * X
     # The term: (I - pQ*pT_QT) = 0 in our symplectic case. 
-    pQ = symplectic_multiply(M, p; left=false)
 
-    pT_QT_X = symplectic_multiply(M, p'; left=false, transposed=true) * X 
-    
+    pQ = symplectic_multiply(M, p; left=false)
+    pT_QT_X = symplectic_multiply(M, p'; left=false, transposed=true) * X     
     symmetrized_pT_QT_X = (1.0/2) .* (pT_QT_X + pT_QT_X')
 
     Y[:, :] = pQ*(symmetrized_pT_QT_X)
@@ -269,3 +278,23 @@ function project_normal!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
     return nothing
 end
 
+
+### TODO: implement retractions. First up, Cauchy-retraction:
+@doc raw"""
+    retract(::Symplectic, p, X, ::CayleyRetraction)
+
+Compute the Cayley retraction on ``p ∈ \operatorname{Sp}(2n, ℝ)`` in the direction of tangent vector 
+``X ∈ T_p\operatorname{Sp}(2n, ℝ)``.
+
+Defined pointwise as
+````math
+\mathcal{R}_p(X) = p(p^TQ^T X + 2X)^{-1}(p^TQ^T X + 2Q)
+````
+"""
+function retract!(M::Symplectic{n}, q, p, X, ::CayleyRetraction) where {n}
+    pTQT_X = symplectic_multiply(M, p'; left=false, transposed=true)*X
+    q .= -p * ((pTQT_X + 2*Q(M)) \ (pTQT_X - 2*Q(M)))
+    return q
+end
+
+ManifoldsBase.default_retraction_method(::Symplectic) = CayleyRetraction()

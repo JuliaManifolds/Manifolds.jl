@@ -1,12 +1,13 @@
-# Implement Pseudo-Riemannian Metric Symplectic Manifold.
-
-# Implemented Pseudo-Riemannian metric as subtyupe of AbstracMetric, taking inspiration from SPD-manifolds.
+@doc raw"""
+    TODO: Explain this Metric.
+"""
 struct SymplecticPseudoRiemannianMetric <: AbstractMetric 
 end
 
-function exp!(::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, q, p, X) where {n, ℝ}
-    p_inv = inv(p)
+function exp!(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, q, p, X) where {n, ℝ}
+    p_inv = inv(M, p)
     q .= p*LinearAlgebra.exp(p_inv * X)
+    return q
 end
 
 
@@ -27,26 +28,14 @@ function inner(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRieman
     return tr((p_star * X) * (p_star * Y))
 end
 
-@doc raw"""
-    direct_grad_euclidian_to_manifold(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, ∇f_euc)
-
-Not used, but direct conversion of a euclidian gradient to the manifold gradient. 
-"""
-function direct_grad_euclidian_to_manifold(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, ∇f_euc) where {n}
-    inner_expression = p' * symplectic_multiply(M.manifold, ∇f_euc; left=false) .- symplectic_multiply(M.manifold, ∇f_euc') * p  
-    ∇f_man = (1/2) .* p * symplectic_multiply(M.manifold, inner_expression)
-    return ∇f_man
-end
 
 @doc raw"""
     grad_euclidian_to_manifold(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, ∇f_euc)
 
-
+TODO: Flesh out. Inspired by Fiori and Gao et al. Use projection from Gao et al, Metric compatibility from Firoi.
 """
 function grad_euclidian_to_manifold(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, ∇f_euc) where {n}
-    # metric_compatible_grad_f = p * ∇f_euc' * p
-    Y = similar(∇f_euc)
-    metric_compatible_grad_f = change_representer!(M, Y, EuclideanMetric(), p, X)
+    metric_compatible_grad_f = change_representer(M, EuclideanMetric(), p, X)
     return project(M, p, metric_compatible_grad_f)
 end
 
@@ -54,8 +43,9 @@ end
     change_representer!(::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, Y, ::EuclideanMetric, p, X)
 
 Change the representer for a tangent vector from the EuclidianMetric to the SymplecticPseudoRiemannianMetric.
+TODO: Flesh out.
 """
-function change_representer!(::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, Y, ::EuclideanMetric, p, X)
+function change_representer!(::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, Y, ::EuclideanMetric, p, X) where {n}
     Y .= p * ∇f_euc' * p
     return Y
 end
