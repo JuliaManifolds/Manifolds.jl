@@ -35,7 +35,7 @@ end
 TODO: Flesh out. Inspired by Fiori and Gao et al. Use projection from Gao et al, Metric compatibility from Firoi.
 """
 function grad_euclidian_to_manifold(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, ∇f_euc) where {n}
-    metric_compatible_grad_f = change_representer(M, EuclideanMetric(), p, X)
+    metric_compatible_grad_f = change_representer(M, EuclideanMetric(), p, ∇f_euc)
     return project(M, p, metric_compatible_grad_f)
 end
 

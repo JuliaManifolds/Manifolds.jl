@@ -93,8 +93,74 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     return nothing
 end
 
+
 @doc raw"""
-    Q(::Symplectic{n})
+    check_even_square(p)::Integer
+
+Convenience function to check whether or not an abstract matrix is square, with an even 
+number (2n, 2n) of rows and columns. Then returns the integer part of the even dimension.
+"""
+function check_even_square(p)
+    m, n = size(p)
+    ((m == n) && (n % 2 == 0)) || throw(DimensionMismatch("Matrix is not square with even dimensions (2n, 2n): Dimensions are ($(m), $(n))."))
+    return div(n, 2)
+end
+
+# T Indicates whether or not transposed.
+# Acts like the symplectic transform. 
+struct SymplecticMatrix{T}
+    λ::T
+end
+# SymplecticMatrix(λ::T) where {T} = SymplecticMatrix{T}(λ)
+
+ndims(Q::SymplecticMatrix) = 2
+copy(Q::SymplecticMatrix) = SymplecticMatrix(Q.λ)
+Base.eltype(::SymplecticMatrix{T}) where {T} = T
+Base.convert(::Type{SymplecticMatrix{T}}, Q::SymplecticMatrix) where {T} = SymplecticMatrix(convert(T, Q.λ))
+function Base.show(io::IO, Q::SymplecticMatrix)
+    s = "$(Q.λ)"
+    if occursin(r"\w+\s*[\+\-]\s*\w+", s)
+        s = "($s)"
+    end
+    print(io, typeof(Q), "\n$(s)*[0 I; -I 0]")
+end
+
+# Overloaded functions:
+(Base.:-)(Q::SymplecticMatrix) = SymplecticMatrix(-Q.λ)
+
+(Base.:*)(x::Number, Q::SymplecticMatrix) = SymplecticMatrix(x*Q.λ)
+(Base.:*)(Q::SymplecticMatrix, x::Number) = SymplecticMatrix(x*Q.λ)
+(Base.:*)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = LinearAlgebra.UniformScaling(-Q1.λ*Q2.λ)
+
+Base.transpose(Q::SymplecticMatrix) = -Q
+Base.adjoint(Q::SymplecticMatrix) = -Q
+Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1/Q.λ))
+
+(Base.:+)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = SymplecticMatrix(Q1.λ + Q2.λ)
+
+(Base.:+)(Q::SymplecticMatrix, p::AbstractMatrix) = p + Q
+function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
+    n = check_even_square(p)
+
+    # Allocate new memory:
+    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    out = copyto!(similar(p, TS), p)
+
+    # Add Q.λ multiples of the UniformScaling to the lower left and upper right blocks of p:
+    λ_Id = LinearAlgebra.UniformScaling(Q.λ)
+
+    out[1:n, (n+1):2n] += λ_Id
+    out[(n+1):2n, 1:n] -= λ_Id
+    return out
+end
+
+# Overload: * scalar left, right, matrix, left, right, itself right and left.
+# unary -, inv = -1/s,
+# transpose = -s, +. 
+
+
+@doc raw"""
+    Q(::Symplectic{n}) where {n}
 
 Convenience function in order to explicitly construct the Canonical symplectic form.
 ````math
@@ -193,6 +259,7 @@ function inner(M::Symplectic{n, ℝ}, p, X, Y) where {n}
     return tr((p_star * X)' * (p_star * Y))
 end
 
+ 
 @doc raw"""
     grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇_Euclidian_f)
 
@@ -209,10 +276,11 @@ and then we project the result onto the tangent space ``T_p\operatorname{Sp}(2n,
     > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
-function grad_euclidian_to_manifold(M::Symplectic, p, ∇f_euc)
+function grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇f_euc) where {n}
     metric_compatible_grad_f = change_representer(M, EuclideanMetric(), p, ∇f_euc)
     return project(M, p, metric_compatible_grad_f)
 end
+
 
 @doc raw"""
     change_representer!(::Symplectic, Y, p, X)
@@ -288,13 +356,26 @@ Compute the Cayley retraction on ``p ∈ \operatorname{Sp}(2n, ℝ)`` in the dir
 
 Defined pointwise as
 ````math
-\mathcal{R}_p(X) = p(p^TQ^T X + 2X)^{-1}(p^TQ^T X + 2Q)
+\mathcal{R}_p(X) = -p(p^TQ^T X + 2X)^{-1}(p^TQ^T X - 2Q)
 ````
 """
-function retract!(M::Symplectic{n}, q, p, X, ::CayleyRetraction) where {n}
+function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
     pTQT_X = symplectic_multiply(M, p'; left=false, transposed=true)*X
     q .= -p * ((pTQT_X + 2*Q(M)) \ (pTQT_X - 2*Q(M)))
     return q
 end
 
 ManifoldsBase.default_retraction_method(::Symplectic) = CayleyRetraction()
+
+struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
+
+
+# Inverse-retract:
+
+function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
+    # 
+    
+end
+
+# Check vector, check point For Symplectic Stiefel.
+# Retract, Inverse-retract for Stiefel.
