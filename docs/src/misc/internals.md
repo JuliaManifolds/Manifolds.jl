@@ -6,7 +6,6 @@ This page documents the internal types and methods of `Manifolds.jl`'s that migh
 
 ```@docs
 Manifolds.eigen_safe
-Manifolds.find_pv
 Manifolds.isnormal
 Manifolds.log_safe
 Manifolds.log_safe!
