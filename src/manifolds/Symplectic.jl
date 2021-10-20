@@ -117,15 +117,20 @@ ndims(Q::SymplecticMatrix) = 2
 copy(Q::SymplecticMatrix) = SymplecticMatrix(Q.λ)
 Base.eltype(::SymplecticMatrix{T}) where {T} = T
 Base.convert(::Type{SymplecticMatrix{T}}, Q::SymplecticMatrix) where {T} = SymplecticMatrix(convert(T, Q.λ))
+
 function Base.show(io::IO, Q::SymplecticMatrix)
     s = "$(Q.λ)"
     if occursin(r"\w+\s*[\+\-]\s*\w+", s)
         s = "($s)"
     end
-    print(io, typeof(Q), "\n$(s)*[0 I; -I 0]")
+    print(io, typeof(Q), "(): $(s)*[0 I; -I 0]")
 end
 
 # Overloaded functions:
+# Overload: * scalar left, right, matrix, left, right, itself right and left.
+# unary -, inv = -1/s,
+# transpose = -s, +. 
+
 (Base.:-)(Q::SymplecticMatrix) = SymplecticMatrix(-Q.λ)
 
 (Base.:*)(x::Number, Q::SymplecticMatrix) = SymplecticMatrix(x*Q.λ)
@@ -137,6 +142,7 @@ Base.adjoint(Q::SymplecticMatrix) = -Q
 Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1/Q.λ))
 
 (Base.:+)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = SymplecticMatrix(Q1.λ + Q2.λ)
+(Base.:-)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = SymplecticMatrix(Q1.λ - Q2.λ)
 
 (Base.:+)(Q::SymplecticMatrix, p::AbstractMatrix) = p + Q
 function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
@@ -154,9 +160,33 @@ function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
     return out
 end
 
-# Overload: * scalar left, right, matrix, left, right, itself right and left.
-# unary -, inv = -1/s,
-# transpose = -s, +. 
+function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
+    n = check_even_square(p)
+
+    # Allocate new memory:
+    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    pQ = similar(p, TS)
+    
+    # Perform right mulitply by λ*Q:
+    pQ[:, 1:n] = (-Q.λ).*p[:, (n+1):end]
+    pQ[:, (n+1):end] = (Q.λ) .*p[:, 1:n]
+
+    return pQ
+end
+
+function (Base.:*)(Q::SymplecticMatrix, p::AbstractMatrix)
+    n = check_even_square(p)
+
+    # Allocate new memory:
+    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    Qp = similar(p, TS)
+    
+    # Perform left mulitply by λ*Q:
+    Qp[1:n, :] = (Q.λ) .* p[(n+1):end, :]
+    Qp[(n+1):end, :] = (-Q.λ) .* p[1:n, :]
+
+    return Qp
+end
 
 
 @doc raw"""
