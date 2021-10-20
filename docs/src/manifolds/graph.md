@@ -1,6 +1,6 @@
 # Graph manifold
 
-For a given graph $G(V,E)$ implemented using [`LightGraphs.jl`](https://juliagraphs.github.io/LightGraphs.jl/latest/), the [`GraphManifold`](@ref) models a [`PowerManifold`](@ref) either on the nodes or edges of the graph, depending on the [`GraphManifoldType`](@ref).
+For a given graph $G(V,E)$ implemented using [`Graphs.jl`](https://juliagraphs.github.io/Graphs.jl/latest/), the [`GraphManifold`](@ref) models a [`PowerManifold`](@ref) either on the nodes or edges of the graph, depending on the [`GraphManifoldType`](@ref).
 i.e., it's either a $\mathcal M^{\lvert V \rvert}$ for the case of a vertex manifold or a $\mathcal M^{\lvert E \rvert}$ for the case of a edge manifold.
 
 ## Example
@@ -9,7 +9,7 @@ To make a graph manifold over $ℝ^2$ with three vertices and two edges, one can
 
 ```@example
 using Manifolds
-using LightGraphs
+using Graphs
 M = Euclidean(2)
 p = [[1., 4.], [2., 5.], [3., 6.]]
 q = [[4., 5.], [6., 7.], [8., 9.]]
@@ -24,7 +24,7 @@ It supports all [`AbstractPowerManifold`](@ref) operations (it is based on [`Nes
 
 ```@setup graph-1
 using Manifolds
-using LightGraphs
+using Graphs
 M = Euclidean(2)
 p = [[1., 4.], [2., 5.], [3., 6.]]
 q = [[4., 5.], [6., 7.], [8., 9.]]

@@ -88,7 +88,7 @@ using Distributions
 using Einsum: @einsum
 using HybridArrays
 using Kronecker
-using LightGraphs
+using Graphs
 using LinearAlgebra
 using ManifoldsBase:
     ℝ,
