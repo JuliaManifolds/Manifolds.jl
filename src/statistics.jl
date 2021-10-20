@@ -342,11 +342,12 @@ function Statistics.mean!(
     v = zero_vector(M, y)
     vtmp = copy(v)
     α = w ./ cumsum(w)
-    for i in 1:stop_iter
+    for _ in 1:stop_iter
         copyto!(yold, y)
         # Online weighted mean
         @inbounds inverse_retract!(M, v, yold, x[1], inverse_retraction)
         @inbounds for j in 2:n
+            iszero(w[j]) && continue
             inverse_retract!(M, vtmp, yold, x[j], inverse_retraction)
             v .+= α[j] .* (vtmp .- v)
         end
@@ -408,6 +409,7 @@ function Statistics.mean!(
     v = zero_vector(M, q)
     ytmp = allocate_result(M, mean, q)
     @inbounds for i in 2:n
+        iszero(w[i]) && continue
         j = order[i]
         s += w[j]
         t = w[j] / s
