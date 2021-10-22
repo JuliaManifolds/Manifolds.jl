@@ -111,7 +111,12 @@ end
 struct SymplecticMatrix{T}
     λ::T
 end
-# SymplecticMatrix(λ::T) where {T} = SymplecticMatrix{T}(λ)
+SymplecticMatrix(λ::T) where {T <: Number} = SymplecticMatrix{T}(λ)
+
+SymplecticMatrix(arrays::Vararg{AbstractArray}) = begin
+    TS = Base.promote_type(map(eltype, arrays)...)
+    SymplecticMatrix(one(TS))
+end
 
 ndims(Q::SymplecticMatrix) = 2
 copy(Q::SymplecticMatrix) = SymplecticMatrix(Q.λ)
@@ -160,6 +165,10 @@ function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
     return out
 end
 
+# Binary minus:
+(Base.:-)(Q::SymplecticMatrix, p::AbstractMatrix) = Q + (-p)
+(Base.:-)(p::AbstractMatrix, Q::SymplecticMatrix) = p + (-Q)
+
 function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
     n = check_even_square(p)
 
@@ -192,6 +201,7 @@ end
 @doc raw"""
     Q(::Symplectic{n}) where {n}
 
+DEPRECATED: In favor of the 'SymplecticMatrix' struct.
 Convenience function in order to explicitly construct the Canonical symplectic form.
 ````math
 Q_{2n} = 
@@ -201,7 +211,7 @@ Q_{2n} =
 \end{bmatrix}.
 ````
 """
-function Q(::Symplectic{n}) where {n}
+function Q_matrix(::Symplectic{n}) where {n}
     return [zeros(n, n)     I(n);
                -I(n)    zeros(n, n)]
 end
@@ -338,18 +348,23 @@ Adapted from projection onto tangent spaces of Symplectic Stiefal manifolds ``\o
     > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
     > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
-function project!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
+function project!(::Symplectic{n, ℝ}, Y, p, X) where {n}
     # Original formulation of the projection from the Gao et al. paper:
     # pT_QT = symplectic_multiply(M, p'; left=false, transposed=true)
     # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*pT_QT) * X
     # The term: (I - pQ*pT_QT) = 0 in our symplectic case. 
 
-    pQ = symplectic_multiply(M, p; left=false)
-    pT_QT_X = symplectic_multiply(M, p'; left=false, transposed=true) * X     
-    symmetrized_pT_QT_X = (1.0/2) .* (pT_QT_X + pT_QT_X')
+    # pQ = symplectic_multiply(M, p; left=false)
+    # pT_QT_X = symplectic_multiply(M, p'; left=false, transposed=true) * X
 
-    Y[:, :] = pQ*(symmetrized_pT_QT_X)
-    return nothing
+    # TS = Base._return_type(+, Tuple{eltype(p), eltype(X)})
+    Q = SymplecticMatrix(p, X)
+
+    pT_QT_X = p' * Q' * X
+    symmetrized_pT_QT_X = (1/2) .* (pT_QT_X + pT_QT_X')
+
+    Y[:, :] = p*Q*(symmetrized_pT_QT_X)
+    return Y
 end
 
 
@@ -368,12 +383,16 @@ Project onto the normal space relative to the tangent space at a point ``p ∈ \
     > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
 function project_normal!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
-    pT_QT_X = symplectic_multiply(M, p'; left=false, transposed=true) * X
-    skew_pT_QT_X = (1.0/2) .* (pT_QT_X .- pT_QT_X')
+    # TS = Base._return_type(+, Tuple{eltype(p), eltype(X)})
+    Q = SymplecticMatrix(p, X)
 
-    pQ = symplectic_multiply(M, p; left=false)
-    Y[:, :] = pQ * skew_pT_QT_X
-    return nothing
+    # pT_QT_X = symplectic_multiply(M, p'; left=false, transposed=true) * X
+    pT_QT_X = p' * Q' * X
+    skew_pT_QT_X = (1/2) .* (pT_QT_X .- pT_QT_X')
+
+    # pQ = symplectic_multiply(M, p; left=false)
+    Y[:, :] = p*Q*skew_pT_QT_X
+    return Y
 end
 
 
@@ -390,22 +409,65 @@ Defined pointwise as
 ````
 """
 function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
-    pTQT_X = symplectic_multiply(M, p'; left=false, transposed=true)*X
-    q .= -p * ((pTQT_X + 2*Q(M)) \ (pTQT_X - 2*Q(M)))
+    Q = SymplecticMatrix(p, X)
+
+    # pTQT_X = symplectic_multiply(M, p'; left=false, transposed=true)*X
+    pT_QT_X = p' * Q' * X
+
+    q .= -p * ((pT_QT_X + 2*Q) \ (pT_QT_X - 2*Q))
     return q
 end
 
 ManifoldsBase.default_retraction_method(::Symplectic) = CayleyRetraction()
 
+
 struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
 
 
 # Inverse-retract:
+@doc raw"""
+    inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
 
+Compute the Cayley Inverse Retraction as in proposition 5.3 of Bendorkat & Zimmermann[^Bendokat2021].
+
+First, recall the definition the standard symplectic matrix
+``Q = 
+\begin{bmatrix}
+ 0    & I_n \\
+-I_n  & 0
+\end{bmatrix}
+``
+as well as the symplectic inverse ``A^{+} = Q^T A^T Q``.
+
+For ``p, q ∈ \operatorname{Sp}(2n, ℝ)``, we can then define the
+inverse cayley retraction as long as the following matrices exist.
+````math
+    U = (I + p^+ q)^{-1}, \quad V = (I + q^+ p)^{-1}.
+````
+
+Finally, definition of the inverse cayley retration at ``p`` applied to ``q`` is
+````math
+\mathcal{L}_p^{\operatorname{Sp}}(q) = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr) ∈ T_p\operatorname{Sp}(2n).   
+````
+
+[Bendokat2021]
+    > Bendokat, Thomas and Zimmermann, Ralf
+	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
+	> arXiv preprint arXiv:2108.12447, 2021
+    > 
+"""
 function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
-    # 
-    
+    Q = SymplecticMatrix(p, q)
+
+    # Speeds up solving the linear systems required for multiplication with U, V:
+    U_inv = factorize(I + inv(M, p) * q)
+    V_inv = factorize(I + inv(M, q) * p)
+
+    X .= 2 .* ((p / V_inv .- p / U_inv) + ((p .+ q) / U_inv) .- p)
+    return X
 end
+
+
 
 # Check vector, check point For Symplectic Stiefel.
 # Retract, Inverse-retract for Stiefel.

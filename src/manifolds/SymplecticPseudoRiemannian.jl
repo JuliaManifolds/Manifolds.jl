@@ -5,7 +5,7 @@ struct SymplecticPseudoRiemannianMetric <: AbstractMetric
 end
 
 function exp!(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, q, p, X) where {n, ℝ}
-    p_inv = inv(M, p)
+    p_inv = inv(M.manifold, p)
     q .= p*LinearAlgebra.exp(p_inv * X)
     return q
 end
@@ -24,7 +24,7 @@ known as the Khvedelidze–Mladenov metric. As referenced in Simone Fiori[^Fiori
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
 function inner(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, X, Y) where {n}
-    p_star = symplectic_inverse(M, p)
+    p_star = inv(M.manifold, p)
     return tr((p_star * X) * (p_star * Y))
 end
 
@@ -36,7 +36,7 @@ TODO: Flesh out. Inspired by Fiori and Gao et al. Use projection from Gao et al,
 """
 function grad_euclidian_to_manifold(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, ∇f_euc) where {n}
     metric_compatible_grad_f = change_representer(M, EuclideanMetric(), p, ∇f_euc)
-    return project(M, p, metric_compatible_grad_f)
+    return project(M.manifold, p, metric_compatible_grad_f)
 end
 
 @doc raw"""
@@ -46,6 +46,6 @@ Change the representer for a tangent vector from the EuclidianMetric to the Symp
 TODO: Flesh out.
 """
 function change_representer!(::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, Y, ::EuclideanMetric, p, X) where {n}
-    Y .= p * ∇f_euc' * p
+    Y .= p * X' * p
     return Y
 end
