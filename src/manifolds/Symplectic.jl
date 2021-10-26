@@ -37,6 +37,10 @@ Symplectic(n::Int, field::AbstractNumbers=ℝ) = begin
     Symplectic{n, field}()
 end
 
+decorated_manifold(::Symplectic{n, ℝ}) where {n, ℝ} = Euclidean(2n, 2n; field=ℝ)
+
+Base.show(io::IO, ::Symplectic{n, ℝ}) where {n, ℝ} = print(io, "Symplectic{$(2n)}()")
+
 @doc """
     #TODO: Document The Riemannian Symplectic metric used.
 """
@@ -199,28 +203,6 @@ end
 
 
 @doc raw"""
-    Q(::Symplectic{n}) where {n}
-
-DEPRECATED: In favor of the 'SymplecticMatrix' struct.
-Convenience function in order to explicitly construct the Canonical symplectic form.
-````math
-Q_{2n} = 
-\begin{bmatrix}
-  0_n & I_n \\
- -I_n & 0_n 
-\end{bmatrix}.
-````
-"""
-function Q_matrix(::Symplectic{n}) where {n}
-    return [zeros(n, n)     I(n);
-               -I(n)    zeros(n, n)]
-end
-
-decorated_manifold(::Symplectic{n, ℝ}) where {n, ℝ} = Euclidean(2n, 2n; field=ℝ)
-
-Base.show(io::IO, ::Symplectic{n, ℝ}) where {n, ℝ} = print(io, "Symplectic{$(2n)}()")
-
-@doc raw"""
     symplectic_inverse(M::Symplectic{n, ℝ}, A) where {n, ℝ}
 
 Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2n}``, returning the result.
@@ -295,7 +277,7 @@ Riemannian: Test Test. Reference to Fiori.
 """
 function inner(M::Symplectic{n, ℝ}, p, X, Y) where {n}
     # For symplectic matrices, the 'symplectic inverse' p^+ is the actual inverse.
-    p_star = symplectic_inverse(M, p)
+    p_star = inv(M, p)
     return tr((p_star * X)' * (p_star * Y))
 end
 
@@ -316,18 +298,53 @@ and then we project the result onto the tangent space ``T_p\operatorname{Sp}(2n,
     > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
-function grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇f_euc) where {n}
-    metric_compatible_grad_f = change_representer(M, EuclideanMetric(), p, ∇f_euc)
-    return project(M, p, metric_compatible_grad_f)
+function wrong_grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇f_euc) where {n}
+    ∇f_proj = project(M, p, ∇f_euc)
+    return change_representer(M, EuclideanMetric(), p, ∇f_proj)
 end
 
+function grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇f_euc) where {n}
+    ∇f_metr_comp = change_representer(M, EuclideanMetric(), p, ∇f_euc)
+    return project(M, p, ∇f_metr_comp)
+end
+
+# Overwrite gradient functions for the Symplectic case: 
+# Need to first change representer of ``∇f_euc`` to the Symplectic manifold, 
+# then project onto the correct tangent space.
+function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
+    amb_grad = _gradient(f, p, backend.diff_backend)
+    
+    # Does not work: Change_representer ∘ Proj(amb_grad):
+    # return change_representer(M, EuclideanMetric(), p, project(M, p, amb_grad))
+
+    # Proj ∘ Change_representer(amb_grad): 
+    return project(M, p, change_representer(M, EuclideanMetric(), p, amb_grad))
+end
+
+function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend)
+    _gradient!(f, X, p, backend.diff_backend)
+    change_representer!(M, X, EuclideanMetric(), p, X)
+    return project!(M, X, p, X)
+end
 
 @doc raw"""
     change_representer!(::Symplectic, Y, p, X)
 
-Change the representation of 
+Change the representation of a tangent vector ``χ ∈ T_p\operatorname{Sp}(2n, ℝ)`` s.t.
+````math
+    g_p(c(χ), η) = ⟨χ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ).
+````
+s.t. 
+
 """
 function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
+    # The following formula actually works for all X ∈ ℝ^{2n × 2n}, and 
+    # is exactly the same as: Proj_[T_pSp](p * p^T * X).
+    # Q = SymplecticMatrix(p, X)
+    # Y .= (1/2) .* p * p' * X .+ (1/2) .* p * Q * X' * p * Q
+    # The above is also the only formula I have found for a 'change_representer' which 
+    # stays in the tangent space of p after application. 
+
     Y .= p * p' * X
     return Y
 end
@@ -457,8 +474,6 @@ Finally, definition of the inverse cayley retration at ``p`` applied to ``q`` is
     > 
 """
 function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
-    Q = SymplecticMatrix(p, q)
-
     # Speeds up solving the linear systems required for multiplication with U, V:
     U_inv = factorize(I + inv(M, p) * q)
     V_inv = factorize(I + inv(M, q) * p)
@@ -466,8 +481,6 @@ function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
     X .= 2 .* ((p / V_inv .- p / U_inv) + ((p .+ q) / U_inv) .- p)
     return X
 end
-
-
 
 # Check vector, check point For Symplectic Stiefel.
 # Retract, Inverse-retract for Stiefel.
