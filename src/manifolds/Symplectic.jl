@@ -1,7 +1,7 @@
 @doc raw"""
     Symplectic{n, ℝ} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
 
-Over the field ℝ, the Real Symplectic Manifold consists of all $2n × 2n$ matrices defined as 
+Over the field ℝ, the Symplectic Manifold consists of all $2n × 2n$ matrices defined as 
 ````math
 \operatorname{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2n} \bigr\}
 ```` 
@@ -37,7 +37,7 @@ Symplectic(n::Int, field::AbstractNumbers=ℝ) = begin
     Symplectic{n, field}()
 end
 
-decorated_manifold(::Symplectic{n, ℝ}) where {n, ℝ} = Euclidean(2n, 2n; field=ℝ)
+decorated_manifold(::Symplectic{n, ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
 
 Base.show(io::IO, ::Symplectic{n, ℝ}) where {n, ℝ} = print(io, "Symplectic{$(2n)}()")
 
@@ -55,12 +55,11 @@ function check_point(M::Symplectic{n, ℝ}, p; kwargs...) where {n, ℝ}
     mpv = invoke(check_point, Tuple{abstract_embedding_type, typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
     
-    # Perform check that the matrix lives on the real symplectic manifold
-    expected_identity = symplectic_inverse(M, p) * p
-    p_identity = one(p)
-    if !isapprox(expected_identity, p_identity; kwargs...)
+    # Perform check that the matrix lives on the real symplectic manifold:
+    expected_zero = norm(inv(M, p) * p - LinearAlgebra.I)
+    if !isapprox(expected_zero, zero(eltype(p)); kwargs...)
         return DomainError(
-            norm(expected_identity - p_identity),
+            expected_zero,
             ("The point $(p) does not lie on $(M) because its symplectic" 
            * " inverse composed with itself is not the identity.")
         )
@@ -85,8 +84,9 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     )
     mpv === nothing || return mpv
 
-    # Big oopsie! (X')
-    tangent_requirement_norm = norm(X' * symplectic_multiply(M, p) + p' * symplectic_multiply(M, X), 2)
+    Q = SymplecticMatrix(p, X)
+    tangent_requirement_norm = norm(X' * Q * p + p' * Q * X, 2)
+
     if !isapprox(tangent_requirement_norm, 0.0; kwargs...)
         return DomainError(
             tangent_requirement_norm,
@@ -99,15 +99,23 @@ end
 
 
 @doc raw"""
-    check_even_square(p)::Integer
+    check_even_dim(p; square=false)::Integer
 
 Convenience function to check whether or not an abstract matrix is square, with an even 
 number (2n, 2n) of rows and columns. Then returns the integer part of the even dimension.
 """
-function check_even_square(p)
-    m, n = size(p)
-    ((m == n) && (n % 2 == 0)) || throw(DimensionMismatch("Matrix is not square with even dimensions (2n, 2n): Dimensions are ($(m), $(n))."))
-    return div(n, 2)
+function check_even_dim(p; square=false)
+    n, k = size(p)
+    # Otherwise, both dimensions just need to be even.
+    # First check that dimensions are even:
+    ((n % 2 == 0) && (k % 2 == 0)) || throw(DimensionMismatch("Matrix does not have even "
+                                      * "dimensions (2n, 2k): Dimensions are ($(n), $(k)).")) 
+                
+    # If 'square=true', we require m==n:
+    (!square || (n == k)) || throw(DimensionMismatch("Matrix is not square with dimensions "
+                                                   * "(2n, 2n): Dimensions are ($(n), $(k))."))
+    
+    return div(n, 2), div(k, 2)
 end
 
 # T Indicates whether or not transposed.
@@ -155,7 +163,8 @@ Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1/Q.λ))
 
 (Base.:+)(Q::SymplecticMatrix, p::AbstractMatrix) = p + Q
 function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
-    n = check_even_square(p)
+    # When we are adding, the Matrices must match in size: 
+    n, _ = check_even_dim(p; square=true)
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -174,21 +183,21 @@ end
 (Base.:-)(p::AbstractMatrix, Q::SymplecticMatrix) = p + (-Q)
 
 function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
-    n = check_even_square(p)
+    _, k = check_even_dim(p)
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
     pQ = similar(p, TS)
     
     # Perform right mulitply by λ*Q:
-    pQ[:, 1:n] = (-Q.λ).*p[:, (n+1):end]
-    pQ[:, (n+1):end] = (Q.λ) .*p[:, 1:n]
+    pQ[:, 1:k] = (-Q.λ).*p[:, (k+1):end]
+    pQ[:, (k+1):end] = (Q.λ) .*p[:, 1:k]
 
     return pQ
 end
 
 function (Base.:*)(Q::SymplecticMatrix, p::AbstractMatrix)
-    n = check_even_square(p)
+    n, _ = check_even_dim(p)
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})

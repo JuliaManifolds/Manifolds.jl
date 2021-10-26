@@ -271,6 +271,7 @@ include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Tucker.jl")
 include("manifolds/Symplectic.jl")
 include("manifolds/SymplecticPseudoRiemannian.jl")
+include("manifolds/SymplecticStiefel.jl")
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -433,6 +434,7 @@ export Euclidean,
     Torus,
     Tucker,
     Symplectic,
+    SymplecticStiefel,
     SymplecticMatrix
 export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
 export HyperboloidTVector,
@@ -476,8 +478,8 @@ export AbstractMetric,
     MinkowskiMetric,
     PowerMetric,
     ProductMetric,
-    SymplecticPseudoRiemannianMetric,
     RealSymplecticMetric,
+    SymplecticPseudoRiemannianMetric,
     CanonicalMetric,
     MetricManifold
 export AbstractAtlas, RetractionAtlas
