@@ -39,10 +39,22 @@ end
 
 decorated_manifold(::Symplectic{n, ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
 
+@doc raw"""
+    manifold_dimension(::Symplectic{n})    
+
+As a special case of the SymplecticStiefel manifold with k = n. As shown in Proposition
+3.1 in Gao et. al.
+"""
+manifold_dimension(::Symplectic{n}) where {n} = (2n + 1)*n
+
 Base.show(io::IO, ::Symplectic{n, ℝ}) where {n, ℝ} = print(io, "Symplectic{$(2n)}()")
 
-@doc """
+@doc raw"""
     #TODO: Document The Riemannian Symplectic metric used.
+
+````math
+    g_p(Z_1, Z_2) = tr((p^{-1}Z_1)^T (p^{-1}Z_2))
+````
 """
 struct RealSymplecticMetric <: RiemannianMetric 
 end
@@ -96,6 +108,27 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     end
     return nothing
 end
+
+Base.inv(M::Symplectic, p) = symplectic_inverse(M, p)
+
+Base.rand(M::Symplectic{n}) where {n} = begin
+    # Generate random matrices to construct a Hamiltonian matrix:
+    Ω = rand_hamiltonian(M)    
+    (I + Ω) / (I - Ω)    
+end
+
+@doc raw"""
+    inner(::Symplectic{n, ℝ}, p, X, Y)
+
+Riemannian: Test Test. Reference to Fiori.
+
+"""
+function inner(M::Symplectic{n, ℝ}, p, X, Y) where {n}
+    # For symplectic matrices, the 'symplectic inverse' p^+ is the actual inverse.
+    p_star = inv(M, p)
+    return tr((p_star * X)' * (p_star * Y))
+end
+
 
 
 @doc raw"""
@@ -258,7 +291,12 @@ function symplectic_inverse(::Symplectic{n, ℝ}, A) where {n}
     return A_star
 end
 
-Base.inv(M::Symplectic, p) = symplectic_inverse(M, p)
+function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}
+    A = randn(n, n); B = randn(n, n); C = randn(n, n)
+    B = (1/2) .* (B .+ B'); C = (1/2) .* (C .+ C')
+    Ω = [A B; C -A']
+    return final_norm*Ω/norm(Ω, 2)
+end
 
 @doc raw"""
     TODO:
@@ -276,18 +314,6 @@ function symplectic_multiply(::Symplectic{n, ℝ}, A; left=true, transposed=fals
         QA[:, (n+1):end] = sign.*A[:, 1:n]
     end
     return QA
-end
-
-@doc raw"""
-    inner(::Symplectic{n, ℝ}, p, X, Y)
-
-Riemannian: Test Test. Reference to Fiori.
-
-"""
-function inner(M::Symplectic{n, ℝ}, p, X, Y) where {n}
-    # For symplectic matrices, the 'symplectic inverse' p^+ is the actual inverse.
-    p_star = inv(M, p)
-    return tr((p_star * X)' * (p_star * Y))
 end
 
  
@@ -434,7 +460,7 @@ Defined pointwise as
 \mathcal{R}_p(X) = -p(p^TQ^T X + 2X)^{-1}(p^TQ^T X - 2Q)
 ````
 """
-function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
+function retract!(::Symplectic, q, p, X, ::CayleyRetraction)
     Q = SymplecticMatrix(p, X)
 
     # pTQT_X = symplectic_multiply(M, p'; left=false, transposed=true)*X
@@ -451,6 +477,7 @@ struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
 
 
 # Inverse-retract:
+# TODO: Write as a special case of the inverse-cayley retraction for the SymplecticStiefel case?
 @doc raw"""
     inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
 
@@ -480,7 +507,6 @@ Finally, definition of the inverse cayley retration at ``p`` applied to ``q`` is
     > Bendokat, Thomas and Zimmermann, Ralf
 	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
 	> arXiv preprint arXiv:2108.12447, 2021
-    > 
 """
 function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
     # Speeds up solving the linear systems required for multiplication with U, V:
