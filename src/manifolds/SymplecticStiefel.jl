@@ -79,11 +79,31 @@ end
 Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
 """
 function inner(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
-    Q = SymplecticMatrix(p, X, Y); p_Tp = p' * p
-    return tr(X' * (I - (1/2) * Q' * p * (p_Tp \ p') * Q) * (Y / p_Tp))
+    Q = SymplecticMatrix(p, X, Y); I = UniformScaling(2n)
+    p_Tp = factorize(p' * p)
+    inner_matrix = I - (1/2) * Q' * p * (p_Tp \ (p')) * Q 
+
+    return tr(X' * inner_matrix * (Y / p_Tp))
+end
+
+function inner_2(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+    Q = SymplecticMatrix(p, X, Y); I = UniformScaling(2n)
+    inv_p_Tp = inv(p' * p)
+
+    inner_matrix = I - (1/2) * Q' * p * inv_p_Tp * p' * Q 
+
+    return tr(X' * inner_matrix * Y * inv_p_Tp)
 end
 
 Base.inv(::SymplecticStiefel, p) = begin Q = SymplecticMatrix(p); Q' * p' * Q end
+
+function change_representer!(::SymplecticStiefel{n, k}, Y, ::EuclideanMetric, p, X) where {n, k}
+    # Quite an ugly expression: Have checked and it seems to be working.
+    Q = SymplecticMatrix(p, X); I = UniformScaling(2n)
+    A = factorize((I - (1/2) * Q' * p * ((p' * p) \ p') * Q)')
+    Y .= (A \ X) * p' * p
+    return Y
+end
 
 @doc raw"""
     rand(M::SymplecticStiefel{n, k})

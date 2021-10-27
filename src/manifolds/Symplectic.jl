@@ -333,11 +333,6 @@ and then we project the result onto the tangent space ``T_p\operatorname{Sp}(2n,
     > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
-function wrong_grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇f_euc) where {n}
-    ∇f_proj = project(M, p, ∇f_euc)
-    return change_representer(M, EuclideanMetric(), p, ∇f_proj)
-end
-
 function grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇f_euc) where {n}
     ∇f_metr_comp = change_representer(M, EuclideanMetric(), p, ∇f_euc)
     return project(M, p, ∇f_metr_comp)
