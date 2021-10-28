@@ -11,6 +11,7 @@ end
 SymplecticStiefel(n::Int, k::Int, field::AbstractNumbers=ℝ) = begin 
     SymplecticStiefel{n, k, field}()
 end
+Base.show(io::IO, ::SymplecticStiefel{n, k}) where {n, k} = print(io, "SymplecticStiefel{$(2n), $(2k)}()")
 
 decorated_manifold(::SymplecticStiefel{n, k, ℝ}) where {n, k} = Euclidean(2n, 2k; field=ℝ)
 
@@ -87,12 +88,15 @@ function inner(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
 end
 
 function inner_2(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+    # This version seems to maybe be faster.
+    # We are only inverting the (2k × 2k) matrix (p' * p).
+
     Q = SymplecticMatrix(p, X, Y); I = UniformScaling(2n)
-    inv_p_Tp = inv(p' * p)
+    inv_pT_p = inv(p' * p) # 𝞞((2k)^3)?
 
-    inner_matrix = I - (1/2) * Q' * p * inv_p_Tp * p' * Q 
+    inner_matrix = I - (1/2) * Q' * p * inv_pT_p * p' * Q 
 
-    return tr(X' * inner_matrix * Y * inv_p_Tp)
+    return tr(X' * inner_matrix * Y * inv_pT_p)
 end
 
 Base.inv(::SymplecticStiefel, p) = begin Q = SymplecticMatrix(p); Q' * p' * Q end
@@ -161,6 +165,8 @@ function retract!(M::SymplecticStiefel, q, p, X, ::CayleyRetraction)
     return q
 end
 
+ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction()
+
 @doc raw"""
     inverse_retract!(::SymplecticStiefel, q, p, X, ::CayleyInverseRetraction)
 
@@ -199,4 +205,26 @@ function inverse_retract!(M::SymplecticStiefel, X, p, q, ::CayleyInverseRetracti
 
     X .= 2 .* ((p / V_inv .- p / U_inv) + ((p .+ q) / U_inv) .- p)
     return X
+end
+
+
+function gradient(M::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
+    amb_grad = _gradient(f, p, backend.diff_backend)
+    return grad_euclidian_to_manifold(M, p, amb_grad)
+end
+
+function gradient!(M::SymplecticStiefel, f, X, p, backend::RiemannianProjectionBackend)
+    _gradient!(f, X, p, backend.diff_backend)
+    return grad_euclidian_to_manifold!(M, X, p, X)
+end
+
+function grad_euclidian_to_manifold(::SymplecticStiefel, p, ∇f_euc)
+    Q = SymplecticMatrix(p, ∇f_euc)
+    return (∇f_euc * p'  .+ Q * p * (∇f_euc)' * Q) * p     
+end
+
+function grad_euclidian_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
+    Q = SymplecticMatrix(p, ∇f_euc)
+    ∇f_man .= (∇f_euc * p' .+ Q * p * (∇f_euc)' * Q) * p     
+    return ∇f_man
 end
