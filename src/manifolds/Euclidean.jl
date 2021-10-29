@@ -105,6 +105,10 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
     return nothing
 end
 
+function default_retract_diff_argument_method(::Euclidean, ::ExponentialRetraction)
+    return FlatExpDiffArgumentMethod()
+end
+
 function det_local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
     p,
