@@ -5,6 +5,8 @@ The Symplectic Stiefel manifold. Each element represent a Symplectic Subspace of
 struct SymplecticStiefel{n, k, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType} 
 end
 
+#TODO: Implement exponential mapping from Bendokat-Zimmermann.
+
 @doc """
     You are given a manifold of embedding dimension 2n × 2p.
 """
