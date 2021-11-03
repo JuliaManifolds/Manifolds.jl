@@ -81,33 +81,105 @@ end
 
 Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
 """
-function inner(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
-    Q = SymplecticMatrix(p, X, Y); I = UniformScaling(2n)
-    p_Tp = factorize(p' * p)
-    inner_matrix = I - (1/2) * Q' * p * (p_Tp \ (p')) * Q 
+function inner_3(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+    Q = SymplecticMatrix(p, X, Y)
+    I = UniformScaling(2n)
 
-    return tr(X' * inner_matrix * (Y / p_Tp))
+    # Saves time compared to recomputing (p' * p) and solving a linear system twice:
+    inv_pT_p = inv(p' * p) # 𝞞((2k)^3)?
+
+    return tr(X' * (I - (1/2) * Q' * p * inv_pT_p * p' * Q) * Y * inv_pT_p) 
 end
 
 function inner_2(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
-    # This version seems to maybe be faster.
-    # We are only inverting the (2k × 2k) matrix (p' * p).
-
-    Q = SymplecticMatrix(p, X, Y); I = UniformScaling(2n)
-    inv_pT_p = inv(p' * p) # 𝞞((2k)^3)?
-
-    inner_matrix = I - (1/2) * Q' * p * inv_pT_p * p' * Q 
-
-    return tr(X' * inner_matrix * Y * inv_pT_p)
+    Q = SymplecticMatrix(p, X, Y)
+    I = UniformScaling(2n)
+    # p_Tp = lu(p' * p)
+    # inner_matrix = (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) 
+    # return tr(X' * (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) * (Y / p_Tp))
+    return tr(X' * (I - (1/2) * Q' * p * ((p' * p) \ (p')) * Q) * (Y / (p' * p)))
 end
 
-Base.inv(::SymplecticStiefel, p) = begin Q = SymplecticMatrix(p); Q' * p' * Q end
+function inner(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+    # This version is Benchmarked to use only two thirds the time of the previous inner-implementation.
+    # We are only finding the LU-factorization of the (2k × 2k) matrix (p' * p).
+
+    Q = SymplecticMatrix(p, X, Y)
+    I = UniformScaling(2n)
+
+    # Perform LU-factorization before multiplication:
+    p_Tp = lu(p' * p)
+    return tr(X' * (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) * (Y / p_Tp))
+end
+
+function inner_mul(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+    # Not faster, and does not save allocations...
+
+    Q = SymplecticMatrix(p, X, Y)
+    I = UniformScaling(2n)
+    # Perform LU-factorization before multiplication by inverse:
+    p_Tp = lu(p' * p)
+
+    # temp_2n_2k = similar(p)
+    temp_2k_2k = similar(p, (2k, 2k))
+    temp_2n_2n = similar(p, (2n, 2n))
+    temp_2k_2n = similar(p, (2k, 2n))
+
+    # End goal:
+    # tr(X' * (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) * (Y / p_Tp))
+
+    # Compute the inner matrix in-place as much as possible: 
+    # First: (p_Tp \ p') -> temp_2k_2n
+    ldiv!(temp_2k_2n, p_Tp, p')
+
+    # Then: p * (p_Tp \ p') -> temp_2n_2n
+    mul!(temp_2n_2n, p, temp_2k_2n)
+
+    # (Q'/2)* p * (p_Tp \ p') * Q -> temp_2n_2n
+    lmul!((1/2)*Q', temp_2n_2n)
+    rmul!(temp_2n_2n, Q)
+
+    inner_matrix = I + lmul!(-1, temp_2n_2n) 
+
+    # Left-multiply:
+    # Multiply X' * inner_matrix from the left -> in 'temp_2k_2n':
+    mul!(temp_2k_2n, X', inner_matrix)
+
+    # Hard to do:
+    # Y * (p_Tp)^{1} -> temp_2n_2k:
+    
+    # Go directly to:
+    # (X' * inner_matrix) * (Y * (p_Tp)^{1}) -> temp_2k_2k:
+    mul!(temp_2k_2k, temp_2k_2n, Y / p_Tp)
+    
+    return tr(temp_2k_2k)    
+end
+
+
+function Base.inv(::SymplecticStiefel, p) 
+    Q = SymplecticMatrix(p)
+    return Q' * p' * Q 
+end
+
+#= 
+Bad Idea: Nothing is square...
+function inv!(::SymplecticStiefel, q, p) 
+    Q = SymplecticMatrix(p)
+    mul!(q, p', Q)
+    lmul!(Q', q) 
+    return q
+end
+=#
 
 function change_representer!(::SymplecticStiefel{n, k}, Y, ::EuclideanMetric, p, X) where {n, k}
     # Quite an ugly expression: Have checked and it seems to be working.
-    Q = SymplecticMatrix(p, X); I = UniformScaling(2n)
-    A = factorize((I - (1/2) * Q' * p * ((p' * p) \ p') * Q)')
-    Y .= (A \ X) * p' * p
+    Q = SymplecticMatrix(p, X)
+    I = UniformScaling(2n)
+
+    # Remove memory allocation:
+    # A = factorize((I - (1/2) * Q' * p * ((p' * p) \ p') * Q)')
+
+    Y .= (lu((I - (1/2) * Q' * p * ((p' * p) \ p') * Q)') \ X) * p' * p
     return Y
 end
 
@@ -144,12 +216,16 @@ It is assumed that the point ``p`` is on ``\operatorname{Sp}(2n, 2n)``.
 
 # As done in Bendokat Zimmermann in equation 3.2.
 """
-canonical_projection(::SymplecticStiefel{n, k}, p; atol=1.0e-12, args...) where {n, k} = begin 
+function canonical_projection(M::SymplecticStiefel{n, k}, p) where {n, k}
     p_SpSt = similar(p, (2n, 2k))
-    p_SpSt[:, (1:k)] .= p[:, (1:k)]; p_SpSt[:, (k+1:2k)] .= p[:, (n+1:n+k)]
-    p_SpSt
+    return canonical_projection!(M, p_SpSt, p)
 end
 
+function canonical_projection!(::SymplecticStiefel{n, k}, p_SpSt, p) where {n, k}
+    p_SpSt[:, (1:k)] .= p[:, (1:k)]; 
+    p_SpSt[:, (k+1:2k)] .= p[:, (n+1:n+k)]
+    return p_SpSt
+end
 
 @doc raw"""
     retract!(::SymplecticStiefel, q, p, X, ::CayleyRetraction)
@@ -158,12 +234,15 @@ Define the Cayley retraction on the Symplectic Stiefel manifold.
 Reduced requirements down to inverting an (2k × 2k) matrix. 
 Formula due to Bendokat-Zimmermann Proposition 5.2.
 
+# TODO: Add formula from Bendokat-Zimmermann.
+
 # We set (t=1), regulate by the norm of the tangent vector how far to move.
 """
-function retract!(M::SymplecticStiefel, q, p, X, ::CayleyRetraction)
+function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
     # Define intermediate matrices for later use:
-    A = inv(M, p) * X; H = X .- p*A
-    q .= -p + (H + 2*p) / (I - A/2 + inv(M, H)*H/4)
+    A = inv(M, p) * X
+    H = X .- p*A
+    q .= -p .+ (H + 2*p) / (I - A/2 + (inv(M, H)*H)/4)
     return q
 end
 
@@ -202,13 +281,12 @@ Finally, definition of the inverse cayley retration at ``p`` applied to ``q`` is
 """
 function inverse_retract!(M::SymplecticStiefel, X, p, q, ::CayleyInverseRetraction)
     # Speeds up solving the linear systems required for multiplication with U, V:
-    U_inv = factorize(I + inv(M, p) * q)
-    V_inv = factorize(I + inv(M, q) * p)
+    U_inv = lu(I + inv(M, p) * q)
+    V_inv = lu(I + inv(M, q) * p)
 
     X .= 2 .* ((p / V_inv .- p / U_inv) + ((p .+ q) / U_inv) .- p)
     return X
 end
-
 
 function gradient(M::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
@@ -227,6 +305,6 @@ end
 
 function grad_euclidian_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
     Q = SymplecticMatrix(p, ∇f_euc)
-    ∇f_man .= (∇f_euc * p' .+ Q * p * (∇f_euc)' * Q) * p     
+    ∇f_man .= (∇f_euc * p' .+ Q * p * (∇f_euc)' * Q) * p    
     return ∇f_man
 end
