@@ -206,8 +206,8 @@ function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
     # Add Q.λ multiples of the UniformScaling to the lower left and upper right blocks of p:
     λ_Id = LinearAlgebra.UniformScaling(Q.λ)
 
-    out[1:n, (n+1):2n] += λ_Id
-    out[(n+1):2n, 1:n] -= λ_Id
+    out[1:n, (n+1):2n] .+= λ_Id
+    out[(n+1):2n, 1:n] .-= λ_Id
     return out
 end
 
@@ -223,8 +223,8 @@ function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
     pQ = similar(p, TS)
 
     # Perform right mulitply by λ*Q:
-    pQ[:, 1:k] = (-Q.λ).*p[:, (k+1):end]
-    pQ[:, (k+1):end] = (Q.λ) .*p[:, 1:k]
+    pQ[:, 1:k] .= (-Q.λ) * p[:, (k+1):end]
+    pQ[:, (k+1):end] .= (Q.λ) * p[:, 1:k]
 
     return pQ
 end
@@ -237,8 +237,8 @@ function (Base.:*)(Q::SymplecticMatrix, p::AbstractMatrix)
     Qp = similar(p, TS)
 
     # Perform left mulitply by λ*Q:
-    Qp[1:n, :] = (Q.λ) .* p[(n+1):end, :]
-    Qp[(n+1):end, :] = (-Q.λ) .* p[1:n, :]
+    Qp[1:n, :] .= (Q.λ) * p[(n+1):end, :]
+    Qp[(n+1):end, :] .= (-Q.λ) * p[1:n, :]
 
     return Qp
 end
@@ -297,6 +297,14 @@ function LinearAlgebra.mul!(A::AbstractMatrix, Q::SymplecticMatrix, p::AbstractM
     return A
 end
 
+function add_scaled_I!(A::AbstractMatrix, λ::Number)
+    LinearAlgebra.checksquare(A)
+    @inbounds for i in axes(A, 1)
+        A[i,i] += λ
+    end
+    return A
+end
+
 @doc raw"""
     symplectic_inverse(M::Symplectic{n, ℝ}, A) where {n, ℝ}
 
@@ -335,12 +343,13 @@ function symplectic_inverse(::Symplectic{n, ℝ}, A) where {n}
     # Allocate memory for A_star, the symplectic inverse:
     A_star = similar(A)
 
-    A_star[1:n, 1:n] = (A[(n+1):2n, (n+1):2n])'
-    A_star[(n+1):2n, (n+1):2n] = (A[1:n, 1:n])'
+    A_star[1:n, 1:n]           .= (A[(n+1):2n, (n+1):2n])'
+    A_star[(n+1):2n, (n+1):2n] .= (A[1:n, 1:n])'
 
     # Invert sign and transpose off-diagonal blocks:
-    A_star[1:n, (n+1):2n] = (-1) .* A[1:n, (n+1):2n]'
-    A_star[(n+1):2n, 1:n] = (-1) .* A[(n+1):2n, 1:n]'
+    A_star[1:n, (n+1):2n] .=  (-1.0) .* A[1:n, (n+1):2n]'
+    A_star[(n+1):2n, 1:n] .=  (-1.0) .* A[(n+1):2n, 1:n]'
+
     return A_star
 end
 
