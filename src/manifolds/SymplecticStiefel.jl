@@ -9,10 +9,14 @@ struct SymplecticStiefel{n, k, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIs
     m_2k_2k::AbstractMatrix{Float64}
 end
 
+# Have reduced allocations a lot for
+# `inner()` and `retract!()` individually as functions,
+# but when used in an optimization problem the gains aren't
+# realized.
+# TODO: Look at type instability problems, smarter allocation
+#       of the matrices stored in M = SymplecticStiefel()?
+
 #TODO: Implement exponential mapping from Bendokat-Zimmermann.
-# Weird solution, allocate needed working memory "in-module"
-# for performing the 'inner' and 'retract!' operations
-# Without allocations?
 
 SymplStiefel_inner_count = 0
 SymplStiefel_retr_count = 0
@@ -103,54 +107,83 @@ end
 
 Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
 """
-function inner(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+function inner_old(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     # Need to do the same to this function, reduce allocations as much as possible:
     # This version is Benchmarked to use only two thirds the time of the previous inner-implementation.
     # We are only finding the LU-factorization of the (2k × 2k) matrix (p' * p).
-    global SymplStiefel_inner_count += 1
-
     Q = SymplecticMatrix(p, X, Y)
-    I = UniformScaling(2n)
+    Id = UniformScaling(one(eltype(p)))
 
     # Perform LU-factorization before multiplication:
     p_Tp = lu(p' * p)
-    return tr(X' * (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) * (Y / p_Tp))
+    return tr(X' * (Id - (1/2) * Q' * p * (p_Tp \ (p')) * Q) * (Y / p_Tp))
+    # right_matrix = (Y / p_Tp)
+
+    # inner_matrix = (Id - (1/2) * Q' * p * (p_Tp \ (p')) * Q)
+
+    # total_matrix = X' * inner_matrix * right_matrix
+
+    #println("right_matrix:")
+    #display(right_matrix)
+    #
+    #println("inner_matrix:")
+    #display(inner_matrix)
+    #
+    #println("total_matrix:")
+    #display(total_matrix)
+
+    # return tr(total_matrix)
 end
 
-function inner_alloc(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+function inner(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     # Need to do the same to this function, reduce allocations as much as possible:
-    # This version is Benchmarked to use only two thirds the time of the previous inner-implementation.
-    # We are only finding the LU-factorization of the (2k × 2k) matrix (p' * p).
-
     Q = SymplecticMatrix(p, X, Y)
-    # I = UniformScaling(2n)
 
     # Perform LU-factorization before multiplication:
     M.m_2k_2k .= p' * p
     p_Tp = lu!(M.m_2k_2k)
 
-    # Use the p_Tp-memory for the two requred solves:
     # p_Tp \ (p') -> M.m_2k_2n:
     ldiv!(M.m_2k_2n, p_Tp, p')
 
+    # Construct inner matrix:
+    # (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q)
+
+    # Copy p -> M.m_2n_2k:
+    M.m_2n_2k .= p
+    # (-1/2)*Q'*p -> M.m_2n_2k
+    lmul!((-1/2) * Q', M.m_2n_2k)
+
+    # (p_Tp \ (p')) * Q -> M.m_2k_2n
+    rmul!(M.m_2k_2n, Q)
+
+    mul!(M.m_2n_2n, M.m_2n_2k, M.m_2k_2n)
+    add_scaled_I!(M.m_2n_2n, 1.0)
+
+    ########################################################
+    #### M.m_2n_2k and M.m_2k_2n now available for use. ####
+    ########################################################
+
+    # println("Inner matrix:")
+    # display(M.m_2n_2n)
+
+    # Use the p_Tp-memory for the requred solve:
     # Y / p_Tp -> M.m_2n_2k / p_Tp -> M.m_2n_2k
     M.m_2n_2k .= Y
     rdiv!(M.m_2n_2k, p_Tp)
-    # M.m_2k_2k now available for use.
 
-    # Construct inner matrix:
-    # (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q)
-    # "Q' * p" and "(p_Tp \ (p')) * Q" are both allocating.
-    mul!(M.m_2n_2n, ((-1/2) * Q') * p, M.m_2k_2n * Q)
-    # lmul!(-0.5, M.m_2n_2n)
-    add_scaled_I!(M.m_2n_2n, 1.0)
-    # M.m_2k_2n now available for use.
+    ##########################################
+    #### M.m_2k_2k now available for use. ####
+    ##########################################
 
     # X' * (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) -> M.m_2k_2n
     mul!(M.m_2k_2n, X', M.m_2n_2n)
 
     # Lastly: X' * (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) * (Y / p_Tp) -> M.m_2k_2k
     # Compute tr(A'*B) with for-loops? Saves this computation.
+    # println("Total matrix:")
+    # display(M.m_2k_2k)
+
     mul!(M.m_2k_2k, M.m_2k_2n, M.m_2n_2k)
     return tr(M.m_2k_2k)
 end
@@ -159,12 +192,19 @@ function Base.inv(M::SymplecticStiefel{n, k}, p) where {n, k}
     # Old version:
     # Q = SymplecticMatrix(p)
     # return Q' * p' * Q
-
-    p_star = similar(p, (2k, 2n))
+    n_p, k_p = check_even_dim(p)
+    p_star = similar(p, (2k_p, 2n_p))
     return inv!(M, p_star, p)
 end
 
-function inv!(::SymplecticStiefel{n, k}, p_star, p) where {n, k}
+function inv!(::SymplecticStiefel, p_star, p)
+    n_p, k_p = check_even_dim(p)
+    k_star, n_star = check_even_dim(p_star)
+    @assert (n_p, k_p) == (n_star, k_star)
+    n, k = n_p, k_p
+
+    # println("inv!(p_star, p):\nDimensions of p_star: $(size(p_star))")
+    # println("Dimensions of p: $(size(p))")
     # New version, three times less allocations:
 
     # Transfer diagonal blocks:
@@ -251,17 +291,18 @@ Formula due to Bendokat-Zimmermann Proposition 5.2.
 
 # We set (t=1), regulate by the norm of the tangent vector how far to move.
 """
-function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
     # global SymplStiefel_retr_count += 1
+    Id = UniformScaling(1)
 
     # Define intermediate matrices for later use:
     A = inv(M, p) * X
     H = X .- p*A
-    q .= -p .+ (H + 2*p) / (I - A/2 .+ (inv(M, H)*H)/4)
+    q .= -p .+ (H + 2*p) / (Id - A/2 .+ (inv(M, H)*H)/4)
     return q
 end
 
-function retract_alloc!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
     # About half to a third as much allocation done here:
 
     M.m_2k_2k .= inv!(M, M.m_2k_2n, p) * X
