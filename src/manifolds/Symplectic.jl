@@ -252,11 +252,11 @@ function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractMatrix)
     # Need to allocate half the space in order to avoid overwriting:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
     half_row_p = similar(p, TS, (n, 2k))
-    half_row_p[1:n, :] = p[1:n, :]
+    half_row_p[1:n, :] .= p[1:n, :]
 
     # Perform left mulitply by λ*Q:
-    p[1:n, :] = (Q.λ) .* p[(n+1):end, :]
-    p[(n+1):end, :] = (-Q.λ) .* half_row_p[1:n, :]
+    p[1:n, :] .= (Q.λ) .* p[(n+1):end, :]
+    p[(n+1):end, :] .= (-Q.λ) .* half_row_p[1:n, :]
 
     return p
 end
@@ -269,14 +269,14 @@ function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
     # Need to allocate half the space in order to avoid overwriting:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
     half_col_p = similar(p, TS, (2n, k))
-    half_col_p[:, 1:k] = p[:, 1:k]
+    half_col_p[:, 1:k] .= p[:, 1:k]
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
 
     # Perform right mulitply by λ*Q:
-    p[:, 1:k] = (-Q.λ).*p[:, (k+1):end]
-    p[:, (k+1):end] = (Q.λ) .*half_col_p[:, 1:k]
+    p[:, 1:k] .= (-Q.λ).*p[:, (k+1):end]
+    p[:, (k+1):end] .= (Q.λ) .* half_col_p[:, 1:k]
 
     return p
 end
