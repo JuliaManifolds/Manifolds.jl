@@ -2,11 +2,11 @@
 
 The Symplectic Stiefel manifold. Each element represent a Symplectic Subspace of ``ℝ^{2n × 2k}``.
 """
-struct SymplecticStiefel{n, k, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
-    m_2n_2n::AbstractMatrix{Float64}
-    m_2k_2n::AbstractMatrix{Float64}
-    m_2n_2k::AbstractMatrix{Float64}
-    m_2k_2k::AbstractMatrix{Float64}
+struct SymplecticStiefel{n, k, 𝔽, T} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+    m_2n_2n::Matrix{T}
+    m_2k_2n::Matrix{T}
+    m_2n_2k::Matrix{T}
+    m_2k_2k::Matrix{T}
 end
 
 # Have reduced allocations a lot for
@@ -18,24 +18,29 @@ end
 
 #TODO: Implement exponential mapping from Bendokat-Zimmermann.
 
+#=
+# Used for counting calls to different functions during an optimization run:
 SymplStiefel_inner_count = 0
 SymplStiefel_retr_count = 0
+SymplStiefel_grad_count = 0
 
 function reset_inner_retr_counts()
     global SymplStiefel_inner_count = 0
     global SymplStiefel_retr_count = 0
+    global SymplStiefel_grad_count = 0
     return nothing
 end
+=#
 
 @doc """
     You are given a manifold of embedding dimension 2n × 2p.
 """
-SymplecticStiefel(n::Int, k::Int, field::AbstractNumbers=ℝ) = begin
-    SymplecticStiefel{n, k, field}(
-        zeros(2n, 2n),
-        zeros(2k, 2n),
-        zeros(2n, 2k), # size(retr_H) = (2n, 2k)
-        zeros(2k, 2k), # size(retr_A) = (2k, 2k)
+SymplecticStiefel(n::Int, k::Int, field::AbstractNumbers=ℝ, T::Type=Float64) = begin
+    SymplecticStiefel{n, k, field, Float64}(
+        zeros(T, 2n, 2n),
+        zeros(T, 2k, 2n),
+        zeros(T, 2n, 2k), # size(retr_H) = (2n, 2k)
+        zeros(T, 2k, 2k), # size(retr_A) = (2k, 2k)
     )
 end
 
@@ -136,6 +141,7 @@ function inner_old(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
 end
 
 function inner(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+    # The new one!
     # Need to do the same to this function, reduce allocations as much as possible:
     Q = SymplecticMatrix(p, X, Y)
 
@@ -292,7 +298,6 @@ Formula due to Bendokat-Zimmermann Proposition 5.2.
 # We set (t=1), regulate by the norm of the tangent vector how far to move.
 """
 function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-    # global SymplStiefel_retr_count += 1
     Id = UniformScaling(1)
 
     # Define intermediate matrices for later use:
@@ -303,6 +308,7 @@ function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) w
 end
 
 function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+    # The new one!
     # About half to a third as much allocation done here:
 
     M.m_2k_2k .= inv!(M, M.m_2k_2n, p) * X
@@ -380,8 +386,30 @@ function grad_euclidian_to_manifold(::SymplecticStiefel, p, ∇f_euc)
     return (∇f_euc * p'  .+ Q * p * (∇f_euc)' * Q) * p
 end
 
-function grad_euclidian_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
+function grad_euclidian_to_manifold_old!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
     Q = SymplecticMatrix(p, ∇f_euc)
     ∇f_man .= (∇f_euc * p' .+ Q * p * (∇f_euc)' * Q) * p
+    return ∇f_man
+end
+
+function grad_euclidian_to_manifold!(M::SymplecticStiefel, ∇f_man, p, ∇f_euc)
+    Q = SymplecticMatrix(p, ∇f_euc)
+
+    # Q * p -> M.m_2n_2k
+    M.m_2n_2k .= p
+    lmul!(Q, M.m_2n_2k)
+
+    # ∇f_euc * p' -> M.m_2n_2n
+    mul!(M.m_2n_2n, ∇f_euc, p')
+
+    # (∇f_euc)' * Q -> M.m_2k_2n
+    M.m_2k_2n .= ∇f_euc'
+    rmul!(M.m_2k_2n, Q)
+
+    # ∇f_euc * p' .+ Q * p * (∇f_euc)' * Q -> C + A * B -> C
+    mul!(M.m_2n_2n, M.m_2n_2k, M.m_2k_2n, 1, 1)
+
+    # ∇f_man .= (∇f_euc * p' .+ Q * p * (∇f_euc)' * Q) * p
+    mul!(∇f_man, M.m_2n_2n, p)
     return ∇f_man
 end
