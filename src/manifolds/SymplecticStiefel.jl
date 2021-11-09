@@ -13,6 +13,12 @@ struct SymplecticInner{S, T<:AbstractMatrix{<:S}}
     m_2k_2n::T
 end
 
+struct SymplecticGrad{S, T<:AbstractMatrix{<:S}}
+    m_2k_2k::T
+    m_2n_2k::T
+    m_2k_2n::T
+end
+
 # Done, uses more allcations:
 # Do the inv!-permutation in-place.
 # Write functor for SymplecticInner, which has memory and can use it.
@@ -26,6 +32,7 @@ mutable struct SymplecticStiefel{n, k, 𝔽} <: AbstractEmbeddedManifold{𝔽, D
     # To avoid type instability.
     symplectic_retraction # ::SymplecticExp{n, k}
     symplectic_inner      # ::SymplecticInner{n, k}
+    symplectic_grad
 
     function SymplecticStiefel{n, k, 𝔽}() where {n, k, 𝔽}
         return new{n, k, 𝔽}()
@@ -143,6 +150,48 @@ function (F::SymplecticRetraction)(M::SymplecticStiefel{n, k}, q, p, X) where {n
     q .= ((-1.0) .* p) .+ rdiv!(F.m_2n_2k, factored_dividend)
     return q
 end
+
+
+function SymplecticGrad(M::SymplecticStiefel{n, k}, p::T) where {n, k, S, T<:AbstractMatrix{<:S}}
+    isdefined(M, :symplectic_grad) && return M.symplectic_grad
+    TS = eltype(T)
+    M.symplectic_grad = SymplecticGrad{S, T}(zeros(TS, 2k, 2k),
+                                             zeros(TS, 2n, 2k),
+                                             zeros(TS, 2k, 2n))
+    return M.symplectic_grad
+end
+
+
+function (F::SymplecticGrad)(M::SymplecticStiefel, ∇f_man, p, ∇f_euc)
+    Q = SymplecticMatrix(p, ∇f_euc)
+
+    # Avoid constructing 2n × 2n matrices.
+    # grad_F = (∇F * p' * p) + (Q * p * ∇F' * Q * p)
+
+    ### First term:
+    # p' * p -> F.m_2k_2k
+    mul!(F.m_2k_2k, p', p)
+    # ∇F * (p' * p) -> ∇f_man
+    mul!(∇f_man, ∇f_euc, F.m_2k_2k)
+
+    ### Second term:
+    # Q * p -> F.m_2n_2k
+    F.m_2n_2k .= p
+    lmul!(Q, F.m_2n_2k)
+
+    # ∇F' * (Q * p) -> F.m_2k_2k
+    mul!(F.m_2k_2k, ∇f_euc', F.m_2n_2k)
+
+    # p * (∇F' * Q * p) -> F.m_2n_2k
+    mul!(F.m_2n_2k, p, F.m_2k_2k)
+    # Q * (p * ∇F' * Q * p) -> F.m_2n_2k
+    lmul!(Q, F.m_2n_2k)
+
+    # ∇f_man .= ∇f_euc * p' * p .+ Q * p * (∇f_euc)' * Q * p
+    ∇f_man .+= F.m_2n_2k
+    return ∇f_man
+end
+
 
 @doc """
     You are given a manifold of embedding dimension 2n × 2p.
@@ -496,6 +545,10 @@ function grad_euclidian_to_manifold_old!(::SymplecticStiefel, ∇f_man, p, ∇f_
     Q = SymplecticMatrix(p, ∇f_euc)
     ∇f_man .= (∇f_euc * p' .+ Q * p * (∇f_euc)' * Q) * p
     return ∇f_man
+end
+
+function grad_euclidian_to_manifold!(M::SymplecticStiefel, ∇f_man, p, ∇f_euc)
+    SymplecticGrad(M, p)(M, ∇f_man, p, ∇f_euc)
 end
 
 function grad_euclidian_to_manifold_deprecated!(M::SymplecticStiefel, ∇f_man, p, ∇f_euc)
