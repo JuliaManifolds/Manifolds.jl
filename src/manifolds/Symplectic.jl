@@ -137,7 +137,7 @@ end
 Convenience function to check whether or not an abstract matrix is square, with an even
 number (2n, 2n) of rows and columns. Then returns the integer part of the even dimension.
 """
-function check_even_dim(p; square=false)
+function get_even_dims(p; square=false)
     n, k = size(p)
     # Otherwise, both dimensions just need to be even.
     # First check that dimensions are even:
@@ -197,7 +197,7 @@ Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1/Q.λ))
 (Base.:+)(Q::SymplecticMatrix, p::AbstractMatrix) = p + Q
 function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
     # When we are adding, the Matrices must match in size:
-    n, _ = check_even_dim(p; square=true)
+    n, _ = get_even_dims(p; square=true)
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -216,7 +216,7 @@ end
 (Base.:-)(p::AbstractMatrix, Q::SymplecticMatrix) = p + (-Q)
 
 function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
-    _, k = check_even_dim(p)
+    _, k = get_even_dims(p)
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -230,7 +230,7 @@ function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
 end
 
 function (Base.:*)(Q::SymplecticMatrix, p::AbstractMatrix)
-    n, _ = check_even_dim(p)
+    n, _ = get_even_dims(p)
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -247,7 +247,7 @@ end
 function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractMatrix)
     # Perform left multiplication by a symplectic matrix,
     # overwriting the matrix p in place:
-    n, k = check_even_dim(p)
+    n, k = get_even_dims(p)
 
     # Need to allocate half the space in order to avoid overwriting:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -264,7 +264,7 @@ end
 function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
     # Perform right multiplication by a symplectic matrix,
     # overwriting the matrix p in place:
-    n, k = check_even_dim(p)
+    n, k = get_even_dims(p)
 
     # Need to allocate half the space in order to avoid overwriting:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -282,7 +282,7 @@ function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
 end
 
 function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractMatrix, Q::SymplecticMatrix)
-    _, k = check_even_dim(p)
+    _, k = get_even_dims(p)
     # Perform right mulitply by λ*Q:
     A[:, 1:k] = (-Q.λ).*p[:, (k+1):end]
     A[:, (k+1):end] = (Q.λ) .* half_col_p[:, 1:k]
@@ -290,7 +290,7 @@ function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractMatrix, Q::SymplecticM
 end
 
 function LinearAlgebra.mul!(A::AbstractMatrix, Q::SymplecticMatrix, p::AbstractMatrix)
-    n, _ = check_even_dim(p)
+    n, _ = get_even_dims(p)
     # Perform right mulitply by λ*Q:
     A[1:n, :] = (Q.λ) .* p[(n+1):end, :]
     A[(n+1):end, :] = (-Q.λ) .* half_row_p[1:n, :]
