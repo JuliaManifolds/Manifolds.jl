@@ -123,7 +123,7 @@ end
 Riemannian: Test Test. Reference to Fiori.
 
 """
-function inner(M::Symplectic{n, ℝ}, p, X, Y) where {n}
+function inner(M::Symplectic{n, ℝ}, p, X, Y)::eltype(p) where {n}
     # For symplectic matrices, the 'symplectic inverse' p^+ is the actual inverse.
     p_star = inv(M, p)
     return tr((p_star * X)' * (p_star * Y))
@@ -361,25 +361,6 @@ function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}
 end
 
 @doc raw"""
-    TODO:
-"""
-function symplectic_multiply(::Symplectic{n, ℝ}, A; left=true, transposed=false) where {n}
-    # Flip sign if the Q-matrix to be multiplied with A is transposed:
-    sign = transposed ? (-1.0) : (1.0)
-
-    QA = similar(A)
-    if left  # Perform left multiplication by Q
-        QA[1:n, :] = sign.*A[(n+1):end, :]
-        QA[(n+1):end, :] = (-sign).*A[1:n, :]
-    else     # Perform right multiplication by Q
-        QA[:, 1:n] = (-sign).*A[:, (n+1):end]
-        QA[:, (n+1):end] = sign.*A[:, 1:n]
-    end
-    return QA
-end
-
-
-@doc raw"""
     grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇_Euclidian_f)
 
 Compute the transformation of the euclidian gradient of a function `f` onto the tangent space of the point p ∈ Sn(ℝ, 2n)[^FioriSimone2011].
@@ -459,14 +440,9 @@ Adapted from projection onto tangent spaces of Symplectic Stiefal manifolds ``\o
 """
 function project!(::Symplectic{n, ℝ}, Y, p, X) where {n}
     # Original formulation of the projection from the Gao et al. paper:
-    # pT_QT = symplectic_multiply(M, p'; left=false, transposed=true)
-    # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*pT_QT) * X
+    # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*p^T_Q^T) * X
     # The term: (I - pQ*pT_QT) = 0 in our symplectic case.
 
-    # pQ = symplectic_multiply(M, p; left=false)
-    # pT_QT_X = symplectic_multiply(M, p'; left=false, transposed=true) * X
-
-    # TS = Base._return_type(+, Tuple{eltype(p), eltype(X)})
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
@@ -517,7 +493,6 @@ Defined pointwise as
 function retract!(::Symplectic, q, p, X, ::CayleyRetraction)
     Q = SymplecticMatrix(p, X)
 
-    # pTQT_X = symplectic_multiply(M, p'; left=false, transposed=true)*X
     pT_QT_X = p' * Q' * X
 
     q .= -p * ((pT_QT_X + 2*Q) \ (pT_QT_X - 2*Q))
