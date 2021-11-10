@@ -34,7 +34,7 @@ end
     You are given a manifold of embedding dimension 2nX2n.
 """
 Symplectic(n::Int, field::AbstractNumbers=ℝ) = begin
-    Symplectic{n, field}()
+    Symplectic{div(n, 2), field}()
 end
 
 decorated_manifold(::Symplectic{n, ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
@@ -123,7 +123,7 @@ end
 Riemannian: Test Test. Reference to Fiori.
 
 """
-function inner(M::Symplectic{n, ℝ}, p, X, Y) where {n}
+function inner(M::Symplectic{n, ℝ}, p, X, Y)::eltype(p) where {n}
     # For symplectic matrices, the 'symplectic inverse' p^+ is the actual inverse.
     p_star = inv(M, p)
     return tr((p_star * X)' * (p_star * Y))
@@ -137,7 +137,7 @@ end
 Convenience function to check whether or not an abstract matrix is square, with an even
 number (2n, 2n) of rows and columns. Then returns the integer part of the even dimension.
 """
-function check_even_dim(p; square=false)
+function get_even_dims(p; square=false)
     n, k = size(p)
     # Otherwise, both dimensions just need to be even.
     # First check that dimensions are even:
@@ -197,7 +197,7 @@ Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1/Q.λ))
 (Base.:+)(Q::SymplecticMatrix, p::AbstractMatrix) = p + Q
 function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
     # When we are adding, the Matrices must match in size:
-    n, _ = check_even_dim(p; square=true)
+    n, _ = get_even_dims(p; square=true)
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -216,7 +216,7 @@ end
 (Base.:-)(p::AbstractMatrix, Q::SymplecticMatrix) = p + (-Q)
 
 function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
-    _, k = check_even_dim(p)
+    _, k = get_even_dims(p)
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -230,7 +230,7 @@ function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
 end
 
 function (Base.:*)(Q::SymplecticMatrix, p::AbstractMatrix)
-    n, _ = check_even_dim(p)
+    n, _ = get_even_dims(p)
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -247,7 +247,7 @@ end
 function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractMatrix)
     # Perform left multiplication by a symplectic matrix,
     # overwriting the matrix p in place:
-    n, k = check_even_dim(p)
+    n, k = get_even_dims(p)
 
     # Need to allocate half the space in order to avoid overwriting:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -264,7 +264,7 @@ end
 function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
     # Perform right multiplication by a symplectic matrix,
     # overwriting the matrix p in place:
-    n, k = check_even_dim(p)
+    n, k = get_even_dims(p)
 
     # Need to allocate half the space in order to avoid overwriting:
     TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
@@ -282,7 +282,7 @@ function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
 end
 
 function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractMatrix, Q::SymplecticMatrix)
-    _, k = check_even_dim(p)
+    _, k = get_even_dims(p)
     # Perform right mulitply by λ*Q:
     A[:, 1:k] = (-Q.λ).*p[:, (k+1):end]
     A[:, (k+1):end] = (Q.λ) .* half_col_p[:, 1:k]
@@ -290,7 +290,7 @@ function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractMatrix, Q::SymplecticM
 end
 
 function LinearAlgebra.mul!(A::AbstractMatrix, Q::SymplecticMatrix, p::AbstractMatrix)
-    n, _ = check_even_dim(p)
+    n, _ = get_even_dims(p)
     # Perform right mulitply by λ*Q:
     A[1:n, :] = (Q.λ) .* p[(n+1):end, :]
     A[(n+1):end, :] = (-Q.λ) .* half_row_p[1:n, :]
@@ -353,25 +353,6 @@ function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}
     Ω = [A B; C -A']
     return final_norm*Ω/norm(Ω, 2)
 end
-
-@doc raw"""
-    TODO:
-"""
-function symplectic_multiply(::Symplectic{n, ℝ}, A; left=true, transposed=false) where {n}
-    # Flip sign if the Q-matrix to be multiplied with A is transposed:
-    sign = transposed ? (-1.0) : (1.0)
-
-    QA = similar(A)
-    if left  # Perform left multiplication by Q
-        QA[1:n, :] = sign.*A[(n+1):end, :]
-        QA[(n+1):end, :] = (-sign).*A[1:n, :]
-    else     # Perform right multiplication by Q
-        QA[:, 1:n] = (-sign).*A[:, (n+1):end]
-        QA[:, (n+1):end] = sign.*A[:, 1:n]
-    end
-    return QA
-end
-
 
 @doc raw"""
     grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇_Euclidian_f)
@@ -453,14 +434,9 @@ Adapted from projection onto tangent spaces of Symplectic Stiefal manifolds ``\o
 """
 function project!(::Symplectic{n, ℝ}, Y, p, X) where {n}
     # Original formulation of the projection from the Gao et al. paper:
-    # pT_QT = symplectic_multiply(M, p'; left=false, transposed=true)
-    # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*pT_QT) * X
+    # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*p^T_Q^T) * X
     # The term: (I - pQ*pT_QT) = 0 in our symplectic case.
 
-    # pQ = symplectic_multiply(M, p; left=false)
-    # pT_QT_X = symplectic_multiply(M, p'; left=false, transposed=true) * X
-
-    # TS = Base._return_type(+, Tuple{eltype(p), eltype(X)})
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
@@ -511,7 +487,6 @@ Defined pointwise as
 function retract!(::Symplectic, q, p, X, ::CayleyRetraction)
     Q = SymplecticMatrix(p, X)
 
-    # pTQT_X = symplectic_multiply(M, p'; left=false, transposed=true)*X
     pT_QT_X = p' * Q' * X
 
     q .= -p * ((pT_QT_X + 2*Q) \ (pT_QT_X - 2*Q))

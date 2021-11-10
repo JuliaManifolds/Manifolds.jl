@@ -1,55 +1,62 @@
 @doc raw"""
-Working memory for SymplecticStiefel Exp and Inner.
+Working memory for SymplecticStiefel Exp (Retraction).
 """
-struct SymplecticRetraction{S, T <:AbstractMatrix{<:S}}
+struct SymplecticRetraction{T <:AbstractMatrix}
     m_2k_2k::T
     m_2n_2k::T
     m_2k_2n::T
 end
 
-struct SymplecticInner{S, T<:AbstractMatrix{<:S}}
+@doc raw"""
+Working memory for SymplecticStiefel Inner product.
+"""
+struct SymplecticInner{T<:AbstractMatrix}
     m_2k_2k::T
     m_2n_2k::T
     m_2k_2n::T
 end
 
-struct SymplecticGrad{S, T<:AbstractMatrix{<:S}}
+@doc raw"""
+Working memory for SymplecticStiefel Gradient Conversion.
+"""
+struct SymplecticGrad{T<:AbstractMatrix}
     m_2k_2k::T
     m_2n_2k::T
     m_2k_2n::T
 end
 
-# Done, uses more allcations:
-# Do the inv!-permutation in-place.
-# Write functor for SymplecticInner, which has memory and can use it.
-# Done!
+#=
+# TODO: Store all matrices in a single struct like this, and store a single
+#       instance of this struct in the SymplecticStiefel manifold. which
+#       only gets populated with memory if any functions needing it are called.
+struct SymplecticStorage{T<:AbstractMatrix}
+    m_2k_2k::T
+    m_2n_2k::T
+    m_2k_2n::T
+end
+=#
 
 @doc raw"""
 The Symplectic Stiefel manifold. Each element represent a Symplectic Subspace of ``ℝ^{2n × 2k}``.
 """
-mutable struct SymplecticStiefel{n, k, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
-    # May have to specify type of 'points' and eltype {S, T <: AbstractMatrix{<:S}}}
+mutable struct SymplecticStiefel{n, k, 𝔽, T} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+    # May have to specify type of 'points' and eltype {S, T <: AbstractMatrix{<:S}}
     # To avoid type instability.
-    symplectic_retraction # ::SymplecticExp{n, k}
-    symplectic_inner      # ::SymplecticInner{n, k}
-    symplectic_grad
+    symplectic_retraction::SymplecticRetraction{T}
+    symplectic_inner::SymplecticInner{T}
+    symplectic_grad::SymplecticGrad{T}
 
-    function SymplecticStiefel{n, k, 𝔽}() where {n, k, 𝔽}
-        return new{n, k, 𝔽}()
+    function SymplecticStiefel{n, k, 𝔽, T}() where {n, k, 𝔽, T}
+        return new{n, k, 𝔽, T}()
     end
-
-    # Stored in the 'SymplecticExp' and 'SymplecticInner' functors:
-    # m_2k_2n::Matrix{T}
-    # m_2n_2k::Matrix{T}
-    # m_2k_2k::Matrix{T}
 end
 
 function SymplecticInner(M::SymplecticStiefel{n, k}, p::T) where {n, k, S, T<:AbstractMatrix{<:S}}
     isdefined(M, :symplectic_inner) && return M.symplectic_inner
-    TS = eltype(T)
-    M.symplectic_inner = SymplecticInner{S, T}(zeros(TS, 2k, 2k),
-                                               zeros(TS, 2n, 2k),
-                                               zeros(TS, 2k, 2n))
+    TS = eltype(p)
+    M.symplectic_inner = SymplecticInner{T}(zeros(TS, 2k, 2k),
+                                            zeros(TS, 2n, 2k),
+                                            zeros(TS, 2k, 2n))
     return M.symplectic_inner
 end
 
@@ -121,10 +128,10 @@ end
 
 function SymplecticRetraction(M::SymplecticStiefel{n, k}, p::T) where {n, k, S, T<:AbstractMatrix{<:S}}
     isdefined(M, :symplectic_retraction) && return M.symplectic_retraction
-    TS = eltype(T)
-    M.symplectic_retraction = SymplecticRetraction{S, T}(zeros(TS, 2k, 2k),
-                                                         zeros(TS, 2n, 2k),
-                                                         zeros(TS, 2k, 2n))
+    TS = eltype(p)
+    M.symplectic_retraction = SymplecticRetraction{T}(zeros(TS, 2k, 2k),
+                                                      zeros(TS, 2n, 2k),
+                                                      zeros(TS, 2k, 2n))
     return M.symplectic_retraction
 end
 
@@ -154,10 +161,10 @@ end
 
 function SymplecticGrad(M::SymplecticStiefel{n, k}, p::T) where {n, k, S, T<:AbstractMatrix{<:S}}
     isdefined(M, :symplectic_grad) && return M.symplectic_grad
-    TS = eltype(T)
-    M.symplectic_grad = SymplecticGrad{S, T}(zeros(TS, 2k, 2k),
-                                             zeros(TS, 2n, 2k),
-                                             zeros(TS, 2k, 2n))
+    TS = eltype(p)
+    M.symplectic_grad = SymplecticGrad{T}(zeros(TS, 2k, 2k),
+                                          zeros(TS, 2n, 2k),
+                                          zeros(TS, 2k, 2n))
     return M.symplectic_grad
 end
 
@@ -193,11 +200,17 @@ function (F::SymplecticGrad)(M::SymplecticStiefel, ∇f_man, p, ∇f_euc)
 end
 
 
-@doc """
-    You are given a manifold of embedding dimension 2n × 2p.
+@doc raw"""
+    You are given a manifold of embedding dimension two_n × two_p.
+    # Tried to type the fields being stored in SymplecticStiefel as well.
 """
-SymplecticStiefel(n::Int, k::Int, field::AbstractNumbers=ℝ, T::Type=Float64) = begin
-    SymplecticStiefel{n, k, field}()
+function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ,
+                           T::Type=Matrix{Float64})
+    SymplecticStiefel{div(two_n, 2), div(two_k, 2), field, T}()
+end
+
+function SymplecticStiefel(two_n::Int, two_k::Int, ::T) where {T <: AbstractMatrix}
+    SymplecticStiefel{div(two_n, 2), div(two_k, 2), ℝ, T}()
 end
 
 Base.show(io::IO, ::SymplecticStiefel{n, k}) where {n, k} = print(io, "SymplecticStiefel{$(2n), $(2k)}()")
@@ -338,17 +351,14 @@ function inner_deprecated(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
 end
 
 function Base.inv(M::SymplecticStiefel{n, k}, p) where {n, k}
-    # Old version:
-    # Q = SymplecticMatrix(p)
-    # return Q' * p' * Q
-    n_p, k_p = check_even_dim(p)
+    n_p, k_p = get_even_dims(p)
     p_star = similar(p, (2k_p, 2n_p))
     return inv!(M, p_star, p)
 end
 
 function inv!(::SymplecticStiefel, p_star, p)
-    n_p, k_p = check_even_dim(p)
-    k_star, n_star = check_even_dim(p_star)
+    n_p, k_p = get_even_dims(p)
+    k_star, n_star = get_even_dims(p_star)
     @assert (n_p, k_p) == (n_star, k_star)
     n, k = n_p, k_p
 
@@ -365,14 +375,6 @@ function inv!(::SymplecticStiefel, p_star, p)
     return p_star
 end
 
-function inv!(::SymplecticStiefel{n, k}, p) where {n, k}
-    # Shuffle in place for the symplectic inverse of p:
-    # Just shuffles memory - Hopefully
-    # Need to fill in p-transposed: (2n × 2k) -> (2k × 2n):
-    (p') .=  [ p[(n+1):2n, (k+1):2k]' -p[1:n, (k+1):2k]';
-              -p[(n+1):2n, 1:k]'       p[1:n, 1:k]'      ]
-    return p'
-end
 
 @doc raw"""
     change_representer!(::SymplecticStiefel{n, k}, Y, ::EuclideanMetric, p, X)
@@ -398,7 +400,7 @@ Use the canonical projection by first generating a random symplectic matrix of t
 and then projecting onto the Symplectic Stiefel manifold.
 """
 Base.rand(M::SymplecticStiefel{n, k}) where {n, k} = begin
-    canonical_projection(M, rand(Symplectic(n)))
+    canonical_projection(M, rand(Symplectic(2n)))
 end
 
 @doc raw"""
@@ -409,7 +411,7 @@ of Benodkat-Zimmermann. There they express the tangent space as ``X = pΩ + p^sB
 The notation ``p^s`` means the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``, and ``B ∈ ℝ^{2(n-k) × 2k}.
 """
 Base.rand(::SymplecticStiefel{n, k}, p) where {n, k} = begin
-    Ω = rand_hamiltonian(Symplectic(k))
+    Ω = rand_hamiltonian(Symplectic(2k))
     p * Ω
 end
 
@@ -446,36 +448,6 @@ Formula due to Bendokat-Zimmermann Proposition 5.2.
 
 # We set (t=1), regulate by the norm of the tangent vector how far to move.
 """
-function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-    # Define intermediate matrices for later use:
-    A = inv(M, p) * X
-    H = X .- p*A
-    q .= -p .+ (H + 2*p) / (I - A/2 .+ (inv(M, H)*H)/4)
-    return q
-end
-
-function retract_deprecated!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-    # The new one!
-    # About half to a third as much allocation done here:
-
-    M.m_2k_2k .= inv!(M, M.m_2k_2n, p) * X
-    M.m_2n_2k .= X .- p*M.m_2k_2k
-
-    # Make the 'dividend' and store into 'M.retr_A' using mul!():
-    # (-0.5*retr_A + 0.25*inv(M, M.retr_H)*M.retr_H -> retr_A.
-    mul!(M.m_2k_2k, inv!(M, M.m_2k_2n, M.m_2n_2k), M.m_2n_2k, 0.25, -0.5)
-    add_scaled_I!(M.m_2k_2k, 1.0)
-
-    # lu! Should not allocate new memory. Overwrites M.retr_A
-    factored_dividend = lu!(M.m_2k_2k)
-
-    # Add two copies of p to M.retr_H:
-    M.m_2n_2k .+= 2*p
-
-    q .= ((-1.0) .* p) .+ rdiv!(M.m_2n_2k, factored_dividend)
-    return q
-end
-
 function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
     return SymplecticRetraction(M, p)(M, q, p, X)
 end
@@ -533,38 +505,9 @@ end
 
 function grad_euclidian_to_manifold(::SymplecticStiefel, p, ∇f_euc)
     Q = SymplecticMatrix(p, ∇f_euc)
-    return (∇f_euc * p'  .+ Q * p * (∇f_euc)' * Q) * p
-end
-
-function grad_euclidian_to_manifold_old!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
-    Q = SymplecticMatrix(p, ∇f_euc)
-    ∇f_man .= (∇f_euc * p' .+ Q * p * (∇f_euc)' * Q) * p
-    return ∇f_man
+    return ∇f_euc * (p' * p)  .+ Q * p * (∇f_euc' * Q * p)
 end
 
 function grad_euclidian_to_manifold!(M::SymplecticStiefel, ∇f_man, p, ∇f_euc)
     SymplecticGrad(M, p)(M, ∇f_man, p, ∇f_euc)
-end
-
-function grad_euclidian_to_manifold_deprecated!(M::SymplecticStiefel, ∇f_man, p, ∇f_euc)
-    # BROKEN:
-    Q = SymplecticMatrix(p, ∇f_euc)
-
-    # Q * p -> M.m_2n_2k
-    M.m_2n_2k .= p
-    lmul!(Q, M.m_2n_2k)
-
-    # ∇f_euc * p' -> M.m_2n_2n
-    mul!(M.m_2n_2n, ∇f_euc, p')
-
-    # (∇f_euc)' * Q -> M.m_2k_2n
-    M.m_2k_2n .= ∇f_euc'
-    rmul!(M.m_2k_2n, Q)
-
-    # ∇f_euc * p' .+ Q * p * (∇f_euc)' * Q -> C + A * B -> C
-    mul!(M.m_2n_2n, M.m_2n_2k, M.m_2k_2n, 1, 1)
-
-    # ∇f_man .= (∇f_euc * p' .+ Q * p * (∇f_euc)' * Q) * p
-    mul!(∇f_man, M.m_2n_2n, p)
-    return ∇f_man
 end
