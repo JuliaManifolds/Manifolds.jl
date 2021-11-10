@@ -452,6 +452,13 @@ function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where
     return SymplecticRetraction(M, p)(M, q, p, X)
 end
 
+function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+    # Define intermediate matrices for later use:
+    A = inv(M, p) * X
+    H = X .- p*A
+    q .= -p .+ (H + 2*p) / (I - A/2 .+ (inv(M, H)*H)/4)
+    return q
+end
 
 @doc raw"""
     inverse_retract!(::SymplecticStiefel, q, p, X, ::CayleyInverseRetraction)
