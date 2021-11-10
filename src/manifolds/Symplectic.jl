@@ -340,17 +340,11 @@ A^{+} =
 ````
 """
 function symplectic_inverse(::Symplectic{n, ℝ}, A) where {n}
-    # Allocate memory for A_star, the symplectic inverse:
-    A_star = similar(A)
+   return [A[(n+1):2n,(n+1):2n]' -A[1:n,(n+1):2n]'; -A[(n+1):2n, 1:n]' A[1:n, 1:n]']
+end
 
-    A_star[1:n, 1:n]           .= (A[(n+1):2n, (n+1):2n])'
-    A_star[(n+1):2n, (n+1):2n] .= (A[1:n, 1:n])'
-
-    # Invert sign and transpose off-diagonal blocks:
-    A_star[1:n, (n+1):2n] .=  (-1.0) .* A[1:n, (n+1):2n]'
-    A_star[(n+1):2n, 1:n] .=  (-1.0) .* A[(n+1):2n, 1:n]'
-
-    return A_star
+function symplectic_inverse!(::Symplectic{n, ℝ}, A) where {n}
+    return (A.= [A[(n+1):2n,(n+1):2n]' -A[1:n,(n+1):2n]'; -A[(n+1):2n, 1:n]' A[1:n, 1:n]'])
 end
 
 function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}

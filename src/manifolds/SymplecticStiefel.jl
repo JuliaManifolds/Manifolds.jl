@@ -265,17 +265,14 @@ end
 
 Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
 """
-function inner_old(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+function inner_old(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     # Need to do the same to this function, reduce allocations as much as possible:
     # This version is Benchmarked to use only two thirds the time of the previous inner-implementation.
     # We are only finding the LU-factorization of the (2k × 2k) matrix (p' * p).
-
     Q = SymplecticMatrix(p, X, Y)
-    Id = UniformScaling(one(eltype(p)))
-
-    # Perform LU-factorization before multiplication:
-    p_Tp = lu(p' * p)
-    return tr(X' * (Id - (1/2) * Q' * p * (p_Tp \ (p')) * Q) * (Y / p_Tp))
+    a = lu(p'*p)
+    b = Q'*p
+    return tr(X' * (Y/a)) - tr( (1/2) * X' * b * (a \ b')* (Y/a))
 end
 
 function inner(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
@@ -446,12 +443,10 @@ Formula due to Bendokat-Zimmermann Proposition 5.2.
 # We set (t=1), regulate by the norm of the tangent vector how far to move.
 """
 function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-    Id = UniformScaling(1)
-
     # Define intermediate matrices for later use:
     A = inv(M, p) * X
     H = X .- p*A
-    q .= -p .+ (H + 2*p) / (Id - A/2 .+ (inv(M, H)*H)/4)
+    q .= -p .+ (H + 2*p) / (I - A/2 .+ (inv(M, H)*H)/4)
     return q
 end
 
