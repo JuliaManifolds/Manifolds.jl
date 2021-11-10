@@ -478,7 +478,9 @@ function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) w
     #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
     A = symplectic_inverse_times(M, p, X)
     q .= X .- p*A
-    q .= -p .+ (q .+ 2*p) / (I - A./2 .+ symplectic_inverse_times(M, q, q)/4)
+    B = symplectic_inverse_times(M, q, q)
+    q .= q .+ 2*p
+    q .= -p .+  q / lu((I - A./2 .+ B/4))
     return q
 end
 
