@@ -450,18 +450,26 @@ function symplectic_inverse_times(M::SymplecticStiefel{n,k}, p, q) where {n,k}
 end
 function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k}
     # we write p = [p1 p2; p3 p4] (and q, too), then
-    # A1 = p4'q1 - p2'q3
-    A[1:k,1:k] .= p[(n+1):2n,(k+1):2k]'*q[1:n,1:k]
-    A[1:k,1:k] .-= p[1:n,(k+1):2k]'*q[(n+1):2n,1:k]
-    # A2 = p4'q2 - p2'q4
-    A[1:k,(k+1):2k] .= p[(n+1):2n,(k+1):2k]'*q[1:n,(k+1):2k]
-    A[1:k,(k+1):2k] .-= p[1:n,(k+1):2k]'*q[(n+1):2n,(k+1):2k]
-    # A3 = p1'q3 - p3'q1
-    A[(k+1):2k,1:k] .= p[1:n,1:k]'*q[(n+1):2n,1:k]
-    A[(k+1):2k,1:k] .-= p[(n+1):2n,1:k]'*q[1:n,1:k]
-    # A4 = p1'q4 - p3'q2
-    A[(k+1):2k,(k+1):2k] .= p[1:n,1:k]'*q[(n+1):2n,(k+1):2k]
-    A[(k+1):2k,(k+1):2k] .-= p[(n+1):2n,1:k]'*q[1:n,(k+1):2k]
+    p1 = @view(p[1:n,1:k])
+    p2 = @view(p[1:n,(k+1):2k])
+    p3 = @view(p[(n+1):2n,1:k])
+    p4 = @view(p[(n+1):2n,(k+1):2k])
+    q1 = @view(q[1:n,1:k])
+    q2 = @view(q[1:n,(k+1):2k])
+    q3 = @view(q[(n+1):2n,1:k])
+    q4 = @view(q[(n+1):2n,(k+1):2k])
+    A1 = @view(A[1:k,1:k])
+    A2 = @view(A[1:k,(k+1):2k])
+    A3 = @view(A[(k+1):2k,1:k])
+    A4 = @view(A[(k+1):2k,(k+1):2k])
+    mul!(A1, p4', q1) # A1 = p4'q1
+    mul!(A1, p2', q3, -1, 1) # A1 -= p2'p3
+    mul!(A2, p4', q2)
+    mul!(A2, p2', q4, -1, 1)
+    mul!(A3, p1', q3)
+    mul!(A3, p3', q1, -1, 1)
+    mul!(A4, p1', q4)
+    mul!(A4, p3', q2, -1, 1)
     return A
 end
 
