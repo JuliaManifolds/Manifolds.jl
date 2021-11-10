@@ -354,28 +354,16 @@ function inner_deprecated(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
 end
 
 function Base.inv(M::SymplecticStiefel{n, k}, p) where {n, k}
-    n_p, k_p = get_even_dims(p)
-    p_star = similar(p, (2k_p, 2n_p))
-    return inv!(M, p_star, p)
+    q = allocate_result(M, inv, p)'
+    return  inv!(M, q, p)
 end
 
-function inv!(::SymplecticStiefel, p_star, p)
-    n_p, k_p = get_even_dims(p)
-    k_star, n_star = get_even_dims(p_star)
-    @assert (n_p, k_p) == (n_star, k_star)
-    n, k = n_p, k_p
-
-    # New version, three times less allocations:
-
-    # Transfer diagonal blocks:
-    p_star[1:k, 1:n]           .= p[(n+1):2n, (k+1):2k]'
-    p_star[(k+1):2k, (n+1):2n] .= p[1:n, 1:k]'
-
-    # Invert sign and transpose off-diagonal blocks:
-    p_star[1:k, (n+1):2n] .=  (-1.0) .* p[1:n, (k+1):2k]'
-    p_star[(k+1):2k, 1:n] .=  (-1.0) .* p[(n+1):2n, 1:k]'
-
-    return p_star
+function inv!(::SymplecticStiefel{n,k}, q, p) where {n, k}
+    q[1:k, 1:n] .= p[(n+1):2n, (k+1):2k]'
+    q[1:k, (n+1):2n] .= -p[1:n, (k+1):2k]'
+    q[(k+1):2k, 1:n] .= -p[(n+1):2n, 1:k]'
+    q[(k+1):2k, (n+1):2n] .= p[1:n, 1:k]'
+    return q
 end
 
 
@@ -455,11 +443,34 @@ function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where
     return SymplecticRetraction(M, p)(M, q, p, X)
 end
 
+# compute p^+q (which is 2kx2k) in place of A
+function symplectic_inverse_times(M::SymplecticStiefel{n,k}, p, q) where {n,k}
+    A = similar(p, (2k,2k))
+    return symplectic_inverse_times!(M, A, p, q)
+end
+function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k}
+    # we write p = [p1 p2; p3 p4] (and q, too), then
+    # A1 = p4'q1 - p2'q3
+    A[1:k,1:k] .= p[(n+1):2n,(k+1):2k]'*q[1:n,1:k]
+    A[1:k,1:k] .-= p[1:n,(k+1):2k]'*q[(n+1):2n,1:k]
+    # A2 = p4'q2 - p2'q4
+    A[1:k,(k+1):2k] .= p[(n+1):2n,(k+1):2k]'*q[1:n,(k+1):2k]
+    A[1:k,(k+1):2k] .-= p[1:n,(k+1):2k]'*q[(n+1):2n,(k+1):2k]
+    # A3 = p1'q3 - p3'q1
+    A[(k+1):2k,1:k] .= p[1:n,1:k]'*q[(n+1):2n,1:k]
+    A[(k+1):2k,1:k] .-= p[(n+1):2n,1:k]'*q[1:n,1:k]
+    # A4 = p1'q4 - p3'q2
+    A[(k+1):2k,(k+1):2k] .= p[1:n,1:k]'*q[(n+1):2n,(k+1):2k]
+    A[(k+1):2k,(k+1):2k] .-= p[(n+1):2n,1:k]'*q[1:n,(k+1):2k]
+    return A
+end
+
 function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
     # Define intermediate matrices for later use:
-    A = inv(M, p) * X
-    H = X .- p*A
-    q .= -p .+ (H + 2*p) / (I - A/2 .+ (inv(M, H)*H)/4)
+    #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
+    A = symplectic_inverse_times(M, p, X)
+    q .= X .- p*A
+    q .= -p .+ (q .+ 2*p) / (I - A./2 .+ symplectic_inverse_times(M, q, q)/4)
     return q
 end
 
