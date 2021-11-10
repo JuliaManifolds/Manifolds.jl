@@ -44,14 +44,14 @@ inner(M, p, X, Y) - Manifolds.inner_old(M, p, X, Y)
 begin
 	Manifolds.retract_old!(M, q, p, X,m)
 	retract!(M, r, p, X,m)
-	norm(r-q)
+	norm(r-q) # since we do not have a distance, let's do the poor-mans check.
 end
 
 # ╔═╡ 2d30d83b-313e-4b06-aac8-1d2a236a4829
-@benchmark retract!(M, r, p, X,m)
+@benchmark retract!($M, $r, $p, $X, $m)
 
 # ╔═╡ 2a5fb247-20af-4e68-8a5e-d4dd18e2cc3c
-@benchmark Manifolds.retract_old!(M, q, p, X,m)
+@benchmark Manifolds.retract_old!($M, $q, $p, $X, $m)
 
 # ╔═╡ Cell order:
 # ╠═b9aec7da-4210-11ec-3f51-71546dd47b1d

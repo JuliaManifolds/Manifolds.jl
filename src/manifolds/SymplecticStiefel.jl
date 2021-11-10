@@ -289,7 +289,7 @@ function inner_old(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     Q = SymplecticMatrix(p, X, Y)
     a = lu(p'*p)
     b = Q'*p
-    return tr(X' * (Y/a)) - tr( (1/2) * X' * b * (a \ b')* (Y/a))
+    return tr(a\(Y'*X)) - tr( (1/2) * X' * b * (a \ b')* (Y/a))
 end
 
 function inner(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
