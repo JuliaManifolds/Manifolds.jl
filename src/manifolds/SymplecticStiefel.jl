@@ -283,13 +283,16 @@ end
 Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
 """
 function inner_old(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
-    # Need to do the same to this function, reduce allocations as much as possible:
-    # This version is Benchmarked to use only two thirds the time of the previous inner-implementation.
-    # We are only finding the LU-factorization of the (2k × 2k) matrix (p' * p).
     Q = SymplecticMatrix(p, X, Y)
-    a = lu(p'*p)
+    # Procompute lu(p'p) since we solve a^{-1}* 3 times
+    a = lu(p'*p) # note that p'p is symmetric so is its inverse c=a^{-1}
     b = Q'*p
-    return tr(a\(Y'*X)) - tr( (1/2) * X' * b * (a \ b')* (Y/a))
+    # we split the original trace into two one with I->(X'Yc)
+    # and the other with 1/2 X'b c b' Y c
+    # a) we permute X' and Y c to c^TY^TX = a\(Y'X) (avoids a large interims matrix)
+    # b) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
+    # and (b'X) again avoids a large interims matrix, so does Y'b.
+    return tr(a\(Y'*X)) - tr( 1/2 * ( a\( (Y' * b) * (a \ (b' * X)) ) ) )
 end
 
 function inner(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
