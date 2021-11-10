@@ -34,7 +34,7 @@ end
     You are given a manifold of embedding dimension 2nX2n.
 """
 Symplectic(n::Int, field::AbstractNumbers=ℝ) = begin
-    Symplectic{n, field}()
+    Symplectic{div(n, 2), field}()
 end
 
 decorated_manifold(::Symplectic{n, ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
