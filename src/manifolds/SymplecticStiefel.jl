@@ -359,13 +359,29 @@ function Base.inv(M::SymplecticStiefel{n, k}, p) where {n, k}
 end
 
 function inv!(::SymplecticStiefel{n,k}, q, p) where {n, k}
+    # still does 4 allocations.
+    p1 = @view(p[1:n, 1:k])
+    p2 = @view(p[1:n, (k+1):2k])
+    p3 = @view(p[(n+1):2n, 1:k])
+    p4 = @view(p[(n+1):2n, (k+1):2k])
+    q1 = @view(q[1:k, 1:n])
+    q2 = @view(q[1:k, (n+1):2n])
+    q3 = @view(q[(k+1):2k, 1:n])
+    q4 = @view(q[(k+1):2k, (n+1):2n])
+    copyto!(q1,p4')
+    copyto!(q2,-p2')
+    copyto!(q3,-p3')
+    copyto!(q4,p1')
+    return q
+end
+
+function old_inv!(::SymplecticStiefel{n,k}, q, p) where {n, k}
     q[1:k, 1:n] .= p[(n+1):2n, (k+1):2k]'
     q[1:k, (n+1):2n] .= -p[1:n, (k+1):2k]'
     q[(k+1):2k, 1:n] .= -p[(n+1):2n, 1:k]'
     q[(k+1):2k, (n+1):2n] .= p[1:n, 1:k]'
     return q
 end
-
 
 @doc raw"""
     change_representer!(::SymplecticStiefel{n, k}, Y, ::EuclideanMetric, p, X)
@@ -477,10 +493,10 @@ function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) w
     # Define intermediate matrices for later use:
     #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
     A = symplectic_inverse_times(M, p, X)
-    q .= X .- p*A
-    B = symplectic_inverse_times(M, q, q)
-    q .= q .+ 2*p
-    q .= -p .+  q / lu((I - A./2 .+ B/4))
+    q .= X .- p*A # H in BZ21
+    A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 #-A/2 + H^+H/4
+    q .= q .+ 2 .* p
+    q .= -p .+ q / lu((I + A))
     return q
 end
 

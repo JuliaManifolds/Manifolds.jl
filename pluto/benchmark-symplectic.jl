@@ -8,7 +8,7 @@ using InteractiveUtils
 begin
 	using Pkg
 	 Pkg.activate()# use global environment to have Manifolds in dev mode
-	using Manifolds, PlutoUI, BenchmarkTools, Random
+	using Manifolds, PlutoUI, BenchmarkTools, Random, Revise
 end
 
 # ╔═╡ aaed81b5-c309-4c7d-98b5-842113e92b36
@@ -53,6 +53,21 @@ end
 # ╔═╡ 2a5fb247-20af-4e68-8a5e-d4dd18e2cc3c
 @benchmark Manifolds.retract_old!($M, $q, $p, $X, $m)
 
+# ╔═╡ 73f1adf0-5c71-484c-b467-e4dd15911c0e
+invp = similar(p');
+
+# ╔═╡ 43e60e53-1924-4d65-8474-ba8051e3cc89
+@benchmark inv!($M, $invp, $p)
+
+# ╔═╡ 3d325328-123b-46cc-8cbc-e7c09be71bc0
+invp2 = similar(p');
+
+# ╔═╡ 556cfbc7-5c04-429e-ac7e-78b658ad9c7a
+@benchmark Manifolds.old_inv!($M, $invp2, $p)
+
+# ╔═╡ 8c2035c0-e8b7-4fd3-818e-cbbce4312765
+norm(invp-invp2)
+
 # ╔═╡ Cell order:
 # ╠═b9aec7da-4210-11ec-3f51-71546dd47b1d
 # ╠═aaed81b5-c309-4c7d-98b5-842113e92b36
@@ -64,3 +79,8 @@ end
 # ╠═a7b1061a-1c5a-40c8-81f9-3d77f6530abe
 # ╠═2d30d83b-313e-4b06-aac8-1d2a236a4829
 # ╠═2a5fb247-20af-4e68-8a5e-d4dd18e2cc3c
+# ╠═73f1adf0-5c71-484c-b467-e4dd15911c0e
+# ╠═43e60e53-1924-4d65-8474-ba8051e3cc89
+# ╠═3d325328-123b-46cc-8cbc-e7c09be71bc0
+# ╠═556cfbc7-5c04-429e-ac7e-78b658ad9c7a
+# ╠═8c2035c0-e8b7-4fd3-818e-cbbce4312765
