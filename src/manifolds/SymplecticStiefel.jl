@@ -493,11 +493,15 @@ end
 function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
     # Define intermediate matrices for later use:
     #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
-    A = symplectic_inverse_times(M, p, X)
+    p_plus = inv(M, p)
+    A = p_plus*X
     q .= X .- p*A # H in BZ21
-    A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 #-A/2 + H^+H/4
+    #A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 , i.e. -A/2 + H^+H/4
+    mul!(A, inv!(M,p_plus,p), q, 0.25, -0.5) #-A/2 + H^+H/4
     q .= q .+ 2 .* p
-    q .= -p .+ q / lu((I + A))
+    add_scaled_I!(A, 1.0)
+    r = lu!(A)
+    q .= -p .+ rdiv!(q, r)
     return q
 end
 
