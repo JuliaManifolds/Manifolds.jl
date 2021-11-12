@@ -303,7 +303,7 @@ function add_scaled_I!(A::AbstractMatrix, λ::Number)
 end
 
 @doc raw"""
-    symplectic_inverse(M::Symplectic{n, ℝ}, A) where {n, ℝ}
+    inv(M::Symplectic{n, ℝ}, A) where {n, ℝ}
 
 Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2n}``, returning the result.
 ````math
@@ -336,11 +336,57 @@ A^{+} =
 \end{bmatrix}
 ````
 """
-function symplectic_inverse(::Symplectic{n, ℝ}, A) where {n}
+function inv(::Symplectic{n, ℝ}, A) where {n}
+    Ai = similar(A)
+    checkbounds(A, 1:2n, 1:2n)
+    @inbounds for i in 1:n, j in 1:n
+        Ai[i, j] = A[j+n, i+n]
+    end
+    @inbounds for i in 1:n, j in 1:n
+        Ai[i+n, j] = -A[j+n, i]
+    end
+    @inbounds for i in 1:n, j in 1:n
+        Ai[i, j+n] = -A[j, i+n]
+    end
+    @inbounds for i in 1:n, j in 1:n
+        Ai[i+n, j+n] = A[j, i]
+    end
+    return Ai
+end
+
+function inv!(::Symplectic{n, ℝ}, A) where {n}
+    checkbounds(A, 1:2n, 1:2n)
+    @inbounds for i in 1:n, j in 1:n
+        tmp = A[i, j]
+        A[i, j] = A[j+n, i+n]
+        A[j+n, i+n] = tmp
+    end
+    @inbounds for i in 1:n, j in i:n
+        if i == j
+            A[i, j+n] = -A[i, j+n]
+        else
+            tmp = A[i, j+n]
+            A[i, j+n] = -A[j, i+n]
+            A[j, i+n] = -tmp
+        end
+    end
+    @inbounds for i in 1:n, j in i:n
+        if i == j
+            A[i+n, j] = -A[i+n, j]
+        else
+            tmp = A[i+n, j]
+            A[i+n, j] = -A[j+n, i]
+            A[j+n, i] = -tmp
+        end
+    end
+    return A
+end
+
+function symplectic_inverse_old(::Symplectic{n, ℝ}, A) where {n}
    return [A[(n+1):2n,(n+1):2n]' -A[1:n,(n+1):2n]'; -A[(n+1):2n, 1:n]' A[1:n, 1:n]']
 end
 
-function symplectic_inverse!(::Symplectic{n, ℝ}, A) where {n}
+function symplectic_inverse_old!(::Symplectic{n, ℝ}, A) where {n}
     return (A.= [A[(n+1):2n,(n+1):2n]' -A[1:n,(n+1):2n]'; -A[(n+1):2n, 1:n]' A[1:n, 1:n]'])
 end
 
@@ -536,6 +582,3 @@ function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
     X .= 2 .* ((p / V_inv .- p / U_inv) + ((p .+ q) / U_inv) .- p)
     return X
 end
-
-# Check vector, check point For Symplectic Stiefel.
-# Retract, Inverse-retract for Stiefel.
