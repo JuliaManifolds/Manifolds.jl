@@ -354,24 +354,25 @@ function inner_deprecated(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
 end
 
 function Base.inv(M::SymplecticStiefel{n, k}, p) where {n, k}
-    q = allocate_result(M, inv, p)'
-    return  inv!(M, q, p)
+    q = similar(p')
+    inv!(M, q, p)
 end
 
 function inv!(::SymplecticStiefel{n,k}, q, p) where {n, k}
-    # still does 4 allocations.
-    p1 = @view(p[1:n, 1:k])
-    p2 = @view(p[1:n, (k+1):2k])
-    p3 = @view(p[(n+1):2n, 1:k])
-    p4 = @view(p[(n+1):2n, (k+1):2k])
-    q1 = @view(q[1:k, 1:n])
-    q2 = @view(q[1:k, (n+1):2n])
-    q3 = @view(q[(k+1):2k, 1:n])
-    q4 = @view(q[(k+1):2k, (n+1):2n])
-    copyto!(q1,p4')
-    copyto!(q2,-p2')
-    copyto!(q3,-p3')
-    copyto!(q4,p1')
+    checkbounds(q, 1:2k, 1:2n)
+    checkbounds(p, 1:2n, 1:2k)
+    @inbounds for i in 1:k, j in 1:n
+        q[i, j] = p[j+n, i+k]
+    end
+    @inbounds for i in 1:k, j in 1:n
+        q[i, j+n] = -p[j, i+k]
+    end
+    @inbounds for i in 1:k, j in 1:n
+        q[i+k, j] = -p[j+n, i]
+    end
+    @inbounds for i in 1:k, j in 1:n
+        q[i+k, j+n] = p[j, i]
+    end
     return q
 end
 

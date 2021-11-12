@@ -336,7 +336,7 @@ A^{+} =
 \end{bmatrix}
 ````
 """
-function inv(::Symplectic{n, ℝ}, A) where {n}
+function Base.inv(::Symplectic{n, ℝ}, A) where {n}
     Ai = similar(A)
     checkbounds(A, 1:2n, 1:2n)
     @inbounds for i in 1:n, j in 1:n
