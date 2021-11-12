@@ -555,6 +555,12 @@ function grad_euclidian_to_manifold(::SymplecticStiefel, p, ∇f_euc)
     return ∇f_euc * (p' * p)  .+ Q * p * (∇f_euc' * Q * p)
 end
 
+function grad_euclidian_to_manifold_old!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
+    Q = SymplecticMatrix(p, ∇f_euc)
+    ∇f_man .= (∇f_euc * p' .+ Q * p * (∇f_euc)' * Q) * p
+    return ∇f_man
+end
+
 function grad_euclidian_to_manifold!(M::SymplecticStiefel, ∇f_man, p, ∇f_euc)
     SymplecticGrad(M, p)(M, ∇f_man, p, ∇f_euc)
 end
