@@ -6,7 +6,7 @@ include("group_utils.jl")
     @test repr(G) == "SpecialOrthogonal(3)"
     M = base_manifold(G)
     @test M === Rotations(3)
-    x = Matrix(I, 3, 3)
+    p = Matrix(I, 3, 3)
 
     @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
     @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
@@ -24,8 +24,8 @@ include("group_utils.jl")
 
     types = [Matrix{Float64}]
     ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
-    pts = [exp(M, x, hat(M, x, ωi)) for ωi in ω]
-    vpts = [hat(M, x, [-1.0, 2.0, 0.5]), hat(M, x, [1.0, 0.0, 0.5])]
+    pts = [exp(M, p, hat(M, p, ωi)) for ωi in ω]
+    Xpts = [hat(M, p, [-1.0, 2.0, 0.5]), hat(M, p, [1.0, 0.0, 0.5])]
 
     ge = allocate(pts[1])
     identity_element!(G, ge)
@@ -41,7 +41,7 @@ include("group_utils.jl")
 
     for T in types
         gpts = convert.(T, pts)
-        vgpts = convert.(T, vpts)
+        vgpts = convert.(T, Xpts)
         @test compose(G, gpts[1], gpts[2]) ≈ gpts[1] * gpts[2]
         @test translate_diff(G, gpts[2], gpts[1], vgpts[1], LeftAction()) ≈ vgpts[1]
         @test translate_diff(G, gpts[2], gpts[1], vgpts[1], RightAction()) ≈
@@ -63,7 +63,7 @@ include("group_utils.jl")
         @test (@inferred Manifolds.decorator_group_dispatch(DM)) === Val(true)
         @test Manifolds.is_group_decorator(DM)
         @test base_group(DM) === G
-        test_group(DM, pts, vpts, vpts; test_diff=true)
+        test_group(DM, pts, Xpts, Xpts; test_diff=true)
     end
 
     @testset "Group forwards to decorated" begin
@@ -102,18 +102,18 @@ include("group_utils.jl")
               injectivity_radius(M, pts[1], PolarRetraction())
 
         y = allocate(pts[1])
-        exp!(G, y, pts[1], vpts[1])
-        @test isapprox(M, y, exp(M, pts[1], vpts[1]))
+        exp!(G, y, pts[1], Xpts[1])
+        @test isapprox(M, y, exp(M, pts[1], Xpts[1]))
 
         y = allocate(pts[1])
-        retract!(G, y, pts[1], vpts[1])
-        @test isapprox(M, y, retract(M, pts[1], vpts[1]))
+        retract!(G, y, pts[1], Xpts[1])
+        @test isapprox(M, y, retract(M, pts[1], Xpts[1]))
 
-        w = allocate(vpts[1])
+        w = allocate(Xpts[1])
         inverse_retract!(G, w, pts[1], pts[2])
         @test isapprox(M, pts[1], w, inverse_retract(M, pts[1], pts[2]))
 
-        w = allocate(vpts[1])
+        w = allocate(Xpts[1])
         inverse_retract!(G, w, pts[1], pts[2], QRInverseRetraction())
         @test isapprox(
             M,
@@ -130,7 +130,7 @@ include("group_utils.jl")
     end
 
     @testset "vee/hat" begin
-        X = vpts[1]
+        X = Xpts[1]
         pe = Identity(G)
 
         Xⁱ = vee(G, identity_element(G), X)
@@ -163,5 +163,12 @@ include("group_utils.jl")
         @test isone(q)
         e2 = Identity(G)
         @test mul!(e2, e, e) === e2
+    end
+
+    @testset "differentials" begin
+        lged0 = Manifolds.LieGroupExpDiffArgumentApprox(0)
+        q2 = exp(G, pts[1], Xpts[2])
+        @test isapprox(G, q2, Manifolds.retract_diff_argument(G, pts[1], Xpts[1], Xpts[2], lged0), Xpts[2])
+
     end
 end

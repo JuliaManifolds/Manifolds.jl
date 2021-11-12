@@ -160,9 +160,21 @@ function retract_diff_argument!(
     p,
     X,
     Y,
-    ::LieGroupExpDiffArgumentApprox,
+    m::LieGroupExpDiffArgumentApprox,
 )
-    return copyto!(M, Z, p, Y)
+    tmp = copy(M, p, Y)
+    a = -1.0
+    zero_vector!(M, p, Z)
+    for k in 0:m.n
+        a *= -1 // (k+1)
+        Z .+= a .* tmp
+        if k < m.n
+            copyto!(tmp, lie_bracket(M, X, tmp))
+        end
+    end
+    q = exp(M, p, X)
+    translate_diff!(M, Z, q, Identity(M), Z)
+    return Z
 end
 
 """
@@ -230,6 +242,10 @@ Note that through the isomorphism ``Y ∈ T_X(T_p\mathcal M) = T_p\mathcal M`` t
 """
 function retract_diff_argument(M::AbstractManifold, p, X, Y, m::AbstractRetractionMethod)
     return retract_diff_argument(M, p, X, Y, default_retract_diff_argument_method(M, m))
+end
+function retract_diff_argument(M::AbstractManifold, p, X, Y, m::AbstractRetractionDiffArgumentMethod)
+    Z = allocate_result(M, retract_diff_argument, Y, X)
+    return retract_diff_argument!(M, Z, p, X, Y, m)
 end
 
 function retract_diff_argument!(
