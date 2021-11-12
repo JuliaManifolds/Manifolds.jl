@@ -252,7 +252,6 @@ function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractMatrix)
     half_row_p = similar(p, TS, (n, 2k))
     half_row_p[1:n, :] .= p[1:n, :]
 
-    # Perform left mulitply by λ*Q:
     p[1:n, :] .= (Q.λ) .* p[(n+1):end, :]
     p[(n+1):end, :] .= (-Q.λ) .* half_row_p[1:n, :]
 
@@ -282,16 +281,16 @@ end
 function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractMatrix, Q::SymplecticMatrix)
     _, k = get_even_dims(p)
     # Perform right mulitply by λ*Q:
-    A[:, 1:k] = (-Q.λ).*p[:, (k+1):end]
-    A[:, (k+1):end] = (Q.λ) .* half_col_p[:, 1:k]
+    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n+1):lastindex(p, 1), :))
+    mul!((@inbounds view(A, (n+1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
     return A
 end
 
 function LinearAlgebra.mul!(A::AbstractMatrix, Q::SymplecticMatrix, p::AbstractMatrix)
     n, _ = get_even_dims(p)
     # Perform right mulitply by λ*Q:
-    A[1:n, :] = (Q.λ) .* p[(n+1):end, :]
-    A[(n+1):end, :] = (-Q.λ) .* half_row_p[1:n, :]
+    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n+1):lastindex(p, 1), :))
+    mul!((@inbounds view(A, (n+1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
     return A
 end
 
