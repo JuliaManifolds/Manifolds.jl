@@ -216,33 +216,31 @@ end
 (Base.:-)(p::AbstractMatrix, Q::SymplecticMatrix) = p + (-Q)
 
 function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
-    _, k = get_even_dims(p)
+    _, k = Manifolds.get_even_dims(p)
 
     # Allocate new memory:
-    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    TS = typeof(one(eltype(p)) + one(eltype(Q)))
     pQ = similar(p, TS)
 
     # Perform right mulitply by λ*Q:
-    pQ[:, 1:k] .= (-Q.λ) * p[:, (k+1):end]
-    pQ[:, (k+1):end] .= (Q.λ) * p[:, 1:k]
-
+    mul!((@inbounds view(pQ, :, 1:k)), -Q.λ, @inbounds view(p, :, (k+1):lastindex(p, 2)))
+    mul!((@inbounds view(pQ, :, (k+1):lastindex(pQ, 2))), Q.λ, @inbounds view(p, :, 1:k))
     return pQ
 end
 
 function (Base.:*)(Q::SymplecticMatrix, p::AbstractMatrix)
-    n, _ = get_even_dims(p)
+    n, _ = Manifolds.get_even_dims(p)
 
     # Allocate new memory:
-    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    TS = typeof(one(eltype(p)) + one(eltype(Q)))
     Qp = similar(p, TS)
 
     # Perform left mulitply by λ*Q:
-    Qp[1:n, :] .= (Q.λ) * p[(n+1):end, :]
-    Qp[(n+1):end, :] .= (-Q.λ) * p[1:n, :]
+    mul!((@inbounds view(Qp, 1:n, :)), Q.λ, @inbounds view(p, (n+1):lastindex(p, 1), :))
+    mul!((@inbounds view(Qp, (n+1):lastindex(Qp, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
 
     return Qp
 end
-
 
 function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractMatrix)
     # Perform left multiplication by a symplectic matrix,
