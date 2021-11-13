@@ -497,11 +497,11 @@ function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) w
     A = p_plus*X
     q .= X .- p*A # H in BZ21
     #A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 , i.e. -A/2 + H^+H/4
-    mul!(A, inv!(M,p_plus,p), q, 0.25, -0.5) #-A/2 + H^+H/4
+    mul!(A, p_plus, q, 0.25, -0.5) #-A/2 + H^+H/4
     q .= q .+ 2 .* p
-    add_scaled_I!(A, 1.0)
+    Manifolds.add_scaled_I!(A, 1.0)
     r = lu!(A)
-    q .= -p .+ rdiv!(q, r)
+    q .= (-).(p) .+ rdiv!(q, r)
     return q
 end
 
