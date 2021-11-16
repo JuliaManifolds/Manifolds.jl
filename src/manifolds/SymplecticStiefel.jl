@@ -97,16 +97,6 @@ function inner(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     return return tr(a\(Y'*X)) - 1/2 * tr( a\( (Y' * b) * (a \ (b' * X)) ) )
 end
 
-function inner_git(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
-    # Retrieved from earlier commit.
-    # This version is Benchmarked to use only two thirds the time of the previous inner-implementation.
-    # We are only finding the LU-factorization of the (2k × 2k) matrix (p' * p).
-    Q = SymplecticMatrix(p, X, Y)
-    I = UniformScaling(2n)
-    # Perform LU-factorization before multiplication:
-    p_Tp = lu(p' * p)
-    return tr(X' * (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) * (Y / p_Tp))
-end
 
 function Base.inv(M::SymplecticStiefel{n, k}, p) where {n, k}
     q = similar(p')
@@ -259,48 +249,6 @@ Formula due to Bendokat-Zimmermann Proposition 5.2.
 
 # We set (t=1), regulate by the norm of the tangent vector how far to move.
 """
-function retract_copy!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-    # Easy solution to avoide overwriting, simply copy the incoming point:
-    p_copy = deepcopy(p)
-
-    # Define intermediate matrices for later use:
-    # A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
-    # A = inv(M, p)*X
-    A = symplectic_inverse_times(M, p, X)
-    q .= X .- p_copy*A # H in BZ21
-
-    #A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 , i.e. -A/2 + H^+H/4
-    mul!(A, inv(M, q), q, 0.25, -0.5)
-
-    q .= q .+ 2 .* p_copy
-    Manifolds.add_scaled_I!(A, 1.0)
-    r = lu!(A)
-    q .= (-).(p_copy) .+ rdiv!(q, r)
-
-    return q
-end
-
-function retract_safe_2!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-    # This 'safe_2' allocates ca. 25% more memory.
-
-    # Define intermediate matrices for later use:
-    # A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
-    # A = symplectic_inverse_times(M, p, X)
-    A = inv(M, p) * X  # Benchmarks faster this way instead of "symplectic_inverse_times".
-
-    H = X .- p*A  # H in BZ21, allocates (2n × 2k). (As much as copying p)
-
-    # I + (H^+ * H)/4 - A/2 -> A
-    mul!(A, inv(M, H), H, 0.25, -0.5)
-    Manifolds.add_scaled_I!(A, 1.0)
-
-    # Reuse 'H' memory:
-    H .= H .+ (2 .* p)
-    r = lu!(A)
-    q .= (-).(p) .+ rdiv!(H, r)
-    return q
-end
-
 function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
     # This 'safe' method uses 2/3 the allocations of 'safe_2',
 
@@ -320,11 +268,6 @@ function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where
     q .= (-).(p) .+ rdiv!(H, r)
     return q
 end
-
-
-# function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-
-# end
 
 @doc raw"""
     inverse_retract!(::SymplecticStiefel, q, p, X, ::CayleyInverseRetraction)
