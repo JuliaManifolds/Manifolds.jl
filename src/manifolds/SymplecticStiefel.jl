@@ -1,192 +1,15 @@
 @doc raw"""
-Working memory for SymplecticStiefel Exp (Retraction).
-"""
-struct SymplecticRetraction{T <:AbstractMatrix}
-    m_2k_2k::T
-    m_2n_2k::T
-    m_2k_2n::T
-end
-
-@doc raw"""
-Working memory for SymplecticStiefel Inner product.
-"""
-struct SymplecticInner{T<:AbstractMatrix}
-    m_2k_2k::T
-    m_2n_2k::T
-    m_2k_2n::T
-end
-
-@doc raw"""
-Working memory for SymplecticStiefel Gradient Conversion.
-"""
-struct SymplecticGrad{T<:AbstractMatrix}
-    m_2k_2k::T
-    m_2n_2k::T
-    m_2k_2n::T
-end
-
-#=
-# TODO: Store all matrices in a single struct like this, and store a single
-#       instance of this struct in the SymplecticStiefel manifold. which
-#       only gets populated with memory if any functions needing it are called.
-struct SymplecticStorage{T<:AbstractMatrix}
-    m_2k_2k::T
-    m_2n_2k::T
-    m_2k_2n::T
-end
-=#
-
-@doc raw"""
 The Symplectic Stiefel manifold. Each element represent a Symplectic Subspace of ``ℝ^{2n × 2k}``.
 """
-mutable struct SymplecticStiefel{n, k, 𝔽, T} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
-    # May have to specify type of 'points' and eltype {S, T <: AbstractMatrix{<:S}}
-    # To avoid type instability.
-    symplectic_retraction::SymplecticRetraction{T}
-    symplectic_inner::SymplecticInner{T}
-    symplectic_grad::SymplecticGrad{T}
-    # mem::SymplecticStorage{T}
-
-    function SymplecticStiefel{n, k, 𝔽, T}() where {n, k, 𝔽, T}
-        return new{n, k, 𝔽, T}()
-    end
+struct SymplecticStiefel{n, k, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 end
-
-function SymplecticInner(M::SymplecticStiefel{n, k}, p::T) where {n, k, S, T<:AbstractMatrix{<:S}}
-    isdefined(M, :symplectic_inner) && return M.symplectic_inner
-    TS = eltype(p)
-    M.symplectic_inner = SymplecticInner{T}(zeros(TS, 2k, 2k),
-                                            zeros(TS, 2n, 2k),
-                                            zeros(TS, 2k, 2n))
-    return M.symplectic_inner
-end
-
-function (F::SymplecticInner)(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
-    # Rewritten like the 'new' inner_old() by Ronny Bergmann:
-    Q = SymplecticMatrix(p, X, Y)
-
-    # Perform LU-factorization before multiplication:
-    F.m_2k_2k .= p' * p
-    p_Tp = lu(F.m_2k_2k) # Allocate (2k × 2k) Matrix
-
-    #### F.m_2k_2k now available for use.
-
-    # Compute first trace: tr((p^T * p)^{-1} * (Y^T * X) )
-    # p_Tp \ (Y' * X) -> F.m_2k_2k
-    temp_2k_2k = Y' * X
-    ldiv!(F.m_2k_2k, p_Tp, temp_2k_2k)
-
-    first_trace = tr(F.m_2k_2k)
-
-    #### F.m_2k_2k, temp_2k_2k now available for use.
-
-    # Construct b = Q' * p:
-    F.m_2n_2k .= p
-    lmul!(Q', F.m_2n_2k)
-
-    # Work "inside-out":
-    # b' * X -> F.m_2k_2k
-    mul!(F.m_2k_2k, F.m_2n_2k', X)
-
-    # (p_Tp)^{-1}*F.m_2k_2k -> F.m_2k_2k
-    ldiv!(p_Tp, F.m_2k_2k)
-
-    # Compute (Y' * b)*((p_Tp)^{-1}*(b' * X)) -> temp_2k_2k
-    mul!(temp_2k_2k, Y' * F.m_2n_2k, F.m_2k_2k)  # Allocates (2k × 2k).
-
-    # (p_Tp)^{-1}*temp_2k_2k -> temp_2k_2k
-    ldiv!(p_Tp, temp_2k_2k)
-
-    second_trace = tr(temp_2k_2k)
-
-    return first_trace - (1/2)*second_trace
-end
-
-function SymplecticRetraction(M::SymplecticStiefel{n, k}, p::T) where {n, k, S, T<:AbstractMatrix{<:S}}
-    isdefined(M, :symplectic_retraction) && return M.symplectic_retraction
-    TS = eltype(p)
-    M.symplectic_retraction = SymplecticRetraction{T}(zeros(TS, 2k, 2k),
-                                                      zeros(TS, 2n, 2k),
-                                                      zeros(TS, 2k, 2n))
-    return M.symplectic_retraction
-end
-
-function (F::SymplecticRetraction)(M::SymplecticStiefel{n, k}, q, p, X) where {n, k}
-    # The new one!
-    # About half to a third as much allocation done here:
-    # Believe this version of inv!(M, q, p) is the fastets:
-    F.m_2k_2k .= inv!(M, F.m_2k_2n, p) * X
-    F.m_2n_2k .= X .- p*F.m_2k_2k
-
-    # Make the 'dividend' and store into 'M.retr_A' using
-    # the five-argument version of 'mul!()':
-    # (-0.5*retr_A + 0.25*inv(M, M.retr_H)*M.retr_H -> retr_A.
-    mul!(F.m_2k_2k, inv!(M, F.m_2k_2n, F.m_2n_2k), F.m_2n_2k, 0.25, -0.5)
-    add_scaled_I!(F.m_2k_2k, 1.0)
-
-    # lu! Should not allocate new memory. Overwrites F.m_2k_2k
-    factored_dividend = lu!(F.m_2k_2k)
-
-    # Add two copies of p to F.m_2n_2k:
-    F.m_2n_2k .+= 2*p
-
-    q .= ((-1.0) .* p) .+ rdiv!(F.m_2n_2k, factored_dividend)
-    return q
-end
-
-
-function SymplecticGrad(M::SymplecticStiefel{n, k}, p::T) where {n, k, S, T<:AbstractMatrix{<:S}}
-    isdefined(M, :symplectic_grad) && return M.symplectic_grad
-    TS = eltype(p)
-    M.symplectic_grad = SymplecticGrad{T}(zeros(TS, 2k, 2k),
-                                          zeros(TS, 2n, 2k),
-                                          zeros(TS, 2k, 2n))
-    return M.symplectic_grad
-end
-
-
-function (F::SymplecticGrad)(M::SymplecticStiefel, ∇f_man, p, ∇f_euc)
-    Q = SymplecticMatrix(p, ∇f_euc)
-
-    # Avoid constructing 2n × 2n matrices.
-    # grad_F = (∇F * p' * p) + (Q * p * ∇F' * Q * p)
-
-    ### First term:
-    # p' * p -> F.m_2k_2k
-    mul!(F.m_2k_2k, p', p)
-    # ∇F * (p' * p) -> ∇f_man
-    mul!(∇f_man, ∇f_euc, F.m_2k_2k)
-
-    ### Second term:
-    # Q * p -> F.m_2n_2k
-    F.m_2n_2k .= p
-    lmul!(Q, F.m_2n_2k)
-
-    # ∇F' * (Q * p) -> F.m_2k_2k
-    mul!(F.m_2k_2k, ∇f_euc', F.m_2n_2k)
-
-    # p * (∇F' * Q * p) -> F.m_2n_2k
-    mul!(F.m_2n_2k, p, F.m_2k_2k)
-    # Q * (p * ∇F' * Q * p) -> F.m_2n_2k
-    lmul!(Q, F.m_2n_2k)
-
-    # ∇f_man .= ∇f_euc * p' * p .+ Q * p * (∇f_euc)' * Q * p
-    ∇f_man .+= F.m_2n_2k
-    return ∇f_man
-end
-
 
 @doc raw"""
     You are given a manifold of embedding dimension two_n × two_p.
     # Tried to type the fields being stored in SymplecticStiefel as well.
 """
-function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ,
-                           T::Type=Matrix{Float64})
-    SymplecticStiefel{div(two_n, 2), div(two_k, 2), field, T}()
-end
-
-function SymplecticStiefel(two_n::Int, two_k::Int, ::T) where {T <: AbstractMatrix}
-    SymplecticStiefel{div(two_n, 2), div(two_k, 2), ℝ, T}()
+function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
+    SymplecticStiefel{div(two_n, 2), div(two_k, 2), field}()
 end
 
 Base.show(io::IO, ::SymplecticStiefel{n, k}) where {n, k} = print(io, "SymplecticStiefel{$(2n), $(2k)}()")
@@ -258,10 +81,10 @@ end
 
 Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
 """
-function inner_old(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+function inner(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     Q = SymplecticMatrix(p, X, Y)
     # Procompute lu(p'p) since we solve a^{-1}* 3 times
-    a = lu(p'*p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
+    a = lu(p' * p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
     b = Q'*p
     # we split the original trace into two one with I->(X'Yc)
     # and the other with 1/2 X'b c b' Y c
@@ -269,64 +92,6 @@ function inner_old(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     # b) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
     # and (b'X) again avoids a large interims matrix, so does Y'b.
     return tr(a\(Y'*X)) - tr( 1/2 * ( a\( (Y' * b) * (a \ (b' * X)) ) ) )
-end
-
-function inner(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
-    return SymplecticInner(M, p)(M, p, X, Y)
-end
-
-function inner_deprecated(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
-    # The new one!
-    # Need to do the same to this function, reduce allocations as much as possible:
-
-    # Avoid constructing the (2n, 2n) matrix.
-    Q = SymplecticMatrix(p, X, Y)
-
-    # Perform LU-factorization before multiplication:
-    M.m_2k_2k .= p' * p
-    p_Tp = lu!(M.m_2k_2k)
-
-    # p_Tp \ (p') -> M.m_2k_2n:
-    ldiv!(M.m_2k_2n, p_Tp, p')
-
-    # Construct inner matrix:
-    # (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q)
-
-    # Copy p -> M.m_2n_2k:
-    M.m_2n_2k .= p
-    # (-1/2)*Q'*p -> M.m_2n_2k
-    lmul!((-1/2) * Q', M.m_2n_2k)
-
-    # (p_Tp \ (p')) * Q -> M.m_2k_2n
-    rmul!(M.m_2k_2n, Q)
-
-    mul!(M.m_2n_2n, M.m_2n_2k, M.m_2k_2n)
-    add_scaled_I!(M.m_2n_2n, 1.0)
-
-    ########################################################
-    #### M.m_2n_2k and M.m_2k_2n now available for use. ####
-    ########################################################
-
-    # println("Inner matrix:")
-    # display(M.m_2n_2n)
-
-    # Use the p_Tp-memory for the requred solve:
-    # Y / p_Tp -> M.m_2n_2k / p_Tp -> M.m_2n_2k
-    M.m_2n_2k .= Y
-    rdiv!(M.m_2n_2k, p_Tp)
-
-    ##########################################
-    #### M.m_2k_2k now available for use. ####
-    ##########################################
-
-    # X' * (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) -> M.m_2k_2n
-    mul!(M.m_2k_2n, X', M.m_2n_2n)
-
-    # Lastly: X' * (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) * (Y / p_Tp) -> M.m_2k_2k
-    # Compute tr(A'*B) with for-loops? Saves this computation.
-
-    mul!(M.m_2k_2k, M.m_2k_2n, M.m_2n_2k)
-    return tr(M.m_2k_2k)
 end
 
 function Base.inv(M::SymplecticStiefel{n, k}, p) where {n, k}
@@ -348,14 +113,6 @@ function inv!(::SymplecticStiefel{n,k}, q, p) where {n, k}
     copyto!(q2,-p2')
     copyto!(q3,-p3')
     copyto!(q4,p1')
-    return q
-end
-
-function old_inv!(::SymplecticStiefel{n,k}, q, p) where {n, k}
-    q[1:k, 1:n] .= p[(n+1):2n, (k+1):2k]'
-    q[1:k, (n+1):2n] .= -p[1:n, (k+1):2k]'
-    q[(k+1):2k, 1:n] .= -p[(n+1):2n, 1:k]'
-    q[(k+1):2k, (n+1):2n] .= p[1:n, 1:k]'
     return q
 end
 
@@ -420,21 +177,6 @@ function canonical_projection!(::SymplecticStiefel{n, k}, p_SpSt, p) where {n, k
     return p_SpSt
 end
 
-@doc raw"""
-    retract!(::SymplecticStiefel, q, p, X, ::CayleyRetraction)
-
-Define the Cayley retraction on the Symplectic Stiefel manifold.
-Reduced requirements down to inverting an (2k × 2k) matrix.
-Formula due to Bendokat-Zimmermann Proposition 5.2.
-
-# TODO: Add formula from Bendokat-Zimmermann.
-
-# We set (t=1), regulate by the norm of the tangent vector how far to move.
-"""
-function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-    return SymplecticRetraction(M, p)(M, q, p, X)
-end
-
 # compute p^+q (which is 2kx2k) in place of A
 function symplectic_inverse_times(M::SymplecticStiefel{n,k}, p, q) where {n,k}
     A = similar(p, (2k,2k))
@@ -465,7 +207,19 @@ function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k
     return A
 end
 
-function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+@doc raw"""
+    retract!(::SymplecticStiefel, q, p, X, ::CayleyRetraction)
+
+Define the Cayley retraction on the Symplectic Stiefel manifold.
+Reduced requirements down to inverting an (2k × 2k) matrix.
+Formula due to Bendokat-Zimmermann Proposition 5.2.
+
+# TODO: Add formula from Bendokat-Zimmermann.
+
+# We set (t=1), regulate by the norm of the tangent vector how far to move.
+"""
+function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+    # Ronny's
     # Define intermediate matrices for later use:
     #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
     A = symplectic_inverse_times(M, p, X)
@@ -473,20 +227,6 @@ function retract_old!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) w
     A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 #-A/2 + H^+H/4
     q .= q .+ 2 .* p
     q .= -p .+ q / lu((I + A))
-    return q
-end
-
-function retract_test!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-    # Define intermediate matrices for later use:
-    #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
-    A = symplectic_inverse_times(M, p, X)
-    q .= X .- p*A # H in BZ21
-    A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 #-A/2 + H^+H/4
-    q .= q .+ 2 .* p
-    # Saves allocation of the (2n × 2k) matrix: q / lu(add_scaled_I!(A, 1.0))
-    # Also ca. 20% faster for SpSt(2000, 80).
-    rdiv!(q, lu(add_scaled_I!(A, 1.0)))
-    q .-= p
     return q
 end
 
@@ -549,8 +289,4 @@ function grad_euclidian_to_manifold_old!(::SymplecticStiefel, ∇f_man, p, ∇f_
     Q = SymplecticMatrix(p, ∇f_euc)
     ∇f_man .= (∇f_euc * p' .+ Q * p * (∇f_euc)' * Q) * p
     return ∇f_man
-end
-
-function grad_euclidian_to_manifold!(M::SymplecticStiefel, ∇f_man, p, ∇f_euc)
-    SymplecticGrad(M, p)(M, ∇f_man, p, ∇f_euc)
 end
