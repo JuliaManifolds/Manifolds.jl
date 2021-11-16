@@ -52,7 +52,7 @@ end
 """
 check_vector(::SymplecticStiefel, ::Any...)
 
-function check_vector(M::SymplecticStiefel{n, k}, p, X; kwargs...) where {n, k}
+function check_vector(M::SymplecticStiefel{n, k, field}, p, X; kwargs...) where {n, k, field}
     abstract_embedding_type = supertype(typeof(M))
 
     mpv = invoke(
@@ -63,8 +63,11 @@ function check_vector(M::SymplecticStiefel{n, k}, p, X; kwargs...) where {n, k}
     )
     mpv === nothing || return mpv
 
-    p_star_X = inv(M, p) * X
-    hamiltonian_identity_norm = norm(inv(M, p_star_X) + p_star_X)
+    # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
+
+    H = inv(M, p) * X  # ∈ ℝ^{2k × 2k}, should be Hamiltonian.
+    H_star = inv(Symplectic(2k, field), H)
+    hamiltonian_identity_norm = norm(H + H_star)
 
     if !isapprox(hamiltonian_identity_norm, 0; kwargs...)
         return DomainError(
