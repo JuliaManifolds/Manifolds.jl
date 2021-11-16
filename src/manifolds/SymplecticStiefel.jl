@@ -242,7 +242,13 @@ function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where
     A = p_plus*X
     q .= X .- p*A # H in BZ21
     #A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 , i.e. -A/2 + H^+H/4
+
+    # Johannes:
+    # I thought that maybe we had a bug here, as I cannot
+    # see immediately how p^+ * H == H^+ * H?
+    # But it appears like the two expressions are indeed equal.
     mul!(A, p_plus, q, 0.25, -0.5) #-A/2 + H^+H/4
+
     q .= q .+ 2 .* p
     Manifolds.add_scaled_I!(A, 1.0)
     r = lu!(A)
