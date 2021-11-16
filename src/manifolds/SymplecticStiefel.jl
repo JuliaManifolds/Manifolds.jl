@@ -250,8 +250,6 @@ Formula due to Bendokat-Zimmermann Proposition 5.2.
 # We set (t=1), regulate by the norm of the tangent vector how far to move.
 """
 function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-    # This 'safe' method uses 2/3 the allocations of 'safe_2',
-
     # Define intermediate matrices for later use:
     # A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
     A = symplectic_inverse_times(M, p, X)
