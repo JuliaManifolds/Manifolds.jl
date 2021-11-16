@@ -91,7 +91,7 @@ function inner_ronny(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     # a) we permute X' and Y c to c^TY^TX = a\(Y'X) (avoids a large interims matrix)
     # b) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
     # and (b'X) again avoids a large interims matrix, so does Y'b.
-    return tr(a\(Y'*X)) - tr( 1/2 * ( a\( (Y' * b) * (a \ (b' * X)) ) ) )
+    return return tr(a\(Y'*X)) - 1//2 * tr( a\( (Y' * b) * (a \ (b' * X)) ) )
 end
 
 function inner_old_commit(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
@@ -107,24 +107,25 @@ function inner_old_commit(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
 end
 
 function Base.inv(M::SymplecticStiefel{n, k}, p) where {n, k}
-    q = allocate_result(M, inv, p)'
-    return  inv!(M, q, p)
+    q = similar(p')
+    inv!(M, q, p)
 end
 
 function inv!(::SymplecticStiefel{n,k}, q, p) where {n, k}
-    # still does 4 allocations.
-    p1 = @view(p[1:n, 1:k])
-    p2 = @view(p[1:n, (k+1):2k])
-    p3 = @view(p[(n+1):2n, 1:k])
-    p4 = @view(p[(n+1):2n, (k+1):2k])
-    q1 = @view(q[1:k, 1:n])
-    q2 = @view(q[1:k, (n+1):2n])
-    q3 = @view(q[(k+1):2k, 1:n])
-    q4 = @view(q[(k+1):2k, (n+1):2n])
-    copyto!(q1,p4')
-    copyto!(q2,-p2')
-    copyto!(q3,-p3')
-    copyto!(q4,p1')
+    checkbounds(q, 1:2k, 1:2n)
+    checkbounds(p, 1:2n, 1:2k)
+    @inbounds for i in 1:k, j in 1:n
+        q[i, j] = p[j+n, i+k]
+    end
+    @inbounds for i in 1:k, j in 1:n
+        q[i, j+n] = -p[j, i+k]
+    end
+    @inbounds for i in 1:k, j in 1:n
+        q[i+k, j] = -p[j+n, i]
+    end
+    @inbounds for i in 1:k, j in 1:n
+        q[i+k, j+n] = p[j, i]
+    end
     return q
 end
 
@@ -234,11 +235,15 @@ function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where
     # Ronny's
     # Define intermediate matrices for later use:
     #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
-    A = symplectic_inverse_times(M, p, X)
+    p_plus = inv(M, p)
+    A = p_plus*X
     q .= X .- p*A # H in BZ21
-    A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 #-A/2 + H^+H/4
+    #A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 , i.e. -A/2 + H^+H/4
+    mul!(A, p_plus, q, 0.25, -0.5) #-A/2 + H^+H/4
     q .= q .+ 2 .* p
-    q .= -p .+ q / lu((I + A))
+    Manifolds.add_scaled_I!(A, 1.0)
+    r = lu!(A)
+    q .= (-).(p) .+ rdiv!(q, r)
     return q
 end
 

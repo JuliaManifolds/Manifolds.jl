@@ -216,33 +216,31 @@ end
 (Base.:-)(p::AbstractMatrix, Q::SymplecticMatrix) = p + (-Q)
 
 function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
-    _, k = get_even_dims(p)
+    _, k = Manifolds.get_even_dims(p)
 
     # Allocate new memory:
-    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    TS = typeof(one(eltype(p)) + one(eltype(Q)))
     pQ = similar(p, TS)
 
     # Perform right mulitply by λ*Q:
-    pQ[:, 1:k] .= (-Q.λ) * p[:, (k+1):end]
-    pQ[:, (k+1):end] .= (Q.λ) * p[:, 1:k]
-
+    mul!((@inbounds view(pQ, :, 1:k)), -Q.λ, @inbounds view(p, :, (k+1):lastindex(p, 2)))
+    mul!((@inbounds view(pQ, :, (k+1):lastindex(pQ, 2))), Q.λ, @inbounds view(p, :, 1:k))
     return pQ
 end
 
 function (Base.:*)(Q::SymplecticMatrix, p::AbstractMatrix)
-    n, _ = get_even_dims(p)
+    n, _ = Manifolds.get_even_dims(p)
 
     # Allocate new memory:
-    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    TS = typeof(one(eltype(p)) + one(eltype(Q)))
     Qp = similar(p, TS)
 
     # Perform left mulitply by λ*Q:
-    Qp[1:n, :] .= (Q.λ) * p[(n+1):end, :]
-    Qp[(n+1):end, :] .= (-Q.λ) * p[1:n, :]
+    mul!((@inbounds view(Qp, 1:n, :)), Q.λ, @inbounds view(p, (n+1):lastindex(p, 1), :))
+    mul!((@inbounds view(Qp, (n+1):lastindex(Qp, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
 
     return Qp
 end
-
 
 function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractMatrix)
     # Perform left multiplication by a symplectic matrix,
@@ -254,7 +252,6 @@ function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractMatrix)
     half_row_p = similar(p, TS, (n, 2k))
     half_row_p[1:n, :] .= p[1:n, :]
 
-    # Perform left mulitply by λ*Q:
     p[1:n, :] .= (Q.λ) .* p[(n+1):end, :]
     p[(n+1):end, :] .= (-Q.λ) .* half_row_p[1:n, :]
 
@@ -284,16 +281,16 @@ end
 function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractMatrix, Q::SymplecticMatrix)
     _, k = get_even_dims(p)
     # Perform right mulitply by λ*Q:
-    A[:, 1:k] = (-Q.λ).*p[:, (k+1):end]
-    A[:, (k+1):end] = (Q.λ) .* half_col_p[:, 1:k]
+    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n+1):lastindex(p, 1), :))
+    mul!((@inbounds view(A, (n+1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
     return A
 end
 
 function LinearAlgebra.mul!(A::AbstractMatrix, Q::SymplecticMatrix, p::AbstractMatrix)
     n, _ = get_even_dims(p)
     # Perform right mulitply by λ*Q:
-    A[1:n, :] = (Q.λ) .* p[(n+1):end, :]
-    A[(n+1):end, :] = (-Q.λ) .* half_row_p[1:n, :]
+    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n+1):lastindex(p, 1), :))
+    mul!((@inbounds view(A, (n+1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
     return A
 end
 
@@ -306,7 +303,7 @@ function add_scaled_I!(A::AbstractMatrix, λ::Number)
 end
 
 @doc raw"""
-    symplectic_inverse(M::Symplectic{n, ℝ}, A) where {n, ℝ}
+    inv(M::Symplectic{n, ℝ}, A) where {n, ℝ}
 
 Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2n}``, returning the result.
 ````math
@@ -339,11 +336,57 @@ A^{+} =
 \end{bmatrix}
 ````
 """
-function symplectic_inverse(::Symplectic{n, ℝ}, A) where {n}
+function Base.inv(::Symplectic{n, ℝ}, A) where {n}
+    Ai = similar(A)
+    checkbounds(A, 1:2n, 1:2n)
+    @inbounds for i in 1:n, j in 1:n
+        Ai[i, j] = A[j+n, i+n]
+    end
+    @inbounds for i in 1:n, j in 1:n
+        Ai[i+n, j] = -A[j+n, i]
+    end
+    @inbounds for i in 1:n, j in 1:n
+        Ai[i, j+n] = -A[j, i+n]
+    end
+    @inbounds for i in 1:n, j in 1:n
+        Ai[i+n, j+n] = A[j, i]
+    end
+    return Ai
+end
+
+function inv!(::Symplectic{n, ℝ}, A) where {n}
+    checkbounds(A, 1:2n, 1:2n)
+    @inbounds for i in 1:n, j in 1:n
+        tmp = A[i, j]
+        A[i, j] = A[j+n, i+n]
+        A[j+n, i+n] = tmp
+    end
+    @inbounds for i in 1:n, j in i:n
+        if i == j
+            A[i, j+n] = -A[i, j+n]
+        else
+            tmp = A[i, j+n]
+            A[i, j+n] = -A[j, i+n]
+            A[j, i+n] = -tmp
+        end
+    end
+    @inbounds for i in 1:n, j in i:n
+        if i == j
+            A[i+n, j] = -A[i+n, j]
+        else
+            tmp = A[i+n, j]
+            A[i+n, j] = -A[j+n, i]
+            A[j+n, i] = -tmp
+        end
+    end
+    return A
+end
+
+function symplectic_inverse_old(::Symplectic{n, ℝ}, A) where {n}
    return [A[(n+1):2n,(n+1):2n]' -A[1:n,(n+1):2n]'; -A[(n+1):2n, 1:n]' A[1:n, 1:n]']
 end
 
-function symplectic_inverse!(::Symplectic{n, ℝ}, A) where {n}
+function symplectic_inverse_old!(::Symplectic{n, ℝ}, A) where {n}
     return (A.= [A[(n+1):2n,(n+1):2n]' -A[1:n,(n+1):2n]'; -A[(n+1):2n, 1:n]' A[1:n, 1:n]'])
 end
 
@@ -539,6 +582,3 @@ function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
     X .= 2 .* ((p / V_inv .- p / U_inv) + ((p .+ q) / U_inv) .- p)
     return X
 end
-
-# Check vector, check point For Symplectic Stiefel.
-# Retract, Inverse-retract for Stiefel.

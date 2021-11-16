@@ -75,6 +75,7 @@ import Base:
     foreach,
     identity,
     in,
+    inv,
     isapprox,
     isempty,
     length,
