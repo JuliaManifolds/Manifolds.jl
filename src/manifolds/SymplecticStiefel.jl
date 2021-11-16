@@ -84,7 +84,7 @@ end
 
 Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
 """
-function inner_ronny(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+function inner(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     Q = SymplecticMatrix(p, X, Y)
     # Procompute lu(p'p) since we solve a^{-1}* 3 times
     a = lu(p' * p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
@@ -94,16 +94,15 @@ function inner_ronny(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     # a) we permute X' and Y c to c^TY^TX = a\(Y'X) (avoids a large interims matrix)
     # b) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
     # and (b'X) again avoids a large interims matrix, so does Y'b.
-    return return tr(a\(Y'*X)) - 1//2 * tr( a\( (Y' * b) * (a \ (b' * X)) ) )
+    return return tr(a\(Y'*X)) - 1/2 * tr( a\( (Y' * b) * (a \ (b' * X)) ) )
 end
 
-function inner_old_commit(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+function inner_git(M::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
     # Retrieved from earlier commit.
     # This version is Benchmarked to use only two thirds the time of the previous inner-implementation.
     # We are only finding the LU-factorization of the (2k × 2k) matrix (p' * p).
     Q = SymplecticMatrix(p, X, Y)
     I = UniformScaling(2n)
-
     # Perform LU-factorization before multiplication:
     p_Tp = lu(p' * p)
     return tr(X' * (I - (1/2) * Q' * p * (p_Tp \ (p')) * Q) * (Y / p_Tp))
@@ -223,6 +222,32 @@ function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k
     return A
 end
 
+function retract_broken!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+    # DANGER: q is aliased with p when called like:
+    #     retract!(p.M, o.x, o.x, -s * o.gradient, o.retraction_method)
+    # Leads to error in Manopt.gradient_descent!().
+
+    # Define intermediate matrices for later use:
+    #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
+    p_plus = inv(M, p)
+    A = p_plus*X
+
+    # Cannot overwrite 'q' when it can be aliased with p:
+    q .= X .- p*A # H in BZ21
+
+    # Johannes: I think we have a bug here.
+    # Want to calculate: (H^+ * H)/4 - A/2 -> A.
+    # Should be: mul!(A, inv(M, q), q, 0.25, -0.5)
+    #A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 , i.e. -A/2 + H^+H/4
+    mul!(A, p_plus, q, 0.25, -0.5) #-A/2 + H^+H/4
+
+    q .= q .+ 2 .* p
+    Manifolds.add_scaled_I!(A, 1.0)
+    r = lu!(A)
+    q .= (-).(p) .+ rdiv!(q, r)
+    return q
+end
+
 @doc raw"""
     retract!(::SymplecticStiefel, q, p, X, ::CayleyRetraction)
 
@@ -234,27 +259,72 @@ Formula due to Bendokat-Zimmermann Proposition 5.2.
 
 # We set (t=1), regulate by the norm of the tangent vector how far to move.
 """
-function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
-    # Ronny's
+function retract_copy!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+    # Easy solution to avoide overwriting, simply copy the incoming point:
+    p_copy = deepcopy(p)
+
     # Define intermediate matrices for later use:
-    #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
-    p_plus = inv(M, p)
-    A = p_plus*X
-    q .= X .- p*A # H in BZ21
+    # A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
+    # A = inv(M, p)*X
+    A = symplectic_inverse_times(M, p, X)
+    q .= X .- p_copy*A # H in BZ21
+
     #A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 , i.e. -A/2 + H^+H/4
+    mul!(A, inv(M, q), q, 0.25, -0.5)
 
-    # Johannes:
-    # I thought that maybe we had a bug here, as I cannot
-    # see immediately how p^+ * H == H^+ * H?
-    # But it appears like the two expressions are indeed equal.
-    mul!(A, p_plus, q, 0.25, -0.5) #-A/2 + H^+H/4
-
-    q .= q .+ 2 .* p
+    q .= q .+ 2 .* p_copy
     Manifolds.add_scaled_I!(A, 1.0)
     r = lu!(A)
-    q .= (-).(p) .+ rdiv!(q, r)
+    q .= (-).(p_copy) .+ rdiv!(q, r)
+
     return q
 end
+
+function retract_safe_2!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+    # This 'safe_2' allocates ca. 25% more memory.
+
+    # Define intermediate matrices for later use:
+    # A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
+    # A = symplectic_inverse_times(M, p, X)
+    A = inv(M, p) * X  # Benchmarks faster this way instead of "symplectic_inverse_times".
+
+    H = X .- p*A  # H in BZ21, allocates (2n × 2k). (As much as copying p)
+
+    # I + (H^+ * H)/4 - A/2 -> A
+    mul!(A, inv(M, H), H, 0.25, -0.5)
+    Manifolds.add_scaled_I!(A, 1.0)
+
+    # Reuse 'H' memory:
+    H .= H .+ (2 .* p)
+    r = lu!(A)
+    q .= (-).(p) .+ rdiv!(H, r)
+    return q
+end
+
+function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+    # This 'safe' method uses 2/3 the allocations of 'safe_2',
+
+    # Define intermediate matrices for later use:
+    # A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
+    A = symplectic_inverse_times(M, p, X)
+
+    H = X .- p*A  # Allocates (2n × 2k).
+
+    # A .= I - A/2 + H^+H/4:
+    A .= (symplectic_inverse_times(M, H, H) ./ 4) .- (A ./ 2)
+    Manifolds.add_scaled_I!(A, 1.0)
+
+    # Reuse 'H' memory:
+    H .= H .+ 2 .* p
+    r = lu!(A)
+    q .= (-).(p) .+ rdiv!(H, r)
+    return q
+end
+
+
+# function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+
+# end
 
 @doc raw"""
     inverse_retract!(::SymplecticStiefel, q, p, X, ::CayleyInverseRetraction)
