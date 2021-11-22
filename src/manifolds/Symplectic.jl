@@ -72,7 +72,7 @@ function check_point(M::Symplectic{n, ℝ}, p; kwargs...) where {n, ℝ}
     if !isapprox(expected_zero, zero(eltype(p)); kwargs...)
         return DomainError(
             expected_zero,
-            ("The point $(p) does not lie on $(M) because its symplectic"
+            ("The point `p` does not lie on $(M) because its symplectic"
            * " inverse composed with itself is not the identity.")
         )
     end
@@ -102,19 +102,26 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     if !isapprox(tangent_requirement_norm, 0.0; kwargs...)
         return DomainError(
             tangent_requirement_norm,
-            ("The matrix $(X) is not in the tangent space at point $p of the"
+            ("The matrix `X` is not in the tangent space at point `p` of the"
            * " $(M) manifold, as X'Qp + p'QX is not the zero matrix")
         )
     end
     return nothing
 end
 
-Base.inv(M::Symplectic, p) = symplectic_inverse(M, p)
-
-Base.rand(M::Symplectic{n}) where {n} = begin
+function Base.rand(M::Symplectic{n}) where {n}
     # Generate random matrices to construct a Hamiltonian matrix:
     Ω = rand_hamiltonian(M)
     (I + Ω) / (I - Ω)
+end
+
+function Base.rand(::Symplectic{n}, p) where {n}
+    # Generate random symmetric matrix:
+    S = rand(2n, 2n) .- 1/2
+    S .= (1/2) .* (S + S')
+    Q = SymplecticMatrix(p)
+    lmul!(Q, S)
+    return p * S
 end
 
 @doc raw"""
@@ -127,6 +134,35 @@ function inner(M::Symplectic{n, ℝ}, p, X, Y)::eltype(p) where {n}
     # For symplectic matrices, the 'symplectic inverse' p^+ is the actual inverse.
     p_star = inv(M, p)
     return tr((p_star * X)' * (p_star * Y))
+end
+
+@doc raw"""
+    distance(M::Symplectic{n}, p, q) where {n}
+
+Approximate distance between two Symplectic matrices, as found
+in eq. (7) of "A Riemannian-Steepest-Descent approach
+for optimization of the real symplectic group."
+"""
+function distance(::Symplectic{n}, p, q) where {n}
+    return norm(log(symplectic_inverse_times(SymplecticStiefel(2n, 2n), p, q)))
+end
+
+
+@doc raw"""
+    exp(M::Symplectic, p, X)
+
+The Exponential mapping on the Symplectic manifold with the 'Fiori'
+inner product.
+From Proposition 2 in "A Riemannian-Steepest-Descent approach
+for optimization of the real symplectic group."
+"""
+function exp!(M::Symplectic{n}, q, p, X) where {n}
+    # p_star_X = inv(M, p)*X
+    p_star_X = symplectic_inverse_times(SymplecticStiefel(2n, 2n), p, X)
+    # Use memory in q once:
+    q .= p_star_X .- p_star_X'
+    q .= p * exp(p_star_X) * exp(q)
+    return q
 end
 
 
@@ -206,8 +242,8 @@ function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
     # Add Q.λ multiples of the UniformScaling to the lower left and upper right blocks of p:
     λ_Id = LinearAlgebra.UniformScaling(Q.λ)
 
-    out[1:n, (n+1):2n] .+= λ_Id
-    out[(n+1):2n, 1:n] .-= λ_Id
+    out[1:n, (n+1):2n] += λ_Id
+    out[(n+1):2n, 1:n] -= λ_Id
     return out
 end
 
@@ -380,14 +416,6 @@ function inv!(::Symplectic{n, ℝ}, A) where {n}
         end
     end
     return A
-end
-
-function symplectic_inverse_old(::Symplectic{n, ℝ}, A) where {n}
-   return [A[(n+1):2n,(n+1):2n]' -A[1:n,(n+1):2n]'; -A[(n+1):2n, 1:n]' A[1:n, 1:n]']
-end
-
-function symplectic_inverse_old!(::Symplectic{n, ℝ}, A) where {n}
-    return (A.= [A[(n+1):2n,(n+1):2n]' -A[1:n,(n+1):2n]'; -A[(n+1):2n, 1:n]' A[1:n, 1:n]'])
 end
 
 function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}

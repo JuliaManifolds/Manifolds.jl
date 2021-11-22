@@ -1,12 +1,12 @@
 @doc raw"""
     TODO: Explain this Metric.
 """
-struct SymplecticPseudoRiemannianMetric <: AbstractMetric 
+struct SymplecticPseudoRiemannianMetric <: AbstractMetric
 end
 
 function exp!(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, q, p, X) where {n, ℝ}
     p_inv = inv(M.manifold, p)
-    q .= p*LinearAlgebra.exp(p_inv * X)
+    q .= p*exp(p_inv * X)
     return q
 end
 
