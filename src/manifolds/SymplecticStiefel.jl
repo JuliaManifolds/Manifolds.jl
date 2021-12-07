@@ -227,32 +227,6 @@ function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k
     return A
 end
 
-function retract_broken!(M::SymplecticStiefel{n,k}, q, p, X, ::CayleyRetraction) where {n,k}
-    # DANGER: q is aliased with p when called like:
-    #     retract!(p.M, o.x, o.x, -s * o.gradient, o.retraction_method)
-    # Leads to error in Manopt.gradient_descent!().
-
-    # Define intermediate matrices for later use:
-    #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
-    p_plus = inv(M, p)
-    A = p_plus * X
-
-    # Cannot overwrite 'q' when it can be aliased with p:
-    q .= X .- p * A # H in BZ21
-
-    # Johannes: I think we have a bug here.
-    # Want to calculate: (H^+ * H)/4 - A/2 -> A.
-    # Should be: mul!(A, inv(M, q), q, 0.25, -0.5)
-    #A .= -A./2 .+ symplectic_inverse_times(M, q, q)./4 , i.e. -A/2 + H^+H/4
-    mul!(A, p_plus, q, 0.25, -0.5) #-A/2 + H^+H/4
-
-    q .= q .+ 2 .* p
-    Manifolds.add_scaled_I!(A, 1.0)
-    r = lu!(A)
-    q .= (-).(p) .+ rdiv!(q, r)
-    return q
-end
-
 @doc raw"""
     retract!(::SymplecticStiefel, q, p, X, ::CayleyRetraction)
 
