@@ -1,20 +1,21 @@
 @doc raw"""
 The Symplectic Stiefel manifold. Each element represent a Symplectic Subspace of ``ℝ^{2n × 2k}``.
 """
-struct SymplecticStiefel{n, k, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
-end
+struct SymplecticStiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 @doc raw"""
     You are given a manifold of embedding dimension two_n × two_p.
     # Tried to type the fields being stored in SymplecticStiefel as well.
 """
 function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
-    SymplecticStiefel{div(two_n, 2), div(two_k, 2), field}()
+    return SymplecticStiefel{div(two_n, 2),div(two_k, 2),field}()
 end
 
-Base.show(io::IO, ::SymplecticStiefel{n, k}) where {n, k} = print(io, "SymplecticStiefel{$(2n), $(2k)}()")
+function Base.show(io::IO, ::SymplecticStiefel{n,k}) where {n,k}
+    return print(io, "SymplecticStiefel{$(2n), $(2k)}()")
+end
 
-decorated_manifold(::SymplecticStiefel{n, k, ℝ}) where {n, k} = Euclidean(2n, 2k; field=ℝ)
+decorated_manifold(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
 ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction()
 
 @doc raw"""
@@ -22,12 +23,12 @@ ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction(
 
 As shown in proposition 3.1 in Bendokat-Zimmermann.
 """
-manifold_dimension(::SymplecticStiefel{n, k}) where {n, k} = (4n -2k + 1)*k
+manifold_dimension(::SymplecticStiefel{n,k}) where {n,k} = (4n - 2k + 1) * k
 
-function check_point(M::SymplecticStiefel{n, k}, p; kwargs...) where {n, k}
+function check_point(M::SymplecticStiefel{n,k}, p; kwargs...) where {n,k}
     abstract_embedding_type = supertype(typeof(M))
 
-    mpv = invoke(check_point, Tuple{abstract_embedding_type, typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{abstract_embedding_type,typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
 
     # Perform check that the matrix lives on the real symplectic manifold:
@@ -35,8 +36,10 @@ function check_point(M::SymplecticStiefel{n, k}, p; kwargs...) where {n, k}
     if !isapprox(expected_zero, 0; kwargs...)
         return DomainError(
             expected_zero,
-            ("The point p does not lie on $(M) because its symplectic"
-           * " inverse composed with itself is not the identity. $(p)")
+            (
+                "The point p does not lie on $(M) because its symplectic" *
+                " inverse composed with itself is not the identity. $(p)"
+            ),
         )
     end
     return nothing
@@ -52,13 +55,15 @@ end
 """
 check_vector(::SymplecticStiefel, ::Any...)
 
-function check_vector(M::SymplecticStiefel{n, k, field}, p, X; kwargs...) where {n, k, field}
+function check_vector(M::SymplecticStiefel{n,k,field}, p, X; kwargs...) where {n,k,field}
     abstract_embedding_type = supertype(typeof(M))
 
     mpv = invoke(
         check_vector,
-        Tuple{abstract_embedding_type, typeof(p), typeof(X)},
-        M, p, X;
+        Tuple{abstract_embedding_type,typeof(p),typeof(X)},
+        M,
+        p,
+        X;
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -72,8 +77,10 @@ function check_vector(M::SymplecticStiefel{n, k, field}, p, X; kwargs...) where 
     if !isapprox(hamiltonian_identity_norm, 0; kwargs...)
         return DomainError(
             hamiltonian_identity_norm,
-            ("The matrix X: $X is not in the tangent space at point p: $p of the"
-           * " $(M) manifold, as p^{+}X is not a Hamiltonian matrix.")
+            (
+                "The matrix X: $X is not in the tangent space at point p: $p of the" *
+                " $(M) manifold, as p^{+}X is not a Hamiltonian matrix."
+            ),
         )
     end
     return nothing
@@ -84,39 +91,38 @@ end
 
 Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
 """
-function inner(::SymplecticStiefel{n, k}, p, X, Y) where {n, k}
+function inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
     Q = SymplecticMatrix(p, X, Y)
     # Procompute lu(p'p) since we solve a^{-1}* 3 times
     a = lu(p' * p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
-    b = Q'*p
+    b = Q' * p
     # we split the original trace into two one with I->(X'Yc)
     # and the other with 1/2 X'b c b' Y c
     # a) we permute X' and Y c to c^TY^TX = a\(Y'X) (avoids a large interims matrix)
     # b) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
     # and (b'X) again avoids a large interims matrix, so does Y'b.
-    return return tr(a\(Y'*X)) - 1/2 * tr( a\( (Y' * b) * (a \ (b' * X)) ) )
+    return return tr(a \ (Y' * X)) - 1 / 2 * tr(a \ ((Y' * b) * (a \ (b' * X))))
 end
 
-
-function Base.inv(M::SymplecticStiefel{n, k}, p) where {n, k}
+function Base.inv(M::SymplecticStiefel{n,k}, p) where {n,k}
     q = similar(p')
-    inv!(M, q, p)
+    return inv!(M, q, p)
 end
 
-function inv!(::SymplecticStiefel{n,k}, q, p) where {n, k}
-    checkbounds(q, 1:2k, 1:2n)
-    checkbounds(p, 1:2n, 1:2k)
+function inv!(::SymplecticStiefel{n,k}, q, p) where {n,k}
+    checkbounds(q, 1:(2k), 1:(2n))
+    checkbounds(p, 1:(2n), 1:(2k))
     @inbounds for i in 1:k, j in 1:n
-        q[i, j] = p[j+n, i+k]
+        q[i, j] = p[j + n, i + k]
     end
     @inbounds for i in 1:k, j in 1:n
-        q[i, j+n] = -p[j, i+k]
+        q[i, j + n] = -p[j, i + k]
     end
     @inbounds for i in 1:k, j in 1:n
-        q[i+k, j] = -p[j+n, i]
+        q[i + k, j] = -p[j + n, i]
     end
     @inbounds for i in 1:k, j in 1:n
-        q[i+k, j+n] = p[j, i]
+        q[i + k, j + n] = p[j, i]
     end
     return q
 end
@@ -126,7 +132,13 @@ end
 
 Calculated myself, but tailored to the right-invariant inner product of Bendokat-Zimmermann
 """
-function change_representer!(::SymplecticStiefel{n, k}, Y, ::EuclideanMetric, p, X) where {n, k}
+function change_representer!(
+    ::SymplecticStiefel{n,k},
+    Y,
+    ::EuclideanMetric,
+    p,
+    X,
+) where {n,k}
     # Quite an ugly expression: Have checked and it seems to be working.
     Q = SymplecticMatrix(p, X)
     I = UniformScaling(2n)
@@ -134,7 +146,7 @@ function change_representer!(::SymplecticStiefel{n, k}, Y, ::EuclideanMetric, p,
     # Remove memory allocation:
     # A = factorize((I - (1/2) * Q' * p * ((p' * p) \ p') * Q)')
 
-    Y .= (lu((I - (1/2) * Q' * p * ((p' * p) \ p') * Q)') \ X) * p' * p
+    Y .= (lu((I - (1 / 2) * Q' * p * ((p' * p) \ p') * Q)') \ X) * p' * p
     return Y
 end
 
@@ -144,8 +156,10 @@ end
 Use the canonical projection by first generating a random symplectic matrix of the correct size,
 and then projecting onto the Symplectic Stiefel manifold.
 """
-Base.rand(M::SymplecticStiefel{n, k}) where {n, k} = begin
-    canonical_projection(M, rand(Symplectic(2n)))
+function Base.rand(M::SymplecticStiefel{n,k}) where {n,k}
+    begin
+        canonical_projection(M, rand(Symplectic(2n)))
+    end
 end
 
 @doc raw"""
@@ -155,11 +169,12 @@ As based on the parametrization of the tangent space ``T_p\operatorname{SpSt}(n,
 of Benodkat-Zimmermann. There they express the tangent space as ``X = pΩ + p^sB``, where ``Ω^+ = -Ω`` is Hamiltonian.
 The notation ``p^s`` means the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``, and ``B ∈ ℝ^{2(n-k) × 2k}.
 """
-Base.rand(::SymplecticStiefel{n, k}, p) where {n, k} = begin
-    Ω = rand_hamiltonian(Symplectic(2k))
-    p * Ω
+function Base.rand(::SymplecticStiefel{n,k}, p) where {n,k}
+    begin
+        Ω = rand_hamiltonian(Symplectic(2k))
+        p * Ω
+    end
 end
-
 
 @doc raw"""
     π(::SymplecticStiefel{n, k}, p) where {n, k}
@@ -171,48 +186,45 @@ It is assumed that the point ``p`` is on ``\operatorname{Sp}(2n, 2n)``.
 
 # As done in Bendokat Zimmermann in equation 3.2.
 """
-function canonical_projection(M::SymplecticStiefel{n, k}, p) where {n, k}
+function canonical_projection(M::SymplecticStiefel{n,k}, p) where {n,k}
     p_SpSt = similar(p, (2n, 2k))
     return canonical_projection!(M, p_SpSt, p)
 end
 
-function canonical_projection!(::SymplecticStiefel{n, k}, p_SpSt, p) where {n, k}
-    p_SpSt[:, (1:k)] .= p[:, (1:k)];
-    p_SpSt[:, (k+1:2k)] .= p[:, (n+1:n+k)]
+function canonical_projection!(::SymplecticStiefel{n,k}, p_SpSt, p) where {n,k}
+    p_SpSt[:, (1:k)] .= p[:, (1:k)]
+    p_SpSt[:, ((k + 1):(2k))] .= p[:, ((n + 1):(n + k))]
     return p_SpSt
 end
 
 # compute p^+q (which is 2kx2k) in place of A
 function symplectic_inverse_times(M::SymplecticStiefel{n,k}, p, q) where {n,k}
-    A = similar(p, (2k,2k))
+    A = similar(p, (2k, 2k))
     return symplectic_inverse_times!(M, A, p, q)
 end
 function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k}
-    # we write p = [p1 p2; p3 p4] (and q, too), then
-    p1 = @view(p[1:n,1:k])
-    p2 = @view(p[1:n,(k+1):2k])
-    p3 = @view(p[(n+1):2n,1:k])
-    p4 = @view(p[(n+1):2n,(k+1):2k])
-    q1 = @view(q[1:n,1:k])
-    q2 = @view(q[1:n,(k+1):2k])
-    q3 = @view(q[(n+1):2n,1:k])
-    q4 = @view(q[(n+1):2n,(k+1):2k])
-    A1 = @view(A[1:k,1:k])
-    A2 = @view(A[1:k,(k+1):2k])
-    A3 = @view(A[(k+1):2k,1:k])
-    A4 = @view(A[(k+1):2k,(k+1):2k])
-    mul!(A1, p4', q1) # A1 = p4'q1
-    mul!(A1, p2', q3, -1, 1) # A1 -= p2'p3
-    mul!(A2, p4', q2)
-    mul!(A2, p2', q4, -1, 1)
-    mul!(A3, p1', q3)
-    mul!(A3, p3', q1, -1, 1)
-    mul!(A4, p1', q4)
-    mul!(A4, p3', q2, -1, 1)
+    checkbounds(q, 1:(2n), 1:(2k))
+    checkbounds(p, 1:(2n), 1:(2k))
+    checkbounds(A, 1:(2k), 1:(2k))
+    # we write p = [p1 p2; p3 p4] (and similarly q and A), where
+    # pi, qi are nxk and Ai is kxk Then the p^+q can be computed as
+    A .= 0
+    @inbounds for i in 1:k, j in 1:k, l in 1:n # Compute A1 = p4'q1 - p2'q3
+        A[i, j] += p[n + l, k + i] * q[l, j] - p[l, k + i] * q[n + l, j]
+    end
+    @inbounds for i in 1:k, j in 1:k, l in 1:n # A2 = p4'q2 - p2'q4
+        A[i, k + j] += p[n + l, k + i] * q[l, k + j] - p[l, k + i] * q[n + l, k + j]
+    end
+    @inbounds for i in 1:k, j in 1:k, l in 1:n # A3 = p1'q3 - p3'q1
+        A[k + i, j] += p[l, i] * q[n + l, j] - p[n + l, i] * q[l, j]
+    end
+    @inbounds for i in 1:k, j in 1:k, l in 1:n # A4 = p1'q4 - p3'q2
+        A[k + i, k + j] += p[l, i] * q[n + l, k + j] - p[n + l, i] * q[l, k + j]
+    end
     return A
 end
 
-function retract_broken!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+function retract_broken!(M::SymplecticStiefel{n,k}, q, p, X, ::CayleyRetraction) where {n,k}
     # DANGER: q is aliased with p when called like:
     #     retract!(p.M, o.x, o.x, -s * o.gradient, o.retraction_method)
     # Leads to error in Manopt.gradient_descent!().
@@ -220,10 +232,10 @@ function retract_broken!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction
     # Define intermediate matrices for later use:
     #A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
     p_plus = inv(M, p)
-    A = p_plus*X
+    A = p_plus * X
 
     # Cannot overwrite 'q' when it can be aliased with p:
-    q .= X .- p*A # H in BZ21
+    q .= X .- p * A # H in BZ21
 
     # Johannes: I think we have a bug here.
     # Want to calculate: (H^+ * H)/4 - A/2 -> A.
@@ -249,12 +261,12 @@ Formula due to Bendokat-Zimmermann Proposition 5.2.
 
 # We set (t=1), regulate by the norm of the tangent vector how far to move.
 """
-function retract!(M::SymplecticStiefel{n, k}, q, p, X, ::CayleyRetraction) where {n, k}
+function retract!(M::SymplecticStiefel{n,k}, q, p, X, ::CayleyRetraction) where {n,k}
     # Define intermediate matrices for later use:
     # A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
     A = symplectic_inverse_times(M, p, X)
 
-    H = X .- p*A  # Allocates (2n × 2k).
+    H = X .- p * A  # Allocates (2n × 2k).
 
     # A .= I - A/2 + H^+H/4:
     A .= (symplectic_inverse_times(M, H, H) ./ 4) .- (A ./ 2)
@@ -319,7 +331,7 @@ end
 
 function grad_euclidian_to_manifold(::SymplecticStiefel, p, ∇f_euc)
     Q = SymplecticMatrix(p, ∇f_euc)
-    return ∇f_euc * (p' * p)  .+ Q * p * (∇f_euc' * Q * p)
+    return ∇f_euc * (p' * p) .+ Q * p * (∇f_euc' * Q * p)
 end
 
 function grad_euclidian_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)

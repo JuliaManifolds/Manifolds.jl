@@ -26,18 +26,17 @@ of a matrix ``A ∈ ℝ^{2n × 2n}`` where we consider it as consisting of four 
 The constructor accepts the number of dimensions in ``ℝ^{2n × 2n}`` as the embedding for the Real Symplectic manifold,
 but internally stores the integer ``n`` denoting half the dimension of the embedding.
 """
-struct Symplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
-end
+struct Symplectic{n,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 @doc """
     Document difference between real and complex.
     You are given a manifold of embedding dimension 2nX2n.
 """
 Symplectic(n::Int, field::AbstractNumbers=ℝ) = begin
-    Symplectic{div(n, 2), field}()
+    Symplectic{div(n, 2),field}()
 end
 
-decorated_manifold(::Symplectic{n, ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
+decorated_manifold(::Symplectic{n,ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
 
 @doc raw"""
     manifold_dimension(::Symplectic{n})
@@ -45,9 +44,9 @@ decorated_manifold(::Symplectic{n, ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ
 As a special case of the SymplecticStiefel manifold with k = n. As shown in Proposition
 3.1 in Gao et. al.
 """
-manifold_dimension(::Symplectic{n}) where {n} = (2n + 1)*n
+manifold_dimension(::Symplectic{n}) where {n} = (2n + 1) * n
 
-Base.show(io::IO, ::Symplectic{n, ℝ}) where {n, ℝ} = print(io, "Symplectic{$(2n)}()")
+Base.show(io::IO, ::Symplectic{n,ℝ}) where {n,ℝ} = print(io, "Symplectic{$(2n)}()")
 
 @doc raw"""
     #TODO: Document The Riemannian Symplectic metric used.
@@ -56,15 +55,14 @@ Base.show(io::IO, ::Symplectic{n, ℝ}) where {n, ℝ} = print(io, "Symplectic{$
     g_p(Z_1, Z_2) = tr((p^{-1}Z_1)^T (p^{-1}Z_2))
 ````
 """
-struct RealSymplecticMetric <: RiemannianMetric
-end
+struct RealSymplecticMetric <: RiemannianMetric end
 
-default_metric_dispatch(::Symplectic{n, ℝ}, ::RealSymplecticMetric) where {n, ℝ} = Val(true)
+default_metric_dispatch(::Symplectic{n,ℝ}, ::RealSymplecticMetric) where {n,ℝ} = Val(true)
 
-function check_point(M::Symplectic{n, ℝ}, p; kwargs...) where {n, ℝ}
+function check_point(M::Symplectic{n,ℝ}, p; kwargs...) where {n,ℝ}
     abstract_embedding_type = supertype(typeof(M))
 
-    mpv = invoke(check_point, Tuple{abstract_embedding_type, typeof(p)}, M, p; kwargs...)
+    mpv = invoke(check_point, Tuple{abstract_embedding_type,typeof(p)}, M, p; kwargs...)
     mpv === nothing || return mpv
 
     # Perform check that the matrix lives on the real symplectic manifold:
@@ -72,8 +70,10 @@ function check_point(M::Symplectic{n, ℝ}, p; kwargs...) where {n, ℝ}
     if !isapprox(expected_zero, zero(eltype(p)); kwargs...)
         return DomainError(
             expected_zero,
-            ("The point $(p) does not lie on $(M) because its symplectic"
-           * " inverse composed with itself is not the identity.")
+            (
+                "The point $(p) does not lie on $(M) because its symplectic" *
+                " inverse composed with itself is not the identity."
+            ),
         )
     end
     return nothing
@@ -90,8 +90,10 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
 
     mpv = invoke(
         check_vector,
-        Tuple{abstract_embedding_type, typeof(p), typeof(X)},
-        M, p, X;
+        Tuple{abstract_embedding_type,typeof(p),typeof(X)},
+        M,
+        p,
+        X;
         kwargs...,
     )
     mpv === nothing || return mpv
@@ -102,8 +104,10 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     if !isapprox(tangent_requirement_norm, 0.0; kwargs...)
         return DomainError(
             tangent_requirement_norm,
-            ("The matrix $(X) is not in the tangent space at point $p of the"
-           * " $(M) manifold, as X'Qp + p'QX is not the zero matrix")
+            (
+                "The matrix $(X) is not in the tangent space at point $p of the" *
+                " $(M) manifold, as X'Qp + p'QX is not the zero matrix"
+            ),
         )
     end
     return nothing
@@ -123,13 +127,11 @@ end
 Riemannian: Test Test. Reference to Fiori.
 
 """
-function inner(M::Symplectic{n, ℝ}, p, X, Y)::eltype(p) where {n}
+function inner(M::Symplectic{n,ℝ}, p, X, Y)::eltype(p) where {n}
     # For symplectic matrices, the 'symplectic inverse' p^+ is the actual inverse.
     p_star = inv(M, p)
     return tr((p_star * X)' * (p_star * Y))
 end
-
-
 
 @doc raw"""
     check_even_dim(p; square=false)::Integer
@@ -141,12 +143,20 @@ function get_even_dims(p; square=false)
     n, k = size(p)
     # Otherwise, both dimensions just need to be even.
     # First check that dimensions are even:
-    ((n % 2 == 0) && (k % 2 == 0)) || throw(DimensionMismatch("Matrix does not have even "
-                                      * "dimensions (2n, 2k): Dimensions are ($(n), $(k))."))
+    ((n % 2 == 0) && (k % 2 == 0)) || throw(
+        DimensionMismatch(
+            "Matrix does not have even " *
+            "dimensions (2n, 2k): Dimensions are ($(n), $(k)).",
+        ),
+    )
 
     # If 'square=true', we require m==n:
-    (!square || (n == k)) || throw(DimensionMismatch("Matrix is not square with dimensions "
-                                                   * "(2n, 2n): Dimensions are ($(n), $(k))."))
+    (!square || (n == k)) || throw(
+        DimensionMismatch(
+            "Matrix is not square with dimensions " *
+            "(2n, 2n): Dimensions are ($(n), $(k)).",
+        ),
+    )
 
     return div(n, 2), div(k, 2)
 end
@@ -156,24 +166,28 @@ end
 struct SymplecticMatrix{T}
     λ::T
 end
-SymplecticMatrix(λ::T) where {T <: Number} = SymplecticMatrix{T}(λ)
+SymplecticMatrix(λ::T) where {T<:Number} = SymplecticMatrix{T}(λ)
 
-SymplecticMatrix(arrays::Vararg{AbstractArray}) = begin
-    TS = Base.promote_type(map(eltype, arrays)...)
-    SymplecticMatrix(one(TS))
+function SymplecticMatrix(arrays::Vararg{AbstractArray})
+    begin
+        TS = Base.promote_type(map(eltype, arrays)...)
+        SymplecticMatrix(one(TS))
+    end
 end
 
 ndims(Q::SymplecticMatrix) = 2
 copy(Q::SymplecticMatrix) = SymplecticMatrix(Q.λ)
 Base.eltype(::SymplecticMatrix{T}) where {T} = T
-Base.convert(::Type{SymplecticMatrix{T}}, Q::SymplecticMatrix) where {T} = SymplecticMatrix(convert(T, Q.λ))
+function Base.convert(::Type{SymplecticMatrix{T}}, Q::SymplecticMatrix) where {T}
+    return SymplecticMatrix(convert(T, Q.λ))
+end
 
 function Base.show(io::IO, Q::SymplecticMatrix)
     s = "$(Q.λ)"
     if occursin(r"\w+\s*[\+\-]\s*\w+", s)
         s = "($s)"
     end
-    print(io, typeof(Q), "(): $(s)*[0 I; -I 0]")
+    return print(io, typeof(Q), "(): $(s)*[0 I; -I 0]")
 end
 
 # Overloaded functions:
@@ -183,13 +197,15 @@ end
 
 (Base.:-)(Q::SymplecticMatrix) = SymplecticMatrix(-Q.λ)
 
-(Base.:*)(x::Number, Q::SymplecticMatrix) = SymplecticMatrix(x*Q.λ)
-(Base.:*)(Q::SymplecticMatrix, x::Number) = SymplecticMatrix(x*Q.λ)
-(Base.:*)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = LinearAlgebra.UniformScaling(-Q1.λ*Q2.λ)
+(Base.:*)(x::Number, Q::SymplecticMatrix) = SymplecticMatrix(x * Q.λ)
+(Base.:*)(Q::SymplecticMatrix, x::Number) = SymplecticMatrix(x * Q.λ)
+function (Base.:*)(Q1::SymplecticMatrix, Q2::SymplecticMatrix)
+    return LinearAlgebra.UniformScaling(-Q1.λ * Q2.λ)
+end
 
 Base.transpose(Q::SymplecticMatrix) = -Q
 Base.adjoint(Q::SymplecticMatrix) = -Q
-Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1/Q.λ))
+Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1 / Q.λ))
 
 (Base.:+)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = SymplecticMatrix(Q1.λ + Q2.λ)
 (Base.:-)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = SymplecticMatrix(Q1.λ - Q2.λ)
@@ -200,14 +216,14 @@ function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
     n, _ = get_even_dims(p; square=true)
 
     # Allocate new memory:
-    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    TS = Base._return_type(+, Tuple{eltype(p),eltype(Q)})
     out = copyto!(similar(p, TS), p)
 
     # Add Q.λ multiples of the UniformScaling to the lower left and upper right blocks of p:
     λ_Id = LinearAlgebra.UniformScaling(Q.λ)
 
-    out[1:n, (n+1):2n] .+= λ_Id
-    out[(n+1):2n, 1:n] .-= λ_Id
+    out[1:n, (n + 1):(2n)] .+= λ_Id
+    out[(n + 1):(2n), 1:n] .-= λ_Id
     return out
 end
 
@@ -223,8 +239,8 @@ function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
     pQ = similar(p, TS)
 
     # Perform right mulitply by λ*Q:
-    mul!((@inbounds view(pQ, :, 1:k)), -Q.λ, @inbounds view(p, :, (k+1):lastindex(p, 2)))
-    mul!((@inbounds view(pQ, :, (k+1):lastindex(pQ, 2))), Q.λ, @inbounds view(p, :, 1:k))
+    mul!((@inbounds view(pQ, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
+    mul!((@inbounds view(pQ, :, (k + 1):lastindex(pQ, 2))), Q.λ, @inbounds view(p, :, 1:k))
     return pQ
 end
 
@@ -236,8 +252,8 @@ function (Base.:*)(Q::SymplecticMatrix, p::AbstractMatrix)
     Qp = similar(p, TS)
 
     # Perform left mulitply by λ*Q:
-    mul!((@inbounds view(Qp, 1:n, :)), Q.λ, @inbounds view(p, (n+1):lastindex(p, 1), :))
-    mul!((@inbounds view(Qp, (n+1):lastindex(Qp, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
+    mul!((@inbounds view(Qp, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
+    mul!((@inbounds view(Qp, (n + 1):lastindex(Qp, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
 
     return Qp
 end
@@ -248,12 +264,12 @@ function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractMatrix)
     n, k = get_even_dims(p)
 
     # Need to allocate half the space in order to avoid overwriting:
-    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    TS = Base._return_type(+, Tuple{eltype(p),eltype(Q)})
     half_row_p = similar(p, TS, (n, 2k))
     half_row_p[1:n, :] .= p[1:n, :]
 
-    p[1:n, :] .= (Q.λ) .* p[(n+1):end, :]
-    p[(n+1):end, :] .= (-Q.λ) .* half_row_p[1:n, :]
+    p[1:n, :] .= (Q.λ) .* p[(n + 1):end, :]
+    p[(n + 1):end, :] .= (-Q.λ) .* half_row_p[1:n, :]
 
     return p
 end
@@ -264,16 +280,16 @@ function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
     n, k = get_even_dims(p)
 
     # Need to allocate half the space in order to avoid overwriting:
-    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    TS = Base._return_type(+, Tuple{eltype(p),eltype(Q)})
     half_col_p = similar(p, TS, (2n, k))
     half_col_p[:, 1:k] .= p[:, 1:k]
 
     # Allocate new memory:
-    TS = Base._return_type(+, Tuple{eltype(p), eltype(Q)})
+    TS = Base._return_type(+, Tuple{eltype(p),eltype(Q)})
 
     # Perform right mulitply by λ*Q:
-    p[:, 1:k] .= (-Q.λ).*p[:, (k+1):end]
-    p[:, (k+1):end] .= (Q.λ) .* half_col_p[:, 1:k]
+    p[:, 1:k] .= (-Q.λ) .* p[:, (k + 1):end]
+    p[:, (k + 1):end] .= (Q.λ) .* half_col_p[:, 1:k]
 
     return p
 end
@@ -281,23 +297,23 @@ end
 function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractMatrix, Q::SymplecticMatrix)
     _, k = get_even_dims(p)
     # Perform right mulitply by λ*Q:
-    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n+1):lastindex(p, 1), :))
-    mul!((@inbounds view(A, (n+1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
+    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
+    mul!((@inbounds view(A, (n + 1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
     return A
 end
 
 function LinearAlgebra.mul!(A::AbstractMatrix, Q::SymplecticMatrix, p::AbstractMatrix)
     n, _ = get_even_dims(p)
     # Perform right mulitply by λ*Q:
-    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n+1):lastindex(p, 1), :))
-    mul!((@inbounds view(A, (n+1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
+    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
+    mul!((@inbounds view(A, (n + 1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
     return A
 end
 
 function add_scaled_I!(A::AbstractMatrix, λ::Number)
     LinearAlgebra.checksquare(A)
     @inbounds for i in axes(A, 1)
-        A[i,i] += λ
+        A[i, i] += λ
     end
     return A
 end
@@ -336,65 +352,82 @@ A^{+} =
 \end{bmatrix}
 ````
 """
-function Base.inv(::Symplectic{n, ℝ}, A) where {n}
+function Base.inv(::Symplectic{n,ℝ}, A) where {n}
     Ai = similar(A)
-    checkbounds(A, 1:2n, 1:2n)
+    checkbounds(A, 1:(2n), 1:(2n))
     @inbounds for i in 1:n, j in 1:n
-        Ai[i, j] = A[j+n, i+n]
+        Ai[i, j] = A[j + n, i + n]
     end
     @inbounds for i in 1:n, j in 1:n
-        Ai[i+n, j] = -A[j+n, i]
+        Ai[i + n, j] = -A[j + n, i]
     end
     @inbounds for i in 1:n, j in 1:n
-        Ai[i, j+n] = -A[j, i+n]
+        Ai[i, j + n] = -A[j, i + n]
     end
     @inbounds for i in 1:n, j in 1:n
-        Ai[i+n, j+n] = A[j, i]
+        Ai[i + n, j + n] = A[j, i]
     end
     return Ai
 end
 
-function inv!(::Symplectic{n, ℝ}, A) where {n}
-    checkbounds(A, 1:2n, 1:2n)
+function inv!(::Symplectic{n,ℝ}, A) where {n}
+    checkbounds(A, 1:(2n), 1:(2n))
     @inbounds for i in 1:n, j in 1:n
         tmp = A[i, j]
-        A[i, j] = A[j+n, i+n]
-        A[j+n, i+n] = tmp
+        A[i, j] = A[j + n, i + n]
+        A[j + n, i + n] = tmp
     end
     @inbounds for i in 1:n, j in i:n
         if i == j
-            A[i, j+n] = -A[i, j+n]
+            A[i, j + n] = -A[i, j + n]
         else
-            tmp = A[i, j+n]
-            A[i, j+n] = -A[j, i+n]
-            A[j, i+n] = -tmp
+            tmp = A[i, j + n]
+            A[i, j + n] = -A[j, i + n]
+            A[j, i + n] = -tmp
         end
     end
     @inbounds for i in 1:n, j in i:n
         if i == j
-            A[i+n, j] = -A[i+n, j]
+            A[i + n, j] = -A[i + n, j]
         else
-            tmp = A[i+n, j]
-            A[i+n, j] = -A[j+n, i]
-            A[j+n, i] = -tmp
+            tmp = A[i + n, j]
+            A[i + n, j] = -A[j + n, i]
+            A[j + n, i] = -tmp
         end
     end
     return A
 end
 
-function symplectic_inverse_old(::Symplectic{n, ℝ}, A) where {n}
-   return [A[(n+1):2n,(n+1):2n]' -A[1:n,(n+1):2n]'; -A[(n+1):2n, 1:n]' A[1:n, 1:n]']
-end
-
-function symplectic_inverse_old!(::Symplectic{n, ℝ}, A) where {n}
-    return (A.= [A[(n+1):2n,(n+1):2n]' -A[1:n,(n+1):2n]'; -A[(n+1):2n, 1:n]' A[1:n, 1:n]'])
+function symplectic_inverse_times!(::::Symplectic{n,ℝ}, A, p, q) where {n}
+    checkbounds(q, 1:(2n), 1:(2n))
+    checkbounds(p, 1:(2n), 1:(2n))
+    checkbounds(A, 1:(2n), 1:(2n))
+    # we write p = [p1 p2; p3 p4] (and similarly q and A), where
+    # pi, qi are nxn and Ai is nxn Then the p^+q can be computed as
+    A .= 0
+    @inbounds for i in 1:n, j in 1:n, l in 1:n # Compute A1 = p4'q1 - p2'q3
+        A[i, j] += p[n + l, n + i] * q[l, j] - p[l, n + i] * q[n + l, j]
+    end
+    @inbounds for i in 1:n, j in 1:n, l in 1:n # A2 = p4'q2 - p2'q4
+        A[i, n + j] += p[n + l, n + i] * q[l, n + j] - p[l, n + i] * q[n + l, n + j]
+    end
+    @inbounds for i in 1:n, j in 1:n, l in 1:n # A3 = p1'q3 - p3'q1
+        A[n + i, j] += p[l, i] * q[n + l, j] - p[n + l, i] * q[l, j]
+    end
+    @inbounds for i in 1:n, j in 1:n, l in 1:n # A4 = p1'q4 - p3'q2
+        A[n + i, n + j] += p[l, i] * q[n + l, n + j] - p[n + l, i] * q[l, n + j]
+    end
+    return A
 end
 
 function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}
-    A = randn(n, n); B = randn(n, n); C = randn(n, n)
-    B = (1/2) .* (B .+ B'); C = (1/2) .* (C .+ C')
+    A = randn(n, n)
+    B = randn(n, n)
+    C = randn(n, n)
+    B = (1 / 2) .* (B .+ B')
+    C = (1 / 2) .* (C .+ C')
     Ω = [A B; C -A']
-    return final_norm*Ω/norm(Ω, 2)
+    return final_norm * Ω / norm(Ω, 2)
 end
 
 @doc raw"""
@@ -459,7 +492,6 @@ function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
     return Y
 end
 
-
 @doc raw"""
     project!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
 
@@ -475,7 +507,7 @@ Adapted from projection onto tangent spaces of Symplectic Stiefal manifolds ``\o
     > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
     > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
-function project!(::Symplectic{n, ℝ}, Y, p, X) where {n}
+function project!(::Symplectic{n,ℝ}, Y, p, X) where {n}
     # Original formulation of the projection from the Gao et al. paper:
     # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*p^T_Q^T) * X
     # The term: (I - pQ*pT_QT) = 0 in our symplectic case.
@@ -483,12 +515,11 @@ function project!(::Symplectic{n, ℝ}, Y, p, X) where {n}
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
-    symmetrized_pT_QT_X = (1/2) .* (pT_QT_X + pT_QT_X')
+    symmetrized_pT_QT_X = (1 / 2) .* (pT_QT_X + pT_QT_X')
 
-    Y[:, :] = p*Q*(symmetrized_pT_QT_X)
+    Y[:, :] = p * Q * (symmetrized_pT_QT_X)
     return Y
 end
-
 
 @doc raw"""
     project_normal!(M::Symplectic{n, ℝ}, Y, p, X)
@@ -504,16 +535,15 @@ Project onto the normal space relative to the tangent space at a point ``p ∈ \
     > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
     > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
-function project_normal!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
+function project_normal!(M::Symplectic{n,ℝ}, Y, p, X) where {n}
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
-    skew_pT_QT_X = (1/2) .* (pT_QT_X .- pT_QT_X')
+    skew_pT_QT_X = (1 / 2) .* (pT_QT_X .- pT_QT_X')
 
-    Y[:, :] = p*Q*skew_pT_QT_X
+    Y[:, :] = p * Q * skew_pT_QT_X
     return Y
 end
-
 
 ### TODO: implement retractions. First up, Cauchy-retraction:
 @doc raw"""
@@ -532,15 +562,13 @@ function retract!(::Symplectic, q, p, X, ::CayleyRetraction)
 
     pT_QT_X = p' * Q' * X
 
-    q .= -p * ((pT_QT_X + 2*Q) \ (pT_QT_X - 2*Q))
+    q .= -p * ((pT_QT_X + 2 * Q) \ (pT_QT_X - 2 * Q))
     return q
 end
 
 ManifoldsBase.default_retraction_method(::Symplectic) = CayleyRetraction()
 
-
 struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
-
 
 # Inverse-retract:
 # TODO: Write as a special case of the inverse-cayley retraction for the SymplecticStiefel case?

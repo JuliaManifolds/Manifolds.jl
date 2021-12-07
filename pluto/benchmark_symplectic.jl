@@ -1,15 +1,15 @@
 ### A Pluto.jl notebook ###
-# v0.17.1
+# v0.17.3
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 85f0da8c-43e6-11ec-0fd5-ad40fcfed441
 begin
-	using Pkg
-	 Pkg.activate()# use global environment to have Manifolds in dev mode
-	using Manifolds, PlutoUI, BenchmarkTools, Random, Revise
-	Random.seed!(42)
+    using Pkg
+    Pkg.activate()# use global environment to have Manifolds in dev mode
+    using Manifolds, PlutoUI, BenchmarkTools, Random, Revise
+    Random.seed!(42)
 end
 
 # ╔═╡ bbda868e-5a2b-4870-980c-1c68080bdd86
@@ -28,7 +28,7 @@ pi, pj = copy(p), copy(p);
 @benchmark Manifolds.symplectic_inverse_old!(M, pj)
 
 # ╔═╡ 0ddded62-2f28-47a9-94a8-4adde80b1e98
-norm(pi-pj)
+norm(pi - pj)
 
 # ╔═╡ Cell order:
 # ╠═85f0da8c-43e6-11ec-0fd5-ad40fcfed441
