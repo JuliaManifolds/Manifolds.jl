@@ -113,12 +113,19 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     return nothing
 end
 
-Base.inv(M::Symplectic, p) = symplectic_inverse(M, p)
-
-Base.rand(M::Symplectic{n}) where {n} = begin
+function Base.rand(M::Symplectic{n}) where {n}
     # Generate random matrices to construct a Hamiltonian matrix:
     Ω = rand_hamiltonian(M)
     (I + Ω) / (I - Ω)
+end
+
+function Base.rand(::Symplectic{n}, p) where {n}
+    # Generate random symmetric matrix:
+    S = rand(2n, 2n) .- 1/2
+    S .= (1/2) .* (S + S')
+    Q = SymplecticMatrix(p)
+    lmul!(Q, S)
+    return p * S
 end
 
 @doc raw"""
@@ -131,6 +138,35 @@ function inner(M::Symplectic{n,ℝ}, p, X, Y)::eltype(p) where {n}
     # For symplectic matrices, the 'symplectic inverse' p^+ is the actual inverse.
     p_star = inv(M, p)
     return tr((p_star * X)' * (p_star * Y))
+end
+
+@doc raw"""
+    distance(M::Symplectic{n}, p, q) where {n}
+
+Approximate distance between two Symplectic matrices, as found
+in eq. (7) of "A Riemannian-Steepest-Descent approach
+for optimization of the real symplectic group."
+"""
+function distance(::Symplectic{n}, p, q) where {n}
+    return norm(log(symplectic_inverse_times(SymplecticStiefel(2n, 2n), p, q)))
+end
+
+
+@doc raw"""
+    exp(M::Symplectic, p, X)
+
+The Exponential mapping on the Symplectic manifold with the 'Fiori'
+inner product.
+From Proposition 2 in "A Riemannian-Steepest-Descent approach
+for optimization of the real symplectic group."
+"""
+function exp!(::Symplectic{n}, q, p, X) where {n}
+    # p_star_X = inv(M, p)*X
+    p_star_X = symplectic_inverse_times(SymplecticStiefel(2n, 2n), p, X)
+    # Use memory in q once:
+    q .= p_star_X .- p_star_X'
+    q .= p * exp(p_star_X) * exp(q)
+    return q
 end
 
 @doc raw"""
@@ -431,9 +467,9 @@ function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}
 end
 
 @doc raw"""
-    grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇_Euclidian_f)
+    grad_euclidean_to_manifold(M::Symplectic{n}, p, ∇_Euclidian_f)
 
-Compute the transformation of the euclidian gradient of a function `f` onto the tangent space of the point p ∈ Sn(ℝ, 2n)[^FioriSimone2011].
+Compute the transformation of the euclidean gradient of a function `f` onto the tangent space of the point p ∈ Sn(ℝ, 2n)[^FioriSimone2011].
 The transformation is found by requireing that the gradient element in the tangent space solves the metric compatibility for the Riemannian default_metric_dispatch
 along with the defining equation for a tangent vector ``X ∈ T_pSn(ℝ)``at a point ``p ∈ Sn(ℝ)``.
 
@@ -446,9 +482,22 @@ and then we project the result onto the tangent space ``T_p\operatorname{Sp}(2n,
     > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
-function grad_euclidian_to_manifold(M::Symplectic{n}, p, ∇f_euc) where {n}
+function grad_euclidean_to_manifold(M::Symplectic{n}, p, ∇f_euc) where {n}
+    # TODO: Make mutating version of this grad-conversion function.
     ∇f_metr_comp = change_representer(M, EuclideanMetric(), p, ∇f_euc)
-    return project(M, p, ∇f_metr_comp)
+    return project_riemannian!(M, ∇f_metr_comp, p, ∇f_metr_comp)
+end
+
+function grad_euclidean_to_manifold!(M::Symplectic{n}, ∇f_man, p, ∇f_euc) where {n}
+    # TODO: Make mutating version of this grad-conversion function.
+    change_representer!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
+    return project_riemannian!(M, ∇f_man, p, ∇f_man)
+end
+
+function new_grad_euclidean_to_manifold!(M::Symplectic, ∇f_man, p, ∇f_euc)
+    # First project onto the tangent space, then change the representer.
+    project!(M, ∇f_man, p, ∇f_euc)  # Requries solving 'sylvester'-equation.
+    return change_tangent_space_representer!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
 end
 
 # Overwrite gradient functions for the Symplectic case:
@@ -457,28 +506,30 @@ end
 function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
 
-    # Does not work: Change_representer ∘ Proj(amb_grad):
-    # return change_representer(M, EuclideanMetric(), p, project(M, p, amb_grad))
-
     # Proj ∘ Change_representer(amb_grad):
-    return project(M, p, change_representer(M, EuclideanMetric(), p, amb_grad))
+    return project_riemannian!(M, similar(amb_grad), p,
+                                change_representer(M, EuclideanMetric(), p, amb_grad))
 end
 
 function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend)
     _gradient!(f, X, p, backend.diff_backend)
     change_representer!(M, X, EuclideanMetric(), p, X)
-    return project!(M, X, p, X)
+    return project_riemannian!(M, X, p, X)
 end
+
 
 @doc raw"""
     change_representer!(::Symplectic, Y, p, X)
 
-Change the representation of a tangent vector ``χ ∈ T_p\operatorname{Sp}(2n, ℝ)`` s.t.
+Change the representation of an arbitrary element ``χ ∈ \mathbb{R}^{2n \times 2n}`` s.t.
 ````math
-    g_p(c(χ), η) = ⟨χ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ).
+    g_p(c_p(χ), η) = ⟨χ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ).
 ````
-s.t.
-
+where
+````math
+    c_p : \mathbb{R}^{2n \times 2n} \rightarrow \mathbb{R}^{2n \times 2n},
+````
+and ``c_p(χ) = pp^T χ``.
 """
 function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
     # The following formula actually works for all X ∈ ℝ^{2n × 2n}, and
@@ -493,7 +544,41 @@ function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
 end
 
 @doc raw"""
-    project!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
+    change_tangent_space_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
+
+Compute the representation of a tangent vector ``χ ∈ T_p\operatorname{Sp}(2n, ℝ)`` s.t.
+````math
+    g_p(c_p(χ), η) = ⟨χ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ).
+````
+with the conversion function
+````math
+    c_p : T_p\operatorname{Sp}(2n, ℝ) \rightarrow T_p\operatorname{Sp}(2n, ℝ), \quad
+    c_p(η) = \frac{1}{2} pp^T η + \frac{1}{2} pQ η^T pQ.
+````
+
+Each of the terms ``c_p^1(η) = p p^T η`` and ``c_p^2(η) = pQ η^T pQ`` from the
+above definition of ``c_p(η)`` are themselves metric compatible in the sense that
+````math
+    c_p^i : T_p\operatorname{Sp}(2n, ℝ) \rightarrow \mathbb{R}^{2n \times 2n}\quad
+    g_p^i(c_p(χ), η) = ⟨χ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ),
+````
+for ``i \in {1, 2}``. However the range of each function alone is not confined to
+``T_p\operatorname{Sp}(2n, ℝ)``, but the convex combination
+````math
+    c_p(η) = \frac{1}{2}c_p^1(η) + \frac{1}{2}c_p^2(η)
+````
+does have the correct range ``T_p\operatorname{Sp}(2n, ℝ)``.
+"""
+function change_tangent_space_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
+    # This is the change in 'representer' which keeps one in the
+    # tangent space of p, but only works in the symplectic case.
+    Q = SymplecticMatrix(p, X)
+    Y .= (1/2) .* p * (p' * X .+ Q * X' * p * Q)
+    return Y
+end
+
+@doc raw"""
+    riemannian_project!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
 
 Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n, ℝ)``, stored inplace in Y.
 Adapted from projection onto tangent spaces of Symplectic Stiefal manifolds ``\operatorname{Sp}(2p, 2n)`` with
@@ -507,7 +592,7 @@ Adapted from projection onto tangent spaces of Symplectic Stiefal manifolds ``\o
     > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
     > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
-function project!(::Symplectic{n,ℝ}, Y, p, X) where {n}
+function project_riemannian!(::Symplectic{n, ℝ}, Y, p, X) where {n}
     # Original formulation of the projection from the Gao et al. paper:
     # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*p^T_Q^T) * X
     # The term: (I - pQ*pT_QT) = 0 in our symplectic case.
@@ -522,10 +607,17 @@ function project!(::Symplectic{n,ℝ}, Y, p, X) where {n}
 end
 
 @doc raw"""
-    project_normal!(M::Symplectic{n, ℝ}, Y, p, X)
+    project_riemannian_normal!(M::Symplectic{n, ℝ}, Y, p, X)
 
+Project onto the normal of the tangent space ``(T_p\operatorname{Sp}(2n))^{\perp_g}`` at
+a point ``p ∈ \operatorname{Sp}(2n)``, relative to the riemannian metric ``g``.
 
-Project onto the normal space relative to the tangent space at a point ``p ∈ \operatorname{Sp}(2n)``, as found in Gao et al.[^Gao2021riemannian].
+That is,
+````math
+(T_p\operatorname{Sp}(2n))^{\perp_g} = \{Y \in \mathbb{R}^{2n \times 2n} :
+                        g_p(Y, X) = 0 \;\forall\; X \in T_p\operatorname{Sp}(2n)\},
+````
+and the closed form projection operator is as found in Gao et al.[^Gao2021riemannian].
 
 # Defining equations:
 
@@ -535,7 +627,7 @@ Project onto the normal space relative to the tangent space at a point ``p ∈ \
     > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
     > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
-function project_normal!(M::Symplectic{n,ℝ}, Y, p, X) where {n}
+function project_riemannian_normal!(::Symplectic{n, ℝ}, Y, p, X) where {n}
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X

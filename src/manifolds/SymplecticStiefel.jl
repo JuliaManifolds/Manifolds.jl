@@ -321,23 +321,53 @@ end
 
 function gradient(M::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
-    return grad_euclidian_to_manifold(M, p, amb_grad)
+    return grad_euclidean_to_manifold(M, p, amb_grad)
 end
 
 function gradient!(M::SymplecticStiefel, f, X, p, backend::RiemannianProjectionBackend)
     _gradient!(f, X, p, backend.diff_backend)
-    return grad_euclidian_to_manifold!(M, X, p, X)
+    return grad_euclidean_to_manifold!(M, X, p, X)
 end
 
-function grad_euclidian_to_manifold(::SymplecticStiefel, p, ∇f_euc)
+function grad_euclidean_to_manifold(::SymplecticStiefel, p, ∇f_euc)
     Q = SymplecticMatrix(p, ∇f_euc)
     return ∇f_euc * (p' * p) .+ Q * p * (∇f_euc' * Q * p)
 end
 
-function grad_euclidian_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
+function grad_euclidean_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
     # Older type: Rewritten to avoid allocating (2n × 2n) matrices:
     Q = SymplecticMatrix(p, ∇f_euc)
     Qp = Q * p
     ∇f_man .= ∇f_euc * (p' * p) .+ Qp * (∇f_euc' * Qp)
     return ∇f_man
+end
+
+@doc raw"""
+    project!(::Union{SymplecticStiefel, Symplectic}, Y, p, A)
+
+Given a point ``p \in \operatorname{SpSt}(2n, 2k)``,
+project an element ``A \in \mathbb{R}^{2n \times 2k}`` onto
+the tangent space ``T_p\operatorname{SpSt}(2n, 2k)`` relative to
+the euclidean metric of the embedding ``\mathbb{R}^{2n \times 2k}``.
+
+That is, we find the element ``X \in T_p\operatorname{SpSt}(2n, 2k)``
+which solves the constrained optimization problem
+
+````math
+    \operatorname{min}_{X \in \mathbb{R}^{2n \times 2k}} \frac{1}{2}||X - A||, \quad
+    s.t. h(X) = X^T Q p + p^T Q X = 0,
+````
+where ``h : \mathbb{R}^{2n \times 2k} \rightarrow \operatorname{skew}(2k)`` defines
+the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``.
+"""
+function project!(::Union{SymplecticStiefel, Symplectic}, Y, p, A)
+    Q = SymplecticMatrix(Y, p, A)
+    h(X) = X' * (Q * p) + p' * (Q * X)
+
+    # Solve for Λ (Lagrange mutliplier):
+    pT_p = p'*p  # (2k × 2k)
+    Λ = sylvester(pT_p, pT_p, h(A) ./ 2)
+
+    Y[:, :] = A .- (Q * p) * (Λ .- Λ')
+    return Y
 end
