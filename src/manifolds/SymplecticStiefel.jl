@@ -203,21 +203,27 @@ function symplectic_inverse_times(M::SymplecticStiefel{n,k}, p, q) where {n,k}
     return symplectic_inverse_times!(M, A, p, q)
 end
 function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k}
-    checkbounds(q, 1:(2n), 1:(2k))
-    checkbounds(p, 1:(2n), 1:(2k))
-    checkbounds(A, 1:(2k), 1:(2k))
-    # we write p = [p1 p2; p3 p4] (and similarly q and A), where
-    # pi, qi are nxk and Ai is kxk Then the p^+q can be computed as
-    @inbounds for i in 1:k, j in 1:k, l in 1:n
-        # Compute A1 = p4'q1 - p2'q3
-        A[i, j] = p[n + l, k + i] * q[l, j] - p[l, k + i] * q[n + l, j]
-        # A2 = p4'q2 - p2'q4
-        A[i, k + j] = p[n + l, k + i] * q[l, k + j] - p[l, k + i] * q[n + l, k + j]
-        # A3 = p1'q3 - p3'q1
-        A[k + i, j] = p[l, i] * q[n + l, j] - p[n + l, i] * q[l, j]
-        # A4 = p1'q4 - p3'q2
-        A[k + i, k + j] = p[l, i] * q[n + l, k + j] - p[n + l, i] * q[l, k + j]
-    end
+    # we write p = [p1 p2; p3 p4] (and q, too), then
+    p1 = @view(p[1:n, 1:k])
+    p2 = @view(p[1:n, (k + 1):(2k)])
+    p3 = @view(p[(n + 1):(2n), 1:k])
+    p4 = @view(p[(n + 1):(2n), (k + 1):(2k)])
+    q1 = @view(q[1:n, 1:k])
+    q2 = @view(q[1:n, (k + 1):(2k)])
+    q3 = @view(q[(n + 1):(2n), 1:k])
+    q4 = @view(q[(n + 1):(2n), (k + 1):(2k)])
+    A1 = @view(A[1:k, 1:k])
+    A2 = @view(A[1:k, (k + 1):(2k)])
+    A3 = @view(A[(k + 1):(2k), 1:k])
+    A4 = @view(A[(k + 1):(2k), (k + 1):(2k)])
+    mul!(A1, p4', q1) # A1 = p4'q1
+    mul!(A1, p2', q3, -1, 1) # A1 -= p2'p3
+    mul!(A2, p4', q2) # A2 = p4'q2
+    mul!(A2, p2', q4, -1, 1) #A2 -= p2'q4
+    mul!(A3, p1', q3) #A3 = p1'q3
+    mul!(A3, p3', q1, -1, 1) # A3 -= p3'q1
+    mul!(A4, p1', q4) # A4 = p1'q4
+    mul!(A4, p3', q2, -1, 1) #A4 -= p3'q2
     return A
 end
 

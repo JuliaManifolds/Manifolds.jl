@@ -433,23 +433,32 @@ function inv!(::Symplectic{n,ℝ}, A) where {n}
     return A
 end
 
-function symplectic_inverse_times!(::Symplectic{n,ℝ}, A, p, q) where {n}
-    checkbounds(q, 1:(2n), 1:(2n))
-    checkbounds(p, 1:(2n), 1:(2n))
-    checkbounds(A, 1:(2n), 1:(2n))
-    # we write p = [p1 p2; p3 p4] (and similarly q and A), where
-    # pi, qi are nxn and Ai is nxn Then the p^+q can be computed as
-    A .= 0
-    @inbounds for i in 1:n, j in 1:n, l in 1:n
-        # Compute A1 = p4'q1 - p2'q3
-        A[i, j] = p[n + l, n + i] * q[l, j] - p[l, n + i] * q[n + l, j]
-        # A2 = p4'q2 - p2'q4
-        A[i, n + j] = p[n + l, n + i] * q[l, n + j] - p[l, n + i] * q[n + l, n + j]
-        # A3 = p1'q3 - p3'q1
-        A[n + i, j] = p[l, i] * q[n + l, j] - p[n + l, i] * q[l, j]
-        # A4 = p1'q4 - p3'q2
-        A[n + i, n + j] = p[l, i] * q[n + l, n + j] - p[n + l, i] * q[l, n + j]
-    end
+function symplectic_inverse_times(M::Symplectic{n}, p, q) where {n}
+    A = similar(p)
+    return symplectic_inverse_times!(M, A, p, q)
+end
+function symplectic_inverse_times!(::Symplectic{n}, A, p, q) where {n}
+    # we write p = [p1 p2; p3 p4] (and q, too), then
+    p1 = @view(p[1:n, 1:n])
+    p2 = @view(p[1:n, (n + 1):(2n)])
+    p3 = @view(p[(n + 1):(2n), 1:n])
+    p4 = @view(p[(n + 1):(2n), (n + 1):(2n)])
+    q1 = @view(q[1:n, 1:n])
+    q2 = @view(q[1:n, (n + 1):(2n)])
+    q3 = @view(q[(n + 1):(2n), 1:n])
+    q4 = @view(q[(n + 1):(2n), (n + 1):(2n)])
+    A1 = @view(A[1:n, 1:n])
+    A2 = @view(A[1:n, (n + 1):(2n)])
+    A3 = @view(A[(n + 1):(2n), 1:n])
+    A4 = @view(A[(n + 1):(2n), (n + 1):(2n)])
+    mul!(A1, p4', q1) # A1 = p4'q1
+    mul!(A1, p2', q3, -1, 1) # A1 -= p2'p3
+    mul!(A2, p4', q2) # A2 = p4'q2
+    mul!(A2, p2', q4, -1, 1) #A2 -= p2'q4
+    mul!(A3, p1', q3) #A3 = p1'q3
+    mul!(A3, p3', q1, -1, 1) # A3 -= p3'q1
+    mul!(A4, p1', q4) # A4 = p1'q4
+    mul!(A4, p3', q2, -1, 1) #A4 -= p3'q2
     return A
 end
 
