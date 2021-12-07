@@ -208,18 +208,15 @@ function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k
     checkbounds(A, 1:(2k), 1:(2k))
     # we write p = [p1 p2; p3 p4] (and similarly q and A), where
     # pi, qi are nxk and Ai is kxk Then the p^+q can be computed as
-    A .= 0
-    @inbounds for i in 1:k, j in 1:k, l in 1:n # Compute A1 = p4'q1 - p2'q3
-        A[i, j] += p[n + l, k + i] * q[l, j] - p[l, k + i] * q[n + l, j]
-    end
-    @inbounds for i in 1:k, j in 1:k, l in 1:n # A2 = p4'q2 - p2'q4
-        A[i, k + j] += p[n + l, k + i] * q[l, k + j] - p[l, k + i] * q[n + l, k + j]
-    end
-    @inbounds for i in 1:k, j in 1:k, l in 1:n # A3 = p1'q3 - p3'q1
-        A[k + i, j] += p[l, i] * q[n + l, j] - p[n + l, i] * q[l, j]
-    end
-    @inbounds for i in 1:k, j in 1:k, l in 1:n # A4 = p1'q4 - p3'q2
-        A[k + i, k + j] += p[l, i] * q[n + l, k + j] - p[n + l, i] * q[l, k + j]
+    @inbounds for i in 1:k, j in 1:k, l in 1:n
+        # Compute A1 = p4'q1 - p2'q3
+        A[i, j] = p[n + l, k + i] * q[l, j] - p[l, k + i] * q[n + l, j]
+        # A2 = p4'q2 - p2'q4
+        A[i, k + j] = p[n + l, k + i] * q[l, k + j] - p[l, k + i] * q[n + l, k + j]
+        # A3 = p1'q3 - p3'q1
+        A[k + i, j] = p[l, i] * q[n + l, j] - p[n + l, i] * q[l, j]
+        # A4 = p1'q4 - p3'q2
+        A[k + i, k + j] = p[l, i] * q[n + l, k + j] - p[n + l, i] * q[l, k + j]
     end
     return A
 end
@@ -360,12 +357,12 @@ which solves the constrained optimization problem
 where ``h : \mathbb{R}^{2n \times 2k} \rightarrow \operatorname{skew}(2k)`` defines
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``.
 """
-function project!(::Union{SymplecticStiefel, Symplectic}, Y, p, A)
+function project!(::Union{SymplecticStiefel,Symplectic}, Y, p, A)
     Q = SymplecticMatrix(Y, p, A)
     h(X) = X' * (Q * p) + p' * (Q * X)
 
     # Solve for Λ (Lagrange mutliplier):
-    pT_p = p'*p  # (2k × 2k)
+    pT_p = p' * p  # (2k × 2k)
     Λ = sylvester(pT_p, pT_p, h(A) ./ 2)
 
     Y[:, :] = A .- (Q * p) * (Λ .- Λ')

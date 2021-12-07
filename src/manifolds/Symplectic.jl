@@ -116,13 +116,13 @@ end
 function Base.rand(M::Symplectic{n}) where {n}
     # Generate random matrices to construct a Hamiltonian matrix:
     Ω = rand_hamiltonian(M)
-    (I + Ω) / (I - Ω)
+    return (I + Ω) / (I - Ω)
 end
 
 function Base.rand(::Symplectic{n}, p) where {n}
     # Generate random symmetric matrix:
-    S = rand(2n, 2n) .- 1/2
-    S .= (1/2) .* (S + S')
+    S = rand(2n, 2n) .- 1 / 2
+    S .= (1 / 2) .* (S + S')
     Q = SymplecticMatrix(p)
     lmul!(Q, S)
     return p * S
@@ -150,7 +150,6 @@ for optimization of the real symplectic group."
 function distance(::Symplectic{n}, p, q) where {n}
     return norm(log(symplectic_inverse_times(SymplecticStiefel(2n, 2n), p, q)))
 end
-
 
 @doc raw"""
     exp(M::Symplectic, p, X)
@@ -434,24 +433,22 @@ function inv!(::Symplectic{n,ℝ}, A) where {n}
     return A
 end
 
-function symplectic_inverse_times!(::::Symplectic{n,ℝ}, A, p, q) where {n}
+function symplectic_inverse_times!(::Symplectic{n,ℝ}, A, p, q) where {n}
     checkbounds(q, 1:(2n), 1:(2n))
     checkbounds(p, 1:(2n), 1:(2n))
     checkbounds(A, 1:(2n), 1:(2n))
     # we write p = [p1 p2; p3 p4] (and similarly q and A), where
     # pi, qi are nxn and Ai is nxn Then the p^+q can be computed as
     A .= 0
-    @inbounds for i in 1:n, j in 1:n, l in 1:n # Compute A1 = p4'q1 - p2'q3
-        A[i, j] += p[n + l, n + i] * q[l, j] - p[l, n + i] * q[n + l, j]
-    end
-    @inbounds for i in 1:n, j in 1:n, l in 1:n # A2 = p4'q2 - p2'q4
-        A[i, n + j] += p[n + l, n + i] * q[l, n + j] - p[l, n + i] * q[n + l, n + j]
-    end
-    @inbounds for i in 1:n, j in 1:n, l in 1:n # A3 = p1'q3 - p3'q1
-        A[n + i, j] += p[l, i] * q[n + l, j] - p[n + l, i] * q[l, j]
-    end
-    @inbounds for i in 1:n, j in 1:n, l in 1:n # A4 = p1'q4 - p3'q2
-        A[n + i, n + j] += p[l, i] * q[n + l, n + j] - p[n + l, i] * q[l, n + j]
+    @inbounds for i in 1:n, j in 1:n, l in 1:n
+        # Compute A1 = p4'q1 - p2'q3
+        A[i, j] = p[n + l, n + i] * q[l, j] - p[l, n + i] * q[n + l, j]
+        # A2 = p4'q2 - p2'q4
+        A[i, n + j] = p[n + l, n + i] * q[l, n + j] - p[l, n + i] * q[n + l, n + j]
+        # A3 = p1'q3 - p3'q1
+        A[n + i, j] = p[l, i] * q[n + l, j] - p[n + l, i] * q[l, j]
+        # A4 = p1'q4 - p3'q2
+        A[n + i, n + j] = p[l, i] * q[n + l, n + j] - p[n + l, i] * q[l, n + j]
     end
     return A
 end
@@ -507,8 +504,12 @@ function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
 
     # Proj ∘ Change_representer(amb_grad):
-    return project_riemannian!(M, similar(amb_grad), p,
-                                change_representer(M, EuclideanMetric(), p, amb_grad))
+    return project_riemannian!(
+        M,
+        similar(amb_grad),
+        p,
+        change_representer(M, EuclideanMetric(), p, amb_grad),
+    )
 end
 
 function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend)
@@ -516,7 +517,6 @@ function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend)
     change_representer!(M, X, EuclideanMetric(), p, X)
     return project_riemannian!(M, X, p, X)
 end
-
 
 @doc raw"""
     change_representer!(::Symplectic, Y, p, X)
@@ -573,7 +573,7 @@ function change_tangent_space_representer!(::Symplectic, Y, ::EuclideanMetric, p
     # This is the change in 'representer' which keeps one in the
     # tangent space of p, but only works in the symplectic case.
     Q = SymplecticMatrix(p, X)
-    Y .= (1/2) .* p * (p' * X .+ Q * X' * p * Q)
+    Y .= (1 / 2) .* p * (p' * X .+ Q * X' * p * Q)
     return Y
 end
 
@@ -592,7 +592,7 @@ Adapted from projection onto tangent spaces of Symplectic Stiefal manifolds ``\o
     > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
     > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
-function project_riemannian!(::Symplectic{n, ℝ}, Y, p, X) where {n}
+function project_riemannian!(::Symplectic{n,ℝ}, Y, p, X) where {n}
     # Original formulation of the projection from the Gao et al. paper:
     # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*p^T_Q^T) * X
     # The term: (I - pQ*pT_QT) = 0 in our symplectic case.
@@ -627,7 +627,7 @@ and the closed form projection operator is as found in Gao et al.[^Gao2021rieman
     > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
     > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
-function project_riemannian_normal!(::Symplectic{n, ℝ}, Y, p, X) where {n}
+function project_riemannian_normal!(::Symplectic{n,ℝ}, Y, p, X) where {n}
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
