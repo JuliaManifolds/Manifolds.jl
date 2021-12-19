@@ -652,7 +652,14 @@ function project_riemannian_normal!(::Symplectic{n,ℝ}, Y, p, X) where {n}
     return Y
 end
 
-### TODO: implement retractions. First up, Cauchy-retraction:
+function old_retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
+    Q = SymplecticMatrix(p, X)
+    pT_QT_X = p' * Q' * X
+    q .= -p * ((pT_QT_X + 2 * Q) \ (pT_QT_X - 2 * Q))
+
+    return q
+end
+
 @doc raw"""
     retract(::Symplectic, p, X, ::CayleyRetraction)
 
@@ -661,30 +668,18 @@ Compute the Cayley retraction on ``p ∈ \operatorname{Sp}(2n, ℝ)`` in the dir
 
 Defined pointwise as
 ````math
-\mathcal{R}_p(X) = -p(p^TQ^T X + 2X)^{-1}(p^TQ^T X - 2Q)
+\mathcal{R}_p(X) = p(2*I - (Q^Tp^TQ)*X)^{-1}(2*I + (Q^Tp^TQ) X)
 ````
+Where
+``exp_{1/1}((Q^Tp^TQ)*X) = (2*I - (Q^Tp^TQ)*X)^{-1}(2*I + (Q^Tp^TQ) X)``
+is the Padé (1, 1) Approximation for exp((Q^Tp^TQ)*X).
 """
 function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
-    Q = SymplecticMatrix(p, X)
-    pT_QT_X = p' * Q' * X
-    q .= -p * ((pT_QT_X + 2 * Q) \ (pT_QT_X - 2 * Q))
+    # Less than a quarter the memory allocations of `old_retract`:
+    p_star_X = symplectic_inverse_times(M, p, X)
 
-    return q
-end
-
-function new_retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
-    # Less than a third of the allocations:
-    # Compute:
-    # q = p * (I - (1/2)p^{+}X)^{-1}(I + (1/2)p^{+}X)
-    # q = p * (2*I - p^{+}X)^{-1}(2*I + p^{+}X)
-    half_p_star_X = (1/2) .* symplectic_inverse_times(M, p, X)
-    # q .= p * ((I - half_p_star_X) \ (I + half_p_star_X))
-
-    # q .= p * ((I - half_p_star_X) \ add_scaled_I!(half_p_star_X, 1.0))
-    left_divisor = lu!(I - half_p_star_X)
-    ldiv!(left_divisor, add_scaled_I!(half_p_star_X, 1.0))
-    mul!(q, p, half_p_star_X)
-
+    ldiv!(lu!(2*I - p_star_X), add_scaled_I!(p_star_X, 2.0))
+    mul!(q, p, p_star_X)
     return q
 end
 
