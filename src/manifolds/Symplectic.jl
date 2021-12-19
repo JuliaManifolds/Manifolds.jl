@@ -71,7 +71,7 @@ function check_point(M::Symplectic{n,ℝ}, p; kwargs...) where {n,ℝ}
         return DomainError(
             expected_zero,
             (
-                "The point $(p) does not lie on $(M) because its symplectic" *
+                "The point p does not lie on $(M) because its symplectic" *
                 " inverse composed with itself is not the identity."
             ),
         )
@@ -105,8 +105,8 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
         return DomainError(
             tangent_requirement_norm,
             (
-                "The matrix $(X) is not in the tangent space at point $p of the" *
-                " $(M) manifold, as X'Qp + p'QX is not the zero matrix"
+                "The matrix X is not in the tangent space at point p of the" *
+                " manifold $(M), as X'Qp + p'QX is not the zero matrix."
             ),
         )
     end
@@ -257,8 +257,8 @@ function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
     # Add Q.λ multiples of the UniformScaling to the lower left and upper right blocks of p:
     λ_Id = LinearAlgebra.UniformScaling(Q.λ)
 
-    out[1:n, (n + 1):(2n)] .+= λ_Id
-    out[(n + 1):(2n), 1:n] .-= λ_Id
+    out[1:n, (n + 1):(2n)] += λ_Id
+    out[(n + 1):(2n), 1:n] -= λ_Id
     return out
 end
 
@@ -500,6 +500,12 @@ function grad_euclidean_to_manifold!(M::Symplectic{n}, ∇f_man, p, ∇f_euc) wh
     return project_riemannian!(M, ∇f_man, p, ∇f_man)
 end
 
+function new_grad_euclidean_to_manifold(M::Symplectic, p, ∇f_euc)
+    # First project onto the tangent space, then change the representer.
+    ∇f_man = similar(∇f_euc)
+    return new_grad_euclidean_to_manifold!(M::Symplectic, ∇f_man, p, ∇f_euc)
+end
+
 function new_grad_euclidean_to_manifold!(M::Symplectic, ∇f_man, p, ∇f_euc)
     # First project onto the tangent space, then change the representer.
     project!(M, ∇f_man, p, ∇f_euc)  # Requries solving 'sylvester'-equation.
@@ -658,12 +664,27 @@ Defined pointwise as
 \mathcal{R}_p(X) = -p(p^TQ^T X + 2X)^{-1}(p^TQ^T X - 2Q)
 ````
 """
-function retract!(::Symplectic, q, p, X, ::CayleyRetraction)
+function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
     Q = SymplecticMatrix(p, X)
-
     pT_QT_X = p' * Q' * X
-
     q .= -p * ((pT_QT_X + 2 * Q) \ (pT_QT_X - 2 * Q))
+
+    return q
+end
+
+function new_retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
+    # Less than a third of the allocations:
+    # Compute:
+    # q = p * (I - (1/2)p^{+}X)^{-1}(I + (1/2)p^{+}X)
+    # q = p * (2*I - p^{+}X)^{-1}(2*I + p^{+}X)
+    half_p_star_X = (1/2) .* symplectic_inverse_times(M, p, X)
+    # q .= p * ((I - half_p_star_X) \ (I + half_p_star_X))
+
+    # q .= p * ((I - half_p_star_X) \ add_scaled_I!(half_p_star_X, 1.0))
+    left_divisor = lu!(I - half_p_star_X)
+    ldiv!(left_divisor, add_scaled_I!(half_p_star_X, 1.0))
+    mul!(q, p, half_p_star_X)
+
     return q
 end
 
