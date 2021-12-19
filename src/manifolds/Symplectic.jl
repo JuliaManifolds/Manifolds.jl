@@ -113,13 +113,14 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     return nothing
 end
 
-function Base.rand(M::Symplectic{n}) where {n}
+function Base.rand(M::Symplectic{n}, hamiltonian_norm::Number=1.0) where {n}
     # Generate random matrices to construct a Hamiltonian matrix:
-    Ω = rand_hamiltonian(M)
-    return (I + Ω) / (I - Ω)
+    Ω = rand_hamiltonian(M; final_norm=hamiltonian_norm)
+    # Return 'cay(Ω)':
+    return (I - Ω) \ (I + Ω)
 end
 
-function Base.rand(::Symplectic{n}, p) where {n}
+function Base.rand(::Symplectic{n}, p::AbstractMatrix) where {n}
     # Generate random symmetric matrix:
     S = rand(2n, 2n) .- 1 / 2
     S .= (1 / 2) .* (S + S')
@@ -679,7 +680,7 @@ function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
     p_star_X = symplectic_inverse_times(M, p, X)
 
     ldiv!(lu!(2*I - p_star_X), add_scaled_I!(p_star_X, 2.0))
-    mul!(q, p, p_star_X)
+    q .= p * p_star_X
     return q
 end
 
