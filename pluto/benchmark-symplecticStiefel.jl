@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.17.3
+# v0.17.1
 
 using Markdown
 using InteractiveUtils
@@ -24,7 +24,7 @@ M = SymplecticStiefel(n, k)
 begin
     Random.seed!(42)
     p = rand(M)
-    q = allocate(p)
+    q = rand(eltype(p), n, k)
     r2 = zeros(k, k)
     X = rand(M, p)
     Y = rand(M, p)
@@ -38,6 +38,9 @@ Manifolds.symplectic_inverse_times!(M, r2, p, q);
 
 # ╔═╡ c710a52d-18fb-4609-bac9-c6b5f0ecfa61
 norm(r - r2)
+
+# ╔═╡ ef744311-f993-47b6-9858-9c45227c0e17
+sizeof(p) / 10^3
 
 # ╔═╡ 6ba126e2-3732-42e4-8e6e-a6e643c12539
 @benchmark inv($M, $p) * $q
@@ -56,6 +59,7 @@ r2
 # ╠═42d56c68-1ae9-4744-9c76-ab681c0d8f54
 # ╠═9fcc168d-7a89-49fc-8c16-6af5449e9314
 # ╠═c710a52d-18fb-4609-bac9-c6b5f0ecfa61
+# ╠═ef744311-f993-47b6-9858-9c45227c0e17
 # ╠═6ba126e2-3732-42e4-8e6e-a6e643c12539
 # ╠═48322c17-4752-45c2-a492-28f757885eed
 # ╠═5b8ee8f9-6e83-4749-802e-dc399ee72a65

@@ -148,8 +148,8 @@ Approximate distance between two Symplectic matrices, as found
 in eq. (7) of "A Riemannian-Steepest-Descent approach
 for optimization of the real symplectic group."
 """
-function distance(::Symplectic{n}, p, q) where {n}
-    return norm(log(symplectic_inverse_times(SymplecticStiefel(2n, 2n), p, q)))
+function distance(M::Symplectic{n}, p, q) where {n}
+    return norm(log(symplectic_inverse_times(M, p, q)))
 end
 
 @doc raw"""
@@ -160,9 +160,9 @@ inner product.
 From Proposition 2 in "A Riemannian-Steepest-Descent approach
 for optimization of the real symplectic group."
 """
-function exp!(::Symplectic{n}, q, p, X) where {n}
+function exp!(M::Symplectic{n}, q, p, X) where {n}
     # p_star_X = inv(M, p)*X
-    p_star_X = symplectic_inverse_times(SymplecticStiefel(2n, 2n), p, X)
+    p_star_X = symplectic_inverse_times(M, p, X)
     # Use memory in q once:
     q .= p_star_X .- p_star_X'
     q .= p * exp(p_star_X) * exp(q)

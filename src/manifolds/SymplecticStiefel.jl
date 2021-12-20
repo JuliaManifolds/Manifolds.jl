@@ -169,7 +169,7 @@ As based on the parametrization of the tangent space ``T_p\operatorname{SpSt}(n,
 of Benodkat-Zimmermann. There they express the tangent space as ``X = pΩ + p^sB``, where ``Ω^+ = -Ω`` is Hamiltonian.
 The notation ``p^s`` means the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``, and ``B ∈ ℝ^{2(n-k) × 2k}.
 """
-function Base.rand(::SymplecticStiefel{n,k}, p) where {n,k}
+function Base.rand(::SymplecticStiefel{n,k}, p::AbstractMatrix) where {n,k}
     begin
         Ω = rand_hamiltonian(Symplectic(2k))
         p * Ω
@@ -225,6 +225,60 @@ function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k
     mul!(A4, p1', q4) # A4 = p1'q4
     mul!(A4, p3', q2, -1, 1) #A4 -= p3'q2
     return A
+end
+
+@doc raw"""
+    Compute the exponential mapping from eq. 3.19 of Bendokat-Zimmermann.
+"""
+function exp!(M::SymplecticStiefel{n, k}, q, p, X) where {n, k}
+    # Cannot alias 'q' and 'p'!
+
+    Q = SymplecticMatrix(p, X)
+    pT_p = lu!(p' * p) # ∈ ℝ^{2k × 2k}
+
+    # Construct A-bar:
+    C = (pT_p) \ X' # ∈ ℝ^{2k × 2n}
+
+    # A_bar = Q * (p^T * C^T) * Q
+    A_bar = rmul!(lmul!(Q, (p' * C')), Q)
+    A_bar .+= C * p
+
+    # Last term, use C-memory:
+    rmul!(C, Q') # C*Q^T -> C
+    C_QT = C
+
+    # Subtract C*Q^T*p*(pT_p)^{-1}*Q from A_bar:
+    A_bar .-= rmul!(rdiv!(C_QT*p, pT_p), Q)
+    # A_bar is "star-skew symmetric" (A^+ = -A).
+
+    # Have not used the q (2n × 2k) memory.
+    # Construct H_bar using q-memory:
+    mul!(q, Q, X) # q = Q*X
+    rdiv!(q, pT_p)
+    rmul!(q, Q)
+
+    q .-= p * symplectic_inverse_times(M, p, q)
+    # H_bar = q
+
+    q .+= p*A_bar
+
+    # Rename q -> Δ_bar.
+    Δ_bar = q
+
+    γ_1 = Δ_bar - p*symplectic_inverse_times(M, p, Δ_bar)
+    γ = [γ_1 -p] # ∈ ℝ^{2n × 4k}
+
+    λ_1 = lmul!(Q', p*Q)
+    λ_2 = (rmul!(Q'*Δ_bar', Q) .-
+            (1/2) .* symplectic_inverse_times(M, Δ_bar, p)*rmul!(Q'*p', Q))'
+    λ = [λ_1 λ_2] # ∈ ℝ^{2n × 4k}
+
+    Γ = [λ -γ] # ∈ ℝ^{2n × 8k}
+    Λ = [γ  λ] # ∈ ℝ^{2n × 8k}
+
+    # Then compute the matrix exponentials:
+    q .= Γ*(exp(Λ' * Γ)[:, (4k+1):end])*(exp(λ'*γ)[:, (2k+1):end])
+    return q
 end
 
 @doc raw"""
