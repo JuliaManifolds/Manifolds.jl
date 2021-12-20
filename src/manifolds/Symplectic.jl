@@ -333,14 +333,17 @@ end
 function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractMatrix, Q::SymplecticMatrix)
     _, k = get_even_dims(p)
     # Perform right mulitply by λ*Q:
-    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
-    mul!((@inbounds view(A, (n + 1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
+    mul!((@inbounds view(A, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
+    mul!((@inbounds view(A, :, (k + 1):lastindex(A, 2))), Q.λ, @inbounds view(p, :, 1:k))
     return A
 end
 
 function LinearAlgebra.mul!(A::AbstractMatrix, Q::SymplecticMatrix, p::AbstractMatrix)
     n, _ = get_even_dims(p)
-    # Perform right mulitply by λ*Q:
+    # Perform left mulitply by λ*Q:
+    println("size(A):  $(size(A))")
+    println("size(p):  $(size(p))")
+
     mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
     mul!((@inbounds view(A, (n + 1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
     return A
