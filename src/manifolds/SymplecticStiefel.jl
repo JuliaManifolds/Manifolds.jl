@@ -101,7 +101,19 @@ function inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
     # a) we permute X' and Y c to c^TY^TX = a\(Y'X) (avoids a large interims matrix)
     # b) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
     # and (b'X) again avoids a large interims matrix, so does Y'b.
-    return return tr(a \ (Y' * X)) - 1 / 2 * tr(a \ ((Y' * b) * (a \ (b' * X))))
+    return tr(a \ (Y' * X)) - (1 / 2) * tr(a \ ((Y' * b) * (a \ (b' * X))))
+end
+
+@doc raw"""
+    inner(M::SymplecticStiefel{n, k}, p, X. Y)
+
+Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
+"""
+function test_inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
+    Q = SymplecticMatrix(p, X, Y)
+    c = inv(p' * p)
+    b = Q' * p
+    return tr((X'* Y) * c) - (1/2) * tr((X' * (b * c)) * (b' * Y) * c)
 end
 
 function Base.inv(M::SymplecticStiefel{n,k}, p) where {n,k}
@@ -146,7 +158,7 @@ function change_representer!(
     # Remove memory allocation:
     # A = factorize((I - (1/2) * Q' * p * ((p' * p) \ p') * Q)')
 
-    Y .= (lu((I - (1 / 2) * Q' * p * ((p' * p) \ p') * Q)') \ X) * p' * p
+    Y .= (lu((I - (1 / 2) * Q' * p * ((p' * p) \ p') * Q)') \ X) * (p' * p)
     return Y
 end
 
@@ -157,9 +169,9 @@ Use the canonical projection by first generating a random symplectic matrix of t
 and then projecting onto the Symplectic Stiefel manifold.
 """
 function Base.rand(M::SymplecticStiefel{n,k}) where {n,k}
-    begin
-        canonical_projection(M, rand(Symplectic(2n)))
-    end
+    #  Ω = rand_hamiltonian(Symplectic(2n); final_norm=1.0)
+    p_symplectic = rand(Symplectic(2n), 1/2)
+    canonical_projection(M, p_symplectic)
 end
 
 @doc raw"""
@@ -170,10 +182,8 @@ of Benodkat-Zimmermann. There they express the tangent space as ``X = pΩ + p^sB
 The notation ``p^s`` means the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``, and ``B ∈ ℝ^{2(n-k) × 2k}.
 """
 function Base.rand(::SymplecticStiefel{n,k}, p::AbstractMatrix) where {n,k}
-    begin
-        Ω = rand_hamiltonian(Symplectic(2k))
-        p * Ω
-    end
+    Ω = rand_hamiltonian(Symplectic(2k))
+    p * Ω
 end
 
 @doc raw"""
@@ -294,7 +304,6 @@ Formula due to Bendokat-Zimmermann Proposition 5.2.
 """
 function retract!(M::SymplecticStiefel{n,k}, q, p, X, ::CayleyRetraction) where {n,k}
     # Define intermediate matrices for later use:
-    # A = inv(M, p) * X # 2k x 2k - writing this out explicitly, since this allocates a 2kx2n matrix.
     A = symplectic_inverse_times(M, p, X)
 
     H = X .- p * A  # Allocates (2n × 2k).
@@ -365,11 +374,19 @@ function grad_euclidean_to_manifold(::SymplecticStiefel, p, ∇f_euc)
     return ∇f_euc * (p' * p) .+ Q * p * (∇f_euc' * Q * p)
 end
 
-function grad_euclidean_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
+function old_grad_euclidean_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
     # Older type: Rewritten to avoid allocating (2n × 2n) matrices:
     Q = SymplecticMatrix(p, ∇f_euc)
-    Qp = Q * p
+    Qp = Q * p  # Allocated memory.
     ∇f_man .= ∇f_euc * (p' * p) .+ Qp * (∇f_euc' * Qp)
+    return ∇f_man
+end
+
+function grad_euclidean_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
+    Q = SymplecticMatrix(p, ∇f_euc)
+    Qp = Q * p  # Allocated memory.
+    mul!(∇f_man, ∇f_euc, (p' * p)) # Use the memory in ∇f_man.
+    ∇f_man .+= Qp * (∇f_euc' * Qp)
     return ∇f_man
 end
 
