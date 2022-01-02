@@ -34,20 +34,6 @@ struct ProbabilitySimplex{n} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingTyp
 ProbabilitySimplex(n::Int) = ProbabilitySimplex{n}()
 
 """
-    SoftmaxRetraction <: AbstractRetractionMethod
-
-Describes a retraction that is based on the softmax function.
-"""
-struct SoftmaxRetraction <: AbstractRetractionMethod end
-
-"""
-    SoftmaxInverseRetraction <: AbstractInverseRetractionMethod
-
-Describes an inverse retraction that is based on the softmax function.
-"""
-struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
-
-"""
     FisherRaoMetric <: AbstractMetric
 
 The Fisher-Rao metric or Fisher information metric is a particular Riemannian metric which

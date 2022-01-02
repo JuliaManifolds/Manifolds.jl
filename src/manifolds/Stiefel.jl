@@ -35,26 +35,6 @@ struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbedd
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ) = Stiefel{n,k,field}()
 
-@doc raw"""
-    PadeRetraction{m} <: AbstractRetractionMethod
-
-A retraction based on the Padé approximation of order $m$
-"""
-struct PadeRetraction{m} <: AbstractRetractionMethod end
-
-function PadeRetraction(m::Int)
-    (m < 1) && error(
-        "The Padé based retraction is only available for positive orders, not for order $m.",
-    )
-    return PadeRetraction{m}()
-end
-@doc raw"""
-    CayleyRetraction <: AbstractRetractionMethod
-
-A retraction based on the Cayley transform, which is realized by using the
-[`PadeRetraction`](@ref)`{1}`.
-"""
-const CayleyRetraction = PadeRetraction{1}
 
 function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where {n,k}
     return complex
@@ -407,8 +387,6 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
-Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
-Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($(m))")
 Base.show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
 
 """
