@@ -500,7 +500,7 @@ function Statistics.mean!(
     return q
 end
 
-@decorator_transparent_signature Statistics.mean!(
+@trait_function Statistics.mean!(
     M::AbstractDecoratorManifold,
     y,
     x::AbstractVector,
@@ -866,7 +866,7 @@ function Statistics.median!(
     return q
 end
 
-@decorator_transparent_signature Statistics.median!(
+@trait_function Statistics.median!(
     M::AbstractDecoratorManifold,
     y,
     x::AbstractVector,

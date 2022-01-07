@@ -19,7 +19,7 @@ function (ξ::RieszRepresenterCotangentVector)(Y)
     return inner(ξ.manifold, ξ.p, ξ.X, Y)
 end
 
-@decorator_transparent_signature flat!(
+@trait_function flat!(
     M::AbstractDecoratorManifold,
     ξ::CoTFVector,
     p,
@@ -152,7 +152,7 @@ $♯ : T^{*}\mathcal M → T\mathcal M$
 """
 sharp(::AbstractManifold, p, ξ)
 
-@decorator_transparent_signature sharp(
+@trait_function sharp(
     M::AbstractDecoratorManifold,
     X::TFVector,
     p,
@@ -164,7 +164,7 @@ function sharp(M::AbstractManifold, p, X::CoTFVector{<:Any,<:AbstractBasis})
     return TFVector(X.data, dual_basis(M, p, X.basis))
 end
 
-@decorator_transparent_signature sharp!(
+@trait_function sharp!(
     M::AbstractDecoratorManifold,
     X::TFVector,
     p,

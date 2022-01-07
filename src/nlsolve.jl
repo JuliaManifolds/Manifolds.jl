@@ -1,6 +1,6 @@
 
 @doc raw"""
-    inverse_retract(M, p, q method::NLsolveInverseRetraction; kwargs...)
+    inverse_retract(M, p, q method::NLSolveInverseRetraction; kwargs...)
 
 Approximate the inverse of the retraction specified by `method.retraction` from `p` with
 respect to `q` on the [`AbstractManifold`](@ref) `M` using NLsolve. This inverse retraction is
@@ -8,16 +8,16 @@ not guaranteed to succeed and probably will not unless `q` is close to `p` and t
 guess `X0` is close.
 
 If the solver fails to converge, an [`OutOfInjectivityRadiusError`](@ref) is raised.
-See [`NLsolveInverseRetraction`](@ref) for configurable parameters.
+See [`NLSolveInverseRetraction`](@ref) for configurable parameters.
 """
-inverse_retract(::AbstractManifold, p, q, ::NLsolveInverseRetraction; kwargs...)
+inverse_retract(::AbstractManifold, p, q, ::NLSolveInverseRetraction; kwargs...)
 
 function inverse_retract_nlsolve!(
     M::AbstractManifold,
     X,
     p,
     q,
-    method::NLsolveInverseRetraction;
+    method::NLSolveInverseRetraction;
     kwargs...,
 )
     X0 = method.X0 === nothing ? zero_vector(M, p) : method.X0
@@ -47,7 +47,7 @@ function _inverse_retract_nlsolve(
         return F
     end
     isdefined(Manifolds, :NLsolve) ||
-        @warn "To use NLsolveInverseRetraction, NLsolve must be loaded using `using NLsolve`."
+        @warn "To use NLSolveInverseRetraction, NLsolve must be loaded using `using NLsolve`."
     res = NLsolve.nlsolve(f!, X0; m.nlsolve_kwargs...)
     if !res.f_converged
         @debug res

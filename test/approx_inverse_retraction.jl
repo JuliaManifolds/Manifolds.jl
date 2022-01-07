@@ -6,19 +6,19 @@ include("utils.jl")
 Random.seed!(10)
 
 @testset "approximate inverse retractions" begin
-    @testset "NLsolveInverseRetraction" begin
+    @testset "NLSolveInverseRetraction" begin
         @testset "constructor" begin
             X = randn(3)
 
-            @test NLsolveInverseRetraction <: ApproximateInverseRetraction
-            m1 = NLsolveInverseRetraction(ExponentialRetraction())
+            @test NLSolveInverseRetraction <: ApproximateInverseRetraction
+            m1 = NLSolveInverseRetraction(ExponentialRetraction())
             @test m1.retraction === ExponentialRetraction()
             @test m1.X0 === nothing
             @test !m1.project_tangent
             @test !m1.project_point
             @test isempty(m1.nlsolve_kwargs)
 
-            m2 = NLsolveInverseRetraction(
+            m2 = NLSolveInverseRetraction(
                 PolarRetraction(),
                 [1.0, 2.0, 3.0];
                 project_tangent=true,
@@ -36,7 +36,7 @@ Random.seed!(10)
             p = [1.0, 2.0, 3.0]
             q = [4.0, 5.0, 6.0]
             retr_method = ExponentialRetraction()
-            inv_retr_method = NLsolveInverseRetraction(retr_method)
+            inv_retr_method = NLSolveInverseRetraction(retr_method)
             X = inverse_retract(M, p, q, inv_retr_method)
             @test is_vector(M, p, X)
             @test X isa Vector{Float64}
@@ -47,7 +47,7 @@ Random.seed!(10)
             p = [[1.0, 2.0], [3.0, 4.0]]
             q = [[5.0, 6.0], [7.0, 8.0]]
             retr_method = ExponentialRetraction()
-            inv_retr_method = NLsolveInverseRetraction(retr_method)
+            inv_retr_method = NLSolveInverseRetraction(retr_method)
             X = inverse_retract(M, p, q, inv_retr_method)
             @test is_vector(M, p, X)
             @test X isa Vector{Vector{Float64}}
@@ -61,7 +61,7 @@ Random.seed!(10)
             # vector must be nonzero to converge
             X0 = randn(3) .* eps()
             inv_retr_method =
-                NLsolveInverseRetraction(ProjectionRetraction(), X0; project_point=true)
+                NLSolveInverseRetraction(ProjectionRetraction(), X0; project_point=true)
             X = inverse_retract(M, p, q, inv_retr_method)
             @test is_vector(M, p, X; atol=1e-9)
             @test X ≈ X_exp atol = 1e-8
@@ -80,7 +80,7 @@ Random.seed!(10)
             q = exp(M, p, X)
             X_exp = log(M, p, q)
             inv_retr_method =
-                NLsolveInverseRetraction(ExponentialRetraction(); project_point=true)
+                NLSolveInverseRetraction(ExponentialRetraction(); project_point=true)
             X = inverse_retract(M, p, q, inv_retr_method)
             @test is_vector(M, p, X; atol=1e-8)
             @test X ≈ X_exp

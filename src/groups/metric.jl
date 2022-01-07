@@ -164,7 +164,7 @@ differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref
 """
 invariant_metric_dispatch(::MetricManifold, ::ActionDirection)
 
-@decorator_transparent_signature invariant_metric_dispatch(
+@trait_function invariant_metric_dispatch(
     M::AbstractDecoratorManifold,
     conv::ActionDirection,
 )

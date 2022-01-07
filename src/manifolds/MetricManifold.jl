@@ -104,13 +104,13 @@ function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     return get_vector!(M, Y, p, z, B)
 end
 
-@decorator_transparent_signature change_metric(
+@trait_function change_metric(
     M::AbstractDecoratorManifold,
     G::AbstractMetric,
     X,
     p,
 )
-@decorator_transparent_signature change_metric!(
+@trait_function change_metric!(
     M::AbstractDecoratorManifold,
     Y,
     G::AbstractMetric,
@@ -168,13 +168,13 @@ function change_representer(M::AbstractManifold, G::AbstractMetric, p, X)
     return change_representer!(M, Y, G, p, X)
 end
 
-@decorator_transparent_signature change_representer(
+@trait_function change_representer(
     M::AbstractDecoratorManifold,
     G::AbstractMetric,
     X,
     p,
 )
-@decorator_transparent_signature change_representer!(
+@trait_function change_representer!(
     M::AbstractDecoratorManifold,
     Y,
     G::AbstractMetric,
@@ -227,7 +227,7 @@ function christoffel_symbols_first(
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
     return Γ
 end
-@decorator_transparent_signature christoffel_symbols_first(
+@trait_function christoffel_symbols_first(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -266,7 +266,7 @@ det_local_metric(::AbstractManifold, p, ::AbstractBasis)
 function det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
     return det(local_metric(M, p, B))
 end
-@decorator_transparent_signature det_local_metric(
+@trait_function det_local_metric(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis,
@@ -290,7 +290,7 @@ function einstein_tensor(
     G = Ric - g .* S / 2
     return G
 end
-@decorator_transparent_signature einstein_tensor(
+@trait_function einstein_tensor(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -311,7 +311,8 @@ where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@r
 """
 flat(::MetricManifold, ::Any...)
 
-@decorator_transparent_fallback function flat!(
+function flat!(
+    ::EmptyTrait,
     M::MetricManifold,
     ξ::CoTFVector,
     p,
@@ -338,7 +339,7 @@ inverse_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 function inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)
     return inv(local_metric(M, p, B))
 end
-@decorator_transparent_signature inverse_local_metric(
+@trait_function inverse_local_metric(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis,
@@ -416,7 +417,8 @@ where ``G_p`` is the loal matrix representation of the [`AbstractMetric`](@ref) 
 """
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
-@decorator_transparent_fallback :intransparent function inner(
+function inner(
+    ::EmptyTrait,
     M::MetricManifold,
     p,
     X::TFVector,
@@ -440,7 +442,7 @@ This yields the property for two tangent vectors (using Einstein summation conve
 ``X = X^ib_i, Y=Y^ib_i \in T_p\mathcal M`` we get ``g_p(X, Y) = g_{ij} X^i Y^j``.
 """
 local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
-@decorator_transparent_signature local_metric(
+@trait_function local_metric(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -470,7 +472,7 @@ function local_metric_jacobian(
     ∂g = reshape(_jacobian(q -> local_metric(M, q, B), p, backend), n, n, n)
     return ∂g
 end
-@decorator_transparent_signature local_metric_jacobian(
+@trait_function local_metric_jacobian(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -498,7 +500,7 @@ log_local_metric_density(::AbstractManifold, ::Any, ::AbstractBasis)
 function log_local_metric_density(M::AbstractManifold, p, B::AbstractBasis)
     return log(abs(det_local_metric(M, p, B))) / 2
 end
-@decorator_transparent_signature log_local_metric_density(
+@trait_function log_local_metric_density(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis,
@@ -538,7 +540,7 @@ function ricci_curvature(
     S = sum(Ginv .* Ric)
     return S
 end
-@decorator_transparent_signature ricci_curvature(
+@trait_function ricci_curvature(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;

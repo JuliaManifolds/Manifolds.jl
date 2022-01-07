@@ -190,7 +190,7 @@ The algorithm proceeds in two stages. First, the point ``r = p^{-1} q`` is proje
 nearest element (under the Frobenius norm) of the direct product subgroup
 ``\mathrm{O}(n) × S^+``, whose logarithmic map is exactly computed using the matrix
 logarithm. This initial tangent vector is then refined using the
-[`NLsolveInverseRetraction`](@ref).
+[`NLSolveInverseRetraction`](@ref).
 
 For `GeneralLinear(n, ℂ)`, the logarithmic map is instead computed on the realified
 supergroup `GeneralLinear(2n)` and the resulting tangent vector is then complexified.
@@ -211,7 +211,7 @@ function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
         pinvqᵣ = realify(pinvq, 𝔽)
         Xᵣ = realify(X, 𝔽)
         log_safe!(Xᵣ, _project_Un_S⁺(pinvqᵣ))
-        inverse_retraction = NLsolveInverseRetraction(ExponentialRetraction(), Xᵣ)
+        inverse_retraction = NLSolveInverseRetraction(ExponentialRetraction(), Xᵣ)
         inverse_retract!(Gᵣ, Xᵣ, Identity(G), pinvqᵣ, inverse_retraction)
         unrealify!(X, Xᵣ, 𝔽, n)
     end

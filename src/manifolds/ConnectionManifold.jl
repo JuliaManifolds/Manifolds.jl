@@ -12,10 +12,8 @@ The [Levi-Civita connection](https://en.wikipedia.org/wiki/Levi-Civita_connectio
 """
 struct LeviCivitaConnection <: AbstractAffineConnection end
 
-struct MetricDecoratorType <: AbstractDecoratorType end
-
 """
-    AbstractConnectionManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractAffineConnection} <: AbstractDecoratorManifold{𝔽}
+    AbstractConnectionManifold{𝔽} <: AbstractDecoratorManifold{𝔽}
 
 Equip an [`AbstractManifold`](@ref) explicitly with an [`AbstractAffineConnection`](@ref) `G`.
 
@@ -33,7 +31,7 @@ An overview of basic properties of affine connection manifolds can be found in [
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
 abstract type AbstractConnectionManifold{𝔽} <:
-              AbstractDecoratorManifold{𝔽,MetricDecoratorType} end
+              AbstractDecoratorManifold{𝔽} end
 
 """
     connection(M::AbstractManifold)
@@ -44,6 +42,10 @@ of [`AbstractManifold`](@ref) `M`.
 connection(::AbstractManifold)
 
 """
+    ConnectionManifold{𝔽,,M<:AbstractManifold{𝔽},G<:AbstractAffineConnection} <: AbstractConnectionManifold{𝔽}
+
+# Constructor
+
     ConnectionManifold(M, C)
 
 Decorate the [`AbstractManifold`](@ref) `M` with [`AbstractAffineConnection`](@ref) `C`.
@@ -77,7 +79,7 @@ are ordered ``(l,i,j)``.
 """
 christoffel_symbols_second(::AbstractManifold, ::Any, ::AbstractBasis)
 
-@decorator_transparent_signature christoffel_symbols_second(
+@trait_function christoffel_symbols_second(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -118,7 +120,7 @@ function christoffel_symbols_second_jacobian(
     )
     return ∂Γ
 end
-@decorator_transparent_signature christoffel_symbols_second_jacobian(
+@trait_function christoffel_symbols_second_jacobian(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -151,7 +153,7 @@ in an embedded space.
 """
 exp(::AbstractConnectionManifold, ::Any...)
 
-@decorator_transparent_fallback function exp!(M::AbstractConnectionManifold, q, p, X)
+function exp!(::EmptyTrait, M::AbstractConnectionManifold, q, p, X)
     return retract!(
         M,
         q,
@@ -171,7 +173,7 @@ gaussian_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
 function gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     return ricci_curvature(M, p, B; kwargs...) / 2
 end
-@decorator_transparent_signature gaussian_curvature(
+@trait_function gaussian_curvature(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -214,7 +216,7 @@ function ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     @einsum Ric[i, j] = R[l, i, l, j]
     return Ric
 end
-@decorator_transparent_signature ricci_tensor(
+@trait_function ricci_tensor(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -251,7 +253,7 @@ function riemann_tensor(
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
     return R
 end
-@decorator_transparent_signature riemann_tensor(
+@trait_function riemann_tensor(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;

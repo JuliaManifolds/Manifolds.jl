@@ -208,7 +208,7 @@ identity_element(G::AbstractGroupManifold)
     return identity_element!(G, q)
 end
 
-@decorator_transparent_signature identity_element!(G::AbstractGroupManifold, p)
+@trait_function identity_element!(G::AbstractGroupManifold, p)
 
 function allocate_result(G::AbstractGroupManifold, ::typeof(identity_element))
     return zeros(representation_size(G)...)
@@ -443,7 +443,7 @@ function _compose(G::AbstractGroupManifold, p, q)
     return _compose!(G, x, p, q)
 end
 
-@decorator_transparent_signature compose!(M::AbstractDecoratorManifold, x, p, q)
+@trait_function compose!(M::AbstractDecoratorManifold, x, p, q)
 
 compose!(G::AbstractGroupManifold, x, q, p) = _compose!(G, x, q, p)
 function compose!(
@@ -565,7 +565,7 @@ Note that this representation isn't generally faithful. Notably the adjoint
 representation of 𝔰𝔬(2) is trivial.
 """
 lie_bracket(G::AbstractGroupManifold, X, Y)
-@decorator_transparent_signature lie_bracket(M::AbstractDecoratorManifold, X, Y)
+@trait_function lie_bracket(M::AbstractDecoratorManifold, X, Y)
 
 _action_order(p, q, ::LeftAction) = (p, q)
 _action_order(p, q, ::RightAction) = (q, p)
@@ -689,7 +689,7 @@ end
 )
     return translate_diff!(G, Y, p, q, X, LeftAction())
 end
-@decorator_transparent_signature translate_diff!(
+@trait_function translate_diff!(
     M::AbstractDecoratorManifold,
     Y,
     p,
@@ -797,7 +797,7 @@ exp_lie(::AbstractGroupManifold, ::Any...)
     return exp_lie!(G, q, X)
 end
 
-@decorator_transparent_signature exp_lie!(M::AbstractDecoratorManifold, q, X)
+@trait_function exp_lie!(M::AbstractDecoratorManifold, q, X)
 
 @doc raw"""
     log_lie(G::AbstractGroupManifold, q)
