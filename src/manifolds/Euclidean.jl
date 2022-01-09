@@ -554,21 +554,6 @@ function vector_transport_to!(
     return copyto!(Y, X)
 end
 
-for VT in ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION
-    eval(
-        quote
-            @invoke_maker 6 AbstractVectorTransportMethod vector_transport_to!(
-                M::Euclidean,
-                Y,
-                p,
-                X,
-                q,
-                B::$VT,
-            )
-        end,
-    )
-end
-
 Statistics.var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 function Statistics.var(::Euclidean, x::AbstractVector{<:Number}, m::Number; kwargs...)
     return sum(var(x; mean=m, kwargs...))

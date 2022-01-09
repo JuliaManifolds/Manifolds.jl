@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralizedGrassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
+    GeneralizedGrassmann{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The generalized Grassmann manifold $\operatorname{Gr}(n,k,B)$ consists of all subspaces
 spanned by $k$ linear independent vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
@@ -44,7 +44,7 @@ Generate the (real-valued) Generalized Grassmann manifold of $n\times k$ dimensi
 orthonormal matrices with scalar product `B`.
 """
 struct GeneralizedGrassmann{n,k,𝔽,TB<:AbstractMatrix} <:
-       AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
+       AbstractDecoratorManifold{𝔽}
     B::TB
 end
 
@@ -56,6 +56,8 @@ function GeneralizedGrassmann(
 )
     return GeneralizedGrassmann{n,k,field,typeof(B)}(B)
 end
+
+activate_traits(::GeneralizedGrassmann, args...) = merge_traits(IsEmbeddedManifold())
 
 @doc raw"""
     change_representer(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)

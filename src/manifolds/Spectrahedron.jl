@@ -1,5 +1,5 @@
 @doc raw"""
-    Spectrahedron{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
+    Spectrahedron{N,K} <: AbstractDecoratorManifold{ℝ}
 
 The Spectrahedron manifold, also known as the set of correlation matrices (symmetric
 positive semidefinite matrices) of rank $k$ with unit trace.
@@ -49,9 +49,12 @@ generates the manifold $\mathcal S(n,k) \subset ℝ^{n × n}$.
     > doi: [10.1137/080731359](https://doi.org/10.1137/080731359),
     > arXiv: [0807.4423](http://arxiv.org/abs/0807.4423).
 """
-struct Spectrahedron{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+struct Spectrahedron{N,K} <: AbstractDecoratorManifold{ℝ} end
 
 Spectrahedron(n::Int, k::Int) = Spectrahedron{n,k}()
+
+activate_traits(::Spectrahedron, args...) = merge_traits(IsIsometricEmbeddedManifold())
+
 
 @doc raw"""
     check_point(M::Spectrahedron, q; kwargs...)

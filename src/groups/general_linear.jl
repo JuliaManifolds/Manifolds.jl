@@ -1,6 +1,6 @@
 @doc raw"""
     GeneralLinear{n,𝔽} <:
-        AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType}
+        AbstractGroupManifold{𝔽,MultiplicationOperation}
 
 The general linear group, that is, the group of all invertible matrices in ``𝔽^{n×n}``.
 
@@ -17,7 +17,9 @@ By default, tangent vectors ``X_p`` are represented with their corresponding Lie
 vectors ``X_e = p^{-1}X_p``.
 """
 struct GeneralLinear{n,𝔽} <:
-       AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultGroupDecoratorType} end
+       AbstractGroupManifold{𝔽,MultiplicationOperation} end
+
+activate_traits(::GeneralLinear, args...) = merge_traits(IsEmbeddedManifold())
 
 GeneralLinear(n, 𝔽::AbstractNumbers=ℝ) = GeneralLinear{n,𝔽}()
 

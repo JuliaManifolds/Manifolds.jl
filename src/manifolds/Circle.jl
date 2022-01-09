@@ -215,19 +215,6 @@ for BT in [AbstractBasis{<:Any,TangentSpaceType}]
         end
     end)
 end
-for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES, CT in [Circle, Circle{ℝ}, Circle{ℂ}]
-    eval(
-        quote
-            @invoke_maker 5 $(supertype(BT)) get_vector!(
-                M::$CT,
-                Y::AbstractArray,
-                p,
-                X,
-                B::$BT,
-            )
-        end,
-    )
-end
 
 @doc raw"""
     injectivity_radius(M::Circle[, p])

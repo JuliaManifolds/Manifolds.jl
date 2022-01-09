@@ -1,5 +1,5 @@
 @doc raw"""
-    Elliptope{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
+    Elliptope{N,K} <: AbstractDecoratorManifold{ℝ}
 
 The Elliptope manifold, also known as the set of correlation matrices, consists of all
 symmetric positive semidefinite matrices of rank $k$ with unit diagonal, i.e.,
@@ -46,7 +46,9 @@ generates the manifold $\mathcal E(n,k) \subset ℝ^{n × n}$.
     > doi: [10.1137/080731359](https://doi.org/10.1137/080731359),
     > arXiv: [0807.4423](http://arxiv.org/abs/0807.4423).
 """
-struct Elliptope{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+struct Elliptope{N,K} <: AbstractDecoratorManifold{ℝ} end
+
+activate_traits(::Elliptope, args...) = merge_traits(IsEmbeddedManifold())
 
 Elliptope(n::Int, k::Int) = Elliptope{n,k}()
 

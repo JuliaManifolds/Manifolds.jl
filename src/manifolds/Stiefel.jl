@@ -1,5 +1,5 @@
 @doc raw"""
-    Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
+    Stiefel{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The Stiefel manifold consists of all $n × k$, $n ≥ k$ unitary matrices, i.e.
 
@@ -31,10 +31,11 @@ The manifold is named after
 
 Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
 """
-struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+struct Stiefel{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ) = Stiefel{n,k,field}()
 
+activate_traits(::Stiefel, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where {n,k}
     return complex

@@ -1,11 +1,11 @@
 """
-    AbstractProjectiveSpace{𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
+    AbstractProjectiveSpace{𝔽} <: AbstractDecoratorManifold{𝔽}
 
 An abstract type to represent a projective space over `𝔽` that is represented isometrically
 in the embedding.
 """
 abstract type AbstractProjectiveSpace{𝔽} <:
-              AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+              AbstractDecoratorManifold{𝔽} end
 
 @doc raw"""
     ProjectiveSpace{n,𝔽} <: AbstractProjectiveSpace{𝔽}
@@ -40,6 +40,8 @@ projective spaces.
 """
 struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
 ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ) = ProjectiveSpace{n,field}()
+
+activate_traits(::AbstractProjectiveSpace, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     ArrayProjectiveSpace{T<:Tuple,𝔽} <: AbstractProjectiveSpace{𝔽}

@@ -1,13 +1,14 @@
 @doc raw"""
-    AbstractMultinomialDoublyStochastic{N} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
+    AbstractMultinomialDoublyStochastic{N} <: AbstractDecoratorManifold{ℝ}
 
 A common type for manifolds that are doubly stochastic, for example by direct constraint
 [`MultinomialDoubleStochastic`](@ref) or by symmetry [`MultinomialSymmetric`](@ref),
-as long as they are also modeled as [`DefaultIsometricEmbeddingType`](@ref)
-[`AbstractEmbeddedManifold`](@ref)s.
+as long as they are also modeled as [`IsIsometricEmbeddedManifold`](@ref).
 """
 abstract type AbstractMultinomialDoublyStochastic{N} <:
-              AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+              AbstractDecoratorManifold{ℝ} end
+
+activate_traits(::AbstractMultinomialDoublyStochastic, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     MultinomialDoublyStochastic{n} <: AbstractMultinomialDoublyStochastic{N}

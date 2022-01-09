@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType}
+    SymmetricPositiveDefinite{N} <: AbstractDecoratorManifold{𝔽}
 
 The manifold of symmetric positive definite matrices, i.e.
 
@@ -26,9 +26,11 @@ i.e. the set of symmetric matrices,
 
 generates the manifold $\mathcal P(n) \subset ℝ^{n × n}$
 """
-struct SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} end
+struct SymmetricPositiveDefinite{N} <: AbstractDecoratorManifold{ℝ} end
 
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
+
+activate_traits(::SymmetricPositiveDefinite, args...) = merge_traits(IsEmbeddedManifold())
 
 @doc raw"""
     check_point(M::SymmetricPositiveDefinite, p; kwargs...)

@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
+    SymmetricMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](@ref) $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
 symmetric matrices of size $n × n$, i.e. the set
@@ -21,11 +21,13 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
+struct SymmetricMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SymmetricMatrices{n,field}()
 end
+
+activate_traits(::SymmetricMatrices, arge...) = merge_traits(IsEmbeddedSubmanifoldManifold())
 
 function allocation_promotion_function(
     M::SymmetricMatrices{<:Any,ℂ},

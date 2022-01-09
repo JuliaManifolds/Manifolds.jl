@@ -1,5 +1,5 @@
 @doc raw"""
-    Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
+    Grassmann{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces spanned by $k$ linear independent
 vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
@@ -51,9 +51,11 @@ The manifold is named after
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case `field = ℝ` is the default.
 """
-struct Grassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+struct Grassmann{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 Grassmann(n::Int, k::Int, field::AbstractNumbers=ℝ) = Grassmann{n,k,field}()
+
+activate_traits(::Grassmann, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 function allocation_promotion_function(M::Grassmann{n,k,ℂ}, f, args::Tuple) where {n,k}
     return complex

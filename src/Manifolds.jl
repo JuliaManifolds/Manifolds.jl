@@ -3,7 +3,11 @@ module Manifolds
 import ManifoldsBase:
     @trait_function,
     _access_nested,
+    _inverse_retract,
+    _inverse_retract!,
     _read,
+    _retract,
+    _retract!,
     _write,
     allocate,
     allocate_result,
@@ -40,6 +44,7 @@ import ManifoldsBase:
     is_vector,
     inverse_retract,
     inverse_retract!,
+    inverse_retract_softmax!,
     log,
     log!,
     manifold_dimension,
@@ -53,6 +58,10 @@ import ManifoldsBase:
     representation_size,
     retract,
     retract!,
+    retract_pade!,
+    retract_polar!,
+    retract_project!,
+    retract_softmax!,
     set_component!,
     vector_space_dimension,
     vector_transport_direction,
@@ -147,6 +156,7 @@ using ManifoldsBase:
     ScaledVectorTransport,
     SchildsLadderTransport,
     SoftmaxRetraction,
+    SoftmaxInverseRetraction,
     TangentSpaceType,
     TCoTSpaceType,
     TFVector,
@@ -461,8 +471,6 @@ export AbstractMetric,
     CanonicalMetric,
     MetricManifold
 export AbstractAtlas, RetractionAtlas
-export AbstractEmbeddingType, AbstractIsometricEmbeddingType
-export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
     CayleyRetraction,

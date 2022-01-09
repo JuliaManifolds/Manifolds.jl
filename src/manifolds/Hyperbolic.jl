@@ -1,5 +1,5 @@
 @doc raw"""
-    Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
+    Hyperbolic{N} <: AbstractDecoratorManifold{ℝ}
 
 The hyperbolic space $\mathcal H^n$ represented by $n+1$-Tuples, i.e. embedded in the
 [`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
@@ -33,9 +33,11 @@ and the Poincaré half space model, see [`PoincareHalfSpacePoint`](@ref) and [`P
 
 Generate the Hyperbolic manifold of dimension `n`.
 """
-struct Hyperbolic{N} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+struct Hyperbolic{N} <: AbstractDecoratorManifold{ℝ} end
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
+
+activate_traits(::Hyperbolic, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     HyperboloidPoint <: AbstractManifoldPoint

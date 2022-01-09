@@ -1,5 +1,5 @@
 @doc raw"""
-    CenteredMatrices{m,n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
+    CenteredMatrices{m,n,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The manifold of $m × n$ real-valued or complex-valued matrices whose columns sum to zero, i.e.
 ````math
@@ -12,11 +12,13 @@ where $𝔽 ∈ \{ℝ,ℂ\}$.
 
 Generate the manifold of `m`-by-`n` (`field`-valued) matrices whose columns sum to zero.
 """
-struct CenteredMatrices{M,N,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
+struct CenteredMatrices{M,N,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers=ℝ)
     return CenteredMatrices{m,n,field}()
 end
+
+activate_traits(::CenteredMatrices, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     check_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...)

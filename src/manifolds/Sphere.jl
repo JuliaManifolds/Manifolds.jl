@@ -1,9 +1,12 @@
 """
-    AbstractSphere{𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
+    AbstractSphere{𝔽} <: AbstractDecoratorManifold{𝔽}
 
 An abstract type to represent a unit sphere that is represented isometrically in the embedding.
 """
-abstract type AbstractSphere{𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+abstract type AbstractSphere{𝔽} <: AbstractDecoratorManifold{𝔽} end
+
+activate_traits(::AbstractSphere, args...) = merge_traits(IsIsometricEmbeddedManifold())
+
 
 @doc raw"""
     Sphere{n,𝔽} <: AbstractSphere{𝔽}

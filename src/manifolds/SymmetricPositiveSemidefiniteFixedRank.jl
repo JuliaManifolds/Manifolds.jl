@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
+    SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](@ref) $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
 symmetric positive semidefinite matrices of size $n × n$ and rank $k$, i.e. the set
@@ -54,11 +54,13 @@ over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
     > preprint: [sites.uclouvain.be/absil/2018.06](https://sites.uclouvain.be/absil/2018.06).
 """
 struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <:
-       AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+       AbstractDecoratorManifold{𝔽} end
 
 function SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ)
     return SymmetricPositiveSemidefiniteFixedRank{n,k,field}()
 end
+
+activate_traits(::SymmetricPositiveSemidefiniteFixedRank, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     check_point(M::SymmetricPositiveSemidefiniteFixedRank{n,𝔽}, q; kwargs...)

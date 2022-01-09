@@ -1,6 +1,6 @@
 @doc raw"""
     SpecialLinear{n,𝔽} <:
-        AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType}
+        AbstractGroupManifold{𝔽,MultiplicationOperation}
 
 The special linear group ``\mathrm{SL}(n,𝔽)`` that is, the group of all invertible matrices
 with unit determinant in ``𝔽^{n×n}``.
@@ -17,7 +17,9 @@ an element of ``𝔰𝔩(n, 𝔽)`` is a closed subgroup of ``\mathrm{SL}(n,𝔽
 metric functions forward to `GeneralLinear`.
 """
 struct SpecialLinear{n,𝔽} <:
-       AbstractGroupManifold{𝔽,MultiplicationOperation,TransparentGroupDecoratorType} end
+       AbstractGroupManifold{𝔽,MultiplicationOperation} end
+
+activate_traits(::SpecialLinear, args...) = merge_traits(IsEmbeddedSubmanifoldManifold())
 
 SpecialLinear(n, 𝔽::AbstractNumbers=ℝ) = SpecialLinear{n,𝔽}()
 

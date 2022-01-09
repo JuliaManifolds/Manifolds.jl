@@ -18,30 +18,6 @@ Note that a manifold is connected with an operation by wrapping it with a decora
 """
 abstract type AbstractGroupOperation end
 
-"""
-    abstract type AbstractGroupDecroatorType <: AbstractDecoratorType
-
-A common decorator type for all group decorators.
-It is similar to [`DefaultEmbeddingType`](@ref) but for groups.
-"""
-abstract type AbstractGroupDecoratorType <: AbstractDecoratorType end
-
-"""
-    struct DefaultGroupDecoratorType <: AbstractDecoratorType
-
-The default group decorator type with no special properties.
-"""
-struct DefaultGroupDecoratorType <: AbstractGroupDecoratorType end
-"""
-    struct TransparentGroupDecoratorType <: AbstractDecoratorType
-
-A transparent group decorator type that acts transparently, similar to
-the [`TransparentIsometricEmbedding`](@ref), i.e. it passes through all metric-related functions such as
-logarithmic and exponential map as well as retraction and inverse retractions
-to the manifold it decorates.
-"""
-struct TransparentGroupDecoratorType <: AbstractGroupDecoratorType end
-
 @doc raw"""
     AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽}
 
@@ -50,8 +26,8 @@ Abstract type for a Lie group, a group that is also a smooth manifold with an
 implement at least [`inv`](@ref), [`compose`](@ref), and
 [`translate_diff`](@ref).
 """
-abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation,T<:AbstractDecoratorType} <:
-              AbstractDecoratorManifold{𝔽,T} end
+abstract type AbstractGroupManifold{𝔽,O<:AbstractGroupOperation} <:
+              AbstractDecoratorManifold{𝔽} end
 
 """
     GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <: AbstractGroupManifold{𝔽,O}
@@ -66,15 +42,12 @@ Group manifolds by default forward metric-related operations to the wrapped mani
     GroupManifold(manifold, op)
 """
 struct GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <:
-       AbstractGroupManifold{𝔽,O,TransparentGroupDecoratorType}
+       AbstractGroupManifold{𝔽,O}
     manifold::M
     op::O
 end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
-
-const GROUP_MANIFOLD_BASIS_DISAMBIGUATION =
-    [AbstractDecoratorManifold, ValidationManifold, VectorBundle]
 
 """
     base_group(M::AbstractManifold) -> AbstractGroupManifold
@@ -203,7 +176,8 @@ It should return the corresponding [`AbstractManifoldPoint`](@ref) of points on 
 points are not represented by arrays.
 """
 identity_element(G::AbstractGroupManifold)
-@decorator_transparent_function function identity_element(G::AbstractGroupManifold)
+@trait_function identity_element(G::AbstractDecoratorManifold)
+function identity_element(G::AbstractGroupManifold)
     q = allocate_result(G, identity_element)
     return identity_element!(G, q)
 end
@@ -221,7 +195,8 @@ Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupMa
 where `p` indicates the type to represent the identity.
 """
 identity_element(G::AbstractGroupManifold, p)
-@decorator_transparent_function function identity_element(G::AbstractGroupManifold, p)
+@trait_function identity_element(G::AbstractDecoratorManifold, p)
+function identity_element(G::AbstractGroupManifold, p)
     q = allocate_result(G, identity_element, p)
     return identity_element!(G, q)
 end
@@ -243,7 +218,8 @@ the [`Identity`](@ref)`{O}` with the corresponding [`AbstractGroupOperation`](@r
 """
 is_identity(G::AbstractGroupManifold, q)
 
-@decorator_transparent_function function is_identity(G::AbstractGroupManifold, q; kwargs...)
+@trait_function is_identity(G::AbstractDecoratorManifold, q; kwargs...)
+function is_identity(G::AbstractGroupManifold, q; kwargs...)
     return isapprox(G, identity_element(G), q; kwargs...)
 end
 function is_identity(
@@ -336,11 +312,8 @@ Note that the adjoint representation of a Lie group isn't generally faithful.
 Notably the adjoint representation of SO(2) is trivial.
 """
 adjoint_action(G::AbstractGroupManifold, p, X)
-@decorator_transparent_function :intransparent function adjoint_action(
-    G::AbstractGroupManifold,
-    p,
-    Xₑ,
-)
+@trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ)
+function adjoint_action(G::AbstractGroupManifold, p, Xₑ)
     Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
     Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
     return Y
@@ -360,7 +333,8 @@ $p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`Identi
 element of $\mathcal{G}$.
 """
 inv(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function Base.inv(G::AbstractGroupManifold, p)
+@trait_function Base.inv(G::AbstractDecoratorManifold, p)
+function Base.inv(G::AbstractGroupManifold, p)
     q = allocate_result(G, inv, p)
     return inv!(G, q, p)
 end
@@ -372,7 +346,8 @@ function Base.inv(
     return e
 end
 
-@decorator_transparent_function function inv!(G::AbstractGroupManifold, q, p)
+@trait_function inv!(G::AbstractDecoratorManifold, q, p)
+function inv!(G::AbstractGroupManifold, q, p)
     return inv!(G.manifold, q, p)
 end
 
@@ -409,7 +384,8 @@ instead so that methods with [`Identity`](@ref) arguments are not ambiguous.
 """
 compose(::AbstractGroupManifold, ::Any...)
 
-@decorator_transparent_function function compose(
+@trait_function compose(G::AbstractDecoratorManifold, p, q)
+function compose(
     G::AbstractGroupManifold{𝔽,Op},
     p,
     q,
@@ -584,10 +560,12 @@ R_p &: q ↦ q \circ p.
 ```
 """
 translate(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function translate(G::AbstractGroupManifold, p, q)
+@trait_function translate(G::AbstractDecoratorManifold, p, q)
+function translate(G::AbstractGroupManifold, p, q)
     return translate(G, p, q, LeftAction())
 end
-@decorator_transparent_function function translate(
+@trait_function translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirection)
+function translate(
     G::AbstractGroupManifold,
     p,
     q,
@@ -596,10 +574,18 @@ end
     return compose(G, _action_order(p, q, conv)...)
 end
 
-@decorator_transparent_function function translate!(G::AbstractGroupManifold, X, p, q)
+@trait_function translate!(G::AbstractDecoratorManifold, X, p, q)
+function translate!(G::AbstractGroupManifold, X, p, q)
     return translate!(G, X, p, q, LeftAction())
 end
-@decorator_transparent_function function translate!(
+@trait_function translate!(
+    G::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+    conv::ActionDirection,
+)
+function translate!(
     G::AbstractGroupManifold,
     X,
     p,
@@ -623,10 +609,17 @@ R_p^{-1} &: q ↦ q \circ p^{-1}.
 ```
 """
 inverse_translate(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function inverse_translate(G::AbstractGroupManifold, p, q)
+@trait_function inverse_translate(G::AbstractDecoratorManifold, p, q)
+function inverse_translate(G::AbstractGroupManifold, p, q)
     return inverse_translate(G, p, q, LeftAction())
 end
-@decorator_transparent_function function inverse_translate(
+@trait_function inverse_translate(
+    G::AbstractDecoratorManifold,
+    p,
+    q,
+    conv::ActionDirection,
+)
+function inverse_translate(
     G::AbstractGroupManifold,
     p,
     q,
@@ -635,7 +628,8 @@ end
     return translate(G, inv(G, p), q, conv)
 end
 
-@decorator_transparent_function function inverse_translate!(
+@trait_function inverse_translate!(G::AbstractDecoratorManifold, X, p, q)
+function inverse_translate!(
     G::AbstractGroupManifold,
     X,
     p,
@@ -643,7 +637,9 @@ end
 )
     return inverse_translate!(G, X, p, q, LeftAction())
 end
-@decorator_transparent_function function inverse_translate!(
+@trait_function inverse_translate!(G::AbstractDecoratorManifold, X, p, q, conv::ActionDirection)
+
+function inverse_translate!(
     G::AbstractGroupManifold,
     X,
     p,
@@ -665,10 +661,12 @@ left or right `conv`ention. The differential transports vectors:
 ```
 """
 translate_diff(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function translate_diff(G::AbstractGroupManifold, p, q, X)
+@trait_function translate_diff(G::AbstractDecoratorManifold, p, q, X)
+function translate_diff(G::AbstractGroupManifold, p, q, X)
     return translate_diff(G, p, q, X, LeftAction())
 end
-@decorator_transparent_function function translate_diff(
+@trait_function translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirection)
+function translate_diff(
     G::AbstractGroupManifold,
     p,
     q,
@@ -679,8 +677,8 @@ end
     translate_diff!(G, Y, p, q, X, conv)
     return Y
 end
-
-@decorator_transparent_function function translate_diff!(
+@trait_function translate_diff!(G::AbstractDecoratorManifold, Y, p, q, X)
+function translate_diff!(
     G::AbstractGroupManifold,
     Y,
     p,
@@ -710,7 +708,8 @@ specified left or right `conv`ention. The differential transports vectors:
 ```
 """
 inverse_translate_diff(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function inverse_translate_diff(
+@trait_function inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X)
+function inverse_translate_diff(
     G::AbstractGroupManifold,
     p,
     q,
@@ -718,7 +717,8 @@ inverse_translate_diff(::AbstractGroupManifold, ::Any...)
 )
     return inverse_translate_diff(G, p, q, X, LeftAction())
 end
-@decorator_transparent_function function inverse_translate_diff(
+@trait_function inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirection)
+function inverse_translate_diff(
     G::AbstractGroupManifold,
     p,
     q,
@@ -728,7 +728,8 @@ end
     return translate_diff(G, inv(G, p), q, X, conv)
 end
 
-@decorator_transparent_function function inverse_translate_diff!(
+@trait_function inverse_translate_diff!(G::AbstractDecoratorManifold, Y, p, q, X)
+function inverse_translate_diff!(
     G::AbstractGroupManifold,
     Y,
     p,
@@ -737,7 +738,8 @@ end
 )
     return inverse_translate_diff!(G, Y, p, q, X, LeftAction())
 end
-@decorator_transparent_function function inverse_translate_diff!(
+@trait_function inverse_translate_diff!(G::AbstractDecoratorManifold, Y, p, q, X, conv::ActionDirection)
+function inverse_translate_diff!(
     G::AbstractGroupManifold,
     Y,
     p,
@@ -792,7 +794,8 @@ exponential,
 ````
 """
 exp_lie(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function exp_lie(G::AbstractGroupManifold, X)
+@trait_function exp_lie(G::AbstractDecoratorManifold, X)
+function exp_lie(G::AbstractGroupManifold, X)
     q = allocate_result(G, exp_lie, X)
     return exp_lie!(G, q, X)
 end
@@ -827,7 +830,8 @@ Since this function handles [`Identity`](@ref) arguments, the preferred function
 is `_log_lie!`.
 """
 log_lie(::AbstractGroupManifold, ::Any...)
-@decorator_transparent_function function log_lie(G::AbstractGroupManifold, q)
+@trait_function log_lie(G::AbstractDecoratorManifold, q)
+function log_lie(G::AbstractGroupManifold, q)
     X = allocate_result(G, log_lie, q)
     return log_lie!(G, X, q)
 end
@@ -838,7 +842,8 @@ function log_lie(
     return zero_vector(G, identity_element(G))
 end
 
-@decorator_transparent_function function log_lie!(G::AbstractGroupManifold, X, q)
+@trait_function log_lie!(G::AbstractDecoratorManifold, X, q)
+function log_lie!(G::AbstractGroupManifold, X, q)
     return _log_lie!(G, X, q)
 end
 
@@ -917,7 +922,7 @@ where $\exp$ is the group exponential ([`exp_lie`](@ref)), and $(\mathrm{d}τ_p^
 the action of the differential of inverse translation $τ_p^{-1}$ evaluated at $p$ (see
 [`inverse_translate_diff`](@ref)).
 """
-function retract(G::AbstractGroupManifold, p, X, method::GroupExponentialRetraction)
+function _retract(G::AbstractGroupManifold, p, X, method::GroupExponentialRetraction)
     conv = direction(method)
     Xₑ = inverse_translate_diff(G, p, p, X, conv)
     pinvq = exp_lie(G, Xₑ)
@@ -925,7 +930,7 @@ function retract(G::AbstractGroupManifold, p, X, method::GroupExponentialRetract
     return q
 end
 
-function retract!(G::AbstractGroupManifold, q, p, X, method::GroupExponentialRetraction)
+function _retract!(G::AbstractGroupManifold, q, p, X, method::GroupExponentialRetraction)
     conv = direction(method)
     Xₑ = inverse_translate_diff(G, p, p, X, conv)
     pinvq = exp_lie(G, Xₑ)
@@ -953,14 +958,14 @@ where $\log$ is the group logarithm ([`log_lie`](@ref)), and $(\mathrm{d}τ_p)_e
 action of the differential of translation $τ_p$ evaluated at the identity element $e$
 (see [`translate_diff`](@ref)).
 """
-function inverse_retract(G::GroupManifold, p, q, method::GroupLogarithmicInverseRetraction)
+function _inverse_retract(G::GroupManifold, p, q, method::GroupLogarithmicInverseRetraction)
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = log_lie(G, pinvq)
     return translate_diff(G, p, Identity(G), Xₑ, conv)
 end
 
-function inverse_retract!(
+function _inverse_retract!(
     G::AbstractGroupManifold,
     X,
     p,
@@ -1205,172 +1210,4 @@ function get_coordinates_lie(G::AbstractGroupManifold, X, B::AbstractBasis)
 end
 function get_coordinates_lie!(G::AbstractGroupManifold, a, X, B::AbstractBasis)
     return get_coordinates!(G, a, identity_element(G), X, B)
-end
-
-# (a) changes / parent.
-for f in [
-    embed,
-    get_basis,
-    vector_transport_direction,
-    vector_transport_direction!,
-    vector_transport_to,
-]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractGroupManifold{𝔽,O,<:AbstractGroupDecoratorType},
-                args...,
-            ) where {𝔽,O}
-                return Val(:parent)
-            end
-        end,
-    )
-end
-for f in [
-    get_coordinates,
-    get_coordinates!,
-    get_vector,
-    get_vector!,
-    inverse_retract!,
-    mid_point!,
-    project,
-    retract!,
-    vector_transport_along,
-]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractGroupManifold{𝔽,O,DefaultGroupDecoratorType},
-                args...,
-            ) where {𝔽,O}
-                return Val(:parent)
-            end
-        end,
-    )
-end
-# (b) changes / transparencies
-for f in [
-    check_point,
-    check_vector,
-    copy,
-    copyto!,
-    distance,
-    exp,
-    exp!,
-    embed!,
-    get_coordinates,
-    get_coordinates!,
-    get_vector,
-    get_vector!,
-    inner,
-    inverse_retract,
-    inverse_retract!,
-    isapprox,
-    log,
-    log!,
-    mid_point,
-    mid_point!,
-    project!,
-    project,
-    retract,
-    retract!,
-    vector_transport_along,
-    vector_transport_direction,
-]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractGroupManifold{𝔽,O,<:TransparentGroupDecoratorType},
-                args...,
-            ) where {𝔽,O}
-                return Val(:transparent)
-            end
-        end,
-    )
-end
-
-# (c) changes / intransparencies.
-for f in [
-    compose,
-    compose!,
-    exp_lie,
-    exp_lie!,
-    log_lie,
-    log_lie!,
-    translate,
-    translate!,
-    translate_diff,
-    translate_diff!,
-]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractGroupManifold,
-                args...,
-            )
-                return Val(:intransparent)
-            end
-        end,
-    )
-end
-# (d) specials
-for f in [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractGroupManifold{𝔽,O,<:TransparentGroupDecoratorType},
-                Y,
-                p,
-                X,
-                q,
-                ::T,
-            ) where {𝔽,O,T}
-                return Val(:transparent)
-            end
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractGroupManifold{𝔽,O,<:AbstractGroupDecoratorType},
-                Y,
-                p,
-                X,
-                q,
-                ::T,
-            ) where {𝔽,O,T}
-                return Val(:intransparent)
-            end
-        end,
-    )
-    for m in [PoleLadderTransport, SchildsLadderTransport, ScaledVectorTransport]
-        eval(
-            quote
-                function decorator_transparent_dispatch(
-                    ::typeof($f),
-                    ::AbstractGroupManifold{𝔽,O,<:TransparentGroupDecoratorType},
-                    Y,
-                    p,
-                    X,
-                    q,
-                    ::$m,
-                ) where {𝔽,O}
-                    return Val(:parent)
-                end
-                function decorator_transparent_dispatch(
-                    ::typeof($f),
-                    ::AbstractGroupManifold{𝔽,O,<:AbstractGroupDecoratorType},
-                    Y,
-                    p,
-                    X,
-                    q,
-                    ::$m,
-                ) where {𝔽,O}
-                    return Val(:parent)
-                end
-            end,
-        )
-    end
 end

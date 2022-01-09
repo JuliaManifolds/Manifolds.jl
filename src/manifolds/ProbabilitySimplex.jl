@@ -1,5 +1,5 @@
 @doc raw"""
-    ProbabilitySimplex{n} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType}
+    ProbabilitySimplex{n} <: AbstractDecoratorManifold{𝔽}
 
 The (relative interior of) the probability simplex is the set
 ````math
@@ -29,7 +29,7 @@ This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017
     > doi: [10.1007/s10851-016-0702-4](https://doi.org/10.1007/s10851-016-0702-4)
     > arxiv: [1603.05285](https://arxiv.org/abs/1603.05285).
 """
-struct ProbabilitySimplex{n} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} end
+struct ProbabilitySimplex{n} <: AbstractDecoratorManifold{ℝ} end
 
 ProbabilitySimplex(n::Int) = ProbabilitySimplex{n}()
 
@@ -43,6 +43,8 @@ probability measures defined on a common probability space.
 See for example the [`ProbabilitySimplex`](@ref).
 """
 struct FisherRaoMetric <: AbstractMetric end
+
+activate_traits(::ProbabilitySimplex, args...) = merge_traits(IsEmbeddedManifold())
 
 @doc raw"""
     change_representer(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
@@ -241,12 +243,11 @@ where $\mathbb{1}^{m,n}$ is the size `(m,n)` matrix containing ones, and $\log$ 
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
-function inverse_retract!(
+function inverse_retract_softmax!(
     ::ProbabilitySimplex{n},
     X,
     p,
     q,
-    ::SoftmaxInverseRetraction,
 ) where {n}
     X .= log.(q) .- log.(p)
     meanlogdiff = mean(X)

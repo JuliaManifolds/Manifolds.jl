@@ -1197,22 +1197,6 @@ end
 function vector_bundle_transport(::VectorSpaceType, M::ProductManifold)
     return ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds))
 end
-for T in [ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION..., AbstractVectorTransportMethod]
-    eval(
-        quote
-            function vector_transport_direction!(M::ProductManifold, Y, p, X, d, m::$T)
-                return vector_transport_direction!(
-                    M,
-                    Y,
-                    p,
-                    X,
-                    d,
-                    ProductVectorTransport(map(_ -> m, M.manifolds)),
-                )
-            end
-        end,
-    )
-end
 function vector_transport_direction!(
     M::ProductManifold,
     Y,
@@ -1243,22 +1227,6 @@ base manifold.
 """
 vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::ProductVectorTransport)
 
-for T in [ManifoldsBase.VECTOR_TRANSPORT_DISAMBIGUATION..., AbstractVectorTransportMethod]
-    eval(
-        quote
-            function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::$T)
-                return vector_transport_to!(
-                    M,
-                    Y,
-                    p,
-                    X,
-                    q,
-                    ProductVectorTransport(map(_ -> m, M.manifolds)),
-                )
-            end
-        end,
-    )
-end
 function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTransport)
     map(
         vector_transport_to!,

@@ -1,5 +1,5 @@
 @doc raw"""
-    SkewHermitianMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
+    SkewHermitianMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](@ref) $ \operatorname{SkewHerm}(n)$ consisting of the real- or
 complex-valued skew-hermitian matrices of size ``n × n``, i.e. the set
@@ -23,7 +23,7 @@ which is also reflected in the
 Generate the manifold of ``n × n`` skew-hermitian matrices.
 """
 struct SkewHermitianMatrices{n,𝔽} <:
-       AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
+       AbstractDecoratorManifold{𝔽} end
 
 function SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SkewHermitianMatrices{n,field}()
@@ -43,6 +43,8 @@ const SkewSymmetricMatrices{n} = SkewHermitianMatrices{n,ℝ}
 
 SkewSymmetricMatrices(n::Int) = SkewSymmetricMatrices{n}()
 @deprecate SkewSymmetricMatrices(n::Int, 𝔽) SkewHermitianMatrices(n, 𝔽)
+
+activate_traits(::SkewSymmetricMatrices, arge...) = merge_traits(IsEmbeddedSubmanifoldManifold())
 
 function allocation_promotion_function(
     ::SkewHermitianMatrices{<:Any,ℂ},

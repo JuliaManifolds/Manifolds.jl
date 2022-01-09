@@ -98,7 +98,16 @@ has_approx_invariant_metric(
     ::Any,
     ::ActionDirection,
 )
-@decorator_transparent_function function has_approx_invariant_metric(
+@trait_function has_approx_invariant_metric(
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    Y,
+    qs,
+    conv::ActionDirection=LeftAction();
+    kwargs...,
+)
+function has_approx_invariant_metric(
     M::AbstractGroupManifold,
     p,
     X,
