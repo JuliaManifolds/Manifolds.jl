@@ -183,7 +183,7 @@ function exp!(M::AbstractSphere, q, p, X)
     return q
 end
 
-function get_basis(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
+function get_basis_diagonalizing(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
     A = zeros(n + 1, n + 1)
     A[1, :] = transpose(p)
     A[2, :] = transpose(B.frame_direction)
@@ -219,6 +219,7 @@ function get_coordinates_orthonormal!(
     Y,
     p,
     X,
+    ::RealNumbers,
 )
     n = manifold_dimension(M)
     p1 = p[1]

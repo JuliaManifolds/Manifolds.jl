@@ -315,42 +315,6 @@ function inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)
 end
 @trait_function inverse_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
-default_decorator_dispatch(M::MetricManifold) = default_metric_dispatch(M)
-
-"""
-    is_default_metric(M, G)
-
-Indicate whether the [`AbstractMetric`](@ref) `G` is the default metric for
-the [`AbstractManifold`](@ref) `M`. This means that any occurence of
-[`MetricManifold`](@ref)(M,G) where `typeof(is_default_metric(M,G)) = true`
-falls back to just be called with `M` such that the [`AbstractManifold`](@ref) `M`
-implicitly has this metric, for example if this was the first one implemented
-or is the one most commonly assumed to be used.
-"""
-function is_default_metric(M::AbstractManifold, G::AbstractMetric)
-    return _extract_val(default_metric_dispatch(M, G))
-end
-
-default_metric_dispatch(::AbstractManifold, ::AbstractMetric) = Val(false)
-function default_metric_dispatch(M::MetricManifold)
-    return default_metric_dispatch(base_manifold(M), metric(M))
-end
-
-"""
-    is_default_metric(MM::MetricManifold)
-
-Indicate whether the [`AbstractMetric`](@ref) `MM.G` is the default metric for
-the [`AbstractManifold`](@ref) `MM.manifold,` within the [`MetricManifold`](@ref) `MM`.
-This means that any occurence of
-[`MetricManifold`](@ref)`(MM.manifold, MM.G)` where `is_default_metric(MM.manifold, MM.G)) = true`
-falls back to just be called with `MM.manifold,` such that the [`AbstractManifold`](@ref) `MM.manifold`
-implicitly has the metric `MM.G`, for example if this was the first one
-implemented or is the one most commonly assumed to be used.
-"""
-function is_default_metric(M::MetricManifold)
-    return _extract_val(default_metric_dispatch(M))
-end
-
 function Base.convert(::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
     return _convert_with_default(M, GT, default_metric_dispatch(M, GT()))
 end
