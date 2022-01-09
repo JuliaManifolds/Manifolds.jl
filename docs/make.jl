@@ -26,12 +26,11 @@ end
 makedocs(
     # for development, we disable prettyurls
     format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
-    modules=[Manifolds, ManifoldsBase],
+    modules=[Manifolds],
     authors="Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename="Manifolds.jl",
     pages=[
         "Home" => "index.md",
-        "ManifoldsBase.jl" => "interface.md",
         "Examples" => ["How to implement a Manifold" => "examples/manifold.md"],
         "Manifolds" => [
             "Basic manifolds" => [

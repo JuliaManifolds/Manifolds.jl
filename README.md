@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://github.com/JuliaManifolds/Manifolds.jl/blob/master/docs/src/assets/logo-text-readme.png" alt="Manifolds.jl" width="526">
+    <img src="https://github.com/JuliaManifolds/Manifolds.jl/blob/master/docs/src/assets/logo-text-readme.png" alt="Manifolds.jl Logo with text" width="526">
 </div>
 
 | **Documentation** | **Source** | **Citation** |
