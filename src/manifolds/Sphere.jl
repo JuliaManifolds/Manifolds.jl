@@ -214,12 +214,11 @@ denotes the Frobenius inner product, the formula for $Y$ is
 """
 get_coordinates(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::AbstractSphere{ℝ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 )
     n = manifold_dimension(M)
     p1 = p[1]

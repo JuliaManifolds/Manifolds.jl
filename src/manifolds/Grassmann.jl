@@ -215,7 +215,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
 
-function inverse_retract!(::Grassmann, X, p, q, ::PolarInverseRetraction)
+function inverse_retract_polar!(::Grassmann, X, p, q)
     return copyto!(X, q / (p' * q) - p)
 end
 
@@ -232,7 +232,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
-inverse_retract!(::Grassmann, X, p, q, ::QRInverseRetraction) = copyto!(X, q / (p' * q) - p)
+inverse_retract_qr!(::Grassmann, X, p, q) = copyto!(X, q / (p' * q) - p)
 
 function Base.isapprox(M::Grassmann, p, X, Y; kwargs...)
     return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
@@ -344,6 +344,11 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
 
+function retract_polar!(::Grassmann, q, p, X)
+    s = svd(p + X)
+    return mul!(q, s.U, s.Vt)
+end
+
 @doc raw"""
     retract(M::Grassmann, p, X, ::QRRetraction )
 
@@ -359,10 +364,6 @@ D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_
 """
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
 
-function retract_polar!(::Grassmann, q, p, X)
-    s = svd(p + X)
-    return mul!(q, s.U, s.Vt)
-end
 function retract_qr!(::Grassmann{N,K}, q, p, X) where {N,K}
     qrfac = qr(p + X)
     d = diag(qrfac.R)
@@ -408,7 +409,7 @@ projecting it onto the tangent space at q.
 """
 vector_transport_to(::Grassmann, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
-function vector_transport_to!(M::Grassmann, Y, p, X, q, ::ProjectionTransport)
+function vector_transport_to_project!(M::Grassmann, Y, p, X, q)
     project!(M, Y, q, X)
     return Y
 end

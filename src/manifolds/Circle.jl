@@ -115,15 +115,14 @@ function exp!(M::Circle{ℂ}, q, p, X)
     return q
 end
 
-function get_basis(::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
+function get_basis_diagonalizing(::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
     return CachedBasis(B, (@SVector [0]), vs)
 end
 
-get_coordinates(::Circle{ℝ}, p, X, ::AbstractBasis{<:Any,TangentSpaceType}) = X
-get_coordinates(::Circle{ℝ}, p, X, ::DefaultOrthonormalBasis{<:Any,TangentSpaceType}) = X
-function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
+get_coordinates_orthonormal(::Circle{ℝ}, p, X) = X
+function get_coordinates_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? one(sbv) : sbv)
 end
@@ -132,53 +131,39 @@ end
 
 Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-function get_coordinates(
+get_coordinates(
     ::Circle{ℂ},
     p,
     X,
     ::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
 )
+function get_coordinates_orthogonal!(::Circle{ℂ}, p, X)
     X, p = X[1], p[1]
     Xⁱ = imag(X) * real(p) - real(X) * imag(p)
     return @SVector [Xⁱ]
 end
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::Circle,
     Y::AbstractArray,
     p,
     X,
-    B::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
 )
     Y[] = get_coordinates(M, p, X, B)[]
     return Y
 end
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::Circle,
     Y::AbstractArray,
     p,
     X,
-    B::DiagonalizingOrthonormalBasis,
 )
     Y[] = get_coordinates(M, p, X, B)[]
     return Y
 end
 
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_coordinates!(
-            M::Circle,
-            Y::AbstractArray,
-            p,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
-
-get_vector(::Circle{ℝ}, p, X, ::AbstractBasis{ℝ,TangentSpaceType}) = X
-get_vector(::Circle{ℝ}, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType}) = X
-function get_vector(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
+get_vector_orthonormal(::Circle{ℝ}, p, X) = X
+function get_vector_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? one(sbv) : sbv)
 end
@@ -412,9 +397,6 @@ project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
 project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
 project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
 
-retract(M::Circle, p, q) = retract(M, p, q, ExponentialRetraction())
-retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)
-
 representation_size(::Circle) = ()
 
 Base.show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
@@ -431,7 +413,7 @@ end
 sym_rem(x, T=π) where {N} = map(sym_rem, x, Ref(T))
 
 @doc raw"""
-    vector_transport_to(M::Circle, p, X, q, ::ParallelTransport)
+     parallel_transport_to(M::Circle, p, X, q)
 
 Compute the parallel transport of `X` from the tangent space at `p` to the tangent space at
 `q` on the [`Circle`](@ref) `M`.
@@ -444,14 +426,14 @@ complex plane.
 ````
 where [`log`](@ref) denotes the logarithmic map on `M`.
 """
-vector_transport_to(::Circle, ::Any, ::Any, ::Any, ::ParallelTransport)
-vector_transport_to(::Circle{ℝ}, p::Real, X::Real, q::Real, ::ParallelTransport) = X
-function vector_transport_to(
+parallel_transport_to(::Circle, ::Any, ::Any, ::Any)
+
+parallel_transport_to(::Circle{ℝ}, p::Real, X::Real, q::Real) = X
+function parallel_transport_to(
     M::Circle{ℂ},
     p::Number,
     X::Number,
     q::Number,
-    ::ParallelTransport,
 )
     X_pq = log(M, p, q)
     Xnorm = norm(M, p, X_pq)
@@ -463,8 +445,8 @@ function vector_transport_to(
     return Y
 end
 
-vector_transport_to!(::Circle{ℝ}, Y, p, X, q, ::ParallelTransport) = (Y .= X)
-function vector_transport_to!(M::Circle{ℂ}, Y, p, X, q, ::ParallelTransport)
+parallel_transport_to!(::Circle{ℝ}, Y, p, X, q) = (Y .= X)
+function parallel_transport_to!(M::Circle{ℂ}, Y, p, X, q)
     X_pq = log(M, p, q)
     Xnorm = norm(M, p, X_pq)
     Y .= X
@@ -473,17 +455,6 @@ function vector_transport_to!(M::Circle{ℂ}, Y, p, X, q, ::ParallelTransport)
         Y .-= factor .* (p + q)
     end
     return Y
-end
-
-function vector_transport_direction(
-    M::Circle,
-    p::Number,
-    X::Number,
-    Y::Number,
-    m::AbstractVectorTransportMethod,
-)
-    q = exp(M, p, Y)
-    return vector_transport_to(M, p, X, q, m)
 end
 
 zero_vector(::Circle, p::Number) = zero(p)
