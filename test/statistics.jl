@@ -44,19 +44,24 @@ function zero_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
     return zero_vector!(Euclidean(N), v, x; kwargs...)
 end
 
-struct TestStatsNotImplementedEmbeddedManifold <:
-       AbstractDecoratorManifold{ℝ} end
-activate_traits(::TestStatsNotImplementedEmbeddedManifold, args...) = merge_traits(IsEmbeddedSubmanifold())
+struct TestStatsNotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
+function activate_traits(::TestStatsNotImplementedEmbeddedManifold, args...)
+    return merge_traits(IsEmbeddedSubmanifold())
+end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 
 struct TestStatsNotImplementedEmbeddedManifold2 <: AbstractDecoratorManifold{ℝ} end
-activate_traits(::TestStatsNotImplementedEmbeddedManifold2, args...) = merge_traits(IsIsometricEmbeddedManifold())
+function activate_traits(::TestStatsNotImplementedEmbeddedManifold2, args...)
+    return merge_traits(IsIsometricEmbeddedManifold())
+end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 
 struct TestStatsNotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{𝔽} end
-activate_traits(::TestStatsNotImplementedEmbeddedManifold3, args...) = merge_traits(IsEmbeddedManifold())
+function activate_traits(::TestStatsNotImplementedEmbeddedManifold3, args...)
+    return merge_traits(IsEmbeddedManifold())
+end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 

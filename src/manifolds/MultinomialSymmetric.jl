@@ -143,7 +143,7 @@ refers to the elementwise exponentiation.
 """
 retract(::MultinomialSymmetric, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract!(M::MultinomialSymmetric, q, p, X, ::ProjectionRetraction)
+function retract_project!(M::MultinomialSymmetric, q, p, X)
     return project!(M, q, p .* exp.(X ./ p))
 end
 

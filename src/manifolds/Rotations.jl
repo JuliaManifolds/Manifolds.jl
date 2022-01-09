@@ -704,14 +704,14 @@ This is also the default retraction on the [`Rotations`](@ref)
 """
 retract(::Rotations, ::Any, ::Any, ::QRRetraction)
 
-function retract!(M::Rotations, q::AbstractArray{T}, p, X, method::QRRetraction) where {T}
+function retract_qr!(::Rotations, q::AbstractArray{T}, p, X) where {T}
     A = p + p * X
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
-function retract!(M::Rotations, q, p, X, method::PolarRetraction)
+function retract_polar!(M::Rotations, q, p, X)
     A = p + p * X
     return project!(M, q, A; check_det=false)
 end

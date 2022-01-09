@@ -14,14 +14,15 @@ and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
 
 Generate the manifold of `n`-by-`n` symmetric matrices of unit Frobenius norm.
 """
-struct SphereSymmetricMatrices{N,𝔽} <:
-       AbstractDecoratorManifold{𝔽} end
+struct SphereSymmetricMatrices{N,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function SphereSymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SphereSymmetricMatrices{n,field}()
 end
 
-activate_traits(::SphereSymmetricMatrices, arge...) = merge_traits(IsEmbeddedSubmanifoldManifold())
+function activate_traits(::SphereSymmetricMatrices, arge...)
+    return merge_traits(IsEmbeddedSubmanifoldManifold())
+end
 
 @doc raw"""
     check_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...)

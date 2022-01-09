@@ -5,10 +5,11 @@ A common type for manifolds that are doubly stochastic, for example by direct co
 [`MultinomialDoubleStochastic`](@ref) or by symmetry [`MultinomialSymmetric`](@ref),
 as long as they are also modeled as [`IsIsometricEmbeddedManifold`](@ref).
 """
-abstract type AbstractMultinomialDoublyStochastic{N} <:
-              AbstractDecoratorManifold{ℝ} end
+abstract type AbstractMultinomialDoublyStochastic{N} <: AbstractDecoratorManifold{ℝ} end
 
-activate_traits(::AbstractMultinomialDoublyStochastic, args...) = merge_traits(IsIsometricEmbeddedManifold())
+function activate_traits(::AbstractMultinomialDoublyStochastic, args...)
+    return merge_traits(IsIsometricEmbeddedManifold())
+end
 
 @doc raw"""
     MultinomialDoublyStochastic{n} <: AbstractMultinomialDoublyStochastic{N}
@@ -205,7 +206,7 @@ refers to the elementwise exponentiation.
 """
 retract(::MultinomialDoubleStochastic, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract!(M::MultinomialDoubleStochastic, q, p, X, ::ProjectionRetraction)
+function retract_project!(M::MultinomialDoubleStochastic, q, p, X)
     return project!(M, q, p .* exp.(X ./ p))
 end
 

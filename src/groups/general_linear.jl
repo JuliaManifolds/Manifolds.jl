@@ -16,8 +16,7 @@ vector in the Lie algebra, and ``⟨⋅,⋅⟩_\mathrm{F}`` denotes the Frobeniu
 By default, tangent vectors ``X_p`` are represented with their corresponding Lie algebra
 vectors ``X_e = p^{-1}X_p``.
 """
-struct GeneralLinear{n,𝔽} <:
-       AbstractGroupManifold{𝔽,MultiplicationOperation} end
+struct GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
 
 activate_traits(::GeneralLinear, args...) = merge_traits(IsEmbeddedManifold())
 

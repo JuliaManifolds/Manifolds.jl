@@ -35,8 +35,7 @@ The manifold is named after
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedStiefel{n,k,𝔽,TB<:AbstractMatrix} <:
-       AbstractDecoratorManifold{𝔽}
+struct GeneralizedStiefel{n,k,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
     B::TB
 end
 
@@ -50,7 +49,6 @@ function GeneralizedStiefel(
 end
 
 activate_traits(::GeneralizedStiefel, args...) = merge_traits(IsEmbeddedManifold())
-
 
 @doc raw"""
     check_point(M::GeneralizedStiefel, p; kwargs...)
@@ -187,14 +185,14 @@ and projecting the result back to the manifold.
 The default retraction for this manifold is the [`ProjectionRetraction`](@ref).
 """
 retract(::GeneralizedStiefel, ::Any...)
-retract(M::GeneralizedStiefel, p, X) = retract(M, p, X, ProjectionRetraction())
 
-retract!(M::GeneralizedStiefel, q, p, X) = retract!(M, q, p, X, ProjectionRetraction())
-function retract!(M::GeneralizedStiefel, q, p, X, ::PolarRetraction)
+default_retraction_method(::GeneralizedStiefel) = ProjectionRetraction()
+
+function retract_polar!(M::GeneralizedStiefel, q, p, X)
     project!(M, q, p + X)
     return q
 end
-function retract!(M::GeneralizedStiefel, q, p, X, ::ProjectionRetraction)
+function retract_project!(M::GeneralizedStiefel, q, p, X)
     project!(M, q, p + X)
     return q
 end

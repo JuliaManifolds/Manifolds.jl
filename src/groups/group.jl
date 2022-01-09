@@ -385,11 +385,7 @@ instead so that methods with [`Identity`](@ref) arguments are not ambiguous.
 compose(::AbstractGroupManifold, ::Any...)
 
 @trait_function compose(G::AbstractDecoratorManifold, p, q)
-function compose(
-    G::AbstractGroupManifold{𝔽,Op},
-    p,
-    q,
-) where {𝔽,Op<:AbstractGroupOperation}
+function compose(G::AbstractGroupManifold{𝔽,Op}, p, q) where {𝔽,Op<:AbstractGroupOperation}
     return _compose(G, p, q)
 end
 function compose(
@@ -565,12 +561,7 @@ function translate(G::AbstractGroupManifold, p, q)
     return translate(G, p, q, LeftAction())
 end
 @trait_function translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirection)
-function translate(
-    G::AbstractGroupManifold,
-    p,
-    q,
-    conv::ActionDirection,
-)
+function translate(G::AbstractGroupManifold, p, q, conv::ActionDirection)
     return compose(G, _action_order(p, q, conv)...)
 end
 
@@ -578,20 +569,8 @@ end
 function translate!(G::AbstractGroupManifold, X, p, q)
     return translate!(G, X, p, q, LeftAction())
 end
-@trait_function translate!(
-    G::AbstractDecoratorManifold,
-    X,
-    p,
-    q,
-    conv::ActionDirection,
-)
-function translate!(
-    G::AbstractGroupManifold,
-    X,
-    p,
-    q,
-    conv::ActionDirection,
-)
+@trait_function translate!(G::AbstractDecoratorManifold, X, p, q, conv::ActionDirection)
+function translate!(G::AbstractGroupManifold, X, p, q, conv::ActionDirection)
     return compose!(G, X, _action_order(p, q, conv)...)
 end
 
@@ -613,39 +592,24 @@ inverse_translate(::AbstractGroupManifold, ::Any...)
 function inverse_translate(G::AbstractGroupManifold, p, q)
     return inverse_translate(G, p, q, LeftAction())
 end
-@trait_function inverse_translate(
-    G::AbstractDecoratorManifold,
-    p,
-    q,
-    conv::ActionDirection,
-)
-function inverse_translate(
-    G::AbstractGroupManifold,
-    p,
-    q,
-    conv::ActionDirection,
-)
+@trait_function inverse_translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirection)
+function inverse_translate(G::AbstractGroupManifold, p, q, conv::ActionDirection)
     return translate(G, inv(G, p), q, conv)
 end
 
 @trait_function inverse_translate!(G::AbstractDecoratorManifold, X, p, q)
-function inverse_translate!(
-    G::AbstractGroupManifold,
-    X,
-    p,
-    q,
-)
+function inverse_translate!(G::AbstractGroupManifold, X, p, q)
     return inverse_translate!(G, X, p, q, LeftAction())
 end
-@trait_function inverse_translate!(G::AbstractDecoratorManifold, X, p, q, conv::ActionDirection)
-
-function inverse_translate!(
-    G::AbstractGroupManifold,
+@trait_function inverse_translate!(
+    G::AbstractDecoratorManifold,
     X,
     p,
     q,
     conv::ActionDirection,
 )
+
+function inverse_translate!(G::AbstractGroupManifold, X, p, q, conv::ActionDirection)
     return translate!(G, X, inv(G, p), q, conv)
 end
 
@@ -666,25 +630,13 @@ function translate_diff(G::AbstractGroupManifold, p, q, X)
     return translate_diff(G, p, q, X, LeftAction())
 end
 @trait_function translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirection)
-function translate_diff(
-    G::AbstractGroupManifold,
-    p,
-    q,
-    X,
-    conv::ActionDirection,
-)
+function translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection)
     Y = allocate_result(G, translate_diff, X, p, q)
     translate_diff!(G, Y, p, q, X, conv)
     return Y
 end
 @trait_function translate_diff!(G::AbstractDecoratorManifold, Y, p, q, X)
-function translate_diff!(
-    G::AbstractGroupManifold,
-    Y,
-    p,
-    q,
-    X,
-)
+function translate_diff!(G::AbstractGroupManifold, Y, p, q, X)
     return translate_diff!(G, Y, p, q, X, LeftAction())
 end
 @trait_function translate_diff!(
@@ -709,36 +661,32 @@ specified left or right `conv`ention. The differential transports vectors:
 """
 inverse_translate_diff(::AbstractGroupManifold, ::Any...)
 @trait_function inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X)
-function inverse_translate_diff(
-    G::AbstractGroupManifold,
-    p,
-    q,
-    X,
-)
+function inverse_translate_diff(G::AbstractGroupManifold, p, q, X)
     return inverse_translate_diff(G, p, q, X, LeftAction())
 end
-@trait_function inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirection)
-function inverse_translate_diff(
-    G::AbstractGroupManifold,
+@trait_function inverse_translate_diff(
+    G::AbstractDecoratorManifold,
     p,
     q,
     X,
     conv::ActionDirection,
 )
+function inverse_translate_diff(G::AbstractGroupManifold, p, q, X, conv::ActionDirection)
     return translate_diff(G, inv(G, p), q, X, conv)
 end
 
 @trait_function inverse_translate_diff!(G::AbstractDecoratorManifold, Y, p, q, X)
-function inverse_translate_diff!(
-    G::AbstractGroupManifold,
+function inverse_translate_diff!(G::AbstractGroupManifold, Y, p, q, X)
+    return inverse_translate_diff!(G, Y, p, q, X, LeftAction())
+end
+@trait_function inverse_translate_diff!(
+    G::AbstractDecoratorManifold,
     Y,
     p,
     q,
     X,
+    conv::ActionDirection,
 )
-    return inverse_translate_diff!(G, Y, p, q, X, LeftAction())
-end
-@trait_function inverse_translate_diff!(G::AbstractDecoratorManifold, Y, p, q, X, conv::ActionDirection)
 function inverse_translate_diff!(
     G::AbstractGroupManifold,
     Y,

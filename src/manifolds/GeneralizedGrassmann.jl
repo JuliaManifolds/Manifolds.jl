@@ -43,8 +43,7 @@ The manifold is named after
 Generate the (real-valued) Generalized Grassmann manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedGrassmann{n,k,𝔽,TB<:AbstractMatrix} <:
-       AbstractDecoratorManifold{𝔽}
+struct GeneralizedGrassmann{n,k,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
     B::TB
 end
 
@@ -373,11 +372,11 @@ Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
 """
 retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarRetraction)
 
-function retract!(M::GeneralizedGrassmann, q, p, X, ::PolarRetraction)
+function retract_polar!(M::GeneralizedGrassmann, q, p, X)
     project!(M, q, p + X)
     return q
 end
-function retract!(M::GeneralizedGrassmann, q, p, X, ::ProjectionRetraction)
+function retract_project!(M::GeneralizedGrassmann, q, p, X)
     project!(M, q, p + X)
     return q
 end

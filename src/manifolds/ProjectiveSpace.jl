@@ -4,8 +4,7 @@
 An abstract type to represent a projective space over `𝔽` that is represented isometrically
 in the embedding.
 """
-abstract type AbstractProjectiveSpace{𝔽} <:
-              AbstractDecoratorManifold{𝔽} end
+abstract type AbstractProjectiveSpace{𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 @doc raw"""
     ProjectiveSpace{n,𝔽} <: AbstractProjectiveSpace{𝔽}
@@ -41,7 +40,9 @@ projective spaces.
 struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
 ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ) = ProjectiveSpace{n,field}()
 
-activate_traits(::AbstractProjectiveSpace, args...) = merge_traits(IsIsometricEmbeddedManifold())
+function activate_traits(::AbstractProjectiveSpace, args...)
+    return merge_traits(IsIsometricEmbeddedManifold())
+end
 
 @doc raw"""
     ArrayProjectiveSpace{T<:Tuple,𝔽} <: AbstractProjectiveSpace{𝔽}
@@ -443,13 +444,15 @@ retract(
     ::Union{ProjectionRetraction,PolarRetraction,QRRetraction},
 )
 
-function retract!(
-    M::AbstractProjectiveSpace,
-    q,
-    p,
-    X,
-    ::Union{ProjectionRetraction,PolarRetraction,QRRetraction},
-)
+function retract_polar!(M::AbstractProjectiveSpace, q, p, X)
+    q .= p .+ X
+    return project!(M, q, q)
+end
+function retract_project!(M::AbstractProjectiveSpace, q, p, X)
+    q .= p .+ X
+    return project!(M, q, q)
+end
+function retract_qr!(M::AbstractProjectiveSpace, q, p, X)
     q .= p .+ X
     return project!(M, q, q)
 end

@@ -7,7 +7,6 @@ abstract type AbstractSphere{𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 activate_traits(::AbstractSphere, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
-
 @doc raw"""
     Sphere{n,𝔽} <: AbstractSphere{𝔽}
 
@@ -442,7 +441,7 @@ Compute the retraction that is based on projection, i.e.
 """
 retract(::AbstractSphere, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract!(M::AbstractSphere, q, p, X, ::ProjectionRetraction)
+function retract_project!(M::AbstractSphere, q, p, X)
     q .= p .+ X
     return project!(M, q, q)
 end

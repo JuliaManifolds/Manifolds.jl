@@ -1046,7 +1046,7 @@ method has to be one that is available on the manifolds.
 """
 retract(::ProductManifold, ::Any...)
 
-function retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
+function _retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
     map(
         retract!,
         M.manifolds,

@@ -22,8 +22,7 @@ which is also reflected in the
 
 Generate the manifold of ``n × n`` skew-hermitian matrices.
 """
-struct SkewHermitianMatrices{n,𝔽} <:
-       AbstractDecoratorManifold{𝔽} end
+struct SkewHermitianMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SkewHermitianMatrices{n,field}()
@@ -44,7 +43,9 @@ const SkewSymmetricMatrices{n} = SkewHermitianMatrices{n,ℝ}
 SkewSymmetricMatrices(n::Int) = SkewSymmetricMatrices{n}()
 @deprecate SkewSymmetricMatrices(n::Int, 𝔽) SkewHermitianMatrices(n, 𝔽)
 
-activate_traits(::SkewSymmetricMatrices, arge...) = merge_traits(IsEmbeddedSubmanifoldManifold())
+function activate_traits(::SkewSymmetricMatrices, arge...)
+    return merge_traits(IsEmbeddedSubmanifoldManifold())
+end
 
 function allocation_promotion_function(
     ::SkewHermitianMatrices{<:Any,ℂ},

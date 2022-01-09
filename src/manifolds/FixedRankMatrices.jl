@@ -414,12 +414,11 @@ singular values and ``U`` and ``V`` are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
 
-function retract!(
+function retract_polar!(
     ::FixedRankMatrices{m,n,k},
     q::SVDMPoint,
     p::SVDMPoint,
     X::UMVTVector,
-    ::PolarRetraction,
 ) where {m,n,k}
     QU, RU = qr([p.U X.U])
     QV, RV = qr([p.Vt' X.Vt'])

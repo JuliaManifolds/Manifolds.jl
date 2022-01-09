@@ -53,14 +53,15 @@ over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
     > doi: [10.1137/18m1231389](https://doi.org/10.1137/18m1231389),
     > preprint: [sites.uclouvain.be/absil/2018.06](https://sites.uclouvain.be/absil/2018.06).
 """
-struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <:
-       AbstractDecoratorManifold{𝔽} end
+struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ)
     return SymmetricPositiveSemidefiniteFixedRank{n,k,field}()
 end
 
-activate_traits(::SymmetricPositiveSemidefiniteFixedRank, args...) = merge_traits(IsIsometricEmbeddedManifold())
+function activate_traits(::SymmetricPositiveSemidefiniteFixedRank, args...)
+    return merge_traits(IsIsometricEmbeddedManifold())
+end
 
 @doc raw"""
     check_point(M::SymmetricPositiveSemidefiniteFixedRank{n,𝔽}, q; kwargs...)

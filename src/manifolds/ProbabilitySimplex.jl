@@ -243,12 +243,7 @@ where $\mathbb{1}^{m,n}$ is the size `(m,n)` matrix containing ones, and $\log$ 
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
-function inverse_retract_softmax!(
-    ::ProbabilitySimplex{n},
-    X,
-    p,
-    q,
-) where {n}
+function inverse_retract_softmax!(::ProbabilitySimplex{n}, X, p, q) where {n}
     X .= log.(q) .- log.(p)
     meanlogdiff = mean(X)
     X .-= meanlogdiff
@@ -379,7 +374,7 @@ where multiplication, exponentiation and division are meant elementwise.
 """
 retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxRetraction)
 
-function retract!(::ProbabilitySimplex, q, p, X, ::SoftmaxRetraction)
+function retract_softmax!(::ProbabilitySimplex, q, p, X)
     s = zero(eltype(q))
     @inbounds for i in eachindex(q, p, X)
         q[i] = p[i] * exp(X[i])

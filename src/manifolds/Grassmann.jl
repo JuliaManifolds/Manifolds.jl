@@ -359,11 +359,11 @@ D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_
 """
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
 
-function retract!(::Grassmann, q, p, X, ::PolarRetraction)
+function retract_polar!(::Grassmann, q, p, X)
     s = svd(p + X)
     return mul!(q, s.U, s.Vt)
 end
-function retract!(::Grassmann{N,K}, q, p, X, ::QRRetraction) where {N,K}
+function retract_qr!(::Grassmann{N,K}, q, p, X) where {N,K}
     qrfac = qr(p + X)
     d = diag(qrfac.R)
     D = Diagonal(sign.(d .+ 1 // 2))

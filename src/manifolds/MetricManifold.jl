@@ -104,19 +104,8 @@ function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     return get_vector!(M, Y, p, z, B)
 end
 
-@trait_function change_metric(
-    M::AbstractDecoratorManifold,
-    G::AbstractMetric,
-    X,
-    p,
-)
-@trait_function change_metric!(
-    M::AbstractDecoratorManifold,
-    Y,
-    G::AbstractMetric,
-    X,
-    p,
-)
+@trait_function change_metric(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
+@trait_function change_metric!(M::AbstractDecoratorManifold, Y, G::AbstractMetric, X, p)
 
 @doc raw"""
     change_representer(M::AbstractManifold, G2::AbstractMetric, p, X)
@@ -168,12 +157,7 @@ function change_representer(M::AbstractManifold, G::AbstractMetric, p, X)
     return change_representer!(M, Y, G, p, X)
 end
 
-@trait_function change_representer(
-    M::AbstractDecoratorManifold,
-    G::AbstractMetric,
-    X,
-    p,
-)
+@trait_function change_representer(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
 @trait_function change_representer!(
     M::AbstractDecoratorManifold,
     Y,
@@ -266,11 +250,7 @@ det_local_metric(::AbstractManifold, p, ::AbstractBasis)
 function det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
     return det(local_metric(M, p, B))
 end
-@trait_function det_local_metric(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis,
-)
+@trait_function det_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 """
     einstein_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_badefault_differential_backendckend())
 
@@ -311,13 +291,7 @@ where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@r
 """
 flat(::MetricManifold, ::Any...)
 
-function flat!(
-    ::EmptyTrait,
-    M::MetricManifold,
-    ξ::CoTFVector,
-    p,
-    X::TFVector,
-)
+function flat!(::EmptyTrait, M::MetricManifold, ξ::CoTFVector, p, X::TFVector)
     g = local_metric(M, p, ξ.basis)
     copyto!(ξ.data, g * X.data)
     return ξ
@@ -339,11 +313,7 @@ inverse_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 function inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)
     return inv(local_metric(M, p, B))
 end
-@trait_function inverse_local_metric(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis,
-)
+@trait_function inverse_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
 default_decorator_dispatch(M::MetricManifold) = default_metric_dispatch(M)
 
@@ -417,13 +387,7 @@ where ``G_p`` is the loal matrix representation of the [`AbstractMetric`](@ref) 
 """
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
-function inner(
-    ::EmptyTrait,
-    M::MetricManifold,
-    p,
-    X::TFVector,
-    Y::TFVector,
-)
+function inner(::EmptyTrait, M::MetricManifold, p, X::TFVector, Y::TFVector)
     X.basis === Y.basis ||
         error("calculating inner product of vectors from different bases is not supported")
     return dot(X.data, local_metric(M, p, X.basis) * Y.data)
@@ -442,12 +406,7 @@ This yields the property for two tangent vectors (using Einstein summation conve
 ``X = X^ib_i, Y=Y^ib_i \in T_p\mathcal M`` we get ``g_p(X, Y) = g_{ij} X^i Y^j``.
 """
 local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
-@trait_function local_metric(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
+@trait_function local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
 @doc raw"""
     local_metric_jacobian(
@@ -500,11 +459,7 @@ log_local_metric_density(::AbstractManifold, ::Any, ::AbstractBasis)
 function log_local_metric_density(M::AbstractManifold, p, B::AbstractBasis)
     return log(abs(det_local_metric(M, p, B))) / 2
 end
-@trait_function log_local_metric_density(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis,
-)
+@trait_function log_local_metric_density(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
 @doc raw"""
     metric(M::MetricManifold)

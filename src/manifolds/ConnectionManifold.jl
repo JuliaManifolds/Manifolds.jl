@@ -30,8 +30,7 @@ An overview of basic properties of affine connection manifolds can be found in [
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
-abstract type AbstractConnectionManifold{𝔽} <:
-              AbstractDecoratorManifold{𝔽} end
+abstract type AbstractConnectionManifold{𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 """
     connection(M::AbstractManifold)
@@ -196,7 +195,13 @@ function injectivity_radius(M::AbstractConnectionManifold, p, m::ExponentialRetr
     return injectivity_radius(base_manifold(M), p, m)
 end
 
-function retract!(M::AbstractDecoratorManifold, q, p, X, r::ODEExponentialRetraction)
+function retract_exp_ode!(
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    r::ODEExponentialRetraction,
+)
     sol = solve_exp_ode(M, p, X; basis=r.basis, dense=false)
     return copyto!(q, sol)
 end
@@ -216,12 +221,7 @@ function ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     @einsum Ric[i, j] = R[l, i, l, j]
     return Ric
 end
-@trait_function ricci_tensor(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
+@trait_function ricci_tensor(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
 @doc raw"""
     riemann_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend=default_differential_backend())
@@ -253,12 +253,7 @@ function riemann_tensor(
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
     return R
 end
-@trait_function riemann_tensor(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
+@trait_function riemann_tensor(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
 @doc raw"""
     solve_exp_ode(

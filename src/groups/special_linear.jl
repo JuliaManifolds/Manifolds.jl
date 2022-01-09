@@ -16,8 +16,7 @@ metric used for [`GeneralLinear(n, 𝔽)`](@ref). The resulting geodesic on
 an element of ``𝔰𝔩(n, 𝔽)`` is a closed subgroup of ``\mathrm{SL}(n,𝔽)``. As a result, most
 metric functions forward to `GeneralLinear`.
 """
-struct SpecialLinear{n,𝔽} <:
-       AbstractGroupManifold{𝔽,MultiplicationOperation} end
+struct SpecialLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
 
 activate_traits(::SpecialLinear, args...) = merge_traits(IsEmbeddedSubmanifoldManifold())
 
