@@ -249,12 +249,11 @@ Y = X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle
 """
 get_vector(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_vector!(
+function get_vector_orthonormal!(
     M::AbstractSphere{ℝ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 )
     n = manifold_dimension(M)
     p1 = p[1]
@@ -473,9 +472,9 @@ P_{p←q}(X) = X - \frac{\Re(⟨\log_p q,X⟩_p)}{d^2_𝕊(p,q)}
 \bigl(\log_p q + \log_q p \bigr).
 ````
 """
-vector_transport_to(::AbstractSphere, ::Any, ::Any, ::Any, ::Any, ::ParallelTransport)
+parallel_transport_to(::AbstractSphere, ::Any, ::Any, ::Any, ::Any)
 
-function vector_transport_to!(::AbstractSphere, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::AbstractSphere, Y, p, X, q)
     m = p .+ q
     mnorm2 = real(dot(m, m))
     factor = 2 * real(dot(X, q)) / mnorm2

@@ -5,6 +5,7 @@ const TEST_STATIC_SIZED = false
 using Manifolds
 using ManifoldsBase
 using ManifoldsBase: number_of_coordinates
+import ManifoldsBase: active_traits, merge_traits
 
 using LinearAlgebra
 using Distributions
