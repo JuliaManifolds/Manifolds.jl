@@ -663,9 +663,9 @@ the direction of tangent vector ``X ∈ T_p\operatorname{Sp}(2n, ℝ)``,
 as defined in by Birtea et al in proposition 2 [^birtea2020optimization].
 
 Using the symplectic inverse of a matrix ``A \in ℝ^{2n \times 2n}``,
-````math
+``
 A^{+} := Q_{2n}^T A^T Q_{2n}
-````
+``
 where
 ````math
 Q_{2n} =
