@@ -1,9 +1,10 @@
 @doc raw"""
     Symplectic{n, ℝ} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
 
-Over the field ℝ, the Symplectic Manifold consists of all $2n × 2n$ matrices defined as
+Over the real number field ℝ the elements of the Symplectic Manifold
+are all $2n × 2n$ matrices satisfying the requirement
 ````math
-\operatorname{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2n} \bigr\}
+\operatorname{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2n} \bigr\},
 ````
 where
 ````math
@@ -11,28 +12,33 @@ Q_{2n} =
 \begin{bmatrix}
   0_n & I_n \\
  -I_n & 0_n
-\end{bmatrix}
+\end{bmatrix},
 ````
-with $0_n$ and $I_n$ denoting the $n × n$ zero-matrix and indentity matrix respectively.
-This way of embedding a symplectic manifold in a real matrix space with twice the dimensions
-along the rows and columns can be seen the 'realification' of an underlying complex structure.
-Internally the dimensionality of the structure is stored as half of the even dimension supplied to the constructor,
-``2n -> n``, as most computations with points on a Real Symplectic manifold takes advantage of the natural block structure
-of a matrix ``A ∈ ℝ^{2n × 2n}`` where we consider it as consisting of four smaller matrices in ``ℝ^{n × n}``.
+with $0_n$ and $I_n$ denoting the $n × n$ zero-matrix
+and indentity matrix in ``ℝ^{n \times n}`` respectively.
+
+Internally the dimensionality of the structure is stored as half of the even dimension
+supplied to the constructor, `Symplectic(2n) -> Symplectic{n}()`,
+as most computations with points on the Real Symplectic manifold takes advantage of the
+natural block structure
+of a matrix ``A ∈ ℝ^{2n × 2n}`` where we consider it as consisting of four
+smaller matrices in ``ℝ^{n × n}``.
 
 # Constructor:
-    Symplectic(2*n, field::AbstractNumbers=ℝ) -> Symplectic{n, ℝ}()
+    Symplectic(n, field::AbstractNumbers=ℝ) -> Symplectic{div(n, 2), ℝ}()
 
-The constructor accepts the number of dimensions in ``ℝ^{2n × 2n}`` as the embedding for the Real Symplectic manifold,
-but internally stores the integer ``n`` denoting half the dimension of the embedding.
+The constructor accepts the even embedding dimension ``n = 2k`` for the real
+symplectic manifold, ``ℝ^{2k × 2k}``, but internally stores the factor ``k``.
 """
 struct Symplectic{n,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 @doc """
-    Document difference between real and complex.
-    You are given a manifold of embedding dimension 2nX2n.
+Constructor for the real symplectic manifold embedded in
+``ℝ^{n \times n}`` with ``n`` required to be even.
 """
-Symplectic(n::Int, field::AbstractNumbers=ℝ) = begin
+function Symplectic(n::Int, field::AbstractNumbers=ℝ)
+    n % 2 == 0 || throw(ArgumentError("The dimensionality of the symplectic manifold
+                        embedding space must be even. Was odd, n % 2 == $(n % 2)."))
     Symplectic{div(n, 2),field}()
 end
 
@@ -41,8 +47,11 @@ decorated_manifold(::Symplectic{n,ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
 @doc raw"""
     manifold_dimension(::Symplectic{n})
 
-As a special case of the SymplecticStiefel manifold with k = n. As shown in Proposition
-3.1 in Gao et. al.
+Returns the dimension of the symplectic manifold embedded in ``ℝ^{2n \times 2n}``,
+i.e.
+````math
+    \operatorname{dim}(\operatorname{Sp}(2n)) = (2n + 1)n.
+````
 """
 manifold_dimension(::Symplectic{n}) where {n} = (2n + 1) * n
 
@@ -157,7 +166,7 @@ end
 
 The Exponential mapping on the Symplectic manifold with the 'Fiori'
 inner product.
-From Proposition 2 in "A Riemannian-Steepest-Descent approach
+From proposition 2 in "A Riemannian-Steepest-Descent approach
 for optimization of the real symplectic group."
 """
 function exp!(M::Symplectic{n}, q, p, X) where {n}
@@ -374,12 +383,12 @@ Q_{2n} =
 \end{bmatrix}
 ````
 
-In total the symplectic inverse of A is computed as:
+In total the symplectic inverse of A is computed explicitly as:
 ````math
 A^{+} =
 \begin{bmatrix}
-  A_{2, 2}^T & -A_{1, 2}^T \\
- -A_{2, 1}^T &  A_{2, 2}^T
+  A_{2, 2}^T & -A_{1, 2}^T \\[1.2mm]
+ -A_{2, 1}^T &  A_{1, 1}^T
 \end{bmatrix}
 ````
 """
@@ -471,9 +480,12 @@ end
 @doc raw"""
     grad_euclidean_to_manifold(M::Symplectic{n}, p, ∇_Euclidian_f)
 
-Compute the transformation of the euclidean gradient of a function `f` onto the tangent space of the point p ∈ Sn(ℝ, 2n)[^FioriSimone2011].
-The transformation is found by requireing that the gradient element in the tangent space solves the metric compatibility for the Riemannian default_metric_dispatch
-along with the defining equation for a tangent vector ``X ∈ T_pSn(ℝ)``at a point ``p ∈ Sn(ℝ)``.
+Compute the transformation of the euclidean gradient of a function `f` onto the
+tangent space of the point p \in Sn(ℝ, 2n)[^FioriSimone2011].
+The transformation is found by requireing that the gradient element in the tangent
+space solves the metric compatibility for the Riemannian default_metric_dispatch
+along with the defining equation for a tangent
+vector ``X \in T_pSn(ℝ)``at a point ``p \in Sn(ℝ)``.
 
 First we change the representation of the gradient from the Euclidean metric to the RealSymplecticMetric at p,
 and then we project the result onto the tangent space ``T_p\operatorname{Sp}(2n, ℝ)`` at p.
@@ -597,11 +609,6 @@ Adapted from projection onto tangent spaces of Symplectic Stiefal manifolds ``\o
 
 # Full defining equations possibly:
 
-[^Gao2021riemannian]:
-    > Gao, Bin and Son, Nguyen Thanh and Absil, P-A and Stykel, Tatjana:
-    > Riemannian optimization on the symplectic Stiefel manifold,
-    > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
-    > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
 function project_riemannian!(::Symplectic{n,ℝ}, Y, p, X) where {n}
     # Original formulation of the projection from the Gao et al. paper:
@@ -648,27 +655,44 @@ function project_riemannian_normal!(::Symplectic{n,ℝ}, Y, p, X) where {n}
     return Y
 end
 
-function old_retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
-    Q = SymplecticMatrix(p, X)
-    pT_QT_X = p' * Q' * X
-    q .= -p * ((pT_QT_X + 2 * Q) \ (pT_QT_X - 2 * Q))
-
-    return q
-end
-
 @doc raw"""
     retract(::Symplectic, p, X, ::CayleyRetraction)
 
-Compute the Cayley retraction on ``p ∈ \operatorname{Sp}(2n, ℝ)`` in the direction of tangent vector
-``X ∈ T_p\operatorname{Sp}(2n, ℝ)``.
+Compute the Cayley retraction on ``p ∈ \operatorname{Sp}(2n, ℝ)`` in
+the direction of tangent vector ``X ∈ T_p\operatorname{Sp}(2n, ℝ)``,
+as defined in by Birtea et al in proposition 2 [^birtea2020optimization].
 
-Defined pointwise as
+Using the symplectic inverse of a matrix ``A \in ℝ^{2n \times 2n}``,
 ````math
-\mathcal{R}_p(X) = p(2*I - (Q^Tp^TQ)*X)^{-1}(2*I + (Q^Tp^TQ) X)
+A^{+} := Q_{2n}^T A^T Q_{2n}
 ````
-Where
-``exp_{1/1}((Q^Tp^TQ)*X) = (2*I - (Q^Tp^TQ)*X)^{-1}(2*I + (Q^Tp^TQ) X)``
-is the Padé (1, 1) Approximation for exp((Q^Tp^TQ)*X).
+where
+````math
+Q_{2n} =
+\begin{bmatrix}
+0_n & I_n \\
+ -I_n & 0_n
+\end{bmatrix},
+````
+the retraction
+``\mathcal{R}\colon T\operatorname{Sp}(2n) \rightarrow \operatorname{Sp}(2n)``
+is defined pointwise as
+````math
+\begin{align*}
+\mathcal{R}_p(X) &= p \operatorname{cay}\left(\frac{1}{2}p^{+}X\right), \\
+                 &= p \operatorname{exp}_{1/1}(p^{+}X), \\
+                 &= p (2I - p^{+}X)^{-1}(2I + p^{+}X).
+\end{align*}
+````
+Here
+``\operatorname{exp}_{1/1}(z) = (2 - z)^{-1}(2 + z)``
+denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
+
+[^birtea2020optimization]:
+    > Birtea, Petre and Ca{\c{s}}u, Ioan and Com{\u{a}}nescu, Dan:
+    > Optimization on the real symplectic group,
+    > Monatshefte f{\"u}r Mathematik, Springer
+    > doi [10.1007/s00605-020-01369-9](https://doi.org/10.1007/s00605-020-01369-9)
 """
 function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
     # Less than a quarter the memory allocations of `old_retract`:
@@ -688,32 +712,34 @@ struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
 @doc raw"""
     inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
 
-Compute the Cayley Inverse Retraction as in proposition 5.3 of Bendorkat & Zimmermann[^Bendokat2021].
+Compute the Cayley Inverse Retraction as in proposition 5.3 of
+Bendorkat & Zimmermann[^Bendokat2021].
 
 First, recall the definition the standard symplectic matrix
-``Q =
+````math
+Q =
 \begin{bmatrix}
- 0    & I_n \\
--I_n  & 0
+ 0    & I \\
+-I  & 0
 \end{bmatrix}
-``
-as well as the symplectic inverse ``A^{+} = Q^T A^T Q``.
+````
+as well as the symplectic inverse of a matrix ``A``, ``A^{+} = Q^T A^T Q``.
 
-For ``p, q ∈ \operatorname{Sp}(2n, ℝ)``, we can then define the
+For ``p, q ∈ \operatorname{Sp}(2n, ℝ)`` then, we can then define the
 inverse cayley retraction as long as the following matrices exist.
 ````math
     U = (I + p^+ q)^{-1}, \quad V = (I + q^+ p)^{-1}.
 ````
 
-Finally, definition of the inverse cayley retration at ``p`` applied to ``q`` is
+If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 ````math
 \mathcal{L}_p^{\operatorname{Sp}}(q) = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr) ∈ T_p\operatorname{Sp}(2n).
 ````
 
-[Bendokat2021]
-    > Bendokat, Thomas and Zimmermann, Ralf
+[^Bendokat2021]:
+    > Bendokat, Thomas and Zimmermann, Ralf:
 	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
-	> arXiv preprint arXiv:2108.12447, 2021
+	> arXiv preprint arXiv:2108.12447, 2021 (https://arxiv.org/abs/2108.12447)
 """
 function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
     # Speeds up solving the linear systems required for multiplication with U, V:

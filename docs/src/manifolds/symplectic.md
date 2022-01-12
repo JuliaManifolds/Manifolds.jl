@@ -2,6 +2,6 @@
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/RealSymplectic.jl"]
+Pages = ["manifolds/Symplectic.jl"]
 Order = [:type, :function]
 ```
