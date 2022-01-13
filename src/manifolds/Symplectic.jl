@@ -142,11 +142,13 @@ end
 @doc raw"""
     inner(::Symplectic{n, ℝ}, p, X, Y)
 
-Riemannian: Test Test. Reference to Fiori.
-
+Compute the canonical Riemannian inner product [`RealSymplecticMetric`](@ref)
+````math
+    g_p(X, Y) = \operatorname{tr}((p^{-1}X)^T (p^{-1}Y))
+````
+between the two tangent vectors ``X, Y \in T_p\operatorname{Sp}(2n)``.
 """
 function inner(M::Symplectic{n,ℝ}, p, X, Y)::eltype(p) where {n}
-    # For symplectic matrices, the 'symplectic inverse' p^+ is the actual inverse.
     p_star = inv(M, p)
     return tr((p_star * X)' * (p_star * Y))
 end
