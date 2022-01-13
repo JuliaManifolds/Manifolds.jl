@@ -23,18 +23,15 @@ as most computations with points on the Real Symplectic manifold takes advantage
 natural block structure
 of a matrix ``A ∈ ℝ^{2n × 2n}`` where we consider it as consisting of four
 smaller matrices in ``ℝ^{n × n}``.
-
-# Constructor:
-    Symplectic(n, field::AbstractNumbers=ℝ) -> Symplectic{div(n, 2), ℝ}()
-
-The constructor accepts the even embedding dimension ``n = 2k`` for the real
-symplectic manifold, ``ℝ^{2k × 2k}``, but internally stores the factor ``k``.
 """
 struct Symplectic{n,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 @doc """
-Constructor for the real symplectic manifold embedded in
-``ℝ^{n \times n}`` with ``n`` required to be even.
+    Symplectic(n, field::AbstractNumbers=ℝ) -> Symplectic{div(n, 2), ℝ}()
+
+# Constructor:
+The constructor for the [`Symplectic`](@ref) manifold accepts the even embedding
+dimension ``n = 2k`` for the real symplectic manifold, ``ℝ^{2k × 2k}``.
 """
 function Symplectic(n::Int, field::AbstractNumbers=ℝ)
     n % 2 == 0 || throw(ArgumentError("The dimensionality of the symplectic manifold
@@ -164,22 +161,33 @@ end
 @doc raw"""
     exp(M::Symplectic, p, X)
 
-The Exponential mapping on the Symplectic manifold with the 'Fiori'
-inner product.
-From proposition 2 in "A Riemannian-Steepest-Descent approach
-for optimization of the real symplectic group."
+The Exponential mapping on the Symplectic manifold with the
+[`RealSymplecticMetric`](@ref) Riemannian metric [^WangRealSymplecticGroup].
+
+For the point ``p \in \operatorname{Sp}(2n)`` the exponential mapping along the tangent
+vector ``X \in T_p\operatorname{Sp}(2n)`` is computed as
+````math
+    \operatorname{Exp}_p(X) = p \operatorname{exp}((p^{-1}X)^T)
+                                \operatorname{exp}([p^{-1}X - (p^{-1}X)^T]).
+````
+
+[^WangRealSymplecticGroup]:
+    > Wang, Jing and Sun, Huafei and Fiori, Simone:
+    > A Riemannian-steepest-descent approach for optimization on the real symplectic group,
+    > Mathematical Methods in the Applied Sciences, 41(11) pp. 4273-4286, 2018
+    > doi [10.1002/mma.4890](https://doi.org/10.1002/mma.4890)
 """
 function exp!(M::Symplectic{n}, q, p, X) where {n}
     # p_star_X = inv(M, p)*X
     p_star_X = symplectic_inverse_times(M, p, X)
     # Use memory in q once:
     q .= p_star_X .- p_star_X'
-    q .= p * exp(p_star_X) * exp(q)
+    q .= p * exp(p_star_X') * exp(q)
     return q
 end
 
 @doc raw"""
-    check_even_dim(p; square=false)::Integer
+    get_even_dims(p; square=false)::Integer
 
 Convenience function to check whether or not an abstract matrix is square, with an even
 number (2n, 2n) of rows and columns. Then returns the integer part of the even dimension.
@@ -206,8 +214,6 @@ function get_even_dims(p; square=false)
     return div(n, 2), div(k, 2)
 end
 
-# T Indicates whether or not transposed.
-# Acts like the symplectic transform.
 struct SymplecticMatrix{T}
     λ::T
 end
@@ -234,11 +240,6 @@ function Base.show(io::IO, Q::SymplecticMatrix)
     end
     return print(io, typeof(Q), "(): $(s)*[0 I; -I 0]")
 end
-
-# Overloaded functions:
-# Overload: * scalar left, right, matrix, left, right, itself right and left.
-# unary -, inv = -1/s,
-# transpose = -s, +.
 
 (Base.:-)(Q::SymplecticMatrix) = SymplecticMatrix(-Q.λ)
 
@@ -478,10 +479,11 @@ function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}
 end
 
 @doc raw"""
-    grad_euclidean_to_manifold(M::Symplectic{n}, p, ∇_Euclidian_f)
+    grad_euclidean_to_manifold(M::Symplectic{n}, p, ∇f_euc)
+    grad_euclidean_to_manifold!(M::Symplectic{n}, ∇f_man, p, ∇f_euc)
 
-Compute the transformation of the euclidean gradient of a function `f` onto the
-tangent space of the point p \in Sn(ℝ, 2n)[^FioriSimone2011].
+Compute the transformation of the euclidean gradient of a scalar function `f` onto the
+tangent space of the point ``p \in \operatorname{Sp}(ℝ, 2n)``[^FioriSimone2011].
 The transformation is found by requireing that the gradient element in the tangent
 space solves the metric compatibility for the Riemannian default_metric_dispatch
 along with the defining equation for a tangent
@@ -504,7 +506,7 @@ end
 
 function grad_euclidean_to_manifold!(M::Symplectic{n}, ∇f_man, p, ∇f_euc) where {n}
     # TODO: Make mutating version of this grad-conversion function.
-    change_representer!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
+    make_metric_compatible!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
     return project_riemannian!(M, ∇f_man, p, ∇f_man)
 end
 
@@ -517,32 +519,46 @@ end
 function new_grad_euclidean_to_manifold!(M::Symplectic, ∇f_man, p, ∇f_euc)
     # First project onto the tangent space, then change the representer.
     project!(M, ∇f_man, p, ∇f_euc)  # Requries solving 'sylvester'-equation.
-    return change_tangent_space_representer!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
+    return change_representer!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
 end
 
 # Overwrite gradient functions for the Symplectic case:
 # Need to first change representer of ``∇f_euc`` to the Symplectic manifold,
 # then project onto the correct tangent space.
+@doc raw"""
+    gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
+
+Specialize the `gradient` computation of smooth extensions of scalar functions
+``f\colon \operatorname{Sp} \rightarrow \mathbb{R}``
+to use the Riemannian metric projection after t
+"""
 function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
+    return gradient!(M, f, similar(p), p, backend)
     amb_grad = _gradient(f, p, backend.diff_backend)
 
     # Proj ∘ Change_representer(amb_grad):
+    make_metric_compatible!(M, amb_grad, EuclideanMetric(), p, amb_grad)
     return project_riemannian!(
         M,
-        similar(amb_grad),
+        amb_grad,
         p,
-        change_representer(M, EuclideanMetric(), p, amb_grad),
+        amb_grad,
     )
 end
 
 function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend)
     _gradient!(f, X, p, backend.diff_backend)
-    change_representer!(M, X, EuclideanMetric(), p, X)
+    make_metric_compatible!(M, X, EuclideanMetric(), p, X)
     return project_riemannian!(M, X, p, X)
 end
 
+function make_metric_compatible(M::Symplectic, EucMet::EuclideanMetric, p, X)
+    return make_metric_compatible!(M, similar(X), EucMet, p, X)
+end
+
 @doc raw"""
-    change_representer!(::Symplectic, Y, p, X)
+    make_metric_compatible(::Symplectic, ::EuclideanMetric, p, X)
+    make_metric_compatible!(::Symplectic, Y, ::EuclideanMetric, p, X)
 
 Change the representation of an arbitrary element ``χ ∈ \mathbb{R}^{2n \times 2n}`` s.t.
 ````math
@@ -554,20 +570,14 @@ where
 ````
 and ``c_p(χ) = pp^T χ``.
 """
-function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
-    # The following formula actually works for all X ∈ ℝ^{2n × 2n}, and
-    # is exactly the same as: Proj_[T_pSp](p * p^T * X).
-    # Q = SymplecticMatrix(p, X)
-    # Y .= (1/2) .* p * p' * X .+ (1/2) .* p * Q * X' * p * Q
-    # The above is also the only formula I have found for a 'change_representer' which
-    # stays in the tangent space of p after application.
-
+function make_metric_compatible!(::Symplectic, Y, ::EuclideanMetric, p, X)
     Y .= p * p' * X
     return Y
 end
 
+
 @doc raw"""
-    change_tangent_space_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
+    change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
 
 Compute the representation of a tangent vector ``χ ∈ T_p\operatorname{Sp}(2n, ℝ)`` s.t.
 ````math
@@ -592,7 +602,7 @@ for ``i \in {1, 2}``. However the range of each function alone is not confined t
 ````
 does have the correct range ``T_p\operatorname{Sp}(2n, ℝ)``.
 """
-function change_tangent_space_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
+function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
     # This is the change in 'representer' which keeps one in the
     # tangent space of p, but only works in the symplectic case.
     Q = SymplecticMatrix(p, X)
@@ -707,8 +717,6 @@ ManifoldsBase.default_retraction_method(::Symplectic) = CayleyRetraction()
 
 struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
 
-# Inverse-retract:
-# TODO: Write as a special case of the inverse-cayley retraction for the SymplecticStiefel case?
 @doc raw"""
     inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
 
@@ -733,7 +741,8 @@ inverse cayley retraction as long as the following matrices exist.
 
 If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 ````math
-\mathcal{L}_p^{\operatorname{Sp}}(q) = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr) ∈ T_p\operatorname{Sp}(2n).
+\mathcal{L}_p^{\operatorname{Sp}}(q) = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr)
+                                        ∈ T_p\operatorname{Sp}(2n).
 ````
 
 [^Bendokat2021]:
