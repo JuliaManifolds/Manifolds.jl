@@ -55,11 +55,15 @@ manifold_dimension(::Symplectic{n}) where {n} = (2n + 1) * n
 Base.show(io::IO, ::Symplectic{n,ℝ}) where {n,ℝ} = print(io, "Symplectic{$(2n)}()")
 
 @doc raw"""
-    #TODO: Document The Riemannian Symplectic metric used.
-
+The canonical Riemannian metric on the symplectic manifold,
+defined pointwise for ``p \in \operatorname{Sp}(2n)``by [^FioriSimone2011]
 ````math
-    g_p(Z_1, Z_2) = tr((p^{-1}Z_1)^T (p^{-1}Z_2))
+\begin{align*}
+    & g_p \colon T_p\operatorname{Sp}(2n) \times T_p\operatorname{Sp}(2n) \rightarrow ℝ, \\
+    & g_p(Z_1, Z_2) = \operatorname{tr}((p^{-1}Z_1)^T (p^{-1}Z_2)).
+\end{align*}
 ````
+This metric is also the default metric used within `Maniolds.jl`.
 """
 struct RealSymplecticMetric <: RiemannianMetric end
 
@@ -167,9 +171,10 @@ The Exponential mapping on the Symplectic manifold with the
 For the point ``p \in \operatorname{Sp}(2n)`` the exponential mapping along the tangent
 vector ``X \in T_p\operatorname{Sp}(2n)`` is computed as [^WangRealSymplecticGroup]
 ````math
-    \operatorname{Exp}_p(X) = p \operatorname{exp}((p^{-1}X)^T)
-                                \operatorname{exp}([p^{-1}X - (p^{-1}X)^T]).
+    \operatorname{exp}_p(X) = p \operatorname{Exp}((p^{-1}X)^T)
+                                \operatorname{Exp}([p^{-1}X - (p^{-1}X)^T]),
 ````
+where ``\operatorname{Exp}(\cdot)`` denotes the matrix exponential.
 
 [^WangRealSymplecticGroup]:
     > Wang, Jing and Sun, Huafei and Fiori, Simone:
