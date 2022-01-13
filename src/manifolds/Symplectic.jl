@@ -56,7 +56,7 @@ Base.show(io::IO, ::Symplectic{n,ℝ}) where {n,ℝ} = print(io, "Symplectic{$(2
 
 @doc raw"""
 The canonical Riemannian metric on the symplectic manifold,
-defined pointwise for ``p \in \operatorname{Sp}(2n)``by [^FioriSimone2011]
+defined pointwise for ``p \in \operatorname{Sp}(2n)`` by [^FioriSimone2011]
 ````math
 \begin{align*}
     & g_p \colon T_p\operatorname{Sp}(2n) \times T_p\operatorname{Sp}(2n) \rightarrow ℝ, \\
