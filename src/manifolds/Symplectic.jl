@@ -505,27 +505,12 @@ and then we project the result onto the tangent space ``T_p\operatorname{Sp}(2n,
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
 function grad_euclidean_to_manifold(M::Symplectic{n}, p, ∇f_euc) where {n}
-    # TODO: Make mutating version of this grad-conversion function.
-    ∇f_metr_comp = change_representer(M, EuclideanMetric(), p, ∇f_euc)
-    return project_riemannian!(M, ∇f_metr_comp, p, ∇f_metr_comp)
+    return grad_euclidean_to_manifold!(M, similar(∇f_euc), p, ∇f_euc)
 end
 
 function grad_euclidean_to_manifold!(M::Symplectic{n}, ∇f_man, p, ∇f_euc) where {n}
-    # TODO: Make mutating version of this grad-conversion function.
     make_metric_compatible!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
     return project_riemannian!(M, ∇f_man, p, ∇f_man)
-end
-
-function new_grad_euclidean_to_manifold(M::Symplectic, p, ∇f_euc)
-    # First project onto the tangent space, then change the representer.
-    ∇f_man = similar(∇f_euc)
-    return new_grad_euclidean_to_manifold!(M::Symplectic, ∇f_man, p, ∇f_euc)
-end
-
-function new_grad_euclidean_to_manifold!(M::Symplectic, ∇f_man, p, ∇f_euc)
-    # First project onto the tangent space, then change the representer.
-    project!(M, ∇f_man, p, ∇f_euc)  # Requries solving 'sylvester'-equation.
-    return change_representer!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
 end
 
 # Overwrite gradient functions for the Symplectic case:
@@ -534,22 +519,12 @@ end
 @doc raw"""
     gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
 
-Specialize the `gradient` computation of smooth extensions of scalar functions
-``f\colon \operatorname{Sp} \rightarrow \mathbb{R}``
-to use the Riemannian metric projection after [...]
+Specialize the `gradient` computation of scalar functions
+``f \colon \operatorname{Sp} \rightarrow \mathbb{R}``
+to use the Riemannian metric projection after a metric compatibility mapping.
 """
 function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
     return gradient!(M, f, similar(p), p, backend)
-    amb_grad = _gradient(f, p, backend.diff_backend)
-
-    # Proj ∘ Change_representer(amb_grad):
-    make_metric_compatible!(M, amb_grad, EuclideanMetric(), p, amb_grad)
-    return project_riemannian!(
-        M,
-        amb_grad,
-        p,
-        amb_grad,
-    )
 end
 
 function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend)
@@ -711,7 +686,6 @@ denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
     > doi [10.1007/s00605-020-01369-9](https://doi.org/10.1007/s00605-020-01369-9)
 """
 function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
-    # Less than a quarter the memory allocations of `old_retract`:
     p_star_X = symplectic_inverse_times(M, p, X)
 
     ldiv!(lu!(2*I - p_star_X), add_scaled_I!(p_star_X, 2.0))
