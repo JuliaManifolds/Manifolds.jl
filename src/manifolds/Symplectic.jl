@@ -162,10 +162,10 @@ end
     exp(M::Symplectic, p, X)
 
 The Exponential mapping on the Symplectic manifold with the
-[`RealSymplecticMetric`](@ref) Riemannian metric [^WangRealSymplecticGroup].
+[`RealSymplecticMetric`](@ref) Riemannian metric.
 
 For the point ``p \in \operatorname{Sp}(2n)`` the exponential mapping along the tangent
-vector ``X \in T_p\operatorname{Sp}(2n)`` is computed as
+vector ``X \in T_p\operatorname{Sp}(2n)`` is computed as [^WangRealSymplecticGroup]
 ````math
     \operatorname{Exp}_p(X) = p \operatorname{exp}((p^{-1}X)^T)
                                 \operatorname{exp}([p^{-1}X - (p^{-1}X)^T]).
@@ -362,7 +362,7 @@ end
 @doc raw"""
     inv(M::Symplectic{n, ℝ}, A) where {n, ℝ}
 
-Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2n}``, returning the result.
+Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2n}``. Given a matrix
 ````math
 A ∈ ℝ^{2n × 2n},\quad
 A =
@@ -371,9 +371,9 @@ A_{1,1} & A_{1,2} \\
 A_{2,1} & A_{2, 2}
 \end{bmatrix}
 ````
-Here the symplectic inverse is defined as:
+the symplectic inverse is defined as:
 ````math
-A^{+} := Q_{2n}^T A^T Q_{2n}
+A^{+} := Q_{2n}^T A^T Q_{2n},
 ````
 where
 ````math
@@ -381,16 +381,15 @@ Q_{2n} =
 \begin{bmatrix}
 0_n & I_n \\
  -I_n & 0_n
-\end{bmatrix}
+\end{bmatrix}.
 ````
-
-In total the symplectic inverse of A is computed explicitly as:
+The symplectic inverse of A can be expressed explicitly as:
 ````math
 A^{+} =
 \begin{bmatrix}
   A_{2, 2}^T & -A_{1, 2}^T \\[1.2mm]
  -A_{2, 1}^T &  A_{1, 1}^T
-\end{bmatrix}
+\end{bmatrix}.
 ````
 """
 function Base.inv(::Symplectic{n,ℝ}, A) where {n}
@@ -530,7 +529,7 @@ end
 
 Specialize the `gradient` computation of smooth extensions of scalar functions
 ``f\colon \operatorname{Sp} \rightarrow \mathbb{R}``
-to use the Riemannian metric projection after t
+to use the Riemannian metric projection after [...]
 """
 function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
     return gradient!(M, f, similar(p), p, backend)
@@ -552,24 +551,26 @@ function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend)
     return project_riemannian!(M, X, p, X)
 end
 
-function make_metric_compatible(M::Symplectic, EucMet::EuclideanMetric, p, X)
-    return make_metric_compatible!(M, similar(X), EucMet, p, X)
-end
-
 @doc raw"""
     make_metric_compatible(::Symplectic, ::EuclideanMetric, p, X)
     make_metric_compatible!(::Symplectic, Y, ::EuclideanMetric, p, X)
 
-Change the representation of an arbitrary element ``χ ∈ \mathbb{R}^{2n \times 2n}`` s.t.
-````math
-    g_p(c_p(χ), η) = ⟨χ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ).
-````
-where
+Change the representation of an arbitrary element ``χ ∈ \mathbb{R}^{2n \times 2n}``
+by a mapping
 ````math
     c_p : \mathbb{R}^{2n \times 2n} \rightarrow \mathbb{R}^{2n \times 2n},
+    \quad c_p(χ) = pp^T χ.
 ````
-and ``c_p(χ) = pp^T χ``.
+The mapping is defined such that the metric compatibility condition
+````math
+    g_p(c_p(χ), η) = ⟨χ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ)
+````
+holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref).
 """
+function make_metric_compatible(M::Symplectic, EucMet::EuclideanMetric, p, X)
+    return make_metric_compatible!(M, similar(X), EucMet, p, X)
+end
+
 function make_metric_compatible!(::Symplectic, Y, ::EuclideanMetric, p, X)
     Y .= p * p' * X
     return Y
@@ -603,28 +604,24 @@ for ``i \in {1, 2}``. However the range of each function alone is not confined t
 does have the correct range ``T_p\operatorname{Sp}(2n, ℝ)``.
 """
 function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
-    # This is the change in 'representer' which keeps one in the
-    # tangent space of p, but only works in the symplectic case.
     Q = SymplecticMatrix(p, X)
     Y .= (1 / 2) .* p * (p' * X .+ Q * X' * p * Q)
     return Y
 end
 
 @doc raw"""
-    riemannian_project!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
+    project_riemannian!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
 
-Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n, ℝ)``, stored inplace in Y.
-Adapted from projection onto tangent spaces of Symplectic Stiefal manifolds ``\operatorname{Sp}(2p, 2n)`` with
-``p = n``[^Gao2021riemannian].
+Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n, ℝ)`` w.r.t.
+the Riemannian metric ``g`` [`RealSymplecticMetric`](@ref).
 
-# Full defining equations possibly:
-
+The closed form projection mapping is given by [^Gao2021riemannian]
+````math
+    \operatorname{P}^{T_p\operatorname{Sp}(2n)}_{g_p}(X) = pQ\operatorname{sym}(p^TQ^TX),
+````
+where ``\operatorname{sym}(A) = \frac{1}{2}(A + A')``.
 """
 function project_riemannian!(::Symplectic{n,ℝ}, Y, p, X) where {n}
-    # Original formulation of the projection from the Gao et al. paper:
-    # Y[:, :] = pQ * symmetrized_pT_QT_X .+ (I - pQ*p^T_Q^T) * X
-    # The term: (I - pQ*pT_QT) = 0 in our symplectic case.
-
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
@@ -638,16 +635,18 @@ end
     project_riemannian_normal!(M::Symplectic{n, ℝ}, Y, p, X)
 
 Project onto the normal of the tangent space ``(T_p\operatorname{Sp}(2n))^{\perp_g}`` at
-a point ``p ∈ \operatorname{Sp}(2n)``, relative to the riemannian metric ``g``.
-
+a point ``p ∈ \operatorname{Sp}(2n)``,
+relative to the riemannian metric ``g`` [`RealSymplecticMetric`](@ref).
 That is,
 ````math
 (T_p\operatorname{Sp}(2n))^{\perp_g} = \{Y \in \mathbb{R}^{2n \times 2n} :
-                        g_p(Y, X) = 0 \;\forall\; X \in T_p\operatorname{Sp}(2n)\},
+                        g_p(Y, X) = 0 \;\forall\; X \in T_p\operatorname{Sp}(2n)\}.
 ````
-and the closed form projection operator is as found in Gao et al.[^Gao2021riemannian].
-
-# Defining equations:
+The closed form projection operator onto the normal space is given by [^Gao2021riemannian]
+````math
+\operatorname{P}^{(T_p\operatorname{Sp}(2n))\perp}_{g_p}(X) = pQ\operatorname{skew}(p^TQ^TX),
+````
+where ``\operatorname{skew}(A) = \frac{1}{2}(A - A')``.
 
 [^Gao2021riemannian]:
     > Gao, Bin and Son, Nguyen Thanh and Absil, P-A and Stykel, Tatjana:

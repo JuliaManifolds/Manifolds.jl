@@ -6,11 +6,11 @@ The canonical symplectic form is $\omega(x, y) = x^T Q y$ for elements $x, y \in
 \\[
     Q = 
     \begin{bmatrix}
-     0  &  I \\
+     0  &  I \\\\
     -I  &  0
     \end{bmatrix}.
 \\] 
-That means given an element $p \in \operatorname{Sp}{2n}$, 
+That means given an element $p \in \operatorname{Sp}(2n)$, 
 \\[
     \omega (p x, p y) = x^T(p^TQp)y = x^TQy = \omega(x, y),
 \\]
