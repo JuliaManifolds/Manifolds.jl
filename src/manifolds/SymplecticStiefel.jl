@@ -322,36 +322,40 @@ end
 @doc raw"""
     inverse_retract!(::SymplecticStiefel, q, p, X, ::CayleyInverseRetraction)
 
-Compute the Cayley Inverse Retraction as in proposition 5.3 of Bendorkat & Zimmermann[^Bendokat2021].
+Compute the Cayley Inverse Retraction ``X = \mathcal{L}_p^{\operatorname{SpSt}}(q)``
+such that the Cayley Retraction from ``p`` along ``X`` lands at ``q``, i.e.
+``\mathcal{R}_p(X) = q`` [^Bendokat2021].
 
 First, recall the definition the standard symplectic matrix
-``Q_{2n} =
+````math
+Q =
 \begin{bmatrix}
- 0    & I_n \\
--I_n  & 0
+ 0    &  I \\
+-I    &  0
 \end{bmatrix}
-``
-as well as the symplectic inverse for a matrix ``A ∈ ℝ^{2n × 2k},
-``A^{+} = Q_{2k}^T A^T Q_{2n}``.
+````
+as well as the symplectic inverse of a matrix ``A``, ``A^{+} = Q^T A^T Q``.
 
-For ``p, q ∈ \operatorname{Sp}(2n, ℝ)``, we can then define the
+For ``p, q ∈ \operatorname{SpSt}(2n, 2k, ℝ)`` then, we can then define the
 inverse cayley retraction as long as the following matrices exist.
 ````math
-    U = (I + p^+ q)^{-1}, \quad V = (I + q^+ p)^{-1}.
+    U = (I + p^+ q)^{-1} \in ℝ^{2k \times 2k},
+    \quad
+    V = (I + q^+ p)^{-1} \in ℝ^{2k \times 2k}.
 ````
 
-Finally, definition of the inverse cayley retration at ``p`` applied to ``q`` is
+If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 ````math
-\mathcal{L}_p^{\operatorname{Sp}}(q) = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr) ∈ T_p\operatorname{Sp}(2n).
+\mathcal{L}_p^{\operatorname{Sp}}(q) = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr)
+                                        ∈ T_p\operatorname{Sp}(2n).
 ````
 
-[Bendokat2021]
-> Bendokat, Thomas and Zimmermann, Ralf
-> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
-> arXiv preprint arXiv:2108.12447, 2021
+[^Bendokat2021]:
+    > Bendokat, Thomas and Zimmermann, Ralf:
+	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
+	> arXiv preprint arXiv:2108.12447, 2021 (https://arxiv.org/abs/2108.12447)
 """
 function inverse_retract!(M::SymplecticStiefel, X, p, q, ::CayleyInverseRetraction)
-    # Speeds up solving the linear systems required for multiplication with U, V:
     U_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
     V_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
 
