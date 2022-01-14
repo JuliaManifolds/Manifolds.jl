@@ -757,25 +757,6 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 	> arXiv preprint arXiv:2108.12447, 2021 (https://arxiv.org/abs/2108.12447)
 """
 function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
-    # Speeds up solving the linear systems required for multiplication with U, V:
-    U_inv = lu(I + inv(M, p) * q)
-    V_inv = lu(I + inv(M, q) * p)
-
-    X .= 2 .* ((p / V_inv .- p / U_inv) .+ ((p .+ q) / U_inv) .- p)
-    return X
-end
-
-function new_inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
-    # Speeds up solving the linear systems required for multiplication with U, V:
-    U_inv = lu!(add_scaled_I!(inv(M, p) * q, 1))
-    V_inv = lu!(add_scaled_I!(inv(M, q) * p, 1))
-
-    X .= 2 .* ((p / V_inv .- p / U_inv) .+ ((p + q) / U_inv) .- p)
-    return X
-end
-
-function test_inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
-    # Speeds up solving the linear systems required for multiplication with U, V:
     U_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
     V_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
 
