@@ -716,7 +716,7 @@ function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
 
     divisor = lu!(2*I - p_star_X)
     ldiv!(divisor, add_scaled_I!(p_star_X, 2.0))
-    mul!(q, p, p_star_X)
+    q = p * p_star_X
     return q
 end
 
@@ -727,8 +727,9 @@ struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
 @doc raw"""
     inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
 
-Compute the Cayley Inverse Retraction as in proposition 5.3 of
-Bendorkat & Zimmermann[^Bendokat2021].
+Compute the Cayley Inverse Retraction ``X = \mathcal{L}_p^{\operatorname{Sp}}(q)``
+such that the Cayley Retraction from ``p`` along ``X`` lands at ``q``, i.e.
+``\mathcal{R}_p(X) = q`` [^Bendokat2021].
 
 First, recall the definition the standard symplectic matrix
 ````math
