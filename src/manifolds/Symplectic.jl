@@ -69,6 +69,21 @@ struct RealSymplecticMetric <: RiemannianMetric end
 
 default_metric_dispatch(::Symplectic{n,ℝ}, ::RealSymplecticMetric) where {n,ℝ} = Val(true)
 
+@doc raw"""
+    check_point(M::Symplectic, p; kwargs...)
+
+Check whether `p` is a valid point on the [`Symplectic`](@ref) `M`=$\operatorname{Sp}(2n)$,
+i.e. that it has the right [`AbstractNumbers`](@ref) type and $p^{+}p$ is (approximately)
+the identity, where $A^{+} = Q_{2n}^TA^TQ_{2n}$ is the symplectic inverse, with
+````math
+Q_{2n} =
+\begin{bmatrix}
+0_n & I_n \\
+ -I_n & 0_n
+\end{bmatrix}.
+````
+The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
+"""
 function check_point(M::Symplectic{n,ℝ}, p; kwargs...) where {n,ℝ}
     abstract_embedding_type = supertype(typeof(M))
 
@@ -91,7 +106,20 @@ end
 
 # Document 'check_vector'.
 @doc raw"""
-    Reference:
+    check_vector(M::Symplectic, p, X; kwargs...)
+
+Checks whether `X` is a valid tangent vector at `p` on the [`Symplectic`](@ref)
+`M`=$\operatorname{Sp}(2n)$, i.e. the [`AbstractNumbers`](@ref) fits and
+it (approximately) holds that $p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0$,
+where
+````math
+Q_{2n} =
+\begin{bmatrix}
+0_n & I_n \\
+ -I_n & 0_n
+\end{bmatrix}.
+````
+The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 check_vector(::Symplectic, ::Any...)
 
