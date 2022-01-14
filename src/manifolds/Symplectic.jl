@@ -716,7 +716,7 @@ function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
 
     divisor = lu!(2*I - p_star_X)
     ldiv!(divisor, add_scaled_I!(p_star_X, 2.0))
-    q = p * p_star_X
+    q .= p * p_star_X
     return q
 end
 
