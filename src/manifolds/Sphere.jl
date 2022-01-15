@@ -5,7 +5,7 @@ An abstract type to represent a unit sphere that is represented isometrically in
 """
 abstract type AbstractSphere{𝔽} <: AbstractDecoratorManifold{𝔽} end
 
-activate_traits(::AbstractSphere, args...) = merge_traits(IsIsometricEmbeddedManifold())
+active_traits(::AbstractSphere, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     Sphere{n,𝔽} <: AbstractSphere{𝔽}
@@ -99,14 +99,6 @@ the embedding of unit length.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(M::AbstractSphere, p; kwargs...)
-    mpv = invoke(
-        check_point,
-        Tuple{(typeof(get_embedding(M))),typeof(p)},
-        get_embedding(M),
-        p;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(norm(p), 1.0; kwargs...)
         return DomainError(
             norm(p),
@@ -125,15 +117,6 @@ and orthogonal to `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::AbstractSphere, p, X; kwargs...)
-    mpv = invoke(
-        check_vector,
-        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
-        get_embedding(M),
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(abs(real(dot(p, X))), 0.0; kwargs...)
         return DomainError(
             abs(dot(p, X)),
@@ -143,8 +126,8 @@ function check_vector(M::AbstractSphere, p, X; kwargs...)
     return nothing
 end
 
-function decorated_manifold(M::AbstractSphere{𝔽}) where {𝔽}
-    return Euclidean(representation_size(M)...; field=𝔽)
+function decorated_manifold(M::AbstractSphere)
+    return M
 end
 
 # Since on every tangent space the Euclidean matric (restricted to this space) is used, this should be fine
@@ -183,7 +166,11 @@ function exp!(M::AbstractSphere, q, p, X)
     return q
 end
 
-function get_basis_diagonalizing(M::Sphere{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
+function get_basis_diagonalizing(
+    M::Sphere{n,ℝ},
+    p,
+    B::DiagonalizingOrthonormalBasis{ℝ},
+) where {n}
     A = zeros(n + 1, n + 1)
     A[1, :] = transpose(p)
     A[2, :] = transpose(B.frame_direction)
@@ -214,13 +201,7 @@ denotes the Frobenius inner product, the formula for $Y$ is
 """
 get_coordinates(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates_orthonormal!(
-    M::AbstractSphere{ℝ},
-    Y,
-    p,
-    X,
-    ::RealNumbers,
-)
+function get_coordinates_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNumbers)
     n = manifold_dimension(M)
     p1 = p[1]
     cosθ = abs(p1)
@@ -231,7 +212,9 @@ function get_coordinates_orthonormal!(
     return Y
 end
 
-get_embedding(M::AbstractSphere{𝔽}) where {𝔽} = decorated_manifold(M)
+function get_embedding(M::AbstractSphere{𝔽}) where {𝔽}
+    return Euclidean(representation_size(M)...; field=𝔽)
+end
 
 @doc raw"""
     get_vector(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
@@ -249,12 +232,7 @@ Y = X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle
 """
 get_vector(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_vector_orthonormal!(
-    M::AbstractSphere{ℝ},
-    Y,
-    p,
-    X,
-)
+function get_vector_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNumbers)
     n = manifold_dimension(M)
     p1 = p[1]
     cosθ = abs(p1)
@@ -305,7 +283,7 @@ since $\Re(⟨p,X⟩) = 0$ and when $d_{𝕊^2}(p,q) ≤ \frac{π}{2}$ that
 """
 inverse_retract(::AbstractSphere, ::Any, ::Any, ::ProjectionInverseRetraction)
 
-function inverse_retract!(::AbstractSphere, X, p, q, ::ProjectionInverseRetraction)
+function inverse_retract_porject!(::AbstractSphere, X, p, q)
     return (X .= q ./ real(dot(p, q)) .- p)
 end
 
@@ -426,8 +404,8 @@ project!(::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 Return the size points on the [`AbstractSphere`](@ref) `M` are represented as, i.e., the
 representation size of the embedding.
 """
-@generated representation_size(M::ArraySphere{N}) where {N} = size_to_tuple(N)
-@generated representation_size(M::Sphere{N}) where {N} = (N + 1,)
+@generated representation_size(::ArraySphere{N}) where {N} = size_to_tuple(N)
+@generated representation_size(::Sphere{N}) where {N} = (N + 1,)
 
 @doc raw"""
     retract(M::AbstractSphere, p, X, ::ProjectionRetraction)

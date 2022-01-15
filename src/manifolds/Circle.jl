@@ -131,33 +131,14 @@ end
 
 Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-get_coordinates(
-    ::Circle{ℂ},
-    p,
-    X,
-    ::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
-)
+get_coordinates(::Circle{ℂ}, p, X, ::DefaultOrthonormalBasis{<:Any,TangentSpaceType})
 function get_coordinates_orthogonal!(::Circle{ℂ}, p, X)
     X, p = X[1], p[1]
     Xⁱ = imag(X) * real(p) - real(X) * imag(p)
     return @SVector [Xⁱ]
 end
 
-function get_coordinates_orthonormal!(
-    M::Circle,
-    Y::AbstractArray,
-    p,
-    X,
-)
-    Y[] = get_coordinates(M, p, X, B)[]
-    return Y
-end
-function get_coordinates_orthonormal!(
-    M::Circle,
-    Y::AbstractArray,
-    p,
-    X,
-)
+function get_coordinates_orthonormal!(M::Circle, Y::AbstractArray, p, X)
     Y[] = get_coordinates(M, p, X, B)[]
     return Y
 end
@@ -429,12 +410,7 @@ where [`log`](@ref) denotes the logarithmic map on `M`.
 parallel_transport_to(::Circle, ::Any, ::Any, ::Any)
 
 parallel_transport_to(::Circle{ℝ}, p::Real, X::Real, q::Real) = X
-function parallel_transport_to(
-    M::Circle{ℂ},
-    p::Number,
-    X::Number,
-    q::Number,
-)
+function parallel_transport_to(M::Circle{ℂ}, p::Number, X::Number, q::Number)
     X_pq = log(M, p, q)
     Xnorm = norm(M, p, X_pq)
     Y = X

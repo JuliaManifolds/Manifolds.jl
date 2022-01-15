@@ -153,12 +153,14 @@ using ManifoldsBase:
     EmptyTrait,
     ExponentialRetraction,
     FVector,
-    QuaternionNumbers,
+    IsIsometricEmbeddedManifold,
+    IsEmbeddedManifold,
+    IsEmbeddedSubmanifoldManifold,
     LogarithmicInverseRetraction,
     ManifoldsBase,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
-    NestedTrait,
+    TraitList,
     NLSolveInverseRetraction,
     ODEExponentialRetraction,
     OutOfInjectivityRadiusError,
@@ -174,6 +176,7 @@ using ManifoldsBase:
     ProjectionInverseRetraction,
     ProjectionRetraction,
     ProjectionTransport,
+    QuaternionNumbers,
     QRInverseRetraction,
     QRRetraction,
     RealNumbers,
@@ -195,6 +198,8 @@ using ManifoldsBase:
     combine_allocation_promotion_functions,
     default_inverse_retraction_method,
     geodesic,
+    merge_traits,
+    next_trait,
     number_system,
     real_dimension,
     rep_size_to_colons,
@@ -458,8 +463,8 @@ export HyperboloidTVector,
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
-export AbstractDecoratorManifold, MetricDecoratorType
-export AbstractGroupDecoratorType, DefaultGroupDecoratorType, TransparentGroupDecoratorType
+export AbstractDecoratorManifold
+export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifoldManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
@@ -684,8 +689,16 @@ export adjoint_action,
     geodesic,
     get_coordinates_lie,
     get_coordinates_lie!,
+    get_coordinates_orthogonal,
+    get_coordinates_orthonormal,
+    get_coordinates_orthogonal!,
+    get_coordinates_orthonormal!,
+    get_vector_diagonalizing!,
     get_vector_lie,
     get_vector_lie!,
+    get_vector_orthogonal,
+    get_vector_orthonormal,
+    get_coordinates_vee!,
     has_biinvariant_metric,
     has_invariant_metric,
     identity_element,

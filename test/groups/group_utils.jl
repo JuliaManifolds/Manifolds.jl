@@ -2,11 +2,12 @@ struct NotImplementedOperation <: AbstractGroupOperation end
 
 struct NotImplementedManifold <: AbstractManifold{ℝ} end
 
-struct NotImplementedGroupDecorator{M} <:
-       AbstractDecoratorManifold{ℝ}
+struct NotImplementedGroupDecorator{M} <: AbstractDecoratorManifold{ℝ}
     manifold::M
 end
-activate_traits(::NotImplementedGroupDecorator) = merge_traits(IsEmbeddedSubmanifoldManifold())
+function activate_traits(::NotImplementedGroupDecorator)
+    return merge_traits(IsEmbeddedSubmanifoldManifold())
+end
 
 struct DefaultTransparencyGroup{M,A<:AbstractGroupOperation} <: AbstractGroupManifold{ℝ,A}
     manifold::M
