@@ -40,7 +40,7 @@ projective spaces.
 struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
 ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ) = ProjectiveSpace{n,field}()
 
-function activate_traits(::AbstractProjectiveSpace, args...)
+function active_traits(::AbstractProjectiveSpace, args...)
     return merge_traits(IsIsometricEmbeddedManifold())
 end
 
@@ -190,12 +190,12 @@ formula for $Y$ is
 """
 get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::AbstractProjectiveSpace{𝔽},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {𝔽}
     n = div(manifold_dimension(M), real_dimension(𝔽))
     z = p[1]
@@ -225,12 +225,12 @@ Y = \left(X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\
 """
 get_vector(::AbstractProjectiveSpace, p, X, ::DefaultOrthonormalBasis{ℝ})
 
-function get_vector!(
+function get_vector_orthonormal!(
     M::AbstractProjectiveSpace{𝔽},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {𝔽}
     n = div(manifold_dimension(M), real_dimension(𝔽))
     z = p[1]
@@ -282,13 +282,15 @@ inverse_retract(
     ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
 )
 
-function inverse_retract!(
-    ::AbstractProjectiveSpace,
-    X,
-    p,
-    q,
-    ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
-)
+function inverse_retract_qr!(::AbstractProjectiveSpace, X, p, q)
+    X .= q ./ dot(p, q) .- p
+    return X
+end
+function inverse_retract_polar!(::AbstractProjectiveSpace, X, p, q)
+    X .= q ./ dot(p, q) .- p
+    return X
+end
+function inverse_retract_project!(::AbstractProjectiveSpace, X, p, q)
     X .= q ./ dot(p, q) .- p
     return X
 end

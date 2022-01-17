@@ -27,7 +27,7 @@ function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SymmetricMatrices{n,field}()
 end
 
-function activate_traits(::SymmetricMatrices, arge...)
+function active_traits(::SymmetricMatrices, arge...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 
