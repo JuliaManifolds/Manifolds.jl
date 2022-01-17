@@ -496,7 +496,7 @@ function get_point!(::Sphere{n,ℝ}, p, ::StereographicAtlas, i::Symbol, x) wher
     return p
 end
 
-function get_coordinates!(
+function get_coordinates_induced_basis!(
     ::Sphere{n,ℝ},
     Y,
     p,
@@ -515,7 +515,7 @@ function get_coordinates!(
     return Y
 end
 
-function get_vector!(
+function get_vector_induced_basis!(
     M::Sphere{n,ℝ},
     Y,
     p,
