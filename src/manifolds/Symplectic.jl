@@ -721,6 +721,7 @@ function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
 end
 
 ManifoldsBase.default_retraction_method(::Symplectic) = CayleyRetraction()
+ManifoldsBase.default_inverse_retraction_method(::Symplectic) = CayleyInverseRetraction()
 
 struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
 
