@@ -48,7 +48,7 @@ generates the manifold $\mathcal E(n,k) \subset ℝ^{n × n}$.
 """
 struct Elliptope{N,K} <: AbstractDecoratorManifold{ℝ} end
 
-activate_traits(::Elliptope, args...) = merge_traits(IsEmbeddedManifold())
+active_traits(::Elliptope, args...) = merge_traits(IsEmbeddedManifold())
 
 Elliptope(n::Int, k::Int) = Elliptope{n,k}()
 

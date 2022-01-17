@@ -43,7 +43,7 @@ const SkewSymmetricMatrices{n} = SkewHermitianMatrices{n,ℝ}
 SkewSymmetricMatrices(n::Int) = SkewSymmetricMatrices{n}()
 @deprecate SkewSymmetricMatrices(n::Int, 𝔽) SkewHermitianMatrices(n, 𝔽)
 
-function activate_traits(::SkewSymmetricMatrices, arge...)
+function active_traits(::SkewSymmetricMatrices, arge...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 

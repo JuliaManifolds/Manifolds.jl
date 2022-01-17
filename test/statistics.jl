@@ -45,21 +45,21 @@ function zero_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
 end
 
 struct TestStatsNotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function activate_traits(::TestStatsNotImplementedEmbeddedManifold, args...)
+function active_traits(::TestStatsNotImplementedEmbeddedManifold, args...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 
 struct TestStatsNotImplementedEmbeddedManifold2 <: AbstractDecoratorManifold{ℝ} end
-function activate_traits(::TestStatsNotImplementedEmbeddedManifold2, args...)
+function active_traits(::TestStatsNotImplementedEmbeddedManifold2, args...)
     return merge_traits(IsIsometricEmbeddedManifold())
 end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 
 struct TestStatsNotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{𝔽} end
-function activate_traits(::TestStatsNotImplementedEmbeddedManifold3, args...)
+function active_traits(::TestStatsNotImplementedEmbeddedManifold3, args...)
     return merge_traits(IsEmbeddedManifold())
 end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)

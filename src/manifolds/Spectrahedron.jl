@@ -53,7 +53,7 @@ struct Spectrahedron{N,K} <: AbstractDecoratorManifold{ℝ} end
 
 Spectrahedron(n::Int, k::Int) = Spectrahedron{n,k}()
 
-activate_traits(::Spectrahedron, args...) = merge_traits(IsIsometricEmbeddedManifold())
+active_traits(::Spectrahedron, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     check_point(M::Spectrahedron, q; kwargs...)
