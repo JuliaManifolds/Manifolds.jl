@@ -199,27 +199,58 @@ function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(M::Euclidean, Y, p, X, ::RealNumbers)
+    S = representation_size(M)
+    PS = prod(S)
+    copyto!(Y, reshape(X, PS))
+    return Y
+end
+
+function get_coordinates_diagonalizing!(
     M::Euclidean,
     Y,
     p,
     X,
-    ::Union{
-        DefaultOrDiagonalizingBasis{ℝ},
-        InducedBasis{ℝ,TangentSpaceType,<:RetractionAtlas},
-    },
+    ::DiagonalizingOrthonormalBasis{ℝ},
 )
     S = representation_size(M)
     PS = prod(S)
     copyto!(Y, reshape(X, PS))
     return Y
 end
-function get_coordinates!(
+
+function get_coordinates_induced_basis!(
+    M::Euclidean,
+    Y,
+    p,
+    X,
+    ::InducedBasis{ℝ,TangentSpaceType,<:RetractionAtlas},
+)
+    S = representation_size(M)
+    PS = prod(S)
+    copyto!(Y, reshape(X, PS))
+    return Y
+end
+
+function get_coordinates_orthonormal!(
     M::Euclidean{<:Tuple,ℂ},
     Y,
     ::Any,
     X,
-    ::DefaultOrDiagonalizingBasis{ℂ},
+    ::ComplexNumbers,
+)
+    S = representation_size(M)
+    PS = prod(S)
+    Y .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
+    return Y
+end
+
+function get_coordinates_diagonalizing!(
+    M::Euclidean{<:Tuple,ℂ},
+    Y,
+    ::Any,
+    X,
+    ::ComplexNumbers,
 )
     S = representation_size(M)
     PS = prod(S)

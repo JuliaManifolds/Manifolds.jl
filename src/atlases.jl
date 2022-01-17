@@ -90,6 +90,12 @@ function allocate_result(M::AbstractManifold, f::typeof(get_parameters), p)
     T = allocate_result_type(M, f, (p,))
     return allocate(p, T, manifold_dimension(M))
 end
+# disambiguation
+@invoke_maker 1 AbstractManifold allocate_result(
+    M::AbstractDecoratorManifold,
+    f::typeof(get_parameters),
+    p,
+)
 
 function get_parameters!(M::AbstractManifold, a, A::RetractionAtlas, i, p)
     return get_coordinates!(M, a, i, inverse_retract(M, i, p, A.invretr), A.basis)
@@ -122,6 +128,12 @@ function allocate_result(M::AbstractManifold, f::typeof(get_point), a)
     T = allocate_result_type(M, f, (a,))
     return allocate(a, T, representation_size(M)...)
 end
+# disambiguation
+@invoke_maker 1 AbstractManifold allocate_result(
+    M::AbstractDecoratorManifold,
+    f::typeof(get_point),
+    a,
+)
 
 function get_point(M::AbstractManifold, A::RetractionAtlas, i, a)
     return retract(M, i, get_vector(M, i, a, A.basis), A.retr)
@@ -302,6 +314,32 @@ function dual_basis(
 ) where {𝔽}
     return induced_basis(M, B.A, B.i, TangentSpace)
 end
+
+function ManifoldsBase._get_coordinates(M::AbstractManifold, p, X, B::InducedBasis)
+    return get_coordinates_induced_basis(M, p, X, B)
+end
+function get_coordinates_induced_basis(M::AbstractManifold, p, X, B::InducedBasis)
+    Y = allocate_result(M, get_coordinates, p, X, B)
+    return get_coordinates_induced_basis!(M, Y, p, X, B)
+end
+
+function ManifoldsBase._get_coordinates!(M::AbstractManifold, Y, p, X, B::InducedBasis)
+    return get_coordinates_induced_basis!(M, Y, p, X, B)
+end
+function get_coordinates_induced_basis! end
+
+function ManifoldsBase._get_vector(M::AbstractManifold, p, c, B::InducedBasis)
+    return get_vector_induced_basis(M, p, c, B)
+end
+function get_vector_induced_basis(M::AbstractManifold, p, c, B::InducedBasis)
+    Y = allocate_result(M, get_vector, p, c)
+    return get_vector!(M, Y, p, c, B)
+end
+
+function ManifoldsBase._get_vector!(M::AbstractManifold, Y, p, c, B::InducedBasis)
+    return get_vector_induced_basis!(M, Y, p, c, B)
+end
+function get_vector_induced_basis! end
 
 """
     local_metric(M::AbstractManifold, p, B::InducedBasis)
