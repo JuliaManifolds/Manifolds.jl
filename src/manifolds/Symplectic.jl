@@ -52,7 +52,7 @@ i.e.
 """
 manifold_dimension(::Symplectic{n}) where {n} = (2n + 1) * n
 
-Base.show(io::IO, ::Symplectic{n,ℝ}) where {n,ℝ} = print(io, "Symplectic{$(2n)}()")
+Base.show(io::IO, ::Symplectic{n,ℝ}) where {n,ℝ} = print(io, "Symplectic($(2n), ℝ)")
 
 @doc raw"""
 The canonical Riemannian metric on the symplectic manifold,
