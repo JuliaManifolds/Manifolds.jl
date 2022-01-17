@@ -85,6 +85,7 @@ import ManifoldsBase:
     retract_pade!,
     retract_polar!,
     retract_project!,
+    retract_qr!,
     retract_softmax!,
     set_component!,
     vector_space_dimension,
