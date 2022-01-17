@@ -1,3 +1,17 @@
+"""
+
+"""
+struct IsMetricManifold <: AbstractTrait end
+
+parent_trait(::IsMetricManifold) = IsConnectionManifold()
+
+"""
+
+"""
+struct IsDefaultMetric <: AbstractTrait end
+
+parent_trait(::IsDefaultMetric) = IsMetricManifold()
+
 @doc raw"""
     AbstractMetric
 
@@ -39,10 +53,13 @@ you can of course still implement that directly.
 Generate the [`AbstractManifold`](@ref) `M` as a manifold with the [`AbstractMetric`](@ref) `G`.
 """
 struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <:
-       AbstractConnectionManifold{𝔽}
+       AbstractDecoratorManifold{𝔽}
     manifold::M
     metric::G
 end
+
+active_traits(::MetricManifold) = merge_traits(IsMetricManifold())
+
 # remetricise instead of double-decorating
 (metric::AbstractMetric)(M::MetricManifold) = MetricManifold(M.manifold, metric)
 (::Type{T})(M::MetricManifold) where {T<:AbstractMetric} = MetricManifold(M.manifold, T())
@@ -179,58 +196,6 @@ function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     return get_vector!(M, Y, p, z, B)
 end
 
-@doc raw"""
-    christoffel_symbols_first(
-        M::MetricManifold,
-        p,
-        B::AbstractBasis;
-        backend::AbstractDiffBackend = default_differential_backend(),
-    )
-
-Compute the Christoffel symbols of the first kind in local coordinates of basis `B`.
-The Christoffel symbols are (in Einstein summation convention)
-
-````math
-Γ_{ijk} = \frac{1}{2} \Bigl[g_{kj,i} + g_{ik,j} - g_{ij,k}\Bigr],
-````
-
-where ``g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}`` is the coordinate
-derivative of the local representation of the metric tensor. The dimensions of
-the resulting multi-dimensional array are ordered ``(i,j,k)``.
-"""
-christoffel_symbols_first(::AbstractManifold, ::Any, B::AbstractBasis)
-function christoffel_symbols_first(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
-    ∂g = local_metric_jacobian(M, p, B; backend=backend)
-    n = size(∂g, 1)
-    Γ = allocate(∂g, Size(n, n, n))
-    @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
-    return Γ
-end
-@trait_function christoffel_symbols_first(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
-
-function christoffel_symbols_second(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
-    Ginv = inverse_local_metric(M, p, B)
-    Γ₁ = christoffel_symbols_first(M, p, B; backend=backend)
-    Γ₂ = allocate(Γ₁)
-    @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
-    return Γ₂
-end
-
 """
     connection(::MetricManifold)
 
@@ -246,17 +211,16 @@ matrix ``G(p)`` representing the metric in the tangent space at ``p`` with as a 
 
 See also [`local_metric`](@ref)
 """
-det_local_metric(::AbstractManifold, p, ::AbstractBasis)
 function det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
     return det(local_metric(M, p, B))
 end
 @trait_function det_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
+
 """
     einstein_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_badefault_differential_backendckend())
 
 Compute the Einstein tensor of the manifold `M` at the point `p`, see [https://en.wikipedia.org/wiki/Einstein_tensor](https://en.wikipedia.org/wiki/Einstein_tensor)
 """
-einstein_tensor(::AbstractManifold, ::Any, ::AbstractBasis)
 function einstein_tensor(
     M::AbstractManifold,
     p,
@@ -291,11 +255,18 @@ where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@r
 """
 flat(::MetricManifold, ::Any...)
 
-function flat!(::EmptyTrait, M::MetricManifold, ξ::CoTFVector, p, X::TFVector)
+function flat!(
+    ::IsMetricManifold,
+    M::AbstractDecoratorManifold,
+    ξ::CoTFVector,
+    p,
+    X::TFVector,
+)
     g = local_metric(M, p, ξ.basis)
     copyto!(ξ.data, g * X.data)
     return ξ
 end
+# ToDo how to do a flat (nonmutating?)
 
 @doc raw"""
     inverse_local_metric(M::AbstractcManifold{𝔽}, p, B::AbstractBasis)
@@ -351,7 +322,13 @@ where ``G_p`` is the loal matrix representation of the [`AbstractMetric`](@ref) 
 """
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
-function inner(::EmptyTrait, M::MetricManifold, p, X::TFVector, Y::TFVector)
+function inner(
+    ::IsMetricManifold,
+    M::AbstractDecoratorManifold,
+    p,
+    X::TFVector,
+    Y::TFVector,
+)
     X.basis === Y.basis ||
         error("calculating inner product of vectors from different bases is not supported")
     return dot(X.data, local_metric(M, p, X.basis) * Y.data)
@@ -481,7 +458,13 @@ where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 """
 sharp(::MetricManifold, ::Any, ::CoTFVector)
 
-function sharp!(M::N, X::TFVector, p, ξ::CoTFVector) where {N<:MetricManifold}
+function sharp!(
+    ::IsMetricManifold,
+    M::AbstractDecoratorManifold,
+    X::TFVector,
+    p,
+    ξ::CoTFVector,
+) where {N<:MetricManifold}
     Ginv = inverse_local_metric(M, p, X.basis)
     copyto!(X.data, Ginv * ξ.data)
     return X
@@ -489,51 +472,4 @@ end
 
 function Base.show(io::IO, M::MetricManifold)
     return print(io, "MetricManifold($(M.manifold), $(M.metric))")
-end
-
-#
-# Introduce transparency
-# (a) new functions & other parents
-for f in [
-    christoffel_symbols_first,
-    det_local_metric,
-    einstein_tensor,
-    inverse_local_metric,
-    local_metric,
-    local_metric_jacobian,
-    log_local_metric_density,
-    ricci_curvature,
-]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                M::AbstractConnectionManifold,
-                args...,
-            )
-                return Val(:parent)
-            end
-        end,
-    )
-end
-
-for f in [change_metric, change_representer, change_metric!, change_representer!]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractManifold,
-                args...,
-            )
-                return Val(:parent)
-            end
-        end,
-    )
-end
-function decorator_transparent_dispatch(
-    ::typeof(christoffel_symbols_second),
-    ::MetricManifold,
-    args...,
-)
-    return Val(:parent)
 end
