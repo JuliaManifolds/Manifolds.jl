@@ -52,5 +52,15 @@ include("../utils.jl")
             @test X_inv_cayley_retraction == X_inv_cayley_retraction_2
             @test X_inv_cayley_retraction ≈ X2
         end
+
+        @testset "Riemannian metric" begin
+            X1_p_norm = 0.49259905148939337
+            @test norm(M, p, X1) == X1_p_norm
+            @test norm(M, p, X1) == √(inner(M, p, X1, X1))
+
+            X2_p_norm = 1/2
+            @test norm(M, p, X2) == X2_p_norm
+            @test norm(M, p, X2) == √(inner(M, p, X2, X2))
+        end
     end
 end
