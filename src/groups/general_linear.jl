@@ -18,7 +18,7 @@ vectors ``X_e = p^{-1}X_p``.
 """
 struct GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
 
-active_traits(::GeneralLinear, args...) = merge_traits(IsEmbeddedManifold())
+active_traits(f, ::GeneralLinear, args...) = merge_traits(IsEmbeddedManifold())
 
 GeneralLinear(n, 𝔽::AbstractNumbers=ℝ) = GeneralLinear{n,𝔽}()
 

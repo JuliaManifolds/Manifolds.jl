@@ -47,7 +47,7 @@ function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)
     return FixedRankMatrices{m,n,k,field}()
 end
 
-active_traits(::FixedRankMatrices, args...) = merge_traits(IsEmbeddedManifold())
+active_traits(f, ::FixedRankMatrices, args...) = merge_traits(IsEmbeddedManifold())
 
 @doc raw"""
     SVDMPoint <: AbstractManifoldPoint

@@ -37,7 +37,7 @@ struct Hyperbolic{N} <: AbstractDecoratorManifold{ℝ} end
 
 Hyperbolic(n::Int) = Hyperbolic{n}()
 
-active_traits(::Hyperbolic, args...) = merge_traits(IsIsometricEmbeddedManifold())
+active_traits(f, ::Hyperbolic, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     HyperboloidPoint <: AbstractManifoldPoint

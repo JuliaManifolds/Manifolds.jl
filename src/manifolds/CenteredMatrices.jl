@@ -18,7 +18,7 @@ function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers=ℝ)
     return CenteredMatrices{m,n,field}()
 end
 
-active_traits(::CenteredMatrices, args...) = merge_traits(IsIsometricEmbeddedManifold())
+active_traits(f, ::CenteredMatrices, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     check_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...)

@@ -40,7 +40,7 @@ projective spaces.
 struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
 ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ) = ProjectiveSpace{n,field}()
 
-function active_traits(::AbstractProjectiveSpace, args...)
+function active_traits(f, ::AbstractProjectiveSpace, args...)
     return merge_traits(IsIsometricEmbeddedManifold())
 end
 

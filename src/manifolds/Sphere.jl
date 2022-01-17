@@ -5,7 +5,7 @@ An abstract type to represent a unit sphere that is represented isometrically in
 """
 abstract type AbstractSphere{𝔽} <: AbstractDecoratorManifold{𝔽} end
 
-active_traits(::AbstractSphere, args...) = merge_traits(IsIsometricEmbeddedManifold())
+active_traits(f, ::AbstractSphere, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     Sphere{n,𝔽} <: AbstractSphere{𝔽}

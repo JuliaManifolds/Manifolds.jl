@@ -59,7 +59,7 @@ function SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractN
     return SymmetricPositiveSemidefiniteFixedRank{n,k,field}()
 end
 
-function active_traits(::SymmetricPositiveSemidefiniteFixedRank, args...)
+function active_traits(f, ::SymmetricPositiveSemidefiniteFixedRank, args...)
     return merge_traits(IsIsometricEmbeddedManifold())
 end
 
