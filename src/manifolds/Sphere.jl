@@ -146,6 +146,9 @@ d_{𝕊}(p,q) = \arccos(\Re(⟨p,q⟩)).
 """
 distance(::AbstractSphere, p, q) = acos(clamp(real(dot(p, q)), -1, 1))
 
+embed(::AbstractSphere, p) = copy(p)
+embed(::AbstractSphere, p, X) = copy(X)
+
 @doc raw"""
     exp(M::AbstractSphere, p, X)
 
@@ -283,7 +286,7 @@ since $\Re(⟨p,X⟩) = 0$ and when $d_{𝕊^2}(p,q) ≤ \frac{π}{2}$ that
 """
 inverse_retract(::AbstractSphere, ::Any, ::Any, ::ProjectionInverseRetraction)
 
-function inverse_retract_porject!(::AbstractSphere, X, p, q)
+function inverse_retract_project!(::AbstractSphere, X, p, q)
     return (X .= q ./ real(dot(p, q)) .- p)
 end
 

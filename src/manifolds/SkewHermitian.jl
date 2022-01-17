@@ -44,7 +44,7 @@ SkewSymmetricMatrices(n::Int) = SkewSymmetricMatrices{n}()
 @deprecate SkewSymmetricMatrices(n::Int, 𝔽) SkewHermitianMatrices(n, 𝔽)
 
 function activate_traits(::SkewSymmetricMatrices, arge...)
-    return merge_traits(IsEmbeddedSubmanifoldManifold())
+    return merge_traits(IsEmbeddedSubmanifold())
 end
 
 function allocation_promotion_function(
