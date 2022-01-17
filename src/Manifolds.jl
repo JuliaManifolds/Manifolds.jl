@@ -135,6 +135,7 @@ using ManifoldsBase:
     AbstractPowerManifold,
     AbstractPowerRepresentation,
     AbstractRetractionMethod,
+    AbstractTrait,
     AbstractVectorTransportMethod,
     AbstractLinearVectorTransportMethod,
     ApproximateInverseRetraction,
