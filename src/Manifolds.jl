@@ -155,7 +155,7 @@ using ManifoldsBase:
     FVector,
     IsIsometricEmbeddedManifold,
     IsEmbeddedManifold,
-    IsEmbeddedSubmanifoldManifold,
+    IsEmbeddedSubmanifold,
     LogarithmicInverseRetraction,
     ManifoldsBase,
     NestedPowerRepresentation,
@@ -464,7 +464,7 @@ export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
 export AbstractDecoratorManifold
-export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifoldManifold
+export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
