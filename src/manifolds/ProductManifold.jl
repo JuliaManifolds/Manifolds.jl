@@ -795,7 +795,19 @@ so the encapsulated inverse retraction methods have to be available per factor.
 """
 inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::InverseProductRetraction)
 
-function inverse_retract!(M::ProductManifold, X, p, q, method::InverseProductRetraction)
+function _inverse_retract(M::ProductManifold, p, q, method::InverseProductRetraction)
+    return ProductRepr(
+        map(
+            inverse_retract,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+            method.inverse_retractions,
+        ),
+    )
+end
+
+function _inverse_retract!(M::ProductManifold, X, p, q, method::InverseProductRetraction)
     map(
         inverse_retract!,
         M.manifolds,
@@ -1045,6 +1057,18 @@ base manifolds. Then this method is performed elementwise, so the encapsulated r
 method has to be one that is available on the manifolds.
 """
 retract(::ProductManifold, ::Any...)
+
+function _retract(M::ProductManifold, p, X, method::ProductRetraction)
+    return ProductRepr(
+        map(
+            retract,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+            method.retractions,
+        ),
+    )
+end
 
 function _retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
     map(
