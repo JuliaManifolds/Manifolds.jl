@@ -184,17 +184,18 @@ end
     p,
 )
 
+# Default fallback II: Default metric (not yet hit, check subtyping?)
 function change_representer!(
-    ::IsDefaultMetric{<:G},
+    ::T,
     ::AbstractManifold,
     Y,
     ::G,
     p,
     X,
-) where {G<:AbstractMetric}
+) where {G<:AbstractMetric, T<:IsDefaultMetric{<:G}}
     return copyto!(M, Y, p, X)
 end
-# Default fallback I: compute in local metric representations
+# Default fallback II: compute in local metric representations
 function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     M.metric === G && return copyto!(M, Y, p, X) # no metric change
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
