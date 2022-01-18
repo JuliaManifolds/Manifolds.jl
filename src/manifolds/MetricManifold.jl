@@ -108,8 +108,17 @@ function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
     Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
     return change_metric!(M, Y, G, p, X)
 end
-function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
-    is_default_metric(M, G) && return copyto!(M, Y, p, X)
+function change_metric!(
+    ::T,
+    M::AbstractDecoratorManifold,
+    Y,
+    ::G,
+    p,
+    X,
+) where {G<:AbstractMetric, T<:TraitList{<:IsDefaultMetric{<:G}}}
+    return copyto!(M, Y, p, X)
+end
+function change_metric!(M::MetricManifold, Y, G::AbstractMetric, p, X)
     M.metric === G && return copyto!(M, Y, p, X) # no metric change
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
@@ -187,12 +196,12 @@ end
 # Default fallback II: Default metric (not yet hit, check subtyping?)
 function change_representer!(
     ::T,
-    ::AbstractManifold,
+    M::AbstractDecoratorManifold,
     Y,
     ::G,
     p,
     X,
-) where {G<:AbstractMetric, T<:IsDefaultMetric{<:G}}
+) where {G<:AbstractMetric, T<:TraitList{<:IsDefaultMetric{<:G}}}
     return copyto!(M, Y, p, X)
 end
 # Default fallback II: compute in local metric representations
