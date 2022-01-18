@@ -1,11 +1,40 @@
 @doc raw"""
-The Symplectic Stiefel manifold. Each element represent a Symplectic Subspace of ``ℝ^{2n × 2k}``.
-"""
-struct SymplecticStiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+    SymplecticStiefel{n, k, ℝ} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
 
-@doc raw"""
-    You are given a manifold of embedding dimension two_n × two_p.
-    # Tried to type the fields being stored in SymplecticStiefel as well.
+Over the real number field ℝ the elements of the symplectic Stiefel manifold
+are all $2n × 2k, \; k \leq n$ matrices satisfying the requirement
+````math
+\operatorname{SpSt}(2n, 2k, ℝ)
+    = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2k} \bigr\},
+````
+where
+````math
+Q_{2n} =
+\begin{bmatrix}
+  0_n & I_n \\
+ -I_n & 0_n
+\end{bmatrix},
+````
+with $0_n$ and $I_n$ denoting the $n × n$ zero-matrix
+and indentity matrix in ``ℝ^{n \times n}`` respectively.
+
+Internally the dimensionality of the structure is stored as half of the even dimensions
+supplied to the constructor, `SymplecticStiefel(2n, 2k) -> SymplecticStiefel{n, k, ℝ}()`,
+as most computations with points on the Real symplectic Stiefel manifold takes
+advantage of the natural block structure matrices
+``A ∈ ℝ^{2n × 2k}`` where we consider it as consisting of four
+smaller matrices in ``ℝ^{n × k}``.
+"""
+struct SymplecticStiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
+end
+
+@doc """
+    SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
+    -> SymplecticStiefel{div(two_n, 2), div(two_k, 2), ℝ}()
+
+# Constructor:
+The constructor for the [`Symplectic`](@ref) manifold accepts the even embedding
+dimension ``n = 2k`` for the real symplectic manifold, ``ℝ^{2k × 2k}``.
 """
 function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
     return SymplecticStiefel{div(two_n, 2),div(two_k, 2),field}()
@@ -17,14 +46,42 @@ end
 
 decorated_manifold(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
 ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction()
+ManifoldsBase.default_inverse_retraction_method(::Symplectic) = CayleyInverseRetraction()
 
 @doc raw"""
-    manifold_dimension(::SymplecticStiefel{n, k})
+    manifold_dimension(::Symplectic{n})
 
-As shown in proposition 3.1 in Bendokat-Zimmermann.
+Returns the dimension of the symplectic Stiefel manifold embedded in ``ℝ^{2n \times 2k}``,
+i.e. [^Bendokat2021]
+````math
+    \operatorname{dim}(\operatorname{SpSt}(2n, 2k)) = (4n - 2k + 1)k.
+````
+
+[^Bendokat2021]:
+    > Bendokat, Thomas and Zimmermann, Ralf:
+	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
+	> arXiv preprint arXiv:2108.12447, 2021 (https://arxiv.org/abs/2108.12447)
 """
 manifold_dimension(::SymplecticStiefel{n,k}) where {n,k} = (4n - 2k + 1) * k
 
+@doc raw"""
+    check_point(M::SymplecticStiefel, p; kwargs...)
+
+Check whether `p` is a valid point on the [`SymplecticStiefel`](@ref),
+$\operatorname{SpSt}(2n, 2k)$ manifold.
+That is, the point has the right [`AbstractNumbers`](@ref) type and $p^{+}p$ is
+(approximately) the identity,
+where for $A \in \mathbb{R}^{2n \times 2k}$,
+$A^{+} = Q_{2k}^TA^TQ_{2n}$ is the symplectic inverse, with
+````math
+Q_{2n} =
+\begin{bmatrix}
+0_n & I_n \\
+ -I_n & 0_n
+\end{bmatrix}.
+````
+The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
+"""
 function check_point(M::SymplecticStiefel{n,k}, p; kwargs...) where {n,k}
     abstract_embedding_type = supertype(typeof(M))
 
@@ -52,6 +109,23 @@ end
 ````math
     T_p\operatorname{SpSt}(2n, 2n) = \left\{X ∈ ℝ^{2n × 2k} | (p^{+}X)^{+} = -p^{+}X \text{in the Lie Algebra of Hamiltonian Matrices}\right\}
 ````
+"""
+@doc raw"""
+    check_vector(M::Symplectic, p, X; kwargs...)
+
+Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticStiefel`](@ref),
+$\operatorname{SpSt}(2n, 2k)$ manifold. That is, the [`AbstractNumbers`](@ref) fits and
+it (approximately) holds that
+$p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0 \in \mathbb{R}^{2k \times 2k}$,
+where
+````math
+Q_{2n} =
+\begin{bmatrix}
+0_n & I_n \\
+ -I_n & 0_n
+\end{bmatrix}.
+````
+The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 check_vector(::SymplecticStiefel, ::Any...)
 
@@ -104,18 +178,6 @@ function inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
     return tr(a \ (Y' * X)) - (1 / 2) * tr(a \ ((Y' * b) * (a \ (b' * X))))
 end
 
-@doc raw"""
-    inner(M::SymplecticStiefel{n, k}, p, X. Y)
-
-Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
-"""
-function test_inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
-    Q = SymplecticMatrix(p, X, Y)
-    c = inv(p' * p)
-    b = Q' * p
-    return tr((X'* Y) * c) - (1/2) * tr((X' * (b * c)) * (b' * Y) * c)
-end
-
 function Base.inv(M::SymplecticStiefel{n,k}, p) where {n,k}
     q = similar(p')
     return inv!(M, q, p)
@@ -140,18 +202,18 @@ function inv!(::SymplecticStiefel{n,k}, q, p) where {n,k}
 end
 
 @doc raw"""
-    change_representer!(::SymplecticStiefel{n, k}, Y, ::EuclideanMetric, p, X)
+    make_metric_compatible!(::SymplecticStiefel{n, k}, Y, ::EuclideanMetric, p, X)
 
-Calculated myself, but tailored to the right-invariant inner product of Bendokat-Zimmermann
+Calculated myself, but tailored to the right-invariant inner product of Bendokat-Zimmermann.
+Does not have the correct range to be a 'change_representer!'-mapping.
 """
-function change_representer!(
+function make_metric_compatible!(
     ::SymplecticStiefel{n,k},
     Y,
     ::EuclideanMetric,
     p,
     X,
 ) where {n,k}
-    # Quite an ugly expression: Have checked and it seems to be working.
     Q = SymplecticMatrix(p, X)
     I = UniformScaling(2n)
 
@@ -165,7 +227,8 @@ end
 @doc raw"""
     rand(M::SymplecticStiefel{n, k})
 
-Use the canonical projection by first generating a random symplectic matrix of the correct size,
+Generate a random point ``p \in \operatorname{SpSt}(2n, 2k)``
+by first generating a random symplectic matrix of the correct size,
 and then projecting onto the Symplectic Stiefel manifold.
 """
 function Base.rand(M::SymplecticStiefel{n,k}) where {n,k}

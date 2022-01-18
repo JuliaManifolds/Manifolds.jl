@@ -1,7 +1,7 @@
 @doc raw"""
     Symplectic{n, ℝ} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
 
-Over the real number field ℝ the elements of the Symplectic Manifold
+Over the real number field ℝ the elements of the symplectic manifold
 are all $2n × 2n$ matrices satisfying the requirement
 ````math
 \operatorname{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2n} \bigr\},
@@ -104,7 +104,6 @@ function check_point(M::Symplectic{n,ℝ}, p; kwargs...) where {n,ℝ}
     return nothing
 end
 
-# Document 'check_vector'.
 @doc raw"""
     check_vector(M::Symplectic, p, X; kwargs...)
 
