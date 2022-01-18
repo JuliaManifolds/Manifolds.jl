@@ -18,7 +18,7 @@ metric functions forward to `GeneralLinear`.
 """
 struct SpecialLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
 
-active_traits(::SpecialLinear, args...) = merge_traits(IsEmbeddedSubmanifold())
+active_traits(f, ::SpecialLinear, args...) = merge_traits(IsEmbeddedSubmanifold())
 
 SpecialLinear(n, 𝔽::AbstractNumbers=ℝ) = SpecialLinear{n,𝔽}()
 

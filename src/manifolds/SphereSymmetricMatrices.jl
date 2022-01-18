@@ -20,7 +20,7 @@ function SphereSymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SphereSymmetricMatrices{n,field}()
 end
 
-function active_traits(::SphereSymmetricMatrices, arge...)
+function active_traits(f, ::SphereSymmetricMatrices, arge...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 

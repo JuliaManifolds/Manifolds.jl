@@ -7,7 +7,7 @@ as long as they are also modeled as [`IsIsometricEmbeddedManifold`](@ref).
 """
 abstract type AbstractMultinomialDoublyStochastic{N} <: AbstractDecoratorManifold{ℝ} end
 
-function active_traits(::AbstractMultinomialDoublyStochastic, args...)
+function active_traits(f, ::AbstractMultinomialDoublyStochastic, args...)
     return merge_traits(IsIsometricEmbeddedManifold())
 end
 

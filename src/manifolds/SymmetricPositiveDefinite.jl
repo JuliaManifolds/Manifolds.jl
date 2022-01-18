@@ -30,7 +30,7 @@ struct SymmetricPositiveDefinite{N} <: AbstractDecoratorManifold{ℝ} end
 
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
-active_traits(::SymmetricPositiveDefinite, args...) = merge_traits(IsEmbeddedManifold())
+active_traits(f, ::SymmetricPositiveDefinite, args...) = merge_traits(IsEmbeddedManifold())
 
 @doc raw"""
     check_point(M::SymmetricPositiveDefinite, p; kwargs...)

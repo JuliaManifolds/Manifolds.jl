@@ -35,7 +35,7 @@ struct Stiefel{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ) = Stiefel{n,k,field}()
 
-active_traits(::Stiefel, args...) = merge_traits(IsIsometricEmbeddedManifold())
+active_traits(f, ::Stiefel, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where {n,k}
     return complex

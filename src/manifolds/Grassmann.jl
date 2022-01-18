@@ -55,7 +55,7 @@ struct Grassmann{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 Grassmann(n::Int, k::Int, field::AbstractNumbers=ℝ) = Grassmann{n,k,field}()
 
-active_traits(::Grassmann, args...) = merge_traits(IsIsometricEmbeddedManifold())
+active_traits(f, ::Grassmann, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 function allocation_promotion_function(M::Grassmann{n,k,ℂ}, f, args::Tuple) where {n,k}
     return complex
