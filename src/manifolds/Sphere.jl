@@ -457,6 +457,12 @@ P_{p←q}(X) = X - \frac{\Re(⟨\log_p q,X⟩_p)}{d^2_𝕊(p,q)}
 """
 parallel_transport_to(::AbstractSphere, ::Any, ::Any, ::Any, ::Any)
 
+function parallel_transport_to(::AbstractSphere, p, X, q)
+    m = p .+ q
+    mnorm2 = real(dot(m, m))
+    factor = 2 * real(dot(X, q)) / mnorm2
+    return X .- m .* factor
+end
 function parallel_transport_to!(::AbstractSphere, Y, p, X, q)
     m = p .+ q
     mnorm2 = real(dot(m, m))
