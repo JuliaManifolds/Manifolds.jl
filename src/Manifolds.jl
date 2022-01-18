@@ -76,6 +76,8 @@ import ManifoldsBase:
     mid_point!,
     number_eltype,
     number_of_coordinates,
+    parallel_transport_to,
+    parallel_transport_to!,
     power_dimensions,
     project,
     project!,
