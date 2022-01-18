@@ -1,17 +1,3 @@
-"""
-
-"""
-struct IsMetricManifold <: AbstractTrait end
-
-parent_trait(::IsMetricManifold) = IsConnectionManifold()
-
-"""
-
-"""
-struct IsDefaultMetric <: AbstractTrait end
-
-parent_trait(::IsDefaultMetric) = IsMetricManifold()
-
 @doc raw"""
     AbstractMetric
 
@@ -29,6 +15,21 @@ where a zero parameter constructor `T()` is availabe.
 If `M` is already a metric manifold, the inner manifold with the new `metric` is returned.
 """
 abstract type AbstractMetric end
+
+"""
+
+"""
+struct IsMetricManifold <: AbstractTrait end
+
+parent_trait(::IsMetricManifold) = IsConnectionManifold()
+
+"""
+
+"""
+struct IsDefaultMetric{G<:AbstractMetric} <: AbstractTrait
+    metric::G
+end
+parent_trait(::IsDefaultMetric) = IsMetricManifold()
 
 # piping syntax for decoration
 (metric::AbstractMetric)(M::AbstractManifold) = MetricManifold(M, metric)
@@ -183,9 +184,18 @@ end
     p,
 )
 
+function change_representer!(
+    ::IsDefaultMetric{<:G},
+    ::AbstractManifold,
+    Y,
+    ::G,
+    p,
+    X,
+) where {G<:AbstractMetric}
+    return copyto!(M, Y, p, X)
+end
 # Default fallback I: compute in local metric representations
 function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
-    is_default_metric(M, G) && return copyto!(M, Y, p, X)
     M.metric === G && return copyto!(M, Y, p, X) # no metric change
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
