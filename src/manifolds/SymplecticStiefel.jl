@@ -90,7 +90,7 @@ function check_point(M::SymplecticStiefel{n,k}, p; kwargs...) where {n,k}
             expected_zero,
             (
                 "The point p does not lie on $(M) because its symplectic" *
-                " inverse composed with itself is not the identity. $(p)"
+                " inverse composed with itself is not the identity."
             ),
         )
     end
@@ -145,7 +145,7 @@ function check_vector(M::SymplecticStiefel{n,k,field}, p, X; kwargs...) where {n
         return DomainError(
             hamiltonian_identity_norm,
             (
-                "The matrix X: $X is not in the tangent space at point p: $p of the" *
+                "The matrix X is not in the tangent space at point p of the" *
                 " $(M) manifold, as p^{+}X is not a Hamiltonian matrix."
             ),
         )
@@ -215,12 +215,14 @@ function make_metric_compatible!(
     X,
 ) where {n,k}
     Q = SymplecticMatrix(p, X)
-    I = UniformScaling(2n)
 
-    # Remove memory allocation:
-    # A = factorize((I - (1/2) * Q' * p * ((p' * p) \ p') * Q)')
+    pT_p = p' * p
+    pT_Q = p' * Q
+    inner_term = pT_Q' * (lu(pT_p) \ pT_Q)
 
-    Y .= (lu((I - (1 / 2) * Q' * p * ((p' * p) \ p') * Q)') \ X) * (p' * p)
+    divisor = lu!(Array(add_scaled_I!(lmul!(-0.5, inner_term), 1.0)'))
+    mul!(Y, X, pT_p)
+    ldiv!(divisor, Y)
     return Y
 end
 
