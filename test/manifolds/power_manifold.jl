@@ -171,7 +171,7 @@ end
     end
 
     @testset "power vector transport" begin
-        m = PowerVectorTransport(ParallelTransport())
+        m = ParallelTransport()
         p = repeat([1.0, 0.0, 0.0], 1, 5)
         q = repeat([0.0, 1.0, 0.0], 1, 5)
         X = log(Ms1, p, q)
@@ -202,9 +202,6 @@ end
                 test_project_point=true,
                 test_project_tangent=true,
                 vector_transport_methods=[
-                    PowerVectorTransport(ParallelTransport()),
-                    PowerVectorTransport(SchildsLadderTransport()),
-                    PowerVectorTransport(PoleLadderTransport()),
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),

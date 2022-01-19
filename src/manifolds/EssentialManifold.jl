@@ -461,28 +461,20 @@ function vector_transport_direction!(M::EssentialManifold, Y, p, X, d)
     return vector_transport_direction!(M, Y, p, X, d, ParallelTransport())
 end
 
-function vector_transport_direction!(M::EssentialManifold, Y, p, X, d, m::ParallelTransport)
+function parallel_transport_direction!(M::EssentialManifold, Y, p, X, d)
     y = exp(M, p, d)
     return vector_transport_to!(M, Y, p, X, y, m)
 end
 
 @doc raw"""
-    vector_transport_to(M::EssentialManifold, p, X, q, method::ParallelTransport)
+    parallel_transport_to(M::EssentialManifold, p, X, q)
 
 Compute the vector transport of the tangent vector `X` at `p` to `q` on the
 [`EssentialManifold`](@ref) `M` using left translation of the ambient group.
 """
-vector_transport_to(::EssentialManifold, ::Any, ::Any, ::Any, ::ParallelTransport)
+parallel_transport_to(::EssentialManifold, ::Any, ::Any, ::Any)
 
-function vector_transport_to(M::EssentialManifold, p, X, q)
-    return vector_transport_to(M, p, X, q, ParallelTransport())
-end
-
-function vector_transport_to!(M::EssentialManifold, Y, p, X, q)
-    return vector_transport_to!(M, Y, p, X, q, ParallelTransport())
-end
-
-function vector_transport_to!(::EssentialManifold, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::EssentialManifold, Y, p, X, q)
     # group operation in the ambient group
     pq = [qe' * pe for (pe, qe) in zip(p, q)]
     # left translation

@@ -182,7 +182,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         )
         @test isapprox(N2, p2_2, exp(N2, p1_2, log(N2, p1_2, p2_2)))
 
-        ppt = PowerVectorTransport(ParallelTransport())
+        ppt = ParallelTransport()
         tbvt = Manifolds.VectorBundleVectorTransport(ppt, ppt)
         @test TangentBundle(M, tbvt).vector_transport === tbvt
         @test CotangentBundle(M, tbvt).vector_transport === tbvt

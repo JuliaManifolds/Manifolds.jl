@@ -478,13 +478,13 @@ function uniform_distribution(M::ProjectiveSpace{n,ℝ}, p) where {n}
 end
 
 @doc raw"""
-    vector_transport_to(M::AbstractProjectiveSpace, p, X, q, method::ParallelTransport)
+    parallel_transport_to(M::AbstractProjectiveSpace, p, X, q)
 
 Parallel transport a vector `X` from the tangent space at a point `p` on the
 [`AbstractProjectiveSpace`](@ref) `M`$=𝔽ℙ^n$ to the tangent space at another point `q`.
 
 This implementation proceeds by transporting $X$ to $T_{q λ} M$ using the same approach as
-[`vector_transport_direction`](@ref vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTransport)),
+[`parallel_transport_direction`](@ref parallel_transport_direction(::AbstractProjectiveSpace, p, X, d)),
 where $λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that
 takes $q$ to the member $q λ$ of its equivalence class $[q]$ closest to $p$ in the
 embedding.
@@ -497,9 +497,9 @@ where $d = \log_p q$ is the direction of the transport, $θ = \lVert d \rVert_p$
 [`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between $p$ and $q$, and
 $\overline{⋅}$ denotes complex or quaternionic conjugation.
 """
-vector_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ParallelTransport)
+parallel_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any)
 
-function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::AbstractProjectiveSpace, Y, p, X, q)
     z = dot(q, p)
     λ = nzsign(z)
     m = p .+ q .* λ # un-normalized midpoint
@@ -516,7 +516,7 @@ function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::Projecti
 end
 
 @doc raw"""
-    vector_transport_direction(M::AbstractProjectiveSpace, p, X, d, method::ParallelTransport)
+    parallel_transport_direction(M::AbstractProjectiveSpace, p, X, d)
 
 Parallel transport a vector `X` from the tangent space at a point `p` on the
 [`AbstractProjectiveSpace`](@ref) `M` along the [`geodesic`](@ref) in the direction
@@ -528,22 +528,9 @@ where $θ = \lVert d \rVert$, and $⟨⋅, ⋅⟩_p$ is the [`inner`](@ref) prod
 For the real projective space, this is equivalent to the same vector transport on the real
 [`AbstractSphere`](@ref).
 """
-vector_transport_direction(
-    ::AbstractProjectiveSpace,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::ParallelTransport,
-)
+parallel_transport_direction(::AbstractProjectiveSpace, ::Any, ::Any, ::Any)
 
-function vector_transport_direction!(
-    M::AbstractProjectiveSpace,
-    Y,
-    p,
-    X,
-    d,
-    ::ParallelTransport,
-)
+function parallel_transport_direction!(M::AbstractProjectiveSpace, Y, p, X, d)
     θ = norm(M, p, d)
     cosθ = cos(θ)
     dX = inner(M, p, d, X)

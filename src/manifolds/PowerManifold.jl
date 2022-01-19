@@ -263,7 +263,7 @@ Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, 
 Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
 function vector_bundle_transport(fiber::VectorSpaceType, M::PowerManifold)
-    return PowerVectorTransport(ParallelTransport())
+    return ParallelTransport()
 end
 
 @inline function _write(

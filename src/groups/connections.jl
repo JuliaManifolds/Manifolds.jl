@@ -92,7 +92,7 @@ function log!(
 end
 
 """
-    vector_transport_to(M::CartanSchoutenMinusGroup, p, X, q, ::ParallelTransport)
+    parallel_transport_to(M::CartanSchoutenMinusGroup, p, X, q)
 
 Transport tangent vector `X` at point `p` on the group manifold `M` with the
 [`CartanSchoutenMinus`](@ref) connection to point `q`. See [^Pennec2020] for details.
@@ -103,14 +103,14 @@ Transport tangent vector `X` at point `p` on the group manifold `M` with the
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
-vector_transport_to(M::CartanSchoutenMinusGroup, p, X, q, ::ParallelTransport)
+parallel_transport_to(M::CartanSchoutenMinusGroup, p, X, q)
 
-function vector_transport_to!(M::CartanSchoutenMinusGroup, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(M::CartanSchoutenMinusGroup, Y, p, X, q)
     return inverse_translate_diff!(M.manifold, Y, q, p, X, LeftAction())
 end
 
 """
-    vector_transport_to(M::CartanSchoutenPlusGroup, p, X, q, ::ParallelTransport)
+    vector_transport_to(M::CartanSchoutenPlusGroup, p, X, q)
 
 Transport tangent vector `X` at point `p` on the group manifold `M` with the
 [`CartanSchoutenPlus`](@ref) connection to point `q`. See [^Pennec2020] for details.
@@ -121,14 +121,14 @@ Transport tangent vector `X` at point `p` on the group manifold `M` with the
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
-vector_transport_to(M::CartanSchoutenPlusGroup, p, X, q, ::ParallelTransport)
+parallel_transport_to(M::CartanSchoutenPlusGroup, p, X, q)
 
-function vector_transport_to!(M::CartanSchoutenPlusGroup, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(M::CartanSchoutenPlusGroup, Y, p, X, q)
     return inverse_translate_diff!(M.manifold, Y, q, p, X, RightAction())
 end
 
 """
-    vector_transport_direction(M::CartanSchoutenZeroGroup, ::Identity, X, d, ::ParallelTransport)
+    parallel_transport_direction(M::CartanSchoutenZeroGroup, ::Identity, X, d)
 
 Transport tangent vector `X` at identity on the group manifold with the
 [`CartanSchoutenZero`](@ref) connection in the direction `d`. See [^Pennec2020] for details.
@@ -139,44 +139,23 @@ Transport tangent vector `X` at identity on the group manifold with the
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
-vector_transport_direction(
-    M::CartanSchoutenZeroGroup,
-    Y,
-    ::Identity,
-    X,
-    d,
-    ::ParallelTransport,
-)
+parallel_transport_direction(M::CartanSchoutenZeroGroup, Y, ::Identity, X, d)
 
-function vector_transport_direction!(
-    M::CartanSchoutenZeroGroup,
-    Y,
-    p::Identity,
-    X,
-    d,
-    ::ParallelTransport,
-)
+function parallel_transport_direction!(M::CartanSchoutenZeroGroup, Y, p::Identity, X, d)
     dexp_half = exp_lie(M.manifold, d / 2)
     translate_diff!(M.manifold, Y, dexp_half, p, X, RightAction())
     return translate_diff!(M.manifold, Y, dexp_half, p, Y, LeftAction())
 end
 
 """
-    vector_transport_to(M::CartanSchoutenZeroGroup, ::Identity, X, q, m::ParallelTransport)
+    parallel_transport_to(M::CartanSchoutenZeroGroup, ::Identity, X, q, m)
 
 Transport vector `X` at identity of group `M` equipped with the [`CartanSchoutenZero`](@ref)
 connection to point `q` using parallel transport.
 """
-vector_transport_to(::CartanSchoutenZeroGroup, ::Identity, X, q, ::ParallelTransport)
+parallel_transport_to(::CartanSchoutenZeroGroup, ::Identity, X, q)
 
-function vector_transport_to!(
-    M::CartanSchoutenZeroGroup,
-    Y,
-    p::Identity,
-    X,
-    q,
-    m::ParallelTransport,
-)
+function parallel_transport_to!(M::CartanSchoutenZeroGroup, Y, p::Identity, X, q)
     d = log_lie(M.manifold, q)
-    return vector_transport_direction!(M, Y, p, X, d, m)
+    return parallel_transport_direction!(M, Y, p, X, d)
 end

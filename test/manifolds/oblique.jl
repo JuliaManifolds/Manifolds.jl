@@ -31,7 +31,7 @@ include("../utils.jl")
         y = [1.0 0.0 0.0; 1/sqrt(2) 1/sqrt(2) 0.0]'
         z = [1/sqrt(2) 1/sqrt(2) 0.0; 1.0 0.0 0.0]'
         basis_types = (DefaultOrthonormalBasis(),)
-        transports = [ParallelTransport(), PowerVectorTransport(ParallelTransport())]
+        transports = [ParallelTransport()]
         test_manifold(
             M,
             [x, y, z],

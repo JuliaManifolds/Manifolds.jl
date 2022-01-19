@@ -392,7 +392,7 @@ for T in _HyperbolicTypes
 end
 
 @doc raw"""
-    vector_transport_to(M::Hyperbolic, p, X, q, ::ParallelTransport)
+    parallel_transport_to(M::Hyperbolic, p, X, q)
 
 Compute the paralllel transport of the `X` from the tangent space at `p` on the
 [`Hyperbolic`](@ref) space $\mathcal H^n$ to the tangent at `q` along the [`geodesic`](@ref)
@@ -404,27 +404,19 @@ connecting `p` and `q`. The formula reads
 ````
 where $⟨\cdot,\cdot⟩_p$ denotes the inner product in the tangent space at `p`.
 """
-vector_transport_to(::Hyperbolic, ::Any, ::Any, ::Any, ::ParallelTransport)
+parallel_transport_to(::Hyperbolic, ::Any, ::Any, ::Any)
 
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
-    @eval function vector_transport_to!(
-        M::Hyperbolic,
-        Y::$T,
-        p::$P,
-        X::$T,
-        q::$P,
-        m::ParallelTransport,
-    )
+    @eval function parallel_transport_to!(M::Hyperbolic, Y::$T, p::$P, X::$T, q::$P)
         Y.value .=
             convert(
                 $T,
                 convert(AbstractVector, q),
-                vector_transport_to(
+                parallel_transport_to(
                     M,
                     convert(AbstractVector, p),
                     convert(AbstractVector, p, X),
                     convert(AbstractVector, q),
-                    m,
                 ),
             ).value
         return Y

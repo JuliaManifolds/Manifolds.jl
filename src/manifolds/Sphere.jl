@@ -438,7 +438,7 @@ function uniform_distribution(M::Sphere{n,ℝ}, p) where {n}
 end
 
 @doc raw"""
-    vector_transport_to(M::AbstractSphere, p, X, q, ::ParallelTransport)
+    parallel_transport_to(M::AbstractSphere, p, X, q)
 
 Compute the parallel transport on the [`Sphere`](@ref) of the tangent vector `X` at `p`
 to `q`, provided, the [`geodesic`](@ref) between `p` and `q` is unique. The formula reads

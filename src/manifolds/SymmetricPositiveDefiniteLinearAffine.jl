@@ -225,8 +225,8 @@ function log!(M::SymmetricPositiveDefinite{N}, X, p, q) where {N}
 end
 
 @doc raw"""
-    vector_transport_to(M::SymmetricPositiveDefinite, p, X, q, ::ParallelTransport)
-    vector_transport_to(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, X, y, ::ParallelTransport)
+    parallel_transport_to(M::SymmetricPositiveDefinite, p, X, q)
+    parallel_transport_to(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, X, y)
 
 Compute the parallel transport of `X` from the tangent space at `p` to the
 tangent space at `q` on the [`SymmetricPositiveDefinite`](@ref) as a
@@ -249,16 +249,9 @@ where $\operatorname{Exp}$ denotes the matrix exponential
 and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 (again with respect to the [`LinearAffineMetric`](@ref)).
 """
-vector_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any, ::ParallelTransport)
+parallel_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any)
 
-function vector_transport_to!(
-    M::SymmetricPositiveDefinite{N},
-    Y,
-    p,
-    X,
-    q,
-    ::ParallelTransport,
-) where {N}
+function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) where {N}
     distance(M, p, q) < 2 * eps(eltype(p)) && copyto!(Y, X)
     e = eigen(Symmetric(p))
     U = e.vectors

@@ -695,7 +695,7 @@ Base.show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""
-    vector_transport_direction(M::Rotations, p, X, d)
+    parallel_transport_direction(M::Rotations, p, X, d)
 
 Compute parallel transport of vector `X` tangent at `p` on the [`Rotations`](@ref)
 manifold in the direction `d`. The formula, provided in [^Rentmeesters], reads:
@@ -712,23 +712,23 @@ The formula simplifies to identity for 2-D rotations.
     > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
     > European Control Conference, Dec. 2011, pp. 7141–7146. doi: 10.1109/CDC.2011.6161280.
 """
-vector_transport_direction(M::Rotations, p, X, d)
+parallel_transport_direction(M::Rotations, p, X, d)
 
-function vector_transport_direction!(M::Rotations, Y, p, X, d, ::ParallelTransport)
+function parallel_transport_direction!(M::Rotations, Y, p, X, d)
     expdhalf = exp(d / 2)
     q = exp(M, p, d)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
-function vector_transport_direction!(M::Rotations{2}, Y, p, X, d, ::ParallelTransport)
+function parallel_transport_direction!(::Rotations{2}, Y, p, X, d)
     return copyto!(Y, X)
 end
 
-function vector_transport_to!(M::Rotations, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(M::Rotations, Y, p, X, q)
     d = log(M, p, q)
     expdhalf = exp(d / 2)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
-function vector_transport_to!(M::Rotations{2}, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::Rotations{2}, Y, p, X, q)
     return copyto!(Y, X)
 end
 
@@ -738,6 +738,6 @@ end
 Return the zero tangent vector from the tangent space art `p` on the [`Rotations`](@ref)
 as an element of the Lie group, i.e. the zero matrix.
 """
-zero_vector(M::Rotations, p) = zero(p)
+zero_vector(::Rotations, p) = zero(p)
 
-zero_vector!(M::Rotations, X, p) = fill!(X, 0)
+zero_vector!(::Rotations, X, p) = fill!(X, 0)

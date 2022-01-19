@@ -406,7 +406,7 @@ function project!(
     return (Y.value .= X.value .+ minkowski_metric(p.value, X.value) .* p.value)
 end
 
-function vector_transport_to!(M::Hyperbolic, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(M::Hyperbolic, Y, p, X, q)
     w = log(M, p, q)
     wn = norm(M, p, w)
     wn < eps(eltype(p + q)) && return copyto!(Y, X)

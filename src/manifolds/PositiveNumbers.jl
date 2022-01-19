@@ -237,7 +237,7 @@ function Base.show(
 end
 
 @doc raw"""
-    vector_transport_to(M::PositiveNumbers, p, X, q, ::ParallelTransport)
+    parallel_transport_to(M::PositiveNumbers, p, X, q)
 
 Compute the parallel transport of `X` from the tangent space at `p` to the tangent space at
 `q` on the [`PositiveNumbers`](@ref) `M`.
@@ -246,18 +246,12 @@ Compute the parallel transport of `X` from the tangent space at `p` to the tange
 \mathcal P_{q\gets p}(X) = X\cdot\frac{q}{p}.
 ````
 """
-vector_transport_to(::PositiveNumbers, ::Any, ::Any, ::Any, ::ParallelTransport)
-function vector_transport_to(
-    ::PositiveNumbers,
-    p::Real,
-    X::Real,
-    q::Real,
-    ::ParallelTransport,
-)
+parallel_transport_to(::PositiveNumbers, ::Any, ::Any, ::Any)
+function parallel_transport_to(::PositiveNumbers, p::Real, X::Real, q::Real)
     return X * q / p
 end
 
-function vector_transport_to!(::PositiveNumbers, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::PositiveNumbers, Y, p, X, q)
     return (Y .= X .* q ./ p)
 end
 

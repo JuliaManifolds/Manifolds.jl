@@ -244,6 +244,6 @@ function translate_diff!(G::GeneralLinear, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
 
-vector_transport_to(::GeneralLinear, p, X, q, ::ParallelTransport) = X
+parallel_transport_to(::GeneralLinear, p, X, q) = X
 
-vector_transport_to!(::GeneralLinear, Y, p, X, q, ::ParallelTransport) = copyto!(Y, X)
+parallel_transport_to!(::GeneralLinear, Y, p, X, q) = copyto!(Y, X)

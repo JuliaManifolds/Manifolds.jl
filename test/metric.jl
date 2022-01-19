@@ -44,7 +44,7 @@ function Manifolds.get_coordinates_orthogonal!(
     c,
     ::Any,
     X,
-    ::ManifoldsBase.AbstractNumbers
+    ::ManifoldsBase.AbstractNumbers,
 )
     c .= 1 ./ [1.0:manifold_dimension(M)...] .* X
     return c
@@ -54,7 +54,7 @@ function Manifolds.get_vector_orthonormal!(
     X,
     ::Any,
     c,
-    ::ManifoldsBase.AbstractNumbers
+    ::ManifoldsBase.AbstractNumbers,
 )
     X .= [1.0:manifold_dimension(M)...] .* c
     return X
@@ -73,7 +73,7 @@ function Manifolds.get_vector_orthogonal!(
     X,
     ::Any,
     c,
-    ::ManifoldsBase.AbstractNumbers
+    ::ManifoldsBase.AbstractNumbers,
 )
     X .= 2 .* [1.0:manifold_dimension(M)...] .* c
     return X
@@ -145,7 +145,7 @@ function Manifolds.get_coordinates_orthonormal!(
     Y,
     p,
     X,
-    ::ManifoldsBase.AbstractNumbers
+    ::ManifoldsBase.AbstractNumbers,
 )
     return Y .= X
 end
@@ -154,11 +154,13 @@ function Manifolds.get_vector_orthonormal!(
     Y,
     p,
     X,
-    ::ManifoldsBase.AbstractNumbers
+    ::ManifoldsBase.AbstractNumbers,
 )
     return Y .= X
 end
-active_traits(f, ::BaseManifold) = merge_traits(IsDefaultMetric(DefaultBaseManifoldMetric()))
+function active_traits(f, ::BaseManifold)
+    return merge_traits(IsDefaultMetric(DefaultBaseManifoldMetric()))
+end
 function Manifolds.projected_distribution(M::BaseManifold, d)
     return ProjectedPointDistribution(M, d, project!, rand(d))
 end
@@ -461,9 +463,9 @@ end
         @test_throws MethodError project!(MM, Y, p, X) === project!(M, Y, p, X)
         @test_throws MethodError project!(MM, q, p) === project!(M, q, p)
         @test_throws MethodError vector_transport_to!(MM, Y, p, X, q) ===
-                                    vector_transport_to!(M, Y, p, X, q)
+                                 vector_transport_to!(M, Y, p, X, q)
         # without DiffEq, these error
-        @test_throws MethodError exp(MM,x, X, 1:3)
+        @test_throws MethodError exp(MM, x, X, 1:3)
         @test_throws MethodError exp!(MM, q, p, X)
         # these always fall back anyways.
         @test zero_vector!(MM, X, p) === zero_vector!(M, X, p)

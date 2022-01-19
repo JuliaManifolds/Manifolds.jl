@@ -917,10 +917,14 @@ function vector_transport_to!(
 )
     return vector_transport_to!(M, Y, p, X, q, VectorBundleVectorTransport(m, m))
 end
-function vector_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q)
-    return copyto!(Y, X)
-end
-function vector_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q, ::ParallelTransport)
+function vector_transport_to!(
+    ::TangentSpaceAtPoint,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
     return copyto!(Y, X)
 end
 

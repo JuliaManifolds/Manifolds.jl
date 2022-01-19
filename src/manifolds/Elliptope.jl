@@ -107,9 +107,7 @@ function check_vector(M::Elliptope{N,K}, q, Y; kwargs...) where {N,K}
     return nothing
 end
 
-function decorated_manifold(M::Elliptope)
-    return Euclidean(representation_size(M)...; field=ℝ)
-end
+get_embedding(M::Elliptope) = Euclidean(representation_size(M)...; field=ℝ)
 
 @doc raw"""
     manifold_dimension(M::Elliptope)
@@ -132,6 +130,7 @@ project `q` onto the manifold [`Elliptope`](@ref) `M`, by normalizing the rows o
 project(::Elliptope, ::Any)
 
 project!(::Elliptope, r, q) = copyto!(r, q ./ (sqrt.(sum(abs2, q, dims=2))))
+project(::Elliptope, q) = q ./ (sqrt.(sum(abs2, q, dims=2)))
 
 """
     project(M::Elliptope, q, Y)
