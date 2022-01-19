@@ -46,7 +46,7 @@ end
 
 decorated_manifold(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
 ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction()
-ManifoldsBase.default_inverse_retraction_method(::Symplectic) = CayleyInverseRetraction()
+ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel) = CayleyInverseRetraction()
 
 @doc raw"""
     manifold_dimension(::Symplectic{n})
@@ -56,11 +56,6 @@ i.e. [^Bendokat2021]
 ````math
     \operatorname{dim}(\operatorname{SpSt}(2n, 2k)) = (4n - 2k + 1)k.
 ````
-
-[^Bendokat2021]:
-    > Bendokat, Thomas and Zimmermann, Ralf:
-	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
-	> arXiv preprint arXiv:2108.12447, 2021 (https://arxiv.org/abs/2108.12447)
 """
 manifold_dimension(::SymplecticStiefel{n,k}) where {n,k} = (4n - 2k + 1) * k
 
@@ -102,28 +97,26 @@ function check_point(M::SymplecticStiefel{n,k}, p; kwargs...) where {n,k}
     return nothing
 end
 
-# Document 'check_vector'.
-@doc raw"""
-    Reference: Proposition 3.2 in Benodkat-Zimmermann. (Eq. 3.3, Second tangent space parametrization.)
-
-````math
-    T_p\operatorname{SpSt}(2n, 2n) = \left\{X ∈ ℝ^{2n × 2k} | (p^{+}X)^{+} = -p^{+}X \text{in the Lie Algebra of Hamiltonian Matrices}\right\}
-````
-"""
 @doc raw"""
     check_vector(M::Symplectic, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticStiefel`](@ref),
-$\operatorname{SpSt}(2n, 2k)$ manifold. That is, the [`AbstractNumbers`](@ref) fits and
-it (approximately) holds that
-$p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0 \in \mathbb{R}^{2k \times 2k}$,
-where
+``\operatorname{SpSt}(2n, 2k)`` manifold. First recall the definition of the symplectic
+inverse for $A \in \mathbb{R}^{2n \times 2k}$,
+$A^{+} = Q_{2k}^TA^TQ_{2n}$ is the symplectic inverse, with
 ````math
-Q_{2n} =
-\begin{bmatrix}
-0_n & I_n \\
- -I_n & 0_n
+    Q_{2n} =
+    \begin{bmatrix}
+    0_n & I_n \\
+     -I_n & 0_n
 \end{bmatrix}.
+````
+The we check that
+``(p^{+}X) = H \in \mathcal{g}_{2k}`` approximately, where ``\mathcal{g}``
+is the Lie Algebra of the symplectic group ``\operatorname{Sp}(2k)``,
+characterized as [^Bendokat2021],
+````math
+    \mathcal{g}_{2k} = \{H \in ℝ^{2k \times 2k} \;|\; H^+ = -H \}.
 ````
 The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
@@ -163,7 +156,14 @@ end
 @doc raw"""
     inner(M::SymplecticStiefel{n, k}, p, X. Y)
 
-Based on the inner product in Proposition 3.10 of Benodkat-Zimmermann.
+Compute the Riemannian inner product ``g^{\operatorname{SpSt}}`` at
+``p \in \operatorname{SpSt}`` between tangent vectors ``X, X \in T_p\operatorname{SpSt}``.
+Given by Proposition 3.10 of Benodkat-Zimmermann [^Bendokat2021].
+````math
+g^{\operatorname{SpSt}}_p(X, Y)
+    = \operatorname{tr}\left(X^T\left(I_{2n} -
+        \frac{1}{2}Q_{2n}^Tp(p^Tp)^{-1}p^TQ_{2n}\right)Y(p^Tp)^{-1}\right).
+````
 """
 function inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
     Q = SymplecticMatrix(p, X, Y)
@@ -250,21 +250,21 @@ function Base.rand(::SymplecticStiefel{n,k}, p::AbstractMatrix) where {n,k}
 end
 
 @doc raw"""
-    π(::SymplecticStiefel{n, k}, p) where {n, k}
+    canonical_projection(::SymplecticStiefel, p_Sp)
+    canonical_projection!(::SymplecticStiefel{n,k}, p, p_Sp)
 
-Define the canonical projection from ``\operatorname{Sp}(2n, 2n)`` onto ``\operatorname{SpSt}(2n, 2k)``,
-by projecting onto the first ``k`` columns, and the ``n + 1``'th column onto the ``n + k``'th columns.
+Define the canonical projection from ``\operatorname{Sp}(2n, 2n)`` onto
+``\operatorname{SpSt}(2n, 2k)``, by projecting onto the first ``k`` columns
+and the ``n + 1``'th onto the ``n + k``'th columns [^Bendokat2021].
 
 It is assumed that the point ``p`` is on ``\operatorname{Sp}(2n, 2n)``.
-
-# As done in Bendokat Zimmermann in equation 3.2.
 """
-function canonical_projection(M::SymplecticStiefel{n,k}, p) where {n,k}
+function canonical_projection(M::SymplecticStiefel{n,k}, p_Sp) where {n,k}
     p_SpSt = similar(p, (2n, 2k))
     return canonical_projection!(M, p_SpSt, p)
 end
 
-function canonical_projection!(::SymplecticStiefel{n,k}, p_SpSt, p) where {n,k}
+function canonical_projection!(::SymplecticStiefel{n,k}, p, p_Sp) where {n,k}
     p_SpSt[:, (1:k)] .= p[:, (1:k)]
     p_SpSt[:, ((k + 1):(2k))] .= p[:, ((n + 1):(n + k))]
     return p_SpSt
@@ -275,6 +275,7 @@ function symplectic_inverse_times(M::SymplecticStiefel{n,k}, p, q) where {n,k}
     A = similar(p, (2k, 2k))
     return symplectic_inverse_times!(M, A, p, q)
 end
+
 function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k}
     # we write p = [p1 p2; p3 p4] (and q, too), then
     p1 = @view(p[1:n, 1:k])
@@ -289,14 +290,14 @@ function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k
     A2 = @view(A[1:k, (k + 1):(2k)])
     A3 = @view(A[(k + 1):(2k), 1:k])
     A4 = @view(A[(k + 1):(2k), (k + 1):(2k)])
-    mul!(A1, p4', q1) # A1 = p4'q1
-    mul!(A1, p2', q3, -1, 1) # A1 -= p2'p3
-    mul!(A2, p4', q2) # A2 = p4'q2
-    mul!(A2, p2', q4, -1, 1) #A2 -= p2'q4
-    mul!(A3, p1', q3) #A3 = p1'q3
-    mul!(A3, p3', q1, -1, 1) # A3 -= p3'q1
-    mul!(A4, p1', q4) # A4 = p1'q4
-    mul!(A4, p3', q2, -1, 1) #A4 -= p3'q2
+    mul!(A1, p4', q1)           # A1  = p4'q1
+    mul!(A1, p2', q3, -1, 1)    # A1 -= p2'p3
+    mul!(A2, p4', q2)           # A2  = p4'q2
+    mul!(A2, p2', q4, -1, 1)    # A2 -= p2'q4
+    mul!(A3, p1', q3)           # A3  = p1'q3
+    mul!(A3, p3', q1, -1, 1)    # A3 -= p3'q1
+    mul!(A4, p1', q4)           # A4  = p1'q4
+    mul!(A4, p3', q2, -1, 1)    #A4  -= p3'q2
     return A
 end
 
@@ -436,23 +437,14 @@ function gradient!(M::SymplecticStiefel, f, X, p, backend::RiemannianProjectionB
     return grad_euclidean_to_manifold!(M, X, p, X)
 end
 
-function grad_euclidean_to_manifold(::SymplecticStiefel, p, ∇f_euc)
-    Q = SymplecticMatrix(p, ∇f_euc)
-    return ∇f_euc * (p' * p) .+ Q * p * (∇f_euc' * Q * p)
-end
-
-function old_grad_euclidean_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
-    # Older type: Rewritten to avoid allocating (2n × 2n) matrices:
-    Q = SymplecticMatrix(p, ∇f_euc)
-    Qp = Q * p  # Allocated memory.
-    ∇f_man .= ∇f_euc * (p' * p) .+ Qp * (∇f_euc' * Qp)
-    return ∇f_man
+function grad_euclidean_to_manifold(M::SymplecticStiefel, p, ∇f_euc)
+    return grad_euclidean_to_manifold!(M, similar(∇f_euc), p, ∇f_euc)
 end
 
 function grad_euclidean_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
     Q = SymplecticMatrix(p, ∇f_euc)
-    Qp = Q * p  # Allocated memory.
-    mul!(∇f_man, ∇f_euc, (p' * p)) # Use the memory in ∇f_man.
+    Qp = Q * p                      # Allocated memory.
+    mul!(∇f_man, ∇f_euc, (p' * p))  # Use the memory in ∇f_man.
     ∇f_man .+= Qp * (∇f_euc' * Qp)
     return ∇f_man
 end
