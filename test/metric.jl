@@ -220,8 +220,10 @@ end
     # some tests failed due to insufficient accuracy for a particularly bad RNG state
     Random.seed!(42)
     @testset "Metric Basics" begin
-        #one for MetricManifold, one for AbstractManifold & Metric
-        @test length(methods(is_default_metric)) == 2
+        @test repr(MetricManifold(Euclidean(3), EuclideanMetric())) ===
+              "MetricManifold(Euclidean(3; field = ℝ), EuclideanMetric())"
+        @test repr(IsDefaultMetric(EuclideanMetric())) ===
+              "IsDefaultMetric(EuclideanMetric())"
     end
 
     @testset "solve_exp_ode error message" begin
@@ -231,7 +233,7 @@ end
 
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
-        @test_throws ErrorException exp(M, p, X)
+        @test_throws MethodError exp(M, p, X)
         using OrdinaryDiffEq
         exp(M, p, X)
     end
@@ -465,14 +467,14 @@ end
         @test retract!(MM, q, p, X) === retract!(M, q, p, X)
         @test retract!(MM, q, p, X, 1) === retract!(M, q, p, X, 1)
         # without a definition for the metric from the embedding, no projection possible
-        @test_throws ErrorException log!(MM, Y, p, q) === project!(M, Y, p, q)
-        @test_throws ErrorException project!(MM, Y, p, X) === project!(M, Y, p, X)
-        @test_throws ErrorException project!(MM, q, p) === project!(M, q, p)
-        @test_throws ErrorException vector_transport_to!(MM, Y, p, X, q) ===
+        @test_throws MethodError log!(MM, Y, p, q) === project!(M, Y, p, q)
+        @test_throws MethodError project!(MM, Y, p, X) === project!(M, Y, p, X)
+        @test_throws MethodError project!(MM, q, p) === project!(M, q, p)
+        @test_throws MethodError vector_transport_to!(MM, Y, p, X, q) ===
                                     vector_transport_to!(M, Y, p, X, q)
         # without DiffEq, these error
-        # @test_throws ErrorException exp(MM,x, X, 1:3)
-        # @test_throws ErrorException exp!(MM, q, p, X)
+        @test_throws MethodError exp(MM,x, X, 1:3)
+        @test_throws MethodError exp!(MM, q, p, X)
         # these always fall back anyways.
         @test zero_vector!(MM, X, p) === zero_vector!(M, X, p)
 
@@ -585,61 +587,6 @@ end
         @test median(M, psample, Y) ≈ 2 .* ones(3)
         @test median(MM2, psample, Y) ≈ 2 * ones(3)
         @test median(MM, psample, Y) ≈ 4 .* ones(3)
-    end
-
-    @testset "Metric decorator dispatches" begin
-        M = BaseManifold{3}()
-        g = BaseManifoldMetric{3}()
-        MM = MetricManifold(M, g)
-        x = [1, 2, 3]
-        # nonmutating always go to parent for allocation
-        for f in [exp, flat, inverse_retract, log, mean, median, project]
-            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
-        end
-        for f in [sharp, retract, get_vector, get_coordinates]
-            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
-        end
-        for f in [vector_transport_along, vector_transport_direction, vector_transport_to]
-            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:parent}()
-        end
-        for f in [get_basis, inner]
-            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
-        end
-        for f in [get_coordinates!, get_vector!]
-            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
-        end
-
-        # mirroring ones are mostly intransparent despite for a few cases - e.g. dispatch/default last variables
-        for f in [exp!, flat!, inverse_retract!, log!, mean!, median!]
-            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
-        end
-        for f in [norm, project!, sharp!, retract!]
-            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
-        end
-        for f in [vector_transport_along!, vector_transport_to!]
-            @test Manifolds.decorator_transparent_dispatch(f, MM) === Val{:intransparent}()
-        end
-        @test Manifolds.decorator_transparent_dispatch(vector_transport_direction!, MM) ===
-              Val{:parent}()
-
-        @test Manifolds.decorator_transparent_dispatch(exp!, MM, x, x, x, x) ===
-              Val{:parent}()
-        @test Manifolds.decorator_transparent_dispatch(
-            inverse_retract!,
-            MM,
-            x,
-            x,
-            x,
-            LogarithmicInverseRetraction(),
-        ) === Val{:parent}()
-        @test Manifolds.decorator_transparent_dispatch(
-            retract!,
-            MM,
-            x,
-            x,
-            x,
-            ExponentialRetraction(),
-        ) === Val{:parent}()
     end
 
     @testset "change metric and representer" begin
