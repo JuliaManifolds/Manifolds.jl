@@ -112,11 +112,11 @@ $A^{+} = Q_{2k}^TA^TQ_{2n}$ is the symplectic inverse, with
 \end{bmatrix}.
 ````
 The we check that
-``(p^{+}X) = H \in \mathcal{g}_{2k}`` approximately, where ``\mathcal{g}``
+``(p^{+}X) = H \in 𝔤_{2k}`` approximately, where ``𝔤``
 is the Lie Algebra of the symplectic group ``\operatorname{Sp}(2k)``,
 characterized as [^Bendokat2021],
 ````math
-    \mathcal{g}_{2k} = \{H \in ℝ^{2k \times 2k} \;|\; H^+ = -H \}.
+    𝔤_{2k} = \{H \in ℝ^{2k \times 2k} \;|\; H^+ = -H \}.
 ````
 The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
@@ -218,7 +218,7 @@ function make_metric_compatible!(
 
     pT_p = p' * p
     pT_Q = p' * Q
-    inner_term = pT_Q' * (lu(pT_p) \ pT_Q)
+    inner_term = pT_Q' * (lu(pT_p) \ pT_Q)  # ∈ ℝ^{2n × 2n}
 
     divisor = lu!(Array(add_scaled_I!(lmul!(-0.5, inner_term), 1.0)'))
     mul!(Y, X, pT_p)
@@ -231,20 +231,23 @@ end
 
 Generate a random point ``p \in \operatorname{SpSt}(2n, 2k)``
 by first generating a random symplectic matrix of the correct size,
-and then projecting onto the Symplectic Stiefel manifold.
+and then projecting onto the Symplectic Stiefel manifold using the
+[`canonical_projection`](@ref).
 """
-function Base.rand(M::SymplecticStiefel{n,k}) where {n,k}
-    #  Ω = rand_hamiltonian(Symplectic(2n); final_norm=1.0)
-    p_symplectic = rand(Symplectic(2n), 1/2)
+function Base.rand(M::SymplecticStiefel{n,k}, hamiltonian_norm=1/2) where {n,k}
+    p_symplectic = rand(Symplectic(2n), hamiltonian_norm)
     canonical_projection(M, p_symplectic)
 end
 
 @doc raw"""
     rand(::SymplecticStiefel{n, k}, p)
 
-As based on the parametrization of the tangent space ``T_p\operatorname{SpSt}(n, k)`` found in Proposition 3.2
-of Benodkat-Zimmermann. There they express the tangent space as ``X = pΩ + p^sB``, where ``Ω^+ = -Ω`` is Hamiltonian.
-The notation ``p^s`` means the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``, and ``B ∈ ℝ^{2(n-k) × 2k}.
+As based on the parametrization of the tangent space ``T_p\operatorname{SpSt}(n, k)``
+found in Proposition 3.2 of Benodkat-Zimmermann.
+There they express the tangent space as ``X = pΩ + p^sB``,
+where ``Ω^+ = -Ω`` is Hamiltonian.
+The notation ``p^s`` means the symplectic complement of ``p`` s.t.
+``p^{+}p^{s} = 0``, and ``B ∈ ℝ^{2(n-k) × 2k}.
 """
 function Base.rand(::SymplecticStiefel{n,k}, p::AbstractMatrix) where {n,k}
     Ω = rand_hamiltonian(Symplectic(2k))
@@ -262,14 +265,14 @@ and the ``n + 1``'th onto the ``n + k``'th columns [^Bendokat2021].
 It is assumed that the point ``p`` is on ``\operatorname{Sp}(2n, 2n)``.
 """
 function canonical_projection(M::SymplecticStiefel{n,k}, p_Sp) where {n,k}
-    p_SpSt = similar(p, (2n, 2k))
-    return canonical_projection!(M, p_SpSt, p)
+    p_SpSt = similar(p_Sp, (2n, 2k))
+    return canonical_projection!(M, p_SpSt, p_Sp)
 end
 
 function canonical_projection!(::SymplecticStiefel{n,k}, p, p_Sp) where {n,k}
-    p_SpSt[:, (1:k)] .= p[:, (1:k)]
-    p_SpSt[:, ((k + 1):(2k))] .= p[:, ((n + 1):(n + k))]
-    return p_SpSt
+    p[:, (1:k)] .= p_Sp[:, (1:k)]
+    p[:, ((k + 1):(2k))] .= p_Sp[:, ((n + 1):(n + k))]
+    return p
 end
 
 # compute p^+q (which is 2kx2k) in place of A
@@ -463,20 +466,26 @@ That is, we find the element ``X \in T_p\operatorname{SpSt}(2n, 2k)``
 which solves the constrained optimization problem
 
 ````math
-    \operatorname{min}_{X \in \mathbb{R}^{2n \times 2k}} \frac{1}{2}||X - A||, \quad
-    s.t. h(X) = X^T Q p + p^T Q X = 0,
+    \operatorname{min}_{X \in \mathbb{R}^{2n \times 2k}} \frac{1}{2}||X - A||^2, \quad
+    \text{s.t.}\;
+    h(X) = X^T Q p + p^T Q X = 0,
 ````
 where ``h : \mathbb{R}^{2n \times 2k} \rightarrow \operatorname{skew}(2k)`` defines
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``.
 """
 function project!(::Union{SymplecticStiefel,Symplectic}, Y, p, A)
     Q = SymplecticMatrix(Y, p, A)
-    h(X) = X' * (Q * p) + p' * (Q * X)
+    Q_p = Q * p
+
+    function h(X)
+        XT_Q_p = X' * Q_p
+        return XT_Q_p .- XT_Q_p'
+    end
 
     # Solve for Λ (Lagrange mutliplier):
     pT_p = p' * p  # (2k × 2k)
     Λ = sylvester(pT_p, pT_p, h(A) ./ 2)
 
-    Y[:, :] = A .- (Q * p) * (Λ .- Λ')
+    Y[:, :] = A .- Q_p * (Λ .- Λ')
     return Y
 end
