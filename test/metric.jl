@@ -39,42 +39,41 @@ function Manifolds.local_metric(
 ) where {T<:ManifoldsBase.AbstractOrthogonalBasis}
     return 2 .* Diagonal(1.0:manifold_dimension(M))
 end
-function Manifolds.get_coordinates!(
+function Manifolds.get_coordinates_orthogonal!(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
     c,
     ::Any,
     X,
-    ::DefaultOrthogonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+    ::ManifoldsBase.AbstractNumbers
 )
     c .= 1 ./ [1.0:manifold_dimension(M)...] .* X
     return c
 end
-function Manifolds.get_vector!(
+function Manifolds.get_vector_orthonormal!(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
     X,
     ::Any,
     c,
-    ::DefaultOrthogonalBasis{ℝ,<:ManifoldsBase.TangentSpaceType},
+    ::ManifoldsBase.AbstractNumbers
 )
     X .= [1.0:manifold_dimension(M)...] .* c
     return X
 end
-function Manifolds.get_coordinates!(
+function Manifolds.get_coordinates_orthogonal!(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
     c,
     ::Any,
     X,
-    ::DefaultOrthogonalBasis,
 )
     c .= 1 ./ (2 .* [1.0:manifold_dimension(M)...]) .* X
     return c
 end
-function Manifolds.get_vector!(
+function Manifolds.get_vector_orthogonal!(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
     X,
     ::Any,
     c,
-    ::DefaultOrthogonalBasis,
+    ::ManifoldsBase.AbstractNumbers
 )
     X .= 2 .* [1.0:manifold_dimension(M)...] .* c
     return X
@@ -131,7 +130,7 @@ function Manifolds.exp!(
 ) where {N}
     return exp!(base_manifold(M), q, p, X)
 end
-function Manifolds.vector_transport_to!(::BaseManifold, Y, p, X, q, ::ParallelTransport)
+function Manifolds.parallel_transport_to!(::BaseManifold, Y, p, X, q)
     return (Y .= X)
 end
 function Manifolds.get_basis(
@@ -141,25 +140,25 @@ function Manifolds.get_basis(
 ) where {N}
     return CachedBasis(B, [(Matrix{eltype(p)}(I, N, N)[:, i]) for i in 1:N])
 end
-function Manifolds.get_coordinates!(
+function Manifolds.get_coordinates_orthonormal!(
     ::BaseManifold,
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType},
+    ::ManifoldsBase.AbstractNumbers
 )
     return Y .= X
 end
-function Manifolds.get_vector!(
+function Manifolds.get_vector_orthonormal!(
     ::BaseManifold,
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType},
+    ::ManifoldsBase.AbstractNumbers
 )
     return Y .= X
 end
-Manifolds.default_metric_dispatch(::BaseManifold, ::DefaultBaseManifoldMetric) = Val(true)
+active_traits(f, ::BaseManifold) = merge_traits(IsDefaultMetric(DefaultBaseManifoldMetric()))
 function Manifolds.projected_distribution(M::BaseManifold, d)
     return ProjectedPointDistribution(M, d, project!, rand(d))
 end
@@ -421,18 +420,9 @@ end
         MM2 = MetricManifold(M, g2)
         A = Manifolds.get_default_atlas(M)
 
-        @test (@inferred Manifolds.default_metric_dispatch(MM)) ===
-              (@inferred Manifolds.default_metric_dispatch(base_manifold(MM), metric(MM)))
-        @test (@inferred Manifolds.default_metric_dispatch(MM2)) ===
-              (@inferred Manifolds.default_metric_dispatch(base_manifold(MM2), metric(MM2)))
-        @test (@inferred Manifolds.default_metric_dispatch(MM2)) === Val(true)
         @test is_default_metric(MM) == is_default_metric(base_manifold(MM), metric(MM))
         @test is_default_metric(MM2) == is_default_metric(base_manifold(MM2), metric(MM2))
         @test is_default_metric(MM2)
-        @test Manifolds.default_decorator_dispatch(MM) ===
-              Manifolds.default_metric_dispatch(MM)
-        @test Manifolds.default_decorator_dispatch(MM2) ===
-              Manifolds.default_metric_dispatch(MM2)
 
         @test convert(typeof(MM2), M) == MM2
         @test_throws ErrorException convert(typeof(MM), M)
