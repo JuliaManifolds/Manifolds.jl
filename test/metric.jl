@@ -158,9 +158,7 @@ function Manifolds.get_vector_orthonormal!(
 )
     return Y .= X
 end
-function active_traits(f, ::BaseManifold)
-    return merge_traits(IsDefaultMetric(DefaultBaseManifoldMetric()))
-end
+Manifolds.is_default_metric(::BaseManifold, ::DefaultBaseManifoldMetric) = true
 function Manifolds.projected_distribution(M::BaseManifold, d)
     return ProjectedPointDistribution(M, d, project!, rand(d))
 end

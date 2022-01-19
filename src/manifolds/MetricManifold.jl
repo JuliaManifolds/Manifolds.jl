@@ -379,6 +379,15 @@ function inner(
         error("calculating inner product of vectors from different bases is not supported")
     return dot(X.data, local_metric(M, p, X.basis) * Y.data)
 end
+function inner(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    Y,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return inner(M.manifold, p, X, Y)
+end
 
 @trait_function is_default_metric(M::AbstractDecoratorManifold, G::AbstractMetric)
 function is_default_metric(
