@@ -37,11 +37,11 @@ function inner(
 end
 
 @doc raw"""
-    grad_euclidian_to_manifold(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, ∇f_euc)
+    grad_euclidean_to_manifold(M::MetricManifold{ℝ, Symplectic{n, ℝ}, SymplecticPseudoRiemannianMetric}, p, ∇f_euc)
 
 TODO: Flesh out. Inspired by Fiori and Gao et al. Use projection from Gao et al, Metric compatibility from Firoi.
 """
-function grad_euclidian_to_manifold(
+function grad_euclidean_to_manifold(
     M::MetricManifold{ℝ,Symplectic{n,ℝ},SymplecticPseudoRiemannianMetric},
     p,
     ∇f_euc,
