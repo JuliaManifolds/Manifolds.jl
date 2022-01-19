@@ -424,8 +424,8 @@ falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for
 """
 log(::MetricManifold, ::Any...)
 
-log(::TraitList{IsDefaultMetric}, M::MetricManifold, p, q) = log(M.manifold, p, q)
-log!(::TraitList{IsDefaultMetric}, M::MetricManifold, X, p, q) = log!(M.manifold, X, p, q)
+log(::TraitList{IsDefaultMetric{G}}, M::MetricManifold{TM,G}, p, q) where {G<:AbstractMetric, TM<:AbstractManifold} = log(M.manifold, p, q)
+log!(::TraitList{IsDefaultMetric{G}}, M::MetricManifold{TM,G}, X, p, q) where {G<:AbstractMetric, TM<:AbstractManifold} = log!(M.manifold, X, p, q)
 
 @doc raw"""
     log_local_metric_density(M::AbstractManifold, p, B::AbstractBasis)
