@@ -59,8 +59,12 @@ struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <:
     metric::G
 end
 
-active_traits(::MetricManifold) = merge_traits(IsMetricManifold())
-
+function active_traits(f, M::MetricManifold, args...)
+    merge_traits(
+        IsMetricManifold(),
+        is_default_metric(M.manifold, M.metric) ? IsDefaultMetric(M.metric) : EmptyTrait()
+    )
+end
 # remetricise instead of double-decorating
 (metric::AbstractMetric)(M::MetricManifold) = MetricManifold(M.manifold, metric)
 (::Type{T})(M::MetricManifold) where {T<:AbstractMetric} = MetricManifold(M.manifold, T())
@@ -115,7 +119,7 @@ function change_metric!(
     ::G,
     p,
     X,
-) where {G<:AbstractMetric, T<:TraitList{<:IsDefaultMetric{<:G}}}
+) where {G<:AbstractMetric,T<:TraitList{<:IsDefaultMetric{<:G}}}
     return copyto!(M, Y, p, X)
 end
 function change_metric!(M::MetricManifold, Y, G::AbstractMetric, p, X)
@@ -201,7 +205,7 @@ function change_representer!(
     ::G,
     p,
     X,
-) where {G<:AbstractMetric, T<:TraitList{<:IsDefaultMetric{<:G}}}
+) where {G<:AbstractMetric,T<:TraitList{<:IsDefaultMetric{<:G}}}
     return copyto!(M, Y, p, X)
 end
 # Default fallback II: compute in local metric representations
@@ -276,7 +280,7 @@ where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@r
 flat(::MetricManifold, ::Any...)
 
 function flat!(
-    ::IsMetricManifold,
+    ::TraitList{IsMetricManifold},
     M::AbstractDecoratorManifold,
     ξ::CoTFVector,
     p,
@@ -327,6 +331,16 @@ function _convert_with_default(
     )
 end
 
+@trait_function is_default_metric(M::AbstractDecoratorManifold, G::AbstractMetric)
+function is_default_metric(
+    ::TraitList{IsDefaultMetric{G}},
+    ::AbstractDecoratorManifold,
+    ::G,
+) where {G<:AbstractMetric}
+    return true
+end
+is_default_metric(::AbstractManifold, ::AbstractMetric) = false
+
 @doc raw"""
     inner(N::MetricManifold{M,G}, p, X, Y)
 
@@ -343,7 +357,7 @@ where ``G_p`` is the loal matrix representation of the [`AbstractMetric`](@ref) 
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
 function inner(
-    ::IsMetricManifold,
+    ::TraitList{IsMetricManifold},
     M::AbstractDecoratorManifold,
     p,
     X::TFVector,
@@ -409,6 +423,9 @@ falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for
 [`AbstractMetric`](@ref) `G` metric within its [`MetricManifold`](@ref)`{M,G}`.
 """
 log(::MetricManifold, ::Any...)
+
+log(::TraitList{IsDefaultMetric}, M::MetricManifold, p, q) = log(M.manifold, p, q)
+log!(::TraitList{IsDefaultMetric}, M::MetricManifold, X, p, q) = log!(M.manifold, X, p, q)
 
 @doc raw"""
     log_local_metric_density(M::AbstractManifold, p, B::AbstractBasis)

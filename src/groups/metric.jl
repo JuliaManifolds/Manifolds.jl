@@ -156,40 +156,6 @@ end
 
 has_biinvariant_metric(M::AbstractManifold) = _extract_val(biinvariant_metric_dispatch(M))
 
-@doc raw"""
-    invariant_metric_dispatch(G::AbstractGroupManifold, conv::ActionDirection) -> Val
-
-Return `Val(true)` if the metric on the group $\mathcal{G}$ is invariant under translations
-by the specified direction, that is, given a group $\mathcal{G}$, a left- or right group
-translation map $τ$, and a metric $g_e$ on the Lie algebra, a $τ$-invariant metric at
-any point $p ∈ \mathcal{G}$ is defined as a metric with the inner product
-
-````math
-g_p(X, Y) = g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y),
-````
-
-for $X,Y ∈ T_q \mathcal{G}$ and all $q ∈ \mathcal{G}$, where $(\mathrm{d}τ_q)_p$ is the
-differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref)).
-"""
-invariant_metric_dispatch(::MetricManifold, ::ActionDirection)
-
-@trait_function invariant_metric_dispatch(
-    M::AbstractDecoratorManifold,
-    conv::ActionDirection,
-)
-function invariant_metric_dispatch(M::MetricManifold, conv::ActionDirection)
-    is_default_metric(M) && return invariant_metric_dispatch(M.manifold, conv)
-    return Val(false)
-end
-function invariant_metric_dispatch(
-    M::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric},
-    conv::ActionDirection,
-) where {𝔽}
-    direction(metric(M)) === conv && return Val(true)
-    return invoke(invariant_metric_dispatch, Tuple{MetricManifold,typeof(conv)}, M, conv)
-end
-invariant_metric_dispatch(::AbstractManifold, ::ActionDirection) = Val(false)
-
 function has_invariant_metric(M::AbstractManifold, conv::ActionDirection)
     return _extract_val(invariant_metric_dispatch(M, conv))
 end

@@ -11,7 +11,6 @@ include("../utils.jl")
     @testset "Real Centered Matrices Basics" begin
         @test repr(M) == "CenteredMatrices(3, 2, ℝ)"
         @test representation_size(M) == (3, 2)
-        @test base_manifold(M) === M
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3,2},ℝ}
         @test check_point(M, A) === nothing
         @test_throws DomainError is_point(M, B, true)

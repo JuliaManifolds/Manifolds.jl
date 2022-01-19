@@ -20,6 +20,9 @@ import ManifoldsBase:
     check_vector,
     copy,
     copyto!,
+    default_inverse_retraction_method,
+    default_retraction_method,
+    default_vector_transport_method,
     decorated_manifold,
     distance,
     dual_basis,
@@ -76,6 +79,10 @@ import ManifoldsBase:
     mid_point!,
     number_eltype,
     number_of_coordinates,
+    parallel_transport_along,
+    parallel_transport_along!,
+    parallel_transport_direction,
+    parallel_transport_direction!,
     parallel_transport_to,
     parallel_transport_to!,
     power_dimensions,
@@ -91,6 +98,8 @@ import ManifoldsBase:
     retract_softmax!,
     set_component!,
     vector_space_dimension,
+    vector_transport_along, # just specified in Euclidean - the next 5 as well
+    vector_transport_along!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
@@ -212,9 +221,7 @@ using ManifoldsBase:
     rep_size_to_colons,
     shortest_geodesic,
     size_to_tuple,
-    trait,
-    vector_transport_along,
-    vector_transport_along!
+    trait
 using Markdown: @doc_str
 using Random
 using RecipesBase
@@ -472,6 +479,7 @@ export AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
+export IsDefaultMetric, IsDefaultConnection
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
@@ -586,10 +594,7 @@ export ×,
     inverse_retract,
     inverse_retract!,
     isapprox,
-    is_decorator_transparent,
-    is_default_decorator,
     is_default_metric,
-    is_group_decorator,
     is_identity,
     is_point,
     is_vector,

@@ -25,10 +25,14 @@ The dimension of this space is ``k \dim_ℝ 𝔽``, where ``\dim_ℝ 𝔽`` is t
 Generate the 1D Euclidean manifold for an `ℝ`-, `ℂ`-valued  real- or complex-valued immutable
 values (in contrast to 1-element arrays from the constructor above).
 """
-struct Euclidean{N,𝔽} <: AbstractManifold{𝔽} where {N<:Tuple} end
+struct Euclidean{N,𝔽} <: AbstractDecoratorManifold{𝔽} where {N<:Tuple} end
 
 function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers=ℝ) where {I}
     return Euclidean{Tuple{n...},field}()
+end
+
+function active_traits(f, ::Euclidean, args...)
+    return merge_traits(IsDefaultMetric(EuclideanMetric()))
 end
 
 Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field=𝔽)
@@ -181,19 +185,15 @@ Base.exp(::Euclidean, p::Number, q::Number) = p + q
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
-function get_basis(::Euclidean, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+function get_basis_orthonormal(::Euclidean, p, ::RealNumbers)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B, vecs)
 end
-function get_basis(
-    ::Euclidean{<:Tuple,ℂ},
-    p,
-    B::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
-)
+function get_basis_orthonormal(::Euclidean{<:Tuple,ℂ}, p, ::ComplexNumbers)
     vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
     return CachedBasis(B, [vecs; im * vecs])
 end
-function get_basis(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
+function get_basis_diagonalizing(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
     eigenvalues = zeros(real(eltype(p)), manifold_dimension(M))
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
@@ -257,35 +257,43 @@ function get_coordinates_diagonalizing!(
     Y .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
     return Y
 end
-
-function get_vector!(
+function get_vector_orthonormal!(M::Euclidean, Y, ::Any, c, ::RealNumbers)
+    S = representation_size(M)
+    copyto!(Y, reshape(c, S))
+    return Y
+end
+function get_vector_diagonalizing!(
     M::Euclidean,
     Y,
     ::Any,
-    X,
-    ::Union{
-        DefaultOrDiagonalizingBasis{ℝ},
-        InducedBasis{ℝ,TangentSpaceType,<:RetractionAtlas},
-    },
+    c,
+    B::DiagonalizingOrthonormalBasis,
 )
+    S = representation_size(M)
+    copyto!(Y, reshape(c, S))
+    return Y
+end
+function get_vector_induced_basis!(M::Euclidean, Y, ::Any, c, B::InducedBasis)
     S = representation_size(M)
     copyto!(Y, reshape(X, S))
     return Y
 end
-function get_vector!(
-    ::Euclidean,
-    Y::AbstractVector,
-    ::Any,
-    X,
-    ::DefaultOrDiagonalizingBasis{ℝ},
-)
-    copyto!(Y, X)
+function get_vector_orthonormal!(M::Euclidean{<:Tuple,ℂ}, Y, ::Any, c, ::ComplexNumbers)
+    S = representation_size(M)
+    N = div(length(c), 2)
+    copyto!(Y, reshape(c[1:N] + im * c[(N + 1):end], S))
     return Y
 end
-function get_vector!(M::Euclidean{<:Tuple,ℂ}, Y, ::Any, X, ::DefaultOrDiagonalizingBasis{ℂ})
+function get_vector_diagonalizing!(
+    M::Euclidean{<:Tuple,ℂ},
+    Y,
+    ::Any,
+    c,
+    ::DiagonalizingOrthonormalBasis{ℂ},
+)
     S = representation_size(M)
     N = div(length(X), 2)
-    copyto!(Y, reshape(X[1:N] + im * X[(N + 1):end], S))
+    copyto!(Y, reshape(c[1:N] + im * c[(N + 1):end], S))
     return Y
 end
 @doc raw"""
@@ -361,18 +369,6 @@ function local_metric(
     return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
 end
 
-function inverse_retract(M::Euclidean{Tuple{}}, x::T, y::T) where {T<:Number}
-    return inverse_retract(M, x, y, LogarithmicInverseRetraction())
-end
-function inverse_retract(
-    M::Euclidean{Tuple{}},
-    x::Number,
-    y::Number,
-    ::LogarithmicInverseRetraction,
-)
-    return log(M, x, y)
-end
-
 @doc raw"""
     log(M::Euclidean, p, q)
 
@@ -384,6 +380,7 @@ which in this case is just
 """
 Base.log(::Euclidean, ::Any...)
 Base.log(::Euclidean{Tuple{}}, p::Number, q::Number) = q - p
+Base.log(::Euclidean, p, q) = q .- p
 
 log!(::Euclidean, X, p, q) = (X .= q .- p)
 
@@ -503,6 +500,30 @@ function project!(
     return q
 end
 
+"""
+    parallel_transport_along(M::Euclidean, p, X, c)
+
+the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
+"""
+parallel_transport_along(::Euclidean, ::Any, X, ::Any) = X
+parallel_transport_along!(::Euclidean, Y, ::Any, X, ::Any) = copyto!(Y, X)
+
+"""
+    parallel_transport_direction(M::Euclidean, p, X, d)
+
+the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
+"""
+parallel_transport_direction(::Euclidean, ::Any, X, ::Any) = X
+parallel_transport_direction!(::Euclidean, Y, ::Any, X, ::Any) = copyto!(Y, X)
+
+"""
+    parallel_transport_to(M::Euclidean, p, X, q)
+
+the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
+"""
+parallel_transport_to(::Euclidean, ::Any, X, ::Any) = X
+parallel_transport_to!(::Euclidean, ::Any, X, ::Any) = copyto!(Y, X)
+
 @doc raw"""
     project(M::Euclidean, p)
 
@@ -545,18 +566,54 @@ end
 function Base.show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
     return print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
 end
-
-function vector_transport_direction(
-    M::Euclidean{Tuple{}},
-    p::Number,
-    X::Number,
-    Y::Number,
-    m::AbstractVectorTransportMethod,
+#
+# Vector Transport
+#
+# The following functions are defined on layer 1 already, since
+# a) its independent of the transport or retraction method
+# b) no amibuities occur
+# c) Euclidean is so basic, that these are plain defaults
+#
+function vector_transport_along(
+    ::Euclidean,
+    ::Any,
+    X,
+    ::AbstractVector,
+    method::AbstractVectorTransportMethod,
 )
-    q = exp(M, p, Y)
-    return vector_transport_to(M, p, X, q, m)
+    return X
 end
-
+function vector_transport_along!(
+    M::Euclidean,
+    Y,
+    ::Any,
+    X,
+    ::AbstractVector,
+    ::AbstractVectorTransportMethod=default_vector_transport_method(M),
+)
+    return copyto!(Y, X)
+end
+function vector_transport_direction(
+    M::Euclidean,
+    ::Any,
+    X,
+    ::Any,
+    ::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    ::AbstractRetractionMethod=default_retraction_method(M),
+)
+    return X
+end
+function vector_transport_direction!(
+    M::Euclidean,
+    Y,
+    ::Any,
+    X,
+    ::Any,
+    ::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    ::AbstractRetractionMethod=default_retraction_method(M),
+)
+    return copyto!(Y, X)
+end
 """
     vector_transport_to(M::Euclidean, p, X, q, ::AbstractVectorTransportMethod)
 
@@ -565,22 +622,24 @@ on the [`Euclidean`](@ref) `M`, which simplifies to the identity.
 """
 vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::AbstractVectorTransportMethod)
 function vector_transport_to(
-    ::Euclidean{Tuple{}},
-    ::Number,
-    X::Number,
-    ::Number,
-    ::AbstractVectorTransportMethod,
+    M::Euclidean,
+    ::Any,
+    X,
+    ::Any,
+    ::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    ::AbstractRetractionMethod=default_retraction_method(M),
 )
     return X
 end
 
 function vector_transport_to!(
-    ::Euclidean,
+    M::Euclidean,
     Y,
     ::Any,
     X,
     ::Any,
-    ::AbstractVectorTransportMethod,
+    ::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    ::AbstractRetractionMethod=default_retraction_method(M),
 )
     return copyto!(Y, X)
 end

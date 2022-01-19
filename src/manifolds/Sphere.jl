@@ -128,13 +128,6 @@ function check_vector(M::AbstractSphere, p, X; kwargs...)
     return nothing
 end
 
-function decorated_manifold(M::AbstractSphere)
-    return M
-end
-
-# Since on every tangent space the Euclidean matric (restricted to this space) is used, this should be fine
-default_metric_dispatch(::AbstractSphere, ::EuclideanMetric) = Val(true)
-
 @doc raw"""
     distance(M::AbstractSphere, p, q)
 

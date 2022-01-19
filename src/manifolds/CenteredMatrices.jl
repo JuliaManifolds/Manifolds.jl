@@ -18,7 +18,7 @@ function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers=ℝ)
     return CenteredMatrices{m,n,field}()
 end
 
-active_traits(f, ::CenteredMatrices, args...) = merge_traits(IsIsometricEmbeddedManifold())
+active_traits(f, ::CenteredMatrices, args...) = merge_traits(IsEmbeddedSubmanifold())
 
 @doc raw"""
     check_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...)
@@ -70,7 +70,7 @@ function check_vector(M::CenteredMatrices{m,n,𝔽}, p, X; kwargs...) where {m,n
     return nothing
 end
 
-decorated_manifold(M::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = Euclidean(m, n; field=𝔽)
+get_embedding(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = Euclidean(m, n; field=𝔽)
 
 @doc raw"""
     manifold_dimension(M::CenteredMatrices{m,n,𝔽})
