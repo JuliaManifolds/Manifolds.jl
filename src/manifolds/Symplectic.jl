@@ -67,7 +67,7 @@ This metric is also the default metric used within `Maniolds.jl`.
 """
 struct RealSymplecticMetric <: RiemannianMetric end
 
-struct ExtendedSymplecticMetric <: RiemannianMetric end
+struct ExtendedSymplecticMetric <: AbstractMetric end
 
 default_metric_dispatch(::Symplectic{n,ℝ}, ::RealSymplecticMetric) where {n,ℝ} = Val(true)
 
@@ -556,7 +556,8 @@ function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend;
     _gradient!(f, X, p, backend.diff_backend)
     if extended_metric
         change_representer!(
-            MetricManifold(Euclidean(representation_size(M)...), ExtendedSymplecticMetric()),
+            MetricManifold(Euclidean(representation_size(M)...),
+                           ExtendedSymplecticMetric()),
             X, EuclideanMetric(), p, X)
         return project_riemannian!(M, X, p, X)
     else
@@ -583,13 +584,15 @@ The mapping is defined such that the metric compatibility condition
 ````
 holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref).
 """
-function change_representer(::MetricManifold{𝔽, Euclidean, ExtendedSymplecticMetric},
-                            EucMet::EuclideanMetric, p, X)  where {𝔽}
+function change_representer(
+    ::MetricManifold{ℝ, Symplectic{n, ℝ}, ExtendedSymplecticMetric},
+    EucMet::EuclideanMetric, p, X)  where {n}
     return change_representer!(M, similar(X), EucMet, p, X)
 end
 
-function change_representer!(::MetricManifold{𝔽, Euclidean, ExtendedSymplecticMetric},
-                             Y, ::EuclideanMetric, p, X) where {𝔽}
+function change_representer!(
+    ::MetricManifold{ℝ, Symplectic{n, ℝ}, ExtendedSymplecticMetric},
+    Y, ::EuclideanMetric, p, X) where {n}
     Y .= p * p' * X
     return Y
 end
