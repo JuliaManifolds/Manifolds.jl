@@ -224,13 +224,6 @@ inner(::Circle, ::Any...)
 @inline inner(::Circle{ℝ}, p::Real, X::Real, Y::Real) = X * Y
 @inline inner(::Circle{ℂ}, p, X, Y) = complex_dot(X, Y)
 
-function inverse_retract(M::Circle, p::Number, q::Number)
-    return inverse_retract(M, p, q, LogarithmicInverseRetraction())
-end
-function inverse_retract(M::Circle, p::Number, q::Number, ::LogarithmicInverseRetraction)
-    return log(M, p, q)
-end
-
 @doc raw"""
     log(M::Circle, p, q)
 

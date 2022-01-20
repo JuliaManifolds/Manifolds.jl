@@ -15,10 +15,6 @@ using Manifolds: default_metric_dispatch
     @test (@inferred default_metric_dispatch(M1, Manifolds.LogCholeskyMetric())) ===
           Val(false)
     @test (@inferred default_metric_dispatch(M3)) === Val(false)
-    @test is_default_metric(M2)
-    @test is_default_metric(M1, Manifolds.LinearAffineMetric())
-    @test !is_default_metric(M1, Manifolds.LogCholeskyMetric())
-    @test !is_default_metric(M3)
 
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1, one(zeros(3, 3))) == Inf

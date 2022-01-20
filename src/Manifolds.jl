@@ -497,7 +497,7 @@ export VectorBundleFibers
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport
-export PowerVectorTransport, ProductVectorTransport
+export ProductVectorTransport
 export AbstractAffineConnection,
     AbstractConnectionManifold, ConnectionManifold, LeviCivitaConnection
 export AbstractCartanSchoutenConnection,

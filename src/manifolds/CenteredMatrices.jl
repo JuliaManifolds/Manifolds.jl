@@ -30,8 +30,6 @@ zero.
 The tolerance for the column sums of `p` can be set using `kwargs...`.
 """
 function check_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) where {m,n,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
     if !isapprox(sum(p, dims=1), zeros(1, n); kwargs...)
         return DomainError(
             p,
@@ -52,15 +50,6 @@ sum to zero and its values are from the correct [`AbstractNumbers`](@ref).
 The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(M::CenteredMatrices{m,n,𝔽}, p, X; kwargs...) where {m,n,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(sum(X, dims=1), zeros(1, n); kwargs...)
         return DomainError(
             X,
@@ -69,6 +58,9 @@ function check_vector(M::CenteredMatrices{m,n,𝔽}, p, X; kwargs...) where {m,n
     end
     return nothing
 end
+
+embed(::CenteredMatrices, p) = p
+embed(::CenteredMatrices, p, X) = X
 
 get_embedding(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = Euclidean(m, n; field=𝔽)
 
