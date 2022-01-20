@@ -566,9 +566,9 @@ function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend;
 end
 
 @doc raw"""
-    change_representer(::MetricManifold{𝔽, Euclidean, LinearAffineMetric},
+    change_representer(::MetricManifold{𝔽, Euclidean, ExtendedSymplecticMetric},
                        ::EuclideanMetric, p, X)
-    change_representer!(::MetricManifold{𝔽, Euclidean, LinearAffineMetric}, Y,
+    change_representer!(::MetricManifold{𝔽, Euclidean, ExtendedSymplecticMetric}, Y,
                         ::EuclideanMetric, p, X)
 
 Change the representation of an arbitrary element ``χ ∈ \mathbb{R}^{2n \times 2n}``
