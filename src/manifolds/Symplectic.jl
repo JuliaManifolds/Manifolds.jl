@@ -67,6 +67,8 @@ This metric is also the default metric used within `Maniolds.jl`.
 """
 struct RealSymplecticMetric <: RiemannianMetric end
 
+struct ExtendedSymplecticMetric <: RiemannianMetric end
+
 default_metric_dispatch(::Symplectic{n,ℝ}, ::RealSymplecticMetric) where {n,ℝ} = Val(true)
 
 @doc raw"""
@@ -509,9 +511,19 @@ function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}
     return final_norm * Ω / norm(Ω, 2)
 end
 
+# @doc raw"""
+#     gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
+#
+# TODO: Document the switch on 'extended_metric'.
+# Specialize the `gradient` computation of scalar functions
+# ``f \colon \operatorname{Sp} \rightarrow \mathbb{R}``
+# to use the Riemannian metric projection after a metric compatibility mapping.
+# """
 @doc raw"""
-    grad_euclidean_to_manifold(M::Symplectic{n}, p, ∇f_euc)
-    grad_euclidean_to_manifold!(M::Symplectic{n}, ∇f_man, p, ∇f_euc)
+    gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
+             extended_metric=true)
+    gradient!(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
+             extended_metric=true)
 
 Compute the transformation of the euclidean gradient of a scalar function `f` onto the
 tangent space of the point ``p \in \operatorname{Sp}(ℝ, 2n)``[^FioriSimone2011].
@@ -533,37 +545,6 @@ extended to the entire embedding space.
     > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
-function _grad_euclidean_to_manifold_riemannian(M::Symplectic{n}, p, ∇f_euc) where {n}
-    return grad_euclidean_to_manifold!(M, similar(∇f_euc), p, ∇f_euc)
-end
-
-function _grad_euclidean_to_manifold_riemannian!(M::Symplectic{n}, ∇f_man, p, ∇f_euc) where {n}
-    M_affine = MetricManifold(Euclidean(representer_size(M)), LinearAffineMetric())
-    change_representer!(M_affine, ∇f_man, EuclideanMetric(), p, ∇f_euc)
-    return project_riemannian!(M, ∇f_man, p, ∇f_man)
-end
-
-function _grad_euclidean_to_manifold_embedding(M::Symplectic, p, ∇f_euc)
-    return _grad_euclidean_to_manifold!(M::Symplectic, similar(∇f_euc), p, ∇f_euc)
-end
-
-function _grad_euclidean_to_manifold_embedding!(M::Symplectic, ∇f_man, p, ∇f_euc)
-    # First project onto the tangent space, then change the representer.
-    project!(M, ∇f_man, p, ∇f_euc)  # Requries solving 'sylvester'-equation.
-    return change_representer!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
-end
-
-# Overwrite gradient functions for the Symplectic case:
-# Need to first change representer of ``∇f_euc`` to the Symplectic manifold,
-# then project onto the correct tangent space.
-@doc raw"""
-    gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
-
-TODO: Document the switch on 'extended_metric'.
-Specialize the `gradient` computation of scalar functions
-``f \colon \operatorname{Sp} \rightarrow \mathbb{R}``
-to use the Riemannian metric projection after a metric compatibility mapping.
-"""
 function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
                   extended_metric=true)
     Y = allocate_result(M, gradient, p)
@@ -571,22 +552,23 @@ function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
 end
 
 function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend;
-                   extended_metric=false)
+                   extended_metric=true)
     _gradient!(f, X, p, backend.diff_backend)
     if extended_metric
-        M_affine = MetricManifold(Euclidean(representer_size(M)), LinearAffineMetric())
-        change_representer!(M_affine, ∇f_man, EuclideanMetric(), p, ∇f_euc)
-        return project_riemannian!(M, ∇f_man, p, ∇f_man)
+        change_representer!(
+            MetricManifold(Euclidean(representation_size(M)...), ExtendedSymplecticMetric()),
+            X, EuclideanMetric(), p, X)
+        return project_riemannian!(M, X, p, X)
     else
-        project!(M, ∇f_man, p, ∇f_euc)
-        return change_representer!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
+        project!(M, X, p, X)
+        return change_representer!(M, X, EuclideanMetric(), p, X)
     end
 end
 
 @doc raw"""
-    change_representer(::MetricManifold{Euclidean; LinearAffineMetric},
+    change_representer(::MetricManifold{𝔽, Euclidean, LinearAffineMetric},
                        ::EuclideanMetric, p, X)
-    change_representer!(::MetricManifold{Euclidean; LinearAffineMetric}, Y,
+    change_representer!(::MetricManifold{𝔽, Euclidean, LinearAffineMetric}, Y,
                         ::EuclideanMetric, p, X)
 
 Change the representation of an arbitrary element ``χ ∈ \mathbb{R}^{2n \times 2n}``
@@ -601,13 +583,13 @@ The mapping is defined such that the metric compatibility condition
 ````
 holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref).
 """
-function change_representer(::MetricManifold{Euclidean; LinearAffineMetric},
-                            EucMet::EuclideanMetric, p, X)
+function change_representer(::MetricManifold{𝔽, Euclidean, ExtendedSymplecticMetric},
+                            EucMet::EuclideanMetric, p, X)  where {𝔽}
     return change_representer!(M, similar(X), EucMet, p, X)
 end
 
-function change_representer!(::MetricManifold{Euclidean; LinearAffineMetric},
-                             Y, ::EuclideanMetric, p, X)
+function change_representer!(::MetricManifold{𝔽, Euclidean, ExtendedSymplecticMetric},
+                             Y, ::EuclideanMetric, p, X) where {𝔽}
     Y .= p * p' * X
     return Y
 end
@@ -657,7 +639,7 @@ The closed form projection mapping is given by [^Gao2021riemannian]
 ````
 where ``\operatorname{sym}(A) = \frac{1}{2}(A + A')``.
 """
-function project_riemannian!(::Symplectic{n,ℝ}, Y, p, X) where {n}
+function project_riemannian!(::Symplectic, Y, p, X)
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
@@ -690,7 +672,7 @@ where ``\operatorname{skew}(A) = \frac{1}{2}(A - A')``.
     > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
     > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
-function project_riemannian_normal!(::Symplectic{n,ℝ}, Y, p, X) where {n}
+function project_riemannian_normal!(::Symplectic, Y, p, X)
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
