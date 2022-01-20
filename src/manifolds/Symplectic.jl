@@ -556,7 +556,7 @@ function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend;
     _gradient!(f, X, p, backend.diff_backend)
     if extended_metric
         change_representer!(
-            MetricManifold(M, ExtendedSymplecticMetric()),
+            MetricManifold(get_embedding(M), ExtendedSymplecticMetric()),
             X, EuclideanMetric(), p, X)
         return project_riemannian!(M, X, p, X)
     else
@@ -583,15 +583,10 @@ The mapping is defined such that the metric compatibility condition
 ````
 holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref).
 """
-function change_representer(
-    ::MetricManifold{ℝ, Symplectic{n, ℝ}, ExtendedSymplecticMetric},
-    EucMet::EuclideanMetric, p, X)  where {n}
-    return change_representer!(M, similar(X), EucMet, p, X)
-end
+function change_representer(::MetricManifold{ℝ, Euclidean, ExtendedSymplecticMetric}, ::EuclideanMetric, p, X)
 
 function change_representer!(
-    ::MetricManifold{ℝ, Symplectic{n, ℝ}, ExtendedSymplecticMetric},
-    Y, ::EuclideanMetric, p, X) where {n}
+    ::MetricManifold{ℝ, Euclidean, ExtendedSymplecticMetric}, Y, ::EuclideanMetric, p, X)
     Y .= p * p' * X
     return Y
 end
@@ -623,6 +618,8 @@ for ``i \in {1, 2}``. However the range of each function alone is not confined t
 ````
 does have the correct range ``T_p\operatorname{Sp}(2n, ℝ)``.
 """
+change_representer(::Symplectic, ::EuclideanMetric, p, X)
+
 function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
     Q = SymplecticMatrix(p, X)
     Y .= (1 / 2) .* p * (p' * X .+ Q * X' * p * Q)
