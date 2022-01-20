@@ -556,8 +556,7 @@ function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend;
     _gradient!(f, X, p, backend.diff_backend)
     if extended_metric
         change_representer!(
-            MetricManifold(Euclidean(representation_size(M)...),
-                           ExtendedSymplecticMetric()),
+            MetricManifold(M, ExtendedSymplecticMetric()),
             X, EuclideanMetric(), p, X)
         return project_riemannian!(M, X, p, X)
     else
