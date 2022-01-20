@@ -1,4 +1,4 @@
-# Symplectic
+# Symplectic Stiefel
 
 The manifold [`SymplecticStiefel`](@ref) denoted, $\operatorname{SpSt}(2n, 2k)$, 
 represents canonical symplectic bases of $2k$ dimensonal symplectic subspaces in $\mathbb{R}^{2n \times 2n}$. 

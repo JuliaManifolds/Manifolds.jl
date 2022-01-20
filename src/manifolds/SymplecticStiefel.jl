@@ -178,6 +178,42 @@ function inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
     return tr(a \ (Y' * X)) - (1 / 2) * tr(a \ ((Y' * b) * (a \ (b' * X))))
 end
 
+@doc raw"""
+    inv(::SymplecticStiefel{n, k}, A)
+    inv!(::SymplecticStiefel{n, k}, q, p)
+
+Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2k}``. Given a matrix
+````math
+A ∈ ℝ^{2n × 2k},\quad
+A =
+\begin{bmatrix}
+A_{1, 1} & A_{1, 2} \\
+A_{2, 1} & A_{2, 2}
+\end{bmatrix},\; A_{i, j} \in ℝ^{2n × 2k}
+````
+the symplectic inverse is defined as:
+````math
+A^{+} := Q_{2k}^T A^T Q_{2n},
+````
+where
+````math
+Q_{2n} =
+\begin{bmatrix}
+0_n & I_n \\
+ -I_n & 0_n
+\end{bmatrix}.
+````
+For any ``p \in \operatorname{SpSt}(2n, 2k)``, ``p^{+}p = I_{2k}``.
+
+The symplectic inverse of a matrix A can be expressed explicitly as:
+````math
+A^{+} =
+\begin{bmatrix}
+  A_{2, 2}^T & -A_{1, 2}^T \\[1.2mm]
+ -A_{2, 1}^T &  A_{1, 1}^T
+\end{bmatrix}.
+````
+"""
 function Base.inv(M::SymplecticStiefel{n,k}, p) where {n,k}
     q = similar(p')
     return inv!(M, q, p)
@@ -202,8 +238,11 @@ function inv!(::SymplecticStiefel{n,k}, q, p) where {n,k}
 end
 
 @doc raw"""
-    make_metric_compatible!(::SymplecticStiefel{n, k}, Y, ::EuclideanMetric, p, X)
+    make_metric_compatible!(::SymplecticStiefel, Y, ::EuclideanMetric, p, X)
 
+TODO: Complete.
+Given the Riemannian metric at ``p``, ``g_p \colon `` we compute a mapping
+``c : T_p\operatorname{SpSt}(2n, 2k) \rightarrow ℝ^{2n \times 2k}``
 Calculated myself, but tailored to the right-invariant inner product of Bendokat-Zimmermann.
 Does not have the correct range to be a 'change_representer!'-mapping.
 """
@@ -230,9 +269,11 @@ end
     rand(M::SymplecticStiefel{n, k})
 
 Generate a random point ``p \in \operatorname{SpSt}(2n, 2k)``
-by first generating a random symplectic matrix of the correct size,
+by first generating a random symplectic matrix
+``p_{\operatorname{Sp}} \in \operatorname{Sp}(2n)``,
 and then projecting onto the Symplectic Stiefel manifold using the
 [`canonical_projection`](@ref).
+That is, ``p = π(p_{\operatorname{Sp}})``
 """
 function Base.rand(M::SymplecticStiefel{n,k}, hamiltonian_norm=1/2) where {n,k}
     p_symplectic = rand(Symplectic(2n), hamiltonian_norm)
@@ -242,12 +283,17 @@ end
 @doc raw"""
     rand(::SymplecticStiefel{n, k}, p)
 
-As based on the parametrization of the tangent space ``T_p\operatorname{SpSt}(n, k)``
-found in Proposition 3.2 of Benodkat-Zimmermann.
-There they express the tangent space as ``X = pΩ + p^sB``,
-where ``Ω^+ = -Ω`` is Hamiltonian.
-The notation ``p^s`` means the symplectic complement of ``p`` s.t.
-``p^{+}p^{s} = 0``, and ``B ∈ ℝ^{2(n-k) × 2k}.
+The symplectic Stiefel tangent space at ``p`` can be parametrized as [^Bendokat2021]
+````math
+    T_p\operatorname{SpSt}(2n, 2k) = \{X = pΩ + p^sB \;|\;
+        Ω ∈ ℝ^{2k × 2k}, Ω^+ = -Ω,
+        p^s ∈ \operatorname{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k) × 2k}, \},
+````
+where ``Ω \in `` is Hamiltonian and ``p^s`` means the symplectic complement of ``p`` s.t.
+``p^{+}p^{s} = 0``.
+
+To then generate random tangent vectors at ``p``, we set ``B = 0`` and generate a random
+Hamiltonian matrix ``Ω``.
 """
 function Base.rand(::SymplecticStiefel{n,k}, p::AbstractMatrix) where {n,k}
     Ω = rand_hamiltonian(Symplectic(2k))
@@ -377,7 +423,7 @@ function retract!(M::SymplecticStiefel{n,k}, q, p, X, ::CayleyRetraction) where 
 
     H = X .- p * A  # Allocates (2n × 2k).
 
-    # A .= I - A/2 + H^+H/4:
+    # A = I - A/2 + H^{+}H/4:
     A .= (symplectic_inverse_times(M, H, H) ./ 4) .- (A ./ 2)
     Manifolds.add_scaled_I!(A, 1.0)
 
