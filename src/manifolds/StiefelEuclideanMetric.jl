@@ -63,35 +63,26 @@ trangular entries of $a$ is set to $1$ its symmetric entry to $-1$ and we normal
 the factor $\frac{1}{\sqrt{2}}$ and for $b$ one can just use unit vectors reshaped to a matrix
 to obtain orthonormal set of parameters.
 """
-function get_basis(
-    M::Stiefel{n,k,ℝ},
-    p,
-    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {n,k}
+function get_basis_orthonormal(M::Stiefel{n,k,ℝ}, p, N::RealNumbers) where {n,k}
+    B = DefaultOrthonormalBasis(N)
     V = get_vectors(M, p, B)
     return CachedBasis(B, V)
 end
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::Stiefel{n,k,ℝ},
     c,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    N::RealNumbers,
 ) where {n,k}
-    V = get_vectors(M, p, B)
+    V = get_vectors(M, p, DefaultOrthonormalBasis(N))
     c .= inner.(Ref(M), Ref(p), V, Ref(X))
     return c
 end
 
-function get_vector!(
-    M::Stiefel{n,k,ℝ},
-    X,
-    p,
-    c,
-    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {n,k}
-    V = get_vectors(M, p, B)
+function get_vector_orthonormal!(M::Stiefel{n,k,ℝ}, X, p, c, ::RealNumbers) where {n,k}
+    V = get_vectors(M, p, DefaultOrthonormalBasis(N))
     zero_vector!(M, X, p)
     length(c) < length(V) && error(
         "Coordinate vector too short. Excpected $(length(V)), but only got $(length(c)) entries.",

@@ -51,12 +51,12 @@ include("../utils.jl")
         TEST_FLOAT32 && push!(types, Matrix{Float32})
         basis_types = (ProjectedOrthonormalBasis(:gram_schmidt),)
         @testset "Type $T" for T in types
-            x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
-            y = exp(M, x, v)
-            w = [0.0 1.0; -1.0 0.0; 1.0 0.0]
-            z = exp(M, x, w)
-            pts = convert.(T, [x, y, z])
+            p1 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            X = [0.0 0.0; 0.0 0.0; 0.0 1.0]
+            p2 = exp(M, p1, X)
+            Y = [0.0 1.0; -1.0 0.0; 1.0 0.0]
+            p3 = exp(M, p1, Y)
+            pts = convert.(T, [p1, p2, p3])
             test_manifold(
                 M,
                 pts,
@@ -80,15 +80,15 @@ include("../utils.jl")
             )
 
             @testset "inner/norm" begin
-                v1 = inverse_retract(M, pts[1], pts[2], PolarInverseRetraction())
-                v2 = inverse_retract(M, pts[1], pts[3], PolarInverseRetraction())
+                X1 = inverse_retract(M, pts[1], pts[2], PolarInverseRetraction())
+                X2 = inverse_retract(M, pts[1], pts[3], PolarInverseRetraction())
 
-                @test real(inner(M, pts[1], v1, v2)) ≈ real(inner(M, pts[1], v2, v1))
-                @test imag(inner(M, pts[1], v1, v2)) ≈ -imag(inner(M, pts[1], v2, v1))
-                @test imag(inner(M, pts[1], v1, v1)) ≈ 0
+                @test real(inner(M, pts[1], X1, X2)) ≈ real(inner(M, pts[1], X2, X1))
+                @test imag(inner(M, pts[1], X1, X2)) ≈ -imag(inner(M, pts[1], X2, X1))
+                @test imag(inner(M, pts[1], X1, X1)) ≈ 0
 
-                @test norm(M, pts[1], v1) isa Real
-                @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
+                @test norm(M, pts[1], X1) isa Real
+                @test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
             end
         end
 
@@ -102,14 +102,15 @@ include("../utils.jl")
         end
 
         @testset "vector transport" begin
-            x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
-            y = exp(M, x, v)
-            @test vector_transport_to(M, x, v, y, ProjectionTransport()) == project(M, y, v)
+            p1 = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            X = [0.0 0.0; 0.0 0.0; 0.0 1.0]
+            p2 = exp(M, p1, X)
+            @test vector_transport_to(M, p1, X, p2, ProjectionTransport()) ==
+                  project(M, p2, X)
             @test is_vector(
                 M,
-                y,
-                vector_transport_to(M, x, v, y, ProjectionTransport()),
+                p2,
+                vector_transport_to(M, p1, X, p2, ProjectionTransport()),
                 true;
                 atol=10^-15,
             )
@@ -148,12 +149,12 @@ include("../utils.jl")
         end
         types = [Matrix{ComplexF64}]
         @testset "Type $T" for T in types
-            x = [0.5+0.5im 0.5+0.5im; 0.5+0.5im -0.5-0.5im; 0.0 0.0]
-            v = [0.0 0.0; 0.0 0.0; 0.0 1.0]
-            y = exp(M, x, v)
-            w = [0.0 1.0; -1.0 0.0; 1.0 0.0]
-            z = exp(M, x, w)
-            pts = convert.(T, [x, y, z])
+            p1 = [0.5+0.5im 0.5+0.5im; 0.5+0.5im -0.5-0.5im; 0.0 0.0]
+            X = [0.0 0.0; 0.0 0.0; 0.0 1.0]
+            p2 = exp(M, p1, X)
+            Y = [0.0 1.0; -1.0 0.0; 1.0 0.0]
+            p3 = exp(M, p1, Y)
+            pts = convert.(T, [p1, p2, p3])
             test_manifold(
                 M,
                 pts,
@@ -175,15 +176,15 @@ include("../utils.jl")
             )
 
             @testset "inner/norm" begin
-                v1 = inverse_retract(M, pts[1], pts[2], PolarInverseRetraction())
-                v2 = inverse_retract(M, pts[1], pts[3], PolarInverseRetraction())
+                X1 = inverse_retract(M, pts[1], pts[2], PolarInverseRetraction())
+                X2 = inverse_retract(M, pts[1], pts[3], PolarInverseRetraction())
 
-                @test real(inner(M, pts[1], v1, v2)) ≈ real(inner(M, pts[1], v2, v1))
-                @test imag(inner(M, pts[1], v1, v2)) ≈ -imag(inner(M, pts[1], v2, v1))
-                @test imag(inner(M, pts[1], v1, v1)) ≈ 0
+                @test real(inner(M, pts[1], X1, X2)) ≈ real(inner(M, pts[1], X2, X1))
+                @test imag(inner(M, pts[1], X1, X2)) ≈ -imag(inner(M, pts[1], X2, X1))
+                @test imag(inner(M, pts[1], X1, X1)) ≈ 0
 
-                @test norm(M, pts[1], v1) isa Real
-                @test norm(M, pts[1], v1) ≈ sqrt(inner(M, pts[1], v1, v1))
+                @test norm(M, pts[1], X1) isa Real
+                @test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
             end
         end
     end

@@ -89,7 +89,9 @@ function check_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     return nothing
 end
 
-decorated_manifold(::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
+function get_embedding(::Stiefel{N,K,𝔽}) where {N,K,𝔽}
+    return Euclidean(N, K; field=𝔽)
+end
 
 @doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
@@ -210,7 +212,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
 
-function inverse_retract!(::Stiefel, X, p, q, ::PolarInverseRetraction)
+function inverse_retract_polar!(::Stiefel, X, p, q)
     A = p' * q
     H = -2 * one(p' * p)
     B = lyap(A, H)
@@ -218,7 +220,7 @@ function inverse_retract!(::Stiefel, X, p, q, ::PolarInverseRetraction)
     X .-= p
     return X
 end
-function inverse_retract!(M::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where {n,k}
+function inverse_retract_qr!(M::Stiefel{n,k}, X, p, q) where {n,k}
     A = p' * q
     @boundscheck size(A) === (k, k)
     ElT = typeof(one(eltype(p)) * one(eltype(q)))

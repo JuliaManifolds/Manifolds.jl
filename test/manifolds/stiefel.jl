@@ -136,8 +136,8 @@ using Manifolds: default_metric_dispatch
                     QRInverseRetraction(),
                 ],
                 vector_transport_methods=[
-                    DifferentiatedRetractionVectorTransport{PolarRetraction}(),
-                    DifferentiatedRetractionVectorTransport{QRRetraction}(),
+                    DifferentiatedRetractionVectorTransport(PolarRetraction()),
+                    DifferentiatedRetractionVectorTransport(QRRetraction()),
                     ProjectionTransport(),
                 ],
                 vector_transport_retractions=[
@@ -223,8 +223,8 @@ using Manifolds: default_metric_dispatch
                     QRInverseRetraction(),
                 ],
                 vector_transport_methods=[
-                    DifferentiatedRetractionVectorTransport{PolarRetraction}(),
-                    DifferentiatedRetractionVectorTransport{QRRetraction}(),
+                    DifferentiatedRetractionVectorTransport(PolarRetraction()),
+                    DifferentiatedRetractionVectorTransport(QRRetraction()),
                     ProjectionTransport(),
                 ],
                 vector_transport_retractions=[

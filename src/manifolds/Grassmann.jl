@@ -112,8 +112,6 @@ function check_vector(M::Grassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     return nothing
 end
 
-decorated_manifold(::Grassmann{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
-
 @doc raw"""
     distance(M::Grassmann, p, q)
 
@@ -166,6 +164,10 @@ function exp!(M::Grassmann, q, p, X)
     d = svd(X)
     z = p * d.V * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
     return copyto!(q, Array(qr(z).Q))
+end
+
+function get_embedding(::Grassmann{N,K,𝔽}) where {N,K,𝔽}
+    return Stiefel(N, K, 𝔽)
 end
 
 @doc raw"""
@@ -408,11 +410,6 @@ interpreting `X` from the tangent space at `p` as a point in the embedding and
 projecting it onto the tangent space at q.
 """
 vector_transport_to(::Grassmann, ::Any, ::Any, ::Any, ::ProjectionTransport)
-
-function vector_transport_to_project!(M::Grassmann, Y, p, X, q)
-    project!(M, Y, q, X)
-    return Y
-end
 
 @doc raw"""
     zero_vector(M::Grassmann, p)
