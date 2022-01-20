@@ -12,7 +12,6 @@ include("../utils.jl")
               0.0 -1.0]
 
         @testset "Basics" begin
-
             @test repr(M) == "Symplectic($(2*small_n), ℝ)"
             @test representation_size(M) == (2small_n, 2small_n)
             @test base_manifold(M) === M
@@ -63,4 +62,6 @@ include("../utils.jl")
             @test norm(M, p, X2) == √(inner(M, p, X2, X2))
         end
     end
+
+    # TODO: test_manifold()
 end

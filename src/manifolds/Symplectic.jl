@@ -515,13 +515,17 @@ end
 
 Compute the transformation of the euclidean gradient of a scalar function `f` onto the
 tangent space of the point ``p \in \operatorname{Sp}(ℝ, 2n)``[^FioriSimone2011].
-The transformation is found by requireing that the gradient element in the tangent
-space solves the metric compatibility for the Riemannian default_metric_dispatch
-along with the defining equation for a tangent
-vector ``X \in T_pSn(ℝ)``at a point ``p \in Sn(ℝ)``.
 
-First we change the representation of the gradient from the Euclidean metric to the RealSymplecticMetric at p,
-and then we project the result onto the tangent space ``T_p\operatorname{Sp}(2n, ℝ)`` at p.
+# Deprecated:
+# The transformation is found by requiring that the gradient element in the tangent
+# space solves the metric compatibility relation for the Riemannian `default_metric_dispatch`
+# along with the defining equation for a tangent
+# vector ``X \in T_pSn(ℝ)``at a point ``p \in Sn(ℝ)``.
+
+First we change the representation of the gradient from the Euclidean metric to the
+[`RealSymplecticMetric`](@ref) at ``p``, and then we project the result onto the
+tangent space ``T_p\operatorname{Sp}(2n, ℝ)`` w.r.t the Riemannian metric ``g_p``
+extended to the entire embedding space.
 
 [^FioriSimone2011]:
     > Simone Fiori:
@@ -529,13 +533,24 @@ and then we project the result onto the tangent space ``T_p\operatorname{Sp}(2n,
     > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
-function grad_euclidean_to_manifold(M::Symplectic{n}, p, ∇f_euc) where {n}
+function _grad_euclidean_to_manifold_riemannian(M::Symplectic{n}, p, ∇f_euc) where {n}
     return grad_euclidean_to_manifold!(M, similar(∇f_euc), p, ∇f_euc)
 end
 
-function grad_euclidean_to_manifold!(M::Symplectic{n}, ∇f_man, p, ∇f_euc) where {n}
-    make_metric_compatible!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
+function _grad_euclidean_to_manifold_riemannian!(M::Symplectic{n}, ∇f_man, p, ∇f_euc) where {n}
+    M_affine = MetricManifold(Euclidean(representer_size(M)), LinearAffineMetric())
+    change_representer!(M_affine, ∇f_man, EuclideanMetric(), p, ∇f_euc)
     return project_riemannian!(M, ∇f_man, p, ∇f_man)
+end
+
+function _grad_euclidean_to_manifold_embedding(M::Symplectic, p, ∇f_euc)
+    return _grad_euclidean_to_manifold!(M::Symplectic, similar(∇f_euc), p, ∇f_euc)
+end
+
+function _grad_euclidean_to_manifold_embedding!(M::Symplectic, ∇f_man, p, ∇f_euc)
+    # First project onto the tangent space, then change the representer.
+    project!(M, ∇f_man, p, ∇f_euc)  # Requries solving 'sylvester'-equation.
+    return change_representer!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
 end
 
 # Overwrite gradient functions for the Symplectic case:
@@ -544,23 +559,35 @@ end
 @doc raw"""
     gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
 
+TODO: Document the switch on 'extended_metric'.
 Specialize the `gradient` computation of scalar functions
 ``f \colon \operatorname{Sp} \rightarrow \mathbb{R}``
 to use the Riemannian metric projection after a metric compatibility mapping.
 """
-function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
-    return gradient!(M, f, similar(p), p, backend)
+function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
+                  extended_metric=true)
+    Y = allocate_result(M, gradient, p)
+    return gradient!(M, f, Y, p, backend, extended_metric=extended_metric)
 end
 
-function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend)
+function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend;
+                   extended_metric=false)
     _gradient!(f, X, p, backend.diff_backend)
-    make_metric_compatible!(M, X, EuclideanMetric(), p, X)
-    return project_riemannian!(M, X, p, X)
+    if extended_metric
+        M_affine = MetricManifold(Euclidean(representer_size(M)), LinearAffineMetric())
+        change_representer!(M_affine, ∇f_man, EuclideanMetric(), p, ∇f_euc)
+        return project_riemannian!(M, ∇f_man, p, ∇f_man)
+    else
+        project!(M, ∇f_man, p, ∇f_euc)
+        return change_representer!(M, ∇f_man, EuclideanMetric(), p, ∇f_euc)
+    end
 end
 
 @doc raw"""
-    make_metric_compatible(::Symplectic, ::EuclideanMetric, p, X)
-    make_metric_compatible!(::Symplectic, Y, ::EuclideanMetric, p, X)
+    change_representer(::MetricManifold{Euclidean; LinearAffineMetric},
+                       ::EuclideanMetric, p, X)
+    change_representer!(::MetricManifold{Euclidean; LinearAffineMetric}, Y,
+                        ::EuclideanMetric, p, X)
 
 Change the representation of an arbitrary element ``χ ∈ \mathbb{R}^{2n \times 2n}``
 by a mapping
@@ -574,11 +601,13 @@ The mapping is defined such that the metric compatibility condition
 ````
 holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref).
 """
-function make_metric_compatible(M::Symplectic, EucMet::EuclideanMetric, p, X)
-    return make_metric_compatible!(M, similar(X), EucMet, p, X)
+function change_representer(::MetricManifold{Euclidean; LinearAffineMetric},
+                            EucMet::EuclideanMetric, p, X)
+    return change_representer!(M, similar(X), EucMet, p, X)
 end
 
-function make_metric_compatible!(::Symplectic, Y, ::EuclideanMetric, p, X)
+function change_representer!(::MetricManifold{Euclidean; LinearAffineMetric},
+                             Y, ::EuclideanMetric, p, X)
     Y .= p * p' * X
     return Y
 end
