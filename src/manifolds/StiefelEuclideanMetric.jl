@@ -81,7 +81,7 @@ function get_coordinates_orthonormal!(
     return c
 end
 
-function get_vector_orthonormal!(M::Stiefel{n,k,ℝ}, X, p, c, ::RealNumbers) where {n,k}
+function get_vector_orthonormal!(M::Stiefel{n,k,ℝ}, X, p, c, N::RealNumbers) where {n,k}
     V = get_vectors(M, p, DefaultOrthonormalBasis(N))
     zero_vector!(M, X, p)
     length(c) < length(V) && error(

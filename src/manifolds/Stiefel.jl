@@ -35,7 +35,9 @@ struct Stiefel{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ) = Stiefel{n,k,field}()
 
-active_traits(f, ::Stiefel, args...) = merge_traits(IsIsometricEmbeddedManifold())
+function active_traits(f, ::Stiefel, args...)
+    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
+end
 
 function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where {n,k}
     return complex
@@ -49,8 +51,8 @@ Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{S
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
+    cks = check_size(M, p)
+    (cks === nothing) || return cks
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
@@ -71,15 +73,8 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (ele
 The settings for approximately can be set with `kwargs...`.
 """
 function check_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
+    cks = check_size(M, p, X)
+    cks === nothing || return cks
     if !isapprox(p' * X, -conj(X' * p); kwargs...)
         return DomainError(
             norm(p' * X + conj(X' * p)),
@@ -467,6 +462,7 @@ vector_transport_direction(
     ::Any,
     ::DifferentiatedRetractionVectorTransport{PolarRetraction},
 )
+
 @doc raw"""
     vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetractionVectorTransport{QRRetraction})
 
@@ -501,13 +497,13 @@ vector_transport_direction(
     ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
 
-function vector_transport_direction!(
+function vector_transport_direction_diff!(
     ::Stiefel,
     Y,
     p,
     X,
     d,
-    ::DifferentiatedRetractionVectorTransport{CayleyRetraction},
+    ::CayleyRetraction,
 )
     Pp = I - 1 // 2 * p * p'
     Wpd = Pp * d * p' - p * d' * Pp
@@ -516,26 +512,26 @@ function vector_transport_direction!(
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
 
-function vector_transport_direction!(
+function vector_transport_direction_diff!(
     M::Stiefel,
     Y,
     p,
     X,
     d,
-    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
+    ::PolarRetraction,
 )
     q = retract(M, p, d, PolarRetraction())
     Iddsqrt = sqrt(I + d' * d)
     Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
     return copyto!(Y, q * Λ + (X - q * (q' * X)) / Iddsqrt)
 end
-function vector_transport_direction!(
+function vector_transport_direction_diff!(
     M::Stiefel,
     Y,
     p,
     X,
     d,
-    ::DifferentiatedRetractionVectorTransport{QRRetraction},
+    ::QRRetraction,
 )
     q = retract(M, p, d, QRRetraction())
     rf = UpperTriangular(qr(p + d).R)
@@ -616,26 +612,26 @@ projection it onto the tangent space at `q`.
 """
 vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
-function vector_transport_to!(
+function vector_transport_to_diff!(
     M::Stiefel,
     Y,
     p,
     X,
     q,
-    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
+    ::PolarRetraction,
 )
     d = inverse_retract(M, p, q, PolarInverseRetraction())
     Iddsqrt = sqrt(I + d' * d)
     Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
     return copyto!(Y, q * Λ + (X - q * (q' * X)) / Iddsqrt)
 end
-function vector_transport_to!(
+function vector_transport_to_diff!(
     M::Stiefel,
     Y,
     p,
     X,
     q,
-    ::DifferentiatedRetractionVectorTransport{QRRetraction},
+    ::QRRetraction,
 )
     d = inverse_retract(M, p, q, QRInverseRetraction())
     rf = UpperTriangular(qr(p + d).R)

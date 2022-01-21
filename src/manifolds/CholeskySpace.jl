@@ -28,12 +28,8 @@ entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_point(M::CholeskySpace, p; kwargs...)
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $(M), since its size is not $(representation_size(M)).",
-        )
-    end
+    cks = check_size(M, p)
+    cks === nothing || return cks
     if !isapprox(norm(strictlyUpperTriangular(p)), 0.0; kwargs...)
         return DomainError(
             norm(UpperTriangular(p) - Diagonal(p)),

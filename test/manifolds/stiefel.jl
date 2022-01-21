@@ -9,7 +9,7 @@ using Manifolds: default_metric_dispatch
         @testset "Basics" begin
             @test repr(M) == "Stiefel(3, 2, ℝ)"
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            @test (@inferred default_metric_dispatch(M2)) === Val(true)
+            @test is_default_metric(M, EuclideanMetric())
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
             base_manifold(M) === M
@@ -87,7 +87,7 @@ using Manifolds: default_metric_dispatch
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
-            @test_throws ErrorException distance(M, x, y)
+            @test_throws MethodError distance(M, x, y)
             @test isapprox(
                 M,
                 retract(
