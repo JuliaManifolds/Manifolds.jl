@@ -136,6 +136,7 @@ include("utils.jl")
     include_test("manifolds/symmetric.jl")
     include_test("manifolds/symmetric_positive_definite.jl")
     include_test("manifolds/symmetric_positive_semidefinite_fixed_rank.jl")
+    include_test("manifolds/symplectic.jl")
     include_test("manifolds/tucker.jl")
 
     include_test("manifolds/essential_manifold.jl")
