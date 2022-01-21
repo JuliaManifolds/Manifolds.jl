@@ -511,33 +511,39 @@ function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}
     return final_norm * Ω / norm(Ω, 2)
 end
 
-# @doc raw"""
-#     gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend)
-#
-# TODO: Document the switch on 'extended_metric'.
-# Specialize the `gradient` computation of scalar functions
-# ``f \colon \operatorname{Sp} \rightarrow \mathbb{R}``
-# to use the Riemannian metric projection after a metric compatibility mapping.
-# """
 @doc raw"""
     gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
              extended_metric=true)
     gradient!(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
              extended_metric=true)
 
-Compute the transformation of the euclidean gradient of a scalar function `f` onto the
-tangent space of the point ``p \in \operatorname{Sp}(ℝ, 2n)``[^FioriSimone2011].
+Compute the manifold gradient ``\text{grad}f(p)`` of a scalar function
+``f \colon \operatorname{Sp}(2n) \rightarrow ℝ`` at
+``p \in \operatorname{Sp}(2n)``.
 
-# Deprecated:
-# The transformation is found by requiring that the gradient element in the tangent
-# space solves the metric compatibility relation for the Riemannian `default_metric_dispatch`
-# along with the defining equation for a tangent
-# vector ``X \in T_pSn(ℝ)``at a point ``p \in Sn(ℝ)``.
+The element ``\text{grad}f(p)`` is found as the Riesz representer of the differential
+``\text{D}f(p) \colon T_p\operatorname{Sp}(2n) \rightarrow ℝ`` w.r.t.
+the Riemannian metric inner product at ``p`` [^FioriSimone2011].
+That is, ``\text{grad}f(p) \in T_p\operatorname{Sp}(2n)`` solves the relation
+````math
+    g_p(\text{grad}f(p), X) = \text{D}f(p) \quad\forall\; X \in T_p\operatorname{Sp}(2n).
+````
 
-First we change the representation of the gradient from the Euclidean metric to the
-[`RealSymplecticMetric`](@ref) at ``p``, and then we project the result onto the
-tangent space ``T_p\operatorname{Sp}(2n, ℝ)`` w.r.t the Riemannian metric ``g_p``
-extended to the entire embedding space.
+The default behaviour is to first change the representation of the Euclidean gradient from
+the Euclidean metric to the [`RealSymplecticMetric`](@ref) at ``p``, and then we projecting
+the result onto the correct tangent tangent space ``T_p\operatorname{Sp}(2n, ℝ)``
+w.r.t the Riemannian metric ``g_p`` extended to the entire embedding space.
+
+# Arguments:
+- `extended_metric = true`: If `true`, compute the gradient ``\text{grad}f(p)`` by
+    first changing the representer of the Euclidean gradient of a smooth extension
+    of ``f``, ``∇f(p)``, w.r.t. the [`RealSymplecticMetric`](@ref) at ``p``
+    extended to the entire embedding space, before projecting onto the correct
+    tangent vector space w.r.t. the same extended metric ``g_p``.
+    If `false`, compute the gradient by first projecting ``∇f(p)`` onto the
+    tangent vector space, before changing the representer in the tangent
+    vector space to comply with the [`RealSymplecticMetric`](@ref).
+
 
 [^FioriSimone2011]:
     > Simone Fiori:
