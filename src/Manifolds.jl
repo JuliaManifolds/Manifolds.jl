@@ -271,7 +271,6 @@ include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Tucker.jl")
 include("manifolds/Symplectic.jl")
-include("manifolds/SymplecticPseudoRiemannian.jl")
 include("manifolds/SymplecticStiefel.jl")
 
 # Product or power based manifolds
@@ -480,7 +479,7 @@ export AbstractMetric,
     PowerMetric,
     ProductMetric,
     RealSymplecticMetric,
-    SymplecticPseudoRiemannianMetric,
+    ExtendedSymplecticMetric,
     CanonicalMetric,
     MetricManifold
 export AbstractAtlas, RetractionAtlas

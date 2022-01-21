@@ -592,7 +592,6 @@ function change_representer!(
     return Y
 end
 
-
 @doc raw"""
     change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
 
