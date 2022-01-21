@@ -121,65 +121,56 @@ function get_basis_diagonalizing(::Circle{ℝ}, p, B::DiagonalizingOrthonormalBa
     return CachedBasis(B, (@SVector [0]), vs)
 end
 
-get_coordinates_orthonormal(::Circle{ℝ}, p, X) = X
+get_coordinates_orthonormal(::Circle{ℝ}, p, X, ::RealNumbers) = X
+get_coordinates_orthonormal!(::Circle{ℝ}, c, p, X, ::RealNumbers) = (c .= X)
 function get_coordinates_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? one(sbv) : sbv)
 end
+function get_coordinates_diagonalizing!(
+    M::Circle{ℝ},
+    Y,
+    p,
+    X,
+    B::DiagonalizingOrthonormalBasis,
+)
+    Y[] = get_coordinates_diagonalizing(M, p, X, B)[]
+    return Y
+end
+
 """
     get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 get_coordinates(::Circle{ℂ}, p, X, ::DefaultOrthonormalBasis{<:Any,TangentSpaceType})
-function get_coordinates_orthogonal!(::Circle{ℂ}, p, X)
+function get_coordinates_orthonormal!(M::Circle{ℂ}, Y, p, X, n::RealNumbers)
+    Y[] = get_coordinates_orthonormal(M, p, X, n)[]
+    return Y
+end
+function get_coordinates_orthonormal(::Circle{ℂ}, p, X, ::RealNumbers)
     X, p = X[1], p[1]
     Xⁱ = imag(X) * real(p) - real(X) * imag(p)
     return @SVector [Xⁱ]
 end
 
-function get_coordinates_orthonormal!(M::Circle, Y::AbstractArray, p, X)
-    Y[] = get_coordinates(M, p, X, B)[]
-    return Y
-end
-
-get_vector_orthonormal(::Circle{ℝ}, p, X) = X
-function get_vector_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
+get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = c
+get_vector_orthonormal!(::Circle{ℝ}, X, p, c, ::RealNumbers) = (X .= c)
+function get_vector_diagonalizing(::Circle{ℝ}, p, c, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
-    return X .* (sbv == 0 ? one(sbv) : sbv)
+    return c .* (sbv == 0 ? one(sbv) : sbv)
 end
 """
     get_vector(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-function get_vector(::Circle{ℂ}, p, X, ::AbstractBasis{<:Any,TangentSpaceType})
-    @SVector [1im * X[1] * p[1]]
+function get_vector_orthonormal(::Circle{ℂ}, p, c, ::RealNumbers)
+    @SVector [1im * c[1] * p[1]]
 end
-eval(
-    quote
-        @invoke_maker 4 AbstractBasis get_vector(
-            M::Circle{ℂ},
-            p,
-            X,
-            B::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
-        )
-    end,
-)
-
-for BT in [AbstractBasis{<:Any,TangentSpaceType}]
-    eval(quote
-        function get_vector!(::Circle{ℝ}, Y::AbstractArray, p, X, ::$BT)
-            Y[] = X[]
-            return Y
-        end
-    end)
-    eval(quote
-        function get_vector!(::Circle{ℂ}, Y::AbstractArray, p, X, ::$BT)
-            Y[] = 1im * X[1] * p[1]
-            return Y
-        end
-    end)
+function get_vector_orthonormal!(::Circle{ℂ}, X, p, c, ::RealNumbers)
+    X .= 1im * c[1] * p[1]
+    return X
 end
 
 @doc raw"""

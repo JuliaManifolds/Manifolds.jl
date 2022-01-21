@@ -497,14 +497,7 @@ vector_transport_direction(
     ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
 
-function vector_transport_direction_diff!(
-    ::Stiefel,
-    Y,
-    p,
-    X,
-    d,
-    ::CayleyRetraction,
-)
+function vector_transport_direction_diff!(::Stiefel, Y, p, X, d, ::CayleyRetraction)
     Pp = I - 1 // 2 * p * p'
     Wpd = Pp * d * p' - p * d' * Pp
     WpX = Pp * X * p' - p * X' * Pp
@@ -512,27 +505,13 @@ function vector_transport_direction_diff!(
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
 
-function vector_transport_direction_diff!(
-    M::Stiefel,
-    Y,
-    p,
-    X,
-    d,
-    ::PolarRetraction,
-)
+function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::PolarRetraction)
     q = retract(M, p, d, PolarRetraction())
     Iddsqrt = sqrt(I + d' * d)
     Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
     return copyto!(Y, q * Λ + (X - q * (q' * X)) / Iddsqrt)
 end
-function vector_transport_direction_diff!(
-    M::Stiefel,
-    Y,
-    p,
-    X,
-    d,
-    ::QRRetraction,
-)
+function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::QRRetraction)
     q = retract(M, p, d, QRRetraction())
     rf = UpperTriangular(qr(p + d).R)
     Xrf = X / rf
@@ -612,27 +591,13 @@ projection it onto the tangent space at `q`.
 """
 vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
-function vector_transport_to_diff!(
-    M::Stiefel,
-    Y,
-    p,
-    X,
-    q,
-    ::PolarRetraction,
-)
+function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::PolarRetraction)
     d = inverse_retract(M, p, q, PolarInverseRetraction())
     Iddsqrt = sqrt(I + d' * d)
     Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
     return copyto!(Y, q * Λ + (X - q * (q' * X)) / Iddsqrt)
 end
-function vector_transport_to_diff!(
-    M::Stiefel,
-    Y,
-    p,
-    X,
-    q,
-    ::QRRetraction,
-)
+function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
     d = inverse_retract(M, p, q, QRInverseRetraction())
     rf = UpperTriangular(qr(p + d).R)
     Xrf = X / rf
