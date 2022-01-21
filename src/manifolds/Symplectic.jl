@@ -570,7 +570,6 @@ end
                        ::EuclideanMetric, p, X)
     change_representer!(::MetricManifold{𝔽, Euclidean, ExtendedSymplecticMetric}, Y,
                         ::EuclideanMetric, p, X)
-
 Change the representation of an arbitrary element ``χ ∈ \mathbb{R}^{2n \times 2n}``
 by a mapping
 ````math
@@ -583,10 +582,12 @@ The mapping is defined such that the metric compatibility condition
 ````
 holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref).
 """
-function change_representer(::MetricManifold{ℝ, Euclidean, ExtendedSymplecticMetric}, ::EuclideanMetric, p, X)
+change_representer(::MetricManifold{ℝ, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric},
+                   ::EuclideanMetric, p, X) where {m, n, 𝔽}
 
 function change_representer!(
-    ::MetricManifold{ℝ, Euclidean, ExtendedSymplecticMetric}, Y, ::EuclideanMetric, p, X)
+    ::MetricManifold{ℝ, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric}, Y,
+    ::EuclideanMetric, p, X) where {m, n, 𝔽}
     Y .= p * p' * X
     return Y
 end
