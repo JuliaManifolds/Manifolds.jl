@@ -25,8 +25,7 @@ advantage of the natural block structure matrices
 ``A ∈ ℝ^{2n × 2k}`` where we consider it as consisting of four
 smaller matrices in ``ℝ^{n × k}``.
 """
-struct SymplecticStiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
-end
+struct SymplecticStiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 @doc """
     SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
@@ -46,7 +45,9 @@ end
 
 decorated_manifold(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
 ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction()
-ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel) = CayleyInverseRetraction()
+function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
+    return CayleyInverseRetraction()
+end
 
 @doc raw"""
     manifold_dimension(::Symplectic{n})
@@ -275,9 +276,9 @@ and then projecting onto the Symplectic Stiefel manifold using the
 [`canonical_projection`](@ref).
 That is, ``p = π(p_{\operatorname{Sp}})``
 """
-function Base.rand(M::SymplecticStiefel{n,k}, hamiltonian_norm=1/2) where {n,k}
+function Base.rand(M::SymplecticStiefel{n,k}, hamiltonian_norm=1 / 2) where {n,k}
     p_symplectic = rand(Symplectic(2n), hamiltonian_norm)
-    canonical_projection(M, p_symplectic)
+    return canonical_projection(M, p_symplectic)
 end
 
 @doc raw"""
@@ -297,7 +298,7 @@ Hamiltonian matrix ``Ω``.
 """
 function Base.rand(::SymplecticStiefel{n,k}, p::AbstractMatrix) where {n,k}
     Ω = rand_hamiltonian(Symplectic(2k))
-    p * Ω
+    return p * Ω
 end
 
 @doc raw"""
@@ -355,7 +356,7 @@ end
 @doc raw"""
     Compute the exponential mapping from eq. 3.19 of Bendokat-Zimmermann.
 """
-function exp!(M::SymplecticStiefel{n, k}, q, p, X) where {n, k}
+function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
     # Cannot alias 'q' and 'p'!
 
     Q = SymplecticMatrix(p, X)
@@ -373,7 +374,7 @@ function exp!(M::SymplecticStiefel{n, k}, q, p, X) where {n, k}
     C_QT = C
 
     # Subtract C*Q^T*p*(pT_p)^{-1}*Q from A_bar:
-    A_bar .-= rmul!(rdiv!(C_QT*p, pT_p), Q)
+    A_bar .-= rmul!(rdiv!(C_QT * p, pT_p), Q)
     # A_bar is "star-skew symmetric" (A^+ = -A).
 
     # Have not used the q (2n × 2k) memory.
@@ -385,24 +386,27 @@ function exp!(M::SymplecticStiefel{n, k}, q, p, X) where {n, k}
     q .-= p * symplectic_inverse_times(M, p, q)
     # H_bar = q
 
-    q .+= p*A_bar
+    q .+= p * A_bar
 
     # Rename q -> Δ_bar.
     Δ_bar = q
 
-    γ_1 = Δ_bar - p*symplectic_inverse_times(M, p, Δ_bar)
+    γ_1 = Δ_bar - p * symplectic_inverse_times(M, p, Δ_bar)
     γ = [γ_1 -p] # ∈ ℝ^{2n × 4k}
 
-    λ_1 = lmul!(Q', p*Q)
-    λ_2 = (rmul!(Q'*Δ_bar', Q) .-
-            (1/2) .* symplectic_inverse_times(M, Δ_bar, p)*rmul!(Q'*p', Q))'
+    λ_1 = lmul!(Q', p * Q)
+    λ_2 =
+        (
+            rmul!(Q' * Δ_bar', Q) .-
+            (1 / 2) .* symplectic_inverse_times(M, Δ_bar, p) * rmul!(Q' * p', Q)
+        )'
     λ = [λ_1 λ_2] # ∈ ℝ^{2n × 4k}
 
     Γ = [λ -γ] # ∈ ℝ^{2n × 8k}
-    Λ = [γ  λ] # ∈ ℝ^{2n × 8k}
+    Λ = [γ λ] # ∈ ℝ^{2n × 8k}
 
     # Then compute the matrix exponentials:
-    q .= Γ*(exp(Λ' * Γ)[:, (4k+1):end])*(exp(λ'*γ)[:, (2k+1):end])
+    q .= Γ * (exp(Λ' * Γ)[:, (4k + 1):end]) * (exp(λ' * γ)[:, (2k + 1):end])
     return q
 end
 

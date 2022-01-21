@@ -36,7 +36,7 @@ dimension ``n = 2k`` for the real symplectic manifold, ``ℝ^{2k × 2k}``.
 function Symplectic(n::Int, field::AbstractNumbers=ℝ)
     n % 2 == 0 || throw(ArgumentError("The dimensionality of the symplectic manifold
                         embedding space must be even. Was odd, n % 2 == $(n % 2)."))
-    Symplectic{div(n, 2),field}()
+    return Symplectic{div(n, 2),field}()
 end
 
 decorated_manifold(::Symplectic{n,ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
@@ -345,11 +345,13 @@ function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractMatrix)
 
     half_row_p = copy(@inbounds view(p, 1:n, :))
 
-    mul!((@inbounds view(p, 1:n, :)), Q.λ,
-          @inbounds view(p, (n + 1):lastindex(p, 1), :))
+    mul!((@inbounds view(p, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
 
-    mul!((@inbounds view(p, (n+1):lastindex(p, 1), :)), -Q.λ,
-          @inbounds view(half_row_p, :, :))
+    mul!(
+        (@inbounds view(p, (n + 1):lastindex(p, 1), :)),
+        -Q.λ,
+        @inbounds view(half_row_p, :, :)
+    )
     return p
 end
 
@@ -360,11 +362,13 @@ function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
 
     half_col_p = copy(@inbounds view(p, :, 1:k))
 
-    mul!((@inbounds view(p, :, 1:k)), -Q.λ,
-          @inbounds view(p, :, (k + 1):lastindex(p, 2)))
+    mul!((@inbounds view(p, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
 
-    mul!((@inbounds view(p, :, (k+1):lastindex(p, 2))), Q.λ,
-          @inbounds view(half_col_p, :, :))
+    mul!(
+        (@inbounds view(p, :, (k + 1):lastindex(p, 2))),
+        Q.λ,
+        @inbounds view(half_col_p, :, :)
+    )
 
     return p
 end
@@ -551,19 +555,34 @@ w.r.t the Riemannian metric ``g_p`` extended to the entire embedding space.
     > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
-function gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
-                  extended_metric=true)
+function gradient(
+    M::Symplectic,
+    f,
+    p,
+    backend::RiemannianProjectionBackend;
+    extended_metric=true,
+)
     Y = allocate_result(M, gradient, p)
     return gradient!(M, f, Y, p, backend, extended_metric=extended_metric)
 end
 
-function gradient!(M::Symplectic, f, X, p, backend::RiemannianProjectionBackend;
-                   extended_metric=true)
+function gradient!(
+    M::Symplectic,
+    f,
+    X,
+    p,
+    backend::RiemannianProjectionBackend;
+    extended_metric=true,
+)
     _gradient!(f, X, p, backend.diff_backend)
     if extended_metric
         change_representer!(
             MetricManifold(get_embedding(M), ExtendedSymplecticMetric()),
-            X, EuclideanMetric(), p, X)
+            X,
+            EuclideanMetric(),
+            p,
+            X,
+        )
         return project_riemannian!(M, X, p, X)
     else
         project!(M, X, p, X)
@@ -588,12 +607,20 @@ The mapping is defined such that the metric compatibility condition
 ````
 holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref).
 """
-change_representer(::MetricManifold{ℝ, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric},
-                   ::EuclideanMetric, p, X) where {m, n, 𝔽}
+change_representer(
+    ::MetricManifold{ℝ,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
+    ::EuclideanMetric,
+    p,
+    X,
+) where {m,n,𝔽}
 
 function change_representer!(
-    ::MetricManifold{ℝ, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric}, Y,
-    ::EuclideanMetric, p, X) where {m, n, 𝔽}
+    ::MetricManifold{ℝ,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
+    Y,
+    ::EuclideanMetric,
+    p,
+    X,
+) where {m,n,𝔽}
     Y .= p * p' * X
     return Y
 end
@@ -729,7 +756,7 @@ denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
 function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
     p_star_X = symplectic_inverse_times(M, p, X)
 
-    divisor = lu!(2*I - p_star_X)
+    divisor = lu!(2 * I - p_star_X)
     ldiv!(divisor, add_scaled_I!(p_star_X, 2.0))
     q .= p * p_star_X
     return q
