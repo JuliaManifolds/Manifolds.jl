@@ -576,6 +576,27 @@ end
                 )
             end
 
+            @testset "Zero weights" begin
+                M = Sphere(2)
+                a = sqrt(2)
+                pV = [[0.0, 0.0, 1.0], [1 / a, 1 / a, 0], [-1 / a, 1 / a, 0.0]]
+                for method in [GeodesicInterpolation(), GradientDescentEstimation()]
+                    @testset "with $method" begin
+                        m1 = mean(M, pV, [0.0, 0.5, 0.5], method)
+                        g1 = shortest_geodesic(M, pV[2], pV[3], 0.5)
+                        @test isapprox(M, m1, g1; atol=1e-7)
+                        m2 = mean(M, pV, [0.5, 0.0, 0.5], method)
+                        @test isapprox(M, m2, shortest_geodesic(M, pV[1], pV[3], 0.5))
+                        m3 = mean(M, pV, [0.5, 0.0, 0.0], method)
+                        @test isapprox(M, m3, pV[1])
+                        m4 = mean(M, pV, [0.0, 1.0, 0.0], method)
+                        @test isapprox(M, m4, pV[2])
+                        m5 = mean(M, pV, [0.0, 0.0, 1.0], method)
+                        @test isapprox(M, m5, pV[3])
+                    end
+                end
+            end
+
             @testset "resumable" begin
                 S = Sphere(2)
                 x = [normalize(randn(rng, 3)) for _ in 1:10]
@@ -782,6 +803,7 @@ end
         covest = SimpleCovariance(; corrected=false)
         @test isapprox(cov(M, x; tangent_space_covariance_estimator=covest), cov(covest, x))
     end
+
     @testset "Covariance matrix, sphere" begin
         rng = MersenneTwister(47)
         S = Sphere(2)

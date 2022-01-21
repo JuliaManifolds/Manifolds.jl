@@ -89,7 +89,7 @@ using Distributions
 using Einsum: @einsum
 using HybridArrays
 using Kronecker
-using LightGraphs
+using Graphs
 using LinearAlgebra
 using ManifoldsBase:
     ℝ,
@@ -135,6 +135,7 @@ using ManifoldsBase:
     LogarithmicInverseRetraction,
     ManifoldsBase,
     NestedPowerRepresentation,
+    NestedReplacingPowerRepresentation,
     NLsolveInverseRetraction,
     OutOfInjectivityRadiusError,
     ParallelTransport,
@@ -172,6 +173,7 @@ using ManifoldsBase:
     _extract_val,
     combine_allocation_promotion_functions,
     default_inverse_retraction_method,
+    geodesic,
     is_decorator_transparent,
     is_default_decorator,
     manifold_function_not_implemented_message,
@@ -673,6 +675,7 @@ export adjoint_action,
     exp_lie,
     exp_lie!,
     g_manifold,
+    geodesic,
     get_coordinates_lie,
     get_coordinates_lie!,
     get_vector_lie,

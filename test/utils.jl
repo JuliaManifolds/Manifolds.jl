@@ -17,7 +17,7 @@ using StaticArrays
 using Statistics
 using StatsBase
 using Test
-using LightGraphs
+using Graphs
 using SimpleWeightedGraphs
 
 function include_test(path)
