@@ -184,6 +184,7 @@ using ManifoldsBase:
     IsIsometricEmbeddedManifold,
     IsEmbeddedManifold,
     IsEmbeddedSubmanifold,
+    IsExplicitDecorator,
     LogarithmicInverseRetraction,
     ManifoldsBase,
     NestedPowerRepresentation,
