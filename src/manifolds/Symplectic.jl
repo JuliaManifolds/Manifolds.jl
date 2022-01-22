@@ -215,8 +215,7 @@ where ``\operatorname{Exp}(\cdot)`` denotes the matrix exponential.
 """
 function exp!(M::Symplectic{n}, q, p, X) where {n}
     p_star_X = symplectic_inverse_times(M, p, X)
-    q .= p_star_X .- p_star_X'
-    q .= p * exp(Array(p_star_X')) * exp(q)
+    q .= p * exp(Array(p_star_X')) * exp(p_star_X - p_star_X')
     return q
 end
 
