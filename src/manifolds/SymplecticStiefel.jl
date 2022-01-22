@@ -478,7 +478,7 @@ function inverse_retract!(M::SymplecticStiefel, X, p, q, ::CayleyInverseRetracti
     U_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
     V_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
 
-    X .= 2 .* ((p / V_inv .- p / U_inv) + ((p .+ q) / U_inv) .- p)
+    X .= 2 .* ((p / V_inv .- p / U_inv) .+ ((p + q) / U_inv) .- p)
     return X
 end
 
