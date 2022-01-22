@@ -63,6 +63,7 @@ function active_traits(f, M::MetricManifold, args...)
     return merge_traits(
         IsMetricManifold(),
         is_default_metric(M.manifold, M.metric) ? IsDefaultMetric(M.metric) : EmptyTrait(),
+        #IsExplicitDecorator(:manifold),
     )
 end
 # remetricise instead of double-decorating
