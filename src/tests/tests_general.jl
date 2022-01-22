@@ -292,8 +292,9 @@ function test_manifold(
     Test.@testset "(inverse &) retraction tests" begin
         for (p, X) in zip(pts, tv)
             epsx = find_eps(p)
+            point_atol = is_point_atol_multiplier * find_eps(p)
             for retr_method in retraction_methods
-                Test.@test is_point(M, retract(M, p, X, retr_method))
+                Test.@test is_point(M, retract(M, p, X, retr_method); atol=point_atol)
                 Test.@test isapprox(
                     M,
                     p,
@@ -308,7 +309,7 @@ function test_manifold(
                 else
                     new_pt = retract(M, p, X, retr_method)
                 end
-                Test.@test is_point(M, new_pt)
+                Test.@test is_point(M, new_pt; atol=point_atol)
                 (test_inplace && is_mutating) && Test.@testset "inplace test for retract!" begin
                     p2 = copy(M, p)
                     X2 = copy(M, p, X)
