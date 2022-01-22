@@ -63,8 +63,6 @@ Since $p$ is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
 function check_point(M::Elliptope{N,K}, q; kwargs...) where {N,K}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
-    mpv === nothing || return mpv
     row_norms_sq = sum(abs2, q; dims=2)
     if !all(isapprox.(row_norms_sq, 1.0; kwargs...))
         return DomainError(
@@ -87,15 +85,6 @@ The tolerance for the base point check and zero diagonal can be set using the `k
 Note that symmetric of $X$ holds by construction an is not explicitly checked.
 """
 function check_vector(M::Elliptope{N,K}, q, Y; kwargs...) where {N,K}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(q),typeof(Y)},
-        M,
-        q,
-        Y;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     X = q * Y' + Y * q'
     n = diag(X)
     if !all(isapprox.(n, 0.0; kwargs...))
@@ -152,7 +141,7 @@ compute a projection based retraction by projecting $q+Y$ back onto the manifold
 """
 retract(::Elliptope, ::Any, ::Any, ::ProjectionRetraction)
 
-retract!(M::Elliptope, r, q, Y, ::ProjectionRetraction) = project!(M, r, q + Y)
+retract_project!(M::Elliptope, r, q, Y) = project!(M, r, q + Y)
 
 @doc raw"""
     representation_size(M::Elliptope)
@@ -174,11 +163,7 @@ transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent
 at `q`.
 """
 vector_transport_to(::Elliptope, ::Any, ::Any, ::Any, ::ProjectionTransport)
-
-function vector_transport_to!(M::Elliptope, Y, p, X, q, ::ProjectionTransport)
-    project!(M, Y, q, X)
-    return Y
-end
+vector_transport_to_project!(M::Elliptope, Y, p, X, q) = project!(M, Y, q, X)
 
 @doc raw"""
     zero_vector(M::Elliptope,p)

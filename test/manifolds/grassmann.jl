@@ -181,7 +181,7 @@ include("../utils.jl")
 
                 @test real(inner(M, pts[1], X1, X2)) ≈ real(inner(M, pts[1], X2, X1))
                 @test imag(inner(M, pts[1], X1, X2)) ≈ -imag(inner(M, pts[1], X2, X1))
-                @test imag(inner(M, pts[1], X1, X1)) ≈ 0
+                @test isapprox(imag(inner(M, pts[1], X1, X1)), 0; atol=1e-30)
 
                 @test norm(M, pts[1], X1) isa Real
                 @test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
