@@ -96,13 +96,25 @@ include("../utils.jl")
                     -37 -29 117 40 -15 9
                     22 30 -47 -27 10 -6
                 ],
+                [
+                    0 0 0 7 -2 1
+                    0 0 0 19 -5 3
+                    0 0 0 -6 2 -1
+                    -1 1 8 -14 4 -2
+                    0 -1 -2 -94 26 -15
+                    -1 -2 3 45 -11 7
+                ],
             ]
             points = map(x -> Array{Float64}(x), points)
             test_manifold(
                 Sp_6,
                 points;
+                retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
                 default_inverse_retraction_method=CayleyInverseRetraction(),
-                is_tangent_atol_multiplier=1.0e6,
+                test_inplace=true,
+                is_point_atol_multiplier=1.0e6,
+                is_tangent_atol_multiplier=1.0e4,
+                retraction_atol_multiplier=1.0e4,
                 test_reverse_diff=false,
                 test_forward_diff=false,
                 test_project_tangent=true,
