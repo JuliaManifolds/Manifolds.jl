@@ -92,6 +92,7 @@ import ManifoldsBase:
     representation_size,
     retract,
     retract!,
+    retract_exp_ode!,
     retract_pade!,
     retract_polar!,
     retract_project!,
