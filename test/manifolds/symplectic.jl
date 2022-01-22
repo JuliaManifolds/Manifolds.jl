@@ -69,7 +69,40 @@ include("../utils.jl")
             @test norm(M, p, X2) == X2_p_norm
             @test norm(M, p, X2) == √(inner(M, p, X2, X2))
         end
+        @testset "test_manifold(Symplectic(6), ...)" begin
+            Sp_6 = Symplectic(6)
+            points = [
+                [1   1    3   0   0   0;
+                -1  -2   -4   0   0   0;
+                 3   0    7   0   0   0;
+                 3   4   10  14   5  -6;
+                -5  -9  -19   7   2  -3;
+                 0   0    0  -2  -1   1],
+                [0   0   0  -2   1    5;
+                 0   0   0   0  -1   -2;
+                 0   0   0  -1  -2   -3;
+                -1   2  -1   9  -4  -21;
+                -7  11  -5  -2  10   24;
+                 3  -4   2  -2  -7  -13],
+                [0   -3   -5    0    0   0;
+                -2   -3    4    0    0   0;
+                -3   -5    5    0    0   0;
+                11   27   -5    5   -2   1;
+               -37  -29  117   40  -15   9;
+                22   30  -47  -27   10  -6]
+            ]
+            points = map(x -> Array{Float64}(x), points)
+            test_manifold(
+                Sp_6, points;
+                default_inverse_retraction_method=CayleyInverseRetraction(),
+                is_tangent_atol_multiplier=1.0e6,
+                test_reverse_diff=false,
+                test_forward_diff=false,
+                test_project_tangent=true,
+                test_injectivity_radius=false,
+                test_exp_log=false,
+                test_representation_size=true,
+            )
+        end
     end
-
-    # TODO: test_manifold()
 end
