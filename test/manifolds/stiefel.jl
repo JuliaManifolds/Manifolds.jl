@@ -286,7 +286,7 @@ using Manifolds: default_metric_dispatch
             p,
             X,
             X,
-            DifferentiatedRetractionVectorTransport{CayleyRetraction}(),
+            DifferentiatedRetractionVectorTransport(CayleyRetraction()),
         )
         @test is_vector(M, q1, Y2; atol=10^-15)
         r2 = PadeRetraction(2)
