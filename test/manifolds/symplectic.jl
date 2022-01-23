@@ -28,6 +28,11 @@ include("../utils.jl")
             @test is_vector(M, p, X1 + X2; atol=1.0e-6)
             @test !is_vector(M, p, X1 + [0.1 0.1; -0.1 0.1]; atol=1.0e-6)
         end
+        @testset "Symplectic Inverse" begin
+            I_2n = Array(I, 2*small_n, 2*small_n)
+            @test Manifolds.symplectic_inverse_times(M, p, p) == I_2n
+            @test inv!(M, copy(p))*p == I_2n
+        end
         @testset "Embedding and Projection" begin
             x = [0.0 1.0/2.0; -2.0 -2.0]
             y = similar(x)
@@ -69,6 +74,15 @@ include("../utils.jl")
             @test norm(M, p, X2) == X2_p_norm
             @test norm(M, p, X2) == √(inner(M, p, X2, X2))
         end
+
+        @testset "Generate random points/tangent vectors" begin
+            M_big = Symplectic(20)
+            p_big = rand(M_big)
+            @test is_point(M_big, p_big, true; atol=1.0e-12)
+            X_big = rand(M_big, p_big)
+            @test is_vector(M_big, p_big, X_big, true; atol=1.0e-12)
+        end
+
         @testset "test_manifold(Symplectic(6), ...)" begin
             Sp_6 = Symplectic(6)
             points = [
@@ -161,6 +175,9 @@ include("../utils.jl")
             @test (2 * Q) * (5 // 6) == SymplecticMatrix(5 // 3)
 
             @testset "Powers" begin
+                @test inv(Q)*Q == I
+                @test (inv(SymplecticMatrix(-4.0 + 8im))*SymplecticMatrix(-4.0 + 8im)
+                        == UniformScaling(1.0 + 0.0im))
                 @test Q * Q == -I
                 @test Q^2 == -I
                 @test Q^3 == -Q
