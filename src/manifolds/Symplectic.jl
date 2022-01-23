@@ -227,13 +227,15 @@ number (2n, 2n) of rows and columns. Then returns the integer part of the even d
 """
 function get_half_dims(p::AbstractMatrix, check_rows=true, check_cols=true, square=false)
     n, k = size(p)
-    # Otherwise, both dimensions just need to be even.
-    # First check that dimensions are even:
+
     rows_ok = !check_rows || (n % 2 == 0)
     cols_ok = !check_cols || (k % 2 == 0)
-    (!rows_ok || !cols_ok) && throw(DimensionMismatch(
-                                "Matrix does not have required even " *
-                                "dimensions (n, k): Dimensions are ($(n), $(k))."))
+    (rows_ok && cols_ok) || throw(
+        DimensionMismatch(
+            "Matrix does not have required even " *
+            "dimensions (n, k): Dimensions are ($(n), $(k)).",
+        ),
+    )
 
     # If 'square=true', we require m==n:
     (!square || (n == k)) || throw(
@@ -276,9 +278,13 @@ end
 
 (Base.:-)(Q::SymplecticMatrix) = SymplecticMatrix(-Q.λ)
 
-(Base.:^)(Q::SymplecticMatrix, n::Integer) = ifelse(n%2 == 0,
-                                            UniformScaling((-1)^(div(n, 2))*(Q.λ)^n),
-                                            SymplecticMatrix((-1)^(div(n-1, 2))*(Q.λ)^n))
+function (Base.:^)(Q::SymplecticMatrix, n::Integer)
+    return ifelse(
+        n % 2 == 0,
+        UniformScaling((-1)^(div(n, 2)) * (Q.λ)^n),
+        SymplecticMatrix((-1)^(div(n - 1, 2)) * (Q.λ)^n),
+    )
+end
 
 (Base.:*)(x::Number, Q::SymplecticMatrix) = SymplecticMatrix(x * Q.λ)
 (Base.:*)(Q::SymplecticMatrix, x::Number) = SymplecticMatrix(x * Q.λ)
@@ -613,13 +619,22 @@ The mapping is defined such that the metric compatibility condition
 holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref) extended
 to all of .
 """
-function change_representer(MetMan::MetricManifold{𝔽, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric},
-                            EucMet::EuclideanMetric, p, X) where {𝔽, m, n}
+function change_representer(
+    MetMan::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
+    EucMet::EuclideanMetric,
+    p,
+    X,
+) where {𝔽,m,n}
     return change_representer!(MetMan, similar(X), EucMet, p, X)
 end
 
-function change_representer!(::MetricManifold{𝔽, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric}, Y,
-                             ::EuclideanMetric, p, X) where {𝔽, m, n}
+function change_representer!(
+    ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
+    Y,
+    ::EuclideanMetric,
+    p,
+    X,
+) where {𝔽,m,n}
     Y .= p * p' * X
     return Y
 end
