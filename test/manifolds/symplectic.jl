@@ -29,9 +29,9 @@ include("../utils.jl")
             @test !is_vector(M, p, X1 + [0.1 0.1; -0.1 0.1]; atol=1.0e-6)
         end
         @testset "Symplectic Inverse" begin
-            I_2n = Array(I, 2*small_n, 2*small_n)
+            I_2n = Array(I, 2 * small_n, 2 * small_n)
             @test Manifolds.symplectic_inverse_times(M, p, p) == I_2n
-            @test inv!(M, copy(p))*p == I_2n
+            @test inv!(M, copy(p)) * p == I_2n
         end
         @testset "Embedding and Projection" begin
             x = [0.0 1.0/2.0; -2.0 -2.0]
@@ -175,9 +175,11 @@ include("../utils.jl")
             @test (2 * Q) * (5 // 6) == SymplecticMatrix(5 // 3)
 
             @testset "Powers" begin
-                @test inv(Q)*Q == I
-                @test (inv(SymplecticMatrix(-4.0 + 8im))*SymplecticMatrix(-4.0 + 8im)
-                        == UniformScaling(1.0 + 0.0im))
+                @test inv(Q) * Q == I
+                @test (
+                    inv(SymplecticMatrix(-4.0 + 8im)) * SymplecticMatrix(-4.0 + 8im) ==
+                    UniformScaling(1.0 + 0.0im)
+                )
                 @test Q * Q == -I
                 @test Q^2 == -I
                 @test Q^3 == -Q
@@ -186,18 +188,24 @@ include("../utils.jl")
             @testset "Addition (subtraction)" begin
                 @test Q + Q == 2 * Q
                 @test Q - SymplecticMatrix(1.0) == SymplecticMatrix(0.0)
-                @test Q + p1 == [0 0 -1 3
-                                 0 0 1 0
-                                -2 -1 0 0
-                                -3 -3 4 -4]
-                @test Q - p1 == [0 0 3 -3
-                                 0 0 -1 2
-                                 0 1 0 0
-                                 3 1 -4 4]
-                @test p1 - Q == [0 0 -3 3
-                                 0 0 1 -2
-                                 0 -1 0 0
-                                 -3 -1 4 -4]
+                @test Q + p1 == [
+                    0 0 -1 3
+                    0 0 1 0
+                    -2 -1 0 0
+                    -3 -3 4 -4
+                ]
+                @test Q - p1 == [
+                    0 0 3 -3
+                    0 0 -1 2
+                    0 1 0 0
+                    3 1 -4 4
+                ]
+                @test p1 - Q == [
+                    0 0 -3 3
+                    0 0 1 -2
+                    0 -1 0 0
+                    -3 -1 4 -4
+                ]
                 @test (p1 + Q) == (Q + p1)
             end
             @testset "Transpose-Adjoint" begin
