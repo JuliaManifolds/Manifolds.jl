@@ -157,10 +157,25 @@ include("../utils.jl")
         @testset "Matrix Operations" begin
             @test -Q == SymplecticMatrix(-1)
             @test (2*Q)*(5//6) == SymplecticMatrix(5//3)
-            @test Q * Q == -I
+
+            @testset "Powers" begin
+                @test Q * Q == -I
+                @test Q^2 == -I
+                @test Q^3 == -Q
+                @test Q^4 == I
+            end
+            @test Q + Q == 2*Q
+            @test Q - SymplecticMatrix(1.0) == SymplecticMatrix(0.0)
+            @test Q' == SymplecticMatrix(-1)
+            @test transpose(SymplecticMatrix(10)) == SymplecticMatrix(-10)
+            @test transpose(SymplecticMatrix(1 - 2.0im)) == SymplecticMatrix(-1 + 2.0im)
+            @test adjoint(Q) == -Q
+            @test adjoint(SymplecticMatrix(1 - 2.0im)) == SymplecticMatrix(-1 - 2.0im)
+            @test adjoint(SymplecticMatrix(-1im)) == SymplecticMatrix(-1im)
+            @test adjoint(SymplecticMatrix(2.0)) == SymplecticMatrix(-2.0)
         end
 
-        @testset "symplectic inverse" begin
+        @testset "Symplectic Inverse Ops." begin
             @test ((Q' * p1' * Q) * p1 - I) == zeros(eltype(p1), size(p1)...)
 
 
