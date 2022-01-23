@@ -376,7 +376,7 @@ function LinearAlgebra.rmul!(p::AbstractVecOrMat, Q::SymplecticMatrix)
     return p
 end
 
-function LinearAlgebra.mul!(A::AbstractMatrix, Q::SymplecticMatrix, p::AbstractMatrix)
+function LinearAlgebra.mul!(A::AbstractVecOrMat, Q::SymplecticMatrix, p::AbstractVecOrMat)
     n, _ = get_half_dims(p, true, false)
     # Perform left multiply by λ*Q:
     mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
@@ -384,7 +384,7 @@ function LinearAlgebra.mul!(A::AbstractMatrix, Q::SymplecticMatrix, p::AbstractM
     return A
 end
 
-function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractVecOrMat, Q::SymplecticMatrix)
+function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractVecOrMat, Q::SymplecticMatrix)
     _, k = get_half_dims(p, false, true)
     # Perform right multiply by λ*Q:
     mul!((@inbounds view(A, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
