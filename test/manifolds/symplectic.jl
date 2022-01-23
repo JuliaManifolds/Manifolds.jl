@@ -176,16 +176,16 @@ include("../utils.jl")
             @test adjoint(SymplecticMatrix(-1im)) == SymplecticMatrix(-1im)
             @test adjoint(SymplecticMatrix(2.0)) == SymplecticMatrix(-2.0)
 
-            z1 = [1 + 2im; 1-2im]
-            @test lmul!(Q, copy(z1)) == Q*z1
-            @test rmul!(copy(z1'), Q) == z1'*Q
+            z1 = [1 + 2im; 1 - 2im]
+            @test lmul!(Q, copy(z1)) == Q * z1
+            @test rmul!(copy(z1'), Q) == z1' * Q
 
             z1_copy = copy(z1)
             mul!(z1_copy, Q, z1)
-            @test z1_copy == Q*z1
+            @test z1_copy == Q * z1
 
             mul!(z1_copy', z1', Q)
-            @test z1_copy' == (z1'*Q)
+            @test z1_copy' == (z1' * Q)
         end
 
         @testset "Symplectic Inverse Ops." begin
