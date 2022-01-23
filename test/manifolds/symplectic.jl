@@ -166,26 +166,44 @@ include("../utils.jl")
                 @test Q^3 == -Q
                 @test Q^4 == I
             end
-            @test Q + Q == 2 * Q
-            @test Q - SymplecticMatrix(1.0) == SymplecticMatrix(0.0)
-            @test Q' == SymplecticMatrix(-1)
-            @test transpose(SymplecticMatrix(10)) == SymplecticMatrix(-10)
-            @test transpose(SymplecticMatrix(1 - 2.0im)) == SymplecticMatrix(-1 + 2.0im)
-            @test adjoint(Q) == -Q
-            @test adjoint(SymplecticMatrix(1 - 2.0im)) == SymplecticMatrix(-1 - 2.0im)
-            @test adjoint(SymplecticMatrix(-1im)) == SymplecticMatrix(-1im)
-            @test adjoint(SymplecticMatrix(2.0)) == SymplecticMatrix(-2.0)
+            @testset "Addition (subtraction)" begin
+                @test Q + Q == 2 * Q
+                @test Q - SymplecticMatrix(1.0) == SymplecticMatrix(0.0)
+                @test Q + p1 == [0 0 -1 3
+                                 0 0 1 0
+                                -2 -1 0 0
+                                -3 -3 4 -4]
+                @test Q - p1 == [0 0 3 -3
+                                 0 0 -1 2
+                                 0 1 0 0
+                                 3 1 -4 4]
+                @test p1 - Q == [0 0 -3 3
+                                 0 0 1 -2
+                                 0 -1 0 0
+                                 -3 -1 4 -4]
+                @test (p1 + Q) == (Q + p1)
+            end
+            @testset "Transpose-Adjoint" begin
+                @test Q' == SymplecticMatrix(-1)
+                @test transpose(SymplecticMatrix(10)) == SymplecticMatrix(-10)
+                @test transpose(SymplecticMatrix(1 - 2.0im)) == SymplecticMatrix(-1 + 2.0im)
+                @test adjoint(Q) == -Q
+                @test adjoint(SymplecticMatrix(1 - 2.0im)) == SymplecticMatrix(-1 - 2.0im)
+                @test adjoint(SymplecticMatrix(-1im)) == SymplecticMatrix(-1im)
+                @test adjoint(SymplecticMatrix(2.0)) == SymplecticMatrix(-2.0)
+            end
+            @testset "Inplace mul!" begin
+                z1 = [1 + 2im; 1 - 2im]
+                @test lmul!(Q, copy(z1)) == Q * z1
+                @test rmul!(copy(z1'), Q) == z1' * Q
 
-            z1 = [1 + 2im; 1 - 2im]
-            @test lmul!(Q, copy(z1)) == Q * z1
-            @test rmul!(copy(z1'), Q) == z1' * Q
+                z1_copy = copy(z1)
+                mul!(z1_copy, Q, z1)
+                @test z1_copy == Q * z1
 
-            z1_copy = copy(z1)
-            mul!(z1_copy, Q, z1)
-            @test z1_copy == Q * z1
-
-            mul!(z1_copy', z1', Q)
-            @test z1_copy' == (z1' * Q)
+                mul!(z1_copy', z1', Q)
+                @test z1_copy' == (z1' * Q)
+            end
         end
 
         @testset "Symplectic Inverse Ops." begin
