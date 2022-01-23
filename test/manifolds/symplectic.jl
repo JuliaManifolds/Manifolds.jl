@@ -124,4 +124,47 @@ include("../utils.jl")
             )
         end
     end
+
+    @testset "SymplecticMatrix" begin
+        # TODO: Test for different type matrices.
+        M = Symplectic(4)
+        p1 = [
+                0   0  -2   3
+                0   0   1  -1
+               -1  -1   0   0
+               -3  -2   4  -4
+             ]
+        p2 = [
+            0   0  -2   5
+             0   0   1  -2
+            -2  -1   0   0
+            -5  -2   4  -8
+            ]
+        Q = SymplecticMatrix(p1, p2)
+        Q2 = SymplecticMatrix(1)
+
+        @testset "Type Basics" begin
+            @test Q == Q2
+            @test ndims(Q) == 2
+            @test copy(Q) == Q
+            @test eltype(SymplecticMatrix(1//1)) == Rational{Int64}
+            @test convert(SymplecticMatrix{Float64}, Q) == SymplecticMatrix(1.0)
+            @test "$Q" == "SymplecticMatrix{Int64}(): 1*[0 I; -I 0]"
+            @test ("$(SymplecticMatrix(1.0 + 2.0im))" ==
+                    "SymplecticMatrix{ComplexF64}(): (1.0 + 2.0im)*[0 I; -I 0]")
+        end
+
+        @testset "Matrix Operations" begin
+            @test -Q == SymplecticMatrix(-1)
+            @test (2*Q)*(5//6) == SymplecticMatrix(5//3)
+            @test Q * Q == -I
+        end
+
+        @testset "symplectic inverse" begin
+            @test ((Q' * p1' * Q) * p1 - I) == zeros(eltype(p1), size(p1)...)
+
+
+        end
+
+    end
 end
