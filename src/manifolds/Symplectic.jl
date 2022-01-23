@@ -225,7 +225,7 @@ end
 Convenience function to check whether or not an abstract matrix is square, with an even
 number (2n, 2n) of rows and columns. Then returns the integer part of the even dimension.
 """
-function get_even_dims(p; square=false)
+function get_half_dims(p, square=false)
     n, k = size(p)
     # Otherwise, both dimensions just need to be even.
     # First check that dimensions are even:
@@ -253,10 +253,8 @@ end
 SymplecticMatrix(λ::T) where {T<:Number} = SymplecticMatrix{T}(λ)
 
 function SymplecticMatrix(arrays::Vararg{AbstractArray})
-    begin
-        TS = Base.promote_type(map(eltype, arrays)...)
-        SymplecticMatrix(one(TS))
-    end
+    TS = Base.promote_type(map(eltype, arrays)...)
+    return SymplecticMatrix(one(TS))
 end
 
 ndims(Q::SymplecticMatrix) = 2
@@ -276,6 +274,10 @@ end
 
 (Base.:-)(Q::SymplecticMatrix) = SymplecticMatrix(-Q.λ)
 
+(Base.:^)(Q::SymplecticMatrix, n::Integer) = ifelse(n%2 == 0,
+                                            UniformScaling((Q.λ)^n),
+                                            SymplecticMatrix(-(Q.λ)^n))
+
 (Base.:*)(x::Number, Q::SymplecticMatrix) = SymplecticMatrix(x * Q.λ)
 (Base.:*)(Q::SymplecticMatrix, x::Number) = SymplecticMatrix(x * Q.λ)
 function (Base.:*)(Q1::SymplecticMatrix, Q2::SymplecticMatrix)
@@ -292,7 +294,7 @@ Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1 / Q.λ))
 (Base.:+)(Q::SymplecticMatrix, p::AbstractMatrix) = p + Q
 function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
     # When we are adding, the Matrices must match in size:
-    n, _ = get_even_dims(p; square=true)
+    n, _ = get_half_dims(p, true)
 
     # Allocate new memory:
     TS = Base._return_type(+, Tuple{eltype(p),eltype(Q)})
@@ -311,7 +313,7 @@ end
 (Base.:-)(p::AbstractMatrix, Q::SymplecticMatrix) = p + (-Q)
 
 function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
-    _, k = Manifolds.get_even_dims(p)
+    _, k = Manifolds.get_half_dims(p)
 
     # Allocate new memory:
     TS = typeof(one(eltype(p)) + one(eltype(Q)))
@@ -324,7 +326,7 @@ function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
 end
 
 function (Base.:*)(Q::SymplecticMatrix, p::AbstractMatrix)
-    n, _ = Manifolds.get_even_dims(p)
+    n, _ = Manifolds.get_half_dims(p)
 
     # Allocate new memory:
     TS = typeof(one(eltype(p)) + one(eltype(Q)))
@@ -340,7 +342,7 @@ end
 function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractMatrix)
     # Perform left multiplication by a symplectic matrix,
     # overwriting the matrix p in place:
-    n, _ = get_even_dims(p)
+    n, _ = get_half_dims(p)
 
     half_row_p = copy(@inbounds view(p, 1:n, :))
 
@@ -357,7 +359,7 @@ end
 function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
     # Perform right multiplication by a symplectic matrix,
     # overwriting the matrix p in place:
-    _, k = get_even_dims(p)
+    _, k = get_half_dims(p)
 
     half_col_p = copy(@inbounds view(p, :, 1:k))
 
@@ -373,7 +375,7 @@ function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
 end
 
 function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractMatrix, Q::SymplecticMatrix)
-    _, k = get_even_dims(p)
+    _, k = get_half_dims(p)
     # Perform right mulitply by λ*Q:
     mul!((@inbounds view(A, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
     mul!((@inbounds view(A, :, (k + 1):lastindex(A, 2))), Q.λ, @inbounds view(p, :, 1:k))
@@ -381,7 +383,7 @@ function LinearAlgebra.mul!(A::AbstractMatrix, p::AbstractMatrix, Q::SymplecticM
 end
 
 function LinearAlgebra.mul!(A::AbstractMatrix, Q::SymplecticMatrix, p::AbstractMatrix)
-    n, _ = get_even_dims(p)
+    n, _ = get_half_dims(p)
     # Perform left mulitply by λ*Q:
     mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
     mul!((@inbounds view(A, (n + 1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
