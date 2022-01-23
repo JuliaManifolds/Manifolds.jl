@@ -592,10 +592,11 @@ function gradient!(
 end
 
 @doc raw"""
-    change_representer(::MetricManifold{𝔽, Euclidean, ExtendedSymplecticMetric},
-                       ::EuclideanMetric, p, X)
-    change_representer!(::MetricManifold{𝔽, Euclidean, ExtendedSymplecticMetric}, Y,
-                        ::EuclideanMetric, p, X)
+    change_representer(MetMan::MetricManifold{𝔽, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric},
+                       EucMet::EuclideanMetric, p, X)
+    change_representer!(MetMan::MetricManifold{𝔽, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric},
+                        Y, EucMet::EuclideanMetric, p, X)
+
 Change the representation of an arbitrary element ``χ ∈ \mathbb{R}^{2n \times 2n}``
 by a mapping
 ````math
@@ -604,24 +605,19 @@ by a mapping
 ````
 The mapping is defined such that the metric compatibility condition
 ````math
-    g_p(c_p(χ), η) = ⟨χ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ)
+    g_p(c_p(χ), η) ⟨p^{-1}c_p(χ), p^{-1}η⟩ = ⟨χ, η⟩^{\text{Euc}}
+        \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ)
 ````
-holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref).
+holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref) extended
+to all of .
 """
-change_representer(
-    ::MetricManifold{ℝ,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
-    ::EuclideanMetric,
-    p,
-    X,
-) where {m,n,𝔽}
+function change_representer(MetMan::MetricManifold{𝔽, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric},
+                            EucMet::EuclideanMetric, p, X) where {𝔽, m, n}
+    return change_representer!(MetMan, similar(X), EucMet, p, X)
+end
 
-function change_representer!(
-    ::MetricManifold{ℝ,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
-    Y,
-    ::EuclideanMetric,
-    p,
-    X,
-) where {m,n,𝔽}
+function change_representer!(::MetricManifold{𝔽, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric}, Y,
+                             ::EuclideanMetric, p, X) where {𝔽, m, n}
     Y .= p * p' * X
     return Y
 end
