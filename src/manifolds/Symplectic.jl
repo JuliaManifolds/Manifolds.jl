@@ -816,8 +816,8 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 	> arXiv preprint arXiv:2108.12447, 2021 (https://arxiv.org/abs/2108.12447)
 """
 function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
-    U_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
-    V_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
+    U_inv = lu(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
+    V_inv = lu(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
 
     X .= 2 .* ((p / V_inv .- p / U_inv) .+ ((p + q) / U_inv) .- p)
     return X
