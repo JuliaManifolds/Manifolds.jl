@@ -103,6 +103,25 @@ include("../utils.jl")
                     3 -4 2 -2 -7 -13
                 ],
                 [
+                    6 -1 11 -10 8 6
+                    2 0 3 23 -14 -14
+                    -3 0 -5 -1 5 1
+                    0 0 0 0 -1 0
+                    0 0 0 5 -3 -3
+                    0 0 0 3 -4 -2
+                ],
+                [
+                    2 -1 5 -4 4 2
+                    2 0 3 11 -6 -6
+                    -1 0 -2 -4 7 3
+                    0 0 0 0 -1 0
+                    0 0 0 2 -1 -1
+                    0 0 0 3 -4 -2
+                ],
+            ]
+
+            large_tr_norm_points = [
+                [
                     0 -3 -5 0 0 0
                     -2 -3 4 0 0 0
                     -3 -5 5 0 0 0
@@ -119,24 +138,72 @@ include("../utils.jl")
                     -1 -2 3 45 -11 7
                 ],
             ]
-            points = map(x -> Array{Float64}(x), points)
-            test_manifold(
-                Sp_6,
-                points;
-                retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
-                default_inverse_retraction_method=CayleyInverseRetraction(),
-                test_inplace=true,
-                is_point_atol_multiplier=1.0e6,
-                is_tangent_atol_multiplier=1.0e4,
-                retraction_atol_multiplier=1.0e4,
-                test_reverse_diff=false,
-                test_forward_diff=false,
-                test_project_tangent=true,
-                test_injectivity_radius=false,
-                test_exp_log=false,
-                test_representation_size=true,
-            )
+
+            @testset "Type $(Matrix{Float64})" begin
+                type = Matrix{Float64}
+                pts = convert.(type, points)
+                test_manifold(
+                    Sp_6,
+                    cat(pts, large_tr_norm_points; dims=1);
+                    retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
+                    default_inverse_retraction_method=CayleyInverseRetraction(),
+                    test_inplace=true,
+                    is_point_atol_multiplier=1.0e8,
+                    is_tangent_atol_multiplier=1.0e6,
+                    retraction_atol_multiplier=1.0e4,
+                    test_reverse_diff=false,
+                    test_forward_diff=false,
+                    test_project_tangent=true,
+                    test_injectivity_radius=false,
+                    test_exp_log=false,
+                    test_representation_size=true,
+                )
+            end # end for
+
+            TEST_FLOAT32 && @testset "Type $(Matrix{Float32})" begin
+                type = Matrix{Float64}
+                pts = convert.(type, points)
+                test_manifold(
+                    Sp_6,
+                    pts;
+                    retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
+                    default_inverse_retraction_method=CayleyInverseRetraction(),
+                    test_inplace=true,
+                    is_point_atol_multiplier=1.0e8,
+                    is_tangent_atol_multiplier=1.0e6,
+                    retraction_atol_multiplier=1.0e4,
+                    test_reverse_diff=false,
+                    test_forward_diff=false,
+                    test_project_tangent=true,
+                    test_injectivity_radius=false,
+                    test_exp_log=false,
+                    test_representation_size=true,
+                )
+            end # end for
+
+            TEST_STATIC_SIZED && @testset "Type $(MMatrix{6, 6, Float64, 36})" begin
+                type = MMatrix{6,6,Float64,36}
+                pts = convert.(type, points)
+                test_manifold(
+                    Sp_6,
+                    pts;
+                    retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
+                    default_inverse_retraction_method=CayleyInverseRetraction(),
+                    test_inplace=true,
+                    is_point_atol_multiplier=1.0e7,
+                    is_tangent_atol_multiplier=1.0e6,
+                    retraction_atol_multiplier=1.0e4,
+                    test_reverse_diff=false,
+                    test_forward_diff=false,
+                    test_project_tangent=false, # Cannot solve 'sylvester' for MMatrix-type.
+                    test_injectivity_radius=false,
+                    test_exp_log=false,
+                    test_representation_size=true,
+                )
+            end # end for
         end
+
+        @testset "Gradient Computations" begin end
     end
 
     @testset "SymplecticMatrix" begin
