@@ -770,9 +770,8 @@ denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
 function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
     p_star_X = symplectic_inverse_times(M, p, X)
 
-    divisor = lu!(2 * I - p_star_X)
-    ldiv!(divisor, add_scaled_I!(p_star_X, 2.0))
-    q .= p * p_star_X
+    divisor = lu(2 * I - p_star_X)
+    q .= p * (divisor \ add_scaled_I!(p_star_X, 2.0))
     return q
 end
 
