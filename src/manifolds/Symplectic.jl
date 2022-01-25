@@ -220,215 +220,6 @@ function exp!(M::Symplectic{n}, q, p, X) where {n}
     return q
 end
 
-@doc raw"""
-    get_even_dims(p; square=false)::Integer
-
-Convenience function to check whether or not an abstract matrix is square, with an even
-number (2n, 2n) of rows and columns. Then returns the integer part of the even dimension.
-"""
-function get_half_dims(p::AbstractMatrix, check_rows=true, check_cols=true, square=false)
-    n, k = size(p)
-
-    rows_ok = !check_rows || (n % 2 == 0)
-    cols_ok = !check_cols || (k % 2 == 0)
-    (rows_ok && cols_ok) || throw(
-        DimensionMismatch(
-            "Matrix does not have required even " *
-            "dimensions (n, k): Dimensions are ($(n), $(k)).",
-        ),
-    )
-
-    # If 'square=true', we require m==n:
-    (!square || (n == k)) || throw(
-        DimensionMismatch(
-            "Matrix is not square with dimensions " *
-            "(2n, 2n): Dimensions are ($(n), $(k)).",
-        ),
-    )
-
-    return div(n, 2), div(k, 2)
-end
-function get_half_dims(p::AbstractVector, check_rows=true, check_cols=true, square=false)
-    return get_half_dims(reshape(p, size(p)..., 1), check_rows, check_cols, square)
-end
-
-@doc raw"""
-    SymplecticMatrix{T}
-
-A lightweight structure to represent the action of the matrix
-representation of the canonical symplectic form,
-````math
-Q_{2n} =
-\begin{bmatrix}
-0_n & I_n \\
- -I_n & 0_n
-\end{bmatrix} \quad \in ℝ^{2n \times 2n},
-````
-such that
-````math
-\omega_{2n}(x, y) = x^TQ_{2n}y, \quad x, y \in ℝ^{2n}.
-````
-
-The entire matrix is however not instantiated in memory, instead a scalar
-``λ`` of type `T` is stored, which is used to keep track of operations and multiplications
-applied  to each `SymplecticMatrix`. For example, given `Q = SymplecticMatrix(1.0)`,
-represented as `1.0*[0 I; -I 0]`, the adjoint `Q'` returns `SymplecticMatrix(-1.0)`.
-"""
-struct SymplecticMatrix{T}
-    λ::T
-end
-SymplecticMatrix() = SymplecticMatrix(1)
-SymplecticMatrix(λ::T) where {T<:Number} = SymplecticMatrix{T}(λ)
-
-function SymplecticMatrix(arrays::Vararg{AbstractArray})
-    TS = Base.promote_type(map(eltype, arrays)...)
-    return SymplecticMatrix(one(TS))
-end
-
-ndims(Q::SymplecticMatrix) = 2
-copy(Q::SymplecticMatrix) = SymplecticMatrix(Q.λ)
-Base.eltype(::SymplecticMatrix{T}) where {T} = T
-function Base.convert(::Type{SymplecticMatrix{T}}, Q::SymplecticMatrix) where {T}
-    return SymplecticMatrix(convert(T, Q.λ))
-end
-
-function Base.show(io::IO, Q::SymplecticMatrix)
-    s = "$(Q.λ)"
-    if occursin(r"\w+\s*[\+\-]\s*\w+", s)
-        s = "($s)"
-    end
-    return print(io, typeof(Q), "(): $(s)*[0 I; -I 0]")
-end
-
-(Base.:-)(Q::SymplecticMatrix) = SymplecticMatrix(-Q.λ)
-
-function (Base.:^)(Q::SymplecticMatrix, n::Integer)
-    return ifelse(
-        n % 2 == 0,
-        UniformScaling((-1)^(div(n, 2)) * (Q.λ)^n),
-        SymplecticMatrix((-1)^(div(n - 1, 2)) * (Q.λ)^n),
-    )
-end
-
-(Base.:*)(x::Number, Q::SymplecticMatrix) = SymplecticMatrix(x * Q.λ)
-(Base.:*)(Q::SymplecticMatrix, x::Number) = SymplecticMatrix(x * Q.λ)
-function (Base.:*)(Q1::SymplecticMatrix, Q2::SymplecticMatrix)
-    return LinearAlgebra.UniformScaling(-Q1.λ * Q2.λ)
-end
-
-Base.transpose(Q::SymplecticMatrix) = -Q
-Base.adjoint(Q::SymplecticMatrix) = -SymplecticMatrix(conj(Q.λ))
-Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1 / Q.λ))
-
-(Base.:+)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = SymplecticMatrix(Q1.λ + Q2.λ)
-(Base.:-)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = SymplecticMatrix(Q1.λ - Q2.λ)
-
-(Base.:+)(Q::SymplecticMatrix, p::AbstractMatrix) = p + Q
-function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
-    # When we are adding, the Matrices must match in size:
-    n, _ = get_half_dims(p, true, false, true)
-
-    # Allocate new memory:
-    TS = Base._return_type(+, Tuple{eltype(p),eltype(Q)})
-    out = copyto!(similar(p, TS), p)
-
-    # Add Q.λ multiples of the UniformScaling to the lower left and upper right blocks of p:
-    λ_Id = LinearAlgebra.UniformScaling(Q.λ)
-
-    out[1:n, (n + 1):(2n)] += λ_Id
-    out[(n + 1):(2n), 1:n] -= λ_Id
-    return out
-end
-
-# Binary minus:
-(Base.:-)(Q::SymplecticMatrix, p::AbstractMatrix) = Q + (-p)
-(Base.:-)(p::AbstractMatrix, Q::SymplecticMatrix) = p + (-Q)
-
-function (Base.:*)(Q::SymplecticMatrix, p::AbstractVecOrMat)
-    n, _ = get_half_dims(p, true, false)
-
-    # Allocate new memory:
-    TS = typeof(one(eltype(p)) + one(eltype(Q)))
-    Qp = similar(p, TS)
-
-    # Perform left mulitply by λ*Q:
-    mul!((@inbounds view(Qp, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
-    mul!((@inbounds view(Qp, (n + 1):lastindex(Qp, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
-
-    return Qp
-end
-
-function (Base.:*)(p::AbstractVecOrMat, Q::SymplecticMatrix)
-    _, k = get_half_dims(p, false, true)
-
-    # Allocate new memory:
-    TS = typeof(one(eltype(p)) + one(eltype(Q)))
-    pQ = similar(p, TS)
-
-    # Perform right mulitply by λ*Q:
-    mul!((@inbounds view(pQ, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
-    mul!((@inbounds view(pQ, :, (k + 1):lastindex(pQ, 2))), Q.λ, @inbounds view(p, :, 1:k))
-    return pQ
-end
-
-function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractVecOrMat)
-    # Perform left multiplication by a symplectic matrix,
-    # overwriting the matrix p in place:
-    n, _ = get_half_dims(p, true, false)
-
-    half_row_p = copy(@inbounds view(p, 1:n, :))
-
-    mul!((@inbounds view(p, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
-
-    mul!(
-        (@inbounds view(p, (n + 1):lastindex(p, 1), :)),
-        -Q.λ,
-        @inbounds view(half_row_p, :, :)
-    )
-    return p
-end
-
-function LinearAlgebra.rmul!(p::AbstractVecOrMat, Q::SymplecticMatrix)
-    # Perform right multiplication by a symplectic matrix,
-    # overwriting the matrix p in place:
-    _, k = get_half_dims(p, false, true)
-
-    half_col_p = copy(@inbounds view(p, :, 1:k))
-
-    mul!((@inbounds view(p, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
-
-    mul!(
-        (@inbounds view(p, :, (k + 1):lastindex(p, 2))),
-        Q.λ,
-        @inbounds view(half_col_p, :, :)
-    )
-
-    return p
-end
-
-function LinearAlgebra.mul!(A::AbstractVecOrMat, Q::SymplecticMatrix, p::AbstractVecOrMat)
-    n, _ = get_half_dims(p, true, false)
-    # Perform left multiply by λ*Q:
-    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
-    mul!((@inbounds view(A, (n + 1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
-    return A
-end
-
-function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractVecOrMat, Q::SymplecticMatrix)
-    _, k = get_half_dims(p, false, true)
-    # Perform right multiply by λ*Q:
-    mul!((@inbounds view(A, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
-    mul!((@inbounds view(A, :, (k + 1):lastindex(A, 2))), Q.λ, @inbounds view(p, :, 1:k))
-    return A
-end
-
-function add_scaled_I!(A::AbstractMatrix, λ::Number)
-    LinearAlgebra.checksquare(A)
-    @inbounds for i in axes(A, 1)
-        A[i, i] += λ
-    end
-    return A
-end
 
 @doc raw"""
     inv(M::Symplectic{n, ℝ}, A) where {n, ℝ}
@@ -844,4 +635,214 @@ function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
 
     X .= 2 .* ((p / V_inv .- p / U_inv) .+ ((p + q) / U_inv) .- p)
     return X
+end
+
+@doc raw"""
+    get_half_dims(p, check_rows=true, check_cols=true, square=false)
+
+Convenience function to check whether or not an abstract matrix is square, with an even
+number (2n, 2n) of rows and columns. Then returns the integer part of the even dimension.
+"""
+function get_half_dims(p::AbstractMatrix, check_rows=true, check_cols=true, square=false)
+    n, k = size(p)
+
+    rows_ok = !check_rows || (n % 2 == 0)
+    cols_ok = !check_cols || (k % 2 == 0)
+    (rows_ok && cols_ok) || throw(
+        DimensionMismatch(
+            "Matrix does not have required even " *
+            "dimensions (n, k): Dimensions are ($(n), $(k)).",
+        ),
+    )
+
+    # If 'square=true', we require m==n:
+    (!square || (n == k)) || throw(
+        DimensionMismatch(
+            "Matrix is not square with dimensions " *
+            "(2n, 2n): Dimensions are ($(n), $(k)).",
+        ),
+    )
+
+    return div(n, 2), div(k, 2)
+end
+function get_half_dims(p::AbstractVector, check_rows=true, check_cols=true, square=false)
+    return get_half_dims(reshape(p, size(p)..., 1), check_rows, check_cols, square)
+end
+
+function add_scaled_I!(A::AbstractMatrix, λ::Number)
+    LinearAlgebra.checksquare(A)
+    @inbounds for i in axes(A, 1)
+        A[i, i] += λ
+    end
+    return A
+end
+
+@doc raw"""
+    SymplecticMatrix{T}
+
+A lightweight structure to represent the action of the matrix
+representation of the canonical symplectic form,
+````math
+Q_{2n} =
+\begin{bmatrix}
+0_n & I_n \\
+ -I_n & 0_n
+\end{bmatrix} \quad \in ℝ^{2n \times 2n},
+````
+such that
+````math
+\omega_{2n}(x, y) = x^TQ_{2n}y, \quad x, y \in ℝ^{2n}.
+````
+
+The entire matrix is however not instantiated in memory, instead a scalar
+``λ`` of type `T` is stored, which is used to keep track of operations and multiplications
+applied  to each `SymplecticMatrix`. For example, given `Q = SymplecticMatrix(1.0)`,
+represented as `1.0*[0 I; -I 0]`, the adjoint `Q'` returns `SymplecticMatrix(-1.0)`.
+"""
+struct SymplecticMatrix{T}
+    λ::T
+end
+SymplecticMatrix() = SymplecticMatrix(1)
+SymplecticMatrix(λ::T) where {T<:Number} = SymplecticMatrix{T}(λ)
+
+function SymplecticMatrix(arrays::Vararg{AbstractArray})
+    TS = Base.promote_type(map(eltype, arrays)...)
+    return SymplecticMatrix(one(TS))
+end
+
+ndims(Q::SymplecticMatrix) = 2
+copy(Q::SymplecticMatrix) = SymplecticMatrix(Q.λ)
+Base.eltype(::SymplecticMatrix{T}) where {T} = T
+function Base.convert(::Type{SymplecticMatrix{T}}, Q::SymplecticMatrix) where {T}
+    return SymplecticMatrix(convert(T, Q.λ))
+end
+
+function Base.show(io::IO, Q::SymplecticMatrix)
+    s = "$(Q.λ)"
+    if occursin(r"\w+\s*[\+\-]\s*\w+", s)
+        s = "($s)"
+    end
+    return print(io, typeof(Q), "(): $(s)*[0 I; -I 0]")
+end
+
+(Base.:-)(Q::SymplecticMatrix) = SymplecticMatrix(-Q.λ)
+
+function (Base.:^)(Q::SymplecticMatrix, n::Integer)
+    return ifelse(
+        n % 2 == 0,
+        UniformScaling((-1)^(div(n, 2)) * (Q.λ)^n),
+        SymplecticMatrix((-1)^(div(n - 1, 2)) * (Q.λ)^n),
+    )
+end
+
+(Base.:*)(x::Number, Q::SymplecticMatrix) = SymplecticMatrix(x * Q.λ)
+(Base.:*)(Q::SymplecticMatrix, x::Number) = SymplecticMatrix(x * Q.λ)
+function (Base.:*)(Q1::SymplecticMatrix, Q2::SymplecticMatrix)
+    return LinearAlgebra.UniformScaling(-Q1.λ * Q2.λ)
+end
+
+Base.transpose(Q::SymplecticMatrix) = -Q
+Base.adjoint(Q::SymplecticMatrix) = -SymplecticMatrix(conj(Q.λ))
+Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1 / Q.λ))
+
+(Base.:+)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = SymplecticMatrix(Q1.λ + Q2.λ)
+(Base.:-)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = SymplecticMatrix(Q1.λ - Q2.λ)
+
+(Base.:+)(Q::SymplecticMatrix, p::AbstractMatrix) = p + Q
+function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
+    # When we are adding, the Matrices must match in size:
+    n, _ = get_half_dims(p, true, false, true)
+
+    # Allocate new memory:
+    TS = Base._return_type(+, Tuple{eltype(p),eltype(Q)})
+    out = copyto!(similar(p, TS), p)
+
+    # Add Q.λ multiples of the UniformScaling to the lower left and upper right blocks of p:
+    λ_Id = LinearAlgebra.UniformScaling(Q.λ)
+
+    out[1:n, (n + 1):(2n)] += λ_Id
+    out[(n + 1):(2n), 1:n] -= λ_Id
+    return out
+end
+
+# Binary minus:
+(Base.:-)(Q::SymplecticMatrix, p::AbstractMatrix) = Q + (-p)
+(Base.:-)(p::AbstractMatrix, Q::SymplecticMatrix) = p + (-Q)
+
+function (Base.:*)(Q::SymplecticMatrix, p::AbstractVecOrMat)
+    n, _ = get_half_dims(p, true, false)
+
+    # Allocate new memory:
+    TS = typeof(one(eltype(p)) + one(eltype(Q)))
+    Qp = similar(p, TS)
+
+    # Perform left mulitply by λ*Q:
+    mul!((@inbounds view(Qp, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
+    mul!((@inbounds view(Qp, (n + 1):lastindex(Qp, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
+
+    return Qp
+end
+
+function (Base.:*)(p::AbstractVecOrMat, Q::SymplecticMatrix)
+    _, k = get_half_dims(p, false, true)
+
+    # Allocate new memory:
+    TS = typeof(one(eltype(p)) + one(eltype(Q)))
+    pQ = similar(p, TS)
+
+    # Perform right mulitply by λ*Q:
+    mul!((@inbounds view(pQ, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
+    mul!((@inbounds view(pQ, :, (k + 1):lastindex(pQ, 2))), Q.λ, @inbounds view(p, :, 1:k))
+    return pQ
+end
+
+function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractVecOrMat)
+    # Perform left multiplication by a symplectic matrix,
+    # overwriting the matrix p in place:
+    n, _ = get_half_dims(p, true, false)
+
+    half_row_p = copy(@inbounds view(p, 1:n, :))
+
+    mul!((@inbounds view(p, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
+
+    mul!(
+        (@inbounds view(p, (n + 1):lastindex(p, 1), :)),
+        -Q.λ,
+        @inbounds view(half_row_p, :, :)
+    )
+    return p
+end
+
+function LinearAlgebra.rmul!(p::AbstractVecOrMat, Q::SymplecticMatrix)
+    # Perform right multiplication by a symplectic matrix,
+    # overwriting the matrix p in place:
+    _, k = get_half_dims(p, false, true)
+
+    half_col_p = copy(@inbounds view(p, :, 1:k))
+
+    mul!((@inbounds view(p, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
+
+    mul!(
+        (@inbounds view(p, :, (k + 1):lastindex(p, 2))),
+        Q.λ,
+        @inbounds view(half_col_p, :, :)
+    )
+
+    return p
+end
+
+function LinearAlgebra.mul!(A::AbstractVecOrMat, Q::SymplecticMatrix, p::AbstractVecOrMat)
+    n, _ = get_half_dims(p, true, false)
+    # Perform left multiply by λ*Q:
+    mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
+    mul!((@inbounds view(A, (n + 1):lastindex(A, 1), :)), -Q.λ, @inbounds view(p, 1:n, :))
+    return A
+end
+
+function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractVecOrMat, Q::SymplecticMatrix)
+    _, k = get_half_dims(p, false, true)
+    # Perform right multiply by λ*Q:
+    mul!((@inbounds view(A, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
+    mul!((@inbounds view(A, :, (k + 1):lastindex(A, 2))), Q.λ, @inbounds view(p, :, 1:k))
+    return A
 end
