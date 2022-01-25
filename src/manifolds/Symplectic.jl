@@ -195,6 +195,7 @@ end
 
 @doc raw"""
     exp(M::Symplectic, p, X)
+    exp!(M::Symplectic, q, p, X)
 
 The Exponential mapping on the Symplectic manifold with the
 [`RealSymplecticMetric`](@ref) Riemannian metric.
@@ -251,9 +252,32 @@ function get_half_dims(p::AbstractVector, check_rows=true, check_cols=true, squa
     return get_half_dims(reshape(p, size(p)..., 1), check_rows, check_cols, square)
 end
 
+@doc raw"""
+    SymplecticMatrix{T}
+
+A lightweight structure to represent the action of the matrix
+representation of the canonical symplectic form,
+````math
+Q_{2n} =
+\begin{bmatrix}
+0_n & I_n \\
+ -I_n & 0_n
+\end{bmatrix} \quad \in ℝ^{2n \times 2n},
+````
+such that
+````math
+\omega_{2n}(x, y) = x^TQ_{2n}y, \quad x, y \in ℝ^{2n}.
+````
+
+The entire matrix is however not instantiated in memory, instead a scalar
+``λ`` of type `T` is stored, which is used to keep track of operations and multiplications
+applied  to each `SymplecticMatrix`. For example, given `Q = SymplecticMatrix(1.0)`,
+represented as `1.0*[0 I; -I 0]`, the adjoint `Q'` returns `SymplecticMatrix(-1.0)`.
+"""
 struct SymplecticMatrix{T}
     λ::T
 end
+SymplecticMatrix() = SymplecticMatrix(1)
 SymplecticMatrix(λ::T) where {T<:Number} = SymplecticMatrix{T}(λ)
 
 function SymplecticMatrix(arrays::Vararg{AbstractArray})
