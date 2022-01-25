@@ -130,6 +130,16 @@ include("../utils.jl")
             X2_p_norm = 1 / 2
             @test norm(Sp_2, p_2, X2) == X2_p_norm
             @test norm(Sp_2, p_2, X2) == √(inner(Sp_2, p_2, X2, X2))
+
+            # Project tangent vector into (T_pSp)^{\perp}:
+            proj_normal_X2 = Manifolds.project_riemannian_normal!(Sp_2, copy(X2), p_2, X2)
+            @test isapprox(proj_normal_X2, zero(X2); atol=1.0e-16)
+
+            # Project Project matrix A ∈ ℝ^{2 × 2} onto (T_pSp):
+            A_2 = [5.0 -21.5; 3.14 14.9]
+            A_2_proj = similar(A_2)
+            Manifolds.project_riemannian!(Sp_2, A_2_proj, p_2, A_2)
+            @test is_vector(Sp_2, p_2, A_2_proj; atol=1.0e-16)
         end
         @testset "Generate random points/tangent vectors" begin
             M_big = Symplectic(20)
@@ -158,7 +168,7 @@ include("../utils.jl")
                     test_exp_log=false,
                     test_representation_size=true,
                 )
-            end # end for
+            end
 
             TEST_FLOAT32 && @testset "Type $(Matrix{Float32})" begin
                 type = Matrix{Float64}
@@ -211,13 +221,20 @@ include("../utils.jl")
             p_grad = convert(Array{Float64}, points[1])
             ad_diff = RiemannianProjectionBackend(Manifolds.ForwardDiffBackend())
 
-            @test (Manifolds.gradient(Sp_6, test_f, p_grad, ad_diff)
-                    == analytical_grad_f(p_grad))
+            @test isapprox(
+                Manifolds.gradient(Sp_6, test_f, p_grad, ad_diff),
+                analytical_grad_f(p_grad); atol=1.0e-16)
+            @test isapprox(
+                Manifolds.gradient(Sp_6, test_f, p_grad, ad_diff; extended_metric=false),
+                analytical_grad_f(p_grad); atol=1.0e-12)
 
             grad_f_p = similar(p_grad)
             Manifolds.gradient!(Sp_6, test_f, grad_f_p, p_grad, ad_diff)
-            @test grad_f_p == analytical_grad_f(p_grad)
+            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-16)
 
+            Manifolds.gradient!(Sp_6, test_f, grad_f_p, p_grad, ad_diff;
+                                extended_metric=false)
+            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-12)
         end
     end
 
