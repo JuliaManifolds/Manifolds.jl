@@ -5,7 +5,7 @@ include("../utils.jl")
         Sp_2 = Symplectic(2 * 1)
         Metr_Sp_2 = MetricManifold(Sp_2, RealSymplecticMetric())
 
-        p = [0.0 1.0/2.0; -2.0 -2.0]
+        p_2 = [0.0 1.0/2.0; -2.0 -2.0]
         X1 = [
             -0.121212 0.121212
             0.969697 -1.0
@@ -76,18 +76,20 @@ include("../utils.jl")
             @test base_manifold(Sp_2) === Sp_2
             @test (@inferred Manifolds.default_metric_dispatch(Metr_Sp_2)) === Val(true)
 
-            @test is_point(Sp_2, p)
-            @test !is_point(Sp_2, p + I)
+            @test is_point(Sp_2, p_2)
+            @test_throws DomainError is_point(Sp_2, p_2 + I, true)
 
-            @test is_vector(Sp_2, p, X1; atol=1.0e-6)
-            @test is_vector(Sp_2, p, X2; atol=1.0e-12)
-            @test is_vector(Sp_2, p, X1 + X2; atol=1.0e-6)
-            @test !is_vector(Sp_2, p, X1 + [0.1 0.1; -0.1 0.1]; atol=1.0e-6)
+            @test is_vector(Sp_2, p_2, X1; atol=1.0e-6)
+            @test is_vector(Sp_2, p_2, X2; atol=1.0e-12)
+            @test is_vector(Sp_2, p_2, X1 + X2; atol=1.0e-6)
+            @test_throws DomainError is_vector(Sp_2, p_2, X1 + [0.1 0.1; -0.1 0.1], true)
         end
         @testset "Symplectic Inverse" begin
             I_2n = Array(I, 2, 2)
-            @test Manifolds.symplectic_inverse_times(Sp_2, p, p) == I_2n
-            @test inv!(Sp_2, copy(p)) * p == I_2n
+            @test Manifolds.symplectic_inverse_times(Sp_2, p_2, p_2) == I_2n
+            @test Manifolds.symplectic_inverse_times!(Sp_2, copy(p_2), p_2, p_2) == I_2n
+            @test inv(Sp_2, p_2) * p_2 == I_2n
+            @test inv!(Sp_2, copy(p_2)) * p_2 == I_2n
         end
         @testset "Embedding and Projection" begin
             x = [0.0 1.0/2.0; -2.0 -2.0]
@@ -96,7 +98,7 @@ include("../utils.jl")
             @test z == x
 
             Y = similar(X1)
-            embed!(Sp_2, Y, p, X1)
+            embed!(Sp_2, Y, p_2, X1)
             @test Y == X1
         end
         @testset "Retractions and Exponential Mapping" begin
@@ -104,30 +106,30 @@ include("../utils.jl")
                 -0.0203171 0.558648
                 -1.6739 -3.19344
             ]
-            @test isapprox(exp(Sp_2, p, X2), q_exp; atol=1.0e-5)
-            @test isapprox(retract(Sp_2, p, X2, ExponentialRetraction()), q_exp; atol=1.0e-5)
+            @test isapprox(exp(Sp_2, p_2, X2), q_exp; atol=1.0e-5)
+            @test isapprox(retract(Sp_2, p_2, X2, ExponentialRetraction()), q_exp; atol=1.0e-5)
 
             q_cay = [
                 0.0 0.5
                 -2.0 -3.0
             ]
-            @test retract(Sp_2, p, X2) == q_cay
-            @test retract(Sp_2, p, X2, CayleyRetraction()) == q_cay
+            @test retract(Sp_2, p_2, X2) == q_cay
+            @test retract(Sp_2, p_2, X2, CayleyRetraction()) == q_cay
 
-            X_inv_cayley_retraction = inverse_retract(Sp_2, p, q_cay)
+            X_inv_cayley_retraction = inverse_retract(Sp_2, p_2, q_cay)
             X_inv_cayley_retraction_2 =
-                inverse_retract(Sp_2, p, q_cay, CayleyInverseRetraction())
+                inverse_retract(Sp_2, p_2, q_cay, CayleyInverseRetraction())
             @test X_inv_cayley_retraction == X_inv_cayley_retraction_2
             @test X_inv_cayley_retraction ≈ X2
         end
         @testset "Riemannian metric" begin
             X1_p_norm = 0.49259905148939337
-            @test norm(Sp_2, p, X1) == X1_p_norm
-            @test norm(Sp_2, p, X1) == √(inner(Sp_2, p, X1, X1))
+            @test norm(Sp_2, p_2, X1) == X1_p_norm
+            @test norm(Sp_2, p_2, X1) == √(inner(Sp_2, p_2, X1, X1))
 
             X2_p_norm = 1 / 2
-            @test norm(Sp_2, p, X2) == X2_p_norm
-            @test norm(Sp_2, p, X2) == √(inner(Sp_2, p, X2, X2))
+            @test norm(Sp_2, p_2, X2) == X2_p_norm
+            @test norm(Sp_2, p_2, X2) == √(inner(Sp_2, p_2, X2, X2))
         end
         @testset "Generate random points/tangent vectors" begin
             M_big = Symplectic(20)
