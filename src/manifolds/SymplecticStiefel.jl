@@ -39,7 +39,7 @@ function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
     return SymplecticStiefel{div(two_n, 2),div(two_k, 2),field}()
 end
 
-function Base.show(io::IO, ::SymplecticStiefel{n,k, 𝔽}) where {n,k, 𝔽}
+function Base.show(io::IO, ::SymplecticStiefel{n,k,𝔽}) where {n,k,𝔽}
     return print(io, "SymplecticStiefel{$(2n), $(2k), $(𝔽)}()")
 end
 

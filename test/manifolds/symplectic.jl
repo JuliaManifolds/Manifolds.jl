@@ -107,7 +107,11 @@ include("../utils.jl")
                 -1.6739 -3.19344
             ]
             @test isapprox(exp(Sp_2, p_2, X2), q_exp; atol=1.0e-5)
-            @test isapprox(retract(Sp_2, p_2, X2, ExponentialRetraction()), q_exp; atol=1.0e-5)
+            @test isapprox(
+                retract(Sp_2, p_2, X2, ExponentialRetraction()),
+                q_exp;
+                atol=1.0e-5,
+            )
 
             q_cay = [
                 0.0 0.5
@@ -117,8 +121,8 @@ include("../utils.jl")
             @test retract(Sp_2, p_2, X2, CayleyRetraction()) == q_cay
 
             X_inv_cayley_retraction = inverse_retract(Sp_2, p_2, q_cay)
-            X_inv_cayley_retraction_2 = inverse_retract(Sp_2, p_2, q_cay,
-                                                        CayleyInverseRetraction())
+            X_inv_cayley_retraction_2 =
+                inverse_retract(Sp_2, p_2, q_cay, CayleyInverseRetraction())
             @test X_inv_cayley_retraction == X_inv_cayley_retraction_2
             @test X_inv_cayley_retraction ≈ X2
         end
@@ -219,24 +223,34 @@ include("../utils.jl")
         @testset "Gradient Computations" begin
             test_f(p) = tr(p)
             Q_grad = SymplecticMatrix(points[1])
-            analytical_grad_f(p) = (1/2)*(p*Q_grad*p*Q_grad + p*p')
+            analytical_grad_f(p) = (1 / 2) * (p * Q_grad * p * Q_grad + p * p')
 
             p_grad = convert(Array{Float64}, points[1])
             ad_diff = RiemannianProjectionBackend(Manifolds.ForwardDiffBackend())
 
             @test isapprox(
                 Manifolds.gradient(Sp_6, test_f, p_grad, ad_diff),
-                analytical_grad_f(p_grad); atol=1.0e-16)
+                analytical_grad_f(p_grad);
+                atol=1.0e-16,
+            )
             @test isapprox(
                 Manifolds.gradient(Sp_6, test_f, p_grad, ad_diff; extended_metric=false),
-                analytical_grad_f(p_grad); atol=1.0e-12)
+                analytical_grad_f(p_grad);
+                atol=1.0e-12,
+            )
 
             grad_f_p = similar(p_grad)
             Manifolds.gradient!(Sp_6, test_f, grad_f_p, p_grad, ad_diff)
             @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-16)
 
-            Manifolds.gradient!(Sp_6, test_f, grad_f_p, p_grad, ad_diff;
-                                extended_metric=false)
+            Manifolds.gradient!(
+                Sp_6,
+                test_f,
+                grad_f_p,
+                p_grad,
+                ad_diff;
+                extended_metric=false,
+            )
             @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-12)
         end
     end

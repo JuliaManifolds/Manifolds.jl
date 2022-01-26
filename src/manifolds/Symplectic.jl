@@ -220,7 +220,6 @@ function exp!(M::Symplectic{n}, q, p, X) where {n}
     return q
 end
 
-
 @doc raw"""
     inv(M::Symplectic{n, ℝ}, A) where {n, ℝ}
 

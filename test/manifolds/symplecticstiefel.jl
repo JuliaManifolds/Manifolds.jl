@@ -4,87 +4,89 @@ include("../utils.jl")
     @testset "Real" begin
         SpSt_6_4 = SymplecticStiefel(2 * 3, 2 * 2)
 
-        p_6_4 = Array{Float64}([
-            0    0   -5  -1
-            0    0    9  -2
-            0    0   -2   1
-           -2   -9   -3   6
-           -3  -13  -21   9
-           -8  -36   18  -6
-        ])
+        p_6_4 = Array{Float64}(
+            [
+                0 0 -5 -1
+                0 0 9 -2
+                0 0 -2 1
+                -2 -9 -3 6
+                -3 -13 -21 9
+                -8 -36 18 -6
+            ],
+        )
         q_6_4 = Array{Float64}([
-            0   0   -3   1
-            0   0    8  -3
-            0   0   -2   1
-           -1  -4   -6   3
-           -1  -3  -21   9
-           -2  -6   18  -6
+            0 0 -3 1
+            0 0 8 -3
+            0 0 -2 1
+            -1 -4 -6 3
+            -1 -3 -21 9
+            -2 -6 18 -6
         ])
         X1 = [
-            0.0     0.0      4.25     4.25
-            0.0     0.0      0.125    0.125
-            0.0     0.0     -1.125   -1.125
-            3.625  18.125  -10.875  -10.875
-            5.0    25.0     -9.0     -9.0
-           13.5    67.5      4.5      4.5
+            0.0 0.0 4.25 4.25
+            0.0 0.0 0.125 0.125
+            0.0 0.0 -1.125 -1.125
+            3.625 18.125 -10.875 -10.875
+            5.0 25.0 -9.0 -9.0
+            13.5 67.5 4.5 4.5
         ]
         X2 = [
-            -0.02648060   0.00416977   0.01130802   0.01015956
-            0.01718954  -0.00680433   0.02364406  -0.00083272
-            0.00050392   0.00191916  -0.01035902  -0.00079734
-            0.01811917  -0.02307032  -0.04297277  -0.05409099
-           -0.02529516   0.00959934  -0.08594555  -0.06117803
-           -0.02823014   0.00029946  -0.04196034  -0.04145413
+            -0.02648060 0.00416977 0.01130802 0.01015956
+            0.01718954 -0.00680433 0.02364406 -0.00083272
+            0.00050392 0.00191916 -0.01035902 -0.00079734
+            0.01811917 -0.02307032 -0.04297277 -0.05409099
+            -0.02529516 0.00959934 -0.08594555 -0.06117803
+            -0.02823014 0.00029946 -0.04196034 -0.04145413
         ]
 
         points = [
             [
-                0   0   2    6
-                0   0   1   -4
-                0   0   0    1
-               -1   0  -7    1
-                1   0  -4  -24
-               10  -1   4   -4
+                0 0 2 6
+                0 0 1 -4
+                0 0 0 1
+                -1 0 -7 1
+                1 0 -4 -24
+                10 -1 4 -4
             ],
             [
-                0   0    5    8
-                0   0   -2   -6
-                0   0    0    1
-                1   0   -4    3
-                3   0  -19  -34
-                10  -1    1   -6
+                0 0 5 8
+                0 0 -2 -6
+                0 0 0 1
+                1 0 -4 3
+                3 0 -19 -34
+                10 -1 1 -6
             ],
             [
-                5  -3   0   0
-                11  -6   0   0
-                -2   1   0   0
-                 8  -5  -3  -3
-                 0   0   2   1
-                 5  -3   3  -2
+                5 -3 0 0
+                11 -6 0 0
+                -2 1 0 0
+                8 -5 -3 -3
+                0 0 2 1
+                5 -3 3 -2
             ],
             [
-                1  -1   0   0
-                3  -2   0   0
-                0   0   0   0
-                2  -2  -2  -3
-                0   0   1   1
-                1  -1   1  -2
+                1 -1 0 0
+                3 -2 0 0
+                0 0 0 0
+                2 -2 -2 -3
+                0 0 1 1
+                1 -1 1 -2
             ],
             [
-                0    0    0   0
-                0    0   -1   0
-                0    0    4  -1
-                -1  -10   -5   2
-                1    4   -2   0
-                0    1  -16   4
+                0 0 0 0
+                0 0 -1 0
+                0 0 4 -1
+                -1 -10 -5 2
+                1 4 -2 0
+                0 1 -16 4
             ],
             [
-                0   0    0   0
-                0   0   -1   0
-                0   0    4  -1
-                0  -6   -5   2
-                1   4   -2   0
-                0   1  -16   4
+                0 0 0 0
+                0 0 -1 0
+                0 0 4 -1
+                0 -6 -5 2
+                1 4 -2 0
+                0 1 -16 4
             ],
         ]
 
@@ -105,19 +107,23 @@ include("../utils.jl")
         @testset "Symplectic Inverse" begin
             I_2k = Array(I, 4, 4)
             @test Manifolds.symplectic_inverse_times(SpSt_6_4, p_6_4, p_6_4) == I_2k
-            @test Manifolds.symplectic_inverse_times!(SpSt_6_4, zeros(4, 4),
-                    p_6_4, p_6_4) == I_2k
+            @test Manifolds.symplectic_inverse_times!(
+                SpSt_6_4,
+                zeros(4, 4),
+                p_6_4,
+                p_6_4,
+            ) == I_2k
             @test inv(SpSt_6_4, p_6_4) * p_6_4 == I_2k
             @test inv!(SpSt_6_4, copy(p_6_4'), p_6_4) * p_6_4 == I_2k
         end
         @testset "Embedding" begin
             x = [
-                1   1   -9   7
-                -1  -1  -13  11
-                 7   8  -22  19
-                 0   0    7  -6
-                 0   0   -1   1
-                 0   0   -1   1
+                1 1 -9 7
+                -1 -1 -13 11
+                7 8 -22 19
+                0 0 7 -6
+                0 0 -1 1
+                0 0 -1 1
             ]
             y = similar(x)
             z = embed(SpSt_6_4, x)
@@ -129,34 +135,43 @@ include("../utils.jl")
         end
         @testset "Retractions and Exponential Mapping" begin
             @test isapprox(retract(SpSt_6_4, p_6_4, X1), q_6_4; atol=1.0e-12)
-            @test isapprox(retract(SpSt_6_4, p_6_4, X1, CayleyRetraction()),
-                           q_6_4; atol=1.0e-12)
+            @test isapprox(
+                retract(SpSt_6_4, p_6_4, X1, CayleyRetraction()),
+                q_6_4;
+                atol=1.0e-12,
+            )
 
             X_inv_cayley_retraction = inverse_retract(SpSt_6_4, p_6_4, q_6_4)
-            X_inv_cayley_retraction_2 = inverse_retract(SpSt_6_4, p_6_4, q_6_4,
-                                                        CayleyInverseRetraction())
+            X_inv_cayley_retraction_2 =
+                inverse_retract(SpSt_6_4, p_6_4, q_6_4, CayleyInverseRetraction())
             @test isapprox(X_inv_cayley_retraction, X_inv_cayley_retraction_2; atol=1.0e-16)
             @test isapprox(X_inv_cayley_retraction, X1; atol=1.0e-12)
         end
         @testset "Riemannian Metric" begin
             X1_norm = 37.85466645
             @test isapprox(norm(SpSt_6_4, p_6_4, X1), X1_norm; atol=1.0e-8)
-            @test isapprox(norm(SpSt_6_4, p_6_4, X1), √inner(SpSt_6_4, p_6_4, X1, X1);
-                           atol=1.0e-8)
+            @test isapprox(
+                norm(SpSt_6_4, p_6_4, X1),
+                √inner(SpSt_6_4, p_6_4, X1, X1);
+                atol=1.0e-8,
+            )
 
             X2_norm = 1.0
             @test isapprox(norm(SpSt_6_4, p_6_4, X2), X2_norm; atol=1.0e-6)
-            @test isapprox(norm(SpSt_6_4, p_6_4, X2), √inner(SpSt_6_4, p_6_4, X2, X2);
-                           atol=1.0e-6)
+            @test isapprox(
+                norm(SpSt_6_4, p_6_4, X2),
+                √inner(SpSt_6_4, p_6_4, X2, X2);
+                atol=1.0e-6,
+            )
 
             # Project Project matrix A ∈ ℝ^{6 × 4} onto (T_pSpSt):
             A_2 = Array{Float64}([
-                -7   2   12   0
-                4   0   1   -2
-               -1  -1   4   0
-              -18   4  -1   5
-                7   0  -2  11
-                2   2  -2   9
+                -7 2 12 0
+                4 0 1 -2
+                -1 -1 4 0
+                -18 4 -1 5
+                7 0 -2 11
+                2 2 -2 9
             ])
             A_2_proj = similar(A_2)
             Manifolds.project!(SpSt_6_4, A_2_proj, p_6_4, A_2)
@@ -237,19 +252,20 @@ include("../utils.jl")
             Q_grad = SymplecticMatrix(points[1])
             function test_f(p)
                 n, k = size(p)
-                tr(p[1:k, 1:k])
+                return tr(p[1:k, 1:k])
             end
             function analytical_grad_f(p)
                 n, k = size(p)
                 euc_grad_f = [Array(I, k, k); zeros((n - k), k)]
-                return Q_grad*p*(euc_grad_f')*Q_grad*p + euc_grad_f*p'*p
+                return Q_grad * p * (euc_grad_f') * Q_grad * p + euc_grad_f * p' * p
             end
             p_grad = convert(Array{Float64}, points[1])
             ad_diff = RiemannianProjectionBackend(Manifolds.ForwardDiffBackend())
 
             @test isapprox(
                 Manifolds.gradient(SpSt_6_4, test_f, p_grad, ad_diff),
-                analytical_grad_f(p_grad); atol=1.0e-16
+                analytical_grad_f(p_grad);
+                atol=1.0e-16,
             )
 
             grad_f_p = similar(p_grad)
