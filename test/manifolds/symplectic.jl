@@ -71,7 +71,7 @@ include("../utils.jl")
         ]
 
         @testset "Basics" begin
-            @test repr(Sp_2) == "Symplectic($(2), ℝ)"
+            @test repr(Sp_2) == "Symplectic{$(2), ℝ}()"
             @test representation_size(Sp_2) == (2, 2)
             @test base_manifold(Sp_2) === Sp_2
             @test (@inferred Manifolds.default_metric_dispatch(Metr_Sp_2)) === Val(true)
@@ -91,7 +91,7 @@ include("../utils.jl")
             @test inv(Sp_2, p_2) * p_2 == I_2n
             @test inv!(Sp_2, copy(p_2)) * p_2 == I_2n
         end
-        @testset "Embedding and Projection" begin
+        @testset "Embedding" begin
             x = [0.0 1.0/2.0; -2.0 -2.0]
             y = similar(x)
             z = embed(Sp_2, x)
@@ -117,8 +117,8 @@ include("../utils.jl")
             @test retract(Sp_2, p_2, X2, CayleyRetraction()) == q_cay
 
             X_inv_cayley_retraction = inverse_retract(Sp_2, p_2, q_cay)
-            X_inv_cayley_retraction_2 =
-                inverse_retract(Sp_2, p_2, q_cay, CayleyInverseRetraction())
+            X_inv_cayley_retraction_2 = inverse_retract(Sp_2, p_2, q_cay,
+                                                        CayleyInverseRetraction())
             @test X_inv_cayley_retraction == X_inv_cayley_retraction_2
             @test X_inv_cayley_retraction ≈ X2
         end
@@ -240,6 +240,7 @@ include("../utils.jl")
 
     @testset "SymplecticMatrix" begin
         # TODO: Test for different type matrices.
+        @test SymplecticMatrix() == SymplecticMatrix(1)
         Sp_4 = Symplectic(4)
         pQ_1 = [
             0 0 -2 3
@@ -264,8 +265,8 @@ include("../utils.jl")
             @test convert(SymplecticMatrix{Float64}, Q) == SymplecticMatrix(1.0)
             @test "$Q" == "SymplecticMatrix{Int64}(): 1*[0 I; -I 0]"
             @test (
-                "$(SymplecticMatrix(1.0 + 2.0im))" ==
-                "SymplecticMatrix{ComplexF64}(): (1.0 + 2.0im)*[0 I; -I 0]"
+                "$(SymplecticMatrix(1 + 2im))" ==
+                "SymplecticMatrix{Complex{Int64}}(): (1 + 2im)*[0 I; -I 0]"
             )
         end
 
