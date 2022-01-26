@@ -39,8 +39,8 @@ function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
     return SymplecticStiefel{div(two_n, 2),div(two_k, 2),field}()
 end
 
-function Base.show(io::IO, ::SymplecticStiefel{n,k}) where {n,k}
-    return print(io, "SymplecticStiefel{$(2n), $(2k)}()")
+function Base.show(io::IO, ::SymplecticStiefel{n,k, 𝔽}) where {n,k, 𝔽}
+    return print(io, "SymplecticStiefel{$(2n), $(2k), $(𝔽)}()")
 end
 
 decorated_manifold(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
@@ -489,7 +489,7 @@ end
 
 function gradient!(M::SymplecticStiefel, f, X, p, backend::RiemannianProjectionBackend)
     _gradient!(f, X, p, backend.diff_backend)
-    return grad_euclidean_to_manifold!(M, X, p, X)
+    return grad_euclidean_to_manifold!(M, X, p, copy(X))
 end
 
 function grad_euclidean_to_manifold(M::SymplecticStiefel, p, ∇f_euc)
