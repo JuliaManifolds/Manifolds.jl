@@ -70,22 +70,22 @@ include("../utils.jl")
                 0   0   1   1
                 1  -1   1  -2
             ],
-            # [
-            #     0    0    0   0
-            #     0    0   -1   0
-            #     0    0    4  -1
-            #     -1  -10   -5   2
-            #     1    4   -2   0
-            #     0    1  -16   4
-            # ],
-            # [
-            #     0   0    0   0
-            #     0   0   -1   0
-            #     0   0    4  -1
-            #     0  -6   -5   2
-            #     1   4   -2   0
-            #     0   1  -16   4
-            # ],
+            [
+                0    0    0   0
+                0    0   -1   0
+                0    0    4  -1
+                -1  -10   -5   2
+                1    4   -2   0
+                0    1  -16   4
+            ],
+            [
+                0   0    0   0
+                0   0   -1   0
+                0   0    4  -1
+                0  -6   -5   2
+                1   4   -2   0
+                0   1  -16   4
+            ],
         ]
 
         @testset "Basics" begin
@@ -170,16 +170,17 @@ include("../utils.jl")
             @test is_vector(M_big, p_big, X_big, true; atol=1.0e-14)
         end
         @testset "test_manifold(Symplectic(6), ...)" begin
-            false && @testset "Type $(Matrix{Float64})" begin
+            @testset "Type $(Matrix{Float64})" begin
                 type = Matrix{Float64}
                 test_manifold(
                     SpSt_6_4,
                     convert.(type, points);
-                    retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
+                    retraction_methods=[CayleyRetraction()],
+                    default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
-                    is_point_atol_multiplier=1.0e8,
-                    is_tangent_atol_multiplier=1.0e6,
+                    is_point_atol_multiplier=1.0e4,
+                    is_tangent_atol_multiplier=1.0e4,
                     retraction_atol_multiplier=1.0e4,
                     test_reverse_diff=false,
                     test_forward_diff=false,
@@ -196,10 +197,11 @@ include("../utils.jl")
                     SpSt_6_4,
                     convert.(type, points);
                     retraction_methods=[CayleyRetraction()],
+                    default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
-                    is_point_atol_multiplier=1.0e8,
-                    is_tangent_atol_multiplier=1.0e6,
+                    is_point_atol_multiplier=1.0e4,
+                    is_tangent_atol_multiplier=1.0e4,
                     retraction_atol_multiplier=1.0e4,
                     test_reverse_diff=false,
                     test_forward_diff=false,
@@ -209,16 +211,17 @@ include("../utils.jl")
                     test_representation_size=true,
                 )
             end
-            TEST_STATIC_SIZED && @testset "Type $(MMatrix{6, 6, Float64, 36})" begin
-                type = MMatrix{6,6,Float64,36}
+            TEST_STATIC_SIZED && @testset "Type $(MMatrix{6, 4, Float64, 24})" begin
+                type = MMatrix{6,4,Float64,24}
                 test_manifold(
                     SpSt_6_4,
                     convert.(type, points);
                     retraction_methods=[CayleyRetraction()],
+                    default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
-                    is_point_atol_multiplier=1.0e7,
-                    is_tangent_atol_multiplier=1.0e6,
+                    is_point_atol_multiplier=1.0e4,
+                    is_tangent_atol_multiplier=1.0e4,
                     retraction_atol_multiplier=1.0e4,
                     test_reverse_diff=false,
                     test_forward_diff=false,
