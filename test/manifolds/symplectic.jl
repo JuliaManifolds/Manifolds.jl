@@ -156,6 +156,7 @@ include("../utils.jl")
                     Sp_6,
                     cat(pts, large_tr_norm_points; dims=1);
                     retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
+                    default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
                     is_point_atol_multiplier=1.0e8,
@@ -177,6 +178,7 @@ include("../utils.jl")
                     Sp_6,
                     pts;
                     retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
+                    default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
                     is_point_atol_multiplier=1.0e8,
@@ -198,6 +200,7 @@ include("../utils.jl")
                     Sp_6,
                     pts;
                     retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
+                    default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
                     is_point_atol_multiplier=1.0e7,
