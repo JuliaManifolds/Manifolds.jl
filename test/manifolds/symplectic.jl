@@ -135,6 +135,11 @@ include("../utils.jl")
             @test norm(Sp_2, p_2, X2) == X2_p_norm
             @test norm(Sp_2, p_2, X2) == √(inner(Sp_2, p_2, X2, X2))
 
+            q_2 = retract(Sp_2, p_2, X2, ExponentialRetraction())
+            approximate_p_q_geodesic_distance = 0.510564444555605
+            @test isapprox(distance(Sp_2, p_2, q_2), approximate_p_q_geodesic_distance;
+                        atol=1.0e-16)
+
             # Project tangent vector into (T_pSp)^{\perp}:
             proj_normal_X2 = Manifolds.project_riemannian_normal!(Sp_2, copy(X2), p_2, X2)
             @test isapprox(proj_normal_X2, zero(X2); atol=1.0e-16)
@@ -144,6 +149,19 @@ include("../utils.jl")
             A_2_proj = similar(A_2)
             Manifolds.project_riemannian!(Sp_2, A_2_proj, p_2, A_2)
             @test is_vector(Sp_2, p_2, A_2_proj; atol=1.0e-16)
+
+            # Change representer of A onto T_pSp:
+            @testset "Change Representer" begin
+                A_2_representer = change_representer(
+                    MetricManifold(get_embedding(Sp_2), ExtendedSymplecticMetric()),
+                    EuclideanMetric(), p_2, A_2)
+                @test isapprox(inner(Sp_2, p_2, A_2_representer, X1),
+                            tr(A_2' * X1); atol=1.0e-12)
+                @test isapprox(inner(Sp_2, p_2, A_2_representer, X2),
+                            tr(A_2' * X2); atol=1.0e-12)
+                @test isapprox(inner(Sp_2, p_2, A_2_representer, A_2),
+                            norm(A_2)^2; atol=1.0e-12)
+            end
         end
         @testset "Generate random points/tangent vectors" begin
             M_big = Symplectic(20)
