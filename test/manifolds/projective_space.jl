@@ -211,8 +211,8 @@ include("../utils.jl")
             )
             @test !is_vector(
                 M,
-                Quaternion[1.0 + 0im, 0.0, 0.0],
-                Quaternion[-0.5im, 0.0, 0.0],
+                Quaternion.([1.0 + 0im, 0.0, 0.0]),
+                Quaternion.([-0.5im, 0.0, 0.0]),
             )
             @test_throws DomainError is_vector(
                 M,
@@ -222,8 +222,8 @@ include("../utils.jl")
             )
             @test_throws DomainError is_vector(
                 M,
-                Quaternion[1.0 + 0im, 0.0, 0.0],
-                Quaternion[-0.5im, 0.0, 0.0],
+                Quaternion.([1.0 + 0im, 0.0, 0.0]),
+                Quaternion.([-0.5im, 0.0, 0.0]),
                 true,
             )
             @test injectivity_radius(M) == π / 2
