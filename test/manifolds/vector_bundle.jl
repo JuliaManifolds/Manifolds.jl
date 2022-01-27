@@ -29,7 +29,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test sprint(show, TB) == "TangentBundle(Sphere(2, ℝ))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2 * manifold_dimension(M)
-        @test representation_size(TB) == (6,)
+        @test representation_size(TB) === nothing
         CTB = CotangentBundle(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
         @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
@@ -69,6 +69,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 basis_types_vecs=basis_types,
                 projection_atol_multiplier=4,
                 test_inplace=true,
+                test_representation_size=false,
             )
 
             # tangent space at point

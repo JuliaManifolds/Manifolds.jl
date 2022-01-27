@@ -318,30 +318,37 @@ function get_basis(M::VectorBundle, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, VectorBundleBasisData(b1, b2))
 end
 
-for BT in [
-    DefaultOrthonormalBasis,
-    DefaultOrthonormalBasis{<:Any,TangentSpaceType},
-    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
-    ProjectedOrthonormalBasis{:svd,ℝ},
-]
-    eval(quote
-        @invoke_maker 3 AbstractBasis get_basis(M::VectorBundle, p, B::$BT)
-    end)
-    eval(
-        quote
-            @invoke_maker 3 AbstractBasis{<:Any,TangentSpaceType} get_basis(
-                M::TangentSpaceAtPoint,
-                p,
-                B::$BT,
-            )
-        end,
-    )
-end
 function get_basis(M::TangentBundleFibers, p, B::AbstractBasis{<:Any,TangentSpaceType})
     return get_basis(M.manifold, p, B)
 end
 function get_basis(M::TangentSpaceAtPoint, p, B::AbstractBasis{<:Any,TangentSpaceType})
     return get_basis(M.fiber.manifold, M.point, B)
+end
+
+function get_coordinates(M::TangentBundleFibers, p, X, B::AbstractBasis)
+    return get_coordinates(M.manifold, p, X, B)
+end
+
+function get_coordinates!(M::TangentBundleFibers, Y, p, X, B::AbstractBasis)
+    return get_coordinates!(M.manifold, Y, p, X, B)
+end
+
+function get_coordinates(M::TangentSpaceAtPoint, p, X, B::AbstractBasis)
+    return get_coordinates(M.fiber.manifold, M.point, X, B)
+end
+
+function get_coordinates!(M::TangentSpaceAtPoint, Y, p, X, B::AbstractBasis)
+    return get_coordinates!(M.fiber.manifold, Y, M.point, X, B)
+end
+
+function get_coordinates(M::VectorBundle, p, X, B::AbstractBasis)
+    px, Vx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    n = manifold_dimension(M.manifold)
+    return vcat(
+        get_coordinates(M.manifold, px, VXM, B),
+        get_coordinates(M.fiber, px, VXF, B),
+    )
 end
 
 function get_coordinates!(M::VectorBundle, Y, p, X, B::AbstractBasis)
@@ -352,6 +359,21 @@ function get_coordinates!(M::VectorBundle, Y, p, X, B::AbstractBasis)
     get_coordinates!(M.fiber, view(Y, (n + 1):length(Y)), px, VXF, B)
     return Y
 end
+
+function get_coordinates(
+    M::VectorBundle,
+    p,
+    X,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
+    px, Vx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    return vcat(
+        get_coordinates(M.manifold, px, VXM, B.data.base_basis),
+        get_coordinates(M.fiber, px, VXF, B.data.vec_basis),
+    )
+end
+
 function get_coordinates!(
     M::VectorBundle,
     Y,
@@ -366,72 +388,38 @@ function get_coordinates!(
     get_coordinates!(M.fiber, view(Y, (n + 1):length(Y)), px, VXF, B.data.vec_basis)
     return Y
 end
-for BT in [
-    DefaultBasis,
-    DefaultOrthogonalBasis,
-    DefaultOrthonormalBasis,
-    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
-    ProjectedOrthonormalBasis{:svd,ℝ},
-    VeeOrthogonalBasis,
-]
-    eval(
-        quote
-            @invoke_maker 5 AbstractBasis get_coordinates!(
-                M::VectorBundle,
-                Y,
-                p,
-                X,
-                B::$BT,
-            )
-        end,
+
+function get_vector(M::VectorBundle, p, X, B::AbstractBasis)
+    n = manifold_dimension(M.manifold)
+    xp1 = submanifold_component(p, Val(1))
+    return ProductRepr(
+        get_vector(M.manifold, xp1, X[1:n], B),
+        get_vector(M.fiber, xp1, X[(n + 1):end], B),
     )
-    eval(
-        quote
-            @invoke_maker 5 AbstractBasis{<:Any,TangentSpaceType} get_coordinates!(
-                M::TangentSpaceAtPoint,
-                Y,
-                p,
-                X,
-                B::$BT,
-            )
-        end,
-    )
-end
-function get_coordinates!(M::VectorBundle, Y, p, X, B::CachedBasis)
-    return error(
-        "get_coordinates! called on $M with an incorrect CachedBasis. Expected a CachedBasis with VectorBundleBasisData, given $B",
-    )
-end
-function get_coordinates!(M::TangentSpaceAtPoint, Y, p, X, B::CachedBasis)
-    return get_coordinates!(M.fiber.manifold, Y, M.point, X, B)
 end
 
-function get_coordinates!(
-    M::TangentBundleFibers,
-    Y,
-    p,
-    X,
-    B::ManifoldsBase.all_uncached_bases{TangentSpaceType},
-)
-    return get_coordinates!(M.manifold, Y, p, X, B)
-end
-function get_coordinates!(
-    M::TangentSpaceAtPoint,
-    Y,
-    p,
-    X,
-    B::ManifoldsBase.all_uncached_bases{TangentSpaceType},
-)
-    return get_coordinates!(M.fiber.manifold, Y, M.point, X, B)
-end
-
-function get_vector!(M::VectorBundle, Y, p, X, B::DefaultOrthonormalBasis)
+function get_vector!(M::VectorBundle, Y, p, X, B::AbstractBasis)
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
     get_vector!(M.manifold, submanifold_component(Y, Val(1)), xp1, X[1:n], B)
     get_vector!(M.fiber, submanifold_component(Y, Val(2)), xp1, X[(n + 1):end], B)
     return Y
 end
+
+function get_vector(
+    M::VectorBundle,
+    p,
+    X,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:VectorBundleBasisData},
+) where {𝔽}
+    n = manifold_dimension(M.manifold)
+    xp1 = submanifold_component(p, Val(1))
+    return ProductRepr(
+        get_vector(M.manifold, xp1, X[1:n], B.data.base_basis),
+        get_vector(M.fiber, xp1, X[(n + 1):end], B.data.vec_basis),
+    )
+end
+
 function get_vector!(
     M::VectorBundle,
     Y,
@@ -457,45 +445,18 @@ function get_vector!(
     )
     return Y
 end
-function get_vector!(
-    M::TangentBundleFibers,
-    Y,
-    p,
-    X,
-    B::ManifoldsBase.all_uncached_bases{TangentSpaceType},
-)
+
+function get_vector(M::TangentBundleFibers, p, X, B::AbstractBasis)
+    return get_vector(M.manifold, p, X, B)
+end
+function get_vector(M::TangentSpaceAtPoint, p, X, B::AbstractBasis)
+    return get_vector(M.fiber.manifold, M.point, X, B)
+end
+
+function get_vector!(M::TangentBundleFibers, Y, p, X, B::AbstractBasis)
     return get_vector!(M.manifold, Y, p, X, B)
 end
-function get_vector!(
-    M::TangentSpaceAtPoint,
-    Y,
-    p,
-    X,
-    B::ManifoldsBase.all_uncached_bases{TangentSpaceType},
-)
-    return get_vector!(M.fiber.manifold, Y, M.point, X, B)
-end
-for BT in [
-    DefaultBasis,
-    DefaultOrthogonalBasis,
-    DefaultOrthonormalBasis,
-    ProjectedOrthonormalBasis{:gram_schmidt,ℝ},
-    ProjectedOrthonormalBasis{:svd,ℝ},
-    VeeOrthogonalBasis,
-]
-    eval(
-        quote
-            @invoke_maker 5 AbstractBasis{<:Any,TangentSpaceType} get_vector!(
-                M::TangentSpaceAtPoint,
-                Y,
-                p,
-                X,
-                B::$BT,
-            )
-        end,
-    )
-end
-function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::CachedBasis)
+function get_vector!(M::TangentSpaceAtPoint, Y, p, X, B::AbstractBasis)
     return get_vector!(M.fiber.manifold, Y, M.point, X, B)
 end
 
@@ -516,7 +477,6 @@ function get_vectors(
     end
     return vs
 end
-
 function get_vectors(M::VectorBundleFibers, p, B::CachedBasis)
     return get_vectors(M.manifold, p, B)
 end
@@ -792,11 +752,6 @@ end
 
 function representation_size(B::VectorBundleFibers{<:TCoTSpaceType})
     return representation_size(B.manifold)
-end
-function representation_size(B::VectorBundle)
-    len_manifold = prod(representation_size(B.manifold))
-    len_vs = prod(representation_size(B.fiber))
-    return (len_manifold + len_vs,)
 end
 function representation_size(B::TangentSpaceAtPoint)
     return representation_size(B.fiber.manifold)
