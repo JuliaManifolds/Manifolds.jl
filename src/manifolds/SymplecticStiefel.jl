@@ -357,14 +357,12 @@ end
     Compute the exponential mapping from eq. 3.19 of Bendokat-Zimmermann.
 """
 function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
-    # Cannot alias 'q' and 'p'!
-
     Q = SymplecticMatrix(p, X)
     pT_p = lu!(p' * p) # ∈ ℝ^{2k × 2k}
 
-    # Construct A-bar:
-    C = (pT_p) \ X' # ∈ ℝ^{2k × 2n}
+    C = pT_p \ X' # ∈ ℝ^{2k × 2n}
 
+    # Construct A-bar:
     # A_bar = Q * (p^T * C^T) * Q
     A_bar = rmul!(lmul!(Q, (p' * C')), Q)
     A_bar .+= C * p
@@ -374,38 +372,36 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
     C_QT = C
 
     # Subtract C*Q^T*p*(pT_p)^{-1}*Q from A_bar:
-    A_bar .-= rmul!(rdiv!(C_QT * p, pT_p), Q)
     # A_bar is "star-skew symmetric" (A^+ = -A).
+    A_bar .-= rmul!(rdiv!(C_QT * p, pT_p), Q)
 
-    # Have not used the q (2n × 2k) memory.
-    # Construct H_bar using q-memory:
-    mul!(q, Q, X) # q = Q*X
-    rdiv!(q, pT_p)
-    rmul!(q, Q)
+    # Construct H_bar:
+    # H_bar = Q * (C_QT * Q)' * Q -> Q * C' * Q = Q * (X / pT_p) * Q
+    H_bar = rmul!(lmul!(Q, rmul!(C_QT, Q)'), Q)
+    H_bar .-= p * symplectic_inverse_times(M, p, H_bar)
 
-    q .-= p * symplectic_inverse_times(M, p, q)
-    # H_bar = q
+    # Construct Δ_bar in H_bar-memory:
+    H_bar .+= p * A_bar
 
-    q .+= p * A_bar
+    # Rename H_bar -> Δ_bar.
+    Δ_bar = H_bar
 
-    # Rename q -> Δ_bar.
-    Δ_bar = q
-
-    γ_1 = Δ_bar - p * symplectic_inverse_times(M, p, Δ_bar)
+    γ_1 = Δ_bar - (1 / 2) .* p * symplectic_inverse_times(M, p, Δ_bar)
     γ = [γ_1 -p] # ∈ ℝ^{2n × 4k}
 
+    Δ_bar_star = rmul!(Q' * Δ_bar', Q)
     λ_1 = lmul!(Q', p * Q)
     λ_2 =
         (
-            rmul!(Q' * Δ_bar', Q) .-
-            (1 / 2) .* symplectic_inverse_times(M, Δ_bar, p) * rmul!(Q' * p', Q)
+            Δ_bar_star .-
+            (1 / 2) .* (Δ_bar_star * p) * rmul!(Q' * p', Q)
         )'
     λ = [λ_1 λ_2] # ∈ ℝ^{2n × 4k}
 
     Γ = [λ -γ] # ∈ ℝ^{2n × 8k}
     Λ = [γ λ] # ∈ ℝ^{2n × 8k}
 
-    # Then compute the matrix exponentials:
+    # At last compute the (8k × 8k) and (4k × 4k) matrix exponentials:
     q .= Γ * (exp(Λ' * Γ)[:, (4k + 1):end]) * (exp(λ' * γ)[:, (2k + 1):end])
     return q
 end
