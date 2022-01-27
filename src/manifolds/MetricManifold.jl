@@ -295,6 +295,15 @@ function flat!(
 end
 # ToDo how to do a flat (nonmutating?)
 
+function get_basis(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return get_basis(M.manifold, p, B)
+end
+
 function get_coordinates(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},
