@@ -30,7 +30,9 @@ struct SymmetricPositiveDefinite{N} <: AbstractDecoratorManifold{ℝ} end
 
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 
-active_traits(f, ::SymmetricPositiveDefinite, args...) = merge_traits(IsEmbeddedManifold())
+function active_traits(f, ::SymmetricPositiveDefinite, args...)
+    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(LinearAffineMetric()))
+end
 
 @doc raw"""
     check_point(M::SymmetricPositiveDefinite, p; kwargs...)
@@ -86,6 +88,10 @@ function check_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N
 end
 
 function decorated_manifold(M::SymmetricPositiveDefinite)
+    return get_embedding(M)
+end
+
+function get_embedding(M::SymmetricPositiveDefinite)
     return Euclidean(representation_size(M)...; field=ℝ)
 end
 

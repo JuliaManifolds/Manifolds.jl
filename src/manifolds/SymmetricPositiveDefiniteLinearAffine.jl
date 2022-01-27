@@ -110,8 +110,8 @@ function exp!(::SymmetricPositiveDefinite{N}, q, p, X) where {N}
 end
 
 @doc raw"""
-    [Ξ,κ] = get_basis(M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis)
-    [Ξ,κ] = get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, p, B::DiagonalizingOrthonormalBasis)
+    [Ξ,κ] = get_basis_diagonalizing(M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis)
+    [Ξ,κ] = get_basis_diagonalizing(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, p, B::DiagonalizingOrthonormalBasis)
 
 Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
@@ -119,7 +119,7 @@ Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
 with eigenvalues `κ` and where the direction `B.frame_direction` has curvature `0`.
 """
-function get_basis(
+function get_basis_diagonalizing(
     ::SymmetricPositiveDefinite{N},
     p,
     B::DiagonalizingOrthonormalBasis,
@@ -137,12 +137,12 @@ function get_basis(
     return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::SymmetricPositiveDefinite{N},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -157,12 +157,12 @@ function get_coordinates!(
     return Y
 end
 
-function get_vector!(
+function get_vector_orthonormal!(
     M::SymmetricPositiveDefinite{N},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (div(N * (N + 1), 2),)

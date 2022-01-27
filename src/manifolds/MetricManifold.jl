@@ -295,6 +295,46 @@ function flat!(
 end
 # ToDo how to do a flat (nonmutating?)
 
+function get_coordinates(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return get_coordinates(M.manifold, p, X, B)
+end
+function get_coordinates!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    Y,
+    p,
+    X,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return get_coordinates!(M.manifold, Y, p, X, B)
+end
+
+function get_vector(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    c,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return get_vector(M.manifold, p, c, B)
+end
+function get_vector!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    Y,
+    p,
+    c,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return get_vector!(M.manifold, Y, p, c, B)
+end
+
 @doc raw"""
     inverse_local_metric(M::AbstractcManifold{𝔽}, p, B::AbstractBasis)
 
@@ -626,9 +666,8 @@ function vector_transport_along(
     X,
     c,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
-    r::AbstractRetractionMethod=default_retraction_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_along(M.manifold, p, X, c, m, r)
+    return vector_transport_along(M.manifold, p, X, c, m)
 end
 function vector_transport_along!(
     ::TraitList{IsDefaultMetric{G}},
@@ -638,7 +677,6 @@ function vector_transport_along!(
     X,
     c,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
-    r::AbstractRetractionMethod=default_retraction_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_to!(M.manifold, Y, p, X, c, m, r)
 end
@@ -650,9 +688,8 @@ function vector_transport_direction(
     X,
     d,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
-    r::AbstractRetractionMethod=default_retraction_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_to(M.manifold, p, X, d, m, r)
+    return vector_transport_to(M.manifold, p, X, d, m)
 end
 function vector_transport_direction!(
     ::TraitList{IsDefaultMetric{G}},
@@ -662,9 +699,8 @@ function vector_transport_direction!(
     X,
     d,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
-    r::AbstractRetractionMethod=default_retraction_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_direction!(M.manifold, Y, p, X, d, m, r)
+    return vector_transport_direction!(M.manifold, Y, p, X, d, m)
 end
 
 function vector_transport_to(
@@ -674,9 +710,8 @@ function vector_transport_to(
     X,
     q,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
-    r::AbstractRetractionMethod=default_retraction_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_to(M.manifold, p, X, q, m, r)
+    return vector_transport_to(M.manifold, p, X, q, m)
 end
 function vector_transport_to!(
     ::TraitList{IsDefaultMetric{G}},
@@ -686,9 +721,8 @@ function vector_transport_to!(
     X,
     q,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
-    r::AbstractRetractionMethod=default_retraction_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_to!(M.manifold, Y, p, X, q, m, r)
+    return vector_transport_to!(M.manifold, Y, p, X, q, m)
 end
 
 zero_vector(M::MetricManifold, p) = zero_vector(M.manifold, p)
