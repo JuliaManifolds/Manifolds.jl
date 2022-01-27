@@ -43,7 +43,7 @@ const SkewSymmetricMatrices{n} = SkewHermitianMatrices{n,ℝ}
 SkewSymmetricMatrices(n::Int) = SkewSymmetricMatrices{n}()
 @deprecate SkewSymmetricMatrices(n::Int, 𝔽) SkewHermitianMatrices(n, 𝔽)
 
-function active_traits(f, ::SkewSymmetricMatrices, arge...)
+function active_traits(f, ::SkewSymmetricMatrices, args...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 
@@ -88,20 +88,18 @@ function check_vector(M::SkewHermitianMatrices, p, X; kwargs...)
     return check_point(M, X; kwargs...)  # manifold is its own tangent space
 end
 
-decorated_manifold(M::SkewHermitianMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
-
 function get_basis(M::SkewHermitianMatrices, p, B::DiagonalizingOrthonormalBasis)
     Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
     κ = zeros(real(eltype(p)), manifold_dimension(M))
     return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::SkewSymmetricMatrices{N},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -114,12 +112,12 @@ function get_coordinates!(
     end
     return Y
 end
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::SkewHermitianMatrices{N,ℂ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
+    ::ComplexNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -139,12 +137,14 @@ function get_coordinates!(
     return Y
 end
 
-function get_vector!(
+get_embedding(::SkewHermitianMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
+
+function get_vector_orthonormal!(
     M::SkewSymmetricMatrices{N},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -160,12 +160,12 @@ function get_vector!(
     end
     return Y
 end
-function get_vector!(
+function get_vector_orthonormal!(
     M::SkewHermitianMatrices{N,ℂ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
+    ::ComplexNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -238,6 +238,8 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 project(::SkewHermitianMatrices, ::Any, ::Any)
 
 project!(M::SkewHermitianMatrices, Y, p, X) = project!(M, Y, X)
+
+representation_size(::SkewHermitianMatrices{N}) where {N} = (N, N)
 
 function Base.show(io::IO, ::SkewHermitianMatrices{n,F}) where {n,F}
     return print(io, "SkewHermitianMatrices($(n), $(F))")
