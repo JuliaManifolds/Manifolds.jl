@@ -137,8 +137,11 @@ include("../utils.jl")
 
             q_2 = retract(Sp_2, p_2, X2, ExponentialRetraction())
             approximate_p_q_geodesic_distance = 0.510564444555605
-            @test isapprox(distance(Sp_2, p_2, q_2), approximate_p_q_geodesic_distance;
-                        atol=1.0e-16)
+            @test isapprox(
+                distance(Sp_2, p_2, q_2),
+                approximate_p_q_geodesic_distance;
+                atol=1.0e-16,
+            )
 
             # Project tangent vector into (T_pSp)^{\perp}:
             proj_normal_X2 = Manifolds.project_riemannian_normal!(Sp_2, copy(X2), p_2, X2)
@@ -154,13 +157,25 @@ include("../utils.jl")
             @testset "Change Representer" begin
                 A_2_representer = change_representer(
                     MetricManifold(get_embedding(Sp_2), ExtendedSymplecticMetric()),
-                    EuclideanMetric(), p_2, A_2)
-                @test isapprox(inner(Sp_2, p_2, A_2_representer, X1),
-                            tr(A_2' * X1); atol=1.0e-12)
-                @test isapprox(inner(Sp_2, p_2, A_2_representer, X2),
-                            tr(A_2' * X2); atol=1.0e-12)
-                @test isapprox(inner(Sp_2, p_2, A_2_representer, A_2),
-                            norm(A_2)^2; atol=1.0e-12)
+                    EuclideanMetric(),
+                    p_2,
+                    A_2,
+                )
+                @test isapprox(
+                    inner(Sp_2, p_2, A_2_representer, X1),
+                    tr(A_2' * X1);
+                    atol=1.0e-12,
+                )
+                @test isapprox(
+                    inner(Sp_2, p_2, A_2_representer, X2),
+                    tr(A_2' * X2);
+                    atol=1.0e-12,
+                )
+                @test isapprox(
+                    inner(Sp_2, p_2, A_2_representer, A_2),
+                    norm(A_2)^2;
+                    atol=1.0e-12,
+                )
             end
         end
         @testset "Generate random points/tangent vectors" begin

@@ -310,15 +310,16 @@ function test_manifold(
                     new_pt = retract(M, p, X, retr_method)
                 end
                 Test.@test is_point(M, new_pt; atol=point_atol)
-                (test_inplace && is_mutating) && Test.@testset "inplace test for retract!" begin
-                    p2 = copy(M, p)
-                    X2 = copy(M, p, X)
-                    q = retract(M, p2, X2, retr_method)
-                    retract!(M, p2, p2, X, retr_method)
-                    Test.@test isapprox(M, p2, q)
-                    # This test is not reasonable for `inverse_retract!(M, X, p, q, m)`,
-                    # since X is of different type/concept than p,q
-                end
+                (test_inplace && is_mutating) &&
+                    Test.@testset "inplace test for retract!" begin
+                        p2 = copy(M, p)
+                        X2 = copy(M, p, X)
+                        q = retract(M, p2, X2, retr_method)
+                        retract!(M, p2, p2, X, retr_method)
+                        Test.@test isapprox(M, p2, q; atol=point_atol)
+                        # This test is not reasonable for `inverse_retract!(M, X, p, q, m)`,
+                        # since X is of different type/concept than p,q
+                    end
             end
         end
         for p in pts
