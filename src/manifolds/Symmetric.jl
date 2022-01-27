@@ -27,7 +27,7 @@ function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SymmetricMatrices{n,field}()
 end
 
-function active_traits(f, ::SymmetricMatrices, arge...)
+function active_traits(f, ::SymmetricMatrices, args...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 
@@ -88,20 +88,18 @@ function check_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,�
     return nothing
 end
 
-decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
-
 function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
     κ = zeros(real(eltype(p)), manifold_dimension(M))
     return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::SymmetricMatrices{N,ℝ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -115,12 +113,12 @@ function get_coordinates!(
     end
     return Y
 end
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::SymmetricMatrices{N,ℂ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
+    ::ComplexNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -139,12 +137,14 @@ function get_coordinates!(
     return Y
 end
 
-function get_vector!(
+get_embedding(::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
+
+function get_vector_orthonormal!(
     M::SymmetricMatrices{N,ℝ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -158,12 +158,12 @@ function get_vector!(
     end
     return Y
 end
-function get_vector!(
+function get_vector_orthonormal!(
     M::SymmetricMatrices{N,ℂ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
+    ::ComplexNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
