@@ -358,7 +358,76 @@ end
 """
 function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
     Q = SymplecticMatrix(p, X)
-    pT_p = lu!(p' * p) # ∈ ℝ^{2k × 2k}
+    pT_p = lu(p' * p) # ∈ ℝ^{2k × 2k}
+
+    C = pT_p \ X' # ∈ ℝ^{2k × 2n}
+
+    # Construct A-bar:
+    # First A-term: Q * (p^T * C^T) * Q
+    A_bar = rmul!(lmul!(Q, (p' * C')), Q)
+    A_bar .+= C * p
+
+    # Second A-term, use C-memory:
+    rmul!(C, Q') # C*Q^T -> C
+    C_QT = C
+
+    # Subtract C*Q^T*p*(pT_p)^{-1}*Q:
+    # A_bar is "star-skew symmetric" (A^+ = -A).
+    A_bar .-= rmul!((C_QT * p) / pT_p, Q)
+
+    # Construct H_bar:
+    # First H-term: Q * (C_QT * Q)' * Q -> Q * C' * Q = Q * (X / pT_p) * Q
+    H_bar = rmul!(lmul!(Q, rmul!(C_QT, Q)'), Q)
+    # Subtract second H-term:
+    H_bar .-= p * symplectic_inverse_times(M, p, H_bar)
+
+    # Construct Δ_bar in H_bar-memory:
+    H_bar .+= p * A_bar
+
+    # Rename H_bar -> Δ_bar.
+    Δ_bar = H_bar
+
+    γ_1 = Δ_bar - (1 / 2) .* p * symplectic_inverse_times(M, p, Δ_bar)
+    γ = [γ_1 -p] # ∈ ℝ^{2n × 4k}
+
+    Δ_bar_star = rmul!(Q' * Δ_bar', Q)
+    λ_1 = lmul!(Q', p * Q)
+    λ_2 = (Δ_bar_star .- (1 / 2) .* (Δ_bar_star * p) * λ_1')'
+    λ = [λ_1 λ_2] # ∈ ℝ^{2n × 4k}
+
+    Γ = [λ -γ] # ∈ ℝ^{2n × 8k}
+    Λ = [γ λ] # ∈ ℝ^{2n × 8k}
+
+    # At last compute the (8k × 8k) and (4k × 4k) matrix exponentials:
+    q .= Γ * (exp(Λ' * Γ)[:, (4k + 1):end]) * (exp(λ' * γ)[:, (2k + 1):end])
+    return q
+end
+
+function Ω(X, p)
+    Q = SymplecticMatrix(X, p)
+    pT_p = lu(p' * p)
+    inv_pTp_pT = pT_p \ p'
+
+    X_inv_pTp_pT = X * inv_pTp_pT
+
+    Ω = Q * (X_inv_pTp_pT') * (I - Q' * p * inv_pTp_pT * Q) * Q
+
+    Ω .+= X_inv_pTp_pT
+    return Ω
+end
+
+function exp_test!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
+    Ω_X = Ω(X, p)
+    q .= exp(Ω_X - Ω_X') * exp(Array(Ω_X')) * p
+    return q
+end
+
+@doc raw"""
+    Compute the exponential mapping from eq. 3.19 of Bendokat-Zimmermann.
+"""
+function exp_old!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
+    Q = SymplecticMatrix(p, X)
+    pT_p = lu(p' * p) # ∈ ℝ^{2k × 2k}
 
     C = pT_p \ X' # ∈ ℝ^{2k × 2n}
 
@@ -391,11 +460,7 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
 
     Δ_bar_star = rmul!(Q' * Δ_bar', Q)
     λ_1 = lmul!(Q', p * Q)
-    λ_2 =
-        (
-            Δ_bar_star .-
-            (1 / 2) .* (Δ_bar_star * p) * rmul!(Q' * p', Q)
-        )'
+    λ_2 = (Δ_bar_star .- (1 / 2) .* (Δ_bar_star * p) * rmul!(Q' * p', Q))'
     λ = [λ_1 λ_2] # ∈ ℝ^{2n × 4k}
 
     Γ = [λ -γ] # ∈ ℝ^{2n × 8k}
