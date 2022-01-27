@@ -97,14 +97,6 @@ that it has the same size as elements of the embedding and has unit Frobenius no
 The tolerance for the norm check can be set using the `kwargs...`.
 """
 function check_point(M::AbstractProjectiveSpace, p; kwargs...)
-    mpv = invoke(
-        check_point,
-        Tuple{(typeof(get_embedding(M))),typeof(p)},
-        get_embedding(M),
-        p;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(norm(p), 1; kwargs...)
         return DomainError(
             norm(p),
@@ -123,15 +115,6 @@ tangent space of the embedding and that the Frobenius inner product
 $⟨p, X⟩_{\mathrm{F}} = 0$.
 """
 function check_vector(M::AbstractProjectiveSpace, p, X; kwargs...)
-    mpv = invoke(
-        check_vector,
-        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
-        get_embedding(M),
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(dot(p, X), 0; kwargs...)
         return DomainError(
             dot(p, X),
