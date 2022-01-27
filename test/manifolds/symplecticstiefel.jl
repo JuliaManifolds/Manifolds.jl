@@ -1,23 +1,22 @@
 include("../utils.jl")
 
-# function Ω(::SympleticStiefel, p, X)
-#     Q = SymplecticMatrix(X, p)
-#     pT_p = lu(p' * p)
-#     inv_pTp_pT = pT_p \ p'
-#
-#     X_inv_pTp_pT = X * inv_pTp_pT
-#
-#     Ω = Q*(X_inv_pTp_pT')*(I - Q'*p*inv_pTp_pT*Q)*Q
-#
-#     Ω .+= X_inv_pTp_pT
-#     return Ω
-# end
-#
-# function exp_naiive!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
-#     Ω_X = Ω(M, p, X)
-#     q .= exp(Ω_X - Ω_X')*exp(Array(Ω_X'))*p
-#     return q
-# end
+function Ω(::SymplecticStiefel, p, X)
+    Q = SymplecticMatrix(X, p)
+    pT_p = lu(p' * p)
+
+    inv_pTp_pT = pT_p \ p'
+    X_inv_pTp_pT = X * inv_pTp_pT
+
+    Ω = Q * (X_inv_pTp_pT') * (I - Q' * p * inv_pTp_pT * Q) * Q
+    Ω .+= X_inv_pTp_pT
+    return Ω
+end
+
+function exp_naiive!(M::SymplecticStiefel, q, p, X)
+    Ω_X = Ω(M, p, X)
+    q .= exp(Ω_X - Ω_X') * exp(Array(Ω_X')) * p
+    return q
+end
 
 @testset "SymplecticStiefel" begin
     @testset "Real" begin
