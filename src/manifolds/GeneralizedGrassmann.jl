@@ -149,10 +149,6 @@ function check_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; kwargs...) where 
     return nothing
 end
 
-function decorated_manifold(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
-    return Euclidean(N, K; field=𝔽)
-end
-
 @doc raw"""
     distance(M::GeneralizedGrassmann, p, q)
 
@@ -225,6 +221,10 @@ eval(
         )
     end,
 )
+
+function get_embedding(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
+    return GeneralizedStiefel(N, K, M.B, 𝔽)
+end
 
 @doc raw"""
     inner(M::GeneralizedGrassmann, p, X, Y)

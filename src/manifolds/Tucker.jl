@@ -614,13 +614,7 @@ inverse_retract(
     ::ProjectionInverseRetraction,
 )
 
-function inverse_retract!(
-    ℳ::Tucker,
-    X,
-    𝔄::TuckerPoint,
-    𝔅::TuckerPoint,
-    ::ProjectionInverseRetraction,
-)
+function inverse_retract_project!(ℳ::Tucker, X, 𝔄::TuckerPoint, 𝔅::TuckerPoint)
     diffVector = embed(ℳ, 𝔅) - embed(ℳ, 𝔄)
     return project!(ℳ, X, 𝔄, diffVector)
 end

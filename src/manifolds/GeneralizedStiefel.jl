@@ -99,7 +99,7 @@ function check_vector(M::GeneralizedStiefel{n,k,𝔽}, p, X; kwargs...) where {n
     return nothing
 end
 
-decorated_manifold(M::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
+get_embedding(::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
 
 @doc raw"""
     inner(M::GeneralizedStiefel, p, X, Y)

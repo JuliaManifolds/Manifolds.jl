@@ -49,8 +49,10 @@ end
 
 get_iterator(::Torus{N}) where {N} = 1:N
 
-@generated manifold_dimension(::Torus{N}) where {N} = N
+manifold_dimension(::Torus{N}) where {N} = N
 
-@generated representation_size(::Torus{N}) where {N} = (N,)
+power_dimensions(::Torus{N}) where {N} = (N,)
+
+representation_size(::Torus{N}) where {N} = (N,)
 
 Base.show(io::IO, ::Torus{N}) where {N} = print(io, "Torus($(N))")
