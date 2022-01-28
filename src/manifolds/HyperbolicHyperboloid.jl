@@ -36,9 +36,6 @@ function check_point(M::Hyperbolic, p; kwargs...)
     end
     return nothing
 end
-function check_point(M::Hyperbolic, p::HyperboloidPoint; kwargs...)
-    return check_point(M, p.value; kwargs...)
-end
 
 function check_vector(M::Hyperbolic, p, X; kwargs...)
     mpv = invoke(
@@ -57,9 +54,6 @@ function check_vector(M::Hyperbolic, p, X; kwargs...)
         )
     end
     return nothing
-end
-function check_vector(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTVector; kwargs...)
-    return check_vector(M, p.value, X.value; kwargs...)
 end
 
 function convert(::Type{HyperboloidTVector}, X::T) where {T<:AbstractVector}
@@ -244,9 +238,6 @@ where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on 
 the [`Lorentz`](@ref)ian manifold.
 """
 distance(::Hyperbolic, p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
-function distance(M::Hyperbolic, p::HyperboloidPoint, q::HyperboloidPoint)
-    return distance(M, p.value, q.value)
-end
 
 function exp!(M::Hyperbolic, q, p, X)
     vn = sqrt(max(inner(M, p, X, X), 0.0))
@@ -365,14 +356,7 @@ g_p(X,Y) = ⟨X,Y⟩_{\mathrm{M}} = -X_{n}Y_{n} + \displaystyle\sum_{k=1}^{n-1} 
 ````
 This employs the metric of the embedding, see [`Lorentz`](@ref) space.
 """
-function inner(
-    M::Hyperbolic,
-    p::HyperboloidPoint,
-    X::HyperboloidTVector,
-    Y::HyperboloidTVector,
-)
-    return inner(M, p.value, X.value, Y.value)
-end
+inner(M::Hyperbolic, p, X, Y)
 
 function log!(M::Hyperbolic, X, p, q)
     scp = minkowski_metric(p, q)
