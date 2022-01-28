@@ -59,8 +59,6 @@ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conju
 transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
@@ -81,15 +79,6 @@ it (approximately) holds that $p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 
 `kwargs...` is passed to the `isapprox`.
 """
 function check_vector(M::GeneralizedStiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,B,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
         return DomainError(
             norm(p' * M.B * X + conj(X' * M.B * p)),

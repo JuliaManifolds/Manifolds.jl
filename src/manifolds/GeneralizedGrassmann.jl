@@ -99,14 +99,6 @@ a `n`-by-`k` matrix of unitary column vectors with respect to the B inner prudct
 of correct `eltype` with respect to `𝔽`.
 """
 function check_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv = invoke(
-        check_point,
-        Tuple{typeof(get_embedding(M)),typeof(p)},
-        get_embedding(M),
-        p;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
@@ -131,15 +123,6 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
 $\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
 """
 function check_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
-        get_embedding(M),
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
         return DomainError(
             norm(p' * M.B * X + conj(X' * M.B * p)),
