@@ -164,11 +164,4 @@ include("group_utils.jl")
         e2 = Identity(G)
         @test mul!(e2, e, e) === e2
     end
-
-    @testset "differentials" begin
-        lged0 = Manifolds.LieGroupExpDiffArgumentApprox(0)
-        q2 = exp(G, pts[1], Xpts[2])
-        @test isapprox(G, q2, Manifolds.retract_diff_argument(G, pts[1], Xpts[1], Xpts[2], lged0), Xpts[2])
-
-    end
 end

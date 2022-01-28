@@ -152,6 +152,7 @@ include("utils.jl")
     include_test("metric.jl")
     include_test("statistics.jl")
     include_test("approx_inverse_retraction.jl")
+    include_test("differentials.jl")
 
     # Lie groups and actions
     include_test("groups/groups_general.jl")
