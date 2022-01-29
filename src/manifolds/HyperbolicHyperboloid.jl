@@ -254,7 +254,7 @@ function exp!(M::Hyperbolic, q, p, X)
     return copyto!(q, cosh(vn) * p + sinh(vn) / vn * X)
 end
 
-function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+function _get_basis(M::Hyperbolic, p, ::DefaultOrthonormalBasis; kwargs...)
     n = manifold_dimension(M)
     V = [
         _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for
@@ -263,7 +263,7 @@ function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis{ℝ,TangentSpace
     return CachedBasis(B, gram_schmidt(M, p, V))
 end
 
-function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
+function get_basis_diagonalizing(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
     n = manifold_dimension(M)
     X = B.frame_direction
     V = [
@@ -297,20 +297,23 @@ Compute the coordinates of the vector `X` with respect to the orthogonalized ver
 the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hyperbolic`](@ref)
  `M`, utting them intop the tangent space at `p` and orthonormalizing them.
 """
-get_coordinates(M::Hyperbolic, p, X, B::DefaultOrthonormalBasis)
+get_coordinates(M::Hyperbolic, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(
+function get_coordinates_orthonormal(M::Hyperbolic, p, X, r::RealNumbers)
+    return get_coordinates(M, p, X, get_basis_orthonormal(M, p, r))
+end
+function get_coordinates_orthonormal!(M::Hyperbolic, c, p, X, r::RealNumbers)
+    c = get_coordinates!(M, c, p, X, get_basis_orthonormal(M, p, r))
+    return c
+end
+function get_coordinates_diagonalizing!(
     M::Hyperbolic,
     c,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    B::DiagonalizingOrthonormalBasis,
 )
-    c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
-    return c
-end
-function get_coordinates!(M::Hyperbolic, c, p, X, B::DiagonalizingOrthonormalBasis)
-    c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
+    c = get_coordinates!(M, c, p, X, get_basis_diagonalizing(M, p, B))
     return c
 end
 
@@ -323,8 +326,8 @@ the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hype
 """
 get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector!(M::Hyperbolic, X, p, c, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
-    X = get_vector!(M, X, p, c, get_basis(M, p, B))
+function get_vector_orthonormal!(M::Hyperbolic, X, p, c, r::RealNumbers)
+    X = get_vector!(M, X, p, c, get_basis(M, p, DefaultOrthonormalBasis(r)))
     return X
 end
 function get_vector!(M::Hyperbolic, X, p, c, B::DiagonalizingOrthonormalBasis)

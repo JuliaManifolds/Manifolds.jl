@@ -187,10 +187,10 @@ include("../utils.jl")
         p2 = HyperboloidPoint(p)
         X2 = HyperboloidTVector(X)
         q2 = HyperboloidPoint(similar(p))
-        @test embed(M, p2).value == p2.value
+        @test embed(M, p2) == p2.value
         embed!(M, q2, p2)
         @test q2.value == p2.value
-        @test embed(M, p2, X2).value == X2.value
+        @test embed(M, p2, X2) == X2.value
         Y2 = HyperboloidTVector(similar(X))
         embed!(M, Y2, p2, X2)
         @test Y2.value == X2.value

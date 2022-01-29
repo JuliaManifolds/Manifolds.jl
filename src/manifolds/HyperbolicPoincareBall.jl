@@ -44,8 +44,6 @@ function change_metric!(
 end
 
 function check_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...) where {N}
-    mpv = check_point(Euclidean(N), p.value; kwargs...)
-    mpv === nothing || return mpv
     if !(norm(p.value) < 1)
         return DomainError(
             norm(p.value),
@@ -291,19 +289,6 @@ function allocate_result(
     return PoincareBallTVector(allocate(X.value))
 end
 
-function parallel_transport_to!(
-    M::Hyperbolic,
-    Y::PoincareBallTVector,
-    p::PoincareBallPoint,
-    X::PoincareBallTVector,
-    q::PoincareBallPoint,
-)
-    T = typeof(Y.value)
-    qt = convert(T, q)
-    Yt = parallel_transport_to(M, convert(T, p), convert(T, X), qt)
-    return copyto!(M, q, Y, convert(PoincareBallTVector, (qt, Yt)))
-end
-
 function project!(
     ::Hyperbolic,
     Y::PoincareBallTVector,
@@ -312,6 +297,3 @@ function project!(
 )
     return (Y.value .= X.value)
 end
-
-zero_vector(::Hyperbolic, p::PoincareBallPoint) = PoincareBallTVector(zero(p.value))
-zero_vector!(::Hyperbolic, X, p::PoincareBallPoint) = copyto!(X.value, zero(p.value))

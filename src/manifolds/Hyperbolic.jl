@@ -340,3 +340,22 @@ connecting `p` and `q`. The formula reads
 where $⟨\cdot,\cdot⟩_p$ denotes the inner product in the tangent space at `p`.
 """
 parallel_transport_to(::Hyperbolic, ::Any, ::Any, ::Any)
+
+for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
+    @eval function parallel_transport_to!(M::Hyperbolic, Y::$T, p::$P, X::$T, q::$P)
+        Y.value .=
+            convert(
+                $T,
+                convert(AbstractVector, q),
+                parallel_transport_to(
+                    M,
+                    convert(AbstractVector, p),
+                    convert(AbstractVector, p, X),
+                    convert(AbstractVector, q),
+                ),
+            ).value
+        return Y
+    end
+    @eval zero_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
+    @eval zero_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
+end

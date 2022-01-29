@@ -212,7 +212,7 @@ function inner(
     return dot(X.value, Y.value) / last(p.value)^2
 end
 
-function norm(::Hyperbolic, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTVector)
+function norm(M::Hyperbolic, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTVector)
     return sqrt(inner(M, p, X, X))
 end
 
@@ -233,19 +233,6 @@ function allocate_result(
     return PoincareHalfSpaceTVector(allocate(X.value))
 end
 
-function parallel_transport_to!(
-    M::Hyperbolic,
-    Y::PoincareHalfSpaceTVector,
-    p::PoincareHalfSpacePoint,
-    X::PoincareHalfSpaceTVector,
-    q::PoincareHalfSpacePoint,
-)
-    T = typeof(Y.value)
-    qt = convert(T, q)
-    Yt = parallel_transport_to(M, convert(T, p), convert(T, X), qt)
-    return copyto!(M, q, Y, convert(PoincareHalfSpaceTVector, (qt, Yt)))
-end
-
 function project!(
     ::Hyperbolic,
     Y::PoincareHalfSpaceTVector,
@@ -254,8 +241,3 @@ function project!(
 )
     return (Y.value .= X.value)
 end
-
-function zero_vector(::Hyperbolic, p::PoincareHalfSpacePoint)
-    return PoincareHalfSpaceTVector(zero(p.value))
-end
-zero_vector!(::Hyperbolic, X, p::PoincareHalfSpacePoint) = copyto!(X.value, zero(p.value))
