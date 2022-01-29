@@ -239,6 +239,15 @@ the [`Lorentz`](@ref)ian manifold.
 """
 distance(::Hyperbolic, p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
 
+embed(M::Hyperbolic, p::HyperboloidPoint) = embed(M, p.value)
+embed!(M::Hyperbolic, q, p::HyperboloidPoint) = embed!(M, q, p.value)
+function embed(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTVector)
+    return embed(M, p.value, X.value)
+end
+function embed(M::Hyperbolic, Y, p::HyperboloidPoint, X::HyperboloidTVector)
+    return embed!(M, Y, p.value, X.value)
+end
+
 function exp!(M::Hyperbolic, q, p, X)
     vn = sqrt(max(inner(M, p, X, X), 0.0))
     vn < eps(eltype(p)) && return copyto!(q, p)

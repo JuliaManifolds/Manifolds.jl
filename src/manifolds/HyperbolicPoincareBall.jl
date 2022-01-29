@@ -247,6 +247,12 @@ function distance(::Hyperbolic, p::PoincareBallPoint, q::PoincareBallPoint)
     )
 end
 
+embed(::Hyperbolic, p::PoincareBallPoint) = p.value
+embed!(::Hyperbolic, q, p::PoincareBallPoint) = copyto!(q, p.value)
+embed(::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector) = X.value
+embed!(::Hyperbolic, Y, p::PoincareBallPoint, X::PoincareBallTVector) = copyto!(Y, X.value)
+get_embedding(::Hyperbolic{n}, p::PoincareBallPoint) where {n} = Euclidean(n)
+
 @doc raw"""
     inner(::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector, Y::PoincareBallTVector)
 
@@ -262,6 +268,10 @@ function inner(
     Y::PoincareBallTVector,
 )
     return 4 / (1 - norm(p.value)^2)^2 * dot(X.value, Y.value)
+end
+
+function norm(M::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector)
+    return sqrt(inner(M, p, X, X))
 end
 
 @doc raw"""
@@ -281,6 +291,19 @@ function allocate_result(
     return PoincareBallTVector(allocate(X.value))
 end
 
+function parallel_transport_to!(
+    M::Hyperbolic,
+    Y::PoincareBallTVector,
+    p::PoincareBallPoint,
+    X::PoincareBallTVector,
+    q::PoincareBallPoint,
+)
+    T = typeof(Y.value)
+    qt = convert(T, q)
+    Yt = parallel_transport_to(M, convert(T, p), convert(T, X), qt)
+    return copyto!(M, q, Y, convert(PoincareBallTVector, (qt, Yt)))
+end
+
 function project!(
     ::Hyperbolic,
     Y::PoincareBallTVector,
@@ -289,3 +312,6 @@ function project!(
 )
     return (Y.value .= X.value)
 end
+
+zero_vector(::Hyperbolic, p::PoincareBallPoint) = PoincareBallTVector(zero(p.value))
+zero_vector!(::Hyperbolic, X, p::PoincareBallPoint) = copyto!(X.value, zero(p.value))

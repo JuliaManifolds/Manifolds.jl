@@ -104,7 +104,6 @@ include("../utils.jl")
             @test isapprox(M, p1, X1, X2)
             # Test broadcast
             @test 2 .* X1 == T(2 .* X1.value)
-            @test 2 .* p1 == P(2 .* p1.value)
             @test copy(X1) == X1
             @test copy(X1) !== X1
             X1s = similar(X1)

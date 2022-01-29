@@ -182,6 +182,14 @@ function distance(::Hyperbolic, p::PoincareHalfSpacePoint, q::PoincareHalfSpaceP
     return acosh(1 + norm(p.value .- q.value)^2 / (2 * p.value[end] * q.value[end]))
 end
 
+embed(::Hyperbolic, p::PoincareHalfSpacePoint) = p.value
+embed!(::Hyperbolic, q, p::PoincareHalfSpacePoint) = copyto!(q, p.value)
+embed(::Hyperbolic, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTVector) = X.value
+function embed!(::Hyperbolic, Y, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTVector)
+    return copyto!(Y, X.value)
+end
+get_embedding(::Hyperbolic{n}, p::PoincareHalfSpacePoint) where {n} = Euclidean(n)
+
 @doc raw"""
     inner(
         ::Hyperbolic{n},
@@ -204,6 +212,10 @@ function inner(
     return dot(X.value, Y.value) / last(p.value)^2
 end
 
+function norm(::Hyperbolic, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTVector)
+    return sqrt(inner(M, p, X, X))
+end
+
 @doc raw"""
     project(::Hyperbolic, ::PoincareHalfSpacePoint ::PoincareHalfSpaceTVector)
 
@@ -221,6 +233,19 @@ function allocate_result(
     return PoincareHalfSpaceTVector(allocate(X.value))
 end
 
+function parallel_transport_to!(
+    M::Hyperbolic,
+    Y::PoincareHalfSpaceTVector,
+    p::PoincareHalfSpacePoint,
+    X::PoincareHalfSpaceTVector,
+    q::PoincareHalfSpacePoint,
+)
+    T = typeof(Y.value)
+    qt = convert(T, q)
+    Yt = parallel_transport_to(M, convert(T, p), convert(T, X), qt)
+    return copyto!(M, q, Y, convert(PoincareHalfSpaceTVector, (qt, Yt)))
+end
+
 function project!(
     ::Hyperbolic,
     Y::PoincareHalfSpaceTVector,
@@ -229,3 +254,8 @@ function project!(
 )
     return (Y.value .= X.value)
 end
+
+function zero_vector(::Hyperbolic, p::PoincareHalfSpacePoint)
+    return PoincareHalfSpaceTVector(zero(p.value))
+end
+zero_vector!(::Hyperbolic, X, p::PoincareHalfSpacePoint) = copyto!(X.value, zero(p.value))
