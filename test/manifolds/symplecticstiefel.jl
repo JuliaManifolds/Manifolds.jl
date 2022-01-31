@@ -235,12 +235,12 @@ end
                 @test isapprox(
                     inner(SpSt_6_4, p_6_4, A_6_4_representer, X1),
                     tr(A_6_4' * X1);
-                    atol=1.0e-9,
+                    atol=1.0e-8,
                 )
                 @test isapprox(
                     inner(SpSt_6_4, p_6_4, A_6_4_representer, X2),
                     tr(A_6_4' * X2);
-                    atol=1.0e-9,
+                    atol=1.0e-8,
                 )
                 @test isapprox(
                     inner(SpSt_6_4, p_6_4, A_6_4_representer, A_6_4),
