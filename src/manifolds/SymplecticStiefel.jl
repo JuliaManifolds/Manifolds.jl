@@ -112,8 +112,7 @@ $A^{+} = Q_{2k}^TA^TQ_{2n}$ is the symplectic inverse, with
      -I_n & 0_n
 \end{bmatrix}.
 ````
-The we check that
-``(p^{+}X) = H \in 𝔤_{2k}`` approximately, where ``𝔤``
+The we check that ``H = p^{+}X \in 𝔤_{2k}``, where ``𝔤``
 is the Lie Algebra of the symplectic group ``\operatorname{Sp}(2k)``,
 characterized as [^Bendokat2021],
 ````math
@@ -159,7 +158,7 @@ end
 
 Compute the Riemannian inner product ``g^{\operatorname{SpSt}}`` at
 ``p \in \operatorname{SpSt}`` between tangent vectors ``X, X \in T_p\operatorname{SpSt}``.
-Given by Proposition 3.10 of Benodkat-Zimmermann [^Bendokat2021].
+Given by Proposition 3.10 in [^Bendokat2021].
 ````math
 g^{\operatorname{SpSt}}_p(X, Y)
     = \operatorname{tr}\left(X^T\left(I_{2n} -
@@ -204,7 +203,7 @@ Q_{2n} =
  -I_n & 0_n
 \end{bmatrix}.
 ````
-For any ``p \in \operatorname{SpSt}(2n, 2k)``, ``p^{+}p = I_{2k}``.
+For any ``p \in \operatorname{SpSt}(2n, 2k)`` we have that ``p^{+}p = I_{2k}``.
 
 The symplectic inverse of a matrix A can be expressed explicitly as:
 ````math
@@ -406,13 +405,34 @@ end
 @doc raw"""
     retract!(::SymplecticStiefel, q, p, X, ::CayleyRetraction)
 
-Define the Cayley retraction on the Symplectic Stiefel manifold.
-Reduced requirements down to inverting an (2k × 2k) matrix.
-Formula due to Bendokat-Zimmermann Proposition 5.2.
+Compute the Cayley retraction on the Symplectic Stiefel manifold, computed inplace
+of `q` from `p` along `X`.
 
-# TODO: Add formula from Bendokat-Zimmermann.
+Given a point ``p \in \operatorname{SpSt}(2n, 2k)``, every tangent vector
+``X \in T_p\operatorname{SpSt}(2n, 2k)`` is of the form
+``X = \tilde{\Omega}p``, with
+````math
+    \tilde{\Omega} = \left(I_{2n} - \frac{1}{2}pp^+\right)Xp^+ -
+                     pX^+\left(I_{2n} - \frac{1}{2}pp^+\right) \in ℝ^{2n \times 2n},
+````
+as shown in Proposition 3.5 of [^Bendokat2021].
+Using this representation of ``X``, the Cayley retraction
+on ``\operatorname{SpSt}(2n, 2k)`` is defined pointwise as
+````math
+    \mathcal{R}_p(X) = \operatorname{cay}\left(\frac{1}{2}\tilde{\Omega}\right)p.
+````
+The operator ``\operatorname{cay}(A) = (I - A)^{-1}(I + A)`` is the Cayley transform.
 
-# We set (t=1), regulate by the norm of the tangent vector how far to move.
+However, the computation of an ``2n \times 2n`` matrix inverse in the expression
+above can be reduced down to inverting a ``2k \times 2k`` matrix due to Proposition
+5.2 of [^Bendokat2021].
+
+Let ``A = p^+X`` and ``H = X - pA``. Then an equivalent expression for the Cayley
+retraction defined pointwise above is
+````math
+    \mathcal{R}_p(X) = -p + (H + 2p)(H^+H/4 - A/2 + I_{2k})^{-1}.
+````
+It is this expression we compute inplace of `q`.
 """
 function retract!(M::SymplecticStiefel{n,k}, q, p, X, ::CayleyRetraction) where {n,k}
     # Define intermediate matrices for later use:
@@ -448,7 +468,7 @@ Q =
 ````
 as well as the symplectic inverse of a matrix ``A``, ``A^{+} = Q^T A^T Q``.
 
-For ``p, q ∈ \operatorname{SpSt}(2n, 2k, ℝ)`` then, we can then define the
+For ``p, q ∈ \operatorname{SpSt}(2n, 2k, ℝ)`` then, we can define the
 inverse cayley retraction as long as the following matrices exist.
 ````math
     U = (I + p^+ q)^{-1} \in ℝ^{2k \times 2k},
