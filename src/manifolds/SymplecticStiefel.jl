@@ -304,7 +304,7 @@ which fulfills the variational equation
     g_p(\text{grad}f(p), X)
     = \text{D}f(p)
     = \langle ∇f(p), X \rangle
-    \quad\forall\; X \in T_p\operatorname{Sp}(2n).
+    \quad\forall\; X \in T_p\operatorname{SpSt}(2n, 2k).
 ````
 The manifold gradient ``\text{grad}f(p)`` is computed from ``∇f(p)`` as
 ````math
