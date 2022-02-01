@@ -221,33 +221,6 @@ end
             A_6_4_proj = similar(A_6_4)
             Manifolds.project!(SpSt_6_4, A_6_4_proj, p_6_4, A_6_4)
             @test is_vector(SpSt_6_4, p_6_4, A_6_4_proj, true; atol=1.0e-12)
-
-            # Change representer of A onto T_pSp:
-            @testset "Metric Compatible" begin
-                A_6_4_representer = similar(A_6_4)
-                Manifolds.make_metric_compatible!(
-                    SpSt_6_4,
-                    A_6_4_representer,
-                    EuclideanMetric(),
-                    p_6_4,
-                    A_6_4,
-                )
-                @test isapprox(
-                    inner(SpSt_6_4, p_6_4, A_6_4_representer, X1),
-                    tr(A_6_4' * X1);
-                    atol=1.0e-8,
-                )
-                @test isapprox(
-                    inner(SpSt_6_4, p_6_4, A_6_4_representer, X2),
-                    tr(A_6_4' * X2);
-                    atol=1.0e-8,
-                )
-                @test isapprox(
-                    inner(SpSt_6_4, p_6_4, A_6_4_representer, A_6_4),
-                    norm(A_6_4)^2;
-                    atol=1.0e-7,
-                )
-            end
         end
         @testset "Generate random points/tangent vectors" begin
             M_big = SymplecticStiefel(20, 10)
