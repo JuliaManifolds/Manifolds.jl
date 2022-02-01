@@ -287,6 +287,9 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
     return q
 end
 
+@doc raw"""
+TODO: Document direct gradient conversion on SpSt(2n, 2k).
+"""
 function gradient(M::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
     return grad_euclidean_to_manifold(M, p, amb_grad)
@@ -589,12 +592,20 @@ function Base.show(io::IO, ::SymplecticStiefel{n,k,𝔽}) where {n,k,𝔽}
     return print(io, "SymplecticStiefel{$(2n), $(2k), $(𝔽)}()")
 end
 
-# compute p^+q (which is 2kx2k) in place of A
 @doc raw"""
     symplectic_inverse_times(::SymplecticStiefel, p, q)
     symplectic_inverse_times!(::SymplecticStiefel, A, p, q)
 
-TODO: Document.
+Directly compute the symplectic inverse of ``p \in \operatorname{SpSt}(2n, 2k)``,
+multiplied with ``q \in \operatorname{SpSt}(2n, 2k)``.
+That is, this function efficiently computes
+``p^+q = (Q_{2k}p^TQ_{2n})q \in ℝ^{2k \times 2k}``,
+where ``Q_{2n}, Q_{2k}`` are the [`SymplecticMatrix`](@ref)
+of sizes ``2n \times 2n`` and ``2k \times 2k`` respectively.
+
+This function performs this common operation without allocating more than
+a ``2k \times 2k`` matrix to store the result in, or in the case of the in-place
+function, without allocating memory at all.
 """
 function symplectic_inverse_times(M::SymplecticStiefel{n,k}, p, q) where {n,k}
     A = similar(p, (2k, 2k))
