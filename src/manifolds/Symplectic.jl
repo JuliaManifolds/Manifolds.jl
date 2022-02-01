@@ -384,7 +384,8 @@ function inner(M::Symplectic{n,ℝ}, p, X, Y)::eltype(p) where {n}
 end
 
 @doc raw"""
-    inv(M::Symplectic{n, ℝ}, A) where {n, ℝ}
+    inv(::Symplectic, A)
+    inv!(::Symplectic, A)
 
 Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2n}``. Given a matrix
 ````math
@@ -437,26 +438,20 @@ end
 function inv!(::Symplectic{n,ℝ}, A) where {n}
     checkbounds(A, 1:(2n), 1:(2n))
     @inbounds for i in 1:n, j in 1:n
-        tmp = A[i, j]
-        A[i, j] = A[j + n, i + n]
-        A[j + n, i + n] = tmp
+        A[i, j], A[j + n, i + n] = A[j + n, i + n], A[i, j]
     end
     @inbounds for i in 1:n, j in i:n
         if i == j
             A[i, j + n] = -A[i, j + n]
         else
-            tmp = A[i, j + n]
-            A[i, j + n] = -A[j, i + n]
-            A[j, i + n] = -tmp
+            A[i, j + n], A[j, i + n] = -A[j, i + n], -A[i, j + n]
         end
     end
     @inbounds for i in 1:n, j in i:n
         if i == j
             A[i + n, j] = -A[i + n, j]
         else
-            tmp = A[i + n, j]
-            A[i + n, j] = -A[j + n, i]
-            A[j + n, i] = -tmp
+            A[i + n, j], A[j + n, i] = -A[j + n, i], -A[i + n, j]
         end
     end
     return A
