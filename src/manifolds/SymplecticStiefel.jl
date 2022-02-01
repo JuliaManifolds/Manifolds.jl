@@ -288,7 +288,29 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
 end
 
 @doc raw"""
-TODO: Document direct gradient conversion on SpSt(2n, 2k).
+    gradient(::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
+    gradient!(::SymplecticStiefel, f, X, p, backend::RiemannianProjectionBackend)
+
+Compute the gradient of
+``f\colon \operatorname{SpSt}(2n, 2k) \rightarrow ℝ``
+at ``p \in \operatorname{SpSt}(2n, 2k)``.
+
+We first compute the embedding gradient ``∇f(p) \in ℝ^{2n \times 2k}`` using
+the [`AbstractRiemannianDiffBackend`](@ref) in the [`RiemannianProjectionBackend`](@ref).
+Then we transform the embedding gradient to the unique tangent vector space element
+``\text{grad}f(p) \in T_p\operatorname{SpSt}(2n, 2k)``
+which fulfills the variational equation
+````math
+    g_p(\text{grad}f(p), X)
+    = \text{D}f(p)
+    = \langle ∇f(p), X \rangle
+    \quad\forall\; X \in T_p\operatorname{Sp}(2n).
+````
+The manifold gradient ``\text{grad}f(p)`` is computed from ``∇f(p)`` as
+````math
+    \text{grad}f(p) = ∇f(p)p^Tp + Q_{2n}p∇f(p)^TQ_{2n}p,
+````
+where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref).
 """
 function gradient(M::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
