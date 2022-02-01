@@ -403,6 +403,7 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
 end
 
 @doc raw"""
+    retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
     retract!(::SymplecticStiefel, q, p, X, ::CayleyRetraction)
 
 Compute the Cayley retraction on the Symplectic Stiefel manifold, computed inplace
@@ -434,7 +435,9 @@ retraction defined pointwise above is
 ````
 It is this expression we compute inplace of `q`.
 """
-function retract!(M::SymplecticStiefel{n,k}, q, p, X, ::CayleyRetraction) where {n,k}
+retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
+
+function retract!(M::SymplecticStiefel, q, p, X, ::CayleyRetraction)
     # Define intermediate matrices for later use:
     A = symplectic_inverse_times(M, p, X)
 
@@ -452,6 +455,7 @@ function retract!(M::SymplecticStiefel{n,k}, q, p, X, ::CayleyRetraction) where 
 end
 
 @doc raw"""
+    inverse_retract(::SymplecticStiefel, p, q, ::CayleyInverseRetraction)
     inverse_retract!(::SymplecticStiefel, q, p, X, ::CayleyInverseRetraction)
 
 Compute the Cayley Inverse Retraction ``X = \mathcal{L}_p^{\operatorname{SpSt}}(q)``
@@ -487,6 +491,8 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
 	> arXiv preprint arXiv:2108.12447, 2021 (https://arxiv.org/abs/2108.12447)
 """
+inverse_retract(::SymplecticStiefel, p, q, ::CayleyInverseRetraction)
+
 function inverse_retract!(M::SymplecticStiefel, X, p, q, ::CayleyInverseRetraction)
     U_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
     V_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
@@ -510,6 +516,11 @@ function grad_euclidean_to_manifold(M::SymplecticStiefel, p, ∇f_euc)
 end
 
 function grad_euclidean_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
+    # ∇f_man cannot be aliased with ∇f_euc:
+    if ∇f_man === ∇f_euc
+        throw(ArgumentError(
+            "Output gradient '∇f_man' must not be aliased with input gradient '∇f_euc'."))
+    end
     Q = SymplecticMatrix(p, ∇f_euc)
     Qp = Q * p                      # Allocated memory.
     mul!(∇f_man, ∇f_euc, (p' * p))  # Use the memory in ∇f_man.
@@ -536,6 +547,8 @@ which solves the constrained optimization problem
 where ``h : \mathbb{R}^{2n \times 2k} \rightarrow \operatorname{skew}(2k)`` defines
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``.
 """
+project(::Union{SymplecticStiefel,Symplectic}, p, A)
+
 function project!(::Union{SymplecticStiefel,Symplectic}, Y, p, A)
     Q = SymplecticMatrix(Y, p, A)
     Q_p = Q * p
