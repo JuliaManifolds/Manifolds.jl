@@ -600,8 +600,11 @@ end
 function grad_euclidean_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
     # ∇f_man cannot be aliased with ∇f_euc:
     if ∇f_man === ∇f_euc
-        throw(ArgumentError(
-            "Output gradient '∇f_man' must not be aliased with input gradient '∇f_euc'."))
+        throw(
+            ArgumentError(
+                "Output gradient '∇f_man' must not be aliased with input gradient '∇f_euc'.",
+            ),
+        )
     end
     Q = SymplecticMatrix(p, ∇f_euc)
     Qp = Q * p                      # Allocated memory.
