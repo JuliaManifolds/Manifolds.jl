@@ -27,13 +27,14 @@ smaller matrices in ``ℝ^{n × k}``.
 """
 struct SymplecticStiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
-@doc """
+@doc raw"""
     SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
     -> SymplecticStiefel{div(two_n, 2), div(two_k, 2), ℝ}()
 
 # Constructor:
-The constructor for the [`Symplectic`](@ref) manifold accepts the even embedding
-dimension ``n = 2k`` for the real symplectic manifold, ``ℝ^{2k × 2k}``.
+The constructor for the [`SymplecticStiefel`](@ref) manifold accepts the even column
+dimension ``n = 2m`` and an even number of columns ``k = 2l`` for
+the real symplectic Stiefel manifold with elements ``p \in ℝ^{2k × 2k}``.
 """
 function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
     return SymplecticStiefel{div(two_n, 2),div(two_k, 2),field}()
@@ -322,6 +323,12 @@ function canonical_projection!(::SymplecticStiefel{n,k}, p, p_Sp) where {n,k}
 end
 
 # compute p^+q (which is 2kx2k) in place of A
+@doc raw"""
+    symplectic_inverse_times(::SymplecticStiefel, p, q)
+    symplectic_inverse_times!(::SymplecticStiefel, A, p, q)
+
+TODO: Document.
+"""
 function symplectic_inverse_times(M::SymplecticStiefel{n,k}, p, q) where {n,k}
     A = similar(p, (2k, 2k))
     return symplectic_inverse_times!(M, A, p, q)
@@ -353,8 +360,83 @@ function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k
 end
 
 @doc raw"""
-    Compute the exponential mapping from eq. 3.19 of Bendokat-Zimmermann.
+    exp(::SymplecticStiefel, p, X)
+    exp!(M::SymplecticStiefel, q, p, X)
+
+Compute the exponential mapping
+````math
+    \operatorname{exp}\colon T\operatorname{SpSt}(2n, 2k)
+    \rightarrow \operatorname{SpSt}(2n, 2k)
+````
+at a point ``p \in  \operatorname{SpSt}(2n, 2k)``
+in the direction of ``X \in T_p\operatorname{SpSt}(2n, 2k)``.
+
+The tangent vector ``X`` can be written in the form
+``X = \bar{\Omega}p`` [^Bendokat2021], with
+````math
+    \bar{\Omega} = X (p^Tp)^{-1}p^T
+        + Q_{2n}p(p^Tp)^{-1}X^T(I_{2n} - Q_{2n}^Tp(p^Tp)^{-1}p^TQ_{2n})Q_{2n}
+        \in ℝ^{2n \times 2n},
+````
+where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref). Using this expression for ``X``,
+the exponential mapping can be computed as
+````math
+    \operatorname{exp}_p(X) = \operatorname{Exp}([\bar{\Omega} - \bar{\Omega}^T])
+                              \operatorname{Exp}(\bar{\Omega}^T)p,
+````
+where ``\operatorname{Exp}(\cdot)`` denotes the matrix exponential.
+
+Computing the above mapping directly however, requires taking matrix exponentials
+of two ``2n \times 2n`` matrices, which is computationally expensive when ``n``
+increases. Therefore we instead follow [^Bendokat2021] who express the above
+exponential mapping in a way which only requires taking matrix exponentials
+of an ``8k \times 8k`` matrix and a ``4k \times 4k`` matrix.
+
+To this end, first define
+````math
+\bar{A} = Q_{2k}p^TX(p^Tp)^{-1}Q_{2k} +
+            (p^Tp)^{-1}X^T(p - Q_{2n}^Tp(p^Tp)^{-1}Q_{2k}) \in ℝ^{2k \times 2k},
+````
+and
+````math
+\bar{H} = (I_{2n} - pp^+)Q_{2n}X(p^Tp)^{-1}Q_{2k} \in ℝ^{2n \times 2k}.
+````
+We then let ``\bar{\Delta} = p\bar{A} + \bar{H}``, and define the matrices
+````math
+    γ = \left[\left(I_{2n} - \frac{1}{2}pp^+\right)\bar{\Delta} \quad
+              -p \right] \in ℝ^{2n \times 4k},
+````
+and
+````math
+    λ = \left[Q_{2n}^TpQ_{2k} \quad
+        \left(\bar{\Delta}^+\left(I_{2n}
+              - \frac{1}{2}pp^+\right)\right)^T\right] \in ℝ^{2n \times 4k}.
+````
+With the above defined matrices it holds that ``\bar{\Omega} = λγ^T``.
+ As a last preliminary step, concatenate ``γ`` and ``λ`` to define the matrices
+``Γ = [λ \quad -γ] \in ℝ^{2n \times 8k}`` and
+``Λ = [γ \quad λ] \in ℝ^{2n \times 8k}``.
+
+With these matrix constructions done, we can compute the
+exponential mapping as
+````math
+    \operatorname{exp}_p(X) =
+        Γ \operatorname{Exp}(ΛΓ^T)
+        \begin{bmatrix}
+            0_{4k} \\
+            I_{4k}
+        \end{bmatrix}
+        \operatorname{Exp}(λγ^T)
+        \begin{bmatrix}
+            0_{2k} \\
+            I_{2k}
+        \end{bmatrix}.
+````
+which only requires computing the matrix exponentials of
+``ΛΓ^T \in ℝ^{8k \times 8k}`` and ``λγ^T \in ℝ^{4k \times 4k}``.
 """
+exp(::SymplecticStiefel, p, X)
+
 function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
     Q = SymplecticMatrix(p, X)
     pT_p = lu(p' * p) # ∈ ℝ^{2k × 2k}
@@ -529,6 +611,7 @@ function grad_euclidean_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
 end
 
 @doc raw"""
+    project(::Union{SymplecticStiefel,Symplectic}, p, A)
     project!(::Union{SymplecticStiefel, Symplectic}, Y, p, A)
 
 Given a point ``p \in \operatorname{SpSt}(2n, 2k)``,

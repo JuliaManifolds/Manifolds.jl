@@ -1,6 +1,6 @@
-# Symplectic Stiefel
+# Symplectic 
 
-The manifold [`Symplectic`](@ref) denoted, $\operatorname{Sp}(2n)$, represents transformations into symplectic subspaces which keep the
+The [`Symplectic`](@ref) manifold, denoted $\operatorname{Sp}(2n)$, represents transformations into symplectic subspaces which keep the
 canonical symplectic form over $\mathbb{R}^{2n \times 2n }$ invariant under the standard embedding inner product.
 The canonical symplectic form is $\omega(x, y) = x^T Q y$ for elements $x, y \in \mathbb{R}^{2n \times 2n }$, with
 ````math

@@ -525,7 +525,7 @@ The closed form projection mapping is given by [^Gao2021riemannian]
 ````math
     \operatorname{P}^{T_p\operatorname{Sp}(2n)}_{g_p}(X) = pQ\operatorname{sym}(p^TQ^TX),
 ````
-where ``\operatorname{sym}(A) = \frac{1}{2}(A + A')``.
+where ``\operatorname{sym}(A) = \frac{1}{2}(A + A^T)``.
 """
 function project_riemannian!(::Symplectic, Y, p, X)
     Q = SymplecticMatrix(p, X)
@@ -552,7 +552,7 @@ The closed form projection operator onto the normal space is given by [^Gao2021r
 ````math
 \operatorname{P}^{(T_p\operatorname{Sp}(2n))\perp}_{g_p}(X) = pQ\operatorname{skew}(p^TQ^TX),
 ````
-where ``\operatorname{skew}(A) = \frac{1}{2}(A - A')``.
+where ``\operatorname{skew}(A) = \frac{1}{2}(A - A^T)``.
 
 [^Gao2021riemannian]:
     > Gao, Bin and Son, Nguyen Thanh and Absil, P-A and Stykel, Tatjana:
