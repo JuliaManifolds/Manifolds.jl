@@ -255,11 +255,46 @@ ManifoldsBase.default_inverse_retraction_method(::Symplectic) = CayleyInverseRet
 ManifoldsBase.default_retraction_method(::Symplectic) = CayleyRetraction()
 
 @doc raw"""
-    distance(M::Symplectic{n}, p, q) where {n}
+    distance(M::Symplectic, p, q)
 
-Approximate distance between two Symplectic matrices, as found
-in eq. (7) of "A Riemannian-Steepest-Descent approach
-for optimization of the real symplectic group."
+Compute an approximate geodesic distance between two Symplectic matrices
+``p, q \in \operatorname{Sp}(2n)``, as done in [^WangRealSymplecticGroup].
+````math
+    \operatorname{dist}(p, q)
+        ≈ ||\operatorname{Log}(p^+q)||_{\operatorname{Fr}},
+````
+where the ``\operatorname{Log}(\cdot)`` operator is the matrix logarithm.
+
+This approximation is justified by first recalling the Baker-Campbell-Hausdorf formula,
+````math
+\operatorname{Log}(\operatorname{Exp}(A)\operatorname{Exp}(B))
+ = A + B + \frac{1}{2}[A, B] + \frac{1}{12}[A, [A, B]] + \frac{1}{12}[B, [B, A]]
+    + \ldots \;.
+````
+Then we write the expression for the exponential map from ``p`` to ``q`` as
+````math
+    q =
+    \operatorname{exp}_p(X)
+    =
+    p \operatorname{Exp}((p^{+}X)^T)
+    \operatorname{Exp}([p^{+}X - (p^{+}X)^T]),
+    X \in T_p\operatorname{Sp},
+````
+and with the geodesic distance between ``p`` and ``q`` given by
+``\operatorname{dist}(p, q) = ||X||_p = ||p^+X||_{\operatorname{Fr}}``
+we see that
+````math
+    \begin{align*}
+    ||\operatorname{Log}(p^+q)||_{\operatorname{Fr}}
+    &= ||\operatorname{Log}\left(
+        \operatorname{Exp}((p^{+}X)^T)
+        \operatorname{Exp}(p^{+}X - (p^{+}X)^T)
+    \right)||_{\operatorname{Fr}} \\
+    &= ||p^{+}X + \frac{1}{2}[(p^{+}X)^T, p^{+}X - (p^{+}X)^T]
+            + \ldots ||_{\operatorname{Fr}} \\
+    &≈ ||p^{+}X||_{\operatorname{Fr}} = \operatorname{dist}(p, q).
+    \end{align*}
+````
 """
 function distance(M::Symplectic{n}, p, q) where {n}
     return norm(log(symplectic_inverse_times(M, p, q)))
@@ -276,7 +311,7 @@ For the point ``p \in \operatorname{Sp}(2n)`` the exponential mapping along the 
 vector ``X \in T_p\operatorname{Sp}(2n)`` is computed as [^WangRealSymplecticGroup]
 ````math
     \operatorname{exp}_p(X) = p \operatorname{Exp}((p^{-1}X)^T)
-                                \operatorname{Exp}([p^{-1}X - (p^{-1}X)^T]),
+                                \operatorname{Exp}(p^{-1}X - (p^{-1}X)^T),
 ````
 where ``\operatorname{Exp}(\cdot)`` denotes the matrix exponential.
 
