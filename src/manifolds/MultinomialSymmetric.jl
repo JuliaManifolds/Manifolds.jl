@@ -59,11 +59,6 @@ Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(m,n)`
 i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
 function check_point(M::MultinomialSymmetric{n}, p; kwargs...) where {n}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
-    # the embedding checks for positivity and unit sum columns, by symmetry we would get
-    # the same for the rows, so checking symmetry is the only thing left, we can just use
-    # the corresponding manifold for that
     return check_point(SymmetricMatrices(n, ℝ), p)
 end
 @doc raw"""
@@ -74,20 +69,10 @@ This means, that `p` is valid, that `X` is of correct dimension, symmetric, and 
 along any row.
 """
 function check_vector(M::MultinomialSymmetric{n}, p, X; kwargs...) where {n}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-    # from the embedding we know that columns sum to zero, only symmety is left, i.e.
     return check_vector(SymmetricMatrices(n, ℝ), p, X; kwargs...)
 end
 
-function decorated_manifold(::MultinomialSymmetric{N}) where {N}
+function get_embedding(::MultinomialSymmetric{N}) where {N}
     return MultinomialMatrices(N, N)
 end
 

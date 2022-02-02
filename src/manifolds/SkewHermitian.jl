@@ -65,8 +65,6 @@ whether `p` is a skew-hermitian matrix of size `(n,n)` with values from the corr
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
 function check_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = check_point(decorated_manifold(M), p; kwargs...)
-    mpv === nothing || return mpv
     if !isapprox(p, -p'; kwargs...)
         return DomainError(
             norm(p + p'),
