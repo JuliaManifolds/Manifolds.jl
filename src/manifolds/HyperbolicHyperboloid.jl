@@ -254,13 +254,23 @@ function exp!(M::Hyperbolic, q, p, X)
     return copyto!(q, cosh(vn) * p + sinh(vn) / vn * X)
 end
 
-function _get_basis(M::Hyperbolic, p, ::DefaultOrthonormalBasis; kwargs...)
-    n = manifold_dimension(M)
+# overwrite the default construction on level 2 (dispatching on basis)
+# since this function should not call get_vector (that relies on get_basis itself on H2)
+function _get_basis(
+    M::Hyperbolic,
+    p,
+    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType};
+    kwargs...,
+)
+    return get_basis_orthonormal(M, p, ℝ)
+end
+
+function get_basis_orthonormal(M::Hyperbolic{n}, p, r::RealNumbers) where {n}
     V = [
         _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for
         i in 1:n
     ]
-    return CachedBasis(B, gram_schmidt(M, p, V))
+    return CachedBasis(DefaultOrthonormalBasis(r), gram_schmidt(M, p, V))
 end
 
 function get_basis_diagonalizing(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)

@@ -3,6 +3,7 @@ module Manifolds
 import ManifoldsBase:
     @trait_function,
     _access_nested,
+    _get_basis,
     _inverse_retract,
     _inverse_retract!,
     _read,
