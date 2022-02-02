@@ -6,7 +6,7 @@ The canonical symplectic form is $\omega(x, y) = x^T Q y$ for elements $x, y \in
 ````math
     Q = 
     \begin{bmatrix}
-     0  &  I \\\\
+     0  &  I \\
     -I  &  0
     \end{bmatrix}.
 ```` 

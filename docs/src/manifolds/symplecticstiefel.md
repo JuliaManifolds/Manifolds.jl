@@ -1,6 +1,6 @@
 # Symplectic Stiefel
 
-The manifold [`SymplecticStiefel`](@ref) denoted, $\operatorname{SpSt}(2n, 2k)$, 
+The [`SymplecticStiefel`](@ref) manifold, denoted $\operatorname{SpSt}(2n, 2k)$, 
 represents canonical symplectic bases of $2k$ dimensonal symplectic subspaces in $\mathbb{R}^{2n \times 2n}$. 
 This means that the columns of each element $p \in \operatorname{SpSt}(2n, 2k) \subset \mathbb{R}^{2n \times 2k}$ 
 has as columns a symplectic basis which recreates the canonical symplectic form over $\mathbb{R}^{2k \times 2k }$.
