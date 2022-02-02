@@ -65,9 +65,6 @@ Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
 function check_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) where {n}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
-    # positivity and columns are checked in the embedding, we further check
     r = sum(p, dims=2)
     if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
         return DomainError(
@@ -85,16 +82,6 @@ This means, that `p` is valid, that `X` is of correct dimension and sums to zero
 column or row.
 """
 function check_vector(M::MultinomialDoubleStochastic{n}, p, X; kwargs...) where {n}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-    # columns are checked in the embedding, we further check
     r = sum(X, dims=2) # check for stochastic rows
     if !isapprox(norm(r), 0.0; kwargs...)
         return DomainError(
@@ -105,7 +92,7 @@ function check_vector(M::MultinomialDoubleStochastic{n}, p, X; kwargs...) where 
     return nothing
 end
 
-function decorated_manifold(::MultinomialDoubleStochastic{N}) where {N}
+function get_embedding(::MultinomialDoubleStochastic{N}) where {N}
     return MultinomialMatrices(N, N)
 end
 

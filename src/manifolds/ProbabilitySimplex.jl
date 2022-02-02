@@ -92,14 +92,6 @@ the embedding with positive entries that sum to one
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(M::ProbabilitySimplex, p; kwargs...)
-    mpv = invoke(
-        check_point,
-        Tuple{(typeof(get_embedding(M))),typeof(p)},
-        get_embedding(M),
-        p;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if minimum(p) <= 0
         return DomainError(
             minimum(p),
@@ -124,15 +116,6 @@ after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::ProbabilitySimplex, p, X; kwargs...)
-    mpv = invoke(
-        check_vector,
-        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
-        get_embedding(M),
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(sum(X), 0.0; kwargs...)
         return DomainError(
             sum(X),
@@ -142,7 +125,7 @@ function check_vector(M::ProbabilitySimplex, p, X; kwargs...)
     return nothing
 end
 
-decorated_manifold(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
+get_embedding(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
 
 default_metric_dispatch(::ProbabilitySimplex, ::FisherRaoMetric) = Val(true)
 
