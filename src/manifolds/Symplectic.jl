@@ -130,20 +130,25 @@ end
     change_representer!(MetMan::MetricManifold{𝔽, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric},
                         Y, EucMet::EuclideanMetric, p, X)
 
-TODO: Explain 'ExtendedSymplecticMetric'.
-Change the representation of an arbitrary element ``χ ∈ \mathbb{R}^{2n \times 2n}``
-by a mapping
+Change the representation of a matrix ``χ ∈ \mathbb{R}^{2n \times 2n}``
+into the inner product space ``(ℝ^{2n \times 2n}, g_p)`` where the inner product
+is given by
+``g_p(χ, η) = \langle p^{-1}χ, p^{-1}η \rangle = \operatorname{tr}(χ^T(pp^T)^{-1}η)``,
+as the extension of the [`RealSymplecticMetric`](@ref) onto the entire embedding space.
+
+By changing the representation we mean to apply a mapping
 ````math
     c_p : \mathbb{R}^{2n \times 2n} \rightarrow \mathbb{R}^{2n \times 2n},
-    \quad c_p(χ) = pp^T χ.
 ````
-The mapping is defined such that the metric compatibility condition
+defined by requiring that it satisfy the metric compatibility condition
 ````math
-    g_p(c_p(χ), η) ⟨p^{-1}c_p(χ), p^{-1}η⟩ = ⟨χ, η⟩^{\text{Euc}}
-        \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ)
+    g_p(c_p(χ), η) = ⟨p^{-1}c_p(χ), p^{-1}η⟩ = ⟨χ, η⟩^{\text{Euc}}
+        \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ).
 ````
-holds, where ``g`` is the Riemannian metric [`RealSymplecticMetric`](@ref) extended
-to all of .
+In this case, we compute the mapping
+````math
+    c_p(χ) = pp^T χ.
+````
 """
 function change_representer(
     MetMan::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
