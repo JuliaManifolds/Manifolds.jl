@@ -302,8 +302,12 @@ end
             Manifolds.gradient!(SpSt_6_4, test_f, grad_f_p, p_grad, ad_diff)
             @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-16)
 
-            @test_throws ArgumentError grad_euclidean_to_manifold!(SpSt_6_4,
-                                            grad_f_p, p_grad, grad_f_p)
+            @test_throws ArgumentError grad_euclidean_to_manifold!(
+                SpSt_6_4,
+                grad_f_p,
+                p_grad,
+                grad_f_p,
+            )
         end
     end
 end
