@@ -43,12 +43,30 @@ function Random.rand(
     return d.proj!(d.manifold, p, p)
 end
 
+function Random.rand(
+    rng::AbstractRNG,
+    d::ProjectedPointDistribution{TResult},
+    n::Int,
+) where {TResult}
+    ps = [convert(TResult, rand(rng, d.distribution)) for _ in 1:n]
+    map(p -> d.proj!(d.manifold, p, p), ps)
+    return ps
+end
+
 function Distributions._rand!(
     rng::AbstractRNG,
     d::ProjectedPointDistribution,
     p::AbstractArray{<:Number},
 )
     Distributions._rand!(rng, d.distribution, p)
+    return d.proj!(d.manifold, p, p)
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    p::AbstractArray{<:Number},
+    d::ProjectedPointDistribution,
+)
+    Random.rand!(rng, p, d.distribution)
     return d.proj!(d.manifold, p, p)
 end
 
