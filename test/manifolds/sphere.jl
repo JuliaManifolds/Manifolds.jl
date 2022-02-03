@@ -227,7 +227,7 @@ using ManifoldsBase: TFVector
 
     @testset "Distributions" begin
         sphere = Sphere(2)
-        haar_measure = uniform_distribution(sphere, zeros(representation_size(sphere)))
+        haar_measure = uniform_distribution(sphere)
         pts = rand(haar_measure, 5)
         @test all(p -> is_point(sphere, p), pts)
     end

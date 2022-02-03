@@ -61,14 +61,6 @@ function Distributions._rand!(
     Distributions._rand!(rng, d.distribution, p)
     return d.proj!(d.manifold, p, p)
 end
-function Random.rand!(
-    rng::AbstractRNG,
-    p::AbstractArray{<:Number},
-    d::ProjectedPointDistribution,
-)
-    Random.rand!(rng, p, d.distribution)
-    return d.proj!(d.manifold, p, p)
-end
 
 Distributions.support(d::ProjectedPointDistribution) = MPointSupport(d.manifold)
 
