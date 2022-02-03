@@ -33,8 +33,6 @@ i.e. is an `n`-by-`n` symmetric matrix of unit Frobenius norm.
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_point(M::SphereSymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
             norm(p - p'),
@@ -54,15 +52,6 @@ of unit Frobenius norm.
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(M::SphereSymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(norm(X - X'), 0.0; kwargs...)
         return DomainError(
             norm(X - X'),
@@ -72,7 +61,7 @@ function check_vector(M::SphereSymmetricMatrices{n,𝔽}, p, X; kwargs...) where
     return nothing
 end
 
-function decorated_manifold(M::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
+function get_embedding(::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
     return ArraySphere(n, n; field=𝔽)
 end
 
