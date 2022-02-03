@@ -77,8 +77,6 @@ function check_point(
     q;
     kwargs...,
 ) where {n,k,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
-    mpv === nothing || return mpv
     p = q * q'
     r = rank(p * p'; kwargs...)
     if r < k
@@ -96,26 +94,12 @@ end
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](@ref).
-The tolerance for the symmetry of `X` can be set using `kwargs...`.
-"""
-function check_vector(
-    M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽},
-    q,
-    Y;
-    kwargs...,
-) where {n,k,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(q),typeof(Y)},
-        M,
-        q,
-        Y;
-        kwargs...,
-    )
-    return mpv
-end
 
-function decorated_manifold(::SymmetricPositiveSemidefiniteFixedRank{N,K,𝔽}) where {N,K,𝔽}
+Due to the reduced representation this is fulfilled as soon as the matrix is of correct size.
+"""
+check_vector(M::SymmetricPositiveSemidefiniteFixedRank, q, Y; kwargs...)
+
+function get_embedding(::SymmetricPositiveSemidefiniteFixedRank{N,K,𝔽}) where {N,K,𝔽}
     return Euclidean(N, K; field=𝔽)
 end
 
