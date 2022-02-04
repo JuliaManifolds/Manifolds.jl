@@ -41,7 +41,7 @@ tp = @pgf Axis({
     axis_equal,
     xmin = -1.7,
     xmax = 1.7,
-    ymin = -.25,
+    ymin = -0.25,
     ymax = 1.4,
     scale = 1.6,
 })
