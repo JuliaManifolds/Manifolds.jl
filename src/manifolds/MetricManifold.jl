@@ -453,6 +453,28 @@ end
 is_default_metric(M::MetricManifold) = is_default_metric(M.manifold, M.metric)
 is_default_metric(::AbstractManifold, ::AbstractMetric) = false
 
+function is_point(
+    ::TraitList{IsMetricManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    te=false;
+    kwargs...,
+)
+    return is_point(decorated_manifold(M), p, te; kwargs...)
+end
+
+function is_vector(
+    ::TraitList{IsMetricManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    te=false,
+    cbp=true;
+    kwargs...,
+)
+    return is_vector(decorated_manifold(M), p, X, te, cbp; kwargs...)
+end
+
 @doc raw"""
     local_metric(M::AbstractManifold{𝔽}, p, B::AbstractBasis)
 
