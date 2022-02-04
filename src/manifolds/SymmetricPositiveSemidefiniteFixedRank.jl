@@ -77,8 +77,6 @@ function check_point(
     q;
     kwargs...,
 ) where {n,k,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
-    mpv === nothing || return mpv
     p = q * q'
     r = rank(p * p'; kwargs...)
     if r < k
@@ -115,7 +113,7 @@ function check_vector(
     return mpv
 end
 
-function decorated_manifold(::SymmetricPositiveSemidefiniteFixedRank{N,K,𝔽}) where {N,K,𝔽}
+function get_embedding(::SymmetricPositiveSemidefiniteFixedRank{N,K,𝔽}) where {N,K,𝔽}
     return Euclidean(N, K; field=𝔽)
 end
 

@@ -21,7 +21,7 @@ where $\operatorname{Log}$ denotes the matrix logarithm and
 $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
 function distance(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogEuclideanMetric},
+    ::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogEuclideanMetric},
     p,
     q,
 ) where {N}

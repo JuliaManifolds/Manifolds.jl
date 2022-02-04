@@ -9,13 +9,6 @@ using Manifolds: default_metric_dispatch
     M3 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
     M4 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
 
-    @test (@inferred default_metric_dispatch(M2)) === Val(true)
-    @test (@inferred default_metric_dispatch(M1, Manifolds.LinearAffineMetric())) ===
-          Val(true)
-    @test (@inferred default_metric_dispatch(M1, Manifolds.LogCholeskyMetric())) ===
-          Val(false)
-    @test (@inferred default_metric_dispatch(M3)) === Val(false)
-
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1, one(zeros(3, 3))) == Inf
     @test injectivity_radius(M1, ExponentialRetraction()) == Inf

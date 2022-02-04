@@ -209,7 +209,7 @@ where $\operatorname{Log}$ denotes to the matrix logarithm.
 """
 log(::SymmetricPositiveDefinite, ::Any...)
 
-function log!(M::SymmetricPositiveDefinite{N}, X, p, q) where {N}
+function log!(::SymmetricPositiveDefinite{N}, X, p, q) where {N}
     e = eigen(Symmetric(p))
     U = e.vectors
     S = max.(e.values, floatmin(eltype(e.values)))

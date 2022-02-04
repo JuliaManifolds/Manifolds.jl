@@ -63,6 +63,7 @@ function active_traits(f, M::MetricManifold, args...)
     return merge_traits(
         IsMetricManifold(),
         is_default_metric(M.manifold, M.metric) ? IsDefaultMetric(M.metric) : EmptyTrait(),
+        active_traits(f, M.manifold, args...),
         #IsExplicitDecorator(:manifold),
     )
 end
@@ -80,6 +81,8 @@ inner product ``g(X, X) > 0`` whenever ``X`` is not the zero vector.
 abstract type RiemannianMetric <: AbstractMetric end
 
 decorated_manifold(M::MetricManifold) = M.manifold
+
+get_embedding(M::MetricManifold) = get_embedding(M.manifold)
 
 @doc raw"""
     change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
@@ -655,7 +658,7 @@ function sharp!(
     X::TFVector,
     p,
     ξ::CoTFVector,
-) where {N<:MetricManifold}
+)
     Ginv = inverse_local_metric(M, p, X.basis)
     copyto!(X.data, Ginv * ξ.data)
     return X
@@ -687,7 +690,7 @@ function vector_transport_along!(
     c,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_to!(M.manifold, Y, p, X, c, m, r)
+    return vector_transport_to!(M.manifold, Y, p, X, c, m)
 end
 
 function vector_transport_direction(
@@ -698,7 +701,7 @@ function vector_transport_direction(
     d,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_to(M.manifold, p, X, d, m)
+    return vector_transport_direction(M.manifold, p, X, d, m)
 end
 function vector_transport_direction!(
     ::TraitList{IsDefaultMetric{G}},

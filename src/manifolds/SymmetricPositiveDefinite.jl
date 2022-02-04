@@ -42,8 +42,6 @@ of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the `kwargs...`.
 """
 function check_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
             norm(p - transpose(p)),
@@ -69,15 +67,6 @@ Lie group.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
         return DomainError(
             X,
@@ -85,10 +74,6 @@ function check_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N
         )
     end
     return nothing
-end
-
-function decorated_manifold(M::SymmetricPositiveDefinite)
-    return get_embedding(M)
 end
 
 function get_embedding(M::SymmetricPositiveDefinite)
@@ -108,14 +93,6 @@ injectivity_radius(::SymmetricPositiveDefinite) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::ExponentialRetraction) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::Any) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::Any, ::ExponentialRetraction) = Inf
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::SymmetricPositiveDefinite,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)

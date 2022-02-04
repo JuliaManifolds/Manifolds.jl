@@ -40,7 +40,7 @@ $⌊\cdot⌋$ denbotes the strictly lower triangular matrix of its argument,
 and $\lVert\cdot\rVert_{\mathrm{F}}$ the Frobenius norm.
 """
 function distance(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    ::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
     p,
     q,
 ) where {N}
@@ -65,7 +65,7 @@ denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}
 exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 
 function exp!(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    ::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
     q,
     p,
     X,
@@ -92,7 +92,7 @@ $a_z(W) = z (z^{-1}Wz^{-\mathrm{T}})_{\frac{1}{2}}$, and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$
 """
 function inner(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    ::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
     p,
     X,
     Y,
@@ -117,7 +117,7 @@ of $q$ and the just mentioned logarithmic map is the one on [`CholeskySpace`](@r
 log(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 
 function log!(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    ::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
     X,
     p,
     q,
@@ -149,24 +149,22 @@ transport on [`CholeskySpace`](@ref) from $x$ to $y$. The formula hear reads
 \mathcal P_{q←p}X = yV^{\mathrm{T}} + Vy^{\mathrm{T}}.
 ````
 """
-vector_transport_to(
+parallel_transport_to(
     ::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric},
     ::Any,
     ::Any,
     ::Any,
-    ::ParallelTransport,
 )
 
-function vector_transport_to!(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
+function parallel_transport_to!(
+    ::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
     Y,
     p,
     X,
     q,
-    m::ParallelTransport,
 ) where {N}
     y = cholesky(q).L
     (x, W) = spd_to_cholesky(p, X)
-    vector_transport_to!(CholeskySpace{N}(), Y, x, W, y, m)
+    parallel_transport_to!(CholeskySpace{N}(), Y, x, W, y)
     return tangent_cholesky_to_tangent_spd!(y, Y)
 end
