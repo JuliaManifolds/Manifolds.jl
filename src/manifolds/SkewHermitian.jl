@@ -43,7 +43,7 @@ const SkewSymmetricMatrices{n} = SkewHermitianMatrices{n,ℝ}
 SkewSymmetricMatrices(n::Int) = SkewSymmetricMatrices{n}()
 @deprecate SkewSymmetricMatrices(n::Int, 𝔽) SkewHermitianMatrices(n, 𝔽)
 
-function active_traits(f, ::SkewSymmetricMatrices, args...)
+function active_traits(f, ::SkewHermitianMatrices, args...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 
@@ -217,7 +217,7 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 """
 project(::SkewHermitianMatrices, ::Any)
 
-function project!(M::SkewHermitianMatrices, q, p)
+function project!(::SkewHermitianMatrices, q, p)
     q .= (p .- p') ./ 2
     return q
 end
