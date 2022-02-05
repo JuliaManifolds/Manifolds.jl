@@ -66,6 +66,7 @@ get_iterator(::Oblique{n,m}) where {n,m} = Base.OneTo(m)
 @generated function manifold_dimension(::Oblique{n,m,𝔽}) where {n,m,𝔽}
     return (n * real_dimension(𝔽) - 1) * m
 end
+power_dimensions(::Oblique{n,m}) where {n,m} = (m,)
 
 @generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
 

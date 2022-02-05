@@ -482,7 +482,7 @@ function parallel_transport_to!(::EssentialManifold, Y, p, X, q)
     copyto!(Y, [pqe * Xe * pqe' for (pqe, Xe) in zip(pq, X)])
     return Y
 end
-# overwrite power passdown - should be
+# overwrite power passdown - should be split into layer 1 and 2 is ambiguities appear.
 function vector_transport_to(M::EssentialManifold, p, X, q, ::ParallelTransport)
     return parallel_transport_to(M, p, X, q)
 end
