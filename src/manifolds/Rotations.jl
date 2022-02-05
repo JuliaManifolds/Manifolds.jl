@@ -609,7 +609,7 @@ where tangent vectors are represented by elements from the Lie group
 """
 project(::Rotations, ::Any, ::Any)
 
-project!(M::Rotations{N}, Y, p, X) where {N} = project!(SkewSymmetricMatrices(N), Y, X)
+project!(::Rotations{N}, Y, p, X) where {N} = project!(SkewSymmetricMatrices(N), Y, X)
 
 @doc raw"""
     representation_size(M::Rotations)
@@ -722,6 +722,12 @@ end
 function parallel_transport_direction!(::Rotations{2}, Y, p, X, d)
     return copyto!(Y, X)
 end
+function parallel_transport_direction(M::Rotations, p, X, d)
+    expdhalf = exp(d / 2)
+    q = exp(M, p, d)
+    return transpose(q) * p * expdhalf * X * expdhalf
+end
+parallel_transport_direction(::Rotations{2}, p, X, d) = X
 
 function parallel_transport_to!(M::Rotations, Y, p, X, q)
     d = log(M, p, q)
@@ -731,6 +737,12 @@ end
 function parallel_transport_to!(::Rotations{2}, Y, p, X, q)
     return copyto!(Y, X)
 end
+function parallel_transport_to(M::Rotations, p, X, q)
+    d = log(M, p, q)
+    expdhalf = exp(d / 2)
+    return transpose(q) * p * expdhalf * X * expdhalf
+end
+parallel_transport_to(::Rotations{2}, p, X, q) = X
 
 @doc raw"""
     zero_vector(M::Rotations, p)
