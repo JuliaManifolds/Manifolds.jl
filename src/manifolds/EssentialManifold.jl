@@ -455,10 +455,10 @@ function Base.show(io::IO, M::EssentialManifold)
     return print(io, "EssentialManifold($(M.is_signed))")
 end
 
-function parallel_transport_direction(::EssentialManifold, p, X, d)
+function parallel_transport_direction(M::EssentialManifold, p, X, d)
     return parallel_transport_to(M, p, X, exp(M, p, d))
 end
-function parallel_transport_direction!(::EssentialManifold, Y, p, X, q)
+function parallel_transport_direction!(M::EssentialManifold, Y, p, X, d)
     parallel_transport_to!(M, Y, p, X, exp(M, p, d))
     return Y
 end
@@ -482,18 +482,18 @@ function parallel_transport_to!(::EssentialManifold, Y, p, X, q)
     copyto!(Y, [pqe * Xe * pqe' for (pqe, Xe) in zip(pq, X)])
     return Y
 end
-# overwrite power passdown
-function _vector_transport_to(M::EssentialManifold, p, X, q, ::ParallelTransport)
+# overwrite power passdown - should be
+function vector_transport_to(M::EssentialManifold, p, X, q, ::ParallelTransport)
     return parallel_transport_to(M, p, X, q)
 end
-function _vector_transport_to!(M::EssentialManifold, Y, p, X, q, ::ParallelTransport)
+function vector_transport_to!(M::EssentialManifold, Y, p, X, q, ::ParallelTransport)
     parallel_transport_to!(M, Y, p, X, q)
     return Y
 end
-function _vector_transport_direction(M::EssentialManifold, p, X, q, ::ParallelTransport)
+function vector_transport_direction(M::EssentialManifold, p, X, q, ::ParallelTransport)
     return parallel_transport_direction(M, p, X, q)
 end
-function _vector_transport_direction!(M::EssentialManifold, Y, p, X, q, ::ParallelTransport)
+function vector_transport_direction!(M::EssentialManifold, Y, p, X, q, ::ParallelTransport)
     parallel_transport_direction!(M, Y, p, X, q)
     return Y
 end
