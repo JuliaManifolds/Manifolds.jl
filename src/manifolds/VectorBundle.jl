@@ -286,7 +286,7 @@ function exp!(B::VectorBundle, q, p, X)
     return q
 end
 function exp!(M::TangentSpaceAtPoint, q, p, X)
-    copyto!(q, p + X)
+    copyto!(M.fiber.manifold, q, p + X)
     return q
 end
 
@@ -635,6 +635,19 @@ LinearAlgebra.norm(B::VectorBundleFibers, p, X) = sqrt(inner(B, p, X, X))
 LinearAlgebra.norm(B::VectorBundleFibers{<:TangentSpaceType}, p, X) = norm(B.manifold, p, X)
 LinearAlgebra.norm(M::VectorSpaceAtPoint, p, X) = norm(M.fiber.manifold, M.point, X)
 
+function parallel_transport_to!(M::VectorBundle, Y, p, X, q)
+    px, pVx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    VYM, VYF = submanifold_components(M.manifold, Y)
+    qx, qVx = submanifold_components(M.manifold, q)
+    parallel_transport_to!(M.manifold, VYM, px, VXM, qx)
+    parallel_transport_to!(M.manifold, VYF, px, VXF, qx)
+    return Y
+end
+function parallel_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q)
+    return copyto!(M.fiber.manifold, Y, p, X)
+end
+
 @doc raw"""
     project(B::VectorBundle, p)
 
@@ -846,6 +859,17 @@ Compute the vector transport the tangent vector `X`at `p` to `q` on the
 [`VectorBundle`](@ref) `M` using the [`VectorBundleVectorTransport`](@ref) `m`.
 """
 vector_transport_to(::VectorBundle, ::Any, ::Any, ::Any, ::VectorBundleVectorTransport)
+
+function _vector_transport_to(M::VectorBundle, p, X, q, m::VectorBundleVectorTransport)
+    px, pVx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    qx, qVx = submanifold_components(M.manifold, q)
+    return ProductRepr(
+        vector_transport_to(M.manifold, px, VXM, qx, m.method_point),
+        vector_transport_to(M.manifold, px, VXF, qx, m.method_vector),
+    )
+end
+
 function vector_transport_to(M::VectorBundle, p, X, q)
     return vector_transport_to(M, p, X, q, M.vector_transport)
 end
@@ -873,14 +897,14 @@ function vector_transport_to!(
     return vector_transport_to!(M, Y, p, X, q, VectorBundleVectorTransport(m, m))
 end
 function vector_transport_to!(
-    ::TangentSpaceAtPoint,
+    M::TangentSpaceAtPoint,
     Y,
     p,
     X,
     q,
     m::AbstractVectorTransportMethod,
 )
-    return copyto!(Y, X)
+    return copyto!(M.fiber.manifold, Y, p, X)
 end
 
 """
