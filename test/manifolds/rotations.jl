@@ -204,15 +204,15 @@ include("../utils.jl")
         @test is_point(M, x3, true)
     end
     @testset "Convert from Lie algebra representation of tangents to Riemannian submanifold representation" begin
-        skew(M) = (M - M')/2
+        skew(M) = (M - M') / 2
         M = Manifolds.Rotations(4)
         rng = MersenneTwister(1)
-        p = project(M, randn(rng, (4,4)))
-        x = skew(randn(rng, (4,4)))
+        p = project(M, randn(rng, (4, 4)))
+        x = skew(randn(rng, (4, 4)))
         @test is_vector(M, p, x, true)
         embedded_x = embed(M, p, x)
         @test embedded_x == p * x
-        res = zeros((4,4))
+        res = zeros((4, 4))
         embed!(M, res, p, x)
         @test res == p * x
         @test embedded_x ≈ p * skew(p' * embedded_x)
