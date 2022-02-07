@@ -99,6 +99,26 @@ function check_vector(M::Rotations{N}, p, X; kwargs...) where {N}
     return check_point(SkewSymmetricMatrices(N), X; kwargs...)
 end
 
+
+@doc raw"""
+    embed(M::Rotations{N}, p, X)
+
+Embed the tangent vector `X` at point `p` in `M` from
+its Lie algebra representation (set of skew matrices) into the
+Riemannian submanifold representation
+
+The formula reads
+```math
+X_{\text{embedded}} = p * X
+```
+"""
+embed(::Rotations{N}, p, X) where {N}
+
+function embed!(::Rotations{N}, Y, p, X) where {N}
+    return mul!(Y, p, X)
+end
+
+
 @doc raw"""
     cos_angles_4d_rotation_matrix(R)
 

@@ -14,7 +14,7 @@ Tangent spaces at different points are different vector spaces.
 
 Let $L_R: \mathrm{SO}(n) → \mathrm{SO}(n)$ where $R ∈ \mathrm{SO}(n)$ be the left-multiplication by $R$, that is $L_R(S) = RS$.
 The tangent space at rotation $R$, $T_R \mathrm{SO}(n)$, is related to the tangent space at the identity rotation $I_n$ by the differential of $L_R$ at identity, $(\mathrm{d}L_R)_{I_n} : T_{I_n} \mathrm{SO}(n) → T_R \mathrm{SO}(n)$.
-For a tangent vector at the identity rotation $X ∈ T_{I_n} \mathrm{SO}(n)$ the matrix representation of the corresponding tangent vector $Y$ at a rotation $R$ can be obtained by matrix multiplication: $Y = RX ∈ T_R \mathrm{SO}(n)$.
+To convert the tangent vector representation at the identity rotation $X ∈ T_{I_n} \mathrm{SO}(n)$ (i.e., the default) to the matrix representation of the corresponding tangent vector $Y$ at a rotation $R$ use the [`embed`](@ref embed(::Manifolds.Rotations, :Any...)) which implements the following multiplication: $Y = RX ∈ T_R \mathrm{SO}(n)$.
 You can compare the functions [`log`](@ref log(::Manifolds.Rotations, :Any...)) and [`exp`](@ref exp(::Manifolds.Rotations, ::Any...)) to see how it works in practice.
 
 ```@autodocs
