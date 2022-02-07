@@ -111,7 +111,7 @@ The formula reads
 X_{\text{embedded}} = p * X
 ```
 """
-embed(::Rotations{N}, p, X) where {N}
+embed(::Rotations, p, X)
 
 function embed!(::Rotations{N}, Y, p, X) where {N}
     return mul!(Y, p, X)
