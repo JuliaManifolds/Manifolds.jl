@@ -113,7 +113,7 @@ X_{\text{embedded}} = p * X
 """
 embed(::Rotations, p, X)
 
-function embed!(::Rotations{N}, Y, p, X) where {N}
+function embed!(::Rotations, Y, p, X)
     return mul!(Y, p, X)
 end
 
