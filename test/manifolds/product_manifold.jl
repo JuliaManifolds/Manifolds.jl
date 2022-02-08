@@ -26,7 +26,6 @@ using RecursiveArrayTools: ArrayPartition
         ExponentialRetraction(),
     ) ≈ π
     @test is_default_metric(Mse, ProductMetric())
-    @test Manifolds.default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
 
     @test Manifolds.number_of_components(Mse) == 2
     # test that arrays are not points

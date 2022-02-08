@@ -201,6 +201,54 @@ function check_point(M::ProductManifold, p; kwargs...)
 end
 
 """
+    check_size(M::ProductManifold, p; kwargs...)
+
+Check whether `p` is of valid size on the [`ProductManifold`](@ref) `M`.
+If `p` has components of wrong size a [`CompositeManifoldError`](@ref) consisting of all error messages of the
+components, for which the tests fail is returned.
+
+The tolerance for the last test can be set using the `kwargs...`.
+"""
+function check_size(M::ProductManifold, p::Union{ProductRepr,ArrayPartition})
+    ts = ziptuples(Tuple(1:length(M.manifolds)), M.manifolds, submanifold_components(M, p))
+    e = [(t[1], check_size(t[2:end]...)) for t in ts]
+    errors = filter((x) -> !(x[2] === nothing), e)
+    cerr = [ComponentManifoldError(er...) for er in errors]
+    (length(errors) > 1) && return CompositeManifoldError(cerr)
+    (length(errors) == 1) && return cerr[1]
+    return nothing
+end
+function check_size(M::ProductManifold, p; kwargs...)
+    return DomainError(
+        typeof(p),
+        "The point $p is not a point on $M, since currently only ProductRepr and ArrayPartition are supported types for points on arbitrary product manifolds",
+    )
+end
+function check_size(
+    M::ProductManifold,
+    p::Union{ProductRepr,ArrayPartition},
+    X::Union{ProductRepr,ArrayPartition},
+)
+    ts = ziptuples(
+        Tuple(1:length(M.manifolds)),
+        M.manifolds,
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    e = [(t[1], check_size(t[2:end]...)) for t in ts]
+    errors = filter(x -> !(x[2] === nothing), e)
+    cerr = [ComponentManifoldError(er...) for er in errors]
+    (length(errors) > 1) && return CompositeManifoldError(cerr)
+    (length(errors) == 1) && return cerr[1]
+    return nothing
+end
+function check_size(M::ProductManifold, p, X; kwargs...)
+    return DomainError(
+        typeof(X),
+        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ProductRepr and ArrayPartition are supported types for tangent vectors on arbitrary product manifolds",
+    )
+end
+"""
     check_vector(M::ProductManifold, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`ProductManifold`](@ref)
