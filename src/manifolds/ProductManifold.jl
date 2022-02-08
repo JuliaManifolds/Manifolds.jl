@@ -11,7 +11,7 @@ generates the product manifold $M_1 × M_2 × … × M_n$.
 Alternatively, the same manifold can be contructed using the `×` operator:
 `M_1 × M_2 × M_3`.
 """
-struct ProductManifold{𝔽,TM<:Tuple} <: AbstractManifold{𝔽}
+struct ProductManifold{𝔽,TM<:Tuple} <: AbstractDecoratorManifold{𝔽}
     manifolds::TM
 end
 
@@ -133,6 +133,10 @@ end
 
 function ProductVectorTransport(methods::AbstractVectorTransportMethod...)
     return ProductVectorTransport{typeof(methods)}(methods)
+end
+
+function active_traits(f, ::ProductManifold, args...)
+    return merge_traits(IsDefaultMetric(ProductMetric()))
 end
 
 """
