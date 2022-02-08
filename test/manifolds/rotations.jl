@@ -209,10 +209,10 @@ include("../utils.jl")
         x = [[0, -1, 3] [1, 0, 2] [-3, -2, 0]]
         @test is_vector(M, p, x, true)
         @test embed(M, p, x) == p * x
-        Y = zeros((3,3))
+        Y = zeros((3, 3))
         embed!(M, Y, p, x)
         @test Y == p * x
-        @test Y ≈ p * (p'Y - Y'p)/2
+        @test Y ≈ p * (p'Y - Y'p) / 2
     end
     @testset "Edge cases of Rotations" begin
         @test_throws OutOfInjectivityRadiusError inverse_retract(
