@@ -13,7 +13,7 @@ include("../utils.jl")
         @test !is_point(M, 9.0)
         @test_throws DomainError is_point(M, 9.0, true)
         @test !is_point(M, [9.0; 9.0])
-        @test_throws DomainError is_point(M, [9.0 9.0], true)
+        @test_throws CompositeManifoldError is_point(M, [9.0 9.0], true)
         @test_throws CompositeManifoldError is_point(M, [9.0, 9.0], true)
         @test !is_vector(M, [9.0; 9.0], 0.0)
         @test_throws DomainError is_vector(M, 9.0, 0.0, true) # point false and checked

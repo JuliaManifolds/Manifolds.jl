@@ -206,6 +206,9 @@ function manifold_dimension(M::EdgeGraphManifold)
     return manifold_dimension(M.manifold) * ne(M.graph)
 end
 
+power_dimensions(M::EdgeGraphManifold) = (ne(M.graph),)
+power_dimensions(M::VertexGraphManifold) = (nv(M.graph),)
+
 function _show_graph_manifold(io::IO, M; man_desc="", pre="")
     println(io, "GraphManifold\nGraph:")
     sg = sprint(show, "text/plain", M.graph, context=io, sizehint=0)

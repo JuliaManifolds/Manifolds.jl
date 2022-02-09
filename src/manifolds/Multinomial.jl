@@ -74,6 +74,7 @@ end
 get_iterator(::MultinomialMatrices{n,m}) where {n,m} = Base.OneTo(m)
 
 @generated manifold_dimension(::MultinomialMatrices{n,m}) where {n,m} = (n - 1) * m
+@generated power_dimensions(::MultinomialMatrices{n,m}) where {n,m} = (m,)
 
 @generated representation_size(::MultinomialMatrices{n,m}) where {n,m} = (n, m)
 
