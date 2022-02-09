@@ -418,6 +418,10 @@ function manifold_dimension(::EssentialManifold)
     return 5
 end
 
+function power_dimensions(::EssentialManifold)
+    return (2,)
+end
+
 @doc raw"""
     project(M::EssentialManifold, p, X)
 

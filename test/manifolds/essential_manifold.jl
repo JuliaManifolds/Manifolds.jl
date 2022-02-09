@@ -20,6 +20,7 @@ include("../utils.jl")
         np2 = [nr, nr]
         np3 = [r1, r2, r3]
         @test !is_point(M, r1)
+        # first two components of r1 are not rotations
         @test_throws DomainError is_point(M, r1, true)
         @test_throws DomainError is_point(M, np3, true)
         @test is_point(M, p1)
