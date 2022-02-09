@@ -410,23 +410,6 @@ end
 function get_basis(M::ProductManifold, p, B::CachedBasis)
     return invoke(get_basis, Tuple{AbstractManifold,Any,CachedBasis}, M, p, B)
 end
-function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
-    vs = map(
-        ziptuples(
-            M.manifolds,
-            submanifold_components(p),
-            submanifold_components(B.frame_direction),
-        ),
-    ) do t
-        return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
-    end
-    return CachedBasis(B, ProductBasisData(vs))
-end
-for BT in PRODUCT_BASIS_LIST
-    eval(quote
-        @invoke_maker 3 AbstractBasis get_basis(M::ProductManifold, p, B::$BT)
-    end)
-end
 
 """
     get_component(M::ProductManifold, p, i)
@@ -437,55 +420,12 @@ function get_component(M::ProductManifold, p, i)
     return submanifold_component(M, p, i)
 end
 
-function get_coordinates(
-    M::ProductManifold,
-    p,
-    X,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
-) where {𝔽}
-    reps = map(
-        get_coordinates,
-        M.manifolds,
-        submanifold_components(p),
-        submanifold_components(X),
-        B.data.parts,
-    )
-    return vcat(reps...)
-end
-
-for BT in PRODUCT_BASIS_LIST_CACHED
-    eval(
-        quote
-            @invoke_maker 4 (
-                CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where {𝔽}
-            ) get_coordinates(M::ProductManifold, p, X, B::$BT)
-        end,
-    )
-end
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_coordinates(
-            M::ProductManifold,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
-
 function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
     reps = map(
         t -> get_coordinates(t..., B),
         ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X)),
     )
     return vcat(reps...)
-end
-for BT in PRODUCT_BASIS_LIST
-    eval(
-        quote
-            @invoke_maker 4 AbstractBasis get_coordinates(M::ProductManifold, p, X, B::$BT)
-        end,
-    )
 end
 
 function get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
@@ -502,7 +442,7 @@ function get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
     end
     return Xⁱ
 end
-function get_coordinates!(
+function _get_coordinates!(
     M::ProductManifold,
     Xⁱ,
     p,
@@ -528,119 +468,9 @@ function get_coordinates!(
     return Xⁱ
 end
 
-for BT in PRODUCT_BASIS_LIST_CACHED
-    eval(
-        quote
-            @invoke_maker 5 (
-                CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where {𝔽}
-            ) get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::$BT)
-        end,
-    )
-end
-for BT in PRODUCT_BASIS_LIST
-    eval(
-        quote
-            @invoke_maker 5 AbstractBasis get_coordinates!(
-                M::ProductManifold,
-                Xⁱ,
-                p,
-                X,
-                B::$BT,
-            )
-        end,
-    )
-end
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_coordinates!(
-            M::ProductManifold,
-            Y,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
-
 function _get_dim_ranges(dims::NTuple{N,Any}) where {N}
     dims_acc = accumulate(+, vcat(1, SVector(dims)))
     return ntuple(i -> (dims_acc[i]:(dims_acc[i] + dims[i] - 1)), Val(N))
-end
-
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_vector(
-            M::ProductManifold,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
-for TP in [ProductRepr, ArrayPartition]
-    eval(
-        quote
-            @invoke_maker 4 (
-                CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData} where {𝔽}
-            ) get_vector(
-                M::ProductManifold,
-                p::$TP,
-                X,
-                B::CachedBasis{ℝ,<:AbstractBasis{ℝ},<:ProductBasisData},
-            )
-            function get_vector(
-                M::ProductManifold,
-                p::$TP,
-                X,
-                B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
-            ) where {𝔽}
-                N = number_of_components(M)
-                dims = map(manifold_dimension, M.manifolds)
-                dim_ranges = _get_dim_ranges(dims)
-                parts = ntuple(N) do i
-                    return get_vector(
-                        M.manifolds[i],
-                        submanifold_component(p, i),
-                        view(X, dim_ranges[i]),
-                        B.data.parts[i],
-                    )
-                end
-                return $TP(parts)
-            end
-            function get_vector(
-                M::ProductManifold,
-                p::$TP,
-                X,
-                B::AbstractBasis{𝔽,TangentSpaceType},
-            ) where {𝔽}
-                N = number_of_components(M)
-                dims = map(manifold_dimension, M.manifolds)
-                dim_ranges = _get_dim_ranges(dims)
-                parts = ntuple(N) do i
-                    return get_vector(
-                        M.manifolds[i],
-                        submanifold_component(p, i),
-                        view(X, dim_ranges[i]),
-                        B,
-                    )
-                end
-                return $TP(parts)
-            end
-            function get_vector(M::ProductManifold, p::$TP, Xⁱ, B::VeeOrthogonalBasis)
-                dim = manifold_dimension(M)
-                @assert length(Xⁱ) == dim
-                i = one(dim)
-                ts = ziptuples(M.manifolds, submanifold_components(M, p))
-                mapped = map(ts) do t
-                    dim = manifold_dimension(first(t))
-                    tXⁱ = @inbounds view(Xⁱ, i:(i + dim - 1))
-                    i += dim
-                    return get_vector(t..., tXⁱ, B)
-                end
-                return $TP(mapped...)
-            end
-        end,
-    )
 end
 
 function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
@@ -659,7 +489,7 @@ function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
     end
     return X
 end
-function get_vector!(
+function _get_vector!(
     M::ProductManifold,
     X,
     p,
@@ -681,30 +511,6 @@ function get_vector!(
         return get_vector!(t...)
     end
     return X
-end
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_vector!(
-            M::ProductManifold,
-            Xⁱ,
-            e::Identity,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
-
-for BT in PRODUCT_BASIS_LIST
-    eval(
-        quote
-            @invoke_maker 5 AbstractBasis get_vector!(M::ProductManifold, X, p, Xⁱ, B::$BT)
-        end,
-    )
-end
-function get_vector!(M::ProductManifold, Y, p, X, B::CachedBasis)
-    return error(
-        "get_vector! called on $M with an incorrect CachedBasis. Expected a CachedBasis with ProductBasisData, given $B",
-    )
 end
 
 function get_vectors(
@@ -847,7 +653,7 @@ so the encapsulated inverse retraction methods have to be available per factor.
 """
 inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::InverseProductRetraction)
 
-function _inverse_retract(M::ProductManifold, p, q, method::InverseProductRetraction)
+function inverse_retract(M::ProductManifold, p, q, method::InverseProductRetraction)
     return ProductRepr(
         map(
             inverse_retract,
@@ -1012,6 +818,69 @@ end
 function ProductPointDistribution(distributions::MPointDistribution...)
     M = ProductManifold(map(d -> support(d).manifold, distributions)...)
     return ProductPointDistribution(M, distributions...)
+end
+
+for TP in [ProductRepr, ArrayPartition]
+    eval(
+        quote
+            function parallel_transport_direction(
+                M::ProductManifold,
+                p::$TP,
+                X::$TP,
+                d::$TP,
+            )
+                return $TP(
+                    map(
+                        parallel_transport_direction,
+                        M.manifolds,
+                        submanifold_components(M, p),
+                        submanifold_components(M, X),
+                        submanifold_components(M, d),
+                    ),
+                )
+            end
+        end,
+    )
+end
+function parallel_transport_direction!(M::ProductManifold, Y, p, X, d)
+    map(
+        parallel_transport_direction!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, d),
+    )
+    return Y
+end
+
+for TP in [ProductRepr, ArrayPartition]
+    eval(
+        quote
+            function parallel_transport_to(M::ProductManifold, p::$TP, X::$TP, q::$TP)
+                return $TP(
+                    map(
+                        parallel_transport_to,
+                        M.manifolds,
+                        submanifold_components(M, p),
+                        submanifold_components(M, X),
+                        submanifold_components(M, q),
+                    ),
+                )
+            end
+        end,
+    )
+end
+function parallel_transport_to!(M::ProductManifold, Y, p, X, q)
+    map(
+        parallel_transport_to!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, q),
+    )
+    return Y
 end
 
 function project(M::ProductManifold, p::ProductRepr)
@@ -1273,6 +1142,31 @@ end
 function vector_bundle_transport(::VectorSpaceType, M::ProductManifold)
     return ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds))
 end
+
+for TP in [ProductRepr, ArrayPartition]
+    eval(
+        quote
+            function vector_transport_direction(
+                M::ProductManifold,
+                p::$TP,
+                X::$TP,
+                d::$TP,
+                m::ProductVectorTransport,
+            )
+                return $TP(
+                    map(
+                        vector_transport_direction,
+                        M.manifolds,
+                        submanifold_components(M, p),
+                        submanifold_components(M, X),
+                        submanifold_components(M, d),
+                        m.methods,
+                    ),
+                )
+            end
+        end,
+    )
+end
 function vector_transport_direction!(
     M::ProductManifold,
     Y,
@@ -1302,6 +1196,31 @@ This method is performed elementwise, i.e. the method `m` has to be implemented 
 base manifold.
 """
 vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::ProductVectorTransport)
+
+for TP in [ProductRepr, ArrayPartition]
+    eval(
+        quote
+            function vector_transport_to(
+                M::ProductManifold,
+                p::$TP,
+                X::$TP,
+                d::$TP,
+                m::ProductVectorTransport,
+            )
+                return $TP(
+                    map(
+                        vector_transport_to,
+                        M.manifolds,
+                        submanifold_components(M, p),
+                        submanifold_components(M, X),
+                        submanifold_components(M, d),
+                        m.methods,
+                    ),
+                )
+            end
+        end,
+    )
+end
 
 function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTransport)
     map(
