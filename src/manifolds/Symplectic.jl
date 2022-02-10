@@ -605,7 +605,7 @@ function project_riemannian_normal!(::Symplectic, Y, p, X)
     return Y
 end
 
-function Base.rand(M::Symplectic{n}, hamiltonian_norm::Number=1.0) where {n}
+function Base.rand(M::Symplectic{n}; hamiltonian_norm::Number=1.0) where {n}
     # Generate random matrices to construct a Hamiltonian matrix:
     Ω = rand_hamiltonian(M; final_norm=hamiltonian_norm)
     # Return 'cay(Ω)':
