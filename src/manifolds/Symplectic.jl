@@ -62,21 +62,22 @@ struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
 A lightweight structure to represent the action of the matrix
 representation of the canonical symplectic form,
 ````math
-Q_{2n} =
+Q_{2n}(λ) = λ
 \begin{bmatrix}
 0_n & I_n \\
  -I_n & 0_n
 \end{bmatrix} \quad \in ℝ^{2n \times 2n},
 ````
-such that
+such that the canonical symplectic form is represented by
 ````math
-\omega_{2n}(x, y) = x^TQ_{2n}y, \quad x, y \in ℝ^{2n}.
+\omega_{2n}(x, y) = x^TQ_{2n}(1)y, \quad x, y \in ℝ^{2n}.
 ````
 
 The entire matrix is however not instantiated in memory, instead a scalar
-``λ`` of type `T` is stored, which is used to keep track of operations and multiplications
-applied  to each `SymplecticMatrix`. For example, given `Q = SymplecticMatrix(1.0)`,
-represented as `1.0*[0 I; -I 0]`, the adjoint `Q'` returns `SymplecticMatrix(-1.0)`.
+``λ`` of type `T` is stored, which is used to keep track of scaling and transpose operations
+applied  to each `SymplecticMatrix`.
+For example, given `Q = SymplecticMatrix(1.0)` represented as `1.0*[0 I; -I 0]`,
+the adjoint `Q'` returns `SymplecticMatrix(-1.0) = (-1.0)*[0 I; -I 0]`.
 """
 struct SymplecticMatrix{T}
     λ::T
@@ -93,26 +94,26 @@ end
     change_representer(::Symplectic, ::EuclideanMetric, p, X)
     change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
 
-Compute the representation of a tangent vector ``χ ∈ T_p\operatorname{Sp}(2n, ℝ)`` s.t.
+Compute the representation of a tangent vector ``ξ ∈ T_p\operatorname{Sp}(2n, ℝ)`` s.t.
 ````math
-    g_p(c_p(χ), η) = ⟨χ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ).
+    g_p(c_p(ξ), η) = ⟨ξ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ).
 ````
 with the conversion function
 ````math
     c_p : T_p\operatorname{Sp}(2n, ℝ) \rightarrow T_p\operatorname{Sp}(2n, ℝ), \quad
-    c_p(η) = \frac{1}{2} pp^T η + \frac{1}{2} pQ η^T pQ.
+    c_p(ξ) = \frac{1}{2} pp^T ξ + \frac{1}{2} pQ ξ^T pQ.
 ````
 
-Each of the terms ``c_p^1(η) = p p^T η`` and ``c_p^2(η) = pQ η^T pQ`` from the
+Each of the terms ``c_p^1(ξ) = p p^T ξ`` and ``c_p^2(ξ) = pQ ξ^T pQ`` from the
 above definition of ``c_p(η)`` are themselves metric compatible in the sense that
 ````math
     c_p^i : T_p\operatorname{Sp}(2n, ℝ) \rightarrow \mathbb{R}^{2n \times 2n}\quad
-    g_p^i(c_p(χ), η) = ⟨χ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ),
+    g_p^i(c_p(ξ), η) = ⟨ξ, η⟩^{\text{Euc}} \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ),
 ````
 for ``i \in {1, 2}``. However the range of each function alone is not confined to
 ``T_p\operatorname{Sp}(2n, ℝ)``, but the convex combination
 ````math
-    c_p(η) = \frac{1}{2}c_p^1(η) + \frac{1}{2}c_p^2(η)
+    c_p(ξ) = \frac{1}{2}c_p^1(ξ) + \frac{1}{2}c_p^2(ξ)
 ````
 does have the correct range ``T_p\operatorname{Sp}(2n, ℝ)``.
 """
@@ -130,10 +131,10 @@ end
     change_representer!(MetMan::MetricManifold{𝔽, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric},
                         Y, EucMet::EuclideanMetric, p, X)
 
-Change the representation of a matrix ``χ ∈ \mathbb{R}^{2n \times 2n}``
+Change the representation of a matrix ``ξ ∈ \mathbb{R}^{2n \times 2n}``
 into the inner product space ``(ℝ^{2n \times 2n}, g_p)`` where the inner product
 is given by
-``g_p(χ, η) = \langle p^{-1}χ, p^{-1}η \rangle = \operatorname{tr}(χ^T(pp^T)^{-1}η)``,
+``g_p(ξ, η) = \langle p^{-1}ξ, p^{-1}η \rangle = \operatorname{tr}(ξ^T(pp^T)^{-1}η)``,
 as the extension of the [`RealSymplecticMetric`](@ref) onto the entire embedding space.
 
 By changing the representation we mean to apply a mapping
@@ -142,21 +143,21 @@ By changing the representation we mean to apply a mapping
 ````
 defined by requiring that it satisfy the metric compatibility condition
 ````math
-    g_p(c_p(χ), η) = ⟨p^{-1}c_p(χ), p^{-1}η⟩ = ⟨χ, η⟩^{\text{Euc}}
+    g_p(c_p(ξ), η) = ⟨p^{-1}c_p(ξ), p^{-1}η⟩ = ⟨ξ, η⟩^{\text{Euc}}
         \;∀\; η ∈ T_p\operatorname{Sp}(2n, ℝ).
 ````
 In this case, we compute the mapping
 ````math
-    c_p(χ) = pp^T χ.
+    c_p(ξ) = pp^T ξ.
 ````
 """
 function change_representer(
-    MetMan::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
-    EucMet::EuclideanMetric,
+    ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
+    ::EuclideanMetric,
     p,
     X,
 ) where {𝔽,m,n}
-    return change_representer!(MetMan, similar(X), EucMet, p, X)
+    return p * p' * X
 end
 
 function change_representer!(
@@ -681,6 +682,17 @@ end
 
 Base.show(io::IO, ::Symplectic{n,𝔽}) where {n,𝔽} = print(io, "Symplectic{$(2n), $(𝔽)}()")
 
+@doc raw"""
+    symplectic_inverse_times(::Symplectic, p, q)
+    symplectic_inverse_times!(::Symplectic, A, p, q)
+
+Directly compute the symplectic inverse of ``p \in \operatorname{Sp}(2n)``,
+multiplied with ``q \in \operatorname{Sp}(2n)``.
+That is, this function efficiently computes
+``p^+q = (Q_{2n}p^TQ_{2n})q \in ℝ^{2n \times 2n}``,
+where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref)
+of size ``2n \times 2n``.
+"""
 function symplectic_inverse_times(M::Symplectic{n}, p, q) where {n}
     A = similar(p)
     return symplectic_inverse_times!(M, A, p, q)
