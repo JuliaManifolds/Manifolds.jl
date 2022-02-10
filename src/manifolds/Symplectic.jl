@@ -613,9 +613,9 @@ function Base.rand(M::Symplectic{n}; hamiltonian_norm::Number=1.0) where {n}
     return (I - Ω) \ (I + Ω)
 end
 
-function Base.rand(::Symplectic{n}, p::AbstractMatrix) where {n}
+function random_vector(::Symplectic{n}, p::AbstractMatrix) where {n}
     # Generate random symmetric matrix:
-    S = rand(2n, 2n) .- 1 / 2
+    S = randn(2n, 2n)
     S .= (1 / 2) .* (S + S')
     Q = SymplecticMatrix(p)
     lmul!(Q, S)

@@ -182,7 +182,7 @@ include("../utils.jl")
             M_big = Symplectic(20)
             p_big = rand(M_big)
             @test is_point(M_big, p_big, true; atol=1.0e-12)
-            X_big = rand(M_big, p_big)
+            X_big = random_vector(M_big, p_big)
             @test is_vector(M_big, p_big, X_big, true; atol=1.0e-12)
         end
         @testset "test_manifold(Symplectic(6), ...)" begin

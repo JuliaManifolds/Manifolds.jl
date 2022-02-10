@@ -531,10 +531,10 @@ by first generating a random symplectic matrix
 ``p_{\operatorname{Sp}} \in \operatorname{Sp}(2n)``,
 and then projecting onto the Symplectic Stiefel manifold using the
 [`canonical_projection`](@ref).
-That is, ``p = π(p_{\operatorname{Sp}})``
+That is, ``p = π(p_{\operatorname{Sp}})``.
 """
-function Base.rand(M::SymplecticStiefel{n,k}, hamiltonian_norm=1 / 2) where {n,k}
-    p_symplectic = rand(Symplectic(2n), hamiltonian_norm)
+function Base.rand(M::SymplecticStiefel{n,k}; hamiltonian_norm=1 / 2) where {n,k}
+    p_symplectic = rand(Symplectic(2n); hamiltonian_norm=hamiltonian_norm)
     return canonical_projection(M, p_symplectic)
 end
 
@@ -553,8 +553,12 @@ where ``Ω \in `` is Hamiltonian and ``p^s`` means the symplectic complement of 
 To then generate random tangent vectors at ``p``, we set ``B = 0`` and generate a random
 Hamiltonian matrix ``Ω``.
 """
-function Base.rand(::SymplecticStiefel{n,k}, p::AbstractMatrix) where {n,k}
-    Ω = rand_hamiltonian(Symplectic(2k))
+function random_vector(
+    ::SymplecticStiefel{n,k},
+    p::AbstractMatrix;
+    hamiltonian_norm=1.0,
+) where {n,k}
+    Ω = rand_hamiltonian(Symplectic(2k); final_norm=hamiltonian_norm)
     return p * Ω
 end
 
