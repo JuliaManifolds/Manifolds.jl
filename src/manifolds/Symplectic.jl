@@ -847,7 +847,7 @@ end
 function LinearAlgebra.mul!(A::AbstractVecOrMat, Q::SymplecticMatrix, p::AbstractVecOrMat)
     n, k = get_half_dims(p, true, false)
     # k == 0 means we're multiplying with a vector:
-    @boundscheck k == 0 ? checkbounds(A, 1:2n, 1) : checkbounds(A, 1:2n, 1:2k)
+    @boundscheck k == 0 ? checkbounds(A, 1:(2n), 1) : checkbounds(A, 1:(2n), 1:(2k))
 
     # Perform left multiply by λ*Q:
     mul!((@inbounds view(A, 1:n, :)), Q.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
@@ -858,7 +858,7 @@ end
 function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractVecOrMat, Q::SymplecticMatrix)
     n, k = get_half_dims(p, false, true)
     # n == 0 means we're multiplying with a vector:
-    @boundscheck n == 0 ? checkbounds(A, 1, 1:2k) : checkbounds(A, 1:2n, 1:2k)
+    @boundscheck n == 0 ? checkbounds(A, 1, 1:(2k)) : checkbounds(A, 1:(2n), 1:(2k))
 
     # Perform right multiply by λ*Q:
     mul!((@inbounds view(A, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
