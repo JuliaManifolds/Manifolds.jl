@@ -433,11 +433,11 @@ export Euclidean,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
     SymmetricPositiveSemidefiniteFixedRank,
-    Torus,
-    Tucker,
     Symplectic,
     SymplecticStiefel,
-    SymplecticMatrix
+    SymplecticMatrix,
+    Torus,
+    Tucker
 export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
 export HyperboloidTVector,
     PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector

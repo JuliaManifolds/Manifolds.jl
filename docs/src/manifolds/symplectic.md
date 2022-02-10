@@ -26,7 +26,7 @@ Algebra
 ````
 This set is also known as the [Hamiltonian matrices](https://en.wikipedia.org/wiki/Hamiltonian_matrix), which have the 
 property that $(QH)^T = QH$ and are commonly used in physics.
- 
+
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/Symplectic.jl"]
