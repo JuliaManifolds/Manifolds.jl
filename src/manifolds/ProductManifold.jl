@@ -410,6 +410,18 @@ end
 function get_basis(M::ProductManifold, p, B::CachedBasis)
     return invoke(get_basis, Tuple{AbstractManifold,Any,CachedBasis}, M, p, B)
 end
+function get_basis(M::ProductManifold, p, B::DiagonalizingOrthonormalBasis)
+    vs = map(
+        ziptuples(
+            M.manifolds,
+            submanifold_components(p),
+            submanifold_components(B.frame_direction),
+        ),
+    ) do t
+        return get_basis(t[1], t[2], DiagonalizingOrthonormalBasis(t[3]))
+    end
+    return CachedBasis(B, ProductBasisData(vs))
+end
 
 """
     get_component(M::ProductManifold, p, i)
@@ -424,6 +436,21 @@ function get_coordinates(M::ProductManifold, p, X, B::AbstractBasis)
     reps = map(
         t -> get_coordinates(t..., B),
         ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, X)),
+    )
+    return vcat(reps...)
+end
+function get_coordinates(
+    M::ProductManifold,
+    p,
+    X,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
+    reps = map(
+        get_coordinates,
+        M.manifolds,
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        B.data.parts,
     )
     return vcat(reps...)
 end
@@ -442,7 +469,7 @@ function get_coordinates!(M::ProductManifold, Xⁱ, p, X, B::AbstractBasis)
     end
     return Xⁱ
 end
-function _get_coordinates!(
+function get_coordinates!(
     M::ProductManifold,
     Xⁱ,
     p,
@@ -489,7 +516,7 @@ function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
     end
     return X
 end
-function _get_vector!(
+function get_vector!(
     M::ProductManifold,
     X,
     p,
@@ -1204,7 +1231,7 @@ for TP in [ProductRepr, ArrayPartition]
                 M::ProductManifold,
                 p::$TP,
                 X::$TP,
-                d::$TP,
+                q::$TP,
                 m::ProductVectorTransport,
             )
                 return $TP(
@@ -1213,8 +1240,25 @@ for TP in [ProductRepr, ArrayPartition]
                         M.manifolds,
                         submanifold_components(M, p),
                         submanifold_components(M, X),
-                        submanifold_components(M, d),
+                        submanifold_components(M, q),
                         m.methods,
+                    ),
+                )
+            end
+            function vector_transport_to(
+                M::ProductManifold,
+                p::$TP,
+                X::$TP,
+                q::$TP,
+                m::ParallelTransport,
+            )
+                return $TP(
+                    map(
+                        (iM, ip, iX, id) -> vector_transport_to(iM, ip, iX, id, m),
+                        M.manifolds,
+                        submanifold_components(M, p),
+                        submanifold_components(M, X),
+                        submanifold_components(M, q),
                     ),
                 )
             end
@@ -1232,6 +1276,17 @@ function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ProductVectorTr
         submanifold_components(M, q),
         m.methods,
     )
+    return Y
+end
+function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ParallelTransport)
+    map(
+        (iM, iY, ip, iX, id) -> vector_transport_to!(iM, iY, ip, iX, id, m),
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, q),
+    ),
     return Y
 end
 
