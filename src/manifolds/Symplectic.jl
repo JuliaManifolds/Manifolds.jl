@@ -755,7 +755,7 @@ function (Base.:*)(Q1::SymplecticMatrix, Q2::SymplecticMatrix)
 end
 
 Base.transpose(Q::SymplecticMatrix) = -Q
-Base.adjoint(Q::SymplecticMatrix) = -SymplecticMatrix(conj(Q.λ))
+Base.adjoint(Q::SymplecticMatrix) = SymplecticMatrix(-conj(Q.λ))
 Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1 / Q.λ))
 
 (Base.:+)(Q1::SymplecticMatrix, Q2::SymplecticMatrix) = SymplecticMatrix(Q1.λ + Q2.λ)
