@@ -606,13 +606,36 @@ function project_riemannian_normal!(::Symplectic, Y, p, X)
     return Y
 end
 
-function Base.rand(M::Symplectic{n}; hamiltonian_norm::Number=1.0) where {n}
+@doc raw"""
+    rand(M::SymplecticStiefel{n}; hamiltonian_norm::Real=1.0)
+
+Generate a random point ``p \in \operatorname{Sp}(2n)``
+by generating a random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)``,
+and then transforming it to a symplectic matrix by applying the Cayley transform
+``\operatorname{cay}\colon \mathfrak{sp}(2n,F) \rightarrow \operatorname{Sp}(2n),
+\; \Omega \mapsto (I - \Omega)^{-1}(I + \Omega)``.
+That is, ``p = \operatorname{cay}(Ω)``.
+"""
+function Base.rand(M::Symplectic{n}; hamiltonian_norm::Real=1.0) where {n}
     # Generate random matrices to construct a Hamiltonian matrix:
     Ω = rand_hamiltonian(M; final_norm=hamiltonian_norm)
     # Return 'cay(Ω)':
     return (I - Ω) \ (I + Ω)
 end
 
+@doc raw"""
+    random_vector(::Symplectic{n}, p)
+
+The symplectic tangent space at ``p`` can be parametrized as [^Bendokat2021]
+````math
+    T_p\operatorname{Sp}(2n) = \{X = pQS \;|\; S ∈ R^{2n × 2n}, S^T = S \},
+````
+where ``S`` is symmetric.
+
+To then generate random tangent vectors at ``p``, we and generate a random
+symmetric matrix ``S`` by `S = randn(2n, 2n)` and then symmetrize it, before
+multiplying with `pQ`.
+"""
 function random_vector(::Symplectic{n}, p::AbstractMatrix) where {n}
     # Generate random symmetric matrix:
     S = randn(2n, 2n)

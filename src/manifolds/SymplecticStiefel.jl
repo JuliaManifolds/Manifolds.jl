@@ -539,7 +539,7 @@ function Base.rand(M::SymplecticStiefel{n,k}; hamiltonian_norm=1 / 2) where {n,k
 end
 
 @doc raw"""
-    rand(::SymplecticStiefel{n, k}, p)
+    random_vector(::SymplecticStiefel{n, k}, p)
 
 The symplectic Stiefel tangent space at ``p`` can be parametrized as [^Bendokat2021]
 ````math
@@ -547,8 +547,8 @@ The symplectic Stiefel tangent space at ``p`` can be parametrized as [^Bendokat2
         Ω ∈ ℝ^{2k × 2k}, Ω^+ = -Ω,
         p^s ∈ \operatorname{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k) × 2k}, \},
 ````
-where ``Ω \in `` is Hamiltonian and ``p^s`` means the symplectic complement of ``p`` s.t.
-``p^{+}p^{s} = 0``.
+where ``Ω \in \mathfrak{sp}(2n,F)`` is Hamiltonian and ``p^s`` means
+the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
 
 To then generate random tangent vectors at ``p``, we set ``B = 0`` and generate a random
 Hamiltonian matrix ``Ω``.
