@@ -621,7 +621,8 @@ function project_riemannian_normal!(::Symplectic, Y, p, X)
 end
 
 @doc raw"""
-    rand(::SymplecticStiefel; vector_at=nothing, frobenius_norm)
+    rand(::SymplecticStiefel; vector_at=nothing,
+        frobenius_norm = (vector_at === nothing ? 1/2 : 1.0))
 
 Generate a random point on ``\operatorname{Sp}(2n)`` or a random
 tangent vector ``X \in T_p\operatorname{Sp}(2n)`` if `vector_at` is set to
@@ -634,14 +635,14 @@ and then transforming it to a symplectic matrix by applying the Cayley transform
     \operatorname{cay}\colon \mathfrak{sp}(2n,F) \rightarrow \operatorname{Sp}(2n),
     \; \Omega \mapsto (I - \Omega)^{-1}(I + \Omega).
 ````
-// That is, ``p = \operatorname{cay}(Ω)``.
-
-To generate a random tangent vector at ``p``, this code generates a random
-symmetric matrix ``S`` by `S = randn(2n, 2n)` and then symmetrize it. Then it
-normalizes ``S`` to have a Frobenius norm of `symmetric_norm` and multiplying with `pQ`.
-
+To generate a random tangent vector at ``p``, this code employs the
+second tangent vector space parametrization of [Symplectic](@ref).
+It first generates a random symmetric matrix ``S`` by `S = randn(2n, 2n)`
+and then symmetrizes it as `S = S + S^T`.
+Then it normalizes ``S`` to have a Frobenius norm of `symmetric_norm`
+and left-multiplies with `pQ` where `Q` is the [SymplecticMatrix](@ref).
 """
-function Base.rand(M::SymplecticStiefel; vector_at=nothing,
+function Base.rand(M::Symplectic; vector_at=nothing,
                 frobenius_norm = (vector_at === nothing ? 1/2 : 1.0))
     if vector_at === nothing
         Ω = rand_hamiltonian(M; frobenius_norm=frobenius_norm)
