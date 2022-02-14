@@ -1,10 +1,11 @@
 @doc raw"""
-    Symplectic{n, ℝ} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
+    Symplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
-Over the real number field ℝ the elements of the symplectic manifold
-are all $2n × 2n$ matrices satisfying the requirement
+The symplectic manifold consists of all ``2n \times 2n`` matrices which preserve
+the canonical symplectic form over ``𝔽^{2n × 2n} \times 𝔽^{2n × 2n}``,
 ````math
-\operatorname{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2n} \bigr\},
+    \omega\colon 𝔽^{2n × 2n} \times 𝔽^{2n × 2n} \rightarrow 𝔽,
+    \quad \omega(x, y) = p^T Q_{2n} q, \; x, y \in 𝔽^{2n × 2n},
 ````
 where
 ````math
@@ -12,17 +13,30 @@ Q_{2n} =
 \begin{bmatrix}
   0_n & I_n \\
  -I_n & 0_n
-\end{bmatrix},
+\end{bmatrix}.
 ````
-with $0_n$ and $I_n$ denoting the $n × n$ zero-matrix
+The matrices ``p`` on the symplectic manifold must thus fulfill the requirement that
+``\omega(px, py) = x^T(p^TQp)y = x^TQy = \omega(x, y) \;\forall\; x, y \in 𝔽^{2n × 2n}``.
+That is, the symplectic manifold consists of
+````math
+\operatorname{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2n} \bigr\},
+````
+with ``0_n`` and ``I_n`` denoting the ``n × n`` zero-matrix
 and indentity matrix in ``ℝ^{n \times n}`` respectively.
 
-Internally the dimensionality of the structure is stored as half of the even dimension
-supplied to the constructor, `Symplectic(2n) -> Symplectic{n}()`,
-as most computations with points on the Real Symplectic manifold takes advantage of the
-natural block structure
-of a matrix ``A ∈ ℝ^{2n × 2n}`` where we consider it as consisting of four
-smaller matrices in ``ℝ^{n × n}``.
+The tangent space at a point ``p`` is given by [^Bendokat2021]
+````math
+\begin{align*}
+    T_p\operatorname{Sp}(2n)
+        &= \{X \in \mathbb{R}^{2n \times 2n} \;|\; p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0 \}, \\
+        &= \{X = pQS \;|\; S ∈ R^{2n × 2n}, S^T = S \}.
+\end{align*}
+````
+
+# Constructor
+    Symplectic(2n, field=ℝ)
+
+Generate the (real-valued) symplectic manifold of ``2n \times 2n`` symplectic matrices.
 """
 struct Symplectic{n,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
@@ -210,8 +224,8 @@ end
     check_vector(M::Symplectic, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Symplectic`](@ref)
-`M`=$\operatorname{Sp}(2n)$, i.e. the [`AbstractNumbers`](@ref) fits and
-it (approximately) holds that $p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0$,
+`M`=``\operatorname{Sp}(2n)``, i.e. the [`AbstractNumbers`](@ref) fits and
+it (approximately) holds that ``p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0``,
 where
 ````math
 Q_{2n} =
@@ -607,52 +621,66 @@ function project_riemannian_normal!(::Symplectic, Y, p, X)
 end
 
 @doc raw"""
-    rand(M::SymplecticStiefel{n}; hamiltonian_norm::Real=1.0)
+    rand(::SymplecticStiefel; vector_at=nothing, frobenius_norm)
 
-Generate a random point ``p \in \operatorname{Sp}(2n)``
-by generating a random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)``,
+Generate a random point on ``\operatorname{Sp}(2n)`` or a random
+tangent vector ``X \in T_p\operatorname{Sp}(2n)`` if `vector_at` is set to
+a point ``p \in \operatorname{Sp}(2n)``.
+
+A random point on ``\operatorname{Sp}(2n)`` is constructed by generating a
+random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)`` with norm `frobenius_norm`,
 and then transforming it to a symplectic matrix by applying the Cayley transform
-``\operatorname{cay}\colon \mathfrak{sp}(2n,F) \rightarrow \operatorname{Sp}(2n),
-\; \Omega \mapsto (I - \Omega)^{-1}(I + \Omega)``.
-That is, ``p = \operatorname{cay}(Ω)``.
+````math
+    \operatorname{cay}\colon \mathfrak{sp}(2n,F) \rightarrow \operatorname{Sp}(2n),
+    \; \Omega \mapsto (I - \Omega)^{-1}(I + \Omega).
+````
+// That is, ``p = \operatorname{cay}(Ω)``.
+
+To generate a random tangent vector at ``p``, this code generates a random
+symmetric matrix ``S`` by `S = randn(2n, 2n)` and then symmetrize it. Then it
+normalizes ``S`` to have a Frobenius norm of `symmetric_norm` and multiplying with `pQ`.
+
 """
-function Base.rand(M::Symplectic{n}; hamiltonian_norm::Real=1.0) where {n}
-    # Generate random matrices to construct a Hamiltonian matrix:
-    Ω = rand_hamiltonian(M; final_norm=hamiltonian_norm)
-    # Return 'cay(Ω)':
-    return (I - Ω) \ (I + Ω)
+function Base.rand(M::SymplecticStiefel; vector_at=nothing,
+                frobenius_norm = (vector_at === nothing ? 1/2 : 1.0))
+    if vector_at === nothing
+        Ω = rand_hamiltonian(M; frobenius_norm=frobenius_norm)
+        return (I - Ω) \ (I + Ω)
+    else
+        random_vector(M, vector_at; symmetric_norm=frobenius_norm)
+    end
 end
 
+
 @doc raw"""
-    random_vector(::Symplectic{n}, p)
+    random_vector(::Symplectic, p; symmetric_norm=1.0)
 
 The symplectic tangent space at ``p`` can be parametrized as [^Bendokat2021]
 ````math
-    T_p\operatorname{Sp}(2n) = \{X = pQS \;|\; S ∈ R^{2n × 2n}, S^T = S \},
+    T_p\operatorname{Sp}(2n) = \{X = pQS \;|\; S ∈ R^{2n × 2n}, S^T = S \}.
 ````
-where ``S`` is symmetric.
-
-To then generate random tangent vectors at ``p``, we and generate a random
-symmetric matrix ``S`` by `S = randn(2n, 2n)` and then symmetrize it, before
-multiplying with `pQ`.
+To generate a random tangent vector at ``p``, this code generates a random
+symmetric matrix ``S`` by `S = randn(2n, 2n)` and then symmetrize it. Then it
+normalizes ``S`` to have a Frobenius norm of `symmetric_norm` and multiplying with `pQ`.
 """
-function random_vector(::Symplectic{n}, p::AbstractMatrix) where {n}
+function random_vector(::Symplectic{n}, p::AbstractMatrix; symmetric_norm=1.0) where {n}
     # Generate random symmetric matrix:
     S = randn(2n, 2n)
-    S .= (1 / 2) .* (S + S')
+    S .= (S + S')
+    S *= symmetric_norm / norm(S)
     Q = SymplecticMatrix(p)
     lmul!(Q, S)
     return p * S
 end
 
-function rand_hamiltonian(::Symplectic{n}; final_norm=1) where {n}
+function rand_hamiltonian(::Symplectic{n}; frobenius_norm=1.0) where {n}
     A = randn(n, n)
     B = randn(n, n)
     C = randn(n, n)
     B = (1 / 2) .* (B .+ B')
     C = (1 / 2) .* (C .+ C')
     Ω = [A B; C -A']
-    return final_norm * Ω / norm(Ω, 2)
+    return frobenius_norm * Ω / norm(Ω, 2)
 end
 
 @doc raw"""
