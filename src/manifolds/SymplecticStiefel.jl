@@ -30,22 +30,17 @@ where ``Ω \in \mathfrak{sp}(2n,F)`` is Hamiltonian and ``p^s`` means
 the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
 
 # Constructor
-    SymplecticStiefel(2n, 2k, field = ℝ)
+    SymplecticStiefel(2n::Int, 2k::Int, field::AbstractNumbers=ℝ)
+        -> SymplecticStiefel{div(2n, 2), div(2k, 2), field}()
 
 Generate the (real-valued) symplectic Stiefel manifold of ``2n \times 2k``
 matrices which span a ``2k`` dimensional symplectic subspace of ``ℝ^{2n \times 2n}``.
+The constructor for the [`SymplecticStiefel`](@ref) manifold accepts the even column
+dimension ``2n`` and an even number of columns ``2k`` for
+the real symplectic Stiefel manifold with elements ``p \in ℝ^{2n × 2k}``.
 """
 struct SymplecticStiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
-@doc raw"""
-    SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
-    -> SymplecticStiefel{div(two_n, 2), div(two_k, 2), field}()
-
-# Constructor:
-The constructor for the [`SymplecticStiefel`](@ref) manifold accepts the even column
-dimension ``n = 2m`` and an even number of columns ``k = 2l`` for
-the real symplectic Stiefel manifold with elements ``p \in ℝ^{2k × 2k}``.
-"""
 function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
     return SymplecticStiefel{div(two_n, 2),div(two_k, 2),field}()
 end
@@ -305,9 +300,9 @@ Compute the gradient of
 ``f\colon \operatorname{SpSt}(2n, 2k) \rightarrow ℝ``
 at ``p \in \operatorname{SpSt}(2n, 2k)``.
 
-We first compute the embedding gradient ``∇f(p) \in ℝ^{2n \times 2k}`` using
+This function first computes the embedding gradient ``∇f(p) \in ℝ^{2n \times 2k}`` using
 the [`AbstractRiemannianDiffBackend`](@ref) in the [`RiemannianProjectionBackend`](@ref).
-Then we transform the embedding gradient to the unique tangent vector space element
+Then it transforms the embedding gradient to the unique tangent vector space element
 ``\text{grad}f(p) \in T_p\operatorname{SpSt}(2n, 2k)``
 which fulfills the variational equation
 ````math
