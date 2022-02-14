@@ -633,15 +633,18 @@ and then transforming it to a symplectic matrix by applying the Cayley transform
     \operatorname{cay}\colon \mathfrak{sp}(2n,F) \rightarrow \operatorname{Sp}(2n),
     \; \Omega \mapsto (I - \Omega)^{-1}(I + \Omega).
 ````
-To generate a random tangent vector at ``p``, this code employs the
+To generate a random tangent vector in ``T_p\operatorname{Sp}(2n)``, this code employs the
 second tangent vector space parametrization of [Symplectic](@ref).
 It first generates a random symmetric matrix ``S`` by `S = randn(2n, 2n)`
 and then symmetrizes it as `S = S + S^T`.
-Then it normalizes ``S`` to have a Frobenius norm of `symmetric_norm`
-and left-multiplies with `pQ` where `Q` is the [SymplecticMatrix](@ref).
+Then ``S`` is normalized to have Frobenius norm of `symmetric_norm`
+and returns `X = pQS` where `Q` is the [`SymplecticMatrix`](@ref).
 """
-function Base.rand(M::Symplectic; vector_at=nothing,
-                frobenius_norm = (vector_at === nothing ? 1/2 : 1.0))
+function Base.rand(
+    M::Symplectic;
+    vector_at=nothing,
+    frobenius_norm=(vector_at === nothing ? 1 / 2 : 1.0),
+)
     if vector_at === nothing
         Ω = rand_hamiltonian(M; frobenius_norm=frobenius_norm)
         return (I - Ω) \ (I + Ω)
@@ -650,18 +653,6 @@ function Base.rand(M::Symplectic; vector_at=nothing,
     end
 end
 
-
-@doc raw"""
-    random_vector(::Symplectic, p; symmetric_norm=1.0)
-
-The symplectic tangent space at ``p`` can be parametrized as [^Bendokat2021]
-````math
-    T_p\operatorname{Sp}(2n) = \{X = pQS \;|\; S ∈ R^{2n × 2n}, S^T = S \}.
-````
-To generate a random tangent vector at ``p``, this code generates a random
-symmetric matrix ``S`` by `S = randn(2n, 2n)` and then symmetrize it. Then it
-normalizes ``S`` to have a Frobenius norm of `symmetric_norm` and multiplying with `pQ`.
-"""
 function random_vector(::Symplectic{n}, p::AbstractMatrix; symmetric_norm=1.0) where {n}
     # Generate random symmetric matrix:
     S = randn(2n, 2n)
@@ -925,22 +916,22 @@ number (2n, 2n) of rows and columns. Then returns the integer part of the even d
 function get_half_dims(p::AbstractMatrix, check_rows=true, check_cols=true, square=false)
     n, k = size(p)
 
-    rows_ok = !check_rows || (n % 2 == 0)
-    cols_ok = !check_cols || (k % 2 == 0)
-    (rows_ok && cols_ok) || throw(
-        DimensionMismatch(
-            "Matrix does not have required even " *
-            "dimensions (n, k): Dimensions are ($(n), $(k)).",
-        ),
-    )
-
-    # If 'square=true', we require m==n:
-    (!square || (n == k)) || throw(
-        DimensionMismatch(
-            "Matrix is not square with dimensions " *
-            "(2n, 2n): Dimensions are ($(n), $(k)).",
-        ),
-    )
+    # rows_ok = !check_rows || (n % 2 == 0)
+    # cols_ok = !check_cols || (k % 2 == 0)
+    # (rows_ok && cols_ok) || throw(
+    #     DimensionMismatch(
+    #         "Matrix does not have required even " *
+    #         "dimensions (n, k): Dimensions are ($(n), $(k)).",
+    #     ),
+    # )
+    #
+    # # If 'square=true', we require m==n:
+    # (!square || (n == k)) || throw(
+    #     DimensionMismatch(
+    #         "Matrix is not square with dimensions " *
+    #         "(2n, 2n): Dimensions are ($(n), $(k)).",
+    #     ),
+    # )
 
     return div(n, 2), div(k, 2)
 end
