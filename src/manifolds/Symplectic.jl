@@ -805,17 +805,14 @@ Base.inv(Q::SymplecticMatrix) = SymplecticMatrix(-(1 / Q.λ))
 (Base.:+)(Q::SymplecticMatrix, p::AbstractMatrix) = p + Q
 function (Base.:+)(p::AbstractMatrix, Q::SymplecticMatrix)
     # When we are adding, the Matrices must match in size:
-    n, _ = get_half_dims(p, true, false, true)
+    n = div(size(p)[1], 2)
 
     # Allocate new memory:
-    TS = Base._return_type(+, Tuple{eltype(p),eltype(Q)})
+    TS = typeof(one(eltype(p)) + one(eltype(Q)))
     out = copyto!(similar(p, TS), p)
 
-    # Add Q.λ multiples of the UniformScaling to the lower left and upper right blocks of p:
-    λ_Id = LinearAlgebra.UniformScaling(Q.λ)
-
-    out[1:n, (n + 1):(2n)] += λ_Id
-    out[(n + 1):(2n), 1:n] -= λ_Id
+    add_scaled_I!(view(out, 1:n, (n + 1):(2n)), Q.λ)
+    add_scaled_I!(view(out, (n + 1):(2n), 1:n), -Q.λ)
     return out
 end
 
@@ -824,7 +821,12 @@ end
 (Base.:-)(p::AbstractMatrix, Q::SymplecticMatrix) = p + (-Q)
 
 function (Base.:*)(Q::SymplecticMatrix, p::AbstractVecOrMat)
-    n, _ = get_half_dims(p, true, false)
+    two_n = size(p)[1]
+    if two_n % 2 != 0
+        throw(ArgumentError("'p' must have even row dimension,"
+                            *" was $(two_n) != 2n."))
+    end
+    n = div(two_n, 2)
 
     # Allocate new memory:
     TS = typeof(one(eltype(p)) + one(eltype(Q)))
@@ -837,8 +839,13 @@ function (Base.:*)(Q::SymplecticMatrix, p::AbstractVecOrMat)
     return Qp
 end
 
-function (Base.:*)(p::AbstractVecOrMat, Q::SymplecticMatrix)
-    _, k = get_half_dims(p, false, true)
+function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
+    two_k = size(p)[2]
+    if two_k % 2 != 0
+        throw(ArgumentError("'p' must have even column dimension,"
+                            *" was $(two_k) != 2k."))
+    end
+    k = div(two_k, 2)
 
     # Allocate new memory:
     TS = typeof(one(eltype(p)) + one(eltype(Q)))
@@ -853,7 +860,12 @@ end
 function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractVecOrMat)
     # Perform left multiplication by a symplectic matrix,
     # overwriting the matrix p in place:
-    n, _ = get_half_dims(p, true, false)
+    two_n = size(p)[1]
+    if two_n % 2 != 0
+        throw(ArgumentError("'p' must have even row dimension,"
+        *" was $(two_n) != 2n."))
+    end
+    n = div(two_n, 2)
 
     half_row_p = copy(@inbounds view(p, 1:n, :))
 
@@ -867,10 +879,15 @@ function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractVecOrMat)
     return p
 end
 
-function LinearAlgebra.rmul!(p::AbstractVecOrMat, Q::SymplecticMatrix)
+function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
     # Perform right multiplication by a symplectic matrix,
     # overwriting the matrix p in place:
-    _, k = get_half_dims(p, false, true)
+    two_k = size(p)[2]
+    if two_k % 2 != 0
+        throw(ArgumentError("'p' must have even column dimension,"
+                            *" was $(two_k) != 2k."))
+    end
+    k = div(two_k, 2)
 
     half_col_p = copy(@inbounds view(p, :, 1:k))
 
@@ -886,7 +903,8 @@ function LinearAlgebra.rmul!(p::AbstractVecOrMat, Q::SymplecticMatrix)
 end
 
 function LinearAlgebra.mul!(A::AbstractVecOrMat, Q::SymplecticMatrix, p::AbstractVecOrMat)
-    n, k = get_half_dims(p, true, false)
+    size_p = size(p)
+    n, k  = length(size_p) == 1 ? (div(size_p[1], 2), 0) : div.(size_p, 2)
     # k == 0 means we're multiplying with a vector:
     @boundscheck k == 0 ? checkbounds(A, 1:(2n), 1) : checkbounds(A, 1:(2n), 1:(2k))
 
@@ -896,8 +914,8 @@ function LinearAlgebra.mul!(A::AbstractVecOrMat, Q::SymplecticMatrix, p::Abstrac
     return A
 end
 
-function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractVecOrMat, Q::SymplecticMatrix)
-    n, k = get_half_dims(p, false, true)
+function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractMatrix, Q::SymplecticMatrix)
+    n, k = div.(size(p), 2)
     # n == 0 means we're multiplying with a vector:
     @boundscheck n == 0 ? checkbounds(A, 1, 1:(2k)) : checkbounds(A, 1:(2n), 1:(2k))
 
@@ -905,38 +923,6 @@ function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractVecOrMat, Q::Symplec
     mul!((@inbounds view(A, :, 1:k)), -Q.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
     mul!((@inbounds view(A, :, (k + 1):lastindex(A, 2))), Q.λ, @inbounds view(p, :, 1:k))
     return A
-end
-
-@doc raw"""
-    get_half_dims(p, check_rows=true, check_cols=true, square=false)
-
-Convenience function to check whether or not an abstract matrix is square, with an even
-number (2n, 2n) of rows and columns. Then returns the integer part of the even dimension.
-"""
-function get_half_dims(p::AbstractMatrix, check_rows=true, check_cols=true, square=false)
-    n, k = size(p)
-
-    # rows_ok = !check_rows || (n % 2 == 0)
-    # cols_ok = !check_cols || (k % 2 == 0)
-    # (rows_ok && cols_ok) || throw(
-    #     DimensionMismatch(
-    #         "Matrix does not have required even " *
-    #         "dimensions (n, k): Dimensions are ($(n), $(k)).",
-    #     ),
-    # )
-    #
-    # # If 'square=true', we require m==n:
-    # (!square || (n == k)) || throw(
-    #     DimensionMismatch(
-    #         "Matrix is not square with dimensions " *
-    #         "(2n, 2n): Dimensions are ($(n), $(k)).",
-    #     ),
-    # )
-
-    return div(n, 2), div(k, 2)
-end
-function get_half_dims(p::AbstractVector, check_rows=true, check_cols=true, square=false)
-    return get_half_dims(reshape(p, size(p)..., 1), check_rows, check_cols, square)
 end
 
 function add_scaled_I!(A::AbstractMatrix, λ::Number)
