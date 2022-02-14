@@ -226,7 +226,7 @@ end
             M_big = SymplecticStiefel(20, 10)
             p_big = rand(M_big)
             @test is_point(M_big, p_big, true; atol=1.0e-14)
-            X_big = random_vector(M_big, p_big; hamiltonian_norm=1.0)
+            X_big = rand(M_big; vector_at=p_big, hamiltonian_norm=1.0)
             @test is_vector(M_big, p_big, X_big, true; atol=1.0e-14)
         end
         @testset "test_manifold(Symplectic(6), ...)" begin

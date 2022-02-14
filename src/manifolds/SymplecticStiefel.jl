@@ -564,7 +564,7 @@ function Base.rand(
         return canonical_projection(
             M,
             rand(Symplectic(2n); hamiltonian_norm=hamiltonian_norm),
-        )# code for generation of random points
+        )
     else
         return random_vector(M, vector_at; hamiltonian_norm=hamiltonian_norm)
     end

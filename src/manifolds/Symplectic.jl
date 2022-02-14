@@ -620,14 +620,14 @@ end
 
 @doc raw"""
     rand(::SymplecticStiefel; vector_at=nothing,
-        frobenius_norm = (vector_at === nothing ? 1/2 : 1.0))
+        hamiltonian_norm = (vector_at === nothing ? 1/2 : 1.0))
 
 Generate a random point on ``\operatorname{Sp}(2n)`` or a random
 tangent vector ``X \in T_p\operatorname{Sp}(2n)`` if `vector_at` is set to
 a point ``p \in \operatorname{Sp}(2n)``.
 
 A random point on ``\operatorname{Sp}(2n)`` is constructed by generating a
-random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)`` with norm `frobenius_norm`,
+random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)`` with norm `hamiltonian_norm`,
 and then transforming it to a symplectic matrix by applying the Cayley transform
 ````math
     \operatorname{cay}\colon \mathfrak{sp}(2n,F) \rightarrow \operatorname{Sp}(2n),
@@ -637,19 +637,19 @@ To generate a random tangent vector in ``T_p\operatorname{Sp}(2n)``, this code e
 second tangent vector space parametrization of [Symplectic](@ref).
 It first generates a random symmetric matrix ``S`` by `S = randn(2n, 2n)`
 and then symmetrizes it as `S = S + S^T`.
-Then ``S`` is normalized to have Frobenius norm of `symmetric_norm`
+Then ``S`` is normalized to have Frobenius norm of `hamiltonian_norm`
 and returns `X = pQS` where `Q` is the [`SymplecticMatrix`](@ref).
 """
 function Base.rand(
     M::Symplectic;
     vector_at=nothing,
-    frobenius_norm=(vector_at === nothing ? 1 / 2 : 1.0),
+    hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),
 )
     if vector_at === nothing
-        Ω = rand_hamiltonian(M; frobenius_norm=frobenius_norm)
+        Ω = rand_hamiltonian(M; frobenius_norm=hamiltonian_norm)
         return (I - Ω) \ (I + Ω)
     else
-        random_vector(M, vector_at; symmetric_norm=frobenius_norm)
+        random_vector(M, vector_at; symmetric_norm=hamiltonian_norm)
     end
 end
 
