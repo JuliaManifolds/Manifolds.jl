@@ -32,19 +32,14 @@ The tangent space at a point ``p`` is given by [^Bendokat2021]
 ````
 
 # Constructor
-    Symplectic(2n, field=ℝ)
+    Symplectic(2n, field=ℝ) -> Symplectic{div(2n, 2), field}()
 
 Generate the (real-valued) symplectic manifold of ``2n \times 2n`` symplectic matrices.
+The constructor for the [`Symplectic`](@ref) manifold accepts the even column/row embedding
+dimension ``2n`` for the real symplectic manifold, ``ℝ^{2n × 2n}``.
 """
 struct Symplectic{n,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
-@doc """
-    Symplectic(n, field::AbstractNumbers=ℝ) -> Symplectic{div(n, 2), ℝ}()
-
-# Constructor:
-The constructor for the [`Symplectic`](@ref) manifold accepts the even embedding
-dimension ``n = 2k`` for the real symplectic manifold, ``ℝ^{2k × 2k}``.
-"""
 function Symplectic(n::Int, field::AbstractNumbers=ℝ)
     n % 2 == 0 || throw(ArgumentError("The dimensionality of the symplectic manifold
                         embedding space must be even. Was odd, n % 2 == $(n % 2)."))
@@ -52,6 +47,8 @@ function Symplectic(n::Int, field::AbstractNumbers=ℝ)
 end
 
 @doc raw"""
+    RealSymplecticMetric <: RiemannianMetric
+
 The canonical Riemannian metric on the symplectic manifold,
 defined pointwise for ``p \in \operatorname{Sp}(2n)`` by [^FioriSimone2011]
 ````math
@@ -60,10 +57,20 @@ defined pointwise for ``p \in \operatorname{Sp}(2n)`` by [^FioriSimone2011]
     & g_p(Z_1, Z_2) = \operatorname{tr}((p^{-1}Z_1)^T (p^{-1}Z_2)).
 \end{align*}
 ````
-This metric is also the default metric used within `Maniolds.jl`.
+This metric is also the default metric for the [`Symplectic`](@ref) manifold.
 """
 struct RealSymplecticMetric <: RiemannianMetric end
 
+@doc raw"""
+    ExtendedSymplecticMetric <: AbstractMetric
+
+The extension of the [`RealSymplecticMetric`](@ref) at a point `p \in \operatorname{Sp}(2n)`
+as an inner product over the embedding space ``ℝ^{2n \times 2n}``, i.e.
+````math
+    \langle x, y \rangle_{p} = \langle p^{-1}x, p^{-1}\rangle_{\operatorname{Fr}}
+    = \operatorname{tr}(x^T(pp^T)^{-1}y), \;\forall\; x, y \in ℝ^{2n \times 2n}.
+````
+"""
 struct ExtendedSymplecticMetric <: AbstractMetric end
 
 struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
@@ -431,9 +438,9 @@ Compute the canonical Riemannian inner product [`RealSymplecticMetric`](@ref)
 ````
 between the two tangent vectors ``X, Y \in T_p\operatorname{Sp}(2n)``.
 """
-function inner(M::Symplectic{n,ℝ}, p, X, Y)::eltype(p) where {n}
+function inner(M::Symplectic{n,ℝ}, p, X, Y) where {n}
     p_star = inv(M, p)
-    return tr((p_star * X)' * (p_star * Y))
+    return dot((p_star * X), (p_star * Y))
 end
 
 @doc raw"""
@@ -636,9 +643,9 @@ and then transforming it to a symplectic matrix by applying the Cayley transform
 To generate a random tangent vector in ``T_p\operatorname{Sp}(2n)``, this code employs the
 second tangent vector space parametrization of [Symplectic](@ref).
 It first generates a random symmetric matrix ``S`` by `S = randn(2n, 2n)`
-and then symmetrizes it as `S = S + S^T`.
+and then symmetrizes it as `S = S + S'`.
 Then ``S`` is normalized to have Frobenius norm of `hamiltonian_norm`
-and returns `X = pQS` where `Q` is the [`SymplecticMatrix`](@ref).
+and `X = pQS` is returned, where `Q` is the [`SymplecticMatrix`](@ref).
 """
 function Base.rand(
     M::Symplectic;
@@ -765,7 +772,7 @@ function symplectic_inverse_times!(::Symplectic{n}, A, p, q) where {n}
 end
 
 ndims(Q::SymplecticMatrix) = 2
-copy(Q::SymplecticMatrix) = SymplecticMatrix(Q.λ)
+copy(Q::SymplecticMatrix) = SymplecticMatrix(copy(Q.λ))
 Base.eltype(::SymplecticMatrix{T}) where {T} = T
 function Base.convert(::Type{SymplecticMatrix{T}}, Q::SymplecticMatrix) where {T}
     return SymplecticMatrix(convert(T, Q.λ))
