@@ -1,8 +1,9 @@
 # Symplectic 
 
-The [`Symplectic`](@ref) manifold, denoted $\operatorname{Sp}(2n, \mathbb{F})$, is a submanifold of $\mathbb{F}^{2n \times 2n}$ that represents transformations into symplectic subspaces which keep the
-canonical symplectic form over $\mathbb{R}^{2n \times 2n }$ invariant under the standard embedding inner product.
-The canonical symplectic form is $\omega(x, y) = x^T Q y$ for elements $x, y \in \mathbb{R}^{2n \times 2n }$, with
+The [`Symplectic`](@ref) manifold, denoted $\operatorname{Sp}(2n, \mathbb{F})$, is a closed, embedded, submanifold of 
+$\mathbb{F}^{2n \times 2n}$ that represents transformations into symplectic subspaces which keep the
+canonical symplectic form over $\mathbb{F}^{2n \times 2n }$ invariant under the standard embedding inner product.
+The canonical symplectic form is $\omega(x, y) = x^T Q y$ for elements $x, y \in \mathbb{F}^{2n}$, with
 ````math
     Q = 
     \begin{bmatrix}
@@ -10,7 +11,7 @@ The canonical symplectic form is $\omega(x, y) = x^T Q y$ for elements $x, y \in
     -I  &  0
     \end{bmatrix}.
 ```` 
-That means given an element $p \in \operatorname{Sp}(2n)$, 
+That means that an element $p \in \operatorname{Sp}(2n)$ must fulfill the requirement that 
 ````math
     \omega (p x, p y) = x^T(p^TQp)y = x^TQy = \omega(x, y),
 ````

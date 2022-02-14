@@ -15,8 +15,6 @@ Q_{2n} =
  -I_n & 0_n
 \end{bmatrix}.
 ````
-The matrices ``p`` on the symplectic manifold must thus fulfill the requirement that
-``\omega(px, py) = x^T(p^TQp)y = x^TQy = \omega(x, y) \;\forall\; x, y \in 𝔽^{2n × 2n}``.
 That is, the symplectic manifold consists of
 ````math
 \operatorname{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2n} \bigr\},
