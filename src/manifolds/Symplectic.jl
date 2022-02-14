@@ -823,8 +823,7 @@ end
 function (Base.:*)(Q::SymplecticMatrix, p::AbstractVecOrMat)
     two_n = size(p)[1]
     if two_n % 2 != 0
-        throw(ArgumentError("'p' must have even row dimension,"
-                            *" was $(two_n) != 2n."))
+        throw(ArgumentError("'p' must have even row dimension, was $(two_n) != 2n."))
     end
     n = div(two_n, 2)
 
@@ -842,8 +841,7 @@ end
 function (Base.:*)(p::AbstractMatrix, Q::SymplecticMatrix)
     two_k = size(p)[2]
     if two_k % 2 != 0
-        throw(ArgumentError("'p' must have even column dimension,"
-                            *" was $(two_k) != 2k."))
+        throw(ArgumentError("'p' must have even column dimension, was $(two_k) != 2k."))
     end
     k = div(two_k, 2)
 
@@ -862,8 +860,7 @@ function LinearAlgebra.lmul!(Q::SymplecticMatrix, p::AbstractVecOrMat)
     # overwriting the matrix p in place:
     two_n = size(p)[1]
     if two_n % 2 != 0
-        throw(ArgumentError("'p' must have even row dimension,"
-        *" was $(two_n) != 2n."))
+        throw(ArgumentError("'p' must have even row dimension, was $(two_n) != 2n."))
     end
     n = div(two_n, 2)
 
@@ -884,8 +881,7 @@ function LinearAlgebra.rmul!(p::AbstractMatrix, Q::SymplecticMatrix)
     # overwriting the matrix p in place:
     two_k = size(p)[2]
     if two_k % 2 != 0
-        throw(ArgumentError("'p' must have even column dimension,"
-                            *" was $(two_k) != 2k."))
+        throw(ArgumentError("'p' must have even column dimension, was $(two_k) != 2k."))
     end
     k = div(two_k, 2)
 
@@ -904,7 +900,7 @@ end
 
 function LinearAlgebra.mul!(A::AbstractVecOrMat, Q::SymplecticMatrix, p::AbstractVecOrMat)
     size_p = size(p)
-    n, k  = length(size_p) == 1 ? (div(size_p[1], 2), 0) : div.(size_p, 2)
+    n, k = length(size_p) == 1 ? (div(size_p[1], 2), 0) : div.(size_p, 2)
     # k == 0 means we're multiplying with a vector:
     @boundscheck k == 0 ? checkbounds(A, 1:(2n), 1) : checkbounds(A, 1:(2n), 1:(2k))
 
