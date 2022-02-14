@@ -1,8 +1,8 @@
 @doc raw"""
-    SymplecticStiefel{n, k, ℝ} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
+    SymplecticStiefel{n, k, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
-Over the real number field ℝ the elements of the symplectic Stiefel manifold
-are all $2n × 2k, \; k \leq n$ matrices satisfying the requirement
+The symplectic Stiefel manifold consists of all
+$2n × 2k, \; n \geq k$ matrices satisfying the requirement
 ````math
 \operatorname{SpSt}(2n, 2k, ℝ)
     = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2k} \bigr\},
@@ -13,23 +13,33 @@ Q_{2n} =
 \begin{bmatrix}
   0_n & I_n \\
  -I_n & 0_n
-\end{bmatrix},
+\end{bmatrix}.
 ````
-with $0_n$ and $I_n$ denoting the $n × n$ zero-matrix
-and indentity matrix in ``ℝ^{n \times n}`` respectively.
 
-Internally the dimensionality of the structure is stored as half of the even dimensions
-supplied to the constructor, `SymplecticStiefel(2n, 2k) -> SymplecticStiefel{n, k, ℝ}()`,
-as most computations with points on the Real symplectic Stiefel manifold takes
-advantage of the natural block structure matrices
-``A ∈ ℝ^{2n × 2k}`` where we consider it as consisting of four
-smaller matrices in ``ℝ^{n × k}``.
+The symplectic Stiefel tangent space at ``p`` can be parametrized as [^Bendokat2021]
+````math
+    \begin{align*}
+    T_p\operatorname{SpSt}(2n, 2k)
+    = \{&X \in \mathbb{R}^{2n \times 2k} \;|\; p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0 \}, \\
+    = \{&X = pΩ + p^sB \;|\;
+        Ω ∈ ℝ^{2k × 2k}, Ω^+ = -Ω, \\
+        &\quad\quad\quad p^s ∈ \operatorname{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k) × 2k}, \},
+    \end{align*}
+````
+where ``Ω \in \mathfrak{sp}(2n,F)`` is Hamiltonian and ``p^s`` means
+the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
+
+# Constructor
+    SymplecticStiefel(2n, 2k, field = ℝ)
+
+Generate the (real-valued) symplectic Stiefel manifold of ``2n \times 2k``
+matrices which span a ``2k`` dimensional symplectic subspace of ``ℝ^{2n \times 2n}``.
 """
 struct SymplecticStiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
 
 @doc raw"""
     SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
-    -> SymplecticStiefel{div(two_n, 2), div(two_k, 2), ℝ}()
+    -> SymplecticStiefel{div(two_n, 2), div(two_k, 2), field}()
 
 # Constructor:
 The constructor for the [`SymplecticStiefel`](@ref) manifold accepts the even column
@@ -524,41 +534,48 @@ function project!(::Union{SymplecticStiefel,Symplectic}, Y, p, A)
 end
 
 @doc raw"""
-    rand(M::SymplecticStiefel{n, k})
+    rand(M::SymplecticStiefel; vector_at=nothing,
+        hamiltonian_norm=(vector_at === nothing ? 1/2 : 1.0))
 
-Generate a random point ``p \in \operatorname{SpSt}(2n, 2k)``
-by first generating a random symplectic matrix
-``p_{\operatorname{Sp}} \in \operatorname{Sp}(2n)``,
+Generate a random point ``p \in \operatorname{SpSt}(2n, 2k)`` or
+a random tangent vector ``X \in T_p\operatorname{SpSt}(2n, 2k)``
+if `vector_at` is set to a point ``p \in \operatorname{Sp}(2n)``.
+
+A random point on ``\operatorname{SpSt}(2n, 2k)`` is found by first generating a
+random point on the symplectic manifold ``\operatorname{Sp}(2n)``,
 and then projecting onto the Symplectic Stiefel manifold using the
-[`canonical_projection`](@ref).
-That is, ``p = π(p_{\operatorname{Sp}})``.
+[`canonical_projection`](@ref) ``π_{\operatorname{SpSt}(2n, 2k)}``.
+That is, ``p = π_{\operatorname{SpSt}(2n, 2k)}(p_{\operatorname{Sp}})``.
+
+To generate a random tangent vector in ``T_p\operatorname{SpSt}(2n, 2k)``
+this code exploits the second tangent vector space parametrization of
+[`SymplecticStiefel`](@ref), showing that any ``X \in T_p\operatorname{SpSt}(2n, 2k)``
+can be written as ``X = pΩ_X + p^sB_X``.
+To generate random tangent vectors at ``p`` then, this function sets ``B_X = 0``
+and generates a random Hamiltonian matrix ``Ω_X \in \mathfrak{sp}(2n,F)`` with
+Frobenius norm of `hamiltonian_norm` before returning ``X = pΩ_X``.
 """
-function Base.rand(M::SymplecticStiefel{n,k}; hamiltonian_norm=1 / 2) where {n,k}
-    p_symplectic = rand(Symplectic(2n); hamiltonian_norm=hamiltonian_norm)
-    return canonical_projection(M, p_symplectic)
+function Base.rand(
+    M::SymplecticStiefel{n};
+    vector_at=nothing,
+    hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),
+) where {n}
+    if vector_at === nothing
+        return canonical_projection(
+            M,
+            rand(Symplectic(2n); hamiltonian_norm=hamiltonian_norm),
+        )# code for generation of random points
+    else
+        return random_vector(M, vector_at; hamiltonian_norm=hamiltonian_norm)
+    end
 end
 
-@doc raw"""
-    random_vector(::SymplecticStiefel{n, k}, p)
-
-The symplectic Stiefel tangent space at ``p`` can be parametrized as [^Bendokat2021]
-````math
-    T_p\operatorname{SpSt}(2n, 2k) = \{X = pΩ + p^sB \;|\;
-        Ω ∈ ℝ^{2k × 2k}, Ω^+ = -Ω,
-        p^s ∈ \operatorname{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k) × 2k}, \},
-````
-where ``Ω \in \mathfrak{sp}(2n,F)`` is Hamiltonian and ``p^s`` means
-the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
-
-To then generate random tangent vectors at ``p``, we set ``B = 0`` and generate a random
-Hamiltonian matrix ``Ω``.
-"""
 function random_vector(
     ::SymplecticStiefel{n,k},
     p::AbstractMatrix;
     hamiltonian_norm=1.0,
 ) where {n,k}
-    Ω = rand_hamiltonian(Symplectic(2k); final_norm=hamiltonian_norm)
+    Ω = rand_hamiltonian(Symplectic(2k); frobenius_norm=hamiltonian_norm)
     return p * Ω
 end
 
