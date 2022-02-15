@@ -172,6 +172,7 @@ using ManifoldsBase:
     _extract_val,
     combine_allocation_promotion_functions,
     default_inverse_retraction_method,
+    default_retraction_method,
     geodesic,
     is_decorator_transparent,
     is_default_decorator,

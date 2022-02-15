@@ -240,6 +240,9 @@ is a function ``D \operatorname{retr}_p: T_X(T_p\mathcal M) → T_{\operatorname
 Note that through the isomorphism ``Y ∈ T_X(T_p\mathcal M) = T_p\mathcal M`` the argument
 `Y` is still a tangent vector.
 """
+function retract_diff_argument(M::AbstractManifold, p, X, Y)
+    return retract_diff_argument(M, p, X, Y, default_retraction_method(M))
+end
 function retract_diff_argument(M::AbstractManifold, p, X, Y, m::AbstractRetractionMethod)
     return retract_diff_argument(M, p, X, Y, default_retract_diff_argument_method(M, m))
 end
@@ -254,6 +257,9 @@ function retract_diff_argument(
     return retract_diff_argument!(M, Z, p, X, Y, m)
 end
 
+function retract_diff_argument!(M::AbstractManifold, Z, p, X, Y)
+    return retract_diff_argument!(M, Z, p, X, Y, default_retraction_method(M))
+end
 function retract_diff_argument!(
     M::AbstractManifold,
     Z,
