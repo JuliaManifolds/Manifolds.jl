@@ -500,6 +500,28 @@ function _get_dim_ranges(dims::NTuple{N,Any}) where {N}
     return ntuple(i -> (dims_acc[i]:(dims_acc[i] + dims[i] - 1)), Val(N))
 end
 
+function get_vector(M::ProductManifold, p, Xⁱ, B::AbstractBasis)
+    dims = map(manifold_dimension, M.manifolds)
+    @assert length(Xⁱ) == sum(dims)
+    dim_ranges = _get_dim_ranges(dims)
+    tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
+    ts = ziptuples(M.manifolds, submanifold_components(M, p), tXⁱ)
+    return ProductRepr(map((@inline t -> get_vector(t..., B)), ts))
+end
+function get_vector(
+    M::ProductManifold,
+    p,
+    Xⁱ,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
+    dims = map(manifold_dimension, M.manifolds)
+    @assert length(Xⁱ) == sum(dims)
+    dim_ranges = _get_dim_ranges(dims)
+    tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
+    ts = ziptuples(M.manifolds, submanifold_components(M, p), tXⁱ, B.data.parts)
+    return ProductRepr(map((@inline t -> get_vector(t...)), ts))
+end
+
 function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
     dims = map(manifold_dimension, M.manifolds)
     @assert length(Xⁱ) == sum(dims)
