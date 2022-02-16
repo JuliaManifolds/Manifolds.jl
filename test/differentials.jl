@@ -1,5 +1,11 @@
 using Manifolds
-using Manifolds: FlatExpDiffArgumentMethod, retract_diff_argument, retract_diff_argument!
+using Manifolds:
+    FlatExpDiffArgumentMethod,
+    FiniteDifferenceLogDiffArgumentMethod,
+    retract_diff_argument,
+    retract_diff_argument!,
+    inverse_retract_diff_argument,
+    inverse_retract_diff_argument!
 using Test
 using LinearAlgebra
 
@@ -35,6 +41,24 @@ using LinearAlgebra
             atol=1e-12,
         )
     end
+end
+
+@testset "FiniteDifferenceLogDiffArgumentMethod" begin
+    M = Sphere(2)
+    lda_1_e_4 = FiniteDifferenceLogDiffArgumentMethod(M, 1e-4)
+    p = [1.0, 0.0, 0.0]
+    q = [0.0, sqrt(2) / 2, sqrt(2) / 2]
+    X = [1.0, -2.0, 2.0]
+
+    # computed using Manopt.differential_log_argument(M, p, q, X)
+    diff_ref = [-5.131524956784507e-33, -3.84869943477634, 2.434485872403245]
+    @test isapprox(
+        M,
+        p,
+        inverse_retract_diff_argument(M, p, q, X, lda_1_e_4),
+        diff_ref;
+        atol=1e-7,
+    )
 end
 
 @testset "Flat differentials" begin

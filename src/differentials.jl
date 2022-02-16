@@ -47,6 +47,14 @@ struct FiniteDifferenceLogDiffArgumentMethod{
     h::TH
 end
 
+function FiniteDifferenceLogDiffArgumentMethod(M::AbstractManifold, h::Real)
+    return FiniteDifferenceLogDiffArgumentMethod(
+        default_retraction_method(M),
+        default_inverse_retraction_method(M),
+        h,
+    )
+end
+
 @doc raw"""
     inverse_retract_diff_argument(M::AbstractManifold, p, q, X, m::FiniteDifferenceLogDiffArgumentMethod)
 
@@ -63,13 +71,17 @@ retraction `m.invretr` and ``\operatorname{retr}`` is the retraction `m.retr`.
     > manifolds,” arXiv:1908.05875 [cs, math], Sep. 2019,
     > Available: http://arxiv.org/abs/1908.05875
 """
-inverse_retract_diff_argument(
+function inverse_retract_diff_argument(
     M::AbstractManifold,
     p,
     q,
     X,
-    ::FiniteDifferenceLogDiffArgumentMethod,
+    m::FiniteDifferenceLogDiffArgumentMethod,
 )
+    Y = allocate_result(M, inverse_retract_diff_argument, X, p, q)
+    inverse_retract_diff_argument!(M, Y, p, q, X, m)
+    return Y
+end
 
 function inverse_retract_diff_argument!(
     M::AbstractManifold,
@@ -79,11 +91,12 @@ function inverse_retract_diff_argument!(
     X,
     m::FiniteDifferenceLogDiffArgumentMethod,
 )
-    p_tmp = retract(M, p, m.h * X, m.retr)
-    inverse_retract!(M, Y, q, p_tmp, m.invretr)
-    retract!(M, p_tmp, p, -m.h * X, m.retr)
-    X_tmp = inverse_retract(M, q, p_tmp, m.invretr)
-    Y .= (Y .- X_tmp) ./ (2 .* h)
+    p_tmp = retract(M, q, m.h * X, m.retr)
+    inverse_retract!(M, Y, p, p_tmp, m.invretr)
+    retract!(M, p_tmp, q, -m.h * X, m.retr)
+    X_tmp = inverse_retract(M, p, p_tmp, m.invretr)
+    Y .-= X_tmp
+    Y ./= 2 * m.h
     return Y
 end
 
