@@ -55,8 +55,6 @@ end
     @test Ms^(5,) === Ms1
     @test Mr^(5, 7) === Mr2
 
-    @test is_default_metric(Ms1, PowerMetric())
-    @test default_metric_dispatch(Ms1, PowerMetric()) === Val{true}()
     types_s1 = [Array{Float64,2}, HybridArray{Tuple{3,Dynamic()},Float64,2}]
     types_s2 = [Array{Float64,3}, HybridArray{Tuple{3,Dynamic(),Dynamic()},Float64,3}]
 
@@ -68,9 +66,8 @@ end
     types_r2 = [Array{Float64,4}, HybridArray{Tuple{3,3,Dynamic(),Dynamic()},Float64,4}]
     types_rn2 = [Matrix{Matrix{Float64}}]
 
-    retraction_methods = [Manifolds.PowerRetraction(ManifoldsBase.ExponentialRetraction())]
-    inverse_retraction_methods =
-        [Manifolds.InversePowerRetraction(ManifoldsBase.LogarithmicInverseRetraction())]
+    retraction_methods = [ManifoldsBase.ExponentialRetraction()]
+    inverse_retraction_methods = [ManifoldsBase.LogarithmicInverseRetraction()]
 
     sphere_dist = Manifolds.uniform_distribution(Ms, @SVector [1.0, 0.0, 0.0])
     power_s1_pt_dist =
