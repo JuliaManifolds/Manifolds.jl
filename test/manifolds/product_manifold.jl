@@ -446,12 +446,20 @@ using RecursiveArrayTools: ArrayPartition
 
     @testset "Basis-related errors" begin
         a = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
-        @test_throws ErrorException get_vector!(
+        B = CachedBasis(DefaultOrthonormalBasis(), ProductBasisData(([],)))
+        @test_throws AssertionError get_vector!(
             Mse,
             a,
             ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0]),
-            [1.0, 2.0, 3.0, 4.0, 5.0],
-            CachedBasis(DefaultOrthonormalBasis(), []),
+            [1.0, 2.0, 3.0, 4.0, 5.0], # this is one element too long, hence assertionerror
+            B,
+        )
+        @test_throws MethodError get_vector!(
+            Mse,
+            a,
+            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0]),
+            [1.0, 2.0, 3.0, 4.0],
+            B, # empty elements yield a submanifold MethodError
         )
     end
 
