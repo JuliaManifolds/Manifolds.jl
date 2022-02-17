@@ -272,6 +272,8 @@ function get_coordinates_orthonormal!(M::Rotations{N}, Xⁱ, p, X, num::RealNumb
     return Xⁱ
 end
 
+get_embedding(::Rotations{N}) where {N} = Euclidean(N, N)
+
 @doc raw"""
     get_vector(M::Rotations, p, Xⁱ, B::DefaultOrthogonalBasis)
 

@@ -262,7 +262,7 @@ function is_identity(
     return false
 end
 
-function isapprox(
+@inline function isapprox(
     ::TraitList{IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p::Identity{O},
@@ -271,7 +271,7 @@ function isapprox(
 ) where {O<:AbstractGroupOperation}
     return is_identity(G, q; kwargs...)
 end
-function isapprox(
+@inline function isapprox(
     ::TraitList{IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p,
@@ -289,7 +289,7 @@ function isapprox(
 ) where {O<:AbstractGroupOperation}
     return true
 end
-function isapprox(
+@inline function isapprox(
     ::TraitList{IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p::Identity{O},
@@ -301,7 +301,7 @@ function isapprox(
 end
 function Base.isapprox(
     ::TraitList{<:IsGroupManifold},
-    ::AbstractGroupManifold,
+    ::AbstractDecoratorManifold,
     ::Identity,
     ::Identity;
     kwargs...,
@@ -334,7 +334,92 @@ function check_point(
     )
 end
 
+##########################
+# Metric function forwards
+##########################
+
+function exp(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
+    return exp(base_manifold(G), p, X)
+end
+
+function exp!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p, X)
+    return exp!(base_manifold(G), q, p, X)
+end
+
 get_embedding(G::GroupManifold) = get_embedding(G.manifold)
+
+function injectivity_radius(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold)
+    return injectivity_radius(base_manifold(G))
+end
+function injectivity_radius(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
+    return injectivity_radius(base_manifold(G), p)
+end
+function injectivity_radius(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    m::AbstractRetractionMethod,
+)
+    return injectivity_radius(base_manifold(G), m)
+end
+function injectivity_radius(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    m::AbstractRetractionMethod,
+)
+    return injectivity_radius(base_manifold(G), p, m)
+end
+
+function inner(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X, Y)
+    return inner(base_manifold(G), p, X, Y)
+end
+
+function inverse_retract(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod,
+)
+    return inverse_retract(base_manifold(G), p, q, m)
+end
+
+function inverse_retract!(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+    m::AbstractInverseRetractionMethod,
+)
+    return inverse_retract!(base_manifold(G), X, p, q, m)
+end
+
+function log(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
+    return log(base_manifold(G), p, q)
+end
+
+function log!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, p, q)
+    return log!(base_manifold(G), X, p, q)
+end
+
+function norm(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
+    return norm(base_manifold(G), p, X)
+end
+
+function project(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
+    return project(base_manifold(G), p)
+end
+function project(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
+    return project(base_manifold(G), p, X)
+end
+
+function project!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p)
+    return project!(base_manifold(G), q, p)
+end
+function project!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
+    return project!(base_manifold(G), Y, p, X)
+end
 
 ##########################
 # Group-specific functions
