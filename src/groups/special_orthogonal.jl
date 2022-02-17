@@ -17,8 +17,6 @@ function default_metric_dispatch(
 end
 default_metric_dispatch(::SpecialOrthogonal, ::EuclideanMetric) = Val(true)
 
-get_embedding(G::SpecialOrthogonal) = get_embedding(G.manifold)
-
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 
 Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")

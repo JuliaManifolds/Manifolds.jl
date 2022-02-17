@@ -334,6 +334,8 @@ function check_point(
     )
 end
 
+get_embedding(G::GroupManifold) = get_embedding(G.manifold)
+
 ##########################
 # Group-specific functions
 ##########################
