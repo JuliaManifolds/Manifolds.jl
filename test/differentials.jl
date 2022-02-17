@@ -3,7 +3,9 @@ using Manifolds:
     FlatExpDiffArgumentMethod,
     FiniteDifferenceLogDiffArgumentMethod,
     exp_diff_argument,
+    exp_diff_argument!,
     log_diff_argument,
+    log_diff_argument!,
     retract_diff_argument,
     retract_diff_argument!,
     inverse_retract_diff_argument,
@@ -77,11 +79,17 @@ end
     Y = similar(X1)
     retract_diff_argument!(M, Y, p, X1, X2)
     @test isapprox(M, p, Y, X2)
+    Y = similar(X1)
+    exp_diff_argument!(M, Y, p, X1, X2)
+    @test isapprox(M, p, Y, X2)
 
     @test isapprox(M, q, inverse_retract_diff_argument(M, p, q, X1), X1)
     @test isapprox(M, q, log_diff_argument(M, p, q, X1), X1)
 
     Y = similar(X1)
     inverse_retract_diff_argument!(M, Y, p, q, X1)
+    @test isapprox(M, q, Y, X1)
+    Y = similar(X1)
+    log_diff_argument!(M, Y, p, q, X1)
     @test isapprox(M, q, Y, X1)
 end
