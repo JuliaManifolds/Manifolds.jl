@@ -207,7 +207,7 @@ default_retract_diff_argument_method(
 The [`AbstractRetractionDiffArgumentMethod`](@ref) that is used when calling
 [`inverse_retract_diff_argument`](@ref) without specifying the method.
 """
-default_retract_diff_argument_method(
+default_inverse_retract_diff_argument_method(
     M::AbstractManifold,
     inverse_retraction::AbstractInverseRetractionMethod,
 )
@@ -240,6 +240,37 @@ function exp_diff_argument!(M::AbstractManifold, Z, p, X, Y)
         X,
         Y,
         default_retract_diff_argument_method(M, ExponentialRetraction()),
+    )
+end
+
+@doc raw"""
+    log_diff_argument(M::AbstractManifold, p, q, X)
+
+Compute differential of the logarithmic map with respect to the argument for a fixed
+base point `p`. The differential of function ``\operatorname{log}^{-1}_p: \mathcal M → T_p\mathcal M``
+is a function ``D \operatorname{log}^{-1}_p: T_p M → T_{\operatorname{log}^{-1}_p q}T_p\mathcal M``.
+
+Note that through the isomorphism ``X ∈ T_{\operatorname{log}^{-1}_p q}(T_p\mathcal M) = T_p \mathcal M``
+the argument `X` is still a tangent vector.
+"""
+function log_diff_argument(M::AbstractManifold, p, q, X)
+    return inverse_retract_diff_argument(
+        M,
+        p,
+        q,
+        X,
+        default_inverse_retract_diff_argument_method(M, LogarithmicInverseRetraction()),
+    )
+end
+
+function log_diff_argument!(M::AbstractManifold, Y, p, q, X)
+    return inverse_retract_diff_argument!(
+        M,
+        Y,
+        p,
+        q,
+        X,
+        default_inverse_retract_diff_argument_method(M, LogarithmicInverseRetraction()),
     )
 end
 
@@ -284,6 +315,10 @@ function retract_diff_argument!(
     return retract_diff_argument!(M, Z, p, X, Y, default_retract_diff_argument_method(M, m))
 end
 
+function inverse_retract_diff_argument(M::AbstractManifold, p, q, X)
+    return inverse_retract_diff_argument(M, p, q, X, default_inverse_retraction_method(M))
+end
+
 @doc raw"""
     inverse_retract_diff_argument(M::AbstractManifold, p, q, X, m::AbstractInverseRetractionMethod)
 
@@ -307,6 +342,17 @@ function inverse_retract_diff_argument(
         q,
         X,
         default_inverse_retract_diff_argument_method(M, m),
+    )
+end
+
+function inverse_retract_diff_argument!(M::AbstractManifold, Y, p, q, X)
+    return inverse_retract_diff_argument!(
+        M,
+        Y,
+        p,
+        q,
+        X,
+        default_inverse_retraction_method(M),
     )
 end
 

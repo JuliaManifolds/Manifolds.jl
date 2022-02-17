@@ -105,6 +105,13 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
     return nothing
 end
 
+function default_inverse_retract_diff_argument_method(
+    ::Euclidean,
+    ::LogarithmicInverseRetraction,
+)
+    return FlatLogDiffArgumentMethod()
+end
+
 function default_retract_diff_argument_method(::Euclidean, ::ExponentialRetraction)
     return FlatExpDiffArgumentMethod()
 end
