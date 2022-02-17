@@ -305,6 +305,17 @@ include("../utils.jl")
             -2 -1 0 0
             -5 -2 4 -8
         ]
+        p_odd_row = [
+            0 0 -1 3
+            0 0 1 0
+            -2 -1 0 0
+        ]
+        p_odd_col = [
+            0 -2 5
+            0 1 -2
+            -1 0 0
+            -2 4 -8
+        ]
         Q = SymplecticMatrix(pQ_1, pQ_2)
         Q2 = SymplecticMatrix(1)
 
@@ -358,6 +369,8 @@ include("../utils.jl")
                     -3 -1 4 -4
                 ]
                 @test (pQ_1 + Q) == (Q + pQ_1)
+
+                @test_throws ArgumentError Q + p_odd_row
             end
             @testset "Transpose-Adjoint" begin
                 @test Q' == SymplecticMatrix(-1)
@@ -371,11 +384,31 @@ include("../utils.jl")
             @testset "Inplace mul!" begin
                 z1 = [1 + 2im; 1 - 2im]
                 @test lmul!(Q, copy(z1)) == Q * z1
+                @test lmul!(Q, copy(p_odd_col)) == [
+                    -1 0 0
+                    -2 4 -8
+                    0 2 -5
+                    0 -1 2
+                ]
+                @test_throws ArgumentError lmul!(Q, copy(p_odd_row))
+
                 @test rmul!(copy(z1'), Q) == z1' * Q
+                @test rmul!(copy(p_odd_row), Q) == [
+                    1 -3 0 0
+                    -1 0 0 0
+                    0 0 -2 -1
+                ]
+                @test_throws ArgumentError rmul!(copy(p_odd_col), Q)
 
                 z1_copy = copy(z1)
                 mul!(z1_copy, Q, z1)
                 @test z1_copy == Q * z1
+
+                @test_throws ArgumentError mul!(copy(p_odd_row), Q, p_odd_row)
+                @test_throws ArgumentError mul!(copy(p_odd_row), p_odd_col, Q)
+
+                @test_throws ArgumentError Q * p_odd_row
+                @test_throws ArgumentError p_odd_col * Q
 
                 mul!(z1_copy', z1', Q)
                 @test z1_copy' == (z1' * Q)
