@@ -144,13 +144,14 @@ include("../utils.jl")
             )
 
             # Project tangent vector into (T_pSp)^{\perp}:
-            proj_normal_X2 = Manifolds.project_riemannian_normal!(Sp_2, copy(X2), p_2, X2)
+            Extended_Sp_2 = MetricManifold(get_embedding(Sp_2), ExtendedSymplecticMetric())
+            proj_normal_X2 = Manifolds.project_normal!(Extended_Sp_2, copy(X2), p_2, X2)
             @test isapprox(proj_normal_X2, zero(X2); atol=1.0e-16)
 
             # Project Project matrix A ∈ ℝ^{2 × 2} onto (T_pSp):
             A_2 = [5.0 -21.5; 3.14 14.9]
             A_2_proj = similar(A_2)
-            Manifolds.project_riemannian!(Sp_2, A_2_proj, p_2, A_2)
+            Manifolds.project!(Extended_Sp_2, A_2_proj, p_2, A_2)
             @test is_vector(Sp_2, p_2, A_2_proj; atol=1.0e-16)
 
             # Change representer of A onto T_pSp:

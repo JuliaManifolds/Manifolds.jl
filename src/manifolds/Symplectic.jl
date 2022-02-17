@@ -415,14 +415,9 @@ function gradient!(
 )
     _gradient!(f, X, p, backend.diff_backend)
     if extended_metric
-        change_representer!(
-            MetricManifold(get_embedding(M), ExtendedSymplecticMetric()),
-            X,
-            EuclideanMetric(),
-            p,
-            X,
-        )
-        return project_riemannian!(M, X, p, X)
+        MetricM = MetricManifold(get_embedding(M), ExtendedSymplecticMetric())
+        change_representer!(MetricM, X, EuclideanMetric(), p, X)
+        return project!(MetricM, X, p, X)
     else
         project!(M, X, p, X)
         return change_representer!(M, X, EuclideanMetric(), p, X)
@@ -570,19 +565,12 @@ embedded in ``ℝ^{2n \times 2n}``, i.e.
 """
 manifold_dimension(::Symplectic{n}) where {n} = (2n + 1) * n
 
-@doc raw"""
-    project_riemannian!(M::Symplectic{n, ℝ}, Y, p, X) where {n}
-
-Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n, ℝ)`` w.r.t.
-the Riemannian metric ``g`` [`RealSymplecticMetric`](@ref).
-
-The closed form projection mapping is given by [^Gao2021riemannian]
-````math
-    \operatorname{P}^{T_p\operatorname{Sp}(2n)}_{g_p}(X) = pQ\operatorname{sym}(p^TQ^TX),
-````
-where ``\operatorname{sym}(A) = \frac{1}{2}(A + A^T)``.
-"""
-function project_riemannian!(::Symplectic, Y, p, X)
+function project!(
+    ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
+    Y,
+    p,
+    X,
+) where {m,n,𝔽}
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
@@ -592,30 +580,12 @@ function project_riemannian!(::Symplectic, Y, p, X)
     return Y
 end
 
-@doc raw"""
-    project_riemannian_normal!(M::Symplectic{n, ℝ}, Y, p, X)
-
-Project onto the normal of the tangent space ``(T_p\operatorname{Sp}(2n))^{\perp_g}`` at
-a point ``p ∈ \operatorname{Sp}(2n)``,
-relative to the riemannian metric ``g`` [`RealSymplecticMetric`](@ref).
-That is,
-````math
-(T_p\operatorname{Sp}(2n))^{\perp_g} = \{Y \in \mathbb{R}^{2n \times 2n} :
-                        g_p(Y, X) = 0 \;\forall\; X \in T_p\operatorname{Sp}(2n)\}.
-````
-The closed form projection operator onto the normal space is given by [^Gao2021riemannian]
-````math
-\operatorname{P}^{(T_p\operatorname{Sp}(2n))\perp}_{g_p}(X) = pQ\operatorname{skew}(p^TQ^TX),
-````
-where ``\operatorname{skew}(A) = \frac{1}{2}(A - A^T)``.
-
-[^Gao2021riemannian]:
-    > Gao, Bin and Son, Nguyen Thanh and Absil, P-A and Stykel, Tatjana:
-    > Riemannian optimization on the symplectic Stiefel manifold,
-    > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
-    > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
-"""
-function project_riemannian_normal!(::Symplectic, Y, p, X)
+function project_normal!(
+    ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
+    Y,
+    p,
+    X,
+) where {m,n,𝔽}
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
