@@ -47,6 +47,24 @@ struct GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <
     op::O
 end
 
+"""
+    IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
+
+A trait to declare an [`AbstractManifold`](@ref) as a manifold with group structure
+with operation of type `O`.
+
+# Constructor
+
+    IsGroupManifold(op)
+"""
+struct IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
+    op::O
+end
+
+@inline function active_traits(f, M::GroupManifold, args...)
+    return merge_traits(IsGroupManifold(M.op), active_traits(f, M.manifold, args...))
+end
+
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
 """
@@ -189,14 +207,14 @@ function allocate_result(G::AbstractGroupManifold, ::typeof(identity_element))
 end
 
 @doc raw"""
-    identity_element(G::AbstractGroupManifold, p)
+    identity_element(G::AbstractDecoratorManifold, p)
 
 Return a point representation of the [`Identity`](@ref) on the [`AbstractGroupManifold`](@ref) `G`,
 where `p` indicates the type to represent the identity.
 """
-identity_element(G::AbstractGroupManifold, p)
+identity_element(G::AbstractDecoratorManifold, p)
 @trait_function identity_element(G::AbstractDecoratorManifold, p)
-function identity_element(G::AbstractGroupManifold, p)
+function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
     q = allocate_result(G, identity_element, p)
     return identity_element!(G, q)
 end
@@ -219,44 +237,61 @@ the [`Identity`](@ref)`{O}` with the corresponding [`AbstractGroupOperation`](@r
 is_identity(G::AbstractGroupManifold, q)
 
 @trait_function is_identity(G::AbstractDecoratorManifold, q; kwargs...)
-function is_identity(G::AbstractGroupManifold, q; kwargs...)
+function is_identity(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    q;
+    kwargs...,
+)
     return isapprox(G, identity_element(G), q; kwargs...)
 end
 function is_identity(
-    ::AbstractGroupManifold{𝔽,O},
+    ::TraitList{IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
     ::Identity{O};
     kwargs...,
 ) where {𝔽,O<:AbstractGroupOperation}
     return true
 end
-is_identity(::AbstractGroupManifold, ::Identity; kwargs...) = false
+function is_identity(
+    ::TraitList{<:IsGroupManifold},
+    ::AbstractDecoratorManifold,
+    ::Identity;
+    kwargs...,
+)
+    return false
+end
 
 function isapprox(
-    G::AbstractGroupManifold{𝔽,O},
+    ::TraitList{IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
     p::Identity{O},
     q;
     kwargs...,
-) where {𝔽,O<:AbstractGroupOperation}
+) where {O<:AbstractGroupOperation}
     return is_identity(G, q; kwargs...)
 end
 function isapprox(
-    G::AbstractGroupManifold{𝔽,O},
+    ::TraitList{IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
     p,
     q::Identity{O};
     kwargs...,
-) where {𝔽,O<:AbstractGroupOperation}
+) where {O<:AbstractGroupOperation}
     return is_identity(G, p; kwargs...)
 end
 function isapprox(
-    G::AbstractGroupManifold{𝔽,O},
+    ::TraitList{IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
     p::Identity{O},
     q::Identity{O};
     kwargs...,
-) where {𝔽,O<:AbstractGroupOperation}
+) where {O<:AbstractGroupOperation}
     return true
 end
 function isapprox(
-    G::AbstractGroupManifold{𝔽,O},
+    ::TraitList{IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
     p::Identity{O},
     X,
     Y;
@@ -264,25 +299,35 @@ function isapprox(
 ) where {𝔽,O<:AbstractGroupOperation}
     return isapprox(G, identity_element(G), X, Y; kwargs...)
 end
-Base.isapprox(::AbstractGroupManifold, ::Identity, ::Identity; kwargs...) = false
+function Base.isapprox(
+    ::TraitList{<:IsGroupManifold},
+    ::AbstractGroupManifold,
+    ::Identity,
+    ::Identity;
+    kwargs...,
+)
+    return false
+end
 
 function Base.show(io::IO, ::Identity{O}) where {O<:AbstractGroupOperation}
     return print(io, "Identity($O)")
 end
 
 function check_point(
-    G::AbstractGroupManifold{𝔽,O},
+    ::TraitList{IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
     e::Identity{O};
     kwargs...,
-) where {𝔽,M,O<:AbstractGroupOperation}
+) where {O<:AbstractGroupOperation}
     return nothing
 end
 
 function check_point(
-    G::AbstractGroupManifold{𝔽,O1},
+    ::TraitList{IsGroupManifold{O1}},
+    G::AbstractDecoratorManifold,
     e::Identity{O2};
     kwargs...,
-) where {𝔽,M,O1<:AbstractGroupOperation,O2<:AbstractGroupOperation}
+) where {O1<:AbstractGroupOperation,O2<:AbstractGroupOperation}
     return DomainError(
         e,
         "The Identity $e does not lie on $G, since its the identity with respect to $O2 and not $O1.",
@@ -294,7 +339,7 @@ end
 ##########################
 
 @doc raw"""
-    adjoint_action(G::AbstractGroupManifold, p, X)
+    adjoint_action(G::AbstractDecoratorManifold, p, X)
 
 Adjoint action of the element `p` of the Lie group `G` on the element `X`
 of the corresponding Lie algebra.
@@ -311,38 +356,46 @@ where $e$ is the identity element of `G`.
 Note that the adjoint representation of a Lie group isn't generally faithful.
 Notably the adjoint representation of SO(2) is trivial.
 """
-adjoint_action(G::AbstractGroupManifold, p, X)
+adjoint_action(G::AbstractDecoratorManifold, p, X)
 @trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ)
-function adjoint_action(G::AbstractGroupManifold, p, Xₑ)
+function adjoint_action(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, Xₑ)
     Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
     Y = inverse_translate_diff(G, p, p, Xₚ, RightAction())
     return Y
 end
 
-function adjoint_action!(G::AbstractGroupManifold, Y, p, Xₑ)
+@trait_function adjoint_action!(G::AbstractDecoratorManifold, Y, p, Xₑ)
+function adjoint_action!(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    Xₑ,
+)
     Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftAction())
     inverse_translate_diff!(G, Y, p, p, Xₚ, RightAction())
     return Y
 end
 
 @doc raw"""
-    inv(G::AbstractGroupManifold, p)
+    inv(G::AbstractDecoratorManifold, p)
 
 Inverse $p^{-1} ∈ \mathcal{G}$ of an element $p ∈ \mathcal{G}$, such that
 $p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`Identity`](@ref)
 element of $\mathcal{G}$.
 """
-inv(::AbstractGroupManifold, ::Any...)
+inv(::AbstractDecoratorManifold, ::Any...)
 @trait_function Base.inv(G::AbstractDecoratorManifold, p)
-function Base.inv(G::AbstractGroupManifold, p)
+function Base.inv(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
     q = allocate_result(G, inv, p)
     return inv!(G, q, p)
 end
 
 function Base.inv(
-    ::AbstractGroupManifold{𝔽,O},
+    ::TraitList{IsGroupManifold{O}},
+    ::AbstractDecoratorManifold,
     e::Identity{O},
-) where {𝔽,O<:AbstractGroupOperation}
+) where {O<:AbstractGroupOperation}
     return e
 end
 
@@ -352,25 +405,28 @@ function inv!(G::AbstractGroupManifold, q, p)
 end
 
 function inv!(
-    G::AbstractGroupManifold{𝔽,O},
+    ::TraitList{IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
     q,
     ::Identity{O},
-) where {𝔽,O<:AbstractGroupOperation}
+) where {O<:AbstractGroupOperation}
     return identity_element!(G, q)
 end
 
 function Base.copyto!(
-    ::AbstractGroupManifold{𝔽,O},
+    ::TraitList{IsGroupManifold{O}},
+    ::AbstractDecoratorManifold,
     e::Identity{O},
     ::Identity{O},
 ) where {𝔽,O<:AbstractGroupOperation}
     return e
 end
 function Base.copyto!(
-    G::AbstractGroupManifold{𝔽,O},
+    ::TraitList{IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
     p,
     ::Identity{O},
-) where {𝔽,O<:AbstractGroupOperation}
+) where {O<:AbstractGroupOperation}
     return identity_element!(G, p)
 end
 

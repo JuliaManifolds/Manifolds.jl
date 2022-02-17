@@ -38,6 +38,8 @@ function NormalRotationDistribution(
     return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
 end
 
+active_traits(f, ::Rotations, args...) = merge_traits(IsEmbeddedManifold())
+
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
