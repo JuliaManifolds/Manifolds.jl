@@ -140,7 +140,8 @@ change_representer(::Symplectic, ::EuclideanMetric, p, X)
 
 function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
     Q = SymplecticMatrix(p, X)
-    Y .= (1 / 2) .* p * (p' * X .+ Q * X' * p * Q)
+    pT_X = p' * X
+    Y .= (1 / 2) .* p * (pT_X .+ Q * pT_X' * Q)
     return Y
 end
 
