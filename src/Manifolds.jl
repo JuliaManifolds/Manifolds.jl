@@ -201,6 +201,7 @@ include("utils.jl")
 include("product_representations.jl")
 include("differentiation/differentiation.jl")
 include("differentiation/riemannian_diff.jl")
+include("differentiation/embedded_diff.jl")
 
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
