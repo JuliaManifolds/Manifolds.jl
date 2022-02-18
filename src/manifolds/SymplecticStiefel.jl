@@ -317,34 +317,18 @@ The manifold gradient ``\text{grad}f(p)`` is computed from ``∇f(p)`` as
 ````
 where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref).
 """
-function gradient(M::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
+function gradient(::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
-    return grad_euclidean_to_manifold(M, p, amb_grad)
+    Q = SymplecticMatrix(p, amb_grad)
+    return amb_grad * (p' * p) .+ (Q*p)*(amb_grad' * (Q * p))
 end
 
-function gradient!(M::SymplecticStiefel, f, X, p, backend::RiemannianProjectionBackend)
+function gradient!(::SymplecticStiefel, f, X, p, backend::RiemannianProjectionBackend)
     _gradient!(f, X, p, backend.diff_backend)
-    return grad_euclidean_to_manifold!(M, X, p, copy(X))
-end
-
-function grad_euclidean_to_manifold(M::SymplecticStiefel, p, ∇f_euc)
-    return grad_euclidean_to_manifold!(M, similar(∇f_euc), p, ∇f_euc)
-end
-
-function grad_euclidean_to_manifold!(::SymplecticStiefel, ∇f_man, p, ∇f_euc)
-    # ∇f_man cannot be aliased with ∇f_euc:
-    if ∇f_man === ∇f_euc
-        throw(
-            ArgumentError(
-                "Output gradient '∇f_man' must not be aliased with input gradient '∇f_euc'.",
-            ),
-        )
-    end
-    Q = SymplecticMatrix(p, ∇f_euc)
-    Qp = Q * p                      # Allocated memory.
-    mul!(∇f_man, ∇f_euc, (p' * p))  # Use the memory in ∇f_man.
-    ∇f_man .+= Qp * (∇f_euc' * Qp)
-    return ∇f_man
+    Q = SymplecticMatrix(p, X)
+    Qp = Q * p
+    X .= X * (p' * p) .+ Qp * (X' * Qp)
+    return X
 end
 
 @doc raw"""

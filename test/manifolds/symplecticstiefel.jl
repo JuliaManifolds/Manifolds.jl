@@ -281,7 +281,7 @@ end
         @testset "Gradient Computations" begin
             Q_grad = SymplecticMatrix(points[1])
             function test_f(p)
-                n, k = size(p)
+                k = size(p)[2]
                 return tr(p[1:k, 1:k])
             end
             function analytical_grad_f(p)
@@ -301,13 +301,6 @@ end
             grad_f_p = similar(p_grad)
             Manifolds.gradient!(SpSt_6_4, test_f, grad_f_p, p_grad, ad_diff)
             @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-16)
-
-            @test_throws ArgumentError grad_euclidean_to_manifold!(
-                SpSt_6_4,
-                grad_f_p,
-                p_grad,
-                grad_f_p,
-            )
         end
     end
 end
