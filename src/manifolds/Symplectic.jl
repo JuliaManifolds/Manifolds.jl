@@ -605,7 +605,17 @@ function project!(::Symplectic, Y, p, A)
 end
 
 @doc raw"""
-    TODO: Document
+    project!(::MetricManifold{𝔽,Euclidean,ExtendedSymplecticMetric}, Y, p, X) where {𝔽}
+
+Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n, ℝ)`` w.r.t.
+the Riemannian metric ``g`` [`RealSymplecticMetric`](@ref).
+The closed form projection mapping is given by [^Gao2021riemannian]
+````math
+    \operatorname{P}^{T_p\operatorname{Sp}(2n)}_{g_p}(X) = pQ\operatorname{sym}(p^TQ^TX),
+````
+where ``\operatorname{sym}(A) = \frac{1}{2}(A + A^T)``.
+
+This function is not exported.
 """
 function project!(
     ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
@@ -618,12 +628,33 @@ function project!(
     pT_QT_X = p' * Q' * X
     symmetrized_pT_QT_X = (1 / 2) .* (pT_QT_X + pT_QT_X')
 
-    Y[:, :] = p * Q * (symmetrized_pT_QT_X)
+    Y .= p * Q * (symmetrized_pT_QT_X)
     return Y
 end
 
 @doc raw"""
-    TODO: Document
+    project_normal!(::MetricManifold{𝔽,Euclidean,ExtendedSymplecticMetric}, Y, p, X)
+
+Project onto the normal of the tangent space ``(T_p\operatorname{Sp}(2n))^{\perp_g}`` at
+a point ``p ∈ \operatorname{Sp}(2n)``, relative to the riemannian metric
+``g`` [`RealSymplecticMetric`](@ref).
+That is,
+````math
+(T_p\operatorname{Sp}(2n))^{\perp_g} = \{Y \in \mathbb{R}^{2n \times 2n} :
+                        g_p(Y, X) = 0 \;\forall\; X \in T_p\operatorname{Sp}(2n)\}.
+````
+The closed form projection operator onto the normal space is given by [^Gao2021riemannian]
+````math
+\operatorname{P}^{(T_p\operatorname{Sp}(2n))\perp}_{g_p}(X) = pQ\operatorname{skew}(p^TQ^TX),
+````
+where ``\operatorname{skew}(A) = \frac{1}{2}(A - A^T)``.
+
+This function is not exported.
+[^Gao2021riemannian]:
+    > Gao, Bin and Son, Nguyen Thanh and Absil, P-A and Stykel, Tatjana:
+    > Riemannian optimization on the symplectic Stiefel manifold,
+    > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
+    > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
 function project_normal!(
     ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
@@ -636,7 +667,7 @@ function project_normal!(
     pT_QT_X = p' * Q' * X
     skew_pT_QT_X = (1 / 2) .* (pT_QT_X .- pT_QT_X')
 
-    Y[:, :] = p * Q * skew_pT_QT_X
+    Y .= p * Q * skew_pT_QT_X
     return Y
 end
 
