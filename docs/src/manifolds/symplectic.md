@@ -3,12 +3,15 @@
 The [`Symplectic`](@ref) manifold, denoted $\operatorname{Sp}(2n, \mathbb{F})$, is a closed, embedded, submanifold of 
 $\mathbb{F}^{2n \times 2n}$ that represents transformations into symplectic subspaces which keep the
 canonical symplectic form over $\mathbb{F}^{2n \times 2n }$ invariant under the standard embedding inner product.
-The canonical symplectic form is $\omega(x, y) = x^T Q y$ for elements $x, y \in \mathbb{F}^{2n}$, with
+The canonical symplectic form is a non-degenerate bilinear and skew symmetric map 
+$\omega\colon \mathbb{F}^{2n} \times \mathbb{F}^{2n} 
+\rightarrow \mathbb{F}$, given by
+$\omega(x, y) = x^T Q_{2n} y$ for elements $x, y \in \mathbb{F}^{2n}$, with
 ````math
-    Q = 
+    Q_{2n} = 
     \begin{bmatrix}
-     0  &  I \\
-    -I  &  0
+     0_n  &  I_n \\
+    -I_n  &  0_n
     \end{bmatrix}.
 ```` 
 That means that an element $p \in \operatorname{Sp}(2n)$ must fulfill the requirement that 

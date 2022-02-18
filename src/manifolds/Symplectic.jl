@@ -582,7 +582,7 @@ which solves the constrained optimization problem
     \text{s.t.}\;
     h(X) \colon= X^T Q p + p^T Q X = 0,
 ````
-where ``h : \mathbb{R}^{2n \times 2n} \rightarrow \operatorname{skew}(2n)`` defines
+where ``h\colon\mathbb{R}^{2n \times 2n} \rightarrow \operatorname{skew}(2n)`` defines
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``.
 """
 project(::Symplectic, p, A)
@@ -609,12 +609,11 @@ end
 
 Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n, ℝ)`` w.r.t.
 the Riemannian metric ``g`` [`RealSymplecticMetric`](@ref).
-The closed form projection mapping is given by [^Gao2021riemannian]
+The closed form projection mapping is given by [^Gao2021Riemannian]
 ````math
     \operatorname{P}^{T_p\operatorname{Sp}(2n)}_{g_p}(X) = pQ\operatorname{sym}(p^TQ^TX),
 ````
 where ``\operatorname{sym}(A) = \frac{1}{2}(A + A^T)``.
-
 This function is not exported.
 """
 function project!(
@@ -643,14 +642,14 @@ That is,
 (T_p\operatorname{Sp}(2n))^{\perp_g} = \{Y \in \mathbb{R}^{2n \times 2n} :
                         g_p(Y, X) = 0 \;\forall\; X \in T_p\operatorname{Sp}(2n)\}.
 ````
-The closed form projection operator onto the normal space is given by [^Gao2021riemannian]
+The closed form projection operator onto the normal space is given by [^Gao2021Riemannian]
 ````math
 \operatorname{P}^{(T_p\operatorname{Sp}(2n))\perp}_{g_p}(X) = pQ\operatorname{skew}(p^TQ^TX),
 ````
 where ``\operatorname{skew}(A) = \frac{1}{2}(A - A^T)``.
-
 This function is not exported.
-[^Gao2021riemannian]:
+
+[^Gao2021Riemannian]:
     > Gao, Bin and Son, Nguyen Thanh and Absil, P-A and Stykel, Tatjana:
     > Riemannian optimization on the symplectic Stiefel manifold,
     > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.

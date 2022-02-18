@@ -23,7 +23,7 @@ The symplectic Stiefel tangent space at ``p`` can be parametrized as [^Bendokat2
     = \{&X \in \mathbb{R}^{2n \times 2k} \;|\; p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0 \}, \\
     = \{&X = pΩ + p^sB \;|\;
         Ω ∈ ℝ^{2k × 2k}, Ω^+ = -Ω, \\
-        &\quad\quad\quad p^s ∈ \operatorname{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k) × 2k}, \},
+        &\; p^s ∈ \operatorname{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k) × 2k}, \},
     \end{align*}
 ````
 where ``Ω \in \mathfrak{sp}(2n,F)`` is Hamiltonian and ``p^s`` means
@@ -487,7 +487,7 @@ which solves the constrained optimization problem
 ````math
     \operatorname{min}_{X \in \mathbb{R}^{2n \times 2k}} \frac{1}{2}||X - A||^2, \quad
     \text{s.t.}\;
-    h(X) = X^T Q p + p^T Q X = 0,
+    h(X)\colon= X^T Q p + p^T Q X = 0,
 ````
 where ``h : \mathbb{R}^{2n \times 2k} \rightarrow \operatorname{skew}(2k)`` defines
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``.
