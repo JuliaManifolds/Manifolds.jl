@@ -425,7 +425,7 @@ end
         @test is_default_metric(MM2)
 
         @test convert(typeof(MM2), M) == MM2
-        @test_throws ErrorException convert(typeof(MM), M)
+        @test_throws Method convert(typeof(MM), M)
         p = [0.1, 0.2, 0.4]
         X = [0.5, 0.7, 0.11]
         Y = [0.13, 0.17, 0.19]
@@ -525,7 +525,7 @@ end
         @test isapprox(a.distribution.μ, b.distribution.μ)
         @test get_basis(M, p, DefaultOrthonormalBasis()).data ==
               get_basis(MM2, p, DefaultOrthonormalBasis()).data
-        @test_throws ErrorException get_basis(MM, p, DefaultOrthonormalBasis())
+        @test_throws MethodError get_basis(MM, p, DefaultOrthonormalBasis())
 
         fX = ManifoldsBase.TFVector(X, B_p)
         fY = ManifoldsBase.TFVector(Y, B_p)

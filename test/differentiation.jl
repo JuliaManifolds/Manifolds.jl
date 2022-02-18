@@ -130,8 +130,8 @@ using LinearAlgebra: Diagonal, dot
             @test _jacobian(f1, [1.0, -1.0]) ≈ [1.0 -2.0]
             # The following seems not to worf for :central, but it does for forward
             fdf = Manifolds.FiniteDiffBackend(Val(:forward))
-            @test_broken _jacobian!(f1!, X, [1.0, -1.0], fdf) === X
-            @test_broken X ≈ [1.0 -2.0]
+            @test _jacobian!(f1!, X, [1.0, -1.0], fdf) === X
+            @test X ≈ [1.0 -2.0]
         end
         set_default_differential_backend!(Manifolds.NoneDiffBackend())
         @testset for backend in [fd51, Manifolds.ForwardDiffBackend()]
