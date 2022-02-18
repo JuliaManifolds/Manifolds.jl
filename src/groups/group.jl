@@ -1260,7 +1260,7 @@ end
 function retract!(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
-    Y,
+    q,
     p,
     X,
     method::GroupExponentialRetraction,
