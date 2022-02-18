@@ -566,6 +566,47 @@ embedded in ``ℝ^{2n \times 2n}``, i.e.
 """
 manifold_dimension(::Symplectic{n}) where {n} = (2n + 1) * n
 
+@doc raw"""
+    project(::Symplectic, p, A)
+    project!(::Symplectic, Y, p, A)
+
+Given a point ``p \in \operatorname{Sp}(2n)``,
+project an element ``A \in \mathbb{R}^{2n \times 2n}`` onto
+the tangent space ``T_p\operatorname{Sp}(2n)`` relative to
+the euclidean metric of the embedding ``\mathbb{R}^{2n \times 2n}``.
+
+That is, we find the element ``X \in T_p\operatorname{SpSt}(2n, 2k)``
+which solves the constrained optimization problem
+````math
+    \operatorname{min}_{X \in \mathbb{R}^{2n \times 2n}} \frac{1}{2}||X - A||^2, \quad
+    \text{s.t.}\;
+    h(X) \colon= X^T Q p + p^T Q X = 0,
+````
+where ``h : \mathbb{R}^{2n \times 2n} \rightarrow \operatorname{skew}(2n)`` defines
+the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``.
+"""
+project(::Symplectic, p, A)
+
+function project!(::Symplectic, Y, p, A)
+    Q = SymplecticMatrix(Y, p, A)
+    Q_p = Q * p
+
+    function h(X)
+        XT_Q_p = X' * Q_p
+        return XT_Q_p .- XT_Q_p'
+    end
+
+    # Solve for Λ (Lagrange mutliplier):
+    pT_p = p' * p  # (2k × 2k)
+    Λ = sylvester(pT_p, pT_p, h(A) ./ 2)
+
+    Y[:, :] = A .- Q_p * (Λ .- Λ')
+    return Y
+end
+
+@doc raw"""
+    TODO: Document
+"""
 function project!(
     ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
     Y,
@@ -581,6 +622,9 @@ function project!(
     return Y
 end
 
+@doc raw"""
+    TODO: Document
+"""
 function project_normal!(
     ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
     Y,

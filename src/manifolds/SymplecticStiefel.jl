@@ -366,8 +366,8 @@ function inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
     b = Q' * p
     # we split the original trace into two one with I->(X'Yc)
     # and the other with 1/2 X'b c b' Y c
-    # a) we permute X' and Y c to c^TY^TX = a\(Y'X) (avoids a large interims matrix)
-    # b) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
+    # 1) we permute X' and Y c to c^TY^TX = a\(Y'X) (avoids a large interims matrix)
+    # 2) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
     # and (b'X) again avoids a large interims matrix, so does Y'b.
     return tr(a \ (Y' * X)) - (1 / 2) * tr(a \ ((Y' * b) * (a \ (b' * X))))
 end
@@ -479,7 +479,7 @@ function inverse_retract!(M::SymplecticStiefel, X, p, q, ::CayleyInverseRetracti
 end
 
 @doc raw"""
-    manifold_dimension(::Symplectic{n})
+    manifold_dimension(::SymplecticStiefel{n, k})
 
 Returns the dimension of the symplectic Stiefel manifold embedded in ``ℝ^{2n \times 2k}``,
 i.e. [^Bendokat2021]
@@ -490,8 +490,8 @@ i.e. [^Bendokat2021]
 manifold_dimension(::SymplecticStiefel{n,k}) where {n,k} = (4n - 2k + 1) * k
 
 @doc raw"""
-    project(::Union{SymplecticStiefel,Symplectic}, p, A)
-    project!(::Union{SymplecticStiefel, Symplectic}, Y, p, A)
+    project(::SymplecticStiefel, p, A)
+    project!(::SymplecticStiefel, Y, p, A)
 
 Given a point ``p \in \operatorname{SpSt}(2n, 2k)``,
 project an element ``A \in \mathbb{R}^{2n \times 2k}`` onto
@@ -509,9 +509,9 @@ which solves the constrained optimization problem
 where ``h : \mathbb{R}^{2n \times 2k} \rightarrow \operatorname{skew}(2k)`` defines
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``.
 """
-project(::Union{SymplecticStiefel,Symplectic}, p, A)
+project(::SymplecticStiefel, p, A)
 
-function project!(::Union{SymplecticStiefel,Symplectic}, Y, p, A)
+function project!(::SymplecticStiefel, Y, p, A)
     Q = SymplecticMatrix(Y, p, A)
     Q_p = Q * p
 
