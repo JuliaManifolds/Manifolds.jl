@@ -319,15 +319,14 @@ where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref).
 """
 function gradient(::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
     amb_grad = _gradient(f, p, backend.diff_backend)
-    Q = SymplecticMatrix(p, amb_grad)
-    return amb_grad * (p' * p) .+ (Q*p)*(amb_grad' * (Q * p))
+    Q_p = SymplecticMatrix(p, amb_grad) * p
+    return amb_grad * (p' * p) .+ Q_p * (amb_grad' * Q_p)
 end
 
 function gradient!(::SymplecticStiefel, f, X, p, backend::RiemannianProjectionBackend)
     _gradient!(f, X, p, backend.diff_backend)
-    Q = SymplecticMatrix(p, X)
-    Qp = Q * p
-    X .= X * (p' * p) .+ Qp * (X' * Qp)
+    Q_p = SymplecticMatrix(p, X) * p
+    X .= X * (p' * p) .+ Q_p * (X' * Q_p)
     return X
 end
 
