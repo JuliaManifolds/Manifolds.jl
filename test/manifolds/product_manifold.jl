@@ -463,6 +463,20 @@ using RecursiveArrayTools: ArrayPartition
         @test Manifolds.allocation_promotion_function(Mse, get_vector, ()) === identity
     end
 
+    @testset "empty allocation" begin
+        p = allocate_result(Mse, uniform_distribution)
+        @test isa(p, ProductRepr)
+        @test size(p[Mse, 1]) == (3,)
+        @test size(p[Mse, 2]) == (2,)
+    end
+
+    @testset "Uniform distribution" begin
+        Mss = ProductManifold(Sphere(2), Sphere(2))
+        p = rand(uniform_distribution(Mss))
+        @test is_point(Mss, p)
+        @test is_point(Mss, rand(uniform_distribution(Mss, p)))
+    end
+
     @testset "Atlas & Induced Basis" begin
         M = ProductManifold(Euclidean(2), Euclidean(2))
         p = ProductRepr(zeros(2), ones(2))

@@ -62,3 +62,7 @@ Get the object of type `FVectorSupport` for the distribution `d`.
 function Distributions.support(::T) where {T<:FVectorDistribution}
     return error("support not implemented for type $T")
 end
+
+function uniform_distribution(M::AbstractManifold)
+    return uniform_distribution(M, allocate_result(M, uniform_distribution))
+end

@@ -117,6 +117,10 @@ function InverseProductRetraction(inverse_retractions::AbstractInverseRetraction
     return InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
 end
 
+@inline function allocate_result(M::ProductManifold, f)
+    return ProductRepr(map(N -> allocate_result(N, f), M.manifolds))
+end
+
 function allocation_promotion_function(M::ProductManifold, f, args::Tuple)
     apfs = map(MM -> allocation_promotion_function(MM, f, args), M.manifolds)
     return reduce(combine_allocation_promotion_functions, apfs)
@@ -1191,6 +1195,16 @@ function Distributions.support(tvd::ProductFVectorDistribution)
     return FVectorSupport(
         tvd.type,
         ProductRepr(map(d -> support(d).point, tvd.distributions)...),
+    )
+end
+
+function uniform_distribution(M::ProductManifold)
+    return ProductPointDistribution(M, map(uniform_distribution, M.manifolds))
+end
+function uniform_distribution(M::ProductManifold, p)
+    return ProductPointDistribution(
+        M,
+        map(uniform_distribution, M.manifolds, submanifold_components(M, p)),
     )
 end
 
