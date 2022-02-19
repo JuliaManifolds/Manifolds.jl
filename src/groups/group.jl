@@ -97,18 +97,6 @@ Here, the internally stored enhanced manifold `M.manifold` is returned.
 """
 base_manifold(G::GroupManifold, ::Val{N}=Val(-1)) where {N} = G.manifold
 
-decorator_group_dispatch(::AbstractManifold) = Val(false)
-function decorator_group_dispatch(M::AbstractDecoratorManifold)
-    return decorator_group_dispatch(decorated_manifold(M))
-end
-decorator_group_dispatch(::AbstractGroupManifold) = Val(true)
-
-function is_group_decorator(M::AbstractManifold)
-    return _extract_val(decorator_group_dispatch(M))
-end
-
-default_decorator_dispatch(::AbstractGroupManifold) = Val(false)
-
 (op::AbstractGroupOperation)(M::AbstractManifold) = GroupManifold(M, op)
 function (::Type{T})(M::AbstractManifold) where {T<:AbstractGroupOperation}
     return GroupManifold(M, T())
@@ -456,6 +444,28 @@ function inverse_retract!(
     q,
 )
     return inverse_retract!(base_manifold(G), X, p, q)
+end
+
+function is_point(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    te = false;
+    kwargs...,
+)
+    return is_point(base_manifold(G), p, te; kwargs...)
+end
+
+function is_vector(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    X,
+    te = false,
+    cbp = true;
+    kwargs...,
+)
+    return is_vector(base_manifold(G), p, X, te, cbp; kwargs...)
 end
 
 function log(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
