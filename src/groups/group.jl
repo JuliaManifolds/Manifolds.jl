@@ -450,10 +450,21 @@ function is_point(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
-    te = false;
+    te=false;
     kwargs...,
 )
     return is_point(base_manifold(G), p, te; kwargs...)
+end
+function is_point(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    e::Identity,
+    te=false;
+    kwargs...,
+)
+    ie = is_identity(G, e; kwargs...)
+    (!te) && return ie
+    return (!ie) && DomainError(e, "The provided identity is not a point on $G.")
 end
 
 function is_vector(
@@ -461,8 +472,8 @@ function is_vector(
     G::AbstractDecoratorManifold,
     p,
     X,
-    te = false,
-    cbp = true;
+    te=false,
+    cbp=true;
     kwargs...,
 )
     return is_vector(base_manifold(G), p, X, te, cbp; kwargs...)
@@ -1081,6 +1092,10 @@ function inverse_translate_diff!(
     return translate_diff!(G, Y, inv(G, p), q, X, conv)
 end
 
+function representation_size(::TraitList{<:IsGroupManifold}, M::AbstractDecoratorManifold)
+    return representation_size(base_manifold(M))
+end
+
 @doc raw"""
     exp_lie(G::AbstractGroupManifold, X)
 
@@ -1302,15 +1317,22 @@ where $\log$ is the group logarithm ([`log_lie`](@ref)), and $(\mathrm{d}τ_p)_e
 action of the differential of translation $τ_p$ evaluated at the identity element $e$
 (see [`translate_diff`](@ref)).
 """
-function _inverse_retract(G::GroupManifold, p, q, method::GroupLogarithmicInverseRetraction)
+function inverse_retract(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    q,
+    method::GroupLogarithmicInverseRetraction,
+)
     conv = direction(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = log_lie(G, pinvq)
     return translate_diff(G, p, Identity(G), Xₑ, conv)
 end
 
-function _inverse_retract!(
-    G::AbstractGroupManifold,
+function inverse_retract!(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
     X,
     p,
     q,

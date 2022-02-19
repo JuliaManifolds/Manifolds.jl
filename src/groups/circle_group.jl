@@ -8,6 +8,14 @@ const CircleGroup = GroupManifold{ℂ,Circle{ℂ},MultiplicationOperation}
 
 CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 
+@inline function active_traits(f, M::CircleGroup, args...)
+    return merge_traits(
+        IsDefaultMetric(EuclideanMetric()),
+        IsGroupManifold(M.op),
+        active_traits(f, M.manifold, args...),
+    )
+end
+
 Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
 invariant_metric_dispatch(::CircleGroup, ::ActionDirection) = Val(true)
@@ -100,6 +108,14 @@ the group operation of addition ([`AdditionOperation`](@ref)).
 const RealCircleGroup = GroupManifold{ℝ,Circle{ℝ},AdditionOperation}
 
 RealCircleGroup() = GroupManifold(Circle{ℝ}(), AdditionOperation())
+
+@inline function active_traits(f, M::RealCircleGroup, args...)
+    return merge_traits(
+        IsDefaultMetric(EuclideanMetric()),
+        IsGroupManifold(M.op),
+        active_traits(f, M.manifold, args...),
+    )
+end
 
 Base.show(io::IO, ::RealCircleGroup) = print(io, "RealCircleGroup()")
 
