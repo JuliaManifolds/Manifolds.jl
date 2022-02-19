@@ -189,7 +189,7 @@ Currently, the numerical integration is only accurate when using a single
 coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
-function exp(::IsConnectionManifold, M::AbstractDecoratorManifold, q, p, X)
+function exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q, p, X)
     return retract(
         M,
         p,
@@ -198,7 +198,7 @@ function exp(::IsConnectionManifold, M::AbstractDecoratorManifold, q, p, X)
     )
 end
 
-function exp!(::IsConnectionManifold, M::AbstractDecoratorManifold, q, p, X)
+function exp!(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(
         M,
         q,
