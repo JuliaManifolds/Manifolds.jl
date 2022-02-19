@@ -232,7 +232,7 @@ end
 
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
-        @test_throws MethodError exp(M, p, X)
+        @test_throws ErrorException exp(M, p, X)
         using OrdinaryDiffEq
         exp(M, p, X)
     end
