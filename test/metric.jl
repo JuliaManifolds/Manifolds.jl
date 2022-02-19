@@ -425,7 +425,7 @@ end
         @test is_default_metric(MM2)
 
         @test convert(typeof(MM2), M) == MM2
-        @test_throws Method convert(typeof(MM), M)
+        @test_throws MethodError convert(typeof(MM), M)
         p = [0.1, 0.2, 0.4]
         X = [0.5, 0.7, 0.11]
         Y = [0.13, 0.17, 0.19]
@@ -463,7 +463,7 @@ end
         @test_throws MethodError vector_transport_to!(MM, Y, p, X, q) ===
                                  vector_transport_to!(M, Y, p, X, q)
         # without DiffEq, these error
-        @test_throws MethodError exp(MM, x, X, 1:3)
+        @test_throws MethodError exp(MM, p, X, 1:3)
         @test_throws MethodError exp!(MM, q, p, X)
         # these always fall back anyways.
         @test zero_vector!(MM, X, p) === zero_vector!(M, X, p)

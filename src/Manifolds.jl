@@ -90,6 +90,7 @@ import ManifoldsBase:
     parallel_transport_direction!,
     parallel_transport_to,
     parallel_transport_to!,
+    parent_trait,
     power_dimensions,
     project,
     project!,
