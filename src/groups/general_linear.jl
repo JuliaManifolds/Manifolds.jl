@@ -18,7 +18,9 @@ vectors ``X_e = p^{-1}X_p``.
 """
 struct GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
 
-active_traits(f, ::GeneralLinear, args...) = merge_traits(IsEmbeddedManifold())
+function active_traits(f, ::GeneralLinear, args...)
+    return merge_traits(IsDefaultMetric(EuclideanMetric()), IsEmbeddedManifold())
+end
 
 GeneralLinear(n, 𝔽::AbstractNumbers=ℝ) = GeneralLinear{n,𝔽}()
 
@@ -53,10 +55,7 @@ function check_vector(G::GeneralLinear, p, X; kwargs...)
     return nothing
 end
 
-decorated_manifold(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
-
-default_metric_dispatch(::GeneralLinear, ::EuclideanMetric) = Val(true)
-default_metric_dispatch(::GeneralLinear, ::LeftInvariantMetric{EuclideanMetric}) = Val(true)
+riemannian_manifold(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
 
 distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
 

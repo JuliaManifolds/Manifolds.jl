@@ -704,6 +704,8 @@ export AbstractGroupAction,
     SpecialOrthogonal,
     TranslationGroup,
     TranslationAction
+export AbstractInvarianceTrait
+export IsGroupManifold, IsLeftInvariantMetric, IsRightInvariantMetric, IsBiinvariantMetric
 export adjoint_action,
     adjoint_action!,
     affine_matrix,

@@ -64,8 +64,7 @@ end
 
 decorated_manifold(::SpecialLinear{n,𝔽}) where {n,𝔽} = GeneralLinear(n, 𝔽)
 
-default_metric_dispatch(::SpecialLinear, ::EuclideanMetric) = Val(true)
-default_metric_dispatch(::SpecialLinear, ::LeftInvariantMetric{EuclideanMetric}) = Val(true)
+# default_metric_dispatch(::SpecialLinear, ::LeftInvariantMetric{EuclideanMetric}) = Val(true)
 
 inverse_translate_diff(::SpecialLinear, p, q, X, ::LeftAction) = X
 inverse_translate_diff(::SpecialLinear, p, q, X, ::RightAction) = p * X / p

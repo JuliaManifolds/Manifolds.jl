@@ -17,11 +17,19 @@ If `M` is already a metric manifold, the inner manifold with the new `metric` is
 abstract type AbstractMetric end
 
 """
+    IsMetricManifold <: AbstractTrait
 
+Specify that a certain decorated Manifold is a metric manifold in the sence that it provides
+explicit metric properties, extending/changing the default metric properties of a manifold.
 """
 struct IsMetricManifold <: AbstractTrait end
 
 """
+    IsDefaultMetric{G<:AbstractMetric}
+
+Specify that a certain [`AbstractMetric`](@ref) is the default metric for a manifold.
+This way the corresponding [`MetricManifold`](@ref) falls back to the default methods
+of the manifold it decorates.
 
 """
 struct IsDefaultMetric{G<:AbstractMetric} <: AbstractTrait

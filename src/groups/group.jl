@@ -61,6 +61,47 @@ struct IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
     op::O
 end
 
+"""
+    AbstractInvarianceTrait <: AbstractTrait
+
+A common supertype for anz [`AbstractTrait`](@ref) related to metric invariance
+"""
+abstract type AbstractInvarianceTrait <: AbstractTrait end
+
+"""
+    IsLeftInvariantMetric{G<:AbstractMetric}
+
+Specify that a certain [`AbstractMetric`](@ref) is a left-invariant metric for a manifold.
+This way the corresponding [`GroupManifold`](@ref) inherits some simplifications
+"""
+struct IsLeftInvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
+    metric::G
+end
+parent_trait(::IsLeftInvariantMetric) = IsGroupManifold()
+
+"""
+    IsRightInvariantMetric{G<:AbstractMetric}
+
+Specify that a certain [`AbstractMetric`](@ref) is a right-invariant metric for a manifold.
+This way the corresponding [`GroupManifold`](@ref) inherits some simplifications
+"""
+struct IsRightInvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
+    metric::G
+end
+parent_trait(::IsRightInvariantMetric) = IsGroupManifold()
+
+"""
+    IsBiinvariantMetric{G<:AbstractMetric}
+
+Specify that a certain [`AbstractMetric`](@ref) is a bi-invariant metric for a manifold.
+This way the corresponding [`GroupManifold`](@ref) inherits some simplifications, especially
+both from [`LeftInvariantMetric`](@ref) and [`IsRightInvariantMetric`](@ref).
+"""
+struct IsBiinvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
+    metric::G
+end
+parent_trait(::IsBiinvariantMetric) = IsGroupManifold()
+
 @inline function active_traits(f, M::GroupManifold, args...)
     return merge_traits(IsGroupManifold(M.op), active_traits(f, M.manifold, args...))
 end
@@ -79,23 +120,9 @@ function base_group(::AbstractManifold)
 end
 base_group(G::AbstractGroupManifold) = G
 
-"""
-    base_manifold(M::AbstractGroupManifold, d::Val{N} = Val(-1))
+decorated_manifold(M::AbstractGroupManifold, ::Val{N}=Val(-1)) where {N} = M
 
-Return the base manifold of `M` that is enhanced with its group.
-While functions like `inner` might be overwritten to use the (decorated) manifold
-representing the group, the `base_manifold` is the manifold itself.
-Hence for this abstract case, just `M` is returned.
-"""
-base_manifold(M::AbstractGroupManifold, ::Val{N}=Val(-1)) where {N} = M
-
-"""
-    base_manifold(M::GroupManifold, d::Val{N} = Val(-1))
-
-Return the base manifold of `M` that is enhanced with its group.
-Here, the internally stored enhanced manifold `M.manifold` is returned.
-"""
-base_manifold(G::GroupManifold, ::Val{N}=Val(-1)) where {N} = G.manifold
+decorated_manifold(G::GroupManifold) = G.manifold
 
 (op::AbstractGroupOperation)(M::AbstractManifold) = GroupManifold(M, op)
 function (::Type{T})(M::AbstractManifold) where {T<:AbstractGroupOperation}

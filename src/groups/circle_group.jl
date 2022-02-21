@@ -20,8 +20,6 @@ Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
 invariant_metric_dispatch(::CircleGroup, ::ActionDirection) = Val(true)
 
-default_metric_dispatch(::MetricManifold{ℂ,CircleGroup,EuclideanMetric}) = Val(true)
-
 adjoint_action(::CircleGroup, p, X) = X
 
 adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)
@@ -121,7 +119,7 @@ Base.show(io::IO, ::RealCircleGroup) = print(io, "RealCircleGroup()")
 
 invariant_metric_dispatch(::RealCircleGroup, ::ActionDirection) = Val(true)
 
-default_metric_dispatch(::MetricManifold{ℝ,RealCircleGroup,EuclideanMetric}) = Val(true)
+is_default_metric(::RealCircleGroup, ::EuclideanMetric) = true
 
 _compose(::RealCircleGroup, p, q) = sym_rem(p + q)
 function _compose(G::RealCircleGroup, p::AbstractVector, q::AbstractVector)
