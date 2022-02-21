@@ -21,8 +21,6 @@ abstract type AbstractMetric end
 """
 struct IsMetricManifold <: AbstractTrait end
 
-parent_trait(::IsMetricManifold) = IsConnectionManifold()
-
 """
 
 """
