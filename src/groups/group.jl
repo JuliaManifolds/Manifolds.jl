@@ -74,7 +74,6 @@ abstract type AbstractInvarianceTrait <: AbstractTrait end
 Specify that a certain the metric of a [`GroupManifold`](@ref) is a left-invariant metric
 """
 struct HasLeftInvariantMetric <: AbstractInvarianceTrait end
-parent_trait(::HasLeftInvariantMetric) = IsGroupManifold()
 
 """
     HasRightInvariantMetric <: AbstractInvarianceTrait
@@ -82,15 +81,14 @@ parent_trait(::HasLeftInvariantMetric) = IsGroupManifold()
 Specify that a certain the metric of a [`GroupManifold`](@ref) is a right-invariant metric
 """
 struct HasRightInvariantMetric <: AbstractInvarianceTrait end
-parent_trait(::HasRightInvariantMetric) = IsGroupManifold()
 
 """
     HasBiinvariantMetric <: AbstractInvarianceTrait
 
 Specify that a certain the metric of a [`GroupManifold`](@ref) is a bi-invariant metric
 """
-struct HasBiinvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait end
-function parent_trait(M::HasBiinvariantMetric)
+struct HasBiinvariantMetric <: AbstractInvarianceTrait end
+function parent_trait(::HasBiinvariantMetric)
     return ManifoldsBase.TraitList(HasLeftInvariantMetric(), HasRightInvariantMetric())
 end
 

@@ -6,6 +6,13 @@ import Manifolds: invariant_metric_dispatch, default_metric_dispatch, local_metr
 
 struct TestInvariantMetricBase <: AbstractMetric end
 
+function active_traits(
+    f,
+    ::MetricManifold{𝔽,<:AbstractManifold,TestInvariantMetricBase},
+    args...,
+) where {𝔽}
+    return HasBiinvariantMetric()
+end
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,TestInvariantMetricBase},
     ::Identity,
