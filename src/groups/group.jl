@@ -69,38 +69,38 @@ A common supertype for anz [`AbstractTrait`](@ref) related to metric invariance
 abstract type AbstractInvarianceTrait <: AbstractTrait end
 
 """
-    IsLeftInvariantMetric{G<:AbstractMetric}
+    HasLeftInvariantMetric{G<:AbstractMetric}
 
 Specify that a certain [`AbstractMetric`](@ref) is a left-invariant metric for a manifold.
 This way the corresponding [`GroupManifold`](@ref) inherits some simplifications
 """
-struct IsLeftInvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
+struct HasLeftInvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
     metric::G
 end
-parent_trait(::IsLeftInvariantMetric) = IsGroupManifold()
+parent_trait(::HasLeftInvariantMetric) = IsGroupManifold()
 
 """
-    IsRightInvariantMetric{G<:AbstractMetric}
+    HasRightInvariantMetric{G<:AbstractMetric}
 
 Specify that a certain [`AbstractMetric`](@ref) is a right-invariant metric for a manifold.
 This way the corresponding [`GroupManifold`](@ref) inherits some simplifications
 """
-struct IsRightInvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
+struct HasRightInvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
     metric::G
 end
-parent_trait(::IsRightInvariantMetric) = IsGroupManifold()
+parent_trait(::HasRightInvariantMetric) = IsGroupManifold()
 
 """
-    IsBiinvariantMetric{G<:AbstractMetric}
+    HasBiinvariantMetric{G<:AbstractMetric}
 
 Specify that a certain [`AbstractMetric`](@ref) is a bi-invariant metric for a manifold.
 This way the corresponding [`GroupManifold`](@ref) inherits some simplifications, especially
-both from [`LeftInvariantMetric`](@ref) and [`IsRightInvariantMetric`](@ref).
+both from [`LeftInvariantMetric`](@ref) and [`HasRightInvariantMetric`](@ref).
 """
-struct IsBiinvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
+struct HasBiinvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
     metric::G
 end
-parent_trait(::IsBiinvariantMetric) = IsGroupManifold()
+parent_trait(::HasBiinvariantMetric) = IsGroupManifold()
 
 @inline function active_traits(f, M::GroupManifold, args...)
     return merge_traits(IsGroupManifold(M.op), active_traits(f, M.manifold, args...))

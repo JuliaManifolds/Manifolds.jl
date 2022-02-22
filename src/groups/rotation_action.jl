@@ -34,18 +34,18 @@ const RotationActionOnVector{N,F,TAD} = RotationAction{
 
 base_group(A::RotationAction) = A.SOn
 
-g_manifold(A::RotationAction) = A.manifold
+group_manifold(A::RotationAction) = A.manifold
 
 function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
     return RotationAction(A.manifold, A.SOn, switch_direction(TAD()))
 end
 
-apply(A::RotationActionOnVector{N,F,LeftAction}, a, p) where {N,F} = a * p
+apply(::RotationActionOnVector{N,F,LeftAction}, a, p) where {N,F} = a * p
 function apply(A::RotationActionOnVector{N,F,RightAction}, a, p) where {N,F}
     return inv(base_group(A), a) * p
 end
 
-apply!(A::RotationActionOnVector{N,F,LeftAction}, q, a, p) where {N,F} = mul!(q, a, p)
+apply!(::RotationActionOnVector{N,F,LeftAction}, q, a, p) where {N,F} = mul!(q, a, p)
 
 function inverse_apply(A::RotationActionOnVector{N,F,LeftAction}, a, p) where {N,F}
     return inv(base_group(A), a) * p
@@ -65,7 +65,7 @@ function apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, p, X) where {
     return inv(base_group(A), a) * X
 end
 
-function apply_diff!(A::RotationActionOnVector{N,F,LeftAction}, Y, a, p, X) where {N,F}
+function apply_diff!(::RotationActionOnVector{N,F,LeftAction}, Y, a, p, X) where {N,F}
     return mul!(Y, a, X)
 end
 function apply_diff!(A::RotationActionOnVector{N,F,RightAction}, Y, a, p, X) where {N,F}
@@ -103,7 +103,7 @@ end
 
 base_group(::RotationAroundAxisAction) = RealCircleGroup()
 
-g_manifold(::RotationAroundAxisAction) = Euclidean(3)
+group_manifold(::RotationAroundAxisAction) = Euclidean(3)
 
 @doc raw"""
     apply(A::RotationAroundAxisAction, θ, p)

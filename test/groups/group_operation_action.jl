@@ -9,7 +9,7 @@ include("group_utils.jl")
 
     types = [Matrix{Float64}]
 
-    @test g_manifold(A_left) === G
+    @test group_manifold(A_left) === G
     @test base_group(A_left) == G
     @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftAction())"
     @test repr(A_right) == "GroupOperationAction($(repr(G)), RightAction())"
@@ -58,7 +58,7 @@ include("group_utils.jl")
         hat(M, p, [0.5, 0.5, 0.5]),
     ]
 
-    @test g_manifold(A_left) === G
+    @test group_manifold(A_left) === G
     @test base_group(A_left) == G
     @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftAction())"
     @test repr(A_right) == "GroupOperationAction($(repr(G)), RightAction())"

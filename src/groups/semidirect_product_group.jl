@@ -45,7 +45,7 @@ function SemidirectProductGroup(
     H::GroupManifold{𝔽},
     A::AbstractGroupAction,
 ) where {𝔽}
-    N === g_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")
+    N === group_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")
     H === base_group(A) || error("Subgroup $(H) must be the base group of action $(A)")
     op = SemidirectProductOperation(A)
     M = ProductManifold(N, H)

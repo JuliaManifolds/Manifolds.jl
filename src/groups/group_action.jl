@@ -13,13 +13,13 @@ The group that acts in action `A`.
 base_group(A::AbstractGroupAction) = error("base_group not implemented for $(typeof(A)).")
 
 """
-    g_manifold(A::AbstractGroupAction)
+    group_manifold(A::AbstractGroupAction)
 
 The manifold the action `A` acts upon.
 """
-g_manifold(A::AbstractGroupAction) = error("g_manifold not implemented for $(typeof(A)).")
+group_manifold(A::AbstractGroupAction) = error("group_manifold not implemented for $(typeof(A)).")
 
-allocate_result(A::AbstractGroupAction, f, p...) = allocate_result(g_manifold(A), f, p...)
+allocate_result(A::AbstractGroupAction, f, p...) = allocate_result(group_manifold(A), f, p...)
 
 """
     direction(::AbstractGroupAction{AD}) -> AD

@@ -315,7 +315,7 @@ struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
         X = [1.0, 2.0]
 
         @test_throws ErrorException base_group(A)
-        @test_throws ErrorException g_manifold(A)
+        @test_throws ErrorException group_manifold(A)
         @test_throws ErrorException apply(A, a, p)
         @test_throws ErrorException apply!(A, p, a, p)
         @test_throws ErrorException inverse_apply(A, a, p)

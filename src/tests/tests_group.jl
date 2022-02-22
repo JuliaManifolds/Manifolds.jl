@@ -513,7 +513,7 @@ function test_action(
     test_switch_direction=true,
 )
     G = base_group(A)
-    M = g_manifold(A)
+    M = group_manifold(A)
     e = Identity(G)
 
     Test.@testset "Basic action properties" begin

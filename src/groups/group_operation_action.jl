@@ -20,7 +20,7 @@ end
 
 base_group(A::GroupOperationAction) = A.group
 
-g_manifold(A::GroupOperationAction) = A.group
+group_manifold(A::GroupOperationAction) = A.group
 
 function switch_direction(A::GroupOperationAction)
     return GroupOperationAction(A.group, switch_direction(direction(A)))
