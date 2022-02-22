@@ -29,7 +29,7 @@ struct TestInvariantMetricManifold <: AbstractManifold{ℝ} end
 struct TestDefaultInvariantMetricManifold <: AbstractManifold{ℝ} end
 
 function ManifoldsBase.active_traits(f, ::TestDefaultInvariantMetricManifold, args...)
-    merge_traits(HasRightInvariantMetric())
+    return merge_traits(HasRightInvariantMetric())
 end
 
 @testset "Invariant metrics" begin

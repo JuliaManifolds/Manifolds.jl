@@ -17,9 +17,13 @@ base_group(A::AbstractGroupAction) = error("base_group not implemented for $(typ
 
 The manifold the action `A` acts upon.
 """
-group_manifold(A::AbstractGroupAction) = error("group_manifold not implemented for $(typeof(A)).")
+function group_manifold(A::AbstractGroupAction)
+    return error("group_manifold not implemented for $(typeof(A)).")
+end
 
-allocate_result(A::AbstractGroupAction, f, p...) = allocate_result(group_manifold(A), f, p...)
+function allocate_result(A::AbstractGroupAction, f, p...)
+    return allocate_result(group_manifold(A), f, p...)
+end
 
 """
     direction(::AbstractGroupAction{AD}) -> AD

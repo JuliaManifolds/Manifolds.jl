@@ -67,15 +67,9 @@ direction(::AbstractGroupManifold)
 
 @trait_function direction(M::AbstractDecoratorManifold)
 
-direction(
-    ::TraitList{HasLeftInvariantMetric},
-    ::AbstractGroupManifold
-) = LeftAction()
+direction(::TraitList{HasLeftInvariantMetric}, ::AbstractGroupManifold) = LeftAction()
 
-direction(
-    ::TraitList{HasRightInvariantMetric},
-    ::AbstractGroupManifold
-) = RightAction()
+direction(::TraitList{HasRightInvariantMetric}, ::AbstractGroupManifold) = RightAction()
 
 function exp!(
     ::TraitList{<:AbstractInvarianceTrait},
@@ -97,12 +91,12 @@ has_biinvariant_metric(::TraitList{EmptyTrait}, ::AbstractGroupManifold) = false
 has_biinvariant_metric(::TraitList{HasBiinvariantMetric}, ::AbstractGroupManifold) = true
 
 function inner(
-        ::TraitList{<:AbstractInvarianceTrait},
-        M::MetricManifold{𝔽,<:AbstractGroupManifold},
-        p,
-        X,
-        Y,
-    ) where {𝔽}
+    ::TraitList{<:AbstractInvarianceTrait},
+    M::MetricManifold{𝔽,<:AbstractGroupManifold},
+    p,
+    X,
+    Y,
+) where {𝔽}
     conv = direction(M)
     N = MetricManifold(M.manifold, imetric.metric)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)

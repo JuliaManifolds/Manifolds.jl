@@ -69,38 +69,30 @@ A common supertype for anz [`AbstractTrait`](@ref) related to metric invariance
 abstract type AbstractInvarianceTrait <: AbstractTrait end
 
 """
-    HasLeftInvariantMetric{G<:AbstractMetric}
+    HasLeftInvariantMetric <: AbstractInvarianceTrait
 
-Specify that a certain [`AbstractMetric`](@ref) is a left-invariant metric for a manifold.
-This way the corresponding [`GroupManifold`](@ref) inherits some simplifications
+Specify that a certain the metric of a [`GroupManifold`](@ref) is a left-invariant metric
 """
-struct HasLeftInvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
-    metric::G
-end
+struct HasLeftInvariantMetric <: AbstractInvarianceTrait end
 parent_trait(::HasLeftInvariantMetric) = IsGroupManifold()
 
 """
-    HasRightInvariantMetric{G<:AbstractMetric}
+    HasRightInvariantMetric <: AbstractInvarianceTrait
 
-Specify that a certain [`AbstractMetric`](@ref) is a right-invariant metric for a manifold.
-This way the corresponding [`GroupManifold`](@ref) inherits some simplifications
+Specify that a certain the metric of a [`GroupManifold`](@ref) is a right-invariant metric
 """
-struct HasRightInvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
-    metric::G
-end
+struct HasRightInvariantMetric <: AbstractInvarianceTrait end
 parent_trait(::HasRightInvariantMetric) = IsGroupManifold()
 
 """
-    HasBiinvariantMetric{G<:AbstractMetric}
+    HasBiinvariantMetric <: AbstractInvarianceTrait
 
-Specify that a certain [`AbstractMetric`](@ref) is a bi-invariant metric for a manifold.
-This way the corresponding [`GroupManifold`](@ref) inherits some simplifications, especially
-both from [`LeftInvariantMetric`](@ref) and [`HasRightInvariantMetric`](@ref).
+Specify that a certain the metric of a [`GroupManifold`](@ref) is a bi-invariant metric
 """
-struct HasBiinvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait
-    metric::G
+struct HasBiinvariantMetric{G<:AbstractMetric} <: AbstractInvarianceTrait end
+function parent_trait(M::HasBiinvariantMetric)
+    return ManifoldsBase.TraitList(HasLeftInvariantMetric(), HasRightInvariantMetric())
 end
-parent_trait(::HasBiinvariantMetric) = IsGroupManifold()
 
 @inline function active_traits(f, M::GroupManifold, args...)
     return merge_traits(IsGroupManifold(M.op), active_traits(f, M.manifold, args...))
