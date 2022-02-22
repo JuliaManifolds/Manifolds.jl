@@ -59,17 +59,17 @@ function has_approx_invariant_metric(
 end
 
 """
-    direction(::AbstractGroupManifold) -> AD
+    direction(::AbstractDecoratorManifold) -> AD
 
 Get the direction of the action a certain [`AbstractGroupManifold`](@ref) with its implicit metric has
 """
-direction(::AbstractGroupManifold)
+direction(::AbstractDecoratorManifold)
 
 @trait_function direction(M::AbstractDecoratorManifold)
 
-direction(::TraitList{HasLeftInvariantMetric}, ::AbstractGroupManifold) = LeftAction()
+direction(::TraitList{HasLeftInvariantMetric}, ::AbstractDecoratorManifold) = LeftAction()
 
-direction(::TraitList{HasRightInvariantMetric}, ::AbstractGroupManifold) = RightAction()
+direction(::TraitList{HasRightInvariantMetric}, ::AbstractDecoratorManifold) = RightAction()
 
 function exp!(
     ::TraitList{<:AbstractInvarianceTrait},
