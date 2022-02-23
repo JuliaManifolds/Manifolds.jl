@@ -1,39 +1,43 @@
 """
-    EmbeddedBackend <: AbstractDiffBackend
+    ExplicitEmbeddedBackend{TF<:NamedTuple} <: AbstractDiffBackend
 
-A type to specify / use differentiation by definiing the functions in the embedding
+A backend to use with the [`RiemannianProjectionBackend`](@ref) or the [`TangentDiffBackend`](@ref),
+when you have explicit formulae for the gradient in the embedding available.
+
 
 # Constructor
-    EmbeddedBackend(; derivative=missing gradient=missing, jacobian=missing)
+    ExplicitEmbeddedBackend(M::AbstractManifold; kwargs)
+
+Construct an [`ExplicitEmbeddedBackend`](@ref) in the embedding `M`,
+where currently the following keywords may be used
+
+* `gradient` for a(n allocating) gradient function `gradient(M, p)` defined in the embedding
+* `gradient!` for a mutating gradient function `gradient!(M, X, p)`.
+
+Note that the gradient functions are defined on the embedding manifold `M` passed to the Backend as well
 """
-struct EmbeddedBackend{D,G,J} <: AbstractDiffBackend
-    gradient::G
-    derivative::D
-    jacobian::J
+struct ExplicitEmbeddedBackend{TM<:AbstractManifold,TF<:NamedTuple} <: AbstractDiffBackend
+    manifold::TM
+    functions::TF
+end
+function ExplicitEmbeddedBackend(M::TM; kwargs...) where {TM<:AbstractManifold}
+    return ExplicitEmbeddedBackend{TM,typeof(values(kwargs))}(M, values(kwargs))
 end
 
-FiniteDiffBackend() = FiniteDiffBackend(Val(:central))
-
-function _derivative(f, p, e::EmbeddedBackend) where {Method}
-    return e.derivative(p)
+function _gradient(f, p, e::ExplicitEmbeddedBackend)
+    g = get(e.functions, :gradient, Missing())
+    g === missing &&
+        throw(MissingException("The provided Embedded backend does not provide a gradient"))
+    return g(e.manifold, p)
 end
 
-function _derivative(f, p, ::EmbeddedBackend{Missing})
-    throw(MissingException("The provided Embedded backend does not provide a derivative"))
-end
-
-function _gradient(f, p, e::EmbeddedBackend) where {Method}
-    return e.gradient(p)
-end
-
-function _gradient(f, p, ::EmbeddedBackend{D,Missing}) where {D}
-    throw(MissingException("The provided Embedded backend does not provide a gradient"))
-end
-
-function _jacobian(f, p, e::EmbeddedBackend)
-    return e.jacobian(p)
-end
-
-function _jacobian(f, p, ::EmbeddedBackend{D,G,Missing}) where {D,G}
-    throw(MissingException("The provided Embedded backend does not provide a jacobian"))
+function _gradient!(f, X, p, e::ExplicitEmbeddedBackend)
+    g! = get(e.functions, :gradient!, Missing())
+    g! === missing && throw(
+        MissingException(
+            "The provided Embedded backend does not provide a mutating gradient",
+        ),
+    )
+    g!(e.manifold, X, p)
+    return X
 end

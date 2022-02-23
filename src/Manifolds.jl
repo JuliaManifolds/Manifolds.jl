@@ -713,6 +713,7 @@ export get_basis,
 # differentiation
 export AbstractDiffBackend,
     AbstractRiemannianDiffBackend,
+    ExplicitEmbeddedBackend,
     FiniteDifferencesBackend,
     TangentDiffBackend,
     RiemannianProjectionBackend
