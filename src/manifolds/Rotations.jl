@@ -376,7 +376,7 @@ g_p(X, Y) = \operatorname{tr}(X^\mathrm{T} Y),
 
 Tangent vectors are represented by matrices.
 """
-inner(M::Rotations, p, X, Y) = dot(X, Y)
+inner(::Rotations, p, X, Y) = dot(X, Y)
 
 @doc raw"""
     inverse_retract(M, p, q, ::PolarInverseRetraction)
