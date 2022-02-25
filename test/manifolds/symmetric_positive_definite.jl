@@ -154,4 +154,14 @@ using Manifolds: default_metric_dispatch
         Y = project(M1, p, X)
         @test is_vector(M1, p, Y)
     end
+    @testset "Tangent ONB" begin
+        q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+        B = get_basis(M1, q, DefaultOrthonormalBasis())
+        for i in 1:length(B.data)
+            @test norm(M1, q, B.data[i]) ≈ 1
+            for j in (i + 1):length(B.data)
+                @test inner(M1, q, B.data[i], B.data[j]) ≈ 0
+            end
+        end
+    end
 end

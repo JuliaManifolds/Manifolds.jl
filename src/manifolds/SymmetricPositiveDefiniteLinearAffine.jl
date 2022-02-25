@@ -124,17 +124,47 @@ function get_basis(
     p,
     B::DiagonalizingOrthonormalBasis,
 ) where {N}
-    pSqrt = sqrt(p)
-    eigv = eigen(B.frame_direction)
+    e = eigen(Symmetric(p))
+    U = e.vectors
+    S = max.(e.values, floatmin(eltype(e.values)))
+    Ssqrt = Diagonal(sqrt.(S))
+    pSqrt = Symmetric(U * Ssqrt * transpose(U))
+    SsqrtInv = Diagonal(1 ./ sqrt.(S))
+    pSqrtInv = Symmetric(U * SsqrtInv * transpose(U))
+    eigv = eigen(Symmetric(pSqrtInv * B.frame_direction * pSqrtInv))
     V = eigv.vectors
     Ξ = [
         (i == j ? 1 / 2 : 1 / sqrt(2)) *
-        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) for i in 1:N for
-        j in i:N
+        pSqrt *
+        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
+        pSqrt for i in 1:N for j in i:N
     ]
     λ = eigv.values
     κ = [-1 / 4 * (λ[i] - λ[j])^2 for i in 1:N for j in i:N]
     return CachedBasis(B, κ, Ξ)
+end
+
+function get_basis(
+    ::SymmetricPositiveDefinite{N},
+    p,
+    B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType},
+) where {N}
+    e = eigen(Symmetric(p))
+    U = e.vectors
+    S = max.(e.values, floatmin(eltype(e.values)))
+    SInv = Diagonal(1 ./ S)
+    Ssqrt = Diagonal(sqrt.(S))
+    pSqrt = Symmetric(U * Ssqrt * transpose(U))
+    pInv = Symmetric(U * SInv * transpose(U))
+    eigv = eigen(pInv)
+    V = eigv.vectors
+    Ξ = [
+        (i == j ? 1 / 2 : 1 / sqrt(2)) *
+        pSqrt *
+        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
+        pSqrt for i in 1:N for j in i:N
+    ]
+    return CachedBasis(B, Ξ)
 end
 
 function get_coordinates!(
