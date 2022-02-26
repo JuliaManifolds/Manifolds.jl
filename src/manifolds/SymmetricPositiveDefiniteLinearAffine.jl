@@ -151,25 +151,31 @@ end
     [Ξ,κ] = get_basis(M::SymmetricPositiveDefinite, p, B::DefaultOrthonormalBasis)
     [Ξ,κ] = get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, p, B::DefaultOrthonormalBasis)
 
-Return a default ONB for the tangent space ``T_p\mathcal P(n)`` of the [`SymmetricPositiveDefinite`](@ref) with respect to the [`LinearAffineMetric`]
+Return a default ONB for the tangent space ``T_p\mathcal P(n)`` of the [`SymmetricPositiveDefinite`](@ref) with respect to the [`LinearAffineMetric`](@ref).
 
-    ```math
-        g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
-    ```
+```math
+    g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
+```
 
-    The basis constructed here is based on the ONB for symmetric matrices constructed as follows.
-    Let ``\Delta_{i,j} = (a_{kl}=_{k,l=1}^n`` with ``a_{kl} =
-    \begin{cases}
-      1 & \mbox{ for } k=l \text{ if } i=j\\
-      \frac{1}{\sqrt{2}}} & \mbox{ for } k=i, l=j \text{ or } k=j, l=i\\
-      0 & \text{ else.}
-    \end{cases}$
-    which forms an ONB for the space of symmetric matrices.
+The basis constructed here is based on the ONB for symmetric matrices constructed as follows.
+Let
 
-    We then form the ONB by
-    ```math
-    \Xi_{i,j} = p^{\frac{1}{2}}\Delta_{i,j}p^{\frac{1}{2}},\qquad i=1,\ldots,n, j=i,\ldots,n
-    ```
+```math
+\Delta_{i,j} = (a_{k,l})_{k,l=1}^n \quad \text{ with }
+a_{k,l} =
+\begin{cases}
+  1 & \mbox{ for } k=l \text{ if } i=j\\
+  \frac{1}{\sqrt{2}} & \mbox{ for } k=i, l=j \text{ or } k=j, l=i\\
+  0 & \text{ else.}
+\end{cases}
+```
+
+which forms an ONB for the space of symmetric matrices.
+
+We then form the ONB by
+```math
+   \Xi_{i,j} = p^{\frac{1}{2}}\Delta_{i,j}p^{\frac{1}{2}},\qquad i=1,\ldots,n, j=i,\ldots,n.
+```
 """
 function get_basis(
     ::SymmetricPositiveDefinite{N},
@@ -194,7 +200,7 @@ end
 @doc raw"""
     get_coordinates(::SymmetricPositiveDefinite, p, X, ::DefaultOrthonormalBasis)
 
-Using the basis from [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
+Using the basis from [`get_basis`](@ref get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
 the coordinates with respect to this ONB can be simplified to
 
 ```math
@@ -235,7 +241,7 @@ end
 @doc raw"""
     get_vector(::SymmetricPositiveDefinite, p, c, ::DefaultOrthonormalBasis)
 
-Using the basis from [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
+Using the basis from [`get_basis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
 the vector reconstruction with respect to this ONB can be simplified to
 
 ```math
