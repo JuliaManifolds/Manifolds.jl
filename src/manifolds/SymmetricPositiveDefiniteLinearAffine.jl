@@ -117,7 +117,10 @@ Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
 [`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
 [`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
-with eigenvalues `κ` and where the direction `B.frame_direction` has curvature `0`.
+with eigenvalues `κ` and where the direction `B.frame_direction` ``V`` has curvature `0`.
+
+The construction is based on an ONB for the symmetric matrices similar to [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
+just that the ONB here is build from the eigen vectors of ``p^{\frac{1}{2}}Vp^{\frac{1}{2}}``.
 """
 function get_basis(
     ::SymmetricPositiveDefinite{N},
@@ -144,6 +147,30 @@ function get_basis(
     return CachedBasis(B, κ, Ξ)
 end
 
+@doc raw"""
+    [Ξ,κ] = get_basis(M::SymmetricPositiveDefinite, p, B::DefaultOrthonormalBasis)
+    [Ξ,κ] = get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, p, B::DefaultOrthonormalBasis)
+
+Return a default ONB for the tangent space ``T_p\mathcal P(n)`` of the [`SymmetricPositiveDefinite`](@ref) with respect to the [`LinearAffineMetric`]
+
+    ```math
+        g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
+    ```
+
+    The basis constructed here is based on the ONB for symmetric matrices constructed as follows.
+    Let ``\Delta_{i,j} = (a_{kl}=_{k,l=1}^n`` with ``a_{kl} =
+    \begin{cases}
+      1 & \mbox{ for } k=l \text{ if } i=j\\
+      \frac{1}{\sqrt{2}}} & \mbox{ for } k=i, l=j \text{ or } k=j, l=i\\
+      0 & \text{ else.}
+    \end{cases}$
+    which forms an ONB for the space of symmetric matrices.
+
+    We then form the ONB by
+    ```math
+    \Xi_{i,j} = p^{\frac{1}{2}}\Delta_{i,j}p^{\frac{1}{2}},\qquad i=1,\ldots,n, j=i,\ldots,n
+    ```
+"""
 function get_basis(
     ::SymmetricPositiveDefinite{N},
     p,
@@ -152,12 +179,9 @@ function get_basis(
     e = eigen(Symmetric(p))
     U = e.vectors
     S = max.(e.values, floatmin(eltype(e.values)))
-    SInv = Diagonal(1 ./ S)
     Ssqrt = Diagonal(sqrt.(S))
     pSqrt = Symmetric(U * Ssqrt * transpose(U))
-    pInv = Symmetric(U * SInv * transpose(U))
-    eigv = eigen(pInv)
-    V = eigv.vectors
+    V = Matrix{Float64}(I, N, N)
     Ξ = [
         (i == j ? 1 / 2 : 1 / sqrt(2)) *
         pSqrt *
@@ -167,44 +191,85 @@ function get_basis(
     return CachedBasis(B, Ξ)
 end
 
+@doc raw"""
+    get_coordinates(::SymmetricPositiveDefinite, p, X, ::DefaultOrthonormalBasis)
+
+Using the basis from [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
+the coordinates with respect to this ONB can be simplified to
+
+```math
+   c_k = \mathrm{tr}(p^{-\frac{1}{2}}\Delta_{i,j} X)
+```
+where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+"""
+get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
+
 function get_coordinates!(
     M::SymmetricPositiveDefinite{N},
-    Y,
+    c,
     p,
     X,
     ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
-    @assert size(Y) == (dim,)
+    @assert size(c) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
+    e = eigen(Symmetric(p))
+    U = e.vectors
+    S = max.(e.values, floatmin(eltype(e.values)))
+    SInvsqrt = Diagonal(1 ./ sqrt.(S))
+    pInvSqrt = Symmetric(U * SInvsqrt * transpose(U))
+    V = Matrix{Float64}(I, N, N)
     k = 1
     for i in 1:N, j in i:N
-        scale = ifelse(i == j, 1, sqrt(2))
-        @inbounds Y[k] = X[i, j] * scale
+        s = i == j ? 1 / 2 : 1 / sqrt(2)
+        @inbounds c[k] =
+            s *
+            tr(pInvSqrt * (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) * X)
         k += 1
     end
-    return Y
+    return c
 end
+
+@doc raw"""
+    get_vector(::SymmetricPositiveDefinite, p, c, ::DefaultOrthonormalBasis)
+
+Using the basis from [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
+the vector reconstruction with respect to this ONB can be simplified to
+
+```math
+   X = p^{\frac{1}{2}} \Biggl( \sum_{i=1,j=i}^n c_k \Delta_{i,j} \Biggr) p^{\frac{1}{2}}
+```
+where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+"""
+get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 
 function get_vector!(
     M::SymmetricPositiveDefinite{N},
-    Y,
-    p,
     X,
+    p,
+    c,
     ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
-    @assert size(X) == (div(N * (N + 1), 2),)
-    @assert size(Y) == (N, N)
+    @assert size(c) == (div(N * (N + 1), 2),)
+    @assert size(X) == (N, N)
+    e = eigen(Symmetric(p))
+    U = e.vectors
+    S = max.(e.values, floatmin(eltype(e.values)))
+    Ssqrt = Diagonal(sqrt.(S))
+    pSqrt = Symmetric(U * Ssqrt * transpose(U))
+    V = Matrix{Float64}(I, N, N)
+    X .= 0
     k = 1
     for i in 1:N, j in i:N
-        scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds Y[i, j] = X[k] * scale
-        @inbounds Y[j, i] = X[k] * scale
+        s = i == j ? 1 / 2 : 1 / sqrt(2)
+        X .+= (s * c[k]) .* (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i]))
         k += 1
     end
-    return Y
+    X .= pSqrt * X * pSqrt
+    return X
 end
 
 @doc raw"""
