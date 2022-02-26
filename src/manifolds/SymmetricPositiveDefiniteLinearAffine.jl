@@ -258,7 +258,6 @@ function get_vector!(
     c,
     ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {N}
-    dim = manifold_dimension(M)
     @assert size(c) == (div(N * (N + 1), 2),)
     @assert size(X) == (N, N)
     e = eigen(Symmetric(p))
@@ -271,10 +270,11 @@ function get_vector!(
     k = 1
     for i in 1:N, j in i:N
         s = i == j ? 1 / 2 : 1 / sqrt(2)
-        X .+= (s * c[k]) .* (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i]))
+        X .+=
+            pSqrt * (s * c[k]) .*
+            (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) * pSqrt
         k += 1
     end
-    X .= pSqrt * X * pSqrt
     return X
 end
 
