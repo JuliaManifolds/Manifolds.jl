@@ -271,8 +271,9 @@ function get_vector!(
     for i in 1:N, j in i:N
         s = i == j ? 1 / 2 : 1 / sqrt(2)
         X .+=
-            pSqrt * (s * c[k]) .*
-            (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) * pSqrt
+            (s * c[k]) .* pSqrt *
+            (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
+            pSqrt
         k += 1
     end
     return X
