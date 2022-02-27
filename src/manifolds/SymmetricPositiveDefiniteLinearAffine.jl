@@ -224,17 +224,35 @@ function get_coordinates!(
     e = eigen(Symmetric(p))
     U = e.vectors
     S = max.(e.values, floatmin(eltype(e.values)))
-    SInvsqrt = Diagonal(1 ./ sqrt.(S))
-    pInvSqrt = Symmetric(U * SInvsqrt * transpose(U))
+    sSqrt = Diagonal(sqrt.(S))
+    pSqrt = Symmetric(U * sSqrt * transpose(U))
     V = Matrix{Float64}(I, N, N)
     k = 1
     for i in 1:N, j in i:N
         s = i == j ? 1 / 2 : 1 / sqrt(2)
-        @inbounds c[k] =
+        @inbounds c[k] = inner(
+            M,
+            p,
+            X,
             s *
-            tr(pInvSqrt * (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) * X)
+            pSqrt *
+            (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
+            pSqrt,
+        )
         k += 1
     end
+    c .= [
+        inner(
+            M,
+            p,
+            X,
+            (i == j ? 1 / 2 : 1 / sqrt(2)) *
+            pSqrt *
+            (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
+            pSqrt,
+        ) for i in 1:N for j in i:N
+    ]
+
     return c
 end
 
@@ -252,7 +270,7 @@ where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 
 function get_vector!(
-    M::SymmetricPositiveDefinite{N},
+    ::SymmetricPositiveDefinite{N},
     X,
     p,
     c,
