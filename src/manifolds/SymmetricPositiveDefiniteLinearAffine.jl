@@ -226,32 +226,22 @@ function get_coordinates!(
     S = max.(e.values, floatmin(eltype(e.values)))
     sSqrt = Diagonal(sqrt.(S))
     pSqrt = Symmetric(U * sSqrt * transpose(U))
-    V = Matrix{Float64}(I, N, N)
     k = 1
+    V = similar(p)
+    fill!(V, zero(eltype(V)))
+
+    F = cholesky(Symmetric(p))
+
     for i in 1:N, j in i:N
         s = i == j ? 1 / 2 : 1 / sqrt(2)
-        @inbounds c[k] = inner(
-            M,
-            p,
-            X,
-            s *
-            pSqrt *
-            (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
-            pSqrt,
-        )
+        @inbounds V[i, j] += 1
+        @inbounds V[j, i] += 1
+        Yij = pSqrt * V * pSqrt
+        @inbounds c[k] = s * dot(F \ Symmetric(X), (Symmetric(Yij) / F))
         k += 1
+        @inbounds V[i, j] = 0
+        @inbounds V[j, i] = 0
     end
-    c .= [
-        inner(
-            M,
-            p,
-            X,
-            (i == j ? 1 / 2 : 1 / sqrt(2)) *
-            pSqrt *
-            (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
-            pSqrt,
-        ) for i in 1:N for j in i:N
-    ]
 
     return c
 end
@@ -283,16 +273,20 @@ function get_vector!(
     S = max.(e.values, floatmin(eltype(e.values)))
     Ssqrt = Diagonal(sqrt.(S))
     pSqrt = Symmetric(U * Ssqrt * transpose(U))
-    V = Matrix{Float64}(I, N, N)
+    #V = Matrix{Float64}(I, N, N)
     X .= 0
     k = 1
+    V = similar(p)
+    fill!(V, zero(eltype(V)))
     for i in 1:N, j in i:N
         s = i == j ? 1 / 2 : 1 / sqrt(2)
-        X .+=
-            (s * c[k]) .* pSqrt *
-            (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
-            pSqrt
+        @inbounds V[i, j] += 1
+        @inbounds V[j, i] += 1
+        Vij = pSqrt * V * pSqrt
+        @. X += (s * c[k]) * Vij
         k += 1
+        @inbounds V[i, j] = 0
+        @inbounds V[j, i] = 0
     end
     return X
 end
@@ -311,7 +305,7 @@ g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
 """
 function inner(::SymmetricPositiveDefinite, p, X, Y)
     F = cholesky(Symmetric(p))
-    return tr((F \ Symmetric(X)) * (F \ Symmetric(Y)))
+    return dot((F \ Symmetric(X)), (Symmetric(Y) / F))
 end
 
 @doc raw"""
