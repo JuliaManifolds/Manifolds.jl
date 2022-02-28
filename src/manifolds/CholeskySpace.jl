@@ -174,7 +174,7 @@ Return the manifold dimension for the [`CholeskySpace`](@ref) `M`, i.e.
 @generated manifold_dimension(::CholeskySpace{N}) where {N} = div(N * (N + 1), 2)
 
 @doc raw"""
-    reporesentation_size(M::CholeskySpace)
+    representation_size(M::CholeskySpace)
 
 Return the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(N,N)`.
 """
