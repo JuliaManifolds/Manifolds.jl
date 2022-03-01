@@ -259,7 +259,7 @@ the vector reconstruction with respect to this ONB can be simplified to
 ```math
    X = p^{\frac{1}{2}} \Biggl( \sum_{i=1,j=i}^n c_k \Delta_{i,j} \Biggr) p^{\frac{1}{2}}
 ```
-where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+where $k$ is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 """
 get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 
@@ -277,7 +277,6 @@ function get_vector!(
     S = max.(e.values, floatmin(eltype(e.values)))
     Ssqrt = Diagonal(sqrt.(S))
     pSqrt = Symmetric(U * Ssqrt * transpose(U))
-    #V = Matrix{Float64}(I, N, N)
     X .= 0
     k = 1
     V = similar(p)
