@@ -178,7 +178,7 @@ We then form the ONB by
 ```
 """
 function get_basis(
-    ::SymmetricPositiveDefinite{N},
+    M::SymmetricPositiveDefinite{N},
     p,
     B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType},
 ) where {N}
@@ -187,13 +187,17 @@ function get_basis(
     S = max.(e.values, floatmin(eltype(e.values)))
     Ssqrt = Diagonal(sqrt.(S))
     pSqrt = Symmetric(U * Ssqrt * transpose(U))
-    V = Matrix{Float64}(I, N, N)
-    Ξ = [
-        (i == j ? 1 / 2 : 1 / sqrt(2)) *
-        pSqrt *
-        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
-        pSqrt for i in 1:N for j in i:N
-    ]
+
+    Ξ = [similar(p) for i in 1:manifold_dimension(M)]
+    k = 1
+    for i in 1:N, j in i:N
+        fill!(Ξ[k], zero(eltype(Ξ[k])))
+        s = i == j ? 1 / 2 : 1 / sqrt(2)
+        @inbounds Ξ[k][i, j] += 1
+        @inbounds Ξ[k][j, i] += 1
+        @inbounds Ξ[k] .= s * pSqrt * Ξ[k] * pSqrt
+        k += 1
+    end
     return CachedBasis(B, Ξ)
 end
 
