@@ -135,7 +135,7 @@ function ProductVectorTransport(methods::AbstractVectorTransportMethod...)
     return ProductVectorTransport{typeof(methods)}(methods)
 end
 
-function allocate_coordinates(M::ProductManifold, p::ArrayPartition, T, n::Int)
+function allocate_coordinates(M::AbstractManifold, p::ArrayPartition, T, n::Int)
     return allocate_coordinates(M, p.x[1], T, n)
 end
 
