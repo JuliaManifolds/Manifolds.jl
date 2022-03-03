@@ -91,16 +91,16 @@ has_biinvariant_metric(::TraitList{EmptyTrait}, ::AbstractGroupManifold) = false
 has_biinvariant_metric(::TraitList{HasBiinvariantMetric}, ::AbstractGroupManifold) = true
 
 function inner(
-    ::TraitList{<:AbstractInvarianceTrait},
+    t::TraitList{<:AbstractInvarianceTrait},
     M::AbstractDecoratorManifold,
     p,
     X,
     Y,
 ) where {𝔽}
     conv = direction(M)
-    Xₑ = inverse_translate_diff(base_group(M), p, p, X, conv)
-    Yₑ = inverse_translate_diff(base_group(M), p, p, Y, conv)
-    return inner(base_manifold(M), Identity(M), Xₑ, Yₑ)
+    Xₑ = inverse_translate_diff(M.manifold, p, p, X, conv)
+    Yₑ = inverse_translate_diff(M.manifold, p, p, Y, conv)
+    return inner(next_trait(t), M, Identity(M), Xₑ, Yₑ)
 end
 
 function log!(
@@ -111,13 +111,7 @@ function log!(
     q,
 ) where {𝔽}
     conv = direction(M)
-    return inverse_retract!(
-        base_group(M),
-        X,
-        p,
-        q,
-        GroupLogarithmicInverseRetraction(conv),
-    )
+    return inverse_retract!(base_group(M), X, p, q, GroupLogarithmicInverseRetraction(conv))
 end
 
 function LinearAlgebra.norm(

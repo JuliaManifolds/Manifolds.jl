@@ -705,6 +705,7 @@ export AbstractGroupAction,
     TranslationGroup,
     TranslationAction
 export AbstractInvarianceTrait
+export IsMetricManifold
 export IsGroupManifold,
     HasLeftInvariantMetric, HasRightInvariantMetric, HasBiinvariantMetric
 export adjoint_action,
