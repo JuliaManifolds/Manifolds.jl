@@ -5,6 +5,7 @@ import ManifoldsBase:
     _read,
     _write,
     allocate,
+    allocate_coordinates,
     allocate_result,
     allocate_result_type,
     allocation_promotion_function,
