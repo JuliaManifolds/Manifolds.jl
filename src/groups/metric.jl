@@ -103,6 +103,28 @@ function inner(
     return inner(next_trait(t), M, Identity(M), Xₑ, Yₑ)
 end
 
+function inverse_translate_diff(
+    ::TraitList{IsMetricManifold},
+    M::MetricManifold,
+    p,
+    q,
+    X,
+    conv::ActionDirection,
+)
+    return inverse_translate_diff(M.manifold, p, q, X, conv)
+end
+function inverse_translate_diff!(
+    ::TraitList{IsMetricManifold},
+    M::MetricManifold,
+    Y,
+    p,
+    q,
+    X,
+    conv::ActionDirection,
+)
+    return inverse_translate_diff!(M.manifold, Y, p, q, X, conv)
+end
+
 function log!(
     ::TraitList{<:HasBiinvariantMetric},
     M::AbstractDecoratorManifold,
@@ -115,12 +137,34 @@ function log!(
 end
 
 function LinearAlgebra.norm(
-    ::TraitList{<:AbstractInvarianceTrait},
+    t::TraitList{<:AbstractInvarianceTrait},
     M::AbstractDecoratorManifold,
     p,
     X,
 ) where {𝔽}
     conv = direction(M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
-    return norm(base_group(M), Identity(M), Xₑ)
+    return norm(next_trait(t), M, Identity(M), Xₑ)
+end
+
+function translate_diff!(
+    ::TraitList{IsMetricManifold},
+    M::MetricManifold,
+    p,
+    q,
+    X,
+    conv::ActionDirection,
+)
+    return translate_diff(M.manifold, p, q, X, conv)
+end
+function translate_diff!(
+    ::TraitList{IsMetricManifold},
+    M::MetricManifold,
+    Y,
+    p,
+    q,
+    X,
+    conv::ActionDirection,
+)
+    return translate_diff!(M.manifold, Y, p, q, X, conv)
 end
