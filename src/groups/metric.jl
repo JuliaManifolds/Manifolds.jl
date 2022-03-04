@@ -71,18 +71,22 @@ direction(::TraitList{HasLeftInvariantMetric}, ::AbstractDecoratorManifold) = Le
 
 direction(::TraitList{HasRightInvariantMetric}, ::AbstractDecoratorManifold) = RightAction()
 
+function exp(
+    ::TraitList{<:HasBiinvariantMetric},
+    M::MetricManifold{𝔽,<:AbstractGroupManifold},
+    p,
+    X,
+) where {𝔽}
+    return retract(base_group(M), p, X, GroupExponentialRetraction(direction(M)))
+end
 function exp!(
-    ::TraitList{<:AbstractInvarianceTrait},
+    ::TraitList{<:HasBiinvariantMetric},
     M::MetricManifold{𝔽,<:AbstractGroupManifold},
     q,
     p,
     X,
 ) where {𝔽}
-    if has_biinvariant_metric(M)
-        conv = direction(M.manifold)
-        return retract!(base_group(M), q, p, X, GroupExponentialRetraction(conv))
-    end
-    return invoke(exp!, Tuple{MetricManifold,typeof(q),typeof(p),typeof(X)}, M, q, p, X)
+    return retract!(base_group(M), q, p, X, GroupExponentialRetraction(direction(M)))
 end
 
 @trait_function has_biinvariant_metric(M::AbstractDecoratorManifold)
@@ -125,6 +129,15 @@ function inverse_translate_diff!(
     return inverse_translate_diff!(M.manifold, Y, p, q, X, conv)
 end
 
+function log(
+    ::TraitList{<:HasBiinvariantMetric},
+    M::AbstractDecoratorManifold,
+    p,
+    q,
+) where {𝔽}
+    conv = direction(M)
+    return inverse_retract(base_group(M), p, q, GroupLogarithmicInverseRetraction(conv))
+end
 function log!(
     ::TraitList{<:HasBiinvariantMetric},
     M::AbstractDecoratorManifold,
