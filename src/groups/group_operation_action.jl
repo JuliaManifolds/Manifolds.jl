@@ -1,5 +1,5 @@
 @doc raw"""
-    GroupOperationAction(group::AbstractGroupManifold, AD::ActionDirection = LeftAction())
+    GroupOperationAction(group::AbstractDecoratorManifold, AD::ActionDirection = LeftAction())
 
 Action of a group upon itself via left or right translation.
 """
@@ -8,10 +8,10 @@ struct GroupOperationAction{G,AD} <: AbstractGroupAction{AD}
 end
 
 function GroupOperationAction(
-    G::AbstractGroupManifold,
+    G::TM,
     ::TAD=LeftAction(),
-) where {TAD<:ActionDirection}
-    return GroupOperationAction{typeof(G),TAD}(G)
+) where {TM<:AbstractDecoratorManifold,TAD<:ActionDirection}
+    return GroupOperationAction{TM,TAD}(G)
 end
 
 function Base.show(io::IO, A::GroupOperationAction)

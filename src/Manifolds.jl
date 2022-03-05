@@ -680,7 +680,6 @@ export ×,
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,
-    AbstractGroupManifold,
     ActionDirection,
     AdditionOperation,
     CircleGroup,

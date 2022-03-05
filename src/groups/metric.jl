@@ -1,6 +1,6 @@
 @doc raw"""
     has_approx_invariant_metric(
-        G::AbstractGroupManifold,
+        G::AbstractDecoratorManifold,
         p,
         X,
         Y,
@@ -22,14 +22,7 @@ This is necessary but not sufficient for invariance.
 
 Optionally, `kwargs` passed to `isapprox` may be provided.
 """
-has_approx_invariant_metric(
-    ::AbstractGroupManifold,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::ActionDirection,
-)
+has_approx_invariant_metric(::AbstractDecoratorManifold, p, X, Y, qs, ::ActionDirection)
 @trait_function has_approx_invariant_metric(
     M::AbstractDecoratorManifold,
     p,
@@ -40,12 +33,13 @@ has_approx_invariant_metric(
     kwargs...,
 )
 function has_approx_invariant_metric(
-    M::AbstractGroupManifold,
+    ::TraitList{<:IsGroupManifold},
+    M::AbstractDecoratorManifold,
     p,
     X,
     Y,
     qs,
-    conv::ActionDirection=LeftAction();
+    conv::ActionDirection;
     kwargs...,
 )
     gpXY = inner(M, p, X, Y)
@@ -61,7 +55,7 @@ end
 """
     direction(::AbstractDecoratorManifold) -> AD
 
-Get the direction of the action a certain [`AbstractGroupManifold`](@ref) with its implicit metric has
+Get the direction of the action a certain Lie group with its implicit metric has
 """
 direction(::AbstractDecoratorManifold)
 
@@ -71,28 +65,22 @@ direction(::TraitList{HasLeftInvariantMetric}, ::AbstractDecoratorManifold) = Le
 
 direction(::TraitList{HasRightInvariantMetric}, ::AbstractDecoratorManifold) = RightAction()
 
-function exp(
-    ::TraitList{<:HasBiinvariantMetric},
-    M::MetricManifold{𝔽,<:AbstractGroupManifold},
-    p,
-    X,
-) where {𝔽}
+function exp(::TraitList{<:HasBiinvariantMetric}, M::MetricManifold, p, X)
     return retract(base_group(M), p, X, GroupExponentialRetraction(direction(M)))
 end
-function exp!(
-    ::TraitList{<:HasBiinvariantMetric},
-    M::MetricManifold{𝔽,<:AbstractGroupManifold},
-    q,
-    p,
-    X,
-) where {𝔽}
+function exp!(::TraitList{<:HasBiinvariantMetric}, M::MetricManifold, q, p, X)
     return retract!(base_group(M), q, p, X, GroupExponentialRetraction(direction(M)))
 end
 
 @trait_function has_biinvariant_metric(M::AbstractDecoratorManifold)
 
-has_biinvariant_metric(::TraitList{EmptyTrait}, ::AbstractGroupManifold) = false
-has_biinvariant_metric(::TraitList{HasBiinvariantMetric}, ::AbstractGroupManifold) = true
+has_biinvariant_metric(::TraitList{EmptyTrait}, ::AbstractDecoratorManifold) = false
+function has_biinvariant_metric(
+    ::TraitList{HasBiinvariantMetric},
+    ::AbstractDecoratorManifold,
+)
+    return true
+end
 
 function inner(
     t::TraitList{<:AbstractInvarianceTrait},

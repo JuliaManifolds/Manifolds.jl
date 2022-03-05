@@ -1,6 +1,5 @@
 @doc raw"""
-    SpecialLinear{n,𝔽} <:
-        AbstractGroupManifold{𝔽,MultiplicationOperation}
+    SpecialLinear{n,𝔽} <: AbstractDecoratorManifold
 
 The special linear group ``\mathrm{SL}(n,𝔽)`` that is, the group of all invertible matrices
 with unit determinant in ``𝔽^{n×n}``.
@@ -16,11 +15,13 @@ metric used for [`GeneralLinear(n, 𝔽)`](@ref). The resulting geodesic on
 an element of ``𝔰𝔩(n, 𝔽)`` is a closed subgroup of ``\mathrm{SL}(n,𝔽)``. As a result, most
 metric functions forward to `GeneralLinear`.
 """
-struct SpecialLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
-
-active_traits(f, ::SpecialLinear, args...) = merge_traits(IsEmbeddedSubmanifold())
+struct SpecialLinear{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 SpecialLinear(n, 𝔽::AbstractNumbers=ℝ) = SpecialLinear{n,𝔽}()
+
+function active_traits(f, ::SpecialLinear, args...)
+    return merge_traits(IsGroupManifold(MultiplicationOperation()), IsEmbeddedSubmanifold())
+end
 
 function allocation_promotion_function(::SpecialLinear{n,ℂ}, f, args::Tuple) where {n}
     return complex
@@ -40,13 +41,6 @@ function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
     return nothing
 end
 check_point(G::SpecialLinear, ::Identity{MultiplicationOperation}; kwargs...) = nothing
-function check_point(
-    G::SpecialLinear,
-    e::Identity{O};
-    kwargs...,
-) where {O<:AbstractGroupOperation}
-    return invoke(check_point, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
-end
 
 function check_vector(G::SpecialLinear, p, X; kwargs...)
     mpv = check_vector(decorated_manifold(G), p, X; kwargs...)

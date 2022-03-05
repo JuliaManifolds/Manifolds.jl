@@ -6,9 +6,6 @@ include("../utils.jl")
 include("group_utils.jl")
 
 @testset "General group tests" begin
-    @test length(methods(has_biinvariant_metric)) == 1
-    @test length(methods(has_invariant_metric)) == 1
-    @test length(methods(has_biinvariant_metric)) == 1
     @testset "Not implemented operation" begin
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
         @test repr(G) ==
@@ -22,29 +19,12 @@ include("group_utils.jl")
         @test_throws MethodError identity_element(G) # but for a NotImplOp there is no concrete id.
         @test isapprox(G, eg, eg)
         @test_throws MethodError is_identity(G, 1) # same rror as before i.e. dispatch isapprox works
-        @test length(methods(is_group_decorator)) == 1
 
         @test Identity(NotImplementedOperation()) === eg
         @test Identity(NotImplementedOperation) === eg
         @test !is_point(G, Identity(AdditionOperation()))
         @test !isapprox(G, eg, Identity(AdditionOperation()))
 
-        @test Manifolds.is_group_decorator(G)
-        @test Manifolds.decorator_group_dispatch(G) === Val{true}()
-        @test Manifolds.default_decorator_dispatch(G) === Val{false}()
-        @test !Manifolds.is_group_decorator(NotImplementedManifold())
-        @test Manifolds.decorator_group_dispatch(NotImplementedManifold()) === Val{false}()
-
-        @test Manifolds.decorator_transparent_dispatch(compose, G, p, p, p) ===
-              Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(compose!, G, p, p, p) ===
-              Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(exp_lie, G, p, p) ===
-              Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(log_lie, G, p, p) ===
-              Val{:intransparent}()
-        @test Manifolds.decorator_transparent_dispatch(translate_diff!, G, X, p, p, X) ===
-              Val{:intransparent}()
         @test base_group(G) === G
         @test NotImplementedOperation(NotImplementedManifold()) === G
         @test (NotImplementedOperation())(NotImplementedManifold()) === G

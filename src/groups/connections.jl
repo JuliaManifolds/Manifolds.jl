@@ -47,7 +47,7 @@ const CartanSchoutenPlusGroup{𝔽,M} = ConnectionManifold{𝔽,M,CartanSchouten
 const CartanSchoutenZeroGroup{𝔽,M} = ConnectionManifold{𝔽,M,CartanSchoutenZero}
 
 """
-    exp!(M::ConnectionManifold{𝔽,<:AbstractGroupManifold{𝔽},<:AbstractCartanSchoutenConnection}, q, p, X) where {𝔽}
+    exp!(M::ConnectionManifold{𝔽,<:AbstractDecoratorManifold{𝔽},<:AbstractCartanSchoutenConnection}, q, p, X) where {𝔽}
 
 Compute the exponential map on the [`ConnectionManifold`](@ref) `M` with a Cartan-Schouten
 connection. See Sections 5.3.2 and 5.3.3 of [^Pennec2020] for details.
@@ -59,7 +59,11 @@ connection. See Sections 5.3.2 and 5.3.3 of [^Pennec2020] for details.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
 function exp!(
-    M::ConnectionManifold{𝔽,<:AbstractGroupManifold{𝔽},<:AbstractCartanSchoutenConnection},
+    M::ConnectionManifold{
+        𝔽,
+        <:AbstractDecoratorManifold{𝔽},
+        <:AbstractCartanSchoutenConnection,
+    },
     q,
     p,
     X,
@@ -69,7 +73,7 @@ function exp!(
 end
 
 """
-    log!(M::ConnectionManifold{𝔽,<:AbstractGroupManifold{𝔽},<:AbstractCartanSchoutenConnection}, Y, p, q) where {𝔽}
+    log!(M::ConnectionManifold{𝔽,<:AbstractDecoratorManifold{𝔽},<:AbstractCartanSchoutenConnection}, Y, p, q) where {𝔽}
 
 Compute the logarithmic map on the [`ConnectionManifold`](@ref) `M` with a Cartan-Schouten
 connection. See Sections 5.3.2 and 5.3.3 of [^Pennec2020] for details.
@@ -81,7 +85,11 @@ connection. See Sections 5.3.2 and 5.3.3 of [^Pennec2020] for details.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
 function log!(
-    M::ConnectionManifold{𝔽,<:AbstractGroupManifold{𝔽},<:AbstractCartanSchoutenConnection},
+    M::ConnectionManifold{
+        𝔽,
+        <:AbstractDecoratorManifold{𝔽},
+        <:AbstractCartanSchoutenConnection,
+    },
     Y,
     p,
     q,

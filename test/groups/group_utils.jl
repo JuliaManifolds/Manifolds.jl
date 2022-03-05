@@ -15,12 +15,15 @@ function Manifolds.decorated_manifold(M::NotImplementedGroupDecorator)
 end
 
 struct DefaultTransparencyGroup{𝔽,M<:AbstractManifold{𝔽},A<:AbstractGroupOperation} <:
-       AbstractGroupManifold{𝔽,A}
+       AbstractDecoratorManifold{𝔽}
     manifold::M
     op::A
 end
-function active_traits(f, ::DefaultTransparencyGroup, args...)
-    return merge_traits(Manifolds.IsGroupManifold(), active_traits(f, M.manifold, args...))
+function active_traits(f, M::DefaultTransparencyGroup, args...)
+    return merge_traits(
+        Manifolds.IsGroupManifold(M.op),
+        active_traits(f, M.manifold, args...),
+    )
 end
 
 function Manifolds.decorated_manifold(M::DefaultTransparencyGroup)

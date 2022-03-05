@@ -12,7 +12,7 @@ const ProductGroup{𝔽,T} = GroupManifold{𝔽,ProductManifold{𝔽,T},ProductO
 
 Decorate a product manifold with a [`ProductOperation`](@ref).
 
-Each submanifold must also be an [`AbstractGroupManifold`](@ref) or a decorated instance of
+Each submanifold must also have a [`IsGroupManifold`](@ref) or a decorated instance of
 one. This type is mostly useful for equipping the direct product of group manifolds with an
 [`Identity`](@ref) element.
 
@@ -25,13 +25,6 @@ function ProductGroup(manifold::ProductManifold{𝔽}) where {𝔽}
     end
     op = ProductOperation()
     return GroupManifold(manifold, op)
-end
-
-function decorator_transparent_dispatch(::typeof(exp_lie!), M::ProductGroup, q, X)
-    return Val(:transparent)
-end
-function decorator_transparent_dispatch(::typeof(log_lie!), M::ProductGroup, X, q)
-    return Val(:transparent)
 end
 
 function identity_element(G::ProductGroup)
@@ -49,9 +42,6 @@ function is_identity(G::ProductGroup, p; kwargs...)
     pes = submanifold_components(G, p)
     M = G.manifold # Inner prodct manifold (of groups)
     return all(map((M, pe) -> is_identity(M, pe; kwargs...), M.manifolds, pes))
-end
-function is_identity(G::ProductGroup, e::Identity; kwargs...)
-    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", G::ProductGroup)

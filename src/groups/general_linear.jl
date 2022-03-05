@@ -1,6 +1,6 @@
 @doc raw"""
     GeneralLinear{n,𝔽} <:
-        AbstractGroupManifold{𝔽,MultiplicationOperation}
+        AbstractDecoratorManifold{𝔽}
 
 The general linear group, that is, the group of all invertible matrices in ``𝔽^{n×n}``.
 
@@ -16,10 +16,14 @@ vector in the Lie algebra, and ``⟨⋅,⋅⟩_\mathrm{F}`` denotes the Frobeniu
 By default, tangent vectors ``X_p`` are represented with their corresponding Lie algebra
 vectors ``X_e = p^{-1}X_p``.
 """
-struct GeneralLinear{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation} end
+struct GeneralLinear{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function active_traits(f, ::GeneralLinear, args...)
-    return merge_traits(IsDefaultMetric(EuclideanMetric()), IsEmbeddedManifold())
+    return merge_traits(
+        IsGroupManifold(MultiplicationOperation()),
+        IsDefaultMetric(EuclideanMetric()),
+        IsEmbeddedManifold(),
+    )
 end
 
 GeneralLinear(n, 𝔽::AbstractNumbers=ℝ) = GeneralLinear{n,𝔽}()
@@ -41,13 +45,6 @@ function check_point(G::GeneralLinear, p; kwargs...)
     return nothing
 end
 check_point(::GeneralLinear, ::Identity{MultiplicationOperation}) = nothing
-function check_point(
-    G::GeneralLinear,
-    e::Identity{O};
-    kwargs...,
-) where {O<:AbstractGroupOperation}
-    return invoke(check_point, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
-end
 
 function check_vector(G::GeneralLinear, p, X; kwargs...)
     mpv = check_vector(decorated_manifold(G), p, X; kwargs...)
