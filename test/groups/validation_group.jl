@@ -4,7 +4,6 @@ include("../utils.jl")
     G = SpecialOrthogonal(3)
     M = Rotations(3)
     AG = ValidationManifold(G)
-    @test base_group(AG) === G
     @test (@inferred Manifolds.decorator_group_dispatch(AG)) === Val(true)
     @test Manifolds.is_group_decorator(AG)
 

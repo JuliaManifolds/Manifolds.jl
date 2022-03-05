@@ -62,7 +62,6 @@ include("group_utils.jl")
         DM = NotImplementedGroupDecorator(G)
         @test (@inferred Manifolds.decorator_group_dispatch(DM)) === Val(true)
         @test Manifolds.is_group_decorator(DM)
-        @test base_group(DM) === G
         test_group(DM, pts, vpts, vpts; test_diff=true)
     end
 

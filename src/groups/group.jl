@@ -237,7 +237,7 @@ function is_identity(
 end
 
 @inline function isapprox(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p::Identity{O},
     q;
@@ -246,7 +246,7 @@ end
     return is_identity(G, q; kwargs...)
 end
 @inline function isapprox(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p,
     q::Identity{O};
@@ -255,7 +255,7 @@ end
     return is_identity(G, p; kwargs...)
 end
 function isapprox(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p::Identity{O},
     q::Identity{O};
@@ -263,6 +263,25 @@ function isapprox(
 ) where {O<:AbstractGroupOperation}
     return true
 end
+function isapprox(
+    ::TraitList{<:IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
+    p::Identity{O},
+    q::Identity;
+    kwargs...,
+) where {O<:AbstractGroupOperation}
+    return false
+end
+function isapprox(
+    ::TraitList{<:IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
+    p::Identity,
+    q::Identity{O};
+    kwargs...,
+) where {O<:AbstractGroupOperation}
+    return false
+end
+
 @inline function isapprox(
     ::TraitList{IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
@@ -791,12 +810,12 @@ end
 
 @trait_function compose!(M::AbstractDecoratorManifold, x, p, q)
 
-function compose!(::TraitList{<:IsGroupManifold}, ::AbstractDecoratorManifold, x, q, p)
+function compose!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, x, q, p)
     return _compose!(G, x, q, p)
 end
 function compose!(
     ::TraitList{<:IsGroupManifold{O}},
-    ::AbstractDecoratorManifold,
+    G::AbstractDecoratorManifold,
     q,
     p,
     ::Identity{O},
@@ -805,7 +824,7 @@ function compose!(
 end
 function compose!(
     ::TraitList{<:IsGroupManifold{O}},
-    ::AbstractDecoratorManifold,
+    G::AbstractDecoratorManifold,
     q,
     ::Identity{O},
     p,
@@ -814,7 +833,7 @@ function compose!(
 end
 function compose!(
     ::TraitList{<:IsGroupManifold{O}},
-    ::AbstractDecoratorManifold,
+    G::AbstractDecoratorManifold,
     q,
     ::Identity{O},
     e::Identity{O},

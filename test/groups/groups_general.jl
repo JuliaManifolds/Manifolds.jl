@@ -24,14 +24,11 @@ include("group_utils.jl")
         @test Identity(NotImplementedOperation) === eg
         @test !is_point(G, Identity(AdditionOperation()))
         @test !isapprox(G, eg, Identity(AdditionOperation()))
+        @test !isapprox(G, Identity(AdditionOperation()), eg)
 
-        @test base_group(G) === G
         @test NotImplementedOperation(NotImplementedManifold()) === G
         @test (NotImplementedOperation())(NotImplementedManifold()) === G
 
-        @test_throws ErrorException base_group(
-            MetricManifold(Euclidean(3), EuclideanMetric()),
-        )
         @test_throws ErrorException hat(Rotations(3), eg, [1, 2, 3])
         # If you force it, you get a not that readable MethodError
         @test_throws MethodError hat(
@@ -46,9 +43,9 @@ include("group_utils.jl")
             [1, 2, 3],
         )
 
-        @test_throws ErrorException inv!(G, p, p)
+        @test_throws MethodError inv!(G, p, p)
         @test_throws MethodError inv!(G, p, eg)
-        @test_throws ErrorException inv(G, p)
+        @test_throws MethodError inv(G, p)
 
         # no function defined to return the identity array representation
         @test_throws MethodError copyto!(G, p, eg)
@@ -70,50 +67,33 @@ include("group_utils.jl")
         @test_throws MethodError translate!(G, p, p, p, LeftAction())
         @test_throws MethodError translate!(G, p, p, p, RightAction())
 
-        @test_throws ErrorException inverse_translate(G, p, p)
-        @test_throws ErrorException inverse_translate(G, p, p, LeftAction())
-        @test_throws ErrorException inverse_translate(G, p, p, RightAction())
-        @test_throws ErrorException inverse_translate!(G, p, p, p)
-        @test_throws ErrorException inverse_translate!(G, p, p, p, LeftAction())
-        @test_throws ErrorException inverse_translate!(G, p, p, p, RightAction())
+        @test_throws MethodError inverse_translate(G, p, p)
+        @test_throws MethodError inverse_translate(G, p, p, LeftAction())
+        @test_throws MethodError inverse_translate(G, p, p, RightAction())
+        @test_throws MethodError inverse_translate!(G, p, p, p)
+        @test_throws MethodError inverse_translate!(G, p, p, p, LeftAction())
+        @test_throws MethodError inverse_translate!(G, p, p, p, RightAction())
 
-        @test_throws ErrorException translate_diff(G, p, p, X)
-        @test_throws ErrorException translate_diff(G, p, p, X, LeftAction())
-        @test_throws ErrorException translate_diff(G, p, p, X, RightAction())
-        @test_throws ErrorException translate_diff!(G, X, p, p, X)
-        @test_throws ErrorException translate_diff!(G, X, p, p, X, LeftAction())
-        @test_throws ErrorException translate_diff!(G, X, p, p, X, RightAction())
+        @test_throws MethodError translate_diff(G, p, p, X)
+        @test_throws MethodError translate_diff(G, p, p, X, LeftAction())
+        @test_throws MethodError translate_diff(G, p, p, X, RightAction())
+        @test_throws MethodError translate_diff!(G, X, p, p, X)
+        @test_throws MethodError translate_diff!(G, X, p, p, X, LeftAction())
+        @test_throws MethodError translate_diff!(G, X, p, p, X, RightAction())
 
-        @test_throws ErrorException inverse_translate_diff(G, p, p, X)
-        @test_throws ErrorException inverse_translate_diff(G, p, p, X, LeftAction())
-        @test_throws ErrorException inverse_translate_diff(G, p, p, X, RightAction())
-        @test_throws ErrorException inverse_translate_diff!(G, X, p, p, X)
-        @test_throws ErrorException inverse_translate_diff!(G, X, p, p, X, LeftAction())
-        @test_throws ErrorException inverse_translate_diff!(G, X, p, p, X, RightAction())
+        @test_throws MethodError inverse_translate_diff(G, p, p, X)
+        @test_throws MethodError inverse_translate_diff(G, p, p, X, LeftAction())
+        @test_throws MethodError inverse_translate_diff(G, p, p, X, RightAction())
+        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X)
+        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X, LeftAction())
+        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X, RightAction())
 
-        @test_throws ErrorException exp_lie(G, X)
-        @test_throws ErrorException exp_lie!(G, p, X)
+        @test_throws MethodError exp_lie(G, X)
+        @test_throws MethodError exp_lie!(G, p, X)
         # no transparency error, but _log_lie missing
         @test_throws MethodError log_lie(G, p)
         @test_throws MethodError log_lie!(G, X, p)
 
-        for f in [translate, translate!]
-            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:intransparent}()
-        end
-        for f in
-            [get_vector, get_coordinates, inverse_translate_diff!, inverse_translate_diff]
-            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:transparent}()
-        end
-        for f in [exp_lie!, exp_lie, log_lie, log_lie!]
-            @test Manifolds.decorator_transparent_dispatch(f, G, p, p) ===
-                  Val{:intransparent}()
-        end
-        @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, p) ===
-              Val{:transparent}()
-        @test Manifolds.decorator_transparent_dispatch(isapprox, G, p, eg) ===
-              Val{:transparent}()
-        @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, eg) ===
-              Val{:transparent}()
     end
 
     @testset "Action direction" begin
@@ -239,7 +219,7 @@ include("group_utils.jl")
         @test y ≈ p
         X = [1.0 2.0; 3.0 4.0]
         @test exp_lie!(G, y, X) === y
-        @test_throws ErrorException exp_lie!(G, y, :a)
+        @test_throws MethodError exp_lie!(G, y, :a)
         @test y ≈ exp(X)
         Y = allocate(X)
         @test log_lie!(G, Y, y) === Y
@@ -294,19 +274,19 @@ struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
         a = [1.0, 2.0]
         X = [1.0, 2.0]
 
-        @test_throws ErrorException base_group(A)
-        @test_throws ErrorException group_manifold(A)
-        @test_throws ErrorException apply(A, a, p)
-        @test_throws ErrorException apply!(A, p, a, p)
-        @test_throws ErrorException inverse_apply(A, a, p)
-        @test_throws ErrorException inverse_apply!(A, p, a, p)
-        @test_throws ErrorException apply_diff(A, a, p, X)
-        @test_throws ErrorException apply_diff!(A, X, p, a, X)
-        @test_throws ErrorException inverse_apply_diff(A, a, p, X)
-        @test_throws ErrorException inverse_apply_diff!(A, X, p, a, X)
-        @test_throws ErrorException compose(A, a, a)
-        @test_throws ErrorException compose!(A, a, a, a)
-        @test_throws ErrorException optimal_alignment(A, p, p)
-        @test_throws ErrorException optimal_alignment!(A, a, p, p)
+        @test_throws MethodError base_group(A)
+        @test_throws MethodError group_manifold(A)
+        @test_throws MethodError apply(A, a, p)
+        @test_throws MethodError apply!(A, p, a, p)
+        @test_throws MethodError inverse_apply(A, a, p)
+        @test_throws MethodError inverse_apply!(A, p, a, p)
+        @test_throws MethodError apply_diff(A, a, p, X)
+        @test_throws MethodError apply_diff!(A, X, p, a, X)
+        @test_throws MethodError inverse_apply_diff(A, a, p, X)
+        @test_throws MethodError inverse_apply_diff!(A, X, p, a, X)
+        @test_throws MethodError compose(A, a, a)
+        @test_throws MethodError compose!(A, a, a, a)
+        @test_throws MethodError optimal_alignment(A, p, p)
+        @test_throws MethodError optimal_alignment!(A, a, p, p)
     end
 end
