@@ -6,6 +6,12 @@
             "orcid": "0000-0002-6284-3033"
         },
         {
+            "affiliation": "EMBL Heidelberg",
+            "name": "Ahlmann-Eltze, Constantin",
+            "type": "Other",
+            "orcid": "0000-0002-3762-068X"
+        },
+        {
             "affiliation": "KU Leuven",
             "name": "Dewaele, Nick",
             "orcid": "0000-0002-5558-4782",
@@ -17,6 +23,11 @@
         },
         {
             "name": "Weiß, Manuel",
+            "type": "ProjectMember"
+        },
+        {
+            "affiliation": "NTNU Trondheim",
+            "name": "Kolstø, Johannes Voll",
             "type": "ProjectMember"
         }
     ],

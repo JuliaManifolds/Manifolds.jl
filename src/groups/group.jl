@@ -1427,10 +1427,20 @@ function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, q; kwar
     return isapprox(G, q, zero(q); kwargs...)
 end
 # resolve ambiguities
-function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, ::Identity{AdditionOperation}; kwargs...)
+function is_identity(
+    ::AdditionGroupTrait,
+    G::AbstractDecoratorManifold,
+    ::Identity{AdditionOperation};
+    kwargs...,
+)
     return true
 end
-function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, ::Identity; kwargs...)
+function is_identity(
+    ::AdditionGroupTrait,
+    G::AbstractDecoratorManifold,
+    ::Identity;
+    kwargs...,
+)
     return false
 end
 
@@ -1671,9 +1681,14 @@ function inverse_translate!(
     return copyto!(x, inverse_translate(G, p, q, conv))
 end
 
-function exp_lie!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, q, X::Union{Number,AbstractMatrix})
+function exp_lie!(
+    ::MultiplicationGroupTrait,
+    G::AbstractDecoratorManifold,
+    q,
+    X::Union{Number,AbstractMatrix},
+)
     copyto!(q, exp(X))
-    q
+    return q
 end
 
 function log_lie!(

@@ -430,6 +430,21 @@ using RecursiveArrayTools: ArrayPartition
         @test isapprox(X, X2)
     end
 
+    @testset "get_coordinates" begin
+        # make sure `get_coordinates` does not return an `ArrayPartition`
+        p1 = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0])
+        X1 = ProductRepr([1.0, 0.0, -1.0], [1.0, 0.0])
+        Tp1Mse = TangentSpaceAtPoint(Mse, p1)
+        c = get_coordinates(Tp1Mse, p1, X1, DefaultOrthonormalBasis())
+        @test c isa Vector
+
+        p1ap = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
+        X1ap = ArrayPartition([1.0, 0.0, -1.0], [1.0, 0.0])
+        Tp1apMse = TangentSpaceAtPoint(Mse, p1ap)
+        cap = get_coordinates(Tp1apMse, p1ap, X1ap, DefaultOrthonormalBasis())
+        @test cap isa Vector
+    end
+
     @testset "Basis printing" begin
         p = ProductRepr([1.0, 0.0, 0.0], [1.0, 0.0])
         B = DefaultOrthonormalBasis()
@@ -468,6 +483,20 @@ using RecursiveArrayTools: ArrayPartition
         Msec = ProductManifold(M1, M2c)
         @test Manifolds.allocation_promotion_function(Msec, get_vector, ()) === complex
         @test Manifolds.allocation_promotion_function(Mse, get_vector, ()) === identity
+    end
+
+    @testset "empty allocation" begin
+        p = allocate_result(Mse, uniform_distribution)
+        @test isa(p, ProductRepr)
+        @test size(p[Mse, 1]) == (3,)
+        @test size(p[Mse, 2]) == (2,)
+    end
+
+    @testset "Uniform distribution" begin
+        Mss = ProductManifold(Sphere(2), Sphere(2))
+        p = rand(uniform_distribution(Mss))
+        @test is_point(Mss, p)
+        @test is_point(Mss, rand(uniform_distribution(Mss, p)))
     end
 
     @testset "Atlas & Induced Basis" begin

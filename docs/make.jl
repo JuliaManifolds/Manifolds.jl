@@ -61,6 +61,8 @@ makedocs(
                 "Symmetric matrices" => "manifolds/symmetric.md",
                 "Symmetric positive definite" => "manifolds/symmetricpositivedefinite.md",
                 "Symmetric positive semidefinite fixed rank" => "manifolds/symmetricpsdfixedrank.md",
+                "Symplectic" => "manifolds/symplectic.md",
+                "Symplectic Stiefel" => "manifolds/symplecticstiefel.md",
                 "Torus" => "manifolds/torus.md",
                 "Tucker" => "manifolds/tucker.md",
                 "Unit-norm symmetric matrices" => "manifolds/spheresymmetricmatrices.md",

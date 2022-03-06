@@ -226,4 +226,11 @@ using ManifoldsBase: TFVector
         @test Z == X
         @test local_metric(M, p, DefaultOrthonormalBasis()) == Diagonal([1.0, 1.0])
     end
+
+    @testset "Distributions" begin
+        sphere = Sphere(2)
+        haar_measure = uniform_distribution(sphere)
+        pts = rand(haar_measure, 5)
+        @test all(p -> is_point(sphere, p), pts)
+    end
 end

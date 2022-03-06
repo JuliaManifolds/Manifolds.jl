@@ -117,6 +117,10 @@ function InverseProductRetraction(inverse_retractions::AbstractInverseRetraction
     return InverseProductRetraction{typeof(inverse_retractions)}(inverse_retractions)
 end
 
+@inline function allocate_result(M::ProductManifold, f)
+    return ProductRepr(map(N -> allocate_result(N, f), M.manifolds))
+end
+
 function allocation_promotion_function(M::ProductManifold, f, args::Tuple)
     apfs = map(MM -> allocation_promotion_function(MM, f, args), M.manifolds)
     return reduce(combine_allocation_promotion_functions, apfs)
@@ -137,6 +141,10 @@ end
 
 function active_traits(f, ::ProductManifold, args...)
     return merge_traits(IsDefaultMetric(ProductMetric()))
+end
+
+function allocate_coordinates(M::AbstractManifold, p::ArrayPartition, T, n::Int)
+    return allocate_coordinates(M, p.x[1], T, n)
 end
 
 """
@@ -503,7 +511,12 @@ end
 for TP in [ProductRepr, ArrayPartition]
     eval(
         quote
-            function get_vector(M::ProductManifold, p::$TP, Xⁱ, B::AbstractBasis)
+            function get_vector(
+                M::ProductManifold,
+                p::$TP,
+                Xⁱ,
+                B::AbstractBasis{𝔽,TangentSpaceType},
+            ) where {𝔽}
                 dims = map(manifold_dimension, M.manifolds)
                 @assert length(Xⁱ) == sum(dims)
                 dim_ranges = _get_dim_ranges(dims)
@@ -1214,6 +1227,16 @@ function Distributions.support(tvd::ProductFVectorDistribution)
     return FVectorSupport(
         tvd.type,
         ProductRepr(map(d -> support(d).point, tvd.distributions)...),
+    )
+end
+
+function uniform_distribution(M::ProductManifold)
+    return ProductPointDistribution(M, map(uniform_distribution, M.manifolds))
+end
+function uniform_distribution(M::ProductManifold, p)
+    return ProductPointDistribution(
+        M,
+        map(uniform_distribution, M.manifolds, submanifold_components(M, p)),
     )
 end
 
