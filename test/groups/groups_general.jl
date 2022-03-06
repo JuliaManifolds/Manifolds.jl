@@ -253,19 +253,17 @@ struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
         a = [1.0, 2.0]
         X = [1.0, 2.0]
 
-        @test_throws MethodError base_group(A)
-        @test_throws MethodError group_manifold(A)
-        @test_throws MethodError apply(A, a, p)
-        @test_throws MethodError apply!(A, p, a, p)
-        @test_throws MethodError inverse_apply(A, a, p)
-        @test_throws MethodError inverse_apply!(A, p, a, p)
-        @test_throws MethodError apply_diff(A, a, p, X)
-        @test_throws MethodError apply_diff!(A, X, p, a, X)
-        @test_throws MethodError inverse_apply_diff(A, a, p, X)
-        @test_throws MethodError inverse_apply_diff!(A, X, p, a, X)
-        @test_throws MethodError compose(A, a, a)
-        @test_throws MethodError compose!(A, a, a, a)
-        @test_throws MethodError optimal_alignment(A, p, p)
-        @test_throws MethodError optimal_alignment!(A, a, p, p)
+        @test_throws ErrorException apply(A, a, p)
+        @test_throws ErrorException apply!(A, p, a, p)
+        @test_throws ErrorException inverse_apply(A, a, p)
+        @test_throws ErrorException inverse_apply!(A, p, a, p)
+        @test_throws ErrorException apply_diff(A, a, p, X)
+        @test_throws ErrorException apply_diff!(A, X, p, a, X)
+        @test_throws ErrorException inverse_apply_diff(A, a, p, X)
+        @test_throws ErrorException inverse_apply_diff!(A, X, p, a, X)
+        @test_throws ErrorException compose(A, a, a)
+        @test_throws ErrorException compose!(A, a, a, a)
+        @test_throws ErrorException optimal_alignment(A, p, p)
+        @test_throws ErrorException optimal_alignment!(A, a, p, p)
     end
 end

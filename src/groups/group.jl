@@ -1426,6 +1426,13 @@ end
 function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, q; kwargs...)
     return isapprox(G, q, zero(q); kwargs...)
 end
+# resolve ambiguities
+function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, ::Identity{AdditionOperation}; kwargs...)
+    return true
+end
+function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, ::Identity; kwargs...)
+    return false
+end
 
 compose(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, q) = p + q
 
