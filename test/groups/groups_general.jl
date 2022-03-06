@@ -18,7 +18,7 @@ include("group_utils.jl")
         @test is_identity(G, eg) # identity transparent
         @test_throws MethodError identity_element(G) # but for a NotImplOp there is no concrete id.
         @test isapprox(G, eg, eg)
-        @test_throws MethodError is_identity(G, 1) # same rror as before i.e. dispatch isapprox works
+        @test_throws MethodError is_identity(G, 1) # same error as before i.e. dispatch isapprox works
 
         @test Identity(NotImplementedOperation()) === eg
         @test Identity(NotImplementedOperation) === eg
@@ -93,7 +93,6 @@ include("group_utils.jl")
         # no transparency error, but _log_lie missing
         @test_throws MethodError log_lie(G, p)
         @test_throws MethodError log_lie!(G, X, p)
-
     end
 
     @testset "Action direction" begin
@@ -242,26 +241,6 @@ include("group_utils.jl")
         @test e_add * e_mul === e_add
         @test e_mul * e_add === e_add
         @test mul!(e_mul, e_mul, e_mul) === e_mul
-    end
-
-    @testset "Transparency tests" begin
-        G = DefaultTransparencyGroup(Euclidean(3), AdditionOperation())
-        p = ones(3)
-        q = 2 * p
-        X = zeros(3)
-        Y = similar(X)
-        for f in
-            [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
-            @test ManifoldsBase.decorator_transparent_dispatch(
-                f,
-                G,
-                Y,
-                p,
-                X,
-                q,
-                ParallelTransport(),
-            ) == Val(:intransparent)
-        end
     end
 end
 
