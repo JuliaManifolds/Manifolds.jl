@@ -18,20 +18,17 @@ include("group_utils.jl")
         @test is_identity(G, eg) # identity transparent
         @test_throws MethodError identity_element(G) # but for a NotImplOp there is no concrete id.
         @test isapprox(G, eg, eg)
-        @test_throws MethodError is_identity(G, 1) # same rror as before i.e. dispatch isapprox works
+        @test_throws MethodError is_identity(G, 1) # same error as before i.e. dispatch isapprox works
 
         @test Identity(NotImplementedOperation()) === eg
         @test Identity(NotImplementedOperation) === eg
         @test !is_point(G, Identity(AdditionOperation()))
         @test !isapprox(G, eg, Identity(AdditionOperation()))
+        @test !isapprox(G, Identity(AdditionOperation()), eg)
 
-        @test base_group(G) === G
         @test NotImplementedOperation(NotImplementedManifold()) === G
         @test (NotImplementedOperation())(NotImplementedManifold()) === G
 
-        @test_throws ErrorException base_group(
-            MetricManifold(Euclidean(3), EuclideanMetric()),
-        )
         @test_throws ErrorException hat(Rotations(3), eg, [1, 2, 3])
         # If you force it, you get a not that readable MethodError
         @test_throws MethodError hat(
@@ -46,9 +43,9 @@ include("group_utils.jl")
             [1, 2, 3],
         )
 
-        @test_throws ErrorException inv!(G, p, p)
+        @test_throws MethodError inv!(G, p, p)
         @test_throws MethodError inv!(G, p, eg)
-        @test_throws ErrorException inv(G, p)
+        @test_throws MethodError inv(G, p)
 
         # no function defined to return the identity array representation
         @test_throws MethodError copyto!(G, p, eg)
@@ -70,50 +67,32 @@ include("group_utils.jl")
         @test_throws MethodError translate!(G, p, p, p, LeftAction())
         @test_throws MethodError translate!(G, p, p, p, RightAction())
 
-        @test_throws ErrorException inverse_translate(G, p, p)
-        @test_throws ErrorException inverse_translate(G, p, p, LeftAction())
-        @test_throws ErrorException inverse_translate(G, p, p, RightAction())
-        @test_throws ErrorException inverse_translate!(G, p, p, p)
-        @test_throws ErrorException inverse_translate!(G, p, p, p, LeftAction())
-        @test_throws ErrorException inverse_translate!(G, p, p, p, RightAction())
+        @test_throws MethodError inverse_translate(G, p, p)
+        @test_throws MethodError inverse_translate(G, p, p, LeftAction())
+        @test_throws MethodError inverse_translate(G, p, p, RightAction())
+        @test_throws MethodError inverse_translate!(G, p, p, p)
+        @test_throws MethodError inverse_translate!(G, p, p, p, LeftAction())
+        @test_throws MethodError inverse_translate!(G, p, p, p, RightAction())
 
-        @test_throws ErrorException translate_diff(G, p, p, X)
-        @test_throws ErrorException translate_diff(G, p, p, X, LeftAction())
-        @test_throws ErrorException translate_diff(G, p, p, X, RightAction())
-        @test_throws ErrorException translate_diff!(G, X, p, p, X)
-        @test_throws ErrorException translate_diff!(G, X, p, p, X, LeftAction())
-        @test_throws ErrorException translate_diff!(G, X, p, p, X, RightAction())
+        @test_throws MethodError translate_diff(G, p, p, X)
+        @test_throws MethodError translate_diff(G, p, p, X, LeftAction())
+        @test_throws MethodError translate_diff(G, p, p, X, RightAction())
+        @test_throws MethodError translate_diff!(G, X, p, p, X)
+        @test_throws MethodError translate_diff!(G, X, p, p, X, LeftAction())
+        @test_throws MethodError translate_diff!(G, X, p, p, X, RightAction())
 
-        @test_throws ErrorException inverse_translate_diff(G, p, p, X)
-        @test_throws ErrorException inverse_translate_diff(G, p, p, X, LeftAction())
-        @test_throws ErrorException inverse_translate_diff(G, p, p, X, RightAction())
-        @test_throws ErrorException inverse_translate_diff!(G, X, p, p, X)
-        @test_throws ErrorException inverse_translate_diff!(G, X, p, p, X, LeftAction())
-        @test_throws ErrorException inverse_translate_diff!(G, X, p, p, X, RightAction())
+        @test_throws MethodError inverse_translate_diff(G, p, p, X)
+        @test_throws MethodError inverse_translate_diff(G, p, p, X, LeftAction())
+        @test_throws MethodError inverse_translate_diff(G, p, p, X, RightAction())
+        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X)
+        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X, LeftAction())
+        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X, RightAction())
 
-        @test_throws ErrorException exp_lie(G, X)
-        @test_throws ErrorException exp_lie!(G, p, X)
+        @test_throws MethodError exp_lie(G, X)
+        @test_throws MethodError exp_lie!(G, p, X)
         # no transparency error, but _log_lie missing
         @test_throws MethodError log_lie(G, p)
         @test_throws MethodError log_lie!(G, X, p)
-
-        for f in [translate, translate!]
-            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:intransparent}()
-        end
-        for f in
-            [get_vector, get_coordinates, inverse_translate_diff!, inverse_translate_diff]
-            @test Manifolds.decorator_transparent_dispatch(f, G) === Val{:transparent}()
-        end
-        for f in [exp_lie!, exp_lie, log_lie, log_lie!]
-            @test Manifolds.decorator_transparent_dispatch(f, G, p, p) ===
-                  Val{:intransparent}()
-        end
-        @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, p) ===
-              Val{:transparent}()
-        @test Manifolds.decorator_transparent_dispatch(isapprox, G, p, eg) ===
-              Val{:transparent}()
-        @test Manifolds.decorator_transparent_dispatch(isapprox, G, eg, eg) ===
-              Val{:transparent}()
     end
 
     @testset "Action direction" begin
@@ -239,7 +218,7 @@ include("group_utils.jl")
         @test y ≈ p
         X = [1.0 2.0; 3.0 4.0]
         @test exp_lie!(G, y, X) === y
-        @test_throws ErrorException exp_lie!(G, y, :a)
+        @test_throws MethodError exp_lie!(G, y, :a)
         @test y ≈ exp(X)
         Y = allocate(X)
         @test log_lie!(G, Y, y) === Y
@@ -263,26 +242,6 @@ include("group_utils.jl")
         @test e_mul * e_add === e_add
         @test mul!(e_mul, e_mul, e_mul) === e_mul
     end
-
-    @testset "Transparency tests" begin
-        G = DefaultTransparencyGroup(Euclidean(3), AdditionOperation())
-        p = ones(3)
-        q = 2 * p
-        X = zeros(3)
-        Y = similar(X)
-        for f in
-            [vector_transport_along!, vector_transport_direction!, vector_transport_to!]
-            @test ManifoldsBase.decorator_transparent_dispatch(
-                f,
-                G,
-                Y,
-                p,
-                X,
-                q,
-                ParallelTransport(),
-            ) == Val(:intransparent)
-        end
-    end
 end
 
 struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
@@ -294,8 +253,6 @@ struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
         a = [1.0, 2.0]
         X = [1.0, 2.0]
 
-        @test_throws ErrorException base_group(A)
-        @test_throws ErrorException group_manifold(A)
         @test_throws ErrorException apply(A, a, p)
         @test_throws ErrorException apply!(A, p, a, p)
         @test_throws ErrorException inverse_apply(A, a, p)

@@ -220,11 +220,11 @@ function is_identity(
     return isapprox(G, identity_element(G), q; kwargs...)
 end
 function is_identity(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     ::Identity{O};
     kwargs...,
-) where {𝔽,O<:AbstractGroupOperation}
+) where {O<:AbstractGroupOperation}
     return true
 end
 function is_identity(
@@ -237,7 +237,7 @@ function is_identity(
 end
 
 @inline function isapprox(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p::Identity{O},
     q;
@@ -246,7 +246,7 @@ end
     return is_identity(G, q; kwargs...)
 end
 @inline function isapprox(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p,
     q::Identity{O};
@@ -255,7 +255,7 @@ end
     return is_identity(G, p; kwargs...)
 end
 function isapprox(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p::Identity{O},
     q::Identity{O};
@@ -263,6 +263,25 @@ function isapprox(
 ) where {O<:AbstractGroupOperation}
     return true
 end
+function isapprox(
+    ::TraitList{<:IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
+    p::Identity{O},
+    q::Identity;
+    kwargs...,
+) where {O<:AbstractGroupOperation}
+    return false
+end
+function isapprox(
+    ::TraitList{<:IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
+    p::Identity,
+    q::Identity{O};
+    kwargs...,
+) where {O<:AbstractGroupOperation}
+    return false
+end
+
 @inline function isapprox(
     ::TraitList{IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
@@ -760,7 +779,6 @@ function compose(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p
     return _compose(G, p, q)
 end
 function compose(
-    ::TraitList{<:IsGroupManifold{O}},
     ::AbstractDecoratorManifold,
     ::Identity{O},
     p,
@@ -768,7 +786,6 @@ function compose(
     return p
 end
 function compose(
-    ::TraitList{<:IsGroupManifold{O}},
     ::AbstractDecoratorManifold,
     p,
     ::Identity{O},
@@ -776,7 +793,6 @@ function compose(
     return p
 end
 function compose(
-    ::TraitList{<:IsGroupManifold{O}},
     ::AbstractDecoratorManifold,
     e::Identity{O},
     ::Identity{O},
@@ -791,12 +807,11 @@ end
 
 @trait_function compose!(M::AbstractDecoratorManifold, x, p, q)
 
-function compose!(::TraitList{<:IsGroupManifold}, ::AbstractDecoratorManifold, x, q, p)
+function compose!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, x, q, p)
     return _compose!(G, x, q, p)
 end
 function compose!(
-    ::TraitList{<:IsGroupManifold{O}},
-    ::AbstractDecoratorManifold,
+    G::AbstractDecoratorManifold,
     q,
     p,
     ::Identity{O},
@@ -804,8 +819,7 @@ function compose!(
     return copyto!(G, q, p)
 end
 function compose!(
-    ::TraitList{<:IsGroupManifold{O}},
-    ::AbstractDecoratorManifold,
+    G::AbstractDecoratorManifold,
     q,
     ::Identity{O},
     p,
@@ -813,8 +827,7 @@ function compose!(
     return copyto!(G, q, p)
 end
 function compose!(
-    ::TraitList{<:IsGroupManifold{O}},
-    ::AbstractDecoratorManifold,
+    G::AbstractDecoratorManifold,
     q,
     ::Identity{O},
     e::Identity{O},
@@ -822,7 +835,6 @@ function compose!(
     return identity_element!(G, q)
 end
 function compose!(
-    ::TraitList{<:IsGroupManifold{O}},
     ::AbstractDecoratorManifold,
     e::Identity{O},
     ::Identity{O},
@@ -1149,6 +1161,7 @@ Since this function also depends on the group operation, make sure to implement
 the corresponding trait version `exp_lie(::TraitList{<:IsGroupManifold}, G, X)`.
 """
 exp_lie(G::AbstractManifold, X)
+@trait_function exp_lie(M::AbstractDecoratorManifold, X)
 function exp_lie(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X)
     q = allocate_result(G, exp_lie, X)
     return exp_lie!(G, q, X)
@@ -1410,13 +1423,20 @@ function inv!(
     return q
 end
 
-function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, q; kwargs...)
+function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, q; kwargs...)
     return isapprox(G, q, zero(q); kwargs...)
 end
+# resolve ambiguities
+function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, ::Identity{AdditionOperation}; kwargs...)
+    return true
+end
+function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, ::Identity; kwargs...)
+    return false
+end
 
-_compose(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, q) = p + q
+compose(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, q) = p + q
 
-function _compose!(::AdditionGroupTrait, G::AbstractDecoratorManifold, x, p, q)
+function compose!(::AdditionGroupTrait, G::AbstractDecoratorManifold, x, p, q)
     x .= p .+ q
     return x
 end
@@ -1615,9 +1635,9 @@ function inv!(
     return q
 end
 
-_compose(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, q) = p * q
+compose(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, q) = p * q
 
-function _compose!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, x, p, q)
+function compose!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, x, p, q)
     return mul!_safe(x, p, q)
 end
 
@@ -1651,11 +1671,9 @@ function inverse_translate!(
     return copyto!(x, inverse_translate(G, p, q, conv))
 end
 
-function exp_lie!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, q, X)
-    X isa Union{Number,AbstractMatrix} && return copyto!(q, exp(X))
-    return error(
-        "exp_lie! not implemented on $(typeof(G)) for vector $(typeof(X)) and element $(typeof(q)).",
-    )
+function exp_lie!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, q, X::Union{Number,AbstractMatrix})
+    copyto!(q, exp(X))
+    q
 end
 
 function log_lie!(
