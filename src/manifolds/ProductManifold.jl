@@ -500,26 +500,33 @@ function _get_dim_ranges(dims::NTuple{N,Any}) where {N}
     return ntuple(i -> (dims_acc[i]:(dims_acc[i] + dims[i] - 1)), Val(N))
 end
 
-function get_vector(M::ProductManifold, p, Xⁱ, B::AbstractBasis)
-    dims = map(manifold_dimension, M.manifolds)
-    @assert length(Xⁱ) == sum(dims)
-    dim_ranges = _get_dim_ranges(dims)
-    tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
-    ts = ziptuples(M.manifolds, submanifold_components(M, p), tXⁱ)
-    return ProductRepr(map((@inline t -> get_vector(t..., B)), ts))
-end
-function get_vector(
-    M::ProductManifold,
-    p,
-    Xⁱ,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
-) where {𝔽}
-    dims = map(manifold_dimension, M.manifolds)
-    @assert length(Xⁱ) == sum(dims)
-    dim_ranges = _get_dim_ranges(dims)
-    tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
-    ts = ziptuples(M.manifolds, submanifold_components(M, p), tXⁱ, B.data.parts)
-    return ProductRepr(map((@inline t -> get_vector(t...)), ts))
+for TP in [ProductRepr, ArrayPartition]
+    eval(
+        quote
+            function get_vector(M::ProductManifold, p::$TP, Xⁱ, B::AbstractBasis)
+                dims = map(manifold_dimension, M.manifolds)
+                @assert length(Xⁱ) == sum(dims)
+                dim_ranges = _get_dim_ranges(dims)
+                tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
+                ts = ziptuples(M.manifolds, submanifold_components(M, p), tXⁱ)
+                return $TP(map((@inline t -> get_vector(t..., B)), ts))
+            end
+            function get_vector(
+                M::ProductManifold,
+                p::$TP,
+                Xⁱ,
+                B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+            ) where {𝔽}
+                dims = map(manifold_dimension, M.manifolds)
+                @assert length(Xⁱ) == sum(dims)
+                dim_ranges = _get_dim_ranges(dims)
+                tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
+                ts =
+                    ziptuples(M.manifolds, submanifold_components(M, p), tXⁱ, B.data.parts)
+                return $TP(map((@inline t -> get_vector(t...)), ts))
+            end
+        end,
+    )
 end
 
 function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
@@ -702,15 +709,26 @@ so the encapsulated inverse retraction methods have to be available per factor.
 """
 inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::InverseProductRetraction)
 
-function inverse_retract(M::ProductManifold, p, q, method::InverseProductRetraction)
-    return ProductRepr(
-        map(
-            inverse_retract,
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, q),
-            method.inverse_retractions,
-        ),
+for TP in [ProductRepr, ArrayPartition]
+    eval(
+        quote
+            function inverse_retract(
+                M::ProductManifold,
+                p::$TP,
+                q::$TP,
+                method::InverseProductRetraction,
+            )
+                return $TP(
+                    map(
+                        inverse_retract,
+                        M.manifolds,
+                        submanifold_components(M, p),
+                        submanifold_components(M, q),
+                        method.inverse_retractions,
+                    ),
+                )
+            end
+        end,
     )
 end
 
@@ -1028,15 +1046,26 @@ method has to be one that is available on the manifolds.
 """
 retract(::ProductManifold, ::Any...)
 
-function _retract(M::ProductManifold, p, X, method::ProductRetraction)
-    return ProductRepr(
-        map(
-            retract,
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-            method.retractions,
-        ),
+for TP in [ProductRepr, ArrayPartition]
+    eval(
+        quote
+            function _retract(
+                M::ProductManifold,
+                p::$TP,
+                X::$TP,
+                method::ProductRetraction,
+            )
+                return $TP(
+                    map(
+                        retract,
+                        M.manifolds,
+                        submanifold_components(M, p),
+                        submanifold_components(M, X),
+                        method.retractions,
+                    ),
+                )
+            end
+        end,
     )
 end
 
