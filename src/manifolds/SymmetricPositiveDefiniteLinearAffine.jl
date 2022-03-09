@@ -117,64 +117,181 @@ Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
 [`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
 [`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
-with eigenvalues `κ` and where the direction `B.frame_direction` has curvature `0`.
+with eigenvalues `κ` and where the direction `B.frame_direction` ``V`` has curvature `0`.
+
+The construction is based on an ONB for the symmetric matrices similar to [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
+just that the ONB here is build from the eigen vectors of ``p^{\frac{1}{2}}Vp^{\frac{1}{2}}``.
 """
 function get_basis(
     ::SymmetricPositiveDefinite{N},
     p,
     B::DiagonalizingOrthonormalBasis,
 ) where {N}
-    pSqrt = sqrt(p)
-    eigv = eigen(B.frame_direction)
+    e = eigen(Symmetric(p))
+    U = e.vectors
+    S = max.(e.values, floatmin(eltype(e.values)))
+    Ssqrt = Diagonal(sqrt.(S))
+    pSqrt = Symmetric(U * Ssqrt * transpose(U))
+    SsqrtInv = Diagonal(1 ./ sqrt.(S))
+    pSqrtInv = Symmetric(U * SsqrtInv * transpose(U))
+    eigv = eigen(Symmetric(pSqrtInv * B.frame_direction * pSqrtInv))
     V = eigv.vectors
     Ξ = [
         (i == j ? 1 / 2 : 1 / sqrt(2)) *
-        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) for i in 1:N for
-        j in i:N
+        pSqrt *
+        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
+        pSqrt for i in 1:N for j in i:N
     ]
     λ = eigv.values
     κ = [-1 / 4 * (λ[i] - λ[j])^2 for i in 1:N for j in i:N]
     return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates!(
+@doc raw"""
+    [Ξ,κ] = get_basis(M::SymmetricPositiveDefinite, p, B::DefaultOrthonormalBasis)
+    [Ξ,κ] = get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, p, B::DefaultOrthonormalBasis)
+
+Return a default ONB for the tangent space ``T_p\mathcal P(n)`` of the [`SymmetricPositiveDefinite`](@ref) with respect to the [`LinearAffineMetric`](@ref).
+
+```math
+    g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
+```
+
+The basis constructed here is based on the ONB for symmetric matrices constructed as follows.
+Let
+
+```math
+\Delta_{i,j} = (a_{k,l})_{k,l=1}^n \quad \text{ with }
+a_{k,l} =
+\begin{cases}
+  1 & \mbox{ for } k=l \text{ if } i=j\\
+  \frac{1}{\sqrt{2}} & \mbox{ for } k=i, l=j \text{ or } k=j, l=i\\
+  0 & \text{ else.}
+\end{cases}
+```
+
+which forms an ONB for the space of symmetric matrices.
+
+We then form the ONB by
+```math
+   \Xi_{i,j} = p^{\frac{1}{2}}\Delta_{i,j}p^{\frac{1}{2}},\qquad i=1,\ldots,n, j=i,\ldots,n.
+```
+"""
+function get_basis(
     M::SymmetricPositiveDefinite{N},
-    Y,
     p,
-    X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType},
 ) where {N}
-    dim = manifold_dimension(M)
-    @assert size(Y) == (dim,)
-    @assert size(X) == (N, N)
-    @assert dim == div(N * (N + 1), 2)
+    e = eigen(Symmetric(p))
+    U = e.vectors
+    S = max.(e.values, floatmin(eltype(e.values)))
+    Ssqrt = Diagonal(sqrt.(S))
+    pSqrt = Symmetric(U * Ssqrt * transpose(U))
+
+    Ξ = [similar(p) for i in 1:manifold_dimension(M)]
     k = 1
     for i in 1:N, j in i:N
-        scale = ifelse(i == j, 1, sqrt(2))
-        @inbounds Y[k] = X[i, j] * scale
+        fill!(Ξ[k], zero(eltype(Ξ[k])))
+        s = i == j ? 1 / 2 : 1 / sqrt(2)
+        @inbounds Ξ[k][i, j] += 1
+        @inbounds Ξ[k][j, i] += 1
+        @inbounds Ξ[k] .= s * pSqrt * Ξ[k] * pSqrt
         k += 1
     end
-    return Y
+    return CachedBasis(B, Ξ)
 end
 
-function get_vector!(
+@doc raw"""
+    get_coordinates(::SymmetricPositiveDefinite, p, X, ::DefaultOrthonormalBasis)
+
+Using the basis from [`get_basis`](@ref get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
+the coordinates with respect to this ONB can be simplified to
+
+```math
+   c_k = \mathrm{tr}(p^{-\frac{1}{2}}\Delta_{i,j} X)
+```
+where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+"""
+get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
+
+function get_coordinates!(
     M::SymmetricPositiveDefinite{N},
-    Y,
+    c,
     p,
     X,
     ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 ) where {N}
     dim = manifold_dimension(M)
-    @assert size(X) == (div(N * (N + 1), 2),)
-    @assert size(Y) == (N, N)
+    @assert size(c) == (dim,)
+    @assert size(X) == (N, N)
+    @assert dim == div(N * (N + 1), 2)
+    e = eigen(Symmetric(p))
+    U = e.vectors
+    S = max.(e.values, floatmin(eltype(e.values)))
+    sSqrt = Diagonal(sqrt.(S))
+    pSqrt = Symmetric(U * sSqrt * transpose(U))
     k = 1
+    V = similar(p)
+    fill!(V, zero(eltype(V)))
+
+    F = cholesky(Symmetric(p))
+
     for i in 1:N, j in i:N
-        scale = ifelse(i == j, 1, 1 / sqrt(2))
-        @inbounds Y[i, j] = X[k] * scale
-        @inbounds Y[j, i] = X[k] * scale
+        s = i == j ? 1 / 2 : 1 / sqrt(2)
+        @inbounds V[i, j] += 1
+        @inbounds V[j, i] += 1
+        Yij = pSqrt * V * pSqrt
+        @inbounds c[k] = s * dot(F \ Symmetric(X), (Symmetric(Yij) / F))
         k += 1
+        @inbounds V[i, j] = 0
+        @inbounds V[j, i] = 0
     end
-    return Y
+
+    return c
+end
+
+@doc raw"""
+    get_vector(::SymmetricPositiveDefinite, p, c, ::DefaultOrthonormalBasis)
+
+Using the basis from [`get_basis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
+the vector reconstruction with respect to this ONB can be simplified to
+
+```math
+   X = p^{\frac{1}{2}} \Biggl( \sum_{i=1,j=i}^n c_k \Delta_{i,j} \Biggr) p^{\frac{1}{2}}
+```
+where $k$ is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+"""
+get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
+
+function get_vector!(
+    ::SymmetricPositiveDefinite{N},
+    X,
+    p,
+    c,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+) where {N}
+    @assert size(c) == (div(N * (N + 1), 2),)
+    @assert size(X) == (N, N)
+    e = eigen(Symmetric(p))
+    U = e.vectors
+    S = max.(e.values, floatmin(eltype(e.values)))
+    Ssqrt = Diagonal(sqrt.(S))
+    pSqrt = Symmetric(U * Ssqrt * transpose(U))
+    X .= 0
+    k = 1
+    V = similar(p)
+    fill!(V, zero(eltype(V)))
+    for i in 1:N, j in i:N
+        s = i == j ? 1 / 2 : 1 / sqrt(2)
+        @inbounds V[i, j] += 1
+        @inbounds V[j, i] += 1
+        Vij = pSqrt * V * pSqrt
+        @. X += (s * c[k]) * Vij
+        k += 1
+        @inbounds V[i, j] = 0
+        @inbounds V[j, i] = 0
+    end
+    return X
 end
 
 @doc raw"""
@@ -191,7 +308,7 @@ g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
 """
 function inner(::SymmetricPositiveDefinite, p, X, Y)
     F = cholesky(Symmetric(p))
-    return tr((F \ Symmetric(X)) * (F \ Symmetric(Y)))
+    return dot((F \ Symmetric(X)), (Symmetric(Y) / F))
 end
 
 @doc raw"""

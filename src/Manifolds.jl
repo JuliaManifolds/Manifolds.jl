@@ -5,6 +5,7 @@ import ManifoldsBase:
     _read,
     _write,
     allocate,
+    allocate_coordinates,
     allocate_result,
     allocate_result_type,
     allocation_promotion_function,
@@ -75,6 +76,7 @@ import Base:
     foreach,
     identity,
     in,
+    inv,
     isapprox,
     isempty,
     length,
@@ -272,6 +274,8 @@ include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Tucker.jl")
+include("manifolds/Symplectic.jl")
+include("manifolds/SymplecticStiefel.jl")
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -308,7 +312,7 @@ include("groups/special_euclidean.jl")
     p ∈ M
 
 Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](@ref) `M`.
-This method employs [`is_point`](@ref) deaticating the error throwing option.
+This method employs [`is_point`](@ref) deactivating the error throwing option.
 """
 Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
@@ -431,6 +435,9 @@ export Euclidean,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
     SymmetricPositiveSemidefiniteFixedRank,
+    Symplectic,
+    SymplecticStiefel,
+    SymplecticMatrix,
     Torus,
     Tucker
 export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
@@ -475,6 +482,8 @@ export AbstractMetric,
     MinkowskiMetric,
     PowerMetric,
     ProductMetric,
+    RealSymplecticMetric,
+    ExtendedSymplecticMetric,
     CanonicalMetric,
     MetricManifold
 export AbstractAtlas, RetractionAtlas
@@ -495,6 +504,7 @@ export AbstractRetractionMethod,
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     ApproximateLogarithmicMap,
+    CayleyInverseRetraction,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,
@@ -546,6 +556,8 @@ export ×,
     get_default_atlas,
     get_component,
     get_embedding,
+    grad_euclidean_to_manifold,
+    grad_euclidean_to_manifold!,
     hat,
     hat!,
     identity_element,
@@ -606,6 +618,8 @@ export ×,
     skewness,
     std,
     sym_rem,
+    symplectic_inverse_times,
+    symplectic_inverse_times!,
     submanifold,
     submanifold_component,
     submanifold_components,
