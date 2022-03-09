@@ -372,7 +372,7 @@ end
 @trait_function inverse_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
 function Base.convert(::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
-    return _convert_with_default(M, GT, default_metric_dispatch(M, GT()))
+    return _convert_with_default(M, GT, Val(is_default_metric(M, GT())))
 end
 
 function _convert_with_default(
