@@ -74,7 +74,6 @@ include("../utils.jl")
             @test repr(Sp_2) == "Symplectic{$(2), ℝ}()"
             @test representation_size(Sp_2) == (2, 2)
             @test base_manifold(Sp_2) === Sp_2
-            @test (@inferred Manifolds.default_metric_dispatch(Metr_Sp_2)) === Val(true)
 
             @test is_point(Sp_2, p_2)
             @test_throws DomainError is_point(Sp_2, p_2 + I, true)
@@ -140,7 +139,7 @@ include("../utils.jl")
             @test isapprox(
                 distance(Sp_2, p_2, q_2),
                 approximate_p_q_geodesic_distance;
-                atol=1.0e-16,
+                atol=1e-14,
             )
 
             # Project tangent vector into (T_pSp)^{\perp}:

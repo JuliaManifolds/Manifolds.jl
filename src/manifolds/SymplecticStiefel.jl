@@ -49,8 +49,6 @@ function active_traits(f, ::SymplecticStiefel, args...)
     return merge_traits(IsIsometricEmbeddedManifold())
 end
 
-decorated_manifold(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
-
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
     return CayleyInverseRetraction()
 end
@@ -295,6 +293,8 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
     q .= Γ * (exp(Λ' * Γ)[:, (4k + 1):end]) * (exp(λ' * γ)[:, (2k + 1):end])
     return q
 end
+
+get_embedding(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
 
 @doc raw"""
     gradient(::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
