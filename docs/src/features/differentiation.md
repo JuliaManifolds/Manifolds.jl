@@ -33,3 +33,9 @@ Modules = [Manifolds]
 Pages = ["differentiation/riemannian_diff.jl"]
 Order = [:type, :function, :constant]
 ```
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["differentiation/embedded_diff.jl"]
+Order = [:type, :function, :constant]
+```
