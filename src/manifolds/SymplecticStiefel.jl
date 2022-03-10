@@ -46,7 +46,7 @@ function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
 end
 
 function active_traits(f, ::SymplecticStiefel, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
+    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
 end
 
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
@@ -457,7 +457,7 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 """
 inverse_retract(::SymplecticStiefel, p, q, ::CayleyInverseRetraction)
 
-function inverse_retract!(M::SymplecticStiefel, X, p, q, ::CayleyInverseRetraction)
+function inverse_retract_caley!(M::SymplecticStiefel, X, p, q)
     U_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
     V_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
 
@@ -596,7 +596,7 @@ It is this expression we compute inplace of `q`.
 """
 retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
 
-function retract!(M::SymplecticStiefel, q, p, X, ::CayleyRetraction)
+function retract_caley!(M::SymplecticStiefel, q, p, X)
     # Define intermediate matrices for later use:
     A = symplectic_inverse_times(M, p, X)
 
