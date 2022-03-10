@@ -170,17 +170,9 @@ end
 Return the injectivity radius on the [`Grassmann`](@ref) `M`, which is $\frac{π}{2}$.
 """
 injectivity_radius(::Grassmann) = π / 2
-injectivity_radius(::Grassmann, ::ExponentialRetraction) = π / 2
-injectivity_radius(::Grassmann, ::Any) = π / 2
-injectivity_radius(::Grassmann, ::Any, ::ExponentialRetraction) = π / 2
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::Grassmann,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
+injectivity_radius(::Grassmann, p) = π / 2
+injectivity_radius(::Grassmann, ::AbstractRetractionMethod) = π / 2
+injectivity_radius(::Grassmann, p, ::AbstractRetractionMethod) = π / 2
 
 @doc raw"""
     inner(M::Grassmann, p, X, Y)

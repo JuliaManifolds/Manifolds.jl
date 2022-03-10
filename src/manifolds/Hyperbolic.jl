@@ -224,17 +224,6 @@ end
 Return the injectivity radius on the [`Hyperbolic`](@ref), which is $∞$.
 """
 injectivity_radius(::Hyperbolic) = Inf
-injectivity_radius(::Hyperbolic, ::ExponentialRetraction) = Inf
-injectivity_radius(::Hyperbolic, ::Any) = Inf
-injectivity_radius(::Hyperbolic, ::Any, ::ExponentialRetraction) = Inf
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::Hyperbolic,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
 
 for T in _ExtraHyperbolicPointTypes
     @eval function isapprox(::Hyperbolic, p::$T, q::$T; kwargs...)

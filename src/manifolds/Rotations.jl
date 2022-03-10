@@ -367,19 +367,8 @@ Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
 [`Rotations`](@ref) `M` which is $\frac{π}{\sqrt{2}}$.
 """
 injectivity_radius(::Rotations) = π * sqrt(2.0)
-injectivity_radius(::Rotations, ::ExponentialRetraction) = π * sqrt(2.0)
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::Rotations,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
-injectivity_radius(::Rotations, ::Any) = π * sqrt(2.0)
-injectivity_radius(::Rotations, ::Any, ::ExponentialRetraction) = π * sqrt(2.0)
-injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
-injectivity_radius(::Rotations, p, ::PolarRetraction) = π / sqrt(2.0)
+injectivity_radius_exp(::Rotations) = π * sqrt(2.0)
+_injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
 
 @doc raw"""
     inner(M::Rotations, p, X, Y)

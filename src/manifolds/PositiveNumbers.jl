@@ -148,17 +148,6 @@ exp!(::PositiveNumbers, q, p, X) = (q .= p .* exp.(X ./ p))
 Return the injectivity radius on the [`PositiveNumbers`](@ref) `M`, i.e. $\infty$.
 """
 injectivity_radius(::PositiveNumbers) = Inf
-injectivity_radius(::PositiveNumbers, ::ExponentialRetraction) = Inf
-injectivity_radius(::PositiveNumbers, ::Any) = Inf
-injectivity_radius(::PositiveNumbers, ::Any, ::ExponentialRetraction) = Inf
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::PositiveNumbers,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
 
 @doc raw"""
     inner(M::PositiveNumbers, p, X, Y)

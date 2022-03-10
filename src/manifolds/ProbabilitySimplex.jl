@@ -182,21 +182,6 @@ function injectivity_radius(::ProbabilitySimplex{n}, p) where {n}
     s = sum(p) - p[i]
     return 2 * acos(sqrt(s))
 end
-function injectivity_radius(M::ProbabilitySimplex, p, ::ExponentialRetraction)
-    return injectivity_radius(M, p)
-end
-injectivity_radius(M::ProbabilitySimplex, p, ::SoftmaxRetraction) = injectivity_radius(M, p)
-injectivity_radius(M::ProbabilitySimplex) = 0
-injectivity_radius(M::ProbabilitySimplex, ::SoftmaxRetraction) = 0
-injectivity_radius(M::ProbabilitySimplex, ::ExponentialRetraction) = 0
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::ProbabilitySimplex,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
 
 @doc raw"""
     inner(M::ProbabilitySimplex,p,X,Y)

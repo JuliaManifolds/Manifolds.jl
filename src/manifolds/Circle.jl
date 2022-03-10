@@ -195,17 +195,6 @@ end
 Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. $π$.
 """
 injectivity_radius(::Circle) = π
-injectivity_radius(::Circle, ::ExponentialRetraction) = π
-injectivity_radius(::Circle, ::Any) = π
-injectivity_radius(::Circle, ::Any, ::ExponentialRetraction) = π
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::Circle,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
 
 @doc raw"""
     inner(M::Circle, p, X, Y)

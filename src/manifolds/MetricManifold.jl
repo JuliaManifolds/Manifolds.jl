@@ -410,7 +410,10 @@ function exp!(
     return exp!(M.manifold, q, p, X)
 end
 
-injectivity_radius(M::MetricManifold, args...) = injectivity_radius(M.manifold, args...)
+injectivity_radius(M::MetricManifold) = injectivity_radius(M.manifold)
+function injectivity_radius(M::MetricManifold, m::AbstractRetractionMethod)
+    return injectivity_radius(M.manifold, m)
+end
 
 @doc raw"""
     inner(N::MetricManifold{M,G}, p, X, Y)
@@ -681,7 +684,7 @@ where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 sharp(::MetricManifold, ::Any, ::CoTFVector)
 
 function sharp!(
-    ::IsMetricManifold,
+    ::TraitList{IsMetricManifold},
     M::AbstractDecoratorManifold,
     X::TFVector,
     p,

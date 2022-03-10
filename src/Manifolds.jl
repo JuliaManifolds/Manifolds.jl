@@ -4,6 +4,7 @@ import ManifoldsBase:
     @trait_function,
     _access_nested,
     _get_basis,
+    _injectivity_radius,
     _inverse_retract,
     _inverse_retract!,
     _read,
@@ -513,7 +514,7 @@ export AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
-export IsDefaultMetric, IsDefaultConnection
+export IsDefaultMetric, IsDefaultConnection, IsMetricManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector

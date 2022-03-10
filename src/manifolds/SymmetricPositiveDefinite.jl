@@ -90,9 +90,9 @@ Since `M` is a Hadamard manifold with respect to the [`LinearAffineMetric`](@ref
 [`LogCholeskyMetric`](@ref), the injectivity radius is globally $∞$.
 """
 injectivity_radius(::SymmetricPositiveDefinite) = Inf
-injectivity_radius(::SymmetricPositiveDefinite, ::ExponentialRetraction) = Inf
-injectivity_radius(::SymmetricPositiveDefinite, ::Any) = Inf
-injectivity_radius(::SymmetricPositiveDefinite, ::Any, ::ExponentialRetraction) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, p) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, ::AbstractRetractionMethod) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, p, ::AbstractRetractionMethod) = Inf
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)

@@ -193,17 +193,9 @@ Return the injectivity radius on the [`GeneralizedGrassmann`](@ref) `M`,
 which is $\frac{π}{2}$.
 """
 injectivity_radius(::GeneralizedGrassmann) = π / 2
-injectivity_radius(::GeneralizedGrassmann, ::ExponentialRetraction) = π / 2
-injectivity_radius(::GeneralizedGrassmann, ::Any) = π / 2
-injectivity_radius(::GeneralizedGrassmann, ::Any, ::ExponentialRetraction) = π / 2
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::GeneralizedGrassmann,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
+injectivity_radius(::GeneralizedGrassmann, p) = π / 2
+injectivity_radius(::GeneralizedGrassmann, ::AbstractRetractionMethod) = π / 2
+injectivity_radius(::GeneralizedGrassmann, p, ::AbstractRetractionMethod) = π / 2
 
 function get_embedding(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
     return GeneralizedStiefel(N, K, M.B, 𝔽)

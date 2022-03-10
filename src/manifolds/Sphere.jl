@@ -254,19 +254,16 @@ Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
 [`AbstractSphere`](@ref), which is globally $\frac{π}{2}$.
 """
 injectivity_radius(::AbstractSphere) = π
-injectivity_radius(::AbstractSphere, ::ExponentialRetraction) = π
-injectivity_radius(::AbstractSphere, ::ProjectionRetraction) = π / 2
-injectivity_radius(::AbstractSphere, ::Any) = π
-injectivity_radius(::AbstractSphere, ::Any, ::ExponentialRetraction) = π
-injectivity_radius(::AbstractSphere, ::Any, ::ProjectionRetraction) = π / 2
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::AbstractSphere,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
+injectivity_radius(::AbstractSphere, p) = π
+#avoid falling back but use the ones below
+function injectivity_radius(M::AbstractSphere, m::AbstractRetractionMethod)
+    return _injectivity_radius(M, m)
+end
+function injectivity_radius(M::AbstractSphere, p, m::AbstractRetractionMethod)
+    return _injectivity_radius(M, p, m)
+end
+_injectivity_radius(::AbstractSphere, ::ExponentialRetraction) = π
+_injectivity_radius(::AbstractSphere, ::ProjectionRetraction) = π / 2
 
 @doc raw"""
     inverse_retract(M::AbstractSphere, p, q, ::ProjectionInverseRetraction)
