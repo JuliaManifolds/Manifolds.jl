@@ -303,12 +303,12 @@ function flat!(
     return ξ
 end
 function flat!(
-    ::TraitList{IsDefaultMetric},
-    M::MetricManifold,
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
     ξ::CoTFVector,
     p,
     X::TFVector,
-)
+) where {𝔽,TM<:AbstractManifold,G<:AbstractMetric}
     flat!(M.manifold, ξ, p, X)
     return ξ
 end
@@ -510,6 +510,15 @@ This yields the property for two tangent vectors (using Einstein summation conve
 local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 @trait_function local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
+function local_metric(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return local_metric(M.manifold, p, B)
+end
+
 @doc raw"""
     local_metric_jacobian(
         M::AbstractManifold,
@@ -706,12 +715,12 @@ function sharp!(
     return X
 end
 function sharp!(
-    ::TraitList{IsDefaultMetric},
-    M::MetricManifold,
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
     X::TFVector,
     p,
     ξ::CoTFVector,
-)
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     sharp!(M.manifold, X, p, ξ)
     return X
 end
