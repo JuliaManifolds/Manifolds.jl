@@ -18,8 +18,6 @@ end
 
 Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
-invariant_metric_dispatch(::CircleGroup, ::ActionDirection) = Val(true)
-
 adjoint_action(::CircleGroup, p, X) = X
 
 adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)

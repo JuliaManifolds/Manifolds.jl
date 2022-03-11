@@ -84,6 +84,24 @@ function exp!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, q, p, X)
     return exp!(M.manifold, q, p, X)
 end
 
+@trait_function has_invariant_metric(M::AbstractDecoratorManifold, op::ActionDirection)
+
+has_invariant_metric(::EmptyTrait, ::AbstractDecoratorManifold, op) = false
+function has_invariant_metric(
+    ::TraitList{HasLeftInvariantMetric},
+    ::AbstractDecoratorManifold,
+    ::LeftAction
+)
+    return true
+end
+function has_invariant_metric(
+    ::TraitList{HasRightInvariantMetric},
+    ::AbstractDecoratorManifold,
+    ::RightAction
+)
+    return true
+end
+
 @trait_function has_biinvariant_metric(M::AbstractDecoratorManifold)
 
 has_biinvariant_metric(::TraitList{EmptyTrait}, ::AbstractDecoratorManifold) = false
@@ -93,7 +111,6 @@ function has_biinvariant_metric(
 )
     return true
 end
-
 function inner(
     t::TraitList{IT},
     M::AbstractDecoratorManifold,
