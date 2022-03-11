@@ -36,6 +36,8 @@ function flat(M::AbstractManifold, p, X::TFVector{<:Any,<:AbstractBasis})
     return CoTFVector(X.data, dual_basis(M, p, X.basis))
 end
 
+is_metric_function(::typeof(flat)) = true
+
 function flat!(::AbstractManifold, ξ::RieszRepresenterCotangentVector, p, X)
     # TODO: maybe assert that ξ.p is equal to p? Allowing for varying p in ξ leads to
     # issues with power manifold.
@@ -153,6 +155,8 @@ sharp(::AbstractManifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
 function sharp(M::AbstractManifold, p, X::CoTFVector{<:Any,<:AbstractBasis})
     return TFVector(X.data, dual_basis(M, p, X.basis))
 end
+
+is_metric_function(::typeof(sharp)) = true
 
 @trait_function sharp!(M::AbstractDecoratorManifold, X::TFVector, p, ξ::CoTFVector)
 

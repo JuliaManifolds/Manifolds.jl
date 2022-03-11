@@ -278,7 +278,7 @@ end
 )
 
 @doc raw"""
-    flat(N::MetricManifold{M,G}, p, X::FVector{TangentSpaceType})
+    flat(N::MetricManifold{M,G}, p, X::TFVector)
 
 Compute the musical isomorphism to transform the tangent vector `X` from the
 [`AbstractManifold`](@ref) `M` equipped with [`AbstractMetric`](@ref) `G` to a cotangent by
@@ -289,7 +289,7 @@ X^♭= G_p X,
 ````
 where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@ref)
 """
-function flat(::MetricManifold, ::Any...) end
+flat(::MetricManifold, ::Any, ::TFVector)
 
 function flat!(
     ::TraitList{IsMetricManifold},
@@ -689,7 +689,7 @@ end
 )
 
 @doc raw"""
-    sharp(N::MetricManifold{M,G}, p, ξ::FVector{CotangentSpaceType})
+    sharp(N::MetricManifold{M,G}, p, ξ::CoTFVector)
 
 Compute the musical isomorphism to transform the cotangent vector `ξ` from the
 [`AbstractManifold`](@ref) `M` equipped with [`AbstractMetric`](@ref) `G` to a tangent by
@@ -701,7 +701,7 @@ computing
 where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 [`inverse_local_metric`](@ref) here to obtain ``G_p^{-1}``.
 """
-function sharp(::MetricManifold, ::Any, ::CoTFVector) end
+sharp(::MetricManifold, ::Any, ::CoTFVector)
 
 function sharp!(
     ::TraitList{IsMetricManifold},
@@ -805,6 +805,8 @@ is_metric_function(::Any) = false
 for mf in [
     change_metric,
     change_metric!,
+    change_representer,
+    change_representer!,
     christoffel_symbols_first,
     christoffel_symbols_second,
     christoffel_symbols_second_jacobian,
@@ -812,7 +814,6 @@ for mf in [
     einstein_tensor,
     exp,
     exp!,
-    flat,
     flat!,
     gaussian_curvature,
     get_basis,
@@ -841,7 +842,7 @@ for mf in [
     retract!,
     ricci_curvature,
     ricci_tensor,
-    sharp,
+    riemann_tensor,
     sharp!,
     vector_transport_along,
     vector_transport_along!,

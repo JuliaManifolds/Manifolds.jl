@@ -43,6 +43,14 @@ function Manifolds.local_metric(
 ) where {T<:ManifoldsBase.AbstractOrthogonalBasis}
     return 2 .* Diagonal(1.0:manifold_dimension(M))
 end
+function Manifolds.get_coordinates_orthogonal(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
+    ::Any,
+    X,
+    ::ManifoldsBase.AbstractNumbers,
+)
+    return 1 ./ [1.0:manifold_dimension(M)...] .* X
+end
 function Manifolds.get_coordinates_orthogonal!(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
     c,
@@ -71,6 +79,14 @@ function Manifolds.get_coordinates_orthogonal!(
 )
     c .= 1 ./ (2 .* [1.0:manifold_dimension(M)...]) .* X
     return c
+end
+function Manifolds.get_vector_orthogonal!(
+    M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
+    ::Any,
+    c,
+    ::ManifoldsBase.AbstractNumbers,
+)
+    return 2 .* [1.0:manifold_dimension(M)...] .* c
 end
 function Manifolds.get_vector_orthogonal!(
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},

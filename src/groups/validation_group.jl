@@ -231,26 +231,14 @@ function inverse_translate_diff!(
 end
 
 function exp_lie(M::ValidationManifold, X; kwargs...)
-    is_vector(
-        M,
-        Identity(M.manifold),
-        array_value(X),
-        true;
-        kwargs...,
-    )
+    is_vector(M, Identity(M.manifold), array_value(X), true; kwargs...)
     q = array_point(exp_lie(M.manifold, array_value(X)))
     is_point(M, q, true; kwargs...)
     return q
 end
 
 function exp_lie!(M::ValidationManifold, q, X; kwargs...)
-    is_vector(
-        M,
-        Identity(M.manifold),
-        array_value(X),
-        true;
-        kwargs...,
-    )
+    is_vector(M, Identity(M.manifold), array_value(X), true; kwargs...)
     exp_lie!(M.manifold, array_value(q), array_value(X))
     is_point(M, q, true; kwargs...)
     return q
@@ -259,25 +247,13 @@ end
 function log_lie(M::ValidationManifold, q; kwargs...)
     is_point(M, q, true; kwargs...)
     X = ValidationTVector(log_lie(M.manifold, array_value(q)))
-    is_vector(
-        M,
-        Identity(M.manifold),
-        array_value(X),
-        true;
-        kwargs...,
-    )
+    is_vector(M, Identity(M.manifold), array_value(X), true; kwargs...)
     return X
 end
 
 function log_lie!(M::ValidationManifold, X, q; kwargs...)
     is_point(M, q, true; kwargs...)
     log_lie!(M.manifold, array_value(X), array_value(q))
-    is_vector(
-        M,
-        Identity(M.manifold),
-        array_value(X),
-        true;
-        kwargs...,
-    )
+    is_vector(M, Identity(M.manifold), array_value(X), true; kwargs...)
     return X
 end

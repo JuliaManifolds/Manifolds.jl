@@ -12,7 +12,6 @@ const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperat
     return merge_traits(IsGroupManifold(M.op))
 end
 
-
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 
 Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
