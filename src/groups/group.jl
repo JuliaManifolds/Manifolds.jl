@@ -526,6 +526,21 @@ function is_vector(
 )
     return is_vector(base_manifold(G), p, X, te, cbp; kwargs...)
 end
+function is_vector(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    e::Identity,
+    X,
+    te=false,
+    cbp=true;
+    kwargs...,
+)
+    if cbp
+        ie = is_identity(G, e; kwargs...)
+        (!te) && return ie
+    end
+    return is_vector(base_manifold(G), identity_element(G), X, te, false; kwargs...)
+end
 
 function log(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
     return log(base_manifold(G), p, q)
@@ -983,6 +998,8 @@ representation of 𝔰𝔬(2) is trivial.
 """
 lie_bracket(G::AbstractDecoratorManifold, X, Y)
 @trait_function lie_bracket(M::AbstractDecoratorManifold, X, Y)
+
+@trait_function lie_bracket!(M::AbstractDecoratorManifold, Z, X, Y)
 
 _action_order(p, q, ::LeftAction) = (p, q)
 _action_order(p, q, ::RightAction) = (q, p)
@@ -1579,7 +1596,7 @@ Group operation that consists of multiplication.
 """
 struct MultiplicationOperation <: AbstractGroupOperation end
 
-const MultiplicationGroupTrait = TraitList{<:IsGroupManifold{MultiplicationOperation}}
+const MultiplicationGroupTrait = TraitList{<:IsGroupManifold{<:MultiplicationOperation}}
 
 Base.:*(e::Identity{MultiplicationOperation}) = e
 Base.:*(::Identity{MultiplicationOperation}, p) = p

@@ -66,8 +66,37 @@ function compose(M::ValidationManifold, p, q; kwargs...)
     is_point(M, x, true; kwargs...)
     return x
 end
+function compose(M::ValidationManifold, p::Identity, q; kwargs...)
+    is_point(M, p, true; kwargs...)
+    is_point(M, q, true; kwargs...)
+    x = array_point(compose(M.manifold, p, array_value(q)))
+    is_point(M, x, true; kwargs...)
+    return x
+end
+function compose(M::ValidationManifold, p, q::Identity; kwargs...)
+    is_point(M, p, true; kwargs...)
+    is_point(M, q, true; kwargs...)
+    x = array_point(compose(M.manifold, array_value(p), q))
+    is_point(M, x, true; kwargs...)
+    return x
+end
 
 function compose!(M::ValidationManifold, x, p, q; kwargs...)
+    is_point(M, p, true; kwargs...)
+    is_point(M, q, true; kwargs...)
+    compose!(M.manifold, array_value(x), array_value(p), array_value(q))
+    is_point(M, x, true; kwargs...)
+    return x
+end
+
+function compose!(M::ValidationManifold, x, p::Identity, q; kwargs...)
+    is_point(M, p, true; kwargs...)
+    is_point(M, q, true; kwargs...)
+    compose!(M.manifold, array_value(x), array_value(p), array_value(q))
+    is_point(M, x, true; kwargs...)
+    return x
+end
+function compose!(M::ValidationManifold, x, p, q::Identity; kwargs...)
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
     compose!(M.manifold, array_value(x), array_value(p), array_value(q))
@@ -207,7 +236,6 @@ function exp_lie(M::ValidationManifold, X; kwargs...)
         Identity(M.manifold),
         array_value(X),
         true;
-        check_base_point=false,
         kwargs...,
     )
     q = array_point(exp_lie(M.manifold, array_value(X)))
@@ -221,7 +249,6 @@ function exp_lie!(M::ValidationManifold, q, X; kwargs...)
         Identity(M.manifold),
         array_value(X),
         true;
-        check_base_point=false,
         kwargs...,
     )
     exp_lie!(M.manifold, array_value(q), array_value(X))
@@ -237,7 +264,6 @@ function log_lie(M::ValidationManifold, q; kwargs...)
         Identity(M.manifold),
         array_value(X),
         true;
-        check_base_point=false,
         kwargs...,
     )
     return X
@@ -251,7 +277,6 @@ function log_lie!(M::ValidationManifold, X, q; kwargs...)
         Identity(M.manifold),
         array_value(X),
         true;
-        check_base_point=false,
         kwargs...,
     )
     return X
