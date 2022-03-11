@@ -88,14 +88,14 @@ end
 
 has_invariant_metric(::EmptyTrait, ::AbstractDecoratorManifold, op) = false
 function has_invariant_metric(
-    ::TraitList{HasLeftInvariantMetric},
+    ::TraitList{<:HasLeftInvariantMetric},
     ::AbstractDecoratorManifold,
     ::LeftAction,
 )
     return true
 end
 function has_invariant_metric(
-    ::TraitList{HasRightInvariantMetric},
+    ::TraitList{<:HasRightInvariantMetric},
     ::AbstractDecoratorManifold,
     ::RightAction,
 )
