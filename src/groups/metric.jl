@@ -65,11 +65,23 @@ direction(::TraitList{HasLeftInvariantMetric}, ::AbstractDecoratorManifold) = Le
 
 direction(::TraitList{HasRightInvariantMetric}, ::AbstractDecoratorManifold) = RightAction()
 
-function exp(::TraitList{<:HasBiinvariantMetric}, M::MetricManifold, p, X)
-    return retract(base_group(M), p, X, GroupExponentialRetraction(direction(M)))
+function exp(::TraitList{HasLeftInvariantMetric}, M::MetricManifold, p, X)
+    return retract(M.manifold, p, X, GroupExponentialRetraction(LeftAction()))
 end
-function exp!(::TraitList{<:HasBiinvariantMetric}, M::MetricManifold, q, p, X)
-    return retract!(base_group(M), q, p, X, GroupExponentialRetraction(direction(M)))
+function exp!(::TraitList{HasLeftInvariantMetric}, M::MetricManifold, q, p, X)
+    return retract!(M.manifold, q, p, X, GroupExponentialRetraction(LeftAction()))
+end
+function exp(::TraitList{HasRightInvariantMetric}, M::MetricManifold, p, X)
+    return retract(M.manifold, p, X, GroupExponentialRetraction(RightAction()))
+end
+function exp!(::TraitList{HasRightInvariantMetric}, M::MetricManifold, q, p, X)
+    return retract!(M.manifold, q, p, X, GroupExponentialRetraction(RightAction()))
+end
+function exp(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, X)
+    return exp(M.manifold, p, X)
+end
+function exp!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, q, p, X)
+    return exp!(M.manifold, q, p, X)
 end
 
 @trait_function has_biinvariant_metric(M::AbstractDecoratorManifold)
@@ -83,16 +95,25 @@ function has_biinvariant_metric(
 end
 
 function inner(
-    t::TraitList{<:AbstractInvarianceTrait},
+    t::TraitList{IT},
     M::AbstractDecoratorManifold,
     p,
     X,
     Y,
-) where {𝔽}
-    conv = direction(M)
+) where {IT<:AbstractInvarianceTrait}
+    conv = direction(IT)
     Xₑ = inverse_translate_diff(M.manifold, p, p, X, conv)
     Yₑ = inverse_translate_diff(M.manifold, p, p, Y, conv)
     return inner(next_trait(t), M, Identity(M), Xₑ, Yₑ)
+end
+function inner(
+    t::TraitList{<:IsGroupManifold},
+    M::AbstractDecoratorManifold,
+    ::Identity,
+    X,
+    Y,
+)
+    return inner(next_trait(t), M, identity_element(M), X, Y)
 end
 
 function inverse_translate_diff(
@@ -117,35 +138,64 @@ function inverse_translate_diff!(
     return inverse_translate_diff!(M.manifold, Y, p, q, X, conv)
 end
 
-function log(
-    ::TraitList{<:HasBiinvariantMetric},
-    M::AbstractDecoratorManifold,
-    p,
-    q,
-) where {𝔽}
-    conv = direction(M)
-    return inverse_retract(base_group(M), p, q, GroupLogarithmicInverseRetraction(conv))
+function log(::TraitList{HasLeftInvariantMetric}, M::MetricManifold, p, q)
+    return inverse_retract(
+        M.manifold,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(LeftAction()),
+    )
 end
-function log!(
-    ::TraitList{<:HasBiinvariantMetric},
-    M::AbstractDecoratorManifold,
-    X,
-    p,
-    q,
-) where {𝔽}
-    conv = direction(M)
-    return inverse_retract!(base_group(M), X, p, q, GroupLogarithmicInverseRetraction(conv))
+function log!(::TraitList{HasLeftInvariantMetric}, M::MetricManifold, X, p, q)
+    return inverse_retract!(
+        M.manifold,
+        X,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(LeftAction()),
+    )
+end
+function log(::TraitList{HasRightInvariantMetric}, M::MetricManifold, p, q)
+    return inverse_retract(
+        M.manifold,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(RightAction()),
+    )
+end
+function log!(::TraitList{HasRightInvariantMetric}, M::MetricManifold, X, p, q)
+    return inverse_retract!(
+        M.manifold,
+        X,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(RightAction()),
+    )
+end
+function log(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, q)
+    return log(M.manifold, p, q)
+end
+function log!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, X, p, q)
+    return log!(M.manifold, X, p, q)
 end
 
 function LinearAlgebra.norm(
-    t::TraitList{<:AbstractInvarianceTrait},
+    t::TraitList{IT},
     M::AbstractDecoratorManifold,
     p,
     X,
-) where {𝔽}
-    conv = direction(M)
+) where {IT<:AbstractInvarianceTrait}
+    conv = direction(IT)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     return norm(next_trait(t), M, Identity(M), Xₑ)
+end
+function LinearAlgebra.norm(
+    t::TraitList{<:IsGroupManifold},
+    M::AbstractDecoratorManifold,
+    ::Identity,
+    X,
+)
+    return norm(next_trait(t), M, identity_element(M), X)
 end
 
 function translate_diff!(

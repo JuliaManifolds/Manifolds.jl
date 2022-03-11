@@ -182,7 +182,9 @@ function injectivity_radius(::ProbabilitySimplex{n}, p) where {n}
     s = sum(p) - p[i]
     return 2 * acos(sqrt(s))
 end
-injectivity_radius(M::ProbabilitySimplex, p, ::AbstractRetractionMethod) = injectivity_radius(M, p)
+function injectivity_radius(M::ProbabilitySimplex, p, ::AbstractRetractionMethod)
+    return injectivity_radius(M, p)
+end
 injectivity_radius(M::ProbabilitySimplex) = 0
 injectivity_radius(M::ProbabilitySimplex, ::AbstractRetractionMethod) = 0
 

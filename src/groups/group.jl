@@ -64,12 +64,18 @@ Specify that a certain the metric of a [`GroupManifold`](@ref) is a left-invaria
 """
 struct HasLeftInvariantMetric <: AbstractInvarianceTrait end
 
+direction(::HasLeftInvariantMetric) = LeftAction()
+direction(::Type{HasLeftInvariantMetric}) = LeftAction()
+
 """
     HasRightInvariantMetric <: AbstractInvarianceTrait
 
 Specify that a certain the metric of a [`GroupManifold`](@ref) is a right-invariant metric
 """
 struct HasRightInvariantMetric <: AbstractInvarianceTrait end
+
+direction(::HasRightInvariantMetric) = RightAction()
+direction(::Type{HasRightInvariantMetric}) = RightAction()
 
 """
     HasBiinvariantMetric <: AbstractInvarianceTrait
