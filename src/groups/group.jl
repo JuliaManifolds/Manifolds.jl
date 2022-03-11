@@ -88,7 +88,11 @@ function parent_trait(::HasBiinvariantMetric)
 end
 
 @inline function active_traits(f, M::GroupManifold, args...)
-    return merge_traits(IsGroupManifold(M.op), active_traits(f, M.manifold, args...))
+    return merge_traits(
+        IsGroupManifold(M.op),
+        active_traits(f, M.manifold, args...),
+        IsExplicitDecorator(),
+    )
 end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
@@ -101,6 +105,38 @@ function (::Type{T})(M::AbstractManifold) where {T<:AbstractGroupOperation}
 end
 
 manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
+
+"""
+    is_group_manifold(G::GroupManifold)
+    is_group_manifoldd(G::AbstractManifold, o::AbstractGroupOperation)
+
+returns whether an [`AbstractDecoratorManifold`](@ref) is a group manifold with
+[`AbstractGroupOperation`]('ref) `o`.
+For a [`GroupManifold`](@ref) `G` this checks whether the right operations is stored within `G`.
+"""
+is_group_manifold(::AbstractManifold, ::AbstractGroupOperation) = false
+
+@trait_function is_group_manifold(M::AbstractDecoratorManifold, op::AbstractGroupOperation)
+function is_group_manifold(
+    ::TraitList{<:IsGroupManifold{<:O}},
+    ::AbstractDecoratorManifold,
+    ::O,
+) where {O<:AbstractGroupOperation}
+    return true
+end
+@trait_function is_group_manifold(M::AbstractDecoratorManifold)
+function is_group_manifold(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation}},
+    ::AbstractDecoratorManifold,
+)
+    return is_group_manifold(M, t.head.op)
+end
+function is_group_manifold(
+    ::TraitList{<:IsGroupManifold{<:O}},
+    ::GroupManifold{𝔽,<:M,<:O},
+) where {𝔽,O<:AbstractGroupOperation,M<:AbstractManifold}
+    return true
+end
 
 ###################
 # Action directions
@@ -206,6 +242,16 @@ identity_element(G::AbstractDecoratorManifold, p)
 function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
     q = allocate_result(G, identity_element, p)
     return identity_element!(G, q)
+end
+function check_size(
+    ::TraitList{<:IsGroupManifold{<:O}},
+    M::AbstractDecoratorManifold,
+    ::Identity{<:O},
+) where {O<:AbstractGroupOperation}
+    return true
+end
+function check_size(::EmptyTrait, M::AbstractDecoratorManifold, e::Identity)
+    return DomainError(0, "$M seems to not be a group manifold with $e.")
 end
 
 @doc raw"""
