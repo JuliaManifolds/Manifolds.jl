@@ -227,6 +227,9 @@ function get_vector_orthonormal!(
 end
 
 injectivity_radius(::AbstractProjectiveSpace) = π / 2
+injectivity_radius(::AbstractProjectiveSpace, p) = π / 2
+injectivity_radius(::AbstractProjectiveSpace, ::AbstractRetractionMethod) = π / 2
+injectivity_radius(::AbstractProjectiveSpace, p, ::AbstractRetractionMethod) = π / 2
 
 @doc raw"""
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::ProjectionInverseRetraction)
