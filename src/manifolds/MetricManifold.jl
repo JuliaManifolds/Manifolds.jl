@@ -70,7 +70,7 @@ function active_traits(f, M::MetricManifold, args...)
         IsMetricManifold(),
         is_default_metric(M.manifold, M.metric) ? IsDefaultMetric(M.metric) : EmptyTrait(),
         active_traits(f, M.manifold, args...),
-        #IsExplicitDecorator(:manifold),
+        IsExplicitDecorator(),
     )
 end
 # remetricise instead of double-decorating
@@ -302,6 +302,17 @@ function flat!(
     copyto!(ξ.data, g * X.data)
     return ξ
 end
+function flat!(
+    ::TraitList{IsDefaultMetric},
+    M::MetricManifold,
+    ξ::CoTFVector,
+    p,
+    X::TFVector,
+)
+    flat!(M.manifold, ξ, p, X)
+    return ξ
+end
+
 # ToDo how to do a flat (nonmutating?)
 
 function get_basis(
@@ -692,6 +703,16 @@ function sharp!(
 )
     Ginv = inverse_local_metric(M, p, X.basis)
     copyto!(X.data, Ginv * ξ.data)
+    return X
+end
+function sharp!(
+    ::TraitList{IsDefaultMetric},
+    M::MetricManifold,
+    X::TFVector,
+    p,
+    ξ::CoTFVector,
+)
+    sharp!(M.manifold, X, p, ξ)
     return X
 end
 
