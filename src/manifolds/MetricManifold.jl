@@ -70,7 +70,7 @@ function active_traits(f, M::MetricManifold, args...)
         IsMetricManifold(),
         is_default_metric(M.manifold, M.metric) ? IsDefaultMetric(M.metric) : EmptyTrait(),
         active_traits(f, M.manifold, args...),
-        IsExplicitDecorator(),
+        is_metric_function(f) ? EmptyTrait() : IsExplicitDecorator(),
     )
 end
 # remetricise instead of double-decorating
@@ -289,7 +289,7 @@ X^♭= G_p X,
 ````
 where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@ref)
 """
-flat(::MetricManifold, ::Any...)
+function flat(::MetricManifold, ::Any...) end
 
 function flat!(
     ::TraitList{IsMetricManifold},
@@ -701,7 +701,7 @@ computing
 where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 [`inverse_local_metric`](@ref) here to obtain ``G_p^{-1}``.
 """
-sharp(::MetricManifold, ::Any, ::CoTFVector)
+function sharp(::MetricManifold, ::Any, ::CoTFVector) end
 
 function sharp!(
     ::TraitList{IsMetricManifold},
@@ -800,3 +800,49 @@ end
 
 zero_vector(M::MetricManifold, p) = zero_vector(M.manifold, p)
 zero_vector!(M::MetricManifold, X, p) = zero_vector!(M.manifold, X, p)
+
+is_metric_function(::Any) = false
+for mf in [
+    change_metric,
+    change_metric!,
+    christoffel_symbols_first,
+    christoffel_symbols_second,
+    christoffel_symbols_second_jacobian,
+    det_local_metric,
+    einstein_tensor,
+    exp,
+    exp!,
+    flat,
+    flat!,
+    gaussian_curvature,
+    get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    get_vectors,
+    inner,
+    inverse_local_metric,
+    inverse_retract,
+    inverse_retract!,
+    local_metric,
+    local_metric_jacobian,
+    log,
+    log!,
+    log_local_metric_density,
+    norm,
+    retract,
+    retract!,
+    ricci_curvature,
+    ricci_tensor,
+    sharp,
+    sharp!,
+    vector_transport_along,
+    vector_transport_along!,
+    vector_transport_direction,
+    vector_transport_direction!,
+    vector_transport_to,
+    vector_transport_to!,
+]
+    @eval is_metric_function(::typeof($mf)) = true
+end
