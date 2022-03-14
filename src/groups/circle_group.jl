@@ -11,6 +11,8 @@ CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 @inline function active_traits(f, M::CircleGroup, args...)
     return merge_traits(
         IsDefaultMetric(EuclideanMetric()),
+        HasLeftInvariantMetric(),
+        HasRightInvariantMetric(),
         IsGroupManifold(M.op),
         active_traits(f, M.manifold, args...),
     )
