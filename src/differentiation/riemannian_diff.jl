@@ -46,11 +46,11 @@ end
 @doc raw"""
     TangentDiffBackend <: AbstractRiemannianDiffBackend
 
-A backend that uses a tangent space and a basis therein to derive an
+A backend that uses tangent spaces and bases therein to derive an
 intrinsic differentiation scheme.
 
-Since it works in a tangent space, methods might require a retraction and an
-inverse retraction as well as a basis.
+Since it works in tangent spaces at argument and function value, methods might require a
+retraction and an inverse retraction as well as a basis.
 
 In the tangent space itself, this backend then employs an (Euclidean)
 [`AbstractDiffBackend`](@ref)
@@ -65,35 +65,41 @@ With the keyword arguments
 
 * `retraction` an [`AbstractRetractionMethod`](@ref) ([`ExponentialRetraction`](@ref) by default)
 * `inverse_retraction` an [`AbstractInverseRetractionMethod`](@ref) ([`LogarithmicInverseRetraction`](@ref) by default)
-* `basis` an [`AbstractBasis`](@ref) ([`DefaultOrthogonalBasis`](@ref) by default)
+* `basis_arg` an [`AbstractBasis`](@ref) ([`DefaultOrthogonalBasis`](@ref) by default)
+* `basis_val` an [`AbstractBasis`](@ref) ([`DefaultOrthogonalBasis`](@ref) by default)
 """
 struct TangentDiffBackend{
     TAD<:AbstractDiffBackend,
     TR<:AbstractRetractionMethod,
     TIR<:AbstractInverseRetractionMethod,
-    TB<:AbstractBasis,
+    TBarg<:AbstractBasis,
+    TBval<:AbstractBasis,
 } <: AbstractRiemannianDiffBackend
     diff_backend::TAD
     retraction::TR
     inverse_retraction::TIR
-    basis::TB
+    basis_arg::TBarg
+    basis_val::TBval
 end
 function TangentDiffBackend(
     diff_backend::TAD;
     retraction::TR=ExponentialRetraction(),
     inverse_retraction::TIR=LogarithmicInverseRetraction(),
-    basis::TB=DefaultOrthonormalBasis(),
+    basis_arg::TBarg=DefaultOrthonormalBasis(),
+    basis_val::TBval=DefaultOrthonormalBasis(),
 ) where {
     TAD<:AbstractDiffBackend,
     TR<:AbstractRetractionMethod,
     TIR<:AbstractInverseRetractionMethod,
-    TB<:AbstractBasis,
+    TBarg<:AbstractBasis,
+    TBval<:AbstractBasis,
 }
-    return TangentDiffBackend{TAD,TR,TIR,TB}(
+    return TangentDiffBackend{TAD,TR,TIR,TBarg,TBval}(
         diff_backend,
         retraction,
         inverse_retraction,
-        basis,
+        basis_arg,
+        basis_val,
     )
 end
 
@@ -104,10 +110,10 @@ function differential(M::AbstractManifold, f, t::Real, backend::TangentDiffBacke
             M,
             p,
             inverse_retract(M, p, f(t + h), backend.inverse_retraction),
-            backend.basis,
+            backend.basis_val,
         )
     end
-    return get_vector(M, p, onb_coords, backend.basis)
+    return get_vector(M, p, onb_coords, backend.basis_val)
 end
 
 function differential!(M::AbstractManifold, f, X, t::Real, backend::TangentDiffBackend)
@@ -117,10 +123,10 @@ function differential!(M::AbstractManifold, f, X, t::Real, backend::TangentDiffB
             M,
             p,
             inverse_retract(M, p, f(t + h), backend.inverse_retraction),
-            backend.basis,
+            backend.basis_val,
         )
     end
-    return get_vector!(M, X, p, onb_coords, backend.basis)
+    return get_vector!(M, X, p, onb_coords, backend.basis_val)
 end
 
 @doc raw"""
@@ -133,7 +139,7 @@ This method uses the internal `backend.diff_backend` (Euclidean) on the function
 ```
 
 which is given on the tangent space. In detail, the gradient can be written in
-terms of the `backend.basis`. We illustrate it here for an [`AbstractOrthonormalBasis`](@ref),
+terms of the `backend.basis_arg`. We illustrate it here for an [`AbstractOrthonormalBasis`](@ref),
 since that simplifies notations:
 
 ```math
@@ -152,19 +158,19 @@ writing ``p=\exp_p(0)`` we see that this is a finite difference of ``f\circ\exp_
 a function on the tangent space, so we can also use other (Euclidean) backends
 """
 function gradient(M::AbstractManifold, f, p, backend::TangentDiffBackend)
-    X = get_coordinates(M, p, zero_vector(M, p), backend.basis)
+    X = get_coordinates(M, p, zero_vector(M, p), backend.basis_arg)
     onb_coords = _gradient(X, backend.diff_backend) do Y
-        return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
+        return f(retract(M, p, get_vector(M, p, Y, backend.basis_arg), backend.retraction))
     end
-    return get_vector(M, p, onb_coords, backend.basis)
+    return get_vector(M, p, onb_coords, backend.basis_arg)
 end
 
 function gradient!(M::AbstractManifold, f, X, p, backend::TangentDiffBackend)
-    X2 = get_coordinates(M, p, zero_vector(M, p), backend.basis)
+    X2 = get_coordinates(M, p, zero_vector(M, p), backend.basis_arg)
     onb_coords = _gradient(X2, backend.diff_backend) do Y
-        return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
+        return f(retract(M, p, get_vector(M, p, Y, backend.basis_arg), backend.retraction))
     end
-    return get_vector!(M, X, p, onb_coords, backend.basis)
+    return get_vector!(M, X, p, onb_coords, backend.basis_arg)
 end
 
 @doc raw"""
@@ -209,4 +215,30 @@ function gradient!(M::AbstractManifold, f, X, p, backend::RiemannianProjectionBa
     _gradient!(f, amb_grad, p, backend.diff_backend)
     project!(M, X, p, amb_grad)
     return change_representer!(M, X, EuclideanMetric(), p, X)
+end
+
+function jacobian(M::AbstractManifold, f, p, backend::TangentDiffBackend)
+    X = get_coordinates(M, p, zero_vector(M, p), backend.basis_arg)
+    q = f(p)
+    onb_coords = _jacobian(X, backend.diff_backend) do Y
+        return get_coordinates(
+            M,
+            q,
+            inverse_retract(
+                M,
+                q,
+                f(
+                    retract(
+                        M,
+                        p,
+                        get_vector(M, p, Y, backend.basis_arg),
+                        backend.retraction,
+                    ),
+                ),
+                backend.inverse_retraction,
+            ),
+            backend.basis_val,
+        )
+    end
+    return onb_coords
 end

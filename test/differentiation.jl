@@ -8,6 +8,7 @@ using Manifolds:
     gradient!,
     _gradient,
     _gradient!,
+    jacobian,
     _jacobian,
     _jacobian!
 
@@ -147,6 +148,7 @@ rb_onb_default = TangentDiffBackend(
     Manifolds.ExponentialRetraction(),
     Manifolds.LogarithmicInverseRetraction(),
     DefaultOrthonormalBasis(),
+    DefaultOrthonormalBasis(),
 )
 
 rb_onb_fd51 = TangentDiffBackend(Manifolds.FiniteDifferencesBackend())
@@ -157,7 +159,7 @@ rb_onb_finite_diff = TangentDiffBackend(Manifolds.FiniteDiffBackend())
 
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();
-    basis=CachedBasis(
+    basis_arg=CachedBasis(
         DefaultOrthonormalBasis(),
         [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
     ),
@@ -191,13 +193,13 @@ end
 
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
     X = similar(q)
-    for backend in [rb_onb_default, rb_proj]
+    for backend in [rb_onb_default, rb_onb_default2, rb_proj]
         @test isapprox(s2, q, gradient(s2, f1, q, backend), [0.5, 0.0, -0.5])
         @test gradient!(s2, f1, X, q, backend) === X
         @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
     end
     X = similar(q)
-    for backend in [rb_onb_default, rb_proj]
+    for backend in [rb_onb_default, rb_onb_default2, rb_proj]
         gradient!(s2, f1, X, q, backend)
         @test isapprox(s2, q, X, [0.5, 0.0, -0.5])
     end
@@ -207,6 +209,15 @@ end
     X = similar(q)
     @test gradient!(s2, f1, X, q, TestRiemannianBackend()) === X
     @test X == [1.0, 2.0, 3.0]
+end
+
+@testset "Riemannian Jacobians" begin
+    s2 = Sphere(2)
+    f1(p) = p
+
+    q = [sqrt(2) / 2, 0, sqrt(2) / 2]
+    X = similar(q)
+    @test isapprox(s2, q, jacobian(s2, f1, q, rb_onb_default), [1.0 0.0; 0.0 1.0])
 end
 
 @testset "EmbeddedBackend" begin
