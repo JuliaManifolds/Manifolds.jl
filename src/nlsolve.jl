@@ -17,16 +17,16 @@ function inverse_retract_nlsolve!(
     X,
     p,
     q,
-    method::NLSolveInverseRetraction;
+    m::NLSolveInverseRetraction;
     kwargs...,
 )
-    X0 = method.X0 === nothing ? zero_vector(M, p) : method.X0
+    X0 = m.X0 === nothing ? zero_vector(M, p) : m.X0
     res = _inverse_retract_nlsolve(M, p, q, m; kwargs...)
     return copyto!(X, res.zero)
 end
 
 function _inverse_retract_nlsolve(M::AbstractManifold, p, q, m; kwargs...)
-    X0 = method.X0 === nothing ? zero_vector(M, p) : method.X0
+    X0 = m.X0 === nothing ? zero_vector(M, p) : m.X0
     function f!(F, X)
         m.project_tangent && project!(M, X, p, X)
         retract!(M, F, p, project(M, p, X), m.retraction; kwargs...)
