@@ -406,7 +406,7 @@ function test_group(
                 )
             end
         end
-        if invariant_metric_dispatch(G, RightAction()) === Val(true)
+        if has_invariant_metric(G, RightAction())
             Test.@testset "right-invariant" begin
                 Test.@test has_approx_invariant_metric(
                     G,

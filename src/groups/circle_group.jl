@@ -10,10 +10,9 @@ CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 
 @inline function active_traits(f, M::CircleGroup, args...)
     return merge_traits(
-        IsDefaultMetric(EuclideanMetric()),
-        HasLeftInvariantMetric(),
-        HasRightInvariantMetric(),
         IsGroupManifold(M.op),
+        IsDefaultMetric(EuclideanMetric()),
+        HasBiinvariantMetric(),
         active_traits(f, M.manifold, args...),
     )
 end
@@ -102,8 +101,9 @@ RealCircleGroup() = GroupManifold(Circle{ℝ}(), AdditionOperation())
 
 @inline function active_traits(f, M::RealCircleGroup, args...)
     return merge_traits(
-        IsDefaultMetric(EuclideanMetric()),
         IsGroupManifold(M.op),
+        IsDefaultMetric(EuclideanMetric()),
+        HasBiinvariantMetric(),
         active_traits(f, M.manifold, args...),
     )
 end
@@ -114,13 +114,20 @@ invariant_metric_dispatch(::RealCircleGroup, ::ActionDirection) = Val(true)
 
 is_default_metric(::RealCircleGroup, ::EuclideanMetric) = true
 
-_compose(::RealCircleGroup, p, q) = sym_rem(p + q)
-function _compose(G::RealCircleGroup, p::AbstractVector, q::AbstractVector)
-    return map(compose, repeated(G), p, q)
+# Lazy overwrite since this is a rare case of nonmutating foo.
+compose(::RealCircleGroup, p, q) = sym_rem(p + q)
+compose(::RealCircleGroup, ::Identity{<:AdditionOperation}, q) = sym_rem(q)
+compose(::RealCircleGroup, p, ::Identity{<:AdditionOperation}) = sym_rem(p)
+function compose(
+    ::RealCircleGroup,
+    e::Identity{<:AdditionOperation},
+    ::Identity{<:AdditionOperation},
+)
+    return e
 end
 
-function _compose!(::RealCircleGroup, x, p, q)
-    x .= sym_rem.(p .+ q)
+function compose!(::RealCircleGroup, x, p, q)
+    x = sym_rem.(p + q)
     return x
 end
 

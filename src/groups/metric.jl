@@ -106,7 +106,7 @@ end
 
 has_biinvariant_metric(::TraitList{EmptyTrait}, ::AbstractDecoratorManifold) = false
 function has_biinvariant_metric(
-    ::TraitList{HasBiinvariantMetric},
+    ::TraitList{<:HasBiinvariantMetric},
     ::AbstractDecoratorManifold,
 )
     return true
@@ -118,9 +118,9 @@ function inner(
     X,
     Y,
 ) where {IT<:AbstractInvarianceTrait}
-    conv = direction(IT)
-    Xₑ = inverse_translate_diff(M.manifold, p, p, X, conv)
-    Yₑ = inverse_translate_diff(M.manifold, p, p, Y, conv)
+    conv = direction(t, M)
+    Xₑ = inverse_translate_diff(M, p, p, X, conv)
+    Yₑ = inverse_translate_diff(M, p, p, Y, conv)
     return inner(next_trait(t), M, Identity(M), Xₑ, Yₑ)
 end
 function inner(
@@ -202,7 +202,7 @@ function LinearAlgebra.norm(
     p,
     X,
 ) where {IT<:AbstractInvarianceTrait}
-    conv = direction(IT)
+    conv = direction(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     return norm(next_trait(t), M, Identity(M), Xₑ)
 end
