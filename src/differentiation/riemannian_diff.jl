@@ -217,21 +217,27 @@ function gradient!(M::AbstractManifold, f, X, p, backend::RiemannianProjectionBa
     return change_representer!(M, X, EuclideanMetric(), p, X)
 end
 
-function jacobian(M::AbstractManifold, f, p, backend::TangentDiffBackend)
-    X = get_coordinates(M, p, zero_vector(M, p), backend.basis_arg)
+function jacobian(
+    M_dom::AbstractManifold,
+    M_codom::AbstractManifold,
+    f,
+    p,
+    backend::TangentDiffBackend,
+)
+    X = get_coordinates(M_dom, p, zero_vector(M_dom, p), backend.basis_arg)
     q = f(p)
     onb_coords = _jacobian(X, backend.diff_backend) do Y
         return get_coordinates(
-            M,
+            M_codom,
             q,
             inverse_retract(
-                M,
+                M_codom,
                 q,
                 f(
                     retract(
-                        M,
+                        M_dom,
                         p,
-                        get_vector(M, p, Y, backend.basis_arg),
+                        get_vector(M_dom, p, Y, backend.basis_arg),
                         backend.retraction,
                     ),
                 ),

@@ -8,11 +8,8 @@ using Manifolds:
     gradient!,
     _gradient,
     _gradient!,
-    jacobian,
     _jacobian,
     _jacobian!
-
-import Manifolds: gradient
 
 struct TestRiemannianBackend <: AbstractRiemannianDiffBackend end
 function Manifolds.gradient(::AbstractManifold, f, p, ::TestRiemannianBackend)
@@ -217,7 +214,22 @@ end
 
     q = [sqrt(2) / 2, 0, sqrt(2) / 2]
     X = similar(q)
-    @test isapprox(s2, q, jacobian(s2, f1, q, rb_onb_default), [1.0 0.0; 0.0 1.0])
+    @test isapprox(
+        s2,
+        q,
+        Manifolds.jacobian(s2, s2, f1, q, rb_onb_default),
+        [1.0 0.0; 0.0 1.0],
+    )
+
+    q2 = [1.0, 0.0, 0.0]
+    f2(X) = [0.0 0.0 0.0; 0.0 2.0 -1.0; 0.0 -3.0 1.0] * X
+    Tq2s2 = TangentSpaceAtPoint(s2, q2)
+    @test isapprox(
+        s2,
+        q,
+        Manifolds.jacobian(Tq2s2, Tq2s2, f2, zero_vector(s2, q2), rb_onb_default),
+        [2.0 -1.0; -3.0 1.0],
+    )
 end
 
 @testset "EmbeddedBackend" begin
