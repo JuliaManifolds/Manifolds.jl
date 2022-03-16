@@ -24,15 +24,8 @@ adjoint_action(::CircleGroup, p, X) = X
 
 adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)
 
-function _compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
-    return map(compose, repeated(G), p, q)
-end
-
-_compose!(G::CircleGroup, x, p, q) = copyto!(x, compose(G, p, q))
-
 identity_element(G::CircleGroup) = 1.0
 identity_element(::CircleGroup, p::Number) = one(p)
-identity_element(::CircleGroup, p::AbstractArray) = map(i -> one(eltype(p)), p)
 
 Base.inv(G::CircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
 
