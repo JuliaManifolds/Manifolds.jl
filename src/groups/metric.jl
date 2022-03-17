@@ -42,12 +42,12 @@ function has_approx_invariant_metric(
     conv::ActionDirection;
     kwargs...,
 )
-    gpXY = inner(M, p, X, Y)
+    gpXY = inner(base_manifold(M), p, X, Y)
     for q in qs
         τq = translate(M, q, p, conv)
         dτqX = translate_diff(M, q, p, X, conv)
         dτqY = translate_diff(M, q, p, Y, conv)
-        isapprox(gpXY, inner(M, τq, dτqX, dτqY); kwargs...) || return false
+        isapprox(gpXY, inner(base_manifold(M), τq, dτqX, dτqY); kwargs...) || return false
     end
     return true
 end
