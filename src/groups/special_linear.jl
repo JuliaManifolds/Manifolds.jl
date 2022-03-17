@@ -20,10 +20,7 @@ struct SpecialLinear{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
 SpecialLinear(n, 𝔽::AbstractNumbers=ℝ) = SpecialLinear{n,𝔽}()
 
 @inline function active_traits(f, ::SpecialLinear, args...)
-    return merge_traits(
-        IsGroupManifold(MultiplicationOperation()),
-        IsEmbeddedSubmanifold()
-    )
+    return merge_traits(IsGroupManifold(MultiplicationOperation()), IsEmbeddedSubmanifold())
 end
 
 function allocation_promotion_function(::SpecialLinear{n,ℂ}, f, args::Tuple) where {n}

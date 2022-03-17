@@ -123,7 +123,7 @@ function get_coordinates!(
     return copyto!(Xⁱ, X)
 end
 
-get_embedding(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n,n; field=𝔽)
+get_embedding(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
 
 function get_vector(
     ::GeneralLinear{n,ℝ},

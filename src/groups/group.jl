@@ -437,7 +437,7 @@ function get_vector!(
 end
 
 function injectivity_radius(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold)
-    return injectivity_radius(next_trait(t), G,)
+    return injectivity_radius(next_trait(t), G)
 end
 function injectivity_radius(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
     return injectivity_radius(next_trait(t), G, p)
