@@ -375,44 +375,44 @@ end
 # Metric function forwards
 ##########################
 
-function exp(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    return exp(base_manifold(G), p, X)
+function exp(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
+    return exp(next_trait(t), G, p, X)
 end
 
-function exp!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p, X)
-    return exp!(base_manifold(G), q, p, X)
+function exp!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p, X)
+    return exp!(next_trait(t), G, q, p, X)
 end
 
 get_embedding(G::GroupManifold) = get_embedding(G.manifold)
 
 function get_basis(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     B::AbstractBasis,
 )
-    return get_basis(base_manifold(G), p, B)
+    return get_basis(next_trait(t), G, p, B)
 end
 
 function get_coordinates(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     X,
     B::AbstractBasis,
 )
-    return get_coordinates(base_manifold(G), p, X, B)
+    return get_coordinates(next_trait(t), G, p, X, B)
 end
 
 function get_coordinates!(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     Y,
     p,
     X,
     B::AbstractBasis,
 )
-    return get_coordinates!(base_manifold(G), Y, p, X, B)
+    return get_coordinates!(next_trait(t), G, Y, p, X, B)
 end
 
 function get_vector(
@@ -422,7 +422,7 @@ function get_vector(
     c,
     B::AbstractBasis,
 )
-    return get_vector(base_manifold(G), p, c, B)
+    return get_vector(next_trait(t), G, p, c, B)
 end
 
 function get_vector!(
@@ -433,21 +433,21 @@ function get_vector!(
     c,
     B::AbstractBasis,
 )
-    return get_vector!(base_manifold(G), Y, p, c, B)
+    return get_vector!(next_trait(t), G, Y, p, c, B)
 end
 
 function injectivity_radius(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold)
-    return injectivity_radius(base_manifold(G))
+    return injectivity_radius(next_trait(t), G,)
 end
 function injectivity_radius(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
-    return injectivity_radius(base_manifold(G), p)
+    return injectivity_radius(next_trait(t), G, p)
 end
 function injectivity_radius(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     m::AbstractRetractionMethod,
 )
-    return injectivity_radius(base_manifold(G), m)
+    return injectivity_radius(next_trait(t), G, m)
 end
 function injectivity_radius(
     ::TraitList{<:IsGroupManifold},
@@ -455,11 +455,11 @@ function injectivity_radius(
     p,
     m::AbstractRetractionMethod,
 )
-    return injectivity_radius(base_manifold(G), p, m)
+    return injectivity_radius(next_trait(t), G, p, m)
 end
 
 function inner(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X, Y)
-    return inner(base_manifold(G), p, X, Y)
+    return inner(next_trait(t), G, p, X, Y)
 end
 
 function inverse_retract(
@@ -469,40 +469,40 @@ function inverse_retract(
     q,
     m::AbstractInverseRetractionMethod,
 )
-    return inverse_retract(base_manifold(G), p, q, m)
+    return inverse_retract(next_trait(t), G, p, q, m)
 end
 function inverse_retract(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
-    return inverse_retract(base_manifold(G), p, q)
+    return inverse_retract(next_trait(t), G, p, q)
 end
 
 function inverse_retract!(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     X,
     p,
     q,
     m::AbstractInverseRetractionMethod,
 )
-    return inverse_retract!(base_manifold(G), X, p, q, m)
+    return inverse_retract!(next_trait(t), G, X, p, q, m)
 end
 function inverse_retract!(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     X,
     p,
     q,
 )
-    return inverse_retract!(base_manifold(G), X, p, q)
+    return inverse_retract!(next_trait(t), G, X, p, q)
 end
 
 function is_point(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     te=false;
     kwargs...,
 )
-    return is_point(base_manifold(G), p, te; kwargs...)
+    return is_point(next_trait(t), G, p, te; kwargs...)
 end
 function is_point(
     ::TraitList{<:IsGroupManifold},
@@ -517,7 +517,7 @@ function is_point(
 end
 
 function is_vector(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     X,
@@ -525,10 +525,10 @@ function is_vector(
     cbp=true;
     kwargs...,
 )
-    return is_vector(base_manifold(G), p, X, te, cbp; kwargs...)
+    return is_vector(next_trait(t), G, p, X, te, cbp; kwargs...)
 end
 function is_vector(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     e::Identity,
     X,
@@ -540,138 +540,138 @@ function is_vector(
         ie = is_identity(G, e; kwargs...)
         (!te) && return ie
     end
-    return is_vector(base_manifold(G), identity_element(G), X, te, false; kwargs...)
+    return is_vector(next_trait(t), G, identity_element(G), X, te, false; kwargs...)
 end
 
-function log(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
-    return log(base_manifold(G), p, q)
+function log(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
+    return log(next_trait(t), G, p, q)
 end
 
-function log!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, p, q)
-    return log!(base_manifold(G), X, p, q)
+function log!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, p, q)
+    return log!(next_trait(t), G, X, p, q)
 end
 
 function norm(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    return norm(base_manifold(G), p, X)
+    return norm(next_trait(t), G, p, X)
 end
 
 function parallel_transport_along(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     X,
     c,
 )
-    return parallel_transport_along(base_manifold(G), p, X, c)
+    return parallel_transport_along(next_trait(t), G, p, X, c)
 end
 
 function parallel_transport_along!(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     Y,
     p,
     X,
     c,
 )
-    return parallel_transport_along!(base_manifold(G), Y, p, X, c)
+    return parallel_transport_along!(next_trait(t), G, Y, p, X, c)
 end
 
 function parallel_transport_direction(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     X,
     q,
 )
-    return parallel_transport_direction(base_manifold(G), p, X, q)
+    return parallel_transport_direction(next_trait(t), G, p, X, q)
 end
 
 function parallel_transport_direction!(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     Y,
     p,
     X,
     q,
 )
-    return parallel_transport_direction!(base_manifold(G), Y, p, X, q)
+    return parallel_transport_direction!(next_trait(t), G, Y, p, X, q)
 end
 
 function parallel_transport_to(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     X,
     q,
 )
-    return parallel_transport_to(base_manifold(G), p, X, q)
+    return parallel_transport_to(next_trait(t), G, p, X, q)
 end
 
 function parallel_transport_to!(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     Y,
     p,
     X,
     q,
 )
-    return parallel_transport_to!(base_manifold(G), Y, p, X, q)
+    return parallel_transport_to!(next_trait(t), G, Y, p, X, q)
 end
 
-function project(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
-    return project(base_manifold(G), p)
+function project(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
+    return project(next_trait(t), G, p)
 end
-function project(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    return project(base_manifold(G), p, X)
-end
-
-function project!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p)
-    return project!(base_manifold(G), q, p)
-end
-function project!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
-    return project!(base_manifold(G), Y, p, X)
+function project(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
+    return project(next_trait(t), G, p, X)
 end
 
-function retract(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    return retract(base_manifold(G), p, X)
+function project!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p)
+    return project!(next_trait(t), G, q, p)
+end
+function project!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
+    return project!(next_trait(t), G, Y, p, X)
+end
+
+function retract(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
+    return retract(next_trait(t), G, p, X)
 end
 function retract(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     X,
     m::AbstractRetractionMethod,
 )
-    return retract(base_manifold(G), p, X, m)
+    return retract(next_trait(t), G, p, X, m)
 end
 
-function retract!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p, X)
-    return retract!(base_manifold(G), q, p, X)
+function retract!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p, X)
+    return retract!(next_trait(t), G, q, p, X)
 end
 function retract!(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     q,
     p,
     X,
     m::AbstractRetractionMethod,
 )
-    return retract!(base_manifold(G), q, p, X, m)
+    return retract!(next_trait(t), G, q, p, X, m)
 end
 
 function vector_transport_along(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     X,
     c,
     m::AbstractVectorTransportMethod,
 )
-    return vector_transport_along(base_manifold(G), p, X, c, m)
+    return vector_transport_along(next_trait(t), G, p, X, c, m)
 end
 
 function vector_transport_along!(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     Y,
     p,
@@ -679,22 +679,22 @@ function vector_transport_along!(
     c::AbstractVector,
     m::AbstractVectorTransportMethod,
 )
-    return vector_transport_along!(base_manifold(G), Y, p, X, c, m)
+    return vector_transport_along!(next_trait(t), G, Y, p, X, c, m)
 end
 
 function vector_transport_direction(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     X,
     d,
     m::AbstractVectorTransportMethod,
 )
-    return vector_transport_direction(base_manifold(G), p, X, d, m)
+    return vector_transport_direction(next_trait(t), G, p, X, d, m)
 end
 
 function vector_transport_direction!(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     Y,
     p,
@@ -702,22 +702,22 @@ function vector_transport_direction!(
     d,
     m::AbstractVectorTransportMethod,
 )
-    return vector_transport_direction!(base_manifold(G), Y, p, X, d, m)
+    return vector_transport_direction!(next_trait(t), G, Y, p, X, d, m)
 end
 
 function vector_transport_to(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     X,
     q,
     m::AbstractVectorTransportMethod,
 )
-    return vector_transport_to(base_manifold(G), p, X, q, m)
+    return vector_transport_to(next_trait(t), G, p, X, q, m)
 end
 
 function vector_transport_to!(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     Y,
     p,
@@ -725,15 +725,15 @@ function vector_transport_to!(
     q,
     m::AbstractVectorTransportMethod,
 )
-    return vector_transport_to!(base_manifold(G), Y, p, X, q, m)
+    return vector_transport_to!(next_trait(t), G, Y, p, X, q, m)
 end
 
-function zero_vector(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
-    return zero_vector(base_manifold(G), p)
+function zero_vector(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
+    return zero_vector(next_trait(t), G, p)
 end
 
-function zero_vector!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, p)
-    return zero_vector!(base_manifold(G), X, p)
+function zero_vector!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, p)
+    return zero_vector!(next_trait(t), G, X, p)
 end
 
 ##########################
@@ -1187,8 +1187,8 @@ function inverse_translate_diff!(
     return translate_diff!(G, Y, inv(G, p), q, X, conv)
 end
 
-function representation_size(::TraitList{<:IsGroupManifold}, M::AbstractDecoratorManifold)
-    return representation_size(base_manifold(M))
+function representation_size(t::TraitList{<:IsGroupManifold}, M::AbstractDecoratorManifold)
+    return representation_size(next_trait(t), M)
 end
 
 @doc raw"""

@@ -22,6 +22,7 @@ function active_traits(f, ::GeneralLinear, args...)
     return merge_traits(
         IsGroupManifold(MultiplicationOperation()),
         IsEmbeddedManifold(),
+        HasBiinvariantMetric(),
         IsDefaultMetric(EuclideanMetric()),
     )
 end
@@ -218,6 +219,8 @@ function log!(::GeneralLinear{1}, X, p, q)
 end
 
 LinearAlgebra.norm(::GeneralLinear, p, X) = norm(X)
+
+manifold_dimension(G::GeneralLinear) = manifold_dimension(get_embedding(G))
 
 project(::GeneralLinear, p) = p
 project(::GeneralLinear, p, X) = X
