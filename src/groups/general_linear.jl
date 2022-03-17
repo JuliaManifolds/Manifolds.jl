@@ -220,7 +220,6 @@ manifold_dimension(G::GeneralLinear) = manifold_dimension(get_embedding(G))
 
 LinearAlgebra.norm(::GeneralLinear, p, X) = norm(X)
 
-
 parallel_transport_to(::GeneralLinear, p, X, q) = X
 
 parallel_transport_to!(::GeneralLinear, Y, p, X, q) = copyto!(Y, X)
