@@ -375,135 +375,8 @@ end
 # Metric function forwards
 ##########################
 
-function exp(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    return exp(next_trait(t), G, p, X)
-end
-
-function exp!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p, X)
-    return exp!(next_trait(t), G, q, p, X)
-end
-
 get_embedding(G::GroupManifold) = get_embedding(G.manifold)
 
-function get_basis(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis,
-)
-    return get_basis(next_trait(t), G, p, B)
-end
-
-function get_coordinates(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    X,
-    B::AbstractBasis,
-)
-    return get_coordinates(next_trait(t), G, p, X, B)
-end
-
-function get_coordinates!(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    B::AbstractBasis,
-)
-    return get_coordinates!(next_trait(t), G, Y, p, X, B)
-end
-
-function get_vector(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    c,
-    B::AbstractBasis,
-)
-    return get_vector(next_trait(t), G, p, c, B)
-end
-
-function get_vector!(
-    ::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    c,
-    B::AbstractBasis,
-)
-    return get_vector!(next_trait(t), G, Y, p, c, B)
-end
-
-function injectivity_radius(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold)
-    return injectivity_radius(next_trait(t), G)
-end
-function injectivity_radius(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
-    return injectivity_radius(next_trait(t), G, p)
-end
-function injectivity_radius(
-    ::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    m::AbstractRetractionMethod,
-)
-    return injectivity_radius(next_trait(t), G, m)
-end
-function injectivity_radius(
-    ::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    m::AbstractRetractionMethod,
-)
-    return injectivity_radius(next_trait(t), G, p, m)
-end
-
-function inner(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X, Y)
-    return inner(next_trait(t), G, p, X, Y)
-end
-
-function inverse_retract(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    q,
-    m::AbstractInverseRetractionMethod,
-)
-    return inverse_retract(next_trait(t), G, p, q, m)
-end
-function inverse_retract(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
-    return inverse_retract(next_trait(t), G, p, q)
-end
-
-function inverse_retract!(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    X,
-    p,
-    q,
-    m::AbstractInverseRetractionMethod,
-)
-    return inverse_retract!(next_trait(t), G, X, p, q, m)
-end
-function inverse_retract!(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    X,
-    p,
-    q,
-)
-    return inverse_retract!(next_trait(t), G, X, p, q)
-end
-
-function is_point(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    te=false;
-    kwargs...,
-)
-    return is_point(next_trait(t), G, p, te; kwargs...)
-end
 function is_point(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
@@ -519,17 +392,6 @@ end
 function is_vector(
     t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
-    p,
-    X,
-    te=false,
-    cbp=true;
-    kwargs...,
-)
-    return is_vector(next_trait(t), G, p, X, te, cbp; kwargs...)
-end
-function is_vector(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
     e::Identity,
     X,
     te=false,
@@ -541,199 +403,6 @@ function is_vector(
         (!te) && return ie
     end
     return is_vector(next_trait(t), G, identity_element(G), X, te, false; kwargs...)
-end
-
-function log(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
-    return log(next_trait(t), G, p, q)
-end
-
-function log!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, p, q)
-    return log!(next_trait(t), G, X, p, q)
-end
-
-function norm(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    return norm(next_trait(t), G, p, X)
-end
-
-function parallel_transport_along(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    X,
-    c,
-)
-    return parallel_transport_along(next_trait(t), G, p, X, c)
-end
-
-function parallel_transport_along!(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    c,
-)
-    return parallel_transport_along!(next_trait(t), G, Y, p, X, c)
-end
-
-function parallel_transport_direction(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    X,
-    q,
-)
-    return parallel_transport_direction(next_trait(t), G, p, X, q)
-end
-
-function parallel_transport_direction!(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    q,
-)
-    return parallel_transport_direction!(next_trait(t), G, Y, p, X, q)
-end
-
-function parallel_transport_to(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    X,
-    q,
-)
-    return parallel_transport_to(next_trait(t), G, p, X, q)
-end
-
-function parallel_transport_to!(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    q,
-)
-    return parallel_transport_to!(next_trait(t), G, Y, p, X, q)
-end
-
-function project(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
-    return project(next_trait(t), G, p)
-end
-function project(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    return project(next_trait(t), G, p, X)
-end
-
-function project!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p)
-    return project!(next_trait(t), G, q, p)
-end
-function project!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
-    return project!(next_trait(t), G, Y, p, X)
-end
-
-function retract(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    return retract(next_trait(t), G, p, X)
-end
-function retract(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    X,
-    m::AbstractRetractionMethod,
-)
-    return retract(next_trait(t), G, p, X, m)
-end
-
-function retract!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p, X)
-    return retract!(next_trait(t), G, q, p, X)
-end
-function retract!(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    m::AbstractRetractionMethod,
-)
-    return retract!(next_trait(t), G, q, p, X, m)
-end
-
-function vector_transport_along(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    X,
-    c,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_along(next_trait(t), G, p, X, c, m)
-end
-
-function vector_transport_along!(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_along!(next_trait(t), G, Y, p, X, c, m)
-end
-
-function vector_transport_direction(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_direction(next_trait(t), G, p, X, d, m)
-end
-
-function vector_transport_direction!(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_direction!(next_trait(t), G, Y, p, X, d, m)
-end
-
-function vector_transport_to(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_to(next_trait(t), G, p, X, q, m)
-end
-
-function vector_transport_to!(
-    t::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_to!(next_trait(t), G, Y, p, X, q, m)
-end
-
-function zero_vector(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
-    return zero_vector(next_trait(t), G, p)
-end
-
-function zero_vector!(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, p)
-    return zero_vector!(next_trait(t), G, X, p)
 end
 
 ##########################
@@ -1187,10 +856,6 @@ function inverse_translate_diff!(
     return translate_diff!(G, Y, inv(G, p), q, X, conv)
 end
 
-function representation_size(t::TraitList{<:IsGroupManifold}, M::AbstractDecoratorManifold)
-    return representation_size(next_trait(t), M)
-end
-
 @doc raw"""
     exp_lie(G, X)
     exp_lie!(G, q, X)
@@ -1433,10 +1098,6 @@ function inverse_retract!(
     return translate_diff!(G, X, p, Identity(G), Xₑ, conv)
 end
 
-#######################################
-# Overloads for MultiplicationOperation
-#######################################
-
 @doc raw"""
     get_vector_lie(G::AbstractDecoratorManifold, a, B::AbstractBasis)
 
@@ -1444,10 +1105,10 @@ Reconstruct a tangent vector from the Lie algebra of `G` from cooordinates `a` o
 This is similar to calling [`get_vector`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
 """
 function get_vector_lie(G::AbstractManifold, X, B::AbstractBasis)
-    return get_vector(G, identity_element(G), X, B)
+    return get_vector(base_manifold(G), identity_element(G), X, B)
 end
 function get_vector_lie!(G::AbstractManifold, Y, X, B::AbstractBasis)
-    return get_vector!(G, Y, identity_element(G), X, B)
+    return get_vector!(base_manifold(G), Y, identity_element(G), X, B)
 end
 
 @doc raw"""
@@ -1457,8 +1118,8 @@ Get the coordinates of an element `X` from the Lie algebra og `G` with respect t
 This is similar to calling [`get_coordinates`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
 """
 function get_coordinates_lie(G::AbstractManifold, X, B::AbstractBasis)
-    return get_coordinates(G, identity_element(G), X, B)
+    return get_coordinates(base_manifold(G), identity_element(G), X, B)
 end
 function get_coordinates_lie!(G::AbstractManifold, a, X, B::AbstractBasis)
-    return get_coordinates!(G, a, identity_element(G), X, B)
+    return get_coordinates!(base_manifold(G), a, identity_element(G), X, B)
 end
