@@ -416,7 +416,7 @@ function get_coordinates!(
 end
 
 function get_vector(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     c,
@@ -463,7 +463,7 @@ function inner(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, 
 end
 
 function inverse_retract(
-    ::TraitList{<:IsGroupManifold},
+    t::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     q,
@@ -471,7 +471,7 @@ function inverse_retract(
 )
     return inverse_retract(next_trait(t), G, p, q, m)
 end
-function inverse_retract(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
+function inverse_retract(t::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
     return inverse_retract(next_trait(t), G, p, q)
 end
 
