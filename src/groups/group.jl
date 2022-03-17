@@ -125,6 +125,7 @@ function is_group_manifold(
     return true
 end
 @trait_function is_group_manifold(M::AbstractDecoratorManifold)
+is_group_manifold(::AbstractManifold) = false
 function is_group_manifold(
     ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation}},
     ::AbstractDecoratorManifold,

@@ -20,7 +20,7 @@ one. This type is mostly useful for equipping the direct product of group manifo
     ProductGroup(manifold::ProductManifold)
 """
 function ProductGroup(manifold::ProductManifold{𝔽}) where {𝔽}
-    if !all(is_group_decorator, manifold.manifolds)
+    if !all(is_group_manifold, manifold.manifolds)
         error("All submanifolds of product manifold must be or decorate groups.")
     end
     op = ProductOperation()
@@ -38,7 +38,7 @@ function identity_element!(G::ProductGroup, p)
     return p
 end
 
-function is_identity(G::ProductGroup, p; kwargs...)
+function is_identity(G::ProductGroup, p::Identity{<:ProductOperation}; kwargs...)
     pes = submanifold_components(G, p)
     M = G.manifold # Inner prodct manifold (of groups)
     return all(map((M, pe) -> is_identity(M, pe; kwargs...), M.manifolds, pes))
