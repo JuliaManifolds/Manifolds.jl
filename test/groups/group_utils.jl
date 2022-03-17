@@ -7,7 +7,7 @@ struct NotImplementedGroupDecorator{𝔽,M<:AbstractManifold{𝔽}} <:
     manifold::M
 end
 function active_traits(f, M::NotImplementedGroupDecorator, args...)
-    return merge_traits(IsEmbeddedSubmanifold(), active_traits(f, M.manifold, args...))
+    return merge_traits(active_traits(f, M.manifold, args...), IsExplicitDecorator())
 end
 
 function Manifolds.decorated_manifold(M::NotImplementedGroupDecorator)

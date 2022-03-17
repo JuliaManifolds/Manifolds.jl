@@ -14,7 +14,7 @@ CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
         IsDefaultMetric(EuclideanMetric()),
         HasBiinvariantMetric(),
         active_traits(f, M.manifold, args...),
-        IsExplicitDecorator()
+        IsExplicitDecorator(),
     )
 end
 
@@ -106,7 +106,7 @@ RealCircleGroup() = GroupManifold(Circle{ℝ}(), AdditionOperation())
         IsDefaultMetric(EuclideanMetric()),
         HasBiinvariantMetric(),
         active_traits(f, M.manifold, args...),
-        IsExplicitDecorator()
+        IsExplicitDecorator(),
     )
 end
 

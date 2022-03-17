@@ -8,34 +8,16 @@ Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 """
 const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
 
-@inline function active_traits(f, M::SpecialOrthogonal, args...)
-    return merge_traits(IsGroupManifold(M.op))
+@inline function active_traits(f, ::SpecialOrthogonal, args...)
+    return merge_traits(
+        IsGroupManifold(MultiplicationOperation()),
+        HasBiinvariantMetric(),
+        IsDefaultMetric(EuclideanMetric()),
+        IsExplicitDecorator(), #pass to Rotations by default/last fallback
+    )
 end
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
-
-Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
-
-Base.inv(::SpecialOrthogonal, p) = transpose(p)
-Base.inv(::SpecialOrthogonal, e::Identity{MultiplicationOperation}) = e
-
-inverse_translate(G::SpecialOrthogonal, p, q, ::LeftAction) = inv(G, p) * q
-inverse_translate(G::SpecialOrthogonal, p, q, ::RightAction) = q * inv(G, p)
-
-translate_diff(::SpecialOrthogonal, p, q, X, ::LeftAction) = X
-translate_diff(G::SpecialOrthogonal, p, q, X, ::RightAction) = inv(G, p) * X * p
-
-function translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionDirection)
-    return copyto!(Y, translate_diff(G, p, q, X, conv))
-end
-
-function inverse_translate_diff(G::SpecialOrthogonal, p, q, X, conv::ActionDirection)
-    return translate_diff(G, inv(G, p), q, X, conv)
-end
-
-function inverse_translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionDirection)
-    return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
-end
 
 function allocate_result(
     ::GT,
@@ -53,3 +35,26 @@ function allocate_result(
 ) where {n,GT<:SpecialOrthogonal{n}}
     return allocate(q)
 end
+
+Base.inv(::SpecialOrthogonal, p) = transpose(p)
+Base.inv(::SpecialOrthogonal, e::Identity{MultiplicationOperation}) = e
+
+inverse_translate(G::SpecialOrthogonal, p, q, ::LeftAction) = inv(G, p) * q
+inverse_translate(G::SpecialOrthogonal, p, q, ::RightAction) = q * inv(G, p)
+
+function inverse_translate_diff(G::SpecialOrthogonal, p, q, X, conv::ActionDirection)
+    return translate_diff(G, inv(G, p), q, X, conv)
+end
+
+function inverse_translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionDirection)
+    return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
+end
+
+translate_diff(::SpecialOrthogonal, p, q, X, ::LeftAction) = X
+translate_diff(G::SpecialOrthogonal, p, q, X, ::RightAction) = inv(G, p) * X * p
+
+function translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionDirection)
+    return copyto!(Y, translate_diff(G, p, q, X, conv))
+end
+
+Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
