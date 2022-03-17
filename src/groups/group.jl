@@ -19,28 +19,14 @@ For a concrete case the concrete wrapper [`GroupManifold`](@ref) can be used.
 abstract type AbstractGroupOperation end
 
 """
-    GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽}
-
-Decorator for a smooth manifold that equips the manifold with a group operation, thus making
-it a Lie group. See [`IsGroupManifold`](@ref) for more details.
-
-Group manifolds by default forward metric-related operations to the wrapped manifold.
-
-# Constructor
-
-    GroupManifold(manifold, op)
-"""
-struct GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <:
-       AbstractDecoratorManifold{𝔽}
-    manifold::M
-    op::O
-end
-
-"""
     IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
 
 A trait to declare an [`AbstractManifold`](@ref) as a manifold with group structure
 with operation of type `O`.
+
+Using this trait you can turn a manifold that you implement _implictly_ into a Lie group.
+If you wish to decorate an existing manifold with one (or different) [`AbstractGroupAction`](@ref)s,
+see [`GroupManifold`](@ref).
 
 # Constructor
 
@@ -87,25 +73,6 @@ function parent_trait(::HasBiinvariantMetric)
     return ManifoldsBase.TraitList(HasLeftInvariantMetric(), HasRightInvariantMetric())
 end
 
-@inline function active_traits(f, M::GroupManifold, args...)
-    return merge_traits(
-        IsGroupManifold(M.op),
-        active_traits(f, M.manifold, args...),
-        IsExplicitDecorator(),
-    )
-end
-
-Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
-
-decorated_manifold(G::GroupManifold) = G.manifold
-
-(op::AbstractGroupOperation)(M::AbstractManifold) = GroupManifold(M, op)
-function (::Type{T})(M::AbstractManifold) where {T<:AbstractGroupOperation}
-    return GroupManifold(M, T())
-end
-
-manifold_dimension(G::GroupManifold) = manifold_dimension(G.manifold)
-
 """
     is_group_manifold(G::GroupManifold)
     is_group_manifoldd(G::AbstractManifold, o::AbstractGroupOperation)
@@ -132,16 +99,6 @@ function is_group_manifold(
 )
     return is_group_manifold(M, t.head.op)
 end
-function is_group_manifold(
-    ::TraitList{<:IsGroupManifold{<:O}},
-    ::GroupManifold{𝔽,<:M,<:O},
-) where {𝔽,O<:AbstractGroupOperation,M<:AbstractManifold}
-    return true
-end
-
-###################
-# Action directions
-###################
 
 """
     ActionDirection
@@ -172,10 +129,6 @@ Returns a [`RightAction`](@ref) when given a [`LeftAction`](@ref) and vice versa
 switch_direction(::ActionDirection)
 switch_direction(::LeftAction) = RightAction()
 switch_direction(::RightAction) = LeftAction()
-
-##################################
-# General Identity element methods
-##################################
 
 @doc raw"""
     Identity{O<:AbstractGroupOperation}
@@ -371,40 +324,6 @@ function check_point(
     )
 end
 
-##########################
-# Metric function forwards - dispatch on layer 2.
-##########################
-
-function exp(::TraitList{<:IsGroupManifold}, G::GroupManifold, p, X)
-    return exp(G.manifold, p, X)
-end
-
-function exp!(::TraitList{<:IsGroupManifold}, G::GroupManifold, q, p, X)
-    return exp!(G.manifold, q, p, X)
-end
-get_embedding(G::GroupManifold) = get_embedding(G.manifold)
-
-function get_vector(
-    ::TraitList{<:IsGroupManifold},
-    G::GroupManifold,
-    p,
-    c,
-    B::AbstractBasis,
-)
-    return get_vector(G.manifold, p, c, B)
-end
-
-function get_vector!(
-    ::TraitList{<:IsGroupManifold},
-    G::GroupManifold,
-    Y,
-    p,
-    c,
-    B::AbstractBasis,
-)
-    return get_vector!(G.manifold, Y, p, c, B)
-end
-
 function is_point(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
@@ -432,30 +351,6 @@ function is_vector(
     end
     return is_vector(next_trait(t), G, identity_element(G), X, te, false; kwargs...)
 end
-
-
-function is_vector(
-    ::TraitList{<:IsGroupManifold},
-    G::GroupManifold,
-    p,
-    X,
-    te=false,
-    cbp=true;
-    kwargs...,
-)
-    return is_vector(G.manifold, p, X, te, cbp; kwargs...)
-end
-
-function log(t::TraitList{<:IsGroupManifold}, G::GroupManifold, p, q)
-    return log(G.manifold, p, q)
-end
-
-function log!(t::TraitList{<:IsGroupManifold}, G::GroupManifold, X, p, q)
-    return log!(G.manifold, X, p, q)
-end
-##########################
-# Group-specific functions
-##########################
 
 @doc raw"""
     adjoint_action(G::AbstractDecoratorManifold, p, X)
@@ -1002,10 +897,6 @@ function log_lie!(
 ) where {O<:AbstractGroupOperation}
     return zero_vector!(G, X, identity_element(G))
 end
-
-############################
-# Group-specific Retractions
-############################
 
 """
     GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod

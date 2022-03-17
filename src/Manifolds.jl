@@ -351,6 +351,7 @@ include("manifolds/EssentialManifold.jl")
 
 #
 # Group Manifolds
+include("groups/GroupManifold.jl")
 
 # a) generics
 include("groups/addition_operation.jl")
