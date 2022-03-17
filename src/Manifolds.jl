@@ -353,6 +353,8 @@ include("manifolds/EssentialManifold.jl")
 # Group Manifolds
 
 # a) generics
+include("groups/addition_operation.jl")
+include("groups/multiplication_operation.jl")
 include("groups/connections.jl")
 include("groups/metric.jl")
 include("groups/group_action.jl")
