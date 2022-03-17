@@ -19,8 +19,11 @@ struct SpecialLinear{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 SpecialLinear(n, 𝔽::AbstractNumbers=ℝ) = SpecialLinear{n,𝔽}()
 
-function active_traits(f, ::SpecialLinear, args...)
-    return merge_traits(IsGroupManifold(MultiplicationOperation()), IsEmbeddedSubmanifold())
+@inline function active_traits(f, ::SpecialLinear, args...)
+    return merge_traits(
+        IsGroupManifold(MultiplicationOperation()),
+        IsEmbeddedSubmanifold()
+    )
 end
 
 function allocation_promotion_function(::SpecialLinear{n,ℂ}, f, args::Tuple) where {n}
@@ -28,8 +31,6 @@ function allocation_promotion_function(::SpecialLinear{n,ℂ}, f, args::Tuple) w
 end
 
 function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = check_point(Euclidean(n, n; field=𝔽), p; kwargs...)
-    mpv === nothing || return mpv
     detp = det(p)
     if !isapprox(detp, 1; kwargs...)
         return DomainError(
@@ -40,11 +41,8 @@ function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
     end
     return nothing
 end
-check_point(G::SpecialLinear, ::Identity{MultiplicationOperation}; kwargs...) = nothing
 
 function check_vector(G::SpecialLinear, p, X; kwargs...)
-    mpv = check_vector(decorated_manifold(G), p, X; kwargs...)
-    mpv === nothing || return mpv
     trX = tr(inverse_translate_diff(G, p, p, X, LeftAction()))
     if !isapprox(trX, 0; kwargs...)
         return DomainError(

@@ -8,12 +8,12 @@ using NLsolve
         @test G === GeneralLinear(3, ℝ)
         @test repr(G) == "GeneralLinear(3, ℝ)"
         @test base_manifold(G) === GeneralLinear(3)
-        @test decorated_manifold(G) === Euclidean(3, 3)
+        @test get_embedding(G) === Euclidean(3, 3)
         @test number_system(G) === ℝ
         @test manifold_dimension(G) == 9
         @test representation_size(G) == (3, 3)
         Gc = GeneralLinear(2, ℂ)
-        @test decorated_manifold(Gc) === Euclidean(2, 2; field=ℂ)
+        @test get_embedding(Gc) === Euclidean(2, 2; field=ℂ)
         @test repr(Gc) == "GeneralLinear(2, ℂ)"
         @test number_system(Gc) == ℂ
         @test manifold_dimension(Gc) == 8
@@ -23,25 +23,6 @@ using NLsolve
         @test number_system(Gh) == ℍ
         @test manifold_dimension(Gh) == 4 * 16
         @test representation_size(Gh) == (4, 4)
-
-        @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
-        @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(false)
-        @test is_default_metric(
-            MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
-        ) === true
-        @test @inferred(Manifolds.default_metric_dispatch(G, EuclideanMetric())) ===
-              Val(true)
-        @test @inferred(
-            Manifolds.default_metric_dispatch(
-                G,
-                InvariantMetric(EuclideanMetric(), LeftAction()),
-            )
-        ) === Val(true)
-        @test @inferred(
-            Manifolds.default_metric_dispatch(
-                MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
-            )
-        ) === Val(true)
         @test Manifolds.allocation_promotion_function(Gc, exp!, (1,)) === complex
 
         q = identity_element(G)

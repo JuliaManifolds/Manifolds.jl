@@ -21,8 +21,8 @@ struct GeneralLinear{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
 function active_traits(f, ::GeneralLinear, args...)
     return merge_traits(
         IsGroupManifold(MultiplicationOperation()),
-        IsDefaultMetric(EuclideanMetric()),
         IsEmbeddedManifold(),
+        IsDefaultMetric(EuclideanMetric()),
     )
 end
 
@@ -33,8 +33,6 @@ function allocation_promotion_function(::GeneralLinear{n,ℂ}, f, ::Tuple) where
 end
 
 function check_point(G::GeneralLinear, p; kwargs...)
-    mpv = check_point(decorated_manifold(G), p; kwargs...)
-    mpv === nothing || return mpv
     detp = det(p)
     if iszero(detp)
         return DomainError(
@@ -47,12 +45,8 @@ end
 check_point(::GeneralLinear, ::Identity{MultiplicationOperation}) = nothing
 
 function check_vector(G::GeneralLinear, p, X; kwargs...)
-    mpv = check_vector(decorated_manifold(G), p, X; kwargs...)
-    mpv === nothing || return mpv
     return nothing
 end
-
-riemannian_manifold(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
 
 distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
 
@@ -127,6 +121,8 @@ function get_coordinates!(
 ) where {n}
     return copyto!(Xⁱ, X)
 end
+
+get_embedding(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n,n; field=𝔽)
 
 function get_vector(
     ::GeneralLinear{n,ℝ},
@@ -220,8 +216,6 @@ function log!(::GeneralLinear{1}, X, p, q)
     X[1] = log(p1 \ q[1])
     return X
 end
-
-manifold_dimension(G::GeneralLinear) = manifold_dimension(decorated_manifold(G))
 
 LinearAlgebra.norm(::GeneralLinear, p, X) = norm(X)
 
