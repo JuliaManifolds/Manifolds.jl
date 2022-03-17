@@ -372,10 +372,38 @@ function check_point(
 end
 
 ##########################
-# Metric function forwards
+# Metric function forwards - dispatch on layer 2.
 ##########################
 
+function exp(::TraitList{<:IsGroupManifold}, G::GroupManifold, p, X)
+    return exp(G.manifold, p, X)
+end
+
+function exp!(::TraitList{<:IsGroupManifold}, G::GroupManifold, q, p, X)
+    return exp!(G.manifold, q, p, X)
+end
 get_embedding(G::GroupManifold) = get_embedding(G.manifold)
+
+function get_vector(
+    ::TraitList{<:IsGroupManifold},
+    G::GroupManifold,
+    p,
+    c,
+    B::AbstractBasis,
+)
+    return get_vector(G.manifold, p, c, B)
+end
+
+function get_vector!(
+    ::TraitList{<:IsGroupManifold},
+    G::GroupManifold,
+    Y,
+    p,
+    c,
+    B::AbstractBasis,
+)
+    return get_vector!(G.manifold, Y, p, c, B)
+end
 
 function is_point(
     ::TraitList{<:IsGroupManifold},
@@ -405,6 +433,26 @@ function is_vector(
     return is_vector(next_trait(t), G, identity_element(G), X, te, false; kwargs...)
 end
 
+
+function is_vector(
+    ::TraitList{<:IsGroupManifold},
+    G::GroupManifold,
+    p,
+    X,
+    te=false,
+    cbp=true;
+    kwargs...,
+)
+    return is_vector(G.manifold, p, X, te, cbp; kwargs...)
+end
+
+function log(t::TraitList{<:IsGroupManifold}, G::GroupManifold, p, q)
+    return log(G.manifold, p, q)
+end
+
+function log!(t::TraitList{<:IsGroupManifold}, G::GroupManifold, X, p, q)
+    return log!(G.manifold, X, p, q)
+end
 ##########################
 # Group-specific functions
 ##########################
