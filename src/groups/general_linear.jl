@@ -150,14 +150,7 @@ function exp_lie!(::GeneralLinear{1}, q, X)
 end
 exp_lie!(::GeneralLinear{2}, q, X) = copyto!(q, exp(SizedMatrix{2,2}(X)))
 
-function _log_lie!(::GeneralLinear{1}, X, p)
-    X[1] = log(p[1])
-    return X
-end
-
 inner(::GeneralLinear, p, X, Y) = dot(X, Y)
-
-invariant_metric_dispatch(::GeneralLinear, ::LeftAction) = Val(true)
 
 inverse_translate_diff(::GeneralLinear, p, q, X, ::LeftAction) = X
 inverse_translate_diff(::GeneralLinear, p, q, X, ::RightAction) = p * X / p
@@ -218,9 +211,19 @@ function log!(::GeneralLinear{1}, X, p, q)
     return X
 end
 
-LinearAlgebra.norm(::GeneralLinear, p, X) = norm(X)
+function log_lie!(::GeneralLinear{1}, X, p)
+    X[1] = log(p[1])
+    return X
+end
 
 manifold_dimension(G::GeneralLinear) = manifold_dimension(get_embedding(G))
+
+LinearAlgebra.norm(::GeneralLinear, p, X) = norm(X)
+
+
+parallel_transport_to(::GeneralLinear, p, X, q) = X
+
+parallel_transport_to!(::GeneralLinear, Y, p, X, q) = copyto!(Y, X)
 
 project(::GeneralLinear, p) = p
 project(::GeneralLinear, p, X) = X
@@ -236,7 +239,3 @@ translate_diff(::GeneralLinear, p, q, X, ::RightAction) = p \ X * p
 function translate_diff!(G::GeneralLinear, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
-
-parallel_transport_to(::GeneralLinear, p, X, q) = X
-
-parallel_transport_to!(::GeneralLinear, Y, p, X, q) = copyto!(Y, X)

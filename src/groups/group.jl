@@ -332,8 +332,8 @@ function is_point(
     kwargs...,
 )
     ie = is_identity(G, e; kwargs...)
-    (!te) && return ie
-    return (!ie) && DomainError(e, "The provided identity is not a point on $G.")
+    (te && !ie) && throw(DomainError(e, "The provided identity is not a point on $G."))
+    return ie
 end
 
 function is_vector(
@@ -346,7 +346,7 @@ function is_vector(
     kwargs...,
 )
     if cbp
-        ie = is_identity(G, e; kwargs...)
+        ie = is_point(G, e; kwargs...)
         (!te) && return ie
     end
     return is_vector(next_trait(t), G, identity_element(G), X, te, false; kwargs...)
