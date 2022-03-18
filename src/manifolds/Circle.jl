@@ -362,7 +362,7 @@ that is parallel to the tangent to `p` on the unit circle and contains `0`.
 """
 project(::Circle, ::Any, ::Any)
 project(::Circle{ℝ}, p::Real, X::Real) = X
-project(::Circle{ℂ}, p::T, X::T) where {T<:Number} = X - complex_dot(p, X) * p
+project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
 
 project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
 project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
