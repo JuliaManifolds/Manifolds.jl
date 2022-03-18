@@ -78,7 +78,11 @@ function identity_element!(G::SemidirectProductGroup, q)
     return q
 end
 
-function is_identity(G::SemidirectProductGroup, p; kwargs...)
+function is_identity(
+    G::SemidirectProductGroup,
+    p::Identity{<:SemidirectProductOperation};
+    kwargs...,
+)
     M = base_manifold(G)
     N, H = M.manifolds
     nq, hq = submanifold_components(G, p)

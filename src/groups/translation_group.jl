@@ -24,6 +24,7 @@ end
         IsDefaultMetric(EuclideanMetric()),
         HasBiinvariantMetric(),
         active_traits(f, M.manifold, args...),
+        IsExplicitDecorator(),
     )
 end
 

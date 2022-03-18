@@ -102,7 +102,7 @@ Random.seed!(10)
             X2[1:n, 1:n] .= X[1:n, 1:n]
             X2[1:n, end] .= X[1:n, end]
             X2[end, end] = X[end, end]
-            @test_throws CompositeManifoldError is_vector(G, p, X2, true)
+            @test_throws DomainError is_vector(G, p, X2, true)
             p[n + 1, n + 1] = 0.1
             @test_throws DomainError is_point(G, p, true)
             p2 = zeros(n + 2, n + 2)
@@ -110,7 +110,7 @@ Random.seed!(10)
             p2[1:n, 1:n] .= p[1:n, 1:n]
             p2[1:n, end] .= p[1:n, end]
             p2[end, end] = p[end, end]
-            @test_throws CompositeManifoldError is_point(G, p2, true)
+            @test_throws DomainError is_point(G, p2, true)
             # exp/log_lie for ProductGroup on arrays
             X = copy(G, p, X_pts[1])
             p3 = exp_lie(G, X)
@@ -133,18 +133,18 @@ Random.seed!(10)
             e = Identity(G)
             Xe = log_lie(G, p)
             Xc = vee(G, e, Xe)
-            @test_throws ErrorException vee(M, e, Xe)
+            @test_throws MethodError vee(M, e, Xe)
             w = similar(Xc)
             vee!(G, w, e, Xe)
             @test isapprox(Xc, w)
-            @test_throws ErrorException vee!(M, w, e, Xe)
+            @test_throws MethodError vee!(M, w, e, Xe)
 
             Ye = hat(G, e, Xc)
-            @test_throws ErrorException hat(M, e, Xc)
+            @test_throws MethodError hat(M, e, Xc)
             isapprox(G, e, Xe, Ye)
             Ye2 = copy(G, p, X)
             hat!(G, Ye2, e, Xc)
-            @test_throws ErrorException hat!(M, Ye, e, Xc)
+            @test_throws MethodError hat!(M, Ye, e, Xc)
             @test isapprox(G, e, Ye, Ye2)
         end
     end

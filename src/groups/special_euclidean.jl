@@ -42,11 +42,10 @@ function SpecialEuclidean(n)
     return SemidirectProductGroup(Tn, SOn, A)
 end
 
-const SpecialEuclideanIdentity{N} = Identity{
-    SemidirectProductOperation{
+const SpecialEuclideanOperation{N} = SemidirectProductOperation{
         RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftAction},
-    },
-}
+    }
+const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
 Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
@@ -153,11 +152,8 @@ function affine_matrix(::SpecialEuclidean{n}, ::SpecialEuclideanIdentity{n}) whe
     return Diagonal{Float64}(I, n)
 end
 
-function check_point(G::SpecialEuclidean{n}, p::AbstractMatrix; kwargs...) where {n}
+function check_point(G::SpecialEuclideanManifold{n}, p::AbstractMatrix; kwargs...) where {n}
     errs = DomainError[]
-    # Valid matrix
-    err1 = check_point(Euclidean(n + 1, n + 1), p)
-    !isnothing(err1) && push!(errs, err1)
     # homogeneous
     if !isapprox(p[end, :], [zeros(size(p, 2) - 1)..., 1]; kwargs...)
         push!(
@@ -179,16 +175,26 @@ function check_point(G::SpecialEuclidean{n}, p::AbstractMatrix; kwargs...) where
     end
     return length(errs) == 0 ? nothing : first(errs)
 end
+
+function check_size(G::SpecialEuclideanManifold{n}, p::AbstractMatrix; kwargs...) where {n}
+    return check_size(Euclidean(n + 1, n + 1), p)
+end
+function check_size(
+    G::SpecialEuclideanManifold{n},
+    p::AbstractMatrix,
+    X::AbstractMatrix;
+    kwargs...,
+) where {n}
+    return check_size(Euclidean(n + 1, n + 1), X)
+end
+
 function check_vector(
-    G::SpecialEuclidean{n},
+    G::SpecialEuclideanManifold{n},
     p::AbstractMatrix,
     X::AbstractMatrix;
     kwargs...,
 ) where {n}
     errs = DomainError[]
-    # Valid matrix
-    err1 = check_point(Euclidean(n + 1, n + 1), X)
-    !isnothing(err1) && push!(errs, err1)
     # homogeneous
     if !isapprox(X[end, :], zeros(size(X, 2)); kwargs...)
         push!(
@@ -246,9 +252,9 @@ function allocate_result(::SpecialEuclidean{n}, ::typeof(screw_matrix), X...) wh
     return allocate(X[1], Size(n + 1, n + 1))
 end
 
-_compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
+compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
 
-function _compose!(
+function compose!(
     ::SpecialEuclidean,
     x::AbstractMatrix,
     p::AbstractMatrix,
@@ -436,14 +442,14 @@ and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 """
 log_lie(::SpecialEuclidean{3}, ::Any)
 
-function _log_lie!(G::SpecialEuclidean, X, q)
+function log_lie!(::TraitList{<:IsGroupManifold}, G::SpecialEuclidean, X, q)
     qmat = affine_matrix(G, q)
     Xmat = real(log_safe(qmat))
     map(copyto!, submanifold_components(G, X), submanifold_components(G, Xmat))
     _padvector!(G, X)
     return X
 end
-function _log_lie!(G::SpecialEuclidean{2}, X, q)
+function log_lie!(::TraitList{<:IsGroupManifold}, G::SpecialEuclidean{2}, X, q)
     SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -461,7 +467,7 @@ function _log_lie!(G::SpecialEuclidean{2}, X, q)
     end
     return X
 end
-function _log_lie!(G::SpecialEuclidean{3}, X, q)
+function log_lie!(::TraitList{<:IsGroupManifold}, G::SpecialEuclidean{3}, X, q)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
     @assert size(Ω) == (3, 3)
@@ -486,7 +492,14 @@ function _log_lie!(G::SpecialEuclidean{3}, X, q)
     @inbounds _padvector!(G, X)
     return X
 end
-
+function log_lie!(
+    ::TraitList{<:IsGroupManifold{SpecialEuclideanOperation{n}}},
+    G::SpecialEuclidean{n},
+    X,
+    ::Identity{SpecialEuclideanOperation{n}},
+) where {n}
+    return zero_vector!(G, X, identity_element(G))
+end
 """
     lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
     lie_bracket(G::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)
