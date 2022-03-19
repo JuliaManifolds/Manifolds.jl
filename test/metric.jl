@@ -477,10 +477,10 @@ end
         @test exp!(MM, q, p, X) === exp!(M, q, p, X)
         @test retract!(MM, q, p, X) === retract!(M, q, p, X)
         @test retract!(MM, q, p, X, 1) === retract!(M, q, p, X, 1)
+        @test project!(MM, Y, p, X) === project!(M, Y, p, X)
+        @test project!(MM, q, p) === project!(M, q, p)
         # without a definition for the metric from the embedding, no projection possible
         @test_throws MethodError log!(MM, Y, p, q) === project!(M, Y, p, q)
-        @test_throws MethodError project!(MM, Y, p, X) === project!(M, Y, p, X)
-        @test_throws MethodError project!(MM, q, p) === project!(M, q, p)
         @test_throws MethodError vector_transport_to!(MM, Y, p, X, q) ===
                                  vector_transport_to!(M, Y, p, X, q)
         # without DiffEq, these error
