@@ -603,6 +603,10 @@ function metric(M::MetricManifold)
     return M.metric
 end
 
+function norm(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, p, X::TFVector)
+    return sqrt(dot(X.data, local_metric(M, p, X.basis) * X.data))
+end
+
 function parallel_transport_to(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},

@@ -9,12 +9,17 @@ Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
 
 @inline function active_traits(f, ::SpecialOrthogonal, args...)
-    return merge_traits(
-        IsGroupManifold(MultiplicationOperation()),
-        HasBiinvariantMetric(),
-        IsDefaultMetric(EuclideanMetric()),
-        IsExplicitDecorator(), #pass to Rotations by default/last fallback
-    )
+    if is_metric_function(f)
+        #pass to Rotations by default
+        return merge_traits(IsExplicitDecorator())
+    else
+        return merge_traits(
+            IsGroupManifold(MultiplicationOperation()),
+            HasBiinvariantMetric(),
+            IsDefaultMetric(EuclideanMetric()),
+            IsExplicitDecorator(), #pass to Rotations by default/last fallback
+        )
+    end
 end
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
