@@ -67,8 +67,8 @@ end
 
 function active_traits(f, M::MetricManifold, args...)
     return merge_traits(
-        IsMetricManifold(),
         is_default_metric(M.manifold, M.metric) ? IsDefaultMetric(M.metric) : EmptyTrait(),
+        IsMetricManifold(),
         active_traits(f, M.manifold, args...),
         is_metric_function(f) ? EmptyTrait() : IsExplicitDecorator(),
     )
