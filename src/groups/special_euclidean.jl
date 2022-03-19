@@ -43,8 +43,8 @@ function SpecialEuclidean(n)
 end
 
 const SpecialEuclideanOperation{N} = SemidirectProductOperation{
-        RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftAction},
-    }
+    RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftAction},
+}
 const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
 Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")

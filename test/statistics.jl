@@ -2,7 +2,14 @@ include("utils.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase:
-    manifold_dimension, exp!, log!, inner, zero_vector!, decorated_manifold, base_manifold
+    manifold_dimension,
+    exp!,
+    log!,
+    inner,
+    zero_vector!,
+    decorated_manifold,
+    base_manifold,
+    get_embedding
 using Manifolds:
     AbstractEstimationMethod,
     CyclicProximalPointEstimation,
@@ -49,6 +56,7 @@ function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold, args...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
+get_embedding(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 
 struct TestStatsNotImplementedEmbeddedManifold2 <: AbstractDecoratorManifold{ℝ} end
@@ -56,13 +64,15 @@ function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold2, args...)
     return merge_traits(IsIsometricEmbeddedManifold())
 end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
+get_embedding(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 
-struct TestStatsNotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{𝔽} end
+struct TestStatsNotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{ℝ} end
 function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold3, args...)
     return merge_traits(IsEmbeddedManifold())
 end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
+get_embedding(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 
 function test_mean(M, x, yexp=nothing, method...; kwargs...)
@@ -413,6 +423,8 @@ end
     end
 
     @testset "decorator dispatch" begin
+        # equality tests are intentional to ensure correct dispatch
+        # (both calls eventually use the same method)
         ps = [normalize([1, 0, 0] .+ 0.1 .* randn(3)) for _ in 1:3]
         M1 = TestStatsNotImplementedEmbeddedManifold()
         @test mean!(M1, similar(ps[1]), ps) == mean!(Sphere(2), similar(ps[1]), ps)
@@ -421,16 +433,16 @@ end
         @test median(M1, ps) == median(Sphere(2), ps)
 
         M2 = TestStatsNotImplementedEmbeddedManifold2()
-        @test_throws ErrorException mean(M2, ps)
-        @test_throws ErrorException mean!(M2, similar(ps[1]), ps)
-        @test_throws ErrorException median(M2, ps)
-        @test_throws ErrorException median!(M2, similar(ps[1]), ps)
+        @test_throws MethodError mean(M2, ps)
+        @test_throws MethodError mean!(M2, similar(ps[1]), ps)
+        @test_throws MethodError median(M2, ps)
+        @test_throws MethodError median!(M2, similar(ps[1]), ps)
 
         M3 = TestStatsNotImplementedEmbeddedManifold3()
-        @test_throws ErrorException mean(M3, ps)
-        @test_throws ErrorException mean!(M3, similar(ps[1]), ps)
-        @test_throws ErrorException median(M3, ps)
-        @test_throws ErrorException median!(M3, similar(ps[1]), ps)
+        @test_throws MethodError mean(M3, ps)
+        @test_throws MethodError mean!(M3, similar(ps[1]), ps)
+        @test_throws MethodError median(M3, ps)
+        @test_throws MethodError median!(M3, similar(ps[1]), ps)
     end
 
     @testset "TestStatsSphere" begin
