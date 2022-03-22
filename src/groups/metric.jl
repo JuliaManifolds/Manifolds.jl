@@ -86,7 +86,8 @@ end
 
 @trait_function has_invariant_metric(M::AbstractDecoratorManifold, op::ActionDirection)
 
-has_invariant_metric(::EmptyTrait, ::AbstractDecoratorManifold, op) = false
+# Fallbacks / false
+has_invariant_metric(::AbstractManifold, op::ActionDirection) = false
 function has_invariant_metric(
     ::TraitList{<:HasLeftInvariantMetric},
     ::AbstractDecoratorManifold,
@@ -104,13 +105,15 @@ end
 
 @trait_function has_biinvariant_metric(M::AbstractDecoratorManifold)
 
-has_biinvariant_metric(::TraitList{EmptyTrait}, ::AbstractDecoratorManifold) = false
+# fallbavk / default: false
+has_biinvariant_metric(::AbstractManifold) = false
 function has_biinvariant_metric(
     ::TraitList{<:HasBiinvariantMetric},
     ::AbstractDecoratorManifold,
 )
     return true
 end
+
 function inner(
     t::TraitList{IT},
     M::AbstractDecoratorManifold,

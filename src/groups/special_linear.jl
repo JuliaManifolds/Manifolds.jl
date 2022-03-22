@@ -23,7 +23,7 @@ SpecialLinear(n, 𝔽::AbstractNumbers=ℝ) = SpecialLinear{n,𝔽}()
     return merge_traits(
         IsGroupManifold(MultiplicationOperation()),
         IsEmbeddedSubmanifold(),
-        HasBiinvariantMetric(),
+        HasLeftInvariantMetric(),
         IsDefaultMetric(EuclideanMetric()),
     )
 end
