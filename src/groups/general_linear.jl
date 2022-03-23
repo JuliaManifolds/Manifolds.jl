@@ -211,7 +211,7 @@ function log!(::GeneralLinear{1}, X, p, q)
     return X
 end
 
-function log_lie!(::GeneralLinear{1}, X, p)
+function _log_lie!(::GeneralLinear{1}, X, p)
     X[1] = log(p[1])
     return X
 end

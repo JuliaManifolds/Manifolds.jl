@@ -872,13 +872,14 @@ where $e$ here is the [`Identity`](@ref) element, that is, $1$ for numeric $q$ o
 identity matrix $I_m$ for matrix $q ∈ ℝ^{m × m}$.
 
 Since this function also depends on the group operation, make sure to implement
-the corresponding trait version `log_lie(::TraitList{<:IsGroupManifold}, G, q)`.
+either
+* `_log_lie(G, q)` and `_log_lie!(G, X, q)` for the points not being the [`Identity`](@ref)
+* the trait version `log_lie(::TraitList{<:IsGroupManifold}, G, e)`, `log_lie(::TraitList{<:IsGroupManifold}, G, X, e)` for own implementations of the identity case.
 """
 log_lie(::AbstractDecoratorManifold, q)
 @trait_function log_lie(G::AbstractDecoratorManifold, q)
 function log_lie(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q)
-    X = allocate_result(G, log_lie, q)
-    return log_lie!(G, X, q)
+    return _log_lie(G, q)
 end
 function log_lie(
     ::TraitList{<:IsGroupManifold{O}},
@@ -887,8 +888,16 @@ function log_lie(
 ) where {O<:AbstractGroupOperation}
     return zero_vector(G, identity_element(G))
 end
+# though identity was taken care of – as usual restart decorator dispatch
+function _log_lie(G::AbstractDecoratorManifold, q)
+    X = allocate_result(G, log_lie, q)
+    return log_lie!(G, X, q)
+end
 
 @trait_function log_lie!(G::AbstractDecoratorManifold, X, q)
+function log_lie!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, q)
+    return _log_lie!(G, X, q)
+end
 function log_lie!(
     ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,

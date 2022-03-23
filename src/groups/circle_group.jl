@@ -75,16 +75,15 @@ end
 
 exp_lie!(G::CircleGroup, q, X) = (q .= exp_lie(G, X))
 
-function log_lie(::CircleGroup, q)
+function _log_lie(::CircleGroup, q)
     return map(q) do z
         cosθ, sinθ = reim(z)
         θ = atan(sinθ, cosθ)
         return θ * im
     end
 end
-log_lie(::CircleGroup, e::Identity{MultiplicationOperation}) = 0.0 * im
 
-_log_lie!(G::CircleGroup, X, q) = (X .= log_lie(G, q))
+_log_lie!(G::CircleGroup, X, q) = (X .= _log_lie(G, q))
 
 function number_of_coordinates(G::CircleGroup, B::AbstractBasis)
     return number_of_coordinates(base_manifold(G), B)
