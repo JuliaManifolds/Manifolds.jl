@@ -10,8 +10,11 @@ const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperat
 
 @inline function active_traits(f, ::SpecialOrthogonal, args...)
     if is_metric_function(f)
-        #pass to Rotations by default
-        return merge_traits(IsExplicitDecorator())
+        #pass to Rotations by default - but keep Group Decorator for the retraction
+        return merge_traits(
+            IsGroupManifold(MultiplicationOperation()),
+            IsExplicitDecorator(),
+        )
     else
         return merge_traits(
             IsGroupManifold(MultiplicationOperation()),
