@@ -530,8 +530,8 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::Rotations, ::Any)
 
-function Statistics.mean!(M::Rotations, q, x::AbstractVector, w::AbstractVector; kwargs...)
-    return mean!(M, q, x, w, GeodesicInterpolationWithinRadius(π / 2 / √2); kwargs...)
+function default_estimation_method(::Rotations, ::typeof(mean))
+    return GeodesicInterpolationWithinRadius(π / 2 / √2)
 end
 
 @doc raw"""

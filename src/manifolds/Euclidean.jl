@@ -417,10 +417,6 @@ function Statistics.mean(
 end
 Statistics.mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
 
-function Statistics.mean!(M::Euclidean, p, x::AbstractVector, w::AbstractVector; kwargs...)
-    return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
-end
-
 function StatsBase.mean_and_var(
     ::Euclidean{Tuple{}},
     x::AbstractVector{<:Number};
@@ -438,14 +434,6 @@ function StatsBase.mean_and_var(
 )
     m, v = mean_and_var(x, w; corrected=corrected, kwargs...)
     return m, sum(v)
-end
-function StatsBase.mean_and_var(
-    M::Euclidean,
-    x::AbstractVector,
-    w::AbstractWeights;
-    kwargs...,
-)
-    return mean_and_var(M, x, w, GeodesicInterpolation(); kwargs...)
 end
 
 Statistics.median(::Euclidean{Tuple{}}, x::AbstractVector{<:Number}; kwargs...) = median(x)

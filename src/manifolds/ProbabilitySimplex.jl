@@ -271,15 +271,7 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::ProbabilitySimplex, ::Any...)
 
-function Statistics.mean!(
-    M::ProbabilitySimplex,
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-)
-    return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
-end
+default_estimation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
 
 @doc raw"""
     project(M::ProbabilitySimplex, p, Y)

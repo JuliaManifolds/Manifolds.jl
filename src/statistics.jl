@@ -153,27 +153,23 @@ Note that his function is decorated, so it can inherit from the embedding, for e
 """
 default_estimation_method(M::AbstractManifold, f)
 
-for mf in [
-    mean,
-    median,
-    cov,
-    var,
-    mean_and_std,
-    mean_and_var,
-]
-    @eval @trait_function default_estimation_method(M::AbstractDecoratorManifold, f::typeof($mf))
-    eval(quote
-        function default_estimation_method(
-        ::TraitList{IsEmbeddedSubmanifold},
+for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
+    @eval @trait_function default_estimation_method(
         M::AbstractDecoratorManifold,
         f::typeof($mf),
-        )
-            return default_estimation_method(get_embedding(M), f)
-        end
-    end
+    )
+    eval(
+        quote
+            function default_estimation_method(
+                ::TraitList{IsEmbeddedSubmanifold},
+                M::AbstractDecoratorManifold,
+                f::typeof($mf),
+            )
+                return default_estimation_method(get_embedding(M), f)
+            end
+        end,
     )
 end
-
 
 """
     Statistics.cov(
@@ -1001,7 +997,7 @@ end
 function StatsBase.mean_and_var(
     M::AbstractManifold,
     x::AbstractVector,
-    method::AbstractEstimationMethod=default_estimation_method(M,mean_and_var);
+    method::AbstractEstimationMethod=default_estimation_method(M, mean_and_var);
     corrected=true,
     kwargs...,
 )
@@ -1014,12 +1010,11 @@ function default_estimation_method(
     M::AbstractDecoratorManifold,
     ::typeof(mean_and_var),
 )
-    return default_estimation_method(M,mean)
+    return default_estimation_method(M, mean)
 end
 function default_estimation_method(M::AbstractManifold, ::typeof(mean_and_var))
-    return default_estimation_method(M,mean)
+    return default_estimation_method(M, mean)
 end
-
 
 @doc raw"""
     mean_and_var(
@@ -1166,10 +1161,10 @@ function default_estimation_method(
     M::AbstractDecoratorManifold,
     ::typeof(mean_and_std),
 )
-    return default_estimation_method(M,mean)
+    return default_estimation_method(M, mean)
 end
 function default_estimation_method(M::AbstractManifold, ::typeof(mean_and_std))
-    return default_estimation_method(M,mean)
+    return default_estimation_method(M, mean)
 end
 
 """

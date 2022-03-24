@@ -286,9 +286,7 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::Hyperbolic, ::Any...)
 
-function Statistics.mean!(M::Hyperbolic, p, x::AbstractVector, w::AbstractVector; kwargs...)
-    return mean!(M, p, x, w, CyclicProximalPointEstimation(); kwargs...)
-end
+default_estimation_method(::Hyperbolic, ::typeof(mean)) = CyclicProximalPointEstimation()
 
 @doc raw"""
     project(M::Hyperbolic, p, X)

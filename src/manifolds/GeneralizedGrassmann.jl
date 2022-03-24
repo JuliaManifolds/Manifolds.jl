@@ -282,14 +282,8 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::GeneralizedGrassmann{n,k} where {n,k}, ::Any...)
 
-function Statistics.mean!(
-    M::GeneralizedGrassmann{n,k},
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {n,k}
-    return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
+function default_estimation_method(::GeneralizedGrassmann, ::typeof(mean))
+    return GeodesicInterpolationWithinRadius(π / 4)
 end
 
 @doc raw"""

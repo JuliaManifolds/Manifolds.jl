@@ -339,14 +339,8 @@ using [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::AbstractProjectiveSpace, ::Any...)
 
-function Statistics.mean!(
-    M::AbstractProjectiveSpace,
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-)
-    return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
+function default_estimation_method(::AbstractProjectiveSpace, ::typeof(mean))
+    return GeodesicInterpolationWithinRadius(π / 4)
 end
 
 function mid_point!(M::ProjectiveSpace, q, p1, p2)

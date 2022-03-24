@@ -121,15 +121,7 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::SymmetricPositiveDefinite, ::Any)
 
-function Statistics.mean!(
-    M::SymmetricPositiveDefinite,
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-)
-    return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
-end
+default_estimation_method(::SymmetricPositiveDefinite, ::typeof(mean)) = GeodesicInterpolation()
 
 @doc raw"""
     project(M::SymmetricPositiveDefinite, p, X)
