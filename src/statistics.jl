@@ -581,7 +581,7 @@ function Statistics.mean!(
     w::AbstractVector,
     ::ExtrinsicEstimation;
     extrinsic_method::AbstractEstimationMethod=default_estimation_method(
-        get_embeddding(M),
+        get_embedding(M),
         mean,
     ),
     kwargs...,
