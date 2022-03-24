@@ -37,7 +37,7 @@ end
 function exp(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, p, X; kwargs...)
     return solve_exp_ode(M, p, X; kwargs...)
 end
-function exp(
+function exp!(
     ::TraitList{IsMetricManifold},
     M::AbstractDecoratorManifold,
     q,
