@@ -2,6 +2,7 @@ include("utils.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase:
+    active_traits,
     manifold_dimension,
     exp!,
     log!,
@@ -17,7 +18,7 @@ using Manifolds:
     GeodesicInterpolationWithinRadius,
     GradientDescentEstimation,
     WeiszfeldEstimation
-import Manifolds: mean!, median!, var, mean_and_var
+import Manifolds: mean!, median!, var, mean_and_var, default_estimation_method
 
 struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
@@ -302,12 +303,13 @@ function mean!(
 )
     return fill!(y, 3)
 end
+default_estimation_function(::TestStatsOverload3, ::typeof(mean)) = TestStatsMethod1()
 function mean!(
     ::TestStatsOverload3,
     y,
     ::AbstractVector,
     ::AbstractWeights,
-    ::TestStatsMethod1=TestStatsMethod1(),
+    ::TestStatsMethod1,
 )
     return fill!(y, 5)
 end
@@ -331,12 +333,13 @@ function median!(
 )
     return fill!(y, 3)
 end
+default_estimation_function(::TestStatsOverload3, ::typeof(median)) = TestStatsMethod1()
 function median!(
     ::TestStatsOverload3,
     y,
     ::AbstractVector,
     ::AbstractWeights,
-    ::TestStatsMethod1=TestStatsMethod1(),
+    ::TestStatsMethod1,
 )
     return fill!(y, 5)
 end
