@@ -18,7 +18,7 @@ using Manifolds:
     GeodesicInterpolationWithinRadius,
     GradientDescentEstimation,
     WeiszfeldEstimation
-import Manifolds: mean!, median!, var, mean_and_var, default_estimation_method
+import Manifolds: mean, mean!, median, median!, var, mean_and_var, default_estimation_method
 
 struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
@@ -280,8 +280,6 @@ function test_moments(M, x)
 end
 
 struct TestStatsOverload1 <: AbstractManifold{ℝ} end
-struct TestStatsOverload2 <: AbstractManifold{ℝ} end
-struct TestStatsOverload3 <: AbstractManifold{ℝ} end
 struct TestStatsMethod1 <: AbstractEstimationMethod end
 
 function mean!(
@@ -293,27 +291,23 @@ function mean!(
 )
     return fill!(y, 3)
 end
-mean!(::TestStatsOverload2, y, ::AbstractVector, ::AbstractWeights) = fill!(y, 4)
-function mean!(
-    ::TestStatsOverload2,
-    y,
+function mean(
+    ::TestStatsOverload1,
     ::AbstractVector,
     ::AbstractWeights,
     ::GradientDescentEstimation,
 )
-    return fill!(y, 3)
-end
-default_estimation_function(::TestStatsOverload3, ::typeof(mean)) = TestStatsMethod1()
-function mean!(
-    ::TestStatsOverload3,
-    y,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::TestStatsMethod1,
-)
-    return fill!(y, 5)
+    return fill(3, 1)
 end
 
+function median(
+    ::TestStatsOverload1,
+    ::AbstractVector,
+    ::AbstractWeights,
+    ::CyclicProximalPointEstimation,
+)
+    return fill(3, 1)
+end
 function median!(
     ::TestStatsOverload1,
     y,
@@ -322,26 +316,6 @@ function median!(
     ::CyclicProximalPointEstimation,
 )
     return fill!(y, 3)
-end
-median!(::TestStatsOverload2, y, ::AbstractVector, ::AbstractWeights) = fill!(y, 4)
-function median!(
-    ::TestStatsOverload2,
-    y,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::CyclicProximalPointEstimation,
-)
-    return fill!(y, 3)
-end
-default_estimation_function(::TestStatsOverload3, ::typeof(median)) = TestStatsMethod1()
-function median!(
-    ::TestStatsOverload3,
-    y,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::TestStatsMethod1,
-)
-    return fill!(y, 5)
 end
 
 function var(::TestStatsOverload1, ::AbstractVector, ::AbstractWeights, m; corrected=false)
@@ -373,18 +347,14 @@ end
         x = [[0.0]]
         @testset "mean" begin
             M = TestStatsOverload1()
+            y = similar(x[1])
             @test mean(M, x) == [3.0]
+            @test mean!(M, y, x) == [3.0]
             @test mean(M, x, w) == [3.0]
             @test mean(M, x, w, GradientDescentEstimation()) == [3.0]
+            @test mean!(M, y, x, w, GradientDescentEstimation()) == [3.0]
             @test mean(M, x, GradientDescentEstimation()) == [3.0]
-            M = TestStatsOverload2()
-            @test mean(M, x) == [4.0]
-            @test mean(M, x, w) == [4.0]
-            @test mean(M, x, w, GradientDescentEstimation()) == [3.0]
-            @test mean(M, x, GradientDescentEstimation()) == [3.0]
-            M = TestStatsOverload3()
-            @test mean(M, x) == [5.0]
-            @test mean(M, x, w) == [5.0]
+            @test mean!(M, y, x, GradientDescentEstimation()) == [3.0]
         end
 
         @testset "median" begin
@@ -393,21 +363,13 @@ end
             @test median(M, x, w) == [3.0]
             @test median(M, x, w, CyclicProximalPointEstimation()) == [3.0]
             @test median(M, x, CyclicProximalPointEstimation()) == [3.0]
-            M = TestStatsOverload2()
-            @test median(M, x) == [4.0]
-            @test median(M, x, w) == [4.0]
-            @test median(M, x, w, CyclicProximalPointEstimation()) == [3.0]
-            @test median(M, x, CyclicProximalPointEstimation()) == [3.0]
-            M = TestStatsOverload3()
-            @test median(M, x) == [5.0]
-            @test median(M, x, w) == [5.0]
         end
 
         @testset "var" begin
             M = TestStatsOverload1()
-            @test mean_and_var(M, x) == ([4.0], 9)
+            @test mean_and_var(M, x) == ([3.0], 9)
             @test mean_and_var(M, x, w) == ([4.0], 4)
-            @test mean_and_std(M, x) == ([4.0], 3.0)
+            @test mean_and_std(M, x) == ([3.0], 3.0)
             @test mean_and_std(M, x, w) == ([4.0], 2.0)
             @test var(M, x) == 9
             @test var(M, x, 2) == 9
@@ -432,8 +394,6 @@ end
         M1 = TestStatsNotImplementedEmbeddedManifold()
         @test mean!(M1, similar(ps[1]), ps) == mean!(Sphere(2), similar(ps[1]), ps)
         @test mean(M1, ps) == mean(Sphere(2), ps)
-        @test median!(M1, similar(ps[1]), ps) == median!(Sphere(2), similar(ps[1]), ps)
-        @test median(M1, ps) == median(Sphere(2), ps)
 
         M2 = TestStatsNotImplementedEmbeddedManifold2()
         @test_throws MethodError mean(M2, ps)
@@ -548,7 +508,7 @@ end
             end
 
             @testset "vector" begin
-                x = [[1.0], [2.0], [3.0], [4.0]]
+                x = [fill(1.0), fill(2.0), fill(3.0), fill(4.0)]
                 vx = vcat(x...)
                 w = pweights(ones(length(x)) / length(x))
                 @test mean(M, x) ≈ mean(x)
