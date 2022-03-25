@@ -186,36 +186,6 @@ end
 function Manifolds.projected_distribution(M::BaseManifold, d, p)
     return ProjectedPointDistribution(M, d, project!, p)
 end
-function Manifolds.mean!(::BaseManifold, y, x::AbstractVector, w::AbstractVector; kwargs...)
-    return fill!(y, 1)
-end
-function Manifolds.median!(
-    ::BaseManifold,
-    y,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-)
-    return fill!(y, 2)
-end
-function Manifolds.mean!(
-    ::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
-    y,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {N}
-    return fill!(y, 3)
-end
-function Manifolds.median!(
-    ::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
-    y,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {N}
-    return fill!(y, 4)
-end
 
 function Manifolds.flat!(
     ::BaseManifold,
@@ -586,17 +556,6 @@ end
             sharp!(MM, fX2, p, cofX2)
             @test isapprox(fX2.data, fX.data)
         end
-
-        psample = [[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
-        Y = pweights([0.5, 0.5])
-        # test despatch with results from above
-        @test mean(M, psample, Y) ≈ ones(3)
-        @test mean(MM2, psample, Y) ≈ ones(3)
-        @test mean(MM, psample, Y) ≈ 3 .* ones(3)
-
-        @test median(M, psample, Y) ≈ 2 .* ones(3)
-        @test median(MM2, psample, Y) ≈ 2 * ones(3)
-        @test median(MM, psample, Y) ≈ 4 .* ones(3)
     end
 
     @testset "change metric and representer" begin
