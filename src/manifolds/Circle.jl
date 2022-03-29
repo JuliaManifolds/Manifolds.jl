@@ -425,6 +425,15 @@ project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
 project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
 project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
 
+@doc raw"""
+    Base.rand(M::Circle{ℝ})
+
+Return a random point on the [`Circle`](@ref) ``\mathbb S^1`` by
+picking a random element from ``[-\pi,\pi)`` uniformly.
+"""
+Base.rand(::Circle{ℝ}) = sym_rem(rand() * 2 * π)
+Base.rand(rng::AbstractRNG, ::Circle{ℝ}) = sym_rem(rand(rng) * 2 * π)
+
 retract(M::Circle, p, q) = retract(M, p, q, ExponentialRetraction())
 retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)
 

@@ -82,6 +82,8 @@ using Manifolds: TFVector, CoTFVector
         @test z2[1] == z
         @test project(M, z) == z
         @test project(M, 1.0, 2.0) == 2.0
+        @test is_point(M, rand(M))
+        @test is_point(M, rand(Random.GLOBAL_RNG, M))
     end
     TEST_STATIC_SIZED && @testset "Real Circle and static sized arrays" begin
         v = MVector(0.0)
