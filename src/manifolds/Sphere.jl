@@ -419,6 +419,13 @@ project(::AbstractSphere, ::Any, ::Any)
 
 project!(::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 
+function Random.rand!(M::Sphere, p)
+    return project!(M, p, randn(manifold_dimension(M) + 1))
+end
+function Random.rand!(rng::AbstractRNG, M::Sphere, p)
+    return project!(M, p, randn(rng, manifold_dimension(M) + 1))
+end
+
 @doc raw"""
     representation_size(M::AbstractSphere)
 

@@ -220,6 +220,7 @@ end
                 is_tangent_atol_multiplier=12.0,
                 exp_log_atol_multiplier=20 * prod(power_dimensions(Ms1)),
                 test_inplace=true,
+                test_rand_point=true,
             )
         end
     end
@@ -290,6 +291,7 @@ end
                 is_tangent_atol_multiplier=12.0,
                 exp_log_atol_multiplier=4e2 * prod(power_dimensions(Mrn1)),
                 test_inplace=true,
+                test_rand_point=true,
             )
         end
     end

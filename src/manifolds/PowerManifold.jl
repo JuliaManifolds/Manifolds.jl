@@ -169,6 +169,33 @@ function Random.rand(rng::AbstractRNG, d::PowerPointDistribution)
     return x
 end
 
+function Random.rand!(M::AbstractPowerManifold, p; kwargs...)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        rand!(M.manifold, _write(M, rep_size, p, i))
+    end
+    return p
+end
+function Random.rand!(rng::AbstractRNG, M::AbstractPowerManifold, p; kwargs...)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        rand!(rng, M.manifold, _write(M, rep_size, p, i))
+    end
+    return p
+end
+function Random.rand!(M::PowerManifoldNestedReplacing, p; kwargs...)
+    for i in get_iterator(M)
+        p[i...] = rand(M.manifold; kwargs...)
+    end
+    return p
+end
+function Random.rand!(rng::AbstractRNG, M::PowerManifoldNestedReplacing, p; kwargs...)
+    for i in get_iterator(M)
+        p[i...] = rand(rng, M.manifold; kwargs...)
+    end
+    return p
+end
+
 function Distributions._rand!(
     rng::AbstractRNG,
     d::PowerFVectorDistribution,

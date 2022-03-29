@@ -674,6 +674,30 @@ function Random.rand(
         convert(TResult, _fix_random_rotation(A))
     end
 end
+function Random.rand!(M::Rotations, p)
+    # Special case: Rotations(1) is just zero-dimensional
+    (manifold_dimension(M) == 0) && return fill!(p, 1)
+    A = randn(representation_size(M))
+    s = diag(sign.(qr(A).R))
+    D = Diagonal(s)
+    p .= qr(A).Q * D
+    if det(p) < 0
+        p[:, [1, 2]] = p[:, [2, 1]]
+    end
+    return p
+end
+function Random.rand!(rng::AbstractRNG, M::Rotations, p)
+    # Special case: Rotations(1) is just zero-dimensional
+    (manifold_dimension(M) == 0) && return fill!(p, 1)
+    A = randn(rng, representation_size(M))
+    s = diag(sign.(qr(A).R))
+    D = Diagonal(s)
+    p .= qr(A).Q * D
+    if det(p) < 0
+        p[:, [1, 2]] = p[:, [2, 1]]
+    end
+    return p
+end
 
 function Distributions._rand!(
     rng::AbstractRNG,

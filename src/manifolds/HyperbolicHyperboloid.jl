@@ -406,9 +406,17 @@ function project!(
     return (Y.value .= X.value .+ minkowski_metric(p.value, X.value) .* p.value)
 end
 
-function Base.rand(::Hyperbolic{N}; σ=1.0) where {N}
+function Random.rand!(::Hyperbolic{N}, p; σ=1.0) where {N}
     a = σ .* randn(N)
-    return [a; sqrt(1 + dot(a, a))]
+    p[1:(end - 1)] .= a
+    p[end] = sqrt(1 + dot(a, a))
+    return p
+end
+function Random.rand!(rng::AbstractRNG, ::Hyperbolic{N}, p; σ=1.0) where {N}
+    a = σ .* randn(rng, N)
+    p[1:(end - 1)] .= a
+    p[end] = sqrt(1 + dot(a, a))
+    return p
 end
 
 function vector_transport_to!(M::Hyperbolic, Y, p, X, q, ::ParallelTransport)
