@@ -426,13 +426,29 @@ project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
 project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
 
 @doc raw"""
-    Random.rand(M::Circle{ℝ})
+    Random.rand(M::Circle{ℝ}; vector_at = nothing, σ::Real=1.0)
 
-Return a random point on the [`Circle`](@ref) ``\mathbb S^1`` by
-picking a random element from ``[-\pi,\pi)`` uniformly.
+If `vector_at` is `nothing`, return a random point on the [`Circle`](@ref) ``\mathbb S^1``
+by picking a random element from ``[-\pi,\pi)`` uniformly.
+
+If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
+the point `vector_at` on the [`Circle``](@ref) by using a normal distribution with
+mean 0 and standard deviation `σ`.
 """
-Random.rand(::Circle{ℝ}) = sym_rem(rand() * 2 * π)
-Random.rand(rng::AbstractRNG, ::Circle{ℝ}) = sym_rem(rand(rng) * 2 * π)
+function Random.rand(::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
+    if vector_at === nothing
+        return sym_rem(rand() * 2 * π)
+    else
+        return σ * randn()
+    end
+end
+function Random.rand(rng::AbstractRNG, ::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
+    if vector_at === nothing
+        return sym_rem(rand(rng) * 2 * π)
+    else
+        return σ * randn(rng)
+    end
+end
 
 retract(M::Circle, p, q) = retract(M, p, q, ExponentialRetraction())
 retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)

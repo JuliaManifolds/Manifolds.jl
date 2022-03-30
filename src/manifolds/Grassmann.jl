@@ -322,28 +322,50 @@ project(::Grassmann, ::Any...)
 project!(::Grassmann, Y, p, X) = copyto!(Y, X - p * p' * X)
 
 @doc raw"""
-    rand(M::Grassmann; σ::Real=1.0])
+    rand(M::Grassmann; σ::Real=1.0, vector_at=nothing)
 
-Return a random point `p` on [`Grassmann`](@ref) manifold `M` by
-generating a random (Gaussian) matrix with standard deviation `σ` in matching
+When `vector_at` is `nothing`, return a random point `p` on [`Grassmann`](@ref) manifold `M`
+by generating a random (Gaussian) matrix with standard deviation `σ` in matching
 size, which is orthonormal.
+
+When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
+``T_p\mathrm{Gr}(n,k)`` with mean zero and standard deviation `σ` by projecting a random
+Matrix onto the tangent space at `vector_at`.
 """
 rand(M::Grassmann; σ::Real=1.0)
 
-function Random.rand!(::Grassmann{n,k,𝔽}, p; σ::Real=one(real(eltype(p)))) where {n,k,𝔽}
-    V = σ * randn(𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
-    p .= qr(V).Q[:, 1:k]
-    return p
+function Random.rand!(
+    M::Grassmann{n,k,𝔽},
+    pX;
+    σ::Real=one(real(eltype(pX))),
+    vector_at=nothing,
+) where {n,k,𝔽}
+    if vector_at === nothing
+        V = σ * randn(𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
+        pX .= qr(V).Q[:, 1:k]
+    else
+        Z = σ * randn(eltype(pX), size(pX))
+        project!(M, pX, vector_at, Z)
+        pX .= pX ./ norm(pX)
+    end
+    return pX
 end
 function Random.rand!(
     rng::AbstractRNG,
-    ::Grassmann{n,k,𝔽},
-    p;
-    σ::Real=one(real(eltype(p))),
+    M::Grassmann{n,k,𝔽},
+    pX;
+    σ::Real=one(real(eltype(pX))),
+    vector_at=nothing,
 ) where {n,k,𝔽}
-    V = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
-    p .= qr(V).Q[:, 1:k]
-    return p
+    if vector_at === nothing
+        V = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
+        pX .= qr(V).Q[:, 1:k]
+    else
+        Z = σ * randn(rng, eltype(pX), size(pX))
+        project!(M, pX, vector_at, Z)
+        pX .= pX ./ norm(pX)
+    end
+    return pX
 end
 
 @doc raw"""

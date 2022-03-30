@@ -115,6 +115,7 @@ function test_manifold(
     test_project_point=false,
     test_project_tangent=false,
     test_rand_point=false,
+    test_rand_tvector=false,
     test_representation_size=true,
     test_reverse_diff=true,
     test_riesz_representer=false,
@@ -743,8 +744,21 @@ function test_manifold(
         Test.@test is_point(M, rand(M))
         # ensure that the RNG source is actually used
         Test.@test rand(rng_a, M) == rand(rng_b, M)
+        # generation of multiple points
         Test.@test all(p -> is_point(M, p), rand(M, 3))
         Test.@test all(p -> is_point(M, p), rand(rng_a, M, 3))
+    end
+
+    test_rand_tvector && Test.@testset "Base.rand tangent vector generation" begin
+        p = pts[1]
+        rng_a = MersenneTwister(123)
+        rng_b = MersenneTwister(123)
+        Test.@test is_vector(M, p, rand(M; vector_at=p))
+        # ensure that the RNG source is actually used
+        Test.@test rand(rng_a, M; vector_at=p) == rand(rng_b, M; vector_at=p)
+        # generation of multiple tangent vectors
+        Test.@test all(X -> is_vector(M, p, X), rand(M, 3; vector_at=p))
+        Test.@test all(X -> is_vector(M, p, X), rand(rng_a, M, 3; vector_at=p))
     end
 
     Test.@testset "tangent vector distributions" begin

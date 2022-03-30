@@ -69,6 +69,7 @@ include("../utils.jl")
                 test_reverse_diff=false,
                 test_vee_hat=false,
                 test_rand_point=true,
+                test_rand_tvector=true,
                 retraction_methods=[PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods=[
                     PolarInverseRetraction(),

@@ -321,6 +321,7 @@ using RecursiveArrayTools: ArrayPartition
         )) == ProductRepr(9, 10.0, 11)
 
         p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        @test p == ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
         @test submanifold_component(Mse, p, 1) === p.parts[1]
         @test submanifold_component(Mse, p, Val(1)) === p.parts[1]
         @test submanifold_component(p, 1) === p.parts[1]
