@@ -495,6 +495,15 @@ project(::Euclidean{Tuple{}}, ::Number, X::Number) = X
 
 project!(::Euclidean, Y, p, X) = copyto!(Y, X)
 
+function Random.rand!(::Euclidean, p; σ=one(eltype(p)))
+    p .= randn(size(p)) .* σ
+    return p
+end
+function Random.rand!(rng::AbstractRNG, ::Euclidean, p; σ=one(eltype(p)))
+    p .= randn(rng, size(p)) .* σ
+    return p
+end
+
 """
     representation_size(M::Euclidean)
 

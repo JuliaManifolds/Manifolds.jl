@@ -270,6 +270,26 @@ manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
 @doc raw"""
+    rand(::Stiefel; σ::Real=1.0)
+
+Return a random (Gaussian) point `x` on the [`Stiefel`](@ref) manifold `M` by generating a
+(Gaussian) matrix with standard deviation `σ` and return the orthogonalized version, i.e.
+return the Q component of the QR decomposition of the random matrix of size ``n×k``.
+"""
+rand(::Stiefel; σ::Real=1.0)
+
+function Random.rand!(::Stiefel{n,k,𝔽}, p; σ::Real=1.0) where {n,k,𝔽}
+    A = σ * randn(𝔽 === ℝ ? Float64 : ComplexF64, n, k)
+    p .= Matrix(qr(A).Q)
+    return p
+end
+function Random.rand!(rng::AbstractRNG, ::Stiefel{n,k,𝔽}, p; σ::Real=1.0) where {n,k,𝔽}
+    A = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, n, k)
+    p .= Matrix(qr(A).Q)
+    return p
+end
+
+@doc raw"""
     retract(::Stiefel, p, X, ::CayleyRetraction)
 
 Compute the retraction on the [`Stiefel`](@ref) that is based on the Cayley transform[^Zhu2017].

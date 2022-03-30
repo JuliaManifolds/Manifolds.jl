@@ -397,6 +397,7 @@ using RecursiveArrayTools: ArrayPartition
                 inverse_retraction_methods=inverse_retraction_methods,
                 test_riesz_representer=true,
                 test_default_vector_transport=true,
+                test_rand_point=true,
                 vector_transport_methods=[
                     ProductVectorTransport(ParallelTransport(), ParallelTransport()),
                     ProductVectorTransport(

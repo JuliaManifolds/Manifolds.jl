@@ -392,6 +392,35 @@ function project!(::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, A::AbstractM
 end
 
 @doc raw"""
+    rand(M::FixedRankMatrices; kwargs...)
+
+Return a random point on the FixedRankMatrices manifold.
+The orthogonal matrices are sampled from the Stiefel manifold
+and the singular values are sampled uniformly at random.
+"""
+rand(M::FixedRankMatrices; kwargs...)
+
+function Random.rand!(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
+    U = rand(Stiefel(m, k); kwargs...)
+    S = sort(rand(k); rev=true)
+    V = rand(Stiefel(n, k); kwargs...)
+    copyto!(M, p, SVDMPoint(U, S, V'))
+    return p
+end
+function Random.rand(
+    rng::AbstractRNG,
+    ::FixedRankMatrices{m,n,k},
+    p;
+    kwargs...,
+) where {m,n,k}
+    U = rand(rng, Stiefel(m, k); kwargs...)
+    S = sort(rand(k); rev=true)
+    V = rand(rng, Stiefel(n, k); kwargs...)
+    copyto!(M, p, SVDMPoint(U, S, V'))
+    return p
+end
+
+@doc raw"""
     representation_size(M::FixedRankMatrices{m,n,k})
 
 Return the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.

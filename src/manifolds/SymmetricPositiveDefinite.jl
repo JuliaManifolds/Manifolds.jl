@@ -157,6 +157,32 @@ project(::SymmetricPositiveDefinite, p, X)
 project!(::SymmetricPositiveDefinite, Y, p, X) = (Y .= Symmetric((X + X') / 2))
 
 @doc raw"""
+    rand(M::SymmetricPositiveDefinite; σ::Real=1)
+
+Generate a random symmetric positive definite matrix on the
+`SymmetricPositiveDefinite` manifold `M`.
+"""
+rand(M::SymmetricPositiveDefinite; σ::Real=1)
+
+function Random.rand!(::SymmetricPositiveDefinite{N}, p; σ::Real=one(eltype(p))) where {N}
+    D = Diagonal(1 .+ rand(N)) # random diagonal matrix
+    s = qr(σ * randn(N, N)) # random q
+    p .= Symmetric(s.Q * D * transpose(s.Q))
+    return p
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    ::SymmetricPositiveDefinite{N},
+    p;
+    σ::Real=one(eltype(p)),
+) where {N}
+    D = Diagonal(1 .+ rand(rng, N)) # random diagonal matrix
+    s = qr(σ * randn(rng, N, N)) # random q
+    p .= Symmetric(s.Q * D * transpose(s.Q))
+    return p
+end
+
+@doc raw"""
     representation_size(M::SymmetricPositiveDefinite)
 
 Return the size of an array representing an element on the

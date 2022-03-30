@@ -434,4 +434,10 @@ end
         ]
         @test norm(N, P, Z .- Zc) ≈ 0
     end
+
+    @testset "Nested replacing RNG" begin
+        M = PowerManifold(Ms, NestedReplacingPowerRepresentation(), 2)
+        #@test is_point(M, rand(M))
+        #@test is_point(M, rand(MersenneTwister(123), M))
+    end
 end

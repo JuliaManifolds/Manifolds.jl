@@ -1009,6 +1009,49 @@ function Random.rand(rng::AbstractRNG, d::ProductFVectorDistribution)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
 
+@doc raw"""
+    rand(M::ProductManifold; parts_kwargs = map(_ -> (;), M.manifolds))
+
+Return a random point on [`ProductManifold`](@ref)  `M`. `parts_kwargs` is
+a tuple of keyword arguments for `rand` on each manifold in `M.manifolds`.
+"""
+function Random.rand(M::ProductManifold; parts_kwargs=map(_ -> (;), M.manifolds))
+    return ProductRepr(map((N, kwargs) -> rand(N; kwargs...), M.manifolds, parts_kwargs)...)
+end
+function Random.rand(
+    rng::AbstractRNG,
+    M::ProductManifold;
+    parts_kwargs=map(_ -> (;), M.manifolds),
+)
+    return ProductRepr(
+        map((N, kwargs) -> rand(rng, N; kwargs...), M.manifolds, parts_kwargs)...,
+    )
+end
+
+function Random.rand!(M::ProductManifold, p; parts_kwargs=map(_ -> (;), M.manifolds))
+    map(
+        (N, q, kwargs) -> rand!(N, q; kwargs...),
+        M.manifolds,
+        submanifold_components(M, p),
+        parts_kwargs,
+    )
+    return p
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::ProductManifold,
+    p;
+    parts_kwargs=map(_ -> (;), M.manifolds),
+)
+    map(
+        (N, q, kwargs) -> rand!(rng, N, q; kwargs...),
+        M.manifolds,
+        submanifold_components(M, p),
+        parts_kwargs,
+    )
+    return p
+end
+
 function Distributions._rand!(
     rng::AbstractRNG,
     d::ProductPointDistribution,

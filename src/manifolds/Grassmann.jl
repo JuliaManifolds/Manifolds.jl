@@ -322,6 +322,31 @@ project(::Grassmann, ::Any...)
 project!(::Grassmann, Y, p, X) = copyto!(Y, X - p * p' * X)
 
 @doc raw"""
+    rand(M::Grassmann; σ::Real=1.0])
+
+Return a random point `p` on [`Grassmann`](@ref) manifold `M` by
+generating a random (Gaussian) matrix with standard deviation `σ` in matching
+size, which is orthonormal.
+"""
+rand(M::Grassmann; σ::Real=1.0)
+
+function Random.rand!(::Grassmann{n,k,𝔽}, p; σ::Real=one(real(eltype(p)))) where {n,k,𝔽}
+    V = σ * randn(𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
+    p .= qr(V).Q[:, 1:k]
+    return p
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    ::Grassmann{n,k,𝔽},
+    p;
+    σ::Real=one(real(eltype(p))),
+) where {n,k,𝔽}
+    V = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
+    p .= qr(V).Q[:, 1:k]
+    return p
+end
+
+@doc raw"""
     representation_size(M::Grassmann{n,k})
 
 Return the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)

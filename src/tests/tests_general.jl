@@ -738,11 +738,13 @@ function test_manifold(
     end
 
     test_rand_point && Test.@testset "Base.rand point generation" begin
-        rng = MersenneTwister(123)
+        rng_a = MersenneTwister(123)
+        rng_b = MersenneTwister(123)
         Test.@test is_point(M, rand(M))
-        Test.@test is_point(M, rand(rng, M))
+        # ensure that the RNG source is actually used
+        Test.@test rand(rng_a, M) == rand(rng_b, M)
         Test.@test all(p -> is_point(M, p), rand(M, 3))
-        Test.@test all(p -> is_point(M, p), rand(rng, M, 3))
+        Test.@test all(p -> is_point(M, p), rand(rng_a, M, 3))
     end
 
     Test.@testset "tangent vector distributions" begin
