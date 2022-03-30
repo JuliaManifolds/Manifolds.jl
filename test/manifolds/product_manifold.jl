@@ -399,6 +399,7 @@ using RecursiveArrayTools: ArrayPartition
                 test_riesz_representer=true,
                 test_default_vector_transport=true,
                 test_rand_point=true,
+                test_rand_tvector=true,
                 vector_transport_methods=[
                     ProductVectorTransport(ParallelTransport(), ParallelTransport()),
                     ProductVectorTransport(

@@ -72,12 +72,12 @@ include("../utils.jl")
         exp!(M, q, q, X)
         @test norm(q - q2) ≈ 0
 
-        v14_polar = inverse_retract(M, pts[1], pts[4], Manifolds.PolarInverseRetraction())
-        p4_polar = retract(M, pts[1], v14_polar, Manifolds.PolarRetraction())
+        X14_polar = inverse_retract(M, pts[1], pts[4], Manifolds.PolarInverseRetraction())
+        p4_polar = retract(M, pts[1], X14_polar, Manifolds.PolarRetraction())
         @test isapprox(M, pts[4], p4_polar)
 
-        v14_qr = inverse_retract(M, pts[1], pts[4], Manifolds.QRInverseRetraction())
-        p4_qr = retract(M, pts[1], v14_qr, Manifolds.QRRetraction())
+        X14_qr = inverse_retract(M, pts[1], pts[4], Manifolds.QRInverseRetraction())
+        p4_qr = retract(M, pts[1], X14_qr, Manifolds.QRRetraction())
         @test isapprox(M, pts[4], p4_qr)
     end
 
@@ -121,6 +121,7 @@ include("../utils.jl")
                 retraction_atol_multiplier=12,
                 test_inplace=true,
                 test_rand_point=true,
+                test_rand_tvector=true,
             )
 
             @testset "vee/hat" begin
@@ -139,7 +140,7 @@ include("../utils.jl")
 
             if n == 4
                 @testset "exp/log edge cases" begin
-                    vs = [
+                    Xs = [
                         [0, 0, π, 0, 0, π],  # θ = (π, π)
                         [0, 0, π, 0, 0, 0],  # θ = (π, 0)
                         [0, 0, π / 2, 0, 0, π],  # θ = (π, π/2)
@@ -151,7 +152,7 @@ include("../utils.jl")
                         [0, 0, 10, 0, 0, 1] .* 1e-6, # α ⪆ β ⩰ 0
                         [0, 0, π / 4, 0, 0, π / 4 - 1e-6], # α ⪆ β > 0
                     ]
-                    for Xf in vs
+                    for Xf in Xs
                         @testset "rotation vector $Xf" begin
                             X = Manifolds.hat(SOn, Matrix(1.0I, n, n), Xf)
                             p = exp(X)
@@ -169,8 +170,8 @@ include("../utils.jl")
                 Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn)))),
             )
             p = exp(SOn, pts[1], X)
-            v2 = log(SOn, pts[1], p)
-            @test p ≈ exp(SOn, pts[1], v2)
+            X2 = log(SOn, pts[1], p)
+            @test p ≈ exp(SOn, pts[1], X2)
         end
     end
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin
