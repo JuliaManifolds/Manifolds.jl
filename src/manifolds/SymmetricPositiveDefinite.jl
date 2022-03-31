@@ -168,7 +168,7 @@ function Random.rand!(
     M::SymmetricPositiveDefinite{N},
     pX;
     vector_at=nothing,
-    σ::Real=one(eltype(pX)),
+    σ::Real=one(eltype(pX)) / (vector_at === nothing ? 1 : 100),
     tangent_distr=:Gaussian,
 ) where {N}
     if vector_at === nothing
@@ -201,7 +201,7 @@ function Random.rand!(
     M::SymmetricPositiveDefinite{N},
     pX;
     vector_at=nothing,
-    σ::Real=one(eltype(pX)),
+    σ::Real=one(eltype(pX)) / (vector_at === nothing ? 1 : 100),
     tangent_distr=:Gaussian,
 ) where {N}
     if vector_at === nothing
