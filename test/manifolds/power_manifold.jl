@@ -443,5 +443,11 @@ end
         M = PowerManifold(Ms, NestedReplacingPowerRepresentation(), 2)
         @test is_point(M, rand(M))
         @test is_point(M, rand(MersenneTwister(123), M))
+        @test rand(MersenneTwister(123), M) == rand(MersenneTwister(123), M)
+        p = rand(M)
+        @test is_vector(M, p, rand(M; vector_at=p); atol=1e-15)
+        @test is_vector(M, p, rand(MersenneTwister(123), M; vector_at=p); atol=1e-15)
+        @test rand(MersenneTwister(123), M; vector_at=p) ==
+              rand(MersenneTwister(123), M; vector_at=p)
     end
 end

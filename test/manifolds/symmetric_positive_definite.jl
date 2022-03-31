@@ -171,4 +171,14 @@ using Manifolds: default_metric_dispatch
         X2 = get_vector(M1, q, c, b)
         @test isapprox(M1, q, X, X2)
     end
+    @testset "rand()" begin
+        p = rand(M1)
+        @test is_point(M1, p)
+        @test is_vector(M1, p, rand(M1; vector_at=p, tangent_distr=:Rician))
+        @test is_vector(
+            M1,
+            p,
+            rand(MersenneTwister(123), M1; vector_at=p, tangent_distr=:Rician),
+        )
+    end
 end
