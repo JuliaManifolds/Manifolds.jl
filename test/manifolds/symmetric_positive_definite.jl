@@ -71,6 +71,7 @@ using Manifolds: default_metric_dispatch
                     is_tangent_atol_multiplier=1,
                     test_inplace=true,
                     test_rand_point=M === M1,
+                    test_rand_tvector=M === M1,
                 )
             end
             @testset "Test Error cases in is_point and is_vector" begin

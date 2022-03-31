@@ -1102,7 +1102,7 @@ end
 function Random.rand!(
     rng::AbstractRNG,
     M::ProductManifold,
-    p;
+    pX;
     vector_at=nothing,
     parts_kwargs=map(_ -> (;), M.manifolds),
 )
@@ -1110,7 +1110,7 @@ function Random.rand!(
         map(
             (N, q, kwargs) -> rand!(rng, N, q; kwargs...),
             M.manifolds,
-            submanifold_components(M, p),
+            submanifold_components(M, pX),
             parts_kwargs,
         )
     else

@@ -266,6 +266,8 @@ using RecursiveArrayTools: ArrayPartition
         is_tangent_atol_multiplier=1,
         exp_log_atol_multiplier=1,
         test_inplace=true,
+        test_rand_point=true,
+        test_rand_tvector=true,
     )
 
     @testset "product vector transport" begin

@@ -317,10 +317,6 @@ function Random.rand!(
     return pX
 end
 
-function random_tangent(M::Stiefel, p, ::Val{:Gaussian}, σ::Float64=1.0)
-    return X
-end
-
 @doc raw"""
     retract(::Stiefel, p, X, ::CayleyRetraction)
 

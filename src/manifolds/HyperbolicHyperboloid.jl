@@ -406,17 +406,33 @@ function project!(
     return (Y.value .= X.value .+ minkowski_metric(p.value, X.value) .* p.value)
 end
 
-function Random.rand!(::Hyperbolic{N}, p; σ=1.0) where {N}
-    a = σ .* randn(N)
-    p[1:(end - 1)] .= a
-    p[end] = sqrt(1 + dot(a, a))
-    return p
+function Random.rand!(::Hyperbolic{N}, pX; vector_at=nothing, σ=one(eltype(pX))) where {N}
+    if vector_at === nothing
+        a = σ .* randn(N)
+        pX[1:(end - 1)] .= a
+        pX[end] = sqrt(1 + dot(a, a))
+    else
+        Y = σ * randn(eltype(p), size(p))
+        project!(M, pX, p, Y)
+    end
+    return pX
 end
-function Random.rand!(rng::AbstractRNG, ::Hyperbolic{N}, p; σ=1.0) where {N}
-    a = σ .* randn(rng, N)
-    p[1:(end - 1)] .= a
-    p[end] = sqrt(1 + dot(a, a))
-    return p
+function Random.rand!(
+    rng::AbstractRNG,
+    ::Hyperbolic{N},
+    pX;
+    vector_at=nothing,
+    σ=one(eltype(pX)),
+) where {N}
+    if vector_at === nothing
+        a = σ .* randn(rng, N)
+        pX[1:(end - 1)] .= a
+        pX[end] = sqrt(1 + dot(a, a))
+    else
+        Y = σ * randn(rng, eltype(p), size(p))
+        project!(M, pX, p, Y)
+    end
+    return pX
 end
 
 function vector_transport_to!(M::Hyperbolic, Y, p, X, q, ::ParallelTransport)

@@ -450,6 +450,21 @@ function Random.rand(rng::AbstractRNG, ::Circle{ℝ}; vector_at=nothing, σ::Rea
     end
 end
 
+function Random.rand!(M::Circle{ℝ}, pX; vector_at=nothing, σ::Real=one(eltype(pX)))
+    pX .= rand(M; vector_at, σ)
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::Circle{ℝ},
+    pX;
+    vector_at=nothing,
+    σ::Real=one(eltype(pX)),
+)
+    pX .= rand(rng, M; vector_at, σ)
+    return pX
+end
+
 retract(M::Circle, p, q) = retract(M, p, q, ExponentialRetraction())
 retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)
 

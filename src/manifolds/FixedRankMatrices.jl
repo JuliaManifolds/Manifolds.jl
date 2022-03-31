@@ -392,32 +392,111 @@ function project!(::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, A::AbstractM
 end
 
 @doc raw"""
-    rand(M::FixedRankMatrices; kwargs...)
+    Random.rand(M::FixedRankMatrices; vector_at=nothing, kwargs...)
 
-Return a random point on the FixedRankMatrices manifold.
-The orthogonal matrices are sampled from the Stiefel manifold
+If `vector_at` is `nothing`, return a random point on the [`FixedRankMatrices`](@ref)
+manifold. The orthogonal matrices are sampled from the [`Stiefel`(@ref) manifold
 and the singular values are sampled uniformly at random.
-"""
-rand(M::FixedRankMatrices; kwargs...)
 
-function Random.rand!(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
-    U = rand(Stiefel(m, k); kwargs...)
-    S = sort(rand(k); rev=true)
-    V = rand(Stiefel(n, k); kwargs...)
-    copyto!(M, p, SVDMPoint(U, S, V'))
-    return p
+If `vector_at` is not `nothing`, generate a random tangent vector in the tangent space of
+the point `vector_at` on the `FixedRankMatrices` manifold `M`.
+"""
+function Random.rand(
+    M::FixedRankMatrices{m,n,k};
+    vector_at=nothing,
+    kwargs...,
+) where {m,n,k}
+    if vector_at === nothing
+        p = SVDMPoint(
+            Matrix{Float64}(undef, m, k),
+            Vector{Float64}(undef, k),
+            Matrix{Float64}(undef, k, n),
+        )
+        return rand!(M, p; kwargs...)
+    else
+        X = UMVTVector(
+            Matrix{Float64}(undef, m, k),
+            Matrix{Float64}(undef, k, k),
+            Matrix{Float64}(undef, k, n),
+        )
+        return rand!(M, X; vector_at, kwargs...)
+    end
 end
 function Random.rand(
     rng::AbstractRNG,
-    ::FixedRankMatrices{m,n,k},
-    p;
+    M::FixedRankMatrices{m,n,k};
+    vector_at=nothing,
     kwargs...,
 ) where {m,n,k}
-    U = rand(rng, Stiefel(m, k); kwargs...)
-    S = sort(rand(k); rev=true)
-    V = rand(rng, Stiefel(n, k); kwargs...)
-    copyto!(M, p, SVDMPoint(U, S, V'))
-    return p
+    if vector_at === nothing
+        p = SVDMPoint(
+            Matrix{Float64}(undef, m, k),
+            Vector{Float64}(undef, k),
+            Matrix{Float64}(undef, k, n),
+        )
+        return rand!(rng, M, p; kwargs...)
+    else
+        X = UMVTVector(
+            Matrix{Float64}(undef, m, k),
+            Matrix{Float64}(undef, k, k),
+            Matrix{Float64}(undef, k, n),
+        )
+        return rand!(rng, M, X; vector_at, kwargs...)
+    end
+end
+
+function Random.rand!(
+    M::FixedRankMatrices{m,n,k},
+    pX;
+    vector_at=nothing,
+    kwargs...,
+) where {m,n,k}
+    if vector_at === nothing
+        U = rand(Stiefel(m, k); kwargs...)
+        S = sort(rand(k); rev=true)
+        V = rand(Stiefel(n, k); kwargs...)
+        copyto!(M, pX, SVDMPoint(U, S, V'))
+    else
+        Up = randn(m, k)
+        Vp = randn(n, k)
+        A = randn(k, k)
+        copyto!(
+            pX,
+            UMVTVector(
+                Up - vector_at.U * vector_at.U' * Up,
+                A,
+                Vp' - Vp' * vector_at.Vt' * vector_at.Vt,
+            ),
+        )
+    end
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    ::FixedRankMatrices{m,n,k},
+    pX;
+    vector_at=nothing,
+    kwargs...,
+) where {m,n,k}
+    if vector_at === nothing
+        U = rand(rng, Stiefel(m, k); kwargs...)
+        S = sort(rand(rng, k); rev=true)
+        V = rand(rng, Stiefel(n, k); kwargs...)
+        copyto!(pX, SVDMPoint(U, S, V'))
+    else
+        Up = randn(rng, m, k)
+        Vp = randn(rng, n, k)
+        A = randn(rng, k, k)
+        copyto!(
+            pX,
+            UMVTVector(
+                Up - vector_at.U * vector_at.U' * Up,
+                A,
+                Vp' - Vp' * vector_at.Vt' * vector_at.Vt,
+            ),
+        )
+    end
+    return pX
 end
 
 @doc raw"""

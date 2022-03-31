@@ -769,12 +769,14 @@ function test_manifold(
         p = pts[1]
         rng_a = MersenneTwister(123)
         rng_b = MersenneTwister(123)
-        Test.@test is_vector(M, p, rand(M; vector_at=p))
+        randX = rand(M; vector_at=p)
+        atol = rand_tvector_atol_multiplier * find_eps(randX)
+        Test.@test is_vector(M, p, randX; atol=atol)
         # ensure that the RNG source is actually used
         Test.@test rand(rng_a, M; vector_at=p) == rand(rng_b, M; vector_at=p)
         # generation of multiple tangent vectors
-        Test.@test all(X -> is_vector(M, p, X), rand(M, 3; vector_at=p))
-        Test.@test all(X -> is_vector(M, p, X), rand(rng_a, M, 3; vector_at=p))
+        Test.@test all(X -> is_vector(M, p, X; atol=atol), rand(M, 3; vector_at=p))
+        Test.@test all(X -> is_vector(M, p, X; atol=atol), rand(rng_a, M, 3; vector_at=p))
 
         if test_inplace && is_mutating
             rng_a = MersenneTwister(123)
@@ -782,7 +784,7 @@ function test_manifold(
 
             X = allocate(tv[1])
             rand!(M, X; vector_at=p)
-            Test.@test is_vector(M, p, X)
+            Test.@test is_vector(M, p, X; atol=atol)
             X = allocate(tv[1])
             rand!(rng_a, M, X; vector_at=p)
             Test.@test is_point(M, p)
