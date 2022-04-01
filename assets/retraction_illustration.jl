@@ -95,7 +95,7 @@ push!(
 )
 push!(
     tp,
-    raw"\node[label ={[label distance=.05cm]below:{\color{gray}$q=\exp_pX$}}] at (axis cs:" *
+    raw"\node[label ={[label distance=.05cm]left:{\color{gray}$q=\exp_pX$}}] at (axis cs:" *
     "$(real(qE)),$(imag(qE))) {};",
 )
 
