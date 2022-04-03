@@ -179,11 +179,7 @@ We then form the ONB by
 """
 get_basis(::SymmetricPositiveDefinite, p, B::DefaultOrthonormalBasis)
 
-function get_basis_orthonormal(
-    M::SymmetricPositiveDefinite{N},
-    p,
-    Ns,
-) where {N}
+function get_basis_orthonormal(M::SymmetricPositiveDefinite{N}, p, Ns) where {N}
     e = eigen(Symmetric(p))
     U = e.vectors
     S = max.(e.values, floatmin(eltype(e.values)))
@@ -266,11 +262,11 @@ where $k$ is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 
 function get_vector_orthonormal!(
-    M::SymmetricPositiveDefinite{N},
+    ::SymmetricPositiveDefinite{N},
     X,
     p,
     c,
-    ::RealNumbers
+    ::RealNumbers,
 ) where {N}
     @assert size(c) == (div(N * (N + 1), 2),)
     @assert size(X) == (N, N)
