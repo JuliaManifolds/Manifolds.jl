@@ -143,4 +143,19 @@ using Manifolds: default_metric_dispatch
         Y = project(M1, p, X)
         @test is_vector(M1, p, Y)
     end
+    @testset "Tangent ONB" begin
+        q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+        b = DefaultOrthonormalBasis()
+        B = get_basis(M1, q, b)
+        for i in 1:length(B.data)
+            @test norm(M1, q, B.data[i]) ≈ 1
+            for j in (i + 1):length(B.data)
+                @test inner(M1, q, B.data[i], B.data[j]) ≈ 0
+            end
+        end
+        X = [1.0 1.0 0.5; 1.0 1.0 0.0; 0.5 0.0 1.0]
+        c = get_coordinates(M1, q, X, b)
+        X2 = get_vector(M1, q, c, b)
+        @test isapprox(M1, q, X, X2)
+    end
 end

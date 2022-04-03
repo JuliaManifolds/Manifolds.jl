@@ -1,5 +1,4 @@
-using Test
-using Manifolds
+include("utils.jl")
 using Manifolds:
     _derivative,
     _derivative!,
@@ -208,6 +207,32 @@ end
     X = similar(q)
     @test gradient!(s2, f1, X, q, TestRiemannianBackend()) === X
     @test X == [1.0, 2.0, 3.0]
+end
+
+@testset "EmbeddedBackend" begin
+    A = [1 0 0; 0 2 0; 0 0 3.0]
+    p = 1 / sqrt(2.0) .* [1.0, 1.0, 0.0]
+
+    cost = p -> p' * A * p # Euclidean cost of Rayleigh
+    grad = (M, p) -> 2A * p
+    grad! = (M, X, p) -> X .= 2A * p
+    M = Euclidean(3)
+    E = ExplicitEmbeddedBackend(M, gradient=grad, (gradient!)=grad!)
+    S = Sphere(2)
+    r_grad = (S, p) -> project(S, p, grad(M, p))
+    Xt = r_grad(S, p)
+    @test is_vector(S, p, Xt, true; atol=1e-14)
+
+    R = RiemannianProjectionBackend(E)
+    X = gradient(S, cost, p, R)
+    @test isapprox(S, p, X, Xt)
+    gradient!(S, cost, X, p, R)
+    @test isapprox(S, p, X, Xt)
+    # Errors with empty gradient
+    Ee = ExplicitEmbeddedBackend(M)
+    Re = RiemannianProjectionBackend(Ee)
+    @test_throws MissingException gradient(S, cost, p, Re)
+    @test_throws MissingException gradient!(S, cost, X, p, Re)
 end
 
 @testset "Default Errors for the ODEExponentialRetraction" begin
