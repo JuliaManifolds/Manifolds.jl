@@ -202,6 +202,8 @@ include("../utils.jl")
                 vector_transport_inverse_retractions=[PolarInverseRetraction()],
                 mid_point12=nothing,
                 test_inplace=true,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
         end
     end

@@ -169,31 +169,76 @@ function Random.rand(rng::AbstractRNG, d::PowerPointDistribution)
     return x
 end
 
-function Random.rand!(M::AbstractPowerManifold, p; kwargs...)
+function Random.rand!(M::AbstractPowerManifold, pX; vector_at=nothing, kwargs...)
     rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        rand!(M.manifold, _write(M, rep_size, p, i))
+    if vector_at === nothing
+        for i in get_iterator(M)
+            rand!(M.manifold, _write(M, rep_size, pX, i))
+        end
+    else
+        for i in get_iterator(M)
+            rand!(
+                M.manifold,
+                _write(M, rep_size, pX, i);
+                vector_at=_read(M, rep_size, vector_at, i),
+            )
+        end
     end
-    return p
+    return pX
 end
-function Random.rand!(rng::AbstractRNG, M::AbstractPowerManifold, p; kwargs...)
+function Random.rand!(
+    rng::AbstractRNG,
+    M::AbstractPowerManifold,
+    pX;
+    vector_at=nothing,
+    kwargs...,
+)
     rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        rand!(rng, M.manifold, _write(M, rep_size, p, i))
+    if vector_at === nothing
+        for i in get_iterator(M)
+            rand!(rng, M.manifold, _write(M, rep_size, pX, i))
+        end
+    else
+        for i in get_iterator(M)
+            rand!(
+                rng,
+                M.manifold,
+                _write(M, rep_size, pX, i);
+                vector_at=_read(M, rep_size, vector_at, i),
+            )
+        end
     end
-    return p
+    return pX
 end
-function Random.rand!(M::PowerManifoldNestedReplacing, p; kwargs...)
-    for i in get_iterator(M)
-        p[i...] = rand(M.manifold; kwargs...)
+function Random.rand!(M::PowerManifoldNestedReplacing, pX; vector_at=nothing, kwargs...)
+    if vector_at === nothing
+        for i in get_iterator(M)
+            pX[i...] = rand(M.manifold; kwargs...)
+        end
+    else
+        for i in get_iterator(M)
+            pX[i...] = rand(M.manifold; vector_at=vector_at[i...], kwargs...)
+        end
     end
-    return p
+    return pX
 end
-function Random.rand!(rng::AbstractRNG, M::PowerManifoldNestedReplacing, p; kwargs...)
-    for i in get_iterator(M)
-        p[i...] = rand(rng, M.manifold; kwargs...)
+function Random.rand!(
+    rng::AbstractRNG,
+    M::PowerManifoldNestedReplacing,
+    pX;
+    vector_at=nothing,
+    kwargs...,
+)
+    if vector_at === nothing
+        for i in get_iterator(M)
+            pX[i...] = rand(rng, M.manifold; kwargs...)
+        end
+    else
+        for i in get_iterator(M)
+            pX[i...] = rand(rng, M.manifold; vector_at=vector_at[i...], kwargs...)
+        end
     end
-    return p
+    return pX
 end
 
 function Distributions._rand!(
