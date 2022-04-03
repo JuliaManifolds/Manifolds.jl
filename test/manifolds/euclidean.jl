@@ -106,6 +106,8 @@ using Manifolds: induced_basis
                     basis_has_specialized_diagonalizing_get=true,
                     test_vee_hat=isa(M, Euclidean),
                     test_inplace=true,
+                    test_rand_point=M === E,
+                    test_rand_tvector=M === E,
                 )
             end
         end
@@ -273,5 +275,9 @@ using Manifolds: induced_basis
         DDB = dual_basis(MM, p, DB2)
         @test DDB isa InducedBasis
         @test DDB.vs isa ManifoldsBase.TangentSpaceType
+    end
+    @testset "RNG point with σ" begin
+        @test is_point(E, rand(E; σ=10.0))
+        @test is_point(E, rand(MersenneTwister(123), E; σ=10.0))
     end
 end

@@ -171,6 +171,8 @@ include("../utils.jl")
                 test_tangent_vector_broadcasting=is_plain_array,
                 test_vector_spaces=is_plain_array,
                 test_inplace=true,
+                test_rand_point=is_plain_array,
+                test_rand_tvector=is_plain_array,
             )
         end
     end

@@ -69,6 +69,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 basis_types_vecs=basis_types,
                 projection_atol_multiplier=4,
                 test_inplace=true,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
 
             # tangent space at point
@@ -95,6 +97,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 basis_types_vecs=basis_types,
                 projection_atol_multiplier=4,
                 test_inplace=true,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
         end
     end

@@ -270,6 +270,54 @@ manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
 manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
 
 @doc raw"""
+    rand(::Stiefel; vector_at=nothing, σ::Real=1.0)
+
+When `vector_at` is `nothing`, return a random (Gaussian) point `x` on the [`Stiefel`](@ref)
+manifold `M` by generating a (Gaussian) matrix with standard deviation `σ` and return the
+orthogonalized version, i.e. return the Q component of the QR decomposition of the random
+matrix of size ``n×k``.
+
+When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
+``T_{vector\_at}\mathrm{St}(n,k)`` with mean zero and standard deviation `σ` by projecting a
+random Matrix onto the tangent vector at `vector_at`.
+"""
+rand(::Stiefel; σ::Real=1.0)
+
+function Random.rand!(
+    M::Stiefel{n,k,𝔽},
+    pX;
+    vector_at=nothing,
+    σ::Real=one(real(eltype(pX))),
+) where {n,k,𝔽}
+    if vector_at === nothing
+        A = σ * randn(𝔽 === ℝ ? Float64 : ComplexF64, n, k)
+        pX .= Matrix(qr(A).Q)
+    else
+        Z = σ * randn(eltype(pX), size(pX))
+        project!(M, pX, vector_at, Z)
+        normalize!(pX)
+    end
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::Stiefel{n,k,𝔽},
+    pX;
+    vector_at=nothing,
+    σ::Real=one(real(eltype(pX))),
+) where {n,k,𝔽}
+    if vector_at === nothing
+        A = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, n, k)
+        pX .= Matrix(qr(A).Q)
+    else
+        Z = σ * randn(rng, eltype(pX), size(pX))
+        project!(M, pX, vector_at, Z)
+        normalize!(pX)
+    end
+    return pX
+end
+
+@doc raw"""
     retract(::Stiefel, p, X, ::CayleyRetraction)
 
 Compute the retraction on the [`Stiefel`](@ref) that is based on the Cayley transform[^Zhu2017].
