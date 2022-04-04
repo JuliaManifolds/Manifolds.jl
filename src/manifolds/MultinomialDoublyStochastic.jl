@@ -3,7 +3,7 @@
 
 A common type for manifolds that are doubly stochastic, for example by direct constraint
 [`MultinomialDoubleStochastic`](@ref) or by symmetry [`MultinomialSymmetric`](@ref),
-as long as they are also modeled as [`IsIsometricEmbeddedManifold`](@ref).
+as long as they are also modeled as `IsIsometricEmbeddedManifold`.
 """
 abstract type AbstractMultinomialDoublyStochastic{N} <: AbstractDecoratorManifold{ℝ} end
 

@@ -46,7 +46,7 @@ using HybridArrays, StaticArrays
 q = HybridArray{Tuple{3,StaticArrays.Dynamic()},Float64,2}(p)
 ```
 
-which is still a valid point on `M` and [`PowerManifold`](@ref) works with these, too.
+which is still a valid point on `M` and `PowerManifold` works with these, too.
 
 An advantage of this representation is that it is quite efficient, especially when a `HybridArray` (from the [HybridArrays.jl](https://github.com/mateuszbaran/HybridArrays.jl) package) is used to represent a point on the power manifold.
 A disadvantage is not being able to easily identify parts of the multidimensional array that correspond to a single point on the base manifold.
@@ -66,7 +66,7 @@ p = [ [1.0, 0.0, 0.0],
     ]
 ```
 
-which is again a valid point so [`is_point`](@ref)`(M, p)` here also yields true.
+which is again a valid point so `is_point``(M, p)` here also yields true.
 A disadvantage might be that with nested arrays one loses a little bit of performance.
 The data however is nicely encapsulated. Accessing the first data item is just `p[1]`.
 

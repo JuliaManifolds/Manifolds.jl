@@ -18,7 +18,7 @@ struct PositiveNumbers <: AbstractManifold{ℝ} end
     PositiveVectors(n)
 
 Generate the manifold of vectors with positive entries.
-This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@ref).
+This manifold is modeled as a `PowerManifold` of [`PositiveNumbers`](@ref).
 """
 PositiveVectors(n::Integer) = PositiveNumbers()^n
 
@@ -26,7 +26,7 @@ PositiveVectors(n::Integer) = PositiveNumbers()^n
     PositiveMatrices(m,n)
 
 Generate the manifold of matrices with positive entries.
-This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@ref).
+This manifold is modeled as a `PowerManifold` of [`PositiveNumbers`](@ref).
 """
 PositiveMatrices(n::Integer, m::Integer) = PositiveNumbers()^(n, m)
 
@@ -34,7 +34,7 @@ PositiveMatrices(n::Integer, m::Integer) = PositiveNumbers()^(n, m)
     PositiveArrays(n₁,n₂,...,nᵢ)
 
 Generate the manifold of `i`-dimensional arrays with positive entries.
-This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@ref).
+This manifold is modeled as a `PowerManifold` of [`PositiveNumbers`](@ref).
 """
 PositiveArrays(n::Vararg{Int,I}) where {I} = PositiveNumbers()^(n)
 

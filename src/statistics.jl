@@ -149,7 +149,7 @@ Specify a default [`AbstractEstimationMethod`](@ref) for an `AbstractManifold`
 for a function `f`, e.g. the `median` or the `mean`.
 
 Note that his function is decorated, so it can inherit from the embedding, for example for the
-[`IsEmbeddedSubmanifold`](@ref) trait.
+`IsEmbeddedSubmanifold` trait.
 """
 default_estimation_method(M::AbstractManifold, f)
 

@@ -1,6 +1,6 @@
 # Torus
 
-The torus $𝕋^d ≅ [-π,π)^d$ is modeled as an [`AbstractPowerManifold`](@ref) of the (real-valued) [`Circle`](@ref) and uses [`ArrayPowerRepresentation`](@ref).
+The torus $𝕋^d ≅ [-π,π)^d$ is modeled as an `AbstractPowerManifold` of the (real-valued) [`Circle`](@ref) and uses [`ArrayPowerRepresentation`](@ref).
 Points on the torus are hence row vectors, $x ∈ ℝ^{d}$.
 
 ## Example
@@ -17,7 +17,7 @@ X = log(M, p, q)
 
 ## Types and functions
 
-Most functions are directly implemented for an [`AbstractPowerManifold`](@ref) with [`ArrayPowerRepresentation`](@ref) except the following special cases:
+Most functions are directly implemented for an `AbstractPowerManifold` with [`ArrayPowerRepresentation`](@ref) except the following special cases:
 
 ```@autodocs
 Modules = [Manifolds]

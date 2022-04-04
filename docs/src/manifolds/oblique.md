@@ -1,6 +1,6 @@
 # Oblique manifold
 
-The oblique manifold $\mathcal{OB}(n,m)$ is modeled as an [`AbstractPowerManifold`](@ref) of the (real-valued) [`Sphere`](@ref) and uses [`ArrayPowerRepresentation`](@ref).
+The oblique manifold $\mathcal{OB}(n,m)$ is modeled as an `AbstractPowerManifold` of the (real-valued) [`Sphere`](@ref) and uses [`ArrayPowerRepresentation`](@ref).
 Points on the torus are hence matrices, $x ∈ ℝ^{n,m}$.
 
 ```@autodocs
@@ -11,7 +11,7 @@ Order = [:type]
 
 ## Functions
 
-Most functions are directly implemented for an [`AbstractPowerManifold`](@ref) with [`ArrayPowerRepresentation`](@ref) except the following special cases:
+Most functions are directly implemented for an `AbstractPowerManifold` with [`ArrayPowerRepresentation`](@ref) except the following special cases:
 
 ```@autodocs
 Modules = [Manifolds]

@@ -1,5 +1,5 @@
 # Essential Manifold
-The essential manifold is modeled as an [`AbstractPowerManifold`](@ref) of the $3\times3$ [`Rotations`](@ref) and uses [`NestedPowerRepresentation`](@ref).
+The essential manifold is modeled as an `AbstractPowerManifold` of the $3\times3$ [`Rotations`](@ref) and uses [`NestedPowerRepresentation`](@ref).
 
 ```@autodocs
 Modules = [Manifolds]

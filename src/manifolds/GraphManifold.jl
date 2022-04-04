@@ -23,7 +23,7 @@ struct VertexManifold <: GraphManifoldType end
 @doc raw"""
     GraphManifold{G,𝔽,M,T} <: AbstractPowerManifold{𝔽,M,NestedPowerRepresentation}
 
-Build a manifold, that is a [`PowerManifold`](@ref) of the `AbstractManifold` `M` either on
+Build a manifold, that is a `PowerManifold` of the `AbstractManifold` `M` either on
 the edges or vertices of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
 
 # Fields

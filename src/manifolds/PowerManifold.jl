@@ -14,7 +14,7 @@ struct ArrayPowerRepresentation <: AbstractPowerRepresentation end
 @doc raw"""
     PowerMetric <: AbstractMetric
 
-Represent the [`AbstractMetric`](@ref) on an [`AbstractPowerManifold`](@ref), i.e. the inner
+Represent the [`AbstractMetric`](@ref) on an `AbstractPowerManifold`, i.e. the inner
 product on the tangent space is the sum of the inner product of each elements
 tangent space of the power manifold.
 """
@@ -124,7 +124,7 @@ end
     flat(M::AbstractPowerManifold, p, X)
 
 use the musical isomorphism to transform the tangent vector `X` from the tangent space at
-`p` on an [`AbstractPowerManifold`](@ref) `M` to a cotangent vector.
+`p` on an `AbstractPowerManifold` `M` to a cotangent vector.
 This can be done elementwise for each entry of `X` (and `p`).
 """
 flat(::AbstractPowerManifold, ::Any...)
@@ -305,7 +305,7 @@ end
     sharp(M::AbstractPowerManifold, p, ξ::RieszRepresenterCotangentVector)
 
 Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
-`p` on an [`AbstractPowerManifold`](@ref) `M` to a tangent vector.
+`p` on an `AbstractPowerManifold` `M` to a tangent vector.
 This can be done elementwise for every entry of `ξ` (and `p`).
 """
 sharp(::AbstractPowerManifold, ::Any...)
