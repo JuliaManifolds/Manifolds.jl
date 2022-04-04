@@ -145,7 +145,7 @@ end
 """
     default_estimation_method(M::AbstractManifold, f)
 
-Specify a default [`AbstractEstimationMethod`](@ref) for an [`AbstractManifold`](@ref)
+Specify a default [`AbstractEstimationMethod`](@ref) for an `AbstractManifold`
 for a function `f`, e.g. the `median` or the `mean`.
 
 Note that his function is decorated, so it can inherit from the embedding, for example for the
@@ -239,7 +239,7 @@ default_estimation_method(::AbstractManifold, ::typeof(cov)) = GradientDescentEs
     mean(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian center of mass also known as
-Karcher mean of the vector `x` of points on the [`AbstractManifold`](@ref) `M`, defined
+Karcher mean of the vector `x` of points on the `AbstractManifold` `M`, defined
 as the point that satisfies the minimizer
 ````math
 \argmin_{y ∈ \mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
@@ -599,7 +599,7 @@ end
     )
 
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
-[`AbstractManifold`](@ref) `M`, defined as the point that satisfies the minimizer
+`AbstractManifold` `M`, defined as the point that satisfies the minimizer
 ````math
 \argmin_{y ∈ \mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
@@ -903,7 +903,7 @@ end
     var(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false)
 
 compute the (optionally weighted) variance of a `Vector` `x` of `n` data points
-on the [`AbstractManifold`](@ref) `M`, i.e.
+on the `AbstractManifold` `M`, i.e.
 
 ````math
 \frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
@@ -951,7 +951,7 @@ end
     std(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
 
 compute the optionally weighted standard deviation of a `Vector` `x` of `n` data
-points on the [`AbstractManifold`](@ref) `M`, i.e.
+points on the `AbstractManifold` `M`, i.e.
 
 ````math
 \sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)},

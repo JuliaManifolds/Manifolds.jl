@@ -1,7 +1,7 @@
 @doc raw"""
     SkewHermitianMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](@ref) $ \operatorname{SkewHerm}(n)$ consisting of the real- or
+The `AbstractManifold` $ \operatorname{SkewHerm}(n)$ consisting of the real- or
 complex-valued skew-hermitian matrices of size ``n × n``, i.e. the set
 
 ````math

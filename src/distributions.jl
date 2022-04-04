@@ -40,7 +40,7 @@ struct MPointvariate <: VariateForm end
     MPointSupport(M::AbstractManifold)
 
 Value support for manifold-valued distributions (values from given
-[`AbstractManifold`](@ref) `M`).
+`AbstractManifold` `M`).
 """
 struct MPointSupport{TM<:AbstractManifold} <: ValueSupport
     manifold::TM
@@ -82,7 +82,7 @@ Optionally a random number generator `rng` to be used can be specified. An optio
 
     Usually a uniform distribution should be expected for compact manifolds and a
     Gaussian-like distribution for non-compact manifolds and tangent vectors, although it is
-    not guaranteed. The distribution may change between releases. 
+    not guaranteed. The distribution may change between releases.
 
     `rand` methods for specific manifolds may take additional keyword arguments.
 

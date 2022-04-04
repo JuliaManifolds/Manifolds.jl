@@ -1,7 +1,7 @@
 @doc raw"""
     SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](@ref) $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
+The `AbstractManifold` $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
 symmetric positive semidefinite matrices of size $n × n$ and rank $k$, i.e. the set
 
 ````math

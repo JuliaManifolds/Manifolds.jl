@@ -73,14 +73,14 @@ const TangentSpaceAtPoint{M} =
     TangentSpaceAtPoint(M::AbstractManifold, p)
 
 Return an object of type [`VectorSpaceAtPoint`](@ref) representing tangent
-space at `p` on the [`AbstractManifold`](@ref) `M`.
+space at `p` on the `AbstractManifold` `M`.
 """
 TangentSpaceAtPoint(M::AbstractManifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
 
 """
     TangentSpace(M::AbstractManifold, p)
 
-Return a [`TangentSpaceAtPoint`](@ref) representing tangent space at `p` on the [`AbstractManifold`](@ref) `M`.
+Return a [`TangentSpaceAtPoint`](@ref) representing tangent space at `p` on the `AbstractManifold` `M`.
 """
 TangentSpace(M::AbstractManifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
 
@@ -117,7 +117,7 @@ end
 """
     VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:AbstractManifold{𝔽}} <: AbstractManifold{𝔽}
 
-Vector bundle on a [`AbstractManifold`](@ref) `M` of type [`VectorSpaceType`](@ref).
+Vector bundle on a `AbstractManifold` `M` of type [`VectorSpaceType`](@ref).
 
 # Constructor
 

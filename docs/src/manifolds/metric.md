@@ -5,11 +5,11 @@ A Riemannian manifold always consists of a [topological manifold](https://en.wik
 However, often there is an implicitly assumed (default) metric, like the usual inner product on [`Euclidean`](@ref) space.
 This decorator takes this into account.
 It is not necessary to use this decorator if you implement just one (or the first) metric.
-If you later introduce a second, the old (first) metric can be used with the (non [`MetricManifold`](@ref)) [`AbstractManifold`](@ref), i.e. without an explicitly stated metric.
+If you later introduce a second, the old (first) metric can be used with the (non [`MetricManifold`](@ref)) `AbstractManifold`, i.e. without an explicitly stated metric.
 
 This manifold decorator serves two purposes:
 
-1. to implement different metrics (e.g. in closed form) for one [`AbstractManifold`](@ref)
+1. to implement different metrics (e.g. in closed form) for one `AbstractManifold`
 2. to provide a way to compute geodesics on manifolds, where this [`AbstractMetric`](@ref) does not yield closed formula.
 
 ```@contents

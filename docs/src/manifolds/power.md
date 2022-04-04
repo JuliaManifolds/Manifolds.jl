@@ -1,6 +1,6 @@
 # Power manifold
 
-A power manifold is based on a [`AbstractManifold`](@ref) $\mathcal M$ to build a $\mathcal M^{n_1 \times n_2 \times \cdots \times n_m}$.
+A power manifold is based on a `AbstractManifold` $\mathcal M$ to build a $\mathcal M^{n_1 \times n_2 \times \cdots \times n_m}$.
 In the case where $m=1$ we can represent a manifold-valued vector of data of length $n_1$, for example a time series.
 The case where $m=2$ is useful for representing manifold-valued matrices of data of size $n_1 \times n_2$, for example certain types of images.
 

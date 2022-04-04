@@ -322,7 +322,7 @@ end
     cross(M, N)
     cross(M1, M2, M3,...)
 
-Return the [`ProductManifold`](@ref) For two [`AbstractManifold`](@ref)s `M` and `N`,
+Return the [`ProductManifold`](@ref) For two `AbstractManifold`s `M` and `N`,
 where for the case that one of them is a [`ProductManifold`](@ref) itself,
 the other is either prepended (if `N` is a product) or appenden (if `M`) is.
 If both are product manifold, they are combined into one product manifold,
@@ -1200,7 +1200,7 @@ end
 """
     set_component!(M::ProductManifold, q, p, i)
 
-Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`AbstractManifold`](@ref) this factor of the product manifold consists of.
+Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the `AbstractManifold` this factor of the product manifold consists of.
 """
 function set_component!(M::ProductManifold, q, p, i)
     return copyto!(submanifold_component(M, q, i), p)

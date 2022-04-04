@@ -381,7 +381,7 @@ include("groups/special_euclidean.jl")
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
 
-Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](@ref) `M`.
+Check, whether a point `p` is a valid point (i.e. in) a `AbstractManifold` `M`.
 This method employs [`is_point`](@ref) deactivating the error throwing option.
 """
 Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
@@ -391,7 +391,7 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
     X ∈ TangentSpaceAtPoint(M,p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](@ref) `M`.
+the [`TangentSpaceAtPoint`](@ref) at `p` on the `AbstractManifold` `M`.
 This method uses [`is_vector`](@ref) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)

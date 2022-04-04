@@ -31,7 +31,6 @@ makedocs(
     sitename="Manifolds.jl",
     pages=[
         "Home" => "index.md",
-        "Examples" => ["How to implement a Manifold" => "examples/manifold.md"],
         "Manifolds" => [
             "Basic manifolds" => [
                 "Centered matrices" => "manifolds/centeredmatrices.md",

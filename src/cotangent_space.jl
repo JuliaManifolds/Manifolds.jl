@@ -25,7 +25,7 @@ end
     flat(M::AbstractManifold, p, X)
 
 Compute the flat isomorphism (one of the musical isomorphisms) of tangent vector `X`
-from the vector space of type `M` at point `p` from the underlying [`AbstractManifold`](@ref).
+from the vector space of type `M` at point `p` from the underlying `AbstractManifold`.
 
 The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
@@ -141,7 +141,7 @@ end
     sharp(M::AbstractManifold, p, ξ)
 
 Compute the sharp isomorphism (one of the musical isomorphisms) of vector `ξ`
-from the vector space `M` at point `p` from the underlying [`AbstractManifold`](@ref).
+from the vector space `M` at point `p` from the underlying `AbstractManifold`.
 
 The function can be used for example to transform vectors
 from the cotangent bundle to vectors from the tangent bundle
