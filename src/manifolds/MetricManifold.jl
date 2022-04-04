@@ -369,7 +369,7 @@ end
 
 Return the local matrix representation of the inverse metric (cometric) tensor
 of the tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M` with respect
-to the [`AbstractBasis`](@ref) basis `B`.
+to the [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) basis `B`.
 
 The metric tensor (see [`local_metric`](@ref)) is usually denoted by ``G = (g_{ij}) ∈ 𝔽^{d×d}``,
 where ``d`` is the dimension of the manifold.
@@ -499,7 +499,7 @@ end
     local_metric(M::AbstractManifold{𝔽}, p, B::AbstractBasis)
 
 Return the local matrix representation at the point `p` of the metric tensor ``g`` with
-respect to the [`AbstractBasis`](@ref) `B` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+respect to the [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) `B` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
 Let ``d``denote the dimension of the manifold and $b_1,\ldots,b_d$ the basis vectors.
 Then the local matrix representation is a matrix ``G\in 𝔽^{n\times n}`` whose entries are
 given by ``g_{ij} = g_p(b_i,b_j), i,j\in\{1,…,d\}``.

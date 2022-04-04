@@ -363,7 +363,7 @@ Return the injectivity radius on the [`Rotations`](@ref) `M`, which is globally
 
     injectivity_radius(M::Rotations, p, ::PolarRetraction)
 
-Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
+Return the radius of injectivity for the [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
 [`Rotations`](@ref) `M` which is $\frac{π}{\sqrt{2}}$.
 """
 injectivity_radius(::Rotations) = π * sqrt(2.0)
@@ -391,7 +391,7 @@ inner(::Rotations, p, X, Y) = dot(X, Y)
 Compute a vector from the tangent space $T_p\mathrm{SO}(n)$
 of the point `p` on the [`Rotations`](@ref) manifold `M`
 with which the point `q` can be reached by the
-[`PolarRetraction`](@ref) from the point `p` after time 1.
+[`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) from the point `p` after time 1.
 
 The formula reads
 ````math
@@ -410,7 +410,7 @@ inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
 
 Compute a vector from the tangent space $T_p\mathrm{SO}(n)$ of the point `p` on the
 [`Rotations`](@ref) manifold `M` with which the point `q` can be reached by the
-[`QRRetraction`](@ref) from the point `q` after time 1.
+[`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) from the point `q` after time 1.
 """
 inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 

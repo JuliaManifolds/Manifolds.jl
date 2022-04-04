@@ -250,7 +250,7 @@ Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is glo
 
     injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
 
-Return the injectivity radius for the [`ProjectionRetraction`](@ref) on the
+Return the injectivity radius for the [`ProjectionRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionRetraction) on the
 [`AbstractSphere`](@ref), which is globally $\frac{π}{2}$.
 """
 injectivity_radius(::AbstractSphere) = π
@@ -451,7 +451,7 @@ end
     parallel_transport_to(M::AbstractSphere, p, X, q)
 
 Compute the parallel transport on the [`Sphere`](@ref) of the tangent vector `X` at `p`
-to `q`, provided, the [`geodesic`](@ref) between `p` and `q` is unique. The formula reads
+to `q`, provided, the [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) between `p` and `q` is unique. The formula reads
 
 ````math
 P_{p←q}(X) = X - \frac{\Re(⟨\log_p q,X⟩_p)}{d^2_𝕊(p,q)}

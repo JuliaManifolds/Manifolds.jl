@@ -20,7 +20,7 @@ add_edge!(G, 2, 3)
 N = GraphManifold(G, M, VertexManifold())
 ```
 
-It supports all [`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  operations (it is based on [`NestedPowerRepresentation`](@ref)) and furthermore it is possible to compute a graph logarithm:
+It supports all [`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  operations (it is based on [`NestedPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedPowerRepresentation)) and furthermore it is possible to compute a graph logarithm:
 
 ```@setup graph-1
 using Manifolds

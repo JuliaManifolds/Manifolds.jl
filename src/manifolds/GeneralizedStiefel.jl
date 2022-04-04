@@ -166,12 +166,12 @@ end
     retract(M::GeneralizedStiefel, p, X, ::PolarRetraction)
     retract(M::GeneralizedStiefel, p, X, ::ProjectionRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
+Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
 [`GeneralizedStiefel`](@ref) manifold `M`, which in this case is the same as
 the projection based retraction employing the exponential map in the embedding
 and projecting the result back to the manifold.
 
-The default retraction for this manifold is the [`ProjectionRetraction`](@ref).
+The default retraction for this manifold is the [`ProjectionRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionRetraction).
 """
 retract(::GeneralizedStiefel, ::Any...)
 
