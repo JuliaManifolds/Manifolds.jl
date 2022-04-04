@@ -420,7 +420,7 @@ end
 @doc raw"""
     Base.foreach(f, M::Tucker, p::TuckerPoint, basis::AbstractBasis, indices=1:manifold_dimension(M))
 
-Let `basis` be and [`AbstractBasis`](@ref) at a point `p` on `M`. Suppose `f` is a function
+Let `basis` be and [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) at a point `p` on `M`. Suppose `f` is a function
 that takes an index and a vector as an argument.
 This function applies `f` to `i` and the `i`th basis vector sequentially for each `i` in
 `indices`.

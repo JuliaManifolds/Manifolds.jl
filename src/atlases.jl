@@ -28,8 +28,8 @@ In short: The coordinates with respect to a basis are used together with a retra
 
 # See also
 
-[`AbstractAtlas`](@ref), [`AbstractInverseRetractionMethod`](@ref),
-[`AbstractRetractionMethod`](@ref), [`AbstractBasis`](@ref)
+[`AbstractAtlas`](@ref), [`AbstractInverseRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractInverseRetractionMethod),
+[`AbstractRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractRetractionMethod), [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis)
 """
 struct RetractionAtlas{
     𝔽,
@@ -221,7 +221,7 @@ chart (`A`, `i`).
 
 # See also
 
-[`VectorSpaceType`](@ref), [`AbstractAtlas`](@ref)
+[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType), [`AbstractAtlas`](@ref)
 """
 induced_basis(M::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType)
 
@@ -277,7 +277,7 @@ and the set ``\{X_1,\ldots,X_n\}`` is the chart-induced basis of ``T_p\mathcal M
 
 # See also
 
-[`VectorSpaceType`](@ref), [`AbstractBasis`](@ref)
+[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType), [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis)
 """
 struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractBasis{𝔽,VST}
     vs::VST

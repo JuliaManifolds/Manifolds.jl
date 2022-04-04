@@ -226,7 +226,7 @@ end
     log(M::GeneralizedGrassmann, p, q)
 
 Compute the logarithmic map on the [`GeneralizedGrassmann`](@ref) `M`$ = \mathcal M=\mathrm{Gr}(n,k,B)$,
-i.e. the tangent vector `X` whose corresponding [`geodesic`](@ref) starting from `p`
+i.e. the tangent vector `X` whose corresponding [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) starting from `p`
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
@@ -335,7 +335,7 @@ Return the represenation size or matrix dimension of a point on the [`Generalize
 @doc raw"""
     retract(M::GeneralizedGrassmann, p, X, ::PolarRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
+Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
 [`GeneralizedGrassmann`](@ref) `M`, by
 [`project`](@ref project(M::GeneralizedGrassmann, p))ing $p + X$ onto `M`.
 """

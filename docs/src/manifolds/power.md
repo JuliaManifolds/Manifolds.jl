@@ -7,8 +7,8 @@ The case where $m=2$ is useful for representing manifold-valued matrices of data
 There are three available representations for points and vectors on a power manifold:
 
 * [`ArrayPowerRepresentation`](@ref) (the default one), very efficient but only applicable when points on the underlying manifold are represented using plain `AbstractArray`s.
-* [`NestedPowerRepresentation`](@ref), applicable to any manifold. It assumes that points on the underlying manifold are represented using mutable data types.
-* [`NestedReplacingPowerRepresentation`](@ref), applicable to any manifold. It does not mutate points on the underlying manifold, replacing them instead when appropriate.
+* [`NestedPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedPowerRepresentation), applicable to any manifold. It assumes that points on the underlying manifold are represented using mutable data types.
+* [`NestedReplacingPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedReplacingPowerRepresentation), applicable to any manifold. It does not mutate points on the underlying manifold, replacing them instead when appropriate.
 
 Below are some examples of usage of these representations.
 
@@ -54,7 +54,7 @@ Another problem is, that accessing a single point is ` p[:, 1]` which might be u
 
 ### `NestedPowerRepresentation`
 
-For the [`NestedPowerRepresentation`](@ref) we can now do
+For the [`NestedPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedPowerRepresentation) we can now do
 
 ```@example 2
 using Manifolds
@@ -87,7 +87,7 @@ get_component(M, p, 4)
 
 ### `NestedReplacingPowerRepresentation`
 
-The final representation is the [`NestedReplacingPowerRepresentation`](@ref). It is similar to the [`NestedPowerRepresentation`](@ref) but it does not perform mutating operations on the points on the underlying manifold. The example below uses this representation to store points on a power manifold of the [`SpecialEuclidean`](@ref) group in-line in an `Vector` for improved efficiency. When having a mixture of both, i.e. an array structure that is nested (like [´NestedPowerRepresentation](@ref)) in the sense that the elements of the main vector are immutable, then changing the elements can not be done in a mutating way and hence [`NestedReplacingPowerRepresentation`](@ref) has to be used.
+The final representation is the [`NestedReplacingPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedReplacingPowerRepresentation). It is similar to the [`NestedPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedPowerRepresentation) but it does not perform mutating operations on the points on the underlying manifold. The example below uses this representation to store points on a power manifold of the [`SpecialEuclidean`](@ref) group in-line in an `Vector` for improved efficiency. When having a mixture of both, i.e. an array structure that is nested (like [´NestedPowerRepresentation](@ref)) in the sense that the elements of the main vector are immutable, then changing the elements can not be done in a mutating way and hence [`NestedReplacingPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedReplacingPowerRepresentation) has to be used.
 
 ```@example 4
 using Manifolds, StaticArrays
