@@ -17,7 +17,7 @@ Pages = ["metric.md"]
 Depth = 2
 ```
 
-Note that a metric manifold is an [`AbstractConnectionManifold`](@ref) with the [`LeviCivitaConnection`](@ref) of the metric $g$, and thus a large part of metric manifold's functionality relies on this.
+Note that a metric manifold is has a [`IsConnectionManifold`](@ref) trait referring to the [`LeviCivitaConnection`](@ref) of the metric $g$, and thus a large part of metric manifold's functionality relies on this.
 
 Let's first look at the provided types.
 

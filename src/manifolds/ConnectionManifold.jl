@@ -25,7 +25,7 @@ struct IsDefaultConnection <: AbstractTrait end
 parent_trait(::IsDefaultConnection) = IsConnectionManifold()
 
 """
-    ConnectionManifold{𝔽,,M<:AbstractManifold{𝔽},G<:AbstractAffineConnection} <: AbstractConnectionManifold{𝔽}
+    ConnectionManifold{𝔽,,M<:AbstractManifold{𝔽},G<:AbstractAffineConnection} <: AbstractDecoratorManifold{𝔽}
 
 # Constructor
 
@@ -181,8 +181,8 @@ connection(M::ConnectionManifold) = M.connection
 Compute the exponential map on a manifold that [`IsConnectionManifold`](@ref) `M` equipped with
 corresponding affine connection.
 
-If `M` is a [`MetricManifold`](@ref) with a metric that was declared the default metric
-using [`is_default_metric`](@ref), this method falls back to `exp(M, p, X)`.
+If `M` is a [`MetricManifold`](@ref) with a [`IsDefaultMetric`](@ref) trait,
+this method falls back to `exp(M, p, X)`.
 
 Otherwise it numerically integrates the underlying ODE, see [`solve_exp_ode`](@ref).
 Currently, the numerical integration is only accurate when using a single

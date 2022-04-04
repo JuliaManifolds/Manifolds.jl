@@ -4,7 +4,7 @@ A connection manifold always consists of a [topological manifold](https://en.wik
 
 However, often there is an implicitly assumed (default) connection, like the [`LeviCivitaConnection`](@ref) connection on a Riemannian manifold.
 It is not necessary to use this decorator if you implement just one (or the first) connection.
-If you later introduce a second, the old (first) connection can be used with the (non [`AbstractConnectionManifold`](@ref)) `AbstractManifold`, i.e. without an explicitly stated connection.
+If you later introduce a second, the old (first) connection can be used without an explicitly stated connection.
 
 This manifold decorator serves two purposes:
 
