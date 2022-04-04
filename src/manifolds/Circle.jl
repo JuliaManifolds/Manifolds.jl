@@ -381,14 +381,15 @@ function Random.rand(::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
     if vector_at === nothing
         return sym_rem(rand() * 2 * π)
     else
-        return σ * randn()
+        # written like that to properly handle `vector_at` being a number or a one-element array
+        return map(_ -> σ * randn(), vector_at)
     end
 end
 function Random.rand(rng::AbstractRNG, ::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
     if vector_at === nothing
         return sym_rem(rand(rng) * 2 * π)
     else
-        return σ * randn(rng)
+        return map(_ -> σ * randn(rng), vector_at)
     end
 end
 
