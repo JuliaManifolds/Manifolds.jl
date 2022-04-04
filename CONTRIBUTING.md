@@ -38,7 +38,7 @@ Even providing a single new method is a good contribution.
 
 A main contribution you can provide is another manifold that is not yet included in the
 package.
-A manifold is a concrete type of [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) from [`ManifoldsBase.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html).
+A manifold is a concrete type of [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  from [`ManifoldsBase.jl`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html).
 This package also provides the main set of functions a manifold can/should implement.
 Don't worry if you can only implement some of the functions.
 If the application you have in mind only requires a subset of these functions, implement those.
@@ -49,7 +49,7 @@ See for example [exp!](https://juliamanifolds.github.io/Manifolds.jl/latest/inte
 The non-mutating one (e.g. `exp`) always falls back to use the mutating one, so in most cases it should
 suffice to implement the mutating one (e.g. `exp!`).
 
-Note that since the first argument is _always_ the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold), the mutated argument is always the second one in the signature.
+Note that since the first argument is _always_ the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold) , the mutated argument is always the second one in the signature.
 In the example we have `exp(M, p, X)` for the exponential map and `exp!(M, q, X, p)` for the mutating one, which stores the result in `q`.
 
 On the other hand, the user will most likely look for the documentation of the non-mutating version, so we recommend adding the docstring for the non-mutating one, where all different signatures should be collected in one string when reasonable.

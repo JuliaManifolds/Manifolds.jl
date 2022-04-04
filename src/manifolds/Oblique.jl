@@ -3,11 +3,11 @@
 
 The oblique manifold $\mathcal{OB}(n,m)$ is the set of 𝔽-valued matrices with unit norm
 column endowed with the metric from the embedding. This yields exactly the same metric as
-considering the product metric of the unit norm vectors, i.e. `PowerManifold` of the
+considering the product metric of the unit norm vectors, i.e. [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of the
 $(n-1)$-dimensional [`Sphere`](@ref).
 
 The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all functions of
-`AbstractPowerManifold` can be used directly.
+[`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  can be used directly.
 
 # Constructor
 

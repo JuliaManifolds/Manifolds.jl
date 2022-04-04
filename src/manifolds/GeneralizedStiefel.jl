@@ -54,7 +54,7 @@ active_traits(f, ::GeneralizedStiefel, args...) = merge_traits(IsEmbeddedManifol
     check_point(M::GeneralizedStiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`GeneralizedStiefel`](@ref) `M`=$\operatorname{St}(n,k,B)$,
-i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}Bx$
+i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $x^{\mathrm{H}}Bx$
 is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
@@ -73,7 +73,7 @@ end
     check_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
-`M`=$\operatorname{St}(n,k,B)$, i.e. the [`AbstractNumbers`](@ref) fits,
+`M`=$\operatorname{St}(n,k,B)$, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits,
 `p` is a valid point on `M` and
 it (approximately) holds that $p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0$, where
 `kwargs...` is passed to the `isapprox`.

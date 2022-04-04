@@ -56,7 +56,7 @@ t_k &= \frac{w_k}{\sum_{i=1}^k w_i}\\
 
 where $x_k$ are points, $w_k$ are weights, $μ_k$ is the $k$th estimate of the
 mean, and $γ_x(y; t)$ is the point at time $t$ along the
-[`shortest_geodesic`](@ref shortest_geodesic(::AbstractManifold, ::Any, ::Any, ::Real))
+[`shortest_geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any})
 between points $x,y ∈ \mathcal M$. The algorithm
 terminates when all $x_k$ have been considered. In the [`Euclidean`](@ref) case,
 this exactly computes the weighted mean.
@@ -239,7 +239,7 @@ default_estimation_method(::AbstractManifold, ::typeof(cov)) = GradientDescentEs
     mean(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian center of mass also known as
-Karcher mean of the vector `x` of points on the `AbstractManifold` `M`, defined
+Karcher mean of the vector `x` of points on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, defined
 as the point that satisfies the minimizer
 ````math
 \argmin_{y ∈ \mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
@@ -599,7 +599,7 @@ end
     )
 
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
-`AbstractManifold` `M`, defined as the point that satisfies the minimizer
+[`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, defined as the point that satisfies the minimizer
 ````math
 \argmin_{y ∈ \mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
@@ -903,7 +903,7 @@ end
     var(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false)
 
 compute the (optionally weighted) variance of a `Vector` `x` of `n` data points
-on the `AbstractManifold` `M`, i.e.
+on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, i.e.
 
 ````math
 \frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
@@ -951,7 +951,7 @@ end
     std(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
 
 compute the optionally weighted standard deviation of a `Vector` `x` of `n` data
-points on the `AbstractManifold` `M`, i.e.
+points on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, i.e.
 
 ````math
 \sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)},

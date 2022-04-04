@@ -8,7 +8,7 @@ Order = [:type]
 
 ## Functions
 
-Most functions are directly implemented for an `AbstractPowerManifold` with [`ArrayPowerRepresentation`](@ref) except the following special cases:
+Most functions are directly implemented for an [`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  with [`ArrayPowerRepresentation`](@ref) except the following special cases:
 
 ```@autodocs
 Modules = [Manifolds]

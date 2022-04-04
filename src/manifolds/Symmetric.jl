@@ -1,7 +1,7 @@
 @doc raw"""
     SymmetricMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The `AbstractManifold` $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
 symmetric matrices of size $n × n$, i.e. the set
 
 ````math
@@ -44,7 +44,7 @@ end
 
 Check whether `p` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e.
 whether `p` is a symmetric matrix of size `(n,n)` with values from the corresponding
-[`AbstractNumbers`](@ref) `𝔽`.
+[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) `𝔽`.
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
@@ -63,7 +63,7 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
-and its values have to be from the correct [`AbstractNumbers`](@ref).
+and its values have to be from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
 
 The tolerance for the symmetry of `X` can be set using `kwargs...`.
 """

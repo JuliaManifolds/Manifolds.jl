@@ -19,21 +19,21 @@ that lie on it (contained in `pts`).
 
 # Arguments
 - `basis_has_specialized_diagonalizing_get = false`: if true, assumes that
-    [`DiagonalizingOrthonormalBasis`](@ref) given in `basis_types` has
+    `DiagonalizingOrthonormalBasis` given in `basis_types` has
     [`get_coordinates`](@ref) and [`get_vector`](@ref) that work without caching.
 - `basis_types_to_from = ()`: basis types that will be tested based on
     [`get_coordinates`](@ref) and [`get_vector`](@ref).
-- `basis_types_vecs = ()` : basis types that will be tested based on [`get_vectors`](@ref).
+- `basis_types_vecs = ()` : basis types that will be tested based on `get_vectors`
 - `default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction()`:
-    default method for inverse retractions ([`log`](@ref)).
+    default method for inverse retractions (`log`.
 - `default_retraction_method = ManifoldsBase.ExponentialRetraction()`: default method for
-    retractions ([`exp`](@ref)).
+    retractions (`exp`).
 - `exp_log_atol_multiplier = 0`: change absolute tolerance of exp/log tests
     (0 use default, i.e. deactivate atol and use rtol).
 - `exp_log_rtol_multiplier = 1`: change the relative tolerance of exp/log tests
     (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `expected_dimension_type = Integer`: expected type of value returned by
-    [`manifold_dimension`](@ref).
+    `manifold_dimension`.
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
 - `is_mutating = true`: whether mutating variants of functions should be tested.
 - `is_point_atol_multiplier = 0`: determines atol of `is_point` checks.

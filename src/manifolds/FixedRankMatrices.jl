@@ -380,7 +380,7 @@ of dimension `m`x`n` of rank `k`, namely
 \dim(\mathcal M) = k(m + n - k) \dim_ℝ 𝔽,
 ````
 
-where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@ref) of `𝔽`.
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
     return (m + n - k) * k * real_dimension(𝔽)

@@ -3,7 +3,7 @@
     AbstractAtlas{𝔽}
 
 An abstract class for atlases whith charts that have values in the vector space `𝔽ⁿ`
-for some value of `n`. `𝔽` is a number system determined by an [`AbstractNumbers`](@ref)
+for some value of `n`. `𝔽` is a number system determined by an [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system)
 object.
 """
 abstract type AbstractAtlas{𝔽} end

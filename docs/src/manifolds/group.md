@@ -33,6 +33,37 @@ Pages = ["groups/group.jl"]
 Order = [:type, :function]
 ```
 
+### GroupManifold
+
+As a concrete wrapper for manifolds (e.g. when the manifold per se is a group manifold but another group structure should be implemented), there is the [`GroupManifold`](@ref)
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/GroupManifold.jl"]
+Order = [:type, :function]
+```
+
+### Generic Operations
+
+For groups based on an addition operation or a group operation, several default implementations are provided.
+
+#### Addition Operation
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/addition_operation.jl"]
+Order = [:type, :function]
+```
+
+#### Multiplication Operation
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/multiplication_operation.jl"]
+Order = [:type, :function]
+```
+
+
 ### Product group
 
 ```@autodocs

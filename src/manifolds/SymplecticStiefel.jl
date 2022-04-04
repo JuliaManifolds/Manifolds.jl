@@ -81,7 +81,7 @@ end
 
 Check whether `p` is a valid point on the [`SymplecticStiefel`](@ref),
 $\operatorname{SpSt}(2n, 2k)$ manifold.
-That is, the point has the right [`AbstractNumbers`](@ref) type and $p^{+}p$ is
+That is, the point has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{+}p$ is
 (approximately) the identity,
 where for $A \in \mathbb{R}^{2n \times 2k}$,
 $A^{+} = Q_{2k}^TA^TQ_{2n}$ is the symplectic inverse, with

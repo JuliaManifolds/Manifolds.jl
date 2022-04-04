@@ -18,7 +18,7 @@ elements are interpreted as ``n_1 × n_2 × … × n_i`` arrays.
 For ``i=2`` we obtain a matrix space.
 The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is ``k \dim_ℝ 𝔽``, where ``\dim_ℝ 𝔽`` is the
-[`real_dimension`](@ref) of the field ``𝔽``.
+[`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the field ``𝔽``.
 
     Euclidean(; field=ℝ)
 
@@ -398,7 +398,7 @@ end
     manifold_dimension(M::Euclidean)
 
 Return the manifold dimension of the [`Euclidean`](@ref) `M`, i.e.
-the product of all array dimensions and the [`real_dimension`](@ref) of the
+the product of all array dimensions and the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the
 underlying number system.
 """
 function manifold_dimension(M::Euclidean{N,𝔽}) where {N,𝔽}

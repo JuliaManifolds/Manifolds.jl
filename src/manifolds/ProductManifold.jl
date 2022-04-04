@@ -187,7 +187,7 @@ end
     check_point(M::ProductManifold, p; kwargs...)
 
 Check whether `p` is a valid point on the [`ProductManifold`](@ref) `M`.
-If `p` is not a point on `M` a `CompositeManifoldError` consisting of all error messages of the
+If `p` is not a point on `M` a [`CompositeManifoldError`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.CompositeManifoldError).consisting of all error messages of the
 components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
@@ -212,7 +212,7 @@ end
     check_size(M::ProductManifold, p; kwargs...)
 
 Check whether `p` is of valid size on the [`ProductManifold`](@ref) `M`.
-If `p` has components of wrong size a `CompositeManifoldError` consisting of all error messages of the
+If `p` has components of wrong size a [`CompositeManifoldError`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.CompositeManifoldError).consisting of all error messages of the
 components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
@@ -261,7 +261,7 @@ end
 
 Check whether `X` is a tangent vector to `p` on the [`ProductManifold`](@ref)
 `M`, i.e. all projections to base manifolds must be respective tangent vectors.
-If `X` is not a tangent vector to `p` on `M` a `CompositeManifoldError` consisting
+If `X` is not a tangent vector to `p` on `M` a [`CompositeManifoldError`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.CompositeManifoldError).consisting
 of all error messages of the components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
@@ -1200,7 +1200,7 @@ end
 """
     set_component!(M::ProductManifold, q, p, i)
 
-Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the `AbstractManifold` this factor of the product manifold consists of.
+Set the `i`th component of a point `q` on a [`ProductManifold`](@ref) `M` to `p`, where `p` is a point on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  this factor of the product manifold consists of.
 """
 function set_component!(M::ProductManifold, q, p, i)
     return copyto!(submanifold_component(M, q, i), p)

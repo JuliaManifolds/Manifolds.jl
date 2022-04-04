@@ -1,6 +1,6 @@
 # Power manifold
 
-A power manifold is based on a `AbstractManifold` $\mathcal M$ to build a $\mathcal M^{n_1 \times n_2 \times \cdots \times n_m}$.
+A power manifold is based on a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $\mathcal M$ to build a $\mathcal M^{n_1 \times n_2 \times \cdots \times n_m}$.
 In the case where $m=1$ we can represent a manifold-valued vector of data of length $n_1$, for example a time series.
 The case where $m=2$ is useful for representing manifold-valued matrices of data of size $n_1 \times n_2$, for example certain types of images.
 
@@ -46,7 +46,7 @@ using HybridArrays, StaticArrays
 q = HybridArray{Tuple{3,StaticArrays.Dynamic()},Float64,2}(p)
 ```
 
-which is still a valid point on `M` and `PowerManifold` works with these, too.
+which is still a valid point on `M` and [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) works with these, too.
 
 An advantage of this representation is that it is quite efficient, especially when a `HybridArray` (from the [HybridArrays.jl](https://github.com/mateuszbaran/HybridArrays.jl) package) is used to represent a point on the power manifold.
 A disadvantage is not being able to easily identify parts of the multidimensional array that correspond to a single point on the base manifold.

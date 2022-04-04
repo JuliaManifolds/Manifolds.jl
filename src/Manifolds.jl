@@ -381,8 +381,8 @@ include("groups/special_euclidean.jl")
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
 
-Check, whether a point `p` is a valid point (i.e. in) a `AbstractManifold` `M`.
-This method employs `is_point` deactivating the error throwing option.
+Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+This method employs [`is_point`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_point) deactivating the error throwing option.
 """
 Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
@@ -391,8 +391,8 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
     X ∈ TangentSpaceAtPoint(M,p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref) at `p` on the `AbstractManifold` `M`.
-This method uses `is_vector` deactivating the error throw option.
+the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
     return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)

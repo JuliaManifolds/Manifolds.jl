@@ -1,7 +1,7 @@
 @doc raw"""
     SphereSymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
 
-The `AbstractManifold` consisting of the $n × n$ symmetric matrices
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  consisting of the $n × n$ symmetric matrices
 of unit Frobenius norm, i.e.
 ````math
 \mathcal{S}_{\text{sym}} :=\bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p, \lVert p \rVert = 1 \bigr\},

@@ -15,7 +15,7 @@ positive entries such that each column sums to one, i.e.
 
 where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
 
-It is modeled as `IsIsometricEmbeddedManifold`.
+It is modeled as [`IsIsometricEmbeddedManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.IsIsometricEmbeddedManifold).
 via the [`AbstractMultinomialDoublyStochastic`](@ref) type, since it shares a few functions
 also with [`AbstractMultinomialDoublyStochastic`](@ref), most and foremost projection of
 a point from the embedding onto the manifold.

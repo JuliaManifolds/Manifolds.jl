@@ -197,7 +197,7 @@ end
     check_point(M::Symplectic, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Symplectic`](@ref) `M`=$\operatorname{Sp}(2n)$,
-i.e. that it has the right [`AbstractNumbers`](@ref) type and $p^{+}p$ is (approximately)
+i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{+}p$ is (approximately)
 the identity, where $A^{+} = Q_{2n}^TA^TQ_{2n}$ is the symplectic inverse, with
 ````math
 Q_{2n} =
@@ -227,7 +227,7 @@ end
     check_vector(M::Symplectic, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Symplectic`](@ref)
-`M`=``\operatorname{Sp}(2n)``, i.e. the [`AbstractNumbers`](@ref) fits and
+`M`=``\operatorname{Sp}(2n)``, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits and
 it (approximately) holds that ``p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0``,
 where
 ````math

@@ -31,7 +31,7 @@ parent_trait(::IsDefaultConnection) = IsConnectionManifold()
 
     ConnectionManifold(M, C)
 
-Decorate the `AbstractManifold` `M` with [`AbstractAffineConnection`](@ref) `C`.
+Decorate the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M` with [`AbstractAffineConnection`](@ref) `C`.
 """
 struct ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnection} <:
        AbstractDecoratorManifold{𝔽}
@@ -164,7 +164,7 @@ end
     connection(M::AbstractManifold)
 
 Get the connection (an object of a subtype of [`AbstractAffineConnection`](@ref))
-of `AbstractManifold` `M`.
+of [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
 """
 connection(::AbstractManifold)
 

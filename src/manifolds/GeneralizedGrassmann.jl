@@ -262,7 +262,7 @@ Return the dimension of the [`GeneralizedGrassmann(n,k,𝔽)`](@ref) manifold `M
 \dim \operatorname{Gr}(n,k,B) = k(n-k) \dim_ℝ 𝔽,
 ````
 
-where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
+where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
     return k * (n - k) * real_dimension(𝔽)

@@ -1,7 +1,7 @@
 @doc raw"""
     SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The `AbstractManifold` $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
 symmetric positive semidefinite matrices of size $n × n$ and rank $k$, i.e. the set
 
 ````math
@@ -68,7 +68,7 @@ end
 
 Check whether `q` is a valid manifold point on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e.
 whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corresponding
-[`AbstractNumbers`](@ref) `𝔽`.
+[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) `𝔽`.
 The symmetry of `p` is not explicitly checked since by using `q` p is symmetric by construction.
 The tolerance for the symmetry of `p` can and the rank of `q*q'` be set using `kwargs...`.
 """
@@ -93,7 +93,7 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
-and its values have to be from the correct [`AbstractNumbers`](@ref).
+and its values have to be from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
 
 Due to the reduced representation this is fulfilled as soon as the matrix is of correct size.
 """

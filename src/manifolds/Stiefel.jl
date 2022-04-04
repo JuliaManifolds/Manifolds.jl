@@ -47,7 +47,7 @@ end
     check_point(M::Stiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$, i.e. that it has the right
-[`AbstractNumbers`](@ref) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the
+[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
@@ -67,7 +67,7 @@ end
     check_vector(M::Stiefel, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
-`M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
+`M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits and
 it (approximately) holds that $p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0$,
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (elementwise) complex conjugate.
 The settings for approximately can be set with `kwargs...`.
@@ -310,7 +310,7 @@ the formula reads
     \operatorname{retr}_pX = \Bigl(I - \frac{1}{2}W_{p,X}\Bigr)^{-1}\Bigl(I + \frac{1}{2}W_{p,X}\Bigr)p.
 ````
 
-It is implemented as the case $m=1$ of the [`PadeRetraction`](@ref).
+It is implemented as the case $m=1$ of the `PadeRetraction`.
 
 [^Zhu2017]:
     > X. Zhu:
@@ -339,7 +339,7 @@ respectively. Then the Padé approximation (of the matrix exponential $\exp(A)$)
 Defining further
 ````math
   W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
-  \quad\text{where} 
+  \quad\text{where }
   \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
 ````
 the retraction reads
@@ -357,7 +357,7 @@ retract(::Stiefel, ::Any, ::Any, ::PadeRetraction)
 @doc raw"""
     retract(M::Stiefel, p, X, ::PolarRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
+Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
 [`Stiefel`](@ref) manifold `M`. With $USV = p + X$ the retraction reads
 
 ````math
@@ -369,7 +369,7 @@ retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
 @doc raw"""
     retract(M::Stiefel, p, X, ::QRRetraction)
 
-Compute the QR-based retraction [`QRRetraction`](@ref) on the
+Compute the QR-based retraction [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) on the
 [`Stiefel`](@ref) manifold `M`. With $QR = p + X$ the retraction reads
 
 ````math
@@ -462,7 +462,7 @@ end
 @doc raw"""
     vector_transport_direction(::Stiefel, p, X, d, ::DifferentiatedRetractionVectorTransport{CayleyRetraction})
 
-Compute the vector transport given by the differentiated retraction of the [`CayleyRetraction`](@ref), cf. [^Zhu2017] Equation (17).
+Compute the vector transport given by the differentiated retraction of the [`CayleyRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.CayleyRetraction), cf. [^Zhu2017] Equation (17).
 
 The formula reads
 ````math
@@ -472,12 +472,12 @@ The formula reads
 with
 ````math
   W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
-  \quad\text{where} 
+  \quad\text{where }
   \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
 ````
 
 Since this is the differentiated retraction as a vector transport, the result will be in the
-tangent space at $q=\operatorname{retr}_p(d)$ using the [`CayleyRetraction`](@ref).
+tangent space at $q=\operatorname{retr}_p(d)$ using the [`CayleyRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.CayleyRetraction).
 """
 vector_transport_direction(
     M::Stiefel,

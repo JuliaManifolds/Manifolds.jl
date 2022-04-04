@@ -21,7 +21,7 @@ abstract type AbstractGroupOperation end
 """
     IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
 
-A trait to declare an `AbstractManifold` as a manifold with group structure
+A trait to declare an [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  as a manifold with group structure
 with operation of type `O`.
 
 Using this trait you can turn a manifold that you implement _implictly_ into a Lie group.
