@@ -412,6 +412,35 @@ function project!(
     return (Y.value .= X.value .+ minkowski_metric(p.value, X.value) .* p.value)
 end
 
+function Random.rand!(M::Hyperbolic{N}, pX; vector_at=nothing, σ=one(eltype(pX))) where {N}
+    if vector_at === nothing
+        a = σ .* randn(N)
+        pX[1:(end - 1)] .= a
+        pX[end] = sqrt(1 + dot(a, a))
+    else
+        Y = σ * randn(eltype(vector_at), size(vector_at))
+        project!(M, pX, vector_at, Y)
+    end
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::Hyperbolic{N},
+    pX;
+    vector_at=nothing,
+    σ=one(eltype(pX)),
+) where {N}
+    if vector_at === nothing
+        a = σ .* randn(rng, N)
+        pX[1:(end - 1)] .= a
+        pX[end] = sqrt(1 + dot(a, a))
+    else
+        Y = σ * randn(rng, eltype(vector_at), size(vector_at))
+        project!(M, pX, vector_at, Y)
+    end
+    return pX
+end
+
 function parallel_transport_to!(M::Hyperbolic, Y, p, X, q)
     w = log(M, p, q)
     wn = norm(M, p, w)

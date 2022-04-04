@@ -997,6 +997,122 @@ function Random.rand(rng::AbstractRNG, d::ProductFVectorDistribution)
     return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
 end
 
+@doc raw"""
+    rand(M::ProductManifold; parts_kwargs = map(_ -> (;), M.manifolds))
+
+Return a random point on [`ProductManifold`](@ref)  `M`. `parts_kwargs` is
+a tuple of keyword arguments for `rand` on each manifold in `M.manifolds`.
+"""
+function Random.rand(
+    M::ProductManifold;
+    vector_at=nothing,
+    parts_kwargs=map(_ -> (;), M.manifolds),
+)
+    if vector_at === nothing
+        return ProductRepr(
+            map((N, kwargs) -> rand(N; kwargs...), M.manifolds, parts_kwargs)...,
+        )
+    elseif isa(vector_at, ProductRepr)
+        return ProductRepr(
+            map(
+                (N, p, kwargs) -> rand(N; vector_at=p, kwargs...),
+                M.manifolds,
+                submanifold_components(M, vector_at),
+                parts_kwargs,
+            )...,
+        )
+    else
+        return ArrayPartition(
+            map(
+                (N, p, kwargs) -> rand(N; vector_at=p, kwargs...),
+                M.manifolds,
+                submanifold_components(M, vector_at),
+                parts_kwargs,
+            )...,
+        )
+    end
+end
+function Random.rand(
+    rng::AbstractRNG,
+    M::ProductManifold;
+    vector_at=nothing,
+    parts_kwargs=map(_ -> (;), M.manifolds),
+)
+    if vector_at === nothing
+        return ProductRepr(
+            map((N, kwargs) -> rand(rng, N; kwargs...), M.manifolds, parts_kwargs)...,
+        )
+    elseif isa(vector_at, ProductRepr)
+        return ProductRepr(
+            map(
+                (N, p, kwargs) -> rand(rng, N; vector_at=p, kwargs...),
+                M.manifolds,
+                submanifold_components(M, vector_at),
+                parts_kwargs,
+            )...,
+        )
+    else
+        return ArrayPartition(
+            map(
+                (N, p, kwargs) -> rand(rng, N; vector_at=p, kwargs...),
+                M.manifolds,
+                submanifold_components(M, vector_at),
+                parts_kwargs,
+            )...,
+        )
+    end
+end
+
+function Random.rand!(
+    M::ProductManifold,
+    pX;
+    vector_at=nothing,
+    parts_kwargs=map(_ -> (;), M.manifolds),
+)
+    if vector_at === nothing
+        map(
+            (N, q, kwargs) -> rand!(N, q; kwargs...),
+            M.manifolds,
+            submanifold_components(M, pX),
+            parts_kwargs,
+        )
+    else
+        map(
+            (N, X, p, kwargs) -> rand!(N, X; vector_at=p, kwargs...),
+            M.manifolds,
+            submanifold_components(M, pX),
+            submanifold_components(M, vector_at),
+            parts_kwargs,
+        )
+    end
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::ProductManifold,
+    pX;
+    vector_at=nothing,
+    parts_kwargs=map(_ -> (;), M.manifolds),
+)
+    if vector_at === nothing
+        map(
+            (N, q, kwargs) -> rand!(rng, N, q; kwargs...),
+            M.manifolds,
+            submanifold_components(M, pX),
+            parts_kwargs,
+        )
+    else
+        map(
+            (N, X, p, kwargs) -> rand!(rng, N, X; vector_at=p, kwargs...),
+            M.manifolds,
+            submanifold_components(M, pX),
+            submanifold_components(M, vector_at),
+            parts_kwargs,
+        )
+    end
+    return pX
+end
+
 function Distributions._rand!(
     rng::AbstractRNG,
     d::ProductPointDistribution,

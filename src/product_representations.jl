@@ -78,6 +78,8 @@ end
 
 ProductRepr(points...) = ProductRepr{typeof(points)}(points)
 
+Base.:(==)(x::ProductRepr, y::ProductRepr) = x.parts == y.parts
+
 @inline function number_eltype(x::ProductRepr)
     @inline eti_to_one(eti) = one(number_eltype(eti))
     return typeof(sum(map(eti_to_one, x.parts)))

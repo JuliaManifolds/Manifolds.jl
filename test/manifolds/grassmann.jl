@@ -68,6 +68,8 @@ include("../utils.jl")
                 test_forward_diff=false,
                 test_reverse_diff=false,
                 test_vee_hat=false,
+                test_rand_point=true,
+                test_rand_tvector=true,
                 retraction_methods=[PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods=[
                     PolarInverseRetraction(),
@@ -173,6 +175,7 @@ include("../utils.jl")
                 exp_log_atol_multiplier=10.0^3,
                 is_tangent_atol_multiplier=20.0,
                 test_inplace=true,
+                test_rand_point=true,
             )
 
             @testset "inner/norm" begin

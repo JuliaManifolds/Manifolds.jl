@@ -153,6 +153,8 @@ using Manifolds: default_metric_dispatch
                 test_vector_transport_direction=[true, true, false],
                 mid_point12=nothing,
                 test_inplace=true,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
 
             @testset "inner/norm" begin
@@ -240,6 +242,7 @@ using Manifolds: default_metric_dispatch
                 test_vector_transport_direction=[true, true, false],
                 mid_point12=nothing,
                 test_inplace=true,
+                test_rand_point=true,
             )
 
             @testset "inner/norm" begin

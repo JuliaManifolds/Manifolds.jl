@@ -61,6 +61,8 @@ using ManifoldsBase: TFVector
                 is_tangent_atol_multiplier=1,
                 test_atlases=test_atlases,
                 test_inplace=true,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end

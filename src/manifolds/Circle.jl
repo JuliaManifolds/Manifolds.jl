@@ -367,6 +367,49 @@ project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
 project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
 project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
 
+@doc raw"""
+    Random.rand(M::Circle{ℝ}; vector_at = nothing, σ::Real=1.0)
+
+If `vector_at` is `nothing`, return a random point on the [`Circle`](@ref) ``\mathbb S^1``
+by picking a random element from ``[-\pi,\pi)`` uniformly.
+
+If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
+the point `vector_at` on the [`Circle``](@ref) by using a normal distribution with
+mean 0 and standard deviation `σ`.
+"""
+function Random.rand(::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
+    if vector_at === nothing
+        return sym_rem(rand() * 2 * π)
+    else
+        return σ * randn()
+    end
+end
+function Random.rand(rng::AbstractRNG, ::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
+    if vector_at === nothing
+        return sym_rem(rand(rng) * 2 * π)
+    else
+        return σ * randn(rng)
+    end
+end
+
+function Random.rand!(M::Circle{ℝ}, pX; vector_at=nothing, σ::Real=one(eltype(pX)))
+    pX .= rand(M; vector_at, σ)
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::Circle{ℝ},
+    pX;
+    vector_at=nothing,
+    σ::Real=one(eltype(pX)),
+)
+    pX .= rand(rng, M; vector_at, σ)
+    return pX
+end
+
+retract(M::Circle, p, q) = retract(M, p, q, ExponentialRetraction())
+retract(M::Circle, p, q, m::ExponentialRetraction) = exp(M, p, q)
+
 representation_size(::Circle) = ()
 
 Base.show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")

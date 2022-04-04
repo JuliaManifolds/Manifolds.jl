@@ -209,11 +209,13 @@ end
                 point_distributions=[power_s1_pt_dist],
                 tvector_distributions=[power_s1_tv_dist],
                 basis_types_to_from=(basis_diag, basis_arb, basis_types...),
-                rand_tvector_atol_multiplier=6.0,
+                rand_tvector_atol_multiplier=600.0,
                 retraction_atol_multiplier=12.0,
                 is_tangent_atol_multiplier=12.0,
                 exp_log_atol_multiplier=20 * prod(power_dimensions(Ms1)),
                 test_inplace=true,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
         end
     end
@@ -279,11 +281,13 @@ end
                 point_distributions=[power_rn1_pt_dist],
                 tvector_distributions=[power_rn1_tv_dist],
                 basis_types_to_from=basis_types,
-                rand_tvector_atol_multiplier=5.0,
+                rand_tvector_atol_multiplier=500.0,
                 retraction_atol_multiplier=12,
                 is_tangent_atol_multiplier=12.0,
                 exp_log_atol_multiplier=4e2 * prod(power_dimensions(Mrn1)),
                 test_inplace=true,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
         end
     end
@@ -351,6 +355,8 @@ end
             is_tangent_atol_multiplier=12.0,
             exp_log_atol_multiplier=1.0,
             test_inplace=true,
+            test_rand_point=true,
+            test_rand_tvector=true,
         )
     end
 
@@ -425,5 +431,17 @@ end
             change_representer(M, e, q, log(M, q, p)),
         ]
         @test norm(N, P, Z .- Zc) ≈ 0
+    end
+
+    @testset "Nested replacing RNG" begin
+        M = PowerManifold(Ms, NestedReplacingPowerRepresentation(), 2)
+        @test is_point(M, rand(M))
+        @test is_point(M, rand(MersenneTwister(123), M))
+        @test rand(MersenneTwister(123), M) == rand(MersenneTwister(123), M)
+        p = rand(M)
+        @test is_vector(M, p, rand(M; vector_at=p); atol=1e-15)
+        @test is_vector(M, p, rand(MersenneTwister(123), M; vector_at=p); atol=1e-15)
+        @test rand(MersenneTwister(123), M; vector_at=p) ==
+              rand(MersenneTwister(123), M; vector_at=p)
     end
 end

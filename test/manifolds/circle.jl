@@ -122,6 +122,8 @@ using Manifolds: TFVector, CoTFVector
                 test_default_vector_transport=true,
                 test_vee_hat=false,
                 is_mutating=false,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
             ptsS = SVector.(pts)
             test_manifold(
@@ -140,6 +142,8 @@ using Manifolds: TFVector, CoTFVector
                 test_vee_hat=true,
                 basis_types_vecs=basis_types_real,
                 basis_types_to_from=basis_types_real,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
         end
     end

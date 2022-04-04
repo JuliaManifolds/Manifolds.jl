@@ -136,6 +136,80 @@ project(::SymmetricPositiveDefinite, p, X)
 project!(::SymmetricPositiveDefinite, Y, p, X) = (Y .= Symmetric((X + X') / 2))
 
 @doc raw"""
+    rand(M::SymmetricPositiveDefinite; σ::Real=1)
+
+Generate a random symmetric positive definite matrix on the
+`SymmetricPositiveDefinite` manifold `M`.
+"""
+rand(M::SymmetricPositiveDefinite; σ::Real=1)
+
+function Random.rand!(
+    M::SymmetricPositiveDefinite{N},
+    pX;
+    vector_at=nothing,
+    σ::Real=one(eltype(pX)) / (vector_at === nothing ? 1 : norm(vector_at)),
+    tangent_distr=:Gaussian,
+) where {N}
+    if vector_at === nothing
+        D = Diagonal(1 .+ rand(N)) # random diagonal matrix
+        s = qr(σ * randn(N, N)) # random q
+        pX .= Symmetric(s.Q * D * transpose(s.Q))
+    elseif tangent_distr === :Gaussian
+        # generate ONB in TxM
+        I = one(vector_at)
+        B = get_basis(M, vector_at, DiagonalizingOrthonormalBasis(I))
+        Ξ = get_vectors(M, vector_at, B)
+        Ξx =
+            vector_transport_to.(
+                Ref(M),
+                Ref(I),
+                Ξ,
+                Ref(vector_at),
+                Ref(ParallelTransport()),
+            )
+        pX .= sum(σ * randn(length(Ξx)) .* Ξx)
+    elseif tangent_distr === :Rician
+        C = cholesky(Hermitian(vector_at))
+        R = C.L + sqrt(σ) * triu(randn(size(vector_at, 1), size(vector_at, 2)), 0)
+        pX .= R * R'
+    end
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::SymmetricPositiveDefinite{N},
+    pX;
+    vector_at=nothing,
+    σ::Real=one(eltype(pX)) / (vector_at === nothing ? 1 : norm(vector_at)),
+    tangent_distr=:Gaussian,
+) where {N}
+    if vector_at === nothing
+        D = Diagonal(1 .+ rand(rng, N)) # random diagonal matrix
+        s = qr(σ * randn(rng, N, N)) # random q
+        pX .= Symmetric(s.Q * D * transpose(s.Q))
+    elseif tangent_distr === :Gaussian
+        # generate ONB in TxM
+        I = one(vector_at)
+        B = get_basis(M, vector_at, DiagonalizingOrthonormalBasis(I))
+        Ξ = get_vectors(M, vector_at, B)
+        Ξx =
+            vector_transport_to.(
+                Ref(M),
+                Ref(I),
+                Ξ,
+                Ref(vector_at),
+                Ref(ParallelTransport()),
+            )
+        pX .= sum(σ * randn(rng, length(Ξx)) .* Ξx)
+    elseif tangent_distr === :Rician
+        C = cholesky(Hermitian(vector_at))
+        R = C.L + sqrt(σ) * triu(randn(rng, size(vector_at, 1), size(vector_at, 2)), 0)
+        pX .= R * R'
+    end
+    return pX
+end
+
+@doc raw"""
     representation_size(M::SymmetricPositiveDefinite)
 
 Return the size of an array representing an element on the

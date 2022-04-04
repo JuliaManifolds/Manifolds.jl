@@ -265,6 +265,8 @@ using RecursiveArrayTools: ArrayPartition
         is_tangent_atol_multiplier=1,
         exp_log_atol_multiplier=1,
         test_inplace=true,
+        test_rand_point=true,
+        test_rand_tvector=true,
     )
 
     @testset "product vector transport" begin
@@ -320,6 +322,7 @@ using RecursiveArrayTools: ArrayPartition
         )) == ProductRepr(9, 10.0, 11)
 
         p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        @test p == ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
         @test submanifold_component(Mse, p, 1) === p.parts[1]
         @test submanifold_component(Mse, p, Val(1)) === p.parts[1]
         @test submanifold_component(p, 1) === p.parts[1]
@@ -396,6 +399,8 @@ using RecursiveArrayTools: ArrayPartition
                 inverse_retraction_methods=inverse_retraction_methods,
                 test_riesz_representer=true,
                 test_default_vector_transport=true,
+                test_rand_point=true,
+                test_rand_tvector=true,
                 vector_transport_methods=[
                     ProductVectorTransport(ParallelTransport(), ParallelTransport()),
                     ProductVectorTransport(

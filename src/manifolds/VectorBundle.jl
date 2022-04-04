@@ -742,6 +742,39 @@ function project!(B::VectorBundleFibers, Y, p, X)
     )
 end
 
+function Random.rand!(M::VectorBundle, pX; vector_at=nothing)
+    pXM, pXF = submanifold_components(M.manifold, pX)
+    if vector_at === nothing
+        rand!(M.manifold, pXM)
+        rand!(M.manifold, pXF; vector_at=pXM)
+    else
+        vector_atM, vector_atF = submanifold_components(M.manifold, vector_at)
+        rand!(M.manifold, pXM; vector_at=vector_atM)
+        rand!(M.manifold, pXF; vector_at=vector_atM)
+    end
+    return pX
+end
+function Random.rand!(rng::AbstractRNG, M::VectorBundle, pX; vector_at=nothing)
+    pXM, pXF = submanifold_components(M.manifold, pX)
+    if vector_at === nothing
+        rand!(rng, M.manifold, pXM)
+        rand!(rng, M.manifold, pXF; vector_at=pXM)
+    else
+        vector_atM, vector_atF = submanifold_components(M.manifold, vector_at)
+        rand!(rng, M.manifold, pXM; vector_at=vector_atM)
+        rand!(rng, M.manifold, pXF; vector_at=vector_atM)
+    end
+    return pX
+end
+function Random.rand!(M::TangentSpaceAtPoint, X; vector_at=nothing)
+    rand!(M.fiber.manifold, X; vector_at=M.point)
+    return X
+end
+function Random.rand!(rng::AbstractRNG, M::TangentSpaceAtPoint, X; vector_at=nothing)
+    rand!(rng, M.fiber.manifold, X; vector_at=M.point)
+    return X
+end
+
 """
     setindex!(p::ProductRepr, val, M::VectorBundle, s::Symbol)
     p[M::VectorBundle, s] = val
@@ -807,19 +840,32 @@ an element of the vector space of type `B.fiber` on manifold `B.manifold`
 and arguments `x...` for implementing the non-modifying operation
 using the modifying operation.
 """
-function allocate_result(B::VectorBundleFibers, f, x...)
-    T = allocate_result_type(B, f, x)
-    return allocate(x[1], T)
+@inline function allocate_result(B::VectorBundleFibers, f::TF, x...) where {TF}
+    if length(x) == 0
+        # TODO: this may be incorrect when point and tangent vector representation are
+        #       different for the manifold but there is no easy and generic way around that
+        return allocate_result(B.manifold, f)
+    else
+        T = allocate_result_type(B, f, x)
+        return allocate(x[1], T)
+    end
+end
+@inline function allocate_result(M::VectorBundle, f::TF) where {TF}
+    return ProductRepr(allocate_result(M.manifold, f), allocate_result(M.fiber, f))
 end
 
 """
     allocate_result_type(B::VectorBundleFibers, f, args::NTuple{N,Any}) where N
 
-Returns type of element of the array that will represent the result of
+Return type of element of the array that will represent the result of
 function `f` for representing an operation with result in the vector space `fiber`
 for manifold `M` on given arguments (passed at a tuple).
 """
-function allocate_result_type(::VectorBundleFibers, f, args::NTuple{N,Any}) where {N}
+@inline function allocate_result_type(
+    ::VectorBundleFibers,
+    f::TF,
+    args::NTuple{N,Any},
+) where {TF,N}
     return typeof(mapreduce(eti -> one(number_eltype(eti)), +, args))
 end
 
