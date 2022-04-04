@@ -52,7 +52,7 @@ function check_size(M::Circle, p)
     )
 end
 check_size(::Circle, ::Number, ::Number) = nothing
-function check_size(::Circle, p, X)
+function check_size(M::Circle, p, X)
     (size(X) == (1,)) && return nothing
     return DomainError(
         size(X),
