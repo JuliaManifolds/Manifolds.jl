@@ -369,7 +369,7 @@ end
 
 Return the local matrix representation of the inverse metric (cometric) tensor
 of the tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` with respect
-to the [`AbstractBasis`](@ref) basis `B`.
+to the [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) basis `B`.
 
 The metric tensor (see [`local_metric`](@ref)) is usually denoted by ``G = (g_{ij}) ∈ 𝔽^{d×d}``,
 where ``d`` is the dimension of the manifold.
@@ -462,6 +462,15 @@ function inner(
     return inner(M.manifold, p, X, Y)
 end
 
+"""
+    is_default_metric(M::AbstractManifold, G::AbstractMetric)
+
+returns whether an [`AbstractMetric`](@ref) is the default metric on the manifold `M` or not.
+This can be set by defining this function, or setting the [`IsDefaultMetric`](@trait) for an
+[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold).
+"""
+is_default_metric(M::AbstractManifold, G::AbstractMetric)
+
 @trait_function is_default_metric(M::AbstractDecoratorManifold, G::AbstractMetric)
 function is_default_metric(
     ::TraitList{IsDefaultMetric{G}},
@@ -499,7 +508,7 @@ end
     local_metric(M::AbstractManifold{𝔽}, p, B::AbstractBasis)
 
 Return the local matrix representation at the point `p` of the metric tensor ``g`` with
-respect to the [`AbstractBasis`](@ref) `B` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M`.
+respect to the [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) `B` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M`.
 Let ``d``denote the dimension of the manifold and $b_1,\ldots,b_d$ the basis vectors.
 Then the local matrix representation is a matrix ``G\in 𝔽^{n\times n}`` whose entries are
 given by ``g_{ij} = g_p(b_i,b_j), i,j\in\{1,…,d\}``.
@@ -554,7 +563,7 @@ end
 
 Copute the logarithmic map on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with the [`AbstractMetric`](@ref) `G`.
 
-If the metric was declared the default metric using [`is_default_metric`](@ref), this method
+If the metric was declared the default metric using the [`IsDefaultMetric`](@ref) trait or [`is_default_metric`](@ref), this method
 falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for the non-default
 [`AbstractMetric`](@ref) `G` metric within its [`MetricManifold`](@ref)`{M,G}`.
 """

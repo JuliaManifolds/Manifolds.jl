@@ -424,7 +424,7 @@ Let `basis` be and [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsB
 that takes an index and a vector as an argument.
 This function applies `f` to `i` and the `i`th basis vector sequentially for each `i` in
 `indices`.
-Using a [`CachedBasis`](@ref) may speed up the computation.
+Using a [`CachedBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.CachedBasis) may speed up the computation.
 
 **NOTE**: The i'th basis vector is overwritten in each iteration. If any information about
 the vector is to be stored, `f` must make a copy.

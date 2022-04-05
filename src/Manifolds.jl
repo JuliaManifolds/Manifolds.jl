@@ -729,7 +729,7 @@ export AbstractGroupAction,
     TranslationGroup,
     TranslationAction
 export AbstractInvarianceTrait
-export IsMetricManifold
+export IsMetricManifold, IsConnectionManifold
 export IsGroupManifold,
     HasLeftInvariantMetric, HasRightInvariantMetric, HasBiinvariantMetric
 export adjoint_action,

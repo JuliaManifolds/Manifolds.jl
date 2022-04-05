@@ -13,7 +13,7 @@ number system `𝔽` or in general, by defining for an operation `Op` the follow
     _compose!(::AbstractDecoratorManifold, x, p, q)
 
 Note that a manifold is connected with an operation by wrapping it with a decorator,
-[`AbstractDecoratorManifold`](@ref) using the [`IsGroupManifold`](@ref) to specify the operation.
+[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold) using the [`IsGroupManifold`](@ref) to specify the operation.
 For a concrete case the concrete wrapper [`GroupManifold`](@ref) can be used.
 """
 abstract type AbstractGroupOperation end
@@ -39,7 +39,7 @@ end
 """
     AbstractInvarianceTrait <: AbstractTrait
 
-A common supertype for anz [`AbstractTrait`](@ref) related to metric invariance
+A common supertype for anz [`AbstractTrait`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractTrait) related to metric invariance
 """
 abstract type AbstractInvarianceTrait <: AbstractTrait end
 
@@ -77,7 +77,7 @@ end
     is_group_manifold(G::GroupManifold)
     is_group_manifoldd(G::AbstractManifold, o::AbstractGroupOperation)
 
-returns whether an [`AbstractDecoratorManifold`](@ref) is a group manifold with
+returns whether an [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold) is a group manifold with
 [`AbstractGroupOperation`]('ref) `o`.
 For a [`GroupManifold`](@ref) `G` this checks whether the right operations is stored within `G`.
 """
@@ -139,7 +139,7 @@ with [`AbstractGroupOperation`](@ref) of type `O`.
 Similar to the philosophy that points are agnostic of their group at hand, the identity
 does not store the group `g` it belongs to. However it depends on the type of the [`AbstractGroupOperation`](@ref) used.
 
-See also [`identity_element`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@ref) or array representation.
+See also [`identity_element`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifoldPoint) or array representation.
 
 # Constructors
 

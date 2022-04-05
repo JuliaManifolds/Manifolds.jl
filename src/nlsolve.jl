@@ -8,7 +8,7 @@ not guaranteed to succeed and probably will not unless `q` is close to `p` and t
 guess `X0` is close.
 
 If the solver fails to converge, an [`OutOfInjectivityRadiusError`](@ref) is raised.
-See [`NLSolveInverseRetraction`](@ref) for configurable parameters.
+See [`NLSolveInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.NLSolveInverseRetraction) for configurable parameters.
 """
 inverse_retract(::AbstractManifold, p, q, ::NLSolveInverseRetraction; kwargs...)
 
