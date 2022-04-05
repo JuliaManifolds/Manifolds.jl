@@ -78,7 +78,7 @@ end
     is_group_manifoldd(G::AbstractManifold, o::AbstractGroupOperation)
 
 returns whether an [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold) is a group manifold with
-[`AbstractGroupOperation`]('ref) `o`.
+[`AbstractGroupOperation`](@ref) `o`.
 For a [`GroupManifold`](@ref) `G` this checks whether the right operations is stored within `G`.
 """
 is_group_manifold(::AbstractManifold, ::AbstractGroupOperation) = false

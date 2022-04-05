@@ -13,7 +13,6 @@ Manifolds.mul!_safe
 Manifolds.nzsign
 Manifolds.realify
 Manifolds.realify!
-Manifolds.size_to_tuple
 Manifolds.select_from_tuple
 Manifolds.unrealify!
 Manifolds.usinc

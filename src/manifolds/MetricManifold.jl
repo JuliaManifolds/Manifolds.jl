@@ -466,7 +466,7 @@ end
     is_default_metric(M::AbstractManifold, G::AbstractMetric)
 
 returns whether an [`AbstractMetric`](@ref) is the default metric on the manifold `M` or not.
-This can be set by defining this function, or setting the [`IsDefaultMetric`](@trait) for an
+This can be set by defining this function, or setting the [`IsDefaultMetric`](@ref) trait for an
 [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold).
 """
 is_default_metric(M::AbstractManifold, G::AbstractMetric)
