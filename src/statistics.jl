@@ -157,7 +157,7 @@ for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
     @eval @trait_function default_estimation_method(
         M::AbstractDecoratorManifold,
         f::typeof($mf),
-    )
+    ) (no_empty,)
     eval(
         quote
             function default_estimation_method(
@@ -226,11 +226,7 @@ function Statistics.cov(
     )
 end
 
-function default_estimation_method(
-    ::TraitList{EmptyTrait},
-    ::AbstractDecoratorManifold,
-    ::typeof(cov),
-)
+function default_estimation_method(::EmptyTrait, ::AbstractDecoratorManifold, ::typeof(cov))
     return GradientDescentEstimation()
 end
 default_estimation_method(::AbstractManifold, ::typeof(cov)) = GradientDescentEstimation()
@@ -322,11 +318,7 @@ function Statistics.mean(
     return mean!(M, y, x, w, method; kwargs...)
 end
 
-function default_estimation_method(
-    ::TraitList{EmptyTrait},
-    ::AbstractManifold,
-    ::typeof(mean),
-)
+function default_estimation_method(::EmptyTrait, ::AbstractManifold, ::typeof(mean))
     return GradientDescentEstimation()
 end;
 default_estimation_method(::AbstractManifold, ::typeof(mean)) = GradientDescentEstimation();
@@ -614,7 +606,7 @@ Compute the median using the specified `method`.
 Statistics.median(::AbstractManifold, ::Any...)
 
 function default_estimation_method(
-    ::TraitList{EmptyTrait},
+    ::EmptyTrait,
     ::AbstractDecoratorManifold,
     ::typeof(median),
 )
@@ -1006,7 +998,7 @@ function StatsBase.mean_and_var(
     return mean_and_var(M, x, w, method; corrected=corrected, kwargs...)
 end
 function default_estimation_method(
-    ::TraitList{EmptyTrait},
+    ::EmptyTrait,
     M::AbstractDecoratorManifold,
     ::typeof(mean_and_var),
 )
@@ -1157,7 +1149,7 @@ function StatsBase.mean_and_std(M::AbstractManifold, args...; kwargs...)
     return m, sqrt(v)
 end
 function default_estimation_method(
-    ::TraitList{EmptyTrait},
+    ::EmptyTrait,
     M::AbstractDecoratorManifold,
     ::typeof(mean_and_std),
 )
