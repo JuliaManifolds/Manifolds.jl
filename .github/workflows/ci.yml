@@ -7,11 +7,11 @@ on:
 
 jobs:
   test:
-    name: Julia ${{ matrix.julia-version }} - group ${{ matrix.group }} - ${{ matrix.os }}
+    name: Julia ${{ matrix.julia-version }} - ${{ matrix.group }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        julia-version: ["1.5", "1.6", "1.7"]
+        julia-version: ["1.6", "1.7"]
         os: [ubuntu-latest, macOS-latest]
         group:
           - 'test_manifolds'

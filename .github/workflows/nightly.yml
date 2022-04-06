@@ -4,12 +4,15 @@ on:
 
 jobs:
   test:
-    name: Julia nightly - ${{ matrix.os }}
+    name: Julia nightly - ${{ matrix.group }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
+        group:
+          - 'test_manifolds'
+          - 'test_lie_groups'
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
@@ -20,3 +23,4 @@ jobs:
       - uses: julia-actions/julia-runtest@latest
         env:
           PYTHON: ""
+          MANIFOLDS_TEST_GROUP: ${{ matrix.group }}
