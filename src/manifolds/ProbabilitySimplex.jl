@@ -127,8 +127,6 @@ end
 
 get_embedding(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
 
-default_metric_dispatch(::ProbabilitySimplex, ::FisherRaoMetric) = Val(true)
-
 @doc raw"""
     distance(M,p,q)
 

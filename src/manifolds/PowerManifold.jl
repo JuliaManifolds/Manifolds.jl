@@ -76,8 +76,6 @@ for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
     end
 end
 
-default_metric_dispatch(::AbstractPowerManifold, ::PowerMetric) = Val(true)
-
 """
     change_representer(M::AbstractPowerManifold, ::AbstractMetric, p, X)
 

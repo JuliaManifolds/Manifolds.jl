@@ -26,8 +26,6 @@ function change_metric!(::Hyperbolic, ::Any, ::EuclideanMetric, ::Any, ::Any)
 end
 
 function check_point(M::Hyperbolic, p; kwargs...)
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, p), -1.0; kwargs...)
         return DomainError(
             minkowski_metric(p, p),
@@ -38,15 +36,6 @@ function check_point(M::Hyperbolic, p; kwargs...)
 end
 
 function check_vector(M::Hyperbolic, p, X; kwargs...)
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, X), 0.0; kwargs...)
         return DomainError(
             abs(minkowski_metric(p, X)),

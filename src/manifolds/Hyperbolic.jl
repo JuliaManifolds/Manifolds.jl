@@ -188,8 +188,6 @@ end
 
 get_embedding(::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
 
-default_metric_dispatch(::Hyperbolic, ::MinkowskiMetric) = Val(true)
-
 @doc raw"""
     exp(M::Hyperbolic, p, X)
 

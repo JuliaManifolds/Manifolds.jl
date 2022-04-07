@@ -18,8 +18,6 @@ include("../utils.jl")
     @test_throws DomainError is_vector(M, p, zeros(4), true)
     @test_throws DomainError is_vector(M, p, Y .+ 1, true)
 
-    @test Manifolds.default_metric_dispatch(M, Manifolds.FisherRaoMetric()) === Val{true}()
-
     @test injectivity_radius(M, p) == injectivity_radius(M, p, ExponentialRetraction())
     @test injectivity_radius(M, p, SoftmaxRetraction()) == injectivity_radius(M, p)
     @test injectivity_radius(M, ExponentialRetraction()) == 0

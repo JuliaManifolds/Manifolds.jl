@@ -65,22 +65,10 @@ passes the [`check_point`](@ref) test for the base manifold `M.manifold`.
 """
 check_point(::GraphManifold, ::Any...)
 function check_point(M::VertexGraphManifold, p; kwargs...)
-    if size(p) != (nv(M.graph),)
-        return DomainError(
-            length(p),
-            "The number of points in `x` ($(length(p))) does not match the number of nodes in the graph ($(nv(M.graph))).",
-        )
-    end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), nv(M.graph))
     return check_point(PM, p; kwargs...)
 end
 function check_point(M::EdgeGraphManifold, p; kwargs...)
-    if size(p) != (ne(M.graph),)
-        return DomainError(
-            length(p),
-            "The number of points in `x` ($(size(p))) does not match the number of edges in the graph ($(ne(M.graph))).",
-        )
-    end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), ne(M.graph))
     return check_point(PM, p; kwargs...)
 end
@@ -97,22 +85,10 @@ together with its corresponding entry of `p` passes the
 """
 check_vector(::GraphManifold, ::Any...)
 function check_vector(M::VertexGraphManifold, p, X; kwargs...)
-    if size(X) != (nv(M.graph),)
-        return DomainError(
-            length(X),
-            "The number of points in `v` ($(size(X)) does not match the number of nodes in the graph ($(nv(M.graph))).",
-        )
-    end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), nv(M.graph))
     return check_vector(PM, p, X; kwargs...)
 end
 function check_vector(M::EdgeGraphManifold, p, X; kwargs...)
-    if size(X) != (ne(M.graph),)
-        return DomainError(
-            length(X),
-            "The number of elements in `v` ($(size(X)) does not match the number of edges in the graph ($(ne(M.graph))).",
-        )
-    end
     PM = PowerManifold(M.manifold, NestedPowerRepresentation(), ne(M.graph))
     return check_vector(PM, p, X; kwargs...)
 end

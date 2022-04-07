@@ -1,8 +1,3 @@
-default_metric_dispatch(::Stiefel, ::EuclideanMetric) = Val(true)
-
-function decorator_transparent_dispatch(::typeof(distance), ::Stiefel, args...)
-    return Val(:intransparent)
-end
 
 @doc raw"""
     exp(M::Stiefel, p, X)

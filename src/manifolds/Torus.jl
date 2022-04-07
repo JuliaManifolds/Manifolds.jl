@@ -22,12 +22,6 @@ its entries is a valid point on the [`Circle`](@ref) and the length of `x` is `n
 """
 check_point(::Torus, ::Any)
 function check_point(M::Torus{N}, p; kwargs...) where {N}
-    if length(p) != N
-        return DomainError(
-            length(p),
-            "The number of elements in `p` ($(length(p))) does not match the dimension of the torus ($(N)).",
-        )
-    end
     return check_point(PowerManifold(M.manifold, N), p; kwargs...)
 end
 @doc raw"""
@@ -38,12 +32,6 @@ This means, that `p` is valid, that `X` is of correct dimension and elementwise
 a tangent vector to the elements of `p` on the [`Circle`](@ref).
 """
 function check_vector(M::Torus{N}, p, X; kwargs...) where {N}
-    if length(X) != N
-        return DomainError(
-            length(X),
-            "The number of elements in `X` ($(length(X))) does not match the dimension of the torus ($(N)).",
-        )
-    end
     return check_vector(PowerManifold(M.manifold, N), p, X; kwargs...)
 end
 

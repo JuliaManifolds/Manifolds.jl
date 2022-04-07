@@ -1,5 +1,4 @@
 using StaticArrays: identity_perm
-using Manifolds: decorator_transparent_dispatch
 using Base: decode_overlong
 
 include("../utils.jl")

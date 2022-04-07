@@ -1,8 +1,6 @@
 include("../utils.jl")
 include("group_utils.jl")
 
-using Manifolds: invariant_metric_dispatch, default_metric_dispatch
-
 @testset "Circle group" begin
     G = CircleGroup()
     @test repr(G) == "CircleGroup()"

@@ -68,8 +68,6 @@ Check whether `p` is representing a point on the [`Grassmann`](@ref) `M`, i.e. i
 a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `𝔽`.
 """
 function check_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    cks = check_size(M, p)
-    cks === nothing || return cks
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
@@ -94,8 +92,6 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian
 and $0_k$ the $k × k$ zero matrix.
 """
 function check_vector(M::Grassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
-    cks = check_size(M, p, X)
-    cks === nothing || return cks
     if !isapprox(p' * X, -conj(X' * p); kwargs...)
         return DomainError(
             norm(p' * X + conj(X' * p)),

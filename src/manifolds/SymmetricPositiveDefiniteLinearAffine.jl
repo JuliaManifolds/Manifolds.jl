@@ -53,8 +53,6 @@ function change_metric!(::SymmetricPositiveDefinite, Y, ::EuclideanMetric, p, X)
     return Y
 end
 
-default_metric_dispatch(::SymmetricPositiveDefinite, ::LinearAffineMetric) = Val(true)
-
 @doc raw"""
     distance(M::SymmetricPositiveDefinite, p, q)
     distance(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, q)

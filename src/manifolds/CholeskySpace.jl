@@ -54,12 +54,6 @@ and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_vector(M::CholeskySpace, p, X; kwargs...)
-    if size(X) != representation_size(M)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $(M) since its size does not match $(representation_size(M)).",
-        )
-    end
     if !isapprox(norm(strictlyUpperTriangular(X)), 0.0; kwargs...)
         return DomainError(
             norm(UpperTriangular(X) - Diagonal(X)),

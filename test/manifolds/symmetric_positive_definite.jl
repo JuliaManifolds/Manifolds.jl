@@ -1,7 +1,5 @@
 include("../utils.jl")
 
-using Manifolds: default_metric_dispatch
-
 @testset "Symmetric Positive Definite Matrices" begin
     M1 = SymmetricPositiveDefinite(3)
     @test repr(M1) == "SymmetricPositiveDefinite(3)"

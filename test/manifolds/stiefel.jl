@@ -1,7 +1,5 @@
 include("../utils.jl")
 
-using Manifolds: default_metric_dispatch
-
 @testset "Stiefel" begin
     @testset "Real" begin
         M = Stiefel(3, 2)

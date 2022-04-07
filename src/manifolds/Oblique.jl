@@ -36,12 +36,6 @@ of `m` unit columns from $\mathbb R^{n}$, i.e. each column is a point from
 """
 check_point(::Oblique, ::Any)
 function check_point(M::Oblique{n,m}, p; kwargs...) where {n,m}
-    if size(p) != (n, m)
-        return DomainError(
-            length(p),
-            "The matrix in `p` ($(size(p))) does not match the dimension of $(M).",
-        )
-    end
     return check_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
 @doc raw"""
@@ -52,12 +46,6 @@ This means, that `p` is valid, that `X` is of correct dimension and columnswise
 a tangent vector to the columns of `p` on the [`Sphere`](@ref).
 """
 function check_vector(M::Oblique{n,m}, p, X; kwargs...) where {n,m}
-    if size(X) != (n, m)
-        return DomainError(
-            length(X),
-            "The matrix `X` ($(size(X))) does not match the required dimension ($(representation_size(M))) for $(M).",
-        )
-    end
     return check_vector(PowerManifold(M.manifold, m), p, X; kwargs...)
 end
 

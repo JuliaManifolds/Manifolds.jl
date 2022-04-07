@@ -210,15 +210,6 @@ function check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
 end
 function check_point(M::FixedRankMatrices{m,n,k}, p::SVDMPoint; kwargs...) where {m,n,k}
     s = "The point $(p) does not lie on $(M), "
-    if (size(p.U) != (m, k)) || (length(p.S) != k) || (size(p.Vt) != (k, n))
-        return DomainError(
-            [size(p.U)..., length(p.S), size(p.Vt)...],
-            string(
-                s,
-                "since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(p.U,1))x$(size(p.Vt,2)) rank $(size(p.S)).",
-            ),
-        )
-    end
     if !isapprox(p.U' * p.U, one(zeros(k, k)); kwargs...)
         return DomainError(
             norm(p.U' * p.U - one(zeros(k, k))),

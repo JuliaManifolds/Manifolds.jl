@@ -78,12 +78,6 @@ function check_point(M::Euclidean{N,𝔽}, p) where {N,𝔽}
             "The matrix $(p) is neither a real- nor complex-valued matrix, so it does not lie on $(M).",
         )
     end
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The matrix $(p) does not lie on $(M), since its dimensions ($(size(p))) are wrong (expected: $(representation_size(M))).",
-        )
-    end
     return nothing
 end
 
@@ -98,12 +92,6 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
         return DomainError(
             eltype(X),
             "The matrix $(X) is neither a real- nor complex-valued matrix, so it can not be a tangent vector to $(p) on $(M).",
-        )
-    end
-    if size(X) != representation_size(M)
-        return DomainError(
-            size(X),
-            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since its dimensions $(size(X)) are wrong  (expected: $(representation_size(M))).",
         )
     end
     return nothing
@@ -351,8 +339,6 @@ function inverse_local_metric(
 ) where {𝔽}
     return local_metric(M, p, B)
 end
-
-default_metric_dispatch(::Euclidean, ::EuclideanMetric) = Val(true)
 
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},

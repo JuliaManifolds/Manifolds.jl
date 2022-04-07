@@ -95,11 +95,6 @@ Q_{2n} =
 The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 function check_point(M::SymplecticStiefel{n,k}, p; kwargs...) where {n,k}
-    abstract_embedding_type = supertype(typeof(M))
-
-    mpv = invoke(check_point, Tuple{abstract_embedding_type,typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
-
     # Perform check that the matrix lives on the real symplectic manifold:
     expected_zero = norm(inv(M, p) * p - I)
     if !isapprox(expected_zero, 0; kwargs...)
@@ -139,20 +134,7 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 check_vector(::SymplecticStiefel, ::Any...)
 
 function check_vector(M::SymplecticStiefel{n,k,field}, p, X; kwargs...) where {n,k,field}
-    abstract_embedding_type = supertype(typeof(M))
-
-    mpv = invoke(
-        check_vector,
-        Tuple{abstract_embedding_type,typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-
     # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
-
     H = inv(M, p) * X  # ∈ ℝ^{2k × 2k}, should be Hamiltonian.
     H_star = inv(Symplectic(2k, field), H)
     hamiltonian_identity_norm = norm(H + H_star)

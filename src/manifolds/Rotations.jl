@@ -71,12 +71,6 @@ valid rotation.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(M::Rotations{N}, p; kwargs...) where {N}
-    if size(p) != (N, N)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $M, since its size is not $((N, N)).",
-        )
-    end
     if !isapprox(det(p), 1; kwargs...)
         return DomainError(det(p), "The determinant of $p has to be +1 but it is $(det(p))")
     end

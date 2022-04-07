@@ -69,12 +69,6 @@ Check whether the matrix is a valid point on the [`EssentialManifold`](@ref) `M`
 i.e. a 2-element array containing SO(3) matrices.
 """
 function check_point(M::EssentialManifold, p; kwargs...)
-    if length(p) != 2
-        return DomainError(
-            length(p),
-            "The point $(p) does not lie on $M, since it does not contain exactly two elements.",
-        )
-    end
     return check_point(
         PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
         p;
@@ -89,12 +83,6 @@ Check whether `X` is a tangent vector to manifold point `p` on the [`EssentialMa
 i.e. `X` has to be a 2-element array of `3`-by-`3` skew-symmetric matrices.
 """
 function check_vector(M::EssentialManifold, p, X; kwargs...)
-    if length(X) != 2
-        return DomainError(
-            length(X),
-            "$(X) is not a tangent vector to the manifold $M, since it does not contain exactly two elements.",
-        )
-    end
     return check_vector(
         PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
         p,

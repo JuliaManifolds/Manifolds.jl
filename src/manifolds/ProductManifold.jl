@@ -740,8 +740,6 @@ function _inverse_retract!(M::ProductManifold, X, p, q, method::InverseProductRe
     return X
 end
 
-default_metric_dispatch(::ProductManifold, ::ProductMetric) = Val(true)
-
 function Base.isapprox(M::ProductManifold, p, q; kwargs...)
     return all(
         t -> isapprox(t...; kwargs...),

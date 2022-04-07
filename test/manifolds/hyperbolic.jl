@@ -18,12 +18,10 @@ include("../utils.jl")
         @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
         @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], true)
         @test !is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
         @test_throws DomainError is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], true)
         @test is_default_metric(M, MinkowskiMetric())
-        @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
 
         for (P, T) in zip(
