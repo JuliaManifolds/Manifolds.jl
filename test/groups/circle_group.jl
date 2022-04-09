@@ -11,7 +11,7 @@ include("group_utils.jl")
     @test has_invariant_metric(G, RightAction())
     @test has_biinvariant_metric(G)
     @test is_default_metric(MetricManifold(G, EuclideanMetric()))
-
+    @test is_group_manifold(G)
     @testset "identity overloads" begin
         ig = Identity(G)
         @test inv(G, ig) === ig
@@ -22,6 +22,10 @@ include("group_utils.jl")
         @test identity_element(G) === 1.0
         @test identity_element(G, 1.0f0) === 1.0f0
         @test identity_element(G, [1.0f0]) == [1.0f0]
+        @test !is_point(G, Identity(AdditionOperation()))
+        ef = Identity(AdditionOperation())
+        @test_throws DomainError is_point(G, ef, true)
+        @test_throws DomainError is_vector(G, ef, X, true; check_base_point=true)
     end
 
     @testset "scalar points" begin

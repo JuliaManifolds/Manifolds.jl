@@ -9,9 +9,13 @@ using Manifolds: TFVector, CoTFVector
         @test representation_size(M) == ()
         @test manifold_dimension(M) == 1
         @test !is_point(M, 9.0)
+        @test !is_point(M, zeros(3, 3))
         @test_throws DomainError is_point(M, 9.0, true)
+        @test_throws DomainError is_point(M, zeros(3, 3), true)
         @test !is_vector(M, 9.0, 0.0)
+        @test !is_vector(M, zeros(3, 3), zeros(3, 3))
         @test_throws DomainError is_vector(M, 9.0, 0.0, true)
+        @test_throws DomainError is_vector(M, zeros(3, 3), zeros(3, 3), true)
         @test is_vector(M, 0.0, 0.0)
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(

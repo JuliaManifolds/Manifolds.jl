@@ -1,6 +1,4 @@
 
-@inline _extract_val(::Val{T}) where {T} = T
-
 @doc raw"""
     usinc(θ::Real)
 
