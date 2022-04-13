@@ -16,6 +16,7 @@ using Manifolds: TFVector, CoTFVector
         @test !is_vector(M, zeros(3, 3), zeros(3, 3))
         @test_throws DomainError is_vector(M, 9.0, 0.0, true)
         @test_throws DomainError is_vector(M, zeros(3, 3), zeros(3, 3), true)
+        @test_throws DomainError is_vector(M, 0.0, zeros(3, 3), true)
         @test is_vector(M, 0.0, 0.0)
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(
@@ -150,6 +151,25 @@ using Manifolds: TFVector, CoTFVector
                 test_rand_tvector=true,
             )
         end
+    end
+    @testset "Mutating Rand for real Circle" begin
+        p = [NaN]
+        X = [NaN]
+        rand!(M, p)
+        @test is_point(M, p)
+        rand!(M, X; vector_at=p)
+        @test is_vector(M, p, X)
+
+        rng = MersenneTwister()
+        rand!(rng, M, p)
+        @test is_point(M, p)
+        rand!(rng, M, X; vector_at=p)
+        @test is_vector(M, p, X)
+    end
+    @testset "Test sym_rem" begin
+        p = 4.0 # not a point
+        p = sym_rem(p) # modulo to a point
+        @test is_point(M, p)
     end
     Mc = Circle(ℂ)
     @testset "Complex Circle Basics" begin
