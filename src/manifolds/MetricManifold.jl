@@ -253,7 +253,7 @@ function det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
 end
 @trait_function det_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
-function exp(::TraitList{IsMetricManifold}, M::MetricManifold, p, X)
+function exp(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, p, X)
     return retract(
         M,
         p,
@@ -261,7 +261,7 @@ function exp(::TraitList{IsMetricManifold}, M::MetricManifold, p, X)
         ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
     )
 end
-function exp!(::TraitList{IsMetricManifold}, M::MetricManifold, q, p, X)
+function exp!(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(
         M,
         q,
@@ -269,23 +269,6 @@ function exp!(::TraitList{IsMetricManifold}, M::MetricManifold, q, p, X)
         X,
         ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
     )
-end
-function exp(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return exp(M.manifold, p, X)
-end
-function exp!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    q,
-    p,
-    X,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return exp!(M.manifold, q, p, X)
 end
 
 """
@@ -437,6 +420,24 @@ function _convert_with_default(
     return error(
         "Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.",
     )
+end
+
+function exp(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return exp(M.manifold, p, X)
+end
+function exp!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    q,
+    p,
+    X,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return exp!(M.manifold, q, p, X)
 end
 
 injectivity_radius(M::MetricManifold) = injectivity_radius(M.manifold)
