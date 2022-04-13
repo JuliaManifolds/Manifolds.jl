@@ -30,7 +30,6 @@ struct IsMetricManifold <: AbstractTrait end
 Specify that a certain [`AbstractMetric`](@ref) is the default metric for a manifold.
 This way the corresponding [`MetricManifold`](@ref) falls back to the default methods
 of the manifold it decorates.
-
 """
 struct IsDefaultMetric{G<:AbstractMetric} <: AbstractTrait
     metric::G
@@ -239,6 +238,8 @@ Return the [`LeviCivitaConnection`](@ref) for a metric manifold.
 """
 connection(::MetricManifold) = LeviCivitaConnection()
 
+default_retraction_method(M::MetricManifold) = default_retraction_method(M.manifold)
+
 @doc raw"""
     det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
 
@@ -251,6 +252,24 @@ function det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
     return det(local_metric(M, p, B))
 end
 @trait_function det_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
+
+function exp(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, p, X)
+    return retract(
+        M,
+        p,
+        X,
+        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
+    )
+end
+function exp!(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, q, p, X)
+    return retract!(
+        M,
+        q,
+        p,
+        X,
+        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
+    )
+end
 
 """
     einstein_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_badefault_differential_backendckend())

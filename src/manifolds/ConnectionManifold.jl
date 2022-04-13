@@ -13,15 +13,23 @@ The [Levi-Civita connection](https://en.wikipedia.org/wiki/Levi-Civita_connectio
 struct LeviCivitaConnection <: AbstractAffineConnection end
 
 """
+    IsConnectionManifold <: AbstractTrait
 
+Specify that a certain decorated Manifold is a connection manifold in the sence that it provides
+explicit connection properties, extending/changing the default connection properties of a manifold.
 """
 struct IsConnectionManifold <: AbstractTrait end
 
 """
+    IsDefaultConnection{G<:AbstractAffineConnection}
 
+Specify that a certain [`AbstractAffineConnection`](@ref) is the default connection for a manifold.
+This way the corresponding [`ConnectionManifold`](@ref) falls back to the default methods
+of the manifold it decorates.
 """
-struct IsDefaultConnection <: AbstractTrait end
-
+struct IsDefaultConnection{C<:AbstractAffineConnection} <: AbstractTrait
+    connection::C
+end
 parent_trait(::IsDefaultConnection) = IsConnectionManifold()
 
 """
@@ -37,6 +45,16 @@ struct ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnec
        AbstractDecoratorManifold{𝔽}
     manifold::M
     connection::C
+end
+
+function active_traits(f, M::ConnectionManifold, args...)
+    return merge_traits(
+        is_default_connection(M.manifold, M.connection) ?
+        IsDefaultConnection(M.connection) : EmptyTrait(),
+        IsConnectionManifold(),
+        active_traits(f, M.manifold, args...),
+        IsExplicitDecorator(),
+    )
 end
 
 @doc raw"""
@@ -175,8 +193,12 @@ Return the connection associated with [`ConnectionManifold`](@ref) `M`.
 """
 connection(M::ConnectionManifold) = M.connection
 
+decorated_manifold(M::ConnectionManifold) = M.manifold
+
+default_retraction_method(M::ConnectionManifold) = default_retraction_method(M.manifold)
+
 @doc raw"""
-    exp(M::AbstractDecoratorManifold, p, X)
+    exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
 
 Compute the exponential map on a manifold that [`IsConnectionManifold`](@ref) `M` equipped with
 corresponding affine connection.
@@ -189,7 +211,7 @@ Currently, the numerical integration is only accurate when using a single
 coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
-function exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q, p, X)
+function exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
     return retract(
         M,
         p,
@@ -224,6 +246,30 @@ end
     B::AbstractBasis;
     kwargs...,
 )
+
+"""
+    is_default_connection(M::AbstractManifold, G::AbstractAffineConnection)
+
+returns whether an [`AbstractAffineConnection`](@ref) is the default metric on the manifold `M` or not.
+This can be set by defining this function, or setting the [`IsDefaultConnection`](@ref) trait for an
+[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold).
+"""
+is_default_connection(M::AbstractManifold, G::AbstractAffineConnection)
+@trait_function is_default_connection(
+    M::AbstractDecoratorManifold,
+    G::AbstractAffineConnection,
+)
+function is_default_connection(
+    ::TraitList{IsDefaultConnection{C}},
+    ::AbstractDecoratorManifold,
+    ::C,
+) where {C<:AbstractAffineConnection}
+    return true
+end
+function is_default_connection(M::ConnectionManifold)
+    return is_default_connection(M.manifold, M.connection)
+end
+is_default_connection(::AbstractManifold, ::AbstractAffineConnection) = false
 
 function retract_exp_ode!(
     M::AbstractManifold,
@@ -322,10 +368,12 @@ in an embedded space.
     ```
 """
 function solve_exp_ode(M, p, X; kwargs...)
-    return error(
-        """
-        solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)).
-        For a suitable default, enter `using OrdinaryDiffEq`.
-        """,
+    throw(
+        ErrorException(
+            """
+            solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)).
+            For a suitable default, enter `using OrdinaryDiffEq`.
+            """,
+        ),
     )
 end

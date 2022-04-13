@@ -2,8 +2,8 @@ using FiniteDifferences, ForwardDiff
 using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
 using ManifoldsBase: TraitList
+import ManifoldsBase: default_retraction_method
 import Manifolds: mean!, median!, InducedBasis, induced_basis, get_chart_index, connection
-
 include("utils.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
@@ -220,10 +220,17 @@ end
         E = TestEuclidean{3}()
         g = TestEuclideanMetric()
         M = MetricManifold(E, g)
-
+        default_retraction_method(::TestEuclidean) = TestRetraction()
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
-        @test_throws MethodError exp(M, p, X)
+        q = similar(X)
+        @test_throws ErrorException exp(M, p, X)
+        @test_throws ErrorException exp!(M, q, p, X)
+
+        N = ConnectionManifold(E, LeviCivitaConnection())
+        @test_throws ErrorException exp(N, p, X)
+        @test_throws ErrorException exp!(N, q, p, X)
+
         using OrdinaryDiffEq
         exp(M, p, X)
     end
