@@ -47,13 +47,21 @@ struct ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnec
     connection::C
 end
 
+function Base.filter(f, t::TraitList)
+    if f(t.head)
+        return merge_traits(t.head, filter(f, t.tail))
+    else
+        return filter(f, t.tail)
+    end
+end
+Base.filter(f, t::EmptyTrait) = t
+
 function active_traits(f, M::ConnectionManifold, args...)
     return merge_traits(
         is_default_connection(M.manifold, M.connection) ?
         IsDefaultConnection(M.connection) : EmptyTrait(),
         IsConnectionManifold(),
-        active_traits(f, M.manifold, args...),
-        IsExplicitDecorator(),
+        filter(x -> x isa IsGroupManifold, active_traits(f, M.manifold, args...)),
     )
 end
 
@@ -211,14 +219,7 @@ Currently, the numerical integration is only accurate when using a single
 coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
-function exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
-    return retract(
-        M,
-        p,
-        X,
-        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
-    )
-end
+exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
 
 function exp!(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(

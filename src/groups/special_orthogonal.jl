@@ -28,19 +28,25 @@ end
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
 
 function allocate_result(
-    ::GT,
+    ::SpecialOrthogonal,
     ::typeof(exp),
-    ::Identity,
+    ::Identity{MultiplicationOperation},
     X,
-) where {n,GT<:SpecialOrthogonal{n}}
+)
     return allocate(X)
 end
 function allocate_result(
-    ::GT,
+    ::SpecialOrthogonal,
     ::typeof(log),
-    ::Identity,
+    ::Identity{MultiplicationOperation},
     q,
-) where {n,GT<:SpecialOrthogonal{n}}
+)
+    return allocate(q)
+end
+function allocate_result(::Rotations, ::typeof(exp), ::Identity{MultiplicationOperation}, X)
+    return allocate(X)
+end
+function allocate_result(::Rotations, ::typeof(log), ::Identity{MultiplicationOperation}, q)
     return allocate(q)
 end
 

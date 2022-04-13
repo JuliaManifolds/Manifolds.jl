@@ -44,6 +44,6 @@ end
 function has_type_in_signature(sig, T::Type)
     return any(map(Base.unwrap_unionall(sig.sig).parameters) do x
         xw = Base.rewrap_unionall(x, sig.sig)
-        return xw <: T
+        return (xw isa Type ? xw : xw.T) <: T
     end)
 end

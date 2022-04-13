@@ -253,14 +253,6 @@ function det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
 end
 @trait_function det_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
-function exp(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, p, X)
-    return retract(
-        M,
-        p,
-        X,
-        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
-    )
-end
 function exp!(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(
         M,
@@ -769,7 +761,7 @@ function vector_transport_along(
     M::MetricManifold{𝔽,TM,G},
     p,
     X,
-    c,
+    c::AbstractVector,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_along(M.manifold, p, X, c, m)
@@ -780,7 +772,7 @@ function vector_transport_along!(
     Y,
     p,
     X,
-    c,
+    c::AbstractVector,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_to!(M.manifold, Y, p, X, c, m)

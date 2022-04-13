@@ -111,7 +111,9 @@ Transport tangent vector `X` at point `p` on the group manifold `M` with the
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
-parallel_transport_to(M::CartanSchoutenMinusGroup, p, X, q)
+function parallel_transport_to(M::CartanSchoutenMinusGroup, p, X, q)
+    return inverse_translate_diff(M.manifold, q, p, X, LeftAction())
+end
 
 function parallel_transport_to!(M::CartanSchoutenMinusGroup, Y, p, X, q)
     return inverse_translate_diff!(M.manifold, Y, q, p, X, LeftAction())
@@ -147,7 +149,11 @@ Transport tangent vector `X` at identity on the group manifold with the
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
     > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
-parallel_transport_direction(M::CartanSchoutenZeroGroup, Y, ::Identity, X, d)
+function parallel_transport_direction(M::CartanSchoutenZeroGroup, p::Identity, X, d)
+    dexp_half = exp_lie(M.manifold, d / 2)
+    Y = translate_diff(M.manifold, dexp_half, p, X, RightAction())
+    return translate_diff(M.manifold, dexp_half, p, Y, LeftAction())
+end
 
 function parallel_transport_direction!(M::CartanSchoutenZeroGroup, Y, p::Identity, X, d)
     dexp_half = exp_lie(M.manifold, d / 2)
@@ -156,12 +162,15 @@ function parallel_transport_direction!(M::CartanSchoutenZeroGroup, Y, p::Identit
 end
 
 """
-    parallel_transport_to(M::CartanSchoutenZeroGroup, ::Identity, X, q, m)
+    parallel_transport_to(M::CartanSchoutenZeroGroup, p::Identity, X, q)
 
 Transport vector `X` at identity of group `M` equipped with the [`CartanSchoutenZero`](@ref)
 connection to point `q` using parallel transport.
 """
-parallel_transport_to(::CartanSchoutenZeroGroup, ::Identity, X, q)
+function parallel_transport_to(M::CartanSchoutenZeroGroup, p::Identity, X, q)
+    d = log_lie(M.manifold, q)
+    return parallel_transport_direction(M, p, X, d)
+end
 
 function parallel_transport_to!(M::CartanSchoutenZeroGroup, Y, p::Identity, X, q)
     d = log_lie(M.manifold, q)

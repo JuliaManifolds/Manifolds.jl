@@ -1,5 +1,5 @@
 @testset "Ambiguities" begin
-    if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.7.0"
+    if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.8.0"
         mbs = Test.detect_ambiguities(ManifoldsBase)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
