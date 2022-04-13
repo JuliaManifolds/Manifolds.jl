@@ -390,13 +390,6 @@ function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t
     return t_min, f_min
 end
 
-# overwrite power default.
-_inverse_retract(M::EssentialManifold, p, q, ::LogarithmicInverseRetraction) = log(M, p, q)
-function _inverse_retract!(M::EssentialManifold, Y, p, q, ::LogarithmicInverseRetraction)
-    log!(M, Y, p, q)
-    return Y
-end
-
 @doc raw"""
     manifold_dimension(M::EssentialManifold{is_signed, ℝ})
 
@@ -472,21 +465,6 @@ function parallel_transport_to!(::EssentialManifold, Y, p, X, q)
     pq = [qe' * pe for (pe, qe) in zip(p, q)]
     # left translation
     copyto!(Y, [pqe * Xe * pqe' for (pqe, Xe) in zip(pq, X)])
-    return Y
-end
-# overwrite power passdown - should be split into layer 1 and 2 is ambiguities appear.
-function vector_transport_to(M::EssentialManifold, p, X, q, ::ParallelTransport)
-    return parallel_transport_to(M, p, X, q)
-end
-function vector_transport_to!(M::EssentialManifold, Y, p, X, q, ::ParallelTransport)
-    parallel_transport_to!(M, Y, p, X, q)
-    return Y
-end
-function vector_transport_direction(M::EssentialManifold, p, X, q, ::ParallelTransport)
-    return parallel_transport_direction(M, p, X, q)
-end
-function vector_transport_direction!(M::EssentialManifold, Y, p, X, q, ::ParallelTransport)
-    parallel_transport_direction!(M, Y, p, X, q)
     return Y
 end
 
