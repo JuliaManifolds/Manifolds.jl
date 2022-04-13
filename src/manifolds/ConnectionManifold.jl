@@ -198,7 +198,7 @@ decorated_manifold(M::ConnectionManifold) = M.manifold
 default_retraction_method(M::ConnectionManifold) = default_retraction_method(M.manifold)
 
 @doc raw"""
-    exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
+    exp(::TraitList{IsConnectionManifold}, M::ConnectionManifold, p, X)
 
 Compute the exponential map on a manifold that [`IsConnectionManifold`](@ref) `M` equipped with
 corresponding affine connection.
@@ -211,7 +211,7 @@ Currently, the numerical integration is only accurate when using a single
 coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
-function exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
+function exp(::TraitList{IsConnectionManifold}, M::ConnectionManifold, p, X)
     return retract(
         M,
         p,
@@ -220,7 +220,7 @@ function exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p,
     )
 end
 
-function exp!(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q, p, X)
+function exp!(::TraitList{IsConnectionManifold}, M::ConnectionManifold, q, p, X)
     return retract!(
         M,
         q,
