@@ -15,13 +15,13 @@ include("group_utils.jl")
     @testset "identity overloads" begin
         ig = Identity(G)
         @test inv(G, ig) === ig
-        q = [1.0 * im]
-        X = [Complex(0.5)]
+        q = fill(1.0 * im)
+        X = fill(Complex(0.5))
         @test translate_diff(G, ig, q, X) === X
 
         @test identity_element(G) === 1.0
         @test identity_element(G, 1.0f0) === 1.0f0
-        @test identity_element(G, [1.0f0]) == [1.0f0]
+        @test identity_element(G, fill(1.0f0)) == fill(1.0f0)
         @test !is_point(G, Identity(AdditionOperation()))
         ef = Identity(AdditionOperation())
         @test_throws DomainError is_point(G, ef, true)
@@ -46,11 +46,11 @@ include("group_utils.jl")
         )
     end
 
-    @testset "vector points" begin
-        pts = [[1.0 + 0.0im], [0.0 + 1.0im], [(1.0 + 1.0im) / √2]]
-        Xpts = [[0.0 + 0.5im], [0.0 - 1.5im]]
-        @test compose(G, pts[2], pts[1]) ≈ pts[2] .* pts[1]
-        @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ pts[2] .* Xpts[1]
+    @testset "array points" begin
+        pts = [fill(1.0 + 0.0im), fill(0.0 + 1.0im), fill((1.0 + 1.0im) / √2)]
+        Xpts = [fill(0.0 + 0.5im), fill(0.0 - 1.5im)]
+        @test compose(G, pts[2], pts[1]) ≈ fill(pts[2] .* pts[1])
+        @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ fill(pts[2] .* Xpts[1])
         test_group(
             G,
             pts,
@@ -97,13 +97,13 @@ end
     @testset "identity overloads" begin
         ig = Identity(G)
         @test inv(G, ig) === ig
-        q = [0.0]
-        X = [0.5]
+        q = fill(0.0)
+        X = fill(0.5)
         @test translate_diff(G, ig, q, X) === X
 
         @test identity_element(G) === 0.0
         @test identity_element(G, 1.0f0) === 0.0f0
-        @test identity_element(G, [0.0f0]) == [0.0f0]
+        @test identity_element(G, fill(0.0f0)) == fill(0.0f0)
     end
 
     @testset "points" begin
@@ -124,10 +124,10 @@ end
         )
     end
 
-    @testset "vector points" begin
-        pts = [[1.0], [0.5], [-3.0]]
-        Xpts = [[-2.0], [0.5], [2.0]]
-        @test compose(G, pts[2], pts[1]) ≈ pts[2] .+ pts[1]
+    @testset "array points" begin
+        pts = [fill(1.0), fill(0.5), fill(-3.0)]
+        Xpts = [fill(-2.0), fill(0.5), fill(2.0)]
+        @test compose(G, pts[2], pts[1]) ≈ fill(pts[2] .+ pts[1])
         @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ Xpts[1]
         test_group(
             G,

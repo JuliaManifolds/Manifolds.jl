@@ -27,18 +27,18 @@ adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)
 function compose(
     ::MultiplicationGroupTrait,
     G::CircleGroup,
-    p::AbstractVector,
-    q::AbstractVector,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
 )
-    return map(compose, repeated(G), p, q)
+    return map((pp, qq) -> compose(G, pp, qq), p, q)
 end
 
 function compose!(
     ::MultiplicationGroupTrait,
     G::CircleGroup,
     x,
-    p::AbstractVector,
-    q::AbstractVector,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
 )
     return copyto!(x, compose(G, p, q))
 end
@@ -46,20 +46,20 @@ end
 identity_element(G::CircleGroup) = 1.0
 identity_element(::CircleGroup, p::Number) = one(p)
 
-Base.inv(G::CircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
+Base.inv(G::CircleGroup, p::AbstractArray{<:Any,0}) = map(pp -> inv(G, pp), p)
 
 function inverse_translate(
     ::CircleGroup,
-    p::AbstractVector,
-    q::AbstractVector,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
     ::LeftAction,
 )
     return map(/, q, p)
 end
 function inverse_translate(
     ::CircleGroup,
-    p::AbstractVector,
-    q::AbstractVector,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
     ::RightAction,
 )
     return map(/, q, p)
@@ -161,20 +161,20 @@ end
 identity_element(G::RealCircleGroup) = 0.0
 identity_element(::RealCircleGroup, p::AbstractArray) = map(i -> zero(eltype(p)), p)
 
-Base.inv(G::RealCircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
+Base.inv(G::RealCircleGroup, p::AbstractArray{<:Any,0}) = map(pp -> inv(G, pp), p)
 
 function inverse_translate(
     ::RealCircleGroup,
-    p::AbstractVector,
-    q::AbstractVector,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
     ::LeftAction,
 )
     return map((x, y) -> sym_rem(x - y), q, p)
 end
 function inverse_translate(
     ::RealCircleGroup,
-    p::AbstractVector,
-    q::AbstractVector,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
     ::RightAction,
 )
     return map((x, y) -> sym_rem(x - y), q, p)

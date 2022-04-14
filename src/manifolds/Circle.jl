@@ -45,7 +45,7 @@ function check_point(M::Circle{ℂ}, p; kwargs...)
 end
 check_size(::Circle, ::Number) = nothing
 function check_size(M::Circle, p)
-    (size(p) == (1,)) && return nothing
+    (size(p) == ()) && return nothing
     return DomainError(
         size(p),
         "The point $p can not belong to the $M, since it is not a number nor a vector of size (1,).",
@@ -53,7 +53,7 @@ function check_size(M::Circle, p)
 end
 check_size(::Circle, ::Number, ::Number) = nothing
 function check_size(M::Circle, p, X)
-    (size(X) == (1,)) && return nothing
+    (size(X) == ()) && return nothing
     return DomainError(
         size(X),
         "The vector $X is not a tangent vector to $p on $M, since it is not a number nor a vector of size (1,).",
