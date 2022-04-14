@@ -46,6 +46,24 @@ include("group_utils.jl")
         )
     end
 
+    @testset "vector points" begin
+        pts = [[1.0 + 0.0im], [0.0 + 1.0im], [(1.0 + 1.0im) / √2]]
+        Xpts = [[0.0 + 0.5im], [0.0 - 1.5im]]
+        @test compose(G, pts[2], pts[1]) ≈ pts[2] .* pts[1]
+        @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ pts[2] .* Xpts[1]
+        test_group(
+            G,
+            pts,
+            Xpts,
+            Xpts;
+            test_diff=true,
+            test_mutating=true,
+            test_invariance=true,
+            test_lie_bracket=true,
+            test_adjoint_action=true,
+        )
+    end
+
     @testset "Group forwards to decorated" begin
         pts = [1.0 + 0.0im, 0.0 + 1.0im, (1.0 + 1.0im) / √2]
         test_manifold(
@@ -100,6 +118,24 @@ end
             Xpts;
             test_diff=true,
             test_mutating=false,
+            test_invariance=true,
+            test_lie_bracket=true,
+            test_adjoint_action=true,
+        )
+    end
+
+    @testset "vector points" begin
+        pts = [[1.0], [0.5], [-3.0]]
+        Xpts = [[-2.0], [0.5], [2.0]]
+        @test compose(G, pts[2], pts[1]) ≈ pts[2] .+ pts[1]
+        @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ Xpts[1]
+        test_group(
+            G,
+            pts,
+            Xpts,
+            Xpts;
+            test_diff=true,
+            test_mutating=true,
             test_invariance=true,
             test_lie_bracket=true,
             test_adjoint_action=true,

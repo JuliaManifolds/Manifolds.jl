@@ -24,6 +24,25 @@ adjoint_action(::CircleGroup, p, X) = X
 
 adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)
 
+function compose(
+    ::MultiplicationGroupTrait,
+    G::CircleGroup,
+    p::AbstractVector,
+    q::AbstractVector,
+)
+    return map(compose, repeated(G), p, q)
+end
+
+function compose!(
+    ::MultiplicationGroupTrait,
+    G::CircleGroup,
+    x,
+    p::AbstractVector,
+    q::AbstractVector,
+)
+    return copyto!(x, compose(G, p, q))
+end
+
 identity_element(G::CircleGroup) = 1.0
 identity_element(::CircleGroup, p::Number) = one(p)
 
@@ -117,19 +136,26 @@ is_default_metric(::RealCircleGroup, ::EuclideanMetric) = true
 
 # Lazy overwrite since this is a rare case of nonmutating foo.
 compose(::RealCircleGroup, p, q) = sym_rem(p + q)
-compose(::RealCircleGroup, ::Identity{<:AdditionOperation}, q) = sym_rem(q)
-compose(::RealCircleGroup, p, ::Identity{<:AdditionOperation}) = sym_rem(p)
+compose(::RealCircleGroup, ::Identity{AdditionOperation}, q) = sym_rem(q)
+compose(::RealCircleGroup, p, ::Identity{AdditionOperation}) = sym_rem(p)
 function compose(
     ::RealCircleGroup,
-    e::Identity{<:AdditionOperation},
-    ::Identity{<:AdditionOperation},
+    e::Identity{AdditionOperation},
+    ::Identity{AdditionOperation},
 )
     return e
 end
 
-function compose!(::RealCircleGroup, x, p, q)
-    x = sym_rem.(p + q)
-    return x
+compose!(::RealCircleGroup, x, p, q) = copyto!(x, sym_rem(p + q))
+compose!(::RealCircleGroup, x, ::Identity{AdditionOperation}, q) = copyto!(x, sym_rem(q))
+compose!(::RealCircleGroup, x, p, ::Identity{AdditionOperation}) = copyto!(x, sym_rem(p))
+function compose!(
+    ::RealCircleGroup,
+    ::Identity{AdditionOperation},
+    e::Identity{AdditionOperation},
+    ::Identity{AdditionOperation},
+)
+    return e
 end
 
 identity_element(G::RealCircleGroup) = 0.0
