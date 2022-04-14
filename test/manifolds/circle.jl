@@ -65,7 +65,7 @@ using Manifolds: TFVector, CoTFVector
         @test flat(M, 0.0, 1.0) == rrcv
         @test sharp(M, 0.0, rrcv) == 1.0
         B_cot = Manifolds.dual_basis(M, 0.0, DefaultOrthonormalBasis())
-        @test get_coordinates(M, 0.0, rrcv, B_cot) ≈ 1.0
+        @test get_coordinates(M, 0.0, rrcv, B_cot) ≈ @SVector [1.0]
         @test get_vector(M, 0.0, 1.0, B_cot) isa Manifolds.RieszRepresenterCotangentVector
         a = fill(NaN)
         get_coordinates!(M, a, 0.0, rrcv, B_cot)
@@ -82,26 +82,26 @@ using Manifolds: TFVector, CoTFVector
         @test mean(M, [-π / 2, 0.0, π]) ≈ -π / 2
         @test mean(M, [-π / 2, 0.0, π], [1.0, 1.0, 1.0]) == -π / 2
         z = project(M, 1.5 * π)
-        z2 = [0.0]
+        z2 = fill(0.0)
         project!(M, z2, 1.5 * π)
         @test z2[1] == z
         @test project(M, z) == z
         @test project(M, 1.0, 2.0) == 2.0
     end
     TEST_STATIC_SIZED && @testset "Real Circle and static sized arrays" begin
-        v = MVector(0.0)
-        x = SVector(0.0)
-        log!(M, v, x, SVector(π / 4))
-        @test norm(M, x, v) ≈ π / 4
-        @test is_vector(M, x, v)
-        @test is_vector(M, [], v)
+        X = @MArray fill(0.0)
+        p = @SArray fill(0.0)
+        log!(M, X, p, @SArray fill(π / 4))
+        @test norm(M, p, X) ≈ π / 4
+        @test is_vector(M, p, X)
+        @test is_vector(M, [], X)
         @test project(M, 1.0) == 1.0
-        x = MVector(0.0)
-        project!(M, x, x)
-        @test x == MVector(0.0)
-        x .+= 2 * π
-        project!(M, x, x)
-        @test x == MVector(0.0)
+        p = @MArray fill(0.0)
+        project!(M, p, p)
+        @test p == @MArray fill(0.0)
+        p .+= 2 * π
+        project!(M, p, p)
+        @test p == @MArray fill(0.0)
         @test project(M, 0.0, 1.0) == 1.0
     end
     types = [Float64]
@@ -130,7 +130,7 @@ using Manifolds: TFVector, CoTFVector
                 test_rand_point=true,
                 test_rand_tvector=true,
             )
-            ptsS = SVector.(pts)
+            ptsS = map(p -> (@SArray fill(p)), pts)
             test_manifold(
                 M,
                 ptsS,
@@ -153,8 +153,8 @@ using Manifolds: TFVector, CoTFVector
         end
     end
     @testset "Mutating Rand for real Circle" begin
-        p = [NaN]
-        X = [NaN]
+        p = fill(NaN)
+        X = fill(NaN)
         rand!(M, p)
         @test is_point(M, p)
         rand!(M, X; vector_at=p)
@@ -189,22 +189,22 @@ using Manifolds: TFVector, CoTFVector
         @test sharp(Mc, 0.0 + 0.0im, rrcv) == 1.0im
         @test norm(Mc, 1.0, log(Mc, 1.0, -1.0)) ≈ π
         @test is_vector(Mc, 1.0, log(Mc, 1.0, -1.0))
-        v = MVector(0.0 + 0.0im)
-        x = SVector(1.0 + 0.0im)
-        log!(Mc, v, x, SVector(-1.0 + 0.0im))
-        @test norm(Mc, SVector(1.0), v) ≈ π
-        @test is_vector(Mc, x, v)
+        X = @MArray fill(0.0 + 0.0im)
+        p = @SArray fill(1.0 + 0.0im)
+        log!(Mc, X, p, @SArray fill(-1.0 + 0.0im))
+        @test norm(Mc, (@SArray fill(1.0)), X) ≈ π
+        @test is_vector(Mc, p, X)
         @test project(Mc, 1.0) == 1.0
-        project(Mc, 1 / sqrt(2.0) + 1 / sqrt(2.0) * im) ==
-        1 / sqrt(2.0) + 1 / sqrt(2.0) * im
-        x = MVector(1.0 + 0.0im)
-        project!(Mc, x, x)
-        @test x == MVector(1.0 + 0.0im)
-        x .*= 2
-        project!(Mc, x, x)
-        @test x == MVector(1.0 + 0.0im)
+        @test project(Mc, 1 / sqrt(2.0) + 1 / sqrt(2.0) * im) ≈
+              1 / sqrt(2.0) + 1 / sqrt(2.0) * im
+        p = @MArray fill(1.0 + 0.0im)
+        project!(Mc, p, p)
+        @test p == @MArray fill(1.0 + 0.0im)
+        p .*= 2
+        project!(Mc, p, p)
+        @test p == @MArray fill(1.0 + 0.0im)
 
-        angles = map(x -> exp(x * im), [-π / 2, 0.0, π])
+        angles = map(pp -> exp(pp * im), [-π / 2, 0.0, π])
         @test mean(Mc, angles) ≈ exp(-π * im / 2)
         @test mean(Mc, angles, [1.0, 1.0, 1.0]) ≈ exp(-π * im / 2)
         @test_throws ErrorException mean(Mc, [-1.0 + 0im, 1.0 + 0im])
@@ -231,7 +231,7 @@ using Manifolds: TFVector, CoTFVector
                 exp_log_atol_multiplier=2.0,
                 is_tangent_atol_multiplier=2.0,
             )
-            ptsS = SVector.(pts)
+            ptsS = map(p -> (@SArray fill(p)), pts)
             test_manifold(
                 Mc,
                 ptsS,

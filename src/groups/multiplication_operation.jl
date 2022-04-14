@@ -58,10 +58,10 @@ end
 function is_identity(
     ::MultiplicationGroupTrait,
     G::AbstractDecoratorManifold,
-    q::AbstractVector;
+    q::AbstractArray{<:Any,0};
     kwargs...,
 )
-    return length(q) == 1 && isapprox(G, q[], one(q[]); kwargs...)
+    return isapprox(G, q[], one(q[]); kwargs...)
 end
 function is_identity(
     ::MultiplicationGroupTrait,

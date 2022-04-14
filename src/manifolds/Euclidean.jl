@@ -471,8 +471,8 @@ end
 
 the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
 """
-parallel_transport_along(::Euclidean, ::Any, X, ::Any) = X
-parallel_transport_along!(::Euclidean, Y, ::Any, X, ::Any) = copyto!(Y, X)
+parallel_transport_along(::Euclidean, ::Any, X, ::AbstractVector) = X
+parallel_transport_along!(::Euclidean, Y, ::Any, X, ::AbstractVector) = copyto!(Y, X)
 
 """
     parallel_transport_direction(M::Euclidean, p, X, d)
