@@ -173,14 +173,6 @@ Base.exp(::Euclidean, p::Number, q::Number) = p + q
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
-function get_basis_orthonormal(::Euclidean, p, ::RealNumbers)
-    vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return CachedBasis(B, vecs)
-end
-function get_basis_orthonormal(::Euclidean{<:Tuple,ℂ}, p, ::ComplexNumbers)
-    vecs = [_euclidean_basis_vector(p, i) for i in eachindex(p)]
-    return CachedBasis(B, [vecs; im * vecs])
-end
 function get_basis_diagonalizing(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
     vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
     eigenvalues = zeros(real(eltype(p)), manifold_dimension(M))
