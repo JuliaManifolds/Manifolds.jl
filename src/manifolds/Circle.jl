@@ -137,7 +137,7 @@ function get_basis_diagonalizing(::Circle{ℝ}, p, B::DiagonalizingOrthonormalBa
     return CachedBasis(B, (@SVector [0]), vs)
 end
 
-get_coordinates_orthonormal(::Circle{ℝ}, p, X, ::RealNumbers) = X
+get_coordinates_orthonormal(::Circle{ℝ}, p, X, ::RealNumbers) = @SVector [X[]]
 get_coordinates_orthonormal!(::Circle{ℝ}, c, p, X, ::RealNumbers) = (c .= X)
 function get_coordinates_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
@@ -170,7 +170,7 @@ function get_coordinates_orthonormal(::Circle{ℂ}, p, X, ::RealNumbers)
     return @SVector [Xⁱ]
 end
 
-get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = c
+get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = Scalar(c[])
 get_vector_orthonormal!(::Circle{ℝ}, X, p, c, ::RealNumbers) = (X .= c[])
 function get_vector_diagonalizing(::Circle{ℝ}, p, c, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
@@ -182,7 +182,7 @@ end
 Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 function get_vector_orthonormal(::Circle{ℂ}, p, c, ::RealNumbers)
-    @SVector [1im * c[1] * p[1]]
+    @SArray fill(1im * c[1] * p[1])
 end
 function get_vector_orthonormal!(::Circle{ℂ}, X, p, c, ::RealNumbers)
     X .= 1im * c[1] * p[1]
@@ -330,7 +330,7 @@ end
 
 mid_point(M::Circle{ℝ}, p1, p2) = exp(M, p1, 0.5 * log(M, p1, p2))
 mid_point(::Circle{ℂ}, p1::Complex, p2::Complex) = exp(im * (angle(p1) + angle(p2)) / 2)
-mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = SA[mid_point(M, p1[], p2[])]
+mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = Scalar(mid_point(M, p1[], p2[]))
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
 
