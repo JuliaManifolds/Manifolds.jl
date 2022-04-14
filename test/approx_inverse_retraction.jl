@@ -73,17 +73,18 @@ Random.seed!(10)
             )
         end
 
-        @testset "Circle(ℂ)" begin
-            M = Circle(ℂ)
-            p = [1.0 * im]
-            X = [p[1] * im * (π / 4)]
-            q = exp(M, p, X)
-            X_exp = log(M, p, q)
-            inv_retr_method =
-                NLSolveInverseRetraction(ExponentialRetraction(); project_point=true)
-            X = inverse_retract(M, p, q, inv_retr_method)
-            @test is_vector(M, p, X; atol=1e-8)
-            @test X ≈ X_exp
-        end
+        # Requires https://github.com/JuliaNLSolvers/NLSolversBase.jl/pull/141
+        # @testset "Circle(ℂ)" begin
+        #     M = Circle(ℂ)
+        #     p = fill(1.0 * im)
+        #     X = fill(p[1] * im * (π / 4))
+        #     q = exp(M, p, X)
+        #     X_exp = log(M, p, q)
+        #     inv_retr_method =
+        #         NLSolveInverseRetraction(ExponentialRetraction(); project_point=true)
+        #     X = inverse_retract(M, p, q, inv_retr_method)
+        #     @test is_vector(M, p, X; atol=1e-8)
+        #     @test X ≈ X_exp
+        # end
     end
 end
