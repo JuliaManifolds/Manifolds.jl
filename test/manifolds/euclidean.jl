@@ -25,6 +25,12 @@ using Manifolds: induced_basis
     @test Y == X
     @test embed(E, p, X) == X
 
+    # temp: explicit test for induced basis
+    B = induced_basis(E, RetractionAtlas(), 0, ManifoldsBase.TangentSpaceType())
+    @test get_coordinates(E, p, X, B) == X
+    get_coordinates!(E, Y, p, X, B)
+    @test Y == X
+
     # real manifold does not allow complex values
     @test_throws DomainError is_point(Ec, [:a, :b, :b], true)
     @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], true)
@@ -64,6 +70,7 @@ using Manifolds: induced_basis
                 DefaultOrthonormalBasis(),
                 DefaultOrthonormalBasis(ℂ),
                 DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]),
+                DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0], ℂ),
             )
         else
             ()

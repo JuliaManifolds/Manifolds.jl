@@ -187,12 +187,12 @@ function get_coordinates_orthonormal!(M::Euclidean, Y, p, X, ::RealNumbers)
 end
 
 function get_coordinates_diagonalizing!(
-    M::Euclidean,
+    M::Euclidean{<:Tuple,𝔽},
     Y,
     p,
     X,
-    ::DiagonalizingOrthonormalBasis{ℝ},
-)
+    ::DiagonalizingOrthonormalBasis{𝔽},
+) where {𝔽}
     S = representation_size(M)
     PS = prod(S)
     copyto!(Y, reshape(X, PS))
@@ -227,14 +227,14 @@ end
 
 function get_coordinates_diagonalizing!(
     M::Euclidean{<:Tuple,ℂ},
-    Y,
+    c,
     ::Any,
     X,
-    ::ComplexNumbers,
+    ::DiagonalizingOrthonormalBasis{ℝ},
 )
     S = representation_size(M)
     PS = prod(S)
-    Y .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
+    c .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
     return Y
 end
 function get_vector_orthonormal!(M::Euclidean, Y, ::Any, c, ::RealNumbers)
@@ -272,7 +272,7 @@ function get_vector_diagonalizing!(
     ::DiagonalizingOrthonormalBasis{ℂ},
 )
     S = representation_size(M)
-    N = div(length(X), 2)
+    N = div(length(c), 2)
     copyto!(Y, reshape(c[1:N] + im * c[(N + 1):end], S))
     return Y
 end
