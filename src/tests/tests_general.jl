@@ -836,13 +836,13 @@ function test_parallel_transport(M, P; along=false, to=true, direction=true)
                     Y2 = similar(X)
                     parallel_transport_to!(M, Y2, p, q, X)
                     # test that mutating and allocating to the same
-                    @test isapprox(M, q, Y1, Y2)
+                    Test.@test isapprox(M, q, Y1, Y2)
                     parallel_transport_to!(M, Y2, q, p, Y1)
                     # Test that transporting there and back again yields the identity
-                    @test isapprox(M, q, X, Y2)
+                    Test.@test isapprox(M, q, X, Y2)
                     parallel_transport_to!(M, Y1, q, p, Y1)
                     # Test that inplace does not have side effects
-                    @test isapprox(M, q, X, Y1)
+                    Test.@test isapprox(M, q, X, Y1)
                 end
             end
         end
