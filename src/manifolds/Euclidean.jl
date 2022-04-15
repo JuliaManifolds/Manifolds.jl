@@ -173,56 +173,56 @@ Base.exp(::Euclidean, p::Number, q::Number) = p + q
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
-function get_basis_diagonalizing(M::Euclidean, p, B::DiagonalizingOrthonormalBasis)
-    vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
+function get_basis_diagonalizing(M::Euclidean, p, B::DiagonalizingOrthonormalBasis{𝔽}) where {𝔽}
+    vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis(𝔽)))
     eigenvalues = zeros(real(eltype(p)), manifold_dimension(M))
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates_orthonormal!(M::Euclidean, Y, p, X, ::RealNumbers)
+function get_coordinates_orthonormal!(M::Euclidean, c, p, X, ::RealNumbers)
     S = representation_size(M)
     PS = prod(S)
-    copyto!(Y, reshape(X, PS))
-    return Y
+    copyto!(c, reshape(X, PS))
+    return c
 end
 
 function get_coordinates_diagonalizing!(
-    M::Euclidean{<:Tuple,𝔽},
-    Y,
+    M::Euclidean{<:Tuple,ℝ},
+    c,
     p,
     X,
-    ::DiagonalizingOrthonormalBasis{𝔽},
+    ::DiagonalizingOrthonormalBasis{ℝ},
 ) where {𝔽}
     S = representation_size(M)
     PS = prod(S)
-    copyto!(Y, reshape(X, PS))
-    return Y
+    copyto!(c, reshape(X, PS))
+    return c
 end
 
 function get_coordinates_induced_basis!(
     M::Euclidean,
-    Y,
+    c,
     p,
     X,
     ::InducedBasis{ℝ,TangentSpaceType,<:RetractionAtlas},
 )
     S = representation_size(M)
     PS = prod(S)
-    copyto!(Y, reshape(X, PS))
-    return Y
+    copyto!(c, reshape(X, PS))
+    return c
 end
 
 function get_coordinates_orthonormal!(
     M::Euclidean{<:Tuple,ℂ},
-    Y,
+    c,
     ::Any,
     X,
     ::ComplexNumbers,
 )
     S = representation_size(M)
     PS = prod(S)
-    Y .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
-    return Y
+    c .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
+    return c
 end
 
 function get_coordinates_diagonalizing!(
@@ -230,13 +230,14 @@ function get_coordinates_diagonalizing!(
     c,
     ::Any,
     X,
-    ::DiagonalizingOrthonormalBasis{ℝ},
+    ::DiagonalizingOrthonormalBasis,
 )
     S = representation_size(M)
     PS = prod(S)
     c .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
-    return Y
+    return c
 end
+
 function get_vector_orthonormal!(M::Euclidean, Y, ::Any, c, ::RealNumbers)
     S = representation_size(M)
     copyto!(Y, reshape(c, S))
