@@ -173,26 +173,17 @@ Base.exp(::Euclidean, p::Number, q::Number) = p + q
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
-function get_basis_diagonalizing(M::Euclidean, p, B::DiagonalizingOrthonormalBasis{𝔽}) where {𝔽}
+function get_basis_diagonalizing(
+    M::Euclidean,
+    p,
+    B::DiagonalizingOrthonormalBasis{𝔽},
+) where {𝔽}
     vecs = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis(𝔽)))
     eigenvalues = zeros(real(eltype(p)), manifold_dimension(M))
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
 function get_coordinates_orthonormal!(M::Euclidean, c, p, X, ::RealNumbers)
-    S = representation_size(M)
-    PS = prod(S)
-    copyto!(c, reshape(X, PS))
-    return c
-end
-
-function get_coordinates_diagonalizing!(
-    M::Euclidean{<:Tuple,ℝ},
-    c,
-    p,
-    X,
-    ::DiagonalizingOrthonormalBasis{ℝ},
-) where {𝔽}
     S = representation_size(M)
     PS = prod(S)
     copyto!(c, reshape(X, PS))
@@ -230,11 +221,23 @@ function get_coordinates_diagonalizing!(
     c,
     ::Any,
     X,
-    ::DiagonalizingOrthonormalBasis,
+    ::DiagonalizingOrthonormalBasis{ℂ},
 )
     S = representation_size(M)
     PS = prod(S)
     c .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
+    return c
+end
+function get_coordinates_diagonalizing!(
+    M::Euclidean,
+    c,
+    p,
+    X,
+    ::DiagonalizingOrthonormalBasis{ℝ},
+) where {𝔽}
+    S = representation_size(M)
+    PS = prod(S)
+    copyto!(c, reshape(X, PS))
     return c
 end
 
