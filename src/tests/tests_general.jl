@@ -808,3 +808,48 @@ function test_manifold(
     end
     return nothing
 end
+
+"""
+    test_parallel_transport(M,P; along=false, to=true, diretion=true)
+
+Generic tests for parallel transport on `M`given at least two pointsin `P`.
+
+The single functions to transport `along` (a curve), `to` (a point) or (towards a) `direction`
+are sub-tests that can be activated by the keywords arguemnts
+"""
+function test_parallel_transport(M, P; along=false, to=true, direction=true)
+    length(P) < 2 &&
+        error("The Parallel Transport test set requires at least 2 points in P")
+    @testset "Test Parallel Transport" begin
+        @testset "Along" begin # even with along= false this displays no tests
+            if along
+                @warn "For now there are no generic tests for parallel transport along"
+            end
+        end
+        @testset "To (a point)" begin # even with to =false this displays no tests
+            if to
+                for i in 1:(length(P) - 1)
+                    p = P[i]
+                    q = P[i + 1]
+                    X = inverse_retract(M, P[i], P[2], default_inverse_retraction_method(M))
+                    Y1 = parallel_transport_to(M, p, q, X)
+                    Y2 = similar(X)
+                    parallel_transport_to!(M, Y2, p, q, X)
+                    # test that mutating and allocating to the same
+                    @test isapprox(M, q, Y1, Y2)
+                    parallel_transport_to!(M, Y2, q, p, Y1)
+                    # Test that transporting there and back again yields the identity
+                    @test isapprox(M, q, X, Y2)
+                    parallel_transport_to!(M, Y1, q, p, Y1)
+                    # Test that inplace does not have side effects
+                    @test isapprox(M, q, X, Y1)
+                end
+            end
+        end
+        @testset "(Tangent Vector) Direction" begin # even with direction=false this displays no tests
+            if along
+                @warn "For now there are no generic tests for parallel transport direction"
+            end
+        end
+    end
+end
