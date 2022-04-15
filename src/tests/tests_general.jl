@@ -820,13 +820,13 @@ are sub-tests that can be activated by the keywords arguemnts
 function test_parallel_transport(M, P; along=false, to=true, direction=true)
     length(P) < 2 &&
         error("The Parallel Transport test set requires at least 2 points in P")
-    @testset "Test Parallel Transport" begin
-        @testset "Along" begin # even with along= false this displays no tests
+    Test.@testset "Test Parallel Transport" begin
+        Test.@testset "Along" begin # even with along= false this displays no tests
             if along
                 @warn "For now there are no generic tests for parallel transport along"
             end
         end
-        @testset "To (a point)" begin # even with to =false this displays no tests
+        Test.@testset "To (a point)" begin # even with to =false this displays no tests
             if to
                 for i in 1:(length(P) - 1)
                     p = P[i]
@@ -846,7 +846,7 @@ function test_parallel_transport(M, P; along=false, to=true, direction=true)
                 end
             end
         end
-        @testset "(Tangent Vector) Direction" begin # even with direction=false this displays no tests
+        Test.@testset "(Tangent Vector) Direction" begin # even with direction=false this displays no tests
             if along
                 @warn "For now there are no generic tests for parallel transport direction"
             end
