@@ -112,6 +112,10 @@ function test_manifold(
     test_inplace=false,
     test_musical_isomorphisms=false,
     test_mutating_rand=false,
+    parallel_transport=false,
+    parallel_transport_to=parallel_transport,
+    parallel_transport_along=parallel_transport,
+    parallel_transport_direction=parallel_transport,
     test_project_point=false,
     test_project_tangent=false,
     test_rand_point=false,
@@ -290,6 +294,15 @@ function test_manifold(
             # since X is of different type/concept than p,q
         end
     end
+
+    parallel_transport && test_parallel_transport(
+        M,
+        pts;
+        along=parallel_transport_along,
+        to=parallel_transport_to,
+        direction=parallel_transport_direction,
+        mutating=is_mutating,
+    )
 
     Test.@testset "(inverse &) retraction tests" begin
         for (p, X) in zip(pts, tv)
@@ -816,39 +829,68 @@ Generic tests for parallel transport on `M`given at least two pointsin `P`.
 
 The single functions to transport `along` (a curve), `to` (a point) or (towards a) `direction`
 are sub-tests that can be activated by the keywords arguemnts
+
+!!! Note
+Since the interface to specify curves is not yet provided, the along keyword does not have an effect yet
 """
-function test_parallel_transport(M, P; along=false, to=true, direction=true)
+function test_parallel_transport(
+    M::AbstractManifold,
+    P,
+    Ξ=inverse_retract.(
+        Ref(M),
+        P[1:(end - 1)],
+        P[2:end],
+        Ref(default_inverse_retraction_method(M)),
+    );
+    along=false,
+    to=true,
+    direction=true,
+    mutating=true,
+)
     length(P) < 2 &&
         error("The Parallel Transport test set requires at least 2 points in P")
     Test.@testset "Test Parallel Transport" begin
-        Test.@testset "Along" begin # even with along= false this displays no tests
-            if along
-                @warn "For now there are no generic tests for parallel transport along"
-            end
-        end
+        along && @warn "parallel transport along test not yet implemented"
         Test.@testset "To (a point)" begin # even with to =false this displays no tests
             if to
                 for i in 1:(length(P) - 1)
                     p = P[i]
                     q = P[i + 1]
-                    X = inverse_retract(M, P[i], P[2], default_inverse_retraction_method(M))
-                    Y1 = parallel_transport_to(M, p, q, X)
-                    Y2 = similar(X)
-                    parallel_transport_to!(M, Y2, p, q, X)
-                    # test that mutating and allocating to the same
-                    Test.@test isapprox(M, q, Y1, Y2)
-                    parallel_transport_to!(M, Y2, q, p, Y1)
-                    # Test that transporting there and back again yields the identity
-                    Test.@test isapprox(M, q, X, Y2)
-                    parallel_transport_to!(M, Y1, q, p, Y1)
-                    # Test that inplace does not have side effects
+                    X = Ξ[i]
+                    Y1 = parallel_transport_to(M, p, X, q)
+                    if mutating
+                        Y2 = similar(X)
+                        parallel_transport_to!(M, Y2, p, X, q)
+                        # test that mutating and allocating to the same
+                        Test.@test isapprox(M, q, Y1, Y2)
+                        parallel_transport_to!(M, Y2, q, Y1, p)
+                        # Test that transporting there and back again yields the identity
+                        Test.@test isapprox(M, q, X, Y2)
+                        parallel_transport_to!(M, Y1, q, Y1, p)
+                        # Test that inplace does not have side effects
+                    else
+                        Y1 = parallel_transport_to(M, q, Y1, p)
+                    end
                     Test.@test isapprox(M, q, X, Y1)
                 end
             end
         end
-        Test.@testset "(Tangent Vector) Direction" begin # even with direction=false this displays no tests
-            if along
-                @warn "For now there are no generic tests for parallel transport direction"
+        Test.@testset "(Tangent Vector) Direction" begin
+            if direction
+                for i in 1:(length(P) - 1)
+                    p = P[i]
+                    X = Ξ[i]
+                    Y1 = parallel_transport_direction(M, p, X, X)
+                    q = exp(M, p, X)
+                    if mutating
+                        Y2 = similar(X)
+                        parallel_transport_direction!(M, Y2, p, X, X)
+                        # test that mutating and allocating to the same
+                        Test.@test isapprox(M, q, Y1, Y2)
+                    end
+                    # Test that Y is a tangent vector at q
+                    Test.@test is_vector(M, p, Y1, true)
+                end
             end
         end
     end

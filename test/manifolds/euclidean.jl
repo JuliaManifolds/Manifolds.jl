@@ -31,6 +31,11 @@ using Manifolds: induced_basis
     get_coordinates!(E, Y, p, X, B)
     @test Y == X
 
+    Y = parallel_transport_along(E, p, X, nothing)
+    @test Y == X
+    parallel_transport_along!(E, Y, p, X, nothing)
+    @test Y == X
+
     # real manifold does not allow complex values
     @test_throws DomainError is_point(Ec, [:a, :b, :b], true)
     @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], true)
@@ -131,6 +136,7 @@ using Manifolds: induced_basis
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,
                 test_vee_hat=false,
+                parallel_transport=true,
             )
         end
     end
