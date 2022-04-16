@@ -56,6 +56,7 @@ include("../utils.jl")
             mid_point12=nothing,
             exp_log_atol_multiplier=4,
             test_inplace=true,
+            parallel_transport=true,
         )
     end
     @testset "Unsigned Essential" begin
@@ -74,6 +75,7 @@ include("../utils.jl")
             test_exp_log=true,
             mid_point12=nothing,
             exp_log_atol_multiplier=4,
+            parallel_transport=true,
         )
     end
 end
