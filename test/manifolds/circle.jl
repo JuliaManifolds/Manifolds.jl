@@ -54,12 +54,8 @@ using Manifolds: TFVector, CoTFVector
               -2.0
         @test get_vector(M, Ref(0.0), [2.0], DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈
               -2.0
-        @test get_vector(
-            M,
-            Ref(0.0),
-            [-2.0],
-            DiagonalizingOrthonormalBasis(Ref(-1.0)),
-        )[] ≈ 2.0
+        @test get_vector(M, Ref(0.0), [-2.0], DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈
+              2.0
         @test number_of_coordinates(M, DiagonalizingOrthonormalBasis(Ref(-1.0))) == 1
         @test number_of_coordinates(M, DefaultOrthonormalBasis()) == 1
         rrcv = Manifolds.RieszRepresenterCotangentVector(M, 0.0, 1.0)
