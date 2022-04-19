@@ -3,7 +3,14 @@ using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
 using ManifoldsBase: TraitList
 import ManifoldsBase: default_retraction_method
-import Manifolds: mean!, median!, InducedBasis, induced_basis, get_chart_index, connection
+using Manifolds:
+    FiniteDifferencesBackend,
+    InducedBasis,
+    connection,
+    get_chart_index,
+    induced_basis,
+    mean!,
+    median!
 include("utils.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
