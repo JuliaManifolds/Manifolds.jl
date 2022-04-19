@@ -11,6 +11,8 @@ include("group_utils.jl")
         @test has_invariant_metric(G, RightAction())
         @test has_biinvariant_metric(G)
         @test is_default_metric(MetricManifold(G, EuclideanMetric())) === true
+        @test is_group_manifold(G)
+        @test !is_group_manifold(G.manifold)
         types = [Matrix{Float64}]
         @test base_manifold(G) === Euclidean(2, 3)
         @test log_lie(G, Identity(G)) == zeros(2, 3) # log_lie with Identity on Addition group.

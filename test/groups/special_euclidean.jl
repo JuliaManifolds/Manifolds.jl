@@ -139,12 +139,20 @@ Random.seed!(10)
             @test isapprox(Xc, w)
             @test_throws MethodError vee!(M, w, e, Xe)
 
+            w = similar(Xc)
+            vee!(G, w, identity_element(G), Xe)
+            @test isapprox(Xc, w)
+
             Ye = hat(G, e, Xc)
             @test_throws MethodError hat(M, e, Xc)
             isapprox(G, e, Xe, Ye)
             Ye2 = copy(G, p, X)
             hat!(G, Ye2, e, Xc)
             @test_throws MethodError hat!(M, Ye, e, Xc)
+            @test isapprox(G, e, Ye, Ye2)
+
+            Ye2 = copy(G, p, X)
+            hat!(G, Ye2, identity_element(G), Xc)
             @test isapprox(G, e, Ye, Ye2)
         end
     end
