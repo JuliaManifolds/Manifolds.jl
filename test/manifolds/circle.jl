@@ -46,17 +46,18 @@ using Manifolds: TFVector, CoTFVector
         y = [0.0]
         get_coordinates!(M, y, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))
         @test y ≈ [2.0]
-        @test get_vector(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
-        @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈
+        @test get_vector(M, Ref(0.0), [2.0], DefaultOrthonormalBasis())[] ≈ 2.0
+        @test get_vector(M, [0.0], [2.0], DefaultOrthonormalBasis())[] ≈ 2.0
+        @test get_vector(M, Ref(0.0), [2.0], DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈
               2.0
-        @test get_vector(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈
+        @test get_vector(M, Ref(0.0), [-2.0], DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈
               -2.0
-        @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈
+        @test get_vector(M, Ref(0.0), [2.0], DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈
               -2.0
         @test get_vector(
             M,
             Ref(0.0),
-            Ref(-2.0),
+            [-2.0],
             DiagonalizingOrthonormalBasis(Ref(-1.0)),
         )[] ≈ 2.0
         @test number_of_coordinates(M, DiagonalizingOrthonormalBasis(Ref(-1.0))) == 1

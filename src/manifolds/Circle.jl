@@ -171,6 +171,9 @@ function get_coordinates_orthonormal(::Circle{ℂ}, p, X, ::RealNumbers)
 end
 
 get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = Scalar(c[])
+# the method below is required for FD and AD differentiation in ManifoldDiff.jl
+# if changed, make sure no tests in that repository get broken
+get_vector_orthonormal(::Circle{ℝ}, p::AbstractVector, c, ::RealNumbers) = c
 get_vector_orthonormal!(::Circle{ℝ}, X, p, c, ::RealNumbers) = (X .= c[])
 function get_vector_diagonalizing(::Circle{ℝ}, p, c, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
