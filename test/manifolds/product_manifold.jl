@@ -316,6 +316,42 @@ using RecursiveArrayTools: ArrayPartition
             @test isapprox(Mse, q, Y, Z)
         end
     end
+    @testset "Parallel transport" begin
+        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        q = ProductRepr([0.0, 1.0, 0.0], [2.0, 0.0])
+        X = log(Mse, p, q)
+        # to
+        Y = parallel_transport_to(Mse, p, X, q)
+        Z1 = parallel_transport_to(
+            Mse.manifolds[1],
+            submanifold_component.([p, X, q], Ref(1))...,
+        )
+        Z2 = parallel_transport_to(
+            Mse.manifolds[2],
+            submanifold_component.([p, X, q], Ref(2))...,
+        )
+        Z = ProductRepr(Z1, Z2)
+        @test isapprox(Mse, q, Y, Z)
+        Ym = allocate(Y)
+        parallel_transport_to!(Mse, Ym, p, X, q)
+        @test isapprox(Mse, q, Y, Z)
+
+        # direction
+        Y = parallel_transport_direction(Mse, p, X, X)
+        Z1 = parallel_transport_direction(
+            Mse.manifolds[1],
+            submanifold_component.([p, X, X], Ref(1))...,
+        )
+        Z2 = parallel_transport_direction(
+            Mse.manifolds[2],
+            submanifold_component.([p, X, X], Ref(2))...,
+        )
+        Z = ProductRepr(Z1, Z2)
+        @test isapprox(Mse, q, Y, Z)
+        Ym = allocate(Y)
+        parallel_transport_direction!(Mse, Ym, p, X, X)
+        @test isapprox(Mse, q, Ym, Z)
+    end
 
     @testset "ProductRepr" begin
         @test (@inferred convert(
