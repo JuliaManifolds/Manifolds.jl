@@ -1,5 +1,6 @@
 include("utils.jl")
 using Manifolds:
+    default_differential_backend,
     _derivative,
     _derivative!,
     differential,
@@ -9,7 +10,16 @@ using Manifolds:
     _gradient,
     _gradient!,
     _jacobian,
-    _jacobian!
+    _jacobian!,
+    set_default_differential_backend!
+
+# differentiation
+using Manifolds:
+    AbstractDiffBackend,
+    AbstractRiemannianDiffBackend,
+    ExplicitEmbeddedBackend,
+    TangentDiffBackend,
+    RiemannianProjectionBackend
 
 import Manifolds: gradient
 

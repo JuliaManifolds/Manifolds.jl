@@ -800,14 +800,7 @@ export AbstractBasis,
 export OutOfInjectivityRadiusError
 export get_basis,
     get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
-# differentiation
-export AbstractDiffBackend,
-    AbstractRiemannianDiffBackend,
-    ExplicitEmbeddedBackend,
-    FiniteDifferencesBackend,
-    TangentDiffBackend,
-    RiemannianProjectionBackend
-export default_differential_backend, set_default_differential_backend!
+
 # atlases and charts
 export get_point, get_point!, get_parameters, get_parameters!
 
