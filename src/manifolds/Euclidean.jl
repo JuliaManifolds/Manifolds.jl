@@ -259,7 +259,7 @@ function get_vector_diagonalizing!(
 end
 function get_vector_induced_basis!(M::Euclidean, Y, ::Any, c, B::InducedBasis)
     S = representation_size(M)
-    copyto!(Y, reshape(X, S))
+    copyto!(Y, reshape(c, S))
     return Y
 end
 function get_vector_orthonormal!(M::Euclidean{<:Tuple,ℂ}, Y, ::Any, c, ::ComplexNumbers)
@@ -475,8 +475,8 @@ end
 
 the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
 """
-parallel_transport_along(::Euclidean, ::Any, X, c) = X
-parallel_transport_along!(::Euclidean, Y, ::Any, X, c) = copyto!(Y, X)
+parallel_transport_along(::Euclidean, ::Any, X, c::AbstractVector) = X
+parallel_transport_along!(::Euclidean, Y, ::Any, X, c::AbstractVector) = copyto!(Y, X)
 
 """
     parallel_transport_direction(M::Euclidean, p, X, d)

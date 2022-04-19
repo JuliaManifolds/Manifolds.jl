@@ -222,6 +222,13 @@ function test_manifold(
         Test.@test isapprox(M, pts[2], exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
         Test.@test isapprox(M, pts[1], exp(M, pts[1], X1, 0); atol=atolp1p2, rtol=rtolp1p2)
         Test.@test isapprox(M, pts[2], exp(M, pts[1], X1, 1); atol=atolp1p2, rtol=rtolp1p2)
+        if is_mutating
+            q2 = allocate(pts[1])
+            exp!(M, q2, pts[1], X1)
+            Test.@test isapprox(M, pts[2], q2; atol=atolp1p2, rtol=rtolp1p2)
+            exp!(M, q2, pts[1], X1, 0)
+            Test.@test isapprox(M, pts[1], q2; atol=atolp1p2, rtol=rtolp1p2)
+        end
         if VERSION >= v"1.5" && isa(M, Union{Grassmann,GeneralizedStiefel})
             # TODO: investigate why this is so imprecise on newer Julia versions on CI
             Test.@test isapprox(

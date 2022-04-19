@@ -30,10 +30,19 @@ using Manifolds: induced_basis
     @test get_coordinates(E, p, X, B) == X
     get_coordinates!(E, Y, p, X, B)
     @test Y == X
+    @test get_vector(E, p, Y, B) == X
+    Y2 = similar(X)
+    get_vector!(E, Y2, p, Y, B)
+    @test Y2 == X
 
-    Y = parallel_transport_along(E, p, X, nothing)
+    Y = parallel_transport_along(E, p, X, [p])
     @test Y == X
-    parallel_transport_along!(E, Y, p, X, nothing)
+    parallel_transport_along!(E, Y, p, X, [p])
+    @test Y == X
+
+    Y = vector_transport_along(E, p, X, [p])
+    @test Y == X
+    vector_transport_along!(E, Y, p, X, [p])
     @test Y == X
 
     # real manifold does not allow complex values
