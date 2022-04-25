@@ -189,17 +189,3 @@ end
 function Base.show(io::IO, M::GeneralizedStiefel{n,k,𝔽}) where {n,k,𝔽}
     return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
 end
-
-@doc raw"""
-    vector_transport_to(M::GeneralizedStiefel, p, X, q, ::ProjectionTransport)
-
-Compute the vector transport of the tangent vector `X` at `p` to `q`,
-using the [`project`](@ref project(::GeneralizedStiefel, ::Any...))
-of `X` to `q`.
-"""
-vector_transport_to(::GeneralizedStiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)
-
-function vector_transport_to!(M::GeneralizedStiefel, Y, p, X, q, ::ProjectionTransport)
-    project!(M, Y, q, X)
-    return Y
-end

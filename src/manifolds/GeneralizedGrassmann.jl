@@ -355,20 +355,6 @@ function Base.show(io::IO, M::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
 end
 
 @doc raw"""
-    vector_transport_to(M::GeneralizedGrassmann, p, X, q, ::ProjectionTransport)
-
-Compute the vector transport of the tangent vector `X` at `p` to `q`,
-using the [`project`](@ref project(::GeneralizedGrassmann, ::Any...))
-of `X` to `q`.
-"""
-vector_transport_to(::GeneralizedGrassmann, ::Any, ::Any, ::Any, ::ProjectionTransport)
-
-function vector_transport_to!(M::GeneralizedGrassmann, Y, p, X, q, ::ProjectionTransport)
-    project!(M, Y, q, X)
-    return Y
-end
-
-@doc raw"""
     zero_vector(M::GeneralizedGrassmann, p)
 
 Return the zero tangent vector from the tangent space at `p` on the
