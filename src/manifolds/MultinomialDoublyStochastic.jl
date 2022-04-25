@@ -197,32 +197,6 @@ function retract_project!(M::MultinomialDoubleStochastic, q, p, X)
     return project!(M, q, p .* exp.(X ./ p))
 end
 
-"""
-    vector_transport_to(M::MultinomialDoubleStochastic, p, X, q)
-
-transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
-at `q`.
-"""
-vector_transport_to(
-    ::MultinomialDoubleStochastic,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::ProjectionTransport,
-)
-
-function vector_transport_to!(
-    M::MultinomialDoubleStochastic,
-    Y,
-    p,
-    X,
-    q,
-    ::ProjectionTransport,
-)
-    project!(M, Y, q, X)
-    return Y
-end
-
 function Base.show(io::IO, ::MultinomialDoubleStochastic{n}) where {n}
     return print(io, "MultinomialDoubleStochastic($(n))")
 end

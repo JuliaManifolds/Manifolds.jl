@@ -132,19 +132,6 @@ function retract_project!(M::MultinomialSymmetric, q, p, X)
     return project!(M, q, p .* exp.(X ./ p))
 end
 
-"""
-    vector_transport_to(M::MultinomialSymmetric, p, X, q)
-
-transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
-at `q`.
-"""
-vector_transport_to(::MultinomialSymmetric, ::Any, ::Any, ::Any, ::ProjectionTransport)
-
-function vector_transport_to!(M::MultinomialSymmetric, Y, p, X, q, ::ProjectionTransport)
-    project!(M, Y, q, X)
-    return Y
-end
-
 function Base.show(io::IO, ::MultinomialSymmetric{n}) where {n}
     return print(io, "MultinomialSymmetric($(n))")
 end
