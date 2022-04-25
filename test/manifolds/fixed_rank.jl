@@ -165,7 +165,7 @@ include("../utils.jl")
                 wb = w .+ X .* 2
                 @test wb isa UMVTVector
                 @test wb == w + X * 2
-                wb .= 2 .* w .+ X
+                @test (wb .= 2 .* w .+ X) == 2 * w + X
                 @test wb == 2 * w + X
                 wb .= w
                 @test wb == w
@@ -194,7 +194,7 @@ include("../utils.jl")
                 test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_vee_hat=false,
-                test_tangent_vector_broadcasting=false, #broadcast not so easy for 3 matrix type
+                test_tangent_vector_broadcasting=true,
                 projection_atol_multiplier=15,
                 retraction_methods=[PolarRetraction()],
                 vector_transport_methods=[ProjectionTransport()],
