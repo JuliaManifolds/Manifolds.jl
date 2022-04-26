@@ -36,7 +36,7 @@ include("group_utils.jl")
             eg,
             [1, 2, 3],
         )
-        
+
         @test_throws ErrorException vee(Rotations(3), eg, [1, 2, 3])
         @test_throws ErrorException vee!(Rotations(3), randn(3), eg, [1, 2, 3])
         @test_throws MethodError vee(
