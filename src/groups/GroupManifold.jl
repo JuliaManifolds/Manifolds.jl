@@ -32,13 +32,6 @@ function (::Type{T})(M::AbstractManifold) where {T<:AbstractGroupOperation}
     return GroupManifold(M, T())
 end
 
-function is_group_manifold(
-    ::TraitList{<:IsGroupManifold{<:O}},
-    ::GroupManifold{𝔽,<:M,<:O},
-) where {𝔽,O<:AbstractGroupOperation,M<:AbstractManifold}
-    return true
-end
-
 function inverse_retract(
     ::TraitList{<:IsGroupManifold},
     G::GroupManifold,

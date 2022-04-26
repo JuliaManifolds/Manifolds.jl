@@ -89,5 +89,16 @@ end
         G = MetricManifold(SO3, TestBiInvariantMetricBase())
         @test isapprox(SO3, exp(G, p, X), exp(SO3, p, X))
         @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol=1e-6)
+
+        @test is_group_manifold(G)
+        @test is_group_manifold(G, MultiplicationOperation())
+        @test !isapprox(G, e, Identity(AdditionOperation()))
+    end
+
+    @testset "invariant metric direction" begin
+        @test direction(HasRightInvariantMetric()) === RightAction()
+        @test direction(HasLeftInvariantMetric()) === LeftAction()
+        @test direction(HasRightInvariantMetric) === RightAction()
+        @test direction(HasLeftInvariantMetric) === LeftAction()
     end
 end
