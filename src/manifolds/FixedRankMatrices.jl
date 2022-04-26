@@ -121,10 +121,6 @@ function allocate(X::UMVTVector, ::Type{T}) where {T}
     return UMVTVector(allocate(X.U, T), allocate(X.M, T), allocate(X.Vt, T))
 end
 
-function allocate_result(::FixedRankMatrices{m,n,k}, ::typeof(embed), vals...) where {m,n,k}
-    #note that vals is (p,) or (X,p) but both first entries have a U of correct type
-    return similar(typeof(vals[1].U), m, n)
-end
 function allocate_result(
     ::FixedRankMatrices{m,n,k},
     ::typeof(project),
@@ -291,9 +287,6 @@ by computing ``USV^{\mathrm{H}}``.
 """
 function embed(::FixedRankMatrices, p::SVDMPoint)
     return p.U * Diagonal(p.S) * p.Vt
-end
-function embed(::FixedRankMatrices, p) # default fallback - identity if we have a matrix
-    return p
 end
 
 function embed!(::FixedRankMatrices, q, p::SVDMPoint)
