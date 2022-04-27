@@ -281,7 +281,8 @@ function retract_exp_ode!(
     b::AbstractBasis,
 )
     sol = solve_exp_ode(M, p, X; basis=b, dense=false)
-    return copyto!(q, sol)
+    copyto!(q, sol)
+    return q
 end
 
 """

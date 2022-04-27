@@ -518,7 +518,7 @@ export AbstractNumbers, ℝ, ℂ, ℍ
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
-export IsDefaultMetric, IsDefaultConnection, IsMetricManifold
+export IsDefaultMetric, IsDefaultConnection, IsMetricManifold, IsConnectionManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
@@ -638,6 +638,7 @@ export ×,
     inverse_retract,
     inverse_retract!,
     isapprox,
+    is_default_connection,
     is_default_metric,
     is_group_manifold,
     is_identity,

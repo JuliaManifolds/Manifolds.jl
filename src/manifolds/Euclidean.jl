@@ -32,7 +32,10 @@ function Euclidean(n::Vararg{Int,I}; field::AbstractNumbers=ℝ) where {I}
 end
 
 function active_traits(f, ::Euclidean, args...)
-    return merge_traits(IsDefaultMetric(EuclideanMetric()))
+    return merge_traits(
+        IsDefaultMetric(EuclideanMetric()),
+        IsDefaultConnection(LeviCivitaConnection()),
+    )
 end
 
 Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field=𝔽)

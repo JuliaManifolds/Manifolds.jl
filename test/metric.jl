@@ -3,6 +3,7 @@ using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
 using ManifoldsBase: TraitList
 import ManifoldsBase: default_retraction_method
+import Manifolds: solve_exp_ode
 using Manifolds:
     FiniteDifferencesBackend,
     InducedBasis,
@@ -17,6 +18,7 @@ struct TestEuclidean{N} <: AbstractManifold{ℝ} end
 struct TestEuclideanMetric <: AbstractMetric end
 struct TestScaledEuclideanMetric <: AbstractMetric end
 struct TestRetraction <: AbstractRetractionMethod end
+struct TestConnection <: AbstractAffineConnection end
 
 ManifoldsBase.default_retraction_method(::TestEuclidean) = TestRetraction()
 function ManifoldsBase.default_retraction_method(
@@ -212,6 +214,14 @@ function Manifolds.sharp!(
     v.data .= w.data ./ 2
     return v
 end
+function solve_exp_ode(
+    ::ConnectionManifold{ℝ,TestEuclidean{N},TestConnection},
+    p,
+    X;
+    kwargs...,
+) where {N}
+    return X
+end
 
 @testset "Metrics" begin
     # some tests failed due to insufficient accuracy for a particularly bad RNG state
@@ -221,6 +231,15 @@ end
               "MetricManifold(Euclidean(3; field = ℝ), EuclideanMetric())"
         @test repr(IsDefaultMetric(EuclideanMetric())) ===
               "IsDefaultMetric(EuclideanMetric())"
+    end
+    @testset "Connection Trait" begin
+        M = ConnectionManifold(Euclidean(3), LeviCivitaConnection())
+        @test is_default_connection(M)
+        @test decorated_manifold(M) == Euclidean(3)
+        @test is_default_connection(Euclidean(3), LeviCivitaConnection())
+        @test !is_default_connection(TestEuclidean{3}(), LeviCivitaConnection())
+        c = IsDefaultConnection(LeviCivitaConnection())
+        @test ManifoldsBase.parent_trait(c) == Manifolds.IsConnectionManifold()
     end
 
     @testset "solve_exp_ode error message" begin
@@ -239,7 +258,11 @@ end
         @test_throws ErrorException exp!(N, q, p, X)
 
         using OrdinaryDiffEq
-        exp(M, p, X)
+        @test is_point(M, exp(M, p, X))
+
+        # a small trick to check that retract_exp_ode! returns the right value on ConnectionManifolds
+        N2 = ConnectionManifold(E, TestConnection())
+        @test exp(N2, p, X) == X
     end
     @testset "Local Metric Error message" begin
         M = MetricManifold(BaseManifold{2}(), NotImplementedMetric())
