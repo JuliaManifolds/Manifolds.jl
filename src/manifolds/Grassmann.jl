@@ -62,46 +62,6 @@ function allocation_promotion_function(M::Grassmann{n,k,ℂ}, f, args::Tuple) wh
 end
 
 @doc raw"""
-    check_point(M::Grassmann{n,k,𝔽}, p)
-
-Check whether `p` is representing a point on the [`Grassmann`](@ref) `M`, i.e. its
-a `n`-by-`k` matrix of unitary column vectors and of correct `eltype` with respect to `𝔽`.
-"""
-function check_point(M::Grassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    c = p' * p
-    if !isapprox(c, one(c); kwargs...)
-        return DomainError(
-            norm(c - one(c)),
-            "The point $(p) does not lie on $(M), because x'x is not the unit matrix.",
-        )
-    end
-    return nothing
-end
-
-@doc raw"""
-    check_vector(M::Grassmann{n,k,𝔽}, p, X; kwargs...)
-
-Check whether `X` is a tangent vector in the tangent space of `p` on
-the [`Grassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
-
-````math
-    p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k,
-````
-
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian
-and $0_k$ the $k × k$ zero matrix.
-"""
-function check_vector(M::Grassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
-    if !isapprox(p' * X, -conj(X' * p); kwargs...)
-        return DomainError(
-            norm(p' * X + conj(X' * p)),
-            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since p'X + X'p is not the zero matrix.",
-        )
-    end
-    return nothing
-end
-
-@doc raw"""
     distance(M::Grassmann, p, q)
 
 Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
