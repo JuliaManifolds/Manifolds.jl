@@ -4,7 +4,8 @@ include("../utils.jl")
     M = FixedRankMatrices(3, 2, 2)
     M2 = FixedRankMatrices(3, 2, 1)
     Mc = FixedRankMatrices(3, 2, 2, ℂ)
-    p = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+    pE = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+    p = SVDMPoint(pE)
     p2 = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0], 1)
     X = UMVTVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], zeros(2, 2))
     @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ)"

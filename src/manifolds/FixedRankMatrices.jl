@@ -307,9 +307,6 @@ U_pMV_p^{\mathrm{H}} + U_XV_p^{\mathrm{H}} + U_pV_X^{\mathrm{H}}
 function embed(::FixedRankMatrices, p::SVDMPoint, X::UMVTVector)
     return (p.U * X.M .+ X.U) * p.Vt + p.U * X.Vt
 end
-function embed(::FixedRankMatrices, p, X) # default fallback - identity if we have a matrix
-    return X
-end
 
 function embed!(::FixedRankMatrices, Y, p::SVDMPoint, X::UMVTVector)
     tmp = p.U * X.M
