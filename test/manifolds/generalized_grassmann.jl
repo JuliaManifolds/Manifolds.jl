@@ -5,6 +5,8 @@ include("../utils.jl")
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
         M = GeneralizedGrassmann(3, 2, B)
         p = [1.0 0.0; 0.0 0.5; 0.0 0.0]
+        X = zeros(3, 2)
+        X[1, :] .= 1.0
         @testset "Basics" begin
             @test repr(M) ==
                   "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
@@ -13,9 +15,11 @@ include("../utils.jl")
             @test base_manifold(M) === M
             @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
             @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws DomainError is_point(M, 2 * p, true)
             @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
             @test_throws DomainError is_vector(M, p, [0.0, 0.0, 1.0, 0.0], true)
             @test_throws DomainError is_vector(M, p, 1 * im * zero_vector(M, p), true)
+            @test_throws DomainError is_vector(M, p, X, true)
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, p) == π / 2

@@ -4,7 +4,9 @@ include("../utils.jl")
     @testset "Real" begin
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
         M = GeneralizedStiefel(3, 2, B)
-        x = [1.0 0.0; 0.0 0.5; 0.0 0.0]
+        p = [1.0 0.0; 0.0 0.5; 0.0 0.0]
+        X = zeros(3, 2)
+        X[1, :] .= 1
         @testset "Basics" begin
             @test repr(M) ==
                   "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
@@ -13,27 +15,31 @@ include("../utils.jl")
             @test base_manifold(M) === M
             @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
             @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
-            @test !is_vector(M, x, [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_vector(M, x, [0.0, 0.0, 1.0, 0.0], true)
-            @test_throws DomainError is_vector(M, x, 1 * im * zero_vector(M, x), true)
+            @test_throws DomainError is_point(M, 2 * p, true)
+            @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
+            @test_throws DomainError is_vector(M, p, [0.0, 0.0, 1.0, 0.0], true)
+            @test_throws DomainError is_vector(M, p, 1 * im * zero_vector(M, p), true)
+            @test_throws DomainError is_vector(M, p, X, true)
+            @test default_retraction_method(M) == ProjectionRetraction()
         end
         @testset "Embedding and Projection" begin
-            y = similar(x)
-            z = embed(M, x)
-            @test z == x
-            embed!(M, y, x)
+            @test get_embedding(GeneralizedStiefel(3, 2)) == Euclidean(3, 2)
+            y = similar(p)
+            z = embed(M, p)
+            @test z == p
+            embed!(M, y, p)
             @test y == z
             a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
             @test !is_point(M, a)
             b = similar(a)
             c = project(M, a)
-            @test c == x
+            @test c == p
             project!(M, b, a)
-            @test b == x
+            @test b == p
             X = [0.0 0.0; 0.0 0.0; -1.0 1.0]
             Y = similar(X)
-            Z = embed(M, x, X)
-            embed!(M, Y, x, X)
+            Z = embed(M, p, X)
+            embed!(M, Y, p, X)
             @test Y == X
             @test Z == X
         end
@@ -42,28 +48,28 @@ include("../utils.jl")
         TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})
         X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
         Y = [0.0 0.0; 0.0 0.0; -1.0 1.0]
-        @test inner(M, x, X, Y) == 0
-        y = retract(M, x, X)
-        z = retract(M, x, Y)
+        @test inner(M, p, X, Y) == 0
+        y = retract(M, p, X)
+        z = retract(M, p, Y)
         @test is_point(M, y)
         @test is_point(M, z)
-        a = project(M, x + X)
-        b = retract(M, x, X)
-        c = retract(M, x, X, ProjectionRetraction())
-        d = retract(M, x, X, PolarRetraction())
+        a = project(M, p + X)
+        b = retract(M, p, X)
+        c = retract(M, p, X, ProjectionRetraction())
+        d = retract(M, p, X, PolarRetraction())
         @test a == b
         @test c == d
         @test b == c
         e = similar(a)
-        retract!(M, e, x, X)
+        retract!(M, e, p, X)
         @test e == a
-        @test vector_transport_to(M, x, X, y, ProjectionTransport()) == project(M, y, X)
+        @test vector_transport_to(M, p, X, y, ProjectionTransport()) == project(M, y, X)
         @testset "Type $T" for T in types
-            pts = convert.(T, [x, y, z])
-            @test !is_point(M, 2 * x)
-            @test_throws DomainError !is_point(M, 2 * x, true)
-            @test !is_vector(M, x, y)
-            @test_throws DomainError is_vector(M, x, y, true)
+            pts = convert.(T, [p, y, z])
+            @test !is_point(M, 2 * p)
+            @test_throws DomainError !is_point(M, 2 * p, true)
+            @test !is_vector(M, p, y)
+            @test_throws DomainError is_vector(M, p, y, true)
             test_manifold(
                 M,
                 pts,
