@@ -187,13 +187,19 @@ include("../utils.jl")
         p2 = HyperboloidPoint(p)
         X2 = HyperboloidTVector(X)
         q2 = HyperboloidPoint(similar(p))
+        q3 = similar(p)
         @test embed(M, p2) == p2.value
         embed!(M, q2, p2)
+        embed!(M, q3, p2)
         @test q2.value == p2.value
+        @test q3 == p2.value
         @test embed(M, p2, X2) == X2.value
         Y2 = HyperboloidTVector(similar(X))
+        Y3 = similar(X)
         embed!(M, Y2, p2, X2)
         @test Y2.value == X2.value
+        embed!(M, Y3, p2, X2)
+        @test Y3 == X2.value
     end
     @testset "Hyperbolic mean test" begin
         pts = [
@@ -226,6 +232,8 @@ include("../utils.jl")
         @test is_vector(M, p, X)
         c = get_coordinates(M, p, X, B)
         @test c ≈ [0.5, 1.0]
+        c2 = similar(c)
+        get_coordinates!(M, c2, p, X, DefaultOrthonormalBasis())
         B2 = DiagonalizingOrthonormalBasis(X)
         V2 = get_vectors(M, p, get_basis(M, p, B2))
         @test V2[1] ≈ X ./ norm(M, p, X)

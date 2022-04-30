@@ -233,7 +233,7 @@ embed!(M::Hyperbolic, q, p::HyperboloidPoint) = embed!(M, q, p.value)
 function embed(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTVector)
     return embed(M, p.value, X.value)
 end
-function embed(M::Hyperbolic, Y, p::HyperboloidPoint, X::HyperboloidTVector)
+function embed!(M::Hyperbolic, Y, p::HyperboloidPoint, X::HyperboloidTVector)
     return embed!(M, Y, p.value, X.value)
 end
 
