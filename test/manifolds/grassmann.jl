@@ -9,14 +9,14 @@ include("../utils.jl")
             @test manifold_dimension(M) == 2
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
-            @test_throws DomainError is_vector(
+            @test_throws ManifoldDomainError is_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws ManifoldDomainError is_vector(
                 M,
                 [2.0 0.0; 0.0 1.0; 0.0 0.0],
                 zeros(3, 2),
                 true,
             )
-            @test_throws DomainError is_vector(
+            @test_throws ManifoldDomainError is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
                 ones(3, 2),
@@ -128,14 +128,14 @@ include("../utils.jl")
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
-            @test_throws DomainError is_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
-            @test_throws DomainError is_vector(
+            @test_throws ManifoldDomainError is_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws ManifoldDomainError is_vector(
                 M,
                 [2.0 0.0; 0.0 1.0; 0.0 0.0],
                 zeros(3, 2),
                 true,
             )
-            @test_throws DomainError is_vector(
+            @test_throws ManifoldDomainError is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
                 ones(3, 2),
@@ -197,7 +197,7 @@ include("../utils.jl")
         p = reshape([im, 0.0, 0.0], 3, 1)
         @test is_point(G, p)
         X = reshape([-0.5; 0.5; 0], 3, 1)
-        @test_throws DomainError is_vector(G, p, X, true)
+        @test_throws ManifoldDomainError is_vector(G, p, X, true)
         Y = project(G, p, X)
         @test is_vector(G, p, Y)
     end

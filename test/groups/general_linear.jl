@@ -63,7 +63,7 @@ using NLsolve
 
         @test_throws DomainError is_point(G, randn(2, 3), true)
         @test_throws DomainError is_point(G, randn(2, 2), true)
-        @test_throws DomainError is_point(G, randn(ComplexF64, 3, 3), true)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3), true)
         @test_throws DomainError is_point(G, zeros(3, 3), true)
         @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
         @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1], true)

@@ -22,7 +22,12 @@ include("../utils.jl")
             @test_throws DomainError is_point(M, 2 * p, true)
             @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
             @test_throws DomainError is_vector(M, p, [0.0, 0.0, 1.0, 0.0], true)
-            @test_throws DomainError is_vector(M, p, 1 * im * zero_vector(M, p), true)
+            @test_throws ManifoldDomainError is_vector(
+                M,
+                p,
+                1 * im * zero_vector(M, p),
+                true,
+            )
             @test_throws DomainError is_vector(M, p, X, true)
             @test default_retraction_method(M) == ProjectionRetraction()
         end
