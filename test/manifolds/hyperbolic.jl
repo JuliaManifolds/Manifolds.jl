@@ -65,7 +65,11 @@ include("../utils.jl")
         @test is_point(M, pB)
         @test convert(AbstractVector, pB) == p # convert back yields again p
         @test convert(HyperboloidPoint, pB).value == pH.value
-        @test_throws DomainError is_point(M, PoincareBallPoint([0.9, 0.0, 0.0]), true)
+        @test_throws ManifoldDomainError is_point(
+            M,
+            PoincareBallPoint([0.9, 0.0, 0.0]),
+            true,
+        )
         @test_throws DomainError is_point(M, PoincareBallPoint([1.0, 0.0]), true)
 
         @test is_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
@@ -74,7 +78,11 @@ include("../utils.jl")
         pS2 = convert(PoincareHalfSpacePoint, pB)
         pS3 = convert(PoincareHalfSpacePoint, pH)
 
-        @test_throws DomainError is_point(M, PoincareHalfSpacePoint([0.0, 0.0, 1.0]), true)
+        @test_throws ManifoldDomainError is_point(
+            M,
+            PoincareHalfSpacePoint([0.0, 0.0, 1.0]),
+            true,
+        )
         @test_throws DomainError is_point(M, PoincareHalfSpacePoint([0.0, -1.0]), true)
 
         @test pS.value == pS2.value
