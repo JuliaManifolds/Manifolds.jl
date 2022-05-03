@@ -20,7 +20,7 @@ end
 function check_size(
     M::Hyperbolic{N},
     p::PoincareHalfSpacePoint,
-    X::PoincareHalfSpacePoint;
+    X::PoincareHalfSpaceTVector;
     kwargs...,
 ) where {N}
     if size(X.value, 1) != N
