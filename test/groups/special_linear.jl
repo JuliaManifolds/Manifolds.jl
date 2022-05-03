@@ -31,13 +31,13 @@ using NLsolve
         G = SpecialLinear(3)
 
         @test_throws DomainError is_point(G, randn(2, 3), true)
-        @test_throws DomainError is_point(G, Float64[2 1; 1 1], true)
-        @test_throws DomainError is_point(G, [1 0 im; im 0 0; 0 -1 0], true)
+        @test_throws ManifoldDomainError is_point(G, Float64[2 1; 1 1], true)
+        @test_throws ManifoldDomainError is_point(G, [1 0 im; im 0 0; 0 -1 0], true)
         @test_throws ManifoldDomainError is_point(G, zeros(3, 3), true)
         @test_throws DomainError is_point(G, Float64[1 3 3; 1 1 2; 1 2 3], true)
         @test is_point(G, Float64[1 1 1; 2 2 1; 2 3 3], true)
         @test is_point(G, Identity(G), true)
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_vector(
             G,
             Float64[2 3 2; 3 1 2; 1 1 1],
             randn(3, 3),
@@ -134,7 +134,7 @@ using NLsolve
         @test_throws DomainError is_point(G, ComplexF64[1 im; im 1], true)
         @test is_point(G, ComplexF64[im 1; -2 im], true)
         @test is_point(G, Identity(G), true)
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_vector(
             G,
             ComplexF64[-1+im -1; -im 1],
             ComplexF64[1-im 1+im; 1 -1+im],

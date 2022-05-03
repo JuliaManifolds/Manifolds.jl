@@ -14,7 +14,7 @@ include("../utils.jl")
     @test manifold_dimension(M) == 2
     @test is_vector(M, p, X)
     @test is_vector(M, p, Y)
-    @test_throws DomainError is_vector(M, p .+ 1, X, true)
+    @test_throws ManifoldDomainError is_vector(M, p .+ 1, X, true)
     @test_throws DomainError is_vector(M, p, zeros(4), true)
     @test_throws DomainError is_vector(M, p, Y .+ 1, true)
 

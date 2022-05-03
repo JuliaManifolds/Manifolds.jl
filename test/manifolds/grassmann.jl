@@ -23,14 +23,18 @@ include("../utils.jl")
                 true,
             )
             @test is_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
-            @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws ManifoldDomainError is_point(
+                M,
+                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
+                true,
+            )
             @test is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
                 zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),
                 true,
             )
-            @test_throws DomainError is_vector(
+            @test_throws ManifoldDomainError is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
                 1im * zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),

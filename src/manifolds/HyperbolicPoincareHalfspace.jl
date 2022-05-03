@@ -7,6 +7,30 @@ function check_point(M::Hyperbolic{N}, p::PoincareHalfSpacePoint; kwargs...) whe
     end
 end
 
+function check_size(M::Hyperbolic{N}, p::PoincareHalfSpacePoint) where {N}
+    if size(p.value, 1) != N
+        !(norm(p.value) < 1)
+        return DomainError(
+            size(p.value, 1),
+            "The point $p does not lie on $M since its length is not $N.",
+        )
+    end
+end
+
+function check_size(
+    M::Hyperbolic{N},
+    p::PoincareHalfSpacePoint,
+    X::PoincareHalfSpacePoint;
+    kwargs...,
+) where {N}
+    if size(X.value, 1) != N
+        return DomainError(
+            size(X.value, 1),
+            "The tangent vector $X can not be a tangent vector for $M since its length is not $N.",
+        )
+    end
+end
+
 @doc raw"""
     convert(::Type{PoincareHalfSpacePoint}, p::PoincareBallPoint)
 

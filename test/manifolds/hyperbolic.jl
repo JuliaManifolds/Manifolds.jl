@@ -18,7 +18,12 @@ include("../utils.jl")
         @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
         @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], true)
+        @test_throws ManifoldDomainError is_vector(
+            M,
+            [1.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            true,
+        )
         @test !is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
         @test_throws DomainError is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], true)
         @test is_default_metric(M, MinkowskiMetric())
@@ -70,10 +75,15 @@ include("../utils.jl")
             PoincareBallPoint([0.9, 0.0, 0.0]),
             true,
         )
-        @test_throws DomainError is_point(M, PoincareBallPoint([1.0, 0.0]), true)
+        @test_throws DomainError is_point(M, PoincareBallPoint([1.1, 0.0]), true)
 
         @test is_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
-
+        @test_throws DomainError is_vector(
+            M,
+            pB,
+            PoincareBallTVector([2.0, 2.0, 3.0]),
+            true,
+        )
         pS = convert(PoincareHalfSpacePoint, p)
         pS2 = convert(PoincareHalfSpacePoint, pB)
         pS3 = convert(PoincareHalfSpacePoint, pH)

@@ -60,7 +60,12 @@ include("../utils.jl")
             UMVTVector(zeros(2, 1), zeros(1, 2), zeros(2, 2)),
         )
         @test !is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), X)
-        @test_throws DomainError is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), X, true)
+        @test_throws ManifoldDomainError is_vector(
+            M,
+            SVDMPoint([1.0 0.0; 0.0 0.0], 2),
+            X,
+            true,
+        )
         @test !is_vector(M, p, UMVTVector(p.U, X.M, p.Vt, 2))
         @test_throws DomainError is_vector(M, p, UMVTVector(p.U, X.M, p.Vt, 2), true)
         @test !is_vector(M, p, UMVTVector(X.U, X.M, p.Vt, 2))

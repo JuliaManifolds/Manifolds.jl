@@ -52,6 +52,30 @@ function check_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...) where {N
     end
 end
 
+function check_size(M::Hyperbolic{N}, p::PoincareBallPoint) where {N}
+    if size(p.value, 1) != N
+        !(norm(p.value) < 1)
+        return DomainError(
+            size(p.value, 1),
+            "The point $p does not lie on $M since its length is not $N.",
+        )
+    end
+end
+
+function check_size(
+    M::Hyperbolic{N},
+    p::PoincareBallPoint,
+    X::PoincareBallTVector;
+    kwargs...,
+) where {N}
+    if size(X.value, 1) != N
+        return DomainError(
+            size(X.value, 1),
+            "The tangent vector $X can not be a tangent vector for $M since its length is not $N.",
+        )
+    end
+end
+
 @doc raw"""
     convert(::Type{PoincareBallPoint}, p::HyperboloidPoint)
     convert(::Type{PoincareBallPoint}, p::T) where {T<:AbstractVector}

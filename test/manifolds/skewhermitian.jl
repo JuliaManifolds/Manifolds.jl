@@ -29,7 +29,7 @@ end
         @test_throws DomainError is_point(M, D, true)
         @test check_vector(M, B_skewsym, B_skewsym) === nothing
         @test_throws DomainError is_vector(M, B_skewsym, A, true)
-        @test_throws DomainError is_vector(M, A, B_skewsym, true)
+        @test_throws ManifoldDomainError is_vector(M, A, B_skewsym, true)
         @test_throws DomainError is_vector(M, B_skewsym, D, true)
         @test_throws ManifoldDomainError is_vector(
             M,

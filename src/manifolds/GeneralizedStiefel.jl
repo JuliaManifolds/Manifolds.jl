@@ -69,6 +69,14 @@ function check_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
     return nothing
 end
 
+# overwrite passing to embedding
+function check_size(M::GeneralizedStiefel{n,k,𝔽}, p) where {n,k,𝔽}
+    return check_size(get_embedding(M), p) #avoid embed, since it uses copyto!
+end
+function check_size(M::GeneralizedStiefel{n,k,𝔽}, p, X) where {n,k,𝔽}
+    return check_size(get_embedding(M), p, X) #avoid embed, since it uses copyto!
+end
+
 @doc raw"""
     check_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
