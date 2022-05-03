@@ -225,14 +225,32 @@ function check_size(M::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
     if (size(p.U) != (m, k)) || (length(p.S) != k) || (size(p.Vt) != (k, n))
         return DomainError(
             [size(p.U)..., length(p.S), size(p.Vt)...],
-            "The point $(p) does not lie on $(M) since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(p.U,1))x$(size(p.Vt,2)) rank $(size(p.S)).",
+            "The point $(p) does not lie on $(M) since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(p.U,1))x$(size(p.Vt,2)) rank $(size(p.S,1)).",
         )
     end
 end
-function check_size(M::FixedRankMatrices{m,n,k}, p::SVDMPoint, X::UMVTVector) where {m,n,k}
+function check_size(M::FixedRankMatrices{m,n,k}, p) where {m,n,k}
+    pS = svd(p)
+    if (size(pS.U) != (m, k)) || (length(pS.S) != k) || (size(pS.Vt) != (k, n))
+        return DomainError(
+            [size(pS.U)..., length(pS.S), size(pS.Vt)...],
+            "The point $(p) does not lie on $(M) since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(pS.U,1))x$(size(pS.Vt,2)) rank $(size(pS.S,1)).",
+        )
+    end
+end
+function check_size(M::FixedRankMatrices{m,n,k}, p, X::UMVTVector) where {m,n,k}
     if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))
         return DomainError(
             cat(size(X.U), size(X.M), size(X.Vt), dims=1),
+            "The tangent vector $(X) is not a tangent vector to $(p) on $(M), since matrix dimensions do not agree (expected $(m)x$(k), $(k)x$(k), $(k)x$(n)).",
+        )
+    end
+end
+function check_size(M::FixedRankMatrices{m,n,k}, p, X) where {m,n,k}
+    XS = svd(X)
+    if (size(XS.U) != (m, k)) || (size(XS.Vt) != (k, n)) || (size(XS.M) != (k, k))
+        return DomainError(
+            cat(size(XS.U), size(XS.M), size(XS.Vt), dims=1),
             "The tangent vector $(X) is not a tangent vector to $(p) on $(M), since matrix dimensions do not agree (expected $(m)x$(k), $(k)x$(k), $(k)x$(n)).",
         )
     end

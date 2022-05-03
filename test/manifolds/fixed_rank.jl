@@ -116,7 +116,7 @@ include("../utils.jl")
                 @test y2 == y3
 
                 @test is_point(M, p)
-                xM = p.U * Diagonal(p.S) * p.Vt
+                xM = embed(M, p)
                 @test is_point(M, xM)
                 @test !is_point(M, xM[1:2, :])
                 @test_throws DomainError is_point(M, xM[1:2, :], true)
