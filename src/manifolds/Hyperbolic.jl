@@ -188,6 +188,9 @@ end
 
 get_embedding(::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
 
+embed(::Hyperbolic, p::AbstractArray) = p
+embed(::Hyperbolic, p::AbstractArray, X::AbstractArray) = X
+
 @doc raw"""
     exp(M::Hyperbolic, p, X)
 

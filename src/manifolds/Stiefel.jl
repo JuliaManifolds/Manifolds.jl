@@ -84,6 +84,9 @@ function check_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     return nothing
 end
 
+embed(::Stiefel, p) = p
+embed(::Stiefel, p, X) = p
+
 function get_embedding(::Stiefel{N,K,𝔽}) where {N,K,𝔽}
     return Euclidean(N, K; field=𝔽)
 end

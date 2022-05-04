@@ -56,6 +56,9 @@ function check_vector(G::SpecialLinear, p, X; kwargs...)
     return nothing
 end
 
+embed(::SpecialLinear, p) = p
+embed(::SpecialLinear, p, X) = X
+
 get_embedding(::SpecialLinear{n,𝔽}) where {n,𝔽} = GeneralLinear(n, 𝔽)
 
 inverse_translate_diff(::SpecialLinear, p, q, X, ::LeftAction) = X

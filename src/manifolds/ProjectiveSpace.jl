@@ -131,6 +131,9 @@ end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
 
+embed(::AbstractProjectiveSpace, p) = p
+embed(::AbstractProjectiveSpace, p, X) = p
+
 @doc raw"""
     distance(M::AbstractProjectiveSpace, p, q)
 
@@ -479,7 +482,7 @@ function parallel_transport_to!(::AbstractProjectiveSpace, Y, p, X, q)
     Y .= (X .- m .* factor) .* λ'
     return Y
 end
-function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::ProjectionTransport)
+function vector_transport_to_project!(M::AbstractProjectiveSpace, Y, p, X, q)
     project!(M, Y, q, X)
     return Y
 end

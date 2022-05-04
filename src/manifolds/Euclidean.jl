@@ -133,9 +133,6 @@ Embed the tangent vector `X` at point `p` in `M`. Equivalent to an identity map.
 """
 embed(::Euclidean, p, X)
 
-embed!(::Euclidean, q, p) = copyto!(q, p)
-embed!(::Euclidean, Y, p, X) = copyto!(Y, X)
-
 function embed!(
     ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},
     q,

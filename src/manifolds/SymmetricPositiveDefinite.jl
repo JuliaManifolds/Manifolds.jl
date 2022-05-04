@@ -80,6 +80,9 @@ function get_embedding(M::SymmetricPositiveDefinite)
     return Euclidean(representation_size(M)...; field=ℝ)
 end
 
+embed(::SymmetricPositiveDefinite, p) = p
+embed(::SymmetricPositiveDefinite, p, X) = X
+
 @doc raw"""
     injectivity_radius(M::SymmetricPositiveDefinite[, p])
     injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}[, p])

@@ -61,6 +61,9 @@ function check_vector(M::SphereSymmetricMatrices{n,𝔽}, p, X; kwargs...) where
     return nothing
 end
 
+embed(::SphereSymmetricMatrices, p::HyperboloidPoint) = p
+embed(::SphereSymmetricMatrices, p, X) = X
+
 function get_embedding(::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
     return ArraySphere(n, n; field=𝔽)
 end

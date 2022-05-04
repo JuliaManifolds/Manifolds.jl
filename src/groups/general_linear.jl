@@ -51,6 +51,9 @@ end
 
 distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
 
+embed(::GeneralLinear, p) = p
+embed(::GeneralLinear, p, X) = X
+
 @doc raw"""
     exp(G::GeneralLinear, p, X)
 

@@ -11,7 +11,7 @@ include("../utils.jl")
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
             base_manifold(M) === M
-            @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
+            @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
             @test_throws ManifoldDomainError is_point(
                 M,
                 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
