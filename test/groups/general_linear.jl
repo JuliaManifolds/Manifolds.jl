@@ -61,7 +61,7 @@ using NLsolve
     @testset "Real" begin
         G = GeneralLinear(3)
 
-        @test_throws DomainError is_point(G, randn(2, 3), true)
+        @test_throws ManifoldDomainError is_point(G, randn(2, 3), true)
         @test_throws ManifoldDomainError is_point(G, randn(2, 2), true)
         @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3), true)
         @test_throws DomainError is_point(G, zeros(3, 3), true)
@@ -137,13 +137,13 @@ using NLsolve
     @testset "Complex" begin
         G = GeneralLinear(2, ℂ)
 
-        @test_throws DomainError is_point(G, randn(ComplexF64, 2, 3), true)
-        @test_throws DomainError is_point(G, randn(ComplexF64, 3, 3), true)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3), true)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3), true)
         @test_throws DomainError is_point(G, zeros(2, 2), true)
         @test_throws DomainError is_point(G, ComplexF64[1 im; 1 im], true)
         @test is_point(G, ComplexF64[1 1; im 1], true)
         @test is_point(G, Identity(G), true)
-        @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
+        @test_throws ManifoldDomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
         @test_throws ManifoldDomainError is_vector(
             G,
             ComplexF64[im im; im im],
