@@ -306,6 +306,9 @@ function distance(M::Symplectic{n}, p, q) where {n}
     return norm(log(symplectic_inverse_times(M, p, q)))
 end
 
+embed(::Symplectic, p) = p
+embed(::Symplectic, p, X) = X
+
 @doc raw"""
     exp(M::Symplectic, p, X)
     exp!(M::Symplectic, q, p, X)

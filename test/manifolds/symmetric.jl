@@ -20,11 +20,11 @@ include("../utils.jl")
         @test check_point(M, B_sym) === nothing
         @test_throws DomainError is_point(M, A, true)
         @test_throws ManifoldDomainError is_point(M, C, true)
-        @test is_point(M, D, true) #embedding changes type
+        @test_throws ManifoldDomainError is_point(M, D, true) #embedding changes type
         @test check_vector(M, B_sym, B_sym) === nothing
         @test_throws DomainError is_vector(M, B_sym, A, true)
         @test_throws ManifoldDomainError is_vector(M, A, B_sym, true)
-        @test_throws DomainError is_vector(M, B_sym, D, true)
+        @test_throws ManifoldDomainError is_vector(M, B_sym, D, true)
         @test_throws ManifoldDomainError is_vector(
             M,
             B_sym,

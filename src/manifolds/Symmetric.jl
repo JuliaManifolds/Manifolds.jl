@@ -77,6 +77,9 @@ function check_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,�
     return nothing
 end
 
+embed(::SymmetricMatrices, p) = p
+embed(::SymmetricMatrices, p, X) = X
+
 function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
     κ = zeros(real(eltype(p)), manifold_dimension(M))

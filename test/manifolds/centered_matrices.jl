@@ -19,7 +19,7 @@ include("../utils.jl")
         @test check_vector(M, A, A) === nothing
         @test_throws DomainError is_vector(M, A, D, true)
         @test_throws ManifoldDomainError is_vector(M, D, A, true)
-        @test_throws DomainError is_vector(M, A, B, true)
+        @test_throws ManifoldDomainError is_vector(M, A, B, true)
         @test manifold_dimension(M) == 4
         @test A == project!(M, A, A)
         @test A == project(M, A, A)

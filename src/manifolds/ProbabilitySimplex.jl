@@ -144,6 +144,9 @@ function distance(::ProbabilitySimplex, p, q)
     return 2 * acos(sumsqrt)
 end
 
+embed(::ProbabilitySimplex, p) = p
+embed(::ProbabilitySimplex, p, X) = X
+
 @doc raw"""
     exp(M::ProbabilitySimplex,p,X)
 

@@ -21,7 +21,7 @@ include("../utils.jl")
         @test_throws DomainError is_point(M, D, true)
         @test_throws ManifoldDomainError is_point(M, E, true)
         @test check_vector(M, A, zeros(3, 3)) === nothing
-        @test_throws DomainError is_vector(M, A, B, true)
+        @test_throws ManifoldDomainError is_vector(M, A, B, true)
         @test_throws ManifoldDomainError is_vector(M, A, C, true)
         @test_throws ManifoldDomainError is_vector(M, A, D, true)
         @test_throws ManifoldDomainError is_vector(M, D, A, true)
