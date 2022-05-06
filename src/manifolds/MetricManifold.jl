@@ -324,8 +324,6 @@ function flat!(
     return ξ
 end
 
-# ToDo how to do a flat (nonmutating?)
-
 function get_basis(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},
@@ -775,7 +773,7 @@ function vector_transport_along!(
     c::AbstractVector,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_to!(M.manifold, Y, p, X, c, m)
+    return vector_transport_along!(M.manifold, Y, p, X, c, m)
 end
 
 function vector_transport_direction(

@@ -222,7 +222,17 @@ function solve_exp_ode(
 ) where {N}
     return X
 end
-
+function Manifolds.vector_transport_along!(
+    M::BaseManifold,
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+)
+    Y .= c
+    return Y
+end
 @testset "Metrics" begin
     # some tests failed due to insufficient accuracy for a particularly bad RNG state
     Random.seed!(42)
@@ -528,7 +538,17 @@ end
 
         @test project!(MM2, q, p) === project!(M, q, p)
         @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
+        @test parallel_transport_to(MM2, p, X, q) == parallel_transport_to(M, q, X, p)
+        @test parallel_transport_to!(MM2, Y, p, X, q) ==
+              parallel_transport_to!(M, Y, q, X, p)
+        @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
         @test vector_transport_to!(MM2, Y, p, X, q) == vector_transport_to!(M, Y, p, X, q)
+        c = 2 * ones(3)
+        m = ParallelTransport()
+        @test vector_transport_along(MM2, p, X, c, m) ==
+              vector_transport_along(M, p, X, c, m)
+        @test vector_transport_along!(MM2, Y, p, X, c, m) ==
+              vector_transport_along!(M, Y, p, X, c, m)
         @test zero_vector!(MM2, X, p) === zero_vector!(M, X, p)
         @test injectivity_radius(MM2, p) === injectivity_radius(M, p)
         @test injectivity_radius(MM2) === injectivity_radius(M)
@@ -592,6 +612,16 @@ end
             fX2 = allocate(fX)
             sharp!(MM, fX2, p, cofX2)
             @test isapprox(fX2.data, fX.data)
+
+            cofX3a = flat(MM2, p, fX)
+            cofX3b = allocate(cofX3a)
+            flat!(MM2, cofX3b, p, fX)
+            @test isapprox(cofX3a.data, cofX3b.data)
+
+            fX3a = sharp(MM2, p, cofX)
+            fX3b = allocate(fX3a)
+            sharp!(MM2, fX3b, p, cofX)
+            @test isapprox(fX3a.data, fX3b.data)
         end
     end
 
