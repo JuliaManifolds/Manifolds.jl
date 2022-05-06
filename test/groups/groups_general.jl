@@ -14,10 +14,17 @@ include("group_utils.jl")
         eg = Identity(G)
         @test repr(eg) === "Identity(NotImplementedOperation)"
         @test number_eltype(eg) == Bool
+        @test !is_group_manifold(NotImplementedManifold(), NotImplementedOperation())
         @test is_identity(G, eg) # identity transparent
         @test_throws MethodError identity_element(G) # but for a NotImplOp there is no concrete id.
         @test isapprox(G, eg, eg)
         @test_throws MethodError is_identity(G, 1) # same error as before i.e. dispatch isapprox works
+        @test Manifolds.check_size(G, eg) === nothing
+        @test Manifolds.check_size(
+            Manifolds.EmptyTrait(),
+            MetricManifold(NotImplementedManifold(), EuclideanMetric()),
+            eg,
+        ) isa DomainError
 
         @test Identity(NotImplementedOperation()) === eg
         @test Identity(NotImplementedOperation) === eg
