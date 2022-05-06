@@ -17,6 +17,11 @@ using RecursiveArrayTools: ArrayPartition
     @test injectivity_radius(Mse) ≈ π
     @test injectivity_radius(
         Mse,
+        ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
+    ) ≈ π
+    @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
+    @test injectivity_radius(
+        Mse,
         ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0]),
         ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
     ) ≈ π

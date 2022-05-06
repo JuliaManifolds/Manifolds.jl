@@ -659,7 +659,7 @@ function injectivity_radius(M::ProductManifold, p, m::AbstractRetractionMethod)
         )...,
     )
 end
-function _injectivity_radius(M::ProductManifold, p, m::ProductRetraction)
+function injectivity_radius(M::ProductManifold, p, m::ProductRetraction)
     return min(
         map(
             (lM, lp, lm) -> injectivity_radius(lM, lp, lm),
@@ -673,7 +673,7 @@ injectivity_radius(M::ProductManifold) = min(map(injectivity_radius, M.manifolds
 function injectivity_radius(M::ProductManifold, m::AbstractRetractionMethod)
     return min(map(manif -> injectivity_radius(manif, m), M.manifolds)...)
 end
-function _injectivity_radius(M::ProductManifold, m::ProductRetraction)
+function injectivity_radius(M::ProductManifold, m::ProductRetraction)
     return min(map((lM, lm) -> injectivity_radius(lM, lm), M.manifolds, m.retractions)...)
 end
 
@@ -726,18 +726,6 @@ for TP in [ProductRepr, ArrayPartition]
             end
         end,
     )
-end
-
-function _inverse_retract!(M::ProductManifold, X, p, q, method::InverseProductRetraction)
-    map(
-        inverse_retract!,
-        M.manifolds,
-        submanifold_components(M, X),
-        submanifold_components(M, p),
-        submanifold_components(M, q),
-        method.inverse_retractions,
-    )
-    return X
 end
 
 function Base.isapprox(M::ProductManifold, p, q; kwargs...)
