@@ -65,6 +65,8 @@ import ManifoldsBase:
     hat,
     hat!,
     injectivity_radius,
+    _injectivity_radius,
+    injectivity_radius_exp,
     inner,
     is_point,
     is_vector,

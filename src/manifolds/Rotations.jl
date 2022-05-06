@@ -361,7 +361,6 @@ Return the radius of injectivity for the [`PolarRetraction`](https://juliamanifo
 [`Rotations`](@ref) `M` which is $\frac{π}{\sqrt{2}}$.
 """
 injectivity_radius(::Rotations) = π * sqrt(2.0)
-injectivity_radius_exp(::Rotations) = π * sqrt(2.0)
 _injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
 
 @doc raw"""
