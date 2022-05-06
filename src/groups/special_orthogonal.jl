@@ -43,12 +43,6 @@ function allocate_result(
 )
     return allocate(q)
 end
-function allocate_result(::Rotations, ::typeof(exp), ::Identity{MultiplicationOperation}, X)
-    return allocate(X)
-end
-function allocate_result(::Rotations, ::typeof(log), ::Identity{MultiplicationOperation}, q)
-    return allocate(q)
-end
 
 Base.inv(::SpecialOrthogonal, p) = transpose(p)
 Base.inv(::SpecialOrthogonal, e::Identity{MultiplicationOperation}) = e
