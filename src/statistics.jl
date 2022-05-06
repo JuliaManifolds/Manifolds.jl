@@ -1148,13 +1148,6 @@ function StatsBase.mean_and_std(M::AbstractManifold, args...; kwargs...)
     m, v = mean_and_var(M, args...; kwargs...)
     return m, sqrt(v)
 end
-function default_estimation_method(
-    ::EmptyTrait,
-    M::AbstractDecoratorManifold,
-    ::typeof(mean_and_std),
-)
-    return default_estimation_method(M, mean)
-end
 function default_estimation_method(M::AbstractManifold, ::typeof(mean_and_std))
     return default_estimation_method(M, mean)
 end

@@ -103,6 +103,14 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
             @test isapprox(M, mean_and_std(M, x, w; kwargs...)[1], y; atol=10^-7)
         end
         @test_throws DimensionMismatch mean(M, x, pweights(ones(n + 1)); kwargs...)
+        @test_throws DimensionMismatch mean!(
+            M,
+            y,
+            x,
+            pweights(ones(n + 1)),
+            Manifolds.default_estimation_method(M, mean);
+            kwargs...,
+        )
     end
     return nothing
 end
@@ -185,6 +193,13 @@ function test_var(M, x, vexp=nothing; kwargs...)
                   var(M, x, w, m; kwargs...) * n / (n - 1)
         end
         @test_throws DimensionMismatch var(M, x, pweights(ones(n + 1)); kwargs...)
+        @test_throws DimensionMismatch mean_and_var(
+            M,
+            x,
+            pweights(ones(n + 1)),
+            GeodesicInterpolation();
+            kwargs...,
+        )
     end
     return nothing
 end
@@ -380,6 +395,8 @@ end
             @test std(M, x, w) == 2.0
             @test std(M, x, w, 2) == 2.0
 
+            @test Manifolds.default_estimation_method(M, mean_and_std) ==
+                  Manifolds.default_estimation_method(M, mean)
             @test mean_and_var(M, x, TestStatsMethod1()) == ([5.0], 16)
             @test mean_and_var(M, x, w, TestStatsMethod1()) == ([5.0], 9)
             @test mean_and_std(M, x, TestStatsMethod1()) == ([5.0], 4.0)
@@ -774,6 +791,11 @@ end
         m = normalize(median(Euclidean(3), x, w))
         mg = median(S, x, w, ExtrinsicEstimation())
         @test isapprox(S, m, mg)
+    end
+
+    @testset "Covariance Default" begin
+        @test default_estimation_method(TestStatsSphere{2}(), cov) ==
+              GradientDescentEstimation()
     end
 
     @testset "Covariance matrix, Euclidean" begin
