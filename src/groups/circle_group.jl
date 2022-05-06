@@ -130,8 +130,6 @@ end
 
 Base.show(io::IO, ::RealCircleGroup) = print(io, "RealCircleGroup()")
 
-invariant_metric_dispatch(::RealCircleGroup, ::ActionDirection) = Val(true)
-
 is_default_metric(::RealCircleGroup, ::EuclideanMetric) = true
 
 # Lazy overwrite since this is a rare case of nonmutating foo.

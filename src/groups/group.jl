@@ -202,7 +202,7 @@ function check_size(
     M::AbstractDecoratorManifold,
     ::Identity{<:O},
 ) where {O<:AbstractGroupOperation}
-    return true
+    return nothing
 end
 function check_size(::EmptyTrait, M::AbstractDecoratorManifold, e::Identity)
     return DomainError(0, "$M seems to not be a group manifold with $e.")
