@@ -33,6 +33,9 @@ using RecursiveArrayTools: ArrayPartition
     @test check_point(Mse, [1, 2]) isa DomainError
     @test_throws DomainError is_vector(Mse, 1, [1, 2], true; check_base_point=false)
     @test check_vector(Mse, 1, [1, 2]; check_base_point=false) isa DomainError
+    #default fallbacks for check_size, Product not working with Arrays
+    @test Manifolds.check_size(Mse, zeros(2)) isa DomainError
+    @test Manifolds.check_size(Mse, zeros(2), zeros(3)) isa DomainError
     types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_STATIC_SIZED && push!(types, MVector{5,Float64})
