@@ -99,14 +99,7 @@ a `n`-by-`k` matrix of unitary column vectors with respect to the B inner prudct
 of correct `eltype` with respect to `𝔽`.
 """
 function check_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    c = p' * M.B * p
-    if !isapprox(c, one(c); kwargs...)
-        return DomainError(
-            norm(c - one(c)),
-            "The point $(p) does not lie on $(M), because x'Bx is not the unit matrix.",
-        )
-    end
-    return nothing
+    return nothing # everything already checked in the embedding (generalized Stiefel)
 end
 
 @doc raw"""
@@ -123,13 +116,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
 $\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
 """
 function check_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
-    if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
-        return DomainError(
-            norm(p' * M.B * X + conj(X' * M.B * p)),
-            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
-        )
-    end
-    return nothing
+    return nothing # everything already checked in the embedding (generalized Stiefel)
 end
 
 @doc raw"""

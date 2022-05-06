@@ -210,6 +210,19 @@ include("../utils.jl")
         @test Y2.value == X2.value
         embed!(M, Y3, p2, X2)
         @test Y3 == X2.value
+        # check embed for PoincareBall
+        p4 = convert(PoincareBallPoint, p)
+        X4 = convert(PoincareBallTVector, p, X)
+        q4 = embed(M, p4)
+        @test isapprox(q, zeros(2))
+        q4b = similar(q)
+        embed!(M, q4b, p4)
+        @test q4b == q4
+        Y4 = embed(M, p4, X4)
+        @test Y4 == X4.value
+        Y4b = similar(Y4)
+        embed!(M, Y4b, p4, X4)
+        @test Y4 == Y4b
     end
     @testset "Hyperbolic mean test" begin
         pts = [

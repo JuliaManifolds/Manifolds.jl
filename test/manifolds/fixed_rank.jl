@@ -53,6 +53,8 @@ include("../utils.jl")
         @test !is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2))
         @test_throws DomainError is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), true)
         @test is_point(M2, p2)
+        @test_throws DomainError is_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+        @test Manifolds.check_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]) isa DomainError
 
         @test !is_vector(
             M,

@@ -246,15 +246,6 @@ function check_size(M::FixedRankMatrices{m,n,k}, p, X::UMVTVector) where {m,n,k}
         )
     end
 end
-function check_size(M::FixedRankMatrices{m,n,k}, p, X) where {m,n,k}
-    XS = svd(X)
-    if (size(XS.U) != (m, k)) || (size(XS.Vt) != (k, n)) || (size(XS.M) != (k, k))
-        return DomainError(
-            cat(size(XS.U), size(XS.M), size(XS.Vt), dims=1),
-            "The tangent vector $(X) is not a tangent vector to $(p) on $(M), since matrix dimensions do not agree (expected $(m)x$(k), $(k)x$(k), $(k)x$(n)).",
-        )
-    end
-end
 
 @doc raw"""
     check_vector(M:FixedRankMatrices{m,n,k}, p, X; kwargs...)
