@@ -214,8 +214,8 @@ include("../utils.jl")
         p4 = convert(PoincareBallPoint, p)
         X4 = convert(PoincareBallTVector, p, X)
         q4 = embed(M, p4)
-        @test isapprox(q, zeros(2))
-        q4b = similar(q)
+        @test isapprox(q4, zeros(2))
+        q4b = similar(q4)
         embed!(M, q4b, p4)
         @test q4b == q4
         Y4 = embed(M, p4, X4)
@@ -223,6 +223,19 @@ include("../utils.jl")
         Y4b = similar(Y4)
         embed!(M, Y4b, p4, X4)
         @test Y4 == Y4b
+        # check embed for PoincareHalfSpace
+        p5 = convert(PoincareHalfSpacePoint, p)
+        X5 = convert(PoincareHalfSpaceTVector, p, X)
+        q5 = embed(M, p5)
+        @test isapprox(q5, [0.0; 1.0])
+        q5b = similar(q5)
+        embed!(M, q5b, p5)
+        @test q5b == q5
+        Y5 = embed(M, p5, X5)
+        @test Y5 == X5.value
+        Y5b = similar(Y5)
+        embed!(M, Y5b, p5, X5)
+        @test Y5 == Y5b
     end
     @testset "Hyperbolic mean test" begin
         pts = [

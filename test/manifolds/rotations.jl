@@ -11,6 +11,7 @@ include("../utils.jl")
           π * sqrt(2.0)
     @test injectivity_radius(M, PolarRetraction()) ≈ π / sqrt(2)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], PolarRetraction()) ≈ π / sqrt(2)
+    @test get_embedding(M) == Euclidean(2, 2)
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{2,2,Float64,4})

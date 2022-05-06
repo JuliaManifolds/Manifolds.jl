@@ -228,14 +228,7 @@ vector_transport_to(
     ::ProjectionTransport,
 )
 
-function vector_transport_to!(
-    M::SymmetricPositiveSemidefiniteFixedRank,
-    Y,
-    p,
-    X,
-    q,
-    ::ProjectionTransport,
-)
+function vector_transport_to_project!(M::SymmetricPositiveSemidefiniteFixedRank, Y, p, X, q)
     project!(M, Y, q, X)
     return Y
 end
