@@ -159,6 +159,9 @@ function distance(M::GeneralizedGrassmann, p, q)
     return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
 end
 
+embed(::GeneralizedGrassmann, p) = p
+embed(::GeneralizedGrassmann, p, X) = X
+
 @doc raw"""
     exp(M::GeneralizedGrassmann, p, X)
 
