@@ -81,10 +81,16 @@ end
         p = exp(hat(SO3, pe, [1.0, 2.0, 3.0]))
         q = exp(hat(SO3, pe, [3.0, 4.0, 1.0]))
         X = hat(SO3, e, [2.0, 3.0, 4.0])
+        Y = similar(X)
+        p2 = similar(p)
 
         G = MetricManifold(SO3, TestBiInvariantMetricBase())
         @test isapprox(SO3, exp(G, p, X), exp(SO3, p, X))
+        exp!(G, p2, p, X)
+        @test isapprox(SO3, p2, exp(SO3, p, X))
         @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol=1e-6)
+        log!(G, Y, p, q)
+        @test isapprox(SO3, p, Y, log(SO3, p, q); atol=1e-6)
 
         G = MetricManifold(SO3, TestBiInvariantMetricBase())
         @test isapprox(SO3, exp(G, p, X), exp(SO3, p, X))
@@ -93,6 +99,8 @@ end
         @test is_group_manifold(G)
         @test is_group_manifold(G, MultiplicationOperation())
         @test !isapprox(G, e, Identity(AdditionOperation()))
+        @test has_biinvariant_metric(G)
+        @test !has_biinvariant_metric(Sphere(2))
     end
 
     @testset "invariant metric direction" begin

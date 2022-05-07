@@ -113,6 +113,9 @@ TEST_GROUP = get(ENV, "MANIFOLDS_TEST_GROUP", "all")
             end
         end
 
+        @test Manifolds.is_metric_function(flat)
+        @test Manifolds.is_metric_function(sharp)
+
         include_test("groups/group_utils.jl")
         include_test("notation.jl")
         # starting with tests of simple manifolds
