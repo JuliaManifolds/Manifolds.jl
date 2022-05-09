@@ -66,7 +66,7 @@ p = [ [1.0, 0.0, 0.0],
     ]
 ```
 
-which is again a valid point so `is_point``(M, p)` here also yields true.
+which is again a valid point so `is_point(M, p)` here also yields true.
 A disadvantage might be that with nested arrays one loses a little bit of performance.
 The data however is nicely encapsulated. Accessing the first data item is just `p[1]`.
 

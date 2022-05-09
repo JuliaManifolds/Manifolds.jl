@@ -313,7 +313,7 @@ function Base.show(io::IO, ::Identity{O}) where {O<:AbstractGroupOperation}
 end
 
 function check_point(
-    ::TraitList{IsGroupManifold{O1}},
+    ::TraitList{<:IsGroupManifold{O1}},
     G::AbstractDecoratorManifold,
     e::Identity{O2};
     kwargs...,
