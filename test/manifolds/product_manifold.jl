@@ -364,6 +364,8 @@ using RecursiveArrayTools: ArrayPartition
             ProductRepr{Tuple{T,Float64,T} where T},
             ProductRepr(9, 10, 11),
         )) == ProductRepr(9, 10.0, 11)
+        @test (@inferred convert(ProductRepr, ProductRepr(9, 10, 11))) ===
+              ProductRepr(9, 10, 11)
 
         p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
         @test p == ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
@@ -373,6 +375,8 @@ using RecursiveArrayTools: ArrayPartition
         @test submanifold_component(p, Val(1)) === p.parts[1]
         @test submanifold_components(Mse, p) === p.parts
         @test submanifold_components(p) === p.parts
+        @test allocate(p, Int, 10) isa Vector{Int}
+        @test length(allocate(p, Int, 10)) == 10
     end
 
     @testset "ArrayPartition" begin
@@ -420,6 +424,13 @@ using RecursiveArrayTools: ArrayPartition
             @test injectivity_radius(Mse) ≈ π
             @test injectivity_radius(Mse, pts[1], ExponentialRetraction()) ≈ π
             @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
+
+            @test ManifoldsBase.allocate_coordinates(
+                Mse,
+                pts[1],
+                Float64,
+                number_of_coordinates(Mse, DefaultOrthogonalBasis()),
+            ) isa Vector{Float64}
 
             test_manifold(
                 Mse,

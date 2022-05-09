@@ -55,6 +55,7 @@ using LinearAlgebra: Diagonal, dot
             return y
         end
         f2(x) = 3 * x[1] * x[2] + x[2]^3
+        @test _jacobian(c1, 0.0) ≈ [1.0; 0.0]
 
         @testset for backend in [fd51]
             set_default_differential_backend!(backend)
