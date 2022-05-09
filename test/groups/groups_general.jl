@@ -18,6 +18,15 @@ include("group_utils.jl")
         @test is_identity(G, eg) # identity transparent
         @test_throws MethodError identity_element(G) # but for a NotImplOp there is no concrete id.
         @test isapprox(G, eg, eg)
+        @test !isapprox(G, Identity(AdditionOperation()), eg)
+        @test !isapprox(G, Identity(AdditionOperation()), eg)
+        @test !isapprox(
+            G,
+            Identity(AdditionOperation()),
+            Identity(MultiplicationOperation()),
+        )
+        @test_throws DomainError is_point(G, Identity(AdditionOperation()), true)
+        @test is_point(G, eg)
         @test_throws MethodError is_identity(G, 1) # same error as before i.e. dispatch isapprox works
         @test Manifolds.check_size(G, eg) === nothing
         @test Manifolds.check_size(
