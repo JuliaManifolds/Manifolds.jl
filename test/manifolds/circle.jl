@@ -116,8 +116,6 @@ using Manifolds: TFVector, CoTFVector
             test_manifold(
                 M,
                 pts,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
@@ -131,8 +129,6 @@ using Manifolds: TFVector, CoTFVector
             test_manifold(
                 M,
                 ptsS,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,
@@ -217,8 +213,6 @@ using Manifolds: TFVector, CoTFVector
             test_manifold(
                 Mc,
                 pts,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
@@ -232,8 +226,6 @@ using Manifolds: TFVector, CoTFVector
             test_manifold(
                 Mc,
                 ptsS,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,

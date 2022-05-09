@@ -29,8 +29,6 @@ include("../utils.jl")
                     pts,
                     exp_log_atol_multiplier=5,
                     is_tangent_atol_multiplier=5,
-                    test_forward_diff=false,
-                    test_reverse_diff=false,
                     test_project_tangent=true,
                     test_inplace=true,
                 )

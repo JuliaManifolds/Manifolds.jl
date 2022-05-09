@@ -43,7 +43,6 @@ include("../utils.jl")
         test_manifold(
             M,
             pts;
-            test_reverse_diff=false,
             test_injectivity_radius=false,
             test_project_tangent=true,
             test_musical_isomorphisms=true,
@@ -107,8 +106,6 @@ include("../utils.jl")
             test_manifold(
                 SOn,
                 pts;
-                test_forward_diff=n == 3,
-                test_reverse_diff=false,
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_mutating_rand=true,

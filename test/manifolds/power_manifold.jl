@@ -191,7 +191,6 @@ end
             test_manifold(
                 Ms1,
                 pts1;
-                test_reverse_diff=true,
                 test_musical_isomorphisms=true,
                 test_injectivity_radius=false,
                 test_default_vector_transport=true,
@@ -224,7 +223,6 @@ end
             test_manifold(
                 Ms2,
                 pts2;
-                test_reverse_diff=true,
                 test_musical_isomorphisms=true,
                 test_injectivity_radius=false,
                 test_vee_hat=true,
@@ -247,7 +245,6 @@ end
             test_manifold(
                 Mr1,
                 pts1;
-                test_reverse_diff=false,
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_vee_hat=true,
@@ -271,7 +268,6 @@ end
             test_manifold(
                 Mrn1,
                 pts1;
-                test_reverse_diff=false,
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_vee_hat=true,
@@ -296,7 +292,6 @@ end
             test_manifold(
                 Mr2,
                 pts2;
-                test_reverse_diff=false,
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_vee_hat=true,
@@ -318,7 +313,6 @@ end
             test_manifold(
                 Mrn2,
                 pts2;
-                test_reverse_diff=false,
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_vee_hat=true,
@@ -342,8 +336,6 @@ end
         test_manifold(
             MT,
             pts_t;
-            test_reverse_diff=false,
-            test_forward_diff=false,
             test_injectivity_radius=false,
             test_musical_isomorphisms=true,
             test_vee_hat=true,
@@ -386,8 +378,6 @@ end
         test_manifold(
             MT,
             pts_t;
-            test_reverse_diff=false,
-            test_forward_diff=false,
             test_injectivity_radius=false,
             test_musical_isomorphisms=true,
             retraction_methods=retraction_methods,

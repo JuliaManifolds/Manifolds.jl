@@ -52,8 +52,6 @@ include("../utils.jl")
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_vee_hat=false,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 is_tangent_atol_multiplier=5.0,
                 inverse_retraction_methods=[SoftmaxInverseRetraction()],
                 retraction_methods=[SoftmaxRetraction()],

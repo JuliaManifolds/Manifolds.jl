@@ -112,8 +112,6 @@ using NLsolve
             test_manifold(
                 G,
                 gpts;
-                test_reverse_diff=false,
-                test_forward_diff=false,
                 test_project_point=true,
                 test_injectivity_radius=false,
                 test_project_tangent=true,
@@ -177,8 +175,6 @@ using NLsolve
             test_manifold(
                 G,
                 gpts;
-                test_reverse_diff=false,
-                test_forward_diff=false,
                 test_project_point=true,
                 test_injectivity_radius=false,
                 test_project_tangent=true,

@@ -34,8 +34,7 @@ using LinearAlgebra: Diagonal, dot
 @testset "Differentiation backend" begin
     fd51 = Manifolds.FiniteDifferencesBackend()
     @testset "default_differential_backend" begin
-        #ForwardDiff is loaded first in utils.
-        @test default_differential_backend() === Manifolds.ForwardDiffBackend()
+        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
 
         @test length(fd51.method.grid) == 5
         # check method order
@@ -43,38 +42,6 @@ using LinearAlgebra: Diagonal, dot
         fd71 = Manifolds.FiniteDifferencesBackend(central_fdm(7, 1))
         @test set_default_differential_backend!(fd71) == fd71
         @test default_differential_backend() == fd71
-    end
-
-    using ForwardDiff
-
-    fwd_diff = Manifolds.ForwardDiffBackend()
-    @testset "ForwardDiff" begin
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        @test set_default_differential_backend!(fwd_diff) == fwd_diff
-        @test default_differential_backend() == fwd_diff
-        @test set_default_differential_backend!(fd51) isa Manifolds.FiniteDifferencesBackend
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        set_default_differential_backend!(fwd_diff)
-        @test default_differential_backend() == fwd_diff
-        set_default_differential_backend!(fd51)
-    end
-
-    using ReverseDiff
-
-    reverse_diff = Manifolds.ReverseDiffBackend()
-    @testset "ReverseDiff" begin
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        @test set_default_differential_backend!(reverse_diff) == reverse_diff
-        @test default_differential_backend() == reverse_diff
-        @test set_default_differential_backend!(fd51) isa Manifolds.FiniteDifferencesBackend
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        set_default_differential_backend!(reverse_diff)
-        @test default_differential_backend() == reverse_diff
-        set_default_differential_backend!(fd51)
     end
 
     @testset "gradient" begin
@@ -89,22 +56,14 @@ using LinearAlgebra: Diagonal, dot
         end
         f2(x) = 3 * x[1] * x[2] + x[2]^3
 
-        @testset "Inference" begin
-            X = [-1.0, -1.0]
-            @test (@inferred _derivative(c1, 0.0, Manifolds.ForwardDiffBackend())) ≈
-                  [1.0, 0.0]
-            @test (@inferred _derivative!(c1, X, 0.0, Manifolds.ForwardDiffBackend())) === X
-            @test X ≈ [1.0, 0.0]
-        end
-
-        @testset for backend in [fd51, fwd_diff]
+        @testset for backend in [fd51]
             set_default_differential_backend!(backend)
             @test _derivative(c1, 0.0) ≈ [1.0, 0.0]
             X = [-1.0, -1.0]
             @test _derivative!(c1, X, 0.0) === X
             @test isapprox(X, [1.0, 0.0])
         end
-        @testset for backend in [fd51, fwd_diff, reverse_diff]
+        @testset for backend in [fd51]
             set_default_differential_backend!(backend)
             X = [-1.0, -1.0]
             @test _gradient(f1, [1.0, -1.0]) ≈ [1.0, -2.0]
@@ -112,7 +71,7 @@ using LinearAlgebra: Diagonal, dot
             @test X ≈ [1.0, -2.0]
         end
         set_default_differential_backend!(Manifolds.NoneDiffBackend())
-        @testset for backend in [fd51, Manifolds.ForwardDiffBackend()]
+        @testset for backend in [fd51]
             @test _derivative(c1, 0.0, backend) ≈ [1.0, 0.0]
             @test _gradient(f1, [1.0, -1.0], backend) ≈ [1.0, -2.0]
         end
@@ -129,8 +88,6 @@ rb_onb_default = TangentDiffBackend(
 )
 
 rb_onb_fd51 = TangentDiffBackend(Manifolds.FiniteDifferencesBackend())
-
-rb_onb_fwd_diff = TangentDiffBackend(Manifolds.ForwardDiffBackend())
 
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();
@@ -154,7 +111,7 @@ rb_proj = Manifolds.RiemannianProjectionBackend(default_differential_backend())
     differential!(s2, c1, X, π / 4, rb_onb_default)
     @test isapprox(s2, c1(π / 4), X, Xval)
 
-    @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff]
+    @testset for backend in [rb_onb_fd51]
         @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4, backend), Xval)
         X = similar(p)
         differential!(s2, c1, X, π / 4, backend)

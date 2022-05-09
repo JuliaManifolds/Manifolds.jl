@@ -48,8 +48,6 @@ include("../utils.jl")
                 tvector_distributions=[
                     Manifolds.normal_tvector_distribution(M, pts[1], 1.0),
                 ],
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 basis_types_vecs=(
                     DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),
                     basis_types...,
@@ -151,8 +149,6 @@ include("../utils.jl")
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 basis_types_to_from=(DefaultOrthonormalBasis(),),
                 test_vee_hat=false,
                 retraction_methods=[
@@ -261,8 +257,6 @@ include("../utils.jl")
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 basis_types_to_from=(DefaultOrthonormalBasis(),),
                 test_vee_hat=false,
                 retraction_methods=[

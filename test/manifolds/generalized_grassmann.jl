@@ -99,8 +99,6 @@ include("../utils.jl")
                 test_is_tangent=true,
                 test_project_tangent=true,
                 test_default_vector_transport=false,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 projection_atol_multiplier=15.0,
                 retraction_atol_multiplier=10.0,
                 is_tangent_atol_multiplier=4 * 10.0^2,

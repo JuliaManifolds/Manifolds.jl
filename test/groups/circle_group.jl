@@ -69,8 +69,6 @@ include("group_utils.jl")
         test_manifold(
             G,
             pts,
-            test_forward_diff=false,
-            test_reverse_diff=false,
             test_vector_spaces=false,
             test_project_tangent=true,
             test_musical_isomorphisms=false,
@@ -147,8 +145,6 @@ end
         test_manifold(
             G,
             pts,
-            test_forward_diff=false,
-            test_reverse_diff=false,
             test_vector_spaces=false,
             test_project_tangent=true,
             test_musical_isomorphisms=false,

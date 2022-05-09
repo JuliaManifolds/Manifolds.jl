@@ -406,11 +406,6 @@ function __init__()
         include("differentiation/finite_differences.jl")
     end
 
-    @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
-        using .ForwardDiff
-        include("differentiation/forward_diff.jl")
-    end
-
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
         using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
         include("differentiation/ode.jl")
@@ -421,26 +416,12 @@ function __init__()
         include("nlsolve.jl")
     end
 
-    @require ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267" begin
-        using .ReverseDiff: ReverseDiff
-        include("differentiation/reverse_diff.jl")
-    end
-
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
         using .Test: Test
         include("tests/tests_general.jl")
         export test_manifold
         include("tests/tests_group.jl")
         export test_group, test_action
-        @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
-            include("tests/tests_forwarddiff.jl")
-            export test_forwarddiff
-        end
-
-        @require ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267" begin
-            include("tests/tests_reversediff.jl")
-            export test_reversediff
-        end
     end
 
     @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin

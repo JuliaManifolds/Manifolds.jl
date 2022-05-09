@@ -173,8 +173,6 @@ include("../utils.jl")
                 exp_log_atol_multiplier=10.0,
                 retraction_methods=(ExponentialRetraction(),),
                 test_vee_hat=false,
-                test_forward_diff=is_plain_array,
-                test_reverse_diff=is_plain_array,
                 test_tangent_vector_broadcasting=is_plain_array,
                 test_vector_spaces=is_plain_array,
                 test_inplace=true,

@@ -52,8 +52,6 @@ that lie on it (contained in `pts`).
 - `retraction_methods = []`: retraction methods that will be tested.
 - `test_atlases = []`: Vector or tuple of atlases that should be tested.
 - `test_exp_log = true`: if true, check that [`exp`](@ref) is the inverse of [`log`](@ref).
-- `test_forward_diff = true`: if true, automatic differentiation using
-    ForwardDiff is tested.
 - `test_injectivity_radius = true`: whether implementation of [`injectivity_radius`](@ref)
     should be tested.
 - `test_inplace = false` : if true check if inplace variants work if they are activated,
@@ -66,8 +64,6 @@ that lie on it (contained in `pts`).
 - `test_project_point = false`: test projections onto the manifold.
 - `test_project_tangent = false` : test projections on tangent spaces.
 - `test_representation_size = true` : test repersentation size of points/tvectprs.
-- `test_reverse_diff = true`: if true, automatic differentiation using
-    ReverseDiff is tested.
 - `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace.
 - `test_vector_spaces = true` : test Vector bundle of this manifold.
 - `test_default_vector_transport = false` : test the default vector transport (usually
@@ -106,7 +102,6 @@ function test_manifold(
     retraction_rtol_multiplier=1,
     test_atlases=(),
     test_exp_log=true,
-    test_forward_diff=true,
     test_is_tangent=true,
     test_injectivity_radius=true,
     test_inplace=false,
@@ -121,7 +116,6 @@ function test_manifold(
     test_rand_point=false,
     test_rand_tvector=false,
     test_representation_size=true,
-    test_reverse_diff=true,
     test_riesz_representer=false,
     test_tangent_vector_broadcasting=true,
     test_default_vector_transport=false,
@@ -670,14 +664,6 @@ function test_manifold(
                 Test.@test isapprox(M, p3, p2)
             end
         end
-    end
-
-    test_forward_diff && Test.@testset "ForwardDiff support" begin
-        test_forwarddiff(M, pts, tv)
-    end
-
-    test_reverse_diff && Test.@testset "ReverseDiff support" begin
-        test_reversediff(M, pts, tv)
     end
 
     test_musical_isomorphisms && Test.@testset "Musical isomorphisms" begin

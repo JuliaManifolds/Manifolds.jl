@@ -207,8 +207,6 @@ include("../utils.jl")
                 default_retraction_method=PolarRetraction(),
                 test_is_tangent=false,
                 test_default_vector_transport=false,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_vee_hat=false,
                 test_tangent_vector_broadcasting=true,

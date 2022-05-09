@@ -43,8 +43,6 @@ include("../utils.jl")
         test_manifold(
             M,
             [p1, p2, p3],
-            test_forward_diff=false,
-            test_reverse_diff=false,
             test_vector_spaces=true,
             test_project_point=true,
             projection_atol_multiplier=10,
@@ -63,8 +61,6 @@ include("../utils.jl")
         test_manifold(
             EssentialManifold(false),
             [p1, p2, p3],
-            test_forward_diff=false,
-            test_reverse_diff=false,
             test_vector_spaces=true,
             test_project_point=true,
             projection_atol_multiplier=10,

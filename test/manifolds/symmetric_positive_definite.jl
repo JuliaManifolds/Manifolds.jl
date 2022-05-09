@@ -49,8 +49,6 @@ include("../utils.jl")
                     test_default_vector_transport=true,
                     vector_transport_methods=typeof(M) == SymmetricPositiveDefinite{3} ?
                                              [ParallelTransport()] : [],
-                    test_forward_diff=false,
-                    test_reverse_diff=false,
                     test_vee_hat=M === M2,
                     exp_log_atol_multiplier=exp_log_atol_multiplier,
                     basis_types_vecs=basis_types,

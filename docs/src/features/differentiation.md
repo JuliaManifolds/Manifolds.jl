@@ -10,14 +10,6 @@ Pages = ["differentiation/differentiation.jl"]
 Order = [:type, :function, :constant]
 ```
 
-### ForwardDiff.jl
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["differentiation/forward_diff.jl"]
-Order = [:type, :function, :constant]
-```
-
 ### FiniteDifferenes.jl
 
 ```@autodocs

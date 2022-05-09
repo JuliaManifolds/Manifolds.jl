@@ -39,7 +39,6 @@ using ManifoldsBase: TFVector
             test_manifold(
                 M,
                 pts,
-                test_reverse_diff=isa(T, Vector),
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,

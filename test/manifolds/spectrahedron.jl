@@ -43,8 +43,6 @@ include("../utils.jl")
                 M,
                 pts,
                 test_injectivity_radius=false,
-                test_reverse_diff=false,
-                test_forward_diff=false,
                 test_project_tangent=true,
                 test_exp_log=false,
                 test_default_vector_transport=true,

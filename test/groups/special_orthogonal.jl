@@ -68,7 +68,6 @@ include("group_utils.jl")
         test_manifold(
             G,
             pts;
-            test_reverse_diff=false,
             test_injectivity_radius=false,
             test_project_tangent=true,
             test_musical_isomorphisms=false,

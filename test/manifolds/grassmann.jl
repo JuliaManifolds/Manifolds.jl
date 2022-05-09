@@ -69,8 +69,6 @@ include("../utils.jl")
                 test_project_tangent=true,
                 test_default_vector_transport=false,
                 point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vee_hat=false,
                 test_rand_point=true,
                 test_rand_tvector=true,
@@ -168,8 +166,6 @@ include("../utils.jl")
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_default_vector_transport=false,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vee_hat=false,
                 retraction_methods=[PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods=[
