@@ -85,13 +85,18 @@ rb_onb_default = TangentDiffBackend(
     Manifolds.ExponentialRetraction(),
     Manifolds.LogarithmicInverseRetraction(),
     DefaultOrthonormalBasis(),
+    DefaultOrthonormalBasis(),
 )
 
 rb_onb_fd51 = TangentDiffBackend(Manifolds.FiniteDifferencesBackend())
 
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();
-    basis=CachedBasis(
+    basis_arg=CachedBasis(
+        DefaultOrthonormalBasis(),
+        [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
+    ),
+    basis_val=CachedBasis(
         DefaultOrthonormalBasis(),
         [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
     ),
