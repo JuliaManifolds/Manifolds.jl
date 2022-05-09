@@ -10,10 +10,8 @@ import ManifoldsBase: active_traits, merge_traits
 using LinearAlgebra
 using Distributions
 using DoubleFloats
-using ForwardDiff
 using Quaternions
 using Random
-using ReverseDiff
 using StaticArrays
 using Statistics
 using StatsBase
