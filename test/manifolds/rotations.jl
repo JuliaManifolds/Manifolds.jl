@@ -155,8 +155,6 @@ include("../utils.jl")
                             X = Manifolds.hat(SOn, Matrix(1.0I, n, n), Xf)
                             p = exp(X)
                             @test p ≈ exp(SOn, one(p), X)
-                            @test ForwardDiff.derivative(t -> exp(SOn, one(p), t * X), 0) ≈
-                                  X
                             p2 = exp(log(SOn, one(p), p))
                             @test isapprox(p, p2; atol=1e-6)
                         end

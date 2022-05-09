@@ -1,4 +1,4 @@
-using FiniteDifferences, ForwardDiff
+using FiniteDifferences
 using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
 using ManifoldsBase: TraitList
@@ -345,17 +345,17 @@ end
             @test gaussian_curvature(M, p, B_chart_p; backend=fdm) ≈ 0 atol = 1e-6
             @test einstein_tensor(M, p, B_chart_p; backend=fdm) ≈ zeros(n, n) atol = 1e-6
 
-            fwd_diff = Manifolds.ForwardDiffBackend()
-            @test christoffel_symbols_first(M, p, B_chart_p; backend=fwd_diff) ≈
+            fd_diff = Manifolds.FiniteDifferencesBackend()
+            @test christoffel_symbols_first(M, p, B_chart_p; backend=fd_diff) ≈
                   zeros(n, n, n) atol = 1e-6
-            @test christoffel_symbols_second(M, p, B_chart_p; backend=fwd_diff) ≈
+            @test christoffel_symbols_second(M, p, B_chart_p; backend=fd_diff) ≈
                   zeros(n, n, n) atol = 1e-6
-            @test riemann_tensor(M, p, B_chart_p; backend=fwd_diff) ≈ zeros(n, n, n, n) atol =
+            @test riemann_tensor(M, p, B_chart_p; backend=fd_diff) ≈ zeros(n, n, n, n) atol =
                 1e-6
-            @test ricci_tensor(M, p, B_chart_p; backend=fwd_diff) ≈ zeros(n, n) atol = 1e-6
-            @test ricci_curvature(M, p, B_chart_p; backend=fwd_diff) ≈ 0 atol = 1e-6
-            @test gaussian_curvature(M, p, B_chart_p; backend=fwd_diff) ≈ 0 atol = 1e-6
-            @test einstein_tensor(M, p, B_chart_p; backend=fwd_diff) ≈ zeros(n, n) atol =
+            @test ricci_tensor(M, p, B_chart_p; backend=fd_diff) ≈ zeros(n, n) atol = 1e-6
+            @test ricci_curvature(M, p, B_chart_p; backend=fd_diff) ≈ 0 atol = 1e-6
+            @test gaussian_curvature(M, p, B_chart_p; backend=fd_diff) ≈ 0 atol = 1e-6
+            @test einstein_tensor(M, p, B_chart_p; backend=fd_diff) ≈ zeros(n, n) atol =
                 1e-6
         end
     end

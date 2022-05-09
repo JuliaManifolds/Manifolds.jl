@@ -253,32 +253,32 @@ include("../utils.jl")
             analytical_grad_f(p) = (1 / 2) * (p * Q_grad * p * Q_grad + p * p')
 
             p_grad = convert(Array{Float64}, points[1])
-            ad_diff = RiemannianProjectionBackend(Manifolds.ForwardDiffBackend())
+            fd_diff = RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
 
             @test isapprox(
-                Manifolds.gradient(Sp_6, test_f, p_grad, ad_diff),
+                Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff),
                 analytical_grad_f(p_grad);
-                atol=1.0e-16,
+                atol=1.0e-9,
             )
             @test isapprox(
-                Manifolds.gradient(Sp_6, test_f, p_grad, ad_diff; extended_metric=false),
+                Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff; extended_metric=false),
                 analytical_grad_f(p_grad);
-                atol=1.0e-12,
+                atol=1.0e-9,
             )
 
             grad_f_p = similar(p_grad)
-            Manifolds.gradient!(Sp_6, test_f, grad_f_p, p_grad, ad_diff)
-            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-16)
+            Manifolds.gradient!(Sp_6, test_f, grad_f_p, p_grad, fd_diff)
+            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-9)
 
             Manifolds.gradient!(
                 Sp_6,
                 test_f,
                 grad_f_p,
                 p_grad,
-                ad_diff;
+                fd_diff;
                 extended_metric=false,
             )
-            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-12)
+            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-9)
         end
     end
 

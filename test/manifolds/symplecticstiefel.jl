@@ -286,17 +286,17 @@ end
                 return Q_grad * p * (euc_grad_f') * Q_grad * p + euc_grad_f * p' * p
             end
             p_grad = convert(Array{Float64}, points[1])
-            ad_diff = RiemannianProjectionBackend(Manifolds.ForwardDiffBackend())
+            fd_diff = RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
 
             @test isapprox(
-                Manifolds.gradient(SpSt_6_4, test_f, p_grad, ad_diff),
+                Manifolds.gradient(SpSt_6_4, test_f, p_grad, fd_diff),
                 analytical_grad_f(p_grad);
-                atol=1.0e-16,
+                atol=1.0e-9,
             )
 
             grad_f_p = similar(p_grad)
-            Manifolds.gradient!(SpSt_6_4, test_f, grad_f_p, p_grad, ad_diff)
-            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-16)
+            Manifolds.gradient!(SpSt_6_4, test_f, grad_f_p, p_grad, fd_diff)
+            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-9)
         end
     end
 end
