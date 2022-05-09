@@ -74,6 +74,10 @@ using LinearAlgebra: Diagonal, dot
         @testset for backend in [fd51]
             @test _derivative(c1, 0.0, backend) ≈ [1.0, 0.0]
             @test _gradient(f1, [1.0, -1.0], backend) ≈ [1.0, -2.0]
+            @test _jacobian(c1, 0.0, backend) ≈ [1.0; 0.0]
+            jac = [NaN; NaN]
+            _jacobian!(c1, jac, 0.0, backend)
+            @test jac ≈ [1.0; 0.0]
         end
 
         set_default_differential_backend!(fd51)
