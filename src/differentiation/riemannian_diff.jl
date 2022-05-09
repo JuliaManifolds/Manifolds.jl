@@ -63,10 +63,10 @@ where `diff_backend` is an [`AbstractDiffBackend`](@ref) to be used on the tange
 
 With the keyword arguments
 
-* `retraction` an [`AbstractRetractionMethod`](@ref) ([`ExponentialRetraction`](@ref) by default)
-* `inverse_retraction` an [`AbstractInverseRetractionMethod`](@ref) ([`LogarithmicInverseRetraction`](@ref) by default)
-* `basis_arg` an [`AbstractBasis`](@ref) ([`DefaultOrthogonalBasis`](@ref) by default)
-* `basis_val` an [`AbstractBasis`](@ref) ([`DefaultOrthogonalBasis`](@ref) by default)
+* `retraction` an [AbstractRetractionMethod](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html) (`ExponentialRetraction` by default)
+* `inverse_retraction` an [AbstractInverseRetractionMethod](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html) `LogarithmicInverseRetraction` by default)
+* `basis_arg` an [AbstractBasis](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html) (`DefaultOrthogonalBasis` by default)
+* `basis_val` an [AbstractBasis](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html) (`DefaultOrthogonalBasis` by default)
 """
 struct TangentDiffBackend{
     TAD<:AbstractDiffBackend,
@@ -139,7 +139,7 @@ This method uses the internal `backend.diff_backend` (Euclidean) on the function
 ```
 
 which is given on the tangent space. In detail, the gradient can be written in
-terms of the `backend.basis_arg`. We illustrate it here for an [`AbstractOrthonormalBasis`](@ref),
+terms of the `backend.basis_arg`. We illustrate it here for an [AbstractOrthonormalBasis](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#ManifoldsBase.AbstractOrthonormalBasis),
 since that simplifies notations:
 
 ```math
