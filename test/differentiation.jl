@@ -28,7 +28,7 @@ function Manifolds.gradient(::AbstractManifold, f, p, ::TestRiemannianBackend)
     return collect(1.0:length(p))
 end
 
-using FiniteDifferences, FiniteDiff
+using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
 @testset "Differentiation backend" begin
@@ -61,22 +61,6 @@ using LinearAlgebra: Diagonal, dot
         set_default_differential_backend!(fd51)
     end
 
-    using FiniteDiff
-
-    finite_diff = Manifolds.FiniteDiffBackend()
-    @testset "FiniteDiff" begin
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        @test set_default_differential_backend!(finite_diff) == finite_diff
-        @test default_differential_backend() == finite_diff
-        @test set_default_differential_backend!(fd51) isa Manifolds.FiniteDifferencesBackend
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        set_default_differential_backend!(finite_diff)
-        @test default_differential_backend() == finite_diff
-        set_default_differential_backend!(fd51)
-    end
-
     using ReverseDiff
 
     reverse_diff = Manifolds.ReverseDiffBackend()
@@ -92,9 +76,6 @@ using LinearAlgebra: Diagonal, dot
         @test default_differential_backend() == reverse_diff
         set_default_differential_backend!(fd51)
     end
-
-    using Zygote
-    zygote_diff = Manifolds.ZygoteDiffBackend()
 
     @testset "gradient" begin
         set_default_differential_backend!(fd51)
@@ -114,33 +95,21 @@ using LinearAlgebra: Diagonal, dot
                   [1.0, 0.0]
             @test (@inferred _derivative!(c1, X, 0.0, Manifolds.ForwardDiffBackend())) === X
             @test X ≈ [1.0, 0.0]
-
-            @test (@inferred _derivative(c1, 0.0, finite_diff)) ≈ [1.0, 0.0]
-            @test (@inferred _gradient(f1, [1.0, -1.0], finite_diff)) ≈ [1.0, -2.0]
         end
 
-        @testset for backend in [fd51, fwd_diff, finite_diff]
+        @testset for backend in [fd51, fwd_diff]
             set_default_differential_backend!(backend)
             @test _derivative(c1, 0.0) ≈ [1.0, 0.0]
             X = [-1.0, -1.0]
             @test _derivative!(c1, X, 0.0) === X
             @test isapprox(X, [1.0, 0.0])
         end
-        @testset for backend in [fd51, fwd_diff, finite_diff, reverse_diff, zygote_diff]
+        @testset for backend in [fd51, fwd_diff, reverse_diff]
             set_default_differential_backend!(backend)
             X = [-1.0, -1.0]
             @test _gradient(f1, [1.0, -1.0]) ≈ [1.0, -2.0]
             @test _gradient!(f1, X, [1.0, -1.0]) === X
             @test X ≈ [1.0, -2.0]
-        end
-        @testset for backend in [finite_diff]
-            set_default_differential_backend!(backend)
-            X = [-0.0 -0.0]
-            @test _jacobian(f1, [1.0, -1.0]) ≈ [1.0 -2.0]
-            # The following seems not to worf for :central, but it does for forward
-            fdf = Manifolds.FiniteDiffBackend(Val(:forward))
-            @test_broken _jacobian!(f1!, X, [1.0, -1.0], fdf) === X
-            @test_broken X ≈ [1.0 -2.0]
         end
         set_default_differential_backend!(Manifolds.NoneDiffBackend())
         @testset for backend in [fd51, Manifolds.ForwardDiffBackend()]
@@ -162,8 +131,6 @@ rb_onb_default = TangentDiffBackend(
 rb_onb_fd51 = TangentDiffBackend(Manifolds.FiniteDifferencesBackend())
 
 rb_onb_fwd_diff = TangentDiffBackend(Manifolds.ForwardDiffBackend())
-
-rb_onb_finite_diff = TangentDiffBackend(Manifolds.FiniteDiffBackend())
 
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();
@@ -187,7 +154,7 @@ rb_proj = Manifolds.RiemannianProjectionBackend(default_differential_backend())
     differential!(s2, c1, X, π / 4, rb_onb_default)
     @test isapprox(s2, c1(π / 4), X, Xval)
 
-    @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff, rb_onb_finite_diff]
+    @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff]
         @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4, backend), Xval)
         X = similar(p)
         differential!(s2, c1, X, π / 4, backend)

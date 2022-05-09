@@ -401,11 +401,6 @@ function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
 end
 
 function __init__()
-    @require FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41" begin
-        using .FiniteDiff
-        include("differentiation/finite_diff.jl")
-    end
-
     @require FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000" begin
         using .FiniteDifferences
         include("differentiation/finite_differences.jl")
@@ -460,11 +455,6 @@ function __init__()
             using Colors: RGBA
             include("recipes.jl")
         end
-    end
-
-    @require Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f" begin
-        using .Zygote: Zygote
-        include("differentiation/zygote.jl")
     end
 
     return nothing
