@@ -1,13 +1,15 @@
 @doc raw"""
-    AbstractMultinomialDoublyStochastic{N} <: AbstractEmbeddedManifold{ℝ, DefaultIsometricEmbeddingType}
+    AbstractMultinomialDoublyStochastic{N} <: AbstractDecoratorManifold{ℝ}
 
 A common type for manifolds that are doubly stochastic, for example by direct constraint
 [`MultinomialDoubleStochastic`](@ref) or by symmetry [`MultinomialSymmetric`](@ref),
-as long as they are also modeled as [`DefaultIsometricEmbeddingType`](@ref)
-[`AbstractEmbeddedManifold`](@ref)s.
+as long as they are also modeled as [`IsIsometricEmbeddedManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.IsIsometricEmbeddedManifold).
 """
-abstract type AbstractMultinomialDoublyStochastic{N} <:
-              AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+abstract type AbstractMultinomialDoublyStochastic{N} <: AbstractDecoratorManifold{ℝ} end
+
+function active_traits(f, ::AbstractMultinomialDoublyStochastic, args...)
+    return merge_traits(IsIsometricEmbeddedManifold())
+end
 
 @doc raw"""
     MultinomialDoublyStochastic{n} <: AbstractMultinomialDoublyStochastic{N}
@@ -63,9 +65,6 @@ Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
 function check_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) where {n}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
-    # positivity and columns are checked in the embedding, we further check
     r = sum(p, dims=2)
     if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
         return DomainError(
@@ -83,16 +82,6 @@ This means, that `p` is valid, that `X` is of correct dimension and sums to zero
 column or row.
 """
 function check_vector(M::MultinomialDoubleStochastic{n}, p, X; kwargs...) where {n}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-    # columns are checked in the embedding, we further check
     r = sum(X, dims=2) # check for stochastic rows
     if !isapprox(norm(r), 0.0; kwargs...)
         return DomainError(
@@ -103,7 +92,7 @@ function check_vector(M::MultinomialDoubleStochastic{n}, p, X; kwargs...) where 
     return nothing
 end
 
-function decorated_manifold(::MultinomialDoubleStochastic{N}) where {N}
+function get_embedding(::MultinomialDoubleStochastic{N}) where {N}
     return MultinomialMatrices(N, N)
 end
 
@@ -204,34 +193,8 @@ refers to the elementwise exponentiation.
 """
 retract(::MultinomialDoubleStochastic, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract!(M::MultinomialDoubleStochastic, q, p, X, ::ProjectionRetraction)
+function retract_project!(M::MultinomialDoubleStochastic, q, p, X)
     return project!(M, q, p .* exp.(X ./ p))
-end
-
-"""
-    vector_transport_to(M::MultinomialDoubleStochastic, p, X, q)
-
-transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
-at `q`.
-"""
-vector_transport_to(
-    ::MultinomialDoubleStochastic,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::ProjectionTransport,
-)
-
-function vector_transport_to!(
-    M::MultinomialDoubleStochastic,
-    Y,
-    p,
-    X,
-    q,
-    ::ProjectionTransport,
-)
-    project!(M, Y, q, X)
-    return Y
 end
 
 function Base.show(io::IO, ::MultinomialDoubleStochastic{n}) where {n}

@@ -26,8 +26,6 @@ function change_metric!(::Hyperbolic, ::Any, ::EuclideanMetric, ::Any, ::Any)
 end
 
 function check_point(M::Hyperbolic, p; kwargs...)
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, p), -1.0; kwargs...)
         return DomainError(
             minkowski_metric(p, p),
@@ -36,20 +34,8 @@ function check_point(M::Hyperbolic, p; kwargs...)
     end
     return nothing
 end
-function check_point(M::Hyperbolic, p::HyperboloidPoint; kwargs...)
-    return check_point(M, p.value; kwargs...)
-end
 
 function check_vector(M::Hyperbolic, p, X; kwargs...)
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(minkowski_metric(p, X), 0.0; kwargs...)
         return DomainError(
             abs(minkowski_metric(p, X)),
@@ -57,9 +43,6 @@ function check_vector(M::Hyperbolic, p, X; kwargs...)
         )
     end
     return nothing
-end
-function check_vector(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTVector; kwargs...)
-    return check_vector(M, p.value, X.value; kwargs...)
 end
 
 function convert(::Type{HyperboloidTVector}, X::T) where {T<:AbstractVector}
@@ -244,8 +227,14 @@ where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on 
 the [`Lorentz`](@ref)ian manifold.
 """
 distance(::Hyperbolic, p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
-function distance(M::Hyperbolic, p::HyperboloidPoint, q::HyperboloidPoint)
-    return distance(M, p.value, q.value)
+
+embed(M::Hyperbolic, p::HyperboloidPoint) = embed(M, p.value)
+embed!(M::Hyperbolic, q, p::HyperboloidPoint) = embed!(M, q, p.value)
+function embed(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTVector)
+    return embed(M, p.value, X.value)
+end
+function embed!(M::Hyperbolic, Y, p::HyperboloidPoint, X::HyperboloidTVector)
+    return embed!(M, Y, p.value, X.value)
 end
 
 function exp!(M::Hyperbolic, q, p, X)
@@ -254,16 +243,26 @@ function exp!(M::Hyperbolic, q, p, X)
     return copyto!(q, cosh(vn) * p + sinh(vn) / vn * X)
 end
 
-function get_basis(M::Hyperbolic, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
-    n = manifold_dimension(M)
+# overwrite the default construction on level 2 (dispatching on basis)
+# since this function should not call get_vector (that relies on get_basis itself on H2)
+function _get_basis(
+    M::Hyperbolic,
+    p,
+    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType};
+    kwargs...,
+)
+    return get_basis_orthonormal(M, p, ℝ)
+end
+
+function get_basis_orthonormal(M::Hyperbolic{n}, p, r::RealNumbers) where {n}
     V = [
         _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for
         i in 1:n
     ]
-    return CachedBasis(B, gram_schmidt(M, p, V))
+    return CachedBasis(DefaultOrthonormalBasis(r), gram_schmidt(M, p, V))
 end
 
-function get_basis(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
+function get_basis_diagonalizing(M::Hyperbolic, p, B::DiagonalizingOrthonormalBasis)
     n = manifold_dimension(M)
     X = B.frame_direction
     V = [
@@ -297,20 +296,23 @@ Compute the coordinates of the vector `X` with respect to the orthogonalized ver
 the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hyperbolic`](@ref)
  `M`, utting them intop the tangent space at `p` and orthonormalizing them.
 """
-get_coordinates(M::Hyperbolic, p, X, B::DefaultOrthonormalBasis)
+get_coordinates(M::Hyperbolic, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(
+function get_coordinates_orthonormal(M::Hyperbolic, p, X, r::RealNumbers)
+    return get_coordinates(M, p, X, get_basis_orthonormal(M, p, r))
+end
+function get_coordinates_orthonormal!(M::Hyperbolic, c, p, X, r::RealNumbers)
+    c = get_coordinates!(M, c, p, X, get_basis_orthonormal(M, p, r))
+    return c
+end
+function get_coordinates_diagonalizing!(
     M::Hyperbolic,
     c,
     p,
     X,
-    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    B::DiagonalizingOrthonormalBasis,
 )
-    c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
-    return c
-end
-function get_coordinates!(M::Hyperbolic, c, p, X, B::DiagonalizingOrthonormalBasis)
-    c = get_coordinates!(M, c, p, X, get_basis(M, p, B))
+    c = get_coordinates!(M, c, p, X, get_basis_diagonalizing(M, p, B))
     return c
 end
 
@@ -323,8 +325,8 @@ the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hype
 """
 get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector!(M::Hyperbolic, X, p, c, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
-    X = get_vector!(M, X, p, c, get_basis(M, p, B))
+function get_vector_orthonormal!(M::Hyperbolic, X, p, c, r::RealNumbers)
+    X = get_vector!(M, X, p, c, get_basis(M, p, DefaultOrthonormalBasis(r)))
     return X
 end
 function get_vector!(M::Hyperbolic, X, p, c, B::DiagonalizingOrthonormalBasis)
@@ -365,14 +367,7 @@ g_p(X,Y) = ⟨X,Y⟩_{\mathrm{M}} = -X_{n}Y_{n} + \displaystyle\sum_{k=1}^{n-1} 
 ````
 This employs the metric of the embedding, see [`Lorentz`](@ref) space.
 """
-function inner(
-    M::Hyperbolic,
-    p::HyperboloidPoint,
-    X::HyperboloidTVector,
-    Y::HyperboloidTVector,
-)
-    return inner(M, p.value, X.value, Y.value)
-end
+inner(M::Hyperbolic, p, X, Y)
 
 function log!(M::Hyperbolic, X, p, q)
     scp = minkowski_metric(p, q)
@@ -435,7 +430,7 @@ function Random.rand!(
     return pX
 end
 
-function vector_transport_to!(M::Hyperbolic, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(M::Hyperbolic, Y, p, X, q)
     w = log(M, p, q)
     wn = norm(M, p, w)
     wn < eps(eltype(p + q)) && return copyto!(Y, X)

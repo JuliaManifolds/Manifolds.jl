@@ -1,7 +1,7 @@
 @doc raw"""
-    SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
+    SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](@ref) $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
 symmetric positive semidefinite matrices of size $n × n$ and rank $k$, i.e. the set
 
 ````math
@@ -53,11 +53,14 @@ over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
     > doi: [10.1137/18m1231389](https://doi.org/10.1137/18m1231389),
     > preprint: [sites.uclouvain.be/absil/2018.06](https://sites.uclouvain.be/absil/2018.06).
 """
-struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <:
-       AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ)
     return SymmetricPositiveSemidefiniteFixedRank{n,k,field}()
+end
+
+function active_traits(f, ::SymmetricPositiveSemidefiniteFixedRank, args...)
+    return merge_traits(IsIsometricEmbeddedManifold())
 end
 
 @doc raw"""
@@ -65,7 +68,7 @@ end
 
 Check whether `q` is a valid manifold point on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e.
 whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corresponding
-[`AbstractNumbers`](@ref) `𝔽`.
+[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) `𝔽`.
 The symmetry of `p` is not explicitly checked since by using `q` p is symmetric by construction.
 The tolerance for the symmetry of `p` can and the rank of `q*q'` be set using `kwargs...`.
 """
@@ -74,8 +77,6 @@ function check_point(
     q;
     kwargs...,
 ) where {n,k,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
-    mpv === nothing || return mpv
     p = q * q'
     r = rank(p * p'; kwargs...)
     if r < k
@@ -92,27 +93,13 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
-and its values have to be from the correct [`AbstractNumbers`](@ref).
-The tolerance for the symmetry of `X` can be set using `kwargs...`.
-"""
-function check_vector(
-    M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽},
-    q,
-    Y;
-    kwargs...,
-) where {n,k,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(q),typeof(Y)},
-        M,
-        q,
-        Y;
-        kwargs...,
-    )
-    return mpv
-end
+and its values have to be from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
 
-function decorated_manifold(::SymmetricPositiveSemidefiniteFixedRank{N,K,𝔽}) where {N,K,𝔽}
+Due to the reduced representation this is fulfilled as soon as the matrix is of correct size.
+"""
+check_vector(M::SymmetricPositiveSemidefiniteFixedRank, q, Y; kwargs...)
+
+function get_embedding(::SymmetricPositiveSemidefiniteFixedRank{N,K,𝔽}) where {N,K,𝔽}
     return Euclidean(N, K; field=𝔽)
 end
 
@@ -241,14 +228,7 @@ vector_transport_to(
     ::ProjectionTransport,
 )
 
-function vector_transport_to!(
-    M::SymmetricPositiveSemidefiniteFixedRank,
-    Y,
-    p,
-    X,
-    q,
-    ::ProjectionTransport,
-)
+function vector_transport_to_project!(M::SymmetricPositiveSemidefiniteFixedRank, Y, p, X, q)
     project!(M, Y, q, X)
     return Y
 end

@@ -1,11 +1,10 @@
 """
-    AbstractProjectiveSpace{𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
+    AbstractProjectiveSpace{𝔽} <: AbstractDecoratorManifold{𝔽}
 
 An abstract type to represent a projective space over `𝔽` that is represented isometrically
 in the embedding.
 """
-abstract type AbstractProjectiveSpace{𝔽} <:
-              AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+abstract type AbstractProjectiveSpace{𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 @doc raw"""
     ProjectiveSpace{n,𝔽} <: AbstractProjectiveSpace{𝔽}
@@ -40,6 +39,10 @@ projective spaces.
 """
 struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
 ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ) = ProjectiveSpace{n,field}()
+
+function active_traits(f, ::AbstractProjectiveSpace, args...)
+    return merge_traits(IsIsometricEmbeddedManifold())
+end
 
 @doc raw"""
     ArrayProjectiveSpace{T<:Tuple,𝔽} <: AbstractProjectiveSpace{𝔽}
@@ -94,14 +97,6 @@ that it has the same size as elements of the embedding and has unit Frobenius no
 The tolerance for the norm check can be set using the `kwargs...`.
 """
 function check_point(M::AbstractProjectiveSpace, p; kwargs...)
-    mpv = invoke(
-        check_point,
-        Tuple{(typeof(get_embedding(M))),typeof(p)},
-        get_embedding(M),
-        p;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(norm(p), 1; kwargs...)
         return DomainError(
             norm(p),
@@ -120,15 +115,6 @@ tangent space of the embedding and that the Frobenius inner product
 $⟨p, X⟩_{\mathrm{F}} = 0$.
 """
 function check_vector(M::AbstractProjectiveSpace, p, X; kwargs...)
-    mpv = invoke(
-        check_vector,
-        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
-        get_embedding(M),
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(dot(p, X), 0; kwargs...)
         return DomainError(
             dot(p, X),
@@ -144,6 +130,9 @@ function decorated_manifold(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
 end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
+
+embed(::AbstractProjectiveSpace, p) = p
+embed(::AbstractProjectiveSpace, p, X) = p
 
 @doc raw"""
     distance(M::AbstractProjectiveSpace, p, q)
@@ -187,12 +176,12 @@ formula for $Y$ is
 """
 get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::AbstractProjectiveSpace{𝔽},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {𝔽}
     n = div(manifold_dimension(M), real_dimension(𝔽))
     z = p[1]
@@ -222,12 +211,12 @@ Y = \left(X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\
 """
 get_vector(::AbstractProjectiveSpace, p, X, ::DefaultOrthonormalBasis{ℝ})
 
-function get_vector!(
+function get_vector_orthonormal!(
     M::AbstractProjectiveSpace{𝔽},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {𝔽}
     n = div(manifold_dimension(M), real_dimension(𝔽))
     z = p[1]
@@ -241,25 +230,17 @@ function get_vector!(
 end
 
 injectivity_radius(::AbstractProjectiveSpace) = π / 2
-injectivity_radius(::AbstractProjectiveSpace, ::ExponentialRetraction) = π / 2
-injectivity_radius(::AbstractProjectiveSpace, ::Any) = π / 2
-injectivity_radius(::AbstractProjectiveSpace, ::Any, ::ExponentialRetraction) = π / 2
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::AbstractProjectiveSpace,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
+injectivity_radius(::AbstractProjectiveSpace, p) = π / 2
+injectivity_radius(::AbstractProjectiveSpace, ::AbstractRetractionMethod) = π / 2
+injectivity_radius(::AbstractProjectiveSpace, p, ::AbstractRetractionMethod) = π / 2
 
 @doc raw"""
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::ProjectionInverseRetraction)
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::PolarInverseRetraction)
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::QRInverseRetraction)
 
-Compute the equivalent inverse retraction [`ProjectionInverseRetraction`](@ref),
-[`PolarInverseRetraction`](@ref), and [`QRInverseRetraction`](@ref) on the
+Compute the equivalent inverse retraction [`ProjectionInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionInverseRetraction),
+[`PolarInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarInverseRetraction), and [`QRInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRInverseRetraction) on the
 [`AbstractProjectiveSpace`](@ref) manifold `M`$=𝔽ℙ^n$, i.e.
 ````math
 \operatorname{retr}_p^{-1} q = q \frac{1}{⟨p, q⟩_{\mathrm{F}}} - p,
@@ -279,13 +260,15 @@ inverse_retract(
     ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
 )
 
-function inverse_retract!(
-    ::AbstractProjectiveSpace,
-    X,
-    p,
-    q,
-    ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
-)
+function inverse_retract_qr!(::AbstractProjectiveSpace, X, p, q)
+    X .= q ./ dot(p, q) .- p
+    return X
+end
+function inverse_retract_polar!(::AbstractProjectiveSpace, X, p, q)
+    X .= q ./ dot(p, q) .- p
+    return X
+end
+function inverse_retract_project!(::AbstractProjectiveSpace, X, p, q)
     X .= q ./ dot(p, q) .- p
     return X
 end
@@ -307,7 +290,7 @@ end
     log(M::AbstractProjectiveSpace, p, q)
 
 Compute the logarithmic map on [`AbstractProjectiveSpace`](@ref) `M`$ = 𝔽ℙ^n$,
-i.e. the tangent vector whose corresponding [`geodesic`](@ref) starting from `p`
+i.e. the tangent vector whose corresponding [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) starting from `p`
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
@@ -359,14 +342,8 @@ using [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::AbstractProjectiveSpace, ::Any...)
 
-function Statistics.mean!(
-    M::AbstractProjectiveSpace,
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-)
-    return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
+function default_estimation_method(::AbstractProjectiveSpace, ::typeof(mean))
+    return GeodesicInterpolationWithinRadius(π / 4)
 end
 
 function mid_point!(M::ProjectiveSpace, q, p1, p2)
@@ -423,8 +400,8 @@ i.e., the representation size of the embedding.
     retract(M::AbstractProjectiveSpace, p, X, method::PolarRetraction)
     retract(M::AbstractProjectiveSpace, p, X, method::QRRetraction)
 
-Compute the equivalent retraction [`ProjectionRetraction`](@ref), [`PolarRetraction`](@ref),
-and [`QRRetraction`](@ref) on the [`AbstractProjectiveSpace`](@ref) manifold `M`$=𝔽ℙ^n$,
+Compute the equivalent retraction [`ProjectionRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionRetraction), [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction),
+and [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) on the [`AbstractProjectiveSpace`](@ref) manifold `M`$=𝔽ℙ^n$,
 i.e.
 ````math
 \operatorname{retr}_p X = \operatorname{proj}_p(p + X).
@@ -441,13 +418,15 @@ retract(
     ::Union{ProjectionRetraction,PolarRetraction,QRRetraction},
 )
 
-function retract!(
-    M::AbstractProjectiveSpace,
-    q,
-    p,
-    X,
-    ::Union{ProjectionRetraction,PolarRetraction,QRRetraction},
-)
+function retract_polar!(M::AbstractProjectiveSpace, q, p, X)
+    q .= p .+ X
+    return project!(M, q, q)
+end
+function retract_project!(M::AbstractProjectiveSpace, q, p, X)
+    q .= p .+ X
+    return project!(M, q, q)
+end
+function retract_qr!(M::AbstractProjectiveSpace, q, p, X)
     q .= p .+ X
     return project!(M, q, q)
 end
@@ -471,13 +450,13 @@ function uniform_distribution(M::ProjectiveSpace{n,ℝ}, p) where {n}
 end
 
 @doc raw"""
-    vector_transport_to(M::AbstractProjectiveSpace, p, X, q, method::ParallelTransport)
+    parallel_transport_to(M::AbstractProjectiveSpace, p, X, q)
 
 Parallel transport a vector `X` from the tangent space at a point `p` on the
 [`AbstractProjectiveSpace`](@ref) `M`$=𝔽ℙ^n$ to the tangent space at another point `q`.
 
 This implementation proceeds by transporting $X$ to $T_{q λ} M$ using the same approach as
-[`vector_transport_direction`](@ref vector_transport_direction(::AbstractProjectiveSpace, p, X, d, ::ParallelTransport)),
+[`parallel_transport_direction`](@ref parallel_transport_direction(::AbstractProjectiveSpace, p, X, d)),
 where $λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that
 takes $q$ to the member $q λ$ of its equivalence class $[q]$ closest to $p$ in the
 embedding.
@@ -490,9 +469,9 @@ where $d = \log_p q$ is the direction of the transport, $θ = \lVert d \rVert_p$
 [`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between $p$ and $q$, and
 $\overline{⋅}$ denotes complex or quaternionic conjugation.
 """
-vector_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any, ::ParallelTransport)
+parallel_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any)
 
-function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::AbstractProjectiveSpace, Y, p, X, q)
     z = dot(q, p)
     λ = nzsign(z)
     m = p .+ q .* λ # un-normalized midpoint
@@ -503,16 +482,16 @@ function vector_transport_to!(::AbstractProjectiveSpace, Y, p, X, q, ::ParallelT
     Y .= (X .- m .* factor) .* λ'
     return Y
 end
-function vector_transport_to!(M::AbstractProjectiveSpace, Y, p, X, q, ::ProjectionTransport)
+function vector_transport_to_project!(M::AbstractProjectiveSpace, Y, p, X, q)
     project!(M, Y, q, X)
     return Y
 end
 
 @doc raw"""
-    vector_transport_direction(M::AbstractProjectiveSpace, p, X, d, method::ParallelTransport)
+    parallel_transport_direction(M::AbstractProjectiveSpace, p, X, d)
 
 Parallel transport a vector `X` from the tangent space at a point `p` on the
-[`AbstractProjectiveSpace`](@ref) `M` along the [`geodesic`](@ref) in the direction
+[`AbstractProjectiveSpace`](@ref) `M` along the [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) in the direction
 indicated by the tangent vector `d`, i.e.
 ````math
 \mathcal{P}_{\exp_p (d) ← p}(X) = X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p,
@@ -521,22 +500,9 @@ where $θ = \lVert d \rVert$, and $⟨⋅, ⋅⟩_p$ is the [`inner`](@ref) prod
 For the real projective space, this is equivalent to the same vector transport on the real
 [`AbstractSphere`](@ref).
 """
-vector_transport_direction(
-    ::AbstractProjectiveSpace,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::ParallelTransport,
-)
+parallel_transport_direction(::AbstractProjectiveSpace, ::Any, ::Any, ::Any)
 
-function vector_transport_direction!(
-    M::AbstractProjectiveSpace,
-    Y,
-    p,
-    X,
-    d,
-    ::ParallelTransport,
-)
+function parallel_transport_direction!(M::AbstractProjectiveSpace, Y, p, X, d)
     θ = norm(M, p, d)
     cosθ = cos(θ)
     dX = inner(M, p, d, X)

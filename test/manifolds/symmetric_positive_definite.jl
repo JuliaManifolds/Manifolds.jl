@@ -1,24 +1,11 @@
 include("../utils.jl")
 
-using Manifolds: default_metric_dispatch
-
 @testset "Symmetric Positive Definite Matrices" begin
     M1 = SymmetricPositiveDefinite(3)
     @test repr(M1) == "SymmetricPositiveDefinite(3)"
     M2 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
     M3 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
     M4 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
-
-    @test (@inferred default_metric_dispatch(M2)) === Val(true)
-    @test (@inferred default_metric_dispatch(M1, Manifolds.LinearAffineMetric())) ===
-          Val(true)
-    @test (@inferred default_metric_dispatch(M1, Manifolds.LogCholeskyMetric())) ===
-          Val(false)
-    @test (@inferred default_metric_dispatch(M3)) === Val(false)
-    @test is_default_metric(M2)
-    @test is_default_metric(M1, Manifolds.LinearAffineMetric())
-    @test !is_default_metric(M1, Manifolds.LogCholeskyMetric())
-    @test !is_default_metric(M3)
 
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1, one(zeros(3, 3))) == Inf
@@ -62,8 +49,6 @@ using Manifolds: default_metric_dispatch
                     test_default_vector_transport=true,
                     vector_transport_methods=typeof(M) == SymmetricPositiveDefinite{3} ?
                                              [ParallelTransport()] : [],
-                    test_forward_diff=false,
-                    test_reverse_diff=false,
                     test_vee_hat=M === M2,
                     exp_log_atol_multiplier=exp_log_atol_multiplier,
                     basis_types_vecs=basis_types,

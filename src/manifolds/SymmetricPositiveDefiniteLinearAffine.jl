@@ -53,8 +53,6 @@ function change_metric!(::SymmetricPositiveDefinite, Y, ::EuclideanMetric, p, X)
     return Y
 end
 
-default_metric_dispatch(::SymmetricPositiveDefinite, ::LinearAffineMetric) = Val(true)
-
 @doc raw"""
     distance(M::SymmetricPositiveDefinite, p, q)
     distance(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, q)
@@ -110,8 +108,8 @@ function exp!(::SymmetricPositiveDefinite{N}, q, p, X) where {N}
 end
 
 @doc raw"""
-    [Ξ,κ] = get_basis(M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis)
-    [Ξ,κ] = get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, p, B::DiagonalizingOrthonormalBasis)
+    [Ξ,κ] = get_basis_diagonalizing(M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis)
+    [Ξ,κ] = get_basis_diagonalizing(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, p, B::DiagonalizingOrthonormalBasis)
 
 Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
@@ -122,7 +120,7 @@ with eigenvalues `κ` and where the direction `B.frame_direction` ``V`` has curv
 The construction is based on an ONB for the symmetric matrices similar to [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
 just that the ONB here is build from the eigen vectors of ``p^{\frac{1}{2}}Vp^{\frac{1}{2}}``.
 """
-function get_basis(
+function get_basis_diagonalizing(
     ::SymmetricPositiveDefinite{N},
     p,
     B::DiagonalizingOrthonormalBasis,
@@ -177,10 +175,12 @@ We then form the ONB by
    \Xi_{i,j} = p^{\frac{1}{2}}\Delta_{i,j}p^{\frac{1}{2}},\qquad i=1,\ldots,n, j=i,\ldots,n.
 ```
 """
-function get_basis(
+get_basis(::SymmetricPositiveDefinite, p, B::DefaultOrthonormalBasis)
+
+function get_basis_orthonormal(
     M::SymmetricPositiveDefinite{N},
     p,
-    B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType},
+    Ns::RealNumbers,
 ) where {N}
     e = eigen(Symmetric(p))
     U = e.vectors
@@ -198,7 +198,7 @@ function get_basis(
         @inbounds Ξ[k] .= s * pSqrt * Ξ[k] * pSqrt
         k += 1
     end
-    return CachedBasis(B, Ξ)
+    return CachedBasis(DefaultOrthonormalBasis(Ns), Ξ)
 end
 
 @doc raw"""
@@ -214,12 +214,12 @@ where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 """
 get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::SymmetricPositiveDefinite{N},
     c,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(c) == (dim,)
@@ -263,12 +263,12 @@ where $k$ is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 """
 get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector!(
+function get_vector_orthonormal!(
     ::SymmetricPositiveDefinite{N},
     X,
     p,
     c,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     @assert size(c) == (div(N * (N + 1), 2),)
     @assert size(X) == (N, N)
@@ -326,7 +326,7 @@ where $\operatorname{Log}$ denotes to the matrix logarithm.
 """
 log(::SymmetricPositiveDefinite, ::Any...)
 
-function log!(M::SymmetricPositiveDefinite{N}, X, p, q) where {N}
+function log!(::SymmetricPositiveDefinite{N}, X, p, q) where {N}
     e = eigen(Symmetric(p))
     U = e.vectors
     S = max.(e.values, floatmin(eltype(e.values)))
@@ -342,8 +342,8 @@ function log!(M::SymmetricPositiveDefinite{N}, X, p, q) where {N}
 end
 
 @doc raw"""
-    vector_transport_to(M::SymmetricPositiveDefinite, p, X, q, ::ParallelTransport)
-    vector_transport_to(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, X, y, ::ParallelTransport)
+    parallel_transport_to(M::SymmetricPositiveDefinite, p, X, q)
+    parallel_transport_to(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, X, y)
 
 Compute the parallel transport of `X` from the tangent space at `p` to the
 tangent space at `q` on the [`SymmetricPositiveDefinite`](@ref) as a
@@ -366,16 +366,9 @@ where $\operatorname{Exp}$ denotes the matrix exponential
 and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 (again with respect to the [`LinearAffineMetric`](@ref)).
 """
-vector_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any, ::ParallelTransport)
+parallel_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any)
 
-function vector_transport_to!(
-    M::SymmetricPositiveDefinite{N},
-    Y,
-    p,
-    X,
-    q,
-    ::ParallelTransport,
-) where {N}
+function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) where {N}
     distance(M, p, q) < 2 * eps(eltype(p)) && copyto!(Y, X)
     e = eigen(Symmetric(p))
     U = e.vectors

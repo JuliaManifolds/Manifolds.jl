@@ -16,6 +16,26 @@ If `M` is already a metric manifold, the inner manifold with the new `metric` is
 """
 abstract type AbstractMetric end
 
+"""
+    IsMetricManifold <: AbstractTrait
+
+Specify that a certain decorated Manifold is a metric manifold in the sence that it provides
+explicit metric properties, extending/changing the default metric properties of a manifold.
+"""
+struct IsMetricManifold <: AbstractTrait end
+
+"""
+    IsDefaultMetric{G<:AbstractMetric}
+
+Specify that a certain [`AbstractMetric`](@ref) is the default metric for a manifold.
+This way the corresponding [`MetricManifold`](@ref) falls back to the default methods
+of the manifold it decorates.
+"""
+struct IsDefaultMetric{G<:AbstractMetric} <: AbstractTrait
+    metric::G
+end
+parent_trait(::IsDefaultMetric) = IsMetricManifold()
+
 # piping syntax for decoration
 (metric::AbstractMetric)(M::AbstractManifold) = MetricManifold(M, metric)
 (::Type{T})(M::AbstractManifold) where {T<:AbstractMetric} = MetricManifold(M, T())
@@ -23,7 +43,7 @@ abstract type AbstractMetric end
 """
     MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <: AbstractDecoratorManifold{𝔽}
 
-Equip a [`AbstractManifold`](@ref) explicitly with a [`AbstractMetric`](@ref) `G`.
+Equip a [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) explicitly with a [`AbstractMetric`](@ref) `G`.
 
 For a Metric AbstractManifold, by default, assumes, that you implement the linear form
 from [`local_metric`](@ref) in order to evaluate the exponential map.
@@ -36,12 +56,21 @@ you can of course still implement that directly.
 
     MetricManifold(M, G)
 
-Generate the [`AbstractManifold`](@ref) `M` as a manifold with the [`AbstractMetric`](@ref) `G`.
+Generate the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` as a manifold with the [`AbstractMetric`](@ref) `G`.
 """
 struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <:
-       AbstractConnectionManifold{𝔽}
+       AbstractDecoratorManifold{𝔽}
     manifold::M
     metric::G
+end
+
+function active_traits(f, M::MetricManifold, args...)
+    return merge_traits(
+        is_default_metric(M.manifold, M.metric) ? IsDefaultMetric(M.metric) : EmptyTrait(),
+        IsMetricManifold(),
+        active_traits(f, M.manifold, args...),
+        is_metric_function(f) ? EmptyTrait() : IsExplicitDecorator(),
+    )
 end
 # remetricise instead of double-decorating
 (metric::AbstractMetric)(M::MetricManifold) = MetricManifold(M.manifold, metric)
@@ -56,10 +85,14 @@ inner product ``g(X, X) > 0`` whenever ``X`` is not the zero vector.
 """
 abstract type RiemannianMetric <: AbstractMetric end
 
+decorated_manifold(M::MetricManifold) = M.manifold
+
+get_embedding(M::MetricManifold) = get_embedding(M.manifold)
+
 @doc raw"""
     change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
 
-On the [`AbstractManifold`](@ref) `M` with implicitly given metric ``g_1``
+On the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` with implicitly given metric ``g_1``
 and a second [`AbstractMetric`](@ref) ``g_2`` this function performs a change of metric in the
 sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B`` fulfills
 
@@ -90,8 +123,17 @@ function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
     Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
     return change_metric!(M, Y, G, p, X)
 end
-function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
-    is_default_metric(M, G) && return copyto!(M, Y, p, X)
+function change_metric!(
+    ::T,
+    M::AbstractDecoratorManifold,
+    Y,
+    ::G,
+    p,
+    X,
+) where {G<:AbstractMetric,T<:TraitList{<:IsDefaultMetric{<:G}}}
+    return copyto!(M, Y, p, X)
+end
+function change_metric!(M::MetricManifold, Y, G::AbstractMetric, p, X)
     M.metric === G && return copyto!(M, Y, p, X) # no metric change
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
@@ -104,25 +146,14 @@ function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     return get_vector!(M, Y, p, z, B)
 end
 
-@decorator_transparent_signature change_metric(
-    M::AbstractDecoratorManifold,
-    G::AbstractMetric,
-    X,
-    p,
-)
-@decorator_transparent_signature change_metric!(
-    M::AbstractDecoratorManifold,
-    Y,
-    G::AbstractMetric,
-    X,
-    p,
-)
+@trait_function change_metric(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
+@trait_function change_metric!(M::AbstractDecoratorManifold, Y, G::AbstractMetric, X, p)
 
 @doc raw"""
     change_representer(M::AbstractManifold, G2::AbstractMetric, p, X)
 
 Convert the representer `X` of a linear function (in other words a cotangent vector at `p`)
-in the tangent space at `p` on the [`AbstractManifold`](@ref) `M` given with respect to the
+in the tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` given with respect to the
 [`AbstractMetric`](@ref) `G2` into the representer with respect to the (implicit) metric of `M`.
 
 In order to convert `X` into the representer with respect to the (implicitly given) metric ``g_1`` of `M`,
@@ -168,13 +199,8 @@ function change_representer(M::AbstractManifold, G::AbstractMetric, p, X)
     return change_representer!(M, Y, G, p, X)
 end
 
-@decorator_transparent_signature change_representer(
-    M::AbstractDecoratorManifold,
-    G::AbstractMetric,
-    X,
-    p,
-)
-@decorator_transparent_signature change_representer!(
+@trait_function change_representer(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
+@trait_function change_representer!(
     M::AbstractDecoratorManifold,
     Y,
     G::AbstractMetric,
@@ -182,9 +208,19 @@ end
     p,
 )
 
-# Default fallback I: compute in local metric representations
+# Default fallback II: Default metric (not yet hit, check subtyping?)
+function change_representer!(
+    ::T,
+    M::AbstractDecoratorManifold,
+    Y,
+    ::G,
+    p,
+    X,
+) where {G<:AbstractMetric,T<:TraitList{<:IsDefaultMetric{<:G}}}
+    return copyto!(M, Y, p, X)
+end
+# Default fallback II: compute in local metric representations
 function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
-    is_default_metric(M, G) && return copyto!(M, Y, p, X)
     M.metric === G && return copyto!(M, Y, p, X) # no metric change
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
@@ -195,64 +231,14 @@ function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     return get_vector!(M, Y, p, z, B)
 end
 
-@doc raw"""
-    christoffel_symbols_first(
-        M::MetricManifold,
-        p,
-        B::AbstractBasis;
-        backend::AbstractDiffBackend = default_differential_backend(),
-    )
-
-Compute the Christoffel symbols of the first kind in local coordinates of basis `B`.
-The Christoffel symbols are (in Einstein summation convention)
-
-````math
-Γ_{ijk} = \frac{1}{2} \Bigl[g_{kj,i} + g_{ik,j} - g_{ij,k}\Bigr],
-````
-
-where ``g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}`` is the coordinate
-derivative of the local representation of the metric tensor. The dimensions of
-the resulting multi-dimensional array are ordered ``(i,j,k)``.
-"""
-christoffel_symbols_first(::AbstractManifold, ::Any, B::AbstractBasis)
-function christoffel_symbols_first(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
-    ∂g = local_metric_jacobian(M, p, B; backend=backend)
-    n = size(∂g, 1)
-    Γ = allocate(∂g, Size(n, n, n))
-    @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
-    return Γ
-end
-@decorator_transparent_signature christoffel_symbols_first(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
-
-function christoffel_symbols_second(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
-    Ginv = inverse_local_metric(M, p, B)
-    Γ₁ = christoffel_symbols_first(M, p, B; backend=backend)
-    Γ₂ = allocate(Γ₁)
-    @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
-    return Γ₂
-end
-
 """
     connection(::MetricManifold)
 
 Return the [`LeviCivitaConnection`](@ref) for a metric manifold.
 """
 connection(::MetricManifold) = LeviCivitaConnection()
+
+default_retraction_method(M::MetricManifold) = default_retraction_method(M.manifold)
 
 @doc raw"""
     det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
@@ -262,21 +248,26 @@ matrix ``G(p)`` representing the metric in the tangent space at ``p`` with as a 
 
 See also [`local_metric`](@ref)
 """
-det_local_metric(::AbstractManifold, p, ::AbstractBasis)
 function det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
     return det(local_metric(M, p, B))
 end
-@decorator_transparent_signature det_local_metric(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis,
-)
+@trait_function det_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
+
+function exp!(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, q, p, X)
+    return retract!(
+        M,
+        q,
+        p,
+        X,
+        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
+    )
+end
+
 """
     einstein_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = diff_badefault_differential_backendckend())
 
 Compute the Einstein tensor of the manifold `M` at the point `p`, see [https://en.wikipedia.org/wiki/Einstein_tensor](https://en.wikipedia.org/wiki/Einstein_tensor)
 """
-einstein_tensor(::AbstractManifold, ::Any, ::AbstractBasis)
 function einstein_tensor(
     M::AbstractManifold,
     p,
@@ -290,7 +281,7 @@ function einstein_tensor(
     G = Ric - g .* S / 2
     return G
 end
-@decorator_transparent_signature einstein_tensor(
+@trait_function einstein_tensor(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -298,10 +289,10 @@ end
 )
 
 @doc raw"""
-    flat(N::MetricManifold{M,G}, p, X::FVector{TangentSpaceType})
+    flat(N::MetricManifold{M,G}, p, X::TFVector)
 
 Compute the musical isomorphism to transform the tangent vector `X` from the
-[`AbstractManifold`](@ref) `M` equipped with [`AbstractMetric`](@ref) `G` to a cotangent by
+[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with [`AbstractMetric`](@ref) `G` to a cotangent by
 computing
 
 ````math
@@ -309,10 +300,11 @@ X^♭= G_p X,
 ````
 where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@ref)
 """
-flat(::MetricManifold, ::Any...)
+flat(::MetricManifold, ::Any, ::TFVector)
 
-@decorator_transparent_fallback function flat!(
-    M::MetricManifold,
+function flat!(
+    ::TraitList{IsMetricManifold},
+    M::AbstractDecoratorManifold,
     ξ::CoTFVector,
     p,
     X::TFVector,
@@ -321,13 +313,72 @@ flat(::MetricManifold, ::Any...)
     copyto!(ξ.data, g * X.data)
     return ξ
 end
+function flat!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    ξ::CoTFVector,
+    p,
+    X::TFVector,
+) where {𝔽,TM<:AbstractManifold,G<:AbstractMetric}
+    flat!(M.manifold, ξ, p, X)
+    return ξ
+end
+
+function get_basis(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return get_basis(M.manifold, p, B)
+end
+
+function get_coordinates(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return get_coordinates(M.manifold, p, X, B)
+end
+function get_coordinates!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    Y,
+    p,
+    X,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return get_coordinates!(M.manifold, Y, p, X, B)
+end
+
+function get_vector(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    c,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return get_vector(M.manifold, p, c, B)
+end
+function get_vector!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    Y,
+    p,
+    c,
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return get_vector!(M.manifold, Y, p, c, B)
+end
 
 @doc raw"""
     inverse_local_metric(M::AbstractcManifold{𝔽}, p, B::AbstractBasis)
 
 Return the local matrix representation of the inverse metric (cometric) tensor
-of the tangent space at `p` on the [`AbstractManifold`](@ref) `M` with respect
-to the [`AbstractBasis`](@ref) basis `B`.
+of the tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` with respect
+to the [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) basis `B`.
 
 The metric tensor (see [`local_metric`](@ref)) is usually denoted by ``G = (g_{ij}) ∈ 𝔽^{d×d}``,
 where ``d`` is the dimension of the manifold.
@@ -338,50 +389,10 @@ inverse_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 function inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)
     return inv(local_metric(M, p, B))
 end
-@decorator_transparent_signature inverse_local_metric(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis,
-)
-
-default_decorator_dispatch(M::MetricManifold) = default_metric_dispatch(M)
-
-"""
-    is_default_metric(M, G)
-
-Indicate whether the [`AbstractMetric`](@ref) `G` is the default metric for
-the [`AbstractManifold`](@ref) `M`. This means that any occurence of
-[`MetricManifold`](@ref)(M,G) where `typeof(is_default_metric(M,G)) = true`
-falls back to just be called with `M` such that the [`AbstractManifold`](@ref) `M`
-implicitly has this metric, for example if this was the first one implemented
-or is the one most commonly assumed to be used.
-"""
-function is_default_metric(M::AbstractManifold, G::AbstractMetric)
-    return _extract_val(default_metric_dispatch(M, G))
-end
-
-default_metric_dispatch(::AbstractManifold, ::AbstractMetric) = Val(false)
-function default_metric_dispatch(M::MetricManifold)
-    return default_metric_dispatch(base_manifold(M), metric(M))
-end
-
-"""
-    is_default_metric(MM::MetricManifold)
-
-Indicate whether the [`AbstractMetric`](@ref) `MM.G` is the default metric for
-the [`AbstractManifold`](@ref) `MM.manifold,` within the [`MetricManifold`](@ref) `MM`.
-This means that any occurence of
-[`MetricManifold`](@ref)`(MM.manifold, MM.G)` where `is_default_metric(MM.manifold, MM.G)) = true`
-falls back to just be called with `MM.manifold,` such that the [`AbstractManifold`](@ref) `MM.manifold`
-implicitly has the metric `MM.G`, for example if this was the first one
-implemented or is the one most commonly assumed to be used.
-"""
-function is_default_metric(M::MetricManifold)
-    return _extract_val(default_metric_dispatch(M))
-end
+@trait_function inverse_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
 function Base.convert(::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
-    return _convert_with_default(M, GT, default_metric_dispatch(M, GT()))
+    return _convert_with_default(M, GT, Val(is_default_metric(M, GT())))
 end
 
 function _convert_with_default(
@@ -401,13 +412,36 @@ function _convert_with_default(
     )
 end
 
+function exp(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return exp(M.manifold, p, X)
+end
+function exp!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    q,
+    p,
+    X,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return exp!(M.manifold, q, p, X)
+end
+
+injectivity_radius(M::MetricManifold) = injectivity_radius(M.manifold)
+function injectivity_radius(M::MetricManifold, m::AbstractRetractionMethod)
+    return injectivity_radius(M.manifold, m)
+end
+
 @doc raw"""
     inner(N::MetricManifold{M,G}, p, X, Y)
 
 Compute the inner product of `X` and `Y` from the tangent space at `p` on the
-[`AbstractManifold`](@ref) `M` using the [`AbstractMetric`](@ref) `G`. If `G` is the default
-metric (see [`is_default_metric`](@ref)) this is done using `inner(M, p, X, Y)`,
-otherwise the [`local_metric`](@ref)`(M, p)` is employed as
+[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` using the [`AbstractMetric`](@ref) `G`.
+If `M` has `G` as its [`IsDefaultMetric`](@ref) trait,
+this is done using `inner(M, p, X, Y)`, otherwise the [`local_metric`](@ref)`(M, p)` is employed as
 
 ````math
 g_p(X, Y) = ⟨X, G_p Y⟩,
@@ -416,8 +450,9 @@ where ``G_p`` is the loal matrix representation of the [`AbstractMetric`](@ref) 
 """
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
-@decorator_transparent_fallback :intransparent function inner(
-    M::MetricManifold,
+function inner(
+    ::TraitList{IsMetricManifold},
+    M::AbstractDecoratorManifold,
     p,
     X::TFVector,
     Y::TFVector,
@@ -426,12 +461,63 @@ inner(::MetricManifold, ::Any, ::Any, ::Any)
         error("calculating inner product of vectors from different bases is not supported")
     return dot(X.data, local_metric(M, p, X.basis) * Y.data)
 end
+function inner(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    Y,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return inner(M.manifold, p, X, Y)
+end
+
+"""
+    is_default_metric(M::AbstractManifold, G::AbstractMetric)
+
+returns whether an [`AbstractMetric`](@ref) is the default metric on the manifold `M` or not.
+This can be set by defining this function, or setting the [`IsDefaultMetric`](@ref) trait for an
+[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold).
+"""
+is_default_metric(M::AbstractManifold, G::AbstractMetric)
+
+@trait_function is_default_metric(M::AbstractDecoratorManifold, G::AbstractMetric)
+function is_default_metric(
+    ::TraitList{IsDefaultMetric{G}},
+    ::AbstractDecoratorManifold,
+    ::G,
+) where {G<:AbstractMetric}
+    return true
+end
+is_default_metric(M::MetricManifold) = is_default_metric(M.manifold, M.metric)
+is_default_metric(::AbstractManifold, ::AbstractMetric) = false
+
+function is_point(
+    ::TraitList{IsMetricManifold},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    te=false;
+    kwargs...,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return is_point(M.manifold, p, te; kwargs...)
+end
+
+function is_vector(
+    ::TraitList{IsMetricManifold},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    te=false,
+    cbp=true;
+    kwargs...,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return is_vector(M.manifold, p, X, te, cbp; kwargs...)
+end
 
 @doc raw"""
     local_metric(M::AbstractManifold{𝔽}, p, B::AbstractBasis)
 
 Return the local matrix representation at the point `p` of the metric tensor ``g`` with
-respect to the [`AbstractBasis`](@ref) `B` on the [`AbstractManifold`](@ref) `M`.
+respect to the [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) `B` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M`.
 Let ``d``denote the dimension of the manifold and $b_1,\ldots,b_d$ the basis vectors.
 Then the local matrix representation is a matrix ``G\in 𝔽^{n\times n}`` whose entries are
 given by ``g_{ij} = g_p(b_i,b_j), i,j\in\{1,…,d\}``.
@@ -440,12 +526,16 @@ This yields the property for two tangent vectors (using Einstein summation conve
 ``X = X^ib_i, Y=Y^ib_i \in T_p\mathcal M`` we get ``g_p(X, Y) = g_{ij} X^i Y^j``.
 """
 local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
-@decorator_transparent_signature local_metric(
-    M::AbstractDecoratorManifold,
+@trait_function local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
+
+function local_metric(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
     p,
-    B::AbstractBasis;
-    kwargs...,
-)
+    B::AbstractBasis,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return local_metric(M.manifold, p, B)
+end
 
 @doc raw"""
     local_metric_jacobian(
@@ -470,7 +560,7 @@ function local_metric_jacobian(
     ∂g = reshape(_jacobian(q -> local_metric(M, q, B), p, backend), n, n, n)
     return ∂g
 end
-@decorator_transparent_signature local_metric_jacobian(
+@trait_function local_metric_jacobian(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -480,13 +570,31 @@ end
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
 
-Copute the logarithmic map on the [`AbstractManifold`](@ref) `M` equipped with the [`AbstractMetric`](@ref) `G`.
+Copute the logarithmic map on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with the [`AbstractMetric`](@ref) `G`.
 
-If the metric was declared the default metric using [`is_default_metric`](@ref), this method
+If the metric was declared the default metric using the [`IsDefaultMetric`](@ref) trait or [`is_default_metric`](@ref), this method
 falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for the non-default
 [`AbstractMetric`](@ref) `G` metric within its [`MetricManifold`](@ref)`{M,G}`.
 """
 log(::MetricManifold, ::Any...)
+
+function log(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    q,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return log(M.manifold, p, q)
+end
+function log!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    X,
+    p,
+    q,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return log!(M.manifold, X, p, q)
+end
 
 @doc raw"""
     log_local_metric_density(M::AbstractManifold, p, B::AbstractBasis)
@@ -498,11 +606,9 @@ log_local_metric_density(::AbstractManifold, ::Any, ::AbstractBasis)
 function log_local_metric_density(M::AbstractManifold, p, B::AbstractBasis)
     return log(abs(det_local_metric(M, p, B))) / 2
 end
-@decorator_transparent_signature log_local_metric_density(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis,
-)
+@trait_function log_local_metric_density(M::AbstractDecoratorManifold, p, B::AbstractBasis)
+
+manifold_dimension(M::MetricManifold) = manifold_dimension(M.manifold)
 
 @doc raw"""
     metric(M::MetricManifold)
@@ -514,6 +620,65 @@ metric(::MetricManifold)
 function metric(M::MetricManifold)
     return M.metric
 end
+
+function norm(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, p, X::TFVector)
+    return sqrt(dot(X.data, local_metric(M, p, X.basis) * X.data))
+end
+
+function parallel_transport_to(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    q,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return parallel_transport_to(M.manifold, p, X, q)
+end
+function parallel_transport_to!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    Y,
+    p,
+    X,
+    q,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return parallel_transport_to!(M.manifold, Y, p, X, q)
+end
+
+function project(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return project(M.manifold, p)
+end
+function project!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    q,
+    p,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return project!(M.manifold, q, p)
+end
+function project(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return project(M.manifold, p, X)
+end
+function project!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    Y,
+    p,
+    X,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return project!(M.manifold, Y, p, X)
+end
+
+representation_size(M::MetricManifold) = representation_size(M.manifold)
 
 @doc raw"""
     ricci_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
@@ -538,7 +703,7 @@ function ricci_curvature(
     S = sum(Ginv .* Ric)
     return S
 end
-@decorator_transparent_signature ricci_curvature(
+@trait_function ricci_curvature(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -546,10 +711,10 @@ end
 )
 
 @doc raw"""
-    sharp(N::MetricManifold{M,G}, p, ξ::FVector{CotangentSpaceType})
+    sharp(N::MetricManifold{M,G}, p, ξ::CoTFVector)
 
 Compute the musical isomorphism to transform the cotangent vector `ξ` from the
-[`AbstractManifold`](@ref) `M` equipped with [`AbstractMetric`](@ref) `G` to a tangent by
+[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with [`AbstractMetric`](@ref) `G` to a tangent by
 computing
 
 ````math
@@ -560,59 +725,153 @@ where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 """
 sharp(::MetricManifold, ::Any, ::CoTFVector)
 
-function sharp!(M::N, X::TFVector, p, ξ::CoTFVector) where {N<:MetricManifold}
+function sharp!(
+    ::TraitList{IsMetricManifold},
+    M::AbstractDecoratorManifold,
+    X::TFVector,
+    p,
+    ξ::CoTFVector,
+)
     Ginv = inverse_local_metric(M, p, X.basis)
     copyto!(X.data, Ginv * ξ.data)
+    return X
+end
+function sharp!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    X::TFVector,
+    p,
+    ξ::CoTFVector,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    sharp!(M.manifold, X, p, ξ)
     return X
 end
 
 function Base.show(io::IO, M::MetricManifold)
     return print(io, "MetricManifold($(M.manifold), $(M.metric))")
 end
+function Base.show(io::IO, i::IsDefaultMetric)
+    return print(io, "IsDefaultMetric($(i.metric))")
+end
 
-#
-# Introduce transparency
-# (a) new functions & other parents
-for f in [
+function vector_transport_along(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    c::AbstractVector,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return vector_transport_along(M.manifold, p, X, c, m)
+end
+function vector_transport_along!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    Y,
+    p,
+    X,
+    c::AbstractVector,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return vector_transport_along!(M.manifold, Y, p, X, c, m)
+end
+
+function vector_transport_direction(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return vector_transport_direction(M.manifold, p, X, d, m)
+end
+function vector_transport_direction!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    Y,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return vector_transport_direction!(M.manifold, Y, p, X, d, m)
+end
+
+function vector_transport_to(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return vector_transport_to(M.manifold, p, X, q, m)
+end
+function vector_transport_to!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return vector_transport_to!(M.manifold, Y, p, X, q, m)
+end
+
+zero_vector(M::MetricManifold, p) = zero_vector(M.manifold, p)
+zero_vector!(M::MetricManifold, X, p) = zero_vector!(M.manifold, X, p)
+
+is_metric_function(::Any) = false
+for mf in [
+    change_metric,
+    change_metric!,
+    change_representer,
+    change_representer!,
     christoffel_symbols_first,
+    christoffel_symbols_second,
+    christoffel_symbols_second_jacobian,
     det_local_metric,
     einstein_tensor,
+    exp,
+    exp!,
+    flat!,
+    gaussian_curvature,
+    get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    get_vectors,
+    inner,
     inverse_local_metric,
+    inverse_retract,
+    inverse_retract!,
     local_metric,
     local_metric_jacobian,
+    log,
+    log!,
     log_local_metric_density,
+    norm,
+    parallel_transport_along,
+    parallel_transport_along!,
+    parallel_transport_direction,
+    parallel_transport_direction!,
+    parallel_transport_to,
+    parallel_transport_to!,
+    retract,
+    retract!,
     ricci_curvature,
+    ricci_tensor,
+    riemann_tensor,
+    sharp!,
+    vector_transport_along,
+    vector_transport_along!,
+    vector_transport_direction,
+    vector_transport_direction!,
+    vector_transport_to,
+    vector_transport_to!,
 ]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                M::AbstractConnectionManifold,
-                args...,
-            )
-                return Val(:parent)
-            end
-        end,
-    )
-end
-
-for f in [change_metric, change_representer, change_metric!, change_representer!]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractManifold,
-                args...,
-            )
-                return Val(:parent)
-            end
-        end,
-    )
-end
-function decorator_transparent_dispatch(
-    ::typeof(christoffel_symbols_second),
-    ::MetricManifold,
-    args...,
-)
-    return Val(:parent)
+    @eval is_metric_function(::typeof($mf)) = true
 end

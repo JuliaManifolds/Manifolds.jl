@@ -15,7 +15,7 @@ positive entries such that each column sums to one, i.e.
 
 where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
 
-It is modeled as an [`DefaultIsometricEmbeddingType`](@ref), [`AbstractEmbeddedManifold`](@ref)
+It is modeled as [`IsIsometricEmbeddedManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.IsIsometricEmbeddedManifold).
 via the [`AbstractMultinomialDoublyStochastic`](@ref) type, since it shares a few functions
 also with [`AbstractMultinomialDoublyStochastic`](@ref), most and foremost projection of
 a point from the embedding onto the manifold.
@@ -59,11 +59,6 @@ Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(m,n)`
 i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
 function check_point(M::MultinomialSymmetric{n}, p; kwargs...) where {n}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
-    # the embedding checks for positivity and unit sum columns, by symmetry we would get
-    # the same for the rows, so checking symmetry is the only thing left, we can just use
-    # the corresponding manifold for that
     return check_point(SymmetricMatrices(n, ℝ), p)
 end
 @doc raw"""
@@ -74,20 +69,10 @@ This means, that `p` is valid, that `X` is of correct dimension, symmetric, and 
 along any row.
 """
 function check_vector(M::MultinomialSymmetric{n}, p, X; kwargs...) where {n}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-    # from the embedding we know that columns sum to zero, only symmety is left, i.e.
     return check_vector(SymmetricMatrices(n, ℝ), p, X; kwargs...)
 end
 
-function decorated_manifold(::MultinomialSymmetric{N}) where {N}
+function get_embedding(::MultinomialSymmetric{N}) where {N}
     return MultinomialMatrices(N, N)
 end
 
@@ -143,21 +128,8 @@ refers to the elementwise exponentiation.
 """
 retract(::MultinomialSymmetric, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract!(M::MultinomialSymmetric, q, p, X, ::ProjectionRetraction)
+function retract_project!(M::MultinomialSymmetric, q, p, X)
     return project!(M, q, p .* exp.(X ./ p))
-end
-
-"""
-    vector_transport_to(M::MultinomialSymmetric, p, X, q)
-
-transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
-at `q`.
-"""
-vector_transport_to(::MultinomialSymmetric, ::Any, ::Any, ::Any, ::ProjectionTransport)
-
-function vector_transport_to!(M::MultinomialSymmetric, Y, p, X, q, ::ProjectionTransport)
-    project!(M, Y, q, X)
-    return Y
 end
 
 function Base.show(io::IO, ::MultinomialSymmetric{n}) where {n}

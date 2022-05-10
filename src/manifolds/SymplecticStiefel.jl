@@ -39,13 +39,15 @@ The constructor for the [`SymplecticStiefel`](@ref) manifold accepts the even co
 dimension ``2n`` and an even number of columns ``2k`` for
 the real symplectic Stiefel manifold with elements ``p \in ℝ^{2n × 2k}``.
 """
-struct SymplecticStiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+struct SymplecticStiefel{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
     return SymplecticStiefel{div(two_n, 2),div(two_k, 2),field}()
 end
 
-decorated_manifold(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
+function active_traits(f, ::SymplecticStiefel, args...)
+    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
+end
 
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
     return CayleyInverseRetraction()
@@ -79,7 +81,7 @@ end
 
 Check whether `p` is a valid point on the [`SymplecticStiefel`](@ref),
 $\operatorname{SpSt}(2n, 2k)$ manifold.
-That is, the point has the right [`AbstractNumbers`](@ref) type and $p^{+}p$ is
+That is, the point has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{+}p$ is
 (approximately) the identity,
 where for $A \in \mathbb{R}^{2n \times 2k}$,
 $A^{+} = Q_{2k}^TA^TQ_{2n}$ is the symplectic inverse, with
@@ -93,11 +95,6 @@ Q_{2n} =
 The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 function check_point(M::SymplecticStiefel{n,k}, p; kwargs...) where {n,k}
-    abstract_embedding_type = supertype(typeof(M))
-
-    mpv = invoke(check_point, Tuple{abstract_embedding_type,typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
-
     # Perform check that the matrix lives on the real symplectic manifold:
     expected_zero = norm(inv(M, p) * p - I)
     if !isapprox(expected_zero, 0; kwargs...)
@@ -137,20 +134,7 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 check_vector(::SymplecticStiefel, ::Any...)
 
 function check_vector(M::SymplecticStiefel{n,k,field}, p, X; kwargs...) where {n,k,field}
-    abstract_embedding_type = supertype(typeof(M))
-
-    mpv = invoke(
-        check_vector,
-        Tuple{abstract_embedding_type,typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-
     # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
-
     H = inv(M, p) * X  # ∈ ℝ^{2k × 2k}, should be Hamiltonian.
     H_star = inv(Symplectic(2k, field), H)
     hamiltonian_identity_norm = norm(H + H_star)
@@ -291,6 +275,8 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
     q .= Γ * (exp(Λ' * Γ)[:, (4k + 1):end]) * (exp(λ' * γ)[:, (2k + 1):end])
     return q
 end
+
+get_embedding(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
 
 @doc raw"""
     gradient(::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
@@ -453,7 +439,7 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 """
 inverse_retract(::SymplecticStiefel, p, q, ::CayleyInverseRetraction)
 
-function inverse_retract!(M::SymplecticStiefel, X, p, q, ::CayleyInverseRetraction)
+function inverse_retract_caley!(M::SymplecticStiefel, X, p, q)
     U_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
     V_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
 
@@ -592,7 +578,7 @@ It is this expression we compute inplace of `q`.
 """
 retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
 
-function retract!(M::SymplecticStiefel, q, p, X, ::CayleyRetraction)
+function retract_caley!(M::SymplecticStiefel, q, p, X)
     # Define intermediate matrices for later use:
     A = symplectic_inverse_times(M, p, X)
 

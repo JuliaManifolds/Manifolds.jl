@@ -3,7 +3,7 @@
     AbstractAtlas{𝔽}
 
 An abstract class for atlases whith charts that have values in the vector space `𝔽ⁿ`
-for some value of `n`. `𝔽` is a number system determined by an [`AbstractNumbers`](@ref)
+for some value of `n`. `𝔽` is a number system determined by an [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system)
 object.
 """
 abstract type AbstractAtlas{𝔽} end
@@ -28,8 +28,8 @@ In short: The coordinates with respect to a basis are used together with a retra
 
 # See also
 
-[`AbstractAtlas`](@ref), [`AbstractInverseRetractionMethod`](@ref),
-[`AbstractRetractionMethod`](@ref), [`AbstractBasis`](@ref)
+[`AbstractAtlas`](@ref), [`AbstractInverseRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractInverseRetractionMethod),
+[`AbstractRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractRetractionMethod), [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis)
 """
 struct RetractionAtlas{
     𝔽,
@@ -90,6 +90,12 @@ function allocate_result(M::AbstractManifold, f::typeof(get_parameters), p)
     T = allocate_result_type(M, f, (p,))
     return allocate(p, T, manifold_dimension(M))
 end
+# disambiguation
+@invoke_maker 1 AbstractManifold allocate_result(
+    M::AbstractDecoratorManifold,
+    f::typeof(get_parameters),
+    p,
+)
 
 function get_parameters!(M::AbstractManifold, a, A::RetractionAtlas, i, p)
     return get_coordinates!(M, a, i, inverse_retract(M, i, p, A.invretr), A.basis)
@@ -122,6 +128,12 @@ function allocate_result(M::AbstractManifold, f::typeof(get_point), a)
     T = allocate_result_type(M, f, (a,))
     return allocate(a, T, representation_size(M)...)
 end
+# disambiguation
+@invoke_maker 1 AbstractManifold allocate_result(
+    M::AbstractDecoratorManifold,
+    f::typeof(get_point),
+    a,
+)
 
 function get_point(M::AbstractManifold, A::RetractionAtlas, i, a)
     return retract(M, i, get_vector(M, i, a, A.basis), A.retr)
@@ -209,7 +221,7 @@ chart (`A`, `i`).
 
 # See also
 
-[`VectorSpaceType`](@ref), [`AbstractAtlas`](@ref)
+[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType), [`AbstractAtlas`](@ref)
 """
 induced_basis(M::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType)
 
@@ -265,7 +277,7 @@ and the set ``\{X_1,\ldots,X_n\}`` is the chart-induced basis of ``T_p\mathcal M
 
 # See also
 
-[`VectorSpaceType`](@ref), [`AbstractBasis`](@ref)
+[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType), [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis)
 """
 struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractBasis{𝔽,VST}
     vs::VST
@@ -302,6 +314,32 @@ function dual_basis(
 ) where {𝔽}
     return induced_basis(M, B.A, B.i, TangentSpace)
 end
+
+function ManifoldsBase._get_coordinates(M::AbstractManifold, p, X, B::InducedBasis)
+    return get_coordinates_induced_basis(M, p, X, B)
+end
+function get_coordinates_induced_basis(M::AbstractManifold, p, X, B::InducedBasis)
+    Y = allocate_result(M, get_coordinates, p, X, B)
+    return get_coordinates_induced_basis!(M, Y, p, X, B)
+end
+
+function ManifoldsBase._get_coordinates!(M::AbstractManifold, Y, p, X, B::InducedBasis)
+    return get_coordinates_induced_basis!(M, Y, p, X, B)
+end
+function get_coordinates_induced_basis! end
+
+function ManifoldsBase._get_vector(M::AbstractManifold, p, c, B::InducedBasis)
+    return get_vector_induced_basis(M, p, c, B)
+end
+function get_vector_induced_basis(M::AbstractManifold, p, c, B::InducedBasis)
+    Y = allocate_result(M, get_vector, p, c)
+    return get_vector!(M, Y, p, c, B)
+end
+
+function ManifoldsBase._get_vector!(M::AbstractManifold, Y, p, c, B::InducedBasis)
+    return get_vector_induced_basis!(M, Y, p, c, B)
+end
+function get_vector_induced_basis! end
 
 """
     local_metric(M::AbstractManifold, p, B::InducedBasis)

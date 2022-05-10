@@ -8,40 +8,58 @@ const CircleGroup = GroupManifold{ℂ,Circle{ℂ},MultiplicationOperation}
 
 CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 
+@inline function active_traits(f, M::CircleGroup, args...)
+    return merge_traits(
+        IsGroupManifold(M.op),
+        IsDefaultMetric(EuclideanMetric()),
+        HasBiinvariantMetric(),
+        active_traits(f, M.manifold, args...),
+        IsExplicitDecorator(),
+    )
+end
+
 Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
-
-invariant_metric_dispatch(::CircleGroup, ::ActionDirection) = Val(true)
-
-default_metric_dispatch(::MetricManifold{ℂ,CircleGroup,EuclideanMetric}) = Val(true)
 
 adjoint_action(::CircleGroup, p, X) = X
 
 adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)
 
-function _compose(G::CircleGroup, p::AbstractVector, q::AbstractVector)
-    return map(compose, repeated(G), p, q)
+function compose(
+    ::MultiplicationGroupTrait,
+    G::CircleGroup,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
+)
+    return map((pp, qq) -> compose(G, pp, qq), p, q)
 end
 
-_compose!(G::CircleGroup, x, p, q) = copyto!(x, compose(G, p, q))
+function compose!(
+    ::MultiplicationGroupTrait,
+    G::CircleGroup,
+    x,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
+)
+    return copyto!(x, compose(G, p, q))
+end
 
 identity_element(G::CircleGroup) = 1.0
 identity_element(::CircleGroup, p::Number) = one(p)
-identity_element(::CircleGroup, p::AbstractArray) = map(i -> one(eltype(p)), p)
 
-Base.inv(G::CircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
+Base.inv(G::CircleGroup, p::AbstractArray{<:Any,0}) = map(pp -> inv(G, pp), p)
 
 function inverse_translate(
     ::CircleGroup,
-    p::AbstractVector,
-    q::AbstractVector,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
     ::LeftAction,
 )
     return map(/, q, p)
 end
 function inverse_translate(
     ::CircleGroup,
-    p::AbstractVector,
-    q::AbstractVector,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
     ::RightAction,
 )
     return map(/, q, p)
@@ -76,16 +94,15 @@ end
 
 exp_lie!(G::CircleGroup, q, X) = (q .= exp_lie(G, X))
 
-function log_lie(::CircleGroup, q)
+function _log_lie(::CircleGroup, q)
     return map(q) do z
         cosθ, sinθ = reim(z)
         θ = atan(sinθ, cosθ)
         return θ * im
     end
 end
-log_lie(::CircleGroup, e::Identity{MultiplicationOperation}) = 0.0 * im
 
-_log_lie!(G::CircleGroup, X, q) = (X .= log_lie(G, q))
+_log_lie!(G::CircleGroup, X, q) = (X .= _log_lie(G, q))
 
 function number_of_coordinates(G::CircleGroup, B::AbstractBasis)
     return number_of_coordinates(base_manifold(G), B)
@@ -101,39 +118,61 @@ const RealCircleGroup = GroupManifold{ℝ,Circle{ℝ},AdditionOperation}
 
 RealCircleGroup() = GroupManifold(Circle{ℝ}(), AdditionOperation())
 
-Base.show(io::IO, ::RealCircleGroup) = print(io, "RealCircleGroup()")
-
-invariant_metric_dispatch(::RealCircleGroup, ::ActionDirection) = Val(true)
-
-default_metric_dispatch(::MetricManifold{ℝ,RealCircleGroup,EuclideanMetric}) = Val(true)
-
-_compose(::RealCircleGroup, p, q) = sym_rem(p + q)
-function _compose(G::RealCircleGroup, p::AbstractVector, q::AbstractVector)
-    return map(compose, repeated(G), p, q)
+@inline function active_traits(f, M::RealCircleGroup, args...)
+    return merge_traits(
+        IsGroupManifold(M.op),
+        IsDefaultMetric(EuclideanMetric()),
+        HasBiinvariantMetric(),
+        active_traits(f, M.manifold, args...),
+        IsExplicitDecorator(),
+    )
 end
 
-function _compose!(::RealCircleGroup, x, p, q)
-    x .= sym_rem.(p .+ q)
-    return x
+Base.show(io::IO, ::RealCircleGroup) = print(io, "RealCircleGroup()")
+
+is_default_metric(::RealCircleGroup, ::EuclideanMetric) = true
+
+# Lazy overwrite since this is a rare case of nonmutating foo.
+compose(::RealCircleGroup, p, q) = sym_rem(p + q)
+compose(::RealCircleGroup, ::Identity{AdditionOperation}, q) = sym_rem(q)
+compose(::RealCircleGroup, p, ::Identity{AdditionOperation}) = sym_rem(p)
+function compose(
+    ::RealCircleGroup,
+    e::Identity{AdditionOperation},
+    ::Identity{AdditionOperation},
+)
+    return e
+end
+
+compose!(::RealCircleGroup, x, p, q) = copyto!(x, sym_rem(p + q))
+compose!(::RealCircleGroup, x, ::Identity{AdditionOperation}, q) = copyto!(x, sym_rem(q))
+compose!(::RealCircleGroup, x, p, ::Identity{AdditionOperation}) = copyto!(x, sym_rem(p))
+function compose!(
+    ::RealCircleGroup,
+    ::Identity{AdditionOperation},
+    e::Identity{AdditionOperation},
+    ::Identity{AdditionOperation},
+)
+    return e
 end
 
 identity_element(G::RealCircleGroup) = 0.0
 identity_element(::RealCircleGroup, p::AbstractArray) = map(i -> zero(eltype(p)), p)
 
-Base.inv(G::RealCircleGroup, p::AbstractVector) = map(inv, repeated(G), p)
+Base.inv(G::RealCircleGroup, p::AbstractArray{<:Any,0}) = map(pp -> inv(G, pp), p)
 
 function inverse_translate(
     ::RealCircleGroup,
-    p::AbstractVector,
-    q::AbstractVector,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
     ::LeftAction,
 )
     return map((x, y) -> sym_rem(x - y), q, p)
 end
 function inverse_translate(
     ::RealCircleGroup,
-    p::AbstractVector,
-    q::AbstractVector,
+    p::AbstractArray{<:Any,0},
+    q::AbstractArray{<:Any,0},
     ::RightAction,
 )
     return map((x, y) -> sym_rem(x - y), q, p)

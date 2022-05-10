@@ -18,12 +18,15 @@ include("../utils.jl")
         @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
         @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
-        @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], true)
+        @test_throws ManifoldDomainError is_vector(
+            M,
+            [1.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            true,
+        )
         @test !is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
         @test_throws DomainError is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], true)
         @test is_default_metric(M, MinkowskiMetric())
-        @test Manifolds.default_metric_dispatch(M, MinkowskiMetric()) === Val{true}()
         @test manifold_dimension(M) == 2
 
         for (P, T) in zip(
@@ -68,10 +71,15 @@ include("../utils.jl")
         @test convert(AbstractVector, pB) == p # convert back yields again p
         @test convert(HyperboloidPoint, pB).value == pH.value
         @test_throws DomainError is_point(M, PoincareBallPoint([0.9, 0.0, 0.0]), true)
-        @test_throws DomainError is_point(M, PoincareBallPoint([1.0, 0.0]), true)
+        @test_throws DomainError is_point(M, PoincareBallPoint([1.1, 0.0]), true)
 
         @test is_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
-
+        @test_throws DomainError is_vector(
+            M,
+            pB,
+            PoincareBallTVector([2.0, 2.0, 3.0]),
+            true,
+        )
         pS = convert(PoincareHalfSpacePoint, p)
         pS2 = convert(PoincareHalfSpacePoint, pB)
         pS3 = convert(PoincareHalfSpacePoint, pH)
@@ -104,7 +112,6 @@ include("../utils.jl")
             @test isapprox(M, p1, X1, X2)
             # Test broadcast
             @test 2 .* X1 == T(2 .* X1.value)
-            @test 2 .* p1 == P(2 .* p1.value)
             @test copy(X1) == X1
             @test copy(X1) !== X1
             X1s = similar(X1)
@@ -166,8 +173,6 @@ include("../utils.jl")
                 exp_log_atol_multiplier=10.0,
                 retraction_methods=(ExponentialRetraction(),),
                 test_vee_hat=false,
-                test_forward_diff=is_plain_array,
-                test_reverse_diff=is_plain_array,
                 test_tangent_vector_broadcasting=is_plain_array,
                 test_vector_spaces=is_plain_array,
                 test_inplace=true,
@@ -190,13 +195,45 @@ include("../utils.jl")
         p2 = HyperboloidPoint(p)
         X2 = HyperboloidTVector(X)
         q2 = HyperboloidPoint(similar(p))
-        @test embed(M, p2).value == p2.value
+        q3 = similar(p)
+        @test embed(M, p2) == p2.value
         embed!(M, q2, p2)
+        embed!(M, q3, p2)
         @test q2.value == p2.value
-        @test embed(M, p2, X2).value == X2.value
+        @test q3 == p2.value
+        @test embed(M, p2, X2) == X2.value
         Y2 = HyperboloidTVector(similar(X))
+        Y3 = similar(X)
         embed!(M, Y2, p2, X2)
         @test Y2.value == X2.value
+        embed!(M, Y3, p2, X2)
+        @test Y3 == X2.value
+        # check embed for PoincareBall
+        p4 = convert(PoincareBallPoint, p)
+        X4 = convert(PoincareBallTVector, p, X)
+        q4 = embed(M, p4)
+        @test isapprox(q4, zeros(2))
+        q4b = similar(q4)
+        embed!(M, q4b, p4)
+        @test q4b == q4
+        Y4 = embed(M, p4, X4)
+        @test Y4 == X4.value
+        Y4b = similar(Y4)
+        embed!(M, Y4b, p4, X4)
+        @test Y4 == Y4b
+        # check embed for PoincareHalfSpace
+        p5 = convert(PoincareHalfSpacePoint, p)
+        X5 = convert(PoincareHalfSpaceTVector, p, X)
+        q5 = embed(M, p5)
+        @test isapprox(q5, [0.0; 1.0])
+        q5b = similar(q5)
+        embed!(M, q5b, p5)
+        @test q5b == q5
+        Y5 = embed(M, p5, X5)
+        @test Y5 == X5.value
+        Y5b = similar(Y5)
+        embed!(M, Y5b, p5, X5)
+        @test Y5 == Y5b
     end
     @testset "Hyperbolic mean test" begin
         pts = [
@@ -229,6 +266,8 @@ include("../utils.jl")
         @test is_vector(M, p, X)
         c = get_coordinates(M, p, X, B)
         @test c ≈ [0.5, 1.0]
+        c2 = similar(c)
+        get_coordinates!(M, c2, p, X, DefaultOrthonormalBasis())
         B2 = DiagonalizingOrthonormalBasis(X)
         V2 = get_vectors(M, p, get_basis(M, p, B2))
         @test V2[1] ≈ X ./ norm(M, p, X)

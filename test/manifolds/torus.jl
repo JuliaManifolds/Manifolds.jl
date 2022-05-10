@@ -14,6 +14,7 @@ include("../utils.jl")
         @test_throws DomainError is_point(M, 9.0, true)
         @test !is_point(M, [9.0; 9.0])
         @test_throws CompositeManifoldError is_point(M, [9.0 9.0], true)
+        @test_throws CompositeManifoldError is_point(M, [9.0, 9.0], true)
         @test !is_vector(M, [9.0; 9.0], 0.0)
         @test_throws DomainError is_vector(M, 9.0, 0.0, true) # point false and checked
         @test !is_vector(M, [9.0; 9.0], [0.0; 0.0])
@@ -26,8 +27,6 @@ include("../utils.jl")
         test_manifold(
             M,
             [x, y, z],
-            test_forward_diff=false,
-            test_reverse_diff=false,
             test_vector_spaces=true,
             test_project_tangent=false,
             test_musical_isomorphisms=true,

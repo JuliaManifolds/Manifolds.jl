@@ -16,7 +16,7 @@ include("group_utils.jl")
 
     types_m = [Vector{Float64}]
 
-    @test g_manifold(A_left) == Euclidean(2)
+    @test group_manifold(A_left) == Euclidean(2)
     @test base_group(A_left) == G
     @test isa(A_left, AbstractGroupAction{LeftAction})
     @test base_manifold(G) == M
@@ -64,7 +64,7 @@ end
 
     types_m = [Vector{Float64}]
 
-    @test g_manifold(A) == Euclidean(3)
+    @test group_manifold(A) == Euclidean(3)
     @test base_group(A) == G
     @test isa(A, AbstractGroupAction{LeftAction})
     @test base_manifold(G) == M

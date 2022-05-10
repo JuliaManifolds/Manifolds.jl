@@ -246,8 +246,6 @@ end
                             is_point_atol_multiplier=1.0e4,
                             is_tangent_atol_multiplier=1.0e3,
                             retraction_atol_multiplier=1.0e1,
-                            test_reverse_diff=false,
-                            test_forward_diff=false,
                             test_project_tangent=(type != MMatrix{6,4,Float64,24}),
                             test_injectivity_radius=false,
                             test_exp_log=false,
@@ -266,8 +264,6 @@ end
                             is_point_atol_multiplier=1.0e11,
                             is_tangent_atol_multiplier=1.0e2,
                             retraction_atol_multiplier=1.0e4,
-                            test_reverse_diff=false,
-                            test_forward_diff=false,
                             test_project_tangent=(type != MMatrix{6,4,Float64,24}),
                             test_injectivity_radius=false,
                             test_exp_log=false,
@@ -290,17 +286,17 @@ end
                 return Q_grad * p * (euc_grad_f') * Q_grad * p + euc_grad_f * p' * p
             end
             p_grad = convert(Array{Float64}, points[1])
-            ad_diff = RiemannianProjectionBackend(Manifolds.ForwardDiffBackend())
+            fd_diff = RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
 
             @test isapprox(
-                Manifolds.gradient(SpSt_6_4, test_f, p_grad, ad_diff),
+                Manifolds.gradient(SpSt_6_4, test_f, p_grad, fd_diff),
                 analytical_grad_f(p_grad);
-                atol=1.0e-16,
+                atol=1.0e-9,
             )
 
             grad_f_p = similar(p_grad)
-            Manifolds.gradient!(SpSt_6_4, test_f, grad_f_p, p_grad, ad_diff)
-            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-16)
+            Manifolds.gradient!(SpSt_6_4, test_f, grad_f_p, p_grad, fd_diff)
+            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-9)
         end
     end
 end

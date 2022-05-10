@@ -9,14 +9,14 @@ include("../utils.jl")
     @test is_point(M, p)
     @test is_vector(M, p, X)
     pf1 = [0.1 0.9 0.1; 0.1 0.9 0.1; 0.1 0.1 0.9] #not sum 1
-    @test_throws CompositeManifoldError is_point(M, pf1, true)
+    @test_throws ManifoldDomainError is_point(M, pf1, true)
     pf2r = [0.1 0.9 0.1; 0.8 0.05 0.15; 0.1 0.05 0.75]
     @test_throws DomainError is_point(M, pf2r, true)
-    @test_throws CompositeManifoldError is_point(M, pf2r', true)
+    @test_throws ManifoldDomainError is_point(M, pf2r', true)
     pf3 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0] # contains nonpositive entries
-    @test_throws CompositeManifoldError is_point(M, pf3, true)
+    @test_throws ManifoldDomainError is_point(M, pf3, true)
     Xf2c = [-0.1 0.0 0.1; -0.2 0.1 0.1; 0.2 -0.1 -0.1] #nonzero columns
-    @test_throws CompositeManifoldError is_vector(M, p, Xf2c, true)
+    @test_throws ManifoldDomainError is_vector(M, p, Xf2c, true)
     @test_throws DomainError is_vector(M, p, Xf2c', true)
     @test representation_size(M) == (3, 3)
     pE = similar(p)
@@ -50,8 +50,6 @@ include("../utils.jl")
                 M,
                 pts,
                 test_injectivity_radius=false,
-                test_reverse_diff=false,
-                test_forward_diff=false,
                 test_project_tangent=true,
                 test_exp_log=false,
                 test_default_vector_transport=true,

@@ -1,5 +1,6 @@
 include("utils.jl")
 using Manifolds:
+    default_differential_backend,
     _derivative,
     _derivative!,
     differential,
@@ -9,7 +10,16 @@ using Manifolds:
     _gradient,
     _gradient!,
     _jacobian,
-    _jacobian!
+    _jacobian!,
+    set_default_differential_backend!
+
+# differentiation
+using Manifolds:
+    AbstractDiffBackend,
+    AbstractRiemannianDiffBackend,
+    ExplicitEmbeddedBackend,
+    TangentDiffBackend,
+    RiemannianProjectionBackend
 
 import Manifolds: gradient
 
@@ -18,14 +28,13 @@ function Manifolds.gradient(::AbstractManifold, f, p, ::TestRiemannianBackend)
     return collect(1.0:length(p))
 end
 
-using FiniteDifferences, FiniteDiff
+using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
 @testset "Differentiation backend" begin
     fd51 = Manifolds.FiniteDifferencesBackend()
     @testset "default_differential_backend" begin
-        #ForwardDiff is loaded first in utils.
-        @test default_differential_backend() === Manifolds.ForwardDiffBackend()
+        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
 
         @test length(fd51.method.grid) == 5
         # check method order
@@ -34,57 +43,6 @@ using LinearAlgebra: Diagonal, dot
         @test set_default_differential_backend!(fd71) == fd71
         @test default_differential_backend() == fd71
     end
-
-    using ForwardDiff
-
-    fwd_diff = Manifolds.ForwardDiffBackend()
-    @testset "ForwardDiff" begin
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        @test set_default_differential_backend!(fwd_diff) == fwd_diff
-        @test default_differential_backend() == fwd_diff
-        @test set_default_differential_backend!(fd51) isa Manifolds.FiniteDifferencesBackend
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        set_default_differential_backend!(fwd_diff)
-        @test default_differential_backend() == fwd_diff
-        set_default_differential_backend!(fd51)
-    end
-
-    using FiniteDiff
-
-    finite_diff = Manifolds.FiniteDiffBackend()
-    @testset "FiniteDiff" begin
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        @test set_default_differential_backend!(finite_diff) == finite_diff
-        @test default_differential_backend() == finite_diff
-        @test set_default_differential_backend!(fd51) isa Manifolds.FiniteDifferencesBackend
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        set_default_differential_backend!(finite_diff)
-        @test default_differential_backend() == finite_diff
-        set_default_differential_backend!(fd51)
-    end
-
-    using ReverseDiff
-
-    reverse_diff = Manifolds.ReverseDiffBackend()
-    @testset "ReverseDiff" begin
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        @test set_default_differential_backend!(reverse_diff) == reverse_diff
-        @test default_differential_backend() == reverse_diff
-        @test set_default_differential_backend!(fd51) isa Manifolds.FiniteDifferencesBackend
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
-
-        set_default_differential_backend!(reverse_diff)
-        @test default_differential_backend() == reverse_diff
-        set_default_differential_backend!(fd51)
-    end
-
-    using Zygote
-    zygote_diff = Manifolds.ZygoteDiffBackend()
 
     @testset "gradient" begin
         set_default_differential_backend!(fd51)
@@ -97,45 +55,30 @@ using LinearAlgebra: Diagonal, dot
             return y
         end
         f2(x) = 3 * x[1] * x[2] + x[2]^3
+        @test _jacobian(c1, 0.0) ≈ [1.0; 0.0]
 
-        @testset "Inference" begin
-            X = [-1.0, -1.0]
-            @test (@inferred _derivative(c1, 0.0, Manifolds.ForwardDiffBackend())) ≈
-                  [1.0, 0.0]
-            @test (@inferred _derivative!(c1, X, 0.0, Manifolds.ForwardDiffBackend())) === X
-            @test X ≈ [1.0, 0.0]
-
-            @test (@inferred _derivative(c1, 0.0, finite_diff)) ≈ [1.0, 0.0]
-            @test (@inferred _gradient(f1, [1.0, -1.0], finite_diff)) ≈ [1.0, -2.0]
-        end
-
-        @testset for backend in [fd51, fwd_diff, finite_diff]
+        @testset for backend in [fd51]
             set_default_differential_backend!(backend)
             @test _derivative(c1, 0.0) ≈ [1.0, 0.0]
             X = [-1.0, -1.0]
             @test _derivative!(c1, X, 0.0) === X
             @test isapprox(X, [1.0, 0.0])
         end
-        @testset for backend in [fd51, fwd_diff, finite_diff, reverse_diff, zygote_diff]
+        @testset for backend in [fd51]
             set_default_differential_backend!(backend)
             X = [-1.0, -1.0]
             @test _gradient(f1, [1.0, -1.0]) ≈ [1.0, -2.0]
             @test _gradient!(f1, X, [1.0, -1.0]) === X
             @test X ≈ [1.0, -2.0]
         end
-        @testset for backend in [finite_diff]
-            set_default_differential_backend!(backend)
-            X = [-0.0 -0.0]
-            @test _jacobian(f1, [1.0, -1.0]) ≈ [1.0 -2.0]
-            # The following seems not to worf for :central, but it does for forward
-            fdf = Manifolds.FiniteDiffBackend(Val(:forward))
-            @test_broken _jacobian!(f1!, X, [1.0, -1.0], fdf) === X
-            @test_broken X ≈ [1.0 -2.0]
-        end
         set_default_differential_backend!(Manifolds.NoneDiffBackend())
-        @testset for backend in [fd51, Manifolds.ForwardDiffBackend()]
+        @testset for backend in [fd51]
             @test _derivative(c1, 0.0, backend) ≈ [1.0, 0.0]
             @test _gradient(f1, [1.0, -1.0], backend) ≈ [1.0, -2.0]
+            @test _jacobian(c1, 0.0, backend) ≈ [1.0; 0.0]
+            jac = [NaN; NaN]
+            _jacobian!(c1, jac, 0.0, backend)
+            @test jac ≈ [1.0; 0.0]
         end
 
         set_default_differential_backend!(fd51)
@@ -147,17 +90,18 @@ rb_onb_default = TangentDiffBackend(
     Manifolds.ExponentialRetraction(),
     Manifolds.LogarithmicInverseRetraction(),
     DefaultOrthonormalBasis(),
+    DefaultOrthonormalBasis(),
 )
 
 rb_onb_fd51 = TangentDiffBackend(Manifolds.FiniteDifferencesBackend())
 
-rb_onb_fwd_diff = TangentDiffBackend(Manifolds.ForwardDiffBackend())
-
-rb_onb_finite_diff = TangentDiffBackend(Manifolds.FiniteDiffBackend())
-
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();
-    basis=CachedBasis(
+    basis_arg=CachedBasis(
+        DefaultOrthonormalBasis(),
+        [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
+    ),
+    basis_val=CachedBasis(
         DefaultOrthonormalBasis(),
         [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
     ),
@@ -177,7 +121,7 @@ rb_proj = Manifolds.RiemannianProjectionBackend(default_differential_backend())
     differential!(s2, c1, X, π / 4, rb_onb_default)
     @test isapprox(s2, c1(π / 4), X, Xval)
 
-    @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff, rb_onb_finite_diff]
+    @testset for backend in [rb_onb_fd51]
         @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4, backend), Xval)
         X = similar(p)
         differential!(s2, c1, X, π / 4, backend)
@@ -207,6 +151,36 @@ end
     X = similar(q)
     @test gradient!(s2, f1, X, q, TestRiemannianBackend()) === X
     @test X == [1.0, 2.0, 3.0]
+end
+
+@testset "Riemannian Jacobians" begin
+    s2 = Sphere(2)
+    f1(p) = p
+
+    q = [sqrt(2) / 2, 0, sqrt(2) / 2]
+    X = similar(q)
+    @test isapprox(
+        s2,
+        q,
+        Manifolds.jacobian(s2, s2, f1, q, rb_onb_default),
+        [1.0 0.0; 0.0 1.0],
+    )
+
+    q2 = [1.0, 0.0, 0.0]
+    f2(X) = [0.0 0.0 0.0; 0.0 2.0 -1.0; 0.0 -3.0 1.0] * X
+    Tq2s2 = TangentSpaceAtPoint(s2, q2)
+    @test isapprox(
+        Manifolds.jacobian(Tq2s2, Tq2s2, f2, zero_vector(s2, q2), rb_onb_default),
+        [2.0 -1.0; -3.0 1.0],
+    )
+
+    q3 = [0.0, 1.0, 0.0]
+    f3(X) = [0.0 2.0 1.0; 0.0 0.0 0.0; 0.0 5.0 1.0] * X
+    Tq3s2 = TangentSpaceAtPoint(s2, q3)
+    @test isapprox(
+        Manifolds.jacobian(Tq2s2, Tq3s2, f3, zero_vector(s2, q2), rb_onb_default),
+        [-2.0 -1.0; 5.0 1.0],
+    )
 end
 
 @testset "EmbeddedBackend" begin

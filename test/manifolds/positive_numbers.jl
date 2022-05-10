@@ -38,8 +38,6 @@ include("../utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
@@ -56,8 +54,6 @@ include("../utils.jl")
             test_manifold(
                 M2,
                 pts2,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,

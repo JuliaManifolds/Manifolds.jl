@@ -1,34 +1,31 @@
 include("../utils.jl")
 include("group_utils.jl")
 
-using Manifolds: invariant_metric_dispatch, default_metric_dispatch
-
 @testset "Circle group" begin
     G = CircleGroup()
     @test repr(G) == "CircleGroup()"
 
     @test base_manifold(G) === Circle{ℂ}()
 
-    @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
-    @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
-    @test (@inferred Manifolds.biinvariant_metric_dispatch(G)) === Val(true)
-    @test (@inferred default_metric_dispatch(MetricManifold(G, EuclideanMetric()))) ===
-          Val(true)
     @test has_invariant_metric(G, LeftAction())
     @test has_invariant_metric(G, RightAction())
     @test has_biinvariant_metric(G)
     @test is_default_metric(MetricManifold(G, EuclideanMetric()))
-
+    @test is_group_manifold(G)
     @testset "identity overloads" begin
         ig = Identity(G)
         @test inv(G, ig) === ig
-        q = [1.0 * im]
-        X = [Complex(0.5)]
+        q = fill(1.0 * im)
+        X = fill(Complex(0.5))
         @test translate_diff(G, ig, q, X) === X
 
         @test identity_element(G) === 1.0
         @test identity_element(G, 1.0f0) === 1.0f0
-        @test identity_element(G, [1.0f0]) == [1.0f0]
+        @test identity_element(G, fill(1.0f0)) == fill(1.0f0)
+        @test !is_point(G, Identity(AdditionOperation()))
+        ef = Identity(AdditionOperation())
+        @test_throws DomainError is_point(G, ef, true)
+        @test_throws DomainError is_vector(G, ef, X, true; check_base_point=true)
     end
 
     @testset "scalar points" begin
@@ -49,11 +46,11 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
         )
     end
 
-    @testset "vector points" begin
-        pts = [[1.0 + 0.0im], [0.0 + 1.0im], [(1.0 + 1.0im) / √2]]
-        Xpts = [[0.0 + 0.5im], [0.0 - 1.5im]]
-        @test compose(G, pts[2], pts[1]) ≈ pts[2] .* pts[1]
-        @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ pts[2] .* Xpts[1]
+    @testset "array points" begin
+        pts = [fill(1.0 + 0.0im), fill(0.0 + 1.0im), fill((1.0 + 1.0im) / √2)]
+        Xpts = [fill(0.0 + 0.5im), fill(0.0 - 1.5im)]
+        @test compose(G, pts[2], pts[1]) ≈ fill(pts[2] .* pts[1])
+        @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ fill(pts[2] .* Xpts[1])
         test_group(
             G,
             pts,
@@ -68,20 +65,18 @@ using Manifolds: invariant_metric_dispatch, default_metric_dispatch
     end
 
     @testset "Group forwards to decorated" begin
-        pts = [[1.0 + 0.0im], [0.0 + 1.0im], [(1.0 + 1.0im) / √2]]
+        pts = [1.0 + 0.0im, 0.0 + 1.0im, (1.0 + 1.0im) / √2]
         test_manifold(
             G,
             pts,
-            basis_types_to_from=(Manifolds.VeeOrthogonalBasis(), DefaultOrthonormalBasis()),
-            test_forward_diff=false,
-            test_reverse_diff=false,
             test_vector_spaces=false,
             test_project_tangent=true,
             test_musical_isomorphisms=false,
             test_default_vector_transport=true,
-            is_mutating=true,
+            is_mutating=false,
             exp_log_atol_multiplier=2.0,
             is_tangent_atol_multiplier=2.0,
+            mid_point12=nothing,
         )
     end
 end
@@ -92,11 +87,6 @@ end
 
     @test base_manifold(G) === Circle{ℝ}()
 
-    @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
-    @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
-    @test (@inferred Manifolds.biinvariant_metric_dispatch(G)) === Val(true)
-    @test (@inferred default_metric_dispatch(MetricManifold(G, EuclideanMetric()))) ===
-          Val(true)
     @test has_invariant_metric(G, LeftAction())
     @test has_invariant_metric(G, RightAction())
     @test has_biinvariant_metric(G)
@@ -105,16 +95,16 @@ end
     @testset "identity overloads" begin
         ig = Identity(G)
         @test inv(G, ig) === ig
-        q = [0.0]
-        X = [0.5]
+        q = fill(0.0)
+        X = fill(0.5)
         @test translate_diff(G, ig, q, X) === X
 
         @test identity_element(G) === 0.0
         @test identity_element(G, 1.0f0) === 0.0f0
-        @test identity_element(G, [0.0f0]) == [0.0f0]
+        @test identity_element(G, fill(0.0f0)) == fill(0.0f0)
     end
 
-    @testset "scalar points" begin
+    @testset "points" begin
         pts = [1.0, 0.5, -3.0]
         Xpts = [-2.0, 0.5, 2.0]
         @test compose(G, pts[2], pts[1]) ≈ pts[2] + pts[1]
@@ -132,10 +122,10 @@ end
         )
     end
 
-    @testset "vector points" begin
-        pts = [[1.0], [0.5], [-3.0]]
-        Xpts = [[-2.0], [0.5], [2.0]]
-        @test compose(G, pts[2], pts[1]) ≈ pts[2] .+ pts[1]
+    @testset "array points" begin
+        pts = [fill(1.0), fill(0.5), fill(-3.0)]
+        Xpts = [fill(-2.0), fill(0.5), fill(2.0)]
+        @test compose(G, pts[2], pts[1]) ≈ fill(pts[2] .+ pts[1])
         @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ Xpts[1]
         test_group(
             G,
@@ -150,21 +140,19 @@ end
         )
     end
 
-    @testset "Group forwards to decorated" begin
-        pts = [[1.0], [0.5], [-3.0]]
+    @testset "Group forwards" begin
+        pts = [1.0, 0.5, -3.0]
         test_manifold(
             G,
             pts,
-            basis_types_to_from=(Manifolds.VeeOrthogonalBasis(), DefaultOrthonormalBasis()),
-            test_forward_diff=false,
-            test_reverse_diff=false,
             test_vector_spaces=false,
             test_project_tangent=true,
             test_musical_isomorphisms=false,
             test_default_vector_transport=true,
-            is_mutating=true,
+            is_mutating=false,
             exp_log_atol_multiplier=2.0,
             is_tangent_atol_multiplier=2.0,
+            mid_point12=nothing,
         )
     end
 end

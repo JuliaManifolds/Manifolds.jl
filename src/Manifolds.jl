@@ -1,9 +1,17 @@
 module Manifolds
 
 import ManifoldsBase:
+    @trait_function,
     _access_nested,
+    _get_basis,
+    _injectivity_radius,
+    _inverse_retract,
+    _inverse_retract!,
     _read,
+    _retract,
+    _retract!,
     _write,
+    active_traits,
     allocate,
     allocate_coordinates,
     allocate_result,
@@ -12,58 +20,119 @@ import ManifoldsBase:
     array_value,
     base_manifold,
     check_point,
-    check_point__transparent,
+    check_size,
     check_vector,
     copy,
     copyto!,
+    default_inverse_retraction_method,
+    default_retraction_method,
+    default_vector_transport_method,
     decorated_manifold,
-    decorator_transparent_dispatch,
-    default_decorator_dispatch,
     distance,
     dual_basis,
     embed,
     embed!,
     exp,
     exp!,
-    exp!__intransparent,
     get_basis,
+    get_basis_default,
+    get_basis_diagonalizing,
+    get_basis_orthogonal,
+    get_basis_orthonormal,
+    get_basis_vee,
     get_component,
     get_coordinates,
     get_coordinates!,
+    get_coordinates_diagonalizing,
+    get_coordinates_diagonalizing!,
+    get_coordinates_orthogonal,
+    get_coordinates_orthonormal,
+    get_coordinates_orthogonal!,
+    get_coordinates_orthonormal!,
+    get_coordinates_vee!,
     get_embedding,
     get_iterator,
     get_vector,
     get_vector!,
+    get_vector_diagonalizing,
+    get_vector_diagonalizing!,
+    get_vector_orthogonal,
+    get_vector_orthonormal,
+    get_vector_orthogonal!,
+    get_vector_orthonormal!,
     get_vectors,
     gram_schmidt,
     hat,
     hat!,
     injectivity_radius,
+    _injectivity_radius,
+    injectivity_radius_exp,
     inner,
-    inner__intransparent,
+    isapprox,
     is_point,
     is_vector,
     inverse_retract,
     inverse_retract!,
+    _inverse_retract,
+    _inverse_retract!,
+    inverse_retract_caley!,
+    inverse_retract_embedded!,
+    inverse_retract_nlsolve!,
+    inverse_retract_pade!,
+    inverse_retract_polar!,
+    inverse_retract_project!,
+    inverse_retract_qr!,
+    inverse_retract_softmax!,
     log,
     log!,
     manifold_dimension,
     mid_point,
     mid_point!,
+    norm,
     number_eltype,
     number_of_coordinates,
+    parallel_transport_along,
+    parallel_transport_along!,
+    parallel_transport_direction,
+    parallel_transport_direction!,
+    parallel_transport_to,
+    parallel_transport_to!,
+    parent_trait,
     power_dimensions,
     project,
     project!,
     representation_size,
     retract,
     retract!,
+    retract_caley!,
+    retract_exp_ode!,
+    retract_pade!,
+    retract_polar!,
+    retract_project!,
+    retract_qr!,
+    retract_softmax!,
     set_component!,
     vector_space_dimension,
+    vector_transport_along, # just specified in Euclidean - the next 5 as well
+    vector_transport_along_diff,
+    vector_transport_along_project,
+    vector_transport_along!,
+    vector_transport_along_diff!,
+    vector_transport_along_project!,
     vector_transport_direction,
+    vector_transport_direction_diff,
     vector_transport_direction!,
+    vector_transport_direction_diff!,
     vector_transport_to,
+    vector_transport_to_diff,
+    vector_transport_to_project,
     vector_transport_to!,
+    vector_transport_to_diff!,
+    vector_transport_to_project!, # some overwrite layer 2
+    _vector_transport_direction,
+    _vector_transport_direction!,
+    _vector_transport_to,
+    _vector_transport_to!,
     vee,
     vee!,
     zero_vector,
@@ -77,7 +146,6 @@ import Base:
     identity,
     in,
     inv,
-    isapprox,
     isempty,
     length,
     ndims,
@@ -98,10 +166,7 @@ using ManifoldsBase:
     ℍ,
     AbstractBasis,
     AbstractDecoratorManifold,
-    AbstractDecoratorType,
-    AbstractEmbeddedManifold,
     AbstractInverseRetractionMethod,
-    AbstractIsometricEmbeddingType,
     AbstractManifold,
     AbstractManifoldPoint,
     AbstractNumbers,
@@ -110,19 +175,20 @@ using ManifoldsBase:
     AbstractPowerManifold,
     AbstractPowerRepresentation,
     AbstractRetractionMethod,
+    AbstractTrait,
     AbstractVectorTransportMethod,
     AbstractLinearVectorTransportMethod,
     ApproximateInverseRetraction,
     ApproximateRetraction,
     CachedBasis,
+    CayleyRetraction,
+    CayleyInverseRetraction,
+    ComplexNumbers,
     ComponentManifoldError,
     CompositeManifoldError,
     CotangentSpaceType,
     CoTFVector,
     DefaultBasis,
-    DefaultEmbeddingType,
-    DefaultIsometricEmbeddingType,
-    DefaultManifold,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     DefaultOrDiagonalizingBasis,
@@ -130,15 +196,23 @@ using ManifoldsBase:
     DiagonalizingOrthonormalBasis,
     DifferentiatedRetractionVectorTransport,
     EmbeddedManifold,
+    EmptyTrait,
     ExponentialRetraction,
     FVector,
-    InversePowerRetraction,
+    IsIsometricEmbeddedManifold,
+    IsEmbeddedManifold,
+    IsEmbeddedSubmanifold,
+    IsExplicitDecorator,
     LogarithmicInverseRetraction,
     ManifoldsBase,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
-    NLsolveInverseRetraction,
+    TraitList,
+    NLSolveInverseRetraction,
+    ODEExponentialRetraction,
     OutOfInjectivityRadiusError,
+    PadeRetraction,
+    PadeInverseRetraction,
     ParallelTransport,
     PolarInverseRetraction,
     PolarRetraction,
@@ -146,45 +220,40 @@ using ManifoldsBase:
     PowerManifold,
     PowerManifoldNested,
     PowerManifoldNestedReplacing,
-    PowerRetraction,
-    PowerVectorTransport,
     ProjectedOrthonormalBasis,
     ProjectionInverseRetraction,
     ProjectionRetraction,
     ProjectionTransport,
+    QuaternionNumbers,
     QRInverseRetraction,
     QRRetraction,
+    RealNumbers,
     ScaledVectorTransport,
     SchildsLadderTransport,
+    SoftmaxRetraction,
+    SoftmaxInverseRetraction,
     TangentSpaceType,
     TCoTSpaceType,
     TFVector,
-    TransparentIsometricEmbedding,
     TVector,
     ValidationManifold,
     ValidationMPoint,
     ValidationTVector,
     VectorSpaceType,
     VeeOrthogonalBasis,
-    @decorator_transparent_fallback,
-    @decorator_transparent_function,
-    @decorator_transparent_signature,
     @invoke_maker,
     _euclidean_basis_vector,
-    _extract_val,
     combine_allocation_promotion_functions,
     default_inverse_retraction_method,
     geodesic,
-    is_decorator_transparent,
-    is_default_decorator,
-    manifold_function_not_implemented_message,
+    merge_traits,
+    next_trait,
     number_system,
     real_dimension,
     rep_size_to_colons,
     shortest_geodesic,
     size_to_tuple,
-    vector_transport_along,
-    vector_transport_along!
+    trait
 using Markdown: @doc_str
 using Random
 using RecipesBase
@@ -285,8 +354,11 @@ include("manifolds/EssentialManifold.jl")
 
 #
 # Group Manifolds
+include("groups/GroupManifold.jl")
 
 # a) generics
+include("groups/addition_operation.jl")
+include("groups/multiplication_operation.jl")
 include("groups/connections.jl")
 include("groups/metric.jl")
 include("groups/group_action.jl")
@@ -311,8 +383,8 @@ include("groups/special_euclidean.jl")
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
 
-Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](@ref) `M`.
-This method employs [`is_point`](@ref) deactivating the error throwing option.
+Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+This method employs [`is_point`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_point) deactivating the error throwing option.
 """
 Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
@@ -321,27 +393,17 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
     X ∈ TangentSpaceAtPoint(M,p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](@ref) `M`.
-This method uses [`is_vector`](@ref) deactivating the error throw option.
+the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
     return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
 
 function __init__()
-    @require FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41" begin
-        using .FiniteDiff
-        include("differentiation/finite_diff.jl")
-    end
-
     @require FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000" begin
         using .FiniteDifferences
         include("differentiation/finite_differences.jl")
-    end
-
-    @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
-        using .ForwardDiff
-        include("differentiation/forward_diff.jl")
     end
 
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
@@ -354,26 +416,12 @@ function __init__()
         include("nlsolve.jl")
     end
 
-    @require ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267" begin
-        using .ReverseDiff: ReverseDiff
-        include("differentiation/reverse_diff.jl")
-    end
-
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
         using .Test: Test
         include("tests/tests_general.jl")
         export test_manifold
         include("tests/tests_group.jl")
         export test_group, test_action
-        @require ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210" begin
-            include("tests/tests_forwarddiff.jl")
-            export test_forwarddiff
-        end
-
-        @require ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267" begin
-            include("tests/tests_reversediff.jl")
-            export test_reversediff
-        end
     end
 
     @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
@@ -388,11 +436,6 @@ function __init__()
             using Colors: RGBA
             include("recipes.jl")
         end
-    end
-
-    @require Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f" begin
-        using .Zygote: Zygote
-        include("differentiation/zygote.jl")
     end
 
     return nothing
@@ -446,8 +489,9 @@ export HyperboloidTVector,
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
-export AbstractDecoratorManifold, MetricDecoratorType
-export AbstractGroupDecoratorType, DefaultGroupDecoratorType, TransparentGroupDecoratorType
+export AbstractDecoratorManifold
+export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
+export IsDefaultMetric, IsDefaultConnection, IsMetricManifold, IsConnectionManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
 export CotangentBundle,
     CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
@@ -465,8 +509,7 @@ export VectorBundleFibers
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport
-export PowerVectorTransport, ProductVectorTransport
-export AbstractEmbeddedManifold
+export ProductVectorTransport
 export AbstractAffineConnection,
     AbstractConnectionManifold, ConnectionManifold, LeviCivitaConnection
 export AbstractCartanSchoutenConnection,
@@ -487,8 +530,6 @@ export AbstractMetric,
     CanonicalMetric,
     MetricManifold
 export AbstractAtlas, RetractionAtlas
-export AbstractEmbeddingType, AbstractIsometricEmbeddingType
-export DefaultEmbeddingType, DefaultIsometricEmbeddingType, TransparentIsometricEmbedding
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 export AbstractRetractionMethod,
     CayleyRetraction,
@@ -570,14 +611,12 @@ export ×,
     inverse_retract,
     inverse_retract!,
     isapprox,
-    is_decorator_transparent,
-    is_default_decorator,
+    is_default_connection,
     is_default_metric,
-    is_group_decorator,
+    is_group_manifold,
     is_identity,
     is_point,
     is_vector,
-    isapprox,
     kurtosis,
     local_metric,
     local_metric_jacobian,
@@ -639,7 +678,6 @@ export ×,
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,
-    AbstractGroupManifold,
     ActionDirection,
     AdditionOperation,
     CircleGroup,
@@ -663,6 +701,10 @@ export AbstractGroupAction,
     SpecialOrthogonal,
     TranslationGroup,
     TranslationAction
+export AbstractInvarianceTrait
+export IsMetricManifold, IsConnectionManifold
+export IsGroupManifold,
+    HasLeftInvariantMetric, HasRightInvariantMetric, HasBiinvariantMetric
 export adjoint_action,
     adjoint_action!,
     affine_matrix,
@@ -678,19 +720,26 @@ export adjoint_action,
     direction,
     exp_lie,
     exp_lie!,
-    g_manifold,
+    group_manifold,
     geodesic,
     get_coordinates_lie,
     get_coordinates_lie!,
+    get_coordinates_orthogonal,
+    get_coordinates_orthonormal,
+    get_coordinates_orthogonal!,
+    get_coordinates_orthonormal!,
+    get_vector_diagonalizing!,
     get_vector_lie,
     get_vector_lie!,
+    get_vector_orthogonal,
+    get_vector_orthonormal,
+    get_coordinates_vee!,
     has_biinvariant_metric,
     has_invariant_metric,
     identity_element,
     identity_element!,
     inv,
     inv!,
-    invariant_metric_dispatch,
     inverse_apply,
     inverse_apply!,
     inverse_apply_diff,
@@ -724,14 +773,7 @@ export AbstractBasis,
 export OutOfInjectivityRadiusError
 export get_basis,
     get_coordinates, get_coordinates!, get_vector, get_vector!, get_vectors, number_system
-# differentiation
-export AbstractDiffBackend,
-    AbstractRiemannianDiffBackend,
-    ExplicitEmbeddedBackend,
-    FiniteDifferencesBackend,
-    TangentDiffBackend,
-    RiemannianProjectionBackend
-export default_differential_backend, set_default_differential_backend!
+
 # atlases and charts
 export get_point, get_point!, get_parameters, get_parameters!
 

@@ -15,7 +15,7 @@ include("group_utils.jl")
 
     types_m = [Matrix{Float64}]
 
-    @test g_manifold(A) == M
+    @test group_manifold(A) == M
     @test base_group(A) == G
     @test base_manifold(G) == M
 

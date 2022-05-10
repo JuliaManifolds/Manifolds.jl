@@ -1,6 +1,6 @@
 # Group manifolds and actions
 
-Lie groups, groups that are [`AbstractManifold`](@ref)s with a smooth binary group operation [`AbstractGroupOperation`](@ref), are implemented as subtypes of [`AbstractGroupManifold`](@ref) or by decorating an existing manifold with a group operation using [`GroupManifold`](@ref).
+Lie groups, groups that are Riemannian manifolds with a smooth binary group operation [`AbstractGroupOperation`](@ref), are implemented as [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold) and specifying the group operation using the [`IsGroupManifold`](@ref) or by decorating an existing manifold with a group operation using [`GroupManifold`](@ref).
 
 The common addition and multiplication group operations of [`AdditionOperation`](@ref) and [`MultiplicationOperation`](@ref) are provided, though their behavior may be customized for a specific group.
 
@@ -32,6 +32,37 @@ Modules = [Manifolds]
 Pages = ["groups/group.jl"]
 Order = [:type, :function]
 ```
+
+### GroupManifold
+
+As a concrete wrapper for manifolds (e.g. when the manifold per se is a group manifold but another group structure should be implemented), there is the [`GroupManifold`](@ref)
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/GroupManifold.jl"]
+Order = [:type, :function]
+```
+
+### Generic Operations
+
+For groups based on an addition operation or a group operation, several default implementations are provided.
+
+#### Addition Operation
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/addition_operation.jl"]
+Order = [:type, :function]
+```
+
+#### Multiplication Operation
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/multiplication_operation.jl"]
+Order = [:type, :function]
+```
+
 
 ### Product group
 

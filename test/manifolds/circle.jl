@@ -9,9 +9,14 @@ using Manifolds: TFVector, CoTFVector
         @test representation_size(M) == ()
         @test manifold_dimension(M) == 1
         @test !is_point(M, 9.0)
+        @test !is_point(M, zeros(3, 3))
         @test_throws DomainError is_point(M, 9.0, true)
+        @test_throws DomainError is_point(M, zeros(3, 3), true)
         @test !is_vector(M, 9.0, 0.0)
+        @test !is_vector(M, zeros(3, 3), zeros(3, 3))
         @test_throws DomainError is_vector(M, 9.0, 0.0, true)
+        @test_throws DomainError is_vector(M, zeros(3, 3), zeros(3, 3), true)
+        @test_throws DomainError is_vector(M, 0.0, zeros(3, 3), true)
         @test is_vector(M, 0.0, 0.0)
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(
@@ -41,26 +46,23 @@ using Manifolds: TFVector, CoTFVector
         y = [0.0]
         get_coordinates!(M, y, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))
         @test y ≈ [2.0]
-        @test get_vector(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
-        @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈
+        @test get_vector(M, Ref(0.0), [2.0], DefaultOrthonormalBasis())[] ≈ 2.0
+        @test get_vector(M, [0.0], [2.0], DefaultOrthonormalBasis())[] ≈ 2.0
+        @test get_vector(M, Ref(0.0), [2.0], DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈
               2.0
-        @test get_vector(M, Ref(0.0), Ref(-2.0), DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈
+        @test get_vector(M, Ref(0.0), [-2.0], DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈
               -2.0
-        @test get_vector(M, Ref(0.0), Ref(2.0), DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈
+        @test get_vector(M, Ref(0.0), [2.0], DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈
               -2.0
-        @test get_vector(
-            M,
-            Ref(0.0),
-            Ref(-2.0),
-            DiagonalizingOrthonormalBasis(Ref(-1.0)),
-        )[] ≈ 2.0
+        @test get_vector(M, Ref(0.0), [-2.0], DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈
+              2.0
         @test number_of_coordinates(M, DiagonalizingOrthonormalBasis(Ref(-1.0))) == 1
         @test number_of_coordinates(M, DefaultOrthonormalBasis()) == 1
         rrcv = Manifolds.RieszRepresenterCotangentVector(M, 0.0, 1.0)
         @test flat(M, 0.0, 1.0) == rrcv
         @test sharp(M, 0.0, rrcv) == 1.0
         B_cot = Manifolds.dual_basis(M, 0.0, DefaultOrthonormalBasis())
-        @test get_coordinates(M, 0.0, rrcv, B_cot) ≈ 1.0
+        @test get_coordinates(M, 0.0, rrcv, B_cot) ≈ @SVector [1.0]
         @test get_vector(M, 0.0, 1.0, B_cot) isa Manifolds.RieszRepresenterCotangentVector
         a = fill(NaN)
         get_coordinates!(M, a, 0.0, rrcv, B_cot)
@@ -77,26 +79,26 @@ using Manifolds: TFVector, CoTFVector
         @test mean(M, [-π / 2, 0.0, π]) ≈ -π / 2
         @test mean(M, [-π / 2, 0.0, π], [1.0, 1.0, 1.0]) == -π / 2
         z = project(M, 1.5 * π)
-        z2 = [0.0]
+        z2 = fill(0.0)
         project!(M, z2, 1.5 * π)
         @test z2[1] == z
         @test project(M, z) == z
         @test project(M, 1.0, 2.0) == 2.0
     end
     TEST_STATIC_SIZED && @testset "Real Circle and static sized arrays" begin
-        v = MVector(0.0)
-        x = SVector(0.0)
-        log!(M, v, x, SVector(π / 4))
-        @test norm(M, x, v) ≈ π / 4
-        @test is_vector(M, x, v)
-        @test is_vector(M, [], v)
+        X = @MArray fill(0.0)
+        p = @SArray fill(0.0)
+        log!(M, X, p, @SArray fill(π / 4))
+        @test norm(M, p, X) ≈ π / 4
+        @test is_vector(M, p, X)
+        @test is_vector(M, [], X)
         @test project(M, 1.0) == 1.0
-        x = MVector(0.0)
-        project!(M, x, x)
-        @test x == MVector(0.0)
-        x .+= 2 * π
-        project!(M, x, x)
-        @test x == MVector(0.0)
+        p = @MArray fill(0.0)
+        project!(M, p, p)
+        @test p == @MArray fill(0.0)
+        p .+= 2 * π
+        project!(M, p, p)
+        @test p == @MArray fill(0.0)
         @test project(M, 0.0, 1.0) == 1.0
     end
     types = [Float64]
@@ -114,8 +116,6 @@ using Manifolds: TFVector, CoTFVector
             test_manifold(
                 M,
                 pts,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
@@ -125,12 +125,10 @@ using Manifolds: TFVector, CoTFVector
                 test_rand_point=true,
                 test_rand_tvector=true,
             )
-            ptsS = SVector.(pts)
+            ptsS = map(p -> (@SArray fill(p)), pts)
             test_manifold(
                 M,
                 ptsS,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,
@@ -146,6 +144,25 @@ using Manifolds: TFVector, CoTFVector
                 test_rand_tvector=true,
             )
         end
+    end
+    @testset "Mutating Rand for real Circle" begin
+        p = fill(NaN)
+        X = fill(NaN)
+        rand!(M, p)
+        @test is_point(M, p)
+        rand!(M, X; vector_at=p)
+        @test is_vector(M, p, X)
+
+        rng = MersenneTwister()
+        rand!(rng, M, p)
+        @test is_point(M, p)
+        rand!(rng, M, X; vector_at=p)
+        @test is_vector(M, p, X)
+    end
+    @testset "Test sym_rem" begin
+        p = 4.0 # not a point
+        p = sym_rem(p) # modulo to a point
+        @test is_point(M, p)
     end
     Mc = Circle(ℂ)
     @testset "Complex Circle Basics" begin
@@ -165,22 +182,22 @@ using Manifolds: TFVector, CoTFVector
         @test sharp(Mc, 0.0 + 0.0im, rrcv) == 1.0im
         @test norm(Mc, 1.0, log(Mc, 1.0, -1.0)) ≈ π
         @test is_vector(Mc, 1.0, log(Mc, 1.0, -1.0))
-        v = MVector(0.0 + 0.0im)
-        x = SVector(1.0 + 0.0im)
-        log!(Mc, v, x, SVector(-1.0 + 0.0im))
-        @test norm(Mc, SVector(1.0), v) ≈ π
-        @test is_vector(Mc, x, v)
+        X = @MArray fill(0.0 + 0.0im)
+        p = @SArray fill(1.0 + 0.0im)
+        log!(Mc, X, p, @SArray fill(-1.0 + 0.0im))
+        @test norm(Mc, (@SArray fill(1.0)), X) ≈ π
+        @test is_vector(Mc, p, X)
         @test project(Mc, 1.0) == 1.0
-        project(Mc, 1 / sqrt(2.0) + 1 / sqrt(2.0) * im) ==
-        1 / sqrt(2.0) + 1 / sqrt(2.0) * im
-        x = MVector(1.0 + 0.0im)
-        project!(Mc, x, x)
-        @test x == MVector(1.0 + 0.0im)
-        x .*= 2
-        project!(Mc, x, x)
-        @test x == MVector(1.0 + 0.0im)
+        @test project(Mc, 1 / sqrt(2.0) + 1 / sqrt(2.0) * im) ≈
+              1 / sqrt(2.0) + 1 / sqrt(2.0) * im
+        p = @MArray fill(1.0 + 0.0im)
+        project!(Mc, p, p)
+        @test p == @MArray fill(1.0 + 0.0im)
+        p .*= 2
+        project!(Mc, p, p)
+        @test p == @MArray fill(1.0 + 0.0im)
 
-        angles = map(x -> exp(x * im), [-π / 2, 0.0, π])
+        angles = map(pp -> exp(pp * im), [-π / 2, 0.0, π])
         @test mean(Mc, angles) ≈ exp(-π * im / 2)
         @test mean(Mc, angles, [1.0, 1.0, 1.0]) ≈ exp(-π * im / 2)
         @test_throws ErrorException mean(Mc, [-1.0 + 0im, 1.0 + 0im])
@@ -196,8 +213,6 @@ using Manifolds: TFVector, CoTFVector
             test_manifold(
                 Mc,
                 pts,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
@@ -207,12 +222,10 @@ using Manifolds: TFVector, CoTFVector
                 exp_log_atol_multiplier=2.0,
                 is_tangent_atol_multiplier=2.0,
             )
-            ptsS = SVector.(pts)
+            ptsS = map(p -> (@SArray fill(p)), pts)
             test_manifold(
                 Mc,
                 ptsS,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,

@@ -28,12 +28,8 @@ entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_point(M::CholeskySpace, p; kwargs...)
-    if size(p) != representation_size(M)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $(M), since its size is not $(representation_size(M)).",
-        )
-    end
+    cks = check_size(M, p)
+    cks === nothing || return cks
     if !isapprox(norm(strictlyUpperTriangular(p)), 0.0; kwargs...)
         return DomainError(
             norm(UpperTriangular(p) - Diagonal(p)),
@@ -58,12 +54,6 @@ and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_vector(M::CholeskySpace, p, X; kwargs...)
-    if size(X) != representation_size(M)
-        return DomainError(
-            size(X),
-            "The vector $(X) is not a tangent to a point on $(M) since its size does not match $(representation_size(M)).",
-        )
-    end
     if !isapprox(norm(strictlyUpperTriangular(X)), 0.0; kwargs...)
         return DomainError(
             norm(UpperTriangular(X) - Diagonal(X)),
@@ -188,7 +178,7 @@ strictlyLowerTriangular(p) = LowerTriangular(p) - Diagonal(diag(p))
 strictlyUpperTriangular(p) = UpperTriangular(p) - Diagonal(diag(p))
 
 @doc raw"""
-    vector_transport_to(M::CholeskySpace, p, X, q, ::ParallelTransport)
+    parallel_transport_to(M::CholeskySpace, p, X, q)
 
 Parallely transport the tangent vector `X` at `p` along the geodesic to `q`
 on the [`CholeskySpace`](@ref) manifold `M`. The formula reads
@@ -201,9 +191,9 @@ on the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 where $⌊\cdot⌋$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
-vector_transport_to(::CholeskySpace, ::Any, ::Any, ::Any, ::ParallelTransport)
+parallel_transport_to(::CholeskySpace, ::Any, ::Any, ::Any)
 
-function vector_transport_to!(::CholeskySpace, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::CholeskySpace, Y, p, X, q)
     return copyto!(Y, strictlyLowerTriangular(p) + Diagonal(diag(q) .* diag(X) ./ diag(p)))
 end
 

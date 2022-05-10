@@ -9,7 +9,7 @@ $\lvert z\rvert = 1$.
     Circle(𝔽=ℝ)
 
 Generate the `ℝ`-valued Circle represented by angles, which
-alternatively can be set to use the [`AbstractNumbers`](@ref) `𝔽=ℂ` to obtain the circle
+alternatively can be set to use the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) `𝔽=ℂ` to obtain the circle
 represented by `ℂ`-valued circle of unit numbers.
 """
 struct Circle{𝔽} <: AbstractManifold{𝔽} end
@@ -42,6 +42,22 @@ function check_point(M::Circle{ℂ}, p; kwargs...)
         )
     end
     return nothing
+end
+check_size(::Circle, ::Number) = nothing
+function check_size(M::Circle, p)
+    (size(p) == ()) && return nothing
+    return DomainError(
+        size(p),
+        "The point $p can not belong to the $M, since it is not a number nor a vector of size (1,).",
+    )
+end
+check_size(::Circle, ::Number, ::Number) = nothing
+function check_size(M::Circle, p, X)
+    (size(X) == ()) && return nothing
+    return DomainError(
+        size(X),
+        "The vector $X is not a tangent vector to $p on $M, since it is not a number nor a vector of size (1,).",
+    )
 end
 
 """
@@ -115,118 +131,65 @@ function exp!(M::Circle{ℂ}, q, p, X)
     return q
 end
 
-function get_basis(::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
+function get_basis_diagonalizing(::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
     return CachedBasis(B, (@SVector [0]), vs)
 end
 
-get_coordinates(::Circle{ℝ}, p, X, ::AbstractBasis{<:Any,TangentSpaceType}) = X
-get_coordinates(::Circle{ℝ}, p, X, ::DefaultOrthonormalBasis{<:Any,TangentSpaceType}) = X
-function get_coordinates(M::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
+get_coordinates_orthonormal(::Circle{ℝ}, p, X, ::RealNumbers) = @SVector [X[]]
+get_coordinates_orthonormal!(::Circle{ℝ}, c, p, X, ::RealNumbers) = (c .= X)
+function get_coordinates_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     return X .* (sbv == 0 ? one(sbv) : sbv)
 end
+function get_coordinates_diagonalizing!(
+    M::Circle{ℝ},
+    Y,
+    p,
+    X,
+    B::DiagonalizingOrthonormalBasis,
+)
+    Y[] = get_coordinates_diagonalizing(M, p, X, B)[]
+    return Y
+end
+
 """
     get_coordinates(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-function get_coordinates(
-    ::Circle{ℂ},
-    p,
-    X,
-    ::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
-)
+get_coordinates(::Circle{ℂ}, p, X, ::DefaultOrthonormalBasis{<:Any,TangentSpaceType})
+function get_coordinates_orthonormal!(M::Circle{ℂ}, Y, p, X, n::RealNumbers)
+    Y[] = get_coordinates_orthonormal(M, p, X, n)[]
+    return Y
+end
+function get_coordinates_orthonormal(::Circle{ℂ}, p, X, ::RealNumbers)
     X, p = X[1], p[1]
     Xⁱ = imag(X) * real(p) - real(X) * imag(p)
     return @SVector [Xⁱ]
 end
 
-function get_coordinates!(
-    M::Circle,
-    Y::AbstractArray,
-    p,
-    X,
-    B::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
-)
-    Y[] = get_coordinates(M, p, X, B)[]
-    return Y
-end
-function get_coordinates!(
-    M::Circle,
-    Y::AbstractArray,
-    p,
-    X,
-    B::DiagonalizingOrthonormalBasis,
-)
-    Y[] = get_coordinates(M, p, X, B)[]
-    return Y
-end
-
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold get_coordinates!(
-            M::Circle,
-            Y::AbstractArray,
-            p,
-            X,
-            B::VeeOrthogonalBasis,
-        )
-    end,
-)
-
-get_vector(::Circle{ℝ}, p, X, ::AbstractBasis{ℝ,TangentSpaceType}) = X
-get_vector(::Circle{ℝ}, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType}) = X
-function get_vector(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
+get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = Scalar(c[])
+# the method below is required for FD and AD differentiation in ManifoldDiff.jl
+# if changed, make sure no tests in that repository get broken
+get_vector_orthonormal(::Circle{ℝ}, p::AbstractVector, c, ::RealNumbers) = c
+get_vector_orthonormal!(::Circle{ℝ}, X, p, c, ::RealNumbers) = (X .= c[])
+function get_vector_diagonalizing(::Circle{ℝ}, p, c, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
-    return X .* (sbv == 0 ? one(sbv) : sbv)
+    return c .* (sbv == 0 ? one(sbv) : sbv)
 end
 """
     get_vector(M::Circle{ℂ}, p, X, B::DefaultOrthonormalBasis)
 
 Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-function get_vector(::Circle{ℂ}, p, X, ::AbstractBasis{<:Any,TangentSpaceType})
-    @SVector [1im * X[1] * p[1]]
+function get_vector_orthonormal(::Circle{ℂ}, p, c, ::RealNumbers)
+    @SArray fill(1im * c[1] * p[1])
 end
-eval(
-    quote
-        @invoke_maker 4 AbstractBasis get_vector(
-            M::Circle{ℂ},
-            p,
-            X,
-            B::DefaultOrthonormalBasis{<:Any,TangentSpaceType},
-        )
-    end,
-)
-
-for BT in [AbstractBasis{<:Any,TangentSpaceType}]
-    eval(quote
-        function get_vector!(::Circle{ℝ}, Y::AbstractArray, p, X, ::$BT)
-            Y[] = X[]
-            return Y
-        end
-    end)
-    eval(quote
-        function get_vector!(::Circle{ℂ}, Y::AbstractArray, p, X, ::$BT)
-            Y[] = 1im * X[1] * p[1]
-            return Y
-        end
-    end)
-end
-for BT in ManifoldsBase.DISAMBIGUATION_BASIS_TYPES, CT in [Circle, Circle{ℝ}, Circle{ℂ}]
-    eval(
-        quote
-            @invoke_maker 5 $(supertype(BT)) get_vector!(
-                M::$CT,
-                Y::AbstractArray,
-                p,
-                X,
-                B::$BT,
-            )
-        end,
-    )
+function get_vector_orthonormal!(::Circle{ℂ}, X, p, c, ::RealNumbers)
+    X .= 1im * c[1] * p[1]
+    return X
 end
 
 @doc raw"""
@@ -235,17 +198,6 @@ end
 Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. $π$.
 """
 injectivity_radius(::Circle) = π
-injectivity_radius(::Circle, ::ExponentialRetraction) = π
-injectivity_radius(::Circle, ::Any) = π
-injectivity_radius(::Circle, ::Any, ::ExponentialRetraction) = π
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::Circle,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
 
 @doc raw"""
     inner(M::Circle, p, X, Y)
@@ -270,13 +222,6 @@ inner(::Circle, ::Any...)
 @inline inner(::Circle{ℝ}, p, X, Y) = dot(X, Y)
 @inline inner(::Circle{ℝ}, p::Real, X::Real, Y::Real) = X * Y
 @inline inner(::Circle{ℂ}, p, X, Y) = complex_dot(X, Y)
-
-function inverse_retract(M::Circle, p::Number, q::Number)
-    return inverse_retract(M, p, q, LogarithmicInverseRetraction())
-end
-function inverse_retract(M::Circle, p::Number, q::Number, ::LogarithmicInverseRetraction)
-    return log(M, p, q)
-end
 
 @doc raw"""
     log(M::Circle, p, q)
@@ -388,7 +333,7 @@ end
 
 mid_point(M::Circle{ℝ}, p1, p2) = exp(M, p1, 0.5 * log(M, p1, p2))
 mid_point(::Circle{ℂ}, p1::Complex, p2::Complex) = exp(im * (angle(p1) + angle(p2)) / 2)
-mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = SA[mid_point(M, p1[], p2[])]
+mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = Scalar(mid_point(M, p1[], p2[]))
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
 
@@ -439,14 +384,15 @@ function Random.rand(::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
     if vector_at === nothing
         return sym_rem(rand() * 2 * π)
     else
-        return σ * randn()
+        # written like that to properly handle `vector_at` being a number or a one-element array
+        return map(_ -> σ * randn(), vector_at)
     end
 end
 function Random.rand(rng::AbstractRNG, ::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
     if vector_at === nothing
         return sym_rem(rand(rng) * 2 * π)
     else
-        return σ * randn(rng)
+        return map(_ -> σ * randn(rng), vector_at)
     end
 end
 
@@ -484,7 +430,7 @@ end
 sym_rem(x, T=π) where {N} = map(sym_rem, x, Ref(T))
 
 @doc raw"""
-    vector_transport_to(M::Circle, p, X, q, ::ParallelTransport)
+     parallel_transport_to(M::Circle, p, X, q)
 
 Compute the parallel transport of `X` from the tangent space at `p` to the tangent space at
 `q` on the [`Circle`](@ref) `M`.
@@ -497,15 +443,10 @@ complex plane.
 ````
 where [`log`](@ref) denotes the logarithmic map on `M`.
 """
-vector_transport_to(::Circle, ::Any, ::Any, ::Any, ::ParallelTransport)
-vector_transport_to(::Circle{ℝ}, p::Real, X::Real, q::Real, ::ParallelTransport) = X
-function vector_transport_to(
-    M::Circle{ℂ},
-    p::Number,
-    X::Number,
-    q::Number,
-    ::ParallelTransport,
-)
+parallel_transport_to(::Circle, ::Any, ::Any, ::Any)
+
+parallel_transport_to(::Circle{ℝ}, p::Real, X::Real, q::Real) = X
+function parallel_transport_to(M::Circle{ℂ}, p::Number, X::Number, q::Number)
     X_pq = log(M, p, q)
     Xnorm = norm(M, p, X_pq)
     Y = X
@@ -516,8 +457,8 @@ function vector_transport_to(
     return Y
 end
 
-vector_transport_to!(::Circle{ℝ}, Y, p, X, q, ::ParallelTransport) = (Y .= X)
-function vector_transport_to!(M::Circle{ℂ}, Y, p, X, q, ::ParallelTransport)
+parallel_transport_to!(::Circle{ℝ}, Y, p, X, q) = (Y .= X)
+function parallel_transport_to!(M::Circle{ℂ}, Y, p, X, q)
     X_pq = log(M, p, q)
     Xnorm = norm(M, p, X_pq)
     Y .= X
@@ -528,16 +469,5 @@ function vector_transport_to!(M::Circle{ℂ}, Y, p, X, q, ::ParallelTransport)
     return Y
 end
 
-function vector_transport_direction(
-    M::Circle,
-    p::Number,
-    X::Number,
-    Y::Number,
-    m::AbstractVectorTransportMethod,
-)
-    q = exp(M, p, Y)
-    return vector_transport_to(M, p, X, q, m)
-end
-
-zero_vector(::Circle, p::Number) = zero(p)
+zero_vector(::Circle, p::T) where {T<:Number} = zero(p)
 zero_vector!(::Circle, X, p) = fill!(X, 0)

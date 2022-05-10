@@ -2,7 +2,15 @@ include("utils.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase:
-    manifold_dimension, exp!, log!, inner, zero_vector!, decorated_manifold, base_manifold
+    active_traits,
+    manifold_dimension,
+    exp!,
+    log!,
+    inner,
+    zero_vector!,
+    decorated_manifold,
+    base_manifold,
+    get_embedding
 using Manifolds:
     AbstractEstimationMethod,
     CyclicProximalPointEstimation,
@@ -10,7 +18,7 @@ using Manifolds:
     GeodesicInterpolationWithinRadius,
     GradientDescentEstimation,
     WeiszfeldEstimation
-import Manifolds: mean!, median!, var, mean_and_var
+import Manifolds: mean, mean!, median, median!, var, mean_and_var, default_estimation_method
 
 struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
@@ -44,19 +52,28 @@ function zero_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
     return zero_vector!(Euclidean(N), v, x; kwargs...)
 end
 
-struct TestStatsNotImplementedEmbeddedManifold <:
-       AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding} end
+struct TestStatsNotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
+function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold, args...)
+    return merge_traits(IsEmbeddedSubmanifold())
+end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
+get_embedding(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 
-struct TestStatsNotImplementedEmbeddedManifold2 <:
-       AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+struct TestStatsNotImplementedEmbeddedManifold2 <: AbstractDecoratorManifold{ℝ} end
+function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold2, args...)
+    return merge_traits(IsIsometricEmbeddedManifold())
+end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
+get_embedding(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 
-struct TestStatsNotImplementedEmbeddedManifold3 <:
-       AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} end
+struct TestStatsNotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{ℝ} end
+function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold3, args...)
+    return merge_traits(IsEmbeddedManifold())
+end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
+get_embedding(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 
 function test_mean(M, x, yexp=nothing, method...; kwargs...)
@@ -86,6 +103,14 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
             @test isapprox(M, mean_and_std(M, x, w; kwargs...)[1], y; atol=10^-7)
         end
         @test_throws DimensionMismatch mean(M, x, pweights(ones(n + 1)); kwargs...)
+        @test_throws DimensionMismatch mean!(
+            M,
+            y,
+            x,
+            pweights(ones(n + 1)),
+            Manifolds.default_estimation_method(M, mean);
+            kwargs...,
+        )
     end
     return nothing
 end
@@ -168,6 +193,13 @@ function test_var(M, x, vexp=nothing; kwargs...)
                   var(M, x, w, m; kwargs...) * n / (n - 1)
         end
         @test_throws DimensionMismatch var(M, x, pweights(ones(n + 1)); kwargs...)
+        @test_throws DimensionMismatch mean_and_var(
+            M,
+            x,
+            pweights(ones(n + 1)),
+            GeodesicInterpolation();
+            kwargs...,
+        )
     end
     return nothing
 end
@@ -263,8 +295,6 @@ function test_moments(M, x)
 end
 
 struct TestStatsOverload1 <: AbstractManifold{ℝ} end
-struct TestStatsOverload2 <: AbstractManifold{ℝ} end
-struct TestStatsOverload3 <: AbstractManifold{ℝ} end
 struct TestStatsMethod1 <: AbstractEstimationMethod end
 
 function mean!(
@@ -276,26 +306,23 @@ function mean!(
 )
     return fill!(y, 3)
 end
-mean!(::TestStatsOverload2, y, ::AbstractVector, ::AbstractWeights) = fill!(y, 4)
-function mean!(
-    ::TestStatsOverload2,
-    y,
+function mean(
+    ::TestStatsOverload1,
     ::AbstractVector,
     ::AbstractWeights,
     ::GradientDescentEstimation,
 )
-    return fill!(y, 3)
-end
-function mean!(
-    ::TestStatsOverload3,
-    y,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::TestStatsMethod1=TestStatsMethod1(),
-)
-    return fill!(y, 5)
+    return fill(3, 1)
 end
 
+function median(
+    ::TestStatsOverload1,
+    ::AbstractVector,
+    ::AbstractWeights,
+    ::CyclicProximalPointEstimation,
+)
+    return fill(3, 1)
+end
 function median!(
     ::TestStatsOverload1,
     y,
@@ -304,25 +331,6 @@ function median!(
     ::CyclicProximalPointEstimation,
 )
     return fill!(y, 3)
-end
-median!(::TestStatsOverload2, y, ::AbstractVector, ::AbstractWeights) = fill!(y, 4)
-function median!(
-    ::TestStatsOverload2,
-    y,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::CyclicProximalPointEstimation,
-)
-    return fill!(y, 3)
-end
-function median!(
-    ::TestStatsOverload3,
-    y,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::TestStatsMethod1=TestStatsMethod1(),
-)
-    return fill!(y, 5)
 end
 
 function var(::TestStatsOverload1, ::AbstractVector, ::AbstractWeights, m; corrected=false)
@@ -354,18 +362,14 @@ end
         x = [[0.0]]
         @testset "mean" begin
             M = TestStatsOverload1()
+            y = similar(x[1])
             @test mean(M, x) == [3.0]
+            @test mean!(M, y, x) == [3.0]
             @test mean(M, x, w) == [3.0]
             @test mean(M, x, w, GradientDescentEstimation()) == [3.0]
+            @test mean!(M, y, x, w, GradientDescentEstimation()) == [3.0]
             @test mean(M, x, GradientDescentEstimation()) == [3.0]
-            M = TestStatsOverload2()
-            @test mean(M, x) == [4.0]
-            @test mean(M, x, w) == [4.0]
-            @test mean(M, x, w, GradientDescentEstimation()) == [3.0]
-            @test mean(M, x, GradientDescentEstimation()) == [3.0]
-            M = TestStatsOverload3()
-            @test mean(M, x) == [5.0]
-            @test mean(M, x, w) == [5.0]
+            @test mean!(M, y, x, GradientDescentEstimation()) == [3.0]
         end
 
         @testset "median" begin
@@ -374,21 +378,13 @@ end
             @test median(M, x, w) == [3.0]
             @test median(M, x, w, CyclicProximalPointEstimation()) == [3.0]
             @test median(M, x, CyclicProximalPointEstimation()) == [3.0]
-            M = TestStatsOverload2()
-            @test median(M, x) == [4.0]
-            @test median(M, x, w) == [4.0]
-            @test median(M, x, w, CyclicProximalPointEstimation()) == [3.0]
-            @test median(M, x, CyclicProximalPointEstimation()) == [3.0]
-            M = TestStatsOverload3()
-            @test median(M, x) == [5.0]
-            @test median(M, x, w) == [5.0]
         end
 
         @testset "var" begin
             M = TestStatsOverload1()
-            @test mean_and_var(M, x) == ([4.0], 9)
+            @test mean_and_var(M, x) == ([3.0], 9)
             @test mean_and_var(M, x, w) == ([4.0], 4)
-            @test mean_and_std(M, x) == ([4.0], 3.0)
+            @test mean_and_std(M, x) == ([3.0], 3.0)
             @test mean_and_std(M, x, w) == ([4.0], 2.0)
             @test var(M, x) == 9
             @test var(M, x, 2) == 9
@@ -399,6 +395,8 @@ end
             @test std(M, x, w) == 2.0
             @test std(M, x, w, 2) == 2.0
 
+            @test Manifolds.default_estimation_method(M, mean_and_std) ==
+                  Manifolds.default_estimation_method(M, mean)
             @test mean_and_var(M, x, TestStatsMethod1()) == ([5.0], 16)
             @test mean_and_var(M, x, w, TestStatsMethod1()) == ([5.0], 9)
             @test mean_and_std(M, x, TestStatsMethod1()) == ([5.0], 4.0)
@@ -407,24 +405,24 @@ end
     end
 
     @testset "decorator dispatch" begin
+        # equality tests are intentional to ensure correct dispatch
+        # (both calls eventually use the same method)
         ps = [normalize([1, 0, 0] .+ 0.1 .* randn(3)) for _ in 1:3]
         M1 = TestStatsNotImplementedEmbeddedManifold()
         @test mean!(M1, similar(ps[1]), ps) == mean!(Sphere(2), similar(ps[1]), ps)
         @test mean(M1, ps) == mean(Sphere(2), ps)
-        @test median!(M1, similar(ps[1]), ps) == median!(Sphere(2), similar(ps[1]), ps)
-        @test median(M1, ps) == median(Sphere(2), ps)
 
         M2 = TestStatsNotImplementedEmbeddedManifold2()
-        @test_throws ErrorException mean(M2, ps)
-        @test_throws ErrorException mean!(M2, similar(ps[1]), ps)
-        @test_throws ErrorException median(M2, ps)
-        @test_throws ErrorException median!(M2, similar(ps[1]), ps)
+        @test_throws MethodError mean(M2, ps)
+        @test_throws MethodError mean!(M2, similar(ps[1]), ps)
+        @test_throws MethodError median(M2, ps)
+        @test_throws MethodError median!(M2, similar(ps[1]), ps)
 
         M3 = TestStatsNotImplementedEmbeddedManifold3()
-        @test_throws ErrorException mean(M3, ps)
-        @test_throws ErrorException mean!(M3, similar(ps[1]), ps)
-        @test_throws ErrorException median(M3, ps)
-        @test_throws ErrorException median!(M3, similar(ps[1]), ps)
+        @test_throws MethodError mean(M3, ps)
+        @test_throws MethodError mean!(M3, similar(ps[1]), ps)
+        @test_throws MethodError median(M3, ps)
+        @test_throws MethodError median!(M3, similar(ps[1]), ps)
     end
 
     @testset "TestStatsSphere" begin
@@ -527,7 +525,7 @@ end
             end
 
             @testset "vector" begin
-                x = [[1.0], [2.0], [3.0], [4.0]]
+                x = [fill(1.0), fill(2.0), fill(3.0), fill(4.0)]
                 vx = vcat(x...)
                 w = pweights(ones(length(x)) / length(x))
                 @test mean(M, x) ≈ mean(x)
@@ -793,6 +791,11 @@ end
         m = normalize(median(Euclidean(3), x, w))
         mg = median(S, x, w, ExtrinsicEstimation())
         @test isapprox(S, m, mg)
+    end
+
+    @testset "Covariance Default" begin
+        @test default_estimation_method(TestStatsSphere{2}(), cov) ==
+              GradientDescentEstimation()
     end
 
     @testset "Covariance matrix, Euclidean" begin

@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralizedStiefel{n,k,𝔽,B} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
+    GeneralizedStiefel{n,k,𝔽,B} <: AbstractDecoratorManifold{𝔽}
 
 The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal
 matrices w.r.t. an arbitrary scalar product with symmetric positive definite matrix
@@ -35,8 +35,7 @@ The manifold is named after
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedStiefel{n,k,𝔽,TB<:AbstractMatrix} <:
-       AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
+struct GeneralizedStiefel{n,k,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
     B::TB
 end
 
@@ -49,17 +48,17 @@ function GeneralizedStiefel(
     return GeneralizedStiefel{n,k,𝔽,typeof(B)}(B)
 end
 
+active_traits(f, ::GeneralizedStiefel, args...) = merge_traits(IsEmbeddedManifold())
+
 @doc raw"""
     check_point(M::GeneralizedStiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`GeneralizedStiefel`](@ref) `M`=$\operatorname{St}(n,k,B)$,
-i.e. that it has the right [`AbstractNumbers`](@ref) type and $x^{\mathrm{H}}Bx$
+i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $x^{\mathrm{H}}Bx$
 is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
@@ -70,25 +69,24 @@ function check_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
     return nothing
 end
 
+# overwrite passing to embedding
+function check_size(M::GeneralizedStiefel{n,k,𝔽}, p) where {n,k,𝔽}
+    return check_size(get_embedding(M), p) #avoid embed, since it uses copyto!
+end
+function check_size(M::GeneralizedStiefel{n,k,𝔽}, p, X) where {n,k,𝔽}
+    return check_size(get_embedding(M), p, X) #avoid embed, since it uses copyto!
+end
+
 @doc raw"""
     check_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
-`M`=$\operatorname{St}(n,k,B)$, i.e. the [`AbstractNumbers`](@ref) fits,
+`M`=$\operatorname{St}(n,k,B)$, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits,
 `p` is a valid point on `M` and
 it (approximately) holds that $p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
 function check_vector(M::GeneralizedStiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,B,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
         return DomainError(
             norm(p' * M.B * X + conj(X' * M.B * p)),
@@ -98,7 +96,7 @@ function check_vector(M::GeneralizedStiefel{n,k,𝔽}, p, X; kwargs...) where {n
     return nothing
 end
 
-decorated_manifold(M::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
+get_embedding(::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
 
 @doc raw"""
     inner(M::GeneralizedStiefel, p, X, Y)
@@ -176,40 +174,26 @@ end
     retract(M::GeneralizedStiefel, p, X, ::PolarRetraction)
     retract(M::GeneralizedStiefel, p, X, ::ProjectionRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
+Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
 [`GeneralizedStiefel`](@ref) manifold `M`, which in this case is the same as
 the projection based retraction employing the exponential map in the embedding
 and projecting the result back to the manifold.
 
-The default retraction for this manifold is the [`ProjectionRetraction`](@ref).
+The default retraction for this manifold is the [`ProjectionRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionRetraction).
 """
 retract(::GeneralizedStiefel, ::Any...)
-retract(M::GeneralizedStiefel, p, X) = retract(M, p, X, ProjectionRetraction())
 
-retract!(M::GeneralizedStiefel, q, p, X) = retract!(M, q, p, X, ProjectionRetraction())
-function retract!(M::GeneralizedStiefel, q, p, X, ::PolarRetraction)
+default_retraction_method(::GeneralizedStiefel) = ProjectionRetraction()
+
+function retract_polar!(M::GeneralizedStiefel, q, p, X)
     project!(M, q, p + X)
     return q
 end
-function retract!(M::GeneralizedStiefel, q, p, X, ::ProjectionRetraction)
+function retract_project!(M::GeneralizedStiefel, q, p, X)
     project!(M, q, p + X)
     return q
 end
 
 function Base.show(io::IO, M::GeneralizedStiefel{n,k,𝔽}) where {n,k,𝔽}
     return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
-end
-
-@doc raw"""
-    vector_transport_to(M::GeneralizedStiefel, p, X, q, ::ProjectionTransport)
-
-Compute the vector transport of the tangent vector `X` at `p` to `q`,
-using the [`project`](@ref project(::GeneralizedStiefel, ::Any...))
-of `X` to `q`.
-"""
-vector_transport_to(::GeneralizedStiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)
-
-function vector_transport_to!(M::GeneralizedStiefel, Y, p, X, q, ::ProjectionTransport)
-    project!(M, Y, q, X)
-    return Y
 end

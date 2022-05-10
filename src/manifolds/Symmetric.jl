@@ -1,7 +1,7 @@
 @doc raw"""
-    SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
+    SymmetricMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](@ref) $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
 symmetric matrices of size $n × n$, i.e. the set
 
 ````math
@@ -21,10 +21,14 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SymmetricMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
+struct SymmetricMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SymmetricMatrices{n,field}()
+end
+
+function active_traits(f, ::SymmetricMatrices, args...)
+    return merge_traits(IsEmbeddedSubmanifold())
 end
 
 function allocation_promotion_function(
@@ -40,13 +44,11 @@ end
 
 Check whether `p` is a valid manifold point on the [`SymmetricMatrices`](@ref) `M`, i.e.
 whether `p` is a symmetric matrix of size `(n,n)` with values from the corresponding
-[`AbstractNumbers`](@ref) `𝔽`.
+[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) `𝔽`.
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
             norm(p - p'),
@@ -61,20 +63,11 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
-and its values have to be from the correct [`AbstractNumbers`](@ref).
+and its values have to be from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
 
 The tolerance for the symmetry of `X` can be set using `kwargs...`.
 """
 function check_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(norm(X - X'), 0.0; kwargs...)
         return DomainError(
             norm(X - X'),
@@ -84,7 +77,8 @@ function check_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,�
     return nothing
 end
 
-decorated_manifold(M::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
+embed(::SymmetricMatrices, p) = p
+embed(::SymmetricMatrices, p, X) = X
 
 function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
@@ -92,12 +86,12 @@ function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::SymmetricMatrices{N,ℝ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -111,12 +105,12 @@ function get_coordinates!(
     end
     return Y
 end
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::SymmetricMatrices{N,ℂ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
+    ::ComplexNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -135,12 +129,14 @@ function get_coordinates!(
     return Y
 end
 
-function get_vector!(
+get_embedding(::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
+
+function get_vector_orthonormal!(
     M::SymmetricMatrices{N,ℝ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -154,12 +150,12 @@ function get_vector!(
     end
     return Y
 end
-function get_vector!(
+function get_vector_orthonormal!(
     M::SymmetricMatrices{N,ℂ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
+    ::ComplexNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)

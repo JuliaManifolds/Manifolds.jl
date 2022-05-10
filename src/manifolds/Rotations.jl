@@ -38,6 +38,8 @@ function NormalRotationDistribution(
     return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
 end
 
+active_traits(f, ::Rotations, args...) = merge_traits(IsEmbeddedManifold())
+
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
@@ -69,12 +71,6 @@ valid rotation.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(M::Rotations{N}, p; kwargs...) where {N}
-    if size(p) != (N, N)
-        return DomainError(
-            size(p),
-            "The point $(p) does not lie on $M, since its size is not $((N, N)).",
-        )
-    end
     if !isapprox(det(p), 1; kwargs...)
         return DomainError(det(p), "The determinant of $p has to be +1 but it is $(det(p))")
     end
@@ -258,23 +254,16 @@ $X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 get_coordinates(::Rotations, ::Any...)
 get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis{ℝ,TangentSpaceType}) = [X[2]]
 
-function get_coordinates!(
-    ::Rotations{2},
-    Xⁱ,
-    p,
-    X,
-    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
-)
+function get_coordinates_orthogonal(M::Rotations, p, X, N)
+    Y = allocate_result(M, get_coordinates, p, X, DefaultOrthogonalBasis(N))
+    return get_coordinates_orthogonal!(M, Y, p, X, N)
+end
+
+function get_coordinates_orthogonal!(::Rotations{2}, Xⁱ, p, X, ::RealNumbers)
     Xⁱ[1] = X[2]
     return Xⁱ
 end
-function get_coordinates!(
-    M::Rotations{N},
-    Xⁱ,
-    p,
-    X,
-    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
-) where {N}
+function get_coordinates_orthogonal!(::Rotations{N}, Xⁱ, p, X, ::RealNumbers) where {N}
     @inbounds begin
         Xⁱ[1] = X[3, 2]
         Xⁱ[2] = X[1, 3]
@@ -288,18 +277,14 @@ function get_coordinates!(
     end
     return Xⁱ
 end
-function get_coordinates!(
-    M::Rotations{N},
-    Xⁱ,
-    p,
-    X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {N}
+function get_coordinates_orthonormal!(M::Rotations{N}, Xⁱ, p, X, num::RealNumbers) where {N}
     T = Base.promote_eltype(p, X)
-    get_coordinates!(M, Xⁱ, p, X, DefaultOrthogonalBasis())
+    get_coordinates_orthogonal!(M, Xⁱ, p, X, num)
     Xⁱ .*= sqrt(T(2))
     return Xⁱ
 end
+
+get_embedding(::Rotations{N}) where {N} = Euclidean(N, N)
 
 @doc raw"""
     get_vector(M::Rotations, p, Xⁱ, B::DefaultOrthogonalBasis)
@@ -310,22 +295,15 @@ group $\mathrm{SO}(n)$ to the matrix representation $X$ of the tangent vector. S
 """
 get_vector(::Rotations, ::Any...)
 
-function get_vector!(
-    M::Rotations{2},
-    X,
-    p,
-    Xⁱ,
-    B::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
-)
-    return get_vector!(M, X, p, Xⁱ[1], B)
+function get_vector_orthogonal(M::Rotations, p, c, N::RealNumbers)
+    Y = allocate_result(M, get_vector, p, c)
+    return get_vector_orthogonal!(M, Y, p, c, N)
 end
-function get_vector!(
-    M::Rotations{2},
-    X,
-    p,
-    Xⁱ::Real,
-    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
-)
+
+function get_vector_orthogonal!(M::Rotations{2}, X, p, Xⁱ, N::RealNumbers)
+    return get_vector_orthogonal!(M, X, p, Xⁱ[1], N)
+end
+function get_vector_orthogonal!(M::Rotations{2}, X, p, Xⁱ::Real, ::RealNumbers)
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0
@@ -335,13 +313,7 @@ function get_vector!(
     end
     return X
 end
-function get_vector!(
-    M::Rotations{N},
-    X,
-    p,
-    Xⁱ,
-    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
-) where {N}
+function get_vector_orthogonal!(M::Rotations{N}, X, p, Xⁱ, ::RealNumbers) where {N}
     @assert size(X) == (N, N)
     @assert length(Xⁱ) == manifold_dimension(M)
     @inbounds begin
@@ -366,9 +338,9 @@ function get_vector!(
     end
     return X
 end
-function get_vector!(M::Rotations, X, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+function get_vector_orthonormal!(M::Rotations, X, p, Xⁱ, N::RealNumbers)
     T = Base.promote_eltype(p, X)
-    get_vector!(M, X, p, Xⁱ, DefaultOrthogonalBasis())
+    get_vector_orthogonal!(M, X, p, Xⁱ, N)
     X ./= sqrt(T(2))
     return X
 end
@@ -385,23 +357,11 @@ Return the injectivity radius on the [`Rotations`](@ref) `M`, which is globally
 
     injectivity_radius(M::Rotations, p, ::PolarRetraction)
 
-Return the radius of injectivity for the [`PolarRetraction`](@ref) on the
+Return the radius of injectivity for the [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
 [`Rotations`](@ref) `M` which is $\frac{π}{\sqrt{2}}$.
 """
 injectivity_radius(::Rotations) = π * sqrt(2.0)
-injectivity_radius(::Rotations, ::ExponentialRetraction) = π * sqrt(2.0)
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::Rotations,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
-injectivity_radius(::Rotations, ::Any) = π * sqrt(2.0)
-injectivity_radius(::Rotations, ::Any, ::ExponentialRetraction) = π * sqrt(2.0)
-injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
-injectivity_radius(::Rotations, p, ::PolarRetraction) = π / sqrt(2.0)
+_injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
 
 @doc raw"""
     inner(M::Rotations, p, X, Y)
@@ -416,7 +376,7 @@ g_p(X, Y) = \operatorname{tr}(X^\mathrm{T} Y),
 
 Tangent vectors are represented by matrices.
 """
-inner(M::Rotations, p, X, Y) = dot(X, Y)
+inner(::Rotations, p, X, Y) = dot(X, Y)
 
 @doc raw"""
     inverse_retract(M, p, q, ::PolarInverseRetraction)
@@ -424,7 +384,7 @@ inner(M::Rotations, p, X, Y) = dot(X, Y)
 Compute a vector from the tangent space $T_p\mathrm{SO}(n)$
 of the point `p` on the [`Rotations`](@ref) manifold `M`
 with which the point `q` can be reached by the
-[`PolarRetraction`](@ref) from the point `p` after time 1.
+[`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) from the point `p` after time 1.
 
 The formula reads
 ````math
@@ -443,11 +403,11 @@ inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
 
 Compute a vector from the tangent space $T_p\mathrm{SO}(n)$ of the point `p` on the
 [`Rotations`](@ref) manifold `M` with which the point `q` can be reached by the
-[`QRRetraction`](@ref) from the point `q` after time 1.
+[`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) from the point `q` after time 1.
 """
 inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 
-function inverse_retract!(M::Rotations, X, p, q, method::PolarInverseRetraction)
+function inverse_retract_polar!(M::Rotations, X, p, q)
     A = transpose(p) * q
     Amat = A isa StaticMatrix ? A : convert(Matrix, A)
     H = copyto!(allocate(Amat), -2I)
@@ -463,7 +423,7 @@ function inverse_retract!(M::Rotations, X, p, q, method::PolarInverseRetraction)
     end
     return project!(M, X, p, X)
 end
-function inverse_retract!(M::Rotations{N}, X, p, q, ::QRInverseRetraction) where {N}
+function inverse_retract_qr!(M::Rotations{N}, X, p, q) where {N}
     A = transpose(p) * q
     R = zero(X)
     for i in 1:N
@@ -563,8 +523,8 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::Rotations, ::Any)
 
-function Statistics.mean!(M::Rotations, q, x::AbstractVector, w::AbstractVector; kwargs...)
-    return mean!(M, q, x, w, GeodesicInterpolationWithinRadius(π / 2 / √2); kwargs...)
+function default_estimation_method(::Rotations, ::typeof(mean))
+    return GeodesicInterpolationWithinRadius(π / 2 / √2)
 end
 
 @doc raw"""
@@ -653,7 +613,7 @@ where tangent vectors are represented by elements from the Lie group
 """
 project(::Rotations, ::Any, ::Any)
 
-project!(M::Rotations{N}, Y, p, X) where {N} = project!(SkewSymmetricMatrices(N), Y, X)
+project!(::Rotations{N}, Y, p, X) where {N} = project!(SkewSymmetricMatrices(N), Y, X)
 
 @doc raw"""
     representation_size(M::Rotations)
@@ -768,14 +728,14 @@ This is also the default retraction on the [`Rotations`](@ref)
 """
 retract(::Rotations, ::Any, ::Any, ::QRRetraction)
 
-function retract!(M::Rotations, q::AbstractArray{T}, p, X, method::QRRetraction) where {T}
+function retract_qr!(::Rotations, q::AbstractArray{T}, p, X) where {T}
     A = p + p * X
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
-function retract!(M::Rotations, q, p, X, method::PolarRetraction)
+function retract_polar!(M::Rotations, q, p, X)
     A = p + p * X
     return project!(M, q, A; check_det=false)
 end
@@ -785,7 +745,7 @@ Base.show(io::IO, ::Rotations{N}) where {N} = print(io, "Rotations($(N))")
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""
-    vector_transport_direction(M::Rotations, p, X, d)
+    parallel_transport_direction(M::Rotations, p, X, d)
 
 Compute parallel transport of vector `X` tangent at `p` on the [`Rotations`](@ref)
 manifold in the direction `d`. The formula, provided in [^Rentmeesters], reads:
@@ -802,25 +762,37 @@ The formula simplifies to identity for 2-D rotations.
     > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
     > European Control Conference, Dec. 2011, pp. 7141–7146. doi: 10.1109/CDC.2011.6161280.
 """
-vector_transport_direction(M::Rotations, p, X, d)
+parallel_transport_direction(M::Rotations, p, X, d)
 
-function vector_transport_direction!(M::Rotations, Y, p, X, d, ::ParallelTransport)
+function parallel_transport_direction!(M::Rotations, Y, p, X, d)
     expdhalf = exp(d / 2)
     q = exp(M, p, d)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
-function vector_transport_direction!(M::Rotations{2}, Y, p, X, d, ::ParallelTransport)
+function parallel_transport_direction!(::Rotations{2}, Y, p, X, d)
     return copyto!(Y, X)
 end
+function parallel_transport_direction(M::Rotations, p, X, d)
+    expdhalf = exp(d / 2)
+    q = exp(M, p, d)
+    return transpose(q) * p * expdhalf * X * expdhalf
+end
+parallel_transport_direction(::Rotations{2}, p, X, d) = X
 
-function vector_transport_to!(M::Rotations, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(M::Rotations, Y, p, X, q)
     d = log(M, p, q)
     expdhalf = exp(d / 2)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
-function vector_transport_to!(M::Rotations{2}, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::Rotations{2}, Y, p, X, q)
     return copyto!(Y, X)
 end
+function parallel_transport_to(M::Rotations, p, X, q)
+    d = log(M, p, q)
+    expdhalf = exp(d / 2)
+    return transpose(q) * p * expdhalf * X * expdhalf
+end
+parallel_transport_to(::Rotations{2}, p, X, q) = X
 
 @doc raw"""
     zero_vector(M::Rotations, p)
@@ -828,6 +800,6 @@ end
 Return the zero tangent vector from the tangent space art `p` on the [`Rotations`](@ref)
 as an element of the Lie group, i.e. the zero matrix.
 """
-zero_vector(M::Rotations, p) = zero(p)
+zero_vector(::Rotations, p) = zero(p)
 
-zero_vector!(M::Rotations, X, p) = fill!(X, 0)
+zero_vector!(::Rotations, X, p) = fill!(X, 0)

@@ -18,7 +18,7 @@ struct PositiveNumbers <: AbstractManifold{ℝ} end
     PositiveVectors(n)
 
 Generate the manifold of vectors with positive entries.
-This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@ref).
+This manifold is modeled as a [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of [`PositiveNumbers`](@ref).
 """
 PositiveVectors(n::Integer) = PositiveNumbers()^n
 
@@ -26,7 +26,7 @@ PositiveVectors(n::Integer) = PositiveNumbers()^n
     PositiveMatrices(m,n)
 
 Generate the manifold of matrices with positive entries.
-This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@ref).
+This manifold is modeled as a [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of [`PositiveNumbers`](@ref).
 """
 PositiveMatrices(n::Integer, m::Integer) = PositiveNumbers()^(n, m)
 
@@ -34,7 +34,7 @@ PositiveMatrices(n::Integer, m::Integer) = PositiveNumbers()^(n, m)
     PositiveArrays(n₁,n₂,...,nᵢ)
 
 Generate the manifold of `i`-dimensional arrays with positive entries.
-This manifold is modeled as a [`PowerManifold`](@ref) of [`PositiveNumbers`](@ref).
+This manifold is modeled as a [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of [`PositiveNumbers`](@ref).
 """
 PositiveArrays(n::Vararg{Int,I}) where {I} = PositiveNumbers()^(n)
 
@@ -148,17 +148,6 @@ exp!(::PositiveNumbers, q, p, X) = (q .= p .* exp.(X ./ p))
 Return the injectivity radius on the [`PositiveNumbers`](@ref) `M`, i.e. $\infty$.
 """
 injectivity_radius(::PositiveNumbers) = Inf
-injectivity_radius(::PositiveNumbers, ::ExponentialRetraction) = Inf
-injectivity_radius(::PositiveNumbers, ::Any) = Inf
-injectivity_radius(::PositiveNumbers, ::Any, ::ExponentialRetraction) = Inf
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::PositiveNumbers,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
 
 @doc raw"""
     inner(M::PositiveNumbers, p, X, Y)
@@ -237,7 +226,7 @@ function Base.show(
 end
 
 @doc raw"""
-    vector_transport_to(M::PositiveNumbers, p, X, q, ::ParallelTransport)
+    parallel_transport_to(M::PositiveNumbers, p, X, q)
 
 Compute the parallel transport of `X` from the tangent space at `p` to the tangent space at
 `q` on the [`PositiveNumbers`](@ref) `M`.
@@ -246,18 +235,12 @@ Compute the parallel transport of `X` from the tangent space at `p` to the tange
 \mathcal P_{q\gets p}(X) = X\cdot\frac{q}{p}.
 ````
 """
-vector_transport_to(::PositiveNumbers, ::Any, ::Any, ::Any, ::ParallelTransport)
-function vector_transport_to(
-    ::PositiveNumbers,
-    p::Real,
-    X::Real,
-    q::Real,
-    ::ParallelTransport,
-)
+parallel_transport_to(::PositiveNumbers, ::Any, ::Any, ::Any)
+function parallel_transport_to(::PositiveNumbers, p::Real, X::Real, q::Real)
     return X * q / p
 end
 
-function vector_transport_to!(::PositiveNumbers, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::PositiveNumbers, Y, p, X, q)
     return (Y .= X .* q ./ p)
 end
 

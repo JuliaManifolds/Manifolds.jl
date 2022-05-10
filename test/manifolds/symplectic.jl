@@ -74,7 +74,6 @@ include("../utils.jl")
             @test repr(Sp_2) == "Symplectic{$(2), ℝ}()"
             @test representation_size(Sp_2) == (2, 2)
             @test base_manifold(Sp_2) === Sp_2
-            @test (@inferred Manifolds.default_metric_dispatch(Metr_Sp_2)) === Val(true)
 
             @test is_point(Sp_2, p_2)
             @test_throws DomainError is_point(Sp_2, p_2 + I, true)
@@ -140,7 +139,7 @@ include("../utils.jl")
             @test isapprox(
                 distance(Sp_2, p_2, q_2),
                 approximate_p_q_geodesic_distance;
-                atol=1.0e-16,
+                atol=1e-14,
             )
 
             # Project tangent vector into (T_pSp)^{\perp}:
@@ -200,8 +199,6 @@ include("../utils.jl")
                     is_point_atol_multiplier=1.0e8,
                     is_tangent_atol_multiplier=1.0e6,
                     retraction_atol_multiplier=1.0e4,
-                    test_reverse_diff=false,
-                    test_forward_diff=false,
                     test_project_tangent=true,
                     test_injectivity_radius=false,
                     test_exp_log=false,
@@ -222,8 +219,6 @@ include("../utils.jl")
                     is_point_atol_multiplier=1.0e8,
                     is_tangent_atol_multiplier=1.0e6,
                     retraction_atol_multiplier=1.0e4,
-                    test_reverse_diff=false,
-                    test_forward_diff=false,
                     test_project_tangent=true,
                     test_injectivity_radius=false,
                     test_exp_log=false,
@@ -244,8 +239,6 @@ include("../utils.jl")
                     is_point_atol_multiplier=1.0e7,
                     is_tangent_atol_multiplier=1.0e6,
                     retraction_atol_multiplier=1.0e4,
-                    test_reverse_diff=false,
-                    test_forward_diff=false,
                     test_project_tangent=false, # Cannot solve 'sylvester' for MMatrix-type.
                     test_injectivity_radius=false,
                     test_exp_log=false,
@@ -260,32 +253,32 @@ include("../utils.jl")
             analytical_grad_f(p) = (1 / 2) * (p * Q_grad * p * Q_grad + p * p')
 
             p_grad = convert(Array{Float64}, points[1])
-            ad_diff = RiemannianProjectionBackend(Manifolds.ForwardDiffBackend())
+            fd_diff = RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
 
             @test isapprox(
-                Manifolds.gradient(Sp_6, test_f, p_grad, ad_diff),
+                Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff),
                 analytical_grad_f(p_grad);
-                atol=1.0e-16,
+                atol=1.0e-9,
             )
             @test isapprox(
-                Manifolds.gradient(Sp_6, test_f, p_grad, ad_diff; extended_metric=false),
+                Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff; extended_metric=false),
                 analytical_grad_f(p_grad);
-                atol=1.0e-12,
+                atol=1.0e-9,
             )
 
             grad_f_p = similar(p_grad)
-            Manifolds.gradient!(Sp_6, test_f, grad_f_p, p_grad, ad_diff)
-            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-16)
+            Manifolds.gradient!(Sp_6, test_f, grad_f_p, p_grad, fd_diff)
+            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-9)
 
             Manifolds.gradient!(
                 Sp_6,
                 test_f,
                 grad_f_p,
                 p_grad,
-                ad_diff;
+                fd_diff;
                 extended_metric=false,
             )
-            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-12)
+            @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-9)
         end
     end
 

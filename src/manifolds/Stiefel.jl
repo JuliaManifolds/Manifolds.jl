@@ -1,5 +1,5 @@
 @doc raw"""
-    Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType}
+    Stiefel{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The Stiefel manifold consists of all $n × k$, $n ≥ k$ unitary matrices, i.e.
 
@@ -31,30 +31,13 @@ The manifold is named after
 
 Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
 """
-struct Stiefel{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+struct Stiefel{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ) = Stiefel{n,k,field}()
 
-@doc raw"""
-    PadeRetraction{m} <: AbstractRetractionMethod
-
-A retraction based on the Padé approximation of order $m$
-"""
-struct PadeRetraction{m} <: AbstractRetractionMethod end
-
-function PadeRetraction(m::Int)
-    (m < 1) && error(
-        "The Padé based retraction is only available for positive orders, not for order $m.",
-    )
-    return PadeRetraction{m}()
+function active_traits(f, ::Stiefel, args...)
+    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
 end
-@doc raw"""
-    CayleyRetraction <: AbstractRetractionMethod
-
-A retraction based on the Cayley transform, which is realized by using the
-[`PadeRetraction`](@ref)`{1}`.
-"""
-const CayleyRetraction = PadeRetraction{1}
 
 function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where {n,k}
     return complex
@@ -64,12 +47,12 @@ end
     check_point(M::Stiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$, i.e. that it has the right
-[`AbstractNumbers`](@ref) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the
+[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
+    cks = check_size(M, p)
+    (cks === nothing) || return cks
     c = p' * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
@@ -84,21 +67,14 @@ end
     check_vector(M::Stiefel, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
-`M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](@ref) fits and
+`M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits and
 it (approximately) holds that $p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0$,
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (elementwise) complex conjugate.
 The settings for approximately can be set with `kwargs...`.
 """
 function check_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
+    cks = check_size(M, p, X)
+    cks === nothing || return cks
     if !isapprox(p' * X, -conj(X' * p); kwargs...)
         return DomainError(
             norm(p' * X + conj(X' * p)),
@@ -108,7 +84,12 @@ function check_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     return nothing
 end
 
-decorated_manifold(::Stiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
+embed(::Stiefel, p) = p
+embed(::Stiefel, p, X) = X
+
+function get_embedding(::Stiefel{N,K,𝔽}) where {N,K,𝔽}
+    return Euclidean(N, K; field=𝔽)
+end
 
 @doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
@@ -229,7 +210,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
 
-function inverse_retract!(::Stiefel, X, p, q, ::PolarInverseRetraction)
+function inverse_retract_polar!(::Stiefel, X, p, q)
     A = p' * q
     H = -2 * one(p' * p)
     B = lyap(A, H)
@@ -237,7 +218,7 @@ function inverse_retract!(::Stiefel, X, p, q, ::PolarInverseRetraction)
     X .-= p
     return X
 end
-function inverse_retract!(M::Stiefel{n,k}, X, p, q, ::QRInverseRetraction) where {n,k}
+function inverse_retract_qr!(M::Stiefel{n,k}, X, p, q) where {n,k}
     A = p' * q
     @boundscheck size(A) === (k, k)
     ElT = typeof(one(eltype(p)) * one(eltype(q)))
@@ -332,7 +313,7 @@ the formula reads
     \operatorname{retr}_pX = \Bigl(I - \frac{1}{2}W_{p,X}\Bigr)^{-1}\Bigl(I + \frac{1}{2}W_{p,X}\Bigr)p.
 ````
 
-It is implemented as the case $m=1$ of the [`PadeRetraction`](@ref).
+It is implemented as the case $m=1$ of the `PadeRetraction`.
 
 [^Zhu2017]:
     > X. Zhu:
@@ -361,7 +342,7 @@ respectively. Then the Padé approximation (of the matrix exponential $\exp(A)$)
 Defining further
 ````math
   W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
-  \quad\text{where} 
+  \quad\text{where }
   \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
 ````
 the retraction reads
@@ -379,7 +360,7 @@ retract(::Stiefel, ::Any, ::Any, ::PadeRetraction)
 @doc raw"""
     retract(M::Stiefel, p, X, ::PolarRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
+Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
 [`Stiefel`](@ref) manifold `M`. With $USV = p + X$ the retraction reads
 
 ````math
@@ -391,7 +372,7 @@ retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
 @doc raw"""
     retract(M::Stiefel, p, X, ::QRRetraction)
 
-Compute the QR-based retraction [`QRRetraction`](@ref) on the
+Compute the QR-based retraction [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) on the
 [`Stiefel`](@ref) manifold `M`. With $QR = p + X$ the retraction reads
 
 ````math
@@ -415,7 +396,7 @@ retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 _qrfac_to_q(qrfac) = Matrix(qrfac.Q)
 _qrfac_to_q(qrfac::StaticArrays.QR) = qrfac.Q
 
-function retract!(::Stiefel, q, p, X, ::PadeRetraction{m}) where {m}
+function retract_pade!(::Stiefel, q, p, X, m)
     Pp = I - 1 // 2 * p * p'
     WpX = Pp * X * p' - p * X' * Pp
     pm = zeros(eltype(WpX), size(WpX))
@@ -436,11 +417,11 @@ function retract!(::Stiefel, q, p, X, ::PadeRetraction{m}) where {m}
     end
     return copyto!(q, (qm \ pm) * p)
 end
-function retract!(::Stiefel, q, p, X, ::PolarRetraction)
+function retract_polar!(::Stiefel, q, p, X)
     s = svd(p + X)
     return mul!(q, s.U, s.Vt)
 end
-function retract!(::Stiefel, q, p, X, ::QRRetraction)
+function retract_qr!(::Stiefel, q, p, X)
     qrfac = qr(p + X)
     d = diag(qrfac.R)
     D = Diagonal(sign.(sign.(d .+ 0.5)))
@@ -455,8 +436,6 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 @generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
 
-Base.show(io::IO, ::CayleyRetraction) = print(io, "CayleyRetraction()")
-Base.show(io::IO, ::PadeRetraction{m}) where {m} = print(io, "PadeRetraction($(m))")
 Base.show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
 
 """
@@ -486,7 +465,7 @@ end
 @doc raw"""
     vector_transport_direction(::Stiefel, p, X, d, ::DifferentiatedRetractionVectorTransport{CayleyRetraction})
 
-Compute the vector transport given by the differentiated retraction of the [`CayleyRetraction`](@ref), cf. [^Zhu2017] Equation (17).
+Compute the vector transport given by the differentiated retraction of the [`CayleyRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.CayleyRetraction), cf. [^Zhu2017] Equation (17).
 
 The formula reads
 ````math
@@ -496,12 +475,12 @@ The formula reads
 with
 ````math
   W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
-  \quad\text{where} 
+  \quad\text{where }
   \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
 ````
 
 Since this is the differentiated retraction as a vector transport, the result will be in the
-tangent space at $q=\operatorname{retr}_p(d)$ using the [`CayleyRetraction`](@ref).
+tangent space at $q=\operatorname{retr}_p(d)$ using the [`CayleyRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.CayleyRetraction).
 """
 vector_transport_direction(
     M::Stiefel,
@@ -534,6 +513,7 @@ vector_transport_direction(
     ::Any,
     ::DifferentiatedRetractionVectorTransport{PolarRetraction},
 )
+
 @doc raw"""
     vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetractionVectorTransport{QRRetraction})
 
@@ -568,14 +548,7 @@ vector_transport_direction(
     ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
 
-function vector_transport_direction!(
-    ::Stiefel,
-    Y,
-    p,
-    X,
-    d,
-    ::DifferentiatedRetractionVectorTransport{CayleyRetraction},
-)
+function vector_transport_direction_diff!(::Stiefel, Y, p, X, d, ::CayleyRetraction)
     Pp = I - 1 // 2 * p * p'
     Wpd = Pp * d * p' - p * d' * Pp
     WpX = Pp * X * p' - p * X' * Pp
@@ -583,27 +556,13 @@ function vector_transport_direction!(
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
 
-function vector_transport_direction!(
-    M::Stiefel,
-    Y,
-    p,
-    X,
-    d,
-    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
-)
+function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::PolarRetraction)
     q = retract(M, p, d, PolarRetraction())
     Iddsqrt = sqrt(I + d' * d)
     Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
     return copyto!(Y, q * Λ + (X - q * (q' * X)) / Iddsqrt)
 end
-function vector_transport_direction!(
-    M::Stiefel,
-    Y,
-    p,
-    X,
-    d,
-    ::DifferentiatedRetractionVectorTransport{QRRetraction},
-)
+function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::QRRetraction)
     q = retract(M, p, d, QRRetraction())
     rf = UpperTriangular(qr(p + d).R)
     Xrf = X / rf
@@ -683,27 +642,13 @@ projection it onto the tangent space at `q`.
 """
 vector_transport_to(::Stiefel, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
-function vector_transport_to!(
-    M::Stiefel,
-    Y,
-    p,
-    X,
-    q,
-    ::DifferentiatedRetractionVectorTransport{PolarRetraction},
-)
+function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::PolarRetraction)
     d = inverse_retract(M, p, q, PolarInverseRetraction())
     Iddsqrt = sqrt(I + d' * d)
     Λ = sylvester(Iddsqrt, Iddsqrt, -q' * X + X' * q)
     return copyto!(Y, q * Λ + (X - q * (q' * X)) / Iddsqrt)
 end
-function vector_transport_to!(
-    M::Stiefel,
-    Y,
-    p,
-    X,
-    q,
-    ::DifferentiatedRetractionVectorTransport{QRRetraction},
-)
+function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
     d = inverse_retract(M, p, q, QRInverseRetraction())
     rf = UpperTriangular(qr(p + d).R)
     Xrf = X / rf

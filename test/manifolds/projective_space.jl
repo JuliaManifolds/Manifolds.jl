@@ -48,8 +48,6 @@ include("../utils.jl")
                 tvector_distributions=[
                     Manifolds.normal_tvector_distribution(M, pts[1], 1.0),
                 ],
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 basis_types_vecs=(
                     DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),
                     basis_types...,
@@ -151,8 +149,6 @@ include("../utils.jl")
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 basis_types_to_from=(DefaultOrthonormalBasis(),),
                 test_vee_hat=false,
                 retraction_methods=[
@@ -211,8 +207,8 @@ include("../utils.jl")
             )
             @test !is_vector(
                 M,
-                Quaternion[1.0 + 0im, 0.0, 0.0],
-                Quaternion[-0.5im, 0.0, 0.0],
+                Quaternion.([1.0 + 0im, 0.0, 0.0]),
+                Quaternion.([-0.5im, 0.0, 0.0]),
             )
             @test_throws DomainError is_vector(
                 M,
@@ -222,8 +218,8 @@ include("../utils.jl")
             )
             @test_throws DomainError is_vector(
                 M,
-                Quaternion[1.0 + 0im, 0.0, 0.0],
-                Quaternion[-0.5im, 0.0, 0.0],
+                Quaternion.([1.0 + 0im, 0.0, 0.0]),
+                Quaternion.([-0.5im, 0.0, 0.0]),
                 true,
             )
             @test injectivity_radius(M) == π / 2
@@ -261,8 +257,6 @@ include("../utils.jl")
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 basis_types_to_from=(DefaultOrthonormalBasis(),),
                 test_vee_hat=false,
                 retraction_methods=[

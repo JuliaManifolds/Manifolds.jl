@@ -17,6 +17,11 @@ using RecursiveArrayTools: ArrayPartition
     @test injectivity_radius(Mse) ≈ π
     @test injectivity_radius(
         Mse,
+        ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
+    ) ≈ π
+    @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
+    @test injectivity_radius(
+        Mse,
         ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0]),
         ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
     ) ≈ π
@@ -26,12 +31,16 @@ using RecursiveArrayTools: ArrayPartition
         ExponentialRetraction(),
     ) ≈ π
     @test is_default_metric(Mse, ProductMetric())
-    @test Manifolds.default_metric_dispatch(Mse, ProductMetric()) === Val{true}()
 
     @test Manifolds.number_of_components(Mse) == 2
     # test that arrays are not points
     @test_throws DomainError is_point(Mse, [1, 2], true)
+    @test check_point(Mse, [1, 2]) isa DomainError
     @test_throws DomainError is_vector(Mse, 1, [1, 2], true; check_base_point=false)
+    @test check_vector(Mse, 1, [1, 2]; check_base_point=false) isa DomainError
+    #default fallbacks for check_size, Product not working with Arrays
+    @test Manifolds.check_size(Mse, zeros(2)) isa DomainError
+    @test Manifolds.check_size(Mse, zeros(2), zeros(3)) isa DomainError
     types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_STATIC_SIZED && push!(types, MVector{5,Float64})
@@ -261,8 +270,6 @@ using RecursiveArrayTools: ArrayPartition
         Mser,
         pts,
         test_injectivity_radius=false,
-        test_forward_diff=false,
-        test_reverse_diff=false,
         is_tangent_atol_multiplier=1,
         exp_log_atol_multiplier=1,
         test_inplace=true,
@@ -315,12 +322,50 @@ using RecursiveArrayTools: ArrayPartition
             @test isapprox(Mse, q, Y, Z)
         end
     end
+    @testset "Parallel transport" begin
+        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        q = ProductRepr([0.0, 1.0, 0.0], [2.0, 0.0])
+        X = log(Mse, p, q)
+        # to
+        Y = parallel_transport_to(Mse, p, X, q)
+        Z1 = parallel_transport_to(
+            Mse.manifolds[1],
+            submanifold_component.([p, X, q], Ref(1))...,
+        )
+        Z2 = parallel_transport_to(
+            Mse.manifolds[2],
+            submanifold_component.([p, X, q], Ref(2))...,
+        )
+        Z = ProductRepr(Z1, Z2)
+        @test isapprox(Mse, q, Y, Z)
+        Ym = allocate(Y)
+        parallel_transport_to!(Mse, Ym, p, X, q)
+        @test isapprox(Mse, q, Y, Z)
+
+        # direction
+        Y = parallel_transport_direction(Mse, p, X, X)
+        Z1 = parallel_transport_direction(
+            Mse.manifolds[1],
+            submanifold_component.([p, X, X], Ref(1))...,
+        )
+        Z2 = parallel_transport_direction(
+            Mse.manifolds[2],
+            submanifold_component.([p, X, X], Ref(2))...,
+        )
+        Z = ProductRepr(Z1, Z2)
+        @test isapprox(Mse, q, Y, Z)
+        Ym = allocate(Y)
+        parallel_transport_direction!(Mse, Ym, p, X, X)
+        @test isapprox(Mse, q, Ym, Z)
+    end
 
     @testset "ProductRepr" begin
         @test (@inferred convert(
             ProductRepr{Tuple{T,Float64,T} where T},
             ProductRepr(9, 10, 11),
         )) == ProductRepr(9, 10.0, 11)
+        @test (@inferred convert(ProductRepr, ProductRepr(9, 10, 11))) ===
+              ProductRepr(9, 10, 11)
 
         p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
         @test p == ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
@@ -330,6 +375,8 @@ using RecursiveArrayTools: ArrayPartition
         @test submanifold_component(p, Val(1)) === p.parts[1]
         @test submanifold_components(Mse, p) === p.parts
         @test submanifold_components(p) === p.parts
+        @test allocate(p, Int, 10) isa Vector{Int}
+        @test length(allocate(p, Int, 10)) == 10
     end
 
     @testset "ArrayPartition" begin
@@ -378,6 +425,13 @@ using RecursiveArrayTools: ArrayPartition
             @test injectivity_radius(Mse, pts[1], ExponentialRetraction()) ≈ π
             @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
 
+            @test ManifoldsBase.allocate_coordinates(
+                Mse,
+                pts[1],
+                Float64,
+                number_of_coordinates(Mse, DefaultOrthogonalBasis()),
+            ) isa Vector{Float64}
+
             test_manifold(
                 Mse,
                 pts;
@@ -391,8 +445,6 @@ using RecursiveArrayTools: ArrayPartition
                 test_musical_isomorphisms=true,
                 musical_isomorphism_bases=[DefaultOrthonormalBasis()],
                 test_tangent_vector_broadcasting=true,
-                test_forward_diff=true,
-                test_reverse_diff=true,
                 test_project_tangent=true,
                 test_project_point=true,
                 test_mutating_rand=false,
@@ -467,12 +519,20 @@ using RecursiveArrayTools: ArrayPartition
 
     @testset "Basis-related errors" begin
         a = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
-        @test_throws ErrorException get_vector!(
+        B = CachedBasis(DefaultOrthonormalBasis(), ProductBasisData(([],)))
+        @test_throws AssertionError get_vector!(
             Mse,
             a,
             ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0]),
-            [1.0, 2.0, 3.0, 4.0, 5.0],
-            CachedBasis(DefaultOrthonormalBasis(), []),
+            [1.0, 2.0, 3.0, 4.0, 5.0], # this is one element too long, hence assertionerror
+            B,
+        )
+        @test_throws MethodError get_vector!(
+            Mse,
+            a,
+            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0]),
+            [1.0, 2.0, 3.0, 4.0],
+            B, # empty elements yield a submanifold MethodError
         )
     end
 

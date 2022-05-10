@@ -8,12 +8,12 @@ using NLsolve
         @test G === GeneralLinear(3, ℝ)
         @test repr(G) == "GeneralLinear(3, ℝ)"
         @test base_manifold(G) === GeneralLinear(3)
-        @test decorated_manifold(G) === Euclidean(3, 3)
+        @test get_embedding(G) === Euclidean(3, 3)
         @test number_system(G) === ℝ
         @test manifold_dimension(G) == 9
         @test representation_size(G) == (3, 3)
         Gc = GeneralLinear(2, ℂ)
-        @test decorated_manifold(Gc) === Euclidean(2, 2; field=ℂ)
+        @test get_embedding(Gc) === Euclidean(2, 2; field=ℂ)
         @test repr(Gc) == "GeneralLinear(2, ℂ)"
         @test number_system(Gc) == ℂ
         @test manifold_dimension(Gc) == 8
@@ -23,25 +23,6 @@ using NLsolve
         @test number_system(Gh) == ℍ
         @test manifold_dimension(Gh) == 4 * 16
         @test representation_size(Gh) == (4, 4)
-
-        @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
-        @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(false)
-        @test is_default_metric(
-            MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
-        ) === true
-        @test @inferred(Manifolds.default_metric_dispatch(G, EuclideanMetric())) ===
-              Val(true)
-        @test @inferred(
-            Manifolds.default_metric_dispatch(
-                G,
-                InvariantMetric(EuclideanMetric(), LeftAction()),
-            )
-        ) === Val(true)
-        @test @inferred(
-            Manifolds.default_metric_dispatch(
-                MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
-            )
-        ) === Val(true)
         @test Manifolds.allocation_promotion_function(Gc, exp!, (1,)) === complex
 
         q = identity_element(G)
@@ -80,14 +61,14 @@ using NLsolve
     @testset "Real" begin
         G = GeneralLinear(3)
 
-        @test_throws DomainError is_point(G, randn(2, 3), true)
-        @test_throws DomainError is_point(G, randn(2, 2), true)
-        @test_throws DomainError is_point(G, randn(ComplexF64, 3, 3), true)
+        @test_throws ManifoldDomainError is_point(G, randn(2, 3), true)
+        @test_throws ManifoldDomainError is_point(G, randn(2, 2), true)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3), true)
         @test_throws DomainError is_point(G, zeros(3, 3), true)
         @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
         @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1], true)
         @test is_point(G, Identity(G), true)
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_vector(
             G,
             Float64[0 1 1; 0 1 1; 1 0 0],
             randn(3, 3),
@@ -131,8 +112,6 @@ using NLsolve
             test_manifold(
                 G,
                 gpts;
-                test_reverse_diff=false,
-                test_forward_diff=false,
                 test_project_point=true,
                 test_injectivity_radius=false,
                 test_project_tangent=true,
@@ -156,14 +135,14 @@ using NLsolve
     @testset "Complex" begin
         G = GeneralLinear(2, ℂ)
 
-        @test_throws DomainError is_point(G, randn(ComplexF64, 2, 3), true)
-        @test_throws DomainError is_point(G, randn(ComplexF64, 3, 3), true)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3), true)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3), true)
         @test_throws DomainError is_point(G, zeros(2, 2), true)
         @test_throws DomainError is_point(G, ComplexF64[1 im; 1 im], true)
         @test is_point(G, ComplexF64[1 1; im 1], true)
         @test is_point(G, Identity(G), true)
-        @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
+        @test_throws ManifoldDomainError is_vector(
             G,
             ComplexF64[im im; im im],
             randn(ComplexF64, 2, 2),
@@ -196,8 +175,6 @@ using NLsolve
             test_manifold(
                 G,
                 gpts;
-                test_reverse_diff=false,
-                test_forward_diff=false,
                 test_project_point=true,
                 test_injectivity_radius=false,
                 test_project_tangent=true,

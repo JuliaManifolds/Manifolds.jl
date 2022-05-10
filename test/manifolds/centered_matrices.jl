@@ -11,16 +11,15 @@ include("../utils.jl")
     @testset "Real Centered Matrices Basics" begin
         @test repr(M) == "CenteredMatrices(3, 2, ℝ)"
         @test representation_size(M) == (3, 2)
-        @test base_manifold(M) === M
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3,2},ℝ}
         @test check_point(M, A) === nothing
-        @test_throws DomainError is_point(M, B, true)
-        @test_throws DomainError is_point(M, C, true)
+        @test_throws ManifoldDomainError is_point(M, B, true)
+        @test_throws ManifoldDomainError is_point(M, C, true)
         @test_throws DomainError is_point(M, D, true)
         @test check_vector(M, A, A) === nothing
         @test_throws DomainError is_vector(M, A, D, true)
-        @test_throws DomainError is_vector(M, D, A, true)
-        @test_throws DomainError is_vector(M, A, B, true)
+        @test_throws ManifoldDomainError is_vector(M, D, A, true)
+        @test_throws ManifoldDomainError is_vector(M, A, B, true)
         @test manifold_dimension(M) == 4
         @test A == project!(M, A, A)
         @test A == project(M, A, A)
@@ -35,7 +34,6 @@ include("../utils.jl")
             M,
             [A, E, F],
             test_injectivity_radius=false,
-            test_reverse_diff=false,
             test_project_tangent=true,
             test_musical_isomorphisms=true,
             test_default_vector_transport=true,
@@ -52,7 +50,6 @@ include("../utils.jl")
             M_complex,
             [C, G, H],
             test_injectivity_radius=false,
-            test_reverse_diff=false,
             test_project_tangent=true,
             test_musical_isomorphisms=true,
             test_default_vector_transport=true,

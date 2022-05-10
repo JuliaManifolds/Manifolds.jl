@@ -44,12 +44,34 @@ function change_metric!(
 end
 
 function check_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...) where {N}
-    mpv = check_point(Euclidean(N), p.value; kwargs...)
-    mpv === nothing || return mpv
     if !(norm(p.value) < 1)
         return DomainError(
             norm(p.value),
             "The point $(p) does not lie on $(M) since its norm is not less than 1.",
+        )
+    end
+end
+
+function check_size(M::Hyperbolic{N}, p::PoincareBallPoint) where {N}
+    if size(p.value, 1) != N
+        !(norm(p.value) < 1)
+        return DomainError(
+            size(p.value, 1),
+            "The point $p does not lie on $M since its length is not $N.",
+        )
+    end
+end
+
+function check_size(
+    M::Hyperbolic{N},
+    p::PoincareBallPoint,
+    X::PoincareBallTVector;
+    kwargs...,
+) where {N}
+    if size(X.value, 1) != N
+        return DomainError(
+            size(X.value, 1),
+            "The tangent vector $X can not be a tangent vector for $M since its length is not $N.",
         )
     end
 end
@@ -247,6 +269,12 @@ function distance(::Hyperbolic, p::PoincareBallPoint, q::PoincareBallPoint)
     )
 end
 
+embed(::Hyperbolic, p::PoincareBallPoint) = p.value
+embed!(::Hyperbolic, q, p::PoincareBallPoint) = copyto!(q, p.value)
+embed(::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector) = X.value
+embed!(::Hyperbolic, Y, p::PoincareBallPoint, X::PoincareBallTVector) = copyto!(Y, X.value)
+get_embedding(::Hyperbolic{n}, p::PoincareBallPoint) where {n} = Euclidean(n)
+
 @doc raw"""
     inner(::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector, Y::PoincareBallTVector)
 
@@ -262,6 +290,10 @@ function inner(
     Y::PoincareBallTVector,
 )
     return 4 / (1 - norm(p.value)^2)^2 * dot(X.value, Y.value)
+end
+
+function norm(M::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector)
+    return sqrt(inner(M, p, X, X))
 end
 
 @doc raw"""

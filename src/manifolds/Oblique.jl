@@ -3,11 +3,11 @@
 
 The oblique manifold $\mathcal{OB}(n,m)$ is the set of 𝔽-valued matrices with unit norm
 column endowed with the metric from the embedding. This yields exactly the same metric as
-considering the product metric of the unit norm vectors, i.e. [`PowerManifold`](@ref) of the
+considering the product metric of the unit norm vectors, i.e. [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of the
 $(n-1)$-dimensional [`Sphere`](@ref).
 
 The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all functions of
-[`AbstractPowerManifold`](@ref) can be used directly.
+[`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  can be used directly.
 
 # Constructor
 
@@ -36,12 +36,6 @@ of `m` unit columns from $\mathbb R^{n}$, i.e. each column is a point from
 """
 check_point(::Oblique, ::Any)
 function check_point(M::Oblique{n,m}, p; kwargs...) where {n,m}
-    if size(p) != (n, m)
-        return DomainError(
-            length(p),
-            "The matrix in `p` ($(size(p))) does not match the dimension of $(M).",
-        )
-    end
     return check_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
 @doc raw"""
@@ -52,12 +46,6 @@ This means, that `p` is valid, that `X` is of correct dimension and columnswise
 a tangent vector to the columns of `p` on the [`Sphere`](@ref).
 """
 function check_vector(M::Oblique{n,m}, p, X; kwargs...) where {n,m}
-    if size(X) != (n, m)
-        return DomainError(
-            length(X),
-            "The matrix `X` ($(size(X))) does not match the required dimension ($(representation_size(M))) for $(M).",
-        )
-    end
     return check_vector(PowerManifold(M.manifold, m), p, X; kwargs...)
 end
 
@@ -66,23 +54,18 @@ get_iterator(::Oblique{n,m}) where {n,m} = Base.OneTo(m)
 @generated function manifold_dimension(::Oblique{n,m,𝔽}) where {n,m,𝔽}
     return (n * real_dimension(𝔽) - 1) * m
 end
+power_dimensions(::Oblique{n,m}) where {n,m} = (m,)
 
 @generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
 
 @doc raw"""
-    vector_transport_to(M::Oblique, p, X, q, ::ParallelTransport)
+    parallel_transport_to(M::Oblique, p, X, q)
 
 Compute the parallel transport on the [`Oblique`](@ref) manifold by
 doing a column wise parallel transport on the [`Sphere`](@ref)
 
-This is a shortcut to using [`PowerVectorTransport{ParallelTransport}`](@ref)
-from the [`AbstractPowerManifold`](@ref).
 """
-vector_transport_to(::Oblique, ::Any, ::Any, ::Any, ::ParallelTransport)
-
-function vector_transport_to!(M::Oblique, Y, p, X, q, m::ParallelTransport)
-    return vector_transport_to!(M, Y, p, X, q, PowerVectorTransport(m))
-end
+parallel_transport_to(::Oblique, p, X, q)
 
 function Base.show(io::IO, ::Oblique{n,m,𝔽}) where {n,m,𝔽}
     return print(io, "Oblique($(n),$(m); field = $(𝔽))")

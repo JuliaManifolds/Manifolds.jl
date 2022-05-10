@@ -25,13 +25,13 @@ end
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
         @test check_point(M, B_skewsym) === nothing
         @test_throws DomainError is_point(M, A, true)
-        @test_throws DomainError is_point(M, C, true)
+        @test_throws ManifoldDomainError is_point(M, C, true)
         @test_throws DomainError is_point(M, D, true)
         @test check_vector(M, B_skewsym, B_skewsym) === nothing
         @test_throws DomainError is_vector(M, B_skewsym, A, true)
-        @test_throws DomainError is_vector(M, A, B_skewsym, true)
+        @test_throws ManifoldDomainError is_vector(M, A, B_skewsym, true)
         @test_throws DomainError is_vector(M, B_skewsym, D, true)
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_vector(
             M,
             B_skewsym,
             1 * im * zero_vector(M, B_skewsym),
@@ -58,7 +58,6 @@ end
                 M,
                 pts,
                 test_injectivity_radius=false,
-                test_reverse_diff=isa(T, Vector),
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,
@@ -88,7 +87,6 @@ end
                 M_complex,
                 pts_complex,
                 test_injectivity_radius=false,
-                test_reverse_diff=isa(T, Vector),
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,

@@ -18,7 +18,7 @@ This is also considered a manifold.
 
 ## FVector
 
-For cases where confusion between different types of vectors is possible, the type [`FVector`](@ref) can be used to express which type of vector space the vector belongs to.
+For cases where confusion between different types of vectors is possible, the type [`FVector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.FVector) can be used to express which type of vector space the vector belongs to.
 It is used for example in musical isomorphisms (the [`flat`](@ref) and [`sharp`](@ref) functions) that are used to go from a tangent space to cotangent space and vice versa.
 
 ## Example

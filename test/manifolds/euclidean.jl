@@ -10,9 +10,6 @@ using Manifolds: induced_basis
     @test repr(Ec) == "Euclidean(3; field = ℂ)"
     @test repr(Euclidean(2, 3; field=ℍ)) == "Euclidean(2, 3; field = ℍ)"
     @test Manifolds.allocation_promotion_function(Ec, get_vector, ()) === complex
-    @test is_default_metric(EM)
-    @test is_default_metric(E, Manifolds.EuclideanMetric())
-    @test Manifolds.default_metric_dispatch(E, Manifolds.EuclideanMetric()) === Val{true}()
     p = zeros(3)
     A = Manifolds.RetractionAtlas()
     B = induced_basis(EM, A, p, TangentSpace)
@@ -27,6 +24,26 @@ using Manifolds: induced_basis
     project!(E, Y, p, X)
     @test Y == X
     @test embed(E, p, X) == X
+
+    # temp: explicit test for induced basis
+    B = induced_basis(E, RetractionAtlas(), 0, ManifoldsBase.TangentSpaceType())
+    @test get_coordinates(E, p, X, B) == X
+    get_coordinates!(E, Y, p, X, B)
+    @test Y == X
+    @test get_vector(E, p, Y, B) == X
+    Y2 = similar(X)
+    get_vector!(E, Y2, p, Y, B)
+    @test Y2 == X
+
+    Y = parallel_transport_along(E, p, X, [p])
+    @test Y == X
+    parallel_transport_along!(E, Y, p, X, [p])
+    @test Y == X
+
+    Y = vector_transport_along(E, p, X, [p])
+    @test Y == X
+    vector_transport_along!(E, Y, p, X, [p])
+    @test Y == X
 
     # real manifold does not allow complex values
     @test_throws DomainError is_point(Ec, [:a, :b, :b], true)
@@ -67,6 +84,7 @@ using Manifolds: induced_basis
                 DefaultOrthonormalBasis(),
                 DefaultOrthonormalBasis(ℂ),
                 DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]),
+                DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0], ℂ),
             )
         else
             ()
@@ -81,7 +99,6 @@ using Manifolds: induced_basis
                 test_manifold(
                     M,
                     pts,
-                    test_reverse_diff=isa(T, Vector),
                     test_project_point=true,
                     test_project_tangent=true,
                     test_musical_isomorphisms=true,
@@ -122,11 +139,11 @@ using Manifolds: induced_basis
             test_manifold(
                 Ec,
                 pts,
-                test_reverse_diff=isa(T, Vector),
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,
                 test_vee_hat=false,
+                parallel_transport=true,
             )
         end
     end
@@ -146,8 +163,6 @@ using Manifolds: induced_basis
                 test_manifold(
                     M,
                     pts,
-                    test_forward_diff=false,
-                    test_reverse_diff=false,
                     test_vector_spaces=false,
                     test_project_tangent=true,
                     test_musical_isomorphisms=true,

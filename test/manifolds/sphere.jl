@@ -13,6 +13,8 @@ using ManifoldsBase: TFVector
         @test injectivity_radius(M, ExponentialRetraction()) == π
         @test injectivity_radius(M, ProjectionRetraction()) == π / 2
         @test base_manifold(M) === M
+        @test is_default_metric(M, EuclideanMetric())
+        @test !is_default_metric(M, LinearAffineMetric())
         @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0])
         @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
@@ -37,7 +39,6 @@ using ManifoldsBase: TFVector
             test_manifold(
                 M,
                 pts,
-                test_reverse_diff=isa(T, Vector),
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,

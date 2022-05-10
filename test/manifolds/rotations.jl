@@ -11,6 +11,7 @@ include("../utils.jl")
           π * sqrt(2.0)
     @test injectivity_radius(M, PolarRetraction()) ≈ π / sqrt(2)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], PolarRetraction()) ≈ π / sqrt(2)
+    @test get_embedding(M) == Euclidean(2, 2)
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{2,2,Float64,4})
@@ -42,7 +43,6 @@ include("../utils.jl")
         test_manifold(
             M,
             pts;
-            test_reverse_diff=false,
             test_injectivity_radius=false,
             test_project_tangent=true,
             test_musical_isomorphisms=true,
@@ -106,8 +106,6 @@ include("../utils.jl")
             test_manifold(
                 SOn,
                 pts;
-                test_forward_diff=n == 3,
-                test_reverse_diff=false,
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_mutating_rand=true,
@@ -157,8 +155,6 @@ include("../utils.jl")
                             X = Manifolds.hat(SOn, Matrix(1.0I, n, n), Xf)
                             p = exp(X)
                             @test p ≈ exp(SOn, one(p), X)
-                            @test ForwardDiff.derivative(t -> exp(SOn, one(p), t * X), 0) ≈
-                                  X
                             p2 = exp(log(SOn, one(p), p))
                             @test isapprox(p, p2; atol=1e-6)
                         end

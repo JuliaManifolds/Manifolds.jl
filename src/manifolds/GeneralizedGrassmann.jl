@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralizedGrassmann{n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
+    GeneralizedGrassmann{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The generalized Grassmann manifold $\operatorname{Gr}(n,k,B)$ consists of all subspaces
 spanned by $k$ linear independent vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
@@ -43,8 +43,7 @@ The manifold is named after
 Generate the (real-valued) Generalized Grassmann manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedGrassmann{n,k,𝔽,TB<:AbstractMatrix} <:
-       AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
+struct GeneralizedGrassmann{n,k,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
     B::TB
 end
 
@@ -56,6 +55,8 @@ function GeneralizedGrassmann(
 )
     return GeneralizedGrassmann{n,k,field,typeof(B)}(B)
 end
+
+active_traits(f, ::GeneralizedGrassmann, args...) = merge_traits(IsEmbeddedManifold())
 
 @doc raw"""
     change_representer(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
@@ -98,22 +99,7 @@ a `n`-by-`k` matrix of unitary column vectors with respect to the B inner prudct
 of correct `eltype` with respect to `𝔽`.
 """
 function check_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
-    mpv = invoke(
-        check_point,
-        Tuple{typeof(get_embedding(M)),typeof(p)},
-        get_embedding(M),
-        p;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-    c = p' * M.B * p
-    if !isapprox(c, one(c); kwargs...)
-        return DomainError(
-            norm(c - one(c)),
-            "The point $(p) does not lie on $(M), because x'Bx is not the unit matrix.",
-        )
-    end
-    return nothing
+    return nothing # everything already checked in the embedding (generalized Stiefel)
 end
 
 @doc raw"""
@@ -130,26 +116,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
 $\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
 """
 function check_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
-        get_embedding(M),
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-    if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
-        return DomainError(
-            norm(p' * M.B * X + conj(X' * M.B * p)),
-            "The matrix $(X) does not lie in the tangent space of $(p) on $(M), since x'Bv + v'Bx is not the zero matrix.",
-        )
-    end
-    return nothing
-end
-
-function decorated_manifold(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
-    return Euclidean(N, K; field=𝔽)
+    return nothing # everything already checked in the embedding (generalized Stiefel)
 end
 
 @doc raw"""
@@ -178,6 +145,9 @@ function distance(M::GeneralizedGrassmann, p, q)
     a = svd(p' * M.B * q).S
     return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
 end
+
+embed(::GeneralizedGrassmann, p) = p
+embed(::GeneralizedGrassmann, p, X) = X
 
 @doc raw"""
     exp(M::GeneralizedGrassmann, p, X)
@@ -213,17 +183,13 @@ Return the injectivity radius on the [`GeneralizedGrassmann`](@ref) `M`,
 which is $\frac{π}{2}$.
 """
 injectivity_radius(::GeneralizedGrassmann) = π / 2
-injectivity_radius(::GeneralizedGrassmann, ::ExponentialRetraction) = π / 2
-injectivity_radius(::GeneralizedGrassmann, ::Any) = π / 2
-injectivity_radius(::GeneralizedGrassmann, ::Any, ::ExponentialRetraction) = π / 2
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::GeneralizedGrassmann,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
+injectivity_radius(::GeneralizedGrassmann, p) = π / 2
+injectivity_radius(::GeneralizedGrassmann, ::AbstractRetractionMethod) = π / 2
+injectivity_radius(::GeneralizedGrassmann, p, ::AbstractRetractionMethod) = π / 2
+
+function get_embedding(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
+    return GeneralizedStiefel(N, K, M.B, 𝔽)
+end
 
 @doc raw"""
     inner(M::GeneralizedGrassmann, p, X, Y)
@@ -250,7 +216,7 @@ end
     log(M::GeneralizedGrassmann, p, q)
 
 Compute the logarithmic map on the [`GeneralizedGrassmann`](@ref) `M`$ = \mathcal M=\mathrm{Gr}(n,k,B)$,
-i.e. the tangent vector `X` whose corresponding [`geodesic`](@ref) starting from `p`
+i.e. the tangent vector `X` whose corresponding [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) starting from `p`
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
@@ -286,7 +252,7 @@ Return the dimension of the [`GeneralizedGrassmann(n,k,𝔽)`](@ref) manifold `M
 \dim \operatorname{Gr}(n,k,B) = k(n-k) \dim_ℝ 𝔽,
 ````
 
-where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
+where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
     return k * (n - k) * real_dimension(𝔽)
@@ -306,14 +272,8 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::GeneralizedGrassmann{n,k} where {n,k}, ::Any...)
 
-function Statistics.mean!(
-    M::GeneralizedGrassmann{n,k},
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-) where {n,k}
-    return mean!(M, p, x, w, GeodesicInterpolationWithinRadius(π / 4); kwargs...)
+function default_estimation_method(::GeneralizedGrassmann, ::typeof(mean))
+    return GeodesicInterpolationWithinRadius(π / 4)
 end
 
 @doc raw"""
@@ -365,37 +325,23 @@ Return the represenation size or matrix dimension of a point on the [`Generalize
 @doc raw"""
     retract(M::GeneralizedGrassmann, p, X, ::PolarRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](@ref) on the
+Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
 [`GeneralizedGrassmann`](@ref) `M`, by
 [`project`](@ref project(M::GeneralizedGrassmann, p))ing $p + X$ onto `M`.
 """
 retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarRetraction)
 
-function retract!(M::GeneralizedGrassmann, q, p, X, ::PolarRetraction)
+function retract_polar!(M::GeneralizedGrassmann, q, p, X)
     project!(M, q, p + X)
     return q
 end
-function retract!(M::GeneralizedGrassmann, q, p, X, ::ProjectionRetraction)
+function retract_project!(M::GeneralizedGrassmann, q, p, X)
     project!(M, q, p + X)
     return q
 end
 
 function Base.show(io::IO, M::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
     return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
-end
-
-@doc raw"""
-    vector_transport_to(M::GeneralizedGrassmann, p, X, q, ::ProjectionTransport)
-
-Compute the vector transport of the tangent vector `X` at `p` to `q`,
-using the [`project`](@ref project(::GeneralizedGrassmann, ::Any...))
-of `X` to `q`.
-"""
-vector_transport_to(::GeneralizedGrassmann, ::Any, ::Any, ::Any, ::ProjectionTransport)
-
-function vector_transport_to!(M::GeneralizedGrassmann, Y, p, X, q, ::ProjectionTransport)
-    project!(M, Y, q, X)
-    return Y
 end
 
 @doc raw"""

@@ -1,6 +1,6 @@
 @doc raw"""
     GeneralLinear{n,𝔽} <:
-        AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType}
+        AbstractDecoratorManifold{𝔽}
 
 The general linear group, that is, the group of all invertible matrices in ``𝔽^{n×n}``.
 
@@ -16,8 +16,16 @@ vector in the Lie algebra, and ``⟨⋅,⋅⟩_\mathrm{F}`` denotes the Frobeniu
 By default, tangent vectors ``X_p`` are represented with their corresponding Lie algebra
 vectors ``X_e = p^{-1}X_p``.
 """
-struct GeneralLinear{n,𝔽} <:
-       AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultGroupDecoratorType} end
+struct GeneralLinear{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
+
+function active_traits(f, ::GeneralLinear, args...)
+    return merge_traits(
+        IsGroupManifold(MultiplicationOperation()),
+        IsEmbeddedManifold(),
+        HasLeftInvariantMetric(),
+        IsDefaultMetric(EuclideanMetric()),
+    )
+end
 
 GeneralLinear(n, 𝔽::AbstractNumbers=ℝ) = GeneralLinear{n,𝔽}()
 
@@ -26,8 +34,6 @@ function allocation_promotion_function(::GeneralLinear{n,ℂ}, f, ::Tuple) where
 end
 
 function check_point(G::GeneralLinear, p; kwargs...)
-    mpv = check_point(decorated_manifold(G), p; kwargs...)
-    mpv === nothing || return mpv
     detp = det(p)
     if iszero(detp)
         return DomainError(
@@ -38,26 +44,15 @@ function check_point(G::GeneralLinear, p; kwargs...)
     return nothing
 end
 check_point(::GeneralLinear, ::Identity{MultiplicationOperation}) = nothing
-function check_point(
-    G::GeneralLinear,
-    e::Identity{O};
-    kwargs...,
-) where {O<:AbstractGroupOperation}
-    return invoke(check_point, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
-end
 
 function check_vector(G::GeneralLinear, p, X; kwargs...)
-    mpv = check_vector(decorated_manifold(G), p, X; kwargs...)
-    mpv === nothing || return mpv
     return nothing
 end
 
-decorated_manifold(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
-
-default_metric_dispatch(::GeneralLinear, ::EuclideanMetric) = Val(true)
-default_metric_dispatch(::GeneralLinear, ::LeftInvariantMetric{EuclideanMetric}) = Val(true)
-
 distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
+
+embed(::GeneralLinear, p) = p
+embed(::GeneralLinear, p, X) = X
 
 @doc raw"""
     exp(G::GeneralLinear, p, X)
@@ -131,6 +126,8 @@ function get_coordinates!(
     return copyto!(Xⁱ, X)
 end
 
+get_embedding(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
+
 function get_vector(
     ::GeneralLinear{n,ℝ},
     p,
@@ -156,14 +153,7 @@ function exp_lie!(::GeneralLinear{1}, q, X)
 end
 exp_lie!(::GeneralLinear{2}, q, X) = copyto!(q, exp(SizedMatrix{2,2}(X)))
 
-function _log_lie!(::GeneralLinear{1}, X, p)
-    X[1] = log(p[1])
-    return X
-end
-
 inner(::GeneralLinear, p, X, Y) = dot(X, Y)
-
-invariant_metric_dispatch(::GeneralLinear, ::LeftAction) = Val(true)
 
 inverse_translate_diff(::GeneralLinear, p, q, X, ::LeftAction) = X
 inverse_translate_diff(::GeneralLinear, p, q, X, ::RightAction) = p * X / p
@@ -190,7 +180,7 @@ The algorithm proceeds in two stages. First, the point ``r = p^{-1} q`` is proje
 nearest element (under the Frobenius norm) of the direct product subgroup
 ``\mathrm{O}(n) × S^+``, whose logarithmic map is exactly computed using the matrix
 logarithm. This initial tangent vector is then refined using the
-[`NLsolveInverseRetraction`](@ref).
+[`NLSolveInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.NLSolveInverseRetraction).
 
 For `GeneralLinear(n, ℂ)`, the logarithmic map is instead computed on the realified
 supergroup `GeneralLinear(2n)` and the resulting tangent vector is then complexified.
@@ -211,7 +201,7 @@ function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
         pinvqᵣ = realify(pinvq, 𝔽)
         Xᵣ = realify(X, 𝔽)
         log_safe!(Xᵣ, _project_Un_S⁺(pinvqᵣ))
-        inverse_retraction = NLsolveInverseRetraction(ExponentialRetraction(), Xᵣ)
+        inverse_retraction = NLSolveInverseRetraction(ExponentialRetraction(), Xᵣ)
         inverse_retract!(Gᵣ, Xᵣ, Identity(G), pinvqᵣ, inverse_retraction)
         unrealify!(X, Xᵣ, 𝔽, n)
     end
@@ -224,9 +214,18 @@ function log!(::GeneralLinear{1}, X, p, q)
     return X
 end
 
-manifold_dimension(G::GeneralLinear) = manifold_dimension(decorated_manifold(G))
+function _log_lie!(::GeneralLinear{1}, X, p)
+    X[1] = log(p[1])
+    return X
+end
+
+manifold_dimension(G::GeneralLinear) = manifold_dimension(get_embedding(G))
 
 LinearAlgebra.norm(::GeneralLinear, p, X) = norm(X)
+
+parallel_transport_to(::GeneralLinear, p, X, q) = X
+
+parallel_transport_to!(::GeneralLinear, Y, p, X, q) = copyto!(Y, X)
 
 project(::GeneralLinear, p) = p
 project(::GeneralLinear, p, X) = X
@@ -242,7 +241,3 @@ translate_diff(::GeneralLinear, p, q, X, ::RightAction) = p \ X * p
 function translate_diff!(G::GeneralLinear, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
-
-vector_transport_to(::GeneralLinear, p, X, q, ::ParallelTransport) = X
-
-vector_transport_to!(::GeneralLinear, Y, p, X, q, ::ParallelTransport) = copyto!(Y, X)

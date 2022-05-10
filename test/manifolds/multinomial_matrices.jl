@@ -35,8 +35,6 @@ include("../utils.jl")
             M,
             [x, y, z],
             test_injectivity_radius=false,
-            test_forward_diff=false,
-            test_reverse_diff=false,
             test_vector_spaces=true,
             test_project_tangent=false,
             test_musical_isomorphisms=true,

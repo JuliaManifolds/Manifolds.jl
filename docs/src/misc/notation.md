@@ -12,7 +12,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\tau_p`` | action map by group element ``p`` | ``\mathrm{L}_p``, ``\mathrm{R}_p`` | either left or right |
 | ``\operatorname{Ad}_p(X)`` | adjoint action of element ``p`` of a Lie group on the element ``X`` of the corresponding Lie algebra | | |
 | ``\times`` | Cartesian product of two manifolds | | see [`ProductManifold`](@ref) |
-| ``^{\wedge}`` | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](@ref) |
+| ``^{\wedge}`` | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) |
 | ``a`` | coordinates of a point in a chart | | see [`get_parameters`](@ref) |
 | ``\frac{\mathrm{D}}{\mathrm{d}t}`` | covariant derivative of a vector field ``X(t)`` | | |
 | ``T^*_p \mathcal M`` | the cotangent space at ``p`` | | |

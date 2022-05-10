@@ -1,5 +1,5 @@
 @doc raw"""
-    Spectrahedron{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType}
+    Spectrahedron{N,K} <: AbstractDecoratorManifold{ℝ}
 
 The Spectrahedron manifold, also known as the set of correlation matrices (symmetric
 positive semidefinite matrices) of rank $k$ with unit trace.
@@ -27,7 +27,7 @@ $Y\in ℝ^{n × k}$ and reads as
 ````math
 T_p\mathcal S(n,k) = \bigl\{
 X ∈ ℝ^{n × n}\,|\,X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}
-\text{ with } \operatorname{tr}(X) = \sum_{i=1}^{n}X_{ii} = 0
+\text{ with } \operatorname{tr}(X) = \sum_{i=1}^{n}X_{ii} = 0
 \bigr\}
 ````
 endowed with the [`Euclidean`](@ref) metric from the embedding, i.e. from the $ℝ^{n × k}$
@@ -49,9 +49,11 @@ generates the manifold $\mathcal S(n,k) \subset ℝ^{n × n}$.
     > doi: [10.1137/080731359](https://doi.org/10.1137/080731359),
     > arXiv: [0807.4423](http://arxiv.org/abs/0807.4423).
 """
-struct Spectrahedron{N,K} <: AbstractEmbeddedManifold{ℝ,DefaultIsometricEmbeddingType} end
+struct Spectrahedron{N,K} <: AbstractDecoratorManifold{ℝ} end
 
 Spectrahedron(n::Int, k::Int) = Spectrahedron{n,k}()
+
+active_traits(f, ::Spectrahedron, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
 @doc raw"""
     check_point(M::Spectrahedron, q; kwargs...)
@@ -65,8 +67,6 @@ Since $p$ is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
 function check_point(M::Spectrahedron{N,K}, q; kwargs...) where {N,K}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(q)}, M, q; kwargs...)
-    mpv === nothing || return mpv
     fro_n = norm(q)
     if !isapprox(fro_n, 1.0; kwargs...)
         return DomainError(
@@ -88,15 +88,6 @@ The tolerance for the base point check and zero diagonal can be set using the `k
 Note that symmetry of $X$ holds by construction and is not explicitly checked.
 """
 function check_vector(M::Spectrahedron{N,K}, q, Y; kwargs...) where {N,K}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(q),typeof(Y)},
-        M,
-        q,
-        Y;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     X = q * Y' + Y * q'
     n = tr(X)
     if !isapprox(n, 0.0; kwargs...)
@@ -108,7 +99,7 @@ function check_vector(M::Spectrahedron{N,K}, q, Y; kwargs...) where {N,K}
     return nothing
 end
 
-function decorated_manifold(M::Spectrahedron)
+function get_embedding(M::Spectrahedron)
     return Euclidean(representation_size(M)...; field=ℝ)
 end
 
@@ -155,7 +146,7 @@ compute a projection based retraction by projecting $q+Y$ back onto the manifold
 """
 retract(::Spectrahedron, ::Any, ::Any, ::ProjectionRetraction)
 
-retract!(M::Spectrahedron, r, q, Y, ::ProjectionRetraction) = project!(M, r, q + Y)
+retract_project!(M::Spectrahedron, r, q, Y) = project!(M, r, q + Y)
 
 @doc raw"""
     representation_size(M::Spectrahedron)
@@ -178,7 +169,7 @@ at `q`.
 """
 vector_transport_to(::Spectrahedron, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
-function vector_transport_to!(M::Spectrahedron, Y, p, X, q, ::ProjectionTransport)
+function vector_transport_to_project!(M::Spectrahedron, Y, p, X, q)
     project!(M, Y, q, X)
     return Y
 end

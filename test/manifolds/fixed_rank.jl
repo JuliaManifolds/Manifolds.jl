@@ -4,7 +4,8 @@ include("../utils.jl")
     M = FixedRankMatrices(3, 2, 2)
     M2 = FixedRankMatrices(3, 2, 1)
     Mc = FixedRankMatrices(3, 2, 2, ℂ)
-    p = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+    pE = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+    p = SVDMPoint(pE)
     p2 = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0], 1)
     X = UMVTVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], zeros(2, 2))
     @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ)"
@@ -52,6 +53,8 @@ include("../utils.jl")
         @test !is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2))
         @test_throws DomainError is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), true)
         @test is_point(M2, p2)
+        @test_throws DomainError is_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+        @test Manifolds.check_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]) isa DomainError
 
         @test !is_vector(
             M,
@@ -59,7 +62,12 @@ include("../utils.jl")
             UMVTVector(zeros(2, 1), zeros(1, 2), zeros(2, 2)),
         )
         @test !is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), X)
-        @test_throws DomainError is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), X, true)
+        @test_throws ManifoldDomainError is_vector(
+            M,
+            SVDMPoint([1.0 0.0; 0.0 0.0], 2),
+            X,
+            true,
+        )
         @test !is_vector(M, p, UMVTVector(p.U, X.M, p.Vt, 2))
         @test_throws DomainError is_vector(M, p, UMVTVector(p.U, X.M, p.Vt, 2), true)
         @test !is_vector(M, p, UMVTVector(X.U, X.M, p.Vt, 2))
@@ -67,6 +75,12 @@ include("../utils.jl")
 
         @test is_point(M, p)
         @test is_vector(M, p, X)
+
+        q = embed(M, p)
+        @test pE == q
+        q2 = similar(q)
+        embed!(M, q2, p)
+        @test q == q2
     end
     types = [[Matrix{Float64}, Vector{Float64}, Matrix{Float64}]]
     TEST_FLOAT32 && push!(types, [Matrix{Float32}, Vector{Float32}, Matrix{Float32}])
@@ -109,7 +123,7 @@ include("../utils.jl")
                 @test y2 == y3
 
                 @test is_point(M, p)
-                xM = p.U * Diagonal(p.S) * p.Vt
+                xM = embed(M, p)
                 @test is_point(M, xM)
                 @test !is_point(M, xM[1:2, :])
                 @test_throws DomainError is_point(M, xM[1:2, :], true)
@@ -165,7 +179,7 @@ include("../utils.jl")
                 wb = w .+ X .* 2
                 @test wb isa UMVTVector
                 @test wb == w + X * 2
-                wb .= 2 .* w .+ X
+                @test (wb .= 2 .* w .+ X) == 2 * w + X
                 @test wb == 2 * w + X
                 wb .= w
                 @test wb == w
@@ -173,6 +187,9 @@ include("../utils.jl")
                 N = get_embedding(M)
                 B = embed(M, p, X)
                 @test isapprox(N, p, B, p.U * X.M * p.Vt + X.U * p.Vt + p.U * X.Vt)
+                BB = similar(B)
+                embed!(M, BB, p, X)
+                @test isapprox(M, p, B, BB)
                 v2 = project(M, p, B)
                 @test isapprox(M, p, X, v2)
             end
@@ -190,11 +207,9 @@ include("../utils.jl")
                 default_retraction_method=PolarRetraction(),
                 test_is_tangent=false,
                 test_default_vector_transport=false,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vector_spaces=false,
                 test_vee_hat=false,
-                test_tangent_vector_broadcasting=false, #broadcast not so easy for 3 matrix type
+                test_tangent_vector_broadcasting=true,
                 projection_atol_multiplier=15,
                 retraction_methods=[PolarRetraction()],
                 vector_transport_methods=[ProjectionTransport()],

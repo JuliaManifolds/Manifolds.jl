@@ -1,5 +1,5 @@
 @doc raw"""
-    FixedRankMatrices{m,n,k,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType}
+    FixedRankMatrices{m,n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The manifold of ``m × n`` real-valued or complex-valued matrices of fixed rank ``k``, i.e.
 ````math
@@ -42,10 +42,12 @@ Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
     > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
     > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
-struct FixedRankMatrices{M,N,K,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultEmbeddingType} end
+struct FixedRankMatrices{M,N,K,𝔽} <: AbstractDecoratorManifold{𝔽} end
 function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)
     return FixedRankMatrices{m,n,k,field}()
 end
+
+active_traits(f, ::FixedRankMatrices, args...) = merge_traits(IsEmbeddedManifold())
 
 @doc raw"""
     SVDMPoint <: AbstractManifoldPoint
@@ -119,10 +121,6 @@ function allocate(X::UMVTVector, ::Type{T}) where {T}
     return UMVTVector(allocate(X.U, T), allocate(X.M, T), allocate(X.Vt, T))
 end
 
-function allocate_result(::FixedRankMatrices{m,n,k}, ::typeof(embed), vals...) where {m,n,k}
-    #note that vals is (p,) or (X,p) but both first entries have a U of correct type
-    return similar(typeof(vals[1].U), m, n)
-end
 function allocate_result(
     ::FixedRankMatrices{m,n,k},
     ::typeof(project),
@@ -201,38 +199,52 @@ shape, i.e. `p.U` and `p.Vt` have to be unitary. The keyword arguments are passe
 function check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
     r = rank(p; kwargs...)
     s = "The point $(p) does not lie on $(M), "
-    if size(p) != (m, n)
-        return DomainError(size(p), string(s, "since its size is wrong."))
-    end
     if r > k
         return DomainError(r, string(s, "since its rank is too large ($(r))."))
     end
     return nothing
 end
-function check_point(M::FixedRankMatrices{m,n,k}, x::SVDMPoint; kwargs...) where {m,n,k}
-    s = "The point $(x) does not lie on $(M), "
-    if (size(x.U) != (m, k)) || (length(x.S) != k) || (size(x.Vt) != (k, n))
+function check_point(M::FixedRankMatrices{m,n,k}, p::SVDMPoint; kwargs...) where {m,n,k}
+    s = "The point $(p) does not lie on $(M), "
+    if !isapprox(p.U' * p.U, one(zeros(k, k)); kwargs...)
         return DomainError(
-            [size(x.U)..., length(x.S), size(x.Vt)...],
-            string(
-                s,
-                "since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(x.U,1))x$(size(x.Vt,2)) rank $(size(x.S)).",
-            ),
-        )
-    end
-    if !isapprox(x.U' * x.U, one(zeros(k, k)); kwargs...)
-        return DomainError(
-            norm(x.U' * x.U - one(zeros(k, k))),
+            norm(p.U' * p.U - one(zeros(k, k))),
             string(s, " since U is not orthonormal/unitary."),
         )
     end
-    if !isapprox(x.Vt * x.Vt', one(zeros(k, k)); kwargs...)
+    if !isapprox(p.Vt * p.Vt', one(zeros(k, k)); kwargs...)
         return DomainError(
-            norm(x.Vt * x.Vt' - one(zeros(k, k))),
+            norm(p.Vt * p.Vt' - one(zeros(k, k))),
             string(s, " since V is not orthonormal/unitary."),
         )
     end
     return nothing
+end
+
+function check_size(M::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
+    if (size(p.U) != (m, k)) || (length(p.S) != k) || (size(p.Vt) != (k, n))
+        return DomainError(
+            [size(p.U)..., length(p.S), size(p.Vt)...],
+            "The point $(p) does not lie on $(M) since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(p.U,1))x$(size(p.Vt,2)) rank $(size(p.S,1)).",
+        )
+    end
+end
+function check_size(M::FixedRankMatrices{m,n,k}, p) where {m,n,k}
+    pS = svd(p)
+    if (size(pS.U) != (m, k)) || (length(pS.S) != k) || (size(pS.Vt) != (k, n))
+        return DomainError(
+            [size(pS.U)..., length(pS.S), size(pS.Vt)...],
+            "The point $(p) does not lie on $(M) since the dimensions do not fit (expected $(n)x$(m) rank $(k) got $(size(pS.U,1))x$(size(pS.Vt,2)) rank $(size(pS.S,1)).",
+        )
+    end
+end
+function check_size(M::FixedRankMatrices{m,n,k}, p, X::UMVTVector) where {m,n,k}
+    if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))
+        return DomainError(
+            cat(size(X.U), size(X.M), size(X.Vt), dims=1),
+            "The tangent vector $(X) is not a tangent vector to $(p) on $(M), since matrix dimensions do not agree (expected $(m)x$(k), $(k)x$(k), $(k)x$(n)).",
+        )
+    end
 end
 
 @doc raw"""
@@ -248,12 +260,6 @@ function check_vector(
     X::UMVTVector;
     kwargs...,
 ) where {m,n,k}
-    if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))
-        return DomainError(
-            cat(size(X.U), size(X.M), size(X.Vt), dims=1),
-            "The tangent vector $(X) is not a tangent vector to $(p) on $(M), since matrix dimensions do not agree (expected $(m)x$(k), $(k)x$(k), $(k)x$(n)).",
-        )
-    end
     if !isapprox(X.U' * p.U, zeros(k, k); kwargs...)
         return DomainError(
             norm(X.U' * p.U - zeros(k, k)),
@@ -288,9 +294,11 @@ end
 Embed the point `p` from its `SVDMPoint` representation into the set of ``m×n`` matrices
 by computing ``USV^{\mathrm{H}}``.
 """
-embed(::FixedRankMatrices, p)
+function embed(::FixedRankMatrices, p::SVDMPoint)
+    return p.U * Diagonal(p.S) * p.Vt
+end
 
-function embed!(::FixedRankMatrices, q, p)
+function embed!(::FixedRankMatrices, q, p::SVDMPoint)
     return mul!(q, p.U * Diagonal(p.S), p.Vt)
 end
 
@@ -305,9 +313,11 @@ The formula reads
 U_pMV_p^{\mathrm{H}} + U_XV_p^{\mathrm{H}} + U_pV_X^{\mathrm{H}}
 ```
 """
-embed(::FixedRankMatrices, p, X)
+function embed(::FixedRankMatrices, p::SVDMPoint, X::UMVTVector)
+    return (p.U * X.M .+ X.U) * p.Vt + p.U * X.Vt
+end
 
-function embed!(::FixedRankMatrices, Y, p, X)
+function embed!(::FixedRankMatrices, Y, p::SVDMPoint, X::UMVTVector)
     tmp = p.U * X.M
     tmp .+= X.U
     mul!(Y, tmp, p.Vt)
@@ -360,7 +370,7 @@ of dimension `m`x`n` of rank `k`, namely
 \dim(\mathcal M) = k(m + n - k) \dim_ℝ 𝔽,
 ````
 
-where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@ref) of `𝔽`.
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
     return (m + n - k) * k * real_dimension(𝔽)
@@ -520,12 +530,11 @@ singular values and ``U`` and ``V`` are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
 
-function retract!(
+function retract_polar!(
     ::FixedRankMatrices{m,n,k},
     q::SVDMPoint,
     p::SVDMPoint,
     X::UMVTVector,
-    ::PolarRetraction,
 ) where {m,n,k}
     QU, RU = qr([p.U X.U])
     QV, RV = qr([p.Vt' X.Vt'])
@@ -595,7 +604,7 @@ of `X` to `q`.
 """
 vector_transport_to!(::FixedRankMatrices, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
-function vector_transport_to!(M::FixedRankMatrices, Y, p, X, q, ::ProjectionTransport)
+function vector_transport_to_project!(M::FixedRankMatrices, Y, p, X, q)
     return project!(M, Y, q, embed(M, p, X))
 end
 

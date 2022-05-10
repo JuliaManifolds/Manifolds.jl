@@ -33,3 +33,15 @@ function solve_exp_ode(
     q = sol.u[1][(n + 1):(2 * n)]
     return q
 end
+# also define exp! for metric manifold anew in this case
+function exp!(
+    ::TraitList{IsMetricManifold},
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X;
+    kwargs...,
+)
+    copyto!(M, q, solve_exp_ode(M, p, X; kwargs...))
+    return q
+end

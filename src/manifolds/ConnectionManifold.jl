@@ -12,47 +12,97 @@ The [Levi-Civita connection](https://en.wikipedia.org/wiki/Levi-Civita_connectio
 """
 struct LeviCivitaConnection <: AbstractAffineConnection end
 
-struct MetricDecoratorType <: AbstractDecoratorType end
+"""
+    IsConnectionManifold <: AbstractTrait
+
+Specify that a certain decorated Manifold is a connection manifold in the sence that it provides
+explicit connection properties, extending/changing the default connection properties of a manifold.
+"""
+struct IsConnectionManifold <: AbstractTrait end
 
 """
-    AbstractConnectionManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractAffineConnection} <: AbstractDecoratorManifold{𝔽}
+    IsDefaultConnection{G<:AbstractAffineConnection}
 
-Equip an [`AbstractManifold`](@ref) explicitly with an [`AbstractAffineConnection`](@ref) `G`.
-
-`AbstractConnectionManifold` is defined by values of [`christoffel_symbols_second`](@ref),
-which is used for a default implementation of [`exp`](@ref), [`log`](@ref) and
-[`vector_transport_to`](@ref). Closed-form formulae for particular connection manifolds may
-be explicitly implemented when available.
-
-An overview of basic properties of affine connection manifolds can be found in [^Pennec2020].
-
-[^Pennec2020]:
-    > X. Pennec and M. Lorenzi, “5 - Beyond Riemannian geometry: The affine connection
-    > setting for transformation groups,” in Riemannian Geometric Statistics in Medical Image
-    > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
-    > doi: 10.1016/B978-0-12-814725-2.00012-1.
+Specify that a certain [`AbstractAffineConnection`](@ref) is the default connection for a manifold.
+This way the corresponding [`ConnectionManifold`](@ref) falls back to the default methods
+of the manifold it decorates.
 """
-abstract type AbstractConnectionManifold{𝔽} <:
-              AbstractDecoratorManifold{𝔽,MetricDecoratorType} end
+struct IsDefaultConnection{C<:AbstractAffineConnection} <: AbstractTrait
+    connection::C
+end
+parent_trait(::IsDefaultConnection) = IsConnectionManifold()
 
 """
-    connection(M::AbstractManifold)
+    ConnectionManifold{𝔽,,M<:AbstractManifold{𝔽},G<:AbstractAffineConnection} <: AbstractDecoratorManifold{𝔽}
 
-Get the connection (an object of a subtype of [`AbstractAffineConnection`](@ref))
-of [`AbstractManifold`](@ref) `M`.
-"""
-connection(::AbstractManifold)
+# Constructor
 
-"""
     ConnectionManifold(M, C)
 
-Decorate the [`AbstractManifold`](@ref) `M` with [`AbstractAffineConnection`](@ref) `C`.
+Decorate the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M` with [`AbstractAffineConnection`](@ref) `C`.
 """
 struct ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnection} <:
-       AbstractConnectionManifold{𝔽}
+       AbstractDecoratorManifold{𝔽}
     manifold::M
     connection::C
 end
+
+function Base.filter(f, t::TraitList)
+    if f(t.head)
+        return merge_traits(t.head, filter(f, t.tail))
+    else
+        return filter(f, t.tail)
+    end
+end
+Base.filter(f, t::EmptyTrait) = t
+
+function active_traits(f, M::ConnectionManifold, args...)
+    return merge_traits(
+        is_default_connection(M.manifold, M.connection) ?
+        IsDefaultConnection(M.connection) : EmptyTrait(),
+        IsConnectionManifold(),
+        filter(x -> x isa IsGroupManifold, active_traits(f, M.manifold, args...)),
+    )
+end
+
+@doc raw"""
+    christoffel_symbols_first(
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
+
+Compute the Christoffel symbols of the first kind in local coordinates of basis `B`.
+The Christoffel symbols are (in Einstein summation convention)
+
+````math
+Γ_{ijk} = \frac{1}{2} \Bigl[g_{kj,i} + g_{ik,j} - g_{ij,k}\Bigr],
+````
+
+where ``g_{ij,k}=\frac{∂}{∂ p^k} g_{ij}`` is the coordinate
+derivative of the local representation of the metric tensor. The dimensions of
+the resulting multi-dimensional array are ordered ``(i,j,k)``.
+"""
+christoffel_symbols_first(::AbstractManifold, ::Any, B::AbstractBasis)
+function christoffel_symbols_first(
+    M::AbstractManifold,
+    p,
+    B::AbstractBasis;
+    backend::AbstractDiffBackend=default_differential_backend(),
+)
+    ∂g = local_metric_jacobian(M, p, B; backend=backend)
+    n = size(∂g, 1)
+    Γ = allocate(∂g, Size(n, n, n))
+    @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
+    return Γ
+end
+@trait_function christoffel_symbols_first(
+    M::AbstractDecoratorManifold,
+    p,
+    B::AbstractBasis;
+    kwargs...,
+)
 
 @doc raw"""
     christoffel_symbols_second(
@@ -75,9 +125,20 @@ where ``Γ_{ijk}`` are the Christoffel symbols of the first kind
 representation of the metric tensor. The dimensions of the resulting multi-dimensional array
 are ordered ``(l,i,j)``.
 """
-christoffel_symbols_second(::AbstractManifold, ::Any, ::AbstractBasis)
+function christoffel_symbols_second(
+    M::AbstractManifold,
+    p,
+    B::AbstractBasis;
+    backend::AbstractDiffBackend=default_differential_backend(),
+)
+    Ginv = inverse_local_metric(M, p, B)
+    Γ₁ = christoffel_symbols_first(M, p, B; backend=backend)
+    Γ₂ = allocate(Γ₁)
+    @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
+    return Γ₂
+end
 
-@decorator_transparent_signature christoffel_symbols_second(
+@trait_function christoffel_symbols_second(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -118,12 +179,20 @@ function christoffel_symbols_second_jacobian(
     )
     return ∂Γ
 end
-@decorator_transparent_signature christoffel_symbols_second_jacobian(
+@trait_function christoffel_symbols_second_jacobian(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
     kwargs...,
 )
+
+"""
+    connection(M::AbstractManifold)
+
+Get the connection (an object of a subtype of [`AbstractAffineConnection`](@ref))
+of [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+"""
+connection(::AbstractManifold)
 
 """
     connection(M::ConnectionManifold)
@@ -132,26 +201,27 @@ Return the connection associated with [`ConnectionManifold`](@ref) `M`.
 """
 connection(M::ConnectionManifold) = M.connection
 
-Base.copyto!(M::AbstractConnectionManifold, q, p) = copyto!(M.manifold, q, p)
-Base.copyto!(M::AbstractConnectionManifold, Y, p, X) = copyto!(M.manifold, Y, p, X)
+decorated_manifold(M::ConnectionManifold) = M.manifold
+
+default_retraction_method(M::ConnectionManifold) = default_retraction_method(M.manifold)
 
 @doc raw"""
-    exp(M::AbstractConnectionManifold, p, X)
+    exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
 
-Compute the exponential map on the [`AbstractConnectionManifold`](@ref) `M` equipped with
+Compute the exponential map on a manifold that [`IsConnectionManifold`](@ref) `M` equipped with
 corresponding affine connection.
 
-If `M` is a [`MetricManifold`](@ref) with a metric that was declared the default metric
-using [`is_default_metric`](@ref), this method falls back to `exp(M, p, X)`.
+If `M` is a [`MetricManifold`](@ref) with a [`IsDefaultMetric`](@ref) trait,
+this method falls back to `exp(M, p, X)`.
 
 Otherwise it numerically integrates the underlying ODE, see [`solve_exp_ode`](@ref).
 Currently, the numerical integration is only accurate when using a single
 coordinate chart that covers the entire manifold. This excludes coordinates
 in an embedded space.
 """
-exp(::AbstractConnectionManifold, ::Any...)
+exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
 
-@decorator_transparent_fallback function exp!(M::AbstractConnectionManifold, q, p, X)
+function exp!(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(
         M,
         q,
@@ -171,32 +241,48 @@ gaussian_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
 function gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     return ricci_curvature(M, p, B; kwargs...) / 2
 end
-@decorator_transparent_signature gaussian_curvature(
+@trait_function gaussian_curvature(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
     kwargs...,
 )
 
-function injectivity_radius(M::AbstractConnectionManifold, p)
-    return injectivity_radius(base_manifold(M), p)
-end
-function injectivity_radius(M::AbstractConnectionManifold, m::AbstractRetractionMethod)
-    return injectivity_radius(base_manifold(M), m)
-end
-function injectivity_radius(M::AbstractConnectionManifold, m::ExponentialRetraction)
-    return injectivity_radius(base_manifold(M), m)
-end
-function injectivity_radius(M::AbstractConnectionManifold, p, m::AbstractRetractionMethod)
-    return injectivity_radius(base_manifold(M), p, m)
-end
-function injectivity_radius(M::AbstractConnectionManifold, p, m::ExponentialRetraction)
-    return injectivity_radius(base_manifold(M), p, m)
-end
+"""
+    is_default_connection(M::AbstractManifold, G::AbstractAffineConnection)
 
-function retract!(M::AbstractDecoratorManifold, q, p, X, r::ODEExponentialRetraction)
-    sol = solve_exp_ode(M, p, X; basis=r.basis, dense=false)
-    return copyto!(q, sol)
+returns whether an [`AbstractAffineConnection`](@ref) is the default metric on the manifold `M` or not.
+This can be set by defining this function, or setting the [`IsDefaultConnection`](@ref) trait for an
+[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold).
+"""
+is_default_connection(M::AbstractManifold, G::AbstractAffineConnection)
+@trait_function is_default_connection(
+    M::AbstractDecoratorManifold,
+    G::AbstractAffineConnection,
+)
+function is_default_connection(
+    ::TraitList{IsDefaultConnection{C}},
+    ::AbstractDecoratorManifold,
+    ::C,
+) where {C<:AbstractAffineConnection}
+    return true
+end
+function is_default_connection(M::ConnectionManifold)
+    return is_default_connection(M.manifold, M.connection)
+end
+is_default_connection(::AbstractManifold, ::AbstractAffineConnection) = false
+
+function retract_exp_ode!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    ::AbstractRetractionMethod,
+    b::AbstractBasis,
+)
+    sol = solve_exp_ode(M, p, X; basis=b, dense=false)
+    copyto!(q, sol)
+    return q
 end
 
 """
@@ -214,12 +300,7 @@ function ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     @einsum Ric[i, j] = R[l, i, l, j]
     return Ric
 end
-@decorator_transparent_signature ricci_tensor(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
+@trait_function ricci_tensor(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
 @doc raw"""
     riemann_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend=default_differential_backend())
@@ -251,12 +332,7 @@ function riemann_tensor(
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
     return R
 end
-@decorator_transparent_signature riemann_tensor(
-    M::AbstractDecoratorManifold,
-    p,
-    B::AbstractBasis;
-    kwargs...,
-)
+@trait_function riemann_tensor(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
 @doc raw"""
     solve_exp_ode(
@@ -294,105 +370,12 @@ in an embedded space.
     ```
 """
 function solve_exp_ode(M, p, X; kwargs...)
-    return error(
-        """
-        solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)).
-        For a suitable default, enter `using OrdinaryDiffEq`.
-        """,
+    throw(
+        ErrorException(
+            """
+            solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)).
+            For a suitable default, enter `using OrdinaryDiffEq`.
+            """,
+        ),
     )
-end
-
-#
-# Introduce transparency
-# (a) new functions & other parents
-for f in [
-    christoffel_symbols_second_jacobian,
-    exp,
-    gaussian_curvature,
-    get_coordinates,
-    get_vector,
-    log,
-    mean,
-    median,
-    project,
-    ricci_tensor,
-    riemann_tensor,
-    vector_transport_along,
-    vector_transport_direction,
-    vector_transport_direction!, #since it has a default using _to!
-    vector_transport_to,
-]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractConnectionManifold,
-                args...,
-            )
-                return Val(:parent)
-            end
-        end,
-    )
-end
-
-# (b) changes / intransparencies.
-for f in [
-    christoffel_symbols_second, # this is basic for connection manifolds but not for metric manifolds
-    exp!,
-    get_coordinates!,
-    get_vector!,
-    get_basis,
-    inner,
-    inverse_retract!,
-    log!,
-    mean!,
-    median!,
-    norm,
-    project!,
-    retract!,
-    vector_transport_along!,
-    vector_transport_to!,
-]
-    eval(
-        quote
-            function decorator_transparent_dispatch(
-                ::typeof($f),
-                ::AbstractConnectionManifold,
-                args...,
-            )
-                return Val(:intransparent)
-            end
-        end,
-    )
-end
-# (c) special cases
-function decorator_transparent_dispatch(
-    ::typeof(exp!),
-    M::AbstractConnectionManifold,
-    q,
-    p,
-    X,
-    t,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(inverse_retract!),
-    M::AbstractConnectionManifold,
-    X,
-    p,
-    q,
-    m::LogarithmicInverseRetraction,
-)
-    return Val(:parent)
-end
-function decorator_transparent_dispatch(
-    ::typeof(retract!),
-    M::AbstractConnectionManifold,
-    q,
-    p,
-    X,
-    m::ExponentialRetraction,
-)
-    return Val(:parent)
 end

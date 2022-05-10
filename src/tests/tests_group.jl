@@ -306,7 +306,7 @@ function test_group(
                 Test.@test log_lie!(G, X, Identity(G)) === X
                 g = allocate(g_pts[1])
                 Test.@test exp_lie!(G, g, X) === g
-                Test.@test is_identity(G, g; atol=atol)
+                Test.@test is_identity(G, g; atol=atol) || "is_identity($G, $g; atol=$atol)"
             end
         end
 
@@ -406,7 +406,7 @@ function test_group(
                 )
             end
         end
-        if invariant_metric_dispatch(G, RightAction()) === Val(true)
+        if has_invariant_metric(G, RightAction())
             Test.@testset "right-invariant" begin
                 Test.@test has_approx_invariant_metric(
                     G,
@@ -513,7 +513,7 @@ function test_action(
     test_switch_direction=true,
 )
     G = base_group(A)
-    M = g_manifold(A)
+    M = group_manifold(A)
     e = Identity(G)
 
     Test.@testset "Basic action properties" begin

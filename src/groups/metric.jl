@@ -1,74 +1,6 @@
 @doc raw"""
-    InvariantMetric{G<:AbstractMetric,D<:ActionDirection} <: AbstractMetric
-
-Extend a metric on the Lie algebra of an [`AbstractGroupManifold`](@ref) to the whole group
-via translation in the specified direction.
-
-Given a group $\mathcal{G}$ and a left- or right group translation map $τ$ on the group, a
-metric $g$ is $τ$-invariant if it has the inner product
-
-````math
-g_p(X, Y) = g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y),
-````
-
-for all $p,q ∈ \mathcal{G}$ and $X,Y ∈ T_p \mathcal{G}$, where $(\mathrm{d}τ_q)_p$ is the
-differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref)).
-
-`InvariantMetric` constructs an (assumed) $τ$-invariant metric by extending the inner
-product of a metric $h_e$ on the Lie algebra to the whole group:
-
-````math
-g_p(X, Y) = h_e((\mathrm{d}τ_p^{-1})_p X, (\mathrm{d}τ_p^{-1})_p Y).
-````
-
-!!! warning
-    The invariance condition is not checked and must be verified for the entire group.
-    To verify the condition for a set of points numerically, use
-    [`has_approx_invariant_metric`](@ref).
-
-The convenient aliases [`LeftInvariantMetric`](@ref) and [`RightInvariantMetric`](@ref) are
-provided.
-
-# Constructor
-
-    InvariantMetric(metric::AbstractMetric, conv::ActionDirection = LeftAction())
-"""
-struct InvariantMetric{G<:AbstractMetric,D<:ActionDirection} <: AbstractMetric
-    metric::G
-    function InvariantMetric{G,D}(metric::G) where {G<:AbstractMetric,D<:ActionDirection}
-        return new(metric)
-    end
-end
-
-function InvariantMetric(metric::MC, conv=LeftAction()) where {MC<:AbstractMetric}
-    return InvariantMetric{MC,typeof(conv)}(metric)
-end
-
-const LeftInvariantMetric{G} = InvariantMetric{G,LeftAction} where {G<:AbstractMetric}
-
-"""
-    LeftInvariantMetric(metric::AbstractMetric)
-
-Alias for a left-[`InvariantMetric`](@ref).
-"""
-function LeftInvariantMetric(metric::T) where {T<:AbstractMetric}
-    return InvariantMetric{T,LeftAction}(metric)
-end
-
-const RightInvariantMetric{G} = InvariantMetric{G,RightAction} where {G<:AbstractMetric}
-
-"""
-    RightInvariantMetric(metric::AbstractMetric)
-
-Alias for a right-[`InvariantMetric`](@ref).
-"""
-function RightInvariantMetric(metric::T) where {T<:AbstractMetric}
-    return InvariantMetric{T,RightAction}(metric)
-end
-
-@doc raw"""
     has_approx_invariant_metric(
-        G::AbstractGroupManifold,
+        G::AbstractDecoratorManifold,
         p,
         X,
         Y,
@@ -90,21 +22,24 @@ This is necessary but not sufficient for invariance.
 
 Optionally, `kwargs` passed to `isapprox` may be provided.
 """
-has_approx_invariant_metric(
-    ::AbstractGroupManifold,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::Any,
-    ::ActionDirection,
-)
-@decorator_transparent_function function has_approx_invariant_metric(
-    M::AbstractGroupManifold,
+has_approx_invariant_metric(::AbstractDecoratorManifold, p, X, Y, qs, ::ActionDirection)
+@trait_function has_approx_invariant_metric(
+    M::AbstractDecoratorManifold,
     p,
     X,
     Y,
     qs,
     conv::ActionDirection=LeftAction();
+    kwargs...,
+)
+function has_approx_invariant_metric(
+    ::TraitList{<:IsGroupManifold},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    Y,
+    qs,
+    conv::ActionDirection;
     kwargs...,
 )
     gpXY = inner(M, p, X, Y)
@@ -117,127 +52,190 @@ has_approx_invariant_metric(
     return true
 end
 
-direction(::InvariantMetric{G,D}) where {G,D} = D()
+"""
+    direction(::AbstractDecoratorManifold) -> AD
 
-function exp!(
-    M::MetricManifold{𝔽,<:AbstractGroupManifold,<:InvariantMetric},
-    q,
+Get the direction of the action a certain Lie group with its implicit metric has
+"""
+direction(::AbstractDecoratorManifold)
+
+@trait_function direction(M::AbstractDecoratorManifold)
+
+direction(::TraitList{HasLeftInvariantMetric}, ::AbstractDecoratorManifold) = LeftAction()
+
+direction(::TraitList{HasRightInvariantMetric}, ::AbstractDecoratorManifold) = RightAction()
+
+function exp(::TraitList{HasLeftInvariantMetric}, M::MetricManifold, p, X)
+    return retract(M.manifold, p, X, GroupExponentialRetraction(LeftAction()))
+end
+function exp!(::TraitList{HasLeftInvariantMetric}, M::MetricManifold, q, p, X)
+    return retract!(M.manifold, q, p, X, GroupExponentialRetraction(LeftAction()))
+end
+function exp(::TraitList{HasRightInvariantMetric}, M::MetricManifold, p, X)
+    return retract(M.manifold, p, X, GroupExponentialRetraction(RightAction()))
+end
+function exp!(::TraitList{HasRightInvariantMetric}, M::MetricManifold, q, p, X)
+    return retract!(M.manifold, q, p, X, GroupExponentialRetraction(RightAction()))
+end
+function exp(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, X)
+    return exp(M.manifold, p, X)
+end
+function exp!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, q, p, X)
+    return exp!(M.manifold, q, p, X)
+end
+
+@trait_function has_invariant_metric(M::AbstractDecoratorManifold, op::ActionDirection)
+
+# Fallbacks / false
+has_invariant_metric(::AbstractManifold, op::ActionDirection) = false
+function has_invariant_metric(
+    ::TraitList{<:HasLeftInvariantMetric},
+    ::AbstractDecoratorManifold,
+    ::LeftAction,
+)
+    return true
+end
+function has_invariant_metric(
+    ::TraitList{<:HasRightInvariantMetric},
+    ::AbstractDecoratorManifold,
+    ::RightAction,
+)
+    return true
+end
+
+@trait_function has_biinvariant_metric(M::AbstractDecoratorManifold)
+
+# fallbavk / default: false
+has_biinvariant_metric(::AbstractManifold) = false
+function has_biinvariant_metric(
+    ::TraitList{<:HasBiinvariantMetric},
+    ::AbstractDecoratorManifold,
+)
+    return true
+end
+
+function inner(
+    t::TraitList{IT},
+    M::AbstractDecoratorManifold,
     p,
     X,
-) where {𝔽}
-    if has_biinvariant_metric(M)
-        conv = direction(metric(M))
-        return retract!(base_group(M), q, p, X, GroupExponentialRetraction(conv))
-    end
-    return invoke(exp!, Tuple{MetricManifold,typeof(q),typeof(p),typeof(X)}, M, q, p, X)
-end
-
-"""
-    biinvariant_metric_dispatch(G::AbstractGroupManifold) -> Val
-
-Return `Val(true)` if the metric on the manifold is bi-invariant, that is, if the metric
-is both left- and right-invariant (see [`invariant_metric_dispatch`](@ref)).
-"""
-function biinvariant_metric_dispatch(M::AbstractManifold)
-    return Val(
-        invariant_metric_dispatch(M, LeftAction()) === Val(true) &&
-        invariant_metric_dispatch(M, RightAction()) === Val(true),
-    )
-end
-
-has_biinvariant_metric(M::AbstractManifold) = _extract_val(biinvariant_metric_dispatch(M))
-
-@doc raw"""
-    invariant_metric_dispatch(G::AbstractGroupManifold, conv::ActionDirection) -> Val
-
-Return `Val(true)` if the metric on the group $\mathcal{G}$ is invariant under translations
-by the specified direction, that is, given a group $\mathcal{G}$, a left- or right group
-translation map $τ$, and a metric $g_e$ on the Lie algebra, a $τ$-invariant metric at
-any point $p ∈ \mathcal{G}$ is defined as a metric with the inner product
-
-````math
-g_p(X, Y) = g_{τ_q p}((\mathrm{d}τ_q)_p X, (\mathrm{d}τ_q)_p Y),
-````
-
-for $X,Y ∈ T_q \mathcal{G}$ and all $q ∈ \mathcal{G}$, where $(\mathrm{d}τ_q)_p$ is the
-differential of translation by $q$ evaluated at $p$ (see [`translate_diff`](@ref)).
-"""
-invariant_metric_dispatch(::MetricManifold, ::ActionDirection)
-
-@decorator_transparent_signature invariant_metric_dispatch(
-    M::AbstractDecoratorManifold,
-    conv::ActionDirection,
-)
-function invariant_metric_dispatch(M::MetricManifold, conv::ActionDirection)
-    is_default_metric(M) && return invariant_metric_dispatch(M.manifold, conv)
-    return Val(false)
-end
-function invariant_metric_dispatch(
-    M::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric},
-    conv::ActionDirection,
-) where {𝔽}
-    direction(metric(M)) === conv && return Val(true)
-    return invoke(invariant_metric_dispatch, Tuple{MetricManifold,typeof(conv)}, M, conv)
-end
-invariant_metric_dispatch(::AbstractManifold, ::ActionDirection) = Val(false)
-
-function has_invariant_metric(M::AbstractManifold, conv::ActionDirection)
-    return _extract_val(invariant_metric_dispatch(M, conv))
-end
-
-function inner(M::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric}, p, X, Y) where {𝔽}
-    imetric = metric(M)
-    conv = direction(imetric)
-    N = MetricManifold(M.manifold, imetric.metric)
+    Y,
+) where {IT<:AbstractInvarianceTrait}
+    conv = direction(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     Yₑ = inverse_translate_diff(M, p, p, Y, conv)
-    return inner(N, Identity(N), Xₑ, Yₑ)
+    return inner(next_trait(t), M, Identity(M), Xₑ, Yₑ)
 end
-
-function default_metric_dispatch(
-    M::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric},
-) where {𝔽}
-    imetric = metric(M)
-    N = MetricManifold(M.manifold, imetric.metric)
-    default_metric_dispatch(N) === Val(true) || return Val(false)
-    return invariant_metric_dispatch(N, direction(imetric))
-end
-
-function log!(
-    M::MetricManifold{𝔽,<:AbstractGroupManifold,<:InvariantMetric},
+function inner(
+    t::TraitList{<:IsGroupManifold},
+    M::AbstractDecoratorManifold,
+    ::Identity,
     X,
+    Y,
+)
+    return inner(next_trait(t), M, identity_element(M), X, Y)
+end
+
+function inverse_translate_diff(
+    ::TraitList{IsMetricManifold},
+    M::MetricManifold,
     p,
     q,
-) where {𝔽}
-    if has_biinvariant_metric(M)
-        imetric = metric(M)
-        conv = direction(imetric)
-        return inverse_retract!(
-            base_group(M),
-            X,
-            p,
-            q,
-            GroupLogarithmicInverseRetraction(conv),
-        )
-    end
-    return invoke(log!, Tuple{MetricManifold,typeof(X),typeof(p),typeof(q)}, M, X, p, q)
+    X,
+    conv::ActionDirection,
+)
+    return inverse_translate_diff(M.manifold, p, q, X, conv)
+end
+function inverse_translate_diff!(
+    ::TraitList{IsMetricManifold},
+    M::MetricManifold,
+    Y,
+    p,
+    q,
+    X,
+    conv::ActionDirection,
+)
+    return inverse_translate_diff!(M.manifold, Y, p, q, X, conv)
+end
+
+function log(::TraitList{HasLeftInvariantMetric}, M::MetricManifold, p, q)
+    return inverse_retract(
+        M.manifold,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(LeftAction()),
+    )
+end
+function log!(::TraitList{HasLeftInvariantMetric}, M::MetricManifold, X, p, q)
+    return inverse_retract!(
+        M.manifold,
+        X,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(LeftAction()),
+    )
+end
+function log(::TraitList{HasRightInvariantMetric}, M::MetricManifold, p, q)
+    return inverse_retract(
+        M.manifold,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(RightAction()),
+    )
+end
+function log!(::TraitList{HasRightInvariantMetric}, M::MetricManifold, X, p, q)
+    return inverse_retract!(
+        M.manifold,
+        X,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(RightAction()),
+    )
+end
+function log(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, q)
+    return log(M.manifold, p, q)
+end
+function log!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, X, p, q)
+    return log!(M.manifold, X, p, q)
 end
 
 function LinearAlgebra.norm(
-    M::MetricManifold{𝔽,<:AbstractManifold,<:InvariantMetric},
+    t::TraitList{IT},
+    M::AbstractDecoratorManifold,
     p,
     X,
-) where {𝔽}
-    imetric = metric(M)
-    conv = direction(imetric)
-    N = MetricManifold(M.manifold, imetric.metric)
+) where {IT<:AbstractInvarianceTrait}
+    conv = direction(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
-    return norm(N, Identity(N), Xₑ)
+    return norm(next_trait(t), M, Identity(M), Xₑ)
+end
+function LinearAlgebra.norm(
+    t::TraitList{<:IsGroupManifold},
+    M::AbstractDecoratorManifold,
+    ::Identity,
+    X,
+)
+    return norm(next_trait(t), M, identity_element(M), X)
 end
 
-function Base.show(io::IO, metric::LeftInvariantMetric)
-    return print(io, "LeftInvariantMetric($(metric.metric))")
+function translate_diff!(
+    ::TraitList{IsMetricManifold},
+    M::MetricManifold,
+    p,
+    q,
+    X,
+    conv::ActionDirection,
+)
+    return translate_diff(M.manifold, p, q, X, conv)
 end
-function Base.show(io::IO, metric::RightInvariantMetric)
-    return print(io, "RightInvariantMetric($(metric.metric))")
+function translate_diff!(
+    ::TraitList{IsMetricManifold},
+    M::MetricManifold,
+    Y,
+    p,
+    q,
+    X,
+    conv::ActionDirection,
+)
+    return translate_diff!(M.manifold, Y, p, q, X, conv)
 end

@@ -1,7 +1,6 @@
 include("../utils.jl")
 
 using HybridArrays, Random
-using Manifolds: default_metric_dispatch
 using StaticArrays: Dynamic
 
 Random.seed!(42)
@@ -55,8 +54,6 @@ end
     @test Ms^(5,) === Ms1
     @test Mr^(5, 7) === Mr2
 
-    @test is_default_metric(Ms1, PowerMetric())
-    @test default_metric_dispatch(Ms1, PowerMetric()) === Val{true}()
     types_s1 = [Array{Float64,2}, HybridArray{Tuple{3,Dynamic()},Float64,2}]
     types_s2 = [Array{Float64,3}, HybridArray{Tuple{3,Dynamic(),Dynamic()},Float64,3}]
 
@@ -68,9 +65,8 @@ end
     types_r2 = [Array{Float64,4}, HybridArray{Tuple{3,3,Dynamic(),Dynamic()},Float64,4}]
     types_rn2 = [Matrix{Matrix{Float64}}]
 
-    retraction_methods = [Manifolds.PowerRetraction(ManifoldsBase.ExponentialRetraction())]
-    inverse_retraction_methods =
-        [Manifolds.InversePowerRetraction(ManifoldsBase.LogarithmicInverseRetraction())]
+    retraction_methods = [ManifoldsBase.ExponentialRetraction()]
+    inverse_retraction_methods = [ManifoldsBase.LogarithmicInverseRetraction()]
 
     sphere_dist = Manifolds.uniform_distribution(Ms, @SVector [1.0, 0.0, 0.0])
     power_s1_pt_dist =
@@ -171,7 +167,7 @@ end
     end
 
     @testset "power vector transport" begin
-        m = PowerVectorTransport(ParallelTransport())
+        m = ParallelTransport()
         p = repeat([1.0, 0.0, 0.0], 1, 5)
         q = repeat([0.0, 1.0, 0.0], 1, 5)
         X = log(Ms1, p, q)
@@ -195,16 +191,12 @@ end
             test_manifold(
                 Ms1,
                 pts1;
-                test_reverse_diff=true,
                 test_musical_isomorphisms=true,
                 test_injectivity_radius=false,
                 test_default_vector_transport=true,
                 test_project_point=true,
                 test_project_tangent=true,
                 vector_transport_methods=[
-                    PowerVectorTransport(ParallelTransport()),
-                    PowerVectorTransport(SchildsLadderTransport()),
-                    PowerVectorTransport(PoleLadderTransport()),
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
@@ -231,7 +223,6 @@ end
             test_manifold(
                 Ms2,
                 pts2;
-                test_reverse_diff=true,
                 test_musical_isomorphisms=true,
                 test_injectivity_radius=false,
                 test_vee_hat=true,
@@ -254,7 +245,6 @@ end
             test_manifold(
                 Mr1,
                 pts1;
-                test_reverse_diff=false,
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_vee_hat=true,
@@ -278,7 +268,6 @@ end
             test_manifold(
                 Mrn1,
                 pts1;
-                test_reverse_diff=false,
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_vee_hat=true,
@@ -303,7 +292,6 @@ end
             test_manifold(
                 Mr2,
                 pts2;
-                test_reverse_diff=false,
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_vee_hat=true,
@@ -325,7 +313,6 @@ end
             test_manifold(
                 Mrn2,
                 pts2;
-                test_reverse_diff=false,
                 test_injectivity_radius=false,
                 test_musical_isomorphisms=true,
                 test_vee_hat=true,
@@ -349,8 +336,6 @@ end
         test_manifold(
             MT,
             pts_t;
-            test_reverse_diff=false,
-            test_forward_diff=false,
             test_injectivity_radius=false,
             test_musical_isomorphisms=true,
             test_vee_hat=true,
@@ -393,8 +378,6 @@ end
         test_manifold(
             MT,
             pts_t;
-            test_reverse_diff=false,
-            test_forward_diff=false,
             test_injectivity_radius=false,
             test_musical_isomorphisms=true,
             retraction_methods=retraction_methods,

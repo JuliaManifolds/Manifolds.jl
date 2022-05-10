@@ -5,17 +5,30 @@ include("../utils.jl")
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
         M = GeneralizedGrassmann(3, 2, B)
         p = [1.0 0.0; 0.0 0.5; 0.0 0.0]
+        X = zeros(3, 2)
+        X[1, :] .= 1.0
         @testset "Basics" begin
             @test repr(M) ==
                   "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
             @test base_manifold(M) === M
-            @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
-            @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
+            @test_throws ManifoldDomainError is_point(
+                M,
+                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
+                true,
+            )
+            @test_throws ManifoldDomainError is_point(M, 2 * p, true)
             @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_vector(M, p, [0.0, 0.0, 1.0, 0.0], true)
-            @test_throws DomainError is_vector(M, p, 1 * im * zero_vector(M, p), true)
+            @test_throws ManifoldDomainError is_vector(M, p, [0.0, 0.0, 1.0, 0.0], true)
+            @test_throws ManifoldDomainError is_vector(
+                M,
+                p,
+                1 * im * zero_vector(M, p),
+                true,
+            )
+            @test_throws ManifoldDomainError is_vector(M, p, X, true)
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, p) == π / 2
@@ -73,9 +86,9 @@ include("../utils.jl")
         @testset "Type $T" for T in types
             pts = convert.(T, [p, q, r])
             @test !is_point(M, 2 * p)
-            @test_throws DomainError !is_point(M, 2 * r, true)
+            @test_throws ManifoldDomainError !is_point(M, 2 * r, true)
             @test !is_vector(M, p, q)
-            @test_throws DomainError is_vector(M, p, q, true)
+            @test_throws ManifoldDomainError is_vector(M, p, q, true)
             test_manifold(
                 M,
                 pts,
@@ -86,8 +99,6 @@ include("../utils.jl")
                 test_is_tangent=true,
                 test_project_tangent=true,
                 test_default_vector_transport=false,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 projection_atol_multiplier=15.0,
                 retraction_atol_multiplier=10.0,
                 is_tangent_atol_multiplier=4 * 10.0^2,

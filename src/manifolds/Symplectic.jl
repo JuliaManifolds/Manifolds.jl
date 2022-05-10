@@ -38,10 +38,14 @@ Generate the (real-valued) symplectic manifold of ``2n \times 2n`` symplectic ma
 The constructor for the [`Symplectic`](@ref) manifold accepts the even column/row embedding
 dimension ``2n`` for the real symplectic manifold, ``ℝ^{2n × 2n}``.
 """
-struct Symplectic{n,𝔽} <: AbstractEmbeddedManifold{𝔽,DefaultIsometricEmbeddingType} end
+struct Symplectic{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
+
+function active_traits(f, ::Symplectic, args...)
+    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
+end
 
 function Symplectic(n::Int, field::AbstractNumbers=ℝ)
-    n % 2 == 0 || throw(ArgumentError("The dimensionality of the symplectic manifold
+    n % 2 == 0 || throw(ArgumentError("The dimension of the symplectic manifold
                         embedding space must be even. Was odd, n % 2 == $(n % 2)."))
     return Symplectic{div(n, 2),field}()
 end
@@ -72,8 +76,6 @@ as an inner product over the embedding space ``ℝ^{2n \times 2n}``, i.e.
 ````
 """
 struct ExtendedSymplecticMetric <: AbstractMetric end
-
-struct CayleyInverseRetraction <: AbstractInverseRetractionMethod end
 
 @doc raw"""
     SymplecticMatrix{T}
@@ -195,7 +197,7 @@ end
     check_point(M::Symplectic, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Symplectic`](@ref) `M`=$\operatorname{Sp}(2n)$,
-i.e. that it has the right [`AbstractNumbers`](@ref) type and $p^{+}p$ is (approximately)
+i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{+}p$ is (approximately)
 the identity, where $A^{+} = Q_{2n}^TA^TQ_{2n}$ is the symplectic inverse, with
 ````math
 Q_{2n} =
@@ -207,11 +209,6 @@ Q_{2n} =
 The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 function check_point(M::Symplectic{n,ℝ}, p; kwargs...) where {n,ℝ}
-    abstract_embedding_type = supertype(typeof(M))
-
-    mpv = invoke(check_point, Tuple{abstract_embedding_type,typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
-
     # Perform check that the matrix lives on the real symplectic manifold:
     expected_zero = norm(inv(M, p) * p - LinearAlgebra.I)
     if !isapprox(expected_zero, zero(eltype(p)); kwargs...)
@@ -230,7 +227,7 @@ end
     check_vector(M::Symplectic, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Symplectic`](@ref)
-`M`=``\operatorname{Sp}(2n)``, i.e. the [`AbstractNumbers`](@ref) fits and
+`M`=``\operatorname{Sp}(2n)``, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits and
 it (approximately) holds that ``p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0``,
 where
 ````math
@@ -245,21 +242,8 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 check_vector(::Symplectic, ::Any...)
 
 function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
-    abstract_embedding_type = supertype(typeof(M))
-
-    mpv = invoke(
-        check_vector,
-        Tuple{abstract_embedding_type,typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
-
     Q = SymplecticMatrix(p, X)
     tangent_requirement_norm = norm(X' * Q * p + p' * Q * X, 2)
-
     if !isapprox(tangent_requirement_norm, 0.0; kwargs...)
         return DomainError(
             tangent_requirement_norm,
@@ -271,10 +255,6 @@ function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
     end
     return nothing
 end
-
-decorated_manifold(::Symplectic{n,ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
-
-default_metric_dispatch(::Symplectic{n,ℝ}, ::RealSymplecticMetric) where {n,ℝ} = Val(true)
 
 ManifoldsBase.default_inverse_retraction_method(::Symplectic) = CayleyInverseRetraction()
 
@@ -326,6 +306,9 @@ function distance(M::Symplectic{n}, p, q) where {n}
     return norm(log(symplectic_inverse_times(M, p, q)))
 end
 
+embed(::Symplectic, p) = p
+embed(::Symplectic, p, X) = X
+
 @doc raw"""
     exp(M::Symplectic, p, X)
     exp!(M::Symplectic, q, p, X)
@@ -354,6 +337,8 @@ function exp!(M::Symplectic, q, p, X)
     q .= p * exp(Array(p_star_X')) * exp(p_star_X - p_star_X')
     return q
 end
+
+get_embedding(::Symplectic{n,ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
 
 @doc raw"""
     gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
@@ -514,7 +499,7 @@ function inv!(::Symplectic{n,ℝ}, A) where {n}
 end
 
 @doc raw"""
-    inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
+    inverse_retract(M::Symplectic, p, q, ::CayleyInverseRetraction)
 
 Compute the Cayley Inverse Retraction ``X = \mathcal{L}_p^{\operatorname{Sp}}(q)``
 such that the Cayley Retraction from ``p`` along ``X`` lands at ``q``, i.e.
@@ -547,7 +532,9 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
 	> arXiv preprint arXiv:2108.12447, 2021 (https://arxiv.org/abs/2108.12447)
 """
-function inverse_retract!(M::Symplectic, X, p, q, ::CayleyInverseRetraction)
+inverse_retract(::Symplectic, p, q, ::CayleyInverseRetraction)
+
+function inverse_retract_caley!(M::Symplectic, X, p, q)
     U_inv = lu(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
     V_inv = lu(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
 
@@ -765,7 +752,9 @@ denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
     > Monatshefte f{\"u}r Mathematik, Springer
     > doi [10.1007/s00605-020-01369-9](https://doi.org/10.1007/s00605-020-01369-9)
 """
-function retract!(M::Symplectic, q, p, X, ::CayleyRetraction)
+retract(M::Symplectic, p, X)
+
+function retract_caley!(M::Symplectic, q, p, X)
     p_star_X = symplectic_inverse_times(M, p, X)
 
     divisor = lu(2 * I - p_star_X)

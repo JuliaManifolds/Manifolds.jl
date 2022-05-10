@@ -1,6 +1,5 @@
 @doc raw"""
-    SpecialLinear{n,𝔽} <:
-        AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType}
+    SpecialLinear{n,𝔽} <: AbstractDecoratorManifold
 
 The special linear group ``\mathrm{SL}(n,𝔽)`` that is, the group of all invertible matrices
 with unit determinant in ``𝔽^{n×n}``.
@@ -14,20 +13,26 @@ The default metric is the same left-``\mathrm{GL}(n)``-right-``\mathrm{O}(n)``-i
 metric used for [`GeneralLinear(n, 𝔽)`](@ref). The resulting geodesic on
 ``\mathrm{GL}(n,𝔽)`` emanating from an element of ``\mathrm{SL}(n,𝔽)`` in the direction of
 an element of ``𝔰𝔩(n, 𝔽)`` is a closed subgroup of ``\mathrm{SL}(n,𝔽)``. As a result, most
-metric functions forward to `GeneralLinear`.
+metric functions forward to [`GeneralLinear`](@ref).
 """
-struct SpecialLinear{n,𝔽} <:
-       AbstractGroupManifold{𝔽,MultiplicationOperation,TransparentGroupDecoratorType} end
+struct SpecialLinear{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 SpecialLinear(n, 𝔽::AbstractNumbers=ℝ) = SpecialLinear{n,𝔽}()
+
+@inline function active_traits(f, ::SpecialLinear, args...)
+    return merge_traits(
+        IsGroupManifold(MultiplicationOperation()),
+        IsEmbeddedSubmanifold(),
+        HasLeftInvariantMetric(),
+        IsDefaultMetric(EuclideanMetric()),
+    )
+end
 
 function allocation_promotion_function(::SpecialLinear{n,ℂ}, f, args::Tuple) where {n}
     return complex
 end
 
 function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = check_point(Euclidean(n, n; field=𝔽), p; kwargs...)
-    mpv === nothing || return mpv
     detp = det(p)
     if !isapprox(detp, 1; kwargs...)
         return DomainError(
@@ -38,18 +43,8 @@ function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
     end
     return nothing
 end
-check_point(G::SpecialLinear, ::Identity{MultiplicationOperation}; kwargs...) = nothing
-function check_point(
-    G::SpecialLinear,
-    e::Identity{O};
-    kwargs...,
-) where {O<:AbstractGroupOperation}
-    return invoke(check_point, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
-end
 
 function check_vector(G::SpecialLinear, p, X; kwargs...)
-    mpv = check_vector(decorated_manifold(G), p, X; kwargs...)
-    mpv === nothing || return mpv
     trX = tr(inverse_translate_diff(G, p, p, X, LeftAction()))
     if !isapprox(trX, 0; kwargs...)
         return DomainError(
@@ -61,10 +56,10 @@ function check_vector(G::SpecialLinear, p, X; kwargs...)
     return nothing
 end
 
-decorated_manifold(::SpecialLinear{n,𝔽}) where {n,𝔽} = GeneralLinear(n, 𝔽)
+embed(::SpecialLinear, p) = p
+embed(::SpecialLinear, p, X) = X
 
-default_metric_dispatch(::SpecialLinear, ::EuclideanMetric) = Val(true)
-default_metric_dispatch(::SpecialLinear, ::LeftInvariantMetric{EuclideanMetric}) = Val(true)
+get_embedding(::SpecialLinear{n,𝔽}) where {n,𝔽} = GeneralLinear(n, 𝔽)
 
 inverse_translate_diff(::SpecialLinear, p, q, X, ::LeftAction) = X
 inverse_translate_diff(::SpecialLinear, p, q, X, ::RightAction) = p * X / p
@@ -74,7 +69,7 @@ function inverse_translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirec
 end
 
 function manifold_dimension(G::SpecialLinear)
-    return manifold_dimension(decorated_manifold(G)) - real_dimension(number_system(G))
+    return manifold_dimension(get_embedding(G)) - real_dimension(number_system(G))
 end
 
 @doc raw"""
@@ -129,10 +124,6 @@ function project!(G::SpecialLinear{n}, Y, p, X) where {n}
     Y[diagind(n, n)] .-= tr(Y) / n
     translate_diff!(G, Y, p, p, Y, LeftAction())
     return Y
-end
-
-function decorator_transparent_dispatch(::typeof(project), ::SpecialLinear, args...)
-    return Val(:parent)
 end
 
 Base.show(io::IO, ::SpecialLinear{n,𝔽}) where {n,𝔽} = print(io, "SpecialLinear($n, $𝔽)")

@@ -19,21 +19,21 @@ that lie on it (contained in `pts`).
 
 # Arguments
 - `basis_has_specialized_diagonalizing_get = false`: if true, assumes that
-    [`DiagonalizingOrthonormalBasis`](@ref) given in `basis_types` has
+    `DiagonalizingOrthonormalBasis` given in `basis_types` has
     [`get_coordinates`](@ref) and [`get_vector`](@ref) that work without caching.
 - `basis_types_to_from = ()`: basis types that will be tested based on
     [`get_coordinates`](@ref) and [`get_vector`](@ref).
-- `basis_types_vecs = ()` : basis types that will be tested based on [`get_vectors`](@ref).
+- `basis_types_vecs = ()` : basis types that will be tested based on `get_vectors`
 - `default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction()`:
-    default method for inverse retractions ([`log`](@ref)).
+    default method for inverse retractions (`log`.
 - `default_retraction_method = ManifoldsBase.ExponentialRetraction()`: default method for
-    retractions ([`exp`](@ref)).
+    retractions (`exp`).
 - `exp_log_atol_multiplier = 0`: change absolute tolerance of exp/log tests
     (0 use default, i.e. deactivate atol and use rtol).
 - `exp_log_rtol_multiplier = 1`: change the relative tolerance of exp/log tests
     (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `expected_dimension_type = Integer`: expected type of value returned by
-    [`manifold_dimension`](@ref).
+    `manifold_dimension`.
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
 - `is_mutating = true`: whether mutating variants of functions should be tested.
 - `is_point_atol_multiplier = 0`: determines atol of `is_point` checks.
@@ -52,8 +52,6 @@ that lie on it (contained in `pts`).
 - `retraction_methods = []`: retraction methods that will be tested.
 - `test_atlases = []`: Vector or tuple of atlases that should be tested.
 - `test_exp_log = true`: if true, check that [`exp`](@ref) is the inverse of [`log`](@ref).
-- `test_forward_diff = true`: if true, automatic differentiation using
-    ForwardDiff is tested.
 - `test_injectivity_radius = true`: whether implementation of [`injectivity_radius`](@ref)
     should be tested.
 - `test_inplace = false` : if true check if inplace variants work if they are activated,
@@ -66,8 +64,6 @@ that lie on it (contained in `pts`).
 - `test_project_point = false`: test projections onto the manifold.
 - `test_project_tangent = false` : test projections on tangent spaces.
 - `test_representation_size = true` : test repersentation size of points/tvectprs.
-- `test_reverse_diff = true`: if true, automatic differentiation using
-    ReverseDiff is tested.
 - `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace.
 - `test_vector_spaces = true` : test Vector bundle of this manifold.
 - `test_default_vector_transport = false` : test the default vector transport (usually
@@ -106,18 +102,20 @@ function test_manifold(
     retraction_rtol_multiplier=1,
     test_atlases=(),
     test_exp_log=true,
-    test_forward_diff=true,
     test_is_tangent=true,
     test_injectivity_radius=true,
     test_inplace=false,
     test_musical_isomorphisms=false,
     test_mutating_rand=false,
+    parallel_transport=false,
+    parallel_transport_to=parallel_transport,
+    parallel_transport_along=parallel_transport,
+    parallel_transport_direction=parallel_transport,
     test_project_point=false,
     test_project_tangent=false,
     test_rand_point=false,
     test_rand_tvector=false,
     test_representation_size=true,
-    test_reverse_diff=true,
     test_riesz_representer=false,
     test_tangent_vector_broadcasting=true,
     test_default_vector_transport=false,
@@ -218,6 +216,13 @@ function test_manifold(
         Test.@test isapprox(M, pts[2], exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
         Test.@test isapprox(M, pts[1], exp(M, pts[1], X1, 0); atol=atolp1p2, rtol=rtolp1p2)
         Test.@test isapprox(M, pts[2], exp(M, pts[1], X1, 1); atol=atolp1p2, rtol=rtolp1p2)
+        if is_mutating
+            q2 = allocate(pts[1])
+            exp!(M, q2, pts[1], X1)
+            Test.@test isapprox(M, pts[2], q2; atol=atolp1p2, rtol=rtolp1p2)
+            exp!(M, q2, pts[1], X1, 0)
+            Test.@test isapprox(M, pts[1], q2; atol=atolp1p2, rtol=rtolp1p2)
+        end
         if VERSION >= v"1.5" && isa(M, Union{Grassmann,GeneralizedStiefel})
             # TODO: investigate why this is so imprecise on newer Julia versions on CI
             Test.@test isapprox(
@@ -290,6 +295,15 @@ function test_manifold(
             # since X is of different type/concept than p,q
         end
     end
+
+    parallel_transport && test_parallel_transport(
+        M,
+        pts;
+        along=parallel_transport_along,
+        to=parallel_transport_to,
+        direction=parallel_transport_direction,
+        mutating=is_mutating,
+    )
 
     Test.@testset "(inverse &) retraction tests" begin
         for (p, X) in zip(pts, tv)
@@ -652,14 +666,6 @@ function test_manifold(
         end
     end
 
-    test_forward_diff && Test.@testset "ForwardDiff support" begin
-        test_forwarddiff(M, pts, tv)
-    end
-
-    test_reverse_diff && Test.@testset "ReverseDiff support" begin
-        test_reversediff(M, pts, tv)
-    end
-
     test_musical_isomorphisms && Test.@testset "Musical isomorphisms" begin
         if default_inverse_retraction_method !== nothing
             tv_m = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
@@ -807,4 +813,78 @@ function test_manifold(
         end
     end
     return nothing
+end
+
+"""
+    test_parallel_transport(M,P; along=false, to=true, diretion=true)
+
+Generic tests for parallel transport on `M`given at least two pointsin `P`.
+
+The single functions to transport `along` (a curve), `to` (a point) or (towards a) `direction`
+are sub-tests that can be activated by the keywords arguemnts
+
+!!! Note
+Since the interface to specify curves is not yet provided, the along keyword does not have an effect yet
+"""
+function test_parallel_transport(
+    M::AbstractManifold,
+    P,
+    Ξ=inverse_retract.(
+        Ref(M),
+        P[1:(end - 1)],
+        P[2:end],
+        Ref(default_inverse_retraction_method(M)),
+    );
+    along=false,
+    to=true,
+    direction=true,
+    mutating=true,
+)
+    length(P) < 2 &&
+        error("The Parallel Transport test set requires at least 2 points in P")
+    Test.@testset "Test Parallel Transport" begin
+        along && @warn "parallel transport along test not yet implemented"
+        Test.@testset "To (a point)" begin # even with to =false this displays no tests
+            if to
+                for i in 1:(length(P) - 1)
+                    p = P[i]
+                    q = P[i + 1]
+                    X = Ξ[i]
+                    Y1 = parallel_transport_to(M, p, X, q)
+                    if mutating
+                        Y2 = similar(X)
+                        parallel_transport_to!(M, Y2, p, X, q)
+                        # test that mutating and allocating to the same
+                        Test.@test isapprox(M, q, Y1, Y2)
+                        parallel_transport_to!(M, Y2, q, Y1, p)
+                        # Test that transporting there and back again yields the identity
+                        Test.@test isapprox(M, q, X, Y2)
+                        parallel_transport_to!(M, Y1, q, Y1, p)
+                        # Test that inplace does not have side effects
+                    else
+                        Y1 = parallel_transport_to(M, q, Y1, p)
+                    end
+                    Test.@test isapprox(M, q, X, Y1)
+                end
+            end
+        end
+        Test.@testset "(Tangent Vector) Direction" begin
+            if direction
+                for i in 1:(length(P) - 1)
+                    p = P[i]
+                    X = Ξ[i]
+                    Y1 = parallel_transport_direction(M, p, X, X)
+                    q = exp(M, p, X)
+                    if mutating
+                        Y2 = similar(X)
+                        parallel_transport_direction!(M, Y2, p, X, X)
+                        # test that mutating and allocating to the same
+                        Test.@test isapprox(M, q, Y1, Y2)
+                    end
+                    # Test that Y is a tangent vector at q
+                    Test.@test is_vector(M, p, Y1, true)
+                end
+            end
+        end
+    end
 end

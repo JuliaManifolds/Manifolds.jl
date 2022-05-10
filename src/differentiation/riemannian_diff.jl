@@ -46,11 +46,11 @@ end
 @doc raw"""
     TangentDiffBackend <: AbstractRiemannianDiffBackend
 
-A backend that uses a tangent space and a basis therein to derive an
+A backend that uses tangent spaces and bases therein to derive an
 intrinsic differentiation scheme.
 
-Since it works in a tangent space, methods might require a retraction and an
-inverse retraction as well as a basis.
+Since it works in tangent spaces at argument and function value, methods might require a
+retraction and an inverse retraction as well as a basis.
 
 In the tangent space itself, this backend then employs an (Euclidean)
 [`AbstractDiffBackend`](@ref)
@@ -63,64 +63,70 @@ where `diff_backend` is an [`AbstractDiffBackend`](@ref) to be used on the tange
 
 With the keyword arguments
 
-* `retraction` an [`AbstractRetractionMethod`](@ref) ([`ExponentialRetraction`](@ref) by default)
-* `inverse_retraction` an [`AbstractInverseRetractionMethod`](@ref) ([`LogarithmicInverseRetraction`](@ref) by default)
-* `basis` an [`AbstractBasis`](@ref) ([`DefaultOrthogonalBasis`](@ref) by default)
+* `retraction` an [AbstractRetractionMethod](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html) (`ExponentialRetraction` by default)
+* `inverse_retraction` an [AbstractInverseRetractionMethod](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html) `LogarithmicInverseRetraction` by default)
+* `basis_arg` an [AbstractBasis](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html) (`DefaultOrthogonalBasis` by default)
+* `basis_val` an [AbstractBasis](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html) (`DefaultOrthogonalBasis` by default)
 """
 struct TangentDiffBackend{
     TAD<:AbstractDiffBackend,
     TR<:AbstractRetractionMethod,
     TIR<:AbstractInverseRetractionMethod,
-    TB<:AbstractBasis,
+    TBarg<:AbstractBasis,
+    TBval<:AbstractBasis,
 } <: AbstractRiemannianDiffBackend
     diff_backend::TAD
     retraction::TR
     inverse_retraction::TIR
-    basis::TB
+    basis_arg::TBarg
+    basis_val::TBval
 end
 function TangentDiffBackend(
     diff_backend::TAD;
     retraction::TR=ExponentialRetraction(),
     inverse_retraction::TIR=LogarithmicInverseRetraction(),
-    basis::TB=DefaultOrthonormalBasis(),
+    basis_arg::TBarg=DefaultOrthonormalBasis(),
+    basis_val::TBval=DefaultOrthonormalBasis(),
 ) where {
     TAD<:AbstractDiffBackend,
     TR<:AbstractRetractionMethod,
     TIR<:AbstractInverseRetractionMethod,
-    TB<:AbstractBasis,
+    TBarg<:AbstractBasis,
+    TBval<:AbstractBasis,
 }
-    return TangentDiffBackend{TAD,TR,TIR,TB}(
+    return TangentDiffBackend{TAD,TR,TIR,TBarg,TBval}(
         diff_backend,
         retraction,
         inverse_retraction,
-        basis,
+        basis_arg,
+        basis_val,
     )
 end
 
 function differential(M::AbstractManifold, f, t::Real, backend::TangentDiffBackend)
     p = f(t)
-    onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
+    onb_coords = Manifolds._derivative(zero(number_eltype(p)), backend.diff_backend) do h
         return get_coordinates(
             M,
             p,
             inverse_retract(M, p, f(t + h), backend.inverse_retraction),
-            backend.basis,
+            backend.basis_val,
         )
     end
-    return get_vector(M, p, onb_coords, backend.basis)
+    return get_vector(M, p, onb_coords, backend.basis_val)
 end
 
 function differential!(M::AbstractManifold, f, X, t::Real, backend::TangentDiffBackend)
     p = f(t)
-    onb_coords = _derivative(zero(number_eltype(p)), backend.diff_backend) do h
+    onb_coords = Manifolds._derivative(zero(number_eltype(p)), backend.diff_backend) do h
         return get_coordinates(
             M,
             p,
             inverse_retract(M, p, f(t + h), backend.inverse_retraction),
-            backend.basis,
+            backend.basis_val,
         )
     end
-    return get_vector!(M, X, p, onb_coords, backend.basis)
+    return get_vector!(M, X, p, onb_coords, backend.basis_val)
 end
 
 @doc raw"""
@@ -133,7 +139,7 @@ This method uses the internal `backend.diff_backend` (Euclidean) on the function
 ```
 
 which is given on the tangent space. In detail, the gradient can be written in
-terms of the `backend.basis`. We illustrate it here for an [`AbstractOrthonormalBasis`](@ref),
+terms of the `backend.basis_arg`. We illustrate it here for an [AbstractOrthonormalBasis](https://juliamanifolds.github.io/Manifolds.jl/stable/interface.html#ManifoldsBase.AbstractOrthonormalBasis),
 since that simplifies notations:
 
 ```math
@@ -152,19 +158,19 @@ writing ``p=\exp_p(0)`` we see that this is a finite difference of ``f\circ\exp_
 a function on the tangent space, so we can also use other (Euclidean) backends
 """
 function gradient(M::AbstractManifold, f, p, backend::TangentDiffBackend)
-    X = get_coordinates(M, p, zero_vector(M, p), backend.basis)
-    onb_coords = _gradient(X, backend.diff_backend) do Y
-        return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
+    X = get_coordinates(M, p, zero_vector(M, p), backend.basis_arg)
+    onb_coords = Manifolds._gradient(X, backend.diff_backend) do Y
+        return f(retract(M, p, get_vector(M, p, Y, backend.basis_arg), backend.retraction))
     end
-    return get_vector(M, p, onb_coords, backend.basis)
+    return get_vector(M, p, onb_coords, backend.basis_arg)
 end
 
 function gradient!(M::AbstractManifold, f, X, p, backend::TangentDiffBackend)
-    X2 = get_coordinates(M, p, zero_vector(M, p), backend.basis)
-    onb_coords = _gradient(X2, backend.diff_backend) do Y
-        return f(retract(M, p, get_vector(M, p, Y, backend.basis), backend.retraction))
+    X2 = get_coordinates(M, p, zero_vector(M, p), backend.basis_arg)
+    onb_coords = Manifolds._gradient(X2, backend.diff_backend) do Y
+        return f(retract(M, p, get_vector(M, p, Y, backend.basis_arg), backend.retraction))
     end
-    return get_vector!(M, X, p, onb_coords, backend.basis)
+    return get_vector!(M, X, p, onb_coords, backend.basis_arg)
 end
 
 @doc raw"""
@@ -200,13 +206,45 @@ struct RiemannianProjectionBackend{TADBackend<:AbstractDiffBackend} <:
 end
 
 function gradient(M::AbstractManifold, f, p, backend::RiemannianProjectionBackend)
-    amb_grad = _gradient(f, p, backend.diff_backend)
+    amb_grad = Manifolds._gradient(f, p, backend.diff_backend)
     return change_representer(M, EuclideanMetric(), p, project(M, p, amb_grad))
 end
 
 function gradient!(M::AbstractManifold, f, X, p, backend::RiemannianProjectionBackend)
     amb_grad = embed(M, p, X)
-    _gradient!(f, amb_grad, p, backend.diff_backend)
+    Manifolds._gradient!(f, amb_grad, p, backend.diff_backend)
     project!(M, X, p, amb_grad)
     return change_representer!(M, X, EuclideanMetric(), p, X)
+end
+
+function jacobian(
+    M_dom::AbstractManifold,
+    M_codom::AbstractManifold,
+    f,
+    p,
+    backend::TangentDiffBackend,
+)
+    X = get_coordinates(M_dom, p, zero_vector(M_dom, p), backend.basis_arg)
+    q = f(p)
+    onb_coords = Manifolds._jacobian(X, backend.diff_backend) do Y
+        return get_coordinates(
+            M_codom,
+            q,
+            inverse_retract(
+                M_codom,
+                q,
+                f(
+                    retract(
+                        M_dom,
+                        p,
+                        get_vector(M_dom, p, Y, backend.basis_arg),
+                        backend.retraction,
+                    ),
+                ),
+                backend.inverse_retraction,
+            ),
+            backend.basis_val,
+        )
+    end
+    return onb_coords
 end

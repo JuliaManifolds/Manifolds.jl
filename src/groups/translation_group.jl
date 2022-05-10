@@ -18,15 +18,17 @@ function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ)
     )
 end
 
-identity_element!(::TranslationGroup, p) = fill!(p, 0)
-
-invariant_metric_dispatch(::TranslationGroup, ::ActionDirection) = Val(true)
-
-function default_metric_dispatch(
-    ::MetricManifold{𝔽,<:TranslationGroup,EuclideanMetric},
-) where {𝔽}
-    return Val(true)
+@inline function active_traits(f, M::TranslationGroup, args...)
+    return merge_traits(
+        IsGroupManifold(M.op),
+        IsDefaultMetric(EuclideanMetric()),
+        HasBiinvariantMetric(),
+        active_traits(f, M.manifold, args...),
+        IsExplicitDecorator(),
+    )
 end
+
+identity_element!(::TranslationGroup, p) = fill!(p, 0)
 
 function Base.show(io::IO, ::TranslationGroup{N,𝔽}) where {N,𝔽}
     return print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(𝔽))")

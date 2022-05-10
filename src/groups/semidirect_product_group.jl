@@ -7,12 +7,6 @@ Group operation of a semidirect product group. The operation consists of the ope
 """
 struct SemidirectProductOperation{A<:AbstractGroupAction} <: AbstractGroupOperation
     action::A
-    function SemidirectProductOperation{A}(action::A) where {A<:AbstractGroupAction}
-        return new(action)
-    end
-end
-function SemidirectProductOperation(action::A) where {A<:AbstractGroupAction}
-    return SemidirectProductOperation{A}(action)
 end
 
 function Base.show(io::IO, op::SemidirectProductOperation)
@@ -45,7 +39,7 @@ function SemidirectProductGroup(
     H::GroupManifold{𝔽},
     A::AbstractGroupAction,
 ) where {𝔽}
-    N === g_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")
+    N === group_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")
     H === base_group(A) || error("Subgroup $(H) must be the base group of action $(A)")
     op = SemidirectProductOperation(A)
     M = ProductManifold(N, H)
@@ -78,14 +72,15 @@ function identity_element!(G::SemidirectProductGroup, q)
     return q
 end
 
-function is_identity(G::SemidirectProductGroup, p; kwargs...)
+function is_identity(
+    G::SemidirectProductGroup,
+    p::Identity{<:SemidirectProductOperation};
+    kwargs...,
+)
     M = base_manifold(G)
     N, H = M.manifolds
     nq, hq = submanifold_components(G, p)
     return is_identity(N, nq; kwargs...) && is_identity(H, hq; kwargs...)
-end
-function is_identity(G::SemidirectProductGroup, e::Identity; kwargs...)
-    return invoke(is_identity, Tuple{AbstractGroupManifold,typeof(e)}, G, e; kwargs...)
 end
 
 function Base.show(io::IO, G::SemidirectProductGroup)

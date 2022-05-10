@@ -1,5 +1,5 @@
 @doc raw"""
-    ProbabilitySimplex{n} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType}
+    ProbabilitySimplex{n} <: AbstractDecoratorManifold{𝔽}
 
 The (relative interior of) the probability simplex is the set
 ````math
@@ -29,23 +29,9 @@ This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017
     > doi: [10.1007/s10851-016-0702-4](https://doi.org/10.1007/s10851-016-0702-4)
     > arxiv: [1603.05285](https://arxiv.org/abs/1603.05285).
 """
-struct ProbabilitySimplex{n} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} end
+struct ProbabilitySimplex{n} <: AbstractDecoratorManifold{ℝ} end
 
 ProbabilitySimplex(n::Int) = ProbabilitySimplex{n}()
-
-"""
-    SoftmaxRetraction <: AbstractRetractionMethod
-
-Describes a retraction that is based on the softmax function.
-"""
-struct SoftmaxRetraction <: AbstractRetractionMethod end
-
-"""
-    SoftmaxInverseRetraction <: AbstractInverseRetractionMethod
-
-Describes an inverse retraction that is based on the softmax function.
-"""
-struct SoftmaxInverseRetraction <: AbstractInverseRetractionMethod end
 
 """
     FisherRaoMetric <: AbstractMetric
@@ -57,6 +43,8 @@ probability measures defined on a common probability space.
 See for example the [`ProbabilitySimplex`](@ref).
 """
 struct FisherRaoMetric <: AbstractMetric end
+
+active_traits(f, ::ProbabilitySimplex, args...) = merge_traits(IsEmbeddedManifold())
 
 @doc raw"""
     change_representer(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
@@ -104,14 +92,6 @@ the embedding with positive entries that sum to one
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(M::ProbabilitySimplex, p; kwargs...)
-    mpv = invoke(
-        check_point,
-        Tuple{(typeof(get_embedding(M))),typeof(p)},
-        get_embedding(M),
-        p;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if minimum(p) <= 0
         return DomainError(
             minimum(p),
@@ -136,15 +116,6 @@ after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::ProbabilitySimplex, p, X; kwargs...)
-    mpv = invoke(
-        check_vector,
-        Tuple{typeof(get_embedding(M)),typeof(p),typeof(X)},
-        get_embedding(M),
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(sum(X), 0.0; kwargs...)
         return DomainError(
             sum(X),
@@ -154,9 +125,7 @@ function check_vector(M::ProbabilitySimplex, p, X; kwargs...)
     return nothing
 end
 
-decorated_manifold(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
-
-default_metric_dispatch(::ProbabilitySimplex, ::FisherRaoMetric) = Val(true)
+get_embedding(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
 
 @doc raw"""
     distance(M,p,q)
@@ -174,6 +143,9 @@ function distance(::ProbabilitySimplex, p, q)
     end
     return 2 * acos(sumsqrt)
 end
+
+embed(::ProbabilitySimplex, p) = p
+embed(::ProbabilitySimplex, p, X) = X
 
 @doc raw"""
     exp(M::ProbabilitySimplex,p,X)
@@ -211,21 +183,11 @@ function injectivity_radius(::ProbabilitySimplex{n}, p) where {n}
     s = sum(p) - p[i]
     return 2 * acos(sqrt(s))
 end
-function injectivity_radius(M::ProbabilitySimplex, p, ::ExponentialRetraction)
+function injectivity_radius(M::ProbabilitySimplex, p, ::AbstractRetractionMethod)
     return injectivity_radius(M, p)
 end
-injectivity_radius(M::ProbabilitySimplex, p, ::SoftmaxRetraction) = injectivity_radius(M, p)
 injectivity_radius(M::ProbabilitySimplex) = 0
-injectivity_radius(M::ProbabilitySimplex, ::SoftmaxRetraction) = 0
-injectivity_radius(M::ProbabilitySimplex, ::ExponentialRetraction) = 0
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::ProbabilitySimplex,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
+injectivity_radius(M::ProbabilitySimplex, ::AbstractRetractionMethod) = 0
 
 @doc raw"""
     inner(M::ProbabilitySimplex,p,X,Y)
@@ -255,13 +217,7 @@ where $\mathbb{1}^{m,n}$ is the size `(m,n)` matrix containing ones, and $\log$ 
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
-function inverse_retract!(
-    ::ProbabilitySimplex{n},
-    X,
-    p,
-    q,
-    ::SoftmaxInverseRetraction,
-) where {n}
+function inverse_retract_softmax!(::ProbabilitySimplex{n}, X, p, q) where {n}
     X .= log.(q) .- log.(p)
     meanlogdiff = mean(X)
     X .-= meanlogdiff
@@ -316,15 +272,7 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::ProbabilitySimplex, ::Any...)
 
-function Statistics.mean!(
-    M::ProbabilitySimplex,
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-)
-    return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
-end
+default_estimation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
 
 @doc raw"""
     project(M::ProbabilitySimplex, p, Y)
@@ -392,7 +340,7 @@ where multiplication, exponentiation and division are meant elementwise.
 """
 retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxRetraction)
 
-function retract!(::ProbabilitySimplex, q, p, X, ::SoftmaxRetraction)
+function retract_softmax!(::ProbabilitySimplex, q, p, X)
     s = zero(eltype(q))
     @inbounds for i in eachindex(q, p, X)
         q[i] = p[i] * exp(X[i])

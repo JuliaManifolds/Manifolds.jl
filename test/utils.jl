@@ -5,14 +5,13 @@ const TEST_STATIC_SIZED = false
 using Manifolds
 using ManifoldsBase
 using ManifoldsBase: number_of_coordinates
+import ManifoldsBase: active_traits, merge_traits
 
 using LinearAlgebra
 using Distributions
 using DoubleFloats
-using ForwardDiff
 using Quaternions
 using Random
-using ReverseDiff
 using StaticArrays
 using Statistics
 using StatsBase
@@ -43,6 +42,6 @@ end
 function has_type_in_signature(sig, T::Type)
     return any(map(Base.unwrap_unionall(sig.sig).parameters) do x
         xw = Base.rewrap_unionall(x, sig.sig)
-        return xw <: T
+        return (xw isa Type ? xw : xw.T) <: T
     end)
 end

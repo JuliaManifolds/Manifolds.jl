@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType}
+    SymmetricPositiveDefinite{N} <: AbstractDecoratorManifold{𝔽}
 
 The manifold of symmetric positive definite matrices, i.e.
 
@@ -26,9 +26,13 @@ i.e. the set of symmetric matrices,
 
 generates the manifold $\mathcal P(n) \subset ℝ^{n × n}$
 """
-struct SymmetricPositiveDefinite{N} <: AbstractEmbeddedManifold{ℝ,DefaultEmbeddingType} end
+struct SymmetricPositiveDefinite{N} <: AbstractDecoratorManifold{ℝ} end
 
 SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
+
+function active_traits(f, ::SymmetricPositiveDefinite, args...)
+    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(LinearAffineMetric()))
+end
 
 @doc raw"""
     check_point(M::SymmetricPositiveDefinite, p; kwargs...)
@@ -38,8 +42,6 @@ of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the `kwargs...`.
 """
 function check_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
             norm(p - transpose(p)),
@@ -65,15 +67,6 @@ Lie group.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
         return DomainError(
             X,
@@ -83,9 +76,12 @@ function check_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N
     return nothing
 end
 
-function decorated_manifold(M::SymmetricPositiveDefinite)
+function get_embedding(M::SymmetricPositiveDefinite)
     return Euclidean(representation_size(M)...; field=ℝ)
 end
+
+embed(::SymmetricPositiveDefinite, p) = p
+embed(::SymmetricPositiveDefinite, p, X) = X
 
 @doc raw"""
     injectivity_radius(M::SymmetricPositiveDefinite[, p])
@@ -97,17 +93,9 @@ Since `M` is a Hadamard manifold with respect to the [`LinearAffineMetric`](@ref
 [`LogCholeskyMetric`](@ref), the injectivity radius is globally $∞$.
 """
 injectivity_radius(::SymmetricPositiveDefinite) = Inf
-injectivity_radius(::SymmetricPositiveDefinite, ::ExponentialRetraction) = Inf
-injectivity_radius(::SymmetricPositiveDefinite, ::Any) = Inf
-injectivity_radius(::SymmetricPositiveDefinite, ::Any, ::ExponentialRetraction) = Inf
-eval(
-    quote
-        @invoke_maker 1 AbstractManifold injectivity_radius(
-            M::SymmetricPositiveDefinite,
-            rm::AbstractRetractionMethod,
-        )
-    end,
-)
+injectivity_radius(::SymmetricPositiveDefinite, p) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, ::AbstractRetractionMethod) = Inf
+injectivity_radius(::SymmetricPositiveDefinite, p, ::AbstractRetractionMethod) = Inf
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)
@@ -136,21 +124,15 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::SymmetricPositiveDefinite, ::Any)
 
-function Statistics.mean!(
-    M::SymmetricPositiveDefinite,
-    p,
-    x::AbstractVector,
-    w::AbstractVector;
-    kwargs...,
-)
-    return mean!(M, p, x, w, GeodesicInterpolation(); kwargs...)
+function default_estimation_method(::SymmetricPositiveDefinite, ::typeof(mean))
+    return GeodesicInterpolation()
 end
 
 @doc raw"""
     project(M::SymmetricPositiveDefinite, p, X)
 
 project a matrix from the embedding onto the tangent space $T_p\mathcal P(n)$ of the
-[SymmetricPositiveDefinite](@ref) matrices, i.e. the set of symmetric matrices.
+[`SymmetricPositiveDefinite`](@ref) matrices, i.e. the set of symmetric matrices.
 """
 project(::SymmetricPositiveDefinite, p, X)
 

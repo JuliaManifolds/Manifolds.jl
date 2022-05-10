@@ -1,7 +1,7 @@
 @doc raw"""
-    SkewHermitianMatrices{n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
+    SkewHermitianMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](@ref) $ \operatorname{SkewHerm}(n)$ consisting of the real- or
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{SkewHerm}(n)$ consisting of the real- or
 complex-valued skew-hermitian matrices of size ``n × n``, i.e. the set
 
 ````math
@@ -22,8 +22,7 @@ which is also reflected in the
 
 Generate the manifold of ``n × n`` skew-hermitian matrices.
 """
-struct SkewHermitianMatrices{n,𝔽} <:
-       AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
+struct SkewHermitianMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ)
     return SkewHermitianMatrices{n,field}()
@@ -44,6 +43,10 @@ const SkewSymmetricMatrices{n} = SkewHermitianMatrices{n,ℝ}
 SkewSymmetricMatrices(n::Int) = SkewSymmetricMatrices{n}()
 @deprecate SkewSymmetricMatrices(n::Int, 𝔽) SkewHermitianMatrices(n, 𝔽)
 
+function active_traits(f, ::SkewHermitianMatrices, args...)
+    return merge_traits(IsEmbeddedSubmanifold())
+end
+
 function allocation_promotion_function(
     ::SkewHermitianMatrices{<:Any,ℂ},
     ::typeof(get_vector),
@@ -57,13 +60,11 @@ end
 
 Check whether `p` is a valid manifold point on the [`SkewHermitianMatrices`](@ref) `M`, i.e.
 whether `p` is a skew-hermitian matrix of size `(n,n)` with values from the corresponding
-[`AbstractNumbers`](@ref) `𝔽`.
+[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) `𝔽`.
 
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
 function check_point(M::SkewHermitianMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
-    mpv = check_point(decorated_manifold(M), p; kwargs...)
-    mpv === nothing || return mpv
     if !isapprox(p, -p'; kwargs...)
         return DomainError(
             norm(p + p'),
@@ -78,14 +79,12 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SkewHermitianMatrices`](@ref) `M`, i.e. `X` must be a skew-hermitian matrix of size `(n,n)`
-and its values have to be from the correct [`AbstractNumbers`](@ref).
+and its values have to be from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
 The tolerance for the skew-symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(M::SkewHermitianMatrices, p, X; kwargs...)
     return check_point(M, X; kwargs...)  # manifold is its own tangent space
 end
-
-decorated_manifold(M::SkewHermitianMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
 
 function get_basis(M::SkewHermitianMatrices, p, B::DiagonalizingOrthonormalBasis)
     Ξ = get_basis(M, p, DefaultOrthonormalBasis()).data
@@ -93,12 +92,12 @@ function get_basis(M::SkewHermitianMatrices, p, B::DiagonalizingOrthonormalBasis
     return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::SkewSymmetricMatrices{N},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -111,12 +110,12 @@ function get_coordinates!(
     end
     return Y
 end
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::SkewHermitianMatrices{N,ℂ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
+    ::ComplexNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -136,12 +135,14 @@ function get_coordinates!(
     return Y
 end
 
-function get_vector!(
+get_embedding(::SkewHermitianMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
+
+function get_vector_orthonormal!(
     M::SkewSymmetricMatrices{N},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -157,12 +158,12 @@ function get_vector!(
     end
     return Y
 end
-function get_vector!(
+function get_vector_orthonormal!(
     M::SkewHermitianMatrices{N,ℂ},
     Y,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℂ,TangentSpaceType},
+    ::ComplexNumbers,
 ) where {N}
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -191,7 +192,7 @@ system `𝔽`, i.e.
 \dim \mathrm{SkewHerm}(n,ℝ) = \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,
 ````
 
-where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@ref) of ``𝔽``. The first term corresponds to
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of ``𝔽``. The first term corresponds to
 only the upper triangular elements of the matrix being unique, and the second term
 corresponds to the constraint that the real part of the diagonal be zero.
 """
@@ -216,7 +217,7 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 """
 project(::SkewHermitianMatrices, ::Any)
 
-function project!(M::SkewHermitianMatrices, q, p)
+function project!(::SkewHermitianMatrices, q, p)
     q .= (p .- p') ./ 2
     return q
 end
@@ -235,6 +236,8 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 project(::SkewHermitianMatrices, ::Any, ::Any)
 
 project!(M::SkewHermitianMatrices, Y, p, X) = project!(M, Y, X)
+
+representation_size(::SkewHermitianMatrices{N}) where {N} = (N, N)
 
 function Base.show(io::IO, ::SkewHermitianMatrices{n,F}) where {n,F}
     return print(io, "SkewHermitianMatrices($(n), $(F))")

@@ -1,7 +1,5 @@
 include("../utils.jl")
 
-using Manifolds: default_metric_dispatch
-
 @testset "Stiefel" begin
     @testset "Real" begin
         M = Stiefel(3, 2)
@@ -9,14 +7,23 @@ using Manifolds: default_metric_dispatch
         @testset "Basics" begin
             @test repr(M) == "Stiefel(3, 2, ℝ)"
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            @test (@inferred default_metric_dispatch(M2)) === Val(true)
+            @test is_default_metric(M, EuclideanMetric())
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
             base_manifold(M) === M
-            @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
-            @test_throws DomainError is_point(M, 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
+            @test_throws ManifoldDomainError is_point(
+                M,
+                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
+                true,
+            )
             @test !is_vector(M, x, [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_vector(M, x, 1 * im * zero_vector(M, x), true)
+            @test_throws ManifoldDomainError is_vector(
+                M,
+                x,
+                1 * im * zero_vector(M, x),
+                true,
+            )
         end
         @testset "Embedding and Projection" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -87,7 +94,7 @@ using Manifolds: default_metric_dispatch
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
-            @test_throws ErrorException distance(M, x, y)
+            @test_throws MethodError distance(M, x, y)
             @test isapprox(
                 M,
                 retract(
@@ -104,7 +111,7 @@ using Manifolds: default_metric_dispatch
             @test !is_point(M, 2 * x)
             @test_throws DomainError !is_point(M, 2 * x, true)
             @test !is_vector(M, 2 * x, v)
-            @test_throws DomainError !is_vector(M, 2 * x, v, true)
+            @test_throws ManifoldDomainError !is_vector(M, 2 * x, v, true)
             @test !is_vector(M, x, y)
             @test_throws DomainError is_vector(M, x, y, true)
             test_manifold(
@@ -119,8 +126,6 @@ using Manifolds: default_metric_dispatch
                 test_project_tangent=true,
                 test_default_vector_transport=false,
                 point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vee_hat=false,
                 projection_atol_multiplier=15.0,
                 retraction_atol_multiplier=10.0,
@@ -136,8 +141,8 @@ using Manifolds: default_metric_dispatch
                     QRInverseRetraction(),
                 ],
                 vector_transport_methods=[
-                    DifferentiatedRetractionVectorTransport{PolarRetraction}(),
-                    DifferentiatedRetractionVectorTransport{QRRetraction}(),
+                    DifferentiatedRetractionVectorTransport(PolarRetraction()),
+                    DifferentiatedRetractionVectorTransport(QRRetraction()),
                     ProjectionTransport(),
                 ],
                 vector_transport_retractions=[
@@ -201,7 +206,7 @@ using Manifolds: default_metric_dispatch
             @test !is_point(M, 2 * x)
             @test_throws DomainError !is_point(M, 2 * x, true)
             @test !is_vector(M, 2 * x, v)
-            @test_throws DomainError !is_vector(M, 2 * x, v, true)
+            @test_throws ManifoldDomainError !is_vector(M, 2 * x, v, true)
             @test !is_vector(M, x, y)
             @test_throws DomainError is_vector(M, x, y, true)
             test_manifold(
@@ -213,8 +218,6 @@ using Manifolds: default_metric_dispatch
                 test_is_tangent=true,
                 test_project_tangent=true,
                 test_default_vector_transport=false,
-                test_forward_diff=false,
-                test_reverse_diff=false,
                 test_vee_hat=false,
                 projection_atol_multiplier=15.0,
                 retraction_atol_multiplier=10.0,
@@ -225,8 +228,8 @@ using Manifolds: default_metric_dispatch
                     QRInverseRetraction(),
                 ],
                 vector_transport_methods=[
-                    DifferentiatedRetractionVectorTransport{PolarRetraction}(),
-                    DifferentiatedRetractionVectorTransport{QRRetraction}(),
+                    DifferentiatedRetractionVectorTransport(PolarRetraction()),
+                    DifferentiatedRetractionVectorTransport(QRRetraction()),
                     ProjectionTransport(),
                 ],
                 vector_transport_retractions=[
@@ -289,7 +292,7 @@ using Manifolds: default_metric_dispatch
             p,
             X,
             X,
-            DifferentiatedRetractionVectorTransport{CayleyRetraction}(),
+            DifferentiatedRetractionVectorTransport(CayleyRetraction()),
         )
         @test is_vector(M, q1, Y2; atol=10^-15)
         r2 = PadeRetraction(2)

@@ -24,12 +24,7 @@ include("../utils.jl")
         @test incident_log(N, x) == [x[2] - x[1], x[1] - x[2] + x[3] - x[2], x[2] - x[3]]
 
         pts = [x, y, z]
-        test_manifold(
-            N,
-            pts;
-            test_representation_size=false,
-            test_reverse_diff=false, #VERSION > v"1.2",
-        )
+        test_manifold(N, pts; test_representation_size=false)
         @test sprint(show, "text/plain", N) == """
         GraphManifold
         Graph:
@@ -51,7 +46,6 @@ include("../utils.jl")
             NE,
             [x[1:2], y[1:2], z[1:2]];
             test_representation_size=false,
-            test_reverse_diff=false, #VERSION > v"1.2",
             test_inplace=true,
         )
         @test sprint(show, "text/plain", NE) == """

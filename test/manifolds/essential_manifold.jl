@@ -20,6 +20,7 @@ include("../utils.jl")
         np2 = [nr, nr]
         np3 = [r1, r2, r3]
         @test !is_point(M, r1)
+        # first two components of r1 are not rotations
         @test_throws DomainError is_point(M, r1, true)
         @test_throws DomainError is_point(M, np3, true)
         @test is_point(M, p1)
@@ -42,8 +43,6 @@ include("../utils.jl")
         test_manifold(
             M,
             [p1, p2, p3],
-            test_forward_diff=false,
-            test_reverse_diff=false,
             test_vector_spaces=true,
             test_project_point=true,
             projection_atol_multiplier=10,
@@ -55,14 +54,13 @@ include("../utils.jl")
             mid_point12=nothing,
             exp_log_atol_multiplier=4,
             test_inplace=true,
+            parallel_transport=true,
         )
     end
     @testset "Unsigned Essential" begin
         test_manifold(
             EssentialManifold(false),
             [p1, p2, p3],
-            test_forward_diff=false,
-            test_reverse_diff=false,
             test_vector_spaces=true,
             test_project_point=true,
             projection_atol_multiplier=10,
@@ -73,6 +71,7 @@ include("../utils.jl")
             test_exp_log=true,
             mid_point12=nothing,
             exp_log_atol_multiplier=4,
+            parallel_transport=true,
         )
     end
 end

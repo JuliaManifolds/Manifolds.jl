@@ -69,12 +69,6 @@ Check whether the matrix is a valid point on the [`EssentialManifold`](@ref) `M`
 i.e. a 2-element array containing SO(3) matrices.
 """
 function check_point(M::EssentialManifold, p; kwargs...)
-    if length(p) != 2
-        return DomainError(
-            length(p),
-            "The point $(p) does not lie on $M, since it does not contain exactly two elements.",
-        )
-    end
     return check_point(
         PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
         p;
@@ -89,12 +83,6 @@ Check whether `X` is a tangent vector to manifold point `p` on the [`EssentialMa
 i.e. `X` has to be a 2-element array of `3`-by-`3` skew-symmetric matrices.
 """
 function check_vector(M::EssentialManifold, p, X; kwargs...)
-    if length(X) != 2
-        return DomainError(
-            length(X),
-            "$(X) is not a tangent vector to the manifold $M, since it does not contain exactly two elements.",
-        )
-    end
     return check_vector(
         PowerManifold(M.manifold, NestedPowerRepresentation(), 2),
         p,
@@ -137,11 +125,6 @@ Compute the exponential map on the [`EssentialManifold`](@ref) from `p` into dir
 where $\tilde X$ is the horizontal lift of $X$[^TronDaniilidis2017].
 """
 exp(::EssentialManifold, ::Any...)
-
-function exp!(M::EssentialManifold, q, p, X)
-    exp!.(Ref(M.manifold), q, p, X)
-    return q
-end
 
 get_iterator(::EssentialManifold) = Base.OneTo(2)
 
@@ -416,6 +399,10 @@ function manifold_dimension(::EssentialManifold)
     return 5
 end
 
+function power_dimensions(::EssentialManifold)
+    return (2,)
+end
+
 @doc raw"""
     project(M::EssentialManifold, p, X)
 
@@ -453,36 +440,27 @@ function Base.show(io::IO, M::EssentialManifold)
     return print(io, "EssentialManifold($(M.is_signed))")
 end
 
-function vector_transport_direction(M::EssentialManifold, p, X, d)
-    return vector_transport_direction(M, p, X, d, ParallelTransport())
+function parallel_transport_direction(M::EssentialManifold, p, X, d)
+    return parallel_transport_to(M, p, X, exp(M, p, d))
 end
-
-function vector_transport_direction!(M::EssentialManifold, Y, p, X, d)
-    return vector_transport_direction!(M, Y, p, X, d, ParallelTransport())
-end
-
-function vector_transport_direction!(M::EssentialManifold, Y, p, X, d, m::ParallelTransport)
-    y = exp(M, p, d)
-    return vector_transport_to!(M, Y, p, X, y, m)
+function parallel_transport_direction!(M::EssentialManifold, Y, p, X, d)
+    parallel_transport_to!(M, Y, p, X, exp(M, p, d))
+    return Y
 end
 
 @doc raw"""
-    vector_transport_to(M::EssentialManifold, p, X, q, method::ParallelTransport)
+    parallel_transport_to(M::EssentialManifold, p, X, q)
 
 Compute the vector transport of the tangent vector `X` at `p` to `q` on the
 [`EssentialManifold`](@ref) `M` using left translation of the ambient group.
 """
-vector_transport_to(::EssentialManifold, ::Any, ::Any, ::Any, ::ParallelTransport)
-
-function vector_transport_to(M::EssentialManifold, p, X, q)
-    return vector_transport_to(M, p, X, q, ParallelTransport())
+function parallel_transport_to(::EssentialManifold, p, X, q)
+    # group operation in the ambient group
+    pq = [qe' * pe for (pe, qe) in zip(p, q)]
+    # left translation
+    return [pqe * Xe * pqe' for (pqe, Xe) in zip(pq, X)]
 end
-
-function vector_transport_to!(M::EssentialManifold, Y, p, X, q)
-    return vector_transport_to!(M, Y, p, X, q, ParallelTransport())
-end
-
-function vector_transport_to!(::EssentialManifold, Y, p, X, q, ::ParallelTransport)
+function parallel_transport_to!(::EssentialManifold, Y, p, X, q)
     # group operation in the ambient group
     pq = [qe' * pe for (pe, qe) in zip(p, q)]
     # left translation
@@ -499,7 +477,6 @@ Project `X` onto the vertical space $T_{\text{vp}}\text{SO}(3)^2$ with
 ````
 where $e_z$ is the third unit vector, $X_i ∈ T_{p}\text{SO}(3)$ for $i=1,2,$ and it holds $R_i = R_0 R'_i, i=1,2,$ where $R'_i$ is part of the
 pose of camera $i$ $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$ [^TronDaniilidis2017].
-
 """
 function vert_proj(M::EssentialManifold, p, X)
     return sum(vert_proj.(Ref(M.manifold), p, X))

@@ -19,13 +19,18 @@ include("../utils.jl")
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
         @test check_point(M, B_sym) === nothing
         @test_throws DomainError is_point(M, A, true)
-        @test_throws DomainError is_point(M, C, true)
-        @test_throws DomainError is_point(M, D, true)
+        @test_throws ManifoldDomainError is_point(M, C, true)
+        @test_throws ManifoldDomainError is_point(M, D, true) #embedding changes type
         @test check_vector(M, B_sym, B_sym) === nothing
         @test_throws DomainError is_vector(M, B_sym, A, true)
-        @test_throws DomainError is_vector(M, A, B_sym, true)
-        @test_throws DomainError is_vector(M, B_sym, D, true)
-        @test_throws DomainError is_vector(M, B_sym, 1 * im * zero_vector(M, B_sym), true)
+        @test_throws ManifoldDomainError is_vector(M, A, B_sym, true)
+        @test_throws ManifoldDomainError is_vector(M, B_sym, D, true)
+        @test_throws ManifoldDomainError is_vector(
+            M,
+            B_sym,
+            1 * im * zero_vector(M, B_sym),
+            true,
+        )
         @test manifold_dimension(M) == 6
         @test manifold_dimension(M_complex) == 9
         @test A_sym2 == project!(M, A_sym, A_sym)
@@ -48,7 +53,6 @@ include("../utils.jl")
                 M,
                 pts,
                 test_injectivity_radius=false,
-                test_reverse_diff=isa(T, Vector),
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,
@@ -64,7 +68,6 @@ include("../utils.jl")
                 M_complex,
                 pts,
                 test_injectivity_radius=false,
-                test_reverse_diff=isa(T, Vector),
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,

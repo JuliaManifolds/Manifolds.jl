@@ -29,13 +29,22 @@ using Manifolds: connection
     end
 
     @testset "Parallel transport" begin
+        Y = similar(X)
         @test isapprox(SO3, q, X, vector_transport_to(SO3minus, SO3e, X, q))
+        @test isapprox(SO3, q, X, vector_transport_to!(SO3minus, Y, SO3e, X, q))
         @test isapprox(SO3, q, q * X / q, vector_transport_to(SO3plus, SO3e, X, q))
+        @test isapprox(SO3, q, q * X / q, vector_transport_to!(SO3plus, Y, SO3e, X, q))
         @test isapprox(
             SO3,
             q,
             vector_transport_to(SO3, e, X, q),
             vector_transport_to(SO3zero, SO3e, X, q),
+        )
+        @test isapprox(
+            SO3,
+            q,
+            vector_transport_to(SO3, e, X, q),
+            vector_transport_to!(SO3zero, Y, SO3e, X, q),
         )
     end
 end

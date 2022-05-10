@@ -29,7 +29,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test sprint(show, TB) == "TangentBundle(Sphere(2, ℝ))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2 * manifold_dimension(M)
-        @test representation_size(TB) == (6,)
+        @test representation_size(TB) === nothing
         CTB = CotangentBundle(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
         @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
@@ -58,8 +58,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 TB,
                 pts_tb,
                 test_injectivity_radius=false,
-                test_reverse_diff=isa(T, Vector),
-                test_forward_diff=isa(T, Vector),
                 test_tangent_vector_broadcasting=false,
                 test_vee_hat=true,
                 test_project_tangent=true,
@@ -69,6 +67,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 basis_types_vecs=basis_types,
                 projection_atol_multiplier=4,
                 test_inplace=true,
+                test_representation_size=false,
                 test_rand_point=true,
                 test_rand_tvector=true,
             )
@@ -87,8 +86,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 TpM,
                 pts_TpM,
                 test_injectivity_radius=true,
-                test_reverse_diff=isa(T, Vector),
-                test_forward_diff=isa(T, Vector),
                 test_tangent_vector_broadcasting=true,
                 test_vee_hat=false,
                 test_project_tangent=true,
@@ -158,14 +155,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws ErrorException Manifolds.project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws ErrorException zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
         @test_throws MethodError vector_space_dimension(vbf)
-        a = fill(0.0, 6)
-        @test_throws ErrorException get_coordinates!(
-            TangentBundle(M),
-            a,
-            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 0.0]),
-            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0, 1.0]),
-            CachedBasis(DefaultOrthonormalBasis(), []),
-        )
     end
 
     @testset "log and exp on tangent bundle for power and product manifolds" begin
@@ -186,7 +175,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         )
         @test isapprox(N2, p2_2, exp(N2, p1_2, log(N2, p1_2, p2_2)))
 
-        ppt = PowerVectorTransport(ParallelTransport())
+        ppt = ParallelTransport()
         tbvt = Manifolds.VectorBundleVectorTransport(ppt, ppt)
         @test TangentBundle(M, tbvt).vector_transport === tbvt
         @test CotangentBundle(M, tbvt).vector_transport === tbvt

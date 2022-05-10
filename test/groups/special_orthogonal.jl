@@ -7,20 +7,7 @@ include("group_utils.jl")
     M = base_manifold(G)
     @test M === Rotations(3)
     x = Matrix(I, 3, 3)
-
-    @test (@inferred invariant_metric_dispatch(G, LeftAction())) === Val(true)
-    @test (@inferred invariant_metric_dispatch(G, RightAction())) === Val(true)
-    @test (@inferred Manifolds.biinvariant_metric_dispatch(G)) === Val(true)
-    @test is_default_metric(MetricManifold(G, EuclideanMetric())) === true
-    @test is_default_metric(
-        MetricManifold(G, InvariantMetric(EuclideanMetric(), LeftAction())),
-    ) === true
-    @test is_default_metric(
-        MetricManifold(G, InvariantMetric(EuclideanMetric(), RightAction())),
-    ) === true
-    @test Manifolds.default_metric_dispatch(G, EuclideanMetric()) === Val{true}()
-    @test Manifolds.default_metric_dispatch(MetricManifold(G, EuclideanMetric())) ===
-          Val{true}()
+    @test is_default_metric(MetricManifold(G, EuclideanMetric()))
 
     types = [Matrix{Float64}]
     ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
@@ -60,9 +47,6 @@ include("group_utils.jl")
 
     @testset "Decorator forwards to group" begin
         DM = NotImplementedGroupDecorator(G)
-        @test (@inferred Manifolds.decorator_group_dispatch(DM)) === Val(true)
-        @test Manifolds.is_group_decorator(DM)
-        @test base_group(DM) === G
         test_group(DM, pts, vpts, vpts; test_diff=true)
     end
 
@@ -84,7 +68,6 @@ include("group_utils.jl")
         test_manifold(
             G,
             pts;
-            test_reverse_diff=false,
             test_injectivity_radius=false,
             test_project_tangent=true,
             test_musical_isomorphisms=false,

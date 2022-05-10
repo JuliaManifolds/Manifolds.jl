@@ -1,5 +1,5 @@
 @doc raw"""
-    CenteredMatrices{m,n,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding}
+    CenteredMatrices{m,n,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The manifold of $m × n$ real-valued or complex-valued matrices whose columns sum to zero, i.e.
 ````math
@@ -12,11 +12,13 @@ where $𝔽 ∈ \{ℝ,ℂ\}$.
 
 Generate the manifold of `m`-by-`n` (`field`-valued) matrices whose columns sum to zero.
 """
-struct CenteredMatrices{M,N,𝔽} <: AbstractEmbeddedManifold{𝔽,TransparentIsometricEmbedding} end
+struct CenteredMatrices{M,N,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers=ℝ)
     return CenteredMatrices{m,n,field}()
 end
+
+active_traits(f, ::CenteredMatrices, args...) = merge_traits(IsEmbeddedSubmanifold())
 
 @doc raw"""
     check_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...)
@@ -28,8 +30,6 @@ zero.
 The tolerance for the column sums of `p` can be set using `kwargs...`.
 """
 function check_point(M::CenteredMatrices{m,n,𝔽}, p; kwargs...) where {m,n,𝔽}
-    mpv = invoke(check_point, Tuple{supertype(typeof(M)),typeof(p)}, M, p; kwargs...)
-    mpv === nothing || return mpv
     if !isapprox(sum(p, dims=1), zeros(1, n); kwargs...)
         return DomainError(
             p,
@@ -46,19 +46,10 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`CenteredMatrices`](@ref) `M`, i.e. that `X` is a matrix of size `(m, n)` whose columns
-sum to zero and its values are from the correct [`AbstractNumbers`](@ref).
+sum to zero and its values are from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
 The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(M::CenteredMatrices{m,n,𝔽}, p, X; kwargs...) where {m,n,𝔽}
-    mpv = invoke(
-        check_vector,
-        Tuple{supertype(typeof(M)),typeof(p),typeof(X)},
-        M,
-        p,
-        X;
-        kwargs...,
-    )
-    mpv === nothing || return mpv
     if !isapprox(sum(X, dims=1), zeros(1, n); kwargs...)
         return DomainError(
             X,
@@ -68,7 +59,10 @@ function check_vector(M::CenteredMatrices{m,n,𝔽}, p, X; kwargs...) where {m,n
     return nothing
 end
 
-decorated_manifold(M::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = Euclidean(m, n; field=𝔽)
+embed(::CenteredMatrices, p) = p
+embed(::CenteredMatrices, p, X) = X
+
+get_embedding(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = Euclidean(m, n; field=𝔽)
 
 @doc raw"""
     manifold_dimension(M::CenteredMatrices{m,n,𝔽})
@@ -79,7 +73,7 @@ Return the manifold dimension of the [`CenteredMatrices`](@ref) `m`-by-`n` matri
 ````math
 \dim(\mathcal M) = (m*n - n) \dim_ℝ 𝔽,
 ````
-where $\dim_ℝ 𝔽$ is the [`real_dimension`](@ref) of `𝔽`.
+where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽}
     return (m * n - n) * real_dimension(𝔽)
