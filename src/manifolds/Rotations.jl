@@ -235,6 +235,105 @@ function exp!(M::Rotations{4}, q, p, X)
     return copyto!(q, p * pinvq)
 end
 
+# from https://github.com/JuliaManifolds/Manifolds.jl/issues/453#issuecomment-1046057557
+function _get_tridiagonal_elements(trian)
+    N = size(trian, 1)
+    res = zeros(N)
+    down = true
+    for i in 1:N
+        if i == N && down
+            elem = 0
+        else
+            elem = trian[i + (down ? +1 : -1), i]
+        end
+        if elem ≈ 0
+            res[i] = 0
+        else
+            res[i] = elem
+            down = !down
+        end
+    end
+    return res
+end
+
+function _ev_diagonal(tridiagonal_elements, unitary, evec, evals, fill_at; i)
+    a = unitary[:, i]
+    b = unitary[:, i + 1]
+    evec[fill_at.x] = [-b a] * [a b]' ./ sqrt(2)
+    evals[fill_at.x] = 0
+    return fill_at.x += 1
+end
+
+function _ev_offdiagonal(tridiagonal_elements, unitary, evec, evals, fill_at; i, j)
+    a = unitary[:, i]
+    b = unitary[:, i + 1]
+    c = unitary[:, j]
+    d = unitary[:, j + 1]
+    ref = hcat(a, b, c, d)' ./ 2
+
+    evec[fill_at.x] = [-c -d a b] * ref
+    evals[fill_at.x] = (tridiagonal_elements[i] - tridiagonal_elements[j])^2 / 4
+    fill_at.x += 1
+    evec[fill_at.x] = [-c d a -b] * ref
+    evals[fill_at.x] = (tridiagonal_elements[i] + tridiagonal_elements[j])^2 / 4
+    fill_at.x += 1
+    evec[fill_at.x] = [-d -c b a] * ref
+    evals[fill_at.x] = (tridiagonal_elements[i] + tridiagonal_elements[j])^2 / 4
+    fill_at.x += 1
+    evec[fill_at.x] = [d -c b -a] * ref
+    evals[fill_at.x] = (tridiagonal_elements[i] - tridiagonal_elements[j])^2 / 4
+    return fill_at.x += 1
+end
+
+function _ev_zero(tridiagonal_elements, unitary, evec, evals, fill_at; i)
+    N = size(unitary, 1)
+    ref = unitary[:, i]
+    for idx in 1:N
+        if idx != i
+            rup = ref * unitary[:, idx]'
+            evec[fill_at.x] = (rup - rup') ./ sqrt(2)
+            evals[fill_at.x] = tridiagonal_elements[idx]^2 / 4
+            fill_at.x += 1
+        end
+    end
+    return (values=evals, vectors=evec)
+end
+
+function get_basis_diagonalizing(
+    M::Rotations{N},
+    p,
+    B::DiagonalizingOrthonormalBasis{ℝ},
+) where {N}
+    decomp = schur(B.frame_direction)
+
+    trian_elem = _get_tridiagonal_elements(decomp.T)
+    unitary = decomp.Z
+    evec = Vector{typeof(B.frame_direction)}(undef, manifold_dimension(M))
+    evals = Vector{eltype(B.frame_direction)}(undef, manifold_dimension(M))
+    i = 1
+    fill_at = Ref(1)
+    while i <= N
+        if trian_elem[i] == 0
+            evs = _ev_zero(trian_elem, unitary, evec, evals, fill_at; i=i)
+            i += 1
+        else
+            evs = _ev_diagonal(trian_elem, unitary, evec, evals, fill_at, i=i)
+            j = 1
+            while j < i
+                if trian_elem[j] == 0
+                    j += 1
+                else
+                    evs =
+                        _ev_offdiagonal(trian_elem, unitary, evec, evals, fill_at, i=i, j=j)
+                    j += 2
+                end
+            end
+            i += 2
+        end
+    end
+    return CachedBasis(B, evals, evec)
+end
+
 @doc raw"""
     get_coordinates(M::Rotations, p, X)
 
