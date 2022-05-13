@@ -119,7 +119,7 @@ include("../utils.jl")
                 point_distributions=[ptd],
                 tvector_distributions=[tvd],
                 basis_types_to_from=basis_types,
-                basis_types_vecs=n == 3 ? (diag_basis_1, diag_basis_2) : (diag_basis_1,),
+                basis_types_vecs=(diag_basis_1, diag_basis_2),
                 exp_log_atol_multiplier=250,
                 retraction_atol_multiplier=12,
                 test_inplace=true,

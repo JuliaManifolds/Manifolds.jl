@@ -288,13 +288,11 @@ end
 function _ev_zero(tridiagonal_elements, unitary, evec, evals, fill_at; i)
     N = size(unitary, 1)
     ref = unitary[:, i]
-    for idx in 1:N
-        if idx != i
-            rup = ref * unitary[:, idx]'
-            evec[fill_at.x] = (rup - rup') ./ sqrt(2)
-            evals[fill_at.x] = tridiagonal_elements[idx]^2 / 4
-            fill_at.x += 1
-        end
+    for idx in 1:(i - 1)
+        rup = ref * unitary[:, idx]'
+        evec[fill_at.x] = (rup - rup') ./ sqrt(2)
+        evals[fill_at.x] = tridiagonal_elements[idx]^2 / 4
+        fill_at.x += 1
     end
     return (values=evals, vectors=evec)
 end
