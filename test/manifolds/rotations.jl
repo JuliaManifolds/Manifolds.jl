@@ -103,7 +103,17 @@ include("../utils.jl")
             ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             tvd = Manifolds.normal_tvector_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             pts = [rand(ptd) for _ in 1:3]
-            diag_basis_1 = DiagonalizingOrthonormalBasis(rand(SOn; vector_at=pts[1]))
+            diag_basis_1 = if n == 3
+                DiagonalizingOrthonormalBasis(
+                    [
+                        0.0 0.24800271831269094 0.30019597622794186
+                        -0.24800271831269094 0.0 -0.5902347224334308
+                        -0.30019597622794186 0.5902347224334308 0.0
+                    ],
+                )
+            else
+                DiagonalizingOrthonormalBasis(rand(SOn; vector_at=pts[1]))
+            end
             diag_basis_2 = DiagonalizingOrthonormalBasis(
                 hat(SOn, pts[1], [1.0, zeros(manifold_dimension(SOn) - 1)...]),
             )

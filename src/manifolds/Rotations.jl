@@ -303,6 +303,7 @@ function get_basis_diagonalizing(
     B::DiagonalizingOrthonormalBasis{ℝ},
 ) where {N}
     decomp = schur(B.frame_direction)
+    decomp = ordschur(decomp, map(v -> norm(v) > eps(eltype(p)), decomp.values))
 
     trian_elem = _get_tridiagonal_elements(decomp.T)
     unitary = decomp.Z
