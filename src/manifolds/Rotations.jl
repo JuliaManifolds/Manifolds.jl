@@ -319,13 +319,10 @@ function get_basis_diagonalizing(
             evs = _ev_diagonal(trian_elem, unitary, evec, evals, fill_at, i=i)
             j = 1
             while j < i
-                if trian_elem[j] == 0
-                    j += 1
-                else
-                    evs =
-                        _ev_offdiagonal(trian_elem, unitary, evec, evals, fill_at, i=i, j=j)
-                    j += 2
-                end
+                # the zero case should have been handled earlier
+                @assert trian_elem[j] != 0
+                evs = _ev_offdiagonal(trian_elem, unitary, evec, evals, fill_at, i=i, j=j)
+                j += 2
             end
             i += 2
         end
