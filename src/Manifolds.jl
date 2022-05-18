@@ -373,6 +373,7 @@ include("groups/special_linear.jl")
 include("groups/translation_group.jl")
 include("groups/special_orthogonal.jl")
 include("groups/circle_group.jl")
+include("groups/heisenberg.jl")
 
 include("groups/translation_action.jl")
 include("groups/rotation_action.jl")
@@ -456,6 +457,7 @@ export Euclidean,
     GeneralizedGrassmann,
     GeneralizedStiefel,
     Grassmann,
+    HeisenbergGroup,
     Hyperbolic,
     Lorentz,
     MultinomialDoubleStochastic,
