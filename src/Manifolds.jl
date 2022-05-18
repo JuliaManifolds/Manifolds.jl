@@ -338,6 +338,8 @@ include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
+include("manifolds/SymmetricPositiveDefiniteBuresWasserstein.jl")
+include("manifolds/SymmetricPositiveDefiniteGeneralizedBuresWasserstein.jl")
 include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
@@ -501,7 +503,7 @@ export AbstractPowerManifold,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
     PowerManifold
-export ProductManifold
+export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
@@ -517,8 +519,9 @@ export AbstractCartanSchoutenConnection,
 export AbstractMetric,
     RiemannianMetric,
     LorentzMetric,
-    EmbeddedManifold,
+    BuresWassersteinMetric,
     EuclideanMetric,
+    GeneralizedBuresWassersteinMetric,
     LinearAffineMetric,
     LogCholeskyMetric,
     LogEuclideanMetric,
