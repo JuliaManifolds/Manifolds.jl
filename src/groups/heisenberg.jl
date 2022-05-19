@@ -8,8 +8,8 @@ Heisenberg group `HeisenbergGroup(n)` is the group of ``(n+2) × (n+2)`` matrice
 \begin{bmatrix} 1 & \mathbf{a} & c \\
 \mathbf{0} & I_n & \mathbf{b} \\
 0 & \mathbf{0} & 1 \end{bmatrix}
-
 ```
+
 where ``I_n`` is the ``n×n`` unit matrix, ``\mathbf{a}`` is a row vector of length ``n``,
 ``\mathbf{b}`` is a column vector of length ``n`` and ``c`` is a real number.
 The group operation is matrix multiplication.
@@ -84,21 +84,30 @@ end
 embed(::HeisenbergGroup, p) = p
 embed(::HeisenbergGroup, p, X) = X
 
-function get_coordinates(
-    M::HeisenbergGroup{n},
-    p,
-    X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {n}
+@doc raw"""
+    get_coordinates(M::HeisenbergGroup, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+
+Get coordinates of tangent vector `X` at point `p` from the [`HeisenbergGroup`](@ref) `M`.
+Given a matrix
+```math
+\begin{bmatrix} 1 & \mathbf{a} & c \\
+\mathbf{0} & I_n & \mathbf{b} \\
+0 & \mathbf{0} & 1 \end{bmatrix}
+```
+the coordinates are concatenated vectors ``a``, ``b``, and number ``c``.
+"""
+get_coordinates(::HeisenbergGroup, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+
+function get_coordinates_orthonormal(M::HeisenbergGroup{n}, p, X, ::RealNumbers) where {n}
     return vcat(_heisenberg_a_view(M, X), _heisenberg_b_view(M, X), X[1, n + 2])
 end
 
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     M::HeisenbergGroup{n},
     Xⁱ,
     p,
     X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+    ::RealNumbers,
 ) where {n}
     Xⁱ[1:n] .= _heisenberg_a_view(M, X)
     Xⁱ[(n + 1):(2 * n)] .= _heisenberg_b_view(M, X)
@@ -108,12 +117,7 @@ end
 
 get_embedding(::HeisenbergGroup{n}) where {n} = Euclidean(n + 2, n + 2)
 
-function get_vector(
-    ::HeisenbergGroup{n},
-    p,
-    Xⁱ,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {n}
+function get_vector_orthonormal(::HeisenbergGroup{n}, p, Xⁱ, ::RealNumbers) where {n}
     return [
         0 Xⁱ[1:n] Xⁱ[2 * n + 1]
         zeros(n, n + 1) Xⁱ[(n + 1):(2 * n)]'
@@ -121,15 +125,10 @@ function get_vector(
     ]
 end
 
-function get_vector!(
-    ::HeisenbergGroup{n},
-    X,
-    p,
-    Xⁱ,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {n}
+function get_vector_orthonormal!(::HeisenbergGroup{n}, X, p, Xⁱ, ::RealNumbers) where {n}
+    fill!(X, 0)
     X[1, 2:(n + 1)] .= Xⁱ[1:n]
-    X[2:(n + 1), n + 2] .= Xⁱ[(n + 1):(2 * n)]'
+    X[2:(n + 1), n + 2] .= Xⁱ[(n + 1):(2 * n)]
     X[1, n + 2] = Xⁱ[2 * n + 1]
     return X
 end
