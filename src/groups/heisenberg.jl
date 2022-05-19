@@ -2,7 +2,7 @@
 @doc raw"""
     HeisenbergGroup{n} <: AbstractDecoratorManifold{ℝ}
 
-Heisenberg group `HeisenbergGroup(n)` is the group of ``(n+2) × (n+2)`` matrices
+Heisenberg group `HeisenbergGroup(n)` is the group of ``(n+2) × (n+2)`` matrices [^BinzPods2008]
 
 ```math
 \begin{bmatrix} 1 & \mathbf{a} & c \\
@@ -15,6 +15,10 @@ where ``I_n`` is the ``n×n`` unit matrix, ``\mathbf{a}`` is a row vector of len
 The group operation is matrix multiplication.
 
 The left-invariant metric on the manifold is used.
+
+[^BinzPods2008]:
+    > E. Binz and S. Pods, The Geometry of Heisenberg Groups: With Applications in Signal
+    > Theory, Optics, Quantization, and Field Quantization. American Mathematical Soc., 2008.
 """
 struct HeisenbergGroup{n} <: AbstractDecoratorManifold{ℝ} end
 
@@ -105,7 +109,7 @@ Given a matrix
 \mathbf{0} & I_n & \mathbf{b} \\
 0 & \mathbf{0} & 1 \end{bmatrix}
 ```
-the coordinates are concatenated vectors ``a``, ``b``, and number ``c``.
+the coordinates are concatenated vectors ``\mathbf{a}``, ``\mathbf{b}``, and number ``c``.
 """
 get_coordinates(::HeisenbergGroup, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
 
@@ -128,6 +132,19 @@ end
 
 get_embedding(::HeisenbergGroup{n}) where {n} = Euclidean(n + 2, n + 2)
 
+@doc raw"""
+    get_vector(M::HeisenbergGroup, p, c, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+
+Get tangent vector with coordinates `c` at point `p` from the [`HeisenbergGroup`](@ref) `M`.
+Given a vector of coordinates ``\begin{bmatrix}\mathbb{a} & \mathbb{b} & c\end{bmatrix}`` the tangent vector is equal to
+```math
+\begin{bmatrix} 1 & \mathbf{a} & c \\
+\mathbf{0} & I_n & \mathbf{b} \\
+0 & \mathbf{0} & 1 \end{bmatrix}
+```
+"""
+get_vector(M::HeisenbergGroup, p, c, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+
 function get_vector_orthonormal(::HeisenbergGroup{n}, p, Xⁱ, ::RealNumbers) where {n}
     return [
         0 Xⁱ[1:n] Xⁱ[2 * n + 1]
@@ -143,6 +160,23 @@ function get_vector_orthonormal!(::HeisenbergGroup{n}, X, p, Xⁱ, ::RealNumbers
     X[1, n + 2] = Xⁱ[2 * n + 1]
     return X
 end
+
+@doc raw"""
+    exp_lie(M::HeisenbergGroup, X)
+
+Lie group exponential for the [`HeisenbergGroup`](@ref) `M` of the vector `X`.
+The formula reads
+```math
+\exp\left(\begin{bmatrix} 0 & \mathbf{a} & c \\
+\mathbf{0} & 0_n & \mathbf{b} \\
+0 & \mathbf{0} & 0 \end{bmatrix}\right) = \begin{bmatrix} 1 & \mathbf{a} & c + \mathbf{a}⋅\mathbf{b}/2 \\
+\mathbf{0} & I_n & \mathbf{b} \\
+0 & \mathbf{0} & 1 \end{bmatrix}
+```
+where ``I_n`` is the ``n×n`` identity matrix, ``0_n`` is the ``n×n`` zero matrix
+and ``\mathbf{a}⋅\mathbf{b}`` is dot product of vectors.
+"""
+exp_lie(M::HeisenbergGroup, X)
 
 function exp_lie!(M::HeisenbergGroup{n}, q, X) where {n}
     copyto!(q, I)
@@ -196,6 +230,23 @@ function log!(G::HeisenbergGroup{n}, X, p, q) where {n}
     return X
 end
 
+@doc raw"""
+    log_lie(M::HeisenbergGroup, p)
+
+Lie group logarithm for the [`HeisenbergGroup`](@ref) `M` of the point `p`.
+The formula reads
+```math
+\log\left(\begin{bmatrix} 1 & \mathbf{a} & c \\
+\mathbf{0} & I_n & \mathbf{b} \\
+0 & \mathbf{0} & 1 \end{bmatrix}\right) = \begin{bmatrix} 0 & \mathbf{a} & c - \mathbf{a}⋅\mathbf{b}/2 \\
+\mathbf{0} & 0_n & \mathbf{b} \\
+0 & \mathbf{0} & 0 \end{bmatrix}
+```
+where ``I_n`` is the ``n×n`` identity matrix, ``0_n`` is the ``n×n`` zero matrix
+and ``\mathbf{a}⋅\mathbf{b}`` is dot product of vectors.
+"""
+log_lie(M::HeisenbergGroup, p)
+
 function log_lie!(M::HeisenbergGroup{n}, X, p) where {n}
     fill!(X, 0)
     view_a_X = _heisenberg_a_view(M, X)
@@ -217,6 +268,13 @@ parallel_transport_to(::HeisenbergGroup, p, X, q) = X
 
 parallel_transport_to!(::HeisenbergGroup, Y, p, X, q) = copyto!(Y, X)
 
+"""
+    project(M::HeisenbergGroup{n}, p)
+
+Project a matrix `p` in the Euclidean embedding onto the [`HeisenbergGroup`](@ref) `M`.
+Sets the diagonal elements to 1 and all non-diagonal elements except the first row and the
+last column to 0.
+"""
 function project(M::HeisenbergGroup{n}, p) where {n}
     return [
         1 p[1, 2:(n + 2)]'
@@ -224,6 +282,14 @@ function project(M::HeisenbergGroup{n}, p) where {n}
         zeros(1, n + 1) 1
     ]
 end
+"""
+    project(M::HeisenbergGroup{n}, p, X)
+
+Project a matrix `X` in the Euclidean embedding onto the Lie algebra of
+[`HeisenbergGroup`](@ref) `M`.
+Sets the diagonal elements to 0 and all non-diagonal elements except the first row and the
+last column to 0.
+"""
 function project(M::HeisenbergGroup{n}, p, X) where {n}
     return [
         0 X[1, 2:(n + 2)]'
