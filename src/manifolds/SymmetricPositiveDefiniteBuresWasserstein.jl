@@ -41,22 +41,22 @@ function change_representer!(
 end
 
 @doc raw"""
-    exp(::MatricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, X)
+    distance(::MatricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 
 Compute the distance with respect to the [`BuresWassersteinMetric`](@ref) on [`SymmetricPositiveDefinite`](@ref) matrices, i.e.
 
 ```math
-    d(p.q) = \operatorname{tr}(p) + \operatorname{tr}(p) + 2\operatorname{tr}(p^{\frac{1}{2}qp^{\frac{1}[2}).
+    d(p.q) = \bigl( \operatorname{tr}(p) + \operatorname{tr}(q) + 2\operatorname{tr}(p^{\frac{1}{2}qp^{\frac{1}[2}) \bigr)^\frac{1}{2},
 ```
+
+where the last trace can be simplified (by rotating the matrix products in the trace) to ``\operatorname{tr}(pq)``.
 """
 function distance(
     ::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric},
     p,
     q,
 )
-    psqrt = sqrt(p)
-    # real and sym for stability
-    return real(tr(p) + tr(q) + 2 * tr(Symmetric(psqrt * q * psqrt)))
+    return sqrt(tr(p) + tr(q) + 2 * sqrt(tr(q * p)))
 end
 
 @doc raw"""
@@ -115,6 +115,6 @@ where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``
 log(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 
 function loq!(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, X, p, q)
-    Y .= Symmetric(sqrt(p * q) + sqrt(q * p)) - 2 * p
-    return Y
+    X .= Symmetric(sqrt(p * q) + sqrt(q * p)) - 2 * p
+    return X
 end

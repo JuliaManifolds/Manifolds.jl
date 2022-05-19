@@ -154,6 +154,7 @@ import Base:
     transpose
 
 using Base.Iterators: repeated
+using Colors: RGBA
 using Distributions
 using Einsum: @einsum
 using HybridArrays
@@ -255,17 +256,17 @@ using ManifoldsBase:
     size_to_tuple,
     trait
 using Markdown: @doc_str
+using MatrixEquations: lyapc
 using Random
 using RecipesBase
 using RecipesBase: @recipe, @series
-using Colors: RGBA
+using RecursiveArrayTools: ArrayPartition
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
 using Statistics
 using StatsBase
 using StatsBase: AbstractWeights
-using RecursiveArrayTools: ArrayPartition
 
 include("utils.jl")
 
