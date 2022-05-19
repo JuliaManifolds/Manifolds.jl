@@ -18,15 +18,15 @@ it holds
 
 ```math
 ⟨X,Y⟩ = \operatorname{tr}(XY) = ⟨Z,Y⟩_{\mathrm{BW}}
-```
+```
 for all ``Y`` and hence we get
 ``Z``= 2(A+A^{\mathrm{T}})`` with ``A=Xp``.
 """
 change_representer(
     ::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric},
     ::EuclideanMetric,
-    ::Any,
-    ::Any,
+    p,
+    X,
 )
 
 function change_representer!(

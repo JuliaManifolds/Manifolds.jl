@@ -14,6 +14,43 @@ where the name also follows the mentioned preprint.
 struct GeneralizedBuresWassersteinMetric{T<:AbstractMatrix} <: RiemannianMetric
     M::T
 end
+function GeneralizedBuresWassersteinMetric(M::T) where {T<:AbstractMatrix}
+    return GeneralizedBuresWassersteinMetric{T}(M)
+end
+
+@doc raw"""
+    change_representer(M::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, E::EuclideanMetric, p, X)
+
+Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
+space at `p` with respect to the [`EuclideanMetric`](@ref) `g_E`,
+this is turned into the representer with respect to the (default) metric,
+the [`GeneralizedBuresWassersteinMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
+
+To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)```
+it holds
+
+```math
+⟨X,Y⟩ = \operatorname{tr}(XY) = ⟨Z,Y⟩_{\mathrm{BW}}
+```
+for all ``Y`` and hence we get ``Z``= 2pXM + 2MXp``.
+"""
+change_representer(
+    ::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric},
+    ::EuclideanMetric,
+    p,
+    X,
+)
+
+function change_representer!(
+    M::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric},
+    Y,
+    ::EuclideanMetric,
+    p,
+    X,
+)
+    Y .= 2 .* (p * X * M.metric.M + M.metric.M * X * p)
+    return Y
+end
 
 @doc raw"""
     distance(::MatricManifold{SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, q)
