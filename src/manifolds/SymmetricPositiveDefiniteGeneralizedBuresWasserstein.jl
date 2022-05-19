@@ -14,9 +14,6 @@ where the name also follows the mentioned preprint.
 struct GeneralizedBuresWassersteinMetric{T<:AbstractMatrix} <: RiemannianMetric
     M::T
 end
-function GeneralizedBuresWassersteinMetric(M::T) where {T<:AbstractMatrix}
-    return GeneralizedBuresWassersteinMetric{T}(M)
-end
 
 @doc raw"""
     change_representer(M::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, E::EuclideanMetric, p, X)
