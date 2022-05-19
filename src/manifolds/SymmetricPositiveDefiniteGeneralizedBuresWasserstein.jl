@@ -103,6 +103,7 @@ function loq!(
 )
     m = M.metric.M
     lum = l(m)
-    X .= Symmetric(m * sqrt((lum \ p / lum) * q) + sqrt(q * (lum \ p / lum)) * m) - 2 * p
+    lum_p_lum = lum \ p / lum
+    X .= Symmetric(m * sqrt(lum_p_lum * q) + sqrt(q * lum_p_lum) * m) - 2 * p
     return X
 end
