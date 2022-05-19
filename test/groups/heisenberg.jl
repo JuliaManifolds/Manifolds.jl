@@ -20,6 +20,17 @@ include("group_utils.jl")
     identity_element!(G, ge)
     @test isapprox(ge, I; atol=1e-10)
 
+    @test check_point(G, [0.0 2.0 3.0; 0.0 1.0 -1.0; 0.0 0.0 1.0]) isa DomainError
+    @test check_point(G, [1.0 2.0 3.0; 0.0 1.0 -1.0; 1.0 0.0 1.0]) isa DomainError
+    @test check_point(G, [1.0 2.0 3.0; 0.0 2.0 -1.0; 0.0 0.0 1.0]) isa DomainError
+    @test check_point(G, [1.0 2.0 3.0; 0.0 1.0 -1.0; 0.0 0.0 2.0]) isa DomainError
+    @test check_point(G, [1.0 2.0 3.0; 0.0 1.0 -1.0; 0.0 1.0 1.0]) isa DomainError
+    @test check_point(G, [1.0 2.0 3.0; 1.0 1.0 -1.0; 0.0 0.0 1.0]) isa DomainError
+
+    @test check_vector(G, pts[1], [1.0 2.0 3.0; 0.0 0.0 -1.0; 0.0 0.0 0.0]) isa DomainError
+    @test check_vector(G, pts[1], [0.0 2.0 3.0; 1.0 0.0 -1.0; 0.0 0.0 0.0]) isa DomainError
+    @test check_vector(G, pts[1], [0.0 2.0 3.0; 0.0 0.0 -1.0; 0.0 0.0 2.0]) isa DomainError
+
     @test compose(G, pts[1], pts[2]) ≈ pts[1] * pts[2]
     test_group(
         G,
@@ -36,7 +47,9 @@ include("group_utils.jl")
         G,
         pts;
         basis_types_to_from=(DefaultOrthonormalBasis(),),
+        parallel_transport=true,
         test_injectivity_radius=true,
+        test_project_point=true,
         test_project_tangent=true,
         test_musical_isomorphisms=false,
     )

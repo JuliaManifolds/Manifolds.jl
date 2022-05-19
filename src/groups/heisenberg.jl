@@ -48,6 +48,18 @@ function check_point(G::HeisenbergGroup{n}, p; kwargs...) where {n}
             "The matrix $(p) does not lie on $(G), since p[n+2, n+2] is not equal to 1.",
         )
     end
+    if !iszero(p[2:(n + 2), 1])
+        return DomainError(
+            norm(iszero(p[2:(n + 2), 1])),
+            "The matrix $(p) does not lie on $(G), since p[2:(n + 2), 1] is not equal to 0.",
+        )
+    end
+    if !iszero(p[n + 2, 1:(n + 1)])
+        return DomainError(
+            norm(iszero(p[n + 2, 1:(n + 1)])),
+            "The matrix $(p) does not lie on $(G), since p[n + 2, 1:(n+1)] is not equal to 0.",
+        )
+    end
     if !isapprox(I, p[2:(n + 1), 2:(n + 1)])
         return DomainError(
             det(p[2:(n + 1), 2:(n + 1)] - I),
@@ -57,7 +69,6 @@ function check_point(G::HeisenbergGroup{n}, p; kwargs...) where {n}
 
     return nothing
 end
-check_point(::HeisenbergGroup, ::Identity{MultiplicationOperation}) = nothing
 
 function check_vector(G::HeisenbergGroup{n}, p, X; kwargs...) where {n}
     if !iszero(X[1, 1])
@@ -72,10 +83,10 @@ function check_vector(G::HeisenbergGroup{n}, p, X; kwargs...) where {n}
             "The matrix $(X) does not lie in the tangent space of $(G), since X[n+2, n+2] is not equal to 0.",
         )
     end
-    if !iszero(X[2:(n + 1), 2:(n + 1)])
+    if !iszero(X[2:(n + 2), 1:(n + 1)])
         return DomainError(
-            det(X[2:(n + 1), 2:(n + 1)]),
-            "The matrix $(X) does not lie on $(G), since X[2:(n+1), 2:(n+1)] is not a zero matrix.",
+            norm(X[2:(n + 2), 1:(n + 1)]),
+            "The matrix $(X) does not lie in the tangent space of $(G), since X[2:(n + 2), 1:(n + 1)] is not a zero matrix.",
         )
     end
     return nothing
