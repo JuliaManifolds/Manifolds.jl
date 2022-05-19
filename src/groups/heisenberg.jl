@@ -133,9 +133,9 @@ end
 get_embedding(::HeisenbergGroup{n}) where {n} = Euclidean(n + 2, n + 2)
 
 @doc raw"""
-    get_vector(M::HeisenbergGroup, p, c, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+    get_vector(M::HeisenbergGroup, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
 
-Get tangent vector with coordinates `c` at point `p` from the [`HeisenbergGroup`](@ref) `M`.
+Get tangent vector with coordinates `Xⁱ` at point `p` from the [`HeisenbergGroup`](@ref) `M`.
 Given a vector of coordinates ``\begin{bmatrix}\mathbb{a} & \mathbb{b} & c\end{bmatrix}`` the tangent vector is equal to
 ```math
 \begin{bmatrix} 1 & \mathbf{a} & c \\
