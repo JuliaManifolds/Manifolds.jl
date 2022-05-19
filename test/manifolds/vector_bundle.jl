@@ -1,7 +1,5 @@
 include("../utils.jl")
 
-using RecursiveArrayTools
-
 struct TestVectorSpaceType <: VectorSpaceType end
 
 @testset "Tangent bundle" begin
@@ -9,35 +7,22 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
     @testset "Nice access to vector bundle components" begin
         TB = TangentBundle(M)
-        @testset "ProductRepr" begin
-            p = ProductRepr([1.0, 0.0, 0.0], [0.0, 2.0, 4.0])
-            @test p[TB, :point] === p.parts[1]
-            @test p[TB, :vector] === p.parts[2]
-            p[TB, :vector] = [0.0, 3.0, 1.0]
-            @test p.parts[2] == [0.0, 3.0, 1.0]
-            p[TB, :point] = [0.0, 1.0, 0.0]
-            @test p.parts[1] == [0.0, 1.0, 0.0]
-            @test_throws DomainError p[TB, :error]
-            @test_throws DomainError p[TB, :error] = [1, 2, 3]
-        end
-        @testset "ArrayPartition" begin
-            p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 2.0, 4.0])
-            @test p[TB, :point] === p.x[1]
-            @test p[TB, :vector] === p.x[2]
-            p[TB, :vector] = [0.0, 3.0, 1.0]
-            @test p.x[2] == [0.0, 3.0, 1.0]
-            p[TB, :point] = [0.0, 1.0, 0.0]
-            @test p.x[1] == [0.0, 1.0, 0.0]
-            @test_throws DomainError p[TB, :error]
-            @test_throws DomainError p[TB, :error] = [1, 2, 3]
-        end
+        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 2.0, 4.0])
+        @test p[TB, :point] === p.parts[1]
+        @test p[TB, :vector] === p.parts[2]
+        p[TB, :vector] = [0.0, 3.0, 1.0]
+        @test p.parts[2] == [0.0, 3.0, 1.0]
+        p[TB, :point] = [0.0, 1.0, 0.0]
+        @test p.parts[1] == [0.0, 1.0, 0.0]
+        @test_throws DomainError p[TB, :error]
+        @test_throws DomainError p[TB, :error] = [1, 2, 3]
     end
 
     types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
 
-    for T in types, prepr in [ProductRepr, ArrayPartition]
+    for T in types
         p = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
         TpM = TangentSpaceAtPoint(M, p)
@@ -51,19 +36,16 @@ struct TestVectorSpaceType <: VectorSpaceType end
               "VectorBundle(TestVectorSpaceType(), Sphere(2, ℝ))"
         @testset "Type $T" begin
             pts_tb = [
-                prepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
-                prepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
-                prepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0])),
+                ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
+                ProductRepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
+                ProductRepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0])),
             ]
-            @inferred prepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0]))
-            if prepr === ProductRepr
-                for pt in pts_tb
-                    @test bundle_projection(TB, pt) ≈ pt.parts[1]
-                end
-            else
-                for pt in pts_tb
-                    @test bundle_projection(TB, pt) ≈ pt.x[1]
-                end
+            @inferred ProductRepr(
+                convert(T, [1.0, 0.0, 0.0]),
+                convert(T, [0.0, -1.0, -1.0]),
+            )
+            for pt in pts_tb
+                @test bundle_projection(TB, pt) ≈ pt.parts[1]
             end
             diag_basis = DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2]))
             basis_types = (
