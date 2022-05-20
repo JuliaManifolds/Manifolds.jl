@@ -128,6 +128,14 @@ Pages = ["groups/special_euclidean.jl"]
 Order = [:type, :function]
 ```
 
+### Heisenberg group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/heisenberg.jl"]
+Order = [:type,:function]
+```
+
 ## Group actions
 
 Group actions represent actions of a given group on a specified manifold.
