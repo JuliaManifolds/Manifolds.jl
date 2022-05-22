@@ -13,6 +13,7 @@ where the name also follows the mentioned preprint.
 """
 struct GeneralizedBuresWassersteinMetric{T<:AbstractMatrix} <: RiemannianMetric
     M::T
+    GeneralizedBuresWassersteinMetric(MM::TT) where {TT<:AbstractMatrix} = new{TT}(MM)
 end
 
 @doc raw"""
