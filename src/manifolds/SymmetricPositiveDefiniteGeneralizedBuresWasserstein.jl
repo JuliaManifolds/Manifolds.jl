@@ -8,7 +8,7 @@ where the name also follows the mentioned preprint.
 
 [^HanMishraJawanpuriaGao2021]:
     > Han, A., Mishra, B., Jawanpuria, P., Gao, J.:
-    > Generalized Bures-Wasserstein geometry for positive definite matrices
+    > _Generalized Bures-Wasserstein geometry for positive definite matrices_.
     > arXiv: [2110.10464](https://arxiv.org/abs/2110.10464).
 """
 struct GeneralizedBuresWassersteinMetric{T<:AbstractMatrix} <: RiemannianMetric
@@ -116,7 +116,7 @@ function inner(
 end
 
 @doc raw"""
-    loq(::MatricManifold{SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, q)
+    log(::MatricManifold{SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, q)
 
 Compute the logarithmic map on [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`BuresWassersteinMetric`](@ref) given by
@@ -129,7 +129,7 @@ where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``
 """
 log(::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, q)
 
-function loq!(
+function log!(
     M::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric},
     X,
     p,

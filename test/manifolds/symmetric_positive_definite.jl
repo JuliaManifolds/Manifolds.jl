@@ -6,6 +6,11 @@ include("../utils.jl")
     M2 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
     M3 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
     M4 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
+    M5 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.BuresWassersteinMetric())
+    M6 = MetricManifold(
+        SymmetricPositiveDefinite(3),
+        Manifolds.GeneralizedBuresWassersteinMetric(2 * Matrix{Float64}(I, 3, 3)),
+    )
 
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1, one(zeros(3, 3))) == Inf
@@ -13,7 +18,7 @@ include("../utils.jl")
     @test injectivity_radius(M1, one(zeros(3, 3)), ExponentialRetraction()) == Inf
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M2, one(zeros(3, 3)))
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M3, one(zeros(3, 3)))
-    metrics = [M1, M2, M3]
+    metrics = [M1, M2, M3, M5, M6]
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})

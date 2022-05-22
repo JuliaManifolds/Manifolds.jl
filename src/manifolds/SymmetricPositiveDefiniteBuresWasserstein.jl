@@ -107,7 +107,7 @@ function inner(
 end
 
 @doc raw"""
-    loq(::MatricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
+    log(::MatricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 
 Compute the logarithmic map on [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`BuresWassersteinMetric`](@ref) given by
@@ -120,7 +120,7 @@ where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``
 """
 log(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 
-function loq!(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, X, p, q)
+function log!(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, X, p, q)
     X .= Symmetric(sqrt(p * q) + sqrt(q * p)) - 2 * p
     return X
 end
