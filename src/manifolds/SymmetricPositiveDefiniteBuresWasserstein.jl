@@ -36,7 +36,7 @@ change_representer(
 )
 
 function change_representer!(
-    ::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric},
+    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
     Y,
     ::EuclideanMetric,
     p,
@@ -58,7 +58,7 @@ Compute the distance with respect to the [`BuresWassersteinMetric`](@ref) on [`S
 where the last trace can be simplified (by rotating the matrix products in the trace) to ``\operatorname{tr}(pq)``.
 """
 function distance(
-    ::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric},
+    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
     p,
     q,
 )
@@ -79,10 +79,15 @@ where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``
 """
 exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, p, X)
 
-function exp!(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, q, p, X)
+function exp!(
+    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
+    q,
+    p,
+    X,
+)
     q .= lyap(p, -X) #lyap solves qp+pq-X=0
     q .= p .+ X .+ q * p * q
-    return Y
+    return q
 end
 
 @doc raw"""
@@ -98,7 +103,7 @@ the [`BuresWassersteinMetric`](@ref) given by
 where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``.
 """
 function inner(
-    ::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric},
+    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
     p,
     X,
     Y,
@@ -120,7 +125,12 @@ where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``
 """
 log(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 
-function log!(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, X, p, q)
+function log!(
+    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
+    X,
+    p,
+    q,
+)
     X .= Symmetric(sqrt(p * q) + sqrt(q * p)) - 2 * p
     return X
 end

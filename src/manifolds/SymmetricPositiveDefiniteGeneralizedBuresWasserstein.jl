@@ -39,7 +39,7 @@ change_representer(
 )
 
 function change_representer!(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric},
+    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
     Y,
     ::EuclideanMetric,
     p,
@@ -61,7 +61,7 @@ Compute the distance with respect to the [`BuresWassersteinMetric`](@ref) on [`S
 where the last trace can be simplified (by rotating the matrix products in the trace) to ``\operatorname{tr}(M^{-1}pM^{-1}q)``.
 """
 function distance(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric},
+    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
     p,
     q,
 )
@@ -84,7 +84,7 @@ where ``q=L_{M,p}(X)`` denotes the generalized lyaponov operator, i.e. it solves
 exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, X)
 
 function exp!(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric},
+    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
     q,
     p,
     X,
@@ -107,7 +107,7 @@ the [`GeneralizedBuresWassersteinMetric`](@ref) given by
 where ``q=L_{M,p}(X)`` denotes the generalized lyaponov operator, i.e. it solves ``pqM + Mqp = X``.
 """
 function inner(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric},
+    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
     p,
     X,
     Y,
@@ -130,7 +130,7 @@ where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``
 log(::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, q)
 
 function log!(
-    M::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric},
+    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
     X,
     p,
     q,
