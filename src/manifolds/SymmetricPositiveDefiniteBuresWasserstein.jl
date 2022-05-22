@@ -1,7 +1,13 @@
 @doc raw"""
     BurresWassertseinMetric <: AbstractMetric
 
-The Bures Wasserstein metric for symmetric positive definite matrices.
+The Bures Wasserstein metric for symmetric positive definite matrices[^MalagoMontruccioPistone2018].
+
+[^MalagoMontruccioPistone2018]:
+    > Malagò, L., Montrucchio, L., Pistone, G.:
+    > _Wasserstein Riemannian geometry of Gaussian densities_.
+    > Information Geometry, 1, pp. 137–179, 2018.
+    > doi: [10.1007/s41884-018-0014-4](https://doi.org/10.1007/s41884-018-0014-4)
 """
 struct BuresWassersteinMetric <: RiemannianMetric end
 

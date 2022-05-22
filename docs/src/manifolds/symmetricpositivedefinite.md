@@ -35,7 +35,23 @@ Pages = ["manifolds/SymmetricPositiveDefiniteLinearAffine.jl"]
 Order = [:function]
 ```
 
-## The log Euclidean metric
+## Bures-Wasserstein metric
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/SymmetricPositiveDefiniteBuresWasserstein.jl"]
+Order = [:type, :function]
+```
+
+## Generalized Bures-Wasserstein metric
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/SymmetricPositiveDefiniteGeneralizedBuresWasserstein.jl"]
+Order = [:type, :function]
+```
+
+## Log-Euclidean metric
 
 ```@autodocs
 Modules = [Manifolds]
@@ -43,7 +59,7 @@ Pages = ["manifolds/SymmetricPositiveDefiniteLogEuclidean.jl"]
 Order = [:type, :function]
 ```
 
-## log Cholesky metric
+## Log-Cholesky metric
 
 ```@autodocs
 Modules = [Manifolds]

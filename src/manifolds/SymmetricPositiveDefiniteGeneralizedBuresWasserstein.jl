@@ -6,7 +6,7 @@ The generalized Bures Wasserstein metric for symmetric positive definite matrice
 This metric internally stores the symmetric positive definite matrix ``M`` to generalise the metric,
 where the name also follows the mentioned preprint.
 
-[^^HanMishraJawanpuriaGao2021]:
+[^HanMishraJawanpuriaGao2021]:
     > Han, A., Mishra, B., Jawanpuria, P., Gao, J.:
     > Generalized Bures-Wasserstein geometry for positive definite matrices
     > arXiv: [2110.10464](https://arxiv.org/abs/2110.10464).
@@ -29,7 +29,7 @@ it holds
 ```math
 ⟨X,Y⟩ = \operatorname{tr}(XY) = ⟨Z,Y⟩_{\mathrm{BW}}
 ```
-for all ``Y`` and hence we get ``Z``= 2pXM + 2MXp``.
+for all ``Y`` and hence we get ``Z = 2pXM + 2MXp``.
 """
 change_representer(
     ::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric},
@@ -101,7 +101,7 @@ Compute the inner product [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`GeneralizedBuresWassersteinMetric`](@ref) given by
 
 ```math
-    ⟨X,Y⟩_{\mathrm{GBW}} = \frac{1}{2}\operatorname{tr}( \mathcal L_{p,M}(X)Y)
+    ⟨X,Y⟩ = \frac{1}{2}\operatorname{tr}( \mathcal L_{p,M}(X)Y)
 ```
 
 where ``q=L_{M,p}(X)`` denotes the generalized lyaponov operator, i.e. it solves ``pqM + Mqp = X``.
@@ -122,7 +122,7 @@ Compute the logarithmic map on [`SymmetricPositiveDefinite`](@ref) with respect 
 the [`BuresWassersteinMetric`](@ref) given by
 
 ```math
-    \loq_p(q) = M(M^{-1}pM^{-1}q)^{\frac{1}{2}} + (qM^{-1}pM^{-1})^{\frac{1}{2}}M^{-1} - 2 p
+    \log_p(q) = M(M^{-1}pM^{-1}q)^{\frac{1}{2}} + (qM^{-1}pM^{-1})^{\frac{1}{2}}M^{-1} - 2 p
 ```
 
 where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``.

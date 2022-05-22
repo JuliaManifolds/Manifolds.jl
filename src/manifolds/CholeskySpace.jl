@@ -12,8 +12,8 @@ are for example summarized in Table 1 of [^Lin2019].
 Generate the manifold of $n× n$ lower triangular matrices with positive diagonal.
 
 [^Lin2019]:
-    > Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
-    > Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
+    > Lin, Zenhua: _Riemannian Geometry of Symmetric Positive Definite Matrices via
+    > Cholesky Decomposition_, arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
 struct CholeskySpace{N} <: AbstractManifold{ℝ} end
 
