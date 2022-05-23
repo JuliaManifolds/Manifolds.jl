@@ -1,8 +1,9 @@
 <div align="center">
     <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/JuliaManifolds/Manifolds.jl/blob/kellertuer/dark-logo-readme/docs/src/assets/logo-text-readme-dark.png">
-  <img alt="Manifolds.jl logo with text on the side" src="https://github.com/JuliaManifolds/Manifolds.jl/blob/kellertuer/dark-logo-readme/docs/src/assets/logo-text-readme.png">
-</picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://github.com/JuliaManifolds/Manifolds.jl/blob/kellertuer/dark-logo-readme/docs/src/assets/logo-text-readme-dark.png">
+      <img alt="Manifolds.jl logo with text on the side" src="https://github.com/JuliaManifolds/Manifolds.jl/blob/kellertuer/dark-logo-readme/docs/src/assets/logo-text-readme.png">
+    </picture>
+</div>
 
 | **Documentation** | **Source** | **Citation** |
 |:-----------------:|:----------------------:|:------------:|
