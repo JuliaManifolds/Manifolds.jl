@@ -8,7 +8,18 @@ R^{\mathrm{T}}R = I_n, \det(R) = 1 \bigr\}$
 The Lie group $\mathrm{SO}(n)$ is a subgroup of the orthogonal group $\mathrm{O}(n)$ and also known as the special orthogonal group or the set of rotations group.
 See also [`SpecialOrthogonal`](@ref), which is this manifold equipped with the group operation.
 
-Tangent vectors are represented by elements of the corresponding Lie algebra, which is the tangent space at the identity element.
+A tangent space to a point ``p ∈ \mathrm{SO}(n)`` is given by
+
+```math
+T_p\mathrm{SO}(n) = \{X : X=pY,\qquad Y=-Y^{\mathrm{T}}\},
+```
+
+i.e. all vectors that are a product of a skew symmetric matrix multiplied with ``p``.
+
+Since the orthogonal matrices ``\mathrm{SO}(n)`` are a Lie group, tangent vectors can also be
+represented by elements of the corresponding Lie algebra, which is the tangent space at the identity element.
+In the notation above, this means we just store the component ``Y`` of ``X``.
+
 This convention allows for more efficient operations on tangent vectors.
 Tangent spaces at different points are different vector spaces.
 
