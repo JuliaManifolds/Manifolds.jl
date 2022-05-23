@@ -38,7 +38,9 @@ function NormalRotationDistribution(
     return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
 end
 
-active_traits(f, ::Rotations, args...) = merge_traits(IsEmbeddedManifold())
+function active_traits(f, ::Rotations, args...)
+    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
+end
 
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
@@ -174,7 +176,7 @@ The algorithm used is a more numerically stable form of those proposed in
 """
 exp(::Rotations, ::Any...)
 
-exp!(M::Rotations, q, p, X) = copyto!(q, p * exp(X))
+exp!(::Rotations, q, p, X) = copyto!(q, p * exp(X))
 function exp!(M::Rotations{2}, q, p, X)
     @assert size(q) == (2, 2)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
