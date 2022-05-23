@@ -1,10 +1,7 @@
-<div align="center">
-    <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://github.com/JuliaManifolds/Manifolds.jl/blob/kellertuer/dark-logo-readme/docs/src/assets/logo-text-readme-dark.png">
-      <img alt="Manifolds.jl logo with text on the side" src="https://github.com/JuliaManifolds/Manifolds.jl/blob/kellertuer/dark-logo-readme/docs/src/assets/logo-text-readme.png">
-    </picture>
-</div>
-
+<picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/JuliaManifolds/Manifolds.jl/blob/kellertuer/dark-logo-readme/docs/src/assets/logo-text-readme-dark.png">
+    <img alt="Manifolds.jl logo with text on the side" src="https://github.com/JuliaManifolds/Manifolds.jl/blob/kellertuer/dark-logo-readme/docs/src/assets/logo-text-readme.png">
+</picture>
 | **Documentation** | **Source** | **Citation** |
 |:-----------------:|:----------------------:|:------------:|
 | [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/stable/) | [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle) | [![arXiv](https://img.shields.io/badge/arXiv%20CS.MS-2106.08777-blue.svg)](https://arxiv.org/abs/2106.08777) |
