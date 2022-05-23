@@ -56,10 +56,10 @@ end
 Compute the distance with respect to the [`BuresWassersteinMetric`](@ref) on [`SymmetricPositiveDefinite`](@ref) matrices, i.e.
 
 ```math
-    d(p.q) = \bigl( \operatorname{tr}(M^{-1}p) + \operatorname{tr}(M^{-1}q) + 2\operatorname{tr}(p^{\frac{1}{2}M^{-1}qM^{-1}p^{\frac{1}[2}) \bigr)^\frac{1}[2},
+    d(p.q) = \bigl(
+    \operatorname{tr}(M^{-1}p) + \operatorname{tr}(M^{-1}q)
+       - 2\operatorname{tr}\bigl( (p^{\frac{1}{2}M^{-1}qM^{-1}p^{\frac{1}[2}) \bigr)^\frac{1}[2} \Bigr),
 ```
-
-where the last trace can be simplified (by rotating the matrix products in the trace) to ``\operatorname{tr}(M^{-1}pM^{-1}q)``.
 """
 function distance(
     M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
@@ -67,7 +67,8 @@ function distance(
     q,
 )
     luM = lu(M.metric.M)
-    return sqrt(tr(luM \ p) + tr(luM \ q) + 2 * tr((lum \ q) * (lum \ p)))
+    psq = sqrt(p)
+    return sqrt(tr(luM \ p) + tr(luM \ q) - 2 * tr(sqrt(psq * (luM \ q) * (luM \ psq))))
 end
 
 @doc raw"""
@@ -90,9 +91,10 @@ function exp!(
     p,
     X,
 )
-    q .= lyapc(p, M.metric.M, -X) #lyap solves qpM + Mpq - X =0
-    q .= p .+ X .+ M.metricM * q * p * q * M.metric.M
-    return Y
+    m = M.metric.M
+    Y = lyapc(p, m, -X) #lyap solves qpM + Mpq - X =0
+    q .= p .+ X .+ m * Y * p * Y * m
+    return q
 end
 
 @doc raw"""
@@ -137,7 +139,7 @@ function log!(
     q,
 )
     m = M.metric.M
-    lum = l(m)
+    lum = lu(m)
     lum_p_lum = lum \ p / lum
     X .= Symmetric(m * sqrt(lum_p_lum * q) + sqrt(q * lum_p_lum) * m) - 2 * p
     return X

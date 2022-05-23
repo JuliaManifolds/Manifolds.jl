@@ -24,10 +24,10 @@ include("../utils.jl")
     TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
 
     for M in metrics
-        basis_types = if M == M3
-            ()
-        else
+        basis_types = if (M == M1 || M == M2)
             (DefaultOrthonormalBasis(),)
+        else
+            ()
         end
         @testset "$(typeof(M))" begin
             @test representation_size(M) == (3, 3)
@@ -51,7 +51,6 @@ include("../utils.jl")
                 test_manifold(
                     M,
                     pts;
-                    test_default_vector_transport=true,
                     vector_transport_methods=typeof(M) == SymmetricPositiveDefinite{3} ?
                                              [ParallelTransport()] : [],
                     test_vee_hat=M === M2,
@@ -62,6 +61,7 @@ include("../utils.jl")
                     test_inplace=true,
                     test_rand_point=M === M1,
                     test_rand_tvector=M === M1,
+                    test_default_vector_transport=!(M === M5 || M === M6),
                 )
             end
             @testset "Test Error cases in is_point and is_vector" begin

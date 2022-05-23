@@ -52,7 +52,8 @@ end
 Compute the distance with respect to the [`BuresWassersteinMetric`](@ref) on [`SymmetricPositiveDefinite`](@ref) matrices, i.e.
 
 ```math
-    d(p.q) = \bigl( \operatorname{tr}(p) + \operatorname{tr}(q) + 2\operatorname{tr}(p^{\frac{1}{2}qp^{\frac{1}[2}) \bigr)^\frac{1}{2},
+    d(p.q) = \bigl(
+    \operatorname{tr}(p) + \operatorname{tr}(q) - 2\operatorname{tr}\Bigl( (p^{\frac{1}{2}qp^{\frac{1}[2}) \bigr)^\frac{1}{2} \Bigr),
 ```
 
 where the last trace can be simplified (by rotating the matrix products in the trace) to ``\operatorname{tr}(pq)``.
@@ -62,7 +63,7 @@ function distance(
     p,
     q,
 )
-    return sqrt(tr(p) + tr(q) + 2 * sqrt(tr(q * p)))
+    return sqrt(tr(p) + tr(q) - 2 * tr(sqrt(sqrt(p) * q * sqrt(p))))
 end
 
 @doc raw"""
@@ -85,8 +86,8 @@ function exp!(
     p,
     X,
 )
-    q .= lyap(p, -X) #lyap solves qp+pq-X=0
-    q .= p .+ X .+ q * p * q
+    Y = lyap(p, -X) #lyap solves qp+pq-X=0
+    q .= p .+ X .+ Y * p * Y
     return q
 end
 
@@ -97,7 +98,7 @@ Compute the inner product [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`BuresWassersteinMetric`](@ref) given by
 
 ```math
-    ⟨X,Y⟩_{\mathrm{BW}} = \frac{1}{2}\operatorname{tr}( \mathcal L_p(X)Y)
+    ⟨X,Y⟩ = \frac{1}{2}\operatorname{tr}( \mathcal L_p(X)Y)
 ```
 
 where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``.
@@ -108,7 +109,7 @@ function inner(
     X,
     Y,
 )
-    return 1 / 2 * tr(lyap(p, -X) * Y)
+    return 1 / 2 * dot(lyap(p, -X), Y)
 end
 
 @doc raw"""
@@ -131,6 +132,6 @@ function log!(
     p,
     q,
 )
-    X .= Symmetric(sqrt(p * q) + sqrt(q * p)) - 2 * p
+    X .= sqrt(p * q) + sqrt(q * p) - 2 * p
     return X
 end
