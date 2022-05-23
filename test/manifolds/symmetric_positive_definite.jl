@@ -81,6 +81,16 @@ include("../utils.jl")
     end
     p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
     q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+    @testset "Convert Eucl/Emb to (Generalised) BW" begin
+        Z = ones(3, 3)
+        em = EuclideanMetric()
+        x = 2 .* (Z * p + p * Z)
+        X = change_representer(M5, em, p, Z)
+        @test isapprox(x, X)
+        y = 2 .* (Z * p * M6.metric.M + M6.metric.M * p' * Z)
+        Y = change_representer(M6, em, p, Z)
+        @test isapprox(y, Y)
+    end
     @testset "Convert SPD to Cholesky" begin
         v = log(M1, p, q)
         (l, w) = Manifolds.spd_to_cholesky(p, v)
