@@ -42,7 +42,8 @@ function change_representer!(
     p,
     X,
 )
-    Y .= 2 .* (X * p + p' * X')
+    A = X * p
+    Y .= 2 .* (A .+ A')
     return Y
 end
 
