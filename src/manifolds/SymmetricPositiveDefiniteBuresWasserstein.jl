@@ -64,7 +64,7 @@ function distance(
     p,
     q,
 )
-    return sqrt(tr(p) + tr(q) - 2 * tr(sqrt(sqrt(p) * q * sqrt(p))))
+    return sqrt(tr(p) + tr(q) - 2 * tr(sqrt(p * q)))
 end
 
 @doc raw"""
