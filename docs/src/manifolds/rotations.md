@@ -8,7 +8,7 @@ R^{\mathrm{T}}R = I_n, \det(R) = 1 \bigr\}$
 The Lie group $\mathrm{SO}(n)$ is a subgroup of the orthogonal group $\mathrm{O}(n)$ and also known as the special orthogonal group or the set of rotations group.
 See also [`SpecialOrthogonal`](@ref), which is this manifold equipped with the group operation.
 
-A tangent space to a point ``p ∈ \mathrm{SO}(n)`` is given by
+The tangent space to a point ``p ∈ \mathrm{SO}(n)`` is given by
 
 ```math
 T_p\mathrm{SO}(n) = \{X : X=pY,\qquad Y=-Y^{\mathrm{T}}\},
