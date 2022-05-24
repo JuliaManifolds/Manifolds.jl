@@ -67,8 +67,9 @@ function distance(
     q,
 )
     luM = lu(M.metric.M)
-    psq = sqrt(p)
-    return sqrt(tr(luM \ p) + tr(luM \ q) - 2 * tr(sqrt(psq * (luM \ q) * (luM \ psq))))
+    luMp = luM \ p
+    luMq = luM \ q
+    return sqrt(tr(luMp) + tr(luMq) - 2 * tr(sqrt(luMq * luMp)))
 end
 
 @doc raw"""
