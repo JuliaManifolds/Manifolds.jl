@@ -74,7 +74,7 @@ Compute the exponential map on [`SymmetricPositiveDefinite`](@ref) with respect 
 the [`BuresWassersteinMetric`](@ref) given by
 
 ```math
-    \exp_p(X) = p+X+\mathcal L_p(X)pL_p(X)
+    \exp_p(X) = p+X+L_p(X)pL_p(X)
 ```
 
 where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``.
