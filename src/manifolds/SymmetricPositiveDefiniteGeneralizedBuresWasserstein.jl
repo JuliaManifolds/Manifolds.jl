@@ -115,7 +115,7 @@ function inner(
     X,
     Y,
 )
-    return 1 / 2 * tr(lyapc(p, M.metric.M, -X) * Y)
+    return dot(lyapc(p, M.metric.M, -X), Y) / 2
 end
 
 @doc raw"""
