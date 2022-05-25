@@ -24,7 +24,7 @@ space at `p` with respect to the [`EuclideanMetric`](@ref) `g_E`,
 this is turned into the representer with respect to the (default) metric,
 the [`GeneralizedBuresWassersteinMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
 
-To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)```
+To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)``
 it holds
 
 ```math
@@ -56,9 +56,8 @@ end
 Compute the distance with respect to the [`BuresWassersteinMetric`](@ref) on [`SymmetricPositiveDefinite`](@ref) matrices, i.e.
 
 ```math
-    d(p.q) = \bigl(
-    \operatorname{tr}(M^{-1}p) + \operatorname{tr}(M^{-1}q)
-       - 2\operatorname{tr}\bigl( (p^{\frac{1}{2}M^{-1}qM^{-1}p^{\frac{1}[2}) \bigr)^\frac{1}[2} \Bigr),
+d(p,q) = \operatorname{tr}(M^{-1}p) + \operatorname{tr}(M^{-1}q)
+       - 2\operatorname{tr}\bigl( (p^{\frac{1}{2}}M^{-1}qM^{-1}p^{\frac{1}{2}} \bigr)^{\frac{1}{2}},
 ```
 """
 function distance(
@@ -82,7 +81,7 @@ the [`GeneralizedBuresWassersteinMetric`](@ref) given by
     \exp_p(X) = p+X+\mathcal ML_{p,M}(X)pML_{p,M}(X)
 ```
 
-where ``q=L_{M,p}(X)`` denotes the generalized lyaponov operator, i.e. it solves ``pqM + Mqp = X``.
+where ``q=L_{M,p}(X)`` denotes the generalized Lyapunov operator, i.e. it solves ``pqM + Mqp = X``.
 """
 exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, X)
 
@@ -105,10 +104,10 @@ Compute the inner product [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`GeneralizedBuresWassersteinMetric`](@ref) given by
 
 ```math
-    ⟨X,Y⟩ = \frac{1}{2}\operatorname{tr}( \mathcal L_{p,M}(X)Y)
+    ⟨X,Y⟩ = \frac{1}{2}\operatorname{tr}(L_{p,M}(X)Y)
 ```
 
-where ``q=L_{M,p}(X)`` denotes the generalized lyaponov operator, i.e. it solves ``pqM + Mqp = X``.
+where ``q=L_{M,p}(X)`` denotes the generalized Lyapunov operator, i.e. it solves ``pqM + Mqp = X``.
 """
 function inner(
     M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
@@ -129,7 +128,7 @@ the [`BuresWassersteinMetric`](@ref) given by
     \log_p(q) = M(M^{-1}pM^{-1}q)^{\frac{1}{2}} + (qM^{-1}pM^{-1})^{\frac{1}{2}}M^{-1} - 2 p
 ```
 
-where ``q=L_p(X)`` denotes the lyaponov operator, i.e. it solves ``pq + qp = X``.
+where ``q=L_p(X)`` denotes the Lyapunov operator, i.e. it solves ``pq + qp = X``.
 """
 log(::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, q)
 
