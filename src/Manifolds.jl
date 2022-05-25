@@ -154,6 +154,7 @@ import Base:
     transpose
 
 using Base.Iterators: repeated
+using Colors: RGBA
 using Distributions
 using Einsum: @einsum
 using HybridArrays
@@ -255,17 +256,17 @@ using ManifoldsBase:
     size_to_tuple,
     trait
 using Markdown: @doc_str
+using MatrixEquations: lyapc
 using Random
 using RecipesBase
 using RecipesBase: @recipe, @series
-using Colors: RGBA
+using RecursiveArrayTools: ArrayPartition
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using StaticArrays
 using Statistics
 using StatsBase
 using StatsBase: AbstractWeights
-using RecursiveArrayTools: ArrayPartition
 
 include("utils.jl")
 
@@ -338,6 +339,8 @@ include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
+include("manifolds/SymmetricPositiveDefiniteBuresWasserstein.jl")
+include("manifolds/SymmetricPositiveDefiniteGeneralizedBuresWasserstein.jl")
 include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
@@ -503,7 +506,7 @@ export AbstractPowerManifold,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
     PowerManifold
-export ProductManifold
+export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
@@ -519,8 +522,9 @@ export AbstractCartanSchoutenConnection,
 export AbstractMetric,
     RiemannianMetric,
     LorentzMetric,
-    EmbeddedManifold,
+    BuresWassersteinMetric,
     EuclideanMetric,
+    GeneralizedBuresWassersteinMetric,
     LinearAffineMetric,
     LogCholeskyMetric,
     LogEuclideanMetric,

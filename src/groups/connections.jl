@@ -3,7 +3,7 @@
     AbstractCartanSchoutenConnection
 
 Abstract type for Cartan-Schouten connections, that is connections whose geodesics
-going through group identity are one-parameter subgroups. See [^Pennec2020] for details.
+going through group identity are one-parameter subgroups. See[^Pennec2020] for details.
 
 [^Pennec2020]:
     > X. Pennec and M. Lorenzi, “5 - Beyond Riemannian geometry: The affine connection
@@ -51,12 +51,6 @@ const CartanSchoutenZeroGroup{𝔽,M} = ConnectionManifold{𝔽,M,CartanSchouten
 
 Compute the exponential map on the [`ConnectionManifold`](@ref) `M` with a Cartan-Schouten
 connection. See Sections 5.3.2 and 5.3.3 of [^Pennec2020] for details.
-
-[^Pennec2020]:
-    > X. Pennec and M. Lorenzi, “5 - Beyond Riemannian geometry: The affine connection
-    > setting for transformation groups,” in Riemannian Geometric Statistics in Medical Image
-    > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
-    > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
 function exp!(
     M::ConnectionManifold{
@@ -77,12 +71,6 @@ end
 
 Compute the logarithmic map on the [`ConnectionManifold`](@ref) `M` with a Cartan-Schouten
 connection. See Sections 5.3.2 and 5.3.3 of [^Pennec2020] for details.
-
-[^Pennec2020]:
-    > X. Pennec and M. Lorenzi, “5 - Beyond Riemannian geometry: The affine connection
-    > setting for transformation groups,” in Riemannian Geometric Statistics in Medical Image
-    > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
-    > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
 function log!(
     M::ConnectionManifold{
@@ -104,12 +92,6 @@ end
 
 Transport tangent vector `X` at point `p` on the group manifold `M` with the
 [`CartanSchoutenMinus`](@ref) connection to point `q`. See [^Pennec2020] for details.
-
-[^Pennec2020]:
-    > X. Pennec and M. Lorenzi, “5 - Beyond Riemannian geometry: The affine connection
-    > setting for transformation groups,” in Riemannian Geometric Statistics in Medical Image
-    > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
-    > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
 function parallel_transport_to(M::CartanSchoutenMinusGroup, p, X, q)
     return inverse_translate_diff(M.manifold, q, p, X, LeftAction())
@@ -124,12 +106,6 @@ end
 
 Transport tangent vector `X` at point `p` on the group manifold `M` with the
 [`CartanSchoutenPlus`](@ref) connection to point `q`. See [^Pennec2020] for details.
-
-[^Pennec2020]:
-    > X. Pennec and M. Lorenzi, “5 - Beyond Riemannian geometry: The affine connection
-    > setting for transformation groups,” in Riemannian Geometric Statistics in Medical Image
-    > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
-    > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
 parallel_transport_to(M::CartanSchoutenPlusGroup, p, X, q)
 
@@ -142,12 +118,6 @@ end
 
 Transport tangent vector `X` at identity on the group manifold with the
 [`CartanSchoutenZero`](@ref) connection in the direction `d`. See [^Pennec2020] for details.
-
-[^Pennec2020]:
-    > X. Pennec and M. Lorenzi, “5 - Beyond Riemannian geometry: The affine connection
-    > setting for transformation groups,” in Riemannian Geometric Statistics in Medical Image
-    > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
-    > doi: 10.1016/B978-0-12-814725-2.00012-1.
 """
 function parallel_transport_direction(M::CartanSchoutenZeroGroup, p::Identity, X, d)
     dexp_half = exp_lie(M.manifold, d / 2)
