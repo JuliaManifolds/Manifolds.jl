@@ -9,7 +9,9 @@ include("../utils.jl")
     M5 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.BuresWassersteinMetric())
     M6 = MetricManifold(
         SymmetricPositiveDefinite(3),
-        Manifolds.GeneralizedBuresWassersteinMetric(2 * Matrix{Float64}(I, 3, 3)),
+        Manifolds.GeneralizedBuresWassersteinMetric(
+            [2.0 1.0 0.0; 1.0 2.0 1.0; 0.0 1.0 2.0],
+        ),
     )
 
     @test injectivity_radius(M1) == Inf
@@ -36,6 +38,10 @@ include("../utils.jl")
                 if T <: MMatrix{3,3,Float64}
                     # eigendecomposition of 3x3 SPD matrices from StaticArrays is not very accurate
                     exp_log_atol_multiplier = 5.0e7
+                end
+                if M == M6
+                    # we have to raise this slightly for the nondiagonal case.
+                    exp_log_atol_multiplier = 5e1
                 end
                 if M == M3 && T <: MMatrix
                     # Cholesky or something does not work in vector_transport yet for MMatrix
