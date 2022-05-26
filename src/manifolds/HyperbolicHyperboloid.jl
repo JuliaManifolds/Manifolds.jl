@@ -396,19 +396,8 @@ function project(::Hyperbolic, p::HyperboloidPoint, X)
 end
 
 project!(::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
-function project!(::Hyperbolic, Y::HyperboloidTVector, p, X)
-    return (Y.value .= X .+ minkowski_metric(p, X) .* p)
-end
 function project!(::Hyperbolic, Y::HyperboloidTVector, p::HyperboloidPoint, X)
     return (Y.value .= X .+ minkowski_metric(p.value, X) .* p.value)
-end
-function project!(
-    ::Hyperbolic,
-    Y::HyperboloidTVector,
-    p::HyperboloidPoint,
-    X::HyperboloidTVector,
-)
-    return (Y.value .= X.value .+ minkowski_metric(p.value, X.value) .* p.value)
 end
 
 function Random.rand!(M::Hyperbolic{N}, pX; vector_at=nothing, σ=one(eltype(pX))) where {N}
