@@ -128,6 +128,9 @@ distance(::PositiveNumbers, ::Any, ::Any)
 
 distance(::PositiveNumbers, p::Real, q::Real) = abs(log(p / q))
 
+embed(::PositiveNumbers, p) = p
+embed(::PositiveNumbers, p, X) = X
+
 @doc raw"""
     exp(M::PositiveNumbers, p, X)
 

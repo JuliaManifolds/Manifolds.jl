@@ -391,7 +391,17 @@ function minkowski_metric(a::HyperboloidTVector, b::HyperboloidTVector)
     return minkowski_metric(a.value, b.value)
 end
 
+function project(::Hyperbolic, p::HyperboloidPoint, X)
+    return HyperboloidTVector(X .+ minkowski_metric(p.value, X) .* p.value)
+end
+
 project!(::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
+function project!(::Hyperbolic, Y::HyperboloidTVector, p, X)
+    return (Y.value .= X .+ minkowski_metric(p, X) .* p)
+end
+function project!(::Hyperbolic, Y::HyperboloidTVector, p::HyperboloidPoint, X)
+    return (Y.value .= X .+ minkowski_metric(p.value, X) .* p.value)
+end
 function project!(
     ::Hyperbolic,
     Y::HyperboloidTVector,

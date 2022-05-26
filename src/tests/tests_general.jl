@@ -426,12 +426,13 @@ function test_manifold(
     test_project_tangent && Test.@testset "project tangent test" begin
         for (p, X) in zip(pts, tv)
             atol = find_eps(p) * projection_atol_multiplier
-            Test.@test isapprox(M, p, X, project(M, p, X); atol=atol)
+            X_emb = embed(M, p, X)
+            Test.@test isapprox(M, p, X, project(M, p, X_emb); atol=atol)
             if is_mutating
                 X2 = allocate(X)
-                project!(M, X2, p, X)
+                project!(M, X2, p, X_emb)
             else
-                X2 = project(M, p, X)
+                X2 = project(M, p, X_emb)
             end
             Test.@test isapprox(M, p, X2, X; atol=atol)
         end
@@ -440,12 +441,13 @@ function test_manifold(
     test_project_point && Test.@testset "project point test" begin
         for p in pts
             atol = find_eps(p) * projection_atol_multiplier
-            Test.@test isapprox(M, p, project(M, p); atol=atol)
+            p_emb = embed(M, p)
+            Test.@test isapprox(M, p, project(M, p_emb); atol=atol)
             if is_mutating
                 p2 = allocate(p)
-                project!(M, p2, p)
+                project!(M, p2, p_emb)
             else
-                p2 = project(M, p)
+                p2 = project(M, p_emb)
             end
             Test.@test isapprox(M, p2, p; atol=atol)
         end

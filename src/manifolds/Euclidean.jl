@@ -123,15 +123,14 @@ distance(::Euclidean{Tuple{}}, p::Number, q::Number) = abs(p - q)
 
 Embed the point `p` in `M`. Equivalent to an identity map.
 """
-embed(::Euclidean, p)
-embed(::Euclidean{Tuple{}}, p) = p
+embed(::Euclidean, p) = p
 
 """
     embed(M::Euclidean, p, X)
 
 Embed the tangent vector `X` at point `p` in `M`. Equivalent to an identity map.
 """
-embed(::Euclidean, p, X)
+embed(::Euclidean, p, X) = X
 
 function embed!(
     ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},

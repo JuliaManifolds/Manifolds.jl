@@ -518,7 +518,7 @@ function inverse_retract_polar!(M::Rotations, X, p, q)
             rethrow()
         end
     end
-    return project!(M, X, p, X)
+    return project_no_rep_change!(M, X, p, X)
 end
 function inverse_retract_qr!(M::Rotations{N}, X, p, q) where {N}
     A = transpose(p) * q
@@ -530,7 +530,7 @@ function inverse_retract_qr!(M::Rotations{N}, X, p, q) where {N}
         R[1:i, i] = A[1:i, 1:i] \ b
     end
     mul!(X, A, R)
-    return project!(M, X, p, X)
+    return project_no_rep_change!(M, X, p, X)
 end
 
 @doc raw"""
@@ -553,7 +553,7 @@ log(::Rotations, ::Any...)
 function log!(M::Rotations, X, p, q)
     U = transpose(p) * q
     X .= real(log_safe(U))
-    return project!(M, X, p, X)
+    return project_no_rep_change!(M, X, p, X)
 end
 function log!(M::Rotations{2}, X, p, q)
     U = transpose(p) * q
@@ -572,7 +572,7 @@ function log!(M::Rotations{3}, X, p, q)
         return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
     end
     X .= U ./ usinc_from_cos(cosθ)
-    return project!(M, X, p, X)
+    return project_no_rep_change!(M, X, p, X)
 end
 function log!(M::Rotations{4}, X, p, q)
     U = transpose(p) * q
@@ -593,7 +593,7 @@ function log!(M::Rotations{4}, X, p, q)
     else
         copyto!(X, real(log_safe(U)))
     end
-    return project!(M, X, p, X)
+    return project_no_rep_change!(M, X, p, X)
 end
 
 @doc raw"""
@@ -700,17 +700,26 @@ end
 @doc raw"""
     project(M::Rotations, p, X)
 
-Project the matrix `X` onto the tangent space by making `X` skew symmetric,
+Project the matrix `X` onto the tangent space left division by and and making the result
+skew symmetric,
 
 ````math
-\operatorname{proj}_p(X) = \frac{X-X^{\mathrm{T}}}{2},
+\operatorname{proj}_p(X) = \frac{pX-(pX)^{\mathrm{T}}}{2},
 ````
 
-where tangent vectors are represented by elements from the Lie group
+where tangent vectors are represented by elements from the Lie group.
 """
 project(::Rotations, ::Any, ::Any)
 
-project!(::Rotations{N}, Y, p, X) where {N} = project!(SkewSymmetricMatrices(N), Y, X)
+function project!(::Rotations{N}, Y, p, X) where {N}
+    project!(SkewSymmetricMatrices(N), Y, p \ X)
+    return Y
+end
+
+function project_no_rep_change!(::Rotations{N}, Y, p, X) where {N}
+    project!(SkewSymmetricMatrices(N), Y, X)
+    return Y
+end
 
 @doc raw"""
     representation_size(M::Rotations)
