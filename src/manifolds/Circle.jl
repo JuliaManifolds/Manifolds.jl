@@ -106,13 +106,13 @@ distance(::Circle{ℝ}, p, q) = abs(sum(sym_rem.(p - q)))
 distance(::Circle{ℂ}, p, q) = acos(clamp(complex_dot(p, q), -1, 1))
 
 @doc raw"""
-    project(M::Circle, p)
+    embed(M::Circle, p)
 
 Embed a point `p` on [`Circle`](@ref) `M` in the ambient space. It returns `p`.
 """
 embed(::Circle, p) = p
 @doc raw"""
-    project(M::Circle, p, X)
+    embed(M::Circle, p, X)
 
 Embed a tangent vector `X` at `p` on [`Circle`](@ref) `M` in the ambient space. It returns `X`.
 """
