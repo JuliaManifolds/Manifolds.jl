@@ -141,6 +141,6 @@ function log!(
     m = M.metric.M
     lum = lu(m)
     lum_p_lum = lum \ p / lum
-    X .= Symmetric(m * sqrt(lum_p_lum * q) + sqrt(q * lum_p_lum) * m) - 2 * p
+    X .= m * sqrt(Symmetric(lum_p_lum * q)) + sqrt(Symmetric((q * lum_p_lum) * m)) - 2 * p
     return X
 end
