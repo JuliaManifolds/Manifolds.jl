@@ -132,7 +132,7 @@ end
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
 
 embed(::AbstractProjectiveSpace, p) = p
-embed(::AbstractProjectiveSpace, p, X) = p
+embed(::AbstractProjectiveSpace, p, X) = X
 
 @doc raw"""
     distance(M::AbstractProjectiveSpace, p, q)

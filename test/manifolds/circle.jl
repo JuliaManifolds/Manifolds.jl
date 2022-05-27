@@ -117,6 +117,7 @@ using Manifolds: TFVector, CoTFVector
                 M,
                 pts,
                 test_vector_spaces=false,
+                test_project_point=true,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,
@@ -129,6 +130,7 @@ using Manifolds: TFVector, CoTFVector
             test_manifold(
                 M,
                 ptsS,
+                test_project_point=true,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,

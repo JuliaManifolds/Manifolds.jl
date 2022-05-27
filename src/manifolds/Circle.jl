@@ -106,6 +106,19 @@ distance(::Circle{ℝ}, p, q) = abs(sum(sym_rem.(p - q)))
 distance(::Circle{ℂ}, p, q) = acos(clamp(complex_dot(p, q), -1, 1))
 
 @doc raw"""
+    embed(M::Circle, p)
+
+Embed a point `p` on [`Circle`](@ref) `M` in the ambient space. It returns `p`.
+"""
+embed(::Circle, p) = p
+@doc raw"""
+    embed(M::Circle, p, X)
+
+Embed a tangent vector `X` at `p` on [`Circle`](@ref) `M` in the ambient space. It returns `X`.
+"""
+embed(::Circle, p, X) = X
+
+@doc raw"""
     exp(M::Circle, p, X)
 
 Compute the exponential map on the [`Circle`](@ref).
