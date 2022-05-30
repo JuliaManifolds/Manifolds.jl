@@ -19,18 +19,18 @@ function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ)
 end
 
 @inline function active_traits(f, M::TranslationGroup, args...)
-    return merge_traits(
-        IsGroupManifold(M.op),
-        HasBiinvariantMetric(),
-        active_traits(f, M.manifold, args...),
-        IsExplicitDecorator(),
-    )
-end
-# for exp! just pass down, the M.manifold traits would introduce MetricManifold which triggers
-# the ODE solver and yields a domain error, cf.
-# https://github.com/JuliaManifolds/Manifolds.jl/issues/483
-@inline function active_traits(::typeof(exp!), M::TranslationGroup, args...)
-    return merge_traits(IsExplicitDecorator())
+    if is_metric_function(f)
+        #pass to Rotations by default - but keep Group Decorator for the retraction
+        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+    else
+        return merge_traits(
+            IsGroupManifold(M.op),
+            HasBiinvariantMetric(),
+            IsDefaultMetric(EuclideanMetric()),
+            active_traits(f, M.manifold, args...),
+            IsExplicitDecorator(), #pass to Rotations by default/last fallback
+        )
+    end
 end
 
 identity_element!(::TranslationGroup, p) = fill!(p, 0)
