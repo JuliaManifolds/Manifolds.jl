@@ -21,11 +21,16 @@ end
 @inline function active_traits(f, M::TranslationGroup, args...)
     return merge_traits(
         IsGroupManifold(M.op),
-        IsDefaultMetric(EuclideanMetric()),
         HasBiinvariantMetric(),
         active_traits(f, M.manifold, args...),
         IsExplicitDecorator(),
     )
+end
+# for exp! just pass down, the M.manifold traits would introduce MetricManifold which triggers
+# the ODE solver and yields a domain error, cf.
+# https://github.com/JuliaManifolds/Manifolds.jl/issues/483
+@inline function active_traits(::typeof(exp!), M::TranslationGroup, args...)
+    return merge_traits(IsExplicitDecorator())
 end
 
 identity_element!(::TranslationGroup, p) = fill!(p, 0)

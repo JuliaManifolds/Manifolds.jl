@@ -18,6 +18,12 @@ include("group_utils.jl")
         @test log_lie(G, Identity(G)) == zeros(2, 3) # log_lie with Identity on Addition group.
         pts = [reshape(i:(i + 5), (2, 3)) for i in 1:3]
         vpts = [reshape(-2:3, (2, 3)), reshape(-1:4, (2, 3))]
+        # test fallback exp/exp! that the fallback works correctly, cf.
+        # https://github.com/JuliaManifolds/Manifolds.jl/issues/483
+        q = exp(G, pts[1], vpts[1])
+        q2 = copy(G, pts[1])
+        exp!(G, q2, pts[1], vpts[1])
+        @test q == q2
         for T in types
             gpts = convert.(T, pts)
             vgpts = convert.(T, vpts)
