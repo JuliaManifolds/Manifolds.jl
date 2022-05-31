@@ -53,7 +53,7 @@ end
 Compute the distance with respect to the [`BuresWassersteinMetric`](@ref) on [`SymmetricPositiveDefinite`](@ref) matrices, i.e.
 
 ```math
-d(p,q) = 
+d(p,q) =
     \operatorname{tr}(p) + \operatorname{tr}(q) - 2\operatorname{tr}\Bigl( (p^{\frac{1}{2}}qp^{\frac{1}{2}} \bigr)^\frac{1}{2} \Bigr),
 ```
 
@@ -133,6 +133,6 @@ function log!(
     p,
     q,
 )
-    X .= sqrt(p * q) + sqrt(q * p) - 2 * p
+    X .= sqrt(Symmetric(p * q)) + sqrt(Symmetric(q * p)) - 2 * p
     return X
 end

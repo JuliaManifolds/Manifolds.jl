@@ -125,10 +125,8 @@ Compute the logarithmic map on [`SymmetricPositiveDefinite`](@ref) with respect 
 the [`BuresWassersteinMetric`](@ref) given by
 
 ```math
-    \log_p(q) = M(M^{-1}pM^{-1}q)^{\frac{1}{2}} + (qM^{-1}pM^{-1})^{\frac{1}{2}}M^{-1} - 2 p
+    \log_p(q) = M(M^{-1}pM^{-1}q)^{\frac{1}{2}} + (qM^{-1}pM^{-1})^{\frac{1}{2}}M - 2 p.
 ```
-
-where ``q=L_p(X)`` denotes the Lyapunov operator, i.e. it solves ``pq + qp = X``.
 """
 log(::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, q)
 
@@ -141,6 +139,6 @@ function log!(
     m = M.metric.M
     lum = lu(m)
     lum_p_lum = lum \ p / lum
-    X .= Symmetric(m * sqrt(lum_p_lum * q) + sqrt(q * lum_p_lum) * m) - 2 * p
+    X .= real.(Symmetric(m * sqrt(lum_p_lum * q) + sqrt(q * lum_p_lum) * m) - 2 * p)
     return X
 end
