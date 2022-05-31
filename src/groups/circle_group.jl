@@ -9,13 +9,18 @@ const CircleGroup = GroupManifold{ℂ,Circle{ℂ},MultiplicationOperation}
 CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 
 @inline function active_traits(f, M::CircleGroup, args...)
-    return merge_traits(
-        IsGroupManifold(M.op),
-        IsDefaultMetric(EuclideanMetric()),
-        HasBiinvariantMetric(),
-        active_traits(f, M.manifold, args...),
-        IsExplicitDecorator(),
-    )
+    if is_metric_function(f)
+        #pass to Euclidean by default - but keep Group Decorator for the retraction
+        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+    else
+        return merge_traits(
+            IsGroupManifold(M.op),
+            HasBiinvariantMetric(),
+            IsDefaultMetric(EuclideanMetric()),
+            active_traits(f, M.manifold, args...),
+            IsExplicitDecorator(), #pass to Euclidean by default/last fallback
+        )
+    end
 end
 
 Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
@@ -119,13 +124,18 @@ const RealCircleGroup = GroupManifold{ℝ,Circle{ℝ},AdditionOperation}
 RealCircleGroup() = GroupManifold(Circle{ℝ}(), AdditionOperation())
 
 @inline function active_traits(f, M::RealCircleGroup, args...)
-    return merge_traits(
-        IsGroupManifold(M.op),
-        IsDefaultMetric(EuclideanMetric()),
-        HasBiinvariantMetric(),
-        active_traits(f, M.manifold, args...),
-        IsExplicitDecorator(),
-    )
+    if is_metric_function(f)
+        #pass to Euclidean by default - but keep Group Decorator for the retraction
+        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+    else
+        return merge_traits(
+            IsGroupManifold(M.op),
+            HasBiinvariantMetric(),
+            IsDefaultMetric(EuclideanMetric()),
+            active_traits(f, M.manifold, args...),
+            IsExplicitDecorator(), #pass to Euclidean by default/last fallback
+        )
+    end
 end
 
 Base.show(io::IO, ::RealCircleGroup) = print(io, "RealCircleGroup()")
