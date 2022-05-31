@@ -83,6 +83,14 @@ using LinearAlgebra: Diagonal, dot
 
         set_default_differential_backend!(fd51)
     end
+
+    @testset "Hessian" begin
+        r2 = Euclidean(2)
+        f1(p) = norm(p - [1.0, -1.0])^2
+        q = [2.0, 3.0]
+
+        @test isapprox(Manifolds._hessian(f1, q), [2.0 0.0; 0.0 2.0])
+    end
 end
 
 rb_onb_default = TangentDiffBackend(

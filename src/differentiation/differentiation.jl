@@ -56,13 +56,31 @@ function _gradient!(f, X, p, backend::AbstractDiffBackend=default_differential_b
 end
 
 """
-    _jacobian(f, p[, backend::AbstractDiffBackend])
+    _hessian(f, p[, backend::AbstractDiffBackend])
 
-Compute the jacobian of a callable `f` at point `p` computed using the given `backend`,
+Compute the Hessian of a callable `f` at point `p` computed using the given `backend`,
 an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitly
 specified, it is obtained using the function [`default_differential_backend`](@ref).
 
-This function calculates plain Euclidean gradients, for Riemannian gradient calculation see
+This function calculates plain Euclidean Hessian.
+
+!!! note
+
+    Not specifying the backend explicitly will usually result in a type instability
+    and decreased performance.
+"""
+function _hessian end
+
+_hessian(f, p) = _hessian(f, p, default_differential_backend())
+
+"""
+    _jacobian(f, p[, backend::AbstractDiffBackend])
+
+Compute the Jacobian of a callable `f` at point `p` computed using the given `backend`,
+an object of type [`AbstractDiffBackend`](@ref). If the backend is not explicitly
+specified, it is obtained using the function [`default_differential_backend`](@ref).
+
+This function calculates plain Euclidean Jacobians, for Riemannian Jacobian calculation see
 for example [`gradient`](@ref Manifolds.gradient(::AbstractManifold, ::Any, ::Any, ::AbstractRiemannianDiffBackend)).
 
 !!! note
