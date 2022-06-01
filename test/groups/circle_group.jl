@@ -78,6 +78,8 @@ include("group_utils.jl")
             is_tangent_atol_multiplier=2.0,
             mid_point12=nothing,
         )
+
+        @test isapprox(G, (1.0 + 1.0im) / √2, mean(G, pts))
     end
 end
 
@@ -154,5 +156,6 @@ end
             is_tangent_atol_multiplier=2.0,
             mid_point12=nothing,
         )
+        @test isapprox(G, 0.5, mean(G, [1.0, 0.5, 0.0]))
     end
 end

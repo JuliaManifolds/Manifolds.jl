@@ -171,6 +171,8 @@ for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
     )
 end
 
+@trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector)
+
 """
     Statistics.cov(
         M::AbstractManifold,
