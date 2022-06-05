@@ -490,12 +490,17 @@ export Euclidean,
     Torus,
     Tucker
 # Point representation types
-export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint,
-    StiefelPoint, ProjectorPoint
+export HyperboloidPoint,
+    PoincareBallPoint,
+    PoincareHalfSpacePoint,
+    SVDMPoint,
+    TuckerPoint,
+    StiefelPoint,
+    ProjectorPoint
 # Tangent vector representation types
 export HyperboloidTVector,
     PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
-    ProjectorTVector, StiefelTVector
+ProjectorTVector, StiefelTVector
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds

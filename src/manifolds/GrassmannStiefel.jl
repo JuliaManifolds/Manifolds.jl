@@ -104,7 +104,6 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 inner(::Grassmann, p, X, Y) = dot(X, Y)
 
-
 @doc raw"""
     inverse_retract(M::Grassmann, p, q, ::PolarInverseRetraction)
 
@@ -239,7 +238,6 @@ Return the represenation size or matrix dimension of a point on the [`Grassmann`
 `M`, i.e. $(n,k)$ for both the real-valued and the complex value case.
 """
 @generated representation_size(::Grassmann{n,k}) where {n,k} = (n, k)
-
 
 @doc raw"""
     retract(M::Grassmann, p, X, ::PolarRetraction)
