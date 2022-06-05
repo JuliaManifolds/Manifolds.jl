@@ -9,7 +9,7 @@ This point is mainly used for representing points on the [`Grassmann`](@ref) whe
 is also the default representation and hence equivalent to using `AbstractMatrices` thereon.
 they can also used be used as points on Stiefel.
 """
-struct GrassmannBasisPoint{T<:AbstractMatrix} <: AbstractManifoldPoint
+struct StiefelPoint{T<:AbstractMatrix} <: AbstractManifoldPoint
     value::T
 end
 
@@ -283,6 +283,8 @@ end
 function Base.show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽}
     return print(io, "Grassmann($(n), $(k), $(𝔽))")
 end
+Base.show(io::IO, p::StiefelPoint) = print(io, "StiefelPoint($(p.value))")
+Base.show(io::IO, X::StiefelTVector) = print(io, "StiefelTVector($(X.value))")
 
 """
     uniform_distribution(M::Grassmann{n,k,ℝ}, p)
