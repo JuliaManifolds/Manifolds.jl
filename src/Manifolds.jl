@@ -140,6 +140,7 @@ import ManifoldsBase:
     CotangentSpace,
     TangentSpace
 import Base:
+    angle,
     copyto!,
     convert,
     foreach,
@@ -488,9 +489,13 @@ export Euclidean,
     SymplecticMatrix,
     Torus,
     Tucker
-export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
+# Point representation types
+export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint,
+    StiefelPoint, ProjectorPoint
+# Tangent vector representation types
 export HyperboloidTVector,
     PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
+    ProjectorTVector, StiefelTVector
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
@@ -519,6 +524,8 @@ export AbstractAffineConnection,
     AbstractConnectionManifold, ConnectionManifold, LeviCivitaConnection
 export AbstractCartanSchoutenConnection,
     CartanSchoutenMinus, CartanSchoutenPlus, CartanSchoutenZero
+export MetricManifold
+# Metric types
 export AbstractMetric,
     RiemannianMetric,
     LorentzMetric,
@@ -533,10 +540,11 @@ export AbstractMetric,
     ProductMetric,
     RealSymplecticMetric,
     ExtendedSymplecticMetric,
-    CanonicalMetric,
-    MetricManifold
+    CanonicalMetric
 export AbstractAtlas, RetractionAtlas
+# Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+# Retraction types
 export AbstractRetractionMethod,
     CayleyRetraction,
     ExponentialRetraction,
@@ -548,6 +556,7 @@ export AbstractRetractionMethod,
     PadeRetraction,
     ProductRetraction,
     PowerRetraction
+# Inverse Retraction types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     ApproximateLogarithmicMap,
@@ -557,12 +566,14 @@ export AbstractInverseRetractionMethod,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
     SoftmaxInverseRetraction
+# Estimation methods for median and mean
 export AbstractEstimationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius,
     ExtrinsicEstimation
+# Tangent space bases
 export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,
@@ -570,7 +581,9 @@ export CachedBasis,
     DiagonalizingOrthonormalBasis,
     InducedBasis,
     ProjectedOrthonormalBasis
+# Errors on Manifolds
 export ComponentManifoldError, CompositeManifoldError
+# Functions on Manifolds
 export ×,
     allocate,
     allocate_result,
