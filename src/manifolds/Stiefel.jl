@@ -43,7 +43,7 @@ function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where
     return complex
 end
 
-ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTVector value value
+ManifoldsBase.@default_manifold_fallbacks Stiefel{<:Any,<:Any,<:AbstractNumbers} StiefelPoint StiefelTVector value value
 
 @doc raw"""
     check_point(M::Stiefel, p; kwargs...)

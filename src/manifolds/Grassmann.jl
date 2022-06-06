@@ -124,4 +124,14 @@ include("GrassmannProjector.jl")
 # Conversions
 #
 convert(::Type{ProjectorPoint}, p::AbstractMatrix) = ProjectorPoint(p * p')
+@doc raw"""
+    convert(::Type{ProjectorPoint}, ::Stiefelpoint)
+
+Convert a point on `p` [`Stiefel`](@ref) that also represents a point (i.e. subspace) on [`Grassmann`](@ref)
+to a projector representation of said subspace, i.e. compute
+
+```math
+  π^{\mathrm{SG}(p) = pp^{\mathrm{T)}}.
+```
+"""
 convert(T::Type{ProjectorPoint}, p::StiefelPoint) = convert(T, p.value)

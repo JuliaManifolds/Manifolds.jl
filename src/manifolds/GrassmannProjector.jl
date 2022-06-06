@@ -1,9 +1,9 @@
 @doc raw"""
-     ProjectorPoint <: AbstractManifoldPoint
+    ProjectorPoint <: AbstractManifoldPoint
 
- A type to represent points on a manifold [`Grassmann`](@ref) that are orthogonal projectors,
- i.e. a matrix ``p ∈ \mathbb F^{n,n}`` projecting onto a ``k``-dimensional subspace.
- """
+A type to represent points on a manifold [`Grassmann`](@ref) that are orthogonal projectors,
+i.e. a matrix ``p ∈ \mathbb F^{n,n}`` projecting onto a ``k``-dimensional subspace.
+"""
 struct ProjectorPoint{T<:AbstractMatrix} <: AbstractManifoldPoint
     value::T
 end
