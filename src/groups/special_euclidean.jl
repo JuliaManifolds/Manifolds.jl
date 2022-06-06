@@ -49,6 +49,34 @@ const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
 Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
+_is_se_forwarded_function(::Any) = false
+for mf in [
+    flat!,
+    get_basis,
+    get_coordinates,
+    get_coordinates!,
+    get_vector,
+    get_vector!,
+    get_vectors,
+    inner,
+    norm,
+    sharp!,
+]
+    @eval _is_se_forwarded_function(::typeof($mf)) = true
+end
+
+@inline function active_traits(f, M::SpecialEuclidean, args...)
+    if is_metric_function(f) && !_is_se_forwarded_function(f)
+        return merge_traits(IsGroupManifold(M.op), HasLeftInvariantMetric())
+    else
+        return merge_traits(
+            IsGroupManifold(M.op),
+            active_traits(f, M.manifold, args...),
+            IsExplicitDecorator(),
+        )
+    end
+end
+
 Base.@propagate_inbounds function submanifold_component(
     ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
     p::AbstractMatrix,
@@ -260,7 +288,8 @@ function compose!(
     p::AbstractMatrix,
     q::AbstractMatrix,
 )
-    return mul!(x, p, q)
+    copyto!(x, p * q)
+    return x
 end
 
 @doc raw"""

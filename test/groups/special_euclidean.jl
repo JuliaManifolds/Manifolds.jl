@@ -77,6 +77,13 @@ Random.seed!(10)
                 test_adjoint_action=true,
                 diff_convs=[(), (LeftAction(),), (RightAction(),)],
             )
+            test_manifold(
+                G,
+                pts;
+                #test_inplace=true,
+                test_vee_hat=true,
+                exp_log_atol_multiplier=50,
+            )
         end
 
         @testset "affine matrix" begin
@@ -91,6 +98,13 @@ Random.seed!(10)
                 test_lie_bracket=true,
                 diff_convs=[(), (LeftAction(),), (RightAction(),)],
                 atol=1e-9,
+            )
+            test_manifold(
+                G,
+                pts;
+                #test_inplace=true,
+                test_vee_hat=true,
+                exp_log_atol_multiplier=50,
             )
             # specific affine tests
             p = copy(G, pts[1])
