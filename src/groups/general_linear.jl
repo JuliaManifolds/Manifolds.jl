@@ -80,7 +80,10 @@ the conjugate transpose. [^AndruchowLarotondaRechtVarela2014][^MartinNeff2016]
     > doi: [10.3934/jgm.2016010](https://doi.org/10.3934/jgm.2016010),
     > arXiv: [1409.7849v2](https://arxiv.org/abs/1409.7849v2).
 """
-exp(::GeneralLinear, p, X)
+function exp(M::GeneralLinear, p, X)
+    q = similar(p)
+    return exp!(M, q, p, X)
+end
 
 function exp!(G::GeneralLinear, q, p, X)
     expX = exp(X)
@@ -187,7 +190,10 @@ supergroup `GeneralLinear(2n)` and the resulting tangent vector is then complexi
 
 Note that this implementation is experimental.
 """
-log(::GeneralLinear, p, q)
+function log(M::GeneralLinear, p, q)
+    X = similar(p)
+    return log!(M, X, p, q)
+end
 
 function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
     pinvq = inverse_translate(G, p, q, LeftAction())
