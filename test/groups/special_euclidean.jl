@@ -44,6 +44,8 @@ Random.seed!(10)
             ]
         end
 
+        basis_types = (DefaultOrthonormalBasis(),)
+
         @testset "product repr" begin
             pts = [ProductRepr(tp...) for tp in tuple_pts]
             X_pts = [ProductRepr(tX...) for tX in tuple_X]
@@ -77,6 +79,16 @@ Random.seed!(10)
                 test_adjoint_action=true,
                 diff_convs=[(), (LeftAction(),), (RightAction(),)],
             )
+            test_manifold(
+                G,
+                pts;
+                basis_types_vecs=basis_types,
+                basis_types_to_from=basis_types,
+                is_mutating=true,
+                #test_inplace=true,
+                test_vee_hat=true,
+                exp_log_atol_multiplier=50,
+            )
         end
 
         @testset "affine matrix" begin
@@ -91,6 +103,14 @@ Random.seed!(10)
                 test_lie_bracket=true,
                 diff_convs=[(), (LeftAction(),), (RightAction(),)],
                 atol=1e-9,
+            )
+            test_manifold(
+                G,
+                pts;
+                is_mutating=true,
+                #test_inplace=true,
+                test_vee_hat=true,
+                exp_log_atol_multiplier=50,
             )
             # specific affine tests
             p = copy(G, pts[1])
