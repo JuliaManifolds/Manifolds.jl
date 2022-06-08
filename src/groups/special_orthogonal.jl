@@ -77,6 +77,10 @@ function log_lie!(::SpecialOrthogonal{2}, X, p)
     end
     return X
 end
+function log_lie!(::SpecialOrthogonal{2}, X, ::Identity{MultiplicationOperation})
+    fill!(X, 0)
+    return X
+end
 
 translate_diff(::SpecialOrthogonal, p, q, X, ::LeftAction) = X
 translate_diff(G::SpecialOrthogonal, p, q, X, ::RightAction) = inv(G, p) * X * p
