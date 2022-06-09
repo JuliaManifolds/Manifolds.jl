@@ -44,6 +44,13 @@ function allocate_result(
     return allocate(q)
 end
 
+function exp_lie!(::SpecialOrthogonal{2}, q, X)
+    @assert size(q) == (2, 2)
+    θ = X[2]
+    sinθ, cosθ = sincos(θ)
+    return copyto!(q, SA[cosθ -sinθ; sinθ cosθ])
+end
+
 Base.inv(::SpecialOrthogonal, p) = transpose(p)
 Base.inv(::SpecialOrthogonal, e::Identity{MultiplicationOperation}) = e
 
@@ -56,6 +63,23 @@ end
 
 function inverse_translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
+end
+
+function log_lie!(::SpecialOrthogonal{2}, X, p)
+    @assert size(p) == (2, 2)
+    @assert size(X) == (2, 2)
+    @inbounds θ = atan(p[2], p[1])
+    @inbounds begin
+        X[1] = 0
+        X[2] = θ
+        X[3] = -θ
+        X[4] = 0
+    end
+    return X
+end
+function log_lie!(::SpecialOrthogonal{2}, X, ::Identity{MultiplicationOperation})
+    fill!(X, 0)
+    return X
 end
 
 translate_diff(::SpecialOrthogonal, p, q, X, ::LeftAction) = X
