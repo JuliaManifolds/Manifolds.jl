@@ -121,6 +121,37 @@ include("GrassmannStiefel.jl")
 include("GrassmannProjector.jl")
 
 #
+# Quotient structure Stiefel and Projectors
+#
+# TODO: Discuss whether we should maybe start a small `QuotientManifold{N,M}`
+# Formula from
+# @online{2011.13699,
+#   Author = {Thomas Bendokat and Ralf Zimmermann and P. -A. Absil},
+#   Title = {A Grassmann Manifold Handbook: Basic Geometry and Computational Aspects},
+#  Year = {2020},
+#  Eprint = {2011.13699},
+#  Eprinttype = {arXiv},
+#}
+#
+#= @doc raw"""
+    quotient_project(::Stiefel{n,k,𝔽}, Grassmann{n,k,𝔽}, p)
+
+    compute the projecttion from [`Stiefel`](@ref) to the [`Grassmann`](@ref),
+    i.e. Compute for the input point ``p\in \mathbb F^{n×k}``
+
+    ```math
+        π^{\mathrm{SG}(p) = pp^{\mathrm{T}}
+    ```
+"""
+function quotient_project(::Stiefel{n,k,𝔽}, N::Grassmann{n,k,𝔽}, p)
+    q = allocate(N, quotient_project) # we need the Stiefel size
+    quotient_project(N, M, q, p)
+end
+function quotient_project!(::Stiefel{n,k,𝔽}, ::Grassmann{n,k,𝔽}, q, p)
+    copyto!(M, q, p*p')
+end
+=#
+#
 # Conversions
 #
 convert(::Type{ProjectorPoint}, p::AbstractMatrix) = ProjectorPoint(p * p')
