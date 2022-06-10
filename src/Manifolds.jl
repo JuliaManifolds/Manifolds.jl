@@ -279,6 +279,7 @@ include("differentiation/embedded_diff.jl")
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
+include("manifolds/QuotientManifold.jl")
 include("manifolds/VectorBundle.jl")
 include("groups/group.jl")
 
@@ -594,6 +595,7 @@ export ×,
     allocate_result,
     base_manifold,
     bundle_projection,
+    canonical_project,
     change_metric,
     change_metric!,
     change_representer,
@@ -621,6 +623,7 @@ export ×,
     get_default_atlas,
     get_component,
     get_embedding,
+    get_total_space,
     grad_euclidean_to_manifold,
     grad_euclidean_to_manifold!,
     hat,
@@ -752,12 +755,12 @@ export adjoint_action,
     get_coordinates_orthonormal,
     get_coordinates_orthogonal!,
     get_coordinates_orthonormal!,
+    get_coordinates_vee!,
     get_vector_diagonalizing!,
     get_vector_lie,
     get_vector_lie!,
     get_vector_orthogonal,
     get_vector_orthonormal,
-    get_coordinates_vee!,
     has_biinvariant_metric,
     has_invariant_metric,
     identity_element,
