@@ -1046,18 +1046,35 @@ function inverse_retract!(
     return translate_diff!(G, X, p, Identity(G), Xₑ, conv)
 end
 
+@trait_function get_vector_lie(G::AbstractManifold, X, B::AbstractBasis)
+@trait_function get_vector_lie!(G::AbstractManifold, Y, X, B::AbstractBasis)
+
 @doc raw"""
     get_vector_lie(G::AbstractDecoratorManifold, a, B::AbstractBasis)
 
 Reconstruct a tangent vector from the Lie algebra of `G` from cooordinates `a` of a basis `B`.
 This is similar to calling [`get_vector`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
 """
-function get_vector_lie(G::AbstractManifold, X, B::AbstractBasis)
+function get_vector_lie(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractManifold,
+    X,
+    B::AbstractBasis,
+)
     return get_vector(base_manifold(G), identity_element(G), X, B)
 end
-function get_vector_lie!(G::AbstractManifold, Y, X, B::AbstractBasis)
+function get_vector_lie!(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractManifold,
+    Y,
+    X,
+    B::AbstractBasis,
+)
     return get_vector!(base_manifold(G), Y, identity_element(G), X, B)
 end
+
+@trait_function get_coordinates_lie(G::AbstractManifold, X, B::AbstractBasis)
+@trait_function get_coordinates_lie!(G::AbstractManifold, a, X, B::AbstractBasis)
 
 @doc raw"""
     get_coordinates_lie(G::AbstractManifold, X, B::AbstractBasis)
@@ -1065,9 +1082,20 @@ end
 Get the coordinates of an element `X` from the Lie algebra og `G` with respect to a basis `B`.
 This is similar to calling [`get_coordinates`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
 """
-function get_coordinates_lie(G::AbstractManifold, X, B::AbstractBasis)
+function get_coordinates_lie(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractManifold,
+    X,
+    B::AbstractBasis,
+)
     return get_coordinates(base_manifold(G), identity_element(G), X, B)
 end
-function get_coordinates_lie!(G::AbstractManifold, a, X, B::AbstractBasis)
+function get_coordinates_lie!(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractManifold,
+    a,
+    X,
+    B::AbstractBasis,
+)
     return get_coordinates!(base_manifold(G), a, identity_element(G), X, B)
 end
