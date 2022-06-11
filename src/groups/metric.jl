@@ -84,51 +84,51 @@ function exp!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, q, p, X)
     return exp!(M.manifold, q, p, X)
 end
 
-function get_coordinates(
+function get_coordinates_orthonormal(
     t::TraitList{IT},
     M::AbstractDecoratorManifold,
     p,
     X,
-    B::AbstractBasis,
+    N::AbstractNumbers,
 ) where {IT<:AbstractInvarianceTrait}
     conv = direction(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
-    return get_coordinates_lie(next_trait(t), M, Xₑ, B)
+    return get_coordinates_lie(next_trait(t), M, Xₑ, DefaultOrthonormalBasis(N))
 end
-function get_coordinates!(
+function get_coordinates_orthonormal!(
     t::TraitList{IT},
     M::AbstractDecoratorManifold,
     c,
     p,
     X,
-    B::AbstractBasis,
+    N::AbstractNumbers,
 ) where {IT<:AbstractInvarianceTrait}
     conv = direction(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
-    return get_coordinates_lie!(next_trait(t), M, c, Xₑ, B)
+    return get_coordinates_lie!(next_trait(t), M, c, Xₑ, DefaultOrthonormalBasis(N))
 end
 
-function get_vector(
+function get_vector_orthonormal(
     t::TraitList{IT},
     M::AbstractDecoratorManifold,
     p,
     c,
-    B::AbstractBasis,
+    N::AbstractNumbers,
 ) where {IT<:AbstractInvarianceTrait}
     conv = direction(t, M)
-    Xₑ = get_vector_lie(next_trait(t), M, c, B)
+    Xₑ = get_vector_lie(next_trait(t), M, c, DefaultOrthonormalBasis(N))
     return translate_diff(M, p, Identity(M), Xₑ, conv)
 end
-function get_vector!(
+function get_vector_orthonormal!(
     t::TraitList{IT},
     M::AbstractDecoratorManifold,
     X,
     p,
     c,
-    B::AbstractBasis,
+    N::AbstractNumbers,
 ) where {IT<:AbstractInvarianceTrait}
     conv = direction(t, M)
-    Xₑ = get_vector_lie(next_trait(t), M, c, B)
+    Xₑ = get_vector_lie(next_trait(t), M, c, DefaultOrthonormalBasis(N))
     return translate_diff!(M, X, p, Identity(M), Xₑ, conv)
 end
 

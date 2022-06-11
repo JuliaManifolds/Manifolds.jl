@@ -49,22 +49,6 @@ const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
 Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
-_is_se_forwarded_function(::Any) = false
-for mf in [
-    flat!,
-    get_basis,
-    get_coordinates,
-    get_coordinates!,
-    get_vector,
-    get_vector!,
-    get_vectors,
-    inner,
-    norm,
-    sharp!,
-]
-    @eval _is_se_forwarded_function(::typeof($mf)) = true
-end
-
 @inline function active_traits(f, M::SpecialEuclidean, args...)
     return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
 end
@@ -679,3 +663,59 @@ end
 function project!(M::SpecialEuclideanInGeneralLinear, Y, p, X)
     return copyto!(Y, project(M, p, X))
 end
+
+"""
+    ChainedTranslationRotationMetric <: AbstractMetric
+
+The chained translation-rotation metric for SE(n)
+"""
+struct ChainedTranslationRotationMetric <: AbstractMetric end
+
+function exp!(
+    M::MetricManifold{ℝ,<:SpecialEuclidean,ChainedTranslationRotationMetric},
+    q,
+    p,
+    X,
+)
+    Mprod = M.manifold.manifold
+    np, hp = submanifold_components(G, p)
+    nq, hq = submanifold_components(G, q)
+    nX, hX = submanifold_components(G, X)
+
+    exp!(Mprod.manifolds[2], hq, hp, hX)
+    nq .= np .+ hp * nX
+
+    @inbounds _padpoint!(M, q)
+    return q
+end
+
+function inner(
+    M::MetricManifold{ℝ,<:SpecialEuclidean,ChainedTranslationRotationMetric},
+    p,
+    X,
+    Y,
+)
+    # TODO: verify
+    Mprod = M.manifold.manifold
+    return inner(Mprod, p, X, Y)
+end
+
+function log!(
+    M::MetricManifold{ℝ,<:SpecialEuclidean,ChainedTranslationRotationMetric},
+    X,
+    p,
+    q,
+)
+    Mprod = M.manifold.manifold
+    np, hp = submanifold_components(G, p)
+    nq, hq = submanifold_components(G, q)
+    nX, hX = submanifold_components(G, X)
+
+    log!(Mprod.manifolds[2], hX, hp, hq)
+    nX .= hp' * (np - nq)
+
+    @inbounds _padvector!(M, X)
+    return X
+end
+
+struct SimultaneousRotationTranslationMetric <: AbstractMetric end
