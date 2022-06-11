@@ -30,7 +30,7 @@ For more details see Subsection 3.4.1[^AbsilMahonySepulchre2008].
 This manifold type models an explicit quotient structure.
 This should be done if either the default implementation of ``\mathcal M``
 uses another representation different from the quotient structure or if
-it provides a (default) quotient structure that is different from the one tintroduced here.
+it provides a (default) quotient structure that is different from the one introduced here.
 
 # Fields
 
