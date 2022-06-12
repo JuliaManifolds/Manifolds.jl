@@ -98,6 +98,7 @@ Random.seed!(10)
                     basis_types_vecs=basis_types,
                     basis_types_to_from=basis_types,
                     is_mutating=true,
+                    exp_log_atol_multiplier=2,
                 )
             end
         end
