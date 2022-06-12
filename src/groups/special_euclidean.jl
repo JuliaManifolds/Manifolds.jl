@@ -678,15 +678,20 @@ function exp!(
     X,
 )
     Mprod = M.manifold.manifold
-    np, hp = submanifold_components(G, p)
-    nq, hq = submanifold_components(G, q)
-    nX, hX = submanifold_components(G, X)
+    np, hp = submanifold_components(Mprod, p)
+    nq, hq = submanifold_components(Mprod, q)
+    nX, hX = submanifold_components(Mprod, X)
 
     exp!(Mprod.manifolds[2], hq, hp, hX)
     nq .= np .+ hp * nX
 
-    @inbounds _padpoint!(M, q)
+    @inbounds _padpoint!(M.manifold, q)
     return q
+end
+
+function exp(M::MetricManifold{ℝ,<:SpecialEuclidean,ChainedTranslationRotationMetric}, p, X)
+    q = allocate(p)
+    return exp!(M, q, p, X)
 end
 
 function inner(
@@ -707,15 +712,20 @@ function log!(
     q,
 )
     Mprod = M.manifold.manifold
-    np, hp = submanifold_components(G, p)
-    nq, hq = submanifold_components(G, q)
-    nX, hX = submanifold_components(G, X)
+    np, hp = submanifold_components(Mprod, p)
+    nq, hq = submanifold_components(Mprod, q)
+    nX, hX = submanifold_components(Mprod, X)
 
     log!(Mprod.manifolds[2], hX, hp, hq)
-    nX .= hp' * (np - nq)
+    nX .= hp' * (nq - np)
 
-    @inbounds _padvector!(M, X)
+    @inbounds _padvector!(M.manifold, X)
     return X
+end
+
+function log(M::MetricManifold{ℝ,<:SpecialEuclidean,ChainedTranslationRotationMetric}, p, q)
+    X = allocate(p)
+    return log!(M, X, p, q)
 end
 
 struct SimultaneousRotationTranslationMetric <: AbstractMetric end
