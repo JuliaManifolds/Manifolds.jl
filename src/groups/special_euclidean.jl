@@ -715,23 +715,14 @@ function exp_lie!(
     q,
     X,
 )
-    Mprod = M.manifold.manifold
-    nq, hq = submanifold_components(Mprod, q)
-    nX, hX = submanifold_components(Mprod, X)
-
-    exp_lie!(Mprod.manifolds[2], hq, hX)
-    nq .= nX
-
-    @inbounds _padpoint!(M.manifold, q)
-    return q
+    return exp_lie!(M.manifold, q, X)
 end
 
 function exp_lie(
     M::MetricManifold{ℝ,<:SpecialEuclidean,ChainedTranslationRotationMetric},
     X,
 )
-    q = allocate(X)
-    return exp_lie!(M, q, X)
+    return exp_lie(M.manifold, X)
 end
 
 function inner(
@@ -795,23 +786,14 @@ function _log_lie!(
     X,
     q,
 )
-    Mprod = M.manifold.manifold
-    nq, hq = submanifold_components(Mprod, q)
-    nX, hX = submanifold_components(Mprod, X)
-
-    log_lie!(Mprod.manifolds[2], hX, hq)
-    nX .= nq
-
-    @inbounds _padvector!(M.manifold, X)
-    return X
+    return log_lie!(M.manifold, X, q)
 end
 
 function _log_lie(
     M::MetricManifold{ℝ,<:SpecialEuclidean,ChainedTranslationRotationMetric},
     q,
 )
-    X = allocate(q)
-    return log_lie!(M, X, q)
+    return log_lie(M.manifold, q)
 end
 
 struct SimultaneousRotationTranslationMetric <: AbstractMetric end
