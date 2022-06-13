@@ -100,6 +100,9 @@ function is_group_manifold(
     return is_group_manifold(M, t.head.op)
 end
 
+base_group(M::MetricManifold) = decorated_manifold(M)
+base_group(M::AbstractDecoratorManifold) = M
+
 """
     ActionDirection
 
@@ -194,13 +197,23 @@ where `p` indicates the type to represent the identity.
 identity_element(G::AbstractDecoratorManifold, p)
 @trait_function identity_element(G::AbstractDecoratorManifold, p)
 function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
-    q = allocate_result(G, identity_element, p)
-    return identity_element!(G, q)
+    BG = base_group(G)
+    q = allocate_result(BG, identity_element, p)
+    return identity_element!(BG, q)
 end
+
+function identity_element!(
+    ::TraitList{<:IsGroupManifold{O}},
+    ::AbstractDecoratorManifold,
+    q::Identity{O},
+) where {O<:AbstractGroupOperation}
+    return q
+end
+
 function check_size(
-    ::TraitList{<:IsGroupManifold{<:O}},
+    ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
-    ::Identity{<:O},
+    ::Identity{O},
 ) where {O<:AbstractGroupOperation}
     return nothing
 end
@@ -223,7 +236,8 @@ function is_identity(
     q;
     kwargs...,
 )
-    return isapprox(G, identity_element(G), q; kwargs...)
+    BG = base_group(G)
+    return isapprox(BG, identity_element(BG), q; kwargs...)
 end
 function is_identity(
     ::TraitList{<:IsGroupManifold{O}},
@@ -258,7 +272,8 @@ end
     q::Identity{O};
     kwargs...,
 ) where {O<:AbstractGroupOperation}
-    return is_identity(G, p; kwargs...)
+    BG = base_group(G)
+    return is_identity(BG, p; kwargs...)
 end
 function isapprox(
     ::TraitList{<:IsGroupManifold{O}},
@@ -296,7 +311,8 @@ end
     Y;
     kwargs...,
 ) where {𝔽,O<:AbstractGroupOperation}
-    return isapprox(G, identity_element(G), X, Y; kwargs...)
+    BG = base_group(G)
+    return isapprox(BG, identity_element(BG), X, Y; kwargs...)
 end
 function Base.isapprox(
     ::TraitList{<:IsGroupManifold},
@@ -402,7 +418,8 @@ inv(::AbstractDecoratorManifold, ::Any...)
 @trait_function Base.inv(G::AbstractDecoratorManifold, p)
 function Base.inv(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
     q = allocate_result(G, inv, p)
-    return inv!(G, q, p)
+    BG = base_group(G)
+    return inv!(BG, q, p)
 end
 
 function Base.inv(
@@ -415,7 +432,8 @@ end
 
 @trait_function inv!(G::AbstractDecoratorManifold, q, p)
 function inv!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p)
-    return inv!(G.manifold, q, p)
+    BG = base_group(G)
+    return inv!(BG, q, p)
 end
 
 function inv!(
@@ -424,7 +442,8 @@ function inv!(
     q,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
-    return identity_element!(G, q)
+    BG = base_group(G)
+    return identity_element!(BG, q)
 end
 
 function Base.copyto!(
@@ -441,7 +460,8 @@ function Base.copyto!(
     p,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
-    return identity_element!(G, p)
+    BG = base_group(G)
+    return identity_element!(BG, p)
 end
 
 @doc raw"""
@@ -456,7 +476,7 @@ compose(::AbstractDecoratorManifold, ::Any...)
 
 @trait_function compose(G::AbstractDecoratorManifold, p, q)
 function compose(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
-    return _compose(G, p, q)
+    return _compose(base_group(G), p, q)
 end
 function compose(
     ::AbstractDecoratorManifold,
@@ -488,7 +508,7 @@ end
 @trait_function compose!(M::AbstractDecoratorManifold, x, p, q)
 
 function compose!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, x, q, p)
-    return _compose!(G, x, q, p)
+    return _compose!(base_group(G), x, q, p)
 end
 function compose!(
     G::AbstractDecoratorManifold,
@@ -643,7 +663,8 @@ function translate(
     q,
     conv::ActionDirection,
 )
-    return compose(G, _action_order(p, q, conv)...)
+    BG = base_group(G)
+    return compose(BG, _action_order(p, q, conv)...)
 end
 
 @trait_function translate!(
@@ -661,7 +682,8 @@ function translate!(
     q,
     conv::ActionDirection,
 )
-    return compose!(G, X, _action_order(p, q, conv)...)
+    BG = base_group(G)
+    return compose!(BG, X, _action_order(p, q, conv)...)
 end
 
 @doc raw"""
@@ -690,7 +712,8 @@ function inverse_translate(
     q,
     conv::ActionDirection,
 )
-    return translate(G, inv(G, p), q, conv)
+    BG = base_group(G)
+    return translate(BG, inv(BG, p), q, conv)
 end
 
 @trait_function inverse_translate!(
@@ -708,7 +731,8 @@ function inverse_translate!(
     q,
     conv::ActionDirection,
 )
-    return translate!(G, X, inv(G, p), q, conv)
+    BG = base_group(G)
+    return translate!(BG, X, inv(BG, p), q, conv)
 end
 
 @doc raw"""
@@ -738,7 +762,8 @@ function translate_diff(
     conv::ActionDirection,
 )
     Y = allocate_result(G, translate_diff, X, p, q)
-    translate_diff!(G, Y, p, q, X, conv)
+    BG = base_group(G)
+    translate_diff!(BG, Y, p, q, X, conv)
     return Y
 end
 @trait_function translate_diff!(
@@ -776,7 +801,8 @@ function inverse_translate_diff(
     X,
     conv::ActionDirection,
 )
-    return translate_diff(G, inv(G, p), q, X, conv)
+    BG = base_group(G)
+    return translate_diff(BG, inv(BG, p), q, X, conv)
 end
 
 @trait_function inverse_translate_diff!(
@@ -796,7 +822,8 @@ function inverse_translate_diff!(
     X,
     conv::ActionDirection,
 )
-    return translate_diff!(G, Y, inv(G, p), q, X, conv)
+    BG = base_group(G)
+    return translate_diff!(BG, Y, inv(BG, p), q, X, conv)
 end
 
 @doc raw"""
