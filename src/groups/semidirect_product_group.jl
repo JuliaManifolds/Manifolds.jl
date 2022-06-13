@@ -13,7 +13,7 @@ function Base.show(io::IO, op::SemidirectProductOperation)
     return print(io, "SemidirectProductOperation($(op.action))")
 end
 
-const SemidirectProductGroup{𝔽,N,H,A} =
+const SemidirectProductGroup{𝔽,N,H,A<:AbstractGroupAction} =
     GroupManifold{𝔽,ProductManifold{𝔽,Tuple{N,H}},SemidirectProductOperation{A}}
 
 @doc raw"""
@@ -69,6 +69,12 @@ function identity_element!(G::SemidirectProductGroup, q)
     identity_element!(N, nq)
     identity_element!(H, hq)
     @inbounds _padpoint!(G, q)
+    return q
+end
+function identity_element!(
+    ::SemidirectProductGroup{𝔽,N,H,A},
+    q::Identity{SemidirectProductOperation{A}},
+) where {𝔽,N,H,A<:AbstractGroupAction}
     return q
 end
 

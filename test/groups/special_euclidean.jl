@@ -92,6 +92,18 @@ Random.seed!(10)
 
             @testset "ChainedTranslationRotationMetric" begin
                 G_TR = MetricManifold(G, Manifolds.ChainedTranslationRotationMetric())
+
+                test_group(
+                    G_TR,
+                    pts,
+                    X_pts,
+                    X_pts;
+                    test_diff=true,
+                    test_lie_bracket=true,
+                    test_adjoint_action=true,
+                    diff_convs=[(), (LeftAction(),), (RightAction(),)],
+                )
+
                 test_manifold(
                     G_TR,
                     pts;
