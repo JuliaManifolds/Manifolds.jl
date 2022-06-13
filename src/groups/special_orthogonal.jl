@@ -50,6 +50,18 @@ function exp_lie!(::SpecialOrthogonal{2}, q, X)
     sinθ, cosθ = sincos(θ)
     return copyto!(q, SA[cosθ -sinθ; sinθ cosθ])
 end
+function exp_lie!(::SpecialOrthogonal{3}, q, X)
+    θ = norm(X) / sqrt(2)
+    if θ ≈ 0
+        a = 1 - θ^2 / 6
+        b = θ / 2
+    else
+        a = sin(θ) / θ
+        b = (1 - cos(θ)) / θ^2
+    end
+    invq = I + a .* X .+ b .* (X^2)
+    return copyto!(q, invq)
+end
 
 Base.inv(::SpecialOrthogonal, p) = transpose(p)
 Base.inv(::SpecialOrthogonal, e::Identity{MultiplicationOperation}) = e
@@ -78,6 +90,22 @@ function log_lie!(::SpecialOrthogonal{2}, X, p)
     return X
 end
 function log_lie!(::SpecialOrthogonal{2}, X, ::Identity{MultiplicationOperation})
+    fill!(X, 0)
+    return X
+end
+function log_lie!(M::SpecialOrthogonal{3}, X, q)
+    cosθ = (tr(q) - 1) / 2
+    if cosθ ≈ -1
+        eig = eigen_safe(q)
+        ival = findfirst(λ -> isapprox(λ, 1), eig.values)
+        inds = SVector{3}(1:3)
+        ax = eig.vectors[inds, ival]
+        return get_vector_lie!(M, X, π * ax, DefaultOrthogonalBasis())
+    end
+    X .= q ./ usinc_from_cos(cosθ)
+    return project_no_rep_change!(M.manifold, X, q, X)
+end
+function log_lie!(::SpecialOrthogonal{3}, X, ::Identity{MultiplicationOperation})
     fill!(X, 0)
     return X
 end
