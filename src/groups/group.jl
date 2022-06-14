@@ -202,14 +202,6 @@ function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorMa
     return identity_element!(BG, q)
 end
 
-function identity_element!(
-    ::TraitList{<:IsGroupManifold{O}},
-    ::AbstractDecoratorManifold,
-    q::Identity{O},
-) where {O<:AbstractGroupOperation}
-    return q
-end
-
 function check_size(
     ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,

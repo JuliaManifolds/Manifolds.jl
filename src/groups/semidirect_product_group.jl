@@ -71,12 +71,6 @@ function identity_element!(G::SemidirectProductGroup, q)
     @inbounds _padpoint!(G, q)
     return q
 end
-function identity_element!(
-    ::SemidirectProductGroup{𝔽,N,H,A},
-    q::Identity{SemidirectProductOperation{A}},
-) where {𝔽,N,H,A<:AbstractGroupAction}
-    return q
-end
 
 function is_identity(
     G::SemidirectProductGroup,
