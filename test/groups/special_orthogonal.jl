@@ -51,6 +51,12 @@ include("group_utils.jl")
                 test_lie_bracket=true,
                 test_adjoint_action=true,
             )
+
+            @testset "log_lie edge cases" begin
+                X = Manifolds.hat(G, ge, vcat(Float64(π), zeros(manifold_dimension(G) - 1)))
+                p = exp_lie(G, X)
+                @test isapprox(p, exp_lie(G, log_lie(G, p)))
+            end
         end
 
         @testset "Decorator forwards to group" begin
