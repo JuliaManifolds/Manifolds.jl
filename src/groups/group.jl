@@ -433,6 +433,9 @@ end
 @trait_function inv!(G::AbstractDecoratorManifold, q, p)
 function inv!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p)
     BG = base_group(G)
+    if BG === G
+        throw(ErrorException("inv! not implemented for $G"))
+    end
     return inv!(BG, q, p)
 end
 
