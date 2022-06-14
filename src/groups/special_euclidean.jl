@@ -678,15 +678,6 @@ function allocate_result(
     return allocate_result(G.manifold, f)
 end
 
-function _compose!(
-    G::MetricManifold{ℝ,<:SpecialEuclidean,ChainedTranslationRotationMetric},
-    x,
-    p,
-    q,
-)
-    return _compose!(G.manifold, x, p, q)
-end
-
 function exp!(
     M::MetricManifold{ℝ,<:SpecialEuclidean,ChainedTranslationRotationMetric},
     q,
