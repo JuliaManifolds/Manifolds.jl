@@ -191,7 +191,27 @@ Pages = ["groups/translation_action.jl"]
 Order = [:type, :function]
 ```
 
-## Invariant metrics
+## Metrics on groups
+
+Lie groups by default typically forward all metric-related operations like exponential or logarithmic map to the underlying manifold, for example [`SpecialOrthogonal`](@ref) uses methods for [`Rotations`](@ref) (which is, incidentally, bi-invariant), or [`SpecialEuclidean`](@ref) uses product metric of the translation and rotation parts (which is not invariant under group operation).
+
+It is, however, possible to change the metric used by a group by wrapping it in a [`MetricManifold`](@ref) decorator, for example
+
+```@repl
+using Manifolds
+G = SpecialEuclidean(3)
+p = ProductRepr(([1.0, 2.0, 3.0], [-0.6949205576413116 0.7135209905277875 0.08929285886191218; -0.19200697279199935 -0.3037850443394705 0.9331923538236468; 0.6929781677417701 0.6313496993837178 0.34810747783026474]))
+q = ProductRepr(([2.0, 3.0, 4.0], [0.34810747783026474 0.9331923538236468 0.08929285886191218; 0.6313496993837178 -0.3037850443394705 0.7135209905277875; 0.6929781677417701 -0.19200697279199935 -0.6949205576413116]))
+X = ProductRepr(([-1.0, 2.0, 1.0], [0.0 0.5 0.5; -0.5 0.0 -1.0; -0.5 1.0 0.0]))
+X_id = ProductRepr(([3.0, 2.0, 1.0], [0.0 0.5 0.5; -0.5 0.0 -1.0; -0.5 1.0 0.0]))
+exp(G, p, X) # uses the product metric
+exp_lie(G, X_id) # group exponential
+G_TR = MetricManifold(G, Manifolds.ChainedTranslationRotationMetric())
+exp(G_TR, p, X) # uses the chained translation-rotation metric
+exp_lie(G_TR, X_id) # still the group exponential
+```
+
+### Invariant metrics
 
 ```@autodocs
 Modules = [Manifolds]
