@@ -89,30 +89,6 @@ Random.seed!(10)
                 test_vee_hat=true,
                 exp_log_atol_multiplier=50,
             )
-
-            @testset "ChainedTranslationRotationMetric" begin
-                G_TR = MetricManifold(G, Manifolds.ChainedTranslationRotationMetric())
-
-                test_group(
-                    G_TR,
-                    pts,
-                    X_pts,
-                    X_pts;
-                    test_diff=true,
-                    test_lie_bracket=true,
-                    test_adjoint_action=true,
-                    diff_convs=[(), (LeftAction(),), (RightAction(),)],
-                )
-
-                test_manifold(
-                    G_TR,
-                    pts;
-                    basis_types_vecs=basis_types,
-                    basis_types_to_from=basis_types,
-                    is_mutating=true,
-                    exp_log_atol_multiplier=50,
-                )
-            end
         end
 
         @testset "affine matrix" begin
