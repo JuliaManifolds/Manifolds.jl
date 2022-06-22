@@ -91,7 +91,6 @@ function log(
         <:AbstractDecoratorManifold{𝔽},
         <:AbstractCartanSchoutenConnection,
     },
-    Y,
     p,
     q,
 ) where {𝔽}
