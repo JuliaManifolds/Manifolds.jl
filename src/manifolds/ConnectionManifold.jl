@@ -62,6 +62,7 @@ function active_traits(f, M::ConnectionManifold, args...)
         IsDefaultConnection(M.connection) : EmptyTrait(),
         IsConnectionManifold(),
         filter(x -> x isa IsGroupManifold, active_traits(f, M.manifold, args...)),
+        is_metric_function(f) ? EmptyTrait() : IsExplicitDecorator(),
     )
 end
 

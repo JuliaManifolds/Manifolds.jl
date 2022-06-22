@@ -101,6 +101,7 @@ function is_group_manifold(
 end
 
 base_group(M::MetricManifold) = decorated_manifold(M)
+base_group(M::ConnectionManifold) = decorated_manifold(M)
 base_group(M::AbstractDecoratorManifold) = M
 
 """
@@ -178,8 +179,9 @@ points are not represented by arrays.
 identity_element(G::AbstractDecoratorManifold)
 @trait_function identity_element(G::AbstractDecoratorManifold)
 function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold)
-    q = allocate_result(G, identity_element)
-    return identity_element!(G, q)
+    BG = base_group(G)
+    q = allocate_result(BG, identity_element)
+    return identity_element!(BG, q)
 end
 
 @trait_function identity_element!(G::AbstractDecoratorManifold, p)
@@ -432,6 +434,14 @@ function inv!(
 ) where {O<:AbstractGroupOperation}
     BG = base_group(G)
     return identity_element!(BG, q)
+end
+function inv!(
+    ::TraitList{IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
+    ::Identity{O},
+    e::Identity{O},
+) where {O<:AbstractGroupOperation}
+    return e
 end
 
 function Base.copyto!(
@@ -856,8 +866,9 @@ the corresponding trait version `exp_lie(::TraitList{<:IsGroupManifold}, G, X)`.
 exp_lie(G::AbstractManifold, X)
 @trait_function exp_lie(M::AbstractDecoratorManifold, X)
 function exp_lie(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X)
-    q = allocate_result(G, exp_lie, X)
-    return exp_lie!(G, q, X)
+    BG = base_group(G)
+    q = allocate_result(BG, exp_lie, X)
+    return exp_lie!(BG, q, X)
 end
 
 @trait_function exp_lie!(M::AbstractDecoratorManifold, q, X)
@@ -894,24 +905,28 @@ either
 log_lie(::AbstractDecoratorManifold, q)
 @trait_function log_lie(G::AbstractDecoratorManifold, q)
 function log_lie(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q)
-    return _log_lie(G, q)
+    BG = base_group(G)
+    return _log_lie(BG, q)
 end
 function log_lie(
     ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
-    return zero_vector(G, identity_element(G))
+    BG = base_group(G)
+    return zero_vector(BG, identity_element(BG))
 end
 # though identity was taken care of – as usual restart decorator dispatch
 function _log_lie(G::AbstractDecoratorManifold, q)
-    X = allocate_result(G, log_lie, q)
-    return log_lie!(G, X, q)
+    BG = base_group(G)
+    X = allocate_result(BG, log_lie, q)
+    return log_lie!(BG, X, q)
 end
 
 @trait_function log_lie!(G::AbstractDecoratorManifold, X, q)
 function log_lie!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, q)
-    return _log_lie!(G, X, q)
+    BG = base_group(G)
+    return _log_lie!(BG, X, q)
 end
 function log_lie!(
     ::TraitList{<:IsGroupManifold{O}},

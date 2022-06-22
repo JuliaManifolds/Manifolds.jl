@@ -89,6 +89,32 @@ Random.seed!(10)
                 test_vee_hat=true,
                 exp_log_atol_multiplier=50,
             )
+
+            for CS in [CartanSchoutenMinus(), CartanSchoutenPlus(), CartanSchoutenZero()]
+                @testset "$CS" begin
+                    G_TR = ConnectionManifold(G, CS)
+
+                    test_group(
+                        G_TR,
+                        pts,
+                        X_pts,
+                        X_pts;
+                        test_diff=true,
+                        test_lie_bracket=true,
+                        test_adjoint_action=true,
+                        diff_convs=[(), (LeftAction(),), (RightAction(),)],
+                    )
+
+                    test_manifold(
+                        G_TR,
+                        pts;
+                        is_mutating=true,
+                        exp_log_atol_multiplier=50,
+                        test_inner=false,
+                        test_norm=false,
+                    )
+                end
+            end
         end
 
         @testset "affine matrix" begin
