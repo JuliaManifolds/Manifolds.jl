@@ -118,6 +118,7 @@ Random.seed!(10)
             for MM in [LeftInvariantMetric()]
                 @testset "$MM" begin
                     G_TR = MetricManifold(G, MM)
+                    @test base_group(G_TR) === G
 
                     test_group(
                         G_TR,
