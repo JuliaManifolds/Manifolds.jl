@@ -47,11 +47,24 @@ const CartanSchoutenPlusGroup{𝔽,M} = ConnectionManifold{𝔽,M,CartanSchouten
 const CartanSchoutenZeroGroup{𝔽,M} = ConnectionManifold{𝔽,M,CartanSchoutenZero}
 
 """
-    exp!(M::ConnectionManifold{𝔽,<:AbstractDecoratorManifold{𝔽},<:AbstractCartanSchoutenConnection}, q, p, X) where {𝔽}
+    exp(M::ConnectionManifold{𝔽,<:AbstractDecoratorManifold{𝔽},<:AbstractCartanSchoutenConnection}, p, X) where {𝔽}
 
 Compute the exponential map on the [`ConnectionManifold`](@ref) `M` with a Cartan-Schouten
 connection. See Sections 5.3.2 and 5.3.3 of [^Pennec2020] for details.
 """
+function exp(
+    M::ConnectionManifold{
+        𝔽,
+        <:AbstractDecoratorManifold{𝔽},
+        <:AbstractCartanSchoutenConnection,
+    },
+    p,
+    X,
+) where {𝔽}
+    Y = inverse_translate_diff(M.manifold, p, p, X, LeftAction())
+    return compose(M.manifold, p, exp_lie(M.manifold, Y))
+end
+
 function exp!(
     M::ConnectionManifold{
         𝔽,
@@ -62,16 +75,30 @@ function exp!(
     p,
     X,
 ) where {𝔽}
-    Y = inverse_translate_diff(M.manifold, q, p, X)
+    Y = inverse_translate_diff(M.manifold, p, p, X, LeftAction())
     return compose!(M.manifold, q, p, exp_lie(M.manifold, Y))
 end
 
 """
-    log!(M::ConnectionManifold{𝔽,<:AbstractDecoratorManifold{𝔽},<:AbstractCartanSchoutenConnection}, Y, p, q) where {𝔽}
+    log(M::ConnectionManifold{𝔽,<:AbstractDecoratorManifold{𝔽},<:AbstractCartanSchoutenConnection}, p, q) where {𝔽}
 
 Compute the logarithmic map on the [`ConnectionManifold`](@ref) `M` with a Cartan-Schouten
 connection. See Sections 5.3.2 and 5.3.3 of [^Pennec2020] for details.
 """
+function log(
+    M::ConnectionManifold{
+        𝔽,
+        <:AbstractDecoratorManifold{𝔽},
+        <:AbstractCartanSchoutenConnection,
+    },
+    p,
+    q,
+) where {𝔽}
+    pinvq = compose(M.manifold, inv(M.manifold, p), q)
+    Y = log_lie(M.manifold, pinvq)
+    return translate_diff(M.manifold, p, Identity(M.manifold), Y, LeftAction())
+end
+
 function log!(
     M::ConnectionManifold{
         𝔽,

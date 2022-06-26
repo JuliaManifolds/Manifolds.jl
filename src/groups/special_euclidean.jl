@@ -49,32 +49,8 @@ const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
 Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
-_is_se_forwarded_function(::Any) = false
-for mf in [
-    flat!,
-    get_basis,
-    get_coordinates,
-    get_coordinates!,
-    get_vector,
-    get_vector!,
-    get_vectors,
-    inner,
-    norm,
-    sharp!,
-]
-    @eval _is_se_forwarded_function(::typeof($mf)) = true
-end
-
 @inline function active_traits(f, M::SpecialEuclidean, args...)
-    if is_metric_function(f) && !_is_se_forwarded_function(f)
-        return merge_traits(IsGroupManifold(M.op), HasLeftInvariantMetric())
-    else
-        return merge_traits(
-            IsGroupManifold(M.op),
-            active_traits(f, M.manifold, args...),
-            IsExplicitDecorator(),
-        )
-    end
+    return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
 end
 
 Base.@propagate_inbounds function submanifold_component(
@@ -290,6 +266,19 @@ function compose!(
 )
     copyto!(x, p * q)
     return x
+end
+
+# More generic default was mostly OK but it lacks padding
+function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X)
+    map(
+        exp!,
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    @inbounds _padpoint!(M, q)
+    return q
 end
 
 @doc raw"""
@@ -521,6 +510,20 @@ function _log_lie!(G::SpecialEuclidean{3}, X, q)
     @inbounds _padvector!(G, X)
     return X
 end
+
+# More generic default was mostly OK but it lacks padding
+function log!(M::SpecialEuclideanManifold, X::AbstractMatrix, p, q)
+    map(
+        log!,
+        M.manifolds,
+        submanifold_components(M, X),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+    )
+    @inbounds _padvector!(M, X)
+    return X
+end
+
 """
     lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
     lie_bracket(G::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)

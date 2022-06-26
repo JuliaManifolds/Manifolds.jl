@@ -84,6 +84,54 @@ function exp!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, q, p, X)
     return exp!(M.manifold, q, p, X)
 end
 
+function get_coordinates(
+    t::TraitList{IT},
+    M::MetricManifold,
+    p,
+    X,
+    B::AbstractBasis,
+) where {IT<:AbstractInvarianceTrait}
+    conv = direction(t, M)
+    Xₑ = inverse_translate_diff(M, p, p, X, conv)
+    return get_coordinates_lie(next_trait(t), M, Xₑ, B)
+end
+function get_coordinates!(
+    t::TraitList{IT},
+    M::MetricManifold,
+    c,
+    p,
+    X,
+    B::AbstractBasis,
+) where {IT<:AbstractInvarianceTrait}
+    conv = direction(t, M)
+    Xₑ = inverse_translate_diff(M, p, p, X, conv)
+    return get_coordinates_lie!(next_trait(t), M, c, Xₑ, B)
+end
+
+function get_vector(
+    t::TraitList{IT},
+    M::MetricManifold,
+    p,
+    c,
+    B::AbstractBasis,
+) where {IT<:AbstractInvarianceTrait}
+    conv = direction(t, M)
+    Xₑ = get_vector_lie(next_trait(t), M, c, B)
+    return translate_diff(M, p, Identity(M), Xₑ, conv)
+end
+function get_vector!(
+    t::TraitList{IT},
+    M::MetricManifold,
+    X,
+    p,
+    c,
+    B::AbstractBasis,
+) where {IT<:AbstractInvarianceTrait}
+    conv = direction(t, M)
+    Xₑ = get_vector_lie(next_trait(t), M, c, B)
+    return translate_diff!(M, X, p, Identity(M), Xₑ, conv)
+end
+
 @trait_function has_invariant_metric(M::AbstractDecoratorManifold, op::ActionDirection)
 
 # Fallbacks / false
@@ -105,7 +153,7 @@ end
 
 @trait_function has_biinvariant_metric(M::AbstractDecoratorManifold)
 
-# fallbavk / default: false
+# fallback / default: false
 has_biinvariant_metric(::AbstractManifold) = false
 function has_biinvariant_metric(
     ::TraitList{<:HasBiinvariantMetric},
@@ -216,4 +264,38 @@ function translate_diff!(
     conv::ActionDirection,
 )
     return translate_diff!(M.manifold, Y, p, q, X, conv)
+end
+
+"""
+    LeftInvariantMetric <: AbstractMetric
+
+An [`AbstractMetric`](@ref) that changes the metric of a Lie group to the left-invariant
+metric obtained by left-translations to the identity. Adds the
+[`HasLeftInvariantMetric`](@ref) trait.
+"""
+struct LeftInvariantMetric <: AbstractMetric end
+
+"""
+    RightInvariantMetric <: AbstractMetric
+
+An [`AbstractMetric`](@ref) that changes the metric of a Lie group to the right-invariant
+metric obtained by right-translations to the identity. Adds the
+[`HasRightInvariantMetric`](@ref) trait.
+"""
+struct RightInvariantMetric <: AbstractMetric end
+
+@inline function active_traits(
+    f,
+    ::MetricManifold{<:Any,<:AbstractManifold,LeftInvariantMetric},
+    args...,
+)
+    return merge_traits(HasLeftInvariantMetric(), IsExplicitDecorator())
+end
+
+@inline function active_traits(
+    f,
+    ::MetricManifold{<:Any,<:AbstractManifold,RightInvariantMetric},
+    args...,
+)
+    return merge_traits(HasRightInvariantMetric(), IsExplicitDecorator())
 end
