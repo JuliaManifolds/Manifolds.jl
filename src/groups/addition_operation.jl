@@ -30,7 +30,7 @@ end
 
 identity_element(::AdditionGroupTrait, G::AbstractDecoratorManifold, p::Number) = zero(p)
 
-function identity_element!(::AdditionGroupTrait, G::AbstractDecoratorManifold, p) where {𝔽}
+function identity_element!(::AdditionGroupTrait, G::AbstractDecoratorManifold, p)
     return fill!(p, zero(eltype(p)))
 end
 

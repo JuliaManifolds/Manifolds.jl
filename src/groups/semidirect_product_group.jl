@@ -13,7 +13,7 @@ function Base.show(io::IO, op::SemidirectProductOperation)
     return print(io, "SemidirectProductOperation($(op.action))")
 end
 
-const SemidirectProductGroup{𝔽,N,H,A} =
+const SemidirectProductGroup{𝔽,N,H,A<:AbstractGroupAction} =
     GroupManifold{𝔽,ProductManifold{𝔽,Tuple{N,H}},SemidirectProductOperation{A}}
 
 @doc raw"""

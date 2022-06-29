@@ -151,6 +151,7 @@ function get_basis_diagonalizing(::Circle{ℝ}, p, B::DiagonalizingOrthonormalBa
 end
 
 get_coordinates_orthonormal(::Circle{ℝ}, p, X, ::RealNumbers) = @SVector [X[]]
+get_coordinates_orthonormal(::Circle{ℝ}, p, X::AbstractArray, ::RealNumbers) = copy(vec(X))
 get_coordinates_orthonormal!(::Circle{ℝ}, c, p, X, ::RealNumbers) = (c .= X)
 function get_coordinates_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])

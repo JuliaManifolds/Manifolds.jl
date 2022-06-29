@@ -27,6 +27,19 @@ function ProductGroup(manifold::ProductManifold{𝔽}) where {𝔽}
     return GroupManifold(manifold, op)
 end
 
+@inline function active_traits(f, M::ProductGroup, args...)
+    if is_metric_function(f)
+        #pass to manifold by default - but keep Group Decorator for the retraction
+        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+    else
+        return merge_traits(
+            IsGroupManifold(M.op),
+            active_traits(f, M.manifold, args...),
+            IsExplicitDecorator(),
+        )
+    end
+end
+
 function identity_element(G::ProductGroup)
     M = G.manifold
     return ProductRepr(map(identity_element, M.manifolds))

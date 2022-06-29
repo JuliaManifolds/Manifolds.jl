@@ -1,6 +1,10 @@
 include("../utils.jl")
 include("group_utils.jl")
 
+# TODO: remove after bug in StaticArray is fixed
+@inline Base.copy(a::SizedArray) = __copy(a)
+@inline __copy(a::SizedArray{S,T}) where {S,T} = SizedArray{S,T}(copy(a.data))
+
 @testset "Circle group" begin
     G = CircleGroup()
     @test repr(G) == "CircleGroup()"
@@ -78,6 +82,8 @@ include("group_utils.jl")
             is_tangent_atol_multiplier=2.0,
             mid_point12=nothing,
         )
+
+        @test isapprox(G, (1.0 + 1.0im) / √2, mean(G, pts))
     end
 end
 
@@ -154,5 +160,9 @@ end
             is_tangent_atol_multiplier=2.0,
             mid_point12=nothing,
         )
+        @test isapprox(G, 0.5, mean(G, [1.0, 0.5, 0.0]))
     end
+
+    # issue #489
+    @test vee(G, [0.0], [1.5]) isa Vector
 end

@@ -4,6 +4,8 @@ include("group_utils.jl")
 using OrdinaryDiffEq
 import Manifolds: local_metric
 
+using Manifolds: LeftInvariantMetric, RightInvariantMetric
+
 struct TestInvariantMetricBase <: AbstractMetric end
 
 function active_traits(
@@ -108,5 +110,54 @@ end
         @test direction(HasLeftInvariantMetric()) === LeftAction()
         @test direction(HasRightInvariantMetric) === RightAction()
         @test direction(HasLeftInvariantMetric) === LeftAction()
+    end
+
+    @testset "invariant metrics on SE(3)" begin
+        basis_types = (DefaultOrthonormalBasis(),)
+        for inv_metric in [LeftInvariantMetric(), RightInvariantMetric()]
+            G = MetricManifold(SpecialEuclidean(3), inv_metric)
+
+            M = base_manifold(G)
+            Rn = Rotations(3)
+            p = Matrix(I, 3, 3)
+
+            t = Vector{Float64}.([1:3, 2:4, 4:6])
+            ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
+            tuple_pts = [(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
+            tuple_X = [
+                ([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5])),
+                ([-2.0, 1.0, 0.5], hat(Rn, p, [-1.0, -0.5, 1.1])),
+            ]
+
+            pts = [ProductRepr(tp...) for tp in tuple_pts]
+            X_pts = [ProductRepr(tX...) for tX in tuple_X]
+
+            g1, g2 = pts[1:2]
+            t1, R1 = g1.parts
+            t2, R2 = g2.parts
+            g1g2 = ProductRepr(R1 * t2 + t1, R1 * R2)
+            @test isapprox(G, compose(G, g1, g2), g1g2)
+
+            test_group(
+                G,
+                pts,
+                X_pts,
+                X_pts;
+                test_diff=true,
+                test_lie_bracket=true,
+                test_adjoint_action=true,
+                diff_convs=[(), (LeftAction(),), (RightAction(),)],
+            )
+            test_manifold(
+                G,
+                pts;
+                #basis_types_vecs=basis_types,
+                basis_types_to_from=basis_types,
+                is_mutating=true,
+                #test_inplace=true,
+                test_vee_hat=false,
+                exp_log_atol_multiplier=50,
+            )
+        end
     end
 end
