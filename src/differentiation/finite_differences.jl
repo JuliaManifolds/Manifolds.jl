@@ -23,6 +23,14 @@ function _jacobian(f, p, backend::FiniteDifferencesBackend)
     return FiniteDifferences.jacobian(backend.method, f, p)[1]
 end
 
+function _hessian(f, p, backend::FiniteDifferencesBackend)
+    return FiniteDifferences.jacobian(
+        backend.method,
+        q -> FiniteDifferences.grad(backend.method, f, q)[1],
+        p,
+    )[1]
+end
+
 if default_differential_backend() === NoneDiffBackend()
     set_default_differential_backend!(FiniteDifferencesBackend())
 end
