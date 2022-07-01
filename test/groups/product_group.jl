@@ -32,6 +32,14 @@ include("group_utils.jl")
         pts = [ProductRepr(tp...) for tp in tuple_pts]
         X_pts = [ProductRepr(tuple_v...)]
 
+        @testset "setindex! and getindex" begin
+            p1 = pts[1]
+            p2 = allocate(p1)
+            @test p1[G, 1] === p1[M, 1]
+            p2[G, 1] = p1[M, 1]
+            @test p2[G, 1] == p1[M, 1]
+        end
+
         @test compose(G, pts[1], Identity(G)) == pts[1]
         @test compose(G, Identity(G), pts[1]) == pts[1]
         test_group(G, pts, X_pts, X_pts; test_diff=true)
