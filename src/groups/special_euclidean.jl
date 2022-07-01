@@ -53,6 +53,24 @@ Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean
     return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
 end
 
+Base.@propagate_inbounds function Base.getindex(
+    p::AbstractMatrix,
+    M::Union{SpecialEuclidean,SpecialEuclideanManifold},
+    i::Union{Integer,Val},
+)
+    return submanifold_component(M, p, i)
+end
+
+Base.@propagate_inbounds function Base.setindex!(
+    q::AbstractMatrix,
+    p,
+    M::Union{SpecialEuclidean,SpecialEuclideanManifold},
+    i::Union{Integer,Val},
+)
+    copyto!(submanifold_component(M, q, i), p)
+    return p
+end
+
 Base.@propagate_inbounds function submanifold_component(
     ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
     p::AbstractMatrix,

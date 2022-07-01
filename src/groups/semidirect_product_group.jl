@@ -255,3 +255,20 @@ function isapprox(
 ) where {𝔽,N<:AbstractManifold,H<:AbstractManifold,A<:AbstractGroupAction}
     return isapprox(G, identity_element(G), X, Y; kwargs...)
 end
+
+Base.@propagate_inbounds function Base.getindex(
+    p::Union{ProductRepr,ArrayPartition},
+    M::SemidirectProductGroup,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return getindex(p, base_manifold(M), i)
+end
+
+Base.@propagate_inbounds function Base.setindex!(
+    q::Union{ProductRepr,ArrayPartition},
+    p,
+    M::SemidirectProductGroup,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return setindex!(q, p, base_manifold(M), i)
+end

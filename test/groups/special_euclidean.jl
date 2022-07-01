@@ -50,6 +50,14 @@ Random.seed!(10)
             pts = [ProductRepr(tp...) for tp in tuple_pts]
             X_pts = [ProductRepr(tX...) for tX in tuple_X]
 
+            @testset "setindex! and getindex" begin
+                p1 = pts[1]
+                p2 = allocate(p1)
+                @test p1[G, 1] === p1[M, 1]
+                p2[G, 1] = p1[M, 1]
+                @test p2[G, 1] == p1[M, 1]
+            end
+
             g1, g2 = pts[1:2]
             t1, R1 = g1.parts
             t2, R2 = g2.parts
@@ -146,6 +154,15 @@ Random.seed!(10)
         @testset "affine matrix" begin
             pts = [affine_matrix(G, ProductRepr(tp...)) for tp in tuple_pts]
             X_pts = [screw_matrix(G, ProductRepr(tX...)) for tX in tuple_X]
+
+            @testset "setindex! and getindex" begin
+                p1 = pts[1]
+                p2 = allocate(p1)
+                @test p1[G, 1] === p1[M, 1]
+                p2[G, 1] = p1[M, 1]
+                @test p2[G, 1] == p1[M, 1]
+            end
+
             test_group(
                 G,
                 pts,

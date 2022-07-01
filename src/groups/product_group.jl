@@ -261,3 +261,20 @@ function log_lie!(G::ProductGroup, X, q::Identity{ProductOperation})
     map(log_lie!, M.manifolds, submanifold_components(G, X), submanifold_components(G, q))
     return X
 end
+
+Base.@propagate_inbounds function Base.getindex(
+    p::Union{ProductRepr,ArrayPartition},
+    M::ProductGroup,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return getindex(p, base_manifold(M), i)
+end
+
+Base.@propagate_inbounds function Base.setindex!(
+    q::Union{ProductRepr,ArrayPartition},
+    p,
+    M::ProductGroup,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return setindex!(q, p, base_manifold(M), i)
+end

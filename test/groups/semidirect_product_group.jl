@@ -20,6 +20,14 @@ include("group_utils.jl")
 
     pts = [ProductRepr(tp...) for tp in tuple_pts]
 
+    @testset "setindex! and getindex" begin
+        p1 = pts[1]
+        p2 = allocate(p1)
+        @test p1[G, 1] === p1[M, 1]
+        p2[G, 1] = p1[M, 1]
+        @test p2[G, 1] == p1[M, 1]
+    end
+
     X = log(G, pts[1], pts[1])
     Y = zero_vector(G, pts[1])
     Z = Manifolds.allocate_result(G, zero_vector, pts[1])
