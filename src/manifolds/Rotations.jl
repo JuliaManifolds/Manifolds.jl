@@ -175,6 +175,11 @@ The algorithm used is a more numerically stable form of those proposed in
     > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
 """
 exp(::Rotations, ::Any...)
+function exp(M::Rotations{2}, p::SMatrix, X::SMatrix)
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
+    sinθ, cosθ = sincos(θ)
+    return p * SA[cosθ -sinθ; sinθ cosθ]
+end
 
 exp!(::Rotations, q, p, X) = copyto!(q, p * exp(X))
 function exp!(M::Rotations{2}, q, p, X)
@@ -350,6 +355,14 @@ $X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 """
 get_coordinates(::Rotations, ::Any...)
 get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis{ℝ,TangentSpaceType}) = [X[2]]
+function get_coordinates(
+    ::Rotations{2},
+    p::SMatrix,
+    X::SMatrix,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+)
+    return SA[X[2]]
+end
 
 function get_coordinates_orthogonal(M::Rotations, p, X, N)
     Y = allocate_result(M, get_coordinates, p, X, DefaultOrthogonalBasis(N))
@@ -397,7 +410,7 @@ function get_vector_orthogonal(M::Rotations, p, c, N::RealNumbers)
     return get_vector_orthogonal!(M, Y, p, c, N)
 end
 function get_vector_orthogonal(::Rotations{2}, p::SMatrix, Xⁱ::Real, ::RealNumbers)
-    return @SMatrix [0 Xⁱ; -Xⁱ 0]
+    return @SMatrix [0 -Xⁱ; Xⁱ 0]
 end
 
 function get_vector_orthogonal!(M::Rotations{2}, X, p, Xⁱ, N::RealNumbers)
