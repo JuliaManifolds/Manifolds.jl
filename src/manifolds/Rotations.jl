@@ -409,8 +409,8 @@ function get_vector_orthogonal(M::Rotations, p, c, N::RealNumbers)
     Y = allocate_result(M, get_vector, p, c)
     return get_vector_orthogonal!(M, Y, p, c, N)
 end
-function get_vector_orthogonal(::Rotations{2}, p::SMatrix, Xⁱ::Real, ::RealNumbers)
-    return @SMatrix [0 -Xⁱ; Xⁱ 0]
+function get_vector_orthogonal(::Rotations{2}, p::SMatrix, Xⁱ, ::RealNumbers)
+    return @SMatrix [0 -Xⁱ[]; Xⁱ[] 0]
 end
 
 function get_vector_orthogonal!(M::Rotations{2}, X, p, Xⁱ, N::RealNumbers)
@@ -451,6 +451,11 @@ function get_vector_orthogonal!(M::Rotations{N}, X, p, Xⁱ, ::RealNumbers) wher
     end
     return X
 end
+
+function get_vector_orthonormal(M::Rotations, p, Xⁱ, N::RealNumbers)
+    return get_vector_orthogonal(M, p, Xⁱ, N) ./ sqrt(eltype(Xⁱ)(2))
+end
+
 function get_vector_orthonormal!(M::Rotations, X, p, Xⁱ, N::RealNumbers)
     T = Base.promote_eltype(p, X)
     get_vector_orthogonal!(M, X, p, Xⁱ, N)

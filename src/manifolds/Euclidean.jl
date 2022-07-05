@@ -167,8 +167,7 @@ Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `p` in 
 \exp_p X = p + X.
 ````
 """
-Base.exp(::Euclidean, ::Any...)
-Base.exp(::Euclidean, p::Number, q::Number) = p + q
+Base.exp(::Euclidean, p, X) = p + X
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 
@@ -182,10 +181,12 @@ function get_basis_diagonalizing(
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
+function get_coordinates_orthonormal(M::Euclidean, p, X, ::RealNumbers)
+    return vec(X)
+end
+
 function get_coordinates_orthonormal!(M::Euclidean, c, p, X, ::RealNumbers)
-    S = representation_size(M)
-    PS = prod(S)
-    copyto!(c, reshape(X, PS))
+    copyto!(c, vec(X))
     return c
 end
 
@@ -238,6 +239,14 @@ function get_coordinates_diagonalizing!(
     PS = prod(S)
     copyto!(c, reshape(X, PS))
     return c
+end
+
+function get_vector_orthonormal(M::Euclidean, ::Any, c, ::RealNumbers)
+    S = representation_size(M)
+    return reshape(c, S)
+end
+function get_vector_orthonormal(::Euclidean, ::SArray{S}, c, ::RealNumbers) where {S}
+    return SArray{S}(c)
 end
 
 function get_vector_orthonormal!(M::Euclidean, Y, ::Any, c, ::RealNumbers)
