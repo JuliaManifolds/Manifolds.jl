@@ -396,11 +396,14 @@ function get_vector_orthogonal(M::Rotations, p, c, N::RealNumbers)
     Y = allocate_result(M, get_vector, p, c)
     return get_vector_orthogonal!(M, Y, p, c, N)
 end
+function get_vector_orthogonal(::Rotations{2}, p::SMatrix, Xⁱ::Real, ::RealNumbers)
+    return @SMatrix [0 Xⁱ; -Xⁱ 0]
+end
 
 function get_vector_orthogonal!(M::Rotations{2}, X, p, Xⁱ, N::RealNumbers)
     return get_vector_orthogonal!(M, X, p, Xⁱ[1], N)
 end
-function get_vector_orthogonal!(M::Rotations{2}, X, p, Xⁱ::Real, ::RealNumbers)
+function get_vector_orthogonal!(::Rotations{2}, X, p, Xⁱ::Real, ::RealNumbers)
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0
@@ -549,6 +552,12 @@ For antipodal rotations the function returns deterministically one of the tangen
 that point at `q`.
 """
 log(::Rotations, ::Any...)
+function ManifoldsBase.log(M::Rotations{2}, p, q)
+    U = transpose(p) * q
+    @assert size(U) == (2, 2)
+    @inbounds θ = atan(U[2], U[1])
+    return get_vector(M, p, θ, DefaultOrthogonalBasis())
+end
 
 function log!(M::Rotations, X, p, q)
     U = transpose(p) * q
