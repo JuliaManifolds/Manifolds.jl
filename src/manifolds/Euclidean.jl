@@ -248,6 +248,9 @@ end
 function get_vector_orthonormal(::Euclidean, ::SArray{S}, c, ::RealNumbers) where {S}
     return SArray{S}(c)
 end
+function get_vector_orthonormal(::Euclidean, ::SizedArray{S}, c, ::RealNumbers) where {S}
+    return SizedArray{S}(c)
+end
 
 function get_vector_orthonormal!(M::Euclidean, Y, ::Any, c, ::RealNumbers)
     S = representation_size(M)
