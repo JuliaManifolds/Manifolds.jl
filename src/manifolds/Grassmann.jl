@@ -47,12 +47,19 @@ For a representation of points as orthogonal projectors see [`ProjectorPoint`](@
 The manifold is named after
 [Hermann G. Graßmann](https://en.wikipedia.org/wiki/Hermann_Grassmann) (1809-1877).
 
+A good overview can be found in[^BendokatZimmermannAbsil2020].
+
 # Constructor
 
     Grassmann(n,k,field=ℝ)
 
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case `field = ℝ` is the default.
+
+[^BendokatZimmermannAbsil2020]:
+    > T. Bendokat, R. Zimmermann, and P. -A. Absil:
+    > _A Grassmann Manifold Handbook: Basic Geometry and Computational Aspects_,
+    > arXiv preprint [2011.13699](https://arxiv.org/abs/2011.13699), 2020.
 """
 struct Grassmann{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 

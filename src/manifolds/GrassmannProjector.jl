@@ -171,5 +171,74 @@ function differential_canonical_project!(
     return differenital_canonical_project!(M, Y, p.value, X.value)
 end
 
+@doc raw"""
+    exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTVector)
+
+Compute the exponential map on the [`Grassmann`](@ref) as
+
+```math
+    \exp_pX = \operatorname{Exp}([X,p])p\operatorname{Exp}(-[X,p]),
+```
+where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = AB-BA`` denotes the matrix commutator.
+
+For details, see Proposition 3.2 in [^BendokatZimmermannAbsil2020].
+"""
+exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTVector)
+
+function exp!(::Grassmann, q::ProjectorPoint, p::ProjectorPoint, X::ProjectorTVector)
+    xppx = X.value * p.value - p.value * X.value
+    q.value .= exp(xppx) * p.value * exp(-xppx)
+    return q
+end
+@doc raw"""
+    horizontal_lift(N::Stiefel{n,k}, q, X::ProjectorTVector)
+
+Compute the horizontal lift of `X` from the tangent space at ``p=π(q)``
+on the [`Grassmann`](@ref) manifold, i.e.
+
+```
+Y = Xq ∈ T_q\mathrm{St}(n,k)
+```
+
+"""
+horizontal_lift(::Stiefel, q, X::ProjectorTVector)
+
+horizontal_lift!(::Stiefel, Y, q, X::ProjectorTVector) = copyto!(Y, X.value * q)
+
+@doc raw"""
+    parallel_transport_direction(
+        M::Grassmann,
+        p::ProjectorPoint,
+        X::ProjectorTVector,
+        d::ProjectorTVector
+    )
+
+Compute the parallel transport of `X` from the tangent space at `p` into direction `d`,
+i.e. to ``q=\exp_pd``. The formula is given in Proposition 3.5 of [^BendokatZimmermannAbsil2020] as
+
+```math
+\mathcal{P}_{q ← p}(X) = \operatorname{Exp}([d,p])X\operatorname{Exp}(-[d,p]),
+```
+
+where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = AB-BA`` denotes the matrix commutator.
+"""
+parallel_transport_direction(
+    M::Grassmann,
+    p::ProjectorPoint,
+    X::ProjectorTVector,
+    d::ProjectorTVector,
+)
+
+function parallel_transport_direction(
+    ::Grassmann,
+    Y::ProjectorTVector,
+    p::ProjectorPoint,
+    X::ProjectorTVector,
+    d::ProjectorTVector,
+)
+    dppd = d.value * p.value - p.value * d.value
+    return Y.value .= exp(dppd) * X.value * exp(-dppd)
+end
+
 Base.show(io::IO, p::ProjectorPoint) = print(io, "ProjectorPoint($(p.value))")
 Base.show(io::IO, X::ProjectorTVector) = print(io, "ProjectorTVector($(X.value))")

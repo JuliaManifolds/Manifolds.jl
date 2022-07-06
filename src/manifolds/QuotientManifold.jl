@@ -58,8 +58,6 @@ end
 
 @inline active_traits(f, ::QuotientManifold, ::Any...) = merge_traits(IsQuotientManifold())
 
-decorated_manifold(M::QuotientManifold) = M.manifold
-
 @doc raw"""
     canonical_project(M, p)
 
@@ -89,6 +87,8 @@ compute the canonical projection ``π`` on a manifold ``\mathcal M`` that
 See [`canonical_project`](@ref) for more details.
 """
 canonical_project!(M::AbstractManifold, q, p)
+
+decorated_manifold(M::QuotientManifold) = M.manifold
 
 @doc raw"""
     differential_canonical_project(M, p, X)
@@ -126,3 +126,26 @@ a [`QuotientManifold`](@ref).
 """
 get_total_space(::AbstractManifold)
 get_total_space(M::QuotientManifold) = M.total_space
+
+@doc raw"""
+    horizontal_lift(N, q, X)
+    horizontal_lift(QuotientManifold{M,N}, p, X)
+
+Given a point `q` such that ``p=π(q)`` is a point on a quotient manifold `M`
+(implicitly given for the first case)
+and a tangent vector `X` this method computes a `Y` on the horizontal space of ``T_q\mathcal N``,
+i.e. that is orthogonal to the kernel of ``Dπ(q)``.
+"""
+function horizontal_lift(N::AbstractManifold, q, X)
+    Y = zero_vector(N, q)
+    return horizontal_lift!(N, Y, q, X)
+end
+
+@doc raw"""
+    horizontal_lift(N, q, X)
+    horizontal_lift(QuotientManifold{M,N}, p, X)
+
+Compute the [`horizontal_lift`](@ref) of `X` from ``T_p\mathcal M``, ``p=π(q)``.
+to ``T_q\mathcal N` in place of `Y`.
+"""
+horizontal_lift!(N::AbstractManifold, Y, q, X)

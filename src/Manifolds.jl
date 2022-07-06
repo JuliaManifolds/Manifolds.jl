@@ -324,7 +324,6 @@ include("manifolds/Elliptope.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
-include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
@@ -350,6 +349,9 @@ include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Tucker.jl")
 include("manifolds/Symplectic.jl")
 include("manifolds/SymplecticStiefel.jl")
+
+# Introduce the quotient, Grassmann, only after Stiefel
+include("manifolds/Grassmann.jl")
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -630,6 +632,8 @@ export ×,
     grad_euclidean_to_manifold!,
     hat,
     hat!,
+    horizontal_lift,
+    horizontal_lift!,
     identity_element,
     identity_element!,
     induced_basis,
