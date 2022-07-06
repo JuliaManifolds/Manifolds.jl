@@ -128,6 +128,20 @@ get_total_space(::AbstractManifold)
 get_total_space(M::QuotientManifold) = M.total_space
 
 @doc raw"""
+    get_orbit_action(M::AbstractDecoratorManifold)
+
+Return the group action that generates the orbit of an equivalence class, that is for the case
+that
+
+```math
+\mathcal M = \mathcal N / \mathcal O,
+```
+
+where ``\mathcal O`` is a Lie group with its group action generating the orbit.
+"""
+get_orbit_action(::AbstractManifold)
+
+@doc raw"""
     horizontal_lift(N, q, X)
     horizontal_lift(QuotientManifold{M,N}, p, X)
 
