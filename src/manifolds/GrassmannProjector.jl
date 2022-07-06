@@ -128,7 +128,7 @@ Compute the canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold o
 manifold when represented as [`ProjectorPoint`](@ref), i.e.
 
 ```math
-    π^˜\mathrm{SG}(p) = pp^{\mathrm{T}}
+    π^{\mathrm{SG}}(p) = pp^{\mathrm{T}}
 ```
 """
 function canonical_project!(::Grassmann{n,k}, q::ProjectorPoint, p) where {n,k}
