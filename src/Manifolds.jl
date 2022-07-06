@@ -345,9 +345,11 @@ include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
-include("manifolds/Tucker.jl")
 include("manifolds/Symplectic.jl")
 include("manifolds/SymplecticStiefel.jl")
+include("manifolds/Tucker.jl")
+include("manifolds/Unitary.jl")
+include("manifolds/Orthogonal.jl")
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -374,6 +376,10 @@ include("groups/semidirect_product_group.jl")
 include("groups/general_linear.jl")
 include("groups/special_linear.jl")
 include("groups/translation_group.jl")
+# TODO
+# include("groups/unitary.jl")
+# include("groups/orthogonal.jl")
+# include("groups/special_unitary.jl")
 include("groups/special_orthogonal.jl")
 include("groups/circle_group.jl")
 include("groups/heisenberg.jl")
@@ -467,6 +473,7 @@ export Euclidean,
     MultinomialMatrices,
     MultinomialSymmetric,
     Oblique,
+    OrthogonalMatrices,
     PositiveArrays,
     PositiveMatrices,
     PositiveNumbers,
@@ -695,6 +702,7 @@ export AbstractGroupAction,
     LeftAction,
     LeftInvariantMetric,
     MultiplicationOperation,
+    OrthogonalMatrices,
     ProductGroup,
     ProductOperation,
     RealCircleGroup,
@@ -705,8 +713,8 @@ export AbstractGroupAction,
     SpecialEuclidean,
     SpecialLinear,
     SpecialOrthogonal,
-    TranslationGroup,
-    TranslationAction
+    SpecialUnitary
+TranslationGroup, TranslationAction, UnitaryMatrices
 export AbstractInvarianceTrait
 export IsMetricManifold, IsConnectionManifold
 export IsGroupManifold,

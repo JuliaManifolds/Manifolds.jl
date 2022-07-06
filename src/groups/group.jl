@@ -204,6 +204,8 @@ function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorMa
     return identity_element!(BG, q)
 end
 
+Base.adjoint(e::Identity) = e
+
 function check_size(
     ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
@@ -541,7 +543,7 @@ function compose!(
     return e
 end
 
-transpose(e::Identity) = e
+Base.transpose(e::Identity) = e
 
 @doc raw"""
     hat(M::AbstractDecoratorManifold{𝔽,O}, ::Identity{O}, Xⁱ) where {𝔽,O<:AbstractGroupOperation}
