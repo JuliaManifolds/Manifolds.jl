@@ -61,7 +61,9 @@ struct Grassmann{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 #
 Grassmann(n::Int, k::Int, field::AbstractNumbers=ℝ) = Grassmann{n,k,field}()
 
-active_traits(f, ::Grassmann, args...) = merge_traits(IsIsometricEmbeddedManifold())
+function active_traits(f, ::Grassmann, args...)
+    return merge_traits(IsIsometricEmbeddedManifold(), IsQuotientManifold())
+end
 
 function allocation_promotion_function(::Grassmann{n,k,ℂ}, f, args::Tuple) where {n,k}
     return complex
@@ -114,6 +116,14 @@ function default_estimation_method(::Grassmann, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 4)
 end
 
+@doc raw"""
+    get_total_space(::Grassmann{n,k})
+
+Return the total space of the [`Grassmann`](@ref) manifold, which is the corresponding Stiefel manifold,
+independent of whether the points are represented already in the total space or as [`ProjectorPoint`](@ref)s.
+"""
+get_total_space(::Grassmann{n,k,𝔽}) where {n,k,𝔽} = Stiefel(n, k; field=𝔽)
+
 #
 # Reprenter specific implementations in their corresponding subfiles
 #
@@ -123,46 +133,30 @@ include("GrassmannProjector.jl")
 #
 # Quotient structure Stiefel and Projectors
 #
-# TODO: Discuss whether we should maybe start a small `QuotientManifold{N,M}`
-# Formula from
-# @online{2011.13699,
-#   Author = {Thomas Bendokat and Ralf Zimmermann and P. -A. Absil},
-#   Title = {A Grassmann Manifold Handbook: Basic Geometry and Computational Aspects},
-#  Year = {2020},
-#  Eprint = {2011.13699},
-#  Eprinttype = {arXiv},
-#}
-#
-#= @doc raw"""
-    quotient_project(::Stiefel{n,k,𝔽}, Grassmann{n,k,𝔽}, p)
-
-    compute the projecttion from [`Stiefel`](@ref) to the [`Grassmann`](@ref),
-    i.e. Compute for the input point ``p\in \mathbb F^{n×k}``
-
-    ```math
-        π^{\mathrm{SG}(p) = pp^{\mathrm{T}}
-    ```
-"""
-function quotient_project(::Stiefel{n,k,𝔽}, N::Grassmann{n,k,𝔽}, p)
-    q = allocate(N, quotient_project) # we need the Stiefel size
-    quotient_project(N, M, q, p)
-end
-function quotient_project!(::Stiefel{n,k,𝔽}, ::Grassmann{n,k,𝔽}, q, p)
-    copyto!(M, q, p*p')
-end
-=#
 #
 # Conversions
 #
+@doc raw"""
+    convert(::Type{ProjectorPoint}, p::AbstractMatrix)
+
+Convert a point on `p` [`Stiefel`](@ref) that also represents a point (i.e. subspace) on [`Grassmann`](@ref)
+to a projector representation of said subspace, i.e. compute the [`canonical_project!`](@ref)
+for
+
+```math
+  π^{\mathrm{SG}}(p) = pp^{\mathrm{T)}}.
+```
+"""
 convert(::Type{ProjectorPoint}, p::AbstractMatrix) = ProjectorPoint(p * p')
 @doc raw"""
     convert(::Type{ProjectorPoint}, ::Stiefelpoint)
 
 Convert a point on `p` [`Stiefel`](@ref) that also represents a point (i.e. subspace) on [`Grassmann`](@ref)
-to a projector representation of said subspace, i.e. compute
+to a projector representation of said subspace, i.e. compute the [`canonical_project!`](@ref)
+for
 
 ```math
-  π^{\mathrm{SG}(p) = pp^{\mathrm{T)}}.
+  π^{\mathrm{SG}}(p) = pp^{\mathrm{T)}}.
 ```
 """
-convert(T::Type{ProjectorPoint}, p::StiefelPoint) = convert(T, p.value)
+convert(::Type{ProjectorPoint}, p::StiefelPoint) = ProjectorPoint(p.value * p.value')

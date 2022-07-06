@@ -18,8 +18,8 @@ end
 
 A tangent vector on the [`Grassmann`](@ref) manifold represented by a tangent vector from
 the tangent space of a corresponding point from the [`Stiefel`](@ref) manifold,
-see [`GrassmannBasisPoint`](@ref). This is the default representation so is can be used
-interchangeably with just abstract matrices.
+see [`StiefelPoint`](@ref).
+This is the default representation so is can be used interchangeably with just abstract matrices.
 """
 struct StiefelTVector{T<:AbstractMatrix} <: AbstractManifoldPoint
     value::T

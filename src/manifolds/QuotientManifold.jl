@@ -24,7 +24,7 @@ on ``\mathcal N`` we have
 ```math
     \mathcal M = \mathcal N / ∼ = \bigl\{ [p] : p ∈ \mathcal N \bigr\},
 ```
-where ``[p] ≔ \{ q ∈ \matcal N : q ∼ p\}`` denotes the equivalence class containing ``p``.
+where ``[p] ≔ \{ q ∈ \mathcal N : q ∼ p\}`` denotes the equivalence class containing ``p``.
 For more details see Subsection 3.4.1[^AbsilMahonySepulchre2008].
 
 This manifold type models an explicit quotient structure.
@@ -40,6 +40,8 @@ it provides a (default) quotient structure that is different from the one introd
 # Constructor
 
     QuotientManifold(M,N)
+
+Create a manifold where `M` is the quotient manifold and `N`is its total space.
 
 [^AbsilMahonySepulchre2008]:
     > Absil, P.-A., Mahony, R. and Sepulchre R.,
@@ -59,21 +61,6 @@ end
 decorated_manifold(M::QuotientManifold) = M.manifold
 
 @doc raw"""
-    get_total_space(M::AbstractDecoratorManifold)
-
-Return the total space of a manifold that [`IsQuotientManifold`](@ref).
-"""
-get_total_space(::AbstractDecoratorManifold)
-
-@doc raw"""
-    get_total_space(M::QuotientManifold)
-
-Return the total space of a manifold that [`IsQuotientManifold`](@ref), e.g.
-a [`QuotientManifold`](@ref).
-"""
-get_total_space(M::QuotientManifold) = M.total_space
-
-@doc raw"""
     canonical_project(M, p)
 
 compute the canonical projection ``π`` on a manifold ``\mathcal M`` that
@@ -84,5 +71,58 @@ onto ``\mathcal M`` given by
 ```math
     π = π_{\mathcal N, \mathcal M} : \mathcal N → \mathcal M, p ↦ π_{\mathcal N, \mathcal M}(p) = [p].
 ```
+
+in other words, this function implicitly assumes, that the total space ``\mathcal N`` is given,
+for example explicitly when `M` is a [`QuotientManifold`](@ref) and `p` is a point on `N`.
 """
-canonical_project(M::AbstractDecoratorManifold, p)
+function canonical_project(M::AbstractManifold, p)
+    allocate_result(M, canonical_project, p)
+    return canonical_project!(M, q, p)
+end
+
+@doc raw"""
+    canonical_project!(M, q, p)
+
+compute the canonical projection ``π`` on a manifold ``\mathcal M`` that
+[`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref) in place of `q`.
+
+See [`canonical_project`](@ref) for more details.
+"""
+canonical_project!(M::AbstractManifold, q, p)
+
+@doc raw"""
+    differential_canonical_project(M, p, X)
+
+compute the differential of the canonical projection ``π`` on a manifold ``\mathcal M`` that
+[`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref).
+The canonical (or natural) projection ``π`` from the total space ``\mathcal N``
+onto ``\mathcal M``, such that its differential
+
+```math
+ Dπ(p) : T_p\mathcal N → T_{π(p)}\mathcal M
+```
+
+where again the total space might be implicitly assumed, or explicitly when using a
+[`QuotientManifold`](@ref) `M`. So here `p` is a point on `N` and `X` is from ``T_p\mathcal N``.
+"""
+function differential_canonical_project(M::AbstractManifold, p, X)
+    allocate_result(M, differential_canonical_project, p, X)
+    return differential_canonical_project!(M, q, p)
+end
+
+@doc raw"""
+    differential_canonical_project!(M, Y, p, X)
+
+compute the differential of the canonical projection ``π`` on a manifold ``\mathcal M`` that
+[`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref). See [`differential_canonical_project`](@ref) for details.
+"""
+differential_canonical_project!(M::AbstractManifold, q, p)
+
+@doc raw"""
+    get_total_space(M::AbstractDecoratorManifold)
+
+Return the total space of a manifold that [`IsQuotientManifold`](@ref), e.g.
+a [`QuotientManifold`](@ref).
+"""
+get_total_space(::AbstractManifold)
+get_total_space(M::QuotientManifold) = M.total_space

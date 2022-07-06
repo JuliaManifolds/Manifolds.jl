@@ -56,8 +56,8 @@ end
 ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction()
 
 @doc raw"""
-    canonical_projection(::SymplecticStiefel, p_Sp)
-    canonical_projection!(::SymplecticStiefel{n,k}, p, p_Sp)
+    canonical_project(::SymplecticStiefel, p_Sp)
+    canonical_project!(::SymplecticStiefel{n,k}, p, p_Sp)
 
 Define the canonical projection from ``\operatorname{Sp}(2n, 2n)`` onto
 ``\operatorname{SpSt}(2n, 2k)``, by projecting onto the first ``k`` columns
@@ -67,10 +67,10 @@ It is assumed that the point ``p`` is on ``\operatorname{Sp}(2n, 2n)``.
 """
 function canonical_projection(M::SymplecticStiefel{n,k}, p_Sp) where {n,k}
     p_SpSt = similar(p_Sp, (2n, 2k))
-    return canonical_projection!(M, p_SpSt, p_Sp)
+    return canonical_project!(M, p_SpSt, p_Sp)
 end
 
-function canonical_projection!(::SymplecticStiefel{n,k}, p, p_Sp) where {n,k}
+function canonical_project!(::SymplecticStiefel{n,k}, p, p_Sp) where {n,k}
     p[:, (1:k)] .= p_Sp[:, (1:k)]
     p[:, ((k + 1):(2k))] .= p_Sp[:, ((n + 1):(n + k))]
     return p
@@ -277,6 +277,13 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
 end
 
 get_embedding(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
+
+@doc raw"""
+    get_total_space(::SymplecticStiefel)
+
+Return the total space of the [`SymplecticStiefel`](@ref) manifold, which is the corresponding [`Symplectic`](@ref) manifold.
+"""
+get_total_space(::SymplecticStiefel{n,k,𝔽}) where {n,k,𝔽} = Symplectic{n,𝔽}()
 
 @doc raw"""
     gradient(::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)

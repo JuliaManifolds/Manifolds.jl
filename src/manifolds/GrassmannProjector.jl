@@ -73,7 +73,7 @@ end
 @doc raw"""
     check_vector(::Grassmann{n,k,𝔽}, p::ProjectorPoint, X::ProjectorTVector; kwargs...) where {n,k,𝔽}
 
-Check whether the [`ProjectorTVector`]('ref) `X` is from the tangent space ``T_p\operatorname{Gr}(n,k) ``
+Check whether the [`ProjectorTVector`](@ref) `X` is from the tangent space ``T_p\operatorname{Gr}(n,k) ``
 at the [`ProjectorPoint`](@ref) `p` on the [`Grassmann`](@ref) manifold ``\operatorname{Gr}(n,k)``.
 This means that `X` has to be symmetric and that
 
@@ -117,9 +117,59 @@ get_embedding(::Grassmann{n,k,𝔽}, ::ProjectorPoint) where {n,k,𝔽} = Euclid
     representation_size(M::Grassmann{n,k}, p::ProjectorPoint)
 
 Return the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)
-`M` when using [`ProjectorPoint`§(@ref)s, i.e. ``(n,n)``.
+`M` when using [`ProjectorPoint`](@ref)s, i.e. ``(n,n)``.
 """
 @generated representation_size(::Grassmann{n,k}, p::ProjectorPoint) where {n,k} = (n, n)
+
+@doc raw"""
+    canonical_project!(M::Grassmann{n,k}, q::ProjectorPoint, p)
+
+Compute the canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold onto the [`Grassmann`](@ref)
+manifold when represented as [`ProjectorPoint`](@ref), i.e.
+
+```math
+    π^˜\mathrm{SG}(p) = pp^{\mathrm{T}}
+```
+"""
+function canonical_project!(::Grassmann{n,k}, q::ProjectorPoint, p) where {n,k}
+    q.value .= p * p'
+    return q
+end
+function canonical_project!(
+    M::Grassmann{n,k},
+    q::ProjectorPoint,
+    p::StiefelPoint,
+) where {n,k}
+    return canonical_project!(M, q, p.value)
+end
+
+@doc raw"""
+    canonical_project!(M::Grassmann{n,k}, q::ProjectorPoint, p)
+
+Compute the canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold onto the [`Grassmann`](@ref)
+manifold when represented as [`ProjectorPoint`](@ref), i.e.
+
+```math
+    Dπ^{\mathrm{SG}}(p)[X] = Xp^{\mathrm{T}} + pX^{\mathrm{T}}
+```
+"""
+function differential_canonical_project!(
+    ::Grassmann{n,k},
+    Y::ProjectorTVector,
+    p,
+    X,
+) where {n,k}
+    copyto!(Y.value, X * p' + p * X')
+    return Y
+end
+function differential_canonical_project!(
+    M::Grassmann{n,k},
+    Y::ProjectorPoint,
+    p::StiefelPoint,
+    X::StiefelTVector,
+) where {n,k}
+    return differenital_canonical_project!(M, Y, p.value, X.value)
+end
 
 Base.show(io::IO, p::ProjectorPoint) = print(io, "ProjectorPoint($(p.value))")
 Base.show(io::IO, X::ProjectorTVector) = print(io, "ProjectorTVector($(X.value))")
