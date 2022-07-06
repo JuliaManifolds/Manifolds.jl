@@ -49,6 +49,28 @@ const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
 Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
 
+@inline function active_traits(f, M::SpecialEuclidean, args...)
+    return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+end
+
+Base.@propagate_inbounds function Base.getindex(
+    p::AbstractMatrix,
+    M::Union{SpecialEuclidean,SpecialEuclideanManifold},
+    i::Union{Integer,Val},
+)
+    return submanifold_component(M, p, i)
+end
+
+Base.@propagate_inbounds function Base.setindex!(
+    q::AbstractMatrix,
+    p,
+    M::Union{SpecialEuclidean,SpecialEuclideanManifold},
+    i::Union{Integer,Val},
+)
+    copyto!(submanifold_component(M, q, i), p)
+    return p
+end
+
 Base.@propagate_inbounds function submanifold_component(
     ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
     p::AbstractMatrix,
@@ -260,7 +282,21 @@ function compose!(
     p::AbstractMatrix,
     q::AbstractMatrix,
 )
-    return mul!(x, p, q)
+    copyto!(x, p * q)
+    return x
+end
+
+# More generic default was mostly OK but it lacks padding
+function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X)
+    map(
+        exp!,
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    @inbounds _padpoint!(M, q)
+    return q
 end
 
 @doc raw"""
@@ -492,6 +528,20 @@ function _log_lie!(G::SpecialEuclidean{3}, X, q)
     @inbounds _padvector!(G, X)
     return X
 end
+
+# More generic default was mostly OK but it lacks padding
+function log!(M::SpecialEuclideanManifold, X::AbstractMatrix, p, q)
+    map(
+        log!,
+        M.manifolds,
+        submanifold_components(M, X),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+    )
+    @inbounds _padvector!(M, X)
+    return X
+end
+
 """
     lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
     lie_bracket(G::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)

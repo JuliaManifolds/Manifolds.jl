@@ -27,6 +27,19 @@ function ProductGroup(manifold::ProductManifold{𝔽}) where {𝔽}
     return GroupManifold(manifold, op)
 end
 
+@inline function active_traits(f, M::ProductGroup, args...)
+    if is_metric_function(f)
+        #pass to manifold by default - but keep Group Decorator for the retraction
+        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+    else
+        return merge_traits(
+            IsGroupManifold(M.op),
+            active_traits(f, M.manifold, args...),
+            IsExplicitDecorator(),
+        )
+    end
+end
+
 function identity_element(G::ProductGroup)
     M = G.manifold
     return ProductRepr(map(identity_element, M.manifolds))
@@ -247,4 +260,21 @@ function log_lie!(G::ProductGroup, X, q::Identity{ProductOperation})
     M = G.manifold
     map(log_lie!, M.manifolds, submanifold_components(G, X), submanifold_components(G, q))
     return X
+end
+
+Base.@propagate_inbounds function Base.getindex(
+    p::Union{ProductRepr,ArrayPartition},
+    M::ProductGroup,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return getindex(p, base_manifold(M), i)
+end
+
+Base.@propagate_inbounds function Base.setindex!(
+    q::Union{ProductRepr,ArrayPartition},
+    p,
+    M::ProductGroup,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return setindex!(q, p, base_manifold(M), i)
 end

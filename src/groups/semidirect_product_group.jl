@@ -13,7 +13,7 @@ function Base.show(io::IO, op::SemidirectProductOperation)
     return print(io, "SemidirectProductOperation($(op.action))")
 end
 
-const SemidirectProductGroup{𝔽,N,H,A} =
+const SemidirectProductGroup{𝔽,N,H,A<:AbstractGroupAction} =
     GroupManifold{𝔽,ProductManifold{𝔽,Tuple{N,H}},SemidirectProductOperation{A}}
 
 @doc raw"""
@@ -254,4 +254,21 @@ function isapprox(
     kwargs...,
 ) where {𝔽,N<:AbstractManifold,H<:AbstractManifold,A<:AbstractGroupAction}
     return isapprox(G, identity_element(G), X, Y; kwargs...)
+end
+
+Base.@propagate_inbounds function Base.getindex(
+    p::Union{ProductRepr,ArrayPartition},
+    M::SemidirectProductGroup,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return getindex(p, base_manifold(M), i)
+end
+
+Base.@propagate_inbounds function Base.setindex!(
+    q::Union{ProductRepr,ArrayPartition},
+    p,
+    M::SemidirectProductGroup,
+    i::Union{Integer,Colon,AbstractVector,Val},
+)
+    return setindex!(q, p, base_manifold(M), i)
 end

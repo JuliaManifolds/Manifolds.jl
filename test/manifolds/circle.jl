@@ -2,6 +2,10 @@ include("../utils.jl")
 
 using Manifolds: TFVector, CoTFVector
 
+# TODO: remove after bug in StaticArray is fixed
+@inline Base.copy(a::SizedArray) = __copy(a)
+@inline __copy(a::SizedArray{S,T}) where {S,T} = SizedArray{S,T}(copy(a.data))
+
 @testset "Circle" begin
     M = Circle()
     @testset "Real Circle Basics" begin

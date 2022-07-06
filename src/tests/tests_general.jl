@@ -111,6 +111,8 @@ function test_manifold(
     parallel_transport_to=parallel_transport,
     parallel_transport_along=parallel_transport,
     parallel_transport_direction=parallel_transport,
+    test_inner=true,
+    test_norm=true,
     test_project_point=false,
     test_project_tangent=false,
     test_rand_point=false,
@@ -275,15 +277,20 @@ function test_manifold(
         Test.@test isapprox(M, exp(M, pts[1], X1, 1), pts[2]; atol=atolp1)
         Test.@test isapprox(M, exp(M, pts[1], X1, 0), pts[1]; atol=atolp1)
 
-        Test.@test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], X1)
+        if test_norm
+            Test.@test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], X1)
+        end
 
-        X3 = log(M, pts[1], pts[3])
+        if test_inner
+            X3 = log(M, pts[1], pts[3])
+            Test.@test inner(M, pts[1], X1, X3) ≈ conj(inner(M, pts[1], X3, X1))
+            Test.@test inner(M, pts[1], X1, X1) ≈ real(inner(M, pts[1], X1, X1))
 
-        Test.@test inner(M, pts[1], X1, X3) ≈ conj(inner(M, pts[1], X3, X1))
-        Test.@test inner(M, pts[1], X1, X1) ≈ real(inner(M, pts[1], X1, X1))
-
-        Test.@test norm(M, pts[1], X1) isa Real
-        Test.@test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
+            Test.@test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
+        end
+        if test_norm
+            Test.@test norm(M, pts[1], X1) isa Real
+        end
 
         (test_inplace && is_mutating) && Test.@testset "inplace test for exp!" begin
             p = copy(M, pts[1])

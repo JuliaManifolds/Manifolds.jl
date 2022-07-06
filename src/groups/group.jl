@@ -100,6 +100,10 @@ function is_group_manifold(
     return is_group_manifold(M, t.head.op)
 end
 
+base_group(M::MetricManifold) = decorated_manifold(M)
+base_group(M::ConnectionManifold) = decorated_manifold(M)
+base_group(M::AbstractDecoratorManifold) = M
+
 """
     ActionDirection
 
@@ -175,8 +179,9 @@ points are not represented by arrays.
 identity_element(G::AbstractDecoratorManifold)
 @trait_function identity_element(G::AbstractDecoratorManifold)
 function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold)
-    q = allocate_result(G, identity_element)
-    return identity_element!(G, q)
+    BG = base_group(G)
+    q = allocate_result(BG, identity_element)
+    return identity_element!(BG, q)
 end
 
 @trait_function identity_element!(G::AbstractDecoratorManifold, p)
@@ -194,13 +199,15 @@ where `p` indicates the type to represent the identity.
 identity_element(G::AbstractDecoratorManifold, p)
 @trait_function identity_element(G::AbstractDecoratorManifold, p)
 function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
-    q = allocate_result(G, identity_element, p)
-    return identity_element!(G, q)
+    BG = base_group(G)
+    q = allocate_result(BG, identity_element, p)
+    return identity_element!(BG, q)
 end
+
 function check_size(
-    ::TraitList{<:IsGroupManifold{<:O}},
+    ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
-    ::Identity{<:O},
+    ::Identity{O},
 ) where {O<:AbstractGroupOperation}
     return nothing
 end
@@ -223,7 +230,8 @@ function is_identity(
     q;
     kwargs...,
 )
-    return isapprox(G, identity_element(G), q; kwargs...)
+    BG = base_group(G)
+    return isapprox(BG, identity_element(BG), q; kwargs...)
 end
 function is_identity(
     ::TraitList{<:IsGroupManifold{O}},
@@ -258,7 +266,8 @@ end
     q::Identity{O};
     kwargs...,
 ) where {O<:AbstractGroupOperation}
-    return is_identity(G, p; kwargs...)
+    BG = base_group(G)
+    return is_identity(BG, p; kwargs...)
 end
 function isapprox(
     ::TraitList{<:IsGroupManifold{O}},
@@ -296,7 +305,8 @@ end
     Y;
     kwargs...,
 ) where {𝔽,O<:AbstractGroupOperation}
-    return isapprox(G, identity_element(G), X, Y; kwargs...)
+    BG = base_group(G)
+    return isapprox(BG, identity_element(BG), X, Y; kwargs...)
 end
 function Base.isapprox(
     ::TraitList{<:IsGroupManifold},
@@ -402,7 +412,8 @@ inv(::AbstractDecoratorManifold, ::Any...)
 @trait_function Base.inv(G::AbstractDecoratorManifold, p)
 function Base.inv(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
     q = allocate_result(G, inv, p)
-    return inv!(G, q, p)
+    BG = base_group(G)
+    return inv!(BG, q, p)
 end
 
 function Base.inv(
@@ -414,9 +425,6 @@ function Base.inv(
 end
 
 @trait_function inv!(G::AbstractDecoratorManifold, q, p)
-function inv!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p)
-    return inv!(G.manifold, q, p)
-end
 
 function inv!(
     ::TraitList{IsGroupManifold{O}},
@@ -424,7 +432,16 @@ function inv!(
     q,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
-    return identity_element!(G, q)
+    BG = base_group(G)
+    return identity_element!(BG, q)
+end
+function inv!(
+    ::TraitList{IsGroupManifold{O}},
+    G::AbstractDecoratorManifold,
+    ::Identity{O},
+    e::Identity{O},
+) where {O<:AbstractGroupOperation}
+    return e
 end
 
 function Base.copyto!(
@@ -441,7 +458,8 @@ function Base.copyto!(
     p,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
-    return identity_element!(G, p)
+    BG = base_group(G)
+    return identity_element!(BG, p)
 end
 
 @doc raw"""
@@ -456,7 +474,7 @@ compose(::AbstractDecoratorManifold, ::Any...)
 
 @trait_function compose(G::AbstractDecoratorManifold, p, q)
 function compose(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
-    return _compose(G, p, q)
+    return _compose(base_group(G), p, q)
 end
 function compose(
     ::AbstractDecoratorManifold,
@@ -488,7 +506,7 @@ end
 @trait_function compose!(M::AbstractDecoratorManifold, x, p, q)
 
 function compose!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, x, q, p)
-    return _compose!(G, x, q, p)
+    return _compose!(base_group(G), x, q, p)
 end
 function compose!(
     G::AbstractDecoratorManifold,
@@ -528,7 +546,7 @@ transpose(e::Identity) = e
 @doc raw"""
     hat(M::AbstractDecoratorManifold{𝔽,O}, ::Identity{O}, Xⁱ) where {𝔽,O<:AbstractGroupOperation}
 
-Given a basis $e_i$ on the tangent space at a the [`Identity`}(@ref) and tangent
+Given a basis $e_i$ on the tangent space at a the [`Identity`](@ref) and tangent
 component vector ``X^i``, compute the equivalent vector representation
 ``X=X^i e_i**, where Einstein summation notation is used:
 
@@ -643,7 +661,8 @@ function translate(
     q,
     conv::ActionDirection,
 )
-    return compose(G, _action_order(p, q, conv)...)
+    BG = base_group(G)
+    return compose(BG, _action_order(p, q, conv)...)
 end
 
 @trait_function translate!(
@@ -661,7 +680,8 @@ function translate!(
     q,
     conv::ActionDirection,
 )
-    return compose!(G, X, _action_order(p, q, conv)...)
+    BG = base_group(G)
+    return compose!(BG, X, _action_order(p, q, conv)...)
 end
 
 @doc raw"""
@@ -690,7 +710,8 @@ function inverse_translate(
     q,
     conv::ActionDirection,
 )
-    return translate(G, inv(G, p), q, conv)
+    BG = base_group(G)
+    return translate(BG, inv(BG, p), q, conv)
 end
 
 @trait_function inverse_translate!(
@@ -708,7 +729,8 @@ function inverse_translate!(
     q,
     conv::ActionDirection,
 )
-    return translate!(G, X, inv(G, p), q, conv)
+    BG = base_group(G)
+    return translate!(BG, X, inv(BG, p), q, conv)
 end
 
 @doc raw"""
@@ -738,7 +760,8 @@ function translate_diff(
     conv::ActionDirection,
 )
     Y = allocate_result(G, translate_diff, X, p, q)
-    translate_diff!(G, Y, p, q, X, conv)
+    BG = base_group(G)
+    translate_diff!(BG, Y, p, q, X, conv)
     return Y
 end
 @trait_function translate_diff!(
@@ -776,7 +799,8 @@ function inverse_translate_diff(
     X,
     conv::ActionDirection,
 )
-    return translate_diff(G, inv(G, p), q, X, conv)
+    BG = base_group(G)
+    return translate_diff(BG, inv(BG, p), q, X, conv)
 end
 
 @trait_function inverse_translate_diff!(
@@ -796,7 +820,8 @@ function inverse_translate_diff!(
     X,
     conv::ActionDirection,
 )
-    return translate_diff!(G, Y, inv(G, p), q, X, conv)
+    BG = base_group(G)
+    return translate_diff!(BG, Y, inv(BG, p), q, X, conv)
 end
 
 @doc raw"""
@@ -841,8 +866,9 @@ the corresponding trait version `exp_lie(::TraitList{<:IsGroupManifold}, G, X)`.
 exp_lie(G::AbstractManifold, X)
 @trait_function exp_lie(M::AbstractDecoratorManifold, X)
 function exp_lie(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X)
-    q = allocate_result(G, exp_lie, X)
-    return exp_lie!(G, q, X)
+    BG = base_group(G)
+    q = allocate_result(BG, exp_lie, X)
+    return exp_lie!(BG, q, X)
 end
 
 @trait_function exp_lie!(M::AbstractDecoratorManifold, q, X)
@@ -879,24 +905,28 @@ either
 log_lie(::AbstractDecoratorManifold, q)
 @trait_function log_lie(G::AbstractDecoratorManifold, q)
 function log_lie(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q)
-    return _log_lie(G, q)
+    BG = base_group(G)
+    return _log_lie(BG, q)
 end
 function log_lie(
     ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
-    return zero_vector(G, identity_element(G))
+    BG = base_group(G)
+    return zero_vector(BG, identity_element(BG))
 end
 # though identity was taken care of – as usual restart decorator dispatch
 function _log_lie(G::AbstractDecoratorManifold, q)
-    X = allocate_result(G, log_lie, q)
-    return log_lie!(G, X, q)
+    BG = base_group(G)
+    X = allocate_result(BG, log_lie, q)
+    return log_lie!(BG, X, q)
 end
 
 @trait_function log_lie!(G::AbstractDecoratorManifold, X, q)
 function log_lie!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, q)
-    return _log_lie!(G, X, q)
+    BG = base_group(G)
+    return _log_lie!(BG, X, q)
 end
 function log_lie!(
     ::TraitList{<:IsGroupManifold{O}},
@@ -1046,18 +1076,35 @@ function inverse_retract!(
     return translate_diff!(G, X, p, Identity(G), Xₑ, conv)
 end
 
+@trait_function get_vector_lie(G::AbstractManifold, X, B::AbstractBasis)
+@trait_function get_vector_lie!(G::AbstractManifold, Y, X, B::AbstractBasis)
+
 @doc raw"""
     get_vector_lie(G::AbstractDecoratorManifold, a, B::AbstractBasis)
 
 Reconstruct a tangent vector from the Lie algebra of `G` from cooordinates `a` of a basis `B`.
 This is similar to calling [`get_vector`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
 """
-function get_vector_lie(G::AbstractManifold, X, B::AbstractBasis)
+function get_vector_lie(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractManifold,
+    X,
+    B::AbstractBasis,
+)
     return get_vector(base_manifold(G), identity_element(G), X, B)
 end
-function get_vector_lie!(G::AbstractManifold, Y, X, B::AbstractBasis)
+function get_vector_lie!(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractManifold,
+    Y,
+    X,
+    B::AbstractBasis,
+)
     return get_vector!(base_manifold(G), Y, identity_element(G), X, B)
 end
+
+@trait_function get_coordinates_lie(G::AbstractManifold, X, B::AbstractBasis)
+@trait_function get_coordinates_lie!(G::AbstractManifold, a, X, B::AbstractBasis)
 
 @doc raw"""
     get_coordinates_lie(G::AbstractManifold, X, B::AbstractBasis)
@@ -1065,9 +1112,20 @@ end
 Get the coordinates of an element `X` from the Lie algebra og `G` with respect to a basis `B`.
 This is similar to calling [`get_coordinates`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
 """
-function get_coordinates_lie(G::AbstractManifold, X, B::AbstractBasis)
+function get_coordinates_lie(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractManifold,
+    X,
+    B::AbstractBasis,
+)
     return get_coordinates(base_manifold(G), identity_element(G), X, B)
 end
-function get_coordinates_lie!(G::AbstractManifold, a, X, B::AbstractBasis)
+function get_coordinates_lie!(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractManifold,
+    a,
+    X,
+    B::AbstractBasis,
+)
     return get_coordinates!(base_manifold(G), a, identity_element(G), X, B)
 end
