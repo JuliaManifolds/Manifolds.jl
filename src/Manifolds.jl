@@ -149,6 +149,7 @@ import Base:
     isempty,
     length,
     ndims,
+    show,
     showerror,
     size,
     transpose
@@ -716,8 +717,10 @@ export AbstractGroupAction,
     SpecialEuclidean,
     SpecialLinear,
     SpecialOrthogonal,
-    SpecialUnitary
-TranslationGroup, TranslationAction, UnitaryMatrices
+    SpecialUnitary,
+    TranslationGroup,
+    TranslationAction,
+    UnitaryMatrices
 export AbstractInvarianceTrait
 export IsMetricManifold, IsConnectionManifold
 export IsGroupManifold,

@@ -25,7 +25,7 @@ const SpecialUnitary{n} = GeneralUnitaryMultiplicationGroup{
     GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices},
 }
 
-SpecialUnitary(n) = SpecialUnitary{n}()
+SpecialUnitary(n) = GroupManifold(GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}(),MultiplicationOperation())
 
 @doc raw"""
     project(G::SpecialUnitary, p)

@@ -27,7 +27,7 @@ const Unitary{n} = GeneralUnitaryMultiplicationGroup{
     GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices},
 }
 
-Unitary(n) = Unitary{n}()
+Unitary(n) = GroupManifold(UnitaryMatrices(n), MultiplicationOperation())
 
 exp!(G::Unitary, q, p, X) = compose!(G, q, p, exp_lie(G, X))
 
