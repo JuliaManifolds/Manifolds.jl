@@ -273,7 +273,7 @@ function get_vector_orthonormal!(
     N::RealNumbers,
 ) where {n}
     T = Base.promote_eltype(p, X)
-    get_vector_orthogonal!(M, X, p, Xⁱ, n)
+    get_vector_orthogonal!(M, X, p, Xⁱ, N)
     X ./= sqrt(T(2))
     return X
 end
@@ -290,6 +290,8 @@ which is globally
 ````
 """
 injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}) where {n} = π * sqrt(2.0)
+_injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::ExponentialRetraction) where {n} = π * sqrt(2.0)
+_injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::PolarRetraction) where {n} = π / sqrt(2.0)
 
 @doc raw"""
     manifold_dimension(M::Rotations)
