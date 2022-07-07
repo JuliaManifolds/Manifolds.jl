@@ -295,6 +295,15 @@ Base.@propagate_inbounds @inline function _read(
     return x[i...]
 end
 
+function Base.view(
+    p::AbstractArray,
+    M::PowerManifoldMultidimensional,
+    I::Union{Integer,Colon,AbstractVector}...,
+)
+    rep_size = representation_size(M.manifold)
+    return _write(M, rep_size, p, I...)
+end
+
 function representation_size(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
     return (representation_size(M.manifold)..., size_to_tuple(TSize)...)
 end

@@ -102,6 +102,24 @@ using RecursiveArrayTools: ArrayPartition
         @test p1c.parts[1][1] == 0.0
     end
 
+    @testset "some ArrayPartition functions" begin
+        p = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
+        q = allocate(p)
+        @test q.x[1] isa Vector
+    end
+
+    @testset "allocate on PowerManifold of ProductManifold" begin
+        p = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
+        q = allocate([p])
+        @test q[1] isa ArrayPartition
+        @test q[1].x[1] isa Vector
+
+        p = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0])
+        q = allocate([p])
+        @test q[1] isa ProductRepr
+        @test q[1].parts[1] isa Vector
+    end
+
     @testset "copyto!" begin
         p = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0])
         X = ProductRepr([1.0, 0.0, 0.0], [1.0, 0.0])

@@ -116,8 +116,11 @@ function embed!(::GeneralUnitaryMatrices, Y, p, X)
     return mul!(Y, p, X)
 end
 
+
 @doc raw"""
     get_coordinates(M::Rotations, p, X)
+    get_coordinates(M::OrthogonalMatrices, p, X)
+    get_coordinates(M::UnitaryMatrices, p, X)
 
 Extract the unique tangent vector components $X^i$ at point `p` on [`Rotations`](@ref)
 $\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
@@ -140,6 +143,14 @@ function get_coordinates(
     ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
 )
     return [X[2]]
+end
+function get_coordinates(
+    ::GeneralUnitaryMatrices{2,ℝ},
+    p::SMatrix,
+    X::SMatrix,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+)
+    return SA[X[2]]
 end
 
 function get_coordinates_orthogonal(M::GeneralUnitaryMatrices{n,ℝ}, p, X, N) where {n}
@@ -215,6 +226,10 @@ function get_vector_orthogonal(
     return get_vector_orthogonal!(M, Y, p, c, N)
 end
 
+function get_vector_orthogonal(::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, Xⁱ, ::RealNumbers)
+    return @SMatrix [0 -Xⁱ[]; Xⁱ[] 0]
+end
+
 function get_vector_orthogonal!(M::GeneralUnitaryMatrices{2,ℝ}, X, p, Xⁱ, N::RealNumbers)
     return get_vector_orthogonal!(M, X, p, Xⁱ[1], N)
 end
@@ -265,6 +280,10 @@ function get_vector_orthogonal!(
     end
     return X
 end
+function get_vector_orthonormal(M::GeneralUnitaryMatrices{n,ℝ}, p, Xⁱ, N::RealNumbers) where {n}
+     return get_vector_orthogonal(M, p, Xⁱ, N) ./ sqrt(eltype(Xⁱ)(2))
+ end
+
 function get_vector_orthonormal!(
     M::GeneralUnitaryMatrices{n,ℝ},
     X,

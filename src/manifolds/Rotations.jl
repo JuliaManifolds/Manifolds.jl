@@ -113,7 +113,11 @@ The algorithm used is a more numerically stable form of those proposed in
     > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
 """
 exp(::Rotations, ::Any...)
-
+function exp(M::Rotations{2}, p::SMatrix, X::SMatrix)
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
+    sinθ, cosθ = sincos(θ)
+    return p * SA[cosθ -sinθ; sinθ cosθ]
+end
 exp!(::Rotations, q, p, X) = copyto!(q, p * exp(X))
 function exp!(M::Rotations{2}, q, p, X)
     @assert size(q) == (2, 2)
@@ -270,6 +274,7 @@ function get_basis_diagonalizing(
     return CachedBasis(B, evals, evec)
 end
 
+
 @doc raw"""
     injectivity_radius(M::Rotations, ::PolarRetraction)
 
@@ -353,6 +358,12 @@ For antipodal rotations the function returns deterministically one of the tangen
 that point at `q`.
 """
 log(::Rotations, ::Any...)
+function ManifoldsBase.log(M::Rotations{2}, p, q)
+    U = transpose(p) * q
+    @assert size(U) == (2, 2)
+    @inbounds θ = atan(U[2], U[1])
+    return get_vector(M, p, θ, DefaultOrthogonalBasis())
+end
 
 function log!(M::Rotations, X, p, q)
     U = transpose(p) * q
