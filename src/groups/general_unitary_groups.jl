@@ -4,8 +4,9 @@
 A generic type for Lie groups based on a unitary property and matrix multiplcation,
 see e.g. [`Orthogonal`](@ref), [`SpecialOrthogonal`](@ref), [`Unitary`](@ref), and [`SpecialUnitary`](@ref)
 """
-const GeneralUnitaryMultiplicationGroup{n,𝔽,M<:AbstractManifold{𝔽}} =
-    GroupManifold{𝔽,M,MultiplicationOperation}
+struct GeneralUnitaryMultiplicationGroup{n,𝔽,S} <: AbstractDecoratorManifold{𝔽}
+    manifold::GeneralUnitaryMatrices{n,𝔽,S}
+end
 
 @inline function active_traits(f, ::GeneralUnitaryMultiplicationGroup, args...)
     if is_metric_function(f)

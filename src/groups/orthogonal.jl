@@ -7,7 +7,7 @@ Orthogonal group $\mathrm{O}(n)$ represented by orthogonal matrices.
 
     Orthogonal(n)
 """
-const Orthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,OrthogonalMatrices{n}}
+const Orthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,AbsoluteDeterminantOneMatrices}
 
 Orthogonal(n) = Orthogonal{n}()
 
