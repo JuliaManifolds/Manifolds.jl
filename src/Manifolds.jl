@@ -369,6 +369,7 @@ include("groups/group_operation_action.jl")
 include("groups/validation_group.jl")
 include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
+include("groups/power_group.jl")
 
 # Special Group Manifolds
 include("groups/general_linear.jl")
@@ -695,6 +696,7 @@ export AbstractGroupAction,
     LeftAction,
     LeftInvariantMetric,
     MultiplicationOperation,
+    PowerGroup,
     ProductGroup,
     ProductOperation,
     RealCircleGroup,
