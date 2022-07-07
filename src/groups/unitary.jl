@@ -21,13 +21,9 @@ or in other words we reoresent the tangent spaces employing the Lie algebra ``\m
 Construct ``\mathrm{U}(n)``.
 See also [`Orthogonal(n)`](@ref) for the real-valued case.
 """
-const Unitary{n} = GeneralUnitaryMultiplicationGroup{
-    n,
-    ℂ,
-    GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices},
-}
+const Unitary{n} = GeneralUnitaryMultiplicationGroup{n,ℂ,AbsoluteDeterminantOneMatrices}
 
-Unitary(n) = GroupManifold(UnitaryMatrices(n), MultiplicationOperation())
+Unitary(n) = Unitary{n}(UnitaryMatrices(n))
 
 exp!(G::Unitary, q, p, X) = compose!(G, q, p, exp_lie(G, X))
 

@@ -498,7 +498,8 @@ export Euclidean,
     SymplecticStiefel,
     SymplecticMatrix,
     Torus,
-    Tucker
+    Tucker,
+    UnitaryMatrices
 export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
 export HyperboloidTVector,
     PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
@@ -706,7 +707,7 @@ export AbstractGroupAction,
     LeftAction,
     LeftInvariantMetric,
     MultiplicationOperation,
-    OrthogonalMatrices,
+    Orthogonal,
     ProductGroup,
     ProductOperation,
     RealCircleGroup,
@@ -720,7 +721,7 @@ export AbstractGroupAction,
     SpecialUnitary,
     TranslationGroup,
     TranslationAction,
-    UnitaryMatrices
+    Unitary
 export AbstractInvarianceTrait
 export IsMetricManifold, IsConnectionManifold
 export IsGroupManifold,

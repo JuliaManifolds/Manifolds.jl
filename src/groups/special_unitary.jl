@@ -19,18 +19,9 @@ or in other words we reoresent the tangent spaces employing the Lie algebra ``\m
 
 Generate the Lie group of ``n×n`` unitary matrices with determinant +1.
 """
-const SpecialUnitary{n} = GeneralUnitaryMultiplicationGroup{
-    n,
-    ℂ,
-    GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices},
-}
+const SpecialUnitary{n} = GeneralUnitaryMultiplicationGroup{n,ℂ,DeterminantOneMatrices}
 
-function SpecialUnitary(n)
-    return GroupManifold(
-        GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}(),
-        MultiplicationOperation(),
-    )
-end
+SpecialUnitary(n) = SpecialUnitary{n}(GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}())
 
 @doc raw"""
     project(G::SpecialUnitary, p)

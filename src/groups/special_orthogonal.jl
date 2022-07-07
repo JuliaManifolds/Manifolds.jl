@@ -7,9 +7,9 @@ Special orthogonal group ``\mathrm{SO}(n)`` represented by rotation matrices.
 # Constructor
     SpecialOrthogonal(n)
 """
-const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
+const SpecialOrthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,DeterminantOneMatrices}
 
-SpecialOrthogonal(n) = GroupManifold(Rotations(n), MultiplicationOperation())
+SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n))
 
 function exp_lie!(::SpecialOrthogonal{2}, q, X)
     @assert size(q) == (2, 2)

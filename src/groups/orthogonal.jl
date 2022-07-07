@@ -9,7 +9,7 @@ Orthogonal group $\mathrm{O}(n)$ represented by orthogonal matrices.
 """
 const Orthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,AbsoluteDeterminantOneMatrices}
 
-Orthogonal(n) = Orthogonal{n}()
+Orthogonal(n) = Orthogonal{n}(OrthogonalMatrices(n))
 
 @doc raw"""
      exp_lie(G::Orthogonal{2}, X)
@@ -152,3 +152,5 @@ function group_log!(G::Orthogonal{4}, X::AbstractMatrix, q::AbstractMatrix)
     end
     return project!(G, X, Identity(G, q), X)
 end
+
+show(io::IO, ::Orthogonal{n}) where {n} = print(io, "Orthogonal($(n))")

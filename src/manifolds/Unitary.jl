@@ -27,3 +27,5 @@ see also [`UnitaryMatrices`](@ref) for the real valued case.
 const UnitaryMatrices{n} = GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices}
 
 UnitaryMatrices(n::Int) = UnitaryMatrices{n}()
+
+show(io::IO, ::UnitaryMatrices{n}) where {n} = print(io, "UnitaryMatrices($(n))")
