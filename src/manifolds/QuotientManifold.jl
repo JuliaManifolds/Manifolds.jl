@@ -142,8 +142,8 @@ where ``\mathcal O`` is a Lie group with its group action generating the orbit.
 get_orbit_action(::AbstractManifold)
 
 @doc raw"""
-    horizontal_lift(N, q, X)
-    horizontal_lift(QuotientManifold{M,N}, p, X)
+    horizontal_lift(N::AbstractManifold, q, X)
+    horizontal_lift(::QuotientManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold}, p, X) where {𝔽}
 
 Given a point `q` such that ``p=π(q)`` is a point on a quotient manifold `M`
 (implicitly given for the first case)
