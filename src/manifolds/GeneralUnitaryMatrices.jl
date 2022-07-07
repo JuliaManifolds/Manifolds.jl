@@ -73,6 +73,12 @@ function check_point(
     if !isapprox(det(p), 1; kwargs...)
         return DomainError(det(p), "The determinant of $p has to be +1 but it is $(det(p))")
     end
+    if !isapprox(p' * p, one(p); kwargs...)
+        return DomainError(
+            norm(p' * p - one(p)),
+            "$p must be orthogonal but it's not at kwargs $kwargs",
+        )
+    end
     return nothing
 end
 
