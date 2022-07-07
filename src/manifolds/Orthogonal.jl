@@ -8,6 +8,6 @@ This is the special case of {`UnitaryMatrices`}(@ref) over the reals.
 
 The constructor is equivalent to calling [`Unitary(n,ℝ)`](@ref).
 """
-const OrthogonalMatrices{n} = UnitaryMatrices{n,ℝ}
+const OrthogonalMatrices{n} = AbstractUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}
 
 OrthogonalMatrices(n) = OrthogonalMatrices{n}()

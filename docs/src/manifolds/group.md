@@ -63,23 +63,6 @@ Pages = ["groups/multiplication_operation.jl"]
 Order = [:type, :function]
 ```
 
-
-### Product group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/product_group.jl"]
-Order = [:type, :function]
-```
-
-### Semidirect product group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/semidirect_product_group.jl"]
-Order = [:type, :function]
-```
-
 ### Circle group
 
 ```@autodocs
@@ -93,6 +76,47 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/general_linear.jl"]
+Order = [:type, :function]
+```
+
+### Heisenberg group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/heisenberg.jl"]
+Order = [:type,:function]
+```
+
+### Product group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/product_group.jl"]
+Order = [:type, :function]
+```
+
+
+### Semidirect product group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/semidirect_product_group.jl"]
+Order = [:type, :function]
+```
+
+### Orthogonal group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/orthogonal.jl"]
+Order = [:type, :function]
+```
+
+### Special Euclidean group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/special_euclidean.jl"]
 Order = [:type, :function]
 ```
 
@@ -120,20 +144,12 @@ Pages = ["groups/translation_group.jl"]
 Order = [:type, :function]
 ```
 
-### Special Euclidean group
+### Unitary group
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["groups/special_euclidean.jl"]
+Pages = ["groups/unitary.jl"]
 Order = [:type, :function]
-```
-
-### Heisenberg group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/heisenberg.jl"]
-Order = [:type,:function]
 ```
 
 ## Group actions

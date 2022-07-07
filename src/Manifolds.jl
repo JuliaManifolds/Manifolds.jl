@@ -329,7 +329,6 @@ include("manifolds/MultinomialSymmetric.jl")
 include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
-include("manifolds/Rotations.jl")
 include("manifolds/SkewHermitian.jl")
 include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
@@ -348,7 +347,9 @@ include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Symplectic.jl")
 include("manifolds/SymplecticStiefel.jl")
 include("manifolds/Tucker.jl")
+#
 include("manifolds/Unitary.jl")
+include("manifolds/Rotations.jl")
 include("manifolds/Orthogonal.jl")
 
 # Product or power based manifolds
@@ -372,14 +373,15 @@ include("groups/validation_group.jl")
 include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 
+# generic group
+include("groups/matrix_multiplication_group.jl")
 # Special Group Manifolds
 include("groups/general_linear.jl")
 include("groups/special_linear.jl")
 include("groups/translation_group.jl")
-# TODO
-# include("groups/unitary.jl")
-# include("groups/orthogonal.jl")
-# include("groups/special_unitary.jl")
+include("groups/unitary.jl")
+include("groups/orthogonal.jl")
+include("groups/special_unitary.jl")
 include("groups/special_orthogonal.jl")
 include("groups/circle_group.jl")
 include("groups/heisenberg.jl")

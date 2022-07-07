@@ -11,7 +11,7 @@ since these matrices represent all rotations of points in $ℝ^n$.
 
 Generate the $\mathrm{SO}(n) \subset ℝ^{n × n}$
 """
-struct Rotations{N} <: AbstractManifold{ℝ} end
+const Rotations{n} = AbstractUnitaryMatrices{n,ℝ,DeterminantOneMatrices}
 
 Rotations(n::Int) = Rotations{n}()
 
@@ -38,10 +38,6 @@ function NormalRotationDistribution(
     return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
 end
 
-function active_traits(f, ::Rotations, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
-end
-
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
@@ -62,56 +58,6 @@ function angles_4d_skew_sym_matrix(A)
     end
     sqrtdisc = sqrt(halfb^2 - c)
     return sqrt(halfb + sqrtdisc), sqrt(halfb - sqrtdisc)
-end
-
-"""
-    check_point(M, p; kwargs...)
-
-Check whether `p` is a valid point on the [`Rotations`](@ref) `M`,
-i.e. is an array of size [`manifold_dimension`](@ref)`(M)` and represents a
-valid rotation.
-The tolerance for the last test can be set using the `kwargs...`.
-"""
-function check_point(M::Rotations{N}, p; kwargs...) where {N}
-    if !isapprox(det(p), 1; kwargs...)
-        return DomainError(det(p), "The determinant of $p has to be +1 but it is $(det(p))")
-    end
-    if !isapprox(transpose(p) * p, one(p); kwargs...)
-        return DomainError(
-            norm(transpose(p) * p - one(p)),
-            "$p must be orthogonal but it's not at kwargs $kwargs",
-        )
-    end
-    return nothing
-end
-
-"""
-    check_vector(M, p, X; kwargs... )
-
-Check whether `X` is a tangent vector to `p` on the [`Rotations`](@ref)
-space `M`, i.e. after [`check_point`](@ref)`(M,p)`, `X` has to be skew symmetric.
-The tolerance for the last test can be set using the `kwargs...`.
-"""
-function check_vector(M::Rotations{N}, p, X; kwargs...) where {N}
-    return check_point(SkewSymmetricMatrices(N), X; kwargs...)
-end
-
-@doc raw"""
-    embed(M::Rotations{N}, p, X)
-
-Embed the tangent vector `X` at point `p` in `M` from
-its Lie algebra representation (set of skew matrices) into the
-Riemannian submanifold representation
-
-The formula reads
-```math
-X_{\text{embedded}} = p * X
-```
-"""
-embed(::Rotations, p, X)
-
-function embed!(::Rotations, Y, p, X)
-    return mul!(Y, p, X)
 end
 
 @doc raw"""

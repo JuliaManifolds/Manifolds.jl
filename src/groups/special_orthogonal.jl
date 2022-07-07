@@ -6,43 +6,9 @@ Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 # Constructor
     SpecialOrthogonal(n)
 """
-const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
-
-@inline function active_traits(f, ::SpecialOrthogonal, args...)
-    if is_metric_function(f)
-        #pass to Rotations by default - but keep Group Decorator for the retraction
-        return merge_traits(
-            IsGroupManifold(MultiplicationOperation()),
-            IsExplicitDecorator(),
-        )
-    else
-        return merge_traits(
-            IsGroupManifold(MultiplicationOperation()),
-            HasBiinvariantMetric(),
-            IsDefaultMetric(EuclideanMetric()),
-            IsExplicitDecorator(), #pass to Rotations by default/last fallback
-        )
-    end
-end
+const SpecialOrthogonal{n} = AbstractUnitaryMultiplicationGroup{n,ℝ,Rotations{n}}
 
 SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
-
-function allocate_result(
-    ::SpecialOrthogonal,
-    ::typeof(exp),
-    ::Identity{MultiplicationOperation},
-    X,
-)
-    return allocate(X)
-end
-function allocate_result(
-    ::SpecialOrthogonal,
-    ::typeof(log),
-    ::Identity{MultiplicationOperation},
-    q,
-)
-    return allocate(q)
-end
 
 function exp_lie!(::SpecialOrthogonal{2}, q, X)
     @assert size(q) == (2, 2)
