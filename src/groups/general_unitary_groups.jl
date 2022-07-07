@@ -41,3 +41,5 @@ function allocate_result(
 )
     return allocate(q)
 end
+
+decorated_manifold(M::GeneralUnitaryMultiplicationGroup) = M.manifold
