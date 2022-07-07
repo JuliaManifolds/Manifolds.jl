@@ -175,6 +175,11 @@ The algorithm used is a more numerically stable form of those proposed in
     > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
 """
 exp(::Rotations, ::Any...)
+function exp(M::Rotations{2}, p::SMatrix, X::SMatrix)
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
+    sinθ, cosθ = sincos(θ)
+    return p * SA[cosθ -sinθ; sinθ cosθ]
+end
 
 exp!(::Rotations, q, p, X) = copyto!(q, p * exp(X))
 function exp!(M::Rotations{2}, q, p, X)
@@ -350,6 +355,14 @@ $X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 """
 get_coordinates(::Rotations, ::Any...)
 get_coordinates(::Rotations{2}, p, X, ::DefaultOrthogonalBasis{ℝ,TangentSpaceType}) = [X[2]]
+function get_coordinates(
+    ::Rotations{2},
+    p::SMatrix,
+    X::SMatrix,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+)
+    return SA[X[2]]
+end
 
 function get_coordinates_orthogonal(M::Rotations, p, X, N)
     Y = allocate_result(M, get_coordinates, p, X, DefaultOrthogonalBasis(N))
@@ -396,11 +409,14 @@ function get_vector_orthogonal(M::Rotations, p, c, N::RealNumbers)
     Y = allocate_result(M, get_vector, p, c)
     return get_vector_orthogonal!(M, Y, p, c, N)
 end
+function get_vector_orthogonal(::Rotations{2}, p::SMatrix, Xⁱ, ::RealNumbers)
+    return @SMatrix [0 -Xⁱ[]; Xⁱ[] 0]
+end
 
 function get_vector_orthogonal!(M::Rotations{2}, X, p, Xⁱ, N::RealNumbers)
     return get_vector_orthogonal!(M, X, p, Xⁱ[1], N)
 end
-function get_vector_orthogonal!(M::Rotations{2}, X, p, Xⁱ::Real, ::RealNumbers)
+function get_vector_orthogonal!(::Rotations{2}, X, p, Xⁱ::Real, ::RealNumbers)
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0
@@ -435,6 +451,11 @@ function get_vector_orthogonal!(M::Rotations{N}, X, p, Xⁱ, ::RealNumbers) wher
     end
     return X
 end
+
+function get_vector_orthonormal(M::Rotations, p, Xⁱ, N::RealNumbers)
+    return get_vector_orthogonal(M, p, Xⁱ, N) ./ sqrt(eltype(Xⁱ)(2))
+end
+
 function get_vector_orthonormal!(M::Rotations, X, p, Xⁱ, N::RealNumbers)
     T = Base.promote_eltype(p, X)
     get_vector_orthogonal!(M, X, p, Xⁱ, N)
@@ -549,6 +570,12 @@ For antipodal rotations the function returns deterministically one of the tangen
 that point at `q`.
 """
 log(::Rotations, ::Any...)
+function ManifoldsBase.log(M::Rotations{2}, p, q)
+    U = transpose(p) * q
+    @assert size(U) == (2, 2)
+    @inbounds θ = atan(U[2], U[1])
+    return get_vector(M, p, θ, DefaultOrthogonalBasis())
+end
 
 function log!(M::Rotations, X, p, q)
     U = transpose(p) * q

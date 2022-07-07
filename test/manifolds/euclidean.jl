@@ -295,4 +295,14 @@ using Manifolds: induced_basis
         @test is_point(E, rand(E; σ=10.0))
         @test is_point(E, rand(MersenneTwister(123), E; σ=10.0))
     end
+
+    @testset "StaticArrays specializations" begin
+        M = Euclidean(2, 2)
+        @test get_vector(
+            M,
+            SA[1.0 2.0; 3.0 4.0],
+            SA[-1.0, -2.0, -3.0, -4.0],
+            DefaultOrthonormalBasis(),
+        ) === SA[-1.0 -3.0; -2.0 -4.0]
+    end
 end
