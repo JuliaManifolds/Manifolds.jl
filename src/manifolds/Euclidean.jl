@@ -181,11 +181,11 @@ function get_basis_diagonalizing(
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates_orthonormal(M::Euclidean, p, X, ::RealNumbers)
+function get_coordinates_orthonormal(::Euclidean, p, X, ::RealNumbers)
     return vec(X)
 end
 
-function get_coordinates_orthonormal!(M::Euclidean, c, p, X, ::RealNumbers)
+function get_coordinates_orthonormal!(::Euclidean, c, p, X, ::RealNumbers)
     copyto!(c, vec(X))
     return c
 end

@@ -30,7 +30,7 @@ which additionally have the `AbstractMatrixType`, e.g. are `DeterminantOneMatric
 struct GeneralUnitaryMatrices{n,𝔽,S<:AbstractMatrixType} <: AbstractDecoratorManifold{𝔽} end
 
 function active_traits(f, ::GeneralUnitaryMatrices, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
+    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
 end
 
 function allocation_promotion_function(::GeneralUnitaryMatrices{n,ℂ}, f, ::Tuple) where {n}
@@ -75,6 +75,40 @@ function check_point(
     end
     return nothing
 end
+
+function check_size(::GeneralUnitaryMatrices{n}, p) where {n}
+    m = size(p)
+    if length(size(p)) != 2
+        return DomainError(
+            size(p),
+            "The point $p is not a matrix (expected a length of size to be 2, got $(length(size(p))))",
+        )
+    end
+    if m != (n, n)
+        return DomainError(
+            size(p),
+            "The point $p is not a matrix of size $((n,n)), but $(size(p)).",
+        )
+    end
+    return nothing
+end
+function check_size(::GeneralUnitaryMatrices{n}, p, X) where {n}
+    m = size(X)
+    if length(size(X)) != 2
+        return DomainError(
+            size(X),
+            "The tangent vector $X is not a matrix (expected a length of size to be 2, got $(length(size(X))))",
+        )
+    end
+    if m != (n, n)
+        return DomainError(
+            size(X),
+            "The tangent vector $X is not a matrix of size $((n,n)), but $(size(X)).",
+        )
+    end
+    return nothing
+end
+
 @doc raw"""
     check_vector(M::UnitaryMatrices{n}, p, X; kwargs... )
     check_vector(M::OrthogonalMatrices{n}, p, X; kwargs... )
@@ -115,7 +149,6 @@ embed(::GeneralUnitaryMatrices, p, X)
 function embed!(::GeneralUnitaryMatrices, Y, p, X)
     return mul!(Y, p, X)
 end
-
 
 @doc raw"""
     get_coordinates(M::Rotations, p, X)
@@ -269,7 +302,7 @@ function get_vector_orthogonal!(
         X[3, 2] = Xⁱ[1]
         X[3, 3] = 0
         k = 4
-        for i in 4:N
+        for i in 4:n
             for j in 1:(i - 1)
                 X[i, j] = Xⁱ[k]
                 X[j, i] = -Xⁱ[k]
@@ -280,9 +313,14 @@ function get_vector_orthogonal!(
     end
     return X
 end
-function get_vector_orthonormal(M::GeneralUnitaryMatrices{n,ℝ}, p, Xⁱ, N::RealNumbers) where {n}
-     return get_vector_orthogonal(M, p, Xⁱ, N) ./ sqrt(eltype(Xⁱ)(2))
- end
+function get_vector_orthonormal(
+    M::GeneralUnitaryMatrices{n,ℝ},
+    p,
+    Xⁱ,
+    N::RealNumbers,
+) where {n}
+    return get_vector_orthogonal(M, p, Xⁱ, N) ./ sqrt(eltype(Xⁱ)(2))
+end
 
 function get_vector_orthonormal!(
     M::GeneralUnitaryMatrices{n,ℝ},
@@ -309,8 +347,19 @@ which is globally
 ````
 """
 injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}) where {n} = π * sqrt(2.0)
-_injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::ExponentialRetraction) where {n} = π * sqrt(2.0)
-_injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::PolarRetraction) where {n} = π / sqrt(2.0)
+function _injectivity_radius(
+    ::GeneralUnitaryMatrices{n,ℝ},
+    ::ExponentialRetraction,
+) where {n}
+    return π * sqrt(2.0)
+end
+function _injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::PolarRetraction) where {n}
+    return π / sqrt(2.0)
+end
+
+inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
+
+norm(::GeneralUnitaryMatrices, p, X) = norm(X)
 
 @doc raw"""
     manifold_dimension(M::Rotations)

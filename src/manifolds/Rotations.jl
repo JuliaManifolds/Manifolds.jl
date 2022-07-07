@@ -274,7 +274,6 @@ function get_basis_diagonalizing(
     return CachedBasis(B, evals, evec)
 end
 
-
 @doc raw"""
     injectivity_radius(M::Rotations, ::PolarRetraction)
 
