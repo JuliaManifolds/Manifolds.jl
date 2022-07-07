@@ -2,7 +2,7 @@
 raw"""
     SpecialOrthogonal{n} <: GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
 
-Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
+Special orthogonal group ``\mathrm{SO}(n)`` represented by rotation matrices.
 
 # Constructor
     SpecialOrthogonal(n)
