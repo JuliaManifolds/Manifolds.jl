@@ -348,6 +348,7 @@ include("manifolds/Symplectic.jl")
 include("manifolds/SymplecticStiefel.jl")
 include("manifolds/Tucker.jl")
 #
+include("manifolds/GeneralUnitaryMatrices.jl")
 include("manifolds/Unitary.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/Orthogonal.jl")
@@ -373,8 +374,8 @@ include("groups/validation_group.jl")
 include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 
-# generic group
-include("groups/matrix_multiplication_group.jl")
+# generic group - commopn (special) unitary/orthogonal functions
+include("groups/general_unitary_groups.jl")
 # Special Group Manifolds
 include("groups/general_linear.jl")
 include("groups/special_linear.jl")

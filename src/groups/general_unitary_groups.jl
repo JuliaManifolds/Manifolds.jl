@@ -1,12 +1,13 @@
 @doc raw"""
-    AbstractUnitaryMultiplicationGroup{n,𝔽,M} <: GroupManifold{𝔽,M,MultiplicationOperation}
+    GeneralUnitaryMultiplicationGroup{n,𝔽,M} = GroupManifold{𝔽,M,MultiplicationOperation}
 
 A generic type for Lie groups based on a unitary property and matrix multiplcation,
 see e.g. [`Orthogonal`](@ref), [`SpecialOrthogonal`](@ref), [`Unitary`](@ref), and [`SpecialUnitary`](@ref)
 """
-const AbstractUnitaryMultiplicationGroup{n,𝔽,M} = GroupManifold{𝔽,M,MultiplicationOperation}
+const GeneralUnitaryMultiplicationGroup{n,𝔽,M<:AbstractManifold{𝔽}} =
+    GroupManifold{𝔽,M,MultiplicationOperation}
 
-@inline function active_traits(f, ::AbstractUnitaryMultiplicationGroup, args...)
+@inline function active_traits(f, ::GeneralUnitaryMultiplicationGroup, args...)
     if is_metric_function(f)
         #pass to Rotations by default - but keep Group Decorator for the retraction
         return merge_traits(
@@ -24,7 +25,7 @@ const AbstractUnitaryMultiplicationGroup{n,𝔽,M} = GroupManifold{𝔽,M,Multip
 end
 
 function allocate_result(
-    ::AbstractUnitaryMultiplicationGroup,
+    ::GeneralUnitaryMultiplicationGroup,
     ::typeof(exp),
     ::Identity{MultiplicationOperation},
     X,
@@ -32,7 +33,7 @@ function allocate_result(
     return allocate(X)
 end
 function allocate_result(
-    ::AbstractUnitaryMultiplicationGroup,
+    ::GeneralUnitaryMultiplicationGroup,
     ::typeof(log),
     ::Identity{MultiplicationOperation},
     q,

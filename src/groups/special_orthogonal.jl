@@ -1,4 +1,5 @@
-@doc raw"""
+# @doc
+raw"""
     SpecialOrthogonal{n} <: GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
 
 Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
@@ -6,9 +7,9 @@ Special orthogonal group $\mathrm{SO}(n)$ represented by rotation matrices.
 # Constructor
     SpecialOrthogonal(n)
 """
-const SpecialOrthogonal{n} = AbstractUnitaryMultiplicationGroup{n,ℝ,Rotations{n}}
+const SpecialOrthogonal{n} = GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
 
-SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n), MultiplicationOperation())
+SpecialOrthogonal(n) = SpecialOrthogonal{n}()
 
 function exp_lie!(::SpecialOrthogonal{2}, q, X)
     @assert size(q) == (2, 2)

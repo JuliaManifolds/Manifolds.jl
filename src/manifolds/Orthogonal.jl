@@ -1,13 +1,14 @@
 @doc raw"""
-     OrthogonalMatrices{n}
+     OrthogonalMatrices{n} =  GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}
 
 The manifold of (real) orthogonal matrices ``\mathrm{O}(n)``.
-This is the special case of {`UnitaryMatrices`}(@ref) over the reals.
 
     OrthogonalMatrices(n)
-
-The constructor is equivalent to calling [`Unitary(n,ℝ)`](@ref).
 """
-const OrthogonalMatrices{n} = AbstractUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}
+const OrthogonalMatrices{n} = GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}
 
 OrthogonalMatrices(n) = OrthogonalMatrices{n}()
+
+function Base.show(io::IO, ::OrthogonalMatrices{n}) where {n}
+    return print(io, "OrthogonalMatrices($(n))")
+end
