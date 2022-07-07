@@ -12,7 +12,7 @@ include("../utils.jl")
     @test injectivity_radius(M, PolarRetraction()) ≈ π / sqrt(2)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], PolarRetraction()) ≈ π / sqrt(2)
     @test get_embedding(M) == Euclidean(2, 2)
-    types = [Matrix{Float64}]
+    types = [Matrix{Float64}, SMatrix{2,2,Float64,4}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{2,2,Float64,4})
     retraction_methods = [Manifolds.PolarRetraction(), Manifolds.QRRetraction()]
@@ -40,20 +40,27 @@ include("../utils.jl")
     for T in types
         angles = (0.0, π / 2, 2π / 3, π / 4)
         pts = [convert(T, [cos(ϕ) -sin(ϕ); sin(ϕ) cos(ϕ)]) for ϕ in angles]
+        point_distributions =
+            (T <: SMatrix) ? [] : [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)]
+        tvector_distributions =
+            (T <: SMatrix) ? [] : [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)]
         test_manifold(
             M,
             pts;
+            is_mutating=!(T <: SMatrix),
             test_injectivity_radius=false,
             test_project_tangent=true,
             test_musical_isomorphisms=true,
             test_default_vector_transport=true,
             retraction_methods=retraction_methods,
             inverse_retraction_methods=inverse_retraction_methods,
-            point_distributions=[Manifolds.normal_rotation_distribution(M, pts[1], 1.0)],
-            tvector_distributions=[Manifolds.normal_tvector_distribution(M, pts[1], 1.0)],
+            point_distributions,
+            tvector_distributions,
             basis_types_to_from=basis_types,
             test_inplace=true,
             test_rand_point=true,
+            retraction_atol_multiplier=2,
+            exp_log_atol_multiplier=10,
         )
 
         @testset "log edge cases" begin
