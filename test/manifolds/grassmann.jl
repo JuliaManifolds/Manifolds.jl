@@ -206,6 +206,8 @@ include("../utils.jl")
         M = Grassmann(3, 2)
         p = ProjectorPoint([1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 0.0])
         X = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 1.0 0.0])
+        pS = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+        Xs = StiefelTVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
         @test representation_size(M, p) == (3, 3)
 
         q = embed(M, p)
@@ -219,7 +221,13 @@ include("../utils.jl")
         embed!(M, Y2, p, X)
         @test Y2 == X.value
 
-        pS = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+        pSe = similar(pS.value)
+        embed!(M, pSe, pS)
+        @test pSe == pS.value
+        Xse = similar(Xs.value)
+        embed!(M, Xse, pS, Xs)
+        Xse == Xs.value
+
         p2 = ProjectorPoint(similar(p.value))
         pC = pS.value * pS.value'
         canonical_project!(M, p2, pS)
@@ -230,16 +238,24 @@ include("../utils.jl")
         p3 = canonical_project(M, pS)
         @test p3.value == pC
 
-        Xs = StiefelTVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
         Y = ProjectorTVector(similar(X.value))
         Yc = Xs.value * pS.value' + pS.value * Xs.value'
-        Manifolds.differential_canonical_project!(M, Y, pS, Xs)
+        differential_canonical_project!(M, Y, pS, Xs)
         @test Y.value == Yc
         Y2 = ProjectorTVector(similar(X.value))
-        Manifolds.differential_canonical_project!(M, Y2, pS.value, Xs.value)
+        differential_canonical_project!(M, Y2, pS.value, Xs.value)
         @test Y2.value == Yc
+        Y3 = differential_canonical_project(M, pS, Xs)
+        @test Y3.value == Yc
+        Y4 = differential_canonical_project(M, pS.value, Xs.value)
+        @test Y4.value == Yc
 
         @test horizontal_lift(Stiefel(3, 2), pS.value, X) == X.value[:, 1:2]
+
+        xppx = X.value * p.value - p.value * X.value
+        qc = exp(xppx) * p.value * exp(-xppx)
+        q = exp(M, p, X)
+        @test qc == q.value
 
         d = -X
         dppd = d.value * p.value - p.value * d.value

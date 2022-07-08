@@ -106,7 +106,7 @@ where again the total space might be implicitly assumed, or explicitly when usin
 [`QuotientManifold`](@ref) `M`. So here `p` is a point on `N` and `X` is from ``T_p\mathcal N``.
 """
 function differential_canonical_project(M::AbstractManifold, p, X)
-    allocate_result(M, differential_canonical_project, p, X)
+    q = allocate_result(M, differential_canonical_project, p, X)
     return differential_canonical_project!(M, q, p, X)
 end
 

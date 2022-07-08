@@ -173,6 +173,22 @@ function differential_canonical_project!(
     differential_canonical_project!(M, Y, p.value, X.value)
     return Y
 end
+function allocate_result(
+    ::Grassmann{n,k},
+    ::typeof(differential_canonical_project),
+    p::StiefelPoint,
+    X::StiefelTVector,
+) where {n,k}
+    return ProjectorTVector(allocate(p.value, (n, n)))
+end
+function allocate_result(
+    ::Grassmann{n,k},
+    ::typeof(differential_canonical_project),
+    p,
+    X,
+) where {n,k}
+    return ProjectorTVector(allocate(p, (n, n)))
+end
 
 @doc raw"""
     exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTVector)
