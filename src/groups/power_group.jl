@@ -331,28 +331,6 @@ end
 function allocate_result(M::PowerGroupNestedReplacing, f::typeof(identity_element))
     return [allocate_result(M.manifold.manifold, f) for _ in get_iterator(M.manifold)]
 end
-for TM in [:PowerGroup, :PowerGroupNestedReplacing]
-    for fname in [get_parameters, get_point]
-        eval(quote
-            function allocate_result(M::$TM, f::typeof($fname), p...)
-                return allocate_result(M.manifold, f, p...)
-            end
-        end)
-    end
-    eval(
-        quote
-            function allocate_result(
-                M::$TM,
-                f::typeof(get_coordinates),
-                p,
-                X,
-                B::AbstractBasis,
-            )
-                return allocate_result(M.manifold, f, p, X, B)
-            end
-        end,
-    )
-end
 
 @inline function _read(
     M::AbstractPowerManifold,
