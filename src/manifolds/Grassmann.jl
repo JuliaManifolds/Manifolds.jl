@@ -141,7 +141,7 @@ end
 Return the total space of the [`Grassmann`](@ref) manifold, which is the corresponding Stiefel manifold,
 independent of whether the points are represented already in the total space or as [`ProjectorPoint`](@ref)s.
 """
-get_total_space(::Grassmann{n,k,𝔽}) where {n,k,𝔽} = Stiefel(n, k; field=𝔽)
+get_total_space(::Grassmann{n,k,𝔽}) where {n,k,𝔽} = Stiefel(n, k, 𝔽)
 
 #
 # Reprenter specific implementations in their corresponding subfiles
