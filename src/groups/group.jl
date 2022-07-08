@@ -545,8 +545,6 @@ end
 
 Base.transpose(e::Identity) = e
 
-@trait_function hat(M::AbstractDecoratorManifold, p, X)
-@trait_function hat!(M::AbstractDecoratorManifold, Y, p, X)
 @trait_function hat(M::AbstractDecoratorManifold, e::Identity, X)
 @trait_function hat!(M::AbstractDecoratorManifold, Y, e::Identity, X)
 
@@ -585,12 +583,10 @@ end
 function hat(M::AbstractManifold, e::Identity, ::Any)
     return throw(ErrorException("On $M there exsists no identity $e"))
 end
-function hat!(M::AbstractManifold, ::Any, e::Identity, ::Any)
+function hat!(M::AbstractManifold, c, e::Identity, X)
     return throw(ErrorException("On $M there exsists no identity $e"))
 end
 
-@trait_function vee(M::AbstractDecoratorManifold, p, X)
-@trait_function vee!(M::AbstractDecoratorManifold, Y, p, X)
 @trait_function vee(M::AbstractDecoratorManifold, e::Identity, X)
 @trait_function vee!(M::AbstractDecoratorManifold, Y, e::Identity, X)
 
@@ -626,10 +622,10 @@ function vee!(
 ) where {O<:AbstractGroupOperation}
     return get_coordinates_lie!(M, Y, X, VeeOrthogonalBasis())
 end
-function vee(M::AbstractManifold, e::Identity, ::Any)
+function vee(M::AbstractManifold, e::Identity, X)
     return throw(ErrorException("On $M there exsists no identity $e"))
 end
-function vee!(M::AbstractManifold, ::Any, e::Identity, ::Any)
+function vee!(M::AbstractManifold, c, e::Identity, X)
     return throw(ErrorException("On $M there exsists no identity $e"))
 end
 

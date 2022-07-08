@@ -112,7 +112,7 @@ function inv!(G::SemidirectProductGroup, q, ::Identity{<:SemidirectProductOperat
     return identity_element!(G, q)
 end
 function inv!(
-    G::SemidirectProductGroup,
+    ::SemidirectProductGroup,
     q::Identity{<:SemidirectProductOperation},
     ::Identity{<:SemidirectProductOperation},
 )
