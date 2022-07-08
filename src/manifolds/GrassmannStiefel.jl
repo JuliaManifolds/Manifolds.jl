@@ -27,8 +27,8 @@ end
 
 ManifoldsBase.@manifold_element_forwards StiefelPoint value
 ManifoldsBase.@manifold_vector_forwards StiefelTVector value
-ManifoldsBase.@default_manifold_fallbacks Stiefel{<:Any,<:Any,<:AbstractNumbers} StiefelPoint StiefelTVector value value
-ManifoldsBase.@default_manifold_fallbacks Grassmann{<:Any,<:Any,<:AbstractNumbers} StiefelPoint StiefelTVector value value
+ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTVector value value
+ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTVector value value
 
 @doc raw"""
     distance(M::Grassmann, p, q)
@@ -56,8 +56,16 @@ function distance(::Grassmann, p, q)
     return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
 end
 
-embed(::Grassmann, p) = p
-embed(::Grassmann, p, X) = X
+embed!(::Grassmann, q, p) = copyto!(q, p)
+embed!(::Grassmann, Y, p, X) = copyto!(Y, X)
+embed!(::Grassmann, q, p::StiefelPoint) = copyto!(q, p.value)
+embed!(::Grassmann, Y, p::StiefelPoint, X::StiefelTVector) = copyto!(Y, X.value)
+embed(::Grassmann, p::StiefelPoint) = p.value
+embed(::Grassmann, p::StiefelPoint, X::StiefelTVector) = X.value
+embed!(::Stiefel, q, p::StiefelPoint) = copyto!(q, p.value)
+embed!(::Stiefel, Y, p::StiefelPoint, X::StiefelTVector) = copyto!(Y, X.value)
+embed(::Stiefel, p::StiefelPoint) = p.value
+embed(::Stiefel, p::StiefelPoint, X::StiefelTVector) = X.value
 
 @doc raw"""
     exp(M::Grassmann, p, X)

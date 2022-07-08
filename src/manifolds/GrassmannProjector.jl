@@ -34,7 +34,7 @@ function check_point(M::Grassmann{n,k,𝔽}, p::ProjectorPoint; kwargs...) where
     end
     if !isapprox(p.value, transpose(p.value); kwargs...)
         return DomainError(
-            norm(c - p),
+            norm(p.value - transpose(p.value)),
             "The point $(p) is not equal to its transpose, so it does not lie on $M.",
         )
     end
@@ -55,19 +55,6 @@ check that the [`ProjectorPoint`](@ref) is of correctsize, i.e. from ``\mathbb F
 """
 function check_size(M::Grassmann{n,k,𝔽}, p::ProjectorPoint; kwargs...) where {n,k,𝔽}
     return check_size(get_embedding(M, p), p.value; kwargs...)
-end
-
-@doc raw"""
-    check_size(M::Grassmann{n,k,𝔽}, p::ProjectorPoint, X::ProjectorTVector; kwargs...) where {n,k}
-
-check that the [`ProjectorTVector`](@ref) is of correctsize, i.e. from ``\mathbb F^{n×n}``
-"""
-function check_size(
-    M::Grassmann{n,k,𝔽},
-    p::ProjectorPoint,
-    X::ProjectorTVector,
-) where {n,k,𝔽}
-    return check_size(get_embedding(M, p), p.value, X.value; kwargs...)
 end
 
 @doc raw"""
@@ -104,6 +91,11 @@ function check_vector(
     end
     return nothing
 end
+
+embed!(::Grassmann, q, p::ProjectorPoint) = copyto!(q, p.value)
+embed!(::Grassmann, Y, p, X::ProjectorTVector) = copyto!(Y, X.value)
+embed(::Grassmann, p::ProjectorPoint) = p.value
+embed(::Grassmann, p, X::ProjectorTVector) = X.value
 
 @doc raw"""
     get_embedding(M::Grassmann{n,k,𝔽}, p::ProjectorPoint) where {n,k,𝔽}

@@ -201,4 +201,45 @@ include("../utils.jl")
         Y = project(G, p, X)
         @test is_vector(G, p, Y)
     end
+
+    @testset "Projector representation" begin end
+
+    @testset "is_point & convert & show" begin
+        M = Grassmann(3, 2)
+        p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+        X = StiefelTVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
+        @test is_point(M, p, true)
+        @test is_vector(M, p, X, true)
+        @test repr(p) == "StiefelPoint($(p.value))"
+        @test repr(X) == "StiefelTVector($(X.value))"
+        M2 = Stiefel(3, 2)
+        @test is_point(M2, p, true)
+        @test is_vector(M2, p, X, true)
+
+        p2 = convert(ProjectorPoint, p)
+        @test is_point(M, p2, true)
+        p3 = convert(ProjectorPoint, p.value)
+        @test p2.value == p3.value
+        X2 = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 1.0 0.0])
+        @test is_vector(M, p2, X2)
+        @test repr(p2) == "ProjectorPoint($(p2.value))"
+        @test repr(X2) == "ProjectorTVector($(X2.value))"
+
+        # rank just 1
+        pF1 = ProjectorPoint([1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0])
+        @test_throws DomainError is_point(M, pF1, true)
+        # not equal to its square
+        pF2 = ProjectorPoint([1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 1.0 0.0])
+        @test_throws DomainError is_point(M, pF2, true)
+        # not symmetric
+        pF3 = ProjectorPoint([0.0 1.0 0.0; 0.0 1.0 0.0; 0.0 0.0 0.0])
+        @test_throws DomainError is_point(M, pF3, true)
+
+        # not symmetric
+        XF1 = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 0.0 0.0])
+        @test_throws DomainError is_vector(M, p2, XF1, true)
+        # XF2 is not p2*XF2 + XF2*p2
+        XF2 = ProjectorTVector(ones(3, 3))
+        @test_throws DomainError is_vector(M, p2, XF2, true)
+    end
 end

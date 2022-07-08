@@ -502,8 +502,12 @@ export HyperboloidPoint,
     ProjectorPoint
 # Tangent vector representation types
 export HyperboloidTVector,
-    PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
-ProjectorTVector, StiefelTVector
+    PoincareBallTVector,
+    PoincareHalfSpaceTVector,
+    TuckerTVector,
+    UMVTVector,
+    ProjectorTVector,
+    StiefelTVector
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds

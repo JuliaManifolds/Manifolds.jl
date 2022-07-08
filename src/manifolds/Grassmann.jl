@@ -29,7 +29,7 @@ the orthogonal group $\operatorname{O}(k)$ of orthogonal $k × k$ matrices.
 The tangent space at a point (subspace) $x$ is given by
 
 ````math
-T_x\mathrm{Gr}(n,k) = \bigl\{
+T_p\mathrm{Gr}(n,k) = \bigl\{
 X ∈ 𝔽^{n × k} :
 X^{\mathrm{H}}p + p^{\mathrm{H}}X = 0_{k} \bigr\},
 ````
@@ -41,8 +41,20 @@ different matrices (i.e. matrices with unitary column vectors that span
 the same subspace). Different representations of $p$ also lead to different
 representation matrices for the tangent space $T_p\mathrm{Gr}(n,k)$
 
-For a representation of points as orthogonal projectors see [`ProjectorPoint`](@ref)
- and [`ProjectorTVector`](@ref).
+For a representation of points as orthogonal projectors. Here
+
+```math
+\operatorname{Gr}(n,k) := \bigl\{ p \in \mathbb R^{n×n} : p = p^˜\mathrm{T}, p^2 = p, \operatorname{rank}(p) = k\},
+```
+
+with tangent space
+
+```math
+T_p\mathrm{Gr}(n,k) = \bigl\{
+X ∈ \mathbb R^{n × n} : X=X^{\mathrm{T}} \text{ and } X = pX+Xp \bigr\},
+```
+
+see also [`ProjectorPoint`](@ref) and [`ProjectorTVector`](@ref).
 
 The manifold is named after
 [Hermann G. Graßmann](https://en.wikipedia.org/wiki/Hermann_Grassmann) (1809-1877).
