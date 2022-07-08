@@ -17,6 +17,9 @@ struct ProjectorTVector{T<:AbstractMatrix} <: TVector
     value::T
 end
 
+ManifoldsBase.@manifold_vector_forwards ProjectorTVector value
+ManifoldsBase.@manifold_element_forwards ProjectorPoint value
+
 @doc raw"""
     check_point(::Grassmann{n,k}, p::ProjectorPoint; kwargs...)
 
@@ -134,6 +137,13 @@ function canonical_project!(
 ) where {n,k}
     return canonical_project!(M, q, p.value)
 end
+function allocate_result(
+    ::Grassmann{n,k},
+    ::typeof(canonical_project),
+    p::StiefelPoint,
+) where {n,k}
+    return ProjectorPoint(allocate(p.value, (n, n)))
+end
 
 @doc raw"""
     canonical_project!(M::Grassmann{n,k}, q::ProjectorPoint, p)
@@ -156,11 +166,12 @@ function differential_canonical_project!(
 end
 function differential_canonical_project!(
     M::Grassmann{n,k},
-    Y::ProjectorPoint,
+    Y::ProjectorTVector,
     p::StiefelPoint,
     X::StiefelTVector,
 ) where {n,k}
-    return differenital_canonical_project!(M, Y, p.value, X.value)
+    differential_canonical_project!(M, Y, p.value, X.value)
+    return Y
 end
 
 @doc raw"""
@@ -214,14 +225,18 @@ i.e. to ``q=\exp_pd``. The formula is given in Proposition 3.5 of [^BendokatZimm
 
 where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = AB-BA`` denotes the matrix commutator.
 """
-parallel_transport_direction(
+function parallel_transport_direction(
     M::Grassmann,
     p::ProjectorPoint,
     X::ProjectorTVector,
     d::ProjectorTVector,
 )
+    Y = allocate_result(M, vector_transport_direction, X, p, d)
+    parallel_transport_direction!(M, Y, p, X, d)
+    return Y
+end
 
-function parallel_transport_direction(
+function parallel_transport_direction!(
     ::Grassmann,
     Y::ProjectorTVector,
     p::ProjectorPoint,

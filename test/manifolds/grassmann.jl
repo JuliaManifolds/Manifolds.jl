@@ -202,7 +202,51 @@ include("../utils.jl")
         @test is_vector(G, p, Y)
     end
 
-    @testset "Projector representation" begin end
+    @testset "Projector representation" begin
+        M = Grassmann(3, 2)
+        p = ProjectorPoint([1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 0.0])
+        X = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 1.0 0.0])
+        @test representation_size(M, p) == (3, 3)
+
+        q = embed(M, p)
+        @test q == p.value
+        q2 = similar(q)
+        embed!(M, q2, p)
+        @test q2 == p.value
+        Y = embed(M, p, X)
+        @test Y == X.value
+        Y2 = similar(Y)
+        embed!(M, Y2, p, X)
+        @test Y2 == X.value
+
+        pS = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+        p2 = ProjectorPoint(similar(p.value))
+        pC = pS.value * pS.value'
+        canonical_project!(M, p2, pS)
+        @test p2.value == pC
+        p3 = ProjectorPoint(similar(p.value))
+        canonical_project!(M, p2, pS.value)
+        @test p2.value == pC
+        p3 = canonical_project(M, pS)
+        @test p3.value == pC
+
+        Xs = StiefelTVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
+        Y = ProjectorTVector(similar(X.value))
+        Yc = Xs.value * pS.value' + pS.value * Xs.value'
+        Manifolds.differential_canonical_project!(M, Y, pS, Xs)
+        @test Y.value == Yc
+        Y2 = ProjectorTVector(similar(X.value))
+        Manifolds.differential_canonical_project!(M, Y2, pS.value, Xs.value)
+        @test Y2.value == Yc
+
+        @test horizontal_lift(Stiefel(3, 2), pS.value, X) == X.value[:, 1:2]
+
+        d = -X
+        dppd = d.value * p.value - p.value * d.value
+        Yc2 = exp(dppd) * X.value * exp(-dppd)
+        Xp = parallel_transport_direction(M, p, X, d)
+        @test Xp.value == Yc2
+    end
 
     @testset "is_point & convert & show" begin
         M = Grassmann(3, 2)
@@ -241,5 +285,18 @@ include("../utils.jl")
         # XF2 is not p2*XF2 + XF2*p2
         XF2 = ProjectorTVector(ones(3, 3))
         @test_throws DomainError is_vector(M, p2, XF2, true)
+
+        # embed for Stiefel with its point
+        M2 = Stiefel(3, 2)
+        q = embed(M2, p)
+        @test q == p.value
+        q2 = similar(q)
+        embed!(M2, q2, p)
+        @test q2 == p.value
+        Y = embed(M2, p, X)
+        @test Y == X.value
+        Y2 = similar(Y)
+        embed!(M2, Y2, p, X)
+        @test Y2 == X.value
     end
 end

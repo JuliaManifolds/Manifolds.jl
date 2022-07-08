@@ -74,7 +74,7 @@ in other words, this function implicitly assumes, that the total space ``\mathca
 for example explicitly when `M` is a [`QuotientManifold`](@ref) and `p` is a point on `N`.
 """
 function canonical_project(M::AbstractManifold, p)
-    allocate_result(M, canonical_project, p)
+    q = allocate_result(M, canonical_project, p)
     return canonical_project!(M, q, p)
 end
 
@@ -107,7 +107,7 @@ where again the total space might be implicitly assumed, or explicitly when usin
 """
 function differential_canonical_project(M::AbstractManifold, p, X)
     allocate_result(M, differential_canonical_project, p, X)
-    return differential_canonical_project!(M, q, p)
+    return differential_canonical_project!(M, q, p, X)
 end
 
 @doc raw"""
