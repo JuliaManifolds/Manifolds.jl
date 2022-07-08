@@ -47,11 +47,21 @@ i.e. that ``p`` has an determinante of absolute value one
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_point(M::GeneralUnitaryMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
+function check_point(
+    M::GeneralUnitaryMatrices{n,𝔽,AbsoluteDeterminantOneMatrices},
+    p;
+    kwargs...,
+) where {n,𝔽}
     if !isapprox(abs(det(p)), 1; kwargs...)
         return DomainError(
             det(p),
             "The absolute value of the determinant of $p has to be 1 but it is $(abs(det(p)))",
+        )
+    end
+    if !isapprox(p' * p, one(p); kwargs...)
+        return DomainError(
+            norm(p' * p - one(p)),
+            "$p must be orthogonal but it's not at kwargs $kwargs",
         )
     end
     return nothing
@@ -84,7 +94,7 @@ end
 
 function check_size(::GeneralUnitaryMatrices{n}, p) where {n}
     m = size(p)
-    if length(size(p)) != 2
+    if length(m) != 2
         return DomainError(
             size(p),
             "The point $p is not a matrix (expected a length of size to be 2, got $(length(size(p))))",
