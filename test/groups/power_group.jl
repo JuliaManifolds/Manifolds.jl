@@ -48,6 +48,11 @@ include("group_utils.jl")
 
         @test compose(G, pts[1], Identity(G)) == pts[1]
         @test compose(G, Identity(G), pts[1]) == pts[1]
-        test_manifold(G, pts; is_mutating=true)
+        test_manifold(
+            G,
+            pts;
+            basis_types_to_from=(DefaultOrthonormalBasis(),),
+            is_mutating=true,
+        )
     end
 end
