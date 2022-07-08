@@ -163,3 +163,7 @@ Compute the [`horizontal_lift`](@ref) of `X` from ``T_p\mathcal M``, ``p=π(q)``
 to ``T_q\mathcal N` in place of `Y`.
 """
 horizontal_lift!(N::AbstractManifold, Y, q, X)
+
+function Base.show(io::IO, M::QuotientManifold)
+    return print(io, "QuotientManifold($(M.manifold), $(M.total_space))")
+end

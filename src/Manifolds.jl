@@ -522,7 +522,8 @@ export AbstractPowerManifold,
     ArrayPowerRepresentation,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
-    PowerManifold
+    PowerManifold,
+    QuotientManifold
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
