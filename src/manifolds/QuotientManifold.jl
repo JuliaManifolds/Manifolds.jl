@@ -2,7 +2,7 @@
 """
     IsQuotientManifold <: AbstractTrait
 
-Specify that a certain decorated Manifold is a quotient manifold in the sence that it provides
+Specify that a certain decorated manifold is a quotient manifold in the sense that it provides
 implicitly (or explicitly through [`QuotientManifold`](@ref)  properties of a quotient manifold.
 
 See [`QuotientManifold`](@ref) for more details.
