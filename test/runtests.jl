@@ -147,6 +147,7 @@ TEST_GROUP = get(ENV, "MANIFOLDS_TEST_GROUP", "all")
         include_test("manifolds/symplectic.jl")
         include_test("manifolds/symplecticstiefel.jl")
         include_test("manifolds/tucker.jl")
+        include_test("manifolds/unitary_matrices.jl")
 
         include_test("manifolds/essential_manifold.jl")
         include_test("manifolds/multinomial_matrices.jl")

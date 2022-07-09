@@ -3,6 +3,9 @@ include("../utils.jl")
 @testset "Orthogonal Matrices" begin
     M = OrthogonalMatrices(3)
     @test repr(M) == "OrthogonalMatrices(3)"
+    @test injectivity_radius(M, PolarRetraction()) == π / sqrt(2.0)
+    p = project(M, ones(3, 3))
+    @test is_point(M, p, true)
 end
 
 @testset "Unitary Matrices" begin
@@ -25,4 +28,9 @@ end
     @test_throws DomainError is_vector(M, p, ones(2, 2), true)
     X = [0.0 1.0; -1.0 0.0]
     @test is_vector(M, p, X, true)
+
+    q = project(M, ones(2, 2))
+    @test isapprox(M, q, one(q))
+    q2 = project(M, 1im * ones(2, 2))
+    @test is_point(M, q2)
 end
