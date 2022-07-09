@@ -65,7 +65,7 @@ and the ``n + 1``'th onto the ``n + k``'th columns [^Bendokat2021].
 
 It is assumed that the point ``p`` is on ``\operatorname{Sp}(2n, 2n)``.
 """
-function canonical_projection(M::SymplecticStiefel{n,k}, p_Sp) where {n,k}
+function canonical_project(M::SymplecticStiefel{n,k}, p_Sp) where {n,k}
     p_SpSt = similar(p_Sp, (2n, 2k))
     return canonical_project!(M, p_SpSt, p_Sp)
 end

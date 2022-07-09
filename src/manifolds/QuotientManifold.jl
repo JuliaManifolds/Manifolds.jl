@@ -113,7 +113,7 @@ end
 @doc raw"""
     differential_canonical_project!(M, Y, p, X)
 
-compute the differential of the canonical projection ``π`` on a manifold ``\mathcal M`` that
+Compute the differential of the canonical projection ``π`` on a manifold ``\mathcal M`` that
 [`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref). See [`differential_canonical_project`](@ref) for details.
 """
 differential_canonical_project!(M::AbstractManifold, q, p)
@@ -130,8 +130,8 @@ get_total_space(M::QuotientManifold) = M.total_space
 @doc raw"""
     get_orbit_action(M::AbstractDecoratorManifold)
 
-Return the group action that generates the orbit of an equivalence class of the quotient manifold `M`,
-that is for the case that
+Return the group action that generates the orbit of an equivalence class of the quotient manifold `M`
+for which equivalence classes are orbits of an action of a Lie group. For the case that
 
 ```math
 \mathcal M = \mathcal N / \mathcal O,
@@ -146,9 +146,9 @@ get_orbit_action(::AbstractManifold)
     horizontal_lift(::QuotientManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold}, p, X) where {𝔽}
 
 Given a point `q` such that ``p=π(q)`` is a point on a quotient manifold `M`
-(implicitly given for the first case)
-and a tangent vector `X` this method computes a `Y` on the horizontal space of ``T_q\mathcal N``,
-i.e. that is orthogonal to the kernel of ``Dπ(q)``.
+(implicitly given for the first case) and a tangent vector `X` this method
+computes a tangent vector `Y` on the horizontal space of ``T_q\mathcal N``,
+i.e. the subspace that is orthogonal to the kernel of ``Dπ(q)``.
 """
 function horizontal_lift(N::AbstractManifold, q, X)
     Y = zero_vector(N, q)

@@ -158,24 +158,24 @@ include("GrassmannProjector.jl")
 @doc raw"""
     convert(::Type{ProjectorPoint}, p::AbstractMatrix)
 
-Convert a point on `p` [`Stiefel`](@ref) that also represents a point (i.e. subspace) on [`Grassmann`](@ref)
+Convert a point `p` on [`Stiefel`](@ref) that also represents a point (i.e. subspace) on [`Grassmann`](@ref)
 to a projector representation of said subspace, i.e. compute the [`canonical_project!`](@ref)
 for
 
 ```math
-  π^{\mathrm{SG}}(p) = pp^{\mathrm{T)}}.
+  π^{\mathrm{SG}}(p) = pp^{\mathrm{T)}.
 ```
 """
 convert(::Type{ProjectorPoint}, p::AbstractMatrix) = ProjectorPoint(p * p')
 @doc raw"""
     convert(::Type{ProjectorPoint}, ::Stiefelpoint)
 
-Convert a point on `p` [`Stiefel`](@ref) that also represents a point (i.e. subspace) on [`Grassmann`](@ref)
+Convert a point `p` on [`Stiefel`](@ref) that also represents a point (i.e. subspace) on [`Grassmann`](@ref)
 to a projector representation of said subspace, i.e. compute the [`canonical_project!`](@ref)
 for
 
 ```math
-  π^{\mathrm{SG}}(p) = pp^{\mathrm{T)}}.
+  π^{\mathrm{SG}}(p) = pp^{\mathrm{T}}.
 ```
 """
 convert(::Type{ProjectorPoint}, p::StiefelPoint) = ProjectorPoint(p.value * p.value')
