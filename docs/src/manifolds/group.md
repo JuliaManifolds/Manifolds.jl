@@ -87,13 +87,51 @@ Pages = ["groups/heisenberg.jl"]
 Order = [:type,:function]
 ```
 
-### Orthogonal group
+### (Special) Orthogonal and (Special) Unitary group
+
+Since the orthogonal, unitary and special orthogonal and special unitary groups share
+quite some common functions, these are also implemented on a common level
+
+#### Common functions
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/general_unitary_groups.jl"]
+Order = [:type, :function]
+```
+
+#### Orthogonal group
 
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/orthogonal.jl"]
 Order = [:type, :function]
 ```
+
+#### Special orthogonal group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/special_orthogonal.jl"]
+Order = [:type, :function]
+```
+
+#### Special unitary group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/special_unitary.jl"]
+Order = [:type, :function]
+```
+
+#### Unitary group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/unitary.jl"]
+Order = [:type, :function]
+```
+
 
 ### Product group
 
@@ -127,35 +165,11 @@ Pages = ["groups/special_linear.jl"]
 Order = [:type, :function]
 ```
 
-### Special orthogonal group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/special_orthogonal.jl"]
-Order = [:type, :function]
-```
-
-### Special unitary group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/special_unitary.jl"]
-Order = [:type, :function]
-```
-
 ### Translation group
 
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/translation_group.jl"]
-Order = [:type, :function]
-```
-
-### Unitary group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/unitary.jl"]
 Order = [:type, :function]
 ```
 

@@ -1,5 +1,4 @@
-#@doc
-raw"""
+@doc raw"""
     SpecialUnitary{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}}
 
 The special unitary group ``\mathrm{SU}(n)`` represented by unitary matrices of determinant +1.

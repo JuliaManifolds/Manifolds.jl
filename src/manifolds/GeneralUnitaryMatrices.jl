@@ -261,7 +261,7 @@ get_embedding(::GeneralUnitaryMatrices{n,𝔽}) where {n,𝔽} = Euclidean(n, n;
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 or [`OrthogonalMatrices`](@ref)
 to the matrix representation $X$ of the tangent vector. See
-[`get_coordinates`](@ref get_coordinates(::GeneralUnitaryMatrices{n,ℝ}, ::Any...)) for the conventions used.
+[`get_coordinates`](@ref get_coordinates(::GeneralUnitaryMatrices{n,ℝ} where {n}, ::Any...)) for the conventions used.
 """
 get_vector(::GeneralUnitaryMatrices{n,ℝ}, ::Any...) where {n}
 
