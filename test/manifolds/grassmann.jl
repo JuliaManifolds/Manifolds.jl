@@ -253,14 +253,14 @@ include("../utils.jl")
 
         @test horizontal_lift(Stiefel(3, 2), pS.value, X) == X.value[:, 1:2]
 
-        xppx = X.value * p.value - p.value * X.value
-        qc = exp(xppx) * p.value * exp(-xppx)
+        exppx = exp(X.value * p.value - p.value * X.value)
+        qc = exppx * p.value / exppx
         q = exp(M, p, X)
         @test qc == q.value
 
         d = -X
-        dppd = d.value * p.value - p.value * d.value
-        Yc2 = exp(dppd) * X.value * exp(-dppd)
+        edppd = exp(d.value * p.value - p.value * d.value)
+        Yc2 = edppd * X.value / edppd
         Xp = parallel_transport_direction(M, p, X, d)
         @test Xp.value == Yc2
     end
