@@ -81,7 +81,7 @@ end
 @doc raw"""
     canonical_project!(M, q, p)
 
-compute the canonical projection ``π`` on a manifold ``\mathcal M`` that
+Compute the canonical projection ``π`` on a manifold ``\mathcal M`` that
 [`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref) in place of `q`.
 
 See [`canonical_project`](@ref) for more details.
