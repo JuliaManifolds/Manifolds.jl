@@ -2,8 +2,20 @@
 const PowerGroup{𝔽,M<:AbstractManifold{𝔽},TPR<:AbstractPowerRepresentation} =
     GroupManifold{𝔽,<:AbstractPowerManifold{𝔽,M,TPR},ProductOperation}
 
+"""
+    PowerGroupNested
+
+Alias to [`PowerGroup`](@ref) with [`NestedPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedPowerRepresentation)
+representation.
+"""
 const PowerGroupNested{𝔽,M<:AbstractManifold{𝔽}} = PowerGroup{𝔽,M,NestedPowerRepresentation}
 
+"""
+    PowerGroupNestedReplacing
+
+Alias to [`PowerGroup`](@ref) with [`NestedReplacingPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedReplacingPowerRepresentation)
+representation.
+"""
 const PowerGroupNestedReplacing{𝔽,M<:AbstractManifold{𝔽}} =
     PowerGroup{𝔽,M,NestedReplacingPowerRepresentation}
 
@@ -107,6 +119,9 @@ function inv!(
 )
     return q
 end
+
+# lower level methods are added instead of top level ones to not have to deal
+# with `Identity` disambiguation
 
 _compose!(G::PowerGroup, x, p, q) = _compose!(G.manifold, x, p, q)
 function _compose!(M::AbstractPowerManifold, x, p, q)
