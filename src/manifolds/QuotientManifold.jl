@@ -61,7 +61,7 @@ end
 @doc raw"""
     canonical_project(M, p)
 
-compute the canonical projection ``π`` on a manifold ``\mathcal M`` that
+Compute the canonical projection ``π`` on a manifold ``\mathcal M`` that
 [`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref).
 The canonical (or natural) projection ``π`` from the total space ``\mathcal N``
 onto ``\mathcal M`` given by
