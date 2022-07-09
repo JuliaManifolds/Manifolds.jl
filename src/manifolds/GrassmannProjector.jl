@@ -162,7 +162,7 @@ function differential_canonical_project!(
     X,
 ) where {n,k}
     Xpt = X * p'
-    Y.value .= Xpt .+ Xpt')
+    Y.value .= Xpt .+ Xpt'
     return Y
 end
 function differential_canonical_project!(
