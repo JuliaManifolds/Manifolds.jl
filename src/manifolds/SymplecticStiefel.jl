@@ -515,7 +515,7 @@ if `vector_at` is set to a point ``p \in \operatorname{Sp}(2n)``.
 A random point on ``\operatorname{SpSt}(2n, 2k)`` is found by first generating a
 random point on the symplectic manifold ``\operatorname{Sp}(2n)``,
 and then projecting onto the Symplectic Stiefel manifold using the
-[`canonical_projection`](@ref) ``π_{\operatorname{SpSt}(2n, 2k)}``.
+[`canonical_project`](@ref) ``π_{\operatorname{SpSt}(2n, 2k)}``.
 That is, ``p = π_{\operatorname{SpSt}(2n, 2k)}(p_{\operatorname{Sp}})``.
 
 To generate a random tangent vector in ``T_p\operatorname{SpSt}(2n, 2k)``
@@ -532,10 +532,7 @@ function Base.rand(
     hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),
 ) where {n}
     if vector_at === nothing
-        return canonical_projection(
-            M,
-            rand(Symplectic(2n); hamiltonian_norm=hamiltonian_norm),
-        )
+        return canonical_project(M, rand(Symplectic(2n); hamiltonian_norm=hamiltonian_norm))
     else
         return random_vector(M, vector_at; hamiltonian_norm=hamiltonian_norm)
     end
