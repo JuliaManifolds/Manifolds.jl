@@ -4,7 +4,7 @@
 Special Euclidean group $\mathrm{SE}(n)$, the group of rigid motions.
 
 ``\mathrm{SE}(n)`` is the semidirect product of the [`TranslationGroup`](@ref) on $ℝ^n$ and
-[`SpecialOrthogonal(n)`](@ref)
+[`SpecialOrthogonal`](@ref)`(n)
 
 ````math
 \mathrm{SE}(n) ≐ \mathrm{T}(n) ⋊_θ \mathrm{SO}(n),

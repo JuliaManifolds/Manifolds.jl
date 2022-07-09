@@ -87,6 +87,14 @@ Pages = ["groups/heisenberg.jl"]
 Order = [:type,:function]
 ```
 
+### Orthogonal group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/orthogonal.jl"]
+Order = [:type, :function]
+```
+
 ### Product group
 
 ```@autodocs
@@ -95,20 +103,11 @@ Pages = ["groups/product_group.jl"]
 Order = [:type, :function]
 ```
 
-
 ### Semidirect product group
 
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/semidirect_product_group.jl"]
-Order = [:type, :function]
-```
-
-### Orthogonal group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/orthogonal.jl"]
 Order = [:type, :function]
 ```
 
@@ -133,6 +132,14 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/special_orthogonal.jl"]
+Order = [:type, :function]
+```
+
+### Special unitary group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/special_unitary.jl"]
 Order = [:type, :function]
 ```
 

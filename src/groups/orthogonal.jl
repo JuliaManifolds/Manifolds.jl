@@ -1,7 +1,7 @@
 @doc raw"""
     Orthogonal{n} <: GroupManifold{ℝ,OrthogonalMatrices{n},MultiplicationOperation}
 
-Orthogonal group $\mathrm{O}(n)$ represented by orthogonal matrices.
+Orthogonal group $\mathrm{O}(n)$ represented by [`OrthogonalMatrices`](@ref).
 
 # Constructor
 
@@ -27,9 +27,7 @@ exp_lie(::Orthogonal{2}, X)
      exp_lie(G::Orthogonal{4}, X)
 
 Compute the group exponential map on the [`Orthogonal`](@ref)`(4)` group.
-The algorithm used is a more numerically stable form of those proposed in
-
-[^Gallier2002] and [^Andrica2013].
+The algorithm used is a more numerically stable form of those proposed in [^Gallier2002], [^Andrica2013].
 
 [^Gallier2002]:
     > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices

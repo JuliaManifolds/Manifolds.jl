@@ -52,6 +52,7 @@ makedocs(
                 "Probability simplex" => "manifolds/probabilitysimplex.md",
                 "Positive numbers" => "manifolds/positivenumbers.md",
                 "Projective space" => "manifolds/projectivespace.md",
+                "Orthogonal and Unitary Matrices" => "manifolds/generalunitary.md",
                 "Rotations" => "manifolds/rotations.md",
                 "Skew-Hermitian matrices" => "manifolds/skewhermitian.md",
                 "Spectrahedron" => "manifolds/spectrahedron.md",

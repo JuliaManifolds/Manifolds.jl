@@ -2,7 +2,7 @@
     AbstractMatrixType
 
 A plain type to distinguish different types of matrices, for example [`DeterminantOneMatrices`](@ref)
-and [`UnitMatrices`](@ref)
+and [`AbsoluteDeterminantOneMatrices`](@ref)
 """
 abstract type AbstractMatrixType end
 

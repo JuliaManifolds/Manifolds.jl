@@ -30,7 +30,7 @@ exp!(G::Unitary, q, p, X) = compose!(G, q, p, exp_lie(G, X))
 flat!(::Unitary, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
 
 @doc raw"""
-    group_exp(G::Unitary{2}, X)
+    exp_lie(G::Unitary{2}, X)
 
 Compute the group exponential map on the [`Unitary(2)`](@ref) group, which is
 
@@ -40,14 +40,14 @@ Compute the group exponential map on the [`Unitary(2)`](@ref) group, which is
 
 where ``θ = \frac{1}{2} \sqrt{4\det(X) - \operatorname{tr}(X)^2}``.
  """
-group_exp(::Unitary{2}, X)
+exp_lie(::Unitary{2}, X)
 
-function group_exp!(::Unitary{1}, q, X)
+function exp_lie!(::Unitary{1}, q, X)
     q[1] = exp(X[1])
     return q
 end
 
-function group_exp!(::Unitary{2}, q, X)
+function exp_lie!(::Unitary{2}, q, X)
     size(X) === (2, 2) && size(q) === (2, 2) || throw(DomainError())
     @inbounds a, d = imag(X[1, 1]), imag(X[2, 2])
     @inbounds b = (X[2, 1] - X[1, 2]') / 2
