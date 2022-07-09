@@ -93,7 +93,7 @@ decorated_manifold(M::QuotientManifold) = M.manifold
 @doc raw"""
     differential_canonical_project(M, p, X)
 
-compute the differential of the canonical projection ``π`` on a manifold ``\mathcal M`` that
+Compute the differential of the canonical projection ``π`` on a manifold ``\mathcal M`` that
 [`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref).
 The canonical (or natural) projection ``π`` from the total space ``\mathcal N``
 onto ``\mathcal M``, such that its differential
