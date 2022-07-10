@@ -30,7 +30,7 @@ end
     @test is_vector(M, p, X, true)
 
     q = project(M, ones(2, 2))
-    @test isapprox(M, q, one(q))
+    @test is_point(M, q, true)
     q2 = project(M, 1im * ones(2, 2))
-    @test is_point(M, q2)
+    @test is_point(M, q2, true)
 end
