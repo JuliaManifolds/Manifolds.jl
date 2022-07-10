@@ -63,7 +63,6 @@ Pages = ["groups/multiplication_operation.jl"]
 Order = [:type, :function]
 ```
 
-
 ### Product group
 
 ```@autodocs
@@ -78,6 +77,14 @@ Order = [:type, :function]
 Modules = [Manifolds]
 Pages = ["groups/semidirect_product_group.jl"]
 Order = [:type, :function]
+```
+
+### Power group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/power_group.jl"]
+Order = [:type, :function, :constant]
 ```
 
 ### Circle group
