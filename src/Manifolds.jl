@@ -140,6 +140,7 @@ import ManifoldsBase:
     CotangentSpace,
     TangentSpace
 import Base:
+    angle,
     copyto!,
     convert,
     foreach,
@@ -278,6 +279,7 @@ include("differentiation/embedded_diff.jl")
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
+include("manifolds/QuotientManifold.jl")
 include("manifolds/VectorBundle.jl")
 include("groups/group.jl")
 
@@ -322,7 +324,6 @@ include("manifolds/Elliptope.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
-include("manifolds/Grassmann.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
@@ -348,6 +349,9 @@ include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Tucker.jl")
 include("manifolds/Symplectic.jl")
 include("manifolds/SymplecticStiefel.jl")
+
+# Introduce the quotient, Grassmann, only after Stiefel
+include("manifolds/Grassmann.jl")
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -489,9 +493,22 @@ export Euclidean,
     SymplecticMatrix,
     Torus,
     Tucker
-export HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint, SVDMPoint, TuckerPoint
+# Point representation types
+export HyperboloidPoint,
+    PoincareBallPoint,
+    PoincareHalfSpacePoint,
+    SVDMPoint,
+    TuckerPoint,
+    StiefelPoint,
+    ProjectorPoint
+# Tangent vector representation types
 export HyperboloidTVector,
-    PoincareBallTVector, PoincareHalfSpaceTVector, UMVTVector, TuckerTVector
+    PoincareBallTVector,
+    PoincareHalfSpaceTVector,
+    TuckerTVector,
+    UMVTVector,
+    ProjectorTVector,
+    StiefelTVector
 export AbstractNumbers, ℝ, ℂ, ℍ
 
 # decorator manifolds
@@ -506,7 +523,8 @@ export AbstractPowerManifold,
     ArrayPowerRepresentation,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
-    PowerManifold
+    PowerManifold,
+    QuotientManifold
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
@@ -520,6 +538,8 @@ export AbstractAffineConnection,
     AbstractConnectionManifold, ConnectionManifold, LeviCivitaConnection
 export AbstractCartanSchoutenConnection,
     CartanSchoutenMinus, CartanSchoutenPlus, CartanSchoutenZero
+export MetricManifold
+# Metric types
 export AbstractMetric,
     RiemannianMetric,
     LorentzMetric,
@@ -534,10 +554,11 @@ export AbstractMetric,
     ProductMetric,
     RealSymplecticMetric,
     ExtendedSymplecticMetric,
-    CanonicalMetric,
-    MetricManifold
+    CanonicalMetric
 export AbstractAtlas, RetractionAtlas
+# Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+# Retraction types
 export AbstractRetractionMethod,
     CayleyRetraction,
     ExponentialRetraction,
@@ -549,6 +570,7 @@ export AbstractRetractionMethod,
     PadeRetraction,
     ProductRetraction,
     PowerRetraction
+# Inverse Retraction types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     ApproximateLogarithmicMap,
@@ -558,12 +580,14 @@ export AbstractInverseRetractionMethod,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
     SoftmaxInverseRetraction
+# Estimation methods for median and mean
 export AbstractEstimationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius,
     ExtrinsicEstimation
+# Tangent space bases
 export CachedBasis,
     DefaultBasis,
     DefaultOrthogonalBasis,
@@ -571,12 +595,16 @@ export CachedBasis,
     DiagonalizingOrthonormalBasis,
     InducedBasis,
     ProjectedOrthonormalBasis
+# Errors on Manifolds
 export ComponentManifoldError, CompositeManifoldError
+# Functions on Manifolds
 export ×,
     allocate,
     allocate_result,
     base_manifold,
     bundle_projection,
+    canonical_project,
+    canonical_project!,
     change_metric,
     change_metric!,
     change_representer,
@@ -590,11 +618,14 @@ export ×,
     complex_dot,
     decorated_manifold,
     det_local_metric,
+    differential_canonical_project,
+    differential_canonical_project!,
     distance,
     dual_basis,
     einstein_tensor,
     embed,
     embed!,
+    equiv,
     exp,
     exp!,
     flat,
@@ -604,10 +635,14 @@ export ×,
     get_default_atlas,
     get_component,
     get_embedding,
+    get_orbit_action,
+    get_total_space,
     grad_euclidean_to_manifold,
     grad_euclidean_to_manifold!,
     hat,
     hat!,
+    horizontal_lift,
+    horizontal_lift!,
     identity_element,
     identity_element!,
     induced_basis,
@@ -647,6 +682,12 @@ export ×,
     number_eltype,
     one,
     power_dimensions,
+    parallel_transport_along,
+    parallel_transport_along!,
+    parallel_transport_direction,
+    parallel_transport_direction!,
+    parallel_transport_to,
+    parallel_transport_to!,
     project,
     project!,
     projected_distribution,
@@ -736,12 +777,12 @@ export adjoint_action,
     get_coordinates_orthonormal,
     get_coordinates_orthogonal!,
     get_coordinates_orthonormal!,
+    get_coordinates_vee!,
     get_vector_diagonalizing!,
     get_vector_lie,
     get_vector_lie!,
     get_vector_orthogonal,
     get_vector_orthonormal,
-    get_coordinates_vee!,
     has_biinvariant_metric,
     has_invariant_metric,
     identity_element,

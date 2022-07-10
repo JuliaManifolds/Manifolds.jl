@@ -139,6 +139,7 @@ end
             @test repr(SpSt_6_4) == "SymplecticStiefel{6, 4, ℝ}()"
             @test representation_size(SpSt_6_4) == (6, 4)
             @test base_manifold(SpSt_6_4) === SpSt_6_4
+            @test get_total_space(SpSt_6_4) == Symplectic(6)
 
             @test is_point(SpSt_6_4, p_6_4)
             @test_throws DomainError is_point(SpSt_6_4, 2 * p_6_4, true)

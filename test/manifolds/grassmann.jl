@@ -7,6 +7,7 @@ include("../utils.jl")
             @test repr(M) == "Grassmann(3, 2, ℝ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
+            @test get_total_space(M) == Stiefel(3, 2, ℝ)
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             @test_throws ManifoldDomainError is_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
@@ -200,5 +201,119 @@ include("../utils.jl")
         @test_throws ManifoldDomainError is_vector(G, p, X, true)
         Y = project(G, p, X)
         @test is_vector(G, p, Y)
+    end
+
+    @testset "Projector representation" begin
+        M = Grassmann(3, 2)
+        p = ProjectorPoint([1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 0.0])
+        X = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 1.0 0.0])
+        pS = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+        Xs = StiefelTVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
+        @test representation_size(M, p) == (3, 3)
+
+        q = embed(M, p)
+        @test q == p.value
+        q2 = similar(q)
+        embed!(M, q2, p)
+        @test q2 == p.value
+        Y = embed(M, p, X)
+        @test Y == X.value
+        Y2 = similar(Y)
+        embed!(M, Y2, p, X)
+        @test Y2 == X.value
+
+        pSe = similar(pS.value)
+        embed!(M, pSe, pS)
+        @test pSe == pS.value
+        Xse = similar(Xs.value)
+        embed!(M, Xse, pS, Xs)
+        Xse == Xs.value
+
+        p2 = ProjectorPoint(similar(p.value))
+        pC = pS.value * pS.value'
+        canonical_project!(M, p2, pS)
+        @test p2.value == pC
+        p3 = ProjectorPoint(similar(p.value))
+        canonical_project!(M, p2, pS.value)
+        @test p2.value == pC
+        p3 = canonical_project(M, pS)
+        @test p3.value == pC
+
+        Y = ProjectorTVector(similar(X.value))
+        Yc = Xs.value * pS.value' + pS.value * Xs.value'
+        differential_canonical_project!(M, Y, pS, Xs)
+        @test Y.value == Yc
+        Y2 = ProjectorTVector(similar(X.value))
+        differential_canonical_project!(M, Y2, pS.value, Xs.value)
+        @test Y2.value == Yc
+        Y3 = differential_canonical_project(M, pS, Xs)
+        @test Y3.value == Yc
+        Y4 = differential_canonical_project(M, pS.value, Xs.value)
+        @test Y4.value == Yc
+
+        @test horizontal_lift(Stiefel(3, 2), pS.value, X) == X.value[:, 1:2]
+
+        exppx = exp(X.value * p.value - p.value * X.value)
+        qc = exppx * p.value / exppx
+        q = exp(M, p, X)
+        @test qc == q.value
+
+        d = -X
+        edppd = exp(d.value * p.value - p.value * d.value)
+        Yc2 = edppd * X.value / edppd
+        Xp = parallel_transport_direction(M, p, X, d)
+        @test Xp.value == Yc2
+    end
+
+    @testset "is_point & convert & show" begin
+        M = Grassmann(3, 2)
+        p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+        X = StiefelTVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
+        @test is_point(M, p, true)
+        @test is_vector(M, p, X, true)
+        @test repr(p) == "StiefelPoint($(p.value))"
+        @test repr(X) == "StiefelTVector($(X.value))"
+        M2 = Stiefel(3, 2)
+        @test is_point(M2, p, true)
+        @test is_vector(M2, p, X, true)
+
+        p2 = convert(ProjectorPoint, p)
+        @test is_point(M, p2, true)
+        p3 = convert(ProjectorPoint, p.value)
+        @test p2.value == p3.value
+        X2 = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 1.0 0.0])
+        @test is_vector(M, p2, X2)
+        @test repr(p2) == "ProjectorPoint($(p2.value))"
+        @test repr(X2) == "ProjectorTVector($(X2.value))"
+
+        # rank just 1
+        pF1 = ProjectorPoint([1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0])
+        @test_throws DomainError is_point(M, pF1, true)
+        # not equal to its square
+        pF2 = ProjectorPoint([1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 1.0 0.0])
+        @test_throws DomainError is_point(M, pF2, true)
+        # not symmetric
+        pF3 = ProjectorPoint([0.0 1.0 0.0; 0.0 1.0 0.0; 0.0 0.0 0.0])
+        @test_throws DomainError is_point(M, pF3, true)
+
+        # not symmetric
+        XF1 = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 0.0 0.0])
+        @test_throws DomainError is_vector(M, p2, XF1, true)
+        # XF2 is not p2*XF2 + XF2*p2
+        XF2 = ProjectorTVector(ones(3, 3))
+        @test_throws DomainError is_vector(M, p2, XF2, true)
+
+        # embed for Stiefel with its point
+        M2 = Stiefel(3, 2)
+        q = embed(M2, p)
+        @test q == p.value
+        q2 = similar(q)
+        embed!(M2, q2, p)
+        @test q2 == p.value
+        Y = embed(M2, p, X)
+        @test Y == X.value
+        Y2 = similar(Y)
+        embed!(M2, Y2, p, X)
+        @test Y2 == X.value
     end
 end

@@ -76,6 +76,7 @@ makedocs(
                 "Connection manifold" => "manifolds/connection.md",
                 "Group manifold" => "manifolds/group.md",
                 "Metric manifold" => "manifolds/metric.md",
+                "Quotient manifold" => "manifolds/quotient.md",
             ],
         ],
         "Features on Manifolds" => [

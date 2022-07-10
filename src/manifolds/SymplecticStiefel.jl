@@ -56,8 +56,8 @@ end
 ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction()
 
 @doc raw"""
-    canonical_projection(::SymplecticStiefel, p_Sp)
-    canonical_projection!(::SymplecticStiefel{n,k}, p, p_Sp)
+    canonical_project(::SymplecticStiefel, p_Sp)
+    canonical_project!(::SymplecticStiefel{n,k}, p, p_Sp)
 
 Define the canonical projection from ``\operatorname{Sp}(2n, 2n)`` onto
 ``\operatorname{SpSt}(2n, 2k)``, by projecting onto the first ``k`` columns
@@ -65,12 +65,12 @@ and the ``n + 1``'th onto the ``n + k``'th columns [^Bendokat2021].
 
 It is assumed that the point ``p`` is on ``\operatorname{Sp}(2n, 2n)``.
 """
-function canonical_projection(M::SymplecticStiefel{n,k}, p_Sp) where {n,k}
+function canonical_project(M::SymplecticStiefel{n,k}, p_Sp) where {n,k}
     p_SpSt = similar(p_Sp, (2n, 2k))
-    return canonical_projection!(M, p_SpSt, p_Sp)
+    return canonical_project!(M, p_SpSt, p_Sp)
 end
 
-function canonical_projection!(::SymplecticStiefel{n,k}, p, p_Sp) where {n,k}
+function canonical_project!(::SymplecticStiefel{n,k}, p, p_Sp) where {n,k}
     p[:, (1:k)] .= p_Sp[:, (1:k)]
     p[:, ((k + 1):(2k))] .= p_Sp[:, ((n + 1):(n + k))]
     return p
@@ -277,6 +277,13 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
 end
 
 get_embedding(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
+
+@doc raw"""
+    get_total_space(::SymplecticStiefel)
+
+Return the total space of the [`SymplecticStiefel`](@ref) manifold, which is the corresponding [`Symplectic`](@ref) manifold.
+"""
+get_total_space(::SymplecticStiefel{n,k,𝔽}) where {n,k,𝔽} = Symplectic{n,𝔽}()
 
 @doc raw"""
     gradient(::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
@@ -508,7 +515,7 @@ if `vector_at` is set to a point ``p \in \operatorname{Sp}(2n)``.
 A random point on ``\operatorname{SpSt}(2n, 2k)`` is found by first generating a
 random point on the symplectic manifold ``\operatorname{Sp}(2n)``,
 and then projecting onto the Symplectic Stiefel manifold using the
-[`canonical_projection`](@ref) ``π_{\operatorname{SpSt}(2n, 2k)}``.
+[`canonical_project`](@ref) ``π_{\operatorname{SpSt}(2n, 2k)}``.
 That is, ``p = π_{\operatorname{SpSt}(2n, 2k)}(p_{\operatorname{Sp}})``.
 
 To generate a random tangent vector in ``T_p\operatorname{SpSt}(2n, 2k)``
@@ -525,10 +532,7 @@ function Base.rand(
     hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),
 ) where {n}
     if vector_at === nothing
-        return canonical_projection(
-            M,
-            rand(Symplectic(2n); hamiltonian_norm=hamiltonian_norm),
-        )
+        return canonical_project(M, rand(Symplectic(2n); hamiltonian_norm=hamiltonian_norm))
     else
         return random_vector(M, vector_at; hamiltonian_norm=hamiltonian_norm)
     end
