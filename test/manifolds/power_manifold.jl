@@ -2,6 +2,7 @@ include("../utils.jl")
 
 using HybridArrays, Random
 using StaticArrays: Dynamic
+using RecursiveArrayTools
 
 Random.seed!(42)
 
@@ -432,5 +433,36 @@ end
         @test is_vector(M, p, rand(MersenneTwister(123), M; vector_at=p); atol=1e-15)
         @test rand(MersenneTwister(123), M; vector_at=p) ==
               rand(MersenneTwister(123), M; vector_at=p)
+    end
+
+    @testset "Nested replacing allocation" begin
+        Msr = PowerManifold(Ms, NestedReplacingPowerRepresentation(), 2)
+        p1 = [SVector{3}(1.0, 0.0, 0.0), SVector{3}(1.0, 0.0, 0.0)]
+        @test allocate(Msr, p1) isa Vector{SVector{3,Float64}}
+
+        SE2 = SpecialEuclidean(2)
+        PSE2 = PowerManifold(SE2, NestedReplacingPowerRepresentation(), 2)
+        pse = ProductRepr(
+            SA[1.0, 2.0],
+            SA[
+                0.5403023058681398 -0.8414709848078965
+                0.8414709848078965 0.5403023058681398
+            ],
+        )
+        p2 = [pse, pse]
+        @test allocate(PSE2, p2) isa
+              Vector{ProductRepr{Tuple{SVector{2,Float64},SMatrix{2,2,Float64,4}}}}
+
+        pse_ap = ArrayPartition(
+            SA[1.0, 2.0],
+            SA[
+                0.5403023058681398 -0.8414709848078965
+                0.8414709848078965 0.5403023058681398
+            ],
+        )
+        p2_ap = [pse_ap, pse_ap]
+        @test allocate(PSE2, p2_ap) isa Vector{
+            ArrayPartition{Float64,Tuple{SVector{2,Float64},SMatrix{2,2,Float64,4}}},
+        }
     end
 end
