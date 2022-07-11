@@ -1129,3 +1129,7 @@ function get_coordinates_lie!(
 )
     return get_coordinates!(base_manifold(G), a, identity_element(G), X, B)
 end
+
+function ManifoldsBase._pick_basic_allocation_argument(::AbstractManifold, f, ::Identity, x...)
+    return x[1]
+end

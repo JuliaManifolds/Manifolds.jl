@@ -40,6 +40,10 @@ function PowerGroup(manifold::AbstractPowerManifold)
     return GroupManifold(manifold, op)
 end
 
+function ManifoldsBase._access_nested(M::PowerManifold, ::Identity{ProductOperation}, i::Tuple)
+    return Identity(M.manifold)
+end
+
 @inline function active_traits(f, M::PowerGroup, args...)
     if is_metric_function(f)
         #pass to manifold by default - but keep Group Decorator for the retraction

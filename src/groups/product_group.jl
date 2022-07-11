@@ -90,6 +90,19 @@ function submanifold_components(
     return map(N -> Identity(N), M.manifolds)
 end
 
+function submanifold_components(
+    M::ProductManifold,
+    ::Identity{ProductOperation},
+)
+    return map(N -> Identity(N), M.manifolds)
+end
+function submanifold_components(
+    M::ProductManifold,
+    ::Identity{<:SemidirectProductOperation},
+)
+    return map(N -> Identity(N), M.manifolds)
+end
+
 inv!(G::ProductGroup, q, ::Identity{ProductOperation}) = identity_element!(G, q)
 function inv!(G::ProductGroup, q, p)
     M = G.manifold
