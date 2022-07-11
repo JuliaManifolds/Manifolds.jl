@@ -59,6 +59,22 @@ const PowerManifoldMultidimensional =
 
 Base.:^(M::AbstractManifold, n) = PowerManifold(M, n...)
 
+function allocate(::PowerManifoldNestedReplacing, x::AbstractArray{<:SArray})
+    return similar(x)
+end
+function allocate(
+    ::PowerManifoldNestedReplacing,
+    x::AbstractArray{<:ProductRepr{<:NTuple{N,SArray}}},
+) where {N}
+    return similar(x)
+end
+function allocate(
+    ::PowerManifoldNestedReplacing,
+    x::AbstractArray{<:ArrayPartition{T,<:NTuple{N,SArray}}},
+) where {T,N}
+    return similar(x)
+end
+
 for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
     @eval begin
         function allocate_result(::$PowerRepr, ::typeof(get_point), a)

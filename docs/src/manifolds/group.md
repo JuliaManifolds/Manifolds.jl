@@ -6,7 +6,7 @@ The common addition and multiplication group operations of [`AdditionOperation`]
 
 There are short introductions at the beginning of each subsection. They briefly mention what is available with links to more detailed descriptions.
 
-#### Contents
+## Contents
 
 ```@contents
 Pages = ["group.md"]
@@ -132,6 +132,13 @@ Pages = ["groups/unitary.jl"]
 Order = [:type, :function]
 ```
 
+### Power group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/power_group.jl"]
+Order = [:type, :function, :constant]
+```
 
 ### Product group
 
