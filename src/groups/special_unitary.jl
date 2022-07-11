@@ -36,7 +36,19 @@ U\operatorname{diag}\left[1,1,…,\det(U V^\mathrm{H})\right] V^\mathrm{H}.
 
 The diagonal matrix ensures that the determinant of the result is $+1$.
 """
-project(::SpecialUnitary, ::Any)
+project(::SpecialUnitary, ::Any...)
+
+#allocate early, passdown later
+function project(G::SpecialUnitary, p)
+    q = allocate_result(G, project, p)
+    project!(G, q, p)
+    return q
+end
+function project(G::SpecialUnitary, p, X)
+    Y = allocate_result(G, project, X, p)
+    project!(G, Y, p, X)
+    return Y
+end
 
 function project!(::SpecialUnitary{n}, q, p) where {n}
     F = svd(p)
@@ -51,7 +63,6 @@ function project!(::SpecialUnitary{n}, q, p) where {n}
     end
     return q
 end
-
 function project!(G::SpecialUnitary{n}, Y, p, X) where {n}
     inverse_translate_diff!(G, Y, p, p, X, LeftAction())
     project!(SkewHermitianMatrices(n, 𝔽), Y, Y)

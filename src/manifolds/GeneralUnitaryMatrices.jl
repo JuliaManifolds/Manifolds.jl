@@ -33,10 +33,6 @@ function active_traits(f, ::GeneralUnitaryMatrices, args...)
     return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
 end
 
-function allocation_promotion_function(::GeneralUnitaryMatrices{n,ℂ}, f, ::Tuple) where {n}
-    return complex
-end
-
 @doc raw"""
     check_point(M::UnitaryMatrices, p; kwargs...)
     check_point(M::OrthogonalMatrices, p; kwargs...)
