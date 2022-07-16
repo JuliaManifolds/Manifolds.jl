@@ -272,3 +272,10 @@ Base.@propagate_inbounds function Base.setindex!(
 )
     return setindex!(q, p, base_manifold(M), i)
 end
+
+function submanifold_components(
+    M::ProductManifold,
+    ::Identity{<:SemidirectProductOperation},
+)
+    return map(N -> Identity(N), M.manifolds)
+end

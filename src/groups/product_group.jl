@@ -90,16 +90,7 @@ function submanifold_components(
     return map(N -> Identity(N), M.manifolds)
 end
 
-function submanifold_components(
-    M::ProductManifold,
-    ::Identity{ProductOperation},
-)
-    return map(N -> Identity(N), M.manifolds)
-end
-function submanifold_components(
-    M::ProductManifold,
-    ::Identity{<:SemidirectProductOperation},
-)
+function submanifold_components(M::ProductManifold, ::Identity{ProductOperation})
     return map(N -> Identity(N), M.manifolds)
 end
 

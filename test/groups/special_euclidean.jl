@@ -319,4 +319,20 @@ Random.seed!(10)
         fXp2 = adjoint_action(G, pts[1], X)
         @test isapprox(G, pts[1], hat(G, pts[1], fXp.data), fXp2)
     end
+
+    @testset "manifold operations with Identity" begin
+        G = SpecialEuclidean(3)
+        t = Vector{Float64}.([1:3, 2:4, 4:6])
+        ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
+        p = Matrix(I, 3, 3)
+        Rn = Rotations(3)
+        pts = [ProductRepr(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
+
+        @test isapprox(
+            G,
+            identity_element(G),
+            log(G, Identity(G), pts[1]),
+            log(G, identity_element(G), pts[1]),
+        )
+    end
 end

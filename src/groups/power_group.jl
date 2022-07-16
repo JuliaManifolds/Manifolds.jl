@@ -40,7 +40,11 @@ function PowerGroup(manifold::AbstractPowerManifold)
     return GroupManifold(manifold, op)
 end
 
-function ManifoldsBase._access_nested(M::PowerManifold, ::Identity{ProductOperation}, i::Tuple)
+function ManifoldsBase._access_nested(
+    M::PowerManifold,
+    ::Identity{ProductOperation},
+    i::Tuple,
+)
     return Identity(M.manifold)
 end
 
