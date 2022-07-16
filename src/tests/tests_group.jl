@@ -38,6 +38,7 @@ function test_group(
     test_lie_bracket=false,
     test_adjoint_action=false,
     diff_convs=[(), (LeftAction(),), (RightAction(),)],
+    test_log_from_identity=false,
 )
     e = Identity(G)
 
@@ -470,6 +471,17 @@ function test_group(
             Z = allocate(X)
             lie_bracket!(G, Z, X, Y)
             Test.@test isapprox(G, e, Z, lie_bracket(G, X, Y))
+        end
+    end
+
+    Test.@testset "Metric operations with Identity" begin
+        if test_log_from_identity
+            Test.@test isapprox(
+                G,
+                identity_element(G),
+                log(G, e, g_pts[1]),
+                log(G, identity_element(G), g_pts[1]),
+            )
         end
     end
 

@@ -42,7 +42,7 @@ include("group_utils.jl")
 
         @test compose(G, pts[1], Identity(G)) == pts[1]
         @test compose(G, Identity(G), pts[1]) == pts[1]
-        test_group(G, pts, X_pts, X_pts; test_diff=true)
+        test_group(G, pts, X_pts, X_pts; test_diff=true, test_log_from_identity=true)
         @test isapprox(
             G,
             Identity(G),
