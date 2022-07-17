@@ -26,13 +26,7 @@ function switch_direction(A::GroupOperationAction)
     return GroupOperationAction(A.group, switch_direction(direction(A)))
 end
 
-apply(A::GroupOperationAction, a, p) = translate(A.group, a, p, direction(A))
-
 apply!(A::GroupOperationAction, q, a, p) = translate!(A.group, q, a, p, direction(A))
-
-function inverse_apply(A::GroupOperationAction, a, p)
-    return inverse_translate(A.group, a, p, direction(A))
-end
 
 function inverse_apply!(A::GroupOperationAction, q, a, p)
     return inverse_translate!(A.group, q, a, p, direction(A))

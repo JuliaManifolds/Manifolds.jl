@@ -34,7 +34,11 @@ include("group_utils.jl")
             MetricManifold(NotImplementedManifold(), EuclideanMetric()),
             eg,
         ) isa DomainError
-
+        @test !is_vector(G, Identity(AdditionOperation()), X)
+        # wrong identity
+        @test_throws DomainError is_vector(G, Identity(AdditionOperation()), X, true)
+        # identity_element for G not implemented
+        @test_throws MethodError is_vector(G, eg, X, true)
         @test Identity(NotImplementedOperation()) === eg
         @test Identity(NotImplementedOperation) === eg
         @test !is_point(G, Identity(AdditionOperation()))

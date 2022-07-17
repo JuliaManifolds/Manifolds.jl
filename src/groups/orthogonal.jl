@@ -117,7 +117,7 @@ end
 function log_lie!(G::Orthogonal{2}, X::AbstractMatrix, q::AbstractMatrix)
     @assert size(q) == (2, 2)
     @inbounds θ = atan(q[2, 1], q[1, 1])
-    return get_vector!(G, X, Identity(G, q), θ, DefaultOrthogonalBasis())
+    return get_vector!(G, X, Identity(G), θ, DefaultOrthogonalBasis())
 end
 function log_lie!(G::Orthogonal{3}, X::AbstractMatrix, q::AbstractMatrix)
     e = Identity(G, q)
