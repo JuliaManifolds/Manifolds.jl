@@ -42,4 +42,13 @@ function allocate_result(
     return allocate(q)
 end
 
-decorated_manifold(M::GeneralUnitaryMultiplicationGroup) = M.manifold
+decorated_manifold(G::GeneralUnitaryMultiplicationGroup) = G.manifold
+
+function Random.rand!(G::GeneralUnitaryMultiplicationGroup, pX; kwargs...)
+    rand!(G.manifold, pX; kwargs...)
+    return pX
+end
+function Random.rand!(rng::AbstractRNG, G::GeneralUnitaryMultiplicationGroup, pX; kwargs...)
+    rand!(rng, G.manifold, pX; kwargs...)
+    return pX
+end
