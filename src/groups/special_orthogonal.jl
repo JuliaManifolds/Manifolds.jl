@@ -76,11 +76,4 @@ function log_lie!(::SpecialOrthogonal{3}, X, ::Identity{MultiplicationOperation}
     return X
 end
 
-translate_diff(::SpecialOrthogonal, p, q, X, ::LeftAction) = X
-translate_diff(G::SpecialOrthogonal, p, q, X, ::RightAction) = inv(G, p) * X * p
-
-function translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionDirection)
-    return copyto!(Y, translate_diff(G, p, q, X, conv))
-end
-
 Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")

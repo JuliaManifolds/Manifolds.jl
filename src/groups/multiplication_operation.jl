@@ -160,29 +160,6 @@ function inverse_translate!(
     return copyto!(x, inverse_translate(G, p, q, conv))
 end
 
-function inverse_translate_diff(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    p,
-    q,
-    X,
-    ::ActionDirection,
-)
-    return X
-end
-
-function inverse_translate_diff!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    q,
-    X,
-    ::ActionDirection,
-)
-    return copyto!(G, Y, p, X)
-end
-
 function exp_lie!(
     ::MultiplicationGroupTrait,
     G::AbstractDecoratorManifold,
@@ -218,27 +195,4 @@ function lie_bracket!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, 
     mul!(Z, X, Y)
     mul!(Z, Y, X, -1, true)
     return Z
-end
-
-function translate_diff(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    p,
-    q,
-    X,
-    ::ActionDirection,
-)
-    return X
-end
-
-function translate_diff!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    q,
-    X,
-    ::ActionDirection,
-)
-    return copyto!(G, Y, p, X)
 end

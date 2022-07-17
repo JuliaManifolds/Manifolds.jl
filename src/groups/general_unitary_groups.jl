@@ -52,3 +52,9 @@ function Random.rand!(rng::AbstractRNG, G::GeneralUnitaryMultiplicationGroup, pX
     rand!(rng, G.manifold, pX; kwargs...)
     return pX
 end
+function translate_diff!(G::GeneralUnitaryMultiplicationGroup, Y, p, q, X, ::LeftAction)
+    return copyto!(G, Y, p, X)
+end
+function translate_diff!(G::GeneralUnitaryMultiplicationGroup, Y, p, q, X, ::RightAction)
+    return copyto!(G, Y, p, inv(G, p) * X * p)
+end
