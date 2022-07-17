@@ -120,7 +120,7 @@ function log_lie!(G::Orthogonal{2}, X::AbstractMatrix, q::AbstractMatrix)
     return get_vector!(G, X, Identity(G), θ, DefaultOrthogonalBasis())
 end
 function log_lie!(G::Orthogonal{3}, X::AbstractMatrix, q::AbstractMatrix)
-    e = Identity(G, q)
+    e = Identity(G)
     cosθ = (tr(q) - 1) / 2
     if cosθ ≈ -1
         eig = eigen_safe(q)
@@ -148,7 +148,7 @@ function log_lie!(G::Orthogonal{4}, X::AbstractMatrix, q::AbstractMatrix)
     else
         log_safe!(X, q)
     end
-    return project!(G, X, Identity(G, q), X)
+    return project!(G, X, Identity(G), X)
 end
 
 show(io::IO, ::Orthogonal{n}) where {n} = print(io, "Orthogonal($(n))")
