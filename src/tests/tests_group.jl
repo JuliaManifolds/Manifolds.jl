@@ -477,8 +477,8 @@ function test_group(
     end
 
     Test.@testset "Metric operations with Identity" begin
-        pe = identity_element(G)
         if test_log_from_identity
+            pe = identity_element(G)
             Test.@test isapprox(G, pe, log(G, e, g_pts[1]), log(G, pe, g_pts[1]))
             if test_mutating
                 X = zero_vector(G, pe)
@@ -487,6 +487,7 @@ function test_group(
             end
         end
         if test_exp_from_identity
+            pe = identity_element(G)
             Test.@test isapprox(G, pe, exp(G, e, Xe_pts[1]), exp(G, pe, Xe_pts[1]))
             if test_mutating
                 q = allocate(G, Xe_pts[1])
@@ -495,6 +496,7 @@ function test_group(
             end
         end
         if test_vee_hat_from_identity
+            pe = identity_element(G)
             coeffs = vee(G, pe, Xe_pts[1])
             Test.@test isapprox(coeffs, vee(G, e, Xe_pts[1]))
             Test.@test isapprox(G, pe, Xe_pts[1], hat(G, e, coeffs))
