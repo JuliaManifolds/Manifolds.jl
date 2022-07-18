@@ -137,6 +137,32 @@ function check_vector(M::GeneralUnitaryMatrices{n,𝔽}, p, X; kwargs...) where 
     return check_point(SkewHermitianMatrices(n, 𝔽), X; kwargs...)
 end
 
+@doc raw"""
+    cos_angles_4d_rotation_matrix(R)
+
+4D rotations can be described by two orthogonal planes that are unchanged by
+the action of the rotation (vectors within a plane rotate only within the
+plane). The cosines of the two angles $α,β$ of rotation about these planes may be
+obtained from the distinct real parts of the eigenvalues of the rotation
+matrix. This function computes these more efficiently by solving the system
+
+```math
+\begin{aligned}
+\cos α + \cos β &= \frac{1}{2} \operatorname{tr}(R)\\
+\cos α + \cos β &= \frac{1}{8} \operatorname{tr}(R)^2
+                 - \frac{1}{16} \operatorname{tr}((R - R^T)^2) - 1.
+\end{aligned}
+```
+
+By convention, the returned values are sorted in increasing order. See
+[`angles_4d_skew_sym_matrix`](@ref).
+"""
+function cos_angles_4d_rotation_matrix(R)
+    a = tr(R)
+    b = sqrt(clamp(2 * dot(transpose(R), R) - a^2 + 8, 0, Inf))
+    return ((a + b) / 4, (a - b) / 4)
+end
+
 function default_estimation_method(
     ::GeneralUnitaryMatrices{n,ℝ},
     ::typeof(mean),
@@ -172,11 +198,94 @@ Compute the exponential map, that is, since ``X`` is represented in the Lie alge
 ```
 exp_p(X) = p\mathrm{e}^X
 ```
+
+For different sizes, like ``n=2,3,4`` there is specialised implementations
+
+The algorithm used is a more numerically stable form of those proposed in
+[^Gallier2002] and [^Andrica2013].
+
+[^Gallier2002]:
+    > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
+    > and logarithms of orthogonal matrices.
+    > International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
+    > [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
+
+[^Andrica2013]:
+    > Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
+    > exponential map of the Lie groups of matrices.
+    > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
+    > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
+
 """
 exp(::GeneralUnitaryMatrices, p, X)
 
 function exp!(M::GeneralUnitaryMatrices, q, p, X)
     return copyto!(M, q, p * exp(X))
+end
+
+function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix)
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
+    sinθ, cosθ = sincos(θ)
+    return p * SA[cosθ -sinθ; sinθ cosθ]
+end
+function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X)
+    @assert size(q) == (2, 2)
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
+    sinθ, cosθ = sincos(θ)
+    return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
+end
+function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X)
+    θ = norm(M, p, X) / sqrt(2)
+    if θ ≈ 0
+        a = 1 - θ^2 / 6
+        b = θ / 2
+    else
+        a = sin(θ) / θ
+        b = (1 - cos(θ)) / θ^2
+    end
+    pinvq = I + a .* X .+ b .* (X^2)
+    return copyto!(q, p * pinvq)
+end
+function exp!(::GeneralUnitaryMatrices{4,ℝ}, q, p, X)
+    T = eltype(X)
+    α, β = angles_4d_skew_sym_matrix(X)
+    sinα, cosα = sincos(α)
+    sinβ, cosβ = sincos(β)
+    α² = α^2
+    β² = β^2
+    Δ = β² - α²
+    if !isapprox(Δ, 0; atol=1e-6)  # Case α > β ≥ 0
+        sincα = sinα / α
+        sincβ = β == 0 ? one(T) : sinβ / β
+        a₀ = (β² * cosα - α² * cosβ) / Δ
+        a₁ = (β² * sincα - α² * sincβ) / Δ
+        a₂ = (cosα - cosβ) / Δ
+        a₃ = (sincα - sincβ) / Δ
+    elseif α == 0 # Case α = β = 0
+        a₀ = one(T)
+        a₁ = one(T)
+        a₂ = T(1 / 2)
+        a₃ = T(1 / 6)
+    else  # Case α ⪆ β ≥ 0, α ≠ 0
+        sincα = sinα / α
+        r = β / α
+        c = 1 / (1 + r)
+        d = α * (α - β) / 2
+        if α < 1e-2
+            e = @evalpoly(α², T(1 / 3), T(-1 / 30), T(1 / 840), T(-1 / 45360))
+        else
+            e = (sincα - cosα) / α²
+        end
+        a₀ = (α * sinα + (1 + r - d) * cosα) * c
+        a₁ = ((3 - d) * sincα - (2 - r) * cosα) * c
+        a₂ = (sincα - (1 - r) / 2 * cosα) * c
+        a₃ = (e + (1 - r) * (e - sincα / 2)) * c
+    end
+
+    X² = X * X
+    X³ = X² * X
+    pinvq = a₀ * I + a₁ .* X .+ a₂ .* X² .+ a₃ .* X³
+    return copyto!(q, p * pinvq)
 end
 
 @doc raw"""
@@ -407,6 +516,75 @@ log_p q = \log(p^{\mathrm{H}q)
 which is projected onto the skew symmetric matrices for numerical stability.
 """
 log(::GeneralUnitaryMatrices, p, q)
+
+@doc raw"""
+    log(M::Rotations, p, q)
+
+Compute the logarithmic map on the [`Rotations`](@ref) manifold
+`M` which is given by
+
+```math
+\log_p q = \operatorname{log}(p^{\mathrm{T}}q)
+```
+
+where $\operatorname{Log}$ denotes the matrix logarithm. For numerical stability,
+the result is projected onto the set of skew symmetric matrices.
+
+For antipodal rotations the function returns deterministically one of the tangent vectors
+that point at `q`.
+"""
+log(::GeneralUnitaryMatrices{n,ℝ}, ::Any...) where {n}
+function ManifoldsBase.log(M::GeneralUnitaryMatrices{2,ℝ}, p, q)
+    U = transpose(p) * q
+    @assert size(U) == (2, 2)
+    @inbounds θ = atan(U[2], U[1])
+    return get_vector(M, p, θ, DefaultOrthogonalBasis())
+end
+function log!(::GeneralUnitaryMatrices{n,ℝ}, X, p, q) where {n}
+    U = transpose(p) * q
+    X .= real(log_safe(U))
+    return project!(SkewSymmetricMatrices(n), X, p, X)
+end
+function log!(M::GeneralUnitaryMatrices{2,ℝ}, X, p, q)
+    U = transpose(p) * q
+    @assert size(U) == (2, 2)
+    @inbounds θ = atan(U[2], U[1])
+    return get_vector!(M, X, p, θ, DefaultOrthogonalBasis())
+end
+function log!(M::GeneralUnitaryMatrices{3,ℝ}, X, p, q)
+    U = transpose(p) * q
+    cosθ = (tr(U) - 1) / 2
+    if cosθ ≈ -1
+        eig = eigen_safe(U)
+        ival = findfirst(λ -> isapprox(λ, 1), eig.values)
+        inds = SVector{3}(1:3)
+        ax = eig.vectors[inds, ival]
+        return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
+    end
+    X .= U ./ usinc_from_cos(cosθ)
+    return project!(SkewSymmetricMatrices(3), X, p, X)
+end
+function log!(::GeneralUnitaryMatrices{4,ℝ}, X, p, q)
+    U = transpose(p) * q
+    cosα, cosβ = cos_angles_4d_rotation_matrix(U)
+    α = acos(clamp(cosα, -1, 1))
+    β = acos(clamp(cosβ, -1, 1))
+    if α ≈ π && β ≈ 0
+        A² = Symmetric((U - I) ./ 2)
+        P = eigvecs(A²)
+        E = similar(U)
+        fill!(E, 0)
+        α = acos(clamp(cosα, -1, 1))
+        @inbounds begin
+            E[2, 1] = -α
+            E[1, 2] = α
+        end
+        copyto!(X, P * E * transpose(P))
+    else
+        copyto!(X, real(log_safe(U)))
+    end
+    return project!(SkewSymmetricMatrices(4), X, p, X)
+end
 
 function log!(::GeneralUnitaryMatrices{n,𝔽}, X, p, q) where {n,𝔽}
     log_safe!(X, adjoint(p) * q)

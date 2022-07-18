@@ -86,13 +86,18 @@ include("group_utils.jl")
         ]
         Ms = [SpecialOrthogonal(4), Orthogonal(4)]
         for Xf in Xs
-            @testset "rotation vector $Xf" begin
-                for M in Ms
+            for M in Ms
+                @testset "for $Xf on $M" begin
                     X = Manifolds.hat(M, Matrix(1.0I, 4, 4), Xf)
                     p = exp(X)
                     @test p ≈ exp_lie(M, X)
                     p2 = exp_lie(M, log_lie(M, p))
                     @test isapprox(M, p, p2; atol=1e-6)
+                    # pass through to the manifold (Orthogonal / Rotations)
+                    @test p ≈ exp(M, one(p), X)
+                    p3 = exp(M, one(p), log(M, one(p), p))
+                    # broken for 9 of the 10
+                    @test isapprox(M, p, p3; atol=1e-4)
                 end
             end
         end

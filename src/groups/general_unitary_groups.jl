@@ -139,9 +139,8 @@ function exp_lie!(::GeneralUnitaryMultiplicationGroup{4,ℝ}, q, X)
     end
 
     X² = X * X
-    copyto!(q, a₀ * I)
-    q .+= a₂ .* X²
-    mul!(q, X², X, a₃, true)
+    X³ = X² * X
+    q = a₀ * I + a₁ .* X .+ a₂ .* X² .+ a₃ .* X³
     return q
 end
 
