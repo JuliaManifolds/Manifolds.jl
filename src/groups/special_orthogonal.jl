@@ -69,7 +69,7 @@ function log_lie!(M::SpecialOrthogonal{3}, X, q)
         return get_vector_lie!(M, X, π * ax, DefaultOrthogonalBasis())
     end
     X .= q ./ usinc_from_cos(cosθ)
-    return project_no_rep_change!(M.manifold, X, q, X)
+    return project!(SkewSymmetricMatrices(3), X, q, X)
 end
 function log_lie!(::SpecialOrthogonal{3}, X, ::Identity{MultiplicationOperation})
     fill!(X, 0)

@@ -163,6 +163,23 @@ function embed!(::GeneralUnitaryMatrices, Y, p, X)
 end
 
 @doc raw"""
+    exp(M::Rotations, p, X)
+    exp(M::OrthogonalMatrices, p, X)
+    exp(M::UnitaryMatrices, p, X)
+
+Compute the exponential map, that is, since ``X`` is represented in the Lie algebra,
+
+```
+exp_p(X) = p\mathrm{e}^X
+```
+"""
+exp(::GeneralUnitaryMatrices, p, X)
+
+function exp!(::GeneralUnitaryMatrices, q, p, X)
+    return copyto!(M, q, p * exp(X))
+end
+
+@doc raw"""
     get_coordinates(M::Rotations, p, X)
     get_coordinates(M::OrthogonalMatrices, p, X)
     get_coordinates(M::UnitaryMatrices, p, X)
@@ -371,6 +388,26 @@ end
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 
+@doc raw"""
+    log(M::Rotations, p, X)
+    log(M::OrthogonalMatrices, p, X)
+    log(M::UnitaryMatrices, p, X)
+
+Compute the logarithmic map, that is, since the resulting ``X`` is represented in the Lie algebra,
+
+```
+log_p q = \log(p^{\mathrm{H}q)
+```
+which is projected onto the skew symmetric matrices for numerical stability.
+"""
+log(::GeneralUnitaryMatrices, p, q)
+
+function log!(::GeneralUnitaryMatrices{n,𝔽}, X, p, q) where {n,𝔽}
+    log_safe!(X, adjoint(p) * q)
+    project!(SkewHermitianMatrices(n, 𝔽), q, q)
+    return q
+end
+
 norm(::GeneralUnitaryMatrices, p, X) = norm(X)
 
 @doc raw"""
@@ -440,11 +477,6 @@ project(::GeneralUnitaryMatrices, p, X)
 
 function project!(::GeneralUnitaryMatrices{n,𝔽}, Y, p, X) where {n,𝔽}
     project!(SkewHermitianMatrices(n, 𝔽), Y, p \ X)
-    return Y
-end
-
-function project_no_rep_change!(::GeneralUnitaryMatrices{n,𝔽}, Y, p, X) where {n,𝔽}
-    project!(SkewSymmetricMatrices(n, 𝔽), Y, X)
     return Y
 end
 

@@ -312,7 +312,7 @@ Compute a vector from the tangent space $T_p\mathrm{SO}(n)$ of the point `p` on 
 """
 inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 
-function inverse_retract_polar!(M::Rotations, X, p, q)
+function inverse_retract_polar!(M::Rotations{n}, X, p, q) where {n}
     A = transpose(p) * q
     Amat = A isa StaticMatrix ? A : convert(Matrix, A)
     H = copyto!(allocate(Amat), -2I)
@@ -326,32 +326,33 @@ function inverse_retract_polar!(M::Rotations, X, p, q)
             rethrow()
         end
     end
-    return project_no_rep_change!(M, X, p, X)
+    return project!(SkewSymmetricMatrices(n), X, p, X)
 end
-function inverse_retract_qr!(M::Rotations{N}, X, p, q) where {N}
+function inverse_retract_qr!(::Rotations{n}, X, p, q) where {n}
     A = transpose(p) * q
     R = zero(X)
-    for i in 1:N
+    for i in 1:n
         b = zeros(i)
         b[end] = 1
         b[1:(end - 1)] = -transpose(R[1:(i - 1), 1:(i - 1)]) * A[i, 1:(i - 1)]
         R[1:i, i] = A[1:i, 1:i] \ b
     end
     mul!(X, A, R)
-    return project_no_rep_change!(M, X, p, X)
+    return project!(SkewSymmetricMatrices(n), X, p, X)
 end
 
 @doc raw"""
     log(M::Rotations, p, q)
 
 Compute the logarithmic map on the [`Rotations`](@ref) manifold
-`M`$=\mathrm{SO}(n)$, which is given by
+`M` which is given by
+
 ```math
-\log_p q =
-  \frac{1}{2} \bigl(\operatorname{Log}(p^{\mathrm{T}}q)
-  - (\operatorname{Log}(p^{\mathrm{T}}q)^{\mathrm{T}}),
+\log_p q = \operatorname{log}(p^{\mathrm{T}}q)
 ```
-where $\operatorname{Log}$ denotes the matrix logarithm.
+
+where $\operatorname{Log}$ denotes the matrix logarithm. For numerical stability,
+the result is projected onto the set of skew symmetric matrices.
 
 For antipodal rotations the function returns deterministically one of the tangent vectors
 that point at `q`.
@@ -364,10 +365,10 @@ function ManifoldsBase.log(M::Rotations{2}, p, q)
     return get_vector(M, p, θ, DefaultOrthogonalBasis())
 end
 
-function log!(M::Rotations, X, p, q)
+function log!(M::Rotations{n}, X, p, q) where {n}
     U = transpose(p) * q
     X .= real(log_safe(U))
-    return project_no_rep_change!(M, X, p, X)
+    return project!(SkewSymmetricMatrices(n), X, p, X)
 end
 function log!(M::Rotations{2}, X, p, q)
     U = transpose(p) * q
@@ -386,9 +387,9 @@ function log!(M::Rotations{3}, X, p, q)
         return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
     end
     X .= U ./ usinc_from_cos(cosθ)
-    return project_no_rep_change!(M, X, p, X)
+    return project!(SkewSymmetricMatrices(3), X, p, X)
 end
-function log!(M::Rotations{4}, X, p, q)
+function log!(::Rotations{4}, X, p, q)
     U = transpose(p) * q
     cosα, cosβ = cos_angles_4d_rotation_matrix(U)
     α = acos(clamp(cosα, -1, 1))
@@ -407,7 +408,7 @@ function log!(M::Rotations{4}, X, p, q)
     else
         copyto!(X, real(log_safe(U)))
     end
-    return project_no_rep_change!(M, X, p, X)
+    return project!(SkewSymmetricMatrices(4), X, p, X)
 end
 
 @doc raw"""
