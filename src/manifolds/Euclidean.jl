@@ -245,6 +245,10 @@ function get_vector_orthonormal(M::Euclidean, ::Any, c, ::RealNumbers)
     S = representation_size(M)
     return reshape(c, S)
 end
+function get_vector_orthonormal(::Euclidean{Tuple{N},ℝ}, ::Any, c, ::RealNumbers) where {N}
+    # this method is defined just to skip a reshape
+    return c
+end
 function get_vector_orthonormal(::Euclidean, ::SArray{S}, c, ::RealNumbers) where {S}
     return SArray{S}(c)
 end
@@ -252,6 +256,17 @@ function get_vector_orthonormal(::Euclidean, ::SizedArray{S}, c, ::RealNumbers) 
     return SizedArray{S}(c)
 end
 
+function get_vector_orthonormal!(
+    ::Euclidean{Tuple{N},ℝ},
+    Y,
+    ::Any,
+    c,
+    ::RealNumbers,
+) where {N}
+    # this method is defined just to skip a reshape
+    copyto!(Y, c)
+    return Y
+end
 function get_vector_orthonormal!(M::Euclidean, Y, ::Any, c, ::RealNumbers)
     S = representation_size(M)
     copyto!(Y, reshape(c, S))
