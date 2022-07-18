@@ -33,11 +33,13 @@ end
     end
 end
 
+exp!(::Euclidean, q, ::Identity{AdditionOperation}, X) = copyto!(q, X)
+
 identity_element!(::TranslationGroup, p) = fill!(p, 0)
 
-Base.log(::Euclidean, p::Identity{AdditionOperation}, q) = q
+log(::Euclidean, ::Identity{AdditionOperation}, q) = q
 
-function Manifolds.log!(::Euclidean, X, p::Identity{AdditionOperation}, q)
+function log!(::Euclidean, X, p::Identity{AdditionOperation}, q)
     copyto!(X, q)
     return X
 end

@@ -37,7 +37,9 @@ include("group_utils.jl")
                 test_invariance=true,
                 test_lie_bracket=true,
                 test_adjoint_action=true,
+                test_exp_from_identity=true,
                 test_log_from_identity=true,
+                test_vee_hat_from_identity=true,
             )
         end
     end

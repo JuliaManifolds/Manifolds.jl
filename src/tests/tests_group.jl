@@ -39,6 +39,8 @@ function test_group(
     test_adjoint_action=false,
     diff_convs=[(), (LeftAction(),), (RightAction(),)],
     test_log_from_identity=false,
+    test_exp_from_identity=false,
+    test_vee_hat_from_identity=false,
 )
     e = Identity(G)
 
@@ -475,13 +477,37 @@ function test_group(
     end
 
     Test.@testset "Metric operations with Identity" begin
+        pe = identity_element(G)
         if test_log_from_identity
-            Test.@test isapprox(
-                G,
-                identity_element(G),
-                log(G, e, g_pts[1]),
-                log(G, identity_element(G), g_pts[1]),
-            )
+            Test.@test isapprox(G, pe, log(G, e, g_pts[1]), log(G, pe, g_pts[1]))
+            if test_mutating
+                X = zero_vector(G, pe)
+                log!(G, X, e, g_pts[1])
+                Test.@test isapprox(G, pe, X, log(G, pe, g_pts[1]))
+            end
+        end
+        if test_exp_from_identity
+            Test.@test isapprox(G, pe, exp(G, e, Xe_pts[1]), exp(G, pe, Xe_pts[1]))
+            if test_mutating
+                q = allocate(G, Xe_pts[1])
+                exp!(G, q, e, Xe_pts[1])
+                Test.@test isapprox(G, q, exp(G, pe, Xe_pts[1]))
+            end
+        end
+        if test_vee_hat_from_identity
+            coeffs = vee(G, pe, Xe_pts[1])
+            Test.@test isapprox(coeffs, vee(G, e, Xe_pts[1]))
+            Test.@test isapprox(G, pe, Xe_pts[1], hat(G, e, coeffs))
+
+            if test_mutating
+                coeffs2 = similar(coeffs)
+                vee!(G, coeffs2, e, Xe_pts[1])
+                Test.@test isapprox(coeffs, coeffs2)
+
+                X = allocate(G, Xe_pts[1])
+                hat!(G, X, e, coeffs2)
+                Test.@test isapprox(G, pe, Xe_pts[1], X)
+            end
         end
     end
 
