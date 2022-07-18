@@ -25,10 +25,6 @@ const Unitary{n} = GeneralUnitaryMultiplicationGroup{n,ℂ,AbsoluteDeterminantOn
 
 Unitary(n) = Unitary{n}(UnitaryMatrices(n))
 
-exp!(G::Unitary, q, p, X) = compose!(G, q, p, exp_lie(G, X))
-
-flat!(::Unitary, ξ::CoTFVector, p, X::TFVector) = copyto!(ξ, X)
-
 @doc raw"""
     exp_lie(G::Unitary{2}, X)
 
