@@ -6,22 +6,22 @@ include("group_utils.jl")
         O2 = Orthogonal(2)
         @test repr(O2) == "Orthogonal(2)"
 
-        for n in [2] # skip 3&4&5,
-            # 3 produces NaNs in this code,
-            # 4 entered with a valid (det = -1) reports that such a determinant is not allowed
-            # 5 also comlains about a negative log.
+        for n in [2, 3, 4, 5] # 2-4 have special implementations, 5 for generic case
             On = Orthogonal(n)
-            p = Matrix{Float64}(I, n, n)
-            p[1, 1] = -1
-            if n > 2
-                p[2, 2] = -1
-                p[3, 3] = -1
-            end
-            X = log_lie(On, p)
-            p2 = exp_lie(On, X)
+            X = zeros(n, n)
+            X[1, 2] = 1.0
+            X[2, 1] = -1.0
+            p = exp_lie(On, X)
+            X2 = log_lie(On, p)
+            e = Identity(MultiplicationOperation())
             # They are not yet inverting, p2 is on the “other half”
             # but taking the log again should also be X ahain
-            @test isapprox(On, p2, log_lie(On, p2), X)
+            if n != 4
+                @test isapprox(On, e, X2, X)
+            else
+                @test_broken isapprox(On, e, X2, X)
+            end
+            @test log_lie(On, e) == zeros(n, n)
         end
     end
 
@@ -50,7 +50,13 @@ include("group_utils.jl")
         @test is_vector(SU2, q, X)
         @test_throws ManifoldDomainError is_vector(SU2, p, X, true, true) # base point wrong
         @test_throws DomainError is_vector(SU2, q, Xe, true, true) # Xe not skew hermitian
-        @test_throws DomainError is_vector(SU2, Identity(AdditionOperation())Xe, true, true) # base point wrong
+        @test_throws DomainError is_vector(
+            SU2,
+            Identity(AdditionOperation()),
+            Xe,
+            true,
+            true,
+        ) # base point wrong
         e = Identity(MultiplicationOperation())
         @test_throws DomainError is_vector(SU2, e, Xe, true, true) # Xe not skew hermitian
     end

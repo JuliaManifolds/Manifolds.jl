@@ -1,5 +1,5 @@
 @doc raw"""
-     Unitary{n,𝔽} <: AbstractGroupManifold{𝔽,MultiplicationOperation,DefaultEmbeddingType}
+     Unitary{n,𝔽} = GeneralUnitaryMultiplicationGroup{n,ℂ,AbsoluteDeterminantOneMatrices}
 
 The group of unitary matrices ``\mathrm{U}(n)``.
 
@@ -67,11 +67,11 @@ function exp_lie!(::Unitary{2}, q, X)
     return q
 end
 
-function group_log!(::Unitary{1}, X::AbstractMatrix, p::AbstractMatrix)
+function log_lie!(::Unitary{1}, X::AbstractMatrix, p::AbstractMatrix)
     X[1] = log(p[1])
     return X
 end
-function group_log!(G::Unitary, X::AbstractMatrix, p::AbstractMatrix)
+function log_lie!(G::Unitary, X::AbstractMatrix, p::AbstractMatrix)
     log_safe!(X, p)
     project!(G, X, Identity(G, p), X)
     return X
@@ -92,27 +92,5 @@ end
 inner(::Unitary, p, X, Y) = dot(X, Y)
 
 Base.inv(::Unitary, p) = adjoint(p)
-
-inverse_translate(G::Unitary, p, q, ::LeftAction) = inv(G, p) * q
-inverse_translate(G::Unitary, p, q, ::RightAction) = q * inv(G, p)
-
-inverse_translate!(G::Unitary, x, p, q, ::LeftAction) = mul!(x, inv(G, p), q)
-inverse_translate!(G::Unitary, x, p, q, ::RightAction) = mul!(x, q, inv(G, p))
-
-function inverse_translate_diff(G::Unitary, p, q, X, conv::ActionDirection)
-    return translate_diff(G, inv(G, p), q, X, conv)
-end
-
-function inverse_translate_diff!(G::Unitary, Y, p, q, X, conv::ActionDirection)
-    return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
-end
-
-function log!(G::Unitary, X, p, q)
-    pinvq = inverse_translate(G, p, q)
-    Xₑ = group_log!(G, X, pinvq)
-    e = Identity(G, pinvq)
-    translate_diff!(G, X, p, e, Xₑ, LeftAction())
-    return X
-end
 
 show(io::IO, ::Unitary{n}) where {n} = print(io, "Unitary($(n))")
