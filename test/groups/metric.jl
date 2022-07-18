@@ -103,6 +103,16 @@ end
         @test !isapprox(G, e, Identity(AdditionOperation()))
         @test has_biinvariant_metric(G)
         @test !has_biinvariant_metric(Sphere(2))
+        Z = translate_diff(G, p, q, X, LeftAction())
+        @test isapprox(SO3, q, Z, translate_diff(SO3, p, q, X, LeftAction()))
+        Z2 = similar(Z)
+        translate_diff!(G, Z2, p, q, X, LeftAction())
+        @test isapprox(SO3, q, Z, Z2)
+        Z3 = inverse_translate_diff(G, p, q, X, LeftAction())
+        @test isapprox(SO3, q, Z3, inverse_translate_diff(SO3, p, q, X, LeftAction()))
+        Z4 = similar(Z3)
+        inverse_translate_diff!(G, Z4, p, q, X, LeftAction())
+        @test isapprox(SO3, q, Z3, Z4)
     end
 
     @testset "invariant metric direction" begin
