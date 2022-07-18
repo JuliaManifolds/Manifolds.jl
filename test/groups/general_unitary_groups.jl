@@ -26,7 +26,7 @@ include("group_utils.jl")
         @test repr(U2) == "Unitary(2)"
         @test injectivity_radius(U2) == π
 
-        for n in [1, 2]
+        for n in [1, 2, 3]
             Un = Unitary(n)
             X = zeros(ComplexF64, n, n)
             X[1] = 1im
@@ -34,6 +34,9 @@ include("group_utils.jl")
             q = exp(Un, p, X)
             X2 = log(Un, p, q)
             @test isapprox(Un, p, X, X2)
+            q2 = exp_lie(Un, X)
+            X3 = log_lie(Un, q2)
+            @test isapprox(Un, p, X, X3)
             @test inv(Un, p) == adjoint(p)
             @test injectivity_radius(Un, p) == π
         end

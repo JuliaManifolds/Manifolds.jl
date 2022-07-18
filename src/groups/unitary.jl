@@ -63,13 +63,18 @@ function exp_lie!(::Unitary{2}, q, X)
     return q
 end
 
-function log_lie!(::Unitary{1}, X::AbstractMatrix, p::AbstractMatrix)
+function exp_lie!(G::Unitary, q, X)
+    copyto!(G, q, exp(X))
+    return q
+end
+
+function log_lie!(::Unitary{1}, X, p)
     X[1] = log(p[1])
     return X
 end
-function log_lie!(G::Unitary, X::AbstractMatrix, p::AbstractMatrix)
+function log_lie!(G::Unitary, X, p)
     log_safe!(X, p)
-    project!(G, X, Identity(G, p), X)
+    project!(G, X, Identity(G), X)
     return X
 end
 
