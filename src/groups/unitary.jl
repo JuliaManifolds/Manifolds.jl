@@ -77,20 +77,6 @@ function log_lie!(G::Unitary, X::AbstractMatrix, p::AbstractMatrix)
     return X
 end
 
-@doc raw"""
-    injectivity_radius(G::Unitary)
-    injectivity_radius(G::Unitary, p)
-
-Return the injectivity radius on the ``\mathrm{U}(n,𝔽)=``[`Unitary`](@ref) group `G`, which
-is globally ``π \sqrt{2}`` for ``𝔽=ℝ`` and ``π`` for ``𝔽=ℂ`` or ``𝔽=ℍ``.
-"""
-function injectivity_radius(::Unitary)
-    T = float(real(eltype(p)))
-    return T(π)
-end
-
-inner(::Unitary, p, X, Y) = dot(X, Y)
-
 Base.inv(::Unitary, p) = adjoint(p)
 
 show(io::IO, ::Unitary{n}) where {n} = print(io, "Unitary($(n))")

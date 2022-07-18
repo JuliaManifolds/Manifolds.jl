@@ -11,6 +11,7 @@ end
 @testset "Unitary Matrices" begin
     M = UnitaryMatrices(2)
     @test repr(M) == "UnitaryMatrices(2)"
+
     # wrong length of size
     @test_throws DomainError is_point(M, zeros(1), true)
     @test_throws DomainError is_point(M, zeros(3, 3), true)
@@ -33,4 +34,8 @@ end
     @test is_point(M, q, true)
     q2 = project(M, 1im * ones(2, 2))
     @test is_point(M, q2, true)
+
+    r = exp(M, p, X)
+    X2 = log(M, p, r)
+    @test isapprox(M, p, X, X2)
 end

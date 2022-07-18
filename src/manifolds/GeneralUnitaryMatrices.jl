@@ -175,7 +175,7 @@ exp_p(X) = p\mathrm{e}^X
 """
 exp(::GeneralUnitaryMatrices, p, X)
 
-function exp!(::GeneralUnitaryMatrices, q, p, X)
+function exp!(M::GeneralUnitaryMatrices, q, p, X)
     return copyto!(M, q, p * exp(X))
 end
 
@@ -385,6 +385,12 @@ end
 function _injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::PolarRetraction) where {n}
     return π / sqrt(2.0)
 end
+@doc raw"""
+    injectivity_radius(G::UnitaryMatrices)
+
+Return the injectivity radius on the [`UnitaryMatrices`](@ref), which is ``π``.
+"""
+injectivity_radius(::GeneralUnitaryMatrices{n,ℂ}) where {n} = π
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 

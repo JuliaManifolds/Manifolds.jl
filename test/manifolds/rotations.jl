@@ -157,33 +157,6 @@ include("../utils.jl")
                 @test isa(Xf, AbstractVector)
                 @test Manifolds.hat(SOn, p, Xf) ≈ X
             end
-
-            if n == 4
-                @testset "exp/log edge cases" begin
-                    Xs = [
-                        [0, 0, π, 0, 0, π],  # θ = (π, π)
-                        [0, 0, π, 0, 0, 0],  # θ = (π, 0)
-                        [0, 0, π / 2, 0, 0, π],  # θ = (π, π/2)
-                        [0, 0, π, 0, 0, 0] ./ 2,  # θ = (π/2, 0)
-                        [0, 0, π, 0, 0, π] ./ 2,  # θ = (π/2, π/2)
-                        [0, 0, 0, 0, 0, 0],  # θ = (0, 0)
-                        [0, 0, 1, 0, 0, 1] .* 1e-100, # α = β ≈ 0
-                        [0, 0, 1, 0, 0, 1] .* 1e-6, # α = β ⩰ 0
-                        [0, 0, 10, 0, 0, 1] .* 1e-6, # α ⪆ β ⩰ 0
-                        [0, 0, π / 4, 0, 0, π / 4 - 1e-6], # α ⪆ β > 0
-                    ]
-                    for Xf in Xs
-                        @testset "rotation vector $Xf" begin
-                            X = Manifolds.hat(SOn, Matrix(1.0I, n, n), Xf)
-                            p = exp(X)
-                            @test p ≈ exp(SOn, one(p), X)
-                            p2 = exp(log(SOn, one(p), p))
-                            @test isapprox(p, p2; atol=1e-6)
-                        end
-                    end
-                end
-            end
-
             X = Matrix(
                 Manifolds.hat(SOn, pts[1], π * normalize(randn(manifold_dimension(SOn)))),
             )
