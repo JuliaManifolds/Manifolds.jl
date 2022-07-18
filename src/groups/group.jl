@@ -324,18 +324,6 @@ function Base.show(io::IO, ::Identity{O}) where {O<:AbstractGroupOperation}
     return print(io, "Identity($O)")
 end
 
-function check_point(
-    ::TraitList{<:IsGroupManifold{O1}},
-    G::AbstractDecoratorManifold,
-    e::Identity{O2};
-    kwargs...,
-) where {O1<:AbstractGroupOperation,O2<:AbstractGroupOperation}
-    return DomainError(
-        e,
-        "The Identity $e does not lie on $G, since its the identity with respect to $O2 and not $O1.",
-    )
-end
-
 function is_point(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,

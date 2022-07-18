@@ -13,6 +13,7 @@ include("group_utils.jl")
         X = [2.0, 3.0]
         eg = Identity(G)
         @test repr(eg) === "Identity(NotImplementedOperation)"
+        @test adjoint(eg) == eg
         @test number_eltype(eg) == Bool
         @test !is_group_manifold(NotImplementedManifold(), NotImplementedOperation())
         @test is_identity(G, eg) # identity transparent
