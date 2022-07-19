@@ -124,6 +124,6 @@ include("group_utils.jl")
         X3b = log_lie(SpecialOrthogonal(4), R3)
         @test isapprox(X3a, X3b)
         @test is_vector(Rotations(4), E, X3b)
-        @test X1a[3, 2] ≈ π
+        @test X3a[2, 3] ≈ π
     end
 end
