@@ -224,14 +224,15 @@ function log_lie!(
     cosα, cosβ = cos_angles_4d_rotation_matrix(q)
     α = acos(clamp(cosα, -1, 1))
     β = acos(clamp(cosβ, -1, 1))
-    if α ≈ π && β ≈ 0
+    if α ≈ 0 && β ≈ π
         A² = Symmetric((q - I) ./ 2)
         P = eigvecs(A²)
         E = similar(q)
         fill!(E, 0)
-        α = acos(clamp(cosα, -1, 1))
-        E[2, 1] = -α
-        E[1, 2] = α
+        @inbounds begin
+            E[2, 1] = -β
+            E[1, 2] = β
+        end
         copyto!(X, P * E * transpose(P))
     else
         det(q) < 0 && throw(

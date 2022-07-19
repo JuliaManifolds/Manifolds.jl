@@ -359,7 +359,7 @@ end
     parallel_transport_direction(M::Rotations, p, X, d)
 
 Compute parallel transport of vector `X` tangent at `p` on the [`Rotations`](@ref)
-manifold in the direction `d`. The formula, provided in [^Rentmeesters], reads:
+manifold in the direction `d`. The formula, provided in [^Rentmeesters2011], reads:
 
 ```math
 \mathcal P_{q\gets p}X = q^\mathrm{T}p \operatorname{Exp}(d/2) X \operatorname{Exp}(d/2)
@@ -368,10 +368,10 @@ where ``q=\exp_p d``.
 
 The formula simplifies to identity for 2-D rotations.
 
-[^Rentmeesters]:
+[^Rentmeesters2011]:
     > Rentmeesters Q., “A gradient method for geodesic data fitting on some symmetric
     > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
-    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: 10.1109/CDC.2011.6161280.
+    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: [10.1109/CDC.2011.6161280](https://doi.org/10.1109/CDC.2011.6161280).
 """
 parallel_transport_direction(M::Rotations, p, X, d)
 

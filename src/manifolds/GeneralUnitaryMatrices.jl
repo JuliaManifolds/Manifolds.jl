@@ -154,7 +154,7 @@ matrix. This function computes these more efficiently by solving the system
 \end{aligned}
 ```
 
-By convention, the returned values are sorted in increasing order. See
+By convention, the returned values are sorted in decreasing order. See
 [`angles_4d_skew_sym_matrix`](@ref).
 """
 function cos_angles_4d_rotation_matrix(R)
@@ -566,22 +566,26 @@ function log!(M::GeneralUnitaryMatrices{3,ℝ}, X, p, q)
 end
 function log!(::GeneralUnitaryMatrices{4,ℝ}, X, p, q)
     U = transpose(p) * q
-    cosα, cosβ = cos_angles_4d_rotation_matrix(U)
+    cosα, cosβ = Manifolds.cos_angles_4d_rotation_matrix(U)
     α = acos(clamp(cosα, -1, 1))
     β = acos(clamp(cosβ, -1, 1))
-    if α ≈ π && β ≈ 0
+    if α ≈ 0 && β ≈ π
         A² = Symmetric((U - I) ./ 2)
         P = eigvecs(A²)
         E = similar(U)
         fill!(E, 0)
-        α = acos(clamp(cosα, -1, 1))
         @inbounds begin
-            E[2, 1] = -α
-            E[1, 2] = α
+            E[2, 1] = -β
+            E[1, 2] = β
         end
         copyto!(X, P * E * transpose(P))
     else
-        copyto!(X, real(log_safe(U)))
+        det(U) < 0 && throw(
+            DomainError(
+                "The logarithm is not defined for $p and $q with a negative determinant of p'q) ($(det(U)) < 0).",
+            ),
+        )
+        copyto!(X, real(Manifolds.log_safe(U)))
     end
     return project!(SkewSymmetricMatrices(4), X, p, X)
 end
