@@ -149,13 +149,13 @@ matrix. This function computes these more efficiently by solving the system
 ```math
 \begin{aligned}
 \cos α + \cos β &= \frac{1}{2} \operatorname{tr}(R)\\
-\cos α + \cos β &= \frac{1}{8} \operatorname{tr}(R)^2
+\cos α \cos β &= \frac{1}{8} \operatorname{tr}(R)^2
                  - \frac{1}{16} \operatorname{tr}((R - R^T)^2) - 1.
 \end{aligned}
 ```
 
-By convention, the returned values are sorted in decreasing order. See
-[`angles_4d_skew_sym_matrix`](@ref).
+By convention, the returned values are sorted in decreasing order.
+See also [`angles_4d_skew_sym_matrix`](@ref).
 """
 function cos_angles_4d_rotation_matrix(R)
     a = tr(R)
