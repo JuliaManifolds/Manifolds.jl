@@ -254,10 +254,10 @@ function get_vector_orthonormal(::Euclidean, ::SArray{S}, c, ::RealNumbers) wher
 end
 function get_vector_orthonormal(
     ::Euclidean{Tuple{N},ℝ},
-    ::SArray,
+    ::SArray{S},
     c,
     ::RealNumbers,
-) where {N}
+) where {N,S}
     # probably doesn't need rewrapping in SArray
     return c
 end
@@ -266,10 +266,10 @@ function get_vector_orthonormal(::Euclidean, ::SizedArray{S}, c, ::RealNumbers) 
 end
 function get_vector_orthonormal(
     ::Euclidean{Tuple{N},ℝ},
-    ::SizedArray,
+    ::SizedArray{S},
     c,
     ::RealNumbers,
-) where {N}
+) where {N,S}
     # probably doesn't need rewrapping in SizedArray
     return c
 end
