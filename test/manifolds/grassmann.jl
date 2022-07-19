@@ -216,11 +216,17 @@ include("../utils.jl")
         q2 = similar(q)
         embed!(M, q2, p)
         @test q2 == p.value
+        q3 = similar(q)
+        embed!(M, q3, p.value)
+        @test q3 == p.value
         Y = embed(M, p, X)
         @test Y == X.value
         Y2 = similar(Y)
         embed!(M, Y2, p, X)
         @test Y2 == X.value
+        Y3 = similar(Y)
+        embed!(M, Y3, p.value, X.value)
+        @test Y3 == X.value
 
         pSe = similar(pS.value)
         embed!(M, pSe, pS)
