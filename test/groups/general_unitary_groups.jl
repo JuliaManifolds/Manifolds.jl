@@ -104,5 +104,26 @@ include("group_utils.jl")
                 end
             end
         end
+        E = diagm(ones(4))
+        R1 = diagm([-1.0, -1.0, 1.0, 1.0])
+        X1a = log(Rotations(4), E, R1)
+        X1b = log_lie(SpecialOrthogonal(4), R1)
+        @test isapprox(X1a, X1b)
+        @test is_vector(Rotations(4), E, X1b)
+        @test X1a[1, 2] ≈ π
+
+        R2 = diagm([-1.0, 1.0, -1.0, 1.0])
+        X2a = log(Rotations(4), E, R2)
+        X2b = log_lie(SpecialOrthogonal(4), R2)
+        @test isapprox(X2a, X2b)
+        @test is_vector(Rotations(4), E, X2b)
+        @test X2a[1, 3] ≈ π
+
+        R3 = diagm([1.0, -1.0, -1.0, 1.0])
+        X3a = log(Rotations(4), E, R3)
+        X3b = log_lie(SpecialOrthogonal(4), R3)
+        @test isapprox(X3a, X3b)
+        @test is_vector(Rotations(4), E, X3b)
+        @test X1a[3, 2] ≈ π
     end
 end
