@@ -297,12 +297,30 @@ using Manifolds: induced_basis
     end
 
     @testset "StaticArrays specializations" begin
-        M = Euclidean(2, 2)
+        M1 = Euclidean(3)
         @test get_vector(
-            M,
+            M1,
+            SA[1.0, 2.0, 3.0],
+            SA[-1.0, -2.0, -3.0],
+            DefaultOrthonormalBasis(),
+        ) === SA[-1.0, -2.0, -3.0]
+
+        c_sv = SizedVector{3}([-1.0, -2.0, -3.0])
+        @test get_vector(M1, SA[1.0, 2.0, 3.0], c_sv, DefaultOrthonormalBasis()) === c_sv
+
+        M2 = Euclidean(2, 2)
+        @test get_vector(
+            M2,
             SA[1.0 2.0; 3.0 4.0],
             SA[-1.0, -2.0, -3.0, -4.0],
             DefaultOrthonormalBasis(),
         ) === SA[-1.0 -3.0; -2.0 -4.0]
+
+        @test get_vector(
+            M2,
+            SizedMatrix{2,2}([1.0 2.0; 3.0 4.0]),
+            SizedMatrix{2,2}([-1.0, -2.0, -3.0, -4.0]),
+            DefaultOrthonormalBasis(),
+        ) == SA[-1.0 -3.0; -2.0 -4.0]
     end
 end
