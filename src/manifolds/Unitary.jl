@@ -4,7 +4,7 @@
 
 The manifold ``U(n)`` of ``n×n`` complex matrices such that
 
-``p^{\mathrm{H}p = \mathrm{I}_n,``
+``p^{\mathrm{H}}p = \mathrm{I}_n,``
 
 where ``\mathrm{I}_n`` is the ``n×n`` identity matrix.
 Such matrices `p` have a property that ``\lVert \det(p) \rVert = 1``.
