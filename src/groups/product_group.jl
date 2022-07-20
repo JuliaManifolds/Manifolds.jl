@@ -126,17 +126,27 @@ function _compose!(M::ProductManifold, x, p, q)
     return x
 end
 
-translate(G::ProductGroup, p, q, conv::ActionDirection) = translate(G.manifold, p, q, conv)
-function translate(
-    M::ProductManifold,
-    p::ProductRepr,
-    q::ProductRepr,
-    conv::ActionDirection,
-)
+function translate(M::ProductGroup, p::ProductRepr, q::ProductRepr, conv::ActionDirection)
     return ProductRepr(
         map(
             translate,
-            M.manifolds,
+            M.manifold.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+            repeated(conv),
+        )...,
+    )
+end
+function translate(
+    M::ProductGroup,
+    p::ArrayPartition,
+    q::ArrayPartition,
+    conv::ActionDirection,
+)
+    return ArrayPartition(
+        map(
+            translate,
+            M.manifold.manifolds,
             submanifold_components(M, p),
             submanifold_components(M, q),
             repeated(conv),
@@ -144,13 +154,10 @@ function translate(
     )
 end
 
-function translate!(G::ProductGroup, x, p, q, conv::ActionDirection)
-    return translate!(G.manifold, x, p, q, conv)
-end
-function translate!(M::ProductManifold, x, p, q, conv::ActionDirection)
+function translate!(M::ProductGroup, x, p, q, conv::ActionDirection)
     map(
         translate!,
-        M.manifolds,
+        M.manifold.manifolds,
         submanifold_components(M, x),
         submanifold_components(M, p),
         submanifold_components(M, q),
