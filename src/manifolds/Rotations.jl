@@ -8,7 +8,7 @@ real-valued orthogonal matrices with determinant ``+1``.
 
     Rotations(n)
 
-Generate the manifold of ``ℝ^{n × n}`` rotation matrices.
+Generate the manifold of ``n × n`` rotation matrices.
 """
 const Rotations{n} = GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}
 
