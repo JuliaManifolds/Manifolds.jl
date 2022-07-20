@@ -294,7 +294,7 @@ function Base.log(M::ProductGroup, p::Identity{ProductOperation}, q::ProductRepr
         )...,
     )
 end
-function Base.log(M::ProductManifold, p::Identity{ProductOperation}, q::ArrayPartition)
+function Base.log(M::ProductGroup, p::Identity{ProductOperation}, q::ArrayPartition)
     return ArrayPartition(
         map(
             log,
