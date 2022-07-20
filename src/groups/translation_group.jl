@@ -33,13 +33,13 @@ end
     end
 end
 
-exp!(::Euclidean, q, ::Identity{AdditionOperation}, X) = copyto!(q, X)
+exp!(::TranslationGroup, q, ::Identity{AdditionOperation}, X) = copyto!(q, X)
 
 identity_element!(::TranslationGroup, p) = fill!(p, 0)
 
-log(::Euclidean, ::Identity{AdditionOperation}, q) = q
+log(::TranslationGroup, ::Identity{AdditionOperation}, q) = q
 
-function log!(::Euclidean, X, p::Identity{AdditionOperation}, q)
+function log!(::TranslationGroup, X, p::Identity{AdditionOperation}, q)
     copyto!(X, q)
     return X
 end

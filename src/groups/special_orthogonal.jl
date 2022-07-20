@@ -63,15 +63,6 @@ function exp_lie!(::SpecialOrthogonal{3}, q, X)
     return copyto!(q, invq)
 end
 
-function get_vector_orthogonal(
-    ::Rotations{2},
-    p::Identity{MultiplicationOperation},
-    Xⁱ,
-    ::RealNumbers,
-)
-    return @SMatrix [0 -Xⁱ[]; Xⁱ[] 0]
-end
-
 Base.inv(::SpecialOrthogonal, p) = transpose(p)
 Base.inv(::SpecialOrthogonal, e::Identity{MultiplicationOperation}) = e
 
@@ -85,6 +76,10 @@ end
 function inverse_translate_diff!(G::SpecialOrthogonal, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
+
+log(G::SpecialOrthogonal, ::Identity{MultiplicationOperation}, q) = log_lie(G, q)
+
+log!(G::SpecialOrthogonal, X, ::Identity{MultiplicationOperation}, q) = log_lie!(G, X, q)
 
 function log_lie!(::SpecialOrthogonal{2}, X, p)
     @assert size(p) == (2, 2)
