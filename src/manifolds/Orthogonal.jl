@@ -1,5 +1,5 @@
 @doc raw"""
-     OrthogonalMatrices{n} =  GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}
+     OrthogonalMatrices{n} = GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}
 
 The manifold of (real) orthogonal matrices ``\mathrm{O}(n)``.
 

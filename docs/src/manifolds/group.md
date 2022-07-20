@@ -90,7 +90,7 @@ Order = [:type,:function]
 ### (Special) Orthogonal and (Special) Unitary group
 
 Since the orthogonal, unitary and special orthogonal and special unitary groups share
-quite some common functions, these are also implemented on a common level
+many common functions, these are also implemented on a common level.
 
 #### Common functions
 

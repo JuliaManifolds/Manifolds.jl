@@ -12,7 +12,7 @@ T_p\mathrm{U}(x) = \bigl\{ X \in \mathbb C^{n×n} \big| X = pY \text{ where } Y 
 ```
 
 and we represent tangent vectors by just storing the [`SkewHermitianMatrices`](@ref) ``Y``,
-or in other words we reoresent the tangent spaces employing the Lie algebra ``\mathfrak{u}(n)``.
+or in other words we represent the tangent spaces employing the Lie algebra ``\mathfrak{u}(n)``.
 
 # Constructor
 

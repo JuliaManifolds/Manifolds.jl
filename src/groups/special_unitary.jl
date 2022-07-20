@@ -3,14 +3,14 @@
 
 The special unitary group ``\mathrm{SU}(n)`` represented by unitary matrices of determinant +1.
 
-The tangent spaces are if the form
+The tangent spaces are of the form
 
 ```math
 T_p\mathrm{SU}(x) = \bigl\{ X \in \mathbb C^{n×n} \big| X = pY \text{ where } Y = -Y^{\mathrm{H}} \bigr\}
 ```
 
 and we represent tangent vectors by just storing the [`SkewHermitianMatrices`](@ref) ``Y``,
-or in other words we reoresent the tangent spaces employing the Lie algebra ``\mathfrak{su}(n)``.
+or in other words we represent the tangent spaces employing the Lie algebra ``\mathfrak{su}(n)``.
 
 # Constructor
 

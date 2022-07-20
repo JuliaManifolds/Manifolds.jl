@@ -7,7 +7,7 @@ and [`AbsoluteDeterminantOneMatrices`](@ref)
 abstract type AbstractMatrixType end
 
 @doc """
-    SoecialMatrices <: AbstractMatrixType
+    DeterminantOneMatrices <: AbstractMatrixType
 
 A type to indicate that we require special (orthogonal / unitary) matrices, i.e. of determinant 1.
 """
@@ -17,7 +17,7 @@ struct DeterminantOneMatrices <: AbstractMatrixType end
     AbsoluteDeterminantOneMatrices <: AbstractMatrixType
 
 A type to indicate that we require (orthogonal / unitary) matrices with normed determinant,
-i.e. that the absolute value of the determinant is one of determinant 1.
+i.e. that the absolute value of the determinant is 1.
 """
 struct AbsoluteDeterminantOneMatrices <: AbstractMatrixType end
 
@@ -50,7 +50,7 @@ function check_point(
 ) where {n,𝔽}
     if !isapprox(abs(det(p)), 1; kwargs...)
         return DomainError(
-            det(p),
+            abs(det(p)),
             "The absolute value of the determinant of $p has to be 1 but it is $(abs(det(p)))",
         )
     end
@@ -128,8 +128,8 @@ end
     check_vector(M::GeneralUnitaryMatrices{n,𝔽}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`UnitaryMatrices`](@ref)
-space `M`, i.e. after [`check_point`](@ref)`(M,p)`, `X` has to be skew symmetric (hermitian)
-dimension and orthogonal to `p`.
+space `M`, i.e. after [`check_point`](@ref)`(M,p)`, `X` has to be skew symmetric (Hermitian)
+and orthogonal to `p`.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """

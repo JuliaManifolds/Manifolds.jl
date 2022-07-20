@@ -237,7 +237,7 @@ function log_lie!(
     else
         det(q) < 0 && throw(
             DomainError(
-                "The LIe group logarithm is not defined for $q with a negative determinant ($(det(q)) < 0).",
+                "The Lie group logarithm is not defined for $q with a negative determinant ($(det(q)) < 0). Point `q` is in a different connected component of the manifold $G",
             ),
         )
         log_safe!(X, q)
