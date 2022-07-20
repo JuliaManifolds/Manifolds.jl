@@ -204,6 +204,8 @@ function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorMa
     return identity_element!(BG, q)
 end
 
+Base.adjoint(e::Identity) = e
+
 function check_size(
     ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
@@ -320,18 +322,6 @@ end
 
 function Base.show(io::IO, ::Identity{O}) where {O<:AbstractGroupOperation}
     return print(io, "Identity($O)")
-end
-
-function check_point(
-    ::TraitList{<:IsGroupManifold{O1}},
-    G::AbstractDecoratorManifold,
-    e::Identity{O2};
-    kwargs...,
-) where {O1<:AbstractGroupOperation,O2<:AbstractGroupOperation}
-    return DomainError(
-        e,
-        "The Identity $e does not lie on $G, since its the identity with respect to $O2 and not $O1.",
-    )
 end
 
 function is_point(
@@ -541,7 +531,10 @@ function compose!(
     return e
 end
 
-transpose(e::Identity) = e
+Base.transpose(e::Identity) = e
+
+@trait_function hat(M::AbstractDecoratorManifold, e::Identity, X)
+@trait_function hat!(M::AbstractDecoratorManifold, Y, e::Identity, X)
 
 @doc raw"""
     hat(M::AbstractDecoratorManifold{𝔽,O}, ::Identity{O}, Xⁱ) where {𝔽,O<:AbstractGroupOperation}
@@ -559,6 +552,7 @@ vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
 function hat(
+    ::TraitList{IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     ::Identity{O},
     X,
@@ -566,6 +560,7 @@ function hat(
     return get_vector_lie(M, X, VeeOrthogonalBasis())
 end
 function hat!(
+    ::TraitList{IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     Y,
     ::Identity{O},
@@ -576,9 +571,12 @@ end
 function hat(M::AbstractManifold, e::Identity, ::Any)
     return throw(ErrorException("On $M there exsists no identity $e"))
 end
-function hat!(M::AbstractManifold, ::Any, e::Identity, ::Any)
+function hat!(M::AbstractManifold, c, e::Identity, X)
     return throw(ErrorException("On $M there exsists no identity $e"))
 end
+
+@trait_function vee(M::AbstractDecoratorManifold, e::Identity, X)
+@trait_function vee!(M::AbstractDecoratorManifold, Y, e::Identity, X)
 
 @doc raw"""
     vee(M::AbstractManifold, p, X)
@@ -596,6 +594,7 @@ vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
 function vee(
+    ::TraitList{IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     ::Identity{O},
     X,
@@ -603,6 +602,7 @@ function vee(
     return get_coordinates_lie(M, X, VeeOrthogonalBasis())
 end
 function vee!(
+    ::TraitList{IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     Y,
     ::Identity{O},
@@ -610,10 +610,10 @@ function vee!(
 ) where {O<:AbstractGroupOperation}
     return get_coordinates_lie!(M, Y, X, VeeOrthogonalBasis())
 end
-function vee(M::AbstractManifold, e::Identity, ::Any)
+function vee(M::AbstractManifold, e::Identity, X)
     return throw(ErrorException("On $M there exsists no identity $e"))
 end
-function vee!(M::AbstractManifold, ::Any, e::Identity, ::Any)
+function vee!(M::AbstractManifold, c, e::Identity, X)
     return throw(ErrorException("On $M there exsists no identity $e"))
 end
 

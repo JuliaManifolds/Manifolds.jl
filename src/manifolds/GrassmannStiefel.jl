@@ -56,6 +56,8 @@ function distance(::Grassmann, p, q)
     return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
 end
 
+embed(::Grassmann, p) = p
+embed(::Grassmann, p, X) = X
 embed!(::Grassmann, q, p) = copyto!(q, p)
 embed!(::Grassmann, Y, p, X) = copyto!(Y, X)
 embed!(::Grassmann, q, p::StiefelPoint) = copyto!(q, p.value)

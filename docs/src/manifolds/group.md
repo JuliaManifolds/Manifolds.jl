@@ -6,7 +6,7 @@ The common addition and multiplication group operations of [`AdditionOperation`]
 
 There are short introductions at the beginning of each subsection. They briefly mention what is available with links to more detailed descriptions.
 
-#### Contents
+## Contents
 
 ```@contents
 Pages = ["group.md"]
@@ -63,30 +63,6 @@ Pages = ["groups/multiplication_operation.jl"]
 Order = [:type, :function]
 ```
 
-### Product group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/product_group.jl"]
-Order = [:type, :function]
-```
-
-### Semidirect product group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/semidirect_product_group.jl"]
-Order = [:type, :function]
-```
-
-### Power group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/power_group.jl"]
-Order = [:type, :function, :constant]
-```
-
 ### Circle group
 
 ```@autodocs
@@ -103,15 +79,36 @@ Pages = ["groups/general_linear.jl"]
 Order = [:type, :function]
 ```
 
-### Special linear group
+### Heisenberg group
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["groups/special_linear.jl"]
+Pages = ["groups/heisenberg.jl"]
+Order = [:type,:function]
+```
+
+### (Special) Orthogonal and (Special) Unitary group
+
+Since the orthogonal, unitary and special orthogonal and special unitary groups share
+many common functions, these are also implemented on a common level.
+
+#### Common functions
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/general_unitary_groups.jl"]
 Order = [:type, :function]
 ```
 
-### Special orthogonal group
+#### Orthogonal group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/orthogonal.jl"]
+Order = [:type, :function]
+```
+
+#### Special orthogonal group
 
 ```@autodocs
 Modules = [Manifolds]
@@ -119,11 +116,43 @@ Pages = ["groups/special_orthogonal.jl"]
 Order = [:type, :function]
 ```
 
-### Translation group
+#### Special unitary group
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["groups/translation_group.jl"]
+Pages = ["groups/special_unitary.jl"]
+Order = [:type, :function]
+```
+
+#### Unitary group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/unitary.jl"]
+Order = [:type, :function]
+```
+
+### Power group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/power_group.jl"]
+Order = [:type, :function, :constant]
+```
+
+### Product group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/product_group.jl"]
+Order = [:type, :function]
+```
+
+### Semidirect product group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/semidirect_product_group.jl"]
 Order = [:type, :function]
 ```
 
@@ -135,12 +164,20 @@ Pages = ["groups/special_euclidean.jl"]
 Order = [:type, :function]
 ```
 
-### Heisenberg group
+### Special linear group
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["groups/heisenberg.jl"]
-Order = [:type,:function]
+Pages = ["groups/special_linear.jl"]
+Order = [:type, :function]
+```
+
+### Translation group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/translation_group.jl"]
+Order = [:type, :function]
 ```
 
 ## Group actions

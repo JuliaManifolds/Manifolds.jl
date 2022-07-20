@@ -83,28 +83,9 @@ function compose!(::AdditionGroupTrait, G::AbstractDecoratorManifold, x, p, q)
     return x
 end
 
-function translate_diff(
-    ::AdditionGroupTrait,
-    G::AbstractDecoratorManifold,
-    p,
-    q,
-    X,
-    ::ActionDirection,
-)
-    return X
-end
+exp_lie(::AdditionGroupTrait, G::AbstractDecoratorManifold, X) = X
 
-function translate_diff!(
-    ::AdditionGroupTrait,
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    q,
-    X,
-    ::ActionDirection,
-)
-    return copyto!(G, Y, p, X)
-end
+exp_lie!(::AdditionGroupTrait, G::AbstractDecoratorManifold, q, X) = copyto!(G, q, X)
 
 function inverse_translate_diff(
     ::AdditionGroupTrait,
@@ -129,10 +110,6 @@ function inverse_translate_diff!(
     return copyto!(G, Y, p, X)
 end
 
-exp_lie(::AdditionGroupTrait, G::AbstractDecoratorManifold, X) = X
-
-exp_lie!(::AdditionGroupTrait, G::AbstractDecoratorManifold, q, X) = copyto!(G, q, X)
-
 log_lie(::AdditionGroupTrait, G::AbstractDecoratorManifold, q) = q
 function log_lie(
     ::AdditionGroupTrait,
@@ -154,3 +131,26 @@ end
 lie_bracket(::AdditionGroupTrait, G::AbstractDecoratorManifold, X, Y) = zero(X)
 
 lie_bracket!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Z, X, Y) = fill!(Z, 0)
+
+function translate_diff(
+    ::AdditionGroupTrait,
+    G::AbstractDecoratorManifold,
+    p,
+    q,
+    X,
+    ::ActionDirection,
+)
+    return X
+end
+
+function translate_diff!(
+    ::AdditionGroupTrait,
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    q,
+    X,
+    ::ActionDirection,
+)
+    return copyto!(G, Y, p, X)
+end
