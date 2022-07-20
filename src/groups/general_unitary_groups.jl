@@ -48,7 +48,7 @@ decorated_manifold(G::GeneralUnitaryMultiplicationGroup) = G.manifold
      exp_lie(G::Orthogonal{2}, X)
      exp_lie(G::SpecialOrthogonal{2}, X)
 
-Compute the Lie group exponential map on the [`Orthogonal(2)`] group.
+Compute the Lie group exponential map on the [`Orthogonal`](@ref)`(2)` or [`SpecialOrthogonal`](@ref)`(2)` group.
 Given ``X = \begin{pmatrix} 0 & -θ \\ θ & 0 \end{pmatrix}``, the group exponential is
 
 ```math
