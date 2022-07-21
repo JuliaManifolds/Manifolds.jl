@@ -23,7 +23,7 @@ include("utils.jl")
         include_test("groups/general_linear.jl")
         include_test("groups/special_linear.jl")
     end
-    if TEST_GROUP != "test_on_normal_compiler"
+    if TEST_GROUP != "test_on_default_compiler"
         @info "Changing Compiler Options to -O0 --compile=min"
         @nospecialize
         if isdefined(Base, :Experimental) &&
