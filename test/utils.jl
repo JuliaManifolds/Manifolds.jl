@@ -20,7 +20,7 @@ using Test
 using Graphs
 using SimpleWeightedGraphs
 
-function include_test(path)
+function include_test(path::String)
     @info "Testing $path"
     @time include(path)  # show basic timing, (this will print a newline at end)
 end

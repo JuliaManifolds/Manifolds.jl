@@ -10,9 +10,30 @@ include("utils.jl")
 @testset "Manifolds.jl" begin
     if TEST_GROUP ∈ ["all", "test_manifolds"]
         include_test("differentiation.jl")
-
         include_test("ambiguities.jl")
-
+    end
+    if TEST_GROUP ∈ ["all", "test_on_default_compiler"]
+        @info "\n Manifold Tests I\n"
+        include_test("manifolds/hyperbolic.jl")
+        include_test("manifolds/tucker.jl")
+        include_test("manifolds/power_manifold.jl")
+        include_test("metric.jl")
+        include_test("statistics.jl")
+        include_test("approx_inverse_retraction.jl")
+        include_test("groups/general_linear.jl")
+        include_test("groups/special_linear.jl")
+    end
+    if TEST_GROUP != "test_on_normal_compiler"
+        @info "Changing Compiler Options to -O2 --compile=min"
+        @nospecialize
+        if isdefined(Base, :Experimental) &&
+           isdefined(Base.Experimental, Symbol("@compiler_options"))
+            @eval Base.Experimental.@compiler_options compile = min optimize = 0 infer = no
+        end
+    end
+    if TEST_GROUP ∈ ["all", "test_manifolds"]
+        @info "\n Manifold Tests II\n"
+        @nospecialize
         @testset "utils test" begin
             Random.seed!(42)
             @testset "usinc_from_cos" begin
@@ -126,7 +147,6 @@ include("utils.jl")
         include_test("manifolds/generalized_grassmann.jl")
         include_test("manifolds/generalized_stiefel.jl")
         include_test("manifolds/grassmann.jl")
-        include_test("manifolds/hyperbolic.jl")
         include_test("manifolds/lorentz.jl")
         include_test("manifolds/multinomial_doubly_stochastic.jl")
         include_test("manifolds/multinomial_symmetric.jl")
@@ -144,7 +164,6 @@ include("utils.jl")
         include_test("manifolds/symmetric_positive_semidefinite_fixed_rank.jl")
         include_test("manifolds/symplectic.jl")
         include_test("manifolds/symplecticstiefel.jl")
-        include_test("manifolds/tucker.jl")
         include_test("manifolds/unitary_matrices.jl")
 
         include_test("manifolds/essential_manifold.jl")
@@ -154,7 +173,6 @@ include("utils.jl")
 
         #meta manifolds
         include_test("manifolds/product_manifold.jl")
-        include_test("manifolds/power_manifold.jl")
         include_test("manifolds/quotient_manifold.jl")
         include_test("manifolds/vector_bundle.jl")
         include_test("manifolds/graph.jl")
@@ -165,14 +183,14 @@ include("utils.jl")
     end
 
     if TEST_GROUP ∈ ["test_lie_groups", "all"]
+        @info "\nLie Group Tests\n"
+        @nospecialize
         # Lie groups and actions
         include_test("groups/groups_general.jl")
         include_test("groups/validation_group.jl")
         include_test("groups/circle_group.jl")
         include_test("groups/translation_group.jl")
-        include_test("groups/general_linear.jl")
         include_test("groups/general_unitary_groups.jl")
-        include_test("groups/special_linear.jl")
         include_test("groups/special_orthogonal.jl")
         include_test("groups/heisenberg.jl")
         include_test("groups/product_group.jl")
