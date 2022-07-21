@@ -60,7 +60,7 @@ end
         true,
     )
 
-    @test is_point(M, [p;;])
+    @test is_point(M, fill(p, 1, 1))
     @test is_point(M, p)
 
     @test_throws DomainError is_vector(M, p, zeros(2, 2), true)

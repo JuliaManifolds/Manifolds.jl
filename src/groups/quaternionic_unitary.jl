@@ -34,19 +34,21 @@ function exp_lie(::QuaternionicUnitary{1}, X::Number)
 end
 
 function exp_lie!(::QuaternionicUnitary{1}, q, X)
-    q[1] = exp(X[1])
+    q[] = exp(X[])
     return q
 end
+
+identity_element(::QuaternionicUnitary{1}) = Quaternion(1.0)
+
+Base.inv(::QuaternionicUnitary, p) = adjoint(p)
 
 function log_lie(::QuaternionicUnitary{1}, q::Number)
     return log(q)
 end
 
 function log_lie!(::QuaternionicUnitary{1}, X, p)
-    X[1] = log(p[1])
+    X[] = log(p[])
     return X
 end
-
-Base.inv(::QuaternionicUnitary, p) = adjoint(p)
 
 show(io::IO, ::QuaternionicUnitary{n}) where {n} = print(io, "QuaternionicUnitary($(n))")
