@@ -1,13 +1,11 @@
 include("utils.jl")
 
-TEST_GROUP = get(ENV, "MANIFOLDS_TEST_GROUP", "all")
-
 @info "Manifolds.jl Test settings:\n\n" *
       "Testing Float32:  $(TEST_FLOAT32)\n" *
       "Testing Double64: $(TEST_DOUBLE64)\n" *
       "Testing Static:   $(TEST_STATIC_SIZED)\n\n" *
       "Test group:       $(TEST_GROUP)\n\n" *
-      "Check test/utils.jl if you wish to change these settings."
+      "These settings are stored in environment variables, see in test/utils.jl"
 
 @testset "Manifolds.jl" begin
     if TEST_GROUP ∈ ["all", "test_manifolds"]
@@ -147,6 +145,7 @@ TEST_GROUP = get(ENV, "MANIFOLDS_TEST_GROUP", "all")
         include_test("manifolds/symplectic.jl")
         include_test("manifolds/symplecticstiefel.jl")
         include_test("manifolds/tucker.jl")
+        include_test("manifolds/unitary_matrices.jl")
 
         include_test("manifolds/essential_manifold.jl")
         include_test("manifolds/multinomial_matrices.jl")
@@ -172,6 +171,7 @@ TEST_GROUP = get(ENV, "MANIFOLDS_TEST_GROUP", "all")
         include_test("groups/circle_group.jl")
         include_test("groups/translation_group.jl")
         include_test("groups/general_linear.jl")
+        include_test("groups/general_unitary_groups.jl")
         include_test("groups/special_linear.jl")
         include_test("groups/special_orthogonal.jl")
         include_test("groups/heisenberg.jl")

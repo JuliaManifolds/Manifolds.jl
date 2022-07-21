@@ -150,6 +150,7 @@ import Base:
     isempty,
     length,
     ndims,
+    show,
     showerror,
     size,
     transpose
@@ -330,7 +331,6 @@ include("manifolds/MultinomialSymmetric.jl")
 include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
-include("manifolds/Rotations.jl")
 include("manifolds/SkewHermitian.jl")
 include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
@@ -346,9 +346,14 @@ include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
-include("manifolds/Tucker.jl")
 include("manifolds/Symplectic.jl")
 include("manifolds/SymplecticStiefel.jl")
+include("manifolds/Tucker.jl")
+#
+include("manifolds/GeneralUnitaryMatrices.jl")
+include("manifolds/Unitary.jl")
+include("manifolds/Rotations.jl")
+include("manifolds/Orthogonal.jl")
 
 # Introduce the quotient, Grassmann, only after Stiefel
 include("manifolds/Grassmann.jl")
@@ -375,10 +380,15 @@ include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 include("groups/power_group.jl")
 
+# generic group - commopn (special) unitary/orthogonal functions
+include("groups/general_unitary_groups.jl")
 # Special Group Manifolds
 include("groups/general_linear.jl")
 include("groups/special_linear.jl")
 include("groups/translation_group.jl")
+include("groups/unitary.jl")
+include("groups/orthogonal.jl")
+include("groups/special_unitary.jl")
 include("groups/special_orthogonal.jl")
 include("groups/circle_group.jl")
 include("groups/heisenberg.jl")
@@ -472,6 +482,7 @@ export Euclidean,
     MultinomialMatrices,
     MultinomialSymmetric,
     Oblique,
+    OrthogonalMatrices,
     PositiveArrays,
     PositiveMatrices,
     PositiveNumbers,
@@ -492,7 +503,8 @@ export Euclidean,
     SymplecticStiefel,
     SymplecticMatrix,
     Torus,
-    Tucker
+    Tucker,
+    UnitaryMatrices
 # Point representation types
 export HyperboloidPoint,
     PoincareBallPoint,
@@ -737,6 +749,7 @@ export AbstractGroupAction,
     LeftAction,
     LeftInvariantMetric,
     MultiplicationOperation,
+    Orthogonal,
     PowerGroup,
     ProductGroup,
     ProductOperation,
@@ -748,8 +761,10 @@ export AbstractGroupAction,
     SpecialEuclidean,
     SpecialLinear,
     SpecialOrthogonal,
+    SpecialUnitary,
     TranslationGroup,
-    TranslationAction
+    TranslationAction,
+    Unitary
 export AbstractInvarianceTrait
 export IsMetricManifold, IsConnectionManifold
 export IsGroupManifold,

@@ -83,7 +83,7 @@ function is_vector(
     if cbp
         ie = is_identity(G, e; kwargs...)
         (te && !ie) && throw(DomainError(e, "The provided identity is not a point on $G."))
-        (!te) && return ie
+        (!te && !ie) && return false
     end
     return is_vector(G.manifold, identity_element(G), X, te, false; kwargs...)
 end

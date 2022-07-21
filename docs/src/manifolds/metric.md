@@ -39,7 +39,7 @@ Introducing a default [`AbstractMetric`](@ref) serves a better readability of th
 
 ## Implementation of Metrics
 
-For the case that a [`local_metric`](@ref) is implemented as a bilinear form that is positive definite, the following further functions are provided, unless the corresponding [`AbstractMetric`](@ref) is marked as default – then the fallbacks mentioned in the last section are used for e.g. the [`exp!`](@ref)onential map.
+For the case that a [`local_metric`](@ref) is implemented as a bilinear form that is positive definite, the following further functions are provided, unless the corresponding [`AbstractMetric`](@ref) is marked as default – then the fallbacks mentioned in the last section are used for e.g. the exponential map.
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]

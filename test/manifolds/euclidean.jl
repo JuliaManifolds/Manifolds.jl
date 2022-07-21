@@ -112,11 +112,11 @@ using Manifolds: induced_basis
                     point_distributions=[
                         Manifolds.projected_distribution(
                             M,
-                            Distributions.MvNormal(zero(pts[1]), 1.0),
+                            Distributions.MvNormal(zero(pts[1]), 1.0 * I),
                         ),
                     ],
                     tvector_distributions=[
-                        Manifolds.normal_tvector_distribution(M, pts[1], 1.0),
+                        Manifolds.normal_tvector_distribution(M, pts[1], 1.0 * I),
                     ],
                     basis_types_vecs=basis_types,
                     basis_types_to_from=basis_types,

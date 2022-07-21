@@ -244,7 +244,7 @@ function LinearAlgebra.norm(
     return norm(next_trait(t), M, identity_element(M), X)
 end
 
-function translate_diff!(
+function translate_diff(
     ::TraitList{IsMetricManifold},
     M::MetricManifold,
     p,

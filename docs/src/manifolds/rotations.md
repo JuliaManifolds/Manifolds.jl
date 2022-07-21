@@ -28,6 +28,8 @@ The tangent space at rotation $R$, $T_R \mathrm{SO}(n)$, is related to the tange
 To convert the tangent vector representation at the identity rotation $X ∈ T_{I_n} \mathrm{SO}(n)$ (i.e., the default) to the matrix representation of the corresponding tangent vector $Y$ at a rotation $R$ use the [`embed`](@ref embed(::Manifolds.Rotations, :Any...)) which implements the following multiplication: $Y = RX ∈ T_R \mathrm{SO}(n)$.
 You can compare the functions [`log`](@ref log(::Manifolds.Rotations, :Any...)) and [`exp`](@ref exp(::Manifolds.Rotations, ::Any...)) to see how it works in practice.
 
+Several common functions are also implemented together with [orthogonal and unitary matrices}(@ref generalunitarymatrices).
+
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/Rotations.jl"]

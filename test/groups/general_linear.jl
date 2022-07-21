@@ -29,6 +29,8 @@ using NLsolve
         @test is_identity(G, q)
         @test isapprox(G, q, Identity(G))
         @test isapprox(G, Identity(G), q)
+        @test apply(GroupOperationAction(G), q, q) == q
+        @test inverse_apply(GroupOperationAction(G), q, q) == q
     end
 
     @testset "GL(1,𝔽) special cases" begin
