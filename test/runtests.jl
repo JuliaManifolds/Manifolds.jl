@@ -24,11 +24,11 @@ include("utils.jl")
         include_test("groups/special_linear.jl")
     end
     if TEST_GROUP != "test_on_normal_compiler"
-        @info "Changing Compiler Options to -O2 --compile=min"
+        @info "Changing Compiler Options to -O0 --compile=min"
         @nospecialize
         if isdefined(Base, :Experimental) &&
            isdefined(Base.Experimental, Symbol("@compiler_options"))
-            @eval Base.Experimental.@compiler_options compile = min optimize = 0 infer = no
+            @eval Base.Experimental.@compiler_options compile = min optimize = 0
         end
     end
     if TEST_GROUP ∈ ["all", "test_manifolds"]
