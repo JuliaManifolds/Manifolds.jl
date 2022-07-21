@@ -177,8 +177,6 @@ include("utils.jl")
         include_test("manifolds/vector_bundle.jl")
         include_test("manifolds/graph.jl")
 
-        include_test("metric.jl")
-        include_test("statistics.jl")
         include_test("approx_inverse_retraction.jl")
     end
 
