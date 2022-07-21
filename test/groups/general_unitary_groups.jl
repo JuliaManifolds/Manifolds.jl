@@ -43,8 +43,8 @@ include("group_utils.jl")
     end
 
     @testset "Quaternionic Unitary Group" begin
-        QU1 = QuaternionicUnitary(1)
-        @test repr(QU1) == "QuaternionicUnitary(1)"
+        QU1 = Unitary(1, ℍ)
+        @test repr(QU1) == "Unitary(1, ℍ)"
 
         @test identity_element(QU1) === Quaternion(1.0)
 

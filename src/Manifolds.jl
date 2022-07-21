@@ -355,7 +355,6 @@ include("manifolds/GeneralUnitaryMatrices.jl")
 include("manifolds/Unitary.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/Orthogonal.jl")
-include("manifolds/QuaternionicUnitary.jl")
 
 # Introduce the quotient, Grassmann, only after Stiefel
 include("manifolds/Grassmann.jl")
@@ -390,7 +389,6 @@ include("groups/special_linear.jl")
 include("groups/translation_group.jl")
 include("groups/unitary.jl")
 include("groups/orthogonal.jl")
-include("groups/quaternionic_unitary.jl")
 include("groups/special_unitary.jl")
 include("groups/special_orthogonal.jl")
 include("groups/circle_group.jl")
@@ -492,7 +490,6 @@ export Euclidean,
     PositiveVectors,
     ProbabilitySimplex,
     ProjectiveSpace,
-    QuaternionicUnitaryMatrices,
     Rotations,
     SkewHermitianMatrices,
     SkewSymmetricMatrices,
@@ -757,7 +754,6 @@ export AbstractGroupAction,
     PowerGroup,
     ProductGroup,
     ProductOperation,
-    QuaternionicUnitary,
     RealCircleGroup,
     RightAction,
     RightInvariantMetric,

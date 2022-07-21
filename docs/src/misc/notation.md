@@ -27,7 +27,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\gamma`` | a geodesic | ``\gamma_{p;q}``, ``\gamma_{p,X}`` | connecting two points ``p,q`` or starting in ``p`` with velocity ``X``. |
 | ``∇ f(p)`` | gradient of function ``f \colon \mathcal{M} \to \mathbb{R}`` at ``p \in \mathcal{M}`` | | |
 | ``\circ`` | a group operation | |
-| ``\cdot^\mathrm{H}`` | Hermitian or conjugate transposed| |
+| ``\cdot^\mathrm{H}`` | Hermitian, quaternionic or conjugate transposed| |
 | ``e`` | identity element of a group | |
 | ``I_k`` | identity matrix of size ``k\times k`` | |
 | ``k`` | indices | ``i,j`` | |
