@@ -42,6 +42,27 @@ include("group_utils.jl")
         end
     end
 
+    @testset "Quaternionic Unitary Group" begin
+        QU1 = QuaternionicUnitary(1)
+        @test repr(QU1) == "QuaternionicUnitary(1)"
+
+        p = QuaternionF64(
+            0.4815296357756736,
+            0.6041613272484806,
+            -0.2322369798903669,
+            0.5909181717450419,
+            true,
+        )
+        X = Quaternion(0.0, 0, 0, 1)
+        q = exp(QU1, p, X)
+        X2 = log(QU1, p, q)
+        @test isapprox(QU1, p, X, X2)
+        q2 = exp_lie(QU1, X)
+        X3 = log_lie(QU1, q2)
+        @test isapprox(QU1, p, X, X3)
+        @test inv(QU1, p) == conj(p)
+    end
+
     @testset "Special Unitary Group" begin
         SU2 = SpecialUnitary(2)
         @test repr(SU2) == "SpecialUnitary(2)"

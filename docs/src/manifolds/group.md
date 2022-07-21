@@ -40,7 +40,7 @@ As a concrete wrapper for manifolds (e.g. when the manifold per se is a group ma
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/GroupManifold.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 ### Generic Operations
@@ -52,7 +52,7 @@ For groups based on an addition operation or a group operation, several default 
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/addition_operation.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 #### Multiplication Operation
@@ -60,7 +60,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/multiplication_operation.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 ### Circle group
@@ -68,7 +68,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/circle_group.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 ### General linear group
@@ -76,7 +76,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/general_linear.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 ### Heisenberg group
@@ -84,7 +84,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/heisenberg.jl"]
-Order = [:type,:function]
+Order = [:type,:function, :constant]
 ```
 
 ### (Special) Orthogonal and (Special) Unitary group
@@ -97,7 +97,7 @@ many common functions, these are also implemented on a common level.
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/general_unitary_groups.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 #### Orthogonal group
@@ -105,7 +105,15 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/orthogonal.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
+```
+
+#### Quaternionic unitary group
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/quaternionic_unitary.jl"]
+Order = [:type, :function, :constant]
 ```
 
 #### Special orthogonal group
@@ -113,7 +121,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/special_orthogonal.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 #### Special unitary group
@@ -121,7 +129,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/special_unitary.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 #### Unitary group
@@ -129,7 +137,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/unitary.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 ### Power group
@@ -145,7 +153,7 @@ Order = [:type, :function, :constant]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/product_group.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 ### Semidirect product group
@@ -153,7 +161,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/semidirect_product_group.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 ### Special Euclidean group
@@ -161,7 +169,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/special_euclidean.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 ### Special linear group
@@ -169,7 +177,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/special_linear.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 ### Translation group
@@ -177,7 +185,7 @@ Order = [:type, :function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["groups/translation_group.jl"]
-Order = [:type, :function]
+Order = [:type, :function, :constant]
 ```
 
 ## Group actions

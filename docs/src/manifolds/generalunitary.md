@@ -18,6 +18,14 @@ Pages = ["manifolds/Unitary.jl"]
 Order = [:type, :function]
 ```
 
+## Quaternionic Unitary Matrices
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/QuaternionicUnitary.jl"]
+Order = [:type, :function]
+```
+
 ## [Common functions](@id generalunitarymatrices)
 
 ```@autodocs

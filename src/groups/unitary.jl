@@ -1,5 +1,5 @@
 @doc raw"""
-     Unitary{n,𝔽} = GeneralUnitaryMultiplicationGroup{n,ℂ,AbsoluteDeterminantOneMatrices}
+     Unitary{n} = GeneralUnitaryMultiplicationGroup{n,ℂ,AbsoluteDeterminantOneMatrices}
 
 The group of unitary matrices ``\mathrm{U}(n)``.
 
@@ -8,7 +8,7 @@ The group consists of all points ``p ∈ \mathbb C^{n × n}`` where ``p^\mathrm{
 The tangent spaces are if the form
 
 ```math
-T_p\mathrm{U}(x) = \bigl\{ X \in \mathbb C^{n×n} \big| X = pY \text{ where } Y = -Y^{\mathrm{H}} \bigr\}
+T_p\mathrm{U}(n) = \bigl\{ X \in \mathbb C^{n×n} \big| X = pY \text{ where } Y = -Y^{\mathrm{H}} \bigr\}
 ```
 
 and we represent tangent vectors by just storing the [`SkewHermitianMatrices`](@ref) ``Y``,
