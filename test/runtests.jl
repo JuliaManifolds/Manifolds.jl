@@ -22,17 +22,13 @@ include("utils.jl")
         include_test("groups/general_linear.jl")
         include_test("groups/special_linear.jl")
     end
-    if TEST_GROUP != "test_on_default_compiler"
-        @info "Changing Compiler Options to -O0 --compile=min"
+    if TEST_GROUP ∈ ["all", "test_manifolds"]
+        @info "\n Manifold Tests II\n"
         @nospecialize
         if isdefined(Base, :Experimental) &&
            isdefined(Base.Experimental, Symbol("@compiler_options"))
             @eval Base.Experimental.@compiler_options compile = min optimize = 0
         end
-    end
-    if TEST_GROUP ∈ ["all", "test_manifolds"]
-        @info "\n Manifold Tests II\n"
-        @nospecialize
         @testset "utils test" begin
             Random.seed!(42)
             @testset "usinc_from_cos" begin
@@ -183,6 +179,10 @@ include("utils.jl")
     if TEST_GROUP ∈ ["test_lie_groups", "all"]
         @info "\nLie Group Tests\n"
         @nospecialize
+        if isdefined(Base, :Experimental) &&
+           isdefined(Base.Experimental, Symbol("@compiler_options"))
+            @eval Base.Experimental.@compiler_options compile = min optimize = 0
+        end
         # Lie groups and actions
         include_test("groups/groups_general.jl")
         include_test("groups/validation_group.jl")
