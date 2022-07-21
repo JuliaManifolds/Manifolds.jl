@@ -15,6 +15,8 @@ T_p\mathrm{U}(n) = \bigl\{ X \in 𝔽^{n×n} \big| X = pY \text{ where } Y = -Y^
 and we represent tangent vectors by just storing the [`SkewHermitianMatrices`](@ref) ``Y``,
 or in other words we represent the tangent spaces employing the Lie algebra ``\mathfrak{u}(n, 𝔽)``.
 
+Quaternionic unitary group is isomorphic to the compact symplectic group of the same dimension.
+
 # Constructor
 
     Unitary(n, 𝔽::AbstractNumbers=ℂ)
