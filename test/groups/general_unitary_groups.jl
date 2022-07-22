@@ -70,6 +70,10 @@ include("group_utils.jl")
         log_lie!(QU1, X4, q2)
         @test isapprox(QU1, identity_element(QU1), X3, X4[])
 
+        X5 = fill(Quaternion(0.0), 1, 1)
+        log_lie!(QU1, X5, fill(q2, 1, 1))
+        @test isapprox(QU1, identity_element(QU1), X3, X5[])
+
         @test inv(QU1, p) == conj(p)
 
         @test project(QU1, p, Quaternion(1.0, 2.0, 3.0, 4.0)) ===

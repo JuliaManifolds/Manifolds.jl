@@ -79,6 +79,10 @@ function log_lie!(::Unitary{1}, X, p)
     X[] = log(p[])
     return X
 end
+function log_lie!(::Unitary{1}, X::AbstractMatrix, p::AbstractMatrix)
+    X[] = log(p[])
+    return X
+end
 function log_lie!(G::Unitary, X, p)
     log_safe!(X, p)
     project!(G, X, Identity(G), X)
