@@ -108,14 +108,6 @@ Pages = ["groups/orthogonal.jl"]
 Order = [:type, :function, :constant]
 ```
 
-#### Quaternionic unitary group
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["groups/quaternionic_unitary.jl"]
-Order = [:type, :function, :constant]
-```
-
 #### Special orthogonal group
 
 ```@autodocs

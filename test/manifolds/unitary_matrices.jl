@@ -43,8 +43,8 @@ end
 end
 
 @testset "Quaternionic Unitary Matrices" begin
-    M = QuaternionicUnitaryMatrices(1)
-    @test repr(M) == "QuaternionicUnitaryMatrices(1)"
+    M = UnitaryMatrices(1, ℍ)
+    @test repr(M) == "UnitaryMatrices(1, ℍ)"
 
     # wrong length of size
     @test_throws DomainError is_point(M, zeros(2, 2), true)
