@@ -33,7 +33,16 @@ end
     end
 end
 
+exp!(::TranslationGroup, q, ::Identity{AdditionOperation}, X) = copyto!(q, X)
+
 identity_element!(::TranslationGroup, p) = fill!(p, 0)
+
+log(::TranslationGroup, ::Identity{AdditionOperation}, q) = q
+
+function log!(::TranslationGroup, X, p::Identity{AdditionOperation}, q)
+    copyto!(X, q)
+    return X
+end
 
 function Base.show(io::IO, ::TranslationGroup{N,𝔽}) where {N,𝔽}
     return print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(𝔽))")

@@ -92,6 +92,10 @@ for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
     end
 end
 
+function allocate_result(M::PowerManifoldNestedReplacing, f, ::Identity, x...)
+    return allocate_result(M, f, x...)
+end
+
 """
     change_representer(M::AbstractPowerManifold, ::AbstractMetric, p, X)
 
