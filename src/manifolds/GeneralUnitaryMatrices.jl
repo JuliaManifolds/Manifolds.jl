@@ -170,6 +170,8 @@ function default_estimation_method(
     return GeodesicInterpolationWithinRadius(π / 2 / √2)
 end
 
+embed(::GeneralUnitaryMatrices, p) = p
+
 @doc raw"""
     embed(M::GeneralUnitaryMatrices{n,𝔽}, p, X)
 

@@ -259,6 +259,7 @@ using ManifoldsBase:
     trait
 using Markdown: @doc_str
 using MatrixEquations: lyapc
+using Quaternions
 using Random
 using RecipesBase
 using RecipesBase: @recipe, @series
