@@ -129,3 +129,60 @@ end
 function inverse_apply(A::RotationAroundAxisAction, θ, p)
     return apply(A, -θ, p)
 end
+
+###
+
+@doc raw"""
+    MatrixColumnwiseMultiplicationAction(
+        M::AbstractManifold,
+        On::GeneralUnitaryMultiplicationGroup,
+        AD::ActionDirection = LeftAction(),
+    )
+
+Space of actions of the (special) unitary or orthogonal group [`GeneralUnitaryMultiplicationGroup`](@ref)
+of type `On` columns of points on a matrix manifold `M`.
+"""
+struct MatrixColumnwiseMultiplicationAction{
+    TM<:AbstractManifold,
+    TO<:GeneralUnitaryMultiplicationGroup,
+    TAD<:ActionDirection,
+} <: AbstractGroupAction{TAD}
+    manifold::TM
+    On::TO
+end
+
+function MatrixColumnwiseMultiplicationAction(
+    M::AbstractManifold,
+    On::GeneralUnitaryMultiplicationGroup,
+    ::TAD=LeftAction(),
+) where {TAD<:ActionDirection}
+    return MatrixColumnwiseMultiplicationAction{typeof(M),typeof(On),TAD}(M, On)
+end
+
+const LeftMatrixColumnwiseMultiplicationAction{
+    TM<:AbstractManifold,
+    TO<:GeneralUnitaryMultiplicationGroup,
+} = MatrixColumnwiseMultiplicationAction{TM,TO,LeftAction}
+
+function apply(::LeftMatrixColumnwiseMultiplicationAction, a, p)
+    return (a * p')'
+end
+function apply(
+    ::LeftMatrixColumnwiseMultiplicationAction,
+    ::Identity{MultiplicationOperation},
+    p,
+)
+    return p
+end
+
+function apply!(::LeftMatrixColumnwiseMultiplicationAction, q, a, p)
+    return map(qcol, pcol -> mul!(qcol, a, pcol), eachcol(q), eachcol(p))
+end
+
+base_group(A::MatrixColumnwiseMultiplicationAction) = A.On
+
+group_manifold(A::MatrixColumnwiseMultiplicationAction) = A.manifold
+
+function inverse_apply(::LeftMatrixColumnwiseMultiplicationAction, a, p)
+    return (a \ p')'
+end
