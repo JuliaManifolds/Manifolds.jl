@@ -11,6 +11,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         group:
+          - 'test_on_default_compiler'
           - 'test_manifolds'
           - 'test_lie_groups'
     steps:
@@ -24,3 +25,9 @@ jobs:
         env:
           PYTHON: ""
           MANIFOLDS_TEST_GROUP: ${{ matrix.group }}
+        if: ${{ matrix.group == 'test_on_default_compiler' }}
+      - run: julia --color=yes --depwarn=yes -O0 --compile=min --inline=yes --project='@.' -e 'import Pkg; ENV["MANIFOLDS_TEST_GROUP"]="${{ matrix.group}}"; Pkg.test(;coverage = true, julia_args = ["--check-bounds=yes"])'
+        shell: bash
+        env:
+          PYTHON: ""
+        if: ${{ matrix.group != 'test_on_default_compiler' }}
