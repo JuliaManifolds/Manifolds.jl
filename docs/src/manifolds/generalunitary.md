@@ -7,7 +7,7 @@ Both [`OrthogonalMatrices`](@ref) and [`UnitaryMatrices`](@ref) are quite simila
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/Orthogonal.jl"]
-Order = [:type, :function, :constant]
+Order = [:constant, :type, :function]
 ```
 
 ## Unitary Matrices
@@ -15,7 +15,7 @@ Order = [:type, :function, :constant]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/Unitary.jl"]
-Order = [:type, :function, :constant]
+Order = [:constant, :type, :function]
 ```
 
 
@@ -24,5 +24,5 @@ Order = [:type, :function, :constant]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/GeneralUnitaryMatrices.jl"]
-Order = [:type, :function, :constant]
+Order = [:constant, :type, :function]
 ```
