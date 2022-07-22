@@ -128,4 +128,7 @@ end
         ],
     )
     @test apply(A, Identity(G), p) === p
+    q = similar(p)
+    apply!(A, q, a, p)
+    @test isapprox(q, apply(A, a, p))
 end

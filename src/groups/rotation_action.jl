@@ -176,7 +176,7 @@ function apply(
 end
 
 function apply!(::LeftMatrixColumnwiseMultiplicationAction, q, a, p)
-    return map(qcol, pcol -> mul!(qcol, a, pcol), eachcol(q), eachcol(p))
+    return map((qrow, prow) -> mul!(qrow, a, prow), eachrow(q), eachrow(p))
 end
 
 base_group(A::MatrixColumnwiseMultiplicationAction) = A.On
