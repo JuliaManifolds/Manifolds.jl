@@ -174,6 +174,19 @@ function inverse_translate_diff!(
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
+function log(G::GeneralUnitaryMultiplicationGroup, ::Identity{MultiplicationOperation}, q)
+    return log_lie(G, q)
+end
+
+function log!(
+    G::GeneralUnitaryMultiplicationGroup,
+    X,
+    ::Identity{MultiplicationOperation},
+    q,
+)
+    return log_lie!(G, X, q)
+end
+
 function log_lie!(
     G::GeneralUnitaryMultiplicationGroup{n,ℝ},
     X::AbstractMatrix,

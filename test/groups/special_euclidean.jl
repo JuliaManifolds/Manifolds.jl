@@ -85,6 +85,9 @@ Random.seed!(10)
                 test_diff=true,
                 test_lie_bracket=true,
                 test_adjoint_action=true,
+                test_exp_from_identity=true,
+                test_log_from_identity=true,
+                test_vee_hat_from_identity=true,
                 diff_convs=[(), (LeftAction(),), (RightAction(),)],
             )
             test_manifold(

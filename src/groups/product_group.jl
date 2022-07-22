@@ -90,6 +90,10 @@ function submanifold_components(
     return map(N -> Identity(N), M.manifolds)
 end
 
+function submanifold_components(M::ProductGroup, ::Identity{ProductOperation})
+    return map(N -> Identity(N), M.manifold.manifolds)
+end
+
 inv!(G::ProductGroup, q, ::Identity{ProductOperation}) = identity_element!(G, q)
 function inv!(G::ProductGroup, q, p)
     M = G.manifold
@@ -122,17 +126,27 @@ function _compose!(M::ProductManifold, x, p, q)
     return x
 end
 
-translate(G::ProductGroup, p, q, conv::ActionDirection) = translate(G.manifold, p, q, conv)
-function translate(
-    M::ProductManifold,
-    p::ProductRepr,
-    q::ProductRepr,
-    conv::ActionDirection,
-)
+function translate(M::ProductGroup, p::ProductRepr, q::ProductRepr, conv::ActionDirection)
     return ProductRepr(
         map(
             translate,
-            M.manifolds,
+            M.manifold.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+            repeated(conv),
+        )...,
+    )
+end
+function translate(
+    M::ProductGroup,
+    p::ArrayPartition,
+    q::ArrayPartition,
+    conv::ActionDirection,
+)
+    return ArrayPartition(
+        map(
+            translate,
+            M.manifold.manifolds,
             submanifold_components(M, p),
             submanifold_components(M, q),
             repeated(conv),
@@ -140,13 +154,10 @@ function translate(
     )
 end
 
-function translate!(G::ProductGroup, x, p, q, conv::ActionDirection)
-    return translate!(G.manifold, x, p, q, conv)
-end
-function translate!(M::ProductManifold, x, p, q, conv::ActionDirection)
+function translate!(M::ProductGroup, x, p, q, conv::ActionDirection)
     map(
         translate!,
-        M.manifolds,
+        M.manifold.manifolds,
         submanifold_components(M, x),
         submanifold_components(M, p),
         submanifold_components(M, q),
@@ -237,6 +248,38 @@ function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirect
     return Y
 end
 
+function Base.exp(M::ProductGroup, p::Identity{ProductOperation}, X::ProductRepr)
+    return ProductRepr(
+        map(
+            exp,
+            M.manifold.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
+end
+function Base.exp(M::ProductGroup, p::Identity{ProductOperation}, X::ArrayPartition)
+    return ArrayPartition(
+        map(
+            exp,
+            M.manifold.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
+end
+
+function exp!(M::ProductGroup, q, p::Identity{ProductOperation}, X)
+    map(
+        exp!,
+        M.manifold.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return q
+end
+
 function exp_lie(G::ProductGroup, X)
     M = G.manifold
     return ProductRepr(map(exp_lie, M.manifolds, submanifold_components(G, X))...)
@@ -246,6 +289,38 @@ function exp_lie!(G::ProductGroup, q, X)
     M = G.manifold
     map(exp_lie!, M.manifolds, submanifold_components(G, q), submanifold_components(G, X))
     return q
+end
+
+function Base.log(M::ProductGroup, p::Identity{ProductOperation}, q::ProductRepr)
+    return ProductRepr(
+        map(
+            log,
+            M.manifold.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+        )...,
+    )
+end
+function Base.log(M::ProductGroup, p::Identity{ProductOperation}, q::ArrayPartition)
+    return ArrayPartition(
+        map(
+            log,
+            M.manifold.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+        )...,
+    )
+end
+
+function log!(M::ProductGroup, X, p::Identity{ProductOperation}, q)
+    map(
+        log!,
+        M.manifold.manifolds,
+        submanifold_components(M, X),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+    )
+    return X
 end
 
 # on this meta level we first pass down before we resolve identity.
