@@ -30,7 +30,7 @@ jobs:
           MANIFOLDS_TEST_GROUP: ${{ matrix.group }}
         if: ${{ matrix.group == 'test_on_default_compiler' }}
       - run: julia --color=yes --depwarn=yes -O0 --compile=min --inline=yes -e 'import Pkg; ENV["MANIFOLDS_TEST_GROUP"]="${{ matrix.group}}"; Pkg.test(;coverage = true, julia_args = ["--check-bounds=yes"])'
-      shell: bash
+        shell: bash
         if: ${{ matrix.group != 'test_on_default_compiler' }}
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v2
