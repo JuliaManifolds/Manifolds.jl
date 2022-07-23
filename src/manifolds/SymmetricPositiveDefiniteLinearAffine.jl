@@ -391,3 +391,29 @@ function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) whe
     vtp = Symmetric(pUe * tv * transpose(pUe)) # so this is the documented formula
     return copyto!(Y, vtp)
 end
+
+@doc raw"""
+    riemann_tensor(::SymmetricPositiveDefinite, p, X, Y, Z)
+
+Compute the value of Riemann tensor on the [`SymmetricPositiveDefinite`](@ref) manifold.
+The formula reads[^Rentmeesters2011] ``R(X,Y)Z=p^{1/2}R(X_I, Y_I)Z_Ip^{1/2}``, where
+``R_I(X_I, Y_I)Z_I=\frac{1}{4}[Z_I, [X_I, Y_I]]``,  ``X_I=p^{-1/2}Xp^{-1/2}``,
+``Y_I=p^{-1/2}Yp^{-1/2}`` and ``Z_I=p^{-1/2}Zp^{-1/2}``.
+
+[^Rentmeesters2011]:
+    > Q. Rentmeesters, “A gradient method for geodesic data fitting on some symmetric
+    > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
+    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: 10.1109/CDC.2011.6161280.
+"""
+riemann_tensor(::SymmetricPositiveDefinite, p, X, Y, Z)
+
+function riemann_tensor!(::SymmetricPositiveDefinite, Xresult, p, X, Y, Z)
+    ps = sqrt(p)
+    ips = inv(ps)
+    XI = ips * X * ips
+    YI = ips * Y * ips
+    ZI = ips * Z * ips
+    Xtmp = XI * YI - YI * XI
+    Xresult .= ps * (1 // 4 .* (ZI * Xtmp .- Xtmp * ZI)) * ps
+    return Xresult
+end

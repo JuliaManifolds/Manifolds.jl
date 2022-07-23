@@ -189,36 +189,6 @@ Distance between vectors `X` and `Y` from the vector space at point `p`
 from the manifold `B.manifold`, that is the base manifold of `M`.
 """
 distance(B::VectorBundleFibers, p, X, Y) = norm(B, p, X - Y)
-@doc raw"""
-    distance(B::VectorBundle, p, q)
-
-Distance between points $x$ and $y$ from the
-vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
-
-Notation:
-  * The point $p = (x_p, V_p)$ where $x_p  ∈ \mathcal M$ and $V_p$ belongs to the
-    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
-    canonical projection of that vector bundle $B$.
-    Similarly, $q = (x_q, V_q)$.
-
-The distance is calculated as
-
-$d_B(x, y) = \sqrt{d_M(x_p, x_q)^2 + d_F(V_p, V_{q←p})^2}$
-
-where $d_\mathcal M$ is the distance on manifold $\mathcal M$, $d_F$ is the distance
-between two vectors from the fiber $F$ and $V_{q←p}$ is the result
-of parallel transport of vector $V_q$ to point $x_p$. The default
-behavior of [`vector_transport_to`](@ref) is used to compute the vector
-transport.
-"""
-function distance(B::VectorBundle, p, q)
-    xp, Vp = submanifold_components(B.manifold, p)
-    xq, Vq = submanifold_components(B.manifold, q)
-    dist_man = distance(B.manifold, xp, xq)
-    vy_x = vector_transport_to(B.manifold, xq, Vq, xp, B.vector_transport.method_point)
-    dist_vec = distance(B.fiber, xp, Vp, vy_x)
-    return sqrt(dist_man^2 + dist_vec^2)
-end
 """
     distance(M::TangentSpaceAtPoint, p, q)
 
@@ -237,30 +207,6 @@ function embed!(M::TangentSpaceAtPoint, Y, p, X)
 end
 
 @doc raw"""
-    exp(B::VectorBundle, p, X)
-
-Exponential map of tangent vector $X$ at point $p$ from
-vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
-
-Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
-    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
-    canonical projection of that vector bundle $B$.
-  * The tangent vector $X = (V_{X,M}, V_{X,F}) ∈ T_pB$ where
-    $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}\mathcal M$ and
-    $V_{X,F}$ is a tangent vector from the tangent space $T_{V_p}F$ (isomorphic to $F$).
-
-The exponential map is calculated as
-
-$\exp_p(X) = (\exp_{x_p}(V_{X,M}), V_{\exp})$
-
-where $V_{\exp}$ is the result of vector transport of $V_p + V_{X,F}$
-to the point $\exp_{x_p}(V_{X,M})$.
-The sum $V_p + V_{X,F}$ corresponds to the exponential map in the vector space $F$.
-"""
-exp(::VectorBundle, ::Any, ::Any)
-
-@doc raw"""
     exp(M::TangentSpaceAtPoint, p, X)
 
 Exponential map of tangent vectors `X` and `p` from the tangent space `M`. It is
@@ -268,23 +214,6 @@ calculated as their sum.
 """
 exp(::TangentSpaceAtPoint, ::Any, ::Any)
 
-function exp!(B::VectorBundle, q, p, X)
-    xp, Xp = submanifold_components(B.manifold, p)
-    xq, Xq = submanifold_components(B.manifold, q)
-    VXM, VXF = submanifold_components(B.manifold, X)
-    # this temporary avoids overwriting `p` when `q` and `p` occupy the same memory
-    xqt = exp(B.manifold, xp, VXM)
-    vector_transport_direction!(
-        B.manifold,
-        Xq,
-        xp,
-        Xp + VXF,
-        VXM,
-        B.vector_transport.method_point,
-    )
-    copyto!(B.manifold, xq, xqt)
-    return q
-end
 function exp!(M::TangentSpaceAtPoint, q, p, X)
     copyto!(M.fiber.manifold, q, p + X)
     return q
@@ -588,6 +517,58 @@ function inner(M::TangentSpaceAtPoint, p, X, Y)
     return inner(M.fiber.manifold, M.point, X, Y)
 end
 
+@doc raw"""
+    struct VectorBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
+
+Inverse retraction of the point `y` at point `p` from
+vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
+
+Notation:
+  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
+    canonical projection of that vector bundle $B$.
+    Similarly, $q = (x_q, V_q)$.
+
+The inverse retraction is calculated as
+
+$\log_p q = (\log_{x_p}(x_q), V_{\log} - V_p)$
+
+where $V_{\log}$ is the result of vector transport of $V_q$ to the point $x_p$.
+The difference $V_{\log} - V_p$ corresponds to the logarithmic map in the vector space $F$.
+
+See also [`VectorBundleProductRetraction`](@ref).
+"""
+struct VectorBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
+
+function _inverse_retract(M::VectorBundle, p, q, ::VectorBundleInverseProductRetraction)
+    return inverse_retract_product(M, p, q)
+end
+
+function _inverse_retract!(M::VectorBundle, X, p, q, ::VectorBundleInverseProductRetraction)
+    return inverse_retract_product!(M, X, p, q)
+end
+
+"""
+    inverse_retract_product(M::VectorBundle, p, q)
+
+Compute the allocating variant of the [`VectorBundleInverseProductRetraction`](@ref),
+which by default allocates and calls `inverse_retract_product!`.
+"""
+function inverse_retract_product(M::VectorBundle, p, q)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract_product!(M, X, p, q)
+end
+
+function inverse_retract_product!(B::VectorBundle, X, p, q)
+    px, Vx = submanifold_components(B.manifold, p)
+    py, Vy = submanifold_components(B.manifold, q)
+    VXM, VXF = submanifold_components(B.manifold, X)
+    log!(B.manifold, VXM, px, py)
+    vector_transport_to!(B.manifold, VXF, py, Vy, px, B.vector_transport.method_vector)
+    copyto!(VXF, VXF - Vx)
+    return X
+end
+
 function Base.isapprox(B::VectorBundle, p, q; kwargs...)
     xp, Vp = submanifold_components(B.manifold, p)
     xq, Vq = submanifold_components(B.manifold, q)
@@ -605,26 +586,6 @@ function Base.isapprox(M::TangentSpaceAtPoint, X, Y; kwargs...)
     return isapprox(M.fiber.manifold, M.point, X, Y; kwargs...)
 end
 
-@doc raw"""
-    log(B::VectorBundle, p, q)
-
-Logarithmic map of the point `y` at point `p` from
-vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
-
-Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
-    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
-    canonical projection of that vector bundle $B$.
-    Similarly, $q = (x_q, V_q)$.
-
-The logarithmic map is calculated as
-
-$\log_p q = (\log_{x_p}(x_q), V_{\log} - V_p)$
-
-where $V_{\log}$ is the result of vector transport of $V_q$ to the point $x_p$.
-The difference $V_{\log} - V_p$ corresponds to the logarithmic map in the vector space $F$.
-"""
-log(::VectorBundle, ::Any...)
 """
     log(M::TangentSpaceAtPoint, p, q)
 
@@ -632,16 +593,6 @@ Logarithmic map on the tangent space manifold `M`, calculated as the difference 
 vectors `q` and `p` from `M`.
 """
 log(::TangentSpaceAtPoint, ::Any...)
-
-function log!(B::VectorBundle, X, p, q)
-    px, Vx = submanifold_components(B.manifold, p)
-    py, Vy = submanifold_components(B.manifold, q)
-    VXM, VXF = submanifold_components(B.manifold, X)
-    log!(B.manifold, VXM, px, py)
-    vector_transport_to!(B.manifold, VXF, py, Vy, px, B.vector_transport.method_vector)
-    copyto!(VXF, VXF - Vx)
-    return X
-end
 function log!(::TangentSpaceAtPoint, X, p, q)
     copyto!(X, q - p)
     return X
@@ -664,15 +615,6 @@ LinearAlgebra.norm(B::VectorBundleFibers, p, X) = sqrt(inner(B, p, X, X))
 LinearAlgebra.norm(B::VectorBundleFibers{<:TangentSpaceType}, p, X) = norm(B.manifold, p, X)
 LinearAlgebra.norm(M::VectorSpaceAtPoint, p, X) = norm(M.fiber.manifold, M.point, X)
 
-function parallel_transport_to!(M::VectorBundle, Y, p, X, q)
-    px, pVx = submanifold_components(M.manifold, p)
-    VXM, VXF = submanifold_components(M.manifold, X)
-    VYM, VYF = submanifold_components(M.manifold, Y)
-    qx, qVx = submanifold_components(M.manifold, q)
-    parallel_transport_to!(M.manifold, VYM, px, VXM, qx)
-    parallel_transport_to!(M.manifold, VYF, px, VXF, qx)
-    return Y
-end
 function parallel_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q)
     return copyto!(M.fiber.manifold, Y, p, X)
 end
@@ -802,6 +744,142 @@ end
 function Random.rand!(rng::AbstractRNG, M::TangentSpaceAtPoint, X; vector_at=nothing)
     rand!(rng, M.fiber.manifold, X; vector_at=M.point)
     return X
+end
+
+@doc raw"""
+    struct VectorBundleProductRetraction <: AbstractRetractionMethod end
+
+Product retraction map of tangent vector $X$ at point $p$ from
+vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
+
+Notation:
+  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
+    canonical projection of that vector bundle $B$.
+  * The tangent vector $X = (V_{X,M}, V_{X,F}) ∈ T_pB$ where
+    $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}\mathcal M$ and
+    $V_{X,F}$ is a tangent vector from the tangent space $T_{V_p}F$ (isomorphic to $F$).
+
+The retraction is calculated as
+
+$\operatorname{retr}_p(X) = (\exp_{x_p}(V_{X,M}), V_{\exp})$
+
+where $V_{\exp}$ is the result of vector transport of $V_p + V_{X,F}$
+to the point $\exp_{x_p}(V_{X,M})$.
+The sum $V_p + V_{X,F}$ corresponds to the exponential map in the vector space $F$.
+
+See also [`VectorBundleInverseProductRetraction`](@ref).
+"""
+struct VectorBundleProductRetraction <: AbstractRetractionMethod end
+
+function _retract(M::VectorBundle, p, X, ::VectorBundleProductRetraction)
+    return retract_product(M, p, X)
+end
+
+function _retract!(M::VectorBundle, q, p, X, ::VectorBundleProductRetraction)
+    return retract_product!(M, q, p, X)
+end
+
+"""
+    retract_product(M::VectorBundle, p, q)
+
+Compute the allocating variant of the [`VectorBundleProductRetraction`](@ref),
+which by default allocates and calls `retract_product!`.
+"""
+function retract_product(M::VectorBundle, p, X)
+    q = allocate_result(M, retract, p, X)
+    return retract_product!(M, q, p, X)
+end
+
+function retract_product!(B::VectorBundle, q, p, X)
+    xp, Xp = submanifold_components(B.manifold, p)
+    xq, Xq = submanifold_components(B.manifold, q)
+    VXM, VXF = submanifold_components(B.manifold, X)
+    # this temporary avoids overwriting `p` when `q` and `p` occupy the same memory
+    xqt = exp(B.manifold, xp, VXM)
+    vector_transport_direction!(
+        B.manifold,
+        Xq,
+        xp,
+        Xp + VXF,
+        VXM,
+        B.vector_transport.method_point,
+    )
+    copyto!(B.manifold, xq, xqt)
+    return q
+end
+
+@doc raw"""
+    struct SasakiRetraction <: AbstractRetractionMethod end
+
+Exponential map on [`TangentBundle`](@ref) computed via Euler integration as described
+in [^Muralidharan2012].
+
+# Constructor
+
+    SasakiRetraction(L::Int)
+
+In this constructor `L` is the number of integration steps.
+
+[^Muralidharan2012]:
+    > P. Muralidharan and P. T. Fletcher, “Sasaki Metrics for Analysis of Longitudinal Data
+    > on Manifolds,” Proc IEEE Comput Soc Conf Comput Vis Pattern Recognit, vol. 2012,
+    > pp. 1027–1034, Jun. 2012, doi: 10.1109/CVPR.2012.6247780.
+"""
+struct SasakiRetraction <: AbstractRetractionMethod
+    L::Int
+end
+
+function _retract(M::AbstractManifold, p, q, m::SasakiRetraction)
+    return retract_sasaki(M, p, q, m)
+end
+
+function _retract!(M::AbstractManifold, X, p, q, m::SasakiRetraction)
+    return retract_sasaki!(M, X, p, q, m)
+end
+
+"""
+    retract_sasaki(M::AbstractManifold, p, q, m::SasakiRetraction)
+
+Compute the allocating variant of the [`SasakiRetraction`](@ref),
+which by default allocates and calls `retract_sasaki!`.
+"""
+function retract_sasaki(M::AbstractManifold, p, X, m::SasakiRetraction)
+    q = allocate_result(M, retract, p, X)
+    return retract_sasaki!(M, q, p, X, m)
+end
+
+function retract_sasaki!(B::TangentBundle, q, p, X, m::SasakiRetraction)
+    xp, Xp = submanifold_components(B.manifold, p)
+    xq, Xq = submanifold_components(B.manifold, q)
+    VXM, VXF = submanifold_components(B.manifold, X)
+    p_k = allocate(B.manifold, xp)
+    copyto!(B.manifold, p_k, xp)
+    X_k = allocate(B.manifold, Xp)
+    copyto!(B.manifold, X_k, Xp)
+    Y_k = allocate(B.manifold, VXM)
+    copyto!(B.manifold, Y_k, VXM)
+    Z_k = allocate(B.manifold, VXF)
+    copyto!(B.manifold, Z_k, VXF)
+    ϵ = 1 / m.L
+    for k in 1:(m.L)
+        p_kp1 = exp(B.manifold, p_k, ϵ * Y_k)
+        X_kp1 = parallel_transport_to(B.manifold, p_k, X_k .+ ϵ .* Z_k, p_kp1)
+        Y_kp1 = parallel_transport_to(
+            B.manifold,
+            p_k,
+            Y_k .+ ϵ .* riemann_tensor(B.manifold, p_k, X_k, Z_k, Y_k),
+            p_kp1,
+        )
+        Z_kp1 = parallel_transport_to(B.manifold, p_k, Z_k, p_kp1)
+        copyto!(B.manifold, p_k, p_kp1)
+        copyto!(B.manifold, X_k, p_kp1, X_kp1)
+        copyto!(B.manifold, Y_k, p_kp1, Y_kp1)
+        copyto!(B.manifold, Z_k, p_kp1, Z_kp1)
+    end
+    copyto!(B.manifold, xq, p_k)
+    copyto!(B.manifold, Xq, xq, X_k)
+    return q
 end
 
 """
@@ -943,8 +1021,41 @@ function vector_transport_direction(M::VectorBundle, p, X, d)
     return vector_transport_direction(M, p, X, d, M.vector_transport)
 end
 
+function _vector_transport_direction(
+    M::VectorBundle,
+    p,
+    X,
+    d,
+    m::VectorBundleVectorTransport,
+)
+    px, pVx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    dx, dVx = submanifold_components(M.manifold, d)
+    return ProductRepr(
+        vector_transport_direction(M.manifold, px, VXM, dx, m.method_point),
+        vector_transport_direction(M.manifold, px, VXF, dx, m.method_vector),
+    )
+end
+
 function vector_transport_direction!(M::VectorBundle, Y, p, X, d)
     return vector_transport_direction!(M, Y, p, X, d, M.vector_transport)
+end
+
+function _vector_transport_direction!(
+    M::VectorBundle,
+    Y,
+    p,
+    X,
+    d,
+    m::VectorBundleVectorTransport,
+)
+    VYM, VYF = submanifold_components(M.manifold, Y)
+    px, pVx = submanifold_components(M.manifold, p)
+    VXM, VXF = submanifold_components(M.manifold, X)
+    dx, dVx = submanifold_components(M.manifold, d)
+    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_point),
+    vector_transport_direction!(M.manifold, VYF, px, VXF, dx, m.method_vector),
+    return Y
 end
 
 @doc raw"""

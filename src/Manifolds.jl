@@ -582,7 +582,8 @@ export AbstractRetractionMethod,
     ODEExponentialRetraction,
     PadeRetraction,
     ProductRetraction,
-    PowerRetraction
+    PowerRetraction,
+    SasakiRetraction
 # Inverse Retraction types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,

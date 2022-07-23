@@ -6,6 +6,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
 @testset "Tangent bundle" begin
     M = Sphere(2)
+    m_prod_retr = Manifolds.VectorBundleProductRetraction()
+    m_prod_invretr = Manifolds.VectorBundleInverseProductRetraction()
+    m_sasaki = SasakiRetraction(5)
 
     @testset "Nice access to vector bundle components" begin
         TB = TangentBundle(M)
@@ -65,7 +68,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
                     @test bundle_projection(TB, pt) ≈ pt.x[1]
                 end
             end
-            diag_basis = DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2]))
+            diag_basis = DiagonalizingOrthonormalBasis(
+                inverse_retract(TB, pts_tb[1], pts_tb[2], m_prod_invretr),
+            )
             basis_types = (
                 DefaultOrthonormalBasis(),
                 get_basis(TB, pts_tb[1], DefaultOrthonormalBasis()),
@@ -75,13 +80,18 @@ struct TestVectorSpaceType <: VectorSpaceType end
             test_manifold(
                 TB,
                 pts_tb,
+                default_inverse_retraction_method=m_prod_invretr,
+                default_retraction_method=m_prod_retr,
+                inverse_retraction_methods=[m_prod_invretr],
+                retraction_methods=[m_prod_retr, m_sasaki],
+                test_exp_log=false,
                 test_injectivity_radius=false,
                 test_tangent_vector_broadcasting=false,
                 test_vee_hat=true,
                 test_project_tangent=true,
                 test_project_point=true,
                 test_default_vector_transport=true,
-                vector_transport_methods=[ParallelTransport()],
+                vector_transport_methods=[],
                 basis_types_vecs=basis_types,
                 projection_atol_multiplier=4,
                 test_inplace=true,
@@ -175,13 +185,13 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws MethodError vector_space_dimension(vbf)
     end
 
-    @testset "log and exp on tangent bundle for power and product manifolds" begin
+    @testset "product retraction and inverse retraction on tangent bundle for power and product manifolds" begin
         M = PowerManifold(Circle(ℝ), 2)
         N = TangentBundle(M)
         p1 = ProductRepr([0.0, 0.0], [0.0, 0.0])
         p2 = ProductRepr([-1.047, -1.047], [0.0, 0.0])
-        X1 = log(N, p1, p2)
-        @test isapprox(N, p2, exp(N, p1, X1))
+        X1 = inverse_retract(N, p1, p2, m_prod_invretr)
+        @test isapprox(N, p2, retract(N, p1, X1, m_prod_retr))
         @test is_vector(N, p2, vector_transport_to(N, p1, X1, p2))
 
         M2 = ProductManifold(Circle(ℝ), Euclidean(2))
@@ -191,7 +201,11 @@ struct TestVectorSpaceType <: VectorSpaceType end
             ProductRepr([-1.047], [1.0, 0.0]),
             ProductRepr([-1.047], [0.0, 1.0]),
         )
-        @test isapprox(N2, p2_2, exp(N2, p1_2, log(N2, p1_2, p2_2)))
+        @test isapprox(
+            N2,
+            p2_2,
+            retract(N2, p1_2, inverse_retract(N2, p1_2, p2_2, m_prod_invretr), m_prod_retr),
+        )
 
         ppt = ParallelTransport()
         tbvt = Manifolds.VectorBundleVectorTransport(ppt, ppt)
