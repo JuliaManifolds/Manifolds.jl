@@ -29,7 +29,10 @@ jobs:
           PYTHON: ""
           MANIFOLDS_TEST_GROUP: ${{ matrix.group }}
         if: ${{ matrix.group == 'test_on_default_compiler' }}
-      - run: julia --code-coverage --color=yes --compile=min --depwarn=yes --inline=yes --optimize=0 --project='@.' -e 'import Pkg; ENV["MANIFOLDS_TEST_GROUP"]="${{matrix.group}}"; Pkg.test(;coverage=true, julia_args = ["--check-bounds=yes"])'
+      - run: julia --color=yes "$GITHUB_ACTION_PATH"/add_general_registry.jl
+        shell: bash
+        if: ${{ matrix.group != 'test_on_default_compiler' }}
+      - run: julia --color=yes --depwarn=yes --optimize=0 --compile=min --inline=yes --project=@. -e 'import Pkg;include(joinpath(ENV["GITHUB_ACTION_PATH"], "kwargs.jl"));kwargs = Kwargs.kwargs(;coverage = :(true),force_latest_compatible_version = :(auto), julia_args = ["--check-bounds=yes"]);Pkg.test(; kwargs...)
         shell: bash
         env:
           PYTHON: ""
