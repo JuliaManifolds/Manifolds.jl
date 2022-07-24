@@ -68,9 +68,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
                     @test bundle_projection(TB, pt) ≈ pt.x[1]
                 end
             end
-            diag_basis = DiagonalizingOrthonormalBasis(
-                inverse_retract(TB, pts_tb[1], pts_tb[2], m_prod_invretr),
-            )
+            X12_prod = inverse_retract(TB, pts_tb[1], pts_tb[2], m_prod_invretr)
+            diag_basis = DiagonalizingOrthonormalBasis(X12_prod)
             basis_types = (
                 DefaultOrthonormalBasis(),
                 get_basis(TB, pts_tb[1], DefaultOrthonormalBasis()),
@@ -98,6 +97,21 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_representation_size=false,
                 test_rand_point=true,
                 test_rand_tvector=true,
+            )
+
+            Xir = allocate(pts_tb[1])
+            inverse_retract!(TB, Xir, pts_tb[1], pts_tb[2], m_prod_invretr)
+            @test isapprox(TB, pts_tb[1], Xir, X12_prod)
+            @test isapprox(
+                norm(TB.fiber, pts_tb[1][TB, :point], pts_tb[1][TB, :vector]),
+                sqrt(
+                    inner(
+                        TB.fiber,
+                        pts_tb[1][TB, :point],
+                        pts_tb[1][TB, :vector],
+                        pts_tb[1][TB, :vector],
+                    ),
+                ),
             )
 
             # tangent space at point

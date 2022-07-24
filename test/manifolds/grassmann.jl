@@ -95,6 +95,8 @@ include("../utils.jl")
                 @test norm(M, pts[1], X1) isa Real
                 @test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
             end
+
+            @test riemann_tensor(M, p1, X, Y, 2 * X + Y) ≈ [0 -2; 0 1; 2 0]
         end
 
         @testset "Distribution tests" begin
