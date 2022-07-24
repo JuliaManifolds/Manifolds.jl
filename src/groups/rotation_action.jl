@@ -133,16 +133,24 @@ end
 ###
 
 @doc raw"""
-    MatrixColumnwiseMultiplicationAction(
+    RowwiseMultiplicationAction{
+        TM<:AbstractManifold,
+        TO<:GeneralUnitaryMultiplicationGroup,
+        TAD<:ActionDirection,
+    } <: AbstractGroupAction{TAD}
+
+Space of actions of the (special) unitary or orthogonal group [`GeneralUnitaryMultiplicationGroup`](@ref)
+of type `On` columns of points on a matrix manifold `M`.
+
+# Constructor
+
+    RowwiseMultiplicationAction(
         M::AbstractManifold,
         On::GeneralUnitaryMultiplicationGroup,
         AD::ActionDirection = LeftAction(),
     )
-
-Space of actions of the (special) unitary or orthogonal group [`GeneralUnitaryMultiplicationGroup`](@ref)
-of type `On` columns of points on a matrix manifold `M`.
 """
-struct MatrixColumnwiseMultiplicationAction{
+struct RowwiseMultiplicationAction{
     TM<:AbstractManifold,
     TO<:GeneralUnitaryMultiplicationGroup,
     TAD<:ActionDirection,
@@ -151,38 +159,34 @@ struct MatrixColumnwiseMultiplicationAction{
     On::TO
 end
 
-function MatrixColumnwiseMultiplicationAction(
+function RowwiseMultiplicationAction(
     M::AbstractManifold,
     On::GeneralUnitaryMultiplicationGroup,
     ::TAD=LeftAction(),
 ) where {TAD<:ActionDirection}
-    return MatrixColumnwiseMultiplicationAction{typeof(M),typeof(On),TAD}(M, On)
+    return RowwiseMultiplicationAction{typeof(M),typeof(On),TAD}(M, On)
 end
 
-const LeftMatrixColumnwiseMultiplicationAction{
+const LeftRowwiseMultiplicationAction{
     TM<:AbstractManifold,
     TO<:GeneralUnitaryMultiplicationGroup,
-} = MatrixColumnwiseMultiplicationAction{TM,TO,LeftAction}
+} = RowwiseMultiplicationAction{TM,TO,LeftAction}
 
-function apply(::LeftMatrixColumnwiseMultiplicationAction, a, p)
+function apply(::LeftRowwiseMultiplicationAction, a, p)
     return (a * p')'
 end
-function apply(
-    ::LeftMatrixColumnwiseMultiplicationAction,
-    ::Identity{MultiplicationOperation},
-    p,
-)
+function apply(::LeftRowwiseMultiplicationAction, ::Identity{MultiplicationOperation}, p)
     return p
 end
 
-function apply!(::LeftMatrixColumnwiseMultiplicationAction, q, a, p)
+function apply!(::LeftRowwiseMultiplicationAction, q, a, p)
     return map((qrow, prow) -> mul!(qrow, a, prow), eachrow(q), eachrow(p))
 end
 
-base_group(A::MatrixColumnwiseMultiplicationAction) = A.On
+base_group(A::RowwiseMultiplicationAction) = A.On
 
-group_manifold(A::MatrixColumnwiseMultiplicationAction) = A.manifold
+group_manifold(A::RowwiseMultiplicationAction) = A.manifold
 
-function inverse_apply(::LeftMatrixColumnwiseMultiplicationAction, a, p)
+function inverse_apply(::LeftRowwiseMultiplicationAction, a, p)
     return (a \ p')'
 end

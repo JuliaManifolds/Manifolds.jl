@@ -136,7 +136,7 @@ function default_estimation_method(::Grassmann, ::typeof(mean))
 end
 
 function get_orbit_action(M::Grassmann{n,k,ℝ}) where {n,k}
-    return MatrixColumnwiseMultiplicationAction(M, Orthogonal(k))
+    return RowwiseMultiplicationAction(M, Orthogonal(k))
 end
 
 @doc raw"""

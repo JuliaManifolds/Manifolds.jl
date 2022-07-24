@@ -97,7 +97,7 @@ end
 @testset "Matrix columnwise multiplication action" begin
     M = Stiefel(4, 2)
     G = Orthogonal(2)
-    A = Manifolds.MatrixColumnwiseMultiplicationAction(M, G)
+    A = Manifolds.RowwiseMultiplicationAction(M, G)
 
     @test group_manifold(A) === M
     @test base_group(A) === G

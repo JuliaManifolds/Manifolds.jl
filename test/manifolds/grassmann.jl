@@ -9,7 +9,7 @@ include("../utils.jl")
             @test manifold_dimension(M) == 2
             @test get_total_space(M) == Stiefel(3, 2, ℝ)
             @test get_orbit_action(M) ==
-                  Manifolds.MatrixColumnwiseMultiplicationAction(M, Orthogonal(2))
+                  Manifolds.RowwiseMultiplicationAction(M, Orthogonal(2))
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             @test_throws ManifoldDomainError is_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
