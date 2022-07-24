@@ -139,7 +139,7 @@ end
         TAD<:ActionDirection,
     } <: AbstractGroupAction{TAD}
 
-Space of actions of the (special) unitary or orthogonal group [`GeneralUnitaryMultiplicationGroup`](@ref)
+Action of the (special) unitary or orthogonal group [`GeneralUnitaryMultiplicationGroup`](@ref)
 of type `On` columns of points on a matrix manifold `M`.
 
 # Constructor
