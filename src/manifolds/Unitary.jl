@@ -46,9 +46,43 @@ function log(::UnitaryMatrices{1,ℍ}, p::Number, q::Number)
     return log(conj(p) * q)
 end
 
+@doc raw"""
+    manifold_dimension(M::UnitaryMatrices{n,ℂ}) where {n}
+    
+Return the dimension of the manifold unitary matrices.
+```math
+\dim_{\mathrm{U}(n)} = n^2.
+```
+"""
+manifold_dimension(::UnitaryMatrices{n,ℂ}) where {n} = n^2
+@doc raw"""
+    manifold_dimension(M::UnitaryMatrices{n,ℍ})
+    
+Return the dimension of the manifold unitary matrices.
+```math
+\dim_{\mathrm{U}(n, ℍ)} = n(2n+1).
+```
+"""
+manifold_dimension(::UnitaryMatrices{n,ℍ}) where {n} = n * (2n + 1)
+
 project(::UnitaryMatrices{1,ℍ}, p) = normalize(p)
 
 project(::UnitaryMatrices{1,ℍ}, p, X) = (X - conj(X)) / 2
+
+function Random.rand(M::UnitaryMatrices{1,ℍ}; vector_at=nothing)
+    if vector_at === nothing
+        return normalize(quatrand())
+    else
+        project(M, vector_at, quatrand())
+    end
+end
+function Random.rand(rng::AbstractRNG, M::UnitaryMatrices{1,ℍ}; vector_at=nothing)
+    if vector_at === nothing
+        return normalize(quatrand(rng))
+    else
+        project(M, vector_at, quatrand(rng))
+    end
+end
 
 show(io::IO, ::UnitaryMatrices{n,ℂ}) where {n} = print(io, "UnitaryMatrices($(n))")
 show(io::IO, ::UnitaryMatrices{n,ℍ}) where {n} = print(io, "UnitaryMatrices($(n), ℍ)")
