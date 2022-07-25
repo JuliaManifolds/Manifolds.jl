@@ -247,7 +247,6 @@ using ManifoldsBase:
     @invoke_maker,
     _euclidean_basis_vector,
     combine_allocation_promotion_functions,
-    default_inverse_retraction_method,
     geodesic,
     merge_traits,
     next_trait,

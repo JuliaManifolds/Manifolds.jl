@@ -98,13 +98,23 @@ function CotangentSpaceAtPoint(M::AbstractManifold, p)
 end
 
 """
+    VectorBundleVectorTransport{
+        TMP<:AbstractVectorTransportMethod,
+        TMV<:AbstractVectorTransportMethod,
+    } <: AbstractVectorTransportMethod
+
+Vector transport type on [`VectorBundle`](@ref). `method_point` is used for vector transport
+of the point part and `method_vector` is used for transport of the vector part.
+
+# Constructor 
+
     VectorBundleVectorTransport(
         method_point::AbstractVectorTransportMethod,
         method_vector::AbstractVectorTransportMethod,
     )
+    VectorBundleVectorTransport()
 
-Vector transport type on [`VectorBundle`](@ref). `method_point` is used for vector transport
-of the point part and `method_vector` is used for transport of the vector part
+By default both methods are set to `ParallelTransport`.
 """
 struct VectorBundleVectorTransport{
     TMP<:AbstractVectorTransportMethod,
@@ -112,6 +122,10 @@ struct VectorBundleVectorTransport{
 } <: AbstractVectorTransportMethod
     method_point::TMP
     method_vector::TMV
+end
+
+function VectorBundleVectorTransport()
+    return VectorBundleVectorTransport(ParallelTransport(), ParallelTransport())
 end
 
 """
@@ -148,6 +162,24 @@ function VectorBundle(fiber::VectorSpaceType, M::AbstractManifold)
     return VectorBundle(fiber, M, vtbm)
 end
 
+"""
+    TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
+
+Tangent bundle for manifold of type `M`, as a manifold with the Sasaki metric [^Sasaki1958].
+
+Exact retraction and inverse retraction can be approximated using [`VectorBundleProductRetraction`](@ref),
+[`VectorBundleInverseProductRetraction`](@ref) and [`SasakiRetraction`](@ref).
+[`VectorBundleVectorTransport`](@ref) can be used as a vector transport.
+
+[^Sasaki1958]:
+    > S. Sasaki, “On the differential geometry of tangent bundles of Riemannian manifolds,”
+    > Tohoku Math. J. (2), vol. 10, no. 3, pp. 338–354, 1958, doi: 10.2748/tmj/1178244668.
+
+# Constructors
+
+    TangentBundle(M::AbstractManifold)
+    TangentBundle(M::AbstractManifold, vtm::VectorBundleVectorTransport)
+"""
 const TangentBundle{𝔽,M} =
     VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
@@ -169,6 +201,55 @@ struct VectorBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
     vec_basis::TBasis
 end
 
+@doc raw"""
+    struct VectorBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
+
+Inverse retraction of the point `y` at point `p` from
+vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
+
+Notation:
+  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
+    canonical projection of that vector bundle $B$.
+    Similarly, $q = (x_q, V_q)$.
+
+The inverse retraction is calculated as
+
+$\log_p q = (\log_{x_p}(x_q), V_{\log} - V_p)$
+
+where $V_{\log}$ is the result of vector transport of $V_q$ to the point $x_p$.
+The difference $V_{\log} - V_p$ corresponds to the logarithmic map in the vector space $F$.
+
+See also [`VectorBundleProductRetraction`](@ref).
+"""
+struct VectorBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
+
+@doc raw"""
+    struct VectorBundleProductRetraction <: AbstractRetractionMethod end
+
+Product retraction map of tangent vector $X$ at point $p$ from
+vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
+
+Notation:
+  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
+    canonical projection of that vector bundle $B$.
+  * The tangent vector $X = (V_{X,M}, V_{X,F}) ∈ T_pB$ where
+    $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}\mathcal M$ and
+    $V_{X,F}$ is a tangent vector from the tangent space $T_{V_p}F$ (isomorphic to $F$).
+
+The retraction is calculated as
+
+$\operatorname{retr}_p(X) = (\exp_{x_p}(V_{X,M}), V_{\exp})$
+
+where $V_{\exp}$ is the result of vector transport of $V_p + V_{X,F}$
+to the point $\exp_{x_p}(V_{X,M})$.
+The sum $V_p + V_{X,F}$ corresponds to the exponential map in the vector space $F$.
+
+See also [`VectorBundleInverseProductRetraction`](@ref).
+"""
+struct VectorBundleProductRetraction <: AbstractRetractionMethod end
+
 base_manifold(B::VectorBundleFibers) = base_manifold(B.manifold)
 base_manifold(B::VectorSpaceAtPoint) = base_manifold(B.fiber)
 base_manifold(B::VectorBundle) = base_manifold(B.manifold)
@@ -181,6 +262,19 @@ Returns the point on the base manifold `B.manifold` at which the vector part
 of `p` is attached.
 """
 bundle_projection(B::VectorBundle, p) = submanifold_component(B.manifold, p, Val(1))
+
+function default_inverse_retraction_method(::TangentBundle)
+    return VectorBundleInverseProductRetraction()
+end
+
+function default_retraction_method(::TangentBundle)
+    return VectorBundleProductRetraction()
+end
+
+function default_vector_transport_method(B::TangentBundle)
+    default_vt_m = default_vector_transport_method(B.manifold)
+    return VectorBundleVectorTransport(default_vt_m, default_vt_m)
+end
 
 """
     distance(B::VectorBundleFibers, p, X, Y)
@@ -517,29 +611,6 @@ function inner(M::TangentSpaceAtPoint, p, X, Y)
     return inner(M.fiber.manifold, M.point, X, Y)
 end
 
-@doc raw"""
-    struct VectorBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
-
-Inverse retraction of the point `y` at point `p` from
-vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
-
-Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
-    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
-    canonical projection of that vector bundle $B$.
-    Similarly, $q = (x_q, V_q)$.
-
-The inverse retraction is calculated as
-
-$\log_p q = (\log_{x_p}(x_q), V_{\log} - V_p)$
-
-where $V_{\log}$ is the result of vector transport of $V_q$ to the point $x_p$.
-The difference $V_{\log} - V_p$ corresponds to the logarithmic map in the vector space $F$.
-
-See also [`VectorBundleProductRetraction`](@ref).
-"""
-struct VectorBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
-
 function _inverse_retract(M::VectorBundle, p, q, ::VectorBundleInverseProductRetraction)
     return inverse_retract_product(M, p, q)
 end
@@ -745,32 +816,6 @@ function Random.rand!(rng::AbstractRNG, M::TangentSpaceAtPoint, X; vector_at=not
     rand!(rng, M.fiber.manifold, X; vector_at=M.point)
     return X
 end
-
-@doc raw"""
-    struct VectorBundleProductRetraction <: AbstractRetractionMethod end
-
-Product retraction map of tangent vector $X$ at point $p$ from
-vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
-
-Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
-    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
-    canonical projection of that vector bundle $B$.
-  * The tangent vector $X = (V_{X,M}, V_{X,F}) ∈ T_pB$ where
-    $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}\mathcal M$ and
-    $V_{X,F}$ is a tangent vector from the tangent space $T_{V_p}F$ (isomorphic to $F$).
-
-The retraction is calculated as
-
-$\operatorname{retr}_p(X) = (\exp_{x_p}(V_{X,M}), V_{\exp})$
-
-where $V_{\exp}$ is the result of vector transport of $V_p + V_{X,F}$
-to the point $\exp_{x_p}(V_{X,M})$.
-The sum $V_p + V_{X,F}$ corresponds to the exponential map in the vector space $F$.
-
-See also [`VectorBundleInverseProductRetraction`](@ref).
-"""
-struct VectorBundleProductRetraction <: AbstractRetractionMethod end
 
 function _retract(M::VectorBundle, p, X, ::VectorBundleProductRetraction)
     return retract_product(M, p, X)
@@ -1111,6 +1156,16 @@ function vector_transport_to!(
     m::AbstractVectorTransportMethod,
 )
     return copyto!(M.fiber.manifold, Y, p, X)
+end
+
+@inline function Base.view(x::ArrayPartition, M::VectorBundle, s::Symbol)
+    if s === :point
+        return x.x[1]
+    elseif s === :vector
+        return x.x[2]
+    else
+        throw(DomainError(s, "unknown component $s on $M."))
+    end
 end
 
 """

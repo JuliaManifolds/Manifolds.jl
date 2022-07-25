@@ -33,6 +33,14 @@ struct TestVectorSpaceType <: VectorSpaceType end
             @test p.x[1] == [0.0, 1.0, 0.0]
             @test_throws DomainError p[TB, :error]
             @test_throws DomainError p[TB, :error] = [1, 2, 3]
+
+            @test view(p, TB, :point) === p.x[1]
+            @test view(p, TB, :vector) === p.x[2]
+            view(p, TB, :point) .= [2.0, 3.0, 5.0]
+            @test p.x[1] == [2.0, 3.0, 5.0]
+            view(p, TB, :vector) .= [-2.0, -3.0, -5.0]
+            @test p.x[2] == [-2.0, -3.0, -5.0]
+            @test_throws DomainError view(p, TB, :error)
         end
     end
 
@@ -48,6 +56,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2 * manifold_dimension(M)
         @test representation_size(TB) === nothing
+        @test default_inverse_retraction_method(TB) === m_prod_invretr
+        @test default_retraction_method(TB) == m_prod_retr
+        @test default_vector_transport_method(TB) isa Manifolds.VectorBundleVectorTransport
         CTB = CotangentBundle(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
         @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
@@ -113,6 +124,16 @@ struct TestVectorSpaceType <: VectorSpaceType end
                     ),
                 ),
             )
+            Xir2 = allocate(pts_tb[1])
+            vector_transport_to!(
+                TB,
+                Xir2,
+                pts_tb[1],
+                Xir,
+                pts_tb[2],
+                Manifolds.VectorBundleVectorTransport(),
+            )
+            @test is_vector(TB, pts_tb[2], Xir2)
 
             # tangent space at point
             pts_TpM = map(

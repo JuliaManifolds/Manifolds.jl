@@ -39,5 +39,5 @@ println("Norm of p: ", norm(M, p[TB, :point], p[TB, :vector]))
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["manifolds/VectorBundle.jl"]
-Order = [:type, :function]
+Order = [:constant, :type, :function]
 ```
