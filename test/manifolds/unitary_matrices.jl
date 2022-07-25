@@ -58,9 +58,9 @@ end
         @test is_point(M, p)
         X = rand(M; vector_at=p)
         @test is_vector(M, p, X)
-        p = rand(Xoshiro(), M)
+        p = rand(MersenneTwister(), M)
         @test is_point(M, p)
-        X = rand(Xoshiro(), M; vector_at=p)
+        X = rand(MersenneTwister(), M; vector_at=p)
         @test is_vector(M, p, X)
     end
 
