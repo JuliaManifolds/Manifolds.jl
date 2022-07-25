@@ -135,6 +135,10 @@ function default_estimation_method(::Grassmann, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 4)
 end
 
+function get_orbit_action(M::Grassmann{n,k,ℝ}) where {n,k}
+    return RowwiseMultiplicationAction(M, Orthogonal(k))
+end
+
 @doc raw"""
     get_total_space(::Grassmann{n,k})
 
