@@ -129,3 +129,64 @@ end
 function inverse_apply(A::RotationAroundAxisAction, θ, p)
     return apply(A, -θ, p)
 end
+
+###
+
+@doc raw"""
+    RowwiseMultiplicationAction{
+        TM<:AbstractManifold,
+        TO<:GeneralUnitaryMultiplicationGroup,
+        TAD<:ActionDirection,
+    } <: AbstractGroupAction{TAD}
+
+Action of the (special) unitary or orthogonal group [`GeneralUnitaryMultiplicationGroup`](@ref)
+of type `On` columns of points on a matrix manifold `M`.
+
+# Constructor
+
+    RowwiseMultiplicationAction(
+        M::AbstractManifold,
+        On::GeneralUnitaryMultiplicationGroup,
+        AD::ActionDirection = LeftAction(),
+    )
+"""
+struct RowwiseMultiplicationAction{
+    TM<:AbstractManifold,
+    TO<:GeneralUnitaryMultiplicationGroup,
+    TAD<:ActionDirection,
+} <: AbstractGroupAction{TAD}
+    manifold::TM
+    On::TO
+end
+
+function RowwiseMultiplicationAction(
+    M::AbstractManifold,
+    On::GeneralUnitaryMultiplicationGroup,
+    ::TAD=LeftAction(),
+) where {TAD<:ActionDirection}
+    return RowwiseMultiplicationAction{typeof(M),typeof(On),TAD}(M, On)
+end
+
+const LeftRowwiseMultiplicationAction{
+    TM<:AbstractManifold,
+    TO<:GeneralUnitaryMultiplicationGroup,
+} = RowwiseMultiplicationAction{TM,TO,LeftAction}
+
+function apply(::LeftRowwiseMultiplicationAction, a, p)
+    return (a * p')'
+end
+function apply(::LeftRowwiseMultiplicationAction, ::Identity{MultiplicationOperation}, p)
+    return p
+end
+
+function apply!(::LeftRowwiseMultiplicationAction, q, a, p)
+    return map((qrow, prow) -> mul!(qrow, a, prow), eachrow(q), eachrow(p))
+end
+
+base_group(A::RowwiseMultiplicationAction) = A.On
+
+group_manifold(A::RowwiseMultiplicationAction) = A.manifold
+
+function inverse_apply(::LeftRowwiseMultiplicationAction, a, p)
+    return (a \ p')'
+end
