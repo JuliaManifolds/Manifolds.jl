@@ -42,6 +42,14 @@ function exp(::UnitaryMatrices{1,ℍ}, p, X::Number)
     return p * exp(X)
 end
 
+function get_coordinates_orthonormal(::UnitaryMatrices{1,ℍ}, p, X, ::RealNumbers)
+    return @SVector [X.v1, X.v2, X.v3]
+end
+
+function get_vector_orthonormal(::UnitaryMatrices{1,ℍ}, p::Quaternion, c, ::RealNumbers)
+    return Quaternion(0, c[1], c[2], c[3])
+end
+
 function log(::UnitaryMatrices{1,ℍ}, p::Number, q::Number)
     return log(conj(p) * q)
 end
