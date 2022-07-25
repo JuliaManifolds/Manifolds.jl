@@ -45,8 +45,8 @@ end
 end
 
 @testset "Special unitary matrices" begin
-    M = Manifolds.GeneralUnitaryMatrices{2,ℂ,Manifolds.AbsoluteDeterminantOneMatrices}()
-    @test manifold_dimension(M) == 4
+    M = Manifolds.GeneralUnitaryMatrices{2,ℂ,Manifolds.DeterminantOneMatrices}()
+    @test manifold_dimension(M) == 3
 end
 
 @testset "Quaternionic Unitary Matrices" begin
