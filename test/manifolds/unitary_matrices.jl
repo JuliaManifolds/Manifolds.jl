@@ -9,6 +9,12 @@ using Quaternions
     @test manifold_dimension(M) == 3
     p = project(M, ones(3, 3))
     @test is_point(M, p, true)
+    @test is_point(M, rand(M), true)
+    @test abs(rand(OrthogonalMatrices(1))[]) == 1
+    @test is_vector(M, p, rand(M; vector_at=p))
+    @test is_point(M, rand(MersenneTwister(), M), true)
+    @test abs(rand(MersenneTwister(), OrthogonalMatrices(1))[]) == 1
+    @test is_vector(M, p, rand(MersenneTwister(), M; vector_at=p))
 end
 
 @testset "Unitary Matrices" begin
@@ -53,6 +59,7 @@ end
     M = UnitaryMatrices(1, ℍ)
     @test repr(M) == "UnitaryMatrices(1, ℍ)"
     @test manifold_dimension(M) == 3
+    @test injectivity_radius(M) == π
     @testset "rand" begin
         p = rand(M)
         @test is_point(M, p)

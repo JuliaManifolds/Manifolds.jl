@@ -50,6 +50,11 @@ function get_vector_orthonormal(::UnitaryMatrices{1,ℍ}, p::Quaternion, c, ::Re
     return Quaternion(0, c[1], c[2], c[3])
 end
 
+injectivity_radius(::UnitaryMatrices{1,ℍ}) = π
+
+Base.isapprox(::UnitaryMatrices{1,ℍ}, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
+Base.isapprox(::UnitaryMatrices{1,ℍ}, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
+
 function log(::UnitaryMatrices{1,ℍ}, p::Number, q::Number)
     return log(conj(p) * q)
 end
@@ -73,6 +78,8 @@ Return the dimension of the manifold unitary matrices.
 """
 manifold_dimension(::UnitaryMatrices{n,ℍ}) where {n} = n * (2n + 1)
 
+Manifolds.number_of_coordinates(::UnitaryMatrices{1,ℍ}, ::AbstractBasis{ℝ}) = 3
+
 project(::UnitaryMatrices{1,ℍ}, p) = normalize(p)
 
 project(::UnitaryMatrices{1,ℍ}, p, X) = (X - conj(X)) / 2
@@ -94,3 +101,5 @@ end
 
 show(io::IO, ::UnitaryMatrices{n,ℂ}) where {n} = print(io, "UnitaryMatrices($(n))")
 show(io::IO, ::UnitaryMatrices{n,ℍ}) where {n} = print(io, "UnitaryMatrices($(n), ℍ)")
+
+Manifolds.zero_vector(::UnitaryMatrices{1,ℍ}, p) = zero(p)
