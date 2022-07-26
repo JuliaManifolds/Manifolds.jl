@@ -169,6 +169,8 @@ end
 identity_element(G::RealCircleGroup) = 0.0
 identity_element(::RealCircleGroup, p) = zero(p)
 
+Base.inv(G::RealCircleGroup, p::AbstractArray{<:Any,0}) = map(pp -> inv(G, pp), p)
+
 function inverse_translate(
     ::RealCircleGroup,
     p::AbstractArray{<:Any,0},
