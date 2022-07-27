@@ -141,6 +141,7 @@ include("group_utils.jl")
         X = [3.0, 4.0]
         ge = Identity(G)
         @test number_eltype(ge) == Bool
+        @test identity_element(G, 2.0) == 0.0
         y = allocate(p)
         copyto!(G, y, ge)
         @test y ≈ zero(p)

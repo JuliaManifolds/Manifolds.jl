@@ -167,7 +167,7 @@ function compose!(
 end
 
 identity_element(G::RealCircleGroup) = 0.0
-identity_element(::RealCircleGroup, p::AbstractArray) = map(i -> zero(eltype(p)), p)
+identity_element(::RealCircleGroup, p) = zero(p)
 
 Base.inv(G::RealCircleGroup, p::AbstractArray{<:Any,0}) = map(pp -> inv(G, pp), p)
 
@@ -192,4 +192,4 @@ function exp_lie(::RealCircleGroup, X)
     return sym_rem(X)
 end
 
-exp_lie!(G::RealCircleGroup, q, X) = (q .= sym_rem(X))
+exp_lie!(::RealCircleGroup, q, X) = (q .= sym_rem(X))
