@@ -859,7 +859,7 @@ end
 
 Exponential map on [`TangentBundle`](@ref) computed via Euler integration as described
 in [^Muralidharan2012]. The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
-$\gamma(1) = exp_{p,X}(X_M, X_F)$ and $\gamma(0)=(p, X)$ reads
+$\gamma(1) = \exp_{p,X}(X_M, X_F)$ and $\gamma(0)=(p, X)$ reads
 
 ```math
 \dot{\gamma}(t) = (\dot{p}(t), \dot{X}(t)) = (R(X(t), \dot{X}(t))\dot{p}(t), 0)
@@ -1143,16 +1143,6 @@ function vector_transport_to!(M::TangentBundle, Y, p, X, q, m::VectorBundleVecto
     vector_transport_to!(M.manifold, VYM, px, VXM, qx, m.method_point)
     vector_transport_to!(M.manifold, VYF, px, VXF, qx, m.method_vector)
     return Y
-end
-function vector_transport_to!(
-    M::TangentBundle,
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod,
-)
-    return vector_transport_to!(M, Y, p, X, q, VectorBundleVectorTransport(m, m))
 end
 function vector_transport_to!(
     M::TangentSpaceAtPoint,

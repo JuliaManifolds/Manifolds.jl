@@ -190,16 +190,18 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test ct_p.point == p
         @test injectivity_radius(t_p) == Inf
         @test representation_size(t_p) == representation_size(M)
-        v = [0.0, 0.0, 1.0]
-        @test embed(t_p, v) == v
-        @test embed(t_p, v, v) == v
+        X = [0.0, 0.0, 1.0]
+        @test embed(t_p, X) == X
+        @test embed(t_p, X, X) == X
         # generic vector space at
         fiber = VectorBundleFibers(TestVectorSpaceType(), M)
-        v_p = VectorSpaceAtPoint(fiber, p)
-        v_ps = sprint(show, "text/plain", v_p)
+        X_p = VectorSpaceAtPoint(fiber, p)
+        X_ps = sprint(show, "text/plain", X_p)
         fiber_s = sprint(show, "text/plain", fiber)
-        v_ps_test = "$(typeof(v_p))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
-        @test v_ps == v_ps_test
+        X_ps_test = "$(typeof(X_p))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
+        @test X_ps == X_ps_test
+        @test_throws ErrorException project(fiber, p, X)
+        @test_throws ErrorException norm(fiber, p, X)
     end
 
     @testset "tensor product" begin
