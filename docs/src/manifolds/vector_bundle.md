@@ -23,17 +23,15 @@ It is used for example in musical isomorphisms (the [`flat`](@ref) and [`sharp`]
 
 ## Example
 
-The following code defines two points on a tangent bundle of the sphere $S^2$ and calculates distance between them, distance between their base points and norm of one of these tangent vectors.
+The following code defines a point on a tangent bundle of the sphere $S^2$ and a tangent vector to that point and calculates an approximation of the exponential in the Sasaki metric using 1000 steps.
 
 ```@example
 using Manifolds
 M = Sphere(2)
 TB = TangentBundle(M)
 p = ProductRepr([1.0, 0.0, 0.0], [0.0, 1.0, 3.0])
-q = ProductRepr([0.0, 1.0, 0.0], [2.0, 0.0, -1.0])
-println("Distance between p and q: ", distance(TB, p, q))
-println("Distance between base points of p and q: ", distance(M, p[TB, :point], q[TB, :point]))
-println("Norm of p: ", norm(M, p[TB, :point], p[TB, :vector]))
+X = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0, -2.0])
+println("Approximation of the exponential map: ", exp(TB, p, q, SasakiRetraction(1000)))
 ```
 
 ```@autodocs

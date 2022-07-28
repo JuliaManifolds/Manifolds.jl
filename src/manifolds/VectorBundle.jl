@@ -858,7 +858,14 @@ end
     struct SasakiRetraction <: AbstractRetractionMethod end
 
 Exponential map on [`TangentBundle`](@ref) computed via Euler integration as described
-in [^Muralidharan2012].
+in [^Muralidharan2012]. The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
+$\gamma(1) = exp_{p,X}(X_M, X_F)$ and $\gamma(0)=(p, X)$ reads
+
+```math
+\dot{\gamma}(t) = (\dot{p}(t), \dot{X}(t)) = (R(X(t), \dot{X}(t))\dot{p}(t), 0)
+```
+
+where $R$ is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
 
 # Constructor
 
