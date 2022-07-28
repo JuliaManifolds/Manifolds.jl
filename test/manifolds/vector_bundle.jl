@@ -80,6 +80,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 end
             end
             X12_prod = inverse_retract(TB, pts_tb[1], pts_tb[2], m_prod_invretr)
+            X13_prod = inverse_retract(TB, pts_tb[1], pts_tb[3], m_prod_invretr)
             diag_basis = DiagonalizingOrthonormalBasis(X12_prod)
             basis_types = (
                 DefaultOrthonormalBasis(),
@@ -123,6 +124,15 @@ struct TestVectorSpaceType <: VectorSpaceType end
                         pts_tb[1][TB, :vector],
                     ),
                 ),
+            )
+            @test isapprox(
+                distance(
+                    TB.fiber,
+                    pts_tb[1][TB, :point],
+                    pts_tb[1][TB, :vector],
+                    [0.0, 2.0, 3.0],
+                ),
+                5.0,
             )
             Xir2 = allocate(pts_tb[1])
             vector_transport_to!(
@@ -202,6 +212,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test X_ps == X_ps_test
         @test_throws ErrorException project(fiber, p, X)
         @test_throws ErrorException norm(fiber, p, X)
+        @test_throws ErrorException distance(fiber, p, X, X)
     end
 
     @testset "tensor product" begin
