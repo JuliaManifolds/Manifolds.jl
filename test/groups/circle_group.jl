@@ -55,6 +55,7 @@ include("group_utils.jl")
         Xpts = [fill(0.0 + 0.5im), fill(0.0 - 1.5im)]
         @test compose(G, pts[2], pts[1]) ≈ fill(pts[2] .* pts[1])
         @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ fill(pts[2] .* Xpts[1])
+        @test all(identity_element(G, pts[1]) .== [1.0 + 0.0im])
         test_group(
             G,
             pts,
@@ -133,6 +134,7 @@ end
         Xpts = [fill(-2.0), fill(0.5), fill(2.0)]
         @test compose(G, pts[2], pts[1]) ≈ fill(pts[2] .+ pts[1])
         @test translate_diff(G, pts[2], pts[1], Xpts[1]) ≈ Xpts[1]
+        @test all(identity_element(G, pts[1]) .== [0.0])
         test_group(
             G,
             pts,
