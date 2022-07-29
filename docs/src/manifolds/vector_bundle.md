@@ -23,7 +23,7 @@ It is used for example in musical isomorphisms (the [`flat`](@ref) and [`sharp`]
 
 ## Example
 
-The following code defines a point on a tangent bundle of the sphere $S^2$ and a tangent vector to that point and calculates an approximation of the exponential in the Sasaki metric using 1000 steps.
+The following code defines a point on the tangent bundle of the sphere $S^2$ and a tangent vector to that point and calculates an approximation of the exponential in the Sasaki metric using 1000 steps.
 
 ```@example
 using Manifolds
