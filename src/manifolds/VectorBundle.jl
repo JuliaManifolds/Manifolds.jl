@@ -125,7 +125,7 @@ struct SasakiRetraction <: AbstractRetractionMethod
     L::Int
 end
 
-"""
+@doc raw"""
     VectorBundleVectorTransport{
         TMP<:AbstractVectorTransportMethod,
         TMV<:AbstractVectorTransportMethod,
@@ -133,6 +133,10 @@ end
 
 Vector transport type on [`VectorBundle`](@ref). `method_point` is used for vector transport
 of the point part and `method_vector` is used for transport of the vector part.
+
+The vector transport is derived as a product manifold-style vector transport. The considered
+product manifold is the product between the manifold $\mathcal M$ and the topological vector
+space isometric to the fiber.
 
 # Constructor 
 
@@ -232,8 +236,11 @@ end
 @doc raw"""
     struct VectorBundleInverseProductRetraction <: AbstractInverseRetractionMethod end
 
-Inverse retraction of the point `y` at point `p` from
-vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
+Inverse retraction of the point `y` at point `p` from vector bundle `B` over manifold
+`B.fiber` (denoted $\mathcal M$). The inverse retraction is derived as a product manifold-style
+approximation to the logarithmic map in the Sasaki metric. The considered product manifold
+is the product between the manifold $\mathcal M$ and the topological vector space isometric
+to the fiber.
 
 Notation:
   * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
@@ -243,10 +250,11 @@ Notation:
 
 The inverse retraction is calculated as
 
-$\log_p q = (\log_{x_p}(x_q), V_{\log} - V_p)$
+$\operatorname{retr}^{-1}_p q = (\operatorname{retr}^{-1}_{x_p}(x_q), V_{\operatorname{retr}^{-1}} - V_p)$
 
-where $V_{\log}$ is the result of vector transport of $V_q$ to the point $x_p$.
-The difference $V_{\log} - V_p$ corresponds to the logarithmic map in the vector space $F$.
+where $V_{\operatorname{retr}^{-1}}$ is the result of vector transport of $V_q$ to the point $x_p$.
+The difference $V_{\operatorname{retr}^{-1}} - V_p$ corresponds to the logarithmic map in
+the vector space $F$.
 
 See also [`VectorBundleProductRetraction`](@ref).
 """
@@ -255,8 +263,11 @@ struct VectorBundleInverseProductRetraction <: AbstractInverseRetractionMethod e
 @doc raw"""
     struct VectorBundleProductRetraction <: AbstractRetractionMethod end
 
-Product retraction map of tangent vector $X$ at point $p$ from
-vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
+Product retraction map of tangent vector $X$ at point $p$ from vector bundle `B` over
+manifold `B.fiber` (denoted $\mathcal M$). The retraction is derived as a product manifold-style
+approximation to the exponential map in the Sasaki metric. The considered product manifold
+is the product between the manifold $\mathcal M$ and the topological vector space isometric
+to the fiber.
 
 Notation:
   * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
