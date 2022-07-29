@@ -42,11 +42,16 @@ function exp(::UnitaryMatrices{1,ℍ}, p, X::Number)
     return p * exp(X)
 end
 
-function get_coordinates_orthonormal(::UnitaryMatrices{1,ℍ}, p, X, ::RealNumbers)
+function get_coordinates_orthonormal(::UnitaryMatrices{1,ℍ}, p, X, ::QuaternionNumbers)
     return @SVector [X.v1, X.v2, X.v3]
 end
 
-function get_vector_orthonormal(::UnitaryMatrices{1,ℍ}, p::Quaternion, c, ::RealNumbers)
+function get_vector_orthonormal(
+    ::UnitaryMatrices{1,ℍ},
+    p::Quaternion,
+    c,
+    ::QuaternionNumbers,
+)
     return Quaternion(0, c[1], c[2], c[3])
 end
 
@@ -78,7 +83,7 @@ Return the dimension of the manifold unitary matrices.
 """
 manifold_dimension(::UnitaryMatrices{n,ℍ}) where {n} = n * (2n + 1)
 
-Manifolds.number_of_coordinates(::UnitaryMatrices{1,ℍ}, ::AbstractBasis{ℝ}) = 3
+Manifolds.number_of_coordinates(::UnitaryMatrices{1,ℍ}, ::AbstractBasis{ℍ}) = 3
 
 project(::UnitaryMatrices{1,ℍ}, p) = normalize(p)
 

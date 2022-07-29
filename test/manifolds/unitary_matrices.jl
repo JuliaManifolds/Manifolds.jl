@@ -105,7 +105,8 @@ end
     @test is_point(M, q)
     @test isapprox(q, normalize(pu))
 
-    @test get_coordinates(M, p, Quaternion(0, 1, 2, 3), DefaultOrthonormalBasis()) ==
+    @test get_coordinates(M, p, Quaternion(0, 1, 2, 3), DefaultOrthonormalBasis(ℍ)) ==
           SA[1, 2, 3]
-    @test get_vector(M, p, SA[1, 2, 3], DefaultOrthonormalBasis()) == Quaternion(0, 1, 2, 3)
+    @test get_vector(M, p, SA[1, 2, 3], DefaultOrthonormalBasis(ℍ)) ==
+          Quaternion(0, 1, 2, 3)
 end
