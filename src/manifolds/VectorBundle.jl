@@ -1156,13 +1156,9 @@ function vector_transport_to!(
 end
 
 @inline function Base.view(x::ArrayPartition, M::VectorBundle, s::Symbol)
-    if s === :point
-        return x.x[1]
-    elseif s === :vector
-        return x.x[2]
-    else
-        throw(DomainError(s, "unknown component $s on $M."))
-    end
+    (s === :point) && return x.x[1]
+    (s === :vector) && return x.x[2]
+    throw(DomainError(s, "unknown component $s on $M."))
 end
 
 """
