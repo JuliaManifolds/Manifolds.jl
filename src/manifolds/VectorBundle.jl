@@ -126,7 +126,7 @@ struct SasakiRetraction <: AbstractRetractionMethod
 end
 
 @doc raw"""
-    VectorBundleVectorTransport{
+    VectorBundleProductVectorTransport{
         TMP<:AbstractVectorTransportMethod,
         TMV<:AbstractVectorTransportMethod,
     } <: AbstractVectorTransportMethod
@@ -140,15 +140,15 @@ space isometric to the fiber.
 
 # Constructor 
 
-    VectorBundleVectorTransport(
+    VectorBundleProductVectorTransport(
         method_point::AbstractVectorTransportMethod,
         method_vector::AbstractVectorTransportMethod,
     )
-    VectorBundleVectorTransport()
+    VectorBundleProductVectorTransport()
 
 By default both methods are set to `ParallelTransport`.
 """
-struct VectorBundleVectorTransport{
+struct VectorBundleProductVectorTransport{
     TMP<:AbstractVectorTransportMethod,
     TMV<:AbstractVectorTransportMethod,
 } <: AbstractVectorTransportMethod
@@ -156,9 +156,16 @@ struct VectorBundleVectorTransport{
     method_vector::TMV
 end
 
-function VectorBundleVectorTransport()
-    return VectorBundleVectorTransport(ParallelTransport(), ParallelTransport())
+function VectorBundleProductVectorTransport()
+    return VectorBundleProductVectorTransport(ParallelTransport(), ParallelTransport())
 end
+
+"""
+    const VectorBundleVectorTransport = VectorBundleProductVectorTransport
+
+Deprecated: an alias for `VectorBundleProductVectorTransport`.
+"""
+const VectorBundleVectorTransport = VectorBundleProductVectorTransport
 
 """
     VectorBundle{𝔽,TVS<:VectorSpaceType,TM<:AbstractManifold{𝔽}} <: AbstractManifold{𝔽}
@@ -173,7 +180,7 @@ struct VectorBundle{
     𝔽,
     TVS<:VectorSpaceType,
     TM<:AbstractManifold{𝔽},
-    TVT<:VectorBundleVectorTransport,
+    TVT<:VectorBundleProductVectorTransport,
 } <: AbstractManifold{𝔽}
     type::TVS
     manifold::TM
@@ -184,13 +191,13 @@ end
 function VectorBundle(
     fiber::TVS,
     M::TM,
-    vtm::VectorBundleVectorTransport,
+    vtm::VectorBundleProductVectorTransport,
 ) where {TVS<:VectorSpaceType,TM<:AbstractManifold{𝔽}} where {𝔽}
     return VectorBundle{𝔽,TVS,TM,typeof(vtm)}(fiber, M, VectorBundleFibers(fiber, M), vtm)
 end
 function VectorBundle(fiber::VectorSpaceType, M::AbstractManifold)
     vtmm = vector_bundle_transport(fiber, M)
-    vtbm = VectorBundleVectorTransport(vtmm, vtmm)
+    vtbm = VectorBundleProductVectorTransport(vtmm, vtmm)
     return VectorBundle(fiber, M, vtbm)
 end
 
@@ -201,7 +208,7 @@ Tangent bundle for manifold of type `M`, as a manifold with the Sasaki metric [^
 
 Exact retraction and inverse retraction can be approximated using [`VectorBundleProductRetraction`](@ref),
 [`VectorBundleInverseProductRetraction`](@ref) and [`SasakiRetraction`](@ref).
-[`VectorBundleVectorTransport`](@ref) can be used as a vector transport.
+[`VectorBundleProductVectorTransport`](@ref) can be used as a vector transport.
 
 [^Sasaki1958]:
     > S. Sasaki, “On the differential geometry of tangent bundles of Riemannian manifolds,”
@@ -210,13 +217,13 @@ Exact retraction and inverse retraction can be approximated using [`VectorBundle
 # Constructors
 
     TangentBundle(M::AbstractManifold)
-    TangentBundle(M::AbstractManifold, vtm::VectorBundleVectorTransport)
+    TangentBundle(M::AbstractManifold, vtm::VectorBundleProductVectorTransport)
 """
 const TangentBundle{𝔽,M} =
     VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
 TangentBundle(M::AbstractManifold) = VectorBundle(TangentSpace, M)
-function TangentBundle(M::AbstractManifold, vtm::VectorBundleVectorTransport)
+function TangentBundle(M::AbstractManifold, vtm::VectorBundleProductVectorTransport)
     return VectorBundle(TangentSpace, M, vtm)
 end
 
@@ -224,7 +231,7 @@ const CotangentBundle{𝔽,M} =
     VectorBundle{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
 CotangentBundle(M::AbstractManifold) = VectorBundle(CotangentSpace, M)
-function CotangentBundle(M::AbstractManifold, vtm::VectorBundleVectorTransport)
+function CotangentBundle(M::AbstractManifold, vtm::VectorBundleProductVectorTransport)
     return VectorBundle(CotangentSpace, M, vtm)
 end
 
@@ -312,7 +319,7 @@ end
 
 function default_vector_transport_method(B::TangentBundle)
     default_vt_m = default_vector_transport_method(B.manifold)
-    return VectorBundleVectorTransport(default_vt_m, default_vt_m)
+    return VectorBundleProductVectorTransport(default_vt_m, default_vt_m)
 end
 
 """
@@ -1089,7 +1096,7 @@ function _vector_transport_direction(
     p,
     X,
     d,
-    m::VectorBundleVectorTransport,
+    m::VectorBundleProductVectorTransport,
 )
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
@@ -1110,7 +1117,7 @@ function _vector_transport_direction!(
     p,
     X,
     d,
-    m::VectorBundleVectorTransport,
+    m::VectorBundleProductVectorTransport,
 )
     VYM, VYF = submanifold_components(M.manifold, Y)
     px, pVx = submanifold_components(M.manifold, p)
@@ -1122,14 +1129,26 @@ function _vector_transport_direction!(
 end
 
 @doc raw"""
-    vector_transport_to(M::VectorBundle, p, X, q, m::VectorBundleVectorTransport)
+    vector_transport_to(M::VectorBundle, p, X, q, m::VectorBundleProductVectorTransport)
 
 Compute the vector transport the tangent vector `X`at `p` to `q` on the
-[`VectorBundle`](@ref) `M` using the [`VectorBundleVectorTransport`](@ref) `m`.
+[`VectorBundle`](@ref) `M` using the [`VectorBundleProductVectorTransport`](@ref) `m`.
 """
-vector_transport_to(::VectorBundle, ::Any, ::Any, ::Any, ::VectorBundleVectorTransport)
+vector_transport_to(
+    ::VectorBundle,
+    ::Any,
+    ::Any,
+    ::Any,
+    ::VectorBundleProductVectorTransport,
+)
 
-function _vector_transport_to(M::VectorBundle, p, X, q, m::VectorBundleVectorTransport)
+function _vector_transport_to(
+    M::VectorBundle,
+    p,
+    X,
+    q,
+    m::VectorBundleProductVectorTransport,
+)
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     qx, qVx = submanifold_components(M.manifold, q)
@@ -1146,7 +1165,14 @@ end
 function vector_transport_to!(M::VectorBundle, Y, p, X, q)
     return vector_transport_to!(M, Y, p, X, q, M.vector_transport)
 end
-function vector_transport_to!(M::TangentBundle, Y, p, X, q, m::VectorBundleVectorTransport)
+function vector_transport_to!(
+    M::TangentBundle,
+    Y,
+    p,
+    X,
+    q,
+    m::VectorBundleProductVectorTransport,
+)
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     VYM, VYF = submanifold_components(M.manifold, Y)

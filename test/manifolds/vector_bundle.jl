@@ -58,7 +58,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test representation_size(TB) === nothing
         @test default_inverse_retraction_method(TB) === m_prod_invretr
         @test default_retraction_method(TB) == m_prod_retr
-        @test default_vector_transport_method(TB) isa Manifolds.VectorBundleVectorTransport
+        @test default_vector_transport_method(TB) isa
+              Manifolds.VectorBundleProductVectorTransport
         CTB = CotangentBundle(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
         @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
@@ -141,7 +142,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 pts_tb[1],
                 Xir,
                 pts_tb[2],
-                Manifolds.VectorBundleVectorTransport(),
+                Manifolds.VectorBundleProductVectorTransport(),
             )
             @test is_vector(TB, pts_tb[2], Xir2)
 
@@ -256,7 +257,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         )
 
         ppt = ParallelTransport()
-        tbvt = Manifolds.VectorBundleVectorTransport(ppt, ppt)
+        tbvt = Manifolds.VectorBundleProductVectorTransport(ppt, ppt)
         @test TangentBundle(M, tbvt).vector_transport === tbvt
         @test CotangentBundle(M, tbvt).vector_transport === tbvt
         @test VectorBundle(TangentSpace, M, tbvt).vector_transport === tbvt
