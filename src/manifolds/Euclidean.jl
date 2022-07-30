@@ -115,7 +115,22 @@ Compute the Euclidean distance between two points on the [`Euclidean`](@ref)
 manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
 and higher order arrays, the matrix and ternsor Frobenius norm, respectively.
 """
-distance(::Euclidean, p, q) = norm(p .- q)
+Base.@propagate_inbounds function distance(M::Euclidean, p, q)
+    # Inspired by euclidean distance calculation in Distances.jl
+    # Much faster for large p, q than a naive implementation
+    @boundscheck if axes(p) != axes(q)
+        throw(DimensionMismatch("At last one of $p and $q does not belong to $M"))
+    end
+    s = zero(eltype(p))
+    @inbounds begin
+        @simd for I in eachindex(p, q)
+            p_i = p[I]
+            q_i = q[I]
+            s += abs2(p_i - q_i)
+        end
+    end
+    return sqrt(s)
+end
 distance(::Euclidean{Tuple{}}, p::Number, q::Number) = abs(p - q)
 
 """

@@ -240,7 +240,7 @@ end
 function exp!(M::Hyperbolic, q, p, X)
     vn = sqrt(max(inner(M, p, X, X), 0.0))
     vn < eps(eltype(p)) && return copyto!(q, p)
-    return copyto!(q, cosh(vn) * p + sinh(vn) / vn * X)
+    return copyto!(q, cosh(vn) .* p .+ (sinh(vn) / vn) .* X)
 end
 
 # overwrite the default construction on level 2 (dispatching on basis)
@@ -335,7 +335,7 @@ function get_vector!(M::Hyperbolic, X, p, c, B::DiagonalizingOrthonormalBasis)
 end
 
 @doc raw"""
-    _hyperbolize(M,q)
+    _hyperbolize(M, q)
 
 Given the [`Hyperbolic`](@ref)`(n)` manifold using the hyperboloid model, a point from the
 $q\in ℝ^n$ can be set onto the manifold by computing its last component such that for the
@@ -372,9 +372,9 @@ inner(M::Hyperbolic, p, X, Y)
 function log!(M::Hyperbolic, X, p, q)
     scp = minkowski_metric(p, q)
     w = q + scp * p
-    wn = sqrt(max(scp .^ 2 - 1, 0.0))
+    wn = sqrt(max(scp .^ 2 - 1, zero(scp)))
     wn < eps(eltype(p)) && return zero_vector!(M, X, p)
-    X .= acosh(max(1.0, -scp)) / wn .* w
+    X .= acosh(max(one(scp), -scp)) / wn .* w
     return X
 end
 

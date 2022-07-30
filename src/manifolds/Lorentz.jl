@@ -53,3 +53,6 @@ Compute the minkowski metric on $\mathbb R^n$ is given by
 ````
 """
 minkowski_metric(a, b) = -a[end] * b[end] + sum(a[1:(end - 1)] .* b[1:(end - 1)])
+function minkowski_metric(a::StaticVector{N}, b::StaticVector{N}) where {N}
+    return -a[N] * b[N] + dot(a[SOneTo(N - 1)], b[SOneTo(N - 1)])
+end
