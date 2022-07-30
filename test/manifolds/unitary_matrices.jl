@@ -109,4 +109,10 @@ end
           SA[1, 2, 3]
     @test get_vector(M, p, SA[1, 2, 3], DefaultOrthonormalBasis(ℍ)) ==
           Quaternion(0, 1, 2, 3)
+
+    @test get_basis(M, p, DefaultOrthonormalBasis(ℍ)).data == [
+        Quaternion(0.0, 1.0, 0.0, 0.0),
+        Quaternion(0.0, 0.0, 1.0, 0.0),
+        Quaternion(0.0, 0.0, 0.0, 1.0),
+    ]
 end
