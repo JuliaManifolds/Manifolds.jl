@@ -323,4 +323,9 @@ using Manifolds: induced_basis
             DefaultOrthonormalBasis(),
         ) == SA[-1.0 -3.0; -2.0 -4.0]
     end
+
+    @testset "Euclidean(1)" begin
+        M = Euclidean(1)
+        @test distance(M, 2.0, 4.0) == 2.0
+    end
 end

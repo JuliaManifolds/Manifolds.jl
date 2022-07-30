@@ -131,6 +131,7 @@ Base.@propagate_inbounds function distance(M::Euclidean, p, q)
     end
     return sqrt(s)
 end
+distance(::Euclidean{Tuple{1}}, p::Number, q::Number) = abs(p - q)
 distance(::Euclidean{Tuple{}}, p::Number, q::Number) = abs(p - q)
 
 """
