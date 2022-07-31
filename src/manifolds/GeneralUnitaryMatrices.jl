@@ -712,3 +712,22 @@ function retract_polar!(M::GeneralUnitaryMatrices{n,𝔽}, q, p, X) where {n,�
     A = p + p * X
     return project!(M, q, A; check_det=false)
 end
+
+@doc raw"""
+    riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
+
+Compute the value of Riemann tensor on the [`GeneralUnitaryMatrices`](@ref) manifold.
+The formula reads[^Rentmeesters2011] ``R(X,Y)Z=\frac{1}{4}[Z, [X, Y]]``.
+
+[^Rentmeesters2011]:
+    > Q. Rentmeesters, “A gradient method for geodesic data fitting on some symmetric
+    > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
+    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: 10.1109/CDC.2011.6161280.
+"""
+riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
+
+function riemann_tensor!(::GeneralUnitaryMatrices, Xresult, p, X, Y, Z)
+    Xtmp = X * Y - Y * X
+    Xresult .= 1 // 4 .* (Z * Xtmp .- Xtmp * Z)
+    return Xresult
+end

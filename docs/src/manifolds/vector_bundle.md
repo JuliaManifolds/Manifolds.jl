@@ -21,23 +21,29 @@ This is also considered a manifold.
 For cases where confusion between different types of vectors is possible, the type [`FVector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.FVector) can be used to express which type of vector space the vector belongs to.
 It is used for example in musical isomorphisms (the [`flat`](@ref) and [`sharp`](@ref) functions) that are used to go from a tangent space to cotangent space and vice versa.
 
-## Example
-
-The following code defines two points on a tangent bundle of the sphere $S^2$ and calculates distance between them, distance between their base points and norm of one of these tangent vectors.
-
-```@example
-using Manifolds
-M = Sphere(2)
-TB = TangentBundle(M)
-p = ProductRepr([1.0, 0.0, 0.0], [0.0, 1.0, 3.0])
-q = ProductRepr([0.0, 1.0, 0.0], [2.0, 0.0, -1.0])
-println("Distance between p and q: ", distance(TB, p, q))
-println("Distance between base points of p and q: ", distance(M, p[TB, :point], q[TB, :point]))
-println("Norm of p: ", norm(M, p[TB, :point], p[TB, :vector]))
-```
+## Documentation
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
 Pages = ["manifolds/VectorBundle.jl"]
-Order = [:type, :function]
+Order = [:constant, :type, :function]
+```
+
+## Example
+
+The following code defines a point on the tangent bundle of the sphere $S^2$ and a tangent vector to that point.
+
+```@example tangent-bundle
+using Manifolds
+M = Sphere(2)
+TB = TangentBundle(M)
+p = ProductRepr([1.0, 0.0, 0.0], [0.0, 1.0, 3.0])
+X = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0, -2.0])
+```
+
+An approximation of the exponential in the Sasaki metric using 1000 steps can be calculated as follows.
+
+```@example tangent-bundle
+q = retract(TB, p, X, SasakiRetraction(1000))
+println("Approximation of the exponential map: ", q)
 ```
