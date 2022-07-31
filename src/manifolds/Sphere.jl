@@ -468,6 +468,31 @@ function parallel_transport_to!(::AbstractSphere, Y, p, X, q)
     return Y
 end
 
+@doc raw"""
+    riemann_tensor(M::AbstractSphere{ℝ}, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`AbstractSphere`](@ref) `M`.
+The formula reads [^MuralidharanFletcher2021] (though note that a different convention is
+used in that paper than in Manifolds.jl):
+
+````math
+R(X,Y)Z = \langle Z, Y \rangle X - \langle Z, X \rangle Y
+````
+
+[^MuralidharanFletcher2021]:
+    > P. Muralidharan and P. T. Fletcher, “Sasaki Metrics for Analysis of Longitudinal Data
+    > on Manifolds,” Proc IEEE Comput Soc Conf Comput Vis Pattern Recognit, vol. 2012,
+    > pp. 1027–1034, Jun. 2012, doi: 10.1109/CVPR.2012.6247780.
+"""
+riemann_tensor(M::AbstractSphere{ℝ}, p, X, Y, Z)
+
+function riemann_tensor!(M::AbstractSphere{ℝ}, Xresult, p, X, Y, Z)
+    innerZX = inner(M, p, Z, X)
+    innerZY = inner(M, p, Z, Y)
+    Xresult .= innerZY .* X .- innerZX .* Y
+    return Xresult
+end
+
 """
     StereographicAtlas()
 

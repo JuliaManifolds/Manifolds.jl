@@ -6,6 +6,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
 @testset "Tangent bundle" begin
     M = Sphere(2)
+    m_prod_retr = Manifolds.VectorBundleProductRetraction()
+    m_prod_invretr = Manifolds.VectorBundleInverseProductRetraction()
+    m_sasaki = SasakiRetraction(5)
 
     @testset "Nice access to vector bundle components" begin
         TB = TangentBundle(M)
@@ -30,6 +33,14 @@ struct TestVectorSpaceType <: VectorSpaceType end
             @test p.x[1] == [0.0, 1.0, 0.0]
             @test_throws DomainError p[TB, :error]
             @test_throws DomainError p[TB, :error] = [1, 2, 3]
+
+            @test view(p, TB, :point) === p.x[1]
+            @test view(p, TB, :vector) === p.x[2]
+            view(p, TB, :point) .= [2.0, 3.0, 5.0]
+            @test p.x[1] == [2.0, 3.0, 5.0]
+            view(p, TB, :vector) .= [-2.0, -3.0, -5.0]
+            @test p.x[2] == [-2.0, -3.0, -5.0]
+            @test_throws DomainError view(p, TB, :error)
         end
     end
 
@@ -45,6 +56,10 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2 * manifold_dimension(M)
         @test representation_size(TB) === nothing
+        @test default_inverse_retraction_method(TB) === m_prod_invretr
+        @test default_retraction_method(TB) == m_prod_retr
+        @test default_vector_transport_method(TB) isa
+              Manifolds.VectorBundleProductVectorTransport
         CTB = CotangentBundle(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
         @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
@@ -65,7 +80,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
                     @test bundle_projection(TB, pt) ≈ pt.x[1]
                 end
             end
-            diag_basis = DiagonalizingOrthonormalBasis(log(TB, pts_tb[1], pts_tb[2]))
+            X12_prod = inverse_retract(TB, pts_tb[1], pts_tb[2], m_prod_invretr)
+            X13_prod = inverse_retract(TB, pts_tb[1], pts_tb[3], m_prod_invretr)
+            diag_basis = DiagonalizingOrthonormalBasis(X12_prod)
             basis_types = (
                 DefaultOrthonormalBasis(),
                 get_basis(TB, pts_tb[1], DefaultOrthonormalBasis()),
@@ -75,13 +92,18 @@ struct TestVectorSpaceType <: VectorSpaceType end
             test_manifold(
                 TB,
                 pts_tb,
+                default_inverse_retraction_method=m_prod_invretr,
+                default_retraction_method=m_prod_retr,
+                inverse_retraction_methods=[m_prod_invretr],
+                retraction_methods=[m_prod_retr, m_sasaki],
+                test_exp_log=false,
                 test_injectivity_radius=false,
                 test_tangent_vector_broadcasting=false,
                 test_vee_hat=true,
                 test_project_tangent=true,
                 test_project_point=true,
                 test_default_vector_transport=true,
-                vector_transport_methods=[ParallelTransport()],
+                vector_transport_methods=[],
                 basis_types_vecs=basis_types,
                 projection_atol_multiplier=4,
                 test_inplace=true,
@@ -89,6 +111,40 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_rand_point=true,
                 test_rand_tvector=true,
             )
+
+            Xir = allocate(pts_tb[1])
+            inverse_retract!(TB, Xir, pts_tb[1], pts_tb[2], m_prod_invretr)
+            @test isapprox(TB, pts_tb[1], Xir, X12_prod)
+            @test isapprox(
+                norm(TB.fiber, pts_tb[1][TB, :point], pts_tb[1][TB, :vector]),
+                sqrt(
+                    inner(
+                        TB.fiber,
+                        pts_tb[1][TB, :point],
+                        pts_tb[1][TB, :vector],
+                        pts_tb[1][TB, :vector],
+                    ),
+                ),
+            )
+            @test isapprox(
+                distance(
+                    TB.fiber,
+                    pts_tb[1][TB, :point],
+                    pts_tb[1][TB, :vector],
+                    [0.0, 2.0, 3.0],
+                ),
+                5.0,
+            )
+            Xir2 = allocate(pts_tb[1])
+            vector_transport_to!(
+                TB,
+                Xir2,
+                pts_tb[1],
+                Xir,
+                pts_tb[2],
+                Manifolds.VectorBundleProductVectorTransport(),
+            )
+            @test is_vector(TB, pts_tb[2], Xir2)
 
             # tangent space at point
             pts_TpM = map(
@@ -145,16 +201,19 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test ct_p.point == p
         @test injectivity_radius(t_p) == Inf
         @test representation_size(t_p) == representation_size(M)
-        v = [0.0, 0.0, 1.0]
-        @test embed(t_p, v) == v
-        @test embed(t_p, v, v) == v
+        X = [0.0, 0.0, 1.0]
+        @test embed(t_p, X) == X
+        @test embed(t_p, X, X) == X
         # generic vector space at
         fiber = VectorBundleFibers(TestVectorSpaceType(), M)
-        v_p = VectorSpaceAtPoint(fiber, p)
-        v_ps = sprint(show, "text/plain", v_p)
+        X_p = VectorSpaceAtPoint(fiber, p)
+        X_ps = sprint(show, "text/plain", X_p)
         fiber_s = sprint(show, "text/plain", fiber)
-        v_ps_test = "$(typeof(v_p))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
-        @test v_ps == v_ps_test
+        X_ps_test = "$(typeof(X_p))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
+        @test X_ps == X_ps_test
+        @test_throws ErrorException project(fiber, p, X)
+        @test_throws ErrorException norm(fiber, p, X)
+        @test_throws ErrorException distance(fiber, p, X, X)
     end
 
     @testset "tensor product" begin
@@ -175,13 +234,13 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test_throws MethodError vector_space_dimension(vbf)
     end
 
-    @testset "log and exp on tangent bundle for power and product manifolds" begin
+    @testset "product retraction and inverse retraction on tangent bundle for power and product manifolds" begin
         M = PowerManifold(Circle(ℝ), 2)
         N = TangentBundle(M)
         p1 = ProductRepr([0.0, 0.0], [0.0, 0.0])
         p2 = ProductRepr([-1.047, -1.047], [0.0, 0.0])
-        X1 = log(N, p1, p2)
-        @test isapprox(N, p2, exp(N, p1, X1))
+        X1 = inverse_retract(N, p1, p2, m_prod_invretr)
+        @test isapprox(N, p2, retract(N, p1, X1, m_prod_retr))
         @test is_vector(N, p2, vector_transport_to(N, p1, X1, p2))
 
         M2 = ProductManifold(Circle(ℝ), Euclidean(2))
@@ -191,10 +250,14 @@ struct TestVectorSpaceType <: VectorSpaceType end
             ProductRepr([-1.047], [1.0, 0.0]),
             ProductRepr([-1.047], [0.0, 1.0]),
         )
-        @test isapprox(N2, p2_2, exp(N2, p1_2, log(N2, p1_2, p2_2)))
+        @test isapprox(
+            N2,
+            p2_2,
+            retract(N2, p1_2, inverse_retract(N2, p1_2, p2_2, m_prod_invretr), m_prod_retr),
+        )
 
         ppt = ParallelTransport()
-        tbvt = Manifolds.VectorBundleVectorTransport(ppt, ppt)
+        tbvt = Manifolds.VectorBundleProductVectorTransport(ppt, ppt)
         @test TangentBundle(M, tbvt).vector_transport === tbvt
         @test CotangentBundle(M, tbvt).vector_transport === tbvt
         @test VectorBundle(TangentSpace, M, tbvt).vector_transport === tbvt

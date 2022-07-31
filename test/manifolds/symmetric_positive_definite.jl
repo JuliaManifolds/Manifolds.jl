@@ -112,13 +112,13 @@ include("../utils.jl")
     @testset "Test for tangent ONB on LinearAffineMetric" begin
         v = log(M2, p, q)
         donb = get_basis(base_manifold(M2), p, DiagonalizingOrthonormalBasis(v))
-        X = get_vectors(base_manifold(M2), p, donb)
+        Xs = get_vectors(base_manifold(M2), p, donb)
         k = donb.data.eigenvalues
         @test isapprox(0.0, first(k))
-        for i in 1:length(X)
-            @test isapprox(1.0, norm(M2, p, X[i]))
-            for j in (i + 1):length(X)
-                @test isapprox(0.0, inner(M2, p, X[i], X[j]))
+        for i in 1:length(Xs)
+            @test isapprox(1.0, norm(M2, p, Xs[i]))
+            for j in (i + 1):length(Xs)
+                @test isapprox(0.0, inner(M2, p, Xs[i], Xs[j]))
             end
         end
         d2onb = get_basis(M2, p, DiagonalizingOrthonormalBasis(v))
@@ -186,5 +186,34 @@ include("../utils.jl")
             p,
             rand(MersenneTwister(123), M1; vector_at=p, tangent_distr=:Rician),
         )
+    end
+    @testset "metric" begin
+        p = [
+            1.3996531703810995 -0.050757455076129054 0.012468338878281887
+            -0.050757455076129054 1.4934536968479577 -0.1322157270710227
+            0.012468338878281887 -0.1322157270710227 1.1406534894519493
+        ]
+        X1 = [
+            -0.040154529852424355 0.0940975617218614 -0.14399681300759132
+            0.0940975617218614 -0.07959493647453719 0.039521032486382335
+            -0.14399681300759132 0.039521032486382335 -0.08077209831531029
+        ]
+        X2 = [
+            0.22320202697960773 0.1294383854675894 -0.15402580371166136
+            0.1294383854675894 0.23251725583184363 0.13919342694607098
+            -0.15402580371166136 0.139193426946071 0.4493904218883048
+        ]
+        X3 = [
+            0.14955817329734716 0.04874731541620811 0.16142208646317371
+            0.048747315416208095 0.4135413163173373 0.0813738001379617
+            0.16142208646317371 0.0813738001379617 0.5381987409318881
+        ]
+        X_rt = [
+            0.0026845159609378074 0.0008609241226852796 0.003549384063443887
+            0.0008609241226852785 -0.0010229969873821812 -0.0014137071858029112
+            0.003549384063443888 -0.0014137071858029105 -0.0011418891263384548
+        ]
+
+        @test isapprox(M1, p, riemann_tensor(M1, p, X1, X2, X3), X_rt)
     end
 end

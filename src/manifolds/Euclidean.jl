@@ -592,6 +592,19 @@ function retract(M::Euclidean{Tuple{}}, p::Number, q::Number, ::ExponentialRetra
     return exp(M, p, q)
 end
 
+@doc raw"""
+    riemann_tensor(M::Euclidean, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`Euclidean`](@ref) manifold `M`.
+Its value is always the zero tangent vector.
+````
+"""
+riemann_tensor(M::Euclidean, p, X, Y, Z)
+
+function riemann_tensor!(::Euclidean, Xresult, p, X, Y, Z)
+    return fill!(Xresult, 0)
+end
+
 function Base.show(io::IO, ::Euclidean{N,𝔽}) where {N,𝔽}
     return print(io, "Euclidean($(join(N.parameters, ", ")); field = $(𝔽))")
 end
