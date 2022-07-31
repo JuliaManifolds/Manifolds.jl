@@ -328,4 +328,9 @@ using Manifolds: induced_basis
         M = Euclidean(1)
         @test distance(M, 2.0, 4.0) == 2.0
     end
+
+    @testset "errors" begin
+        M = Euclidean(4)
+        @test_throws DimensionMismatch distance(M, [1, 2, 3, 4], [1 2; 3 4])
+    end
 end
