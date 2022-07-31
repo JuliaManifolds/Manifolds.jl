@@ -234,4 +234,9 @@ using ManifoldsBase: TFVector
         pts = rand(haar_measure, 5)
         @test all(p -> is_point(sphere, p), pts)
     end
+
+    @testset "other metric" begin
+        M = Sphere(2)
+        @test riemann_tensor(M, [0, 1, 0], [1, 0, 0], [1, 0, 4], [0, 0, 1]) == [4, 0, 0]
+    end
 end
