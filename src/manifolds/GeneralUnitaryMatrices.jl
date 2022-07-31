@@ -610,6 +610,15 @@ Return the dimension of the manifold orthogonal matrices and of the manifold of 
 ```
 """
 manifold_dimension(::GeneralUnitaryMatrices{n,ℝ}) where {n} = div(n * (n - 1), 2)
+@doc raw"""
+    manifold_dimension(M::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices})
+    
+Return the dimension of the manifold of special unitary matrices.
+```math
+\dim_{\mathrm{SU}(n)} = n^2-1.
+```
+"""
+manifold_dimension(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n} = n^2 - 1
 
 """
     mean(

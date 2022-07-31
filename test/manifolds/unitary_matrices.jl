@@ -6,13 +6,21 @@ using Quaternions
     M = OrthogonalMatrices(3)
     @test repr(M) == "OrthogonalMatrices(3)"
     @test injectivity_radius(M, PolarRetraction()) == π / sqrt(2.0)
+    @test manifold_dimension(M) == 3
     p = project(M, ones(3, 3))
     @test is_point(M, p, true)
+    @test is_point(M, rand(M), true)
+    @test abs(rand(OrthogonalMatrices(1))[]) == 1
+    @test is_vector(M, p, rand(M; vector_at=p))
+    @test is_point(M, rand(MersenneTwister(), M), true)
+    @test abs(rand(MersenneTwister(), OrthogonalMatrices(1))[]) == 1
+    @test is_vector(M, p, rand(MersenneTwister(), M; vector_at=p))
 end
 
 @testset "Unitary Matrices" begin
     M = UnitaryMatrices(2)
     @test repr(M) == "UnitaryMatrices(2)"
+    @test manifold_dimension(M) == 4
 
     # wrong length of size
     @test_throws DomainError is_point(M, zeros(1), true)
@@ -42,9 +50,26 @@ end
     @test isapprox(M, p, X, X2)
 end
 
+@testset "Special unitary matrices" begin
+    M = Manifolds.GeneralUnitaryMatrices{2,ℂ,Manifolds.DeterminantOneMatrices}()
+    @test manifold_dimension(M) == 3
+end
+
 @testset "Quaternionic Unitary Matrices" begin
     M = UnitaryMatrices(1, ℍ)
     @test repr(M) == "UnitaryMatrices(1, ℍ)"
+    @test manifold_dimension(M) == 3
+    @test injectivity_radius(M) == π
+    @testset "rand" begin
+        p = rand(M)
+        @test is_point(M, p)
+        X = rand(M; vector_at=p)
+        @test is_vector(M, p, X)
+        p = rand(MersenneTwister(), M)
+        @test is_point(M, p)
+        X = rand(MersenneTwister(), M; vector_at=p)
+        @test is_vector(M, p, X)
+    end
 
     # wrong length of size
     @test_throws DomainError is_point(M, zeros(2, 2), true)
@@ -79,4 +104,15 @@ end
     q = project(M, pu)
     @test is_point(M, q)
     @test isapprox(q, normalize(pu))
+
+    @test get_coordinates(M, p, Quaternion(0, 1, 2, 3), DefaultOrthonormalBasis(ℍ)) ==
+          SA[1, 2, 3]
+    @test get_vector(M, p, SA[1, 2, 3], DefaultOrthonormalBasis(ℍ)) ==
+          Quaternion(0, 1, 2, 3)
+
+    @test get_basis(M, p, DefaultOrthonormalBasis(ℍ)).data == [
+        Quaternion(0.0, 1.0, 0.0, 0.0),
+        Quaternion(0.0, 0.0, 1.0, 0.0),
+        Quaternion(0.0, 0.0, 0.0, 1.0),
+    ]
 end
