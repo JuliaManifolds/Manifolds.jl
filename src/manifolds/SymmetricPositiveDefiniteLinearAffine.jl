@@ -33,6 +33,7 @@ struct SPDPoint{
     sqrt::Q
     sqrt_inv::R
 end
+SPDPoint(p::SPDPoint) = p
 function SPDPoint(p::AbstractMatrix; store_p=true, store_sqrt=true, store_sqrt_inv=true)
     e = eigen(Symmetric(p))
     U = e.vectors
