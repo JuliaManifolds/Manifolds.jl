@@ -514,7 +514,8 @@ export HyperboloidPoint,
     SVDMPoint,
     TuckerPoint,
     StiefelPoint,
-    ProjectorPoint
+    ProjectorPoint,
+    SPDPoint
 # Tangent vector representation types
 export HyperboloidTVector,
     PoincareBallTVector,

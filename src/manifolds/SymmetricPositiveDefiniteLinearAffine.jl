@@ -56,6 +56,7 @@ function SPDPoint(p::AbstractMatrix; store_p=true, store_sqrt=true, store_sqrt_i
     end
     return SPDPoint{typeof(q),typeof(p_sqrt),typeof(p_sqrt_inv),typeof(e)}(
         q,
+        e,
         p_sqrt,
         p_sqrt_inv,
     )
@@ -263,14 +264,14 @@ function exp!(::SymmetricPositiveDefinite{N}, q::SPDPoint, p, X) where {N}
     Se = Diagonal(exp.(eig1.values))
     Ue = eig1.vectors
     pUe = p_sqrt * Ue
-    !ismissing(q.p) && copyto!(q.p, pUe * Se * transpose(pUe))
-    q.eigen .= eigen(q)
+    Q = pUe * Se * transpose(pUe)
+    !ismissing(q.p) && copyto!(q.p, Q)
+    q.eigen .= eigen(Q)
     if !is_missing(q.sqrt) && !ismissing(q.sqrt_inv)
-        copyto!.([q.sqrt, q.sqrt_inv], get_p_sqrt_and_sqrt_inv(pUe * Se * transpose(pUe)))
+        copyto!.([q.sqrt, q.sqrt_inv], get_p_sqrt_and_sqrt_inv(Q))
     else
-        !ismissing(q.sqrt) && copyto!(q.sqrt, get_p_sqrt(pUe * Se * transpose(pUe)))
-        !ismissing(q.sqrt_inv) &&
-            copyto!(q.sqrt_inv, get_p_sqrt_inv(pUe * Se * transpose(pUe)))
+        !ismissing(q.sqrt) && copyto!(q.sqrt, get_p_sqrt(Q))
+        !ismissing(q.sqrt_inv) && copyto!(q.sqrt_inv, get_p_sqrt_inv(Q))
     end
     return q
 end
@@ -474,7 +475,7 @@ log(::SymmetricPositiveDefinite, ::Any...)
 
 function log!(::SymmetricPositiveDefinite{N}, X, p, q) where {N}
     (p_sqrt, p_sqrt_inv) = get_p_sqrt_and_sqrt_inv(p)
-    T = Symmetric(p_sqrt_inv * q * p_sqrt_inv)
+    T = Symmetric(p_sqrt_inv * get_point(q) * p_sqrt_inv)
     e2 = eigen(T)
     Se = Diagonal(log.(max.(e2.values, eps())))
     pUe = p_sqrt * e2.vectors
@@ -524,6 +525,8 @@ function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) whe
     vtp = Symmetric(pUe * tv * transpose(pUe)) # so this is the documented formula
     return copyto!(Y, vtp)
 end
+
+zero_vector(M::SymmetricPositiveDefinite, p::SPDPoint) = zero_vector(M, get_point(p))
 
 @doc raw"""
     riemann_tensor(::SymmetricPositiveDefinite, p, X, Y, Z)
