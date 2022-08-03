@@ -240,7 +240,8 @@ end
 function exp!(M::Hyperbolic, q, p, X)
     vn = sqrt(max(inner(M, p, X, X), 0.0))
     vn < eps(eltype(p)) && return copyto!(q, p)
-    return copyto!(q, cosh(vn) .* p .+ (sinh(vn) / vn) .* X)
+    q .= cosh(vn) .* p .+ (sinh(vn) / vn) .* X
+    return q
 end
 
 # overwrite the default construction on level 2 (dispatching on basis)
