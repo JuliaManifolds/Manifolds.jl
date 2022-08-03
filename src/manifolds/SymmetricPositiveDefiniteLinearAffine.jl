@@ -89,7 +89,7 @@ function get_p_sqrt(p::AbstractMatrix)
     return Symmetric(U * Ssqrt * transpose(U))
 end
 get_p_sqrt(p::SPDPoint) = Symmetric(p.sqrt)
-function get_p_sqrt(p::SPDPoint{P,Missing}) where {P}
+function get_p_sqrt(p::SPDPoint{P,Missing}) where {P<:AbstractMatrix}
     U = p.eigen.vectors
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     Ssqrt = Diagonal(sqrt.(S))
