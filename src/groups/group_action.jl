@@ -126,11 +126,12 @@ end
 @doc raw"""
     apply_diff_group(A::AbstractGroupAction, a, X, p)
 
-For a point on manifold ``p ∈ \mathcal M`` and an element `X` of the tangent space at `a`,
-an element of the Lie group of action `A`, ``X ∈ T_a \mathcal G``, compute the
-differential of action of `a` on `p` for vector `X`, as specified by rule `A`.
-When action on element `p` is written as ``\mathrm{d}τ^p``, with the specified left or right
-convention, the differential transforms vectors
+For a point ``p ∈ \mathcal M`` on manifold ``\mathcal M`` the action `A` is acting upon and
+an element `X` of the tangent space at `a ∈ \mathcal G`, an element of the Lie group `G` of
+action `A`, ``X ∈ T_a \mathcal G``, compute the differential of action of `a` on `p` for
+vector `X`, as specified by rule `A`. When action on element `p` is written as
+``\mathrm{d}τ^p``, with the specified left or right convention, the differential transforms
+vectors
 
 ````math
 (\mathrm{d}τ^p) : T_{a} \mathcal G → T_{τ_a p} \mathcal M
