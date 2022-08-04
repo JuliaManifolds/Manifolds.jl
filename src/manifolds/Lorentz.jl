@@ -52,7 +52,11 @@ Compute the minkowski metric on $\mathbb R^n$ is given by
 \displaystyle\sum_{k=1}^{n-1} a_kb_k.
 ````
 """
-minkowski_metric(a, b) = -a[end] * b[end] + sum(a[1:(end - 1)] .* b[1:(end - 1)])
+function minkowski_metric(a, b)
+    a_part = @view a[1:(end - 1)]
+    b_part = @view b[1:(end - 1)]
+    return -a[end] * b[end] + dot(a_part, b_part)
+end
 function minkowski_metric(a::StaticVector{N}, b::StaticVector{N}) where {N}
     return -a[N] * b[N] + dot(a[SOneTo(N - 1)], b[SOneTo(N - 1)])
 end
