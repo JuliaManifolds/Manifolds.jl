@@ -43,7 +43,7 @@ include("../utils.jl")
                     # we have to raise this slightly for the nondiagonal case.
                     exp_log_atol_multiplier = 5e1
                 end
-                if T == SPDPoint && (M != M1 || M != M2)
+                if T == SPDPoint && (M != M1 && M != M2)
                     # SPDPoint only meant for Affine metric
                     continue
                 end

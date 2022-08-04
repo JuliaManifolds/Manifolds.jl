@@ -98,8 +98,8 @@ function allocate(p::SPDPoint)
     return SPDPoint(
         ismissing(p.p) ? missing : allocate(pV),
         e2,
-        is_missing(p.sqrt) ? missing : allocate(p.sqrt),
-        is_missing(p.sqrt_inv) ? missing : allocate(p.sqrt_inv),
+        ismissing(p.sqrt) ? missing : allocate(p.sqrt),
+        ismissing(p.sqrt_inv) ? missing : allocate(p.sqrt_inv),
     )
 end
 function allocate(p::SPDPoint, ::Type{T}) where {T}
@@ -230,8 +230,8 @@ injectivity_radius(::SymmetricPositiveDefinite, p) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::AbstractRetractionMethod) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, p, ::AbstractRetractionMethod) = Inf
 
-function isapprox(M::SymmetricPositiveDefinite, p::SPDPoint, q::SPDPoint, kwargs...)
-    return isapprox(M, get_point(p), get_point(q); kwargs...)
+function isapprox(p::SPDPoint, q::SPDPoint; kwargs...)
+    return isapprox(get_point(p), get_point(q); kwargs...)
 end
 
 @doc raw"""
@@ -474,5 +474,5 @@ definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
 zero_vector(::SymmetricPositiveDefinite, ::Any)
 
-zero_vector(::SymmetricPositiveDefinite, p::SPDPoint) = zero_vector(M, get_point(p))
+zero_vector(M::SymmetricPositiveDefinite, p::SPDPoint) = zero_vector(M, get_point(p))
 zero_vector!(::SymmetricPositiveDefinite{N}, v, ::Any) where {N} = fill!(v, 0)

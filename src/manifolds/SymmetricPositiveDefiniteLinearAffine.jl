@@ -74,6 +74,9 @@ function distance(::SymmetricPositiveDefinite{N}, p, q) where {N}
     s = eigvals(Symmetric(cq.L \ p / cq.U))
     return any(s .<= eps()) ? zero(eltype(p)) : sqrt(sum(abs.(log.(s)) .^ 2))
 end
+function distance(M::SymmetricPositiveDefinite, p::SPDPoint, q::SPDPoint)
+    return distance(M, get_point(p), get_point(q))
+end
 
 @doc raw"""
     exp(M::SymmetricPositiveDefinite, p, X)
@@ -125,7 +128,7 @@ function exp!(::SymmetricPositiveDefinite{N}, q::SPDPoint, p, X) where {N}
     pUe = p_sqrt * Ue
     Q = pUe * Se * transpose(pUe)
     !ismissing(q.p) && copyto!(q.p, Q)
-    q.eigen .= eigen(Q)
+    q.eigen = eigen(Q)
     if !is_missing(q.sqrt) && !ismissing(q.sqrt_inv)
         copyto!.([q.sqrt, q.sqrt_inv], get_p_sqrt_and_sqrt_inv(Q))
     else
