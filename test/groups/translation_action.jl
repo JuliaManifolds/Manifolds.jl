@@ -29,6 +29,15 @@ include("group_utils.jl")
                     [1.0 1.0 2.0; 3.0 2.0 1.0],
                 ],
             )
+        a_X_pts =
+            convert.(
+                T_A,
+                [
+                    [10.0 1.0 2.0; 2.0 4.0 1.0],
+                    [-1.0 10.0 2.0; -2.0 3.0 3.0],
+                    [1.0 1.0 12.0; 3.0 2.0 1.0],
+                ],
+            )
         m_pts =
             convert.(
                 T_M,
@@ -55,6 +64,25 @@ include("group_utils.jl")
         end
         @test apply_diff(A, a_pts[1], m_pts[1], X_pts[1]) === X_pts[1]
         @test inverse_apply_diff(A, a_pts[1], m_pts[1], X_pts[1]) === X_pts[1]
+
+        @test apply_diff_group(A, a_pts[1], a_X_pts[1], m_pts[1]) === a_X_pts[1]
+        @test apply_diff_group(A, Identity(G), a_X_pts[1], m_pts[1]) === a_X_pts[1]
+        Y = similar(a_X_pts[1])
+        apply_diff_group!(A, Y, a_pts[1], a_X_pts[1], m_pts[1])
+        @test Y == a_X_pts[1]
+        Y = similar(a_X_pts[1])
+        apply_diff_group!(A, Y, Identity(G), a_X_pts[1], m_pts[1])
+        @test Y == a_X_pts[1]
+
+        @test adjoint_apply_diff_group(A, a_pts[1], X_pts[1], m_pts[1]) === X_pts[1]
+        @test adjoint_apply_diff_group(A, Identity(G), X_pts[1], m_pts[1]) === X_pts[1]
+        Y = similar(X_pts[1])
+        adjoint_apply_diff_group!(A, Y, a_pts[1], X_pts[1], m_pts[1])
+        @test Y == X_pts[1]
+        Y = similar(X_pts[1])
+        adjoint_apply_diff_group!(A, Y, Identity(G), X_pts[1], m_pts[1])
+        @test Y == X_pts[1]
+
         test_action(
             A,
             a_pts,

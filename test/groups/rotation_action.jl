@@ -92,6 +92,8 @@ end
             atol=atol,
         )
     end
+    # make sure angle can be in a one-element vector
+    @test apply(A, [π / 2], [0.0, 1.0, 0.0]) ≈ [0.5, 0.5, sqrt(2) / 2]
 end
 
 @testset "Matrix columnwise multiplication action" begin

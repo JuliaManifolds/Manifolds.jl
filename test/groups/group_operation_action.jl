@@ -66,4 +66,18 @@ include("group_utils.jl")
     test_action(A_left, a_pts, m_pts, X_pts; test_optimal_alignment=true, test_diff=true)
 
     test_action(A_right, a_pts, m_pts, X_pts; test_optimal_alignment=true, test_diff=true)
+
+    @testset "apply_diff_group" begin
+        @test apply_diff_group(A_left, a_pts[1], X_pts[1], m_pts[1]) ≈
+              translate_diff(G, m_pts[1], a_pts[1], X_pts[1], RightAction())
+        Y = similar(X_pts[1])
+        apply_diff_group!(A_left, Y, a_pts[1], X_pts[1], m_pts[1])
+        @test Y ≈ translate_diff(G, m_pts[1], a_pts[1], X_pts[1], RightAction())
+
+        @test adjoint_apply_diff_group(A_left, a_pts[1], X_pts[1], m_pts[1]) ≈
+              inverse_translate_diff(G, a_pts[1], m_pts[1], X_pts[1], RightAction())
+        Y = similar(X_pts[1])
+        adjoint_apply_diff_group!(A_left, Y, a_pts[1], X_pts[1], m_pts[1])
+        @test Y ≈ inverse_translate_diff(G, a_pts[1], m_pts[1], X_pts[1], RightAction())
+    end
 end

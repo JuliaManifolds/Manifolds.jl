@@ -72,6 +72,15 @@ function apply_diff!(A::RotationActionOnVector{N,F,RightAction}, Y, a, p, X) whe
     return mul!(Y, inv(base_group(A), a), X)
 end
 
+function apply_diff_group(
+    ::RotationActionOnVector{N,F,LeftAction},
+    ::Identity,
+    X,
+    p,
+) where {N,F}
+    return X * p
+end
+
 function inverse_apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, p, X) where {N,F}
     return inv(base_group(A), a) * X
 end
@@ -121,6 +130,10 @@ function apply(A::RotationAroundAxisAction, θ, p)
     return p .* cθ .+ cross(A.axis, p) .* sθ .+ A.axis .* apd .* (1 - cθ)
 end
 apply(::RotationAroundAxisAction, ::Identity{AdditionOperation}, p) = p
+function apply(A::RotationAroundAxisAction, θ::AbstractArray, p)
+    # this method is here to make sure that θ represented by 1-element vectors works
+    return apply(A, θ[], p)
+end
 
 function apply!(A::RotationAroundAxisAction, q, θ, p)
     return copyto!(q, apply(A, θ, p))
