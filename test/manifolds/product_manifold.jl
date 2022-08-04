@@ -606,4 +606,24 @@ using RecursiveArrayTools: ArrayPartition
         )
         @test norm(N, P, Z - Zc) ≈ 0
     end
+
+    @testset "default retraction, inverse retraction and VT" begin
+        Mstb = ProductManifold(M1, TangentBundle(M1))
+        @test Manifolds.default_retraction_method(Mstb) === ProductRetraction(
+            ExponentialRetraction(),
+            Manifolds.VectorBundleProductRetraction(),
+        )
+        @test Manifolds.default_inverse_retraction_method(Mstb) ===
+              Manifolds.InverseProductRetraction(
+            LogarithmicInverseRetraction(),
+            Manifolds.VectorBundleInverseProductRetraction(),
+        )
+        @test Manifolds.default_vector_transport_method(Mstb) === ProductVectorTransport(
+            ParallelTransport(),
+            Manifolds.VectorBundleProductVectorTransport(
+                ParallelTransport(),
+                ParallelTransport(),
+            ),
+        )
+    end
 end

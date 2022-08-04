@@ -24,6 +24,7 @@ include("group_utils.jl")
     for (i, T_A, T_M) in zip(1:length(types_a), types_a, types_m)
         angles = (0.0, π / 2, 2π / 3, π / 4)
         a_pts = convert.(T_A, [[cos(ϕ) -sin(ϕ); sin(ϕ) cos(ϕ)] for ϕ in angles])
+        a_X_pts = map(a -> log_lie(G, a), a_pts)
         m_pts = convert.(T_M, [[0.0, 1.0], [-1.0, 0.0], [1.0, 1.0]])
         X_pts = convert.(T_M, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
 
@@ -51,6 +52,14 @@ include("group_utils.jl")
             test_diff=true,
             atol=atol,
         )
+
+        @testset "apply_diff_group" begin
+            @test apply_diff_group(A_left, Identity(G), a_X_pts[1], m_pts[1]) ≈
+                  a_X_pts[1] * m_pts[1]
+            Y = similar(m_pts[1])
+            apply_diff_group!(A_left, Y, Identity(G), a_X_pts[1], m_pts[1])
+            @test Y ≈ a_X_pts[1] * m_pts[1]
+        end
     end
 end
 

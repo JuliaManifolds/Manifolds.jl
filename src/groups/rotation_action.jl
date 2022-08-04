@@ -81,6 +81,17 @@ function apply_diff_group(
     return X * p
 end
 
+function apply_diff_group!(
+    ::RotationActionOnVector{N,F,LeftAction},
+    Y,
+    ::Identity,
+    X,
+    p,
+) where {N,F}
+    Y .= X * p
+    return Y
+end
+
 function inverse_apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, p, X) where {N,F}
     return inv(base_group(A), a) * X
 end
