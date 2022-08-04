@@ -46,7 +46,7 @@ when required.
 
 Create an SPD point using an symmetric positive defincite matrix `p`, where you can optionally store `p`, `p_sqrt` and `p_sqrt_inv`
 """
-struct SPDPoint{
+mutable struct SPDPoint{
     P<:Union{<:AbstractMatrix,Missing},
     Q<:Union{<:AbstractMatrix,Missing},
     R<:Union{<:AbstractMatrix,Missing},
@@ -111,6 +111,10 @@ function allocate(p::SPDPoint, ::Type{T}) where {T}
         ismissing(p.sqrt) ? missing : allocate(p.sqrt, T),
         ismissing(p.sqrt_inv) ? missing : allocate(p.sqrt_inv, T),
     )
+end
+
+function allocate_result(M::SymmetricPositiveDefinite, zero_vector, p::SPDPoint)
+    return allocate_result(M, zero_vector, get_point(p))
 end
 
 @doc raw"""
@@ -207,6 +211,8 @@ function copyto!(q::SPDPoint, p::SPDPoint)
     end
     return q
 end
+
+eltype(p::SPDPoint) = eltype(get_point(p))
 
 embed(::SymmetricPositiveDefinite, p) = p
 embed(::SymmetricPositiveDefinite, p::SPDPoint) = get_point(p)
@@ -474,5 +480,4 @@ definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
 zero_vector(::SymmetricPositiveDefinite, ::Any)
 
-zero_vector(M::SymmetricPositiveDefinite, p::SPDPoint) = zero_vector(M, get_point(p))
 zero_vector!(::SymmetricPositiveDefinite{N}, v, ::Any) where {N} = fill!(v, 0)
