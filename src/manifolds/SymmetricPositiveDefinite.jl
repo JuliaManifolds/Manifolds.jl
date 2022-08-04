@@ -212,8 +212,6 @@ function copyto!(q::SPDPoint, p::SPDPoint)
     return q
 end
 
-eltype(p::SPDPoint) = eltype(get_point(p))
-
 embed(::SymmetricPositiveDefinite, p) = p
 embed(::SymmetricPositiveDefinite, p::SPDPoint) = get_point(p)
 embed(::SymmetricPositiveDefinite, p, X) = X
