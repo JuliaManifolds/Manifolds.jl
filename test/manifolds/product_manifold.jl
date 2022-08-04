@@ -323,6 +323,9 @@ using RecursiveArrayTools: ArrayPartition
             )
             Z = ProductRepr(Z1, Z2)
             @test isapprox(Mse, q, Y, Z)
+            Y2 = allocate(Mse, Y)
+            vector_transport_to!(Mse, Y2, p, X, q, m)
+            @test isapprox(Mse, q, Y2, Z)
         end
         for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
             Y = vector_transport_direction(Mse, p, X, X, m)
