@@ -21,7 +21,7 @@ include("../utils.jl")
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M2, one(zeros(3, 3)))
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M3, one(zeros(3, 3)))
     metrics = [M1, M2, M3, M5, M6]
-    types = [Matrix{Float64}]
+    types = [Matrix{Float64}, SPDPoint]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
 
@@ -42,6 +42,10 @@ include("../utils.jl")
                 if M == M6
                     # we have to raise this slightly for the nondiagonal case.
                     exp_log_atol_multiplier = 5e1
+                end
+                if T == SPDPoint && (M != M1 || M != M2)
+                    # SPDPoint only meant for Affine metric
+                    continue
                 end
                 if M == M3 && T <: MMatrix
                     # Cholesky or something does not work in vector_transport yet for MMatrix

@@ -86,6 +86,7 @@ function SPDPoint(p::AbstractMatrix; store_p=true, store_sqrt=true, store_sqrt_i
         p_sqrt_inv,
     )
 end
+convert(::Type{SPDPoint}, p::AbstractMatrix) = SPDPoint(p)
 
 function active_traits(f, ::SymmetricPositiveDefinite, args...)
     return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(LinearAffineMetric()))
@@ -160,10 +161,10 @@ function check_vector(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
     return check_vector(M, get_point(p), X; kwargs...)
 end
 
-function check_size(M::SymmetricPositiveDefinite, p::SPDPoint; kwargs)
+function check_size(M::SymmetricPositiveDefinite, p::SPDPoint; kwargs...)
     return check_size(M, get_point(p); kwargs...)
 end
-function check_size(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs)
+function check_size(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
     return check_size(M, get_point(p), X; kwargs...)
 end
 
@@ -228,6 +229,10 @@ injectivity_radius(::SymmetricPositiveDefinite) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, p) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, ::AbstractRetractionMethod) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, p, ::AbstractRetractionMethod) = Inf
+
+function isapprox(M::SymmetricPositiveDefinite, p::SPDPoint, q::SPDPoint, kwargs...)
+    return isapprox(M, get_point(p), get_point(q); kwargs...)
+end
 
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)

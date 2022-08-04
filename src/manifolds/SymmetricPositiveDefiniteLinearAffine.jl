@@ -101,8 +101,8 @@ function exp(::SymmetricPositiveDefinite{N}, p::SPDPoint, X) where {N}
     q = SPDPoint(
         pUe * Se * transpose(pUe),
         store_p=!ismissing(p.p),
-        store_p_sqrt=!ismissing(p.sqrt),
-        store_p_sqrt_inv=!ismissing(p.sqrt_inv),
+        store_sqrt=!ismissing(p.sqrt),
+        store_sqrt_inv=!ismissing(p.sqrt_inv),
     )
     return q
 end
@@ -331,6 +331,10 @@ p^{\frac{1}{2}}\operatorname{Log}(p^{-\frac{1}{2}}qp^{-\frac{1}{2}})p^{\frac{1}{
 where $\operatorname{Log}$ denotes to the matrix logarithm.
 """
 log(::SymmetricPositiveDefinite, ::Any...)
+
+function allocate_result(M::SymmetricPositiveDefinite, log, q::SPDPoint, p::SPDPoint)
+    return allocate_result(M, log, get_point(q), get_point(p))
+end
 
 function log!(::SymmetricPositiveDefinite{N}, X, p, q) where {N}
     (p_sqrt, p_sqrt_inv) = get_p_sqrt_and_sqrt_inv(p)
