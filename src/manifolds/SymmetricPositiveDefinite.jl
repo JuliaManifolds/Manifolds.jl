@@ -316,6 +316,12 @@ function _sqrt(p::SPDPoint{P,Missing}) where {P<:AbstractMatrix}
     Ssqrt = Diagonal(sqrt.(S))
     return Symmetric(U * Ssqrt * transpose(U))
 end
+function _sqrt(p::SPDPoint{Missing,Missing})
+    U = p.eigen.vectors
+    S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
+    Ssqrt = Diagonal(sqrt.(S))
+    return Symmetric(U * Ssqrt * transpose(U))
+end
 
 @doc raw"""
     _sqrt_inv(p::AbstractMatrix)
@@ -390,6 +396,16 @@ Generate a random symmetric positive definite matrix on the
 `SymmetricPositiveDefinite` manifold `M`.
 """
 rand(M::SymmetricPositiveDefinite; σ::Real=1)
+
+function Random.rand!(M::SymmetricPositiveDefinite, pX::SPDPoint; kwargs...)
+    p = rand(M; kwargs...)
+    pP = SPDPoint(p; store_p=false, store_sqrt=false, store_sqrt_inv=false)
+    !ismissing(pX.p) && pX.p .= p
+    pX.eigen = pP.eigen
+    !ismissing(pX.sqrt) && pX.sqrt .= _sqrt(pP)
+    !ismissing(pX.sqrt_inv) && pX.sqrt_inv .= _sqrt_inv(pP)
+    return pX
+end
 
 function Random.rand!(
     M::SymmetricPositiveDefinite{N},
