@@ -26,6 +26,27 @@ function switch_direction(A::GroupOperationAction)
     return GroupOperationAction(A.group, switch_direction(direction(A)))
 end
 
+function adjoint_apply_diff_group(
+    A::GroupOperationAction{<:AbstractDecoratorManifold,AD},
+    a,
+    X,
+    p,
+) where {AD<:ActionDirection}
+    G = base_group(A)
+    return inverse_translate_diff(G, a, p, X, switch_direction(AD()))
+end
+
+function adjoint_apply_diff_group!(
+    A::GroupOperationAction{<:AbstractDecoratorManifold,AD},
+    Y,
+    a,
+    X,
+    p,
+) where {AD<:ActionDirection}
+    G = base_group(A)
+    return inverse_translate_diff!(G, Y, a, p, X, switch_direction(AD()))
+end
+
 apply(A::GroupOperationAction, a, p) = translate(A.group, a, p, direction(A))
 
 apply!(A::GroupOperationAction, q, a, p) = translate!(A.group, q, a, p, direction(A))
@@ -44,6 +65,26 @@ end
 
 function apply_diff!(A::GroupOperationAction, Y, a, p, X)
     return translate_diff!(A.group, Y, a, p, X, direction(A))
+end
+
+function apply_diff_group(
+    A::GroupOperationAction{<:AbstractDecoratorManifold,AD},
+    a,
+    X,
+    p,
+) where {AD<:ActionDirection}
+    G = base_group(A)
+    return translate_diff(G, p, a, X, switch_direction(AD()))
+end
+function apply_diff_group!(
+    A::GroupOperationAction{<:AbstractDecoratorManifold,AD},
+    Y,
+    a,
+    X,
+    p,
+) where {AD<:ActionDirection}
+    G = base_group(A)
+    return translate_diff!(G, Y, p, a, X, switch_direction(AD()))
 end
 
 function inverse_apply_diff(A::GroupOperationAction, a, p, X)

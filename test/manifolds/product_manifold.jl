@@ -323,6 +323,9 @@ using RecursiveArrayTools: ArrayPartition
             )
             Z = ProductRepr(Z1, Z2)
             @test isapprox(Mse, q, Y, Z)
+            Y2 = allocate(Mse, Y)
+            vector_transport_to!(Mse, Y2, p, X, q, m)
+            @test isapprox(Mse, q, Y2, Z)
         end
         for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
             Y = vector_transport_direction(Mse, p, X, X, m)
@@ -605,5 +608,25 @@ using RecursiveArrayTools: ArrayPartition
             change_representer(M, e, q, log(M, q, p)),
         )
         @test norm(N, P, Z - Zc) ≈ 0
+    end
+
+    @testset "default retraction, inverse retraction and VT" begin
+        Mstb = ProductManifold(M1, TangentBundle(M1))
+        @test Manifolds.default_retraction_method(Mstb) === ProductRetraction(
+            ExponentialRetraction(),
+            Manifolds.VectorBundleProductRetraction(),
+        )
+        @test Manifolds.default_inverse_retraction_method(Mstb) ===
+              Manifolds.InverseProductRetraction(
+            LogarithmicInverseRetraction(),
+            Manifolds.VectorBundleInverseProductRetraction(),
+        )
+        @test Manifolds.default_vector_transport_method(Mstb) === ProductVectorTransport(
+            ParallelTransport(),
+            Manifolds.VectorBundleProductVectorTransport(
+                ParallelTransport(),
+                ParallelTransport(),
+            ),
+        )
     end
 end

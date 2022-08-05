@@ -33,6 +33,17 @@ Get the direction of the action
 direction(::AbstractGroupAction{AD}) where {AD} = AD()
 
 @doc raw"""
+    adjoint_apply_diff_group(A::AbstractGroupAction, a, X, p)
+
+Pullback with respect to group element of group action `A`.
+
+````math
+(\mathrm{d}τ^{p,*}) : T_{τ_{a} p} \mathcal M → T_{a} \mathcal G
+````
+"""
+adjoint_apply_diff_group(A::AbstractGroupAction, a, X, p)
+
+@doc raw"""
     apply(A::AbstractGroupAction, a, p)
 
 Apply action `a` to the point `p` using map $τ_a$, specified by `A`.
@@ -111,6 +122,29 @@ function apply_diff!(A::AbstractGroupAction, Y, a, p, X)
         "apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), vectors $(typeof(Y)) and $(typeof(X))",
     )
 end
+
+@doc raw"""
+    apply_diff_group(A::AbstractGroupAction, a, X, p)
+
+Compute the value of differential of action [`AbstractGroupAction`](@ref) `A` on vector `X`,
+where element `a` is acting on `p`, with respect to the group element.
+
+Let ``\mathcal G`` be the group acting on manifold ``\mathcal M`` by the action `A`.
+The action is of element ``g ∈ \mathcal G`` on a point ``p ∈ \mathcal M``.
+The differential transforms vector `X` from the tangent space at `a ∈ \mathcal G`, 
+``X ∈ T_a \mathcal G`` into a tangent space of the manifold ``\mathcal M``.
+When action on element `p` is written as ``\mathrm{d}τ^p``, with the specified left or right
+convention, the differential transforms vectors
+
+````math
+(\mathrm{d}τ^p) : T_{a} \mathcal G → T_{τ_a p} \mathcal M
+````
+
+# See also
+
+[`apply`](@ref), [`apply_diff`](@ref)
+"""
+apply_diff_group(A::AbstractGroupAction, a, X, p)
 
 @doc raw"""
     inverse_apply_diff(A::AbstractGroupAction, a, p, X)

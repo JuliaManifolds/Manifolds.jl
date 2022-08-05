@@ -88,6 +88,10 @@ using Manifolds: TFVector, CoTFVector
         @test z2[1] == z
         @test project(M, z) == z
         @test project(M, 1.0, 2.0) == 2.0
+
+        # isapprox for 1-element vectors
+        @test isapprox(M, [1.0], [1.0])
+        @test isapprox(M, [0.0], [1.0], [1.0])
     end
     TEST_STATIC_SIZED && @testset "Real Circle and static sized arrays" begin
         X = @MArray fill(0.0)

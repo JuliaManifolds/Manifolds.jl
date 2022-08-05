@@ -36,20 +36,43 @@ function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
     return TranslationAction(A.manifold, A.Rn, switch_direction(TAD()))
 end
 
+adjoint_apply_diff_group(::TranslationAction, a, X, p) = X
+function adjoint_apply_diff_group!(A::TranslationAction, Y, a, X, p)
+    copyto!(A.manifold, Y, p, X)
+    return Y
+end
+
 apply(::TranslationAction, a, p) = p + a
 
 apply!(::TranslationAction, q, a, p) = (q .= p .+ a)
-apply!(::TranslationAction, q, e::Identity{AdditionOperation}, p) = copyto!(q, p)
+function apply!(A::TranslationAction, q, e::Identity{AdditionOperation}, p)
+    return copyto!(A.manifold, q, p)
+end
 
 inverse_apply(::TranslationAction, a, p) = p - a
 
 inverse_apply!(::TranslationAction, q, a, p) = (q .= p .- a)
-inverse_apply!(::TranslationAction, q, e::Identity{AdditionOperation}, p) = copyto!(q, p)
+function inverse_apply!(A::TranslationAction, q, e::Identity{AdditionOperation}, p)
+    return copyto!(A.manifold, q, p)
+end
 
 apply_diff(::TranslationAction, a, p, X) = X
 
-apply_diff!(::TranslationAction, Y, a, p, X) = copyto!(Y, X)
+function apply_diff!(A::TranslationAction, Y, a, p, X)
+    return copyto!(A.manifold, Y, p, X)
+end
+
+function apply_diff_group(::TranslationAction{N,F,LeftAction}, a, X, p) where {N,F}
+    return X
+end
+
+function apply_diff_group!(A::TranslationAction{N,F,LeftAction}, Y, a, X, p) where {N,F}
+    copyto!(A.manifold, Y, p, X)
+    return Y
+end
 
 inverse_apply_diff(::TranslationAction, a, p, X) = X
 
-inverse_apply_diff!(::TranslationAction, Y, a, p, X) = copyto!(Y, X)
+function inverse_apply_diff!(A::TranslationAction, Y, a, p, X)
+    return copyto!(A.manifold, Y, p, X)
+end

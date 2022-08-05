@@ -343,6 +343,18 @@ function LinearAlgebra.cross(M1::ProductManifold, M2::ProductManifold)
     return ProductManifold(M1.manifolds..., M2.manifolds...)
 end
 
+function default_retraction_method(M::ProductManifold)
+    return ProductRetraction(map(default_retraction_method, M.manifolds)...)
+end
+
+function default_inverse_retraction_method(M::ProductManifold)
+    return InverseProductRetraction(map(default_inverse_retraction_method, M.manifolds)...)
+end
+
+function default_vector_transport_method(M::ProductManifold)
+    return ProductVectorTransport(map(default_vector_transport_method, M.manifolds)...)
+end
+
 @doc raw"""
     distance(M::ProductManifold, p, q)
 
