@@ -123,7 +123,6 @@ function allocate_result(M::SymmetricPositiveDefinite, get_vector, p::SPDPoint, 
     return allocate_result(M, get_vector, Matrix(p), c)
 end
 
-
 @doc raw"""
     check_point(M::SymmetricPositiveDefinite, p; kwargs...)
 
