@@ -237,6 +237,10 @@ inner(::Circle, ::Any...)
 @inline inner(::Circle{ℝ}, p::Real, X::Real, Y::Real) = X * Y
 @inline inner(::Circle{ℂ}, p, X, Y) = complex_dot(X, Y)
 
+# these methods make sure that we allow for checking mixed bare number and number wrapped in array
+Base.isapprox(::Circle, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
+Base.isapprox(::Circle, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
+
 @doc raw"""
     log(M::Circle, p, q)
 
