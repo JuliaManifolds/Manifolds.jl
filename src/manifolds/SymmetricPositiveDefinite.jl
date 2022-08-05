@@ -213,7 +213,7 @@ function copyto!(q::SPDPoint, p::SPDPoint)
         if !ismissing(p.sqrt)
             copyto!(q.sqrt, p.sqrt)
         else # otherwise compute and copy
-            copyto(q.sqrt, _sqrt(p))
+            copyto(q.sqrt, eigvals_sqrt(p))
         end
     end
     if !ismissing(q.sqrt_inv)
@@ -294,29 +294,29 @@ Matrix(p::SPDPoint) = p.p
 Matrix(p::SPDPoint{Missing}) = p.eigen.vectors * p.eigen.values * p.eigen.vectors'
 
 @doc raw"""
-    _sqrt(p::AbstractMatrix)
-    _sqrt(p::SPDPoint)
+    eigvals_sqrt(p::AbstractMatrix)
+    eigvals_sqrt(p::SPDPoint)
 
 return ``p^{\frac{1}{2}}`` by either computing it (if it is missing or for the `AbstractMatrix`)
 or returning the stored value from within the [`SPDPoint`](@ref).
 
 This method assumes that `p` represents an spd matrix.
 """
-function _sqrt(p::AbstractMatrix)
+function eigvals_sqrt(p::AbstractMatrix)
     e = eigen(Symmetric(p))
     U = e.vectors
     S = max.(e.values, floatmin(eltype(e.values)))
     Ssqrt = Diagonal(sqrt.(S))
     return Symmetric(U * Ssqrt * transpose(U))
 end
-_sqrt(p::SPDPoint) = Symmetric(p.sqrt)
-function _sqrt(p::SPDPoint{P,Missing}) where {P<:AbstractMatrix}
+eigvals_sqrt(p::SPDPoint) = Symmetric(p.sqrt)
+function eigvals_sqrt(p::SPDPoint{P,Missing}) where {P<:AbstractMatrix}
     U = p.eigen.vectors
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     Ssqrt = Diagonal(sqrt.(S))
     return Symmetric(U * Ssqrt * transpose(U))
 end
-function _sqrt(p::SPDPoint{Missing,Missing})
+function eigvals_sqrt(p::SPDPoint{Missing,Missing})
     U = p.eigen.vectors
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     Ssqrt = Diagonal(sqrt.(S))
@@ -324,16 +324,16 @@ function _sqrt(p::SPDPoint{Missing,Missing})
 end
 
 @doc raw"""
-    _sqrt_inv(p::AbstractMatrix)
-    _sqrt_inv(p::SPDPoint)
+    eigvals_sqrt_inv(p::AbstractMatrix)
+    eigvals_sqrt_inv(p::SPDPoint)
 
 return ``p^{-\frac{1}{2}}`` by either computing it (if it is missing or for the `AbstractMatrix`)
 or returning the stored value from within the [`SPDPoint`](@ref).
 
 This method assumes that `p` represents an spd matrix.
 """
-_sqrt_inv(p::SPDPoint) = Symmetric(p.sqrt_inv)
-function _sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
+eigvals_sqrt_inv(p::SPDPoint) = Symmetric(p.sqrt_inv)
+function eigvals_sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
     U = p.eigen.vectors
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     SsqrtInv = Diagonal(1 ./ sqrt.(S))
@@ -341,8 +341,8 @@ function _sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
 end
 
 @doc raw"""
-    _sqrt_and_sqrt_inv(p::AbstractMatrix)
-    _sqrt_and_sqrt_inv(p::SPDPoint)
+    eigvals_sqrt_and_sqrt_inv(p::AbstractMatrix)
+    eigvals_sqrt_and_sqrt_inv(p::SPDPoint)
 
 return ``p^{\frac{1}{2}}`` and ``p^{-\frac{1}{2}}`` by either computing them (if they are missing or for the `AbstractMatrix`)
 or returning their stored value from within the [`SPDPoint`](@ref).
@@ -354,7 +354,7 @@ This method assumes that `p` represents an spd matrix.
 """
 _sqrt_and_sqrt_inv(p)
 
-function _sqrt_and_sqrt_inv(p::AbstractMatrix)
+function eigvals_sqrt_and_sqrt_inv(p::AbstractMatrix)
     e = eigen(Symmetric(p))
     U = e.vectors
     S = max.(e.values, floatmin(eltype(e.values)))
@@ -363,13 +363,13 @@ function _sqrt_and_sqrt_inv(p::AbstractMatrix)
     return (Symmetric(U * Ssqrt * transpose(U)), Symmetric(U * SsqrtInv * transpose(U)))
 end
 _sqrt_and_sqrt_inv(p::SPDPoint) = (Symmetric(p.sqrt), Symmetric(p.sqrt_inv))
-function _sqrt_and_sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
+function eigvals_sqrt_and_sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
     return (Symmetric(p.sqrt), sqrt_inv(p))
 end
-function _sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,R}) where {P,R}
+function eigvals_sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,R}) where {P,R}
     return (_sqrt(p), Symmetric(p.sqrt_inv))
 end
-function _sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,Missing}) where {P}
+function eigvals_sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,Missing}) where {P}
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     U = p.eigen.vectors
     Ssqrt = Diagonal(sqrt.(S))
@@ -402,8 +402,8 @@ function Random.rand!(M::SymmetricPositiveDefinite, pX::SPDPoint; kwargs...)
     pP = SPDPoint(p; store_p=false, store_sqrt=false, store_sqrt_inv=false)
     !ismissing(pX.p) && pX.p .= p
     pX.eigen = pP.eigen
-    !ismissing(pX.sqrt) && pX.sqrt .= _sqrt(pP)
-    !ismissing(pX.sqrt_inv) && pX.sqrt_inv .= _sqrt_inv(pP)
+    !ismissing(pX.sqrt) && pX.sqrt .= eigvals_sqrt(pP)
+    !ismissing(pX.sqrt_inv) && pX.sqrt_inv .= eigvals_sqrt_inv(pP)
     return pX
 end
 

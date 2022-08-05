@@ -95,7 +95,7 @@ where $\operatorname{Exp}$ denotes to the matrix exponential.
 exp(::SymmetricPositiveDefinite, ::Any...)
 
 function exp(::SymmetricPositiveDefinite{N}, p::SPDPoint, X) where {N}
-    (p_sqrt, p_sqrt_inv) = _sqrt_and_sqrt_inv(p)
+    (p_sqrt, p_sqrt_inv) = eigvals_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
@@ -111,7 +111,7 @@ function exp(::SymmetricPositiveDefinite{N}, p::SPDPoint, X) where {N}
 end
 
 function exp!(::SymmetricPositiveDefinite{N}, q, p, X) where {N}
-    (p_sqrt, p_sqrt_inv) = _sqrt_and_sqrt_inv(p)
+    (p_sqrt, p_sqrt_inv) = eigvals_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
@@ -120,7 +120,7 @@ function exp!(::SymmetricPositiveDefinite{N}, q, p, X) where {N}
     return copyto!(q, pUe * Se * transpose(pUe))
 end
 function exp!(::SymmetricPositiveDefinite{N}, q::SPDPoint, p, X) where {N}
-    (p_sqrt, p_sqrt_inv) = _sqrt_and_sqrt_inv(p)
+    (p_sqrt, p_sqrt_inv) = eigvals_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
@@ -130,10 +130,10 @@ function exp!(::SymmetricPositiveDefinite{N}, q::SPDPoint, p, X) where {N}
     !ismissing(q.p) && copyto!(q.p, Q)
     q.eigen = eigen(Q)
     if !ismissing(q.sqrt) && !ismissing(q.sqrt_inv)
-        copyto!.([q.sqrt, q.sqrt_inv], _sqrt_and_sqrt_inv(Q))
+        copyto!.([q.sqrt, q.sqrt_inv], eigvals_sqrt_and_sqrt_inv(Q))
     else
-        !ismissing(q.sqrt) && copyto!(q.sqrt, _sqrt(Q))
-        !ismissing(q.sqrt_inv) && copyto!(q.sqrt_inv, _sqrt_inv(Q))
+        !ismissing(q.sqrt) && copyto!(q.sqrt, eigvals_sqrt(Q))
+        !ismissing(q.sqrt_inv) && copyto!(q.sqrt_inv, eigvals_sqrt_inv(Q))
     end
     return q
 end
@@ -156,7 +156,7 @@ function get_basis_diagonalizing(
     p,
     B::DiagonalizingOrthonormalBasis,
 ) where {N}
-    (p_sqrt, p_sqrt_inv) = _sqrt_and_sqrt_inv(p)
+    (p_sqrt, p_sqrt_inv) = eigvals_sqrt_and_sqrt_inv(p)
     eigv = eigen(Symmetric(p_sqrt_inv * B.frame_direction * p_sqrt_inv))
     V = eigv.vectors
     Ξ = [
@@ -207,7 +207,7 @@ function get_basis_orthonormal(
     p,
     Ns::RealNumbers,
 ) where {N}
-    p_sqrt = _sqrt(p)
+    p_sqrt = eigvals_sqrt(p)
     Ξ = [similar(Matrix(p)) for _ in 1:manifold_dimension(M)]
     k = 1
     for i in 1:N, j in i:N
@@ -245,7 +245,7 @@ function get_coordinates_orthonormal!(
     @assert size(c) == (dim,)
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
-    p_sqrt = _sqrt(p)
+    p_sqrt = eigvals_sqrt(p)
     k = 1
     V = similar(Matrix(p))
     fill!(V, zero(eltype(V)))
@@ -285,7 +285,7 @@ function get_vector_orthonormal!(
 ) where {N}
     @assert size(c) == (div(N * (N + 1), 2),)
     @assert size(X) == (N, N)
-    p_sqrt = _sqrt(p)
+    p_sqrt = eigvals_sqrt(p)
     X .= 0
     k = 1
     V = similar(Matrix(p))
@@ -340,7 +340,7 @@ function allocate_result(M::SymmetricPositiveDefinite, log, q::SPDPoint, p::SPDP
 end
 
 function log!(::SymmetricPositiveDefinite{N}, X, p, q) where {N}
-    (p_sqrt, p_sqrt_inv) = _sqrt_and_sqrt_inv(p)
+    (p_sqrt, p_sqrt_inv) = eigvals_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * Matrix(q) * p_sqrt_inv)
     e2 = eigen(T)
     Se = Diagonal(log.(max.(e2.values, eps())))
@@ -377,7 +377,7 @@ parallel_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any)
 
 function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) where {N}
     distance(M, p, q) < 2 * eps(eltype(Matrix(p))) && copyto!(Y, X)
-    (p_sqrt, p_sqrt_inv) = _sqrt_and_sqrt_inv(p)
+    (p_sqrt, p_sqrt_inv) = eigvals_sqrt_and_sqrt_inv(p)
     tv = Symmetric(p_sqrt_inv * X * p_sqrt_inv) # p^(-1/2)Xp^{-1/2}
     ty = Symmetric(p_sqrt_inv * Matrix(q) * p_sqrt_inv) # p^(-1/2)qp^(-1/2)
     e2 = eigen(ty)
