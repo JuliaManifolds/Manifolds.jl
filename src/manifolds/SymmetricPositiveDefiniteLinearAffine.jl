@@ -337,7 +337,12 @@ where $\operatorname{Log}$ denotes to the matrix logarithm.
 """
 log(::SymmetricPositiveDefinite, ::Any...)
 
-function allocate_result(M::SymmetricPositiveDefinite, ::typeof(log), q::SPDPoint, p::SPDPoint)
+function allocate_result(
+    M::SymmetricPositiveDefinite,
+    ::typeof(log),
+    q::SPDPoint,
+    p::SPDPoint,
+)
     return allocate_result(M, log, convert(AbstractMatrix, q), convert(AbstractMatrix, p))
 end
 
