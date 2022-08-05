@@ -259,7 +259,7 @@ include("../utils.jl")
         ssi = (pF.sqrt, pF.sqrt_inv)
         @test Manifolds.eigvals_sqrt_and_sqrt_inv(pF4) == ssi # comp sqrt inv
         @test Manifolds.eigvals_sqrt_and_sqrt_inv(pF5) == ssi # comp sqrt
-        @test Manifolds.eigvals_sqrt_and_sqrt_inv(pF4) == ssi # com both
+        @test Manifolds.eigvals_sqrt_and_sqrt_inv(pS) == ssi # com both
         M = SymmetricPositiveDefinite(3)
         @test isapprox(exp!(M, pS, p, zero_vector(M, p)), p)
         @test ismissing(pS.sqrt)
