@@ -1047,6 +1047,9 @@ using the modifying operation.
         return allocate(x[1], T)
     end
 end
+@inline function allocate_result(B::TangentBundleFibers, f::typeof(zero_vector), x...)
+    return allocate_result(B.manifold, f, x...)
+end
 @inline function allocate_result(M::VectorBundle, f::TF) where {TF}
     return ProductRepr(allocate_result(M.manifold, f), allocate_result(M.fiber, f))
 end

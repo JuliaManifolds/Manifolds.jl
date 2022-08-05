@@ -46,11 +46,11 @@ when required.
 
 Create an SPD point using an symmetric positive defincite matrix `p`, where you can optionally store `p`, `p_sqrt` and `p_sqrt_inv`
 """
-mutable struct SPDPoint{
-    P<:Union{<:AbstractMatrix,Missing},
-    Q<:Union{<:AbstractMatrix,Missing},
-    R<:Union{<:AbstractMatrix,Missing},
-    E,
+struct SPDPoint{
+    P<:Union{AbstractMatrix,Missing},
+    Q<:Union{AbstractMatrix,Missing},
+    R<:Union{AbstractMatrix,Missing},
+    E<:Eigen,
 } <: AbstractManifoldPoint
     p::P
     eigen::E
@@ -86,41 +86,42 @@ function SPDPoint(p::AbstractMatrix; store_p=true, store_sqrt=true, store_sqrt_i
         p_sqrt_inv,
     )
 end
+
 convert(::Type{SPDPoint}, p::AbstractMatrix) = SPDPoint(p)
+
+function Base.:(==)(p::SPDPoint, q::SPDPoint)
+    return p.eigen == q.eigen
+end
 
 function active_traits(f, ::SymmetricPositiveDefinite, args...)
     return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(LinearAffineMetric()))
 end
 
 function allocate(p::SPDPoint)
-    pV = Matrix(p)
-    e2 = eigen(pV)
     return SPDPoint(
-        ismissing(p.p) ? missing : allocate(pV),
-        e2,
+        ismissing(p.p) ? missing : allocate(p.p),
+        Eigen(allocate(p.eigen.values), allocate(p.eigen.vectors)),
         ismissing(p.sqrt) ? missing : allocate(p.sqrt),
         ismissing(p.sqrt_inv) ? missing : allocate(p.sqrt_inv),
     )
 end
 function allocate(p::SPDPoint, ::Type{T}) where {T}
-    pV = Matrix(p)
-    e2 = eigen(pV)
     return SPDPoint(
         ismissing(p.p) ? missing : allocate(p.p, T),
-        e2,
+        Eigen(allocate(p.eigen.values, T), allocate(p.eigen.vectors, T)),
         ismissing(p.sqrt) ? missing : allocate(p.sqrt, T),
         ismissing(p.sqrt_inv) ? missing : allocate(p.sqrt_inv, T),
     )
 end
 
-function allocate_result(M::SymmetricPositiveDefinite, zero_vector, p::SPDPoint)
-    return allocate_result(M, zero_vector, Matrix(p))
+function allocate_result(M::SymmetricPositiveDefinite, ::typeof(zero_vector), p::SPDPoint)
+    return allocate_result(M, zero_vector, convert(AbstractMatrix, p))
 end
 function allocate_coordinates(M::SymmetricPositiveDefinite, p::SPDPoint, T, n::Int)
-    return allocate_coordinates(M, Matrix(p), T, n)
+    return allocate_coordinates(M, convert(AbstractMatrix, p), T, n)
 end
-function allocate_result(M::SymmetricPositiveDefinite, get_vector, p::SPDPoint, c)
-    return allocate_result(M, get_vector, Matrix(p), c)
+function allocate_result(M::SymmetricPositiveDefinite, ::typeof(get_vector), p::SPDPoint, c)
+    return allocate_result(M, get_vector, convert(AbstractMatrix, p), c)
 end
 
 @doc raw"""
@@ -146,7 +147,7 @@ function check_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
     return nothing
 end
 function check_point(M::SymmetricPositiveDefinite, p::SPDPoint; kwargs...)
-    return check_point(M, Matrix(p); kwargs...)
+    return check_point(M, convert(AbstractMatrix, p); kwargs...)
 end
 
 """
@@ -168,33 +169,25 @@ function check_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N
     return nothing
 end
 function check_vector(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
-    return check_vector(M, Matrix(p), X; kwargs...)
+    return check_vector(M, convert(AbstractMatrix, p), X; kwargs...)
 end
 
 function check_size(M::SymmetricPositiveDefinite, p::SPDPoint; kwargs...)
-    return check_size(M, Matrix(p); kwargs...)
+    return check_size(M, convert(AbstractMatrix, p); kwargs...)
 end
 function check_size(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
-    return check_size(M, Matrix(p), X; kwargs...)
+    return check_size(M, convert(AbstractMatrix, p), X; kwargs...)
 end
 
 function Base.copy(p::SPDPoint)
     return SPDPoint(
         is_missing(p.p) ? missing : copy(p.p),
-        eigen(Matrix(p)),
+        Eigen(copy(p.eigen.values), copy(p.eigen.vectors)),
         is_missing(p.sqrt) ? missing : copy(p.sqrt),
         is_missing(p.sqrt_inv) ? missing : copy(p.sqrt_inv),
     )
 end
 
-function copy(M::SymmetricPositiveDefinite, p::SPDPoint)
-    return SPDPoint(
-        Matrix(p);
-        store_p=!ismissing(p.p),
-        store_sqrt=!ismissing(p.sqrt),
-        store_sqrt_inv=!ismissing(p.sqrt_inv),
-    )
-end
 #
 # Lazy copyto, only copy if both are not missing,
 # create from `p` if it is a nonmissing field in q.
@@ -204,7 +197,7 @@ function copyto!(q::SPDPoint, p::SPDPoint)
         if !ismissing(p.p)
             !ismissing(q.p) && copyto!(q.p, p.p)
         else # otherwise compute and copy
-            copyto(q.p, Matrix(p))
+            copyto(q.p, convert(AbstractMatrix, p))
         end
     end
     copyto!(q.eigen.values, p.eigen.values)
@@ -213,21 +206,21 @@ function copyto!(q::SPDPoint, p::SPDPoint)
         if !ismissing(p.sqrt)
             copyto!(q.sqrt, p.sqrt)
         else # otherwise compute and copy
-            copyto(q.sqrt, eigvals_sqrt(p))
+            copyto!(q.sqrt, eigvals_sqrt(p))
         end
     end
     if !ismissing(q.sqrt_inv)
         if !ismissing(p.sqrt_inv)
             copyto!(q.sqrt_inv, p.sqrt_inv)
         else # otherwise compute and copy
-            copyto(q.sqrt_inv, sqrt_inv(p))
+            copyto!(q.sqrt_inv, sqrt_inv(p))
         end
     end
     return q
 end
 
 embed(::SymmetricPositiveDefinite, p) = p
-embed(::SymmetricPositiveDefinite, p::SPDPoint) = Matrix(p)
+embed(::SymmetricPositiveDefinite, p::SPDPoint) = convert(AbstractMatrix, p)
 embed(::SymmetricPositiveDefinite, p, X) = X
 
 function get_embedding(M::SymmetricPositiveDefinite)
@@ -249,7 +242,7 @@ injectivity_radius(::SymmetricPositiveDefinite, ::AbstractRetractionMethod) = In
 injectivity_radius(::SymmetricPositiveDefinite, p, ::AbstractRetractionMethod) = Inf
 
 function isapprox(p::SPDPoint, q::SPDPoint; kwargs...)
-    return isapprox(Matrix(p), Matrix(q); kwargs...)
+    return isapprox(convert(AbstractMatrix, p), convert(AbstractMatrix, q); kwargs...)
 end
 
 @doc raw"""
@@ -284,14 +277,16 @@ function default_estimation_method(::SymmetricPositiveDefinite, ::typeof(mean))
 end
 
 @doc raw"""
-    Matrix(p::SPDPoint)
+    convert(::Type{AbstractMatrix}, p::SPDPoint)
 
 return the point `p` as a matrix.
 The matrix is either stored within the [`SPDPoint`](@ref) or reconstructed from `p.eigen`.
 """
-Matrix(p::SPDPoint)
-Matrix(p::SPDPoint) = p.p
-Matrix(p::SPDPoint{Missing}) = p.eigen.vectors * p.eigen.values * p.eigen.vectors'
+convert(::Type{AbstractMatrix}, p::SPDPoint)
+convert(::Type{AbstractMatrix}, p::SPDPoint) = p.p
+function convert(::Type{AbstractMatrix}, p::SPDPoint{Missing})
+    return (p.eigen.vectors * p.eigen.values * p.eigen.vectors')
+end
 
 @doc raw"""
     eigvals_sqrt(p::AbstractMatrix)
@@ -333,7 +328,9 @@ or returning the stored value from within the [`SPDPoint`](@ref).
 This method assumes that `p` represents an spd matrix.
 """
 eigvals_sqrt_inv(p::SPDPoint) = Symmetric(p.sqrt_inv)
-function eigvals_sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
+function eigvals_sqrt_inv(
+    p::SPDPoint{P,Q,Missing},
+) where {P<:Union{AbstractMatrix,Missing},Q<:Union{AbstractMatrix,Missing}}
     U = p.eigen.vectors
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     SsqrtInv = Diagonal(1 ./ sqrt.(S))
@@ -377,7 +374,7 @@ function eigvals_sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,Missing}) where {P}
     return (Symmetric(U * Ssqrt * transpose(U)), Symmetric(U * SsqrtInv * transpose(U)))
 end
 
-number_eltype(p::SPDPoint) = number_eltype(Matrix(p))
+Base.eltype(p::SPDPoint) = eltype(p.eigen)
 
 @doc raw"""
     project(M::SymmetricPositiveDefinite, p, X)
@@ -401,7 +398,8 @@ function Random.rand!(M::SymmetricPositiveDefinite, pX::SPDPoint; kwargs...)
     p = rand(M; kwargs...)
     pP = SPDPoint(p; store_p=false, store_sqrt=false, store_sqrt_inv=false)
     !ismissing(pX.p) && pX.p .= p
-    pX.eigen = pP.eigen
+    copyto!(pX.eigen.values, pP.eigen.values)
+    copyto!(pX.eigen.vectors, pP.eigen.vectors)
     !ismissing(pX.sqrt) && pX.sqrt .= eigvals_sqrt(pP)
     !ismissing(pX.sqrt_inv) && pX.sqrt_inv .= eigvals_sqrt_inv(pP)
     return pX
@@ -411,7 +409,8 @@ function Random.rand!(
     M::SymmetricPositiveDefinite{N},
     pX;
     vector_at=nothing,
-    σ::Real=one(eltype(pX)) / (vector_at === nothing ? 1 : norm(vector_at)),
+    σ::Real=one(eltype(pX)) /
+            (vector_at === nothing ? 1 : norm(convert(AbstractMatrix, vector_at))),
     tangent_distr=:Gaussian,
 ) where {N}
     if vector_at === nothing
@@ -420,7 +419,8 @@ function Random.rand!(
         pX .= Symmetric(s.Q * D * transpose(s.Q))
     elseif tangent_distr === :Gaussian
         # generate ONB in TxM
-        I = one(vector_at)
+        vector_at_matrix = convert(AbstractMatrix, vector_at)
+        I = one(vector_at_matrix)
         B = get_basis(M, vector_at, DiagonalizingOrthonormalBasis(I))
         Ξ = get_vectors(M, vector_at, B)
         Ξx =
@@ -428,7 +428,7 @@ function Random.rand!(
                 Ref(M),
                 Ref(I),
                 Ξ,
-                Ref(vector_at),
+                Ref(vector_at_matrix),
                 Ref(ParallelTransport()),
             )
         pX .= sum(σ * randn(length(Ξx)) .* Ξx)
@@ -444,16 +444,26 @@ function Random.rand!(
     M::SymmetricPositiveDefinite{N},
     pX;
     vector_at=nothing,
-    σ::Real=one(eltype(pX)) / (vector_at === nothing ? 1 : norm(vector_at)),
+    σ::Real=one(eltype(pX)) /
+            (vector_at === nothing ? 1 : norm(convert(AbstractMatrix, vector_at))),
     tangent_distr=:Gaussian,
 ) where {N}
     if vector_at === nothing
         D = Diagonal(1 .+ rand(rng, N)) # random diagonal matrix
         s = qr(σ * randn(rng, N, N)) # random q
-        pX .= Symmetric(s.Q * D * transpose(s.Q))
+        if pX isa SPDPoint
+            pX.eigen.values .= D.diag
+            pX.eigen.vectors .= s.Q
+            !ismissing(pX.p) && pX.p .= Symmetric(s.Q * D * transpose(s.Q))
+            !ismissing(pX.sqrt) && pX.sqrt .= sqrt.(D.diag)
+            !ismissing(pX.sqrt_inv) && pX.sqrt_inv .= inv.(sqrt.(D.diag))
+        else
+            pX .= Symmetric(s.Q * D * transpose(s.Q))
+        end
     elseif tangent_distr === :Gaussian
         # generate ONB in TxM
-        I = one(vector_at)
+        vector_at_matrix = convert(AbstractMatrix, vector_at)
+        I = one(vector_at_matrix)
         B = get_basis(M, vector_at, DiagonalizingOrthonormalBasis(I))
         Ξ = get_vectors(M, vector_at, B)
         Ξx =
@@ -461,7 +471,7 @@ function Random.rand!(
                 Ref(M),
                 Ref(I),
                 Ξ,
-                Ref(vector_at),
+                Ref(vector_at_matrix),
                 Ref(ParallelTransport()),
             )
         pX .= sum(σ * randn(rng, length(Ξx)) .* Ξx)
@@ -511,6 +521,8 @@ definite matrix `p` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
 zero_vector(::SymmetricPositiveDefinite, ::Any)
 
-zero_vector(M::SymmetricPositiveDefinite, p::SPDPoint) = zero_vector(M, Matrix(p))
+function zero_vector(M::SymmetricPositiveDefinite, p::SPDPoint)
+    return zero_vector(M, convert(AbstractMatrix, p))
+end
 
-zero_vector!(::SymmetricPositiveDefinite{N}, v, ::Any) where {N} = fill!(v, 0)
+zero_vector!(::SymmetricPositiveDefinite{N}, X, ::Any) where {N} = fill!(X, 0)
