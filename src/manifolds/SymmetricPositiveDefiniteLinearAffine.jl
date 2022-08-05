@@ -376,10 +376,10 @@ and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 parallel_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any)
 
 function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) where {N}
-    distance(M, p, q) < 2 * eps(eltype(p)) && copyto!(Y, X)
+    distance(M, p, q) < 2 * eps(eltype(Matrix(p))) && copyto!(Y, X)
     (p_sqrt, p_sqrt_inv) = _sqrt_and_sqrt_inv(p)
     tv = Symmetric(p_sqrt_inv * X * p_sqrt_inv) # p^(-1/2)Xp^{-1/2}
-    ty = Symmetric(p_sqrt_inv * q * p_sqrt_inv) # p^(-1/2)qp^(-1/2)
+    ty = Symmetric(p_sqrt_inv * Matrix(p) * p_sqrt_inv) # p^(-1/2)qp^(-1/2)
     e2 = eigen(ty)
     Se = Diagonal(log.(max.(e2.values, floatmin(eltype(e2.values)))))
     Ue = e2.vectors

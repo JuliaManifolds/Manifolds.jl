@@ -116,6 +116,9 @@ end
 function allocate_result(M::SymmetricPositiveDefinite, zero_vector, p::SPDPoint)
     return allocate_result(M, zero_vector, Matrix(p))
 end
+function allocate_coordinates(M::SymmetricPositiveDefinite, p::SPDPoint, T, n::Int)
+    return allocate_coordinates(M, Matrix(p), T, n)
+end
 
 @doc raw"""
     check_point(M::SymmetricPositiveDefinite, p; kwargs...)
@@ -181,6 +184,14 @@ function Base.copy(p::SPDPoint)
     )
 end
 
+function copy(M::SymmetricPositiveDefinite, p::SPDPoint)
+    return SPDPoint(
+        Matrix(p);
+        store_p=!ismissing(p.p),
+        store_sqrt=!ismissing(p.sqrt),
+        store_sqrt_inv=!ismissing(p.sqrt_inv),
+    )
+end
 #
 # Lazy copyto, only copy if both are not missing,
 # create from `p` if it is a nonmissing field in q.
