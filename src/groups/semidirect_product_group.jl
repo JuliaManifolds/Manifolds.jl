@@ -216,6 +216,7 @@ function zero_vector!(G::SemidirectProductGroup, X, p)
     nX, hX = submanifold_components(G, X)
     zero_vector!(N, nX, np)
     zero_vector!(H, hX, hp)
+    _padvector!(G, X)
     return X
 end
 
