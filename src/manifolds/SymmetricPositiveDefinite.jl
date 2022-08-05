@@ -93,7 +93,7 @@ function active_traits(f, ::SymmetricPositiveDefinite, args...)
 end
 
 function allocate(p::SPDPoint)
-    pV = get_point(p)
+    pV = Matrix(p)
     e2 = eigen(pV)
     return SPDPoint(
         ismissing(p.p) ? missing : allocate(pV),
@@ -103,7 +103,7 @@ function allocate(p::SPDPoint)
     )
 end
 function allocate(p::SPDPoint, ::Type{T}) where {T}
-    pV = get_point(p)
+    pV = Matrix(p)
     e2 = eigen(pV)
     return SPDPoint(
         ismissing(p.p) ? missing : allocate(p.p, T),
@@ -114,7 +114,7 @@ function allocate(p::SPDPoint, ::Type{T}) where {T}
 end
 
 function allocate_result(M::SymmetricPositiveDefinite, zero_vector, p::SPDPoint)
-    return allocate_result(M, zero_vector, get_point(p))
+    return allocate_result(M, zero_vector, Matrix(p))
 end
 
 @doc raw"""
@@ -140,7 +140,7 @@ function check_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
     return nothing
 end
 function check_point(M::SymmetricPositiveDefinite, p::SPDPoint; kwargs...)
-    return check_point(M, get_point(p); kwargs...)
+    return check_point(M, Matrix(p); kwargs...)
 end
 
 """
@@ -162,20 +162,20 @@ function check_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N
     return nothing
 end
 function check_vector(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
-    return check_vector(M, get_point(p), X; kwargs...)
+    return check_vector(M, Matrix(p), X; kwargs...)
 end
 
 function check_size(M::SymmetricPositiveDefinite, p::SPDPoint; kwargs...)
-    return check_size(M, get_point(p); kwargs...)
+    return check_size(M, Matrix(p); kwargs...)
 end
 function check_size(M::SymmetricPositiveDefinite, p::SPDPoint, X; kwargs...)
-    return check_size(M, get_point(p), X; kwargs...)
+    return check_size(M, Matrix(p), X; kwargs...)
 end
 
 function Base.copy(p::SPDPoint)
     return SPDPoint(
         is_missing(p.p) ? missing : copy(p.p),
-        eigen(get_point(p)),
+        eigen(Matrix(p)),
         is_missing(p.sqrt) ? missing : copy(p.sqrt),
         is_missing(p.sqrt_inv) ? missing : copy(p.sqrt_inv),
     )
@@ -190,7 +190,7 @@ function copyto!(q::SPDPoint, p::SPDPoint)
         if !ismissing(p.p)
             !ismissing(q.p) && copyto!(q.p, p.p)
         else # otherwise compute and copy
-            copyto(q.p, get_point(p))
+            copyto(q.p, Matrix(p))
         end
     end
     copyto!(q.eigen.values, p.eigen.values)
@@ -199,21 +199,21 @@ function copyto!(q::SPDPoint, p::SPDPoint)
         if !ismissing(p.sqrt)
             copyto!(q.sqrt, p.sqrt)
         else # otherwise compute and copy
-            copyto(q.sqrt, get_p_sqrt(p))
+            copyto(q.sqrt, _sqrt(p))
         end
     end
     if !ismissing(q.sqrt_inv)
         if !ismissing(p.sqrt_inv)
             copyto!(q.sqrt_inv, p.sqrt_inv)
         else # otherwise compute and copy
-            copyto(q.sqrt_inv, get_p_sqrt_inv(p))
+            copyto(q.sqrt_inv, sqrt_inv(p))
         end
     end
     return q
 end
 
 embed(::SymmetricPositiveDefinite, p) = p
-embed(::SymmetricPositiveDefinite, p::SPDPoint) = get_point(p)
+embed(::SymmetricPositiveDefinite, p::SPDPoint) = Matrix(p)
 embed(::SymmetricPositiveDefinite, p, X) = X
 
 function get_embedding(M::SymmetricPositiveDefinite)
@@ -235,7 +235,7 @@ injectivity_radius(::SymmetricPositiveDefinite, ::AbstractRetractionMethod) = In
 injectivity_radius(::SymmetricPositiveDefinite, p, ::AbstractRetractionMethod) = Inf
 
 function isapprox(p::SPDPoint, q::SPDPoint; kwargs...)
-    return isapprox(get_point(p), get_point(q); kwargs...)
+    return isapprox(Matrix(p), Matrix(q); kwargs...)
 end
 
 @doc raw"""
@@ -270,34 +270,33 @@ function default_estimation_method(::SymmetricPositiveDefinite, ::typeof(mean))
 end
 
 @doc raw"""
-    get_point(p::AbstractMatrix)
-    get_point(p::SPDPoint)
+    Matrix(p::SPDPoint)
 
-return the point `p`, which is either the identity if `p` is an abstract matrix or stored within the [`SPDPoint`](@ref),
-and is reconstructed from `p.eigen` otherwise.
+return the point `p` as a matrix.
+The matrix is either stored within the [`SPDPoint`](@ref) or reconstructed from `p.eigen`.
 """
-get_point(p)
-
-get_point(p::AbstractMatrix) = p
-get_point(p::SPDPoint) = p.p
-get_point(p::SPDPoint{Missing}) = p.eigen.vectors * p.eigen.values * p.eigen.vectors'
+Matrix(p::SPDPoint)
+Matrix(p::SPDPoint) = p.p
+Matrix(p::SPDPoint{Missing}) = p.eigen.vectors * p.eigen.values * p.eigen.vectors'
 
 @doc raw"""
-    get_p_sqrt(p::AbstractMatrix)
-    get_p_sqrt(p::SPDPoint)
+    _sqrt(p::AbstractMatrix)
+    _sqrt(p::SPDPoint)
 
 return ``p^{\frac{1}{2}}`` by either computing it (if it is missing or for the `AbstractMatrix`)
 or returning the stored value from within the [`SPDPoint`](@ref).
+
+This method assumes that `p` represents an spd matrix.
 """
-function get_p_sqrt(p::AbstractMatrix)
+function _sqrt(p::AbstractMatrix)
     e = eigen(Symmetric(p))
     U = e.vectors
     S = max.(e.values, floatmin(eltype(e.values)))
     Ssqrt = Diagonal(sqrt.(S))
     return Symmetric(U * Ssqrt * transpose(U))
 end
-get_p_sqrt(p::SPDPoint) = Symmetric(p.sqrt)
-function get_p_sqrt(p::SPDPoint{P,Missing}) where {P<:AbstractMatrix}
+_sqrt(p::SPDPoint) = Symmetric(p.sqrt)
+function _sqrt(p::SPDPoint{P,Missing}) where {P<:AbstractMatrix}
     U = p.eigen.vectors
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     Ssqrt = Diagonal(sqrt.(S))
@@ -305,14 +304,16 @@ function get_p_sqrt(p::SPDPoint{P,Missing}) where {P<:AbstractMatrix}
 end
 
 @doc raw"""
-    get_p_sqrt_inv(p::AbstractMatrix)
-    get_p_sqrt_inv(p::SPDPoint)
+    _sqrt_inv(p::AbstractMatrix)
+    _sqrt_inv(p::SPDPoint)
 
 return ``p^{-\frac{1}{2}}`` by either computing it (if it is missing or for the `AbstractMatrix`)
 or returning the stored value from within the [`SPDPoint`](@ref).
+
+This method assumes that `p` represents an spd matrix.
 """
-get_p_sqrt_inv(p::SPDPoint) = Symmetric(p.sqrt_inv)
-function get_p_sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
+_sqrt_inv(p::SPDPoint) = Symmetric(p.sqrt_inv)
+function _sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
     U = p.eigen.vectors
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     SsqrtInv = Diagonal(1 ./ sqrt.(S))
@@ -320,18 +321,20 @@ function get_p_sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
 end
 
 @doc raw"""
-    get_p_sqrt_and_sqrt_inv(p::AbstractMatrix)
-    get_p_sqrt_and_sqrt_inv(p::SPDPoint)
+    _sqrt_and_sqrt_inv(p::AbstractMatrix)
+    _sqrt_and_sqrt_inv(p::SPDPoint)
 
 return ``p^{\frac{1}{2}}`` and ``p^{-\frac{1}{2}}`` by either computing them (if they are missing or for the `AbstractMatrix`)
 or returning their stored value from within the [`SPDPoint`](@ref).
 
-Compared to calling single methods [`get_p_sqrt`](@ref) and [`get_p_sqrt_inv`](@ref) this method
+Compared to calling single methods [`sqrt`](@ref) and [`sqrt_inv`](@ref) this method
 only computes the eigenvectors once for the case of the `AbstractMatrix` or if both are missing.
-"""
-get_p_sqrt_and_sqrt_inv(p)
 
-function get_p_sqrt_and_sqrt_inv(p::AbstractMatrix)
+This method assumes that `p` represents an spd matrix.
+"""
+_sqrt_and_sqrt_inv(p)
+
+function _sqrt_and_sqrt_inv(p::AbstractMatrix)
     e = eigen(Symmetric(p))
     U = e.vectors
     S = max.(e.values, floatmin(eltype(e.values)))
@@ -339,14 +342,14 @@ function get_p_sqrt_and_sqrt_inv(p::AbstractMatrix)
     SsqrtInv = Diagonal(1 ./ sqrt.(S))
     return (Symmetric(U * Ssqrt * transpose(U)), Symmetric(U * SsqrtInv * transpose(U)))
 end
-get_p_sqrt_and_sqrt_inv(p::SPDPoint) = (Symmetric(p.sqrt), Symmetric(p.sqrt_inv))
-function get_p_sqrt_and_sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
-    return (Symmetric(p.sqrt), get_p_sqrt_inv(p))
+_sqrt_and_sqrt_inv(p::SPDPoint) = (Symmetric(p.sqrt), Symmetric(p.sqrt_inv))
+function _sqrt_and_sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
+    return (Symmetric(p.sqrt), sqrt_inv(p))
 end
-function get_p_sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,R}) where {P,R}
-    return (get_p_sqrt(p), Symmetric(p.sqrt_inv))
+function _sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,R}) where {P,R}
+    return (_sqrt(p), Symmetric(p.sqrt_inv))
 end
-function get_p_sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,Missing}) where {P}
+function _sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,Missing}) where {P}
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
     U = p.eigen.vectors
     Ssqrt = Diagonal(sqrt.(S))
@@ -354,7 +357,7 @@ function get_p_sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,Missing}) where {P}
     return (Symmetric(U * Ssqrt * transpose(U)), Symmetric(U * SsqrtInv * transpose(U)))
 end
 
-number_eltype(p::SPDPoint) = number_eltype(get_point(p))
+number_eltype(p::SPDPoint) = number_eltype(Matrix(p))
 
 @doc raw"""
     project(M::SymmetricPositiveDefinite, p, X)
@@ -471,11 +474,13 @@ function Base.show(io::IO, ::MIME"text/plain", p::SPDPoint)
 end
 
 @doc raw"""
-    zero_vector(M::SymmetricPositiveDefinite,x)
+    zero_vector(M::SymmetricPositiveDefinite, p)
 
 returns the zero tangent vector in the tangent space of the symmetric positive
-definite matrix `x` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
+definite matrix `p` on the [`SymmetricPositiveDefinite`](@ref) manifold `M`.
 """
 zero_vector(::SymmetricPositiveDefinite, ::Any)
+
+zero_vector(M::SymmetricPositiveDefinite, p::SPDPoint) = zero_vector(M, Matrix(p))
 
 zero_vector!(::SymmetricPositiveDefinite{N}, v, ::Any) where {N} = fill!(v, 0)

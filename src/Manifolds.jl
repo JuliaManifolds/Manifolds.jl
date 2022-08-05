@@ -151,9 +151,11 @@ import Base:
     inv,
     isempty,
     length,
+    Matrix,
     ndims,
     show,
     showerror,
+    sqrt,
     size,
     transpose
 
