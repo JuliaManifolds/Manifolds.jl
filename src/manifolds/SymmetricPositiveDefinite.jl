@@ -362,7 +362,7 @@ function eigvals_sqrt_and_sqrt_inv(p::AbstractMatrix)
     SsqrtInv = Diagonal(1 ./ sqrt.(S))
     return (Symmetric(U * Ssqrt * transpose(U)), Symmetric(U * SsqrtInv * transpose(U)))
 end
-_sqrt_and_sqrt_inv(p::SPDPoint) = (Symmetric(p.sqrt), Symmetric(p.sqrt_inv))
+eigvals_sqrt_and_sqrt_inv(p::SPDPoint) = (Symmetric(p.sqrt), Symmetric(p.sqrt_inv))
 function eigvals_sqrt_and_sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
     return (Symmetric(p.sqrt), sqrt_inv(p))
 end
