@@ -119,6 +119,10 @@ end
 function allocate_coordinates(M::SymmetricPositiveDefinite, p::SPDPoint, T, n::Int)
     return allocate_coordinates(M, Matrix(p), T, n)
 end
+function allocate_result(M::SymmetricPositiveDefinite, get_vector, p::SPDPoint, c)
+    return allocate_result(M, get_vector, Matrix(p), c)
+end
+
 
 @doc raw"""
     check_point(M::SymmetricPositiveDefinite, p; kwargs...)
