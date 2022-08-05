@@ -80,7 +80,7 @@ TangentSpaceAtPoint(M::AbstractManifold, p) = VectorSpaceAtPoint(TangentBundleFi
 """
     TangentSpace(M::AbstractManifold, p)
 
-Return a [`TangentSpaceAtPoint`](@ref) representing tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+Return a [`TangentSpaceAtPoint`](@ref TangentSpaceAtPoint{AbstractManifold, Any}) representing tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold) `M`.
 """
 TangentSpace(M::AbstractManifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
 
@@ -138,7 +138,7 @@ The vector transport is derived as a product manifold-style vector transport. Th
 product manifold is the product between the manifold $\mathcal M$ and the topological vector
 space isometric to the fiber.
 
-# Constructor 
+# Constructor
 
     VectorBundleProductVectorTransport(
         method_point::AbstractVectorTransportMethod,

@@ -297,6 +297,8 @@ or returning the stored value from within the [`SPDPoint`](@ref).
 
 This method assumes that `p` represents an spd matrix.
 """
+eigvals_sqrt(p)
+
 function eigvals_sqrt(p::AbstractMatrix)
     e = eigen(Symmetric(p))
     U = e.vectors
@@ -313,7 +315,6 @@ function eigvals_sqrt(p::SPDPoint{P,Missing}) where {P<:Union{AbstractMatrix,Mis
 end
 
 @doc raw"""
-    eigvals_sqrt_inv(p::AbstractMatrix)
     eigvals_sqrt_inv(p::SPDPoint)
 
 return ``p^{-\frac{1}{2}}`` by either computing it (if it is missing or for the `AbstractMatrix`)
@@ -338,12 +339,12 @@ end
 return ``p^{\frac{1}{2}}`` and ``p^{-\frac{1}{2}}`` by either computing them (if they are missing or for the `AbstractMatrix`)
 or returning their stored value from within the [`SPDPoint`](@ref).
 
-Compared to calling single methods [`sqrt`](@ref) and [`sqrt_inv`](@ref) this method
+Compared to calling single methods [`eigvals_sqrt`](@ref Manifolds.eigvals_sqrt) and [`eigvals_sqrt_inv`](@ref Manifolds.eigvals_sqrt_inv) this method
 only computes the eigenvectors once for the case of the `AbstractMatrix` or if both are missing.
 
 This method assumes that `p` represents an spd matrix.
 """
-_sqrt_and_sqrt_inv(p)
+eigvals_sqrt_and_sqrt_inv(p)
 
 function eigvals_sqrt_and_sqrt_inv(p::AbstractMatrix)
     e = eigen(Symmetric(p))
