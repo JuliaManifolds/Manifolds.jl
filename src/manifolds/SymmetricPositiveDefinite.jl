@@ -364,10 +364,10 @@ function eigvals_sqrt_and_sqrt_inv(p::AbstractMatrix)
 end
 eigvals_sqrt_and_sqrt_inv(p::SPDPoint) = (Symmetric(p.sqrt), Symmetric(p.sqrt_inv))
 function eigvals_sqrt_and_sqrt_inv(p::SPDPoint{P,Q,Missing}) where {P,Q}
-    return (Symmetric(p.sqrt), sqrt_inv(p))
+    return (Symmetric(p.sqrt), eigvals_sqrt_inv(p))
 end
 function eigvals_sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,R}) where {P,R}
-    return (_sqrt(p), Symmetric(p.sqrt_inv))
+    return (eigvals_sqrt(p), Symmetric(p.sqrt_inv))
 end
 function eigvals_sqrt_and_sqrt_inv(p::SPDPoint{P,Missing,Missing}) where {P}
     S = max.(p.eigen.values, floatmin(eltype(p.eigen.values)))
