@@ -44,7 +44,7 @@ when required.
 
     SPDPoint(p::AbstractMatrix; store_p=true, store_sqrt=true, store_sqrt_inv=true)
 
-Create an SPD point using an symmetric positive defincite matrix `p`, where you can optionally store `p`, `p_sqrt` and `p_sqrt_inv`
+Create an SPD point using an symmetric positive defincite matrix `p`, where you can optionally store `p`, `sqrt` and `sqrt_inv`
 """
 struct SPDPoint{
     P<:Union{AbstractMatrix,Missing},

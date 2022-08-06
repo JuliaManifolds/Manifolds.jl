@@ -81,7 +81,7 @@ Filter = t -> t === mean
 ## Efficient representation
 
 When a point `p` is used in several occasions, it might be beneficial to store the eigenvalues
-and vectors of `p` and eventually/optionally ist square root and the inverse of the square root.
+and vectors of `p` and optionally its square root and the inverse of the square root.
 The [`SPDPoint`](@ref) can be used for exactly that.
 
 ```@docs
