@@ -252,14 +252,14 @@ include("../utils.jl")
         @test ismissing(pF3.p)
         @test ismissing(pF3.sqrt)
         @test ismissing(pF3.sqrt_inv)
-        @test isapprox(Manifolds.eigvals_sqrt(pS), pF.sqrt) # recreate
-        @test isapprox(Manifolds.eigvals_sqrt_inv(pF), pF.sqrt_inv) #identity
+        @test isapprox(Manifolds.spd_sqrt(pS), pF.sqrt) # recreate
+        @test isapprox(Manifolds.spd_sqrt_inv(pF), pF.sqrt_inv) #identity
         pF4 = SPDPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt_inv=false)
         pF5 = SPDPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt=false)
         ssi = (pF.sqrt, pF.sqrt_inv)
-        @test Manifolds.eigvals_sqrt_and_sqrt_inv(pF4) == ssi # comp sqrt inv
-        @test Manifolds.eigvals_sqrt_and_sqrt_inv(pF5) == ssi # comp sqrt
-        @test Manifolds.eigvals_sqrt_and_sqrt_inv(pS) == ssi # com both
+        @test Manifolds.spd_sqrt_and_sqrt_inv(pF4) == ssi # comp sqrt inv
+        @test Manifolds.spd_sqrt_and_sqrt_inv(pF5) == ssi # comp sqrt
+        @test Manifolds.spd_sqrt_and_sqrt_inv(pS) == ssi # com both
         M = SymmetricPositiveDefinite(3)
         @test isapprox(exp!(M, pS, p, zero_vector(M, p)), p)
         @test ismissing(pS.sqrt)

@@ -92,9 +92,9 @@ and there are three internal functions to be able to use [`SPDPoint`](@ref) inte
 with the default representation as a matrix.
 
 ```@docs
-Manifolds.eigvals_sqrt
-Manifolds.eigvals_sqrt_inv
-Manifolds.eigvals_sqrt_and_sqrt_inv
+Manifolds.spd_sqrt
+Manifolds.spd_sqrt_inv
+Manifolds.spd_sqrt_and_sqrt_inv
 ```
 
 ## Literature
