@@ -736,25 +736,20 @@ for TP in [ProductRepr, ArrayPartition]
                     ),
                 )
             end
-            function inverse_retract!(
-                M::ProductManifold,
-                Y::$TP,
-                p::$TP,
-                q::$TP,
-                method::InverseProductRetraction,
-            )
-                map(
-                    inverse_retract!,
-                    M.manifolds,
-                    submanifold_components(M, Y),
-                    submanifold_components(M, p),
-                    submanifold_components(M, q),
-                    method.inverse_retractions,
-                )
-                return Y
-            end
         end,
     )
+end
+
+function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRetraction)
+    map(
+        inverse_retract!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+        method.inverse_retractions,
+    )
+    return Y
 end
 
 function Base.isapprox(M::ProductManifold, p, q; kwargs...)
