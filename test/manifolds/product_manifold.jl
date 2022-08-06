@@ -453,6 +453,20 @@ using RecursiveArrayTools: ArrayPartition
                 number_of_coordinates(Mse, DefaultOrthogonalBasis()),
             ) isa Vector{Float64}
 
+            Y = allocate(pts[1])
+            inverse_retract!(Mse, Y, pts[1], pts[2], default_inverse_retraction_method(Mse))
+            @test isapprox(
+                Mse,
+                pts[1],
+                Y,
+                inverse_retract(
+                    Mse,
+                    pts[1],
+                    pts[2],
+                    default_inverse_retraction_method(Mse),
+                ),
+            )
+
             test_manifold(
                 Mse,
                 pts;
