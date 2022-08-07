@@ -248,10 +248,11 @@ function get_coordinates_orthonormal!(
     @assert size(X) == (N, N)
     @assert dim == div(N * (N + 1), 2)
     p_sqrt = spd_sqrt(p)
+    pM = convert(AbstractMatrix, p)
     k = 1
-    V = similar(convert(AbstractMatrix, p))
+    V = similar(pM)
     fill!(V, zero(eltype(V)))
-    F = cholesky(Symmetric(convert(AbstractMatrix, p)))
+    F = cholesky(Symmetric(pM))
     for i in 1:N, j in i:N
         s = i == j ? 1 / 2 : 1 / sqrt(2)
         @inbounds V[i, j] += 1
