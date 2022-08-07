@@ -383,7 +383,7 @@ and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 parallel_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any)
 
 function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) where {N}
-    distance(M, p, q) < 2 * eps(eltype(convert(AbstractMatrix, p))) && copyto!(Y, X)
+    distance(M, p, q) < 2 * eps(eltype(p)) && copyto!(Y, X)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     tv = Symmetric(p_sqrt_inv * X * p_sqrt_inv) # p^(-1/2)Xp^{-1/2}
     ty = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv) # p^(-1/2)qp^(-1/2)

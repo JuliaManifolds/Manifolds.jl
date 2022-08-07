@@ -282,7 +282,6 @@ end
 return the point `p` as a matrix.
 The matrix is either stored within the [`SPDPoint`](@ref) or reconstructed from `p.eigen`.
 """
-convert(::Type{AbstractMatrix}, p::SPDPoint)
 convert(::Type{AbstractMatrix}, p::SPDPoint) = p.p
 function convert(::Type{AbstractMatrix}, p::SPDPoint{Missing})
     return (p.eigen.vectors * Diagonal(p.eigen.values) * p.eigen.vectors')
