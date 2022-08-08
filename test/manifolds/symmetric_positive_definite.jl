@@ -21,7 +21,7 @@ include("../utils.jl")
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M2, one(zeros(3, 3)))
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M3, one(zeros(3, 3)))
     metrics = [M1, M2, M3, M5, M6]
-    types = [Matrix{Float64}]
+    types = [Matrix{Float64}, SPDPoint]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
 
@@ -42,6 +42,10 @@ include("../utils.jl")
                 if M == M6
                     # we have to raise this slightly for the nondiagonal case.
                     exp_log_atol_multiplier = 5e1
+                end
+                if T == SPDPoint && (M != M1 && M != M2)
+                    # SPDPoint only meant for Affine metric
+                    continue
                 end
                 if M == M3 && T <: MMatrix
                     # Cholesky or something does not work in vector_transport yet for MMatrix
@@ -215,5 +219,50 @@ include("../utils.jl")
         ]
 
         @test isapprox(M1, p, riemann_tensor(M1, p, X1, X2, X3), X_rt)
+    end
+    @testset "SPDPoint functions" begin
+        p = SPDPoint(2 * Matrix{Float64}(I, 3, 3))
+        p2 = copy(p)
+        @test SPDPoint(p2) === p2
+        @test p2.eigen == p.eigen
+        pS = SPDPoint(
+            2 * Matrix{Float64}(I, 3, 3);
+            store_p=false,
+            store_sqrt=false,
+            store_sqrt_inv=false,
+        )
+        m = missing
+        s = "$(typeof(pS))\np:\n $m\np^{1/2}:\n $m\np^{-1/2}:\n $m"
+        @test sprint(show, "text/plain", pS) == s
+        pF = SPDPoint(Matrix{Float64}(I, 3, 3))
+        copyto!(pF, pS) # fill values in F
+        @test pF == p
+        pF2 = SPDPoint(Matrix{Float64}(I, 3, 3))
+        copyto!(pF2, pF) # copy alues in F
+        @test !ismissing(pF2.p)
+        @test !ismissing(pF2.sqrt)
+        @test !ismissing(pF2.sqrt_inv)
+        pF3 = SPDPoint(
+            Matrix{Float64}(I, 3, 3);
+            store_p=false,
+            store_sqrt=false,
+            store_sqrt_inv=false,
+        )
+        copyto!(pF3, pF2) # do not fill values from F
+        @test ismissing(pF3.p)
+        @test ismissing(pF3.sqrt)
+        @test ismissing(pF3.sqrt_inv)
+        @test isapprox(Manifolds.spd_sqrt(pS), pF.sqrt) # recreate
+        @test isapprox(Manifolds.spd_sqrt_inv(pF), pF.sqrt_inv) #identity
+        pF4 = SPDPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt_inv=false)
+        pF5 = SPDPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt=false)
+        ssi = (pF.sqrt, pF.sqrt_inv)
+        @test Manifolds.spd_sqrt_and_sqrt_inv(pF4) == ssi # comp sqrt inv
+        @test Manifolds.spd_sqrt_and_sqrt_inv(pF5) == ssi # comp sqrt
+        @test Manifolds.spd_sqrt_and_sqrt_inv(pS) == ssi # com both
+        M = SymmetricPositiveDefinite(3)
+        @test isapprox(exp!(M, pS, p, zero_vector(M, p)), p)
+        @test ismissing(pS.sqrt)
+        @test ismissing(pS.sqrt_inv)
     end
 end

@@ -16,7 +16,9 @@ The manifold can be equipped with different metrics
 Modules = [Manifolds]
 Pages = ["manifolds/SymmetricPositiveDefinite.jl"]
 Order = [:function]
- Filter = t -> t !== mean
+Public=true
+Private=false
+Filter = t -> t !== mean
 ```
 
 ## Default metric: the linear affine metric
@@ -74,6 +76,25 @@ Modules = [Manifolds]
 Pages   = ["SymmetricPositiveDefinite.jl"]
 Order = [:function]
 Filter = t -> t === mean
+```
+
+## Efficient representation
+
+When a point `p` is used in several occasions, it might be beneficial to store the eigenvalues
+and vectors of `p` and optionally its square root and the inverse of the square root.
+The [`SPDPoint`](@ref) can be used for exactly that.
+
+```@docs
+SPDPoint
+```
+
+and there are three internal functions to be able to use [`SPDPoint`](@ref) interchangeably
+with the default representation as a matrix.
+
+```@docs
+Manifolds.spd_sqrt
+Manifolds.spd_sqrt_inv
+Manifolds.spd_sqrt_and_sqrt_inv
 ```
 
 ## Literature
