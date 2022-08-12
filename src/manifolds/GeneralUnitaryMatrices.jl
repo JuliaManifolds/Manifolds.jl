@@ -612,7 +612,7 @@ Return the dimension of the manifold orthogonal matrices and of the manifold of 
 manifold_dimension(::GeneralUnitaryMatrices{n,ℝ}) where {n} = div(n * (n - 1), 2)
 @doc raw"""
     manifold_dimension(M::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices})
-    
+
 Return the dimension of the manifold of special unitary matrices.
 ```math
 \dim_{\mathrm{SU}(n)} = n^2-1.
@@ -666,16 +666,17 @@ end
 
 Orthogonally project the tangent vector ``X ∈ 𝔽^{n × n}``, ``\mathbb F ∈ \{\mathbb R, \mathbb C\}``
 to the tangent space of `M` at `p`,
-and change the representer to use the corresponding Lie algebra, i.e. we compute
+where `X` is already assumed to be in a Lie algebra represemtation, that is,
+the projection is perfomed onto the Lie algebra. We compute
 
 ```math
-    \operatorname{proj}_p(X) = \frac{pX-(pX)^{\mathrm{T}}}{2},
+    \operatorname{proj}_p(X) = \frac{X-X^{\mathrm{T}}}{2},
 ```
 """
 project(::GeneralUnitaryMatrices, p, X)
 
 function project!(::GeneralUnitaryMatrices{n,𝔽}, Y, p, X) where {n,𝔽}
-    project!(SkewHermitianMatrices(n, 𝔽), Y, p \ X)
+    project!(SkewHermitianMatrices(n, 𝔽), Y, X)
     return Y
 end
 
