@@ -128,13 +128,13 @@ end
     check_vector(M::GeneralUnitaryMatrices{n,𝔽}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`UnitaryMatrices`](@ref)
-space `M`, i.e. after [`check_point`](@ref)`(M,p)`, `X` has to be skew symmetric (Hermitian)
-and orthogonal to `p`.
+space `M`, i.e. after [`check_point`](@ref)`(M,p)`,
+``p^{-1}X`` has to be skew symmetric (Hermitian).
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::GeneralUnitaryMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
-    return check_point(SkewHermitianMatrices(n, 𝔽), X; kwargs...)
+    return check_point(SkewHermitianMatrices(n, 𝔽), p \ X; kwargs...)
 end
 
 @doc raw"""
@@ -669,13 +669,14 @@ to the tangent space of `M` at `p`,
 and change the representer to use the corresponding Lie algebra, i.e. we compute
 
 ```math
-    \operatorname{proj}_p(X) = \frac{pX-(pX)^{\mathrm{T}}}{2},
+    \operatorname{proj}_p(X) = p\frac{p^{-1}X-(p^{-1}X)^{\mathrm{T}}}{2},
 ```
 """
 project(::GeneralUnitaryMatrices, p, X)
 
 function project!(::GeneralUnitaryMatrices{n,𝔽}, Y, p, X) where {n,𝔽}
     project!(SkewHermitianMatrices(n, 𝔽), Y, p \ X)
+    mul!(Y, p, Y)
     return Y
 end
 
