@@ -258,6 +258,27 @@ function log_lie!(
     return project!(G, X, Identity(G), X)
 end
 
+@doc raw"""
+     project(M::Orthogonal{n}, p, X)
+     project(M::SpecialUnitary{n}, p, X)
+     project(M::SpecialOrthogonal{n}, p, X)
+     project(M::SpecialUnitary{n}, p, X)
+
+Orthogonally project the tangent vector ``X ∈ 𝔽^{n × n}``, ``\mathbb F ∈ \{\mathbb R, \mathbb C\}``
+to the tangent space of `M` at `p`,
+where `X` is already assumed to be in a Lie algebra represemtation, that isand change the representer to use the corresponding Lie algebra, i.e. we compute
+
+```math
+    \operatorname{proj}_p(X) = \frac{X-X^{\mathrm{T}}}{2},
+```
+"""
+project(::GeneralUnitaryMultiplicationGroup, p, X)
+
+function project!(::GeneralUnitaryMultiplicationGroup{n,𝔽}, Y, p, X) where {n,𝔽}
+    project!(SkewHermitianMatrices(n, 𝔽), Y, X)
+    return Y
+end
+
 function Random.rand!(G::GeneralUnitaryMultiplicationGroup, pX; kwargs...)
     rand!(G.manifold, pX; kwargs...)
     return pX

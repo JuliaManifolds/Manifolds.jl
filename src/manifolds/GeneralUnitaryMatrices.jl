@@ -666,17 +666,16 @@ end
 
 Orthogonally project the tangent vector ``X ∈ 𝔽^{n × n}``, ``\mathbb F ∈ \{\mathbb R, \mathbb C\}``
 to the tangent space of `M` at `p`,
-where `X` is already assumed to be in a Lie algebra represemtation, that is,
-the projection is perfomed onto the Lie algebra. We compute
+and change the representer to use the corresponding Lie algebra, i.e. we compute
 
 ```math
-    \operatorname{proj}_p(X) = \frac{X-X^{\mathrm{T}}}{2},
+    \operatorname{proj}_p(X) = \frac{pX-(pX)^{\mathrm{T}}}{2},
 ```
 """
 project(::GeneralUnitaryMatrices, p, X)
 
 function project!(::GeneralUnitaryMatrices{n,𝔽}, Y, p, X) where {n,𝔽}
-    project!(SkewHermitianMatrices(n, 𝔽), Y, X)
+    project!(SkewHermitianMatrices(n, 𝔽), Y, p \ X)
     return Y
 end
 
