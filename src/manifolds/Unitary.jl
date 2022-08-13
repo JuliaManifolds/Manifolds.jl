@@ -18,11 +18,11 @@ The tangent spaces are given by
     \bigr\}
 ```
 
-But note that tangent vectors are represented in the Lie algebra, i.e. just using ``Y`` in
-the representation above.
+If you prefer to use the representation of tangent vectors in the Lie algebra, see
+the [`Unitary`](@ref)`(n)` group.
 
 # Constructor
-    
+
     UnitaryMatrices(n, 𝔽::AbstractNumbers=ℂ)
 
 see also [`OrthogonalMatrices`](@ref) for the real valued case.
@@ -39,7 +39,7 @@ embed(::UnitaryMatrices{1,ℍ}, p::Number) = SMatrix{1,1}(p)
 embed(::UnitaryMatrices{1,ℍ}, p, X::Number) = SMatrix{1,1}(X)
 
 function exp(::UnitaryMatrices{1,ℍ}, p, X::Number)
-    return p * exp(X)
+    return p * exp(p \ X)
 end
 
 function get_coordinates_orthonormal(::UnitaryMatrices{1,ℍ}, p, X, ::QuaternionNumbers)
@@ -61,12 +61,12 @@ Base.isapprox(::UnitaryMatrices{1,ℍ}, x, y; kwargs...) = isapprox(x[], y[]; kw
 Base.isapprox(::UnitaryMatrices{1,ℍ}, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
 
 function log(::UnitaryMatrices{1,ℍ}, p::Number, q::Number)
-    return log(conj(p) * q)
+    return p * log(conj(p) * q)
 end
 
 @doc raw"""
     manifold_dimension(M::UnitaryMatrices{n,ℂ}) where {n}
-    
+
 Return the dimension of the manifold unitary matrices.
 ```math
 \dim_{\mathrm{U}(n)} = n^2.
@@ -75,7 +75,7 @@ Return the dimension of the manifold unitary matrices.
 manifold_dimension(::UnitaryMatrices{n,ℂ}) where {n} = n^2
 @doc raw"""
     manifold_dimension(M::UnitaryMatrices{n,ℍ})
-    
+
 Return the dimension of the manifold unitary matrices.
 ```math
 \dim_{\mathrm{U}(n, ℍ)} = n(2n+1).
@@ -87,7 +87,7 @@ Manifolds.number_of_coordinates(::UnitaryMatrices{1,ℍ}, ::AbstractBasis{ℍ}) 
 
 project(::UnitaryMatrices{1,ℍ}, p) = normalize(p)
 
-project(::UnitaryMatrices{1,ℍ}, p, X) = (X - conj(X)) / 2
+project(::UnitaryMatrices{1,ℍ}, p, X) = p * (X - conj(X)) / 2
 
 function Random.rand(M::UnitaryMatrices{1,ℍ}; vector_at=nothing)
     if vector_at === nothing

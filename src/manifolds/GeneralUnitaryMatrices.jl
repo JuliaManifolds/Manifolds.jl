@@ -175,19 +175,14 @@ embed(::GeneralUnitaryMatrices, p) = p
 @doc raw"""
     embed(M::GeneralUnitaryMatrices{n,𝔽}, p, X)
 
-Embed the tangent vector `X` at point `p` in `M` from
-its Lie algebra representation (set of skew matrices) into the
-Riemannian submanifold representation
-
-The formula reads
-```math
-X_{\text{embedded}} = p * X
+Embed the tangent vector `X` at point `p` in `M` is assumed to be of the form
+``X = pY``, where  ``Y``is skew symmetric, so the embedding is the identity.
 ```
 """
 embed(::GeneralUnitaryMatrices, p, X)
 
-function embed!(::GeneralUnitaryMatrices, Y, p, X)
-    return mul!(Y, p, X)
+function embed!(G::GeneralUnitaryMatrices, Y, p, X)
+    return copyto!(G, Y, p, X)
 end
 
 @doc raw"""
@@ -510,95 +505,24 @@ inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
     log(M::OrthogonalMatrices, p, X)
     log(M::UnitaryMatrices, p, X)
 
-Compute the logarithmic map, that is, since the resulting ``X`` is represented in the Lie algebra,
+Compute the logarithmic map, that is,
 
 ```
-log_p q = \log(p^{\mathrm{H}q)
+log_p q = p\log(p^{\mathrm{H}q)
 ```
-which is projected onto the skew symmetric matrices for numerical stability.
 """
 log(::GeneralUnitaryMatrices, p, q)
 
-@doc raw"""
-    log(M::Rotations, p, q)
-
-Compute the logarithmic map on the [`Rotations`](@ref) manifold
-`M` which is given by
-
-```math
-\log_p q = \operatorname{log}(p^{\mathrm{T}}q)
-```
-
-where $\operatorname{Log}$ denotes the matrix logarithm. For numerical stability,
-the result is projected onto the set of skew symmetric matrices.
-
-For antipodal rotations the function returns deterministically one of the tangent vectors
-that point at `q`.
-"""
-log(::GeneralUnitaryMatrices{n,ℝ}, ::Any...) where {n}
-function ManifoldsBase.log(M::GeneralUnitaryMatrices{2,ℝ}, p, q)
-    U = transpose(p) * q
-    @assert size(U) == (2, 2)
-    @inbounds θ = atan(U[2], U[1])
-    return get_vector(M, p, θ, DefaultOrthogonalBasis())
+function ManifoldsBase.log(::GeneralUnitaryMatrices{2,ℝ}, p, q)
+    return p * log(GeneralUnitaryMultiplicationGroup{n,2}(), p, q)
 end
-function log!(::GeneralUnitaryMatrices{n,ℝ}, X, p, q) where {n}
-    U = transpose(p) * q
-    X .= real(log_safe(U))
-    return project!(SkewSymmetricMatrices(n), X, p, X)
-end
-function log!(M::GeneralUnitaryMatrices{2,ℝ}, X, p, q)
-    U = transpose(p) * q
-    @assert size(U) == (2, 2)
-    @inbounds θ = atan(U[2], U[1])
-    return get_vector!(M, X, p, θ, DefaultOrthogonalBasis())
-end
-function log!(M::GeneralUnitaryMatrices{3,ℝ}, X, p, q)
-    U = transpose(p) * q
-    cosθ = (tr(U) - 1) / 2
-    if cosθ ≈ -1
-        eig = eigen_safe(U)
-        ival = findfirst(λ -> isapprox(λ, 1), eig.values)
-        inds = SVector{3}(1:3)
-        ax = eig.vectors[inds, ival]
-        return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
-    end
-    X .= U ./ usinc_from_cos(cosθ)
-    return project!(SkewSymmetricMatrices(3), X, p, X)
-end
-function log!(::GeneralUnitaryMatrices{4,ℝ}, X, p, q)
-    U = transpose(p) * q
-    cosα, cosβ = Manifolds.cos_angles_4d_rotation_matrix(U)
-    α = acos(clamp(cosα, -1, 1))
-    β = acos(clamp(cosβ, -1, 1))
-    if α ≈ 0 && β ≈ π
-        A² = Symmetric((U - I) ./ 2)
-        P = eigvecs(A²)
-        E = similar(U)
-        fill!(E, 0)
-        @inbounds begin
-            E[2, 1] = -β
-            E[1, 2] = β
-        end
-        copyto!(X, P * E * transpose(P))
-    else
-        det(U) < 0 && throw(
-            DomainError(
-                "The logarithm is not defined for $p and $q with a negative determinant of p'q) ($(det(U)) < 0).",
-            ),
-        )
-        copyto!(X, real(Manifolds.log_safe(U)))
-    end
-    return project!(SkewSymmetricMatrices(4), X, p, X)
+function log!(::GeneralUnitaryMatrices{n,ℝ}, X, p, q) where {n,𝔽}
+    log!(GeneralUnitaryMultiplicationGroup{m,𝔽}(), X, p, q)
+    X .= p * X
+    return X
 end
 
-function log!(::GeneralUnitaryMatrices{n,𝔽}, X, p, q) where {n,𝔽}
-    log_safe!(X, adjoint(p) * q)
-    project!(SkewHermitianMatrices(n, 𝔽), q, q)
-    return q
-end
-
-norm(::GeneralUnitaryMatrices, p, X) = norm(X)
+norm(::GeneralUnitaryMatrices, p, X) = norm(p \ X)
 
 @doc raw"""
     manifold_dimension(M::Rotations)
@@ -610,6 +534,7 @@ Return the dimension of the manifold orthogonal matrices and of the manifold of 
 ```
 """
 manifold_dimension(::GeneralUnitaryMatrices{n,ℝ}) where {n} = div(n * (n - 1), 2)
+
 @doc raw"""
     manifold_dimension(M::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices})
 
@@ -676,7 +601,7 @@ project(::GeneralUnitaryMatrices, p, X)
 
 function project!(::GeneralUnitaryMatrices{n,𝔽}, Y, p, X) where {n,𝔽}
     project!(SkewHermitianMatrices(n, 𝔽), Y, p \ X)
-    mul!(Y, p, Y)
+    Y .= p * Y
     return Y
 end
 
@@ -712,14 +637,14 @@ This is also the default retraction on these manifolds.
 retract(::GeneralUnitaryMatrices{n,𝔽}, ::Any, ::Any, ::QRRetraction) where {n,𝔽}
 
 function retract_qr!(::GeneralUnitaryMatrices{n,𝔽}, q::AbstractArray{T}, p, X) where {n,𝔽,T}
-    A = p + p * X
+    A = p + X
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
 function retract_polar!(M::GeneralUnitaryMatrices{n,𝔽}, q, p, X) where {n,𝔽}
-    A = p + p * X
+    A = p + X
     return project!(M, q, A; check_det=false)
 end
 

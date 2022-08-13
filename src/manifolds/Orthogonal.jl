@@ -3,7 +3,20 @@
 
 The manifold of (real) orthogonal matrices ``\mathrm{O}(n)``.
 
-    OrthogonalMatrices(n)
+The tangent space at ``p`` are all matrices of the form ``X = pY``, where ``Y```
+is skew symmetric.
+
+If you prefer to use the representation of tangent vectors in the Lie algebra, see
+the [`Orthogonal`](@ref)`(n)` group.
+
+# Constructor
+
+   OrthogonalMatrices(n)
+
+Generate the ``n × x`` orthognoal matrices manifold.
+
+## See also
+[`Rotations`](@ref), [`UnitaryMatrices`](@ref), [`Orthogonal`](@ref).
 """
 const OrthogonalMatrices{n} = GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}
 

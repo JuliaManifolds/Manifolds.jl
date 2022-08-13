@@ -4,11 +4,20 @@
 The manifold of rotation matrices of sice ``n × n``, i.e.
 real-valued orthogonal matrices with determinant ``+1``.
 
+The tangent space at ``p`` are all matrices of the form ``X = pY``, where ``Y```
+is skew symmetric.
+
+If you prefer to use the representation of tangent vectors in the Lie algebra, see
+the [`SpecialOrthogonal`](@ref)`(n)` group.
+
 # Constructor
 
     Rotations(n)
 
 Generate the manifold of ``n × n`` rotation matrices.
+
+## See also
+[`OrthogonalMatrices`](@ref), [`SpecialOrthogonal`](@ref).
 """
 const Rotations{n} = GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}
 

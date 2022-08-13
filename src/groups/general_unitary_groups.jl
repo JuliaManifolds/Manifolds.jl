@@ -44,6 +44,8 @@ end
 
 decorated_manifold(G::GeneralUnitaryMultiplicationGroup) = G.manifold
 
+embed!(G::GeneralUnitaryMultiplicationGroup, Y, p, X) = copyto!(G, Y, p, X)
+
 @doc raw"""
      exp_lie(G::Orthogonal{2}, X)
      exp_lie(G::SpecialOrthogonal{2}, X)
@@ -176,6 +178,101 @@ end
 
 function log(G::GeneralUnitaryMultiplicationGroup, ::Identity{MultiplicationOperation}, q)
     return log_lie(G, q)
+end
+
+@doc raw"""
+    log(M::Orthogonal, p, X)
+    log(M::SpecialOrthogonal, p, X)
+    log(M::SpecialUnitary, p, X)
+    log(M::Unitary, p, X)
+
+Compute the logarithmic map, that is, since the resulting ``X`` is represented in the Lie algebra,
+
+```
+log_p q = \log(p^{\mathrm{H}q)
+```
+which is projected onto the skew symmetric matrices for numerical stability.
+"""
+log(::GeneralUnitaryMultiplicationGroup, p, q)
+
+@doc raw"""
+    log(M::GeneralUnitaryMultiplicationGroup, p, q)
+
+Compute the logarithmic map on the [`Rotations`](@ref) manifold
+`M` which is given by
+
+```math
+\log_p q = \operatorname{log}(p^{\mathrm{T}}q)
+```
+
+where $\operatorname{Log}$ denotes the matrix logarithm. For numerical stability,
+the result is projected onto the set of skew symmetric matrices.
+
+For antipodal rotations the function returns deterministically one of the tangent vectors
+that point at `q`.
+"""
+log(::GeneralUnitaryMultiplicationGroup{n,ℝ}, ::Any...) where {n}
+function ManifoldsBase.log(M::GeneralUnitaryMultiplicationGroup{2,ℝ}, p, q)
+    U = transpose(p) * q
+    @assert size(U) == (2, 2)
+    @inbounds θ = atan(U[2], U[1])
+    return get_vector(M, p, θ, DefaultOrthogonalBasis())
+end
+function log!(::GeneralUnitaryMultiplicationGroup{n,ℝ}, X, p, q) where {n}
+    U = transpose(p) * q
+    X .= real(log_safe(U))
+    return project!(SkewSymmetricMatrices(n), X, p, X)
+end
+function log!(M::GeneralUnitaryMultiplicationGroup{2,ℝ}, X, p, q)
+    U = transpose(p) * q
+    @assert size(U) == (2, 2)
+    @inbounds θ = atan(U[2], U[1])
+    return get_vector!(M, X, p, θ, DefaultOrthogonalBasis())
+end
+function log!(M::GeneralUnitaryMultiplicationGroup{3,ℝ}, X, p, q)
+    U = transpose(p) * q
+    cosθ = (tr(U) - 1) / 2
+    if cosθ ≈ -1
+        eig = eigen_safe(U)
+        ival = findfirst(λ -> isapprox(λ, 1), eig.values)
+        inds = SVector{3}(1:3)
+        ax = eig.vectors[inds, ival]
+        return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
+    end
+    X .= U ./ usinc_from_cos(cosθ)
+    return project!(SkewSymmetricMatrices(3), X, p, X)
+end
+function log!(::GeneralUnitaryMultiplicationGroup{4,ℝ}, X, p, q)
+    U = transpose(p) * q
+    cosα, cosβ = Manifolds.cos_angles_4d_rotation_matrix(U)
+    α = acos(clamp(cosα, -1, 1))
+    β = acos(clamp(cosβ, -1, 1))
+    if α ≈ 0 && β ≈ π
+        A² = Symmetric((U - I) ./ 2)
+        P = eigvecs(A²)
+        E = similar(U)
+        fill!(E, 0)
+        @inbounds begin
+            E[2, 1] = -β
+            E[1, 2] = β
+        end
+        copyto!(X, P * E * transpose(P))
+    else
+        det(U) < 0 && throw(
+            DomainError(
+                "The logarithm is not defined for $p and $q with a negative determinant of p'q) ($(det(U)) < 0).",
+            ),
+        )
+        copyto!(X, real(Manifolds.log_safe(U)))
+    end
+    return project!(SkewSymmetricMatrices(4), X, p, X)
+end
+
+function log!(::GeneralUnitaryMultiplicationGroup{n,𝔽}, X, p, q) where {n,𝔽}
+    log_safe!(X, adjoint(p) * q)
+    project!(SkewHermitianMatrices(n, 𝔽), X, q)
+    X .= p * X
+    return X
 end
 
 function log!(
