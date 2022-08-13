@@ -46,6 +46,107 @@ decorated_manifold(G::GeneralUnitaryMultiplicationGroup) = G.manifold
 
 embed!(G::GeneralUnitaryMultiplicationGroup, Y, p, X) = copyto!(G, Y, p, X)
 
+
+@doc raw"""
+    exp(M::Rotations, p, X)
+    exp(M::OrthogonalMatrices, p, X)
+    exp(M::UnitaryMatrices, p, X)
+
+Compute the exponential map, that is, since ``X`` is represented in the Lie algebra,
+
+```
+exp_p(X) = p\mathrm{e}^X
+```
+
+For different sizes, like ``n=2,3,4`` there is specialised implementations
+
+The algorithm used is a more numerically stable form of those proposed in
+[^Gallier2002] and [^Andrica2013].
+
+[^Gallier2002]:
+    > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
+    > and logarithms of orthogonal matrices.
+    > International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
+    > [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
+
+[^Andrica2013]:
+    > Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
+    > exponential map of the Lie groups of matrices.
+    > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
+    > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
+
+"""
+exp(::GeneralUnitaryMultiplicationGroup, p, X)
+
+function exp!(M::GeneralUnitaryMultiplicationGroup, q, p, X)
+    return copyto!(M, q, p * exp(X))
+end
+
+function exp(M::GeneralUnitaryMultiplicationGroup{2,ℝ}, p::SMatrix, X::SMatrix)
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
+    sinθ, cosθ = sincos(θ)
+    return p * SA[cosθ -sinθ; sinθ cosθ]
+end
+function exp!(M::GeneralUnitaryMultiplicationGroup{2,ℝ}, q, p, X)
+    @assert size(q) == (2, 2)
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
+    sinθ, cosθ = sincos(θ)
+    return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
+end
+function exp!(M::GeneralUnitaryMultiplicationGroup{3,ℝ}, q, p, X)
+    θ = norm(M, p, X) / sqrt(2)
+    if θ ≈ 0
+        a = 1 - θ^2 / 6
+        b = θ / 2
+    else
+        a = sin(θ) / θ
+        b = (1 - cos(θ)) / θ^2
+    end
+    pinvq = I + a .* X .+ b .* (X^2)
+    return copyto!(q, p * pinvq)
+end
+function exp!(::GeneralUnitaryMultiplicationGroup{4,ℝ}, q, p, X)
+    T = eltype(X)
+    α, β = angles_4d_skew_sym_matrix(X)
+    sinα, cosα = sincos(α)
+    sinβ, cosβ = sincos(β)
+    α² = α^2
+    β² = β^2
+    Δ = β² - α²
+    if !isapprox(Δ, 0; atol=1e-6)  # Case α > β ≥ 0
+        sincα = sinα / α
+        sincβ = β == 0 ? one(T) : sinβ / β
+        a₀ = (β² * cosα - α² * cosβ) / Δ
+        a₁ = (β² * sincα - α² * sincβ) / Δ
+        a₂ = (cosα - cosβ) / Δ
+        a₃ = (sincα - sincβ) / Δ
+    elseif α == 0 # Case α = β = 0
+        a₀ = one(T)
+        a₁ = one(T)
+        a₂ = T(1 / 2)
+        a₃ = T(1 / 6)
+    else  # Case α ⪆ β ≥ 0, α ≠ 0
+        sincα = sinα / α
+        r = β / α
+        c = 1 / (1 + r)
+        d = α * (α - β) / 2
+        if α < 1e-2
+            e = @evalpoly(α², T(1 / 3), T(-1 / 30), T(1 / 840), T(-1 / 45360))
+        else
+            e = (sincα - cosα) / α²
+        end
+        a₀ = (α * sinα + (1 + r - d) * cosα) * c
+        a₁ = ((3 - d) * sincα - (2 - r) * cosα) * c
+        a₂ = (sincα - (1 - r) / 2 * cosα) * c
+        a₃ = (e + (1 - r) * (e - sincα / 2)) * c
+    end
+
+    X² = X * X
+    X³ = X² * X
+    pinvq = a₀ * I + a₁ .* X .+ a₂ .* X² .+ a₃ .* X³
+    return copyto!(q, p * pinvq)
+end
+
 @doc raw"""
      exp_lie(G::Orthogonal{2}, X)
      exp_lie(G::SpecialOrthogonal{2}, X)

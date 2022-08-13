@@ -134,7 +134,7 @@ space `M`, i.e. after [`check_point`](@ref)`(M,p)`,
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::GeneralUnitaryMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
-    return check_point(SkewHermitianMatrices(n, 𝔽), p \ X; kwargs...)
+    return check_point(SkewHermitianMatrices(n, 𝔽), transpose(p) * X; kwargs...)
 end
 
 @doc raw"""
@@ -185,104 +185,8 @@ function embed!(G::GeneralUnitaryMatrices, Y, p, X)
     return copyto!(G, Y, p, X)
 end
 
-@doc raw"""
-    exp(M::Rotations, p, X)
-    exp(M::OrthogonalMatrices, p, X)
-    exp(M::UnitaryMatrices, p, X)
-
-Compute the exponential map, that is, since ``X`` is represented in the Lie algebra,
-
-```
-exp_p(X) = p\mathrm{e}^X
-```
-
-For different sizes, like ``n=2,3,4`` there is specialised implementations
-
-The algorithm used is a more numerically stable form of those proposed in
-[^Gallier2002] and [^Andrica2013].
-
-[^Gallier2002]:
-    > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
-    > and logarithms of orthogonal matrices.
-    > International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
-    > [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
-
-[^Andrica2013]:
-    > Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
-    > exponential map of the Lie groups of matrices.
-    > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
-    > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
-
-"""
-exp(::GeneralUnitaryMatrices, p, X)
-
-function exp!(M::GeneralUnitaryMatrices, q, p, X)
-    return copyto!(M, q, p * exp(X))
-end
-
-function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix)
-    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
-    sinθ, cosθ = sincos(θ)
-    return p * SA[cosθ -sinθ; sinθ cosθ]
-end
-function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X)
-    @assert size(q) == (2, 2)
-    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
-    sinθ, cosθ = sincos(θ)
-    return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
-end
-function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X)
-    θ = norm(M, p, X) / sqrt(2)
-    if θ ≈ 0
-        a = 1 - θ^2 / 6
-        b = θ / 2
-    else
-        a = sin(θ) / θ
-        b = (1 - cos(θ)) / θ^2
-    end
-    pinvq = I + a .* X .+ b .* (X^2)
-    return copyto!(q, p * pinvq)
-end
-function exp!(::GeneralUnitaryMatrices{4,ℝ}, q, p, X)
-    T = eltype(X)
-    α, β = angles_4d_skew_sym_matrix(X)
-    sinα, cosα = sincos(α)
-    sinβ, cosβ = sincos(β)
-    α² = α^2
-    β² = β^2
-    Δ = β² - α²
-    if !isapprox(Δ, 0; atol=1e-6)  # Case α > β ≥ 0
-        sincα = sinα / α
-        sincβ = β == 0 ? one(T) : sinβ / β
-        a₀ = (β² * cosα - α² * cosβ) / Δ
-        a₁ = (β² * sincα - α² * sincβ) / Δ
-        a₂ = (cosα - cosβ) / Δ
-        a₃ = (sincα - sincβ) / Δ
-    elseif α == 0 # Case α = β = 0
-        a₀ = one(T)
-        a₁ = one(T)
-        a₂ = T(1 / 2)
-        a₃ = T(1 / 6)
-    else  # Case α ⪆ β ≥ 0, α ≠ 0
-        sincα = sinα / α
-        r = β / α
-        c = 1 / (1 + r)
-        d = α * (α - β) / 2
-        if α < 1e-2
-            e = @evalpoly(α², T(1 / 3), T(-1 / 30), T(1 / 840), T(-1 / 45360))
-        else
-            e = (sincα - cosα) / α²
-        end
-        a₀ = (α * sinα + (1 + r - d) * cosα) * c
-        a₁ = ((3 - d) * sincα - (2 - r) * cosα) * c
-        a₂ = (sincα - (1 - r) / 2 * cosα) * c
-        a₃ = (e + (1 - r) * (e - sincα / 2)) * c
-    end
-
-    X² = X * X
-    X³ = X² * X
-    pinvq = a₀ * I + a₁ .* X .+ a₂ .* X² .+ a₃ .* X³
-    return copyto!(q, p * pinvq)
+function exp!(M::GeneralUnitaryMatrices{n,𝔽,S}, q, p, X) where {n,𝔽,S}
+    return exp!(GeneralUnitaryMultiplicationGroup{n,𝔽,S}(M), q, p, adjoint(p)*X)
 end
 
 @doc raw"""
@@ -513,16 +417,16 @@ log_p q = p\log(p^{\mathrm{H}q)
 """
 log(::GeneralUnitaryMatrices, p, q)
 
-function ManifoldsBase.log(::GeneralUnitaryMatrices{2,ℝ}, p, q)
-    return p * log(GeneralUnitaryMultiplicationGroup{n,2}(), p, q)
+function ManifoldsBase.log(M::GeneralUnitaryMatrices{2,ℝ,S}, p, q) where {S}
+    return p * log(GeneralUnitaryMultiplicationGroup{2,ℝ,S}(M), p, q)
 end
-function log!(::GeneralUnitaryMatrices{n,ℝ}, X, p, q) where {n,𝔽}
-    log!(GeneralUnitaryMultiplicationGroup{m,𝔽}(), X, p, q)
+function log!(M::GeneralUnitaryMatrices{n,𝔽,S}, X, p, q) where {n,𝔽,S}
+    log!(GeneralUnitaryMultiplicationGroup{n,𝔽,S}(M), X, p, q)
     X .= p * X
     return X
 end
 
-norm(::GeneralUnitaryMatrices, p, X) = norm(p \ X)
+norm(::GeneralUnitaryMatrices, p, X) = norm(adjoint(p) * X)
 
 @doc raw"""
     manifold_dimension(M::Rotations)
