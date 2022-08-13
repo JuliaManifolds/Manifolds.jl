@@ -46,7 +46,6 @@ decorated_manifold(G::GeneralUnitaryMultiplicationGroup) = G.manifold
 
 embed!(G::GeneralUnitaryMultiplicationGroup, Y, p, X) = copyto!(G, Y, p, X)
 
-
 @doc raw"""
     exp(M::Rotations, p, X)
     exp(M::OrthogonalMatrices, p, X)

@@ -186,7 +186,7 @@ function embed!(G::GeneralUnitaryMatrices, Y, p, X)
 end
 
 function exp!(M::GeneralUnitaryMatrices{n,𝔽,S}, q, p, X) where {n,𝔽,S}
-    return exp!(GeneralUnitaryMultiplicationGroup{n,𝔽,S}(M), q, p, adjoint(p)*X)
+    return exp!(GeneralUnitaryMultiplicationGroup{n,𝔽,S}(M), q, p, adjoint(p) * X)
 end
 
 @doc raw"""
