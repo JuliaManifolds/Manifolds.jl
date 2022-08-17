@@ -838,7 +838,8 @@ the group $\mathcal{G}$, and $𝔤$ is its Lie algebra, the group exponential is
 \exp : 𝔤 → \mathcal{G},
 ````
 such that for $t,s ∈ ℝ$, $γ(t) = \exp (t X)$ defines a one-parameter subgroup with the
-following properties:
+following properties. Note that one-parameter subgroups are commutative (see [^Suhubi2013],
+section 3.5).
 
 ````math
 \begin{aligned}
@@ -862,6 +863,10 @@ the Lie exponential is the numeric/matrix exponential.
 
 Since this function also depends on the group operation, make sure to implement
 the corresponding trait version `exp_lie(::TraitList{<:IsGroupManifold}, G, X)`.
+
+[^Suhubi2013]:
+    > E. Suhubi, Exterior Analysis: Using Applications of Differential Forms, 1st edition.
+    > Amsterdam: Academic Press, 2013.
 """
 exp_lie(G::AbstractManifold, X)
 @trait_function exp_lie(M::AbstractDecoratorManifold, X)
