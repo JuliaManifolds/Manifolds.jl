@@ -839,7 +839,7 @@ the group $\mathcal{G}$, and $𝔤$ is its Lie algebra, the group exponential is
 ````
 such that for $t,s ∈ ℝ$, $γ(t) = \exp (t X)$ defines a one-parameter subgroup with the
 following properties. Note that one-parameter subgroups are commutative (see [^Suhubi2013],
-section 3.5).
+section 3.5), even if the Lie group itself is not commutative.
 
 ````math
 \begin{aligned}
