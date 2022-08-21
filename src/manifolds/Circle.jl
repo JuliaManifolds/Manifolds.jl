@@ -317,7 +317,7 @@ end
     mean(M::Circle{ℂ}, x::AbstractVector[, w::AbstractWeights])
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
-the [`Circle`](@ref) $𝕊^1$, reprsented by complex numbers, i.e. embedded in the complex plade.
+the [`Circle`](@ref) $𝕊^1$, reprsented by complex numbers, i.e. embedded in the complex plane.
 Comuting the sum
 ````math
 s = \sum_{i=1}^n x_i

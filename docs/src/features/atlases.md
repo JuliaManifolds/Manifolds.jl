@@ -1,6 +1,6 @@
 # [Atlases and charts](@id atlases_and_charts)
 
-Atlases on an ``n``-dimensional manifold $\mathcal M$ are collections of charts ``\mathcal A = \{(U_i, φ_i) \colon i \in I\}``, where ``I`` is a (finite or infinte) index family, such that ``U_i \subseteq \mathcal M`` is an open set and each chart ``φ_i: U_i \to \mathbb{R}^n`` is a homeomorphism. This means, that ``φ_i`` is bijecive – sometimes also called one-to-one and onto - and continuous, and its inverse ``φ_i^{-1}`` is continuous as well.
+Atlases on an ``n``-dimensional manifold $\mathcal M$ are collections of charts ``\mathcal A = \{(U_i, φ_i) \colon i \in I\}``, where ``I`` is a (finite or infinte) index family, such that ``U_i \subseteq \mathcal M`` is an open set and each chart ``φ_i: U_i \to \mathbb{R}^n`` is a homeomorphism. This means, that ``φ_i`` is bijective – sometimes also called one-to-one and onto - and continuous, and its inverse ``φ_i^{-1}`` is continuous as well.
 The inverse ``φ_i^{-1}`` is called (local) parametrization.
 The resulting _parameters_ ``a=φ(p)`` of ``p`` (with respect to the chart ``φ``) are in the literature also called “(local) coordinates”. To distinguish the parameter ``a`` from  [`get_coordinates`](@ref) in a basis, we use the terminology parameter in this package.
 
