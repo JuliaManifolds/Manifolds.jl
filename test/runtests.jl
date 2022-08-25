@@ -185,7 +185,7 @@ include("utils.jl")
         include_test("groups/connections.jl")
         include_test("groups/metric.jl")
     end
-    if TEST_GROUP ∈ ["all", "test_manifolds"]
+    if TEST_GROUP ∈ ["all", "test_manifolds"] && !Sys.isapple()
         include_test("recipes.jl")
     end
 end
