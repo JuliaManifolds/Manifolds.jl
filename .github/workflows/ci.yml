@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        julia-version: ["1.6", "1.7"]
+        julia-version: ["1.6", "1.8"]
         os: [ubuntu-latest, macOS-latest]
         group:
           - 'test_manifolds'
@@ -31,4 +31,4 @@ jobs:
       - uses: codecov/codecov-action@v2
         with:
           fail_ci_if_error: false
-        if: ${{ matrix.julia-version == '1.7' && matrix.os =='ubuntu-latest' }}
+        if: ${{ matrix.julia-version == '1.8' && matrix.os =='ubuntu-latest' }}

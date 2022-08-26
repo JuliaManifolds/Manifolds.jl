@@ -66,6 +66,11 @@ struct VectorSpaceAtPoint{
     point::TX
 end
 
+"""
+    TangentSpaceAtPoint{M}
+
+Alias for [`VectorSpaceAtPoint`](@ref) for the tangent space at a point.
+"""
 const TangentSpaceAtPoint{M} =
     VectorSpaceAtPoint{𝔽,TangentBundleFibers{M}} where {𝔽,M<:AbstractManifold{𝔽}}
 
