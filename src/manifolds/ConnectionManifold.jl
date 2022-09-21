@@ -66,6 +66,32 @@ function active_traits(f, M::ConnectionManifold, args...)
     )
 end
 
+"""
+    affine_connection(M::AbstractManifold, p, X, Y)
+
+Calculate affine connection on manifold `M` at point `p` of vectors `X` and `Y`.
+"""
+function affine_connection(M::AbstractManifold, p, X, Y) end
+
+"""
+    affine_connection(M::AbstractManifold, p, Xc, Yc, B::AbstractBasis)
+
+Calculate affine connection on manifold `M` at point `p` of vectors with coefficients `Xc`
+and `Yc` in basis `B`.
+"""
+function affine_connection(M::AbstractManifold, p, Xc, Yc, B::AbstractBasis)
+    Zc = allocate(Xc)
+    return affine_connection!(M, Zc, p, Xc, Yc, B)
+end
+
+"""
+    affine_connection!(M::AbstractManifold, Zc, p, Xc, Yc, B::AbstractBasis)
+
+Calculate affine connection on manifold `M` at point `p` of vectors with coefficients `Xc`
+and `Yc` in basis `B` and save the result in `Zc`.
+"""
+function affine_connection!(M::AbstractManifold, Zc, p, Xc, Yc, B::AbstractBasis) end
+
 @doc raw"""
     christoffel_symbols_first(
         M::AbstractManifold,
