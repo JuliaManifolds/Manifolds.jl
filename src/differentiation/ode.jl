@@ -69,7 +69,9 @@ function solve_chart_exp_ode(
     params = (M, B)
     prob = ODEProblem(chart_exp_problem, u0, (0.0, 1.0), params)
     sol = solve(prob, solver; kwargs...)
-    q = sol.u[1].x[1]
+    q = sol.u[end].x[1]
+    return sol
+    #println(sol)
     return q
 end
 

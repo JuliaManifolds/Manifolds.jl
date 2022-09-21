@@ -38,6 +38,14 @@ function check_point(M::TorusInR3, p; kwargs...)
     return nothing
 end
 
+function check_vector(M::TorusInR3, p, X; kwargs...)
+    dot_nX = dot(_torus_normal(M, p), X)
+    if !isapprox(dot_nX, 0; kwargs...)
+        return DomainError(dot_nX, "The point $(p) is not tangent to $(p) from $(M).")
+    end
+    return nothing
+end
+
 function get_embedding(::TorusInR3)
     return Euclidean(3)
 end
@@ -48,7 +56,9 @@ end
 Return the dimension of the [`AbstractSphere`](@ref) `M`, respectively i.e. the
 dimension of the embedding -1.
 """
-manifold_dimension(M::TorusInR3) = 2
+manifold_dimension(::TorusInR3) = 2
+
+representation_size(::TorusInR3) = (3,)
 
 @doc raw"""
     DefaultTorusAtlas()
@@ -101,6 +111,18 @@ function _torus_param(M::TorusInR3, θ, φ)
     return ((M.R + M.r * cosθ) * cosφ, (M.R + M.r * cosθ) * sinφ, M.r * sinθ)
 end
 
+"""
+    _torus_normal(M::TorusInR3, p)
+
+Outward-pointing normal vector to torus at `p`.
+"""
+function _torus_normal(M::TorusInR3, p)
+    θ, φ = _torus_theta_phi(M, p)
+    t = @SVector [-sin(φ), cos(φ), 0]
+    s = @SVector [cos(φ) * (-sin(θ)), sin(φ) * (-sin(θ)), cos(θ)]
+    return normalize(cross(t, s))
+end
+
 function get_chart_index(M::TorusInR3, ::DefaultTorusAtlas, p)
     return _torus_theta_phi(M, p)
 end
@@ -111,7 +133,7 @@ function get_parameters!(M::TorusInR3, x, ::DefaultTorusAtlas, i::NTuple{2}, p)
 end
 
 function get_point!(M::TorusInR3, p, ::DefaultTorusAtlas, i, x)
-    p .= _torus_param(M, i...)
+    p .= _torus_param(M, (x .+ i)...)
     return p
 end
 

@@ -1,4 +1,4 @@
-
+using Revise
 using Manifolds
 using GLMakie
 using OrdinaryDiffEq
@@ -40,14 +40,17 @@ function plot_thing()
     A = Manifolds.DefaultTorusAtlas()
 
     p0x = [0.5, -1.2]
-    X_p0x = [-0.2, 0.4]
+    X_p0x = [-1.2, 0.4]
     p = [Manifolds._torus_param(M, p0x...)...]
     i_p0x = Manifolds.get_chart_index(M, A, p)
     B = induced_basis(M, A, i_p0x, Manifolds.TangentSpaceType())
     X = get_vector(M, p, X_p0x, B)
 
-    arrows!(ax, [Point3f(p)], [Point3f(X)], linecolor=:red, arrowcolor=:red)
+    p_exp = Manifolds.solve_chart_exp_ode(M, [0.0, 0.0], X_p0x, A, i_p0x)
+    samples = p_exp(0.0:0.1:1.0)
+    geo_ps = [Point3f(get_point(M, A, i_p0x, s.x[1])) for s in samples.u]
+    geo_Xs = [Point3f(get_vector(M, p, s.x[2], B)) for s in samples.u]
 
-    p_exp = Manifolds.solve_chart_exp_ode(M, p0x, X_p0x, A, i_p0x)
+    arrows!(ax, geo_ps, geo_Xs, linecolor=:red, arrowcolor=:red)
     return fig
 end
