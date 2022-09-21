@@ -121,8 +121,7 @@ function get_coordinates_induced_basis!(
     p,
     X,
     B::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas},
-)
-end
+) end
 
 function get_vector_induced_basis!(
     M::TorusInR3,
