@@ -5,3 +5,4 @@ docs/src/generated
 docs/src/misc/contributing.md
 benchmark/tune.json
 benchmark/results*
+docs/src/tutorials/*.md

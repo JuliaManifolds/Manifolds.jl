@@ -1,4 +1,5 @@
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PyPlot
+using PlutoStaticHTML
 # required for loading the manifold tests functios
 using Test, FiniteDifferences
 ENV["GKSwstype"] = "100"
@@ -23,6 +24,44 @@ open(joinpath(generated_path, "contributing.md"), "w") do io
     end
 end
 
+#
+# Generate Pluto Tutorial HTMLs
+tutorial_menu = Array{Pair{String,String},1}()
+tutorial_src_folder = joinpath(@__DIR__, "..", "tutorials/")
+tutorial_output_folder = joinpath(@__DIR__, "src/", "tutorials/")
+tutorial_relative_path = "tutorials/"
+mkpath(tutorial_output_folder)
+#
+# Tutorials
+@info " \n      Rendering Tutorials\n "
+tutorials = [
+    Dict(:file => "Primer", :title => "Get started with Manifolds"),
+]
+# build menu and write files myself - tp set edit url correctly.
+for t in tutorials
+    global tutorial_menu
+    rendered = build_notebooks( #though not really parallel here
+        BuildOptions(
+            tutorial_src_folder;
+            output_format=documenter_output,
+            write_files=false,
+            use_distributed=false,
+        ),
+        ["$(t[:file]).jl"],
+    )
+    write(
+        tutorial_output_folder * t[:file] * ".md",
+        """
+        ```@meta
+        EditURL = "$(tutorial_src_folder)$(t[:file]).jl"
+        ```
+        $(rendered["$(t[:file]).jl"][1])
+        """,
+    )
+    push!(tutorial_menu, t[:title] => joinpath(tutorial_relative_path, t[:file] * ".md"))
+end
+
+
 makedocs(
     # for development, we disable prettyurls
     format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
@@ -31,6 +70,7 @@ makedocs(
     sitename="Manifolds.jl",
     pages=[
         "Home" => "index.md",
+        "Tutorials" => tutorial_menu,
         "Manifolds" => [
             "Basic manifolds" => [
                 "Centered matrices" => "manifolds/centeredmatrices.md",
