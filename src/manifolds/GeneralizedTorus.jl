@@ -38,10 +38,10 @@ function check_point(M::TorusInR3, p; kwargs...)
     return nothing
 end
 
-function check_vector(M::TorusInR3, p, X; kwargs...)
+function check_vector(M::TorusInR3, p, X; atol=eps(eltype(p)), kwargs...)
     dot_nX = dot(_torus_normal(M, p), X)
-    if !isapprox(dot_nX, 0; kwargs...)
-        return DomainError(dot_nX, "The point $(p) is not tangent to $(p) from $(M).")
+    if !isapprox(dot_nX, 0; atol, kwargs...)
+        return DomainError(dot_nX, "The vector $(X) is not tangent to $(p) from $(M).")
     end
     return nothing
 end
@@ -93,6 +93,15 @@ function affine_connection!(
     return Zc
 end
 
+"""
+    inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
+
+Injectivity radius of `get_point` for chart `i` from atlas `A` of manifold `M`.
+"""
+function inverse_chart_injectivity_radius(::TorusInR3, ::DefaultTorusAtlas, i)
+    return π
+end
+
 function _torus_theta_phi(M::TorusInR3, p)
     φ = atan(p[2], p[1])
     sinφ, cosφ = sincos(φ)
@@ -138,12 +147,25 @@ function get_point!(M::TorusInR3, p, ::DefaultTorusAtlas, i, x)
 end
 
 function get_coordinates_induced_basis!(
-    ::TorusInR3,
+    M::TorusInR3,
     Y,
     p,
     X,
     B::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas},
-) end
+)
+    θ, φ = get_parameters(M, B.A, B.i, p)
+
+    sinθ, cosθ = sincos(θ + B.i[1])
+    sinφ, cosφ = sincos(φ + B.i[2])
+
+    A = @SMatrix [
+        (-M.r*sinθ*cosφ) (-M.R * sinφ-M.r * cosθ * sinφ)
+        (-M.r*sinθ*sinφ) (M.R * cosφ+M.r * cosθ * cosφ)
+        (M.r*cosθ) 0
+    ]
+    Y .= A \ SVector{3}(X)
+    return Y
+end
 
 function get_vector_induced_basis!(
     M::TorusInR3,

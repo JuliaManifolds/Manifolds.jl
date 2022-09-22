@@ -300,6 +300,13 @@ function induced_basis(
     return InducedBasis{𝔽,typeof(VST),typeof(A),typeof(i)}(VST, A, i)
 end
 
+"""
+    inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
+
+Injectivity radius of `get_point` for chart `i` from atlas `A` of manifold `M`.
+"""
+inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
+
 function dual_basis(
     M::AbstractManifold{𝔽},
     ::Any,

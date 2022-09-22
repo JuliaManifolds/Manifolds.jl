@@ -1,7 +1,24 @@
-using Revise
+#using Revise
 using Manifolds
-using GLMakie
+#using GLMakie
 using OrdinaryDiffEq
+using Test
+
+#using DiffEqCallbacks
+#using RecursiveArrayTools
+
+@testset "Torus in ℝ³" begin
+    M = Manifolds.TorusInR3(3, 2)
+    A = Manifolds.DefaultTorusAtlas()
+
+    p0x = [0.5, -1.2]
+    X_p0x = [-1.2, 0.4]
+    p = [Manifolds._torus_param(M, p0x...)...]
+    i_p0x = Manifolds.get_chart_index(M, A, p)
+    B = induced_basis(M, A, i_p0x, Manifolds.TangentSpaceType())
+    X = get_vector(M, p, X_p0x, B)
+    @test get_coordinates(M, p, X, B) ≈ X_p0x
+end
 
 function plot_thing()
     # take a look at http://www.rdrop.com/~half/math/torus/torus.geodesics.pdf
@@ -49,8 +66,43 @@ function plot_thing()
     p_exp = Manifolds.solve_chart_exp_ode(M, [0.0, 0.0], X_p0x, A, i_p0x)
     samples = p_exp(0.0:0.1:1.0)
     geo_ps = [Point3f(get_point(M, A, i_p0x, s.x[1])) for s in samples.u]
-    geo_Xs = [Point3f(get_vector(M, p, s.x[2], B)) for s in samples.u]
+    geo_Xs = [
+        Point3f(get_vector(M, get_point(M, A, i_p0x, s.x[1]), s.x[2], B)) for s in samples.u
+    ]
 
     arrows!(ax, geo_ps, geo_Xs, linecolor=:red, arrowcolor=:red)
     return fig
 end
+
+# function maybe_switch_chart(u, t, integrator)
+#     (M, B) = integrator.p
+#     dist = norm(u.x[1] - SVector{2}(B.i))
+#     if dist > 2/3 * Manifolds.inverse_chart_injectivity_radius(M, B.A, B.i)
+#         # switch charts
+#         println("TODO: switch charts (dist = $dist)")
+#     end
+#     return u
+# end
+
+# function Manifolds.solve_chart_exp_ode(
+#     M::AbstractManifold,
+#     p,
+#     X,
+#     A::AbstractAtlas,
+#     i;
+#     solver=AutoVern9(Rodas5()),
+#     kwargs...,
+# )
+#     u0 = ArrayPartition(p, X)
+#     B = induced_basis(M, A, i, Manifolds.TangentSpaceType())
+#     params = (M, B)
+
+#     cb = FunctionCallingCallback(maybe_switch_chart; func_start = false)
+
+#     prob = ODEProblem(Manifolds.chart_exp_problem, u0, (0.0, 1.0), params; callback=cb)
+#     sol = solve(prob, solver; kwargs...)
+#     q = sol.u[end].x[1]
+#     return sol
+#     #println(sol)
+#     return q
+# end
