@@ -85,7 +85,7 @@ TangentSpaceAtPoint(M::AbstractManifold, p) = VectorSpaceAtPoint(TangentBundleFi
 """
     TangentSpace(M::AbstractManifold, p)
 
-Return a [`TangentSpaceAtPoint`](@ref TangentSpaceAtPoint{AbstractManifold, Any}) representing tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold) `M`.
+Return a [`TangentSpaceAtPoint`](@ref) representing tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold) `M`.
 """
 TangentSpace(M::AbstractManifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
 
@@ -603,7 +603,7 @@ end
 @doc raw"""
     injectivity_radius(M::TangentSpaceAtPoint)
 
-Return the injectivity radius on the [`TangentSpaceAtPoint`](@ref) `M`, which is $∞$.
+Return the injectivity radius on the [`TangentSpaceAtPoint`](@ref TangentSpaceAtPoint) `M`, which is $∞$.
 """
 injectivity_radius(::TangentSpaceAtPoint) = Inf
 

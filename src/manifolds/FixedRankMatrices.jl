@@ -84,9 +84,11 @@ Base.:(==)(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt =
 @doc raw"""
     UMVTVector <: TVector
 
-A tangent vector that can be described as a product `U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mathrm{H}`,
-where `X = U_X S V_X^\mathrm{H}` is its base point, see for example [`FixedRankMatrices`](@ref).
-This vector structure stores the additionally (to the point) required fields.
+A tangent vector that can be described as a product ``U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mathrm{H}```,
+where ``X = U_X S V_X^\mathrm{H}`` is its base point, see for example [`FixedRankMatrices`](@ref).
+
+The base point ``p`` is required for example embedding this point, but it is not stored.
+The fields of thie tangent vector are `U` for ``U_X``, `M` and `Vt` to store ``V_X^\mathrm{H}``
 
 # Constructors
 * `UMVTVector(U,M,Vt)` store umv factors to initialize the `UMVTVector`
