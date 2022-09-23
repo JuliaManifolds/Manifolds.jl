@@ -135,6 +135,9 @@ end
 function get_chart_index(M::TorusInR3, ::DefaultTorusAtlas, p)
     return _torus_theta_phi(M, p)
 end
+function get_chart_index(::TorusInR3, ::DefaultTorusAtlas, i, a)
+    return (a[1], a[2])
+end
 
 function get_parameters!(M::TorusInR3, x, ::DefaultTorusAtlas, i::NTuple{2}, p)
     x .= _torus_theta_phi(M, p) .- i

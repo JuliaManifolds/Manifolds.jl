@@ -158,6 +158,20 @@ get_chart_index(::AbstractManifold, ::AbstractAtlas, ::Any)
 
 get_chart_index(::AbstractManifold, ::RetractionAtlas, p) = p
 
+"""
+    get_chart_index(M::AbstractManifold, A::AbstractAtlas, i, a)
+
+Select a chart from an [`AbstractAtlas`](@ref) `A` for manifold `M` that is suitable for
+representing the neighborhood of point with parametrization `a` in chart `i`. This selection
+should be deterministic, although different charts may be selected for arbitrarily close but
+distinct points.
+
+# See also
+
+[`get_default_atlas`](@ref)
+"""
+get_chart_index(::AbstractManifold, ::AbstractAtlas, ::Any, ::Any)
+
 @doc raw"""
     transition_map(M::AbstractManifold, A_from::AbstractAtlas, i_from, A_to::AbstractAtlas, i_to, a)
     transition_map(M::AbstractManifold, A::AbstractAtlas, i_from, i_to, a)
@@ -286,16 +300,20 @@ struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractB
 end
 
 """
-    induced_basis(::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType)
+    induced_basis(::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType = TangentSpace)
 
 Get the basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
 space of type `vs`. Returns an object of type [`InducedBasis`](@ref).
+
+# See also
+
+[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType), [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis)
 """
 function induced_basis(
     ::AbstractManifold{𝔽},
     A::AbstractAtlas,
     i,
-    VST::VectorSpaceType,
+    VST::VectorSpaceType=TangentSpace,
 ) where {𝔽}
     return InducedBasis{𝔽,typeof(VST),typeof(A),typeof(i)}(VST, A, i)
 end
