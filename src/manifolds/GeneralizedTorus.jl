@@ -1,6 +1,6 @@
 
 @doc raw"""
-    TorusInR3{TR<:Real} <: AbstractManifold{ℝ}
+    TorusInR3{TR<:Real} <: AbstractDecoratorManifold{ℝ}
 
 Surface in ℝ³ described by parametric equations:
 ```math
@@ -16,9 +16,13 @@ Alternative names include anchor ring, donut and doughnut.
 
     TorusInR3(R, r)
 """
-struct TorusInR3{TR<:Real} <: AbstractManifold{ℝ}
+struct TorusInR3{TR<:Real} <: AbstractDecoratorManifold{ℝ}
     R::TR
     r::TR
+end
+
+function active_traits(f, ::TorusInR3, args...)
+    return merge_traits(IsMetricManifold())
 end
 
 aspect_ratio(M::TorusInR3) = M.R / M.r
@@ -83,13 +87,13 @@ function affine_connection!(
     B::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas},
 )
     # as in https://www.cefns.nau.edu/~schulz/torus.pdf
-    θ = p[1]
+    θ = p[1] .+ B.i[1]
     sinθ, cosθ = sincos(θ)
-    Γ²₁₁ = (M.R + M.r * cosθ) * sinθ / M.r
-    Γ¹₁₂ = -M.r * sinθ / (M.R + M.r * cosθ)
+    Γ¹₂₂ = (M.R + M.r * cosθ) * sinθ / M.r
+    Γ²₁₂ = -M.r * sinθ / (M.R + M.r * cosθ)
 
-    Zc[1] = Xc' * [0 Γ¹₁₂; Γ²₁₁ 0] * Yc
-    Zc[2] = Xc' * [Γ¹₁₂ 0; 0 0] * Yc
+    Zc[1] = Xc[2] * Γ¹₂₂ * Yc[2]
+    Zc[2] = Γ²₁₂ * (Xc[1] * Yc[2] + Xc[2] * Yc[1])
     return Zc
 end
 
@@ -187,7 +191,12 @@ function get_vector_induced_basis!(
     return Y
 end
 
-function local_metric(M::TorusInR3, p, ::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas})
-    diag = ((M.R + M.r * cos(p[1]))^2, M.r^2)
+function local_metric(
+    M::TorusInR3,
+    p,
+    B::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas},
+)
+    @assert length(p) == 2
+    diag = ((M.R + M.r * cos(p[1] + B.i[1]))^2, M.r^2)
     return Diagonal(SVector(diag))
 end

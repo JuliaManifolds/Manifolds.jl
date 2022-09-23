@@ -51,8 +51,8 @@ function chart_exp_problem(u, params, t)
     B = params[2]
     p = u.x[1]
     dx = u.x[2]
-    du = affine_connection(M, p, dx, dx, B)
-    return ArrayPartition(dx, du)
+    ddx = -affine_connection(M, p, dx, dx, B)
+    return ArrayPartition(dx, ddx)
 end
 
 function solve_chart_exp_ode(
@@ -61,13 +61,14 @@ function solve_chart_exp_ode(
     X,
     A::AbstractAtlas,
     i;
+    final_time=1.0,
     solver=AutoVern9(Rodas5()),
     kwargs...,
 )
     u0 = ArrayPartition(p, X)
     B = induced_basis(M, A, i, TangentSpaceType())
     params = (M, B)
-    prob = ODEProblem(chart_exp_problem, u0, (0.0, 1.0), params)
+    prob = ODEProblem(chart_exp_problem, u0, (0.0, final_time), params)
     sol = solve(prob, solver; kwargs...)
     q = sol.u[end].x[1]
     return sol

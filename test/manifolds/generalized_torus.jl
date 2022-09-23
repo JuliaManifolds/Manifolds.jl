@@ -1,6 +1,6 @@
 using Revise
 using Manifolds
-using GLMakie
+using GLMakie, Makie
 using OrdinaryDiffEq
 using Test
 
@@ -8,18 +8,22 @@ using StaticArrays
 using DiffEqCallbacks
 using SciMLBase
 using RecursiveArrayTools
+using Manifolds: TFVector
 
 @testset "Torus in ℝ³" begin
     M = Manifolds.TorusInR3(3, 2)
     A = Manifolds.DefaultTorusAtlas()
 
-    p0x = [0.5, -1.2]
+    #p0x = [0.5, -1.2]
+    p0x = [pi / 2, 0.0]
     X_p0x = [-1.2, 0.4]
     p = [Manifolds._torus_param(M, p0x...)...]
     i_p0x = Manifolds.get_chart_index(M, A, p)
     B = induced_basis(M, A, i_p0x)
     X = get_vector(M, p, X_p0x, B)
     @test get_coordinates(M, p, X, B) ≈ X_p0x
+
+    @test_broken norm(X) ≈ norm(M, p0x, TFVector(X_p0x, B))
 end
 
 function plot_thing()
@@ -54,24 +58,56 @@ function plot_thing()
     wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5)
     zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
 
-    # a point and tangent vector
-
+    sg = SliderGrid(
+        fig[2, 1],
+        (label="θₚ", range=(-pi):(pi / 100):pi, startvalue=pi / 10),
+        (label="φₚ", range=(-pi):(pi / 100):pi, startvalue=0.0),
+        (label="θₓ", range=(-pi):(pi / 100):pi, startvalue=pi / 10),
+        (label="φₓ", range=(-pi):(pi / 100):pi, startvalue=pi / 10),
+    )
     A = Manifolds.DefaultTorusAtlas()
 
-    p0x = [0.5, -1.2]
-    X_p0x = [-1.2, 0.4]
-    p = [Manifolds._torus_param(M, p0x...)...]
-    i_p0x = Manifolds.get_chart_index(M, A, p)
-    B = induced_basis(M, A, i_p0x)
-    X = get_vector(M, p, X_p0x, B)
+    # a point and tangent vector
 
-    t_end = 100.0
-    p_exp = Manifolds.solve_chart_exp_ode(M, [0.0, 0.0], X_p0x, A, i_p0x, final_time=t_end)
-    samples = p_exp(0.0:0.1:t_end)
-    geo_ps = [Point3f(s[1]) for s in samples]
-    geo_Xs = [Point3f(s[2]) for s in samples]
+    function solve_for(p0x, X_p0x)
+        p = [Manifolds._torus_param(M, p0x...)...]
+        i_p0x = Manifolds.get_chart_index(M, A, p)
+        B = induced_basis(M, A, i_p0x)
+        X = get_vector(M, p, X_p0x, B)
+
+        t_end = 200.0
+        return p_exp =
+            Manifolds.solve_chart_exp_ode(M, [0.0, 0.0], X_p0x, A, i_p0x, final_time=t_end)
+    end
+
+    geo_ps = lift(
+        sg.sliders[1].value,
+        sg.sliders[2].value,
+        sg.sliders[3].value,
+        sg.sliders[4].value,
+    ) do θₚ, φₚ, θₓ, φₓ
+        p_exp = solve_for([θₚ, φₚ], [θₓ, φₓ])
+
+        samples = p_exp(0.0:0.5:t_end)
+        geo_ps = [Point3f(s[1]) for s in samples]
+        return geo_ps
+    end
+
+    geo_Xs = lift(
+        sg.sliders[1].value,
+        sg.sliders[2].value,
+        sg.sliders[3].value,
+        sg.sliders[4].value,
+    ) do θₚ, φₚ, θₓ, φₓ
+        p_exp = solve_for([θₚ, φₚ], [θₓ, φₓ])
+
+        samples = p_exp(0.0:0.5:t_end)
+        geo_Xs = [Point3f(s[2]) for s in samples]
+        return geo_Xs
+    end
 
     arrows!(ax, geo_ps, geo_Xs, linecolor=:red, arrowcolor=:red, linewidth=0.05)
+
     return fig
 end
 
@@ -131,7 +167,6 @@ function Manifolds.solve_chart_exp_ode(
     while retcode === :Terminated && init_time < final_time
         B = induced_basis(M, A, cur_i)
         params = (M, B)
-        println((init_time, final_time))
         prob = ODEProblem(
             Manifolds.chart_exp_problem,
             u0,
