@@ -57,6 +57,8 @@ function plot_thing()
     )
     wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5)
     zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
+    
+    t_end = 200.0
 
     sg = SliderGrid(
         fig[2, 1],
@@ -74,8 +76,6 @@ function plot_thing()
         i_p0x = Manifolds.get_chart_index(M, A, p)
         B = induced_basis(M, A, i_p0x)
         X = get_vector(M, p, X_p0x, B)
-
-        t_end = 200.0
         return p_exp =
             Manifolds.solve_chart_exp_ode(M, [0.0, 0.0], X_p0x, A, i_p0x, final_time=t_end)
     end
