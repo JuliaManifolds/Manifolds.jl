@@ -34,9 +34,7 @@ mkpath(tutorial_output_folder)
 #
 # Tutorials
 @info " \n      Rendering Tutorials\n "
-tutorials = [
-    Dict(:file => "Primer", :title => "Get started with Manifolds"),
-]
+tutorials = [Dict(:file => "Primer", :title => "Get started with Manifolds")]
 # build menu and write files myself - tp set edit url correctly.
 for t in tutorials
     global tutorial_menu
@@ -60,7 +58,6 @@ for t in tutorials
     )
     push!(tutorial_menu, t[:title] => joinpath(tutorial_relative_path, t[:file] * ".md"))
 end
-
 
 makedocs(
     # for development, we disable prettyurls

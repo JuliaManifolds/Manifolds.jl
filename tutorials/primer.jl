@@ -16,7 +16,6 @@ This short primer illustrates how to use a manifold from [`Manifolds.jl`](https:
 
 # ╔═╡ da637130-fb5c-4d54-9603-b853d41e9c96
 
-
 # ╔═╡ c1e139b0-7d39-4d20-81dc-5592fee831d0
 md"We can first just create a manifold"
 
@@ -33,20 +32,19 @@ manifold_dimension(M)
 md"or whether points belong to the manifold. Note that there is a final optional argument to activate an error message:"
 
 # ╔═╡ a37ba296-75b8-4b4d-8629-510241b43757
-is_point(M, [0,0,1,0,1])
+is_point(M, [0, 0, 1, 0, 1])
 
 # ╔═╡ 204ace1b-da5a-42dc-9163-43d046995dd6
 try
-	is_point(M, [0,0,1,0,1], true)
+    is_point(M, [0, 0, 1, 0, 1], true)
 catch e
-	md"$e"
+    md"$e"
 end
 
 # ╔═╡ dea45eb9-4a88-4ea1-b6c2-377cd98a0c22
-is_point(M, [0,0,0,0,1])
+is_point(M, [0, 0, 0, 0, 1])
 
 # ╔═╡ 5967e7c1-50b9-4a2a-b5ce-107fa2b6cfa7
-
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
