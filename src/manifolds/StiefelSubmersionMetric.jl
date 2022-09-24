@@ -196,13 +196,19 @@ function log!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     X,
     p,
-    q,
+    q;
+    tolerance=sqrt(eps(float(real(eltype(X))))),
+    max_iterations=1_000,
+    num_transport_points=4,
 ) where {n,k}
-    T = float(real(Base.promote_eltype(X, p, q)))
-    tolerance = sqrt(eps(T))
+    retraction = ExponentialRetraction()
+    vector_transport = ScaledVectorTransport(ProjectionTransport())
     inverse_retraction = ShootingInverseRetraction(
-        tolerance=tolerance,
-        num_transport_points=4,
+        tolerance,
+        max_iterations,
+        num_transport_points,
+        retraction,
+        vector_transport,
     )
     return inverse_retract!(M, X, p, q, inverse_retraction)
 end
