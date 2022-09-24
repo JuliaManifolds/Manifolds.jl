@@ -107,7 +107,7 @@ function inverse_retract!(
     method::ShootingInverseRetraction{T,ExponentialRetraction},
 ) where {n,k,T<:Real}
     if k > div(n, 2)
-        return invoke(
+        invoke(
             inverse_retract!,
             Tuple{
                 typeof(M),
@@ -122,6 +122,7 @@ function inverse_retract!(
             q,
             method,
         )
+        return X
     end
     ts = range(0, 1; length=method.num_transport_points)
     α = metric(M).α
