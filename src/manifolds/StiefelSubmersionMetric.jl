@@ -84,14 +84,14 @@ function exp!(
         Q, B = qr(Y)
         @views begin
             copyto!(G[1:n, 1:k], p)
-            copyto!(G[1:n, (k+1):2k], Matrix(Q))
+            copyto!(G[1:n, (k + 1):(2k)], Matrix(Q))
             F[1:k, 1:k] .= A ./ (α + 1)
-            F[1:k, k+1:2k] .= -B'
-            F[k+1:2k, 1:k] .= B
-            fill!(F[k+1:2k, k+1:2k], false)
+            F[1:k, (k + 1):(2k)] .= -B'
+            F[(k + 1):(2k), 1:k] .= B
+            fill!(F[(k + 1):(2k), (k + 1):(2k)], false)
         end
         rmul!(A, α / (α + 1))
-        mul!(q, G, @views(exp(F)[1:2k, 1:k]) * exp(A))
+        mul!(q, G, @views(exp(F)[1:(2k), 1:k]) * exp(A))
     elseif n == k
         A = allocate(q, T)
         C = allocate(q, T)
@@ -221,9 +221,9 @@ function inverse_retract!(
     while (gap > method.tolerance) && (i < method.max_iterations)
         @views begin
             C[1:k, 1:k] .= A ./ (α + 1)
-            C[1:k, k+1:2k] .= -R'
-            C[k+1:2k, 1:k] .= R
-            fill!(C[k+1:2k, k+1:2k], false)
+            C[1:k, (k + 1):(2k)] .= -R'
+            C[(k + 1):(2k), 1:k] .= R
+            fill!(C[(k + 1):(2k), (k + 1):(2k)], false)
         end
         D .= A .* (α / (α + 1))
         @views begin
