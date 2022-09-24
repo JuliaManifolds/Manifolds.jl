@@ -339,6 +339,7 @@ include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
 include("manifolds/StiefelEuclideanMetric.jl")
 include("manifolds/StiefelCanonicalMetric.jl")
+include("manifolds/StiefelSubmersionMetric.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
@@ -570,7 +571,8 @@ export AbstractMetric,
     ProductMetric,
     RealSymplecticMetric,
     ExtendedSymplecticMetric,
-    CanonicalMetric
+    CanonicalMetric,
+    StiefelSubmersionMetric
 export AbstractAtlas, RetractionAtlas
 # Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
