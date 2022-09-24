@@ -169,6 +169,7 @@ function inverse_retract!(
     rmul!(X, gap / norm(X))
     i = 1
     Xˢ = allocate(X)
+    Xˢnew = allocate(Xˢ)
     retr_tX = allocate_result(M, retract, p, X)
     retr_tX_new = allocate_result(M, retract, p, X)
     while (gap > method.tolerance) && (i < method.max_iterations)
@@ -179,12 +180,12 @@ function inverse_retract!(
         rmul!(Xˢ, gap / norm(Xˢ))
         for t in reverse(ts)[2:end-1]
             retract!(M, retr_tX_new, p, t * X, method.retraction)
-            vector_transport_to!(M, Xˢ, retr_tX, Xˢ, retr_tX_new, method.vector_transport)
+            vector_transport_to!(M, Xˢnew, retr_tX, Xˢ, retr_tX_new, method.vector_transport)
             retr_tX, retr_tX_new = retr_tX_new, retr_tX
-            Xˢ, Xˢ = Xˢ, Xˢ
+            Xˢ, Xˢnew = Xˢnew, Xˢ
         end
-        vector_transport_to!(M, Xˢ, retr_tX, Xˢ, p, method.vector_transport)
-        X .-= Xˢ
+        vector_transport_to!(M, Xˢnew, retr_tX, Xˢ, p, method.vector_transport)
+        X .-= Xˢnew
         i += 1
     end
     return X
