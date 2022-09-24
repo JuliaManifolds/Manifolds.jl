@@ -195,6 +195,26 @@ function _vector_transport_factors!(A, R, S, M, N, gap, ϵ, ::Val{k}) where {k}
     return A, R
 end
 
+function log(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    p,
+    q;
+    tolerance=sqrt(eps(float(real(Base.promote_eltype(p, q))))),
+    max_iterations=1_000,
+    num_transport_points=4,
+) where {n,k}
+    X = allocate_result(M, log, p, q)
+    log!(
+        M,
+        X,
+        p,
+        q;
+        tolerance=tolerance,
+        max_iterations=max_iterations,
+        num_transport_points=num_transport_points,
+    )
+    return X
+end
 function log!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     X,
