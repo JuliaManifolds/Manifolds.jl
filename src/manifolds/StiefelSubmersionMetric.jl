@@ -107,20 +107,13 @@ function inverse_retract!(
     method::ShootingInverseRetraction{T,ExponentialRetraction},
 ) where {n,k,T<:Real}
     if k > div(n, 2)
-        invoke(
-            inverse_retract!,
-            Tuple{
-                typeof(M),
-                typeof(X),
-                typeof(p),
-                typeof(q),
-                ShootingInverseRetraction{T},
-            },
-            M,
-            X,
-            p,
-            q,
-            method,
+        _shooting!(
+            M, X, p, q;
+            max_iterations=method.max_iterations,
+            tolerance=method.tolerance,
+            num_transport_points=method.num_transport_points,
+            retraction=method.retraction,
+            vector_transport=method.vector_transport,
         )
         return X
     end
