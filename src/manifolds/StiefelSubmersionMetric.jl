@@ -105,7 +105,7 @@ function inverse_retract!(
     p,
     q,
     method::ShootingInverseRetraction{T,ExponentialRetraction},
-) where {n,k,T}
+) where {n,k,T<:Real}
     if k > div(n, 2)
         return invoke(
             inverse_retract!,
@@ -114,7 +114,6 @@ function inverse_retract!(
                 typeof(X),
                 typeof(p),
                 typeof(q),
-                AbstractArray,
                 ShootingInverseRetraction{T},
             },
             M,
@@ -211,8 +210,8 @@ function log!(
     retraction = ExponentialRetraction()
     vector_transport = ScaledVectorTransport(ProjectionTransport())
     inverse_retraction = ShootingInverseRetraction(
-        tolerance,
         max_iterations,
+        tolerance,
         num_transport_points,
         retraction,
         vector_transport,
