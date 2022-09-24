@@ -160,18 +160,18 @@ function inverse_retract!(
         Aˢ .= M .- M̂
         Rˢ .= N .- N̂
         gap = sqrt(norm(Aˢ)^2 + norm(Rˢ)^2)
-        _para_trans_kfactors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
+        _vector_transport_factors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
         for t in reverse(ts)[2:(end - 1)]
             @views begin
                 E = exp(t * C)[:, 1:k] * exp(t * D)
                 M = E[1:k, 1:k]
                 N = E[(k + 1):(2k), 1:k]
             end
-            _para_trans_kfactors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
+            _vector_transport_factors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
         end
         copyto!(M, I)
         fill!(N, 0)
-        _para_trans_kfactors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
+        _vector_transport_factors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
         A .-= Aˢ
         R .-= Rˢ
         i += 1
@@ -181,7 +181,7 @@ function inverse_retract!(
     return X
 end
 
-function _para_trans_kfactors!(A, R, S, M, N, gap, ϵ, ::Val{k}) where {k}
+function _vector_transport_factors!(A, R, S, M, N, gap, ϵ, ::Val{k}) where {k}
     mul!(S, M', A)
     mul!(S, N', R, true, true)
     project!(SymmetricMatrices(k), S, S)
