@@ -17,6 +17,33 @@ struct StiefelSubmersionMetric{T<:Real} <: RiemannianMetric
     α::T
 end
 
+struct StiefelShootingInverseRetraction{
+    T<:Real,
+    R<:AbstractRetractionMethod,
+    VT<:AbstractVectorTransportMethod,
+} <: AbstractInverseRetractionMethod
+    max_iterations::Int
+    tolerance::T
+    num_transport_points::Int
+    retraction::R
+    vector_transport::VT
+end
+function StiefelShootingInverseRetraction(;
+    max_iterations=1_000,
+    tolerance=sqrt(eps()),
+    num_transport_points=4,
+    retraction=ExponentialRetraction(),
+    vector_transport=ScaledVectorTransport(ProjectionTransport()),
+)
+    return StiefelShootingInverseRetraction(
+        max_iterations,
+        tolerance,
+        num_transport_points,
+        retraction,
+        vector_transport,
+    )
+end
+
 
 function exp!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
@@ -78,4 +105,46 @@ function inner(
     else
         return dot(X, Y) - (T(dot(p'X, p'Y)) * (2α + 1)) / (2 * (α + 1))
     end
+end
+
+function inverse_retract(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    p,
+    q,
+    method::StiefelShootingInverseRetraction,
+) where {n,k}
+    X = allocate_result(M, inverse_retract, p, q)
+    inverse_retract!(M, X, p, q, method)
+    return X
+end
+function inverse_retract!(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    X,
+    p,
+    q,
+    method::StiefelShootingInverseRetraction,
+) where {n,k}
+    T = real(Base.promote_eltype(X, p, q))
+    ts = range(zero(T), one(T); length=method.num_transport_points)
+    X .= q .- p
+    gap = norm(X)
+    project!(M, X, p, X)
+    rmul!(X, gap / norm(X))
+    i = 1
+    Xˢ = allocate(X)
+    retr_tX = allocate_result(M, retract, p, X)
+    retr_tX_new = allocate_result(M, retract, p, X)
+    while (gap > method.tolerance) && (i < method.max_iterations)
+        retract!(M, retr_tX, p, X, method.retraction)
+        Xˢ .= retr_tX .- q
+        gap = norm(Xˢ)
+        for t in reverse(ts)
+            retract!(M, retr_tX_new, p, t * X, method.retraction)
+            vector_transport_to!(M, Xˢ, retr_tX, Xˢ, retr_tX_new, method.vector_transport)
+            retr_tX, retr_tX_new = retr_tX_new, retr_tX
+        end
+        X .-= Xˢ
+        i += 1
+    end
+    return X
 end
