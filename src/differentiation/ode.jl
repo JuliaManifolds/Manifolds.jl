@@ -46,36 +46,6 @@ function exp!(
     return q
 end
 
-function chart_exp_problem(u, params, t)
-    M = params[1]
-    B = params[2]
-    p = u.x[1]
-    dx = u.x[2]
-    ddx = -affine_connection(M, p, dx, dx, B)
-    return ArrayPartition(dx, ddx)
-end
-
-function solve_chart_exp_ode(
-    M::AbstractManifold,
-    p,
-    X,
-    A::AbstractAtlas,
-    i;
-    final_time=1.0,
-    solver=AutoVern9(Rodas5()),
-    kwargs...,
-)
-    u0 = ArrayPartition(p, X)
-    B = induced_basis(M, A, i, TangentSpaceType())
-    params = (M, B)
-    prob = ODEProblem(chart_exp_problem, u0, (0.0, final_time), params)
-    sol = solve(prob, solver; kwargs...)
-    q = sol.u[end].x[1]
-    return sol
-    #println(sol)
-    return q
-end
-
 # also define exp! for metric manifold anew in this case
 function exp!(
     ::TraitList{IsMetricManifold},

@@ -41,7 +41,7 @@ function plot_torus()
     Y1 = [p[2] for p in param_points]
     Z1 = [p[3] for p in param_points]
 
-    fig = Figure(resolution=(1200, 800), fontsize=22)
+    fig = Figure(resolution=(1400, 1000), fontsize=22)
     ax = LScene(fig[1, 1], show_axis=true)
     gcs = [gaussian_curvature(M, p) for p in param_points]
 
@@ -69,54 +69,68 @@ function plot_torus()
 
     sg = SliderGrid(
         fig[2, 1],
-        (label="θₚ", range=(-pi):(pi / 100):pi, startvalue=pi / 10),
-        (label="φₚ", range=(-pi):(pi / 100):pi, startvalue=0.0),
-        (label="θₓ", range=(-pi):(pi / 100):pi, startvalue=pi / 10),
-        (label="φₓ", range=(-pi):(pi / 100):pi, startvalue=pi / 10),
+        (label="θₚ", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="φₚ", range=(-pi):(pi / 200):pi, startvalue=0.0),
+        (label="θₓ", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="φₓ", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="θy", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="φy", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
     )
     A = Manifolds.DefaultTorusAtlas()
 
     # a point and tangent vector
 
-    function solve_for(p0x, X_p0x)
+    function solve_for(p0x, X_p0x, Y_transp)
         p = [Manifolds._torus_param(M, p0x...)...]
         i_p0x = Manifolds.get_chart_index(M, A, p)
         B = induced_basis(M, A, i_p0x)
         X = get_vector(M, p, X_p0x, B)
-        return p_exp =
-            Manifolds.solve_chart_exp_ode(M, [0.0, 0.0], X_p0x, A, i_p0x, final_time=t_end)
+        p_exp = Manifolds.solve_chart_parallel_transport_ode(
+            M,
+            [0.0, 0.0],
+            X_p0x,
+            A,
+            i_p0x,
+            Y_transp;
+            final_time=t_end,
+        )
+        return p_exp
     end
 
     dt = 0.1
 
-    geo_ps = lift(
+    geo = lift(
         sg.sliders[1].value,
         sg.sliders[2].value,
         sg.sliders[3].value,
         sg.sliders[4].value,
-    ) do θₚ, φₚ, θₓ, φₓ
-        p_exp = solve_for([θₚ, φₚ], [θₓ, φₓ])
+        sg.sliders[5].value,
+        sg.sliders[6].value,
+    ) do θₚ, φₚ, θₓ, φₓ, θy, φy
+        p_exp = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])
 
         samples = p_exp(0.0:dt:t_end)
-        geo_ps = [Point3f(s[1]) for s in samples]
-        return geo_ps
+        return samples
     end
 
-    geo_Xs = lift(
-        sg.sliders[1].value,
-        sg.sliders[2].value,
-        sg.sliders[3].value,
-        sg.sliders[4].value,
-    ) do θₚ, φₚ, θₓ, φₓ
-        p_exp = solve_for([θₚ, φₚ], [θₓ, φₓ])
+    geo_ps = lift(geo) do samples
+        return [Point3f(s[1]) for s in samples]
+    end
 
-        samples = p_exp(0.0:dt:t_end)
-        geo_Xs = [Point3f(s[2]) for s in samples]
-        return geo_Xs
+    # geo_Xs = lift(geo) do samples
+    #     return [Point3f(s[2]) for s in samples]
+    # end
+
+    pt_indices = 1:20:length(geo[])
+    geo_ps_pt = lift(geo) do samples
+        return [Point3f(s[1]) for s in samples[pt_indices]]
+    end
+    geo_Ys = lift(geo) do samples
+        return [Point3f(s[3]) for s in samples[pt_indices]]
     end
 
     lines!(geo_ps; linewidth=2.0, color=:red)
-    #arrows!(ax, geo_ps, geo_Xs, linecolor=:red, arrowcolor=:red, linewidth=0.05)
+    arrows!(ax, geo_ps_pt, geo_Ys, linecolor=:green, arrowcolor=:green, linewidth=0.05)
 
     return fig
 end
