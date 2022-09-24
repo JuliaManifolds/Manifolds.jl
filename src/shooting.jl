@@ -45,9 +45,16 @@ function inverse_retract!(
         gap = norm(Xˢ)
         project!(M, Xˢ, retr_tX, Xˢ)
         rmul!(Xˢ, gap / norm(Xˢ))
-        for t in reverse(ts)[2:end-1]
+        for t in reverse(ts)[2:(end - 1)]
             retract!(M, retr_tX_new, p, t * X, method.retraction)
-            vector_transport_to!(M, Xˢnew, retr_tX, Xˢ, retr_tX_new, method.vector_transport)
+            vector_transport_to!(
+                M,
+                Xˢnew,
+                retr_tX,
+                Xˢ,
+                retr_tX_new,
+                method.vector_transport,
+            )
             retr_tX, retr_tX_new = retr_tX_new, retr_tX
             Xˢ, Xˢnew = Xˢnew, Xˢ
         end

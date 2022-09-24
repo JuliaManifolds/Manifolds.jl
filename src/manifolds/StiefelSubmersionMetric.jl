@@ -109,12 +109,19 @@ function inverse_retract!(
     if k > div(n, 2)
         return invoke(
             inverse_retract!,
-            Tuple{typeof(M),typeof(X),typeof(p),typeof(q),AbstractArray,ShootingInverseRetraction{T}},
+            Tuple{
+                typeof(M),
+                typeof(X),
+                typeof(p),
+                typeof(q),
+                AbstractArray,
+                ShootingInverseRetraction{T},
+            },
             M,
             X,
             p,
             q,
-            method
+            method,
         )
     end
     ts = range(0, 1; length=method.num_transport_points)
@@ -124,8 +131,8 @@ function inverse_retract!(
     Q, N̂ = qr(q - p * M̂)
     normN̂² = norm(N̂)^2
     gap = sqrt(norm(M̂ - I)^2 + normN̂²) # γ
-    if gap < method.tolerance
-        mul!(X, Matrix(Q), R)
+    if iszero(gap)
+        fill!(X, false)
         return X
     end
     c = gap / sqrt(norm(skewM̂)^2 + normN̂²)
@@ -154,7 +161,7 @@ function inverse_retract!(
         Rˢ .= N .- N̂
         gap = sqrt(norm(Aˢ)^2 + norm(Rˢ)^2)
         _para_trans_kfactors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
-        for t in reverse(ts)[2:end-1]
+        for t in reverse(ts)[2:(end - 1)]
             @views begin
                 E = exp(t * C)[:, 1:k] * exp(t * D)
                 M = E[1:k, 1:k]

@@ -311,7 +311,6 @@ METAMANIFOLDS = [
 include("atlases.jl")
 include("cotangent_space.jl")
 
-
 include("shooting.jl")
 
 # Meta Manifolds II: Power Manifolds
