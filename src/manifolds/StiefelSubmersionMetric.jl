@@ -165,6 +165,7 @@ function inverse_retract!(
     X .= q .- p
     gap = norm(X)
     project!(M, X, p, X)
+    gap < method.tolerance && return X
     rmul!(X, gap / norm(X))
     i = 1
     Xˢ = allocate(X)
@@ -209,6 +210,10 @@ function inverse_retract!(
     Q, N̂ = qr(q - p * M̂)
     normN̂² = norm(N̂)^2
     gap = sqrt(norm(M̂ - I)^2 + normN̂²) # γ
+    if gap < method.tolerance
+        mul!(X, Matrix(Q), R)
+        return X
+    end
     c = gap / sqrt(norm(skewM̂)^2 + normN̂²)
     A = rmul!(skewM̂, c)
     R = c * N̂
