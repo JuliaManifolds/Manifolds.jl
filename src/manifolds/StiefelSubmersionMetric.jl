@@ -108,7 +108,10 @@ function inverse_retract!(
 ) where {n,k,T<:Real}
     if k > div(n, 2)
         _shooting!(
-            M, X, p, q;
+            M,
+            X,
+            p,
+            q;
             max_iterations=method.max_iterations,
             tolerance=method.tolerance,
             num_transport_points=method.num_transport_points,

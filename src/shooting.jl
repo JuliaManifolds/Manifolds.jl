@@ -28,7 +28,10 @@ function inverse_retract!(
     method::ShootingInverseRetraction,
 )
     _shooting!(
-        M, X, p, q;
+        M,
+        X,
+        p,
+        q;
         max_iterations=method.max_iterations,
         tolerance=method.tolerance,
         num_transport_points=method.num_transport_points,
@@ -69,14 +72,7 @@ function _shooting!(
         rmul!(Xˢ, gap / norm(Xˢ))
         for t in reverse(ts)[2:(end - 1)]
             retract!(M, retr_tX_new, p, t * X, retraction)
-            vector_transport_to!(
-                M,
-                Xˢnew,
-                retr_tX,
-                Xˢ,
-                retr_tX_new,
-                vector_transport,
-            )
+            vector_transport_to!(M, Xˢnew, retr_tX, Xˢ, retr_tX_new, vector_transport)
             retr_tX, retr_tX_new = retr_tX_new, retr_tX
             Xˢ, Xˢnew = Xˢnew, Xˢ
         end
