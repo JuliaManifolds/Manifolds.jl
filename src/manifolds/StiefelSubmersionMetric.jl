@@ -184,3 +184,20 @@ function inverse_retract!(
 ) where {n,k}
 end
 
+function log!(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    X,
+    p,
+    q,
+) where {n,k}
+    T = float(real(Base.promote_eltype(X, p, q)))
+    tolerance = sqrt(eps(T))
+    if k ≤ div(n, 2)
+        inverse_retraction =
+            StiefelPShootingInverseRetraction(tolerance=tolerance, num_transport_points=4)
+    else
+        inverse_retraction =
+            StiefelShootingInverseRetraction(tolerance=tolerance, num_transport_points=4)
+    end
+    return inverse_retract!(M, X, p, q, inverse_retraction)
+end
