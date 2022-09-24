@@ -175,11 +175,15 @@ function inverse_retract!(
         retract!(M, retr_tX, p, X, method.retraction)
         Xˢ .= retr_tX .- q
         gap = norm(Xˢ)
-        for t in reverse(ts)
+        project!(M, Xˢ, retr_tX, Xˢ)
+        rmul!(Xˢ, gap / norm(Xˢ))
+        for t in reverse(ts)[2:end-1]
             retract!(M, retr_tX_new, p, t * X, method.retraction)
             vector_transport_to!(M, Xˢ, retr_tX, Xˢ, retr_tX_new, method.vector_transport)
             retr_tX, retr_tX_new = retr_tX_new, retr_tX
+            Xˢ, Xˢ = Xˢ, Xˢ
         end
+        vector_transport_to!(M, Xˢ, retr_tX, Xˢ, p, method.vector_transport)
         X .-= Xˢ
         i += 1
     end
@@ -239,7 +243,8 @@ function inverse_retract!(
         Aˢ .= M .- M̂
         Rˢ .= N .- N̂
         gap = sqrt(norm(Aˢ)^2 + norm(Rˢ)^2)
-        for t in reverse(ts)
+        _para_trans_kfactors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
+        for t in reverse(ts)[2:end-1]
             @views begin
                 E = exp(t * C)[:, 1:k] * exp(t * D)
                 M = E[1:k, 1:k]
@@ -247,6 +252,9 @@ function inverse_retract!(
             end
             _para_trans_kfactors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
         end
+        copyto!(M, I)
+        fill!(N, 0)
+        _para_trans_kfactors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
         A .-= Aˢ
         R .-= Rˢ
         i += 1
