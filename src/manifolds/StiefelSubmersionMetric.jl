@@ -99,16 +99,6 @@ function inner(
     end
 end
 
-function inverse_retract(
-    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
-    p,
-    q,
-    method::StiefelShootingInverseRetraction,
-) where {n,k}
-    X = allocate_result(M, inverse_retract, p, q)
-    inverse_retract!(M, X, p, q, method)
-    return X
-end
 function inverse_retract!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     X,
