@@ -68,30 +68,50 @@ function exp!(
     X,
 ) where {n,k}
     α = metric(M).α
+    T = Base.promote_eltype(q, p, X)
     # TODO:
     # - dispatch to exp! for α = -1/2 and α = 0 for efficiency
-    # - reduce allocations
     # - handle rank-deficient QB
     if k ≤ div(n, 2)
         # eq. 11
-        A = p'X
-        Q, B = qr(X - p * A)
-        copyto!(
-            q,
-            [p Matrix(Q)] *
-            exp([A/(α + 1) -B'; B zero(B)])[:, 1:k] *
-            exp(A * (α / (α + 1))),
-        )
+        A = allocate(q, T, Size(k, k))
+        Y = allocate(X, T)
+        F = allocate(A, T, Size(2k, 2k))
+        G = allocate(p, T, Size(n, 2k))
+        mul!(A, p', X)
+        copyto!(Y, X)
+        mul!(Y, p, A, -1, true)
+        Q, B = qr(Y)
+        @views begin
+            copyto!(G[1:n, 1:k], p)
+            copyto!(G[1:n, (k+1):2k], Matrix(Q))
+            F[1:k, 1:k] .= A ./ (α + 1)
+            F[1:k, k+1:2k] .= -B'
+            F[k+1:2k, 1:k] .= B
+            fill!(F[k+1:2k, k+1:2k], false)
+        end
+        rmul!(A, α / (α + 1))
+        mul!(q, G, @views(exp(F)[1:2k, 1:k]) * exp(A))
     elseif n == k
-        copyto!(q, exp((X * p') / (α + 1)) * p * exp((p' * X) * (α / (α + 1))))
+        A = allocate(q, T)
+        C = allocate(q, T)
+        mul!(A, p', X, α / (α + 1), false)
+        mul!(C, X, p', inv(α + 1), false)
+        expC = exp(C)
+        tmp = mul!(C, p, exp(A))
+        mul!(q, expC, tmp)
     else  # n/2 < k < n
         # eq. 8
         A = p' * X
-        C = X * p'
-        copyto!(
-            q,
-            exp((-(2α + 1) / (α + 1)) * (p * A * p') + C - C') * p * exp((α / (α + 1)) * A),
-        )
+        C = allocate(q, T, Size(n, n))
+        tmp = allocate(q, T)
+        mul!(C, X, p')
+        C .-= C'
+        mul!(tmp, p, A)
+        mul!(C, tmp, p', -(2α + 1) / (α + 1), true)
+        rmul!(A, α / (α + 1))
+        mul!(tmp, p, exp(A))
+        mul!(q, exp(C), tmp)
     end
     return q
 end
