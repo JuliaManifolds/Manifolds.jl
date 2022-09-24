@@ -60,24 +60,24 @@ function _shooting!(
     gap < tolerance && return X
     rmul!(X, gap / norm(X))
     i = 1
-    Xˢ = allocate(X)
-    Xˢnew = allocate(Xˢ)
+    ΔX = allocate(X)
+    ΔXnew = allocate(ΔX)
     retr_tX = allocate_result(M, retract, p, X)
     retr_tX_new = allocate_result(M, retract, p, X)
     while (gap > tolerance) && (i < max_iterations)
         retract!(M, retr_tX, p, X, retraction)
-        Xˢ .= retr_tX .- q
-        gap = norm(Xˢ)
-        project!(M, Xˢ, retr_tX, Xˢ)
-        rmul!(Xˢ, gap / norm(Xˢ))
+        ΔX .= retr_tX .- q
+        gap = norm(ΔX)
+        project!(M, ΔX, retr_tX, ΔX)
+        rmul!(ΔX, gap / norm(ΔX))
         for t in reverse(ts)[2:(end - 1)]
             retract!(M, retr_tX_new, p, t * X, retraction)
-            vector_transport_to!(M, Xˢnew, retr_tX, Xˢ, retr_tX_new, vector_transport)
+            vector_transport_to!(M, ΔXnew, retr_tX, ΔX, retr_tX_new, vector_transport)
             retr_tX, retr_tX_new = retr_tX_new, retr_tX
-            Xˢ, Xˢnew = Xˢnew, Xˢ
+            ΔX, ΔXnew = ΔXnew, ΔX
         end
-        vector_transport_to!(M, Xˢnew, retr_tX, Xˢ, p, vector_transport)
-        X .-= Xˢnew
+        vector_transport_to!(M, ΔXnew, retr_tX, ΔX, p, vector_transport)
+        X .-= ΔXnew
         i += 1
     end
     return X
