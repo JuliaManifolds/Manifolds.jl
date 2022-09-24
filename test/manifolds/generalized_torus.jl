@@ -23,7 +23,7 @@ using Manifolds: TFVector
     X = get_vector(M, p, X_p0x, B)
     @test get_coordinates(M, p, X, B) ≈ X_p0x
 
-    @test_broken norm(X) ≈ norm(M, p0x, TFVector(X_p0x, B))
+    @test norm(X) ≈ norm(M, [0.0, 0.0], TFVector(X_p0x, B))
 end
 
 function plot_torus()
@@ -56,7 +56,7 @@ function plot_torus()
         ambient=Vec3f(0.65, 0.65, 0.65),
         backlight=1.0f0,
         color=gcs,
-        colormap=:RdBu,
+        colormap=Reverse(:RdBu),
         colorrange=(-gcs_mm, gcs_mm),
         transparency=true,
     )

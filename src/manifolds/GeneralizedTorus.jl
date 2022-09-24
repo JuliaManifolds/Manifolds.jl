@@ -6,7 +6,7 @@ Surface in ℝ³ described by parametric equations:
 ```math
 x(θ, φ) = (R + r\cos θ)\cos φ
 y(θ, φ) = (R + r\cos θ)\sin φ
-z(θ, φ) = r\sin φ
+z(θ, φ) = r\sin θ
 ```
 for θ, φ in $[-π, π)$. It is assumed that $R > r > 0$.
 
@@ -73,7 +73,7 @@ a chart $(θ₀, φ₀)$ is given by
 ```math
 x(θ, φ) = (R + r\cos(θ + θ₀))\cos(φ + φ₀)
 y(θ, φ) = (R + r\cos(θ + θ₀))\sin(φ + φ₀)
-z(θ, φ) = r\sin(φ + φ₀)
+z(θ, φ) = r\sin(θ + θ₀)
 ```
 """
 struct DefaultTorusAtlas <: AbstractAtlas{ℝ} end
@@ -199,8 +199,8 @@ function get_vector_induced_basis!(
     dθ, dφ = X
     sinθ, cosθ = sincos(θ + B.i[1])
     sinφ, cosφ = sincos(φ + B.i[2])
-    Y[1] = -M.R * sinφ * dφ + M.r * (-cosθ * sinφ * dφ - sinθ * cosφ * dθ)
-    Y[2] = M.R * cosφ * dφ + M.r * (cosθ * cosφ * dφ - sinθ * sinφ * dθ)
+    Y[1] = -M.r * sinθ * cosφ * dθ - (M.R + M.r * cosθ) * sinφ * dφ
+    Y[2] = -M.r * sinθ * sinφ * dθ + (M.R + M.r * cosθ) * cosφ * dφ
     Y[3] = M.r * cosθ * dθ
     return Y
 end
@@ -211,6 +211,6 @@ function local_metric(
     B::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas},
 )
     @assert length(p) == 2
-    diag = ((M.R + M.r * cos(p[1] + B.i[1]))^2, M.r^2)
+    diag = (M.r^2, (M.R + M.r * cos(p[1] + B.i[1]))^2)
     return Diagonal(SVector(diag))
 end
