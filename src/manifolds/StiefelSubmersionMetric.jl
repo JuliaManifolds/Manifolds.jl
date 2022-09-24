@@ -44,6 +44,22 @@ function StiefelShootingInverseRetraction(;
     )
 end
 
+struct StiefelPShootingInverseRetraction{T<:Real} <: AbstractInverseRetractionMethod
+    max_iterations::Int
+    tolerance::T
+    num_transport_points::Int
+end
+function StiefelPShootingInverseRetraction(;
+    max_iterations=1_000,
+    tolerance=sqrt(eps()),
+    num_transport_points=4,
+)
+    return StiefelPShootingInverseRetraction(
+        max_iterations,
+        tolerance,
+        num_transport_points,
+    )
+end
 
 function exp!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
@@ -148,3 +164,23 @@ function inverse_retract!(
     end
     return X
 end
+
+function inverse_retract(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    p,
+    q,
+    method::StiefelPShootingInverseRetraction,
+) where {n,k}
+    X = allocate_result(M, inverse_retract, p, q)
+    inverse_retract!(M, X, p, q, method)
+    return X
+end
+function inverse_retract!(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    X,
+    p,
+    q,
+    method::StiefelPShootingInverseRetraction,
+) where {n,k}
+end
+
