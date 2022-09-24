@@ -17,50 +17,6 @@ struct StiefelSubmersionMetric{T<:Real} <: RiemannianMetric
     α::T
 end
 
-struct StiefelShootingInverseRetraction{
-    T<:Real,
-    R<:AbstractRetractionMethod,
-    VT<:AbstractVectorTransportMethod,
-} <: AbstractInverseRetractionMethod
-    max_iterations::Int
-    tolerance::T
-    num_transport_points::Int
-    retraction::R
-    vector_transport::VT
-end
-function StiefelShootingInverseRetraction(;
-    max_iterations=1_000,
-    tolerance=sqrt(eps()),
-    num_transport_points=4,
-    retraction=ExponentialRetraction(),
-    vector_transport=ScaledVectorTransport(ProjectionTransport()),
-)
-    return StiefelShootingInverseRetraction(
-        max_iterations,
-        tolerance,
-        num_transport_points,
-        retraction,
-        vector_transport,
-    )
-end
-
-struct StiefelKShootingInverseRetraction{T<:Real} <: AbstractInverseRetractionMethod
-    max_iterations::Int
-    tolerance::T
-    num_transport_points::Int
-end
-function StiefelKShootingInverseRetraction(;
-    max_iterations=1_000,
-    tolerance=sqrt(eps()),
-    num_transport_points=4,
-)
-    return StiefelKShootingInverseRetraction(
-        max_iterations,
-        tolerance,
-        num_transport_points,
-    )
-end
-
 function exp!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     q,
@@ -158,56 +114,19 @@ function inverse_retract!(
     X,
     p,
     q,
-    method::StiefelShootingInverseRetraction,
-) where {n,k}
-    T = real(Base.promote_eltype(X, p, q))
-    ts = range(zero(T), one(T); length=method.num_transport_points)
-    X .= q .- p
-    gap = norm(X)
-    project!(M, X, p, X)
-    gap < method.tolerance && return X
-    rmul!(X, gap / norm(X))
-    i = 1
-    Xˢ = allocate(X)
-    Xˢnew = allocate(Xˢ)
-    retr_tX = allocate_result(M, retract, p, X)
-    retr_tX_new = allocate_result(M, retract, p, X)
-    while (gap > method.tolerance) && (i < method.max_iterations)
-        retract!(M, retr_tX, p, X, method.retraction)
-        Xˢ .= retr_tX .- q
-        gap = norm(Xˢ)
-        project!(M, Xˢ, retr_tX, Xˢ)
-        rmul!(Xˢ, gap / norm(Xˢ))
-        for t in reverse(ts)[2:end-1]
-            retract!(M, retr_tX_new, p, t * X, method.retraction)
-            vector_transport_to!(M, Xˢnew, retr_tX, Xˢ, retr_tX_new, method.vector_transport)
-            retr_tX, retr_tX_new = retr_tX_new, retr_tX
-            Xˢ, Xˢnew = Xˢnew, Xˢ
-        end
-        vector_transport_to!(M, Xˢnew, retr_tX, Xˢ, p, method.vector_transport)
-        X .-= Xˢnew
-        i += 1
+    method::ShootingInverseRetraction{T,ExponentialRetraction},
+) where {n,k,T}
+    if k > div(n, 2)
+        return invoke(
+            inverse_retract!,
+            Tuple{typeof(M),typeof(X),typeof(p),typeof(q),AbstractArray,ShootingInverseRetraction{T}},
+            M,
+            X,
+            p,
+            q,
+            method
+        )
     end
-    return X
-end
-
-function inverse_retract(
-    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
-    p,
-    q,
-    method::StiefelKShootingInverseRetraction,
-) where {n,k}
-    X = allocate_result(M, inverse_retract, p, q)
-    inverse_retract!(M, X, p, q, method)
-    return X
-end
-function inverse_retract!(
-    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
-    X,
-    p,
-    q,
-    method::StiefelKShootingInverseRetraction,
-) where {n,k}
     ts = range(0, 1; length=method.num_transport_points)
     α = metric(M).α
     M̂ = p'q
@@ -265,8 +184,6 @@ function inverse_retract!(
     return X
 end
 
-_sym(X) = (X + X') / 2
-
 function _para_trans_kfactors!(A, R, S, M, N, gap, ϵ, ::Val{k}) where {k}
     mul!(S, M', A)
     mul!(S, N', R, true, true)
@@ -293,12 +210,9 @@ function log!(
 ) where {n,k}
     T = float(real(Base.promote_eltype(X, p, q)))
     tolerance = sqrt(eps(T))
-    if k ≤ div(n, 2)
-        inverse_retraction =
-            StiefelKShootingInverseRetraction(tolerance=tolerance, num_transport_points=4)
-    else
-        inverse_retraction =
-            StiefelShootingInverseRetraction(tolerance=tolerance, num_transport_points=4)
-    end
+    inverse_retraction = ShootingInverseRetraction(
+        tolerance=tolerance,
+        num_transport_points=4,
+    )
     return inverse_retract!(M, X, p, q, inverse_retraction)
 end
