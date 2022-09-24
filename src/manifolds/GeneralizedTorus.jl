@@ -97,6 +97,20 @@ function affine_connection!(
     return Zc
 end
 
+function check_chart_switch(::TorusInR3, A::DefaultTorusAtlas, i, a)
+    return abs(i[1] - a[1]) > 2pi / 3 || abs(i[2] - a[2]) > 2pi / 3
+end
+
+"""
+    gaussian_curvature(M::TorusInR3, p)
+
+Gaussian curvature at point `p` from [`TorusInR3`](@ref) `M`.
+"""
+function gaussian_curvature(M::TorusInR3, p)
+    θ, φ = _torus_theta_phi(M, p)
+    return cos(θ) / (M.r * (M.R + M.r * cos(θ)))
+end
+
 """
     inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
 

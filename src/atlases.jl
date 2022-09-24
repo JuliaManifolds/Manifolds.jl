@@ -97,6 +97,16 @@ end
     p,
 )
 
+"""
+    check_chart_switch(M::AbstractManifold, A::AbstractAtlas, i, a)
+
+Determine whether chart should be switched when an operation in chart `i` from atlas `A`
+reaches parameters `a` in that chart.
+
+By default `false` is returned.
+"""
+check_chart_switch(M::AbstractManifold, A::AbstractAtlas, i, a) = false
+
 function get_parameters!(M::AbstractManifold, a, A::RetractionAtlas, i, p)
     return get_coordinates!(M, a, i, inverse_retract(M, i, p, A.invretr), A.basis)
 end
