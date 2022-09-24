@@ -202,6 +202,73 @@ function inverse_retract!(
     q,
     method::StiefelKShootingInverseRetraction,
 ) where {n,k}
+    ts = range(0, 1; length=method.num_transport_points)
+    α = metric(M).α
+    M̂ = p'q
+    skewM̂ = project(SkewHermitianMatrices(k), M̂)
+    Q, N̂ = qr(q - p * M̂)
+    normN̂² = norm(N̂)^2
+    gap = sqrt(norm(M̂ - I)^2 + normN̂²) # γ
+    c = gap / sqrt(norm(skewM̂)^2 + normN̂²)
+    A = rmul!(skewM̂, c)
+    R = c * N̂
+    S = allocate(A)
+    Aˢ = allocate(A)
+    Rˢ = allocate(R)
+    D = allocate(A)
+    C = allocate(A, Size(2k, 2k))
+    i = 1
+    while (gap > method.tolerance) && (i < method.max_iterations)
+        @views begin
+            C[1:k, 1:k] .= A ./ (α + 1)
+            C[1:k, k+1:2k] .= -R'
+            C[k+1:2k, 1:k] .= R
+            fill!(C[k+1:2k, k+1:2k], false)
+        end
+        D .= A .* (α / (α + 1))
+        @views begin
+            E = exp(C)[:, 1:k] * exp(D)
+            M = E[1:k, 1:k]
+            N = E[(k + 1):(2k), 1:k]
+        end
+        Aˢ .= M .- M̂
+        Rˢ .= N .- N̂
+        gap = sqrt(norm(Aˢ)^2 + norm(Rˢ)^2)
+        for t in reverse(ts)
+            @views begin
+                E = exp(t * C)[:, 1:k] * exp(t * D)
+                M = E[1:k, 1:k]
+                N = E[(k + 1):(2k), 1:k]
+            end
+            _para_trans_kfactors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
+        end
+        A .-= Aˢ
+        R .-= Rˢ
+        i += 1
+    end
+    mul!(X, p, A)
+    mul!(X, Matrix(Q), R, true, true)
+    return X
+end
+
+_sym(X) = (X + X') / 2
+
+function _para_trans_kfactors!(A, R, S, M, N, gap, ϵ, ::Val{k}) where {k}
+    mul!(S, M', A)
+    mul!(S, N', R, true, true)
+    project!(SymmetricMatrices(k), S, S)
+    mul!(A, M, S, -1, true)
+    mul!(R, N, S, -1, true)
+    l = sqrt(norm(A)^2 + norm(R)^2)
+    if l > ϵ
+        c = gap / l
+        rmul!(A, c)
+        rmul!(R, c)
+    else
+        fill!(A, 0)
+        fill!(R, 0)
+    end
+    return A, R
 end
 
 function log!(
