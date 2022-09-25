@@ -324,5 +324,11 @@ include("../utils.jl")
         Z3 = similar(Z2)
         log!(M4, Z3, p, s)
         @test isapprox(M4, p, Z2, Z3)
+
+        M4 = MetricManifold(Stiefel(3, 3), CanonicalMetric())
+        p = project(M4, randn(3, 3))
+        X = project(M4, p, randn(3, 3))
+        Y = project(M4, p, randn(3, 3))
+        @test inner(M4, p, X, Y) ≈ tr(X' * (I - p * p' / 2) * Y)
     end
 end
