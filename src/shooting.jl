@@ -52,12 +52,12 @@ function inverse_retract!(
     q,
     method::ShootingInverseRetraction,
 )
-    _shooting!(
+    shooting!(
         M,
         X,
         p,
-        q;
-        retraction=method.retraction,
+        q,
+        method.retraction;
         initial_inverse_retraction=method.initial_inverse_retraction,
         vector_transport=method.vector_transport,
         num_transport_points=method.num_transport_points,
@@ -67,27 +67,38 @@ function inverse_retract!(
     return X
 end
 
-function _shooting!(
-    M,
+function shooting(
+    M::AbstractManifold,
+    p,
+    q,
+    retraction::AbstractRetractionMethod;
+    kwargs...,
+)
+    X = allocate_result(M, inverse_retract, p, q)
+    shooting!(M, X, p, q, retraction; kwargs...)
+    return X
+end
+function shooting!(
+    M::AbstractManifold,
     X,
     p,
-    q;
-    retraction,
-    initial_inverse_retraction,
-    vector_transport,
-    num_transport_points,
-    tolerance,
-    max_iterations,
+    q,
+    retraction::AbstractRetractionMethod;
+    initial_inverse_retraction=default_inverse_retraction_method(M),
+    vector_transport=default_vector_transport_method(M),
+    num_transport_points::Int=2,
+    tolerance::Real=sqrt(eps(float(real(eltype(X))))),
+    max_iterations::Int=10_000,
 )
     inverse_retract!(M, X, p, q, initial_inverse_retraction)
     gap = norm(M, p, X)
     gap < tolerance && return X
     T = real(Base.promote_eltype(X, p, q))
-    transport_grid = range(one(T), zero(T); length=num_transport_points)[2:(end-1)]
+    transport_grid = range(one(T), zero(T); length=num_transport_points)[2:(end - 1)]
     ΔX = allocate(X)
     ΔXnew = tX = allocate(ΔX)
     retr_tX = allocate_result(M, retract, p, X)
-    if length(transport_grid) > 0
+    if num_transport_points > 2
         retr_tX_new = allocate_result(M, retract, p, X)
     end
     iteration = 1
