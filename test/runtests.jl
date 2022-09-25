@@ -125,7 +125,6 @@ include("utils.jl")
         include_test("manifolds/fixed_rank.jl")
         include_test("manifolds/generalized_grassmann.jl")
         include_test("manifolds/generalized_stiefel.jl")
-        include_test("manifolds/generalized_torus.jl")
         include_test("manifolds/grassmann.jl")
         include_test("manifolds/hyperbolic.jl")
         include_test("manifolds/lorentz.jl")
@@ -163,6 +162,9 @@ include("utils.jl")
         include_test("metric.jl")
         include_test("statistics.jl")
         include_test("approx_inverse_retraction.jl")
+
+        # manifolds requiring ODE solvers
+        include_test("manifolds/generalized_torus.jl")
     end
 
     if TEST_GROUP ∈ ["test_lie_groups", "all"]
