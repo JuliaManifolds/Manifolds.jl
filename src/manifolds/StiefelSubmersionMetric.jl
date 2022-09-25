@@ -178,6 +178,17 @@ function inverse_retract!(
     return X
 end
 
+function inverse_retract_project!(
+    M::MetricManifold{ℝ,<:Stiefel,<:StiefelSubmersionMetric},
+    X,
+    p,
+    q,
+)
+    X .= q .- p
+    project!(M, X, p, X)
+    return X
+end
+
 function _vector_transport_factors!(A, R, S, M, N, gap, ϵ, ::Val{k}) where {k}
     mul!(S, M', A)
     mul!(S, N', R, true, true)

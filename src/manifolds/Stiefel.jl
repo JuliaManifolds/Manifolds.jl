@@ -130,6 +130,12 @@ in [^KanekoFioriTanaka2013].
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
 
+function inverse_retract_project!(M::Stiefel, X, p, q)
+    X .= q .- p
+    project!(M, X, p, X)
+    return X
+end
+
 function _stiefel_inv_retr_qr_mul_by_r_generic!(::Stiefel{n,k}, X, q, R, A) where {n,k}
     @inbounds for i in 1:k
         b = zeros(eltype(R), i)
