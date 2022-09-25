@@ -118,12 +118,7 @@ function solve_chart_exp_ode(
         new_p0 = transition_map(M, A, cur_i, new_i, a_final)
         new_B = induced_basis(M, A, new_i)
         p_final = get_point(M, A, cur_i, a_final)
-        new_X0 = get_coordinates(
-            M,
-            p_final,
-            get_vector(M, p_final, sol.u[end].x[2]::typeof(X), B),
-            new_B,
-        )
+        new_X0 = change_basis(M, p_final, sol.u[end].x[2]::typeof(X), B, new_B)
         u0 = ArrayPartition(new_p0, new_X0)::typeof(u0)
         cur_i = new_i
     end
@@ -178,18 +173,8 @@ function solve_chart_parallel_transport_ode(
         new_p0 = transition_map(M, A, cur_i, new_i, a_final)
         new_B = induced_basis(M, A, new_i)
         p_final = get_point(M, A, cur_i, a_final)
-        new_X0 = get_coordinates(
-            M,
-            p_final,
-            get_vector(M, p_final, sol.u[end].x[2]::typeof(X), B),
-            new_B,
-        )
-        new_Y0 = get_coordinates(
-            M,
-            p_final,
-            get_vector(M, p_final, sol.u[end].x[3]::typeof(Y), B),
-            new_B,
-        )
+        new_X0 = change_basis(M, p_final, sol.u[end].x[2]::typeof(X), B, new_B)
+        new_Y0 = change_basis(M, p_final, sol.u[end].x[3]::typeof(X), B, new_B)
         u0 = ArrayPartition(new_p0, new_X0, new_Y0)::typeof(u0)
         cur_i = new_i
     end
