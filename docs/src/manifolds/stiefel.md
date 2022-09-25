@@ -44,4 +44,18 @@ Pages = ["manifolds/StiefelCanonicalMetric.jl"]
 Order = [:function]
 ```
 
+# The submersion or normal metric
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/StiefelSubmersionMetric.jl"]
+Order = [:type]
+```
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/StiefelSubmersionMetric.jl"]
+Order = [:function]
+```
+
 ## Literature
