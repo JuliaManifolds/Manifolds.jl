@@ -331,4 +331,34 @@ include("../utils.jl")
         Y = project(M4, p, randn(3, 3))
         @test inner(M4, p, X, Y) ≈ tr(X' * (I - p * p' / 2) * Y)
     end
+
+    @testset "StiefelSubmersionMetric" begin
+        g = StiefelSubmersionMetric(1)
+        @test g isa StiefelSubmersionMetric{Int}
+
+        @testset for M in [Stiefel(3, 3), Stiefel(4, 3), Stiefel(4, 2)]
+            Mcan = MetricManifold(M, CanonicalMetric())
+            Meu = MetricManifold(M, EuclideanMetric())
+            @testset "α=$α" for (α, Mcomp) in [(0, Mcan), (-1 // 2, Meu)]
+                p = project(M, randn(representation_size(M)))
+                X = project(M, p, randn(representation_size(M)))
+                X ./= norm(Mcomp, p, X)
+                Y = project(M, p, randn(representation_size(M)))
+                MM = MetricManifold(M, StiefelSubmersionMetric(α))
+                @test inner(MM, p, X, Y) ≈ inner(Mcomp, p, X, Y)
+                q = exp(Mcomp, p, X)
+                @test isapprox(MM, q, exp(Mcomp, p, X))
+                Mcomp === Mcan && isapprox(MM, p, log(MM, p, q), log(Mcomp, p, q))
+            end
+            @testset "α=$α" for α in [-0.75, -0.25, 0.5]
+                MM = MetricManifold(M, StiefelSubmersionMetric(α))
+                p = project(MM, randn(representation_size(M)))
+                X = project(MM, p, randn(representation_size(M)))
+                X ./= norm(MM, p, X)
+                q = exp(MM, p, X)
+                @test is_point(MM, q)
+                @test isapprox(MM, p, log(MM, p, q), X)
+            end
+        end
+    end
 end
