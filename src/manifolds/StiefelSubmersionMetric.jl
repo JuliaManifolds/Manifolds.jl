@@ -104,19 +104,20 @@ function inverse_retract!(
     X,
     p,
     q,
-    method::ShootingInverseRetraction{T,ExponentialRetraction},
-) where {n,k,T<:Real}
+    method::ShootingInverseRetraction{ExponentialRetraction},
+) where {n,k}
     if k > div(n, 2)
         _shooting!(
             M,
             X,
             p,
             q;
-            max_iterations=method.max_iterations,
-            tolerance=method.tolerance,
-            num_transport_points=method.num_transport_points,
             retraction=method.retraction,
             vector_transport=method.vector_transport,
+            initial_inverse_retraction=method.initial_inverse_retraction,
+            num_transport_points=method.num_transport_points,
+            tolerance=method.tolerance,
+            max_iterations=method.max_iterations,
         )
         return X
     end
@@ -225,13 +226,15 @@ function log!(
     num_transport_points=4,
 ) where {n,k}
     retraction = ExponentialRetraction()
+    initial_inverse_retraction = ProjectionInverseRetraction()
     vector_transport = ScaledVectorTransport(ProjectionTransport())
     inverse_retraction = ShootingInverseRetraction(
-        max_iterations,
-        tolerance,
-        num_transport_points,
         retraction,
+        initial_inverse_retraction,
         vector_transport,
+        num_transport_points,
+        tolerance,
+        max_iterations,
     )
     return inverse_retract!(M, X, p, q, inverse_retraction)
 end
