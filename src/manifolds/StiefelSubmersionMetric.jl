@@ -136,12 +136,12 @@ function inverse_retract!(
     method::ShootingInverseRetraction{ExponentialRetraction},
 ) where {n,k}
     if k > div(n, 2)
-        _shooting!(
+        shooting!(
             M,
             X,
             p,
-            q;
-            retraction=method.retraction,
+            q,
+            method.retraction;
             vector_transport=method.vector_transport,
             initial_inverse_retraction=method.initial_inverse_retraction,
             num_transport_points=method.num_transport_points,
