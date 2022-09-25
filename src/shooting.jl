@@ -1,25 +1,17 @@
 """
     ShootingInverseRetraction <: ApproximateInverseRetraction
 
-Approximate the inverse of a retraction using the shooting method.
-
-This implementation of the shooting method works by using another inverse retraction to form
-the first guess of the vector. This guess is updated by shooting the vector, guessing the
-vector pointing from the shooting result to the target point, and transporting this vector
-update back to the initial point on aa discretized grid. This process is repeated until the
-norm of the vector update falls below a specified tolerance or the maximum number of
-iterations is reached.
+Approximate the inverse of a retraction using [`shooting`](@ref).
 
 # Fields
-- `retraction::AbstractRetractionMethod`: The retraction whose inverse is to be approximated
-- `initial_inverse_retraction::AbstractInverseRetractionMethod`: The inverse retraction used
-    to form the initial guess of the vector.
-- `vector_transport::AbstractVectorTransportMethod`: The vector transport used to transport
-    the initial guess of the vector.
-- `num_transport_points::Int`: The number of discretization points used for vector transport
-    in the shooting method. 2 is the minimum number of points, including just the endpoints.
-- `tolerance::Real`: The tolerance for the shooting method.
-- `max_iterations::Int`: The maximum number of iterations for the shooting method.
+
+See [`shooting`](@ref) for descriptions of the following fields:
+- `retraction::AbstractRetractionMethod`
+- `initial_inverse_retraction::AbstractInverseRetractionMethod`
+- `vector_transport::AbstractVectorTransportMethod`
+- `num_transport_points::Int`
+- `tolerance::Real`
+- `max_iterations::Int`
 """
 struct ShootingInverseRetraction{
     R<:AbstractRetractionMethod,
@@ -67,6 +59,35 @@ function inverse_retract!(
     return X
 end
 
+"""
+    shooting(M::AbstractManifold, p, q, retraction::AbstractRetractionMethod; kwargs...)
+    shooting!(M::AbstractManifold, X, p, q, retraction::AbstractRetractionMethod; kwargs...)
+
+Approximate the inverse of the `retraction` from `p` to `q` using the shooting method.
+
+In the shooting method, we search for a vector `X` such that
+`retract(M, p, X, retraction) ≈ q`.
+
+This implementation of the shooting method works by using another inverse retraction to form
+the first guess of the vector. This guess is updated by shooting the vector, guessing the
+vector pointing from the shooting result to the target point, and transporting this vector
+update back to the initial point on aa discretized grid. This process is repeated until the
+norm of the vector update falls below a specified tolerance or the maximum number of
+iterations is reached.
+
+# Keywords
+- `initial_inverse_retraction::AbstractInverseRetractionMethod`: The inverse retraction used
+    to form the initial guess of the vector. Defaults to
+    [`default_inverse_retraction`](@ref)`(M)`
+- `vector_transport::AbstractVectorTransportMethod`: The vector transport used to transport
+    the initial guess of the vector. Defaults to [`default_vector_transport`](@ref)`(M)`.
+- `num_transport_points::Int=2`: The number of discretization points used for vector
+    transport in the shooting method. 2 is the minimum number of points, including just the
+    endpoints.
+- `tolerance::Real`: The tolerance for the shooting method. Defaults to `sqrt(eps())` for
+    the eltypes of `p` and `q`.
+- `max_iterations::Int=10_000`: The maximum number of iterations for the shooting method.
+"""
 function shooting(
     M::AbstractManifold,
     p,
