@@ -3,19 +3,48 @@
 
 The submersion (or normal) metric family on the [`Stiefel`](@ref) manifold.
 
+The family, with a single real parameter ``α>-1``, has two special cases:
+- ``α = -\frac{1}{2}``: [`EuclideanMetric`](@ref)
+- ``α = 0``: [`CanonicalMetric`](@ref)
+
+The family was described in [^HüperMarkinaLeite2021]. This implementation follows the
+description in [^ZimmermanHüper2022].
+
+[^HüperMarkinaLeite2021]:
+    > Hüper, M., Markina, A., Leite, R. T. (2021)
+    > "A Lagrangian approach to extremal curves on Stiefel manifolds"
+    > Journal of Geometric Mechanics, 13(1): 55-72.
+    > doi: [10.3934/jgm.2020031](http://dx.doi.org/10.3934/jgm.2020031)
+[^ZimmermanHüper2022]:
+    > Ralf Zimmerman and Knut Hüper. (2022).
+    > "Computing the Riemannian logarithm on the Stiefel manifold: metrics, methods and performance."
+    > arXiv: [2103.12046](https://arxiv.org/abs/2103.12046)
+
 # Constructor
 
     StiefelSubmersionMetric(α)
 
-Construct the submersion metric on the Stiefel manifold with the parameter ``α > -1``.
-
-The submersion metric family has two special cases:
-- ``α = -\frac{1}{2}``: [`EuclideanMetric`](@ref)
-- ``α = 0``: [`CanonicalMetric`](@ref)
+Construct the submersion metric on the Stiefel manifold with the parameter ``α``.
 """
 struct StiefelSubmersionMetric{T<:Real} <: RiemannianMetric
     α::T
 end
+
+@doc raw"""
+    q = exp(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, <:StiefelSubmersionMetric}, p, X)
+    exp!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, q, <:StiefelSubmersionMetric}, p, X)
+
+Compute the exponential map on the [`Stiefel(n,k)`](@ref) manifold with respect to the [`StiefelSubmersionMetric`](@ref).
+
+The exponential map is given by
+````math
+\exp_p X = \operatorname{Exp}\bigl(
+    -\frac{2α+1}{α+1} p p^\mathrm{T} X p^\mathrm{T} +
+    X p^\mathrm{T} - p X^\mathrm{T}
+\bigr) p \operatorname{Exp}\bigl(\frac{\alpha}{\alpha+1} p^\mathrm{T} X\bigr)
+````
+"""
+exp(::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric}, ::Any...) where {n,k}
 
 function exp!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
@@ -207,6 +236,19 @@ function _vector_transport_factors!(A, R, S, M, N, gap, ϵ, ::Val{k}) where {k}
     return A, R
 end
 
+@doc raw"""
+    log(M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric}, p, q; kwargs...)
+
+Compute the logarithmic map on the [`Stiefel(n,k)`](@ref) manifold with respect to the [`StiefelSubmersionMetric`](@ref).
+
+The logarithmic map is computed using [`ShootingInverseRetraction`](@ref). For
+``k \le \frac{n}{2}``, this is sped up using the ``k``-shooting method of
+[^ZimmermanHüper2022]. Keyword arguments are forwarded to `ShootingInverseRetraction`; see
+that documentation for details. Their defaults are:
+- `num_transport_points=4`
+- `tolerance=sqrt(eps())`
+- `max_iterations=1_000`
+"""
 function log(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     p,
