@@ -43,7 +43,7 @@ function check_point(M::TorusInR3, p; kwargs...)
 end
 
 function check_vector(M::TorusInR3, p, X; atol=eps(eltype(p)), kwargs...)
-    dot_nX = dot(_torus_normal(M, p), X)
+    dot_nX = dot(normal_vector(M, p), X)
     if !isapprox(dot_nX, 0; atol, kwargs...)
         return DomainError(dot_nX, "The vector $(X) is not tangent to $(p) from $(M).")
     end
@@ -139,11 +139,11 @@ function _torus_param(M::TorusInR3, θ, φ)
 end
 
 """
-    _torus_normal(M::TorusInR3, p)
+    normal_vector(M::TorusInR3, p)
 
 Outward-pointing normal vector to torus at `p`.
 """
-function _torus_normal(M::TorusInR3, p)
+function normal_vector(M::TorusInR3, p)
     θ, φ = _torus_theta_phi(M, p)
     t = @SVector [-sin(φ), cos(φ), 0]
     s = @SVector [cos(φ) * (-sin(θ)), sin(φ) * (-sin(θ)), cos(θ)]

@@ -22,6 +22,19 @@ using RecursiveArrayTools
 
     @test norm(X) ≈ norm(M, [0.0, 0.0], TFVector(X_p0x, B))
 
+    @test Manifolds.aspect_ratio(M) == 3 / 2
+    @test check_point(M, p) === nothing
+    @test check_point(M, [0.0, 0.0, 0.0]) isa DomainError
+
+    @test check_vector(M, p, X) === nothing
+    @test check_vector(M, p, [1, 2, 3]) isa DomainError
+
+    @test get_embedding(M) === Euclidean(3)
+    @test Manifolds.inverse_chart_injectivity_radius(M, A, i_p0x) === π
+    @test gaussian_curvature(M, p) ≈ 0.09227677052701619
+    @test Manifolds.normal_vector(M, p) ≈
+          [0.3179988464944819, -0.8179412488450798, 0.479425538604203]
+
     p_exp = Manifolds.solve_chart_parallel_transport_ode(
         M,
         [0.0, 0.0],
