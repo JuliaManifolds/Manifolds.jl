@@ -1,13 +1,15 @@
 struct ShootingInverseRetraction{
-    T<:Real,
     R<:AbstractRetractionMethod,
+    IR<:AbstractInverseRetractionMethod,
     VT<:AbstractVectorTransportMethod,
-} <: AbstractInverseRetractionMethod
-    max_iterations::Int
-    tolerance::T
-    num_transport_points::Int
+    T<:Real,
+} <: ApproximateInverseRetraction
     retraction::R
+    initial_inverse_retraction::IR
     vector_transport::VT
+    num_transport_points::Int
+    tolerance::T
+    max_iterations::Int
 end
 
 function inverse_retract(
@@ -32,11 +34,12 @@ function inverse_retract!(
         X,
         p,
         q;
-        max_iterations=method.max_iterations,
-        tolerance=method.tolerance,
-        num_transport_points=method.num_transport_points,
         retraction=method.retraction,
+        initial_inverse_retraction=method.initial_inverse_retraction,
         vector_transport=method.vector_transport,
+        num_transport_points=method.num_transport_points,
+        tolerance=method.tolerance,
+        max_iterations=method.max_iterations,
     )
     return X
 end
@@ -46,30 +49,27 @@ function _shooting!(
     X,
     p,
     q;
-    max_iterations,
-    tolerance,
-    num_transport_points,
     retraction,
+    initial_inverse_retraction,
     vector_transport,
+    num_transport_points,
+    tolerance,
+    max_iterations,
 )
     T = real(Base.promote_eltype(X, p, q))
-    ts = range(zero(T), one(T); length=num_transport_points)
-    X .= q .- p
-    gap = norm(X)
-    project!(M, X, p, X)
+    inverse_retract!(M, X, p, q, initial_inverse_retraction)
+    gap = norm(M, p, X)
     gap < tolerance && return X
-    rmul!(X, gap / norm(X))
-    i = 1
+    ts = range(zero(T), one(T); length=num_transport_points)
     ΔX = allocate(X)
     ΔXnew = allocate(ΔX)
     retr_tX = allocate_result(M, retract, p, X)
     retr_tX_new = allocate_result(M, retract, p, X)
+    i = 1
     while (gap > tolerance) && (i < max_iterations)
         retract!(M, retr_tX, p, X, retraction)
-        ΔX .= retr_tX .- q
-        gap = norm(ΔX)
-        project!(M, ΔX, retr_tX, ΔX)
-        rmul!(ΔX, gap / norm(ΔX))
+        inverse_retract!(M, ΔX, retr_tX, q, initial_inverse_retraction)
+        gap = norm(M, retr_tX, ΔX)
         for t in reverse(ts)[2:(end - 1)]
             retract!(M, retr_tX_new, p, t * X, retraction)
             vector_transport_to!(M, ΔXnew, retr_tX, ΔX, retr_tX_new, vector_transport)
@@ -77,7 +77,7 @@ function _shooting!(
             ΔX, ΔXnew = ΔXnew, ΔX
         end
         vector_transport_to!(M, ΔXnew, retr_tX, ΔX, p, vector_transport)
-        X .-= ΔXnew
+        X .+= ΔXnew
         i += 1
     end
     return X
