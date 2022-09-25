@@ -79,29 +79,32 @@ function _shooting!(
     tolerance,
     max_iterations,
 )
-    T = real(Base.promote_eltype(X, p, q))
     inverse_retract!(M, X, p, q, initial_inverse_retraction)
     gap = norm(M, p, X)
     gap < tolerance && return X
-    ts = range(zero(T), one(T); length=num_transport_points)
+    T = real(Base.promote_eltype(X, p, q))
+    transport_grid = range(one(T), zero(T); length=num_transport_points)[2:(end-1)]
     ΔX = allocate(X)
-    ΔXnew = allocate(ΔX)
+    ΔXnew = tX = allocate(ΔX)
     retr_tX = allocate_result(M, retract, p, X)
-    retr_tX_new = allocate_result(M, retract, p, X)
-    i = 1
-    while (gap > tolerance) && (i < max_iterations)
+    if length(transport_grid) > 0
+        retr_tX_new = allocate_result(M, retract, p, X)
+    end
+    iteration = 1
+    while (gap > tolerance) && (iteration < max_iterations)
         retract!(M, retr_tX, p, X, retraction)
         inverse_retract!(M, ΔX, retr_tX, q, initial_inverse_retraction)
         gap = norm(M, retr_tX, ΔX)
-        for t in reverse(ts)[2:(end - 1)]
-            retract!(M, retr_tX_new, p, t * X, retraction)
+        for t in transport_grid
+            tX .= t .* X
+            retract!(M, retr_tX_new, p, tX, retraction)
             vector_transport_to!(M, ΔXnew, retr_tX, ΔX, retr_tX_new, vector_transport)
-            retr_tX, retr_tX_new = retr_tX_new, retr_tX
-            ΔX, ΔXnew = ΔXnew, ΔX
+            # realias storage
+            retr_tX, retr_tX_new, ΔX, ΔXnew, tX = retr_tX_new, retr_tX, ΔXnew, ΔX, ΔX
         end
         vector_transport_to!(M, ΔXnew, retr_tX, ΔX, p, vector_transport)
         X .+= ΔXnew
-        i += 1
+        iteration += 1
     end
     return X
 end
