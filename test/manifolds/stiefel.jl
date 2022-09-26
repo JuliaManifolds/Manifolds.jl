@@ -349,6 +349,8 @@ include("../utils.jl")
                 q = exp(Mcomp, p, X)
                 @test isapprox(MM, q, exp(Mcomp, p, X))
                 Mcomp === Mcan && isapprox(MM, p, log(MM, p, q), log(Mcomp, p, q))
+                @test isapprox(MM, exp(MM, p, 0 * X), p)
+                @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
             end
             @testset "α=$α" for α in [-0.75, -0.25, 0.5]
                 MM = MetricManifold(M, StiefelSubmersionMetric(α))
@@ -358,6 +360,8 @@ include("../utils.jl")
                 q = exp(MM, p, X)
                 @test is_point(MM, q)
                 @test isapprox(MM, p, log(MM, p, q), X)
+                @test isapprox(MM, exp(MM, p, 0 * X), p)
+                @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
             end
         end
     end
