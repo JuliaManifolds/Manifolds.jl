@@ -24,3 +24,13 @@ Modules = [Manifolds]
 Pages = ["manifolds/Torus.jl"]
 Order = [:type, :function]
 ```
+
+## Curved Torus
+
+Two-dimensional torus embedded in $ℝ^3$.
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/CurvedTorus.jl"]
+Order = [:type, :function]
+```

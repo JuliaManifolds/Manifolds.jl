@@ -96,8 +96,13 @@ function affine_connection!(M::TorusInR3, Zc, ::DefaultTorusAtlas, i, a, Xc, Yc)
     return Zc
 end
 
-function check_chart_switch(::TorusInR3, A::DefaultTorusAtlas, i, a)
-    return abs(i[1] - a[1]) > 2pi / 3 || abs(i[2] - a[2]) > 2pi / 3
+"""
+    check_chart_switch(::TorusInR3, A::DefaultTorusAtlas, i, a; ϵ = pi/3)
+
+Return true if parameters `a` lie closer than `ϵ` to chart boundary.
+"""
+function check_chart_switch(::TorusInR3, A::DefaultTorusAtlas, i, a; ϵ=pi / 3)
+    return abs(i[1] - a[1]) > (pi - ϵ) || abs(i[2] - a[2]) > (pi - ϵ)
 end
 
 """
