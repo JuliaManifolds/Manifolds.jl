@@ -36,6 +36,7 @@ makedocs(
                 "Centered matrices" => "manifolds/centeredmatrices.md",
                 "Cholesky space" => "manifolds/choleskyspace.md",
                 "Circle" => "manifolds/circle.md",
+                "Curved torus" => "manifolds/curvedtorus.md",
                 "Elliptope" => "manifolds/elliptope.md",
                 "Essential manifold" => "manifolds/essentialmanifold.md",
                 "Euclidean" => "manifolds/euclidean.md",

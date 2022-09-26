@@ -1,4 +1,4 @@
-# Generalized Torus
+# Curved Torus
 
 Example: geodesic on a torus
 
@@ -8,6 +8,6 @@ Example: geodesic on a torus
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/GeneralizedTorus.jl"]
+Pages = ["manifolds/CurvedTorus.jl"]
 Order = [:type, :function]
 ```

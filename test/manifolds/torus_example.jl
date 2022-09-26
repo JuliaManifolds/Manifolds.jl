@@ -5,10 +5,9 @@ using GLMakie, Makie
 using OrdinaryDiffEq
 using DiffEqCallbacks
 
-function plot_torus()
-    # take a look at http://www.rdrop.com/~half/math/torus/torus.geodesics.pdf
+GLMakie.activate!()
 
-    GLMakie.activate!()
+function plot_torus()
 
     # selected torus
     M = Manifolds.TorusInR3(3, 2)

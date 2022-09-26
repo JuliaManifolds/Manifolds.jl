@@ -61,4 +61,6 @@ using RecursiveArrayTools
         [-0.41778834843865575, 2.935021992911625, 0.7673987137187901],
         rtol=1e-5,
     )
+
+    Manifolds.transition_map_diff(M, A, i_p0x, [0.0, 0.0], X_p0x, (-1.0, -0.3))
 end

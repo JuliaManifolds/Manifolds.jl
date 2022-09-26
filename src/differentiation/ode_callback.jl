@@ -65,9 +65,9 @@ end
 
 function chart_exp_problem(u, params, t)
     M, B = params
-    p = u.x[1]
+    a = u.x[1]
     dx = u.x[2]
-    ddx = -affine_connection(M, p, dx, dx, B)
+    ddx = -affine_connection(M, B.A, B.i, a, dx, dx)
     return ArrayPartition(dx, ddx)
 end
 
@@ -75,7 +75,7 @@ end
     solve_chart_exp_ode(
         M::AbstractManifold,
         a,
-        X,
+        Xc,
         A::AbstractAtlas,
         i0;
         solver=AutoVern9(Rodas5()),
@@ -84,19 +84,19 @@ end
     )
 
 Solve geodesic ODE on manifold `M` from point of coordinates `a` in chart `i0` from atlas
-`A` in direction of coordinates `X` in induced basis.
+`A` in direction of coordinates `Xc` in induced basis.
 """
 function solve_chart_exp_ode(
     M::AbstractManifold,
     a,
-    X,
+    Xc,
     A::AbstractAtlas,
     i0;
     solver=AutoVern9(Rodas5()),
     final_time=1.0,
     kwargs...,
 )
-    u0 = ArrayPartition(a, X)
+    u0 = ArrayPartition(copy(a), copy(Xc))
     cur_i = i0
     # callback stops solver when we get too close to chart boundary
     cb = FunctionCallingCallback(maybe_switch_chart; func_start=false)
@@ -115,11 +115,16 @@ function solve_chart_exp_ode(
         # here we switch charts
         a_final = sol.u[end].x[1]::typeof(a)
         new_i = get_chart_index(M, A, cur_i, a_final)
-        new_p0 = transition_map(M, A, cur_i, new_i, a_final)
-        new_B = induced_basis(M, A, new_i)
-        p_final = get_point(M, A, cur_i, a_final)
-        new_X0 = change_basis(M, p_final, sol.u[end].x[2]::typeof(X), B, new_B)
-        u0 = ArrayPartition(new_p0, new_X0)::typeof(u0)
+        transition_map!(M, u0.x[1], A, cur_i, new_i, a_final)
+        transition_map_diff!(
+            M,
+            u0.x[2],
+            A,
+            cur_i,
+            a_final,
+            sol.u[end].x[2]::typeof(Xc),
+            new_i,
+        )
         cur_i = new_i
     end
     return sols
@@ -127,31 +132,44 @@ end
 
 function chart_pt_problem(u, params, t)
     M, B = params
-    p = u.x[1]
+    a = u.x[1]
     dx = u.x[2]
     dY = u.x[3]
-    ddx = -affine_connection(M, p, dx, dx, B)
-    ddY = -affine_connection(M, p, dx, dY, B)
+
+    ddx = -affine_connection(M, B.A, B.i, a, dx, dx)
+    ddY = -affine_connection(M, B.A, B.i, a, dx, dY)
     return ArrayPartition(dx, ddx, ddY)
 end
 
 """
+    solve_chart_parallel_transport_ode(
+        M::AbstractManifold,
+        a,
+        Xc,
+        A::AbstractAtlas,
+        i0,
+        Yc;
+        solver=AutoVern9(Rodas5()),
+        final_time=1.0,
+        kwargs...,
+    )
 
-Parallel transport vector `Y` along geodesic on manifold `M` from point of coordinates `a`
-in chart `i0` from atlas `A` in direction of coordinates `X` in induced basis.
+Parallel transport vector with coordinates `Yc` along geodesic on manifold `M` from point of
+coordinates `a` in chart `i0` from atlas `A` in direction of coordinates `Xc` in induced
+basis.
 """
 function solve_chart_parallel_transport_ode(
     M::AbstractManifold,
     a,
-    X,
+    Xc,
     A::AbstractAtlas,
     i0,
-    Y;
+    Yc;
     solver=AutoVern9(Rodas5()),
     final_time=1.0,
     kwargs...,
 )
-    u0 = ArrayPartition(a, X, Y)
+    u0 = ArrayPartition(copy(a), copy(Xc), copy(Yc))
     cur_i = i0
     # callback stops solver when we get too close to chart boundary
     cb = FunctionCallingCallback(maybe_switch_chart; func_start=false)
@@ -170,12 +188,25 @@ function solve_chart_parallel_transport_ode(
         # here we switch charts
         a_final = sol.u[end].x[1]::typeof(a)
         new_i = get_chart_index(M, A, cur_i, a_final)
-        new_p0 = transition_map(M, A, cur_i, new_i, a_final)
-        new_B = induced_basis(M, A, new_i)
-        p_final = get_point(M, A, cur_i, a_final)
-        new_X0 = change_basis(M, p_final, sol.u[end].x[2]::typeof(X), B, new_B)
-        new_Y0 = change_basis(M, p_final, sol.u[end].x[3]::typeof(X), B, new_B)
-        u0 = ArrayPartition(new_p0, new_X0, new_Y0)::typeof(u0)
+        transition_map!(M, u0.x[1], A, cur_i, new_i, a_final)
+        transition_map_diff!(
+            M,
+            u0.x[2],
+            A,
+            cur_i,
+            a_final,
+            sol.u[end].x[2]::typeof(Xc),
+            new_i,
+        )
+        transition_map_diff!(
+            M,
+            u0.x[3],
+            A,
+            cur_i,
+            a_final,
+            sol.u[end].x[3]::typeof(Yc),
+            new_i,
+        )
         cur_i = new_i
     end
     return sols

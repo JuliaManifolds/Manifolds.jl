@@ -57,8 +57,7 @@ end
 @doc raw"""
     manifold_dimension(M::TorusInR3)
 
-Return the dimension of the [`AbstractSphere`](@ref) `M`, respectively i.e. the
-dimension of the embedding -1.
+Return the dimension of the [`TorusInR3`](@ref) `M` that is 2.
 """
 manifold_dimension(::TorusInR3) = 2
 
@@ -78,16 +77,16 @@ z(θ, φ) = r\sin(θ + θ₀)
 """
 struct DefaultTorusAtlas <: AbstractAtlas{ℝ} end
 
-function affine_connection!(
-    M::TorusInR3,
-    Zc,
-    p,
-    Xc,
-    Yc,
-    B::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas},
-)
+"""
+    affine_connection(M::TorusInR3, A::DefaultTorusAtlas, i, a, Xc, Yc)
+
+Affine connection on [`TorusInR3`](@ref) `M`.
+"""
+affine_connection(M::TorusInR3, A::DefaultTorusAtlas, i, a, Xc, Yc)
+
+function affine_connection!(M::TorusInR3, Zc, ::DefaultTorusAtlas, i, a, Xc, Yc)
     # as in https://www.cefns.nau.edu/~schulz/torus.pdf
-    θ = p[1] .+ B.i[1]
+    θ = a[1] .+ i[1]
     sinθ, cosθ = sincos(θ)
     Γ¹₂₂ = (M.R + M.r * cosθ) * sinθ / M.r
     Γ²₁₂ = -M.r * sinθ / (M.R + M.r * cosθ)

@@ -56,6 +56,26 @@ end
 RetractionAtlas() = RetractionAtlas(ExponentialRetraction(), LogarithmicInverseRetraction())
 
 """
+    affine_connection(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
+
+Calculate affine connection on manifold `M` at point with parameters `a` in chart `i` of
+atlas `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
+"""
+function affine_connection(M::AbstractManifold, A, i, a, Xc, Yc)
+    Zc = allocate(Xc)
+    return affine_connection!(M, Zc, A, i, a, Xc, Yc)
+end
+
+"""
+    affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
+
+Calculate affine connection on manifold `M` at point with parameters `a` in chart `i` of
+atlas `A` of vectors with coefficients `Xc` and `Yc` in induced basis and save the result
+in `Zc`.
+"""
+affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
+
+"""
     get_default_atlas(::AbstractManifold)
 
 Determine the default real-valued atlas for the given manifold.
@@ -235,6 +255,34 @@ end
 
 function transition_map!(M::AbstractManifold, y, A::AbstractAtlas, i_from, i_to, a)
     return transition_map!(M, y, A, i_from, A, i_to, a)
+end
+
+"""
+    transition_map_diff(M::AbstractManifold, A::AbstractAtlas, i_from, a, c, i_to)
+
+Compute differential of transition map from chart `i_from` to chart `i_to` from atlas `A`
+on manifold `M` at point with coordinates `a` on tangent vector with coordinates `c`.
+"""
+function transition_map_diff(M::AbstractManifold, A::AbstractAtlas, i_from, a, c, i_to)
+    old_B = induced_basis(M, A, i_from)
+    new_B = induced_basis(M, A, i_to)
+    p_final = get_point(M, A, i_from, a)
+    return change_basis(M, p_final, c, old_B, new_B)
+end
+
+function transition_map_diff!(
+    M::AbstractManifold,
+    c_out,
+    A::AbstractAtlas,
+    i_from,
+    a,
+    c_in,
+    i_to,
+)
+    old_B = induced_basis(M, A, i_from)
+    new_B = induced_basis(M, A, i_to)
+    p_final = get_point(M, A, i_from, a)
+    return change_basis!(M, c_out, p_final, c_in, old_B, new_B)
 end
 
 """
