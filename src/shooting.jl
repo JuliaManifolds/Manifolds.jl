@@ -71,7 +71,7 @@ In the shooting method, we search for a vector `X` such that
 This implementation of the shooting method works by using another inverse retraction to form
 the first guess of the vector. This guess is updated by shooting the vector, guessing the
 vector pointing from the shooting result to the target point, and transporting this vector
-update back to the initial point on aa discretized grid. This process is repeated until the
+update back to the initial point on a discretized grid. This process is repeated until the
 norm of the vector update falls below a specified tolerance or the maximum number of
 iterations is reached.
 
@@ -114,7 +114,7 @@ function shooting!(
     inverse_retract!(M, X, p, q, initial_inverse_retraction)
     gap = norm(M, p, X)
     gap < tolerance && return X
-    T = real(Base.promote_eltype(X, p, q))
+    T = real(Base.promote_type(number_eltype(X), number_eltype(p), number_eltype(q)))
     transport_grid = range(one(T), zero(T); length=num_transport_points)[2:(end - 1)]
     ΔX = allocate(X)
     ΔXnew = tX = allocate(ΔX)
