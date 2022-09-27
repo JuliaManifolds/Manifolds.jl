@@ -1,4 +1,8 @@
 
+default_inverse_retraction_method(::Stiefel) = PolarInverseRetraction()
+
+default_retraction_method(::Stiefel) = PolarRetraction()
+
 @doc raw"""
     exp(M::Stiefel, p, X)
 

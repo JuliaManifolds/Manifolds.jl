@@ -24,6 +24,8 @@ include("../utils.jl")
                 1 * im * zero_vector(M, x),
                 true,
             )
+            @test default_retraction_method(M) === PolarRetraction()
+            @test default_inverse_retraction_method(M) === PolarInverseRetraction()
         end
         @testset "Embedding and Projection" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
