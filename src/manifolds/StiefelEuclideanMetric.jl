@@ -3,14 +3,14 @@
     default_inverse_retraction_method(::Stiefel)
 
 Return [`PolarInverseRetraction`](@ref) as the default inverse retraction for
-[`Stiefel`] manifold.
+[`Stiefel`](@ref) manifold.
 """
 default_inverse_retraction_method(::Stiefel) = PolarInverseRetraction()
 
 """
     default_retraction_method(::Stiefel)
 
-Return [`PolarRetraction`](@ref) as the default retraction for [`Stiefel`] manifold.
+Return [`PolarRetraction`](@ref) as the default retraction for [`Stiefel`](@ref) manifold.
 """
 default_retraction_method(::Stiefel) = PolarRetraction()
 
