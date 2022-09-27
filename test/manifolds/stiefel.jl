@@ -26,6 +26,8 @@ include("../utils.jl")
             )
             @test default_retraction_method(M) === PolarRetraction()
             @test default_inverse_retraction_method(M) === PolarInverseRetraction()
+            vtm = DifferentiatedRetractionVectorTransport(PolarRetraction())
+            @test default_vector_transport_method(M) === vtm
         end
         @testset "Embedding and Projection" begin
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
