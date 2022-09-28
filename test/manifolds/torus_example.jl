@@ -4,6 +4,7 @@ using RecursiveArrayTools
 using GLMakie, Makie
 using OrdinaryDiffEq
 using DiffEqCallbacks
+using BoundaryValueDiffEq
 
 GLMakie.activate!()
 
@@ -61,8 +62,6 @@ function plot_torus()
     function solve_for(p0x, X_p0x, Y_transp)
         p = [Manifolds._torus_param(M, p0x...)...]
         i_p0x = Manifolds.get_chart_index(M, A, p)
-        B = induced_basis(M, A, i_p0x)
-        X = get_vector(M, p, X_p0x, B)
         p_exp = Manifolds.solve_chart_parallel_transport_ode(
             M,
             [0.0, 0.0],
@@ -109,6 +108,14 @@ function plot_torus()
 
     lines!(geo_ps; linewidth=2.0, color=:red)
     arrows!(ax, geo_ps_pt, geo_Ys, linecolor=:green, arrowcolor=:green, linewidth=0.05)
+
+    # draw a geodesic between two points
+    bvp_i = (0, 0)
+    bvp_a1 = [-1.7, -0.3]
+    bvp_a2 = [0.5, -1.2]
+    bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i)
+    bvp_sol_pts = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
+    lines!(bvp_sol_pts; linewidth=2.0, color=:orange)
 
     return fig
 end

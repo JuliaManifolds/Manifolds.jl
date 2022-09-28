@@ -202,6 +202,22 @@ distinct points.
 """
 get_chart_index(::AbstractManifold, ::AbstractAtlas, ::Any, ::Any)
 
+"""
+    inner(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
+
+Calculate inner product on manifold `M` at point with parameters `a` in chart `i` of
+atlas `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
+"""
+inner(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
+
+"""
+    norm(M::AbstractManifold, A::AbstractAtlas, i, a, Xc)
+
+Calculate norm on manifold `M` at point with parameters `a` in chart `i` of
+[`AbstractAtlas`](@ref) `A` of vector with coefficients `Xc` in induced basis.
+"""
+norm(M::AbstractManifold, A::AbstractAtlas, i, a, Xc) = sqrt(inner(M, A, i, a, Xc, Xc))
+
 @doc raw"""
     transition_map(M::AbstractManifold, A_from::AbstractAtlas, i_from, A_to::AbstractAtlas, i_to, a)
     transition_map(M::AbstractManifold, A::AbstractAtlas, i_from, i_to, a)

@@ -426,6 +426,11 @@ function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
 end
 
 function __init__()
+    @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
+        using .BoundaryValueDiffEq
+        include("differentiation/bvp.jl")
+    end
+
     @require FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000" begin
         using .FiniteDifferences
         include("differentiation/finite_differences.jl")

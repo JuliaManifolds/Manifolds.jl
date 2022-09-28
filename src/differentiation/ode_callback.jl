@@ -5,8 +5,8 @@
 Terminate integration when integrator goes too closely to chart boundary.
 """
 function maybe_switch_chart(u, t, integrator)
-    (M, B) = integrator.p
-    if check_chart_switch(M, B.A, B.i, u.x[1])
+    (M, A, i) = integrator.p
+    if check_chart_switch(M, A, i, u.x[1])
         # switch charts
         OrdinaryDiffEq.terminate!(integrator)
     end
@@ -64,10 +64,10 @@ function (scs::StitchedChartSolution)(t::AbstractArray)
 end
 
 function chart_exp_problem(u, params, t)
-    M, B = params
+    M, A, i = params
     a = u.x[1]
     dx = u.x[2]
-    ddx = -affine_connection(M, B.A, B.i, a, dx, dx)
+    ddx = -affine_connection(M, A, i, a, dx, dx)
     return ArrayPartition(dx, ddx)
 end
 
@@ -104,8 +104,7 @@ function solve_chart_exp_ode(
     init_time = zero(final_time)
     sols = StitchedChartSolution(M, A, :Exp, typeof(i0))
     while retcode === :Terminated && init_time < final_time
-        B = induced_basis(M, A, cur_i)
-        params = (M, B)
+        params = (M, A, cur_i)
         prob =
             ODEProblem(chart_exp_problem, u0, (init_time, final_time), params; callback=cb)
         sol = solve(prob, solver; kwargs...)
@@ -131,13 +130,13 @@ function solve_chart_exp_ode(
 end
 
 function chart_pt_problem(u, params, t)
-    M, B = params
+    M, A, i = params
     a = u.x[1]
     dx = u.x[2]
     dY = u.x[3]
 
-    ddx = -affine_connection(M, B.A, B.i, a, dx, dx)
-    ddY = -affine_connection(M, B.A, B.i, a, dx, dY)
+    ddx = -affine_connection(M, A, i, a, dx, dx)
+    ddY = -affine_connection(M, A, i, a, dx, dY)
     return ArrayPartition(dx, ddx, ddY)
 end
 
@@ -177,8 +176,7 @@ function solve_chart_parallel_transport_ode(
     init_time = zero(final_time)
     sols = StitchedChartSolution(M, A, :PT, typeof(i0))
     while retcode === :Terminated && init_time < final_time
-        B = induced_basis(M, A, cur_i)
-        params = (M, B)
+        params = (M, A, cur_i)
         prob =
             ODEProblem(chart_pt_problem, u0, (init_time, final_time), params; callback=cb)
         sol = solve(prob, solver; kwargs...)

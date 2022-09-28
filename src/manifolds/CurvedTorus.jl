@@ -116,6 +116,19 @@ function gaussian_curvature(M::TorusInR3, p)
 end
 
 """
+    inner(M::TorusInR3, ::DefaultTorusAtlas, i, a, Xc, Yc)
+
+Inner product on [`TorusInR3`](@ref) in chart `i` of atlas [`DefaultTorusAtlas`](@ref)
+between vectors with coordinates `Xc` and `Yc` tangent at point with parameters `a`.
+Vector coordinates must be given in the induced basis.
+"""
+function inner(M::TorusInR3, ::DefaultTorusAtlas, i, a, Xc, Yc)
+    diag_1 = M.r^2
+    diag_2 = (M.R + M.r * cos(a[1] + i[1]))^2
+    return Xc[1] * diag_1 * Yc[1] + Xc[2] * diag_2 * Yc[2]
+end
+
+"""
     inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
 
 Injectivity radius of `get_point` for chart `i` from atlas `A` of manifold `M`.
