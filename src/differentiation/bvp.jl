@@ -61,7 +61,7 @@ function estimate_distance_from_bvp(
     kwargs...,
 )
     sol = solve_chart_log_bvp(M, a1, a2, A, i; solver, dt, kwargs...)
-    mid = div(length(a1), 2)
-    Xc = sol.u[1][1:mid]
+    mid = length(a1)
+    Xc = sol.u[1][(mid + 1):end]
     return norm(M, A, i, a1, Xc)
 end

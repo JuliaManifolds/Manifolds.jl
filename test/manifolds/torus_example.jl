@@ -20,7 +20,7 @@ function plot_torus()
     Y1 = [p[2] for p in param_points]
     Z1 = [p[3] for p in param_points]
 
-    fig = Figure(resolution=(1400, 1000), fontsize=22)
+    fig = Figure(resolution=(1400, 1000), fontsize=18)
     ax = LScene(fig[1, 1], show_axis=true)
     gcs = [gaussian_curvature(M, p) for p in param_points]
 
@@ -54,7 +54,13 @@ function plot_torus()
         (label="φₓ", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
         (label="θy", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
         (label="φy", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="geodesic - θ₁", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="geodesic - φ₁", range=(-pi):(pi / 200):pi, startvalue=0.0),
+        (label="geodesic - θ₂", range=(-pi):(pi / 200):pi, startvalue=-pi / 3),
+        (label="geodesic - φ₂", range=(-pi):(pi / 200):pi, startvalue=pi / 2);
+        height=Auto(0.2f0),
     )
+    rowgap!(sg.layout, 5)
     A = Manifolds.DefaultTorusAtlas()
 
     # a point and tangent vector
@@ -110,12 +116,22 @@ function plot_torus()
     arrows!(ax, geo_ps_pt, geo_Ys, linecolor=:green, arrowcolor=:green, linewidth=0.05)
 
     # draw a geodesic between two points
-    bvp_i = (0, 0)
-    bvp_a1 = [-1.7, -0.3]
-    bvp_a2 = [0.5, -1.2]
-    bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i)
-    bvp_sol_pts = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
-    lines!(bvp_sol_pts; linewidth=2.0, color=:orange)
+    geo_r = lift(
+        sg.sliders[7].value,
+        sg.sliders[8].value,
+        sg.sliders[9].value,
+        sg.sliders[10].value,
+    ) do θ₁, φ₁, θ₂, φ₂
+        bvp_i = (0, 0)
+        bvp_a1 = [θ₁, φ₁]
+        bvp_a2 = [θ₂, φ₂]
+        bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i)
+        bvp_sol_pts =
+            [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
+        return bvp_sol_pts
+    end
+
+    lines!(geo_r; linewidth=2.0, color=:orange)
 
     return fig
 end

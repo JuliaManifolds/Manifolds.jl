@@ -5,6 +5,7 @@ using DiffEqCallbacks
 using Test
 using Manifolds: TFVector
 using RecursiveArrayTools
+using BoundaryValueDiffEq
 
 @testset "Torus in ℝ³" begin
     M = Manifolds.TorusInR3(3, 2)
@@ -20,7 +21,7 @@ using RecursiveArrayTools
     X = get_vector(M, p, X_p0x, B)
     @test get_coordinates(M, p, X, B) ≈ X_p0x
 
-    @test norm(X) ≈ norm(M, [0.0, 0.0], TFVector(X_p0x, B))
+    @test norm(X) ≈ norm(M, A, (0.0, 0.0), p0x, X_p0x)
 
     @test Manifolds.aspect_ratio(M) == 3 / 2
     @test check_point(M, p) === nothing
@@ -63,4 +64,11 @@ using RecursiveArrayTools
     )
 
     Manifolds.transition_map_diff(M, A, i_p0x, [0.0, 0.0], X_p0x, (-1.0, -0.3))
+
+    a2 = [-0.5, 0.3]
+    sol_log = Manifolds.solve_chart_log_bvp(M, p0x, a2, A, (0, 0))
+    @test sol_log(0.0)[1:2] ≈ p0x
+    @test sol_log(1.0)[1:2] ≈ a2
+    @test norm(M, A, (0, 0), p0x, sol_log(0.0)[3:4]) ≈
+          Manifolds.estimate_distance_from_bvp(M, p0x, a2, A, (0, 0))
 end

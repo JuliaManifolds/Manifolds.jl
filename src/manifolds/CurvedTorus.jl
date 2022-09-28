@@ -221,13 +221,3 @@ function get_vector_induced_basis!(
     Y[3] = M.r * cosθ * dθ
     return Y
 end
-
-function local_metric(
-    M::TorusInR3,
-    p,
-    B::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas},
-)
-    @assert length(p) == 2
-    diag = (M.r^2, (M.R + M.r * cos(p[1] + B.i[1]))^2)
-    return Diagonal(SVector(diag))
-end
