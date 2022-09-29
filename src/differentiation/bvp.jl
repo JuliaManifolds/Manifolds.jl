@@ -17,11 +17,15 @@ end
         a2,
         A::AbstractAtlas,
         i;
-        solver=MIRK(),
+        solver=GeneralMIRK4(),
+        dt=0.05,
         kwargs...,
     )
 
-Solve the BVP
+Solve the BVP corresponding to geodesic calculation on [`AbstractManifold`](@ref) M,
+between points with parameters `a1` and `a2` in chart `i` of [`AbstractAtlas`](@ref) `A`
+using solver `solver`. Geodesic γ is sampled at time interval `dt`, with γ(0) = a1 and
+γ(1) = a2.
 """
 function solve_chart_log_bvp(
     M::AbstractManifold,
@@ -50,6 +54,22 @@ function solve_chart_log_bvp(
     return sol1
 end
 
+"""
+    estimate_distance_from_bvp(
+        M::AbstractManifold,
+        a1,
+        a2,
+        A::AbstractAtlas,
+        i;
+        solver=GeneralMIRK4(),
+        dt=0.05,
+        kwargs...,
+    )
+
+Estimate distance between points on [`AbstractManifold`](@ref) M with parameters `a1` and
+`a2` in chart `i` of [`AbstractAtlas`](@ref) `A` using solver `solver`, employing 
+[`solve_chart_log_bvp`](@ref) to solve the geodesic BVP.
+"""
 function estimate_distance_from_bvp(
     M::AbstractManifold,
     a1,
