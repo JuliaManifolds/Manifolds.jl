@@ -115,7 +115,6 @@ Here, a useful function is to check, whether some ``p∈\mathbb R^3`` is a point
 
 # ╔═╡ 908d0ee4-73c0-4f8a-b9b4-5b42aec8559b
 
-
 # ╔═╡ 4880eaaf-6cf0-4250-8056-6d5b220e963c
 md"""
 But in an interactive session an error message might be helpful. A positional (third) argument is present to activate this. Here we illustrate this with try-catch to keep the notebook as valid running code.
@@ -153,7 +152,6 @@ end
 
 # ╔═╡ 6d8a6b23-2ab8-4a70-b303-eda3f490efee
 
-
 # ╔═╡ a9883394-e1bb-4cef-bae5-ce34f6e821d8
 md"To learn about how to define a manifold youself check out the [How to define your own manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/example.html) tutorial of [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)."
 
@@ -166,7 +164,6 @@ Based on these basic manifolds we can directly build more advanced manifolds.
 
 # ╔═╡ 114b46c3-654d-4b1c-b8a9-3acc5939a25e
 
-
 # ╔═╡ a68af8e4-82d0-4d55-ad39-461688c86b95
 md"""
 ## Implementing generic functions
@@ -175,7 +172,6 @@ In this section
 """
 
 # ╔═╡ 592549a7-5de7-452d-9dfa-fc748afc8b04
-
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
