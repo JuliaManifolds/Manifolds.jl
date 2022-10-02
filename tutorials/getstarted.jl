@@ -45,7 +45,7 @@ md"""
 """
 
 # ╔═╡ c1e139b0-7d39-4d20-81dc-5592fee831d0
-@mdx """
+md"""
 ## Using the Library of Manifolds
 
 [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/) is first of all a library of manifolds, see the list in the menu [here](https://juliamanifolds.github.io/Manifolds.jl/latest/) under “basic manifolds”.
