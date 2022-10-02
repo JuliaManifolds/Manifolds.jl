@@ -4,55 +4,188 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 714c6e7a-346d-423f-9685-d67a5faad2c8
+# ╔═╡ b911af8b-3c2d-440f-a7f5-2c8a6d5e2ee3
+begin
+    #I am a hidden trick layer
+    using MarkdownLiteral: @mdx
+end
+
+# ╔═╡ c96935ca-6bda-466d-ad29-b40c19f55392
 using Manifolds
 
 # ╔═╡ 41cbc7c8-3a39-11ed-292e-0bb253a3b2f3
 md"""
-# A short primer on Manifolds in Julia
+# 🚀 Get Started with `Manifolds.jl` 
 
-This short primer illustrates how to use a manifold from [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/).
+This is a short overview of [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/).
+
+This tutorial is rendered from a pluto notebook, so you can also open the file [tutorials/getstarted.jl](https://github.com/JuliaManifolds/Manifolds.jl/tree/master/tutorials/getstarted.jl) in Pluto and work on this tutorial interactively.
+
+As usual, if you want to install the package, just type
+
+```
+] add Manifolds
+```
+
+in Julia REPL or use
+
+```
+using Pkg; Pkg.add("Manifolds");
+```
+
+before the first use. Then load the package with
 """
 
-# ╔═╡ da637130-fb5c-4d54-9603-b853d41e9c96
+# ╔═╡ 9d16efde-bd95-46d9-a659-5420fe860699
+md"""
+Since the packagae hevily depends on [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/) we will sometimes also link to the interface definition of functions in the interface and mark this with 🔗.
+"""
+
+# ╔═╡ b34d2b6c-907e-45b3-9b62-445666413b26
+@mdx """
+## Contents
+* [Using the library of manifolds](#using-the-library-of-manifolds)
+* [implementing generic functions](#implementing-generic-functions)
+* the exponential map and retractions
+* the logarithmic map, parallel transport and its 
+"""
 
 # ╔═╡ c1e139b0-7d39-4d20-81dc-5592fee831d0
-md"We can first just create a manifold"
+@mdx """
+## Using the Library of Manifolds
+
+[`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/) is first of all a library of manifolds, see the list in the menu [here](https://juliamanifolds.github.io/Manifolds.jl/latest/) under “basic manifolds”.
+
+Let's look at three examples together with the first few functions on manifolds. 
+"""
+
+# ╔═╡ 7a3d7f18-75b2-4c0b-ac4f-8c5d5e27b4f6
+md"#### 1. [The Euclidean space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) 
+
+[The Euclidean space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html#Manifolds.Euclidean) brings us (back) into linear case of vectors, so in terms of manifolds, this is a very simple one. It is often useful to compare to classical algorithms, or implementations."
 
 # ╔═╡ 554a8a25-92bd-4603-9f23-1afd18dfc658
-M = Hyperbolic(4)
+M₁ = Euclidean(3)
+
+# ╔═╡ 6341255c-f641-4b91-a7a9-e052183a5791
+md"""
+Note that since a manifold is a type in Julia, we write it in CamelCase. Its parameters are first a dimension or size parameter of the manifold, sometimes optional is a field the manifold is defined over.
+
+For example the above definition is the same as the real-valued case
+"""
+
+# ╔═╡ fef3b6a6-b19b-4fac-9ffe-aa45a4bc547a
+M₁ === Euclidean(3, field=ℝ)
+
+# ╔═╡ 338465ed-3055-45b7-a7e1-304a7ac856b5
+md"But we even introduced a short hand notation, since ℝ is also just a symbol/variable to use"
+
+# ╔═╡ 6360598f-5280-4327-ab0c-50bd401ed5d6
+M₁ === ℝ^3
+
+# ╔═╡ 088293e9-ebff-49e3-868a-ed824de857fa
+md"And similarly here are two ways to create the manifold of vectors of length two with complex entries – or mathematically the space ``\mathbb C^2``"
+
+# ╔═╡ 657bce13-5cf2-438f-9c12-4434fa1850ac
+Euclidean(2, field=ℂ) === ℂ^2
+
+# ╔═╡ 57c6fb90-03fc-487d-a8e7-02108097cc78
+md"""
+The easiest to check is the dimension of a manifold. Here we have three “directions to walk into” at every point ``p\in \mathbb R
+^3`` so [`manifold_dimension`]() ([🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.maniold_dimension-Tuple{AbstractManifold})) is
+"""
+
+# ╔═╡ 316b2d4f-984c-4969-b515-0772ec89a745
+manifold_dimension(M₁)
+
+# ╔═╡ 78f1ae49-a973-4b39-a058-720e12532283
+md"""
+#### 2. [The hyperpolic space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/hyperbolic.html)
+
+The ``d``-dimensional [hyperbolic space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/hyperbolic.html#Manifolds.Hyperbolic) is usually represented in ``\mathbb R^{d+1}`` as the set of points ``p\in\mathbb R^3`` fulfilling
+```math
+p_1^2+p_2^2+\cdots+p_d^2-p_{d+1}^2 = -1.
+```
+"""
+
+# ╔═╡ 1025b30d-3433-4335-8751-658e7731d424
+M₂ = Hyperbolic(2)
+
+# ╔═╡ 77101edd-4870-4b45-88f2-20b48a07fd57
+manifold_dimension(M₂)
+
+# ╔═╡ 588e67af-8335-47e5-ba34-ad1cfd22a69d
+md"""
+Here, a useful function is to check, whether some ``p∈\mathbb R^3`` is a point on the manifold. We can check
+"""
+
+# ╔═╡ 908d0ee4-73c0-4f8a-b9b4-5b42aec8559b
+
+# ╔═╡ 4880eaaf-6cf0-4250-8056-6d5b220e963c
+md"""
+But in an interactive session an error message might be helpful. A positional (third) argument is present to activate this. Here we illustrate this with try-catch to keep the notebook as valid running code.
+"""
+
+# ╔═╡ 19cbc8c5-4c2c-4594-bbb5-30f268c046cc
+md"""
+#### 3. [The sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html)
+
+[The sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html#Manifolds.Sphere) ``\mathbb S^d`` is the ``d``-dimensional sphere represented in its embedded form, that is unit vectors ``p \in \mathbb R^{d+1}`` with unit norm ``\lVert p \rVert_2 = 1``. 
+"""
 
 # ╔═╡ f689ac55-7c5d-4197-90b6-6c32591482d7
-md"And first check properties like its dimension."
+M₃ = Sphere(2)
 
-# ╔═╡ 2d26fc64-21a3-428b-b3e9-6199be442705
-manifold_dimension(M)
+# ╔═╡ dcce82a5-f7bb-4ebb-89cb-a66900c873fd
+is_point(M₃, [0, 0, 1])
 
-# ╔═╡ a9883394-e1bb-4cef-bae5-ce34f6e821d8
-md"or whether points belong to the manifold. Note that there is a final optional argument to activate an error message:"
+# ╔═╡ c07a05df-9d0c-4810-9539-a5fdd7640f45
+is_point(M₃, [1, 0, 1])
 
-# ╔═╡ a37ba296-75b8-4b4d-8629-510241b43757
-is_point(M, [0, 0, 1, 0, 1])
+# ╔═╡ 0066a636-2a06-4891-b807-8b354827ad0a
+is_point(M₃, [0, 0, 1.001]; atol=1e-3)
 
-# ╔═╡ 204ace1b-da5a-42dc-9163-43d046995dd6
+# ╔═╡ d3caea7a-89ff-4f04-94e9-922048ad0bb1
 try
-    is_point(M, [0, 0, 1, 0, 1], true)
+    is_point(M₃, [0, 0, 1.001], true)
 catch e
-    md"$e"
+    if isa(e, DomainError)
+        display(e)
+    else
+        rethrow(e)
+    end
 end
 
-# ╔═╡ dea45eb9-4a88-4ea1-b6c2-377cd98a0c22
-is_point(M, [0, 0, 0, 0, 1])
+# ╔═╡ 6d8a6b23-2ab8-4a70-b303-eda3f490efee
 
-# ╔═╡ 5967e7c1-50b9-4a2a-b5ce-107fa2b6cfa7
+# ╔═╡ a9883394-e1bb-4cef-bae5-ce34f6e821d8
+md"To learn about how to define a manifold youself check out the [How to define your own manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/example.html) tutorial of [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)."
+
+# ╔═╡ 1c3c993c-4c49-4baa-b84f-eb42cd481620
+md"""
+### Building more advanced manifolds
+"""
+
+# ╔═╡ 114b46c3-654d-4b1c-b8a9-3acc5939a25e
+
+# ╔═╡ a68af8e4-82d0-4d55-ad39-461688c86b95
+@mdx """
+## Implementing generic functions
+
+In this section 
+"""
+
+# ╔═╡ 592549a7-5de7-452d-9dfa-fc748afc8b04
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
+MarkdownLiteral = "736d6165-7244-6769-4267-6b50796e6954"
 
 [compat]
 Manifolds = "~0.8.28"
+MarkdownLiteral = "~0.1.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -61,7 +194,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.1"
 manifest_format = "2.0"
-project_hash = "bed83249a4f5713cda4c32b0c399a757dfeefa70"
+project_hash = "015548ea63f040ccadb454f3fbc37f47f7bddc16"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -133,6 +266,12 @@ git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.8"
 
+[[deps.CommonMark]]
+deps = ["Crayons", "JSON", "URIs"]
+git-tree-sha1 = "4cd7063c9bdebdbd55ede1af70f3c2f48fab4215"
+uuid = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
+version = "0.8.6"
+
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
 git-tree-sha1 = "5856d3031cdb1f3b2b6340dfdc66b6d9a149a374"
@@ -149,6 +288,11 @@ deps = ["LinearAlgebra", "Statistics", "StatsBase"]
 git-tree-sha1 = "3c8de95b4e932d76ec8960e12d681eba580e9674"
 uuid = "587fd27a-f159-11e8-2dae-1979310e6154"
 version = "0.2.8"
+
+[[deps.Crayons]]
+git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.1.1"
 
 [[deps.DataAPI]]
 git-tree-sha1 = "1106fa7e1256b402a86a8e7b15c00c85036fef49"
@@ -248,6 +392,12 @@ git-tree-sha1 = "709d864e3ed6e3545230601f94e11ebc65994641"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.11"
 
+[[deps.HypertextLiteral]]
+deps = ["Tricks"]
+git-tree-sha1 = "c47c5fa4c5308f27ccaac35504858d8914e102f9"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.4"
+
 [[deps.Inflate]]
 git-tree-sha1 = "5cd07aab533df5170988219191dfad0519391428"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
@@ -278,6 +428,12 @@ deps = ["Preferences"]
 git-tree-sha1 = "abc9885a7ca2052a736a600f7fa66209f96506e1"
 uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
 version = "1.4.1"
+
+[[deps.JSON]]
+deps = ["Dates", "Mmap", "Parsers", "Unicode"]
+git-tree-sha1 = "3c837543ddb02250ef42f4738347454f95079d4e"
+uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+version = "0.21.3"
 
 [[deps.Kronecker]]
 deps = ["LinearAlgebra", "NamedDims", "SparseArrays", "StatsBase"]
@@ -348,6 +504,12 @@ version = "0.13.18"
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
+[[deps.MarkdownLiteral]]
+deps = ["CommonMark", "HypertextLiteral"]
+git-tree-sha1 = "0d3fa2dd374934b62ee16a4721fe68c418b92899"
+uuid = "736d6165-7244-6769-4267-6b50796e6954"
+version = "0.1.1"
+
 [[deps.MatrixEquations]]
 deps = ["LinearAlgebra", "LinearMaps"]
 git-tree-sha1 = "3b284e9c98f645232f9cf07d4118093801729d43"
@@ -414,6 +576,12 @@ deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
 git-tree-sha1 = "cf494dca75a69712a72b80bc48f59dcf3dea63ec"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
 version = "0.11.16"
+
+[[deps.Parsers]]
+deps = ["Dates"]
+git-tree-sha1 = "3d5bf43e3e8b412656404ed9466f1dcbf7c50269"
+uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
+version = "2.4.0"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
@@ -589,6 +757,16 @@ version = "1.10.0"
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
+[[deps.Tricks]]
+git-tree-sha1 = "6bac775f2d42a611cdfcd1fb217ee719630c4175"
+uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
+version = "0.1.6"
+
+[[deps.URIs]]
+git-tree-sha1 = "e59ecc5a41b000fa94423a578d29290c7266fc10"
+uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+version = "1.4.0"
+
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
@@ -624,17 +802,39 @@ version = "17.4.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═41cbc7c8-3a39-11ed-292e-0bb253a3b2f3
-# ╠═da637130-fb5c-4d54-9603-b853d41e9c96
-# ╠═714c6e7a-346d-423f-9685-d67a5faad2c8
+# ╟─b911af8b-3c2d-440f-a7f5-2c8a6d5e2ee3
+# ╟─41cbc7c8-3a39-11ed-292e-0bb253a3b2f3
+# ╠═c96935ca-6bda-466d-ad29-b40c19f55392
+# ╟─9d16efde-bd95-46d9-a659-5420fe860699
+# ╠═b34d2b6c-907e-45b3-9b62-445666413b26
 # ╟─c1e139b0-7d39-4d20-81dc-5592fee831d0
+# ╟─7a3d7f18-75b2-4c0b-ac4f-8c5d5e27b4f6
 # ╠═554a8a25-92bd-4603-9f23-1afd18dfc658
+# ╟─6341255c-f641-4b91-a7a9-e052183a5791
+# ╠═fef3b6a6-b19b-4fac-9ffe-aa45a4bc547a
+# ╟─338465ed-3055-45b7-a7e1-304a7ac856b5
+# ╠═6360598f-5280-4327-ab0c-50bd401ed5d6
+# ╟─088293e9-ebff-49e3-868a-ed824de857fa
+# ╠═657bce13-5cf2-438f-9c12-4434fa1850ac
+# ╟─57c6fb90-03fc-487d-a8e7-02108097cc78
+# ╠═316b2d4f-984c-4969-b515-0772ec89a745
+# ╟─78f1ae49-a973-4b39-a058-720e12532283
+# ╠═1025b30d-3433-4335-8751-658e7731d424
+# ╠═77101edd-4870-4b45-88f2-20b48a07fd57
+# ╠═588e67af-8335-47e5-ba34-ad1cfd22a69d
+# ╠═dcce82a5-f7bb-4ebb-89cb-a66900c873fd
+# ╠═c07a05df-9d0c-4810-9539-a5fdd7640f45
+# ╠═908d0ee4-73c0-4f8a-b9b4-5b42aec8559b
+# ╠═0066a636-2a06-4891-b807-8b354827ad0a
+# ╠═4880eaaf-6cf0-4250-8056-6d5b220e963c
+# ╠═d3caea7a-89ff-4f04-94e9-922048ad0bb1
+# ╟─19cbc8c5-4c2c-4594-bbb5-30f268c046cc
 # ╠═f689ac55-7c5d-4197-90b6-6c32591482d7
-# ╠═2d26fc64-21a3-428b-b3e9-6199be442705
-# ╠═a9883394-e1bb-4cef-bae5-ce34f6e821d8
-# ╠═a37ba296-75b8-4b4d-8629-510241b43757
-# ╠═204ace1b-da5a-42dc-9163-43d046995dd6
-# ╠═dea45eb9-4a88-4ea1-b6c2-377cd98a0c22
-# ╠═5967e7c1-50b9-4a2a-b5ce-107fa2b6cfa7
+# ╠═6d8a6b23-2ab8-4a70-b303-eda3f490efee
+# ╟─a9883394-e1bb-4cef-bae5-ce34f6e821d8
+# ╠═1c3c993c-4c49-4baa-b84f-eb42cd481620
+# ╠═114b46c3-654d-4b1c-b8a9-3acc5939a25e
+# ╠═a68af8e4-82d0-4d55-ad39-461688c86b95
+# ╠═592549a7-5de7-452d-9dfa-fc748afc8b04
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
