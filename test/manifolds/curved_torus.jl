@@ -63,6 +63,23 @@ using BoundaryValueDiffEq
         rtol=1e-5,
     )
 
+    p_exp_switch = Manifolds.solve_chart_exp_ode(
+        M,
+        [0.0, 0.0],
+        X_p0x,
+        A,
+        i_p0x;
+        final_time=3.0,
+        check_chart_switch_kwargs=(; ϵ=0.3),
+    )
+    p_exp_switch_3 = p_exp_switch(3.0)
+    @test isapprox(
+        p_exp_switch_3[1],
+        [2.701765894057119, 2.668437820810143, -1.8341712552932237],
+        rtol=1e-5,
+    )
+    @test length(p_exp_switch.sols) < length(p_exp.sols)
+
     Manifolds.transition_map_diff(M, A, i_p0x, [0.0, 0.0], X_p0x, (-1.0, -0.3))
 
     a2 = [-0.5, 0.3]

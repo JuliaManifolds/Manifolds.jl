@@ -1,12 +1,40 @@
 
 """
-    maybe_switch_chart(u, t, integrator)
+    IntegratorTerminatorNearChartBoundary{TKwargs}
+
+An object for determining the point at which integration of a differential equation
+in a chart on a manifold should be terminated for the purpose of switching a chart.
+
+The value stored in `check_chart_switch_kwargs` will be passed as keyword arguments
+to  [`check_chart_switch`](@ref). By default an empty tuple is stored.
+"""
+struct IntegratorTerminatorNearChartBoundary{TKwargs}
+    check_chart_switch_kwargs::TKwargs
+end
+
+function IntegratorTerminatorNearChartBoundary()
+    return IntegratorTerminatorNearChartBoundary(NamedTuple())
+end
+
+"""
+    (int_term::IntegratorTerminatorNearChartBoundary)(u, t, integrator)
 
 Terminate integration when integrator goes too closely to chart boundary.
+Closeness is determined by `ϵ` value of [`IntegratorTerminatorNearChartBoundary`](@ref)
+`int_term`.
+
+# Arguments:
+
+- `int_term`: object containing keyword arguments for `check_chart_switch`, such as
+  the desired maximum distance to boundary,
+- `u`: parameters of a point at which the integrator is solving a differential equation.
+- `t`: time parameter of the integrator
+- `integrator`: state of the integrator. Internal parameters are expected to contained
+  the manifold on which the equation is solved, the atlas and the current chart index.
 """
-function maybe_switch_chart(u, t, integrator)
+function (int_term::IntegratorTerminatorNearChartBoundary)(u, t, integrator)
     (M, A, i) = integrator.p
-    if check_chart_switch(M, A, i, u.x[1])
+    if check_chart_switch(M, A, i, u.x[1]; int_term.check_chart_switch_kwargs...)
         # switch charts
         OrdinaryDiffEq.terminate!(integrator)
     end
@@ -80,11 +108,12 @@ end
         i0;
         solver=AutoVern9(Rodas5()),
         final_time=1.0,
+        check_chart_switch_kwargs=NamedTuple(),
         kwargs...,
     )
 
-Solve geodesic ODE on a manifold `M` from point of coordinates `a` in chart `i0` from an [`AbstractAtlas`](@ref) `A`.
-`A` in direction of coordinates `Xc` in induced basis.
+Solve geodesic ODE on a manifold `M` from point of coordinates `a` in chart `i0` from an
+[`AbstractAtlas`](@ref) `A` in direction of coordinates `Xc` in the induced basis.
 """
 function solve_chart_exp_ode(
     M::AbstractManifold,
@@ -94,12 +123,16 @@ function solve_chart_exp_ode(
     i0;
     solver=AutoVern9(Rodas5()),
     final_time=1.0,
+    check_chart_switch_kwargs=NamedTuple(),
     kwargs...,
 )
     u0 = ArrayPartition(copy(a), copy(Xc))
     cur_i = i0
     # callback stops solver when we get too close to chart boundary
-    cb = FunctionCallingCallback(maybe_switch_chart; func_start=false)
+    cb = FunctionCallingCallback(
+        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
+        func_start=false,
+    )
     retcode = :Terminated
     init_time = zero(final_time)
     sols = StitchedChartSolution(M, A, :Exp, typeof(i0))
@@ -149,13 +182,14 @@ end
         i0,
         Yc;
         solver=AutoVern9(Rodas5()),
+        check_chart_switch_kwargs=NamedTuple(),
         final_time=1.0,
         kwargs...,
     )
 
 Parallel transport vector with coordinates `Yc` along geodesic on a manifold `M` from point of
-coordinates `a` in a chart `i0` from an [`AbstractAtlas`](@ref) `A` in direction of coordinates `Xc` in induced
-basis.
+coordinates `a` in a chart `i0` from an [`AbstractAtlas`](@ref) `A` in direction of
+coordinates `Xc` in the induced basis.
 """
 function solve_chart_parallel_transport_ode(
     M::AbstractManifold,
@@ -166,12 +200,16 @@ function solve_chart_parallel_transport_ode(
     Yc;
     solver=AutoVern9(Rodas5()),
     final_time=1.0,
+    check_chart_switch_kwargs=NamedTuple(),
     kwargs...,
 )
     u0 = ArrayPartition(copy(a), copy(Xc), copy(Yc))
     cur_i = i0
     # callback stops solver when we get too close to chart boundary
-    cb = FunctionCallingCallback(maybe_switch_chart; func_start=false)
+    cb = FunctionCallingCallback(
+        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
+        func_start=false,
+    )
     retcode = :Terminated
     init_time = zero(final_time)
     sols = StitchedChartSolution(M, A, :PT, typeof(i0))

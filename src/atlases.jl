@@ -276,8 +276,9 @@ end
 """
     transition_map_diff(M::AbstractManifold, A::AbstractAtlas, i_from, a, c, i_to)
 
-Compute differential of transition map from chart `i_from` to chart `i_to` from an [`AbstractAtlas`](@ref) `A`
-on manifold `M` at point with coordinates `a` on tangent vector with coordinates `c`.
+Compute differential of transition map from chart `i_from` to chart `i_to` from an
+[`AbstractAtlas`](@ref) `A` on manifold `M` at point with parameters `a` on tangent vector
+with coordinates `c` in the induced basis.
 """
 function transition_map_diff(M::AbstractManifold, A::AbstractAtlas, i_from, a, c, i_to)
     old_B = induced_basis(M, A, i_from)
@@ -286,6 +287,11 @@ function transition_map_diff(M::AbstractManifold, A::AbstractAtlas, i_from, a, c
     return change_basis(M, p_final, c, old_B, new_B)
 end
 
+"""
+    transition_map_diff!(M::AbstractManifold, c_out, A::AbstractAtlas, i_from, a, c, i_to)
+
+Compute [`transition_map_diff`](@ref) on given arguments and save the result in `c_out`.
+"""
 function transition_map_diff!(
     M::AbstractManifold,
     c_out,

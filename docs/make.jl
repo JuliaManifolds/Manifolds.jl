@@ -1,7 +1,9 @@
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PyPlot
+# required for loading methods that handle differential equation solving
+using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 # required for loading the manifold tests functions
 using Test, FiniteDifferences
-using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
+
 ENV["GKSwstype"] = "100"
 
 generated_path = joinpath(@__DIR__, "src", "misc")
