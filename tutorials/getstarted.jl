@@ -113,12 +113,32 @@ md"""
 Here, a useful function is to check, whether some ``p∈\mathbb R^3`` is a point on the manifold. We can check
 """
 
+# ╔═╡ dcce82a5-f7bb-4ebb-89cb-a66900c873fd
+is_point(M₂, [0, 0, 1])
+
+# ╔═╡ c07a05df-9d0c-4810-9539-a5fdd7640f45
+is_point(M₂, [1, 0, 1])
+
 # ╔═╡ 908d0ee4-73c0-4f8a-b9b4-5b42aec8559b
+md"Keyword arguments are passed on to any numerical checks, for example an absolute tolerance when checking the above equiality."
 
 # ╔═╡ 4880eaaf-6cf0-4250-8056-6d5b220e963c
 md"""
 But in an interactive session an error message might be helpful. A positional (third) argument is present to activate this. Here we illustrate this with try-catch to keep the notebook as valid running code.
 """
+
+# ╔═╡ d3caea7a-89ff-4f04-94e9-922048ad0bb1
+try
+    is_point(M₂, [0, 0, 1.001], true)
+catch e #We just have to trick a litte to display the Domain error here
+    if isa(e, DomainError)
+        Markdown.parse("""```
+        $(e)
+        ```""")
+    else
+        rethrow(e)
+    end
+end
 
 # ╔═╡ 19cbc8c5-4c2c-4594-bbb5-30f268c046cc
 md"""
@@ -130,27 +150,45 @@ md"""
 # ╔═╡ f689ac55-7c5d-4197-90b6-6c32591482d7
 M₃ = Sphere(2)
 
-# ╔═╡ dcce82a5-f7bb-4ebb-89cb-a66900c873fd
-is_point(M₃, [0, 0, 1])
-
-# ╔═╡ c07a05df-9d0c-4810-9539-a5fdd7640f45
-is_point(M₃, [1, 0, 1])
-
 # ╔═╡ 0066a636-2a06-4891-b807-8b354827ad0a
 is_point(M₃, [0, 0, 1.001]; atol=1e-3)
 
-# ╔═╡ d3caea7a-89ff-4f04-94e9-922048ad0bb1
+# ╔═╡ 6d8a6b23-2ab8-4a70-b303-eda3f490efee
+md"""
+Here we can show a last nice check: [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) to check whether a tangent vector `X` is a representation of a tangent vector ``X∈T_p\mathcal M`` to a point `p` on the manifold.
+
+This function has two positional asrguments, the first to again indicate whether to throw an error, the second to disable the check that `p` is a valid point on the manifold. Usually this validity is essential for the tangent check, but if it was for example performed before, it can be turned off to spare time. 
+
+For example in our first example the point is not of unit norm
+"""
+
+# ╔═╡ 9f1482b8-d345-4e65-a2a0-9fd38a251df5
+is_vector(M₃, [2, 0, 0], [0, 1, 1])
+
+# ╔═╡ e8f068e4-f11c-480e-86ab-9934263d1c06
+md"But the orthogonality of `p` and `X` is still valid, so we get"
+
+# ╔═╡ ff2cf9f6-712b-4c67-9d65-92412558b6e4
+is_vector(M₃, [2, 0, 0], [0, 1, 1], true, false)
+
+# ╔═╡ 082e751c-eaa5-4c31-9589-aada0d417a66
+md"But of course it is better to use a valid point in the first place"
+
+# ╔═╡ 90832504-4eaf-49d3-9c59-6b219121c6ef
+is_vector(M₃, [1, 0, 0], [0, 1, 1])
+
+# ╔═╡ ba9320d3-a340-4b36-95ac-2a9935803f44
 try
-    is_point(M₃, [0, 0, 1.001], true)
-catch e
+    is_vector(M₃, [1, 0, 0], [0.1, 1, 1], true)
+catch e #We just have to trick a litte to display the Domain error here
     if isa(e, DomainError)
-        display(e)
+        Markdown.parse("""```
+        $(e)
+        ```""")
     else
         rethrow(e)
     end
 end
-
-# ╔═╡ 6d8a6b23-2ab8-4a70-b303-eda3f490efee
 
 # ╔═╡ a9883394-e1bb-4cef-bae5-ce34f6e821d8
 md"To learn about how to define a manifold youself check out the [How to define your own manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/example.html) tutorial of [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)."
@@ -772,13 +810,19 @@ version = "17.4.0+0"
 # ╟─588e67af-8335-47e5-ba34-ad1cfd22a69d
 # ╠═dcce82a5-f7bb-4ebb-89cb-a66900c873fd
 # ╠═c07a05df-9d0c-4810-9539-a5fdd7640f45
-# ╠═908d0ee4-73c0-4f8a-b9b4-5b42aec8559b
+# ╟─908d0ee4-73c0-4f8a-b9b4-5b42aec8559b
 # ╠═0066a636-2a06-4891-b807-8b354827ad0a
 # ╟─4880eaaf-6cf0-4250-8056-6d5b220e963c
 # ╠═d3caea7a-89ff-4f04-94e9-922048ad0bb1
 # ╟─19cbc8c5-4c2c-4594-bbb5-30f268c046cc
 # ╠═f689ac55-7c5d-4197-90b6-6c32591482d7
 # ╠═6d8a6b23-2ab8-4a70-b303-eda3f490efee
+# ╠═9f1482b8-d345-4e65-a2a0-9fd38a251df5
+# ╟─e8f068e4-f11c-480e-86ab-9934263d1c06
+# ╠═ff2cf9f6-712b-4c67-9d65-92412558b6e4
+# ╟─082e751c-eaa5-4c31-9589-aada0d417a66
+# ╠═90832504-4eaf-49d3-9c59-6b219121c6ef
+# ╠═ba9320d3-a340-4b36-95ac-2a9935803f44
 # ╟─a9883394-e1bb-4cef-bae5-ce34f6e821d8
 # ╠═1c3c993c-4c49-4baa-b84f-eb42cd481620
 # ╠═114b46c3-654d-4b1c-b8a9-3acc5939a25e
