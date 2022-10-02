@@ -15,7 +15,7 @@ using Manifolds
 
 # ╔═╡ 41cbc7c8-3a39-11ed-292e-0bb253a3b2f3
 md"""
-# 🚀 Get Started with `Manifolds.jl` 
+# 🚀 Get Started with `Manifolds.jl`
 
 This is a short overview of [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/).
 
@@ -47,7 +47,7 @@ Since the packagae hevily depends on [`ManifoldsBase.jl`](https://juliamanifolds
 * [Using the library of manifolds](#using-the-library-of-manifolds)
 * [implementing generic functions](#implementing-generic-functions)
 * the exponential map and retractions
-* the logarithmic map, parallel transport and its 
+* the logarithmic map, parallel transport and its
 """
 
 # ╔═╡ c1e139b0-7d39-4d20-81dc-5592fee831d0
@@ -56,11 +56,11 @@ Since the packagae hevily depends on [`ManifoldsBase.jl`](https://juliamanifolds
 
 [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/) is first of all a library of manifolds, see the list in the menu [here](https://juliamanifolds.github.io/Manifolds.jl/latest/) under “basic manifolds”.
 
-Let's look at three examples together with the first few functions on manifolds. 
+Let's look at three examples together with the first few functions on manifolds.
 """
 
 # ╔═╡ 7a3d7f18-75b2-4c0b-ac4f-8c5d5e27b4f6
-md"#### 1. [The Euclidean space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html) 
+md"#### 1. [The Euclidean space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html)
 
 [The Euclidean space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html#Manifolds.Euclidean) brings us (back) into linear case of vectors, so in terms of manifolds, this is a very simple one. It is often useful to compare to classical algorithms, or implementations."
 
@@ -130,7 +130,7 @@ But in an interactive session an error message might be helpful. A positional (t
 md"""
 #### 3. [The sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html)
 
-[The sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html#Manifolds.Sphere) ``\mathbb S^d`` is the ``d``-dimensional sphere represented in its embedded form, that is unit vectors ``p \in \mathbb R^{d+1}`` with unit norm ``\lVert p \rVert_2 = 1``. 
+[The sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html#Manifolds.Sphere) ``\mathbb S^d`` is the ``d``-dimensional sphere represented in its embedded form, that is unit vectors ``p \in \mathbb R^{d+1}`` with unit norm ``\lVert p \rVert_2 = 1``.
 """
 
 # ╔═╡ f689ac55-7c5d-4197-90b6-6c32591482d7
@@ -164,6 +164,8 @@ md"To learn about how to define a manifold youself check out the [How to define 
 # ╔═╡ 1c3c993c-4c49-4baa-b84f-eb42cd481620
 md"""
 ### Building more advanced manifolds
+
+Based on these basic manifolds we can directly build more advanced manifolds.
 """
 
 # ╔═╡ 114b46c3-654d-4b1c-b8a9-3acc5939a25e
@@ -172,7 +174,7 @@ md"""
 @mdx """
 ## Implementing generic functions
 
-In this section 
+In this section
 """
 
 # ╔═╡ 592549a7-5de7-452d-9dfa-fc748afc8b04
