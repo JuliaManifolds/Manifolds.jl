@@ -23,7 +23,7 @@ end
     )
 
 Solve the BVP corresponding to geodesic calculation on [`AbstractManifold`](@ref) M,
-between points with parameters `a1` and `a2` in chart `i` of [`AbstractAtlas`](@ref) `A`
+between points with parameters `a1` and `a2` in a chart `i` of an [`AbstractAtlas`](@ref) `A`
 using solver `solver`. Geodesic γ is sampled at time interval `dt`, with γ(0) = a1 and
 γ(1) = a2.
 """

@@ -118,7 +118,7 @@ end
 """
     inner(M::TorusInR3, ::DefaultTorusAtlas, i, a, Xc, Yc)
 
-Inner product on [`TorusInR3`](@ref) in chart `i` of atlas [`DefaultTorusAtlas`](@ref)
+Inner product on [`TorusInR3`](@ref) in chart `i` in the [`DefaultTorusAtlas`](@ref).
 between vectors with coordinates `Xc` and `Yc` tangent at point with parameters `a`.
 Vector coordinates must be given in the induced basis.
 """
@@ -131,7 +131,7 @@ end
 """
     inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
 
-Injectivity radius of `get_point` for chart `i` from atlas `A` of manifold `M`.
+Injectivity radius of `get_point` for chart `i` from the [`DefaultTorusAtlas`](@ref) `A` of the [`TorusInR3`](@ref).
 """
 function inverse_chart_injectivity_radius(::TorusInR3, ::DefaultTorusAtlas, i)
     return π
@@ -158,7 +158,7 @@ end
 """
     normal_vector(M::TorusInR3, p)
 
-Outward-pointing normal vector to torus at `p`.
+Outward-pointing normal vector on the [`TorusInR3`](@ref) at the point `p`.
 """
 function normal_vector(M::TorusInR3, p)
     θ, φ = _torus_theta_phi(M, p)

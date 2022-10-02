@@ -59,7 +59,7 @@ RetractionAtlas() = RetractionAtlas(ExponentialRetraction(), LogarithmicInverseR
     affine_connection(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
 
 Calculate affine connection on manifold `M` at point with parameters `a` in chart `i` of
-atlas `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
+[`AbstractAtlas`](@ref) `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
 """
 function affine_connection(M::AbstractManifold, A, i, a, Xc, Yc)
     Zc = allocate(Xc)
@@ -69,8 +69,8 @@ end
 """
     affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
 
-Calculate affine connection on manifold `M` at point with parameters `a` in chart `i` of
-atlas `A` of vectors with coefficients `Xc` and `Yc` in induced basis and save the result
+Calculate affine connection on manifold `M` at point with parameters `a` in chart `i` of an
+an [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Zc` and `Yc` in induced basis and save the result
 in `Zc`.
 """
 affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
@@ -120,7 +120,7 @@ end
 """
     check_chart_switch(M::AbstractManifold, A::AbstractAtlas, i, a)
 
-Determine whether chart should be switched when an operation in chart `i` from atlas `A`
+Determine whether chart should be switched when an operation in chart `i` from an [`AbstractAtlas`](@ref) `A`
 reaches parameters `a` in that chart.
 
 By default `false` is returned.
@@ -205,7 +205,7 @@ get_chart_index(::AbstractManifold, ::AbstractAtlas, ::Any, ::Any)
 """
     inner(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
 
-Calculate inner product on manifold `M` at point with parameters `a` in chart `i` of
+Calculate inner product on manifold `M` at point with parameters `a` in chart `i` of an
 atlas `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
 """
 inner(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
@@ -213,7 +213,7 @@ inner(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
 """
     norm(M::AbstractManifold, A::AbstractAtlas, i, a, Xc)
 
-Calculate norm on manifold `M` at point with parameters `a` in chart `i` of
+Calculate norm on manifold `M` at point with parameters `a` in chart `i` of an
 [`AbstractAtlas`](@ref) `A` of vector with coefficients `Xc` in induced basis.
 """
 norm(M::AbstractManifold, A::AbstractAtlas, i, a, Xc) = sqrt(inner(M, A, i, a, Xc, Xc))
@@ -276,7 +276,7 @@ end
 """
     transition_map_diff(M::AbstractManifold, A::AbstractAtlas, i_from, a, c, i_to)
 
-Compute differential of transition map from chart `i_from` to chart `i_to` from atlas `A`
+Compute differential of transition map from chart `i_from` to chart `i_to` from an [`AbstractAtlas`](@ref) `A`
 on manifold `M` at point with coordinates `a` on tangent vector with coordinates `c`.
 """
 function transition_map_diff(M::AbstractManifold, A::AbstractAtlas, i_from, a, c, i_to)
@@ -395,7 +395,7 @@ end
 """
     inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
 
-Injectivity radius of `get_point` for chart `i` from atlas `A` of manifold `M`.
+Injectivity radius of `get_point` for chart `i` from an [`AbstractAtlas`](@ref) `A` of a manifold `M`.
 """
 inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
 

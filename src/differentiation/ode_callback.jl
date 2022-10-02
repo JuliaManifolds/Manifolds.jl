@@ -16,7 +16,7 @@ end
 """
     StitchedChartSolution{TM<:AbstractManifold,TA<:AbstractAtlas,TChart}
 
-Solution of an ODE on manifold `M` in charts of atlas `A`.
+Solution of an ODE on a manifold `M` in charts of an [`AbstractAtlas`](@ref) `A`.
 """
 struct StitchedChartSolution{Prob,TM<:AbstractManifold,TA<:AbstractAtlas,TChart}
     M::TM
@@ -83,7 +83,7 @@ end
         kwargs...,
     )
 
-Solve geodesic ODE on manifold `M` from point of coordinates `a` in chart `i0` from atlas
+Solve geodesic ODE on a manifold `M` from point of coordinates `a` in chart `i0` from an [`AbstractAtlas`](@ref) `A`.
 `A` in direction of coordinates `Xc` in induced basis.
 """
 function solve_chart_exp_ode(
@@ -153,8 +153,8 @@ end
         kwargs...,
     )
 
-Parallel transport vector with coordinates `Yc` along geodesic on manifold `M` from point of
-coordinates `a` in chart `i0` from atlas `A` in direction of coordinates `Xc` in induced
+Parallel transport vector with coordinates `Yc` along geodesic on a manifold `M` from point of
+coordinates `a` in a chart `i0` from an [`AbstractAtlas`](@ref) `A` in direction of coordinates `Xc` in induced
 basis.
 """
 function solve_chart_parallel_transport_ode(
