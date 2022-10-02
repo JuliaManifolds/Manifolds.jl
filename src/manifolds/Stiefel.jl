@@ -84,6 +84,31 @@ function check_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     return nothing
 end
 
+"""
+    default_inverse_retraction_method(M::Stiefel)
+
+Return [`PolarInverseRetraction`](@ref) as the default inverse retraction for the
+[`Stiefel`](@ref) manifold.
+"""
+default_inverse_retraction_method(::Stiefel) = PolarInverseRetraction()
+
+"""
+    default_retraction_method(M::Stiefel)
+
+Return [`PolarRetraction`](@ref) as the default retraction for the [`Stiefel`](@ref) manifold.
+"""
+default_retraction_method(::Stiefel) = PolarRetraction()
+
+"""
+    default_vector_transport_method(M::Stiefel)
+
+Return the [`DifferentiatedRetractionVectorTransport`](@ref) of the [`PolarRetraction`](@ref)
+as the default vector transport method for the [`Stiefel`](@ref) manifold.
+"""
+function default_vector_transport_method(::Stiefel)
+    return DifferentiatedRetractionVectorTransport(PolarRetraction())
+end
+
 embed(::Stiefel, p) = p
 embed(::Stiefel, p, X) = X
 
