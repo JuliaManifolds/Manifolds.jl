@@ -4,12 +4,6 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ b911af8b-3c2d-440f-a7f5-2c8a6d5e2ee3
-begin
-    #I am a hidden trick layer
-    using MarkdownLiteral: @mdx
-end
-
 # ╔═╡ c96935ca-6bda-466d-ad29-b40c19f55392
 using Manifolds
 
@@ -42,7 +36,7 @@ Since the packagae hevily depends on [`ManifoldsBase.jl`](https://juliamanifolds
 """
 
 # ╔═╡ b34d2b6c-907e-45b3-9b62-445666413b26
-@mdx """
+md"""
 ## Contents
 * [Using the library of manifolds](#using-the-library-of-manifolds)
 * [implementing generic functions](#implementing-generic-functions)
@@ -121,6 +115,7 @@ Here, a useful function is to check, whether some ``p∈\mathbb R^3`` is a point
 
 # ╔═╡ 908d0ee4-73c0-4f8a-b9b4-5b42aec8559b
 
+
 # ╔═╡ 4880eaaf-6cf0-4250-8056-6d5b220e963c
 md"""
 But in an interactive session an error message might be helpful. A positional (third) argument is present to activate this. Here we illustrate this with try-catch to keep the notebook as valid running code.
@@ -158,6 +153,7 @@ end
 
 # ╔═╡ 6d8a6b23-2ab8-4a70-b303-eda3f490efee
 
+
 # ╔═╡ a9883394-e1bb-4cef-bae5-ce34f6e821d8
 md"To learn about how to define a manifold youself check out the [How to define your own manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/example.html) tutorial of [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)."
 
@@ -170,8 +166,9 @@ Based on these basic manifolds we can directly build more advanced manifolds.
 
 # ╔═╡ 114b46c3-654d-4b1c-b8a9-3acc5939a25e
 
+
 # ╔═╡ a68af8e4-82d0-4d55-ad39-461688c86b95
-@mdx """
+md"""
 ## Implementing generic functions
 
 In this section
@@ -179,15 +176,14 @@ In this section
 
 # ╔═╡ 592549a7-5de7-452d-9dfa-fc748afc8b04
 
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
-MarkdownLiteral = "736d6165-7244-6769-4267-6b50796e6954"
 
 [compat]
 Manifolds = "~0.8.28"
-MarkdownLiteral = "~0.1.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -196,7 +192,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.1"
 manifest_format = "2.0"
-project_hash = "015548ea63f040ccadb454f3fbc37f47f7bddc16"
+project_hash = "bed83249a4f5713cda4c32b0c399a757dfeefa70"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -268,12 +264,6 @@ git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.8"
 
-[[deps.CommonMark]]
-deps = ["Crayons", "JSON", "URIs"]
-git-tree-sha1 = "4cd7063c9bdebdbd55ede1af70f3c2f48fab4215"
-uuid = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
-version = "0.8.6"
-
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
 git-tree-sha1 = "5856d3031cdb1f3b2b6340dfdc66b6d9a149a374"
@@ -290,11 +280,6 @@ deps = ["LinearAlgebra", "Statistics", "StatsBase"]
 git-tree-sha1 = "3c8de95b4e932d76ec8960e12d681eba580e9674"
 uuid = "587fd27a-f159-11e8-2dae-1979310e6154"
 version = "0.2.8"
-
-[[deps.Crayons]]
-git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
-uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
-version = "4.1.1"
 
 [[deps.DataAPI]]
 git-tree-sha1 = "1106fa7e1256b402a86a8e7b15c00c85036fef49"
@@ -394,12 +379,6 @@ git-tree-sha1 = "709d864e3ed6e3545230601f94e11ebc65994641"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.11"
 
-[[deps.HypertextLiteral]]
-deps = ["Tricks"]
-git-tree-sha1 = "c47c5fa4c5308f27ccaac35504858d8914e102f9"
-uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.4"
-
 [[deps.Inflate]]
 git-tree-sha1 = "5cd07aab533df5170988219191dfad0519391428"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"
@@ -430,12 +409,6 @@ deps = ["Preferences"]
 git-tree-sha1 = "abc9885a7ca2052a736a600f7fa66209f96506e1"
 uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
 version = "1.4.1"
-
-[[deps.JSON]]
-deps = ["Dates", "Mmap", "Parsers", "Unicode"]
-git-tree-sha1 = "3c837543ddb02250ef42f4738347454f95079d4e"
-uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-version = "0.21.3"
 
 [[deps.Kronecker]]
 deps = ["LinearAlgebra", "NamedDims", "SparseArrays", "StatsBase"]
@@ -506,12 +479,6 @@ version = "0.13.18"
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
-[[deps.MarkdownLiteral]]
-deps = ["CommonMark", "HypertextLiteral"]
-git-tree-sha1 = "0d3fa2dd374934b62ee16a4721fe68c418b92899"
-uuid = "736d6165-7244-6769-4267-6b50796e6954"
-version = "0.1.1"
-
 [[deps.MatrixEquations]]
 deps = ["LinearAlgebra", "LinearMaps"]
 git-tree-sha1 = "3b284e9c98f645232f9cf07d4118093801729d43"
@@ -578,12 +545,6 @@ deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
 git-tree-sha1 = "cf494dca75a69712a72b80bc48f59dcf3dea63ec"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
 version = "0.11.16"
-
-[[deps.Parsers]]
-deps = ["Dates"]
-git-tree-sha1 = "3d5bf43e3e8b412656404ed9466f1dcbf7c50269"
-uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.4.0"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
@@ -759,16 +720,6 @@ version = "1.10.0"
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-[[deps.Tricks]]
-git-tree-sha1 = "6bac775f2d42a611cdfcd1fb217ee719630c4175"
-uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.6"
-
-[[deps.URIs]]
-git-tree-sha1 = "e59ecc5a41b000fa94423a578d29290c7266fc10"
-uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
-version = "1.4.0"
-
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
@@ -804,11 +755,10 @@ version = "17.4.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─b911af8b-3c2d-440f-a7f5-2c8a6d5e2ee3
 # ╟─41cbc7c8-3a39-11ed-292e-0bb253a3b2f3
 # ╠═c96935ca-6bda-466d-ad29-b40c19f55392
 # ╟─9d16efde-bd95-46d9-a659-5420fe860699
-# ╠═b34d2b6c-907e-45b3-9b62-445666413b26
+# ╟─b34d2b6c-907e-45b3-9b62-445666413b26
 # ╟─c1e139b0-7d39-4d20-81dc-5592fee831d0
 # ╟─7a3d7f18-75b2-4c0b-ac4f-8c5d5e27b4f6
 # ╠═554a8a25-92bd-4603-9f23-1afd18dfc658
@@ -823,12 +773,12 @@ version = "17.4.0+0"
 # ╟─78f1ae49-a973-4b39-a058-720e12532283
 # ╠═1025b30d-3433-4335-8751-658e7731d424
 # ╠═77101edd-4870-4b45-88f2-20b48a07fd57
-# ╠═588e67af-8335-47e5-ba34-ad1cfd22a69d
+# ╟─588e67af-8335-47e5-ba34-ad1cfd22a69d
 # ╠═dcce82a5-f7bb-4ebb-89cb-a66900c873fd
 # ╠═c07a05df-9d0c-4810-9539-a5fdd7640f45
 # ╠═908d0ee4-73c0-4f8a-b9b4-5b42aec8559b
 # ╠═0066a636-2a06-4891-b807-8b354827ad0a
-# ╠═4880eaaf-6cf0-4250-8056-6d5b220e963c
+# ╟─4880eaaf-6cf0-4250-8056-6d5b220e963c
 # ╠═d3caea7a-89ff-4f04-94e9-922048ad0bb1
 # ╟─19cbc8c5-4c2c-4594-bbb5-30f268c046cc
 # ╠═f689ac55-7c5d-4197-90b6-6c32591482d7
@@ -836,7 +786,7 @@ version = "17.4.0+0"
 # ╟─a9883394-e1bb-4cef-bae5-ce34f6e821d8
 # ╠═1c3c993c-4c49-4baa-b84f-eb42cd481620
 # ╠═114b46c3-654d-4b1c-b8a9-3acc5939a25e
-# ╠═a68af8e4-82d0-4d55-ad39-461688c86b95
+# ╟─a68af8e4-82d0-4d55-ad39-461688c86b95
 # ╠═592549a7-5de7-452d-9dfa-fc748afc8b04
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
