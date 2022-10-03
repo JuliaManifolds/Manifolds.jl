@@ -128,6 +128,37 @@ function inner(
     end
 end
 
+"""
+    inverse_retract(
+        M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+        p,
+        q,
+        method::ProjectionInverseRetraction,
+    )
+
+Compute a projection-based inverse retraction.
+
+The retraction is computed by projecting the logarithm map in the embedding to the tangent
+space at ``p``.
+"""
+inverse_retract(
+    ::MetricManifold{ℝ,<:Stiefel,<:StiefelSubmersionMetric},
+    ::Any,
+    ::Any,
+    ::ProjectionInverseRetraction,
+)
+
+function inverse_retract_project!(
+    M::MetricManifold{ℝ,<:Stiefel,<:StiefelSubmersionMetric},
+    X,
+    p,
+    q,
+)
+    log!(get_embedding(M), X, p, q)
+    project!(M, X, p, X)
+    return X
+end
+
 function inverse_retract_shooting!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     X,
@@ -159,17 +190,6 @@ function inverse_retract_shooting!(
     else
         _inverse_retract_shooting_factors!(M, X, p, q, method)
     end
-    return X
-end
-
-function inverse_retract_project!(
-    M::MetricManifold{ℝ,<:Stiefel,<:StiefelSubmersionMetric},
-    X,
-    p,
-    q,
-)
-    X .= q .- p
-    project!(M, X, p, X)
     return X
 end
 
