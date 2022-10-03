@@ -311,8 +311,6 @@ METAMANIFOLDS = [
 include("atlases.jl")
 include("cotangent_space.jl")
 
-include("shooting.jl")
-
 # Meta Manifolds II: Power Manifolds
 include("manifolds/PowerManifold.jl")
 include("manifolds/GraphManifold.jl")
@@ -725,8 +723,6 @@ export ×,
     set_component!,
     sharp,
     sharp!,
-    shooting,
-    shooting!,
     shortest_geodesic,
     skewness,
     std,
