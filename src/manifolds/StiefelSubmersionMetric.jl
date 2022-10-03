@@ -128,28 +128,62 @@ function inner(
     end
 end
 
-function inverse_retract!(
+function inverse_retract_shooting!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     X,
     p,
     q,
-    method::ShootingInverseRetraction{ExponentialRetraction},
+    method::ShootingInverseRetraction{
+        ExponentialRetraction,
+        ProjectionInverseRetraction,
+        ScaledVectorTransport{ProjectionTransport},
+    },
 ) where {n,k}
     if k > div(n, 2)
-        shooting!(
+        # fall back to default method
+        invoke(
+            inverse_retract_shooting!,
+            Tuple{
+                MetricManifold{ℝ,Stiefel{n,k,ℝ}},
+                typeof(X),
+                typeof(p),
+                typeof(q),
+                typeof(method),
+            },
             M,
             X,
             p,
             q,
-            method.retraction;
-            vector_transport=method.vector_transport,
-            initial_inverse_retraction=method.initial_inverse_retraction,
-            num_transport_points=method.num_transport_points,
-            tolerance=method.tolerance,
-            max_iterations=method.max_iterations,
+            method,
         )
-        return X
+    else
+        _inverse_retract_shooting_factors!(M, X, p, q, method)
     end
+    return X
+end
+
+function inverse_retract_project!(
+    M::MetricManifold{ℝ,<:Stiefel,<:StiefelSubmersionMetric},
+    X,
+    p,
+    q,
+)
+    X .= q .- p
+    project!(M, X, p, X)
+    return X
+end
+
+function _inverse_retract_shooting_factors!(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    X,
+    p,
+    q,
+    method::ShootingInverseRetraction{
+        ExponentialRetraction,
+        ProjectionInverseRetraction,
+        ScaledVectorTransport{ProjectionTransport},
+    },
+) where {n,k}
     ts = range(0, 1; length=method.num_transport_points)
     α = metric(M).α
     M̂ = p'q
@@ -204,17 +238,6 @@ function inverse_retract!(
     end
     mul!(X, p, A)
     mul!(X, Matrix(Q), R, true, true)
-    return X
-end
-
-function inverse_retract_project!(
-    M::MetricManifold{ℝ,<:Stiefel,<:StiefelSubmersionMetric},
-    X,
-    p,
-    q,
-)
-    X .= q .- p
-    project!(M, X, p, X)
     return X
 end
 
