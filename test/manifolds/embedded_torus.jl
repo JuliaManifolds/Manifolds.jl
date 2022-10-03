@@ -8,7 +8,7 @@ using RecursiveArrayTools
 using BoundaryValueDiffEq
 
 @testset "Torus in ℝ³" begin
-    M = Manifolds.TorusInR3(3, 2)
+    M = Manifolds.EmbeddedTorus(3, 2)
     A = Manifolds.DefaultTorusAtlas()
 
     p0x = [0.5, -1.2]

@@ -11,7 +11,7 @@ GLMakie.activate!()
 function plot_torus()
 
     # selected torus
-    M = Manifolds.TorusInR3(3, 2)
+    M = Manifolds.EmbeddedTorus(3, 2)
 
     ϴs = LinRange(-π, π, 50)
     φs = LinRange(-π, π, 50)

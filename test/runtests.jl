@@ -164,7 +164,7 @@ include("utils.jl")
         include_test("approx_inverse_retraction.jl")
 
         # manifolds requiring ODE solvers
-        include_test("manifolds/curved_torus.jl")
+        include_test("manifolds/embedded_torus.jl")
     end
 
     if TEST_GROUP ∈ ["test_lie_groups", "all"]

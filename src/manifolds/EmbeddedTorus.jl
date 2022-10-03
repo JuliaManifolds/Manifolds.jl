@@ -1,6 +1,6 @@
 
 @doc raw"""
-    TorusInR3{TR<:Real} <: AbstractDecoratorManifold{ℝ}
+    EmbeddedTorus{TR<:Real} <: AbstractDecoratorManifold{ℝ}
 
 Surface in ℝ³ described by parametric equations:
 ```math
@@ -14,26 +14,29 @@ Alternative names include anchor ring, donut and doughnut.
 
 # Constructor
 
-    TorusInR3(R, r)
+    EmbeddedTorus(R, r)
 """
-struct TorusInR3{TR<:Real} <: AbstractDecoratorManifold{ℝ}
+struct EmbeddedTorus{TR<:Real} <: AbstractDecoratorManifold{ℝ}
     R::TR
     r::TR
 end
 
-function active_traits(f, ::TorusInR3, args...)
+function active_traits(f, ::EmbeddedTorus, args...)
     return merge_traits(IsMetricManifold())
 end
 
-aspect_ratio(M::TorusInR3) = M.R / M.r
+aspect_ratio(M::EmbeddedTorus) = M.R / M.r
 
-"""
-    check_point(M::TorusInR3, p; kwargs...)
+@doc raw"""
+    check_point(M::EmbeddedTorus, p; kwargs...)
 
-Check whether `p` is a valid point on the [`TorusInR3`](@ref) `M`.
+Check whether `p` is a valid point on the [`EmbeddedTorus`](@ref) `M`.
 The tolerance for the last test can be set using the `kwargs...`.
+
+The method checks if ```(p_1^2 + p_2^2 + p_3^2 + R^2 - r^2)^2```
+is apprximately equal to ```4R^2(p_1^2 + p_2^2)```.
 """
-function check_point(M::TorusInR3, p; kwargs...)
+function check_point(M::EmbeddedTorus, p; kwargs...)
     A = (dot(p, p) + M.R^2 - M.r^2)^2
     B = 4 * M.R^2 * (p[1]^2 + p[2]^2)
     if !isapprox(A, B; kwargs...)
@@ -42,7 +45,14 @@ function check_point(M::TorusInR3, p; kwargs...)
     return nothing
 end
 
-function check_vector(M::TorusInR3, p, X; atol=eps(eltype(p)), kwargs...)
+@doc raw"""
+    check_vector(M::EmbeddedTorus, p, X; atol=eps(eltype(p)), kwargs...)
+
+Check whether `X` is a valid vector tangent to `p` on the [`EmbeddedTorus`](@ref) `M`.
+The method checks if the vector `X` is orthogonal to the vector normal to the torus,
+see [`normal_vector`](@ref). Absolute tolerance can be set using `atol`.
+"""
+function check_vector(M::EmbeddedTorus, p, X; atol=eps(eltype(p)), kwargs...)
     dot_nX = dot(normal_vector(M, p), X)
     if !isapprox(dot_nX, 0; atol, kwargs...)
         return DomainError(dot_nX, "The vector $(X) is not tangent to $(p) from $(M).")
@@ -50,18 +60,18 @@ function check_vector(M::TorusInR3, p, X; atol=eps(eltype(p)), kwargs...)
     return nothing
 end
 
-function get_embedding(::TorusInR3)
+function get_embedding(::EmbeddedTorus)
     return Euclidean(3)
 end
 
 @doc raw"""
-    manifold_dimension(M::TorusInR3)
+    manifold_dimension(M::EmbeddedTorus)
 
-Return the dimension of the [`TorusInR3`](@ref) `M` that is 2.
+Return the dimension of the [`EmbeddedTorus`](@ref) `M` that is 2.
 """
-manifold_dimension(::TorusInR3) = 2
+manifold_dimension(::EmbeddedTorus) = 2
 
-representation_size(::TorusInR3) = (3,)
+representation_size(::EmbeddedTorus) = (3,)
 
 @doc raw"""
     DefaultTorusAtlas()
@@ -78,13 +88,13 @@ z(θ, φ) = r\sin(θ + θ₀)
 struct DefaultTorusAtlas <: AbstractAtlas{ℝ} end
 
 """
-    affine_connection(M::TorusInR3, A::DefaultTorusAtlas, i, a, Xc, Yc)
+    affine_connection(M::EmbeddedTorus, A::DefaultTorusAtlas, i, a, Xc, Yc)
 
-Affine connection on [`TorusInR3`](@ref) `M`.
+Affine connection on [`EmbeddedTorus`](@ref) `M`.
 """
-affine_connection(M::TorusInR3, A::DefaultTorusAtlas, i, a, Xc, Yc)
+affine_connection(M::EmbeddedTorus, A::DefaultTorusAtlas, i, a, Xc, Yc)
 
-function affine_connection!(M::TorusInR3, Zc, ::DefaultTorusAtlas, i, a, Xc, Yc)
+function affine_connection!(M::EmbeddedTorus, Zc, ::DefaultTorusAtlas, i, a, Xc, Yc)
     # as in https://www.cefns.nau.edu/~schulz/torus.pdf
     θ = a[1] .+ i[1]
     sinθ, cosθ = sincos(θ)
@@ -97,32 +107,32 @@ function affine_connection!(M::TorusInR3, Zc, ::DefaultTorusAtlas, i, a, Xc, Yc)
 end
 
 """
-    check_chart_switch(::TorusInR3, A::DefaultTorusAtlas, i, a; ϵ = pi/3)
+    check_chart_switch(::EmbeddedTorus, A::DefaultTorusAtlas, i, a; ϵ = pi/3)
 
 Return true if parameters `a` lie closer than `ϵ` to chart boundary.
 """
-function check_chart_switch(::TorusInR3, A::DefaultTorusAtlas, i, a; ϵ=pi / 3)
+function check_chart_switch(::EmbeddedTorus, A::DefaultTorusAtlas, i, a; ϵ=pi / 3)
     return abs(i[1] - a[1]) > (pi - ϵ) || abs(i[2] - a[2]) > (pi - ϵ)
 end
 
 """
-    gaussian_curvature(M::TorusInR3, p)
+    gaussian_curvature(M::EmbeddedTorus, p)
 
-Gaussian curvature at point `p` from [`TorusInR3`](@ref) `M`.
+Gaussian curvature at point `p` from [`EmbeddedTorus`](@ref) `M`.
 """
-function gaussian_curvature(M::TorusInR3, p)
+function gaussian_curvature(M::EmbeddedTorus, p)
     θ, φ = _torus_theta_phi(M, p)
     return cos(θ) / (M.r * (M.R + M.r * cos(θ)))
 end
 
 """
-    inner(M::TorusInR3, ::DefaultTorusAtlas, i, a, Xc, Yc)
+    inner(M::EmbeddedTorus, ::DefaultTorusAtlas, i, a, Xc, Yc)
 
-Inner product on [`TorusInR3`](@ref) in chart `i` in the [`DefaultTorusAtlas`](@ref).
+Inner product on [`EmbeddedTorus`](@ref) in chart `i` in the [`DefaultTorusAtlas`](@ref).
 between vectors with coordinates `Xc` and `Yc` tangent at point with parameters `a`.
 Vector coordinates must be given in the induced basis.
 """
-function inner(M::TorusInR3, ::DefaultTorusAtlas, i, a, Xc, Yc)
+function inner(M::EmbeddedTorus, ::DefaultTorusAtlas, i, a, Xc, Yc)
     diag_1 = M.r^2
     diag_2 = (M.R + M.r * cos(a[1] + i[1]))^2
     return Xc[1] * diag_1 * Yc[1] + Xc[2] * diag_2 * Yc[2]
@@ -131,13 +141,13 @@ end
 """
     inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
 
-Injectivity radius of `get_point` for chart `i` from the [`DefaultTorusAtlas`](@ref) `A` of the [`TorusInR3`](@ref).
+Injectivity radius of `get_point` for chart `i` from the [`DefaultTorusAtlas`](@ref) `A` of the [`EmbeddedTorus`](@ref).
 """
-function inverse_chart_injectivity_radius(::TorusInR3, ::DefaultTorusAtlas, i)
+function inverse_chart_injectivity_radius(::EmbeddedTorus, ::DefaultTorusAtlas, i)
     return π
 end
 
-function _torus_theta_phi(M::TorusInR3, p)
+function _torus_theta_phi(M::EmbeddedTorus, p)
     φ = atan(p[2], p[1])
     sinφ, cosφ = sincos(φ)
     rsinθ = p[3]
@@ -149,43 +159,43 @@ function _torus_theta_phi(M::TorusInR3, p)
     return (atan(rsinθ, rcosθ), φ)
 end
 
-function _torus_param(M::TorusInR3, θ, φ)
+function _torus_param(M::EmbeddedTorus, θ, φ)
     sinθ, cosθ = sincos(θ)
     sinφ, cosφ = sincos(φ)
     return ((M.R + M.r * cosθ) * cosφ, (M.R + M.r * cosθ) * sinφ, M.r * sinθ)
 end
 
 """
-    normal_vector(M::TorusInR3, p)
+    normal_vector(M::EmbeddedTorus, p)
 
-Outward-pointing normal vector on the [`TorusInR3`](@ref) at the point `p`.
+Outward-pointing normal vector on the [`EmbeddedTorus`](@ref) at the point `p`.
 """
-function normal_vector(M::TorusInR3, p)
+function normal_vector(M::EmbeddedTorus, p)
     θ, φ = _torus_theta_phi(M, p)
     t = @SVector [-sin(φ), cos(φ), 0]
     s = @SVector [cos(φ) * (-sin(θ)), sin(φ) * (-sin(θ)), cos(θ)]
     return normalize(cross(t, s))
 end
 
-function get_chart_index(M::TorusInR3, ::DefaultTorusAtlas, p)
+function get_chart_index(M::EmbeddedTorus, ::DefaultTorusAtlas, p)
     return _torus_theta_phi(M, p)
 end
-function get_chart_index(::TorusInR3, ::DefaultTorusAtlas, i, a)
+function get_chart_index(::EmbeddedTorus, ::DefaultTorusAtlas, i, a)
     return (a[1], a[2])
 end
 
-function get_parameters!(M::TorusInR3, x, ::DefaultTorusAtlas, i::NTuple{2}, p)
+function get_parameters!(M::EmbeddedTorus, x, ::DefaultTorusAtlas, i::NTuple{2}, p)
     x .= _torus_theta_phi(M, p) .- i
     return x
 end
 
-function get_point!(M::TorusInR3, p, ::DefaultTorusAtlas, i, x)
+function get_point!(M::EmbeddedTorus, p, ::DefaultTorusAtlas, i, x)
     p .= _torus_param(M, (x .+ i)...)
     return p
 end
 
 function get_coordinates_induced_basis!(
-    M::TorusInR3,
+    M::EmbeddedTorus,
     Y,
     p,
     X,
@@ -206,7 +216,7 @@ function get_coordinates_induced_basis!(
 end
 
 function get_vector_induced_basis!(
-    M::TorusInR3,
+    M::EmbeddedTorus,
     Y,
     p,
     X,
