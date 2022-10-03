@@ -4,8 +4,8 @@
 
 Surface in ℝ³ described by parametric equations:
 ```math
-x(θ, φ) = (R + r\cos θ)\cos φ
-y(θ, φ) = (R + r\cos θ)\sin φ
+x(θ, φ) = (R + r\cos θ)\cos φ \\
+y(θ, φ) = (R + r\cos θ)\sin φ \\
 z(θ, φ) = r\sin θ
 ```
 for θ, φ in $[-π, π)$. It is assumed that $R > r > 0$.
@@ -33,8 +33,8 @@ aspect_ratio(M::EmbeddedTorus) = M.R / M.r
 Check whether `p` is a valid point on the [`EmbeddedTorus`](@ref) `M`.
 The tolerance for the last test can be set using the `kwargs...`.
 
-The method checks if ```(p_1^2 + p_2^2 + p_3^2 + R^2 - r^2)^2```
-is apprximately equal to ```4R^2(p_1^2 + p_2^2)```.
+The method checks if ``(p_1^2 + p_2^2 + p_3^2 + R^2 - r^2)^2``
+is apprximately equal to ``4R^2(p_1^2 + p_2^2)``.
 """
 function check_point(M::EmbeddedTorus, p; kwargs...)
     A = (dot(p, p) + M.R^2 - M.r^2)^2
@@ -80,8 +80,8 @@ Atlas for torus with charts indexed by two angles numbers $θ₀, φ₀ ∈ [-π
 a chart $(θ₀, φ₀)$ is given by
 
 ```math
-x(θ, φ) = (R + r\cos(θ + θ₀))\cos(φ + φ₀)
-y(θ, φ) = (R + r\cos(θ + θ₀))\sin(φ + φ₀)
+x(θ, φ) = (R + r\cos(θ + θ₀))\cos(φ + φ₀) \\
+y(θ, φ) = (R + r\cos(θ + θ₀))\sin(φ + φ₀) \\
 z(θ, φ) = r\sin(θ + θ₀)
 ```
 """
