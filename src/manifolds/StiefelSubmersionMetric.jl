@@ -334,3 +334,164 @@ function log!(
     )
     return inverse_retract!(M, X, p, q, inverse_retraction)
 end
+
+# StiefelFactorization and StiefelFactorizationAdjoint
+# Note: intended only for internal use
+
+@doc doc"""
+    StiefelFactorization{UT,XT} <: AbstractManifoldPoint
+
+Represent points (and vectors) on `Stiefel(n, k)` with ``2k × k`` factors.[^ZimmermanHüper2022]
+
+Given a point ``p ∈ \mathrm{St}(n, k)`` and another matrix ``B ∈ ℝ^{n × k}`` for
+``k ≤ \lfloor\frac{n}{2}\rfloor`` the factorization is
+````math
+\begin{aligned}
+B &= UZ\\
+U &= \begin{bmatrix}p & Q\end{bmatrix} ∈ \mathrm{St}(n, 2k)\\
+Z &= \begin{bmatrix}Z_1 \\ Z_2\end{bmatrix}, \quad Z_1,Z_2 ∈ ℝ^{k × k}.
+\end{aligned}
+````
+If ``B ∈ \mathrm{St}(n, k)``, then ``Z ∈ \mathrm{St}(2k, k)``, and if
+``B ∈ T_p \mathrm{St}(n, k)``, then ``Z_1 ∈ \mathrm{SkewHermitianMatrices}(k)``.
+
+``Q`` is determined by choice of a second matrix ``A ∈ ℝ^{n × k}`` with the decomposition
+````math
+\begin{aligned}
+A &= UZ\\
+Z_1 &= p^\mathrm{T} A \\
+Q Z_2 &= (I - p p^\mathrm{T}) A,
+\end{aligned}
+````
+where here ``Q Z_2`` is the QR decomposition.
+
+This factorization is useful because it is closed under addition, subtraction, scaling,
+projection, and the Riemannian exponential and logarithm under the
+[`StiefelSubmersionMetric`](@ref). That is, if all matrices involved are factorized to have
+the same ``U``, then all of these operations and any algorithm that depends only on them can
+be performed in terms of the ``2k × k`` matrices ``Z``. For ``n ≫ k``, this can be much more
+efficient than working with the full matrices.
+"""
+struct StiefelFactorization{UT,ZT} <: AbstractManifoldPoint
+    U::UT
+    Z::ZT
+end
+function stiefel_factorization(p, q)
+    n, k = size(p)
+    k ≤ div(n, 2) || throw(ArgumentError("k must be ≤ div(n, 2)"))
+    T = Base.promote_eltype(p, q)
+    U = allocate(p, T, Size(n, 2k))
+    Z = allocate(p, T, Size(2k, k))
+    @views begin
+        U1 = U[1:n, 1:k]
+        U2 = U[1:n, (k + 1):(2k)]
+        Z1 = Z[1:k, 1:k]
+        Z2 = Z[(k + 1):(2k), 1:k]
+    end
+    mul!(Z1, p', q)
+    copyto!(U1, q)
+    mul!(U1, p, Z1, -1, true)
+    Q, N = qr(U1)
+    copyto!(Z2, N)
+    copyto!(U1, p)
+    copyto!(U2, Matrix(Q))
+    return StiefelFactorization(U, Z)
+end
+function Base.eltype(F::StiefelFactorization)
+    return Base.promote_eltype(F.U, F.Z)
+end
+Base.size(F::StiefelFactorization) = (size(F.U, 1), size(F.Z, 2))
+function Base.similar(F::StiefelFactorization, ::Type{T}=eltype(F), sz=size(F)) where {T}
+    size(F) == sz || throw(DimensionMismatch("size of factorization must be preserved"))
+    return StiefelFactorization(F.U, similar(F.Z, T))
+end
+function Base.copyto!(A::StiefelFactorization, B::StiefelFactorization)
+    copyto!(A.Z, B.Z)
+    return A
+end
+function Base.copyto!(A::AbstractMatrix{<:Real}, B::StiefelFactorization)
+    mul!(A, B.U, B.Z)
+    return A
+end
+function Base.copyto!(A::StiefelFactorization, B::AbstractMatrix{<:Real})
+    mul!(A.Z, A.U', B)
+    return A
+end
+LinearAlgebra.dot(A::StiefelFactorization, B::StiefelFactorization) = dot(A.Z, B.Z)
+function LinearAlgebra.mul!(
+    A::StiefelFactorization,
+    B::StiefelFactorization,
+    C::AbstractMatrix{<:Real},
+    α::Real,
+    β::Real,
+)
+    mul!(A.Z, B.Z, C, α, β)
+    return A
+end
+function project!(
+    ::Stiefel{n,k,ℝ},
+    q::StiefelFactorization,
+    p::StiefelFactorization,
+) where {n,k}
+    project!(Stiefel(2k, k), q.Z, p.Z)
+    return q
+end
+function exp!(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    q::StiefelFactorization,
+    p::StiefelFactorization,
+    X::StiefelFactorization,
+) where {n,k}
+    # TODO:
+    # - handle rank-deficient QB
+    α = metric(M).α
+    @views begin
+        ZM = X.Z[1:k, 1:k]
+        ZN = X.Z[(k + 1):(2k), 1:k]
+        qM = q.Z[1:k, 1:k]
+    end
+    qM .= ZM .* (α / (α + 1))
+    D = exp(qM)
+    C = allocate(D, Size(2k, 2k))
+    @views begin
+        C[1:k, 1:k] .= ZM ./ (α + 1)
+        C[1:k, (k + 1):(2k)] .= -ZN'
+        C[(k + 1):(2k), 1:k] .= ZN
+        fill!(C[(k + 1):(2k), (k + 1):(2k)], false)
+        mul!(q.Z, exp(C)[1:(2k), 1:k], D)
+    end
+    return q
+end
+function Broadcast.BroadcastStyle(::Type{<:StiefelFactorization})
+    return Broadcast.Style{StiefelFactorization}()
+end
+function Broadcast.BroadcastStyle(
+    ::Broadcast.AbstractArrayStyle{0},
+    b::Broadcast.Style{<:StiefelFactorization},
+)
+    return b
+end
+Broadcast.broadcastable(v::StiefelFactorization) = v
+function Base.copyto!(
+    dest::StiefelFactorization,
+    bc::Broadcast.Broadcasted{Broadcast.Style{StiefelFactorization}},
+)
+    bc.args isa Tuple{Vararg{<:Union{Manifolds.StiefelFactorization,Real}}} ||
+        throw(ArgumentError("Not implemented"))
+    bc.f ∈ (identity, *, +, -, /) || throw(ArgumentError("Not implemented"))
+    Zargs = map(x -> x isa Manifolds.StiefelFactorization ? x.Z : x, bc.args)
+    broadcast!(bc.f, dest.Z, Zargs...)
+    return dest
+end
+
+struct StiefelFactorizationAdjoint{F<:StiefelFactorization}
+    data::F
+end
+Base.parent(F::StiefelFactorizationAdjoint) = F.data
+Base.adjoint(F::StiefelFactorization) = StiefelFactorizationAdjoint(F)
+Base.adjoint(F::StiefelFactorizationAdjoint) = parent(F)
+
+function Base.:*(A′::StiefelFactorizationAdjoint, B::StiefelFactorization)
+    A = adjoint(A′)
+    return A.Z' * B.Z
+end
