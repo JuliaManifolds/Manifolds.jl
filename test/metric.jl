@@ -650,6 +650,11 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         M = Sphere(2)
         p = [0.49567358314486515, 0.3740229181343087, -0.7838460025302334]
         X = [-1.1552859627097727, 0.40665559717366767, -0.5365163797547751]
-        @test 3 ≈ norm(MetricManifold(M, Issue539Metric()), p, X)^2
+        MM = MetricManifold(M, Issue539Metric())
+        @test norm(MM, p, X)^2 ≈ 3
+        @test Manifolds._drop_embedding_type(
+            ManifoldsBase.merge_traits(IsEmbeddedSubmanifold()),
+        ) === ManifoldsBase.EmptyTrait()
+        @test get_embedding(MM) === get_embedding(M)
     end
 end

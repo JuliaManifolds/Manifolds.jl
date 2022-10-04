@@ -77,13 +77,14 @@ _drop_embedding_type(t::EmptyTrait) = t
 
 function active_traits(f, M::MetricManifold, args...)
     at = active_traits(f, M.manifold, args...)
-    idm = is_default_metric(M.manifold, M.metric)
+    imf = is_metric_function(f)
+    idm = imf && is_default_metric(M.manifold, M.metric)
     return merge_traits(
         idm ? IsDefaultMetric(M.metric) : EmptyTrait(),
         IsMetricManifold(),
         # avoid forwarding to the embedding if the metric is not the default one
         idm ? at : _drop_embedding_type(at),
-        is_metric_function(f) ? EmptyTrait() : IsExplicitDecorator(),
+        imf ? EmptyTrait() : IsExplicitDecorator(),
     )
 end
 # remetricise instead of double-decorating
