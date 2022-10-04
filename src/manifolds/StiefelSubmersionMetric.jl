@@ -145,9 +145,9 @@ end
 
 function inverse_retract_shooting!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
-    X,
-    p,
-    q,
+    X::AbstractMatrix,
+    p::AbstractMatrix,
+    q::AbstractMatrix,
     method::ShootingInverseRetraction{
         ExponentialRetraction,
         ProjectionInverseRetraction,
