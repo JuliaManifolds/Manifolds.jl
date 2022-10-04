@@ -151,7 +151,7 @@ function inverse_retract_shooting!(
     method::ShootingInverseRetraction{
         ExponentialRetraction,
         ProjectionInverseRetraction,
-        ScaledVectorTransport{ProjectionTransport},
+        Union{ProjectionTransport,ScaledVectorTransport{ProjectionTransport}},
     },
 ) where {n,k}
     if k > div(n, 2)
