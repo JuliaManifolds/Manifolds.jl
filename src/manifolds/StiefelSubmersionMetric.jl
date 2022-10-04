@@ -54,29 +54,13 @@ function exp!(
 ) where {n,k}
     α = metric(M).α
     T = Base.promote_eltype(q, p, X)
-    # TODO:
-    # - dispatch to exp! for α = -1/2 and α = 0 for efficiency
-    # - handle rank-deficient QB
     if k ≤ div(n, 2)
-        # eq. 11
-        A = allocate(q, T, Size(k, k))
-        Y = allocate(X, T)
-        F = allocate(A, T, Size(2k, 2k))
-        G = allocate(p, T, Size(n, 2k))
-        mul!(A, p', X)
-        copyto!(Y, X)
-        mul!(Y, p, A, -1, true)
-        Q, B = qr(Y)
-        @views begin
-            copyto!(G[1:n, 1:k], p)
-            copyto!(G[1:n, (k + 1):(2k)], Matrix(Q))
-            F[1:k, 1:k] .= A ./ (α + 1)
-            F[1:k, (k + 1):(2k)] .= -B'
-            F[(k + 1):(2k), 1:k] .= B
-            fill!(F[(k + 1):(2k), (k + 1):(2k)], false)
-        end
-        rmul!(A, α / (α + 1))
-        mul!(q, G, @views(exp(F)[1:(2k), 1:k]) * exp(A))
+        Xfact = stiefel_factorization(p, X)
+        pfact = similar(Xfact, eltype(p))
+        copyto!(pfact, p)
+        qfact = similar(Xfact, eltype(q))
+        exp!(M, qfact, pfact, Xfact)
+        copyto!(q, qfact)
     elseif n == k
         A = allocate(q, T)
         C = allocate(q, T)
@@ -188,95 +172,14 @@ function inverse_retract_shooting!(
             method,
         )
     else
-        _inverse_retract_shooting_factors!(M, X, p, q, method)
+        qfact = stiefel_factorization(p, q)
+        pfact = similar(qfact, eltype(p))
+        copyto!(pfact, p)
+        Xfact = similar(qfact, eltype(X))
+        inverse_retract_shooting!(M, Xfact, pfact, qfact, method)
+        copyto!(X, Xfact)
     end
     return X
-end
-
-function _inverse_retract_shooting_factors!(
-    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
-    X,
-    p,
-    q,
-    method::ShootingInverseRetraction{
-        ExponentialRetraction,
-        ProjectionInverseRetraction,
-        ScaledVectorTransport{ProjectionTransport},
-    },
-) where {n,k}
-    ts = range(0, 1; length=method.num_transport_points)
-    α = metric(M).α
-    M̂ = p'q
-    skewM̂ = project(SkewHermitianMatrices(k), M̂)
-    Q, N̂ = qr(q - p * M̂)
-    normN̂² = norm(N̂)^2
-    gap = sqrt(norm(M̂ - I)^2 + normN̂²) # γ
-    if iszero(gap)
-        fill!(X, false)
-        return X
-    end
-    c = gap / sqrt(norm(skewM̂)^2 + normN̂²)
-    A = rmul!(skewM̂, c)
-    R = c * N̂
-    S = allocate(A)
-    Aˢ = allocate(A)
-    Rˢ = allocate(R)
-    D = allocate(A)
-    C = allocate(A, Size(2k, 2k))
-    i = 1
-    while (gap > method.tolerance) && (i < method.max_iterations)
-        @views begin
-            C[1:k, 1:k] .= A ./ (α + 1)
-            C[1:k, (k + 1):(2k)] .= -R'
-            C[(k + 1):(2k), 1:k] .= R
-            fill!(C[(k + 1):(2k), (k + 1):(2k)], false)
-        end
-        D .= A .* (α / (α + 1))
-        @views begin
-            E = exp(C)[:, 1:k] * exp(D)
-            M = E[1:k, 1:k]
-            N = E[(k + 1):(2k), 1:k]
-        end
-        Aˢ .= M .- M̂
-        Rˢ .= N .- N̂
-        gap = sqrt(norm(Aˢ)^2 + norm(Rˢ)^2)
-        _vector_transport_factors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
-        for t in reverse(ts)[2:(end - 1)]
-            @views begin
-                E = exp(t * C)[:, 1:k] * exp(t * D)
-                M = E[1:k, 1:k]
-                N = E[(k + 1):(2k), 1:k]
-            end
-            _vector_transport_factors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
-        end
-        copyto!(M, I)
-        fill!(N, 0)
-        _vector_transport_factors!(Aˢ, Rˢ, S, M, N, gap, method.tolerance, Val(k))
-        A .-= Aˢ
-        R .-= Rˢ
-        i += 1
-    end
-    mul!(X, p, A)
-    mul!(X, Matrix(Q), R, true, true)
-    return X
-end
-
-function _vector_transport_factors!(A, R, S, M, N, gap, ϵ, ::Val{k}) where {k}
-    mul!(S, M', A)
-    mul!(S, N', R, true, true)
-    project!(SymmetricMatrices(k), S, S)
-    mul!(A, M, S, -1, true)
-    mul!(R, N, S, -1, true)
-    l = sqrt(norm(A)^2 + norm(R)^2)
-    if l > ϵ
-        c = gap / l
-        rmul!(A, c)
-        rmul!(R, c)
-    else
-        fill!(A, 0)
-        fill!(R, 0)
-    end
-    return A, R
 end
 
 @doc raw"""
