@@ -292,8 +292,11 @@ U &= \begin{bmatrix}p & Q\end{bmatrix} ∈ \mathrm{St}(n, 2k)\\
 Z &= \begin{bmatrix}Z_1 \\ Z_2\end{bmatrix}, \quad Z_1,Z_2 ∈ ℝ^{k × k}.
 \end{aligned}
 ````
-If ``B ∈ \mathrm{St}(n, k)``, then ``Z ∈ \mathrm{St}(2k, k)``, and if
-``B ∈ T_p \mathrm{St}(n, k)``, then ``Z_1 ∈ \mathrm{SkewHermitianMatrices}(k)``.
+If ``B ∈ \mathrm{St}(n, k)``, then ``Z ∈ \mathrm{St}(2k, k)``.
+
+More generally, for a fixed ``U``, if ``r ∈ \mathrm{St}(n, k)`` has the factor
+``Z_r ∈ \mathrm{St}(2k, k)``, then ``X_r ∈ T_r \mathrm{St}(n, k)`` has the factor
+``Z_{X_r} ∈ T_{Z_r} \mathrm{St}(2k, k)``.
 
 ``Q`` is determined by choice of a second matrix ``A ∈ ℝ^{n × k}`` with the decomposition
 ````math
