@@ -32,16 +32,16 @@ before the first use. Then load the package with
 
 # ╔═╡ 9d16efde-bd95-46d9-a659-5420fe860699
 md"""
-Since the packagae hevily depends on [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/) we will sometimes also link to the interface definition of functions in the interface and mark this with 🔗.
+Since the package heavily depends on [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/) we will sometimes also link to the interface definition of functions in the interface and mark this with 🔗. When referring to [Wikipedia](https://en.wikipedia.org/), the link is marked with 📖.
 """
 
 # ╔═╡ b34d2b6c-907e-45b3-9b62-445666413b26
 md"""
 ## Contents
-* [Using the library of manifolds](#using-the-library-of-manifolds)
-* [implementing generic functions](#implementing-generic-functions)
-* the exponential map and retractions
-* the logarithmic map, parallel transport and its
+* [Using the library of manifolds](#Using-the-Library-of-Manifolds)
+* [implementing generic functions](#Implementing-generic-Functions)
+* Allocating and in-place computations
+* decorating a manifold
 """
 
 # ╔═╡ c1e139b0-7d39-4d20-81dc-5592fee831d0
@@ -86,7 +86,7 @@ Euclidean(2, field=ℂ) === ℂ^2
 # ╔═╡ 57c6fb90-03fc-487d-a8e7-02108097cc78
 md"""
 The easiest to check is the dimension of a manifold. Here we have three “directions to walk into” at every point ``p\in \mathbb R
-^3`` so [`manifold_dimension`]() ([🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.maniold_dimension-Tuple{AbstractManifold})) is
+^3`` so [🔗 `manifold_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.maniold_dimension-Tuple{AbstractManifold})) is
 """
 
 # ╔═╡ 316b2d4f-984c-4969-b515-0772ec89a745
@@ -282,12 +282,111 @@ M₇ = TangentBundle(M₃)
 
 # ╔═╡ a68af8e4-82d0-4d55-ad39-461688c86b95
 md"""
-## Implementing generic functions
+## Implementing generic Functions
 
-In this section
+In this section we take a look how to implement generic functions on manifolds.
 """
 
 # ╔═╡ 592549a7-5de7-452d-9dfa-fc748afc8b04
+md"""
+For our example here, we want to implement the so-called [📖 Bézier curve](https://en.wikipedia.org
+/wiki/Bézier_curve) using the so-called [📖 de-Casteljau algorithm](https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm).
+The linked algorithm can easily be generalised to manifolds by replacing lines with geodesics. This was for example used in [^BergmannGousenbourger2018] and the following example is an extended version of an example from [^AxenBaranBergmannRzecki2022].
+"""
+
+# ╔═╡ ea0c3a0c-c11c-4ef4-8e74-60f73777c869
+md"""
+The algorithm works recursively. For the case that we have a Bézier curve with just two points, the algorithm just evaluates the geodesic connecting both at some time point ``t∈[0,1]``. The function to evaluate a shortest geodesic (it might not be unique, but then a deterministic choice is taken) between two points `p` and `q` on a manifold `M` [🔗 `shortest_geodesic(M, p, q, t)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any}).
+"""
+
+# ╔═╡ 6487b3bc-7ff2-47f8-9f99-17442f48f19c
+function de_Casteljau(M::AbstractManifold, t, pts::NTuple{2})
+    return shortest_geodesic(M, pts[1], pts[2], t)
+end
+
+# ╔═╡ a1f3a57f-dad7-4ed8-bde9-249d2cd76367
+function de_Casteljau(M::AbstractManifold, t, pts::NTuple)
+    p = de_Casteljau(M, t, pts[1:(end - 1)])
+    q = de_Casteljau(M, t, pts[2:end])
+    return shortest_geodesic(M, p, q, t)
+end
+
+# ╔═╡ d879ea0d-1bb2-438a-a75e-1c8a89e19f2a
+md"""
+This works fine on the sphere, see [this tutorial](https://manoptjl.org/stable/tutorials/Bezier/) for an optimization task involving Bézier curves.
+"""
+
+# ╔═╡ cac20d84-d5c2-4631-9269-6cd44d1fc8d7
+md"""
+Now on several manifolds the exponential map and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see [^AbsilMahonySepulchre2008], Def. 4.1.1 for details) and its (local) inverse.
+
+The function itself is quite similar to the expontial map, just that [📖 `retract(M, p, X, m)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.retract) has one further parameter, the type of retraction to take, so `m` is a subtype of [`AbstractRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractRetractionMethod) `m`, the same for the [📖 `inverse_retract(M, p, q, n)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.inverse_retract) with an [`AbstractInverseRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractInverseRetractionMethod) `n`.
+
+Now, thinking of a generic implementation, we would like to have a way to specify one, that is available. This can be done by using [📖 `default_retraction_method`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.default_retraction_method-Tuple{AbstractManifold}) and [📖 `default_inverse_retraction_method`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.default_inverse_retraction_method-Tuple{AbstractManifold}), respectively. We implement
+"""
+
+# ╔═╡ 98e86918-20ec-4db2-992a-9c961aa9f798
+function generic_de_Casteljau(
+    M::AbstractManifold,
+    t,
+    pts::NTuple{2};
+    m::AbstractRetractionMethod=default_retraction_method(M),
+    n::AbstractInverseRetractionMethod=default_inverse_retraction_method(M),
+)
+    X = inverse_retract(M, pts[1], pts[2], n)
+    return retract(M, pts[1], X, t, m)
+end
+
+# ╔═╡ ed79649e-74b2-4261-a79c-73b41f9306ae
+md"and for the recursion"
+
+# ╔═╡ 51bcd660-5622-480c-b37c-ca29412b9c98
+function generic_de_Casteljau(
+    M::AbstractManifold,
+    t,
+    pts::NTuple;
+    m::AbstractRetractionMethod=default_retraction_method(M),
+    n::AbstractInverseRetractionMethod=default_inverse_retraction_method(M),
+)
+    p = generic_de_Casteljau(M, t, pts[1:(end - 1)]; m=m, n=n)
+    q = generic_de_Casteljau(M, t, pts[2:end]; m=m, n=n)
+    X = inverse_retract(M, p, q, n)
+    return retract(M, p, X, t, m)
+end
+
+# ╔═╡ af5ced3e-f541-4b7a-9315-846df5206124
+md"
+Note that on a manifold `M` where the exponential map is implemented, the `default_retraction_method(M)` returns [🔗 `ExponentialRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ExponentialRetraction), which yields that the `retract` function falls back to calling `exp`.
+"
+
+# ╔═╡ 5a76aff5-f78e-4263-b4d3-22b5063f573b
+md"The same mechanism exists for [🔗 `parallel_transport_to(M, p, X, q)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.parallel_transport_to-Tuple{AbstractManifold,%20Any,%20Any,%20Any}) and the more general [🔗 `vector_transport_to(M, p, X, q, m)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.vector_transport_to) whose [🔗 `AbstractVectorTransportMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.AbstractVectorTransportMethod) `m` has a default defined by [🔗 `default_vector_transport_method(M)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.default_vector_transport_method-Tuple{AbstractManifold}).
+"
+
+# ╔═╡ a0ac32e0-3f41-4bc2-910b-85a0d1f1a4fd
+
+# ╔═╡ d9a335f1-af0d-412e-bde2-cc147de90579
+md"""
+## References
+
+[^AbsilMahonySepulchre2008]:
+    > Absil, P.-A., Mahony, R. and Sepulchre R.,
+    > _Optimization Algorithms on Matrix Manifolds_
+    > Princeton University Press, 2008,
+    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
+    > [open access](http://press.princeton.edu/chapters/absil/)
+[^AxenBaranBergmannRzecki2022]:
+	>Axen, S. D., Baran, M., Bergmann, R. and Rzecki, K:
+	> _Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds_,
+    > arXiv preprint, 2022, [2106.08777](https://arxiv.org/abs/2106.08777)
+[^BergmannGousenbourger2018]:
+    > Bergmann, R. and Gousenbourger, P.-Y.:
+	> _A variational model for data fitting on manifolds
+    > by minimizing the acceleration of a Bézier curve_.
+    > Frontiers in Applied Mathematics and Statistics, 2018.
+    > doi: [10.3389/fams.2018.00059](https://dx.doi.org/10.3389/fams.2018.00059),
+    > arXiv: [1807.10090](https://arxiv.org/abs/1807.10090)
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -304,7 +403,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.1"
 manifest_format = "2.0"
-project_hash = "71acc07ae88ce70be87ae3e5f6370e01ce20d018"
+project_hash = "03536ef8d343278e2a69fa11ecd65b3220f0b905"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -885,8 +984,8 @@ version = "17.4.0+0"
 # ╟─338465ed-3055-45b7-a7e1-304a7ac856b5
 # ╠═6360598f-5280-4327-ab0c-50bd401ed5d6
 # ╟─088293e9-ebff-49e3-868a-ed824de857fa
-# ╠═657bce13-5cf2-438f-9c12-4434fa1850ac
-# ╟─57c6fb90-03fc-487d-a8e7-02108097cc78
+# ╟─657bce13-5cf2-438f-9c12-4434fa1850ac
+# ╠═57c6fb90-03fc-487d-a8e7-02108097cc78
 # ╠═316b2d4f-984c-4969-b515-0772ec89a745
 # ╟─78f1ae49-a973-4b39-a058-720e12532283
 # ╠═1025b30d-3433-4335-8751-658e7731d424
@@ -918,23 +1017,35 @@ version = "17.4.0+0"
 # ╟─8e85742c-fa06-4212-bace-81479b31d9e9
 # ╠═262f0ca4-4ef5-4670-a3d2-c86a74884d97
 # ╟─0c46f29e-126b-42c0-a96c-24f369c5fd80
-# ╠═0d56dddc-0f52-48e1-b81f-bc08fbcdfddf
+# ╟─0d56dddc-0f52-48e1-b81f-bc08fbcdfddf
 # ╠═01cae5a1-0d0d-4163-8713-52efb79d5043
-# ╠═33bab279-4258-4402-a4e5-da6fec1a88bf
+# ╟─33bab279-4258-4402-a4e5-da6fec1a88bf
 # ╠═e20ec2bc-7488-4d09-9a3a-17c06d6a4bfa
 # ╟─58eb08aa-1963-4b01-bbee-48ca9ae68e9e
 # ╠═bd676b86-060d-4e94-af01-fa1fe88a4cc7
 # ╠═44840536-f75e-4db9-ad70-ded60beac987
-# ╠═5570facf-5d04-42fc-bc40-28acad1fbc40
+# ╟─5570facf-5d04-42fc-bc40-28acad1fbc40
 # ╠═a02f085b-eaef-4a8f-a8fe-e306e956dd2c
-# ╠═0f135d94-25c8-499d-a9e0-169db76cb901
+# ╟─0f135d94-25c8-499d-a9e0-169db76cb901
 # ╠═fa0baedb-636e-4ac8-9779-039625ca8267
 # ╠═3e1e665f-ae85-4a4c-9f7d-4db6b9beada8
-# ╠═82b06119-d5f6-4aca-bd6c-45251144e4bf
+# ╟─82b06119-d5f6-4aca-bd6c-45251144e4bf
 # ╠═b253ac94-d09a-4f5e-87d6-61275b81f8f4
 # ╟─0e8778d6-b550-4d3d-9788-15c2c52c502c
 # ╟─ab650dfb-f156-4a57-b85b-419b4b65c9c4
 # ╟─a68af8e4-82d0-4d55-ad39-461688c86b95
-# ╠═592549a7-5de7-452d-9dfa-fc748afc8b04
+# ╟─592549a7-5de7-452d-9dfa-fc748afc8b04
+# ╠═ea0c3a0c-c11c-4ef4-8e74-60f73777c869
+# ╠═6487b3bc-7ff2-47f8-9f99-17442f48f19c
+# ╠═a1f3a57f-dad7-4ed8-bde9-249d2cd76367
+# ╟─d879ea0d-1bb2-438a-a75e-1c8a89e19f2a
+# ╠═cac20d84-d5c2-4631-9269-6cd44d1fc8d7
+# ╠═98e86918-20ec-4db2-992a-9c961aa9f798
+# ╟─ed79649e-74b2-4261-a79c-73b41f9306ae
+# ╠═51bcd660-5622-480c-b37c-ca29412b9c98
+# ╟─af5ced3e-f541-4b7a-9315-846df5206124
+# ╟─5a76aff5-f78e-4263-b4d3-22b5063f573b
+# ╠═a0ac32e0-3f41-4bc2-910b-85a0d1f1a4fd
+# ╟─d9a335f1-af0d-412e-bde2-cc147de90579
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
