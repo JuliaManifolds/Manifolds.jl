@@ -64,11 +64,24 @@ struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <:
     metric::G
 end
 
+function _drop_embedding_type(t::TraitList)
+    return TraitList(t.head, _drop_embedding_type(t.tail))
+end
+function _drop_embedding_type(t::TraitList{IsIsometricEmbeddedManifold})
+    return _drop_embedding_type(t.tail)
+end
+function _drop_embedding_type(t::TraitList{IsEmbeddedSubmanifold})
+    return _drop_embedding_type(t.tail)
+end
+_drop_embedding_type(t::EmptyTrait) = t
+
 function active_traits(f, M::MetricManifold, args...)
+    at = active_traits(f, M.manifold, args...)
+    idm = is_default_metric(M.manifold, M.metric)
     return merge_traits(
-        is_default_metric(M.manifold, M.metric) ? IsDefaultMetric(M.metric) : EmptyTrait(),
+        idm ? IsDefaultMetric(M.metric) : EmptyTrait(),
         IsMetricManifold(),
-        active_traits(f, M.manifold, args...),
+        idm ? at : _drop_embedding_type(at),
         is_metric_function(f) ? EmptyTrait() : IsExplicitDecorator(),
     )
 end

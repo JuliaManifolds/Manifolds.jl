@@ -233,6 +233,11 @@ function Manifolds.vector_transport_along!(
     Y .= c
     return Y
 end
+
+# test for https://github.com/JuliaManifolds/Manifolds.jl/issues/539
+struct Issue539Metric <: RiemannianMetric end
+Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p, X, Y) = 3
+
 @testset "Metrics" begin
     # some tests failed due to insufficient accuracy for a particularly bad RNG state
     Random.seed!(42)
@@ -639,5 +644,12 @@ end
         @test change_representer(M, TestEuclideanMetric(), p, X) == X
         Y2 = change_representer(M, G, p, X)
         @test Y2 ≈ 2 .* X #scaled metric has a factor 2, removing introduces this factor
+    end
+
+    @testset "issue #539" begin
+        M = Sphere(2)
+        p = rand(M)
+        X = rand(M; vector_at=p)
+        @test 3 ≈ norm(MetricManifold(M, Issue539Metric()), p, X)^2
     end
 end
