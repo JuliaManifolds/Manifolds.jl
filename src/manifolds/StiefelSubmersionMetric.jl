@@ -102,7 +102,7 @@ function inner(
     Y,
 ) where {n,k}
     α = metric(M).α
-    T = typeof(one(Base.promote_eltypeof(p, X, Y, α)))
+    T = typeof(one(Base.promote_eltype(p, X, Y, α)))
     if n == k
         return T(dot(X, Y)) / (2 * (α + 1))
     elseif α == -1 // 2
