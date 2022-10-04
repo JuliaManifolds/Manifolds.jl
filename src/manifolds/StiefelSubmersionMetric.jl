@@ -34,7 +34,8 @@ end
     q = exp(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, <:StiefelSubmersionMetric}, p, X)
     exp!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, q, <:StiefelSubmersionMetric}, p, X)
 
-Compute the exponential map on the [`Stiefel(n,k)`](@ref) manifold with respect to the [`StiefelSubmersionMetric`](@ref).
+Compute the exponential map on the [`Stiefel(n,k)`](@ref) manifold with respect to the
+[`StiefelSubmersionMetric`](@ref).
 
 The exponential map is given by
 ````math
@@ -43,6 +44,7 @@ The exponential map is given by
     X p^\mathrm{T} - p X^\mathrm{T}
 \bigr) p \operatorname{Exp}\bigl(\frac{\alpha}{\alpha+1} p^\mathrm{T} X\bigr)
 ````
+This implementation is based on [^ZimmermanHüper2022].
 """
 exp(::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric}, ::Any...) where {n,k}
 
@@ -143,6 +145,41 @@ function inverse_retract_project!(
     return X
 end
 
+@doc doc"""
+    inverse_retract(
+        M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+        p,
+        q,
+        method::ShootingInverseRetraction,
+    )
+
+Compute the inverse retraction using [`ShootingInverseRetraction`](@ref).
+
+In general the retraction is computed using the generic shooting method.
+
+    inverse_retract(
+        M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+        p,
+        q,
+        method::ShootingInverseRetraction{
+            ExponentialRetraction,
+            ProjectionInverseRetraction,
+            Union{ProjectionTransport,ScaledVectorTransport{ProjectionTransport}},
+        },
+    )
+
+Compute the inverse retraction using [`ShootingInverseRetraction`](@ref) more efficiently.
+
+For ``k < \frac{n}{2}`` the retraction is computed more efficiently using a factorized
+representation.
+"""
+inverse_retract(
+    ::MetricManifold{ℝ,<:Stiefel,<:StiefelSubmersionMetric},
+    ::Any,
+    ::Any,
+    ::ShootingInverseRetraction,
+)
+
 function inverse_retract_shooting!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     X::AbstractMatrix,
@@ -188,7 +225,7 @@ end
 Compute the logarithmic map on the [`Stiefel(n,k)`](@ref) manifold with respect to the [`StiefelSubmersionMetric`](@ref).
 
 The logarithmic map is computed using [`ShootingInverseRetraction`](@ref). For
-``k \le \frac{n}{2}``, this is sped up using the ``k``-shooting method of
+``k ≤ \lfloor\frac{n}{2}\rfloor``, this is sped up using the ``k``-shooting method of
 [^ZimmermanHüper2022]. Keyword arguments are forwarded to `ShootingInverseRetraction`; see
 that documentation for details. Their defaults are:
 - `num_transport_points=4`
