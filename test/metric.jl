@@ -648,8 +648,8 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
 
     @testset "issue #539" begin
         M = Sphere(2)
-        p = rand(M)
-        X = rand(M; vector_at=p)
+        p = [0.49567358314486515, 0.3740229181343087, -0.7838460025302334]
+        X = [-1.1552859627097727, 0.40665559717366767, -0.5365163797547751]
         @test 3 ≈ norm(MetricManifold(M, Issue539Metric()), p, X)^2
     end
 end

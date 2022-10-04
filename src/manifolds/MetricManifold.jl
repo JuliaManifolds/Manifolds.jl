@@ -81,6 +81,7 @@ function active_traits(f, M::MetricManifold, args...)
     return merge_traits(
         idm ? IsDefaultMetric(M.metric) : EmptyTrait(),
         IsMetricManifold(),
+        # avoid forwarding to the embedding if the metric is not the default one
         idm ? at : _drop_embedding_type(at),
         is_metric_function(f) ? EmptyTrait() : IsExplicitDecorator(),
     )
