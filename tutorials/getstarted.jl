@@ -5,7 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ c96935ca-6bda-466d-ad29-b40c19f55392
-using Manifolds
+using Manifolds, Random
 
 # ╔═╡ 41cbc7c8-3a39-11ed-292e-0bb253a3b2f3
 md"""
@@ -30,6 +30,9 @@ using Pkg; Pkg.add("Manifolds");
 before the first use. Then load the package with
 """
 
+# ╔═╡ 1764f781-9f03-4103-9f3b-d042de068dd8
+Random.seed!(42);
+
 # ╔═╡ 9d16efde-bd95-46d9-a659-5420fe860699
 md"""
 Since the package heavily depends on [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/) we will sometimes also link to the interface definition of functions in the interface and mark this with 🔗. When referring to [Wikipedia](https://en.wikipedia.org/), the link is marked with 📖.
@@ -40,8 +43,9 @@ md"""
 ## Contents
 * [Using the library of manifolds](#Using-the-Library-of-Manifolds)
 * [implementing generic functions](#Implementing-generic-Functions)
-* Allocating and in-place computations
-* decorating a manifold
+* [Allocating and in-place computations](#Allocating-and-in-place-computations)
+* Decorating a manifold
+* Representations with and without charts.
 """
 
 # ╔═╡ c1e139b0-7d39-4d20-81dc-5592fee831d0
@@ -318,11 +322,11 @@ This works fine on the sphere, see [this tutorial](https://manoptjl.org/stable/t
 
 # ╔═╡ cac20d84-d5c2-4631-9269-6cd44d1fc8d7
 md"""
-Now on several manifolds the exponential map and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see [^AbsilMahonySepulchre2008], Def. 4.1.1 for details) and its (local) inverse.
+Now on several manifolds the [📖 expontial map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see [^AbsilMahonySepulchre2008], Def. 4.1.1 for details) and its (local) inverse.
 
-The function itself is quite similar to the expontial map, just that [📖 `retract(M, p, X, m)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.retract) has one further parameter, the type of retraction to take, so `m` is a subtype of [`AbstractRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractRetractionMethod) `m`, the same for the [📖 `inverse_retract(M, p, q, n)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.inverse_retract) with an [`AbstractInverseRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractInverseRetractionMethod) `n`.
+The function itself is quite similar to the expponential map, just that [🔗 `retract(M, p, X, m)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.retract) has one further parameter, the type of retraction to take, so `m` is a subtype of [`AbstractRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractRetractionMethod) `m`, the same for the [🔗 `inverse_retract(M, p, q, n)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.inverse_retract) with an [`AbstractInverseRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractInverseRetractionMethod) `n`.
 
-Now, thinking of a generic implementation, we would like to have a way to specify one, that is available. This can be done by using [📖 `default_retraction_method`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.default_retraction_method-Tuple{AbstractManifold}) and [📖 `default_inverse_retraction_method`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.default_inverse_retraction_method-Tuple{AbstractManifold}), respectively. We implement
+Now, thinking of a generic implementation, we would like to have a way to specify one, that is available. This can be done by using [🔗 `default_retraction_method`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.default_retraction_method-Tuple{AbstractManifold}) and [🔗 `default_inverse_retraction_method`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.default_inverse_retraction_method-Tuple{AbstractManifold}), respectively. We implement
 """
 
 # ╔═╡ 98e86918-20ec-4db2-992a-9c961aa9f798
@@ -364,6 +368,57 @@ md"The same mechanism exists for [🔗 `parallel_transport_to(M, p, X, q)`](http
 "
 
 # ╔═╡ a0ac32e0-3f41-4bc2-910b-85a0d1f1a4fd
+md"""
+## Allocating and in-place computations
+
+Memory allocation is a [critical performace issue](https://docs.julialang.org/en/v1/manual/performance-tips/#Measure-performance-with-[@time](@ref)-and-pay-attention-to-memory-allocation) when programming in Julia. To take this into account, `Manifolds.jl` provides special functions to reduce the amount of allocations.
+
+We again look at the [📖 expontial map](https://en.wikip edia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` [🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.exp-Tuple{AbstractManifold,%20Any,%20Any}). This function returns the resulting point `q`, which requires to allocate new memory.
+
+To avoid this allocation, the function `exp!(M, q, p, X)` [🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.exp!-Tuple{AbstractManifold,%20Any,%20Any,%20Any}) can be called. Here `q` is allocated beforehand and is passed as the memory, where the result is returned in.
+It might be used even for interims computations, as long as it does not introduce side effects. Thas means that even with `exp!(M, p, p, X)` the result is correct.
+"""
+
+# ╔═╡ e9e6729f-6818-4f6d-a4ee-2767f8e2b6fa
+md"""
+Let's look at an example.
+
+We take another look at the [Sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html#Manifolds.Sphere) but now a high.dimensional one.
+We can also illustrate how to generate radnom points and tangent vectors.
+"""
+
+# ╔═╡ 84e54672-b6fe-44cf-8f66-ce0bf0da854f
+M = Sphere(10000)
+
+# ╔═╡ a36f370d-cfc8-48bb-9906-e43674fc91fb
+p₄ = rand(M);
+
+# ╔═╡ 99802699-a4a3-4f15-9a6f-1b48158486d0
+X = rand(M; vector_at=p₄);
+
+# ╔═╡ 6be039cb-f414-4897-9914-a3bfa267c216
+md"Now looking at the allocations required we get"
+
+# ╔═╡ 75e342b0-2a5f-4b85-9c71-b8d9e990bda8
+@allocated exp(M, p₄, X)
+
+# ╔═╡ ce6d6ad1-b844-400f-b01d-60f58b940170
+md"While if we have the memory"
+
+# ╔═╡ a1dfab8e-467d-4ab6-afb9-5b28711e1028
+q₂ = zero(p₄);
+
+# ╔═╡ 1ebc9da7-c75d-442c-9662-ab3eedf8b142
+md"There are no new memory allocations necessary if we use the in-place function."
+
+# ╔═╡ d92b31ec-cd96-4638-80af-0ba6d95b7e19
+@allocated exp!(M, q₂, p₄, X)
+
+# ╔═╡ 4761b8d9-ba93-4d1a-84da-4ed34a15860d
+md"""
+This methodology is used for all functions that compute a new point or tangent vector. By default all allocating functions allocate memory and call the in-place function.
+This also means that if you implement a new manifold, you just have to implement the in-place version.
+"""
 
 # ╔═╡ d9a335f1-af0d-412e-bde2-cc147de90579
 md"""
@@ -392,6 +447,7 @@ md"""
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 Manifolds = "~0.8.29"
@@ -403,7 +459,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.1"
 manifest_format = "2.0"
-project_hash = "03536ef8d343278e2a69fa11ecd65b3220f0b905"
+project_hash = "dd49af59fc2e05d4273da5eee0fa8c7f5a25b220"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -974,8 +1030,9 @@ version = "17.4.0+0"
 # ╔═╡ Cell order:
 # ╟─41cbc7c8-3a39-11ed-292e-0bb253a3b2f3
 # ╠═c96935ca-6bda-466d-ad29-b40c19f55392
+# ╠═1764f781-9f03-4103-9f3b-d042de068dd8
 # ╟─9d16efde-bd95-46d9-a659-5420fe860699
-# ╟─b34d2b6c-907e-45b3-9b62-445666413b26
+# ╠═b34d2b6c-907e-45b3-9b62-445666413b26
 # ╟─c1e139b0-7d39-4d20-81dc-5592fee831d0
 # ╟─7a3d7f18-75b2-4c0b-ac4f-8c5d5e27b4f6
 # ╠═554a8a25-92bd-4603-9f23-1afd18dfc658
@@ -985,7 +1042,7 @@ version = "17.4.0+0"
 # ╠═6360598f-5280-4327-ab0c-50bd401ed5d6
 # ╟─088293e9-ebff-49e3-868a-ed824de857fa
 # ╟─657bce13-5cf2-438f-9c12-4434fa1850ac
-# ╠═57c6fb90-03fc-487d-a8e7-02108097cc78
+# ╟─57c6fb90-03fc-487d-a8e7-02108097cc78
 # ╠═316b2d4f-984c-4969-b515-0772ec89a745
 # ╟─78f1ae49-a973-4b39-a058-720e12532283
 # ╠═1025b30d-3433-4335-8751-658e7731d424
@@ -1035,17 +1092,28 @@ version = "17.4.0+0"
 # ╟─ab650dfb-f156-4a57-b85b-419b4b65c9c4
 # ╟─a68af8e4-82d0-4d55-ad39-461688c86b95
 # ╟─592549a7-5de7-452d-9dfa-fc748afc8b04
-# ╠═ea0c3a0c-c11c-4ef4-8e74-60f73777c869
+# ╟─ea0c3a0c-c11c-4ef4-8e74-60f73777c869
 # ╠═6487b3bc-7ff2-47f8-9f99-17442f48f19c
 # ╠═a1f3a57f-dad7-4ed8-bde9-249d2cd76367
 # ╟─d879ea0d-1bb2-438a-a75e-1c8a89e19f2a
-# ╠═cac20d84-d5c2-4631-9269-6cd44d1fc8d7
+# ╟─cac20d84-d5c2-4631-9269-6cd44d1fc8d7
 # ╠═98e86918-20ec-4db2-992a-9c961aa9f798
 # ╟─ed79649e-74b2-4261-a79c-73b41f9306ae
 # ╠═51bcd660-5622-480c-b37c-ca29412b9c98
 # ╟─af5ced3e-f541-4b7a-9315-846df5206124
 # ╟─5a76aff5-f78e-4263-b4d3-22b5063f573b
-# ╠═a0ac32e0-3f41-4bc2-910b-85a0d1f1a4fd
+# ╟─a0ac32e0-3f41-4bc2-910b-85a0d1f1a4fd
+# ╠═e9e6729f-6818-4f6d-a4ee-2767f8e2b6fa
+# ╠═84e54672-b6fe-44cf-8f66-ce0bf0da854f
+# ╠═a36f370d-cfc8-48bb-9906-e43674fc91fb
+# ╠═99802699-a4a3-4f15-9a6f-1b48158486d0
+# ╟─6be039cb-f414-4897-9914-a3bfa267c216
+# ╠═75e342b0-2a5f-4b85-9c71-b8d9e990bda8
+# ╟─ce6d6ad1-b844-400f-b01d-60f58b940170
+# ╠═a1dfab8e-467d-4ab6-afb9-5b28711e1028
+# ╟─1ebc9da7-c75d-442c-9662-ab3eedf8b142
+# ╠═d92b31ec-cd96-4638-80af-0ba6d95b7e19
+# ╟─4761b8d9-ba93-4d1a-84da-4ed34a15860d
 # ╟─d9a335f1-af0d-412e-bde2-cc147de90579
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
