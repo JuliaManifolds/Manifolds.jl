@@ -346,7 +346,7 @@ end
 Base.size(F::StiefelFactorization) = (size(F.U, 1), size(F.Z, 2))
 function Base.similar(F::StiefelFactorization, ::Type{T}=eltype(F), sz=size(F)) where {T}
     size(F) == sz || throw(DimensionMismatch("size of factorization must be preserved"))
-    return StiefelFactorization(F.U, similar(F.Z, T))
+    return StiefelFactorization(convert(AbstractArray{T}, F.U), similar(F.Z, T))
 end
 function Base.copyto!(A::StiefelFactorization, B::StiefelFactorization)
     copyto!(A.Z, B.Z)
