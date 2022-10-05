@@ -275,7 +275,7 @@ function log!(
     return inverse_retract!(M, X, p, q, inverse_retraction)
 end
 
-# StiefelFactorization and StiefelFactorizationAdjoint
+# StiefelFactorization code
 # Note: intended only for internal use
 
 @doc doc"""
@@ -379,6 +379,23 @@ function project!(
     project!(Stiefel(2k, k), q.Z, p.Z)
     return q
 end
+function inner(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    p::StiefelFactorization,
+    X::StiefelFactorization,
+    Y::StiefelFactorization,
+) where {n,k}
+    α = metric(M).α
+    XZ = X.Z
+    YZ = Y.Z
+    @views begin
+        XZ1 = XZ[1:k, 1:k]
+        XZ2 = XZ[(k + 1):(2k), 1:k]
+        YZ1 = YZ[1:k, 1:k]
+        YZ2 = YZ[(k + 1):(2k), 1:k]
+    end
+    return dot(XZ1, YZ1) / (2 * (α + 1)) + dot(XZ2, YZ2)
+end
 function exp!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     q::StiefelFactorization,
@@ -425,16 +442,4 @@ function Base.copyto!(
     Zargs = map(x -> x isa Manifolds.StiefelFactorization ? x.Z : x, bc.args)
     broadcast!(bc.f, dest.Z, Zargs...)
     return dest
-end
-
-struct StiefelFactorizationAdjoint{F<:StiefelFactorization}
-    data::F
-end
-Base.parent(F::StiefelFactorizationAdjoint) = F.data
-Base.adjoint(F::StiefelFactorization) = StiefelFactorizationAdjoint(F)
-Base.adjoint(F::StiefelFactorizationAdjoint) = parent(F)
-
-function Base.:*(A′::StiefelFactorizationAdjoint, B::StiefelFactorization)
-    A = adjoint(A′)
-    return A.Z' * B.Z
 end
