@@ -360,16 +360,6 @@ function Base.copyto!(A::StiefelFactorization, B::AbstractMatrix{<:Real})
     mul!(A.Z, A.U', B)
     return A
 end
-function LinearAlgebra.mul!(
-    A::StiefelFactorization,
-    B::StiefelFactorization,
-    C::AbstractMatrix{<:Real},
-    α::Real,
-    β::Real,
-)
-    mul!(A.Z, B.Z, C, α, β)
-    return A
-end
 LinearAlgebra.dot(A::StiefelFactorization, B::StiefelFactorization) = dot(A.Z, B.Z)
 function Broadcast.BroadcastStyle(::Type{<:StiefelFactorization})
     return Broadcast.Style{StiefelFactorization}()
