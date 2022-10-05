@@ -379,6 +379,15 @@ function project!(
     project!(Stiefel(2k, k), q.Z, p.Z)
     return q
 end
+function project!(
+    ::Stiefel{n,k,ℝ},
+    Y::StiefelFactorization,
+    p::StiefelFactorization,
+    X::StiefelFactorization,
+) where {n,k}
+    project!(Stiefel(2k, k), Y.Z, p.Z, X.Z)
+    return Y
+end
 function inner(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     p::StiefelFactorization,
