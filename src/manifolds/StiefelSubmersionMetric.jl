@@ -293,9 +293,10 @@ Z &= \begin{bmatrix}Z_1 \\ Z_2\end{bmatrix}, \quad Z_1,Z_2 ∈ ℝ^{k × k}.
 \end{aligned}
 ````
 If ``B ∈ \mathrm{St}(n, k)``, then ``Z ∈ \mathrm{St}(2k, k)``.
+Note that not every matrix ``B`` can be factorized in this way.
 
-More generally, for a fixed ``U``, if ``r ∈ \mathrm{St}(n, k)`` has the factor
-``Z_r ∈ \mathrm{St}(2k, k)``, then ``X_r ∈ T_r \mathrm{St}(n, k)`` has the factor
+For a fixed ``U``, if ``r ∈ \mathrm{St}(n, k)`` has the factor ``Z_r ∈ \mathrm{St}(2k, k)``,
+then ``X_r ∈ T_r \mathrm{St}(n, k)`` has the factor
 ``Z_{X_r} ∈ T_{Z_r} \mathrm{St}(2k, k)``.
 
 ``Q`` is determined by choice of a second matrix ``A ∈ ℝ^{n × k}`` with the decomposition
@@ -306,7 +307,8 @@ Z_1 &= p^\mathrm{T} A \\
 Q Z_2 &= (I - p p^\mathrm{T}) A,
 \end{aligned}
 ````
-where here ``Q Z_2`` is the QR decomposition.
+where here ``Q Z_2`` is the any decomposition that produces ``Q ∈ \mathrm{St}(n, k)``, for
+which we choose the QR decomposition.
 
 This factorization is useful because it is closed under addition, subtraction, scaling,
 projection, and the Riemannian exponential and logarithm under the
