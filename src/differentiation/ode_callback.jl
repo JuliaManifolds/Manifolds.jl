@@ -62,6 +62,9 @@ function StitchedChartSolution(
 end
 
 function (scs::StitchedChartSolution{:Exp})(t::Real)
+    if t < scs.sols[1][1].t[1]
+        throw(DomainError("Time $t is outside of the solution."))
+    end
     for (sol, i) in scs.sols
         if t <= sol.t[end]
             B = induced_basis(scs.M, scs.A, i)
@@ -74,6 +77,9 @@ function (scs::StitchedChartSolution{:Exp})(t::Real)
     throw(DomainError("Time $t is outside of the solution."))
 end
 function (scs::StitchedChartSolution{:PT})(t::Real)
+    if t < scs.sols[1][1].t[1]
+        throw(DomainError("Time $t is outside of the solution."))
+    end
     for (sol, i) in scs.sols
         if t <= sol.t[end]
             B = induced_basis(scs.M, scs.A, i)
