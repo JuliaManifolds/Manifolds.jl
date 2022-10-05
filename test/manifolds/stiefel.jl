@@ -337,6 +337,129 @@ include("../utils.jl")
     end
 
     @testset "StiefelSubmersionMetric" begin
+        @testset "StiefelFactorization" begin
+            n = 6
+            @testset for k in [2, 3]
+                M = MetricManifold(Stiefel(n, k), StiefelSubmersionMetric(rand()))
+                p = project(M, randn(representation_size(M)))
+                X = project(M, p, randn(representation_size(M)))
+                X /= norm(M, p, X)
+                q = exp(M, p, X)
+                qfact = Manifolds.stiefel_factorization(p, q)
+                @testset "basic properties" begin
+                    @test qfact isa Manifolds.StiefelFactorization
+                    @test qfact.U[1:n, 1:k] ≈ p
+                    @test qfact.U'qfact.U ≈ I
+                    @test qfact.U * qfact.Z ≈ q
+                    @test is_point(Stiefel(2k, k), qfact.Z)
+
+                    Xfact = Manifolds.stiefel_factorization(p, X)
+                    @test Xfact isa Manifolds.StiefelFactorization
+                    @test Xfact.U[1:n, 1:k] ≈ p
+                    @test Xfact.U'Xfact.U ≈ I
+                    @test Xfact.U * Xfact.Z ≈ X
+                    @test is_vector(Rotations(k), I(k), Xfact.Z[1:k, 1:k])
+                end
+                @testset "basic functions" begin
+                    @test size(qfact) == (n, k)
+                    @test eltype(qfact) === eltype(q)
+                end
+                @testset "similar" begin
+                    qfact2 = similar(qfact)
+                    @test qfact2.U === qfact.U
+                    @test size(qfact2.Z) == size(qfact.Z)
+                    @test eltype(qfact2.Z) === eltype(qfact.Z)
+
+                    qfact3 = similar(qfact, Float32)
+                    @test eltype(qfact3) === Float32
+                    @test eltype(qfact3.U) === Float32
+                    @test eltype(qfact3.Z) === Float32
+                    @test qfact3.U ≈ qfact.U
+                    @test size(qfact3.Z) == size(qfact.Z)
+
+                    qfact4 = similar(qfact, Float32, (n, k))
+                    @test eltype(qfact4) === Float32
+                    @test eltype(qfact4.U) === Float32
+                    @test eltype(qfact4.Z) === Float32
+                    @test qfact4.U ≈ qfact.U
+                    @test size(qfact4.Z) == size(qfact.Z)
+
+                    @test_throws Exception similar(qfact, Float32, (n, k + 1))
+                end
+                @testset "copyto!" begin
+                    qfact2 = similar(qfact)
+                    copyto!(qfact2, qfact)
+                    @test qfact2.U === qfact.U
+                    @test qfact2.Z ≈ qfact.Z
+
+                    q2 = similar(q)
+                    copyto!(q2, qfact)
+                    @test q2 ≈ q
+
+                    qfact3 = similar(qfact)
+                    copyto!(qfact3, q)
+                    @test qfact3.U === qfact.U
+                    @test qfact3.Z ≈ qfact.Z
+                end
+                @testset "dot" begin
+                    Afact = similar(qfact)
+                    Afact.Z .= randn.()
+                    A = copyto!(similar(q), Afact)
+                    Bfact = similar(qfact)
+                    Bfact.Z .= randn.()
+                    B = copyto!(similar(q), Bfact)
+                    @test dot(Afact, Bfact) ≈ dot(A, B)
+                end
+                @testset "broadcast!" begin
+                    rfact = similar(qfact)
+                    @testset for f in [*, +, -]
+                        rfact .= f.(qfact, 2.5)
+                        @test rfact.U === qfact.U
+                        @test rfact.Z ≈ f.(qfact.Z, 2.5)
+                    end
+                end
+                @testset "project" begin
+                    rfact = similar(qfact)
+                    rfact.Z .= randn.()
+                    r = copyto!(similar(q), rfact)
+                    rfactproj = project(M, rfact)
+                    @test rfactproj isa Manifolds.StiefelFactorization
+                    @test copyto!(similar(r), rfactproj) ≈ project(M, r)
+
+                    Yfact = similar(qfact)
+                    Yfact.Z .= randn.()
+                    Y = copyto!(similar(q), Yfact)
+                    Yfactproj = project(M, rfact, Yfact)
+                    @test Yfactproj isa Manifolds.StiefelFactorization
+                    @test copyto!(similar(Y), Yfactproj) ≈ project(M, r, Y)
+                end
+                @testset "inner" begin
+                    rfact = similar(qfact)
+                    rfact.Z .= randn.()
+                    rfact = project(M, rfact)
+
+                    Yfact = similar(qfact)
+                    Yfact.Z .= randn.()
+                    Yfact = project(M, rfact, Yfact)
+
+                    Zfact = similar(qfact)
+                    Zfact.Z .= randn.()
+                    Zfact = project(M, rfact, Zfact)
+
+                    r, Z, Y = map(x -> copyto!(similar(q), x), (rfact, Zfact, Yfact))
+                    @test inner(M, rfact, Yfact, Zfact) ≈ inner(M, r, Y, Z)
+                end
+                @testset "exp" begin
+                    pfact = copyto!(similar(qfact), p)
+                    Xfact = copyto!(similar(qfact), X)
+                    rfact = exp(M, pfact, Xfact)
+                    r = exp(M, p, X)
+                    @test rfact isa Manifolds.StiefelFactorization
+                    @test copyto!(similar(r), rfact) ≈ r
+                end
+            end
+        end
+
         g = StiefelSubmersionMetric(1)
         @test g isa StiefelSubmersionMetric{Int}
 
