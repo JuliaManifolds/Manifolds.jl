@@ -402,8 +402,6 @@ function exp!(
     p::StiefelFactorization,
     X::StiefelFactorization,
 ) where {n,k}
-    # TODO:
-    # - handle rank-deficient QB
     α = metric(M).α
     @views begin
         ZM = X.Z[1:k, 1:k]
