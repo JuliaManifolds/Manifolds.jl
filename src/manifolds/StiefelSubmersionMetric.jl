@@ -360,7 +360,6 @@ function Base.copyto!(A::StiefelFactorization, B::AbstractMatrix{<:Real})
     mul!(A.Z, A.U', B)
     return A
 end
-LinearAlgebra.dot(A::StiefelFactorization, B::StiefelFactorization) = dot(A.Z, B.Z)
 function LinearAlgebra.mul!(
     A::StiefelFactorization,
     B::StiefelFactorization,
@@ -370,6 +369,28 @@ function LinearAlgebra.mul!(
 )
     mul!(A.Z, B.Z, C, α, β)
     return A
+end
+LinearAlgebra.dot(A::StiefelFactorization, B::StiefelFactorization) = dot(A.Z, B.Z)
+function Broadcast.BroadcastStyle(::Type{<:StiefelFactorization})
+    return Broadcast.Style{StiefelFactorization}()
+end
+function Broadcast.BroadcastStyle(
+    ::Broadcast.AbstractArrayStyle{0},
+    b::Broadcast.Style{<:StiefelFactorization},
+)
+    return b
+end
+Broadcast.broadcastable(v::StiefelFactorization) = v
+function Base.copyto!(
+    dest::StiefelFactorization,
+    bc::Broadcast.Broadcasted{Broadcast.Style{StiefelFactorization}},
+)
+    bc.args isa Tuple{Vararg{<:Union{Manifolds.StiefelFactorization,Real}}} ||
+        throw(ArgumentError("Not implemented"))
+    bc.f ∈ (identity, *, +, -, /) || throw(ArgumentError("Not implemented"))
+    Zargs = map(x -> x isa Manifolds.StiefelFactorization ? x.Z : x, bc.args)
+    broadcast!(bc.f, dest.Z, Zargs...)
+    return dest
 end
 function project!(
     ::Stiefel{n,k,ℝ},
@@ -420,25 +441,4 @@ function exp!(
         mul!(q.Z, exp(C)[1:(2k), 1:k], D)
     end
     return q
-end
-function Broadcast.BroadcastStyle(::Type{<:StiefelFactorization})
-    return Broadcast.Style{StiefelFactorization}()
-end
-function Broadcast.BroadcastStyle(
-    ::Broadcast.AbstractArrayStyle{0},
-    b::Broadcast.Style{<:StiefelFactorization},
-)
-    return b
-end
-Broadcast.broadcastable(v::StiefelFactorization) = v
-function Base.copyto!(
-    dest::StiefelFactorization,
-    bc::Broadcast.Broadcasted{Broadcast.Style{StiefelFactorization}},
-)
-    bc.args isa Tuple{Vararg{<:Union{Manifolds.StiefelFactorization,Real}}} ||
-        throw(ArgumentError("Not implemented"))
-    bc.f ∈ (identity, *, +, -, /) || throw(ArgumentError("Not implemented"))
-    Zargs = map(x -> x isa Manifolds.StiefelFactorization ? x.Z : x, bc.args)
-    broadcast!(bc.f, dest.Z, Zargs...)
-    return dest
 end
