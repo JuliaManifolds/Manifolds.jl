@@ -394,16 +394,8 @@ function inner(
     X::StiefelFactorization,
     Y::StiefelFactorization,
 ) where {n,k}
-    α = metric(M).α
-    XZ = X.Z
-    YZ = Y.Z
-    @views begin
-        XZ1 = XZ[1:k, 1:k]
-        XZ2 = XZ[(k + 1):(2k), 1:k]
-        YZ1 = YZ[1:k, 1:k]
-        YZ2 = YZ[(k + 1):(2k), 1:k]
-    end
-    return dot(XZ1, YZ1) / (2 * (α + 1)) + dot(XZ2, YZ2)
+    Msub = MetricManifold(Stiefel(2k, k), metric(M))
+    return inner(Msub, p.Z, X.Z, Y.Z)
 end
 function exp!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
