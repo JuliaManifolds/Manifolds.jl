@@ -1,7 +1,10 @@
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PyPlot
 using PlutoStaticHTML
-# required for loading the manifold tests functios
+# required for loading methods that handle differential equation solving
+using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
+# required for loading the manifold tests functions
 using Test, FiniteDifferences
+
 ENV["GKSwstype"] = "100"
 
 generated_path = joinpath(@__DIR__, "src", "misc")

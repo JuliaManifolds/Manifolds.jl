@@ -56,6 +56,26 @@ end
 RetractionAtlas() = RetractionAtlas(ExponentialRetraction(), LogarithmicInverseRetraction())
 
 """
+    affine_connection(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
+
+Calculate affine connection on manifold `M` at point with parameters `a` in chart `i` of
+[`AbstractAtlas`](@ref) `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
+"""
+function affine_connection(M::AbstractManifold, A, i, a, Xc, Yc)
+    Zc = allocate(Xc)
+    return affine_connection!(M, Zc, A, i, a, Xc, Yc)
+end
+
+"""
+    affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
+
+Calculate affine connection on manifold `M` at point with parameters `a` in chart `i` of an
+an [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Zc` and `Yc` in induced basis and save the result
+in `Zc`.
+"""
+affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
+
+"""
     get_default_atlas(::AbstractManifold)
 
 Determine the default real-valued atlas for the given manifold.
@@ -96,6 +116,16 @@ end
     f::typeof(get_parameters),
     p,
 )
+
+"""
+    check_chart_switch(M::AbstractManifold, A::AbstractAtlas, i, a)
+
+Determine whether chart should be switched when an operation in chart `i` from an [`AbstractAtlas`](@ref) `A`
+reaches parameters `a` in that chart.
+
+By default `false` is returned.
+"""
+check_chart_switch(M::AbstractManifold, A::AbstractAtlas, i, a) = false
 
 function get_parameters!(M::AbstractManifold, a, A::RetractionAtlas, i, p)
     return get_coordinates!(M, a, i, inverse_retract(M, i, p, A.invretr), A.basis)
@@ -158,6 +188,36 @@ get_chart_index(::AbstractManifold, ::AbstractAtlas, ::Any)
 
 get_chart_index(::AbstractManifold, ::RetractionAtlas, p) = p
 
+"""
+    get_chart_index(M::AbstractManifold, A::AbstractAtlas, i, a)
+
+Select a chart from an [`AbstractAtlas`](@ref) `A` for manifold `M` that is suitable for
+representing the neighborhood of point with parametrization `a` in chart `i`. This selection
+should be deterministic, although different charts may be selected for arbitrarily close but
+distinct points.
+
+# See also
+
+[`get_default_atlas`](@ref)
+"""
+get_chart_index(::AbstractManifold, ::AbstractAtlas, ::Any, ::Any)
+
+"""
+    inner(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
+
+Calculate inner product on manifold `M` at point with parameters `a` in chart `i` of an
+atlas `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
+"""
+inner(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
+
+"""
+    norm(M::AbstractManifold, A::AbstractAtlas, i, a, Xc)
+
+Calculate norm on manifold `M` at point with parameters `a` in chart `i` of an
+[`AbstractAtlas`](@ref) `A` of vector with coefficients `Xc` in induced basis.
+"""
+norm(M::AbstractManifold, A::AbstractAtlas, i, a, Xc) = sqrt(inner(M, A, i, a, Xc, Xc))
+
 @doc raw"""
     transition_map(M::AbstractManifold, A_from::AbstractAtlas, i_from, A_to::AbstractAtlas, i_to, a)
     transition_map(M::AbstractManifold, A::AbstractAtlas, i_from, i_to, a)
@@ -211,6 +271,40 @@ end
 
 function transition_map!(M::AbstractManifold, y, A::AbstractAtlas, i_from, i_to, a)
     return transition_map!(M, y, A, i_from, A, i_to, a)
+end
+
+"""
+    transition_map_diff(M::AbstractManifold, A::AbstractAtlas, i_from, a, c, i_to)
+
+Compute differential of transition map from chart `i_from` to chart `i_to` from an
+[`AbstractAtlas`](@ref) `A` on manifold `M` at point with parameters `a` on tangent vector
+with coordinates `c` in the induced basis.
+"""
+function transition_map_diff(M::AbstractManifold, A::AbstractAtlas, i_from, a, c, i_to)
+    old_B = induced_basis(M, A, i_from)
+    new_B = induced_basis(M, A, i_to)
+    p_final = get_point(M, A, i_from, a)
+    return change_basis(M, p_final, c, old_B, new_B)
+end
+
+"""
+    transition_map_diff!(M::AbstractManifold, c_out, A::AbstractAtlas, i_from, a, c, i_to)
+
+Compute [`transition_map_diff`](@ref) on given arguments and save the result in `c_out`.
+"""
+function transition_map_diff!(
+    M::AbstractManifold,
+    c_out,
+    A::AbstractAtlas,
+    i_from,
+    a,
+    c_in,
+    i_to,
+)
+    old_B = induced_basis(M, A, i_from)
+    new_B = induced_basis(M, A, i_to)
+    p_final = get_point(M, A, i_from, a)
+    return change_basis!(M, c_out, p_final, c_in, old_B, new_B)
 end
 
 """
@@ -286,19 +380,30 @@ struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractB
 end
 
 """
-    induced_basis(::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType)
+    induced_basis(::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType = TangentSpace)
 
 Get the basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
 space of type `vs`. Returns an object of type [`InducedBasis`](@ref).
+
+# See also
+
+[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType), [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis)
 """
 function induced_basis(
     ::AbstractManifold{𝔽},
     A::AbstractAtlas,
     i,
-    VST::VectorSpaceType,
+    VST::VectorSpaceType=TangentSpace,
 ) where {𝔽}
     return InducedBasis{𝔽,typeof(VST),typeof(A),typeof(i)}(VST, A, i)
 end
+
+"""
+    inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
+
+Injectivity radius of `get_point` for chart `i` from an [`AbstractAtlas`](@ref) `A` of a manifold `M`.
+"""
+inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
 
 function dual_basis(
     M::AbstractManifold{𝔽},
