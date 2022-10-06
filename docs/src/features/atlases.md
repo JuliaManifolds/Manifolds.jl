@@ -49,3 +49,17 @@ Modules = [Manifolds,ManifoldsBase]
 Pages = ["cotangent_space.jl"]
 Order = [:type, :function]
 ```
+
+## Computations in charts
+
+```@autodocs
+Modules = [Manifolds,ManifoldsBase]
+Pages = ["ode_callback.jl"]
+Order = [:constant, :type, :function]
+```
+
+```@autodocs
+Modules = [Manifolds,ManifoldsBase]
+Pages = ["bvp.jl"]
+Order = [:constant, :type, :function]
+```
