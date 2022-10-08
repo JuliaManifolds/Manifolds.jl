@@ -272,6 +272,7 @@ using Manifolds: induced_basis
         @test norm(RT) ≈ 0.0 atol = 1e-16
 
         @test riemann_tensor(M, p, [1, 2], [1, 3], [1, 4]) == [0, 0]
+        @test !Manifolds.check_chart_switch(M, A, i, p)
     end
     @testset "Induced Basis and local metric for EuclideanMetric" begin
         struct DefaultManifold <: AbstractManifold{ℝ} end

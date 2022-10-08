@@ -19,6 +19,8 @@ import ManifoldsBase:
     allocation_promotion_function,
     array_value,
     base_manifold,
+    change_basis,
+    change_basis!,
     check_point,
     check_size,
     check_vector,
@@ -327,6 +329,7 @@ include("manifolds/CenteredMatrices.jl")
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
 include("manifolds/Elliptope.jl")
+include("manifolds/EmbeddedTorus.jl")
 include("manifolds/FixedRankMatrices.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
@@ -426,6 +429,11 @@ function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
 end
 
 function __init__()
+    @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
+        using .BoundaryValueDiffEq
+        include("differentiation/bvp.jl")
+    end
+
     @require FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000" begin
         using .FiniteDifferences
         include("differentiation/finite_differences.jl")
@@ -434,6 +442,11 @@ function __init__()
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
         using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
         include("differentiation/ode.jl")
+
+        @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
+            using .DiffEqCallbacks
+            include("differentiation/ode_callback.jl")
+        end
     end
 
     @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
@@ -627,10 +640,13 @@ export ×,
     bundle_projection,
     canonical_project,
     canonical_project!,
+    change_basis,
+    change_basis!,
     change_metric,
     change_metric!,
     change_representer,
     change_representer!,
+    check_chart_switch,
     check_point,
     check_vector,
     christoffel_symbols_first,
