@@ -28,6 +28,7 @@ Construct the submersion metric on the Stiefel manifold with the parameter ``α`
 """
 struct StiefelSubmersionMetric{T<:Real} <: RiemannianMetric
     α::T
+    StiefelSubmersionMetric(α::T) where {T<:Real} = new{T}(α)
 end
 
 @doc raw"""
