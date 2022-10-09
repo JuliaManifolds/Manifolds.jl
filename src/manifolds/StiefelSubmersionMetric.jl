@@ -327,20 +327,27 @@ function stiefel_factorization(p, q)
     T = Base.promote_eltype(p, q)
     U = allocate(p, T, Size(n, 2k))
     Z = allocate(p, T, Size(2k, k))
+    qfact = StiefelFactorization(U, Z)
     @views begin
         U1 = U[1:n, 1:k]
         U2 = U[1:n, (k + 1):(2k)]
         Z1 = Z[1:k, 1:k]
         Z2 = Z[(k + 1):(2k), 1:k]
     end
-    mul!(Z1, p', q)
-    copyto!(U1, q)
-    mul!(U1, p, Z1, -1, true)
-    Q, N = qr(U1)
-    copyto!(Z2, N)
-    copyto!(U1, p)
-    copyto!(U2, Matrix(Q))
-    return StiefelFactorization(U, Z)
+    if p ≈ q
+        copyto!(U1, p)
+        copyto!(U2, qr(U1).Q[1:n, (k + 1):(2k)])
+        copyto!(qfact, q)
+    else
+        copyto!(U1, q)
+        mul!(Z1, p', q)
+        mul!(U1, p, Z1, -1, true)
+        Q, N = qr(U1)
+        copyto!(Z2, N)
+        copyto!(U1, p)
+        copyto!(U2, Matrix(Q))
+    end
+    return qfact
 end
 function Base.eltype(F::StiefelFactorization)
     return Base.promote_eltype(F.U, F.Z)

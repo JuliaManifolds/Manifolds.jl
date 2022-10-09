@@ -359,6 +359,12 @@ include("../utils.jl")
                     @test Xfact.U'Xfact.U ≈ I
                     @test Xfact.U * Xfact.Z ≈ X
                     @test is_vector(Rotations(k), I(k), Xfact.Z[1:k, 1:k])
+
+                    pfact2 = Manifolds.stiefel_factorization(p, p)
+                    @test pfact2 isa Manifolds.StiefelFactorization
+                    @test pfact2.U[1:n, 1:k] ≈ p
+                    @test pfact2.U'pfact2.U ≈ I
+                    @test pfact2.Z ≈ [I(k); zeros(k, k)] atol = 1e-6
                 end
                 @testset "basic functions" begin
                     @test size(qfact) == (n, k)
