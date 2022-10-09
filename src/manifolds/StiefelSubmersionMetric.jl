@@ -283,6 +283,9 @@ end
 
 Represent points (and vectors) on `Stiefel(n, k)` with ``2k × k`` factors.[^ZimmermanHüper2022]
 
+!!! warning
+    This type is intended strictly for internal use and should not be directly used.
+
 Given a point ``p ∈ \mathrm{St}(n, k)`` and another matrix ``B ∈ ℝ^{n × k}`` for
 ``k ≤ \lfloor\frac{n}{2}\rfloor`` the factorization is
 ````math
@@ -321,33 +324,38 @@ struct StiefelFactorization{UT,ZT} <: AbstractManifoldPoint
     U::UT
     Z::ZT
 end
-function stiefel_factorization(p, q)
+"""
+    stiefel_factorization(p, x) -> StiefelFactorization
+
+Compute the [`StiefelFactorization`](@ref) of ``x`` relative to the point ``p``.
+"""
+function stiefel_factorization(p, x)
     n, k = size(p)
     k ≤ div(n, 2) || throw(ArgumentError("k must be ≤ div(n, 2)"))
-    T = Base.promote_eltype(p, q)
+    T = Base.promote_eltype(p, x)
     U = allocate(p, T, Size(n, 2k))
     Z = allocate(p, T, Size(2k, k))
-    qfact = StiefelFactorization(U, Z)
+    xfact = StiefelFactorization(U, Z)
     @views begin
         U1 = U[1:n, 1:k]
         U2 = U[1:n, (k + 1):(2k)]
         Z1 = Z[1:k, 1:k]
         Z2 = Z[(k + 1):(2k), 1:k]
     end
-    if p ≈ q
+    if p ≈ x
         copyto!(U1, p)
         copyto!(U2, qr(U1).Q[1:n, (k + 1):(2k)])
-        copyto!(qfact, q)
+        copyto!(xfact, x)
     else
-        copyto!(U1, q)
-        mul!(Z1, p', q)
+        copyto!(U1, x)
+        mul!(Z1, p', x)
         mul!(U1, p, Z1, -1, true)
         Q, N = qr(U1)
         copyto!(Z2, N)
         copyto!(U1, p)
         copyto!(U2, Matrix(Q))
     end
-    return qfact
+    return xfact
 end
 function Base.eltype(F::StiefelFactorization)
     return Base.promote_eltype(F.U, F.Z)
