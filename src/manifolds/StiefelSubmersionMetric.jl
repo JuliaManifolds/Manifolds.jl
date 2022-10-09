@@ -164,7 +164,7 @@ In general the retraction is computed using the generic shooting method.
         method::ShootingInverseRetraction{
             ExponentialRetraction,
             ProjectionInverseRetraction,
-            Union{ProjectionTransport,ScaledVectorTransport{ProjectionTransport}},
+            <:Union{ProjectionTransport,ScaledVectorTransport{ProjectionTransport}},
         },
     )
 
@@ -188,7 +188,7 @@ function inverse_retract_shooting!(
     method::ShootingInverseRetraction{
         ExponentialRetraction,
         ProjectionInverseRetraction,
-        Union{ProjectionTransport,ScaledVectorTransport{ProjectionTransport}},
+        <:Union{ProjectionTransport,ScaledVectorTransport{ProjectionTransport}},
     },
 ) where {n,k}
     if k > div(n, 2)
