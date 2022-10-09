@@ -45,6 +45,9 @@ The exponential map is given by
 \bigr) p \operatorname{Exp}\bigl(\frac{\alpha}{\alpha+1} p^\mathrm{T} X\bigr)
 ````
 This implementation is based on [^ZimmermanHüper2022].
+
+For ``k < \frac{n}{2}`` the exponential is computed more efficiently using
+[`StiefelFactorization`](@ref).
 """
 exp(::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric}, ::Any...) where {n,k}
 
@@ -170,8 +173,8 @@ In general the retraction is computed using the generic shooting method.
 
 Compute the inverse retraction using [`ShootingInverseRetraction`](@ref) more efficiently.
 
-For ``k < \frac{n}{2}`` the retraction is computed more efficiently using a factorized
-representation.
+For ``k < \frac{n}{2}`` the retraction is computed more efficiently using
+[`StiefelFactorization`](@ref).
 """
 inverse_retract(
     ::MetricManifold{ℝ,<:Stiefel,<:StiefelSubmersionMetric},
