@@ -115,8 +115,8 @@ _euclidean_unit_vector(n, i) = [k == i ? 1.0 : 0.0 for k in 1:n]
 
 Compute a projection-based inverse retraction.
 
-The retraction is computed by projecting the logarithm map in the embedding to the tangent
-space at ``p``.
+The inverse retraction is computed by projecting the logarithm map in the embedding to the
+tangent space at ``p``.
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::ProjectionInverseRetraction)
 
