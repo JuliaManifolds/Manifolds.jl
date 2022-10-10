@@ -287,9 +287,6 @@ end
 
 Represent points (and vectors) on `Stiefel(n, k)` with ``2k × k`` factors.[^ZimmermanHüper2022]
 
-!!! warning
-    This type is intended strictly for internal use and should not be directly used.
-
 Given a point ``p ∈ \mathrm{St}(n, k)`` and another matrix ``B ∈ ℝ^{n × k}`` for
 ``k ≤ \lfloor\frac{n}{2}\rfloor`` the factorization is
 ````math
@@ -323,6 +320,9 @@ projection, and the Riemannian exponential and logarithm under the
 the same ``U``, then all of these operations and any algorithm that depends only on them can
 be performed in terms of the ``2k × k`` matrices ``Z``. For ``n ≫ k``, this can be much more
 efficient than working with the full matrices.
+
+!!! warning
+    This type is intended strictly for internal use and should not be directly used.
 """
 struct StiefelFactorization{UT,ZT} <: AbstractManifoldPoint
     U::UT
