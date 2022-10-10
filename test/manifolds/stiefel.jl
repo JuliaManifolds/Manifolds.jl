@@ -139,10 +139,12 @@ include("../utils.jl")
                     QRRetraction(),
                     CayleyRetraction(),
                     PadeRetraction(2),
+                    ProjectionRetraction(),
                 ],
                 inverse_retraction_methods=[
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
+                    ProjectionInverseRetraction(),
                 ],
                 vector_transport_methods=[
                     DifferentiatedRetractionVectorTransport(PolarRetraction()),
