@@ -164,6 +164,21 @@ function project!(::Stiefel, Y, p, X)
     return Y
 end
 
+"""
+    retract(M::Stiefel, p, X, method::ProjectionRetraction)
+
+Compute a projection-based retraction.
+
+The retraction is computed by projecting the exponential map in the embedding to `M`.
+"""
+retract(::Stiefel, ::Any, ::Any, ::ProjectionRetraction)
+
+function retract_project!(M::Stiefel, q, p, X)
+    exp!(get_embedding(M), q, p, X)
+    project!(M, q, q)
+    return q
+end
+
 function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)
 end
