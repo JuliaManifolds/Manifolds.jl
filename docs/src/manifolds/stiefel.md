@@ -49,13 +49,19 @@ Order = [:function]
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/StiefelSubmersionMetric.jl"]
-Order = [:type]
+Order = [:type, :function]
+Public = true
+Private = false
 ```
+
+# Internal types
 
 ```@autodocs
 Modules = [Manifolds]
 Pages = ["manifolds/StiefelSubmersionMetric.jl"]
-Order = [:function]
+Order = [:type, :function]
+Public = false
+Private = true
 ```
 
 ## Literature
