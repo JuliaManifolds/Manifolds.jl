@@ -56,6 +56,10 @@ include("../utils.jl")
         @test_throws DomainError is_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
         @test Manifolds.check_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]) isa DomainError
 
+        @test default_retraction_method(M) === PolarRetraction()
+        @test default_inverse_retraction_method(M) === PolarInverseRetraction()
+        @test default_vector_transport_method(M) == ProjectionTransport()
+
         @test !is_vector(
             M,
             SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0]),
