@@ -121,7 +121,7 @@ tangent space at ``p``.
 inverse_retract(::Stiefel, ::Any, ::Any, ::ProjectionInverseRetraction)
 
 function inverse_retract_project!(M::Stiefel, X, p, q)
-    log!(get_embedding(M), X, p, q)
+    X .= p .- q
     project!(M, X, p, X)
     return X
 end
@@ -174,7 +174,7 @@ The retraction is computed by projecting the exponential map in the embedding to
 retract(::Stiefel, ::Any, ::Any, ::ProjectionRetraction)
 
 function retract_project!(M::Stiefel, q, p, X)
-    exp!(get_embedding(M), q, p, X)
+    q .= p .+ X
     project!(M, q, q)
     return q
 end
