@@ -110,6 +110,22 @@ end
 
 _euclidean_unit_vector(n, i) = [k == i ? 1.0 : 0.0 for k in 1:n]
 
+"""
+    inverse_retract(M::Stiefel, p, q, method::ProjectionInverseRetraction)
+
+Compute a projection-based inverse retraction.
+
+The inverse retraction is computed by projecting the logarithm map in the embedding to the
+tangent space at ``p``.
+"""
+inverse_retract(::Stiefel, ::Any, ::Any, ::ProjectionInverseRetraction)
+
+function inverse_retract_project!(M::Stiefel, X, p, q)
+    X .= p .- q
+    project!(M, X, p, X)
+    return X
+end
+
 @doc raw"""
     project(M::Stiefel,p)
 
@@ -146,6 +162,21 @@ function project!(::Stiefel, Y, p, X)
     copyto!(Y, X)
     mul!(Y, p, A + A', T(-0.5), true)
     return Y
+end
+
+"""
+    retract(M::Stiefel, p, X, method::ProjectionRetraction)
+
+Compute a projection-based retraction.
+
+The retraction is computed by projecting the exponential map in the embedding to `M`.
+"""
+retract(::Stiefel, ::Any, ::Any, ::ProjectionRetraction)
+
+function retract_project!(M::Stiefel, q, p, X)
+    q .= p .+ X
+    project!(M, q, q)
+    return q
 end
 
 function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)

@@ -203,7 +203,10 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpo
 """
 project(::SymmetricMatrices, ::Any)
 
-project!(M::SymmetricMatrices, q, p) = copyto!(q, (p + p') ./ 2)
+function project!(M::SymmetricMatrices, q, p)
+    q .= (p .+ p') ./ 2
+    return q
+end
 
 @doc raw"""
     project(M::SymmetricMatrices, p, X)
