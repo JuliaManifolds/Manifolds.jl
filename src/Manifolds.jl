@@ -84,6 +84,7 @@ import ManifoldsBase:
     inverse_retract_polar!,
     inverse_retract_project!,
     inverse_retract_qr!,
+    inverse_retract_shooting!,
     inverse_retract_softmax!,
     log,
     log!,
@@ -238,6 +239,7 @@ using ManifoldsBase:
     RealNumbers,
     ScaledVectorTransport,
     SchildsLadderTransport,
+    ShootingInverseRetraction,
     SoftmaxRetraction,
     SoftmaxInverseRetraction,
     TangentSpaceType,
@@ -342,6 +344,7 @@ include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
 include("manifolds/StiefelEuclideanMetric.jl")
 include("manifolds/StiefelCanonicalMetric.jl")
+include("manifolds/StiefelSubmersionMetric.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
@@ -583,7 +586,8 @@ export AbstractMetric,
     ProductMetric,
     RealSymplecticMetric,
     ExtendedSymplecticMetric,
-    CanonicalMetric
+    CanonicalMetric,
+    StiefelSubmersionMetric
 export AbstractAtlas, RetractionAtlas
 # Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
@@ -609,6 +613,7 @@ export AbstractInverseRetractionMethod,
     QRInverseRetraction,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
+    ShootingInverseRetraction,
     SoftmaxInverseRetraction
 # Estimation methods for median and mean
 export AbstractEstimationMethod,

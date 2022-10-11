@@ -87,7 +87,7 @@ end
 @doc raw"""
     inner(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p, X, Y)
 
-compute the inner procuct on the [`Stiefel`](@ref) manifold with respect to the
+Compute the inner product on the [`Stiefel`](@ref) manifold with respect to the
 [`CanonicalMetric`](@ref). The formula reads
 
 ```math
@@ -96,11 +96,11 @@ g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{1}{2}pp^{\mathrm{T
 """
 function inner(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, p, X, Y) where {n,k}
     T = Base.promote_eltype(p, X, Y)
-    s = T(dot(X, Y))
-    if n != k
-        s -= dot(p'X, p'Y) / 2
+    if n == k
+        return T(dot(X, Y)) / 2
+    else
+        return T(dot(X, Y)) - T(dot(p'X, p'Y)) / 2
     end
-    return s
 end
 
 @doc raw"""
