@@ -1,11 +1,38 @@
 ### A Pluto.jl notebook ###
-# v0.19.11
+# v0.19.13
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ c96935ca-6bda-466d-ad29-b40c19f55392
 using Manifolds, Random
+
+# ╔═╡ c0498a70-6a97-4436-9a3a-8e2641647caa
+function pretty_error(err)
+    return Markdown.parse("""
+       !!! info "This is how the Error we expect here looks like"
+           ```
+           $(replace(sprint(showerror, err), "\n" => "\n        "))
+           ```
+
+       """)
+end;
+
+# ╔═╡ 65110d60-a553-446d-b6ea-c605742a9b37
+macro expect_error(code, error=:DomainError)
+    quote
+        try
+            $(esc(code))
+            error(string("Error of type ", $(esc(error)), " was not thrown."))
+        catch e
+            if e isa $(esc(error))
+                pretty_error(e)
+            else
+                rethrow()
+            end
+        end
+    end
+end;
 
 # ╔═╡ 41cbc7c8-3a39-11ed-292e-0bb253a3b2f3
 md"""
@@ -132,17 +159,7 @@ But in an interactive session an error message might be helpful. A positional (t
 """
 
 # ╔═╡ d3caea7a-89ff-4f04-94e9-922048ad0bb1
-try
-    is_point(M₂, [0, 0, 1.001], true)
-catch e #We just have to trick a litte to display the Domain error here
-    if isa(e, DomainError)
-        Markdown.parse("""```
-        $(e)
-        ```""")
-    else
-        rethrow(e)
-    end
-end
+@expect_error is_point(M₂, [0, 0, 1.001], true) DomainError
 
 # ╔═╡ 19cbc8c5-4c2c-4594-bbb5-30f268c046cc
 md"""
@@ -182,17 +199,7 @@ md"But of course it is better to use a valid point in the first place"
 is_vector(M₃, [1, 0, 0], [0, 1, 1])
 
 # ╔═╡ ba9320d3-a340-4b36-95ac-2a9935803f44
-try
-    is_vector(M₃, [1, 0, 0], [0.1, 1, 1], true)
-catch e #We just have to trick a litte to display the Domain error here
-    if isa(e, DomainError)
-        Markdown.parse("""```
-        $(e)
-        ```""")
-    else
-        rethrow(e)
-    end
-end
+@expect_error is_vector(M₃, [1, 0, 0], [0.1, 1, 1], true) DomainError
 
 # ╔═╡ a9883394-e1bb-4cef-bae5-ce34f6e821d8
 md"To learn about how to define a manifold youself check out the [How to define your own manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/example.html) tutorial of [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)."
@@ -450,7 +457,7 @@ Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
-Manifolds = "~0.8.29"
+Manifolds = "~0.8.32"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -459,7 +466,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.1"
 manifest_format = "2.0"
-project_hash = "dd49af59fc2e05d4273da5eee0fa8c7f5a25b220"
+project_hash = "b26c4b2ef38cbd12f397ce4e60b512ecd1cc455c"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -533,9 +540,9 @@ version = "0.12.8"
 
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
-git-tree-sha1 = "5856d3031cdb1f3b2b6340dfdc66b6d9a149a374"
+git-tree-sha1 = "3ca828fe1b75fa84b021a7860bd039eaea84d2f2"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.2.0"
+version = "4.3.0"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -549,9 +556,9 @@ uuid = "587fd27a-f159-11e8-2dae-1979310e6154"
 version = "0.2.8"
 
 [[deps.DataAPI]]
-git-tree-sha1 = "1106fa7e1256b402a86a8e7b15c00c85036fef49"
+git-tree-sha1 = "46d2680e618f8abd007bce0c3026cb0c4a8f2032"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.11.0"
+version = "1.12.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -580,9 +587,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "0d7d213133d948c56e8c2d9f4eab0293491d8e4a"
+git-tree-sha1 = "04db820ebcfc1e053bd8cbb8d8bccf0ff3ead3f7"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.75"
+version = "0.25.76"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -636,9 +643,9 @@ version = "1.7.4"
 
 [[deps.HybridArrays]]
 deps = ["LinearAlgebra", "Requires", "StaticArrays"]
-git-tree-sha1 = "898f2ae8e920084a7e05963b263b0d9c6ceafc23"
+git-tree-sha1 = "0de633a951f8b5bd32febc373588517aa9f2f482"
 uuid = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
-version = "0.4.12"
+version = "0.4.13"
 
 [[deps.HypergeometricFunctions]]
 deps = ["DualNumbers", "LinearAlgebra", "OpenLibm_jll", "SpecialFunctions", "Test"]
@@ -726,21 +733,21 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
-git-tree-sha1 = "3d3e902b31198a27340d0bf00d6ac452866021cf"
+git-tree-sha1 = "42324d08725e200c23d4dfb549e0d5d89dede2d2"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.9"
+version = "0.5.10"
 
 [[deps.Manifolds]]
 deps = ["Colors", "Distributions", "Einsum", "Graphs", "HybridArrays", "Kronecker", "LinearAlgebra", "ManifoldsBase", "Markdown", "MatrixEquations", "Quaternions", "Random", "RecipesBase", "RecursiveArrayTools", "Requires", "SimpleWeightedGraphs", "SpecialFunctions", "StaticArrays", "Statistics", "StatsBase"]
-git-tree-sha1 = "f2d8872d3202d2ef34cc687b0c5bca44fc82d432"
+git-tree-sha1 = "67eda08ae731d5d3499dba8efbb049d65288ea29"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
-version = "0.8.29"
+version = "0.8.32"
 
 [[deps.ManifoldsBase]]
 deps = ["LinearAlgebra", "Markdown"]
-git-tree-sha1 = "3e0dc4ae917310b1d7952c8741ecfd9942c93540"
+git-tree-sha1 = "d39d5f8f117c9b370f4b8520182f48ecf9e32620"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
-version = "0.13.20"
+version = "0.13.21"
 
 [[deps.Markdown]]
 deps = ["Base64"]
@@ -1028,11 +1035,13 @@ version = "17.4.0+0"
 """
 
 # ╔═╡ Cell order:
+# ╟─c0498a70-6a97-4436-9a3a-8e2641647caa
+# ╟─65110d60-a553-446d-b6ea-c605742a9b37
 # ╟─41cbc7c8-3a39-11ed-292e-0bb253a3b2f3
 # ╠═c96935ca-6bda-466d-ad29-b40c19f55392
 # ╠═1764f781-9f03-4103-9f3b-d042de068dd8
 # ╟─9d16efde-bd95-46d9-a659-5420fe860699
-# ╠═b34d2b6c-907e-45b3-9b62-445666413b26
+# ╟─b34d2b6c-907e-45b3-9b62-445666413b26
 # ╟─c1e139b0-7d39-4d20-81dc-5592fee831d0
 # ╟─7a3d7f18-75b2-4c0b-ac4f-8c5d5e27b4f6
 # ╠═554a8a25-92bd-4603-9f23-1afd18dfc658
@@ -1103,7 +1112,7 @@ version = "17.4.0+0"
 # ╟─af5ced3e-f541-4b7a-9315-846df5206124
 # ╟─5a76aff5-f78e-4263-b4d3-22b5063f573b
 # ╟─a0ac32e0-3f41-4bc2-910b-85a0d1f1a4fd
-# ╠═e9e6729f-6818-4f6d-a4ee-2767f8e2b6fa
+# ╟─e9e6729f-6818-4f6d-a4ee-2767f8e2b6fa
 # ╠═84e54672-b6fe-44cf-8f66-ce0bf0da854f
 # ╠═a36f370d-cfc8-48bb-9906-e43674fc91fb
 # ╠═99802699-a4a3-4f15-9a6f-1b48158486d0
