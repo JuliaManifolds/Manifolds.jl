@@ -34,6 +34,7 @@ tutorial_src_folder = joinpath(@__DIR__, "..", "tutorials/")
 tutorial_output_folder = joinpath(@__DIR__, "src/", "tutorials/")
 tutorial_relative_path = "tutorials/"
 mkpath(tutorial_output_folder)
+@info tutorial_src_folder
 #
 # Tutorials
 @info " \n      Rendering Tutorials\n "
@@ -46,7 +47,7 @@ for t in tutorials
             tutorial_src_folder;
             output_format=documenter_output,
             write_files=false,
-            use_distributed=false,
+            use_distributed=true,
         ),
         ["$(t[:file]).jl"],
     )

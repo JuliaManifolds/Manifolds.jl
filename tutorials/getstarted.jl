@@ -14,7 +14,6 @@ function pretty_error(err)
            ```
            $(replace(sprint(showerror, err), "\n" => "\n        "))
            ```
-
        """)
 end;
 
@@ -71,7 +70,7 @@ md"""
 * [Using the library of manifolds](#Using-the-Library-of-Manifolds)
 * [implementing generic functions](#Implementing-generic-Functions)
 * [Allocating and in-place computations](#Allocating-and-in-place-computations)
-* Decorating a manifold
+* [Decorating a manifold](#Decorating-a-manifold)
 * Representations with and without charts.
 """
 
@@ -425,6 +424,83 @@ md"There are no new memory allocations necessary if we use the in-place function
 md"""
 This methodology is used for all functions that compute a new point or tangent vector. By default all allocating functions allocate memory and call the in-place function.
 This also means that if you implement a new manifold, you just have to implement the in-place version.
+"""
+
+# ╔═╡ 810cdb2a-9cbc-4652-b955-a0e63d0d37cc
+md"## Decorating a manifold"
+
+# ╔═╡ a71d870d-83b9-46af-a2eb-04c746c1c20d
+md"""
+As you saw until now, an
+[📎 `AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#The-AbstractManifold)
+describes a Riemannian manifold.
+For completeness, this also includes the chosen
+[Riemannian metric tensor](https://en.wikipedia.org/wiki/Metric_tensor)
+or inner product on the tangent spaces.
+
+In `Manifolds.jl` these are assumed to be a “reasonable default”.
+For example on the `Sphere(n)` we used above, the default metric is the one inherited from
+restricting the inner product from the embedding space onto each tangent space.
+
+Consider a manifold like
+"""
+
+# ╔═╡ d4226ae7-d11f-47a1-a2b0-c631945c5fb7
+M₈ = SymmetricPositiveDefinite(3)
+
+# ╔═╡ 82dca58f-52e6-491e-97ec-904bb5b0b36b
+md"""
+which is the manifold of ``3×3`` matrices that are [symmetric and positive definite](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Manifolds.SymmetricPositiveDefinite).
+which has a default as well, the affine invariant [`LinearAffineMetric`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Default-metric:-the-linear-affine-metric), but also has several different metrics.
+
+Two switch the metric, we use the idea of a [📖 decorator pattern](https://en.wikipedia.org/wiki/Decorator_pattern)-like approach. Defining
+"""
+
+# ╔═╡ 1023f2a9-4b73-4c3f-8384-3c36a537479a
+M₈₂ = MetricManifold(M₈, BuresWassersteinMetric())
+
+# ╔═╡ faf5e291-6de3-4dd1-8e0d-790aaf5f36bd
+md"""
+changes the manifold to use the [`BuresWassersteinMetric`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Bures-Wasserstein-metric).
+
+This changes all functions that depend on the metric, most prominently the Riemannian matric, but also the exponential and logarithmic map and hence also geodesics.
+
+All functions that are not dependent on a metric – for example the manifold dimension, the tests of points and vectors we already looked at, but also all retractions – stay unchanged.
+This means that for example
+"""
+
+# ╔═╡ 93d77443-ee4c-40bd-bbc2-a669a269af9f
+[manifold_dimension(M₈₂), manifold_dimension(M₈)]
+
+# ╔═╡ 1cca1824-c983-40c0-a955-4ee4a32d7db1
+md"""
+both calls the same underlying function. On the other hand with
+"""
+
+# ╔═╡ 6c80af23-c960-4f5d-87e4-31535eb8a149
+p₅, X₅ = one(zeros(3, 3)), [1.0 0.0 1.0; 0.0 1.0 0.0; 1.0 0.0 1.0]
+
+# ╔═╡ efafedc3-4d25-4ce7-937c-71fd50d90143
+md"but for example the exponential map and the norm yield different results"
+
+# ╔═╡ cf13eee6-f53b-4109-afd6-8d2978a2aa07
+[exp(M₈, p₅, X₅), exp(M₈₂, p₅, X₅)]
+
+# ╔═╡ 3ca21132-6f53-4aba-9212-ce4f17d5b48c
+[norm(M₈, p₅, X₅), norm(M₈₂, p₅, X₅)]
+
+# ╔═╡ cfcf6cf4-6244-4b26-8097-90afb03abad6
+md"""
+Technically this done using Traits – the trait here is the [`IsMetricManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/metric.html#Manifolds.IsMetricManifold) trait. Our trait system allows to combine traits but also to inherit properties in a hierarchical way, see [🔗 here](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#Traits-with-an-inheritance-hierarchy) for the technical details.
+
+The same approach is used for
+
+* specifying a different [connection](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/connection.html)
+* specifying a manifold as a certain [quotient manifold](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/quotient.html)
+* specifying a certain [embedding](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#The-Manifold-decorator)
+* specify a certain [group action](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/group.html)
+
+Again, for all of these, the concrete types only have to be used if you want to do a second, different from the details, property, for example a second way to embed a manfiold. If a manifold is (in its usual representation) an embedded manifold, this works with the default manifold type already, since then it is again set as the reasonable default.
 """
 
 # ╔═╡ d9a335f1-af0d-412e-bde2-cc147de90579
@@ -1041,7 +1117,7 @@ version = "17.4.0+0"
 # ╠═c96935ca-6bda-466d-ad29-b40c19f55392
 # ╠═1764f781-9f03-4103-9f3b-d042de068dd8
 # ╟─9d16efde-bd95-46d9-a659-5420fe860699
-# ╟─b34d2b6c-907e-45b3-9b62-445666413b26
+# ╠═b34d2b6c-907e-45b3-9b62-445666413b26
 # ╟─c1e139b0-7d39-4d20-81dc-5592fee831d0
 # ╟─7a3d7f18-75b2-4c0b-ac4f-8c5d5e27b4f6
 # ╠═554a8a25-92bd-4603-9f23-1afd18dfc658
@@ -1123,6 +1199,20 @@ version = "17.4.0+0"
 # ╟─1ebc9da7-c75d-442c-9662-ab3eedf8b142
 # ╠═d92b31ec-cd96-4638-80af-0ba6d95b7e19
 # ╟─4761b8d9-ba93-4d1a-84da-4ed34a15860d
+# ╟─810cdb2a-9cbc-4652-b955-a0e63d0d37cc
+# ╟─a71d870d-83b9-46af-a2eb-04c746c1c20d
+# ╠═d4226ae7-d11f-47a1-a2b0-c631945c5fb7
+# ╠═9ad036e8-d6d2-465f-9f3a-df1af92b632b
+# ╠═82dca58f-52e6-491e-97ec-904bb5b0b36b
+# ╠═1023f2a9-4b73-4c3f-8384-3c36a537479a
+# ╟─faf5e291-6de3-4dd1-8e0d-790aaf5f36bd
+# ╠═93d77443-ee4c-40bd-bbc2-a669a269af9f
+# ╟─1cca1824-c983-40c0-a955-4ee4a32d7db1
+# ╠═6c80af23-c960-4f5d-87e4-31535eb8a149
+# ╠═efafedc3-4d25-4ce7-937c-71fd50d90143
+# ╠═cf13eee6-f53b-4109-afd6-8d2978a2aa07
+# ╠═3ca21132-6f53-4aba-9212-ce4f17d5b48c
+# ╟─cfcf6cf4-6244-4b26-8097-90afb03abad6
 # ╟─d9a335f1-af0d-412e-bde2-cc147de90579
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
