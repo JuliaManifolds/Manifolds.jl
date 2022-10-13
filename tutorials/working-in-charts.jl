@@ -35,7 +35,13 @@ using Manifolds,
 md"""
 # Working in Charts: the embedded Torus
 
-The following values still require explanation
+There are two conceptually different approaches to working on a manifold. The first one, widespread in differential geometry textbooks, is based on defining an atlas on the manifold and performing computations in selected charts. This approach, while generic, is not ideally suitable in all circumstances. For example, working in charts that do not cover the entire manifold causes issues with having to switch charts when operating on a manifold. Furthermore, for some manifolds, there are efficient closed-form formulas for standard functions like the exponential map or Riemannian distance that use a chart-free representation. Manifolds.jl supports both approaches, although the chart-free approach is the main focus of the library.
+
+This section of the tutorial focuses on the chart-based computation.
+
+`M` is the torus we will be working on, one defined as a surface of revolution of a circle of radius 2 around a circle of radius 3. The atlas we will perform computations in is `A`.
+
+We will draw geodesics time between 0 and `t_end`, and then sample the solution at multiples of `dt` and draw a line connecting sampled points.
 """
 
 # ╔═╡ 27038d25-32b3-433d-ad47-f7ae330fef1c
@@ -55,6 +61,8 @@ md"""
 ## Setup
 
 We will first set up our plot with an empty torus.
+`param_points` are points on the surface of the torus that will be used for basic surface shape in Makie.jl.
+The torus will be colored according to its Gaussian curvature stored in `gcs`. We later want to have a color scale that has negative curvature blue, zero curvature white and positive curvature red so `gcs_mm` is the largest absolute value of the curvature that will be needed to properly set range of curvature values.
 """
 
 # ╔═╡ 44e6e4e1-6b69-4a40-a1f1-d0084a0af8c3
@@ -77,7 +85,22 @@ gcs_mm = max(abs(minimum(gcs)), abs(maximum(gcs)));
 
 # ╔═╡ c18609fe-b510-447f-9d2a-d1e6eb1da3c2
 md"""
-## (Interactive) Values for the geodesic
+## (Interactive) Values for the geodesic.
+
+`solve_for` is a helper function that solves a parallel transport along geodesic problem on the torus `M`.
+`p0x` is the (ϴ, φ) parametrization of the point from which we will transport the vector.
+We first calculate the coordinates in the embedding of `p0x` and store it as `p`, and then get the initial chart from atlas `A` appropriate for starting working at point `p`.
+The vector we transport has coordinates `Y_transp` in the induced tangent space basis of chart `i_p0x`.
+The function returns the full solution to the parallel transport problem, containing the sequence of charts that was used and solutions of differential equations computed using `OrdinaryDiffEq`.
+
+`bvp_i` is needed later for a different purpose, it is the chart index we will use for solving the logarithmic map boundary value problem in.
+
+Next we solve the vector transport problem `solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])`, sample the result at the selected time steps and store the result in `geo`. The solution includes the geodesic which we extract and convert to a sequence of points digestible by `Makie.jl`, `geo_ps`.
+
+We won't draw the transported vector at every point as there would be too many arrows, which is why we select every 100th point only for that purpose with `pt_indices`. Then, `geo_ps_pt` contains points at which the transported vector is tangent to and `geo_Ys` the transported vector at that point, represented in the embedding.
+
+The logarithmic map will be solved between points with parametrization `bvp_a1` and `bvp_a2` in chart `bvp_i`.
+The result is assigned to variable `bvp_sol` and then sampled with time step 0.05. The result of this sampling is converted from parameters in chart `bvp_i` to point in the embedding and stored in `geo_r`.
 """
 
 # ╔═╡ 28832031-1779-46ec-b341-e502f59ee16e
