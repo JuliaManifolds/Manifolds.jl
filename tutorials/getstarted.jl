@@ -8,6 +8,7 @@ using InteractiveUtils
 using Manifolds, Random
 
 # ╔═╡ c0498a70-6a97-4436-9a3a-8e2641647caa
+# hideall
 function pretty_error(err)
     return Markdown.parse("""
        !!! info "This is how the Error we expect here looks like"
@@ -18,6 +19,7 @@ function pretty_error(err)
 end;
 
 # ╔═╡ 65110d60-a553-446d-b6ea-c605742a9b37
+# hideall
 macro expect_error(code, error=:DomainError)
     quote
         try
