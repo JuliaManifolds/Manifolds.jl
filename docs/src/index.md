@@ -1,6 +1,9 @@
 # Manifolds
 
-The package __Manifolds__ aims to provide a library of manifolds to be used within your project.
+```@docs
+Manifolds.Manifolds
+```
+
 The implemented manifolds are accompanied by their mathematical formulae.
 
 The manifolds are implemented using the interface for manifolds given in [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/).

@@ -290,8 +290,26 @@ function Base.copyto!(X::UMVTVector, Y::UMVTVector)
     return X
 end
 
-default_retraction_method(::FixedRankMatrices) = PolarRetraction()
+"""
+    default_inverse_retraction_method(M::Stiefel)
+
+Return [`PolarInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarInverseRetraction) as the default inverse retraction for the
+[`FixedRankMatrices`](@ref) manifold.
+"""
 default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction()
+
+"""
+    default_retraction_method(M::FixedRankMatrices)
+
+Return [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) as the default retraction for the [`FixedRankMatrices`](@ref) manifold.
+"""
+default_retraction_method(::FixedRankMatrices) = PolarRetraction()
+
+"""
+    default_vector_transport_method(M::FixedRankMatrices)
+
+Return the [`ProjectionTransport`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.ProjectionTransport) as the default vector transport method for the [`FixedRankMatrices`](@ref) manifold.
+"""
 default_vector_transport_method(::FixedRankMatrices) = ProjectionTransport()
 
 @doc raw"""

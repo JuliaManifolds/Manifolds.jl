@@ -135,7 +135,7 @@ end
         method::ShootingInverseRetraction,
     )
 
-Compute the inverse retraction using [`ShootingInverseRetraction`](@ref).
+Compute the inverse retraction using [`ShootingInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ShootingInverseRetraction).
 
 In general the retraction is computed using the generic shooting method.
 
@@ -150,7 +150,7 @@ In general the retraction is computed using the generic shooting method.
         },
     )
 
-Compute the inverse retraction using [`ShootingInverseRetraction`](@ref) more efficiently.
+Compute the inverse retraction using [`ShootingInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ShootingInverseRetraction) more efficiently.
 
 For ``k < \frac{n}{2}`` the retraction is computed more efficiently using
 [`StiefelFactorization`](@ref).
@@ -206,7 +206,7 @@ end
 
 Compute the logarithmic map on the [`Stiefel(n,k)`](@ref) manifold with respect to the [`StiefelSubmersionMetric`](@ref).
 
-The logarithmic map is computed using [`ShootingInverseRetraction`](@ref). For
+The logarithmic map is computed using [`ShootingInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ShootingInverseRetraction). For
 ``k ≤ \lfloor\frac{n}{2}\rfloor``, this is sped up using the ``k``-shooting method of
 [^ZimmermanHüper2022]. Keyword arguments are forwarded to `ShootingInverseRetraction`; see
 that documentation for details. Their defaults are:

@@ -1,3 +1,6 @@
+"""
+`Manifolds.jl` provides a library of manifolds aiming for an easy-to-use and fast implementation.
+"""
 module Manifolds
 
 import ManifoldsBase:

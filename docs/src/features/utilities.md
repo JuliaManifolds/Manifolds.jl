@@ -7,6 +7,16 @@ in
 TangentSpace
 ````
 
+# Fallback for the exponential map: Solving the corresponding ODE
+
+When additionally loading [`NLSolve.jl`](https://github.com/JuliaNLSolvers/NLsolve.jl) the following fallback for the exponential map is available.
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["nlsolve.jl"]
+Order = [:type, :function]
+```
+
 # Public documentation
 
 The following functions are of interest for extending and using the [`ProductManifold`](@ref).

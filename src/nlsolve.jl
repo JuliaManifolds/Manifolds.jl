@@ -7,7 +7,7 @@ respect to `q` on the [`AbstractManifold`](https://juliamanifolds.github.io/Mani
 not guaranteed to succeed and probably will not unless `q` is close to `p` and the initial
 guess `X0` is close.
 
-If the solver fails to converge, an [`OutOfInjectivityRadiusError`](@ref) is raised.
+If the solver fails to converge, an [`OutOfInjectivityRadiusError`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.OutOfInjectivityRadiusError) is raised.
 See [`NLSolveInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.NLSolveInverseRetraction) for configurable parameters.
 """
 inverse_retract(::AbstractManifold, p, q, ::NLSolveInverseRetraction; kwargs...)
