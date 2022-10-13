@@ -47,7 +47,7 @@ If you use `Manifolds.jl` in your work, please cite the following
 To refer to a certain version we recommend to also cite for example
 
 ```biblatex
-@softawre{manifoldsjl-zenodo-mostrecent,
+@software{manifoldsjl-zenodo-mostrecent,
   Author = {Seth D. Axen and Mateusz Baran and Ronny Bergmann},
   Title = {Manifolds.jl},
   Doi = {10.5281/ZENODO.4292129},
