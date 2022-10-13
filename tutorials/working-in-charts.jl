@@ -69,44 +69,11 @@ param_points = [Manifolds._torus_param(M, θ, φ) for θ in ϴs, φ in φs];
 # ╔═╡ 90822ca9-3fb2-41c5-9a33-00cfc6b30997
 X1, Y1, Z1 = [[p[i] for p in param_points] for i in 1:3];
 
-# ╔═╡ 6bb6654c-648c-4d7b-92c4-c9599f7f513e
-fig = Figure(resolution=(1400, 1000), fontsize=17);
-
-# ╔═╡ 92faf88f-dad8-46e0-8e1f-746098989412
-ax = LScene(fig[1, 1], show_axis=true);
-
 # ╔═╡ 0eeba70a-ce44-42a2-a435-ca0e4f58a486
 gcs = [gaussian_curvature(M, p) for p in param_points];
 
 # ╔═╡ fe261a1a-2c63-4180-9490-9164822d645f
 gcs_mm = max(abs(minimum(gcs)), abs(maximum(gcs)));
-
-# ╔═╡ 72fb53c5-d88e-4f1f-9f11-76d03bcb3a14
-pltobj = surface!(
-    ax,
-    X1,
-    Y1,
-    Z1;
-    shading=true,
-    ambient=Vec3f(0.65, 0.65, 0.65),
-    backlight=1.0f0,
-    color=gcs,
-    colormap=Reverse(:RdBu),
-    colorrange=(-gcs_mm, gcs_mm),
-    transparency=true,
-);
-
-# ╔═╡ 1c6b5caf-909a-48d2-a88b-4075e8fb85c3
-wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5);
-
-# ╔═╡ 53fa247c-d95e-4a51-a5a3-b85c64e9066f
-zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
-
-# ╔═╡ f6cd153b-f10a-4004-8c77-4d79dd39e4b6
-Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
-
-# ╔═╡ c1b20c01-0d44-4f3d-bd27-289295f09c1f
-fig
 
 # ╔═╡ c18609fe-b510-447f-9d2a-d1e6eb1da3c2
 md"""
@@ -119,7 +86,26 @@ PlutoUI.Slider
 # ╔═╡ 09b09179-4b31-4ecd-8c7c-26641dd392eb
 range
 
-# ╔═╡ 6267e4e8-546a-4593-a032-a154a95b8a01
+# ╔═╡ 2532be0e-6d48-4775-b78f-e48f04e5c3a3
+function solve_for(p0x, X_p0x, Y_transp)
+    p = [Manifolds._torus_param(M, p0x...)...]
+    i_p0x = Manifolds.get_chart_index(M, A, p)
+    p_exp = Manifolds.solve_chart_parallel_transport_ode(
+        M,
+        [0.0, 0.0],
+        X_p0x,
+        A,
+        i_p0x,
+        Y_transp;
+        final_time=t_end,
+    )
+    return p_exp
+end
+
+# ╔═╡ 2abef887-32a8-40ba-89e1-b6adbfe9174f
+bvp_i = (0, 0);
+
+# ╔═╡ 8903c913-840e-4922-a42d-cb0281c9b52f
 #hideall
 md"""
 θₚ $(@bind θₚ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
@@ -144,22 +130,6 @@ md"""
 φ₂ $(@bind φ₂ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
 """
 
-# ╔═╡ 2532be0e-6d48-4775-b78f-e48f04e5c3a3
-function solve_for(p0x, X_p0x, Y_transp)
-    p = [Manifolds._torus_param(M, p0x...)...]
-    i_p0x = Manifolds.get_chart_index(M, A, p)
-    p_exp = Manifolds.solve_chart_parallel_transport_ode(
-        M,
-        [0.0, 0.0],
-        X_p0x,
-        A,
-        i_p0x,
-        Y_transp;
-        final_time=t_end,
-    )
-    return p_exp
-end
-
 # ╔═╡ c1660206-d21a-4812-9dd3-bda91b633c0b
 geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])(0.0:dt:t_end)
 
@@ -167,22 +137,13 @@ geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])(0.0:dt:t_end)
 geo_ps = [Point3f(s[1]) for s in geo];
 
 # ╔═╡ f0d99ebf-cc53-485a-91a7-0271c48940fc
-pt_indices = 1:20:length(geo);
+pt_indices = 1:100:length(geo)
 
 # ╔═╡ d24ff04c-0916-4e65-9929-e396c641f5f7
 geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]];
 
 # ╔═╡ 89107a1d-68ea-4431-95f0-ada54beeca24
 geo_Ys = [Point3f(s[3]) for s in geo[pt_indices]];
-
-# ╔═╡ 17ba03c3-85aa-4d8c-b201-c8fbd8ffd148
-lines!(geo_ps; linewidth=2.0, color=:red)
-
-# ╔═╡ 421a0c02-645b-498e-84bf-ee0ad4c9156b
-arrows!(ax, geo_ps_pt, geo_Ys, linecolor=:green, arrowcolor=:green, linewidth=0.05)
-
-# ╔═╡ 2abef887-32a8-40ba-89e1-b6adbfe9174f
-bvp_i = (0, 0);
 
 # ╔═╡ 60b67901-9e6e-4185-bd5a-f65f147031bd
 bvp_a1 = [θ₁, φ₁];
@@ -197,7 +158,37 @@ bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i);
 geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)];
 
 # ╔═╡ eea2fbc7-1ba8-49f8-916c-743984abe15d
-lines!(geo_r; linewidth=2.0, color=:orange)
+begin
+    fig = Figure(resolution=(1400, 1000), fontsize=16)
+    ax = LScene(fig[1, 1], show_axis=true)
+    arrows!(ax, geo_ps_pt, geo_Ys, linecolor=:green, arrowcolor=:green, linewidth=0.05)
+    lines!(geo_ps; linewidth=2.0, color=:red)
+    lines!(geo_r; linewidth=2.0, color=:orange)
+end;
+
+# ╔═╡ 72fb53c5-d88e-4f1f-9f11-76d03bcb3a14
+pltobj = surface!(
+    ax,
+    X1,
+    Y1,
+    Z1;
+    shading=true,
+    ambient=Vec3f(0.65, 0.65, 0.65),
+    backlight=1.0f0,
+    color=gcs,
+    colormap=Reverse(:RdBu),
+    colorrange=(-gcs_mm, gcs_mm),
+    transparency=true,
+);
+
+# ╔═╡ 1c6b5caf-909a-48d2-a88b-4075e8fb85c3
+wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5);
+
+# ╔═╡ 53fa247c-d95e-4a51-a5a3-b85c64e9066f
+zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
+
+# ╔═╡ f6cd153b-f10a-4004-8c77-4d79dd39e4b6
+Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
 
 # ╔═╡ ae6242a4-87de-4e57-a91a-af6e73823bb6
 fig
@@ -2005,33 +1996,28 @@ version = "3.5.0+0"
 # ╠═f2276b50-49f4-478f-9a96-0e374a37fe2f
 # ╠═37a08f1f-08a9-4e25-91ad-d3e97609682b
 # ╠═90822ca9-3fb2-41c5-9a33-00cfc6b30997
-# ╠═6bb6654c-648c-4d7b-92c4-c9599f7f513e
-# ╠═92faf88f-dad8-46e0-8e1f-746098989412
 # ╠═0eeba70a-ce44-42a2-a435-ca0e4f58a486
 # ╠═fe261a1a-2c63-4180-9490-9164822d645f
 # ╠═72fb53c5-d88e-4f1f-9f11-76d03bcb3a14
 # ╠═1c6b5caf-909a-48d2-a88b-4075e8fb85c3
 # ╠═53fa247c-d95e-4a51-a5a3-b85c64e9066f
 # ╠═f6cd153b-f10a-4004-8c77-4d79dd39e4b6
-# ╠═c1b20c01-0d44-4f3d-bd27-289295f09c1f
 # ╟─c18609fe-b510-447f-9d2a-d1e6eb1da3c2
 # ╠═28832031-1779-46ec-b341-e502f59ee16e
 # ╠═09b09179-4b31-4ecd-8c7c-26641dd392eb
-# ╠═6267e4e8-546a-4593-a032-a154a95b8a01
 # ╠═2532be0e-6d48-4775-b78f-e48f04e5c3a3
 # ╠═c1660206-d21a-4812-9dd3-bda91b633c0b
 # ╠═a16a6a4c-3a22-4b3a-ab19-ab4e3cfa117c
 # ╠═f0d99ebf-cc53-485a-91a7-0271c48940fc
 # ╠═d24ff04c-0916-4e65-9929-e396c641f5f7
 # ╠═89107a1d-68ea-4431-95f0-ada54beeca24
-# ╠═17ba03c3-85aa-4d8c-b201-c8fbd8ffd148
-# ╠═421a0c02-645b-498e-84bf-ee0ad4c9156b
 # ╠═2abef887-32a8-40ba-89e1-b6adbfe9174f
 # ╠═60b67901-9e6e-4185-bd5a-f65f147031bd
 # ╠═25c427f6-e17d-4d37-86ef-d6b4b9ea7930
 # ╠═4cf7d1b4-3b5c-449a-ad6b-7b9252a7d124
 # ╠═687af044-42b0-433f-95ca-1ede1f96cc63
-# ╠═eea2fbc7-1ba8-49f8-916c-743984abe15d
+# ╟─8903c913-840e-4922-a42d-cb0281c9b52f
+# ╟─eea2fbc7-1ba8-49f8-916c-743984abe15d
 # ╠═ae6242a4-87de-4e57-a91a-af6e73823bb6
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
