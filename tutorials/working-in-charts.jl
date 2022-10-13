@@ -5,7 +5,13 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 04e7ac42-4b1b-11ed-1cb3-e76ac86d4203
-using Manifolds, RecursiveArrayTools, GLMakie, Makie, OrdinaryDiffEq, DiffEqCallbacks, BoundaryValueDiffEq
+using Manifolds,
+    RecursiveArrayTools,
+    GLMakie,
+    Makie,
+    OrdinaryDiffEq,
+    DiffEqCallbacks,
+    BoundaryValueDiffEq
 
 # ╔═╡ 8159d5bc-2c3f-4657-80c4-661e9162b79d
 md"""
@@ -15,13 +21,18 @@ md"""
 # ╔═╡ 27038d25-32b3-433d-ad47-f7ae330fef1c
 M = Manifolds.EmbeddedTorus(3, 2)
 
+# ╔═╡ e0c54d00-c698-4ea6-a710-37fc284ed83e
+A = Manifolds.DefaultTorusAtlas()
+
+# ╔═╡ 9a544db4-f291-4c06-b344-1be75bdfa1eb
+t_end = 200.0
+
 # ╔═╡ f0d60996-ae46-4bfa-8408-b6e28cba1f6b
 md"""
 ## Setup
 
 We will first set up our plot with an empty torus.
 """
-
 
 # ╔═╡ 44e6e4e1-6b69-4a40-a1f1-d0084a0af8c3
 GLMakie.activate!()
@@ -33,10 +44,10 @@ GLMakie.activate!()
 param_points = [Manifolds._torus_param(M, θ, φ) for θ in ϴs, φ in φs];
 
 # ╔═╡ 90822ca9-3fb2-41c5-9a33-00cfc6b30997
-X1, Y1, Z1 = [ [p[i] for p ∈ param_points] for i=1:3];
+X1, Y1, Z1 = [[p[i] for p in param_points] for i in 1:3];
 
 # ╔═╡ 6bb6654c-648c-4d7b-92c4-c9599f7f513e
-fig = Figure(resolution=(1400, 1000), fontsize=18);
+fig = Figure(resolution=(1400, 1000), fontsize=17);
 
 # ╔═╡ 92faf88f-dad8-46e0-8e1f-746098989412
 ax = LScene(fig[1, 1], show_axis=true);
@@ -69,7 +80,7 @@ wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5);
 zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
 
 # ╔═╡ f6cd153b-f10a-4004-8c77-4d79dd39e4b6
-Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
+#Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
 
 # ╔═╡ c1b20c01-0d44-4f3d-bd27-289295f09c1f
 fig
@@ -1837,6 +1848,8 @@ version = "3.5.0+0"
 # ╠═04e7ac42-4b1b-11ed-1cb3-e76ac86d4203
 # ╠═8159d5bc-2c3f-4657-80c4-661e9162b79d
 # ╠═27038d25-32b3-433d-ad47-f7ae330fef1c
+# ╠═e0c54d00-c698-4ea6-a710-37fc284ed83e
+# ╠═9a544db4-f291-4c06-b344-1be75bdfa1eb
 # ╟─f0d60996-ae46-4bfa-8408-b6e28cba1f6b
 # ╠═44e6e4e1-6b69-4a40-a1f1-d0084a0af8c3
 # ╠═f2276b50-49f4-478f-9a96-0e374a37fe2f
