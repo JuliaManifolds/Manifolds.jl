@@ -16,6 +16,8 @@ using Manifolds,
 # ╔═╡ 8159d5bc-2c3f-4657-80c4-661e9162b79d
 md"""
 # Working in Charts: the embedded Torus
+
+The following values still require explanation
 """
 
 # ╔═╡ 27038d25-32b3-433d-ad47-f7ae330fef1c
@@ -26,6 +28,9 @@ A = Manifolds.DefaultTorusAtlas()
 
 # ╔═╡ 9a544db4-f291-4c06-b344-1be75bdfa1eb
 t_end = 200.0
+
+# ╔═╡ df540cac-5f79-4234-ad32-41f5c86609b8
+dt = 0.1
 
 # ╔═╡ f0d60996-ae46-4bfa-8408-b6e28cba1f6b
 md"""
@@ -84,6 +89,93 @@ zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
 
 # ╔═╡ c1b20c01-0d44-4f3d-bd27-289295f09c1f
 fig
+
+# ╔═╡ eea2fbc7-1ba8-49f8-916c-743984abe15d
+#=
+	# This part still needs conversion but I (kellertuer) also need a little bit of explanation/text here.
+
+	## Sliders – easy peasy in Pluto, maybe careful in rednering them to docs, but I have an idea.
+    sg = SliderGrid(
+        fig[2, 1],
+        (label="θₚ", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="φₚ", range=(-pi):(pi / 200):pi, startvalue=0.0),
+        (label="θₓ", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="φₓ", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="θy", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="φy", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="geodesic - θ₁", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
+        (label="geodesic - φ₁", range=(-pi):(pi / 200):pi, startvalue=0.0),
+        (label="geodesic - θ₂", range=(-pi):(pi / 200):pi, startvalue=-pi / 3),
+        (label="geodesic - φ₂", range=(-pi):(pi / 200):pi, startvalue=pi / 2);
+        height=Auto(0.2f0),
+    )
+    rowgap!(sg.layout, 5)
+
+	# a point and tangent vector
+	## might need more explanation, what this function does
+    function solve_for(p0x, X_p0x, Y_transp)
+        p = [Manifolds._torus_param(M, p0x...)...]
+        i_p0x = Manifolds.get_chart_index(M, A, p)
+        p_exp = Manifolds.solve_chart_parallel_transport_ode(
+            M,
+            [0.0, 0.0],
+            X_p0x,
+            A,
+            i_p0x,
+            Y_transp;
+            final_time=t_end,
+        )
+        return p_exp
+    end
+	## Also needs explanation - 
+    geo = lift(
+        sg.sliders[1].value,
+        sg.sliders[2].value,
+        sg.sliders[3].value,
+        sg.sliders[4].value,
+        sg.sliders[5].value,
+        sg.sliders[6].value,
+    ) do θₚ, φₚ, θₓ, φₓ, θy, φy
+        p_exp = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])
+
+        samples = p_exp(0.0:dt:t_end)
+        return samples
+    end
+	## Also needs explanation - 
+    geo_ps = lift(geo) do samples
+        return [Point3f(s[1]) for s in samples]
+    end
+
+	## From here on without comments – I am lost.
+    pt_indices = 1:20:length(geo[])
+    geo_ps_pt = lift(geo) do samples
+        return [Point3f(s[1]) for s in samples[pt_indices]]
+    end
+    geo_Ys = lift(geo) do samples
+        return [Point3f(s[3]) for s in samples[pt_indices]]
+    end
+
+    lines!(geo_ps; linewidth=2.0, color=:red)
+    arrows!(ax, geo_ps_pt, geo_Ys, linecolor=:green, arrowcolor=:green, linewidth=0.05)
+
+    # draw a geodesic between two points
+    geo_r = lift(
+        sg.sliders[7].value,
+        sg.sliders[8].value,
+        sg.sliders[9].value,
+        sg.sliders[10].value,
+    ) do θ₁, φ₁, θ₂, φ₂
+        bvp_i = (0, 0)
+        bvp_a1 = [θ₁, φ₁]
+        bvp_a2 = [θ₂, φ₂]
+        bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i)
+        bvp_sol_pts =
+            [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
+        return bvp_sol_pts
+    end
+
+    lines!(geo_r; linewidth=2.0, color=:orange)
+=#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1850,6 +1942,7 @@ version = "3.5.0+0"
 # ╠═27038d25-32b3-433d-ad47-f7ae330fef1c
 # ╠═e0c54d00-c698-4ea6-a710-37fc284ed83e
 # ╠═9a544db4-f291-4c06-b344-1be75bdfa1eb
+# ╠═df540cac-5f79-4234-ad32-41f5c86609b8
 # ╟─f0d60996-ae46-4bfa-8408-b6e28cba1f6b
 # ╠═44e6e4e1-6b69-4a40-a1f1-d0084a0af8c3
 # ╠═f2276b50-49f4-478f-9a96-0e374a37fe2f
@@ -1864,5 +1957,6 @@ version = "3.5.0+0"
 # ╠═53fa247c-d95e-4a51-a5a3-b85c64e9066f
 # ╠═f6cd153b-f10a-4004-8c77-4d79dd39e4b6
 # ╠═c1b20c01-0d44-4f3d-bd27-289295f09c1f
+# ╠═eea2fbc7-1ba8-49f8-916c-743984abe15d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
