@@ -4,6 +4,23 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try
+            Base.loaded_modules[Base.PkgId(
+                Base.UUID("6e696c72-6542-2067-7265-42206c756150"),
+                "AbstractPlutoDingetjes",
+            )].Bonds.initial_value
+        catch
+            b -> missing
+        end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
 # ╔═╡ 04e7ac42-4b1b-11ed-1cb3-e76ac86d4203
 using Manifolds,
     RecursiveArrayTools,
@@ -11,7 +28,8 @@ using Manifolds,
     Makie,
     OrdinaryDiffEq,
     DiffEqCallbacks,
-    BoundaryValueDiffEq
+    BoundaryValueDiffEq,
+    PlutoUI
 
 # ╔═╡ 8159d5bc-2c3f-4657-80c4-661e9162b79d
 md"""
@@ -85,97 +103,104 @@ wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5);
 zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
 
 # ╔═╡ f6cd153b-f10a-4004-8c77-4d79dd39e4b6
-#Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
+Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
 
 # ╔═╡ c1b20c01-0d44-4f3d-bd27-289295f09c1f
 fig
 
-# ╔═╡ eea2fbc7-1ba8-49f8-916c-743984abe15d
-#=
-	# This part still needs conversion but I (kellertuer) also need a little bit of explanation/text here.
+# ╔═╡ c18609fe-b510-447f-9d2a-d1e6eb1da3c2
+md"""
+## (Interactive) Values for the geodesic
+"""
 
-	## Sliders – easy peasy in Pluto, maybe careful in rednering them to docs, but I have an idea.
-    sg = SliderGrid(
-        fig[2, 1],
-        (label="θₚ", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
-        (label="φₚ", range=(-pi):(pi / 200):pi, startvalue=0.0),
-        (label="θₓ", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
-        (label="φₓ", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
-        (label="θy", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
-        (label="φy", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
-        (label="geodesic - θ₁", range=(-pi):(pi / 200):pi, startvalue=pi / 10),
-        (label="geodesic - φ₁", range=(-pi):(pi / 200):pi, startvalue=0.0),
-        (label="geodesic - θ₂", range=(-pi):(pi / 200):pi, startvalue=-pi / 3),
-        (label="geodesic - φ₂", range=(-pi):(pi / 200):pi, startvalue=pi / 2);
-        height=Auto(0.2f0),
+# ╔═╡ 28832031-1779-46ec-b341-e502f59ee16e
+PlutoUI.Slider
+
+# ╔═╡ 09b09179-4b31-4ecd-8c7c-26641dd392eb
+range
+
+# ╔═╡ 6267e4e8-546a-4593-a032-a154a95b8a01
+#hideall
+md"""
+θₚ $(@bind θₚ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+
+θₓ $(@bind θₓ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+
+θy $(@bind θy PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+
+φₚ $(@bind φₚ PlutoUI.Slider(range(-π,π,200), default=0.0, show_value=true))
+
+φₓ $(@bind φₓ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+
+φy $(@bind φy PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+
+
+θ₁ $(@bind θ₁ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+
+θ₂ $(@bind θ₂ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+
+φ₁ $(@bind φ₁ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+
+φ₂ $(@bind φ₂ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+"""
+
+# ╔═╡ 2532be0e-6d48-4775-b78f-e48f04e5c3a3
+function solve_for(p0x, X_p0x, Y_transp)
+    p = [Manifolds._torus_param(M, p0x...)...]
+    i_p0x = Manifolds.get_chart_index(M, A, p)
+    p_exp = Manifolds.solve_chart_parallel_transport_ode(
+        M,
+        [0.0, 0.0],
+        X_p0x,
+        A,
+        i_p0x,
+        Y_transp;
+        final_time=t_end,
     )
-    rowgap!(sg.layout, 5)
+    return p_exp
+end
 
-	# a point and tangent vector
-	## might need more explanation, what this function does
-    function solve_for(p0x, X_p0x, Y_transp)
-        p = [Manifolds._torus_param(M, p0x...)...]
-        i_p0x = Manifolds.get_chart_index(M, A, p)
-        p_exp = Manifolds.solve_chart_parallel_transport_ode(
-            M,
-            [0.0, 0.0],
-            X_p0x,
-            A,
-            i_p0x,
-            Y_transp;
-            final_time=t_end,
-        )
-        return p_exp
-    end
-	## Also needs explanation - 
-    geo = lift(
-        sg.sliders[1].value,
-        sg.sliders[2].value,
-        sg.sliders[3].value,
-        sg.sliders[4].value,
-        sg.sliders[5].value,
-        sg.sliders[6].value,
-    ) do θₚ, φₚ, θₓ, φₓ, θy, φy
-        p_exp = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])
+# ╔═╡ c1660206-d21a-4812-9dd3-bda91b633c0b
+geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])(0.0:dt:t_end)
 
-        samples = p_exp(0.0:dt:t_end)
-        return samples
-    end
-	## Also needs explanation - 
-    geo_ps = lift(geo) do samples
-        return [Point3f(s[1]) for s in samples]
-    end
+# ╔═╡ a16a6a4c-3a22-4b3a-ab19-ab4e3cfa117c
+geo_ps = [Point3f(s[1]) for s in geo];
 
-	## From here on without comments – I am lost.
-    pt_indices = 1:20:length(geo[])
-    geo_ps_pt = lift(geo) do samples
-        return [Point3f(s[1]) for s in samples[pt_indices]]
-    end
-    geo_Ys = lift(geo) do samples
-        return [Point3f(s[3]) for s in samples[pt_indices]]
-    end
+# ╔═╡ f0d99ebf-cc53-485a-91a7-0271c48940fc
+pt_indices = 1:20:length(geo);
 
-    lines!(geo_ps; linewidth=2.0, color=:red)
-    arrows!(ax, geo_ps_pt, geo_Ys, linecolor=:green, arrowcolor=:green, linewidth=0.05)
+# ╔═╡ d24ff04c-0916-4e65-9929-e396c641f5f7
+geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]];
 
-    # draw a geodesic between two points
-    geo_r = lift(
-        sg.sliders[7].value,
-        sg.sliders[8].value,
-        sg.sliders[9].value,
-        sg.sliders[10].value,
-    ) do θ₁, φ₁, θ₂, φ₂
-        bvp_i = (0, 0)
-        bvp_a1 = [θ₁, φ₁]
-        bvp_a2 = [θ₂, φ₂]
-        bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i)
-        bvp_sol_pts =
-            [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
-        return bvp_sol_pts
-    end
+# ╔═╡ 89107a1d-68ea-4431-95f0-ada54beeca24
+geo_Ys = [Point3f(s[3]) for s in geo[pt_indices]];
 
-    lines!(geo_r; linewidth=2.0, color=:orange)
-=#
+# ╔═╡ 17ba03c3-85aa-4d8c-b201-c8fbd8ffd148
+lines!(geo_ps; linewidth=2.0, color=:red)
+
+# ╔═╡ 421a0c02-645b-498e-84bf-ee0ad4c9156b
+arrows!(ax, geo_ps_pt, geo_Ys, linecolor=:green, arrowcolor=:green, linewidth=0.05)
+
+# ╔═╡ 2abef887-32a8-40ba-89e1-b6adbfe9174f
+bvp_i = (0, 0);
+
+# ╔═╡ 60b67901-9e6e-4185-bd5a-f65f147031bd
+bvp_a1 = [θ₁, φ₁];
+
+# ╔═╡ 25c427f6-e17d-4d37-86ef-d6b4b9ea7930
+bvp_a2 = [θ₂, φ₂];
+
+# ╔═╡ 4cf7d1b4-3b5c-449a-ad6b-7b9252a7d124
+bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i);
+
+# ╔═╡ 687af044-42b0-433f-95ca-1ede1f96cc63
+geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)];
+
+# ╔═╡ eea2fbc7-1ba8-49f8-916c-743984abe15d
+lines!(geo_r; linewidth=2.0, color=:orange)
+
+# ╔═╡ ae6242a4-87de-4e57-a91a-af6e73823bb6
+fig
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -186,6 +211,7 @@ GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 
 [compat]
@@ -195,6 +221,7 @@ GLMakie = "~0.7.0"
 Makie = "~0.18.0"
 Manifolds = "~0.8.33"
 OrdinaryDiffEq = "~6.28.1"
+PlutoUI = "~0.7.44"
 RecursiveArrayTools = "~2.32.0"
 """
 
@@ -204,13 +231,19 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.1"
 manifest_format = "2.0"
-project_hash = "9c476d1ba4fa393791f40bab10a90b620c0c8eb4"
+project_hash = "d604172bc48c88a8c744935121b4dd84c28bc08f"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
 git-tree-sha1 = "69f7020bd72f069c219b5e8c236c1fa90d2cb409"
 uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
 version = "1.2.1"
+
+[[deps.AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "8eaf9f1b4921132a4cff3f36a1d9ba923b14a481"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.1.4"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "5c0b629df8a5566a06f5fef5100b53ea56e465a0"
@@ -783,6 +816,24 @@ git-tree-sha1 = "709d864e3ed6e3545230601f94e11ebc65994641"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.11"
 
+[[deps.Hyperscript]]
+deps = ["Test"]
+git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
+uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
+version = "0.0.4"
+
+[[deps.HypertextLiteral]]
+deps = ["Tricks"]
+git-tree-sha1 = "c47c5fa4c5308f27ccaac35504858d8914e102f9"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.4"
+
+[[deps.IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "f7be53659ab06ddc986428d3a9dcc95f6fa6705a"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "0.2.2"
+
 [[deps.IfElse]]
 git-tree-sha1 = "debdd00ffef04665ccbb3e150747a77560e8fad1"
 uuid = "615f187c-cbe4-4ef1-ba3b-2fcf58d6d173"
@@ -1343,6 +1394,12 @@ deps = ["ColorSchemes", "Colors", "Dates", "Printf", "Random", "Reexport", "Snoo
 git-tree-sha1 = "21303256d239f6b484977314674aef4bb1fe4420"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.3.1"
+
+[[deps.PlutoUI]]
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
+git-tree-sha1 = "6e33d318cf8843dade925e35162992145b4eb12f"
+uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+version = "0.7.44"
 
 [[deps.Polyester]]
 deps = ["ArrayInterface", "BitTwiddlingConvenienceFunctions", "CPUSummary", "IfElse", "ManualMemory", "PolyesterWeave", "Requires", "Static", "StrideArraysCore", "ThreadingUtilities"]
@@ -1957,6 +2014,24 @@ version = "3.5.0+0"
 # ╠═53fa247c-d95e-4a51-a5a3-b85c64e9066f
 # ╠═f6cd153b-f10a-4004-8c77-4d79dd39e4b6
 # ╠═c1b20c01-0d44-4f3d-bd27-289295f09c1f
+# ╟─c18609fe-b510-447f-9d2a-d1e6eb1da3c2
+# ╠═28832031-1779-46ec-b341-e502f59ee16e
+# ╠═09b09179-4b31-4ecd-8c7c-26641dd392eb
+# ╠═6267e4e8-546a-4593-a032-a154a95b8a01
+# ╠═2532be0e-6d48-4775-b78f-e48f04e5c3a3
+# ╠═c1660206-d21a-4812-9dd3-bda91b633c0b
+# ╠═a16a6a4c-3a22-4b3a-ab19-ab4e3cfa117c
+# ╠═f0d99ebf-cc53-485a-91a7-0271c48940fc
+# ╠═d24ff04c-0916-4e65-9929-e396c641f5f7
+# ╠═89107a1d-68ea-4431-95f0-ada54beeca24
+# ╠═17ba03c3-85aa-4d8c-b201-c8fbd8ffd148
+# ╠═421a0c02-645b-498e-84bf-ee0ad4c9156b
+# ╠═2abef887-32a8-40ba-89e1-b6adbfe9174f
+# ╠═60b67901-9e6e-4185-bd5a-f65f147031bd
+# ╠═25c427f6-e17d-4d37-86ef-d6b4b9ea7930
+# ╠═4cf7d1b4-3b5c-449a-ad6b-7b9252a7d124
+# ╠═687af044-42b0-433f-95ca-1ede1f96cc63
 # ╠═eea2fbc7-1ba8-49f8-916c-743984abe15d
+# ╠═ae6242a4-87de-4e57-a91a-af6e73823bb6
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
