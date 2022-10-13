@@ -290,6 +290,10 @@ function Base.copyto!(X::UMVTVector, Y::UMVTVector)
     return X
 end
 
+default_retraction_method(::FixedRankMatrices) = PolarRetraction()
+default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction()
+default_vector_transport_method(::FixedRankMatrices) = ProjectionTransport()
+
 @doc raw"""
     embed(::FixedRankMatrices, p::SVDMPoint)
 
