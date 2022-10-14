@@ -35,11 +35,19 @@ using Manifolds,
 md"""
 # Working in Charts: the embedded Torus
 
-There are two conceptually different approaches to working on a manifold. The first one, widespread in differential geometry textbooks, is based on defining an atlas on the manifold and performing computations in selected charts. This approach, while generic, is not ideally suitable in all circumstances. For example, working in charts that do not cover the entire manifold causes issues with having to switch charts when operating on a manifold. Furthermore, for some manifolds, there are efficient closed-form formulas for standard functions like the exponential map or Riemannian distance that use a chart-free representation. Manifolds.jl supports both approaches, although the chart-free approach is the main focus of the library.
+There are two conceptually different approaches to working on a manifold: working in charts and chart-free representations.
 
-This section of the tutorial focuses on the chart-based computation.
+The first one, widespread in differential geometry textbooks, is based on defining an atlas on the manifold and performing computations in selected charts. This approach, while generic, is not ideally suitable in all circumstances. For example, working in charts that do not cover the entire manifold causes issues with having to switch charts when operating on a manifold.
 
-`M` is the torus we will be working on, one defined as a surface of revolution of a circle of radius 2 around a circle of radius 3. The atlas we will perform computations in is `A`.
+The second one is beneficital, if there exist a representation of points and tangent vectors for a manifold, which allow for efficient closed-form formulas for standard functions like the exponential map or Riemannian distance in this representation. These computations are then chart-free. `Manifolds.jl` supports both approaches, although the chart-free approach is the main focus of the library.
+
+In this tutorial we focsus on chart-based computation.
+"""
+
+# ╔═╡ b85a56ad-3b74-402d-8fbe-9f0d130253e6
+md"""
+The manifold we consider is the `M` is the torus in form of the [`EmbeddedTorus`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/torus.html#Manifolds.EmbeddedTorus), that is the representation defined as a surface of revolution of a circle of radius 2 around a circle of radius 3.
+The atlas we will perform computations in is its [`DefaultTorusAtlas`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/torus.html#Manifolds.DefaultTorusAtlas) `A`, consistting of a family of charts indexed by two angles, that specify the base point of the chart.
 
 We will draw geodesics time between 0 and `t_end`, and then sample the solution at multiples of `dt` and draw a line connecting sampled points.
 """
@@ -49,12 +57,6 @@ M = Manifolds.EmbeddedTorus(3, 2)
 
 # ╔═╡ e0c54d00-c698-4ea6-a710-37fc284ed83e
 A = Manifolds.DefaultTorusAtlas()
-
-# ╔═╡ 9a544db4-f291-4c06-b344-1be75bdfa1eb
-t_end = 200.0
-
-# ╔═╡ df540cac-5f79-4234-ad32-41f5c86609b8
-dt = 0.1
 
 # ╔═╡ f0d60996-ae46-4bfa-8408-b6e28cba1f6b
 md"""
@@ -69,19 +71,37 @@ The torus will be colored according to its Gaussian curvature stored in `gcs`. W
 GLMakie.activate!()
 
 # ╔═╡ f2276b50-49f4-478f-9a96-0e374a37fe2f
-ϴs, φs = LinRange(-π, π, 50), LinRange(-π, π, 50);
+"""
+	torus_figure()
 
-# ╔═╡ 37a08f1f-08a9-4e25-91ad-d3e97609682b
-param_points = [Manifolds._torus_param(M, θ, φ) for θ in ϴs, φ in φs];
-
-# ╔═╡ 90822ca9-3fb2-41c5-9a33-00cfc6b30997
-X1, Y1, Z1 = [[p[i] for p in param_points] for i in 1:3];
-
-# ╔═╡ 0eeba70a-ce44-42a2-a435-ca0e4f58a486
-gcs = [gaussian_curvature(M, p) for p in param_points];
-
-# ╔═╡ fe261a1a-2c63-4180-9490-9164822d645f
-gcs_mm = max(abs(minimum(gcs)), abs(maximum(gcs)));
+This function generates a simple plot of a torus and returns the new figure containing the plot.
+"""
+function torus_figure()
+    fig = Figure(resolution=(1400, 1000), fontsize=16)
+    ax = LScene(fig[1, 1], show_axis=true)
+    ϴs, φs = LinRange(-π, π, 50), LinRange(-π, π, 50)
+    param_points = [Manifolds._torus_param(M, θ, φ) for θ in ϴs, φ in φs]
+    X1, Y1, Z1 = [[p[i] for p in param_points] for i in 1:3]
+    gcs = [gaussian_curvature(M, p) for p in param_points]
+    gcs_mm = max(abs(minimum(gcs)), abs(maximum(gcs)))
+    pltobj = surface!(
+        ax,
+        X1,
+        Y1,
+        Z1;
+        shading=true,
+        ambient=Vec3f(0.65, 0.65, 0.65),
+        backlight=1.0f0,
+        color=gcs,
+        colormap=Reverse(:RdBu),
+        colorrange=(-gcs_mm, gcs_mm),
+        transparency=true,
+    )
+    wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5)
+    zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
+    Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
+    return ax, fig
+end
 
 # ╔═╡ c18609fe-b510-447f-9d2a-d1e6eb1da3c2
 md"""
@@ -103,14 +123,8 @@ The logarithmic map will be solved between points with parametrization `bvp_a1` 
 The result is assigned to variable `bvp_sol` and then sampled with time step 0.05. The result of this sampling is converted from parameters in chart `bvp_i` to point in the embedding and stored in `geo_r`.
 """
 
-# ╔═╡ 28832031-1779-46ec-b341-e502f59ee16e
-PlutoUI.Slider
-
-# ╔═╡ 09b09179-4b31-4ecd-8c7c-26641dd392eb
-range
-
 # ╔═╡ 2532be0e-6d48-4775-b78f-e48f04e5c3a3
-function solve_for(p0x, X_p0x, Y_transp)
+function solve_for(p0x, X_p0x, Y_transp, T)
     p = [Manifolds._torus_param(M, p0x...)...]
     i_p0x = Manifolds.get_chart_index(M, A, p)
     p_exp = Manifolds.solve_chart_parallel_transport_ode(
@@ -120,101 +134,86 @@ function solve_for(p0x, X_p0x, Y_transp)
         A,
         i_p0x,
         Y_transp;
-        final_time=t_end,
+        final_time=T,
     )
     return p_exp
 end
 
-# ╔═╡ 2abef887-32a8-40ba-89e1-b6adbfe9174f
-bvp_i = (0, 0);
-
-# ╔═╡ 8903c913-840e-4922-a42d-cb0281c9b52f
-#hideall
+# ╔═╡ 9ee3fbaf-a579-480e-ae33-9d6eb8b07fbc
 md"""
-θₚ $(@bind θₚ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+### Solving parallel Transport ODE
+"""
 
-θₓ $(@bind θₓ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+# ╔═╡ 34cd1003-3790-4db1-bcf8-2e98cf9b98b6
+md"""
+Next we have to determine the 
 
-θy $(@bind θy PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+* ``t_\mathrm{end}`` $(@bind t_end PlutoUI.Slider(range(0,100,1001), default=2, show_value=true))
+* ``\mathrm{d}t`` $(@bind dt PlutoUI.Slider(range(1e-3,0.5,500), default=1e-1, show_value=true))
+"""
 
-φₚ $(@bind φₚ PlutoUI.Slider(range(-π,π,200), default=0.0, show_value=true))
+# ╔═╡ 6db745f9-afa4-4b5a-8871-b58585165c9e
+md" And we parametrise the start point and direction"
 
-φₓ $(@bind φₓ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
-
-φy $(@bind φy PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
-
-
-θ₁ $(@bind θ₁ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
-
-θ₂ $(@bind θ₂ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
-
-φ₁ $(@bind φ₁ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
-
-φ₂ $(@bind φ₂ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+# ╔═╡ fea185a1-bfae-4bd8-9b2a-f889e54f3f70
+md"""
+* θₚ $(@bind θₚ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
+* θₓ $(@bind θₓ PlutoUI.Slider(range(-π,π,200), default=π/2, show_value=true))
+* θy $(@bind θy PlutoUI.Slider(range(-π,π,200), default=0, show_value=true))
+* φₚ $(@bind φₚ PlutoUI.Slider(range(-π,π,200), default=-π/4, show_value=true))
+* φₓ $(@bind φₓ PlutoUI.Slider(range(-π,π,200), default=π/4, show_value=true))
+* φy $(@bind φy PlutoUI.Slider(range(-π,π,200), default=π/8, show_value=true))
 """
 
 # ╔═╡ c1660206-d21a-4812-9dd3-bda91b633c0b
-geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])(0.0:dt:t_end)
+begin
+    geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy], t_end)(0.0:dt:t_end)
+    geo_ps = [Point3f(s[1]) for s in geo]
+    pt_indices = 1:div(length(geo), 10):length(geo)
+    geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]]
+    geo_Ys = [Point3f(s[3]) for s in geo[pt_indices]]
+end;
 
-# ╔═╡ a16a6a4c-3a22-4b3a-ab19-ab4e3cfa117c
-geo_ps = [Point3f(s[1]) for s in geo];
+# ╔═╡ a30fa94f-5669-4265-a541-03d16dbd5745
+begin
+    ax1, fig1 = torus_figure()
+    arrows!(ax1, geo_ps_pt, geo_Ys, linewidth=0.05, color=:blue)
+    lines!(geo_ps; linewidth=8.0, color=:green)
+    fig1
+end
 
-# ╔═╡ f0d99ebf-cc53-485a-91a7-0271c48940fc
-pt_indices = 1:100:length(geo)
+# ╔═╡ a941fd19-faf5-49d0-8f68-ae2fbe45130d
+md" ### Solving the logairthmic map ODE"
 
-# ╔═╡ d24ff04c-0916-4e65-9929-e396c641f5f7
-geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]];
+# ╔═╡ 922461b0-55a0-447b-b59d-cfff7b448858
+#hideall
+md"""
+Start point angles
 
-# ╔═╡ 89107a1d-68ea-4431-95f0-ada54beeca24
-geo_Ys = [Point3f(s[3]) for s in geo[pt_indices]];
+* θ₁ $(@bind θ₁ PlutoUI.Slider(range(-π,π,200), default=π/2, show_value=true))
+* φ₁ $(@bind φ₁ PlutoUI.Slider(range(-π,π,200), default=0, show_value=true))
 
-# ╔═╡ 60b67901-9e6e-4185-bd5a-f65f147031bd
-bvp_a1 = [θ₁, φ₁];
+End point angles
 
-# ╔═╡ 25c427f6-e17d-4d37-86ef-d6b4b9ea7930
-bvp_a2 = [θ₂, φ₂];
+* θ₂ $(@bind θ₂ PlutoUI.Slider(range(-π,π,200), default=-π/2, show_value=true))
+* φ₂ $(@bind φ₂ PlutoUI.Slider(range(-π,π,200), default=π, show_value=true))
+"""
 
-# ╔═╡ 4cf7d1b4-3b5c-449a-ad6b-7b9252a7d124
-bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i);
-
-# ╔═╡ 687af044-42b0-433f-95ca-1ede1f96cc63
-geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)];
+# ╔═╡ 2abef887-32a8-40ba-89e1-b6adbfe9174f
+begin
+    bvp_i = (0, 0)
+    bvp_a1 = [θ₁, φ₁]
+    bvp_a2 = [θ₂, φ₂]
+    bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i)
+    geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
+end;
 
 # ╔═╡ eea2fbc7-1ba8-49f8-916c-743984abe15d
 begin
-    fig = Figure(resolution=(1400, 1000), fontsize=16)
-    ax = LScene(fig[1, 1], show_axis=true)
-    arrows!(ax, geo_ps_pt, geo_Ys, linecolor=:green, arrowcolor=:green, linewidth=0.05)
-    lines!(geo_ps; linewidth=2.0, color=:red)
-    lines!(geo_r; linewidth=2.0, color=:orange)
-end;
-
-# ╔═╡ 72fb53c5-d88e-4f1f-9f11-76d03bcb3a14
-pltobj = surface!(
-    ax,
-    X1,
-    Y1,
-    Z1;
-    shading=true,
-    ambient=Vec3f(0.65, 0.65, 0.65),
-    backlight=1.0f0,
-    color=gcs,
-    colormap=Reverse(:RdBu),
-    colorrange=(-gcs_mm, gcs_mm),
-    transparency=true,
-);
-
-# ╔═╡ 1c6b5caf-909a-48d2-a88b-4075e8fb85c3
-wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5);
-
-# ╔═╡ 53fa247c-d95e-4a51-a5a3-b85c64e9066f
-zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
-
-# ╔═╡ f6cd153b-f10a-4004-8c77-4d79dd39e4b6
-Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
-
-# ╔═╡ ae6242a4-87de-4e57-a91a-af6e73823bb6
-fig
+    ax2, fig2 = torus_figure()
+    lines!(geo_r; linewidth=8.0, color=:green)
+    fig2
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -245,7 +244,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.1"
 manifest_format = "2.0"
-project_hash = "d604172bc48c88a8c744935121b4dd84c28bc08f"
+project_hash = "968389e9aae83329e6c849c6f597f8623f3782d7"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -2009,38 +2008,24 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═04e7ac42-4b1b-11ed-1cb3-e76ac86d4203
-# ╠═8159d5bc-2c3f-4657-80c4-661e9162b79d
+# ╟─8159d5bc-2c3f-4657-80c4-661e9162b79d
+# ╠═b85a56ad-3b74-402d-8fbe-9f0d130253e6
 # ╠═27038d25-32b3-433d-ad47-f7ae330fef1c
 # ╠═e0c54d00-c698-4ea6-a710-37fc284ed83e
-# ╠═9a544db4-f291-4c06-b344-1be75bdfa1eb
-# ╠═df540cac-5f79-4234-ad32-41f5c86609b8
 # ╟─f0d60996-ae46-4bfa-8408-b6e28cba1f6b
 # ╠═44e6e4e1-6b69-4a40-a1f1-d0084a0af8c3
 # ╠═f2276b50-49f4-478f-9a96-0e374a37fe2f
-# ╠═37a08f1f-08a9-4e25-91ad-d3e97609682b
-# ╠═90822ca9-3fb2-41c5-9a33-00cfc6b30997
-# ╠═0eeba70a-ce44-42a2-a435-ca0e4f58a486
-# ╠═fe261a1a-2c63-4180-9490-9164822d645f
-# ╠═72fb53c5-d88e-4f1f-9f11-76d03bcb3a14
-# ╠═1c6b5caf-909a-48d2-a88b-4075e8fb85c3
-# ╠═53fa247c-d95e-4a51-a5a3-b85c64e9066f
-# ╠═f6cd153b-f10a-4004-8c77-4d79dd39e4b6
 # ╟─c18609fe-b510-447f-9d2a-d1e6eb1da3c2
-# ╠═28832031-1779-46ec-b341-e502f59ee16e
-# ╠═09b09179-4b31-4ecd-8c7c-26641dd392eb
 # ╠═2532be0e-6d48-4775-b78f-e48f04e5c3a3
+# ╠═9ee3fbaf-a579-480e-ae33-9d6eb8b07fbc
+# ╠═34cd1003-3790-4db1-bcf8-2e98cf9b98b6
+# ╠═6db745f9-afa4-4b5a-8871-b58585165c9e
+# ╠═fea185a1-bfae-4bd8-9b2a-f889e54f3f70
 # ╠═c1660206-d21a-4812-9dd3-bda91b633c0b
-# ╠═a16a6a4c-3a22-4b3a-ab19-ab4e3cfa117c
-# ╠═f0d99ebf-cc53-485a-91a7-0271c48940fc
-# ╠═d24ff04c-0916-4e65-9929-e396c641f5f7
-# ╠═89107a1d-68ea-4431-95f0-ada54beeca24
+# ╠═a30fa94f-5669-4265-a541-03d16dbd5745
+# ╟─a941fd19-faf5-49d0-8f68-ae2fbe45130d
+# ╟─922461b0-55a0-447b-b59d-cfff7b448858
 # ╠═2abef887-32a8-40ba-89e1-b6adbfe9174f
-# ╠═60b67901-9e6e-4185-bd5a-f65f147031bd
-# ╠═25c427f6-e17d-4d37-86ef-d6b4b9ea7930
-# ╠═4cf7d1b4-3b5c-449a-ad6b-7b9252a7d124
-# ╠═687af044-42b0-433f-95ca-1ede1f96cc63
-# ╟─8903c913-840e-4922-a42d-cb0281c9b52f
-# ╟─eea2fbc7-1ba8-49f8-916c-743984abe15d
-# ╠═ae6242a4-87de-4e57-a91a-af6e73823bb6
+# ╠═eea2fbc7-1ba8-49f8-916c-743984abe15d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
