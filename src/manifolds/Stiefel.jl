@@ -252,10 +252,9 @@ function inverse_retract_qr!(M::Stiefel{n,k}, X, p, q) where {n,k}
     return X
 end
 
-function Base.isapprox(M::Stiefel, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
+function Base.isapprox(M::Stiefel, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
+    return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
-Base.isapprox(::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
 
 @doc raw"""
     manifold_dimension(M::Stiefel)
