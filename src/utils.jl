@@ -312,3 +312,8 @@ end
     end
     return ex
 end
+
+_eps_safe(::Type{T}) where {T<:Integer} = zero(T)
+_eps_safe(::Type{T}) where {T<:Real} = eps(T)
+
+max_eps(xs...) = maximum(_eps_safe ∘ eltype, xs)
