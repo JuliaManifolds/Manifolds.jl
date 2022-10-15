@@ -315,5 +315,6 @@ end
 
 _eps_safe(::Type{T}) where {T<:Integer} = zero(T)
 _eps_safe(::Type{T}) where {T<:Real} = eps(T)
+_eps_safe(::Type{T}) where {T<:Number} = eps(real(T))
 
 max_eps(xs...) = maximum(_eps_safe ∘ eltype, xs)
