@@ -210,7 +210,7 @@ function Base.isapprox(
     p,
     X,
     Y;
-    atol=sqrt(default_atol(X, Y)),
+    atol=sqrt(max_eps(X, Y)),
     kwargs...,
 )
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
