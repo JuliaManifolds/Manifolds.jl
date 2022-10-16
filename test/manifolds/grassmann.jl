@@ -84,6 +84,8 @@ include("../utils.jl")
                 # investigate why this is so large on dev
                 exp_log_atol_multiplier=10.0 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
                 is_tangent_atol_multiplier=20.0,
+                projection_atol_multiplier=10.0,
+                retraction_atol_multiplier=10.0,
             )
 
             @testset "inner/norm" begin
@@ -179,6 +181,8 @@ include("../utils.jl")
                 ],
                 exp_log_atol_multiplier=10.0^3,
                 is_tangent_atol_multiplier=20.0,
+                projection_atol_multiplier=10.0,
+                retraction_atol_multiplier=10.0,
                 test_inplace=true,
                 test_rand_point=true,
             )
