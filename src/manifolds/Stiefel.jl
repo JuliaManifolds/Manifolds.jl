@@ -588,7 +588,13 @@ function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::PolarRetract
 end
 function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::QRRetraction)
     q = retract(M, p, d, QRRetraction())
-    rf = UpperTriangular(qr(p + d).R)
+
+    # use the QR factorization with positive diagonal of R
+    pdR = qr(p + d).R
+    s = sign.(diag(pdR))
+    s[s .== 0] .= 1
+    rf = UpperTriangular(Diagonal(s)' * pdR)
+
     Xrf = X / rf
     qtXrf = q' * Xrf
     return copyto!(
@@ -674,7 +680,12 @@ function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::PolarRetraction)
 end
 function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
     d = inverse_retract(M, p, q, QRInverseRetraction())
-    rf = UpperTriangular(qr(p + d).R)
+
+    # use the QR factorization with positive diagonal of R
+    pdR = qr(p + d).R
+    s = sign.(diag(pdR))
+    s[s .== 0] .= 1
+    rf = UpperTriangular(Diagonal(s)' * pdR)
     Xrf = X / rf
     qtXrf = q' * Xrf
     return copyto!(
