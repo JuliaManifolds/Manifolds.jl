@@ -374,7 +374,7 @@ function Base.copyto!(
     dest::StiefelFactorization,
     bc::Broadcast.Broadcasted{Broadcast.Style{StiefelFactorization}},
 )
-    bc.args isa Tuple{Vararg{<:Union{Manifolds.StiefelFactorization,Real}}} ||
+    bc.args isa Tuple{Vararg{Union{Manifolds.StiefelFactorization,Real}}} ||
         throw(ArgumentError("Not implemented"))
     bc.f ∈ (identity, *, +, -, /) || throw(ArgumentError("Not implemented"))
     Zargs = map(x -> x isa Manifolds.StiefelFactorization ? x.Z : x, bc.args)

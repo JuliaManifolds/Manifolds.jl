@@ -64,7 +64,7 @@ include("../utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                is_tangent_atol_multiplier=1,
+                is_tangent_atol_multiplier=2,
                 test_inplace=true,
             )
         end
@@ -161,7 +161,7 @@ include("../utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                is_tangent_atol_multiplier=1,
+                is_tangent_atol_multiplier=2,
                 exp_log_atol_multiplier=10.0^3,
                 retraction_atol_multiplier=10.0,
             )

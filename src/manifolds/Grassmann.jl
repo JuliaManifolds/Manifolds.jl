@@ -99,10 +99,12 @@ injectivity_radius(::Grassmann, p) = π / 2
 injectivity_radius(::Grassmann, ::AbstractRetractionMethod) = π / 2
 injectivity_radius(::Grassmann, p, ::AbstractRetractionMethod) = π / 2
 
-function Base.isapprox(M::Grassmann, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
+function Base.isapprox(M::Grassmann, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
+    return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
-Base.isapprox(M::Grassmann, p, q; kwargs...) = isapprox(distance(M, p, q), 0.0; kwargs...)
+function Base.isapprox(M::Grassmann, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
+    return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
+end
 
 @doc raw"""
     manifold_dimension(M::Grassmann)

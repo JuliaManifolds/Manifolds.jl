@@ -502,37 +502,40 @@ function test_manifold(
                 test_dir && (v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm))
                 test_to && Test.@test is_vector(M, pts32, v1t1, true; atol=tvatol)
                 test_dir && Test.@test is_vector(M, pts32, v1t2, true; atol=tvatol)
-                (test_to && test_dir) && Test.@test isapprox(M, pts32, v1t1, v1t2)
+                (test_to && test_dir) &&
+                    Test.@test isapprox(M, pts32, v1t1, v1t2, atol=tvatol)
                 test_to && Test.@test isapprox(
                     M,
                     pts[1],
                     vector_transport_to(M, pts[1], X1, pts[1], vtm),
-                    X1,
+                    X1;
+                    atol=tvatol,
                 )
                 test_dir && Test.@test isapprox(
                     M,
                     pts[1],
                     vector_transport_direction(M, pts[1], X1, zero_vector(M, pts[1]), vtm),
-                    X1,
+                    X1;
+                    atol=tvatol,
                 )
 
                 is_mutating && Test.@testset "mutating variants" begin
                     if test_to
                         v1t1_m = allocate(v1t1)
                         vector_transport_to!(M, v1t1_m, pts[1], X1, pts32, vtm)
-                        Test.@test isapprox(M, pts32, v1t1, v1t1_m)
+                        Test.@test isapprox(M, pts32, v1t1, v1t1_m; atol=tvatol)
                         test_inplace &&
                             Test.@testset "inplace test for vector_transport_to!" begin
                                 X1a = copy(M, pts[1], X1)
                                 Xt = vector_transport_to(M, pts[1], X1, pts32, vtm)
                                 vector_transport_to!(M, X1a, pts[1], X1a, pts32, vtm)
-                                Test.@test isapprox(M, pts[1], X1a, Xt)
+                                Test.@test isapprox(M, pts[1], X1a, Xt; atol=tvatol)
                             end
                     end
                     if test_dir
                         v1t2_m = allocate(v1t2)
                         vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
-                        Test.@test isapprox(M, pts32, v1t2, v1t2_m)
+                        Test.@test isapprox(M, pts32, v1t2, v1t2_m; atol=tvatol)
                         test_inplace &&
                             Test.@testset "inplace test for vector_transport_direction!" begin
                                 X1a = copy(M, pts[1], X1)
@@ -540,8 +543,8 @@ function test_manifold(
                                 Xt = vector_transport_direction(M, pts[1], X1, X2, vtm)
                                 vector_transport_direction!(M, X1a, pts[1], X1a, X2, vtm)
                                 vector_transport_direction!(M, X2a, pts[1], X1, X2a, vtm)
-                                Test.@test isapprox(M, pts[1], X1a, Xt)
-                                Test.@test isapprox(M, pts[1], X2a, Xt)
+                                Test.@test isapprox(M, pts[1], X1a, Xt; atol=tvatol)
+                                Test.@test isapprox(M, pts[1], X2a, Xt; atol=tvatol)
                             end
                     end
                 end

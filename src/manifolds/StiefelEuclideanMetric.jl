@@ -121,7 +121,7 @@ tangent space at ``p``.
 inverse_retract(::Stiefel, ::Any, ::Any, ::ProjectionInverseRetraction)
 
 function inverse_retract_project!(M::Stiefel, X, p, q)
-    X .= p .- q
+    X .= q .- p
     project!(M, X, p, X)
     return X
 end
