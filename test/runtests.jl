@@ -109,6 +109,20 @@ include("utils.jl")
                 @test Manifolds.eigen_safe(SA[1.0 0.0; 0.0 1.0]) isa
                       Eigen{Float64,Float64,<:SizedMatrix{2,2},<:SizedVector{2}}
             end
+            @testset "max_eps" begin
+                x64 = randn(Float64, 2)
+                x32 = randn(Float32, 2)
+                z32 = randn(ComplexF32, 2)
+                xi = rand(0:1, 2)
+                @test Manifolds.max_eps(x64, x64) == eps()
+                @test Manifolds.max_eps(x64, x32) == eps(Float32)
+                @test Manifolds.max_eps(x32, x64) == eps(Float32)
+                @test Manifolds.max_eps(xi, xi) == 0
+                @test Manifolds.max_eps(xi, x64) == eps()
+                @test Manifolds.max_eps(xi, x32) == eps(Float32)
+                @test Manifolds.max_eps(xi, z32) == eps(Float32)
+                @test Manifolds.max_eps(xi, x64, x32, z32) == eps(Float32)
+            end
         end
 
         @test Manifolds.is_metric_function(flat)

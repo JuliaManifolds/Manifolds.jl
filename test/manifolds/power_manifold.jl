@@ -210,7 +210,7 @@ end
                 basis_types_to_from=(basis_diag, basis_arb, basis_types...),
                 rand_tvector_atol_multiplier=600.0,
                 retraction_atol_multiplier=12.0,
-                is_tangent_atol_multiplier=12.0,
+                is_tangent_atol_multiplier=500.0,
                 exp_log_atol_multiplier=20 * prod(power_dimensions(Ms1)),
                 test_inplace=true,
                 test_rand_point=true,
