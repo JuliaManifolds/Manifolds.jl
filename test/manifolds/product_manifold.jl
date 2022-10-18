@@ -643,4 +643,16 @@ using RecursiveArrayTools: ArrayPartition
             ),
         )
     end
+
+    @testset "Riemann tensor" begin
+        p = ArrayPartition([0.0, 1.0, 0.0], [2.0, 3.0])
+        X = ArrayPartition([1.0, 0.0, 0.0], [2.0, 3.0])
+        Y = ArrayPartition([0.0, 0.0, 3.0], [-2.0, 3.0])
+        Z = ArrayPartition([-1.0, 0.0, 2.0], [2.0, -3.0])
+        Xresult = ArrayPartition([6.0, 0.0, 3.0], [0.0, 0.0])
+        @test isapprox(riemann_tensor(Mse, p, X, Y, Z), Xresult)
+        Xresult2 = allocate(Xresult)
+        riemann_tensor!(Mse, Xresult2, p, X, Y, Z)
+        @test isapprox(Xresult2, Xresult)
+    end
 end
