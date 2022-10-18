@@ -1207,6 +1207,46 @@ function representation_size(M::ProductManifold)
     return (mapreduce(m -> prod(representation_size(m)), +, M.manifolds),)
 end
 
+@doc raw"""
+    riemann_tensor(M::ProductManifold, p, X, Y, Z)
+
+Compute the Riemann tensor at point from `p` with tangent vectors `X`, `Y` and `Z` on
+the [`ProductManifold`](@ref) `M`.
+"""
+riemann_tensor(M::ProductManifold, p, X, Y, X)
+
+for TP in [ProductRepr, ArrayPartition]
+    eval(
+        quote
+            function riemann_tensor(M::ProductManifold, p::$TP, X::$TP, Y::$TP, Z::$TP)
+                return $TP(
+                    map(
+                        riemann_tensor,
+                        M.manifolds,
+                        submanifold_components(M, p),
+                        submanifold_components(M, X),
+                        submanifold_components(M, Y),
+                        submanifold_components(M, Z),
+                    ),
+                )
+            end
+        end,
+    )
+end
+
+function riemann_tensor!(M::ProductManifold, Xresult, p, X, Y, Z)
+    map(
+        riemann_tensor!,
+        M.manifolds,
+        submanifold_components(M, Xresult),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, Y),
+        submanifold_components(M, Z),
+    )
+    return Xresult
+end
+
 """
     set_component!(M::ProductManifold, q, p, i)
 

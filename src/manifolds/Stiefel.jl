@@ -252,10 +252,9 @@ function inverse_retract_qr!(M::Stiefel{n,k}, X, p, q) where {n,k}
     return X
 end
 
-function Base.isapprox(M::Stiefel, p, X, Y; kwargs...)
-    return isapprox(sqrt(inner(M, p, zero_vector(M, p), X - Y)), 0; kwargs...)
+function Base.isapprox(M::Stiefel, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
+    return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
-Base.isapprox(::Stiefel, p, q; kwargs...) = isapprox(norm(p - q), 0; kwargs...)
 
 @doc raw"""
     manifold_dimension(M::Stiefel)
@@ -589,7 +588,13 @@ function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::PolarRetract
 end
 function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::QRRetraction)
     q = retract(M, p, d, QRRetraction())
-    rf = UpperTriangular(qr(p + d).R)
+
+    # use the QR factorization with positive diagonal of R
+    pdR = qr(p + d).R
+    s = sign.(diag(pdR))
+    s[s .== 0] .= 1
+    rf = UpperTriangular(Diagonal(s)' * pdR)
+
     Xrf = X / rf
     qtXrf = q' * Xrf
     return copyto!(
@@ -675,7 +680,12 @@ function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::PolarRetraction)
 end
 function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
     d = inverse_retract(M, p, q, QRInverseRetraction())
-    rf = UpperTriangular(qr(p + d).R)
+
+    # use the QR factorization with positive diagonal of R
+    pdR = qr(p + d).R
+    s = sign.(diag(pdR))
+    s[s .== 0] .= 1
+    rf = UpperTriangular(Diagonal(s)' * pdR)
     Xrf = X / rf
     qtXrf = q' * Xrf
     return copyto!(
