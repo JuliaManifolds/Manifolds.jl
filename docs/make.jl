@@ -38,7 +38,11 @@ mkpath(tutorial_output_folder)
 #
 # Tutorials
 @info " \n      Rendering Tutorials\n "
-tutorials = [Dict(:file => "getstarted", :title => "Get started with Manifolds.jl")]
+tutorials = [
+    Dict(:file => "getstarted", :title => "Get started with Manifolds.jl"),
+    Dict(:file => "working-in-charts", :title => "Working in charts"),
+
+]
 # build menu and write files myself - tp set edit url correctly.
 for t in tutorials
     global tutorial_menu

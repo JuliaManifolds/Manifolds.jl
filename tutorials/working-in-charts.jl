@@ -7,14 +7,7 @@ using InteractiveUtils
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
     quote
-        local iv = try
-            Base.loaded_modules[Base.PkgId(
-                Base.UUID("6e696c72-6542-2067-7265-42206c756150"),
-                "AbstractPlutoDingetjes",
-            )].Bonds.initial_value
-        catch
-            b -> missing
-        end
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
@@ -49,7 +42,7 @@ md"""
 The manifold we consider is the `M` is the torus in form of the [`EmbeddedTorus`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/torus.html#Manifolds.EmbeddedTorus), that is the representation defined as a surface of revolution of a circle of radius 2 around a circle of radius 3.
 The atlas we will perform computations in is its [`DefaultTorusAtlas`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/torus.html#Manifolds.DefaultTorusAtlas) `A`, consistting of a family of charts indexed by two angles, that specify the base point of the chart.
 
-We will draw geodesics time between 0 and `t_end`, and then sample the solution at multiples of `dt` and draw a line connecting sampled points.
+We will draw geodesics time between `0` and `t_end`, and then sample the solution at multiples of `dt` and draw a line connecting sampled points.
 """
 
 # ╔═╡ 27038d25-32b3-433d-ad47-f7ae330fef1c
@@ -117,9 +110,8 @@ The function returns the full solution to the parallel transport problem, contai
 
 Next we solve the vector transport problem `solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy])`, sample the result at the selected time steps and store the result in `geo`. The solution includes the geodesic which we extract and convert to a sequence of points digestible by `Makie.jl`, `geo_ps`.
 `[θₚ, φₚ]` is the parametrization in chart (0, 0) of the starting point of the geodesic.
-The direction of the geodesic is determined by `[θₓ, φₓ]`, coordinates of the tangent vector at the initial point expressed in the induced basis of chart `i_p0x` (which depends on the initial point).
-Finally, `[θy, φy]` are the coordinates of the tangent vector that will be transported along the geodesic.
-These coordinates are expressed in the same basis as `[θₓ, φₓ]`.
+The direction of the geodesic is determined by `[θₓ, φₓ]`, coordinates of the tangent vector at the starting point expressed in the induced basis of chart `i_p0x` (which depends on the initial point).
+Finally, `[θy, φy]` are the coordinates of the tangent vector that will be transported along the geodesic, which are also expressed in same basis as `[θₓ, φₓ]`.
 
 We won't draw the transported vector at every point as there would be too many arrows, which is why we select every 100th point only for that purpose with `pt_indices`. Then, `geo_ps_pt` contains points at which the transported vector is tangent to and `geo_Ys` the transported vector at that point, represented in the embedding.
 
@@ -161,12 +153,9 @@ md" And we parametrise the start point and direction"
 
 # ╔═╡ fea185a1-bfae-4bd8-9b2a-f889e54f3f70
 md"""
-* θₚ $(@bind θₚ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=true))
-* θₓ $(@bind θₓ PlutoUI.Slider(range(-π,π,200), default=π/2, show_value=true))
-* θy $(@bind θy PlutoUI.Slider(range(-π,π,200), default=0, show_value=true))
-* φₚ $(@bind φₚ PlutoUI.Slider(range(-π,π,200), default=-π/4, show_value=true))
-* φₓ $(@bind φₓ PlutoUI.Slider(range(-π,π,200), default=π/4, show_value=true))
-* φy $(@bind φy PlutoUI.Slider(range(-π,π,200), default=π/8, show_value=true))
+* start point θₚ $(@bind θₚ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=false)) | φₚ $(@bind φₚ PlutoUI.Slider(range(-π,π,200), default=-π/4))
+* start direction θₓ $(@bind θₓ PlutoUI.Slider(range(-π,π,200), default=π/2)) | φₓ $(@bind φₓ PlutoUI.Slider(range(-π,π,200), default=0.7))
+* a tangent vector θy $(@bind θy PlutoUI.Slider(range(-π,π,200), default=0.2)) | φy $(@bind φy PlutoUI.Slider(range(-π,π,200), default=-0.1)) to be transported
 """
 
 # ╔═╡ c1660206-d21a-4812-9dd3-bda91b633c0b
@@ -192,15 +181,8 @@ md" ### Solving the logairthmic map ODE"
 # ╔═╡ 922461b0-55a0-447b-b59d-cfff7b448858
 #hideall
 md"""
-Start point angles
-
-* θ₁ $(@bind θ₁ PlutoUI.Slider(range(-π,π,200), default=π/2, show_value=true))
-* φ₁ $(@bind φ₁ PlutoUI.Slider(range(-π,π,200), default=0, show_value=true))
-
-End point angles
-
-* θ₂ $(@bind θ₂ PlutoUI.Slider(range(-π,π,200), default=-π/2, show_value=true))
-* φ₂ $(@bind φ₂ PlutoUI.Slider(range(-π,π,200), default=π, show_value=true))
+* start point θ₁ $(@bind θ₁ PlutoUI.Slider(range(-π,π,200), default=π/2)) |  φ₁ $(@bind φ₁ PlutoUI.Slider(range(-π,π,200), default=-1.0))
+* end point θ₂ $(@bind θ₂ PlutoUI.Slider(range(-π,π,200), default=-π/8)) | φ₂ $(@bind φ₂ PlutoUI.Slider(range(-π,π,200), default=π/2))
 """
 
 # ╔═╡ 2abef887-32a8-40ba-89e1-b6adbfe9174f
@@ -321,9 +303,9 @@ version = "0.1.4"
 
 [[deps.ArrayInterfaceStaticArraysCore]]
 deps = ["Adapt", "ArrayInterfaceCore", "LinearAlgebra", "StaticArraysCore"]
-git-tree-sha1 = "a1e2cf6ced6505cbad2490532388683f1e88c3ed"
+git-tree-sha1 = "93c8ba53d8d26e124a5a8d4ec914c3a16e6a0970"
 uuid = "dd5226c6-a4d4-4bc7-8575-46859f9c95b9"
-version = "0.1.0"
+version = "0.1.3"
 
 [[deps.ArrayLayouts]]
 deps = ["FillArrays", "LinearAlgebra", "SparseArrays"]
@@ -535,9 +517,9 @@ version = "1.1.0"
 
 [[deps.DiffRules]]
 deps = ["IrrationalConstants", "LogExpFunctions", "NaNMath", "Random", "SpecialFunctions"]
-git-tree-sha1 = "992a23afdb109d0d2f8802a30cf5ae4b1fe7ea68"
+git-tree-sha1 = "8b7a4d23e22f5d44883671da70865ca98f2ebf9d"
 uuid = "b552c78f-8df3-52c6-915a-8e097449b14b"
-version = "1.11.1"
+version = "1.12.0"
 
 [[deps.Distances]]
 deps = ["LinearAlgebra", "SparseArrays", "Statistics", "StatsAPI"]
@@ -584,6 +566,11 @@ git-tree-sha1 = "4a6b3eee0161c89700b6c1949feae8b851da5494"
 uuid = "b7d42ee7-0b51-5a75-98ca-779d3107e4c0"
 version = "0.4.1"
 
+[[deps.EnumX]]
+git-tree-sha1 = "e5333cd1e1c713ee21d07b6ed8b0d8853fabe650"
+uuid = "4e289a0a-7415-4d19-859d-a7e5c4648b56"
+version = "1.0.3"
+
 [[deps.Expat_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "bad72f730e9e91c08d9427d5e8db95478a3c323d"
@@ -595,6 +582,11 @@ deps = ["ArrayInterfaceCore", "GPUArraysCore", "GenericSchur", "LinearAlgebra", 
 git-tree-sha1 = "b19c3f5001b11b71d0f970f354677d604f3a1a97"
 uuid = "d4d017d3-3776-5f7e-afef-a10c40355c18"
 version = "1.19.0"
+
+[[deps.ExprTools]]
+git-tree-sha1 = "56559bbef6ca5ea0c0818fa5c90320398a6fbf8d"
+uuid = "e2ba6199-217a-4e67-a87a-7c52f15ade04"
+version = "0.1.8"
 
 [[deps.Extents]]
 git-tree-sha1 = "5e1e4c53fa39afe63a7d356e30452249365fba99"
@@ -644,18 +636,18 @@ version = "1.2.7"
 
 [[deps.FileIO]]
 deps = ["Pkg", "Requires", "UUIDs"]
-git-tree-sha1 = "94f5101b96d2d968ace56f7f2db19d0a5f592e28"
+git-tree-sha1 = "7be5f99f7d15578798f338f5433b6c432ea8037b"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
-version = "1.15.0"
+version = "1.16.0"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
-git-tree-sha1 = "87519eb762f85534445f5cda35be12e32759ee14"
+git-tree-sha1 = "802bfc139833d2ba893dd9e62ba1767c88d708ae"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "0.13.4"
+version = "0.13.5"
 
 [[deps.FiniteDiff]]
 deps = ["ArrayInterfaceCore", "LinearAlgebra", "Requires", "Setfield", "SparseArrays", "StaticArrays"]
@@ -1012,9 +1004,9 @@ version = "1.3.0"
 
 [[deps.LayoutPointers]]
 deps = ["ArrayInterface", "ArrayInterfaceOffsetArrays", "ArrayInterfaceStaticArrays", "LinearAlgebra", "ManualMemory", "SIMDTypes", "Static"]
-git-tree-sha1 = "b67e749fb35530979839e7b4b606a97105fe4f1c"
+git-tree-sha1 = "73e2e40eb02d6ccd191a8a9f8cee20db8d5df010"
 uuid = "10f19ff3-798f-405d-979b-55457f8fc047"
-version = "0.1.10"
+version = "0.1.11"
 
 [[deps.LazyArtifacts]]
 deps = ["Artifacts", "Pkg"]
@@ -1107,9 +1099,9 @@ version = "3.8.0"
 
 [[deps.LinearSolve]]
 deps = ["ArrayInterfaceCore", "DocStringExtensions", "FastLapackInterface", "GPUArraysCore", "IterativeSolvers", "KLU", "Krylov", "KrylovKit", "LinearAlgebra", "RecursiveFactorization", "Reexport", "SciMLBase", "Setfield", "SnoopPrecompile", "SparseArrays", "SuiteSparse", "UnPack"]
-git-tree-sha1 = "d1a5a61fa3728fcf63c5798458bce6ec57129065"
+git-tree-sha1 = "70db49cbaec1cdf4def39c4ac51a3abe56b2e421"
 uuid = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
-version = "1.26.1"
+version = "1.27.0"
 
 [[deps.LogExpFunctions]]
 deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
@@ -1122,15 +1114,20 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoopVectorization]]
 deps = ["ArrayInterface", "ArrayInterfaceCore", "ArrayInterfaceOffsetArrays", "ArrayInterfaceStaticArrays", "CPUSummary", "ChainRulesCore", "CloseOpenIntervals", "DocStringExtensions", "ForwardDiff", "HostCPUFeatures", "IfElse", "LayoutPointers", "LinearAlgebra", "OffsetArrays", "PolyesterWeave", "SIMDDualNumbers", "SIMDTypes", "SLEEFPirates", "SnoopPrecompile", "SpecialFunctions", "Static", "ThreadingUtilities", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "39af6a1e398a29f568dc9fe469f459ad3aacb03b"
+git-tree-sha1 = "4fd7d87ed1d95320c2a3da0d1738dae54441c0b1"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.12.133"
+version = "0.12.135"
+
+[[deps.MIMEs]]
+git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
+uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
+version = "0.1.4"
 
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "Pkg"]
-git-tree-sha1 = "41d162ae9c868218b1f3fe78cba878aa348c2d26"
+git-tree-sha1 = "2ce8695e1e699b68702c03402672a69f54b8aca9"
 uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
-version = "2022.1.0+0"
+version = "2022.2.0+0"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
@@ -1152,15 +1149,15 @@ version = "0.5.0"
 
 [[deps.Manifolds]]
 deps = ["Colors", "Distributions", "Einsum", "Graphs", "HybridArrays", "Kronecker", "LinearAlgebra", "ManifoldsBase", "Markdown", "MatrixEquations", "Quaternions", "Random", "RecipesBase", "RecursiveArrayTools", "Requires", "SimpleWeightedGraphs", "SpecialFunctions", "StaticArrays", "Statistics", "StatsBase"]
-git-tree-sha1 = "74ce044a6511d70a7d7c72cf496ef653c09d9a1e"
+git-tree-sha1 = "d569c649333e42aa8e2bb40a050b7fd842ec255e"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
-version = "0.8.33"
+version = "0.8.35"
 
 [[deps.ManifoldsBase]]
 deps = ["LinearAlgebra", "Markdown"]
-git-tree-sha1 = "d39d5f8f117c9b370f4b8520182f48ecf9e32620"
+git-tree-sha1 = "9e2772a950c5b5a6ac47fd2480b8b47be66b93cd"
 uuid = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
-version = "0.13.21"
+version = "0.13.22"
 
 [[deps.ManualMemory]]
 git-tree-sha1 = "bcaef4fc7a0cfe2cba636d84cda54b5e4e4ca3cd"
@@ -1183,9 +1180,9 @@ version = "1.2.0"
 
 [[deps.MathTeXEngine]]
 deps = ["AbstractTrees", "Automa", "DataStructures", "FreeTypeAbstraction", "GeometryBasics", "LaTeXStrings", "REPL", "RelocatableFolders", "Test", "UnicodeFun"]
-git-tree-sha1 = "03d7e6e449f2c53907016a2e858d6f6139e68cff"
+git-tree-sha1 = "7f837e1884f1ef84984c919fc7a00638cff1e6d1"
 uuid = "0a4f8689-d25c-4efe-a92b-7142dfc1aa53"
-version = "0.5.2"
+version = "0.5.3"
 
 [[deps.MatrixEquations]]
 deps = ["LinearAlgebra", "LinearMaps"]
@@ -1321,9 +1318,9 @@ version = "0.8.1+0"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "a94dc0169bffbf7e5250fb7e1efb1a85b09105c7"
+git-tree-sha1 = "e60321e3f2616584ff98f0a4f18d98ae6f89bbb3"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "1.1.18+0"
+version = "1.1.17+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1413,10 +1410,10 @@ uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.3.1"
 
 [[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
-git-tree-sha1 = "6e33d318cf8843dade925e35162992145b4eb12f"
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
+git-tree-sha1 = "47a31ed1dd7d30173cb78f5066860eea2d4eaf7b"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.44"
+version = "0.7.46"
 
 [[deps.Polyester]]
 deps = ["ArrayInterface", "BitTwiddlingConvenienceFunctions", "CPUSummary", "IfElse", "ManualMemory", "PolyesterWeave", "Requires", "Static", "StrideArraysCore", "ThreadingUtilities"]
@@ -1482,10 +1479,10 @@ uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 version = "2.5.0"
 
 [[deps.Quaternions]]
-deps = ["DualNumbers", "LinearAlgebra", "Random"]
-git-tree-sha1 = "4ab19353944c46d65a10a75289d426ef57b0a40c"
+deps = ["LinearAlgebra", "Random"]
+git-tree-sha1 = "fd78cbfa5f5be5f81a482908f8ccfad611dca9a9"
 uuid = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0"
-version = "0.5.7"
+version = "0.6.0"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
@@ -1503,9 +1500,9 @@ version = "0.4.3"
 
 [[deps.RecipesBase]]
 deps = ["SnoopPrecompile"]
-git-tree-sha1 = "612a4d76ad98e9722c8ba387614539155a59e30c"
+git-tree-sha1 = "d12e612bba40d189cead6ff857ddb67bd2e6a387"
 uuid = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-version = "1.3.0"
+version = "1.3.1"
 
 [[deps.RecursiveArrayTools]]
 deps = ["Adapt", "ArrayInterfaceCore", "ArrayInterfaceStaticArraysCore", "ChainRulesCore", "DocStringExtensions", "FillArrays", "GPUArraysCore", "IteratorInterfaceExtensions", "LinearAlgebra", "RecipesBase", "StaticArraysCore", "Statistics", "Tables", "ZygoteRules"]
@@ -1548,6 +1545,12 @@ git-tree-sha1 = "68db32dff12bb6127bac73c209881191bf0efbb7"
 uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
 version = "0.3.0+0"
 
+[[deps.RuntimeGeneratedFunctions]]
+deps = ["ExprTools", "SHA", "Serialization"]
+git-tree-sha1 = "cdc1e4278e91a6ad530770ebb327f9ed83cf10c4"
+uuid = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
+version = "0.5.3"
+
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
@@ -1581,10 +1584,10 @@ uuid = "7b38b023-a4d7-4c5e-8d43-3f3097f304eb"
 version = "0.3.3"
 
 [[deps.SciMLBase]]
-deps = ["ArrayInterfaceCore", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "Preferences", "RecipesBase", "RecursiveArrayTools", "StaticArraysCore", "Statistics", "Tables"]
-git-tree-sha1 = "87424b3619663adc8fd7d2a153953691f51f727a"
+deps = ["ArrayInterfaceCore", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "Preferences", "RecipesBase", "RecursiveArrayTools", "RuntimeGeneratedFunctions", "StaticArraysCore", "Statistics", "Tables"]
+git-tree-sha1 = "d41daf11db3383bd979ba00e1590d2f4297ace61"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "1.61.3"
+version = "1.63.0"
 
 [[deps.Scratch]]
 deps = ["Dates"]
@@ -1724,9 +1727,9 @@ version = "0.3.15"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArraysCore", "Tables"]
-git-tree-sha1 = "8c6ac65ec9ab781af05b08ff305ddc727c25f680"
+git-tree-sha1 = "13237798b407150a6d2e2bce5d793d7d9576e99e"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.6.12"
+version = "0.6.13"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -1803,6 +1806,11 @@ git-tree-sha1 = "4d4ed7f294cda19382ff7de4c137d24d16adc89b"
 uuid = "981d1d27-644d-49a2-9326-4793e63143c3"
 version = "0.1.0"
 
+[[deps.URIs]]
+git-tree-sha1 = "e59ecc5a41b000fa94423a578d29290c7266fc10"
+uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+version = "1.4.0"
+
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
@@ -1823,9 +1831,9 @@ version = "0.4.1"
 
 [[deps.VectorizationBase]]
 deps = ["ArrayInterface", "CPUSummary", "HostCPUFeatures", "IfElse", "LayoutPointers", "Libdl", "LinearAlgebra", "SIMDTypes", "Static"]
-git-tree-sha1 = "3bc5ea8fbf25f233c4c49c0a75f14b276d2f9a69"
+git-tree-sha1 = "866e77ea9c675306652f5b5b9010ccbccc684c79"
 uuid = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
-version = "0.21.51"
+version = "0.21.53"
 
 [[deps.VertexSafeGraphs]]
 deps = ["Graphs"]
@@ -2013,22 +2021,22 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╠═04e7ac42-4b1b-11ed-1cb3-e76ac86d4203
 # ╟─8159d5bc-2c3f-4657-80c4-661e9162b79d
-# ╠═b85a56ad-3b74-402d-8fbe-9f0d130253e6
+# ╟─b85a56ad-3b74-402d-8fbe-9f0d130253e6
 # ╠═27038d25-32b3-433d-ad47-f7ae330fef1c
 # ╠═e0c54d00-c698-4ea6-a710-37fc284ed83e
 # ╟─f0d60996-ae46-4bfa-8408-b6e28cba1f6b
 # ╠═44e6e4e1-6b69-4a40-a1f1-d0084a0af8c3
 # ╠═f2276b50-49f4-478f-9a96-0e374a37fe2f
-# ╟─c18609fe-b510-447f-9d2a-d1e6eb1da3c2
+# ╠═c18609fe-b510-447f-9d2a-d1e6eb1da3c2
 # ╠═2532be0e-6d48-4775-b78f-e48f04e5c3a3
-# ╠═9ee3fbaf-a579-480e-ae33-9d6eb8b07fbc
-# ╠═34cd1003-3790-4db1-bcf8-2e98cf9b98b6
-# ╠═6db745f9-afa4-4b5a-8871-b58585165c9e
-# ╠═fea185a1-bfae-4bd8-9b2a-f889e54f3f70
+# ╟─9ee3fbaf-a579-480e-ae33-9d6eb8b07fbc
+# ╟─34cd1003-3790-4db1-bcf8-2e98cf9b98b6
+# ╟─6db745f9-afa4-4b5a-8871-b58585165c9e
+# ╟─fea185a1-bfae-4bd8-9b2a-f889e54f3f70
 # ╠═c1660206-d21a-4812-9dd3-bda91b633c0b
 # ╠═a30fa94f-5669-4265-a541-03d16dbd5745
 # ╟─a941fd19-faf5-49d0-8f68-ae2fbe45130d
-# ╟─922461b0-55a0-447b-b59d-cfff7b448858
+# ╠═922461b0-55a0-447b-b59d-cfff7b448858
 # ╠═2abef887-32a8-40ba-89e1-b6adbfe9174f
 # ╠═eea2fbc7-1ba8-49f8-916c-743984abe15d
 # ╟─00000000-0000-0000-0000-000000000001
