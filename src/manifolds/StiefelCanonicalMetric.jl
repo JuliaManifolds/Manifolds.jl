@@ -158,30 +158,29 @@ function inverse_retract!(
     q,
     a::ApproximateLogarithmicMap,
 ) where {n,k}
-    M = p' * q
-    QR = qr(q - p * M)
-    V = convert(Matrix, qr([M; QR.R]).Q * I)
-    Vcorner = @view V[(k + 1):(2 * k), (k + 1):(2k)] #bottom right corner
-    Vpcols = @view V[:, (k + 1):(2 * k)] #second half of the columns
-    S = svd(Vcorner) # preprocessing: Procrustes
-    mul!(Vpcols, Vpcols * S.U, S.V')
-    V[1:k, 1:k] .= M
-    V[(k + 1):(2 * k), 1:k] .= QR.R
-
-    LV = log_safe!(allocate(V), V)
-    C = view(LV, (k + 1):(2 * k), (k + 1):(2 * k))
-    expnC = exp(-C)
-    i = 0
-    new_Vpcols = Vpcols * expnC # allocate once
-    while (i < a.max_iterations) && (norm(C) > a.tolerance)
-        i = i + 1
+    qfact = stiefel_factorization(p, q)
+    V = allocate(qfact.Z, Size(2k, 2k))
+    LV = allocate(V)
+    Zcompl = qr(qfact.Z).Q[1:(2k), (k + 1):(2k)]
+    @views begin
+        Vpcols = V[1:(2k), (k + 1):(2 * k)] #second half of the columns
+        B = LV[(k + 1):(2 * k), 1:k]
+        C = LV[(k + 1):(2 * k), (k + 1):(2 * k)]
+        copyto!(V[1:(2k), 1:k], qfact.Z)
+        copyto!(Vpcols, Zcompl)
+    end
+    S = allocate(B)
+    new_Vpcols = allocate(Vpcols)
+    for _ in 1:(a.max_iterations)
         log_safe!(LV, V)
-        expnC = exp(-C)
-        mul!(new_Vpcols, Vpcols, expnC)
+        norm(C) ≤ a.tolerance && break
+        copyto!(S, I)
+        mul!(S, B, B', -1 // 12, 1 // 2)
+        Γ = lyap(S, C)
+        expΓ = exp(Γ)
+        mul!(new_Vpcols, Vpcols, expΓ)
         copyto!(Vpcols, new_Vpcols)
     end
-    mul!(X, p, @view(LV[1:k, 1:k]))
-    # force the first - Q - to be the reduced form, not the full matrix
-    mul!(X, @view(QR.Q[:, 1:k]), @view(LV[(k + 1):(2 * k), 1:k]), true, true)
+    @views mul!(X, qfact.U, LV[1:(2k), 1:k])
     return X
 end
