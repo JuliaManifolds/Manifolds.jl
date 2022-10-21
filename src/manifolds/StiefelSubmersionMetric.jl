@@ -313,7 +313,6 @@ Compute the [`StiefelFactorization`](@ref) of ``x`` relative to the point ``p``.
 """
 function stiefel_factorization(p, x)
     n, k = size(p)
-    k ≤ div(n, 2) || throw(ArgumentError("k must be ≤ div(n, 2)"))
     T = Base.promote_eltype(p, x)
     U = allocate(p, T, Size(n, 2k))
     Z = allocate(p, T, Size(2k, k))
