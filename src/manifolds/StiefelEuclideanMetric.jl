@@ -126,6 +126,12 @@ function inverse_retract_project!(M::Stiefel, X, p, q)
     return X
 end
 
+function log!(M::Stiefel{n,k,ℝ}, X, p, q) where {n,k}
+    MM = MetricManifold(M, StiefelSubmersionMetric(-1 // 2))
+    log!(MM, X, p, q)
+    return X
+end
+
 @doc raw"""
     project(M::Stiefel,p)
 
