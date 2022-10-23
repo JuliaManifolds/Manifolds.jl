@@ -163,17 +163,16 @@ function inverse_retract!(
     LV = allocate(V)
     Zcompl = qr(qfact.Z).Q[1:(2k), (k + 1):(2k)]
     @views begin
-        Vcorner = V[(k + 1):(2k), (k + 1):(2k)] #bottom right corner
         Vpcols = V[1:(2k), (k + 1):(2k)] #second half of the columns
         B = LV[(k + 1):(2k), 1:k]
         C = LV[(k + 1):(2k), (k + 1):(2k)]
         copyto!(V[1:(2k), 1:k], qfact.Z)
+        F = svd(Zcompl[(k + 1):(2k), 1:k]) # preprocessing: Procrustes
     end
-    F = svd(Vcorner) # preprocessing: Procrustes
-    S = allocate(B)
     new_Vpcols = allocate(Vpcols)
     mul!(new_Vpcols, Zcompl, F.U)
     mul!(Vpcols, new_Vpcols, F.V')
+    S = allocate(B)
     for _ in 1:(a.max_iterations)
         log_safe!(LV, V)
         norm(C) ≤ a.tolerance && break
