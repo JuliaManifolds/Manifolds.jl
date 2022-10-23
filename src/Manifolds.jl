@@ -278,6 +278,7 @@ using StatsBase
 using StatsBase: AbstractWeights
 
 include("utils.jl")
+include("expm_frechet.jl")
 
 include("product_representations.jl")
 include("differentiation/differentiation.jl")
@@ -345,6 +346,7 @@ include("manifolds/Stiefel.jl")
 include("manifolds/StiefelEuclideanMetric.jl")
 include("manifolds/StiefelCanonicalMetric.jl")
 include("manifolds/StiefelSubmersionMetric.jl")
+include("manifolds/StiefelFrechet.jl")
 include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
