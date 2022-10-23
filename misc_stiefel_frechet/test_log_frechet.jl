@@ -34,7 +34,7 @@ X = randvec(M, p)
 q = exp(M, p, X)
 
 XA = Manifolds.log(M, p, q)
-XB = Manifolds.log_lbfgs(M, p, q, 1e-10)
+XB = Manifolds.log_lbfgs(M, p, q, tolerance=1e-10)
 
 
 function do_one(n, k, α, i, max_ft=0.5, n_samples=3, pretol=1e-3)
@@ -46,10 +46,10 @@ function do_one(n, k, α, i, max_ft=0.5, n_samples=3, pretol=1e-3)
     q = exp(M, p, ft*pi*X)
 
     XOld = Manifolds.log(M, p, q)
-    XF = Manifolds.log_lbfgs(M, p, q, 1e-10, 1000, pretol)
+    XF = Manifolds.log_lbfgs(M, p, q, tolerance=1e-10, max_itr=1000, pretol=pretol)
     
     tLogOld = @belapsed Manifolds.log($M, $p, $q) samples=n_samples    
-    tLogF = @belapsed  Manifolds.log_lbfgs($M, $p, $q, 1e-10, 1000, $pretol) samples=n_samples
+    tLogF = @belapsed  Manifolds.log_lbfgs($M, $p, $q, tolerance=1e-10, max_itr=1000, pretol=$pretol) samples=n_samples
     
     errOld = linf(exp(M, p, XOld) - q)    
     errF = linf(exp(M, p, XF) - q)

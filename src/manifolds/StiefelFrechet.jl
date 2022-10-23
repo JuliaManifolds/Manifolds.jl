@@ -71,7 +71,7 @@ Express $span(Y, W)$ in an orthogonal basis $[Y, Q]$, we solve for two matrices 
 The exact gradient calculation with Frechet derivatives is expensive, to speed up we only run the exact gradient until the iteration error is less than pretol, then run a simple update on A, R for the last steps.
 If we suspect the distance between p and q is over 0.5pi, use pretol=1e-5.  Otherwise pretol=1e-3 is much faster for short distance.
 """
-function log_lbfgs(Stf, Y, W,
+function log_lbfgs(Stf, Y, W;
                    tolerance=sqrt(eps(float(real(Base.promote_eltype(Y, W))))),
                    max_itr=1_000, pretol=1e-3)
     α = metric(Stf).α
