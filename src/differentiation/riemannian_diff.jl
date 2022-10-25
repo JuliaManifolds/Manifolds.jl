@@ -135,7 +135,7 @@ end
 This method uses the internal `backend.diff_backend` (Euclidean) on the function
 
 ```math
-    f(\retr_p(\cdot))
+    f(\operatorname{retr}_p(\cdot))
 ```
 
 which is given on the tangent space. In detail, the gradient can be written in
