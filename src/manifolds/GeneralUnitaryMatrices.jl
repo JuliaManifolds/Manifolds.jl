@@ -612,7 +612,7 @@ Return the dimension of the manifold orthogonal matrices and of the manifold of 
 manifold_dimension(::GeneralUnitaryMatrices{n,ℝ}) where {n} = div(n * (n - 1), 2)
 @doc raw"""
     manifold_dimension(M::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices})
-    
+
 Return the dimension of the manifold of special unitary matrices.
 ```math
 \dim_{\mathrm{SU}(n)} = n^2-1.
@@ -731,7 +731,7 @@ The formula reads[^Rentmeesters2011] ``R(X,Y)Z=\frac{1}{4}[Z, [X, Y]]``.
 [^Rentmeesters2011]:
     > Q. Rentmeesters, “A gradient method for geodesic data fitting on some symmetric
     > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
-    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: 10.1109/CDC.2011.6161280.
+    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: [10.1109/CDC.2011.6161280](https://doi.org/10.1109/CDC.2011.6161280).
 """
 riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 

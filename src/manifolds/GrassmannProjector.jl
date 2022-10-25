@@ -217,7 +217,7 @@ end
 Compute the horizontal lift of `X` from the tangent space at ``p=π(q)``
 on the [`Grassmann`](@ref) manifold, i.e.
 
-```
+```math
 Y = Xq ∈ T_q\mathrm{St}(n,k)
 ```
 

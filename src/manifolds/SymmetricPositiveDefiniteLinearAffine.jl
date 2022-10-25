@@ -411,7 +411,7 @@ The formula reads[^Rentmeesters2011] ``R(X,Y)Z=p^{1/2}R(X_I, Y_I)Z_Ip^{1/2}``, w
 [^Rentmeesters2011]:
     > Q. Rentmeesters, “A gradient method for geodesic data fitting on some symmetric
     > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
-    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: 10.1109/CDC.2011.6161280.
+    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: [10.1109/CDC.2011.6161280](https://doi.org/10.1109/CDC.2011.6161280).
 """
 riemann_tensor(::SymmetricPositiveDefinite, p, X, Y, Z)
 

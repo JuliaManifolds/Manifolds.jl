@@ -22,7 +22,7 @@ That is, the symplectic manifold consists of
 with ``0_n`` and ``I_n`` denoting the ``n × n`` zero-matrix
 and indentity matrix in ``ℝ^{n \times n}`` respectively.
 
-The tangent space at a point ``p`` is given by [^Bendokat2021]
+The tangent space at a point ``p`` is given by [^BendokatZimmermann2021]
 ````math
 \begin{align*}
     T_p\operatorname{Sp}(2n)
@@ -54,7 +54,7 @@ end
     RealSymplecticMetric <: RiemannianMetric
 
 The canonical Riemannian metric on the symplectic manifold,
-defined pointwise for ``p \in \operatorname{Sp}(2n)`` by [^FioriSimone2011]
+defined pointwise for ``p \in \operatorname{Sp}(2n)`` by [^Fiori2011]
 ````math
 \begin{align*}
     & g_p \colon T_p\operatorname{Sp}(2n) \times T_p\operatorname{Sp}(2n) \rightarrow ℝ, \\
@@ -264,7 +264,7 @@ ManifoldsBase.default_retraction_method(::Symplectic) = CayleyRetraction()
     distance(M::Symplectic, p, q)
 
 Compute an approximate geodesic distance between two Symplectic matrices
-``p, q \in \operatorname{Sp}(2n)``, as done in [^WangRealSymplecticGroup].
+``p, q \in \operatorname{Sp}(2n)``, as done in [^WangSunFiori2018].
 ````math
     \operatorname{dist}(p, q)
         ≈ ||\operatorname{Log}(p^+q)||_{\operatorname{Fr}},
@@ -317,14 +317,14 @@ The Exponential mapping on the Symplectic manifold with the
 [`RealSymplecticMetric`](@ref) Riemannian metric.
 
 For the point ``p \in \operatorname{Sp}(2n)`` the exponential mapping along the tangent
-vector ``X \in T_p\operatorname{Sp}(2n)`` is computed as [^WangRealSymplecticGroup]
+vector ``X \in T_p\operatorname{Sp}(2n)`` is computed as [^WangSunFiori2018]
 ````math
     \operatorname{exp}_p(X) = p \operatorname{Exp}((p^{-1}X)^T)
                                 \operatorname{Exp}(p^{-1}X - (p^{-1}X)^T),
 ````
 where ``\operatorname{Exp}(\cdot)`` denotes the matrix exponential.
 
-[^WangRealSymplecticGroup]:
+[^WangSunFiori2018]:
     > Wang, Jing and Sun, Huafei and Fiori, Simone:
     > A Riemannian-steepest-descent approach for optimization on the real symplectic group,
     > Mathematical Methods in the Applied Sciences, 41(11) pp. 4273-4286, 2018
@@ -352,7 +352,7 @@ Compute the manifold gradient ``\text{grad}f(p)`` of a scalar function
 
 The element ``\text{grad}f(p)`` is found as the Riesz representer of the differential
 ``\text{D}f(p) \colon T_p\operatorname{Sp}(2n) \rightarrow ℝ`` w.r.t.
-the Riemannian metric inner product at ``p`` [^FioriSimone2011].
+the Riemannian metric inner product at ``p`` [^Fiori2011].
 That is, ``\text{grad}f(p) \in T_p\operatorname{Sp}(2n)`` solves the relation
 ````math
     g_p(\text{grad}f(p), X) = \text{D}f(p) \quad\forall\; X \in T_p\operatorname{Sp}(2n).
@@ -374,7 +374,7 @@ w.r.t the Riemannian metric ``g_p`` extended to the entire embedding space.
     vector space to comply with the [`RealSymplecticMetric`](@ref).
 
 
-[^FioriSimone2011]:
+[^Fiori2011]:
     > Simone Fiori:
     > Solving minimal-distance problems over the manifold of real-symplectic matrices,
     > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
@@ -503,7 +503,7 @@ end
 
 Compute the Cayley Inverse Retraction ``X = \mathcal{L}_p^{\operatorname{Sp}}(q)``
 such that the Cayley Retraction from ``p`` along ``X`` lands at ``q``, i.e.
-``\mathcal{R}_p(X) = q`` [^Bendokat2021].
+``\mathcal{R}_p(X) = q`` [^BendokatZimmermann2021].
 
 First, recall the definition the standard symplectic matrix
 ````math
@@ -527,10 +527,10 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
                                         ∈ T_p\operatorname{Sp}(2n).
 ````
 
-[^Bendokat2021]:
+[^BendokatZimmermann2021]:
     > Bendokat, Thomas and Zimmermann, Ralf:
 	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
-	> arXiv preprint arXiv:2108.12447, 2021 (https://arxiv.org/abs/2108.12447)
+	> arXiv preprint arXiv:[2108.12447](https://arxiv.org/abs/2108.12447), 2021.
 """
 inverse_retract(::Symplectic, p, q, ::CayleyInverseRetraction)
 
@@ -596,7 +596,7 @@ end
 
 Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n, ℝ)`` w.r.t.
 the Riemannian metric ``g`` [`RealSymplecticMetric`](@ref).
-The closed form projection mapping is given by [^Gao2021Riemannian]
+The closed form projection mapping is given by [^GaoSonAbsilStykel2021]
 ````math
     \operatorname{P}^{T_p\operatorname{Sp}(2n)}_{g_p}(X) = pQ\operatorname{sym}(p^TQ^TX),
 ````
@@ -629,14 +629,14 @@ That is,
 (T_p\operatorname{Sp}(2n))^{\perp_g} = \{Y \in \mathbb{R}^{2n \times 2n} :
                         g_p(Y, X) = 0 \;\forall\; X \in T_p\operatorname{Sp}(2n)\}.
 ````
-The closed form projection operator onto the normal space is given by [^Gao2021Riemannian]
+The closed form projection operator onto the normal space is given by [^GaoSonAbsilStykel2021]
 ````math
 \operatorname{P}^{(T_p\operatorname{Sp}(2n))\perp}_{g_p}(X) = pQ\operatorname{skew}(p^TQ^TX),
 ````
 where ``\operatorname{skew}(A) = \frac{1}{2}(A - A^T)``.
 This function is not exported.
 
-[^Gao2021Riemannian]:
+[^GaoSonAbsilStykel2021]:
     > Gao, Bin and Son, Nguyen Thanh and Absil, P-A and Stykel, Tatjana:
     > Riemannian optimization on the symplectic Stiefel manifold,
     > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
@@ -718,7 +718,7 @@ end
 
 Compute the Cayley retraction on ``p ∈ \operatorname{Sp}(2n, ℝ)`` in
 the direction of tangent vector ``X ∈ T_p\operatorname{Sp}(2n, ℝ)``,
-as defined in by Birtea et al in proposition 2 [^birtea2020optimization].
+as defined in by Birtea et al in proposition 2 [^BirteaCaşuComănescu2020].
 
 Using the symplectic inverse of a matrix ``A \in ℝ^{2n \times 2n}``,
 ``
@@ -746,10 +746,10 @@ Here
 ``\operatorname{exp}_{1/1}(z) = (2 - z)^{-1}(2 + z)``
 denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
 
-[^birtea2020optimization]:
-    > Birtea, Petre and Ca{\c{s}}u, Ioan and Com{\u{a}}nescu, Dan:
+[^BirteaCaşuComănescu2020]:
+    > Birtea, Petre and Caşu, Ioan and Comănescu, Dan:
     > Optimization on the real symplectic group,
-    > Monatshefte f{\"u}r Mathematik, Springer
+    > Monatshefte f{\"u}r Mathematik, Springer, 2020.
     > doi [10.1007/s00605-020-01369-9](https://doi.org/10.1007/s00605-020-01369-9)
 """
 retract(M::Symplectic, p, X)

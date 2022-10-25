@@ -124,7 +124,7 @@ In this constructor `L` is the number of integration steps.
 [^Muralidharan2012]:
     > P. Muralidharan and P. T. Fletcher, “Sasaki Metrics for Analysis of Longitudinal Data
     > on Manifolds,” Proc IEEE Comput Soc Conf Comput Vis Pattern Recognit, vol. 2012,
-    > pp. 1027–1034, Jun. 2012, doi: 10.1109/CVPR.2012.6247780.
+    > pp. 1027–1034, Jun. 2012, doi: [10.1109/CVPR.2012.6247780](https://doi.org/10.1109/CVPR.2012.6247780).
 """
 struct SasakiRetraction <: AbstractRetractionMethod
     L::Int
@@ -217,7 +217,7 @@ Exact retraction and inverse retraction can be approximated using [`VectorBundle
 
 [^Sasaki1958]:
     > S. Sasaki, “On the differential geometry of tangent bundles of Riemannian manifolds,”
-    > Tohoku Math. J. (2), vol. 10, no. 3, pp. 338–354, 1958, doi: 10.2748/tmj/1178244668.
+    > Tohoku Math. J. (2), vol. 10, no. 3, pp. 338–354, 1958, doi: [10.2748/tmj/1178244668](https://doi.org/10.2748/tmj/1178244668).
 
 # Constructors
 

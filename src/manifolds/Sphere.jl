@@ -482,7 +482,7 @@ R(X,Y)Z = \langle Z, Y \rangle X - \langle Z, X \rangle Y
 [^MuralidharanFletcher2021]:
     > P. Muralidharan and P. T. Fletcher, “Sasaki Metrics for Analysis of Longitudinal Data
     > on Manifolds,” Proc IEEE Comput Soc Conf Comput Vis Pattern Recognit, vol. 2012,
-    > pp. 1027–1034, Jun. 2012, doi: 10.1109/CVPR.2012.6247780.
+    > pp. 1027–1034, Jun. 2012, doi: [10.1109/CVPR.2012.6247780](https://doi.org/10.1109/CVPR.2012.6247780).
 """
 riemann_tensor(M::AbstractSphere{ℝ}, p, X, Y, Z)
 
