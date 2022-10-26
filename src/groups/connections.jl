@@ -9,7 +9,7 @@ going through group identity are one-parameter subgroups. See[^Pennec2020] for d
     > X. Pennec and M. Lorenzi, “5 - Beyond Riemannian geometry: The affine connection
     > setting for transformation groups,” in Riemannian Geometric Statistics in Medical Image
     > Analysis, X. Pennec, S. Sommer, and T. Fletcher, Eds. Academic Press, 2020, pp. 169–229.
-    > doi: 10.1016/B978-0-12-814725-2.00012-1.
+    > doi: [10.1016/B978-0-12-814725-2.00012-1](https://doi.org/10.1016/B978-0-12-814725-2.00012-1).
 """
 abstract type AbstractCartanSchoutenConnection <: AbstractAffineConnection end
 
