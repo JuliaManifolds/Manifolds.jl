@@ -78,10 +78,10 @@ end;
 
 # ╔═╡ 40487cc6-707f-4ca3-b735-6d5f50b07f74
 # Only load Makie if necessary
-(interactive || render_images) && ( using GLMakie,Makie );
-
-# ╔═╡ 44e6e4e1-6b69-4a40-a1f1-d0084a0af8c3
-GLMakie.activate!()
+if (interactive || render_images) 
+	using GLMakie,Makie
+	GLMakie.activate!()
+end
 
 # ╔═╡ f2276b50-49f4-478f-9a96-0e374a37fe2f
 """
@@ -2097,7 +2097,6 @@ version = "3.5.0+0"
 # ╠═27038d25-32b3-433d-ad47-f7ae330fef1c
 # ╠═e0c54d00-c698-4ea6-a710-37fc284ed83e
 # ╟─f0d60996-ae46-4bfa-8408-b6e28cba1f6b
-# ╠═44e6e4e1-6b69-4a40-a1f1-d0084a0af8c3
 # ╟─96fcb06e-2517-4c5b-b350-375d1ecb3258
 # ╠═87272f4b-f898-4edb-8842-0464ffc4bf01
 # ╟─0fe4dd5d-9838-4236-8ef9-bfe9afb76ac7
