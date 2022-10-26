@@ -15,7 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 04e7ac42-4b1b-11ed-1cb3-e76ac86d4203
-using Manifolds,RecursiveArrayTools,GLMakie,Makie, OrdinaryDiffEq,
+using Manifolds,RecursiveArrayTools, OrdinaryDiffEq,
     DiffEqCallbacks, BoundaryValueDiffEq, PlutoUI
 
 # ╔═╡ 8159d5bc-2c3f-4657-80c4-661e9162b79d
@@ -54,20 +54,18 @@ We will first set up our plot with an empty torus.
 The torus will be colored according to its Gaussian curvature stored in `gcs`. We later want to have a color scale that has negative curvature blue, zero curvature white and positive curvature red so `gcs_mm` is the largest absolute value of the curvature that will be needed to properly set range of curvature values.
 """
 
-# ╔═╡ 44e6e4e1-6b69-4a40-a1f1-d0084a0af8c3
-GLMakie.activate!()
-
 # ╔═╡ 96fcb06e-2517-4c5b-b350-375d1ecb3258
 md"""
  In the documentation this tutorial represents a static situation (loading precomputed images). In the Pluto notebook, you can set interactive to true to change the points and tangent vectors in the following example.
 """
 
 # ╔═╡ 87272f4b-f898-4edb-8842-0464ffc4bf01
-interactive = false
+interactive = false;
 
 # ╔═╡ 0fe4dd5d-9838-4236-8ef9-bfe9afb76ac7
 md"""
 We also cache the images to reduce the documentation generation time.
+If you activate `rendering` the images are saved in non-interactive mode.
 """
 
 # ╔═╡ 9efc27d4-caa0-4e9c-85e6-e9dbdbafbb9c
@@ -75,8 +73,15 @@ begin
 	localpath = join(splitpath(@__FILE__)[1:(end - 1)], "/") # files folder
     image_prefix = localpath * "/working-in-charts"
     @info image_prefix
-	safe_images = false && !interactive
-end
+	render_images = false
+end;
+
+# ╔═╡ 40487cc6-707f-4ca3-b735-6d5f50b07f74
+# Only load Makie if necessary
+(interactive || render_images) && ( using GLMakie,Makie );
+
+# ╔═╡ 44e6e4e1-6b69-4a40-a1f1-d0084a0af8c3
+GLMakie.activate!()
 
 # ╔═╡ f2276b50-49f4-478f-9a96-0e374a37fe2f
 """
@@ -148,7 +153,7 @@ function solve_for(p0x, X_p0x, Y_transp, T)
         final_time=T,
     )
     return p_exp
-end
+end;
 
 # ╔═╡ 9ee3fbaf-a579-480e-ae33-9d6eb8b07fbc
 md"""
@@ -211,11 +216,11 @@ end;
 
 # ╔═╡ a30fa94f-5669-4265-a541-03d16dbd5745
 begin
-    ax1, fig1 = torus_figure()
-    arrows!(ax1, geo_ps_pt, geo_Ys, linewidth=0.05, color=:blue)
-    lines!(geo_ps; linewidth=4.0, color=:green)
-	safe_images && Makie.save("working-in-charts-transport.png", fig1)
-	if interactive
+	if render_images || interactive # generate images in these two cases
+    	ax1, fig1 = torus_figure()
+    	arrows!(ax1, geo_ps_pt, geo_Ys, linewidth=0.05, color=:blue)
+	    lines!(geo_ps; linewidth=4.0, color=:green)
+		(!interactive) && Makie.save(image_prefix * "working-in-charts-transport.png", fig1)
 	    fig1
 	else
 		PlutoUI.LocalResource(image_prefix * "/working-in-charts-transport.png")
@@ -258,10 +263,10 @@ end;
 
 # ╔═╡ eea2fbc7-1ba8-49f8-916c-743984abe15d
 begin
-    ax2, fig2 = torus_figure()
-    lines!(geo_r; linewidth=4.0, color=:green)
-	safe_images && Makie.save(image_prefix * "/working-in-charts-geodesic.png", fig2)
-	if interactive
+	if render_images || interactive # generate images in these two cases
+    	ax2, fig2 = torus_figure()
+    	lines!(geo_r; linewidth=4.0, color=:green)
+		(!interactive) && Makie.save(image_prefix * "/working-in-charts-geodesic.png", fig2)
 	    fig2
 	else
 		PlutoUI.LocalResource(image_prefix * "/working-in-charts-geodesic.png")
@@ -2097,6 +2102,7 @@ version = "3.5.0+0"
 # ╠═87272f4b-f898-4edb-8842-0464ffc4bf01
 # ╟─0fe4dd5d-9838-4236-8ef9-bfe9afb76ac7
 # ╠═9efc27d4-caa0-4e9c-85e6-e9dbdbafbb9c
+# ╠═40487cc6-707f-4ca3-b735-6d5f50b07f74
 # ╠═f2276b50-49f4-478f-9a96-0e374a37fe2f
 # ╟─c18609fe-b510-447f-9d2a-d1e6eb1da3c2
 # ╠═2532be0e-6d48-4775-b78f-e48f04e5c3a3
