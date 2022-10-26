@@ -71,7 +71,12 @@ We also cache the images to reduce the documentation generation time.
 """
 
 # ╔═╡ 9efc27d4-caa0-4e9c-85e6-e9dbdbafbb9c
-safe_images = true && !interactive
+begin
+	localpath = join(splitpath(@__FILE__)[1:(end - 1)], "/") # files folder
+    image_prefix = localpath * "/working-in-charts"
+    @info image_prefix
+	safe_images = false && !interactive
+end
 
 # ╔═╡ f2276b50-49f4-478f-9a96-0e374a37fe2f
 """
@@ -209,8 +214,12 @@ begin
     ax1, fig1 = torus_figure()
     arrows!(ax1, geo_ps_pt, geo_Ys, linewidth=0.05, color=:blue)
     lines!(geo_ps; linewidth=4.0, color=:green)
-	Makie.save("working-in-charts-transport.png", fig1)
-    fig1
+	safe_images && Makie.save("working-in-charts-transport.png", fig1)
+	if interactive
+	    fig1
+	else
+		PlutoUI.LocalResource(image_prefix * "/working-in-charts-transport.png")
+	end
 end
 
 # ╔═╡ a941fd19-faf5-49d0-8f68-ae2fbe45130d
@@ -251,8 +260,12 @@ end;
 begin
     ax2, fig2 = torus_figure()
     lines!(geo_r; linewidth=4.0, color=:green)
-	Makie.save("working-in-charts-geodesic.png", fig2)
-    fig2
+	safe_images && Makie.save(image_prefix * "/working-in-charts-geodesic.png", fig2)
+	if interactive
+	    fig2
+	else
+		PlutoUI.LocalResource(image_prefix * "/working-in-charts-geodesic.png")
+	end
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2094,7 +2107,7 @@ version = "3.5.0+0"
 # ╠═c1660206-d21a-4812-9dd3-bda91b633c0b
 # ╠═a30fa94f-5669-4265-a541-03d16dbd5745
 # ╟─a941fd19-faf5-49d0-8f68-ae2fbe45130d
-# ╠═922461b0-55a0-447b-b59d-cfff7b448858
+# ╟─922461b0-55a0-447b-b59d-cfff7b448858
 # ╠═2abef887-32a8-40ba-89e1-b6adbfe9174f
 # ╠═eea2fbc7-1ba8-49f8-916c-743984abe15d
 # ╟─00000000-0000-0000-0000-000000000001
