@@ -40,7 +40,8 @@ mkpath(tutorial_output_folder)
 @info " \n      Rendering Tutorials\n "
 tutorials = [
     Dict(:file => "getstarted", :title => "Get started with Manifolds.jl"),
-    Dict(:file => "working-in-charts", :title => "Working in charts"),
+    # Optional loading of packages (GLMakie) required
+    # Dict(:file => "working-in-charts", :title => "Working in charts"),
 ]
 # build menu and write files myself - tp set edit url correctly.
 for t in tutorials
