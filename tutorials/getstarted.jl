@@ -73,7 +73,7 @@ md"""
 * [implementing generic functions](#Implementing-generic-Functions)
 * [Allocating and in-place computations](#Allocating-and-in-place-computations)
 * [Decorating a manifold](#Decorating-a-manifold)
-* Representations with and without charts.
+* Representations with and without charts (see notebook `working-in-charts.jl`, currently not rendered as a part of this documentation).
 """
 
 # ╔═╡ c1e139b0-7d39-4d20-81dc-5592fee831d0
@@ -275,7 +275,7 @@ M₆ = M₂ × M₃
 md"Since now the representations might differ from element to element, we have to encapsulate these in their own type."
 
 # ╔═╡ fa0baedb-636e-4ac8-9779-039625ca8267
-p₃ = ProductRepr([0, 0, 1], [0, 1, 0])
+p₃ = ArrayPartition([0, 0, 1], [0, 1, 0])
 
 # ╔═╡ 3e1e665f-ae85-4a4c-9f7d-4db6b9beada8
 is_point(M₆, p₃, true)
@@ -330,7 +330,7 @@ This works fine on the sphere, see [this tutorial](https://manoptjl.org/stable/t
 
 # ╔═╡ cac20d84-d5c2-4631-9269-6cd44d1fc8d7
 md"""
-Now on several manifolds the [📖 expontial map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see [^AbsilMahonySepulchre2008], Def. 4.1.1 for details) and its (local) inverse.
+Now on several manifolds the [📖 exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see [^AbsilMahonySepulchre2008], Def. 4.1.1 for details) and its (local) inverse.
 
 The function itself is quite similar to the expponential map, just that [🔗 `retract(M, p, X, m)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.retract) has one further parameter, the type of retraction to take, so `m` is a subtype of [`AbstractRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractRetractionMethod) `m`, the same for the [🔗 `inverse_retract(M, p, q, n)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.inverse_retract) with an [`AbstractInverseRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractInverseRetractionMethod) `n`.
 
@@ -381,7 +381,7 @@ md"""
 
 Memory allocation is a [critical performace issue](https://docs.julialang.org/en/v1/manual/performance-tips/#Measure-performance-with-[@time](@ref)-and-pay-attention-to-memory-allocation) when programming in Julia. To take this into account, `Manifolds.jl` provides special functions to reduce the amount of allocations.
 
-We again look at the [📖 expontial map](https://en.wikip edia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` [🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.exp-Tuple{AbstractManifold,%20Any,%20Any}). This function returns the resulting point `q`, which requires to allocate new memory.
+We again look at the [📖 exponential map](https://en.wikip edia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` [🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.exp-Tuple{AbstractManifold,%20Any,%20Any}). This function returns the resulting point `q`, which requires to allocate new memory.
 
 To avoid this allocation, the function `exp!(M, q, p, X)` [🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.exp!-Tuple{AbstractManifold,%20Any,%20Any,%20Any}) can be called. Here `q` is allocated beforehand and is passed as the memory, where the result is returned in.
 It might be used even for interims computations, as long as it does not introduce side effects. Thas means that even with `exp!(M, p, p, X)` the result is correct.
@@ -391,7 +391,7 @@ It might be used even for interims computations, as long as it does not introduc
 md"""
 Let's look at an example.
 
-We take another look at the [Sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html#Manifolds.Sphere) but now a high.dimensional one.
+We take another look at the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html#Manifolds.Sphere) but now a high-dimensional one.
 We can also illustrate how to generate radnom points and tangent vectors.
 """
 
@@ -455,7 +455,7 @@ md"""
 which is the manifold of ``3×3`` matrices that are [symmetric and positive definite](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Manifolds.SymmetricPositiveDefinite).
 which has a default as well, the affine invariant [`LinearAffineMetric`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Default-metric:-the-linear-affine-metric), but also has several different metrics.
 
-Two switch the metric, we use the idea of a [📖 decorator pattern](https://en.wikipedia.org/wiki/Decorator_pattern)-like approach. Defining
+To switch the metric, we use the idea of a [📖 decorator pattern](https://en.wikipedia.org/wiki/Decorator_pattern)-like approach. Defining
 """
 
 # ╔═╡ 1023f2a9-4b73-4c3f-8384-3c36a537479a
@@ -516,12 +516,12 @@ md"""
     > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
     > [open access](http://press.princeton.edu/chapters/absil/)
 [^AxenBaranBergmannRzecki2022]:
-	>Axen, S. D., Baran, M., Bergmann, R. and Rzecki, K:
-	> _Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds_,
+    >Axen, S. D., Baran, M., Bergmann, R. and Rzecki, K:
+    > _Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds_,
     > arXiv preprint, 2022, [2106.08777](https://arxiv.org/abs/2106.08777)
 [^BergmannGousenbourger2018]:
     > Bergmann, R. and Gousenbourger, P.-Y.:
-	> _A variational model for data fitting on manifolds
+    > _A variational model for data fitting on manifolds
     > by minimizing the acceleration of a Bézier curve_.
     > Frontiers in Applied Mathematics and Statistics, 2018.
     > doi: [10.3389/fams.2018.00059](https://dx.doi.org/10.3389/fams.2018.00059),
