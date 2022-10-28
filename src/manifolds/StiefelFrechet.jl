@@ -185,7 +185,7 @@ function log_lbfgs(Stf, Y, W;
         max_ls = get(lbfgs_options, "max_ls", _g_max_ls)
     end
         
-    xret, f, exitflag, output = minimize(fun!, v0,
+    xret, f, exitflag, output = minimize_lbfgs.minimize(fun!, v0,
                                          max_fun_evals=max_fun_evals,
                                          max_itr=max_itr,
                                          grad_tol=pretol, func_tol=pretol,
