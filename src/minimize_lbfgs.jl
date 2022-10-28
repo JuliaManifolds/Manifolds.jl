@@ -81,7 +81,7 @@ end
     if abs(ys) > 1e-10
         rho[lbfgs_end] = 1.0/ys
     else:
-        rho[lbfgs_end] = 1.0/
+        rho[lbfgs_end] = 1.0
     end
     # Update scale of initial Hessian approximation
     # Hdiag .= ys/sum(y.*pcondx.*y)*pcondx
