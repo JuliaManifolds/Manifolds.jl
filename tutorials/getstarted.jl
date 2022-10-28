@@ -277,6 +277,11 @@ md"Since now the representations might differ from element to element, we have t
 # ╔═╡ fa0baedb-636e-4ac8-9779-039625ca8267
 p₃ = Manifolds.ArrayPartition([0, 0, 1], [0, 1, 0])
 
+# ╔═╡ 36140614-7d40-4281-ba75-2b7b7106e637
+md"""
+Here `ArrayPartition` taken from [`RecursiveTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient acces to the product elements.
+"""
+
 # ╔═╡ 3e1e665f-ae85-4a4c-9f7d-4db6b9beada8
 is_point(M₆, p₃, true)
 
@@ -1172,6 +1177,7 @@ version = "17.4.0+0"
 # ╠═a02f085b-eaef-4a8f-a8fe-e306e956dd2c
 # ╟─0f135d94-25c8-499d-a9e0-169db76cb901
 # ╠═fa0baedb-636e-4ac8-9779-039625ca8267
+# ╟─36140614-7d40-4281-ba75-2b7b7106e637
 # ╠═3e1e665f-ae85-4a4c-9f7d-4db6b9beada8
 # ╟─82b06119-d5f6-4aca-bd6c-45251144e4bf
 # ╠═b253ac94-d09a-4f5e-87d6-61275b81f8f4
