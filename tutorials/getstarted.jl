@@ -275,7 +275,7 @@ M₆ = M₂ × M₃
 md"Since now the representations might differ from element to element, we have to encapsulate these in their own type."
 
 # ╔═╡ fa0baedb-636e-4ac8-9779-039625ca8267
-p₃ = ArrayPartition([0, 0, 1], [0, 1, 0])
+p₃ = Manifolds.ArrayPartition([0, 0, 1], [0, 1, 0])
 
 # ╔═╡ 3e1e665f-ae85-4a4c-9f7d-4db6b9beada8
 is_point(M₆, p₃, true)
@@ -1204,7 +1204,6 @@ version = "17.4.0+0"
 # ╟─810cdb2a-9cbc-4652-b955-a0e63d0d37cc
 # ╟─a71d870d-83b9-46af-a2eb-04c746c1c20d
 # ╠═d4226ae7-d11f-47a1-a2b0-c631945c5fb7
-# ╠═9ad036e8-d6d2-465f-9f3a-df1af92b632b
 # ╠═82dca58f-52e6-491e-97ec-904bb5b0b36b
 # ╠═1023f2a9-4b73-4c3f-8384-3c36a537479a
 # ╟─faf5e291-6de3-4dd1-8e0d-790aaf5f36bd
