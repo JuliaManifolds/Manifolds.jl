@@ -279,7 +279,7 @@ p₃ = Manifolds.ArrayPartition([0, 0, 1], [0, 1, 0])
 
 # ╔═╡ 36140614-7d40-4281-ba75-2b7b7106e637
 md"""
-Here `ArrayPartition` taken from [`RecursiveTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient acces to the product elements.
+Here `ArrayPartition` taken from [`RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient access to the product elements.
 """
 
 # ╔═╡ 3e1e665f-ae85-4a4c-9f7d-4db6b9beada8
