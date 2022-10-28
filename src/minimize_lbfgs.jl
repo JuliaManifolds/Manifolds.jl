@@ -63,7 +63,7 @@ end
     ys = dot(y, s)
     skipped = 0
     corrections = size(S)[2]
-    if ys > 1e-10
+    if abs(ys) > 1e-10
         if lbfgs_end < corrections
             lbfgs_end = lbfgs_end+1
             if lbfgs_start != 1
