@@ -80,7 +80,7 @@ end
     Y[:, lbfgs_end] .= y
     if abs(ys) > 1e-10
         rho[lbfgs_end] = 1.0/ys
-    else:
+    else
         rho[lbfgs_end] = 1.0
     end
     # Update scale of initial Hessian approximation
