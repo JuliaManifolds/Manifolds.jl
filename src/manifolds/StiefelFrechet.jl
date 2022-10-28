@@ -1,6 +1,9 @@
-import Optim as Opm
-
 _g_rank_cutoff = 1e-14  # cut off of eigenvalue to determine rank of span of two orthogonal basis
+
+_g_corrections = 10  # number of stored history in LBFGS
+_g_c1 = 1e-4
+_g_c2 = 0.9
+_g_max_ls = 25  # max number of line search
 
 @doc raw"""
     q, dot_q = dot_exp(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, <:StiefelSubmersionMetric}, p, X)
@@ -58,7 +61,9 @@ function dot_exp!(
 end
 
 @doc raw"""
-    log_lbfgs(Stf::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric}, Y, W; kwargs...)
+    log_lbfgs(Stf::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric}, Y, W;
+                       tolerance=sqrt(eps(float(real(Base.promote_eltype(Y, W))))),
+                       max_itr=1_000, pretol=1e-3, lbfgs_options=nothing)
 
 Compute the logarithmic map on the [`Stiefel(n,k)`](@ref) manifold with respect to the [`StiefelSubmersionMetric`](@ref). Returning eta such that ``\operatorname{Exp}_Y\eta = W``
 
@@ -70,10 +75,14 @@ Express $span(Y, W)$ in an orthogonal basis $[Y, Q]$, we solve for two matrices 
 ````math \eta = Y*A + Q*R. ````
 The exact gradient calculation with Frechet derivatives is expensive, to speed up we only run the exact gradient until the iteration error is less than pretol, then run a simple update on A, R for the last steps.
 If we suspect the distance between p and q is over 0.5pi, use pretol=1e-5.  Otherwise pretol=1e-3 is much faster for short distance.
+
+lbfgs_options is a dictionary, with parameters for lbfgs_options:
+    corrections, c1, c2, max_ls
+If missing will use default
 """
 function log_lbfgs(Stf, Y, W;
                    tolerance=sqrt(eps(float(real(Base.promote_eltype(Y, W))))),
-                   max_itr=1_000, pretol=1e-3)
+                   max_itr=1_000, pretol=1e-3, lbfgs_options=nothing)
     α = metric(Stf).α
     alf = 0.5/(1+α)
     T = Base.promote_eltype(Y, W)        
@@ -164,11 +173,26 @@ function log_lbfgs(Stf, Y, W;
     v0[Adim+1:end] = vec(R)
 
     # run full gradient until pretol
-    optzer = Opm.LBFGS(linesearch = Opm.LineSearches.MoreThuente(), m=5)
-    ret = Opm.optimize(Opm.only_fg!(fun!), v0, optzer,
-                   Opm.Options(g_tol=pretol,
-                                 iterations=max_itr))
-    unvecAR!(A, R, Opm.minimizer(ret))
+    max_fun_evals = Int(ceil(max_itr*1.3))
+    corrections = _g_corrections
+    c1 = _g_c1
+    c2 = _g_c2
+    max_ls = _g_max_ls
+    if !isnothing(lbfgs_options)
+        corrections = get(lbfgs_options, "corrections", _g_corrections)
+        c1 = get(lbfgs_options, "c1", _g_c1)
+        c2 = get(lbfgs_options, "c2", _g_c2)
+        max_ls = get(lbfgs_options, "max_ls", _g_max_ls)
+    end
+        
+    xret, f, exitflag, output = minimize(fun!, v0,
+                                         max_fun_evals=max_fun_evals,
+                                         max_itr=max_itr,
+                                         grad_tol=pretol, func_tol=pretol,
+                                         corrections=_g_corrections,
+                                         c1=c1, c2=c2, max_ls=max_ls)
+                                         
+    unvecAR!(A, R, xret)
 
     # run simple descent
     function Fnorm(dA, dR)
