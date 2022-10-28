@@ -61,38 +61,36 @@ end
 """        
 @inline function _save!(y, s, S, Y, rho, lbfgs_start, lbfgs_end, Hdiag, precondx)
     ys = dot(y, s)
-    skipped = 0
     corrections = size(S)[2]
-    if abs(ys) > 1e-10
-        if lbfgs_end < corrections
-            lbfgs_end = lbfgs_end+1
-            if lbfgs_start != 1
-                if lbfgs_start == corrections
-                    lbfgs_start = 1
-                else
-                    lbfgs_start = lbfgs_start+1
-                end
+    if lbfgs_end < corrections
+        lbfgs_end = lbfgs_end+1
+        if lbfgs_start != 1
+            if lbfgs_start == corrections
+                lbfgs_start = 1
+            else
+                lbfgs_start = lbfgs_start+1
             end
-        else
-            lbfgs_start = min(2, corrections)
-            lbfgs_end = 1
-        end
-
-        S[:, lbfgs_end] .= s
-        Y[:, lbfgs_end] .= y
-        rho[lbfgs_end] = 1.0/ys
-
-        # Update scale of initial Hessian approximation
-        # Hdiag .= ys/sum(y.*pcondx.*y)*pcondx
-        if isnothing(precondx)
-            Hdiag .=  ys/dot(y,  y)
-        else
-            mul!(Hdiag,  ys/dot3(y, precondx, y), precondx)
         end
     else
-        skipped = 1
+        lbfgs_start = min(2, corrections)
+        lbfgs_end = 1
     end
-    return lbfgs_start, lbfgs_end, skipped
+
+    S[:, lbfgs_end] .= s
+    Y[:, lbfgs_end] .= y
+    if abs(ys) > 1e-10
+        rho[lbfgs_end] = 1.0/ys
+    else:
+        rho[lbfgs_end] = 1.0/
+    end
+    # Update scale of initial Hessian approximation
+    # Hdiag .= ys/sum(y.*pcondx.*y)*pcondx
+    if isnothing(precondx)
+        Hdiag .=  ys/dot(y,  y)
+    else
+        mul!(Hdiag,  ys/dot3(y, precondx, y), precondx)
+    end
+    return lbfgs_start, lbfgs_end
 end
 
 @doc raw"""
@@ -365,7 +363,7 @@ function minimize(
         # COMPUTE DESCENT DIRECTION 
         # Update the direction and step sizes
         if i > 1
-            lbfgs_start, lbfgs_end, skipped = _save!(
+            lbfgs_start, lbfgs_end, = _save!(
                 g - g_old, t*d, S, Y, rho,
                 lbfgs_start, lbfgs_end, Hdiag, precondx)
             _lbfgs_calc!(d, g, S, Y, rho, lbfgs_start, lbfgs_end, Hdiag, al_buff)
