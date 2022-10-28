@@ -279,6 +279,7 @@ using StatsBase: AbstractWeights
 
 include("utils.jl")
 include("expm_frechet.jl")
+include("minimize_lbfgs.jl")
 
 include("product_representations.jl")
 include("differentiation/differentiation.jl")
