@@ -28,6 +28,7 @@ end
 ManifoldsBase.@manifold_element_forwards StiefelPoint value
 ManifoldsBase.@manifold_vector_forwards StiefelTVector value
 ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTVector value value
+ManifoldsBase.@default_manifold_fallbacks (Stiefel{n,k,ℝ} where {n,k}) StiefelPoint StiefelTVector value value
 ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTVector value value
 
 @doc raw"""

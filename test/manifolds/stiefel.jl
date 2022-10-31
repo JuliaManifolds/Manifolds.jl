@@ -98,7 +98,6 @@ include("../utils.jl")
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
-            @test_throws MethodError distance(M, x, y)
             @test isapprox(
                 M,
                 retract(
@@ -123,7 +122,7 @@ include("../utils.jl")
                 pts,
                 basis_types_to_from=(DefaultOrthonormalBasis(),),
                 basis_types_vecs=(DefaultOrthonormalBasis(),),
-                test_exp_log=false,
+                test_exp_log=true,
                 default_inverse_retraction_method=PolarInverseRetraction(),
                 test_injectivity_radius=false,
                 test_is_tangent=true,
@@ -132,6 +131,7 @@ include("../utils.jl")
                 point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
                 test_vee_hat=false,
                 projection_atol_multiplier=100.0,
+                exp_log_atol_multiplier=10.0,
                 retraction_atol_multiplier=10.0,
                 is_tangent_atol_multiplier=4 * 10.0^2,
                 retraction_methods=[
