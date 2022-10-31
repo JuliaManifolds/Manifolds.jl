@@ -16,7 +16,7 @@ Q_{2n} =
 \end{bmatrix}.
 ````
 
-The symplectic Stiefel tangent space at ``p`` can be parametrized as [^Bendokat2021]
+The symplectic Stiefel tangent space at ``p`` can be parametrized as [^BendokatZimmermann2021]
 ````math
     \begin{align*}
     T_p\operatorname{SpSt}(2n, 2k)
@@ -61,7 +61,7 @@ ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction(
 
 Define the canonical projection from ``\operatorname{Sp}(2n, 2n)`` onto
 ``\operatorname{SpSt}(2n, 2k)``, by projecting onto the first ``k`` columns
-and the ``n + 1``'th onto the ``n + k``'th columns [^Bendokat2021].
+and the ``n + 1``'th onto the ``n + k``'th columns [^BendokatZimmermann2021].
 
 It is assumed that the point ``p`` is on ``\operatorname{Sp}(2n, 2n)``.
 """
@@ -125,7 +125,7 @@ $A^{+} = Q_{2k}^TA^TQ_{2n}$ is the symplectic inverse, with
 ````
 The we check that ``H = p^{+}X \in 𝔤_{2k}``, where ``𝔤``
 is the Lie Algebra of the symplectic group ``\operatorname{Sp}(2k)``,
-characterized as [^Bendokat2021],
+characterized as [^BendokatZimmermann2021],
 ````math
     𝔤_{2k} = \{H \in ℝ^{2k \times 2k} \;|\; H^+ = -H \}.
 ````
@@ -164,7 +164,7 @@ at a point ``p \in  \operatorname{SpSt}(2n, 2k)``
 in the direction of ``X \in T_p\operatorname{SpSt}(2n, 2k)``.
 
 The tangent vector ``X`` can be written in the form
-``X = \bar{\Omega}p`` [^Bendokat2021], with
+``X = \bar{\Omega}p`` [^BendokatZimmermann2021], with
 ````math
     \bar{\Omega} = X (p^Tp)^{-1}p^T
         + Q_{2n}p(p^Tp)^{-1}X^T(I_{2n} - Q_{2n}^Tp(p^Tp)^{-1}p^TQ_{2n})Q_{2n}
@@ -180,7 +180,7 @@ where ``\operatorname{Exp}(\cdot)`` denotes the matrix exponential.
 
 Computing the above mapping directly however, requires taking matrix exponentials
 of two ``2n \times 2n`` matrices, which is computationally expensive when ``n``
-increases. Therefore we instead follow [^Bendokat2021] who express the above
+increases. Therefore we instead follow [^BendokatZimmermann2021] who express the above
 exponential mapping in a way which only requires taking matrix exponentials
 of an ``8k \times 8k`` matrix and a ``4k \times 4k`` matrix.
 
@@ -328,7 +328,7 @@ end
 
 Compute the Riemannian inner product ``g^{\operatorname{SpSt}}`` at
 ``p \in \operatorname{SpSt}`` between tangent vectors ``X, X \in T_p\operatorname{SpSt}``.
-Given by Proposition 3.10 in [^Bendokat2021].
+Given by Proposition 3.10 in [^BendokatZimmermann2021].
 ````math
 g^{\operatorname{SpSt}}_p(X, Y)
     = \operatorname{tr}\left(X^T\left(I_{2n} -
@@ -413,7 +413,7 @@ end
 
 Compute the Cayley Inverse Retraction ``X = \mathcal{L}_p^{\operatorname{SpSt}}(q)``
 such that the Cayley Retraction from ``p`` along ``X`` lands at ``q``, i.e.
-``\mathcal{R}_p(X) = q`` [^Bendokat2021].
+``\mathcal{R}_p(X) = q`` [^BendokatZimmermann2021].
 
 First, recall the definition the standard symplectic matrix
 ````math
@@ -439,10 +439,10 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
                                         ∈ T_p\operatorname{Sp}(2n).
 ````
 
-[^Bendokat2021]:
+[^BendokatZimmermann2021]:
     > Bendokat, Thomas and Zimmermann, Ralf:
 	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
-	> arXiv preprint arXiv:2108.12447, 2021 (https://arxiv.org/abs/2108.12447)
+	> arXiv preprint arXiv:[2108.12447](https://arxiv.org/abs/2108.12447), 2021.
 """
 inverse_retract(::SymplecticStiefel, p, q, ::CayleyInverseRetraction)
 
@@ -458,7 +458,7 @@ end
     manifold_dimension(::SymplecticStiefel{n, k})
 
 Returns the dimension of the symplectic Stiefel manifold embedded in ``ℝ^{2n \times 2k}``,
-i.e. [^Bendokat2021]
+i.e. [^BendokatZimmermann2021]
 ````math
     \operatorname{dim}(\operatorname{SpSt}(2n, 2k)) = (4n - 2k + 1)k.
 ````
@@ -561,7 +561,7 @@ Given a point ``p \in \operatorname{SpSt}(2n, 2k)``, every tangent vector
     \tilde{\Omega} = \left(I_{2n} - \frac{1}{2}pp^+\right)Xp^+ -
                      pX^+\left(I_{2n} - \frac{1}{2}pp^+\right) \in ℝ^{2n \times 2n},
 ````
-as shown in Proposition 3.5 of [^Bendokat2021].
+as shown in Proposition 3.5 of [^BendokatZimmermann2021].
 Using this representation of ``X``, the Cayley retraction
 on ``\operatorname{SpSt}(2n, 2k)`` is defined pointwise as
 ````math
@@ -571,7 +571,7 @@ The operator ``\operatorname{cay}(A) = (I - A)^{-1}(I + A)`` is the Cayley trans
 
 However, the computation of an ``2n \times 2n`` matrix inverse in the expression
 above can be reduced down to inverting a ``2k \times 2k`` matrix due to Proposition
-5.2 of [^Bendokat2021].
+5.2 of [^BendokatZimmermann2021].
 
 Let ``A = p^+X`` and ``H = X - pA``. Then an equivalent expression for the Cayley
 retraction defined pointwise above is

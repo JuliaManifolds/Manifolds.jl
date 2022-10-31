@@ -1,3 +1,6 @@
+"""
+`Manifolds.jl` provides a library of manifolds aiming for an easy-to-use and fast implementation.
+"""
 module Manifolds
 
 import ManifoldsBase:
@@ -559,7 +562,8 @@ export AbstractPowerManifold,
     QuotientManifold
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
-export ProjectedPointDistribution, ProductRepr, TangentBundle, TangentBundleFibers
+export ProductRepr, ArrayPartition
+export ProjectedPointDistribution, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers
 export AbstractVectorTransportMethod,

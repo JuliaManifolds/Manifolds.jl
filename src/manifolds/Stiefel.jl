@@ -87,7 +87,7 @@ end
 """
     default_inverse_retraction_method(M::Stiefel)
 
-Return [`PolarInverseRetraction`](@ref) as the default inverse retraction for the
+Return [`PolarInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarInverseRetraction) as the default inverse retraction for the
 [`Stiefel`](@ref) manifold.
 """
 default_inverse_retraction_method(::Stiefel) = PolarInverseRetraction()
@@ -95,14 +95,14 @@ default_inverse_retraction_method(::Stiefel) = PolarInverseRetraction()
 """
     default_retraction_method(M::Stiefel)
 
-Return [`PolarRetraction`](@ref) as the default retraction for the [`Stiefel`](@ref) manifold.
+Return [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) as the default retraction for the [`Stiefel`](@ref) manifold.
 """
 default_retraction_method(::Stiefel) = PolarRetraction()
 
 """
     default_vector_transport_method(M::Stiefel)
 
-Return the [`DifferentiatedRetractionVectorTransport`](@ref) of the [`PolarRetraction`](@ref)
+Return the [`DifferentiatedRetractionVectorTransport`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.DifferentiatedRetractionVectorTransport) of the [`PolarRetraction`]([`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction)
 as the default vector transport method for the [`Stiefel`](@ref) manifold.
 """
 function default_vector_transport_method(::Stiefel)

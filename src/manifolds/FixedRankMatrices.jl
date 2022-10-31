@@ -84,9 +84,11 @@ Base.:(==)(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt =
 @doc raw"""
     UMVTVector <: TVector
 
-A tangent vector that can be described as a product `U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mathrm{H}`,
-where `X = U_X S V_X^\mathrm{H}` is its base point, see for example [`FixedRankMatrices`](@ref).
-This vector structure stores the additionally (to the point) required fields.
+A tangent vector that can be described as a product ``U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mathrm{H}``,
+where ``X = U_X S V_X^\mathrm{H}`` is its base point, see for example [`FixedRankMatrices`](@ref).
+
+The base point ``p`` is required for example embedding this point, but it is not stored.
+The fields of thie tangent vector are `U` for ``U_X``, `M` and `Vt` to store ``V_X^\mathrm{H}``
 
 # Constructors
 * `UMVTVector(U,M,Vt)` store umv factors to initialize the `UMVTVector`
@@ -288,8 +290,26 @@ function Base.copyto!(X::UMVTVector, Y::UMVTVector)
     return X
 end
 
-default_retraction_method(::FixedRankMatrices) = PolarRetraction()
+"""
+    default_inverse_retraction_method(M::Stiefel)
+
+Return [`PolarInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarInverseRetraction) as the default inverse retraction for the
+[`FixedRankMatrices`](@ref) manifold.
+"""
 default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction()
+
+"""
+    default_retraction_method(M::FixedRankMatrices)
+
+Return [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) as the default retraction for the [`FixedRankMatrices`](@ref) manifold.
+"""
+default_retraction_method(::FixedRankMatrices) = PolarRetraction()
+
+"""
+    default_vector_transport_method(M::FixedRankMatrices)
+
+Return the [`ProjectionTransport`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.ProjectionTransport) as the default vector transport method for the [`FixedRankMatrices`](@ref) manifold.
+"""
 default_vector_transport_method(::FixedRankMatrices) = ProjectionTransport()
 
 @doc raw"""
@@ -409,7 +429,7 @@ end
     Random.rand(M::FixedRankMatrices; vector_at=nothing, kwargs...)
 
 If `vector_at` is `nothing`, return a random point on the [`FixedRankMatrices`](@ref)
-manifold. The orthogonal matrices are sampled from the [`Stiefel`(@ref) manifold
+manifold. The orthogonal matrices are sampled from the [`Stiefel`](@ref) manifold
 and the singular values are sampled uniformly at random.
 
 If `vector_at` is not `nothing`, generate a random tangent vector in the tangent space of

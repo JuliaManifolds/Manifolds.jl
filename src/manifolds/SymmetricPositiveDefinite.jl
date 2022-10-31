@@ -33,7 +33,7 @@ SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
 @doc raw"""
     SPDPoint <: AbstractManifoldsPoint
 
-Store the result of `eigen(p)` of an SPD matrix and (optionally) ``p^{\frac{1}[2}}`` and ``p^{-\frac{1}[2}}``
+Store the result of `eigen(p)` of an SPD matrix and (optionally) ``p^{1/2}`` and ``p^{-1/2}``
 to avoid their repeated computations.
 
 This result only has the result of `eigen` as a mandatory storage, the other three
@@ -381,7 +381,7 @@ Base.eltype(p::SPDPoint) = eltype(p.eigen)
 @doc raw"""
     project(M::SymmetricPositiveDefinite, p, X)
 
-project a matrix from the embedding onto the tangent space $T_p\mathcal P(n)$ of the
+project a matrix from the embedding onto the tangent space ``T_p\mathcal P(n)`` of the
 [`SymmetricPositiveDefinite`](@ref) matrices, i.e. the set of symmetric matrices.
 """
 project(::SymmetricPositiveDefinite, p, X)

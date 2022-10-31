@@ -203,7 +203,7 @@ Finally, the covariance matrix in the tangent plane is estimated using the Eucli
 [^Pennec2006]:
     > X. Pennec, “Intrinsic Statistics on Riemannian Manifolds: Basic Tools for Geometric
     > Measurements,” J Math Imaging Vis, vol. 25, no. 1, p. 127, Jul. 2006,
-    > doi: 10.1007/s10851-006-6228-4.
+    > doi: [10.1007/s10851-006-6228-4](https:///doi.org/10.1007/s10851-006-6228-4).
 """
 function Statistics.cov(
     M::AbstractManifold,
