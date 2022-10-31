@@ -41,7 +41,7 @@ md"""
 
 This is a short overview of [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/).
 
-This tutorial is rendered from a pluto notebook, so you can also open the file [tutorials/getstarted.jl](https://github.com/JuliaManifolds/Manifolds.jl/tree/master/tutorials/getstarted.jl) in Pluto and work on this tutorial interactively.
+This tutorial is rendered from a pluto notebook, so you can also open the file [🎈  tutorials/getstarted.jl](https://github.com/JuliaManifolds/Manifolds.jl/tree/master/tutorials/getstarted.jl) in Pluto and work on this tutorial interactively.
 
 As usual, if you want to install the package, just type
 
