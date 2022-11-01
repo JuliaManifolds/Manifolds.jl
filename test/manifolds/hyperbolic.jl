@@ -170,7 +170,7 @@ include("../utils.jl")
                     PoleLadderTransport(),
                 ],
                 is_tangent_atol_multiplier=10.0,
-                exp_log_atol_multiplier=10.0,
+                exp_log_atol_multiplier=20.0,
                 retraction_methods=(ExponentialRetraction(),),
                 test_vee_hat=false,
                 test_tangent_vector_broadcasting=is_plain_array,
