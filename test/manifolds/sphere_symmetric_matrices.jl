@@ -45,6 +45,7 @@ include("../utils.jl")
             test_project_tangent=true,
             test_musical_isomorphisms=true,
             test_default_vector_transport=true,
+            exp_log_atol_multiplier=8,
             is_tangent_atol_multiplier=2,
             test_inplace=true,
         )

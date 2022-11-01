@@ -252,53 +252,30 @@ function test_manifold(
         direction=parallel_transport_direction,
         mutating=is_mutating,
     )
-
-    Test.@testset "(inverse &) retraction tests" begin
-        for (p, X) in zip(pts, tv)
-            epsx = find_eps(p)
-            point_atol = is_point_atol_multiplier * find_eps(p)
-            for retr_method in retraction_methods
-                Test.@test is_point(M, retract(M, p, X, retr_method); atol=point_atol)
-                Test.@test isapprox(
-                    M,
-                    p,
-                    retract(M, p, X, 0, retr_method);
-                    atol=epsx * retraction_atol_multiplier,
-                    rtol=retraction_atol_multiplier == 0 ?
-                         sqrt(epsx) * retraction_rtol_multiplier : 0,
-                )
-                if is_mutating
-                    new_pt = allocate(p)
-                    retract!(M, new_pt, p, X, retr_method)
-                else
-                    new_pt = retract(M, p, X, retr_method)
-                end
-                Test.@test is_point(M, new_pt; atol=point_atol)
-                (test_inplace && is_mutating) &&
-                    Test.@testset "inplace test for retract!" begin
-                        p2 = copy(M, p)
-                        X2 = copy(M, p, X)
-                        q = retract(M, p2, X2, retr_method)
-                        retract!(M, p2, p2, X, retr_method)
-                        Test.@test isapprox(M, p2, q; atol=point_atol)
-                        # This test is not reasonable for `inverse_retract!(M, X, p, q, m)`,
-                        # since X is of different type/concept than p,q
-                    end
-            end
+    Test.@testset "retraction tests" begin
+        for retr_method in retraction_methods
+            test_retr(
+                M,
+                Tuple(pts),
+                Tuple(tv),
+                retr_method;
+                in_place=is_mutating,
+                atol=retraction_atol_multiplier,
+                rtol=retraction_rtol_multiplier,
+            )
         end
-        for p in pts
-            epsx = find_eps(p)
-            for inv_retr_method in inverse_retraction_methods
-                Test.@test isapprox(
-                    M,
-                    p,
-                    zero_vector(M, p),
-                    inverse_retract(M, p, p, inv_retr_method);
-                    atol=epsx * retraction_atol_multiplier,
-                    rtol=retraction_atol_multiplier == 0 ?
-                         sqrt(epsx) * retraction_rtol_multiplier : 0,
-                )
-            end
+    end
+    Test.@testset "inverse retraction tests" begin
+        for inv_retr_method in inverse_retraction_methods
+            test_retr(
+                M,
+                Tuple(pts),
+                Tuple(tv),
+                inv_retr_method;
+                in_place=is_mutating,
+                atol=retraction_atol_multiplier,
+                rtol=retraction_rtol_multiplier,
+            )
         end
     end
 

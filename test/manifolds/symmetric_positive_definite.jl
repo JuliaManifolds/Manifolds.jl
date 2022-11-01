@@ -39,6 +39,10 @@ include("../utils.jl")
                     # eigendecomposition of 3x3 SPD matrices from StaticArrays is not very accurate
                     exp_log_atol_multiplier = 5.0e7
                 end
+                if M == M5
+                    # BuresWasserstein is a little inexact (changing oder of log and exp)
+                    exp_log_atol_multiplier = 1e14
+                end
                 if M == M6
                     # we have to raise this slightly for the nondiagonal case.
                     exp_log_atol_multiplier = 5e1
