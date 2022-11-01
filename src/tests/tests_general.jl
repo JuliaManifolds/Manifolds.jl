@@ -208,75 +208,16 @@ function test_manifold(
         end
     end
 
-    test_exp_log && Test.@testset "log/exp tests" begin
-        epsp1p2 = find_eps(pts[1], pts[2])
-        atolp1p2 = exp_log_atol_multiplier * epsp1p2
-        rtolp1p2 =
-            exp_log_atol_multiplier == 0.0 ? sqrt(epsp1p2) * exp_log_rtol_multiplier : 0
+    test_exp_log && test_explog(
+        M,
+        Tuple(pts),
+        Tuple(tv);
+        in_place=is_mutating,
+        atol_multiplier=exp_log_atol_multiplier,
+        rtol_multiplier=exp_log_rtol_multiplier,
+    )
+    test_exp_log && Test.@testset "Remaining exp/log based stuff (temp)" begin
         X1 = log(M, pts[1], pts[2])
-        X2 = log(M, pts[2], pts[1])
-        Test.@test isapprox(M, pts[2], exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
-        Test.@test isapprox(M, pts[1], exp(M, pts[1], X1, 0); atol=atolp1p2, rtol=rtolp1p2)
-        Test.@test isapprox(M, pts[2], exp(M, pts[1], X1, 1); atol=atolp1p2, rtol=rtolp1p2)
-        if is_mutating
-            q2 = allocate(pts[1])
-            exp!(M, q2, pts[1], X1)
-            Test.@test isapprox(M, pts[2], q2; atol=atolp1p2, rtol=rtolp1p2)
-            exp!(M, q2, pts[1], X1, 0)
-            Test.@test isapprox(M, pts[1], q2; atol=atolp1p2, rtol=rtolp1p2)
-        end
-        if VERSION >= v"1.5" && isa(M, Union{Grassmann,GeneralizedStiefel})
-            # TODO: investigate why this is so imprecise on newer Julia versions on CI
-            Test.@test isapprox(
-                M,
-                pts[1],
-                exp(M, pts[2], X2);
-                # yields 5*10^-8 for the usual 10^-13 we impose on earlier Julia versions
-                atol=atolp1p2 * 5 * 10^5,
-                rtol=rtolp1p2,
-            )
-        else
-            Test.@test isapprox(M, pts[1], exp(M, pts[2], X2); atol=atolp1p2, rtol=rtolp1p2)
-        end
-        Test.@test is_point(M, exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
-        Test.@test isapprox(M, pts[1], exp(M, pts[1], X1, 0); atol=atolp1p2, rtol=rtolp1p2)
-        for p in pts
-            epsx = find_eps(p)
-            Test.@test isapprox(
-                M,
-                p,
-                zero_vector(M, p),
-                log(M, p, p);
-                atol=epsx * exp_log_atol_multiplier,
-                rtol=exp_log_atol_multiplier == 0.0 ?
-                     sqrt(epsx) * exp_log_rtol_multiplier : 0,
-            )
-            Test.@test isapprox(
-                M,
-                p,
-                zero_vector(M, p),
-                inverse_retract(M, p, p);
-                atol=epsx * exp_log_atol_multiplier,
-                rtol=exp_log_atol_multiplier == 0.0 ?
-                     sqrt(epsx) * exp_log_rtol_multiplier : 0.0,
-            )
-        end
-        atolp1 = exp_log_atol_multiplier * find_eps(pts[1])
-        if is_mutating
-            zero_vector!(M, X1, pts[1])
-        else
-            X1 = zero_vector(M, pts[1])
-        end
-        Test.@test isapprox(M, pts[1], X1, zero_vector(M, pts[1]); atol=atolp1)
-        if is_mutating
-            log!(M, X1, pts[1], pts[2])
-        else
-            X1 = log(M, pts[1], pts[2])
-        end
-
-        Test.@test isapprox(M, exp(M, pts[1], X1, 1), pts[2]; atol=atolp1)
-        Test.@test isapprox(M, exp(M, pts[1], X1, 0), pts[1]; atol=atolp1)
-
         if test_norm
             Test.@test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], X1)
         end

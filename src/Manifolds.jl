@@ -459,6 +459,7 @@ function __init__()
 
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
         using .Test: Test
+        include("tests/tests_manifold.jl")
         include("tests/tests_general.jl")
         export test_manifold
         include("tests/tests_group.jl")
