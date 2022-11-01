@@ -50,7 +50,7 @@ function test_explog(
         for (pi, Xi) in zip(p, X)
             qi = exp(M, pi, Xi)
             Yi = log(M, pi, qi)
-            Test.@test is_point(M, qi; kwargs...)
+            Test.@test is_point(M, qi, true; kwargs...)
             Test.@test isapprox(M, pi, Xi, Yi; atol=atp, rtol=rtp)
 
             Test.@test isapprox(M, pi, exp(M, pi, Xi, 0); atol=atp, rtol=rtp)
