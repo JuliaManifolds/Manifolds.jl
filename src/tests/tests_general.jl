@@ -260,21 +260,21 @@ function test_manifold(
                 Tuple(tv),
                 retr_method;
                 in_place=is_mutating,
-                atol=retraction_atol_multiplier,
-                rtol=retraction_rtol_multiplier,
+                atol_multiplier=retraction_atol_multiplier,
+                rtol_multiplier=retraction_rtol_multiplier,
             )
         end
     end
     Test.@testset "inverse retraction tests" begin
         for inv_retr_method in inverse_retraction_methods
-            test_retr(
+            test_inv_retr(
                 M,
                 Tuple(pts),
                 Tuple(tv),
                 inv_retr_method;
                 in_place=is_mutating,
-                atol=retraction_atol_multiplier,
-                rtol=retraction_rtol_multiplier,
+                atol_multiplier=retraction_atol_multiplier,
+                rtol_multiplier=retraction_rtol_multiplier,
             )
         end
     end

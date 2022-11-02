@@ -47,8 +47,8 @@ function generate_tangent_vectors(
 end
 
 """
-    test_exp_log(M, p; kwargs...)
-    test_exp_log(M, p, X; kwargs...)
+    test_explog(M, p; kwargs...)
+    test_explog(M, p, X; kwargs...)
 
 Test suite for exponential and logarithmic map, where
 
@@ -140,7 +140,7 @@ function test_exp(
         XL = X
     end
     in_place && (ri = allocate(M, first(pL)))
-    Test.@testset "Testing exp/log on $M" begin
+    Test.@testset "Testing exp on $M" begin
         for (pi, Xi) in zip(pL, XL)
             qi = exp(M, pi, Xi)
             Test.@test is_point(M, qi, true; atol=atp, rtol=rtp, kwargs...)
@@ -185,7 +185,14 @@ function test_log(
         for (pi, qi) in zip(pL, qL)
             Xi = log(M, pi, qi)
             Test.@test is_vector(M, pi, Xi, true; atol=atp, rtol=rtp, kwargs...)
-            Test.@test isapprox(M, log(M, pi, pi), zero_vector(M, pi); atol=atp, rtol=rtp)
+            Test.@test isapprox(
+                M,
+                pi,
+                log(M, pi, pi),
+                zero_vector(M, pi);
+                atol=atp,
+                rtol=rtp,
+            )
             if in_place
                 log!(M, Yi, pi, qi)
                 Test.@test isapprox(M, pi, Xi, Yi; atol=atp, rtol=rtp)
@@ -193,6 +200,8 @@ function test_log(
         end
     end
 end
+"""
+"""
 function test_retr_and_inv(
     M,
     p,
@@ -280,13 +289,14 @@ function test_inv_retr(
             Test.@test is_vector(M, pi, Xi, true; atol=atp, rtol=rtp, kwargs...)
             Test.@test isapprox(
                 M,
-                inverse_retract(M, pi, pi),
+                pi,
+                inverse_retract(M, pi, pi, m),
                 zero_vector(M, pi);
                 atol=atp,
                 rtol=rtp,
             )
             if in_place
-                inverse_retract!(M, Yi, pi, qi)
+                inverse_retract!(M, Yi, pi, qi, m)
                 Test.@test isapprox(M, pi, Xi, Yi; atol=atp, rtol=rtp)
             end
         end
@@ -331,10 +341,10 @@ function test_retr(
         for (pi, Xi) in zip(pL, XL)
             qi = retract(M, pi, Xi, m)
             Test.@test is_point(M, qi, true; atol=atp, rtol=rtp, kwargs...)
-            Test.@test isapprox(M, pi, retract(M, pi, Xi, 0); atol=atp, rtol=rtp)
-            Test.@test isapprox(M, qi, retract(M, pi, Xi, 1); atol=atp, rtol=rtp)
+            Test.@test isapprox(M, pi, retract(M, pi, Xi, 0, m); atol=atp, rtol=rtp)
+            Test.@test isapprox(M, qi, retract(M, pi, Xi, 1, m); atol=atp, rtol=rtp)
             if in_place
-                retract!(M, ri, pi, Xi)
+                retract!(M, ri, pi, Xi, m)
                 Test.@test isapprox(M, qi, ri; atol=atp, rtol=rtp)
             end
         end

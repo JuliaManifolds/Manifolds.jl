@@ -55,6 +55,8 @@ include("../utils.jl")
                 is_tangent_atol_multiplier=5.0,
                 inverse_retraction_methods=[SoftmaxInverseRetraction()],
                 retraction_methods=[SoftmaxRetraction()],
+                exp_log_atol_multiplier=1e1,
+                retraction_atol_multiplier=1e1,
                 test_inplace=true,
             )
         end

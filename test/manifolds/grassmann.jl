@@ -85,7 +85,7 @@ include("../utils.jl")
                 exp_log_atol_multiplier=10.0 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
                 is_tangent_atol_multiplier=20.0,
                 projection_atol_multiplier=10.0,
-                retraction_atol_multiplier=10.0,
+                retraction_atol_multiplier=1e2,
             )
 
             @testset "inner/norm" begin
@@ -179,7 +179,7 @@ include("../utils.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                exp_log_atol_multiplier=10.0^3,
+                exp_log_atol_multiplier=1e4,
                 is_tangent_atol_multiplier=20.0,
                 projection_atol_multiplier=10.0,
                 retraction_atol_multiplier=10.0,
