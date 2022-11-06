@@ -90,7 +90,7 @@ function allocate(x::ProductRepr, ::Type{T}) where {T}
     return ProductRepr(map(t -> allocate(t, T), submanifold_components(x))...)
 end
 allocate(p::ProductRepr, ::Type{T}, s::Size{S}) where {S,T} = Vector{T}(undef, S)
-allocate(p::ProductRepr, ::Type{T}, s::Integer) where {S,T} = Vector{T}(undef, s)
+allocate(p::ProductRepr, ::Type{T}, s::Integer) where {T} = Vector{T}(undef, s)
 allocate(a::AbstractArray{<:ProductRepr}) = map(allocate, a)
 
 Base.copy(x::ProductRepr) = ProductRepr(map(copy, x.parts))

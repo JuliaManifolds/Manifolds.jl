@@ -445,7 +445,7 @@ Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
 function sym_rem(x::N, T=π) where {N<:Number}
     return (x ≈ T ? convert(N, -T) : rem(x, convert(N, 2 * T), RoundNearest))
 end
-sym_rem(x, T=π) where {N} = map(sym_rem, x, Ref(T))
+sym_rem(x, T=π) = map(sym_rem, x, Ref(T))
 
 @doc raw"""
      parallel_transport_to(M::Circle, p, X, q)
