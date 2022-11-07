@@ -63,7 +63,7 @@ function is_point(
     ::TraitList{<:IsGroupManifold},
     G::GroupManifold,
     e::Identity,
-    te=false;
+    te::Bool=false;
     kwargs...,
 )
     ie = is_identity(G, e; kwargs...)
@@ -76,7 +76,7 @@ function is_vector(
     G::GroupManifold,
     e::Identity,
     X,
-    te=false,
+    te::Bool=false,
     cbp=true;
     kwargs...,
 )

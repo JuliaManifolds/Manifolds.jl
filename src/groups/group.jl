@@ -306,7 +306,7 @@ end
     X,
     Y;
     kwargs...,
-) where {𝔽,O<:AbstractGroupOperation}
+) where {O<:AbstractGroupOperation}
     BG = base_group(G)
     return isapprox(BG, identity_element(BG), X, Y; kwargs...)
 end
@@ -328,7 +328,7 @@ function is_point(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     e::Identity,
-    te=false;
+    te::Bool=false;
     kwargs...,
 )
     ie = is_identity(G, e; kwargs...)
@@ -341,7 +341,7 @@ function is_vector(
     G::AbstractDecoratorManifold,
     e::Identity,
     X,
-    te=false,
+    te::Bool=false,
     cbp=true;
     kwargs...,
 )

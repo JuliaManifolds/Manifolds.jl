@@ -510,7 +510,7 @@ function is_point(
     ::TraitList{IsMetricManifold},
     M::MetricManifold{𝔽,TM,G},
     p,
-    te=false;
+    te::Bool=false;
     kwargs...,
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return is_point(M.manifold, p, te; kwargs...)
@@ -521,7 +521,7 @@ function is_vector(
     M::MetricManifold{𝔽,TM,G},
     p,
     X,
-    te=false,
+    te::Bool=false,
     cbp=true;
     kwargs...,
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}

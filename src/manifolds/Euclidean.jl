@@ -250,7 +250,7 @@ function get_coordinates_diagonalizing!(
     p,
     X,
     ::DiagonalizingOrthonormalBasis{ℝ},
-) where {𝔽}
+)
     S = representation_size(M)
     PS = prod(S)
     copyto!(c, reshape(X, PS))
