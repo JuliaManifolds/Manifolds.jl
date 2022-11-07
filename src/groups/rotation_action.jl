@@ -214,3 +214,76 @@ group_manifold(A::RowwiseMultiplicationAction) = A.manifold
 function inverse_apply(::LeftRowwiseMultiplicationAction, a, p)
     return (a \ p')'
 end
+
+###
+
+@doc raw"""
+    ColumnwiseMultiplicationAction{
+        TM<:AbstractManifold,
+        TO<:GeneralUnitaryMultiplicationGroup,
+        TAD<:ActionDirection,
+    } <: AbstractGroupAction{TAD}
+
+Action of the (special) unitary or orthogonal group [`GeneralUnitaryMultiplicationGroup`](@ref)
+of type `On` columns of points on a matrix manifold `M`.
+
+# Constructor
+
+    ColumnwiseMultiplicationAction(
+        M::AbstractManifold,
+        On::GeneralUnitaryMultiplicationGroup,
+        AD::ActionDirection = LeftAction(),
+    )
+"""
+struct ColumnwiseMultiplicationAction{
+    TM<:AbstractManifold,
+    TO<:GeneralUnitaryMultiplicationGroup,
+    TAD<:ActionDirection,
+} <: AbstractGroupAction{TAD}
+    manifold::TM
+    On::TO
+end
+
+function ColumnwiseMultiplicationAction(
+    M::AbstractManifold,
+    On::GeneralUnitaryMultiplicationGroup,
+    ::TAD=LeftAction(),
+) where {TAD<:ActionDirection}
+    return ColumnwiseMultiplicationAction{typeof(M),typeof(On),TAD}(M, On)
+end
+
+const LeftColumnwiseMultiplicationAction{
+    TM<:AbstractManifold,
+    TO<:GeneralUnitaryMultiplicationGroup,
+} = ColumnwiseMultiplicationAction{TM,TO,LeftAction}
+
+function apply(::LeftColumnwiseMultiplicationAction, a, p)
+    return a * p
+end
+function apply(::LeftColumnwiseMultiplicationAction, ::Identity{MultiplicationOperation}, p)
+    return p
+end
+
+function apply!(::LeftColumnwiseMultiplicationAction, q, a, p)
+    return map((qrow, prow) -> mul!(qrow, a, prow), eachcol(q), eachcol(p))
+end
+
+base_group(A::LeftColumnwiseMultiplicationAction) = A.On
+
+group_manifold(A::LeftColumnwiseMultiplicationAction) = A.manifold
+
+function inverse_apply(::LeftColumnwiseMultiplicationAction, a, p)
+    return a \ p
+end
+
+function optimal_alignment(A::LeftColumnwiseMultiplicationAction, p, q)
+    is_point(A.manifold, p, true)
+    is_point(A.manifold, q, true)
+
+    Xmul = p * transpose(q)
+    F = svd(Xmul)
+    L = size(Xmul)[2]
+    UVt = F.U * F.Vt
+    Ostar = det(UVt) ≥ 0 ? UVt : F.U * Diagonal([i < L ? 1 : -1 for i in 1:L]) * F.Vt
+    return convert(typeof(Xmul), Ostar)
+end
