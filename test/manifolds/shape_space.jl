@@ -1,4 +1,3 @@
-using Revise
 include("../utils.jl")
 
 @testset "KendallsPreShapeSpace" begin
