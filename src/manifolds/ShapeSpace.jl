@@ -2,7 +2,7 @@
 @doc raw"""
     KendallsPreShapeSpace{n,k} <: AbstractSphere{ℝ}
 
-Kendall's pre-shape space, equivalent to [`ArraySphere`](@ref) represented by n×k matrices).
+Kendall's pre-shape space of ``k`` landmarks in $ℝ^n$ represented by n×k matrices.
 
 # Constructor 
 
@@ -105,8 +105,8 @@ end
 @doc raw"""
     KendallsShapeSpace{n,k} <: AbstractDecoratorManifold{ℝ}
 
-Kendall's shape space, defined as quotient of a pre-shape space (equivalent to
-[`ArraySphere`](@ref) represented by n×k matrices) by the action [`ColumnwiseMultiplicationAction`](@ref)
+Kendall's shape space, defined as quotient of a [`KendallsPreShapeSpace`](@ref)
+(represented by n×k matrices) by the action [`ColumnwiseMultiplicationAction`](@ref).
 
 # Constructor 
 
