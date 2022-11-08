@@ -343,7 +343,6 @@ include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
 include("manifolds/SkewHermitian.jl")
-include("manifolds/ShapeSpace.jl")
 include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
 include("manifolds/StiefelEuclideanMetric.jl")
@@ -367,6 +366,9 @@ include("manifolds/GeneralUnitaryMatrices.jl")
 include("manifolds/Unitary.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/Orthogonal.jl")
+
+# shape spaces require Sphere
+include("manifolds/ShapeSpace.jl")
 
 # Introduce the quotient, Grassmann, only after Stiefel
 include("manifolds/Grassmann.jl")
@@ -500,6 +502,8 @@ export Euclidean,
     Grassmann,
     HeisenbergGroup,
     Hyperbolic,
+    KendallsPreShapeSpace,
+    KendallsShapeSpace,
     Lorentz,
     MultinomialDoubleStochastic,
     MultinomialMatrices,
@@ -513,7 +517,6 @@ export Euclidean,
     ProbabilitySimplex,
     ProjectiveSpace,
     Rotations,
-    ShapeSpace,
     SkewHermitianMatrices,
     SkewSymmetricMatrices,
     Spectrahedron,
