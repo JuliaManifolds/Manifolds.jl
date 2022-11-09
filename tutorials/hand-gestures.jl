@@ -25,8 +25,15 @@ function hand_analysis()
 
     # doing tangent PCA
     mean_hand = mean(Mshape, hands_projected)
+    # For tangent PCA, we need coordinates in a basis.
+    # Some libraries skip this step because the representation of tangent vectors
+    # forms a linear subspace of an Euclidean space so PCA automatically detects
+    # which directions have no variance but this is a more principled way to solve
+    # this issue.
     B = get_basis(Mshape, mean_hand, ProjectedOrthonormalBasis(:svd))
     hand_logs = [log(Mshape, mean_hand, p) for p in hands_projected]
+    # Preparing data for MultivariateStats -- mean=0 is set because we've centered
+    # the data geometrically to mean_hand in the code above.
     red_coords = reduce(hcat, [get_coordinates(Mshape, mean_hand, X, B) for X in hand_logs])
     fp = fit(PCA, red_coords; mean=0)
     # show explained variance of each principal component
