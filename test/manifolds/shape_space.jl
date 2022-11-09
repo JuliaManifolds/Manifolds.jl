@@ -4,6 +4,7 @@ include("../utils.jl")
     M = KendallsPreShapeSpace(2, 3)
     @test representation_size(M) === (2, 3)
     @test manifold_dimension(M) == 3
+    @test injectivity_radius(M) == pi
 
     p1 = [
         0.4385117672460505 -0.6877826444042382 0.24927087715818771

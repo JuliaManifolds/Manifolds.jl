@@ -17,7 +17,7 @@ end
 function hand_analysis()
     hands, hand_labels = load_hands()
 
-    scatter3d(hands[1,1,:], hands[1,2,:], hands[1,3,:])
+    scatter3d(hands[1, 1, :], hands[1, 2, :], hands[1, 3, :])
 
     Mshape = KendallsShapeSpace(3, 22)
     # projecting hands
@@ -37,9 +37,17 @@ function hand_analysis()
         mask = hand_labels .== label_num
         cur_hand_logs = red_coords[:, mask]
         cur_t = MultivariateStats.transform(fp, cur_hand_logs)
-        scatter!(fig, cur_t[1,:], cur_t[2,:], label="gesture " * string(label_num))
+        scatter!(fig, cur_t[1, :], cur_t[2, :], label="gesture " * string(label_num))
     end
     xlabel!(fig, "principal component 1")
     ylabel!(fig, "principal component 2")
     fig
+
+    # now let's compute pairwise distances between gestures
+    # we can use them for clustering, classification, etc.
+    hand_distances = [
+        distance(Mshape, hands_projected[i], hands_projected[j]) for
+        i in eachindex(hands_projected), j in eachindex(hands_projected)
+    ]
+    return heatmap(hand_distances, aspect_ratio=:equal)
 end
