@@ -201,12 +201,12 @@ function manifold_dimension(::KendallsShapeSpace{n,k}) where {n,k}
     return n * (k - 1) - 1 - div(n * (n - 1), 2)
 end
 
-function project!(::KendallsShapeSpace{n,k}, q, p) where {n,k}
-    return project!(KendallsPreShapeSpace(n, k), q, p)
+function project!(M::KendallsShapeSpace, q, p)
+    return project!(get_embedding(M), q, p)
 end
 
-function project!(::KendallsShapeSpace{n,k}, Y, p, X) where {n,k}
-    return project!(KendallsPreShapeSpace(n, k), Y, p, X)
+function project!(M::KendallsShapeSpace, Y, p, X)
+    return project!(get_embedding(M), Y, p, X)
 end
 
 @doc raw"""
