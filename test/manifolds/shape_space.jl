@@ -30,7 +30,7 @@ include("../utils.jl")
         test_project_tangent=true,
         test_rand_point=true,
         test_rand_tvector=true,
-        rand_tvector_atol_multiplier=1,
+        rand_tvector_atol_multiplier=2,
     )
 end
 
