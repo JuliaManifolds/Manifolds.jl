@@ -25,7 +25,7 @@ include("../utils.jl")
         [p1, p2, p3];
         is_point_atol_multiplier=1,
         is_tangent_atol_multiplier=1,
-        exp_log_atol_multiplier=1,
+        exp_log_atol_multiplier=2,
         test_project_point=true,
         test_project_tangent=true,
         test_rand_point=true,
