@@ -61,6 +61,12 @@ function get_embedding(::KendallsPreShapeSpace{N,K}) where {N,K}
     return ArraySphere(N, K)
 end
 
+@doc raw"""
+    manifold_dimension(M::KendallsPreShapeSpace)
+
+Return the dimension of the [`KendallsPreShapeSpace`](@ref) manifold `M`. The dimension is
+given by ``n(k - 1) - 1``.
+"""
 manifold_dimension(::KendallsPreShapeSpace{n,k}) where {n,k} = n * (k - 1) - 1
 
 function project!(::KendallsPreShapeSpace, q, p)
@@ -194,8 +200,7 @@ end
     manifold_dimension(M::KendallsShapeSpace)
 
 Return the dimension of the [`KendallsShapeSpace`](@ref) manifold `M`. The dimension is given by
-``nk - 1 - n(n - 1)/2``
-
+``n(k - 1) - 1 - n(n - 1)/2``.
 """
 function manifold_dimension(::KendallsShapeSpace{n,k}) where {n,k}
     return n * (k - 1) - 1 - div(n * (n - 1), 2)
