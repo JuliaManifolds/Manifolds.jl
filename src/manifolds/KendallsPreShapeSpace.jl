@@ -17,10 +17,12 @@ translation and scaling of all points, so this can be thought of as a quotient m
 
 [^Kendall1989]:
     > D. G. Kendall, “A Survey of the Statistical Theory of Shape,” Statist. Sci., vol. 4,
-    > no. 2, pp. 87–99, May 1989, doi: 10.1214/ss/1177012582.
+    > no. 2, pp. 87–99, May 1989,
+    > doi: [10.1214/ss/1177012582](https://doi.org/10.1214/ss/1177012582).
 [^Kendall1984]:
     > D. G. Kendall, “Shape Manifolds, Procrustean Metrics, and Complex Projective Spaces,”
-    > Bull. London Math. Soc., vol. 16, no. 2, pp. 81–121, Mar. 1984, doi: 10.1112/blms/16.2.81.
+    > Bull. London Math. Soc., vol. 16, no. 2, pp. 81–121, Mar. 1984
+    > doi: [10.1112/blms/16.2.81](https://doi.org/10.1112/blms/16.2.81).
 """
 struct KendallsPreShapeSpace{n,k} <: AbstractSphere{ℝ} end
 
@@ -71,6 +73,12 @@ end
 embed(::KendallsPreShapeSpace, p) = p
 embed(::KendallsPreShapeSpace, p, X) = X
 
+"""
+    get_embedding(M::KendallsPreShapeSpace)
+
+Return the space [`KendallsPreShapeSpace`](@ref) `M` is embedded in, i.e. [`ArraySphere`](@ref)
+of matrices of the same shape.
+"""
 function get_embedding(::KendallsPreShapeSpace{N,K}) where {N,K}
     return ArraySphere(N, K)
 end
@@ -90,10 +98,8 @@ Project point `p` from the embedding to [`KendallsPreShapeSpace`](@ref) by selec
 the right element from the orthogonal section representing the quotient manifold `M`.
 See Section 3.7 of [^Srivastava2016] for details.
 
-# References
-
-[^Srivastava2016]:
-    > A. Srivastava and E. P. Klassen, Functional and Shape Data Analysis. Springer New York, 2016.
+The method computes the mean of the landmarks and moves them to make their mean zero;
+afterwards the Frobenius norm of the landmarks (as a matrix) is normalised to fix the scaling.
 """
 project(::KendallsPreShapeSpace, p)
 
@@ -114,6 +120,8 @@ quotient manifold `M`. See Section 3.7 of [^Srivastava2016] for details.
 
 [^Srivastava2016]:
     > A. Srivastava and E. P. Klassen, Functional and Shape Data Analysis. Springer New York, 2016.
+    > ISBN: 978-1-4939-4018-9.
+    > doi: [10.1007/978-1-4939-4020-2](https://doi.org/10.1007/978-1-4939-4020-2).
 """
 project(::KendallsPreShapeSpace, p, X)
 
