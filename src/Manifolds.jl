@@ -368,7 +368,8 @@ include("manifolds/Rotations.jl")
 include("manifolds/Orthogonal.jl")
 
 # shape spaces require Sphere
-include("manifolds/ShapeSpace.jl")
+include("manifolds/KendallsPreShapeSpace.jl")
+include("manifolds/KendallsShapeSpace.jl")
 
 # Introduce the quotient, Grassmann, only after Stiefel
 include("manifolds/Grassmann.jl")

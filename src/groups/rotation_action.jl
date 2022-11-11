@@ -276,6 +276,18 @@ function inverse_apply(::LeftColumnwiseMultiplicationAction, a, p)
     return a \ p
 end
 
+"""
+    optimal_alignment(A::LeftColumnwiseMultiplicationAction, p, q)
+
+Compute optimal alignment for the left [`ColumnwiseMultiplicationAction`](@ref), i.e. the
+group element that, when it acts on `p`, returns the point closest to `q`. Details of
+computation are described in Section 2.2.1 of [^Srivastava2016].
+
+# References
+
+[^Srivastava2016]:
+    > A. Srivastava and E. P. Klassen, Functional and Shape Data Analysis. Springer New York, 2016.
+"""
 function optimal_alignment(A::LeftColumnwiseMultiplicationAction, p, q)
     is_point(A.manifold, p, true)
     is_point(A.manifold, q, true)

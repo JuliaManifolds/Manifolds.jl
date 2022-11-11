@@ -1,6 +1,9 @@
 # Shape spaces
 
-Kendall's pre-shape and shape spaces.
+Shape spaces are spaces of ``k`` points in ``\mathbb{R}^n`` up to simultaneous action of a group on all points.
+The most commonly encountered are Kendall's pre-shape and shape spaces.
+In the case of the Kendall's pre-shape spaces the action is translation and scaling.
+In the case of the Kendall's shape spaces the action is translation, scaling and rotation.
 
 ```@example
 using Manifolds, Plots
@@ -26,9 +29,17 @@ rot_q = apply(A, a, q)
 scatter!(fig, rot_q[1,:], rot_q[2,:], label="q aligned to p")
 ```
 
+A more extensive usage example is available in the `hand_gestures.jl` tutorial.
+
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
-Pages = ["manifolds/ShapeSpace.jl"]
+Pages = ["manifolds/KendallsPreShapeSpace.jl"]
+Order = [:type]
+```
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["manifolds/KendallsShapeSpace.jl"]
 Order = [:type]
 ```
 
@@ -36,6 +47,12 @@ Order = [:type]
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
-Pages = ["manifolds/ShapeSpace.jl"]
+Pages = ["manifolds/KendallsPreShapeSpace.jl"]
+Order = [:function]
+```
+
+```@autodocs
+Modules = [Manifolds, ManifoldsBase]
+Pages = ["manifolds/KendallsShapeSpace.jl"]
 Order = [:function]
 ```
