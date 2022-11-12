@@ -18,8 +18,13 @@ include("../utils.jl")
         0.3248027612629014 0.440253011955812 -0.7650557732187135
         0.26502337825226757 -0.06175142812400016 -0.20327195012826738
     ]
-    @test_throws ManifoldDomainError is_point(M, [1 0 1; 1 -1 0], true)
-    @test_throws ManifoldDomainError is_vector(M, p1, [1 0 1; 1 -1 0], true)
+    @test_throws DomainError is_point(M, [1 0 1; 1 -1 0] / 2, true)
+    @test_throws DomainError is_vector(
+        M,
+        [-1 0 1.0; 0 0 0] / sqrt(2),
+        [1.0 0 1; 1 -1 0],
+        true,
+    )
     test_manifold(
         M,
         [p1, p2, p3];

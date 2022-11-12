@@ -58,7 +58,7 @@ end
 Check whether `X` is a valid tangent vector on [`KendallsPreShapeSpace`](@ref), i.e. whether
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
 """
-function check_vector(M::KendallsPreShapeSpace, p, X; atol=sqrt(max_eps(X, Y)), kwargs...)
+function check_vector(M::KendallsPreShapeSpace, p, X; atol=sqrt(eps(eltype(X))), kwargs...)
     for X_row in eachrow(X)
         if !isapprox(mean(X_row), 0; atol, kwargs...)
             return DomainError(
