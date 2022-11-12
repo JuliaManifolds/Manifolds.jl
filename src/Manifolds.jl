@@ -367,6 +367,10 @@ include("manifolds/Unitary.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/Orthogonal.jl")
 
+# shape spaces require Sphere
+include("manifolds/KendallsPreShapeSpace.jl")
+include("manifolds/KendallsShapeSpace.jl")
+
 # Introduce the quotient, Grassmann, only after Stiefel
 include("manifolds/Grassmann.jl")
 
@@ -499,6 +503,8 @@ export Euclidean,
     Grassmann,
     HeisenbergGroup,
     Hyperbolic,
+    KendallsPreShapeSpace,
+    KendallsShapeSpace,
     Lorentz,
     MultinomialDoubleStochastic,
     MultinomialMatrices,
