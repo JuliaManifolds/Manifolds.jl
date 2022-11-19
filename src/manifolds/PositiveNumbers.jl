@@ -145,6 +145,36 @@ Base.exp(::PositiveNumbers, p::Real, X::Real) = p * exp(X / p)
 
 exp!(::PositiveNumbers, q, p, X) = (q .= p .* exp.(X ./ p))
 
+"""
+    get_coordinates(::PositiveNumbers, p, X, ::DefaultOrthonormalBasis{ℝ})
+
+Compute the coordinate of vector `X` which is tangent to `p` on the
+[`PositiveNumbers`](@ref PositiveNumbers) manifold. The formula is ``X / p``.
+"""
+get_coordinates(::PositiveNumbers, p, X, ::DefaultOrthonormalBasis{ℝ})
+
+get_coordinates_orthonormal(::PositiveNumbers, p, X, ::RealNumbers) = X / p
+
+function get_coordinates_orthonormal!(::PositiveNumbers, c, p, X, ::RealNumbers)
+    c .= X / p
+    return c
+end
+
+"""
+    get_vector(::PositiveNumbers, p, c, ::DefaultOrthonormalBasis{ℝ})
+
+Compute the vector with coordinate `c` which is tangent to `p` on the
+[`PositiveNumbers`](@ref PositiveNumbers) manifold. The formula is ``p * c``.
+"""
+get_vector(::PositiveNumbers, p, c, ::DefaultOrthonormalBasis{ℝ})
+
+get_vector_orthonormal(::PositiveNumbers, p, c, ::RealNumbers) = p * c[]
+
+function get_vector_orthonormal!(::PositiveNumbers, X, p, c, ::RealNumbers)
+    X .= c[] * p
+    return X
+end
+
 @doc raw"""
     injectivity_radius(M::PositiveNumbers[, p])
 
@@ -245,6 +275,29 @@ end
 
 function parallel_transport_to!(::PositiveNumbers, Y, p, X, q)
     return (Y .= X .* q ./ p)
+end
+
+function Random.rand!(::PositiveNumbers, pX; σ=one(eltype(pX)), vector_at=nothing)
+    if vector_at === nothing
+        pX .= exp(randn() * σ)
+    else
+        pX .= vector_at * randn() * σ
+    end
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    ::PositiveNumbers,
+    pX;
+    σ=one(eltype(pX)),
+    vector_at=nothing,
+)
+    if vector_at === nothing
+        pX .= exp(randn(rng) * σ)
+    else
+        pX .= vector_at * randn(rng) * σ
+    end
+    return pX
 end
 
 function vector_transport_direction(
