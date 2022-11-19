@@ -59,7 +59,7 @@ include("../utils.jl")
             basis_types_to_from=basis_types,
             test_inplace=true,
             test_rand_point=true,
-            retraction_atol_multiplier=2,
+            retraction_atol_multiplier=10,
             exp_log_atol_multiplier=10,
         )
 

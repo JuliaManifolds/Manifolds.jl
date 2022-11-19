@@ -213,10 +213,11 @@ function test_manifold(
         Tuple(pts),
         Tuple(tv);
         in_place=is_mutating,
+        in_place_self=test_inplace,
         atol_multiplier=exp_log_atol_multiplier,
         rtol_multiplier=exp_log_rtol_multiplier,
     )
-    test_exp_log && Test.@testset "Remaining exp/log based stuff (temp)" begin
+    test_exp_log && Test.@testset "Interplay distance, inner and norm" begin
         X1 = log(M, pts[1], pts[2])
         if test_norm
             Test.@test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], X1)
@@ -231,16 +232,6 @@ function test_manifold(
         end
         if test_norm
             Test.@test norm(M, pts[1], X1) isa Real
-        end
-
-        (test_inplace && is_mutating) && Test.@testset "inplace test for exp!" begin
-            p = copy(M, pts[1])
-            X = copy(M, pts[1], X1)
-            q = exp(M, p, X)
-            exp!(M, p, p, X)
-            Test.@test isapprox(M, p, q)
-            # This test is not reasonable for `log!(M, X, p, q)`,
-            # since X is of different type/concept than p,q
         end
     end
 

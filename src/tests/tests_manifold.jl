@@ -76,6 +76,7 @@ function test_explog(
     X::NTuple{N,T};
     minimal=false,
     in_place=true,
+    in_place_self=false,
     atol_multiplier=0,
     rtol_multiplier=1,
     kwargs...,
@@ -92,7 +93,7 @@ function test_explog(
         rtol_multiplier=rtol_multiplier,
         kwargs...,
     )
-    test_exp(M, pL, XL; kw...)
+    test_exp(M, pL, XL; in_place_self=in_place_self, kw...)
     test_log(M, pL, XL; kw...)
     if in_place
         ri = allocate(M, first(pL))
@@ -113,18 +114,36 @@ function test_explog(
     end
 end
 """
+    test_exp(M, p; kwargs...)
 
+Call [`generate_tangent_vectors`](@ref) and call the test with tangent vectors.
+all kwargs are passt on to the `test_exp(M,p,X)`.
 """
 function test_exp(M, p::NTuple{N,P}; minimal=false, kwargs...) where {N,P}
     (pL, X) = generate_tangent_vectors(M, p; minimal=minimal)
     return test_exp(M, pL, X; minimal=minimal, kwargs...)
 end
+"""
+    test_exp(M, p, X)
+
+Perform generic tests for the exponential map for each pair of point and tangent vector
+from zip(p,X).
+
+# Keyword arguments
+
+* `minimal` _ (`false`) – perform a minimal test only on `p[1]` and `X[1]`.
+* `in_place` – (`true`) test `exp!`
+* `in_place_self` – (`false`) test that `exp!(M, p, p, X)` works (i.e. has no side effects)
+* `atol_multiplier` _ (`0`) modify the default `atol` of `isapprox by a factor.
+* `rtol_multiplier` - (`1` has no effect, if `atol_multiplier>0`) modify the default `rtol` of `isapprox by a factor.
+"""
 function test_exp(
     M,
     p::NTuple{N,P},
     X::NTuple{N,T};
     minimal=false,
     in_place=true,
+    in_place_self=false,
     atol_multiplier=0,
     rtol_multiplier=1,
     kwargs...,
@@ -149,17 +168,40 @@ function test_exp(
             if in_place
                 exp!(M, ri, pi, Xi)
                 Test.@test isapprox(M, ri, qi; atol=atp, rtol=rtp)
+                #test self in_place has no side effects
+                if in_place_self
+                    ri = copy(M, pi)
+                    exp!(M, ri, ri, Xi)
+                    Test.@test isapprox(M, ri, qi; atol=atp, rtol=rtp)
+                end
             end
         end
     end
 end
 """
+    test_exp(M, p; kwargs...)
 
+Call [`generate_tangent_vectors`](@ref) and call the test with tangent vectors.
+all kwargs are passt on to the `test_log(M,p,X)`.
 """
 function test_log(M, p::NTuple{N,P}; minimal=false, kwargs...) where {N,P}
     (pL, X) = generate_tangent_vectors(M, p; minimal=minimal)
     return test_log(M, pL, X; minimal=minimal, kwargs...)
 end
+"""
+    test_log(M, p, X)
+
+Perform generic tests for the logarithmic map for each pair of point and tangent vector
+from zip(p,X).
+
+# Keyword arguments
+
+* `minimal` _ (`false`) – perform a minimal test only on `p[1]` and `X[1]`.
+* `in_place` – (`true`) test `exp!`
+* `atol_multiplier` _ (`0`) modify the default `atol` of `isapprox by a factor.
+* `rtol_multiplier` - (`1` has no effect, if `atol_multiplier>0`) modify the default `rtol` of `isapprox by a factor.
+"""
+
 function test_log(
     M,
     p::NTuple{N,P},
@@ -201,6 +243,10 @@ function test_log(
     end
 end
 """
+    test_retr_and_inv(M, p; kwargs...)
+
+Call [`generate_tangent_vectors`](@ref) and call the test with tangent vectors.
+all kwargs are passt on to the `test_retr_and_inv(M,p,X)`.
 """
 function test_retr_and_inv(
     M,
@@ -255,7 +301,10 @@ function test_retr_and_inv(
     end
 end
 """
+    test_inv_retr(M, p; kwargs...)
 
+Call [`generate_tangent_vectors`](@ref) and call the test with tangent vectors.
+all kwargs are passt on to the `test_int_retr(M,p,X)`.
 """
 function test_inv_retr(M, p, m::AbstractInverseRetractionMethod; kwargs...)
     X = generate_tangent_vectors(M, p, m)
@@ -303,7 +352,10 @@ function test_inv_retr(
     end
 end
 """
+    test_retr(M, p; kwargs...)
 
+Call [`generate_tangent_vectors`](@ref) and call the test with tangent vectors.
+all kwargs are passt on to the `test_retr(M,p,X)`.
 """
 function test_retr(
     M,
