@@ -168,10 +168,10 @@ Compute the vector with coordinate `c` which is tangent to `p` on the
 """
 get_vector(::PositiveNumbers, p, c, ::DefaultOrthonormalBasis{ℝ})
 
-get_vector_orthonormal(::PositiveNumbers, p, c, ::RealNumbers) = p * c
+get_vector_orthonormal(::PositiveNumbers, p, c, ::RealNumbers) = p * c[]
 
 function get_vector_orthonormal!(::PositiveNumbers, X, p, c, ::RealNumbers)
-    X .= c * p
+    X .= c[] * p
     return X
 end
 
