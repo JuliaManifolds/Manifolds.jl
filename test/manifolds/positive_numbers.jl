@@ -24,12 +24,23 @@ include("../utils.jl")
         X = similar([1.0])
         zero_vector!(M, X, 1.0)
         @test X == [0.0]
+        @test get_coordinates(M, 2.0, 1.0, DefaultOrthonormalBasis()) == 0.5
+        @test get_vector(M, 2.0, 0.5, DefaultOrthonormalBasis()) == 1.0
 
         @test change_metric(M, EuclideanMetric(), 2, 3) == 3 * 2
         @test change_representer(M, EuclideanMetric(), 2, 3) == 3 * 2^2
         N = PositiveVectors(2)
         @test change_metric(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2]
         @test change_representer(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2^2]
+        @test get_coordinates(N, [2.0, 4.0], [1.0, 10.0], DefaultOrthonormalBasis()) ==
+              [0.5, 2.5]
+        @test get_vector(N, [2.0, 4.0], [0.5, 2.5], DefaultOrthonormalBasis()) ==
+              [1.0, 10.0]
+        tmp = zeros(2)
+        get_coordinates!(N, tmp, [2.0, 4.0], [1.0, 10.0], DefaultOrthonormalBasis())
+        @test tmp == [0.5, 2.5]
+        get_vector!(N, tmp, [2.0, 4.0], [0.5, 2.5], DefaultOrthonormalBasis())
+        @test tmp == [1.0, 10.0]
     end
     types = [Float64]
     TEST_FLOAT32 && push!(types, Float32)
@@ -45,6 +56,8 @@ include("../utils.jl")
                 test_default_vector_transport=true,
                 test_vee_hat=false,
                 is_mutating=false,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
         end
     end
