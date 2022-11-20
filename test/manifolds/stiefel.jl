@@ -131,7 +131,7 @@ include("../utils.jl")
                 point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
                 test_vee_hat=false,
                 projection_atol_multiplier=100.0,
-                exp_log_atol_multiplier=10.0,
+                exp_log_atol_multiplier=1e2,
                 retraction_atol_multiplier=10.0,
                 is_tangent_atol_multiplier=4 * 10.0^2,
                 retraction_methods=[
@@ -225,8 +225,9 @@ include("../utils.jl")
                 test_project_tangent=true,
                 test_default_vector_transport=false,
                 test_vee_hat=false,
-                projection_atol_multiplier=100.0,
-                retraction_atol_multiplier=10.0,
+                projection_atol_multiplier=1e2,
+                retraction_atol_multiplier=1e2,
+                exp_log_atol_multiplier=1e4,
                 is_tangent_atol_multiplier=4 * 10.0^2,
                 retraction_methods=[PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods=[

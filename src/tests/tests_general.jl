@@ -7,6 +7,8 @@ find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
 find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
 find_eps(x) = find_eps(number_eltype(x))
 
+DEFAULT_TESTS = Dict(:exp => true, :log=true)
+
 """
     test_manifold(
         M::AbstractManifold,
@@ -81,7 +83,7 @@ that lie on it (contained in `pts`).
 function test_manifold(
     M::AbstractManifold,
     pts::AbstractVector;
-    basis_has_specialized_diagonalizing_get=false,
+    tests=Dict{Symbol,Any}()basis_has_specialized_diagonalizing_get = false,
     basis_types_to_from=(),
     basis_types_vecs=(),
     default_inverse_retraction_method=LogarithmicInverseRetraction(),
@@ -135,6 +137,7 @@ function test_manifold(
     test_vector_transport_direction=[true for _ in 1:length(vector_transport_methods)],
     mid_point12=test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing,
 )
+    lTest = merge(DEFAULT_TESTS, tests)
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
     isapprox(M, pts[1], pts[3]) && error("Points 1 and 3 are equal")

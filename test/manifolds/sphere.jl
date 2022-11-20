@@ -33,8 +33,8 @@ using ManifoldsBase: TFVector
         @testset "Type $T" begin
             pts = [
                 convert(T, [1.0, 0.0, 0.0]),
-                convert(T, [0.0, 1.0, 0.0]),
-                convert(T, [0.0, 0.0, 1.0]),
+                convert(T, 1 / sqrt(2) .* [1.0, 1.0, 0.0]),
+                convert(T, 1 / sqrt(2) .* [1.0, 0.0, 1.0]),
             ]
             test_manifold(
                 M,
@@ -58,6 +58,8 @@ using ManifoldsBase: TFVector
                 retraction_methods=[ProjectionRetraction(), ExponentialRetraction()],
                 inverse_retraction_methods=[ProjectionInverseRetraction()],
                 is_tangent_atol_multiplier=1,
+                exp_log_atol_multiplier=2,
+                retraction_atol_multiplier=2,
                 test_atlases=test_atlases,
                 test_inplace=true,
                 test_rand_point=true,
