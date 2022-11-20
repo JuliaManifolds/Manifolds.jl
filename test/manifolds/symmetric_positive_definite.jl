@@ -34,7 +34,7 @@ include("../utils.jl")
         @testset "$(typeof(M))" begin
             @test representation_size(M) == (3, 3)
             for T in types
-                exp_log_atol_multiplier = 8.0
+                exp_log_atol_multiplier = 1e2
                 if T <: MMatrix{3,3,Float64}
                     # eigendecomposition of 3x3 SPD matrices from StaticArrays is not very accurate
                     exp_log_atol_multiplier = 5.0e7
