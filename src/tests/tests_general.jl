@@ -7,7 +7,7 @@ find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
 find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
 find_eps(x) = find_eps(number_eltype(x))
 
-DEFAULT_TESTS = Dict(:exp => true, :log=true)
+DEFAULT_TESTS = Dict(:exp => true, :log => true)
 
 """
     test_manifold(
@@ -83,7 +83,8 @@ that lie on it (contained in `pts`).
 function test_manifold(
     M::AbstractManifold,
     pts::AbstractVector;
-    tests=Dict{Symbol,Any}()basis_has_specialized_diagonalizing_get = false,
+    tests=Dict{Symbol,Any}(),
+    basis_has_specialized_diagonalizing_get=false,
     basis_types_to_from=(),
     basis_types_vecs=(),
     default_inverse_retraction_method=LogarithmicInverseRetraction(),

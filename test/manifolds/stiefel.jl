@@ -96,8 +96,8 @@ include("../utils.jl")
 
         @testset "Type $T" for T in types
             x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
-            z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
+            y = exp(M, x, 0.1 * [0.0 0.0; 0.0 0.0; 1.0 1.0])
+            z = exp(M, x, 0.1 * [0.0 0.0; 0.0 0.0; -1.0 1.0])
             @test isapprox(
                 M,
                 retract(
@@ -131,9 +131,9 @@ include("../utils.jl")
                 point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
                 test_vee_hat=false,
                 projection_atol_multiplier=100.0,
-                exp_log_atol_multiplier=1e2,
-                retraction_atol_multiplier=10.0,
-                is_tangent_atol_multiplier=4 * 10.0^2,
+                exp_log_atol_multiplier=1e4,
+                retraction_atol_multiplier=3e4,
+                is_tangent_atol_multiplier=4e2,
                 retraction_methods=[
                     PolarRetraction(),
                     QRRetraction(),
