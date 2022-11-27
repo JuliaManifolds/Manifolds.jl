@@ -86,7 +86,7 @@ Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`]
 it (approximately) holds that $p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
-function check_vector(M::GeneralizedStiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,B,𝔽}
+function check_vector(M::GeneralizedStiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
     if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
         return DomainError(
             norm(p' * M.B * X + conj(X' * M.B * p)),

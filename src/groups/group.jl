@@ -306,7 +306,7 @@ end
     X,
     Y;
     kwargs...,
-) where {𝔽,O<:AbstractGroupOperation}
+) where {O<:AbstractGroupOperation}
     BG = base_group(G)
     return isapprox(BG, identity_element(BG), X, Y; kwargs...)
 end

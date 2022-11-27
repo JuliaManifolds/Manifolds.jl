@@ -166,7 +166,7 @@ end
 function default_estimation_method(
     ::GeneralUnitaryMatrices{n,ℝ},
     ::typeof(mean),
-) where {n,𝔽}
+) where {n}
     return GeodesicInterpolationWithinRadius(π / 2 / √2)
 end
 
