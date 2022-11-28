@@ -91,8 +91,8 @@ include("../utils.jl")
             @test_throws ManifoldDomainError is_vector(M, p, q, true)
             test_manifold(
                 M,
-                pts,
-                test_exp_log=false,
+                pts;
+                tests=Dict(:exp => false, :log => false),
                 default_inverse_retraction_method=LogarithmicInverseRetraction(),
                 default_retraction_method=ExponentialRetraction(),
                 test_injectivity_radius=false,

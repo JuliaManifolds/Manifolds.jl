@@ -43,6 +43,7 @@ include("../utils.jl")
         test_manifold(
             M,
             [p1, p2, p3],
+            tests=Dict(:exp => true, :log => false, :explog => false),
             test_vector_spaces=true,
             test_project_point=true,
             projection_atol_multiplier=10,
@@ -50,7 +51,6 @@ include("../utils.jl")
             test_musical_isomorphisms=false,
             test_default_vector_transport=true,
             test_representation_size=false,
-            test_exp_log=true,
             mid_point12=nothing,
             exp_log_atol_multiplier=4,
             test_inplace=true,
@@ -61,6 +61,7 @@ include("../utils.jl")
         test_manifold(
             EssentialManifold(false),
             [p1, p2, p3],
+            tests=Dict(:exp => true, :log => false, :explog => false),
             test_vector_spaces=true,
             test_project_point=true,
             projection_atol_multiplier=10,

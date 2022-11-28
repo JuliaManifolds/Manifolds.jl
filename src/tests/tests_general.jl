@@ -9,6 +9,18 @@ find_eps(x) = find_eps(number_eltype(x))
 
 DEFAULT_TESTS = Dict(:exp => true, :log => true)
 
+@doc """
+    do_test(tests::dictionary, s::Symbol)
+
+from a current dictionary `ltest` check whether to perform test `:s`.
+This function first checks whether the value exists, otherwise checks the `DEFAULT_TESTS`
+for existence of a global default. If neither exists, the function returns false.
+
+"""
+function do_test(A::Dict, s::Symbol)
+    return get(A, s, get(DEFAULT_TESTS, s, false))
+end
+
 """
     test_manifold(
         M::AbstractManifold,
@@ -40,9 +52,7 @@ that lie on it (contained in `pts`).
 - `is_mutating = true`: whether mutating variants of functions should be tested.
 - `is_point_atol_multiplier = 0`: determines atol of `is_point` checks.
 - `is_tangent_atol_multiplier = 0`: determines atol of `is_vector` checks.
-- `mid_point12 = test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing`: if not `nothing`, then check
-    that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`. This is
-    by default set to `nothing` if `text_exp_log` is set to false.
+- `mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5) if `:exp` and `:log` are available or a midpoint is explicitly set
 - `point_distributions = []` : point distributions to test.
 - `rand_tvector_atol_multiplier = 0` : chage absolute tolerance in testing random vectors
     (0 use default, i.e. deactivate atol and use rtol) random tangent vectors are tangent
@@ -104,7 +114,6 @@ function test_manifold(
     retraction_methods=[],
     retraction_rtol_multiplier=1,
     test_atlases=(),
-    test_exp_log=true,
     test_is_tangent=true,
     test_injectivity_radius=true,
     test_inplace=false,
@@ -136,9 +145,16 @@ function test_manifold(
     ],
     test_vector_transport_to=[true for _ in 1:length(vector_transport_methods)],
     test_vector_transport_direction=[true for _ in 1:length(vector_transport_methods)],
-    mid_point12=test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing,
+    mid_point12=get(tests, :explog, true) ? shortest_geodesic(M, pts[1], pts[2], 0.5) :
+                nothing,
 )
     lTest = merge(DEFAULT_TESTS, tests)
+    # convert an old into a new option temporarily
+    # Default for explog autofil if not set
+    if haskey(lTest, :exp) && haskey(lTest, :log) && !haskey(lTest, :explog)
+        lTest[:explog] = lTest[:exp] && lTest[:log]
+    end
+
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
     isapprox(M, pts[1], pts[3]) && error("Points 1 and 3 are equal")
@@ -212,7 +228,29 @@ function test_manifold(
         end
     end
 
-    test_exp_log && test_explog(
+    do_test(lTest, :exp) &&
+        !do_test(lTest, :explog) &&
+        test_exp(
+            M,
+            Tuple(pts),
+            Tuple(tv);
+            in_place=is_mutating,
+            in_place_self=test_inplace,
+            atol_multiplier=exp_log_atol_multiplier,
+            rtol_multiplier=exp_log_rtol_multiplier,
+        )
+    do_test(lTest, :log) &&
+        !do_test(lTest, :explog) &&
+        test_log(
+            M,
+            Tuple(pts),
+            Tuple(tv);
+            in_place=is_mutating,
+            in_place_self=test_inplace,
+            atol_multiplier=exp_log_atol_multiplier,
+            rtol_multiplier=exp_log_rtol_multiplier,
+        )
+    do_test(lTest, :explog) && test_explog(
         M,
         Tuple(pts),
         Tuple(tv);
@@ -221,7 +259,7 @@ function test_manifold(
         atol_multiplier=exp_log_atol_multiplier,
         rtol_multiplier=exp_log_rtol_multiplier,
     )
-    test_exp_log && Test.@testset "Interplay distance, inner and norm" begin
+    do_test(lTest, :explog) && Test.@testset "Interplay distance, inner and norm" begin
         X1 = log(M, pts[1], pts[2])
         if test_norm
             Test.@test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], X1)

@@ -194,7 +194,8 @@ using FiniteDifferences
                 test_manifold(
                     Sp_6,
                     cat(pts, large_tr_norm_points; dims=1);
-                    retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
+                    tests=Dict(:exp => true, :log => false),
+                    retraction_methods=[CayleyRetraction()],
                     default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
@@ -203,7 +204,6 @@ using FiniteDifferences
                     retraction_atol_multiplier=1e7, # 1e-9 is the exactneww we get for Caley
                     test_project_tangent=true,
                     test_injectivity_radius=false,
-                    test_exp_log=false,
                     test_representation_size=true,
                 )
             end
@@ -214,7 +214,8 @@ using FiniteDifferences
                 test_manifold(
                     Sp_6,
                     pts;
-                    retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
+                    tests=Dict(:exp => true, :log => false),
+                    retraction_methods=[CayleyRetraction()],
                     default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
@@ -223,7 +224,6 @@ using FiniteDifferences
                     retraction_atol_multiplier=1e4,
                     test_project_tangent=true,
                     test_injectivity_radius=false,
-                    test_exp_log=false,
                     test_representation_size=true,
                 )
             end
@@ -234,7 +234,8 @@ using FiniteDifferences
                 test_manifold(
                     Sp_6,
                     pts;
-                    retraction_methods=[CayleyRetraction(), ExponentialRetraction()],
+                    tests=Dict(:exp => true, :log => false),
+                    retraction_methods=[CayleyRetraction()],
                     default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
@@ -243,7 +244,6 @@ using FiniteDifferences
                     retraction_atol_multiplier=1.0e4,
                     test_project_tangent=false, # Cannot solve 'sylvester' for MMatrix-type.
                     test_injectivity_radius=false,
-                    test_exp_log=false,
                     test_representation_size=true,
                 )
             end

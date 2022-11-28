@@ -91,12 +91,12 @@ struct TestVectorSpaceType <: VectorSpaceType end
             )
             test_manifold(
                 TB,
-                pts_tb,
+                pts_tb;
+                tests=Dict(:exp => false, :log => false),
                 default_inverse_retraction_method=m_prod_invretr,
                 default_retraction_method=m_prod_retr,
                 inverse_retraction_methods=[m_prod_invretr],
                 retraction_methods=[m_prod_retr, m_sasaki],
-                test_exp_log=false,
                 test_injectivity_radius=false,
                 test_tangent_vector_broadcasting=false,
                 test_vee_hat=true,

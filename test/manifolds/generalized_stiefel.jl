@@ -81,8 +81,8 @@ include("../utils.jl")
             @test_throws DomainError is_vector(M, p, y, true)
             test_manifold(
                 M,
-                pts,
-                test_exp_log=false,
+                pts;
+                tests=Dict(:exp => false, :log => false),
                 default_inverse_retraction_method=nothing,
                 default_retraction_method=ProjectionRetraction(),
                 test_injectivity_radius=false,

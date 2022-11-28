@@ -240,6 +240,7 @@ end
                         test_manifold(
                             SpSt_6_4,
                             convert.(type, points);
+                            tests=Dict(:exp => false, :log => false),
                             retraction_methods=[CayleyRetraction()],
                             default_retraction_method=CayleyRetraction(),
                             default_inverse_retraction_method=CayleyInverseRetraction(),
@@ -249,7 +250,6 @@ end
                             retraction_atol_multiplier=1e4,
                             test_project_tangent=(type != MMatrix{6,4,Float64,24}),
                             test_injectivity_radius=false,
-                            test_exp_log=false,
                             test_representation_size=true,
                         )
                     end
@@ -258,7 +258,7 @@ end
                         test_manifold(
                             SpSt_6_4,
                             convert.(type, close_points);
-                            retraction_methods=[ExponentialRetraction()],
+                            tests=Dict(:exp => true, :log => false),
                             default_retraction_method=ExponentialRetraction(),
                             default_inverse_retraction_method=CayleyInverseRetraction(),
                             test_inplace=true,
@@ -267,7 +267,6 @@ end
                             retraction_atol_multiplier=5 * 1e9,
                             test_project_tangent=(type != MMatrix{6,4,Float64,24}),
                             test_injectivity_radius=false,
-                            test_exp_log=false,
                             test_representation_size=true,
                         )
                     end
