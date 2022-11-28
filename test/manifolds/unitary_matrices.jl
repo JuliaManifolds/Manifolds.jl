@@ -103,7 +103,7 @@ end
     )
     q = project(M, pu)
     @test is_point(M, q)
-    @test isapprox(q, normalize(pu))
+    @test isapprox(q, sign(pu))
 
     @test get_coordinates(M, p, Quaternion(0, 1, 2, 3), DefaultOrthonormalBasis(ℍ)) ==
           SA[1, 2, 3]
