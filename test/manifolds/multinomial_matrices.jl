@@ -40,6 +40,7 @@ include("../utils.jl")
             test_musical_isomorphisms=true,
             test_default_vector_transport=false,
             is_tangent_atol_multiplier=5.0,
+            exp_log_atol_multiplier=10,
             test_inplace=true,
         )
     end

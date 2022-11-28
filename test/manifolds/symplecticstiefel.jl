@@ -264,6 +264,7 @@ end
                             test_inplace=true,
                             is_point_atol_multiplier=1e11,
                             is_tangent_atol_multiplier=1e2,
+                            exp_log_atol_multiplier=5 * 1e9,
                             retraction_atol_multiplier=5 * 1e9,
                             test_project_tangent=(type != MMatrix{6,4,Float64,24}),
                             test_injectivity_radius=false,

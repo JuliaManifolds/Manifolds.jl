@@ -201,6 +201,7 @@ using FiniteDifferences
                     test_inplace=true,
                     is_point_atol_multiplier=1e8,
                     is_tangent_atol_multiplier=1e6,
+                    exp_log_atol_multiplier=1e7,
                     retraction_atol_multiplier=1e7, # 1e-9 is the exactneww we get for Caley
                     test_project_tangent=true,
                     test_injectivity_radius=false,
@@ -221,7 +222,8 @@ using FiniteDifferences
                     test_inplace=true,
                     is_point_atol_multiplier=1e8,
                     is_tangent_atol_multiplier=1e6,
-                    retraction_atol_multiplier=1e4,
+                    exp_log_atol_multiplier=1e7,
+                    retraction_atol_multiplier=1e8,
                     test_project_tangent=true,
                     test_injectivity_radius=false,
                     test_representation_size=true,

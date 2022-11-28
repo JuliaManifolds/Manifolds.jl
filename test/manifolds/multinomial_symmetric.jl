@@ -53,7 +53,8 @@ include("../utils.jl")
         @testset "Type $T" begin
             test_manifold(
                 M,
-                pts,
+                pts;
+                tests=Dict(:exp => false, :log => false),
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_default_vector_transport=true,

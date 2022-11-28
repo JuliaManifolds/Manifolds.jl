@@ -69,7 +69,6 @@ include("../utils.jl")
             test_musical_isomorphisms=false,
             test_default_vector_transport=true,
             test_representation_size=false,
-            test_exp_log=true,
             mid_point12=nothing,
             exp_log_atol_multiplier=4,
             parallel_transport=true,

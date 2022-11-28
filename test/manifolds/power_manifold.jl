@@ -179,157 +179,167 @@ end
     trim(s::String) = s[1:min(length(s), 20)]
 
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
-    for T in types_s1
-        @testset "Type $(trim(string(T)))..." begin
-            pts1 = [convert(T, rand(power_s1_pt_dist)) for _ in 1:3]
-            @test injectivity_radius(Ms1, pts1[1]) == π
-            basis_diag = get_basis(
-                Ms1,
-                pts1[1],
-                DiagonalizingOrthonormalBasis(log(Ms1, pts1[1], pts1[2])),
-            )
-            basis_arb = get_basis(Ms1, pts1[1], DefaultOrthonormalBasis())
-            test_manifold(
-                Ms1,
-                pts1;
-                test_musical_isomorphisms=true,
-                test_injectivity_radius=false,
-                test_default_vector_transport=true,
-                test_project_point=true,
-                test_project_tangent=true,
-                vector_transport_methods=[
-                    ParallelTransport(),
-                    SchildsLadderTransport(),
-                    PoleLadderTransport(),
-                ],
-                test_vee_hat=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[power_s1_pt_dist],
-                tvector_distributions=[power_s1_tv_dist],
-                basis_types_to_from=(basis_diag, basis_arb, basis_types...),
-                rand_tvector_atol_multiplier=600.0,
-                retraction_atol_multiplier=12.0,
-                is_tangent_atol_multiplier=500.0,
-                exp_log_atol_multiplier=20 * prod(power_dimensions(Ms1)),
-                test_inplace=true,
-                test_rand_point=true,
-                test_rand_tvector=true,
-            )
-        end
-    end
-    for T in types_s2
-        @testset "Type $(trim(string(T)))..." begin
-            pts2 = [convert(T, rand(power_s2_pt_dist)) for _ in 1:3]
-            test_manifold(
-                Ms2,
-                pts2;
-                test_musical_isomorphisms=true,
-                test_injectivity_radius=false,
-                test_vee_hat=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[power_s2_pt_dist],
-                tvector_distributions=[power_s2_tv_dist],
-                rand_tvector_atol_multiplier=6.0,
-                retraction_atol_multiplier=12,
-                is_tangent_atol_multiplier=12.0,
-                exp_log_atol_multiplier=3 * prod(power_dimensions(Ms2)),
-                test_inplace=true,
-            )
-        end
-    end
 
-    for T in types_r1
-        @testset "Type $(trim(string(T)))..." begin
-            pts1 = [convert(T, rand(power_r1_pt_dist)) for _ in 1:3]
-            test_manifold(
-                Mr1,
-                pts1;
-                test_injectivity_radius=false,
-                test_musical_isomorphisms=true,
-                test_vee_hat=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[power_r1_pt_dist],
-                tvector_distributions=[power_r1_tv_dist],
-                basis_types_to_from=basis_types,
-                rand_tvector_atol_multiplier=8.0,
-                retraction_atol_multiplier=12,
-                is_tangent_atol_multiplier=12.0,
-                exp_log_atol_multiplier=2e2 * prod(power_dimensions(Mr2)),
-                test_inplace=true,
-            )
+    @testset "Testing $(Ms1)" begin
+        for T in types_s1
+            @testset "Type $(trim(string(T)))..." begin
+                pts1 = [convert(T, rand(power_s1_pt_dist)) for _ in 1:3]
+                @test injectivity_radius(Ms1, pts1[1]) == π
+                basis_diag = get_basis(
+                    Ms1,
+                    pts1[1],
+                    DiagonalizingOrthonormalBasis(log(Ms1, pts1[1], pts1[2])),
+                )
+                basis_arb = get_basis(Ms1, pts1[1], DefaultOrthonormalBasis())
+                test_manifold(
+                    Ms1,
+                    pts1;
+                    test_musical_isomorphisms=true,
+                    test_injectivity_radius=false,
+                    test_default_vector_transport=true,
+                    test_project_point=true,
+                    test_project_tangent=true,
+                    vector_transport_methods=[
+                        ParallelTransport(),
+                        SchildsLadderTransport(),
+                        PoleLadderTransport(),
+                    ],
+                    test_vee_hat=true,
+                    retraction_methods=retraction_methods,
+                    inverse_retraction_methods=inverse_retraction_methods,
+                    point_distributions=[power_s1_pt_dist],
+                    tvector_distributions=[power_s1_tv_dist],
+                    basis_types_to_from=(basis_diag, basis_arb, basis_types...),
+                    rand_tvector_atol_multiplier=600.0,
+                    retraction_atol_multiplier=12.0,
+                    is_tangent_atol_multiplier=500.0,
+                    exp_log_atol_multiplier=1e2 * prod(power_dimensions(Ms1)),
+                    test_inplace=true,
+                    test_rand_point=true,
+                    test_rand_tvector=true,
+                )
+            end
         end
     end
-
-    for T in types_rn1
-        @testset "Type $(trim(string(T)))..." begin
-            pts1 = [convert(T, rand(power_rn1_pt_dist)) for _ in 1:3]
-            test_manifold(
-                Mrn1,
-                pts1;
-                test_injectivity_radius=false,
-                test_musical_isomorphisms=true,
-                test_vee_hat=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[power_rn1_pt_dist],
-                tvector_distributions=[power_rn1_tv_dist],
-                basis_types_to_from=basis_types,
-                rand_tvector_atol_multiplier=500.0,
-                retraction_atol_multiplier=12,
-                is_tangent_atol_multiplier=12.0,
-                exp_log_atol_multiplier=4e2 * prod(power_dimensions(Mrn1)),
-                test_inplace=true,
-                test_rand_point=true,
-                test_rand_tvector=true,
-            )
+    @testset "Testing $Ms2" begin
+        for T in types_s2
+            @testset "Type $(trim(string(T)))..." begin
+                pts2 = [convert(T, rand(power_s2_pt_dist)) for _ in 1:3]
+                test_manifold(
+                    Ms2,
+                    pts2;
+                    test_musical_isomorphisms=true,
+                    test_injectivity_radius=false,
+                    test_vee_hat=true,
+                    retraction_methods=retraction_methods,
+                    inverse_retraction_methods=inverse_retraction_methods,
+                    point_distributions=[power_s2_pt_dist],
+                    tvector_distributions=[power_s2_tv_dist],
+                    rand_tvector_atol_multiplier=6.0,
+                    retraction_atol_multiplier=12,
+                    is_tangent_atol_multiplier=12.0,
+                    exp_log_atol_multiplier=3 * prod(power_dimensions(Ms2)),
+                    test_inplace=true,
+                )
+            end
         end
     end
-    for T in types_r2
-        @testset "Type $(trim(string(T)))..." begin
-            pts2 = [convert(T, rand(power_r2_pt_dist)) for _ in 1:3]
-            test_manifold(
-                Mr2,
-                pts2;
-                test_injectivity_radius=false,
-                test_musical_isomorphisms=true,
-                test_vee_hat=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[power_r2_pt_dist],
-                tvector_distributions=[power_r2_tv_dist],
-                rand_tvector_atol_multiplier=8.0,
-                retraction_atol_multiplier=12,
-                is_tangent_atol_multiplier=12.0,
-                exp_log_atol_multiplier=4e3 * prod(power_dimensions(Mr2)),
-                test_inplace=true,
-            )
+    @testset "Testing $Mr1" begin
+        for T in types_r1
+            @testset "Type $(trim(string(T)))..." begin
+                pts1 = [convert(T, rand(power_r1_pt_dist)) for _ in 1:3]
+                test_manifold(
+                    Mr1,
+                    pts1;
+                    test_injectivity_radius=false,
+                    test_musical_isomorphisms=true,
+                    test_vee_hat=true,
+                    retraction_methods=retraction_methods,
+                    inverse_retraction_methods=inverse_retraction_methods,
+                    point_distributions=[power_r1_pt_dist],
+                    tvector_distributions=[power_r1_tv_dist],
+                    basis_types_to_from=basis_types,
+                    rand_tvector_atol_multiplier=8.0,
+                    retraction_atol_multiplier=12,
+                    is_tangent_atol_multiplier=12.0,
+                    exp_log_atol_multiplier=2e2 * prod(power_dimensions(Mr2)),
+                    test_inplace=true,
+                )
+            end
         end
     end
-    for T in types_rn2
-        @testset "Type $(trim(string(T)))..." begin
-            pts2 = [convert(T, rand(power_rn2_pt_dist)) for _ in 1:3]
-            test_manifold(
-                Mrn2,
-                pts2;
-                test_injectivity_radius=false,
-                test_musical_isomorphisms=true,
-                test_vee_hat=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[power_rn2_pt_dist],
-                tvector_distributions=[power_rn2_tv_dist],
-                rand_tvector_atol_multiplier=8.0,
-                retraction_atol_multiplier=12,
-                is_tangent_atol_multiplier=12.0,
-                exp_log_atol_multiplier=4e3 * prod(power_dimensions(Mrn2)),
-                test_inplace=true,
-            )
+    @testset "Testing $Mrn1" begin
+        for T in types_rn1
+            @testset "Type $(trim(string(T)))..." begin
+                pts1 = [convert(T, rand(power_rn1_pt_dist)) for _ in 1:3]
+                test_manifold(
+                    Mrn1,
+                    pts1;
+                    test_injectivity_radius=false,
+                    test_musical_isomorphisms=true,
+                    test_vee_hat=true,
+                    retraction_methods=retraction_methods,
+                    inverse_retraction_methods=inverse_retraction_methods,
+                    point_distributions=[power_rn1_pt_dist],
+                    tvector_distributions=[power_rn1_tv_dist],
+                    basis_types_to_from=basis_types,
+                    rand_tvector_atol_multiplier=500.0,
+                    retraction_atol_multiplier=12,
+                    is_tangent_atol_multiplier=12.0,
+                    exp_log_atol_multiplier=4e2 * prod(power_dimensions(Mrn1)),
+                    test_inplace=true,
+                    test_rand_point=true,
+                    test_rand_tvector=true,
+                )
+            end
         end
     end
-
+    @testset "Testing $Mr2" begin
+        for T in types_r2
+            @testset "Type $(trim(string(T)))..." begin
+                pts2 = [convert(T, rand(power_r2_pt_dist)) for _ in 1:3]
+                test_manifold(
+                    Mr2,
+                    pts2;
+                    test_injectivity_radius=false,
+                    test_musical_isomorphisms=true,
+                    test_vee_hat=true,
+                    retraction_methods=retraction_methods,
+                    inverse_retraction_methods=inverse_retraction_methods,
+                    point_distributions=[power_r2_pt_dist],
+                    tvector_distributions=[power_r2_tv_dist],
+                    rand_tvector_atol_multiplier=8.0,
+                    retraction_atol_multiplier=24,
+                    is_tangent_atol_multiplier=12.0,
+                    exp_log_atol_multiplier=4e3 * prod(power_dimensions(Mr2)),
+                    test_inplace=true,
+                )
+            end
+        end
+    end
+    @testset "Testing $Mrn2" begin
+        for T in types_rn2
+            @testset "Type $(trim(string(T)))..." begin
+                pts2 = [convert(T, rand(power_rn2_pt_dist)) for _ in 1:3]
+                test_manifold(
+                    Mrn2,
+                    pts2;
+                    test_injectivity_radius=false,
+                    test_musical_isomorphisms=true,
+                    test_vee_hat=true,
+                    retraction_methods=retraction_methods,
+                    inverse_retraction_methods=inverse_retraction_methods,
+                    point_distributions=[power_rn2_pt_dist],
+                    tvector_distributions=[power_rn2_tv_dist],
+                    rand_tvector_atol_multiplier=8.0,
+                    retraction_atol_multiplier=12,
+                    is_tangent_atol_multiplier=12.0,
+                    exp_log_atol_multiplier=4e4 * prod(power_dimensions(Mrn2)),
+                    test_inplace=true,
+                )
+            end
+        end
+    end
     @testset "Power manifold of Circle" begin
         pts_t = [[0.0, 1.0, 2.0], [1.0, 1.0, 2.4], [0.0, 2.0, 1.0]]
         MT = PowerManifold(Circle(), 3)

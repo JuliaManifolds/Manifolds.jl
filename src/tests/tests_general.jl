@@ -63,11 +63,10 @@ that lie on it (contained in `pts`).
     tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `retraction_methods = []`: retraction methods that will be tested.
 - `test_atlases = []`: Vector or tuple of atlases that should be tested.
-- `test_exp_log = true`: if true, check that [`exp`](@ref) is the inverse of [`log`](@ref).
 - `test_injectivity_radius = true`: whether implementation of [`injectivity_radius`](@ref)
     should be tested.
 - `test_inplace = false` : if true check if inplace variants work if they are activated,
-   e.g. check that `exp!(M, p, p, X)` work if `test_exp_log = true`.
+   e.g. check that `exp!(M, p, p, X)` work if `:exp`tests are activated
    This in general requires `is_mutating` to be true.
 - `test_is_tangent`: if true check that the `default_inverse_retraction_method`
     actually returns valid tangent vectors.
@@ -145,8 +144,8 @@ function test_manifold(
     ],
     test_vector_transport_to=[true for _ in 1:length(vector_transport_methods)],
     test_vector_transport_direction=[true for _ in 1:length(vector_transport_methods)],
-    mid_point12=get(tests, :explog, true) ? shortest_geodesic(M, pts[1], pts[2], 0.5) :
-                nothing,
+    mid_point12=(do_test(tests, :exp) && do_test(tests, :log)) ?
+                shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing,
 )
     lTest = merge(DEFAULT_TESTS, tests)
     # convert an old into a new option temporarily

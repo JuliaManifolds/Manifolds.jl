@@ -289,7 +289,7 @@ using RecursiveArrayTools: ArrayPartition
         pts,
         test_injectivity_radius=false,
         is_tangent_atol_multiplier=1,
-        exp_log_atol_multiplier=1,
+        exp_log_atol_multiplier=10,
         test_inplace=true,
         test_rand_point=true,
         test_rand_tvector=true,

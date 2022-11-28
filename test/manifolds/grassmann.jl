@@ -67,7 +67,6 @@ include("../utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_exp_log=true,
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_default_vector_transport=false,
@@ -169,7 +168,6 @@ include("../utils.jl")
             test_manifold(
                 M,
                 pts,
-                test_exp_log=true,
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_default_vector_transport=false,

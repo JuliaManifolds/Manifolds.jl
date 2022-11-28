@@ -128,8 +128,8 @@ using NLsolve
                 inverse_retraction_methods=inverse_retraction_methods,
                 basis_types_vecs=basis_types,
                 basis_types_to_from=basis_types,
-                exp_log_atol_multiplier=1e7,
-                retraction_atol_multiplier=1e7,
+                exp_log_atol_multiplier=1e8,
+                retraction_atol_multiplier=1e8,
             )
         end
     end

@@ -194,42 +194,30 @@ include("../utils.jl")
             @test repr(M) == "ProjectiveSpace(2, ℍ)"
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 8
-            @test !is_point(M, Quaternion[1.0 + 0im, 0.0, 0.0, 0.0])
-            @test !is_vector(
-                M,
-                Quaternion[1.0 + 0im, 0.0, 0.0, 0.0],
-                Quaternion[0.0 + 0im, 1.0, 0.0],
-            )
-            @test_throws DomainError is_point(M, Quaternion[1.0, im, 0.0], true)
-            @test !is_point(M, Quaternion[1.0, im, 0.0])
-            @test !is_vector(
-                M,
-                Quaternion[1.0 + 0im, 0.0, 0.0],
-                Quaternion[1.0 + 0im, 0.0, 0.0],
-            )
-            @test !is_vector(
-                M,
-                Quaternion.([1.0 + 0im, 0.0, 0.0]),
-                Quaternion.([-0.5im, 0.0, 0.0]),
-            )
+            @test !is_point(M, Quaternion[1.0, 0.0, 0.0, 0.0])
+            @test !is_vector(M, Quaternion[1.0, 0.0, 0.0, 0.0], Quaternion[0.0, 1.0, 0.0])
+            @test_throws DomainError is_point(M, Quaternion[1.0, 1.0, 0.0], true)
+            @test !is_point(M, Quaternion[1.0, 1.0, 0.0])
+            @test !is_vector(M, Quaternion[1.0, 0.0, 0.0], Quaternion[1.0, 0.0, 0.0])
+            @test !is_vector(M, Quaternion.([1.0, 0.0, 0.0]), Quaternion.([-0.5, 0.0, 0.0]))
             @test_throws DomainError is_vector(
                 M,
-                Quaternion[1.0 + 0im, 0.0, 0.0],
-                Quaternion[1.0 + 0im, 0.0, 0.0],
+                Quaternion[1.0, 0.0, 0.0],
+                Quaternion[1.0, 0.0, 0.0],
                 true,
             )
             @test_throws DomainError is_vector(
                 M,
-                Quaternion.([1.0 + 0im, 0.0, 0.0]),
-                Quaternion.([-0.5im, 0.0, 0.0]),
+                Quaternion.([1.0, 0.0, 0.0]),
+                Quaternion.([-0.5, 0.0, 0.0]),
                 true,
             )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
-            @test injectivity_radius(M, Quaternion[1.0 + 0im, 0.0, 0.0]) == π / 2
+            @test injectivity_radius(M, Quaternion[1.0, 0.0, 0.0]) == π / 2
             @test injectivity_radius(
                 M,
-                Quaternion[1.0 + 0im, 0.0, 0.0],
+                Quaternion[1.0, 0.0, 0.0],
                 ExponentialRetraction(),
             ) == π / 2
         end
@@ -286,8 +274,8 @@ include("../utils.jl")
         end
 
         @testset "equivalence" begin
-            x = Quaternion[1.0 + 0im, 0.0, 0.0]
-            v = Quaternion[0.0, im, 0.0]
+            x = Quaternion[1.0, 0.0, 0.0]
+            v = Quaternion[0.0, 1.0, 0.0]
             s = Quaternion(0.5, -0.5, 0.5, -0.5)
             @test isapprox(M, x, x * s)
             @test isapprox(M, x, exp(M, x, π * v))

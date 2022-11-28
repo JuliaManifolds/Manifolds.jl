@@ -122,7 +122,6 @@ include("../utils.jl")
                 pts,
                 basis_types_to_from=(DefaultOrthonormalBasis(),),
                 basis_types_vecs=(DefaultOrthonormalBasis(),),
-                test_exp_log=true,
                 default_inverse_retraction_method=PolarInverseRetraction(),
                 test_injectivity_radius=false,
                 test_is_tangent=true,
