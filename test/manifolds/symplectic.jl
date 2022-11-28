@@ -1,5 +1,7 @@
 include("../utils.jl")
 
+using FiniteDifferences
+
 @testset "Symplectic" begin
     @testset "Real" begin
         Sp_2 = Symplectic(2 * 1)
@@ -71,7 +73,7 @@ include("../utils.jl")
         ]
 
         @testset "Basics" begin
-            @test repr(Sp_2) == "Symplectic{$(2), ℝ}()"
+            @test repr(Sp_2) == "Symplectic{2, ℝ}()"
             @test representation_size(Sp_2) == (2, 2)
             @test base_manifold(Sp_2) === Sp_2
 
@@ -185,7 +187,7 @@ include("../utils.jl")
             X_big = rand(M_big; vector_at=p_big)
             @test is_vector(M_big, p_big, X_big, true; atol=1.0e-12)
         end
-        @testset "test_manifold(Symplectic(6), ...)" begin
+        @testset "Test manifold example $(Sp_6)" begin
             @testset "Type $(Matrix{Float64})" begin
                 type = Matrix{Float64}
                 pts = convert.(type, points)
@@ -196,9 +198,9 @@ include("../utils.jl")
                     default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
-                    is_point_atol_multiplier=1.0e8,
-                    is_tangent_atol_multiplier=1.0e6,
-                    retraction_atol_multiplier=1.0e4,
+                    is_point_atol_multiplier=1e8,
+                    is_tangent_atol_multiplier=1e6,
+                    retraction_atol_multiplier=1e7, # 1e-9 is the exactneww we get for Caley
                     test_project_tangent=true,
                     test_injectivity_radius=false,
                     test_exp_log=false,
@@ -216,9 +218,9 @@ include("../utils.jl")
                     default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
-                    is_point_atol_multiplier=1.0e8,
-                    is_tangent_atol_multiplier=1.0e6,
-                    retraction_atol_multiplier=1.0e4,
+                    is_point_atol_multiplier=1e8,
+                    is_tangent_atol_multiplier=1e6,
+                    retraction_atol_multiplier=1e4,
                     test_project_tangent=true,
                     test_injectivity_radius=false,
                     test_exp_log=false,
@@ -253,7 +255,8 @@ include("../utils.jl")
             analytical_grad_f(p) = (1 / 2) * (p * Q_grad * p * Q_grad + p * p')
 
             p_grad = convert(Array{Float64}, points[1])
-            fd_diff = RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
+            fd_diff =
+                Manifolds.RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
 
             @test isapprox(
                 Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff),

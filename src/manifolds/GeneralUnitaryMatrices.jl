@@ -163,10 +163,7 @@ function cos_angles_4d_rotation_matrix(R)
     return ((a + b) / 4, (a - b) / 4)
 end
 
-function default_estimation_method(
-    ::GeneralUnitaryMatrices{n,ℝ},
-    ::typeof(mean),
-) where {n}
+function default_estimation_method(::GeneralUnitaryMatrices{n,ℝ}, ::typeof(mean)) where {n}
     return GeodesicInterpolationWithinRadius(π / 2 / √2)
 end
 
