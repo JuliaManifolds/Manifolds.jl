@@ -1,5 +1,7 @@
 include("../utils.jl")
 
+using FiniteDifferences
+
 function Ω(::SymplecticStiefel, p, X)
     Q = SymplecticMatrix(X, p)
     pT_p = lu(p' * p)
@@ -228,7 +230,7 @@ end
             X_big = rand(M_big; vector_at=p_big, hamiltonian_norm=1.0)
             @test is_vector(M_big, p_big, X_big, true; atol=1.0e-14)
         end
-        @testset "test_manifold(Symplectic(6), ...)" begin
+        @testset "Test manifold $(SpSt_6_4)" begin
             types = [Matrix{Float64}]
             TEST_FLOAT32 && push!(types, Matrix{Float32})
             TEST_STATIC_SIZED && push!(types, MMatrix{6,4,Float64,24})
@@ -242,9 +244,9 @@ end
                             default_retraction_method=CayleyRetraction(),
                             default_inverse_retraction_method=CayleyInverseRetraction(),
                             test_inplace=true,
-                            is_point_atol_multiplier=1.0e4,
-                            is_tangent_atol_multiplier=1.0e3,
-                            retraction_atol_multiplier=1.0e1,
+                            is_point_atol_multiplier=1e4,
+                            is_tangent_atol_multiplier=1e3,
+                            retraction_atol_multiplier=1e4,
                             test_project_tangent=(type != MMatrix{6,4,Float64,24}),
                             test_injectivity_radius=false,
                             test_exp_log=false,
@@ -260,9 +262,9 @@ end
                             default_retraction_method=ExponentialRetraction(),
                             default_inverse_retraction_method=CayleyInverseRetraction(),
                             test_inplace=true,
-                            is_point_atol_multiplier=1.0e11,
-                            is_tangent_atol_multiplier=1.0e2,
-                            retraction_atol_multiplier=1.0e4,
+                            is_point_atol_multiplier=1e11,
+                            is_tangent_atol_multiplier=1e2,
+                            retraction_atol_multiplier=5 * 1e9,
                             test_project_tangent=(type != MMatrix{6,4,Float64,24}),
                             test_injectivity_radius=false,
                             test_exp_log=false,
@@ -285,7 +287,8 @@ end
                 return Q_grad * p * (euc_grad_f') * Q_grad * p + euc_grad_f * p' * p
             end
             p_grad = convert(Array{Float64}, points[1])
-            fd_diff = RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
+            fd_diff =
+                Manifolds.RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
 
             @test isapprox(
                 Manifolds.gradient(SpSt_6_4, test_f, p_grad, fd_diff),
