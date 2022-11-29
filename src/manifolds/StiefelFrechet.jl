@@ -91,6 +91,13 @@ function log_lbfgs(Stf, Y, W;
     Q = _get_Q(Y, W)
     k = size(Q, 2)
 
+    if k == 0
+        # q and p has the same linear span
+        A = log(Y' * W)
+        return Y*A
+    end
+
+
     eta0 = project(Stf, Y, W-Y)
     A = asym(Y' * eta0)
     R = Q' * eta0 - (Q' * Y) * (Y' * eta0)
