@@ -24,40 +24,41 @@ function dot_exp(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     p,
     X,
-    t
-) where {n, k}
+    t,
+) where {n,k}
     q = similar(p)
     dot_q = similar(p)
     dot_exp!(M, q, dot_q, p, X, t)
     return q, dot_q
-end      
-    
+end
+
 function dot_exp!(
     M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
     q,
     dot_q,
     p,
     X,
-    t
-) where {n, k}
+    t,
+) where {n,k}
     # return the other exp formula, and also
     # time derivative of the exponential map
     α = metric(M).α
     T = Base.promote_eltype(p, X)
-    
-    alf = 0.5/(1+α)
+
+    alf = 0.5 / (1 + α)
     A = p' * X
-    e_mat = Array{T, 2}(undef, 2*k, 2*k)
-    e_mat[1:k, 1:k] = (2*alf-1)*A 
-    e_mat[1:k, k+1:end] = -X'*X - 2*(1-alf)*A*A
-    e_mat[k+1:end, 1:k] = I(k)
-    e_mat[k+1:end, k+1:end] = A
-    eE = exp(t*e_mat)
-    eA = exp((1-2*alf)*t*A)
+    e_mat = Array{T,2}(undef, 2 * k, 2 * k)
+    e_mat[1:k, 1:k] = (2 * alf - 1) * A
+    e_mat[1:k, (k + 1):end] = -X' * X - 2 * (1 - alf) * A * A
+    e_mat[(k + 1):end, 1:k] = I(k)
+    e_mat[(k + 1):end, (k + 1):end] = A
+    eE = exp(t * e_mat)
+    eA = exp((1 - 2 * alf) * t * A)
     q .= ([p X] * eE)[1:end, 1:k] * eA
-    dot_q .= (vcat([p X]) * e_mat*eE)[1:end, 1:k] * eA +
-        (vcat([p X]) * eE)[1:end, 1:k] * ((1-2*alf)*A*eA)
-   return q, dot_q
+    dot_q .=
+        (vcat([p X]) * e_mat * eE)[1:end, 1:k] * eA +
+        (vcat([p X]) * eE)[1:end, 1:k] * ((1 - 2 * alf) * A * eA)
+    return q, dot_q
 end
 
 @doc raw"""
@@ -80,12 +81,18 @@ lbfgs_options is a dictionary, with parameters for lbfgs_options:
     corrections, c1, c2, max_ls
 If missing will use default
 """
-function log_lbfgs(Stf, Y, W;
-                   tolerance=sqrt(eps(float(real(Base.promote_eltype(Y, W))))),
-                   max_itr=1_000, pretol=1e-3, lbfgs_options=nothing)
+function log_lbfgs(
+    Stf,
+    Y,
+    W;
+    tolerance=sqrt(eps(float(real(Base.promote_eltype(Y, W))))),
+    max_itr=1_000,
+    pretol=1e-3,
+    lbfgs_options=nothing,
+)
     α = metric(Stf).α
-    alf = 0.5/(1+α)
-    T = Base.promote_eltype(Y, W)        
+    alf = 0.5 / (1 + α)
+    T = Base.promote_eltype(Y, W)
     n, p = size(Y)
 
     Q = _get_Q(Y, W)
@@ -94,93 +101,93 @@ function log_lbfgs(Stf, Y, W;
     if k == 0
         # q and p has the same linear span
         A = log(Y' * W)
-        return Y*A
+        return Y * A
     end
 
-
-    eta0 = project(Stf, Y, W-Y)
+    eta0 = project(Stf, Y, W - Y)
     A = asym(Y' * eta0)
     R = Q' * eta0 - (Q' * Y) * (Y' * eta0)
-    Adim = div(p*(p-1), 2)
+    Adim = div(p * (p - 1), 2)
 
     # W is Z in the paper.
-    WTY = W'*Y
-    WTQ = W'*Q
+    WTY = W' * Y
+    WTQ = W' * Q
 
-    mat = zeros(T, p+k, p+k)
-    E = zeros(T, p+k, p+k)
-    v0 = Array{T, 1}(undef, Adim + k*p)
-    buff = Array{T, 2}(undef, 16*(p+k), p+k)
-    buffA = Array{T, 2}(undef, 16*p, p)    
+    mat = zeros(T, p + k, p + k)
+    E = zeros(T, p + k, p + k)
+    v0 = Array{T,1}(undef, Adim + k * p)
+    buff = Array{T,2}(undef, 16 * (p + k), p + k)
+    buffA = Array{T,2}(undef, 16 * p, p)
 
     @views begin
         mat11 = mat[1:p, 1:p]
-        mat12 = mat[1:p, p+1:end]
-        mat21 = mat[p+1:end, 1:p]
+        mat12 = mat[1:p, (p + 1):end]
+        mat21 = mat[(p + 1):end, 1:p]
     end
 
     @views begin
         E11 = E[1:p, 1:p]
-        E12 = E[1:p, p+1:end]
+        E12 = E[1:p, (p + 1):end]
     end
 
-    WYMQN = Array{T, 2}(undef, p, p)
+    WYMQN = Array{T,2}(undef, p, p)
     dA = similar(A)
     dR = similar(R)
     ex1 = similar(A)
     @views begin
-        ex2 = buff[1:k+p, :]
-        fe2 = buff[k+p+1:2*(k+p), :]
+        ex2 = buff[1:(k + p), :]
+        fe2 = buff[(k + p + 1):(2 * (k + p)), :]
         M = buff[1:p, 1:p]
-        N = buff[p+1:p+k, 1:p]                
+        N = buff[(p + 1):(p + k), 1:p]
     end
 
     # unravel v to A and R
     @inline function unvecAR!(A, R, v)
         A .= unveca(v[1:Adim])
-        R .= reshape(v[Adim+1:end], k, p)
+        return R .= reshape(v[(Adim + 1):end], k, p)
     end
-    
+
     # compute ex1= exp((1-2*alf)*A) and populate
     # the (p+k) × (p+k) matrix mat in the Exp formula. ex2=exp(mat)
     @inline function setMatForExp!(mat, ex1, ex2, A, R)
-        mul!(mat11, 2*alf, A)
+        mul!(mat11, 2 * alf, A)
         mul!(mat12, -1, R')
-        copyto!(mat21, R)
+        return copyto!(mat21, R)
     end
-        
+
     function fun!(F, G, v)
         unvecAR!(A, R, v)
-        ex1 .= exp((1-2*alf)*A)        
+        ex1 .= exp((1 - 2 * alf) * A)
         setMatForExp!(mat, ex1, ex2, A, R)
         mul!(E11, ex1, WTY)
-        mul!(E12, ex1, WTQ)        
+        mul!(E12, ex1, WTQ)
 
         if isnothing(G)
-            ex2 .= exp(mat)        
-            return -sum(( WTY*M+WTQ*N)' .* ex1)
+            ex2 .= exp(mat)
+            return -sum((WTY * M + WTQ * N)' .* ex1)
         end
         # ex2, fe2 = Manifolds.expm_frechet(mat, E)
         # expm affects buff, so affect ex2, fe2
-        expm_frechet!(buff, mat, E)        
-        
+        expm_frechet!(buff, mat, E)
+
         mul!(WYMQN, WTY, M)
         mul!(WYMQN, WTQ, N, 1, 1)
 
-        expm_frechet!(buffA, (1-2*alf)*A, WYMQN)
-        dA .= asym((1-2*alf)*buffA[p+1:2*p, :]) .+ 2*alf*asym(fe2[1:p, 1:p])
-        
-        dR .= fe2[p+1:end, 1:p] - fe2[1:p, p+1:end]' 
-        
+        expm_frechet!(buffA, (1 - 2 * alf) * A, WYMQN)
+        dA .=
+            asym((1 - 2 * alf) * buffA[(p + 1):(2 * p), :]) .+ 2 * alf * asym(fe2[1:p, 1:p])
+
+        dR .= fe2[(p + 1):end, 1:p] - fe2[1:p, (p + 1):end]'
+
         G[1:Adim] .= veca(dA)
-        G[1+Adim:end] .= vec(dR)
+        G[(1 + Adim):end] .= vec(dR)
         return -sum(WYMQN' .* ex1)
     end
     v0[1:Adim] = veca(A)
-    v0[Adim+1:end] = vec(R)
+    v0[(Adim + 1):end] = vec(R)
 
     # run full gradient until pretol
-    max_fun_evals = Int(ceil(max_itr*1.3))
+    max_fun_evals = Int(ceil(max_itr * 1.3))
     corrections = _g_corrections
     c1 = _g_c1
     c2 = _g_c2
@@ -191,14 +198,20 @@ function log_lbfgs(Stf, Y, W;
         c2 = get(lbfgs_options, "c2", _g_c2)
         max_ls = get(lbfgs_options, "max_ls", _g_max_ls)
     end
-        
-    xret, f, exitflag, output = minimize(fun!, v0,
-                                         max_fun_evals=max_fun_evals,
-                                         max_itr=max_itr,
-                                         grad_tol=pretol, func_tol=pretol,
-                                         corrections=_g_corrections,
-                                         c1=c1, c2=c2, max_ls=max_ls)
-                                         
+
+    xret, f, exitflag, output = minimize(
+        fun!,
+        v0,
+        max_fun_evals=max_fun_evals,
+        max_itr=max_itr,
+        grad_tol=pretol,
+        func_tol=pretol,
+        corrections=_g_corrections,
+        c1=c1,
+        c2=c2,
+        max_ls=max_ls,
+    )
+
     unvecAR!(A, R, xret)
 
     # run simple descent
@@ -207,31 +220,33 @@ function log_lbfgs(Stf, Y, W;
     end
     disc = Fnorm(dA, dR)
     for i in 1:max_itr
-        ex1 .= exp((1-2*alf)*A)        
+        ex1 .= exp((1 - 2 * alf) * A)
         setMatForExp!(mat, ex1, ex2, A, R)
         # this operation changes ex2, so change M, N        
         ex2 .= exp(mat)
-        dA .= asym(WTY' - M*ex1)
-        broadcast!(-, dR, WTQ', N*ex1)
+        dA .= asym(WTY' - M * ex1)
+        broadcast!(-, dR, WTQ', N * ex1)
         new_d = Fnorm(dA, dR)
         if new_d < disc
             A .+= dA
             R .+= dR
             disc = new_d
         else
-            A .+= dA*disc/new_d
-            R .+= dR*disc/new_d
+            A .+= dA * disc / new_d
+            R .+= dR * disc / new_d
         end
-        if (maximum(abs.(extrema(dA))) < tolerance &&
-            maximum(abs.(extrema(dR))) < tolerance)
+        if (
+            maximum(abs.(extrema(dA))) < tolerance &&
+            maximum(abs.(extrema(dR))) < tolerance
+        )
             break
         end
     end
-    
+
     eta = similar(Y)
     mul!(eta, Y, A)
     mul!(eta, Q, R, 1, 1)
-  
+
     # return Y * A + Q*R, ret
     return eta
 end
@@ -241,27 +256,27 @@ end
     sym(mat)
     symmetrize mat
 """
-@inline sym(mat) = 0.5*(mat + mat')
+@inline sym(mat) = 0.5 * (mat + mat')
 
 @doc raw"""
      asym(mat)
      anti-symmetrize mat
 """
-@inline asym(mat) = 0.5*(mat - mat')
+@inline asym(mat) = 0.5 * (mat - mat')
 
 @doc raw"""
     _get_Q(Y, Y1)
     Find a complement basis Q in the linear span of Y Y1
     orthogonal to Y
 """
-function _get_Q(Y, Y1)    
-    n , p = size(Y)
+function _get_Q(Y, Y1)
+    n, p = size(Y)
     F = svd([Y Y1])
     k = sum(F.S .> _g_rank_cutoff)
-    good = F.U[:, 1:k]*F.Vt[1:k, 1:k]
-    qs = nullspace(Y'*good)
-    QR = qr(good*qs)
-    return QR.Q * vcat(I, zeros((n-k+p, k - p)))
+    good = F.U[:, 1:k] * F.Vt[1:k, 1:k]
+    qs = nullspace(Y' * good)
+    QR = qr(good * qs)
+    return QR.Q * vcat(I, zeros((n - k + p, k - p)))
 end
 
 @doc raw"""
@@ -270,11 +285,11 @@ end
 """
 function veca(mat)
     sz = size(mat)[1]
-    ret = zeros(div((sz*(sz-1)), 2))
+    ret = zeros(div((sz * (sz - 1)), 2))
     start = 1
-    for i in 1:sz-1
-        ret[start:start+sz-i-1] .= mat[i+1:end, i]
-        start += sz-i
+    for i in 1:(sz - 1)
+        ret[start:(start + sz - i - 1)] .= mat[(i + 1):end, i]
+        start += sz - i
     end
     return ret
 end
@@ -284,14 +299,14 @@ end
     unravel v to an antisymmetric matrices
 """
 function unveca(v)
-    sz = .5 * (1 + sqrt(1 + 8 * size(v)[1]))
+    sz = 0.5 * (1 + sqrt(1 + 8 * size(v)[1]))
     sz = Int(round(sz))
     mat = zeros(sz, sz)
     start = 1
-    for i in 1:(sz-1)
-        mat[i+1:end, i] .= v[start:start+sz-i-1]
-        mat[i, i+1:end] .= - v[start:start+sz-i-1]
-        start += sz-i
+    for i in 1:(sz - 1)
+        mat[(i + 1):end, i] .= v[start:(start + sz - i - 1)]
+        mat[i, (i + 1):end] .= -v[start:(start + sz - i - 1)]
+        start += sz - i
     end
     return mat
 end

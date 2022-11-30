@@ -469,40 +469,44 @@ include("../utils.jl")
         end
 
         @testset "expm_frechet" begin
-            max_norm = 10.
+            max_norm = 10.0
             for n in [5, 100, 1000]
-                ft = (rand() + .1)*max_norm/1.1
+                ft = (rand() + 0.1) * max_norm / 1.1
                 A = rand(n, n)
 
-                A = A / norm(A, 2)*ft
+                A = A / norm(A, 2) * ft
                 E = rand(n, n)
-                E = E / norm(E, 2)*ft
-                buff = Array{Float64, 2}(undef, 16*n, n)
+                E = E / norm(E, 2) * ft
+                buff = Array{Float64,2}(undef, 16 * n, n)
                 @views begin
                     expA = buff[1:n, :]
-                    expAE = buff[n+1:2*n, :]
+                    expAE = buff[(n + 1):(2 * n), :]
                 end
                 Manifolds.expm_frechet!(buff, A, E)
                 eA1, eAE1 = Manifolds.expm_frechet(A, E)
                 dlt = 1e-7
-                @test maximum(abs.((exp(A+dlt*E) .- exp(A))/dlt .- expAE)) < 2e-3
-           end
+                @test maximum(abs.((exp(A + dlt * E) .- exp(A)) / dlt .- expAE)) < 2e-3
+            end
         end
         @testset "lbfgs" begin
             p = 5
-            function rosenbrock!(f, df, x)    
+            function rosenbrock!(f, df, x)
                 D = size(x)[1]
-                f = sum(100*(x[2:end] .- x[1:end-1].^2).^2 .+ (1 .- x[1:end-1]).^2)
+                f = sum(
+                    100 * (x[2:end] .- x[1:(end - 1)] .^ 2) .^ 2 .+
+                    (1 .- x[1:(end - 1)]) .^ 2,
+                )
 
                 @views begin
-                    xm = x[2:end-1]
-                    xm_m1 = x[1:end-2]
+                    xm = x[2:(end - 1)]
+                    xm_m1 = x[1:(end - 2)]
                     xm_p1 = x[3:end]
                 end
-                df[2:end-1] .= (200 * (xm - xm_m1.^2) -
-                                400 * (xm_p1 - xm.^2) .* xm - 2 * (1 .- xm))
+                df[2:(end - 1)] .= (
+                    200 * (xm - xm_m1 .^ 2) - 400 * (xm_p1 - xm .^ 2) .* xm - 2 * (1 .- xm)
+                )
                 df[1] = -400 * x[1] * (x[2] - x[1]^2) - 2 * (1 - x[1])
-                df[end] = 200 * (x[end] - x[end-1]^2)        
+                df[end] = 200 * (x[end] - x[end - 1]^2)
                 return f
             end
             x0 = randn(p)
@@ -511,17 +515,17 @@ include("../utils.jl")
                 return fill!(similar(y), 1)
                 x = fill!(similar(y), 1)
                 ret = simiar(x)
-                ret[0] = (1200*x[0]^2 - 400*x[1]+2)
-                ret[2:end-1] .= 202 .+ 1200*x[2:end-1].^2 .- 400*x[3:end]
+                ret[0] = (1200 * x[0]^2 - 400 * x[1] + 2)
+                ret[2:(end - 1)] .= 202 .+ 1200 * x[2:(end - 1)] .^ 2 .- 400 * x[3:end]
                 ret[end] = 200
                 return 1.0 / ret
             end
-    
+
             x0 .= 0.0
             x, f, exitflag, output = Manifolds.minimize(rosenbrock!, x0, precond=pcondR)
             @test maximum(abs.(x .- ones(p))) < 1e-7
             x, f, exitflag, output = Manifolds.minimize(rosenbrock!, x0)
-            @test maximum(abs.(x .- ones(p))) < 1e-7            
+            @test maximum(abs.(x .- ones(p))) < 1e-7
         end
 
         g = StiefelSubmersionMetric(1)
@@ -540,11 +544,18 @@ include("../utils.jl")
                 q = exp(Mcomp, p, X)
                 @test isapprox(MM, q, exp(Mcomp, p, X))
                 Mcomp === Mcan && isapprox(MM, p, log(MM, p, q), log(Mcomp, p, q))
-                Mcomp === Mcan && isapprox(MM, p, Manifolds.log_lbfgs(MM, p, q), log(Mcomp, p, q))
-                
+                Mcomp === Mcan &&
+                    isapprox(MM, p, Manifolds.log_lbfgs(MM, p, q), log(Mcomp, p, q))
+
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
                 @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
-                @test isapprox(MM, p, Manifolds.log_lbfgs(MM, p, p), zero_vector(MM, p); atol=1e-6)
+                @test isapprox(
+                    MM,
+                    p,
+                    Manifolds.log_lbfgs(MM, p, p),
+                    zero_vector(MM, p);
+                    atol=1e-6,
+                )
             end
             @testset "α=$α" for α in [-0.75, -0.25, 0.5]
                 MM = MetricManifold(M, StiefelSubmersionMetric(α))
@@ -558,7 +569,13 @@ include("../utils.jl")
 
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
                 @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
-                @test isapprox(MM, p, Manifolds.log_lbfgs(MM, p, p), zero_vector(MM, p); atol=1e-6)
+                @test isapprox(
+                    MM,
+                    p,
+                    Manifolds.log_lbfgs(MM, p, p),
+                    zero_vector(MM, p);
+                    atol=1e-6,
+                )
             end
         end
     end
