@@ -469,7 +469,7 @@ include("../utils.jl")
         end
 
         @testset "expm_frechet" begin
-            max_norm = 10.0
+            max_norm = 3.0
             for n in [5, 100, 1000]
                 ft = (rand() + 0.1) * max_norm / 1.1
                 A = rand(n, n)
@@ -485,7 +485,7 @@ include("../utils.jl")
                 Manifolds.expm_frechet!(buff, A, E)
                 eA1, eAE1 = Manifolds.expm_frechet(A, E)
                 dlt = 1e-7
-                @test maximum(abs.((exp(A + dlt * E) .- exp(A)) / dlt .- expAE)) < 2e-3
+                @test maximum(abs.((exp(A + dlt * E) .- exp(A)) / dlt .- expAE)) < 1e-3
             end
         end
         @testset "lbfgs" begin
@@ -544,8 +544,13 @@ include("../utils.jl")
                 q = exp(Mcomp, p, X)
                 @test isapprox(MM, q, exp(Mcomp, p, X))
                 Mcomp === Mcan && isapprox(MM, p, log(MM, p, q), log(Mcomp, p, q))
-                Mcomp === Mcan &&
-                    isapprox(MM, p, Manifolds.log_lbfgs(MM, p, q), log(Mcomp, p, q))
+                Mcomp === Mcan && isapprox(
+                    MM,
+                    p,
+                    Manifolds.log_lbfgs(MM, p, q),
+                    log(Mcomp, p, q),
+                    atol=1e-6,
+                )
 
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
                 @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
@@ -565,7 +570,7 @@ include("../utils.jl")
                 q = exp(MM, p, X)
                 @test is_point(MM, q)
                 @test isapprox(MM, p, log(MM, p, q), X)
-                @test isapprox(MM, p, Manifolds.log_lbfgs(MM, p, q), X)
+                @test isapprox(MM, p, Manifolds.log_lbfgs(MM, p, q), X, atol=1e-6)
 
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
                 @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
