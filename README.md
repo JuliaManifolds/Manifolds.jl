@@ -33,11 +33,11 @@ M = Sphere(2)
 γ(0.5)
 ```
 
-Ecosystem highlights:
+## Ecosystem highlights
 
 * A wide selection of Riemannian manifolds like spheres, hyperbolic spaces, Stiefel and Grassmann manifolds.
 * Support for optimization on manifolds using [Manopt.jl](https://github.com/JuliaManifolds/Manopt.jl/).
-* Support for many operations used in optimization and manifold-valued statistics.
+* Support for many operations used in optimization and manifold-valued statistics with a focus on performance and ease of use.
 * Connection manifolds.
 * Lie groups.
 * Atlases, charts and custom metrics (work in progress).
@@ -46,6 +46,10 @@ Ecosystem highlights:
 * Finite differences and automatic differentiation on manifolds using [ManifoldDiff.jl](https://github.com/JuliaManifolds/ManifoldDiff.jl) (work in progress).
 * Integration and measures on manifolds: [ManifoldMeasures.jl](https://github.com/JuliaManifolds/ManifoldMeasures.jl) (work in progress).
 * Functional manifolds: [FunManifolds.jl](https://github.com/JuliaManifolds/FunManifolds.jl) (work in progress).
+
+## Support
+
+If you have any questions regarding the Manifolds.jl ecosystem feel free to reach us using [Github discussion forums](https://github.com/JuliaManifolds/Manifolds.jl/discussions), [Julia Slack](https://julialang.org/slack/), [Julia Zulip](https://julialang.zulipchat.com/) or [Julia discourse](https://discourse.julialang.org/) forums. We are interested in new applications and methods on manifolds -- sharing your work is welcome!
 
 ## Citation
 
