@@ -11,17 +11,16 @@
 | [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/latest/) | [![CI](https://github.com/JuliaManifolds/Manifolds.jl/workflows/CI/badge.svg)](https://github.com/JuliaManifolds/Manifolds.jl/actions?query=workflow%3ACI+branch%3Amaster) | [![DOI](https://zenodo.org/badge/190447542.svg)](https://zenodo.org/badge/latestdoi/190447542) |
 | | [![codecov.io](http://codecov.io/github/JuliaManifolds/Manifolds.jl/coverage.svg?branch=master)](https://codecov.io/gh/JuliaManifolds/Manifolds.jl/) |
 
-
 Package __Manifolds.jl__ aims to provide both a unified interface to define and
 use manifolds as well as a library of manifolds to use for your projects.
-This package is under development, and subject to changes as needed.
+This package is mostly stable, see https://github.com/JuliaManifolds/Manifolds.jl/issues/438 for planned upcoming changes.
 
 ## Getting started
 
 To install the package just type
 
 ```julia
-] add Manifolds
+using Pkg; Pkg.add("Manifolds")
 ```
 
 Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/sphere.html) to a point on the equator, you can generate the [`shortest_geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any}).
@@ -33,6 +32,20 @@ M = Sphere(2)
 γ = shortest_geodesic(M, [0., 0., 1.], [0., 1., 0.])
 γ(0.5)
 ```
+
+Ecosystem highlights:
+
+* A wide selection of Riemannian manifolds like spheres, hyperbolic spaces, Stiefel and Grassmann manifolds.
+* Support for optimization on manifolds using [Manopt.jl](https://github.com/JuliaManifolds/Manopt.jl/).
+* Support for many operations used in optimization and manifold-valued statistics.
+* Connection manifolds.
+* Lie groups.
+* Atlases, charts and custom metrics (work in progress).
+* A lightweight interface package: [ManifoldsBase.jl](https://github.com/JuliaManifolds/ManifoldsBase.jl).
+* Differential equations on manifolds: [ManifoldDiffEq.jl](https://github.com/JuliaManifolds/ManifoldDiffEq.jl).
+* Finite differences and automatic differentiation on manifolds using [ManifoldDiff.jl](https://github.com/JuliaManifolds/ManifoldDiff.jl) (work in progress).
+* Integration and measures on manifolds: [ManifoldMeasures.jl](https://github.com/JuliaManifolds/ManifoldMeasures.jl) (work in progress).
+* Functional manifolds: [FunManifolds.jl](https://github.com/JuliaManifolds/FunManifolds.jl) (work in progress).
 
 ## Citation
 
