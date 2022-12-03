@@ -398,18 +398,20 @@ end
     return U, V, Lu, Lv
 end
 
-@doc raw"""
+@doc doc"""
     expm_frechet(A, E)
     expm_frechet!(buff, A, E)
 
 Compute Frechet derivative of expm(A) in direction E using algorithm 6.4 of [^AlMohyHigham2009]
-For sufficiently small $|A|_1$ norm, we use Padé with appropriate number of terms
-(3, 5, 7, 9, 13), with 13 terms is the default. Otherwise we use the formula
-exp(A) = (exp(A/2^s))^{2^s}, where s is used to scale so $|A|_1$ is smaller than ell_table_61[14] of tbale ell_table_61.
+````math
+expm\_frechet(A, E) = \lim_{t\to 0}\frac{1}{t}(\exp(A + tE) - \exp(A))
+````
+For sufficiently small $|A|_1$ norm, we use Padé with an appropriate number of terms
+( one of (3, 5, 7, 9, 13)), with 13 terms is the default. Otherwise, we use the formula
+exp(A) = (exp(A/2^s))^{2^s}, where s is used to scale so $2^{-s}|A|_1$ is smaller than $ell\_table\_61$[14] of the lookup table $ell\_table\_61$ in the code, which comes from table 6.1 in op. cit.
 
-For expm_frechet!, buff is a matrix of size 16*k times k
-the returns, eA = exp(A), eAf = dexp(A, E) are stored in the first two blocks
-the remaining blocks are used as temporary storage
+For $expm\_frechet!$, buff is a matrix of size 16*k times k, where $k$ is the size of $A$. The returns, (exp(A), dexp(A, E)) are stored in the first two blocks of buff.
+The remaining blocks are used as temporary storage. This is for algorithms calling expm_frechet repeatedly, where allocation becomes the biggest bottleneck.
 
 [^AlMohyHigham2009]:
     >Al-Mohy, A. H., Higham, N. J. (2009)
@@ -450,19 +452,6 @@ function expm_frechet(A, E)
 
     return eA, eAf
 end
-
-@doc raw"""
-    expm_frechet!(buff, A, E)
-
-Compute Frechet derivative of expm(A) in direction E using algorithm 6.4 of [^AlMohyHigham2009]
-For sufficiently small $|A|_1$ norm, we use Padé with appropriate number of terms
-(3, 5, 7, 9, 13), with 13 terms is the default. Otherwise we use the formula
-exp(A) = (exp(A/2^s))^{2^s}, where s is used to scale so $|A|_1$ is smaller than ell_table_61[14] of tbale ell_table_61.
-
-For expm_frechet!, buff is a matrix of size 16*k times k
-the returns, eA = exp(A), eAf = dexp(A, E) are stored in the first two blocks
-the remaining blocks are used as temporary storage
-"""
 function expm_frechet!(buff, A, E)
     n = size(A, 1)
     s = nothing

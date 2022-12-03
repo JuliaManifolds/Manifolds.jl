@@ -54,6 +54,14 @@ Public = true
 Private = false
 ```
 
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/StiefelFrechet.jl"]
+Order = [:type, :function]
+Public = true
+Private = false
+```
+
 ## Internal types and functions
 
 ```@autodocs

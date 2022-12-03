@@ -1,18 +1,20 @@
-using LinearAlgebra
-
-# A simple implementation of LBFGS based on minFunc.m
+# A simple implementation of L-BFGS based on minFunc.m
 # https://www.cs.ubc.ca/~schmidtm/Software/minFunc.html
 
 @doc raw"""
     _lbfgs_calc!(z, g, S, Y, rho, lbfgs_start, lbfgs_end, Hdiag, al_buff)
-    LBFGS Search Direction
-    This function returns the (L-BFGS) approximate inverse Hessian,
-    multiplied by the negative gradient
-    Use saved data Y S YS
-    To avoid repeated allocation of memory use fix Y, S, YS but
-    cycling the indices
-    data is saved between lbfgs_start and lbfgs_end, inclusively both ends
-    Hdiag is the diagonal Hessian approximation. al_buff is a buffer for the alpha coefficients
+Compute the L-BFGS Search Direction.
+This function returns the (L-BFGS) approximate inverse Hessian, multiplied by the negative gradient.
+
+z is the storage for the output, also returned.
+g is the gradient
+S: storage for change in x (steps) (also called q_i)
+Y: storage for change in gradient
+rho: storage for 1/dot(Y, S)
+lbfgs_start, lbfgs_end: starting and ending position of the storage, similar to a linked-list implementation. We keep only a short history, and reuse storage when full. Data is saved between lbfgs_start and lbfgs_end, inclusively both ends.
+
+Hdiag is the diagonal Hessian approximation.
+al_buff is a buffer for the alpha coefficients.
 """
 @inline function _lbfgs_calc!(z, g, S, Y, rho, lbfgs_start, lbfgs_end, Hdiag, al_buff)
     # Set up indexing
@@ -35,14 +37,12 @@ using LinearAlgebra
     for j in 1:nid
         i = ind[nid - j + 1]
         al[i] = dot(S[:, i], z) * rho[i]
-        # z .-= al[i]*Y[:, i]
         mul!(z, UniformScaling(-al[i]), Y[:, i], 1, 1)
     end
     # Multiply by Initial Hessian.
     z .= Hdiag .* z
     for i in ind
         be_i = dot(Y[:, i], z) * rho[i]
-        # z .+= S[:, i]*(al[i]-be_i)
         mul!(z, UniformScaling(al[i] - be_i), S[:, i], 1, 1)
     end
     return z
@@ -50,13 +50,19 @@ end
 
 @doc raw"""
     _save!(y, s, S, Y, rho, lbfgs_start, lbfgs_end, Hdiag, precondx)
-    append data to S, Y, rho.
-     To avoid repeated allocation of memory use fixed storage
-     but keep tract of indices, and recycle if the storage is full.
-    Data to save:
-    S: change in x (steps) (also called q_i)
-    Y: Change in gradient
-    YS: contraction of Y and S
+y: current change in gradient
+s: current change in x (step)
+rho: 1/(y.s) - set to 1 if (y.s) = 0
+lbfgs_start, lbfgs_end: running indices for storage.
+Hdiag: Hessian diagonal
+precondx: preconditioner function. Apply no preconditioner if empty.
+
+Helper function to append data to S, Y, rho.
+To avoid repeated allocation of memory use fixed storage but keep tract of indices, and recycle if the storage is full. We isolate the code to save current data to storage in this function.
+Data to save:
+S: storage for change in x (steps) (also called q_i)
+Y: storage for Change in gradient
+rho: storage for 1/(Y.S), set to 1 when (Y.S) == 0
 """
 @inline function _save!(y, s, S, Y, rho, lbfgs_start, lbfgs_end, Hdiag, precondx)
     ys = dot(y, s)
@@ -93,6 +99,9 @@ end
 end
 
 @doc raw"""
+    _cubic_interpolate(x1, f1, g1, x2, f2, g2; bounds=nothing)
+Cubic interpolation of 2 points w/ function and derivative values for both
+Used in Wolfe line search.
 """
 @inline function _cubic_interpolate(x1, f1, g1, x2, f2, g2; bounds=nothing)
     # Compute bounds of interpolation area
@@ -123,27 +132,15 @@ end
     end
 end
 
-@inline function multd!(x_buff, x, t, d)
-    mul!(x_buff, t, d)
-    return x_buff .+= x
-end
+@doc raw"""
+     _strong_wolfe(
+        fun_obj, x, t, d, f, g, gx_buff, gtd, c1=1e-4, c2=0.9, tolerance_change=1e-9, max_ls=25)
+Algorithm 3.5 in [^WrightNocedal2006]. The magic number values c_1 and c_2 are suggested from the notes following the algorithm. Converting from the matlab code in https://www.cs.ubc.ca/~schmidtm/Software/minFunc.html
 
-@doc raw""" Strong Wolf condition
+fun_obj returns the objective function value
+
 """
-@inline function _strong_wolfe(
-    fun_obj,
-    x,
-    t,
-    d,
-    f,
-    g,
-    gx_buff,
-    gtd,
-    c1=1e-4,
-    c2=0.9,
-    tolerance_change=1e-9,
-    max_ls=25,
-)
+@inline function _strong_wolfe(fun_obj, x, t, d, f, g, gx_buff, gtd, c1=1e-4, c2=0.9, tolerance_change=1e-9, max_ls=25)
     d_norm = max_abs(d)
     # g = copy(g)
     # evaluate objective and gradient using initial step
@@ -196,15 +193,7 @@ end
         min_step = t + 0.01 * (t - t_prev)
         max_step = t * 10
         tmp = t
-        t = _cubic_interpolate(
-            t_prev,
-            f_prev,
-            gtd_prev,
-            t,
-            f_new,
-            gtd_new,
-            bounds=(min_step, max_step),
-        )
+        t = _cubic_interpolate(t_prev, f_prev, gtd_prev, t, f_new, gtd_new, bounds=(min_step, max_step))
 
         # next step
         t_prev = tmp
@@ -317,22 +306,31 @@ end
     return f_new, t, ls_func_evals
 end
 
-@doc raw"""minimize
-    minimize(fun_obj, x0, options)
+@doc doc"""
+    minimize(
+        fun_obj,
+         x0;
+         max_fun_evals=120,
+         max_itr=100,
+         grad_tol=1e-15,
+         func_tol=1e-15,
+         corrections=10,
+         c1=1e-4,
+         c2=0.9,
+         max_ls=25,
+         precond=nothing)
+
+Minimize the objective fun_obj using the L-BFGS two-loop method in [^WrightNocedal2006], chapter 6.
+
+The algorithm calls the internal $\_strong\_wolfe$ function for line search. The magic numbers c_1 and c_2 are for the line search, suggested in op. cit.
+Corrections are the number of historical step/gradient saved, max_ls is the max number of line search iterations, precondx is a preconditioner - a function return a vector in the shape of x0.
+
+[^WrightNocedal2006]:
+    ^Wright, S., Nocedal, J. (2006).
+    ^" Numerical Optimization"
+    ^Springer New York. ISBN:9780387227429.
 """
-function minimize(
-    fun_obj,
-    x0;
-    max_fun_evals=120,
-    max_itr=100,
-    grad_tol=1e-15,
-    func_tol=1e-15,
-    corrections=10,
-    c1=1e-4,
-    c2=0.9,
-    max_ls=25,
-    precond=nothing,
-)
+function minimize(fun_obj, x0; max_fun_evals=120, max_itr=100, grad_tol=1e-15, func_tol=1e-15, corrections=10, c1=1e-4, c2=0.9, max_ls=25, precond=nothing)
 
     # Initialize
     p = size(x0)[1]
@@ -475,6 +473,11 @@ function minimize(
 end
 
 # internal functions. Self explanatory - for vector functions
+@inline function multd!(x_buff, x, t, d)
+    mul!(x_buff, t, d)
+    return x_buff .+= x
+end
+
 @inline function _is_legal(v)
     return isreal(v) && sum(isnan.(v)) == 0 && sum(isinf.(v)) == 0
 end
