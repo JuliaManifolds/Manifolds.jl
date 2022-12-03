@@ -412,14 +412,14 @@ end
     expm_frechet(A, E)
     expm_frechet!(buff, A, E)
 
-    Compute Frechet derivative of expm(A) in direction E using algorithm 6.4 of [^AlMohyHigham]
-    For sufficiently small $|A|_1$ norm, we use Padé with appropriate number of terms
-    (3, 5, 7, 9, 13), with 13 terms is the default. Otherwise we use the formula
-    exp(A) = (exp(A/2^s))^{2^s}, where s is used to scale so $|A|_1$ is smaller than ell_table_61[14] of tbale ell_table_61.
+Compute Frechet derivative of expm(A) in direction E using algorithm 6.4 of [^AlMohyHigham]
+For sufficiently small $|A|_1$ norm, we use Padé with appropriate number of terms
+(3, 5, 7, 9, 13), with 13 terms is the default. Otherwise we use the formula
+exp(A) = (exp(A/2^s))^{2^s}, where s is used to scale so $|A|_1$ is smaller than ell_table_61[14] of tbale ell_table_61.
 
-    For expmm_frechet!, buff is a matrix of size 16*k times k
-    the returns, eA = exp(A), eAf = dexp(A, E) are stored in the first two blocks
-    the remaining blocks are used as temporary storage
+For expm_frechet!, buff is a matrix of size 16*k times k
+the returns, eA = exp(A), eAf = dexp(A, E) are stored in the first two blocks
+the remaining blocks are used as temporary storage
 """
 function expm_frechet(A, E)
     n = size(A, 1)
