@@ -7,6 +7,8 @@ This page documents the internal types and methods of `Manifolds.jl`'s that migh
 ```@docs
 Manifolds.eigen_safe
 Manifolds.isnormal
+Manifolds.expm_frechet
+Manifolds.expm_frechet!
 Manifolds.log_safe
 Manifolds.log_safe!
 Manifolds.mul!_safe
