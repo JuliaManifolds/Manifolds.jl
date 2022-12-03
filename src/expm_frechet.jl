@@ -1,12 +1,6 @@
 
 @doc raw"""
 based on algorithm 6.3 of [^AlMohyHigham2009].
-
-[^AlMohyHigham2009]:
-    >Al-Mohy, A. H., Higham, N. J. (2009)
-    >"Computing the Frechet Derivative of the Matrix Exponential, with an application to Condition Number Estimation."
-    >SIAM Journal On Matrix Analysis and Applications., 30 (4). pp. 1639-1657. ISSN 1095-7162
-    >doi: [https://doi.org/10.1137/080716426](https://doi.org/10.1137/080716426)
 """
 
 # From table 6.1 of [^AlMohyHigham2009]. A list of cut off values $l_m$ used to determine how many terms of Padé approximant is used. To compute expm_frechet(A, E), look for the largest index $m\in [3, 5, 7, 9, 13]$ just exceed $|A|_1$.
@@ -416,6 +410,12 @@ exp(A) = (exp(A/2^s))^{2^s}, where s is used to scale so $|A|_1$ is smaller than
 For expm_frechet!, buff is a matrix of size 16*k times k
 the returns, eA = exp(A), eAf = dexp(A, E) are stored in the first two blocks
 the remaining blocks are used as temporary storage
+
+[^AlMohyHigham2009]:
+    >Al-Mohy, A. H., Higham, N. J. (2009)
+    >"Computing the Frechet Derivative of the Matrix Exponential, with an application to Condition Number Estimation."
+    >SIAM Journal On Matrix Analysis and Applications., 30 (4). pp. 1639-1657. ISSN 1095-7162
+    >doi: [https://doi.org/10.1137/080716426](https://doi.org/10.1137/080716426)
 """
 function expm_frechet(A, E)
     n = size(A, 1)
@@ -450,6 +450,19 @@ function expm_frechet(A, E)
 
     return eA, eAf
 end
+
+@doc raw"""
+    expm_frechet!(buff, A, E)
+
+Compute Frechet derivative of expm(A) in direction E using algorithm 6.4 of [^AlMohyHigham2009]
+For sufficiently small $|A|_1$ norm, we use Padé with appropriate number of terms
+(3, 5, 7, 9, 13), with 13 terms is the default. Otherwise we use the formula
+exp(A) = (exp(A/2^s))^{2^s}, where s is used to scale so $|A|_1$ is smaller than ell_table_61[14] of tbale ell_table_61.
+
+For expm_frechet!, buff is a matrix of size 16*k times k
+the returns, eA = exp(A), eAf = dexp(A, E) are stored in the first two blocks
+the remaining blocks are used as temporary storage
+"""
 function expm_frechet!(buff, A, E)
     n = size(A, 1)
     s = nothing
