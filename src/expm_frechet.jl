@@ -455,8 +455,6 @@ function expm_frechet(A, E)
     return eA, eAf
 end
 
-@doc raw"""
-"""
 function expm_frechet!(buff, A, E)
     n = size(A, 1)
     s = nothing
