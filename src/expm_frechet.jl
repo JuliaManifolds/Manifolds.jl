@@ -9,7 +9,7 @@ based on algorithm 6.3 of [^AlMohyHigham2009].
     >doi: [https://doi.org/10.1137/080716426](https://doi.org/10.1137/080716426)
 """
 
-# From table 6.1 of [^AlMohyHigham]. A list of cut off values $l_m$ used to determine how many terms of Padé approximant is used. To compute expm_frechet(A, E), look for the largest index $m\in [3, 5, 7, 9, 13]$ just exceed $|A|_1$.
+# From table 6.1 of [^AlMohyHigham2009]. A list of cut off values $l_m$ used to determine how many terms of Padé approximant is used. To compute expm_frechet(A, E), look for the largest index $m\in [3, 5, 7, 9, 13]$ just exceed $|A|_1$.
 ell_table_61 = (
     nothing,
     # 1
@@ -39,7 +39,7 @@ ell_table_61 = (
 @doc raw"""
     _diff_pade3(A, E)
     Compute U, V, LU, LV from the first 6 lines of the for loop in
-    algorithm 6.4 of [^AlMohyHigham] using 3-term Padé approximant
+    algorithm 6.4 of [^AlMohyHigham2009] using 3-term Padé approximant
     the tuple b contains the Padé coefficients of the numerator
 """
 @inline function _diff_pade3!(buff, A, E)
@@ -80,7 +80,7 @@ end
 @doc raw"""
     _diff_pade5(A, E)
     Compute U, V, LU, LV from the first 6 lines of the for loop in
-    algorithm 6.4 of [^AlMohyHigham] using 5-term Padé approximant
+    algorithm 6.4 of [^AlMohyHigham2009] using 5-term Padé approximant
     the tuple b contains the Padé coefficients of the numerator
 """
 @inline function _diff_pade5!(buff, A, E)
@@ -131,7 +131,7 @@ end
 @doc raw"""
     _diff_pade7(A, E)
     Compute U, V, LU, LV from the first 6 lines of the for loop in
-    algorithm 6.4 of [^AlMohyHigham] using 7-term Padé approximant
+    algorithm 6.4 of [^AlMohyHigham2009] using 7-term Padé approximant
     the tuple b contains the Padé coefficients of the numerator
 """
 @inline function _diff_pade7!(buff, A, E)
@@ -190,7 +190,7 @@ end
 @doc raw"""
     _diff_pade9(A, E)
     Compute U, V, LU, LV from the first 6 lines of the for loop in
-    algorithm 6.4 of [^AlMohyHigham] using 9-term Padé approximant
+    algorithm 6.4 of [^AlMohyHigham2009] using 9-term Padé approximant
     the tuple b contains the Padé coefficients of the numerator
 """
 @inline function _diff_pade9!(buff, A, E)
@@ -278,7 +278,7 @@ end
 @doc raw"""
     _diff_pade13(A, E)
     Compute U, V, LU, LV from the lines 10-25 of the for loop in
-    algorithm 6.4 of [^AlMohyHigham] using 9-term Padé approximant
+    algorithm 6.4 of [^AlMohyHigham2009] using 9-term Padé approximant
     The returns U, V, Lu, Lv are stored in the first four blocks of buff
     the tuple b contains the Padé coefficients of the numerator
 """
@@ -408,7 +408,7 @@ end
     expm_frechet(A, E)
     expm_frechet!(buff, A, E)
 
-Compute Frechet derivative of expm(A) in direction E using algorithm 6.4 of [^AlMohyHigham]
+Compute Frechet derivative of expm(A) in direction E using algorithm 6.4 of [^AlMohyHigham2009]
 For sufficiently small $|A|_1$ norm, we use Padé with appropriate number of terms
 (3, 5, 7, 9, 13), with 13 terms is the default. Otherwise we use the formula
 exp(A) = (exp(A/2^s))^{2^s}, where s is used to scale so $|A|_1$ is smaller than ell_table_61[14] of tbale ell_table_61.
