@@ -1,13 +1,14 @@
 
 @doc raw"""
-based on
-.. [1] Awad H. Al-Mohy and Nicholas J. Higham (2009)
-           Computing the Frechet Derivative of the Matrix Exponential,
-           with an application to Condition Number Estimation.
-           SIAM Journal On Matrix Analysis and Applications.,
-           30 (4). pp. 1639-1657. ISSN 1095-7162
+based on algorithm 6.3 of [^AlMohyHigham]
+[^AlMohyHigham]:
+    >Al-Mohy, A. H., Higham, N. J. (2009)
+    >"Computing the Frechet Derivative of the Matrix Exponential, with an application to Condition Number Estimation."
+    >SIAM Journal On Matrix Analysis and Applications., 30 (4). pp. 1639-1657. ISSN 1095-7162
+    >doi: [https://doi.org/10.1137/080716426](https://doi.org/10.1137/080716426)
 """
 
+# From table 6.1 of [^AlMohyHigham]. A list of cut off values $l_m$ used to determine how many terms of Padé approximant is used. To compute expm_frechet(A, E), look for the largest index $m\in [3, 5, 7, 9, 13]$ just exceed $|A|_1$.
 ell_table_61 = (
     nothing,
     # 1
@@ -36,185 +37,9 @@ ell_table_61 = (
 
 @doc raw"""
     _diff_pade3(A, E)
-
-Compute expm using 3-term pade approximant
-"""
-@inline function _diff_pade3(A, E)
-    b = (120.0, 60.0, 12.0, 1.0)
-    A2 = A * A
-    M2 = A * E + E * A
-    U = A * (b[4] * A2 + UniformScaling(b[2]))
-    V = b[3] * A2 + UniformScaling(b[1])
-    Lu = A * (b[3] * M2) + E * (b[3] * A2 + UniformScaling(b[1]))
-    Lv = b[3] .* M2
-    return U, V, Lu, Lv
-end
-
-@doc raw"""
-    _diff_pade5(A, E)
-
-Compute expm using 5-term pade approximant
-"""
-@inline function _diff_pade5(A, E)
-    b = (30240.0, 15120.0, 3360.0, 420.0, 30.0, 1.0)
-    A2 = A * A
-    M2 = A * E + E * A
-    A4 = A2 * A2
-    M4 = A2 * M2 + M2 * A2
-    U = A * (b[6] * A4 + b[4] * A2 + UniformScaling(b[2]))
-    V = b[5] * A4 + b[3] * A2 + UniformScaling(b[1])
-    Lu = (A * (b[6] * M4 + b[4] * M2) + E * (b[6] * A4 + b[4] * A2 + UniformScaling(b[2])))
-    Lv = b[5] * M4 + b[3] * M2
-    return U, V, Lu, Lv
-end
-
-@doc raw"""
-    _diff_pade7(A, E)
-
-Compute expm using 7-term pade approximant
-"""
-@inline function _diff_pade7(A, E)
-    b = (17297280.0, 8648640.0, 1995840.0, 277200.0, 25200.0, 1512.0, 56.0, 1.0)
-    A2 = A * A
-    M2 = A * E + E * A
-    A4 = A2 * A2
-    M4 = A2 * M2 + M2 * A2
-    A6 = A2 * A4
-    M6 = A4 * M2 + M4 * A2
-    U = A * (b[8] * A6 + b[6] * A4 + b[4] * A2 + UniformScaling(b[2]))
-    V = b[7] * A6 + b[5] * A4 + b[3] * A2 + UniformScaling(b[1])
-    Lu = (
-        A * (b[8] * M6 + b[6] * M4 + b[4] * M2) +
-        E * (b[8] * A6 + b[6] * A4 + b[4] * A2 + UniformScaling(b[2]))
-    )
-    Lv = b[7] * M6 + b[5] * M4 + b[3] * M2
-    return U, V, Lu, Lv
-end
-
-@doc raw"""
-    _diff_pade9(A, E)
-
-Compute expm using 9-term pade approximant
-"""
-@inline function _diff_pade9(A, E)
-    b = (
-        17643225600.0,
-        8821612800.0,
-        2075673600.0,
-        302702400.0,
-        30270240.0,
-        2162160.0,
-        110880.0,
-        3960.0,
-        90.0,
-        1.0,
-    )
-    A2 = A * A
-    M2 = A * E + E * A
-    A4 = A2 * A2
-    M4 = A2 * M2 + M2 * A2
-    A6 = A2 * A4
-    M6 = A4 * M2 + M4 * A2
-    A8 = A4 * A4
-    M8 = A4 * M4 + M4 * A4
-    U = A * (b[10] * A8 + b[8] * A6 + b[6] * A4 + b[4] * A2 + UniformScaling(b[2]))
-    V = b[9] * A8 + b[7] * A6 + b[5] * A4 + b[3] * A2 + UniformScaling(b[1])
-    Lu = (
-        A * (b[10] * M8 + b[8] * M6 + b[6] * M4 + b[4] * M2) +
-        E * (b[10] * A8 + b[8] * A6 + b[6] * A4 + b[4] * A2 + UniformScaling(b[2]))
-    )
-    Lv = b[9] * M8 + b[7] * M6 + b[5] * M4 + b[3] * M2
-    return U, V, Lu, Lv
-end
-
-@doc raw"""
-    _diff_pade13(A, E)
-Compute expm using 13-term pade approximant
-"""
-@inline function _diff_pade13(A, E)
-    b = (
-        64764752532480000.0,
-        32382376266240000.0,
-        7771770303897600.0,
-        1187353796428800.0,
-        129060195264000.0,
-        10559470521600.0,
-        670442572800.0,
-        33522128640.0,
-        1323241920.0,
-        40840800.0,
-        960960.0,
-        16380.0,
-        182.0,
-        1.0,
-    )
-
-    A2 = A * A
-
-    M2 = A * E + E * A
-    A4 = A2 * A2
-    M4 = A2 * M2 + M2 * A2
-    A6 = A2 * A4
-    M6 = A4 * M2 + M4 * A2
-    W1 = b[14] * A6 + b[12] * A4 + b[10] * A2
-    W2 = b[8] * A6 + b[6] * A4 + b[4] * A2 + UniformScaling(b[2])
-    Z1 = b[13] * A6 + b[11] * A4 + b[9] * A2
-    Z2 = b[7] * A6 + b[5] * A4 + b[3] * A2 + UniformScaling(b[1])
-    W = A6 * W1 + W2
-    U = A * W
-    V = A6 * Z1 + Z2
-    Lw1 = b[14] * M6 + b[12] * M4 + b[10] * M2
-    Lw2 = b[8] * M6 + b[6] * M4 + b[4] * M2
-    Lz1 = b[13] * M6 + b[11] * M4 + b[9] * M2
-    Lz2 = b[7] * M6 + b[5] * M4 + b[3] * M2
-    Lw = A6 * Lw1 + M6 * W1 + Lw2
-    Lu = A * Lw + E * W
-    Lv = A6 * Lz1 + M6 * Z1 + Lz2
-    return U, V, Lu, Lv
-end
-
-@doc raw"""
-    expmm_frechet(A, E)
-Compute frechet derivative of expm(A) in direction E using algorithm 6.4 of @ref
-"""
-function expm_frechet(A, E)
-    n = size(A, 1)
-    s = nothing
-    A_norm_1 = maximum(sum(abs.(A), dims=1))
-    m_pade_pairs = ((3, _diff_pade3), (5, _diff_pade5), (7, _diff_pade7), (9, _diff_pade9))
-
-    for m_pade in m_pade_pairs
-        m, pade = m_pade
-        if A_norm_1 <= ell_table_61[m]
-            U, V, Lu, Lv = pade(A, E)
-            s = 0
-            break
-        end
-    end
-    if isnothing(s)
-        # scaling
-        s = max(0, Int(ceil(log2(A_norm_1 / ell_table_61[14]))))
-        # pade order 13
-        U, V, Lu, Lv = _diff_pade13((2.0^-s) * A, (2.0^-s) * E)
-    end
-    # factor once and solve twice    
-    lu_piv = lu(-U + V)
-    eA = lu_piv \ (U + V)
-    eAf = lu_piv \ (Lu + Lv + (Lu - Lv) * eA)
-
-    # squaring
-    for k in 1:s
-        eAf = eA * eAf + eAf * eA
-        eA = eA * eA
-    end
-
-    return eA, eAf
-end
-
-@doc raw"""
-    _diff_pade3!(buff, A, E)
-Compute expm using 3-term pade approximant, with buff used as temporary storage
-The returns U, V, Lu, Lv are stored in the first four blocks of buff
+    Compute U, V, LU, LV from the first 6 lines of the for loop in
+    algorithm 6.4 of [^AlMohyHigham] using 3-term Padé approximant
+    the tuple b contains the Padé coefficients of the numerator
 """
 @inline function _diff_pade3!(buff, A, E)
     b = (120.0, 60.0, 12.0, 1.0)
@@ -241,10 +66,22 @@ The returns U, V, Lu, Lv are stored in the first four blocks of buff
     return mul!(Lv, b[3], M2)
 end
 
+@inline function _diff_pade3(A, E)
+    b = (120.0, 60.0, 12.0, 1.0)
+    A2 = A * A
+    M2 = A * E + E * A
+    U = A * (b[4] * A2 + UniformScaling(b[2]))
+    V = b[3] * A2 + UniformScaling(b[1])
+    Lu = A * (b[3] * M2) + E * (b[3] * A2 + UniformScaling(b[1]))
+    Lv = b[3] .* M2
+    return U, V, Lu, Lv
+end
+
 @doc raw"""
-    _diff_pade5!(buff, A, E)
-Compute expm using 5-term pade approximant, with buff used as temporary storage
-The returns U, V, Lu, Lv are stored in the first four blocks of buff
+    _diff_pade5(A, E)
+    Compute U, V, LU, LV from the first 6 lines of the for loop in
+    algorithm 6.4 of [^AlMohyHigham] using 5-term Padé approximant
+    the tuple b contains the Padé coefficients of the numerator
 """
 @inline function _diff_pade5!(buff, A, E)
     b = (30240.0, 15120.0, 3360.0, 420.0, 30.0, 1.0)
@@ -279,10 +116,24 @@ The returns U, V, Lu, Lv are stored in the first four blocks of buff
     return Lv .= b[5] * M4 + b[3] * M2
 end
 
+@inline function _diff_pade5(A, E)
+    b = (30240.0, 15120.0, 3360.0, 420.0, 30.0, 1.0)
+    A2 = A * A
+    M2 = A * E + E * A
+    A4 = A2 * A2
+    M4 = A2 * M2 + M2 * A2
+    U = A * (b[6] * A4 + b[4] * A2 + UniformScaling(b[2]))
+    V = b[5] * A4 + b[3] * A2 + UniformScaling(b[1])
+    Lu = (A * (b[6] * M4 + b[4] * M2) + E * (b[6] * A4 + b[4] * A2 + UniformScaling(b[2])))
+    Lv = b[5] * M4 + b[3] * M2
+    return U, V, Lu, Lv
+end
+
 @doc raw"""
-    _diff_pade7!(buff, A, E)
-Compute expm using 7-term pade approximant, with buff used as temporary storage
-The returns U, V, Lu, Lv are stored in the first four blocks of buff
+    _diff_pade7(A, E)
+    Compute U, V, LU, LV from the first 6 lines of the for loop in
+    algorithm 6.4 of [^AlMohyHigham] using 7-term Padé approximant
+    the tuple b contains the Padé coefficients of the numerator
 """
 @inline function _diff_pade7!(buff, A, E)
     b = (17297280.0, 8648640.0, 1995840.0, 277200.0, 25200.0, 1512.0, 56.0, 1.0)
@@ -320,10 +171,29 @@ The returns U, V, Lu, Lv are stored in the first four blocks of buff
     return Lv .= b[7] * M6 + b[5] * M4 + b[3] * M2
 end
 
+@inline function _diff_pade7(A, E)
+    b = (17297280.0, 8648640.0, 1995840.0, 277200.0, 25200.0, 1512.0, 56.0, 1.0)
+    A2 = A * A
+    M2 = A * E + E * A
+    A4 = A2 * A2
+    M4 = A2 * M2 + M2 * A2
+    A6 = A2 * A4
+    M6 = A4 * M2 + M4 * A2
+    U = A * (b[8] * A6 + b[6] * A4 + b[4] * A2 + UniformScaling(b[2]))
+    V = b[7] * A6 + b[5] * A4 + b[3] * A2 + UniformScaling(b[1])
+    Lu = (
+        A * (b[8] * M6 + b[6] * M4 + b[4] * M2) +
+        E * (b[8] * A6 + b[6] * A4 + b[4] * A2 + UniformScaling(b[2]))
+    )
+    Lv = b[7] * M6 + b[5] * M4 + b[3] * M2
+    return U, V, Lu, Lv
+end
+
 @doc raw"""
-    _diff_pade9!(buff, A, E)
-Compute expm using 9-term pade approximant, with buff used as temporary storage
-The returns U, V, Lu, Lv are stored in the first four blocks of buff
+    _diff_pade9(A, E)
+    Compute U, V, LU, LV from the first 6 lines of the for loop in
+    algorithm 6.4 of [^AlMohyHigham] using 9-term Padé approximant
+    the tuple b contains the Padé coefficients of the numerator
 """
 @inline function _diff_pade9!(buff, A, E)
     b = (
@@ -377,10 +247,43 @@ The returns U, V, Lu, Lv are stored in the first four blocks of buff
     return Lv .= b[9] * M8 + b[7] * M6 + b[5] * M4 + b[3] * M2
 end
 
+@inline function _diff_pade9(A, E)
+    b = (
+        17643225600.0,
+        8821612800.0,
+        2075673600.0,
+        302702400.0,
+        30270240.0,
+        2162160.0,
+        110880.0,
+        3960.0,
+        90.0,
+        1.0,
+    )
+    A2 = A * A
+    M2 = A * E + E * A
+    A4 = A2 * A2
+    M4 = A2 * M2 + M2 * A2
+    A6 = A2 * A4
+    M6 = A4 * M2 + M4 * A2
+    A8 = A4 * A4
+    M8 = A4 * M4 + M4 * A4
+    U = A * (b[10] * A8 + b[8] * A6 + b[6] * A4 + b[4] * A2 + UniformScaling(b[2]))
+    V = b[9] * A8 + b[7] * A6 + b[5] * A4 + b[3] * A2 + UniformScaling(b[1])
+    Lu = (
+        A * (b[10] * M8 + b[8] * M6 + b[6] * M4 + b[4] * M2) +
+        E * (b[10] * A8 + b[8] * A6 + b[6] * A4 + b[4] * A2 + UniformScaling(b[2]))
+    )
+    Lv = b[9] * M8 + b[7] * M6 + b[5] * M4 + b[3] * M2
+    return U, V, Lu, Lv
+end
+
 @doc raw"""
-    _diff_pade13!(buff, A, E)
-Compute expm using 13-term pade approximant, with buff used as temporary storage
-The returns U, V, Lu, Lv are stored in the first four blocks of buff
+    _diff_pade13(A, E)
+    Compute U, V, LU, LV from the lines 10-25 of the for loop in
+    algorithm 6.4 of [^AlMohyHigham] using 9-term Padé approximant
+    The returns U, V, Lu, Lv are stored in the first four blocks of buff
+    the tuple b contains the Padé coefficients of the numerator
 """
 @inline function _diff_pade13!(buff, A, E)
     b = (
@@ -463,12 +366,96 @@ The returns U, V, Lu, Lv are stored in the first four blocks of buff
     return Lv .+= b[7] * M6 + b[5] * M4 + b[3] * M2
 end
 
+@inline function _diff_pade13(A, E)
+    b = (
+        64764752532480000.0,
+        32382376266240000.0,
+        7771770303897600.0,
+        1187353796428800.0,
+        129060195264000.0,
+        10559470521600.0,
+        670442572800.0,
+        33522128640.0,
+        1323241920.0,
+        40840800.0,
+        960960.0,
+        16380.0,
+        182.0,
+        1.0,
+    )
+
+    A2 = A * A
+
+    M2 = A * E + E * A
+    A4 = A2 * A2
+    M4 = A2 * M2 + M2 * A2
+    A6 = A2 * A4
+    M6 = A4 * M2 + M4 * A2
+    W1 = b[14] * A6 + b[12] * A4 + b[10] * A2
+    W2 = b[8] * A6 + b[6] * A4 + b[4] * A2 + UniformScaling(b[2])
+    Z1 = b[13] * A6 + b[11] * A4 + b[9] * A2
+    Z2 = b[7] * A6 + b[5] * A4 + b[3] * A2 + UniformScaling(b[1])
+    W = A6 * W1 + W2
+    U = A * W
+    V = A6 * Z1 + Z2
+    Lw1 = b[14] * M6 + b[12] * M4 + b[10] * M2
+    Lw2 = b[8] * M6 + b[6] * M4 + b[4] * M2
+    Lz1 = b[13] * M6 + b[11] * M4 + b[9] * M2
+    Lz2 = b[7] * M6 + b[5] * M4 + b[3] * M2
+    Lw = A6 * Lw1 + M6 * W1 + Lw2
+    Lu = A * Lw + E * W
+    Lv = A6 * Lz1 + M6 * Z1 + Lz2
+    return U, V, Lu, Lv
+end
+
 @doc raw"""
-    expmm_frechet!(buff, A, E)
-Compute frechet derivative of expm(A) in direction E using algorithm 6.4 of @ref
-buff is a matrix of size 16*k times k
-the returns, eA = exp(A), eAf = dexp(A, E) are stored in the first two blocks
-the remaining blocks are used as temporary storage
+    expm_frechet(A, E)
+    expm_frechet!(buff, A, E)
+
+    Compute Frechet derivative of expm(A) in direction E using algorithm 6.4 of [^AlMohyHigham]
+    For sufficiently small $|A|_1$ norm, we use Padé with appropriate number of terms
+    (3, 5, 7, 9, 13), with 13 terms is the default. Otherwise we use the formula
+    exp(A) = (exp(A/2^s))^{2^s}, where s is used to scale so $|A|_1$ is smaller than ell_table_61[14] of tbale ell_table_61.
+
+    For expmm_frechet!, buff is a matrix of size 16*k times k
+    the returns, eA = exp(A), eAf = dexp(A, E) are stored in the first two blocks
+    the remaining blocks are used as temporary storage
+"""
+function expm_frechet(A, E)
+    n = size(A, 1)
+    s = nothing
+    A_norm_1 = maximum(sum(abs.(A), dims=1))
+    m_pade_pairs = ((3, _diff_pade3), (5, _diff_pade5), (7, _diff_pade7), (9, _diff_pade9))
+
+    for m_pade in m_pade_pairs
+        m, pade = m_pade
+        if A_norm_1 <= ell_table_61[m]
+            U, V, Lu, Lv = pade(A, E)
+            s = 0
+            break
+        end
+    end
+    if isnothing(s)
+        # scaling
+        s = max(0, Int(ceil(log2(A_norm_1 / ell_table_61[14]))))
+        # pade order 13
+        U, V, Lu, Lv = _diff_pade13((2.0^-s) * A, (2.0^-s) * E)
+    end
+    # factor once and solve twice    
+    lu_piv = lu(-U + V)
+    eA = lu_piv \ (U + V)
+    eAf = lu_piv \ (Lu + Lv + (Lu - Lv) * eA)
+
+    # squaring
+    for k in 1:s
+        eAf = eA * eAf + eAf * eA
+        eA = eA * eA
+    end
+
+    return eA, eAf
+end
+
+@doc raw"""
 """
 function expm_frechet!(buff, A, E)
     n = size(A, 1)
@@ -524,7 +511,7 @@ end
 
 @doc raw"""
     mulsym!(C, A, E)
-Compute C = A*E + E*A by mul    
+    Compute C = A*E + E*A by mul    
 """
 @inline function mulsym!(C, A, B)
     mul!(C, A, B)
