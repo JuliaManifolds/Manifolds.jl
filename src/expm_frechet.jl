@@ -1,7 +1,8 @@
 
 @doc raw"""
-based on algorithm 6.3 of [^AlMohyHigham]
-[^AlMohyHigham]:
+based on algorithm 6.3 of [^AlMohyHigham2009].
+
+[^AlMohyHigham2009]:
     >Al-Mohy, A. H., Higham, N. J. (2009)
     >"Computing the Frechet Derivative of the Matrix Exponential, with an application to Condition Number Estimation."
     >SIAM Journal On Matrix Analysis and Applications., 30 (4). pp. 1639-1657. ISSN 1095-7162
@@ -65,7 +66,6 @@ ell_table_61 = (
     mul!(Lu, A, M2, b[3], 1)
     return mul!(Lv, b[3], M2)
 end
-
 @inline function _diff_pade3(A, E)
     b = (120.0, 60.0, 12.0, 1.0)
     A2 = A * A
@@ -115,7 +115,6 @@ end
 
     return Lv .= b[5] * M4 + b[3] * M2
 end
-
 @inline function _diff_pade5(A, E)
     b = (30240.0, 15120.0, 3360.0, 420.0, 30.0, 1.0)
     A2 = A * A
@@ -170,7 +169,6 @@ end
     mul!(Lu, A, b[8] * M6 + b[6] * M4 + b[4] * M2, 1, 1)
     return Lv .= b[7] * M6 + b[5] * M4 + b[3] * M2
 end
-
 @inline function _diff_pade7(A, E)
     b = (17297280.0, 8648640.0, 1995840.0, 277200.0, 25200.0, 1512.0, 56.0, 1.0)
     A2 = A * A
@@ -246,7 +244,6 @@ end
     mul!(Lu, A, b[10] * M8 + b[8] * M6 + b[6] * M4 + b[4] * M2, 1, 1)
     return Lv .= b[9] * M8 + b[7] * M6 + b[5] * M4 + b[3] * M2
 end
-
 @inline function _diff_pade9(A, E)
     b = (
         17643225600.0,
@@ -365,7 +362,6 @@ end
     mul!(Lv, M6, Z1, 1, 1)
     return Lv .+= b[7] * M6 + b[5] * M4 + b[3] * M2
 end
-
 @inline function _diff_pade13(A, E)
     b = (
         64764752532480000.0,
@@ -454,7 +450,6 @@ function expm_frechet(A, E)
 
     return eA, eAf
 end
-
 function expm_frechet!(buff, A, E)
     n = size(A, 1)
     s = nothing
