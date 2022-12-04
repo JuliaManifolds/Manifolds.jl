@@ -220,7 +220,7 @@ function log_lbfgs(
         max_itr=max_itr,
         grad_tol=pretol,
         func_tol=pretol,
-        corrections=_g_corrections,
+        corrections=corrections,
         c1=c1,
         c2=c2,
         max_ls=max_ls,
