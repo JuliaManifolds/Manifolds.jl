@@ -585,9 +585,10 @@ include("../utils.jl")
                      ("max_ls", 20),
                      ("max_fun_evals", 1500)])
 
-                @test isapprox(MM, p, log_lbfgs(
-                    M, p, q, lbfgs_options=lbfgs_options),
-                               log(Mcomp, p, q), atol=1e-6)
+                Mcomp === Mcan && isapprox(
+                    MM, p, log_lbfgs(
+                        MM, p, q, lbfgs_options=lbfgs_options),
+                    log(Mcomp, p, q), atol=1e-6)
 
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
                 @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
