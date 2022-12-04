@@ -234,7 +234,7 @@ fun_obj returns the objective function value
         ls_iter += 1
     end
     # reached max number of iterations?
-    if ls_iter == max_ls
+    if ls_iter >= max_ls
         bracket = [0.0, t]
         bracket_f = [f, f_new]
         bracket_g = [idx_g, idx_g_new]
