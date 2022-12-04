@@ -103,7 +103,7 @@ function log_lbfgs(
         c1 = get(lbfgs_options, "c1", 1e-4)
         c2 = get(lbfgs_options, "c2", .9)
         max_ls = get(lbfgs_options, "max_ls", 25)
-    else:
+    else
         complementary_rank_cutoff = 1e-14
         corrections = 10
         c1 = 1e-4
