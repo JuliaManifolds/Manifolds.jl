@@ -242,13 +242,14 @@ fun_obj returns the objective function value
     # zoom phase: we now have a point satisfying the criteria, or
     # a bracket around it. We refine the bracket until we find the
     # exact point satisfying the criteria
+    # implementing algorithm 3.6 of [^WrightNocedal2006]
     insuf_progress = false
     # find high and low points in bracket
     low_pos, high_pos = bracket_f[1] <= bracket_f[end] ? (1, 2) : (2, 1)
 
     while !done && (ls_iter < max_ls)
-        # line-search bracket is so small
         if abs(bracket[2] - bracket[1]) * d_norm < tolerance_change
+            println("F1")
             break
         end
 
@@ -278,14 +279,18 @@ fun_obj returns the objective function value
                 # evaluate at 0.1 away from boundary
                 if abs(t - bkhi) < abs(t - bklo)
                     t = bkhi - eps
+                    println("F2")
                 else
                     t = bklo + eps
+                    println("F3")                    
                 end
                 insuf_progress = false
             else
+                println("F4")
                 insuf_progress = true
             end
         else
+            println("F5")            
             insuf_progress = false
         end
         # Evaluate new point
@@ -296,6 +301,7 @@ fun_obj returns the objective function value
         ls_iter += 1
         if (f_new > (f + c1 * t * gtd)) || (f_new >= bracket_f[low_pos])
             # Armijo condition not satisfied or not lower than lowest point
+            println("F6")            
             bracket[high_pos] = t
             bracket_f[high_pos] = f_new
             bracket_g[high_pos] = idx_g_new
@@ -305,6 +311,7 @@ fun_obj returns the objective function value
             if abs(gtd_new) <= -c2 * gtd
                 # Wolfe conditions satisfied
                 done = true
+
             elseif gtd_new * (bracket[high_pos] - bracket[low_pos]) >= 0
                 # old high becomes new low
                 bracket[high_pos] = bracket[low_pos]
@@ -326,6 +333,7 @@ fun_obj returns the objective function value
         if idx == 1
             g .= g_new
         elseif idx == 2
+            println("F8")            
             g .= g_prev
         end
     end
