@@ -102,6 +102,12 @@ end
     _cubic_interpolate(x1, f1, g1, x2, f2, g2; bounds=nothing)
 Cubic interpolation of 2 points w/ function and derivative values for both
 Used in Wolfe line search.
+Fit a cubic c(x) going through x1, x2, with specified values and derivative.
+Find the minimum of c(x) in the interval. The first derivative of the cubic
+is a quadratic function, with discriminant d2_square.
+We address the negative discriminant case, taking the half point.
+Compare with function interpolate in
+https://github.com/JuliaNLSolvers/LineSearches.jl/blob/master/src/strongwolfe.jl
 """
 @inline function _cubic_interpolate(x1, f1, g1, x2, f2, g2; bounds=nothing)
     # Compute bounds of interpolation area
@@ -327,7 +333,7 @@ fun_obj returns the objective function value
     return f_new, t, ls_func_evals
 end
 
-@doc doc"""
+@doc raw"""
     minimize(
         fun_obj,
          x0;
@@ -464,6 +470,7 @@ function minimize(
             _strong_wolfe(fun_obj, x, t, d, f, g, gx_buff, gtd, c1, c2, func_tol, max_ls)
         funEvals = funEvals + LSfunEvals
         x .+= t * d
+        optCond = max_abs(g)
         # Check Optimality Condition
         if optCond <= grad_tol
             exitflag = 1
