@@ -96,13 +96,19 @@ function log_lbfgs(
     pretol=1e-3,
     lbfgs_options=nothing,
 )
-    # these are default values - overide in lbfgs_options.    
+    # these are default values - overide in lbfgs_options.
     if !isnothing(lbfgs_options)
         complementary_rank_cutoff = get(lbfgs_options, "complementary_rank_cutoff", 1e-14)
         corrections = get(lbfgs_options, "corrections", 10)
         c1 = get(lbfgs_options, "c1", 1e-4)
         c2 = get(lbfgs_options, "c2", .9)
         max_ls = get(lbfgs_options, "max_ls", 25)
+    else:
+        complementary_rank_cutoff = 1e-14
+        corrections = 10
+        c1 = 1e-4
+        c2 = .9
+        max_ls = 25
     end
 
     α = metric(Stf).α
