@@ -473,18 +473,23 @@ include("../utils.jl")
             for ft in (1e-2, 0.19, 0.78, 1.7, 4.5, 9.)
                 A = rand(n, n)
 
-                A = A / norm(A, 2) * ft
+                A = A / maximum(sum(abs.(A), dims=1)) * ft
                 E = rand(n, n)
                 E = E / norm(E, 2) * ft
                 buff = Array{Float64,2}(undef, 16 * n, n)
+                ret = Manifolds._diff_pade3(A, E)
+                Manifolds._diff_pade3!(buff, A, E)
+                @test maximum(abs.(ret[1] - buff[1:n, 1:end])) < 1e-6
                 @views begin
                     expA = buff[1:n, :]
                     expAE = buff[(n + 1):(2 * n), :]
                 end
                 Manifolds.expm_frechet!(buff, A, E)
-                eA1, eAE1 = Manifolds.expm_frechet(A, E)
+                expA1, expAE1 = Manifolds.expm_frechet(A, E)
+                @test maximum(abs.((expA - expA1))) < 1e-9
+                @test maximum(abs.((expAE - expAE1))) < 1e-9                              
                 dlt = 1e-7
-                @test maximum(abs.((exp(A + dlt * E) .- exp(A)) / dlt .- expAE)) / norm(eA1, 2) < 1e-3
+                @test maximum(abs.((exp(A + dlt * E) .- exp(A)) / dlt .- expAE)) / norm(expA1, 2) < 1e-3
             end
         end
 
@@ -572,11 +577,22 @@ include("../utils.jl")
                 @test isapprox(MM, q, exp(Mcomp, p, X))
                 Mcomp === Mcan && isapprox(MM, p, log(MM, p, q), log(Mcomp, p, q))
                 Mcomp === Mcan && isapprox(MM, p, log_lbfgs(MM, p, q), log(Mcomp, p, q), atol=1e-6)
+                lbfgs_options = Dict(
+                    [("complementary_rank_cutoff", 1.5e-14),
+                     ("corrections", 5),
+                     ("c1", 1.1e-4),
+                     ("c2", 0.9),
+                     ("max_ls", 20),
+                     ("max_fun_evals", 1500)])
+
+                @test isapprox(MM, p, log_lbfgs(
+                    M, p, q, lbfgs_options=lbfgs_options),
+                               log(Mcomp, p, q), atol=1e-6)
 
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
                 @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
                 @test isapprox(MM, p, log_lbfgs(MM, p, p), zero_vector(MM, p); atol=1e-6,
-                )
+                               )
             end
             @testset "α=$α" for α in [-0.75, -0.25, 0.5]
                 MM = MetricManifold(M, StiefelSubmersionMetric(α))

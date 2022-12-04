@@ -181,6 +181,9 @@ function log_lbfgs(
     end
 
     # cost function and gradient in the format expected by minimize
+    # F is storage for function value.
+    # G is storage for gradient.
+    # v is vectorization of matrices A and R. A is a skew matrix.
     function cost_and_grad!(F, G, v)
         vec2AR!(A, R, v)
         ex1 .= exp((1 - 2 * alf) * A)
@@ -188,11 +191,6 @@ function log_lbfgs(
         mul!(E11, ex1, WTY)
         mul!(E12, ex1, WTQ)
 
-        if isnothing(G)
-            ex2 .= exp(mat)
-            return -sum((WTY * M + WTQ * N)' .* ex1)
-        end
-        # ex2, fe2 = Manifolds.expm_frechet(mat, E)
         # expm affects buff, so affect ex2, fe2
         expm_frechet!(buff, mat, E)
 
@@ -220,7 +218,7 @@ function log_lbfgs(
         max_itr=max_itr,
         grad_tol=pretol,
         func_tol=pretol,
-        corrections=_g_corrections,
+        corrections=corrections,
         c1=c1,
         c2=c2,
         max_ls=max_ls,
@@ -280,13 +278,6 @@ function _get_complementary_basis(Y, Y1, complementary_rank_cutoff)
     QR = qr(good * qs)
     return QR.Q * vcat(I, zeros((n - k + p, k - p)))
 end
-
-
-@doc raw"""
-    sym(mat)
-symmetrize mat
-"""
-@inline sym(mat) = 0.5 * (mat + mat')
 
 @doc raw"""
      asym(mat)
