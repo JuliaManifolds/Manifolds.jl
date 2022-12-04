@@ -140,7 +140,20 @@ Algorithm 3.5 in [^WrightNocedal2006]. The magic number values c_1 and c_2 are s
 fun_obj returns the objective function value
 
 """
-@inline function _strong_wolfe(fun_obj, x, t, d, f, g, gx_buff, gtd, c1=1e-4, c2=0.9, tolerance_change=1e-9, max_ls=25)
+@inline function _strong_wolfe(
+    fun_obj,
+    x,
+    t,
+    d,
+    f,
+    g,
+    gx_buff,
+    gtd,
+    c1=1e-4,
+    c2=0.9,
+    tolerance_change=1e-9,
+    max_ls=25,
+)
     d_norm = max_abs(d)
     # g = copy(g)
     # evaluate objective and gradient using initial step
@@ -193,7 +206,15 @@ fun_obj returns the objective function value
         min_step = t + 0.01 * (t - t_prev)
         max_step = t * 10
         tmp = t
-        t = _cubic_interpolate(t_prev, f_prev, gtd_prev, t, f_new, gtd_new, bounds=(min_step, max_step))
+        t = _cubic_interpolate(
+            t_prev,
+            f_prev,
+            gtd_prev,
+            t,
+            f_new,
+            gtd_new,
+            bounds=(min_step, max_step),
+        )
 
         # next step
         t_prev = tmp
@@ -330,7 +351,19 @@ Corrections are the number of historical step/gradient saved, max_ls is the max 
     ^" Numerical Optimization"
     ^Springer New York. ISBN:9780387227429.
 """
-function minimize(fun_obj, x0; max_fun_evals=120, max_itr=100, grad_tol=1e-15, func_tol=1e-15, corrections=10, c1=1e-4, c2=0.9, max_ls=25, precond=nothing)
+function minimize(
+    fun_obj,
+    x0;
+    max_fun_evals=120,
+    max_itr=100,
+    grad_tol=1e-15,
+    func_tol=1e-15,
+    corrections=10,
+    c1=1e-4,
+    c2=0.9,
+    max_ls=25,
+    precond=nothing,
+)
 
     # Initialize
     p = size(x0)[1]

@@ -470,7 +470,7 @@ include("../utils.jl")
 
         @testset "expm_frechet" begin
             n = 50
-            for ft in (1e-2, 0.19, 0.78, 1.7, 4.5, 9.)
+            for ft in (1e-2, 0.19, 0.78, 1.7, 4.5, 9.0)
                 A = rand(n, n)
 
                 A = A / maximum(sum(abs.(A), dims=1)) * ft
@@ -487,9 +487,10 @@ include("../utils.jl")
                 Manifolds.expm_frechet!(buff, A, E)
                 expA1, expAE1 = Manifolds.expm_frechet(A, E)
                 @test maximum(abs.((expA - expA1))) < 1e-9
-                @test maximum(abs.((expAE - expAE1))) < 1e-9                              
+                @test maximum(abs.((expAE - expAE1))) < 1e-9
                 dlt = 1e-7
-                @test maximum(abs.((exp(A + dlt * E) .- exp(A)) / dlt .- expAE)) / norm(expA1, 2) < 1e-3
+                @test maximum(abs.((exp(A + dlt * E) .- exp(A)) / dlt .- expAE)) /
+                      norm(expA1, 2) < 1e-3
             end
         end
 
@@ -543,21 +544,21 @@ include("../utils.jl")
                     p = project(MM, randn(representation_size(M)))
                     X = project(MM, p, randn(representation_size(M)))
                     X ./= norm(MM, p, X)
-                    
+
                     t = 1.3
-                    q = exp(MM, p, t*X)
+                    q = exp(MM, p, t * X)
                     qx = similar(q)
-                    dqx = similar(q)                    
-                    
+                    dqx = similar(q)
+
                     dot_exp!(MM, qx, dqx, p, X, t)
                     qx1, dqx1 = dot_exp(MM, p, X, t)
-                    
+
                     @test isapprox(MM, qx, q)
                     @test isapprox(MM, qx, dqx, dqx1)
                     dlt = 1e-7
-                    qxp = exp(MM, p, (t+dlt)*X)
-                    qxm = exp(MM, p, (t-dlt)*X)
-                    qdt = (qxp - qxm)/dlt/2
+                    qxp = exp(MM, p, (t + dlt) * X)
+                    qxm = exp(MM, p, (t - dlt) * X)
+                    qdt = (qxp - qxm) / dlt / 2
                     @test maximum(abs.(qdt .- dqx)) < 1e-4
                 end
             end
@@ -576,24 +577,28 @@ include("../utils.jl")
                 q = exp(Mcomp, p, X)
                 @test isapprox(MM, q, exp(Mcomp, p, X))
                 Mcomp === Mcan && isapprox(MM, p, log(MM, p, q), log(Mcomp, p, q))
-                Mcomp === Mcan && isapprox(MM, p, log_lbfgs(MM, p, q), log(Mcomp, p, q), atol=1e-6)
-                lbfgs_options = Dict(
-                    [("complementary_rank_cutoff", 1.5e-14),
-                     ("corrections", 5),
-                     ("c1", 1.1e-4),
-                     ("c2", 0.9),
-                     ("max_ls", 20),
-                     ("max_fun_evals", 1500)])
+                Mcomp === Mcan &&
+                    isapprox(MM, p, log_lbfgs(MM, p, q), log(Mcomp, p, q), atol=1e-6)
+                lbfgs_options = Dict([
+                    ("complementary_rank_cutoff", 1.5e-14),
+                    ("corrections", 5),
+                    ("c1", 1.1e-4),
+                    ("c2", 0.9),
+                    ("max_ls", 20),
+                    ("max_fun_evals", 1500),
+                ])
 
                 Mcomp === Mcan && isapprox(
-                    MM, p, log_lbfgs(
-                        MM, p, q, lbfgs_options=lbfgs_options),
-                    log(Mcomp, p, q), atol=1e-6)
+                    MM,
+                    p,
+                    log_lbfgs(MM, p, q, lbfgs_options=lbfgs_options),
+                    log(Mcomp, p, q),
+                    atol=1e-6,
+                )
 
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
                 @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
-                @test isapprox(MM, p, log_lbfgs(MM, p, p), zero_vector(MM, p); atol=1e-6,
-                               )
+                @test isapprox(MM, p, log_lbfgs(MM, p, p), zero_vector(MM, p); atol=1e-6)
             end
             @testset "α=$α" for α in [-0.75, -0.25, 0.5]
                 MM = MetricManifold(M, StiefelSubmersionMetric(α))
@@ -607,8 +612,7 @@ include("../utils.jl")
 
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
                 @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
-                @test isapprox(MM, p, log_lbfgs(MM, p, p), zero_vector(MM, p); atol=1e-6,
-                )
+                @test isapprox(MM, p, log_lbfgs(MM, p, p), zero_vector(MM, p); atol=1e-6)
             end
         end
     end

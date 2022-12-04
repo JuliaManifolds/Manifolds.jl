@@ -98,19 +98,19 @@ function log_lbfgs(
     lbfgs_options=nothing,
 )
     # these are default values - overide in lbfgs_options.
-    
+
     if !isnothing(lbfgs_options)
         complementary_rank_cutoff = get(lbfgs_options, "complementary_rank_cutoff", 1e-14)
         corrections = get(lbfgs_options, "corrections", 10)
         c1 = get(lbfgs_options, "c1", 1e-4)
-        c2 = get(lbfgs_options, "c2", .9)
+        c2 = get(lbfgs_options, "c2", 0.9)
         max_ls = get(lbfgs_options, "max_ls", 25)
         max_fun_evals = get(lbfgs_options, "max_fun_evals", Int(ceil(max_itr * 1.3)))
     else
         complementary_rank_cutoff = 1e-14
         corrections = 10
         c1 = 1e-4
-        c2 = .9
+        c2 = 0.9
         max_ls = 25
         max_fun_evals = Int(ceil(max_itr * 1.3))
     end
@@ -268,7 +268,7 @@ end
     _get_complementary_basis(Y, Y1)
 Find a complementary basis Q in the linear span of Y Y1
 orthogonal to Y
-"""    
+"""
 function _get_complementary_basis(Y, Y1, complementary_rank_cutoff)
     n, p = size(Y)
     F = svd([Y Y1])
