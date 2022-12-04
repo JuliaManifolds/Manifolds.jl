@@ -86,7 +86,7 @@ The exact gradient calculation with Fréchet derivatives is relatively expensive
     + ``c1`` (default = 1e-4)  default c1, c2 in the line search.\
     + ``c2`` (default = 0.9).\
     +  ``max\_ls`` (default = 25) max iterations for the line search.
-    + ``max_fun_evals`` (default = Int(ceil(max_itr * 1.3))) max function evaluations
+    + ``max\_fun\_evals`` (default = Int(ceil(max_itr * 1.3))) max function evaluations
 """
 function log_lbfgs(
     Stf,
