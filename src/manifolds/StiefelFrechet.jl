@@ -1,4 +1,4 @@
-@doc doc"""
+@doc raw"""
     q, dot_q = dot_exp(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, <:StiefelSubmersionMetric}, p, X)
     dot_exp!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, <:StiefelSubmersionMetric}, q, dot_q, p, X)
 
@@ -58,7 +58,7 @@ function dot_exp!(
     return q, dot_q
 end
 
-@doc doc"""
+@doc raw"""
     log_lbfgs(Stf::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric}, Y, W;
                        tolerance=sqrt(eps(float(real(Base.promote_eltype(Y, W))))),
                        max_itr=1_000, pretol=1e-3, lbfgs_options=nothing)
@@ -66,27 +66,27 @@ end
 Compute the Riemannian logarithm on [`Stiefel(n,k)`](@ref) with the [`StiefelSubmersionMetric`](@ref). Returning ``\eta`` such that ``\operatorname{Exp}_Y\eta = W``.
 
 The logarithmic map is computed by finding the initial velocity ``\eta`` such that if ``\gamma`` is the geodesic with initial conditions ``\gamma(0) = Y, \dot{\gamma}(0) = \eta``, 
-the cost function ``|\gamma(1) - W|^2`` (the square Euclidean distance) is minimized. The exact gradient of the cost function is computed using Fréchet derivatives. The function is optimized using an [L-BFGS optimizer `minimize`](@ref).
+the cost function ``|\gamma(1) - W|^2`` (the square Euclidean distance) is minimized. The exact gradient of the cost function is computed using Fréchet derivatives. The function is optimized using an L-BFGS optimizer [`minimize`](@ref).
 
-The vector space spanned by $Y$ and $W$ intersects with the original Stiefel manifold along a smaller Stiefel manifold in ``ℝ^{\dim(span(Y, W))\times k}``. Let $Q$ be the complementary basis of $Y$ in ``span(Y, W)``, so ``[Y|Q]`` is an orthogonal basis for ``span(Y, W)``, we solve for two matrices ``A, R`` representing the tangent vector in this smaller Stiefel manifold (following [^Zimmermann2017]):
+The vector space spanned by ``Y`` and ``W`` intersects with the original Stiefel manifold along a smaller Stiefel manifold in ``ℝ^{\dim(span(Y, W))\times k}``. Let ``Q`` be the complementary basis of ``Y`` in ``span(Y, W)``, so ``[Y|Q]`` is an orthogonal basis for ``span(Y, W)``, we solve for two matrices ``A, R`` representing the tangent vector in this smaller Stiefel manifold (following [^Zimmermann2017]):
 
 ```math
  \eta = YA + QR
 ```
 
-The exact gradient calculation with Fréchet derivatives is relatively expensive, to speed up we only run the exact gradient until the iteration error is less than pretol, then run a simple update on ``A, R`` for the last steps. A pretol=1e-5 is used if the distance is expected to be over $\frac{1}{2}\pi$. Otherwise, use pretol=1e-3.
+The exact gradient calculation with Fréchet derivatives is relatively expensive, to speed up we only run the exact gradient until the iteration error is less than pretol, then run a simple update on ``A, R`` for the last steps. A pretol=1e-5 is used if the distance is expected to be over ``\frac{1}{2}\pi``. Otherwise, use pretol=1e-3.
 
-``lbfgs\_options`` is a dictionary of technical parameters, isolated to a separate group as we do not expect users to modify them. The relevant keys are\
+``\mathrm{lbfgs\_options}`` is a dictionary of technical parameters, isolated to a separate group as we do not expect users to modify them. The relevant keys are\
 
-* ``complementary\_rank\_cutoff`` (default = 1e-14): cut off of eigenvalue to determine the rank of the complementary basis ``Q``. We use SVD to determine the size of the complement basis ``Q`` of ``Y`` in ``span(Y, W)``. We keep columns of $Q$ corresponding to eigenvalues higher than this cutoff.\
+* ``\mathrm{complementary\_rank\_cutoff}`` (default = 1e-14): cut off of eigenvalue to determine the rank of the complementary basis ``Q``. We use SVD to determine the size of the complement basis ``Q`` of ``Y`` in ``span(Y, W)``. We keep columns of ``Q`` corresponding to eigenvalues higher than this cutoff.\
 
-*  The remaining parameters are related to the [L-BFGS minimizer `minimize`](@ref):\
+*  The remaining parameters are related to the L-BFGS minimizer [`minimize`](@ref):\
 
-    +  ``corrections`` (default = 10): default number of stored history in L-BFGS.\
-    + ``c1`` (default = 1e-4)  default c1, c2 in the line search.\
-    + ``c2`` (default = 0.9).\
-    +  ``max\_ls`` (default = 25) max iterations for the line search.
-    + ``max\_fun\_evals`` (default = Int(ceil(max_itr * 1.3))) max function evaluations
+    +  ``\mathrm{corrections}`` (default = 10): default number of stored history in L-BFGS.\
+    + ``\mathrm{c1}`` (default = 1e-4): ``c1, c2`` in the line search.\
+    + ``\mathrm{c2}`` (default = 0.9).\
+    +  ``\mathrm{max\_ls}`` (default = 25): max iterations for the line search.
+    + ``\mathrm{max\_fun\_evals}`` (default = Int(ceil(max_itr * 1.3))): max function evaluations
 """
 function log_lbfgs(
     Stf,

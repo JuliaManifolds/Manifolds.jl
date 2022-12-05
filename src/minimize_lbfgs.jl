@@ -89,7 +89,6 @@ rho: storage for 1/(Y.S), set to 1 when (Y.S) == 0
         rho[lbfgs_end] = 1.0
     end
     # Update scale of initial Hessian approximation
-    # Hdiag .= ys/sum(y.*pcondx.*y)*pcondx
     if isnothing(precondx)
         Hdiag .= ys / dot(y, y)
     else
@@ -161,7 +160,6 @@ fun_obj returns the objective function value
     max_ls=25,
 )
     d_norm = max_abs(d)
-    # g = copy(g)
     # evaluate objective and gradient using initial step
     p = size(x)[1]
     @views begin
@@ -171,7 +169,6 @@ fun_obj returns the objective function value
     end
     multd!(x_buff, x, t, d)
 
-    # f_new = 0.
     f_new = fun_obj(0.0, g_new, x_buff)
     ls_func_evals = 1
     gtd_new = dot(g_new, d)
@@ -249,7 +246,6 @@ fun_obj returns the objective function value
 
     while !done && (ls_iter < max_ls)
         if abs(bracket[2] - bracket[1]) * d_norm < tolerance_change
-            println("F1")
             break
         end
 
@@ -279,18 +275,14 @@ fun_obj returns the objective function value
                 # evaluate at 0.1 away from boundary
                 if abs(t - bkhi) < abs(t - bklo)
                     t = bkhi - eps
-                    println("F2")
                 else
                     t = bklo + eps
-                    println("F3")                    
                 end
                 insuf_progress = false
             else
-                println("F4")
                 insuf_progress = true
             end
         else
-            println("F5")            
             insuf_progress = false
         end
         # Evaluate new point
@@ -301,7 +293,6 @@ fun_obj returns the objective function value
         ls_iter += 1
         if (f_new > (f + c1 * t * gtd)) || (f_new >= bracket_f[low_pos])
             # Armijo condition not satisfied or not lower than lowest point
-            println("F6")            
             bracket[high_pos] = t
             bracket_f[high_pos] = f_new
             bracket_g[high_pos] = idx_g_new
@@ -333,7 +324,6 @@ fun_obj returns the objective function value
         if idx == 1
             g .= g_new
         elseif idx == 2
-            println("F8")            
             g .= g_prev
         end
     end
@@ -357,7 +347,7 @@ end
 
 Minimize the objective fun_obj using the L-BFGS two-loop method in [^WrightNocedal2006], chapter 6.
 
-The algorithm calls the internal $\_strong\_wolfe$ function for line search. The magic numbers c_1 and c_2 are for the line search, suggested in op. cit.
+The algorithm calls the internal ``\mathrm{\_strong\_wolfe}`` function for line search. The magic numbers c_1 and c_2 are for the line search, suggested in op. cit.
 Corrections are the number of historical step/gradient saved, max_ls is the max number of line search iterations, precondx is a preconditioner - a function return a vector in the shape of x0.
 
 [^WrightNocedal2006]:
@@ -396,7 +386,6 @@ function minimize(
     g = similar(x)
     gx_buff = Array{eltype(x),1}(undef, 3 * p)
 
-    # f = 0.0
     f = fun_obj(0.0, g, x)
     funEvals = 1
     g_old = similar(g)
@@ -435,12 +424,11 @@ function minimize(
             lbfgs_start, lbfgs_end, =
                 _save!(g - g_old, t * d, S, Y, rho, lbfgs_start, lbfgs_end, Hdiag, precondx)
             _lbfgs_calc!(d, g, S, Y, rho, lbfgs_start, lbfgs_end, Hdiag, al_buff)
-            # display(string(i)*" "*string(lbfgs_start)*" "*string(lbfgs_end)*string(Hdiag[1:5]))
         end
         g_old .= g
 
         if !_is_legal(d)
-            display("Step direction is illegal!\n")
+            println("Step direction is illegal!")
             output = Dict(
                 "iterations" => i,
                 "funcCount" => funEvals * funEvalMultiplier,
@@ -464,16 +452,13 @@ function minimize(
 
         # Select Initial Guess
         if i == 1
-            t = min(1.0, 1.0 / sum_abs(g))
+            t = min(1.0, 1.0 / sum(abs.(g)))
         else
             t = 1.0
         end
         f_old = f
         gtd_old = gtd
 
-        # function obj_func(f, grad, x, t, d)
-        #    return funObj(f, grad, x + t*d)
-        # end
         f, t, LSfunEvals =
             _strong_wolfe(fun_obj, x, t, d, f, g, gx_buff, gtd, c1, c2, func_tol, max_ls)
         funEvals = funEvals + LSfunEvals
@@ -538,20 +523,13 @@ end
     return s
 end
 
-@inline function sum_abs(a)
-    s = 0
-    for i in 1:size(a)[1]
-        s += abs(a[i])
-    end
-    return s
-end
-
 @inline function max_abs(a)
+    # avoid using maximum(abs.(a)) so we dont have to allocate
     s = -Inf
     for i in 1:size(a)[1]
         if s < abs(a[i])
             s = abs(a[i])
         end
     end
-    return s
+    return abs(s)
 end

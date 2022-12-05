@@ -1,9 +1,8 @@
-
-@doc raw"""
+"""
 based on algorithm 6.3 of [^AlMohyHigham2009].
 """
 
-# From table 6.1 of [^AlMohyHigham2009]. A list of cut off values $l_m$ used to determine how many terms of Padé approximant is used. To compute expm_frechet(A, E), look for the largest index $m\in [3, 5, 7, 9, 13]$ just exceed $|A|_1$.
+# From table 6.1 of [^AlMohyHigham2009]. A list of cut off values ``l_m`` used to determine how many terms of Padé approximant is used to compute expm_frechet(A, E), look for the largest index ``m\in [3, 5, 7, 9, 13]`` just exceed \lVert A\rVert_1.
 ell_table_61 = (
     nothing,
     # 1
@@ -32,6 +31,7 @@ ell_table_61 = (
 
 @doc raw"""
     _diff_pade3(A, E)
+
     Compute U, V, LU, LV from the first 6 lines of the for loop in
     algorithm 6.4 of [^AlMohyHigham2009] using 3-term Padé approximant
     the tuple b contains the Padé coefficients of the numerator
@@ -73,6 +73,7 @@ end
 
 @doc raw"""
     _diff_pade5(A, E)
+
     Compute U, V, LU, LV from the first 6 lines of the for loop in
     algorithm 6.4 of [^AlMohyHigham2009] using 5-term Padé approximant
     the tuple b contains the Padé coefficients of the numerator
@@ -124,6 +125,7 @@ end
 
 @doc raw"""
     _diff_pade7(A, E)
+
     Compute U, V, LU, LV from the first 6 lines of the for loop in
     algorithm 6.4 of [^AlMohyHigham2009] using 7-term Padé approximant
     the tuple b contains the Padé coefficients of the numerator
@@ -183,6 +185,7 @@ end
 
 @doc raw"""
     _diff_pade9(A, E)
+
     Compute U, V, LU, LV from the first 6 lines of the for loop in
     algorithm 6.4 of [^AlMohyHigham2009] using 9-term Padé approximant
     the tuple b contains the Padé coefficients of the numerator
@@ -271,6 +274,7 @@ end
 
 @doc raw"""
     _diff_pade13(A, E)
+
     Compute U, V, LU, LV from the lines 10-25 of the for loop in
     algorithm 6.4 of [^AlMohyHigham2009] using 9-term Padé approximant
     The returns U, V, Lu, Lv are stored in the first four blocks of buff
@@ -398,19 +402,19 @@ end
     return U, V, Lu, Lv
 end
 
-@doc doc"""
+@doc raw"""
     expm_frechet(A, E)
     expm_frechet!(buff, A, E)
 
 Compute Frechet derivative of expm(A) in direction E using algorithm 6.4 of [^AlMohyHigham2009]
 ````math
-expm\_frechet(A, E) = \lim_{t\to 0}\frac{1}{t}(\exp(A + tE) - \exp(A))
+\mathrm{expm\_frechet}(A, E) = \lim_{t\to 0}\frac{1}{t}(\exp(A + tE) - \exp(A))
 ````
-For sufficiently small $|A|_1$ norm, we use Padé with an appropriate number of terms
+For sufficiently small ``\lVert A\rVert_1`` norm, we use Padé with an appropriate number of terms
 ( one of (3, 5, 7, 9, 13)), with 13 terms is the default. Otherwise, we use the formula
-exp(A) = (exp(A/2^s))^{2^s}, where s is used to scale so $2^{-s}|A|_1$ is smaller than $ell\_table\_61$[14] of the lookup table $ell\_table\_61$ in the code, which comes from table 6.1 in op. cit.
+``\exp(A) = (\exp(A/2^s))^{2^s}``, where s is used to scale so ``2^{-s}\lVert A\rVert_1`` is smaller than element ``\mathrm{ell\_table\_61}``[14] of the lookup table ``\mathrm{ell\_table\_61}`` in the code, which comes from table 6.1 in op. cit.
 
-For $expm\_frechet!$, buff is a matrix of size 16*k times k, where $k$ is the size of $A$. The returns, (exp(A), dexp(A, E)) are stored in the first two blocks of buff.
+For ``\mathrm{expm\_frechet}!``, buff is a matrix of size 16*k times k, where ``k`` is the size of ``A``. The returns, (exp(A), dexp(A, E)) are stored in the first two blocks of buff.
 The remaining blocks are used as temporary storage. This is for algorithms calling expm_frechet repeatedly, where allocation becomes the biggest bottleneck.
 
 [^AlMohyHigham2009]:

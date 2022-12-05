@@ -495,7 +495,7 @@ include("../utils.jl")
         end
 
         @testset "lbfgs" begin
-            p = 5
+            p = 100
             function rosenbrock!(f, df, x)
                 D = size(x)[1]
                 f = sum(
@@ -518,20 +518,156 @@ include("../utils.jl")
             x0 = randn(p)
 
             function pcondR(y)
-                return fill!(similar(y), 1)
                 x = fill!(similar(y), 1)
-                ret = simiar(x)
-                ret[0] = (1200 * x[0]^2 - 400 * x[1] + 2)
+                ret = similar(x)
+                ret[1] = (1200 * x[1]^2 - 400 * x[2] + 2)
                 ret[2:(end - 1)] .= 202 .+ 1200 * x[2:(end - 1)] .^ 2 .- 400 * x[3:end]
                 ret[end] = 200
                 return 1.0 / ret
             end
 
+            # test to show different scenarios of the optimizer are reached.
             x0 .= 0.0
-            x, f, exitflag, output = Manifolds.minimize(rosenbrock!, x0, precond=pcondR)
-            @test maximum(abs.(x .- ones(p))) < 1e-7
-            x, f, exitflag, output = Manifolds.minimize(rosenbrock!, x0)
-            @test maximum(abs.(x .- ones(p))) < 1e-7
+            x, f, exitflag, output = Manifolds.minimize(
+                rosenbrock!,
+                x0,
+                precond=pcondR,
+                max_itr=2,
+                max_fun_evals=3,
+            )
+            @test exitflag == 0 &&
+                  output["message"] == "Reached Maximum Number of Function Evaluations"
+
+            x0 .= 0.0
+            x, f, exitflag, output = Manifolds.minimize(
+                rosenbrock!,
+                x0,
+                precond=pcondR,
+                max_itr=2,
+                max_fun_evals=30,
+            )
+            @test exitflag == 0 &&
+                  output["message"] == "Reached Maximum Number of Iterations"
+
+            x0 .= 0.0
+            x, f, exitflag, output = Manifolds.minimize(
+                rosenbrock!,
+                x0,
+                precond=pcondR,
+                func_tol=1e-3,
+                max_itr=1000,
+                max_fun_evals=1300,
+            )
+            @test exitflag == 2
+
+            x0 .= 0.0
+            x, f, exitflag, output = Manifolds.minimize(
+                rosenbrock!,
+                x0,
+                precond=pcondR,
+                grad_tol=1e-3,
+                max_itr=1000,
+                max_fun_evals=1300,
+            )
+            @test exitflag == 1
+
+            x, f, exitflag, output = Manifolds.minimize(
+                rosenbrock!,
+                x0,
+                precond=pcondR,
+                max_itr=1000,
+                max_fun_evals=1300,
+            )
+            @test exitflag > 0
+
+            x1, f1, exitflag1, output1 = Manifolds.minimize(
+                rosenbrock!,
+                x,
+                max_itr=1000,
+                max_fun_evals=1300,
+                func_tol=1e-2,
+                max_ls=2,
+            )
+
+            x1, f1, exitflag1, output1 =
+                Manifolds.minimize(rosenbrock!, x0, max_itr=1000, max_fun_evals=1300)
+            @test exitflag > 0
+
+            x1, f1, exitflag1, output1 = Manifolds.minimize(
+                rosenbrock!,
+                x0,
+                max_itr=1000,
+                max_fun_evals=1300,
+                max_ls=3,
+            )
+
+            x1, f1, exitflag1, output1 = Manifolds.minimize(
+                rosenbrock!,
+                x0,
+                max_itr=1000,
+                max_fun_evals=1300,
+                func_tol=1e-2,
+                max_ls=2,
+            )
+
+            function bad_func!(f, df, x)
+                f = (sum(x .* x))^(1 / 3)
+                df[:] = 2 / 3 * x ./ (f * f)
+                return f
+            end
+            x0[:] .= 0.0
+            x1, f1, exitflag1, output1 = Manifolds.minimize(bad_func!, x0)
+
+            function randpoint(M)
+                return project(M, randn(representation_size(M)))
+            end
+
+            # generate unit vector            
+            function randvec(M, p)
+                X = project(M, p, randn(representation_size(M)))
+                X ./= sqrt(inner(M, p, X, X))
+                return X
+            end
+
+            Random.seed!(0)
+
+            n_samples = 3
+            Random.seed!(0)
+            max_ft = 0.5
+            NN = 50
+            pretol = 1e-3
+
+            for i in 1:NN
+                # n = Int(ceil(2^(10/1.04*(.04+rand()))))
+                # fix small n so does not take too long
+                n = 10
+                if n < 4
+                    n = 4
+                end
+
+                k = rand(2:(n - 1))
+                α = 3 * rand() - 0.9
+                M = MetricManifold(Stiefel(n, k), StiefelSubmersionMetric(α))
+                p = randpoint(M)
+                X = randvec(M, p)
+
+                ft = (rand() + 0.1) * max_ft / 0.2
+                q = exp(M, p, ft * pi * X)
+                println("i=\t", i, " n=\t", n, " k=\t", k)
+
+                try
+                    XF = Manifolds.log_lbfgs(
+                        M,
+                        p,
+                        q,
+                        tolerance=1e-8,
+                        max_itr=1000,
+                        pretol=pretol,
+                    )
+                catch
+                    println("bad at i=\t", i)
+                end
+            end
         end
 
         g = StiefelSubmersionMetric(1)
