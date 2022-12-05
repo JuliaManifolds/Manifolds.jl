@@ -580,12 +580,13 @@ include("../utils.jl")
             )
             @test exitflag > 0
 
+            # if initial point is optimal
             x1, f1, exitflag1, output1 = Manifolds.minimize(
                 rosenbrock!,
                 x,
                 max_itr=1000,
                 max_fun_evals=1300,
-                func_tol=1e-2,
+                grad_tol=1e-3,
                 max_ls=2,
             )
 
@@ -629,6 +630,8 @@ include("../utils.jl")
                 return X
             end
 
+            # run a lot of scenarios - this will hit most
+            # conditions in the optimizer.
             Random.seed!(0)
 
             n_samples = 3
@@ -638,9 +641,7 @@ include("../utils.jl")
             pretol = 1e-3
 
             for i in 1:NN
-                # n = Int(ceil(2^(10/1.04*(.04+rand()))))
-                # fix small n so does not take too long
-                n = 10
+                n = Int(ceil(2^(7 / 1.04 * (0.04 + rand()))))
                 if n < 4
                     n = 4
                 end

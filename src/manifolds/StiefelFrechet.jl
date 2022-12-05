@@ -148,23 +148,20 @@ function log_lbfgs(
         mat11 = mat[1:p, 1:p]
         mat12 = mat[1:p, (p + 1):end]
         mat21 = mat[(p + 1):end, 1:p]
-    end
 
-    @views begin
         E11 = E[1:p, 1:p]
         E12 = E[1:p, (p + 1):end]
+
+        ex2 = buff[1:(k + p), :]
+        fe2 = buff[(k + p + 1):(2 * (k + p)), :]
+        M = buff[1:p, 1:p]
+        N = buff[(p + 1):(p + k), 1:p]
     end
 
     WYMQN = Array{T,2}(undef, p, p)
     dA = similar(A)
     dR = similar(R)
     ex1 = similar(A)
-    @views begin
-        ex2 = buff[1:(k + p), :]
-        fe2 = buff[(k + p + 1):(2 * (k + p)), :]
-        M = buff[1:p, 1:p]
-        N = buff[(p + 1):(p + k), 1:p]
-    end
 
     # unravel v to A and R
     @inline function vec2AR!(A, R, v)
@@ -259,7 +256,6 @@ function log_lbfgs(
     mul!(eta, Y, A)
     mul!(eta, Q, R, 1, 1)
 
-    # return Y * A + Q*R, ret
     return eta
 end
 
