@@ -192,12 +192,12 @@ include("../utils.jl")
             @test repr(M) == "ProjectiveSpace(2, ℍ)"
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 8
-            @test !is_point(M, Quaternion[1.0, 0.0, 0.0, 0.0])
-            @test !is_vector(M, Quaternion[1.0, 0.0, 0.0, 0.0], Quaternion[0.0, 1.0, 0.0])
-            @test_throws DomainError is_point(M, Quaternion[5.0, 0.0, 0.0], true)
-            @test !is_point(M, Quaternion[5.0, 0.0, 0.0])
-            @test !is_vector(M, Quaternion[1.0, 0.0, 0.0], Quaternion[1.0, 0.0, 0.0])
-            @test !is_vector(M, Quaternion.([1.0, 0.0, 0.0]), Quaternion.([-0.5, 0.0, 0.0]))
+            @test !is_point(M, quat([1.0, 0.0, 0.0, 0.0])
+            @test !is_vector(M, quat([1.0, 0.0, 0.0, 0.0]), quat([0.0, 1.0, 0.0]))
+            @test_throws DomainError is_point(M, [1.0, quat(0, 1, 0, 0), 0.0], true)
+            @test !is_point(M, [1.0, quat(0, 1, 0, 0), 0.0])
+            @test !is_vector(M, quat([1.0, 0.0, 0.0]), quat([1.0, 0.0, 0.0]))
+            @test !is_vector(M, quat([1.0, 0.0, 0.0]), [quat(0, -0.5, 0, 0), 0.0, 0.0])
             @test_throws DomainError is_vector(
                 M,
                 Quaternion[1.0, 0.0, 0.0],
@@ -206,8 +206,8 @@ include("../utils.jl")
             )
             @test_throws DomainError is_vector(
                 M,
-                Quaternion.([1.0, 0.0, 0.0]),
-                Quaternion.([-0.5, 0.0, 0.0]),
+                quat([1.0, 0.0, 0.0]),
+                quat([-0.5, 0.0, 0.0]),
                 true,
             )
             @test injectivity_radius(M) == π / 2
@@ -273,7 +273,7 @@ include("../utils.jl")
 
         @testset "equivalence" begin
             x = Quaternion[1.0, 0.0, 0.0]
-            v = Quaternion[0.0, 0.0, 0.0]
+            v = [0.0, quat(0, 1, 0, 0), 0.0]
             s = Quaternion(0.5, -0.5, 0.5, -0.5)
             @test isapprox(M, x, x * s)
             @test isapprox(M, x, exp(M, x, π * v))

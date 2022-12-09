@@ -75,7 +75,7 @@ end
     @test_throws DomainError is_point(M, zeros(2, 2), true)
 
     # Determinant not one
-    pF2 = [1 1.0; 0.0 -1]
+    pF2 = [quat(0, 1, 0, 0) 1.0; 0.0 -quat(0, 1, 0, 0)]
     @test_throws DomainError is_point(M, pF2, true)
     p = QuaternionF64(
         0.4815296357756736,
