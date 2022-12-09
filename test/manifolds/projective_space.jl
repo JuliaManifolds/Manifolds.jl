@@ -192,7 +192,7 @@ include("../utils.jl")
             @test repr(M) == "ProjectiveSpace(2, ℍ)"
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 8
-            @test !is_point(M, quat([1.0, 0.0, 0.0, 0.0])
+            @test !is_point(M, quat([1.0, 0.0, 0.0, 0.0]))
             @test !is_vector(M, quat([1.0, 0.0, 0.0, 0.0]), quat([0.0, 1.0, 0.0]))
             @test_throws DomainError is_point(M, [1.0, quat(0, 1, 0, 0), 0.0], true)
             @test !is_point(M, [1.0, quat(0, 1, 0, 0), 0.0])
