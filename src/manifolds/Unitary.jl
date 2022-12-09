@@ -53,11 +53,12 @@ end
 
 function get_vector_orthonormal(
     ::UnitaryMatrices{1,ℍ},
-    p::Quaternion,
+    p::Quaternions.Quaternion,
     c,
     ::QuaternionNumbers,
 )
-    return Quaternion(0, c[1], c[2], c[3])
+    i = firstindex(c)
+    return Quaternions.quat(0, c[i], c[i + 1], c[i + 2])
 end
 
 injectivity_radius(::UnitaryMatrices{1,ℍ}) = π
