@@ -42,7 +42,12 @@ function exp(::UnitaryMatrices{1,ℍ}, p, X::Number)
     return p * exp(X)
 end
 
-function get_coordinates_orthonormal(::UnitaryMatrices{1,ℍ}, p, X, ::QuaternionNumbers)
+function get_coordinates_orthonormal(
+    ::UnitaryMatrices{1,ℍ},
+    p,
+    X::Quaternions.Quaternion,
+    ::QuaternionNumbers,
+)
     return @SVector [X.v1, X.v2, X.v3]
 end
 
