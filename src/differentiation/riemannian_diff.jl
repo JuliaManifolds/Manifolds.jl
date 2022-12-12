@@ -191,7 +191,7 @@ Then we require three tools
   the inner product from restriction of the inner product from the tangent space ``T_pℝ^m``
   of the embedding
 
-For more details see [^AbsilMahonySepulchre2008], Section 3.6.1 for a derivation on submanifolds.
+see also [`riemannian_gradient`](@ref) and [^AbsilMahonySepulchre2008], Section 3.6.1 for a derivation on submanifolds.
 
 [^AbsilMahonySepulchre2008]:
     > Absil, P.-A., Mahony, R. and Sepulchre R.,
@@ -205,16 +205,81 @@ struct RiemannianProjectionBackend{TADBackend<:AbstractDiffBackend} <:
     diff_backend::TADBackend
 end
 
-function gradient(M::AbstractManifold, f, p, backend::RiemannianProjectionBackend)
-    amb_grad = Manifolds._gradient(f, p, backend.diff_backend)
-    return change_representer(M, EuclideanMetric(), p, project(M, p, amb_grad))
+@doc raw"""
+    riemannian_gradient(M, p, Y; embedding_metric=EuclideanMetric())
+    riemannian_gradient!(M, X, p, Y; embedding_metric=EuclideanMetric())
+
+For a given gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding of a manifold,
+this function computes the Riemannian gradient ``\operatorname{grad} f(p)`` of the function
+``\tilde f`` restricted to the manifold ``M``.
+This can also be done in place of `X`.
+
+By default it uses the following computation: Let the projection ``Z = \operatorname{proj}_{T_p\mathcal M}(Y)``
+of ``Y`` onto the tangent space at ``p`` be given, that is with respect to the inner product in the embedding,
+then
+
+```math
+
+⟨Z-Y, W⟩ = 0 \text{ for all } W \in T_p\mathal M,
+
+```
+or rearranged ``⟨\operatorname{grad}f,W⟩ = ⟨Z,W⟩``. We then use the definition of the Riemannian gradient
+
+```math
+⟨\operatorname{grad} f(p()), W⟩_p = Df(p)[X] = ⟨\operatorname{grad}f(p), W⟩ = ⟨\operatorname{proj}_{T_p\mathcal M}(\operatorname{grad}f(p)),⟩
+\quad\text{for all } W \in T_p\mathcal M.
+```
+Comparing the first and the last term, the remaining computation is the function [``change_representer``](@ref).
+
+This method can also be implemented directly, if a more efficient/stable version is known.
+
+The function is inspired by `egrad2rgrad` in the [Matlab package Manopt](https://manopt.org).
+"""
+function riemannian_gradient(
+    M::AbstractManifold,
+    p,
+    Y;
+    embedding_metric::AbstractMetric=EuclideanMetric(),
+)
+    X = zero_vector(M, p)
+    return riemannian_gradient!(M, X, p, Y; embedding_metric=embedding_metric)
 end
 
-function gradient!(M::AbstractManifold, f, X, p, backend::RiemannianProjectionBackend)
+function riemannian_gradient!(
+    M::AbstractManifold,
+    X,
+    p,
+    Y;
+    embedding_metric=EuclideanMetric(),
+)
+    project!(M, X, p, Y)
+    change_representer!(M, X, embedding_metric, p, X)
+    return X
+end
+
+function gradient(
+    M::AbstractManifold,
+    f,
+    p,
+    backend::RiemannianProjectionBackend;
+    kwargs...,
+)
+    amb_grad = Manifolds._gradient(f, p, backend.diff_backend)
+    return riemannian_gradient(M, p, amb_grad; kwargs...)
+end
+
+function gradient!(
+    M::AbstractManifold,
+    f,
+    X,
+    p,
+    backend::RiemannianProjectionBackend;
+    kwargs...,
+)
     amb_grad = embed(M, p, X)
     Manifolds._gradient!(f, amb_grad, p, backend.diff_backend)
-    project!(M, X, p, amb_grad)
-    return change_representer!(M, X, EuclideanMetric(), p, X)
+    riemannian_gradient!(M, X, p, amb_grad; kwargs...)
+    return X
 end
 
 function jacobian(
