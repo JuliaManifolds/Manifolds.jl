@@ -304,7 +304,7 @@ function riemannian_gradient(::SymplecticStiefel, p, Y)
     return Y * (p' * p) .+ Q_p * (Y' * Q_p)
 end
 
-function riemannian_gradient!(::SymplecticStiefel, X, p, Y)
+function riemannian_gradient!(::SymplecticStiefel, X, p, Y; embedding_metric::EuclideanMetric=EuclideanMetric())
     Q_p = SymplecticMatrix(p, Y) * p
     X .= Y * (p' * p) .+ Q_p * (Y' * Q_p)
     return X
