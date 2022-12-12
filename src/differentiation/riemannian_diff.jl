@@ -214,22 +214,22 @@ this function computes the Riemannian gradient ``\operatorname{grad} f(p)`` of t
 ``\tilde f`` restricted to the manifold ``M``.
 This can also be done in place of `X`.
 
-By default it uses the following computation: Let the projection ``Z = \operatorname{proj}_{T_p\mathcal M}(Y)``
-of ``Y`` onto the tangent space at ``p`` be given, that is with respect to the inner product in the embedding,
-then
+By default it uses the following computation:
+Let the projection ``Z = \operatorname{proj}_{T_p\mathcal M}(Y)`` of ``Y`` onto the
+tangent space at ``p`` be given, that is with respect to the inner product in the embedding.
+Then
 
 ```math
-
 ⟨Z-Y, W⟩ = 0 \text{ for all } W \in T_p\mathal M,
-
 ```
-or rearranged ``⟨\operatorname{grad}f,W⟩ = ⟨Z,W⟩``. We then use the definition of the Riemannian gradient
+
+or rearranged ``⟨Y,W⟩ = ⟨Z,W⟩``. We then use the definition of the Riemannian gradient
 
 ```math
-⟨\operatorname{grad} f(p()), W⟩_p = Df(p)[X] = ⟨\operatorname{grad}f(p), W⟩ = ⟨\operatorname{proj}_{T_p\mathcal M}(\operatorname{grad}f(p)),⟩
+⟨\operatorname{grad} f(p), W⟩_p = Df(p)[X] = ⟨\operatorname{grad}f(p), W⟩ = ⟨\operatorname{proj}_{T_p\mathcal M}(\operatorname{grad}f(p)),W⟩
 \quad\text{for all } W \in T_p\mathcal M.
 ```
-Comparing the first and the last term, the remaining computation is the function [``change_representer``](@ref).
+Comparing the first and the last term, the remaining computation is the function [`change_representer`](@ref change_representer(M::AbstractManifold, G2::AbstractMetric, p, X)).
 
 This method can also be implemented directly, if a more efficient/stable version is known.
 
@@ -242,7 +242,8 @@ function riemannian_gradient(
     embedding_metric::AbstractMetric=EuclideanMetric(),
 )
     X = zero_vector(M, p)
-    return riemannian_gradient!(M, X, p, Y; embedding_metric=embedding_metric)
+    riemannian_gradient!(M, X, p, Y; embedding_metric=embedding_metric)
+    return X
 end
 
 function riemannian_gradient!(

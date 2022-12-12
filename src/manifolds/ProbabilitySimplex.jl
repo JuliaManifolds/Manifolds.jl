@@ -351,7 +351,8 @@ function retract_softmax!(::ProbabilitySimplex, q, p, X)
 end
 
 @doc raw"""
-    riemannian_gradient(M::ProbabilitySimplex{n}, p, Y)
+    X = riemannian_gradient(M::ProbabilitySimplex{n}, p, Y)
+    riemannian_gradient!(M::ProbabilitySimplex{n}, X, p, Y)
 
 Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{n+1}`` of the
 [`ProbabilitySimplex`](@ref) ``Δ^n``, this function computes the Riemannian gradient
@@ -360,7 +361,7 @@ Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^
 The formula reads
 
 ```math
-    \operatorname{grad} f(p) = p ⊙ Y - ⟨p, Y⟩p,
+    X = p ⊙ Y - ⟨p, Y⟩p,
 ```
 where ``⊙`` denotes the emelementwise product.
 """
