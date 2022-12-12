@@ -22,7 +22,7 @@ But note that tangent vectors are represented in the Lie algebra, i.e. just usin
 the representation above.
 
 # Constructor
-    
+
     UnitaryMatrices(n, 𝔽::AbstractNumbers=ℂ)
 
 see also [`OrthogonalMatrices`](@ref) for the real valued case.
@@ -66,7 +66,7 @@ end
 
 @doc raw"""
     manifold_dimension(M::UnitaryMatrices{n,ℂ}) where {n}
-    
+
 Return the dimension of the manifold unitary matrices.
 ```math
 \dim_{\mathrm{U}(n)} = n^2.
@@ -75,7 +75,7 @@ Return the dimension of the manifold unitary matrices.
 manifold_dimension(::UnitaryMatrices{n,ℂ}) where {n} = n^2
 @doc raw"""
     manifold_dimension(M::UnitaryMatrices{n,ℍ})
-    
+
 Return the dimension of the manifold unitary matrices.
 ```math
 \dim_{\mathrm{U}(n, ℍ)} = n(2n+1).
@@ -85,20 +85,20 @@ manifold_dimension(::UnitaryMatrices{n,ℍ}) where {n} = n * (2n + 1)
 
 Manifolds.number_of_coordinates(::UnitaryMatrices{1,ℍ}, ::AbstractBasis{ℍ}) = 3
 
-project(::UnitaryMatrices{1,ℍ}, p) = normalize(p)
+project(::UnitaryMatrices{1,ℍ}, p) = sign(p)
 
 project(::UnitaryMatrices{1,ℍ}, p, X) = (X - conj(X)) / 2
 
 function Random.rand(M::UnitaryMatrices{1,ℍ}; vector_at=nothing)
     if vector_at === nothing
-        return normalize(quatrand())
+        return sign(quatrand())
     else
         project(M, vector_at, quatrand())
     end
 end
 function Random.rand(rng::AbstractRNG, M::UnitaryMatrices{1,ℍ}; vector_at=nothing)
     if vector_at === nothing
-        return normalize(quatrand(rng))
+        return sign(quatrand(rng))
     else
         project(M, vector_at, quatrand(rng))
     end
