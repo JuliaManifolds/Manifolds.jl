@@ -89,7 +89,7 @@ function log_lie!(G::Unitary, X, p)
     return X
 end
 
-identity_element(::Unitary{1,ℍ}) = Quaternion(1.0)
+identity_element(::Unitary{1,ℍ}) = Quaternions.quat(1.0)
 
 function log_lie(::Unitary{1}, q::Number)
     return log(q)

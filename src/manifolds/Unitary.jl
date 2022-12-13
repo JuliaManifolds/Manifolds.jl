@@ -42,17 +42,23 @@ function exp(::UnitaryMatrices{1,ℍ}, p, X::Number)
     return p * exp(X)
 end
 
-function get_coordinates_orthonormal(::UnitaryMatrices{1,ℍ}, p, X, ::QuaternionNumbers)
+function get_coordinates_orthonormal(
+    ::UnitaryMatrices{1,ℍ},
+    p,
+    X::Quaternions.Quaternion,
+    ::QuaternionNumbers,
+)
     return @SVector [X.v1, X.v2, X.v3]
 end
 
 function get_vector_orthonormal(
     ::UnitaryMatrices{1,ℍ},
-    p::Quaternion,
+    p::Quaternions.Quaternion,
     c,
     ::QuaternionNumbers,
 )
-    return Quaternion(0, c[1], c[2], c[3])
+    i = firstindex(c)
+    return Quaternions.quat(0, c[i], c[i + 1], c[i + 2])
 end
 
 injectivity_radius(::UnitaryMatrices{1,ℍ}) = π
@@ -91,16 +97,16 @@ project(::UnitaryMatrices{1,ℍ}, p, X) = (X - conj(X)) / 2
 
 function Random.rand(M::UnitaryMatrices{1,ℍ}; vector_at=nothing)
     if vector_at === nothing
-        return sign(quatrand())
+        return sign(rand(Quaternions.QuaternionF64))
     else
-        project(M, vector_at, quatrand())
+        project(M, vector_at, rand(Quaternions.QuaternionF64))
     end
 end
 function Random.rand(rng::AbstractRNG, M::UnitaryMatrices{1,ℍ}; vector_at=nothing)
     if vector_at === nothing
-        return sign(quatrand(rng))
+        return sign(rand(rng, Quaternions.QuaternionF64))
     else
-        project(M, vector_at, quatrand(rng))
+        project(M, vector_at, rand(rng, Quaternions.QuaternionF64))
     end
 end
 
