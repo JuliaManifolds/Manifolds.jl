@@ -220,7 +220,7 @@ tangent space at ``p`` be given, that is with respect to the inner product in th
 Then
 
 ```math
-⟨Z-Y, W⟩ = 0 \text{ for all } W \in T_p\mathal M,
+⟨Z-Y, W⟩ = 0 \text{ for all } W \in T_p\mathcal M,
 ```
 
 or rearranged ``⟨Y,W⟩ = ⟨Z,W⟩``. We then use the definition of the Riemannian gradient
