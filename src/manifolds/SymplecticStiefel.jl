@@ -286,37 +286,6 @@ Return the total space of the [`SymplecticStiefel`](@ref) manifold, which is the
 get_total_space(::SymplecticStiefel{n,k,𝔽}) where {n,k,𝔽} = Symplectic{n,𝔽}()
 
 @doc raw"""
-    X = riemannian_gradient(::SymplecticStiefel, f, p, Y)
-    riemannian_gradient!(::SymplecticStiefel, f, X, p, Y)
-
-Compute the riemannian gradient `X` of `f` on [`SymplecticStiefel`](@ref)  at a point `p`,
-provided that the gradient of the function ``\tilde f``, which is `f` continued into the embedding
-is given by `Y`.
-
-The manifold gradient `X` is computed from `Y` as
-```math
-    X = Yp^{\mathrm{T}}p + Q_{2n}pY^{\mathrm{T}}Q_{2n}p,
-```
-where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref).
-"""
-function riemannian_gradient(::SymplecticStiefel, p, Y)
-    Q_p = SymplecticMatrix(p, Y) * p
-    return Y * (p' * p) .+ Q_p * (Y' * Q_p)
-end
-
-function riemannian_gradient!(
-    ::SymplecticStiefel,
-    X,
-    p,
-    Y;
-    embedding_metric::EuclideanMetric=EuclideanMetric(),
-)
-    Q_p = SymplecticMatrix(p, Y) * p
-    X .= Y * (p' * p) .+ Q_p * (Y' * Q_p)
-    return X
-end
-
-@doc raw"""
     inner(M::SymplecticStiefel{n, k}, p, X. Y)
 
 Compute the Riemannian inner product ``g^{\operatorname{SpSt}}`` at
@@ -590,6 +559,39 @@ function retract_caley!(M::SymplecticStiefel, q, p, X)
     r = lu!(A)
     q .= (-).(p) .+ rdiv!(H, r)
     return q
+end
+
+@doc raw"""
+    X = riemannian_gradient(::SymplecticStiefel, f, p, Y; embedding_metric::EuclideanMetric=EuclideanMetric())
+    riemannian_gradient!(::SymplecticStiefel, f, X, p, Y; embedding_metric::EuclideanMetric=EuclideanMetric())
+
+Compute the riemannian gradient `X` of `f` on [`SymplecticStiefel`](@ref)  at a point `p`,
+provided that the gradient of the function ``\tilde f``, which is `f` continued into the embedding
+is given by `Y`. The metric in the embedding is the Euclidean metric.
+
+The manifold gradient `X` is computed from `Y` as
+```math
+    X = Yp^{\mathrm{T}}p + Q_{2n}pY^{\mathrm{T}}Q_{2n}p,
+```
+where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref).
+
+
+"""
+function riemannian_gradient(::SymplecticStiefel, p, Y)
+    Q_p = SymplecticMatrix(p, Y) * p
+    return Y * (p' * p) .+ Q_p * (Y' * Q_p)
+end
+
+function riemannian_gradient!(
+    ::SymplecticStiefel,
+    X,
+    p,
+    Y;
+    embedding_metric::EuclideanMetric=EuclideanMetric(),
+)
+    Q_p = SymplecticMatrix(p, Y) * p
+    X .= Y * (p' * p) .+ Q_p * (Y' * Q_p)
+    return X
 end
 
 function Base.show(io::IO, ::SymplecticStiefel{n,k,𝔽}) where {n,k,𝔽}
