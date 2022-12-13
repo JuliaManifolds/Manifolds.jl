@@ -97,16 +97,16 @@ project(::UnitaryMatrices{1,ℍ}, p, X) = (X - conj(X)) / 2
 
 function Random.rand(M::UnitaryMatrices{1,ℍ}; vector_at=nothing)
     if vector_at === nothing
-        return sign(quatrand())
+        return sign(rand(Quaternions.QuaternionF64))
     else
-        project(M, vector_at, quatrand())
+        project(M, vector_at, rand(Quaternions.QuaternionF64))
     end
 end
 function Random.rand(rng::AbstractRNG, M::UnitaryMatrices{1,ℍ}; vector_at=nothing)
     if vector_at === nothing
-        return sign(quatrand(rng))
+        return sign(rand(rng, Quaternions.QuaternionF64))
     else
-        project(M, vector_at, quatrand(rng))
+        project(M, vector_at, rand(rng, Quaternions.QuaternionF64))
     end
 end
 
