@@ -1,4 +1,6 @@
 include("../utils.jl")
+using FiniteDifferences
+using Manifolds: RiemannianProjectionBackend
 
 @testset "Symplectic" begin
     @testset "Real" begin

@@ -5,7 +5,7 @@ The symplectic Stiefel manifold consists of all
 $2n × 2k, \; n \geq k$ matrices satisfying the requirement
 ````math
 \operatorname{SpSt}(2n, 2k, ℝ)
-    = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2k} \bigr\},
+    = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^{\mathrm{T}}Q_{2n}p = Q_{2k} \bigr\},
 ````
 where
 ````math
@@ -84,7 +84,7 @@ $\operatorname{SpSt}(2n, 2k)$ manifold.
 That is, the point has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{+}p$ is
 (approximately) the identity,
 where for $A \in \mathbb{R}^{2n \times 2k}$,
-$A^{+} = Q_{2k}^TA^TQ_{2n}$ is the symplectic inverse, with
+$A^{+} = Q_{2k}^{\mathrm{T}}A^{\mathrm{T}}Q_{2n}$ is the symplectic inverse, with
 ````math
 Q_{2n} =
 \begin{bmatrix}
@@ -115,7 +115,7 @@ end
 Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticStiefel`](@ref),
 ``\operatorname{SpSt}(2n, 2k)`` manifold. First recall the definition of the symplectic
 inverse for $A \in \mathbb{R}^{2n \times 2k}$,
-$A^{+} = Q_{2k}^TA^TQ_{2n}$ is the symplectic inverse, with
+$A^{+} = Q_{2k}^{\mathrm{T}}A^{\mathrm{T}}Q_{2n}$ is the symplectic inverse, with
 ````math
     Q_{2n} =
     \begin{bmatrix}
@@ -166,15 +166,15 @@ in the direction of ``X \in T_p\operatorname{SpSt}(2n, 2k)``.
 The tangent vector ``X`` can be written in the form
 ``X = \bar{\Omega}p`` [^BendokatZimmermann2021], with
 ````math
-    \bar{\Omega} = X (p^Tp)^{-1}p^T
-        + Q_{2n}p(p^Tp)^{-1}X^T(I_{2n} - Q_{2n}^Tp(p^Tp)^{-1}p^TQ_{2n})Q_{2n}
+    \bar{\Omega} = X (p^{\mathrm{T}}p)^{-1}p^{\mathrm{T}}
+        + Q_{2n}p(p^{\mathrm{T}}p)^{-1}X^{\mathrm{T}}(I_{2n} - Q_{2n}^{\mathrm{T}}p(p^{\mathrm{T}}p)^{-1}p^{\mathrm{T}}Q_{2n})Q_{2n}
         \in ℝ^{2n \times 2n},
 ````
 where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref). Using this expression for ``X``,
 the exponential mapping can be computed as
 ````math
-    \operatorname{exp}_p(X) = \operatorname{Exp}([\bar{\Omega} - \bar{\Omega}^T])
-                              \operatorname{Exp}(\bar{\Omega}^T)p,
+    \operatorname{exp}_p(X) = \operatorname{Exp}([\bar{\Omega} - \bar{\Omega}^{\mathrm{T}}])
+                              \operatorname{Exp}(\bar{\Omega}^{\mathrm{T}})p,
 ````
 where ``\operatorname{Exp}(\cdot)`` denotes the matrix exponential.
 
@@ -186,12 +186,12 @@ of an ``8k \times 8k`` matrix and a ``4k \times 4k`` matrix.
 
 To this end, first define
 ````math
-\bar{A} = Q_{2k}p^TX(p^Tp)^{-1}Q_{2k} +
-            (p^Tp)^{-1}X^T(p - Q_{2n}^Tp(p^Tp)^{-1}Q_{2k}) \in ℝ^{2k \times 2k},
+\bar{A} = Q_{2k}p^{\mathrm{T}}X(p^{\mathrm{T}}p)^{-1}Q_{2k} +
+            (p^{\mathrm{T}}p)^{-1}X^{\mathrm{T}}(p - Q_{2n}^{\mathrm{T}}p(p^{\mathrm{T}}p)^{-1}Q_{2k}) \in ℝ^{2k \times 2k},
 ````
 and
 ````math
-\bar{H} = (I_{2n} - pp^+)Q_{2n}X(p^Tp)^{-1}Q_{2k} \in ℝ^{2n \times 2k}.
+\bar{H} = (I_{2n} - pp^+)Q_{2n}X(p^{\mathrm{T}}p)^{-1}Q_{2k} \in ℝ^{2n \times 2k}.
 ````
 We then let ``\bar{\Delta} = p\bar{A} + \bar{H}``, and define the matrices
 ````math
@@ -200,11 +200,11 @@ We then let ``\bar{\Delta} = p\bar{A} + \bar{H}``, and define the matrices
 ````
 and
 ````math
-    λ = \left[Q_{2n}^TpQ_{2k} \quad
+    λ = \left[Q_{2n}^{\mathrm{T}}pQ_{2k} \quad
         \left(\bar{\Delta}^+\left(I_{2n}
-              - \frac{1}{2}pp^+\right)\right)^T\right] \in ℝ^{2n \times 4k}.
+              - \frac{1}{2}pp^+\right)\right)^{\mathrm{T}}\right] \in ℝ^{2n \times 4k}.
 ````
-With the above defined matrices it holds that ``\bar{\Omega} = λγ^T``.
+With the above defined matrices it holds that ``\bar{\Omega} = λγ^{\mathrm{T}}``.
  As a last preliminary step, concatenate ``γ`` and ``λ`` to define the matrices
 ``Γ = [λ \quad -γ] \in ℝ^{2n \times 8k}`` and
 ``Λ = [γ \quad λ] \in ℝ^{2n \times 8k}``.
@@ -213,19 +213,19 @@ With these matrix constructions done, we can compute the
 exponential mapping as
 ````math
     \operatorname{exp}_p(X) =
-        Γ \operatorname{Exp}(ΛΓ^T)
+        Γ \operatorname{Exp}(ΛΓ^{\mathrm{T}})
         \begin{bmatrix}
             0_{4k} \\
             I_{4k}
         \end{bmatrix}
-        \operatorname{Exp}(λγ^T)
+        \operatorname{Exp}(λγ^{\mathrm{T}})
         \begin{bmatrix}
             0_{2k} \\
             I_{2k}
         \end{bmatrix}.
 ````
 which only requires computing the matrix exponentials of
-``ΛΓ^T \in ℝ^{8k \times 8k}`` and ``λγ^T \in ℝ^{4k \times 4k}``.
+``ΛΓ^{\mathrm{T}} \in ℝ^{8k \times 8k}`` and ``λγ^{\mathrm{T}} \in ℝ^{4k \times 4k}``.
 """
 exp(::SymplecticStiefel, p, X)
 
@@ -236,15 +236,15 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
     C = pT_p \ X' # ∈ ℝ^{2k × 2n}
 
     # Construct A-bar:
-    # First A-term: Q * (p^T * C^T) * Q
+    # First A-term: Q * (p^{\mathrm{T}} * C^{\mathrm{T}}) * Q
     A_bar = rmul!(lmul!(Q, (p' * C')), Q)
     A_bar .+= C * p
 
     # Second A-term, use C-memory:
-    rmul!(C, Q') # C*Q^T -> C
+    rmul!(C, Q') # C*Q^{\mathrm{T}} -> C
     C_QT = C
 
-    # Subtract C*Q^T*p*(pT_p)^{-1}*Q:
+    # Subtract C*Q^{\mathrm{T}}*p*(pT_p)^{-1}*Q:
     # A_bar is "star-skew symmetric" (A^+ = -A).
     A_bar .-= rmul!((C_QT * p) / pT_p, Q)
 
@@ -286,44 +286,6 @@ Return the total space of the [`SymplecticStiefel`](@ref) manifold, which is the
 get_total_space(::SymplecticStiefel{n,k,𝔽}) where {n,k,𝔽} = Symplectic{n,𝔽}()
 
 @doc raw"""
-    gradient(::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
-    gradient!(::SymplecticStiefel, f, X, p, backend::RiemannianProjectionBackend)
-
-Compute the gradient of
-``f\colon \operatorname{SpSt}(2n, 2k) \rightarrow ℝ``
-at ``p \in \operatorname{SpSt}(2n, 2k)``.
-
-This function first computes the embedding gradient ``∇f(p) \in ℝ^{2n \times 2k}`` using
-the [`AbstractRiemannianDiffBackend`](@ref) in the [`RiemannianProjectionBackend`](@ref).
-Then it transforms the embedding gradient to the unique tangent vector space element
-``\text{grad}f(p) \in T_p\operatorname{SpSt}(2n, 2k)``
-which fulfills the variational equation
-````math
-    g_p(\text{grad}f(p), X)
-    = \text{D}f(p)
-    = \langle ∇f(p), X \rangle
-    \quad\forall\; X \in T_p\operatorname{SpSt}(2n, 2k).
-````
-The manifold gradient ``\text{grad}f(p)`` is computed from ``∇f(p)`` as
-````math
-    \text{grad}f(p) = ∇f(p)p^Tp + Q_{2n}p∇f(p)^TQ_{2n}p,
-````
-where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref).
-"""
-function gradient(::SymplecticStiefel, f, p, backend::RiemannianProjectionBackend)
-    amb_grad = _gradient(f, p, backend.diff_backend)
-    Q_p = SymplecticMatrix(p, amb_grad) * p
-    return amb_grad * (p' * p) .+ Q_p * (amb_grad' * Q_p)
-end
-
-function gradient!(::SymplecticStiefel, f, X, p, backend::RiemannianProjectionBackend)
-    _gradient!(f, X, p, backend.diff_backend)
-    Q_p = SymplecticMatrix(p, X) * p
-    X .= X * (p' * p) .+ Q_p * (X' * Q_p)
-    return X
-end
-
-@doc raw"""
     inner(M::SymplecticStiefel{n, k}, p, X. Y)
 
 Compute the Riemannian inner product ``g^{\operatorname{SpSt}}`` at
@@ -331,8 +293,8 @@ Compute the Riemannian inner product ``g^{\operatorname{SpSt}}`` at
 Given by Proposition 3.10 in [^BendokatZimmermann2021].
 ````math
 g^{\operatorname{SpSt}}_p(X, Y)
-    = \operatorname{tr}\left(X^T\left(I_{2n} -
-        \frac{1}{2}Q_{2n}^Tp(p^Tp)^{-1}p^TQ_{2n}\right)Y(p^Tp)^{-1}\right).
+    = \operatorname{tr}\left(X^{\mathrm{T}}\left(I_{2n} -
+        \frac{1}{2}Q_{2n}^{\mathrm{T}}p(p^{\mathrm{T}}p)^{-1}p^{\mathrm{T}}Q_{2n}\right)Y(p^{\mathrm{T}}p)^{-1}\right).
 ````
 """
 function inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
@@ -342,7 +304,7 @@ function inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
     b = Q' * p
     # we split the original trace into two one with I->(X'Yc)
     # and the other with 1/2 X'b c b' Y c
-    # 1) we permute X' and Y c to c^TY^TX = a\(Y'X) (avoids a large interims matrix)
+    # 1) we permute X' and Y c to c^{\mathrm{T}}Y^{\mathrm{T}}X = a\(Y'X) (avoids a large interims matrix)
     # 2) we permute Y c up front, the center term is symmetric, so we get cY'b c b' X
     # and (b'X) again avoids a large interims matrix, so does Y'b.
     return tr(a \ (Y' * X)) - (1 / 2) * tr(a \ ((Y' * b) * (a \ (b' * X))))
@@ -363,7 +325,7 @@ A_{2, 1} & A_{2, 2}
 ````
 the symplectic inverse is defined as:
 ````math
-A^{+} := Q_{2k}^T A^T Q_{2n},
+A^{+} := Q_{2k}^{\mathrm{T}} A^{\mathrm{T}} Q_{2n},
 ````
 where
 ````math
@@ -379,8 +341,8 @@ The symplectic inverse of a matrix A can be expressed explicitly as:
 ````math
 A^{+} =
 \begin{bmatrix}
-  A_{2, 2}^T & -A_{1, 2}^T \\[1.2mm]
- -A_{2, 1}^T &  A_{1, 1}^T
+  A_{2, 2}^{\mathrm{T}} & -A_{1, 2}^{\mathrm{T}} \\[1.2mm]
+ -A_{2, 1}^{\mathrm{T}} &  A_{1, 1}^{\mathrm{T}}
 \end{bmatrix}.
 ````
 """
@@ -423,7 +385,7 @@ Q =
 -I    &  0
 \end{bmatrix}
 ````
-as well as the symplectic inverse of a matrix ``A``, ``A^{+} = Q^T A^T Q``.
+as well as the symplectic inverse of a matrix ``A``, ``A^{+} = Q^{\mathrm{T}} A^{\mathrm{T}} Q``.
 
 For ``p, q ∈ \operatorname{SpSt}(2n, 2k, ℝ)`` then, we can define the
 inverse cayley retraction as long as the following matrices exist.
@@ -480,7 +442,7 @@ which solves the constrained optimization problem
 ````math
     \operatorname{min}_{X \in \mathbb{R}^{2n \times 2k}} \frac{1}{2}||X - A||^2, \quad
     \text{s.t.}\;
-    h(X)\colon= X^T Q p + p^T Q X = 0,
+    h(X)\colon= X^{\mathrm{T}} Q p + p^{\mathrm{T}} Q X = 0,
 ````
 where ``h : \mathbb{R}^{2n \times 2k} \rightarrow \operatorname{skew}(2k)`` defines
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``.
@@ -599,6 +561,39 @@ function retract_caley!(M::SymplecticStiefel, q, p, X)
     return q
 end
 
+@doc raw"""
+    X = riemannian_gradient(::SymplecticStiefel, f, p, Y; embedding_metric::EuclideanMetric=EuclideanMetric())
+    riemannian_gradient!(::SymplecticStiefel, f, X, p, Y; embedding_metric::EuclideanMetric=EuclideanMetric())
+
+Compute the riemannian gradient `X` of `f` on [`SymplecticStiefel`](@ref)  at a point `p`,
+provided that the gradient of the function ``\tilde f``, which is `f` continued into the embedding
+is given by `Y`. The metric in the embedding is the Euclidean metric.
+
+The manifold gradient `X` is computed from `Y` as
+```math
+    X = Yp^{\mathrm{T}}p + Q_{2n}pY^{\mathrm{T}}Q_{2n}p,
+```
+where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref).
+
+
+"""
+function riemannian_gradient(::SymplecticStiefel, p, Y)
+    Q_p = SymplecticMatrix(p, Y) * p
+    return Y * (p' * p) .+ Q_p * (Y' * Q_p)
+end
+
+function riemannian_gradient!(
+    ::SymplecticStiefel,
+    X,
+    p,
+    Y;
+    embedding_metric::EuclideanMetric=EuclideanMetric(),
+)
+    Q_p = SymplecticMatrix(p, Y) * p
+    X .= Y * (p' * p) .+ Q_p * (Y' * Q_p)
+    return X
+end
+
 function Base.show(io::IO, ::SymplecticStiefel{n,k,𝔽}) where {n,k,𝔽}
     return print(io, "SymplecticStiefel{$(2n), $(2k), $(𝔽)}()")
 end
@@ -610,7 +605,7 @@ end
 Directly compute the symplectic inverse of ``p \in \operatorname{SpSt}(2n, 2k)``,
 multiplied with ``q \in \operatorname{SpSt}(2n, 2k)``.
 That is, this function efficiently computes
-``p^+q = (Q_{2k}p^TQ_{2n})q \in ℝ^{2k \times 2k}``,
+``p^+q = (Q_{2k}p^{\mathrm{T}}Q_{2n})q \in ℝ^{2k \times 2k}``,
 where ``Q_{2n}, Q_{2k}`` are the [`SymplecticMatrix`](@ref)
 of sizes ``2n \times 2n`` and ``2k \times 2k`` respectively.
 

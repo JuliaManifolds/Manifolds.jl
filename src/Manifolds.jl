@@ -284,7 +284,6 @@ include("utils.jl")
 
 include("product_representations.jl")
 include("differentiation/differentiation.jl")
-include("differentiation/riemannian_diff.jl")
 include("differentiation/embedded_diff.jl")
 
 # Main Meta Manifolds
@@ -293,6 +292,9 @@ include("manifolds/MetricManifold.jl")
 include("manifolds/QuotientManifold.jl")
 include("manifolds/VectorBundle.jl")
 include("groups/group.jl")
+
+# Requires both differentiation and metric
+include("differentiation/riemannian_diff.jl")
 
 # Features I: Which are extended on Meta Manifolds
 include("distributions.jl")
@@ -746,6 +748,8 @@ export ×,
     representation_size,
     retract,
     retract!,
+    riemannian_gradient,
+    riemannian_gradient!,
     riemann_tensor,
     riemann_tensor!,
     set_component!,

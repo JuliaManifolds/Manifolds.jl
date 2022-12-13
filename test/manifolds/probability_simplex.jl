@@ -82,4 +82,20 @@ include("../utils.jl")
         @test_throws DomainError project(M, [1, -1, 2])
         @test isapprox(M, [0.6, 0.2, 0.2], project(M, [0.3, 0.1, 0.1]))
     end
+
+    @testset "Gradient conversion" begin
+        M = ProbabilitySimplex(4) # n=5
+        # For f(p) = \sum_i 1/n log(p_i) we know the Euclidean gradient
+        grad_f_eucl(p) = [1 / (5 * pi) for pi in p]
+        # but we can also easily derive the Riemannian one
+        grad_f(M, p) = 1 / 5 .- p
+        #We take some point
+        p = [0.1, 0.2, 0.4, 0.2, 0.1]
+        Y = grad_f_eucl(p)
+        X = grad_f(M, p)
+        @test isapprox(M, p, X, riemannian_gradient(M, p, Y))
+        Z = zero_vector(M, p)
+        riemannian_gradient!(M, Z, p, Y)
+        @test X == Z
+    end
 end

@@ -5,7 +5,7 @@ The symplectic manifold consists of all ``2n \times 2n`` matrices which preserve
 the canonical symplectic form over ``𝔽^{2n × 2n} \times 𝔽^{2n × 2n}``,
 ````math
     \omega\colon 𝔽^{2n × 2n} \times 𝔽^{2n × 2n} \rightarrow 𝔽,
-    \quad \omega(x, y) = p^T Q_{2n} q, \; x, y \in 𝔽^{2n × 2n},
+    \quad \omega(x, y) = p^{\mathrm{T}} Q_{2n} q, \; x, y \in 𝔽^{2n × 2n},
 ````
 where
 ````math
@@ -17,7 +17,7 @@ Q_{2n} =
 ````
 That is, the symplectic manifold consists of
 ````math
-\operatorname{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^TQ_{2n}p = Q_{2n} \bigr\},
+\operatorname{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^{\mathrm{T}}Q_{2n}p = Q_{2n} \bigr\},
 ````
 with ``0_n`` and ``I_n`` denoting the ``n × n`` zero-matrix
 and indentity matrix in ``ℝ^{n \times n}`` respectively.
@@ -27,7 +27,7 @@ The tangent space at a point ``p`` is given by [^BendokatZimmermann2021]
 \begin{align*}
     T_p\operatorname{Sp}(2n)
         &= \{X \in \mathbb{R}^{2n \times 2n} \;|\; p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0 \}, \\
-        &= \{X = pQS \;|\; S ∈ R^{2n × 2n}, S^T = S \}.
+        &= \{X = pQS \;|\; S ∈ R^{2n × 2n}, S^{\mathrm{T}} = S \}.
 \end{align*}
 ````
 
@@ -58,7 +58,7 @@ defined pointwise for ``p \in \operatorname{Sp}(2n)`` by [^Fiori2011]
 ````math
 \begin{align*}
     & g_p \colon T_p\operatorname{Sp}(2n) \times T_p\operatorname{Sp}(2n) \rightarrow ℝ, \\
-    & g_p(Z_1, Z_2) = \operatorname{tr}((p^{-1}Z_1)^T (p^{-1}Z_2)).
+    & g_p(Z_1, Z_2) = \operatorname{tr}((p^{-1}Z_1)^{\mathrm{T}} (p^{-1}Z_2)).
 \end{align*}
 ````
 This metric is also the default metric for the [`Symplectic`](@ref) manifold.
@@ -72,7 +72,7 @@ The extension of the [`RealSymplecticMetric`](@ref) at a point `p \in \operatorn
 as an inner product over the embedding space ``ℝ^{2n \times 2n}``, i.e.
 ````math
     \langle x, y \rangle_{p} = \langle p^{-1}x, p^{-1}\rangle_{\operatorname{Fr}}
-    = \operatorname{tr}(x^T(pp^T)^{-1}y), \;\forall\; x, y \in ℝ^{2n \times 2n}.
+    = \operatorname{tr}(x^{\mathrm{T}}(pp^{\mathrm{T}})^{-1}y), \;\forall\; x, y \in ℝ^{2n \times 2n}.
 ````
 """
 struct ExtendedSymplecticMetric <: AbstractMetric end
@@ -91,7 +91,7 @@ Q_{2n}(λ) = λ
 ````
 such that the canonical symplectic form is represented by
 ````math
-\omega_{2n}(x, y) = x^TQ_{2n}(1)y, \quad x, y \in ℝ^{2n}.
+\omega_{2n}(x, y) = x^{\mathrm{T}}Q_{2n}(1)y, \quad x, y \in ℝ^{2n}.
 ````
 
 The entire matrix is however not instantiated in memory, instead a scalar
@@ -122,10 +122,10 @@ Compute the representation of a tangent vector ``ξ ∈ T_p\operatorname{Sp}(2n,
 with the conversion function
 ````math
     c_p : T_p\operatorname{Sp}(2n, ℝ) \rightarrow T_p\operatorname{Sp}(2n, ℝ), \quad
-    c_p(ξ) = \frac{1}{2} pp^T ξ + \frac{1}{2} pQ ξ^T pQ.
+    c_p(ξ) = \frac{1}{2} pp^{\mathrm{T}} ξ + \frac{1}{2} pQ ξ^{\mathrm{T}} pQ.
 ````
 
-Each of the terms ``c_p^1(ξ) = p p^T ξ`` and ``c_p^2(ξ) = pQ ξ^T pQ`` from the
+Each of the terms ``c_p^1(ξ) = p p^{\mathrm{T}} ξ`` and ``c_p^2(ξ) = pQ ξ^{\mathrm{T}} pQ`` from the
 above definition of ``c_p(η)`` are themselves metric compatible in the sense that
 ````math
     c_p^i : T_p\operatorname{Sp}(2n, ℝ) \rightarrow \mathbb{R}^{2n \times 2n}\quad
@@ -156,7 +156,7 @@ end
 Change the representation of a matrix ``ξ ∈ \mathbb{R}^{2n \times 2n}``
 into the inner product space ``(ℝ^{2n \times 2n}, g_p)`` where the inner product
 is given by
-``g_p(ξ, η) = \langle p^{-1}ξ, p^{-1}η \rangle = \operatorname{tr}(ξ^T(pp^T)^{-1}η)``,
+``g_p(ξ, η) = \langle p^{-1}ξ, p^{-1}η \rangle = \operatorname{tr}(ξ^{\mathrm{T}}(pp^{\mathrm{T}})^{-1}η)``,
 as the extension of the [`RealSymplecticMetric`](@ref) onto the entire embedding space.
 
 By changing the representation we mean to apply a mapping
@@ -170,7 +170,7 @@ defined by requiring that it satisfy the metric compatibility condition
 ````
 In this case, we compute the mapping
 ````math
-    c_p(ξ) = pp^T ξ.
+    c_p(ξ) = pp^{\mathrm{T}} ξ.
 ````
 """
 function change_representer(
@@ -198,7 +198,7 @@ end
 
 Check whether `p` is a valid point on the [`Symplectic`](@ref) `M`=$\operatorname{Sp}(2n)$,
 i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{+}p$ is (approximately)
-the identity, where $A^{+} = Q_{2n}^TA^TQ_{2n}$ is the symplectic inverse, with
+the identity, where $A^{+} = Q_{2n}^{\mathrm{T}}A^{\mathrm{T}}Q_{2n}$ is the symplectic inverse, with
 ````math
 Q_{2n} =
 \begin{bmatrix}
@@ -282,8 +282,8 @@ Then we write the expression for the exponential map from ``p`` to ``q`` as
     q =
     \operatorname{exp}_p(X)
     =
-    p \operatorname{Exp}((p^{+}X)^T)
-    \operatorname{Exp}([p^{+}X - (p^{+}X)^T]),
+    p \operatorname{Exp}((p^{+}X)^{\mathrm{T}})
+    \operatorname{Exp}([p^{+}X - (p^{+}X)^{\mathrm{T}}]),
     X \in T_p\operatorname{Sp},
 ````
 and with the geodesic distance between ``p`` and ``q`` given by
@@ -293,10 +293,10 @@ we see that
     \begin{align*}
     ||\operatorname{Log}(p^+q)||_{\operatorname{Fr}}
     &= ||\operatorname{Log}\left(
-        \operatorname{Exp}((p^{+}X)^T)
-        \operatorname{Exp}(p^{+}X - (p^{+}X)^T)
+        \operatorname{Exp}((p^{+}X)^{\mathrm{T}})
+        \operatorname{Exp}(p^{+}X - (p^{+}X)^{\mathrm{T}})
     \right)||_{\operatorname{Fr}} \\
-    &= ||p^{+}X + \frac{1}{2}[(p^{+}X)^T, p^{+}X - (p^{+}X)^T]
+    &= ||p^{+}X + \frac{1}{2}[(p^{+}X)^{\mathrm{T}}, p^{+}X - (p^{+}X)^{\mathrm{T}}]
             + \ldots ||_{\operatorname{Fr}} \\
     &≈ ||p^{+}X||_{\operatorname{Fr}} = \operatorname{dist}(p, q).
     \end{align*}
@@ -319,8 +319,8 @@ The Exponential mapping on the Symplectic manifold with the
 For the point ``p \in \operatorname{Sp}(2n)`` the exponential mapping along the tangent
 vector ``X \in T_p\operatorname{Sp}(2n)`` is computed as [^WangSunFiori2018]
 ````math
-    \operatorname{exp}_p(X) = p \operatorname{Exp}((p^{-1}X)^T)
-                                \operatorname{Exp}(p^{-1}X - (p^{-1}X)^T),
+    \operatorname{exp}_p(X) = p \operatorname{Exp}((p^{-1}X)^{\mathrm{T}})
+                                \operatorname{Exp}(p^{-1}X - (p^{-1}X)^{\mathrm{T}}),
 ````
 where ``\operatorname{Exp}(\cdot)`` denotes the matrix exponential.
 
@@ -388,7 +388,7 @@ function gradient(
     extended_metric=true,
 )
     Y = allocate_result(M, gradient, p)
-    return gradient!(M, f, Y, p, backend, extended_metric=extended_metric)
+    return gradient!(M, f, Y, p, backend; extended_metric=extended_metric)
 end
 
 function gradient!(
@@ -415,7 +415,7 @@ end
 
 Compute the canonical Riemannian inner product [`RealSymplecticMetric`](@ref)
 ````math
-    g_p(X, Y) = \operatorname{tr}((p^{-1}X)^T (p^{-1}Y))
+    g_p(X, Y) = \operatorname{tr}((p^{-1}X)^{\mathrm{T}} (p^{-1}Y))
 ````
 between the two tangent vectors ``X, Y \in T_p\operatorname{Sp}(2n)``.
 """
@@ -439,7 +439,7 @@ A_{2,1} & A_{2, 2}
 ````
 the symplectic inverse is defined as:
 ````math
-A^{+} := Q_{2n}^T A^T Q_{2n},
+A^{+} := Q_{2n}^{\mathrm{T}} A^{\mathrm{T}} Q_{2n},
 ````
 where
 ````math
@@ -453,8 +453,8 @@ The symplectic inverse of A can be expressed explicitly as:
 ````math
 A^{+} =
 \begin{bmatrix}
-  A_{2, 2}^T & -A_{1, 2}^T \\[1.2mm]
- -A_{2, 1}^T &  A_{1, 1}^T
+  A_{2, 2}^{\mathrm{T}} & -A_{1, 2}^{\mathrm{T}} \\[1.2mm]
+ -A_{2, 1}^{\mathrm{T}} &  A_{1, 1}^{\mathrm{T}}
 \end{bmatrix}.
 ````
 """
@@ -513,7 +513,7 @@ Q =
 -I  & 0
 \end{bmatrix}
 ````
-as well as the symplectic inverse of a matrix ``A``, ``A^{+} = Q^T A^T Q``.
+as well as the symplectic inverse of a matrix ``A``, ``A^{+} = Q^{\mathrm{T}} A^{\mathrm{T}} Q``.
 
 For ``p, q ∈ \operatorname{Sp}(2n, ℝ)`` then, we can then define the
 inverse cayley retraction as long as the following matrices exist.
@@ -567,7 +567,7 @@ which solves the constrained optimization problem
 ````math
     \operatorname{min}_{X \in \mathbb{R}^{2n \times 2n}} \frac{1}{2}||X - A||^2, \quad
     \text{s.t.}\;
-    h(X) \colon= X^T Q p + p^T Q X = 0,
+    h(X) \colon= X^{\mathrm{T}} Q p + p^{\mathrm{T}} Q X = 0,
 ````
 where ``h\colon\mathbb{R}^{2n \times 2n} \rightarrow \operatorname{skew}(2n)`` defines
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``.
@@ -598,9 +598,9 @@ Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n,
 the Riemannian metric ``g`` [`RealSymplecticMetric`](@ref).
 The closed form projection mapping is given by [^GaoSonAbsilStykel2021]
 ````math
-    \operatorname{P}^{T_p\operatorname{Sp}(2n)}_{g_p}(X) = pQ\operatorname{sym}(p^TQ^TX),
+    \operatorname{P}^{T_p\operatorname{Sp}(2n)}_{g_p}(X) = pQ\operatorname{sym}(p^{\mathrm{T}}Q^{\mathrm{T}}X),
 ````
-where ``\operatorname{sym}(A) = \frac{1}{2}(A + A^T)``.
+where ``\operatorname{sym}(A) = \frac{1}{2}(A + A^{\mathrm{T}})``.
 This function is not exported.
 """
 function project!(
@@ -631,9 +631,9 @@ That is,
 ````
 The closed form projection operator onto the normal space is given by [^GaoSonAbsilStykel2021]
 ````math
-\operatorname{P}^{(T_p\operatorname{Sp}(2n))\perp}_{g_p}(X) = pQ\operatorname{skew}(p^TQ^TX),
+\operatorname{P}^{(T_p\operatorname{Sp}(2n))\perp}_{g_p}(X) = pQ\operatorname{skew}(p^{\mathrm{T}}Q^{\mathrm{T}}X),
 ````
-where ``\operatorname{skew}(A) = \frac{1}{2}(A - A^T)``.
+where ``\operatorname{skew}(A) = \frac{1}{2}(A - A^{\mathrm{T}})``.
 This function is not exported.
 
 [^GaoSonAbsilStykel2021]:
@@ -722,7 +722,7 @@ as defined in by Birtea et al in proposition 2 [^BirteaCaşuComănescu2020].
 
 Using the symplectic inverse of a matrix ``A \in ℝ^{2n \times 2n}``,
 ``
-A^{+} := Q_{2n}^T A^T Q_{2n}
+A^{+} := Q_{2n}^{\mathrm{T}} A^{\mathrm{T}} Q_{2n}
 ``
 where
 ````math
@@ -771,7 +771,7 @@ Base.show(io::IO, ::Symplectic{n,𝔽}) where {n,𝔽} = print(io, "Symplectic{$
 Directly compute the symplectic inverse of ``p \in \operatorname{Sp}(2n)``,
 multiplied with ``q \in \operatorname{Sp}(2n)``.
 That is, this function efficiently computes
-``p^+q = (Q_{2n}p^TQ_{2n})q \in ℝ^{2n \times 2n}``,
+``p^+q = (Q_{2n}p^{\mathrm{T}}Q_{2n})q \in ℝ^{2n \times 2n}``,
 where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref)
 of size ``2n \times 2n``.
 """

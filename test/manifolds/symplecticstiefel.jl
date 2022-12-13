@@ -1,4 +1,6 @@
 include("../utils.jl")
+using FiniteDifferences
+using Manifolds: RiemannianProjectionBackend
 
 function Ω(::SymplecticStiefel, p, X)
     Q = SymplecticMatrix(X, p)
