@@ -18,6 +18,8 @@ end
 Flag manifold of ``d`` subspaces of ``ℝ^N``[^YeWongLim2022]. By default the manifold uses
 the orthogonal coordinates representation.
 
+Tangent space is represented in the block-skew-symmetric form.
+
 # Constructor
 
     Flag(N, n1, n2, ..., nd)
@@ -63,9 +65,9 @@ end
 """
     get_embedding(M::Flag)
 
-Get the embedding of the [`Flag`](@ref) manifold `M`, i.e. the [`Rotations`](@ref) manifold.
+Get the embedding of the [`Flag`](@ref) manifold `M`, i.e. the [`Stiefel`](@ref) manifold.
 """
-get_embedding(::Flag{N}) where {N} = Rotations(N)
+get_embedding(M::Flag{N,dp1}) where {N,dp1} = Stiefel(N, M.subspace_dimensions[dp1 - 1])
 
 @doc raw"""
     injectivity_radius(M::Flag)
@@ -78,25 +80,10 @@ injectivity_radius(::Flag, p) = π / 2
 injectivity_radius(::Flag, ::AbstractRetractionMethod) = π / 2
 injectivity_radius(::Flag, p, ::AbstractRetractionMethod) = π / 2
 
-inner(::Flag, p::AbstractMatrix, X::AbstractMatrix, Y::AbstractMatrix) = dot(X, Y) / 2
-
-function Base.isapprox(
-    M::Flag,
-    p::AbstractMatrix,
-    X::AbstractMatrix,
-    Y::AbstractMatrix;
-    atol=sqrt(max_eps(X, Y)),
-    kwargs...,
-)
+function Base.isapprox(M::Flag, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
-function Base.isapprox(
-    M::Flag,
-    p::AbstractMatrix,
-    q::AbstractMatrix;
-    atol=sqrt(max_eps(p, q)),
-    kwargs...,
-)
+function Base.isapprox(M::Flag, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
     return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
 end
 
