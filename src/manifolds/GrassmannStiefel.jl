@@ -194,7 +194,10 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 project(::Grassmann, ::Any...)
 
-project!(::Grassmann, Y, p, X) = copyto!(Y, X - p * p' * X)
+function project!(::Grassmann, Y, p, X)
+    Y .= X .- p * (p' * X)
+    return Y
+end
 
 @doc raw"""
     rand(M::Grassmann; σ::Real=1.0, vector_at=nothing)

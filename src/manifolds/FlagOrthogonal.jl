@@ -1,28 +1,3 @@
-@doc raw"""
-    OrthogonalPoint <: AbstractManifoldPoint
-
-A type to represent points on a manifold [`Flag`](@ref) in the orthogonal coordinates
-representation, i.e. a rotation matrix.
-"""
-struct OrthogonalPoint{T<:AbstractMatrix} <: AbstractManifoldPoint
-    value::T
-end
-
-@doc raw"""
-    OrthogonalTVector <: TVector
-
-A type to represent tangent vectors to points on a [`Flag`](@ref) manifold  in the
-orthogonal coordinates representation.
-"""
-struct OrthogonalTVector{T<:AbstractMatrix} <: TVector
-    value::T
-end
-
-ManifoldsBase.@manifold_vector_forwards OrthogonalTVector value
-ManifoldsBase.@manifold_element_forwards OrthogonalPoint value
-
-Base.eltype(p::OrthogonalPoint) = eltype(p.value)
-Base.eltype(X::OrthogonalTVector) = eltype(X.value)
 
 function check_vector(
     M::Flag{N,dp1},
@@ -164,6 +139,24 @@ function Random.rand!(
     return pX
 end
 
+function _phi_B_map!(M::Flag, Y, p, B, X)
+    Y .= (B * X .- X * B) ./ 2
+    return project!(M, Y, p, Y)
+end
+
+function parallel_transport_direction!(M::Flag, Y::OrthogonalTVector, p::OrthogonalPoint, X::OrthogonalTVector, d::OrthogonalTVector)
+    Y.value .= X.value
+    Z = copy(X.value)
+    k_factor = -1
+    # TODO: check more carefully the series cutoff.
+    for k in 1:10
+        _phi_B_map!(M, Z, p, d, Z)
+        k_factor *= -k
+        Y .+=  Z ./ k_factor
+    end
+    return Y
+end
+
 function retract_qr!(
     ::Flag,
     q::OrthogonalPoint{AbstractMatrix{T}},
@@ -175,57 +168,4 @@ function retract_qr!(
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
-end
-
-"""
-    orthogonal_tv_to_stiefel(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
-
-Convert tangent vector from [`Flag`](@ref) manifold `M` from orthogonal representation to
-Stiefel representation.
-"""
-function orthogonal_tv_to_stiefel(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
-    (N, k) = representation_size(M)
-    return p.value * X.value[:, 1:k]
-end
-
-"""
-    stiefel_tv_to_orthogonal(M::Flag, p::AbstractMatrix, X::AbstractMatrix)
-
-Convert tangent vector from [`Flag`](@ref) manifold `M` from Stiefel representation to
-orthogonal representation.
-"""
-function stiefel_tv_to_orthogonal(M::Flag, p::AbstractMatrix, X::AbstractMatrix)
-    (N, k) = representation_size(M)
-    out = similar(X, N, N)
-    fill!(out, 0)
-    out[:, 1:k] = X
-    out[1:k, (k + 1):N] = -transpose(view(X, (k + 1):N, 1:k))
-    p_ortho = stiefel_point_to_orthogonal(M, p)
-    return OrthogonalTVector(p_ortho.value' * out)
-end
-
-"""
-    orthogonal_point_to_stiefel(M::Flag, p::OrthogonalTVector)
-
-Convert point `p` from [`Flag`](@ref) manifold `M` from orthogonal representation to
-Stiefel representation.
-"""
-function orthogonal_point_to_stiefel(M::Flag, p::OrthogonalTVector)
-    (N, k) = representation_size(M)
-    return p.value[:, 1:k]
-end
-
-"""
-    stiefel_point_to_orthogonal(M::Flag, p::AbstractMatrix)
-
-Convert point `p` from [`Flag`](@ref) manifold `M` from Stiefel representation to
-orthogonal representation.
-"""
-function stiefel_point_to_orthogonal(M::Flag, p::AbstractMatrix)
-    (N, k) = representation_size(M)
-    out = similar(p, N, N)
-    fill!(out, 0)
-    out[:, 1:k] = p
-    out[:, (k + 1):N] = nullspace(p')
-    return OrthogonalPoint(out)
 end
