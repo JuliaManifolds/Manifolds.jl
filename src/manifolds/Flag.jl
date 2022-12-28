@@ -24,8 +24,6 @@ ManifoldsBase.@manifold_element_forwards OrthogonalPoint value
 Base.eltype(p::OrthogonalPoint) = eltype(p.value)
 Base.eltype(X::OrthogonalTVector) = eltype(X.value)
 
-
-
 struct ZeroTuple{TupT}
     x::TupT
 end

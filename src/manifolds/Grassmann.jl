@@ -28,7 +28,7 @@ the orthogonal group $\operatorname{O}(k)$ of orthogonal $k × k$ matrices.
 Note that it doesn't matter whether we start from the Euclidean or canonical metric
 on the Stiefel manifold, the resulting quotient metric on Grassmann is the same.
 
-The tangent space at a point (subspace) $x$ is given by
+The tangent space at a point (subspace) $p$ is given by
 
 ````math
 T_p\mathrm{Gr}(n,k) = \bigl\{

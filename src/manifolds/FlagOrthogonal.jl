@@ -144,7 +144,13 @@ function _phi_B_map!(M::Flag, Y, p, B, X)
     return project!(M, Y, p, Y)
 end
 
-function parallel_transport_direction!(M::Flag, Y::OrthogonalTVector, p::OrthogonalPoint, X::OrthogonalTVector, d::OrthogonalTVector)
+function parallel_transport_direction!(
+    M::Flag,
+    Y::OrthogonalTVector,
+    p::OrthogonalPoint,
+    X::OrthogonalTVector,
+    d::OrthogonalTVector,
+)
     Y.value .= X.value
     Z = copy(X.value)
     k_factor = -1
@@ -152,7 +158,7 @@ function parallel_transport_direction!(M::Flag, Y::OrthogonalTVector, p::Orthogo
     for k in 1:10
         _phi_B_map!(M, Z, p, d, Z)
         k_factor *= -k
-        Y .+=  Z ./ k_factor
+        Y .+= Z ./ k_factor
     end
     return Y
 end
