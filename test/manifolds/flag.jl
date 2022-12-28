@@ -56,4 +56,51 @@ using Test
     @test check_vector(M, p1_ortho, X1_ortho) === nothing
     @test check_vector(M, p1_ortho, X2_ortho_wrong1) isa DomainError
     @test isapprox(M, p1_ortho, X2_ortho, project(M, p1_ortho, X2_ortho_wrong1))
+
+    p1 = [
+        -0.3146651787309489 -0.48660897424165994
+        0.6064615017863313 -0.34830198287474623
+        0.7186856131733219 0.21637936237010186
+        -0.04188711028762897 0.09081337776276559
+        0.12217500380489567 -0.7660485212260545
+    ]
+    p2 = [
+        -0.03091072893493796 0.13880702776118134
+        0.1223349326386293 -0.21714532137397113
+        0.49375943573694303 0.2005115408134847
+        0.6786375747132262 0.5164995985838793
+        0.5288963536470062 -0.7915831005730196
+    ]
+
+    X1 = [
+        -0.6804229240952372 -0.034412196486963954
+        0.8344934559155401 0.48097313913408224
+        -1.0810467279810454 0.11289047449146702
+        -1.1353782173810583 0.34131188565927895
+        0.0751500891676202 -0.12447744196142059
+    ]
+    X2 = [
+        -0.9739291698646104 0.8292235723623507
+        0.3096151247876431 -0.9579823665757918
+        -0.5250283055037331 -0.05809529998521694
+        0.5756364579603817 -0.37414047858670213
+        -0.7594778759730498 -0.1519330114054877
+    ]
+
+    p1o = Manifolds.stiefel_point_to_orthogonal(M, p1)
+    X1o = Manifolds.stiefel_tv_to_orthogonal(M, p1, X1)
+    X2o = Manifolds.stiefel_tv_to_orthogonal(M, p1, X2)
+
+    @test check_point(M, p1) === nothing
+    @test check_vector(M, p1, X1) === nothing
+    @test check_vector(M, p1, X2) === nothing
+
+    @testset "conversion between Stiefel and orthogonal coordinates" begin
+        p1os = Manifolds.orthogonal_point_to_stiefel(M, p1o)
+        @test isapprox(p1, p1os)
+
+        X1os = Manifolds.orthogonal_tv_to_stiefel(M, p1o, X1o)
+        @test isapprox(X1, X1os)
+    end
+    @test inner(M, p1, X1, X2) ≈ inner(M, p1o, X1o, X2o)
 end

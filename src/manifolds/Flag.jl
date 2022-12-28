@@ -144,19 +144,23 @@ function stiefel_tv_to_orthogonal(M::Flag, p::AbstractMatrix, X::AbstractMatrix)
     (N, k) = representation_size(M)
     out = similar(X, N, N)
     fill!(out, 0)
-    out[:, 1:k] = X
-    out[1:k, (k + 1):N] = -transpose(view(X, (k + 1):N, 1:k))
+
     p_ortho = stiefel_point_to_orthogonal(M, p)
-    return OrthogonalTVector(p_ortho.value' * out)
+    pX = p_ortho.value' * X
+
+    out[:, 1:k] = pX
+    out[1:k, (k + 1):N] = -transpose(view(pX, (k + 1):N, 1:k))
+
+    return OrthogonalTVector(out)
 end
 
 """
-    orthogonal_point_to_stiefel(M::Flag, p::OrthogonalTVector)
+    orthogonal_point_to_stiefel(M::Flag, p::OrthogonalPoint)
 
 Convert point `p` from [`Flag`](@ref) manifold `M` from orthogonal representation to
 Stiefel representation.
 """
-function orthogonal_point_to_stiefel(M::Flag, p::OrthogonalTVector)
+function orthogonal_point_to_stiefel(M::Flag, p::OrthogonalPoint)
     (N, k) = representation_size(M)
     return p.value[:, 1:k]
 end

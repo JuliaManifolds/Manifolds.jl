@@ -6,13 +6,18 @@ function inner(
     Y::AbstractMatrix,
 ) where {N,dp1}
     inner_prod = zero(eltype(X))
+    pX = p' * X
+    pY = p' * Y
+    X_perp = X - p * pX
+    Y_perp = Y - p * pY
     for i in 1:(dp1 - 1)
-        for j in i:dp1
-            block_X = _extract_flag(M, X, j, i)
-            block_Y = _extract_flag(M, Y, j, i)
+        for j in i:(dp1 - 1)
+            block_X = _extract_flag(M, pX, j, i)
+            block_Y = _extract_flag(M, pY, j, i)
             inner_prod += dot(block_X, block_Y)
         end
     end
+    inner_prod += dot(X_perp, Y_perp)
     return inner_prod
 end
 
@@ -29,13 +34,11 @@ function check_vector(
     M::Flag{N,dp1},
     p::AbstractMatrix,
     X::AbstractMatrix;
-    atol=eps(eltype(X)),
+    atol=sqrt(eps(eltype(X))),
 ) where {N,dp1}
-    p_ortho = stiefel_point_to_orthogonal(M, p)
-    pX = p_ortho.value * X
     for i in 1:(dp1 - 1)
         p_i = _extract_flag_stiefel(M, p, i)
-        X_i = _extract_flag_stiefel(M, pX, i)
+        X_i = _extract_flag_stiefel(M, X, i)
 
         pTX_norm = norm(p_i' * X_i)
         if pTX_norm > atol
@@ -47,7 +50,7 @@ function check_vector(
 
         for j in i:(dp1 - 1)
             p_j = _extract_flag_stiefel(M, p, j)
-            X_j = _extract_flag_stiefel(M, pX, j)
+            X_j = _extract_flag_stiefel(M, X, j)
             sum_norm = norm(p_i' * X_j + X_i' * p_j)
             if sum_norm > atol
                 return DomainError(
@@ -67,11 +70,14 @@ function project!(
     X::AbstractMatrix,
 ) where {N,dp1}
     (_, k) = representation_size(M)
-    project!(SkewHermitianMatrices(k), view(Y, 1:k, :), view(X, 1:k, :))
+    pX = p' * X
+    X_perp = X - p * pX
+    project!(SkewHermitianMatrices(k), pX, pX)
     for i in 1:(dp1 - 1)
-        Bi = _extract_flag(M, Y, i)
+        Bi = _extract_flag(M, pX, i)
         fill!(Bi, 0)
     end
+    Y .+= X_perp .+ p * pX
     return Y
 end
 
@@ -99,4 +105,22 @@ function Random.rand!(
         project!(M, pX, vector_at, pX)
     end
     return pX
+end
+
+@doc raw"""
+    retract(M::Flag, p, X, ::PolarRetraction)
+
+Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
+[`Flag`](@ref) `M`. With $USV = p + X$ the retraction reads
+````math
+\operatorname{retr}_p X = UV^\mathrm{H},
+````
+
+where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+"""
+retract(::Flag, ::Any, ::Any, ::PolarRetraction)
+
+function retract_polar!(::Flag, q, p, X)
+    s = svd(p + p * X)
+    return mul!(q, s.U, s.Vt)
 end
