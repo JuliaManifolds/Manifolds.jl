@@ -1,4 +1,28 @@
 
+"""
+    default_inverse_retraction_method(M::Flag)
+
+Return [`PolarInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarInverseRetraction)
+as the default inverse retraction for the [`Flag`](@ref) manifold.
+"""
+default_inverse_retraction_method(::Flag) = PolarInverseRetraction()
+
+"""
+    default_retraction_method(M::Flag)
+
+Return [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction)
+as the default retraction for the [`Flag`](@ref) manifold.
+"""
+default_retraction_method(::Flag) = PolarRetraction()
+
+"""
+    default_vector_transport_method(M::Flag)
+
+Return the [`ProjectionTransport`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.ProjectionTransport)
+as the default vector transport method for the [`Flag`](@ref) manifold.
+"""
+default_vector_transport_method(::Flag) = ProjectionTransport()
+
 function inner(
     M::Flag{N,dp1},
     p::AbstractMatrix,
@@ -19,6 +43,18 @@ function inner(
     end
     inner_prod += dot(X_perp, Y_perp)
     return inner_prod
+end
+
+@doc raw"""
+    inverse_retract(M::Flag, p, q, ::PolarInverseRetraction)
+
+Compute the inverse retraction for the [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction), on the
+[`Flag`](@ref) manifold `M`.
+"""
+inverse_retract(::Flag, ::Any, ::Any, ::PolarInverseRetraction)
+
+function inverse_retract_polar!(::Flag, X, p, q)
+    return copyto!(X, q / (p' * q) - p)
 end
 
 function _extract_flag_stiefel(M::Flag, pX::AbstractMatrix, i::Int)
@@ -63,21 +99,47 @@ function check_vector(
     return nothing
 end
 
+function distance(::Flag, p::AbstractMatrix, q::AbstractMatrix)
+    eigval_angles = map(angle, eigvals(p' * q))
+    positive_angles = filter(x -> x > 0, eigval_angles)
+    return norm(positive_angles)
+end
+
+@doc raw"""
+    project(::Flag, p, X)
+
+Project vector `X` in the Euclidean embedding to the tangent space at point `p` on
+[`Flag`](@ref) manifold. The formula reads[^YeWongLim2022]:
+
+```math
+Y_i = X_i - (p_i p_i^{\mathrm{T}}) X_i + \sum_{j \neq i} p_j X_j^{\mathrm{T}} p_i
+```
+for ``i`` from 1 to ``d`` where the resulting vector is ``Y = [Y_1, Y_2, …, Y_d]`` and
+``X = [X_1, X_2, …, X_d]``, ``p = [p_1, p_2, …, p_d]`` are decompositions into basis vector
+matrices for consecutive subspaces of the flag.
+"""
+project(::Flag, p, X)
+
 function project!(
     M::Flag{N,dp1},
     Y::AbstractMatrix,
     p::AbstractMatrix,
     X::AbstractMatrix,
 ) where {N,dp1}
-    (_, k) = representation_size(M)
-    pX = p' * X
-    X_perp = X - p * pX
-    project!(SkewHermitianMatrices(k), pX, pX)
     for i in 1:(dp1 - 1)
-        Bi = _extract_flag(M, pX, i)
-        fill!(Bi, 0)
+        Y_i = _extract_flag_stiefel(M, Y, i)
+        p_i = _extract_flag_stiefel(M, p, i)
+        X_i = _extract_flag_stiefel(M, X, i)
+
+        Y_i .= X_i .- p_i * (p_i' * X_i)
+        for j in 1:(dp1 - 1)
+            i == j && continue
+            p_j = _extract_flag_stiefel(M, p, j)
+            X_j = _extract_flag_stiefel(M, X, j)
+            Y_i .-= p_j * X_j' * p_i
+        end
     end
-    Y .+= X_perp .+ p * pX
+
     return Y
 end
 
@@ -121,6 +183,6 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 retract(::Flag, ::Any, ::Any, ::PolarRetraction)
 
 function retract_polar!(::Flag, q, p, X)
-    s = svd(p + p * X)
+    s = svd(p + X)
     return mul!(q, s.U, s.Vt)
 end

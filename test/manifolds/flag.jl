@@ -4,6 +4,8 @@ using Test
 @testset "Flag manifold" begin
     M = Flag(5, 1, 2)
 
+    @test repr(M) == "Flag(5, 1, 2)"
+
     p1_ortho = Manifolds.OrthogonalPoint(
         [
             0.5483710839601286 0.11431583140179802 -0.4549972669468796 -0.24420811180644114 -0.6477352315306864
@@ -88,6 +90,7 @@ using Test
     ]
 
     p1o = Manifolds.stiefel_point_to_orthogonal(M, p1)
+    p2o = Manifolds.stiefel_point_to_orthogonal(M, p2)
     X1o = Manifolds.stiefel_tv_to_orthogonal(M, p1, X1)
     X2o = Manifolds.stiefel_tv_to_orthogonal(M, p1, X2)
 
@@ -103,4 +106,22 @@ using Test
         @test isapprox(X1, X1os)
     end
     @test inner(M, p1, X1, X2) ≈ inner(M, p1o, X1o, X2o)
+    @test distance(M, p1o, p2o) ≈ 1.724221091262504
+
+    @testset "projection" begin
+        X_to_project = [
+            -0.5847114032301931 0.3817639698271648
+            -1.0084766091896127 1.5421885878147963
+            -0.22275127208629275 0.4376200479885611
+            -1.2310630343987463 0.6594777460928264
+            0.4109127063901268 -0.2827478363715998
+        ]
+        @test project(M, p1, X_to_project) ≈ [
+            -0.21816592446975824 0.2612682744329179
+            -0.3419669237188776 1.3220342586044491
+            -0.10450160051834301 0.39801647223092396
+            -1.3483600206492228 0.6981642398704684
+            1.288033080060952 -0.5718664356833303
+        ]
+    end
 end

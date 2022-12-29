@@ -42,7 +42,7 @@ where ``λ_1, λ_2, …, λ_r`` are real numbers corresponding to positive angle
 complex eigenvalues of matrix `p' * q`.
 """
 function distance(::Flag, p::OrthogonalPoint, q::OrthogonalPoint)
-    eigval_angles = map(angle, eigvals(p' * q))
+    eigval_angles = map(angle, eigvals(p.value' * q.value))
     positive_angles = filter(x -> x > 0, eigval_angles)
     return norm(positive_angles)
 end

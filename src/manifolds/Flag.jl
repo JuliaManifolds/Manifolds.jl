@@ -123,6 +123,14 @@ function manifold_dimension(M::Flag{N,dp1}) where {N,dp1}
     return dim
 end
 
+function Base.show(io::IO, M::Flag{N}) where {N}
+    print(io, "Flag($(N)")
+    for d_i in M.subspace_dimensions.x[1:(end - 1)]
+        print(io, ", $d_i")
+    end
+    return print(io, ")")
+end
+
 """
     orthogonal_tv_to_stiefel(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
 
