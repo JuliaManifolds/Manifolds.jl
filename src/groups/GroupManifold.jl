@@ -24,6 +24,13 @@ end
         IsExplicitDecorator(),
     )
 end
+@inline function active_traits(f, ::AbstractRNG, M::GroupManifold, args...)
+    return merge_traits(
+        IsGroupManifold(M.op),
+        active_traits(f, M.manifold, args...),
+        IsExplicitDecorator(),
+    )
+end
 
 decorated_manifold(G::GroupManifold) = G.manifold
 
@@ -86,15 +93,6 @@ function is_vector(
         (!te && !ie) && return false
     end
     return is_vector(G.manifold, identity_element(G), X, te, false; kwargs...)
-end
-
-function Random.rand!(G::GroupManifold, pX; kwargs...)
-    rand!(G.manifold, pX; kwargs...)
-    return pX
-end
-function Random.rand!(rng::AbstractRNG, G::GroupManifold, pX; kwargs...)
-    rand!(rng, G.manifold, pX; kwargs...)
-    return pX
 end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
