@@ -10,7 +10,8 @@ struct IsMetricManifold <: AbstractTrait end
 """
     IsDefaultMetric{G<:AbstractMetric}
 
-Specify that a certain [`AbstractMetric`](@ref) is the default metric for a manifold.
+Specify that a certain [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+is the default metric for a manifold.
 This way the corresponding [`MetricManifold`](@ref) falls back to the default methods
 of the manifold it decorates.
 """
@@ -26,12 +27,13 @@ parent_trait(::IsDefaultMetric) = IsMetricManifold()
 """
     MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <: AbstractDecoratorManifold{𝔽}
 
-Equip a [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) explicitly with a [`AbstractMetric`](@ref) `G`.
+Equip a [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) explicitly with an
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G`.
 
 For a Metric AbstractManifold, by default, assumes, that you implement the linear form
 from [`local_metric`](@ref) in order to evaluate the exponential map.
 
-If the corresponding [`AbstractMetric`](@ref) `G` yields closed form formulae for e.g.
+If the corresponding `AbstractMetric` `G` yields closed form formulae for e.g.
 the exponential map and this is implemented directly (without solving the ode),
 you can of course still implement that directly.
 
@@ -39,7 +41,7 @@ you can of course still implement that directly.
 
     MetricManifold(M, G)
 
-Generate the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` as a manifold with the [`AbstractMetric`](@ref) `G`.
+Generate the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` as a manifold with the `AbstractMetric` `G`.
 """
 struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <:
        AbstractDecoratorManifold{𝔽}
@@ -82,7 +84,8 @@ get_embedding(M::MetricManifold) = get_embedding(M.manifold)
     change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
 
 On the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` with implicitly given metric ``g_1``
-and a second [`AbstractMetric`](@ref) ``g_2`` this function performs a change of metric in the
+and a second [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+``g_2`` this function performs a change of metric in the
 sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B`` fulfills
 
 ````math
@@ -143,7 +146,8 @@ end
 
 Convert the representer `X` of a linear function (in other words a cotangent vector at `p`)
 in the tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` given with respect to the
-[`AbstractMetric`](@ref) `G2` into the representer with respect to the (implicit) metric of `M`.
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+`G2` into the representer with respect to the (implicit) metric of `M`.
 
 In order to convert `X` into the representer with respect to the (implicitly given) metric ``g_1`` of `M`,
 we have to find the conversion function ``c: T_p\mathcal M \to T_p\mathcal M`` such that
@@ -281,7 +285,8 @@ end
     flat(N::MetricManifold{M,G}, p, X::TFVector)
 
 Compute the musical isomorphism to transform the tangent vector `X` from the
-[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with [`AbstractMetric`](@ref) `G` to a cotangent by
+[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G` to a cotangent by
 computing
 
 ````math
@@ -428,14 +433,15 @@ end
     inner(N::MetricManifold{M,G}, p, X, Y)
 
 Compute the inner product of `X` and `Y` from the tangent space at `p` on the
-[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` using the [`AbstractMetric`](@ref) `G`.
+[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` using the
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G`.
 If `M` has `G` as its [`IsDefaultMetric`](@ref) trait,
 this is done using `inner(M, p, X, Y)`, otherwise the [`local_metric`](@ref)`(M, p)` is employed as
 
 ````math
 g_p(X, Y) = ⟨X, G_p Y⟩,
 ````
-where ``G_p`` is the loal matrix representation of the [`AbstractMetric`](@ref) `G`.
+where ``G_p`` is the loal matrix representation of the `AbstractMetric` `G`.
 """
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
@@ -463,7 +469,8 @@ end
 """
     is_default_metric(M::AbstractManifold, G::AbstractMetric)
 
-returns whether an [`AbstractMetric`](@ref) is the default metric on the manifold `M` or not.
+returns whether an [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+is the default metric on the manifold `M` or not.
 This can be set by defining this function, or setting the [`IsDefaultMetric`](@ref) trait for an
 [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold).
 """
@@ -559,11 +566,12 @@ end
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
 
-Copute the logarithmic map on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with the [`AbstractMetric`](@ref) `G`.
+Copute the logarithmic map on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with the
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G`.
 
 If the metric was declared the default metric using the [`IsDefaultMetric`](@ref) trait or [`is_default_metric`](@ref), this method
 falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for the non-default
-[`AbstractMetric`](@ref) `G` metric within its [`MetricManifold`](@ref)`{M,G}`.
+`AbstractMetric` `G` metric within its [`MetricManifold`](@ref)`{M,G}`.
 """
 log(::MetricManifold, ::Any...)
 
@@ -703,7 +711,8 @@ end
     sharp(N::MetricManifold{M,G}, p, ξ::CoTFVector)
 
 Compute the musical isomorphism to transform the cotangent vector `ξ` from the
-[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with [`AbstractMetric`](@ref) `G` to a tangent by
+[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G` to a tangent by
 computing
 
 ````math
