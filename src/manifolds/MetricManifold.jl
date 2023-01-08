@@ -1,20 +1,3 @@
-@doc raw"""
-    AbstractMetric
-
-Abstract type for the pseudo-Riemannian metric tensor ``g``, a family of smoothly
-varying inner products on the tangent space. See [`inner`](@ref).
-
-# Functor
-
-    (metric::Metric)(M::AbstractManifold)
-    (metric::Metric)(M::MetricManifold)
-
-Generate the `MetricManifold` that wraps the manifold `M` with given `metric`.
-This works for both a variable containing the metric as well as a subtype `T<:AbstractMetric`,
-where a zero parameter constructor `T()` is availabe.
-If `M` is already a metric manifold, the inner manifold with the new `metric` is returned.
-"""
-abstract type AbstractMetric end
 
 """
     IsMetricManifold <: AbstractTrait
@@ -90,15 +73,6 @@ end
 # remetricise instead of double-decorating
 (metric::AbstractMetric)(M::MetricManifold) = MetricManifold(M.manifold, metric)
 (::Type{T})(M::MetricManifold) where {T<:AbstractMetric} = MetricManifold(M.manifold, T())
-
-@doc raw"""
-    RiemannianMetric <: AbstractMetric
-
-Abstract type for Riemannian metrics, a family of positive definite inner
-products. The positive definite property means that for ``X  ∈ T_p \mathcal M``, the
-inner product ``g(X, X) > 0`` whenever ``X`` is not the zero vector.
-"""
-abstract type RiemannianMetric <: AbstractMetric end
 
 decorated_manifold(M::MetricManifold) = M.manifold
 
