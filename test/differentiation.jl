@@ -27,7 +27,6 @@ using ManifoldDiff
 
 import ManifoldDiff: gradient
 
-
 struct TestRiemannianBackend <: AbstractRiemannianDiffBackend end
 function ManifoldDiff.gradient(::AbstractManifold, f, p, ::TestRiemannianBackend)
     return collect(1.0:length(p))
