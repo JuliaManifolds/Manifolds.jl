@@ -269,7 +269,8 @@ end
 """
     LeftInvariantMetric <: AbstractMetric
 
-An [`AbstractMetric`](@ref) that changes the metric of a Lie group to the left-invariant
+An [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+that changes the metric of a Lie group to the left-invariant
 metric obtained by left-translations to the identity. Adds the
 [`HasLeftInvariantMetric`](@ref) trait.
 """
@@ -278,7 +279,8 @@ struct LeftInvariantMetric <: AbstractMetric end
 """
     RightInvariantMetric <: AbstractMetric
 
-An [`AbstractMetric`](@ref) that changes the metric of a Lie group to the right-invariant
+An [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+that changes the metric of a Lie group to the right-invariant
 metric obtained by right-translations to the identity. Adds the
 [`HasRightInvariantMetric`](@ref) trait.
 """

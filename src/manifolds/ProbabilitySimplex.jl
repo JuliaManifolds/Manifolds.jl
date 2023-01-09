@@ -49,7 +49,7 @@ active_traits(f, ::ProbabilitySimplex, args...) = merge_traits(IsEmbeddedManifol
 @doc raw"""
     change_representer(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
-Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](@ref),
+Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric),
 the representer of a linear functional on the tangent space is adapted as ``Z = p .* X``, since
 this “compensates” for the divsion by ``p`` in the Riemannian metric on the [`ProbabilitySimplex`](@ref).
 

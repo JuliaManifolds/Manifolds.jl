@@ -42,7 +42,7 @@ PositiveArrays(n::Vararg{Int,I}) where {I} = PositiveNumbers()^(n)
     change_representer(M::PositiveNumbers, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect
-to the [`EuclideanMetric`](@ref) `g_E`, this function changes the representer into the one
+to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric) `g_E`, this function changes the representer into the one
 with respect to the positivity metric representation of
 [`PositiveNumbers`](@ref) `M`.
 
@@ -67,7 +67,7 @@ end
     change_metric(M::PositiveNumbers, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect to
-the [`EuclideanMetric`](@ref) `g_E`,
+the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric) `g_E`,
 this function changes the representer into the one with respect to the positivity metric
 of [`PositiveNumbers`](@ref) `M`.
 
