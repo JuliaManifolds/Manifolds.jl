@@ -1,6 +1,7 @@
 include("../utils.jl")
 using FiniteDifferences
 using Manifolds: RiemannianProjectionBackend
+using ManifoldDiff
 
 function Ω(::SymplecticStiefel, p, X)
     Q = SymplecticMatrix(X, p)
@@ -287,7 +288,7 @@ end
                 return Q_grad * p * (euc_grad_f') * Q_grad * p + euc_grad_f * p' * p
             end
             p_grad = convert(Array{Float64}, points[1])
-            fd_diff = RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
+            fd_diff = RiemannianProjectionBackend(ManifoldDiff.FiniteDifferencesBackend())
 
             @test isapprox(
                 Manifolds.gradient(SpSt_6_4, test_f, p_grad, fd_diff),
