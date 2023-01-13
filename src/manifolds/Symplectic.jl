@@ -380,7 +380,7 @@ w.r.t the Riemannian metric ``g_p`` extended to the entire embedding space.
     > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
     > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
-function gradient(
+function ManifoldDiff.gradient(
     M::Symplectic,
     f,
     p,
@@ -391,7 +391,7 @@ function gradient(
     return gradient!(M, f, Y, p, backend; extended_metric=extended_metric)
 end
 
-function gradient!(
+function ManifoldDiff.gradient!(
     M::Symplectic,
     f,
     X,

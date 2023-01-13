@@ -14,7 +14,8 @@ struct ArrayPowerRepresentation <: AbstractPowerRepresentation end
 @doc raw"""
     PowerMetric <: AbstractMetric
 
-Represent the [`AbstractMetric`](@ref) on an `AbstractPowerManifold`, i.e. the inner
+Represent the [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+on an `AbstractPowerManifold`, i.e. the inner
 product on the tangent space is the sum of the inner product of each elements
 tangent space of the power manifold.
 """

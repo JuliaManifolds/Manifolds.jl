@@ -182,6 +182,7 @@ using ManifoldsBase:
     AbstractInverseRetractionMethod,
     AbstractManifold,
     AbstractManifoldPoint,
+    AbstractMetric,
     AbstractNumbers,
     AbstractOrthogonalBasis,
     AbstractOrthonormalBasis,
@@ -210,6 +211,7 @@ using ManifoldsBase:
     DifferentiatedRetractionVectorTransport,
     EmbeddedManifold,
     EmptyTrait,
+    EuclideanMetric,
     ExponentialRetraction,
     FVector,
     IsIsometricEmbeddedManifold,
@@ -241,6 +243,7 @@ using ManifoldsBase:
     QRInverseRetraction,
     QRRetraction,
     RealNumbers,
+    RiemannianMetric,
     ScaledVectorTransport,
     SchildsLadderTransport,
     ShootingInverseRetraction,
@@ -267,6 +270,35 @@ using ManifoldsBase:
     shortest_geodesic,
     size_to_tuple,
     trait
+using ManifoldDiff: ManifoldDiff
+using ManifoldDiff:
+    default_differential_backend,
+    _derivative,
+    _derivative!,
+    differential,
+    differential!,
+    gradient,
+    gradient!,
+    _gradient,
+    _gradient!,
+    hessian,
+    _hessian,
+    jacobian,
+    _jacobian,
+    _jacobian!,
+    riemannian_gradient,
+    riemannian_gradient!,
+    set_default_differential_backend!
+using ManifoldDiff:
+    AbstractDiffBackend,
+    AbstractRiemannianDiffBackend,
+    ExplicitEmbeddedBackend,
+    NoneDiffBackend,
+    RiemannianProjectionBackend,
+    TangentDiffBackend
+
+import ManifoldDiff: riemannian_gradient, riemannian_gradient!
+
 using Markdown: @doc_str
 using MatrixEquations: lyapc
 using Quaternions: Quaternions
@@ -284,8 +316,6 @@ using StatsBase: AbstractWeights
 include("utils.jl")
 
 include("product_representations.jl")
-include("differentiation/differentiation.jl")
-include("differentiation/embedded_diff.jl")
 
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
@@ -293,9 +323,6 @@ include("manifolds/MetricManifold.jl")
 include("manifolds/QuotientManifold.jl")
 include("manifolds/VectorBundle.jl")
 include("groups/group.jl")
-
-# Requires both differentiation and metric
-include("differentiation/riemannian_diff.jl")
 
 # Features I: Which are extended on Meta Manifolds
 include("distributions.jl")
@@ -445,11 +472,6 @@ function __init__()
     @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
         using .BoundaryValueDiffEq
         include("differentiation/bvp.jl")
-    end
-
-    @require FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000" begin
-        using .FiniteDifferences
-        include("differentiation/finite_differences.jl")
     end
 
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin

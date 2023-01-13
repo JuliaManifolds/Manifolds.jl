@@ -4,14 +4,8 @@ using StatsBase: AbstractWeights, pweights
 using ManifoldsBase: TraitList
 import ManifoldsBase: default_retraction_method
 import Manifolds: solve_exp_ode
-using Manifolds:
-    FiniteDifferencesBackend,
-    InducedBasis,
-    connection,
-    get_chart_index,
-    induced_basis,
-    mean!,
-    median!
+using Manifolds: InducedBasis, connection, get_chart_index, induced_basis, mean!, median!
+using ManifoldDiff: FiniteDifferencesBackend
 include("utils.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
@@ -350,7 +344,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
             @test gaussian_curvature(M, p, B_chart_p; backend=fdm) ≈ 0 atol = 1e-6
             @test einstein_tensor(M, p, B_chart_p; backend=fdm) ≈ zeros(n, n) atol = 1e-6
 
-            fd_diff = Manifolds.FiniteDifferencesBackend()
+            fd_diff = FiniteDifferencesBackend()
             @test christoffel_symbols_first(M, p, B_chart_p; backend=fd_diff) ≈
                   zeros(n, n, n) atol = 1e-6
             @test christoffel_symbols_second(M, p, B_chart_p; backend=fd_diff) ≈

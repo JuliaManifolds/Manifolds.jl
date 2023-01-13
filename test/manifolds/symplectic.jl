@@ -1,6 +1,7 @@
 include("../utils.jl")
 using FiniteDifferences
 using Manifolds: RiemannianProjectionBackend
+using ManifoldDiff
 
 @testset "Symplectic" begin
     @testset "Real" begin
@@ -255,7 +256,7 @@ using Manifolds: RiemannianProjectionBackend
             analytical_grad_f(p) = (1 / 2) * (p * Q_grad * p * Q_grad + p * p')
 
             p_grad = convert(Array{Float64}, points[1])
-            fd_diff = RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
+            fd_diff = RiemannianProjectionBackend(ManifoldDiff.FiniteDifferencesBackend())
 
             @test isapprox(
                 Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff),
