@@ -112,6 +112,13 @@ tangent space.
 """
 inner(M::GeneralizedStiefel, p, X, Y) = dot(X, M.B * Y)
 
+"""
+    is_flat(::GeneralizedStiefel)
+
+Return false. [`GeneralizedStiefel`](@ref) is not a flat manifold.
+"""
+is_flat(M::GeneralizedStiefel) = false
+
 @doc raw"""
     manifold_dimension(M::GeneralizedStiefel)
 

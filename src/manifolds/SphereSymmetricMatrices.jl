@@ -68,6 +68,13 @@ function get_embedding(::SphereSymmetricMatrices{n,𝔽}) where {n,𝔽}
     return ArraySphere(n, n; field=𝔽)
 end
 
+"""
+    is_flat(::SphereSymmetricMatrices)
+
+Return false. [`SphereSymmetricMatrices`](@ref) is not a flat manifold.
+"""
+is_flat(M::SphereSymmetricMatrices) = false
+
 @doc raw"""
     manifold_dimension(M::SphereSymmetricMatrices{n,𝔽})
 

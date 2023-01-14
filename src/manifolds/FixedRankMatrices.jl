@@ -377,6 +377,13 @@ function Base.isapprox(
     )
 end
 
+"""
+    is_flat(::FixedRankMatrices)
+
+Return false. [`FixedRankMatrices`](@ref) is not a flat manifold.
+"""
+is_flat(M::FixedRankMatrices) = false
+
 function number_eltype(p::SVDMPoint)
     return typeof(one(eltype(p.U)) + one(eltype(p.S)) + one(eltype(p.Vt)))
 end

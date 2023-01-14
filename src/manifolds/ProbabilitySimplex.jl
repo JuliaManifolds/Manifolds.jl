@@ -224,6 +224,13 @@ function inverse_retract_softmax!(::ProbabilitySimplex{n}, X, p, q) where {n}
     return X
 end
 
+"""
+    is_flat(::ProbabilitySimplex)
+
+Return false. [`ProbabilitySimplex`](@ref) is not a flat manifold.
+"""
+is_flat(M::ProbabilitySimplex) = false
+
 @doc raw"""
     log(M::ProbabilitySimplex, p, q)
 

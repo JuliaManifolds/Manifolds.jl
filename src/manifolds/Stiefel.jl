@@ -256,6 +256,13 @@ function Base.isapprox(M::Stiefel, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
 
+"""
+    is_flat(::Stiefel)
+
+Return false. [`Stiefel`](@ref) is not a flat manifold.
+"""
+is_flat(M::Stiefel) = false
+
 @doc raw"""
     manifold_dimension(M::Stiefel)
 

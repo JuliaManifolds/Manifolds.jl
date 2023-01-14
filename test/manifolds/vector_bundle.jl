@@ -51,6 +51,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
     for T in types, prepr in [ProductRepr, ArrayPartition]
         p = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
+        @test injectivity_radius(TB) == 0
         TpM = TangentSpaceAtPoint(M, p)
         @test sprint(show, TB) == "TangentBundle(Sphere(2, ℝ))"
         @test base_manifold(TB) == M

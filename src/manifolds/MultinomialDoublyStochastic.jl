@@ -96,6 +96,13 @@ function get_embedding(::MultinomialDoubleStochastic{N}) where {N}
     return MultinomialMatrices(N, N)
 end
 
+"""
+    is_flat(::MultinomialDoubleStochastic)
+
+Return false. [`MultinomialDoubleStochastic`](@ref) is not a flat manifold.
+"""
+is_flat(M::MultinomialDoubleStochastic) = false
+
 @doc raw"""
     manifold_dimension(M::MultinomialDoubleStochastic{n}) where {n}
 

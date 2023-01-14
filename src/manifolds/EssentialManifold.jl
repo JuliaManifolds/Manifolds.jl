@@ -132,6 +132,13 @@ function isapprox(M::EssentialManifold, p, q; kwargs...)
     return isapprox(distance(M, p, q), 0.0; kwargs...)
 end
 
+"""
+    is_flat(::EssentialManifold)
+
+Return false. [`EssentialManifold`](@ref) is not a flat manifold.
+"""
+is_flat(M::EssentialManifold) = false
+
 @doc raw"""
     log(M::EssentialManifold, p, q)
 

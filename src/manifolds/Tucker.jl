@@ -628,6 +628,13 @@ function isapprox(M::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector;
     return isapprox(embed(M, p, x), embed(M, p, y); kwargs...)
 end
 
+"""
+    is_flat(::Tucker)
+
+Return false. [`Tucker`](@ref) is not a flat manifold.
+"""
+is_flat(M::Tucker) = false
+
 #=
 Determines whether there are tensors of dimensions n⃗ with multilinear rank r⃗
 =#

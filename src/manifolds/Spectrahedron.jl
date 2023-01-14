@@ -103,6 +103,13 @@ function get_embedding(M::Spectrahedron)
     return Euclidean(representation_size(M)...; field=ℝ)
 end
 
+"""
+    is_flat(::Spectrahedron)
+
+Return false. [`Spectrahedron`](@ref) is not a flat manifold.
+"""
+is_flat(M::Spectrahedron) = false
+
 @doc raw"""
     manifold_dimension(M::Spectrahedron)
 

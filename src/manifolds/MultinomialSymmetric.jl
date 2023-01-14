@@ -79,6 +79,13 @@ end
 embed!(::MultinomialSymmetric, q, p) = copyto!(q, p)
 embed!(::MultinomialSymmetric, Y, ::Any, X) = copyto!(Y, X)
 
+"""
+    is_flat(::MultinomialSymmetric)
+
+Return false. [`MultinomialSymmetric`](@ref) is not a flat manifold.
+"""
+is_flat(M::MultinomialSymmetric) = false
+
 @doc raw"""
     manifold_dimension(M::MultinomialSymmetric{n}) where {n}
 

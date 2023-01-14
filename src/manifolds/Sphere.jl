@@ -282,6 +282,13 @@ function inverse_retract_project!(::AbstractSphere, X, p, q)
     return (X .= q ./ real(dot(p, q)) .- p)
 end
 
+"""
+    is_flat(::AbstractSphere)
+
+Return false. [`AbstractSphere`](@ref) is not a flat manifold.
+"""
+is_flat(M::AbstractSphere) = false
+
 @doc raw"""
     local_metric(M::Sphere{n}, p, ::DefaultOrthonormalBasis)
 

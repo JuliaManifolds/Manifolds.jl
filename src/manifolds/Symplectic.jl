@@ -542,6 +542,13 @@ function inverse_retract_caley!(M::Symplectic, X, p, q)
     return X
 end
 
+"""
+    is_flat(::Symplectic)
+
+Return false. [`Symplectic`](@ref) is not a flat manifold.
+"""
+is_flat(M::Symplectic) = false
+
 @doc raw"""
     manifold_dimension(::Symplectic{n})
 

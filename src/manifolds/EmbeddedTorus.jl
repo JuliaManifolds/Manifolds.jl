@@ -64,6 +64,13 @@ function get_embedding(::EmbeddedTorus)
     return Euclidean(3)
 end
 
+"""
+    is_flat(::EmbeddedTorus)
+
+Return false. [`EmbeddedTorus`](@ref) is not a flat manifold.
+"""
+is_flat(M::EmbeddedTorus) = false
+
 @doc raw"""
     manifold_dimension(M::EmbeddedTorus)
 

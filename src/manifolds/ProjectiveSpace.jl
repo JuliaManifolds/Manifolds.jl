@@ -286,6 +286,13 @@ function Base.isapprox(::AbstractProjectiveSpace, p, q; kwargs...)
     return isapprox(abs(dot(p, q)), 1; kwargs...)
 end
 
+"""
+    is_flat(::AbstractProjectiveSpace)
+
+Return false. [`AbstractProjectiveSpace`](@ref) is not a flat manifold.
+"""
+is_flat(M::AbstractProjectiveSpace) = false
+
 @doc raw"""
     log(M::AbstractProjectiveSpace, p, q)
 

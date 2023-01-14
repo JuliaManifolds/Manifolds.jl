@@ -381,6 +381,13 @@ function inverse_local_metric(
     return local_metric(M, p, B)
 end
 
+"""
+    is_flat(::Euclidean)
+
+Return true. [`Euclidean`](@ref) is a flat manifold.
+"""
+is_flat(M::Euclidean) = true
+
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
     p,

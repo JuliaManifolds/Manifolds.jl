@@ -502,6 +502,13 @@ injectivity_radius(::GeneralUnitaryMatrices{n,ℂ}) where {n} = π
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 
+"""
+    is_flat(::GeneralUnitaryMatrices)
+
+Return false. [`GeneralUnitaryMatrices`](@ref) is not a flat manifold.
+"""
+is_flat(M::GeneralUnitaryMatrices) = false
+
 @doc raw"""
     log(M::Rotations, p, X)
     log(M::OrthogonalMatrices, p, X)

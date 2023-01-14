@@ -187,6 +187,13 @@ injectivity_radius(::GeneralizedGrassmann, p) = π / 2
 injectivity_radius(::GeneralizedGrassmann, ::AbstractRetractionMethod) = π / 2
 injectivity_radius(::GeneralizedGrassmann, p, ::AbstractRetractionMethod) = π / 2
 
+"""
+    is_flat(::GeneralizedGrassmann)
+
+Return false. [`GeneralizedGrassmann`](@ref) is not a flat manifold.
+"""
+is_flat(M::GeneralizedGrassmann) = false
+
 function get_embedding(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
     return GeneralizedStiefel(N, K, M.B, 𝔽)
 end
