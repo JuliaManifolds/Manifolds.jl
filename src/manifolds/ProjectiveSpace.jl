@@ -287,11 +287,11 @@ function Base.isapprox(::AbstractProjectiveSpace, p, q; kwargs...)
 end
 
 """
-    is_flat(::AbstractProjectiveSpace)
+    is_flat(M::AbstractProjectiveSpace)
 
-Return false. [`AbstractProjectiveSpace`](@ref) is not a flat manifold.
+Return true if [`AbstractProjectiveSpace`](@ref) is of dimension 1 and false otherwise.
 """
-is_flat(M::AbstractProjectiveSpace) = false
+is_flat(M::AbstractProjectiveSpace) = manifold_dimension(M) == 1
 
 @doc raw"""
     log(M::AbstractProjectiveSpace, p, q)

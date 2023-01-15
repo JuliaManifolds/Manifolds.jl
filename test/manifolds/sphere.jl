@@ -9,6 +9,8 @@ using ManifoldsBase: TFVector
         @test repr(M) == "Sphere(2, ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3},ℝ}
         @test representation_size(M) == (3,)
+        @test !is_flat(M)
+        @test is_flat(Sphere(1))
         @test injectivity_radius(M) == π
         @test injectivity_radius(M, ExponentialRetraction()) == π
         @test injectivity_radius(M, ProjectionRetraction()) == π / 2

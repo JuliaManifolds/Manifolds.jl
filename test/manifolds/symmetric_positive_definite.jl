@@ -14,6 +14,11 @@ include("../utils.jl")
         ),
     )
 
+    @test !is_flat(M1)
+    @test !is_flat(M2)
+    @test !is_flat(M3)
+    @test !is_flat(M4)
+    @test !is_flat(M5)
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1, one(zeros(3, 3))) == Inf
     @test injectivity_radius(M1, ExponentialRetraction()) == Inf
