@@ -8,6 +8,7 @@ include("../utils.jl")
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
             @test !is_flat(M)
+            @test is_flat(Grassmann(2, 1))
             @test get_total_space(M) == Stiefel(3, 2, ℝ)
             @test get_orbit_action(M) ==
                   Manifolds.RowwiseMultiplicationAction(M, Orthogonal(2))

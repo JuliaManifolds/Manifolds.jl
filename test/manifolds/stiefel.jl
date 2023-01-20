@@ -12,6 +12,7 @@ include("../utils.jl")
             @test manifold_dimension(M) == 3
             @test !is_flat(M)
             @test !is_flat(M2)
+            @test is_flat(Stiefel(2, 1))
             base_manifold(M) === M
             @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
             @test_throws ManifoldDomainError is_point(
