@@ -57,6 +57,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2 * manifold_dimension(M)
         @test !is_flat(TB)
+        @test is_flat(TpM)
         @test representation_size(TB) === nothing
         @test default_inverse_retraction_method(TB) === m_prod_invretr
         @test default_retraction_method(TB) == m_prod_retr
@@ -266,6 +267,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
     end
 
     @testset "Extended flatness tests" begin
-        @test is_flat(TangentBundle(Euclidean(3)))
+        M = TangentBundle(Euclidean(3))
+        @test is_flat(M)
+        @test injectivity_radius(M) == Inf
     end
 end
