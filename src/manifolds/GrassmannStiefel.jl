@@ -31,6 +31,11 @@ ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTVector va
 ManifoldsBase.@default_manifold_fallbacks (Stiefel{n,k,ℝ} where {n,k}) StiefelPoint StiefelTVector value value
 ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTVector value value
 
+function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
+    return ProjectionTransport()
+end
+default_vector_transport_method(::Grassmann, ::Type{StiefelPoint}) = ProjectionTransport()
+
 @doc raw"""
     distance(M::Grassmann, p, q)
 
