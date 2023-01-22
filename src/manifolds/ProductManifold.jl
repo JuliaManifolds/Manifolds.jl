@@ -346,13 +346,55 @@ end
 function default_retraction_method(M::ProductManifold)
     return ProductRetraction(map(default_retraction_method, M.manifolds)...)
 end
+function default_retraction_method(M::ProductManifold, ::Type{T}) where {T<:ArrayPartition}
+    return ProductRetraction(
+        map(default_retraction_method, M.manifolds, T.parameters[2].parameters)...,
+    )
+end
+function default_retraction_method(M::ProductManifold, ::Type{T}) where {T<:ProductRepr}
+    return ProductRetraction(
+        map(default_retraction_method, M.manifolds, T.parameters[1].parameters)...,
+    )
+end
 
 function default_inverse_retraction_method(M::ProductManifold)
     return InverseProductRetraction(map(default_inverse_retraction_method, M.manifolds)...)
 end
+function default_inverse_retraction_method(
+    M::ProductManifold,
+    ::Type{T},
+) where {T<:ArrayPartition}
+    return InverseProductRetraction(
+        map(default_inverse_retraction_method, M.manifolds, T.parameters[2].parameters)...,
+    )
+end
+function default_inverse_retraction_method(
+    M::ProductManifold,
+    ::Type{T},
+) where {T<:ProductRepr}
+    return InverseProductRetraction(
+        map(default_inverse_retraction_method, M.manifolds, T.parameters[1].parameters)...,
+    )
+end
 
 function default_vector_transport_method(M::ProductManifold)
     return ProductVectorTransport(map(default_vector_transport_method, M.manifolds)...)
+end
+function default_vector_transport_method(
+    M::ProductManifold,
+    ::Type{T},
+) where {T<:ArrayPartition}
+    return ProductVectorTransport(
+        map(default_vector_transport_method, M.manifolds, T.parameters[2].parameters)...,
+    )
+end
+function default_vector_transport_method(
+    M::ProductManifold,
+    ::Type{T},
+) where {T<:ProductRepr}
+    return ProductVectorTransport(
+        map(default_vector_transport_method, M.manifolds, T.parameters[1].parameters)...,
+    )
 end
 
 @doc raw"""

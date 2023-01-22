@@ -626,16 +626,59 @@ using RecursiveArrayTools: ArrayPartition
 
     @testset "default retraction, inverse retraction and VT" begin
         Mstb = ProductManifold(M1, TangentBundle(M1))
+        T_p_ap = ArrayPartition{
+            Float64,
+            Tuple{Matrix{Float64},ProductRepr{Tuple{Matrix{Float64},Matrix{Float64}}}},
+        }
+        T_p_pr = ProductRepr{
+            Tuple{Matrix{Float64},ProductRepr{Tuple{Matrix{Float64},Matrix{Float64}}}},
+        }
         @test Manifolds.default_retraction_method(Mstb) === ProductRetraction(
             ExponentialRetraction(),
             Manifolds.VectorBundleProductRetraction(),
         )
+        @test Manifolds.default_retraction_method(Mstb, T_p_ap) === ProductRetraction(
+            ExponentialRetraction(),
+            Manifolds.VectorBundleProductRetraction(),
+        )
+        @test Manifolds.default_retraction_method(Mstb, T_p_pr) === ProductRetraction(
+            ExponentialRetraction(),
+            Manifolds.VectorBundleProductRetraction(),
+        )
+
         @test Manifolds.default_inverse_retraction_method(Mstb) ===
               Manifolds.InverseProductRetraction(
             LogarithmicInverseRetraction(),
             Manifolds.VectorBundleInverseProductRetraction(),
         )
+        @test Manifolds.default_inverse_retraction_method(Mstb, T_p_ap) ===
+              Manifolds.InverseProductRetraction(
+            LogarithmicInverseRetraction(),
+            Manifolds.VectorBundleInverseProductRetraction(),
+        )
+        @test Manifolds.default_inverse_retraction_method(Mstb, T_p_pr) ===
+              Manifolds.InverseProductRetraction(
+            LogarithmicInverseRetraction(),
+            Manifolds.VectorBundleInverseProductRetraction(),
+        )
+
         @test Manifolds.default_vector_transport_method(Mstb) === ProductVectorTransport(
+            ParallelTransport(),
+            Manifolds.VectorBundleProductVectorTransport(
+                ParallelTransport(),
+                ParallelTransport(),
+            ),
+        )
+        @test Manifolds.default_vector_transport_method(Mstb, T_p_pr) ===
+              ProductVectorTransport(
+            ParallelTransport(),
+            Manifolds.VectorBundleProductVectorTransport(
+                ParallelTransport(),
+                ParallelTransport(),
+            ),
+        )
+        @test Manifolds.default_vector_transport_method(Mstb, T_p_pr) ===
+              ProductVectorTransport(
             ParallelTransport(),
             Manifolds.VectorBundleProductVectorTransport(
                 ParallelTransport(),
