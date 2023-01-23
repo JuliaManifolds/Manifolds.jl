@@ -204,11 +204,6 @@ connection(M::ConnectionManifold) = M.connection
 
 decorated_manifold(M::ConnectionManifold) = M.manifold
 
-default_retraction_method(M::ConnectionManifold) = default_retraction_method(M.manifold)
-function default_retraction_method(M::ConnectionManifold, t::Type)
-    return default_retraction_method(M.manifold, t)
-end
-
 @doc raw"""
     exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
 

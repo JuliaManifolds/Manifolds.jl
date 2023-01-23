@@ -359,6 +359,14 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         end
     end
 
+    @testset "default_* functions" begin
+        E = Euclidean(3)
+        EM = MetricManifold(E, EuclideanMetric())
+        @test default_retraction_method(EM) === default_retraction_method(E)
+        @test default_inverse_retraction_method(EM) === default_inverse_retraction_method(E)
+        @test default_vector_transport_method(EM) === default_vector_transport_method(E)
+    end
+
     @testset "scaled Sphere metric" begin
         n = 2
         r = 10 * rand()

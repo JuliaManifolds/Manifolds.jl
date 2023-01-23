@@ -126,6 +126,13 @@ include("../utils.jl")
                 atol=10^-15,
             )
         end
+
+        @testset "default_* functions" begin
+            p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            pS = StiefelPoint(p)
+            @test default_vector_transport_method(M, typeof(p)) == ProjectionTransport()
+            @test default_vector_transport_method(M, typeof(pS)) == ProjectionTransport()
+        end
     end
 
     @testset "Complex" begin

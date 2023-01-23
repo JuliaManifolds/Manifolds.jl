@@ -34,7 +34,7 @@ ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTVector 
 function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
     return ProjectionTransport()
 end
-default_vector_transport_method(::Grassmann, ::Type{StiefelPoint}) = ProjectionTransport()
+default_vector_transport_method(::Grassmann, ::Type{<:StiefelPoint}) = ProjectionTransport()
 
 @doc raw"""
     distance(M::Grassmann, p, q)

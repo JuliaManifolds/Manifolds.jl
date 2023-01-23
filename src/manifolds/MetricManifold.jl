@@ -231,23 +231,6 @@ Return the [`LeviCivitaConnection`](@ref) for a metric manifold.
 """
 connection(::MetricManifold) = LeviCivitaConnection()
 
-default_retraction_method(M::MetricManifold) = default_retraction_method(M.manifold)
-function default_retraction_method(M::MetricManifold, t::Type)
-    return default_retraction_method(M.manifold, t)
-end
-function default_inverse_retraction_method(M::MetricManifold)
-    return default_inverse_retraction_method(M.manifold)
-end
-function default_inverse_retraction_method(M::MetricManifold, t::Type)
-    return default_inverse_retraction_method(M.manifold, t)
-end
-function default_vector_transport_method(M::MetricManifold)
-    return default_vector_transport_method(M.manifold)
-end
-function default_vector_transport_method(M::MetricManifold, t::Type)
-    return default_vector_transport_method(M.manifold, t)
-end
-
 @doc raw"""
     det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
 
