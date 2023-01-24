@@ -365,6 +365,10 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test default_retraction_method(EM) === default_retraction_method(E)
         @test default_inverse_retraction_method(EM) === default_inverse_retraction_method(E)
         @test default_vector_transport_method(EM) === default_vector_transport_method(E)
+        EC = ConnectionManifold(E, TestConnection())
+        @test default_retraction_method(EC) === default_retraction_method(E)
+        @test default_inverse_retraction_method(EC) === default_inverse_retraction_method(E)
+        @test default_vector_transport_method(EC) === default_vector_transport_method(E)
     end
 
     @testset "scaled Sphere metric" begin
