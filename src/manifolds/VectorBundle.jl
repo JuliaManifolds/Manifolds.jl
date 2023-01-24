@@ -608,6 +608,21 @@ Return the injectivity radius on the [`TangentSpaceAtPoint`](@ref) `M`, which is
 injectivity_radius(::TangentSpaceAtPoint) = Inf
 
 """
+    injectivity_radius(M::TangentBundle)
+
+Injectivity radius of [`TangentBundle`](@ref) manifold is infinite if the base manifold
+is flat and 0 otherwise.
+See [https://mathoverflow.net/questions/94322/injectivity-radius-of-the-sasaki-metric](https://mathoverflow.net/questions/94322/injectivity-radius-of-the-sasaki-metric).
+"""
+function injectivity_radius(M::TangentBundle)
+    if is_flat(M.manifold)
+        return Inf
+    else
+        return 0.0
+    end
+end
+
+"""
     inner(B::VectorBundleFibers, p, X, Y)
 
 Inner product of vectors `X` and `Y` from the vector space of type `B.fiber`
@@ -707,6 +722,19 @@ end
 function Base.isapprox(M::TangentSpaceAtPoint, X, Y; kwargs...)
     return isapprox(M.fiber.manifold, M.point, X, Y; kwargs...)
 end
+
+"""
+    is_flat(::TangentSpaceAtPoint)
+
+Return true. [`TangentSpaceAtPoint`](@ref) is a flat manifold.
+"""
+is_flat(::TangentSpaceAtPoint) = true
+"""
+    is_flat(::VectorBundle)
+
+Return true if the underlying manifold of [`VectorBundle`](@ref) `M` is flat.
+"""
+is_flat(M::VectorBundle) = is_flat(M.manifold)
 
 """
     log(M::TangentSpaceAtPoint, p, q)

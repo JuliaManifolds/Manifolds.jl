@@ -9,6 +9,7 @@ include("../utils.jl")
         @test repr(PositiveArrays(2, 3, 4)) == "PositiveArrays(2, 3, 4)"
         @test representation_size(M) == ()
         @test manifold_dimension(M) == 1
+        @test !is_flat(M)
         @test !is_point(M, -1.0)
         @test_throws DomainError is_point(M, -1.0, true)
         @test is_vector(M, 1.0, 0.0)

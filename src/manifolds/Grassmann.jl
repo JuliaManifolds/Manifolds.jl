@@ -106,6 +106,13 @@ function Base.isapprox(M::Grassmann, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
     return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
 end
 
+"""
+    is_flat(M::Grassmann)
+
+Return true if [`Grassmann`](@ref) `M` is one-dimensional.
+"""
+is_flat(M::Grassmann) = manifold_dimension(M) == 1
+
 @doc raw"""
     manifold_dimension(M::Grassmann)
 

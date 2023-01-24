@@ -323,6 +323,14 @@ function inner(::SymmetricPositiveDefinite, p, X, Y)
     return dot((F \ Symmetric(X)), (Symmetric(Y) / F))
 end
 
+"""
+    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LinearAffineMetric})
+
+Return false. [`SymmetricPositiveDefinite`](@ref) with [`LinearAffineMetric`](@ref)
+is not a flat manifold.
+"""
+is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LinearAffineMetric}) = false
+
 @doc raw"""
     log(M::SymmetricPositiveDefinite, p, q)
     log(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, q)

@@ -7,6 +7,7 @@ using Quaternions
     @test repr(M) == "OrthogonalMatrices(3)"
     @test injectivity_radius(M, PolarRetraction()) == π / sqrt(2.0)
     @test manifold_dimension(M) == 3
+    @test !is_flat(M)
     p = project(M, ones(3, 3))
     @test is_point(M, p, true)
     @test is_point(M, rand(M), true)
@@ -21,6 +22,7 @@ end
     M = UnitaryMatrices(2)
     @test repr(M) == "UnitaryMatrices(2)"
     @test manifold_dimension(M) == 4
+    @test !is_flat(M)
 
     # wrong length of size
     @test_throws DomainError is_point(M, zeros(1), true)
@@ -60,6 +62,7 @@ end
     @test repr(M) == "UnitaryMatrices(1, ℍ)"
     @test manifold_dimension(M) == 3
     @test injectivity_radius(M) == π
+    @test !is_flat(M)
     @testset "rand" begin
         p = rand(M)
         @test is_point(M, p)
@@ -113,4 +116,10 @@ end
         Quaternion(0.0, 0.0, 1.0, 0.0),
         Quaternion(0.0, 0.0, 0.0, 1.0),
     ]
+end
+
+@testset "Flatness edge cases" begin
+    @test is_flat(
+        Manifolds.GeneralUnitaryMatrices{1,ℂ,Manifolds.AbsoluteDeterminantOneMatrices}(),
+    )
 end

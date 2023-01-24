@@ -502,6 +502,15 @@ injectivity_radius(::GeneralUnitaryMatrices{n,ℂ}) where {n} = π
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 
+"""
+    is_flat(M::GeneralUnitaryMatrices)
+
+Return true if [`GeneralUnitaryMatrices`](@ref) `M` is SO(2) or U(1) and false otherwise.
+"""
+is_flat(M::GeneralUnitaryMatrices) = false
+is_flat(M::GeneralUnitaryMatrices{2,ℝ}) = true
+is_flat(M::GeneralUnitaryMatrices{1,ℂ}) = true
+
 @doc raw"""
     log(M::Rotations, p, X)
     log(M::OrthogonalMatrices, p, X)

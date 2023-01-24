@@ -241,6 +241,13 @@ inner(::Circle, ::Any...)
 Base.isapprox(::Circle, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
 Base.isapprox(::Circle, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
 
+"""
+    is_flat(::Circle)
+
+Return true. [`Circle`](@ref) is a flat manifold.
+"""
+is_flat(M::Circle) = true
+
 @doc raw"""
     log(M::Circle, p, q)
 

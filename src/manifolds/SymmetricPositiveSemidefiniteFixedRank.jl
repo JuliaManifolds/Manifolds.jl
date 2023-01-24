@@ -153,6 +153,13 @@ function isapprox(M::SymmetricPositiveSemidefiniteFixedRank, p, q; kwargs...)
            isapprox(distance(M, p, q), 0.0; kwargs...)
 end
 
+"""
+    is_flat(::SymmetricPositiveSemidefiniteFixedRank)
+
+Return false. [`SymmetricPositiveSemidefiniteFixedRank`](@ref) is not a flat manifold.
+"""
+is_flat(M::SymmetricPositiveSemidefiniteFixedRank) = false
+
 @doc raw"""
     log(M::SymmetricPositiveSemidefiniteFixedRank, q, p)
 

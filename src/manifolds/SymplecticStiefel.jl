@@ -416,6 +416,13 @@ function inverse_retract_caley!(M::SymplecticStiefel, X, p, q)
     return X
 end
 
+"""
+    is_flat(::SymplecticStiefel)
+
+Return false. [`SymplecticStiefel`](@ref) is not a flat manifold.
+"""
+is_flat(M::SymplecticStiefel) = false
+
 @doc raw"""
     manifold_dimension(::SymplecticStiefel{n, k})
 

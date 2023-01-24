@@ -770,6 +770,15 @@ function Base.isapprox(M::ProductManifold, p, X, Y; kwargs...)
     )
 end
 
+"""
+    is_flat(::ProductManifold)
+
+Return true if and only if all component manifolds of [`ProductManifold`](@ref) `M` are flat.
+"""
+function is_flat(M::ProductManifold)
+    return all(is_flat, M.manifolds)
+end
+
 @doc raw"""
     log(M::ProductManifold, p, q)
 

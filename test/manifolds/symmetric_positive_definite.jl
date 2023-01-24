@@ -14,6 +14,7 @@ include("../utils.jl")
         ),
     )
 
+    @test !is_flat(M4)
     @test injectivity_radius(M1) == Inf
     @test injectivity_radius(M1, one(zeros(3, 3))) == Inf
     @test injectivity_radius(M1, ExponentialRetraction()) == Inf
@@ -33,6 +34,7 @@ include("../utils.jl")
         end
         @testset "$(typeof(M))" begin
             @test representation_size(M) == (3, 3)
+            @test !is_flat(M)
             for T in types
                 exp_log_atol_multiplier = 8.0
                 if T <: MMatrix{3,3,Float64}

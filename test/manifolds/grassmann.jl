@@ -7,6 +7,8 @@ include("../utils.jl")
             @test repr(M) == "Grassmann(3, 2, ℝ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
+            @test !is_flat(M)
+            @test is_flat(Grassmann(2, 1))
             @test get_total_space(M) == Stiefel(3, 2, ℝ)
             @test get_orbit_action(M) ==
                   Manifolds.RowwiseMultiplicationAction(M, Orthogonal(2))
@@ -134,6 +136,7 @@ include("../utils.jl")
             @test repr(M) == "Grassmann(3, 2, ℂ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 4
+            @test !is_flat(M)
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex

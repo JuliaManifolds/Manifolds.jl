@@ -7,6 +7,8 @@ include("../utils.jl")
             @test repr(M) == "ProjectiveSpace(2, ℝ)"
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 2
+            @test !is_flat(M)
+            @test is_flat(ProjectiveSpace(1))
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0])
             @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
@@ -102,6 +104,7 @@ include("../utils.jl")
             @test repr(M) == "ProjectiveSpace(2, ℂ)"
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 4
+            @test !is_flat(M)
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
             @test !is_point(M, [1.0 + 0im, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0, 0.0], [0.0 + 0im, 1.0, 0.0])
@@ -192,6 +195,7 @@ include("../utils.jl")
             @test repr(M) == "ProjectiveSpace(2, ℍ)"
             @test representation_size(M) == (3,)
             @test manifold_dimension(M) == 8
+            @test !is_flat(M)
             @test !is_point(M, quat([1.0, 0.0, 0.0, 0.0]))
             @test !is_vector(M, quat([1.0, 0.0, 0.0, 0.0]), quat([0.0, 1.0, 0.0]))
             @test_throws DomainError is_point(M, [1.0, quat(0, 1, 0, 0), 0.0], true)

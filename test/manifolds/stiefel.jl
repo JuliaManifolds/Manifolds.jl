@@ -10,6 +10,9 @@ include("../utils.jl")
             @test is_default_metric(M, EuclideanMetric())
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
+            @test !is_flat(M)
+            @test !is_flat(M2)
+            @test is_flat(Stiefel(2, 1))
             base_manifold(M) === M
             @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
             @test_throws ManifoldDomainError is_point(
@@ -197,6 +200,7 @@ include("../utils.jl")
             @test repr(M) == "Stiefel(3, 2, ℂ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
+            @test !is_flat(M)
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
@@ -314,6 +318,7 @@ include("../utils.jl")
         q = exp(M3, p, X)
         Y = [0.0 0.0; 0.0 0.0; -1.0 1.0]
         r = exp(M3, p, Y)
+        @test !is_flat(M3)
         @test isapprox(M3, p, log(M3, p, q), X)
         @test isapprox(M3, p, log(M3, p, r), Y)
         @test inner(M3, p, X, Y) == 0

@@ -64,6 +64,13 @@ embed(::CenteredMatrices, p, X) = X
 
 get_embedding(::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽} = Euclidean(m, n; field=𝔽)
 
+"""
+    is_flat(::CenteredMatrices)
+
+Return true. [`CenteredMatrices`](@ref) is a flat manifold.
+"""
+is_flat(M::CenteredMatrices) = true
+
 @doc raw"""
     manifold_dimension(M::CenteredMatrices{m,n,𝔽})
 

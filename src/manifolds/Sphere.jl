@@ -282,6 +282,13 @@ function inverse_retract_project!(::AbstractSphere, X, p, q)
     return (X .= q ./ real(dot(p, q)) .- p)
 end
 
+"""
+    is_flat(M::AbstractSphere)
+
+Return true if [`AbstractSphere`](@ref) is of dimension 1 and false otherwise.
+"""
+is_flat(M::AbstractSphere) = manifold_dimension(M) == 1
+
 @doc raw"""
     local_metric(M::Sphere{n}, p, ::DefaultOrthonormalBasis)
 

@@ -12,6 +12,7 @@ using Manifolds: TFVector, CoTFVector
         @test repr(M) == "Circle(ℝ)"
         @test representation_size(M) == ()
         @test manifold_dimension(M) == 1
+        @test is_flat(M)
         @test !is_point(M, 9.0)
         @test !is_point(M, zeros(3, 3))
         @test_throws DomainError is_point(M, 9.0, true)
@@ -179,6 +180,7 @@ using Manifolds: TFVector, CoTFVector
         @test repr(Mc) == "Circle(ℂ)"
         @test representation_size(Mc) == ()
         @test manifold_dimension(Mc) == 1
+        @test is_flat(Mc)
         @test is_vector(Mc, 1im, 0.0)
         @test is_point(Mc, 1im)
         @test !is_point(Mc, 1 + 1im)

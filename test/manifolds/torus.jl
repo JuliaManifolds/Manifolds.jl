@@ -10,6 +10,7 @@ include("../utils.jl")
         @test repr(M) == "Torus(2)"
         @test representation_size(M) == (2,)
         @test manifold_dimension(M) == 2
+        @test is_flat(M)
         @test !is_point(M, 9.0)
         @test_throws DomainError is_point(M, 9.0, true)
         @test !is_point(M, [9.0; 9.0])

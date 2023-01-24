@@ -98,6 +98,13 @@ end
 
 get_embedding(M::Elliptope) = Euclidean(representation_size(M)...; field=ℝ)
 
+"""
+    is_flat(::Elliptope)
+
+Return false. [`Elliptope`](@ref) is not a flat manifold.
+"""
+is_flat(M::Elliptope) = false
+
 @doc raw"""
     manifold_dimension(M::Elliptope)
 

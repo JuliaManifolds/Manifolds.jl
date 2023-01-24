@@ -19,6 +19,7 @@ include("../utils.jl")
     Xf2 = [0.0 -1.0 0.0; -1.0 0.0 0.0; 0.0 0.0 0.0] # nonzero sums
     @test_throws ManifoldDomainError is_vector(M, p, Xf2, true)
     @test representation_size(M) == (3, 3)
+    @test !is_flat(M)
     pE = similar(p)
     embed!(M, pE, p)
     pE2 = embed(M, p)

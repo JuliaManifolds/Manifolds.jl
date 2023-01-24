@@ -201,6 +201,13 @@ function inverse_retract(M::PositiveNumbers, x, y, ::LogarithmicInverseRetractio
     return log(M, x, y)
 end
 
+"""
+    is_flat(::PositiveNumbers)
+
+Return false. [`PositiveNumbers`](@ref) is not a flat manifold.
+"""
+is_flat(M::PositiveNumbers) = false
+
 @doc raw"""
     log(M::PositiveNumbers, p, q)
 

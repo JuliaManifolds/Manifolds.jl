@@ -90,6 +90,13 @@ function Base.isapprox(M::KendallsShapeSpace, p, q; atol=sqrt(max_eps(p, q)), kw
 end
 
 """
+    is_flat(::KendallsShapeSpace)
+
+Return false. [`KendallsShapeSpace`](@ref) is not a flat manifold.
+"""
+is_flat(M::KendallsShapeSpace) = false
+
+"""
     log(M::KendallsShapeSpace, p, q)
 
 Compute the logarithmic map on [`KendallsShapeSpace`](@ref) `M`. See [^Guigui2021] for discussion

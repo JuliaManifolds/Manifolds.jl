@@ -9,6 +9,7 @@ using RecursiveArrayTools: ArrayPartition
     @test (@inferred ProductManifold(M1, M2)) isa ProductManifold
     Mse = ProductManifold(M1, M2)
     @test Mse == M1 × M2
+    @test !is_flat(Mse)
     @test Mse == ProductManifold(M1) × M2
     @test Mse == ProductManifold(M1) × ProductManifold(M2)
     @test Mse == M1 × ProductManifold(M2)

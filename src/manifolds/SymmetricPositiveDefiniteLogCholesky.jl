@@ -102,6 +102,14 @@ function inner(
     return inner(CholeskySpace{N}(), z, Xz, Yz)
 end
 
+"""
+    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric})
+
+Return false. [`SymmetricPositiveDefinite`](@ref) with [`LogCholeskyMetric`](@ref)
+is not a flat manifold.
+"""
+is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}) = false
+
 @doc raw"""
     log(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
 

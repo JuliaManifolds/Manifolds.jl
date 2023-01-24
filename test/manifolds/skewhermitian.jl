@@ -22,6 +22,7 @@ end
         @test repr(M) == "SkewSymmetricMatrices(3)"
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
+        @test is_flat(M)
         @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
         @test check_point(M, B_skewsym) === nothing
         @test_throws DomainError is_point(M, A, true)

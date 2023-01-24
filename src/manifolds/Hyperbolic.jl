@@ -237,6 +237,13 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
     end
 end
 
+"""
+    is_flat(::Hyperbolic)
+
+Return false. [`Hyperbolic`](@ref) is not a flat manifold.
+"""
+is_flat(M::Hyperbolic) = false
+
 @doc raw"""
     log(M::Hyperbolic, p, q)
 
