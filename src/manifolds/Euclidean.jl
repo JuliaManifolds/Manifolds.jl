@@ -169,8 +169,10 @@ Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `p` in 
 ````
 """
 Base.exp(::Euclidean, p, X) = p + X
+Base.exp(::Euclidean, p, X, t::Number) = p .+ t .* X
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
+exp!(::Euclidean, q, p, X, t::Number) = (q .= p .+ t .* X)
 
 function get_basis_diagonalizing(
     M::Euclidean,

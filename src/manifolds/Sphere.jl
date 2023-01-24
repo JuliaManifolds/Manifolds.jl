@@ -163,6 +163,11 @@ function exp!(M::AbstractSphere, q, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
     return q
 end
+function exp!(M::AbstractSphere, q, p, X, t::Number)
+    θ = norm(M, p, X)
+    q .= cos(θ) .* p .+ usinc(θ) .* t .* X
+    return q
+end
 
 function get_basis_diagonalizing(
     M::Sphere{n,ℝ},
