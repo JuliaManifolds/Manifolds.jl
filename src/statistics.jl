@@ -183,7 +183,7 @@ end
         ),
         mean_estimation_method::AbstractEstimationMethod=GradientDescentEstimation(),
         inverse_retraction_method::AbstractInverseRetractionMethod=default_inverse_retraction_method(
-            M,
+            M, eltype(x),
         ),
     )
 
@@ -215,6 +215,7 @@ function Statistics.cov(
     mean_estimation_method::AbstractEstimationMethod=default_estimation_method(M, cov),
     inverse_retraction_method::AbstractInverseRetractionMethod=default_inverse_retraction_method(
         M,
+        eltype(x),
     ),
 )
     μ = mean(M, x, mean_estimation_method)
@@ -263,7 +264,7 @@ Compute the mean using the specified `method`.
         p0=x[1],
         stop_iter=100,
         retraction::AbstractRetractionMethod = default_retraction_method(M),
-        inverse_retraction::AbstractInverseRetractionMethod = default_retraction_method(M),
+        inverse_retraction::AbstractInverseRetractionMethod = default_retraction_method(M, eltype(x)),
         kwargs...,
     )
 
@@ -358,9 +359,10 @@ function Statistics.mean!(
     ::GradientDescentEstimation;
     p0=x[1],
     stop_iter=100,
-    retraction::AbstractRetractionMethod=default_retraction_method(M),
+    retraction::AbstractRetractionMethod=default_retraction_method(M, eltype(x)),
     inverse_retraction::AbstractInverseRetractionMethod=default_inverse_retraction_method(
         M,
+        eltype(x),
     ),
     kwargs...,
 )
@@ -399,8 +401,8 @@ end
         [w::AbstractWeights,]
         method::GeodesicInterpolation;
         shuffle_rng=nothing,
-        retraction::AbstractRetractionMethod = default_retraction_method(M),
-        inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+        retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
+        inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, eltype(x)),
         kwargs...,
     )
 
@@ -423,9 +425,10 @@ function Statistics.mean!(
     w::AbstractVector,
     ::GeodesicInterpolation;
     shuffle_rng::Union{AbstractRNG,Nothing}=nothing,
-    retraction::AbstractRetractionMethod=default_retraction_method(M),
+    retraction::AbstractRetractionMethod=default_retraction_method(M, eltype(x)),
     inverse_retraction::AbstractInverseRetractionMethod=default_inverse_retraction_method(
         M,
+        eltype(x),
     ),
     kwargs...,
 )
@@ -506,9 +509,10 @@ function Statistics.mean!(
     ::CyclicProximalPointEstimation;
     p0=x[1],
     stop_iter=1000000,
-    retraction::AbstractRetractionMethod=default_retraction_method(M),
+    retraction::AbstractRetractionMethod=default_retraction_method(M, eltype(x)),
     inverse_retraction::AbstractInverseRetractionMethod=default_inverse_retraction_method(
         M,
+        eltype(x),
     ),
     kwargs...,
 )
@@ -626,8 +630,8 @@ end
         method::CyclicProximalPointEstimation;
         p0=x[1],
         stop_iter=1000000,
-        retraction::AbstractRetractionMethod = default_retraction_method(M),
-        inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+        retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x),),
+        inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, eltype(x),),
         kwargs...,
     )
 
@@ -691,8 +695,8 @@ Statistics.median(
         α = 1.0,
         p0=x[1],
         stop_iter=2000,
-        retraction::AbstractRetractionMethod = default_retraction_method(M),
-        inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+        retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
+        inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, eltype(x)),
         kwargs...,
     )
 
@@ -796,9 +800,10 @@ function Statistics.median!(
     ::CyclicProximalPointEstimation;
     p0=x[1],
     stop_iter=1000000,
-    retraction::AbstractRetractionMethod=default_retraction_method(M),
+    retraction::AbstractRetractionMethod=default_retraction_method(M, eltype(x)),
     inverse_retraction::AbstractInverseRetractionMethod=default_inverse_retraction_method(
         M,
+        eltype(x),
     ),
     kwargs...,
 )
@@ -856,9 +861,10 @@ function Statistics.median!(
     p0=x[1],
     stop_iter=2000,
     α=1.0,
-    retraction::AbstractRetractionMethod=default_retraction_method(M),
+    retraction::AbstractRetractionMethod=default_retraction_method(M, eltype(x)),
     inverse_retraction::AbstractInverseRetractionMethod=default_inverse_retraction_method(
         M,
+        eltype(x),
     ),
     kwargs...,
 )
@@ -1017,8 +1023,8 @@ end
         [w::AbstractWeights,]
         method::GeodesicInterpolation;
         shuffle_rng::Union{AbstractRNG,Nothing} = nothing,
-        retraction::AbstractRetractionMethod = default_retraction_method(M),
-        inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(M),
+        retraction::AbstractRetractionMethod = default_retraction_method(M, eltype(x)),
+        inverse_retraction::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, eltype(x)),
         kwargs...,
     ) -> (mean, var)
 
@@ -1043,9 +1049,10 @@ function StatsBase.mean_and_var(
     ::GeodesicInterpolation;
     shuffle_rng::Union{AbstractRNG,Nothing}=nothing,
     corrected=false,
-    retraction::AbstractRetractionMethod=default_retraction_method(M),
+    retraction::AbstractRetractionMethod=default_retraction_method(M, eltype(x)),
     inverse_retraction::AbstractInverseRetractionMethod=default_inverse_retraction_method(
         M,
+        eltype(x),
     ),
     kwargs...,
 )
