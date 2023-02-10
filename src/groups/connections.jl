@@ -100,7 +100,7 @@ function exp!(
     q,
     p,
     X,
-    t::Number
+    t::Number,
 ) where {𝔽}
     return exp!(M, q, p, t * X)
 end
