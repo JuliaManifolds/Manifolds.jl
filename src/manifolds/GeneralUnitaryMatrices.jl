@@ -221,11 +221,17 @@ exp(::GeneralUnitaryMatrices, p, X)
 function exp!(M::GeneralUnitaryMatrices, q, p, X)
     return copyto!(M, q, p * exp(X))
 end
+function exp!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
+    return copyto!(M, q, p * exp(t * X))
+end
 
 function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(θ)
     return p * SA[cosθ -sinθ; sinθ cosθ]
+end
+function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix, t::Number)
+    return exp(M, p, t * X)
 end
 function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X)
     @assert size(q) == (2, 2)
@@ -716,15 +722,21 @@ This is also the default retraction on these manifolds.
 """
 retract(::GeneralUnitaryMatrices{n,𝔽}, ::Any, ::Any, ::QRRetraction) where {n,𝔽}
 
-function retract_qr!(::GeneralUnitaryMatrices{n,𝔽}, q::AbstractArray{T}, p, X) where {n,𝔽,T}
-    A = p + p * X
+function retract_qr!(
+    ::GeneralUnitaryMatrices{n,𝔽},
+    q::AbstractArray{T},
+    p,
+    X,
+    t::Number,
+) where {n,𝔽,T}
+    A = p + p * (t * X)
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
-function retract_polar!(M::GeneralUnitaryMatrices{n,𝔽}, q, p, X) where {n,𝔽}
-    A = p + p * X
+function retract_polar!(M::GeneralUnitaryMatrices{n,𝔽}, q, p, X, t::Number) where {n,𝔽}
+    A = p + p * (t * X)
     return project!(M, q, A; check_det=false)
 end
 

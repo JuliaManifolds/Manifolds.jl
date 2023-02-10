@@ -345,12 +345,12 @@ Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.gith
 """
 retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(M::GeneralizedGrassmann, q, p, X)
-    project!(M, q, p + X)
+function retract_polar!(M::GeneralizedGrassmann, q, p, X, t::Number)
+    project!(M, q, p .+ t .* X)
     return q
 end
-function retract_project!(M::GeneralizedGrassmann, q, p, X)
-    project!(M, q, p + X)
+function retract_project!(M::GeneralizedGrassmann, q, p, X, t::Number)
+    project!(M, q, p .+ t .* X)
     return q
 end
 

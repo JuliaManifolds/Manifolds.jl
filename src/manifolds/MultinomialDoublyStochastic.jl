@@ -200,8 +200,8 @@ refers to the elementwise exponentiation.
 """
 retract(::MultinomialDoubleStochastic, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract_project!(M::MultinomialDoubleStochastic, q, p, X)
-    return project!(M, q, p .* exp.(X ./ p))
+function retract_project!(M::MultinomialDoubleStochastic, q, p, X, t::Number)
+    return project!(M, q, p .* exp.(t .* X ./ p))
 end
 
 function Base.show(io::IO, ::MultinomialDoubleStochastic{n}) where {n}

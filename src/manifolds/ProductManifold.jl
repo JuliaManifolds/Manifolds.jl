@@ -1196,6 +1196,23 @@ for TP in [ProductRepr, ArrayPartition]
                     ),
                 )
             end
+            function _retract(
+                M::ProductManifold,
+                p::$TP,
+                X::$TP,
+                t::Number,
+                method::ProductRetraction,
+            )
+                return $TP(
+                    map(
+                        (N, pc, Xc, rm) -> retract(N, pc, Xc, t, rm),
+                        M.manifolds,
+                        submanifold_components(M, p),
+                        submanifold_components(M, X),
+                        method.retractions,
+                    ),
+                )
+            end
         end,
     )
 end
@@ -1207,6 +1224,18 @@ function _retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
         submanifold_components(M, q),
         submanifold_components(M, p),
         submanifold_components(M, X),
+        method.retractions,
+    )
+    return q
+end
+function _retract!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
+    map(
+        retract!,
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        t,
         method.retractions,
     )
     return q

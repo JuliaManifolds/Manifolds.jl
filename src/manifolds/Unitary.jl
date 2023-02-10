@@ -41,6 +41,9 @@ embed(::UnitaryMatrices{1,ℍ}, p, X::Number) = SMatrix{1,1}(X)
 function exp(::UnitaryMatrices{1,ℍ}, p, X::Number)
     return p * exp(X)
 end
+function exp(::UnitaryMatrices{1,ℍ}, p, X::Number, t::Number)
+    return p * exp(t * X)
+end
 
 function get_coordinates_orthonormal(
     ::UnitaryMatrices{1,ℍ},

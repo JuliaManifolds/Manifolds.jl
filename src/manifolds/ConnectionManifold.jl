@@ -231,6 +231,23 @@ function exp!(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q
         ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
     )
 end
+function exp!(
+    ::TraitList{IsConnectionManifold},
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    t::Number,
+)
+    return retract!(
+        M,
+        q,
+        p,
+        X,
+        t,
+        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
+    )
+end
 
 """
     gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
@@ -282,6 +299,19 @@ function retract_exp_ode!(
     b::AbstractBasis,
 )
     sol = solve_exp_ode(M, p, X; basis=b, dense=false)
+    copyto!(q, sol)
+    return q
+end
+function retract_exp_ode!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::AbstractRetractionMethod,
+    b::AbstractBasis,
+)
+    sol = solve_exp_ode(M, p, t * X; basis=b, dense=false)
     copyto!(q, sol)
     return q
 end

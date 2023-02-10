@@ -260,7 +260,7 @@ end
 # StiefelFactorization code
 # Note: intended only for internal use
 
-@doc doc"""
+@doc raw"""
     StiefelFactorization{UT,XT} <: AbstractManifoldPoint
 
 Represent points (and vectors) on `Stiefel(n, k)` with ``2k × k`` factors.[^ZimmermanHüper2022]
@@ -429,4 +429,7 @@ function exp!(
         mul!(q.Z, exp(C)[1:(2k), 1:k], D)
     end
     return q
+end
+function Base.:*(t::Number, sf::StiefelFactorization)
+    return StiefelFactorization(sf.U, t * sf.Z)
 end

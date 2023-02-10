@@ -347,10 +347,10 @@ where multiplication, exponentiation and division are meant elementwise.
 """
 retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxRetraction)
 
-function retract_softmax!(::ProbabilitySimplex, q, p, X)
+function retract_softmax!(::ProbabilitySimplex, q, p, X, t::Number)
     s = zero(eltype(q))
     @inbounds for i in eachindex(q, p, X)
-        q[i] = p[i] * exp(X[i])
+        q[i] = p[i] * exp(t * X[i])
         s += q[i]
     end
     q ./= s

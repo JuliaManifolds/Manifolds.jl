@@ -702,11 +702,13 @@ function retract_polar!(
     q::TuckerPoint,
     p::TuckerPoint{T,D},
     x::TuckerTVector,
+    t::Number,
 ) where {T,D}
+    tx = t * x
     U = p.hosvd.U
-    V = x.U̇
+    V = tx.U̇
     ℭ = p.hosvd.core
-    𝔊 = x.Ċ
+    𝔊 = tx.Ċ
     r⃗ = size(ℭ)
 
     # Build the core tensor S and the factors [Uᵈ  Vᵈ]

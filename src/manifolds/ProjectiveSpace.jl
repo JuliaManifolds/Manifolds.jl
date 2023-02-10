@@ -425,16 +425,16 @@ retract(
     ::Union{ProjectionRetraction,PolarRetraction,QRRetraction},
 )
 
-function retract_polar!(M::AbstractProjectiveSpace, q, p, X)
-    q .= p .+ X
+function retract_polar!(M::AbstractProjectiveSpace, q, p, X, t::Number)
+    q .= p .+ t .* X
     return project!(M, q, q)
 end
-function retract_project!(M::AbstractProjectiveSpace, q, p, X)
-    q .= p .+ X
+function retract_project!(M::AbstractProjectiveSpace, q, p, X, t::Number)
+    q .= p .+ t .* X
     return project!(M, q, q)
 end
-function retract_qr!(M::AbstractProjectiveSpace, q, p, X)
-    q .= p .+ X
+function retract_qr!(M::AbstractProjectiveSpace, q, p, X, t::Number)
+    q .= p .+ t .* X
     return project!(M, q, q)
 end
 

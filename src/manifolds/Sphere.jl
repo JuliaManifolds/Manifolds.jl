@@ -164,7 +164,7 @@ function exp!(M::AbstractSphere, q, p, X)
     return q
 end
 function exp!(M::AbstractSphere, q, p, X, t::Number)
-    θ = norm(M, p, X)
+    θ = abs(t) * norm(M, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* t .* X
     return q
 end
@@ -446,6 +446,10 @@ retract(::AbstractSphere, ::Any, ::Any, ::ProjectionRetraction)
 
 function retract_project!(M::AbstractSphere, q, p, X)
     q .= p .+ X
+    return project!(M, q, q)
+end
+function retract_project!(M::AbstractSphere, q, p, X, t::Number)
+    q .= p .+ t .* X
     return project!(M, q, q)
 end
 
