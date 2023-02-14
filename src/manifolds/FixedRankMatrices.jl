@@ -360,10 +360,10 @@ function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
     return dot(v.U, w.U) + dot(v.M, w.M) + dot(v.Vt, w.Vt)
 end
 
-function Base.isapprox(::FixedRankMatrices, p::SVDMPoint, q::SVDMPoint; kwargs...)
+function _isapprox(::FixedRankMatrices, p::SVDMPoint, q::SVDMPoint; kwargs...)
     return isapprox(p.U * Diagonal(p.S) * p.Vt, q.U * Diagonal(q.S) * q.Vt; kwargs...)
 end
-function Base.isapprox(
+function _isapprox(
     ::FixedRankMatrices,
     p::SVDMPoint,
     X::UMVTVector,

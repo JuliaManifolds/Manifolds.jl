@@ -227,12 +227,12 @@ Return the injectivity radius on the [`Hyperbolic`](@ref), which is $∞$.
 injectivity_radius(::Hyperbolic) = Inf
 
 for T in _ExtraHyperbolicPointTypes
-    @eval function isapprox(::Hyperbolic, p::$T, q::$T; kwargs...)
+    @eval function _isapprox(::Hyperbolic, p::$T, q::$T; kwargs...)
         return isapprox(p.value, q.value; kwargs...)
     end
 end
 for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
-    @eval function isapprox(::Hyperbolic, ::$P, X::$T, Y::$T; kwargs...)
+    @eval function _isapprox(::Hyperbolic, ::$P, X::$T, Y::$T; kwargs...)
         return isapprox(X.value, Y.value; kwargs...)
     end
 end

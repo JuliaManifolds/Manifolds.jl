@@ -66,8 +66,8 @@ end
 
 injectivity_radius(::UnitaryMatrices{1,ℍ}) = π
 
-Base.isapprox(::UnitaryMatrices{1,ℍ}, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
-Base.isapprox(::UnitaryMatrices{1,ℍ}, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
+_isapprox(::UnitaryMatrices{1,ℍ}, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
+_isapprox(::UnitaryMatrices{1,ℍ}, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
 
 function log(::UnitaryMatrices{1,ℍ}, p::Number, q::Number)
     return log(conj(p) * q)

@@ -8,13 +8,13 @@ for trait_type in [
     TraitList{IsConnectionManifold},
 ]
     @eval begin
-        ManifoldsBase.@next_trait_function $trait_type isapprox(
+        @next_trait_function $trait_type isapprox(
             M::AbstractDecoratorManifold,
             p,
             q;
             kwargs...,
         )
-        ManifoldsBase.@next_trait_function $trait_type isapprox(
+        @next_trait_function $trait_type isapprox(
             M::AbstractDecoratorManifold,
             p,
             X,

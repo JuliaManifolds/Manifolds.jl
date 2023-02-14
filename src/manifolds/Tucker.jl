@@ -436,7 +436,7 @@ function Base.foreach(
     basis::AbstractBasis,
     indices=1:manifold_dimension(M),
 )
-    # Use mutating variants to avoid superfluous allocation
+    # Use in-place variants to avoid superfluous allocation
     bᵢ = zero_vector(M, p)
     eᵢ = zeros(number_eltype(p), manifold_dimension(M))
     for i in indices
@@ -624,7 +624,7 @@ function isapprox(p::TuckerPoint, q::TuckerPoint; kwargs...)
     return isapprox(embed(ℳ, p), embed(ℳ, q); kwargs...)
 end
 isapprox(::Tucker, p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
-function isapprox(M::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector; kwargs...)
+function _isapprox(M::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector; kwargs...)
     return isapprox(embed(M, p, x), embed(M, p, y); kwargs...)
 end
 

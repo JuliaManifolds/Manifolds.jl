@@ -282,7 +282,7 @@ unit absolute value, that is, $|λ| = 1$.
 This is equivalent to the Riemannian
 [`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) being 0.
 """
-function Base.isapprox(::AbstractProjectiveSpace, p, q; kwargs...)
+function _isapprox(::AbstractProjectiveSpace, p, q; kwargs...)
     return isapprox(abs(dot(p, q)), 1; kwargs...)
 end
 

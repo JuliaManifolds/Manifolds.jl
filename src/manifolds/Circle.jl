@@ -249,8 +249,8 @@ inner(::Circle, ::Any...)
 @inline inner(::Circle{ℂ}, p, X, Y) = complex_dot(X, Y)
 
 # these methods make sure that we allow for checking mixed bare number and number wrapped in array
-Base.isapprox(::Circle, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
-Base.isapprox(::Circle, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
+_isapprox(::Circle, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
+_isapprox(::Circle, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
 
 """
     is_flat(::Circle)

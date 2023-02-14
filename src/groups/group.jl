@@ -310,7 +310,7 @@ end
     BG = base_group(G)
     return isapprox(BG, identity_element(BG), X, Y; kwargs...)
 end
-function Base.isapprox(
+function isapprox(
     ::TraitList{<:IsGroupManifold},
     ::AbstractDecoratorManifold,
     ::Identity,

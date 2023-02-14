@@ -82,10 +82,10 @@ function get_embedding(::KendallsShapeSpace{N,K}) where {N,K}
     return KendallsPreShapeSpace(N, K)
 end
 
-function Base.isapprox(M::KendallsShapeSpace, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
+function _isapprox(M::KendallsShapeSpace, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
-function Base.isapprox(M::KendallsShapeSpace, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
+function _isapprox(M::KendallsShapeSpace, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
     return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
 end
 

@@ -74,6 +74,7 @@ import ManifoldsBase:
     injectivity_radius_exp,
     inner,
     isapprox,
+    _isapprox,
     is_flat,
     is_point,
     is_vector,
@@ -175,6 +176,7 @@ using Kronecker
 using Graphs
 using LinearAlgebra
 using ManifoldsBase:
+    @next_trait_function,
     ℝ,
     ℂ,
     ℍ,

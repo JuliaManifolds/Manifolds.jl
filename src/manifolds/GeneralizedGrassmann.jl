@@ -212,17 +212,10 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B * Y)
 
-function Base.isapprox(
-    M::GeneralizedGrassmann,
-    p,
-    X,
-    Y;
-    atol=sqrt(max_eps(X, Y)),
-    kwargs...,
-)
+function _isapprox(M::GeneralizedGrassmann, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
-function Base.isapprox(M::GeneralizedGrassmann, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
+function _isapprox(M::GeneralizedGrassmann, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
     return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
 end
 

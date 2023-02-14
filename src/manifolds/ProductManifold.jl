@@ -752,13 +752,13 @@ function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRet
     return Y
 end
 
-function Base.isapprox(M::ProductManifold, p, q; kwargs...)
+function _isapprox(M::ProductManifold, p, q; kwargs...)
     return all(
         t -> isapprox(t...; kwargs...),
         ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, q)),
     )
 end
-function Base.isapprox(M::ProductManifold, p, X, Y; kwargs...)
+function _isapprox(M::ProductManifold, p, X, Y; kwargs...)
     return all(
         t -> isapprox(t...; kwargs...),
         ziptuples(

@@ -706,20 +706,20 @@ function inverse_retract_product!(B::VectorBundle, X, p, q)
     return X
 end
 
-function Base.isapprox(B::VectorBundle, p, q; kwargs...)
+function _isapprox(B::VectorBundle, p, q; kwargs...)
     xp, Vp = submanifold_components(B.manifold, p)
     xq, Vq = submanifold_components(B.manifold, q)
     return isapprox(B.manifold, xp, xq; kwargs...) &&
            isapprox(VectorSpaceAtPoint(B.fiber, xp), Vp, Vq; kwargs...)
 end
-function Base.isapprox(B::VectorBundle, p, X, Y; kwargs...)
+function _isapprox(B::VectorBundle, p, X, Y; kwargs...)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
     return isapprox(B.manifold, VXM, VYM; kwargs...) &&
            isapprox(VectorSpaceAtPoint(B.fiber, px), VXF, VYF; kwargs...)
 end
-function Base.isapprox(M::TangentSpaceAtPoint, X, Y; kwargs...)
+function _isapprox(M::TangentSpaceAtPoint, X, Y; kwargs...)
     return isapprox(M.fiber.manifold, M.point, X, Y; kwargs...)
 end
 
