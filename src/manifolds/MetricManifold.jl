@@ -232,6 +232,21 @@ Return the [`LeviCivitaConnection`](@ref) for a metric manifold.
 connection(::MetricManifold) = LeviCivitaConnection()
 
 default_retraction_method(M::MetricManifold) = default_retraction_method(M.manifold)
+function default_retraction_method(M::MetricManifold, t::Type)
+    return default_retraction_method(M.manifold, t)
+end
+function default_inverse_retraction_method(M::MetricManifold)
+    return default_inverse_retraction_method(M.manifold)
+end
+function default_inverse_retraction_method(M::MetricManifold, t::Type)
+    return default_inverse_retraction_method(M.manifold, t)
+end
+function default_vector_transport_method(M::MetricManifold)
+    return default_vector_transport_method(M.manifold)
+end
+function default_vector_transport_method(M::MetricManifold, t::Type)
+    return default_vector_transport_method(M.manifold, t)
+end
 
 @doc raw"""
     det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
@@ -252,7 +267,7 @@ function exp!(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, q, p,
         q,
         p,
         X,
-        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
+        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M, typeof(p))),
     )
 end
 
@@ -777,7 +792,7 @@ function vector_transport_along(
     p,
     X,
     c::AbstractVector,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_along(M.manifold, p, X, c, m)
 end
@@ -788,7 +803,7 @@ function vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_along!(M.manifold, Y, p, X, c, m)
 end
@@ -799,7 +814,7 @@ function vector_transport_direction(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_direction(M.manifold, p, X, d, m)
 end
@@ -810,7 +825,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_direction!(M.manifold, Y, p, X, d, m)
 end
@@ -821,7 +836,7 @@ function vector_transport_to(
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_to(M.manifold, p, X, q, m)
 end
@@ -832,7 +847,7 @@ function vector_transport_to!(
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_to!(M.manifold, Y, p, X, q, m)
 end
