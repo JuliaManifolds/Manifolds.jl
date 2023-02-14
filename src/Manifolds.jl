@@ -445,6 +445,9 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
+# final utilities
+include("trait_recursion_breaking.jl")
+
 @doc raw"""
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
