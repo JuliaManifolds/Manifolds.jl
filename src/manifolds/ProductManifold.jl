@@ -1272,12 +1272,11 @@ function _retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
 end
 function _retract!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
     map(
-        retract!,
+        (N, qc, pc, Xc, rm) -> retract!(N, qc, pc, Xc, t, rm),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),
         submanifold_components(M, X),
-        t,
         method.retractions,
     )
     return q
