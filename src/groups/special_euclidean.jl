@@ -298,6 +298,17 @@ function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X)
     @inbounds _padpoint!(M, q)
     return q
 end
+function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X, t::Number)
+    map(
+        (N, qc, pc, Xc) -> exp!(N, qc, pc, Xc, t),
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    @inbounds _padpoint!(M, q)
+    return q
+end
 
 @doc raw"""
     exp_lie(G::SpecialEuclidean{n}, X)

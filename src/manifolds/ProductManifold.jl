@@ -443,10 +443,40 @@ function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
         )...,
     )
 end
+function Base.exp(M::ProductManifold, p::ProductRepr, X::ProductRepr, t::Number)
+    return ProductRepr(
+        map(
+            (N, pc, Xc) -> exp(N, pc, Xc, t),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
+end
+function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition, t::Number)
+    return ArrayPartition(
+        map(
+            (N, pc, Xc) -> exp(N, pc, Xc, t),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
+end
 
 function exp!(M::ProductManifold, q, p, X)
     map(
         exp!,
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return q
+end
+function exp!(M::ProductManifold, q, p, X, t::Number)
+    map(
+        (N, qc, pc, Xc) -> exp!(N, qc, pc, Xc, t),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),
