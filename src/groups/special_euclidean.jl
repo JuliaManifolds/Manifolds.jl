@@ -430,6 +430,41 @@ function exp_lie!(G::SpecialEuclidean{3}, q, X)
     return q
 end
 
+function isapprox(M::SpecialEuclidean, p, q; kwargs...)
+    tp, Rp = submanifold_components(M, p)
+    tq, Rq = submanifold_components(M, q)
+    return isapprox(tp, tq; kwargs...) && isapprox(Rp, Rq; kwargs...)
+end
+function isapprox(
+    M::SpecialEuclidean{N},
+    p::SpecialEuclideanIdentity{N},
+    q;
+    kwargs...,
+) where {N}
+    return is_identity(M, q)
+end
+function isapprox(
+    M::SpecialEuclidean{N},
+    p,
+    q::SpecialEuclideanIdentity{N};
+    kwargs...,
+) where {N}
+    return is_identity(M, p)
+end
+function isapprox(
+    M::SpecialEuclidean{N},
+    p::SpecialEuclideanIdentity{N},
+    q::SpecialEuclideanIdentity{N};
+    kwargs...,
+) where {N}
+    return true
+end
+function isapprox(M::SpecialEuclidean, p, X, Y; kwargs...)
+    tX, RX = submanifold_components(M, X)
+    tY, RY = submanifold_components(M, Y)
+    return isapprox(tX, tY; kwargs...) && isapprox(RX, RY; kwargs...)
+end
+
 @doc raw"""
     log_lie(G::SpecialEuclidean{n}, p) where {n}
 

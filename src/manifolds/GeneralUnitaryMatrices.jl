@@ -255,7 +255,7 @@ function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X, t::Real)
         a = sin(θ) / θ
         b = (1 - cos(θ)) / θ^2
     end
-    pinvq = I + a .* X .+ b .* (X^2)
+    pinvq = I + a .* t .* X .+ b .* t^2 .* (X^2)
     return copyto!(q, p * pinvq)
 end
 exp!(M::GeneralUnitaryMatrices{4,ℝ}, q, p, X, t::Real) = exp!(M, q, p, t * X)

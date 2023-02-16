@@ -747,8 +747,8 @@ end
             m = mean(R, x, w)
             mg = mean(R, x, w, GeodesicInterpolation())
             mf = mean(R, x, w, GradientDescentEstimation(); p0=mg)
-            @test m != mf
-            @test m ≈ mg
+            @test m != mg
+            @test m == mf
 
             μ = project(R, randn(3, 3))
             d = normal_tvector_distribution(R, μ, 0.1)
