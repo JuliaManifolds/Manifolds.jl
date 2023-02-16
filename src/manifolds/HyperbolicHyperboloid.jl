@@ -238,6 +238,9 @@ function embed!(M::Hyperbolic, Y, p::HyperboloidPoint, X::HyperboloidTVector)
 end
 
 function exp!(M::Hyperbolic, q, p, X)
+    return exp!(M, q, p, X, one(eltype(X)))
+end
+function exp!(M::Hyperbolic, q, p, X, t::Number)
     vn = sqrt(max(inner(M, p, X, X), 0.0))
     vn < eps(eltype(p)) && return copyto!(q, p)
     q .= cosh(vn) .* p .+ (sinh(vn) / vn) .* X

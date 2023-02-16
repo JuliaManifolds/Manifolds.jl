@@ -74,6 +74,15 @@ function exp!(
     z = exp(CholeskySpace{N}(), y, W)
     return copyto!(q, z * z')
 end
+function exp!(
+    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    q,
+    p,
+    X,
+    t::Number,
+) where {N}
+    return exp!(M, q, p, t * X)
+end
 
 @doc raw"""
     inner(M::MetricManifold{LogCholeskyMetric,ℝ,SymmetricPositiveDefinite}, p, X, Y)

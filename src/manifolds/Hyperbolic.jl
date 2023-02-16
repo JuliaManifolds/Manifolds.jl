@@ -208,13 +208,23 @@ the [`Lorentz`](@ref)ian manifold.
 exp(::Hyperbolic, ::Any...)
 
 for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
-    @eval function exp!(M::Hyperbolic, q::$P, p::$P, X::$T)
-        q.value .=
-            convert(
-                $P,
-                exp(M, convert(AbstractVector, p), convert(AbstractVector, p, X)),
-            ).value
-        return q
+    @eval begin
+        function exp!(M::Hyperbolic, q::$P, p::$P, X::$T)
+            q.value .=
+                convert(
+                    $P,
+                    exp(M, convert(AbstractVector, p), convert(AbstractVector, p, X)),
+                ).value
+            return q
+        end
+        function exp!(M::Hyperbolic, q::$P, p::$P, X::$T, t::Number)
+            q.value .=
+                convert(
+                    $P,
+                    exp(M, convert(AbstractVector, p), convert(AbstractVector, p, X), t),
+                ).value
+            return q
+        end
     end
 end
 
