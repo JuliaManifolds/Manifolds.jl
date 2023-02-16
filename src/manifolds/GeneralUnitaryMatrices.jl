@@ -230,7 +230,7 @@ function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix)
     sinθ, cosθ = sincos(θ)
     return p * SA[cosθ -sinθ; sinθ cosθ]
 end
-function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix, t::Number)
+function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix, t::Real)
     return exp(M, p, t * X)
 end
 function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X)
@@ -239,8 +239,15 @@ function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X)
     sinθ, cosθ = sincos(θ)
     return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
 end
-function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X)
-    θ = norm(M, p, X) / sqrt(2)
+function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X, t::Real)
+    @assert size(q) == (2, 2)
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
+    sinθ, cosθ = sincos(t * θ)
+    return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
+end
+exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X) = exp!(M, q, p, X, one(eltype(X)))
+function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X, t::Real)
+    θ = abs(t) * norm(M, p, X) / sqrt(2)
     if θ ≈ 0
         a = 1 - θ^2 / 6
         b = θ / 2
@@ -251,6 +258,7 @@ function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X)
     pinvq = I + a .* X .+ b .* (X^2)
     return copyto!(q, p * pinvq)
 end
+exp!(M::GeneralUnitaryMatrices{4,ℝ}, q, p, X, t::Real) = exp!(M, q, p, t * X)
 function exp!(::GeneralUnitaryMatrices{4,ℝ}, q, p, X)
     T = eltype(X)
     α, β = angles_4d_skew_sym_matrix(X)
@@ -606,8 +614,8 @@ end
 
 function log!(::GeneralUnitaryMatrices{n,𝔽}, X, p, q) where {n,𝔽}
     log_safe!(X, adjoint(p) * q)
-    project!(SkewHermitianMatrices(n, 𝔽), q, q)
-    return q
+    project!(SkewHermitianMatrices(n, 𝔽), X, X)
+    return X
 end
 
 norm(::GeneralUnitaryMatrices, p, X) = norm(X)

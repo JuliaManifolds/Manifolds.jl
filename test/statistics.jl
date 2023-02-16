@@ -23,33 +23,39 @@ import Manifolds: mean, mean!, median, median!, var, mean_and_var, default_estim
 struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
 manifold_dimension(::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N))
-function exp!(::TestStatsSphere{N}, w, x, y; kwargs...) where {N}
-    return exp!(Sphere(N), w, x, y; kwargs...)
+function exp!(::TestStatsSphere{N}, q, p, X; kwargs...) where {N}
+    return exp!(Sphere(N), q, p, X; kwargs...)
 end
-function log!(::TestStatsSphere{N}, y, x, v; kwargs...) where {N}
-    return log!(Sphere(N), y, x, v; kwargs...)
+function exp!(::TestStatsSphere{N}, q, p, X, t::Number; kwargs...) where {N}
+    return exp!(Sphere(N), q, p, X, t; kwargs...)
 end
-function inner(::TestStatsSphere{N}, x, v, w; kwargs...) where {N}
-    return inner(Sphere(N), x, v, w; kwargs...)
+function log!(::TestStatsSphere{N}, X, p, q; kwargs...) where {N}
+    return log!(Sphere(N), X, p, q; kwargs...)
 end
-function zero_vector!(::TestStatsSphere{N}, v, x; kwargs...) where {N}
-    return zero_vector!(Sphere(N), v, x; kwargs...)
+function inner(::TestStatsSphere{N}, p, X, Y; kwargs...) where {N}
+    return inner(Sphere(N), p, X, Y; kwargs...)
+end
+function zero_vector!(::TestStatsSphere{N}, X, p; kwargs...) where {N}
+    return zero_vector!(Sphere(N), X, p; kwargs...)
 end
 
 struct TestStatsEuclidean{N} <: AbstractManifold{ℝ} end
 TestStatsEuclidean(N) = TestStatsEuclidean{N}()
 manifold_dimension(::TestStatsEuclidean{N}) where {N} = manifold_dimension(Euclidean(N))
-function exp!(::TestStatsEuclidean{N}, y, x, v; kwargs...) where {N}
-    return exp!(Euclidean(N), y, x, v; kwargs...)
+function exp!(::TestStatsEuclidean{N}, q, p, X; kwargs...) where {N}
+    return exp!(Euclidean(N), q, p, X; kwargs...)
 end
-function log!(::TestStatsEuclidean{N}, w, x, y; kwargs...) where {N}
-    return log!(Euclidean(N), w, x, y; kwargs...)
+function exp!(::TestStatsEuclidean{N}, q, p, X, t::Number; kwargs...) where {N}
+    return exp!(Euclidean(N), q, p, X, t; kwargs...)
 end
-function inner(::TestStatsEuclidean{N}, x, v, w; kwargs...) where {N}
-    return inner(Euclidean(N), x, v, w; kwargs...)
+function log!(::TestStatsEuclidean{N}, X, p, q; kwargs...) where {N}
+    return log!(Euclidean(N), X, p, q; kwargs...)
 end
-function zero_vector!(::TestStatsEuclidean{N}, v, x; kwargs...) where {N}
-    return zero_vector!(Euclidean(N), v, x; kwargs...)
+function inner(::TestStatsEuclidean{N}, p, X, Y; kwargs...) where {N}
+    return inner(Euclidean(N), p, X, Y; kwargs...)
+end
+function zero_vector!(::TestStatsEuclidean{N}, X, p; kwargs...) where {N}
+    return zero_vector!(Euclidean(N), X, p; kwargs...)
 end
 
 struct TestStatsNotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
@@ -734,15 +740,15 @@ end
             rng = MersenneTwister(47)
             R = Manifolds.Rotations(3)
             p0 = collect(Diagonal(ones(3)))
-            v1 = hat(R, p0, [1.0, 0.0, 0.0])
-            v2 = hat(R, p0, [0.0, 1.0, 0.0])
-            x = [geodesic(R, p0, v1, π / 2 * (1:4)); geodesic(R, p0, v2, π / 2 * (1:4))]
+            X1 = hat(R, p0, [1.0, 0.0, 0.0])
+            X2 = hat(R, p0, [0.0, 1.0, 0.0])
+            x = [geodesic(R, p0, X1, π / 2 * (1:4)); geodesic(R, p0, X2, π / 2 * (1:4))]
             w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(R, x, w)
             mg = mean(R, x, w, GeodesicInterpolation())
             mf = mean(R, x, w, GradientDescentEstimation(); p0=mg)
-            @test m != mg
-            @test m == mf
+            @test m != mf
+            @test m ≈ mg
 
             μ = project(R, randn(3, 3))
             d = normal_tvector_distribution(R, μ, 0.1)
