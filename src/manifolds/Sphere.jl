@@ -444,10 +444,6 @@ Compute the retraction that is based on projection, i.e.
 """
 retract(::AbstractSphere, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract_project!(M::AbstractSphere, q, p, X)
-    q .= p .+ X
-    return project!(M, q, q)
-end
 function retract_project!(M::AbstractSphere, q, p, X, t::Number)
     q .= p .+ t .* X
     return project!(M, q, q)

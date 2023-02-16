@@ -310,23 +310,11 @@ function retract_exp_ode!(
     q,
     p,
     X,
-    ::AbstractRetractionMethod,
-    b::AbstractBasis,
-)
-    sol = solve_exp_ode(M, p, X; basis=b, dense=false)
-    copyto!(q, sol)
-    return q
-end
-function retract_exp_ode!(
-    M::AbstractManifold,
-    q,
-    p,
-    X,
     t::Number,
     ::AbstractRetractionMethod,
     b::AbstractBasis,
 )
-    sol = solve_exp_ode(M, p, t * X; basis=b, dense=false)
+    sol = solve_exp_ode(M, p, X, t; basis=b, dense=false)
     copyto!(q, sol)
     return q
 end
@@ -385,6 +373,7 @@ end
         M::AbstractConnectionManifold,
         p,
         X,
+        t::Number,
         B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
         solver = AutoVern9(Rodas5()),
@@ -415,7 +404,7 @@ in an embedded space.
     using OrdinaryDiffEq
     ```
 """
-function solve_exp_ode(M, p, X; kwargs...)
+function solve_exp_ode(M::AbstractManifold, p, X, t::Number; kwargs...)
     throw(
         ErrorException(
             """

@@ -911,38 +911,16 @@ function _retract!(M::VectorBundle, q, p, X, t::Number, ::VectorBundleProductRet
 end
 
 """
-    retract_product(M::VectorBundle, p, q)
+    retract_product(M::VectorBundle, p, q, t::Number)
 
 Compute the allocating variant of the [`VectorBundleProductRetraction`](@ref),
 which by default allocates and calls `retract_product!`.
 """
-function retract_product(M::VectorBundle, p, X)
-    q = allocate_result(M, retract, p, X)
-    return retract_product!(M, q, p, X)
-end
-
 function retract_product(M::VectorBundle, p, X, t::Number)
     q = allocate_result(M, retract, p, X)
     return retract_product!(M, q, p, X, t)
 end
 
-function retract_product!(B::VectorBundle, q, p, X)
-    xp, Xp = submanifold_components(B.manifold, p)
-    xq, Xq = submanifold_components(B.manifold, q)
-    VXM, VXF = submanifold_components(B.manifold, X)
-    # this temporary avoids overwriting `p` when `q` and `p` occupy the same memory
-    xqt = exp(B.manifold, xp, VXM)
-    vector_transport_direction!(
-        B.manifold,
-        Xq,
-        xp,
-        Xp + VXF,
-        VXM,
-        B.vector_transport.method_point,
-    )
-    copyto!(B.manifold, xq, xqt)
-    return q
-end
 function retract_product!(B::VectorBundle, q, p, X, t::Number)
     tX = t * X
     xp, Xp = submanifold_components(B.manifold, p)
@@ -962,37 +940,23 @@ function retract_product!(B::VectorBundle, q, p, X, t::Number)
     return q
 end
 
-function _retract(M::AbstractManifold, p, X, m::SasakiRetraction)
-    return retract_sasaki(M, p, X, m)
-end
 function _retract(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
     return retract_sasaki(M, p, X, t, m)
 end
 
-function _retract!(M::AbstractManifold, q, p, X, m::SasakiRetraction)
-    return retract_sasaki!(M, q, p, X, m)
-end
 function _retract!(M::AbstractManifold, q, p, X, t::Number, m::SasakiRetraction)
     return retract_sasaki!(M, q, p, X, t, m)
 end
 
 """
-    retract_sasaki(M::AbstractManifold, p, X, m::SasakiRetraction)
+    retract_sasaki(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
 
 Compute the allocating variant of the [`SasakiRetraction`](@ref),
 which by default allocates and calls `retract_sasaki!`.
 """
-function retract_sasaki(M::AbstractManifold, p, X, m::SasakiRetraction)
-    q = allocate_result(M, retract, p, X)
-    return retract_sasaki!(M, q, p, X, m)
-end
 function retract_sasaki(M::AbstractManifold, p, X, t::Number, m::SasakiRetraction)
     q = allocate_result(M, retract, p, X)
     return retract_sasaki!(M, q, p, X, t, m)
-end
-
-function retract_sasaki!(B::TangentBundle, q, p, X, m::SasakiRetraction)
-    return retract_sasaki!(B, q, p, X, 1, m)
 end
 
 function retract_sasaki!(B::TangentBundle, q, p, X, t::Number, m::SasakiRetraction)
