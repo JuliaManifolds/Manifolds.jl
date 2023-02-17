@@ -163,9 +163,6 @@ Return the radius of injectivity for the [`PolarRetraction`](https://juliamanifo
 injectivity_radius(::Rotations, ::PolarRetraction)
 _injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
 
-
-
-
 @doc raw"""
     inverse_retract(M, p, q, ::PolarInverseRetraction)
 
