@@ -233,9 +233,7 @@ function check_vector(
     # SOn
     err3 = check_vector(submanifold(G, 2), p[1:n, 1:n], X[1:n, 1:n]; kwargs...)
     !isnothing(err3) && push!(errs, err3)
-    if length(errs) > 1
-        return CompositeManifoldError(errs)
-    end
+    (length(errs) > 1) && (return CompositeManifoldError(errs))
     return length(errs) == 0 ? nothing : first(errs)
 end
 
