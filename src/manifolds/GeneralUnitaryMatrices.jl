@@ -490,7 +490,7 @@ Return the injectivity radius for general unitary matrix manifolds, where the de
 which is
 
 ````math
-    \operatorname{inj}_{\mathrm{SU}(n)}(p) = π.
+    \operatorname{inj}_{\mathrm{SU}(n)}(p) = π \sqrt{2}.
 ````
 """
 
