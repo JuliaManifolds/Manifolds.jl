@@ -896,16 +896,10 @@ function Random.rand!(rng::AbstractRNG, M::TangentSpaceAtPoint, X; vector_at=not
     return X
 end
 
-function _retract(M::VectorBundle, p, X, ::VectorBundleProductRetraction)
-    return retract_product(M, p, X)
-end
 function _retract(M::VectorBundle, p, X, t::Number, ::VectorBundleProductRetraction)
     return retract_product(M, p, X, t)
 end
 
-function _retract!(M::VectorBundle, q, p, X, ::VectorBundleProductRetraction)
-    return retract_product!(M, q, p, X)
-end
 function _retract!(M::VectorBundle, q, p, X, t::Number, ::VectorBundleProductRetraction)
     return retract_product!(M, q, p, X, t)
 end
