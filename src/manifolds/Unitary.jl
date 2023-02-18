@@ -41,6 +41,9 @@ embed(::UnitaryMatrices{1,ℍ}, p, X::Number) = SMatrix{1,1}(X)
 function exp(::UnitaryMatrices{1,ℍ}, p, X::Number)
     return p * exp(X)
 end
+function exp(::UnitaryMatrices{1,ℍ}, p, X::Number, t::Number)
+    return p * exp(t * X)
+end
 
 function get_coordinates_orthonormal(
     ::UnitaryMatrices{1,ℍ},
@@ -63,8 +66,8 @@ end
 
 injectivity_radius(::UnitaryMatrices{1,ℍ}) = π
 
-Base.isapprox(::UnitaryMatrices{1,ℍ}, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
-Base.isapprox(::UnitaryMatrices{1,ℍ}, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
+_isapprox(::UnitaryMatrices{1,ℍ}, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
+_isapprox(::UnitaryMatrices{1,ℍ}, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
 
 function log(::UnitaryMatrices{1,ℍ}, p::Number, q::Number)
     return log(conj(p) * q)

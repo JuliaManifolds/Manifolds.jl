@@ -24,6 +24,7 @@ using Manifolds: connection
     @testset "log/exp" begin
         for CSO3 in [SO3minus, SO3plus, SO3zero]
             @test isapprox(SO3, exp(CSO3, p, X), exp(SO3, p, X))
+            @test isapprox(SO3, exp(CSO3, p, X, 1.0), exp(SO3, p, X, 1.0))
             @test isapprox(SO3, p, log(CSO3, p, q), log(SO3, p, q); atol=1e-6)
         end
     end

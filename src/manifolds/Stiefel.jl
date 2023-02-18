@@ -252,7 +252,7 @@ function inverse_retract_qr!(M::Stiefel{n,k}, X, p, q) where {n,k}
     return X
 end
 
-function Base.isapprox(M::Stiefel, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
+function _isapprox(M::Stiefel, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
 
@@ -427,9 +427,10 @@ retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 _qrfac_to_q(qrfac) = Matrix(qrfac.Q)
 _qrfac_to_q(qrfac::StaticArrays.QR) = qrfac.Q
 
-function retract_pade!(::Stiefel, q, p, X, m)
+function retract_pade!(::Stiefel, q, p, X, t::Number, ::PadeRetraction{m}) where {m}
+    tX = t * X
     Pp = I - 1 // 2 * p * p'
-    WpX = Pp * X * p' - p * X' * Pp
+    WpX = Pp * tX * p' - p * tX' * Pp
     pm = zeros(eltype(WpX), size(WpX))
     qm = zeros(eltype(WpX), size(WpX))
     WpXk = similar(WpX)
@@ -448,12 +449,12 @@ function retract_pade!(::Stiefel, q, p, X, m)
     end
     return copyto!(q, (qm \ pm) * p)
 end
-function retract_polar!(::Stiefel, q, p, X)
-    s = svd(p + X)
+function retract_polar!(::Stiefel, q, p, X, t::Number)
+    s = svd(p .+ t .* X)
     return mul!(q, s.U, s.Vt)
 end
-function retract_qr!(::Stiefel, q, p, X)
-    qrfac = qr(p + X)
+function retract_qr!(::Stiefel, q, p, X, t::Number)
+    qrfac = qr(p .+ t .* X)
     d = diag(qrfac.R)
     D = Diagonal(sign.(sign.(d .+ 0.5)))
     return mul!(q, _qrfac_to_q(qrfac), D)

@@ -74,6 +74,7 @@ import ManifoldsBase:
     injectivity_radius_exp,
     inner,
     isapprox,
+    _isapprox,
     is_flat,
     is_point,
     is_vector,
@@ -81,7 +82,7 @@ import ManifoldsBase:
     inverse_retract!,
     _inverse_retract,
     _inverse_retract!,
-    inverse_retract_caley!,
+    inverse_retract_cayley!,
     inverse_retract_embedded!,
     inverse_retract_nlsolve!,
     inverse_retract_pade!,
@@ -113,7 +114,7 @@ import ManifoldsBase:
     representation_size,
     retract,
     retract!,
-    retract_caley!,
+    retract_cayley!,
     retract_exp_ode!,
     retract_pade!,
     retract_polar!,
@@ -175,6 +176,7 @@ using Kronecker
 using Graphs
 using LinearAlgebra
 using ManifoldsBase:
+    @next_trait_function,
     ℝ,
     ℂ,
     ℍ,
@@ -444,6 +446,9 @@ include("groups/translation_action.jl")
 include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
+
+# final utilities
+include("trait_recursion_breaking.jl")
 
 @doc raw"""
     Base.in(p, M::AbstractManifold; kwargs...)
