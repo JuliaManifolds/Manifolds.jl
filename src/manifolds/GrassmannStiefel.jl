@@ -269,8 +269,8 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(::Grassmann, q, p, X)
-    s = svd(p + X)
+function retract_polar!(::Grassmann, q, p, X, t::Number)
+    s = svd(p .+ t .* X)
     return mul!(q, s.U, s.Vt)
 end
 
@@ -289,8 +289,8 @@ D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_
 """
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
 
-function retract_qr!(::Grassmann{N,K}, q, p, X) where {N,K}
-    qrfac = qr(p + X)
+function retract_qr!(::Grassmann{N,K}, q, p, X, t::Number) where {N,K}
+    qrfac = qr(p .+ t .* X)
     d = diag(qrfac.R)
     D = Diagonal(sign.(d .+ 1 // 2))
     mul!(q, Array(qrfac.Q), D)

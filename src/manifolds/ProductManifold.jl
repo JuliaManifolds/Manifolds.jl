@@ -443,10 +443,40 @@ function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
         )...,
     )
 end
+function Base.exp(M::ProductManifold, p::ProductRepr, X::ProductRepr, t::Number)
+    return ProductRepr(
+        map(
+            (N, pc, Xc) -> exp(N, pc, Xc, t),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
+end
+function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition, t::Number)
+    return ArrayPartition(
+        map(
+            (N, pc, Xc) -> exp(N, pc, Xc, t),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
+end
 
 function exp!(M::ProductManifold, q, p, X)
     map(
         exp!,
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return q
+end
+function exp!(M::ProductManifold, q, p, X, t::Number)
+    map(
+        (N, qc, pc, Xc) -> exp!(N, qc, pc, Xc, t),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),
@@ -794,13 +824,13 @@ function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRet
     return Y
 end
 
-function Base.isapprox(M::ProductManifold, p, q; kwargs...)
+function _isapprox(M::ProductManifold, p, q; kwargs...)
     return all(
         t -> isapprox(t...; kwargs...),
         ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, q)),
     )
 end
-function Base.isapprox(M::ProductManifold, p, X, Y; kwargs...)
+function _isapprox(M::ProductManifold, p, X, Y; kwargs...)
     return all(
         t -> isapprox(t...; kwargs...),
         ziptuples(
@@ -1226,11 +1256,12 @@ for TP in [ProductRepr, ArrayPartition]
                 M::ProductManifold,
                 p::$TP,
                 X::$TP,
+                t::Number,
                 method::ProductRetraction,
             )
                 return $TP(
                     map(
-                        retract,
+                        (N, pc, Xc, rm) -> retract(N, pc, Xc, t, rm),
                         M.manifolds,
                         submanifold_components(M, p),
                         submanifold_components(M, X),
@@ -1242,9 +1273,9 @@ for TP in [ProductRepr, ArrayPartition]
     )
 end
 
-function _retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
+function _retract!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
     map(
-        retract!,
+        (N, qc, pc, Xc, rm) -> retract!(N, qc, pc, Xc, t, rm),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),

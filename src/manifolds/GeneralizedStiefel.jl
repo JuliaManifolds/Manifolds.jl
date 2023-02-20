@@ -192,12 +192,12 @@ retract(::GeneralizedStiefel, ::Any...)
 
 default_retraction_method(::GeneralizedStiefel) = ProjectionRetraction()
 
-function retract_polar!(M::GeneralizedStiefel, q, p, X)
-    project!(M, q, p + X)
+function retract_polar!(M::GeneralizedStiefel, q, p, X, t::Number)
+    project!(M, q, p .+ t .* X)
     return q
 end
-function retract_project!(M::GeneralizedStiefel, q, p, X)
-    project!(M, q, p + X)
+function retract_project!(M::GeneralizedStiefel, q, p, X, t::Number)
+    project!(M, q, p .+ t .* X)
     return q
 end
 

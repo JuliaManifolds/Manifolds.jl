@@ -52,6 +52,8 @@ end
     r = exp(M, p, X)
     X2 = log(M, p, r)
     @test isapprox(M, p, X, X2)
+    r1 = exp(M, p, X, 1.0)
+    @test isapprox(M, r, r1; atol=1e-10)
 end
 
 @testset "Special unitary matrices" begin

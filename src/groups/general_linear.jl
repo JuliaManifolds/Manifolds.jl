@@ -84,6 +84,10 @@ function exp(M::GeneralLinear, p, X)
     q = similar(p)
     return exp!(M, q, p, X)
 end
+function exp(M::GeneralLinear, p, X, t::Number)
+    q = similar(p)
+    return exp!(M, q, p, t * X)
+end
 
 function exp!(G::GeneralLinear, q, p, X)
     expX = exp(X)
@@ -93,6 +97,9 @@ function exp!(G::GeneralLinear, q, p, X)
     compose!(G, q, expX', exp(X - X'))
     compose!(G, q, p, q)
     return q
+end
+function exp!(G::GeneralLinear, q, p, X, t::Number)
+    return exp!(G, q, p, t * X)
 end
 function exp!(::GeneralLinear{1}, q, p, X)
     p1 = p isa Identity ? p : p[1]

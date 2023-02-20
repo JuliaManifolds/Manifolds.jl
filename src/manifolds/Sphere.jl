@@ -163,6 +163,11 @@ function exp!(M::AbstractSphere, q, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
     return q
 end
+function exp!(M::AbstractSphere, q, p, X, t::Number)
+    θ = abs(t) * norm(M, p, X)
+    q .= cos(θ) .* p .+ usinc(θ) .* t .* X
+    return q
+end
 
 function get_basis_diagonalizing(
     M::Sphere{n,ℝ},
@@ -439,8 +444,8 @@ Compute the retraction that is based on projection, i.e.
 """
 retract(::AbstractSphere, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract_project!(M::AbstractSphere, q, p, X)
-    q .= p .+ X
+function retract_project!(M::AbstractSphere, q, p, X, t::Number)
+    q .= p .+ t .* X
     return project!(M, q, q)
 end
 

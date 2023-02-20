@@ -148,7 +148,11 @@ compute a projection based retraction by projecting $q+Y$ back onto the manifold
 """
 retract(::Elliptope, ::Any, ::Any, ::ProjectionRetraction)
 
-retract_project!(M::Elliptope, r, q, Y) = project!(M, r, q + Y)
+function retract_project!(M::Elliptope, r, q, Y, t::Number)
+    r .= q .+ t .* Y
+    project!(M, r, r)
+    return r
+end
 
 @doc raw"""
     representation_size(M::Elliptope)

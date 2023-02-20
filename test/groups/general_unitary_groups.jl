@@ -65,6 +65,8 @@ include("group_utils.jl")
         q2 = exp_lie(QU1, X)
         X3 = log_lie(QU1, q2)
         @test isapprox(QU1, p, X, X3)
+        q3 = exp(QU1, p, X, 1.0)
+        @test isapprox(QU1, q, q3)
 
         q3 = Ref(Quaternion(0.0))
         exp_lie!(QU1, q3, X)

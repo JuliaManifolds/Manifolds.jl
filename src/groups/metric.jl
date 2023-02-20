@@ -68,20 +68,64 @@ direction(::TraitList{HasRightInvariantMetric}, ::AbstractDecoratorManifold) = R
 function exp(::TraitList{HasLeftInvariantMetric}, M::AbstractDecoratorManifold, p, X)
     return retract(M, p, X, GroupExponentialRetraction(LeftAction()))
 end
+function exp(
+    ::TraitList{HasLeftInvariantMetric},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    t::Number,
+)
+    return retract(M, p, X, t, GroupExponentialRetraction(LeftAction()))
+end
 function exp!(::TraitList{HasLeftInvariantMetric}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(M, q, p, X, GroupExponentialRetraction(LeftAction()))
+end
+function exp!(
+    ::TraitList{HasLeftInvariantMetric},
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    t::Number,
+)
+    return retract!(M, q, p, X, t, GroupExponentialRetraction(LeftAction()))
 end
 function exp(::TraitList{HasRightInvariantMetric}, M::AbstractDecoratorManifold, p, X)
     return retract(M, p, X, GroupExponentialRetraction(RightAction()))
 end
+function exp(
+    ::TraitList{HasRightInvariantMetric},
+    M::AbstractDecoratorManifold,
+    p,
+    X,
+    t::Number,
+)
+    return retract(M, p, X, t, GroupExponentialRetraction(RightAction()))
+end
 function exp!(::TraitList{HasRightInvariantMetric}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(M, q, p, X, GroupExponentialRetraction(RightAction()))
+end
+function exp!(
+    ::TraitList{HasRightInvariantMetric},
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    t::Number,
+)
+    return retract!(M, q, p, X, t, GroupExponentialRetraction(RightAction()))
 end
 function exp(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, X)
     return exp(M.manifold, p, X)
 end
+function exp(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, X, t::Number)
+    return exp(M.manifold, p, X, t)
+end
 function exp!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, q, p, X)
     return exp!(M.manifold, q, p, X)
+end
+function exp!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, q, p, X, t::Number)
+    return exp!(M.manifold, q, p, X, t)
 end
 
 function get_coordinates(
