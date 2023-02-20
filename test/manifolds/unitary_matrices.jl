@@ -7,6 +7,7 @@ using Quaternions
     @test repr(M) == "OrthogonalMatrices(3)"
     @test injectivity_radius(M, PolarRetraction()) == π / sqrt(2.0)
     @test manifold_dimension(M) == 3
+    @test injectivity_radius(M) ≈ π√2
     @test !is_flat(M)
     p = project(M, ones(3, 3))
     @test is_point(M, p, true)
@@ -23,8 +24,9 @@ end
     @test repr(M) == "UnitaryMatrices(2)"
     @test manifold_dimension(M) == 4
     @test !is_flat(M)
+    @test injectivity_radius(M) == π
 
-    # wrong length of size
+     # wrong length of size
     @test_throws DomainError is_point(M, zeros(1), true)
     @test_throws DomainError is_point(M, zeros(3, 3), true)
     pF = 1 / 2 .* [1im 1im; -1im 1im]
@@ -55,6 +57,7 @@ end
 @testset "Special unitary matrices" begin
     M = Manifolds.GeneralUnitaryMatrices{2,ℂ,Manifolds.DeterminantOneMatrices}()
     @test manifold_dimension(M) == 3
+    @test injectivity_radius(M) ≈ π√2
 end
 
 @testset "Quaternionic Unitary Matrices" begin

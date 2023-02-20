@@ -489,11 +489,10 @@ injectivity_radius(::GeneralUnitaryMatrices) = π
 Return the injectivity radius for general unitary matrix manifolds, where the determinant is $+1$,
 which is
 
-````math
+```math
     \operatorname{inj}_{\mathrm{SU}(n)}(p) = π \sqrt{2}.
-````
+```
 """
-
 function injectivity_radius(
     ::GeneralUnitaryMatrices{n,𝔽,DeterminantOneMatrices},
 ) where {n,𝔽}
@@ -524,13 +523,6 @@ end
 function _injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::PolarRetraction) where {n}
     return π / sqrt(2.0)
 end
-
-@doc raw"""
-    injectivity_radius(G::UnitaryMatrices)
-
-Return the injectivity radius on the [`UnitaryMatrices`](@ref), which is ``π``.
-"""
-injectivity_radius(::GeneralUnitaryMatrices{n,ℂ}) where {n} = π
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 
