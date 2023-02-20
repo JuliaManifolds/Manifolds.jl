@@ -26,7 +26,7 @@ end
     @test !is_flat(M)
     @test injectivity_radius(M) == π
 
-     # wrong length of size
+    # wrong length of size
     @test_throws DomainError is_point(M, zeros(1), true)
     @test_throws DomainError is_point(M, zeros(3, 3), true)
     pF = 1 / 2 .* [1im 1im; -1im 1im]

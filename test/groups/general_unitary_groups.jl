@@ -11,7 +11,7 @@ include("group_utils.jl")
 
         for n in [2, 3, 4, 5] # 2-4 have special implementations, 5 for generic case
             On = Orthogonal(n)
-            injectivity_radius(On) ≈ π*√2
+            injectivity_radius(On) ≈ π * √2
             X = zeros(n, n)
             X[1, 2] = 1.0
             X[2, 1] = -1.0
