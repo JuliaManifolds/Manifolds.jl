@@ -4,7 +4,7 @@ include("group_utils.jl")
 @testset "General Unitary Groups" begin
     # SpecialUnitary -> injectivity us also π√2
     SU3 = Manifolds.GeneralUnitaryMatrices{3,ℂ,Manifolds.DeterminantOneMatrices}()
-    @test injectivity_radius(SU3) == π
+    @test injectivity_radius(SU3) == π * √2
     @testset "Orthogonal Group" begin
         O2 = Orthogonal(2)
         @test repr(O2) == "Orthogonal(2)"
