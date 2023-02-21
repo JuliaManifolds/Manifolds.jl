@@ -80,41 +80,6 @@ decorated_manifold(M::MetricManifold) = M.manifold
 
 get_embedding(M::MetricManifold) = get_embedding(M.manifold)
 
-@doc raw"""
-    change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
-
-On the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` with implicitly given metric ``g_1``
-and a second [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
-``g_2`` this function performs a change of metric in the
-sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B`` fulfills
-
-````math
-g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
-````
-
-If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
-representations ``G_1 = C_1C_1^{\mathrm{H}}`` and ``G_2 = C_2C_2^{\mathrm{H}}``, where ``C_1,C_2`` denote their respective
-Cholesky factors, then solving ``C_2C_2^{\mathrm{H}} = G_2 = B^{\mathrm{H}}G_1B = B^{\mathrm{H}}C_1C_1^{\mathrm{H}}B`` yields ``B = (C_1 \backslash C_2)^{\mathrm{H}}``,
-where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
-
-This function returns `Z = BX`.
-
-# Examples
-
-    change_metric(Sphere(2), EuclideanMetric(), p, X)
-
-Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
-
-    change_metric(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
-
-Here, the default metric in ``\mathcal P(3)`` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``B=p``
-"""
-change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
-
-function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
-    Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
-    return change_metric!(M, Y, G, p, X)
-end
 function change_metric!(
     ::T,
     M::AbstractDecoratorManifold,
@@ -137,69 +102,6 @@ function change_metric!(M::MetricManifold, Y, G::AbstractMetric, p, X)
     z = (C1 \ C2)'x
     return get_vector!(M, Y, p, z, B)
 end
-
-@trait_function change_metric(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
-@trait_function change_metric!(M::AbstractDecoratorManifold, Y, G::AbstractMetric, X, p)
-
-@doc raw"""
-    change_representer(M::AbstractManifold, G2::AbstractMetric, p, X)
-
-Convert the representer `X` of a linear function (in other words a cotangent vector at `p`)
-in the tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` given with respect to the
-[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
-`G2` into the representer with respect to the (implicit) metric of `M`.
-
-In order to convert `X` into the representer with respect to the (implicitly given) metric ``g_1`` of `M`,
-we have to find the conversion function ``c: T_p\mathcal M \to T_p\mathcal M`` such that
-
-```math
-    g_2(X,Y) = g_1(c(X),Y)
-```
-
-If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
-representations ``G_1`` and ``G_2`` and ``x,y`` are the local coordinates with respect to
-the same basis of the tangent space, the equation reads
-
-```math
-   x^{\mathrm{H}}G_2y = c(x)^{\mathrm{H}}G_1 y \quad \text{for all } y \in ℝ^d,
-```
-where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
-We obtain ``c(X) = (G_1\backslash G_2)^{\mathrm{H}}X``
-
-For example `X` could be the gradient ``\operatorname{grad}f`` of a real-valued function
-``f: \mathcal M \to ℝ``, i.e.
-
-```math
-    g_2(X,Y) = Df(p)[Y] \quad \text{for all } Y ∈ T_p\mathcal M.
-```
-
-and we would change the Riesz representer `X` to the representer with respect to the metric ``g_1``.
-
-# Examples
-
-    change_representer(Sphere(2), EuclideanMetric(), p, X)
-
-Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
-
-    change_representer(SymmetricPositiveDefinite(3), EuclideanMetric(), p, X)
-
-Here, the default metric in ``\mathcal P(3)`` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``pXp``
-"""
-change_representer(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
-
-function change_representer(M::AbstractManifold, G::AbstractMetric, p, X)
-    Y = allocate_result(M, change_representer, X, p) # this way we allocate a tangent
-    return change_representer!(M, Y, G, p, X)
-end
-
-@trait_function change_representer(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
-@trait_function change_representer!(
-    M::AbstractDecoratorManifold,
-    Y,
-    G::AbstractMetric,
-    X,
-    p,
-)
 
 # Default fallback II: Default metric (not yet hit, check subtyping?)
 function change_representer!(
