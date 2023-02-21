@@ -59,7 +59,7 @@ end
 @testset "Special unitary matrices" begin
     M = Manifolds.GeneralUnitaryMatrices{2,ℂ,Manifolds.DeterminantOneMatrices}()
     @test manifold_dimension(M) == 3
-    @test injectivity_radius(M) ≈ π√2
+    @test injectivity_radius(M) ≈ π * sqrt(2.0)
 end
 
 @testset "Quaternionic Unitary Matrices" begin
