@@ -7,7 +7,7 @@ using Quaternions
     @test repr(M) == "OrthogonalMatrices(3)"
     @test injectivity_radius(M, PolarRetraction()) == π / sqrt(2.0)
     @test manifold_dimension(M) == 3
-    @test injectivity_radius(M) ≈ π√2
+    @test injectivity_radius(M) == π * sqrt(2.0)
     @test !is_flat(M)
     p = project(M, ones(3, 3))
     @test is_point(M, p, true)
