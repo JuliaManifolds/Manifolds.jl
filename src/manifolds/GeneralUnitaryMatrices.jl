@@ -498,9 +498,9 @@ Return the injectivity radius for general unitary matrix manifolds, which is
 injectivity_radius(::GeneralUnitaryMatrices) = π
 
 @doc raw"""
-    injectivity_radius(G::GeneraliUnitaryMatrices{n,𝔽,DeterminantOneMatrices})
+    injectivity_radius(G::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices})
 
-Return the injectivity radius for general unitary matrix manifolds, where the determinant is $+1$,
+Return the injectivity radius for general complex unitary matrix manifolds, where the determinant is $+1$,
 which is
 
 ```math
@@ -508,8 +508,8 @@ which is
 ```
 """
 function injectivity_radius(
-    ::GeneralUnitaryMatrices{n,𝔽,DeterminantOneMatrices},
-) where {n,𝔽}
+    ::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices},
+) where {n,ℂ}
     return π * sqrt(2.0)
 end
 
@@ -522,10 +522,6 @@ end
 Return the radius of injectivity on the [`Rotations`](@ref) manifold `M`, which is ``π\sqrt{2}``.
 """
 injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}) where {n} = π * sqrt(2.0)
-# same as above just resolving an ambiguity
-function injectivity_radius(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}) where {n}
-    return π * sqrt(2.0)
-end
 
 # Resolve ambiguity on Rotations and Orthogonal
 function _injectivity_radius(
