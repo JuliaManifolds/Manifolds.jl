@@ -10,7 +10,7 @@ translation and scaling and rotation of all points [^Kendall1984][^Kendall1989].
 
 This manifold possesses the [`IsQuotientManifold`](@ref) trait.
 
-# Constructor 
+# Constructor
 
     KendallsShapeSpace(n::Int, k::Int)
 
@@ -55,8 +55,8 @@ end
 """
     exp(M::KendallsShapeSpace, p, X)
 
-Compute the exponential map on [`KendallsShapeSpace`](@ref) `M`. See [^Guigui2021] for discussion
-about its computation.
+Compute the exponential map on [`KendallsShapeSpace`](@ref) `M`.
+See [^Guigui2021] for discussion about its computation.
 
 [^Guigui2021]:
     > N. Guigui, E. Maignant, A. Trouvé, and X. Pennec, “Parallel Transport on Kendall Shape
@@ -99,13 +99,8 @@ is_flat(M::KendallsShapeSpace) = false
 """
     log(M::KendallsShapeSpace, p, q)
 
-Compute the logarithmic map on [`KendallsShapeSpace`](@ref) `M`. See [^Guigui2021] for discussion
-about its computation.
-
-[^Guigui2021]:
-    > N. Guigui, E. Maignant, A. Trouvé, and X. Pennec, “Parallel Transport on Kendall Shape
-    > Spaces,” in Geometric Science of Information, Cham, 2021, pp. 103–110.
-    > doi: [10.1007/978-3-030-80209-7_12](https://doi.org/10.1007/978-3-030-80209-7_12).
+Compute the logarithmic map on [`KendallsShapeSpace`](@ref) `M`.
+See the [`exp`](@ref exp(::KendallsShapeSpace, ::Any, ::Any)onential map for more details
 """
 log(M::KendallsShapeSpace, p, q)
 
