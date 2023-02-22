@@ -489,7 +489,7 @@ end
 @doc raw"""
     injectivity_radius(G::GeneraliUnitaryMatrices)
 
-Return the injectivity radius for general unitary matrix manifolds, which is
+Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 
 ````math
     \operatorname{inj}_{\mathrm{U}(n)}(p) = π.
@@ -501,7 +501,7 @@ injectivity_radius(::GeneralUnitaryMatrices) = π
     injectivity_radius(G::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices})
 
 Return the injectivity radius for general complex unitary matrix manifolds, where the determinant is $+1$,
-which is
+which is[^1]
 
 ```math
     \operatorname{inj}_{\mathrm{SU}(n)}(p) = π \sqrt{2}.
@@ -520,6 +520,10 @@ end
     injectivity_radius(M::Rotations, ::ExponentialRetraction)
 
 Return the radius of injectivity on the [`Rotations`](@ref) manifold `M`, which is ``π\sqrt{2}``.
+[^1]
+
+[^1]:
+    > For a derivation of the injectivity radius, see [sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/](https://sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/).
 """
 injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}) where {n} = π * sqrt(2.0)
 
