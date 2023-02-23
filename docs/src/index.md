@@ -17,7 +17,7 @@ For more information, see the [About](misc/about.md) section.
 To install the package just type
 
 ```julia
-] add Manifolds
+using Pkg; Pkg.add("Manifolds")
 ```
 
 Then you can directly start, for example to stop half way from the north pole on the [`Sphere`](@ref) to a point on the the equator, you can generate the [`shortest_geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any}).

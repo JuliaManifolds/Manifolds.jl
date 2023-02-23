@@ -272,7 +272,7 @@ Compute the mean using the gradient descent scheme [`GradientDescentEstimation`]
 
 Optionally, provide `p0`, the starting point (by default set to the first data
 point). `stop_iter` denotes the maximal number of iterations to perform and the
-`kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal change
+`kwargs...` are passed to [`isapprox`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.isapprox-Tuple{AbstractManifold,%20Any,%20Any}) to stop, when the minimal change
 between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
@@ -639,7 +639,7 @@ Compute the median using [`CyclicProximalPointEstimation`](@ref).
 
 Optionally, provide `p0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
-and the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal
+and the `kwargs...` are passed to [`isapprox`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.isapprox-Tuple{AbstractManifold,%20Any,%20Any}) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
@@ -704,7 +704,7 @@ Compute the median using [`WeiszfeldEstimation`](@ref).
 
 Optionally, provide `p0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
-and the `kwargs...` are passed to [`isapprox`](@ref) to stop, when the minimal
+and the `kwargs...` are passed to [`isapprox`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.isapprox-Tuple{AbstractManifold,%20Any,%20Any}) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 

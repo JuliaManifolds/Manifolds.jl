@@ -9,20 +9,12 @@ is equal to 1 [^Kendall1984][^Kendall1989].
 The space can be interpreted as tuples of ``k`` points in ``ℝ^n`` up to simultaneous
 translation and scaling of all points, so this can be thought of as a quotient manifold.
 
-# Constructor 
+# Constructor
 
     KendallsPreShapeSpace(n::Int, k::Int)
 
-# References
-
-[^Kendall1989]:
-    > D. G. Kendall, “A Survey of the Statistical Theory of Shape,” Statist. Sci., vol. 4,
-    > no. 2, pp. 87–99, May 1989,
-    > doi: [10.1214/ss/1177012582](https://doi.org/10.1214/ss/1177012582).
-[^Kendall1984]:
-    > D. G. Kendall, “Shape Manifolds, Procrustean Metrics, and Complex Projective Spaces,”
-    > Bull. London Math. Soc., vol. 16, no. 2, pp. 81–121, Mar. 1984
-    > doi: [10.1112/blms/16.2.81](https://doi.org/10.1112/blms/16.2.81).
+# See also
+[`KendallsShapeSpace`](@ref), esp. for the references
 """
 struct KendallsPreShapeSpace{n,k} <: AbstractSphere{ℝ} end
 

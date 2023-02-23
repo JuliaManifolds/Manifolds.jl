@@ -487,17 +487,47 @@ function get_vector_orthonormal!(
 end
 
 @doc raw"""
-    injectivity_radius(G::Orthogonal)
-    injectivity_radius(M::Rotations)
+    injectivity_radius(G::GeneraliUnitaryMatrices)
 
-Return the injectivity radius on the [`Rotations`](@ref) and the [`OrthogonalMatrices`](@ref) `M`,
-which is globally
+Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 
 ````math
-    \operatorname{inj}_{\mathrm{O}(n)}(p) = \operatorname{inj}_{\mathrm{SO}(n)}(p) = π\sqrt{2}.
+    \operatorname{inj}_{\mathrm{U}(n)} = π.
 ````
 """
+injectivity_radius(::GeneralUnitaryMatrices) = π
+
+@doc raw"""
+    injectivity_radius(G::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices})
+
+Return the injectivity radius for general complex unitary matrix manifolds, where the determinant is $+1$,
+which is[^1]
+
+```math
+    \operatorname{inj}_{\mathrm{SU}(n)} = π \sqrt{2}.
+```
+"""
+function injectivity_radius(
+    ::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices},
+) where {n,ℂ}
+    return π * sqrt(2.0)
+end
+
+@doc raw"""
+    injectivity_radius(G::SpecialOrthogonal)
+    injectivity_radius(G::Orthogonal)
+    injectivity_radius(M::Rotations)
+    injectivity_radius(M::Rotations, ::ExponentialRetraction)
+
+Return the radius of injectivity on the [`Rotations`](@ref) manifold `M`, which is ``π\sqrt{2}``.
+[^1]
+
+[^1]:
+    > For a derivation of the injectivity radius, see [sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/](https://sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/).
+"""
 injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}) where {n} = π * sqrt(2.0)
+
+# Resolve ambiguity on Rotations and Orthogonal
 function _injectivity_radius(
     ::GeneralUnitaryMatrices{n,ℝ},
     ::ExponentialRetraction,
@@ -507,12 +537,6 @@ end
 function _injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::PolarRetraction) where {n}
     return π / sqrt(2.0)
 end
-@doc raw"""
-    injectivity_radius(G::UnitaryMatrices)
-
-Return the injectivity radius on the [`UnitaryMatrices`](@ref), which is ``π``.
-"""
-injectivity_radius(::GeneralUnitaryMatrices{n,ℂ}) where {n} = π
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 

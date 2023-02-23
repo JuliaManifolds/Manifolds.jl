@@ -603,7 +603,7 @@ end
 @doc raw"""
     injectivity_radius(M::TangentSpaceAtPoint)
 
-Return the injectivity radius on the [`TangentSpaceAtPoint`](@ref) `M`, which is $∞$.
+Return the injectivity radius on the [`TangentSpaceAtPoint`](@ref Manifolds.TangentSpaceAtPoint) `M`, which is $∞$.
 """
 injectivity_radius(::TangentSpaceAtPoint) = Inf
 
@@ -726,7 +726,7 @@ end
 """
     is_flat(::TangentSpaceAtPoint)
 
-Return true. [`TangentSpaceAtPoint`](@ref) is a flat manifold.
+Return true. [`TangentSpaceAtPoint`](@ref Manifolds.TangentSpaceAtPoint) is a flat manifold.
 """
 is_flat(::TangentSpaceAtPoint) = true
 """
