@@ -492,7 +492,7 @@ end
 Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 
 ````math
-    \operatorname{inj}_{\mathrm{U}(n)}(p) = π.
+    \operatorname{inj}_{\mathrm{U}(n)} = π.
 ````
 """
 injectivity_radius(::GeneralUnitaryMatrices) = π
@@ -504,7 +504,7 @@ Return the injectivity radius for general complex unitary matrix manifolds, wher
 which is[^1]
 
 ```math
-    \operatorname{inj}_{\mathrm{SU}(n)}(p) = π \sqrt{2}.
+    \operatorname{inj}_{\mathrm{SU}(n)} = π \sqrt{2}.
 ```
 """
 function injectivity_radius(
