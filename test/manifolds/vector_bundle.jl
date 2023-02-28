@@ -51,10 +51,13 @@ struct TestVectorSpaceType <: VectorSpaceType end
     for T in types, prepr in [ProductRepr, ArrayPartition]
         p = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
+        @test injectivity_radius(TB) == 0
         TpM = TangentSpaceAtPoint(M, p)
         @test sprint(show, TB) == "TangentBundle(Sphere(2, ℝ))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2 * manifold_dimension(M)
+        @test !is_flat(TB)
+        @test is_flat(TpM)
         @test representation_size(TB) === nothing
         @test default_inverse_retraction_method(TB) === m_prod_invretr
         @test default_retraction_method(TB) == m_prod_retr
@@ -261,5 +264,11 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test TangentBundle(M, tbvt).vector_transport === tbvt
         @test CotangentBundle(M, tbvt).vector_transport === tbvt
         @test VectorBundle(TangentSpace, M, tbvt).vector_transport === tbvt
+    end
+
+    @testset "Extended flatness tests" begin
+        M = TangentBundle(Euclidean(3))
+        @test is_flat(M)
+        @test injectivity_radius(M) == Inf
     end
 end

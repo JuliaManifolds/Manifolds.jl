@@ -132,15 +132,26 @@ complex plane.
 """
 exp(::Circle, ::Any...)
 Base.exp(::Circle{ℝ}, p::Real, X::Real) = sym_rem(p + X)
+Base.exp(::Circle{ℝ}, p::Real, X::Real, t::Real) = sym_rem(p + t * X)
 function Base.exp(M::Circle{ℂ}, p::Number, X::Number)
     θ = norm(M, p, X)
     return cos(θ) * p + usinc(θ) * X
 end
+function Base.exp(M::Circle{ℂ}, p::Number, X::Number, t::Number)
+    θ = abs(t) * norm(M, p, X)
+    return cos(θ) * p + usinc(θ) * t * X
+end
 
 exp!(::Circle{ℝ}, q, p, X) = (q .= sym_rem(p + X))
+exp!(::Circle{ℝ}, q, p, X, t::Number) = (q .= sym_rem(p + t * X))
 function exp!(M::Circle{ℂ}, q, p, X)
     θ = norm(M, p, X)
     q .= cos(θ) * p + usinc(θ) * X
+    return q
+end
+function exp!(M::Circle{ℂ}, q, p, X, t::Number)
+    θ = abs(t) * norm(M, p, X)
+    q .= cos(θ) * p + usinc(θ) * t * X
     return q
 end
 
@@ -238,8 +249,15 @@ inner(::Circle, ::Any...)
 @inline inner(::Circle{ℂ}, p, X, Y) = complex_dot(X, Y)
 
 # these methods make sure that we allow for checking mixed bare number and number wrapped in array
-Base.isapprox(::Circle, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
-Base.isapprox(::Circle, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
+_isapprox(::Circle, x, y; kwargs...) = isapprox(x[], y[]; kwargs...)
+_isapprox(::Circle, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
+
+"""
+    is_flat(::Circle)
+
+Return true. [`Circle`](@ref) is a flat manifold.
+"""
+is_flat(M::Circle) = true
 
 @doc raw"""
     log(M::Circle, p, q)

@@ -163,6 +163,11 @@ function exp!(M::AbstractSphere, q, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
     return q
 end
+function exp!(M::AbstractSphere, q, p, X, t::Number)
+    θ = abs(t) * norm(M, p, X)
+    q .= cos(θ) .* p .+ usinc(θ) .* t .* X
+    return q
+end
 
 function get_basis_diagonalizing(
     M::Sphere{n,ℝ},
@@ -281,6 +286,13 @@ inverse_retract(::AbstractSphere, ::Any, ::Any, ::ProjectionInverseRetraction)
 function inverse_retract_project!(::AbstractSphere, X, p, q)
     return (X .= q ./ real(dot(p, q)) .- p)
 end
+
+"""
+    is_flat(M::AbstractSphere)
+
+Return true if [`AbstractSphere`](@ref) is of dimension 1 and false otherwise.
+"""
+is_flat(M::AbstractSphere) = manifold_dimension(M) == 1
 
 @doc raw"""
     local_metric(M::Sphere{n}, p, ::DefaultOrthonormalBasis)
@@ -432,8 +444,8 @@ Compute the retraction that is based on projection, i.e.
 """
 retract(::AbstractSphere, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract_project!(M::AbstractSphere, q, p, X)
-    q .= p .+ X
+function retract_project!(M::AbstractSphere, q, p, X, t::Number)
+    q .= p .+ t .* X
     return project!(M, q, q)
 end
 

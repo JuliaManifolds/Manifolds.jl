@@ -221,11 +221,17 @@ exp(::GeneralUnitaryMatrices, p, X)
 function exp!(M::GeneralUnitaryMatrices, q, p, X)
     return copyto!(M, q, p * exp(X))
 end
+function exp!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
+    return copyto!(M, q, p * exp(t * X))
+end
 
 function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(θ)
     return p * SA[cosθ -sinθ; sinθ cosθ]
+end
+function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix, t::Real)
+    return exp(M, p, t * X)
 end
 function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X)
     @assert size(q) == (2, 2)
@@ -233,8 +239,15 @@ function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X)
     sinθ, cosθ = sincos(θ)
     return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
 end
-function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X)
-    θ = norm(M, p, X) / sqrt(2)
+function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X, t::Real)
+    @assert size(q) == (2, 2)
+    θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
+    sinθ, cosθ = sincos(t * θ)
+    return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
+end
+exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X) = exp!(M, q, p, X, one(eltype(X)))
+function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X, t::Real)
+    θ = abs(t) * norm(M, p, X) / sqrt(2)
     if θ ≈ 0
         a = 1 - θ^2 / 6
         b = θ / 2
@@ -242,9 +255,10 @@ function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X)
         a = sin(θ) / θ
         b = (1 - cos(θ)) / θ^2
     end
-    pinvq = I + a .* X .+ b .* (X^2)
+    pinvq = I + a .* t .* X .+ b .* t^2 .* (X^2)
     return copyto!(q, p * pinvq)
 end
+exp!(M::GeneralUnitaryMatrices{4,ℝ}, q, p, X, t::Real) = exp!(M, q, p, t * X)
 function exp!(::GeneralUnitaryMatrices{4,ℝ}, q, p, X)
     T = eltype(X)
     α, β = angles_4d_skew_sym_matrix(X)
@@ -473,17 +487,47 @@ function get_vector_orthonormal!(
 end
 
 @doc raw"""
-    injectivity_radius(G::Orthogonal)
-    injectivity_radius(M::Rotations)
+    injectivity_radius(G::GeneraliUnitaryMatrices)
 
-Return the injectivity radius on the [`Rotations`](@ref) and the [`OrthogonalMatrices`](@ref) `M`,
-which is globally
+Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 
 ````math
-    \operatorname{inj}_{\mathrm{O}(n)}(p) = \operatorname{inj}_{\mathrm{SO}(n)}(p) = π\sqrt{2}.
+    \operatorname{inj}_{\mathrm{U}(n)} = π.
 ````
 """
+injectivity_radius(::GeneralUnitaryMatrices) = π
+
+@doc raw"""
+    injectivity_radius(G::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices})
+
+Return the injectivity radius for general complex unitary matrix manifolds, where the determinant is $+1$,
+which is[^1]
+
+```math
+    \operatorname{inj}_{\mathrm{SU}(n)} = π \sqrt{2}.
+```
+"""
+function injectivity_radius(
+    ::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices},
+) where {n,ℂ}
+    return π * sqrt(2.0)
+end
+
+@doc raw"""
+    injectivity_radius(G::SpecialOrthogonal)
+    injectivity_radius(G::Orthogonal)
+    injectivity_radius(M::Rotations)
+    injectivity_radius(M::Rotations, ::ExponentialRetraction)
+
+Return the radius of injectivity on the [`Rotations`](@ref) manifold `M`, which is ``π\sqrt{2}``.
+[^1]
+
+[^1]:
+    > For a derivation of the injectivity radius, see [sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/](https://sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/).
+"""
 injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}) where {n} = π * sqrt(2.0)
+
+# Resolve ambiguity on Rotations and Orthogonal
 function _injectivity_radius(
     ::GeneralUnitaryMatrices{n,ℝ},
     ::ExponentialRetraction,
@@ -493,14 +537,17 @@ end
 function _injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::PolarRetraction) where {n}
     return π / sqrt(2.0)
 end
-@doc raw"""
-    injectivity_radius(G::UnitaryMatrices)
-
-Return the injectivity radius on the [`UnitaryMatrices`](@ref), which is ``π``.
-"""
-injectivity_radius(::GeneralUnitaryMatrices{n,ℂ}) where {n} = π
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
+
+"""
+    is_flat(M::GeneralUnitaryMatrices)
+
+Return true if [`GeneralUnitaryMatrices`](@ref) `M` is SO(2) or U(1) and false otherwise.
+"""
+is_flat(M::GeneralUnitaryMatrices) = false
+is_flat(M::GeneralUnitaryMatrices{2,ℝ}) = true
+is_flat(M::GeneralUnitaryMatrices{1,ℂ}) = true
 
 @doc raw"""
     log(M::Rotations, p, X)
@@ -591,8 +638,8 @@ end
 
 function log!(::GeneralUnitaryMatrices{n,𝔽}, X, p, q) where {n,𝔽}
     log_safe!(X, adjoint(p) * q)
-    project!(SkewHermitianMatrices(n, 𝔽), q, q)
-    return q
+    project!(SkewHermitianMatrices(n, 𝔽), X, X)
+    return X
 end
 
 norm(::GeneralUnitaryMatrices, p, X) = norm(X)
@@ -707,15 +754,21 @@ This is also the default retraction on these manifolds.
 """
 retract(::GeneralUnitaryMatrices{n,𝔽}, ::Any, ::Any, ::QRRetraction) where {n,𝔽}
 
-function retract_qr!(::GeneralUnitaryMatrices{n,𝔽}, q::AbstractArray{T}, p, X) where {n,𝔽,T}
-    A = p + p * X
+function retract_qr!(
+    ::GeneralUnitaryMatrices{n,𝔽},
+    q::AbstractArray{T},
+    p,
+    X,
+    t::Number,
+) where {n,𝔽,T}
+    A = p + p * (t * X)
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
-function retract_polar!(M::GeneralUnitaryMatrices{n,𝔽}, q, p, X) where {n,𝔽}
-    A = p + p * X
+function retract_polar!(M::GeneralUnitaryMatrices{n,𝔽}, q, p, X, t::Number) where {n,𝔽}
+    A = p + p * (t * X)
     return project!(M, q, A; check_det=false)
 end
 

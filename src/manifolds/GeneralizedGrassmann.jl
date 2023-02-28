@@ -187,6 +187,13 @@ injectivity_radius(::GeneralizedGrassmann, p) = π / 2
 injectivity_radius(::GeneralizedGrassmann, ::AbstractRetractionMethod) = π / 2
 injectivity_radius(::GeneralizedGrassmann, p, ::AbstractRetractionMethod) = π / 2
 
+"""
+    is_flat(M::GeneralizedGrassmann)
+
+Return true if [`GeneralizedGrassmann`](@ref) `M` is one-dimensional.
+"""
+is_flat(M::GeneralizedGrassmann) = manifold_dimension(M) == 1
+
 function get_embedding(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
     return GeneralizedStiefel(N, K, M.B, 𝔽)
 end
@@ -205,17 +212,10 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B * Y)
 
-function Base.isapprox(
-    M::GeneralizedGrassmann,
-    p,
-    X,
-    Y;
-    atol=sqrt(max_eps(X, Y)),
-    kwargs...,
-)
+function _isapprox(M::GeneralizedGrassmann, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
-function Base.isapprox(M::GeneralizedGrassmann, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
+function _isapprox(M::GeneralizedGrassmann, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
     return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
 end
 
@@ -338,12 +338,12 @@ Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.gith
 """
 retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(M::GeneralizedGrassmann, q, p, X)
-    project!(M, q, p + X)
+function retract_polar!(M::GeneralizedGrassmann, q, p, X, t::Number)
+    project!(M, q, p .+ t .* X)
     return q
 end
-function retract_project!(M::GeneralizedGrassmann, q, p, X)
-    project!(M, q, p + X)
+function retract_project!(M::GeneralizedGrassmann, q, p, X, t::Number)
+    project!(M, q, p .+ t .* X)
     return q
 end
 

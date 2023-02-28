@@ -75,6 +75,7 @@ include("../utils.jl")
 
             @test manifold_dimension(M) ==
                   prod(r⃗) + sum(ntuple(d -> r⃗[d] * (n⃗[d] - r⃗[d]), length(r⃗)))
+            @test !is_flat(M)
 
             @test is_point(M_small, p_small)
             @test is_point(M, p)

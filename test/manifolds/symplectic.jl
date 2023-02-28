@@ -77,6 +77,7 @@ using ManifoldDiff
             @test repr(Sp_2) == "Symplectic{$(2), ℝ}()"
             @test representation_size(Sp_2) == (2, 2)
             @test base_manifold(Sp_2) === Sp_2
+            @test !is_flat(Sp_2)
 
             @test is_point(Sp_2, p_2)
             @test_throws DomainError is_point(Sp_2, p_2 + I, true)

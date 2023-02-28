@@ -12,6 +12,7 @@ include("../utils.jl")
     @test_throws ManifoldDomainError is_point(M, [0], true)
     @test_throws DomainError is_point(M, -ones(3), true)
     @test manifold_dimension(M) == 2
+    @test !is_flat(M)
     @test is_vector(M, p, X)
     @test is_vector(M, p, Y)
     @test_throws ManifoldDomainError is_vector(M, p .+ 1, X, true)

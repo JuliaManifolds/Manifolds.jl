@@ -98,6 +98,11 @@ end
         @test isapprox(SO3, exp(G, p, X), exp(SO3, p, X))
         @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol=1e-6)
 
+        @test isapprox(SO3, exp(G, p, X, 1.0), exp(G, p, X))
+        p3 = similar(p)
+        exp!(G, p3, p, X, 1.0)
+        @test isapprox(SO3, p2, p3)
+
         @test is_group_manifold(G)
         @test is_group_manifold(G, MultiplicationOperation())
         @test !isapprox(G, e, Identity(AdditionOperation()))

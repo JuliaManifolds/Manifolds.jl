@@ -182,6 +182,13 @@ function get_vector_orthonormal!(
     return Y
 end
 
+"""
+    is_flat(::SkewHermitianMatrices)
+
+Return true. [`SkewHermitianMatrices`](@ref) is a flat manifold.
+"""
+is_flat(M::SkewHermitianMatrices) = true
+
 @doc raw"""
     manifold_dimension(M::SkewHermitianMatrices{n,𝔽})
 

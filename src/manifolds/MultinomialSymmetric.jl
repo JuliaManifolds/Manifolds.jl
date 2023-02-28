@@ -79,6 +79,13 @@ end
 embed!(::MultinomialSymmetric, q, p) = copyto!(q, p)
 embed!(::MultinomialSymmetric, Y, ::Any, X) = copyto!(Y, X)
 
+"""
+    is_flat(::MultinomialSymmetric)
+
+Return false. [`MultinomialSymmetric`](@ref) is not a flat manifold.
+"""
+is_flat(M::MultinomialSymmetric) = false
+
 @doc raw"""
     manifold_dimension(M::MultinomialSymmetric{n}) where {n}
 
@@ -128,8 +135,8 @@ refers to the elementwise exponentiation.
 """
 retract(::MultinomialSymmetric, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract_project!(M::MultinomialSymmetric, q, p, X)
-    return project!(M, q, p .* exp.(X ./ p))
+function retract_project!(M::MultinomialSymmetric, q, p, X, t::Number)
+    return project!(M, q, p .* exp.(t .* X ./ p))
 end
 
 function Base.show(io::IO, ::MultinomialSymmetric{n}) where {n}

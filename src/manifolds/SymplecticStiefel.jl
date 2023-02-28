@@ -408,13 +408,20 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 """
 inverse_retract(::SymplecticStiefel, p, q, ::CayleyInverseRetraction)
 
-function inverse_retract_caley!(M::SymplecticStiefel, X, p, q)
+function inverse_retract_cayley!(M::SymplecticStiefel, X, p, q)
     U_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
     V_inv = lu!(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
 
     X .= 2 .* ((p / V_inv .- p / U_inv) .+ ((p + q) / U_inv) .- p)
     return X
 end
+
+"""
+    is_flat(::SymplecticStiefel)
+
+Return false. [`SymplecticStiefel`](@ref) is not a flat manifold.
+"""
+is_flat(M::SymplecticStiefel) = false
 
 @doc raw"""
     manifold_dimension(::SymplecticStiefel{n, k})
@@ -544,11 +551,12 @@ It is this expression we compute inplace of `q`.
 """
 retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
 
-function retract_caley!(M::SymplecticStiefel, q, p, X)
+function retract_cayley!(M::SymplecticStiefel, q, p, X, t::Number)
+    tX = t * X
     # Define intermediate matrices for later use:
-    A = symplectic_inverse_times(M, p, X)
+    A = symplectic_inverse_times(M, p, tX)
 
-    H = X .- p * A  # Allocates (2n × 2k).
+    H = tX .- p * A  # Allocates (2n × 2k).
 
     # A = I - A/2 + H^{+}H/4:
     A .= (symplectic_inverse_times(M, H, H) ./ 4) .- (A ./ 2)

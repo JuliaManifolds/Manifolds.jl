@@ -24,6 +24,10 @@ import ManifoldsBase:
     base_manifold,
     change_basis,
     change_basis!,
+    change_metric,
+    change_metric!,
+    change_representer,
+    change_representer!,
     check_point,
     check_size,
     check_vector,
@@ -74,13 +78,15 @@ import ManifoldsBase:
     injectivity_radius_exp,
     inner,
     isapprox,
+    _isapprox,
+    is_flat,
     is_point,
     is_vector,
     inverse_retract,
     inverse_retract!,
     _inverse_retract,
     _inverse_retract!,
-    inverse_retract_caley!,
+    inverse_retract_cayley!,
     inverse_retract_embedded!,
     inverse_retract_nlsolve!,
     inverse_retract_pade!,
@@ -112,7 +118,7 @@ import ManifoldsBase:
     representation_size,
     retract,
     retract!,
-    retract_caley!,
+    retract_cayley!,
     retract_exp_ode!,
     retract_pade!,
     retract_polar!,
@@ -174,6 +180,7 @@ using Kronecker
 using Graphs
 using LinearAlgebra
 using ManifoldsBase:
+    @next_trait_function,
     ℝ,
     ℂ,
     ℍ,
@@ -447,6 +454,9 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
+# final utilities
+include("trait_recursion_breaking.jl")
+
 @doc raw"""
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
@@ -461,7 +471,7 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
     X ∈ TangentSpaceAtPoint(M,p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+the [`TangentSpaceAtPoint`](@ref Manifolds.TangentSpaceAtPoint) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
 This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
@@ -694,6 +704,9 @@ export ×,
     convert,
     complex_dot,
     decorated_manifold,
+    default_vector_transport_method,
+    default_inverse_retraction_method,
+    default_retraction_method,
     det_local_metric,
     differential_canonical_project,
     differential_canonical_project!,
@@ -732,6 +745,7 @@ export ×,
     isapprox,
     is_default_connection,
     is_default_metric,
+    is_flat,
     is_group_manifold,
     is_identity,
     is_point,

@@ -534,13 +534,20 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
 """
 inverse_retract(::Symplectic, p, q, ::CayleyInverseRetraction)
 
-function inverse_retract_caley!(M::Symplectic, X, p, q)
+function inverse_retract_cayley!(M::Symplectic, X, p, q)
     U_inv = lu(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
     V_inv = lu(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
 
     X .= 2 .* ((p / V_inv .- p / U_inv) .+ ((p + q) / U_inv) .- p)
     return X
 end
+
+"""
+    is_flat(::Symplectic)
+
+Return false. [`Symplectic`](@ref) is not a flat manifold.
+"""
+is_flat(M::Symplectic) = false
 
 @doc raw"""
     manifold_dimension(::Symplectic{n})
@@ -754,8 +761,8 @@ denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
 """
 retract(M::Symplectic, p, X)
 
-function retract_caley!(M::Symplectic, q, p, X)
-    p_star_X = symplectic_inverse_times(M, p, X)
+function retract_cayley!(M::Symplectic, q, p, X, t::Number)
+    p_star_X = symplectic_inverse_times(M, p, t * X)
 
     divisor = lu(2 * I - p_star_X)
     q .= p * (divisor \ add_scaled_I!(p_star_X, 2.0))

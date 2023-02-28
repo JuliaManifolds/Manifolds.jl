@@ -142,6 +142,7 @@ Compute the exponential map on the [`PositiveNumbers`](@ref) `M`.
 Base.exp(::PositiveNumbers, ::Any, ::Any)
 
 Base.exp(::PositiveNumbers, p::Real, X::Real) = p * exp(X / p)
+Base.exp(::PositiveNumbers, p::Real, X::Real, t::Real) = p * exp(t * X / p)
 
 exp!(::PositiveNumbers, q, p, X) = (q .= p .* exp.(X ./ p))
 
@@ -200,6 +201,13 @@ end
 function inverse_retract(M::PositiveNumbers, x, y, ::LogarithmicInverseRetraction)
     return log(M, x, y)
 end
+
+"""
+    is_flat(::PositiveNumbers)
+
+Return false. [`PositiveNumbers`](@ref) is not a flat manifold.
+"""
+is_flat(M::PositiveNumbers) = false
 
 @doc raw"""
     log(M::PositiveNumbers, p, q)

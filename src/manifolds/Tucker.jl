@@ -436,7 +436,7 @@ function Base.foreach(
     basis::AbstractBasis,
     indices=1:manifold_dimension(M),
 )
-    # Use mutating variants to avoid superfluous allocation
+    # Use in-place variants to avoid superfluous allocation
     bᵢ = zero_vector(M, p)
     eᵢ = zeros(number_eltype(p), manifold_dimension(M))
     for i in indices
@@ -624,9 +624,16 @@ function isapprox(p::TuckerPoint, q::TuckerPoint; kwargs...)
     return isapprox(embed(ℳ, p), embed(ℳ, q); kwargs...)
 end
 isapprox(::Tucker, p::TuckerPoint, q::TuckerPoint; kwargs...) = isapprox(p, q; kwargs...)
-function isapprox(M::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector; kwargs...)
+function _isapprox(M::Tucker, p::TuckerPoint, x::TuckerTVector, y::TuckerTVector; kwargs...)
     return isapprox(embed(M, p, x), embed(M, p, y); kwargs...)
 end
+
+"""
+    is_flat(::Tucker)
+
+Return false. [`Tucker`](@ref) is not a flat manifold.
+"""
+is_flat(M::Tucker) = false
 
 #=
 Determines whether there are tensors of dimensions n⃗ with multilinear rank r⃗
@@ -695,11 +702,13 @@ function retract_polar!(
     q::TuckerPoint,
     p::TuckerPoint{T,D},
     x::TuckerTVector,
+    t::Number,
 ) where {T,D}
+    tx = t * x
     U = p.hosvd.U
-    V = x.U̇
+    V = tx.U̇
     ℭ = p.hosvd.core
-    𝔊 = x.Ċ
+    𝔊 = tx.Ċ
     r⃗ = size(ℭ)
 
     # Build the core tensor S and the factors [Uᵈ  Vᵈ]

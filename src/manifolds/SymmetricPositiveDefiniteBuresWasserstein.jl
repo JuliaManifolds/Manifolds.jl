@@ -113,6 +113,14 @@ function inner(
     return 1 / 2 * dot(lyap(p, -X), Y)
 end
 
+"""
+    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric})
+
+Return false. [`SymmetricPositiveDefinite`](@ref) with [`BuresWassersteinMetric`](@ref)
+is not a flat manifold.
+"""
+is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric}) = false
+
 @doc raw"""
     log(::MatricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 

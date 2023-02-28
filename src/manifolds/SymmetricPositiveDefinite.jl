@@ -245,6 +245,13 @@ function isapprox(p::SPDPoint, q::SPDPoint; kwargs...)
     return isapprox(convert(AbstractMatrix, p), convert(AbstractMatrix, q); kwargs...)
 end
 
+"""
+    is_flat(::SymmetricPositiveDefinite)
+
+Return false. [`SymmetricPositiveDefinite`](@ref) is not a flat manifold.
+"""
+is_flat(M::SymmetricPositiveDefinite) = false
+
 @doc raw"""
     manifold_dimension(M::SymmetricPositiveDefinite)
 

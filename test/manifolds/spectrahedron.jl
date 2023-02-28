@@ -6,6 +6,7 @@ include("../utils.jl")
     @test manifold_dimension(M) == 6
     @test get_embedding(M) == Euclidean(4, 2)
     @test representation_size(M) == (4, 2)
+    @test !is_flat(M)
     q = [1.0 0.0; 0.0 1.0; 1.0 1.0; -1.0 1.0]
     q = q / norm(q)
     @test is_point(M, q, true)

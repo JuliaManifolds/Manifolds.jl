@@ -362,10 +362,10 @@ function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
     return dot(v.U, w.U) + dot(v.M, w.M) + dot(v.Vt, w.Vt)
 end
 
-function Base.isapprox(::FixedRankMatrices, p::SVDMPoint, q::SVDMPoint; kwargs...)
+function _isapprox(::FixedRankMatrices, p::SVDMPoint, q::SVDMPoint; kwargs...)
     return isapprox(p.U * Diagonal(p.S) * p.Vt, q.U * Diagonal(q.S) * q.Vt; kwargs...)
 end
-function Base.isapprox(
+function _isapprox(
     ::FixedRankMatrices,
     p::SVDMPoint,
     X::UMVTVector,
@@ -378,6 +378,13 @@ function Base.isapprox(
         kwargs...,
     )
 end
+
+"""
+    is_flat(::FixedRankMatrices)
+
+Return false. [`FixedRankMatrices`](@ref) is not a flat manifold.
+"""
+is_flat(M::FixedRankMatrices) = false
 
 function number_eltype(p::SVDMPoint)
     return typeof(one(eltype(p.U)) + one(eltype(p.S)) + one(eltype(p.Vt)))
@@ -561,9 +568,11 @@ function retract_polar!(
     q::SVDMPoint,
     p::SVDMPoint,
     X::UMVTVector,
+    t::Number,
 ) where {m,n,k}
-    QU, RU = qr([p.U X.U])
-    QV, RV = qr([p.Vt' X.Vt'])
+    tX = t * X
+    QU, RU = qr([p.U tX.U])
+    QV, RV = qr([p.Vt' tX.Vt'])
 
     # Compute T = svd(RU * [diagm(p.S) + X.M I; I zeros(k, k)] * RV')
     @views begin
@@ -573,7 +582,7 @@ function retract_polar!(
         RV12 = RV[:, (k + 1):(2 * k)]
     end
     tmp = RU11 .* p.S' .+ RU12
-    mul!(tmp, RU11, X.M, true, true)
+    mul!(tmp, RU11, tX.M, true, true)
     tmp2 = tmp * RV11'
     mul!(tmp2, RU11, RV12', true, true)
     T = svd(tmp2)

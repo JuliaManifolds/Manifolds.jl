@@ -346,13 +346,55 @@ end
 function default_retraction_method(M::ProductManifold)
     return ProductRetraction(map(default_retraction_method, M.manifolds)...)
 end
+function default_retraction_method(M::ProductManifold, ::Type{T}) where {T<:ArrayPartition}
+    return ProductRetraction(
+        map(default_retraction_method, M.manifolds, T.parameters[2].parameters)...,
+    )
+end
+function default_retraction_method(M::ProductManifold, ::Type{T}) where {T<:ProductRepr}
+    return ProductRetraction(
+        map(default_retraction_method, M.manifolds, T.parameters[1].parameters)...,
+    )
+end
 
 function default_inverse_retraction_method(M::ProductManifold)
     return InverseProductRetraction(map(default_inverse_retraction_method, M.manifolds)...)
 end
+function default_inverse_retraction_method(
+    M::ProductManifold,
+    ::Type{T},
+) where {T<:ArrayPartition}
+    return InverseProductRetraction(
+        map(default_inverse_retraction_method, M.manifolds, T.parameters[2].parameters)...,
+    )
+end
+function default_inverse_retraction_method(
+    M::ProductManifold,
+    ::Type{T},
+) where {T<:ProductRepr}
+    return InverseProductRetraction(
+        map(default_inverse_retraction_method, M.manifolds, T.parameters[1].parameters)...,
+    )
+end
 
 function default_vector_transport_method(M::ProductManifold)
     return ProductVectorTransport(map(default_vector_transport_method, M.manifolds)...)
+end
+function default_vector_transport_method(
+    M::ProductManifold,
+    ::Type{T},
+) where {T<:ArrayPartition}
+    return ProductVectorTransport(
+        map(default_vector_transport_method, M.manifolds, T.parameters[2].parameters)...,
+    )
+end
+function default_vector_transport_method(
+    M::ProductManifold,
+    ::Type{T},
+) where {T<:ProductRepr}
+    return ProductVectorTransport(
+        map(default_vector_transport_method, M.manifolds, T.parameters[1].parameters)...,
+    )
 end
 
 @doc raw"""
@@ -401,10 +443,40 @@ function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
         )...,
     )
 end
+function Base.exp(M::ProductManifold, p::ProductRepr, X::ProductRepr, t::Number)
+    return ProductRepr(
+        map(
+            (N, pc, Xc) -> exp(N, pc, Xc, t),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
+end
+function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition, t::Number)
+    return ArrayPartition(
+        map(
+            (N, pc, Xc) -> exp(N, pc, Xc, t),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        )...,
+    )
+end
 
 function exp!(M::ProductManifold, q, p, X)
     map(
         exp!,
+        M.manifolds,
+        submanifold_components(M, q),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return q
+end
+function exp!(M::ProductManifold, q, p, X, t::Number)
+    map(
+        (N, qc, pc, Xc) -> exp!(N, qc, pc, Xc, t),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),
@@ -752,13 +824,13 @@ function inverse_retract!(M::ProductManifold, Y, p, q, method::InverseProductRet
     return Y
 end
 
-function Base.isapprox(M::ProductManifold, p, q; kwargs...)
+function _isapprox(M::ProductManifold, p, q; kwargs...)
     return all(
         t -> isapprox(t...; kwargs...),
         ziptuples(M.manifolds, submanifold_components(M, p), submanifold_components(M, q)),
     )
 end
-function Base.isapprox(M::ProductManifold, p, X, Y; kwargs...)
+function _isapprox(M::ProductManifold, p, X, Y; kwargs...)
     return all(
         t -> isapprox(t...; kwargs...),
         ziptuples(
@@ -768,6 +840,15 @@ function Base.isapprox(M::ProductManifold, p, X, Y; kwargs...)
             submanifold_components(M, Y),
         ),
     )
+end
+
+"""
+    is_flat(::ProductManifold)
+
+Return true if and only if all component manifolds of [`ProductManifold`](@ref) `M` are flat.
+"""
+function is_flat(M::ProductManifold)
+    return all(is_flat, M.manifolds)
 end
 
 @doc raw"""
@@ -1175,11 +1256,12 @@ for TP in [ProductRepr, ArrayPartition]
                 M::ProductManifold,
                 p::$TP,
                 X::$TP,
+                t::Number,
                 method::ProductRetraction,
             )
                 return $TP(
                     map(
-                        retract,
+                        (N, pc, Xc, rm) -> retract(N, pc, Xc, t, rm),
                         M.manifolds,
                         submanifold_components(M, p),
                         submanifold_components(M, X),
@@ -1191,9 +1273,9 @@ for TP in [ProductRepr, ArrayPartition]
     )
 end
 
-function _retract!(M::ProductManifold, q, p, X, method::ProductRetraction)
+function _retract!(M::ProductManifold, q, p, X, t::Number, method::ProductRetraction)
     map(
-        retract!,
+        (N, qc, pc, Xc, rm) -> retract!(N, qc, pc, Xc, t, rm),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),

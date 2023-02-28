@@ -96,6 +96,13 @@ function get_embedding(::MultinomialDoubleStochastic{N}) where {N}
     return MultinomialMatrices(N, N)
 end
 
+"""
+    is_flat(::MultinomialDoubleStochastic)
+
+Return false. [`MultinomialDoubleStochastic`](@ref) is not a flat manifold.
+"""
+is_flat(M::MultinomialDoubleStochastic) = false
+
 @doc raw"""
     manifold_dimension(M::MultinomialDoubleStochastic{n}) where {n}
 
@@ -193,8 +200,8 @@ refers to the elementwise exponentiation.
 """
 retract(::MultinomialDoubleStochastic, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract_project!(M::MultinomialDoubleStochastic, q, p, X)
-    return project!(M, q, p .* exp.(X ./ p))
+function retract_project!(M::MultinomialDoubleStochastic, q, p, X, t::Number)
+    return project!(M, q, p .* exp.(t .* X ./ p))
 end
 
 function Base.show(io::IO, ::MultinomialDoubleStochastic{n}) where {n}

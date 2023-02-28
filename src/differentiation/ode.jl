@@ -1,7 +1,8 @@
 function solve_exp_ode(
     M::AbstractManifold,
     p,
-    X;
+    X,
+    t::Number;
     basis::AbstractBasis=DefaultOrthonormalBasis(),
     solver=AutoVern9(Rodas5()),
     backend=default_differential_backend(),
@@ -28,7 +29,7 @@ function solve_exp_ode(
     end
 
     params = (M,)
-    prob = ODEProblem(exp_problem, u0, (0.0, 1.0), params)
+    prob = ODEProblem(exp_problem, u0, (0.0, t), params)
     sol = solve(prob, solver; kwargs...)
     q = sol.u[1][(n + 1):(2 * n)]
     return q
@@ -39,9 +40,10 @@ function exp!(
     M::AbstractDecoratorManifold,
     q,
     p,
-    X;
+    X,
+    t::Number;
     kwargs...,
 )
-    copyto!(M, q, solve_exp_ode(M, p, X; kwargs...))
+    copyto!(M, q, solve_exp_ode(M, p, X, t; kwargs...))
     return q
 end

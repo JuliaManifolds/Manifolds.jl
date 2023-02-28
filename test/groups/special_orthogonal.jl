@@ -9,6 +9,7 @@ include("group_utils.jl")
         @test M === Rotations(n)
         p = Matrix(I, n, n)
         @test is_default_metric(MetricManifold(G, EuclideanMetric()))
+        @test is_flat(G) == (n == 2)
 
         types = [Matrix{Float64}]
 

@@ -2,12 +2,16 @@ include("../utils.jl")
 include("group_utils.jl")
 
 @testset "General Unitary Groups" begin
+    # SpecialUnitary -> injectivity us also π√2
+    SU3 = Manifolds.GeneralUnitaryMatrices{3,ℂ,Manifolds.DeterminantOneMatrices}()
+    @test injectivity_radius(SU3) == π * √2
     @testset "Orthogonal Group" begin
         O2 = Orthogonal(2)
         @test repr(O2) == "Orthogonal(2)"
 
         for n in [2, 3, 4, 5] # 2-4 have special implementations, 5 for generic case
             On = Orthogonal(n)
+            injectivity_radius(On) ≈ π * √2
             X = zeros(n, n)
             X[1, 2] = 1.0
             X[2, 1] = -1.0
@@ -61,6 +65,8 @@ include("group_utils.jl")
         q2 = exp_lie(QU1, X)
         X3 = log_lie(QU1, q2)
         @test isapprox(QU1, p, X, X3)
+        q3 = exp(QU1, p, X, 1.0)
+        @test isapprox(QU1, q, q3)
 
         q3 = Ref(Quaternion(0.0))
         exp_lie!(QU1, q3, X)

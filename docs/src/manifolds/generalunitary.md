@@ -26,3 +26,4 @@ Modules = [Manifolds]
 Pages = ["manifolds/GeneralUnitaryMatrices.jl"]
 Order = [:constant, :type, :function]
 ```
+## Footnotes and References
