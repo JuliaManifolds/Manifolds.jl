@@ -99,12 +99,6 @@ function check_vector(
     return nothing
 end
 
-function distance(::Flag, p::AbstractMatrix, q::AbstractMatrix)
-    eigval_angles = map(angle, eigvals(p' * q))
-    positive_angles = filter(x -> x > 0, eigval_angles)
-    return norm(positive_angles)
-end
-
 @doc raw"""
     project(::Flag, p, X)
 

@@ -31,22 +31,6 @@ function check_vector(
     return nothing
 end
 
-@doc raw"""
-    distance(::Flag, p::OrthogonalPoint, q::OrthogonalPoint)
-
-Distance between two points `p`, `q` on [`Flag`](@ref) manifold. The formula reads
-```math
-d(p, q) = \sqrt{\sum_{i=1}^r λ_i^2}
-```
-where ``λ_1, λ_2, …, λ_r`` are real numbers corresponding to positive angles of pairs of
-complex eigenvalues of matrix `p' * q`.
-"""
-function distance(::Flag, p::OrthogonalPoint, q::OrthogonalPoint)
-    eigval_angles = map(angle, eigvals(p.value' * q.value))
-    positive_angles = filter(x -> x > 0, eigval_angles)
-    return norm(positive_angles)
-end
-
 function exp!(::Flag, q::OrthogonalPoint, p::OrthogonalPoint, X::OrthogonalTVector)
     return q .= p * exp(X)
 end

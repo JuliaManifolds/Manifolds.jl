@@ -106,7 +106,6 @@ using Test
         @test isapprox(X1, X1os)
     end
     @test inner(M, p1, X1, X2) ≈ inner(M, p1o, X1o, X2o)
-    @test distance(M, p1o, p2o) ≈ 1.724221091262504
 
     @testset "projection" begin
         X_to_project = [

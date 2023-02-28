@@ -110,7 +110,8 @@ function Base.isapprox(M::Flag, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
 function Base.isapprox(M::Flag, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
-    return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
+    X = inverse_retract(M, p, q, PolarInverseRetraction())
+    return isapprox(norm(M, p, X), 0; atol=atol, kwargs...)
 end
 
 function manifold_dimension(M::Flag{N,dp1}) where {N,dp1}
