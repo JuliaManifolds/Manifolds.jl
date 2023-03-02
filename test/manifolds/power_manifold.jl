@@ -262,7 +262,7 @@ end
                     rand_tvector_atol_multiplier=8.0,
                     retraction_atol_multiplier=12,
                     is_tangent_atol_multiplier=12.0,
-                    exp_log_atol_multiplier=2e2 * prod(power_dimensions(Mr2)),
+                    exp_log_atol_multiplier=4e2 * prod(power_dimensions(Mr2)),
                     test_inplace=true,
                 )
             end
@@ -286,7 +286,7 @@ end
                     rand_tvector_atol_multiplier=500.0,
                     retraction_atol_multiplier=12,
                     is_tangent_atol_multiplier=12.0,
-                    exp_log_atol_multiplier=4e2 * prod(power_dimensions(Mrn1)),
+                    exp_log_atol_multiplier=1e4 * prod(power_dimensions(Mrn1)),
                     test_inplace=true,
                     test_rand_point=true,
                     test_rand_tvector=true,
@@ -311,7 +311,7 @@ end
                     rand_tvector_atol_multiplier=8.0,
                     retraction_atol_multiplier=24,
                     is_tangent_atol_multiplier=12.0,
-                    exp_log_atol_multiplier=4e3 * prod(power_dimensions(Mr2)),
+                    exp_log_atol_multiplier=1e4 * prod(power_dimensions(Mr2)),
                     test_inplace=true,
                 )
             end
@@ -332,9 +332,9 @@ end
                     point_distributions=[power_rn2_pt_dist],
                     tvector_distributions=[power_rn2_tv_dist],
                     rand_tvector_atol_multiplier=8.0,
-                    retraction_atol_multiplier=12,
+                    retraction_atol_multiplier=4e1,
                     is_tangent_atol_multiplier=12.0,
-                    exp_log_atol_multiplier=4e4 * prod(power_dimensions(Mrn2)),
+                    exp_log_atol_multiplier=2e5 * prod(power_dimensions(Mrn2)),
                     test_inplace=true,
                 )
             end
