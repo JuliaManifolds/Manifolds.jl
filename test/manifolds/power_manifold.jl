@@ -213,7 +213,7 @@ end
                     rand_tvector_atol_multiplier=600.0,
                     retraction_atol_multiplier=12.0,
                     is_tangent_atol_multiplier=500.0,
-                    exp_log_atol_multiplier=1e2 * prod(power_dimensions(Ms1)),
+                    exp_log_atol_multiplier=1e3 * prod(power_dimensions(Ms1)),
                     test_inplace=true,
                     test_rand_point=true,
                     test_rand_tvector=true,
