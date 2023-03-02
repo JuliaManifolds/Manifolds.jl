@@ -103,6 +103,13 @@ function get_embedding(M::Spectrahedron)
     return Euclidean(representation_size(M)...; field=ℝ)
 end
 
+"""
+    is_flat(::Spectrahedron)
+
+Return false. [`Spectrahedron`](@ref) is not a flat manifold.
+"""
+is_flat(M::Spectrahedron) = false
+
 @doc raw"""
     manifold_dimension(M::Spectrahedron)
 
@@ -146,7 +153,7 @@ compute a projection based retraction by projecting $q+Y$ back onto the manifold
 """
 retract(::Spectrahedron, ::Any, ::Any, ::ProjectionRetraction)
 
-retract_project!(M::Spectrahedron, r, q, Y) = project!(M, r, q + Y)
+retract_project!(M::Spectrahedron, r, q, Y, t::Number) = project!(M, r, q .+ t .* Y)
 
 @doc raw"""
     representation_size(M::Spectrahedron)

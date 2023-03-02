@@ -171,6 +171,13 @@ function get_vector_orthonormal!(
 end
 ## unify within bases later.
 
+"""
+    is_flat(::SymmetricMatrices)
+
+Return true. [`SymmetricMatrices`](@ref) is a flat manifold.
+"""
+is_flat(M::SymmetricMatrices) = true
+
 @doc raw"""
     manifold_dimension(M::SymmetricMatrices{n,𝔽})
 

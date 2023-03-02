@@ -105,7 +105,7 @@ end
     @test apply(A, [π / 2], [0.0, 1.0, 0.0]) ≈ [0.5, 0.5, sqrt(2) / 2]
 end
 
-@testset "Matrix columnwise multiplication action" begin
+@testset "Matrix rowwise multiplication action" begin
     M = Stiefel(4, 2)
     G = Orthogonal(2)
     A = Manifolds.RowwiseMultiplicationAction(M, G)
@@ -142,4 +142,41 @@ end
     q = similar(p)
     apply!(A, q, a, p)
     @test isapprox(q, apply(A, a, p))
+end
+
+@testset "Matrix columnwise multiplication action" begin
+    M = KendallsShapeSpace(2, 3)
+    G = SpecialOrthogonal(2)
+    p1 = [
+        0.4385117672460505 -0.6877826444042382 0.24927087715818771
+        -0.3830259932279294 0.35347460720654283 0.029551386021386548
+    ]
+    p2 = [
+        -0.42693314765896473 -0.3268567431952937 0.7537898908542584
+        0.3054740561061169 -0.18962848284149897 -0.11584557326461796
+    ]
+    A = get_orbit_action(M)
+
+    @test group_manifold(A) === M
+    @test base_group(A) === SpecialOrthogonal(2)
+
+    a = [0.5851302132737501 -0.8109393525500014; 0.8109393525500014 0.5851302132737504]
+    @test isapprox(
+        apply(A, a, p1),
+        [
+            0.5671973348498089 -0.6890888745171757 0.1218915396673668
+            0.13148636750922071 -0.35092134004668124 0.2194349725374605
+        ],
+    )
+    @test isapprox(
+        inverse_apply(A, a, p1),
+        [
+            -0.05402436706634758 -0.11579593629529603 0.1698203033616436
+            -0.5797265297229175 0.7645786846499203 -0.18485215492700285
+        ],
+    )
+    @test apply(A, Identity(G), p1) === p1
+    q = similar(p1)
+    apply!(A, q, a, p1)
+    @test isapprox(q, apply(A, a, p1))
 end

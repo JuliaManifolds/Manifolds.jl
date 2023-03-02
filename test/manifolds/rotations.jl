@@ -4,6 +4,7 @@ include("../utils.jl")
     M = Manifolds.Rotations(2)
     @test repr(M) == "Rotations(2)"
     @test representation_size(M) == (2, 2)
+    @test is_flat(M)
     @test injectivity_radius(M) == π * sqrt(2.0)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0]) == π * sqrt(2.0)
     @test injectivity_radius(M, ExponentialRetraction()) == π * sqrt(2.0)
@@ -107,6 +108,7 @@ include("../utils.jl")
     for n in (3, 4, 5)
         @testset "Rotations: SO($n)" begin
             SOn = Manifolds.Rotations(n)
+            @test !is_flat(SOn)
             ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             tvd = Manifolds.normal_tvector_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             pts = [rand(ptd) for _ in 1:3]

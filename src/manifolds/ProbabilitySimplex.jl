@@ -49,7 +49,7 @@ active_traits(f, ::ProbabilitySimplex, args...) = merge_traits(IsEmbeddedManifol
 @doc raw"""
     change_representer(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
-Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](@ref),
+Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric),
 the representer of a linear functional on the tangent space is adapted as ``Z = p .* X``, since
 this “compensates” for the divsion by ``p`` in the Riemannian metric on the [`ProbabilitySimplex`](@ref).
 
@@ -224,6 +224,13 @@ function inverse_retract_softmax!(::ProbabilitySimplex{n}, X, p, q) where {n}
     return X
 end
 
+"""
+    is_flat(::ProbabilitySimplex)
+
+Return false. [`ProbabilitySimplex`](@ref) is not a flat manifold.
+"""
+is_flat(M::ProbabilitySimplex) = false
+
 @doc raw"""
     log(M::ProbabilitySimplex, p, q)
 
@@ -340,14 +347,36 @@ where multiplication, exponentiation and division are meant elementwise.
 """
 retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxRetraction)
 
-function retract_softmax!(::ProbabilitySimplex, q, p, X)
+function retract_softmax!(::ProbabilitySimplex, q, p, X, t::Number)
     s = zero(eltype(q))
     @inbounds for i in eachindex(q, p, X)
-        q[i] = p[i] * exp(X[i])
+        q[i] = p[i] * exp(t * X[i])
         s += q[i]
     end
     q ./= s
     return q
+end
+
+@doc raw"""
+    X = riemannian_gradient(M::ProbabilitySimplex{n}, p, Y)
+    riemannian_gradient!(M::ProbabilitySimplex{n}, X, p, Y)
+
+Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{n+1}`` of the
+[`ProbabilitySimplex`](@ref) ``Δ^n``, this function computes the Riemannian gradient
+``X = \operatorname{grad} f(p)`` where ``f`` is the function ``\tilde f`` restricted to the manifold.
+
+The formula reads
+
+```math
+    X = p ⊙ Y - ⟨p, Y⟩p,
+```
+where ``⊙`` denotes the emelementwise product.
+"""
+riemannian_gradient(M::ProbabilitySimplex, p, Y; kwargs...)
+
+function riemannian_gradient!(M::ProbabilitySimplex, X, p, Y; kwargs...)
+    X .= p .* Y - dot(p, Y) .* p
+    return X
 end
 
 function Base.show(io::IO, ::ProbabilitySimplex{n}) where {n}

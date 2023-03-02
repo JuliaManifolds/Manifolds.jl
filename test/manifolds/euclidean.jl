@@ -10,6 +10,8 @@ using Manifolds: induced_basis
     @test repr(Ec) == "Euclidean(3; field = ℂ)"
     @test repr(Euclidean(2, 3; field=ℍ)) == "Euclidean(2, 3; field = ℍ)"
     @test Manifolds.allocation_promotion_function(Ec, get_vector, ()) === complex
+    @test is_flat(E)
+    @test is_flat(Ec)
     p = zeros(3)
     A = Manifolds.RetractionAtlas()
     B = induced_basis(EM, A, p, TangentSpace)

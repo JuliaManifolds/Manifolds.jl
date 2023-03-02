@@ -310,7 +310,7 @@ end
     BG = base_group(G)
     return isapprox(BG, identity_element(BG), X, Y; kwargs...)
 end
-function Base.isapprox(
+function isapprox(
     ::TraitList{<:IsGroupManifold},
     ::AbstractDecoratorManifold,
     ::Identity,
@@ -328,7 +328,7 @@ function is_point(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     e::Identity,
-    te=false;
+    te::Bool=false;
     kwargs...,
 )
     ie = is_identity(G, e; kwargs...)
@@ -341,7 +341,7 @@ function is_vector(
     G::AbstractDecoratorManifold,
     e::Identity,
     X,
-    te=false,
+    te::Bool=false,
     cbp=true;
     kwargs...,
 )
@@ -1018,6 +1018,16 @@ function retract(
     q = translate(G, p, pinvq, conv)
     return q
 end
+function retract(
+    tl::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    X,
+    t::Number,
+    method::GroupExponentialRetraction,
+)
+    return retract(tl, G, p, t * X, method)
+end
 
 function retract!(
     ::TraitList{<:IsGroupManifold},
@@ -1031,6 +1041,17 @@ function retract!(
     Xₑ = inverse_translate_diff(G, p, p, X, conv)
     pinvq = exp_lie(G, Xₑ)
     return translate!(G, q, p, pinvq, conv)
+end
+function retract!(
+    tl::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    method::GroupExponentialRetraction,
+)
+    return retract!(tl, G, q, p, t * X, method)
 end
 
 @doc raw"""

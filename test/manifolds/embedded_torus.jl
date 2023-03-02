@@ -10,6 +10,7 @@ using BoundaryValueDiffEq
 @testset "Torus in ℝ³" begin
     M = Manifolds.EmbeddedTorus(3, 2)
     A = Manifolds.DefaultTorusAtlas()
+    @test !is_flat(M)
 
     p0x = [0.5, -1.2]
     X_p0x = [-1.2, 0.4]

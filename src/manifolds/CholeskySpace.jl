@@ -128,6 +128,13 @@ function inner(::CholeskySpace, p, X, Y)
     )
 end
 
+"""
+    is_flat(::CholeskySpace)
+
+Return false. [`CholeskySpace`](@ref) is not a flat manifold.
+"""
+is_flat(M::CholeskySpace) = false
+
 @doc raw"""
     log(M::CholeskySpace, X, p, q)
 

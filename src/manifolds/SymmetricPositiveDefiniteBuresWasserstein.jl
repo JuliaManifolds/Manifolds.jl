@@ -15,8 +15,8 @@ struct BuresWassersteinMetric <: RiemannianMetric end
     change_representer(M::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
-space at `p` with respect to the [`EuclideanMetric`](@ref) `g_E`,
-this is turned into the representer with respect to the (default) metric,
+space at `p` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+`g_E`, this is turned into the representer with respect to the (default) metric,
 the [`BuresWassersteinMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
 
 To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)```
@@ -112,6 +112,14 @@ function inner(
 )
     return 1 / 2 * dot(lyap(p, -X), Y)
 end
+
+"""
+    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric})
+
+Return false. [`SymmetricPositiveDefinite`](@ref) with [`BuresWassersteinMetric`](@ref)
+is not a flat manifold.
+"""
+is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric}) = false
 
 @doc raw"""
     log(::MatricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)

@@ -74,6 +74,15 @@ function exp!(
     z = exp(CholeskySpace{N}(), y, W)
     return copyto!(q, z * z')
 end
+function exp!(
+    M::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogCholeskyMetric},
+    q,
+    p,
+    X,
+    t::Number,
+) where {N}
+    return exp!(M, q, p, t * X)
+end
 
 @doc raw"""
     inner(M::MetricManifold{LogCholeskyMetric,ℝ,SymmetricPositiveDefinite}, p, X, Y)
@@ -101,6 +110,14 @@ function inner(
     (z, Yz) = spd_to_cholesky(p, z, Y)
     return inner(CholeskySpace{N}(), z, Xz, Yz)
 end
+
+"""
+    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric})
+
+Return false. [`SymmetricPositiveDefinite`](@ref) with [`LogCholeskyMetric`](@ref)
+is not a flat manifold.
+"""
+is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}) = false
 
 @doc raw"""
     log(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)

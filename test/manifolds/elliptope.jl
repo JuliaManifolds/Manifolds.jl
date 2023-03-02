@@ -4,6 +4,7 @@ include("../utils.jl")
     M = Elliptope(4, 2)
     @test repr(M) == "Elliptope(4, 2)"
     @test manifold_dimension(M) == 3
+    @test !is_flat(M)
     @test get_embedding(M) == Euclidean(4, 2)
     @test representation_size(M) == (4, 2)
     q = [1.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]

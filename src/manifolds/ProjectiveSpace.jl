@@ -282,9 +282,16 @@ unit absolute value, that is, $|λ| = 1$.
 This is equivalent to the Riemannian
 [`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) being 0.
 """
-function Base.isapprox(::AbstractProjectiveSpace, p, q; kwargs...)
+function _isapprox(::AbstractProjectiveSpace, p, q; kwargs...)
     return isapprox(abs(dot(p, q)), 1; kwargs...)
 end
+
+"""
+    is_flat(M::AbstractProjectiveSpace)
+
+Return true if [`AbstractProjectiveSpace`](@ref) is of dimension 1 and false otherwise.
+"""
+is_flat(M::AbstractProjectiveSpace) = manifold_dimension(M) == 1
 
 @doc raw"""
     log(M::AbstractProjectiveSpace, p, q)
@@ -418,16 +425,16 @@ retract(
     ::Union{ProjectionRetraction,PolarRetraction,QRRetraction},
 )
 
-function retract_polar!(M::AbstractProjectiveSpace, q, p, X)
-    q .= p .+ X
+function retract_polar!(M::AbstractProjectiveSpace, q, p, X, t::Number)
+    q .= p .+ t .* X
     return project!(M, q, q)
 end
-function retract_project!(M::AbstractProjectiveSpace, q, p, X)
-    q .= p .+ X
+function retract_project!(M::AbstractProjectiveSpace, q, p, X, t::Number)
+    q .= p .+ t .* X
     return project!(M, q, q)
 end
-function retract_qr!(M::AbstractProjectiveSpace, q, p, X)
-    q .= p .+ X
+function retract_qr!(M::AbstractProjectiveSpace, q, p, X, t::Number)
+    q .= p .+ t .* X
     return project!(M, q, q)
 end
 

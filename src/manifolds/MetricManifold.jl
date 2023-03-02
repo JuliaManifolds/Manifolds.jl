@@ -1,20 +1,3 @@
-@doc raw"""
-    AbstractMetric
-
-Abstract type for the pseudo-Riemannian metric tensor ``g``, a family of smoothly
-varying inner products on the tangent space. See [`inner`](@ref).
-
-# Functor
-
-    (metric::Metric)(M::AbstractManifold)
-    (metric::Metric)(M::MetricManifold)
-
-Generate the `MetricManifold` that wraps the manifold `M` with given `metric`.
-This works for both a variable containing the metric as well as a subtype `T<:AbstractMetric`,
-where a zero parameter constructor `T()` is availabe.
-If `M` is already a metric manifold, the inner manifold with the new `metric` is returned.
-"""
-abstract type AbstractMetric end
 
 """
     IsMetricManifold <: AbstractTrait
@@ -27,7 +10,8 @@ struct IsMetricManifold <: AbstractTrait end
 """
     IsDefaultMetric{G<:AbstractMetric}
 
-Specify that a certain [`AbstractMetric`](@ref) is the default metric for a manifold.
+Specify that a certain [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+is the default metric for a manifold.
 This way the corresponding [`MetricManifold`](@ref) falls back to the default methods
 of the manifold it decorates.
 """
@@ -43,12 +27,13 @@ parent_trait(::IsDefaultMetric) = IsMetricManifold()
 """
     MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <: AbstractDecoratorManifold{𝔽}
 
-Equip a [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) explicitly with a [`AbstractMetric`](@ref) `G`.
+Equip a [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) explicitly with an
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G`.
 
 For a Metric AbstractManifold, by default, assumes, that you implement the linear form
 from [`local_metric`](@ref) in order to evaluate the exponential map.
 
-If the corresponding [`AbstractMetric`](@ref) `G` yields closed form formulae for e.g.
+If the corresponding `AbstractMetric` `G` yields closed form formulae for e.g.
 the exponential map and this is implemented directly (without solving the ode),
 you can of course still implement that directly.
 
@@ -56,7 +41,7 @@ you can of course still implement that directly.
 
     MetricManifold(M, G)
 
-Generate the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` as a manifold with the [`AbstractMetric`](@ref) `G`.
+Generate the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` as a manifold with the `AbstractMetric` `G`.
 """
 struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <:
        AbstractDecoratorManifold{𝔽}
@@ -91,53 +76,10 @@ end
 (metric::AbstractMetric)(M::MetricManifold) = MetricManifold(M.manifold, metric)
 (::Type{T})(M::MetricManifold) where {T<:AbstractMetric} = MetricManifold(M.manifold, T())
 
-@doc raw"""
-    RiemannianMetric <: AbstractMetric
-
-Abstract type for Riemannian metrics, a family of positive definite inner
-products. The positive definite property means that for ``X  ∈ T_p \mathcal M``, the
-inner product ``g(X, X) > 0`` whenever ``X`` is not the zero vector.
-"""
-abstract type RiemannianMetric <: AbstractMetric end
-
 decorated_manifold(M::MetricManifold) = M.manifold
 
 get_embedding(M::MetricManifold) = get_embedding(M.manifold)
 
-@doc raw"""
-    change_metric(M::AbstractcManifold, G2::AbstractMetric, p, X)
-
-On the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` with implicitly given metric ``g_1``
-and a second [`AbstractMetric`](@ref) ``g_2`` this function performs a change of metric in the
-sense that it returns the tangent vector ``Z=BX`` such that the linear map ``B`` fulfills
-
-````math
-g_2(Y_1,Y_2) = g_1(BY_1,BY_2) \quad \text{for all } Y_1, Y_2 ∈ T_p\mathcal M.
-````
-
-If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
-representations ``G_1 = C_1C_1^{\mathrm{H}}`` and ``G_2 = C_2C_2^{\mathrm{H}}``, where ``C_1,C_2`` denote their respective
-Cholesky factors, then solving ``C_2C_2^{\mathrm{H}} = G_2 = B^{\mathrm{H}}G_1B = B^{\mathrm{H}}C_1C_1^{\mathrm{H}}B`` yields ``B = (C_1 \backslash C_2)^{\mathrm{H}}``,
-where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
-
-This function returns `Z = BX`.
-
-# Examples
-
-    change_metric(Sphere(2), EuclideanMetric(), p, X)
-
-Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
-
-    change_metric(SymmetricPOsitiveDefinite(3), EuclideanMetric, p, X)
-
-Here, the default metric in ``\mathcal P(3)`` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``B=p``
-"""
-change_metric(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
-
-function change_metric(M::AbstractManifold, G::AbstractMetric, p, X)
-    Y = allocate_result(M, change_metric, X, p) # this way we allocate a tangent
-    return change_metric!(M, Y, G, p, X)
-end
 function change_metric!(
     ::T,
     M::AbstractDecoratorManifold,
@@ -160,68 +102,6 @@ function change_metric!(M::MetricManifold, Y, G::AbstractMetric, p, X)
     z = (C1 \ C2)'x
     return get_vector!(M, Y, p, z, B)
 end
-
-@trait_function change_metric(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
-@trait_function change_metric!(M::AbstractDecoratorManifold, Y, G::AbstractMetric, X, p)
-
-@doc raw"""
-    change_representer(M::AbstractManifold, G2::AbstractMetric, p, X)
-
-Convert the representer `X` of a linear function (in other words a cotangent vector at `p`)
-in the tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` given with respect to the
-[`AbstractMetric`](@ref) `G2` into the representer with respect to the (implicit) metric of `M`.
-
-In order to convert `X` into the representer with respect to the (implicitly given) metric ``g_1`` of `M`,
-we have to find the conversion function ``c: T_p\mathcal M \to T_p\mathcal M`` such that
-
-```math
-    g_2(X,Y) = g_1(c(X),Y)
-```
-
-If both metrics are given in their [`local_metric`](@ref) (symmetric positive defintie) matrix
-representations ``G_1`` and ``G_2`` and ``x,y`` are the local coordinates with respect to
-the same basis of the tangent space, the equation reads
-
-```math
-   x^{\mathrm{H}}G_2y = c(x)^{\mathrm{H}}G_1 y \quad \text{for all } y \in ℝ^d,
-```
-where ``\cdot^{\mathrm{H}}`` denotes the conjugate transpose.
-We obtain ``c(X) = (G_1\backslash G_2)^{\mathrm{H}}X``
-
-For example `X` could be the gradient ``\operatorname{grad}f`` of a real-valued function
-``f: \mathcal M \to ℝ``, i.e.
-
-```math
-    g_2(X,Y) = Df(p)[Y] \quad \text{for all } Y ∈ T_p\mathcal M.
-```
-
-and we would change the Riesz representer `X` to the representer with respect to the metric ``g_1``.
-
-# Examples
-
-    change_representer(Sphere(2), EuclideanMetric(), p, X)
-
-Since the metric in ``T_p\mathbb S^2`` is the Euclidean metric from the embedding restricted to ``T_p\mathbb S^2``, this just returns `X`
-
-    change_representer(SymmetricPositiveDefinite(3), EuclideanMetric(), p, X)
-
-Here, the default metric in ``\mathcal P(3)`` is the [`LinearAffineMetric`](@ref) and the transformation can be computed as ``pXp``
-"""
-change_representer(::AbstractManifold, ::AbstractMetric, ::Any, ::Any)
-
-function change_representer(M::AbstractManifold, G::AbstractMetric, p, X)
-    Y = allocate_result(M, change_representer, X, p) # this way we allocate a tangent
-    return change_representer!(M, Y, G, p, X)
-end
-
-@trait_function change_representer(M::AbstractDecoratorManifold, G::AbstractMetric, X, p)
-@trait_function change_representer!(
-    M::AbstractDecoratorManifold,
-    Y,
-    G::AbstractMetric,
-    X,
-    p,
-)
 
 # Default fallback II: Default metric (not yet hit, check subtyping?)
 function change_representer!(
@@ -254,6 +134,21 @@ Return the [`LeviCivitaConnection`](@ref) for a metric manifold.
 connection(::MetricManifold) = LeviCivitaConnection()
 
 default_retraction_method(M::MetricManifold) = default_retraction_method(M.manifold)
+function default_retraction_method(M::MetricManifold, t::Type)
+    return default_retraction_method(M.manifold, t)
+end
+function default_inverse_retraction_method(M::MetricManifold)
+    return default_inverse_retraction_method(M.manifold)
+end
+function default_inverse_retraction_method(M::MetricManifold, t::Type)
+    return default_inverse_retraction_method(M.manifold, t)
+end
+function default_vector_transport_method(M::MetricManifold)
+    return default_vector_transport_method(M.manifold)
+end
+function default_vector_transport_method(M::MetricManifold, t::Type)
+    return default_vector_transport_method(M.manifold, t)
+end
 
 @doc raw"""
     det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
@@ -274,7 +169,7 @@ function exp!(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, q, p,
         q,
         p,
         X,
-        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
+        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M, typeof(p))),
     )
 end
 
@@ -307,7 +202,8 @@ end
     flat(N::MetricManifold{M,G}, p, X::TFVector)
 
 Compute the musical isomorphism to transform the tangent vector `X` from the
-[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with [`AbstractMetric`](@ref) `G` to a cotangent by
+[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G` to a cotangent by
 computing
 
 ````math
@@ -435,6 +331,15 @@ function exp(
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return exp(M.manifold, p, X)
 end
+function exp(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    t::Number,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return exp(M.manifold, p, X, t)
+end
 function exp!(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},
@@ -443,6 +348,16 @@ function exp!(
     X,
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return exp!(M.manifold, q, p, X)
+end
+function exp!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    q,
+    p,
+    X,
+    t::Number,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return exp!(M.manifold, q, p, X, t)
 end
 
 injectivity_radius(M::MetricManifold) = injectivity_radius(M.manifold)
@@ -454,14 +369,15 @@ end
     inner(N::MetricManifold{M,G}, p, X, Y)
 
 Compute the inner product of `X` and `Y` from the tangent space at `p` on the
-[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` using the [`AbstractMetric`](@ref) `G`.
+[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` using the
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G`.
 If `M` has `G` as its [`IsDefaultMetric`](@ref) trait,
 this is done using `inner(M, p, X, Y)`, otherwise the [`local_metric`](@ref)`(M, p)` is employed as
 
 ````math
 g_p(X, Y) = ⟨X, G_p Y⟩,
 ````
-where ``G_p`` is the loal matrix representation of the [`AbstractMetric`](@ref) `G`.
+where ``G_p`` is the loal matrix representation of the `AbstractMetric` `G`.
 """
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
@@ -489,7 +405,8 @@ end
 """
     is_default_metric(M::AbstractManifold, G::AbstractMetric)
 
-returns whether an [`AbstractMetric`](@ref) is the default metric on the manifold `M` or not.
+returns whether an [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+is the default metric on the manifold `M` or not.
 This can be set by defining this function, or setting the [`IsDefaultMetric`](@ref) trait for an
 [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold).
 """
@@ -510,7 +427,7 @@ function is_point(
     ::TraitList{IsMetricManifold},
     M::MetricManifold{𝔽,TM,G},
     p,
-    te=false;
+    te::Bool=false;
     kwargs...,
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return is_point(M.manifold, p, te; kwargs...)
@@ -521,7 +438,7 @@ function is_vector(
     M::MetricManifold{𝔽,TM,G},
     p,
     X,
-    te=false,
+    te::Bool=false,
     cbp=true;
     kwargs...,
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
@@ -585,11 +502,12 @@ end
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
 
-Copute the logarithmic map on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with the [`AbstractMetric`](@ref) `G`.
+Copute the logarithmic map on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with the
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G`.
 
 If the metric was declared the default metric using the [`IsDefaultMetric`](@ref) trait or [`is_default_metric`](@ref), this method
 falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for the non-default
-[`AbstractMetric`](@ref) `G` metric within its [`MetricManifold`](@ref)`{M,G}`.
+`AbstractMetric` `G` metric within its [`MetricManifold`](@ref)`{M,G}`.
 """
 log(::MetricManifold, ::Any...)
 
@@ -729,7 +647,8 @@ end
     sharp(N::MetricManifold{M,G}, p, ξ::CoTFVector)
 
 Compute the musical isomorphism to transform the cotangent vector `ξ` from the
-[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with [`AbstractMetric`](@ref) `G` to a tangent by
+[`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with
+[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G` to a tangent by
 computing
 
 ````math
@@ -775,7 +694,7 @@ function vector_transport_along(
     p,
     X,
     c::AbstractVector,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_along(M.manifold, p, X, c, m)
 end
@@ -786,7 +705,7 @@ function vector_transport_along!(
     p,
     X,
     c::AbstractVector,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_along!(M.manifold, Y, p, X, c, m)
 end
@@ -797,7 +716,7 @@ function vector_transport_direction(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_direction(M.manifold, p, X, d, m)
 end
@@ -808,7 +727,7 @@ function vector_transport_direction!(
     p,
     X,
     d,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_direction!(M.manifold, Y, p, X, d, m)
 end
@@ -819,7 +738,7 @@ function vector_transport_to(
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_to(M.manifold, p, X, q, m)
 end
@@ -830,7 +749,7 @@ function vector_transport_to!(
     p,
     X,
     q,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return vector_transport_to!(M.manifold, Y, p, X, q, m)
 end

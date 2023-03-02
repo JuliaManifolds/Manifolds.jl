@@ -46,6 +46,11 @@ Random.seed!(10)
 
         basis_types = (DefaultOrthonormalBasis(),)
 
+        @testset "isapprox with identity" begin
+            @test isapprox(G, Identity(G), identity_element(G))
+            @test isapprox(G, identity_element(G), Identity(G))
+        end
+
         @testset "product repr" begin
             pts = [ProductRepr(tp...) for tp in tuple_pts]
             X_pts = [ProductRepr(tX...) for tX in tuple_X]

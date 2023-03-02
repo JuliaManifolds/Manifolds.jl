@@ -4,6 +4,8 @@ include("../utils.jl")
     M = Manifolds.CholeskySpace(3)
     @test repr(M) == "CholeskySpace(3)"
 
+    @test !is_flat(M)
+
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})

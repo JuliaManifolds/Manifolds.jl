@@ -5,6 +5,7 @@ include("../utils.jl")
         M = SymmetricPositiveSemidefiniteFixedRank(4, 2)
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℝ)"
         @test manifold_dimension(M) == 7
+        @test !is_flat(M)
         q = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
         @test is_point(M, q)
         Y = [1.0 0.0; 0.0 0.0; 0.0 0.0; 0.0 0.0]

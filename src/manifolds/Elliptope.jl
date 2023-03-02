@@ -98,6 +98,13 @@ end
 
 get_embedding(M::Elliptope) = Euclidean(representation_size(M)...; field=ℝ)
 
+"""
+    is_flat(::Elliptope)
+
+Return false. [`Elliptope`](@ref) is not a flat manifold.
+"""
+is_flat(M::Elliptope) = false
+
 @doc raw"""
     manifold_dimension(M::Elliptope)
 
@@ -141,7 +148,11 @@ compute a projection based retraction by projecting $q+Y$ back onto the manifold
 """
 retract(::Elliptope, ::Any, ::Any, ::ProjectionRetraction)
 
-retract_project!(M::Elliptope, r, q, Y) = project!(M, r, q + Y)
+function retract_project!(M::Elliptope, r, q, Y, t::Number)
+    r .= q .+ t .* Y
+    project!(M, r, r)
+    return r
+end
 
 @doc raw"""
     representation_size(M::Elliptope)

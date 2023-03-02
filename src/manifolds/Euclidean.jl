@@ -40,21 +40,6 @@ end
 
 Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field=𝔽)
 
-"""
-    EuclideanMetric <: RiemannianMetric
-
-A general type for any manifold that employs the Euclidean Metric, for example
-the [`Euclidean`](@ref) manifold itself, or the [`Sphere`](@ref), where every
-tangent space (as a plane in the embedding) uses this metric (in the embedding).
-
-Since the metric is independent of the field type, this metric is also used for
-the Hermitian metrics, i.e. metrics that are analogous to the `EuclideanMetric`
-but where the field type of the manifold is `ℂ`.
-
-This metric is the default metric for example for the [`Euclidean`](@ref) manifold.
-"""
-struct EuclideanMetric <: RiemannianMetric end
-
 Base.:^(M::Euclidean, n::Int) = ^(M, (n,))
 function Base.:^(::Euclidean{T,𝔽}, n::NTuple{N,Int}) where {T,𝔽,N}
     return Euclidean{Tuple{T.parameters...,n...},𝔽}()
@@ -184,8 +169,10 @@ Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `p` in 
 ````
 """
 Base.exp(::Euclidean, p, X) = p + X
+Base.exp(::Euclidean, p, X, t::Number) = p .+ t .* X
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
+exp!(::Euclidean, q, p, X, t::Number) = (q .= p .+ t .* X)
 
 function get_basis_diagonalizing(
     M::Euclidean,
@@ -395,6 +382,13 @@ function inverse_local_metric(
 ) where {𝔽}
     return local_metric(M, p, B)
 end
+
+"""
+    is_flat(::Euclidean)
+
+Return true. [`Euclidean`](@ref) is a flat manifold.
+"""
+is_flat(M::Euclidean) = true
 
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
@@ -644,31 +638,31 @@ end
 function vector_transport_along!(
     M::Euclidean,
     Y,
-    ::Any,
+    p,
     X,
     ::AbstractVector,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M),
+    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 )
     return copyto!(Y, X)
 end
 function vector_transport_direction(
     M::Euclidean,
-    ::Any,
+    p,
     X,
     ::Any,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M),
-    ::AbstractRetractionMethod=default_retraction_method(M),
+    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
+    ::AbstractRetractionMethod=default_retraction_method(M, typeof(p)),
 )
     return X
 end
 function vector_transport_direction!(
     M::Euclidean,
     Y,
-    ::Any,
+    p,
     X,
     ::Any,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M),
-    ::AbstractRetractionMethod=default_retraction_method(M),
+    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
+    ::AbstractRetractionMethod=default_retraction_method(M, typeof(p)),
 )
     return copyto!(Y, X)
 end
@@ -681,11 +675,11 @@ on the [`Euclidean`](@ref) `M`, which simplifies to the identity.
 vector_transport_to(::Euclidean, ::Any, ::Any, ::Any, ::AbstractVectorTransportMethod)
 function vector_transport_to(
     M::Euclidean,
-    ::Any,
+    p,
     X,
     ::Any,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M),
-    ::AbstractRetractionMethod=default_retraction_method(M),
+    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
+    ::AbstractRetractionMethod=default_retraction_method(M, typeof(p)),
 )
     return X
 end
@@ -693,11 +687,11 @@ end
 function vector_transport_to!(
     M::Euclidean,
     Y,
-    ::Any,
+    p,
     X,
     ::Any,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M),
-    ::AbstractRetractionMethod=default_retraction_method(M),
+    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
+    ::AbstractRetractionMethod=default_retraction_method(M, typeof(p)),
 )
     return copyto!(Y, X)
 end

@@ -205,6 +205,21 @@ connection(M::ConnectionManifold) = M.connection
 decorated_manifold(M::ConnectionManifold) = M.manifold
 
 default_retraction_method(M::ConnectionManifold) = default_retraction_method(M.manifold)
+function default_retraction_method(M::ConnectionManifold, t::Type)
+    return default_retraction_method(M.manifold, t)
+end
+function default_inverse_retraction_method(M::ConnectionManifold)
+    return default_inverse_retraction_method(M.manifold)
+end
+function default_inverse_retraction_method(M::ConnectionManifold, t::Type)
+    return default_inverse_retraction_method(M.manifold, t)
+end
+function default_vector_transport_method(M::ConnectionManifold)
+    return default_vector_transport_method(M.manifold)
+end
+function default_vector_transport_method(M::ConnectionManifold, t::Type)
+    return default_vector_transport_method(M.manifold, t)
+end
 
 @doc raw"""
     exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
@@ -228,6 +243,23 @@ function exp!(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q
         q,
         p,
         X,
+        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M, typeof(p))),
+    )
+end
+function exp!(
+    ::TraitList{IsConnectionManifold},
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    t::Number,
+)
+    return retract!(
+        M,
+        q,
+        p,
+        X,
+        t,
         ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
     )
 end
@@ -278,10 +310,11 @@ function retract_exp_ode!(
     q,
     p,
     X,
+    t::Number,
     ::AbstractRetractionMethod,
     b::AbstractBasis,
 )
-    sol = solve_exp_ode(M, p, X; basis=b, dense=false)
+    sol = solve_exp_ode(M, p, X, t; basis=b, dense=false)
     copyto!(q, sol)
     return q
 end
@@ -340,6 +373,7 @@ end
         M::AbstractConnectionManifold,
         p,
         X,
+        t::Number,
         B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
         solver = AutoVern9(Rodas5()),
@@ -370,7 +404,7 @@ in an embedded space.
     using OrdinaryDiffEq
     ```
 """
-function solve_exp_ode(M, p, X; kwargs...)
+function solve_exp_ode(M::AbstractManifold, p, X, t::Number; kwargs...)
     throw(
         ErrorException(
             """

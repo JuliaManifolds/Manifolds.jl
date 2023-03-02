@@ -31,6 +31,7 @@ using NLsolve
         @test isapprox(G, Identity(G), q)
         @test apply(GroupOperationAction(G), q, q) == q
         @test inverse_apply(GroupOperationAction(G), q, q) == q
+        @test is_point(G, Identity(MultiplicationOperation()))
     end
 
     @testset "GL(1,𝔽) special cases" begin

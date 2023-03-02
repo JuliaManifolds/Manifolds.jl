@@ -4,7 +4,7 @@
 The submersion (or normal) metric family on the [`Stiefel`](@ref) manifold.
 
 The family, with a single real parameter ``α>-1``, has two special cases:
-- ``α = -\frac{1}{2}``: [`EuclideanMetric`](@ref)
+- ``α = -\frac{1}{2}``: [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
 - ``α = 0``: [`CanonicalMetric`](@ref)
 
 The family was described in [^HüperMarkinaLeite2021]. This implementation follows the
@@ -260,7 +260,7 @@ end
 # StiefelFactorization code
 # Note: intended only for internal use
 
-@doc doc"""
+@doc raw"""
     StiefelFactorization{UT,XT} <: AbstractManifoldPoint
 
 Represent points (and vectors) on `Stiefel(n, k)` with ``2k × k`` factors.[^ZimmermanHüper2022]
@@ -429,4 +429,7 @@ function exp!(
         mul!(q.Z, exp(C)[1:(2k), 1:k], D)
     end
     return q
+end
+function Base.:*(t::Number, sf::StiefelFactorization)
+    return StiefelFactorization(sf.U, t * sf.Z)
 end

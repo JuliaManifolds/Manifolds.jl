@@ -10,8 +10,8 @@ struct LinearAffineMetric <: RiemannianMetric end
     change_representer(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
-space at `p` with respect to the [`EuclideanMetric`](@ref) `g_E`,
-this is turned into the representer with respect to the (default) metric,
+space at `p` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+`g_E`, this is turned into the representer with respect to the (default) metric,
 the [`LinearAffineMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
 
 To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)```
@@ -33,8 +33,8 @@ end
 @doc raw"""
     change_metric(M::SymmetricPositiveDefinite{n}, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`EuclideanMetric`](@ref) `g_E`,
-this function changes into the [`LinearAffineMetric`](@ref) (default) metric on the
+Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+`g_E`, this function changes into the [`LinearAffineMetric`](@ref) (default) metric on the
 [`SymmetricPositiveDefinite`](@ref) `M`.
 
 To be precise we are looking for ``c\colon T_p\mathcal P(n) \to T_p\mathcal P(n) ``
@@ -94,6 +94,7 @@ where $\operatorname{Exp}$ denotes to the matrix exponential.
 """
 exp(::SymmetricPositiveDefinite, ::Any...)
 
+exp(M::SymmetricPositiveDefinite, p::SPDPoint, X, t::Number) = exp(M, p, t * X)
 function exp(::SymmetricPositiveDefinite{N}, p::SPDPoint, X) where {N}
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
@@ -110,6 +111,9 @@ function exp(::SymmetricPositiveDefinite{N}, p::SPDPoint, X) where {N}
     return q
 end
 
+function exp!(M::SymmetricPositiveDefinite, q, p, X, t::Number)
+    return exp!(M, q, p, t * X)
+end
 function exp!(::SymmetricPositiveDefinite{N}, q, p, X) where {N}
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
@@ -322,6 +326,14 @@ function inner(::SymmetricPositiveDefinite, p, X, Y)
     F = cholesky(Symmetric(convert(AbstractMatrix, p)))
     return dot((F \ Symmetric(X)), (Symmetric(Y) / F))
 end
+
+"""
+    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LinearAffineMetric})
+
+Return false. [`SymmetricPositiveDefinite`](@ref) with [`LinearAffineMetric`](@ref)
+is not a flat manifold.
+"""
+is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LinearAffineMetric}) = false
 
 @doc raw"""
     log(M::SymmetricPositiveDefinite, p, q)

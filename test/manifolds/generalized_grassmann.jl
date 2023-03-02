@@ -13,6 +13,7 @@ include("../utils.jl")
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
             @test base_manifold(M) === M
+            @test !is_flat(M)
             @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
             @test_throws ManifoldDomainError is_point(
                 M,
@@ -117,6 +118,7 @@ include("../utils.jl")
                   "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℂ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 4
+            @test !is_flat(M)
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             x = [1.0 0.0; 0.0 0.5; 0.0 0.0]
@@ -135,6 +137,7 @@ include("../utils.jl")
         @testset "Basics" begin
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
+            @test !is_flat(M)
         end
     end
 end

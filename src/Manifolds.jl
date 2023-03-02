@@ -24,6 +24,10 @@ import ManifoldsBase:
     base_manifold,
     change_basis,
     change_basis!,
+    change_metric,
+    change_metric!,
+    change_representer,
+    change_representer!,
     check_point,
     check_size,
     check_vector,
@@ -74,13 +78,15 @@ import ManifoldsBase:
     injectivity_radius_exp,
     inner,
     isapprox,
+    _isapprox,
+    is_flat,
     is_point,
     is_vector,
     inverse_retract,
     inverse_retract!,
     _inverse_retract,
     _inverse_retract!,
-    inverse_retract_caley!,
+    inverse_retract_cayley!,
     inverse_retract_embedded!,
     inverse_retract_nlsolve!,
     inverse_retract_pade!,
@@ -107,10 +113,12 @@ import ManifoldsBase:
     power_dimensions,
     project,
     project!,
+    rand,
+    rand!,
     representation_size,
     retract,
     retract!,
-    retract_caley!,
+    retract_cayley!,
     retract_exp_ode!,
     retract_pade!,
     retract_polar!,
@@ -158,7 +166,6 @@ import Base:
     isempty,
     length,
     ndims,
-    rand,
     show,
     showerror,
     size,
@@ -173,6 +180,7 @@ using Kronecker
 using Graphs
 using LinearAlgebra
 using ManifoldsBase:
+    @next_trait_function,
     ℝ,
     ℂ,
     ℍ,
@@ -181,6 +189,7 @@ using ManifoldsBase:
     AbstractInverseRetractionMethod,
     AbstractManifold,
     AbstractManifoldPoint,
+    AbstractMetric,
     AbstractNumbers,
     AbstractOrthogonalBasis,
     AbstractOrthonormalBasis,
@@ -209,6 +218,7 @@ using ManifoldsBase:
     DifferentiatedRetractionVectorTransport,
     EmbeddedManifold,
     EmptyTrait,
+    EuclideanMetric,
     ExponentialRetraction,
     FVector,
     IsIsometricEmbeddedManifold,
@@ -240,6 +250,7 @@ using ManifoldsBase:
     QRInverseRetraction,
     QRRetraction,
     RealNumbers,
+    RiemannianMetric,
     ScaledVectorTransport,
     SchildsLadderTransport,
     ShootingInverseRetraction,
@@ -266,9 +277,38 @@ using ManifoldsBase:
     shortest_geodesic,
     size_to_tuple,
     trait
+using ManifoldDiff: ManifoldDiff
+using ManifoldDiff:
+    default_differential_backend,
+    _derivative,
+    _derivative!,
+    differential,
+    differential!,
+    gradient,
+    gradient!,
+    _gradient,
+    _gradient!,
+    hessian,
+    _hessian,
+    jacobian,
+    _jacobian,
+    _jacobian!,
+    riemannian_gradient,
+    riemannian_gradient!,
+    set_default_differential_backend!
+using ManifoldDiff:
+    AbstractDiffBackend,
+    AbstractRiemannianDiffBackend,
+    ExplicitEmbeddedBackend,
+    NoneDiffBackend,
+    RiemannianProjectionBackend,
+    TangentDiffBackend
+
+import ManifoldDiff: riemannian_gradient, riemannian_gradient!
+
 using Markdown: @doc_str
 using MatrixEquations: lyapc
-using Quaternions
+using Quaternions: Quaternions
 using Random
 using RecipesBase
 using RecipesBase: @recipe, @series
@@ -283,9 +323,6 @@ using StatsBase: AbstractWeights
 include("utils.jl")
 
 include("product_representations.jl")
-include("differentiation/differentiation.jl")
-include("differentiation/riemannian_diff.jl")
-include("differentiation/embedded_diff.jl")
 
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
@@ -367,6 +404,10 @@ include("manifolds/Unitary.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/Orthogonal.jl")
 
+# shape spaces require Sphere
+include("manifolds/KendallsPreShapeSpace.jl")
+include("manifolds/KendallsShapeSpace.jl")
+
 # Introduce the quotient, Grassmann, only after Stiefel
 include("manifolds/Grassmann.jl")
 
@@ -410,6 +451,9 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
+# final utilities
+include("trait_recursion_breaking.jl")
+
 @doc raw"""
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
@@ -424,7 +468,7 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
     X ∈ TangentSpaceAtPoint(M,p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+the [`TangentSpaceAtPoint`](@ref Manifolds.TangentSpaceAtPoint) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
 This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
@@ -435,11 +479,6 @@ function __init__()
     @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
         using .BoundaryValueDiffEq
         include("differentiation/bvp.jl")
-    end
-
-    @require FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000" begin
-        using .FiniteDifferences
-        include("differentiation/finite_differences.jl")
     end
 
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
@@ -500,6 +539,8 @@ export Euclidean,
     Grassmann,
     HeisenbergGroup,
     Hyperbolic,
+    KendallsPreShapeSpace,
+    KendallsShapeSpace,
     Lorentz,
     MultinomialDoubleStochastic,
     MultinomialMatrices,
@@ -660,6 +701,9 @@ export ×,
     convert,
     complex_dot,
     decorated_manifold,
+    default_vector_transport_method,
+    default_inverse_retraction_method,
+    default_retraction_method,
     det_local_metric,
     differential_canonical_project,
     differential_canonical_project!,
@@ -698,6 +742,7 @@ export ×,
     isapprox,
     is_default_connection,
     is_default_metric,
+    is_flat,
     is_group_manifold,
     is_identity,
     is_point,
@@ -741,6 +786,8 @@ export ×,
     representation_size,
     retract,
     retract!,
+    riemannian_gradient,
+    riemannian_gradient!,
     riemann_tensor,
     riemann_tensor!,
     set_component!,

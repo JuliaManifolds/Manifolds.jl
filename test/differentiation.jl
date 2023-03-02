@@ -1,3 +1,5 @@
+# A bit of duplication of tests in ManifoldDiff.jl but it ensures that it works here too.
+
 include("utils.jl")
 using Manifolds:
     default_differential_backend,
@@ -21,10 +23,12 @@ using Manifolds:
     TangentDiffBackend,
     RiemannianProjectionBackend
 
-import Manifolds: gradient
+using ManifoldDiff
+
+import ManifoldDiff: gradient
 
 struct TestRiemannianBackend <: AbstractRiemannianDiffBackend end
-function Manifolds.gradient(::AbstractManifold, f, p, ::TestRiemannianBackend)
+function ManifoldDiff.gradient(::AbstractManifold, f, p, ::TestRiemannianBackend)
     return collect(1.0:length(p))
 end
 
@@ -32,14 +36,14 @@ using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
 @testset "Differentiation backend" begin
-    fd51 = Manifolds.FiniteDifferencesBackend()
+    fd51 = ManifoldDiff.FiniteDifferencesBackend()
     @testset "default_differential_backend" begin
-        @test default_differential_backend() isa Manifolds.FiniteDifferencesBackend
+        @test default_differential_backend() isa ManifoldDiff.FiniteDifferencesBackend
 
         @test length(fd51.method.grid) == 5
         # check method order
         @test typeof(fd51.method).parameters[2] == 1
-        fd71 = Manifolds.FiniteDifferencesBackend(central_fdm(7, 1))
+        fd71 = ManifoldDiff.FiniteDifferencesBackend(central_fdm(7, 1))
         @test set_default_differential_backend!(fd71) == fd71
         @test default_differential_backend() == fd71
     end
@@ -101,7 +105,7 @@ rb_onb_default = TangentDiffBackend(
     DefaultOrthonormalBasis(),
 )
 
-rb_onb_fd51 = TangentDiffBackend(Manifolds.FiniteDifferencesBackend())
+rb_onb_fd51 = TangentDiffBackend(ManifoldDiff.FiniteDifferencesBackend())
 
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();

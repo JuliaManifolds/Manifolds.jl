@@ -10,6 +10,7 @@ include("../utils.jl")
         @test repr(M) == "Oblique(3,2; field = ℝ)"
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
+        @test !is_flat(M)
         p = [2, 0, 0]
         p2 = [p p]
         @test !is_point(M, p)

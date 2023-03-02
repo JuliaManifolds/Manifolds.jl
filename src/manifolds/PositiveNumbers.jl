@@ -42,7 +42,7 @@ PositiveArrays(n::Vararg{Int,I}) where {I} = PositiveNumbers()^(n)
     change_representer(M::PositiveNumbers, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect
-to the [`EuclideanMetric`](@ref) `g_E`, this function changes the representer into the one
+to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric) `g_E`, this function changes the representer into the one
 with respect to the positivity metric representation of
 [`PositiveNumbers`](@ref) `M`.
 
@@ -67,7 +67,7 @@ end
     change_metric(M::PositiveNumbers, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect to
-the [`EuclideanMetric`](@ref) `g_E`,
+the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric) `g_E`,
 this function changes the representer into the one with respect to the positivity metric
 of [`PositiveNumbers`](@ref) `M`.
 
@@ -142,8 +142,39 @@ Compute the exponential map on the [`PositiveNumbers`](@ref) `M`.
 Base.exp(::PositiveNumbers, ::Any, ::Any)
 
 Base.exp(::PositiveNumbers, p::Real, X::Real) = p * exp(X / p)
+Base.exp(::PositiveNumbers, p::Real, X::Real, t::Real) = p * exp(t * X / p)
 
 exp!(::PositiveNumbers, q, p, X) = (q .= p .* exp.(X ./ p))
+
+"""
+    get_coordinates(::PositiveNumbers, p, X, ::DefaultOrthonormalBasis{ℝ})
+
+Compute the coordinate of vector `X` which is tangent to `p` on the
+[`PositiveNumbers`](@ref PositiveNumbers) manifold. The formula is ``X / p``.
+"""
+get_coordinates(::PositiveNumbers, p, X, ::DefaultOrthonormalBasis{ℝ})
+
+get_coordinates_orthonormal(::PositiveNumbers, p, X, ::RealNumbers) = X / p
+
+function get_coordinates_orthonormal!(::PositiveNumbers, c, p, X, ::RealNumbers)
+    c .= X / p
+    return c
+end
+
+"""
+    get_vector(::PositiveNumbers, p, c, ::DefaultOrthonormalBasis{ℝ})
+
+Compute the vector with coordinate `c` which is tangent to `p` on the
+[`PositiveNumbers`](@ref PositiveNumbers) manifold. The formula is ``p * c``.
+"""
+get_vector(::PositiveNumbers, p, c, ::DefaultOrthonormalBasis{ℝ})
+
+get_vector_orthonormal(::PositiveNumbers, p, c, ::RealNumbers) = p * c[]
+
+function get_vector_orthonormal!(::PositiveNumbers, X, p, c, ::RealNumbers)
+    X .= c[] * p
+    return X
+end
 
 @doc raw"""
     injectivity_radius(M::PositiveNumbers[, p])
@@ -170,6 +201,13 @@ end
 function inverse_retract(M::PositiveNumbers, x, y, ::LogarithmicInverseRetraction)
     return log(M, x, y)
 end
+
+"""
+    is_flat(::PositiveNumbers)
+
+Return false. [`PositiveNumbers`](@ref) is not a flat manifold.
+"""
+is_flat(M::PositiveNumbers) = false
 
 @doc raw"""
     log(M::PositiveNumbers, p, q)
@@ -245,6 +283,29 @@ end
 
 function parallel_transport_to!(::PositiveNumbers, Y, p, X, q)
     return (Y .= X .* q ./ p)
+end
+
+function Random.rand!(::PositiveNumbers, pX; σ=one(eltype(pX)), vector_at=nothing)
+    if vector_at === nothing
+        pX .= exp(randn() * σ)
+    else
+        pX .= vector_at * randn() * σ
+    end
+    return pX
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    ::PositiveNumbers,
+    pX;
+    σ=one(eltype(pX)),
+    vector_at=nothing,
+)
+    if vector_at === nothing
+        pX .= exp(randn(rng) * σ)
+    else
+        pX .= vector_at * randn(rng) * σ
+    end
+    return pX
 end
 
 function vector_transport_direction(

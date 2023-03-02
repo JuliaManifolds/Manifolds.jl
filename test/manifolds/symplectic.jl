@@ -1,4 +1,7 @@
 include("../utils.jl")
+using FiniteDifferences
+using Manifolds: RiemannianProjectionBackend
+using ManifoldDiff
 
 using FiniteDifferences
 
@@ -76,6 +79,7 @@ using FiniteDifferences
             @test repr(Sp_2) == "Symplectic{2, ℝ}()"
             @test representation_size(Sp_2) == (2, 2)
             @test base_manifold(Sp_2) === Sp_2
+            @test !is_flat(Sp_2)
 
             @test is_point(Sp_2, p_2)
             @test_throws DomainError is_point(Sp_2, p_2 + I, true)
@@ -257,8 +261,7 @@ using FiniteDifferences
             analytical_grad_f(p) = (1 / 2) * (p * Q_grad * p * Q_grad + p * p')
 
             p_grad = convert(Array{Float64}, points[1])
-            fd_diff =
-                Manifolds.RiemannianProjectionBackend(Manifolds.FiniteDifferencesBackend())
+            fd_diff = RiemannianProjectionBackend(ManifoldDiff.FiniteDifferencesBackend())
 
             @test isapprox(
                 Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff),

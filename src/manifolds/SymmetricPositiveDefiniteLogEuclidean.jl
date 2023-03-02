@@ -27,3 +27,11 @@ function distance(
 ) where {N}
     return norm(log(Symmetric(p)) - log(Symmetric(q)))
 end
+
+"""
+    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogEuclideanMetric})
+
+Return false. [`SymmetricPositiveDefinite`](@ref) with [`LogEuclideanMetric`](@ref)
+is not a flat manifold.
+"""
+is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogEuclideanMetric}) = false

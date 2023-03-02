@@ -64,6 +64,18 @@ function exp(
     Y = inverse_translate_diff(M.manifold, p, p, X, LeftAction())
     return compose(M.manifold, p, exp_lie(M.manifold, Y))
 end
+function exp(
+    M::ConnectionManifold{
+        𝔽,
+        <:AbstractDecoratorManifold{𝔽},
+        <:AbstractCartanSchoutenConnection,
+    },
+    p,
+    X,
+    t::Number,
+) where {𝔽}
+    return exp(M, p, t * X)
+end
 
 function exp!(
     M::ConnectionManifold{
@@ -77,6 +89,20 @@ function exp!(
 ) where {𝔽}
     Y = inverse_translate_diff(M.manifold, p, p, X, LeftAction())
     return compose!(M.manifold, q, p, exp_lie(M.manifold, Y))
+end
+
+function exp!(
+    M::ConnectionManifold{
+        𝔽,
+        <:AbstractDecoratorManifold{𝔽},
+        <:AbstractCartanSchoutenConnection,
+    },
+    q,
+    p,
+    X,
+    t::Number,
+) where {𝔽}
+    return exp!(M, q, p, t * X)
 end
 
 """

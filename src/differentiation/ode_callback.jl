@@ -74,7 +74,11 @@ function (scs::StitchedChartSolution{:Exp})(t::Real)
             return (p, X)
         end
     end
-    throw(DomainError("Time $t is outside of the solution."))
+    throw(
+        DomainError(
+            "Time $t is outside of the solution (solution time range is [$(scs.sols[1][1].t[1]), $(scs.sols[end][1].t[end])]).",
+        ),
+    )
 end
 function (scs::StitchedChartSolution{:PT})(t::Real)
     if t < scs.sols[1][1].t[1]
@@ -90,7 +94,11 @@ function (scs::StitchedChartSolution{:PT})(t::Real)
             return (p, X, Y)
         end
     end
-    throw(DomainError("Time $t is outside of the solution."))
+    throw(
+        DomainError(
+            "Time $t is outside of the solution (solution time range is [$(scs.sols[1][1].t[1]), $(scs.sols[end][1].t[end])]).",
+        ),
+    )
 end
 
 function (scs::StitchedChartSolution)(t::AbstractArray)
@@ -139,10 +147,10 @@ function solve_chart_exp_ode(
         IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
         func_start=false,
     )
-    retcode = :Terminated
+    retcode = SciMLBase.ReturnCode.Terminated
     init_time = zero(final_time)
     sols = StitchedChartSolution(M, A, :Exp, typeof(i0))
-    while retcode === :Terminated && init_time < final_time
+    while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
         prob =
             ODEProblem(chart_exp_problem, u0, (init_time, final_time), params; callback=cb)
@@ -216,10 +224,10 @@ function solve_chart_parallel_transport_ode(
         IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
         func_start=false,
     )
-    retcode = :Terminated
+    retcode = SciMLBase.ReturnCode.Terminated
     init_time = zero(final_time)
     sols = StitchedChartSolution(M, A, :PT, typeof(i0))
-    while retcode === :Terminated && init_time < final_time
+    while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
         prob =
             ODEProblem(chart_pt_problem, u0, (init_time, final_time), params; callback=cb)

@@ -14,6 +14,7 @@ include("../utils.jl")
         @test repr(M) == "SphereSymmetricMatrices(3, ℝ)"
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
+        @test !is_flat(M)
         @test typeof(get_embedding(M)) === ArraySphere{Tuple{3,3},ℝ}
         @test check_point(M, A) === nothing
         @test_throws ManifoldDomainError is_point(M, B, true)

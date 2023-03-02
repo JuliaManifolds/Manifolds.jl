@@ -4,14 +4,8 @@ using StatsBase: AbstractWeights, pweights
 using ManifoldsBase: TraitList
 import ManifoldsBase: default_retraction_method
 import Manifolds: solve_exp_ode
-using Manifolds:
-    FiniteDifferencesBackend,
-    InducedBasis,
-    connection,
-    get_chart_index,
-    induced_basis,
-    mean!,
-    median!
+using Manifolds: InducedBasis, connection, get_chart_index, induced_basis, mean!, median!
+using ManifoldDiff: FiniteDifferencesBackend
 include("utils.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
@@ -135,6 +129,7 @@ struct NotImplementedMetric <: AbstractMetric end
 Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
 Manifolds.inner(::BaseManifold, p, X, Y) = 2 * dot(X, Y)
 Manifolds.exp!(::BaseManifold, q, p, X) = q .= p + 2 * X
+Manifolds.exp!(::BaseManifold, q, p, X, t::Number) = q .= p + 2 * t * X
 Manifolds.log!(::BaseManifold, Y, p, q) = Y .= (q - p) / 2
 Manifolds.project!(::BaseManifold, Y, p, X) = Y .= 2 .* X
 Manifolds.project!(::BaseManifold, q, p) = (q .= p)
@@ -159,6 +154,15 @@ function Manifolds.exp!(
     X,
 ) where {N}
     return exp!(base_manifold(M), q, p, X)
+end
+function Manifolds.exp!(
+    M::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
+    q,
+    p,
+    X,
+    t::Number,
+) where {N}
+    return exp!(base_manifold(M), q, p, X, t)
 end
 function Manifolds.parallel_transport_to!(::BaseManifold, Y, p, X, q)
     return (Y .= X)
@@ -217,7 +221,8 @@ end
 function solve_exp_ode(
     ::ConnectionManifold{ℝ,TestEuclidean{N},TestConnection},
     p,
-    X;
+    X,
+    t::Number;
     kwargs...,
 ) where {N}
     return X
@@ -266,14 +271,19 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         X = [2.0, 3.0, 4.0]
         q = similar(X)
         @test_throws ErrorException exp(M, p, X)
+        @test_throws ErrorException exp(M, p, X, 1.0)
         @test_throws ErrorException exp!(M, q, p, X)
+        @test_throws ErrorException exp!(M, q, p, X, 1.0)
 
         N = ConnectionManifold(E, LeviCivitaConnection())
         @test_throws ErrorException exp(N, p, X)
+        @test_throws ErrorException exp(N, p, X, 1.0)
         @test_throws ErrorException exp!(N, q, p, X)
+        @test_throws ErrorException exp!(N, q, p, X, 1.0)
 
         using OrdinaryDiffEq
         @test is_point(M, exp(M, p, X))
+        @test is_point(M, exp(M, p, X, 1.0))
 
         # a small trick to check that retract_exp_ode! returns the right value on ConnectionManifolds
         N2 = ConnectionManifold(E, TestConnection())
@@ -350,7 +360,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
             @test gaussian_curvature(M, p, B_chart_p; backend=fdm) ≈ 0 atol = 1e-6
             @test einstein_tensor(M, p, B_chart_p; backend=fdm) ≈ zeros(n, n) atol = 1e-6
 
-            fd_diff = Manifolds.FiniteDifferencesBackend()
+            fd_diff = FiniteDifferencesBackend()
             @test christoffel_symbols_first(M, p, B_chart_p; backend=fd_diff) ≈
                   zeros(n, n, n) atol = 1e-6
             @test christoffel_symbols_second(M, p, B_chart_p; backend=fd_diff) ≈
@@ -363,6 +373,18 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
             @test einstein_tensor(M, p, B_chart_p; backend=fd_diff) ≈ zeros(n, n) atol =
                 1e-6
         end
+    end
+
+    @testset "default_* functions" begin
+        E = Euclidean(3)
+        EM = MetricManifold(E, EuclideanMetric())
+        @test default_retraction_method(EM) === default_retraction_method(E)
+        @test default_inverse_retraction_method(EM) === default_inverse_retraction_method(E)
+        @test default_vector_transport_method(EM) === default_vector_transport_method(E)
+        EC = ConnectionManifold(E, TestConnection())
+        @test default_retraction_method(EC) === default_retraction_method(E)
+        @test default_inverse_retraction_method(EC) === default_inverse_retraction_method(E)
+        @test default_vector_transport_method(EC) === default_vector_transport_method(E)
     end
 
     @testset "scaled Sphere metric" begin
@@ -486,6 +508,8 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         copyto!(M, Y2, p, X)
         @test Y == Y2
 
+        X = [0.5, 0.7, 0.11]
+
         chart_p = get_chart_index(M, A, p)
         B_p = induced_basis(M, A, chart_p, TangentSpace)
         fX = ManifoldsBase.TFVector(X, B_p)
@@ -495,8 +519,11 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test inner(MM, p, fX, fY) === inner(M, p, X, Y)
         @test norm(MM, p, fX) === norm(M, p, X)
         @test exp(M, p, X) == p + 2 * X
+        @test exp(M, p, X, 0.5) == p + X
         @test exp(MM2, p, X) == exp(M, p, X)
+        @test exp(MM2, p, X, 0.5) == exp(M, p, X, 0.5)
         @test exp!(MM, q, p, X) === exp!(M, q, p, X)
+        @test exp!(MM, q, p, X, 0.5) === exp!(M, q, p, X, 0.5)
         @test retract!(MM, q, p, X) === retract!(M, q, p, X)
         @test retract!(MM, q, p, X, 1) === retract!(M, q, p, X, 1)
         @test project!(MM, Y, p, X) === project!(M, Y, p, X)

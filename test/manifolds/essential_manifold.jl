@@ -16,6 +16,7 @@ include("../utils.jl")
         @test M.manifold == Rotations(3)
         @test repr(M) == "EssentialManifold(true)"
         @test manifold_dimension(M) == 5
+        @test !is_flat(M)
         np1 = [r1, nr]
         np2 = [nr, nr]
         np3 = [r1, r2, r3]
