@@ -177,7 +177,6 @@ include("utils.jl")
 
         include_test("metric.jl")
         include_test("statistics.jl")
-
     end
 
     if TEST_GROUP ∈ ["all", "test_integration"]
