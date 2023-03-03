@@ -16,6 +16,7 @@ jobs:
         group:
           - 'test_manifolds'
           - 'test_lie_groups'
+          - 'test_integration'
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
