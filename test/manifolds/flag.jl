@@ -5,6 +5,7 @@ using Test
     M = Flag(5, 1, 2)
 
     @test repr(M) == "Flag(5, 1, 2)"
+    @test manifold_dimension(M) == 7
 
     p1_ortho = Manifolds.OrthogonalPoint(
         [
@@ -73,6 +74,13 @@ using Test
         0.6786375747132262 0.5164995985838793
         0.5288963536470062 -0.7915831005730196
     ]
+    p3 = [
+        -0.7170895889528139 -0.11876117758587547
+        -0.23046861559362633 -0.31457380030454196
+        -0.425250070689939 0.7225016888982094
+        -0.4413689679425084 -0.5121935612141849
+        -0.238793949164145 0.32029388419128463
+    ]
 
     X1 = [
         -0.6804229240952372 -0.034412196486963954
@@ -116,11 +124,57 @@ using Test
             0.4109127063901268 -0.2827478363715998
         ]
         @test project(M, p1, X_to_project) ≈ [
-            -0.21816592446975824 0.2612682744329179
-            -0.3419669237188776 1.3220342586044491
-            -0.10450160051834301 0.39801647223092396
-            -1.3483600206492228 0.6981642398704684
-            1.288033080060952 -0.5718664356833303
+            -0.43871844928855513 0.4038883314300648
+            -0.4998326553201793 1.047159312796425
+            -0.00642898530655063 0.07227663814064052
+            -1.3071994157012459 0.7171493149930495
+            0.9408262991884606 -0.6272415047537456
         ]
     end
+
+    @testset "retraction, inverse retraction and VT" begin
+        @test default_retraction_method(M) === PolarRetraction()
+        @test default_inverse_retraction_method(M) === PolarInverseRetraction()
+        @test default_vector_transport_method(M) === ProjectionTransport()
+
+        @test isapprox(
+            M,
+            retract(M, p1, X1, PolarRetraction()),
+            [
+                -0.4688597409064468 -0.45541418524363636
+                0.6719554741291286 0.129306063763389
+                -0.16490485737874422 0.2766729757843485
+                -0.5429179652489367 0.3552156355310046
+                0.08180987206864788 -0.7570678823578711
+            ],
+        )
+    end
+
+    test_manifold(
+        M,
+        [p1, p2, p3],
+        test_exp_log=false,
+        default_inverse_retraction_method=PolarInverseRetraction(),
+        test_injectivity_radius=false,
+        test_is_tangent=true,
+        test_project_tangent=true,
+        test_default_vector_transport=false,
+        test_vee_hat=false,
+        default_retraction_method=PolarRetraction(),
+        is_point_atol_multiplier=10.0,
+        projection_atol_multiplier=200.0,
+        retraction_atol_multiplier=10.0,
+        is_tangent_atol_multiplier=4 * 10.0^2,
+        rand_tvector_atol_multiplier=10,
+        retraction_methods=[PolarRetraction()],
+        inverse_retraction_methods=[PolarInverseRetraction()],
+        vector_transport_methods=[ProjectionTransport()],
+        vector_transport_retractions=[PolarRetraction()],
+        vector_transport_inverse_retractions=[PolarInverseRetraction()],
+        test_vector_transport_direction=[true, true, false],
+        mid_point12=nothing,
+        test_inplace=true,
+        test_rand_point=true,
+        test_rand_tvector=true,
+    )
 end

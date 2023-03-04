@@ -120,17 +120,18 @@ function project!(
     p::AbstractMatrix,
     X::AbstractMatrix,
 ) where {N,dp1}
+    Xc = X .- p * (p' * X) ./ 2
     for i in 1:(dp1 - 1)
         Y_i = _extract_flag_stiefel(M, Y, i)
         p_i = _extract_flag_stiefel(M, p, i)
-        X_i = _extract_flag_stiefel(M, X, i)
+        Xc_i = _extract_flag_stiefel(M, Xc, i)
 
-        Y_i .= X_i .- p_i * (p_i' * X_i)
+        Y_i .= Xc_i .- p_i * (p_i' * Xc_i)
         for j in 1:(dp1 - 1)
             i == j && continue
             p_j = _extract_flag_stiefel(M, p, j)
-            X_j = _extract_flag_stiefel(M, X, j)
-            Y_i .-= p_j * X_j' * p_i
+            Xc_j = _extract_flag_stiefel(M, Xc, j)
+            Y_i .-= p_j * Xc_j' * p_i
         end
     end
 
@@ -176,7 +177,7 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 retract(::Flag, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(::Flag, q, p, X)
-    s = svd(p + X)
+function retract_polar!(::Flag, q, p, X, t::Number)
+    s = svd(p .+ t .* X)
     return mul!(q, s.U, s.Vt)
 end
