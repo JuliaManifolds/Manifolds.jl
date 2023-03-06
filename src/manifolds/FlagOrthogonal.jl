@@ -31,6 +31,14 @@ function check_vector(
     return nothing
 end
 
+embed(::Flag, p::OrthogonalPoint) = p.value
+embed!(::Flag, q, p::OrthogonalPoint) = copyto!(q, p.value)
+embed(::Flag, p::OrthogonalPoint, X::OrthogonalTVector) = X.value
+function embed!(::Flag, Y, p::OrthogonalPoint, X::OrthogonalTVector)
+    return copyto!(Y, X.value)
+end
+get_embedding(::Flag{N}, p::OrthogonalPoint) where {N} = OrthogonalMatrices(N)
+
 function exp!(::Flag, q::OrthogonalPoint, p::OrthogonalPoint, X::OrthogonalTVector)
     return q .= p * exp(X)
 end
@@ -80,7 +88,7 @@ function Random.rand!(
 ) where {N,dp1}
     if vector_at === nothing
         RN = Rotations(N)
-        rand!(RN, pX)
+        rand!(RN, pX.value)
     else
         for i in 1:dp1
             for j in i:dp1
@@ -99,13 +107,13 @@ function Random.rand!(
 end
 function Random.rand!(
     rng::AbstractRNG,
-    ::Flag{N,dp1},
+    M::Flag{N,dp1},
     pX::Union{OrthogonalPoint,OrthogonalTVector};
     vector_at=nothing,
 ) where {N,dp1}
     if vector_at === nothing
         RN = Rotations(N)
-        rand!(rng, RN, pX)
+        rand!(rng, RN, pX.value)
     else
         for i in 1:dp1
             for j in i:dp1
