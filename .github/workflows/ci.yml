@@ -11,11 +11,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        julia-version: ["1.6", "1.8"]
+        julia-version: ["1.6", "1.8", "~1.9.0-0"]
         os: [ubuntu-latest, macOS-latest]
         group:
           - 'test_manifolds'
           - 'test_lie_groups'
+          - 'test_integration'
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1

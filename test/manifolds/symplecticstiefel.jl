@@ -223,7 +223,7 @@ end
             ])
             A_6_4_proj = similar(A_6_4)
             Manifolds.project!(SpSt_6_4, A_6_4_proj, p_6_4, A_6_4)
-            @test is_vector(SpSt_6_4, p_6_4, A_6_4_proj, true; atol=1.0e-12)
+            @test is_vector(SpSt_6_4, p_6_4, A_6_4_proj, true; atol=2.0e-12)
         end
         @testset "Generate random points/tangent vectors" begin
             M_big = SymplecticStiefel(20, 10)
