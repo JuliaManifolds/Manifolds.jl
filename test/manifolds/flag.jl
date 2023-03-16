@@ -1,4 +1,4 @@
-using Manifolds
+using Manifolds, ManifoldsBase
 using Test
 using Random
 
@@ -81,6 +81,7 @@ using Random
 
         @test project(Flag(5, 2), p1, X_to_project) ≈
               project(Grassmann(5, 2), p1, X_to_project)
+        @test ManifoldsBase.embed_project(Flag(5, 2), p1) ≈ p1
     end
 
     @testset "retraction, inverse retraction and VT" begin
@@ -186,13 +187,29 @@ using Random
                 0.7481810438379631 0.014502786096688508 0.0 0.0 0.0
             ],
         )
+        X2_ortho_wrong2 = Manifolds.OrthogonalTVector(
+            [
+                1.0 -0.2979953307015468 0.7855622797662635 -1.783621666926397 -0.7481810438379631
+                0.2979953307015468 0.0 -0.10452766698617191 -0.018998219248410615 -0.014502786096688508
+                -0.7855622797662635 0.10452766698617191 0.0 0.0 0.0
+                1.783621666926397 0.018998219248410615 0.0 0.0 0.0
+                0.7481810438379631 0.014502786096688508 0.0 0.0 0.0
+            ],
+        )
 
         @test check_point(M, p1_ortho) === nothing
         @test check_vector(M, p1_ortho, X1_ortho) === nothing
         @test check_vector(M, p1_ortho, X2_ortho_wrong1) isa DomainError
+        @test check_vector(M, p1_ortho, X2_ortho_wrong2) isa DomainError
         @test is_point(M, p1_ortho)
         @test is_vector(M, p1_ortho, X1_ortho)
         @test isapprox(M, p1_ortho, X2_ortho, project(M, p1_ortho, X2_ortho_wrong1))
+        @test isapprox(
+            M,
+            p1_ortho,
+            X2_ortho,
+            project!(M, similar(X2_ortho_wrong1), p1_ortho, X2_ortho_wrong1),
+        )
 
         q_tmp = similar(p1_ortho)
         Y_tmp = similar(X1_ortho)
@@ -207,5 +224,15 @@ using Random
         @test is_point(M, q_tmp)
         rand!(Random.default_rng(), M, Y_tmp; vector_at=p1_ortho)
         @test is_vector(M, p1_ortho, Y_tmp)
+
+        q_tmp = similar(p1_ortho.value)
+        embed!(M, q_tmp, p1_ortho)
+        @test isapprox(M, q_tmp, p1_ortho.value)
+        Y_tmp = similar(X1_ortho.value)
+        embed!(M, Y_tmp, p1_ortho, X1_ortho)
+        @test isapprox(Y_tmp, X1_ortho.value)
+
+        @test retract(M, p1_ortho, X1_ortho, QRRetraction()).value ≈
+              retract(Orthogonal(5), p1_ortho.value, X1_ortho.value, QRRetraction())
     end
 end

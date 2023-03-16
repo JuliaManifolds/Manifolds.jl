@@ -137,6 +137,9 @@ function project!(
 
     return Y
 end
+function project!(M::Flag, q::AbstractMatrix, p::AbstractMatrix)
+    return project!(get_embedding(M), q, p)
+end
 
 function Random.rand!(M::Flag{N,dp1}, pX::AbstractMatrix; vector_at=nothing) where {N,dp1}
     EM = get_embedding(M)

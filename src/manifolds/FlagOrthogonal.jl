@@ -131,39 +131,17 @@ function Random.rand!(
     return pX
 end
 
-function _phi_B_map!(M::Flag, Y, p, B, X)
-    Y .= (B * X .- X * B) ./ 2
-    return project!(M, Y, p, Y)
-end
-
-function parallel_transport_direction!(
-    M::Flag,
-    Y::OrthogonalTVector,
-    p::OrthogonalPoint,
-    X::OrthogonalTVector,
-    d::OrthogonalTVector,
-)
-    Y.value .= X.value
-    Z = copy(X.value)
-    k_factor = -1
-    # TODO: check more carefully the series cutoff.
-    for k in 1:10
-        _phi_B_map!(M, Z, p, d, Z)
-        k_factor *= -k
-        Y .+= Z ./ k_factor
-    end
-    return Y
-end
-
 function retract_qr!(
     ::Flag,
-    q::OrthogonalPoint{AbstractMatrix{T}},
+    q::OrthogonalPoint{<:AbstractMatrix{T}},
     p::OrthogonalPoint,
     X::OrthogonalTVector,
+    t::Number,
 ) where {T}
-    A = p + p * X
+    A = p.value + p.value * (t * X.value)
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
-    return copyto!(q, qr_decomp.Q * D)
+    copyto!(q.value, qr_decomp.Q * D)
+    return q
 end
