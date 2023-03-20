@@ -56,6 +56,24 @@ end
         0.3248027612629014 0.440253011955812 -0.7650557732187135
         0.26502337825226757 -0.06175142812400016 -0.20327195012826738
     ]
+    X1 = [
+        0.6090792159558263 -0.02523987621672985 -0.5838393397390964
+        0.4317628895706799 0.12108361184633629 -0.5528465014170161
+    ]
+    X1h = [
+        0.5218590427922166 0.05525104866717821 -0.5771100914593948
+        0.3319078589730016 0.2777009756923593 -0.6096088346653609
+    ]
+    X1v = [
+        0.08722017316360964 -0.08049092488390806 -0.006729248279701561
+        0.09985503059767825 -0.156617363846023 0.05676233324834479
+    ]
+    @testset "tangent vector components" begin
+        @test isapprox(M, p1, horizontal_component(M, p1, X1), X1h)
+        @test isapprox(M, p1, vertical_component(M, p1, X1), X1v)
+        @test norm(M, p1, X1v) < 1e-16
+        @test abs(norm(M, p1, X1) - norm(M, p1, X1h)) < 1e-16
+    end
     @test_throws ManifoldDomainError is_point(M, [1 0 1; 1 -1 0], true)
     @test_throws ManifoldDomainError is_vector(M, p1, [1 0 1; 1 -1 0], true)
     test_manifold(
@@ -71,4 +89,8 @@ end
         test_rand_tvector=true,
         rand_tvector_atol_multiplier=5,
     )
+    @testset "degenerate cases" begin
+        Md1 = KendallsShapeSpace(3, 2)
+        @test manifold_dimension(Md1) == 0
+    end
 end

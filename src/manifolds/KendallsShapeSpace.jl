@@ -82,6 +82,20 @@ function get_embedding(::KendallsShapeSpace{N,K}) where {N,K}
     return KendallsPreShapeSpace(N, K)
 end
 
+function horizontal_component!(::KendallsShapeSpace, Y, p, X)
+    B = p * transpose(p)
+    C = X * transpose(p) - p * transpose(X)
+    A = sylvc(B, B, C)
+    Y .= X .- A * p
+    return Y
+end
+
+function inner(M::KendallsShapeSpace, p, X, Y)
+    Xh = horizontal_component(M, p, X)
+    Yh = horizontal_component(M, p, Y)
+    return inner(get_embedding(M), p, Xh, Yh)
+end
+
 function _isapprox(M::KendallsShapeSpace, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
 end
@@ -114,11 +128,22 @@ end
 @doc raw"""
     manifold_dimension(M::KendallsShapeSpace)
 
-Return the dimension of the [`KendallsShapeSpace`](@ref) manifold `M`. The dimension is given by
-``n(k - 1) - 1 - n(n - 1)/2``.
+Return the dimension of the [`KendallsShapeSpace`](@ref) manifold `M`. The dimension is
+given by ``n(k - 1) - 1 - n(n - 1)/2`` in the typical case where ``k \geq n+1``, and
+``(k + 1)(k - 2) / 2`` otherwise. See [^Kendall1984] for a discussion of the
+over-dimensioned case.
 """
 function manifold_dimension(::KendallsShapeSpace{n,k}) where {n,k}
-    return n * (k - 1) - 1 - div(n * (n - 1), 2)
+    if k < n + 1 # over-dimensioned case
+        return div((k + 1) * (k - 2), 2)
+    else
+        return n * (k - 1) - 1 - div(n * (n - 1), 2)
+    end
+end
+
+function norm(M::KendallsShapeSpace, p, X)
+    Xh = horizontal_component(M, p, X)
+    return norm(get_embedding(M), p, Xh)
 end
 
 function project!(M::KendallsShapeSpace, q, p)
