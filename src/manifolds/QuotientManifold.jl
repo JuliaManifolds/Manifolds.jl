@@ -192,6 +192,6 @@ end
 function vertical_component!(N::AbstractManifold, Y, p, X)
     horizontal_component!(N, Y, p, X)
     Y .*= -1
-    Y += X
+    Y .+= X
     return Y
 end

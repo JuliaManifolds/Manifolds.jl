@@ -71,6 +71,9 @@ end
     @testset "tangent vector components" begin
         @test isapprox(M, p1, horizontal_component(M, p1, X1), X1h)
         @test isapprox(M, p1, vertical_component(M, p1, X1), X1v)
+        Y = similar(X1)
+        vertical_component!(M, Y, p1, X1)
+        @test isapprox(M, p1, Y, X1v)
         @test norm(M, p1, X1v) < 1e-16
         @test abs(norm(M, p1, X1) - norm(M, p1, X1h)) < 1e-16
     end
