@@ -130,12 +130,16 @@ end
 
 Return the dimension of the [`KendallsShapeSpace`](@ref) manifold `M`. The dimension is
 given by ``n(k - 1) - 1 - n(n - 1)/2`` in the typical case where ``k \geq n+1``, and
-``(k + 1)(k - 2) / 2`` otherwise. See [^Kendall1984] for a discussion of the
-over-dimensioned case.
+``(k + 1)(k - 2) / 2`` otherwise, unless ``k`` is equal to 1, in which case the dimension
+is 0. See [^Kendall1984] for a discussion of the over-dimensioned case.
 """
 function manifold_dimension(::KendallsShapeSpace{n,k}) where {n,k}
     if k < n + 1 # over-dimensioned case
-        return div((k + 1) * (k - 2), 2)
+        if k == 1
+            return 0
+        else
+            return div((k + 1) * (k - 2), 2)
+        end
     else
         return n * (k - 1) - 1 - div(n * (n - 1), 2)
     end

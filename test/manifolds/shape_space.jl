@@ -90,7 +90,9 @@ end
         rand_tvector_atol_multiplier=5,
     )
     @testset "degenerate cases" begin
-        Md1 = KendallsShapeSpace(3, 2)
-        @test manifold_dimension(Md1) == 0
+        Md3_2 = KendallsShapeSpace(3, 2)
+        Md2_1 = KendallsShapeSpace(2, 1)
+        @test manifold_dimension(Md3_2) == 0
+        @test manifold_dimension(Md2_1) == 0
     end
 end
