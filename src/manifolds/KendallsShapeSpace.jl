@@ -66,7 +66,8 @@ See [^Guigui2021] for discussion about its computation.
 exp(M::KendallsShapeSpace, p, X)
 
 function exp!(M::KendallsShapeSpace, q, p, X)
-    return exp!(get_embedding(M), q, p, X)
+    Xh = horizontal_component(M, p, X)
+    return exp!(get_embedding(M), q, p, Xh)
 end
 
 embed(::KendallsShapeSpace, p) = p

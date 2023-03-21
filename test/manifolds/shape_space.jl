@@ -77,8 +77,15 @@ end
         @test norm(M, p1, X1v) < 1e-16
         @test abs(norm(M, p1, X1) - norm(M, p1, X1h)) < 1e-16
     end
+
     @test_throws ManifoldDomainError is_point(M, [1 0 1; 1 -1 0], true)
     @test_throws ManifoldDomainError is_vector(M, p1, [1 0 1; 1 -1 0], true)
+
+    @testset "exp/distance/norm" begin
+        q1 = exp(M, p1, X1)
+        @test distance(M, p1, q1) ≈ norm(M, p1, X1)
+    end
+
     test_manifold(
         M,
         [p1, p2, p3];
