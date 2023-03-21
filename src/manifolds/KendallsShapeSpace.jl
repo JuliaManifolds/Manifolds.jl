@@ -83,6 +83,14 @@ function get_embedding(::KendallsShapeSpace{N,K}) where {N,K}
     return KendallsPreShapeSpace(N, K)
 end
 
+"""
+    horizontal_component(::KendallsShapeSpace, p, X)
+
+Compute the horizontal component of tangent vector `X` at `p` on [`KendallsShapeSpace`](@ref)
+`M`. See [^Guigui2021], Section 2.3 for details.
+"""
+horizontal_component(::KendallsShapeSpace, p, X)
+
 function horizontal_component!(::KendallsShapeSpace, Y, p, X)
     B = p * transpose(p)
     C = X * transpose(p) - p * transpose(X)
