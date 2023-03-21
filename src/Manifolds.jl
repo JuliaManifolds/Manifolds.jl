@@ -307,7 +307,7 @@ using ManifoldDiff:
 import ManifoldDiff: riemannian_gradient, riemannian_gradient!
 
 using Markdown: @doc_str
-using MatrixEquations: lyapc
+using MatrixEquations: lyapc, sylvc
 using Quaternions: Quaternions
 using Random
 using RecipesBase
@@ -727,6 +727,8 @@ export ×,
     grad_euclidean_to_manifold!,
     hat,
     hat!,
+    horizontal_component,
+    horizontal_component!,
     horizontal_lift,
     horizontal_lift!,
     identity_element,
@@ -812,6 +814,8 @@ export ×,
     vector_transport_to!,
     vee,
     vee!,
+    vertical_component,
+    vertical_component!,
     zero_vector,
     zero_vector!
 # Lie group types & functions
