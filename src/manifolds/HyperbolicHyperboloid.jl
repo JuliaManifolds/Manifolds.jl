@@ -406,9 +406,10 @@ end
 
 function Random.rand!(M::Hyperbolic{N}, pX; vector_at=nothing, σ=one(eltype(pX))) where {N}
     if vector_at === nothing
-        a = σ .* randn(N)
-        pX[1:(end - 1)] .= a
-        pX[end] = sqrt(1 + dot(a, a))
+        a = randn(N)
+        f = 1 + σ * abs(randn())
+        pX[1:(end - 1)] .= a .* sqrt(f^2 - 1) / norm(a)
+        pX[end] = f
     else
         Y = σ * randn(eltype(vector_at), size(vector_at))
         project!(M, pX, vector_at, Y)
@@ -423,9 +424,10 @@ function Random.rand!(
     σ=one(eltype(pX)),
 ) where {N}
     if vector_at === nothing
-        a = σ .* randn(rng, N)
-        pX[1:(end - 1)] .= a
-        pX[end] = sqrt(1 + dot(a, a))
+        a = randn(rng, N)
+        f = 1 + σ * abs(randn(rng))
+        pX[1:(end - 1)] .= a .* sqrt(f^2 - 1) / norm(a)
+        pX[end] = f
     else
         Y = σ * randn(rng, eltype(vector_at), size(vector_at))
         project!(M, pX, vector_at, Y)

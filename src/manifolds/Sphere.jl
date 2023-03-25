@@ -139,7 +139,7 @@ both `p` and `q` lie on.
 d_{𝕊}(p,q) = \arccos(\Re(⟨p,q⟩)).
 ````
 """
-distance(::AbstractSphere, p, q) = acos(clamp(real(dot(p, q)), -1, 1))
+distance(::AbstractSphere, p, q) = 2 * abs(atan(norm(p - q), norm(p + q)))
 
 embed(::AbstractSphere, p) = copy(p)
 embed(::AbstractSphere, p, X) = copy(X)
