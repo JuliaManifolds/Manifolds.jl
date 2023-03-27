@@ -423,13 +423,8 @@ If `vector_at` is not `nothing`, return a random tangent vector from the tangent
 the point `vector_at` on the [`Circle`](@ref) by using a normal distribution with
 mean 0 and standard deviation `σ`.
 """
-function Random.rand(::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
-    if vector_at === nothing
-        return sym_rem(rand() * 2 * π)
-    else
-        # written like that to properly handle `vector_at` being a number or a one-element array
-        return map(_ -> σ * randn(), vector_at)
-    end
+function Random.rand(M::Circle; vector_at=nothing, σ::Real=1.0)
+    return rand(Random.default_rng(), M; vector_at=vector_at, σ=σ)
 end
 function Random.rand(rng::AbstractRNG, ::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
     if vector_at === nothing
@@ -438,18 +433,11 @@ function Random.rand(rng::AbstractRNG, ::Circle{ℝ}; vector_at=nothing, σ::Rea
         return map(_ -> σ * randn(rng), vector_at)
     end
 end
-function Random.rand(M::Circle{ℂ}; vector_at=nothing, σ::Real=1.0)
-    if vector_at === nothing
-        return sign(randn(ComplexF64))
-    else
-        # written like that to properly handle `vector_at` being a number or a one-element array
-        return map(p -> project(M, p, σ * rand(typeof(p))), vector_at)
-    end
-end
 function Random.rand(rng::AbstractRNG, M::Circle{ℂ}; vector_at=nothing, σ::Real=1.0)
     if vector_at === nothing
         return sign(randn(rng, ComplexF64))
     else
+        # written like that to properly handle `vector_at` being a number or a one-element array
         return map(p -> project(M, p, σ * rand(rng, typeof(p))), vector_at)
     end
 end
