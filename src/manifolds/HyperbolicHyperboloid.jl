@@ -426,7 +426,7 @@ function Random.rand!(
     if vector_at === nothing
         a = randn(rng, N)
         f = 1 + σ * abs(randn(rng))
-        pX[1:(end - 1)] .= a .* sqrt(f^2 - 1) / norm(a)
+        pX[firstindex(pX):(end - 1)] .= a .* sqrt(f^2 - 1) / norm(a)
         pX[end] = f
     else
         Y = σ * randn(rng, eltype(vector_at), size(vector_at))
