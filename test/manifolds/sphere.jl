@@ -69,6 +69,13 @@ using ManifoldsBase: TFVector
         end
     end
 
+    @testset "small and large distance tests" begin
+        p = [-0.18337624444127734, 0.8345313166281056, 0.5195484910396462]
+        q = [-0.18337624444127681, 0.8345313166281058, 0.5195484910396464]
+        @test isapprox(distance(M, p, q), 5.828670879282073e-16)
+        @test isapprox(distance(M, p, -q), 3.1415926535897927; atol=eps())
+    end
+
     @testset "Distribution tests" begin
         usd_mvector = Manifolds.uniform_distribution(M, @MVector [1.0, 0.0, 0.0])
         @test isa(rand(usd_mvector), MVector)

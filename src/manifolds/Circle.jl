@@ -103,7 +103,14 @@ complex-valued case.
 distance(::Circle, ::Any...)
 distance(::Circle{ℝ}, p::Real, q::Real) = abs(sym_rem(p - q))
 distance(::Circle{ℝ}, p, q) = abs(sum(sym_rem.(p - q)))
-distance(::Circle{ℂ}, p, q) = acos(clamp(complex_dot(p, q), -1, 1))
+function distance(::Circle{ℂ}, p, q)
+    cosθ = complex_dot(p, q)
+    T = float(real(Base.promote_eltype(p, q)))
+    # abs and relative error of acos is less than sqrt(eps(T))
+    -1 < cosθ < 1 - sqrt(eps(T)) / 8 && return acos(cosθ)
+    # improved accuracy for q close to p or -p
+    return 2 * abs(atan(norm(p - q), norm(p + q)))
+end
 
 @doc raw"""
     embed(M::Circle, p)
@@ -413,7 +420,7 @@ If `vector_at` is `nothing`, return a random point on the [`Circle`](@ref) ``\ma
 by picking a random element from ``[-\pi,\pi)`` uniformly.
 
 If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
-the point `vector_at` on the [`Circle``](@ref) by using a normal distribution with
+the point `vector_at` on the [`Circle`](@ref) by using a normal distribution with
 mean 0 and standard deviation `σ`.
 """
 function Random.rand(::Circle{ℝ}; vector_at=nothing, σ::Real=1.0)
@@ -429,6 +436,23 @@ function Random.rand(rng::AbstractRNG, ::Circle{ℝ}; vector_at=nothing, σ::Rea
         return sym_rem(rand(rng) * 2 * π)
     else
         return map(_ -> σ * randn(rng), vector_at)
+    end
+end
+function Random.rand(M::Circle{ℂ}; vector_at=nothing, σ::Real=1.0)
+    if vector_at === nothing
+        phi = rand() * 2 * π
+        return Complex(cos(phi), sin(phi))
+    else
+        # written like that to properly handle `vector_at` being a number or a one-element array
+        return map(p -> project(M, p, σ * rand(typeof(p))), vector_at)
+    end
+end
+function Random.rand(rng::AbstractRNG, M::Circle{ℂ}; vector_at=nothing, σ::Real=1.0)
+    if vector_at === nothing
+        phi = rand(rng) * 2 * π
+        return Complex(cos(phi), sin(phi))
+    else
+        return map(p -> project(M, p, σ * rand(rng, typeof(p))), vector_at)
     end
 end
 
