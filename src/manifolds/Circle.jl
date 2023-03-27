@@ -440,8 +440,7 @@ function Random.rand(rng::AbstractRNG, ::Circle{ℝ}; vector_at=nothing, σ::Rea
 end
 function Random.rand(M::Circle{ℂ}; vector_at=nothing, σ::Real=1.0)
     if vector_at === nothing
-        phi = rand() * 2 * π
-        return Complex(cos(phi), sin(phi))
+        return sign(randn(ComplexF64))
     else
         # written like that to properly handle `vector_at` being a number or a one-element array
         return map(p -> project(M, p, σ * rand(typeof(p))), vector_at)
@@ -449,8 +448,7 @@ function Random.rand(M::Circle{ℂ}; vector_at=nothing, σ::Real=1.0)
 end
 function Random.rand(rng::AbstractRNG, M::Circle{ℂ}; vector_at=nothing, σ::Real=1.0)
     if vector_at === nothing
-        phi = rand(rng) * 2 * π
-        return Complex(cos(phi), sin(phi))
+        return sign(randn(rng, ComplexF64))
     else
         return map(p -> project(M, p, σ * rand(rng, typeof(p))), vector_at)
     end
