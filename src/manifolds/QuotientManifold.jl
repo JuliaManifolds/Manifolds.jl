@@ -145,9 +145,9 @@ get_orbit_action(::AbstractManifold)
     horizontal_lift(N::AbstractManifold, q, X)
     horizontal_lift(::QuotientManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold}, p, X) where {𝔽}
 
-Given a point `q` such that ``p=π(q)`` is a point on a quotient manifold `M`
-(implicitly given for the first case) and a tangent vector `X` this method
-computes a tangent vector `Y` on the horizontal space of ``T_q\mathcal N``,
+Given a point `q` in total space of quotient manifold `N` such that ``p=π(q)`` is a point on
+a quotient manifold `M` (implicitly given for the first case) and a tangent vector `X` this
+method computes a tangent vector `Y` on the horizontal space of ``T_q\mathcal N``,
 i.e. the subspace that is orthogonal to the kernel of ``Dπ(q)``.
 """
 function horizontal_lift(N::AbstractManifold, q, X)
@@ -156,14 +156,42 @@ function horizontal_lift(N::AbstractManifold, q, X)
 end
 
 @doc raw"""
-    horizontal_lift(N, q, X)
-    horizontal_lift(QuotientManifold{M,N}, p, X)
+    horizontal_lift!(N, Y, q, X)
+    horizontal_lift!(QuotientManifold{M,N}, Y, p, X)
 
 Compute the [`horizontal_lift`](@ref) of `X` from ``T_p\mathcal M``, ``p=π(q)``.
 to ``T_q\mathcal N` in place of `Y`.
 """
 horizontal_lift!(N::AbstractManifold, Y, q, X)
 
+"""
+    horizontal_component(N::AbstractManifold, p, X)    
+
+Compute the horizontal component of tangent vector `X` at point `p`
+in the total space of quotient manifold `N`.
+"""
+function horizontal_component(N::AbstractManifold, p, X)
+    Y = allocate_result(N, horizontal_component, X, p)
+    return horizontal_component!(N, Y, p, X)
+end
+
 function Base.show(io::IO, M::QuotientManifold)
     return print(io, "QuotientManifold($(M.manifold), $(M.total_space))")
+end
+
+"""
+    vertical_component(N::AbstractManifold, p, X)    
+
+Compute the vertical component of tangent vector `X` at point `p`
+in the total space of quotient manifold `N`.
+"""
+function vertical_component(N::AbstractManifold, p, X)
+    return X - horizontal_component(N, p, X)
+end
+
+function vertical_component!(N::AbstractManifold, Y, p, X)
+    horizontal_component!(N, Y, p, X)
+    Y .*= -1
+    Y .+= X
+    return Y
 end

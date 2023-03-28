@@ -139,7 +139,14 @@ both `p` and `q` lie on.
 d_{𝕊}(p,q) = \arccos(\Re(⟨p,q⟩)).
 ````
 """
-distance(::AbstractSphere, p, q) = acos(clamp(real(dot(p, q)), -1, 1))
+function distance(::AbstractSphere, p, q)
+    cosθ = real(dot(p, q))
+    T = float(real(Base.promote_eltype(p, q)))
+    # abs and relative error of acos is less than sqrt(eps(T))
+    -1 < cosθ < 1 - sqrt(eps(T)) / 8 && return acos(cosθ)
+    # improved accuracy for q close to p or -p
+    return 2 * abs(atan(norm(p - q), norm(p + q)))
+end
 
 embed(::AbstractSphere, p) = copy(p)
 embed(::AbstractSphere, p, X) = copy(X)
