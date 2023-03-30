@@ -101,8 +101,8 @@ include("utils.jl")
         #        end
         #        @plottest Hyp2_quiver joinpath(references_folder, "Hyp2Quiver.png") false
     end
-    @testset "3D Recipes in pyplot" begin
-        pyplot()
+    @testset "3D Recipes in pythonplot" begin
+        pythonplot()
         #        function Sphere2_plot()
         M = Sphere(2)
         pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
@@ -128,7 +128,7 @@ include("utils.jl")
         #        @plottest Sphere2_plot_geo joinpath(references_folder, "Sphere2PlotGeo.png") false
 
         #        function Sphere2_quiver()
-        pyplot()
+        pythonplot()
         M = Sphere(2)
         pts2 = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]]
         p3 = 1 / sqrt(3) .* [1.0, -1.0, 1.0]
