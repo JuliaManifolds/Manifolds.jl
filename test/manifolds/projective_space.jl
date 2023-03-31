@@ -305,4 +305,23 @@ include("../utils.jl")
         @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℂ}
         @test representation_size(M) == (2, 2)
     end
+
+    @testset "small distance tests" begin
+        @testset for fT in (Float32, Float64), T in (fT, Complex{fT}, Quaternion{fT})
+            𝔽 = T isa Complex ? ℂ : (T isa Quaternion ? ℍ : ℝ)
+            M = ProjectiveSpace(2, 𝔽)
+            rT = real(T)
+            atol = rtol = sqrt(eps(rT))
+            @testset for t in (zero(rT), eps(rT)^(1 // 4) / 8, eps(rT)^(1 // 4)),
+                λ in (one(T), (T <: Real ? -one(T) : sign(randn(T))))
+
+                p = project(M, randn(T, representation_size(M)))
+                X = project(M, p, randn(T, representation_size(M)))
+                X ./= norm(M, p, X)
+                project!(M, X, p, X)
+                @test distance(M, p, exp(M, p, t * X) * λ) ≈ t atol = atol rtol = rtol
+                @test distance(M, p, exp(M, p, (π - t) * X) * λ) ≈ t atol = atol rtol = rtol
+            end
+        end
+    end
 end
