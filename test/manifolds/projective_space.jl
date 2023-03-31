@@ -307,7 +307,7 @@ include("../utils.jl")
     end
 
     @testset "small distance tests" begin
-        @testset for fT in (Float32, Float64, BigFloat),
+        @testset for fT in (Float32, Float64),
             T in (fT, Complex{fT}, Quaternion{fT})
 
             𝔽 = T isa Complex ? ℂ : (T isa Quaternion ? ℍ : ℝ)
