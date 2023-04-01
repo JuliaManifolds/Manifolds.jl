@@ -295,21 +295,8 @@ random Matrix onto the tangent vector at `vector_at`.
 """
 rand(::Stiefel; σ::Real=1.0)
 
-function Random.rand!(
-    M::Stiefel{n,k,𝔽},
-    pX;
-    vector_at=nothing,
-    σ::Real=one(real(eltype(pX))),
-) where {n,k,𝔽}
-    if vector_at === nothing
-        A = σ * randn(𝔽 === ℝ ? Float64 : ComplexF64, n, k)
-        pX .= Matrix(qr(A).Q)
-    else
-        Z = σ * randn(eltype(pX), size(pX))
-        project!(M, pX, vector_at, Z)
-        normalize!(pX)
-    end
-    return pX
+function Random.rand!(M::Stiefel, pX; kwargs...)
+    return Random.rand!(Random.default_rng(), M, pX; kwargs...)
 end
 function Random.rand!(
     rng::AbstractRNG,
@@ -450,13 +437,15 @@ function retract_pade!(::Stiefel, q, p, X, t::Number, ::PadeRetraction{m}) where
     return copyto!(q, (qm \ pm) * p)
 end
 function retract_polar!(::Stiefel, q, p, X, t::Number)
-    s = svd(p .+ t .* X)
+    q .= p .+ t .* X
+    s = svd(q)
     return mul!(q, s.U, s.Vt)
 end
 function retract_qr!(::Stiefel, q, p, X, t::Number)
-    qrfac = qr(p .+ t .* X)
+    q .= p .+ t .* X
+    qrfac = qr(q)
     d = diag(qrfac.R)
-    D = Diagonal(sign.(sign.(d .+ 0.5)))
+    D = Diagonal(sign.(sign.(d .+ 1 // 2)))
     return mul!(q, _qrfac_to_q(qrfac), D)
 end
 
