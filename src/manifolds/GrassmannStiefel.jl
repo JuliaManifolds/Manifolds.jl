@@ -189,6 +189,21 @@ function log!(M::Grassmann, X, p, q)
 end
 
 @doc raw"""
+    project(M::Grassmann,p)
+
+Projects `p` from the embedding onto the [`Grassmann`](@ref) `M`, i.e. compute `q`
+as the polar decomposition of $p$ such that $q^{\mathrm{H}q$ is the identity,
+where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+"""
+project(::Grassmann, ::Any, ::Any)
+
+function project!(::Grassmann, q, p)
+    s = svd(p)
+    mul!(q, s.U, s.Vt)
+    return q
+end
+
+@doc raw"""
     project(M::Grassmann, p, X)
 
 Project the `n`-by-`k` `X` onto the tangent space of `p` on the [`Grassmann`](@ref) `M`,
@@ -264,9 +279,10 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(::Grassmann, q, p, X, t::Number)
-    s = svd(p .+ t .* X)
-    return mul!(q, s.U, s.Vt)
+function retract_polar!(M::Grassmann, q, p, X, t::Number)
+    q .= p .+ t .* X
+    project!(M, q, q)
+    return q
 end
 
 @doc raw"""
@@ -285,7 +301,8 @@ D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
 
 function retract_qr!(::Grassmann{N,K}, q, p, X, t::Number) where {N,K}
-    qrfac = qr(p .+ t .* X)
+    q .= p .+ t .* X
+    qrfac = qr(q)
     d = diag(qrfac.R)
     q .= Array(qrfac.Q) .* sign.(transpose(d) .+ 1 // 2)
     return q
