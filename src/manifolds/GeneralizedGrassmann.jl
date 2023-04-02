@@ -171,8 +171,7 @@ function exp!(M::GeneralizedGrassmann, q, p, X)
     d = svd(X' * M.B * X)
     V = d.Vt
     S = abs.(sqrt.(d.S))
-    U = X * (V / Diagonal(S))
-    mul!(q, p * (V .* cos.(S')) + U .* sin.(S'), V)
+    mul!(q, p * (V .* cos.(S')) + X * (V .* usinc.(S')), V)
     project!(M, q, q)
     return q
 end
