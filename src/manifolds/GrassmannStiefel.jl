@@ -41,25 +41,15 @@ default_vector_transport_method(::Grassmann, ::Type{<:StiefelPoint}) = Projectio
 
 Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
 
-Let $USV = p^\mathrm{H}q$ denote the SVD decomposition of
-$p^\mathrm{H}q$, where $\cdot^{\mathrm{H}}$ denotes the complex
-conjugate transposed or Hermitian. Then the distance is given by
+The distance is given by
 ````math
-d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\operatorname{Re}(b)).
-````
-where
-
-````math
-b_{i}=\begin{cases}
-0 & \text{if} \; S_i ≥ 1\\
-\arccos(S_i) & \, \text{if} \; S_i<1.
-\end{cases}
+d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\log_p(q)).
 ````
 """
 function distance(::Grassmann, p, q)
-    p ≈ q && return zero(real(eltype(p)))
-    a = svd(p' * q).S
-    return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
+    z = p' * q
+    S = svd(q / z - p).S
+    return norm(map(atan, S))
 end
 
 embed(::Grassmann, p) = p
@@ -183,6 +173,12 @@ function log!(::Grassmann{n,k}, X, p, q) where {n,k}
     Bt = z \ At
     d = svd(Bt')
     return X .= view(d.U, :, 1:k) * Diagonal(atan.(view(d.S, 1:k))) * view(d.Vt, 1:k, :)
+end
+
+function project!(::Grassmann, q, p)
+    s = svd(p)
+    mul!(q, s.U, s.Vt)
+    return q
 end
 
 @doc raw"""

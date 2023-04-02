@@ -346,4 +346,24 @@ include("../utils.jl")
         embed!(M2, Y3, p.value, X.value)
         @test Y3 == X.value
     end
+
+    @testset "small distance tests" begin
+        n, k = 5, 3
+        @testset for fT in (Float32, Float64), T in (fT, Complex{fT})
+            𝔽 = T isa Complex ? ℂ : ℝ
+            M = Grassmann(n, k, 𝔽)
+            U = Unitary(k, 𝔽)
+            rT = real(T)
+            atol = rtol = sqrt(eps(rT))
+            @testset for t in (zero(rT), eps(rT)^(1 // 4) / 8, eps(rT)^(1 // 4)),
+                z in (I, rand(U))
+
+                p = project(M, randn(T, representation_size(M)))
+                X = project(M, p, randn(T, representation_size(M)))
+                X ./= norm(M, p, X)
+                project!(M, X, p, X)
+                @test distance(M, p, exp(M, p, t * X) * z) ≈ t atol = atol rtol = rtol
+            end
+        end
+    end
 end

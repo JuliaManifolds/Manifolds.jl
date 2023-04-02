@@ -125,25 +125,15 @@ end
 Compute the Riemannian distance on [`GeneralizedGrassmann`](@ref)
 manifold `M`$= \mathrm{Gr}(n,k,B)$.
 
-Let $USV = p^\mathrm{H}Bq$ denote the SVD decomposition of
-$p^\mathrm{H}Bq$, where $\cdot^{\mathrm{H}}$ denotes the complex
-conjugate transposed or Hermitian. Then the distance is given by
+The distance is given by
 ````math
-d_{\mathrm{Gr}(n,k,B)}(p,q) = \operatorname{norm}(\operatorname{Re}(b)).
-````
-where
-
-````math
-b_{i}=\begin{cases}
-0 & \text{if} \; S_i ≥ 1\\
-\arccos(S_i) & \, \text{if} \; S_i<1.
-\end{cases}
+d_{\mathrm{Gr}(n,k,B)}(p,q) = \operatorname{norm}(\log_p(q)).
 ````
 """
 function distance(M::GeneralizedGrassmann, p, q)
-    p ≈ q && return zero(real(eltype(p)))
-    a = svd(p' * M.B * q).S
-    return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
+    z = p' * M.B' * q
+    S = svd(q / z - p).S
+    return norm(map(atan, S))
 end
 
 embed(::GeneralizedGrassmann, p) = p
