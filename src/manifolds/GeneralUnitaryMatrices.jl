@@ -248,14 +248,9 @@ end
 exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X) = exp!(M, q, p, X, one(eltype(X)))
 function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X, t::Real)
     θ = abs(t) * norm(M, p, X) / sqrt(2)
-    if θ ≈ 0
-        a = 1 - θ^2 / 6
-        b = θ / 2
-    else
-        a = sin(θ) / θ
-        b = (1 - cos(θ)) / θ^2
-    end
-    pinvq = I + a .* t .* X .+ b .* t^2 .* (X^2)
+    a = usinc(θ)
+    b = usinc(θ/2)^2 / 2
+    pinvq = I + (a * t) .* X .+ (b * t^2) .* (X^2)
     return copyto!(q, p * pinvq)
 end
 exp!(M::GeneralUnitaryMatrices{4,ℝ}, q, p, X, t::Real) = exp!(M, q, p, t * X)
@@ -598,17 +593,13 @@ function log!(M::GeneralUnitaryMatrices{2,ℝ}, X, p, q)
     return get_vector!(M, X, p, θ, DefaultOrthogonalBasis())
 end
 function log!(M::GeneralUnitaryMatrices{3,ℝ}, X, p, q)
-    U = transpose(p) * q
-    cosθ = (tr(U) - 1) / 2
-    if cosθ ≈ -1
-        eig = eigen_safe(U)
-        ival = findfirst(λ -> isapprox(λ, 1), eig.values)
-        inds = SVector{3}(1:3)
-        ax = eig.vectors[inds, ival]
-        return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
-    end
-    X .= U ./ usinc_from_cos(cosθ)
-    return project!(SkewSymmetricMatrices(3), X, p, X)
+    U = mul!(X, transpose(p), q)
+    dcosθ = tr(U) - 1
+    project!(SkewSymmetricMatrices(3), X, p, X)
+    dsinθ = norm(X)
+    sincθ = usinc(atan(dsinθ, dcosθ))
+    X ./= sincθ
+    return X
 end
 function log!(::GeneralUnitaryMatrices{4,ℝ}, X, p, q)
     U = transpose(p) * q
