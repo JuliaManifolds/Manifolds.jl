@@ -94,6 +94,9 @@ using Random
     end
     @test inner(M, p1, X1, X2) ≈ inner(M, p1o, X1o, X2o)
 
+    @test eltype(p1o) === Float64
+    @test eltype(X1o) === Float64
+
     @testset "projection" begin
         X_to_project = [
             -0.5847114032301931 0.3817639698271648
