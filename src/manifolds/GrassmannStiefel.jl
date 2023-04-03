@@ -193,12 +193,6 @@ function project!(::Grassmann, q, p)
     return q
 end
 
-function project!(::Grassmann, q, p)
-    s = svd(p)
-    mul!(q, s.U, s.Vt)
-    return q
-end
-
 @doc raw"""
     project(M::Grassmann, p, X)
 
