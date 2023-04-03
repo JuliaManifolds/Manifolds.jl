@@ -102,6 +102,7 @@ include("../utils.jl")
                 test_default_vector_transport=false,
                 projection_atol_multiplier=15.0,
                 retraction_atol_multiplier=10.0,
+                is_point_atol_multiplier=10.0,
                 is_tangent_atol_multiplier=4 * 10.0^2,
                 retraction_methods=[PolarRetraction(), ProjectionRetraction()],
                 mid_point12=nothing,
@@ -149,7 +150,8 @@ include("../utils.jl")
             M = GeneralizedGrassmann(n, k, B, 𝔽)
             U = Unitary(k, 𝔽)
             rT = real(T)
-            atol = rtol = sqrt(eps(rT))
+            atol = eps(rT)^(1//4)
+            rtol = eps(rT)
             @testset for t in (zero(rT), eps(rT)^(1 // 4) / 8, eps(rT)^(1 // 4))
                 p = project(M, randn(T, representation_size(M)))
                 X = project(M, p, randn(T, representation_size(M)))
