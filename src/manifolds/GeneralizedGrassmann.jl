@@ -133,8 +133,11 @@ d_{\mathrm{Gr}(n,k,B)}(p,q) = \operatorname{norm}(\log_p(q)).
 """
 function distance(M::GeneralizedGrassmann, p, q)
     z = p' * M.B' * q
-    S = svd(q / z - p).S
-    return norm(map(atan, S))
+    X = allocate_result(M, log, p, q)
+    X .= q / z .- p
+    d = svd(X)
+    X .= d.U .* atan.(d.S')
+    return norm(M, p, X)
 end
 
 embed(::GeneralizedGrassmann, p) = p
