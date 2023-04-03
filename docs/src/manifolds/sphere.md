@@ -41,7 +41,7 @@ In general you can plot the surface of the hyperboloid either as wireframe (`wir
 
 ```@example sphereplot1
 using Manifolds, Plots
-pyplot()
+pythonplot()
 M = Sphere(2)
 pts = [ [1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0] ]
 scene = plot(M, pts; wireframe_color=colorant"#CCCCCC", markersize=10)

@@ -1,4 +1,4 @@
-using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PyPlot
+using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
 using PlutoStaticHTML
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
