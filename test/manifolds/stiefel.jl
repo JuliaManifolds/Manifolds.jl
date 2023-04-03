@@ -6,7 +6,7 @@ include("../utils.jl")
         M2 = MetricManifold(M, EuclideanMetric())
         @testset "Basics" begin
             @test repr(M) == "Stiefel(3, 2, ℝ)"
-            x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             @test is_default_metric(M, EuclideanMetric())
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
@@ -20,11 +20,11 @@ include("../utils.jl")
                 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
                 true,
             )
-            @test !is_vector(M, x, [0.0, 0.0, 1.0, 0.0])
+            @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
             @test_throws ManifoldDomainError is_vector(
                 M,
-                x,
-                1 * im * zero_vector(M, x),
+                p,
+                1 * im * zero_vector(M, p),
                 true,
             )
             @test default_retraction_method(M) === PolarRetraction()
@@ -33,27 +33,34 @@ include("../utils.jl")
             @test default_vector_transport_method(M) === vtm
         end
         @testset "Embedding and Projection" begin
-            x = [1.0 0.0; 0.0 1.0; 0.0 0.0]
-            y = similar(x)
-            z = embed(M, x)
-            @test z == x
-            embed!(M, y, x)
-            @test y == z
+            p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            q = similar(p)
+            r = embed(M, p)
+            @test r == p
+            embed!(M, q, p)
+            @test q == r
             a = [1.0 0.0; 0.0 2.0; 0.0 0.0]
             @test !is_point(M, a)
             b = similar(a)
             c = project(M, a)
-            @test c == x
+            @test c == p
             project!(M, b, a)
-            @test b == x
+            @test b == p
             X = [0.0 0.0; 0.0 0.0; -1.0 1.0]
             Y = similar(X)
-            Z = embed(M, x, X)
-            embed!(M, Y, x, X)
+            Z = embed(M, p, X)
+            embed!(M, Y, p, X)
             @test Y == X
             @test Z == X
         end
-
+        @testset "gradient and metric conversion" begin
+            p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            X = [0.0 0.0; 0.0 0.0; -1.0 1.0]
+            Y = change_metric(M, EuclideanMetric(), p, X)
+            @test Y == X
+            Z = change_representer(M, EuclideanMetric(), p, X)
+            @test Z == X
+        end
         types = [Matrix{Float64}]
         TEST_FLOAT32 && push!(types, Matrix{Float32})
         TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})

@@ -44,6 +44,32 @@ function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where
 end
 
 @doc raw"""
+    change_representer(M::Stiefel, ::EuclideanMetric, p, X)
+
+Change `X` to the corresponding representer of a cotangent vector at `p`.
+Since the [`Stiefel`](@ref) manifold `M`, is isometrically embedded, this is the identity
+"""
+change_representer(::Stiefel, ::EuclideanMetric, ::Any, ::Any)
+
+function change_representer!(M::Stiefel, Y, ::EuclideanMetric, p, X)
+    copyto!(M, Y, p, X)
+    return Y
+end
+
+@doc raw"""
+    change_metric(M::Stiefel, ::EuclideanMetric, p X)
+
+Change `X` to the corresponding vector with respect to the metric of the [`Stiefel`](@ref) `M`,
+which is just the identity, since the manifold is isometrically embedded.
+"""
+change_metric(M::Stiefel, ::EuclideanMetric, ::Any, ::Any)
+
+function change_metric!(::Stiefel, Y, ::EuclideanMetric, p, X)
+    copyto!(Y, X)
+    return Y
+end
+
+@doc raw"""
     check_point(M::Stiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$, i.e. that it has the right

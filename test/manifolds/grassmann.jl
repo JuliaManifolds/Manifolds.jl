@@ -102,8 +102,13 @@ include("../utils.jl")
                 @test norm(M, pts[1], X1) isa Real
                 @test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
             end
-
             @test riemann_tensor(M, p1, X, Y, 2 * X + Y) ≈ [0 -2; 0 1; 2 0]
+            @testset "gradient and metric conversion" begin
+                Y = change_metric(M, EuclideanMetric(), p1, X)
+                @test Y == X
+                Z = change_representer(M, EuclideanMetric(), p1, X)
+                @test Z == X
+            end
         end
 
         @testset "Distribution tests" begin
