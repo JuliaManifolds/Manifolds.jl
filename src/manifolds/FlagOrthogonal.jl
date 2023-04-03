@@ -39,10 +39,6 @@ function embed!(::Flag, Y, p::OrthogonalPoint, X::OrthogonalTVector)
 end
 get_embedding(::Flag{N}, p::OrthogonalPoint) where {N} = OrthogonalMatrices(N)
 
-function exp!(::Flag, q::OrthogonalPoint, p::OrthogonalPoint, X::OrthogonalTVector)
-    return q .= p * exp(X)
-end
-
 function _extract_flag(M::Flag, p::AbstractMatrix, i::Int)
     range = (M.subspace_dimensions[i - 1] + 1):M.subspace_dimensions[i]
     return view(p, range, range)
@@ -82,28 +78,11 @@ function project(M::Flag{N,dp1}, ::OrthogonalPoint, X::OrthogonalTVector) where 
 end
 
 function Random.rand!(
-    M::Flag{N,dp1},
+    M::Flag,
     pX::Union{OrthogonalPoint,OrthogonalTVector};
     vector_at=nothing,
-) where {N,dp1}
-    if vector_at === nothing
-        RN = Rotations(N)
-        rand!(RN, pX.value)
-    else
-        for i in 1:dp1
-            for j in i:dp1
-                Bij = _extract_flag(M, pX.value, i, j)
-                if i == j
-                    fill!(Bij, 0)
-                else
-                    Bij .= randn(size(Bij))
-                    Bji = _extract_flag(M, pX.value, j, i)
-                    Bji .= -Bij'
-                end
-            end
-        end
-    end
-    return pX
+)
+    return rand!(Random.default_rng(), M, pX; vector_at=vector_at)
 end
 function Random.rand!(
     rng::AbstractRNG,

@@ -141,15 +141,8 @@ function project!(M::Flag, q::AbstractMatrix, p::AbstractMatrix)
     return project!(get_embedding(M), q, p)
 end
 
-function Random.rand!(M::Flag{N,dp1}, pX::AbstractMatrix; vector_at=nothing) where {N,dp1}
-    EM = get_embedding(M)
-    if vector_at === nothing
-        rand!(EM, pX)
-    else
-        rand!(EM, pX; vector_at=vector_at)
-        project!(M, pX, vector_at, pX)
-    end
-    return pX
+function Random.rand!(M::Flag, pX::AbstractMatrix; vector_at=nothing)
+    return rand!(Random.default_rng(), M, pX; vector_at=vector_at)
 end
 function Random.rand!(
     rng::AbstractRNG,

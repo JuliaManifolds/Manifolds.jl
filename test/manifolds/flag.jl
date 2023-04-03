@@ -8,6 +8,12 @@ using Random
     @test repr(M) == "Flag(5, 1, 2)"
     @test manifold_dimension(M) == 7
 
+    @testset "Flag constructor errors" begin
+        @test_throws ErrorException Flag(0, 0)
+        @test_throws ErrorException Flag(5, 2, 2)
+        @test_throws ErrorException Flag(5, 2, 5)
+    end
+
     p1 = [
         -0.3146651787309489 -0.48660897424165994
         0.6064615017863313 -0.34830198287474623
@@ -45,6 +51,22 @@ using Random
         -0.7594778759730498 -0.1519330114054877
     ]
 
+    X1_wrong = [
+        -1.6804229240952372 -0.034412196486963954
+        0.8344934559155401 0.48097313913408224
+        -1.0810467279810454 0.11289047449146702
+        -1.1353782173810583 0.34131188565927895
+        0.0751500891676202 -0.12447744196142059
+    ]
+
+    X1_wrong2 = [
+        -0.6804229240952372 -0.034412196486963954
+        0.8344934559155401 0.48097313913408224
+        -1.0810467279810454 0.11289047449146702
+        -1.1353782173810583 0.34131188565927895
+        0.0751500891676202 -1.12447744196142059
+    ]
+
     p1o = Manifolds.stiefel_point_to_orthogonal(M, p1)
     p2o = Manifolds.stiefel_point_to_orthogonal(M, p2)
     X1o = Manifolds.stiefel_tv_to_orthogonal(M, p1, X1)
@@ -53,6 +75,15 @@ using Random
     @test check_point(M, p1) === nothing
     @test check_vector(M, p1, X1) === nothing
     @test check_vector(M, p1, X2) === nothing
+    @test check_vector(M, p1, X1_wrong) isa DomainError
+    @test check_vector(M, p1, X1_wrong2) isa DomainError
+
+    @testset "injectivity_radius" begin
+        @test injectivity_radius(M) == π / 2
+        @test injectivity_radius(M, p1) == π / 2
+        @test injectivity_radius(M, PolarRetraction()) == π / 2
+        @test injectivity_radius(M, p1, PolarRetraction()) == π / 2
+    end
 
     @testset "conversion between Stiefel and orthogonal coordinates" begin
         p1os = Manifolds.orthogonal_point_to_stiefel(M, p1o)
