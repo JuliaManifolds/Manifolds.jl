@@ -189,13 +189,13 @@ function log!(M::Grassmann, X, p, q)
 end
 
 @doc raw"""
-    project(M::Grassmann,p)
+    project(M::Grassmann, p)
 
-Projects `p` from the embedding onto the [`Grassmann`](@ref) `M`, i.e. compute `q`
-as the polar decomposition of $p$ such that $q^{\mathrm{H}q$ is the identity,
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+Project `p` from the embedding onto the [`Grassmann`](@ref) `M`, i.e. compute `q`
+as the polar decomposition of $p$ such that $q^{\mathrm{H}}q$ is the identity,
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
-project(::Grassmann, ::Any, ::Any)
+project(::Grassmann, ::Any)
 
 function project!(::Grassmann, q, p)
     s = svd(p)
