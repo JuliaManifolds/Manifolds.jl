@@ -37,6 +37,12 @@ embed(::Flag, p::OrthogonalPoint, X::OrthogonalTVector) = X.value
 function embed!(::Flag, Y, p::OrthogonalPoint, X::OrthogonalTVector)
     return copyto!(Y, X.value)
 end
+
+"""
+    get_embedding(M::Flag, p::OrthogonalPoint)
+
+Get embedding of [`Flag`](@ref) manifold `M`, i.e. the manifold [`OrthogonalMatrices`](@ref).
+"""
 get_embedding(::Flag{N}, p::OrthogonalPoint) where {N} = OrthogonalMatrices(N)
 
 function _extract_flag(M::Flag, p::AbstractMatrix, i::Int)
