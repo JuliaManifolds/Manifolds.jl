@@ -87,7 +87,8 @@ change_metric(M::GeneralizedGrassmann, ::EuclideanMetric, ::Any, ::Any)
 
 function change_metric!(M::GeneralizedGrassmann, Y, ::EuclideanMetric, p, X)
     C2 = cholesky(M.B).L
-    Y .= C2 \ X
+    copyto!(Y, X)
+    ldiv!(C2, Y)
     return Y
 end
 
@@ -160,9 +161,9 @@ function exp!(M::GeneralizedGrassmann, q, p, X)
     d = svd(X' * M.B * X)
     V = d.Vt
     S = abs.(sqrt.(d.S))
-    U = X * (V / Diagonal(S))
-    z = p * V * Diagonal(cos.(S)) * V + U * Diagonal(sin.(S)) * V
-    return copyto!(q, project(M, z))
+    mul!(q, p * (V .* cos.(S')) + X * (V .* usinc.(S')), V)
+    project!(M, q, q)
+    return q
 end
 
 @doc raw"""
@@ -200,7 +201,7 @@ g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}BY),
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B * Y)
+inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B, Y)
 
 function _isapprox(M::GeneralizedGrassmann, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
@@ -232,12 +233,11 @@ In this formula the $\operatorname{atan}$ is meant elementwise.
 """
 log(::GeneralizedGrassmann, ::Any...)
 
-function log!(M::GeneralizedGrassmann{n,k}, X, p, q) where {n,k}
-    z = q' * M.B * p
-    At = q' - z * p'
-    Bt = z \ At
-    d = svd(Bt')
-    return X .= view(d.U, :, 1:k) * Diagonal(atan.(view(d.S, 1:k))) * view(d.Vt, 1:k, :)
+function log!(M::GeneralizedGrassmann, X, p, q)
+    z = p' * M.B' * q
+    X .= q / z .- p
+    d = svd(X)
+    return mul!(X, d.U, atan.(d.S) .* d.Vt)
 end
 
 @doc raw"""
@@ -285,7 +285,7 @@ project(::GeneralizedGrassmann, ::Any)
 function project!(M::GeneralizedGrassmann, q, p)
     s = svd(p)
     e = eigen(s.U' * M.B * s.U)
-    qsinv = e.vectors * Diagonal(1 ./ sqrt.(e.values))
+    qsinv = e.vectors ./ sqrt.(transpose(e.values))
     q .= s.U * qsinv * e.vectors' * s.V'
     return q
 end
@@ -307,7 +307,8 @@ project(::GeneralizedGrassmann, ::Any, ::Any)
 
 function project!(M::GeneralizedGrassmann, Y, p, X)
     A = p' * M.B' * X
-    copyto!(Y, X - p * Hermitian((A + A') / 2))
+    copyto!(Y, X)
+    mul!(Y, p, Hermitian((A .+ A') ./ 2), -1, 1)
     return Y
 end
 
@@ -329,11 +330,13 @@ Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.gith
 retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarRetraction)
 
 function retract_polar!(M::GeneralizedGrassmann, q, p, X, t::Number)
-    project!(M, q, p .+ t .* X)
+    q .= p .+ t .* X
+    project!(M, q, q)
     return q
 end
 function retract_project!(M::GeneralizedGrassmann, q, p, X, t::Number)
-    project!(M, q, p .+ t .* X)
+    q .= p .+ t .* X
+    project!(M, q, q)
     return q
 end
 
