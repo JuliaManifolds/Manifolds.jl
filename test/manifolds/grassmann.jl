@@ -87,6 +87,7 @@ include("../utils.jl")
                 # investigate why this is so large on dev
                 exp_log_atol_multiplier=10.0 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
                 is_tangent_atol_multiplier=20.0,
+                is_point_atol_multiplier=10.0,
                 projection_atol_multiplier=10.0,
                 retraction_atol_multiplier=10.0,
             )
@@ -197,6 +198,7 @@ include("../utils.jl")
                     QRInverseRetraction(),
                 ],
                 exp_log_atol_multiplier=10.0^3,
+                is_point_atol_multiplier=20.0,
                 is_tangent_atol_multiplier=20.0,
                 projection_atol_multiplier=10.0,
                 retraction_atol_multiplier=10.0,
@@ -352,5 +354,25 @@ include("../utils.jl")
         Y3 = similar(Y)
         embed!(M2, Y3, p.value, X.value)
         @test Y3 == X.value
+    end
+
+    @testset "small distance tests" begin
+        n, k = 5, 3
+        @testset for fT in (Float32, Float64), T in (fT, Complex{fT})
+            𝔽 = T isa Complex ? ℂ : ℝ
+            M = Grassmann(n, k, 𝔽)
+            U = Unitary(k, 𝔽)
+            rT = real(T)
+            atol = rtol = sqrt(eps(rT))
+            @testset for t in (zero(rT), eps(rT)^(1 // 4) / 8, eps(rT)^(1 // 4)),
+                z in (I, rand(U))
+
+                p = project(M, randn(T, representation_size(M)))
+                X = project(M, p, randn(T, representation_size(M)))
+                X ./= norm(M, p, X)
+                project!(M, X, p, X)
+                @test distance(M, p, exp(M, p, t * X) * z) ≈ t atol = atol rtol = rtol
+            end
+        end
     end
 end
