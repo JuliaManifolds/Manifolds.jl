@@ -91,6 +91,32 @@ function allocation_promotion_function(::Grassmann{n,k,ℂ}, f, args::Tuple) whe
 end
 
 @doc raw"""
+    change_representer(M::Grassmann, ::EuclideanMetric, p, X)
+
+Change `X` to the corresponding representer of a cotangent vector at `p`.
+Since the [`Grassmann`](@ref) manifold `M`, is isometrically embedded, this is the identity
+"""
+change_representer(::Grassmann, ::EuclideanMetric, ::Any, ::Any)
+
+function change_representer!(M::Grassmann, Y, ::EuclideanMetric, p, X)
+    copyto!(M, Y, p, X)
+    return Y
+end
+
+@doc raw"""
+    change_metric(M::Grassmann, ::EuclideanMetric, p X)
+
+Change `X` to the corresponding vector with respect to the metric of the [`Grassmann`](@ref) `M`,
+which is just the identity, since the manifold is isometrically embedded.
+"""
+change_metric(M::Grassmann, ::EuclideanMetric, ::Any, ::Any)
+
+function change_metric!(::Grassmann, Y, ::EuclideanMetric, p, X)
+    copyto!(Y, X)
+    return Y
+end
+
+@doc raw"""
     injectivity_radius(M::Grassmann)
     injectivity_radius(M::Grassmann, p)
 

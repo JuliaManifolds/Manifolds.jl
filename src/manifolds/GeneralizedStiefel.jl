@@ -110,7 +110,7 @@ on the [`GeneralizedStiefel`](@ref) manifold `M`. The formula reads
 i.e. the metric induced by the scalar product `B` from the embedding, restricted to the
 tangent space.
 """
-inner(M::GeneralizedStiefel, p, X, Y) = dot(X, M.B * Y)
+inner(M::GeneralizedStiefel, p, X, Y) = dot(X, M.B, Y)
 
 """
     is_flat(M::GeneralizedStiefel)
@@ -151,7 +151,7 @@ project(::GeneralizedStiefel, ::Any)
 function project!(M::GeneralizedStiefel, q, p)
     s = svd(p)
     e = eigen(s.U' * M.B * s.U)
-    qsinv = e.vectors * Diagonal(1 ./ sqrt.(e.values))
+    qsinv = e.vectors ./ sqrt.(transpose(e.values))
     q .= s.U * qsinv * e.vectors' * s.V'
     return q
 end
@@ -173,7 +173,8 @@ project(::GeneralizedStiefel, ::Any, ::Any)
 
 function project!(M::GeneralizedStiefel, Y, p, X)
     A = p' * M.B' * X
-    copyto!(Y, X - p * Hermitian((A + A') / 2))
+    copyto!(Y, X)
+    mul!(Y, p, Hermitian((A .+ A') ./ 2), -1, 1)
     return Y
 end
 @doc raw"""
@@ -193,11 +194,13 @@ retract(::GeneralizedStiefel, ::Any...)
 default_retraction_method(::GeneralizedStiefel) = ProjectionRetraction()
 
 function retract_polar!(M::GeneralizedStiefel, q, p, X, t::Number)
-    project!(M, q, p .+ t .* X)
+    q .= p .+ t .* X
+    project!(M, q, q)
     return q
 end
 function retract_project!(M::GeneralizedStiefel, q, p, X, t::Number)
-    project!(M, q, p .+ t .* X)
+    q .= p .+ t .* X
+    project!(M, q, q)
     return q
 end
 
