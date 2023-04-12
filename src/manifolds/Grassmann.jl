@@ -218,3 +218,7 @@ for
 ```
 """
 convert(::Type{ProjectorPoint}, p::StiefelPoint) = ProjectorPoint(p.value * p.value')
+
+default_retraction_method(::Grassmann, ::Type{ProjectorPoint}) = ExponentialRetraction()
+default_retraction_method(::Grassmann) = PolarRetraction()
+default_vector_transport_method(::Grassmann) = ProjectionTransport()

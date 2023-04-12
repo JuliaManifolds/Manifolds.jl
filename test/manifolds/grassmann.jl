@@ -9,6 +9,11 @@ include("../utils.jl")
             @test manifold_dimension(M) == 2
             @test !is_flat(M)
             @test is_flat(Grassmann(2, 1))
+            @test default_retraction_method(M) == PolarRetraction()
+            @test default_retraction_method(M, typeof(zeros(3, 2))) == PolarRetraction()
+            @test default_retraction_method(M, ProjectorPoint) == ExponentialRetraction()
+            @test default_retraction_method(M) == PolarRetraction()
+            @test default_vector_transport_method(M) == ProjectionTransport()
             @test get_total_space(M) == Stiefel(3, 2, ℝ)
             @test get_orbit_action(M) ==
                   Manifolds.RowwiseMultiplicationAction(M, Orthogonal(2))
