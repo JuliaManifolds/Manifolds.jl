@@ -218,3 +218,26 @@ for
 ```
 """
 convert(::Type{ProjectorPoint}, p::StiefelPoint) = ProjectorPoint(p.value * p.value')
+
+"""
+    default_retraction_method(M::Grassmann, ::Type{ProjectorPoint})
+
+Return `ExponentialRetraction` as the default on the [`Grassmann`](@ref) manifold
+with projection matrices
+"""
+default_retraction_method(::Grassmann, ::Type{ProjectorPoint}) = ExponentialRetraction()
+"""
+    default_retraction_method(M::Grassmann)
+    default_retraction_method(M::Grassmann, ::Type{StiefelPoint})
+
+Return `PolarRetracion` as the default on the [`Grassmann`](@ref) manifold
+with projection matrices
+"""
+default_retraction_method(::Grassmann) = PolarRetraction()
+"""
+    default_vector_transport_method(M::Grassmann)
+
+Return the `ProjectionTransport` as the default vector transport method
+for the [`Grassmann`](@ref) manifold.
+"""
+default_vector_transport_method(::Grassmann) = ProjectionTransport()
