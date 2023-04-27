@@ -267,4 +267,13 @@ include("../utils.jl")
         @test ismissing(pS.sqrt)
         @test ismissing(pS.sqrt_inv)
     end
+
+    @testset "test BigFloat" begin
+        M = SymmetricPositiveDefinite(2)
+        p1 = BigFloat[
+            1.6590891025248637458133771360735408961772918701171875 -2.708777790960681386422947980463504791259765625e-07
+            -2.708777790960681386422947980463504791259765625e-07 1.6590893171834280028775765458703972399234771728515625
+        ]
+        @test is_point(M, p1)
+    end
 end
