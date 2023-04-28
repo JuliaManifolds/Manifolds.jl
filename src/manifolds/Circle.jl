@@ -329,7 +329,7 @@ manifold_dimension(::Circle) = 1
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of points in vector
 `x` using [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::AbstractProjectiveSpace, ::Any...)
+mean(::Circle, ::Any...)
 
 function default_estimation_method(::Circle, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 2)
