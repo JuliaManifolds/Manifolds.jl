@@ -94,6 +94,8 @@ function exp!(
     m = M.metric.M
     Y = lyapc(p, m, -X) #lyap solves qpM + Mpq - X =0
     q .= p .+ X .+ m * Y * p * Y * m
+    # symmetrizing for better accuracy
+    copyto!(q, (q .+ q') ./ 2)
     return q
 end
 
