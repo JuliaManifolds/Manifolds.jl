@@ -69,7 +69,7 @@ end
 
 function Flag(N, ns::Vararg{Int,I}) where {I}
     if ns[1] <= 0
-        error("First dimension in sequence (given: $(ns[1])) must be strictly positive.")
+        error("First dimension in the sequence ns must be strictly positive, but is $(ns[1]).")
     end
     for i in 1:(length(ns) - 1)
         if ns[i] >= ns[i + 1]
