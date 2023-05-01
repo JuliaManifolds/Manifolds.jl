@@ -1,4 +1,20 @@
 
+@doc raw"""
+    check_vector(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector; kwargs... )
+
+Check whether `X` is a tangent vector to point `p` on the [`Flag`](@ref) manifold `M`
+``\operatorname{Flag}(n_1, n_2, ..., n_d; N)`` in the orthogonal matrix representation,
+i.e. that `X` is block-skew-symmetric with zero diagonal:
+````math
+X = \begin{bmatrix}
+0                     & B_{1,2}               & \cdots & B_{1,d+1} \\
+-B_{1,2}^\mathrm{T}   & 0                     & \cdots & B_{2,d+1} \\
+\vdots                & \vdots                & \ddots & \vdots    \\
+-B_{1,d+1}^\mathrm{T} & -B_{2,d+1}^\mathrm{T} & \cdots & 0            
+\end{bmatrix}
+````
+where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
+"""
 function check_vector(
     M::Flag{N,dp1},
     p::OrthogonalPoint,
@@ -74,6 +90,23 @@ function project!(
     return Y
 end
 
+@doc raw"""
+    project(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
+
+Project vector `X` to tangent space at point `p` from [`Flag`](@ref) manifold `M`
+``\operatorname{Flag}(n_1, n_2, ..., n_d; N)``, in the orthogonal matrix representation.
+It works by first projecting `X` to the space of [`SkewHermitianMatrices`](@ref) and then
+setting diagonal blocks to 0:
+````math
+X = \begin{bmatrix}
+0                     & B_{1,2}               & \cdots & B_{1,d+1} \\
+-B_{1,2}^\mathrm{T}   & 0                     & \cdots & B_{2,d+1} \\
+\vdots                & \vdots                & \ddots & \vdots    \\
+-B_{1,d+1}^\mathrm{T} & -B_{2,d+1}^\mathrm{T} & \cdots & 0            
+\end{bmatrix}
+````
+where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
+"""
 function project(M::Flag{N,dp1}, ::OrthogonalPoint, X::OrthogonalTVector) where {N,dp1}
     Y = project(SkewHermitianMatrices(N), X.value)
     for i in 1:dp1
@@ -115,6 +148,15 @@ function Random.rand!(
     end
     return pX
 end
+
+@doc raw"""
+    retract(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector, ::QRRetraction)
+
+Compute the QR retraction on the [`Flag`](@ref) in the orthogonal matrix representation
+as the first order approximation to the exponential map. Similar to QR retraction for
+[`GeneralUnitaryMatrices`].
+"""
+retract(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector, ::QRRetraction)
 
 function retract_qr!(
     ::Flag,

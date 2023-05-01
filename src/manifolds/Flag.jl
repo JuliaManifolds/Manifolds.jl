@@ -42,7 +42,9 @@ end
     Flag{N,d} <: AbstractDecoratorManifold{ℝ}
 
 Flag manifold of ``d`` subspaces of ``ℝ^N``[^YeWongLim2022]. By default the manifold uses
-the orthogonal coordinates representation.
+the Stiefel coordinates representation, embedding it in the [`Stiefel`](@ref) manifold.
+The other available representation is an embedding in [`OrthogonalMatrices`](@ref).
+It can be utilized using [`OrthogonalPoint`](@ref) and [`OrthogonalTVector`](@ref) wrappers.
 
 Tangent space is represented in the block-skew-symmetric form.
 
@@ -69,7 +71,9 @@ end
 
 function Flag(N, ns::Vararg{Int,I}) where {I}
     if ns[1] <= 0
-        error("First dimension in the sequence ns must be strictly positive, but is $(ns[1]).")
+        error(
+            "First dimension in the sequence ns must be strictly positive, but is $(ns[1]).",
+        )
     end
     for i in 1:(length(ns) - 1)
         if ns[i] >= ns[i + 1]

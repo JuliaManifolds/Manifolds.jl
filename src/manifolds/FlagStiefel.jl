@@ -66,6 +66,23 @@ function check_point(M::Flag, p::AbstractMatrix)
     return check_point(get_embedding(M), p)
 end
 
+@doc raw"""
+    check_vector(M::Flag, p::AbstractMatrix, X::AbstractMatrix; kwargs... )
+
+Check whether `X` is a tangent vector to point `p` on the [`Flag`](@ref) manifold `M`
+``\operatorname{Flag}(n_1, n_2, ..., n_d; N)`` in the Stiefel representation,
+i.e. that `X` is a matrix of the form
+````math
+X = \begin{bmatrix}
+0                     & B_{1,2}               & \cdots & B_{1,d} \\
+-B_{1,2}^\mathrm{T}   & 0                     & \cdots & B_{2,d} \\
+\vdots                & \vdots                & \ddots & \vdots  \\
+-B_{1,d}^\mathrm{T}   & -B_{2,d}^\mathrm{T}   & \cdots & 0       \\
+-B_{1,d+1}^\mathrm{T} & -B_{2,d+1}^\mathrm{T} & \cdots & -B_{d,d+1}^\mathrm{T}
+\end{bmatrix}
+````
+where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
+"""
 function check_vector(
     M::Flag{N,dp1},
     p::AbstractMatrix,
