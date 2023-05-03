@@ -24,6 +24,12 @@ ManifoldsBase.@manifold_element_forwards OrthogonalPoint value
 Base.eltype(p::OrthogonalPoint) = eltype(p.value)
 Base.eltype(X::OrthogonalTVector) = eltype(X.value)
 
+"""
+    ZeroTuple
+
+Internal structure for representing shape of a [`Flag`](@ref) manifold. Behaves like
+a normal tuple, except at index zero returns value 0.
+"""
 struct ZeroTuple{TupT}
     x::TupT
 end
@@ -118,6 +124,12 @@ function Base.isapprox(M::Flag, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
     return isapprox(norm(M, p, X), 0; atol=atol, kwargs...)
 end
 
+@doc raw"""
+    manifold_dimension(M::Flag)
+
+Return dimension of flag manifold ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)``.
+The formula reads ``\sum_{i=1}^d (n_i-n_{i-1})(N-n_i)``.
+"""
 function manifold_dimension(M::Flag{N,dp1}) where {N,dp1}
     dim = 0
     for i in 1:(dp1 - 1)
