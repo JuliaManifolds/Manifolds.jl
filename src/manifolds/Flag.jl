@@ -149,28 +149,28 @@ function Base.show(io::IO, M::Flag{N}) where {N}
 end
 
 """
-    orthogonal_tv_to_stiefel(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
+    convert(::Type{AbstractMatrix}, M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
 
 Convert tangent vector from [`Flag`](@ref) manifold `M` from orthogonal representation to
 Stiefel representation.
 """
-function orthogonal_tv_to_stiefel(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
+function convert(::Type{AbstractMatrix}, M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
     (N, k) = representation_size(M)
     return p.value * X.value[:, 1:k]
 end
 
 """
-    stiefel_tv_to_orthogonal(M::Flag, p::AbstractMatrix, X::AbstractMatrix)
+    convert(::Type{OrthogonalTVector}, M::Flag, p::AbstractMatrix, X::AbstractMatrix)
 
 Convert tangent vector from [`Flag`](@ref) manifold `M` from Stiefel representation to
 orthogonal representation.
 """
-function stiefel_tv_to_orthogonal(M::Flag, p::AbstractMatrix, X::AbstractMatrix)
+function convert(::Type{OrthogonalTVector}, M::Flag, p::AbstractMatrix, X::AbstractMatrix)
     (N, k) = representation_size(M)
     out = similar(X, N, N)
     fill!(out, 0)
 
-    p_ortho = stiefel_point_to_orthogonal(M, p)
+    p_ortho = convert(OrthogonalPoint, M, p)
     pX = p_ortho.value' * X
 
     out[:, 1:k] = pX
@@ -180,23 +180,23 @@ function stiefel_tv_to_orthogonal(M::Flag, p::AbstractMatrix, X::AbstractMatrix)
 end
 
 """
-    orthogonal_point_to_stiefel(M::Flag, p::OrthogonalPoint)
+    convert(::Type{AbstractMatrix}, M::Flag, p::OrthogonalPoint)
 
 Convert point `p` from [`Flag`](@ref) manifold `M` from orthogonal representation to
 Stiefel representation.
 """
-function orthogonal_point_to_stiefel(M::Flag, p::OrthogonalPoint)
+function convert(::Type{AbstractMatrix}, M::Flag, p::OrthogonalPoint)
     (N, k) = representation_size(M)
     return p.value[:, 1:k]
 end
 
 """
-    stiefel_point_to_orthogonal(M::Flag, p::AbstractMatrix)
+    convert(::Type{OrthogonalPoint}, M::Flag, p::AbstractMatrix)
 
 Convert point `p` from [`Flag`](@ref) manifold `M` from Stiefel representation to
 orthogonal representation.
 """
-function stiefel_point_to_orthogonal(M::Flag, p::AbstractMatrix)
+function convert(::Type{OrthogonalPoint}, M::Flag, p::AbstractMatrix)
     (N, k) = representation_size(M)
     out = similar(p, N, N)
     fill!(out, 0)
