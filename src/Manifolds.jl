@@ -371,6 +371,9 @@ include("manifolds/Circle.jl")
 include("manifolds/Elliptope.jl")
 include("manifolds/EmbeddedTorus.jl")
 include("manifolds/FixedRankMatrices.jl")
+include("manifolds/Flag.jl")
+include("manifolds/FlagOrthogonal.jl")
+include("manifolds/FlagStiefel.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Hyperbolic.jl")
@@ -533,6 +536,7 @@ export Euclidean,
     Elliptope,
     EssentialManifold,
     FixedRankMatrices,
+    Flag,
     GeneralizedGrassmann,
     GeneralizedStiefel,
     Grassmann,

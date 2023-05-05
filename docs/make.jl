@@ -85,6 +85,7 @@ makedocs(
                 "Essential manifold" => "manifolds/essentialmanifold.md",
                 "Euclidean" => "manifolds/euclidean.md",
                 "Fixed-rank matrices" => "manifolds/fixedrankmatrices.md",
+                "Flag" => "manifolds/flag.md",
                 "Generalized Stiefel" => "manifolds/generalizedstiefel.md",
                 "Generalized Grassmann" => "manifolds/generalizedgrassmann.md",
                 "Grassmann" => "manifolds/grassmann.md",
