@@ -147,6 +147,10 @@ using ManifoldsBase: TFVector
         Y = [2.0, 1.0im, 20.0]
         X = project(M, q, Y)
         @test is_vector(M, q, X, true; atol=10^(-14))
+        Random.seed!(42)
+        r = rand(M)
+        @test is_point(M, r)
+        @test norm(imag.(r)) != 0
     end
 
     @testset "Quaternion Sphere" begin

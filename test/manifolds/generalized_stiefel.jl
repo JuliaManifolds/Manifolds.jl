@@ -31,6 +31,8 @@ include("../utils.jl")
             )
             @test_throws DomainError is_vector(M, p, X, true)
             @test default_retraction_method(M) == ProjectionRetraction()
+            @test is_point(M, rand(M))
+            @test is_vector(M, p, rand(M; vector_at=p))
         end
         @testset "Embedding and Projection" begin
             @test get_embedding(GeneralizedStiefel(3, 2)) == Euclidean(3, 2)
