@@ -44,7 +44,7 @@ allocate(p::StaticArray, s::Size{S}) where {S} = similar(p, maybesize(s))
 allocate(p, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, S...)
 allocate(p::StaticArray, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, maybesize(s))
 
-quat_promote(T::Type{<:Real}) = typeof(Quaternions.quat(zero(T)))
+quat_promote(T::Type{<:Number}) = typeof(Quaternions.quat(zero(T)))
 
 allocation_promotion_function(::AbstractManifold{ℍ}, f, args::Tuple) = quat_promote
 
