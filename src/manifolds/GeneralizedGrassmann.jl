@@ -315,6 +315,18 @@ function project!(M::GeneralizedGrassmann, Y, p, X)
     return Y
 end
 
+
+function Random.rand!(M::GeneralizedGrassmann, pX; kwargs...)
+    return Random.rand!(Random.default_rng(), M, pX; kwargs...)
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::GeneralizedGrassmann,
+    pX; kwargs...
+)
+    rand!(rng, get_embedding(M), pX, kwargs...)
+end
+
 @doc raw"""
     representation_size(M::GeneralizedGrassmann{n,k})
 

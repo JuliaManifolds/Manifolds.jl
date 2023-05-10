@@ -177,6 +177,43 @@ function project!(M::GeneralizedStiefel, Y, p, X)
     mul!(Y, p, Hermitian((A .+ A') ./ 2), -1, 1)
     return Y
 end
+
+
+@doc raw"""
+    rand(::GeneralizedStiefel; vector_at=nothing, σ::Real=1.0)
+
+When `vector_at` is `nothing`, return a random (Gaussian) point `x` on the [`GeneralizedStiefel`](@ref)
+manifold `M` by generating a (Gaussian) matrix with standard deviation `σ` and return the
+(generalized) orthogonalized version, i.e. return the projection onto the manifold of the
+Q component of the QR decomposition of the random matrix of size ``n×k``.
+
+When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
+``T_{vector\_at}\mathrm{St}(n,k)`` with mean zero and standard deviation `σ` by projecting a
+random Matrix onto the tangent vector at `vector_at`.
+"""
+rand(::GeneralizedStiefel; σ::Real=1.0)
+
+function Random.rand!(M::GeneralizedStiefel, pX; kwargs...)
+    return Random.rand!(Random.default_rng(), M, pX; kwargs...)
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::GeneralizedStiefel{n,k,𝔽},
+    pX;
+    vector_at=nothing,
+    σ::Real=one(real(eltype(pX))),
+) where {n,k,𝔽}
+    if vector_at === nothing
+        A = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, n, k)
+        project!(M, pX, Matrix(qr(A).Q))
+    else
+        Z = σ * randn(rng, eltype(pX), size(pX))
+        project!(M, pX, vector_at, Z)
+        normalize!(pX)
+    end
+    return pX
+end
+
 @doc raw"""
     retract(M::GeneralizedStiefel, p, X)
     retract(M::GeneralizedStiefel, p, X, ::PolarRetraction)
