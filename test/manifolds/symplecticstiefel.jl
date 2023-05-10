@@ -243,9 +243,13 @@ end
                     @testset "CayleyRetraction" begin
                         test_manifold(
                             SpSt_6_4,
-                            convert.(type, points),
-                            Dict(exp => false, log => false);
-                            tol_functions=Dict(is_point => 1e4),
+                            convert.(type, points);
+                            test_functions=Dict{Function,Bool}(
+                                exp => false,
+                                log => false,
+                                representation_size => true,
+                            ),
+                            tol_functions=Dict{Function,Bool}(is_point => 1e4),
                             retraction_methods=[CayleyRetraction()],
                             retraction_method=CayleyRetraction(),
                             inverse_retraction_method=CayleyInverseRetraction(),
@@ -254,7 +258,6 @@ end
                             retraction_atol_multiplier=1e4,
                             test_project_tangent=(type != MMatrix{6,4,Float64,24}),
                             test_injectivity_radius=false,
-                            test_representation_size=true,
                         )
                     end
 
@@ -262,8 +265,12 @@ end
                         test_manifold(
                             SpSt_6_4,
                             convert.(type, close_points),
-                            Dict(exp => true, log => false);
-                            tol_functions=Dict(is_point => 1e-3),
+                            test_functions=Dict{Function,Bool}(
+                                exp => false,
+                                log => false,
+                                representation_size => true,
+                            ),
+                            tol_functions=Dict{Function,Bool}(is_point => 1e-3),
                             retraction_method=ExponentialRetraction(),
                             inverse_retraction_method=CayleyInverseRetraction(),
                             test_inplace=true,
@@ -272,7 +279,6 @@ end
                             retraction_atol_multiplier=5 * 1e9,
                             test_project_tangent=(type != MMatrix{6,4,Float64,24}),
                             test_injectivity_radius=false,
-                            test_representation_size=true,
                         )
                     end
                 end

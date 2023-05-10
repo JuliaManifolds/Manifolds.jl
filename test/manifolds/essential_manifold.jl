@@ -67,7 +67,7 @@ include("../utils.jl")
                 log => false,
                 representation_size=false,
             ),
-            test_features=Dict{Symbol,Bool}(:ExpLog => false);
+            test_features=Dict{Symbol,Bool}(:ExpLog => false),
             test_vector_spaces=true,
             test_project_point=true,
             projection_atol_multiplier=10,

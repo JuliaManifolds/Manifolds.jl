@@ -163,7 +163,11 @@ include("../utils.jl")
             test_manifold(
                 M,
                 pts;
-                test_functions=Dict(exp => false, log => false),
+                test_functions=Dict{Function,Bool}(
+                    exp => false,
+                    log => false,
+                    representation_size => false,
+                ),
                 is_mutating=false, # avoid allocations of the wrong type
                 basis_types_to_from=(DefaultOrthonormalBasis(),),
                 basis_types_vecs=(DefaultOrthonormalBasis(),),

@@ -197,9 +197,13 @@ using FiniteDifferences
                 pts = convert.(type, points)
                 test_manifold(
                     Sp_6,
-                    cat(pts, large_tr_norm_points; dims=1),
-                    Dict(exp => true, log => false);
-                    tol_functions=Dict(is_point => 1e8),
+                    cat(pts, large_tr_norm_points; dims=1);
+                    test_functions=Dict{Function,Bool}(
+                        exp => true,
+                        log => false,
+                        representation_size => true,
+                    );
+                    tol_functions=Dict{Function,Bool}(is_point => 1e8),
                     retraction_methods=[CayleyRetraction()],
                     retraction_method=CayleyRetraction(),
                     inverse_retraction_method=CayleyInverseRetraction(),
@@ -209,7 +213,6 @@ using FiniteDifferences
                     retraction_atol_multiplier=1e7, # 1e-9 is the exactneww we get for Caley
                     test_project_tangent=true,
                     test_injectivity_radius=false,
-                    test_representation_size=true,
                 )
             end
 
