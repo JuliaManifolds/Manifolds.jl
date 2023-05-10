@@ -206,11 +206,11 @@ include("../utils.jl")
             end
             test_manifold(
                 M,
-                pts;
-                tests=Dict(:exp => false, :log => false),
-                default_inverse_retraction_method=nothing,
+                pts,
+                Dict(exp => false, log => false),
+                inverse_retraction_method=nothing,
                 test_injectivity_radius=false,
-                default_retraction_method=PolarRetraction(),
+                retraction_method=PolarRetraction(),
                 test_is_tangent=false,
                 test_default_vector_transport=false,
                 test_vector_spaces=false,

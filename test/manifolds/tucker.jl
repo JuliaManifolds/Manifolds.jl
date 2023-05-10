@@ -162,8 +162,8 @@ include("../utils.jl")
             ]
             test_manifold(
                 M,
-                pts;
-                tests=Dict(:exp => false, :log => false),
+                pts,
+                Dict(exp => false, log => false),
                 is_mutating=false, # avoid allocations of the wrong type
                 basis_types_to_from=(DefaultOrthonormalBasis(),),
                 basis_types_vecs=(DefaultOrthonormalBasis(),),

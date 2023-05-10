@@ -39,13 +39,13 @@ include("../utils.jl")
         @testset "Type $T" begin
             test_manifold(
                 M,
-                pts;
-                tests=Dict(:exp => false, :log => false, :explog => :false),
+                pts,
+                Dict(exp => false, log => false, :ExpLog => false);
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_project_point=true,
-                default_inverse_retraction_method=nothing,
-                default_retraction_method=ProjectionRetraction(),
+                inverse_retraction_method=nothing,
+                retraction_method=ProjectionRetraction(),
                 is_tangent_atol_multiplier=1,
                 test_inplace=true,
             )

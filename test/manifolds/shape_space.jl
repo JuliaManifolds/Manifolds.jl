@@ -28,7 +28,7 @@ include("../utils.jl")
     test_manifold(
         M,
         [p1, p2, p3];
-        is_point_atol_multiplier=1,
+        #tolerances = Dict(is_point=>1.0)
         is_tangent_atol_multiplier=1,
         exp_log_atol_multiplier=5,
         test_project_point=true,
@@ -89,7 +89,7 @@ end
     test_manifold(
         M,
         [p1, p2, p3];
-        is_point_atol_multiplier=1,
+        #tolerances = Dict(is_point=>1.0)
         is_tangent_atol_multiplier=1,
         exp_log_atol_multiplier=2e8,
         projection_atol_multiplier=2,

@@ -62,14 +62,14 @@ include("../utils.jl")
             norm([2.0 4.0 5.0im; 4.0 -1.0 -9.0; -5.0im -9.0 2.5])
         test_manifold(
             M_complex,
-            [C, H, I],
+            [C, H, I];
+            tolerances=Dict(is_point => 2.0),
             test_injectivity_radius=false,
             test_vector_spaces=true,
             test_project_tangent=true,
             test_musical_isomorphisms=true,
             test_default_vector_transport=true,
             is_tangent_atol_multiplier=2,
-            is_point_atol_multiplier=2,
             projection_atol_multiplier=2,
             exp_log_atol_multiplier=2,
             test_inplace=true,

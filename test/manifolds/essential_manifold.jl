@@ -44,7 +44,7 @@ include("../utils.jl")
         test_manifold(
             M,
             [p1, p2, p3],
-            tests=Dict(:exp => true, :log => false, :explog => false),
+            Dict(exp => false, log => false, :ExpLog => false);
             test_vector_spaces=true,
             test_project_point=true,
             projection_atol_multiplier=10,
@@ -62,7 +62,7 @@ include("../utils.jl")
         test_manifold(
             EssentialManifold(false),
             [p1, p2, p3],
-            tests=Dict(:exp => true, :log => false, :explog => false),
+            Dict(exp => true, log => false, :ExpLog => false);
             test_vector_spaces=true,
             test_project_point=true,
             projection_atol_multiplier=10,

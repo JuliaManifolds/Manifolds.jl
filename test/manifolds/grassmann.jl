@@ -73,8 +73,8 @@ include("../utils.jl")
             pts = convert.(T, [p1, p2, p3])
             test_manifold(
                 M,
-                pts,
-                test_injectivity_radius=false,
+                pts;
+                tolerances=Dict(is_point => 10.0)test_injectivity_radius = false,
                 test_project_tangent=true,
                 test_project_point=true,
                 test_default_vector_transport=false,
@@ -91,7 +91,6 @@ include("../utils.jl")
                 # investigate why this is so large on dev
                 exp_log_atol_multiplier=10.0 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
                 is_tangent_atol_multiplier=20.0,
-                is_point_atol_multiplier=10.0,
                 projection_atol_multiplier=10.0,
                 retraction_atol_multiplier=1e2,
             )
@@ -189,8 +188,8 @@ include("../utils.jl")
             pts = convert.(T, [p1, p2, p3])
             test_manifold(
                 M,
-                pts,
-                test_injectivity_radius=false,
+                pts;
+                tolerances=Dict(is_point => 10.0)test_injectivity_radius = false,
                 test_project_tangent=true,
                 test_project_point=true,
                 test_default_vector_transport=false,
@@ -201,7 +200,6 @@ include("../utils.jl")
                     QRInverseRetraction(),
                 ],
                 exp_log_atol_multiplier=1e4,
-                is_point_atol_multiplier=20.0,
                 is_tangent_atol_multiplier=20.0,
                 projection_atol_multiplier=10.0,
                 retraction_atol_multiplier=10.0,

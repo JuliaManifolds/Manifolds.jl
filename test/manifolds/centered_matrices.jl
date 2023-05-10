@@ -33,13 +33,12 @@ include("../utils.jl")
         F = [0.5 1; -1 -0.7; 0.5 -0.3]
         test_manifold(
             M,
-            [A, E, F],
+            [A, E, F];
             test_injectivity_radius=false,
             test_project_tangent=true,
             test_musical_isomorphisms=true,
             test_default_vector_transport=true,
             is_tangent_atol_multiplier=1,
-            is_point_atol_multiplier=1,
         )
     end
     @testset "Complex Centered Matrices Basics" begin
@@ -49,13 +48,12 @@ include("../utils.jl")
         H = [1.0im 0.0; -2.0im 1.0im; 1.0im -1.0im]
         test_manifold(
             M_complex,
-            [C, G, H],
+            [C, G, H];
             test_injectivity_radius=false,
             test_project_tangent=true,
             test_musical_isomorphisms=true,
             test_default_vector_transport=true,
             is_tangent_atol_multiplier=1,
-            is_point_atol_multiplier=1,
             test_inplace=true,
         )
     end

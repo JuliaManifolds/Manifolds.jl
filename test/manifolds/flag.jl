@@ -138,16 +138,13 @@ using Random
 
     test_manifold(
         M,
-        [p1, p2, p3],
-        test_exp_log=false,
-        default_inverse_retraction_method=PolarInverseRetraction(),
+        [p1, p2, p3];
+        tolerances=Dict(is_point => 10.0),
         test_injectivity_radius=false,
         test_is_tangent=true,
         test_project_tangent=true,
         test_default_vector_transport=false,
         test_vee_hat=false,
-        default_retraction_method=PolarRetraction(),
-        is_point_atol_multiplier=10.0,
         projection_atol_multiplier=200.0,
         retraction_atol_multiplier=10.0,
         is_tangent_atol_multiplier=4 * 10.0^2,

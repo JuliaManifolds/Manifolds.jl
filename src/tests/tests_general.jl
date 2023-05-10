@@ -7,52 +7,89 @@ find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
 find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
 find_eps(x) = find_eps(number_eltype(x))
 
-DEFAULT_TESTS = Dict(:exp => true, :log => true)
+@doc raw"""
+    DEFAULT_TESTS = Dict{Function,Bool}
+
+The default setup of tests to run / available tests
+
+* `exp`                 – (`true`)
+* `log`                 - (`true`)
+* `manifold_dimension`  - (`true`)
+*
+"""
+DEFAULT_TESTS = Dict{Union{<:Function,Symbol},Bool}(#
+    exp => true,
+    log => true,
+    manifold_dimension => true,
+    representation_size => true,
+    is_point => true,
+    is_vector => true,
+)
 
 @doc """
-    do_test(tests::dictionary, s::Symbol)
+    do_test(tests::dictionary, f::Function)
 
-from a current dictionary `ltest` check whether to perform test `:s`.
-This function first checks whether the value exists, otherwise checks the `DEFAULT_TESTS`
-for existence of a global default. If neither exists, the function returns false.
-
+from a current dictionary `test` check whether to perform test for the function `f``.
+    By default this is `false`.
 """
-function do_test(A::Dict, s::Symbol)
-    return get(A, s, get(DEFAULT_TESTS, s, false))
+function do_test(A::Dict, f::Union{Function,Symbol})
+    return get(A, f, get(DEFAULT_TESTS, f, false))
+end
+
+DEFAULT_TOLERANCES =
+    Dict{Union{Function,Symbol},Float64}(exp => 1e-8, log => 1e-9, is_point => 1e-14)
+
+@doc """
+    get_tolerance(tols::dictionary, f::function; eps=1.0)
+
+Obtain the tolerance used for f, where the default is `1e-14`.
+This dictionary stores two types of values
+* any tolerance `≥1` acts as a tolerance factor, i.e. is multiplied with `eps()``
+* any tolerance `<1` acts as an absolute tolerance.
+
+The first case with `=1` is the default.
+"""
+function get_tolerance(A::Dict, f::Union{Function,Symbol}; eps=1.0)
+    t = get(A, f, get(DEFAULT_TOLERANCES, f, 1e-14))
+    return t ≥ 1 ? t * eps : t
 end
 
 """
     test_manifold(
         M::AbstractManifold,
-        pts::AbstractVector;
+        pts::AbstractVector,
+        tests = DEFAULT_TESTS;
+        tolerances=DEFAULT_TOLERANCES,
         args,
     )
 
 Test general properties of manifold `M`, given at least three different points
-that lie on it (contained in `pts`).
+that lie on it (contained in `pts`), where `tests` is a Dictionary specifying which tests to run.
+
+The following Keyword arguments can be used to set properties of the tests, that are actually run.
+
 
 # Arguments
-- `basis_has_specialized_diagonalizing_get = false`: if true, assumes that
+* `basis_has_specialized_diagonalizing_get = false`: if true, assumes that
     `DiagonalizingOrthonormalBasis` given in `basis_types` has
     [`get_coordinates`](@ref) and [`get_vector`](@ref) that work without caching.
-- `basis_types_to_from = ()`: basis types that will be tested based on
+* `basis_types_to_from = ()`: basis types that will be tested based on
     [`get_coordinates`](@ref) and [`get_vector`](@ref).
-- `basis_types_vecs = ()` : basis types that will be tested based on `get_vectors`
-- `default_inverse_retraction_method = ManifoldsBase.LogarithmicInverseRetraction()`:
-    default method for inverse retractions (`log`.
-- `default_retraction_method = ManifoldsBase.ExponentialRetraction()`: default method for
-    retractions (`exp`).
-- `exp_log_atol_multiplier = 0`: change absolute tolerance of exp/log tests
+* `basis_types_vecs = ()` : basis types that will be tested based on `get_vectors`
+* `inverse_retraction_method – (`inverse_retraction_method(M)`) default inverse retrcation,
+  can be deactivated using `nothing`
+* `default_retraction_method – (`default_retraction_method(M)`) default retraction to use,
+  can be deactivated using `nothing`
+* `exp_log_atol_multiplier = 0`: change absolute tolerance of exp/log tests
     (0 use default, i.e. deactivate atol and use rtol).
-- `exp_log_rtol_multiplier = 1`: change the relative tolerance of exp/log tests
+* `exp_log_rtol_multiplier = 1`: change the relative tolerance of exp/log tests
     (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `expected_dimension_type = Integer`: expected type of value returned by
     `manifold_dimension`.
 - `inverse_retraction_methods = []`: inverse retraction methods that will be tested.
 - `is_mutating = true`: whether mutating variants of functions should be tested.
-- `is_point_atol_multiplier = 0`: determines atol of `is_point` checks.
 - `is_tangent_atol_multiplier = 0`: determines atol of `is_vector` checks.
-- `mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5) if `:exp` and `:log` are available or a midpoint is explicitly set
+- `mid_point12 = shortest_geodesic(M, pts[1], pts[2], 0.5) if `exp` and `log` are available or a midpoint is explicitly set
 - `point_distributions = []` : point distributions to test.
 - `rand_tvector_atol_multiplier = 0` : chage absolute tolerance in testing random vectors
     (0 use default, i.e. deactivate atol and use rtol) random tangent vectors are tangent
@@ -66,9 +103,9 @@ that lie on it (contained in `pts`).
 - `test_injectivity_radius = true`: whether implementation of [`injectivity_radius`](@ref)
     should be tested.
 - `test_inplace = false` : if true check if inplace variants work if they are activated,
-   e.g. check that `exp!(M, p, p, X)` work if `:exp`tests are activated
+   e.g. check that `exp!(M, p, p, X)` work if `exp`tests are activated
    This in general requires `is_mutating` to be true.
-- `test_is_tangent`: if true check that the `default_inverse_retraction_method`
+- `test_is_tangent`: if true check that the `inverse_retraction_method`
     actually returns valid tangent vectors.
 - `test_musical_isomorphisms = false` : test musical isomorphisms.
 - `test_mutating_rand = false` : test the mutating random function for points on manifolds.
@@ -82,7 +119,7 @@ that lie on it (contained in `pts`).
 - `test_vee_hat = false`: test [`vee`](@ref) and [`hat`](@ref) functions.
 - `tvector_distributions = []` : tangent vector distributions to test.
 - `vector_transport_methods = []`: vector transport methods that should be tested.
-- `vector_transport_inverse_retractions = [default_inverse_retraction_method for _ in 1:length(vector_transport_methods)]``
+- `vector_transport_inverse_retractions = [inverse_retraction_method for _ in 1:length(vector_transport_methods)]``
   inverse retractions to use with the vector transport method (especially the differentiated ones)
 - `vector_transport_to = [ true for _ in 1:length(vector_transport_methods)]`: whether
    to check the `to` variant of vector transport
@@ -91,19 +128,24 @@ that lie on it (contained in `pts`).
 """
 function test_manifold(
     M::AbstractManifold,
-    pts::AbstractVector;
-    tests=Dict{Symbol,Any}(),
+    pts::AbstractVector,
+    tests::Dict{Union{Function,Symbol},Bool}=DEFAULT_TESTS;
+    tolerances::Dict{Union{Function,Symbol},<:Real}=DEFAULT_TOLERANCES,
+    #specific setups
+    expected_dimension_type=Integer,
+    inverse_retraction_method=default_inverse_retraction_method(M),
+    retraction_method=default_retraction_method(M),
+    #
+    # Old kwargs...
+    #
     basis_has_specialized_diagonalizing_get=false,
     basis_types_to_from=(),
     basis_types_vecs=(),
-    default_inverse_retraction_method=LogarithmicInverseRetraction(),
-    default_retraction_method=ExponentialRetraction(),
+    # Tolerances
     exp_log_atol_multiplier=0,
     exp_log_rtol_multiplier=1,
-    expected_dimension_type=Integer,
     inverse_retraction_methods=[],
     is_mutating=true,
-    is_point_atol_multiplier=0,
     is_tangent_atol_multiplier=0,
     musical_isomorphism_bases=[],
     point_distributions=[],
@@ -128,7 +170,6 @@ function test_manifold(
     test_project_tangent=false,
     test_rand_point=false,
     test_rand_tvector=false,
-    test_representation_size=true,
     test_riesz_representer=false,
     test_tangent_vector_broadcasting=true,
     test_default_vector_transport=false,
@@ -137,21 +178,23 @@ function test_manifold(
     tvector_distributions=[],
     vector_transport_methods=[],
     vector_transport_inverse_retractions=[
-        default_inverse_retraction_method for _ in 1:length(vector_transport_methods)
+        inverse_retraction_method for _ in 1:length(vector_transport_methods)
     ],
     vector_transport_retractions=[
-        default_retraction_method for _ in 1:length(vector_transport_methods)
+        retraction_method for _ in 1:length(vector_transport_methods)
     ],
     test_vector_transport_to=[true for _ in 1:length(vector_transport_methods)],
     test_vector_transport_direction=[true for _ in 1:length(vector_transport_methods)],
-    mid_point12=(do_test(tests, :exp) && do_test(tests, :log)) ?
+    mid_point12=(do_test(tests, exp) && do_test(tests, log)) ?
                 shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing,
 )
-    lTest = merge(DEFAULT_TESTS, tests)
-    # convert an old into a new option temporarily
-    # Default for explog autofil if not set
-    if haskey(lTest, :exp) && haskey(lTest, :log) && !haskey(lTest, :explog)
-        lTest[:explog] = lTest[:exp] && lTest[:log]
+    #
+    # Setup phase
+    #
+
+    # Autocomplete a Few testsDefault for explog autofil if not set
+    if haskey(tests, exp) && haskey(tests, log) && !haskey(tests, :ExpLog)
+        tests[:ExpLog] = tests[exp] && tests[log]
     end
 
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
@@ -160,44 +203,55 @@ function test_manifold(
 
     # get a default tangent vector for every of the three tangent spaces
     n = length(pts)
-    if default_inverse_retraction_method === nothing
+    if inverse_retraction_method === nothing
         tv = [zero_vector(M, pts[i]) for i in 1:n] # no other available
     else
         tv = [
-            inverse_retract(
-                M,
-                pts[i],
-                pts[((i + 1) % n) + 1],
-                default_inverse_retraction_method,
-            ) for i in 1:n
+            inverse_retract(M, pts[i], pts[((i + 1) % n) + 1], inverse_retraction_method) for i in 1:n
         ]
     end
-    Test.@testset "dimension" begin
-        Test.@test isa(manifold_dimension(M), expected_dimension_type)
-        Test.@test manifold_dimension(M) ≥ 0
-        Test.@test manifold_dimension(M) == vector_space_dimension(
-            Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M),
-        )
-        Test.@test manifold_dimension(M) == vector_space_dimension(
-            Manifolds.VectorBundleFibers(Manifolds.CotangentSpace, M),
-        )
-    end
 
-    test_representation_size && Test.@testset "representation" begin
-        function test_repr(repr)
-            Test.@test isa(repr, Tuple)
-            for rs in repr
-                Test.@test rs > 0
+    #
+    # Test calls for the functions
+    #
+    Test.@testset "$(repr(M)) Tests" begin
+        do_test(tests, manifold_dimension) &&
+            Test.@testset "Manifold dimension                                " begin
+                Test.@test isa(manifold_dimension(M), expected_dimension_type)
+                Test.@test manifold_dimension(M) ≥ 0
+                Test.@test manifold_dimension(M) == vector_space_dimension(
+                    Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M),
+                )
+                Test.@test manifold_dimension(M) == vector_space_dimension(
+                    Manifolds.VectorBundleFibers(Manifolds.CotangentSpace, M),
+                )
             end
-            return nothing
-        end
-
-        test_repr(Manifolds.representation_size(M))
-        for fiber in (Manifolds.TangentSpace, Manifolds.CotangentSpace)
-            test_repr(Manifolds.representation_size(Manifolds.VectorBundleFibers(fiber, M)))
-        end
+        do_test(tests, representation_size) &&
+            Test.@testset "representation_size                               " begin
+                rs = Manifolds.representation_size(M)
+                Test.@test isa(rs, Tuple)
+                for s in rs
+                    Test.@test s > 0
+                end
+                for fiber in (Manifolds.TangentSpace, Manifolds.CotangentSpace)
+                    rs = Manifolds.representation_size(
+                        Manifolds.VectorBundleFibers(fiber, M),
+                    )
+                    Test.@test isa(rs, Tuple)
+                    for s in rs
+                        Test.@test s > 0
+                    end
+                end
+            end
+        do_test(tests, is_point) &&
+            Test.@testset "is_point                                         " begin
+                for pt in pts
+                    atol = get_tolerance(tolerances, is_point; eps=find_eps(pt))
+                    Test.@test is_point(M, pt; atol=atol)
+                    Test.@test check_point(M, pt; atol=atol) === nothing
+                end
+            end
     end
-
     test_injectivity_radius && Test.@testset "injectivity radius" begin
         Test.@test injectivity_radius(M, pts[1]) > 0
         Test.@test injectivity_radius(M, pts[1]) ≥ injectivity_radius(M)
@@ -205,14 +259,6 @@ function test_manifold(
             Test.@test injectivity_radius(M, rm) > 0
             Test.@test injectivity_radius(M, pts[1], rm) ≥ injectivity_radius(M, rm)
             Test.@test injectivity_radius(M, pts[1], rm) ≤ injectivity_radius(M, pts[1])
-        end
-    end
-
-    Test.@testset "is_point" begin
-        for pt in pts
-            atol = is_point_atol_multiplier * find_eps(pt)
-            Test.@test is_point(M, pt; atol=atol)
-            Test.@test check_point(M, pt; atol=atol) === nothing
         end
     end
 
@@ -227,8 +273,8 @@ function test_manifold(
         end
     end
 
-    do_test(lTest, :exp) &&
-        !do_test(lTest, :explog) &&
+    do_test(tests, exp) &&
+        !do_test(tests, :ExpLog) &&
         test_exp(
             M,
             Tuple(pts),
@@ -238,8 +284,8 @@ function test_manifold(
             atol_multiplier=exp_log_atol_multiplier,
             rtol_multiplier=exp_log_rtol_multiplier,
         )
-    do_test(lTest, :log) &&
-        !do_test(lTest, :explog) &&
+    do_test(tests, log) &&
+        !do_test(tests, :ExpLog) &&
         test_log(
             M,
             Tuple(pts),
@@ -249,7 +295,7 @@ function test_manifold(
             atol_multiplier=exp_log_atol_multiplier,
             rtol_multiplier=exp_log_rtol_multiplier,
         )
-    do_test(lTest, :explog) && test_explog(
+    do_test(tests, :ExpLog) && test_explog(
         M,
         Tuple(pts),
         Tuple(tv);
@@ -258,7 +304,7 @@ function test_manifold(
         atol_multiplier=exp_log_atol_multiplier,
         rtol_multiplier=exp_log_rtol_multiplier,
     )
-    do_test(lTest, :explog) && Test.@testset "Interplay distance, inner and norm" begin
+    do_test(tests, :ExpLog) && Test.@testset "Interplay distance, inner and norm" begin
         X1 = log(M, pts[1], pts[2])
         if test_norm
             Test.@test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], X1)
@@ -410,97 +456,120 @@ function test_manifold(
         end
     end
 
-    !(
-        default_retraction_method === nothing ||
-        default_inverse_retraction_method === nothing
-    ) && Test.@testset "vector transport" begin
-        tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
-        X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
-        X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
-        pts32 = retract(M, pts[1], X2, default_retraction_method)
-        test_default_vector_transport && Test.@testset "default vector transport" begin
-            v1t1 = vector_transport_to(M, pts[1], X1, pts32)
-            v1t2 = vector_transport_direction(M, pts[1], X1, X2)
-            Test.@test is_vector(M, pts32, v1t1; atol=tvatol)
-            Test.@test is_vector(M, pts32, v1t2; atol=tvatol)
-            Test.@test isapprox(M, pts32, v1t1, v1t2)
-            Test.@test isapprox(M, pts[1], vector_transport_to(M, pts[1], X1, pts[1]), X1)
-
-            is_mutating && Test.@testset "mutating variants" begin
-                v1t1_m = allocate(v1t1)
-                v1t2_m = allocate(v1t2)
-                vector_transport_to!(M, v1t1_m, pts[1], X1, pts32)
-                vector_transport_direction!(M, v1t2_m, pts[1], X1, X2)
-                Test.@test isapprox(M, pts32, v1t1, v1t1_m)
-                Test.@test isapprox(M, pts32, v1t2, v1t2_m)
-            end
-        end
-
-        for (vtm, test_to, test_dir, rtr_m, irtr_m) in zip(
-            vector_transport_methods,
-            test_vector_transport_to,
-            test_vector_transport_direction,
-            vector_transport_retractions,
-            vector_transport_inverse_retractions,
-        )
-            Test.@testset "vector transport method $(vtm)" begin
-                tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
-                X1 = inverse_retract(M, pts[1], pts[2], irtr_m)
-                X2 = inverse_retract(M, pts[1], pts[3], irtr_m)
-                pts32 = retract(M, pts[1], X2, rtr_m)
-                test_to && (v1t1 = vector_transport_to(M, pts[1], X1, pts32, vtm))
-                test_dir && (v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm))
-                test_to && Test.@test is_vector(M, pts32, v1t1, true; atol=tvatol)
-                test_dir && Test.@test is_vector(M, pts32, v1t2, true; atol=tvatol)
-                (test_to && test_dir) &&
-                    Test.@test isapprox(M, pts32, v1t1, v1t2, atol=tvatol)
-                test_to && Test.@test isapprox(
+    !(retraction_method === nothing || inverse_retraction_method === nothing) &&
+        Test.@testset "vector transport" begin
+            tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
+            X1 = inverse_retract(M, pts[1], pts[2], inverse_retraction_method)
+            X2 = inverse_retract(M, pts[1], pts[3], inverse_retraction_method)
+            pts32 = retract(M, pts[1], X2, retraction_method)
+            test_default_vector_transport && Test.@testset "default vector transport" begin
+                v1t1 = vector_transport_to(M, pts[1], X1, pts32)
+                v1t2 = vector_transport_direction(M, pts[1], X1, X2)
+                Test.@test is_vector(M, pts32, v1t1; atol=tvatol)
+                Test.@test is_vector(M, pts32, v1t2; atol=tvatol)
+                Test.@test isapprox(M, pts32, v1t1, v1t2)
+                Test.@test isapprox(
                     M,
                     pts[1],
-                    vector_transport_to(M, pts[1], X1, pts[1], vtm),
-                    X1;
-                    atol=tvatol,
-                )
-                test_dir && Test.@test isapprox(
-                    M,
-                    pts[1],
-                    vector_transport_direction(M, pts[1], X1, zero_vector(M, pts[1]), vtm),
-                    X1;
-                    atol=tvatol,
+                    vector_transport_to(M, pts[1], X1, pts[1]),
+                    X1,
                 )
 
                 is_mutating && Test.@testset "mutating variants" begin
-                    if test_to
-                        v1t1_m = allocate(v1t1)
-                        vector_transport_to!(M, v1t1_m, pts[1], X1, pts32, vtm)
-                        Test.@test isapprox(M, pts32, v1t1, v1t1_m; atol=tvatol)
-                        test_inplace &&
-                            Test.@testset "inplace test for vector_transport_to!" begin
-                                X1a = copy(M, pts[1], X1)
-                                Xt = vector_transport_to(M, pts[1], X1, pts32, vtm)
-                                vector_transport_to!(M, X1a, pts[1], X1a, pts32, vtm)
-                                Test.@test isapprox(M, pts[1], X1a, Xt; atol=tvatol)
-                            end
-                    end
-                    if test_dir
-                        v1t2_m = allocate(v1t2)
-                        vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
-                        Test.@test isapprox(M, pts32, v1t2, v1t2_m; atol=tvatol)
-                        test_inplace &&
-                            Test.@testset "inplace test for vector_transport_direction!" begin
-                                X1a = copy(M, pts[1], X1)
-                                X2a = copy(M, pts[1], X2)
-                                Xt = vector_transport_direction(M, pts[1], X1, X2, vtm)
-                                vector_transport_direction!(M, X1a, pts[1], X1a, X2, vtm)
-                                vector_transport_direction!(M, X2a, pts[1], X1, X2a, vtm)
-                                Test.@test isapprox(M, pts[1], X1a, Xt; atol=tvatol)
-                                Test.@test isapprox(M, pts[1], X2a, Xt; atol=tvatol)
-                            end
+                    v1t1_m = allocate(v1t1)
+                    v1t2_m = allocate(v1t2)
+                    vector_transport_to!(M, v1t1_m, pts[1], X1, pts32)
+                    vector_transport_direction!(M, v1t2_m, pts[1], X1, X2)
+                    Test.@test isapprox(M, pts32, v1t1, v1t1_m)
+                    Test.@test isapprox(M, pts32, v1t2, v1t2_m)
+                end
+            end
+
+            for (vtm, test_to, test_dir, rtr_m, irtr_m) in zip(
+                vector_transport_methods,
+                test_vector_transport_to,
+                test_vector_transport_direction,
+                vector_transport_retractions,
+                vector_transport_inverse_retractions,
+            )
+                Test.@testset "vector transport method $(vtm)" begin
+                    tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
+                    X1 = inverse_retract(M, pts[1], pts[2], irtr_m)
+                    X2 = inverse_retract(M, pts[1], pts[3], irtr_m)
+                    pts32 = retract(M, pts[1], X2, rtr_m)
+                    test_to && (v1t1 = vector_transport_to(M, pts[1], X1, pts32, vtm))
+                    test_dir && (v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm))
+                    test_to && Test.@test is_vector(M, pts32, v1t1, true; atol=tvatol)
+                    test_dir && Test.@test is_vector(M, pts32, v1t2, true; atol=tvatol)
+                    (test_to && test_dir) &&
+                        Test.@test isapprox(M, pts32, v1t1, v1t2, atol=tvatol)
+                    test_to && Test.@test isapprox(
+                        M,
+                        pts[1],
+                        vector_transport_to(M, pts[1], X1, pts[1], vtm),
+                        X1;
+                        atol=tvatol,
+                    )
+                    test_dir && Test.@test isapprox(
+                        M,
+                        pts[1],
+                        vector_transport_direction(
+                            M,
+                            pts[1],
+                            X1,
+                            zero_vector(M, pts[1]),
+                            vtm,
+                        ),
+                        X1;
+                        atol=tvatol,
+                    )
+
+                    is_mutating && Test.@testset "mutating variants" begin
+                        if test_to
+                            v1t1_m = allocate(v1t1)
+                            vector_transport_to!(M, v1t1_m, pts[1], X1, pts32, vtm)
+                            Test.@test isapprox(M, pts32, v1t1, v1t1_m; atol=tvatol)
+                            test_inplace &&
+                                Test.@testset "inplace test for vector_transport_to!" begin
+                                    X1a = copy(M, pts[1], X1)
+                                    Xt = vector_transport_to(M, pts[1], X1, pts32, vtm)
+                                    vector_transport_to!(M, X1a, pts[1], X1a, pts32, vtm)
+                                    Test.@test isapprox(M, pts[1], X1a, Xt; atol=tvatol)
+                                end
+                        end
+                        if test_dir
+                            v1t2_m = allocate(v1t2)
+                            vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
+                            Test.@test isapprox(M, pts32, v1t2, v1t2_m; atol=tvatol)
+                            test_inplace &&
+                                Test.@testset "inplace test for vector_transport_direction!" begin
+                                    X1a = copy(M, pts[1], X1)
+                                    X2a = copy(M, pts[1], X2)
+                                    Xt = vector_transport_direction(M, pts[1], X1, X2, vtm)
+                                    vector_transport_direction!(
+                                        M,
+                                        X1a,
+                                        pts[1],
+                                        X1a,
+                                        X2,
+                                        vtm,
+                                    )
+                                    vector_transport_direction!(
+                                        M,
+                                        X2a,
+                                        pts[1],
+                                        X1,
+                                        X2a,
+                                        vtm,
+                                    )
+                                    Test.@test isapprox(M, pts[1], X1a, Xt; atol=tvatol)
+                                    Test.@test isapprox(M, pts[1], X2a, Xt; atol=tvatol)
+                                end
+                        end
                     end
                 end
             end
         end
-    end
 
     for btype in basis_types_vecs
         Test.@testset "Basis support for $(btype)" begin
@@ -536,7 +605,7 @@ function test_manifold(
                 basis_has_specialized_diagonalizing_get ||
                 !isa(btype, DiagonalizingOrthonormalBasis)
             )
-                X1 = inverse_retract(M, p, pts[2], default_inverse_retraction_method)
+                X1 = inverse_retract(M, p, pts[2], inverse_retraction_method)
                 Xb = get_coordinates(M, p, X1, btype)
 
                 Test.@test get_coordinates(M, p, X1, b) ≈ Xb
@@ -557,7 +626,7 @@ function test_manifold(
             basis_has_specialized_diagonalizing_get ||
             !isa(btype, DiagonalizingOrthonormalBasis)
         )
-            X1 = inverse_retract(M, p, pts[2], default_inverse_retraction_method)
+            X1 = inverse_retract(M, p, pts[2], inverse_retraction_method)
 
             Xb = get_coordinates(M, p, X1, btype)
             #Test.@test isa(Xb, AbstractVector{<:Real})
@@ -591,7 +660,7 @@ function test_manifold(
     test_vee_hat && Test.@testset "vee and hat" begin
         p = pts[1]
         q = pts[2]
-        X = inverse_retract(M, p, q, default_inverse_retraction_method)
+        X = inverse_retract(M, p, q, inverse_retraction_method)
         Y = vee(M, p, X)
         Test.@test length(Y) == number_of_coordinates(M, ManifoldsBase.VeeOrthogonalBasis())
         Test.@test isapprox(M, p, X, hat(M, p, Y))
@@ -629,8 +698,8 @@ function test_manifold(
     end
 
     test_musical_isomorphisms && Test.@testset "Musical isomorphisms" begin
-        if default_inverse_retraction_method !== nothing
-            tv_m = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
+        if inverse_retraction_method !== nothing
+            tv_m = inverse_retract(M, pts[1], pts[2], inverse_retraction_method)
         else
             tv_m = zero_vector(M, pts[1])
         end
@@ -660,7 +729,7 @@ function test_manifold(
     Test.@testset "number_eltype" begin
         for (p, X) in zip(pts, tv)
             Test.@test number_eltype(X) == number_eltype(p)
-            p = retract(M, p, X, default_retraction_method)
+            p = retract(M, p, X, retraction_method)
             Test.@test number_eltype(p) == number_eltype(p)
         end
     end
@@ -672,19 +741,19 @@ function test_manifold(
             Test.@test isapprox(M, p2, p)
 
             X2 = allocate(X)
-            if default_inverse_retraction_method === nothing
+            if inverse_retraction_method === nothing
                 X3 = zero_vector(M, p)
                 copyto!(X2, X3)
                 Test.@test isapprox(M, p, X2, zero_vector(M, p))
             else
-                q = retract(M, p, X, default_retraction_method)
-                X3 = inverse_retract(M, p, q, default_inverse_retraction_method)
+                q = retract(M, p, X, retraction_method)
+                X3 = inverse_retract(M, p, q, inverse_retraction_method)
                 copyto!(X2, X3)
                 Test.@test isapprox(
                     M,
                     p,
                     X2,
-                    inverse_retract(M, p, q, default_inverse_retraction_method),
+                    inverse_retract(M, p, q, inverse_retraction_method),
                 )
             end
         end
@@ -781,7 +850,7 @@ function test_manifold(
 end
 
 """
-    test_parallel_transport(M,P; along=false, to=true, diretion=true)
+    test_parallel_transport(M, pts; along=false, to=true, diretion=true)
 
 Generic tests for parallel transport on `M`given at least two pointsin `P`.
 

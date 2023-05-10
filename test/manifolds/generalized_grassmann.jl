@@ -92,9 +92,10 @@ include("../utils.jl")
             @test_throws ManifoldDomainError is_vector(M, p, q, true)
             test_manifold(
                 M,
-                pts;
-                tests=Dict(:exp => false, :log => false),
-                default_inverse_retraction_method=LogarithmicInverseRetraction(),
+                pts,
+                Dict(exp => false, log => false);
+                tolerances=Dict(is_point => 10.0)default_inverse_retraction_method =
+                    LogarithmicInverseRetraction(),
                 default_retraction_method=ExponentialRetraction(),
                 test_injectivity_radius=false,
                 test_is_tangent=true,
@@ -102,7 +103,6 @@ include("../utils.jl")
                 test_default_vector_transport=false,
                 projection_atol_multiplier=15.0,
                 retraction_atol_multiplier=10.0,
-                is_point_atol_multiplier=10.0,
                 is_tangent_atol_multiplier=4 * 10.0^2,
                 retraction_methods=[PolarRetraction(), ProjectionRetraction()],
                 mid_point12=nothing,

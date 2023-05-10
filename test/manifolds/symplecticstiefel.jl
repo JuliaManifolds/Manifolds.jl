@@ -243,13 +243,13 @@ end
                     @testset "CayleyRetraction" begin
                         test_manifold(
                             SpSt_6_4,
-                            convert.(type, points);
-                            tests=Dict(:exp => false, :log => false),
+                            convert.(type, points),
+                            Dict(exp => false, log => false);
+                            tolerances=Dict(is_point => 1e4),
                             retraction_methods=[CayleyRetraction()],
                             default_retraction_method=CayleyRetraction(),
                             default_inverse_retraction_method=CayleyInverseRetraction(),
                             test_inplace=true,
-                            is_point_atol_multiplier=1e4,
                             is_tangent_atol_multiplier=1e3,
                             retraction_atol_multiplier=1e4,
                             test_project_tangent=(type != MMatrix{6,4,Float64,24}),
@@ -261,12 +261,12 @@ end
                     @testset "ExponentialRetraction" begin
                         test_manifold(
                             SpSt_6_4,
-                            convert.(type, close_points);
-                            tests=Dict(:exp => true, :log => false),
+                            convert.(type, close_points),
+                            Dict(exp => true, log => false);
+                            tolerances=Dict(is_point => 1e-3),
                             default_retraction_method=ExponentialRetraction(),
                             default_inverse_retraction_method=CayleyInverseRetraction(),
                             test_inplace=true,
-                            is_point_atol_multiplier=1e11,
                             is_tangent_atol_multiplier=1e2,
                             exp_log_atol_multiplier=5 * 1e9,
                             retraction_atol_multiplier=5 * 1e9,

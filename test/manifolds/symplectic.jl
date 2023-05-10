@@ -197,13 +197,13 @@ using FiniteDifferences
                 pts = convert.(type, points)
                 test_manifold(
                     Sp_6,
-                    cat(pts, large_tr_norm_points; dims=1);
-                    tests=Dict(:exp => true, :log => false),
+                    cat(pts, large_tr_norm_points; dims=1),
+                    Dict(exp => true, log => false);
+                    tolerances=Dict(is_point => 1e8),
                     retraction_methods=[CayleyRetraction()],
                     default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
-                    is_point_atol_multiplier=1e8,
                     is_tangent_atol_multiplier=1e6,
                     exp_log_atol_multiplier=1e7,
                     retraction_atol_multiplier=1e7, # 1e-9 is the exactneww we get for Caley
@@ -218,13 +218,13 @@ using FiniteDifferences
                 pts = convert.(type, points)
                 test_manifold(
                     Sp_6,
-                    pts;
-                    tests=Dict(:exp => true, :log => false),
+                    pts,
+                    Dict(exp => true, log => false);
+                    tolerances=Dict(is_point => 1e8),
                     retraction_methods=[CayleyRetraction()],
                     default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
-                    is_point_atol_multiplier=1e8,
                     is_tangent_atol_multiplier=1e6,
                     exp_log_atol_multiplier=1e7,
                     retraction_atol_multiplier=1e8,
@@ -239,13 +239,13 @@ using FiniteDifferences
                 pts = convert.(type, points)
                 test_manifold(
                     Sp_6,
-                    pts;
-                    tests=Dict(:exp => true, :log => false),
+                    pts,
+                    Dict(exp => true, log => false);
+                    tolerances=Dict(is_point => 1e7),
                     retraction_methods=[CayleyRetraction()],
                     default_retraction_method=CayleyRetraction(),
                     default_inverse_retraction_method=CayleyInverseRetraction(),
                     test_inplace=true,
-                    is_point_atol_multiplier=1.0e7,
                     is_tangent_atol_multiplier=1.0e6,
                     retraction_atol_multiplier=1.0e4,
                     test_project_tangent=false, # Cannot solve 'sylvester' for MMatrix-type.
