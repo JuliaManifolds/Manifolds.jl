@@ -214,7 +214,7 @@ function test_log(
 ) where {N,T,P}
     epsFp = find_eps(first(p))
     atp = atol_multiplier * epsFp
-    rtp = atol_multiplier == 0.0 ? sqrt(epsFp) * rtol_multiplier : 0
+    rtp = atol_multiplier == 0.0 ? sqrt(epsFp) * rtol_multiplier : 0.0
     if minimal # Minimal: just check the very fist one
         pL = (p[1],)
         qL = (X[1],)

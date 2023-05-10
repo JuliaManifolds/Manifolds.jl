@@ -42,14 +42,14 @@ include("../utils.jl")
         @testset "Type $T" begin
             test_manifold(
                 M,
-                pts,
-                Dict(exp => false, log => false),
+                pts;
+                test_functions=Dict(exp => false, log => false),
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_default_vector_transport=true,
                 vector_transport_methods=[ProjectionTransport()],
-                default_inverse_retraction_method=nothing,
-                default_retraction_method=ProjectionRetraction(),
+                inverse_retraction_method=nothing,
+                retraction_method=ProjectionRetraction(),
                 test_inplace=true,
             )
         end

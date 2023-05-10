@@ -54,15 +54,15 @@ include("../utils.jl")
         @testset "Type $T" begin
             test_manifold(
                 M,
-                pts,
-                Dict(:exp => false, :log => false);
-                tolerances=Dict(is_point => 10.0),
+                pts;
+                test_functions=Dict{Function,Bool}(exp => false, log => false),
+                tol_functions=Dict{Function,Float64}(is_point => 10.0),
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_default_vector_transport=true,
                 vector_transport_methods=[ProjectionTransport()],
-                default_inverse_retraction_method=nothing,
-                default_retraction_method=ProjectionRetraction(),
+                inverse_retraction_method=nothing,
+                retraction_method=ProjectionRetraction(),
                 is_tangent_atol_multiplier=20,
                 test_inplace=true,
             )

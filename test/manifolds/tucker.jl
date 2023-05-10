@@ -162,14 +162,14 @@ include("../utils.jl")
             ]
             test_manifold(
                 M,
-                pts,
-                Dict(exp => false, log => false),
+                pts;
+                test_functions=Dict(exp => false, log => false),
                 is_mutating=false, # avoid allocations of the wrong type
                 basis_types_to_from=(DefaultOrthonormalBasis(),),
                 basis_types_vecs=(DefaultOrthonormalBasis(),),
-                default_inverse_retraction_method=ProjectionInverseRetraction(),
+                inverse_retraction_method=ProjectionInverseRetraction(),
                 test_injectivity_radius=false,
-                default_retraction_method=PolarRetraction(),
+                retraction_method=PolarRetraction(),
                 test_is_tangent=false,
                 test_project_tangent=false,
                 test_default_vector_transport=false,

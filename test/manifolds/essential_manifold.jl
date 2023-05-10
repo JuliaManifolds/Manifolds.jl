@@ -61,15 +61,19 @@ include("../utils.jl")
     @testset "Unsigned Essential" begin
         test_manifold(
             EssentialManifold(false),
-            [p1, p2, p3],
-            Dict(exp => true, log => false, :ExpLog => false);
+            [p1, p2, p3];
+            test_functions=Dict{Function,Bool}(
+                exp => true,
+                log => false,
+                representation_size=false,
+            ),
+            test_features=Dict{Symbol,Bool}(:ExpLog => false);
             test_vector_spaces=true,
             test_project_point=true,
             projection_atol_multiplier=10,
             test_project_tangent=false, # since it includes vert_proj.
             test_musical_isomorphisms=false,
             test_default_vector_transport=true,
-            test_representation_size=false,
             mid_point12=nothing,
             exp_log_atol_multiplier=4,
             parallel_transport=true,

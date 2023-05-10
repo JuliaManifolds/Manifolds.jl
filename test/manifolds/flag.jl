@@ -139,7 +139,8 @@ using Random
     test_manifold(
         M,
         [p1, p2, p3];
-        tolerances=Dict(is_point => 10.0),
+        test_functions=Dict{Function,Bool}(exp => false, log => false),
+        tol_functions=Dict{Function,Float64}(is_point => 10.0),
         test_injectivity_radius=false,
         test_is_tangent=true,
         test_project_tangent=true,

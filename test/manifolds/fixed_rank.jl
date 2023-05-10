@@ -206,8 +206,8 @@ include("../utils.jl")
             end
             test_manifold(
                 M,
-                pts,
-                Dict(exp => false, log => false),
+                pts;
+                test_functions=Dict(exp => false, log => false),
                 inverse_retraction_method=nothing,
                 test_injectivity_radius=false,
                 retraction_method=PolarRetraction(),

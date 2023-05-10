@@ -88,6 +88,7 @@ function check_vector(
     p::AbstractMatrix,
     X::AbstractMatrix;
     atol=sqrt(eps(eltype(X))),
+    kwargs...,
 ) where {N,dp1}
     for i in 1:(dp1 - 1)
         p_i = _extract_flag_stiefel(M, p, i)

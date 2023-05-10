@@ -63,7 +63,7 @@ include("../utils.jl")
         test_manifold(
             M_complex,
             [C, H, I];
-            tolerances=Dict(is_point => 2.0),
+            tol_functions=Dict{Function,Float64}(is_point => 2.0),
             test_injectivity_radius=false,
             test_vector_spaces=true,
             test_project_tangent=true,

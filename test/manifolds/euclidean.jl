@@ -140,7 +140,7 @@ using Manifolds: induced_basis
             ]
             test_manifold(
                 Ec,
-                pts,
+                pts;
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
                 test_default_vector_transport=true,

@@ -74,7 +74,8 @@ include("../utils.jl")
             test_manifold(
                 M,
                 pts;
-                tolerances=Dict(is_point => 10.0)test_injectivity_radius = false,
+                tol_functions=Dict{Function,Float64}(is_point => 10.0),
+                test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_project_point=true,
                 test_default_vector_transport=false,
@@ -189,7 +190,8 @@ include("../utils.jl")
             test_manifold(
                 M,
                 pts;
-                tolerances=Dict(is_point => 10.0)test_injectivity_radius = false,
+                tol_functions=Dict{Function,Float64}(is_point => 10.0),
+                test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_project_point=true,
                 test_default_vector_transport=false,

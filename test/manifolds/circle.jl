@@ -124,7 +124,7 @@ using Manifolds: TFVector, CoTFVector
             pts = convert.(Ref(T), [-π / 4, 0.0, π / 4])
             test_manifold(
                 M,
-                pts,
+                pts;
                 test_vector_spaces=false,
                 test_project_point=true,
                 test_project_tangent=true,
@@ -231,7 +231,7 @@ using Manifolds: TFVector, CoTFVector
             pts = convert.(Ref(T), [a - a * im, 1 + 0im, a + a * im])
             test_manifold(
                 Mc,
-                pts,
+                pts;
                 test_vector_spaces=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,

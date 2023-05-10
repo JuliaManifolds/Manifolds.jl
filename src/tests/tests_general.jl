@@ -7,17 +7,7 @@ find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
 find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
 find_eps(x) = find_eps(number_eltype(x))
 
-@doc raw"""
-    DEFAULT_TESTS = Dict{Function,Bool}
-
-The default setup of tests to run / available tests
-
-* `exp`                 – (`true`)
-* `log`                 - (`true`)
-* `manifold_dimension`  - (`true`)
-*
-"""
-DEFAULT_TESTS = Dict{Union{<:Function,Symbol},Bool}(#
+DEFAULT_TEST_FUNCTIONS = Dict{Function,Bool}(#
     exp => true,
     log => true,
     manifold_dimension => true,
@@ -25,19 +15,26 @@ DEFAULT_TESTS = Dict{Union{<:Function,Symbol},Bool}(#
     is_point => true,
     is_vector => true,
 )
-
+DEFAULT_TEST_FEATURES = Dict{Symbol,Bool}(#
+#
+)
 @doc """
     do_test(tests::dictionary, f::Function)
+    do_test(tests::dictionary, f::Symbol)
 
 from a current dictionary `test` check whether to perform test for the function `f``.
     By default this is `false`.
 """
-function do_test(A::Dict, f::Union{Function,Symbol})
-    return get(A, f, get(DEFAULT_TESTS, f, false))
+function do_test(A::Dict, f::Function)
+    return get(A, f, get(DEFAULT_TEST_FUNCTIONS, f, false))
+end
+function do_test(A::Dict, f::Symbol)
+    return get(A, f, get(DEFAULT_TEST_FEATURES, f, false))
 end
 
-DEFAULT_TOLERANCES =
-    Dict{Union{Function,Symbol},Float64}(exp => 1e-8, log => 1e-9, is_point => 1e-14)
+DEFAULT_FUNCTION_TOLERANCES =
+    Dict{Function,Float64}(exp => 1e-8, log => 1e-9, is_point => 1e-14)
+DEFAULT_FEATURE_TOLERANCES = Dict{Symbol,Float64}()
 
 @doc """
     get_tolerance(tols::dictionary, f::function; eps=1.0)
@@ -49,15 +46,19 @@ This dictionary stores two types of values
 
 The first case with `=1` is the default.
 """
-function get_tolerance(A::Dict, f::Union{Function,Symbol}; eps=1.0)
-    t = get(A, f, get(DEFAULT_TOLERANCES, f, 1e-14))
+function get_tolerance(A::Dict, f::Function; eps=1.0)
+    t = get(A, f, get(DEFAULT_FUNCTION_TOLERANCES, f, 1e-14))
+    return t ≥ 1 ? t * eps : t
+end
+function get_tolerance(A::Dict, f::Symbol; eps=1.0)
+    t = get(A, f, get(DEFAULT_FEATURE_TOLERANCES, f, 1e-14))
     return t ≥ 1 ? t * eps : t
 end
 
 """
     test_manifold(
         M::AbstractManifold,
-        pts::AbstractVector,
+        pts::AbstractVector;
         tests = DEFAULT_TESTS;
         tolerances=DEFAULT_TOLERANCES,
         args,
@@ -128,9 +129,11 @@ The following Keyword arguments can be used to set properties of the tests, that
 """
 function test_manifold(
     M::AbstractManifold,
-    pts::AbstractVector,
-    tests::Dict{Union{Function,Symbol},Bool}=DEFAULT_TESTS;
-    tolerances::Dict{Union{Function,Symbol},<:Real}=DEFAULT_TOLERANCES,
+    pts::AbstractVector;
+    test_features::Dict{Symbol,Bool}=Dict{Symbol,Bool}(),
+    tol_features::Dict{Symbol,<:Real}=Dict{Symbol,Float64}(),
+    test_functions::Dict{Function,Bool}=Dict{Function,Bool}(),
+    tol_functions::Dict{Function,<:Real}=Dict{Function,Float64}(),
     #specific setups
     expected_dimension_type=Integer,
     inverse_retraction_method=default_inverse_retraction_method(M),
@@ -185,7 +188,7 @@ function test_manifold(
     ],
     test_vector_transport_to=[true for _ in 1:length(vector_transport_methods)],
     test_vector_transport_direction=[true for _ in 1:length(vector_transport_methods)],
-    mid_point12=(do_test(tests, exp) && do_test(tests, log)) ?
+    mid_point12=(do_test(test_functions, exp) && do_test(test_functions, log)) ?
                 shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing,
 )
     #
@@ -193,8 +196,10 @@ function test_manifold(
     #
 
     # Autocomplete a Few testsDefault for explog autofil if not set
-    if haskey(tests, exp) && haskey(tests, log) && !haskey(tests, :ExpLog)
-        tests[:ExpLog] = tests[exp] && tests[log]
+    if haskey(test_functions, exp) &&
+       haskey(test_functions, log) &&
+       !haskey(test_features, :ExpLog)
+        test_features[:ExpLog] = test_functions[exp] && test_functions[log]
     end
 
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
@@ -215,7 +220,7 @@ function test_manifold(
     # Test calls for the functions
     #
     Test.@testset "$(repr(M)) Tests" begin
-        do_test(tests, manifold_dimension) &&
+        do_test(test_functions, manifold_dimension) &&
             Test.@testset "Manifold dimension                                " begin
                 Test.@test isa(manifold_dimension(M), expected_dimension_type)
                 Test.@test manifold_dimension(M) ≥ 0
@@ -226,7 +231,7 @@ function test_manifold(
                     Manifolds.VectorBundleFibers(Manifolds.CotangentSpace, M),
                 )
             end
-        do_test(tests, representation_size) &&
+        do_test(test_functions, representation_size) &&
             Test.@testset "representation_size                               " begin
                 rs = Manifolds.representation_size(M)
                 Test.@test isa(rs, Tuple)
@@ -243,10 +248,10 @@ function test_manifold(
                     end
                 end
             end
-        do_test(tests, is_point) &&
+        do_test(test_functions, is_point) &&
             Test.@testset "is_point                                         " begin
                 for pt in pts
-                    atol = get_tolerance(tolerances, is_point; eps=find_eps(pt))
+                    atol = get_tolerance(tol_functions, is_point; eps=find_eps(pt))
                     Test.@test is_point(M, pt; atol=atol)
                     Test.@test check_point(M, pt; atol=atol) === nothing
                 end
@@ -273,8 +278,8 @@ function test_manifold(
         end
     end
 
-    do_test(tests, exp) &&
-        !do_test(tests, :ExpLog) &&
+    do_test(test_functions, exp) &&
+        !do_test(test_functions, :ExpLog) &&
         test_exp(
             M,
             Tuple(pts),
@@ -284,18 +289,17 @@ function test_manifold(
             atol_multiplier=exp_log_atol_multiplier,
             rtol_multiplier=exp_log_rtol_multiplier,
         )
-    do_test(tests, log) &&
-        !do_test(tests, :ExpLog) &&
+    do_test(test_functions, log) &&
+        !do_test(test_features, :ExpLog) &&
         test_log(
             M,
             Tuple(pts),
             Tuple(tv);
             in_place=is_mutating,
-            in_place_self=test_inplace,
             atol_multiplier=exp_log_atol_multiplier,
             rtol_multiplier=exp_log_rtol_multiplier,
         )
-    do_test(tests, :ExpLog) && test_explog(
+    do_test(test_features, :ExpLog) && test_explog(
         M,
         Tuple(pts),
         Tuple(tv);
@@ -304,23 +308,24 @@ function test_manifold(
         atol_multiplier=exp_log_atol_multiplier,
         rtol_multiplier=exp_log_rtol_multiplier,
     )
-    do_test(tests, :ExpLog) && Test.@testset "Interplay distance, inner and norm" begin
-        X1 = log(M, pts[1], pts[2])
-        if test_norm
-            Test.@test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], X1)
-        end
+    do_test(test_features, :ExpLog) &&
+        Test.@testset "Interplay distance, inner and norm" begin
+            X1 = log(M, pts[1], pts[2])
+            if test_norm
+                Test.@test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], X1)
+            end
 
-        if test_inner
-            X3 = log(M, pts[1], pts[3])
-            Test.@test inner(M, pts[1], X1, X3) ≈ conj(inner(M, pts[1], X3, X1))
-            Test.@test inner(M, pts[1], X1, X1) ≈ real(inner(M, pts[1], X1, X1))
+            if test_inner
+                X3 = log(M, pts[1], pts[3])
+                Test.@test inner(M, pts[1], X1, X3) ≈ conj(inner(M, pts[1], X3, X1))
+                Test.@test inner(M, pts[1], X1, X1) ≈ real(inner(M, pts[1], X1, X1))
 
-            Test.@test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
+                Test.@test norm(M, pts[1], X1) ≈ sqrt(inner(M, pts[1], X1, X1))
+            end
+            if test_norm
+                Test.@test norm(M, pts[1], X1) isa Real
+            end
         end
-        if test_norm
-            Test.@test norm(M, pts[1], X1) isa Real
-        end
-    end
 
     parallel_transport && test_parallel_transport(
         M,
@@ -343,7 +348,7 @@ function test_manifold(
             )
         end
     end
-    Test.@testset "inverse retraction tests" begin
+    Test.@testset "inverse retraction" begin
         for inv_retr_method in inverse_retraction_methods
             test_inv_retr(
                 M,
@@ -389,7 +394,7 @@ function test_manifold(
         Test.@test isapprox(M, pts[1], rrcv.X, rrcv2.X)
     end
 
-    test_vector_spaces && Test.@testset "vector spaces tests" begin
+    test_vector_spaces && Test.@testset "vector spaces" begin
         for p in pts
             X = zero_vector(M, p)
             mts = Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M)
@@ -426,7 +431,7 @@ function test_manifold(
             end
         end
 
-    test_project_tangent && Test.@testset "project tangent test" begin
+    test_project_tangent && Test.@testset "project tangent" begin
         for (p, X) in zip(pts, tv)
             atol = find_eps(p) * projection_atol_multiplier
             X_emb = embed(M, p, X)
@@ -876,9 +881,9 @@ function test_parallel_transport(
 )
     length(P) < 2 &&
         error("The Parallel Transport test set requires at least 2 points in P")
-    Test.@testset "Test Parallel Transport" begin
+    Test.@testset "Parallel Transport" begin
         along && @warn "parallel transport along test not yet implemented"
-        Test.@testset "To (a point)" begin # even with to =false this displays no tests
+        Test.@testset "To (a point)" begin # even with to =false this displays no
             if to
                 for i in 1:(length(P) - 1)
                     p = P[i]

@@ -132,7 +132,7 @@ include("../utils.jl")
                 pts,
                 basis_types_to_from=(DefaultOrthonormalBasis(),),
                 basis_types_vecs=(DefaultOrthonormalBasis(),),
-                default_inverse_retraction_method=PolarInverseRetraction(),
+                inverse_retraction_method=PolarInverseRetraction(),
                 test_injectivity_radius=false,
                 test_is_tangent=true,
                 test_project_tangent=true,
@@ -227,9 +227,9 @@ include("../utils.jl")
             @test_throws DomainError is_vector(M, x, y, true)
             test_manifold(
                 M,
-                pts,
-                Dict(exp => false, log => false),
-                default_inverse_retraction_method=PolarInverseRetraction(),
+                pts;
+                test_functions=Dict(exp => false, log => false),
+                inverse_retraction_method=PolarInverseRetraction(),
                 test_injectivity_radius=false,
                 test_is_tangent=true,
                 test_project_tangent=true,

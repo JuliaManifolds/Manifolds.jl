@@ -92,11 +92,11 @@ include("../utils.jl")
             @test_throws ManifoldDomainError is_vector(M, p, q, true)
             test_manifold(
                 M,
-                pts,
-                Dict(exp => false, log => false);
-                tolerances=Dict(is_point => 10.0)default_inverse_retraction_method =
-                    LogarithmicInverseRetraction(),
-                default_retraction_method=ExponentialRetraction(),
+                pts;
+                test_functions=Dict{Function,Bool}(exp => false, log => false),
+                tol_functions=Dict{Function,Float64}(is_point => 10.0),
+                inverse_retraction_method=LogarithmicInverseRetraction(),
+                retraction_method=ExponentialRetraction(),
                 test_injectivity_radius=false,
                 test_is_tangent=true,
                 test_project_tangent=true,
