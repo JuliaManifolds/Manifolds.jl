@@ -137,6 +137,7 @@ include("utils.jl")
         include_test("manifolds/elliptope.jl")
         include_test("manifolds/euclidean.jl")
         include_test("manifolds/fixed_rank.jl")
+        include_test("manifolds/flag.jl")
         include_test("manifolds/generalized_grassmann.jl")
         include_test("manifolds/generalized_stiefel.jl")
         include_test("manifolds/grassmann.jl")
@@ -176,6 +177,9 @@ include("utils.jl")
 
         include_test("metric.jl")
         include_test("statistics.jl")
+    end
+
+    if TEST_GROUP ∈ ["all", "test_integration"]
         include_test("approx_inverse_retraction.jl")
 
         # manifolds requiring ODE solvers
@@ -203,7 +207,7 @@ include("utils.jl")
         include_test("groups/connections.jl")
         include_test("groups/metric.jl")
     end
-    if TEST_GROUP ∈ ["all", "test_manifolds"] && !Sys.isapple()
+    if TEST_GROUP ∈ ["all", "test_integration"] && !Sys.isapple()
         include_test("recipes.jl")
     end
 end

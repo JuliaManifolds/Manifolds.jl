@@ -218,6 +218,13 @@ using Manifolds: TFVector, CoTFVector
     types = [Complex{Float64}]
     TEST_FLOAT32 && push!(types, Complex{Float32})
 
+    @testset "small and large distance tests" begin
+        p = -0.42681766710748265 + 0.9043377018818392im
+        q = -0.42681766710748226 + 0.9043377018818393im
+        @test isapprox(distance(Mc, p, q), 4.041272810440265e-16)
+        @test isapprox(distance(Mc, p, -q), 3.1415926535897927; atol=eps())
+    end
+
     for T in types
         @testset "Type $T" begin
             a = 1 / sqrt(2.0)
@@ -233,6 +240,9 @@ using Manifolds: TFVector, CoTFVector
                 test_vee_hat=false,
                 exp_log_atol_multiplier=2.0,
                 is_tangent_atol_multiplier=2.0,
+                rand_tvector_atol_multiplier=1.0,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
             ptsS = map(p -> (@SArray fill(p)), pts)
             test_manifold(
@@ -244,8 +254,11 @@ using Manifolds: TFVector, CoTFVector
                 test_vee_hat=true,
                 exp_log_atol_multiplier=2.0,
                 is_tangent_atol_multiplier=2.0,
+                rand_tvector_atol_multiplier=1.0,
                 basis_types_vecs=basis_types,
                 basis_types_to_from=basis_types,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
         end
     end

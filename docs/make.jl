@@ -1,4 +1,4 @@
-using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PyPlot
+using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
 using PlutoStaticHTML
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
@@ -85,6 +85,7 @@ makedocs(
                 "Essential manifold" => "manifolds/essentialmanifold.md",
                 "Euclidean" => "manifolds/euclidean.md",
                 "Fixed-rank matrices" => "manifolds/fixedrankmatrices.md",
+                "Flag" => "manifolds/flag.md",
                 "Generalized Stiefel" => "manifolds/generalizedstiefel.md",
                 "Generalized Grassmann" => "manifolds/generalizedgrassmann.md",
                 "Grassmann" => "manifolds/grassmann.md",

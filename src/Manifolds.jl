@@ -307,7 +307,7 @@ using ManifoldDiff:
 import ManifoldDiff: riemannian_gradient, riemannian_gradient!
 
 using Markdown: @doc_str
-using MatrixEquations: lyapc
+using MatrixEquations: lyapc, sylvc
 using Quaternions: Quaternions
 using Random
 using RecipesBase
@@ -371,6 +371,9 @@ include("manifolds/Circle.jl")
 include("manifolds/Elliptope.jl")
 include("manifolds/EmbeddedTorus.jl")
 include("manifolds/FixedRankMatrices.jl")
+include("manifolds/Flag.jl")
+include("manifolds/FlagOrthogonal.jl")
+include("manifolds/FlagStiefel.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Hyperbolic.jl")
@@ -534,6 +537,7 @@ export Euclidean,
     Elliptope,
     EssentialManifold,
     FixedRankMatrices,
+    Flag,
     GeneralizedGrassmann,
     GeneralizedStiefel,
     Grassmann,
@@ -728,6 +732,8 @@ export ×,
     grad_euclidean_to_manifold!,
     hat,
     hat!,
+    horizontal_component,
+    horizontal_component!,
     horizontal_lift,
     horizontal_lift!,
     identity_element,
@@ -813,6 +819,8 @@ export ×,
     vector_transport_to!,
     vee,
     vee!,
+    vertical_component,
+    vertical_component!,
     zero_vector,
     zero_vector!
 # Lie group types & functions

@@ -25,8 +25,10 @@ Another interpretation is, that
 
 i.e the Grassmann manifold is the quotient of the [`Stiefel`](@ref) manifold and
 the orthogonal group $\operatorname{O}(k)$ of orthogonal $k × k$ matrices.
+Note that it doesn't matter whether we start from the Euclidean or canonical metric
+on the Stiefel manifold, the resulting quotient metric on Grassmann is the same.
 
-The tangent space at a point (subspace) $x$ is given by
+The tangent space at a point (subspace) $p$ is given by
 
 ````math
 T_p\mathrm{Gr}(n,k) = \bigl\{
@@ -86,6 +88,32 @@ end
 
 function allocation_promotion_function(::Grassmann{n,k,ℂ}, f, args::Tuple) where {n,k}
     return complex
+end
+
+@doc raw"""
+    change_representer(M::Grassmann, ::EuclideanMetric, p, X)
+
+Change `X` to the corresponding representer of a cotangent vector at `p`.
+Since the [`Grassmann`](@ref) manifold `M`, is isometrically embedded, this is the identity
+"""
+change_representer(::Grassmann, ::EuclideanMetric, ::Any, ::Any)
+
+function change_representer!(M::Grassmann, Y, ::EuclideanMetric, p, X)
+    copyto!(M, Y, p, X)
+    return Y
+end
+
+@doc raw"""
+    change_metric(M::Grassmann, ::EuclideanMetric, p X)
+
+Change `X` to the corresponding vector with respect to the metric of the [`Grassmann`](@ref) `M`,
+which is just the identity, since the manifold is isometrically embedded.
+"""
+change_metric(M::Grassmann, ::EuclideanMetric, ::Any, ::Any)
+
+function change_metric!(::Grassmann, Y, ::EuclideanMetric, p, X)
+    copyto!(Y, X)
+    return Y
 end
 
 @doc raw"""
@@ -192,3 +220,26 @@ for
 ```
 """
 convert(::Type{ProjectorPoint}, p::StiefelPoint) = ProjectorPoint(p.value * p.value')
+
+"""
+    default_retraction_method(M::Grassmann, ::Type{ProjectorPoint})
+
+Return `ExponentialRetraction` as the default on the [`Grassmann`](@ref) manifold
+with projection matrices
+"""
+default_retraction_method(::Grassmann, ::Type{ProjectorPoint}) = ExponentialRetraction()
+"""
+    default_retraction_method(M::Grassmann)
+    default_retraction_method(M::Grassmann, ::Type{StiefelPoint})
+
+Return `PolarRetracion` as the default on the [`Grassmann`](@ref) manifold
+with projection matrices
+"""
+default_retraction_method(::Grassmann) = PolarRetraction()
+"""
+    default_vector_transport_method(M::Grassmann)
+
+Return the `ProjectionTransport` as the default vector transport method
+for the [`Grassmann`](@ref) manifold.
+"""
+default_vector_transport_method(::Grassmann) = ProjectionTransport()

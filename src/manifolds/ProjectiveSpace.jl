@@ -147,7 +147,16 @@ Note that this definition is similar to that of the [`AbstractSphere`](@ref).
 However, the absolute value ensures that all equivalent `p` and `q` have the same pairwise
 distance.
 """
-distance(::AbstractProjectiveSpace, p, q) = acos(min(abs(dot(p, q)), 1))
+function distance(::AbstractProjectiveSpace, p, q)
+    z = dot(p, q)
+    cosθ = abs(z)
+    T = float(real(Base.promote_eltype(p, q)))
+    # abs and relative error of acos is less than sqrt(eps(T))
+    cosθ < 1 - sqrt(eps(T)) / 8 && return acos(cosθ)
+    # improved accuracy for q close to p or -p
+    λ = sign(z)
+    return 2 * abs(atan(norm(p .* λ .- q), norm(p .* λ .+ q)))
+end
 
 function exp!(M::AbstractProjectiveSpace, q, p, X)
     θ = norm(M, p, X)

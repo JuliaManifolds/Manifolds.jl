@@ -44,6 +44,32 @@ function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where
 end
 
 @doc raw"""
+    change_representer(M::Stiefel, ::EuclideanMetric, p, X)
+
+Change `X` to the corresponding representer of a cotangent vector at `p`.
+Since the [`Stiefel`](@ref) manifold `M`, is isometrically embedded, this is the identity
+"""
+change_representer(::Stiefel, ::EuclideanMetric, ::Any, ::Any)
+
+function change_representer!(M::Stiefel, Y, ::EuclideanMetric, p, X)
+    copyto!(M, Y, p, X)
+    return Y
+end
+
+@doc raw"""
+    change_metric(M::Stiefel, ::EuclideanMetric, p X)
+
+Change `X` to the corresponding vector with respect to the metric of the [`Stiefel`](@ref) `M`,
+which is just the identity, since the manifold is isometrically embedded.
+"""
+change_metric(M::Stiefel, ::EuclideanMetric, ::Any, ::Any)
+
+function change_metric!(::Stiefel, Y, ::EuclideanMetric, p, X)
+    copyto!(Y, X)
+    return Y
+end
+
+@doc raw"""
     check_point(M::Stiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$, i.e. that it has the right
@@ -295,21 +321,8 @@ random Matrix onto the tangent vector at `vector_at`.
 """
 rand(::Stiefel; σ::Real=1.0)
 
-function Random.rand!(
-    M::Stiefel{n,k,𝔽},
-    pX;
-    vector_at=nothing,
-    σ::Real=one(real(eltype(pX))),
-) where {n,k,𝔽}
-    if vector_at === nothing
-        A = σ * randn(𝔽 === ℝ ? Float64 : ComplexF64, n, k)
-        pX .= Matrix(qr(A).Q)
-    else
-        Z = σ * randn(eltype(pX), size(pX))
-        project!(M, pX, vector_at, Z)
-        normalize!(pX)
-    end
-    return pX
+function Random.rand!(M::Stiefel, pX; kwargs...)
+    return Random.rand!(Random.default_rng(), M, pX; kwargs...)
 end
 function Random.rand!(
     rng::AbstractRNG,
@@ -450,13 +463,15 @@ function retract_pade!(::Stiefel, q, p, X, t::Number, ::PadeRetraction{m}) where
     return copyto!(q, (qm \ pm) * p)
 end
 function retract_polar!(::Stiefel, q, p, X, t::Number)
-    s = svd(p .+ t .* X)
+    q .= p .+ t .* X
+    s = svd(q)
     return mul!(q, s.U, s.Vt)
 end
 function retract_qr!(::Stiefel, q, p, X, t::Number)
-    qrfac = qr(p .+ t .* X)
+    q .= p .+ t .* X
+    qrfac = qr(q)
     d = diag(qrfac.R)
-    D = Diagonal(sign.(sign.(d .+ 0.5)))
+    D = Diagonal(sign.(sign.(d .+ 1 // 2)))
     return mul!(q, _qrfac_to_q(qrfac), D)
 end
 

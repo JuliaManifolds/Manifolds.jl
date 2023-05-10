@@ -97,10 +97,7 @@ function inverse_apply_diff(A::RotationActionOnVector{N,F,LeftAction}, a, p, X) 
 end
 inverse_apply_diff(A::RotationActionOnVector{N,F,RightAction}, a, p, X) where {N,F} = a * X
 
-function optimal_alignment(A::RotationActionOnVector{N,T,LeftAction}, p, q) where {N,T}
-    is_point(A.manifold, p, true)
-    is_point(A.manifold, q, true)
-
+function optimal_alignment(::RotationActionOnVector{N,T,LeftAction}, p, q) where {N,T}
     Xmul = p * transpose(q)
     F = svd(Xmul)
     L = size(Xmul)[2]

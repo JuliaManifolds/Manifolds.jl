@@ -41,25 +41,15 @@ default_vector_transport_method(::Grassmann, ::Type{<:StiefelPoint}) = Projectio
 
 Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
 
-Let $USV = p^\mathrm{H}q$ denote the SVD decomposition of
-$p^\mathrm{H}q$, where $\cdot^{\mathrm{H}}$ denotes the complex
-conjugate transposed or Hermitian. Then the distance is given by
+The distance is given by
 ````math
-d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\operatorname{Re}(b)).
-````
-where
-
-````math
-b_{i}=\begin{cases}
-0 & \text{if} \; S_i ≥ 1\\
-\arccos(S_i) & \, \text{if} \; S_i<1.
-\end{cases}
+d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\log_p(q)).
 ````
 """
 function distance(::Grassmann, p, q)
-    p ≈ q && return zero(real(eltype(p)))
-    a = svd(p' * q).S
-    return sqrt(sum(x -> abs2(acos(clamp(x, -1, 1))), a))
+    z = p' * q
+    S = svd(q / z - p).S
+    return norm(map(atan, S))
 end
 
 embed(::Grassmann, p) = p
@@ -99,7 +89,7 @@ exp(::Grassmann, ::Any...)
 function exp!(M::Grassmann, q, p, X)
     norm(M, p, X) ≈ 0 && return copyto!(q, p)
     d = svd(X)
-    z = p * d.V * Diagonal(cos.(d.S)) * d.Vt + d.U * Diagonal(sin.(d.S)) * d.Vt
+    z = (p * (d.V .* cos.(d.S')) + d.U .* sin.(d.S')) * d.Vt
     return copyto!(q, Array(qr(z).Q))
 end
 
@@ -136,7 +126,8 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 inverse_retract(::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
 
 function inverse_retract_polar!(::Grassmann, X, p, q)
-    return copyto!(X, q / (p' * q) - p)
+    X .= q / (p' * q) .- p
+    return X
 end
 
 @doc raw"""
@@ -152,7 +143,10 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
-inverse_retract_qr!(::Grassmann, X, p, q) = copyto!(X, q / (p' * q) - p)
+function inverse_retract_qr!(::Grassmann, X, p, q)
+    X .= q / (p' * q) .- p
+    return X
+end
 
 @doc raw"""
     log(M::Grassmann, p, q)
@@ -177,12 +171,26 @@ In this formula the $\operatorname{atan}$ is meant elementwise.
 """
 log(::Grassmann, ::Any...)
 
-function log!(::Grassmann{n,k}, X, p, q) where {n,k}
-    z = q' * p
-    At = q' - z * p'
-    Bt = z \ At
-    d = svd(Bt')
-    return X .= view(d.U, :, 1:k) * Diagonal(atan.(view(d.S, 1:k))) * view(d.Vt, 1:k, :)
+function log!(M::Grassmann, X, p, q)
+    inverse_retract_polar!(M, X, p, q)
+    d = svd(X)
+    mul!(X, d.U, atan.(d.S) .* d.Vt)
+    return X
+end
+
+@doc raw"""
+    project(M::Grassmann, p)
+
+Project `p` from the embedding onto the [`Grassmann`](@ref) `M`, i.e. compute `q`
+as the polar decomposition of $p$ such that $q^{\mathrm{H}}q$ is the identity,
+where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+"""
+project(::Grassmann, ::Any)
+
+function project!(::Grassmann, q, p)
+    s = svd(p)
+    mul!(q, s.U, s.Vt)
+    return q
 end
 
 @doc raw"""
@@ -199,7 +207,11 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 project(::Grassmann, ::Any...)
 
-project!(::Grassmann, Y, p, X) = copyto!(Y, X - p * p' * X)
+function project!(::Grassmann, Y, p, X)
+    copyto!(Y, X)
+    mul!(Y, p, p' * X, -1, 1)
+    return Y
+end
 
 @doc raw"""
     rand(M::Grassmann; σ::Real=1.0, vector_at=nothing)
@@ -214,20 +226,8 @@ Matrix onto the tangent space at `vector_at`.
 """
 rand(M::Grassmann; σ::Real=1.0)
 
-function Random.rand!(
-    M::Grassmann{n,k,𝔽},
-    pX;
-    σ::Real=one(real(eltype(pX))),
-    vector_at=nothing,
-) where {n,k,𝔽}
-    if vector_at === nothing
-        V = σ * randn(𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
-        pX .= qr(V).Q[:, 1:k]
-    else
-        Z = σ * randn(eltype(pX), size(pX))
-        project!(M, pX, vector_at, Z)
-        pX .= pX ./ norm(pX)
-    end
+function Random.rand!(M::Grassmann, pX; kwargs...)
+    Random.rand!(Random.default_rng(), M, pX; kwargs...)
     return pX
 end
 function Random.rand!(
@@ -243,7 +243,7 @@ function Random.rand!(
     else
         Z = σ * randn(rng, eltype(pX), size(pX))
         project!(M, pX, vector_at, Z)
-        pX .= pX ./ norm(pX)
+        pX ./= norm(pX)
     end
     return pX
 end
@@ -269,9 +269,10 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(::Grassmann, q, p, X, t::Number)
-    s = svd(p .+ t .* X)
-    return mul!(q, s.U, s.Vt)
+function retract_polar!(M::Grassmann, q, p, X, t::Number)
+    q .= p .+ t .* X
+    project!(M, q, q)
+    return q
 end
 
 @doc raw"""
@@ -290,10 +291,10 @@ D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
 
 function retract_qr!(::Grassmann{N,K}, q, p, X, t::Number) where {N,K}
-    qrfac = qr(p .+ t .* X)
+    q .= p .+ t .* X
+    qrfac = qr(q)
     d = diag(qrfac.R)
-    D = Diagonal(sign.(d .+ 1 // 2))
-    mul!(q, Array(qrfac.Q), D)
+    q .= Array(qrfac.Q) .* sign.(transpose(d) .+ 1 // 2)
     return q
 end
 
