@@ -124,7 +124,7 @@ function project!(::KendallsPreShapeSpace, Y, p, X)
 end
 
 function Random.rand!(M::KendallsPreShapeSpace, pX; vector_at=nothing, σ=one(eltype(pX)))
-    return rand!(Random.default_rng(), pX; vector_at=vector_at, σ=σ)
+    return rand!(Random.default_rng(), M, pX; vector_at=vector_at, σ=σ)
 end
 function Random.rand!(
     rng::AbstractRNG,

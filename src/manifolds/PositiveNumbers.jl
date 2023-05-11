@@ -285,7 +285,7 @@ function parallel_transport_to!(::PositiveNumbers, Y, p, X, q)
     return (Y .= X .* q ./ p)
 end
 
-function Random.rand!(::PositiveNumbers, pX; σ=one(eltype(pX)), vector_at=nothing)
+function Random.rand!(M::PositiveNumbers, pX; σ=one(eltype(pX)), vector_at=nothing)
     return rand!(Random.default_rng(), M, pX; vector_at=vector_at, σ=σ)
 end
 function Random.rand!(
