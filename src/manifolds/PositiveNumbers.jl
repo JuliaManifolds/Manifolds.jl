@@ -286,12 +286,7 @@ function parallel_transport_to!(::PositiveNumbers, Y, p, X, q)
 end
 
 function Random.rand!(::PositiveNumbers, pX; σ=one(eltype(pX)), vector_at=nothing)
-    if vector_at === nothing
-        pX .= exp(randn() * σ)
-    else
-        pX .= vector_at * randn() * σ
-    end
-    return pX
+    return rand!(Random.default_rng(), M, pX; vector_at=vector_at, σ=σ)
 end
 function Random.rand!(
     rng::AbstractRNG,

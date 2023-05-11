@@ -124,13 +124,7 @@ function project!(::KendallsPreShapeSpace, Y, p, X)
 end
 
 function Random.rand!(M::KendallsPreShapeSpace, pX; vector_at=nothing, σ=one(eltype(pX)))
-    if vector_at === nothing
-        project!(M, pX, randn(representation_size(M)))
-    else
-        n = σ * randn(size(pX)) # Gaussian in embedding
-        project!(M, pX, vector_at, n) # project to TpM (keeps Gaussianness)
-    end
-    return pX
+    return rand!(Random.default_rng(), pX; vector_at=vector_at, σ=σ)
 end
 function Random.rand!(
     rng::AbstractRNG,

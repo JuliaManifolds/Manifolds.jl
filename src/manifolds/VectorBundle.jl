@@ -864,16 +864,7 @@ function project!(B::VectorBundleFibers, Y, p, X)
 end
 
 function Random.rand!(M::VectorBundle, pX; vector_at=nothing)
-    pXM, pXF = submanifold_components(M.manifold, pX)
-    if vector_at === nothing
-        rand!(M.manifold, pXM)
-        rand!(M.manifold, pXF; vector_at=pXM)
-    else
-        vector_atM, vector_atF = submanifold_components(M.manifold, vector_at)
-        rand!(M.manifold, pXM; vector_at=vector_atM)
-        rand!(M.manifold, pXF; vector_at=vector_atM)
-    end
-    return pX
+    return rand!(Random.default_rng(), M, pX; vector_at=vector_at)
 end
 function Random.rand!(rng::AbstractRNG, M::VectorBundle, pX; vector_at=nothing)
     pXM, pXF = submanifold_components(M.manifold, pX)
