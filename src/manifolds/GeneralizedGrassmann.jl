@@ -316,6 +316,41 @@ function project!(M::GeneralizedGrassmann, Y, p, X)
 end
 
 @doc raw"""
+    rand(::GeneralizedGrassmann; vector_at=nothing, σ::Real=1.0)
+
+When `vector_at` is `nothing`, return a random (Gaussian) point `p` on the [`GeneralizedGrassmann`](@ref)
+manifold `M` by generating a (Gaussian) matrix with standard deviation `σ` and return the
+(generalized) orthogonalized version, i.e. return the projection onto the manifold of the
+Q component of the QR decomposition of the random matrix of size ``n×k``.
+
+When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
+``T_{vector\_at}\mathrm{St}(n,k)`` with mean zero and standard deviation `σ` by projecting a
+random Matrix onto the tangent vector at `vector_at`.
+"""
+rand(::GeneralizedGrassmann; σ::Real=1.0)
+
+function Random.rand!(M::GeneralizedGrassmann{n,k,ℝ}, pX; kwargs...) where {n,k}
+    return Random.rand!(Random.default_rng(), M, pX; kwargs...)
+end
+function Random.rand!(
+    rng::AbstractRNG,
+    M::GeneralizedGrassmann{n,k,ℝ},
+    pX;
+    vector_at=nothing,
+    σ::Real=one(real(eltype(pX))),
+) where {n,k}
+    if vector_at === nothing
+        A = σ * randn(rng, eltype(pX), n, k)
+        project!(M, pX, Matrix(qr(A).Q))
+    else
+        Z = σ * randn(rng, eltype(pX), size(pX))
+        project!(M, pX, vector_at, Z)
+        normalize!(pX)
+    end
+    return pX
+end
+
+@doc raw"""
     representation_size(M::GeneralizedGrassmann{n,k})
 
 Return the represenation size or matrix dimension of a point on the [`GeneralizedGrassmann`](@ref)

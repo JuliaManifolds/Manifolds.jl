@@ -572,7 +572,7 @@ project(::Euclidean{Tuple{}}, ::Number, X::Number) = X
 project!(::Euclidean, Y, p, X) = copyto!(Y, X)
 
 function Random.rand!(::Euclidean, pX; σ=one(eltype(pX)), vector_at=nothing)
-    pX .= randn(size(pX)) .* σ
+    pX .= randn(eltype(pX), size(pX)) .* σ
     return pX
 end
 function Random.rand!(
@@ -582,7 +582,7 @@ function Random.rand!(
     σ=one(eltype(pX)),
     vector_at=nothing,
 )
-    pX .= randn(rng, size(pX)) .* σ
+    pX .= randn(rng, eltype(pX), size(pX)) .* σ
     return pX
 end
 

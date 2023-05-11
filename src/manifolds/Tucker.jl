@@ -480,10 +480,8 @@ function get_basis(
     D = ndims(𝔄)
     n⃗ = size(𝔄)
     r⃗ = size(𝔄.hosvd.core)
-
     U = 𝔄.hosvd.U
     U⊥ = ntuple(d -> Matrix(qr(I - U[d] * U[d]', Val(true)).Q)[:, 1:(n⃗[d] - r⃗[d])], D)
-
     basis = HOSVDBasis(𝔄, U⊥)
     return CachedBasis(basisType, basis)
 end

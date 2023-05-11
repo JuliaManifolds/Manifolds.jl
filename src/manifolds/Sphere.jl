@@ -408,9 +408,9 @@ project!(::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 
 function Random.rand!(M::AbstractSphere, pX; vector_at=nothing, σ=one(eltype(pX)))
     if vector_at === nothing
-        project!(M, pX, randn(representation_size(M)))
+        project!(M, pX, randn(eltype(pX), representation_size(M)))
     else
-        n = σ * randn(size(pX)) # Gaussian in embedding
+        n = σ * randn(eltype(pX), size(pX)) # Gaussian in embedding
         project!(M, pX, vector_at, n) #project to TpM (keeps Gaussianness)
     end
     return pX
@@ -423,9 +423,9 @@ function Random.rand!(
     σ=one(eltype(pX)),
 )
     if vector_at === nothing
-        project!(M, pX, randn(rng, representation_size(M)))
+        project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
     else
-        n = σ * randn(rng, size(pX)) # Gaussian in embedding
+        n = σ * randn(rng, eltype(pX), size(pX)) # Gaussian in embedding
         project!(M, pX, vector_at, n) #project to TpM (keeps Gaussianness)
     end
     return pX

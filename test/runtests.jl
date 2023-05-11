@@ -104,6 +104,10 @@ include("utils.jl")
                 @test allocate([1 2; 3 4], Float64, Size(3, 3)) isa Matrix{Float64}
                 @test allocate(SA[1 2; 3 4], Float64, Size(3, 3)) isa MMatrix{3,3,Float64}
                 @test allocate(SA[1 2; 3 4], Size(3, 3)) isa MMatrix{3,3,Int}
+                @test Manifolds.quat_promote(Float64) === Quaternions.QuaternionF64
+                @test Manifolds.quat_promote(Float32) === Quaternions.QuaternionF32
+                @test Manifolds.quat_promote(QuaternionF64) === Quaternions.QuaternionF64
+                @test Manifolds.quat_promote(QuaternionF32) === Quaternions.QuaternionF32
             end
             @testset "eigen_safe" begin
                 @test Manifolds.eigen_safe(SA[1.0 0.0; 0.0 1.0]) isa
