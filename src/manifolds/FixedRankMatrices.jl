@@ -471,14 +471,6 @@ function Random.rand(
 end
 
 function Random.rand!(
-    M::FixedRankMatrices{m,n,k},
-    pX;
-    vector_at=nothing,
-    kwargs...,
-) where {m,n,k}
-    return rand!(Random.default_rng(), M, pX; vector_at=vector_at, kwargs...)
-end
-function Random.rand!(
     rng::AbstractRNG,
     ::FixedRankMatrices{m,n,k},
     pX;

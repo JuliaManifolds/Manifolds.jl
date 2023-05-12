@@ -290,9 +290,7 @@ function Random.rand(
         convert(TResult, _fix_random_rotation(A))
     end
 end
-function Random.rand!(M::Rotations, pX; vector_at=nothing, σ::Real=one(eltype(pX)))
-    return rand!(Random.default_rng(), M, pX; vector_at=vector_at, σ=σ)
-end
+
 function Random.rand!(
     rng::AbstractRNG,
     M::Rotations,

@@ -403,8 +403,13 @@ Generate a random symmetric positive definite matrix on the
 """
 rand(M::SymmetricPositiveDefinite; σ::Real=1)
 
-function Random.rand!(M::SymmetricPositiveDefinite, pX::SPDPoint; kwargs...)
-    p = rand(M; kwargs...)
+function Random.rand!(
+    rng::AbstractRNG,
+    M::SymmetricPositiveDefinite,
+    pX::SPDPoint;
+    kwargs...,
+)
+    p = rand(rng, M; kwargs...)
     pP = SPDPoint(p; store_p=false, store_sqrt=false, store_sqrt_inv=false)
     !ismissing(pX.p) && pX.p .= p
     copyto!(pX.eigen.values, pP.eigen.values)
@@ -412,24 +417,6 @@ function Random.rand!(M::SymmetricPositiveDefinite, pX::SPDPoint; kwargs...)
     !ismissing(pX.sqrt) && pX.sqrt .= spd_sqrt(pP)
     !ismissing(pX.sqrt_inv) && pX.sqrt_inv .= spd_sqrt_inv(pP)
     return pX
-end
-
-function Random.rand!(
-    M::SymmetricPositiveDefinite{N},
-    pX;
-    vector_at=nothing,
-    σ::Real=one(eltype(pX)) /
-            (vector_at === nothing ? 1 : norm(convert(AbstractMatrix, vector_at))),
-    tangent_distr=:Gaussian,
-) where {N}
-    return rand!(
-        Random.default_rng(),
-        M,
-        pX;
-        vector_at=vector_at,
-        σ=σ,
-        tangent_distr=tangent_distr,
-    )
 end
 function Random.rand!(
     rng::AbstractRNG,

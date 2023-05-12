@@ -863,9 +863,6 @@ function project!(B::VectorBundleFibers, Y, p, X)
     )
 end
 
-function Random.rand!(M::VectorBundle, pX; vector_at=nothing)
-    return rand!(Random.default_rng(), M, pX; vector_at=vector_at)
-end
 function Random.rand!(rng::AbstractRNG, M::VectorBundle, pX; vector_at=nothing)
     pXM, pXF = submanifold_components(M.manifold, pX)
     if vector_at === nothing
@@ -877,10 +874,6 @@ function Random.rand!(rng::AbstractRNG, M::VectorBundle, pX; vector_at=nothing)
         rand!(rng, M.manifold, pXF; vector_at=vector_atM)
     end
     return pX
-end
-function Random.rand!(M::TangentSpaceAtPoint, X; vector_at=nothing)
-    rand!(M.fiber.manifold, X; vector_at=M.point)
-    return X
 end
 function Random.rand!(rng::AbstractRNG, M::TangentSpaceAtPoint, X; vector_at=nothing)
     rand!(rng, M.fiber.manifold, X; vector_at=M.point)

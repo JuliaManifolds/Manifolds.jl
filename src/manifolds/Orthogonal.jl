@@ -9,9 +9,6 @@ const OrthogonalMatrices{n} = GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOn
 
 OrthogonalMatrices(n) = OrthogonalMatrices{n}()
 
-function Random.rand!(M::OrthogonalMatrices, pX; vector_at=nothing, σ::Real=one(eltype(pX)))
-    return rand!(Random.default_rng(), M, pX; vector_at=vector_at, σ=σ)
-end
 function Random.rand!(
     rng::AbstractRNG,
     M::OrthogonalMatrices,

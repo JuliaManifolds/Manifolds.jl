@@ -329,9 +329,6 @@ random Matrix onto the tangent vector at `vector_at`.
 """
 rand(::GeneralizedGrassmann; σ::Real=1.0)
 
-function Random.rand!(M::GeneralizedGrassmann{n,k,ℝ}, pX; kwargs...) where {n,k}
-    return Random.rand!(Random.default_rng(), M, pX; kwargs...)
-end
 function Random.rand!(
     rng::AbstractRNG,
     M::GeneralizedGrassmann{n,k,ℝ},

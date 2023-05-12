@@ -406,9 +406,6 @@ project(::AbstractSphere, ::Any, ::Any)
 
 project!(::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 
-function Random.rand!(M::AbstractSphere, pX; vector_at=nothing, σ=one(eltype(pX)))
-    return rand!(Random.default_rng(), M, pX; vector_at=vector_at, σ=σ)
-end
 function Random.rand!(
     rng::AbstractRNG,
     M::AbstractSphere,
