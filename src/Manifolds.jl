@@ -324,9 +324,7 @@ include("utils.jl")
 
 include("product_representations.jl")
 
-function Random.rand!(M::AbstractManifold, pX; kwargs...)
-    return rand!(Random.default_rng(), M, pX; kwargs...)
-end
+include("manifold_fallbacks.jl")
 
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
