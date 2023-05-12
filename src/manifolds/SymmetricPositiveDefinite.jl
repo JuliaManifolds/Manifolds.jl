@@ -405,21 +405,6 @@ rand(M::SymmetricPositiveDefinite; σ::Real=1)
 
 function Random.rand!(
     rng::AbstractRNG,
-    M::SymmetricPositiveDefinite,
-    pX::SPDPoint;
-    kwargs...,
-)
-    p = rand(rng, M; kwargs...)
-    pP = SPDPoint(p; store_p=false, store_sqrt=false, store_sqrt_inv=false)
-    !ismissing(pX.p) && pX.p .= p
-    copyto!(pX.eigen.values, pP.eigen.values)
-    copyto!(pX.eigen.vectors, pP.eigen.vectors)
-    !ismissing(pX.sqrt) && pX.sqrt .= spd_sqrt(pP)
-    !ismissing(pX.sqrt_inv) && pX.sqrt_inv .= spd_sqrt_inv(pP)
-    return pX
-end
-function Random.rand!(
-    rng::AbstractRNG,
     M::SymmetricPositiveDefinite{N},
     pX;
     vector_at=nothing,
