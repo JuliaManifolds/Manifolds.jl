@@ -3,8 +3,6 @@ using FiniteDifferences
 using Manifolds: RiemannianProjectionBackend
 using ManifoldDiff
 
-using FiniteDifferences
-
 @testset "Symplectic" begin
     @testset "Real" begin
         Sp_2 = Symplectic(2 * 1)
@@ -202,8 +200,8 @@ using FiniteDifferences
                         exp => true,
                         log => false,
                         representation_size => true,
-                    );
-                    tol_functions=Dict{Function,Bool}(is_point => 1e8),
+                    ),
+                    tol_functions=Dict{Function,Float64}(is_point => 1e8),
                     retraction_methods=[CayleyRetraction()],
                     retraction_method=CayleyRetraction(),
                     inverse_retraction_method=CayleyInverseRetraction(),
