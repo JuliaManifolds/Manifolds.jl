@@ -138,7 +138,8 @@ function check_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
             "The point $(p) does not lie on $(M) since its not a symmetric matrix:",
         )
     end
-    if !isposdef(p)
+    # Since we checked symmetry above, this check can be done on the symmetric
+    if !isposdef(Symmetric(p))
         return DomainError(
             eigvals(p),
             "The point $p does not lie on $(M) since its not a positive definite matrix.",

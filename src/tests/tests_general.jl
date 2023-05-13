@@ -882,7 +882,7 @@ function test_parallel_transport(
     length(P) < 2 &&
         error("The Parallel Transport test set requires at least 2 points in P")
     Test.@testset "Parallel Transport" begin
-        along && @warn "parallel transport along test not yet implemented"
+        along && @warn "A test for parallel transport along test not yet implemented"
         Test.@testset "To (a point)" begin # even with to =false this displays no
             if to
                 for i in 1:(length(P) - 1)
