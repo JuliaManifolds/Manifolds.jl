@@ -1,4 +1,6 @@
 
+using .OrdinaryDiffEq: SciMLBase
+
 """
     IntegratorTerminatorNearChartBoundary{TKwargs}
 
@@ -49,7 +51,7 @@ Solution of an ODE on a manifold `M` in charts of an [`AbstractAtlas`](@ref) `A`
 struct StitchedChartSolution{Prob,TM<:AbstractManifold,TA<:AbstractAtlas,TChart}
     M::TM
     A::TA
-    sols::Vector{Tuple{OrdinaryDiffEq.SciMLBase.AbstractODESolution,TChart}}
+    sols::Vector{Tuple{SciMLBase.AbstractODESolution,TChart}}
 end
 
 function StitchedChartSolution(

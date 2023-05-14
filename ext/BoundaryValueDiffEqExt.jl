@@ -1,3 +1,13 @@
+module BoundaryValueDiffEqExt
+
+using Manifolds
+using ManifoldsBase
+
+using Manifolds: affine_connection
+
+import Manifolds: solve_chart_log_bvp, estimate_distance_from_bvp
+
+isdefined(Base, :get_extension) ? (using BoundaryValueDiffEq) : (using .BoundaryValueDiffEq)
 
 function chart_log_problem!(du, u, params, t)
     M, A, i = params
@@ -84,4 +94,6 @@ function estimate_distance_from_bvp(
     mid = length(a1)
     Xc = sol.u[1][(mid + 1):end]
     return norm(M, A, i, a1, Xc)
+end
+
 end

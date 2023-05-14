@@ -88,7 +88,6 @@ import ManifoldsBase:
     _inverse_retract!,
     inverse_retract_cayley!,
     inverse_retract_embedded!,
-    inverse_retract_nlsolve!,
     inverse_retract_pade!,
     inverse_retract_polar!,
     inverse_retract_project!,
@@ -478,12 +477,10 @@ function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
     return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
 
-function __init__()
-    @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
-        using .BoundaryValueDiffEq
-        include("differentiation/bvp.jl")
-    end
+function solve_chart_log_bvp end
+function estimate_distance_from_bvp end
 
+function __init__()
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
         using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
         include("differentiation/ode.jl")
@@ -494,9 +491,14 @@ function __init__()
         end
     end
 
-    @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
-        using .NLsolve: NLsolve
-        include("nlsolve.jl")
+    @static if !isdefined(Base, :get_extension)
+        @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
+            include("../ext/BoundaryValueDiffEqExt.jl")
+        end
+
+        @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
+            include("../ext/NLsolveExt.jl")
+        end
     end
 
     @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin

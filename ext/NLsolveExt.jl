@@ -1,3 +1,9 @@
+module NLsolveExt
+
+using Manifolds
+using ManifoldsBase
+
+isdefined(Base, :get_extension) ? (using NLsolve: NLsolve) : (using .NLsolve: NLsolve)
 
 @doc raw"""
     inverse_retract(M, p, q method::NLSolveInverseRetraction; kwargs...)
@@ -12,7 +18,7 @@ See [`NLSolveInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.
 """
 inverse_retract(::AbstractManifold, p, q, ::NLSolveInverseRetraction; kwargs...)
 
-function inverse_retract_nlsolve!(
+function ManifoldsBase.inverse_retract_nlsolve!(
     M::AbstractManifold,
     X,
     p,
@@ -40,12 +46,12 @@ function _inverse_retract_nlsolve(
         F .-= q
         return F
     end
-    isdefined(Manifolds, :NLsolve) ||
-        @warn "To use NLSolveInverseRetraction, NLsolve must be loaded using `using NLsolve`."
     res = NLsolve.nlsolve(f!, X0; m.nlsolve_kwargs...)
     if !res.f_converged
         @debug res
         throw(OutOfInjectivityRadiusError())
     end
     return res
+end
+
 end
