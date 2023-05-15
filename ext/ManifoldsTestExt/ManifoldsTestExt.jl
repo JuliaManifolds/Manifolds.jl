@@ -1,14 +1,28 @@
 module ManifoldsTestExt
 
-using Manifolds
-using ManifoldsBase
+if isdefined(Base, :get_extension)
+    using Manifolds
+    using ManifoldsBase
 
-import Manifolds: test_manifold, test_group, test_action
-using Manifolds: get_chart_index
+    import Manifolds: test_manifold, test_group, test_action
+    using Manifolds: RieszRepresenterCotangentVector, get_chart_index
 
-using Random: MersenneTwister, rand!
+    using Random: MersenneTwister, rand!
 
-isdefined(Base, :get_extension) ? (using Test: Test) : (using ..Test: Test)
+    using Test: Test
+else
+    # imports need to be relative for Requires.jl-based workflows:
+    # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
+    using ..Manifolds
+    using ..ManifoldsBase
+
+    import ..Manifolds: test_manifold, test_group, test_action
+    using ..Manifolds: RieszRepresenterCotangentVector, get_chart_index
+
+    using ..Random: MersenneTwister, rand!
+
+    using ..Test: Test
+end
 
 include("tests_general.jl")
 include("tests_group.jl")

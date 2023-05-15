@@ -1,19 +1,31 @@
 module ManifoldsOrdinaryDiffEqDiffEqCallbacksExt
 
-using Manifolds
-using Manifolds:
-    IntegratorTerminatorNearChartBoundary,
-    affine_connection,
-    get_chart_index,
-    transition_map!,
-    transition_map_diff!
-import Manifolds: solve_chart_exp_ode, solve_chart_parallel_transport_ode
-using ManifoldsBase
-
 if isdefined(Base, :get_extension)
+    using Manifolds
+    using Manifolds:
+        IntegratorTerminatorNearChartBoundary,
+        affine_connection,
+        get_chart_index,
+        transition_map!,
+        transition_map_diff!
+    import Manifolds: solve_chart_exp_ode, solve_chart_parallel_transport_ode
+    using ManifoldsBase
+
     using DiffEqCallbacks
     using OrdinaryDiffEq: OrdinaryDiffEq, SciMLBase, Rodas5, AutoVern9, ODEProblem, solve
 else
+    # imports need to be relative for Requires.jl-based workflows:
+    # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
+    using ..Manifolds
+    using ..Manifolds:
+        IntegratorTerminatorNearChartBoundary,
+        affine_connection,
+        get_chart_index,
+        transition_map!,
+        transition_map_diff!
+    import ..Manifolds: solve_chart_exp_ode, solve_chart_parallel_transport_ode
+    using ..ManifoldsBase
+
     using ..DiffEqCallbacks
     using ..OrdinaryDiffEq: OrdinaryDiffEq, SciMLBase, Rodas5, AutoVern9, ODEProblem, solve
 end
