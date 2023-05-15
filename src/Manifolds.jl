@@ -490,6 +490,15 @@ function test_action end
 # end of functions populated with methods by extensions
 
 function __init__()
+    @static if isdefined(Base.Experimental, :register_error_hint)
+        Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
+            if exc.f === solve_exp_ode
+                print(io, "\nDid you forget to load OrdinaryDiffEq? For example: ")
+                printstyled(io, "`using OrdinaryDiffEq`", color=:cyan)
+            end
+        end
+    end
+
     @static if !isdefined(Base, :get_extension)
         @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
             @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
