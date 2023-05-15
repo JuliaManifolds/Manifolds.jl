@@ -171,7 +171,6 @@ import Base:
     transpose
 
 using Base.Iterators: repeated
-using Colors: RGBA
 using Distributions
 using Einsum: @einsum
 using HybridArrays
@@ -309,8 +308,6 @@ using Markdown: @doc_str
 using MatrixEquations: lyapc, sylvc
 using Quaternions: Quaternions
 using Random
-using RecipesBase
-using RecipesBase: @recipe, @series
 using RecursiveArrayTools: ArrayPartition
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
@@ -477,14 +474,15 @@ function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
     return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
 
+# functions populated with methods by extensions
+
 function solve_chart_log_bvp end
 function estimate_distance_from_bvp end
 
+# end of functions populated with methods by extensions
+
 function __init__()
     @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-        using .OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
-        include("differentiation/ode.jl")
-
         @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
             using .DiffEqCallbacks
             include("differentiation/ode_callback.jl")
@@ -492,12 +490,22 @@ function __init__()
     end
 
     @static if !isdefined(Base, :get_extension)
+        @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
+            include("../ext/ManifoldsOrdinaryDiffEqExt.jl")
+        end
+
         @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
-            include("../ext/BoundaryValueDiffEqExt.jl")
+            include("../ext/ManifoldsBoundaryValueDiffEqExt.jl")
         end
 
         @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
-            include("../ext/NLsolveExt.jl")
+            include("../ext/ManifoldsNLsolveExt.jl")
+        end
+
+        @require RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01" begin
+            @require Colors = "5ae59095-9a9b-59fe-a467-6f913c188581" begin
+                include("../ext/ManifoldsRecipesBaseExt.jl")
+            end
         end
     end
 
@@ -507,20 +515,6 @@ function __init__()
         export test_manifold
         include("tests/tests_group.jl")
         export test_group, test_action
-    end
-
-    @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
-        using RecipesBase: @recipe, @series
-        using Colors: RGBA
-        include("recipes.jl")
-    end
-
-    @require RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01" begin
-        @require Colors = "5ae59095-9a9b-59fe-a467-6f913c188581" begin
-            using .RecipesBase: @recipe, @series
-            using Colors: RGBA
-            include("recipes.jl")
-        end
     end
 
     return nothing

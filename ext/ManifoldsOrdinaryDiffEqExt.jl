@@ -1,3 +1,17 @@
+module ManifoldsOrdinaryDiffEqExt
+
+using ManifoldsBase
+using ManifoldsBase: TraitList
+
+using Manifolds
+using Manifolds: @einsum
+
+if isdefined(Base, :get_extension)
+    using OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
+else
+    using ..OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
+end
+
 function solve_exp_ode(
     M::AbstractManifold,
     p,
@@ -46,4 +60,6 @@ function exp!(
 )
     copyto!(M, q, solve_exp_ode(M, p, X, t; kwargs...))
     return q
+end
+
 end

@@ -1,9 +1,9 @@
-module NLsolveExt
+module ManifoldsNLsolveExt
 
 using Manifolds
 using ManifoldsBase
 
-isdefined(Base, :get_extension) ? (using NLsolve: NLsolve) : (using .NLsolve: NLsolve)
+isdefined(Base, :get_extension) ? (using NLsolve: NLsolve) : (using ..NLsolve: NLsolve)
 
 @doc raw"""
     inverse_retract(M, p, q method::NLSolveInverseRetraction; kwargs...)

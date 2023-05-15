@@ -1,3 +1,15 @@
+module ManifoldsRecipesBaseExt
+
+using Manifolds
+
+using Colors: RGBA
+
+if isdefined(Base, :get_extension)
+    using RecipesBase: @recipe, @series
+else
+    using ..RecipesBase: @recipe, @series
+end
+
 #
 # Defaults
 #
@@ -303,4 +315,6 @@ end
         end
     end
     return x, y, z
+end
+
 end

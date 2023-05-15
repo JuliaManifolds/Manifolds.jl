@@ -1,5 +1,5 @@
 
-using .OrdinaryDiffEq: SciMLBase
+using .OrdinaryDiffEq: SciMLBase, Rodas5, AutoVern9, ODEProblem, solve
 
 """
     IntegratorTerminatorNearChartBoundary{TKwargs}
