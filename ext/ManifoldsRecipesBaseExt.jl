@@ -2,12 +2,12 @@ module ManifoldsRecipesBaseExt
 
 using Manifolds
 
-using Colors: RGBA
-
 if isdefined(Base, :get_extension)
+    using Colors: RGBA
     using RecipesBase: @recipe, @series
 else
     using ..RecipesBase: @recipe, @series
+    using ..Colors: RGBA
 end
 
 #

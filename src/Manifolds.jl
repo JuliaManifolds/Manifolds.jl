@@ -349,6 +349,7 @@ METAMANIFOLDS = [
 
 # Features II: That require metas
 include("atlases.jl")
+include("differentiation/ode_callback.jl")
 include("cotangent_space.jl")
 
 # Meta Manifolds II: Power Manifolds
@@ -479,17 +480,23 @@ end
 function solve_chart_log_bvp end
 function estimate_distance_from_bvp end
 
+function solve_chart_exp_ode end
+function solve_chart_parallel_transport_ode end
+
+function test_manifold end
+function test_group end
+function test_action end
+
 # end of functions populated with methods by extensions
 
 function __init__()
-    @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-        @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
-            using .DiffEqCallbacks
-            include("differentiation/ode_callback.jl")
-        end
-    end
-
     @static if !isdefined(Base, :get_extension)
+        @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
+            @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
+                include("../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.jl")
+            end
+        end
+
         @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
             include("../ext/ManifoldsOrdinaryDiffEqExt.jl")
         end
@@ -507,18 +514,17 @@ function __init__()
                 include("../ext/ManifoldsRecipesBaseExt.jl")
             end
         end
-    end
 
-    @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
-        using .Test: Test
-        include("tests/tests_general.jl")
-        export test_manifold
-        include("tests/tests_group.jl")
-        export test_group, test_action
+        @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
+            include("../ext/ManifoldsTestExt/ManifoldsTestExt.jl")
+        end
     end
 
     return nothing
 end
+
+export test_manifold
+export test_group, test_action
 
 #
 export CoTVector, AbstractManifold, AbstractManifoldPoint, TVector
