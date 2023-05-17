@@ -178,10 +178,6 @@ with mean zero and standard deviation `σ`.
 """
 rand(::KendallsShapeSpace; σ::Real=1.0)
 
-function Random.rand!(M::KendallsShapeSpace{n,k}, pX; vector_at=nothing) where {n,k}
-    rand!(get_embedding(M), pX; vector_at=vector_at)
-    return pX
-end
 function Random.rand!(
     rng::AbstractRNG,
     M::KendallsShapeSpace{n,k},

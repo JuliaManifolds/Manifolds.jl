@@ -321,9 +321,6 @@ random Matrix onto the tangent vector at `vector_at`.
 """
 rand(::Stiefel; σ::Real=1.0)
 
-function Random.rand!(M::Stiefel, pX; kwargs...)
-    return Random.rand!(Random.default_rng(), M, pX; kwargs...)
-end
 function Random.rand!(
     rng::AbstractRNG,
     M::Stiefel{n,k,𝔽},
