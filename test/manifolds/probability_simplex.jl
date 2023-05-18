@@ -99,4 +99,13 @@ include("../utils.jl")
         riemannian_gradient!(M, Z, p, Y)
         @test X == Z
     end
+
+    @testset "Simplex with boundary" begin
+        Mb = ProbabilitySimplex(2; closed=true)
+        p = [0, 0.5, 0.5]
+        X = [0, 1, -1]
+        Y = [0, 2, -2]
+        @test is_point(Mb, p)
+        @test inner(Mb, p, X, Y) == 8
+    end
 end
