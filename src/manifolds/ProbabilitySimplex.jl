@@ -8,8 +8,8 @@ The (relative interior of) the probability simplex is the set
 ````
 where $\mathbb{1}=(1,…,1)^{\mathrm{T}}∈ ℝ^{n+1}$ denotes the vector containing only ones.
 
-If `closed` is set to `false`, then the object represents an open simplex. Otherwise,
-that is when `closed` is set to `true`, the boundary is also included:
+If `closed` is set to `:open`, then the object represents an open simplex. Otherwise,
+that is when `closed` is set to `:Closed`, the boundary is also included:
 ````math
 \hat{Δ}^n := \biggl\{ p ∈ ℝ^{n+1}\ \big|\ p_i \geq 0 \text{ for all } i=1,…,n+1,
 \text{ and } ⟨\mathbb{1},p⟩ = \sum_{i=1}^{n+1} p_i = 1\biggr\},
@@ -32,7 +32,7 @@ This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017
 
 # Constructor
 
-    ProbabilitySimplex(n::Int; closed::Bool=false)
+    ProbabilitySimplex(n::Int; closed::Symbol=:open)
 
 [^ÅströmPetraSchmitzerSchnörr2017]:
     > F. Åström, S. Petra, B. Schmitzer, C. Schnörr: “Image Labeling by Assignment”,
@@ -42,7 +42,12 @@ This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017
 """
 struct ProbabilitySimplex{n,closed} <: AbstractDecoratorManifold{ℝ} end
 
-ProbabilitySimplex(n::Int; closed::Bool=false) = ProbabilitySimplex{n,closed}()
+function ProbabilitySimplex(n::Int; closed::Symbol=:open)
+    if closed !== :open && closed !== :Closed
+        throw(ArgumentError("closed can only be set to :open or :Closed; received $closed"))
+    end
+    return ProbabilitySimplex{n,closed}()
+end
 
 """
     FisherRaoMetric <: AbstractMetric
@@ -103,13 +108,13 @@ the embedding with positive entries that sum to one
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(M::ProbabilitySimplex{n,closed}, p; kwargs...) where {n,closed}
-    if closed && minimum(p) < 0
+    if closed === :Closed && minimum(p) < 0
         return DomainError(
             minimum(p),
             "The point $(p) does not lie on the $(M) since it has negative entries.",
         )
     end
-    if !closed && minimum(p) <= 0
+    if closed === :open && minimum(p) <= 0
         return DomainError(
             minimum(p),
             "The point $(p) does not lie on the $(M) since it has nonpositive entries.",
@@ -225,7 +230,7 @@ Proposition 2.1 in [^AyJostLeSchwachhöfer2017].
 """
 function inner(::ProbabilitySimplex{n,closed}, p, X, Y) where {n,closed}
     d = zero(Base.promote_eltype(p, X, Y))
-    if closed
+    if closed === :Closed
         @inbounds for i in eachindex(p, X, Y)
             if p[i] > 0
                 d += X[i] * Y[i] / p[i]

@@ -101,11 +101,13 @@ include("../utils.jl")
     end
 
     @testset "Simplex with boundary" begin
-        Mb = ProbabilitySimplex(2; closed=true)
+        Mb = ProbabilitySimplex(2; closed=:Closed)
         p = [0, 0.5, 0.5]
         X = [0, 1, -1]
         Y = [0, 2, -2]
         @test is_point(Mb, p)
         @test inner(Mb, p, X, Y) == 8
+
+        @test_throws ArgumentError ProbabilitySimplex(2; closed=:tomato)
     end
 end
