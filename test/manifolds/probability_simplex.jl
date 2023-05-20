@@ -106,6 +106,7 @@ include("../utils.jl")
         X = [0, 1, -1]
         Y = [0, 2, -2]
         @test is_point(Mb, p)
+        @test_throws DomainError is_point(Mb, p .+ 1, true)
         @test inner(Mb, p, X, Y) == 8
 
         @test_throws ArgumentError ProbabilitySimplex(2; boundary=:tomato)
