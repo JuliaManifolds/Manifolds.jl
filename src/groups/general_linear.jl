@@ -247,7 +247,7 @@ project!(::GeneralLinear, q, p) = copyto!(q, p)
 project!(::GeneralLinear, Y, p, X) = copyto!(Y, X)
 
 @doc raw"""
-    Random.rand(G::GeneralLinear; kwargs...0)
+    Random.rand(G::GeneralLinear; vector_at=nothing, kwargs...)
 
 If `vector_at` is `nothing`, return a random point on the [`GeneralLinear`](@ref) group `G`
 by using `rand` in the embedding.
