@@ -246,7 +246,6 @@ project(::GeneralLinear, p, X) = X
 project!(::GeneralLinear, q, p) = copyto!(q, p)
 project!(::GeneralLinear, Y, p, X) = copyto!(Y, X)
 
-
 @doc raw"""
     Random.rand(G::GeneralLinear; kwargs...0)
 
