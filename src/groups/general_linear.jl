@@ -246,6 +246,18 @@ project(::GeneralLinear, p, X) = X
 project!(::GeneralLinear, q, p) = copyto!(q, p)
 project!(::GeneralLinear, Y, p, X) = copyto!(Y, X)
 
+
+@doc raw"""
+    Random.rand(G::GeneralLinear; kwargs...0)
+
+If `vector_at` is `nothing`, return a random point on the [`GeneralLinear`](@ref) group `G`
+by using `rand` in the embedding.
+
+If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
+the point `vector_at` on the [`GeneralLinear`](@ref) by using by using `rand` in the embedding.
+"""
+rand(G::GeneralLinear; kwargs...)
+
 function Random.rand!(G::GeneralLinear, pX; kwargs...)
     rand!(get_embedding(G), pX; kwargs...)
     return pX

@@ -353,11 +353,24 @@ function project!(M::HeisenbergGroup{n}, Y, p, X) where {n}
     return Y
 end
 
+@doc raw"""
+    Random.rand(M::HeisenbergGroup; vector_at = nothing, σ::Real=1.0)
+
+If `vector_at` is `nothing`, return a random point on the [`HeisenbergGroup`](@ref) `M`
+by sampling elements of the first row and the last column from the normal distribution with
+mean 0 and standard deviation `σ`.
+
+If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
+the point `vector_at` on the [`HeisenbergGroup`](@ref) by using a normal distribution with
+mean 0 and standard deviation `σ`.
+"""
+rand(M::HeisenbergGroup; vector_at=nothing, σ::Real=1.0)
+
 function Random.rand!(
     rng::AbstractRNG,
     ::HeisenbergGroup{n},
     pX;
-    σ=one(eltype(pX)),
+    σ::Real=one(eltype(pX)),
     vector_at=nothing,
 ) where {n}
     if vector_at === nothing
