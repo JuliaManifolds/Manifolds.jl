@@ -1,5 +1,5 @@
 @doc raw"""
-    ProbabilitySimplex{n,closed} <: AbstractDecoratorManifold{𝔽}
+    ProbabilitySimplex{n,boundary} <: AbstractDecoratorManifold{𝔽}
 
 The (relative interior of) the probability simplex is the set
 ````math
@@ -8,8 +8,8 @@ The (relative interior of) the probability simplex is the set
 ````
 where $\mathbb{1}=(1,…,1)^{\mathrm{T}}∈ ℝ^{n+1}$ denotes the vector containing only ones.
 
-If `closed` is set to `:open`, then the object represents an open simplex. Otherwise,
-that is when `closed` is set to `:Closed`, the boundary is also included:
+If `boundary` is set to `:open`, then the object represents an open simplex. Otherwise,
+that is when `boundary` is set to `:closed`, the boundary is also included:
 ````math
 \hat{Δ}^n := \biggl\{ p ∈ ℝ^{n+1}\ \big|\ p_i \geq 0 \text{ for all } i=1,…,n+1,
 \text{ and } ⟨\mathbb{1},p⟩ = \sum_{i=1}^{n+1} p_i = 1\biggr\},
@@ -32,7 +32,7 @@ This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017
 
 # Constructor
 
-    ProbabilitySimplex(n::Int; closed::Symbol=:open)
+    ProbabilitySimplex(n::Int; boundary::Symbol=:open)
 
 [^ÅströmPetraSchmitzerSchnörr2017]:
     > F. Åström, S. Petra, B. Schmitzer, C. Schnörr: “Image Labeling by Assignment”,
@@ -40,13 +40,17 @@ This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017
     > doi: [10.1007/s10851-016-0702-4](https://doi.org/10.1007/s10851-016-0702-4)
     > arxiv: [1603.05285](https://arxiv.org/abs/1603.05285).
 """
-struct ProbabilitySimplex{n,closed} <: AbstractDecoratorManifold{ℝ} end
+struct ProbabilitySimplex{n,boundary} <: AbstractDecoratorManifold{ℝ} end
 
-function ProbabilitySimplex(n::Int; closed::Symbol=:open)
-    if closed !== :open && closed !== :Closed
-        throw(ArgumentError("closed can only be set to :open or :Closed; received $closed"))
+function ProbabilitySimplex(n::Int; boundary::Symbol=:open)
+    if boundary !== :open && boundary !== :closed
+        throw(
+            ArgumentError(
+                "boundary can only be set to :open or :closed; received $boundary",
+            ),
+        )
     end
-    return ProbabilitySimplex{n,closed}()
+    return ProbabilitySimplex{n,boundary}()
 end
 
 """
@@ -107,14 +111,14 @@ Check whether `p` is a valid point on the [`ProbabilitySimplex`](@ref) `M`, i.e.
 the embedding with positive entries that sum to one
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_point(M::ProbabilitySimplex{n,closed}, p; kwargs...) where {n,closed}
-    if closed === :Closed && minimum(p) < 0
+function check_point(M::ProbabilitySimplex{n,boundary}, p; kwargs...) where {n,boundary}
+    if boundary === :closed && minimum(p) < 0
         return DomainError(
             minimum(p),
             "The point $(p) does not lie on the $(M) since it has negative entries.",
         )
     end
-    if closed === :open && minimum(p) <= 0
+    if boundary === :open && minimum(p) <= 0
         return DomainError(
             minimum(p),
             "The point $(p) does not lie on the $(M) since it has nonpositive entries.",
@@ -228,9 +232,9 @@ Proposition 2.1 in [^AyJostLeSchwachhöfer2017].
     > Mathematics. Springer International Publishing, 2017.
     > doi: [10.1007/978-3-319-56478-4](https://doi.org/10.1007/978-3-319-56478-4)
 """
-function inner(::ProbabilitySimplex{n,closed}, p, X, Y) where {n,closed}
+function inner(::ProbabilitySimplex{n,boundary}, p, X, Y) where {n,boundary}
     d = zero(Base.promote_eltype(p, X, Y))
-    if closed === :Closed
+    if boundary === :closed
         @inbounds for i in eachindex(p, X, Y)
             if p[i] > 0
                 d += X[i] * Y[i] / p[i]
@@ -417,8 +421,8 @@ function riemannian_gradient!(M::ProbabilitySimplex, X, p, Y; kwargs...)
     return X
 end
 
-function Base.show(io::IO, ::ProbabilitySimplex{n,closed}) where {n,closed}
-    return print(io, "ProbabilitySimplex($(n); closed=$closed)")
+function Base.show(io::IO, ::ProbabilitySimplex{n,boundary}) where {n,boundary}
+    return print(io, "ProbabilitySimplex($(n); boundary=$boundary)")
 end
 
 @doc raw"""
