@@ -353,6 +353,30 @@ function project!(M::HeisenbergGroup{n}, Y, p, X) where {n}
     return Y
 end
 
+function Random.rand!(
+    rng::AbstractRNG,
+    ::HeisenbergGroup{n},
+    pX;
+    σ=one(eltype(pX)),
+    vector_at=nothing,
+) where {n}
+    if vector_at === nothing
+        copyto!(pX, I)
+        va = view(pX, 1, 2:(n + 2))
+        randn!(rng, va)
+        va .*= σ
+        vb = view(pX, 2:(n + 1), n + 2)
+        randn!(rng, vb)
+        vb .*= σ
+    else
+        fill!(pX, 0)
+        randn!(rng, view(pX, 1, 2:(n + 2)))
+        randn!(rng, view(pX, 2:(n + 1), n + 2))
+        pX .*= σ
+    end
+    return pX
+end
+
 Base.show(io::IO, ::HeisenbergGroup{n}) where {n} = print(io, "HeisenbergGroup($n)")
 
 translate_diff(::HeisenbergGroup, p, q, X, ::LeftAction) = X
