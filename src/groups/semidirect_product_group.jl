@@ -123,13 +123,15 @@ function _compose!(G::SemidirectProductGroup, x, p, q)
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action
+    x_tmp = allocate(x)
     np, hp = submanifold_components(G, p)
     nq, hq = submanifold_components(G, q)
-    nx, hx = submanifold_components(G, x)
+    nx, hx = submanifold_components(G, x_tmp)
     compose!(H, hx, hp, hq)
     nxtmp = apply(A, hp, nq)
     compose!(N, nx, np, nxtmp)
     @inbounds _padpoint!(G, x)
+    copyto!(x, x_tmp)
     return x
 end
 
