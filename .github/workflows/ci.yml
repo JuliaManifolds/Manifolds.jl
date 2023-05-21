@@ -32,4 +32,4 @@ jobs:
       - uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: false
-        if: ${{ matrix.julia-version == '1.8' && matrix.os =='ubuntu-latest' }}
+        if: ${{ matrix.os =='ubuntu-latest' }}
