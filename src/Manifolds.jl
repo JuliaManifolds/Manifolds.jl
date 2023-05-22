@@ -485,6 +485,8 @@ function estimate_distance_from_bvp end
 function solve_chart_exp_ode end
 function solve_chart_parallel_transport_ode end
 
+function find_eps end
+function test_parallel_transport end
 function test_manifold end
 function test_group end
 function test_action end

@@ -8,4 +8,6 @@ interface. Similarly [`test_group`](@ref Manifolds.test_group) and [`test_action
 Manifolds.test_action
 Manifolds.test_group
 Manifolds.test_manifold
+Manifolds.find_eps
+Manifolds.test_parallel_transport
 ```

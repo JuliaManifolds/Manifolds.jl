@@ -70,7 +70,11 @@ end
 makedocs(
     # for development, we disable prettyurls
     format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
-    modules=[Manifolds],
+    modules=[
+        Manifolds,
+        isdefined(Base, :get_extension) ? Base.get_extension(Manifolds, :ManifoldsTestExt) :
+        Manifolds.ManifoldsTestExt,
+    ],
     authors="Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename="Manifolds.jl",
     pages=[
