@@ -43,6 +43,11 @@ include("group_utils.jl")
     @test compose(G, pts[1], e) == pts[1]
     @test compose(G, e, e) === e
 
+    # test in-place composition
+    o1 = copy(pts[1])
+    compose!(G, o1, o1, pts[2])
+    @test isapprox(G, o1, compose(G, pts[1], pts[2]))
+
     eA = identity_element(G)
     @test isapprox(G, eA, e)
     @test isapprox(G, e, eA)

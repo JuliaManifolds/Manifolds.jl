@@ -52,5 +52,7 @@ include("group_utils.jl")
         test_project_point=true,
         test_project_tangent=true,
         test_musical_isomorphisms=false,
+        test_rand_point=true,
+        test_rand_tvector=true,
     )
 end
