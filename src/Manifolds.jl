@@ -320,6 +320,8 @@ include("utils.jl")
 
 include("product_representations.jl")
 
+include("manifold_fallbacks.jl")
+
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")

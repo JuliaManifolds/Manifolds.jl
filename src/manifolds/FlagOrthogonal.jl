@@ -117,13 +117,6 @@ function project(M::Flag{N,dp1}, ::OrthogonalPoint, X::OrthogonalTVector) where 
 end
 
 function Random.rand!(
-    M::Flag,
-    pX::Union{OrthogonalPoint,OrthogonalTVector};
-    vector_at=nothing,
-)
-    return rand!(Random.default_rng(), M, pX; vector_at=vector_at)
-end
-function Random.rand!(
     rng::AbstractRNG,
     M::Flag{N,dp1},
     pX::Union{OrthogonalPoint,OrthogonalTVector};

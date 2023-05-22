@@ -131,6 +131,8 @@ using NLsolve
                 basis_types_to_from=basis_types,
                 exp_log_atol_multiplier=1e7,
                 retraction_atol_multiplier=1e7,
+                test_rand_point=true,
+                test_rand_tvector=true,
             )
         end
     end
