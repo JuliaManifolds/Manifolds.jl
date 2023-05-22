@@ -72,6 +72,20 @@ makedocs(
     format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
     modules=[
         Manifolds,
+        isdefined(Base, :get_extension) ?
+        Base.get_extension(Manifolds, :ManifoldsBoundaryValueDiffEqExt) :
+        Manifolds.ManifoldsBoundaryValueDiffEqExt,
+        isdefined(Base, :get_extension) ?
+        Base.get_extension(Manifolds, :ManifoldsNLsolveExt) : Manifolds.ManifoldsNLsolveExt,
+        isdefined(Base, :get_extension) ?
+        Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqDiffEqCallbacksExt) :
+        Manifolds.ManifoldsOrdinaryDiffEqDiffEqCallbacksExt,
+        isdefined(Base, :get_extension) ?
+        Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqExt) :
+        Manifolds.ManifoldsOrdinaryDiffEqExt,
+        isdefined(Base, :get_extension) ?
+        Base.get_extension(Manifolds, :ManifoldsRecipesBaseExt) :
+        Manifolds.ManifoldsRecipesBaseExt,
         isdefined(Base, :get_extension) ? Base.get_extension(Manifolds, :ManifoldsTestExt) :
         Manifolds.ManifoldsTestExt,
     ],
