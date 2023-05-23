@@ -42,7 +42,7 @@ end
 
 function identity_element(G::ProductGroup)
     M = G.manifold
-    return ProductRepr(map(identity_element, M.manifolds))
+    return ArrayPartition(map(identity_element, M.manifolds))
 end
 function identity_element!(G::ProductGroup, p)
     pes = submanifold_components(G, p)
@@ -194,7 +194,7 @@ end
 
 function translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
     M = G.manifold
-    return ProductRepr(
+    return ArrayPartition(
         map(
             translate_diff,
             M.manifolds,
@@ -282,7 +282,7 @@ end
 
 function exp_lie(G::ProductGroup, X)
     M = G.manifold
-    return ProductRepr(map(exp_lie, M.manifolds, submanifold_components(G, X))...)
+    return ArrayPartition(map(exp_lie, M.manifolds, submanifold_components(G, X))...)
 end
 
 function exp_lie!(G::ProductGroup, q, X)

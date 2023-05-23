@@ -144,35 +144,37 @@ end
                 ([-2.0, 1.0, 0.5], hat(Rn, p, [-1.0, -0.5, 1.1])),
             ]
 
-            pts = [ProductRepr(tp...) for tp in tuple_pts]
-            X_pts = [ProductRepr(tX...) for tX in tuple_X]
+            for prod_type in [ProductRepr, ArrayPartition]
+                pts = [prod_type(tp...) for tp in tuple_pts]
+                X_pts = [prod_type(tX...) for tX in tuple_X]
 
-            g1, g2 = pts[1:2]
-            t1, R1 = g1.parts
-            t2, R2 = g2.parts
-            g1g2 = ProductRepr(R1 * t2 + t1, R1 * R2)
-            @test isapprox(G, compose(G, g1, g2), g1g2)
+                g1, g2 = pts[1:2]
+                t1, R1 = g1.parts
+                t2, R2 = g2.parts
+                g1g2 = prod_type(R1 * t2 + t1, R1 * R2)
+                @test isapprox(G, compose(G, g1, g2), g1g2)
 
-            test_group(
-                G,
-                pts,
-                X_pts,
-                X_pts;
-                test_diff=true,
-                test_lie_bracket=true,
-                test_adjoint_action=true,
-                diff_convs=[(), (LeftAction(),), (RightAction(),)],
-            )
-            test_manifold(
-                G,
-                pts;
-                #basis_types_vecs=basis_types,
-                basis_types_to_from=basis_types,
-                is_mutating=true,
-                #test_inplace=true,
-                test_vee_hat=false,
-                exp_log_atol_multiplier=50,
-            )
+                test_group(
+                    G,
+                    pts,
+                    X_pts,
+                    X_pts;
+                    test_diff=true,
+                    test_lie_bracket=true,
+                    test_adjoint_action=true,
+                    diff_convs=[(), (LeftAction(),), (RightAction(),)],
+                )
+                test_manifold(
+                    G,
+                    pts;
+                    #basis_types_vecs=basis_types,
+                    basis_types_to_from=basis_types,
+                    is_mutating=true,
+                    #test_inplace=true,
+                    test_vee_hat=false,
+                    exp_log_atol_multiplier=50,
+                )
+            end
         end
     end
 end

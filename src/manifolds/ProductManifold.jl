@@ -118,7 +118,7 @@ function InverseProductRetraction(inverse_retractions::AbstractInverseRetraction
 end
 
 @inline function allocate_result(M::ProductManifold, f)
-    return ProductRepr(map(N -> allocate_result(N, f), M.manifolds))
+    return ArrayPartition(map(N -> allocate_result(N, f), M.manifolds))
 end
 
 function allocation_promotion_function(M::ProductManifold, f, args::Tuple)
