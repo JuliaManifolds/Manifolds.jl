@@ -149,8 +149,8 @@ end
                 X_pts = [prod_type(tX...) for tX in tuple_X]
 
                 g1, g2 = pts[1:2]
-                t1, R1 = g1.parts
-                t2, R2 = g2.parts
+                t1, R1 = submanifold_components(g1)
+                t2, R2 = submanifold_components(g2)
                 g1g2 = prod_type(R1 * t2 + t1, R1 * R2)
                 @test isapprox(G, compose(G, g1, g2), g1g2)
 
