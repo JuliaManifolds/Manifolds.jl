@@ -71,12 +71,25 @@ created as
 
 where `[1.0, 0.0, 0.0]` is the part corresponding to the sphere factor
 and `[2.0, 3.0]` is the part corresponding to the euclidean manifold.
+
+
+!!! warning
+
+    `ProductRepr` is deprecated and will be removed in a future release.
+    Please use `ArrayPartition` instead.
 """
 struct ProductRepr{TM<:Tuple}
     parts::TM
 end
 
-ProductRepr(points...) = ProductRepr{typeof(points)}(points)
+function ProductRepr(points...)
+    Base.depwarn(
+        "`ProductRepr` will be deprecated in a future release. " *
+        "Please use `ArrayPartition` instead of `ProductRepr`.",
+        :ProductRepr,
+    )
+    return ProductRepr{typeof(points)}(points)
+end
 
 Base.:(==)(x::ProductRepr, y::ProductRepr) = x.parts == y.parts
 
