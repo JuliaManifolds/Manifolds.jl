@@ -52,14 +52,10 @@ Order = [:type, :function]
 
 ## Computations in charts
 
-```@autodocs
-Modules = [Manifolds,ManifoldsBase]
-Pages = ["ode_callback.jl"]
-Order = [:constant, :type, :function]
-```
-
-```@autodocs
-Modules = [Manifolds,ManifoldsBase]
-Pages = ["bvp.jl"]
-Order = [:constant, :type, :function]
+```@docs
+Manifolds.IntegratorTerminatorNearChartBoundary
+Manifolds.estimate_distance_from_bvp
+Manifolds.solve_chart_exp_ode
+Manifolds.solve_chart_log_bvp
+Manifolds.solve_chart_parallel_transport_ode
 ```

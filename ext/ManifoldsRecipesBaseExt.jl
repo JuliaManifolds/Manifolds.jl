@@ -1,3 +1,19 @@
+module ManifoldsRecipesBaseExt
+
+if isdefined(Base, :get_extension)
+    using Manifolds
+
+    using Colors: RGBA
+    using RecipesBase: @recipe, @series
+else
+    # imports need to be relative for Requires.jl-based workflows:
+    # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
+    using ..Manifolds
+
+    using ..RecipesBase: @recipe, @series
+    using ..Colors: RGBA
+end
+
 #
 # Defaults
 #
@@ -303,4 +319,6 @@ end
         end
     end
     return x, y, z
+end
+
 end

@@ -270,16 +270,16 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         p = [1.0, 2.0, 3.0]
         X = [2.0, 3.0, 4.0]
         q = similar(X)
-        @test_throws ErrorException exp(M, p, X)
-        @test_throws ErrorException exp(M, p, X, 1.0)
-        @test_throws ErrorException exp!(M, q, p, X)
-        @test_throws ErrorException exp!(M, q, p, X, 1.0)
+        @test_throws MethodError exp(M, p, X)
+        @test_throws MethodError exp(M, p, X, 1.0)
+        @test_throws MethodError exp!(M, q, p, X)
+        @test_throws MethodError exp!(M, q, p, X, 1.0)
 
         N = ConnectionManifold(E, LeviCivitaConnection())
-        @test_throws ErrorException exp(N, p, X)
-        @test_throws ErrorException exp(N, p, X, 1.0)
-        @test_throws ErrorException exp!(N, q, p, X)
-        @test_throws ErrorException exp!(N, q, p, X, 1.0)
+        @test_throws MethodError exp(N, p, X)
+        @test_throws MethodError exp(N, p, X, 1.0)
+        @test_throws MethodError exp!(N, q, p, X)
+        @test_throws MethodError exp!(N, q, p, X, 1.0)
 
         using OrdinaryDiffEq
         @test is_point(M, exp(M, p, X))
