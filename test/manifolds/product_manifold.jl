@@ -101,6 +101,10 @@ using RecursiveArrayTools: ArrayPartition
         @test p1.parts[1][1] == 0.0
         copyto!(p1c, p1)
         @test p1c.parts[1][1] == 0.0
+
+        p1c.parts[1][1] = -123.0
+        copyto!(p1ap, p1c)
+        @test p1ap.x[1][1] == -123.0
     end
 
     @testset "some ArrayPartition functions" begin
@@ -388,10 +392,9 @@ using RecursiveArrayTools: ArrayPartition
             ProductRepr{Tuple{T,Float64,T} where T},
             ProductRepr(9, 10, 11),
         )) == ProductRepr(9, 10.0, 11)
-        @test (@inferred convert(ProductRepr, ProductRepr(9, 10, 11))) ===
-              ProductRepr(9, 10, 11)
-
         p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        @test (@inferred convert(ProductRepr, p)) === p
+
         @test p == ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
         @test submanifold_component(Mse, p, 1) === p.parts[1]
         @test submanifold_component(Mse, p, Val(1)) === p.parts[1]
