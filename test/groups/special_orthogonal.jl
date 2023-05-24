@@ -62,12 +62,10 @@ include("group_utils.jl")
                 @test isapprox(p, exp_lie(G, log_lie(G, p)))
             end
         end
-
         @testset "Decorator forwards to group" begin
             DM = NotImplementedGroupDecorator(G)
             test_group(DM, pts, Xpts, Xpts; test_diff=true)
         end
-
         @testset "Group forwards to decorated" begin
             retraction_methods = [
                 Manifolds.PolarRetraction(),
@@ -134,7 +132,6 @@ include("group_utils.jl")
             project!(G, z2, z)
             @test isapprox(M, z2, project(M, z))
         end
-
         @testset "vee/hat" begin
             X = Xpts[1]
             pe = Identity(G)
@@ -177,6 +174,11 @@ include("group_utils.jl")
             @test isone(q)
             e2 = Identity(G)
             @test mul!(e2, e, e) === e2
+        end
+        @testset "Identity and point/vector check" begin
+            # see https://github.com/JuliaManifolds/Manifolds.jl/issues/613
+            @test !is_vector(G, gI, ones(n, n)) #not skew
+            @test !is_vector(G, gI, ones(n)) # wrong size
         end
     end
 end
