@@ -353,3 +353,20 @@ Base.@propagate_inbounds function Base.setindex!(
 )
     return setindex!(q, p, base_manifold(M), i)
 end
+
+# these isapprox methods are here just to reduce time-to-first-isapprox
+function isapprox(G::ProductGroup, p::ArrayPartition, q::ArrayPartition; kwargs...)
+    return isapprox(G.manifold, p, q; kwargs...)
+end
+function isapprox(
+    G::ProductGroup,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    Y::ArrayPartition;
+    kwargs...,
+)
+    return isapprox(G.manifold, p, X, Y; kwargs...)
+end
+function isapprox(G::ProductGroup, ::Identity{ProductOperation}, X, Y; kwargs...)
+    return isapprox(G.manifold, identity_element(G), X, Y; kwargs...)
+end
