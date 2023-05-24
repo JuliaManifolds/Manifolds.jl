@@ -346,8 +346,9 @@ function is_vector(
     kwargs...,
 )
     if cbp
-        ie = is_point(G, e; kwargs...)
-        (!te) && return ie
+        # pass te down so this throws an error if te=true
+        # if !te and is_point was false -> return false, otherwise continue
+        (!te && !is_point(G, e, te; kwargs...)) && return false
     end
     return is_vector(next_trait(t), G, identity_element(G), X, te, false; kwargs...)
 end
