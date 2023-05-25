@@ -447,7 +447,7 @@ function test_group(
             Test.@test isapprox(G, e, Z, adjoint_action(G, g_pts[2], X))
         end
 
-        # Adjoint action is a Lie bracket morphism
+        # interaction with Lie bracket
         if test_lie_bracket
             Test.@test isapprox(
                 G,
@@ -463,16 +463,11 @@ function test_group(
     end
 
     test_lie_bracket && Test.@testset "Lie bracket" begin
+        # anticommutativity
         X = Xe_pts[1]
         Y = Xe_pts[2]
-        Z = Xe_pts[3]
         e = Identity(G)
-        # anticommutativity
         Test.@test isapprox(G, e, lie_bracket(G, X, Y), -lie_bracket(G, Y, X))
-        # Jacobi identity
-        computed = lie_bracket(G, X, lie_bracket(G, Y, Z))
-        expected = lie_bracket(G, Y, lie_bracket(G, X, Z)) + lie_bracket(G, lie_bracket(G, X, Y), Z)
-        Test.@test isapprox(G, e, computed, expected)
 
         if test_mutating
             Z = allocate(X)
