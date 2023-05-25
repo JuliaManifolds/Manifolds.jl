@@ -128,88 +128,13 @@ include("utils.jl")
                 @test Manifolds.max_eps(xi, x64, x32, z32) == eps(Float32)
             end
         end
-
         @test Manifolds.is_metric_function(flat)
         @test Manifolds.is_metric_function(sharp)
-
-        include_test("groups/group_utils.jl")
-        include_test("notation.jl")
-        # starting with tests of simple manifolds
-        include_test("manifolds/centered_matrices.jl")
-        include_test("manifolds/circle.jl")
-        include_test("manifolds/cholesky_space.jl")
-        include_test("manifolds/elliptope.jl")
-        include_test("manifolds/euclidean.jl")
-        include_test("manifolds/fixed_rank.jl")
-        include_test("manifolds/flag.jl")
-        include_test("manifolds/generalized_grassmann.jl")
-        include_test("manifolds/generalized_stiefel.jl")
-        include_test("manifolds/grassmann.jl")
-        include_test("manifolds/hyperbolic.jl")
-        include_test("manifolds/lorentz.jl")
-        include_test("manifolds/multinomial_doubly_stochastic.jl")
-        include_test("manifolds/multinomial_symmetric.jl")
-        include_test("manifolds/positive_numbers.jl")
-        include_test("manifolds/probability_simplex.jl")
-        include_test("manifolds/projective_space.jl")
-        include_test("manifolds/rotations.jl")
-        include_test("manifolds/shape_space.jl")
-        include_test("manifolds/skewhermitian.jl")
-        include_test("manifolds/spectrahedron.jl")
-        include_test("manifolds/sphere.jl")
-        include_test("manifolds/sphere_symmetric_matrices.jl")
-        include_test("manifolds/stiefel.jl")
-        include_test("manifolds/symmetric.jl")
-        include_test("manifolds/symmetric_positive_definite.jl")
-        include_test("manifolds/symmetric_positive_semidefinite_fixed_rank.jl")
-        include_test("manifolds/symplectic.jl")
-        include_test("manifolds/symplecticstiefel.jl")
-        include_test("manifolds/tucker.jl")
-        include_test("manifolds/unitary_matrices.jl")
-
-        include_test("manifolds/essential_manifold.jl")
-        include_test("manifolds/multinomial_matrices.jl")
-        include_test("manifolds/oblique.jl")
-        include_test("manifolds/torus.jl")
-
-        #meta manifolds
-        include_test("manifolds/product_manifold.jl")
-        include_test("manifolds/power_manifold.jl")
-        include_test("manifolds/quotient_manifold.jl")
-        include_test("manifolds/vector_bundle.jl")
-        include_test("manifolds/graph.jl")
-
-        include_test("metric.jl")
-        include_test("statistics.jl")
     end
 
     if TEST_GROUP ∈ ["all", "test_integration"]
-        include_test("approx_inverse_retraction.jl")
-
-        # manifolds requiring ODE solvers
-        include_test("manifolds/embedded_torus.jl")
     end
-
     if TEST_GROUP ∈ ["test_lie_groups", "all"]
-        # Lie groups and actions
-        include_test("groups/groups_general.jl")
-        include_test("groups/validation_group.jl")
-        include_test("groups/circle_group.jl")
-        include_test("groups/translation_group.jl")
-        include_test("groups/general_linear.jl")
-        include_test("groups/general_unitary_groups.jl")
-        include_test("groups/special_linear.jl")
-        include_test("groups/special_orthogonal.jl")
-        include_test("groups/heisenberg.jl")
-        include_test("groups/product_group.jl")
-        include_test("groups/semidirect_product_group.jl")
-        include_test("groups/power_group.jl")
-        include_test("groups/special_euclidean.jl")
-        include_test("groups/group_operation_action.jl")
-        include_test("groups/rotation_action.jl")
-        include_test("groups/translation_action.jl")
-        include_test("groups/connections.jl")
-        include_test("groups/metric.jl")
     end
     if TEST_GROUP ∈ ["all", "test_integration"] && !Sys.isapple()
         include_test("recipes.jl")

@@ -316,8 +316,8 @@ using Statistics
 using StatsBase
 using StatsBase: AbstractWeights
 
-include("utils.jl")
-
+include("utils/general.jl")
+include("utils/manifold_features.jl")
 include("product_representations.jl")
 
 include("manifold_fallbacks.jl")
