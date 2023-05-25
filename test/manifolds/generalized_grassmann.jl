@@ -35,6 +35,9 @@ include("../utils.jl")
             @test injectivity_radius(M, p) == π / 2
             @test injectivity_radius(M, p, ExponentialRetraction()) == π / 2
             @test mean(M, [p, p, p]) == p
+            Random.seed!(42)
+            @test is_point(M, rand(M))
+            @test is_vector(M, p, rand(M; vector_at=p))
         end
         @testset "Embedding and Projection" begin
             q = similar(p)

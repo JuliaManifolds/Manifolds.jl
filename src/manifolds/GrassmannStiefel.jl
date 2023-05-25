@@ -226,10 +226,6 @@ Matrix onto the tangent space at `vector_at`.
 """
 rand(M::Grassmann; σ::Real=1.0)
 
-function Random.rand!(M::Grassmann, pX; kwargs...)
-    Random.rand!(Random.default_rng(), M, pX; kwargs...)
-    return pX
-end
 function Random.rand!(
     rng::AbstractRNG,
     M::Grassmann{n,k,𝔽},

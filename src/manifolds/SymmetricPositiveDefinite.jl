@@ -404,51 +404,6 @@ Generate a random symmetric positive definite matrix on the
 """
 rand(M::SymmetricPositiveDefinite; σ::Real=1)
 
-function Random.rand!(M::SymmetricPositiveDefinite, pX::SPDPoint; kwargs...)
-    p = rand(M; kwargs...)
-    pP = SPDPoint(p; store_p=false, store_sqrt=false, store_sqrt_inv=false)
-    !ismissing(pX.p) && pX.p .= p
-    copyto!(pX.eigen.values, pP.eigen.values)
-    copyto!(pX.eigen.vectors, pP.eigen.vectors)
-    !ismissing(pX.sqrt) && pX.sqrt .= spd_sqrt(pP)
-    !ismissing(pX.sqrt_inv) && pX.sqrt_inv .= spd_sqrt_inv(pP)
-    return pX
-end
-
-function Random.rand!(
-    M::SymmetricPositiveDefinite{N},
-    pX;
-    vector_at=nothing,
-    σ::Real=one(eltype(pX)) /
-            (vector_at === nothing ? 1 : norm(convert(AbstractMatrix, vector_at))),
-    tangent_distr=:Gaussian,
-) where {N}
-    if vector_at === nothing
-        D = Diagonal(1 .+ rand(N)) # random diagonal matrix
-        s = qr(σ * randn(N, N)) # random q
-        pX .= Symmetric(s.Q * D * transpose(s.Q))
-    elseif tangent_distr === :Gaussian
-        # generate ONB in TxM
-        vector_at_matrix = convert(AbstractMatrix, vector_at)
-        I = one(vector_at_matrix)
-        B = get_basis(M, vector_at, DiagonalizingOrthonormalBasis(I))
-        Ξ = get_vectors(M, vector_at, B)
-        Ξx =
-            vector_transport_to.(
-                Ref(M),
-                Ref(I),
-                Ξ,
-                Ref(vector_at_matrix),
-                Ref(ParallelTransport()),
-            )
-        pX .= sum(σ * randn(length(Ξx)) .* Ξx)
-    elseif tangent_distr === :Rician
-        C = cholesky(Hermitian(vector_at))
-        R = C.L + sqrt(σ) * triu(randn(size(vector_at, 1), size(vector_at, 2)), 0)
-        pX .= R * R'
-    end
-    return pX
-end
 function Random.rand!(
     rng::AbstractRNG,
     M::SymmetricPositiveDefinite{N},

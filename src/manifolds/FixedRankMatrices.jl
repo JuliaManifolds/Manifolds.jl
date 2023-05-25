@@ -444,26 +444,8 @@ and the singular values are sampled uniformly at random.
 If `vector_at` is not `nothing`, generate a random tangent vector in the tangent space of
 the point `vector_at` on the `FixedRankMatrices` manifold `M`.
 """
-function Random.rand(
-    M::FixedRankMatrices{m,n,k};
-    vector_at=nothing,
-    kwargs...,
-) where {m,n,k}
-    if vector_at === nothing
-        p = SVDMPoint(
-            Matrix{Float64}(undef, m, k),
-            Vector{Float64}(undef, k),
-            Matrix{Float64}(undef, k, n),
-        )
-        return rand!(M, p; kwargs...)
-    else
-        X = UMVTVector(
-            Matrix{Float64}(undef, m, k),
-            Matrix{Float64}(undef, k, k),
-            Matrix{Float64}(undef, k, n),
-        )
-        return rand!(M, X; vector_at, kwargs...)
-    end
+function Random.rand(M::FixedRankMatrices; vector_at=nothing, kwargs...)
+    return rand(Random.default_rng(), M; vector_at=vector_at, kwargs...)
 end
 function Random.rand(
     rng::AbstractRNG,
@@ -488,32 +470,6 @@ function Random.rand(
     end
 end
 
-function Random.rand!(
-    M::FixedRankMatrices{m,n,k},
-    pX;
-    vector_at=nothing,
-    kwargs...,
-) where {m,n,k}
-    if vector_at === nothing
-        U = rand(Stiefel(m, k); kwargs...)
-        S = sort(rand(k); rev=true)
-        V = rand(Stiefel(n, k); kwargs...)
-        copyto!(M, pX, SVDMPoint(U, S, V'))
-    else
-        Up = randn(m, k)
-        Vp = randn(n, k)
-        A = randn(k, k)
-        copyto!(
-            pX,
-            UMVTVector(
-                Up - vector_at.U * vector_at.U' * Up,
-                A,
-                Vp' - Vp' * vector_at.Vt' * vector_at.Vt,
-            ),
-        )
-    end
-    return pX
-end
 function Random.rand!(
     rng::AbstractRNG,
     ::FixedRankMatrices{m,n,k},

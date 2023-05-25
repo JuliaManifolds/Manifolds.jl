@@ -368,6 +368,8 @@ function riemann_tensor(
 end
 @trait_function riemann_tensor(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
+function solve_exp_ode end
+
 @doc raw"""
     solve_exp_ode(
         M::AbstractConnectionManifold,
@@ -404,13 +406,4 @@ in an embedded space.
     using OrdinaryDiffEq
     ```
 """
-function solve_exp_ode(M::AbstractManifold, p, X, t::Number; kwargs...)
-    throw(
-        ErrorException(
-            """
-            solve_exp_ode not implemented on $(typeof(M)) for point $(typeof(p)), vector $(typeof(X)).
-            For a suitable default, enter `using OrdinaryDiffEq`.
-            """,
-        ),
-    )
-end
+solve_exp_ode(M::AbstractManifold, p, X, t::Number; kwargs...)

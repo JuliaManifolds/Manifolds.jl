@@ -1155,30 +1155,6 @@ function Random.rand(
 end
 
 function Random.rand!(
-    M::ProductManifold,
-    pX;
-    vector_at=nothing,
-    parts_kwargs=map(_ -> (;), M.manifolds),
-)
-    if vector_at === nothing
-        map(
-            (N, q, kwargs) -> rand!(N, q; kwargs...),
-            M.manifolds,
-            submanifold_components(M, pX),
-            parts_kwargs,
-        )
-    else
-        map(
-            (N, X, p, kwargs) -> rand!(N, X; vector_at=p, kwargs...),
-            M.manifolds,
-            submanifold_components(M, pX),
-            submanifold_components(M, vector_at),
-            parts_kwargs,
-        )
-    end
-    return pX
-end
-function Random.rand!(
     rng::AbstractRNG,
     M::ProductManifold,
     pX;
