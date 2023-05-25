@@ -464,8 +464,8 @@ function test_group(
 
     test_lie_bracket && Test.@testset "Lie bracket" begin
         # anticommutativity
-        X = X_pts[1]
-        Y = X_pts[2]
+        X = Xe_pts[1]
+        Y = Xe_pts[2]
         e = Identity(G)
         Test.@test isapprox(G, e, lie_bracket(G, X, Y), -lie_bracket(G, Y, X))
 
