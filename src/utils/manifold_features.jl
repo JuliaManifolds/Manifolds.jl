@@ -99,8 +99,8 @@ Collect a set of features available on a manifold.
 * `vector_transports`
 * `tolerances` – based on functions or symbols provide a tolerance
 """
-struct ManifoldFeatures{}
-    functions::Vector{Function}
+struct ManifoldFeatures{F<:Function}
+    functions::Vector{F}
     retractions::Vector{AbstractRetractionMethod}
     inverse_retractions::Vector{AbstractInverseRetractionMethod}
     vector_transports::Vector{AbstractVectorTransportMethod}
@@ -143,17 +143,17 @@ values and tolerances
 * `strings`    a dictionary `:Symbol->String` for expected strings, e.g. `:repr` for `repr(M)`
 * `tolerances` a dictionary `:Symbol->Float64` for tolerances in checks of functions.
 """
-struct ManifoldExpectations
-    values::Dict{Symbol,Int}
+struct ManifoldExpectations{V}
+    values::Dict{Symbol,V}
     strings::Dict{Symbol,String}
     tolerances::Dict{Symbol,Float64}
 end
 function ManifoldExpectations(;
-    values=Dict{Symbol,Int}(),
+    values::Dict{Symbol,V}=Dict{Symbol,Float64}(),
     strings=Dict{Symbol,String}(),
     tolerances=Dict(:default => 1e-14),
-)
-    return ManifoldExpectations(values, strings, tolerances)
+) where {V}
+    return ManifoldExpectations{V}(values, strings, tolerances)
 end
 
 @doc """
