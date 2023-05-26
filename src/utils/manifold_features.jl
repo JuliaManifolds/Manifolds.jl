@@ -99,8 +99,8 @@ Collect a set of features available on a manifold.
 * `vector_transports`
 * `tolerances` – based on functions or symbols provide a tolerance
 """
-struct ManifoldFeatures{F<:Function}
-    functions::Vector{F}
+struct ManifoldFeatures{}
+    functions::Vector{Function}
     retractions::Vector{AbstractRetractionMethod}
     inverse_retractions::Vector{AbstractInverseRetractionMethod}
     vector_transports::Vector{AbstractVectorTransportMethod}
