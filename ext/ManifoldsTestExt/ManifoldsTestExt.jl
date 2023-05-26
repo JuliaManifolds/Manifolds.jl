@@ -7,7 +7,7 @@ if isdefined(Base, :get_extension)
     import Manifolds:
         test_manifold, test_group, test_action, test_parallel_transport, find_eps
     using Manifolds: RieszRepresenterCotangentVector, get_chart_index
-
+    using Manifolds: ManifoldFeatures, ManifoldExpectations, has_feature_expectations
     using Random: MersenneTwister, rand!
 
     using Test: Test
@@ -20,6 +20,7 @@ else
     import ..Manifolds:
         test_manifold, test_group, test_action, test_parallel_transport, find_eps
     using ..Manifolds: RieszRepresenterCotangentVector, get_chart_index
+    using ..Manifolds: ManifoldFeatures, ManifoldExpectations, has_feature_expectations
 
     using ..Random: MersenneTwister, rand!
 
@@ -28,5 +29,5 @@ end
 
 include("tests_general.jl")
 include("tests_group.jl")
-
+include("tests_manifold.jl")
 end

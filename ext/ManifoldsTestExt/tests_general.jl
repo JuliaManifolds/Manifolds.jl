@@ -7,54 +7,32 @@ find_eps(x...) = find_eps(Base.promote_type(map(number_eltype, x)...))
 find_eps(x::Type{TN}) where {TN<:Number} = eps(real(TN))
 find_eps(x) = find_eps(number_eltype(x))
 
-DEFAULT_TEST_FUNCTIONS = Dict{Function,Bool}(#
-    exp => true,
-    log => true,
-    manifold_dimension => true,
-    representation_size => true,
-    is_point => true,
-    is_vector => true,
+function test_manifold(
+    M::AbstractManifold;
+    points=[rand(M) for _ in 1:3],
+    tangent_vectors=[rand(M; vector_at=p) for p in points],
+    features=ManifoldFeatures(M),
+    expectations=ManifoldExpectations(),
 )
-DEFAULT_TEST_FEATURES = Dict{Symbol,Bool}(#
+    length(points) ≥ 3 || error("$(length(points)) are not enough points, 3 required")
+    length(tangent_vectors) == length(points) || error(
+        "$(length(tangent_vectors)) has to be the same as number of points $(length(points)).",
+    )
+    Test.@testset "Testing the Manifold $M" begin
+        if has_feature_expectations(features, expectations, :manifold_dimension)
+            d = expectations.values[:manifold_dimension]
+            Test.@testset "Manifold dimension" begin
+                Test.@test manifold_dimension(M) ≥ 0
+                Test.@test manifold_dimension(M) == d
+            end
+        end
+    end
+    #
+end
+
 #
-)
-@doc """
-    do_test(tests::dictionary, f::Function)
-    do_test(tests::dictionary, f::Symbol)
-
-from a current dictionary `test` check whether to perform test for the function `f``.
-    By default this is `false`.
-"""
-function do_test(A::Dict, f::Function)
-    return get(A, f, get(DEFAULT_TEST_FUNCTIONS, f, false))
-end
-function do_test(A::Dict, f::Symbol)
-    return get(A, f, get(DEFAULT_TEST_FEATURES, f, false))
-end
-
-DEFAULT_FUNCTION_TOLERANCES =
-    Dict{Function,Float64}(exp => 1e-8, log => 1e-9, is_point => 1e-14)
-DEFAULT_FEATURE_TOLERANCES = Dict{Symbol,Float64}()
-
-@doc """
-    get_tolerance(tols::dictionary, f::function; eps=1.0)
-
-Obtain the tolerance used for f, where the default is `1e-14`.
-This dictionary stores two types of values
-* any tolerance `≥1` acts as a tolerance factor, i.e. is multiplied with `eps()``
-* any tolerance `<1` acts as an absolute tolerance.
-
-The first case with `=1` is the default.
-"""
-function get_tolerance(A::Dict, f::Function; eps=1.0)
-    t = get(A, f, get(DEFAULT_FUNCTION_TOLERANCES, f, 1e-14))
-    return t ≥ 1 ? t * eps : t
-end
-function get_tolerance(A::Dict, f::Symbol; eps=1.0)
-    t = get(A, f, get(DEFAULT_FEATURE_TOLERANCES, f, 1e-14))
-    return t ≥ 1 ? t * eps : t
-end
-
+# The old method for reference
+#
 """
     test_manifold(
         M::AbstractManifold,
