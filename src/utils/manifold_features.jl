@@ -151,7 +151,7 @@ end
 function ManifoldExpectations(;
     values=Dict{Symbol,Int}(),
     strings=Dict{Symbol,String}(),
-    tolerances=Dict{Symbol,Int}(:default => 1e-14),
+    tolerances=Dict(:default => 1e-14),
 )
     return ManifoldExpectations(values, strings, tolerances)
 end
