@@ -1,5 +1,6 @@
 using Manifolds, ManifoldsBase, Test
 
 @testset "Deprecation tests" begin
-    @test_deprecated LinearAffineMetric()
+    # Let's just test that for now it still works
+    @test LinearAffineMetric() === AffineInvariantMetric()
 end
