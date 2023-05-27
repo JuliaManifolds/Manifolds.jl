@@ -458,7 +458,7 @@ M₈ = SymmetricPositiveDefinite(3)
 # ╔═╡ 82dca58f-52e6-491e-97ec-904bb5b0b36b
 md"""
 which is the manifold of ``3×3`` matrices that are [symmetric and positive definite](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Manifolds.SymmetricPositiveDefinite).
-which has a default as well, the affine invariant [`LinearAffineMetric`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Default-metric:-the-linear-affine-metric), but also has several different metrics.
+which has a default as well, the affine invariant [`AffineInvariantMetric`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Default-metric:-the-linear-affine-metric), but also has several different metrics.
 
 To switch the metric, we use the idea of a [📖 decorator pattern](https://en.wikipedia.org/wiki/Decorator_pattern)-like approach. Defining
 """

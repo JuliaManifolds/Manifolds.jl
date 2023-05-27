@@ -3,7 +3,7 @@ include("../utils.jl")
 @testset "Symmetric Positive Definite Matrices" begin
     M1 = SymmetricPositiveDefinite(3)
     @test repr(M1) == "SymmetricPositiveDefinite(3)"
-    M2 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LinearAffineMetric())
+    M2 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.AffineInvariantMetric())
     M3 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogCholeskyMetric())
     M4 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.LogEuclideanMetric())
     M5 = MetricManifold(SymmetricPositiveDefinite(3), Manifolds.BuresWassersteinMetric())
@@ -115,7 +115,7 @@ include("../utils.jl")
         @test isapprox(distance(M4, p, q), sqrt(2) * log(2))
         @test manifold_dimension(M4) == manifold_dimension(M1)
     end
-    @testset "Test for tangent ONB on LinearAffineMetric" begin
+    @testset "Test for tangent ONB on AffineInvariantMetric" begin
         v = log(M2, p, q)
         donb = get_basis(base_manifold(M2), p, DiagonalizingOrthonormalBasis(v))
         Xs = get_vectors(base_manifold(M2), p, donb)
