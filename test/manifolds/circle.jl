@@ -15,6 +15,8 @@ using Manifolds: TFVector, CoTFVector
         @test is_flat(M)
         @test !is_point(M, 9.0)
         @test !is_point(M, zeros(3, 3))
+        @test Manifolds.check_size(M, [9.0]) === nothing
+        @test Manifolds.check_size(M, [1.0], [-2.0]) === nothing
         @test_throws DomainError is_point(M, 9.0, true)
         @test_throws DomainError is_point(M, zeros(3, 3), true)
         @test !is_vector(M, 9.0, 0.0)
