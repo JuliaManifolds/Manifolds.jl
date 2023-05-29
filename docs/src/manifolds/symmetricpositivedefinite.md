@@ -25,7 +25,7 @@ Filter = t -> t !== mean
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/SymmetricPositiveDefiniteLinearAffine.jl"]
+Pages = ["manifolds/SymmetricPositiveDefiniteAffineInvariant.jl"]
 Order = [:type]
 ```
 
