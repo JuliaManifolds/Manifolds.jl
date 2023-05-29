@@ -393,7 +393,7 @@ include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
 include("manifolds/SymmetricPositiveDefiniteBuresWasserstein.jl")
 include("manifolds/SymmetricPositiveDefiniteGeneralizedBuresWasserstein.jl")
-include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
+include("manifolds/SymmetricPositiveDefiniteAffineInvariant.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
@@ -536,6 +536,8 @@ function __init__()
     return nothing
 end
 
+include("deprecated.jl")
+
 export test_manifold
 export test_group, test_action
 
@@ -642,7 +644,7 @@ export AbstractMetric,
     BuresWassersteinMetric,
     EuclideanMetric,
     GeneralizedBuresWassersteinMetric,
-    LinearAffineMetric,
+    AffineInvariantMetric,
     LogCholeskyMetric,
     LogEuclideanMetric,
     MinkowskiMetric,

@@ -10,9 +10,8 @@ include("utils.jl")
 @testset "Manifolds.jl" begin
     if TEST_GROUP ∈ ["all", "test_manifolds"]
         include_test("differentiation.jl")
-
         include_test("ambiguities.jl")
-
+        include_test("test_deprecated.jl")
         @testset "utils test" begin
             Random.seed!(42)
             @testset "usinc_from_cos" begin

@@ -102,7 +102,7 @@ end
 @doc raw"""
     apply_diff(A::AbstractGroupAction, a, p, X)
 
-For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action
+For point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action
 on $X$ of the differential of the action of $a ∈ \mathcal{G}$, specified by rule `A`.
 Written as $(\mathrm{d}τ_a)_p$, with the specified left or right convention, the
 differential transports vectors

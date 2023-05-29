@@ -94,7 +94,7 @@ function Base.:(==)(p::SPDPoint, q::SPDPoint)
 end
 
 function active_traits(f, ::SymmetricPositiveDefinite, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(LinearAffineMetric()))
+    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(AffineInvariantMetric()))
 end
 
 function allocate(p::SPDPoint)
@@ -229,11 +229,11 @@ end
 
 @doc raw"""
     injectivity_radius(M::SymmetricPositiveDefinite[, p])
-    injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}[, p])
+    injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}[, p])
     injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,LogCholeskyMetric}[, p])
 
 Return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref).
-Since `M` is a Hadamard manifold with respect to the [`LinearAffineMetric`](@ref) and the
+Since `M` is a Hadamard manifold with respect to the [`AffineInvariantMetric`](@ref) and the
 [`LogCholeskyMetric`](@ref), the injectivity radius is globally $∞$.
 """
 injectivity_radius(::SymmetricPositiveDefinite) = Inf

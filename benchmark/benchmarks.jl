@@ -287,7 +287,7 @@ function add_manifold_benchmarks()
         M_spd_1 = Manifolds.SymmetricPositiveDefinite(3)
         M_spd_2 = MetricManifold(
             Manifolds.SymmetricPositiveDefinite(3),
-            Manifolds.LinearAffineMetric(),
+            Manifolds.AffineInvariantMetric(),
         )
         M_spd_3 = MetricManifold(
             Manifolds.SymmetricPositiveDefinite(3),

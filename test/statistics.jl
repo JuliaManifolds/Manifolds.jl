@@ -681,7 +681,7 @@ end
         @testset "SymmetricPositiveDefinite default" begin
             rng = MersenneTwister(36)
             P1 = SymmetricPositiveDefinite(3)
-            P2 = MetricManifold(P1, LinearAffineMetric())
+            P2 = MetricManifold(P1, AffineInvariantMetric())
             @testset "$P" for P in [P1, P2]
                 p0 = collect(exp(Symmetric(randn(rng, 3, 3) * 0.1)))
                 x = [exp(P, p0, Symmetric(randn(rng, 3, 3) * 0.1)) for _ in 1:10]
