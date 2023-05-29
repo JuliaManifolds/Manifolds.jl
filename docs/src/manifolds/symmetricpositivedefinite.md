@@ -21,19 +21,19 @@ Private=false
 Filter = t -> t !== mean
 ```
 
-## Default metric: the linear affine metric
+## Default metric: the affine invariant metric
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/SymmetricPositiveDefiniteLinearAffine.jl"]
+Pages = ["manifolds/SymmetricPositiveDefiniteAffineInvariant.jl"]
 Order = [:type]
 ```
 
-This metric is also the default metric, i.e. any call of the following functions with `P=SymmetricPositiveDefinite(3)` will result in `MetricManifold(P,LinearAffineMetric())`and hence yield the formulae described in this seciton.
+This metric is also the default metric, i.e. any call of the following functions with `P=SymmetricPositiveDefinite(3)` will result in `MetricManifold(P,AffineInvariantMetric())`and hence yield the formulae described in this seciton.
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/SymmetricPositiveDefiniteLinearAffine.jl"]
+Pages = ["manifolds/SymmetricPositiveDefiniteAffineInvariant.jl"]
 Order = [:function]
 ```
 

@@ -1,0 +1,2 @@
+Base.@deprecate_binding LinearAffineMetric AffineInvariantMetric
+export LinearAffineMetric
