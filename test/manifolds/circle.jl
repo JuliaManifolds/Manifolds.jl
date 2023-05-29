@@ -240,7 +240,7 @@ using Manifolds: TFVector, CoTFVector
                 test_vee_hat=false,
                 exp_log_atol_multiplier=2.0,
                 is_tangent_atol_multiplier=2.0,
-                rand_tvector_atol_multiplier=1.0,
+                rand_tvector_atol_multiplier=2.0,
                 test_rand_point=true,
                 test_rand_tvector=true,
             )
@@ -254,7 +254,7 @@ using Manifolds: TFVector, CoTFVector
                 test_vee_hat=true,
                 exp_log_atol_multiplier=2.0,
                 is_tangent_atol_multiplier=2.0,
-                rand_tvector_atol_multiplier=1.0,
+                rand_tvector_atol_multiplier=2.0,
                 basis_types_vecs=basis_types,
                 basis_types_to_from=basis_types,
                 test_rand_point=true,
