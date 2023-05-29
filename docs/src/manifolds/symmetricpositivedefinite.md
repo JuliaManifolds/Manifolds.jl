@@ -33,7 +33,7 @@ This metric is also the default metric, i.e. any call of the following functions
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/SymmetricPositiveDefiniteLinearAffine.jl"]
+Pages = ["manifolds/SymmetricPositiveDefiniteAffineInvariant.jl"]
 Order = [:function]
 ```
 
