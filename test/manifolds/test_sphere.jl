@@ -11,9 +11,8 @@ if generate || !isfile(config_file)
     using Manifolds: find_manifold_functions, ManifoldFeatures, ManifoldExpectations
     features = ManifoldFeatures(M)
     expectations = ManifoldExpectations(
-        values=Dict(:manifold_dimension => 2),
-        strings=Dict(:repr_manifold => "Sphere(2, ℝ)"),
-        tolerances=Dict(:exp => 1e-9),
+        values=Dict(:manifold_dimension => 2, :repr_manifold => "Sphere(2, ℝ)"),
+        tolerances=Dict(:exp_atol => 1e-9),
     )
     jldsave(config_file; features, expectations)
     @warn "Configuration for the Sphere regenerated. This should not be actve by default."

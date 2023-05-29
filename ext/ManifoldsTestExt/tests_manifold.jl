@@ -1,51 +1,3 @@
-@doc raw"""
-    (p,X) = generate_tangent_vectors(M, p, m=default_inverse_retraction_method(M))
-
-Generate a set `X` of tangent vectors on the manifold `M`
-using the point tuple `p` of `n` points and the `AbstractInverseRetractionMethod` `m`.
-
-The generated vectors are
-
-```math
-    \begin{align*}
-    X_i &= \operatorname{retr}_{p_i}^{-1}p_{i+1},\qquad i=1,...n-1\\
-    X_n &= 0_{p_n},
-    \end{align*}
-```
-where ``0_p ∈ T_p\mathcal M`` denotes the zeros vector.
-
-## keywords
-
-* `minimal` (`false`) – reduce the ``X_i`` and ``p_i`` to just a tuple of length 1.
-
-## Returns
-
-* (`p`, `X`) – a tuple of points and corresponding tangent vectors
-
-"""
-function generate_tangent_vectors(
-    M::AbstractManifold,
-    p::NTuple{N,P},
-    m::AbstractInverseRetractionMethod;
-    minimal=false,
-) where {N,P}
-    if N == 1
-        X = Tuple(zero_vector(M, p[1]))
-    else
-        if minimal # only compute first
-            X = (inverse_retract(M, p[1], p[2], m),)
-            return ((p[1],), (X,))
-        end
-        p1 = p[1:(end - 1)]
-        p2 = p[2:end]
-        X = Tuple([
-            [inverse_retract(M, pi, pj, m) for (pi, pj) in zip(p1, p2)]...,
-            zero_vector(M, p[end]),
-        ])
-    end
-    return (p, X)
-end
-
 """
     test_explog(M, p; kwargs...)
     test_explog(M, p, X; kwargs...)
@@ -133,9 +85,9 @@ from zip(p,X).
 
 * `minimal` _ (`false`) – perform a minimal test only on `p[1]` and `X[1]`.
 * `in_place` – (`true`) test `exp!`
-* `in_place_self` – (`false`) test that `exp!(M, p, p, X)` works (i.e. has no side effects)
-* `atol_multiplier` _ (`0`) modify the default `atol` of `isapprox by a factor.
-* `rtol_multiplier` - (`1` has no effect, if `atol_multiplier>0`) modify the default `rtol` of `isapprox by a factor.
+* `in_place_self` – (`true`) test that `exp!(M, p, p, X)` works (i.e. has no side effects)
+* `atol` _ (`0`) `atol` of `isapprox`checks in this test
+* `rtol` - (`1` has no effect, if `atol_multiplier>0`) modify the default `rtol` of `isapprox by a factor.
 """
 function test_exp(
     M,
@@ -144,13 +96,11 @@ function test_exp(
     minimal=false,
     in_place=true,
     in_place_self=false,
-    atol_multiplier=0,
-    rtol_multiplier=1,
+    atol=0,
+    rtol=atol > 0 ? 0 : sqrt(eps),
     kwargs...,
 ) where {N,T,P}
     epsFp = find_eps(first(p))
-    atp = atol_multiplier * epsFp
-    rtp = atol_multiplier == 0.0 ? sqrt(epsFp) * rtol_multiplier : 0
     if minimal # Minimal: just check the very fist one
         pL = (p[1],)
         XL = (X[1],)
@@ -162,17 +112,17 @@ function test_exp(
     Test.@testset "Testing exp on $M" begin
         for (pi, Xi) in zip(pL, XL)
             qi = exp(M, pi, Xi)
-            Test.@test is_point(M, qi, true; atol=atp, rtol=rtp, kwargs...)
-            Test.@test isapprox(M, pi, exp(M, pi, Xi, 0); atol=atp, rtol=rtp)
-            Test.@test isapprox(M, qi, exp(M, pi, Xi, 1); atol=atp, rtol=rtp)
+            Test.@test is_point(M, qi, true; atol=atol, rtol=rtol, kwargs...)
+            Test.@test isapprox(M, pi, exp(M, pi, Xi, 0); atol=atol, rtol=rtol)
+            Test.@test isapprox(M, qi, exp(M, pi, Xi, 1); atol=atol, rtol=rtol)
             if in_place
                 exp!(M, ri, pi, Xi)
-                Test.@test isapprox(M, ri, qi; atol=atp, rtol=rtp)
+                Test.@test isapprox(M, ri, qi; atol=atol, rtol=rtol)
                 #test self in_place has no side effects
                 if in_place_self
                     ri = copy(M, pi)
                     exp!(M, ri, ri, Xi)
-                    Test.@test isapprox(M, ri, qi; atol=atp, rtol=rtp)
+                    Test.@test isapprox(M, ri, qi; atol=atol, rtol=rtol)
                 end
             end
         end

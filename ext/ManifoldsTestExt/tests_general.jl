@@ -26,6 +26,19 @@ function test_manifold(
                 Test.@test manifold_dimension(M) == d
             end
         end
+        if has_feature_expectations(features, expectations, :exp)
+            in_place = get(features.properties, :inplace, true)
+            atol = get(expectations.tolerances, :exp_atol, 0)
+            test_exp(
+                M,
+                Tuple(points),
+                Tuple(tangent_vectors);
+                in_place=in_place,
+                in_place_self=get(features.properties, :inplaceself, in_place),
+                atol=atol,
+                rtol=get(expectations.tolerances, :exp_rtol, atol > 0 ? 0 : eps),
+            )
+        end
     end
     #
 end
@@ -169,31 +182,6 @@ function test_manifold(
     mid_point12=(do_test(test_functions, exp) && do_test(test_functions, log)) ?
                 shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing,
 )
-    #
-    # Setup phase
-    #
-
-    # Autocomplete a Few testsDefault for explog autofil if not set
-    if haskey(test_functions, exp) &&
-       haskey(test_functions, log) &&
-       !haskey(test_features, :ExpLog)
-        test_features[:ExpLog] = test_functions[exp] && test_functions[log]
-    end
-
-    length(pts) ≥ 3 || error("Not enough points (at least three expected)")
-    isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
-    isapprox(M, pts[1], pts[3]) && error("Points 1 and 3 are equal")
-
-    # get a default tangent vector for every of the three tangent spaces
-    n = length(pts)
-    if inverse_retraction_method === nothing
-        tv = [zero_vector(M, pts[i]) for i in 1:n] # no other available
-    else
-        tv = [
-            inverse_retract(M, pts[i], pts[((i + 1) % n) + 1], inverse_retraction_method) for i in 1:n
-        ]
-    end
-
     #
     # Test calls for the functions
     #

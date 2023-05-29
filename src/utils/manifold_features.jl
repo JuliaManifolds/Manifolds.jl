@@ -104,18 +104,21 @@ struct ManifoldFeatures{F<:Function}
     retractions::Vector{AbstractRetractionMethod}
     inverse_retractions::Vector{AbstractInverseRetractionMethod}
     vector_transports::Vector{AbstractVectorTransportMethod}
+    properties::Dict{Symbol,Bool}
 end
 function ManifoldFeatures(;
     functions::Vector{F}=Functions[],
     retractions=Vector{AbstractRetractionMethod}[],
     inverse_retractions=Vector{AbstractInverseRetractionMethod}[],
     vector_transports=Vector{AbstractVectorTransportMethod}[],
+    properties=Dict{Symbol,Bools}(),
 ) where {F<:Function}
     return ManifoldFeatures{F}(
         functions,
         retractions,
         inverse_retractions,
         vector_transports,
+        properties,
     )
 end
 function ManifoldFeatures(
@@ -124,12 +127,14 @@ function ManifoldFeatures(
     retractions=Vector{AbstractRetractionMethod}[],
     inverse_retractions=Vector{AbstractInverseRetractionMethod}[],
     vector_transports=Vector{AbstractVectorTransportMethod}[],
+    properties=Dict{Symbol,Bool}(),
 ) where {F<:Function}
     return ManifoldFeatures{F}(
         functions,
         retractions,
         inverse_retractions,
         vector_transports,
+        properties,
     )
 end
 
@@ -145,15 +150,13 @@ values and tolerances
 """
 struct ManifoldExpectations{V}
     values::Dict{Symbol,V}
-    strings::Dict{Symbol,String}
     tolerances::Dict{Symbol,Float64}
 end
 function ManifoldExpectations(;
     values::Dict{Symbol,V}=Dict{Symbol,Float64}(),
-    strings=Dict{Symbol,String}(),
     tolerances=Dict(:default => 1e-14),
 ) where {V}
-    return ManifoldExpectations{V}(values, strings, tolerances)
+    return ManifoldExpectations{V}(values, tolerances)
 end
 
 @doc """
