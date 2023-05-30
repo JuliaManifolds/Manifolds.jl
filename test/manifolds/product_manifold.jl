@@ -111,6 +111,9 @@ using RecursiveArrayTools: ArrayPartition
         p = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
         q = allocate(p)
         @test q.x[1] isa Vector
+        p = ArrayPartition([[0.0, 1.0, 0.0]], [0.0, 0.0])
+        q = allocate(p, Int)
+        @test q.x[1] isa Vector{Vector{Int}}
     end
 
     @testset "allocate on PowerManifold of ProductManifold" begin
