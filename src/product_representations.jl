@@ -99,7 +99,7 @@ Base.:(==)(x::ProductRepr, y::ProductRepr) = x.parts == y.parts
 end
 
 allocate(x::ProductRepr) = ProductRepr(map(allocate, submanifold_components(x))...)
-function allocate(x::ProductRepr, ::Type{T}) where {T}
+function allocate(x::ProductRepr, T::Type)
     return ProductRepr(map(t -> allocate(t, T), submanifold_components(x))...)
 end
 allocate(::ProductRepr, ::Type{T}, s::Size{S}) where {S,T} = Vector{T}(undef, S)
@@ -203,3 +203,6 @@ ManifoldsBase._get_vector_cache_broadcast(::ArrayPartition) = Val(false)
 
 allocate(a::AbstractArray{<:ArrayPartition}) = map(allocate, a)
 allocate(x::ArrayPartition) = ArrayPartition(map(allocate, x.x)...)
+function allocate(x::ArrayPartition, T::Type)
+    return ArrayPartition(map(t -> allocate(t, T), submanifold_components(x))...)
+end
