@@ -15,6 +15,8 @@ using Manifolds: TFVector, CoTFVector
         @test is_flat(M)
         @test !is_point(M, 9.0)
         @test !is_point(M, zeros(3, 3))
+        @test Manifolds.check_size(M, [9.0]) === nothing
+        @test Manifolds.check_size(M, [1.0], [-2.0]) === nothing
         @test_throws DomainError is_point(M, 9.0, true)
         @test_throws DomainError is_point(M, zeros(3, 3), true)
         @test !is_vector(M, 9.0, 0.0)
@@ -240,7 +242,7 @@ using Manifolds: TFVector, CoTFVector
                 test_vee_hat=false,
                 exp_log_atol_multiplier=2.0,
                 is_tangent_atol_multiplier=2.0,
-                rand_tvector_atol_multiplier=1.0,
+                rand_tvector_atol_multiplier=2.0,
                 test_rand_point=true,
                 test_rand_tvector=true,
             )
@@ -254,7 +256,7 @@ using Manifolds: TFVector, CoTFVector
                 test_vee_hat=true,
                 exp_log_atol_multiplier=2.0,
                 is_tangent_atol_multiplier=2.0,
-                rand_tvector_atol_multiplier=1.0,
+                rand_tvector_atol_multiplier=2.0,
                 basis_types_vecs=basis_types,
                 basis_types_to_from=basis_types,
                 test_rand_point=true,

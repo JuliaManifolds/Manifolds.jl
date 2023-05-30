@@ -18,40 +18,42 @@ include("group_utils.jl")
     ts2 = Vector{Float64}.([1:2, 2:3, 3:4]) .* 10
     tuple_pts = [zip(ts1, ts2)...]
 
-    pts = [ProductRepr(tp...) for tp in tuple_pts]
+    for prod_type in [ProductRepr, ArrayPartition]
+        pts = [prod_type(tp...) for tp in tuple_pts]
 
-    @testset "setindex! and getindex" begin
-        p1 = pts[1]
-        p2 = allocate(p1)
-        @test p1[G, 1] === p1[M, 1]
-        p2[G, 1] = p1[M, 1]
-        @test p2[G, 1] == p1[M, 1]
+        @testset "setindex! and getindex" begin
+            p1 = pts[1]
+            p2 = allocate(p1)
+            @test p1[G, 1] === p1[M, 1]
+            p2[G, 1] = p1[M, 1]
+            @test p2[G, 1] == p1[M, 1]
+        end
+
+        X = log(G, pts[1], pts[1])
+        Y = zero_vector(G, pts[1])
+        Z = Manifolds.allocate_result(G, zero_vector, pts[1])
+        Z = zero_vector!(M, Z, pts[1])
+        @test norm(G, pts[1], X) ≈ 0
+        @test norm(G, pts[1], Y) ≈ 0
+        @test norm(G, pts[1], Z) ≈ 0
+
+        e = Identity(G)
+        @test inv(G, e) === e
+
+        @test compose(G, e, pts[1]) == pts[1]
+        @test compose(G, pts[1], e) == pts[1]
+        @test compose(G, e, e) === e
+
+        # test in-place composition
+        o1 = copy(pts[1])
+        compose!(G, o1, o1, pts[2])
+        @test isapprox(G, o1, compose(G, pts[1], pts[2]))
+
+        eA = identity_element(G)
+        @test isapprox(G, eA, e)
+        @test isapprox(G, e, eA)
+        W = log(G, eA, pts[1])
+        Z = log(G, eA, pts[1])
+        @test isapprox(G, e, W, Z)
     end
-
-    X = log(G, pts[1], pts[1])
-    Y = zero_vector(G, pts[1])
-    Z = Manifolds.allocate_result(G, zero_vector, pts[1])
-    Z = zero_vector!(M, Z, pts[1])
-    @test norm(G, pts[1], X) ≈ 0
-    @test norm(G, pts[1], Y) ≈ 0
-    @test norm(G, pts[1], Z) ≈ 0
-
-    e = Identity(G)
-    @test inv(G, e) === e
-
-    @test compose(G, e, pts[1]) == pts[1]
-    @test compose(G, pts[1], e) == pts[1]
-    @test compose(G, e, e) === e
-
-    # test in-place composition
-    o1 = copy(pts[1])
-    compose!(G, o1, o1, pts[2])
-    @test isapprox(G, o1, compose(G, pts[1], pts[2]))
-
-    eA = identity_element(G)
-    @test isapprox(G, eA, e)
-    @test isapprox(G, e, eA)
-    W = log(G, eA, pts[1])
-    Z = log(G, eA, pts[1])
-    @test isapprox(G, e, W, Z)
 end

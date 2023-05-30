@@ -51,14 +51,14 @@ function allocate_result(G::SemidirectProductGroup, ::typeof(identity_element))
     N, H = M.manifolds
     np = allocate_result(N, identity_element)
     hp = allocate_result(H, identity_element)
-    return ProductRepr(np, hp)
+    return ArrayPartition(np, hp)
 end
 
 """
     identity_element(G::SemidirectProductGroup)
 
-Get the identity element of [`SemidirectProductGroup`](@ref) `G`. Uses [`ProductRepr`](@ref)
-to represent the point.
+Get the identity element of [`SemidirectProductGroup`](@ref) `G`. Uses `ArrayPartition`
+from `RecursiveArrayTools.jl` to represent the point.
 """
 identity_element(G::SemidirectProductGroup)
 
