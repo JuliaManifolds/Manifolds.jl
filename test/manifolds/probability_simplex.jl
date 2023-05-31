@@ -59,6 +59,7 @@ include("../utils.jl")
                 inverse_retraction_methods=[SoftmaxInverseRetraction()],
                 retraction_methods=[SoftmaxRetraction()],
                 test_inplace=true,
+                vector_transport_methods=[ParallelTransport()],
             )
         end
     end
@@ -115,16 +116,13 @@ include("../utils.jl")
     end
 
     @testset "Probability amplitudes" begin
+        ME = RealProbabilityAmplitudes(2)
         p = [0.1, 0.7, 0.2]
         Y = [-0.1, 0.05, 0.05]
-        @test to_probability_amplitude(M, p) ≈
-              [0.31622776601683794, 0.8366600265340756, 0.4472135954999579]
-        @test from_probability_amplitude(
-            M,
-            [0.31622776601683794, 0.8366600265340756, 0.4472135954999579],
-        ) ≈ p
-        @test to_probability_amplitude_diff(M, p, Y) ≈
+        @test embed(ME, p) ≈ [0.31622776601683794, 0.8366600265340756, 0.4472135954999579]
+        @test project(ME, [0.31622776601683794, 0.8366600265340756, 0.4472135954999579]) ≈ p
+        @test embed(ME, p, Y) ≈
               [-0.31622776601683794, 0.05976143046671968, 0.1118033988749895]
-        @test from_probability_amplitude_diff(M, p, Y) ≈ [-0.01, 0.035, 0.01]
+        @test project(ME, p, Y) ≈ [-0.01, 0.035, 0.01]
     end
 end

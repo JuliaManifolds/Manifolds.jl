@@ -378,7 +378,6 @@ include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
-include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
 include("manifolds/SkewHermitian.jl")
@@ -401,6 +400,7 @@ include("manifolds/Symplectic.jl")
 include("manifolds/SymplecticStiefel.jl")
 include("manifolds/Tucker.jl")
 #
+include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/GeneralUnitaryMatrices.jl")
 include("manifolds/Unitary.jl")
 include("manifolds/Rotations.jl")
@@ -637,6 +637,7 @@ export AbstractAffineConnection,
 export AbstractCartanSchoutenConnection,
     CartanSchoutenMinus, CartanSchoutenPlus, CartanSchoutenZero
 export MetricManifold
+export RealProbabilityAmplitudes
 # Metric types
 export AbstractMetric,
     RiemannianMetric,
@@ -948,15 +949,5 @@ export get_basis,
 
 # atlases and charts
 export get_point, get_point!, get_parameters, get_parameters!
-
-# additional functions on Simplex
-export from_probability_amplitude,
-    from_probability_amplitude!,
-    from_probability_amplitude_diff,
-    from_probability_amplitude_diff!,
-    to_probability_amplitude,
-    to_probability_amplitude!,
-    to_probability_amplitude_diff,
-    to_probability_amplitude_diff!
 
 end # module

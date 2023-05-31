@@ -204,13 +204,8 @@ function get_coordinates_orthonormal!(
     X,
     R::RealNumbers,
 ) where {N}
-    get_coordinates_orthonormal!(
-        Sphere(N),
-        Xc,
-        to_probability_amplitude(M, p),
-        to_probability_amplitude_diff(M, p, X),
-        R,
-    )
+    ME = RealProbabilityAmplitudes(N)
+    get_coordinates_orthonormal!(Sphere(N), Xc, embed(ME, p), embed(ME, p, X), R)
     return Xc
 end
 
@@ -221,8 +216,10 @@ function get_vector_orthonormal!(
     Xc,
     R::RealNumbers,
 ) where {N}
-    X = get_vector_orthonormal(Sphere(N), to_probability_amplitude(M, p), Xc, R)
-    return from_probability_amplitude_diff!(M, Y, to_probability_amplitude(M, p), X)
+    ME = RealProbabilityAmplitudes(N)
+    ps = embed(ME, p)
+    X = get_vector_orthonormal(Sphere(N), ps, Xc, R)
+    return project!(ME, Y, ps, X)
 end
 
 @doc raw"""
@@ -351,6 +348,12 @@ mean(::ProbabilitySimplex, ::Any...)
 
 default_estimation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
 
+function parallel_transport_to!(M::ProbabilitySimplex{N}, Y, p, X, q) where {N}
+    ME = RealProbabilityAmplitudes(N)
+    Ys = parallel_transport_to(Sphere(N), embed(ME, p), embed(ME, p, X), embed(ME, q))
+    return project!(ME, Y, embed(ME, q), Ys)
+end
+
 @doc raw"""
     project(M::ProbabilitySimplex, p, Y)
 
@@ -464,63 +467,79 @@ zero_vector(::ProbabilitySimplex, ::Any)
 zero_vector!(::ProbabilitySimplex, X, p) = fill!(X, 0)
 
 @doc raw"""
-    to_probability_amplitude(M::ProbabilitySimplex{N}, p) where {N}
+    RealProbabilityAmplitudes
+
+An explicit isometric and homomorphic embedding of interior of [`ProbabilitySimplex`] in
+positive quadrant of the [`Sphere`]. Some properties extend to the boundary but not all.
+
+# Constructor
+
+    RealProbabilityAmplitudes(n)
+"""
+const RealProbabilityAmplitudes{N} = EmbeddedManifold{ℝ,<:ProbabilitySimplex{N},Sphere{N,ℝ}}
+
+function RealProbabilityAmplitudes(n)
+    return EmbeddedManifold(ProbabilitySimplex(n), Sphere(n))
+end
+
+@doc raw"""
+    embed(M::RealProbabilityAmplitudes{N}, p) where {N}
 
 Convert point `p` on `ProbabilitySimplex` to (real) probability amplitude. The formula reads
 ``(\sqrt{p_1}, \sqrt{p_2}, …, \sqrt{p_{N+1}})``. This is an isometry from the interior of
 the probability simplex to the interior of the positive orthant of a sphere.
 """
-function to_probability_amplitude(M::ProbabilitySimplex, p)
-    return to_probability_amplitude!(M, similar(p), p)
+function embed(M::RealProbabilityAmplitudes, p)
+    return embed!(M, similar(p), p)
 end
 
-function to_probability_amplitude!(::ProbabilitySimplex, q, p)
+function embed!(::RealProbabilityAmplitudes, q, p)
     q .= sqrt.(p)
     return q
 end
 
 @doc raw"""
-    from_probability_amplitude(M::ProbabilitySimplex{N}, p) where {N}
+    project(M::RealProbabilityAmplitudes{N}, p) where {N}
 
-Convert point (real) probability amplitude `p` on to a point on `ProbabilitySimplex`.
+Convert point (real) probability amplitude `p` on to a point on [`ProbabilitySimplex`](@ref).
 The formula reads ``(p_1^2, p_2^2, …, p_{N+1}^2)``. This is an isometry from the interior of
 the positive orthant of a sphere to interior of the probability simplex.
 """
-function from_probability_amplitude(M::ProbabilitySimplex, p)
-    return from_probability_amplitude!(M, similar(p), p)
+function project(M::RealProbabilityAmplitudes, p)
+    return project!(M, similar(p), p)
 end
 
-function from_probability_amplitude!(::ProbabilitySimplex, q, p)
+function project!(::RealProbabilityAmplitudes, q, p)
     q .= p .^ 2
     return q
 end
 
 @doc raw"""
-    to_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
+    embed(M::RealProbabilityAmplitudes, p, X)
 
-Compute differential of [`to_probability_amplitude`](@ref) at tangent vector `X` from the
-tangent space at `p` from `M`.
+Compute differential of [`embed`](@ref) on [`RealProbabilityAmplitudes`](@ref) at tangent
+vector `X` from the tangent space at `p` from sphere.
 """
-function to_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
-    return to_probability_amplitude_diff!(M, similar(X), p, X)
+function embed(M::RealProbabilityAmplitudes, p, X)
+    return embed!(M, similar(X), p, X)
 end
 
-function to_probability_amplitude_diff!(::ProbabilitySimplex, Y, p, X)
+function embed!(::RealProbabilityAmplitudes, Y, p, X)
     Y .= X ./ sqrt.(p)
     return Y
 end
 
 @doc raw"""
-    from_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
+    project(M::RealProbabilityAmplitudes, p, X)
 
-Compute differential of [`from_probability_amplitude`](@ref) at tangent vector `X` from the
-tangent space at `p` from a sphere.
+Compute differential of [`project`](@ref) on [`RealProbabilityAmplitudes`](@ref) at tangent
+vector `X` from the tangent space at `p` from a sphere.
 """
-function from_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
-    return from_probability_amplitude_diff!(M, similar(X), p, X)
+function project(M::RealProbabilityAmplitudes, p, X)
+    return project!(M, similar(X), p, X)
 end
 
-function from_probability_amplitude_diff!(::ProbabilitySimplex, Y, p, X)
+function project!(::RealProbabilityAmplitudes, Y, p, X)
     Y .= p .* X
     return Y
 end
