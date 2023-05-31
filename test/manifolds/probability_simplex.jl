@@ -7,6 +7,7 @@ include("../utils.jl")
     q = [0.3, 0.6, 0.1]
     X = zeros(3)
     Y = [-0.1, 0.05, 0.05]
+    @test repr(M) == "ProbabilitySimplex(2; boundary=:open)"
     @test is_point(M, p)
     @test_throws DomainError is_point(M, p .+ 1, true)
     @test_throws ManifoldDomainError is_point(M, [0], true)
@@ -49,6 +50,7 @@ include("../utils.jl")
             test_manifold(
                 M,
                 pts,
+                basis_types_to_from=(DefaultOrthonormalBasis(),),
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
@@ -110,5 +112,19 @@ include("../utils.jl")
         @test inner(Mb, p, X, Y) == 8
 
         @test_throws ArgumentError ProbabilitySimplex(2; boundary=:tomato)
+    end
+
+    @testset "Probability amplitudes" begin
+        p = [0.1, 0.7, 0.2]
+        Y = [-0.1, 0.05, 0.05]
+        @test to_probability_amplitude(M, p) ≈
+              [0.31622776601683794, 0.8366600265340756, 0.4472135954999579]
+        @test from_probability_amplitude(
+            M,
+            [0.31622776601683794, 0.8366600265340756, 0.4472135954999579],
+        ) ≈ p
+        @test to_probability_amplitude_diff(M, p, Y) ≈
+              [-0.15811388300841897, 0.02988071523335984, 0.05590169943749475]
+        @test from_probability_amplitude_diff(M, p, Y) ≈ [-0.02, 0.07, 0.02]
     end
 end

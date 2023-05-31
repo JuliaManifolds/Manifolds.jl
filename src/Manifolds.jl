@@ -949,4 +949,14 @@ export get_basis,
 # atlases and charts
 export get_point, get_point!, get_parameters, get_parameters!
 
+# additional functions on Simplex
+export from_probability_amplitude,
+    from_probability_amplitude!,
+    from_probability_amplitude_diff,
+    from_probability_amplitude_diff!,
+    to_probability_amplitude,
+    to_probability_amplitude!,
+    to_probability_amplitude_diff,
+    to_probability_amplitude_diff!
+
 end # module

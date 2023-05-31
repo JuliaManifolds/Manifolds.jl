@@ -197,6 +197,36 @@ function exp!(::ProbabilitySimplex, q, p, X)
     return q
 end
 
+function get_coordinates_orthonormal!(
+    M::ProbabilitySimplex{N},
+    Xc,
+    p,
+    X,
+    R::RealNumbers,
+) where {N}
+    get_coordinates_orthonormal!(
+        Sphere(N),
+        Xc,
+        to_probability_amplitude(M, p),
+        to_probability_amplitude_diff(M, p, X),
+        R,
+    )
+    Xc .*= 2
+    return Xc
+end
+
+function get_vector_orthonormal!(
+    M::ProbabilitySimplex{N},
+    Y,
+    p,
+    Xc,
+    R::RealNumbers,
+) where {N}
+    Xcs = Xc / 2
+    X = get_vector_orthonormal(Sphere(N), to_probability_amplitude(M, p), Xcs, R)
+    return from_probability_amplitude_diff!(M, Y, to_probability_amplitude(M, p), X)
+end
+
 @doc raw"""
     injectivity_radius(M,p)
 
@@ -422,7 +452,7 @@ function riemannian_gradient!(M::ProbabilitySimplex, X, p, Y; kwargs...)
 end
 
 function Base.show(io::IO, ::ProbabilitySimplex{n,boundary}) where {n,boundary}
-    return print(io, "ProbabilitySimplex($(n); boundary=$boundary)")
+    return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
 end
 
 @doc raw"""
@@ -434,3 +464,65 @@ returns the zero tangent vector in the tangent space of the point `p`  from the
 zero_vector(::ProbabilitySimplex, ::Any)
 
 zero_vector!(::ProbabilitySimplex, X, p) = fill!(X, 0)
+
+@doc raw"""
+    to_probability_amplitude(M::ProbabilitySimplex{N}, p) where {N}
+
+Convert point `p` on `ProbabilitySimplex` to (real) probability amplitude. The formula reads
+``(\sqrt{p_1}, \sqrt{p_2}, …, \sqrt{p_{N+1}})``. This is an isometry from the interior of
+the probability simplex to the interior of the positive orthant of a sphere.
+"""
+function to_probability_amplitude(M::ProbabilitySimplex, p)
+    return to_probability_amplitude!(M, similar(p), p)
+end
+
+function to_probability_amplitude!(::ProbabilitySimplex, q, p)
+    q .= sqrt.(p)
+    return q
+end
+
+@doc raw"""
+    from_probability_amplitude(M::ProbabilitySimplex{N}, p) where {N}
+
+Convert point (real) probability amplitude `p` on to a point on `ProbabilitySimplex`.
+The formula reads ``(p_1^2, p_2^2, …, p_{N+1}^2)``. This is an isometry from the interior of
+the positive orthant of a sphere to interior of the probability simplex.
+"""
+function from_probability_amplitude(M::ProbabilitySimplex, p)
+    return from_probability_amplitude!(M, similar(p), p)
+end
+
+function from_probability_amplitude!(::ProbabilitySimplex, q, p)
+    q .= p .^ 2
+    return q
+end
+
+@doc raw"""
+    to_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
+
+Compute differential of [`to_probability_amplitude`](@ref) at tangent vector `X` from the
+tangent space at `p` from `M`.
+"""
+function to_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
+    return to_probability_amplitude_diff!(M, similar(X), p, X)
+end
+
+function to_probability_amplitude_diff!(::ProbabilitySimplex, Y, p, X)
+    Y .= X ./ sqrt.(p) ./ 2
+    return Y
+end
+
+@doc raw"""
+    from_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
+
+Compute differential of [`from_probability_amplitude`](@ref) at tangent vector `X` from the
+tangent space at `p` from a sphere with a scaled metric.
+"""
+function from_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
+    return from_probability_amplitude_diff!(M, similar(X), p, X)
+end
+
+function from_probability_amplitude_diff!(::ProbabilitySimplex, Y, p, X)
+    Y .= 2 .* p .* X
+    return Y
+end
