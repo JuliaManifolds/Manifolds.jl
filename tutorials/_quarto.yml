@@ -1,0 +1,27 @@
+project:
+  title: "Manifolds.jl Tutorials"
+  output-dir: ../docs/src/tutorials
+  render:
+    - "*.qmd"
+
+crossref:
+  fig-prefix: Figure
+  tbl-prefix: Table
+bibliography:
+  - ../CITATION.bib
+#  - ../bib/manopt-bibliography.yaml
+# csl: ../bib/harvard1.csl
+fig-format: png
+
+execute:
+  freeze: auto
+  eval: true
+  echo: true
+  output: true
+
+format:
+  commonmark:
+    variant: -raw_html+tex_math_dollars
+    wrap: preserve
+
+jupyter: julia-1.9

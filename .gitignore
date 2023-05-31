@@ -9,3 +9,4 @@ docs/src/tutorials/*.md
 .CondaPkg
 coverage
 *.cov
+tutorials/_freeze

@@ -1,0 +1,471 @@
+---
+title: 🚀 Get Started with `Manifolds.jl`
+---
+
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+using Pkg;
+cd(@__DIR__)
+Pkg.activate("."); # for reproducibility use the local tutorial environment.
+using Markdown
+```
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+# We define a small helper to nicely display errors
+function pretty_error(err)
+    s = replace(sprint(showerror, err), "\n" => "\n    ")
+    str = "!!! danger \"Expected error: $(typeof(err))\"\n   This is how the Error we expect here looks like:\n    ```\n    $s\n    ```\n"
+    println(str)
+    return Markdown.parse(str)
+end
+macro expect_error(code, error=:DomainError)
+    quote
+        try
+            $(esc(code))
+            error(string("Error of type ", $(esc(error)), " was not thrown."))
+        catch e
+            if e isa $(esc(error))
+                pretty_error(e)
+            else
+                rethrow()
+            end
+        end
+    end
+end
+```
+
+This is a short overview of [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/) and how to get started working with your first Manifold.
+we first need to install the package, using for example
+
+```{julia}
+#| eval: false
+using Pkg; Pkg.add("Manifolds")
+```
+
+Then you can load the package with
+
+```{julia}
+using Manifolds
+```
+
+## Using the Library of Manifolds
+
+[`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/) is first of all a library of manifolds, see the list in the menu [here](https://juliamanifolds.github.io/Manifolds.jl/latest/) under “basic manifolds”.
+
+Let's look at three examples together with the first few functions on manifolds.
+
+#### 1. [The Euclidean space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html)
+
+[The Euclidean space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html#Manifolds.Euclidean) brings us (back) into linear case of vectors, so in terms of manifolds, this is a very simple one. It is often useful to compare to classical algorithms, or implementations.
+
+```{julia}
+M₁ = Euclidean(3)
+```
+
+Since a manifold is a type in Julia, we write it in CamelCase. Its parameters are first a dimension or size parameter of the manifold, sometimes optional is a field the manifold is defined over.
+
+For example the above definition is the same as the real-valued case
+
+```{julia}
+M₁ === Euclidean(3, field=ℝ)
+```
+
+But we even introduced a short hand notation, since ℝ is also just a symbol/variable to use"
+
+```{julia}
+M₁ === ℝ^3
+```
+
+And similarly here are two ways to create the manifold of vectors of length two with complex entries – or mathematically the space $\mathbb C^2$
+
+```{julia}
+Euclidean(2, field=ℂ) === ℂ^2
+```
+
+The easiest to check is the dimension of a manifold. Here we have three “directions to walk into” at every point $p\in \mathbb R
+^3$ so [🔗 `manifold_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.maniold_dimension-Tuple{AbstractManifold})) is
+
+```{julia}
+manifold_dimension(M₁)
+```
+
+#### 2. [The hyperpolic space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/hyperbolic.html)
+
+The $d$-dimensional [hyperbolic space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/hyperbolic.html#Manifolds.Hyperbolic) is usually represented in $\mathbb R^{d+1}$ as the set of points $p\in\mathbb R^3$ fulfilling
+
+```math
+p_1^2+p_2^2+\cdots+p_d^2-p_{d+1}^2 = -1.
+```
+
+We define the manifold using
+
+```{julia}
+M₂ = Hyperbolic(2)
+```
+
+And we can again just start with looking at the manifold dimension of `M₂`
+
+
+```{julia}
+manifold_dimension(M₂)
+```
+
+A next useful function is to check, whether some $p∈\mathbb R^3$ is a point on the manifold `M₂`. We can check
+
+```{julia}
+is_point(M₂, [0, 0, 1])
+```
+
+or
+
+```{julia}
+is_point(M₂, [1, 0, 1])
+```
+
+Keyword arguments are passed on to any numerical checks, for example an absolute tolerance when checking the above equiality.
+
+But in an interactive session an error message might be helpful. A positional (third) argument is present to activate this. Setting this parameter to true, we obtain an error message that gives insight into why the point is not a point on `M₂`.
+Note that the `LoadError:` is due to quarto, on `REPL` you would just get the `DomainError`.
+
+```{julia}
+#| error: true
+is_point(M₂, [0, 0, 1.001], true)
+```
+
+#### 3. [The sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html)
+
+[The sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html#Manifolds.Sphere) $\mathbb S^d$ is the $d$-dimensional sphere represented in its embedded form, that is unit vectors $p \in \mathbb R^{d+1}$ with unit norm $\lVert p \rVert_2 = 1$.
+
+```{julia}
+M₃ = Sphere(2)
+```
+
+If we only have a point that is approximately on the manifold, we can allow for a tolerance. Usually these are the same values of `atol` and `rtol` alowed in `isapprox`,
+i.e. we get
+
+```{julia}
+is_point(M₃, [0, 0, 1.001]; atol=1e-3)
+```
+
+Here we can show a last nice check: [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) to check whether a tangent vector `X` is a representation of a tangent vector $X∈T_p\mathcal M$ to a point `p` on the manifold.
+
+This function has two positional asrguments, the first to again indicate whether to throw an error, the second to disable the check that `p` is a valid point on the manifold. Usually this validity is essential for the tangent check, but if it was for example performed before, it can be turned off to spare time.
+
+For example in our first example the point is not of unit norm
+
+```{julia}
+is_vector(M₃, [2, 0, 0], [0, 1, 1])
+```
+
+But the orthogonality of `p` and `X` is still valid, we can disable the point check,
+but even setting the error to true we get here
+
+```{julia}
+is_vector(M₃, [2, 0, 0], [0, 1, 1], true, false)
+```
+
+But of course it is better to use a valid point in the first place"
+
+```{julia}
+is_vector(M₃, [1, 0, 0], [0, 1, 1])
+```
+
+and for these we again get informative error messages
+
+```{julia}
+#| error: true
+@expect_error is_vector(M₃, [1, 0, 0], [0.1, 1, 1], true) DomainError
+```
+
+To learn about how to define a manifold youself check out the [How to define your own manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/example.html) tutorial of [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)."
+
+### Building more advanced manifolds
+
+Based on these basic manifolds we can directly build more advanced manifolds.
+
+The first one concerns vectors or matrices of data on a manifold, the [PowerManifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#sec-power-manifold).
+
+```{julia}
+M₄ = M₂^2
+```
+
+Then points are represented by arrays, where the power manifold dimension is added in the end. In other words – for the hyperbolic manifold here, we have a matrix with 2 columns, where each column is a valid point on hyperbolic space."
+
+```{julia}
+p = [0 0; 0 1; 1 sqrt(2)]
+```
+
+```{julia}
+[is_point(M₂, p[:, 1]), is_point(M₂, p[:, 2])]
+```
+
+But of course the method we used previously also works for power manifolds:"
+
+```{julia}
+is_point(M₄, p)
+```
+
+Note that nested power manifolds are combined into one as in
+
+```{julia}
+M₄₂ = M₄^4
+```
+
+which represents $2\times 4$ – matrices of hyperbolic points represented in $3\times 2\times 4$ arrays.
+
+We can – alternatively – use a power manifold with nested arrays
+
+```{julia}
+M₅ = PowerManifold(M₃, NestedPowerRepresentation(), 2)
+```
+
+which emphasizes that we have vectors of length 2 that contain points, so we store them that way.
+
+```{julia}
+p₂ = [[0.0, 0.0, 1.0], [0.0, 1.0, 0.0]]
+```
+
+To unify both representations, elements of the power manifold can also be accessed in the classical indexing fashion, if we start with the corresponding manifold first. This way one can implement algorithms also independent of which representation is used."
+
+```{julia}
+p[M₄, 1]
+```
+
+```{julia}
+p₂[M₅, 2]
+```
+
+Another construtor is the [ProductManifold](https://juliamanifolds.github.io/Manifolds.jl/previews/PR534/manifolds/product.html) to combine different manifolds. Here of course the order matters.
+First we construct these using $×$
+
+```{julia}
+M₆ = M₂ × M₃
+```
+
+Since now the representations might differ from element to element, we have to encapsulate these in their own type.
+
+```{julia}
+p₃ = Manifolds.ArrayPartition([0, 0, 1], [0, 1, 0])
+```
+
+Here `ArrayPartition` taken from [`RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient access to the product elements.
+
+```{julia}
+is_point(M₆, p₃, true)
+```
+
+But accessing single components still works the same."
+
+```{julia}
+p₃[M₆, 1]
+```
+
+Finally, also the [TangentBundle](https://juliamanifolds.github.io/Manifolds.jl/previews/PR534/manifolds/vector_bundle.html#Manifolds.TangentBundle), the manifold collecting all tangent spaces on a manifold is available as"
+
+```{julia}
+M₇ = TangentBundle(M₃)
+```
+
+## Implementing generic Functions
+
+In this section we take a look how to implement generic functions on manifolds.
+
+For our example here, we want to implement the so-called [📖 Bézier curve](https://en.wikipedia.org
+/wiki/Bézier_curve) using the so-called [📖 de-Casteljau algorithm](https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm).
+The linked algorithm can easily be generalised to manifolds by replacing lines with geodesics. This was for example used in [^BergmannGousenbourger2018] and the following example is an extended version of an example from [^AxenBaranBergmannRzecki2022].
+
+The algorithm works recursively. For the case that we have a Bézier curve with just two points, the algorithm just evaluates the geodesic connecting both at some time point $t∈[0,1]$. The function to evaluate a shortest geodesic (it might not be unique, but then a deterministic choice is taken) between two points `p` and `q` on a manifold `M` [🔗 `shortest_geodesic(M, p, q, t)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any}).
+"""
+
+```{julia}
+function de_Casteljau(M::AbstractManifold, t, pts::NTuple{2})
+    return shortest_geodesic(M, pts[1], pts[2], t)
+end
+```
+
+```{julia}
+function de_Casteljau(M::AbstractManifold, t, pts::NTuple)
+    p = de_Casteljau(M, t, pts[1:(end - 1)])
+    q = de_Casteljau(M, t, pts[2:end])
+    return shortest_geodesic(M, p, q, t)
+end
+```
+
+Which can now be used on any manifold where the shortest geodesic is implemented
+
+Now on several manifolds the [📖 exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see [^AbsilMahonySepulchre2008], Def. 4.1.1 for details) and its (local) inverse.
+
+The function itself is quite similar to the expponential map, just that [🔗 `retract(M, p, X, m)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.retract) has one further parameter, the type of retraction to take, so `m` is a subtype of [`AbstractRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractRetractionMethod) `m`, the same for the [🔗 `inverse_retract(M, p, q, n)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.inverse_retract) with an [`AbstractInverseRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractInverseRetractionMethod) `n`.
+
+Thinking of a generic implementation, we would like to have a way to specify one, that is available. This can be done by using [🔗 `default_retraction_method`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.default_retraction_method-Tuple{AbstractManifold}) and [🔗 `default_inverse_retraction_method`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.default_inverse_retraction_method-Tuple{AbstractManifold}), respectively. We implement
+"""
+
+```{julia}
+function generic_de_Casteljau(
+    M::AbstractManifold,
+    t,
+    pts::NTuple{2};
+    m::AbstractRetractionMethod=default_retraction_method(M),
+    n::AbstractInverseRetractionMethod=default_inverse_retraction_method(M),
+)
+    X = inverse_retract(M, pts[1], pts[2], n)
+    return retract(M, pts[1], X, t, m)
+end
+```
+
+and for the recursion
+
+```{julia}
+function generic_de_Casteljau(
+    M::AbstractManifold,
+    t,
+    pts::NTuple;
+    m::AbstractRetractionMethod=default_retraction_method(M),
+    n::AbstractInverseRetractionMethod=default_inverse_retraction_method(M),
+)
+    p = generic_de_Casteljau(M, t, pts[1:(end - 1)]; m=m, n=n)
+    q = generic_de_Casteljau(M, t, pts[2:end]; m=m, n=n)
+    X = inverse_retract(M, p, q, n)
+    return retract(M, p, X, t, m)
+end
+```
+
+Note that on a manifold `M` where the exponential map is implemented, the `default_retraction_method(M)` returns [🔗 `ExponentialRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ExponentialRetraction), which yields that the `retract` function falls back to calling `exp`.
+
+The same mechanism exists for [🔗 `parallel_transport_to(M, p, X, q)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.parallel_transport_to-Tuple{AbstractManifold,%20Any,%20Any,%20Any}) and the more general [🔗 `vector_transport_to(M, p, X, q, m)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.vector_transport_to) whose [🔗 `AbstractVectorTransportMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.AbstractVectorTransportMethod) `m` has a default defined by [🔗 `default_vector_transport_method(M)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.default_vector_transport_method-Tuple{AbstractManifold}).
+
+## Allocating and in-place computations
+
+Memory allocation is a [critical performace issue](https://docs.julialang.org/en/v1/manual/performance-tips/#Measure-performance-with-[@time](@ref)-and-pay-attention-to-memory-allocation) when programming in Julia. To take this into account, `Manifolds.jl` provides special functions to reduce the amount of allocations.
+
+We again look at the [📖 exponential map](https://en.wikip edia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` [🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.exp-Tuple{AbstractManifold,%20Any,%20Any}). This function returns the resulting point `q`, which requires to allocate new memory.
+
+To avoid this allocation, the function `exp!(M, q, p, X)` [🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.exp!-Tuple{AbstractManifold,%20Any,%20Any,%20Any}) can be called. Here `q` is allocated beforehand and is passed as the memory, where the result is returned in.
+It might be used even for interims computations, as long as it does not introduce side effects. Thas means that even with `exp!(M, p, p, X)` the result is correct.
+
+Let's look at an example.
+
+We take another look at the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html#Manifolds.Sphere) but now a high-dimensional one.
+We can also illustrate how to generate radnom points and tangent vectors.
+
+```{julia}
+#| output: false
+M = Sphere(10000)
+p₄ = rand(M)
+X = rand(M; vector_at=p₄)
+```
+
+Looking at the allocations required we get
+
+```{julia}
+@allocated exp(M, p₄, X)
+```
+
+While if we have already allocated memory for the resulting point on the manifold,
+for example
+
+```{julia}
+q₂ = zero(p₄);
+```
+
+There are no new memory allocations necessary if we use the in-place function."
+
+```{julia}
+@allocated exp!(M, q₂, p₄, X)
+```
+
+
+This methodology is used for all functions that compute a new point or tangent vector. By default all allocating functions allocate memory and call the in-place function.
+This also means that if you implement a new manifold, you just have to implement the in-place version.
+
+## Decorating a manifold"
+
+As you saw until now, an
+[📎 `AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#The-AbstractManifold)
+describes a Riemannian manifold.
+For completeness, this also includes the chosen
+[Riemannian metric tensor](https://en.wikipedia.org/wiki/Metric_tensor)
+or inner product on the tangent spaces.
+
+In `Manifolds.jl` these are assumed to be a “reasonable default”.
+For example on the `Sphere(n)` we used above, the default metric is the one inherited from
+restricting the inner product from the embedding space onto each tangent space.
+
+Consider a manifold like
+
+```{julia}
+M₈ = SymmetricPositiveDefinite(3)
+```
+
+which is the manifold of $3×3$ matrices that are [symmetric and positive definite](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Manifolds.SymmetricPositiveDefinite).
+which has a default as well, the affine invariant [`AffineInvariantMetric`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Default-metric:-the-affine-invariant-metric), but also has several different metrics.
+
+To switch the metric, we use the idea of a [📖 decorator pattern](https://en.wikipedia.org/wiki/Decorator_pattern)-like approach. Defining
+
+```{julia}
+M₈₂ = MetricManifold(M₈, BuresWassersteinMetric())
+```
+
+changes the manifold to use the [`BuresWassersteinMetric`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Bures-Wasserstein-metric).
+
+This changes all functions that depend on the metric, most prominently the Riemannian matric, but also the exponential and logarithmic map and hence also geodesics.
+
+All functions that are not dependent on a metric – for example the manifold dimension, the tests of points and vectors we already looked at, but also all retractions – stay unchanged.
+This means that for example
+
+```{julia}
+[manifold_dimension(M₈₂), manifold_dimension(M₈)]
+```
+
+both calls the same underlying function. On the other hand with
+
+```{julia}
+p₅, X₅ = one(zeros(3, 3)), [1.0 0.0 1.0; 0.0 1.0 0.0; 1.0 0.0 1.0]
+```
+
+
+but for example the exponential map and the norm yield different results
+
+```{julia}
+[exp(M₈, p₅, X₅), exp(M₈₂, p₅, X₅)]
+```
+
+```{julia}
+[norm(M₈, p₅, X₅), norm(M₈₂, p₅, X₅)]
+```
+
+
+Technically this done using Traits – the trait here is the [`IsMetricManifold`](@ref) trait. Our trait system allows to combine traits but also to inherit properties in a hierarchical way, see [🔗 here](@ref #Traits-with-an-inheritance-hierarchy) for the technical details.
+
+The same approach is used for
+
+* specifying a different [connection](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/connection.html)
+* specifying a manifold as a certain [quotient manifold](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/quotient.html)
+* specifying a certain [embedding](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#The-Manifold-decorator)
+* specify a certain [group action](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/group.html)
+
+Again, for all of these, the concrete types only have to be used if you want to do a second, different from the details, property, for example a second way to embed a manfiold. If a manifold is (in its usual representation) an embedded manifold, this works with the default manifold type already, since then it is again set as the reasonable default.
+
+## References
+
+[^AbsilMahonySepulchre2008]:
+    > Absil, P.-A., Mahony, R. and Sepulchre R.,
+    > _Optimization Algorithms on Matrix Manifolds_
+    > Princeton University Press, 2008,
+    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
+    > [open access](http://press.princeton.edu/chapters/absil/)
+[^AxenBaranBergmannRzecki2022]:
+    >Axen, S. D., Baran, M., Bergmann, R. and Rzecki, K:
+    > _Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds_,
+    > arXiv preprint, 2022, [2106.08777](https://arxiv.org/abs/2106.08777)
+[^BergmannGousenbourger2018]:
+    > Bergmann, R. and Gousenbourger, P.-Y.:
+    > _A variational model for data fitting on manifolds
+    > by minimizing the acceleration of a Bézier curve_.
+    > Frontiers in Applied Mathematics and Statistics, 2018.
+    > doi: [10.3389/fams.2018.00059](https://dx.doi.org/10.3389/fams.2018.00059),
+    > arXiv: [1807.10090](https://arxiv.org/abs/1807.10090)
