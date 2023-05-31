@@ -33,7 +33,7 @@ if "--quarto" ∈ ARGS
 end
 
 # (c) load necessary packages for the docs
-using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
+using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter#, PythonPlot
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 # required for loading the manifold tests functions
