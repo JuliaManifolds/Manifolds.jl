@@ -439,7 +439,7 @@ but for example the exponential map and the norm yield different results
 ```
 
 
-Technically this done using Traits – the trait here is the [`IsMetricManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#Traits-with-an-inheritance-hierarchy) trait. Our trait system allows to combine traits but also to inherit properties in a hierarchical way, see [🔗 here](@ref #Traits-with-an-inheritance-hierarchy) for the technical details.
+Technically this done using Traits – the trait here is the [`IsMetricManifold`](@ref) trait. Our trait system allows to combine traits but also to inherit properties in a hierarchical way, see [🔗 here](@ref https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#Traits-with-an-inheritance-hierarchy) for the technical details.
 
 The same approach is used for
 
