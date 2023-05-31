@@ -470,7 +470,7 @@ zero_vector!(::ProbabilitySimplex, X, p) = fill!(X, 0)
     RealProbabilityAmplitudes
 
 An explicit isometric embedding of interior of [`ProbabilitySimplex`] in
-positive quadrant of the [`Sphere`]. Some properties extend to the boundary but not all.
+positive orthant of the [`Sphere`]. Some properties extend to the boundary but not all.
 
 # Constructor
 
