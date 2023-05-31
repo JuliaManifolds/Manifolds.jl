@@ -124,7 +124,7 @@ include("../utils.jl")
             [0.31622776601683794, 0.8366600265340756, 0.4472135954999579],
         ) ≈ p
         @test to_probability_amplitude_diff(M, p, Y) ≈
-              [-0.15811388300841897, 0.02988071523335984, 0.05590169943749475]
-        @test from_probability_amplitude_diff(M, p, Y) ≈ [-0.02, 0.07, 0.02]
+              [-0.31622776601683794, 0.05976143046671968, 0.1118033988749895]
+        @test from_probability_amplitude_diff(M, p, Y) ≈ [-0.01, 0.035, 0.01]
     end
 end

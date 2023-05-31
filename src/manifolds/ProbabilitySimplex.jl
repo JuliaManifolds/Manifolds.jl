@@ -211,7 +211,6 @@ function get_coordinates_orthonormal!(
         to_probability_amplitude_diff(M, p, X),
         R,
     )
-    Xc .*= 2
     return Xc
 end
 
@@ -222,8 +221,7 @@ function get_vector_orthonormal!(
     Xc,
     R::RealNumbers,
 ) where {N}
-    Xcs = Xc / 2
-    X = get_vector_orthonormal(Sphere(N), to_probability_amplitude(M, p), Xcs, R)
+    X = get_vector_orthonormal(Sphere(N), to_probability_amplitude(M, p), Xc, R)
     return from_probability_amplitude_diff!(M, Y, to_probability_amplitude(M, p), X)
 end
 
@@ -508,7 +506,7 @@ function to_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
 end
 
 function to_probability_amplitude_diff!(::ProbabilitySimplex, Y, p, X)
-    Y .= X ./ sqrt.(p) ./ 2
+    Y .= X ./ sqrt.(p)
     return Y
 end
 
@@ -516,13 +514,13 @@ end
     from_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
 
 Compute differential of [`from_probability_amplitude`](@ref) at tangent vector `X` from the
-tangent space at `p` from a sphere with a scaled metric.
+tangent space at `p` from a sphere.
 """
 function from_probability_amplitude_diff(M::ProbabilitySimplex, p, X)
     return from_probability_amplitude_diff!(M, similar(X), p, X)
 end
 
 function from_probability_amplitude_diff!(::ProbabilitySimplex, Y, p, X)
-    Y .= 2 .* p .* X
+    Y .= p .* X
     return Y
 end
