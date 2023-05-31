@@ -154,7 +154,7 @@ end
 get_embedding(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
 
 @doc raw"""
-    distance(M,p,q)
+    distance(M, p, q)
 
 Compute the distance between two points on the [`ProbabilitySimplex`](@ref) `M`.
 The formula reads
@@ -174,7 +174,7 @@ embed(::ProbabilitySimplex, p) = p
 embed(::ProbabilitySimplex, p, X) = X
 
 @doc raw"""
-    exp(M::ProbabilitySimplex,p,X)
+    exp(M::ProbabilitySimplex, p, X)
 
 Compute the exponential map on the probability simplex.
 
@@ -223,9 +223,9 @@ function get_vector_orthonormal!(
 end
 
 @doc raw"""
-    injectivity_radius(M,p)
+    injectivity_radius(M, p)
 
-compute the injectivity radius on the [`ProbabilitySimplex`](@ref) `M` at the point `p`,
+Compute the injectivity radius on the [`ProbabilitySimplex`](@ref) `M` at the point `p`,
 i.e. the distanceradius to a point near/on the boundary, that could be reached by following the
 geodesic.
 """
@@ -357,7 +357,7 @@ end
 @doc raw"""
     project(M::ProbabilitySimplex, p, Y)
 
-project `Y` from the embedding onto the tangent space at `p` on
+Project `Y` from the embedding onto the tangent space at `p` on
 the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 
 ````math
@@ -402,7 +402,7 @@ end
 @doc raw"""
     representation_size(::ProbabilitySimplex{n})
 
-return the representation size of points in the $n$-dimensional probability simplex,
+Return the representation size of points in the $n$-dimensional probability simplex,
 i.e. an array size of `(n+1,)`.
 """
 representation_size(::ProbabilitySimplex{n}) where {n} = (n + 1,)
@@ -459,7 +459,7 @@ end
 @doc raw"""
     zero_vector(M::ProbabilitySimplex, p)
 
-returns the zero tangent vector in the tangent space of the point `p`  from the
+Return the zero tangent vector in the tangent space of the point `p`  from the
 [`ProbabilitySimplex`](@ref) `M`, i.e. its representation by the zero vector in the embedding.
 """
 zero_vector(::ProbabilitySimplex, ::Any)
@@ -469,7 +469,7 @@ zero_vector!(::ProbabilitySimplex, X, p) = fill!(X, 0)
 @doc raw"""
     RealProbabilityAmplitudes
 
-An explicit isometric and homomorphic embedding of interior of [`ProbabilitySimplex`] in
+An explicit isometric embedding of interior of [`ProbabilitySimplex`] in
 positive quadrant of the [`Sphere`]. Some properties extend to the boundary but not all.
 
 # Constructor
