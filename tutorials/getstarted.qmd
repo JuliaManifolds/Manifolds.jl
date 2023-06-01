@@ -359,7 +359,7 @@ This also means that if you implement a new manifold, you just have to implement
 ## Decorating a manifold
 
 As you saw until now, an
-[📎 `AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#The-AbstractManifold)
+[🔗 `AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#The-AbstractManifold)
 describes a Riemannian manifold.
 For completeness, this also includes the chosen
 [📖 Riemannian metric tensor](https://en.wikipedia.org/wiki/Metric_tensor)
