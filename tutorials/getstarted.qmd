@@ -168,7 +168,7 @@ but even setting the error to true we get here
 is_vector(M₃, [2, 0, 0], [0, 1, 1], true, false)
 ```
 
-But of course it is better to use a valid point in the first place"
+But of course it is better to use a valid point in the first place
 
 ```{julia}
 is_vector(M₃, [1, 0, 0], [0, 1, 1])
@@ -193,7 +193,7 @@ The first one concerns vectors or matrices of data on a manifold, the [PowerMani
 M₄ = M₂^2
 ```
 
-Then points are represented by arrays, where the power manifold dimension is added in the end. In other words – for the hyperbolic manifold here, we have a matrix with 2 columns, where each column is a valid point on hyperbolic space."
+Then points are represented by arrays, where the power manifold dimension is added in the end. In other words – for the hyperbolic manifold here, we have a matrix with 2 columns, where each column is a valid point on hyperbolic space.
 
 ```{julia}
 p = [0 0; 0 1; 1 sqrt(2)]
@@ -203,7 +203,7 @@ p = [0 0; 0 1; 1 sqrt(2)]
 [is_point(M₂, p[:, 1]), is_point(M₂, p[:, 2])]
 ```
 
-But of course the method we used previously also works for power manifolds:"
+But of course the method we used previously also works for power manifolds:
 
 ```{julia}
 is_point(M₄, p)
@@ -382,7 +382,7 @@ There are no new memory allocations necessary if we use the in-place function."
 This methodology is used for all functions that compute a new point or tangent vector. By default all allocating functions allocate memory and call the in-place function.
 This also means that if you implement a new manifold, you just have to implement the in-place version.
 
-## Decorating a manifold"
+## Decorating a manifold
 
 As you saw until now, an
 [📎 `AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#The-AbstractManifold)
