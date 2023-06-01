@@ -279,7 +279,7 @@ For our example here, we want to implement the so-called [📖 Bézier curve](ht
 The linked algorithm can easily be generalised to manifolds by replacing lines with geodesics. This was for example used in [^BergmannGousenbourger2018] and the following example is an extended version of an example from [^AxenBaranBergmannRzecki2022].
 
 The algorithm works recursively. For the case that we have a Bézier curve with just two points, the algorithm just evaluates the geodesic connecting both at some time point $t∈[0,1]$. The function to evaluate a shortest geodesic (it might not be unique, but then a deterministic choice is taken) between two points `p` and `q` on a manifold `M` [🔗 `shortest_geodesic(M, p, q, t)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any}).
-"""
+
 
 ```{julia}
 function de_Casteljau(M::AbstractManifold, t, pts::NTuple{2})
@@ -302,7 +302,7 @@ Now on several manifolds the [📖 exponential map](https://en.wikipedia.org/wik
 The function itself is quite similar to the expponential map, just that [🔗 `retract(M, p, X, m)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.retract) has one further parameter, the type of retraction to take, so `m` is a subtype of [`AbstractRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractRetractionMethod) `m`, the same for the [🔗 `inverse_retract(M, p, q, n)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.inverse_retract) with an [`AbstractInverseRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractInverseRetractionMethod) `n`.
 
 Thinking of a generic implementation, we would like to have a way to specify one, that is available. This can be done by using [🔗 `default_retraction_method`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.default_retraction_method-Tuple{AbstractManifold}) and [🔗 `default_inverse_retraction_method`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.default_inverse_retraction_method-Tuple{AbstractManifold}), respectively. We implement
-"""
+
 
 ```{julia}
 function generic_de_Casteljau(
