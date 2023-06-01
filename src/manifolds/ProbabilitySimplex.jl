@@ -452,6 +452,23 @@ function riemannian_gradient!(M::ProbabilitySimplex, X, p, Y; kwargs...)
     return X
 end
 
+@doc raw"""
+    riemann_tensor(::ProbabilitySimplex, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`ProbabilitySimplex`](@ref) `M`.
+It is computed using [`RealProbabilityAmplitudes`](@ref) isometry with positive orthant of
+a sphere.
+"""
+riemann_tensor(::ProbabilitySimplex, p, X, Y, Z)
+
+function riemann_tensor!(::ProbabilitySimplex{N}, Xresult, p, X, Y, Z) where {N}
+    ME = RealProbabilityAmplitudes(N)
+    pe = embed(ME, p)
+    Xrs = riemann_tensor(Sphere(N), pe, embed(ME, p, X), embed(ME, p, Y), embed(ME, p, Z))
+    project!(ME, Xresult, pe, Xrs)
+    return Xresult
+end
+
 function Base.show(io::IO, ::ProbabilitySimplex{n,boundary}) where {n,boundary}
     return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
 end
