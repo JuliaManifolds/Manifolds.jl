@@ -54,13 +54,13 @@ using Manifolds
 
 ## Using the Library of Manifolds
 
-[`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/) is first of all a library of manifolds, see the list in the menu [here](https://juliamanifolds.github.io/Manifolds.jl/latest/) under “basic manifolds”.
+`Manifolds.jl` is first of all a library of manifolds, see the list in the menu [here](https://juliamanifolds.github.io/Manifolds.jl/latest/) under “basic manifolds”.
 
 Let's look at three examples together with the first few functions on manifolds.
 
 #### 1. [The Euclidean space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html)
 
-[The Euclidean space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html#Manifolds.Euclidean) brings us (back) into linear case of vectors, so in terms of manifolds, this is a very simple one. It is often useful to compare to classical algorithms, or implementations.
+The Euclidean Space ``[Euclidean](@ref Manifold.Euclidean)``{=commonmark} brings us (back) into linear case of vectors, so in terms of manifolds, this is a very simple one. It is often useful to compare to classical algorithms, or implementations.
 
 ```{julia}
 M₁ = Euclidean(3)
@@ -93,9 +93,9 @@ The easiest to check is the dimension of a manifold. Here we have three “direc
 manifold_dimension(M₁)
 ```
 
-#### 2. [The hyperpolic space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/hyperbolic.html)
+#### 2. ``[The hyperpolic space](``@ref HyperbolicSpace``{=commonmark})
 
-The $d$-dimensional [hyperbolic space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/hyperbolic.html#Manifolds.Hyperbolic) is usually represented in $\mathbb R^{d+1}$ as the set of points $p\in\mathbb R^3$ fulfilling
+The $d$-dimensional [hyperbolic space](``@ref Manifolds.Hyperbolic``{=commonmark}) is usually represented in $\mathbb R^{d+1}$ as the set of points $p\in\mathbb R^3$ fulfilling
 
 ```math
 p_1^2+p_2^2+\cdots+p_d^2-p_{d+1}^2 = -1.
@@ -136,9 +136,9 @@ Note that the `LoadError:` is due to quarto, on `REPL` you would just get the `D
 is_point(M₂, [0, 0, 1.001], true)
 ```
 
-#### 3. [The sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html)
+#### 3. [The sphere](``@ref Manifolds.Sphere``{=commonmark})
 
-[The sphere](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html#Manifolds.Sphere) $\mathbb S^d$ is the $d$-dimensional sphere represented in its embedded form, that is unit vectors $p \in \mathbb R^{d+1}$ with unit norm $\lVert p \rVert_2 = 1$.
+[The sphere](``@ref Manifolds.Sphere``{=commonmark}) $\mathbb S^d$ is the $d$-dimensional sphere represented in its embedded form, that is unit vectors $p \in \mathbb R^{d+1}$ with unit norm $\lVert p \rVert_2 = 1$.
 
 ```{julia}
 M₃ = Sphere(2)
@@ -151,7 +151,7 @@ i.e. we get
 is_point(M₃, [0, 0, 1.001]; atol=1e-3)
 ```
 
-Here we can show a last nice check: [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) to check whether a tangent vector `X` is a representation of a tangent vector $X∈T_p\mathcal M$ to a point `p` on the manifold.
+Here we can show a last nice check: [🔗 `is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) to check whether a tangent vector `X` is a representation of a tangent vector $X∈T_p\mathcal M$ to a point `p` on the manifold.
 
 This function has two positional asrguments, the first to again indicate whether to throw an error, the second to disable the check that `p` is a valid point on the manifold. Usually this validity is essential for the tangent check, but if it was for example performed before, it can be turned off to spare time.
 
@@ -181,13 +181,13 @@ and for these we again get informative error messages
 @expect_error is_vector(M₃, [1, 0, 0], [0.1, 1, 1], true) DomainError
 ```
 
-To learn about how to define a manifold youself check out the [How to define your own manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/example.html) tutorial of [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)."
+To learn about how to define a manifold youself check out the [🔗 How to define your own manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/example.html) tutorial of [🔗 `ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)."
 
 ### Building more advanced manifolds
 
 Based on these basic manifolds we can directly build more advanced manifolds.
 
-The first one concerns vectors or matrices of data on a manifold, the [PowerManifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#sec-power-manifold).
+The first one concerns vectors or matrices of data on a manifold, the [PowerManifold](``@ref PowerManifoldSection``{=commonmark}).
 
 ```{julia}
 M₄ = M₂^2
@@ -239,8 +239,8 @@ p[M₄, 1]
 p₂[M₅, 2]
 ```
 
-Another construtor is the [ProductManifold](https://juliamanifolds.github.io/Manifolds.jl/previews/PR534/manifolds/product.html) to combine different manifolds. Here of course the order matters.
-First we construct these using $×$
+Another construtor is the [ProductManifold](``@ref ProductManifoldSection``{=commonmark}) to combine different manifolds.
+Here of course the order matters. First we construct these using $×$
 
 ```{julia}
 M₆ = M₂ × M₃
@@ -252,7 +252,7 @@ Since now the representations might differ from element to element, we have to e
 p₃ = Manifolds.ArrayPartition([0, 0, 1], [0, 1, 0])
 ```
 
-Here `ArrayPartition` taken from [`RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient access to the product elements.
+Here `ArrayPartition` taken from [🔗 `RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient access to the product elements.
 
 ```{julia}
 is_point(M₆, p₃, true)
@@ -264,7 +264,7 @@ But accessing single components still works the same."
 p₃[M₆, 1]
 ```
 
-Finally, also the [TangentBundle](https://juliamanifolds.github.io/Manifolds.jl/previews/PR534/manifolds/vector_bundle.html#Manifolds.TangentBundle), the manifold collecting all tangent spaces on a manifold is available as"
+Finally, also the [TangentBundle](``@ref Manifolds.TangentBundle``{=commonmark]), the manifold collecting all tangent spaces on a manifold is available as"
 
 ```{julia}
 M₇ = TangentBundle(M₃)
@@ -340,16 +340,16 @@ The same mechanism exists for [🔗 `parallel_transport_to(M, p, X, q)`](https:/
 
 ## Allocating and in-place computations
 
-Memory allocation is a [critical performace issue](https://docs.julialang.org/en/v1/manual/performance-tips/#Measure-performance-with-[@time](@ref)-and-pay-attention-to-memory-allocation) when programming in Julia. To take this into account, `Manifolds.jl` provides special functions to reduce the amount of allocations.
+Memory allocation is a [🔗 critical performace issue](https://docs.julialang.org/en/v1/manual/performance-tips/#Measure-performance-with-[@time](@ref)-and-pay-attention-to-memory-allocation) when programming in Julia. To take this into account, `Manifolds.jl` provides special functions to reduce the amount of allocations.
 
-We again look at the [📖 exponential map](https://en.wikip edia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` [🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.exp-Tuple{AbstractManifold,%20Any,%20Any}). This function returns the resulting point `q`, which requires to allocate new memory.
+We again look at the [📖 exponential map](https://en.wikip edia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` (see [🔗 `exp(M, p, X)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.exp-Tuple{AbstractManifold,%20Any,%20Any})). This function returns the resulting point `q`, which requires to allocate new memory.
 
-To avoid this allocation, the function `exp!(M, q, p, X)` [🔗](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.exp!-Tuple{AbstractManifold,%20Any,%20Any,%20Any}) can be called. Here `q` is allocated beforehand and is passed as the memory, where the result is returned in.
+To avoid this allocation, the function [🔗 `exp!(M, q, p, X)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.exp!-Tuple{AbstractManifold,%20Any,%20Any,%20Any}) can be called. Here `q` is allocated beforehand and is passed as the memory, where the result is returned in.
 It might be used even for interims computations, as long as it does not introduce side effects. Thas means that even with `exp!(M, p, p, X)` the result is correct.
 
 Let's look at an example.
 
-We take another look at the [`Sphere`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/sphere.html#Manifolds.Sphere) but now a high-dimensional one.
+We take another look at the [`Sphere`](@ref), but now a high-dimensional one.
 We can also illustrate how to generate radnom points and tangent vectors.
 
 ```{julia}
@@ -388,11 +388,11 @@ As you saw until now, an
 [📎 `AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#The-AbstractManifold)
 describes a Riemannian manifold.
 For completeness, this also includes the chosen
-[Riemannian metric tensor](https://en.wikipedia.org/wiki/Metric_tensor)
+[📖 Riemannian metric tensor](https://en.wikipedia.org/wiki/Metric_tensor)
 or inner product on the tangent spaces.
 
 In `Manifolds.jl` these are assumed to be a “reasonable default”.
-For example on the `Sphere(n)` we used above, the default metric is the one inherited from
+For example on the [`Sphere`](@ref)`(n)` we used above, the default metric is the one inherited from
 restricting the inner product from the embedding space onto each tangent space.
 
 Consider a manifold like
@@ -401,16 +401,16 @@ Consider a manifold like
 M₈ = SymmetricPositiveDefinite(3)
 ```
 
-which is the manifold of $3×3$ matrices that are [symmetric and positive definite](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Manifolds.SymmetricPositiveDefinite).
-which has a default as well, the affine invariant [`AffineInvariantMetric`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Default-metric:-the-affine-invariant-metric), but also has several different metrics.
+which is the manifold of $3×3$ matrices that are [symmetric and positive definite](``@ref SymmetricPositiveDefiniteSection``{=commonmark}).
+which has a default as well, the affine invariant [`AffineInvariantMetric`](``@ref Manifolds.AffineInvariantmetric``{=commonmark}), but also has several different metrics.
 
-To switch the metric, we use the idea of a [📖 decorator pattern](https://en.wikipedia.org/wiki/Decorator_pattern)-like approach. Defining
+To switch the metric, we use the idea of a [📖 decorator pattern](https://en.wikipedia.org/wiki/Decorator_pattern) approach. Defining
 
 ```{julia}
 M₈₂ = MetricManifold(M₈, BuresWassersteinMetric())
 ```
 
-changes the manifold to use the [`BuresWassersteinMetric`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/symmetricpositivedefinite.html#Bures-Wasserstein-metric).
+changes the manifold to use the [`BuresWassersteinMetric`](``@ref BuresWassersteinMetricSection``{=commonmark}).
 
 This changes all functions that depend on the metric, most prominently the Riemannian matric, but also the exponential and logarithmic map and hence also geodesics.
 
@@ -443,10 +443,10 @@ Technically this done using Traits – the trait here is the [`IsMetricManifold`
 
 The same approach is used for
 
-* specifying a different [connection](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/connection.html)
-* specifying a manifold as a certain [quotient manifold](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/quotient.html)
-* specifying a certain [embedding](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#The-Manifold-decorator)
-* specify a certain [group action](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/group.html)
+* specifying a different [connection](``@ref ConnectionSection``{=commonmark})
+* specifying a manifold as a certain [quotient manifold](``@ref QuotientManifoldSection``{=commonmark})
+* specifying a certain [🔗 embedding](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#The-Manifold-decorator)s
+* specify a certain [group action](``@ref GroupManifoldSection``{=commonmark})
 
 Again, for all of these, the concrete types only have to be used if you want to do a second, different from the details, property, for example a second way to embed a manfiold. If a manifold is (in its usual representation) an embedded manifold, this works with the default manifold type already, since then it is again set as the reasonable default.
 

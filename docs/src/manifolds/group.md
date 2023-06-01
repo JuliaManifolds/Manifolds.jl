@@ -1,4 +1,4 @@
-# Group manifolds and actions
+# [Group manifolds and actions](@id GroupManifoldSection)
 
 Lie groups, groups that are Riemannian manifolds with a smooth binary group operation [`AbstractGroupOperation`](@ref), are implemented as [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold) and specifying the group operation using the [`IsGroupManifold`](@ref) or by decorating an existing manifold with a group operation using [`GroupManifold`](@ref).
 

@@ -1,4 +1,4 @@
-# Symmetric positive definite matrices
+# [Symmetric positive definite matrices](@id SymmetricPositiveDefiniteSection)
 
 ```@docs
 SymmetricPositiveDefinite
@@ -37,7 +37,7 @@ Pages = ["manifolds/SymmetricPositiveDefiniteAffineInvariant.jl"]
 Order = [:function]
 ```
 
-## Bures-Wasserstein metric
+## [Bures-Wasserstein metric](@id BuresWassersteinMetricSection)
 
 ```@autodocs
 Modules = [Manifolds]
