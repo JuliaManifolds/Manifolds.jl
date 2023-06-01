@@ -11,32 +11,6 @@ cd(@__DIR__)
 Pkg.activate("."); # for reproducibility use the local tutorial environment.
 using Markdown
 ```
-```{julia}
-#| echo: false
-#| code-fold: true
-#| output: false
-# We define a small helper to nicely display errors
-function pretty_error(err)
-    s = replace(sprint(showerror, err), "\n" => "\n    ")
-    str = "!!! danger \"Expected error: $(typeof(err))\"\n   This is how the Error we expect here looks like:\n    ```\n    $s\n    ```\n"
-    println(str)
-    return Markdown.parse(str)
-end
-macro expect_error(code, error=:DomainError)
-    quote
-        try
-            $(esc(code))
-            error(string("Error of type ", $(esc(error)), " was not thrown."))
-        catch e
-            if e isa $(esc(error))
-                pretty_error(e)
-            else
-                rethrow()
-            end
-        end
-    end
-end
-```
 
 This is a short overview of [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/) and how to get started working with your first Manifold.
 we first need to install the package, using for example
@@ -60,7 +34,7 @@ Let's look at three examples together with the first few functions on manifolds.
 
 #### 1. [The Euclidean space](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/euclidean.html)
 
-The Euclidean Space ``[Euclidean](@ref Manifold.Euclidean)``{=commonmark} brings us (back) into linear case of vectors, so in terms of manifolds, this is a very simple one. It is often useful to compare to classical algorithms, or implementations.
+The Euclidean Space ``[Euclidean](@ref EuclideanSection)``{=commonmark} brings us (back) into linear case of vectors, so in terms of manifolds, this is a very simple one. It is often useful to compare to classical algorithms, or implementations.
 
 ```{julia}
 M₁ = Euclidean(3)
@@ -93,9 +67,9 @@ The easiest to check is the dimension of a manifold. Here we have three “direc
 manifold_dimension(M₁)
 ```
 
-#### 2. ``[The hyperpolic space](``@ref HyperbolicSpace``{=commonmark})
+#### 2. ``[The hyperpolic space](@ref HyperbolicSpace)``{=commonmark}
 
-The $d$-dimensional [hyperbolic space](``@ref Manifolds.Hyperbolic``{=commonmark}) is usually represented in $\mathbb R^{d+1}$ as the set of points $p\in\mathbb R^3$ fulfilling
+The $d$-dimensional ``[hyperbolic space](@ref HyperbolicSpace)``{=commonmark} is usually represented in $\mathbb R^{d+1}$ as the set of points $p\in\mathbb R^3$ fulfilling
 
 ```math
 p_1^2+p_2^2+\cdots+p_d^2-p_{d+1}^2 = -1.
@@ -136,9 +110,9 @@ Note that the `LoadError:` is due to quarto, on `REPL` you would just get the `D
 is_point(M₂, [0, 0, 1.001], true)
 ```
 
-#### 3. [The sphere](``@ref Manifolds.Sphere``{=commonmark})
+#### 3. ``[The sphere](@ref SphereSection)``{=commonmark}
 
-[The sphere](``@ref Manifolds.Sphere``{=commonmark}) $\mathbb S^d$ is the $d$-dimensional sphere represented in its embedded form, that is unit vectors $p \in \mathbb R^{d+1}$ with unit norm $\lVert p \rVert_2 = 1$.
+``[The sphere](@ref SphereSection)``{=commonmark} $\mathbb S^d$ is the $d$-dimensional sphere represented in its embedded form, that is unit vectors $p \in \mathbb R^{d+1}$ with unit norm $\lVert p \rVert_2 = 1$.
 
 ```{julia}
 M₃ = Sphere(2)
@@ -187,7 +161,7 @@ To learn about how to define a manifold youself check out the [🔗 How to defin
 
 Based on these basic manifolds we can directly build more advanced manifolds.
 
-The first one concerns vectors or matrices of data on a manifold, the [PowerManifold](``@ref PowerManifoldSection``{=commonmark}).
+The first one concerns vectors or matrices of data on a manifold, the ``[PowerManifold](@ref PowerManifoldSection)``{=commonmark}.
 
 ```{julia}
 M₄ = M₂^2
@@ -239,7 +213,7 @@ p[M₄, 1]
 p₂[M₅, 2]
 ```
 
-Another construtor is the [ProductManifold](``@ref ProductManifoldSection``{=commonmark}) to combine different manifolds.
+Another construtor is the ``[ProductManifold](@ref ProductManifoldSection)``{=commonmark} to combine different manifolds.
 Here of course the order matters. First we construct these using $×$
 
 ```{julia}
@@ -264,7 +238,7 @@ But accessing single components still works the same."
 p₃[M₆, 1]
 ```
 
-Finally, also the [TangentBundle](``@ref Manifolds.TangentBundle``{=commonmark]), the manifold collecting all tangent spaces on a manifold is available as"
+Finally, also the ``[`TangentBundle`](@ref)``{=commonmark}, the manifold collecting all tangent spaces on a manifold is available as"
 
 ```{julia}
 M₇ = TangentBundle(M₃)
@@ -401,8 +375,8 @@ Consider a manifold like
 M₈ = SymmetricPositiveDefinite(3)
 ```
 
-which is the manifold of $3×3$ matrices that are [symmetric and positive definite](``@ref SymmetricPositiveDefiniteSection``{=commonmark}).
-which has a default as well, the affine invariant [`AffineInvariantMetric`](``@ref Manifolds.AffineInvariantmetric``{=commonmark}), but also has several different metrics.
+which is the manifold of $3×3$ matrices that are ``[symmetric and positive definite](@ref SymmetricPositiveDefiniteSection)``{=commonmark}.
+which has a default as well, the affine invariant ``[`AffineInvariantMetric`](@ref)``{=commonmark}, but also has several different metrics.
 
 To switch the metric, we use the idea of a [📖 decorator pattern](https://en.wikipedia.org/wiki/Decorator_pattern) approach. Defining
 
@@ -410,7 +384,7 @@ To switch the metric, we use the idea of a [📖 decorator pattern](https://en.w
 M₈₂ = MetricManifold(M₈, BuresWassersteinMetric())
 ```
 
-changes the manifold to use the [`BuresWassersteinMetric`](``@ref BuresWassersteinMetricSection``{=commonmark}).
+changes the manifold to use the ``[`BuresWassersteinMetric`](@ref BuresWassersteinMetricSection)``{=commonmark}.
 
 This changes all functions that depend on the metric, most prominently the Riemannian matric, but also the exponential and logarithmic map and hence also geodesics.
 
@@ -443,10 +417,10 @@ Technically this done using Traits – the trait here is the [`IsMetricManifold`
 
 The same approach is used for
 
-* specifying a different [connection](``@ref ConnectionSection``{=commonmark})
-* specifying a manifold as a certain [quotient manifold](``@ref QuotientManifoldSection``{=commonmark})
+* specifying a different ``[connection](@ref ConnectionSection)``{=commonmark}
+* specifying a manifold as a certain ``[quotient manifold](@ref QuotientManifoldSection)``{=commonmark}
 * specifying a certain [🔗 embedding](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#The-Manifold-decorator)s
-* specify a certain [group action](``@ref GroupManifoldSection``{=commonmark})
+* specify a certain ``[group action](@ref GroupManifoldSection)``{=commonmark}
 
 Again, for all of these, the concrete types only have to be used if you want to do a second, different from the details, property, for example a second way to embed a manfiold. If a manifold is (in its usual representation) an embedded manifold, this works with the default manifold type already, since then it is again set as the reasonable default.
 
