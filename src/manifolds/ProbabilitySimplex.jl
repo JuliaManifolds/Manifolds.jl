@@ -542,8 +542,8 @@ end
 @doc raw"""
     embed(M::RealProbabilityAmplitudes, p, X)
 
-Compute differential of [`embed`](@ref) on [`RealProbabilityAmplitudes`](@ref) at tangent
-vector `X` from the tangent space at `p` from sphere.
+Compute differential of [`embed`](@ref) of a point on `p` [`RealProbabilityAmplitudes`](@ref)
+at tangent vector `X` from the tangent space at `p` from sphere.
 """
 function embed(M::RealProbabilityAmplitudes, p, X)
     return embed!(M, similar(X), p, X)
@@ -557,8 +557,8 @@ end
 @doc raw"""
     project(M::RealProbabilityAmplitudes, p, X)
 
-Compute differential of [`project`](@ref) on [`RealProbabilityAmplitudes`](@ref) at tangent
-vector `X` from the tangent space at `p` from a sphere.
+Compute differential of [`project`](@ref) of a point `p` on [`RealProbabilityAmplitudes`](@ref)
+at tangent vector `X` from the tangent space at `p` from a sphere.
 """
 function project(M::RealProbabilityAmplitudes, p, X)
     return project!(M, similar(X), p, X)
