@@ -252,4 +252,16 @@ using ManifoldsBase: TFVector
         M = Sphere(2)
         @test riemann_tensor(M, [0, 1, 0], [1, 0, 0], [1, 0, 4], [0, 0, 1]) == [4, 0, 0]
     end
+
+    @testset "ManifoldDiff" begin
+        # ManifoldDiff
+        M = Sphere(2)
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 2.0, -1.0]
+        dpX = ManifoldDiff.diagonalizing_projectors(M, p, X)
+        @test dpX[1][1] == 0.0
+        @test dpX[1][2].X == normalize(X)
+        @test dpX[2][1] == 1.0
+        @test dpX[2][2].X == normalize(X)
+    end
 end

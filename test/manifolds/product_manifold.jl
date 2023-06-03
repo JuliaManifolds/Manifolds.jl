@@ -709,4 +709,27 @@ using RecursiveArrayTools: ArrayPartition
         riemann_tensor!(Mse, Xresult2, p, X, Y, Z)
         @test isapprox(Xresult2, Xresult)
     end
+
+    @testset "ManifoldDiff" begin
+        p = ArrayPartition([0.0, 1.0, 0.0], [2.0, 3.0])
+        q = ArrayPartition([1.0, 0.0, 0.0], [-2.0, 3.0])
+        X = ArrayPartition([1.0, 0.0, 0.0], [2.0, 3.0])
+        # ManifoldDiff
+        @test ManifoldDiff.adjoint_Jacobi_field(
+            Mse,
+            p,
+            q,
+            0.5,
+            X,
+            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+        ) == ArrayPartition([0.5, 0.0, 0.0], [1.0, 1.5])
+        @test ManifoldDiff.jacobi_field(
+            Mse,
+            p,
+            q,
+            0.5,
+            X,
+            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+        ) == ArrayPartition([0.3535533905932738, -0.35355339059327373, 0.0], [1.0, 1.5])
+    end
 end

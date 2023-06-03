@@ -181,4 +181,33 @@ include("group_utils.jl")
             @test !is_vector(G, gI, ones(n)) # wrong size
         end
     end
+
+    @testset "differentials" begin
+        G = SpecialOrthogonal(3)
+        p = Matrix(I, 3, 3)
+
+        ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
+        pts = [exp(M, p, hat(M, p, ωi)) for ωi in ω]
+        Xpts = [hat(M, p, [-1.0, 2.0, 0.5]), hat(M, p, [1.0, 0.0, 0.5])]
+
+        q2 = exp(G, pts[1], Xpts[2])
+        @test isapprox(
+            G,
+            q2,
+            differential_exp_argument_lie_approx(G, pts[1], Xpts[1], Xpts[2]; n=0),
+            Xpts[2],
+        )
+        diff_ref = [
+            0.0 -0.7482721017619345 -0.508151233069837
+            0.7482721017619345 0.0 -0.10783358474129323
+            0.508151233069837 0.10783358474129323 0.0
+        ]
+        @test isapprox(
+            G,
+            q2,
+            differential_exp_argument_lie_approx(G, pts[1], Xpts[1], Xpts[2]),
+            diff_ref;
+            atol=1e-12,
+        )
+    end
 end

@@ -342,4 +342,27 @@ using Manifolds: induced_basis
         M = Euclidean(4)
         @test_throws DimensionMismatch distance(M, [1, 2, 3, 4], [1 2; 3 4])
     end
+
+    @testset "ManifoldDiff" begin
+        # ManifoldDiff
+        M0 = Euclidean()
+        @test ManifoldDiff.adjoint_Jacobi_field(
+            M0,
+            0.0,
+            1.0,
+            0.5,
+            2.0,
+            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+        ) === 2.0
+        @test ManifoldDiff.diagonalizing_projectors(M0, 0.0, 2.0) ==
+              ((0.0, ManifoldDiff.IdentityProjector()),)
+        @test ManifoldDiff.jacobi_field(
+            M0,
+            0.0,
+            1.0,
+            0.5,
+            2.0,
+            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+        ) === 2.0
+    end
 end
