@@ -291,8 +291,6 @@ using ManifoldDiff:
     jacobian,
     _jacobian,
     _jacobian!,
-    riemannian_gradient,
-    riemannian_gradient!,
     set_default_differential_backend!
 using ManifoldDiff:
     AbstractDiffBackend,
@@ -310,6 +308,7 @@ import ManifoldDiff:
     adjoint_Jacobi_field!,
     diagonalizing_projectors,
     jacobi_field,
+    jacobi_field!,
     riemannian_gradient,
     riemannian_gradient!
 
