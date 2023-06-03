@@ -1,4 +1,4 @@
-# Sphere and unit norm arrays
+# [Sphere and unit norm arrays](@id SphereSection)
 
 ```@docs
 AbstractSphere

@@ -1,4 +1,4 @@
-# Quotient manifold
+# [Quotient manifold](@id QuotientManifoldSection)
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
