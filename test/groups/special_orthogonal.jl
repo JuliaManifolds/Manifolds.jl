@@ -187,14 +187,20 @@ include("group_utils.jl")
         p = Matrix(I, 3, 3)
 
         ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
-        pts = [exp(M, p, hat(M, p, ωi)) for ωi in ω]
-        Xpts = [hat(M, p, [-1.0, 2.0, 0.5]), hat(M, p, [1.0, 0.0, 0.5])]
+        pts = [exp(G, p, hat(G, p, ωi)) for ωi in ω]
+        Xpts = [hat(G, p, [-1.0, 2.0, 0.5]), hat(G, p, [1.0, 0.0, 0.5])]
 
         q2 = exp(G, pts[1], Xpts[2])
         @test isapprox(
             G,
             q2,
-            differential_exp_argument_lie_approx(G, pts[1], Xpts[1], Xpts[2]; n=0),
+            ManifoldDiff.differential_exp_argument_lie_approx(
+                G,
+                pts[1],
+                Xpts[1],
+                Xpts[2];
+                n=0,
+            ),
             Xpts[2],
         )
         diff_ref = [
@@ -205,7 +211,7 @@ include("group_utils.jl")
         @test isapprox(
             G,
             q2,
-            differential_exp_argument_lie_approx(G, pts[1], Xpts[1], Xpts[2]),
+            ManifoldDiff.differential_exp_argument_lie_approx(G, pts[1], Xpts[1], Xpts[2]),
             diff_ref;
             atol=1e-12,
         )
