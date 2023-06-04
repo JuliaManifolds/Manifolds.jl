@@ -723,6 +723,17 @@ using RecursiveArrayTools: ArrayPartition
             X,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
         ) == ArrayPartition([0.5, 0.0, 0.0], [1.0, 1.5])
+        X2 = allocate(X)
+        ManifoldDiff.adjoint_Jacobi_field!(
+            Mse,
+            X2,
+            p,
+            q,
+            0.5,
+            X,
+            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+        )
+        @test X2 == ArrayPartition([0.5, 0.0, 0.0], [1.0, 1.5])
         @test ManifoldDiff.jacobi_field(
             Mse,
             p,
@@ -731,5 +742,17 @@ using RecursiveArrayTools: ArrayPartition
             X,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
         ) == ArrayPartition([0.3535533905932738, -0.35355339059327373, 0.0], [1.0, 1.5])
+        X2 = allocate(X)
+        ManifoldDiff.jacobi_field!(
+            Mse,
+            X2,
+            p,
+            q,
+            0.5,
+            X,
+            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+        )
+        @test X2 ==
+              ArrayPartition([0.3535533905932738, -0.35355339059327373, 0.0], [1.0, 1.5])
     end
 end
