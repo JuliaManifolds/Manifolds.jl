@@ -186,6 +186,15 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
     end
 end
 
+function diagonalizing_projectors(M::Hyperbolic, p, X)
+    X_norm = norm(M, p, X)
+    X_normed = X / X_norm
+    return (
+        (zero(number_eltype(p)), ProjectorOntoVector(M, p, X_normed)),
+        (-one(number_eltype(p)), CoprojectorOntoVector(M, p, X_normed)),
+    )
+end
+
 get_embedding(::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
 
 embed(::Hyperbolic, p::AbstractArray) = p

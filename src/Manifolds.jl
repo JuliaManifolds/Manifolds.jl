@@ -291,18 +291,26 @@ using ManifoldDiff:
     jacobian,
     _jacobian,
     _jacobian!,
-    riemannian_gradient,
-    riemannian_gradient!,
     set_default_differential_backend!
 using ManifoldDiff:
     AbstractDiffBackend,
     AbstractRiemannianDiffBackend,
+    CoprojectorOntoVector,
     ExplicitEmbeddedBackend,
+    IdentityProjector,
     NoneDiffBackend,
+    ProjectorOntoVector,
     RiemannianProjectionBackend,
     TangentDiffBackend
 
-import ManifoldDiff: riemannian_gradient, riemannian_gradient!
+import ManifoldDiff:
+    adjoint_Jacobi_field,
+    adjoint_Jacobi_field!,
+    diagonalizing_projectors,
+    jacobi_field,
+    jacobi_field!,
+    riemannian_gradient,
+    riemannian_gradient!
 
 using Markdown: @doc_str
 using MatrixEquations: lyapc, sylvc

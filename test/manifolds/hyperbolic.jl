@@ -328,4 +328,15 @@ include("../utils.jl")
         A = change_metric(M, MinkowskiMetric(), p, X)
         @test A == X
     end
+    @testset "ManifoldDiff" begin
+        # ManifoldDiff
+        M = Hyperbolic(2)
+        p = [1.0, 1.0, sqrt(3)]
+        X = [1.0, 2.0, sqrt(3)]
+        dpX = ManifoldDiff.diagonalizing_projectors(M, p, X)
+        @test dpX[1][1] == 0.0
+        @test dpX[1][2].X == 2 * normalize(X)
+        @test dpX[2][1] == -1.0
+        @test dpX[2][2].X == 2 * normalize(X)
+    end
 end
