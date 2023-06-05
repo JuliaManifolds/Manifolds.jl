@@ -86,6 +86,56 @@ function find_manifold_functions(M; p=rand(M), X=rand(M; vector_at=p), t=1.0)
     return features
 end
 
+function find_manifold_retractions(M; p=rand(M), X=rand(M; vector_at=p), t=1.0)
+    checks = AbstractRetractionMethod[]
+    # The following can only be checked on certain manifolds and/or need parameters
+    auto_excl = [
+        EmbeddedRetraction,
+        RetractionWithKeywords,
+        ODEExponentialRetraction,
+        PadeRetraction,
+        ProductRetraction, # generic on Products
+        SasakiRetraction, # generic on tangent bundle
+    ]
+    for T in subtypes(AbstractRetractionMethod)
+        if !isabstracttype(T) && T ∉ auto_excl
+            push!(checks, T())
+        end
+    end
+    return push!(checks, PadeRetraction(2)) # Since order one might just fall back to Caley
+    try #if we have an emebdding try embedded retraction with their default one
+        push!(checks, EmbeddedRetraction(default_retraction_method(get_embedding(M))))
+    catch
+    end
+    if default_retraction_method(M) != ExponentialRetraction()
+        push!(checks, ODEExponentialRetraction(default_retraction_method(M)))
+    end
+    if M isa ProductManifold
+        push!(
+            checks,
+            ProductRetraction([default_retraction_method(N) for N in M.manifolds]...),
+        )
+    end
+    if M isa TangentBundle
+        push!(checks, SasakiRetraction(1))
+    end
+    #
+    # Ok – Let's check them
+    retr_features = AbstractRetractionMethod[]
+    for retr in checks
+        try
+            retract(M, p, X, retr)
+            push!(retr_features, retr)
+        catch
+        end
+    end
+    return retr_features
+end
+
+function find_manifold_inverse_retractions(M; p=rand(M), X=rand(M; vector_at=p), t=1.0) end
+
+function find_manifold_vector_transports(M; p=rand(M), X=rand(M; vector_at=p), t=1.0) end
+
 """
     ManifoldFeatures
 
@@ -123,12 +173,15 @@ function ManifoldFeatures(;
 end
 function ManifoldFeatures(
     M::AbstractManifold;
-    functions::Vector{F}=find_manifold_functions(M),
-    retractions=Vector{AbstractRetractionMethod}[],
+    p=rand(M),
+    X=rand(M; vector_at=p),
+    t=1.0,
+    functions::Vector{F}=find_manifold_functions(M; p=p, X=X, t=t),
+    retractions::Vector{R}=find_manifold_retractions(M; p=p, X=X, t=t),
     inverse_retractions=Vector{AbstractInverseRetractionMethod}[],
     vector_transports=Vector{AbstractVectorTransportMethod}[],
     properties=Dict{Symbol,Bool}(),
-) where {F<:Function}
+) where {F<:Function,R<:AbstractRetractionMethod}
     return ManifoldFeatures{F}(
         functions,
         retractions,

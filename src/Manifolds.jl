@@ -174,6 +174,7 @@ using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
 using HybridArrays
+using InteractiveUtils: subtypes
 using Kronecker
 using Graphs
 using LinearAlgebra
@@ -215,6 +216,8 @@ using ManifoldsBase:
     DiagonalizingOrthonormalBasis,
     DifferentiatedRetractionVectorTransport,
     EmbeddedManifold,
+    EmbeddedRetraction,
+    EmbeddedInverseRetraction,
     EmptyTrait,
     EuclideanMetric,
     ExponentialRetraction,
@@ -248,6 +251,7 @@ using ManifoldsBase:
     QRInverseRetraction,
     QRRetraction,
     RealNumbers,
+    RetractionWithKeywords,
     RiemannianMetric,
     ScaledVectorTransport,
     SchildsLadderTransport,
@@ -668,6 +672,7 @@ export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
 # Retraction types
 export AbstractRetractionMethod,
     CayleyRetraction,
+    EmbeddedRetraction,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
@@ -676,13 +681,13 @@ export AbstractRetractionMethod,
     ODEExponentialRetraction,
     PadeRetraction,
     ProductRetraction,
-    PowerRetraction,
     SasakiRetraction
 # Inverse Retraction types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
     ApproximateLogarithmicMap,
     CayleyInverseRetraction,
+    EmbeddedInverseRetraction,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
     PolarInverseRetraction,

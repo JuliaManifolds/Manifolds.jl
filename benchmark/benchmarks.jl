@@ -190,10 +190,8 @@ function add_manifold_benchmarks()
             HybridArray{Tuple{3,3,StaticArrays.Dynamic(),StaticArrays.Dynamic()},Float64,4},
         )
 
-        retraction_methods =
-            [Manifolds.PowerRetraction(ManifoldsBase.ExponentialRetraction())]
-        inverse_retraction_methods =
-            [Manifolds.InversePowerRetraction(ManifoldsBase.LogarithmicInverseRetraction())]
+        retraction_methods = [ManifoldsBase.ExponentialRetraction()]
+        inverse_retraction_methods = [ManifoldsBase.LogarithmicInverseRetraction()]
 
         sphere_dist = Manifolds.uniform_distribution(Ms, @SVector [1.0, 0.0, 0.0])
         power_s1_pt_dist =
