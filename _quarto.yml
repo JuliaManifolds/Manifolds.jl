@@ -1,0 +1,26 @@
+
+project:
+  title: "Manonifolds.jl"
+  #execute-dir: project
+
+crossref:
+  fig-prefix: Figure
+  tbl-prefix: Table
+bibliography:
+  - CITATION.bib
+#  - bib/manopt-bibliography.yaml
+# csl: journal-of-the-royal-statistical-society.csl
+fig-format: png
+
+execute:
+  freeze: auto
+  eval: true
+  echo: true
+  output: true
+
+format:
+  commonmark:
+    variant: -raw_html+tex_math_dollars
+    wrap: preserve
+
+jupyter: julia-1.9

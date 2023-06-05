@@ -42,7 +42,7 @@ end
 
 function identity_element(G::ProductGroup)
     M = G.manifold
-    return ProductRepr(map(identity_element, M.manifolds))
+    return ArrayPartition(map(identity_element, M.manifolds))
 end
 function identity_element!(G::ProductGroup, p)
     pes = submanifold_components(G, p)
@@ -194,7 +194,7 @@ end
 
 function translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
     M = G.manifold
-    return ProductRepr(
+    return ArrayPartition(
         map(
             translate_diff,
             M.manifolds,
@@ -282,7 +282,7 @@ end
 
 function exp_lie(G::ProductGroup, X)
     M = G.manifold
-    return ProductRepr(map(exp_lie, M.manifolds, submanifold_components(G, X))...)
+    return ArrayPartition(map(exp_lie, M.manifolds, submanifold_components(G, X))...)
 end
 
 function exp_lie!(G::ProductGroup, q, X)
@@ -352,4 +352,21 @@ Base.@propagate_inbounds function Base.setindex!(
     i::Union{Integer,Colon,AbstractVector,Val},
 )
     return setindex!(q, p, base_manifold(M), i)
+end
+
+# these isapprox methods are here just to reduce time-to-first-isapprox
+function isapprox(G::ProductGroup, p::ArrayPartition, q::ArrayPartition; kwargs...)
+    return isapprox(G.manifold, p, q; kwargs...)
+end
+function isapprox(
+    G::ProductGroup,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    Y::ArrayPartition;
+    kwargs...,
+)
+    return isapprox(G.manifold, p, X, Y; kwargs...)
+end
+function isapprox(G::ProductGroup, ::Identity{ProductOperation}, X, Y; kwargs...)
+    return isapprox(G.manifold, identity_element(G), X, Y; kwargs...)
 end

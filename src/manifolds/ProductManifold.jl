@@ -118,7 +118,7 @@ function InverseProductRetraction(inverse_retractions::AbstractInverseRetraction
 end
 
 @inline function allocate_result(M::ProductManifold, f)
-    return ProductRepr(map(N -> allocate_result(N, f), M.manifolds))
+    return ArrayPartition(map(N -> allocate_result(N, f), M.manifolds))
 end
 
 function allocation_promotion_function(M::ProductManifold, f, args::Tuple)
@@ -141,6 +141,40 @@ end
 
 function active_traits(f, ::ProductManifold, args...)
     return merge_traits(IsDefaultMetric(ProductMetric()))
+end
+
+function adjoint_Jacobi_field(
+    M::ProductManifold,
+    p::ArrayPartition,
+    q::ArrayPartition,
+    t,
+    X::ArrayPartition,
+    β::Tβ,
+) where {Tβ}
+    return ArrayPartition(
+        map(
+            adjoint_Jacobi_field,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+            ntuple(_ -> t, length(M.manifolds)),
+            submanifold_components(M, X),
+            ntuple(_ -> β, length(M.manifolds)),
+        )...,
+    )
+end
+function adjoint_Jacobi_field!(M::ProductManifold, Y, p, q, t, X, β::Tβ) where {Tβ}
+    map(
+        adjoint_Jacobi_field!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+        ntuple(_ -> t, length(M.manifolds)),
+        submanifold_components(M, X),
+        ntuple(_ -> β, length(M.manifolds)),
+    )
+    return Y
 end
 
 function allocate_coordinates(M::AbstractManifold, p::ArrayPartition, T, n::Int)
@@ -878,6 +912,40 @@ function Base.log(M::ProductManifold, p::ArrayPartition, q::ArrayPartition)
             submanifold_components(M, q),
         )...,
     )
+end
+
+function jacobi_field(
+    M::ProductManifold,
+    p::ArrayPartition,
+    q::ArrayPartition,
+    t,
+    X::ArrayPartition,
+    β::Tβ,
+) where {Tβ}
+    return ArrayPartition(
+        map(
+            jacobi_field,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+            ntuple(_ -> t, length(M.manifolds)),
+            submanifold_components(M, X),
+            ntuple(_ -> β, length(M.manifolds)),
+        )...,
+    )
+end
+function jacobi_field!(M::ProductManifold, Y, p, q, t, X, β::Tβ) where {Tβ}
+    map(
+        jacobi_field!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, q),
+        ntuple(_ -> t, length(M.manifolds)),
+        submanifold_components(M, X),
+        ntuple(_ -> β, length(M.manifolds)),
+    )
+    return Y
 end
 
 function log!(M::ProductManifold, X, p, q)

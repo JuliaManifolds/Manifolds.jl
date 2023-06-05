@@ -8,6 +8,8 @@ using ManifoldsBase
 using ManifoldsBase: number_of_coordinates
 import ManifoldsBase: active_traits, merge_traits
 
+using ManifoldDiff
+
 using LinearAlgebra
 using Distributions
 using DoubleFloats

@@ -71,12 +71,25 @@ created as
 
 where `[1.0, 0.0, 0.0]` is the part corresponding to the sphere factor
 and `[2.0, 3.0]` is the part corresponding to the euclidean manifold.
+
+
+!!! warning
+
+    `ProductRepr` is deprecated and will be removed in a future release.
+    Please use `ArrayPartition` instead.
 """
 struct ProductRepr{TM<:Tuple}
     parts::TM
 end
 
-ProductRepr(points...) = ProductRepr{typeof(points)}(points)
+function ProductRepr(points...)
+    Base.depwarn(
+        "`ProductRepr` will be deprecated in a future release. " *
+        "Please use `ArrayPartition` instead of `ProductRepr`.",
+        :ProductRepr,
+    )
+    return ProductRepr{typeof(points)}(points)
+end
 
 Base.:(==)(x::ProductRepr, y::ProductRepr) = x.parts == y.parts
 
@@ -86,16 +99,20 @@ Base.:(==)(x::ProductRepr, y::ProductRepr) = x.parts == y.parts
 end
 
 allocate(x::ProductRepr) = ProductRepr(map(allocate, submanifold_components(x))...)
-function allocate(x::ProductRepr, ::Type{T}) where {T}
+function allocate(x::ProductRepr, T::Type)
     return ProductRepr(map(t -> allocate(t, T), submanifold_components(x))...)
 end
-allocate(p::ProductRepr, ::Type{T}, s::Size{S}) where {S,T} = Vector{T}(undef, S)
-allocate(p::ProductRepr, ::Type{T}, s::Integer) where {T} = Vector{T}(undef, s)
+allocate(::ProductRepr, ::Type{T}, s::Size{S}) where {S,T} = Vector{T}(undef, S)
+allocate(::ProductRepr, ::Type{T}, s::Integer) where {T} = Vector{T}(undef, s)
 allocate(a::AbstractArray{<:ProductRepr}) = map(allocate, a)
 
 Base.copy(x::ProductRepr) = ProductRepr(map(copy, x.parts))
 
-function Base.copyto!(x::ProductRepr, y::ProductRepr)
+function Base.copyto!(x::ProductRepr, y::Union{ProductRepr,ArrayPartition})
+    map(copyto!, submanifold_components(x), submanifold_components(y))
+    return x
+end
+function Base.copyto!(x::ArrayPartition, y::ProductRepr)
     map(copyto!, submanifold_components(x), submanifold_components(y))
     return x
 end
@@ -186,3 +203,6 @@ ManifoldsBase._get_vector_cache_broadcast(::ArrayPartition) = Val(false)
 
 allocate(a::AbstractArray{<:ArrayPartition}) = map(allocate, a)
 allocate(x::ArrayPartition) = ArrayPartition(map(allocate, x.x)...)
+function allocate(x::ArrayPartition, T::Type)
+    return ArrayPartition(map(t -> allocate(t, T), submanifold_components(x))...)
+end

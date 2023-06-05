@@ -291,18 +291,26 @@ using ManifoldDiff:
     jacobian,
     _jacobian,
     _jacobian!,
-    riemannian_gradient,
-    riemannian_gradient!,
     set_default_differential_backend!
 using ManifoldDiff:
     AbstractDiffBackend,
     AbstractRiemannianDiffBackend,
+    CoprojectorOntoVector,
     ExplicitEmbeddedBackend,
+    IdentityProjector,
     NoneDiffBackend,
+    ProjectorOntoVector,
     RiemannianProjectionBackend,
     TangentDiffBackend
 
-import ManifoldDiff: riemannian_gradient, riemannian_gradient!
+import ManifoldDiff:
+    adjoint_Jacobi_field,
+    adjoint_Jacobi_field!,
+    diagonalizing_projectors,
+    jacobi_field,
+    jacobi_field!,
+    riemannian_gradient,
+    riemannian_gradient!
 
 using Markdown: @doc_str
 using MatrixEquations: lyapc, sylvc
@@ -393,7 +401,7 @@ include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
 include("manifolds/SymmetricPositiveDefiniteBuresWasserstein.jl")
 include("manifolds/SymmetricPositiveDefiniteGeneralizedBuresWasserstein.jl")
-include("manifolds/SymmetricPositiveDefiniteLinearAffine.jl")
+include("manifolds/SymmetricPositiveDefiniteAffineInvariant.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
@@ -536,6 +544,8 @@ function __init__()
     return nothing
 end
 
+include("deprecated.jl")
+
 export test_manifold
 export test_group, test_action
 
@@ -642,7 +652,7 @@ export AbstractMetric,
     BuresWassersteinMetric,
     EuclideanMetric,
     GeneralizedBuresWassersteinMetric,
-    LinearAffineMetric,
+    AffineInvariantMetric,
     LogCholeskyMetric,
     LogEuclideanMetric,
     MinkowskiMetric,

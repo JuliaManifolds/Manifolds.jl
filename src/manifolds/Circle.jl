@@ -16,6 +16,10 @@ struct Circle{𝔽} <: AbstractManifold{𝔽} end
 
 Circle(𝔽::AbstractNumbers=ℝ) = Circle{𝔽}()
 
+function adjoint_Jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
+    return X
+end
+
 @doc raw"""
     check_point(M::Circle, p)
 
@@ -37,7 +41,7 @@ end
 function check_point(M::Circle{ℂ}, p; kwargs...)
     if !isapprox(sum(abs.(p)), 1.0; kwargs...)
         return DomainError(
-            abs(p),
+            sum(abs.(p)),
             "The point $(p) does not lie on the $(M) since its norm is not 1.",
         )
     end
@@ -45,7 +49,7 @@ function check_point(M::Circle{ℂ}, p; kwargs...)
 end
 check_size(::Circle, ::Number) = nothing
 function check_size(M::Circle, p)
-    (size(p) == ()) && return nothing
+    (size(p) === () || size(p) === (1,)) && return nothing
     return DomainError(
         size(p),
         "The point $p can not belong to the $M, since it is not a number nor a vector of size (1,).",
@@ -53,7 +57,7 @@ function check_size(M::Circle, p)
 end
 check_size(::Circle, ::Number, ::Number) = nothing
 function check_size(M::Circle, p, X)
-    (size(X) == ()) && return nothing
+    (size(X) === () || size(p) === (1,)) && return nothing
     return DomainError(
         size(X),
         "The vector $X is not a tangent vector to $p on $M, since it is not a number nor a vector of size (1,).",
@@ -91,6 +95,12 @@ Compute the inner product of two (complex) numbers with in the complex plane.
 """
 complex_dot(a, b) = dot(map(real, a), map(real, b)) + dot(map(imag, a), map(imag, b))
 complex_dot(a::Number, b::Number) = (real(a) * real(b) + imag(a) * imag(b))
+
+function diagonalizing_projectors(M::Circle{ℝ}, p, X)
+    sbv = sign(X[])
+    proj = ProjectorOntoVector(M, p, @SVector [sbv == 0 ? one(sbv) : sbv])
+    return ((zero(number_eltype(p)), proj),)
+end
 
 @doc raw"""
     distance(M::Circle, p, q)
@@ -265,6 +275,10 @@ _isapprox(::Circle, p, X, Y; kwargs...) = isapprox(X[], Y[]; kwargs...)
 Return true. [`Circle`](@ref) is a flat manifold.
 """
 is_flat(M::Circle) = true
+
+function jacobi_field(::Circle{ℝ}, p, q, t, X, β::Tβ) where {Tβ}
+    return X
+end
 
 @doc raw"""
     log(M::Circle, p, q)

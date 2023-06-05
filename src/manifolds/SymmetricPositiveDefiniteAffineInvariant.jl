@@ -1,10 +1,10 @@
 @doc raw"""
-    LinearAffineMetric <: AbstractMetric
+    AffineInvariantMetric <: AbstractMetric
 
 The linear affine metric is the metric for symmetric positive definite matrices, that employs
 matrix logarithms and exponentials, which yields a linear and affine metric.
 """
-struct LinearAffineMetric <: RiemannianMetric end
+struct AffineInvariantMetric <: RiemannianMetric end
 
 @doc raw"""
     change_representer(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
@@ -12,7 +12,7 @@ struct LinearAffineMetric <: RiemannianMetric end
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
 space at `p` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
 `g_E`, this is turned into the representer with respect to the (default) metric,
-the [`LinearAffineMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
+the [`AffineInvariantMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
 
 To be precise we are looking for ``Z∈T_p\mathcal P(n)`` such that for all ``Y∈T_p\mathcal P(n)```
 it holds
@@ -34,7 +34,7 @@ end
     change_metric(M::SymmetricPositiveDefinite{n}, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
-`g_E`, this function changes into the [`LinearAffineMetric`](@ref) (default) metric on the
+`g_E`, this function changes into the [`AffineInvariantMetric`](@ref) (default) metric on the
 [`SymmetricPositiveDefinite`](@ref) `M`.
 
 To be precise we are looking for ``c\colon T_p\mathcal P(n) \to T_p\mathcal P(n) ``
@@ -55,10 +55,10 @@ end
 
 @doc raw"""
     distance(M::SymmetricPositiveDefinite, p, q)
-    distance(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, q)
+    distance(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}, p, q)
 
 Compute the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between `p` and `q`,
-as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
+as a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula reads
 
 ```math
 d_{\mathcal P(n)}(p,q)
@@ -80,11 +80,11 @@ end
 
 @doc raw"""
     exp(M::SymmetricPositiveDefinite, p, X)
-    exp(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, p, X)
+    exp(M::MetricManifold{SymmetricPositiveDefinite{N},AffineInvariantMetric}, p, X)
 
 Compute the exponential map from `p` with tangent vector `X` on the
 [`SymmetricPositiveDefinite`](@ref) `M` with its default [`MetricManifold`](@ref) having the
-[`LinearAffineMetric`](@ref). The formula reads
+[`AffineInvariantMetric`](@ref). The formula reads
 
 ```math
 \exp_p X = p^{\frac{1}{2}}\operatorname{Exp}(p^{-\frac{1}{2}} X p^{-\frac{1}{2}})p^{\frac{1}{2}},
@@ -146,12 +146,12 @@ end
 
 @doc raw"""
     [Ξ,κ] = get_basis_diagonalizing(M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis)
-    [Ξ,κ] = get_basis_diagonalizing(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, p, B::DiagonalizingOrthonormalBasis)
+    [Ξ,κ] = get_basis_diagonalizing(M::MetricManifold{SymmetricPositiveDefinite{N},AffineInvariantMetric}, p, B::DiagonalizingOrthonormalBasis)
 
 Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
 [`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
-[`LinearAffineMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
+[`AffineInvariantMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
 with eigenvalues `κ` and where the direction `B.frame_direction` ``V`` has curvature `0`.
 
 The construction is based on an ONB for the symmetric matrices similar to [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
@@ -178,9 +178,9 @@ end
 
 @doc raw"""
     [Ξ,κ] = get_basis(M::SymmetricPositiveDefinite, p, B::DefaultOrthonormalBasis)
-    [Ξ,κ] = get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},LinearAffineMetric}, p, B::DefaultOrthonormalBasis)
+    [Ξ,κ] = get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},AffineInvariantMetric}, p, B::DefaultOrthonormalBasis)
 
-Return a default ONB for the tangent space ``T_p\mathcal P(n)`` of the [`SymmetricPositiveDefinite`](@ref) with respect to the [`LinearAffineMetric`](@ref).
+Return a default ONB for the tangent space ``T_p\mathcal P(n)`` of the [`SymmetricPositiveDefinite`](@ref) with respect to the [`AffineInvariantMetric`](@ref).
 
 ```math
     g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
@@ -312,11 +312,11 @@ end
 
 @doc raw"""
     inner(M::SymmetricPositiveDefinite, p, X, Y)
-    inner(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, X, Y)
+    inner(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}, p, X, Y)
 
 Compute the inner product of `X`, `Y` in the tangent space of `p` on
 the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
-a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
+a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula reads
 
 ````math
 g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
@@ -328,19 +328,19 @@ function inner(::SymmetricPositiveDefinite, p, X, Y)
 end
 
 """
-    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LinearAffineMetric})
+    is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,AffineInvariantMetric})
 
-Return false. [`SymmetricPositiveDefinite`](@ref) with [`LinearAffineMetric`](@ref)
+Return false. [`SymmetricPositiveDefinite`](@ref) with [`AffineInvariantMetric`](@ref)
 is not a flat manifold.
 """
-is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LinearAffineMetric}) = false
+is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,AffineInvariantMetric}) = false
 
 @doc raw"""
     log(M::SymmetricPositiveDefinite, p, q)
-    log(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, q)
+    log(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}, p, q)
 
 Compute the logarithmic map from `p` to `q` on the [`SymmetricPositiveDefinite`](@ref)
-as a [`MetricManifold`](@ref) with [`LinearAffineMetric`](@ref). The formula reads
+as a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula reads
 
 ```math
 \log_p q =
@@ -370,11 +370,11 @@ end
 
 @doc raw"""
     parallel_transport_to(M::SymmetricPositiveDefinite, p, X, q)
-    parallel_transport_to(M::MetricManifold{SymmetricPositiveDefinite,LinearAffineMetric}, p, X, y)
+    parallel_transport_to(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}, p, X, y)
 
 Compute the parallel transport of `X` from the tangent space at `p` to the
 tangent space at `q` on the [`SymmetricPositiveDefinite`](@ref) as a
-[`MetricManifold`](@ref) with the [`LinearAffineMetric`](@ref).
+[`MetricManifold`](@ref) with the [`AffineInvariantMetric`](@ref).
 The formula reads
 
 ```math
@@ -391,7 +391,7 @@ p^{\frac{1}{2}},
 
 where $\operatorname{Exp}$ denotes the matrix exponential
 and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
-(again with respect to the [`LinearAffineMetric`](@ref)).
+(again with respect to the [`AffineInvariantMetric`](@ref)).
 """
 parallel_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any)
 

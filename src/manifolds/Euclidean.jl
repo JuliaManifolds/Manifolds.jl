@@ -38,6 +38,10 @@ function active_traits(f, ::Euclidean, args...)
     )
 end
 
+function adjoint_Jacobi_field(::Euclidean{Tuple{}}, p, q, t, X, β::Tβ) where {Tβ}
+    return X
+end
+
 Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field=𝔽)
 
 Base.:^(M::Euclidean, n::Int) = ^(M, (n,))
@@ -91,6 +95,10 @@ function det_local_metric(
     ::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
 ) where {𝔽}
     return one(eltype(p))
+end
+
+function diagonalizing_projectors(::Euclidean, p, X)
+    return ((zero(number_eltype(p)), IdentityProjector()),)
 end
 
 """
@@ -389,6 +397,10 @@ end
 Return true. [`Euclidean`](@ref) is a flat manifold.
 """
 is_flat(M::Euclidean) = true
+
+function jacobi_field(::Euclidean{Tuple{}}, p, q, t, X, β::Tβ) where {Tβ}
+    return X
+end
 
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},

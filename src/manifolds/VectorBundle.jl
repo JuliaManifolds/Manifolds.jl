@@ -306,7 +306,7 @@ base_manifold(B::VectorSpaceAtPoint) = base_manifold(B.fiber)
 base_manifold(B::VectorBundle) = base_manifold(B.manifold)
 
 """
-    bundle_projection(B::VectorBundle, x::ProductRepr)
+    bundle_projection(B::VectorBundle, p::ArrayPartition)
 
 Projection of point `p` from the bundle `M` to the base manifold.
 Returns the point on the base manifold `B.manifold` at which the vector part
@@ -466,7 +466,7 @@ end
 function get_vector(M::VectorBundle, p, X, B::AbstractBasis)
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
-    return ProductRepr(
+    return ArrayPartition(
         get_vector(M.manifold, xp1, X[1:n], B),
         get_vector(M.fiber, xp1, X[(n + 1):end], B),
     )
@@ -488,7 +488,7 @@ function get_vector(
 ) where {𝔽}
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
-    return ProductRepr(
+    return ArrayPartition(
         get_vector(M.manifold, xp1, X[1:n], B.data.base_basis),
         get_vector(M.fiber, xp1, X[(n + 1):end], B.data.vec_basis),
     )
@@ -1070,7 +1070,7 @@ end
     return allocate_result(B.manifold, f, x...)
 end
 @inline function allocate_result(M::VectorBundle, f::TF) where {TF}
-    return ProductRepr(allocate_result(M.manifold, f), allocate_result(M.fiber, f))
+    return ArrayPartition(allocate_result(M.manifold, f), allocate_result(M.fiber, f))
 end
 
 """
@@ -1123,7 +1123,7 @@ function _vector_transport_direction(
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     dx, dVx = submanifold_components(M.manifold, d)
-    return ProductRepr(
+    return ArrayPartition(
         vector_transport_direction(M.manifold, px, VXM, dx, m.method_point),
         vector_transport_direction(M.manifold, px, VXF, dx, m.method_vector),
     )
@@ -1174,7 +1174,7 @@ function _vector_transport_to(
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     qx, qVx = submanifold_components(M.manifold, q)
-    return ProductRepr(
+    return ArrayPartition(
         vector_transport_to(M.manifold, px, VXM, qx, m.method_point),
         vector_transport_to(M.manifold, px, VXF, qx, m.method_vector),
     )
