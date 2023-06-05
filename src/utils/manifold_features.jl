@@ -102,7 +102,7 @@ function find_manifold_retractions(M; p=rand(M), X=rand(M; vector_at=p), t=1.0)
             push!(checks, T())
         end
     end
-    return push!(checks, PadeRetraction(2)) # Since order one might just fall back to Caley
+    push!(checks, PadeRetraction(2)) # Since order one might just fall back to Caley
     try #if we have an emebdding try embedded retraction with their default one
         push!(checks, EmbeddedRetraction(default_retraction_method(get_embedding(M))))
     catch
@@ -132,10 +132,86 @@ function find_manifold_retractions(M; p=rand(M), X=rand(M; vector_at=p), t=1.0)
     return retr_features
 end
 
-function find_manifold_inverse_retractions(M; p=rand(M), X=rand(M; vector_at=p), t=1.0) end
+function find_manifold_inverse_retractions(M; p=rand(M), X=rand(M; vector_at=p), t=1.0)
+    checks = AbstractInverseRetractionMethod[]
+    # The following can only be checked on certain manifolds and/or need parameters
+    auto_excl = [
+        EmbeddedInverseRetraction,
+        PadeInverseRetraction,
+        InverseProductRetraction,
+        InverseRetractionWithKeywords,
+    ]
+    for T in subtypes(AbstractInverseRetractionMethod)
+        if !isabstracttype(T) && T ∉ auto_excl
+            push!(checks, T())
+        end
+    end
+    push!(checks, PadeInverseRetraction(2)) # Since order one might just fall back to Caley
+    try #if we have an emebdding try embedded retraction with their default one
+        push!(
+            checks,
+            EmbeddedInverseRetraction(default_inverse_retraction_method(get_embedding(M))),
+        )
+    catch
+    end
+    if M isa ProductManifold
+        push!(
+            checks,
+            InverseProductRetraction(
+                [default_inverse_retraction_method(N) for N in M.manifolds]...,
+            ),
+        )
+    end
+    #
+    # Ok – Let's check them
+    inv_retr_features = AbstractInverseRetractionMethod[]
+    for inv_retr in checks
+        try
+            inverse_retract(M, p, p, inv_retr)
+            push!(inv_retr_features, inv_retr)
+        catch
+        end
+    end
+    return inv_retr_features
+end
 
-function find_manifold_vector_transports(M; p=rand(M), X=rand(M; vector_at=p), t=1.0) end
-
+function find_manifold_vector_transports(M; p=rand(M), X=rand(M; vector_at=p), t=1.0)
+    checks = AbstractVectorTransportMethod[]
+    # The following can only be checked on certain manifolds and/or need parameters
+    auto_excl = [
+        ScaledVectorTransport,
+        VectorTransportWithKeywords,
+        DifferentiatedRetractionVectorTransport,
+        VectorTransportTo, #only generic for internal use
+    ]
+    for T in [
+        subtypes(AbstractVectorTransportMethod)...,
+        subtypes(AbstractLinearVectorTransportMethod)...,
+    ]
+        if !isabstracttype(T) && T ∉ auto_excl
+            push!(checks, T())
+        end
+    end
+    try
+        push!(checks, DifferentiatedRetractionVectorTransport(default_retraction_method(M)))
+    catch
+    end
+    try #if we have an emebdding try embedded retraction with their default one
+        push!(checks, ScaledVectorTransport(default_vector_transport_method(M)))
+    catch
+    end
+    #
+    # Ok – Let's check them
+    vector_transport_features = AbstractVectorTransportMethod[]
+    for vector_transport in checks
+        try
+            vector_transport_to(M, p, X, p, vector_transport)
+            push!(vector_transport_features, vector_transport)
+        catch
+        end
+    end
+    return vector_transport_features
+end
 """
     ManifoldFeatures
 
@@ -147,7 +223,10 @@ Collect a set of features available on a manifold.
 * `retractions`
 * `inverseretractions`
 * `vector_transports`
-* `tolerances` – based on functions or symbols provide a tolerance
+* `properties` – specify further properties to be checked (traits or decorators)
+
+All these are filled by default calling the corresponding `find_manifold_` functions,
+though the properties variant is still under development
 """
 struct ManifoldFeatures{F<:Function}
     functions::Vector{F}
@@ -178,10 +257,15 @@ function ManifoldFeatures(
     t=1.0,
     functions::Vector{F}=find_manifold_functions(M; p=p, X=X, t=t),
     retractions::Vector{R}=find_manifold_retractions(M; p=p, X=X, t=t),
-    inverse_retractions=Vector{AbstractInverseRetractionMethod}[],
-    vector_transports=Vector{AbstractVectorTransportMethod}[],
+    inverse_retractions::Vector{I}=find_manifold_inverse_retractions(M; p=p, X=X, t=t),
+    vector_transports::Vector{V}=find_manifold_vector_transports(M; p=p, X=X, t=t),
     properties=Dict{Symbol,Bool}(),
-) where {F<:Function,R<:AbstractRetractionMethod}
+) where {
+    F<:Function,
+    R<:AbstractRetractionMethod,
+    I<:AbstractInverseRetractionMethod,
+    V<:AbstractVectorTransportMethod,
+}
     return ManifoldFeatures{F}(
         functions,
         retractions,
@@ -190,7 +274,29 @@ function ManifoldFeatures(
         properties,
     )
 end
+function show(io::IO, mf::ManifoldFeatures)
+    # Print features to terminal
+    s = """
+    ManifoldFeatures\n\n
 
+    Functions
+    $(join(["  * $(f)" for f in mf.functions],"\n"))
+
+    Retractions
+    $(join(["  * $(typeof(r))" for r in mf.retractions],"\n"))
+
+    Inverse Retractions
+    $(join(["  * $(typeof(ir))" for ir in mf.inverse_retractions],"\n"))
+
+    Vector transports
+    $(join(["  * $(typeof(v))" for v in mf.vector_transports],"\n"))
+    """
+    return print(io, s)
+end
+
+function show(io::IO, ::MIME"test/markdown", mf::ManifoldFeatures)
+    # Print the features in a nice Markdown table for the docs
+end
 @doc """
     ManifoldExpectations
 

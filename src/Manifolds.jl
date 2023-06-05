@@ -226,6 +226,7 @@ using ManifoldsBase:
     IsEmbeddedManifold,
     IsEmbeddedSubmanifold,
     IsExplicitDecorator,
+    InverseRetractionWithKeywords,
     LogarithmicInverseRetraction,
     ManifoldsBase,
     NestedPowerRepresentation,
@@ -266,6 +267,8 @@ using ManifoldsBase:
     ValidationMPoint,
     ValidationTVector,
     VectorSpaceType,
+    VectorTransportTo,
+    VectorTransportWithKeywords,
     VeeOrthogonalBasis,
     @invoke_maker,
     _euclidean_basis_vector,
@@ -668,7 +671,11 @@ export AbstractMetric,
     StiefelSubmersionMetric
 export AbstractAtlas, RetractionAtlas
 # Vector transport types
-export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
+export AbstractVectorTransportMethod,
+    ParallelTransport,
+    ProjectionTransport,
+    ScaledVectorTransport,
+    VectorTransportWithKeywords
 # Retraction types
 export AbstractRetractionMethod,
     CayleyRetraction,
@@ -690,8 +697,10 @@ export AbstractInverseRetractionMethod,
     EmbeddedInverseRetraction,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
+    PadeInverseRetraction,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
+    InverseRetractionWithKeywords,
     ShootingInverseRetraction,
     SoftmaxInverseRetraction
 # Estimation methods for median and mean
