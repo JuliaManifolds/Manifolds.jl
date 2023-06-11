@@ -204,8 +204,13 @@ function get_coordinates_orthonormal!(
     X,
     R::RealNumbers,
 ) where {N}
-    ME = RealProbabilityAmplitudes(N)
-    get_coordinates_orthonormal!(Sphere(N), Xc, embed(ME, p), embed(ME, p, X), R)
+    get_coordinates_orthonormal!(
+        Sphere(N),
+        Xc,
+        simplex_to_amplitude(M, p),
+        simplex_to_amplitude_diff(M, p, X),
+        R,
+    )
     return Xc
 end
 
@@ -216,10 +221,9 @@ function get_vector_orthonormal!(
     Xc,
     R::RealNumbers,
 ) where {N}
-    ME = RealProbabilityAmplitudes(N)
-    ps = embed(ME, p)
+    ps = simplex_to_amplitude(M, p)
     X = get_vector_orthonormal(Sphere(N), ps, Xc, R)
-    return project!(ME, Y, ps, X)
+    return amplitude_to_simplex_diff!(M, Y, ps, X)
 end
 
 @doc raw"""
@@ -349,9 +353,14 @@ mean(::ProbabilitySimplex, ::Any...)
 default_estimation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
 
 function parallel_transport_to!(M::ProbabilitySimplex{N}, Y, p, X, q) where {N}
-    ME = RealProbabilityAmplitudes(N)
-    Ys = parallel_transport_to(Sphere(N), embed(ME, p), embed(ME, p, X), embed(ME, q))
-    return project!(ME, Y, embed(ME, q), Ys)
+    q_s = simplex_to_amplitude(M, q)
+    Ys = parallel_transport_to(
+        Sphere(N),
+        simplex_to_amplitude(M, p),
+        simplex_to_amplitude_diff(M, p, X),
+        q_s,
+    )
+    return amplitude_to_simplex_diff!(M, Y, q_s, Ys)
 end
 
 @doc raw"""
@@ -456,16 +465,20 @@ end
     riemann_tensor(::ProbabilitySimplex, p, X, Y, Z)
 
 Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`ProbabilitySimplex`](@ref) `M`.
-It is computed using [`RealProbabilityAmplitudes`](@ref) isometry with positive orthant of
-a sphere.
+It is computed using isometry with positive orthant of a sphere.
 """
 riemann_tensor(::ProbabilitySimplex, p, X, Y, Z)
 
-function riemann_tensor!(::ProbabilitySimplex{N}, Xresult, p, X, Y, Z) where {N}
-    ME = RealProbabilityAmplitudes(N)
-    pe = embed(ME, p)
-    Xrs = riemann_tensor(Sphere(N), pe, embed(ME, p, X), embed(ME, p, Y), embed(ME, p, Z))
-    project!(ME, Xresult, pe, Xrs)
+function riemann_tensor!(M::ProbabilitySimplex{N}, Xresult, p, X, Y, Z) where {N}
+    pe = simplex_to_amplitude(M, p)
+    Xrs = riemann_tensor(
+        Sphere(N),
+        pe,
+        simplex_to_amplitude_diff(M, p, X),
+        simplex_to_amplitude_diff(M, p, Y),
+        simplex_to_amplitude_diff(M, p, Z),
+    )
+    amplitude_to_simplex_diff!(M, Xresult, pe, Xrs)
     return Xresult
 end
 
@@ -484,87 +497,65 @@ zero_vector(::ProbabilitySimplex, ::Any)
 zero_vector!(::ProbabilitySimplex, X, p) = fill!(X, 0)
 
 @doc raw"""
-    RealProbabilityAmplitudes
+    simplex_to_amplitude(M::ProbabilitySimplex, p)
 
-An explicit isometric embedding of interior of [`ProbabilitySimplex`] in
-positive orthant of the [`Sphere`]. Some properties extend to the boundary but not all.
-
-This embedding isometrically maps the Fisher-Rao metric on the open probability simplex to
-the sphere of radius 1 with Euclidean metric. More details can be found in Section 2.2
-of [^AyJostLeSchwachhöfer2017].
-
-The name derives from the notion of probability amplitudes in quantum mechanics.
-They are complex-valued and their squared norm corresponds to probability. This construction
-restricted to real valued amplitudes results in this embedding.
-
-# Constructor
-
-    RealProbabilityAmplitudes(n)
+Convert point `p` on [`ProbabilitySimplex`](@ref) to (real) probability amplitude. The
+formula reads ``(\sqrt{p_1}, \sqrt{p_2}, …, \sqrt{p_{N+1}})``. This is an isometry from the
+interior of the probability simplex to the interior of the positive orthant of a sphere.
 """
-const RealProbabilityAmplitudes{N} = EmbeddedManifold{ℝ,<:ProbabilitySimplex{N},Sphere{N,ℝ}}
-
-function RealProbabilityAmplitudes(n)
-    return EmbeddedManifold(ProbabilitySimplex(n), Sphere(n))
+function simplex_to_amplitude(M::ProbabilitySimplex, p)
+    return simplex_to_amplitude!(M, similar(p), p)
 end
 
-@doc raw"""
-    embed(M::RealProbabilityAmplitudes{N}, p) where {N}
-
-Convert point `p` on `ProbabilitySimplex` to (real) probability amplitude. The formula reads
-``(\sqrt{p_1}, \sqrt{p_2}, …, \sqrt{p_{N+1}})``. This is an isometry from the interior of
-the probability simplex to the interior of the positive orthant of a sphere.
-"""
-function embed(M::RealProbabilityAmplitudes, p)
-    return embed!(M, similar(p), p)
-end
-
-function embed!(::RealProbabilityAmplitudes, q, p)
+function simplex_to_amplitude!(::ProbabilitySimplex, q, p)
     q .= sqrt.(p)
     return q
 end
 
 @doc raw"""
-    project(M::RealProbabilityAmplitudes{N}, p) where {N}
+    amplitude_to_simplex(M::ProbabilitySimplex{N}, p) where {N}
 
 Convert point (real) probability amplitude `p` on to a point on [`ProbabilitySimplex`](@ref).
 The formula reads ``(p_1^2, p_2^2, …, p_{N+1}^2)``. This is an isometry from the interior of
 the positive orthant of a sphere to interior of the probability simplex.
 """
-function project(M::RealProbabilityAmplitudes, p)
-    return project!(M, similar(p), p)
+function amplitude_to_simplex(M::ProbabilitySimplex, p)
+    return amplitude_to_simplex!(M, similar(p), p)
 end
 
-function project!(::RealProbabilityAmplitudes, q, p)
+function amplitude_to_simplex!(::ProbabilitySimplex, q, p)
     q .= p .^ 2
     return q
 end
 
 @doc raw"""
-    embed(M::RealProbabilityAmplitudes, p, X)
+    simplex_to_amplitude_diff(M::ProbabilitySimplex, p, X)
 
-Compute differential of [`embed`](@ref) of a point on `p` [`RealProbabilityAmplitudes`](@ref)
-at tangent vector `X` from the tangent space at `p` from sphere.
+Compute differential of [`simplex_to_amplitude`](@ref) of a point on `p` one
+[`ProbabilitySimplex`](@ref) at tangent vector `X` from the tangent space at `p` from
+a sphere.
 """
-function embed(M::RealProbabilityAmplitudes, p, X)
-    return embed!(M, similar(X), p, X)
+function simplex_to_amplitude_diff(M::ProbabilitySimplex, p, X)
+    return simplex_to_amplitude_diff!(M, similar(X), p, X)
 end
 
-function embed!(::RealProbabilityAmplitudes, Y, p, X)
+function simplex_to_amplitude_diff!(::ProbabilitySimplex, Y, p, X)
     Y .= X ./ sqrt.(p)
     return Y
 end
 
 @doc raw"""
-    project(M::RealProbabilityAmplitudes, p, X)
+    amplitude_to_simplex_diff(M::ProbabilitySimplex, p, X)
 
-Compute differential of [`project`](@ref) of a point `p` on [`RealProbabilityAmplitudes`](@ref)
-at tangent vector `X` from the tangent space at `p` from a sphere.
+Compute differential of [`amplitude_to_simplex`](@ref) of a point `p` on
+[`ProbabilitySimplex`](@ref) at tangent vector `X` from the tangent space at `p` from
+a sphere.
 """
-function project(M::RealProbabilityAmplitudes, p, X)
-    return project!(M, similar(X), p, X)
+function amplitude_to_simplex_diff(M::ProbabilitySimplex, p, X)
+    return amplitude_to_simplex_diff!(M, similar(X), p, X)
 end
 
-function project!(::RealProbabilityAmplitudes, Y, p, X)
+function amplitude_to_simplex_diff!(::ProbabilitySimplex, Y, p, X)
     Y .= p .* X
     return Y
 end

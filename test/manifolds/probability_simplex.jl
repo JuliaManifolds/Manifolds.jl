@@ -116,14 +116,18 @@ include("../utils.jl")
     end
 
     @testset "Probability amplitudes" begin
-        ME = RealProbabilityAmplitudes(2)
+        M = ProbabilitySimplex(2)
         p = [0.1, 0.7, 0.2]
         Y = [-0.1, 0.05, 0.05]
-        @test embed(ME, p) ≈ [0.31622776601683794, 0.8366600265340756, 0.4472135954999579]
-        @test project(ME, [0.31622776601683794, 0.8366600265340756, 0.4472135954999579]) ≈ p
-        @test embed(ME, p, Y) ≈
+        @test Manifolds.simplex_to_amplitude(M, p) ≈
+              [0.31622776601683794, 0.8366600265340756, 0.4472135954999579]
+        @test Manifolds.amplitude_to_simplex(
+            M,
+            [0.31622776601683794, 0.8366600265340756, 0.4472135954999579],
+        ) ≈ p
+        @test Manifolds.simplex_to_amplitude_diff(M, p, Y) ≈
               [-0.31622776601683794, 0.05976143046671968, 0.1118033988749895]
-        @test project(ME, p, Y) ≈ [-0.01, 0.035, 0.01]
+        @test Manifolds.amplitude_to_simplex_diff(M, p, Y) ≈ [-0.01, 0.035, 0.01]
     end
 
     @testset "other metric" begin

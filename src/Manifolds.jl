@@ -645,7 +645,6 @@ export AbstractAffineConnection,
 export AbstractCartanSchoutenConnection,
     CartanSchoutenMinus, CartanSchoutenPlus, CartanSchoutenZero
 export MetricManifold
-export RealProbabilityAmplitudes
 # Metric types
 export AbstractMetric,
     RiemannianMetric,
