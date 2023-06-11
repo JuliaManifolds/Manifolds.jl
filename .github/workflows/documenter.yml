@@ -9,13 +9,37 @@ jobs:
   docs:
     name: Documentation
     runs-on: ubuntu-latest
-    if: "contains( github.event.pull_request.labels.*.name, 'preview docs') || github.ref == 'refs/heads/master' || contains(github.ref, 'refs/tags/')"
+    if: "contains( github.event.pull_request.labels.*.name, 'preview docs') || github.ref == 'refs/heads/master' || contains(github.ref, 'refs/tags/')"
     steps:
       - uses: actions/checkout@v3
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.3.353
       - uses: julia-actions/setup-julia@latest
         with:
-          version: 1.8
-      - uses: julia-actions/julia-docdeploy@v1
+          version: 1.9
+      - name: Julia Cache
+        uses: julia-actions/cache@v1
+      - name: Cache Quarto
+        id: cache-quarto
+        uses: actions/cache@v3
+        with:
+          path: tutorials/_freeze
+          key: ${{ runner.os }}-quarto-freeze
+      - name: Cache Documenter
+        id: cache-documenter
+        uses: actions/cache@v3
+        with:
+          path: docs/src/tutorials
+          key: ${{ runner.os }}-documenter-tutorials
+      - name: Cache CondaPkg
+        id: cache-condaPkg
+        uses: actions/cache@v3
+        with:
+          path: docs/.CondaPkg
+          key: ${{ runner.os }}-condapkg
+      - name: "Documenter rendering (including Quarto)"
+        run: "docs/make.jl --quarto"
         env:
           PYTHON: ""
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

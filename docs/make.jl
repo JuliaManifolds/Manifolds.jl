@@ -1,16 +1,49 @@
+#!/usr/bin/env julia
+#
+#
+
+#
+# (a) if docs is not the current active environment, switch to it
+# (from https://github.com/JuliaIO/HDF5.jl/pull/1020/) 
+if Base.active_project() != joinpath(@__DIR__, "Project.toml")
+    using Pkg
+    Pkg.activate(@__DIR__)
+    Pkg.develop(PackageSpec(; path=(@__DIR__) * "/../"))
+    Pkg.resolve()
+    Pkg.instantiate()
+    if "--quarto" ∈ ARGS
+        Pkg.build("IJulia") # to activate the right kernel
+    end
+end
+
+# (b) Did someone say render? Then we render!
+if "--quarto" ∈ ARGS
+    using CondaPkg
+    CondaPkg.withenv() do
+        @info "Rendering Quarto"
+        tutorials_folder = (@__DIR__) * "/../tutorials"
+        # instantiate the tutorials environment if necessary
+        Pkg.activate(tutorials_folder)
+        Pkg.resolve()
+        Pkg.instantiate()
+        Pkg.activate(@__DIR__) # but return to the docs one before
+        run(`quarto render $(tutorials_folder)`)
+        return nothing
+    end
+end
+
+# (c) load necessary packages for the docs
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
-using PlutoStaticHTML
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 # required for loading the manifold tests functions
 using Test, FiniteDifferences
-
 ENV["GKSwstype"] = "100"
 
+# (d) add contributing.md to docs
 generated_path = joinpath(@__DIR__, "src", "misc")
 base_url = "https://github.com/JuliaManifolds/Manifolds.jl/blob/master/"
 isdir(generated_path) || mkdir(generated_path)
-
 open(joinpath(generated_path, "contributing.md"), "w") do io
     # Point to source license file
     println(
@@ -27,46 +60,7 @@ open(joinpath(generated_path, "contributing.md"), "w") do io
     end
 end
 
-#
-# Generate Pluto Tutorial HTMLs
-tutorial_menu = Array{Pair{String,String},1}()
-tutorial_src_folder = joinpath(@__DIR__, "..", "tutorials/")
-tutorial_output_folder = joinpath(@__DIR__, "src/", "tutorials/")
-tutorial_relative_path = "tutorials/"
-mkpath(tutorial_output_folder)
-@info tutorial_src_folder
-#
-# Tutorials
-@info " \n      Rendering Tutorials\n "
-tutorials = [
-    Dict(:file => "getstarted", :title => "Get started with Manifolds.jl"),
-    # Optional loading of packages (GLMakie) required
-    # Dict(:file => "working-in-charts", :title => "Working in charts"),
-]
-# build menu and write files myself - tp set edit url correctly.
-for t in tutorials
-    global tutorial_menu
-    rendered = build_notebooks( #though not really parallel here
-        BuildOptions(
-            tutorial_src_folder;
-            output_format=documenter_output,
-            write_files=false,
-            use_distributed=true,
-        ),
-        ["$(t[:file]).jl"],
-    )
-    write(
-        tutorial_output_folder * t[:file] * ".md",
-        """
-        ```@meta
-        EditURL = "$(tutorial_src_folder)$(t[:file]).jl"
-        ```
-        $(rendered["$(t[:file]).jl"][1])
-        """,
-    )
-    push!(tutorial_menu, t[:title] => joinpath(tutorial_relative_path, t[:file] * ".md"))
-end
-
+# (e) ...finally! make docs
 makedocs(
     # for development, we disable prettyurls
     format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
@@ -93,7 +87,7 @@ makedocs(
     sitename="Manifolds.jl",
     pages=[
         "Home" => "index.md",
-        "Tutorials" => tutorial_menu,
+        "How to..." => ["🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md"],
         "Manifolds" => [
             "Basic manifolds" => [
                 "Centered matrices" => "manifolds/centeredmatrices.md",

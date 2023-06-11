@@ -128,6 +128,15 @@ function check_vector(M::AbstractSphere, p, X; kwargs...)
     return nothing
 end
 
+function diagonalizing_projectors(M::AbstractSphere{ℝ}, p, X)
+    X_norm = norm(M, p, X)
+    X_normed = X / X_norm
+    return (
+        (zero(number_eltype(p)), ProjectorOntoVector(M, p, X_normed)),
+        (one(number_eltype(p)), CoprojectorOntoVector(M, p, X_normed)),
+    )
+end
+
 @doc raw"""
     distance(M::AbstractSphere, p, q)
 

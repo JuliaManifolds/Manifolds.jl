@@ -1,4 +1,4 @@
-# Connection manifold
+# [Connection manifold](@id ConnectionSection)
 
 A connection manifold always consists of a [topological manifold](https://en.wikipedia.org/wiki/Topological_manifold) together with a [connection](https://en.wikipedia.org/wiki/Connection_(mathematics)) $\Gamma$.
 

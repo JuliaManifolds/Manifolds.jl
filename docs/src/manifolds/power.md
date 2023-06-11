@@ -1,4 +1,4 @@
-# Power manifold
+# [Power manifold](@id PowerManifoldSection)
 
 A power manifold is based on a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $\mathcal M$ to build a $\mathcal M^{n_1 \times n_2 \times \cdots \times n_m}$.
 In the case where $m=1$ we can represent a manifold-valued vector of data of length $n_1$, for example a time series.
