@@ -7,6 +7,7 @@ include("../utils.jl")
     q = [0.3, 0.6, 0.1]
     X = zeros(3)
     Y = [-0.1, 0.05, 0.05]
+    @test repr(M) == "ProbabilitySimplex(2; boundary=:open)"
     @test is_point(M, p)
     @test_throws DomainError is_point(M, p .+ 1, true)
     @test_throws ManifoldDomainError is_point(M, [0], true)
@@ -49,6 +50,7 @@ include("../utils.jl")
             test_manifold(
                 M,
                 pts,
+                basis_types_to_from=(DefaultOrthonormalBasis(),),
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
@@ -57,6 +59,7 @@ include("../utils.jl")
                 inverse_retraction_methods=[SoftmaxInverseRetraction()],
                 retraction_methods=[SoftmaxRetraction()],
                 test_inplace=true,
+                vector_transport_methods=[ParallelTransport()],
             )
         end
     end
@@ -110,5 +113,29 @@ include("../utils.jl")
         @test inner(Mb, p, X, Y) == 8
 
         @test_throws ArgumentError ProbabilitySimplex(2; boundary=:tomato)
+    end
+
+    @testset "Probability amplitudes" begin
+        M = ProbabilitySimplex(2)
+        p = [0.1, 0.7, 0.2]
+        Y = [-0.1, 0.05, 0.05]
+        @test Manifolds.simplex_to_amplitude(M, p) ≈
+              [0.31622776601683794, 0.8366600265340756, 0.4472135954999579]
+        @test Manifolds.amplitude_to_simplex(
+            M,
+            [0.31622776601683794, 0.8366600265340756, 0.4472135954999579],
+        ) ≈ p
+        @test Manifolds.simplex_to_amplitude_diff(M, p, Y) ≈
+              [-0.31622776601683794, 0.05976143046671968, 0.1118033988749895]
+        @test Manifolds.amplitude_to_simplex_diff(M, p, Y) ≈ [-0.01, 0.035, 0.01]
+    end
+
+    @testset "other metric" begin
+        p = [0.1, 0.7, 0.2]
+        X = [-0.1, 0.05, 0.05]
+        Y = [0.05, 0.05, -0.1]
+        Z = [-0.1, 0.15, -0.05]
+        @test riemann_tensor(M, p, X, Y, Z) ≈
+              [-0.0034821428571428577, -0.005625, 0.009107142857142857]
     end
 end

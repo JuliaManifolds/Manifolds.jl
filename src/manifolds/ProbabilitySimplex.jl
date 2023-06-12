@@ -154,7 +154,7 @@ end
 get_embedding(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
 
 @doc raw"""
-    distance(M,p,q)
+    distance(M, p, q)
 
 Compute the distance between two points on the [`ProbabilitySimplex`](@ref) `M`.
 The formula reads
@@ -174,7 +174,7 @@ embed(::ProbabilitySimplex, p) = p
 embed(::ProbabilitySimplex, p, X) = X
 
 @doc raw"""
-    exp(M::ProbabilitySimplex,p,X)
+    exp(M::ProbabilitySimplex, p, X)
 
 Compute the exponential map on the probability simplex.
 
@@ -197,10 +197,39 @@ function exp!(::ProbabilitySimplex, q, p, X)
     return q
 end
 
-@doc raw"""
-    injectivity_radius(M,p)
+function get_coordinates_orthonormal!(
+    M::ProbabilitySimplex{N},
+    Xc,
+    p,
+    X,
+    R::RealNumbers,
+) where {N}
+    get_coordinates_orthonormal!(
+        Sphere(N),
+        Xc,
+        simplex_to_amplitude(M, p),
+        simplex_to_amplitude_diff(M, p, X),
+        R,
+    )
+    return Xc
+end
 
-compute the injectivity radius on the [`ProbabilitySimplex`](@ref) `M` at the point `p`,
+function get_vector_orthonormal!(
+    M::ProbabilitySimplex{N},
+    Y,
+    p,
+    Xc,
+    R::RealNumbers,
+) where {N}
+    ps = simplex_to_amplitude(M, p)
+    X = get_vector_orthonormal(Sphere(N), ps, Xc, R)
+    return amplitude_to_simplex_diff!(M, Y, ps, X)
+end
+
+@doc raw"""
+    injectivity_radius(M, p)
+
+Compute the injectivity radius on the [`ProbabilitySimplex`](@ref) `M` at the point `p`,
 i.e. the distanceradius to a point near/on the boundary, that could be reached by following the
 geodesic.
 """
@@ -323,10 +352,21 @@ mean(::ProbabilitySimplex, ::Any...)
 
 default_estimation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
 
+function parallel_transport_to!(M::ProbabilitySimplex{N}, Y, p, X, q) where {N}
+    q_s = simplex_to_amplitude(M, q)
+    Ys = parallel_transport_to(
+        Sphere(N),
+        simplex_to_amplitude(M, p),
+        simplex_to_amplitude_diff(M, p, X),
+        q_s,
+    )
+    return amplitude_to_simplex_diff!(M, Y, q_s, Ys)
+end
+
 @doc raw"""
     project(M::ProbabilitySimplex, p, Y)
 
-project `Y` from the embedding onto the tangent space at `p` on
+Project `Y` from the embedding onto the tangent space at `p` on
 the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 
 ````math
@@ -371,7 +411,7 @@ end
 @doc raw"""
     representation_size(::ProbabilitySimplex{n})
 
-return the representation size of points in the $n$-dimensional probability simplex,
+Return the representation size of points in the $n$-dimensional probability simplex,
 i.e. an array size of `(n+1,)`.
 """
 representation_size(::ProbabilitySimplex{n}) where {n} = (n + 1,)
@@ -421,16 +461,101 @@ function riemannian_gradient!(M::ProbabilitySimplex, X, p, Y; kwargs...)
     return X
 end
 
+@doc raw"""
+    riemann_tensor(::ProbabilitySimplex, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`ProbabilitySimplex`](@ref) `M`.
+It is computed using isometry with positive orthant of a sphere.
+"""
+riemann_tensor(::ProbabilitySimplex, p, X, Y, Z)
+
+function riemann_tensor!(M::ProbabilitySimplex{N}, Xresult, p, X, Y, Z) where {N}
+    pe = simplex_to_amplitude(M, p)
+    Xrs = riemann_tensor(
+        Sphere(N),
+        pe,
+        simplex_to_amplitude_diff(M, p, X),
+        simplex_to_amplitude_diff(M, p, Y),
+        simplex_to_amplitude_diff(M, p, Z),
+    )
+    amplitude_to_simplex_diff!(M, Xresult, pe, Xrs)
+    return Xresult
+end
+
 function Base.show(io::IO, ::ProbabilitySimplex{n,boundary}) where {n,boundary}
-    return print(io, "ProbabilitySimplex($(n); boundary=$boundary)")
+    return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
 end
 
 @doc raw"""
     zero_vector(M::ProbabilitySimplex, p)
 
-returns the zero tangent vector in the tangent space of the point `p`  from the
+Return the zero tangent vector in the tangent space of the point `p`  from the
 [`ProbabilitySimplex`](@ref) `M`, i.e. its representation by the zero vector in the embedding.
 """
 zero_vector(::ProbabilitySimplex, ::Any)
 
 zero_vector!(::ProbabilitySimplex, X, p) = fill!(X, 0)
+
+@doc raw"""
+    simplex_to_amplitude(M::ProbabilitySimplex, p)
+
+Convert point `p` on [`ProbabilitySimplex`](@ref) to (real) probability amplitude. The
+formula reads ``(\sqrt{p_1}, \sqrt{p_2}, …, \sqrt{p_{N+1}})``. This is an isometry from the
+interior of the probability simplex to the interior of the positive orthant of a sphere.
+"""
+function simplex_to_amplitude(M::ProbabilitySimplex, p)
+    return simplex_to_amplitude!(M, similar(p), p)
+end
+
+function simplex_to_amplitude!(::ProbabilitySimplex, q, p)
+    q .= sqrt.(p)
+    return q
+end
+
+@doc raw"""
+    amplitude_to_simplex(M::ProbabilitySimplex{N}, p) where {N}
+
+Convert point (real) probability amplitude `p` on to a point on [`ProbabilitySimplex`](@ref).
+The formula reads ``(p_1^2, p_2^2, …, p_{N+1}^2)``. This is an isometry from the interior of
+the positive orthant of a sphere to interior of the probability simplex.
+"""
+function amplitude_to_simplex(M::ProbabilitySimplex, p)
+    return amplitude_to_simplex!(M, similar(p), p)
+end
+
+function amplitude_to_simplex!(::ProbabilitySimplex, q, p)
+    q .= p .^ 2
+    return q
+end
+
+@doc raw"""
+    simplex_to_amplitude_diff(M::ProbabilitySimplex, p, X)
+
+Compute differential of [`simplex_to_amplitude`](@ref) of a point on `p` one
+[`ProbabilitySimplex`](@ref) at tangent vector `X` from the tangent space at `p` from
+a sphere.
+"""
+function simplex_to_amplitude_diff(M::ProbabilitySimplex, p, X)
+    return simplex_to_amplitude_diff!(M, similar(X), p, X)
+end
+
+function simplex_to_amplitude_diff!(::ProbabilitySimplex, Y, p, X)
+    Y .= X ./ sqrt.(p)
+    return Y
+end
+
+@doc raw"""
+    amplitude_to_simplex_diff(M::ProbabilitySimplex, p, X)
+
+Compute differential of [`amplitude_to_simplex`](@ref) of a point `p` on
+[`ProbabilitySimplex`](@ref) at tangent vector `X` from the tangent space at `p` from
+a sphere.
+"""
+function amplitude_to_simplex_diff(M::ProbabilitySimplex, p, X)
+    return amplitude_to_simplex_diff!(M, similar(X), p, X)
+end
+
+function amplitude_to_simplex_diff!(::ProbabilitySimplex, Y, p, X)
+    Y .= p .* X
+    return Y
+end
