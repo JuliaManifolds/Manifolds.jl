@@ -151,8 +151,6 @@ function check_vector(M::ProbabilitySimplex, p, X; kwargs...)
     return nothing
 end
 
-get_embedding(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
-
 @doc raw"""
     distance(M, p, q)
 
@@ -213,6 +211,8 @@ function get_coordinates_orthonormal!(
     )
     return Xc
 end
+
+get_embedding(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
 
 function get_vector_orthonormal!(
     M::ProbabilitySimplex{N},
@@ -499,7 +499,7 @@ zero_vector!(::ProbabilitySimplex, X, p) = fill!(X, 0)
 @doc raw"""
     simplex_to_amplitude(M::ProbabilitySimplex, p)
 
-Convert point `p` on [`ProbabilitySimplex`](@ref) to (real) probability amplitude. The
+Convert point `p` on [`ProbabilitySimplex`](@ref Manifolds.ProbabilitySimplex) to (real) probability amplitude. The
 formula reads ``(\sqrt{p_1}, \sqrt{p_2}, …, \sqrt{p_{N+1}})``. This is an isometry from the
 interior of the probability simplex to the interior of the positive orthant of a sphere.
 """
@@ -515,7 +515,7 @@ end
 @doc raw"""
     amplitude_to_simplex(M::ProbabilitySimplex{N}, p) where {N}
 
-Convert point (real) probability amplitude `p` on to a point on [`ProbabilitySimplex`](@ref).
+Convert point (real) probability amplitude `p` on to a point on [`ProbabilitySimplex`](@ref Manifolds.ProbabilitySimplex).
 The formula reads ``(p_1^2, p_2^2, …, p_{N+1}^2)``. This is an isometry from the interior of
 the positive orthant of a sphere to interior of the probability simplex.
 """
@@ -531,7 +531,7 @@ end
 @doc raw"""
     simplex_to_amplitude_diff(M::ProbabilitySimplex, p, X)
 
-Compute differential of [`simplex_to_amplitude`](@ref) of a point on `p` one
+Compute differential of [`simplex_to_amplitude`](@ref Manifolds.simplex_to_amplitude) of a point on `p` one
 [`ProbabilitySimplex`](@ref) at tangent vector `X` from the tangent space at `p` from
 a sphere.
 """
@@ -547,7 +547,7 @@ end
 @doc raw"""
     amplitude_to_simplex_diff(M::ProbabilitySimplex, p, X)
 
-Compute differential of [`amplitude_to_simplex`](@ref) of a point `p` on
+Compute differential of [`amplitude_to_simplex`](@ref Manifolds.amplitude_to_simplex) of a point `p` on
 [`ProbabilitySimplex`](@ref) at tangent vector `X` from the tangent space at `p` from
 a sphere.
 """
