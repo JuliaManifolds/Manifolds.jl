@@ -4,6 +4,8 @@
 Modules = [Manifolds]
 Pages = ["manifolds/ProbabilitySimplex.jl"]
 Order = [:type, :function]
+Private=false
+Public=true
 ```
 
 ## Real probability amplitudes
@@ -19,11 +21,12 @@ The name derives from the notion of probability amplitudes in quantum mechanics.
 They are complex-valued and their squared norm corresponds to probability. This construction
 restricted to real valued amplitudes results in this embedding.
 
-```@docs
-Manifolds.amplitude_to_simplex
-Manifolds.amplitude_to_simplex_diff
-Manifolds.simplex_to_amplitude
-Manifolds.simplex_to_amplitude_diff
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/ProbabilitySimplex.jl"]
+Order = [:type, :function]
+Private=true
+Public=false
 ```
 
 ## Literature
