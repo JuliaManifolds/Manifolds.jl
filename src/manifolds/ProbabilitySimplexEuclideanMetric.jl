@@ -19,7 +19,7 @@ rand(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}; σ::Real=1.0)
 
 function Random.rand!(
     rng::AbstractRNG,
-    M::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric},
+    M::MetricManifold{ℝ,ProbabilitySimplex,EuclideanMetric},
     pX;
     vector_at=nothing,
     σ=one(eltype(pX)),
