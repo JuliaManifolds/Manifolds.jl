@@ -2,6 +2,8 @@ include("../utils.jl")
 
 @testset "Probability simplex" begin
     M = ProbabilitySimplex(2)
+    M_euc = MetricManifold(ProbabilitySimplex(2), EuclideanMetric())
+
     @test M^4 == MultinomialMatrices(3, 4)
     p = [0.1, 0.7, 0.2]
     q = [0.3, 0.6, 0.1]
@@ -60,6 +62,9 @@ include("../utils.jl")
                 retraction_methods=[SoftmaxRetraction()],
                 test_inplace=true,
                 vector_transport_methods=[ParallelTransport()],
+                test_rand_point=true,
+                test_rand_tvector=true,
+                rand_tvector_atol_multiplier=10.0,
             )
         end
     end
