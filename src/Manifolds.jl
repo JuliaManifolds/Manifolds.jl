@@ -649,20 +649,21 @@ export AbstractCartanSchoutenConnection,
 export MetricManifold
 # Metric types
 export AbstractMetric,
-    RiemannianMetric,
-    LorentzMetric,
-    BuresWassersteinMetric,
-    EuclideanMetric,
-    GeneralizedBuresWassersteinMetric,
     AffineInvariantMetric,
+    BuresWassersteinMetric,
+    CanonicalMetric,
+    EuclideanMetric,
+    ExtendedSymplecticMetric,
+    FisherRaoMetric,
+    GeneralizedBuresWassersteinMetric,
     LogCholeskyMetric,
     LogEuclideanMetric,
+    LorentzMetric,
     MinkowskiMetric,
     PowerMetric,
     ProductMetric,
     RealSymplecticMetric,
-    ExtendedSymplecticMetric,
-    CanonicalMetric,
+    RiemannianMetric,
     StiefelSubmersionMetric
 export AbstractAtlas, RetractionAtlas
 # Vector transport types
