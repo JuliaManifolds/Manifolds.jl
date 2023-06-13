@@ -65,7 +65,7 @@ include("../utils.jl")
     end
 
     @testset "Projection testing" begin
-        p = [1 / 3, 1 / 3, 1 / 3]
+        p = [1 / 2, 1 / 3, 1 / 6]
         q = [0.2, 0.3, 0.5]
         X = log(M, p, q)
         X2 = X .+ 10
@@ -74,9 +74,9 @@ include("../utils.jl")
 
         # Check adaption of metric and representer
         Y1 = change_metric(M, EuclideanMetric(), p, X)
-        @test Y1 == X .* sqrt.(p)
+        @test Y1 ≈ [-0.17062114054478128, 0.04002429219016789, 0.13059684835461377]
         Y2 = change_representer(M, EuclideanMetric(), p, X)
-        @test Y2 == X .* p
+        @test Y2 ≈ [-0.10040964054128285, 0.03818665287320871, 0.06222298766807415]
 
         X = log(M, q, p)
         X2 = X + [1, 2, 3]
