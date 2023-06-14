@@ -264,4 +264,10 @@ using ManifoldsBase: TFVector
         @test dpX[2][1] == 1.0
         @test dpX[2][2].X == normalize(X)
     end
+
+    @testset "Volume density" begin
+        M = Sphere(2)
+        p = [1.0, 0.0, 0.0]
+        @test Manifolds.volume_density(M, p, [0.0, 0.5, 0.5]) ≈ 0.9187253698655684
+    end
 end

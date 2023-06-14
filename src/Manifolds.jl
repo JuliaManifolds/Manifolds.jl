@@ -321,6 +321,7 @@ using Random
 using RecursiveArrayTools: ArrayPartition
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
+using SpecialFunctions
 using StaticArrays
 using Statistics
 using StatsBase

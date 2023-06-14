@@ -143,6 +143,7 @@ makedocs(
             "Atlases and charts" => "features/atlases.md",
             "Differentiation" => "features/differentiation.md",
             "Distributions" => "features/distributions.md",
+            "Integration" => "features/integration.md",
             "Statistics" => "features/statistics.md",
             "Testing" => "features/testing.md",
             "Utilities" => "features/utilities.md",
