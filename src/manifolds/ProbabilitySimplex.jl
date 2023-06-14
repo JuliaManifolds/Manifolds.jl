@@ -70,38 +70,29 @@ active_traits(f, ::ProbabilitySimplex, args...) = merge_traits(IsEmbeddedManifol
     change_representer(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
 Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric),
-the representer of a linear functional on the tangent space is adapted as ``Z = p .* X``, since
-this “compensates” for the divsion by ``p`` in the Riemannian metric on the [`ProbabilitySimplex`](@ref).
+the representer of a linear functional on the tangent space is adapted as ``Z = p .* X .- p .* dot(p, X)``.
+The first part “compensates” for the divsion by ``p`` in the Riemannian metric on the [`ProbabilitySimplex`](@ref)
+and the second part performs appropriate projection to keep the vector tangent.
 
-To be precise for any ``Y ∈ T_pΔ^n`` we are looking for ``Z ∈ T_pΔ^n`` such that
-
-```math
-    ⟨X,Y⟩ = X^\mathrm{T}Y = \sum_{i=1}^{n+1}\frac{Z_iY_i}{p_i} = g_p(Z,Y)
-```
-
-and hence ``Z_i = X_ip_i, i=1,…,n+1``.
+For details see Proposition 2.3 in [^ÅströmPetraSchmitzerSchnörr2017].
 """
 change_representer(::ProbabilitySimplex, ::EuclideanMetric, ::Any, ::Any)
 
 function change_representer!(::ProbabilitySimplex, Y, ::EuclideanMetric, p, X)
-    return Y .= p .* X
+    return Y .= p .* X .- p .* dot(p, X)
 end
 
 @doc raw"""
     change_metric(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
 To change the metric, we are looking for a function ``c\colon T_pΔ^n \to T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
-
-```math
-    ⟨X,Y⟩ = X^\mathrm{T}Y = \sum_{i=1}^{n+1}\frac{c(X)_ic(Y)_i}{p_i} = g_p(X,Y)
-```
-
-and hence ``C(X)_i = X_i\sqrt{p_i}, i=1,…,n+1``.
+This can be achieved by rewriting representer change in matrix form as `(Diagonal(p) - p * p') * X`
+and taking square root of the matrix
 """
 change_metric(::ProbabilitySimplex, ::EuclideanMetric, ::Any, ::Any)
 
 function change_metric!(::ProbabilitySimplex, Y, ::EuclideanMetric, p, X)
-    return Y .= sqrt.(p) .* X
+    return Y .= sqrt(Diagonal(p) - p * p') * X
 end
 
 """
@@ -408,14 +399,14 @@ Project `Y` from the embedding onto the tangent space at `p` on
 the [`ProbabilitySimplex`](@ref) `M`. The formula reads
 
 ````math
-\operatorname{proj}_{Δ^n}(p,Y) = Y - ⟨\mathbb 1,Y⟩p,
-````
-where ``\mathbb 1 ∈ ℝ`` denotes the vector of ones.
+\operatorname{proj}_{Δ^n}(p,Y) = Y - \bar{Y}
+```
+where ``\bar{Y}`` denotes mean of ``Y``.
 """
 project(::ProbabilitySimplex, ::Any, ::Any)
 
 function project!(::ProbabilitySimplex, X, p, Y)
-    X .= Y .- sum(Y) .* p
+    X .= Y .- mean(Y)
     return X
 end
 
