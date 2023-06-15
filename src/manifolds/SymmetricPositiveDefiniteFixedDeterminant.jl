@@ -144,7 +144,7 @@ project(M::SymmetricPositiveDefiniteFixedDeterminant, p, X)
 
 function project!(M::SymmetricPositiveDefiniteFixedDeterminant, Y, p, X)
     copyto!(M, Y, p, X)
-    Y[diagind(Y)] .= 0.0
+    fill!(view(Y, diagind(Y)), 0)
     return Y
 end
 
