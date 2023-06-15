@@ -25,12 +25,14 @@ Additionally we store the tangent vectors as `X=p^{-1}Z`, i.e. symmetric matrice
 
 # Constructor
 
-    SymmetricPositiveDefiniteFixedDeterminant(n, d=1.0)
+    SymmetricPositiveDefiniteFixedDeterminant(n::Int, d::Real=1.0)
 
 generates the manifold $\mathcal P_d(n) \subset \mathcal P(n)$ of determinant ``d``,
 which defaults to 1.
 """
-struct SymmetricPositiveDefiniteFixedDeterminant{N,D} <: AbstractDecoratorManifold{ℝ} end
+struct SymmetricPositiveDefiniteFixedDeterminant{N,TD<:Real} <: AbstractDecoratorManifold{ℝ}
+    d::TD
+end
 
 function SymmetricPositiveDefiniteFixedDeterminant(n::Int, d::F=1.0) where {F<:Real}
     @assert d > 0 "The determinant has to be positive but was provided as $d."

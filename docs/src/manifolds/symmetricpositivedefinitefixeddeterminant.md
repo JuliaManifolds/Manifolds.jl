@@ -1,4 +1,4 @@
-# [Symmetric positive definite matrices of fixed deretminant](@id SymmetricPositiveDefiniteFixedDeterminantSection)
+# [Symmetric positive definite matrices of fixed determinant](@id SymmetricPositiveDefiniteFixedDeterminantSection)
 
 ```@docs
 SymmetricPositiveDefiniteFixedDeterminant
