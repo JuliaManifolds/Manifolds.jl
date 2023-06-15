@@ -363,9 +363,20 @@ dimension of the embedding -1.
 """
 manifold_dimension(M::AbstractSphere) = manifold_dimension(get_embedding(M)) - 1
 
+@doc raw"""
+    manifold_volume(M::AbstractSphere{ℝ})
+
+Volume of the ``n``-dimensional [`Sphere`](@ref) `M`. The formula reads
+
+````math
+\frac{2\pi^{(n+1)/2}}{Γ((n+1)/2)},
+````
+
+where ``Γ`` denotes the [Gamma function](https://en.wikipedia.org/wiki/Gamma_function).
+"""
 function manifold_volume(M::AbstractSphere{ℝ})
     n = manifold_dimension(M) + 1
-    return n * pi^(n / 2) / gamma(n / 2 + 1)
+    return 2 * pi^(n / 2) / gamma(n / 2)
 end
 
 """
