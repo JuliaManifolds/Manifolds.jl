@@ -36,7 +36,7 @@ end
 
 function SymmetricPositiveDefiniteFixedDeterminant(n::Int, d::F=1.0) where {F<:Real}
     @assert d > 0 "The determinant has to be positive but was provided as $d."
-    return SymmetricPositiveDefiniteFixedDeterminant{n,d}()
+    return SymmetricPositiveDefiniteFixedDeterminant{n,F}(d)
 end
 
 function active_traits(f, ::SymmetricPositiveDefiniteFixedDeterminant, args...)
@@ -44,7 +44,7 @@ function active_traits(f, ::SymmetricPositiveDefiniteFixedDeterminant, args...)
 end
 
 @doc raw"""
-    check_point(M::SymmetricPositiveDefiniteFixedDeterminant{n,d}, p; kwargs...)
+    check_point(M::SymmetricPositiveDefiniteFixedDeterminant{n}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`SymmetricPositiveDefiniteFixedDeterminant`](@ref)`(n,d)` `M`, i.e.
 whether `p` is a [`SymmetricPositiveDefinite`](@ref) matrix (checked by traits) ofsize `(n,n)`
@@ -54,21 +54,21 @@ with determinant ``\det(p) = d``.
 The tolerance for the determinant of `p` can be set using `kwargs...`.
 """
 function check_point(
-    M::SymmetricPositiveDefiniteFixedDeterminant{n,d},
+    M::SymmetricPositiveDefiniteFixedDeterminant{n},
     p;
     kwargs...,
-) where {n,d}
-    if det(p) != d
+) where {n}
+    if det(p) != M.d
         return DomainError(
             det(p),
-            "The point $(p) does not lie on $M, since it does not have a determinant $d.",
+            "The point $(p) does not lie on $M, since it does not have a determinant $(M.d).",
         )
     end
     return nothing
 end
 
 """
-    check_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs... )
+    check_vector(M::SymmetricPositiveDefiniteFixedDeterminant{n}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
@@ -76,12 +76,7 @@ and its values have to be from the correct [`AbstractNumbers`](https://juliamani
 
 The tolerance for the symmetry of `X` can be set using `kwargs...`.
 """
-function check_vector(
-    M::SymmetricPositiveDefiniteFixedDeterminant{n,d},
-    p,
-    X;
-    kwargs...,
-) where {n,d}
+function check_vector(M::SymmetricPositiveDefiniteFixedDeterminant, p, X; kwargs...)
     if !isapprox(tr(X), 0.0; kwargs...)
         return DomainError(
             tr(X),
@@ -96,7 +91,7 @@ embed(M::SymmetricPositiveDefiniteFixedDeterminant, p, X) = copy(M, X)
 embed!(M::SymmetricPositiveDefiniteFixedDeterminant, q, p) = copyto!(M, q, p)
 embed!(M::SymmetricPositiveDefiniteFixedDeterminant, Y, p, X) = copyto!(M; y, p, X)
 
-function get_embedding(::SymmetricPositiveDefiniteFixedDeterminant{n,d}) where {n,d}
+function get_embedding(::SymmetricPositiveDefiniteFixedDeterminant{n}) where {n}
     return SymmetricPositiveDefinite(n)
 end
 
@@ -130,8 +125,8 @@ q = \Bigl(\frac{d}{\det(p)}\Bigr)^{\frac{1}{n}}p
 """
 project(M::SymmetricPositiveDefiniteFixedDeterminant, p)
 
-function project!(::SymmetricPositiveDefiniteFixedDeterminant{n,d}, q, p) where {n,d}
-    q .= (d / det(p))^(1 / n) .* p
+function project!(M::SymmetricPositiveDefiniteFixedDeterminant{n}, q, p) where {n}
+    q .= (M.d / det(p))^(1 / n) .* p
     return
 end
 
@@ -152,6 +147,6 @@ function project!(M::SymmetricPositiveDefiniteFixedDeterminant, Y, p, X)
     return Y
 end
 
-function Base.show(io::IO, ::SymmetricPositiveDefiniteFixedDeterminant{n,d}) where {n,d}
-    return print(io, "SymmetricPositiveDefiniteFixedDeterminant($n, $d)")
+function Base.show(io::IO, M::SymmetricPositiveDefiniteFixedDeterminant{n}) where {n}
+    return print(io, "SymmetricPositiveDefiniteFixedDeterminant($n, $(M.d))")
 end
