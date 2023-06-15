@@ -67,14 +67,15 @@ function check_point(
     return nothing
 end
 
-"""
+@doc raw"""
     check_vector(M::SymmetricPositiveDefiniteFixedDeterminant{n}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`SymmetricPositiveDefiniteFixedDeterminant`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
-and its values have to be from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
+[`SymmetricPositiveDefiniteFixedDeterminant`](@ref) `M`,
+i.e. `X` has to be a tangent vector on [`SymmetricPositiveDefinite`](@ref), so a symmetric matrix,
+and additionally fulfill ``\operatorname{tr}(X) = 0``.
 
-The tolerance for the symmetry of `X` can be set using `kwargs...`.
+The tolerance for the trace check of `X` can be set using `kwargs...`, which influences the `isapprox`-check.
 """
 function check_vector(M::SymmetricPositiveDefiniteFixedDeterminant, p, X; kwargs...)
     if !isapprox(tr(X), 0.0; kwargs...)
