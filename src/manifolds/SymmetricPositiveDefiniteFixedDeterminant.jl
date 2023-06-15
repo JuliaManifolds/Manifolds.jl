@@ -20,7 +20,7 @@ and consists of all symmetric matrices with zero trace
         X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T} \text{ and } \operatorname{tr}(p) = 0
     \bigr\},
 ```
-since for a constant determinant we require that `0 = D\det(p)[Z] = \det(p)\operatorname{tr}(p^{-1}Z)` for all tangent vectprs ``Z``.
+since for a constant determinant we require that `0 = D\det(p)[Z] = \det(p)\operatorname{tr}(p^{-1}Z)` for all tangent vectors ``Z``.
 Additionally we store the tangent vectors as `X=p^{-1}Z`, i.e. symmetric matrices.
 
 # Constructor
@@ -47,7 +47,7 @@ end
     check_point(M::SymmetricPositiveDefiniteFixedDeterminant{n}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`SymmetricPositiveDefiniteFixedDeterminant`](@ref)`(n,d)` `M`, i.e.
-whether `p` is a [`SymmetricPositiveDefinite`](@ref) matrix (checked by traits) ofsize `(n,n)`
+whether `p` is a [`SymmetricPositiveDefinite`](@ref) matrix (checked by traits) of size `(n, n)`
 
 with determinant ``\det(p) = d``.
 
@@ -58,7 +58,7 @@ function check_point(
     p;
     kwargs...,
 ) where {n}
-    if det(p) != M.d
+    if det(p) ≉ M.d
         return DomainError(
             det(p),
             "The point $(p) does not lie on $M, since it does not have a determinant $(M.d).",
@@ -71,7 +71,7 @@ end
     check_vector(M::SymmetricPositiveDefiniteFixedDeterminant{n}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`SymmetricMatrices`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
+[`SymmetricPositiveDefiniteFixedDeterminant`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
 and its values have to be from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
 
 The tolerance for the symmetry of `X` can be set using `kwargs...`.
@@ -111,11 +111,11 @@ function manifold_dimension(M::SymmetricPositiveDefiniteFixedDeterminant)
 end
 
 @doc raw"""
-    q = project(M::SymmetricPositiveDefiniteFixedDeterminant{n,d}, p)
-    project!(M::SymmetricPositiveDefiniteFixedDeterminant{n,d}, q, p)
+    q = project(M::SymmetricPositiveDefiniteFixedDeterminant{n}, p)
+    project!(M::SymmetricPositiveDefiniteFixedDeterminant{n}, q, p)
 
 Project the symmetric positive definite (s.p.d.) matrix `p` from the embedding onto the
-(sub-)manifold of s.p.d. matrices of determinant d (in place of q).
+(sub-)manifold of s.p.d. matrices of determinant `M.d` (in place of `q`).
 
 The formula reads
 
@@ -131,11 +131,11 @@ function project!(M::SymmetricPositiveDefiniteFixedDeterminant{n}, q, p) where {
 end
 
 @doc raw"""
-    Y = project(M::SymmetricPositiveDefiniteFixedDeterminant{n,d}, p, X)
-    project!(M::SymmetricPositiveDefiniteFixedDeterminant{n,d}, Y, p, X)
+    Y = project(M::SymmetricPositiveDefiniteFixedDeterminant{n}, p, X)
+    project!(M::SymmetricPositiveDefiniteFixedDeterminant{n}, Y, p, X)
 
 Project the symmetric matrix `X` onto the tangent space at `p` of the
-(sub-)manifold of s.p.d. matrices of determinant d (in place of `Y`),
+(sub-)manifold of s.p.d. matrices of determinant `M.d` (in place of `Y`),
 by setting its diagonal (and hence its trace) to zero.
 
 """
@@ -143,7 +143,7 @@ project(M::SymmetricPositiveDefiniteFixedDeterminant, p, X)
 
 function project!(M::SymmetricPositiveDefiniteFixedDeterminant, Y, p, X)
     copyto!(M, Y, p, X)
-    Y[diagind(Y)] .= 0.0
+    fill!(Y[diagind(Y)], 0)
     return Y
 end
 
