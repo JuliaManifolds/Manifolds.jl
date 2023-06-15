@@ -3,6 +3,21 @@
 """
 module Manifolds
 
+import Base:
+    angle,
+    copyto!,
+    convert,
+    foreach,
+    identity,
+    in,
+    inv,
+    isempty,
+    length,
+    ndims,
+    show,
+    showerror,
+    size,
+    transpose
 import ManifoldsBase:
     @trait_function,
     _access_nested,
@@ -154,21 +169,14 @@ import ManifoldsBase:
     zero_vector!,
     CotangentSpace,
     TangentSpace
-import Base:
-    angle,
-    copyto!,
-    convert,
-    foreach,
-    identity,
-    in,
-    inv,
-    isempty,
-    length,
-    ndims,
-    show,
-    showerror,
-    size,
-    transpose
+import ManifoldDiff:
+    adjoint_Jacobi_field,
+    adjoint_Jacobi_field!,
+    diagonalizing_projectors,
+    jacobi_field,
+    jacobi_field!,
+    riemannian_gradient,
+    riemannian_gradient!
 
 using Base.Iterators: repeated
 using Distributions
@@ -304,16 +312,6 @@ using ManifoldDiff:
     ProjectorOntoVector,
     RiemannianProjectionBackend,
     TangentDiffBackend
-
-import ManifoldDiff:
-    adjoint_Jacobi_field,
-    adjoint_Jacobi_field!,
-    diagonalizing_projectors,
-    jacobi_field,
-    jacobi_field!,
-    riemannian_gradient,
-    riemannian_gradient!
-
 using Markdown: @doc_str
 using MatrixEquations: lyapc, sylvc
 using Quaternions: Quaternions
@@ -400,6 +398,7 @@ include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
+include("manifolds/SymmetricPositiveDefiniteFixedDeterminant.jl")
 include("manifolds/SymmetricPositiveDefiniteBuresWasserstein.jl")
 include("manifolds/SymmetricPositiveDefiniteGeneralizedBuresWasserstein.jl")
 include("manifolds/SymmetricPositiveDefiniteAffineInvariant.jl")
@@ -592,6 +591,7 @@ export Euclidean,
     Stiefel,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
+    SymmetricPositiveDefiniteFixedDeterminant,
     SymmetricPositiveSemidefiniteFixedRank,
     Symplectic,
     SymplecticStiefel,

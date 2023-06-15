@@ -30,10 +30,9 @@ Additionally we store the tangent vectors as `X=p^{-1}Z`, i.e. symmetric matrice
 generates the manifold $\mathcal P_d(n) \subset \mathcal P(n)$ of determinant ``d``,
 which defaults to 1.
 """
-
 struct SymmetricPositiveDefiniteFixedDeterminant{N,D} <: AbstractDecoratorManifold{ℝ} end
 
-function SymmetricPositiveDefiniteFixedDeterminant(n::Int, d::F=1.0) where {F <: Real}
+function SymmetricPositiveDefiniteFixedDeterminant(n::Int, d::F=1.0) where {F<:Real}
     @assert d > 0 "The determinant has to be positive but was provided as $d."
     return SymmetricPositiveDefiniteFixedDeterminant{n,d}()
 end
@@ -46,7 +45,7 @@ end
     check_point(M::SymmetricPositiveDefiniteFixedDeterminant{n,d}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`SymmetricPositiveDefiniteFixedDeterminant`](@ref)`(n,d)` `M`, i.e.
-whether `p` is a [`SymmetricPositiceDefinite`](@ref) matrix (checked by traits) ofsize `(n,n)`
+whether `p` is a [`SymmetricPositiveDefinite`](@ref) matrix (checked by traits) ofsize `(n,n)`
 
 with determinant ``\det(p) = d``.
 
@@ -75,32 +74,82 @@ and its values have to be from the correct [`AbstractNumbers`](https://juliamani
 
 The tolerance for the symmetry of `X` can be set using `kwargs...`.
 """
-function check_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
-    if !isapprox(norm(X - X'), 0.0; kwargs...)
+function check_vector(
+    M::SymmetricPositiveDefiniteFixedDeterminant{n,d},
+    p,
+    X;
+    kwargs...,
+) where {n,d}
+    if !isapprox(tr(X), 0.0; kwargs...)
         return DomainError(
-            norm(X - X'),
-            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not symmetric.",
+            tr(X),
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since it does not have a zero trace.",
         )
     end
     return nothing
 end
 
-embed(::SymmetricPositiveDefiniteFixedDeterminant, p) = p
-embed(::SymmetricPositiveDefiniteFixedDeterminant, p, X) = X
-embed!(::SymmetricPositiveDefiniteFixedDeterminant, q, p) = copyto!(M, q, p)
-embed!(::SymmetricPositiveDefiniteFixedDeterminant, Y, p, X) = copyto!(M; y, p, X)
+embed(M::SymmetricPositiveDefiniteFixedDeterminant, p) = copy(M, p)
+embed(M::SymmetricPositiveDefiniteFixedDeterminant, p, X) = copy(M, X)
+embed!(M::SymmetricPositiveDefiniteFixedDeterminant, q, p) = copyto!(M, q, p)
+embed!(M::SymmetricPositiveDefiniteFixedDeterminant, Y, p, X) = copyto!(M; y, p, X)
 
 function get_embedding(::SymmetricPositiveDefiniteFixedDeterminant{n,d}) where {n,d}
     return SymmetricPositiveDefinite(n)
 end
 
+@doc raw"""
+    manifold_dimension(M::SymmetricPositiveDefiniteFixedDeterminant)
+
+Return the manifold dimension of the [`SymmetricPositiveDefiniteFixedDeterminant`](@ref) manifold `M`
+which is given by
+
+````math
+\dim \mathcal P_d(n) = \frac{n(n+1)}{2} - 1.
+````
+"""
+
+function manifold_dimension(M::SymmetricPositiveDefiniteFixedDeterminant)
+    return manifold_dimension(get_embedding(M)) - 1
+end
+
+@doc raw"""
+    q = project(M::SymmetricPositiveDefiniteFixedDeterminant{n,d}, p)
+    project!(M::SymmetricPositiveDefiniteFixedDeterminant{n,d}, q, p)
+
+Project the symmetric positive definite (s.p.d.) matrix `p` from the embedding onto the
+(sub-)manifold of s.p.d. matrices of determinant d (in place of q).
+
+The formula reads
+
+```math
+q = \Bigl(\frac{d}{\det(p)}\Bigr)^{\frac{1}{n}}p
+```
+"""
+project(M::SymmetricPositiveDefiniteFixedDeterminant, p)
+
 function project!(::SymmetricPositiveDefiniteFixedDeterminant{n,d}, q, p) where {n,d}
-    q .= (d / det(p))^1 / n .* p
+    q .= (d / det(p))^(1 / n) .* p
     return
 end
+
+@doc raw"""
+    Y = project(M::SymmetricPositiveDefiniteFixedDeterminant{n,d}, p, X)
+    project!(M::SymmetricPositiveDefiniteFixedDeterminant{n,d}, Y, p, X)
+
+Project the symmetric matrix `X` onto the tangent space at `p` of the
+(sub-)manifold of s.p.d. matrices of determinant d (in place of `Y`),
+by setting its diagonal (and hence its trace) to zero.
+
+"""
+project(M::SymmetricPositiveDefiniteFixedDeterminant, p, X)
 
 function project!(M::SymmetricPositiveDefiniteFixedDeterminant, Y, p, X)
     copyto!(M, Y, p, X)
     Y[diagind(Y)] .= 0.0
     return Y
+end
+
+function Base.show(io::IO, ::SymmetricPositiveDefiniteFixedDeterminant{n,d}) where {n,d}
+    return print(io, "SymmetricPositiveDefiniteFixedDeterminant($n, $d)")
 end
