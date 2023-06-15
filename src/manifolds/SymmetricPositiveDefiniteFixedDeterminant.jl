@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricPositiveDefiniteFixedRank{N,D} <: AbstractDecoratorManifold{ℝ}
+    SymmetricPositiveDefiniteFixedDeterminant{N,D} <: AbstractDecoratorManifold{ℝ}
 
 The manifold of symmetric positive definite matrices of fixed determinant ``d > 0``, i.e.
 
