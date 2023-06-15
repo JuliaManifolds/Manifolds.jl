@@ -488,6 +488,37 @@ function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
     return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
 
+@doc raw"""
+    manifold_volume(M::AbstractManifold)
+
+Volume of manifold `M` defined through integration of Riemannian volume element in a chart.
+Note that for many manifolds there is no universal agreement over the exact ranges over
+which the integration should happen. For details see [^BoyaSudarshanTilma2003].
+
+[^BoyaSudarshanTilma2003]:
+    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
+    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
+    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
+"""
+manifold_volume(::AbstractManifold)
+
+@doc raw"""
+    volume_density(M::AbstractManifold, p, X)
+
+Volume density function of manifold `M`, i.e. determinant of the differential of exponential map
+`exp(M, p, X)`. Determinant can be understood as computed in a basis, from the matrix
+of the linear operator said differential corresponds to. Details are available in Section 4.1
+of [^ChevallierLiLuDunson2022].
+
+Note that volume density is well-defined only for `X` for which `exp(M, p, X)` is injective.
+
+[^ChevallierLiLuDunson2022]:
+    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
+    > symmetric spaces.” arXiv, Oct. 09, 2022.
+    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
+"""
+volume_density(::AbstractManifold, p, X)
+
 # functions populated with methods by extensions
 
 function solve_chart_log_bvp end

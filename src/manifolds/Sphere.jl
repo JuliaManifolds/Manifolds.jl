@@ -538,18 +538,13 @@ end
     volume_density(M::AbstractSphere{ℝ}, p, X)
 
 Volume density function of a sphere, i.e. determinant of the differential of exponential map
-`exp(M, p, X)`. Determinant can be understood as computed in a basis, from the matrix
-of the linear operator said differential corresponds to. Details are available in Section 4.1
-of [^ChevallierLiLuDunson2022].
-
-The formula reads ``(sin(\lVert X\rVert)/\lVert X\rVert)^(n-1)`` where `n` is the dimension
-of `M`. It is derived from Eq. (4.1).
-
-Note that volume density is well-defined only for `X` for which `exp(M, p, X)` is injective.
+`exp(M, p, X)`. The formula reads ``(sin(\lVert X\rVert)/\lVert X\rVert)^(n-1)`` where `n`
+is the dimension of `M`. It is derived from Eq. (4.1) in [^ChevallierLiLuDunson2022].
 
 [^ChevallierLiLuDunson2022]:
     > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
-    > symmetric spaces.” arXiv, Oct. 09, 2022. doi: 10.48550/arXiv.2009.01983.
+    > symmetric spaces.” arXiv, Oct. 09, 2022.
+    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
 """
 function volume_density(M::AbstractSphere{ℝ}, p, X)
     Xnorm = norm(X)

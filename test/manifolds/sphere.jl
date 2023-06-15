@@ -268,10 +268,10 @@ using ManifoldsBase: TFVector
     @testset "Volume density" begin
         M = Sphere(2)
         p = [1.0, 0.0, 0.0]
-        @test manifold_volume(Sphere(0)) == 2
-        @test manifold_volume(Sphere(1)) == 2 * π
-        @test manifold_volume(Sphere(2)) == 4 * π
-        @test manifold_volume(Sphere(3)) == 2 * π * π
+        @test manifold_volume(Sphere(0)) ≈ 2
+        @test manifold_volume(Sphere(1)) ≈ 2 * π
+        @test manifold_volume(Sphere(2)) ≈ 4 * π
+        @test manifold_volume(Sphere(3)) ≈ 2 * π * π
         @test volume_density(M, p, [0.0, 0.5, 0.5]) ≈ 0.9187253698655684
     end
 end

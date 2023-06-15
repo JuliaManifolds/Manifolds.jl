@@ -344,6 +344,28 @@ function manifold_dimension(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
     return manifold_dimension(get_embedding(M)) - real_dimension(𝔽)
 end
 
+@doc raw"""
+    manifold_volume(M::AbstractProjectiveSpace{ℝ})
+
+Volume of the ``n``-dimensional [`AbstractProjectiveSpace`](@ref) `M`. The formula reads:
+
+````math
+\frac{\pi^{(n+1)/2}}{Γ((n+1)/2)},
+````
+
+where ``Γ`` denotes the [Gamma function](https://en.wikipedia.org/wiki/Gamma_function).
+For details see [^BoyaSudarshanTilma2003].
+
+[^BoyaSudarshanTilma2003]:
+    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
+    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
+    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
+"""
+function manifold_volume(M::AbstractProjectiveSpace{ℝ})
+    n = manifold_dimension(M) + 1
+    return pi^(n / 2) / gamma(n / 2)
+end
+
 """
     mean(
         M::AbstractProjectiveSpace,
