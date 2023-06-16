@@ -67,3 +67,10 @@ pts = rand(M, 1)
 kde = PelletierKDE(M, 0.2, pts)
 println(kde(rand(M)))
 ```
+
+## Documentation
+
+```@docs
+manifold_volume(::AbstractManifold)
+volume_density(::AbstractManifold, ::Any, ::Any)
+```

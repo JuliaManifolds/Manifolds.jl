@@ -258,6 +258,10 @@ function log_lie!(
     return project!(G, X, Identity(G), X)
 end
 
+function manifold_volume(M::GeneralUnitaryMultiplicationGroup)
+    return manifold_volume(M.manifold)
+end
+
 function Random.rand!(G::GeneralUnitaryMultiplicationGroup, pX; kwargs...)
     rand!(G.manifold, pX; kwargs...)
     return pX

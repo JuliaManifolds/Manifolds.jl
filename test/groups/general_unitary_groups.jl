@@ -23,12 +23,29 @@ include("group_utils.jl")
             @test isapprox(On, e, X2, X)
             @test log_lie(On, e) == zeros(n, n)
         end
+
+        @test manifold_volume(Orthogonal(1)) ≈ 2
+        @test manifold_volume(Orthogonal(2)) ≈ 4 * π
+        @test manifold_volume(Orthogonal(3)) ≈ 16 * π^2
+        @test manifold_volume(Orthogonal(4)) ≈ 2 * (2 * π)^4
+    end
+
+    @testset "Special Orthogonal Group" begin
+        @test manifold_volume(SpecialOrthogonal(1)) ≈ 1
+        @test manifold_volume(SpecialOrthogonal(2)) ≈ 2 * π
+        @test manifold_volume(SpecialOrthogonal(3)) ≈ 8 * π^2
+        @test manifold_volume(SpecialOrthogonal(4)) ≈ (2 * π)^4
     end
 
     @testset "Unitary Group" begin
         U2 = Unitary(2)
         @test repr(U2) == "Unitary(2)"
         @test injectivity_radius(U2) == π
+
+        @test manifold_volume(Unitary(1)) ≈ 2 * π
+        @test manifold_volume(Unitary(2)) ≈ 4 * π^3
+        @test manifold_volume(Unitary(3)) ≈ sqrt(3) * 2 * π^6
+        @test manifold_volume(Unitary(4)) ≈ sqrt(2) * 8 * π^10 / 12
 
         for n in [1, 2, 3]
             Un = Unitary(n)
@@ -115,6 +132,11 @@ include("group_utils.jl")
         ) # base point wrong
         e = Identity(MultiplicationOperation())
         @test_throws DomainError is_vector(SU2, e, Xe, true, true) # Xe not skew hermitian
+
+        @test manifold_volume(SpecialUnitary(1)) ≈ 1
+        @test manifold_volume(SpecialUnitary(2)) ≈ 2 * π^2
+        @test manifold_volume(SpecialUnitary(3)) ≈ sqrt(3) * π^5
+        @test manifold_volume(SpecialUnitary(4)) ≈ sqrt(2) * 4 * π^9 / 12
     end
 
     @testset "SO(4) and O(4) exp/log edge cases" begin
