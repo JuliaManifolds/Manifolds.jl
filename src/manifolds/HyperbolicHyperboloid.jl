@@ -226,7 +226,6 @@ d_{\mathcal H^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
 where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 """
-distance_old(::Hyperbolic, p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
 function distance(::Hyperbolic, p, q)
     w = p - q
     m = sqrt(max(0.0, minkowski_metric(w, w)))
@@ -247,11 +246,7 @@ function exp!(M::Hyperbolic, q, p, X, t::Number)
 end
 function exp!(M::Hyperbolic, q, p, X)
     vn = sqrt(max(inner(M, p, X, X), 0.0))
-    # vn < eps(eltype(p)) && return copyto!(q, p)
-    sn = sinh(vn) / vn
-    if isnan(sn) 
-        sn = 1.0
-    end
+    sn = vn == 0.0 ? 1.0 : sinh(vn) / vn
     q .= cosh(vn) .* p .+ sn .* X
     return q
 end
@@ -383,16 +378,9 @@ This employs the metric of the embedding, see [`Lorentz`](@ref) space.
 inner(M::Hyperbolic, p, X, Y)
 
 function log!(M::Hyperbolic, X, p, q)
-    scp = distance(M, p, q)#minkowski_metric(p, q)
-    # w = q + scp * p
-    # wn = sqrt(max(scp .^ 2 - 1, zero(scp)))
-    # wn < eps(eltype(p)) && return zero_vector!(M, X, p)
-    # X .= acosh(max(one(scp), -scp)) / wn .* w
-
-    w = scp / sinh(scp)
-    if isnan(w)
-        w = 1.0
-    end
+    d = distance(M, p, q)
+    s = sinh(d)
+    w = s == 0.0 ? 1.0 : d / s
     project!(M, X, p, w .* q)
     return X
 end
