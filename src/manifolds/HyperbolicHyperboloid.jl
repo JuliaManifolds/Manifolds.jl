@@ -227,7 +227,7 @@ where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on 
 the [`Lorentz`](@ref)ian manifold.
 """
 function distance(::Hyperbolic, p, q)
-    w = p - q
+    w = q - p
     m = sqrt(max(0.0, minkowski_metric(w, w)))
     return 2 * asinh(0.5 * m)
 end
