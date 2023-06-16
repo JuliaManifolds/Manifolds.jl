@@ -398,7 +398,7 @@ include("manifolds/Sphere.jl")
 include("manifolds/SphereSymmetricMatrices.jl")
 include("manifolds/Symmetric.jl")
 include("manifolds/SymmetricPositiveDefinite.jl")
-include("manifolds/SymmetricPositiveDefiniteFixedDeterminant.jl")
+include("manifolds/IsochoricMatrices.jl")
 include("manifolds/SymmetricPositiveDefiniteBuresWasserstein.jl")
 include("manifolds/SymmetricPositiveDefiniteGeneralizedBuresWasserstein.jl")
 include("manifolds/SymmetricPositiveDefiniteAffineInvariant.jl")
@@ -591,7 +591,7 @@ export Euclidean,
     Stiefel,
     SymmetricMatrices,
     SymmetricPositiveDefinite,
-    SymmetricPositiveDefiniteFixedDeterminant,
+    IsochoricMatrices,
     SymmetricPositiveSemidefiniteFixedRank,
     Symplectic,
     SymplecticStiefel,

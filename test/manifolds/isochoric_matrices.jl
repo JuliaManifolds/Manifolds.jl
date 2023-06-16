@@ -1,8 +1,8 @@
 include("../utils.jl")
 
-@testset "Symmetric Positive Definite Matrices fixed determinant" begin
-    M = SymmetricPositiveDefiniteFixedDeterminant(2, 1.0)
-    @test repr(M) == "SymmetricPositiveDefiniteFixedDeterminant(2, 1.0)"
+@testset "Isochoric matrices" begin
+    M = IsochoricMatrices(2, 1.0)
+    @test repr(M) == "IsochoricMatrices(2, 1.0)"
     p = [1.0 0.0; 0.0 1.0]
     @test is_point(M, p)
     # Determinant is 4
