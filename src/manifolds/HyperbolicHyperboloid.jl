@@ -226,7 +226,12 @@ d_{\mathcal H^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
 where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 """
-distance(::Hyperbolic, p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
+distance_old(::Hyperbolic, p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
+function distance(::Hyperbolic, p, q)
+    w = p - q
+    m = sqrt(max(0.0, minkowski_metric(w, w)))
+    return 2 * asinh(0.5 * m)
+end
 
 embed(M::Hyperbolic, p::HyperboloidPoint) = embed(M, p.value)
 embed!(M::Hyperbolic, q, p::HyperboloidPoint) = embed!(M, q, p.value)
@@ -242,8 +247,12 @@ function exp!(M::Hyperbolic, q, p, X, t::Number)
 end
 function exp!(M::Hyperbolic, q, p, X)
     vn = sqrt(max(inner(M, p, X, X), 0.0))
-    vn < eps(eltype(p)) && return copyto!(q, p)
-    q .= cosh(vn) .* p .+ (sinh(vn) / vn) .* X
+    # vn < eps(eltype(p)) && return copyto!(q, p)
+    sn = sinh(vn) / vn
+    if isnan(sn) 
+        sn = 1.0
+    end
+    q .= cosh(vn) .* p .+ sn .* X
     return q
 end
 
@@ -374,11 +383,17 @@ This employs the metric of the embedding, see [`Lorentz`](@ref) space.
 inner(M::Hyperbolic, p, X, Y)
 
 function log!(M::Hyperbolic, X, p, q)
-    scp = minkowski_metric(p, q)
-    w = q + scp * p
-    wn = sqrt(max(scp .^ 2 - 1, zero(scp)))
-    wn < eps(eltype(p)) && return zero_vector!(M, X, p)
-    X .= acosh(max(one(scp), -scp)) / wn .* w
+    scp = distance(M, p, q)#minkowski_metric(p, q)
+    # w = q + scp * p
+    # wn = sqrt(max(scp .^ 2 - 1, zero(scp)))
+    # wn < eps(eltype(p)) && return zero_vector!(M, X, p)
+    # X .= acosh(max(one(scp), -scp)) / wn .* w
+
+    w = scp / sinh(scp)
+    if isnan(w)
+        w = 1.0
+    end
+    project!(M, X, p, w .* q)
     return X
 end
 
