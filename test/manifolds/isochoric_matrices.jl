@@ -18,6 +18,15 @@ include("../utils.jl")
     @test project(M, 2.0 .* p) == p
     @test project(M, p, Y) == X
 
+    @test embed(M, p) == p
+    @test embed(M, p, X) == X
+    q = zero(p)
+    @test embed!(M, q, p) == p
+    @test p == q
+    Y = zero(X)
+    @test embed!(M, Y, p, X) == X
+    @test Y == X
+
     @test manifold_dimension(M) == 2
 
     q = exp(M, p, X)

@@ -90,7 +90,7 @@ end
 embed(M::IsochoricMatrices, p) = copy(M, p)
 embed(M::IsochoricMatrices, p, X) = copy(M, X)
 embed!(M::IsochoricMatrices, q, p) = copyto!(M, q, p)
-embed!(M::IsochoricMatrices, Y, p, X) = copyto!(M; y, p, X)
+embed!(M::IsochoricMatrices, Y, p, X) = copyto!(M, Y, p, X)
 
 function get_embedding(::IsochoricMatrices{n}) where {n}
     return SymmetricPositiveDefinite(n)
