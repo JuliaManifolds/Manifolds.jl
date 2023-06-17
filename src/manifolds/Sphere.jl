@@ -538,7 +538,7 @@ end
     volume_density(M::AbstractSphere{ℝ}, p, X)
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
-exponential map `exp(M, p, X)`. The formula reads ``(sin(\lVert X\rVert)/\lVert X\rVert)^(n-1)``
+exponential map `exp(M, p, X)`. The formula reads ``(\sin(\lVert X\rVert)/\lVert X\rVert)^(n-1)``
 where `n` is the dimension of `M`. It is derived from Eq. (4.1) in [^ChevallierLiLuDunson2022].
 
 [^ChevallierLiLuDunson2022]:
