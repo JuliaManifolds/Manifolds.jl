@@ -274,12 +274,14 @@ using ManifoldsBase:
     _euclidean_basis_vector,
     combine_allocation_promotion_functions,
     geodesic,
+    geodesic!,
     merge_traits,
     next_trait,
     number_system,
     real_dimension,
     rep_size_to_colons,
     shortest_geodesic,
+    shortest_geodesic!,
     size_to_tuple,
     trait
 using ManifoldDiff: ManifoldDiff
@@ -393,7 +395,6 @@ include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
-include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
 include("manifolds/SkewHermitian.jl")
@@ -416,6 +417,7 @@ include("manifolds/Symplectic.jl")
 include("manifolds/SymplecticStiefel.jl")
 include("manifolds/Tucker.jl")
 #
+include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/GeneralUnitaryMatrices.jl")
 include("manifolds/Unitary.jl")
 include("manifolds/Rotations.jl")
@@ -654,20 +656,21 @@ export AbstractCartanSchoutenConnection,
 export MetricManifold
 # Metric types
 export AbstractMetric,
-    RiemannianMetric,
-    LorentzMetric,
-    BuresWassersteinMetric,
-    EuclideanMetric,
-    GeneralizedBuresWassersteinMetric,
     AffineInvariantMetric,
+    BuresWassersteinMetric,
+    CanonicalMetric,
+    EuclideanMetric,
+    ExtendedSymplecticMetric,
+    FisherRaoMetric,
+    GeneralizedBuresWassersteinMetric,
     LogCholeskyMetric,
     LogEuclideanMetric,
+    LorentzMetric,
     MinkowskiMetric,
     PowerMetric,
     ProductMetric,
     RealSymplecticMetric,
-    ExtendedSymplecticMetric,
-    CanonicalMetric,
+    RiemannianMetric,
     StiefelSubmersionMetric
 export AbstractAtlas, RetractionAtlas
 # Vector transport types
@@ -761,6 +764,7 @@ export ×,
     flat!,
     gaussian_curvature,
     geodesic,
+    geodesic!,
     get_default_atlas,
     get_component,
     get_embedding,
@@ -824,6 +828,7 @@ export ×,
     project!,
     projected_distribution,
     rand,
+    rand!,
     real_dimension,
     ricci_curvature,
     ricci_tensor,
@@ -838,6 +843,7 @@ export ×,
     sharp,
     sharp!,
     shortest_geodesic,
+    shortest_geodesic!,
     skewness,
     std,
     sym_rem,
