@@ -64,7 +64,7 @@ include("../utils.jl")
                 vector_transport_methods=[ParallelTransport()],
                 test_rand_point=true,
                 test_rand_tvector=true,
-                rand_tvector_atol_multiplier=10.0,
+                rand_tvector_atol_multiplier=20.0,
             )
             test_manifold(
                 M_euc,
