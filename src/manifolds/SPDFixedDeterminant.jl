@@ -13,8 +13,8 @@ p ∈ ℝ^{n × n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\ba
 
 This manifold is modelled as a submanifold of [`SymmetricPositiveDefinite`](@ref)`(n)`.
 
-These matrices are sometimes also called [isochoric](https://en.wiktionary.org/wiki/isochoric) refers to the interpretation of
-the matrix representing an ellipsoid. All ellipsoids on this manifold have the same volume.
+These matrices are sometimes also called [isochoric](https://en.wiktionary.org/wiki/isochoric), which refers to the interpretation of
+the matrix representing an ellipsoid. All ellipsoids that represent points on this manifold have the same volume.
 
 The tangent space is modelled the same as for [`SymmetricPositiveDefinite`](@ref)`(n)`
 and consists of all symmetric matrices with zero trace
