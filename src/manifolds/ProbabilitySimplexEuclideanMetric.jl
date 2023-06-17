@@ -1,3 +1,14 @@
+exp!(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}, q, p, X) = (q .= p .+ X)
+function exp!(
+    ::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric},
+    q,
+    p,
+    X,
+    t::Number,
+)
+    return (q .= p .+ t .* X)
+end
+
 @doc raw"""
     rand(::ProbabilitySimplex; vector_at=nothing, σ::Real=1.0)
 

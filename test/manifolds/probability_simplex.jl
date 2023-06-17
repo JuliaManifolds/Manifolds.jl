@@ -2,6 +2,7 @@ include("../utils.jl")
 
 @testset "Probability simplex" begin
     M = ProbabilitySimplex(2)
+    M_euc = MetricManifold(M, EuclideanMetric())
 
     @test M^4 == MultinomialMatrices(3, 4)
     p = [0.1, 0.7, 0.2]
@@ -64,6 +65,21 @@ include("../utils.jl")
                 test_rand_point=true,
                 test_rand_tvector=true,
                 rand_tvector_atol_multiplier=10.0,
+            )
+            test_manifold(
+                M_euc,
+                pts,
+                test_exp_log=false,
+                test_injectivity_radius=false,
+                test_project_tangent=true,
+                test_musical_isomorphisms=true,
+                test_vee_hat=false,
+                is_tangent_atol_multiplier=40.0,
+                default_inverse_retraction_method=nothing,
+                test_inplace=false,
+                test_rand_point=true,
+                test_rand_tvector=true,
+                rand_tvector_atol_multiplier=40.0,
             )
         end
     end
