@@ -365,4 +365,9 @@ using Manifolds: induced_basis
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
         ) === 2.0
     end
+
+    @testset "Volume" begin
+        @test manifold_volume(Euclidean(2)) == Inf
+        @test volume_density(E, p, X) == 1.0
+    end
 end

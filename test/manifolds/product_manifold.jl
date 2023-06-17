@@ -755,4 +755,27 @@ using RecursiveArrayTools: ArrayPartition
         @test X2 ==
               ArrayPartition([0.3535533905932738, -0.35355339059327373, 0.0], [1.0, 1.5])
     end
+
+    @testset "Manifold volume" begin
+        MS2 = Sphere(2)
+        MS3 = Sphere(3)
+        PM = ProductManifold(MS2, MS3)
+        @test manifold_volume(PM) ≈ manifold_volume(MS2) * manifold_volume(MS3)
+        p1 = [-0.9171596991960276, 0.39792260844341604, -0.02181017790481868]
+        p2 = [
+            -0.5427653626654726,
+            5.420303965772687e-5,
+            -0.8302022885580579,
+            -0.12716099333369416,
+        ]
+        X1 = [-0.35333565579879633, -0.7896159441709865, 0.45204526334685574]
+        X2 = [
+            -0.33940201562492356,
+            0.8092470417550779,
+            0.18290591742514573,
+            0.2548785571950708,
+        ]
+        @test volume_density(PM, ArrayPartition(p1, p2), ArrayPartition(X1, X2)) ≈
+              volume_density(MS2, p1, X1) * volume_density(MS3, p2, X2)
+    end
 end

@@ -28,6 +28,7 @@ include("group_utils.jl")
         @test manifold_volume(Orthogonal(2)) ≈ 4 * π
         @test manifold_volume(Orthogonal(3)) ≈ 16 * π^2
         @test manifold_volume(Orthogonal(4)) ≈ 2 * (2 * π)^4
+        @test manifold_volume(Orthogonal(5)) ≈ 8 * (2 * π)^6 / 6
     end
 
     @testset "Special Orthogonal Group" begin
@@ -35,6 +36,7 @@ include("group_utils.jl")
         @test manifold_volume(SpecialOrthogonal(2)) ≈ 2 * π
         @test manifold_volume(SpecialOrthogonal(3)) ≈ 8 * π^2
         @test manifold_volume(SpecialOrthogonal(4)) ≈ (2 * π)^4
+        @test manifold_volume(SpecialOrthogonal(5)) ≈ 4 * (2 * π)^6 / 6
     end
 
     @testset "Unitary Group" begin

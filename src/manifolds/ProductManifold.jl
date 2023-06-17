@@ -967,6 +967,14 @@ manifold dimensions the product is made of.
 """
 manifold_dimension(M::ProductManifold) = mapreduce(manifold_dimension, +, M.manifolds)
 
+"""
+    manifold_dimension(M::ProductManifold)
+
+Return the volume of [`ProductManifold`](@ref) `M`, i.e. product of volumes of the
+manifolds `M` is constructed from.
+"""
+manifold_volume(M::ProductManifold) = mapreduce(manifold_volume, *, M.manifolds)
+
 function mid_point!(M::ProductManifold, q, p1, p2)
     map(
         mid_point!,
@@ -1637,6 +1645,22 @@ function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ParallelTranspo
         submanifold_components(M, q),
     ),
     return Y
+end
+
+@doc raw"""
+    volume_density(M::ProductManifold, p, X)
+
+Return volume density on the [`ProductManifold`](@ref) `M`, i.e. product of constituent
+volume densities.
+"""
+function volume_density(M::ProductManifold, p, X)
+    dens = map(
+        volume_density,
+        M.manifolds,
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return prod(dens)
 end
 
 function zero_vector!(M::ProductManifold, X, p)
