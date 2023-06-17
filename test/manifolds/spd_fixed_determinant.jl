@@ -1,8 +1,8 @@
 include("../utils.jl")
 
 @testset "Isochoric matrices" begin
-    M = IsochoricMatrices(2, 1.0)
-    @test repr(M) == "IsochoricMatrices(2, 1.0)"
+    M = SPDFixedDeterminant(2, 1.0)
+    @test repr(M) == "SPDFixedDeterminant(2, 1.0)"
     p = [1.0 0.0; 0.0 1.0]
     @test is_point(M, p)
     # Determinant is 4

@@ -1,5 +1,5 @@
 @doc raw"""
-    IsochoricMatrices{N,D} <: AbstractDecoratorManifold{ℝ}
+    SPDFixedDeterminant{N,D} <: AbstractDecoratorManifold{ℝ}
 
 The manifold of symmetric positive definite matrices of fixed determinant ``d > 0``, i.e.
 
@@ -13,7 +13,7 @@ p ∈ ℝ^{n × n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\ba
 
 This manifold is modelled as a submanifold of [`SymmetricPositiveDefinite`](@ref)`(n)`.
 
-Here [isochoric](https://en.wiktionary.org/wiki/isochoric) refers to the interpretation of
+These matrices are sometimes also called [isochoric](https://en.wiktionary.org/wiki/isochoric) refers to the interpretation of
 the matrix representing an ellipsoid. All ellipsoids on this manifold have the same volume.
 
 The tangent space is modelled the same as for [`SymmetricPositiveDefinite`](@ref)`(n)`
@@ -29,35 +29,35 @@ Additionally we store the tangent vectors as `X=p^{-1}Z`, i.e. symmetric matrice
 
 # Constructor
 
-    IsochoricMatrices(n::Int, d::Real=1.0)
+    SPDFixedDeterminant(n::Int, d::Real=1.0)
 
 generates the manifold $\mathcal P_d(n) \subset \mathcal P(n)$ of determinant ``d``,
 which defaults to 1.
 """
-struct IsochoricMatrices{N,TD<:Real} <: AbstractDecoratorManifold{ℝ}
+struct SPDFixedDeterminant{N,TD<:Real} <: AbstractDecoratorManifold{ℝ}
     d::TD
 end
 
-function IsochoricMatrices(n::Int, d::F=1.0) where {F<:Real}
+function SPDFixedDeterminant(n::Int, d::F=1.0) where {F<:Real}
     @assert d > 0 "The determinant has to be positive but was provided as $d."
-    return IsochoricMatrices{n,F}(d)
+    return SPDFixedDeterminant{n,F}(d)
 end
 
-function active_traits(f, ::IsochoricMatrices, args...)
+function active_traits(f, ::SPDFixedDeterminant, args...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 
 @doc raw"""
-    check_point(M::IsochoricMatrices{n}, p; kwargs...)
+    check_point(M::SPDFixedDeterminant{n}, p; kwargs...)
 
-Check whether `p` is a valid manifold point on the [`IsochoricMatrices`](@ref)`(n,d)` `M`, i.e.
+Check whether `p` is a valid manifold point on the [`SPDFixedDeterminant`](@ref)`(n,d)` `M`, i.e.
 whether `p` is a [`SymmetricPositiveDefinite`](@ref) matrix of size `(n, n)`
 
 with determinant ``\det(p) = ```M.d`.
 
 The tolerance for the determinant of `p` can be set using `kwargs...`.
 """
-function check_point(M::IsochoricMatrices{n}, p; kwargs...) where {n}
+function check_point(M::SPDFixedDeterminant{n}, p; kwargs...) where {n}
     if det(p) ≉ M.d
         return DomainError(
             det(p),
@@ -68,16 +68,16 @@ function check_point(M::IsochoricMatrices{n}, p; kwargs...) where {n}
 end
 
 @doc raw"""
-    check_vector(M::IsochoricMatrices{n}, p, X; kwargs... )
+    check_vector(M::SPDFixedDeterminant, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`IsochoricMatrices`](@ref) `M`,
+[`SPDFixedDeterminant`](@ref) `M`,
 i.e. `X` has to be a tangent vector on [`SymmetricPositiveDefinite`](@ref), so a symmetric matrix,
 and additionally fulfill ``\operatorname{tr}(X) = 0``.
 
 The tolerance for the trace check of `X` can be set using `kwargs...`, which influences the `isapprox`-check.
 """
-function check_vector(M::IsochoricMatrices, p, X; kwargs...)
+function check_vector(M::SPDFixedDeterminant, p, X; kwargs...)
     if !isapprox(tr(X), 0.0; kwargs...)
         return DomainError(
             tr(X),
@@ -87,19 +87,19 @@ function check_vector(M::IsochoricMatrices, p, X; kwargs...)
     return nothing
 end
 
-embed(M::IsochoricMatrices, p) = copy(M, p)
-embed(M::IsochoricMatrices, p, X) = copy(M, X)
-embed!(M::IsochoricMatrices, q, p) = copyto!(M, q, p)
-embed!(M::IsochoricMatrices, Y, p, X) = copyto!(M, Y, p, X)
+embed(M::SPDFixedDeterminant, p) = copy(M, p)
+embed(M::SPDFixedDeterminant, p, X) = copy(M, X)
+embed!(M::SPDFixedDeterminant, q, p) = copyto!(M, q, p)
+embed!(M::SPDFixedDeterminant, Y, p, X) = copyto!(M, Y, p, X)
 
-function get_embedding(::IsochoricMatrices{n}) where {n}
+function get_embedding(::SPDFixedDeterminant{n}) where {n}
     return SymmetricPositiveDefinite(n)
 end
 
 @doc raw"""
-    manifold_dimension(M::IsochoricMatrices)
+    manifold_dimension(M::SPDFixedDeterminant)
 
-Return the manifold dimension of the [`IsochoricMatrices`](@ref) manifold `M`
+Return the manifold dimension of the [`SPDFixedDeterminant`](@ref) manifold `M`
 which is given by
 
 ````math
@@ -107,13 +107,13 @@ which is given by
 ````
 """
 
-function manifold_dimension(M::IsochoricMatrices)
+function manifold_dimension(M::SPDFixedDeterminant)
     return manifold_dimension(get_embedding(M)) - 1
 end
 
 @doc raw"""
-    q = project(M::IsochoricMatrices{n}, p)
-    project!(M::IsochoricMatrices{n}, q, p)
+    q = project(M::SPDFixedDeterminant{n}, p)
+    project!(M::SPDFixedDeterminant{n}, q, p)
 
 Project the symmetric positive definite (s.p.d.) matrix `p` from the embedding onto the
 (sub-)manifold of s.p.d. matrices of determinant `M.d` (in place of `q`).
@@ -124,30 +124,30 @@ The formula reads
 q = \Bigl(\frac{d}{\det(p)}\Bigr)^{\frac{1}{n}}p
 ```
 """
-project(M::IsochoricMatrices, p)
+project(M::SPDFixedDeterminant, p)
 
-function project!(M::IsochoricMatrices{n}, q, p) where {n}
+function project!(M::SPDFixedDeterminant{n}, q, p) where {n}
     q .= (M.d / det(p))^(1 / n) .* p
     return
 end
 
 @doc raw"""
-    Y = project(M::IsochoricMatrices{n}, p, X)
-    project!(M::IsochoricMatrices{n}, Y, p, X)
+    Y = project(M::SPDFixedDeterminant{n}, p, X)
+    project!(M::SPDFixedDeterminant{n}, Y, p, X)
 
 Project the symmetric matrix `X` onto the tangent space at `p` of the
 (sub-)manifold of s.p.d. matrices of determinant `M.d` (in place of `Y`),
 by setting its diagonal (and hence its trace) to zero.
 
 """
-project(M::IsochoricMatrices, p, X)
+project(M::SPDFixedDeterminant, p, X)
 
-function project!(M::IsochoricMatrices, Y, p, X)
+function project!(M::SPDFixedDeterminant, Y, p, X)
     copyto!(M, Y, p, X)
     fill!(view(Y, diagind(Y)), 0)
     return Y
 end
 
-function Base.show(io::IO, M::IsochoricMatrices{n}) where {n}
-    return print(io, "IsochoricMatrices($n, $(M.d))")
+function Base.show(io::IO, M::SPDFixedDeterminant{n}) where {n}
+    return print(io, "SPDFixedDeterminant($n, $(M.d))")
 end
