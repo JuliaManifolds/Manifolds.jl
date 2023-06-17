@@ -388,6 +388,7 @@ function Random.rand!(
     else
         Random.randn!(rng, pX)
         pX .= (pX .- mean(pX)) .* σ
+        change_metric!(M, pX, EuclideanMetric(), vector_at, pX)
     end
     return pX
 end

@@ -2,7 +2,6 @@ include("../utils.jl")
 
 @testset "Probability simplex" begin
     M = ProbabilitySimplex(2)
-    M_euc = MetricManifold(ProbabilitySimplex(2), EuclideanMetric())
 
     @test M^4 == MultinomialMatrices(3, 4)
     p = [0.1, 0.7, 0.2]
