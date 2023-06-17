@@ -10,7 +10,7 @@ function exp!(
 end
 
 @doc raw"""
-    rand(::ProbabilitySimplex; vector_at=nothing, σ::Real=1.0)
+    rand(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}; vector_at=nothing, σ::Real=1.0)
 
 
 When `vector_at` is `nothing`, return a random (uniform) point `x` on the [`ProbabilitySimplex`](@ref) with the Euclidean metric
