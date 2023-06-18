@@ -23,6 +23,8 @@ else
     close(file)
 end
 
+#
+# (classical / vector) Sphere
 ps = [[1.0, 0.0, 0.0], 1 / sqrt(2) .* [1.0, 1.0, 0.0], 1 / sqrt(2) .* [1.0, 0.0, 1.0]]
 
 Xs = [1 / sqrt(2) .* [0.0, 1.0, 1.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]]
@@ -31,6 +33,24 @@ test_manifold(
     M;
     points=ps,
     tangent_vectors=Xs,
+    features=features,
+    expectations=expectations,
+)
+
+#
+# ArraySphere
+M2 = ArraySphere(2, 2)
+p2s = [[1.0 0.0; 0.0 0.0], [1/sqrt(2) 0.0; 0.0 1/sqrt(2)], [0.0 1/sqrt(2); 1/sqrt(2) 0.0]]
+X2s = [1 / sqrt(2) .* [0.0 0.0; 1.0 1.0], [0.0 0.0; 1.0 0.0], [1.0 0.0; 0.0 0.0]]
+expectations = Manifolds.ManifoldExpectations(
+    values=Dict(:manifold_dimension => 3, :repr_manifold => "ArraySphere(2, 2; field = ℝ)"),
+    tolerances=Dict(:exp_atol => 1e-9),
+)
+
+test_manifold(
+    M2;
+    points=p2s,
+    tangent_vectors=X2s,
     features=features,
     expectations=expectations,
 )

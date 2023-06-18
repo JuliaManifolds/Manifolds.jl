@@ -18,14 +18,11 @@ function test_manifold(
     length(tangent_vectors) == length(points) || error(
         "$(length(tangent_vectors)) has to be the same as number of points $(length(points)).",
     )
-    Test.@testset "Testing the Manifold $M" begin
-        if has_feature_expectations(features, expectations, :manifold_dimension)
-            d = expectations.values[:manifold_dimension]
-            Test.@testset "Manifold dimension" begin
-                Test.@test manifold_dimension(M) ≥ 0
-                Test.@test manifold_dimension(M) == d
-            end
-        end
+    Test.@testset "$(rpad("Testing the Manifold $M",60," "))" begin
+        #
+        # Manifold functions in alphabetical order – check ManifoldsBase for the mainlist
+        #
+        # exp – the exponential map
         if has_feature_expectations(features, expectations, :exp)
             in_place = get(features.properties, :inplace, true)
             atol = get(expectations.tolerances, :exp_atol, 0)
@@ -38,6 +35,14 @@ function test_manifold(
                 atol=atol,
                 rtol=get(expectations.tolerances, :exp_rtol, atol > 0 ? 0 : eps),
             )
+        end
+        # manifold_dimension – the dimension on the manifold
+        if has_feature_expectations(features, expectations, :manifold_dimension)
+            d = expectations.values[:manifold_dimension]
+            Test.@testset "Manifold dimension" begin
+                Test.@test manifold_dimension(M) ≥ 0
+                Test.@test manifold_dimension(M) == d
+            end
         end
     end
     #

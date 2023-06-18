@@ -100,7 +100,6 @@ function test_exp(
     rtol=atol > 0 ? 0 : sqrt(eps),
     kwargs...,
 ) where {N,T,P}
-    epsFp = find_eps(first(p))
     if minimal # Minimal: just check the very fist one
         pL = (p[1],)
         XL = (X[1],)
