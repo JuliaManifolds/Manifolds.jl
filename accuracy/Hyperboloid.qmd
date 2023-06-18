@@ -33,7 +33,7 @@ We choose a “base point”, a direction and create tangent vectors and correcp
 ```{julia}
 #| output: false
 M = Hyperbolic(2)
-p = [0.0, 0.0, 0.1]
+p = [0.0, 0.0, 1.0]
 pb = BigFloat.(p)
 X = [1 / sqrt(2), 1 / sqrt(2), 0.0]
 Xb = BigFloat.(X)
