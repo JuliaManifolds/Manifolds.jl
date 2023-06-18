@@ -229,7 +229,7 @@ the [`Lorentz`](@ref)ian manifold.
 function distance(::Hyperbolic, p, q)
     w = q - p
     m = sqrt(max(0.0, minkowski_metric(w, w)))
-    return 2 * asinh(0.5 * m)
+    return 2 * asinh(m / 2)
 end
 
 embed(M::Hyperbolic, p::HyperboloidPoint) = embed(M, p.value)
@@ -246,7 +246,7 @@ function exp!(M::Hyperbolic, q, p, X, t::Number)
 end
 function exp!(M::Hyperbolic, q, p, X)
     vn = sqrt(max(inner(M, p, X, X), 0.0))
-    sn = vn == 0.0 ? 1.0 : sinh(vn) / vn
+    sn = vn == 0 ? one(vn) : sinh(vn) / vn
     q .= cosh(vn) .* p .+ sn .* X
     return q
 end
@@ -380,7 +380,7 @@ inner(M::Hyperbolic, p, X, Y)
 function log!(M::Hyperbolic, X, p, q)
     d = distance(M, p, q)
     s = sinh(d)
-    w = s == 0.0 ? 1.0 : d / s
+    w = s == 0 ? one(s) : d / s
     project!(M, X, p, w .* q)
     return X
 end
