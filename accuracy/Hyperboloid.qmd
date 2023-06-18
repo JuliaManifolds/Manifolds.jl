@@ -1,6 +1,5 @@
 ---
 title: Accurcay tests on the Hyperboloid
-format: html
 ---
 
 
@@ -38,8 +37,9 @@ p = [0.0, 0.0, 0.1]
 pb = BigFloat.(p)
 X = [1 / sqrt(2), 1 / sqrt(2), 0.0]
 Xb = BigFloat.(X)
-lengths = [10.0^k for k in -16:1]
+lengths = [10.0^k for k in -16:4]
 Xbs = [s*Xb for s in lengths]
+Xbns = [norm(M, p, X) for X in Xbs]
 qbs = [exp(M, pb, Y) for Y in Xbs]
 Xs = [Float64.(X) for X in Xbs]
 qs = [Float64.(q) for q in qbs]
@@ -62,26 +62,25 @@ end
 and compare
 
 ```{julia}
-d_comp = [distance(M, pb, q) for q in qbs]
 d_1 = [distance_1(p, q) for q in qs]
 d_2 = [distance_2(p, q) for q in qs]
 fig = plot(;
-    legend=:topright,
+    legend=:topleft,
     xlabel=raw"lengths $s$ (log. scale)",
     ylabel=raw"Error to BigFloat (log. scale)",
     yaxis=:log,
     xaxis=:log,
     ylims=(1e-16, 1e2),
-    xlims=(1e-17, 10^1),
+    xlims=(1e-17, 10^3),
 )
-plot!(fig, lengths, abs.(d_comp .- d_1), color=indigo, label="1 - acosh-based")
-plot!(fig, lengths, abs.(d_comp .- d_2), color=teal, label="2 - sinh-based")
+plot!(fig, lengths, abs.(Xbns .- d_1), color=indigo, label="1 - acosh-based")
+plot!(fig, lengths, abs.(Xbns .- d_2), color=teal, label="2 - asinh-based")
 ```
 
 ```{julia}
-abs.(d_comp .- d_1)
+abs.(Xbns .- d_1)
 ```
 
 ```{julia}
-abs.(d_comp .- d_2)
+abs.(Xbns .- d_2)
 ```
