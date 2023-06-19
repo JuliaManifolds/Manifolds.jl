@@ -426,7 +426,9 @@ function Random.rand!(
     return pX
 end
 
-function parallel_transport_to!(M::Hyperbolic, Y, p, X, q)
-    Y .= X .+ minkowski_metric(q, X) ./ (1 - minkowski_metric(p, q)) .* (p + q)
-    return Y
+function parallel_transport_to!(::Hyperbolic, Y, p, X, q)
+    return copyto!(
+        Y,
+        X .+ minkowski_metric(q, X) ./ (1 - minkowski_metric(p, q)) .* (p + q),
+    )
 end
