@@ -899,3 +899,37 @@ function riemann_tensor!(::GeneralUnitaryMatrices, Xresult, p, X, Y, Z)
     Xresult .= 1 // 4 .* (Z * Xtmp .- Xtmp * Z)
     return Xresult
 end
+
+@doc raw"""
+    volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
+
+Compute volume density function of a sphere, i.e. determinant of the differential of
+exponential map `exp(M, p, X)`. It is derived from Eq. (4.1) and Corollary 4.4
+in [^ChevallierLiLuDunson2022].
+
+[^ChevallierLiLuDunson2022]:
+    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
+    > symmetric spaces.” arXiv, Oct. 09, 2022.
+    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
+"""
+function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
+    dens = one(complex(eltype(X)))
+    B = get_basis(M, p, DefaultOrthonormalBasis())
+    Ys = get_vectors(M, p, B)
+    Z = similar(X)
+    op_coeffs = similar(X, manifold_dimension(M), manifold_dimension(M))
+    for k in 1:manifold_dimension(M)
+        Y = Ys[k]
+        Z .= X * Y .- Y * X
+        get_coordinates!(M, view(op_coeffs, :, k), p, Z, DefaultOrthonormalBasis())
+    end
+    for ev in eigvals(op_coeffs)
+        if abs(ev) > eps(eltype(X))
+            cm = (1 - exp(ev)) / ev
+            dens *= real(cm)
+        end
+    end
+    @assert abs(imag(dens)) < eps(eltype(X))
+
+    return real(dens)
+end

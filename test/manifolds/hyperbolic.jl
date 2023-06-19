@@ -345,5 +345,6 @@ include("../utils.jl")
         p = [1.0, 1.0, sqrt(3)]
         X = [1.0, 2.0, sqrt(3)]
         @test volume_density(M, p, X) ≈ 2.980406103535168
+        @test volume_density(M, p, [0.0, 0.0, 0.0]) ≈ 1.0
     end
 end

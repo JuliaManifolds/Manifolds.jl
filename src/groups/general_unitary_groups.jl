@@ -277,3 +277,7 @@ end
 function translate_diff!(G::GeneralUnitaryMultiplicationGroup, Y, p, q, X, ::RightAction)
     return copyto!(G, Y, p, inv(G, p) * X * p)
 end
+
+function volume_density(M::GeneralUnitaryMultiplicationGroup, p, X)
+    return volume_density(M.manifold, p, X)
+end
