@@ -318,6 +318,16 @@ function ManifoldExpectations(;
     return ManifoldExpectations{V}(values, tolerances)
 end
 
+@doc raw"""
+    set_expectation!(expectation::ManifoldExpectation, key::Symbol, value)
+
+Set an expectation of the `key` to `value`.
+"""
+function set_expectation(expectation::ManifoldExpectations, key::Symbol, value)
+    expectation.values[key] = value
+    return expectation
+end
+
 @doc """
     has_feature_expectations(F::ManifoldFeatures, E::ManifoldExpectations, s::symbol)
 

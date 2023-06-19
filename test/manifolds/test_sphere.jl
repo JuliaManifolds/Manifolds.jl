@@ -1,4 +1,5 @@
 using Manifolds, Test, JLD2
+using ManifoldsBase: ManifoldDomainError
 using Manifolds: test_manifold, has_feature_expectations
 # Generate or load Test Scenario – can be set here or globally by env
 generate_test = false;
@@ -26,8 +27,9 @@ end
 #
 # (classical / vector) Sphere
 ps = [[1.0, 0.0, 0.0], 1 / sqrt(2) .* [1.0, 1.0, 0.0], 1 / sqrt(2) .* [1.0, 0.0, 1.0]]
-
+nps = [[2.0, 0.0, 0.0], [1.0, 0.0, 0.0, 0.0]]
 Xs = [1 / sqrt(2) .* [0.0, 1.0, 1.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]]
+nXs = [[1.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0]]
 
 test_manifold(
     M;
@@ -35,6 +37,9 @@ test_manifold(
     tangent_vectors=Xs,
     features=features,
     expectations=expectations,
+    non_points=nps,
+    non_tangent_vectors=nXs,
+    tangent_vector_errors=[DomainError, ManifoldDomainError],
 )
 
 #
@@ -42,6 +47,8 @@ test_manifold(
 M2 = ArraySphere(2, 2)
 p2s = [[1.0 0.0; 0.0 0.0], [1/sqrt(2) 0.0; 0.0 1/sqrt(2)], [0.0 1/sqrt(2); 1/sqrt(2) 0.0]]
 X2s = [1 / sqrt(2) .* [0.0 0.0; 1.0 1.0], [0.0 0.0; 1.0 0.0], [1.0 0.0; 0.0 0.0]]
+np2s = [[1.0, 0.0, 0.0, 0.0], [2.0 0.0; 0.0 0.0]]
+nX2s = [[2.0 0.0; 0.0 0.0], [0.0, 1.0, 0.0, 0.0]]
 expectations = Manifolds.ManifoldExpectations(
     values=Dict(:manifold_dimension => 3, :repr_manifold => "ArraySphere(2, 2; field = ℝ)"),
     tolerances=Dict(:exp_atol => 1e-9),
@@ -52,5 +59,8 @@ test_manifold(
     points=p2s,
     tangent_vectors=X2s,
     features=features,
-    expectations=expectations,
+    expectations=expectations;
+    non_points=np2s,
+    non_tangent_vectors=nX2s,
+    tangent_vector_errors=[DomainError, ManifoldDomainError],
 )

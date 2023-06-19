@@ -13,6 +13,14 @@ function test_manifold(
     tangent_vectors=[rand(M; vector_at=p) for p in points],
     features=ManifoldFeatures(M),
     expectations=ManifoldExpectations(),
+    non_points=[],
+    point_error=DomainError,
+    point_errors=fill(point_error, length(non_points)),
+    non_tangent_vectors=[],
+    # Errors should be in expectations as well
+    tangent_vector_error=DomainError,
+    tangent_vector_errors=fill(tangent_vector_error, length(non_tangent_vectors)),
+    tangent_vector_point_errors=fill(ManifoldDomainError, length(non_points)),
 )
     length(points) ≥ 3 || error("$(length(points)) are not enough points, 3 required")
     length(tangent_vectors) == length(points) || error(
@@ -34,6 +42,31 @@ function test_manifold(
                 in_place_self=get(features.properties, :inplaceself, in_place),
                 atol=atol,
                 rtol=get(expectations.tolerances, :exp_rtol, atol > 0 ? 0 : eps),
+            )
+        end
+        # is_point - verify points on a manifold
+        if has_feature_expectations(features, expectations, :is_point)
+            atol = get(expectations.tolerances, :is_point_atol, 0)
+            test_is_point(
+                M,
+                Tuple(points),
+                Tuple(non_points);
+                errors=point_errors,
+                atol=atol,
+            )
+        end
+        # is_vector – verify tangent vectors
+        if has_feature_expectations(features, expectations, :is_point)
+            atol = get(expectations.tolerances, :is_vector_atol, 0)
+            test_is_vector(
+                M,
+                Tuple(points),
+                Tuple(tangent_vectors),
+                Tuple(non_tangent_vectors),
+                Tuple(non_points);
+                atol=atol,
+                errors=tangent_vector_errors,
+                point_errors=tangent_vector_point_errors,
             )
         end
         # manifold_dimension – the dimension on the manifold

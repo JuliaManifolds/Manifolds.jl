@@ -1,70 +1,7 @@
-"""
-    test_explog(M, p; kwargs...)
-    test_explog(M, p, X; kwargs...)
+#
+# Test suite for exponential map
+#
 
-Test suite for exponential and logarithmic map, where
-
-* `M` is an `AbstractManifold`
-* `p` is a point or a `Tuple` of points
-* `X` is either provided or computed (using `log`)
-
-## Keyword Arguments
-* `minimal` (`false`) – whether to perform a minimal test (only the first elements of `p` and `X`) or not
-* `in_place`(`true`) — whether to test the in-place function as well
-* `atol_multiplier = 0`: change absolute tolerance in comparisons
-    (0 use default, i.e. deactivate atol and use rtol).
-* `rtol_multiplier = 1`: change the relative tolerance of exp/log tests
-    (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
-
-All further keyword arguments are passed down to both `is_point` and `is_vector` calls.
-"""
-function test_explog(M, p::NTuple{N,P}; minimal=false, kwargs...) where {N,P}
-    (pL, X) = generate_tangent_vectors(M, p; minimal=minimal)
-    return test_explog(M, pL, X; minimal=minimal, kwargs...)
-end
-function test_explog(
-    M,
-    p::NTuple{N,P},
-    X::NTuple{N,T};
-    minimal=false,
-    in_place=true,
-    in_place_self=false,
-    atol_multiplier=0,
-    rtol_multiplier=1,
-    kwargs...,
-) where {N,T,P}
-    epsFp = find_eps(first(p))
-    atp = atol_multiplier * epsFp
-    rtp = atol_multiplier == 0.0 ? sqrt(epsFp) * rtol_multiplier : 0
-    pL = minimal ? (p[1],) : p
-    XL = minimal ? (X[1],) : X
-    kw = (
-        minimal=minimal,
-        in_place=in_place,
-        atol_multiplier=atol_multiplier,
-        rtol_multiplier=rtol_multiplier,
-        kwargs...,
-    )
-    test_exp(M, pL, XL; in_place_self=in_place_self, kw...)
-    test_log(M, pL, XL; kw...)
-    if in_place
-        ri = allocate(M, first(pL))
-        Zi = zero_vector(M, first(pL))
-    end
-    Test.@testset "Testing exp/log on $M" begin
-        for (pi, Xi) in zip(pL, XL)
-            qi = exp(M, pi, Xi)
-            Yi = log(M, pi, qi)
-            Test.@test isapprox(M, pi, Xi, Yi; atol=atp, rtol=rtp)
-            if in_place
-                exp!(M, ri, pi, Xi)
-                Test.@test isapprox(M, ri, qi; atol=atp, rtol=rtp)
-                log!(M, Zi, pi, qi)
-                Test.@test isapprox(M, pi, Zi, Yi; atol=atp, rtol=rtp)
-            end
-        end
-    end
-end
 """
     test_exp(M, p; kwargs...)
 
@@ -137,6 +74,173 @@ function test_log(M, p::NTuple{N,P}; minimal=false, kwargs...) where {N,P}
     (pL, X) = generate_tangent_vectors(M, p; minimal=minimal)
     return test_log(M, pL, X; minimal=minimal, kwargs...)
 end
+
+#
+# Test suite for exp _and_ log, that they are inverses of each other
+#
+
+"""
+    test_explog(M, p; kwargs...)
+    test_explog(M, p, X; kwargs...)
+
+Test suite for exponential and logarithmic map, where
+
+* `M` is an `AbstractManifold`
+* `p` is a point or a `Tuple` of points
+* `X` is either provided or computed (using `log`)
+
+## Keyword Arguments
+* `minimal` (`false`) – whether to perform a minimal test (only the first elements of `p` and `X`) or not
+* `in_place`(`true`) — whether to test the in-place function as well
+* `atol_multiplier = 0`: change absolute tolerance in comparisons
+    (0 use default, i.e. deactivate atol and use rtol).
+* `rtol_multiplier = 1`: change the relative tolerance of exp/log tests
+    (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
+
+All further keyword arguments are passed down to both `is_point` and `is_vector` calls.
+"""
+function test_explog(M, p::NTuple{N,P}; minimal=false, kwargs...) where {N,P}
+    (pL, X) = generate_tangent_vectors(M, p; minimal=minimal)
+    return test_explog(M, pL, X; minimal=minimal, kwargs...)
+end
+function test_explog(
+    M,
+    p::NTuple{N,P},
+    X::NTuple{N,T};
+    minimal=false,
+    in_place=true,
+    in_place_self=false,
+    atol_multiplier=0,
+    rtol_multiplier=1,
+    kwargs...,
+) where {N,T,P}
+    epsFp = find_eps(first(p))
+    atp = atol_multiplier * epsFp
+    rtp = atol_multiplier == 0.0 ? sqrt(epsFp) * rtol_multiplier : 0
+    pL = minimal ? (p[1],) : p
+    XL = minimal ? (X[1],) : X
+    kw = (
+        minimal=minimal,
+        in_place=in_place,
+        atol_multiplier=atol_multiplier,
+        rtol_multiplier=rtol_multiplier,
+        kwargs...,
+    )
+    test_exp(M, pL, XL; in_place_self=in_place_self, kw...)
+    test_log(M, pL, XL; kw...)
+    if in_place
+        ri = allocate(M, first(pL))
+        Zi = zero_vector(M, first(pL))
+    end
+    Test.@testset "Testing exp/log on $M" begin
+        for (pi, Xi) in zip(pL, XL)
+            qi = exp(M, pi, Xi)
+            Yi = log(M, pi, qi)
+            Test.@test isapprox(M, pi, Xi, Yi; atol=atp, rtol=rtp)
+            if in_place
+                exp!(M, ri, pi, Xi)
+                Test.@test isapprox(M, ri, qi; atol=atp, rtol=rtp)
+                log!(M, Zi, pi, qi)
+                Test.@test isapprox(M, pi, Zi, Yi; atol=atp, rtol=rtp)
+            end
+        end
+    end
+end
+
+#
+# Test suite for is_point and is_vector
+#
+"""
+    test_is_point(M, points, non_points; kwargs...)
+
+Test suite for checking points, where
+
+* `M` is an `AbstractManifold`
+* `points` is a `Tuple` of points
+* `non_points` is a `Tuple` of “points” that issue each of the errors a point can have.
+  these are expected to throw `DomainErrors`.
+
+## Keyword Arguments
+* `minimal` (`false`) – whether to perform a minimal test (only the first elements of `p` and `X`) or not
+* `atol_multiplier = 0`: change absolute tolerance in comparisons
+    (0 use default, i.e. deactivate atol and use rtol).
+* `rtol_multiplier = 1`: change the relative tolerance of exp/log tests
+    (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
+
+All further keyword arguments are passed down to both `is_point` and `is_vector` calls.
+"""
+function test_is_point(
+    M,
+    points,
+    non_points;
+    error=DomainError,
+    errors=fill(error, length(non_points)),
+    kwargs...,
+)
+    Test.@testset "Testing is_point on $M" begin
+        for p in points # test that they are points, these also error if this is not the case
+            Test.@test is_point(M, p, true; kwargs...)
+        end
+        for (p, e) in zip(non_points, errors)
+            Test.@test_throws "$e" is_point(M, p, true; kwargs...)
+        end
+    end
+end
+
+"""
+    test_is_vector(M, points, vectors, non_vectors, non_points; kwargs...)
+
+Test suite for checking points, where
+
+* `M` is an `AbstractManifold`
+* `points` is a `Tuple` of points
+* `vectors` is a `Tuple` of tangent vectors, same length (or less) as `points` and such that
+  the `i`th vector is a tangent vector at the `i`th point
+* `non_points` is a `Tuple` of “points” that issue each of the errors a point can have.
+  and are used with the correspondin vectors avobe to thech `check_point=true`.
+  these have to be less or equally many as `vectors`
+* `non_vectors` is a `Tuple` of “vectors” that issue each of the errors a tangent vector can have.
+  The check for the `i`th vector is done in the `i`th point from above
+
+## Keyword Arguments
+* `minimal` (`false`) – whether to perform a minimal test (only the first elements of `p` and `X`) or not
+* `atol_multiplier = 0`: change absolute tolerance in comparisons
+    (0 use default, i.e. deactivate atol and use rtol).
+* `rtol_multiplier = 1`: change the relative tolerance of exp/log tests
+    (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
+
+All further keyword arguments are passed down to both `is_point` and `is_vector` calls.
+"""
+function test_is_vector(
+    M,
+    points,
+    vectors,
+    non_vectors,
+    non_points;
+    error=DomainError,
+    errors=fill(error, length(non_vectors)),
+    point_errors=fill(error, length(non_points)),
+    kwargs...,
+)
+    print(errors, "\n\n")
+    Test.@testset "Testing is_vector on $M" begin
+        for (p, X) in zip(points, vectors)  # test that they are points, these also error if this is not the case
+            Test.@test is_vector(M, p, X, true; kwargs...)
+        end
+        for (np, X, e) in zip(non_points, vectors, point_errors) #check that the point check errors
+            Test.@test_throws e is_vector(M, np, X, true, true; kwargs...)
+        end
+        for (p, nX, e) in zip(points, non_vectors, errors) #check that the point check errors
+            print(M, ",", p, ",", nX, "  ", e, "\n")
+            Test.@test_throws e is_vector(M, p, nX, true; kwargs...)
+        end
+    end
+end
+
+#
+# Test Suite for the logarithmic map
+#
+
 """
     test_log(M, p, X)
 
@@ -150,7 +254,6 @@ from zip(p,X).
 * `atol_multiplier` _ (`0`) modify the default `atol` of `isapprox by a factor.
 * `rtol_multiplier` - (`1` has no effect, if `atol_multiplier>0`) modify the default `rtol` of `isapprox by a factor.
 """
-
 function test_log(
     M,
     p::NTuple{N,P},
