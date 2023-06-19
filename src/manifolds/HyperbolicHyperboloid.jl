@@ -427,8 +427,6 @@ function Random.rand!(
 end
 
 function parallel_transport_to!(M::Hyperbolic, Y, p, X, q)
-    w = log(M, p, q)
-    wn = norm(M, p, w)
-    wn < eps(eltype(p + q)) && return copyto!(Y, X)
-    return copyto!(Y, X - (inner(M, p, w, X) * (w + log(M, q, p)) / wn^2))
+    Y .= X .+ minkowski_metric(q, X) ./ (1 - minkowski_metric(p, q)) .* (p + q)
+    return Y
 end
