@@ -303,19 +303,21 @@ end
 For the features from [`ManifoldFeatures`](@ref) this struct provides expected
 values and tolerances
 
-* `values`     a dictionary `:Symbol->value` for expected values, e.g. `:dimension`
-* `strings`    a dictionary `:Symbol->String` for expected strings, e.g. `:repr` for `repr(M)`
+* `errors`     a dictionary `:Symbol-> [...]` for expected errors, e.g. when passing non-points to `:is_point`.
+* `values`     a dictionary `:Symbol-> [...]` to values, strings or arrays, that we expect for, e.g. `:manifold_dimension`
 * `tolerances` a dictionary `:Symbol->Float64` for tolerances in checks of functions.
-"""
-struct ManifoldExpectations{V}
+x"""
+struct ManifoldExpectations{E,V,T}
+    errors::Dict{Symbol,E}
     values::Dict{Symbol,V}
-    tolerances::Dict{Symbol,Float64}
+    tolerances::Dict{Symbol,T}
 end
 function ManifoldExpectations(;
-    values::Dict{Symbol,V}=Dict{Symbol,Float64}(),
-    tolerances=Dict(:default => 1e-14),
-) where {V}
-    return ManifoldExpectations{V}(values, tolerances)
+    values::Dict{Symbol,V}=Dict{Symbol,Union{String,Float64,Array{Float64}}}(),
+    tolerances::Dict{Symbol,T}=Dict(:default => 1e-14),
+    errors::Dict{Symbol,E}=Dict{Symbol,Any}(),
+) where {E,V,T}
+    return ManifoldExpectations{E,V,T}(errors, values, tolerances)
 end
 
 @doc raw"""

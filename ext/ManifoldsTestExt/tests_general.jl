@@ -14,13 +14,8 @@ function test_manifold(
     features=ManifoldFeatures(M),
     expectations=ManifoldExpectations(),
     non_points=[],
-    point_error=DomainError,
-    point_errors=fill(point_error, length(non_points)),
     non_tangent_vectors=[],
     # Errors should be in expectations as well
-    tangent_vector_error=DomainError,
-    tangent_vector_errors=fill(tangent_vector_error, length(non_tangent_vectors)),
-    tangent_vector_point_errors=fill(ManifoldDomainError, length(non_points)),
 )
     length(points) ≥ 3 || error("$(length(points)) are not enough points, 3 required")
     length(tangent_vectors) == length(points) || error(
@@ -47,17 +42,19 @@ function test_manifold(
         # is_point - verify points on a manifold
         if has_feature_expectations(features, expectations, :is_point)
             atol = get(expectations.tolerances, :is_point_atol, 0)
+            e = get(expectations.errors, :is_point, DomainError)
             test_is_point(
                 M,
                 Tuple(points),
                 Tuple(non_points);
-                errors=point_errors,
+                errors=e isa AbstractVector ? e : fill(e, length(non_points)),
                 atol=atol,
             )
         end
         # is_vector – verify tangent vectors
-        if has_feature_expectations(features, expectations, :is_point)
+        if has_feature_expectations(features, expectations, :is_vector)
             atol = get(expectations.tolerances, :is_vector_atol, 0)
+            e = get(expectations.errors, :is_vector, DomainError)
             test_is_vector(
                 M,
                 Tuple(points),
@@ -65,8 +62,7 @@ function test_manifold(
                 Tuple(non_tangent_vectors),
                 Tuple(non_points);
                 atol=atol,
-                errors=tangent_vector_errors,
-                point_errors=tangent_vector_point_errors,
+                errors=e isa AbstractVector ? e : fill(e, length(non_points)),
             )
         end
         # manifold_dimension – the dimension on the manifold
@@ -75,6 +71,13 @@ function test_manifold(
             Test.@testset "Manifold dimension" begin
                 Test.@test manifold_dimension(M) ≥ 0
                 Test.@test manifold_dimension(M) == d
+            end
+        end
+        # representation_size – the dimension on the manifold
+        if has_feature_expectations(features, expectations, :representation_size)
+            r = expectations.values[:representation_size]
+            Test.@testset "representation size" begin
+                Test.@test representation_size(M) == r
             end
         end
     end

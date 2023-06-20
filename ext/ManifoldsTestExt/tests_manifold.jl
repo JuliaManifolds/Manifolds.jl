@@ -219,19 +219,16 @@ function test_is_vector(
     non_points;
     error=DomainError,
     errors=fill(error, length(non_vectors)),
-    point_errors=fill(error, length(non_points)),
     kwargs...,
 )
-    print(errors, "\n\n")
     Test.@testset "Testing is_vector on $M" begin
         for (p, X) in zip(points, vectors)  # test that they are points, these also error if this is not the case
             Test.@test is_vector(M, p, X, true; kwargs...)
         end
-        for (np, X, e) in zip(non_points, vectors, point_errors) #check that the point check errors
-            Test.@test_throws e is_vector(M, np, X, true, true; kwargs...)
+        for (np, X) in zip(non_points, vectors) # check that the point errors yield  false
+            Test.@test !is_vector(M, np, X, false, true; kwargs...)
         end
         for (p, nX, e) in zip(points, non_vectors, errors) #check that the point check errors
-            print(M, ",", p, ",", nX, "  ", e, "\n")
             Test.@test_throws e is_vector(M, p, nX, true; kwargs...)
         end
     end
