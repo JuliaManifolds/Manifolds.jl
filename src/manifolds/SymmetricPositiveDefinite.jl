@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricPositiveDefinite{N} <: AbstractDecoratorManifold{𝔽}
+    SymmetricPositiveDefinite{N} <: AbstractDecoratorManifold{ℝ}
 
 The manifold of symmetric positive definite matrices, i.e.
 
