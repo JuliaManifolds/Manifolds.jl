@@ -695,10 +695,14 @@ formula reads [^BoyaSudarshanTilma2003]:
 
 ```math
 \begin{cases}
-\frac{2^{k-1}(2\pi)^{k^2}}{\prod_{s=1}^{k-1} (2s)!} & \text{ if } n = 2k \\
-\frac{2^{k}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
+2 & \text{ if } n = 0 \\
+\frac{2^{k-1/2}(2\pi)^{k^2}}{\prod_{s=1}^{k-1} (2s)!} & \text{ if } n = 2k+2 \\
+\frac{2^{k+1/2}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
 \end{cases}
 ```
+
+It differs from the paper by a factor of `sqrt(2)` due to a different choice of
+normalization.
 
 [^BoyaSudarshanTilma2003]:
     > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
@@ -719,6 +723,9 @@ function manifold_volume(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices})
         for s in 1:(k - 1)
             vol /= factorial(2 * s + 1)
         end
+    end
+    if n > 1
+        vol *= sqrt(2)
     end
     return vol
 end
@@ -913,7 +920,7 @@ in [^ChevallierLiLuDunson2022].
     > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
 """
 function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
-    dens = one(complex(eltype(X)))
+    dens = one(eltype(X))
     B = get_basis(M, p, DefaultOrthonormalBasis())
     Ys = get_vectors(M, p, B)
     Z = similar(X)
@@ -925,11 +932,10 @@ function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
     end
     for ev in eigvals(op_coeffs)
         if abs(ev) > eps(eltype(X))
-            cm = (1 - exp(ev)) / ev
+            cm = (1 - exp(-ev)) / ev
             dens *= real(cm)
         end
     end
-    @assert abs(imag(dens)) < eps(eltype(X))
 
-    return real(dens)
+    return dens
 end

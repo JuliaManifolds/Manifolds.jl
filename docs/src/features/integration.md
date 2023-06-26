@@ -19,15 +19,20 @@ end
 We will now try to verify that volume density correction correctly changes probability density of a (wrapped) normal distribution
 
 ```@example 1
-function pdf_basic(p)
-    return pdf(MvNormal([0.0, 0.0], 0.2*I), p)
+function pdf_basic(M::AbstractManifold, p)
+    return pdf(MvNormal(zeros(manifold_dimension(M)), 0.2*I), p)
 end
 
 function pdf_corrected(M::AbstractManifold, q)
     p = [1.0, 0.0, 0.0]
     X = log(M, p, q)
     Xc = get_coordinates(M, p, X, DefaultOrthonormalBasis())
-    return pdf_basic(Xc) / volume_density(M, p, X)
+    vd = abs(volume_density(M, p, X))
+    if vd > eps()
+        return pdf_basic(M, Xc) / vd
+    else
+        return 0.0
+    end
 end
 
 simple_mc_integrate(Sphere(2), pdf_corrected; N=1000000)
