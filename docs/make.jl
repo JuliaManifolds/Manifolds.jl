@@ -119,6 +119,7 @@ makedocs(
                 "Stiefel" => "manifolds/stiefel.md",
                 "Symmetric matrices" => "manifolds/symmetric.md",
                 "Symmetric positive definite" => "manifolds/symmetricpositivedefinite.md",
+                "SPD, fixed determinant" => "manifolds/spdfixeddeterminant.md",
                 "Symmetric positive semidefinite fixed rank" => "manifolds/symmetricpsdfixedrank.md",
                 "Symplectic" => "manifolds/symplectic.md",
                 "Symplectic Stiefel" => "manifolds/symplecticstiefel.md",

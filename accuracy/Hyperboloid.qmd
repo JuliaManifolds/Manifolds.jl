@@ -1,0 +1,86 @@
+---
+title: Accurcay tests on the Hyperboloid
+---
+
+
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+using Pkg;
+cd(@__DIR__)
+Pkg.activate("."); # for reproducibility use the local accuracy environment.
+```
+
+In this small note we compare different implementations of several functions on the [Hyperboloic]().
+We compare the functions prior [PR #]() to vs those introduced therein.
+We compare the previous version (always called `_1`) and the new version `_2`, where we leave out the manifold to indicate, that these are the local functions here.
+We compare this to the one given in `Manifolds.jl` at time of writing (which is the first one), on `BigFloat` on several scales of magnitudes.
+
+```{julia}
+#| output: false
+using Manifolds, Random, NamedColors, Plots
+using Manifolds: minkowski_metric
+
+paul_tol = load_paul_tol()
+indigo = paul_tol["mutedindigo"]
+teal = paul_tol["mutedteal"]
+```
+
+## Reference Data
+
+We choose a “base point”, a direction and create tangent vectors and correcponding points in several magnutudes of distances
+```{julia}
+#| output: false
+M = Hyperbolic(2)
+p = [0.0, 0.0, 1.0]
+pb = BigFloat.(p)
+X = [1 / sqrt(2), 1 / sqrt(2), 0.0]
+Xb = BigFloat.(X)
+lengths = [10.0^k for k in -16:4]
+Xbs = [s*Xb for s in lengths]
+Xbns = [norm(M, p, X) for X in Xbs]
+qbs = [exp(M, pb, Y) for Y in Xbs]
+Xs = [Float64.(X) for X in Xbs]
+qs = [Float64.(q) for q in qbs]
+```
+
+## Distance
+
+We define
+
+```{julia}
+#| output: false
+distance_1(p, q) = acosh(max(-minkowski_metric(p, q), 1.0))
+function distance_2(p, q)
+     w = q - p
+     m = sqrt(max(0.0, minkowski_metric(w, w)))
+     return 2 * asinh(m/2)
+end
+```
+
+and compare
+
+```{julia}
+d_1 = [distance_1(p, q) for q in qs]
+d_2 = [distance_2(p, q) for q in qs]
+fig = plot(;
+    legend=:topleft,
+    xlabel=raw"lengths $s$ (log. scale)",
+    ylabel=raw"Error to BigFloat (log. scale)",
+    yaxis=:log,
+    xaxis=:log,
+    ylims=(1e-16, 1e2),
+    xlims=(1e-17, 10^3),
+)
+plot!(fig, lengths, abs.(Xbns .- d_1), color=indigo, label="1 - acosh-based")
+plot!(fig, lengths, abs.(Xbns .- d_2), color=teal, label="2 - asinh-based")
+```
+
+```{julia}
+abs.(Xbns .- d_1)
+```
+
+```{julia}
+abs.(Xbns .- d_2)
+```

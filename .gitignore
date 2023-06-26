@@ -10,3 +10,6 @@ docs/src/tutorials/*.md
 coverage
 *.cov
 tutorials/_freeze
+accuracy/*_files
+accuracy/_freeze
+accuracy/.quarto
