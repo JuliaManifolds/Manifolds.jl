@@ -218,4 +218,22 @@ include("../utils.jl")
             PolarInverseRetraction(),
         )
     end
+
+    @testset "Rotations(1)" begin
+        M = Rotations(1)
+        p = fill(1.0, 1, 1)
+        X = get_vector(M, p, Float64[], DefaultOrthonormalBasis())
+        @test X isa Matrix{Float64}
+        @test X == fill(0.0, 1, 1)
+        Xc = get_coordinates(M, p, X, DefaultOrthonormalBasis())
+        @test length(Xc) == 0
+        @test Xc isa Vector{Float64}
+
+        @test injectivity_radius(M) == 0.0
+        @test injectivity_radius(M, p) == 0.0
+        @test injectivity_radius(M, ExponentialRetraction()) == 0.0
+        @test injectivity_radius(M, p, ExponentialRetraction()) == 0.0
+        @test injectivity_radius(M, PolarRetraction()) == 0.0
+        @test injectivity_radius(M, p, PolarRetraction()) == 0.0
+    end
 end

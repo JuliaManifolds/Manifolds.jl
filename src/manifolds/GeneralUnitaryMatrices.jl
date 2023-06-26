@@ -342,17 +342,22 @@ function get_coordinates_orthogonal(M::GeneralUnitaryMatrices{n,ℝ}, p, X, N) w
     return get_coordinates_orthogonal!(M, Y, p, X, N)
 end
 
+function get_coordinates_orthogonal!(::GeneralUnitaryMatrices{1,ℝ}, Xⁱ, p, X, ::RealNumbers)
+    return Xⁱ
+end
 function get_coordinates_orthogonal!(::GeneralUnitaryMatrices{2,ℝ}, Xⁱ, p, X, ::RealNumbers)
     Xⁱ[1] = X[2]
     return Xⁱ
 end
 function get_coordinates_orthogonal!(
-    ::GeneralUnitaryMatrices{n,ℝ},
+    M::GeneralUnitaryMatrices{n,ℝ},
     Xⁱ,
     p,
     X,
     ::RealNumbers,
 ) where {n}
+    @assert length(Xⁱ) == manifold_dimension(M)
+    @assert size(X) == (n, n)
     @inbounds begin
         Xⁱ[1] = X[3, 2]
         Xⁱ[2] = X[1, 3]
@@ -414,6 +419,9 @@ function get_vector_orthogonal(::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, Xⁱ
     return @SMatrix [0 -Xⁱ[]; Xⁱ[] 0]
 end
 
+function get_vector_orthogonal!(::GeneralUnitaryMatrices{1,ℝ}, X, p, Xⁱ, N::RealNumbers)
+    return X .= 0
+end
 function get_vector_orthogonal!(M::GeneralUnitaryMatrices{2,ℝ}, X, p, Xⁱ, N::RealNumbers)
     return get_vector_orthogonal!(M, X, p, Xⁱ[1], N)
 end
@@ -526,6 +534,7 @@ Return the radius of injectivity on the [`Rotations`](@ref) manifold `M`, which 
     > For a derivation of the injectivity radius, see [sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/](https://sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/).
 """
 injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}) where {n} = π * sqrt(2.0)
+injectivity_radius(::GeneralUnitaryMatrices{1,ℝ}) = 0.0
 
 # Resolve ambiguity on Rotations and Orthogonal
 function _injectivity_radius(
@@ -536,6 +545,12 @@ function _injectivity_radius(
 end
 function _injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::PolarRetraction) where {n}
     return π / sqrt(2.0)
+end
+function _injectivity_radius(::GeneralUnitaryMatrices{1,ℝ}, ::ExponentialRetraction)
+    return 0.0
+end
+function _injectivity_radius(::GeneralUnitaryMatrices{1,ℝ}, ::PolarRetraction)
+    return 0.0
 end
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
