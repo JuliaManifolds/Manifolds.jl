@@ -1,7 +1,7 @@
 include("../utils.jl")
 
 @testset "Rotations" begin
-    M = Manifolds.Rotations(2)
+    M = Rotations(2)
     @test repr(M) == "Rotations(2)"
     @test representation_size(M) == (2, 2)
     @test is_flat(M)
@@ -16,15 +16,14 @@ include("../utils.jl")
     types = [Matrix{Float64}, SMatrix{2,2,Float64,4}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{2,2,Float64,4})
-    retraction_methods = [Manifolds.PolarRetraction(), Manifolds.QRRetraction()]
+    retraction_methods = [PolarRetraction(), QRRetraction()]
 
-    inverse_retraction_methods =
-        [Manifolds.PolarInverseRetraction(), Manifolds.QRInverseRetraction()]
+    inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
 
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
 
     @testset "vee/hat" begin
-        M = Manifolds.Rotations(2)
+        M = Rotations(2)
         Xf = [1.23]
         p = Matrix{Float64}(I, 2, 2)
         X = Manifolds.hat(M, p, Xf)
@@ -80,12 +79,12 @@ include("../utils.jl")
         exp!(M, q, q, X)
         @test norm(q - q2) ≈ 0
 
-        X14_polar = inverse_retract(M, pts[1], pts[4], Manifolds.PolarInverseRetraction())
-        p4_polar = retract(M, pts[1], X14_polar, Manifolds.PolarRetraction())
+        X14_polar = inverse_retract(M, pts[1], pts[4], PolarInverseRetraction())
+        p4_polar = retract(M, pts[1], X14_polar, PolarRetraction())
         @test isapprox(M, pts[4], p4_polar)
 
-        X14_qr = inverse_retract(M, pts[1], pts[4], Manifolds.QRInverseRetraction())
-        p4_qr = retract(M, pts[1], X14_qr, Manifolds.QRRetraction())
+        X14_qr = inverse_retract(M, pts[1], pts[4], QRInverseRetraction())
+        p4_qr = retract(M, pts[1], X14_qr, QRRetraction())
         @test isapprox(M, pts[4], p4_qr)
     end
 
@@ -107,7 +106,7 @@ include("../utils.jl")
     Random.seed!(42)
     for n in (3, 4, 5)
         @testset "Rotations: SO($n)" begin
-            SOn = Manifolds.Rotations(n)
+            SOn = Rotations(n)
             @test !is_flat(SOn)
             ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             tvd = Manifolds.normal_tvector_distribution(SOn, Matrix(1.0I, n, n), 1.0)
@@ -168,7 +167,7 @@ include("../utils.jl")
         end
     end
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin
-        M = Manifolds.Rotations(2)
+        M = Rotations(2)
         for p in [1, [2.0 0.0; 0.0 1.0], [1.0 0.5; 0.0 1.0]]
             @test_throws DomainError is_point(M, p, true)
             @test !is_point(M, p)
@@ -185,12 +184,12 @@ include("../utils.jl")
         @test is_vector(M, p, X, true)
     end
     @testset "Project point" begin
-        M = Manifolds.Rotations(2)
+        M = Rotations(2)
         p = Matrix{Float64}(I, 2, 2)
         p1 = project(M, p)
         @test is_point(M, p1, true)
 
-        M = Manifolds.Rotations(3)
+        M = Rotations(3)
         p = collect(reshape(1.0:9.0, (3, 3)))
         p2 = project(M, p)
         @test is_point(M, p2, true)
@@ -200,7 +199,7 @@ include("../utils.jl")
         @test is_point(M, x3, true)
     end
     @testset "Convert from Lie algebra representation of tangents to Riemannian submanifold representation" begin
-        M = Manifolds.Rotations(3)
+        M = Rotations(3)
         p = project(M, collect(reshape(1.0:9.0, (3, 3))))
         x = [[0, -1, 3] [1, 0, 2] [-3, -2, 0]]
         @test is_vector(M, p, x, true)

@@ -912,12 +912,18 @@ end
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
 exponential map `exp(M, p, X)`. It is derived from Eq. (4.1) and Corollary 4.4
-in [^ChevallierLiLuDunson2022].
+in [^ChevallierLiLuDunson2022]. See also Theorem 4.1 in [^FalorsideHaanDavidsonForré2019],
+(note that it uses a different convention).
 
 [^ChevallierLiLuDunson2022]:
     > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
     > symmetric spaces.” arXiv, Oct. 09, 2022.
     > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
+
+[^FalorsideHaanDavidsonForré2019]:
+    > L. Falorsi, P. de Haan, T. R. Davidson, and P. Forré, “Reparameterizing Distributions
+    > on Lie Groups,” arXiv:1903.02958 [cs, math, stat], Mar. 2019
+    > doi: [10.48550/arXiv.1903.02958](https://doi.org/10.48550/arXiv.1903.02958)
 """
 function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
     dens = one(eltype(X))
@@ -938,4 +944,30 @@ function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
     end
 
     return dens
+end
+
+@doc raw"""
+    volume_density(M::GeneralUnitaryMatrices{3,ℝ}, p, X)
+
+Compute the volume density on O(3)/SO(3). The formula reads [^FalorsideHaanDavidsonForré2019]:
+```math
+\frac{1-1\cos(\sqrt{2}\lVert X \rVert)}{\lVert X \rVert^2}.
+```
+"""
+function volume_density(M::GeneralUnitaryMatrices{3,ℝ}, p, X)
+    nX = norm(M, p, X)
+    if nX > eps(eltype(X))
+        return (1 - 1 * cos(sqrt(2) * nX)) / nX^2
+    else
+        return one(nX)
+    end
+end
+
+@doc raw"""
+    volume_density(M::GeneralUnitaryMatrices{2,ℝ}, p, X)
+
+Volume density on O(2)/SO(2) is equal to 1.
+"""
+function volume_density(::GeneralUnitaryMatrices{2,ℝ}, p, X)
+    return one(eltype(X))
 end
