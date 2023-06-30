@@ -8,6 +8,15 @@ Private=false
 Public=true
 ```
 
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/ProbabilitySimplexEuclideanMetric.jl"]
+Order = [:type, :function]
+Private=false
+Public=true
+```
+
+
 ## Real probability amplitudes
 
 An isometric embedding of interior of [`ProbabilitySimplex`](@ref) in positive orthant of the

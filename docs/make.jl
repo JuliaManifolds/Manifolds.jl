@@ -87,7 +87,10 @@ makedocs(
     sitename="Manifolds.jl",
     pages=[
         "Home" => "index.md",
-        "How to..." => ["🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md"],
+        "How to..." => [
+            "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
+            "Integration on manifolds and probability densities" => "tutorials/integration.md",
+        ],
         "Manifolds" => [
             "Basic manifolds" => [
                 "Centered matrices" => "manifolds/centeredmatrices.md",
