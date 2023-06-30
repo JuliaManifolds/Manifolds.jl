@@ -411,6 +411,7 @@ include("manifolds/SymplecticStiefel.jl")
 include("manifolds/Tucker.jl")
 #
 include("manifolds/ProbabilitySimplex.jl")
+include("manifolds/ProbabilitySimplexEuclideanMetric.jl")
 include("manifolds/GeneralUnitaryMatrices.jl")
 include("manifolds/Unitary.jl")
 include("manifolds/Rotations.jl")

@@ -136,7 +136,7 @@ function check_vector(M::ProbabilitySimplex, p, X; kwargs...)
     if !isapprox(sum(X), 0.0; kwargs...)
         return DomainError(
             sum(X),
-            "The vector $(X) is not a tangent vector to $(p) on $(M), since its elements to not sum up to 0.",
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since its elements do not sum up to 0.",
         )
     end
     return nothing
@@ -352,6 +352,45 @@ function parallel_transport_to!(M::ProbabilitySimplex{N}, Y, p, X, q) where {N}
         q_s,
     )
     return amplitude_to_simplex_diff!(M, Y, q_s, Ys)
+end
+
+@doc raw"""
+    rand(::ProbabilitySimplex; vector_at=nothing, σ::Real=1.0)
+
+
+When `vector_at` is `nothing`, return a random (uniform over the Fisher-Rao metric; that is, uniform with respect to the `n`-sphere whose positive orthant is mapped to the simplex).
+point `x` on the [`ProbabilitySimplex`](@ref) manifold `M` according to the isometric embedding into 
+the `n`-sphere by normalizing the vector length of a sample from a multivariate Gaussian. See [^Marsaglia1972].
+
+When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
+``T_{p}\mathrm{\Delta}^n``by shifting a multivariate Gaussian with standard deviation `σ` 
+to have a zero component sum.
+
+[^Marsaglia1972]:
+    > Marsaglia, G.:
+    > _Choosing a Point from the Surface of a Sphere_.
+    > Annals of Mathematical Statistics, 43 (2): 645–646, 1972.
+    > doi: [10.1214/aoms/1177692644](https://doi.org/10.1214/aoms/1177692644)
+"""
+rand(::ProbabilitySimplex; σ::Real=1.0)
+
+function Random.rand!(
+    rng::AbstractRNG,
+    M::ProbabilitySimplex,
+    pX;
+    vector_at=nothing,
+    σ=one(eltype(pX)),
+)
+    if isnothing(vector_at)
+        Random.randn!(rng, pX)
+        LinearAlgebra.normalize!(pX, 2)
+        pX .= abs2.(pX)
+    else
+        Random.randn!(rng, pX)
+        pX .= (pX .- mean(pX)) .* σ
+        change_metric!(M, pX, EuclideanMetric(), vector_at, pX)
+    end
+    return pX
 end
 
 @doc raw"""
