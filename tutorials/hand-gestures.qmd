@@ -33,27 +33,30 @@ function load_hands()
 end
 ```
 
-Let's load dataset of hand gestures, described here: https://geomstats.github.io/notebooks/14_real_world_applications__hand_poses_analysis_in_kendall_shape_space.html
+Let's load dataset of hand gestures, described [here](https://geomstats.github.io/notebooks/14_real_world_applications__hand_poses_analysis_in_kendall_shape_space.html)
 and plot a sample gesture as a 3D scatter plot of points.
 ```{julia}
 hands, hand_labels = load_hands()
 scatter3d(hands[1, 1, :], hands[1, 2, :], hands[1, 3, :])
 ```
 
-Each gesture is represented by 22 landmarks in ℝ³, so we use the appropriate Kendall's shape space
+Each gesture is represented by 22 landmarks in $ℝ³$, so we use the appropriate Kendall's shape space
 ```{julia}
 Mshape = KendallsShapeSpace(3, 22)
 ```
+
 Hands read from the dataset are projected to the shape space to remove translation
 and scaling variability. Rotational variability is then handled using quotient
-structure of KendallsShapeSpace
+structure of ``[`KendallsShapeSpace`](@ref)``{=commonmark}
 ```{julia}
+#| output: false
 hands_projected = [project(Mshape, hands[i, :, :]) for i in axes(hands, 1)]
 ```
 
 Now let's do tangent space PCA. This starts with computing a mean point and computing
 logithmic maps at mean to each point in the dataset.
 ```{julia}
+#| output: false
 mean_hand = mean(Mshape, hands_projected)
 hand_logs = [log(Mshape, mean_hand, p) for p in hands_projected]
 ```
@@ -64,6 +67,7 @@ forms a linear subspace of an Euclidean space so PCA automatically detects
 which directions have no variance but this is a more principled way to solve
 this issue.
 ```{julia}
+#| output: false
 B = get_basis(Mshape, mean_hand, ProjectedOrthonormalBasis(:svd))
 hand_log_coordinates = [get_coordinates(Mshape, mean_hand, X, B) for X in hand_logs]
 ```
@@ -82,6 +86,7 @@ Now let's show explained variance of each principal component.
 plot(principalvars(fp), title="explained variance", label="Tangent PCA")
 
 ```
+
 Also, let's look at how projections on the first two pricipal components look like.
 ```{julia}
 
