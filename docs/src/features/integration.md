@@ -5,7 +5,7 @@ The basic concepts are derived from geometric measure theory.
 In principle, there are many ways in which a manifold can be equipped with a measure that can be later used to define an integral.
 One of the most popular ways is based on pushing the Lebesgue measure on a tangent space through the exponential map.
 Any other suitable atlas could be used, not just the one defined by normal coordinates, though each one requires different volume density corrections due to the Jacobian determinant of the pushforward.
-Manifolds.jl provides the function [`volume_density`](@ref) that calculates that quantity.
+`Manifolds.jl` provides the function [`volume_density`](@ref) that calculates that quantity.
 
 While many sources define volume density as a function of two points, `Manifolds.jl` decided to use the more general point-tangent vector formulation. The two-points variant can be implemented as `volume_density_two_points(M, p, q) = volume_density(M, p, log(M, p, q))`.
 
@@ -29,15 +29,15 @@ end
 [`manifold_volume`](@ref) and [`volume_density`](@ref) are closely related to each other, though very few sources explore this connection, and some even claiming a certain level of arbitrariness in defining `manifold_volume`.
 Volume is sometimes considered arbitrary because Riemannian metrics on some spaces like the manifold of rotations are defined with arbitrary constants.
 However, once a constant is picked (and it must be picked before any useful computation can be performed), all geometric operations must follow in a consistent way: inner products, exponential and logarithmic maps, volume densities, etc.
-Manifolds.jl consistently picks such constants and provides a unified framework, though it sometimes results in picking a different constant than what is the most popular in some sub-communities.
+`Manifolds.jl` consistently picks such constants and provides a unified framework, though it sometimes results in picking a different constant than what is the most popular in some sub-communities.
 
 On Lie groups the situation is more complicated. Invariance under left or right group action is a desired property that leads one to consider Haar measures.
 It is, however, unclear what are the practical benefits of considering Haar measures over the Lebesgue measure of the underlying manifold, which often turns out to be invariant anyway.
 
 Last point before we turn to consider an example is the matter of integration through charts.
-This is an approach not currently supported by Manifolds.jl.
-One has to define a suitable set of disjoint charts covering the entire manifold and using a suitably scaled method for multivariate Euclidean integration.
-Note that ranges of parameters have to be suitably adjusted.
+This is an approach not currently supported by `Manifolds.jl`.
+One has to define a suitable set of disjoint charts covering the entire manifold and use a method for multivariate Euclidean integration.
+Note that ranges of parameters have to be adjusted for each manifold and scaling based on the metric needs to be applied.
 See [^BoyaSudarshanTilma2003] for some considerations on symmetric spaces.
 
 ## Distributions
@@ -66,7 +66,7 @@ function pdf_manifold(M::AbstractManifold, q)
     end
 end
 
-simple_mc_integrate(Sphere(2), pdf_manifold; N=1000000)
+println(simple_mc_integrate(Sphere(2), pdf_manifold; N=1000000))
 ```
 
 We can also make a Pelletier's isotropic kernel density estimator:
@@ -100,8 +100,9 @@ function (kde::PelletierKDE)(p)
 end
 
 M = Sphere(2)
-pts = rand(M, 1)
-kde = PelletierKDE(M, 0.2, pts)
+pts = rand(M, 8)
+kde = PelletierKDE(M, 0.7, pts)
+println(simple_mc_integrate(Sphere(2), kde; N=1000000))
 println(kde(rand(M)))
 ```
 
