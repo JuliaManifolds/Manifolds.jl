@@ -58,6 +58,7 @@ include("group_utils.jl")
             -0.5499897386953444 0.32059980100053004 0.0
         ]
         @test volume_density(M, p, X) ≈ 0.8440563052346255
+        @test volume_density(M, p, zero(X)) ≈ 1.0
 
         M = SpecialOrthogonal(4)
         p = [
