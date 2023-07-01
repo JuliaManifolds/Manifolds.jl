@@ -25,6 +25,7 @@ The second one is beneficital, if there exist a representation of points and tan
 In this tutorial we focus on chart-based computation.
 
 ```{julia}
+#| output: false
 using Manifolds, RecursiveArrayTools, OrdinaryDiffEq, DiffEqCallbacks, BoundaryValueDiffEq
 ```
 
@@ -84,10 +85,10 @@ end
 ```
 
 
-## (Interactive) Values for the geodesic.
+## Values for the geodesic
 
 `solve_for` is a helper function that solves a parallel transport along geodesic problem on the torus `M`.
-`p0x` is the (ϴ, φ) parametrization of the point from which we will transport the vector.
+`p0x` is the $(ϴ, φ)$ parametrization of the point from which we will transport the vector.
 We first calculate the coordinates in the embedding of `p0x` and store it as `p`, and then get the initial chart from atlas `A` appropriate for starting working at point `p`.
 The vector we transport has coordinates `Y_transp` in the induced tangent space basis of chart `i_p0x`.
 The function returns the full solution to the parallel transport problem, containing the sequence of charts that was used and solutions of differential equations computed using `OrdinaryDiffEq`.

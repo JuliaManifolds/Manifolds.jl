@@ -1,12 +1,18 @@
 [deps]
+BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 ManifoldsBase = "3362f125-f0bb-47a3-aa74-596ffd7ef2fb"
 Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 MultivariateStats = "6f286f6a-111f-5878-ab1e-185364afe411"
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 
 [compat]
 IJulia = "1"

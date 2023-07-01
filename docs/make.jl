@@ -17,7 +17,7 @@ if Base.active_project() != joinpath(@__DIR__, "Project.toml")
 end
 
 # (b) Did someone say render? Then we render!
-if "--quarto" ∈ ARGS
+if true || "--quarto" ∈ ARGS
     using CondaPkg
     CondaPkg.withenv() do
         @info "Rendering Quarto"
@@ -90,6 +90,7 @@ makedocs(
         "How to..." => [
             "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
             "Hand gesture analysis" => "tutorials/hand-gestures.md",
+            "Working in charts" => "tutorials/working-in-charts.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [
