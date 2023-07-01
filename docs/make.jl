@@ -17,7 +17,7 @@ if Base.active_project() != joinpath(@__DIR__, "Project.toml")
 end
 
 # (b) Did someone say render? Then we render!
-if true || "--quarto" ∈ ARGS
+if "--quarto" ∈ ARGS
     using CondaPkg
     CondaPkg.withenv() do
         @info "Rendering Quarto"
