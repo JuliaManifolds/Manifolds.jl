@@ -45,11 +45,11 @@ We will first set up our plot with an empty torus.
 `param_points` are points on the surface of the torus that will be used for basic surface shape in `Makie.jl`.
 The torus will be colored according to its Gaussian curvature stored in `gcs`. We later want to have a color scale that has negative curvature blue, zero curvature white and positive curvature red so `gcs_mm` is the largest absolute value of the curvature that will be needed to properly set range of curvature values.
 
-In the documentation this tutorial represents a static situation (without interactivity).
+In the documentation this tutorial represents a static situation (without interactivity). `Makie.jl` rendering is turned off.
 
 ```{julia}
-using GLMakie, Makie
-GLMakie.activate!()
+# using GLMakie, Makie
+# GLMakie.activate!()
 
 """
 	torus_figure()
@@ -144,16 +144,18 @@ We also parametrise the start point and direction.
 φy = -0.1
 
 geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy], t_end)(0.0:dt:t_end)
-geo_ps = [Point3f(s[1]) for s in geo]
-pt_indices = 1:div(length(geo), 10):length(geo)
-geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]]
-geo_Ys = [Point3f(s[3]) for s in geo[pt_indices]]
+# geo_ps = [Point3f(s[1]) for s in geo]
+# pt_indices = 1:div(length(geo), 10):length(geo)
+# geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]]
+# geo_Ys = [Point3f(s[3]) for s in geo[pt_indices]]
 
-ax1, fig1 = torus_figure()
-arrows!(ax1, geo_ps_pt, geo_Ys, linewidth=0.05, color=:blue)
-lines!(geo_ps; linewidth=4.0, color=:green)
-fig1
+# ax1, fig1 = torus_figure()
+# arrows!(ax1, geo_ps_pt, geo_Ys, linewidth=0.05, color=:blue)
+# lines!(geo_ps; linewidth=4.0, color=:green)
+# fig1
 ```
+
+![fig-pt]{tutorials/working-in-charts-transport.png}
 
 ### Solving the logairthmic map ODE
 
@@ -167,9 +169,11 @@ bvp_i = (0, 0)
 bvp_a1 = [θ₁, φ₁]
 bvp_a2 = [θ₂, φ₂]
 bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i)
-geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
+# geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
 
-ax2, fig2 = torus_figure()
-lines!(geo_r; linewidth=4.0, color=:green)
-fig2
+# ax2, fig2 = torus_figure()
+# lines!(geo_r; linewidth=4.0, color=:green)
+# fig2
 ```
+
+![fig-geodesic]{tutorials/working-in-charts-geodesic.png}
