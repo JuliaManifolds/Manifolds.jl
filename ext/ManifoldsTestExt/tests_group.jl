@@ -12,7 +12,7 @@ using Base: IdentityUnitRange
         test_invariance = false,
         test_lie_bracket=false,
         test_adjoint_action=false,
-        diff_convs = [(), (LeftAction(),), (RightAction(),)],
+        diff_convs = [(), (LeftForwardAction(),), (RightBackwardAction(),)],
     )
 
 Tests general properties of the group `G`, given at least three different points
@@ -37,7 +37,7 @@ function test_group(
     test_invariance=false,
     test_lie_bracket=false,
     test_adjoint_action=false,
-    diff_convs=[(), (LeftAction(),), (RightAction(),)],
+    diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
     test_log_from_identity=false,
     test_exp_from_identity=false,
     test_vee_hat_from_identity=false,
@@ -133,7 +133,7 @@ function test_group(
     end
 
     Test.@testset "translation" begin
-        convs = ((), (LeftAction(),), (RightAction(),))
+        convs = ((), (LeftForwardAction(),), (RightBackwardAction(),))
 
         Test.@test isapprox(
             G,
@@ -143,13 +143,13 @@ function test_group(
         )
         Test.@test isapprox(
             G,
-            translate(G, g_pts[1], g_pts[2], LeftAction()),
+            translate(G, g_pts[1], g_pts[2], LeftForwardAction()),
             compose(G, g_pts[1], g_pts[2]);
             atol=atol,
         )
         Test.@test isapprox(
             G,
-            translate(G, g_pts[1], g_pts[2], RightAction()),
+            translate(G, g_pts[1], g_pts[2], RightBackwardAction()),
             compose(G, g_pts[2], g_pts[1]);
             atol=atol,
         )
@@ -211,20 +211,20 @@ function test_group(
             G,
             g12,
             translate_diff(G, g_pts[2], g_pts[1], X),
-            translate_diff(G, g_pts[2], g_pts[1], X, LeftAction());
+            translate_diff(G, g_pts[2], g_pts[1], X, LeftForwardAction());
             atol=atol,
         )
         Test.@test is_vector(
             G,
             g12,
-            translate_diff(G, g_pts[2], g_pts[1], X, LeftAction()),
+            translate_diff(G, g_pts[2], g_pts[1], X, LeftForwardAction()),
             true;
             atol=atol,
         )
-        RightAction() in diff_convs && Test.@test is_vector(
+        RightBackwardAction() in diff_convs && Test.@test is_vector(
             G,
             g21,
-            translate_diff(G, g_pts[2], g_pts[1], X, RightAction()),
+            translate_diff(G, g_pts[2], g_pts[1], X, RightBackwardAction()),
             true;
             atol=atol,
         )
@@ -397,7 +397,7 @@ function test_group(
         end
 
     test_invariance && Test.@testset "metric invariance" begin
-        if has_invariant_metric(G, LeftAction())
+        if has_invariant_metric(G, LeftForwardAction())
             Test.@testset "left-invariant" begin
                 Test.@test has_approx_invariant_metric(
                     G,
@@ -405,11 +405,11 @@ function test_group(
                     X_pts[1],
                     X_pts[end],
                     g_pts,
-                    LeftAction(),
+                    LeftForwardAction(),
                 )
             end
         end
-        if has_invariant_metric(G, RightAction())
+        if has_invariant_metric(G, RightBackwardAction())
             Test.@testset "right-invariant" begin
                 Test.@test has_approx_invariant_metric(
                     G,
@@ -417,7 +417,7 @@ function test_group(
                     X_pts[1],
                     X_pts[end],
                     g_pts,
-                    RightAction(),
+                    RightBackwardAction(),
                 )
             end
         end
@@ -559,14 +559,14 @@ function test_action(
     Test.@testset "Basic action properties" begin
         test_switch_direction && Test.@testset "Direction" begin
             Aswitch = switch_direction(A)
-            if isa(A, AbstractGroupAction{LeftAction})
-                Test.@test direction(A) === LeftAction()
-                Test.@test isa(Aswitch, AbstractGroupAction{RightAction})
-                Test.@test direction(Aswitch) === RightAction()
+            if isa(A, AbstractGroupAction{LeftForwardAction})
+                Test.@test direction(A) === LeftForwardAction()
+                Test.@test isa(Aswitch, AbstractGroupAction{RightBackwardAction})
+                Test.@test direction(Aswitch) === RightBackwardAction()
             else
-                Test.@test direction(A) === RightAction()
-                Test.@test isa(Aswitch, AbstractGroupAction{LeftAction})
-                Test.@test direction(Aswitch) === LeftAction()
+                Test.@test direction(A) === RightBackwardAction()
+                Test.@test isa(Aswitch, AbstractGroupAction{LeftForwardAction})
+                Test.@test direction(Aswitch) === LeftForwardAction()
             end
         end
 

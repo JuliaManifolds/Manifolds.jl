@@ -65,12 +65,12 @@ end
 Apply action `a` to the point `p` with the rule specified by `A`.
 The result is saved in `q`.
 """
-function apply!(A::AbstractGroupAction{LeftAction}, q, a, p)
+function apply!(A::AbstractGroupAction{LeftForwardAction}, q, a, p)
     return error(
         "apply! not implemented for action $(typeof(A)) and points $(typeof(q)), $(typeof(p)) and $(typeof(a)).",
     )
 end
-function apply!(A::AbstractGroupAction{RightAction}, q, a, p)
+function apply!(A::AbstractGroupAction{RightBackwardAction}, q, a, p)
     ainv = inv(base_group(A), a)
     apply!(switch_direction(A), q, ainv, p)
     return q
@@ -166,11 +166,15 @@ function inverse_apply_diff!(A::AbstractGroupAction, Y, a, p, X)
     return apply_diff!(A, Y, inv(base_group(A), a), p, X)
 end
 
-compose(A::AbstractGroupAction{LeftAction}, a, b) = compose(base_group(A), a, b)
-compose(A::AbstractGroupAction{RightAction}, a, b) = compose(base_group(A), b, a)
+compose(A::AbstractGroupAction{LeftForwardAction}, a, b) = compose(base_group(A), a, b)
+compose(A::AbstractGroupAction{RightBackwardAction}, a, b) = compose(base_group(A), b, a)
 
-compose!(A::AbstractGroupAction{LeftAction}, q, a, b) = compose!(base_group(A), q, a, b)
-compose!(A::AbstractGroupAction{RightAction}, q, a, b) = compose!(base_group(A), q, b, a)
+function compose!(A::AbstractGroupAction{LeftForwardAction}, q, a, b)
+    return compose!(base_group(A), q, a, b)
+end
+function compose!(A::AbstractGroupAction{RightBackwardAction}, q, a, b)
+    return compose!(base_group(A), q, b, a)
+end
 
 @doc raw"""
     optimal_alignment(A::AbstractGroupAction, p, q)

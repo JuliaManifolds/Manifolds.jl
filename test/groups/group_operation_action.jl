@@ -5,17 +5,17 @@ include("group_utils.jl")
 @testset "Group operation action" begin
     G = GroupManifold(NotImplementedManifold(), Manifolds.MultiplicationOperation())
     A_left = GroupOperationAction(G)
-    A_right = GroupOperationAction(G, RightAction())
+    A_right = GroupOperationAction(G, RightBackwardAction())
 
     types = [Matrix{Float64}]
 
     @test group_manifold(A_left) === G
     @test base_group(A_left) == G
-    @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftAction())"
-    @test repr(A_right) == "GroupOperationAction($(repr(G)), RightAction())"
+    @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftForwardAction())"
+    @test repr(A_right) == "GroupOperationAction($(repr(G)), RightBackwardAction())"
 
-    @test switch_direction(LeftAction()) == RightAction()
-    @test switch_direction(RightAction()) == LeftAction()
+    @test switch_direction(LeftForwardAction()) == RightBackwardAction()
+    @test switch_direction(RightBackwardAction()) == LeftForwardAction()
 
     for type in types
         a_pts = convert.(type, [reshape(i:(i + 3), 2, 2) for i in 1:3])
@@ -45,7 +45,7 @@ include("group_utils.jl")
     G = SpecialOrthogonal(3)
     M = Rotations(3)
     A_left = GroupOperationAction(G)
-    A_right = GroupOperationAction(G, RightAction())
+    A_right = GroupOperationAction(G, RightBackwardAction())
 
     p = Matrix{Float64}(I, 3, 3)
     aω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
@@ -60,8 +60,8 @@ include("group_utils.jl")
 
     @test group_manifold(A_left) === G
     @test base_group(A_left) == G
-    @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftAction())"
-    @test repr(A_right) == "GroupOperationAction($(repr(G)), RightAction())"
+    @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftForwardAction())"
+    @test repr(A_right) == "GroupOperationAction($(repr(G)), RightBackwardAction())"
 
     test_action(A_left, a_pts, m_pts, X_pts; test_optimal_alignment=true, test_diff=true)
 
@@ -69,15 +69,16 @@ include("group_utils.jl")
 
     @testset "apply_diff_group" begin
         @test apply_diff_group(A_left, a_pts[1], X_pts[1], m_pts[1]) ≈
-              translate_diff(G, m_pts[1], a_pts[1], X_pts[1], RightAction())
+              translate_diff(G, m_pts[1], a_pts[1], X_pts[1], RightBackwardAction())
         Y = similar(X_pts[1])
         apply_diff_group!(A_left, Y, a_pts[1], X_pts[1], m_pts[1])
-        @test Y ≈ translate_diff(G, m_pts[1], a_pts[1], X_pts[1], RightAction())
+        @test Y ≈ translate_diff(G, m_pts[1], a_pts[1], X_pts[1], RightBackwardAction())
 
         @test adjoint_apply_diff_group(A_left, a_pts[1], X_pts[1], m_pts[1]) ≈
-              inverse_translate_diff(G, a_pts[1], m_pts[1], X_pts[1], RightAction())
+              inverse_translate_diff(G, a_pts[1], m_pts[1], X_pts[1], RightBackwardAction())
         Y = similar(X_pts[1])
         adjoint_apply_diff_group!(A_left, Y, a_pts[1], X_pts[1], m_pts[1])
-        @test Y ≈ inverse_translate_diff(G, a_pts[1], m_pts[1], X_pts[1], RightAction())
+        @test Y ≈
+              inverse_translate_diff(G, a_pts[1], m_pts[1], X_pts[1], RightBackwardAction())
     end
 end

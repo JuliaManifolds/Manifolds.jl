@@ -135,7 +135,7 @@ function inverse_translate(
     G::AbstractDecoratorManifold,
     p,
     q,
-    ::LeftAction,
+    ::LeftForwardAction,
 )
     return p \ q
 end
@@ -144,7 +144,7 @@ function inverse_translate(
     G::AbstractDecoratorManifold,
     p,
     q,
-    ::RightAction,
+    ::RightBackwardAction,
 )
     return q / p
 end

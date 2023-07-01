@@ -1,5 +1,5 @@
 @doc raw"""
-    GroupOperationAction(group::AbstractDecoratorManifold, AD::ActionDirection = LeftAction())
+    GroupOperationAction(group::AbstractDecoratorManifold, AD::ActionDirection = LeftForwardAction())
 
 Action of a group upon itself via left or right translation.
 """
@@ -9,7 +9,7 @@ end
 
 function GroupOperationAction(
     G::TM,
-    ::TAD=LeftAction(),
+    ::TAD=LeftForwardAction(),
 ) where {TM<:AbstractDecoratorManifold,TAD<:ActionDirection}
     return GroupOperationAction{TM,TAD}(G)
 end

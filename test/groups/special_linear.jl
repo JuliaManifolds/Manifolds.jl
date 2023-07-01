@@ -65,13 +65,13 @@ using NLsolve
         vpts = [[0 -1 -5; 1 2 0; 1 2 -2], [0 -2 1; -2 1 2; -4 2 -1]]
 
         retraction_methods = [
-            Manifolds.GroupExponentialRetraction(LeftAction()),
-            Manifolds.GroupExponentialRetraction(RightAction()),
+            Manifolds.GroupExponentialRetraction(LeftForwardAction()),
+            Manifolds.GroupExponentialRetraction(RightBackwardAction()),
         ]
 
         inverse_retraction_methods = [
-            Manifolds.GroupLogarithmicInverseRetraction(LeftAction()),
-            Manifolds.GroupLogarithmicInverseRetraction(RightAction()),
+            Manifolds.GroupLogarithmicInverseRetraction(LeftForwardAction()),
+            Manifolds.GroupLogarithmicInverseRetraction(RightBackwardAction()),
         ]
 
         for T in types
@@ -167,13 +167,13 @@ using NLsolve
         vpts = [[0-1im -1+1im; -1+0im 0+1im], [1+1im 0+0im; 0+1im -1-1im]]
 
         retraction_methods = [
-            Manifolds.GroupExponentialRetraction(LeftAction()),
-            Manifolds.GroupExponentialRetraction(RightAction()),
+            Manifolds.GroupExponentialRetraction(LeftForwardAction()),
+            Manifolds.GroupExponentialRetraction(RightBackwardAction()),
         ]
 
         inverse_retraction_methods = [
-            Manifolds.GroupLogarithmicInverseRetraction(LeftAction()),
-            Manifolds.GroupLogarithmicInverseRetraction(RightAction()),
+            Manifolds.GroupLogarithmicInverseRetraction(LeftForwardAction()),
+            Manifolds.GroupLogarithmicInverseRetraction(RightBackwardAction()),
         ]
 
         for T in types

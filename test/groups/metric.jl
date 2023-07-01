@@ -108,23 +108,28 @@ end
         @test !isapprox(G, e, Identity(AdditionOperation()))
         @test has_biinvariant_metric(G)
         @test !has_biinvariant_metric(Sphere(2))
-        Z = translate_diff(G, p, q, X, LeftAction())
-        @test isapprox(SO3, q, Z, translate_diff(SO3, p, q, X, LeftAction()))
+        Z = translate_diff(G, p, q, X, LeftForwardAction())
+        @test isapprox(SO3, q, Z, translate_diff(SO3, p, q, X, LeftForwardAction()))
         Z2 = similar(Z)
-        translate_diff!(G, Z2, p, q, X, LeftAction())
+        translate_diff!(G, Z2, p, q, X, LeftForwardAction())
         @test isapprox(SO3, q, Z, Z2)
-        Z3 = inverse_translate_diff(G, p, q, X, LeftAction())
-        @test isapprox(SO3, q, Z3, inverse_translate_diff(SO3, p, q, X, LeftAction()))
+        Z3 = inverse_translate_diff(G, p, q, X, LeftForwardAction())
+        @test isapprox(
+            SO3,
+            q,
+            Z3,
+            inverse_translate_diff(SO3, p, q, X, LeftForwardAction()),
+        )
         Z4 = similar(Z3)
-        inverse_translate_diff!(G, Z4, p, q, X, LeftAction())
+        inverse_translate_diff!(G, Z4, p, q, X, LeftForwardAction())
         @test isapprox(SO3, q, Z3, Z4)
     end
 
     @testset "invariant metric direction" begin
-        @test direction(HasRightInvariantMetric()) === RightAction()
-        @test direction(HasLeftInvariantMetric()) === LeftAction()
-        @test direction(HasRightInvariantMetric) === RightAction()
-        @test direction(HasLeftInvariantMetric) === LeftAction()
+        @test direction(HasRightInvariantMetric()) === RightBackwardAction()
+        @test direction(HasLeftInvariantMetric()) === LeftForwardAction()
+        @test direction(HasRightInvariantMetric) === RightBackwardAction()
+        @test direction(HasLeftInvariantMetric) === LeftForwardAction()
     end
 
     @testset "invariant metrics on SE(3)" begin
@@ -162,7 +167,7 @@ end
                     test_diff=true,
                     test_lie_bracket=true,
                     test_adjoint_action=true,
-                    diff_convs=[(), (LeftAction(),), (RightAction(),)],
+                    diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
                 )
                 test_manifold(
                     G,

@@ -57,7 +57,7 @@ function inverse_translate(
     ::CircleGroup,
     p::AbstractArray{<:Any,0},
     q::AbstractArray{<:Any,0},
-    ::LeftAction,
+    ::LeftForwardAction,
 )
     return map(/, q, p)
 end
@@ -65,7 +65,7 @@ function inverse_translate(
     ::CircleGroup,
     p::AbstractArray{<:Any,0},
     q::AbstractArray{<:Any,0},
-    ::RightAction,
+    ::RightBackwardAction,
 )
     return map(/, q, p)
 end
@@ -175,7 +175,7 @@ function inverse_translate(
     ::RealCircleGroup,
     p::AbstractArray{<:Any,0},
     q::AbstractArray{<:Any,0},
-    ::LeftAction,
+    ::LeftForwardAction,
 )
     return map((x, y) -> sym_rem(x - y), q, p)
 end
@@ -183,7 +183,7 @@ function inverse_translate(
     ::RealCircleGroup,
     p::AbstractArray{<:Any,0},
     q::AbstractArray{<:Any,0},
-    ::RightAction,
+    ::RightBackwardAction,
 )
     return map((x, y) -> sym_rem(x - y), q, p)
 end

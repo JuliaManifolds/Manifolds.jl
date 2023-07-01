@@ -144,13 +144,34 @@ function exp_lie!(::GeneralUnitaryMultiplicationGroup{4,ℝ}, q, X)
     return q
 end
 
-inverse_translate(G::GeneralUnitaryMultiplicationGroup, p, q, ::LeftAction) = inv(G, p) * q
-inverse_translate(G::GeneralUnitaryMultiplicationGroup, p, q, ::RightAction) = q * inv(G, p)
+function inverse_translate(G::GeneralUnitaryMultiplicationGroup, p, q, ::LeftForwardAction)
+    return inv(G, p) * q
+end
+function inverse_translate(
+    G::GeneralUnitaryMultiplicationGroup,
+    p,
+    q,
+    ::RightBackwardAction,
+)
+    return q * inv(G, p)
+end
 
-function inverse_translate!(G::GeneralUnitaryMultiplicationGroup, x, p, q, ::LeftAction)
+function inverse_translate!(
+    G::GeneralUnitaryMultiplicationGroup,
+    x,
+    p,
+    q,
+    ::LeftForwardAction,
+)
     return mul!(x, inv(G, p), q)
 end
-function inverse_translate!(G::GeneralUnitaryMultiplicationGroup, x, p, q, ::RightAction)
+function inverse_translate!(
+    G::GeneralUnitaryMultiplicationGroup,
+    x,
+    p,
+    q,
+    ::RightBackwardAction,
+)
     return mul!(x, q, inv(G, p))
 end
 
@@ -267,9 +288,23 @@ function Random.rand!(rng::AbstractRNG, G::GeneralUnitaryMultiplicationGroup, pX
     return pX
 end
 
-function translate_diff!(G::GeneralUnitaryMultiplicationGroup, Y, p, q, X, ::LeftAction)
+function translate_diff!(
+    G::GeneralUnitaryMultiplicationGroup,
+    Y,
+    p,
+    q,
+    X,
+    ::LeftForwardAction,
+)
     return copyto!(G, Y, p, X)
 end
-function translate_diff!(G::GeneralUnitaryMultiplicationGroup, Y, p, q, X, ::RightAction)
+function translate_diff!(
+    G::GeneralUnitaryMultiplicationGroup,
+    Y,
+    p,
+    q,
+    X,
+    ::RightBackwardAction,
+)
     return copyto!(G, Y, p, inv(G, p) * X * p)
 end

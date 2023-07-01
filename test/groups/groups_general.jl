@@ -84,32 +84,39 @@ include("group_utils.jl")
         @test_throws MethodError compose!(G, p, eg, eg)
 
         @test_throws MethodError translate(G, p, p)
-        @test_throws MethodError translate(G, p, p, LeftAction())
-        @test_throws MethodError translate(G, p, p, RightAction())
+        @test_throws MethodError translate(G, p, p, LeftForwardAction())
+        @test_throws MethodError translate(G, p, p, RightBackwardAction())
         @test_throws MethodError translate!(G, p, p, p)
-        @test_throws MethodError translate!(G, p, p, p, LeftAction())
-        @test_throws MethodError translate!(G, p, p, p, RightAction())
+        @test_throws MethodError translate!(G, p, p, p, LeftForwardAction())
+        @test_throws MethodError translate!(G, p, p, p, RightBackwardAction())
 
         @test_throws MethodError inverse_translate(G, p, p)
-        @test_throws MethodError inverse_translate(G, p, p, LeftAction())
-        @test_throws MethodError inverse_translate(G, p, p, RightAction())
+        @test_throws MethodError inverse_translate(G, p, p, LeftForwardAction())
+        @test_throws MethodError inverse_translate(G, p, p, RightBackwardAction())
         @test_throws MethodError inverse_translate!(G, p, p, p)
-        @test_throws MethodError inverse_translate!(G, p, p, p, LeftAction())
-        @test_throws MethodError inverse_translate!(G, p, p, p, RightAction())
+        @test_throws MethodError inverse_translate!(G, p, p, p, LeftForwardAction())
+        @test_throws MethodError inverse_translate!(G, p, p, p, RightBackwardAction())
 
         @test_throws MethodError translate_diff(G, p, p, X)
-        @test_throws MethodError translate_diff(G, p, p, X, LeftAction())
-        @test_throws MethodError translate_diff(G, p, p, X, RightAction())
+        @test_throws MethodError translate_diff(G, p, p, X, LeftForwardAction())
+        @test_throws MethodError translate_diff(G, p, p, X, RightBackwardAction())
         @test_throws MethodError translate_diff!(G, X, p, p, X)
-        @test_throws MethodError translate_diff!(G, X, p, p, X, LeftAction())
-        @test_throws MethodError translate_diff!(G, X, p, p, X, RightAction())
+        @test_throws MethodError translate_diff!(G, X, p, p, X, LeftForwardAction())
+        @test_throws MethodError translate_diff!(G, X, p, p, X, RightBackwardAction())
 
         @test_throws MethodError inverse_translate_diff(G, p, p, X)
-        @test_throws MethodError inverse_translate_diff(G, p, p, X, LeftAction())
-        @test_throws MethodError inverse_translate_diff(G, p, p, X, RightAction())
+        @test_throws MethodError inverse_translate_diff(G, p, p, X, LeftForwardAction())
+        @test_throws MethodError inverse_translate_diff(G, p, p, X, RightBackwardAction())
         @test_throws MethodError inverse_translate_diff!(G, X, p, p, X)
-        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X, LeftAction())
-        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X, RightAction())
+        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X, LeftForwardAction())
+        @test_throws MethodError inverse_translate_diff!(
+            G,
+            X,
+            p,
+            p,
+            X,
+            RightBackwardAction(),
+        )
 
         @test_throws MethodError exp_lie(G, X)
         @test_throws MethodError exp_lie!(G, p, X)
@@ -119,11 +126,11 @@ include("group_utils.jl")
     end
 
     @testset "Action direction" begin
-        @test switch_direction(LeftAction()) == RightAction()
-        @test switch_direction(RightAction()) == LeftAction()
+        @test switch_direction(LeftForwardAction()) == RightBackwardAction()
+        @test switch_direction(RightBackwardAction()) == LeftForwardAction()
 
-        @test Manifolds._action_order(1, 2, LeftAction()) === (1, 2)
-        @test Manifolds._action_order(1, 2, RightAction()) === (2, 1)
+        @test Manifolds._action_order(1, 2, LeftForwardAction()) === (1, 2)
+        @test Manifolds._action_order(1, 2, RightBackwardAction()) === (2, 1)
     end
 
     @testset "Addition operation" begin
@@ -268,7 +275,7 @@ include("group_utils.jl")
     end
 end
 
-struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
+struct NotImplementedAction <: AbstractGroupAction{LeftForwardAction} end
 
 @testset "General group action tests" begin
     @testset "Not implemented operations" begin
