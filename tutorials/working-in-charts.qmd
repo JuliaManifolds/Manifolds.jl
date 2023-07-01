@@ -143,7 +143,7 @@ We also parametrise the start point and direction.
 θy = 0.2
 φy = -0.1
 
-geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy], t_end)(0.0:dt:t_end)
+geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy], t_end)(0.0:dt:t_end);
 # geo_ps = [Point3f(s[1]) for s in geo]
 # pt_indices = 1:div(length(geo), 10):length(geo)
 # geo_ps_pt = [Point3f(s[1]) for s in geo[pt_indices]]
@@ -155,7 +155,7 @@ geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy], t_end)(0.0:dt:t_end)
 # fig1
 ```
 
-![fig-pt]{tutorials/working-in-charts-transport.png}
+![fig-pt](working-in-charts/working-in-charts-transport.png)
 
 ### Solving the logairthmic map ODE
 
@@ -168,7 +168,7 @@ geo = solve_for([θₚ, φₚ], [θₓ, φₓ], [θy, φy], t_end)(0.0:dt:t_end)
 bvp_i = (0, 0)
 bvp_a1 = [θ₁, φ₁]
 bvp_a2 = [θ₂, φ₂]
-bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i)
+bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i);
 # geo_r = [Point3f(get_point(M, A, bvp_i, p[1:2])) for p in bvp_sol(0.0:0.05:1.0)]
 
 # ax2, fig2 = torus_figure()
@@ -176,4 +176,4 @@ bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i)
 # fig2
 ```
 
-![fig-geodesic]{tutorials/working-in-charts-geodesic.png}
+![fig-geodesic](working-in-charts/working-in-charts-geodesic.png)
