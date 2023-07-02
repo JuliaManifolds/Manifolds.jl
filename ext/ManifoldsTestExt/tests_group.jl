@@ -562,10 +562,10 @@ function test_action(
                 Aswitch = switch_direction(A)
                 if isa(A, AbstractGroupAction{LeftForwardAction})
                     Test.@test direction(A) === LeftForwardAction()
-                    Test.@test isa(Aswitch, AbstractGroupAction{RightBackwardAction})
-                    Test.@test direction(Aswitch) === RightBackwardAction()
+                    Test.@test isa(Aswitch, AbstractGroupAction{RightForwardAction})
+                    Test.@test direction(Aswitch) === RightForwardAction()
                 else
-                    Test.@test direction(A) === RightBackwardAction()
+                    Test.@test direction(A) === RightForwardAction()
                     Test.@test isa(Aswitch, AbstractGroupAction{LeftForwardAction})
                     Test.@test direction(Aswitch) === LeftForwardAction()
                 end
