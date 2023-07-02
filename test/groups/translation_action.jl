@@ -9,7 +9,7 @@ include("group_utils.jl")
 
     @test repr(A) == "TranslationAction($(repr(M)), $(repr(G)), LeftForwardAction())"
     @test repr(switch_direction(A)) ==
-          "TranslationAction($(repr(M)), $(repr(G)), RightBackwardAction())"
+          "TranslationAction($(repr(M)), $(repr(G)), RightForwardAction())"
 
     types_a = [Matrix{Float64}]
 

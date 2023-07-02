@@ -65,9 +65,25 @@ include("group_utils.jl")
     @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftForwardAction())"
     @test repr(A_right) == "GroupOperationAction($(repr(G)), RightBackwardAction())"
 
-    test_action(A_left, a_pts, m_pts, X_pts; test_optimal_alignment=true, test_diff=true)
+    test_action(
+        A_left,
+        a_pts,
+        m_pts,
+        X_pts;
+        test_optimal_alignment=true,
+        test_diff=true,
+        test_switch_direction=Manifolds.SimultaneousSwitch(),
+    )
 
-    test_action(A_right, a_pts, m_pts, X_pts; test_optimal_alignment=true, test_diff=true)
+    test_action(
+        A_right,
+        a_pts,
+        m_pts,
+        X_pts;
+        test_optimal_alignment=true,
+        test_diff=true,
+        test_switch_direction=Manifolds.SimultaneousSwitch(),
+    )
 
     @testset "apply_diff_group" begin
         @test apply_diff_group(A_left, a_pts[1], X_pts[1], m_pts[1]) ≈

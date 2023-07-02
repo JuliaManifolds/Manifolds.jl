@@ -32,8 +32,11 @@ base_group(A::TranslationAction) = A.Rn
 
 group_manifold(A::TranslationAction) = A.manifold
 
-function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
-    return TranslationAction(A.manifold, A.Rn, switch_direction(TAD()))
+function switch_direction(
+    A::TranslationAction{TM,TSO,TAD},
+    ::LeftRightSwitch=LeftRightSwitch(),
+) where {TM<:AbstractManifold,TSO<:TranslationGroup,TAD<:ActionDirection}
+    return TranslationAction(A.manifold, A.Rn, switch_direction(TAD(), LeftRightSwitch()))
 end
 
 adjoint_apply_diff_group(::TranslationAction, a, X, p) = X
