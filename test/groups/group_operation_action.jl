@@ -14,8 +14,8 @@ include("group_utils.jl")
     @test repr(A_left) == "GroupOperationAction($(repr(G)), LeftForwardAction())"
     @test repr(A_right) == "GroupOperationAction($(repr(G)), RightBackwardAction())"
 
-    @test switch_direction(LeftForwardAction()) == RightBackwardAction()
-    @test switch_direction(RightBackwardAction()) == LeftForwardAction()
+    @test switch_direction(LeftForwardAction()) === RightBackwardAction()
+    @test switch_direction(RightBackwardAction()) === LeftForwardAction()
 
     for type in types
         a_pts = convert.(type, [reshape(i:(i + 3), 2, 2) for i in 1:3])
@@ -30,6 +30,7 @@ include("group_utils.jl")
             test_optimal_alignment=false,
             test_diff=false,
             atol=atol,
+            test_switch_direction=Manifolds.SimultaneousSwitch(),
         )
 
         test_action(
@@ -39,6 +40,7 @@ include("group_utils.jl")
             test_optimal_alignment=false,
             test_diff=false,
             atol=atol,
+            test_switch_direction=Manifolds.SimultaneousSwitch(),
         )
     end
 

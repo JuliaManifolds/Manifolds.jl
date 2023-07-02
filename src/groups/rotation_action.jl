@@ -36,12 +36,15 @@ base_group(A::RotationAction) = A.SOn
 
 group_manifold(A::RotationAction) = A.manifold
 
-function switch_direction(A::RotationAction{TM,TSO,TAD}) where {TM,TSO,TAD}
-    return RotationAction(A.manifold, A.SOn, switch_direction(TAD()))
+function switch_direction(
+    A::RotationAction{TM,TSO,TAD},
+    ::LeftRightSwitch=LeftRightSwitch(),
+) where {TM<:AbstractManifold,TSO<:SpecialOrthogonal,TAD<:ActionDirection}
+    return RotationAction(A.manifold, A.SOn, switch_direction(TAD(), LeftRightSwitch()))
 end
 
 apply(::RotationActionOnVector{N,F,LeftForwardAction}, a, p) where {N,F} = a * p
-function apply(A::RotationActionOnVector{N,F,RightBackwardAction}, a, p) where {N,F}
+function apply(A::RotationActionOnVector{N,F,RightForwardAction}, a, p) where {N,F}
     return inv(base_group(A), a) * p
 end
 
@@ -50,7 +53,7 @@ apply!(::RotationActionOnVector{N,F,LeftForwardAction}, q, a, p) where {N,F} = m
 function inverse_apply(A::RotationActionOnVector{N,F,LeftForwardAction}, a, p) where {N,F}
     return inv(base_group(A), a) * p
 end
-inverse_apply(::RotationActionOnVector{N,F,RightBackwardAction}, a, p) where {N,F} = a * p
+inverse_apply(::RotationActionOnVector{N,F,RightForwardAction}, a, p) where {N,F} = a * p
 
 apply_diff(::RotationActionOnVector{N,F,LeftForwardAction}, a, p, X) where {N,F} = a * X
 function apply_diff(
@@ -61,7 +64,7 @@ function apply_diff(
 ) where {N,F}
     return X
 end
-function apply_diff(A::RotationActionOnVector{N,F,RightBackwardAction}, a, p, X) where {N,F}
+function apply_diff(A::RotationActionOnVector{N,F,RightForwardAction}, a, p, X) where {N,F}
     return inv(base_group(A), a) * X
 end
 
@@ -75,7 +78,7 @@ function apply_diff!(
     return mul!(Y, a, X)
 end
 function apply_diff!(
-    A::RotationActionOnVector{N,F,RightBackwardAction},
+    A::RotationActionOnVector{N,F,RightForwardAction},
     Y,
     a,
     p,
@@ -113,7 +116,7 @@ function inverse_apply_diff(
     return inv(base_group(A), a) * X
 end
 function inverse_apply_diff(
-    A::RotationActionOnVector{N,F,RightBackwardAction},
+    A::RotationActionOnVector{N,F,RightForwardAction},
     a,
     p,
     X,
@@ -134,7 +137,7 @@ function optimal_alignment(
     return convert(typeof(Xmul), Ostar)
 end
 function optimal_alignment(
-    A::RotationActionOnVector{N,T,RightBackwardAction},
+    A::RotationActionOnVector{N,T,RightForwardAction},
     p,
     q,
 ) where {N,T}

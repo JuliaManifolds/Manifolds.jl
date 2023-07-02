@@ -550,25 +550,39 @@ function test_action(
     test_mutating_group=true,
     test_mutating_action=true,
     test_diff=false,
-    test_switch_direction=true,
+    test_switch_direction=Manifolds.LeftRightSwitch(),
 )
     G = base_group(A)
     M = group_manifold(A)
     e = Identity(G)
 
     Test.@testset "Basic action properties" begin
-        test_switch_direction && Test.@testset "Direction" begin
-            Aswitch = switch_direction(A)
-            if isa(A, AbstractGroupAction{LeftForwardAction})
-                Test.@test direction(A) === LeftForwardAction()
-                Test.@test isa(Aswitch, AbstractGroupAction{RightBackwardAction})
-                Test.@test direction(Aswitch) === RightBackwardAction()
-            else
-                Test.@test direction(A) === RightBackwardAction()
-                Test.@test isa(Aswitch, AbstractGroupAction{LeftForwardAction})
-                Test.@test direction(Aswitch) === LeftForwardAction()
+        test_switch_direction === Manifolds.LeftRightSwitch() &&
+            Test.@testset "Direction" begin
+                Aswitch = switch_direction(A)
+                if isa(A, AbstractGroupAction{LeftForwardAction})
+                    Test.@test direction(A) === LeftForwardAction()
+                    Test.@test isa(Aswitch, AbstractGroupAction{RightBackwardAction})
+                    Test.@test direction(Aswitch) === RightBackwardAction()
+                else
+                    Test.@test direction(A) === RightBackwardAction()
+                    Test.@test isa(Aswitch, AbstractGroupAction{LeftForwardAction})
+                    Test.@test direction(Aswitch) === LeftForwardAction()
+                end
             end
-        end
+        test_switch_direction === Manifolds.SimultaneousSwitch() &&
+            Test.@testset "Direction" begin
+                Aswitch = switch_direction(A)
+                if isa(A, AbstractGroupAction{LeftForwardAction})
+                    Test.@test direction(A) === LeftForwardAction()
+                    Test.@test isa(Aswitch, AbstractGroupAction{RightBackwardAction})
+                    Test.@test direction(Aswitch) === RightBackwardAction()
+                else
+                    Test.@test direction(A) === RightBackwardAction()
+                    Test.@test isa(Aswitch, AbstractGroupAction{LeftForwardAction})
+                    Test.@test direction(Aswitch) === LeftForwardAction()
+                end
+            end
 
         Test.@testset "Closed" begin
             Test.@testset "over actions" begin

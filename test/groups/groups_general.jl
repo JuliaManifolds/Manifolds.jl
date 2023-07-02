@@ -126,8 +126,28 @@ include("group_utils.jl")
     end
 
     @testset "Action direction" begin
-        @test switch_direction(LeftForwardAction()) == RightBackwardAction()
-        @test switch_direction(RightBackwardAction()) == LeftForwardAction()
+        @test switch_direction(LeftBackwardAction()) === RightForwardAction()
+        @test switch_direction(LeftForwardAction()) === RightBackwardAction()
+        @test switch_direction(RightBackwardAction()) === LeftForwardAction()
+        @test switch_direction(RightForwardAction()) === LeftBackwardAction()
+
+        @test switch_direction(LeftBackwardAction(), Manifolds.LeftRightSwitch()) ===
+              RightBackwardAction()
+        @test switch_direction(LeftForwardAction(), Manifolds.LeftRightSwitch()) ===
+              RightForwardAction()
+        @test switch_direction(RightBackwardAction(), Manifolds.LeftRightSwitch()) ===
+              LeftBackwardAction()
+        @test switch_direction(RightForwardAction(), Manifolds.LeftRightSwitch()) ===
+              LeftForwardAction()
+
+        @test switch_direction(LeftBackwardAction(), Manifolds.ForwardBackwardSwitch()) ===
+              LeftForwardAction()
+        @test switch_direction(LeftForwardAction(), Manifolds.ForwardBackwardSwitch()) ===
+              LeftBackwardAction()
+        @test switch_direction(RightBackwardAction(), Manifolds.ForwardBackwardSwitch()) ===
+              RightForwardAction()
+        @test switch_direction(RightForwardAction(), Manifolds.ForwardBackwardSwitch()) ===
+              RightBackwardAction()
 
         @test Manifolds._action_order(1, 2, LeftForwardAction()) === (1, 2)
         @test Manifolds._action_order(1, 2, RightBackwardAction()) === (2, 1)
