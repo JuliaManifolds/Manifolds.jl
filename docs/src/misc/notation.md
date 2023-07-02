@@ -53,4 +53,6 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``B`` | a vector bundle | |
 | ``\mathcal T_{q\gets p}X`` | vector transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``
 | ``\mathcal T_{p,Y}X`` | vector transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, where ``q`` is deretmined by ``Y``, for example using the exponential map or some retraction.
+| ``\operatorname{Vol}(\mathcal M)`` | volume of manifold ``\mathcal M`` | |
+| ``\theta_p(X)`` | volume density for vector ``X`` tangent at point ``p`` | |
 | ``0_k`` | the ``k\times k`` zero matrix. | |

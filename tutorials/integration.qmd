@@ -18,7 +18,8 @@ The basic concepts are derived from geometric measure theory.
 In principle, there are many ways in which a manifold can be equipped with a measure that can be later used to define an integral.
 One of the most popular ways is based on pushing the Lebesgue measure on a tangent space through the exponential map.
 Any other suitable atlas could be used, not just the one defined by normal coordinates, though each one requires different volume density corrections due to the Jacobian determinant of the pushforward.
-`Manifolds.jl` provides the function ``[`volume_density`](@ref)``{=commonmark} that calculates that quantity.
+`Manifolds.jl` provides the function ``[`volume_density`](@ref)``{=commonmark} that calculates that quantity, denoted $\theta_p(X)$.
+See for example [^leBrigantPuechmorel2019], Definition 11, for a precise description using Jacobi fields.
 
 While many sources define volume density as a function of two points, `Manifolds.jl` decided to use the more general point-tangent vector formulation. The two-points variant can be implemented as
 ```{julia}
@@ -27,7 +28,7 @@ volume_density_two_points(M::AbstractManifold, p, q) = volume_density(M, p, log(
 ```
 
 The simplest way to of integrating a function on a compact manifold is through a Monte Carlo integrator.
-A simple variant can be implemented as follows:
+A simple variant can be implemented as follows (assuming uniform distribution of `rand`):
 
 ```{julia}
 using LinearAlgebra, Distributions, SpecialFunctions
@@ -59,12 +60,13 @@ See [^BoyaSudarshanTilma2003] for some considerations on symmetric spaces.
 
 ## Distributions
 
-We will now try to verify that volume density correction correctly changes probability density of a (wrapped) normal distribution.
-`pdf_tangent_space` represents probability density of a normally distributed random variable in the tangent space.
-`pdf_manifold` refers to the probability density of the distribution from the tangent space wrapped using exponential map on the manifold.
+We will now try to verify that volume density correction correctly changes probability density of an exponential-wrapped normal distribution.
+`pdf_tangent_space` represents probability density of a normally distributed random variable $X_T$ in the tangent space.
+`pdf_manifold` refers to the probability density of the distribution $X_M$ from the tangent space wrapped using exponential map on the manifold.
 ``[`volume_density`](@ref)``{=commonmark} function calculates the necessary correction.
 
-Note that our simplified `pdf_manifold` assumes that the probability mass of `pdf_tangent_space` outside of (local) injectivity radius is negligible. If it was not, a summation over vectors in the tangent plane pointing at `q` would have to be performed.
+Note that our simplified `pdf_manifold` assumes that the probability mass of `pdf_tangent_space` outside of (local) injectivity radius is negligible.
+If it was not, a summation over vectors in the tangent plane pointing at `q` would have to be performed.
 
 ```{julia}
 function pdf_tangent_space(M::AbstractManifold, p)
@@ -86,7 +88,23 @@ end
 println(simple_mc_integrate(Sphere(2), pdf_manifold; N=1000000))
 ```
 
-We can also make a Pelletier's isotropic kernel density estimator:
+Remarkably, exponential-wrapped distributions possess three important qualities [^ChevallierLiLuDunson2022]:
+
+* Densities of $X_M$ are explicit. There is no normalization constant that needs to be computed like in truncated distributions.
+* Sampling from $X_M$ is easy. It suffices to get a sample from $X_T$ and pass it to the exponential map.
+* If mean of $X_T$ is 0, then there is a simple correspondence between moments of $X_M$ and $X_T$.
+
+## Kernel density estimation
+
+We can also make a Pelletier's isotropic kernel density estimator. Given points $p_1, p_2, \dots, p_n$ on $d$-dimensional manifold $\mathcal M$
+the density at point $q$ is defined as
+$$
+f(q) = \frac{1}{n h^d} \sum_{i=1}^n \frac{1}{\theta_q(\log_q(p_i))}K\left( \frac{d(q, p_i)}{h} \right),
+$$
+
+where $h$ is the bandwidth, a small positive number less than the injectivity radius of $\mathcal M$ and $K\colon\mathbb{R}\to\mathbb{R}$ is a kernel function.
+Note that Pelletier's estimator can only use radially-symmetric kernels.
+The radially symmetric multivariate Epanechnikov kernel used in the example below is described in [^LangrenéWarin2019].
 
 ```{julia}
 struct PelletierKDE{TM<:AbstractManifold,TPts<:AbstractVector}
@@ -123,16 +141,26 @@ println(simple_mc_integrate(Sphere(2), kde; N=1000000))
 println(kde(rand(M)))
 ```
 
-The radially symmetric multivariate Epanechnikov kernel is described in [^LangrenéWarin2019].
+
 
 ## References
 
 [^Tornier2020]:
     > S. Tornier, “Haar Measures.” arXiv, Jun. 19, 2020.
-    > doi: 10.48550/arXiv.2006.10956.
+    > doi: [10.48550/arXiv.2006.10956](https://doi.org/10.48550/arXiv.2006.10956).
 
 [^LangrenéWarin2019]:
     > N. Langrené and X. Warin, “Fast and Stable Multivariate Kernel Density Estimation by
     > Fast Sum Updating,” Journal of Computational and Graphical Statistics, vol. 28, no. 3,
     > pp. 596–608, Jul. 2019,
-    > doi: 10.1080/10618600.2018.1549052.
+    > doi: [10.1080/10618600.2018.1549052](https://doi.org/10.1080/10618600.2018.1549052).
+
+[^leBrigantPuechmorel2019]:
+    > A. le Brigant and S. Puechmorel, “Approximation of Densities on Riemannian Manifolds,”
+    > Entropy, vol. 21, no. 1, Art. no. 1, Jan. 2019,
+    > doi: [10.3390/e21010043](https://doi.org/10.3390/e21010043).
+
+[^ChevallierLiLuDunson2022]:
+    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
+    > symmetric spaces.” arXiv, Oct. 09, 2022.
+    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
