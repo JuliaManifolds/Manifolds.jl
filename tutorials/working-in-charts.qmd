@@ -88,7 +88,7 @@ end
 ## Values for the geodesic
 
 `solve_for` is a helper function that solves a parallel transport along geodesic problem on the torus `M`.
-`p0x` is the $(ϴ, φ)$ parametrization of the point from which we will transport the vector.
+`p0x` is the $(\theta, \varphi)$ parametrization of the point from which we will transport the vector.
 We first calculate the coordinates in the embedding of `p0x` and store it as `p`, and then get the initial chart from atlas `A` appropriate for starting working at point `p`.
 The vector we transport has coordinates `Y_transp` in the induced tangent space basis of chart `i_p0x`.
 The function returns the full solution to the parallel transport problem, containing the sequence of charts that was used and solutions of differential equations computed using `OrdinaryDiffEq`.
@@ -104,7 +104,7 @@ We won't draw the transported vector at every point as there would be too many a
 
 The logarithmic map will be solved between points with parametrization `bvp_a1` and `bvp_a2` in chart `bvp_i`.
 The result is assigned to variable `bvp_sol` and then sampled with time step 0.05. The result of this sampling is converted from parameters in chart `bvp_i` to point in the embedding and stored in `geo_r`.
-"""
+
 
 ```{julia}
 function solve_for(p0x, X_p0x, Y_transp, T)
