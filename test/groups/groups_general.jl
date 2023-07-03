@@ -149,6 +149,7 @@ include("group_utils.jl")
         @test switch_direction(RightForwardAction(), Manifolds.ForwardBackwardSwitch()) ===
               RightBackwardAction()
 
+        G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
         @test Manifolds._action_order(G, 1, 2, LeftForwardAction()) === (1, 2)
         @test Manifolds._action_order(G, 1, 2, RightBackwardAction()) === (2, 1)
     end

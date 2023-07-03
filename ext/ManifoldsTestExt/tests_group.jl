@@ -559,11 +559,11 @@ function test_action(
     e = Identity(G)
 
     Test.@testset "Basic action properties" begin # COV_EXCL_LINE
-        Test.@testset "Direction" begin
+        test_switch_direction !== false && Test.@testset "Direction" begin
             Aswitch = switch_direction(A)
 
             Test.@test direction(A) === _direction_from_type(A)
-            sd = switch_direction(_direction_from_type(A))
+            sd = switch_direction(_direction_from_type(A), test_switch_direction)
             Test.@test isa(Aswitch, AbstractGroupAction{typeof(sd)})
             Test.@test direction(Aswitch) === sd
         end
