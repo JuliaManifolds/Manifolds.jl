@@ -234,6 +234,15 @@ i.e. of the 1-dimensional hyperbolic space,
 """
 manifold_dimension(::PositiveNumbers) = 1
 
+@doc raw"""
+    manifold_volume(M::PositiveNumbers)
+
+Return volume of [`PositiveNumbers`](@ref) `M`, i.e. `Inf`.
+"""
+function manifold_volume(::PositiveNumbers)
+    return Inf
+end
+
 mid_point(M::PositiveNumbers, p1, p2) = exp(M, p1, log(M, p1, p2) / 2)
 
 @inline LinearAlgebra.norm(::PositiveNumbers, p, X) = sum(abs.(X ./ p))
@@ -309,6 +318,18 @@ function vector_transport_direction(
 )
     q = exp(M, p, Y)
     return vector_transport_to(M, p, X, q, m)
+end
+
+@doc raw"""
+    volume_density(M::PositiveNumbers, p, X)
+
+Compute volume density function of [`PositiveNumbers`](@ref). The formula reads
+```math
+\theta_p(X) = \exp(X / p)
+```
+"""
+function volume_density(::PositiveNumbers, p, X)
+    return exp(X / p)
 end
 
 zero_vector(::PositiveNumbers, p::Real) = zero(p)

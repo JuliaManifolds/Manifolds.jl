@@ -369,7 +369,7 @@ manifold_dimension(M::AbstractSphere) = manifold_dimension(get_embedding(M)) - 1
 Volume of the ``n``-dimensional [`Sphere`](@ref) `M`. The formula reads
 
 ````math
-\frac{2\pi^{(n+1)/2}}{Γ((n+1)/2)},
+\operatorname{Vol}(𝕊^{n}) = \frac{2\pi^{(n+1)/2}}{Γ((n+1)/2)},
 ````
 
 where ``Γ`` denotes the [Gamma function](https://en.wikipedia.org/wiki/Gamma_function).
