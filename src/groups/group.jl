@@ -736,18 +736,23 @@ lie_bracket(G::AbstractDecoratorManifold, X, Y)
 
 @trait_function lie_bracket!(M::AbstractDecoratorManifold, Z, X, Y)
 
-_action_order(p, q, ::LeftForwardAction) = (p, q)
-_action_order(p, q, ::RightBackwardAction) = (q, p)
+_action_order(BG::AbstractDecoratorManifold, p, q, ::LeftForwardAction) = (p, q)
+_action_order(BG::AbstractDecoratorManifold, p, q, ::LeftBackwardAction) = (q, inv(BG, p))
+_action_order(BG::AbstractDecoratorManifold, p, q, ::RightForwardAction) = (inv(BG, p), q)
+_action_order(BG::AbstractDecoratorManifold, p, q, ::RightBackwardAction) = (q, p)
 
 @doc raw"""
     translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirection=LeftForwardAction()])
 
 Translate group element $q$ by $p$ with the translation $τ_p$ with the specified
-`conv`ention, either left ($L_p$) or right ($R_p$), defined as
+`conv`ention, either left forward ($L_p$), left backward ($R'_p$), right backward ($R_p$)
+or right forward ($L'_p$), defined as
 ```math
 \begin{aligned}
 L_p &: q ↦ p \circ q\\
-R_p &: q ↦ q \circ p.
+L'_p &: q ↦ p^{-1} \circ q\\
+R_p &: q ↦ q \circ p\\
+R'_p &: q ↦ q \circ p^{-1}.
 \end{aligned}
 ```
 """
@@ -766,7 +771,7 @@ function translate(
     conv::ActionDirection,
 )
     BG = base_group(G)
-    return compose(BG, _action_order(p, q, conv)...)
+    return compose(BG, _action_order(BG, p, q, conv)...)
 end
 
 @trait_function translate!(
@@ -785,7 +790,7 @@ function translate!(
     conv::ActionDirection,
 )
     BG = base_group(G)
-    return compose!(BG, X, _action_order(p, q, conv)...)
+    return compose!(BG, X, _action_order(BG, p, q, conv)...)
 end
 
 @doc raw"""
