@@ -13,6 +13,9 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 
 [compat]
+CSV = "0.10"
+DataFrames = "1"
 IJulia = "1"
 Manifolds = "0.8.46"
 ManifoldsBase = "0.14.5"
+MultivariateStats = "0.10"

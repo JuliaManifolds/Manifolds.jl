@@ -2,7 +2,7 @@
 title: Working in charts
 ---
 
-In this tutorial we will learn how to use Kendall's shape space to analyze hand gesture data.
+In this tutorial we will learn how to use charts for basic geometric operations like exponential map, logarithmic map and parallel transport.
 
 ```{julia}
 #| echo: false
@@ -176,3 +176,5 @@ bvp_sol = Manifolds.solve_chart_log_bvp(M, bvp_a1, bvp_a2, A, bvp_i);
 ```
 
 ![fig-geodesic](working-in-charts/working-in-charts-geodesic.png)
+
+An interactive Pluto version of this tutorial is available in file `tutorials/working-in-charts.jl`.
