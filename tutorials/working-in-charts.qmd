@@ -14,7 +14,6 @@ Pkg.activate("."); # for reproducibility use the local tutorial environment.
 using Markdown
 ```
 
-## Working in Charts: the embedded Torus
 
 There are two conceptually different approaches to working on a manifold: working in charts and chart-free representations.
 

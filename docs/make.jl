@@ -89,8 +89,8 @@ makedocs(
         "Home" => "index.md",
         "How to..." => [
             "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
-            "Hand gesture analysis" => "tutorials/hand-gestures.md",
-            "Working in charts" => "tutorials/working-in-charts.md",
+            "work in charts" => "tutorials/working-in-charts.md",
+            "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [

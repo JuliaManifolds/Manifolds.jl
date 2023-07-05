@@ -16,11 +16,7 @@ using Markdown
 
 
 ```{julia}
-using Manifolds
-using CSV
-using DataFrames
-using Plots
-using MultivariateStats
+using Manifolds, CSV, DataFrames, Plots, MultivariateStats
 
 function load_hands()
     hands_url = "https://raw.githubusercontent.com/geomstats/geomstats/master/geomstats/datasets/data/hands/hands.txt"
@@ -46,7 +42,7 @@ Mshape = KendallsShapeSpace(3, 22)
 ```
 
 Hands read from the dataset are projected to the shape space to remove translation
-and scaling variability. Rotational variability is then handled using quotient
+and scaling variability. Rotational variability is then handled using the quotient
 structure of ``[`KendallsShapeSpace`](@ref)``{=commonmark}
 ```{julia}
 #| output: false
@@ -61,10 +57,10 @@ mean_hand = mean(Mshape, hands_projected)
 hand_logs = [log(Mshape, mean_hand, p) for p in hands_projected]
 ```
 
-For tangent PCA, we need coordinates in a basis.
+For a tangent PCA, we need coordinates in a basis.
 Some libraries skip this step because the representation of tangent vectors
 forms a linear subspace of an Euclidean space so PCA automatically detects
-which directions have no variance but this is a more principled way to solve
+which directions have no variance but this is a more generic way to solve
 this issue.
 ```{julia}
 #| output: false
@@ -75,16 +71,13 @@ hand_log_coordinates = [get_coordinates(Mshape, mean_hand, X, B) for X in hand_l
 This code prepares data for MultivariateStats -- `mean=0` is set because we've centered
 the data geometrically to `mean_hand` in the code above.
 ```{julia}
-
 red_coords = reduce(hcat, hand_log_coordinates)
 fp = fit(PCA, red_coords; mean=0)
 ```
 
 Now let's show explained variance of each principal component.
 ```{julia}
-
 plot(principalvars(fp), title="explained variance", label="Tangent PCA")
-
 ```
 
 Also, let's look at how projections on the first two pricipal components look like.
