@@ -2,7 +2,7 @@
     TranslationAction(
         M::AbstractManifold,
         Rn::TranslationGroup,
-        AD::ActionDirection = LeftAction(),
+        AD::ActionDirection = LeftForwardAction(),
     )
 
 Space of actions of the [`TranslationGroup`](@ref) $\mathrm{T}(n)$ on a Euclidean-like
@@ -19,7 +19,7 @@ end
 function TranslationAction(
     M::AbstractManifold,
     Rn::TranslationGroup,
-    ::TAD=LeftAction(),
+    ::TAD=LeftForwardAction(),
 ) where {TAD<:ActionDirection}
     return TranslationAction{typeof(M),typeof(Rn),TAD}(M, Rn)
 end
@@ -32,8 +32,11 @@ base_group(A::TranslationAction) = A.Rn
 
 group_manifold(A::TranslationAction) = A.manifold
 
-function switch_direction(A::TranslationAction{TM,TRN,TAD}) where {TM,TRN,TAD}
-    return TranslationAction(A.manifold, A.Rn, switch_direction(TAD()))
+function switch_direction(
+    A::TranslationAction{TM,TSO,TAD},
+    ::LeftRightSwitch=LeftRightSwitch(),
+) where {TM<:AbstractManifold,TSO<:TranslationGroup,TAD<:ActionDirection}
+    return TranslationAction(A.manifold, A.Rn, switch_direction(TAD(), LeftRightSwitch()))
 end
 
 adjoint_apply_diff_group(::TranslationAction, a, X, p) = X
@@ -62,11 +65,17 @@ function apply_diff!(A::TranslationAction, Y, a, p, X)
     return copyto!(A.manifold, Y, p, X)
 end
 
-function apply_diff_group(::TranslationAction{N,F,LeftAction}, a, X, p) where {N,F}
+function apply_diff_group(::TranslationAction{N,F,LeftForwardAction}, a, X, p) where {N,F}
     return X
 end
 
-function apply_diff_group!(A::TranslationAction{N,F,LeftAction}, Y, a, X, p) where {N,F}
+function apply_diff_group!(
+    A::TranslationAction{N,F,LeftForwardAction},
+    Y,
+    a,
+    X,
+    p,
+) where {N,F}
     copyto!(A.manifold, Y, p, X)
     return Y
 end

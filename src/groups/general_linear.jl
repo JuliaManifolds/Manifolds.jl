@@ -165,8 +165,8 @@ exp_lie!(::GeneralLinear{2}, q, X) = copyto!(q, exp(SizedMatrix{2,2}(X)))
 
 inner(::GeneralLinear, p, X, Y) = dot(X, Y)
 
-inverse_translate_diff(::GeneralLinear, p, q, X, ::LeftAction) = X
-inverse_translate_diff(::GeneralLinear, p, q, X, ::RightAction) = p * X / p
+inverse_translate_diff(::GeneralLinear, p, q, X, ::LeftForwardAction) = X
+inverse_translate_diff(::GeneralLinear, p, q, X, ::RightBackwardAction) = p * X / p
 
 function inverse_translate_diff!(G::GeneralLinear, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
@@ -203,7 +203,7 @@ function log(M::GeneralLinear, p, q)
 end
 
 function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
-    pinvq = inverse_translate(G, p, q, LeftAction())
+    pinvq = inverse_translate(G, p, q, LeftForwardAction())
     𝔽 === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
     if isnormal(pinvq; atol=sqrt(eps(real(eltype(pinvq)))))
         log_safe!(X, pinvq)
@@ -218,7 +218,7 @@ function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
         inverse_retract!(Gᵣ, Xᵣ, Identity(G), pinvqᵣ, inverse_retraction)
         unrealify!(X, Xᵣ, 𝔽, n)
     end
-    translate_diff!(G, X, p, Identity(G), X, LeftAction())
+    translate_diff!(G, X, p, Identity(G), X, LeftForwardAction())
     return X
 end
 function log!(::GeneralLinear{1}, X, p, q)
@@ -268,8 +268,8 @@ end
 
 Base.show(io::IO, ::GeneralLinear{n,𝔽}) where {n,𝔽} = print(io, "GeneralLinear($n, $𝔽)")
 
-translate_diff(::GeneralLinear, p, q, X, ::LeftAction) = X
-translate_diff(::GeneralLinear, p, q, X, ::RightAction) = p \ X * p
+translate_diff(::GeneralLinear, p, q, X, ::LeftForwardAction) = X
+translate_diff(::GeneralLinear, p, q, X, ::RightBackwardAction) = p \ X * p
 
 function translate_diff!(G::GeneralLinear, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))

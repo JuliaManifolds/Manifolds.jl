@@ -45,7 +45,7 @@ function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
 end
 
 function check_vector(G::SpecialLinear, p, X; kwargs...)
-    trX = tr(inverse_translate_diff(G, p, p, X, LeftAction()))
+    trX = tr(inverse_translate_diff(G, p, p, X, LeftForwardAction()))
     if !isapprox(trX, 0; kwargs...)
         return DomainError(
             trX,
@@ -61,8 +61,8 @@ embed(::SpecialLinear, p, X) = X
 
 get_embedding(::SpecialLinear{n,𝔽}) where {n,𝔽} = GeneralLinear(n, 𝔽)
 
-inverse_translate_diff(::SpecialLinear, p, q, X, ::LeftAction) = X
-inverse_translate_diff(::SpecialLinear, p, q, X, ::RightAction) = p * X / p
+inverse_translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X
+inverse_translate_diff(::SpecialLinear, p, q, X, ::RightBackwardAction) = p * X / p
 
 function inverse_translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
@@ -120,16 +120,16 @@ where the last expression uses the tangent space representation as the Lie algeb
 project(::SpecialLinear, p, X)
 
 function project!(G::SpecialLinear{n}, Y, p, X) where {n}
-    inverse_translate_diff!(G, Y, p, p, X, LeftAction())
+    inverse_translate_diff!(G, Y, p, p, X, LeftForwardAction())
     Y[diagind(n, n)] .-= tr(Y) / n
-    translate_diff!(G, Y, p, p, Y, LeftAction())
+    translate_diff!(G, Y, p, p, Y, LeftForwardAction())
     return Y
 end
 
 Base.show(io::IO, ::SpecialLinear{n,𝔽}) where {n,𝔽} = print(io, "SpecialLinear($n, $𝔽)")
 
-translate_diff(::SpecialLinear, p, q, X, ::LeftAction) = X
-translate_diff(::SpecialLinear, p, q, X, ::RightAction) = p \ X * p
+translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X
+translate_diff(::SpecialLinear, p, q, X, ::RightBackwardAction) = p \ X * p
 
 function translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))

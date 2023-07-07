@@ -74,7 +74,7 @@ include("../utils.jl")
     adjoint_action!(AG, Xaa, p, X2)
     @test isapprox(G, e, Xaa.value, adjoint_action(G, p, X2.value))
 
-    for conv in (LeftAction(), RightAction())
+    for conv in (LeftForwardAction(), RightBackwardAction())
         @test translate(AG, p2, q2, conv) isa ValidationMPoint
         @test isapprox(G, translate(AG, p2, q2, conv).value, translate(G, p, q, conv))
 
@@ -94,7 +94,7 @@ include("../utils.jl")
         @test isapprox(G, pinvq.value, inverse_translate(G, p, q, conv))
     end
 
-    for conv in (LeftAction(), RightAction())
+    for conv in (LeftForwardAction(), RightBackwardAction())
         @test translate_diff(AG, q2, p2, X2, conv; atol=1e-10) isa ValidationTVector
         @test isapprox(
             G,

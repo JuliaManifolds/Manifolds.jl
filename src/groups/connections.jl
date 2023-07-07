@@ -61,7 +61,7 @@ function exp(
     p,
     X,
 ) where {𝔽}
-    Y = inverse_translate_diff(M.manifold, p, p, X, LeftAction())
+    Y = inverse_translate_diff(M.manifold, p, p, X, LeftForwardAction())
     return compose(M.manifold, p, exp_lie(M.manifold, Y))
 end
 function exp(
@@ -87,7 +87,7 @@ function exp!(
     p,
     X,
 ) where {𝔽}
-    Y = inverse_translate_diff(M.manifold, p, p, X, LeftAction())
+    Y = inverse_translate_diff(M.manifold, p, p, X, LeftForwardAction())
     return compose!(M.manifold, q, p, exp_lie(M.manifold, Y))
 end
 
@@ -122,7 +122,7 @@ function log(
 ) where {𝔽}
     pinvq = compose(M.manifold, inv(M.manifold, p), q)
     Y = log_lie(M.manifold, pinvq)
-    return translate_diff(M.manifold, p, Identity(M.manifold), Y, LeftAction())
+    return translate_diff(M.manifold, p, Identity(M.manifold), Y, LeftForwardAction())
 end
 
 function log!(
@@ -147,11 +147,11 @@ Transport tangent vector `X` at point `p` on the group manifold `M` with the
 [`CartanSchoutenMinus`](@ref) connection to point `q`. See [^Pennec2020] for details.
 """
 function parallel_transport_to(M::CartanSchoutenMinusGroup, p, X, q)
-    return inverse_translate_diff(M.manifold, q, p, X, LeftAction())
+    return inverse_translate_diff(M.manifold, q, p, X, LeftForwardAction())
 end
 
 function parallel_transport_to!(M::CartanSchoutenMinusGroup, Y, p, X, q)
-    return inverse_translate_diff!(M.manifold, Y, q, p, X, LeftAction())
+    return inverse_translate_diff!(M.manifold, Y, q, p, X, LeftForwardAction())
 end
 
 """
@@ -163,7 +163,7 @@ Transport tangent vector `X` at point `p` on the group manifold `M` with the
 parallel_transport_to(M::CartanSchoutenPlusGroup, p, X, q)
 
 function parallel_transport_to!(M::CartanSchoutenPlusGroup, Y, p, X, q)
-    return inverse_translate_diff!(M.manifold, Y, q, p, X, RightAction())
+    return inverse_translate_diff!(M.manifold, Y, q, p, X, RightBackwardAction())
 end
 
 """
@@ -174,14 +174,14 @@ Transport tangent vector `X` at identity on the group manifold with the
 """
 function parallel_transport_direction(M::CartanSchoutenZeroGroup, p::Identity, X, d)
     dexp_half = exp_lie(M.manifold, d / 2)
-    Y = translate_diff(M.manifold, dexp_half, p, X, RightAction())
-    return translate_diff(M.manifold, dexp_half, p, Y, LeftAction())
+    Y = translate_diff(M.manifold, dexp_half, p, X, RightBackwardAction())
+    return translate_diff(M.manifold, dexp_half, p, Y, LeftForwardAction())
 end
 
 function parallel_transport_direction!(M::CartanSchoutenZeroGroup, Y, p::Identity, X, d)
     dexp_half = exp_lie(M.manifold, d / 2)
-    translate_diff!(M.manifold, Y, dexp_half, p, X, RightAction())
-    return translate_diff!(M.manifold, Y, dexp_half, p, Y, LeftAction())
+    translate_diff!(M.manifold, Y, dexp_half, p, X, RightBackwardAction())
+    return translate_diff!(M.manifold, Y, dexp_half, p, Y, LeftForwardAction())
 end
 
 """
