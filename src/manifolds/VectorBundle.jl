@@ -635,8 +635,8 @@ function inner(B::VectorBundleFibers, p, X, Y)
         "vectors of types $(typeof(X)) and $(typeof(Y)).",
     )
 end
-inner(B::VectorBundleFibers{<:TangentSpaceType}, p, X, Y) = inner(B.manifold, p, X, Y)
-function inner(B::VectorBundleFibers{<:CotangentSpaceType}, p, X, Y)
+inner(B::TangentBundleFibers, p, X, Y) = inner(B.manifold, p, X, Y)
+function inner(B::CotangentBundleFibers, p, X, Y)
     return inner(B.manifold, p, sharp(B.manifold, p, X), sharp(B.manifold, p, Y))
 end
 @doc raw"""
@@ -701,7 +701,7 @@ function inverse_retract_product!(B::VectorBundle, X, p, q)
     py, Vy = submanifold_components(B.manifold, q)
     VXM, VXF = submanifold_components(B.manifold, X)
     log!(B.manifold, VXM, px, py)
-    vector_transport_to!(B.manifold, VXF, py, Vy, px, B.vector_transport.method_vector)
+    vector_transport_to!(B.fiber, VXF, py, Vy, px, B.vector_transport.method_vector)
     copyto!(VXF, VXF - Vx)
     return X
 end
@@ -762,7 +762,7 @@ Norm of the vector `X` from the vector space of type `B.fiber`
 at point `p` from manifold `B.manifold`.
 """
 LinearAlgebra.norm(B::VectorBundleFibers, p, X) = sqrt(inner(B, p, X, X))
-LinearAlgebra.norm(B::VectorBundleFibers{<:TangentSpaceType}, p, X) = norm(B.manifold, p, X)
+LinearAlgebra.norm(B::TangentBundleFibers, p, X) = norm(B.manifold, p, X)
 LinearAlgebra.norm(M::VectorSpaceAtPoint, p, X) = norm(M.fiber.manifold, M.point, X)
 
 function parallel_transport_to!(M::TangentSpaceAtPoint, Y, p, X, q)
@@ -854,7 +854,7 @@ function project(B::VectorBundleFibers, p, X)
     return project!(B, Y, p, X)
 end
 
-function project!(B::VectorBundleFibers{<:TangentSpaceType}, Y, p, X)
+function project!(B::TangentBundleFibers, Y, p, X)
     return project!(B.manifold, Y, p, X)
 end
 function project!(B::VectorBundleFibers, Y, p, X)
@@ -867,11 +867,11 @@ function Random.rand!(rng::AbstractRNG, M::VectorBundle, pX; vector_at=nothing)
     pXM, pXF = submanifold_components(M.manifold, pX)
     if vector_at === nothing
         rand!(rng, M.manifold, pXM)
-        rand!(rng, M.manifold, pXF; vector_at=pXM)
+        rand!(rng, VectorSpaceAtPoint(M.fiber, pXM), pXF)
     else
         vector_atM, vector_atF = submanifold_components(M.manifold, vector_at)
         rand!(rng, M.manifold, pXM; vector_at=vector_atM)
-        rand!(rng, M.manifold, pXF; vector_at=vector_atM)
+        rand!(rng, VectorSpaceAtPoint(M.fiber, pXM), pXF; vector_at=vector_atF)
     end
     return pX
 end
@@ -1112,6 +1112,15 @@ end
 function vector_transport_direction(M::VectorBundle, p, X, d)
     return vector_transport_direction(M, p, X, d, M.vector_transport)
 end
+function vector_transport_direction(
+    M::TangentBundleFibers,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod,
+)
+    return vector_transport_direction(M.manifold, p, X, d, m)
+end
 
 function _vector_transport_direction(
     M::VectorBundle,
@@ -1125,7 +1134,7 @@ function _vector_transport_direction(
     dx, dVx = submanifold_components(M.manifold, d)
     return ArrayPartition(
         vector_transport_direction(M.manifold, px, VXM, dx, m.method_point),
-        vector_transport_direction(M.manifold, px, VXF, dx, m.method_vector),
+        vector_transport_direction(M.fiber, px, VXF, dx, m.method_vector),
     )
 end
 
@@ -1213,6 +1222,17 @@ function vector_transport_to!(
 )
     return copyto!(M.fiber.manifold, Y, p, X)
 end
+function vector_transport_to!(
+    M::TangentBundleFibers,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod,
+)
+    vector_transport_to!(M.manifold, Y, p, X, q, m)
+    return Y
+end
 
 @inline function Base.view(x::ArrayPartition, M::VectorBundle, s::Symbol)
     (s === :point) && return x.x[1]
@@ -1242,7 +1262,7 @@ function zero_vector!(B::VectorBundleFibers, X, p)
         "zero_vector! not implemented for vector space family of type $(typeof(B)).",
     )
 end
-function zero_vector!(B::VectorBundleFibers{<:TangentSpaceType}, X, p)
+function zero_vector!(B::TangentBundleFibers, X, p)
     return zero_vector!(B.manifold, X, p)
 end
 
