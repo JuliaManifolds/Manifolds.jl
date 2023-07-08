@@ -95,7 +95,7 @@ Random.seed!(10)
                     test_exp_from_identity=true,
                     test_log_from_identity=true,
                     test_vee_hat_from_identity=true,
-                    diff_convs=[(), (LeftAction(),), (RightAction(),)],
+                    diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
                 )
                 test_manifold(
                     G,
@@ -121,7 +121,11 @@ Random.seed!(10)
                             test_diff=true,
                             test_lie_bracket=true,
                             test_adjoint_action=true,
-                            diff_convs=[(), (LeftAction(),), (RightAction(),)],
+                            diff_convs=[
+                                (),
+                                (LeftForwardAction(),),
+                                (RightBackwardAction(),),
+                            ],
                         )
 
                         test_manifold(
@@ -147,7 +151,11 @@ Random.seed!(10)
                             test_diff=true,
                             test_lie_bracket=true,
                             test_adjoint_action=true,
-                            diff_convs=[(), (LeftAction(),), (RightAction(),)],
+                            diff_convs=[
+                                (),
+                                (LeftForwardAction(),),
+                                (RightBackwardAction(),),
+                            ],
                         )
 
                         test_manifold(
@@ -181,7 +189,7 @@ Random.seed!(10)
                     X_pts;
                     test_diff=true,
                     test_lie_bracket=true,
-                    diff_convs=[(), (LeftAction(),), (RightAction(),)],
+                    diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
                     atol=1e-9,
                 )
                 test_manifold(
@@ -301,7 +309,7 @@ Random.seed!(10)
                 project!(SEGL, X2, pts_gl[1], X_gl)
                 @test isapprox(G, pts[1], X, X2)
 
-                for conv in [LeftAction(), RightAction()]
+                for conv in [LeftForwardAction(), RightBackwardAction()]
                     tpgl = translate(GL, pts_gl[2], pts_gl[1], conv)
                     tXgl = translate_diff(GL, pts_gl[2], pts_gl[1], X_gl, conv)
                     tpse = translate(G, pts[2], pts[1], conv)

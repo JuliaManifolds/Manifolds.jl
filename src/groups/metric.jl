@@ -5,7 +5,7 @@
         X,
         Y,
         qs::AbstractVector,
-        conv::ActionDirection = LeftAction();
+        conv::ActionDirection = LeftForwardAction();
         kwargs...,
     ) -> Bool
 
@@ -29,7 +29,7 @@ has_approx_invariant_metric(::AbstractDecoratorManifold, p, X, Y, qs, ::ActionDi
     X,
     Y,
     qs,
-    conv::ActionDirection=LeftAction();
+    conv::ActionDirection=LeftForwardAction();
     kwargs...,
 )
 function has_approx_invariant_metric(
@@ -61,12 +61,16 @@ direction(::AbstractDecoratorManifold)
 
 @trait_function direction(M::AbstractDecoratorManifold)
 
-direction(::TraitList{HasLeftInvariantMetric}, ::AbstractDecoratorManifold) = LeftAction()
+function direction(::TraitList{HasLeftInvariantMetric}, ::AbstractDecoratorManifold)
+    return LeftForwardAction()
+end
 
-direction(::TraitList{HasRightInvariantMetric}, ::AbstractDecoratorManifold) = RightAction()
+function direction(::TraitList{HasRightInvariantMetric}, ::AbstractDecoratorManifold)
+    return RightBackwardAction()
+end
 
 function exp(::TraitList{HasLeftInvariantMetric}, M::AbstractDecoratorManifold, p, X)
-    return retract(M, p, X, GroupExponentialRetraction(LeftAction()))
+    return retract(M, p, X, GroupExponentialRetraction(LeftForwardAction()))
 end
 function exp(
     ::TraitList{HasLeftInvariantMetric},
@@ -75,10 +79,10 @@ function exp(
     X,
     t::Number,
 )
-    return retract(M, p, X, t, GroupExponentialRetraction(LeftAction()))
+    return retract(M, p, X, t, GroupExponentialRetraction(LeftForwardAction()))
 end
 function exp!(::TraitList{HasLeftInvariantMetric}, M::AbstractDecoratorManifold, q, p, X)
-    return retract!(M, q, p, X, GroupExponentialRetraction(LeftAction()))
+    return retract!(M, q, p, X, GroupExponentialRetraction(LeftForwardAction()))
 end
 function exp!(
     ::TraitList{HasLeftInvariantMetric},
@@ -88,10 +92,10 @@ function exp!(
     X,
     t::Number,
 )
-    return retract!(M, q, p, X, t, GroupExponentialRetraction(LeftAction()))
+    return retract!(M, q, p, X, t, GroupExponentialRetraction(LeftForwardAction()))
 end
 function exp(::TraitList{HasRightInvariantMetric}, M::AbstractDecoratorManifold, p, X)
-    return retract(M, p, X, GroupExponentialRetraction(RightAction()))
+    return retract(M, p, X, GroupExponentialRetraction(RightBackwardAction()))
 end
 function exp(
     ::TraitList{HasRightInvariantMetric},
@@ -100,10 +104,10 @@ function exp(
     X,
     t::Number,
 )
-    return retract(M, p, X, t, GroupExponentialRetraction(RightAction()))
+    return retract(M, p, X, t, GroupExponentialRetraction(RightBackwardAction()))
 end
 function exp!(::TraitList{HasRightInvariantMetric}, M::AbstractDecoratorManifold, q, p, X)
-    return retract!(M, q, p, X, GroupExponentialRetraction(RightAction()))
+    return retract!(M, q, p, X, GroupExponentialRetraction(RightBackwardAction()))
 end
 function exp!(
     ::TraitList{HasRightInvariantMetric},
@@ -113,7 +117,7 @@ function exp!(
     X,
     t::Number,
 )
-    return retract!(M, q, p, X, t, GroupExponentialRetraction(RightAction()))
+    return retract!(M, q, p, X, t, GroupExponentialRetraction(RightBackwardAction()))
 end
 function exp(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, X)
     return exp(M.manifold, p, X)
@@ -183,14 +187,14 @@ has_invariant_metric(::AbstractManifold, op::ActionDirection) = false
 function has_invariant_metric(
     ::TraitList{<:HasLeftInvariantMetric},
     ::AbstractDecoratorManifold,
-    ::LeftAction,
+    ::LeftForwardAction,
 )
     return true
 end
 function has_invariant_metric(
     ::TraitList{<:HasRightInvariantMetric},
     ::AbstractDecoratorManifold,
-    ::RightAction,
+    ::RightBackwardAction,
 )
     return true
 end
@@ -251,16 +255,33 @@ function inverse_translate_diff!(
 end
 
 function log(::TraitList{HasLeftInvariantMetric}, M::AbstractDecoratorManifold, p, q)
-    return inverse_retract(M, p, q, GroupLogarithmicInverseRetraction(LeftAction()))
+    return inverse_retract(M, p, q, GroupLogarithmicInverseRetraction(LeftForwardAction()))
 end
 function log!(::TraitList{HasLeftInvariantMetric}, M::AbstractDecoratorManifold, X, p, q)
-    return inverse_retract!(M, X, p, q, GroupLogarithmicInverseRetraction(LeftAction()))
+    return inverse_retract!(
+        M,
+        X,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(LeftForwardAction()),
+    )
 end
 function log(::TraitList{HasRightInvariantMetric}, M::AbstractDecoratorManifold, p, q)
-    return inverse_retract(M, p, q, GroupLogarithmicInverseRetraction(RightAction()))
+    return inverse_retract(
+        M,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(RightBackwardAction()),
+    )
 end
 function log!(::TraitList{HasRightInvariantMetric}, M::AbstractDecoratorManifold, X, p, q)
-    return inverse_retract!(M, X, p, q, GroupLogarithmicInverseRetraction(RightAction()))
+    return inverse_retract!(
+        M,
+        X,
+        p,
+        q,
+        GroupLogarithmicInverseRetraction(RightBackwardAction()),
+    )
 end
 function log(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, q)
     return log(M.manifold, p, q)

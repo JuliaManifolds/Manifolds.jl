@@ -392,8 +392,8 @@ end
 
 Base.show(io::IO, ::HeisenbergGroup{n}) where {n} = print(io, "HeisenbergGroup($n)")
 
-translate_diff(::HeisenbergGroup, p, q, X, ::LeftAction) = X
-translate_diff(::HeisenbergGroup, p, q, X, ::RightAction) = p \ X * p
+translate_diff(::HeisenbergGroup, p, q, X, ::LeftForwardAction) = X
+translate_diff(::HeisenbergGroup, p, q, X, ::RightBackwardAction) = p \ X * p
 
 function translate_diff!(G::HeisenbergGroup, Y, p, q, X, conv::ActionDirection)
     return copyto!(Y, translate_diff(G, p, q, X, conv))

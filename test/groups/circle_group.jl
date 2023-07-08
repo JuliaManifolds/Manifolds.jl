@@ -11,8 +11,8 @@ include("group_utils.jl")
 
     @test base_manifold(G) === Circle{ℂ}()
 
-    @test has_invariant_metric(G, LeftAction())
-    @test has_invariant_metric(G, RightAction())
+    @test has_invariant_metric(G, LeftForwardAction())
+    @test has_invariant_metric(G, RightBackwardAction())
     @test has_biinvariant_metric(G)
     @test is_default_metric(MetricManifold(G, EuclideanMetric()))
     @test is_group_manifold(G)
@@ -94,8 +94,8 @@ end
 
     @test base_manifold(G) === Circle{ℝ}()
 
-    @test has_invariant_metric(G, LeftAction())
-    @test has_invariant_metric(G, RightAction())
+    @test has_invariant_metric(G, LeftForwardAction())
+    @test has_invariant_metric(G, RightBackwardAction())
     @test has_biinvariant_metric(G)
     @test is_default_metric(MetricManifold(G, EuclideanMetric()))
 

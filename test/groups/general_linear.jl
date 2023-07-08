@@ -88,13 +88,13 @@ using NLsolve
         vpts = [[-1 -2 0; -2 1 -2; 2 0 2], [1 1 1; 0 0 -2; 2 0 0]]
 
         retraction_methods = [
-            Manifolds.GroupExponentialRetraction(LeftAction()),
-            Manifolds.GroupExponentialRetraction(RightAction()),
+            Manifolds.GroupExponentialRetraction(LeftForwardAction()),
+            Manifolds.GroupExponentialRetraction(RightBackwardAction()),
         ]
 
         inverse_retraction_methods = [
-            Manifolds.GroupLogarithmicInverseRetraction(LeftAction()),
-            Manifolds.GroupLogarithmicInverseRetraction(RightAction()),
+            Manifolds.GroupLogarithmicInverseRetraction(LeftForwardAction()),
+            Manifolds.GroupLogarithmicInverseRetraction(RightBackwardAction()),
         ]
 
         basis_types = [DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd)]
@@ -164,13 +164,13 @@ using NLsolve
         vpts = [[1+0im -2-1im; -1-2im -4+1im], [-2+2im -1-1im; -1-1im -3+0im]]
 
         retraction_methods = [
-            Manifolds.GroupExponentialRetraction(LeftAction()),
-            Manifolds.GroupExponentialRetraction(RightAction()),
+            Manifolds.GroupExponentialRetraction(LeftForwardAction()),
+            Manifolds.GroupExponentialRetraction(RightBackwardAction()),
         ]
 
         inverse_retraction_methods = [
-            Manifolds.GroupLogarithmicInverseRetraction(LeftAction()),
-            Manifolds.GroupLogarithmicInverseRetraction(RightAction()),
+            Manifolds.GroupLogarithmicInverseRetraction(LeftForwardAction()),
+            Manifolds.GroupLogarithmicInverseRetraction(RightBackwardAction()),
         ]
 
         for T in types

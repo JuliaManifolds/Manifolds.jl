@@ -64,10 +64,10 @@ function project!(::SpecialUnitary{n}, q, p) where {n}
     return q
 end
 function project!(G::SpecialUnitary{n}, Y, p, X) where {n}
-    inverse_translate_diff!(G, Y, p, p, X, LeftAction())
+    inverse_translate_diff!(G, Y, p, p, X, LeftForwardAction())
     project!(SkewHermitianMatrices(n, ℂ), Y, Y)
     Y[diagind(n, n)] .-= tr(Y) / n
-    translate_diff!(G, Y, p, p, Y, LeftAction())
+    translate_diff!(G, Y, p, p, Y, LeftForwardAction())
     return Y
 end
 

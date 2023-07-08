@@ -39,8 +39,9 @@ include("group_utils.jl")
             gpts = convert.(T, pts)
             Xgpts = convert.(T, Xpts)
             @test compose(G, gpts[1], gpts[2]) ≈ gpts[1] * gpts[2]
-            @test translate_diff(G, gpts[2], gpts[1], Xgpts[1], LeftAction()) ≈ Xgpts[1]
-            @test translate_diff(G, gpts[2], gpts[1], Xgpts[1], RightAction()) ≈
+            @test translate_diff(G, gpts[2], gpts[1], Xgpts[1], LeftForwardAction()) ≈
+                  Xgpts[1]
+            @test translate_diff(G, gpts[2], gpts[1], Xgpts[1], RightBackwardAction()) ≈
                   transpose(gpts[2]) * Xgpts[1] * gpts[2]
             test_group(
                 G,
@@ -70,15 +71,15 @@ include("group_utils.jl")
             retraction_methods = [
                 Manifolds.PolarRetraction(),
                 Manifolds.QRRetraction(),
-                Manifolds.GroupExponentialRetraction(LeftAction()),
-                Manifolds.GroupExponentialRetraction(RightAction()),
+                Manifolds.GroupExponentialRetraction(LeftForwardAction()),
+                Manifolds.GroupExponentialRetraction(RightBackwardAction()),
             ]
 
             inverse_retraction_methods = [
                 Manifolds.PolarInverseRetraction(),
                 Manifolds.QRInverseRetraction(),
-                Manifolds.GroupLogarithmicInverseRetraction(LeftAction()),
-                Manifolds.GroupLogarithmicInverseRetraction(RightAction()),
+                Manifolds.GroupLogarithmicInverseRetraction(LeftForwardAction()),
+                Manifolds.GroupLogarithmicInverseRetraction(RightBackwardAction()),
             ]
 
             test_manifold(
