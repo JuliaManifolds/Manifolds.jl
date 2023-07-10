@@ -235,6 +235,14 @@ Pages = ["groups/translation_action.jl"]
 Order = [:type, :function]
 ```
 
+### Rotation-translation action (special Euclidean)
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["groups/rotation_translation_action.jl"]
+Order = [:type, :function]
+```
+
 ## Metrics on groups
 
 Lie groups by default typically forward all metric-related operations like exponential or logarithmic map to the underlying manifold, for example [`SpecialOrthogonal`](@ref) uses methods for [`Rotations`](@ref) (which is, incidentally, bi-invariant), or [`SpecialEuclidean`](@ref) uses product metric of the translation and rotation parts (which is not invariant under group operation).

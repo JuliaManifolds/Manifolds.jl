@@ -208,6 +208,7 @@ include("utils.jl")
         include_test("groups/group_operation_action.jl")
         include_test("groups/rotation_action.jl")
         include_test("groups/translation_action.jl")
+        include_test("groups/rotation_translation_action.jl")
         include_test("groups/connections.jl")
         include_test("groups/metric.jl")
     end

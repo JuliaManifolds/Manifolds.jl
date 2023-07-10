@@ -30,7 +30,7 @@ const RotationActionOnVector{N,F,TAD} = RotationAction{
     <:Union{Euclidean{Tuple{N},F},TranslationGroup{Tuple{N},F}},
     SpecialOrthogonal{N},
     TAD,
-}
+} where {TAD<:ActionDirection}
 
 base_group(A::RotationAction) = A.SOn
 

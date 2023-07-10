@@ -741,10 +741,10 @@ function test_action(
 
                 eX = allocate(X)
                 Test.@test apply_diff!(A, eX, e, m, X) === eX
-                Test.@test isapprox(G, m, eX, X; atol=atol)
+                Test.@test isapprox(M, m, eX, X; atol=atol)
                 eX = allocate(X)
                 Test.@test inverse_apply_diff!(A, eX, e, m, X) === eX
-                Test.@test isapprox(G, m, eX, X; atol=atol)
+                Test.@test isapprox(M, m, eX, X; atol=atol)
             end
         end
     end

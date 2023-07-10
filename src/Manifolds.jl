@@ -463,6 +463,8 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
+include("groups/rotation_translation_action.jl")
+
 # final utilities
 include("trait_recursion_breaking.jl")
 
@@ -880,6 +882,7 @@ export AbstractGroupAction,
     RightForwardAction,
     RightInvariantMetric,
     RotationAction,
+    RotationTranslationAction,
     SemidirectProductGroup,
     SpecialEuclidean,
     SpecialLinear,
