@@ -87,7 +87,11 @@ makedocs(
     sitename="Manifolds.jl",
     pages=[
         "Home" => "index.md",
-        "How to..." => ["🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md"],
+        "How to..." => [
+            "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
+            "work in charts" => "tutorials/working-in-charts.md",
+            "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
+        ],
         "Manifolds" => [
             "Basic manifolds" => [
                 "Centered matrices" => "manifolds/centeredmatrices.md",
