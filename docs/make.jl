@@ -89,7 +89,9 @@ makedocs(
         "Home" => "index.md",
         "How to..." => [
             "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
-            "Integration on manifolds and probability densities" => "tutorials/integration.md",
+            "work in charts" => "tutorials/working-in-charts.md",
+            "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
+            "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [
