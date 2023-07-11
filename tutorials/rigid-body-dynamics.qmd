@@ -1,0 +1,127 @@
+---
+title: Rigid body dynamics
+---
+
+In this tutorial we will learn how rigid body dynamics relates to concepts from Riemannian geometry and Lie groups.
+
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+using Pkg;
+cd(@__DIR__)
+Pkg.activate("."); # for reproducibility use the local tutorial environment.
+using Markdown
+```
+
+In this tutorial we need to load a few libraries:
+```{julia}
+using Manifolds, LinearAlgebra, StaticArrays, RecursiveArrayTools, Plots
+```
+
+## 2-dimensional introduction
+
+We will start by considering 2-D rigid bodies. They are characterized by three numbers: position along $x$ and $x$ axes and an angle.
+Geometrically it can be represented by elements of the special euclidean group in 2 dimensions, $\operatorname{SE}(2)$:
+
+```{julia}
+SE2 = SpecialEuclidean(2)
+se2_id = identity_element(SE2)
+R2 = Euclidean(2)
+```
+
+For example, an object at $(2, 5)$ and at angle $\pi/3$ is represented by
+```{julia}
+p = exp(SE2, se2_id, hat(SE2, se2_id, [2.0, 5.0, pi/3]))
+```
+
+What does it do, exactly? This is one of many ways of creating a points on $\operatorname{SE}(2)$.
+We can clearly recognize the numbers representing position and orientation of our object.
+The `hat` function converts them to the Lie algebra of $\operatorname{SE}(2)$, denoted $\mathfrak{se}(2)$, while `exp` turns an element of $\mathfrak{se}(2)$ to an element of $\operatorname{SE}(2)$.
+There are many ways of mapping between these two structures but `exp` is the one we need at the moment.
+
+Now we will draw our object as an arrow, with position represented by the central-left point in the default orientation.
+
+```{julia}
+function draw_arrow_at(p; plt=nothing, arrow_kwargs=(;))
+    if plt === nothing
+        plt = plot(; aspect_ratio=:equal)
+    end
+    # constructing matrix where columns are vertices of our arrow
+    pts = reduce(hcat, [[0.0, -1], [2.0, -1], [2.0, -2], [4.0, 0], [2.0, 2], [2.0, 1], [0.0, 1], [0.0, -1]])
+    # action that transforms the arrow
+    A = Manifolds.ColumnwiseSpecialEuclideanAction(R2, SE2)
+    # applying the transformation
+    pts_pos = apply(A, p, pts)
+    # drawing the arrow
+    arr = Shape(pts_pos[1, :], pts_pos[2, :])
+    plot!(plt, arr; arrow_kwargs...)
+end
+plt1 = plot(; aspect_ratio=:equal)
+draw_arrow_at(se2_id; plt=plt1, arrow_kwargs=(; label="default position"))
+draw_arrow_at(p; plt=plt1, arrow_kwargs=(; label="arrow at p"))
+plt1
+```
+
+### Simple transformations in global coordinates
+
+There are several ways of transforming position and orientation of an object.
+The first one translates and rotates an object by composition.
+In the following example, translation by $(-1, -2)$ and rotation by $-\pi/6$ are applied.
+
+```{julia}
+p_tr = exp(SE2, se2_id, hat(SE2, se2_id, [-1.0, -2.0, -pi/6]))
+p_transformed = compose(SE2, p_tr, p)
+plt2 = plot(; aspect_ratio=:equal)
+draw_arrow_at(p; plt=plt2, arrow_kwargs=(; label="arrow at p"))
+draw_arrow_at(p_transformed; plt=plt2, arrow_kwargs=(; label="arrow after transformation"))
+plt2
+```
+
+Transformation is applied using group composition operation of $\operatorname{SE}(2)$.
+`p_transformed` corresponds to active transformation, represented also by [left-forward](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.LeftForwardAction) [group operation action](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.GroupOperationAction):
+
+```{julia}
+G_LF = GroupOperationAction(SE2, LeftForwardAction())
+p_transformed_2 = apply(G_LF, p_tr, p)
+isapprox(p_transformed, p_transformed_2)
+```
+
+Note that translation and rotation happen in the global coordinates, not local ones.
+We will cover local coordinates later.
+
+Basis transformation in the passive transformation can be understood as [right-forward](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.RightForwardAction) group operation action.
+First we need to get vectors constituting the orthonormal basis of tangent space to $\operatorname{SE}(2)$ at $p$.
+These vectors are elements of the special Euclidean Lie algebra $\mathfrak{se}(2)$.
+```{julia}
+B_SE2 = get_basis(SE2, p, DefaultOrthonormalBasis())
+B_SE2_vecs = get_vectors(SE2, p, B_SE2)
+```
+
+Next we can use the right-forward action to transform these vectors.
+
+```{julia}
+G_RF = GroupOperationAction(SE2, RightForwardAction())
+B_transformed = [apply(G_LF, p_tr, X_i) for X_i in B_SE2_vecs]
+```
+
+Notice that active transformation does not require a basis of the tangent space while the passive one does.
+
+### Local transformations
+
+Performing local transformations of an object requires different geometric tools.
+Moving and rotating an object from its current position can be performed using an exponential map.
+Its input are the current position and rotation (a point on $\operatorname{SE}(2)$) and a tangent vector that corresponds to the desired change.
+
+```{julia}
+X = hat(SE2, se2_id, [-1.0, -2.0, -pi/6])
+```
+
+The inverse problem, i.e. figuring out what transformation needs to be applied to transform one position and orientation to another one, is solved by a logarithmic map.
+
+### A freely moving object
+
+
+### Effects of external forces
+
+

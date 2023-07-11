@@ -293,7 +293,7 @@ end
 @doc raw"""
     optimal_alignment(A::LeftColumnwiseSpecialEuclideanAction, p, q)
 
-Compute optimal alignment of `p` to `q` under the [`LeftColumnwiseSpecialEuclideanAction`](@ref).
+Compute optimal alignment of `p` to `q` under the forward left [`ColumnwiseSpecialEuclideanAction`](@ref).
 The algorithm, in sequence, computes optimal translation and optimal rotation
 """
 function optimal_alignment(
