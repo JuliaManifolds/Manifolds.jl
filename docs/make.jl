@@ -89,7 +89,9 @@ makedocs(
         "Home" => "index.md",
         "How to..." => [
             "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
-            "Do rigid body dynamics with geometry" => "tutorials/rigid-body-dynamics.md",
+            "work in charts" => "tutorials/working-in-charts.md",
+            "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
+            "do rigid body dynamics with geometry" => "tutorials/rigid-body-dynamics.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [
