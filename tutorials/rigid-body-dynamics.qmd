@@ -162,7 +162,46 @@ You may notice that our object actually follows a geodesic in the special Euclid
 
 ### Effects of external forces
 
+::: {.callout-caution}
 
+This tutorial, but most importantly this section, does not aim to follow a particular physical model of forces.
+The aim is to get a description that can be reasonably used for motion estimation from noisy sensors.
+However, the language used here is fairly close to what geometric descriptions of physical models use so likely it could be developed much futher.
+Original author of this tutorial is not a physicist though so take it with a grain of salt.
+
+:::
+
+An external force acting upon a rigid body makes it accelerate or changes its angular velocity.
+There are many possible geometric descriptions of these phenomena.
+In this tutorial we will use the most simple one, i.e. representing acceleration as an additional tangent vector.
+This ignores a lot of geometric content that could be exploited but it lets us move forward towards representing and analysing uncertainties caused by measurement inaccuracy.
+
+The freely moving object followed a trajectory $\gamma(t)=\exp_p(tX)$
+We can think of it as an object in the tangent bundle $T\operatorname{SE}(2)$ (though see technical note about cotangent bundle).
+We could do again the trick with representing change as a tangent vector $(X_p, X_X) \in T_{(p, X)} T\operatorname{SE}(2)$ but it is a redundant representation: $X_p$ describes change in $p$ which is already described by $X$.
+So all we need is the $X_X$ part of the tangent vector (to the tangent bundle).
+Using the metric of $\operatorname{SE}(2)$ we can construct an isomorphism between the space in which $X_X$ lives in and the tangent space $T_p\operatorname{SE}(2)$.
+
+Finally we determined that an accelerating object can be described by a triple $(p, X, X_X)$.
+We do not yet have a complete description of the dynamics: how does the triple evolve with time?
+A freely moving object followed a geodesic.
+An accelerating object could also just follow a geodesic but we would have to manufacture an appropriate affine connection (see: [📖 general relativity](https://en.wikipedia.org/wiki/General_relativity)).
+We are trying to keep things relatively simple so we will use the following ODE:
+```math
+\begin{aligned}
+\dot{p} &= X \\
+\dot{X} &= X_X\\
+\dot{X_X} &= 0
+\end{aligned}
+```
+
+To solve the ODE we still need an affine connection on the manifold $(p, X, X_X)$ lives on.
+A nice way of describing that manifold in `Manifolds.jl` is by using a vector bundle where each fiber corresponds to direct sum of tangent spaces.
+There is, however, one small caveat: `X_X` was brought from the double tangent bundle and depends on the connection we (should have) selected for the tangent bundle $T\operatorname{SE}(2)$.
+So we may use the connection from $\operatorname{SE}(2)$ but we may also use the Levi-Civita connection of the Sasaki metric on $T\operatorname{SE}(2)$.
+We shall explore this choice later in the tutorial.
+
+For simplicity again we will use a first order forward Euler discretization to solve our ODE (see [technical note](@sec-forward-euler) if you disapprove).
 
 ## Technical notes
 
@@ -190,4 +229,18 @@ They give the same exponential and logarithmic maps but a different parallel tra
 
 ### Jet bundles?
 
-Yes, [📖 jet bundles](https://en.wikipedia.org/wiki/Jet_bundle) are more mathematically enticing objects for describing dynamics but practical details of their application haven't been worked out yet.
+Yes, [📖 jet bundles](https://en.wikipedia.org/wiki/Jet_bundle) are more mathematically enticing objects for describing dynamics but practical details of their implementation haven't been worked out yet.
+
+### Phase space as a contangent bundle
+
+Phase space in classical mechanics is typically defined as a contangent bundle.
+Cotangent bundles are, however, hard to use for computation.
+So we select Riesz representers of cotangent vectors according to the metric of our manifold.
+In this way we get an isomorphism between tangent and cotangent bundles.
+
+Note that a generic description of a phase space doesn't require a Riemannian metric.
+Generic tools come from symplectic geometry which imposes a less rich structure.
+
+### Forward Euler? Really? {#sec-forward-euler}
+
+Yes, for simplicity. For a start. I may try a higher order or a symplectic solver later. You can do that too!
