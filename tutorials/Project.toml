@@ -11,6 +11,7 @@ MultivariateStats = "6f286f6a-111f-5878-ab1e-185364afe411"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 CSV = "0.10"
@@ -19,3 +20,4 @@ IJulia = "1"
 Manifolds = "0.8.46"
 ManifoldsBase = "0.14.5"
 MultivariateStats = "0.10"
+StaticArrays = "1"

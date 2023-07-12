@@ -48,7 +48,7 @@ function draw_arrow_at(p; plt=nothing, arrow_kwargs=(;))
         plt = plot(; aspect_ratio=:equal)
     end
     # constructing matrix where columns are vertices of our arrow
-    pts = reduce(hcat, [[0.0, -1], [2.0, -1], [2.0, -2], [4.0, 0], [2.0, 2], [2.0, 1], [0.0, 1], [0.0, -1]])
+    pts = reduce(hcat, [[0.0, -0.125], [0.5, -0.125], [0.5, -0.25], [1.0, 0.0], [0.5, 0.25], [0.5, 0.125], [0.0, 0.125], [0.0, -0.125]])
     # action that transforms the arrow
     A = Manifolds.ColumnwiseSpecialEuclideanAction(R2, SE2)
     # applying the transformation
@@ -117,11 +117,77 @@ Its input are the current position and rotation (a point on $\operatorname{SE}(2
 X = hat(SE2, se2_id, [-1.0, -2.0, -pi/6])
 ```
 
+Let's see how it affects our arrow:
+
+```{julia}
+p_exp = exp(SE2, p, X)
+println("Old position: ", p)
+println("New position: ", p_exp)
+plt3 = plot(; aspect_ratio=:equal)
+draw_arrow_at(p; plt=plt3, arrow_kwargs=(; label="arrow at p"))
+draw_arrow_at(p_exp; plt=plt3, arrow_kwargs=(; label="arrow at exp(M, p, X)"))
+plt3
+```
+
+As we can see, the arrow moved exactly as expected.
+
 The inverse problem, i.e. figuring out what transformation needs to be applied to transform one position and orientation to another one, is solved by a logarithmic map.
+Additionally, we can use [`vee`](@ref) to get back the coordinates of a tangent vector:
+```{julia}
+X_from_log = log(SE2, p, p_exp)
+vee(SE2, p, X_from_log)
+```
+
+which gives us back the same coordinates that we used for `X`.
 
 ### A freely moving object
 
+A freely moving object moves at a constant velocity and rotates with a constant angular velocity.
+Both velocity and angular velocity can be represented by tangent vectors.
+The following plot shows what happens to an object in such conditions.
+
+```{julia}
+ts = 0.0:0.5:10.0
+pts = [exp(SE2, p, t * X) for t in ts]
+plt4 = plot(; aspect_ratio=:equal)
+for (t, p) in zip(ts, pts)
+    draw_arrow_at(p; plt=plt4, arrow_kwargs=(; label="arrow at t=$t"))
+end
+plt4
+```
+
+As we can see, the arrow moves at velocity defined by `X`: -1 space units per time unit in the $x$ direction, -2 space units per time unit in the $y$ direction and rotates by $\pi/6$ clockwise per time unit.
+Any kind of free movement can be expressed using a tangent vector.
+You may notice that our object actually follows a geodesic in the special Euclidean group.
 
 ### Effects of external forces
 
 
+
+## Technical notes
+
+These technical notes elaborate on some aspects of the tutorial that a curious reader may find interesting but are not necessary to effectively work with `Manifolds.jl`
+
+### Different exponential maps and connections
+
+The exponential map we used in this tutorial is not the only one available on Lie groups.
+Another choice is the so-called ``[Lie group exponential](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Manifolds.exp_lie-Tuple{SpecialEuclidean,%20Any})``{=commonmark}.
+In the case of the special Euclidean group, Lie group exponential mixes the translation and rotation parts of a tangent vector:
+
+```{julia}
+ts = 0.0:0.25:1.0
+pts = [exp_lie(SE2, t * X) for t in ts]
+plt5 = plot(; aspect_ratio=:equal)
+for (t, p) in zip(ts, pts)
+    draw_arrow_at(p; plt=plt5, arrow_kwargs=(; label="arrow at t=$t"))
+end
+plt5
+```
+
+Note also that the default choice of connection for Lie groups is not the only one.
+There are also ``[Cartan-Schouten connections](https://juliamanifolds.github.io/Manifolds.jl/stable/manifolds/group.html#Cartan-Schouten-connections)``{=commonmark}.
+They give the same exponential and logarithmic maps but a different parallel transport.
+
+### Jet bundles?
+
+Yes, [📖 jet bundles](https://en.wikipedia.org/wiki/Jet_bundle) are more mathematically enticing objects for describing dynamics but practical details of their application haven't been worked out yet.
