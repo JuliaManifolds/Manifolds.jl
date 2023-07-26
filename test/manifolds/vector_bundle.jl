@@ -6,8 +6,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
 @testset "Tangent bundle" begin
     M = Sphere(2)
-    m_prod_retr = Manifolds.VectorBundleProductRetraction()
-    m_prod_invretr = Manifolds.VectorBundleInverseProductRetraction()
+    m_prod_retr = Manifolds.FiberBundleProductRetraction()
+    m_prod_invretr = Manifolds.FiberBundleInverseProductRetraction()
     m_sasaki = SasakiRetraction(5)
 
     @testset "Nice access to vector bundle components" begin
@@ -62,7 +62,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test default_inverse_retraction_method(TB) === m_prod_invretr
         @test default_retraction_method(TB) == m_prod_retr
         @test default_vector_transport_method(TB) isa
-              Manifolds.VectorBundleProductVectorTransport
+              Manifolds.FiberBundleProductVectorTransport
         CTB = CotangentBundle(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
         @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
@@ -145,7 +145,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 pts_tb[1],
                 Xir,
                 pts_tb[2],
-                Manifolds.VectorBundleProductVectorTransport(),
+                Manifolds.FiberBundleProductVectorTransport(),
             )
             @test is_vector(TB, pts_tb[2], Xir2)
 
@@ -183,41 +183,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
           VectorBundle{ℝ,Manifolds.CotangentSpaceType,Sphere{2,ℝ}}
 
     @test base_manifold(TangentBundle(M)) == M
-    @testset "spaces at point" begin
-        p = [1.0, 0.0, 0.0]
-        t_p = TangentSpaceAtPoint(M, p)
-        t_p2 = TangentSpace(M, p)
-        @test t_p == t_p2
-        ct_p = CotangentSpaceAtPoint(M, p)
-        t_ps = sprint(show, "text/plain", t_p)
-        sp = sprint(show, "text/plain", p)
-        sp = replace(sp, '\n' => "\n ")
-        t_ps_test = "Tangent space to the manifold $(M) at point:\n $(sp)"
-        @test t_ps == t_ps_test
-        @test base_manifold(t_p) == M
-        @test base_manifold(ct_p) == M
-        @test t_p.fiber.manifold == M
-        @test ct_p.fiber.manifold == M
-        @test t_p.fiber.fiber == TangentSpace
-        @test ct_p.fiber.fiber == CotangentSpace
-        @test t_p.point == p
-        @test ct_p.point == p
-        @test injectivity_radius(t_p) == Inf
-        @test representation_size(t_p) == representation_size(M)
-        X = [0.0, 0.0, 1.0]
-        @test embed(t_p, X) == X
-        @test embed(t_p, X, X) == X
-        # generic vector space at
-        fiber = VectorBundleFibers(TestVectorSpaceType(), M)
-        X_p = VectorSpaceAtPoint(fiber, p)
-        X_ps = sprint(show, "text/plain", X_p)
-        fiber_s = sprint(show, "text/plain", fiber)
-        X_ps_test = "$(typeof(X_p))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
-        @test X_ps == X_ps_test
-        @test_throws ErrorException project(fiber, p, X)
-        @test_throws ErrorException norm(fiber, p, X)
-        @test_throws ErrorException distance(fiber, p, X, X)
-    end
 
     @testset "tensor product" begin
         TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)
@@ -260,7 +225,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         )
 
         ppt = ParallelTransport()
-        tbvt = Manifolds.VectorBundleProductVectorTransport(ppt, ppt)
+        tbvt = Manifolds.FiberBundleProductVectorTransport(ppt, ppt)
         @test TangentBundle(M, tbvt).vector_transport === tbvt
         @test CotangentBundle(M, tbvt).vector_transport === tbvt
         @test VectorBundle(TangentSpace, M, tbvt).vector_transport === tbvt

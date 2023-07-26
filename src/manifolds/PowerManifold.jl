@@ -290,10 +290,6 @@ end
 Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
 Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
-function vector_bundle_transport(fiber::VectorSpaceType, M::PowerManifold)
-    return ParallelTransport()
-end
-
 @inline function _write(
     ::PowerManifoldMultidimensional,
     rep_size::Tuple,

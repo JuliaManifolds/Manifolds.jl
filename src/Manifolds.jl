@@ -334,6 +334,8 @@ include("manifold_fallbacks.jl")
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/QuotientManifold.jl")
+include("manifolds/Fiber.jl")
+include("manifolds/FiberBundle.jl")
 include("manifolds/VectorBundle.jl")
 include("groups/group.jl")
 

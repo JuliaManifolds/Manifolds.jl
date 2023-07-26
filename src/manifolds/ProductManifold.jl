@@ -1515,7 +1515,7 @@ function uniform_distribution(M::ProductManifold, p)
     )
 end
 
-function vector_bundle_transport(::VectorSpaceType, M::ProductManifold)
+function vector_bundle_transport(::FiberType, M::ProductManifold)
     return ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds))
 end
 

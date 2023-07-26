@@ -201,7 +201,12 @@ There is, however, one small caveat: `X_X` was brought from the double tangent b
 So we may use the connection from $\operatorname{SE}(2)$ but we may also use the Levi-Civita connection of the Sasaki metric on $T\operatorname{SE}(2)$.
 We shall explore this choice later in the tutorial.
 
-For simplicity again we will use a first order forward Euler discretization to solve our ODE (see [technical note](@sec-forward-euler) if you disapprove).
+For simplicity again we will use a first order forward Euler discretization to solve our ODE (see `[technical note](@ref sec-forward-euler)`{=commonmark} if you disapprove).
+For the initial conditions in our example we will use `p` and `X` from earlier examples and add `X_X`:
+```{julia}
+X_X = hat(SE2, se2_id, [0.5, -1.0, pi/6])
+```
+
 
 ## Technical notes
 
@@ -241,6 +246,6 @@ In this way we get an isomorphism between tangent and cotangent bundles.
 Note that a generic description of a phase space doesn't require a Riemannian metric.
 Generic tools come from symplectic geometry which imposes a less rich structure.
 
-### Forward Euler? Really? {#sec-forward-euler}
+### `[Forward Euler? Really?](@id sec-forward-euler)`{=commonmark}
 
 Yes, for simplicity. For a start. I may try a higher order or a symplectic solver later. You can do that too!
