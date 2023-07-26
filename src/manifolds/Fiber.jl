@@ -62,6 +62,9 @@ const VectorBundleFibers{TVS,TM} = BundleFibers{
 function VectorBundleFibers(fiber::VectorSpaceType, M::AbstractManifold)
     return BundleFibers(VectorSpaceFiberType(fiber), M)
 end
+function VectorBundleFibers(fiber::VectorSpaceFiberType, M::AbstractManifold)
+    return BundleFibers(fiber, M)
+end
 
 const TangentBundleFibers{M} = BundleFibers{TangentFiberType,M} where {M<:AbstractManifold}
 

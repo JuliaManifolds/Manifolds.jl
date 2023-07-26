@@ -646,36 +646,36 @@ using RecursiveArrayTools: ArrayPartition
         }
         @test Manifolds.default_retraction_method(Mstb) === ProductRetraction(
             ExponentialRetraction(),
-            Manifolds.VectorBundleProductRetraction(),
+            Manifolds.FiberBundleProductRetraction(),
         )
         @test Manifolds.default_retraction_method(Mstb, T_p_ap) === ProductRetraction(
             ExponentialRetraction(),
-            Manifolds.VectorBundleProductRetraction(),
+            Manifolds.FiberBundleProductRetraction(),
         )
         @test Manifolds.default_retraction_method(Mstb, T_p_pr) === ProductRetraction(
             ExponentialRetraction(),
-            Manifolds.VectorBundleProductRetraction(),
+            Manifolds.FiberBundleProductRetraction(),
         )
 
         @test Manifolds.default_inverse_retraction_method(Mstb) ===
               Manifolds.InverseProductRetraction(
             LogarithmicInverseRetraction(),
-            Manifolds.VectorBundleInverseProductRetraction(),
+            Manifolds.FiberBundleInverseProductRetraction(),
         )
         @test Manifolds.default_inverse_retraction_method(Mstb, T_p_ap) ===
               Manifolds.InverseProductRetraction(
             LogarithmicInverseRetraction(),
-            Manifolds.VectorBundleInverseProductRetraction(),
+            Manifolds.FiberBundleInverseProductRetraction(),
         )
         @test Manifolds.default_inverse_retraction_method(Mstb, T_p_pr) ===
               Manifolds.InverseProductRetraction(
             LogarithmicInverseRetraction(),
-            Manifolds.VectorBundleInverseProductRetraction(),
+            Manifolds.FiberBundleInverseProductRetraction(),
         )
 
         @test Manifolds.default_vector_transport_method(Mstb) === ProductVectorTransport(
             ParallelTransport(),
-            Manifolds.VectorBundleProductVectorTransport(
+            Manifolds.FiberBundleProductVectorTransport(
                 ParallelTransport(),
                 ParallelTransport(),
             ),
@@ -683,7 +683,7 @@ using RecursiveArrayTools: ArrayPartition
         @test Manifolds.default_vector_transport_method(Mstb, T_p_pr) ===
               ProductVectorTransport(
             ParallelTransport(),
-            Manifolds.VectorBundleProductVectorTransport(
+            Manifolds.FiberBundleProductVectorTransport(
                 ParallelTransport(),
                 ParallelTransport(),
             ),
@@ -691,7 +691,7 @@ using RecursiveArrayTools: ArrayPartition
         @test Manifolds.default_vector_transport_method(Mstb, T_p_pr) ===
               ProductVectorTransport(
             ParallelTransport(),
-            Manifolds.VectorBundleProductVectorTransport(
+            Manifolds.FiberBundleProductVectorTransport(
                 ParallelTransport(),
                 ParallelTransport(),
             ),
