@@ -225,6 +225,7 @@ function fiber_dimension(B::BundleFibers)
 end
 fiber_dimension(M::TangentBundleFibers) = manifold_dimension(M.manifold)
 fiber_dimension(M::CotangentBundleFibers) = manifold_dimension(M.manifold)
+fiber_dimension(M::AbstractManifold, V::VectorSpaceFiberType) = fiber_dimension(M, V.fiber)
 fiber_dimension(M::AbstractManifold, ::CotangentSpaceType) = manifold_dimension(M)
 fiber_dimension(M::AbstractManifold, ::TangentSpaceType) = manifold_dimension(M)
 
