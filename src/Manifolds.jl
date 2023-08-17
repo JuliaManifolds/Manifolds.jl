@@ -165,6 +165,8 @@ import ManifoldsBase:
     _vector_transport_to!,
     vee,
     vee!,
+    Weingarten,
+    Weingarten!,
     zero_vector,
     zero_vector!,
     CotangentSpace,
@@ -176,7 +178,9 @@ import ManifoldDiff:
     jacobi_field,
     jacobi_field!,
     riemannian_gradient,
-    riemannian_gradient!
+    riemannian_gradient!,
+    riemannian_Hessian,
+    riemannian_Hessian!
 
 using Base.Iterators: repeated
 using Distributions
@@ -824,6 +828,8 @@ export ×,
     retract!,
     riemannian_gradient,
     riemannian_gradient!,
+    riemannian_Hessian,
+    riemannian_Hessian!,
     riemann_tensor,
     riemann_tensor!,
     set_component!,
@@ -852,8 +858,9 @@ export ×,
     vee!,
     vertical_component,
     vertical_component!,
-    zero_vector,
-    zero_vector!
+    Weingarten,
+    Weingarten!
+zero_vector, zero_vector!
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,

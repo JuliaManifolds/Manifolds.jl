@@ -518,6 +518,23 @@ function riemann_tensor!(M::AbstractSphere{ℝ}, Xresult, p, X, Y, Z)
     return Xresult
 end
 
+@doc raw"""
+    Weingarten(M::Sphere, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Sphere`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
+
+```
+\mathcal W_p(X,V) = -Xp^{\mathrm{T}}V
+```
+"""
+function Weingarten!(::Sphere, Y, p, X, V)
+    Y .= -X * p'V
+    return Y
+end
+
 """
     StereographicAtlas()
 
