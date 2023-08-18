@@ -136,8 +136,8 @@ end
     project(M::Stiefel,p)
 
 Projects `p` from the embedding onto the [`Stiefel`](@ref) `M`, i.e. compute `q`
-as the polar decomposition of $p$ such that $q^{\mathrm{H}q$ is the identity,
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+as the polar decomposition of $p$ such that ``q^{\mathrm{H}}q`` is the identity,
+where ``\cdot^{\mathrm{H}}`` denotes the hermitian, i.e. complex conjugate transposed.
 """
 project(::Stiefel, ::Any, ::Any)
 
@@ -154,7 +154,7 @@ Project `X` onto the tangent space of `p` to the [`Stiefel`](@ref) manifold `M`.
 The formula reads
 
 ````math
-\operatorname{proj}_{\mathcal M}(p, X) = X - p \operatorname{Sym}(p^{\mathrm{H}}X),
+\operatorname{proj}_{T_p\mathcal M}(X) = X - p \operatorname{Sym}(p^{\mathrm{H}}X),
 ````
 
 where $\operatorname{Sym}(q)$ is the symmetrization of $q$, e.g. by

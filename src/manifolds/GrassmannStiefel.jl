@@ -357,29 +357,6 @@ projecting it onto the tangent space at q.
 vector_transport_to(::Grassmann, ::Any, ::Any, ::Any, ::ProjectionTransport)
 
 @doc raw"""
-    Weingarten(M::Grassmann, p, X, V)
-
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Grassmann`](@ref) `M` with
-respect to the tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
-
-The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
-
-```math
-\mathcal W_p(X,V) = -\operatorname{ad}_p\bigl(\operatorname{ad}_V(X),
-```
-
-where $\operatorname{ad}_pX := [p,X] := pX - Xp$.
-"""
-Weingarten(::Grassmann, p, X, V)
-
-_ad(p, X) = p * X - X * p
-
-function Weingarten!(::Grassmann, Y, p, X, V)
-    Y .= -_ad(p, _ad(V, X))
-    return Y
-end
-
-@doc raw"""
     zero_vector(M::Grassmann, p)
 
 Return the zero tangent vector from the tangent space at `p` on the [`Grassmann`](@ref) `M`,

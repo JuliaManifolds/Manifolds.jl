@@ -346,7 +346,7 @@ Compute the retraction on the [`Stiefel`](@ref) that is based on the Cayley tran
 Using
 ````math
   W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
-  \quad\text{where} 
+  \quad\text{where}
   \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
 ````
 the formula reads
