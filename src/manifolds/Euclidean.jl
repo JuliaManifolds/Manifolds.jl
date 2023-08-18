@@ -498,14 +498,14 @@ end
 manifold_dimension(::Euclidean{TypeParameter{Tuple{}},𝔽}) where {𝔽} = real_dimension(𝔽)
 
 function Statistics.mean(
-    ::Euclidean{TypeParameter{Tuple{}}},
+    ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector{<:Number};
     kwargs...,
 )
     return mean(x)
 end
 function Statistics.mean(
-    ::Euclidean{TypeParameter{Tuple{}}},
+    ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector{<:Number},
     w::AbstractWeights;
     kwargs...,
@@ -515,7 +515,7 @@ end
 Statistics.mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
 
 function StatsBase.mean_and_var(
-    ::Euclidean{TypeParameter{Tuple{}}},
+    ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector{<:Number};
     kwargs...,
 )
@@ -523,7 +523,7 @@ function StatsBase.mean_and_var(
     return m, sum(v)
 end
 function StatsBase.mean_and_var(
-    ::Euclidean{TypeParameter{Tuple{}}},
+    ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector{<:Number},
     w::AbstractWeights;
     corrected=false,
@@ -534,14 +534,14 @@ function StatsBase.mean_and_var(
 end
 
 function Statistics.median(
-    ::Euclidean{TypeParameter{Tuple{}}},
+    ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector{<:Number};
     kwargs...,
 )
     return median(x)
 end
 function Statistics.median(
-    ::Euclidean{TypeParameter{Tuple{}}},
+    ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector{<:Number},
     w::AbstractWeights;
     kwargs...,
@@ -550,7 +550,13 @@ function Statistics.median(
 end
 
 mid_point(::Euclidean, p1, p2) = (p1 .+ p2) ./ 2
-mid_point(::Euclidean{TypeParameter{Tuple{}}}, p1::Number, p2::Number) = (p1 + p2) / 2
+function mid_point(
+    ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
+    p1::Number,
+    p2::Number,
+)
+    return (p1 + p2) / 2
+end
 
 function mid_point!(::Euclidean, q, p1, p2)
     q .= (p1 .+ p2) ./ 2
@@ -686,11 +692,11 @@ end
 
 function Base.show(io::IO, M::Euclidean{N,𝔽}) where {N<:Tuple,𝔽}
     size = get_parameter(M.size)
-    return print(io, "Euclidean($(join(size, ", ")); field = $(𝔽), parameter = :field)")
+    return print(io, "Euclidean($(join(size, ", ")); field = $(𝔽))")
 end
 function Base.show(io::IO, M::Euclidean{N,𝔽}) where {N<:TypeParameter,𝔽}
     size = get_parameter(M.size)
-    return print(io, "Euclidean($(join(size, ", ")); field = $(𝔽))")
+    return print(io, "Euclidean($(join(size, ", ")); field = $(𝔽), parameter = :type)")
 end
 #
 # Vector Transport

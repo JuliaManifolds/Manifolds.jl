@@ -47,13 +47,19 @@ const SpecialEuclideanOperation{N} = SemidirectProductOperation{
 }
 const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
-Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
+function Base.show(io::IO, ::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "SpecialEuclidean($(n); field=:type)")
+end
+function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
+    n = get_n(G)
+    return print(io, "SpecialEuclidean($(n))")
+end
 
 @inline function active_traits(f, M::SpecialEuclidean, args...)
     return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
 end
 
-get_n(::SpecialEuclidean{N}) where {N} = N
+get_n(::SpecialEuclidean{TypeParameter{Tuple{N}}}) where {N} = N
 get_n(M::SpecialEuclidean{Tuple{Int}}) = manifold_dimension(M.manifold.manifolds[1])
 
 Base.@propagate_inbounds function Base.getindex(
@@ -280,11 +286,11 @@ function screw_matrix(G::SpecialEuclidean, X)
 end
 screw_matrix(::SpecialEuclidean, X::AbstractMatrix) = X
 
-function allocate_result(::SpecialEuclidean, ::typeof(affine_matrix), p...)
+function allocate_result(G::SpecialEuclidean, ::typeof(affine_matrix), p...)
     n = get_n(G)
     return allocate(p[1], Size(n + 1, n + 1))
 end
-function allocate_result(::SpecialEuclidean, ::typeof(screw_matrix), X...)
+function allocate_result(G::SpecialEuclidean, ::typeof(screw_matrix), X...)
     n = get_n(G)
     return allocate(X[1], Size(n + 1, n + 1))
 end

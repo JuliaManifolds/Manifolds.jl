@@ -229,6 +229,10 @@ project(::SymmetricMatrices, ::Any, ::Any)
 
 project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
-function Base.show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
+function Base.show(io::IO, ::SymmetricMatrices{TypeParameter{Tuple{n}},F}) where {n,F}
+    return print(io, "SymmetricMatrices($(n), $(F); parameter=:type)")
+end
+function Base.show(io::IO, M::SymmetricMatrices{Tuple{Int},F}) where {F}
+    n = get_n(M)
     return print(io, "SymmetricMatrices($(n), $(F))")
 end

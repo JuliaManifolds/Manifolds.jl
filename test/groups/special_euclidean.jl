@@ -9,7 +9,12 @@ Random.seed!(10)
     for se_parameter in [:field, :type]
         @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
             G = SpecialEuclidean(n; parameter=se_parameter)
-            @test isa(G, SpecialEuclidean{n})
+            if se_parameter === :field
+                @test isa(G, SpecialEuclidean{Tuple{Int}})
+            else
+                @test isa(G, SpecialEuclidean{TypeParameter{Tuple{n}}})
+            end
+
             @test repr(G) == "SpecialEuclidean($n)"
             M = base_manifold(G)
             @test M === TranslationGroup(n) × SpecialOrthogonal(n)

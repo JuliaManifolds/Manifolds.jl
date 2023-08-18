@@ -11,7 +11,7 @@ $𝔽^{n₁,…,nᵢ}$ = `Euclidean(n₁,...,nᵢ; field = 𝔽)`, which is isom
 """
 const TranslationGroup{T,𝔽} = GroupManifold{𝔽,Euclidean{T,𝔽},AdditionOperation}
 
-function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ, parameter::Symbol=:type)
+function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ, parameter::Symbol=:field)
     size = wrap_type_parameter(parameter, n)
     return TranslationGroup{typeof(size),field}(
         Euclidean(n...; field=field, parameter=parameter),
@@ -47,12 +47,12 @@ end
 
 function Base.show(io::IO, M::TranslationGroup{N,𝔽}) where {N<:Tuple,𝔽}
     size = get_parameter(M.manifold.size)
-    return print(
-        io,
-        "TranslationGroup($(join(size, ", ")); field = $(𝔽), parameter = :field)",
-    )
+    return print(io, "TranslationGroup($(join(size, ", ")); field = $(𝔽))")
 end
 function Base.show(io::IO, M::TranslationGroup{N,𝔽}) where {N<:TypeParameter,𝔽}
     size = get_parameter(M.manifold.size)
-    return print(io, "TranslationGroup($(join(size, ", ")); field = $(𝔽))")
+    return print(
+        io,
+        "TranslationGroup($(join(size, ", ")); field = $(𝔽), parameter = :type)",
+    )
 end

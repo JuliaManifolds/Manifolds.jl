@@ -57,14 +57,14 @@ end
 end
 
 @testset "Special unitary matrices" begin
-    M = Manifolds.GeneralUnitaryMatrices{2,ℂ,Manifolds.DeterminantOneMatrices}()
+    M = SpecialUnitary(2)
     @test manifold_dimension(M) == 3
     @test injectivity_radius(M) ≈ π * sqrt(2.0)
 end
 
 @testset "Quaternionic Unitary Matrices" begin
-    M = UnitaryMatrices(1, ℍ)
-    @test repr(M) == "UnitaryMatrices(1, ℍ)"
+    M = UnitaryMatrices(1, ℍ; parameter=:type)
+    @test repr(M) == "UnitaryMatrices(1, ℍ; parameter=:type)"
     @test manifold_dimension(M) == 3
     @test injectivity_radius(M) == π
     @test !is_flat(M)
@@ -124,7 +124,5 @@ end
 end
 
 @testset "Flatness edge cases" begin
-    @test is_flat(
-        Manifolds.GeneralUnitaryMatrices{1,ℂ,Manifolds.AbsoluteDeterminantOneMatrices}(),
-    )
+    @test is_flat(SpecialUnitary(1))
 end

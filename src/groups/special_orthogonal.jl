@@ -18,7 +18,7 @@ Base.inv(::SpecialOrthogonal, e::Identity{MultiplicationOperation}) = e
 function Base.show(io::IO, ::SpecialOrthogonal{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "SpecialOrthogonal($(n); parameter=:type)")
 end
-function Base.show(io::IO, M::SpecialOrthogonal{Type{Int}})
+function Base.show(io::IO, M::SpecialOrthogonal{Tuple{Int}})
     n = get_n(M)
     return print(io, "SpecialOrthogonal($(n))")
 end

@@ -668,7 +668,7 @@ function _injectivity_radius(M::GeneralUnitaryMatrices{<:Any,ℝ}, ::Exponential
     n = get_n(M)
     return n == 1 ? 0.0 : π * sqrt(2.0)
 end
-function _injectivity_radius(::GeneralUnitaryMatrices{<:Any,ℝ}, ::PolarRetraction)
+function _injectivity_radius(M::GeneralUnitaryMatrices{<:Any,ℝ}, ::PolarRetraction)
     n = get_n(M)
     return n == 1 ? 0.0 : π / sqrt(2.0)
 end
