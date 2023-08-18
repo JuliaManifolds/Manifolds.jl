@@ -9,6 +9,14 @@ Orthogonal group $\mathrm{O}(n)$ represented by [`OrthogonalMatrices`](@ref).
 """
 const Orthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,AbsoluteDeterminantOneMatrices}
 
-Orthogonal(n) = Orthogonal{n}(OrthogonalMatrices(n))
+function Orthogonal(n; parameter::Symbol=:field)
+    return GeneralUnitaryMultiplicationGroup(OrthogonalMatrices(n; parameter=parameter))
+end
 
-show(io::IO, ::Orthogonal{n}) where {n} = print(io, "Orthogonal($(n))")
+function Base.show(io::IO, ::Orthogonal{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "Orthogonal($(n); parameter=:type)")
+end
+function Base.show(io::IO, M::Orthogonal{Tuple{Int}})
+    n = get_n(M)
+    return print(io, "Orthogonal($(n))")
+end

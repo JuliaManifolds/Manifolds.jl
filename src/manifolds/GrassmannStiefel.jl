@@ -93,8 +93,12 @@ function exp!(M::Grassmann, q, p, X)
     return copyto!(q, Array(qr(z).Q))
 end
 
-function get_embedding(::Grassmann{N,K,𝔽}) where {N,K,𝔽}
-    return Stiefel(N, K, 𝔽)
+function get_embedding(::Grassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return Stiefel(n, k, 𝔽; parameter=:type)
+end
+function get_embedding(M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_nk(M)
+    return Stiefel(n, k, 𝔽)
 end
 
 @doc raw"""
@@ -228,12 +232,13 @@ rand(M::Grassmann; σ::Real=1.0)
 
 function Random.rand!(
     rng::AbstractRNG,
-    M::Grassmann{n,k,𝔽},
+    M::Grassmann{<:Any,𝔽},
     pX;
     σ::Real=one(real(eltype(pX))),
     vector_at=nothing,
-) where {n,k,𝔽}
+) where {𝔽}
     if vector_at === nothing
+        n, k = get_nk(M)
         V = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
         pX .= qr(V).Q[:, 1:k]
     else
@@ -245,12 +250,12 @@ function Random.rand!(
 end
 
 @doc raw"""
-    representation_size(M::Grassmann{n,k})
+    representation_size(M::Grassmann)
 
-Return the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)
+Return the representation size or matrix dimension of a point on the [`Grassmann`](@ref)
 `M`, i.e. $(n,k)$ for both the real-valued and the complex value case.
 """
-@generated representation_size(::Grassmann{n,k}) where {n,k} = (n, k)
+representation_size(M::Grassmann) = get_nk(M)
 
 @doc raw"""
     retract(M::Grassmann, p, X, ::PolarRetraction)
@@ -286,7 +291,7 @@ D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_
 """
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
 
-function retract_qr!(::Grassmann{N,K}, q, p, X, t::Number) where {N,K}
+function retract_qr!(::Grassmann, q, p, X, t::Number)
     q .= p .+ t .* X
     qrfac = qr(q)
     d = diag(qrfac.R)
@@ -295,7 +300,7 @@ function retract_qr!(::Grassmann{N,K}, q, p, X, t::Number) where {N,K}
 end
 
 @doc raw"""
-    riemann_tensor(::Grassmann{n,k,ℝ}, p, X, Y, Z) where {n,k}
+    riemann_tensor(::Grassmann{<:Any,ℝ}, p, X, Y, Z)
 
 Compute the value of Riemann tensor on the real [`Grassmann`](@ref) manifold.
 The formula reads[^Rentmeesters2011]
@@ -306,9 +311,9 @@ The formula reads[^Rentmeesters2011]
     > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
     > European Control Conference, Dec. 2011, pp. 7141–7146. doi: [10.1109/CDC.2011.6161280](https://doi.org/10.1109/CDC.2011.6161280).
 """
-riemann_tensor(::Grassmann{n,k,ℝ}, p, X, Y, Z) where {n,k}
+riemann_tensor(::Grassmann{<:Any,ℝ}, p, X, Y, Z)
 
-function riemann_tensor!(::Grassmann{n,k,ℝ}, Xresult, p, X, Y, Z) where {n,k}
+function riemann_tensor!(::Grassmann{<:Any,ℝ}, Xresult, p, X, Y, Z)
     XYᵀ = X * Y'
     YXᵀ = XYᵀ'
     YᵀX = Y' * X
@@ -317,14 +322,18 @@ function riemann_tensor!(::Grassmann{n,k,ℝ}, Xresult, p, X, Y, Z) where {n,k}
     return Xresult
 end
 
-function Base.show(io::IO, ::Grassmann{n,k,𝔽}) where {n,k,𝔽}
+function Base.show(io::IO, ::Grassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return print(io, "Grassmann($(n), $(k), $(𝔽); parameter=:type)")
+end
+function Base.show(io::IO, M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_nk(M)
     return print(io, "Grassmann($(n), $(k), $(𝔽))")
 end
 Base.show(io::IO, p::StiefelPoint) = print(io, "StiefelPoint($(p.value))")
 Base.show(io::IO, X::StiefelTVector) = print(io, "StiefelTVector($(X.value))")
 
 """
-    uniform_distribution(M::Grassmann{n,k,ℝ}, p)
+    uniform_distribution(M::Grassmann{<:Any,ℝ}, p)
 
 Uniform distribution on given (real-valued) [`Grassmann`](@ref) `M`.
 Specifically, this is the normalized Haar measure on `M`.
@@ -337,7 +346,8 @@ see also Theorem 2.2.2(iii) in [^Chikuse2003].
     > Y. Chikuse: "Statistics on Special Manifolds", Springer New York, 2003,
     > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
 """
-function uniform_distribution(M::Grassmann{n,k,ℝ}, p) where {n,k}
+function uniform_distribution(M::Grassmann{<:Any,ℝ}, p)
+    n, k = get_nk(M)
     μ = Distributions.Zeros(n, k)
     σ = one(eltype(p))
     Σ1 = Distributions.PDMats.ScalMat(n, σ)
@@ -348,7 +358,7 @@ function uniform_distribution(M::Grassmann{n,k,ℝ}, p) where {n,k}
 end
 
 @doc raw"""
-    vector_transport_to(M::Grassmann,p,X,q,::ProjectionTransport)
+    vector_transport_to(M::Grassmann, p, X, q, ::ProjectionTransport)
 
 compute the projection based transport on the [`Grassmann`](@ref) `M` by
 interpreting `X` from the tangent space at `p` as a point in the embedding and

@@ -1,154 +1,167 @@
 include("../utils.jl")
 
 using Manifolds: induced_basis
+using FiniteDifferences
 
 @testset "Euclidean" begin
-    E = Euclidean(3)
-    Ec = Euclidean(3; field=ℂ)
-    EM = Manifolds.MetricManifold(E, Manifolds.EuclideanMetric())
-    @test repr(E) == "Euclidean(3; field = ℝ)"
-    @test repr(Ec) == "Euclidean(3; field = ℂ)"
-    @test repr(Euclidean(2, 3; field=ℍ)) == "Euclidean(2, 3; field = ℍ)"
-    @test Manifolds.allocation_promotion_function(Ec, get_vector, ()) === complex
-    @test is_flat(E)
-    @test is_flat(Ec)
-    p = zeros(3)
-    A = Manifolds.RetractionAtlas()
-    B = induced_basis(EM, A, p, TangentSpace)
-    @test det_local_metric(EM, p, B) == one(eltype(p))
-    @test log_local_metric_density(EM, p, B) == zero(eltype(p))
-    @test project!(E, p, p) == p
-    @test embed!(E, p, p) == p
-    @test manifold_dimension(Ec) == 2 * manifold_dimension(E)
-    X = zeros(3)
-    X[1] = 1.0
-    Y = similar(X)
-    project!(E, Y, p, X)
-    @test Y == X
-    @test embed(E, p, X) == X
-
-    # temp: explicit test for induced basis
-    B = induced_basis(E, RetractionAtlas(), 0, ManifoldsBase.TangentSpaceType())
-    @test get_coordinates(E, p, X, B) == X
-    get_coordinates!(E, Y, p, X, B)
-    @test Y == X
-    @test get_vector(E, p, Y, B) == X
-    Y2 = similar(X)
-    get_vector!(E, Y2, p, Y, B)
-    @test Y2 == X
-
-    Y = parallel_transport_along(E, p, X, [p])
-    @test Y == X
-    parallel_transport_along!(E, Y, p, X, [p])
-    @test Y == X
-
-    Y = vector_transport_along(E, p, X, [p])
-    @test Y == X
-    vector_transport_along!(E, Y, p, X, [p])
-    @test Y == X
-
-    # real manifold does not allow complex values
-    @test_throws DomainError is_point(Ec, [:a, :b, :b], true)
-    @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], true)
-    @test_throws DomainError is_point(E, [1], true)
-    @test_throws DomainError is_vector(Ec, [:a, :b, :b], [1.0, 1.0, 0.0], true)
-    @test_throws DomainError is_vector(E, [1.0, 1.0im, 0.0], [1.0, 1.0, 0.0], true) # real manifold does not allow complex values
-    @test_throws DomainError is_vector(E, [1], [1.0, 1.0, 0.0], true)
-    @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0], true)
-    @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0, 0.0, 1.0im], true)
-    @test_throws DomainError is_vector(Ec, [0.0, 0.0, 0.0], [:a, :b, :c], true)
-
-    @test E^2 === Euclidean(3, 2)
-    @test ^(E, 2) === Euclidean(3, 2)
-    @test E^(2,) === Euclidean(3, 2)
-    @test Ec^(4, 5) === Euclidean(3, 4, 5; field=ℂ)
-
-    manifolds = [E, EM, Ec]
-    types = [Vector{Float64}]
-    TEST_FLOAT32 && push!(types, Vector{Float32})
-    TEST_DOUBLE64 && push!(types, Vector{Double64})
-    TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
-
-    types_complex = [Vector{ComplexF64}]
-    TEST_FLOAT32 && push!(types_complex, Vector{ComplexF32})
-    TEST_DOUBLE64 && push!(types_complex, Vector{ComplexDF64})
-    TEST_STATIC_SIZED && push!(types_complex, MVector{3,ComplexF64})
-
-    for M in manifolds
-        basis_types = if M == E
-            (
-                DefaultOrthonormalBasis(),
-                ProjectedOrthonormalBasis(:svd),
-                DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]),
-            )
-        elseif M == Ec
-            (
-                DefaultOrthonormalBasis(),
-                DefaultOrthonormalBasis(ℂ),
-                DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]),
-                DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0], ℂ),
-            )
+    for param in [:field, :type]
+        E = Euclidean(3, parameter=param)
+        Ec = Euclidean(3; field=ℂ, parameter=param)
+        EM = Manifolds.MetricManifold(E, Manifolds.EuclideanMetric())
+        EH = Euclidean(2, 3; field=ℍ, parameter=param)
+        if param === :type
+            @test repr(E) == "Euclidean(3; field = ℝ)"
+            @test repr(Ec) == "Euclidean(3; field = ℂ)"
+            @test repr(EH) == "Euclidean(2, 3; field = ℍ)"
         else
-            ()
+            @test repr(E) == "Euclidean(3; field = ℝ, parameter = :field)"
+            @test repr(Ec) == "Euclidean(3; field = ℂ, parameter = :field)"
+            @test repr(EH) == "Euclidean(2, 3; field = ℍ, parameter = :field)"
         end
-        for T in types
-            @testset "$M Type $T" begin
+
+        @test Manifolds.allocation_promotion_function(Ec, get_vector, ()) === complex
+        @test is_flat(E)
+        @test is_flat(Ec)
+        p = zeros(3)
+        A = Manifolds.RetractionAtlas()
+        B = induced_basis(EM, A, p, TangentSpace)
+        @test det_local_metric(EM, p, B) == one(eltype(p))
+        @test log_local_metric_density(EM, p, B) == zero(eltype(p))
+        @test project!(E, p, p) == p
+        @test embed!(E, p, p) == p
+        @test manifold_dimension(Ec) == 2 * manifold_dimension(E)
+        X = zeros(3)
+        X[1] = 1.0
+        Y = similar(X)
+        project!(E, Y, p, X)
+        @test Y == X
+        @test embed(E, p, X) == X
+
+        # temp: explicit test for induced basis
+        B = induced_basis(E, RetractionAtlas(), 0, ManifoldsBase.TangentSpaceType())
+        @test get_coordinates(E, p, X, B) == X
+        get_coordinates!(E, Y, p, X, B)
+        @test Y == X
+        @test get_vector(E, p, Y, B) == X
+        Y2 = similar(X)
+        get_vector!(E, Y2, p, Y, B)
+        @test Y2 == X
+
+        Y = parallel_transport_along(E, p, X, [p])
+        @test Y == X
+        parallel_transport_along!(E, Y, p, X, [p])
+        @test Y == X
+
+        Y = vector_transport_along(E, p, X, [p])
+        @test Y == X
+        vector_transport_along!(E, Y, p, X, [p])
+        @test Y == X
+
+        # real manifold does not allow complex values
+        @test_throws DomainError is_point(Ec, [:a, :b, :b], true)
+        @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], true)
+        @test_throws DomainError is_point(E, [1], true)
+        @test_throws DomainError is_vector(Ec, [:a, :b, :b], [1.0, 1.0, 0.0], true)
+        @test_throws DomainError is_vector(E, [1.0, 1.0im, 0.0], [1.0, 1.0, 0.0], true) # real manifold does not allow complex values
+        @test_throws DomainError is_vector(E, [1], [1.0, 1.0, 0.0], true)
+        @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0], true)
+        @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0, 0.0, 1.0im], true)
+        @test_throws DomainError is_vector(Ec, [0.0, 0.0, 0.0], [:a, :b, :c], true)
+
+        @test E^2 === Euclidean(3, 2, parameter=param)
+        @test ^(E, 2) === Euclidean(3, 2, parameter=param)
+        @test E^(2,) === Euclidean(3, 2, parameter=param)
+        @test Ec^(4, 5) === Euclidean(3, 4, 5; field=ℂ, parameter=param)
+
+        manifolds = [E, EM, Ec]
+        types = [Vector{Float64}]
+        TEST_FLOAT32 && push!(types, Vector{Float32})
+        TEST_DOUBLE64 && push!(types, Vector{Double64})
+        TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
+
+        types_complex = [Vector{ComplexF64}]
+        TEST_FLOAT32 && push!(types_complex, Vector{ComplexF32})
+        TEST_DOUBLE64 && push!(types_complex, Vector{ComplexDF64})
+        TEST_STATIC_SIZED && push!(types_complex, MVector{3,ComplexF64})
+
+        for M in manifolds
+            basis_types = if M == E
+                (
+                    DefaultOrthonormalBasis(),
+                    ProjectedOrthonormalBasis(:svd),
+                    DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]),
+                )
+            elseif M == Ec
+                (
+                    DefaultOrthonormalBasis(),
+                    DefaultOrthonormalBasis(ℂ),
+                    DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0]),
+                    DiagonalizingOrthonormalBasis([1.0, 2.0, 3.0], ℂ),
+                )
+            else
+                ()
+            end
+            for T in types
+                @testset "$M Type $T" begin
+                    pts = [
+                        convert(T, [1.0, 0.0, 0.0]),
+                        convert(T, [0.0, 1.0, 0.0]),
+                        convert(T, [0.0, 0.0, 1.0]),
+                    ]
+                    test_manifold(
+                        M,
+                        pts,
+                        test_project_point=true,
+                        test_project_tangent=true,
+                        test_musical_isomorphisms=true,
+                        test_default_vector_transport=true,
+                        vector_transport_methods=[
+                            ParallelTransport(),
+                            SchildsLadderTransport(),
+                            PoleLadderTransport(),
+                        ],
+                        test_mutating_rand=isa(T, Vector),
+                        point_distributions=[
+                            Manifolds.projected_distribution(
+                                M,
+                                Distributions.MvNormal(zero(pts[1]), 1.0 * I),
+                            ),
+                        ],
+                        tvector_distributions=[
+                            Manifolds.normal_tvector_distribution(M, pts[1], 1.0 * I),
+                        ],
+                        basis_types_vecs=basis_types,
+                        basis_types_to_from=basis_types,
+                        basis_has_specialized_diagonalizing_get=true,
+                        test_vee_hat=isa(M, Euclidean),
+                        test_inplace=true,
+                        test_rand_point=M === E,
+                        test_rand_tvector=M === E,
+                    )
+                end
+            end
+        end
+        for T in types_complex
+            @testset "Complex Euclidean, type $T" begin
                 pts = [
-                    convert(T, [1.0, 0.0, 0.0]),
-                    convert(T, [0.0, 1.0, 0.0]),
+                    convert(T, [1.0im, -1.0im, 1.0]),
+                    convert(T, [0.0, 1.0, 1.0im]),
                     convert(T, [0.0, 0.0, 1.0]),
                 ]
                 test_manifold(
-                    M,
+                    Ec,
                     pts,
-                    test_project_point=true,
                     test_project_tangent=true,
                     test_musical_isomorphisms=true,
                     test_default_vector_transport=true,
-                    vector_transport_methods=[
-                        ParallelTransport(),
-                        SchildsLadderTransport(),
-                        PoleLadderTransport(),
-                    ],
-                    test_mutating_rand=isa(T, Vector),
-                    point_distributions=[
-                        Manifolds.projected_distribution(
-                            M,
-                            Distributions.MvNormal(zero(pts[1]), 1.0 * I),
-                        ),
-                    ],
-                    tvector_distributions=[
-                        Manifolds.normal_tvector_distribution(M, pts[1], 1.0 * I),
-                    ],
-                    basis_types_vecs=basis_types,
-                    basis_types_to_from=basis_types,
-                    basis_has_specialized_diagonalizing_get=true,
-                    test_vee_hat=isa(M, Euclidean),
-                    test_inplace=true,
-                    test_rand_point=M === E,
-                    test_rand_tvector=M === E,
+                    test_vee_hat=false,
+                    parallel_transport=true,
                 )
             end
         end
     end
-    for T in types_complex
-        @testset "Complex Euclidean, type $T" begin
-            pts = [
-                convert(T, [1.0im, -1.0im, 1.0]),
-                convert(T, [0.0, 1.0, 1.0im]),
-                convert(T, [0.0, 0.0, 1.0]),
-            ]
-            test_manifold(
-                Ec,
-                pts,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                test_vee_hat=false,
-                parallel_transport=true,
-            )
-        end
-    end
+    E = Euclidean(3)
+    Ec = Euclidean(3; field=ℂ)
 
     number_types = [Float64, ComplexF64]
     TEST_FLOAT32 && push!(number_types, Float32)
@@ -306,7 +319,7 @@ using Manifolds: induced_basis
     end
 
     @testset "StaticArrays specializations" begin
-        M1 = Euclidean(3)
+        M1 = Euclidean(3; parameter=:type)
         @test get_vector(
             M1,
             SA[1.0, 2.0, 3.0],
@@ -317,7 +330,7 @@ using Manifolds: induced_basis
         c_sv = SizedVector{3}([-1.0, -2.0, -3.0])
         @test get_vector(M1, SA[1.0, 2.0, 3.0], c_sv, DefaultOrthonormalBasis()) === c_sv
 
-        M2 = Euclidean(2, 2)
+        M2 = Euclidean(2, 2; parameter=:type)
         @test get_vector(
             M2,
             SA[1.0 2.0; 3.0 4.0],

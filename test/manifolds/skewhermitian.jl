@@ -2,7 +2,6 @@ include("../utils.jl")
 
 @testset "SkewSymmetricMatrices" begin
     @test SkewSymmetricMatrices(3) === SkewHermitianMatrices(3)
-    @test SkewSymmetricMatrices(3, ℂ) === SkewHermitianMatrices(3, ℂ)
 end
 
 @testset "SkewHermitianMatrices" begin
@@ -23,7 +22,7 @@ end
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test is_flat(M)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
         @test check_point(M, B_skewsym) === nothing
         @test_throws DomainError is_point(M, A, true)
         @test_throws ManifoldDomainError is_point(M, C, true)

@@ -25,19 +25,19 @@ $\mathrm{T}(n) × \mathrm{SO}(n)$. For group-specific functions, they may also b
 represented as affine matrices with size `(n + 1, n + 1)` (see [`affine_matrix`](@ref)), for
 which the group operation is [`MultiplicationOperation`](@ref).
 """
-const SpecialEuclidean{N} = SemidirectProductGroup{
+const SpecialEuclidean{T} = SemidirectProductGroup{
     ℝ,
-    TranslationGroup{Tuple{N},ℝ},
-    SpecialOrthogonal{N},
-    RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftForwardAction},
+    TranslationGroup{T,ℝ},
+    SpecialOrthogonal{T},
+    RotationAction{TranslationGroup{T,ℝ},SpecialOrthogonal{T},LeftForwardAction},
 }
 
 const SpecialEuclideanManifold{N} =
-    ProductManifold{ℝ,Tuple{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N}}}
+    ProductManifold{ℝ,Tuple{TranslationGroup{N,ℝ},SpecialOrthogonal{N}}}
 
-function SpecialEuclidean(n)
-    Tn = TranslationGroup(n)
-    SOn = SpecialOrthogonal(n)
+function SpecialEuclidean(n; parameter::Symbol=:type)
+    Tn = TranslationGroup(n; parameter=parameter)
+    SOn = SpecialOrthogonal(n; parameter=parameter)
     A = RotationAction(Tn, SOn)
     return SemidirectProductGroup(Tn, SOn, A)
 end
@@ -52,6 +52,9 @@ Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean
 @inline function active_traits(f, M::SpecialEuclidean, args...)
     return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
 end
+
+get_n(::SpecialEuclidean{N}) where {N} = N
+get_n(M::SpecialEuclidean{Tuple{Int}}) = manifold_dimension(M.manifold.manifolds[1])
 
 Base.@propagate_inbounds function Base.getindex(
     p::AbstractMatrix,
@@ -72,24 +75,27 @@ Base.@propagate_inbounds function Base.setindex!(
 end
 
 Base.@propagate_inbounds function submanifold_component(
-    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     p::AbstractMatrix,
     ::Val{1},
-) where {n}
+)
+    n = get_n(G)
     return view(p, 1:n, n + 1)
 end
 Base.@propagate_inbounds function submanifold_component(
-    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     p::AbstractMatrix,
     ::Val{2},
-) where {n}
+)
+    n = get_n(G)
     return view(p, 1:n, 1:n)
 end
 
 function submanifold_components(
-    G::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     p::AbstractMatrix,
-) where {n}
+)
+    n = get_n(G)
     @assert size(p) == (n + 1, n + 1)
     @inbounds t = submanifold_component(G, p, Val(1))
     @inbounds R = submanifold_component(G, p, Val(2))
@@ -97,9 +103,10 @@ function submanifold_components(
 end
 
 Base.@propagate_inbounds function _padpoint!(
-    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     q::AbstractMatrix,
-) where {n}
+)
+    n = get_n(G)
     for i in 1:n
         q[n + 1, i] = 0
     end
@@ -108,9 +115,10 @@ Base.@propagate_inbounds function _padpoint!(
 end
 
 Base.@propagate_inbounds function _padvector!(
-    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    ::Union{SpecialEuclidean,SpecialEuclideanManifold},
     X::AbstractMatrix,
-) where {n}
+)
+    n = get_n(G)
     for i in 1:(n + 1)
         X[n + 1, i] = 0
     end
@@ -159,21 +167,26 @@ See also [`screw_matrix`](@ref) for matrix representations of the Lie algebra.
     > Rico Martinez, J. M., “Representations of the Euclidean group and its applications
     > to the kinematics of spatial chains,” PhD Thesis, University of Florida, 1988.
 """
-function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
+function affine_matrix(G::SpecialEuclidean, p)
     pis = submanifold_components(G, p)
     pmat = allocate_result(G, affine_matrix, pis...)
     map(copyto!, submanifold_components(G, pmat), pis)
     @inbounds _padpoint!(G, pmat)
     return pmat
 end
-affine_matrix(::SpecialEuclidean{n}, p::AbstractMatrix) where {n} = p
+affine_matrix(::SpecialEuclidean, p::AbstractMatrix) = p
 function affine_matrix(::SpecialEuclidean{n}, ::SpecialEuclideanIdentity{n}) where {n}
     s = maybesize(Size(n, n))
     s isa Size && return SDiagonal{n,Float64}(I)
     return Diagonal{Float64}(I, n)
 end
+function affine_matrix(::SpecialEuclidean{Tuple{Int}}, ::SpecialEuclideanIdentity)
+    n = get_n(G)
+    return Diagonal{Float64}(I, n)
+end
 
-function check_point(G::SpecialEuclideanManifold{n}, p::AbstractMatrix; kwargs...) where {n}
+function check_point(G::SpecialEuclideanManifold, p::AbstractMatrix; kwargs...)
+    n = get_n(G)
     errs = DomainError[]
     # homogeneous
     if !isapprox(p[end, :], [zeros(size(p, 2) - 1)..., 1]; kwargs...)
@@ -197,24 +210,27 @@ function check_point(G::SpecialEuclideanManifold{n}, p::AbstractMatrix; kwargs..
     return length(errs) == 0 ? nothing : first(errs)
 end
 
-function check_size(G::SpecialEuclideanManifold{n}, p::AbstractMatrix; kwargs...) where {n}
+function check_size(G::SpecialEuclideanManifold, p::AbstractMatrix; kwargs...)
+    n = get_n(G)
     return check_size(Euclidean(n + 1, n + 1), p)
 end
 function check_size(
-    G::SpecialEuclideanManifold{n},
+    G::SpecialEuclideanManifold,
     p::AbstractMatrix,
     X::AbstractMatrix;
     kwargs...,
-) where {n}
+)
+    n = get_n(G)
     return check_size(Euclidean(n + 1, n + 1), X)
 end
 
 function check_vector(
-    G::SpecialEuclideanManifold{n},
+    G::SpecialEuclideanManifold,
     p::AbstractMatrix,
     X::AbstractMatrix;
     kwargs...,
-) where {n}
+)
+    n = get_n(G)
     errs = DomainError[]
     # homogeneous
     if !isapprox(X[end, :], zeros(size(X, 2)); kwargs...)
@@ -255,19 +271,21 @@ a homomorphic embedding (see [`SpecialEuclideanInGeneralLinear`](@ref) for a hom
 
 See also [`affine_matrix`](@ref) for matrix representations of the Lie group.
 """
-function screw_matrix(G::SpecialEuclidean{n}, X) where {n}
+function screw_matrix(G::SpecialEuclidean, X)
     Xis = submanifold_components(G, X)
     Xmat = allocate_result(G, screw_matrix, Xis...)
     map(copyto!, submanifold_components(G, Xmat), Xis)
     @inbounds _padvector!(G, Xmat)
     return Xmat
 end
-screw_matrix(::SpecialEuclidean{n}, X::AbstractMatrix) where {n} = X
+screw_matrix(::SpecialEuclidean, X::AbstractMatrix) = X
 
-function allocate_result(::SpecialEuclidean{n}, ::typeof(affine_matrix), p...) where {n}
+function allocate_result(::SpecialEuclidean, ::typeof(affine_matrix), p...)
+    n = get_n(G)
     return allocate(p[1], Size(n + 1, n + 1))
 end
-function allocate_result(::SpecialEuclidean{n}, ::typeof(screw_matrix), X...) where {n}
+function allocate_result(::SpecialEuclidean, ::typeof(screw_matrix), X...)
+    n = get_n(G)
     return allocate(X[1], Size(n + 1, n + 1))
 end
 

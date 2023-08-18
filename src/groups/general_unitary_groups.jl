@@ -1,12 +1,14 @@
 @doc raw"""
-    GeneralUnitaryMultiplicationGroup{n,𝔽,M} = GroupManifold{𝔽,M,MultiplicationOperation}
+    GeneralUnitaryMultiplicationGroup{T,𝔽,M} = GroupManifold{𝔽,M,MultiplicationOperation}
 
 A generic type for Lie groups based on a unitary property and matrix multiplcation,
 see e.g. [`Orthogonal`](@ref), [`SpecialOrthogonal`](@ref), [`Unitary`](@ref), and [`SpecialUnitary`](@ref)
 """
-struct GeneralUnitaryMultiplicationGroup{n,𝔽,S} <: AbstractDecoratorManifold{𝔽}
-    manifold::GeneralUnitaryMatrices{n,𝔽,S}
+struct GeneralUnitaryMultiplicationGroup{T,𝔽,S} <: AbstractDecoratorManifold{𝔽}
+    manifold::GeneralUnitaryMatrices{T,𝔽,S}
 end
+
+get_n(M::GeneralUnitaryMultiplicationGroup) = get_n(M.manifold)
 
 @inline function active_traits(f, ::GeneralUnitaryMultiplicationGroup, args...)
     if is_metric_function(f)
@@ -45,8 +47,8 @@ end
 decorated_manifold(G::GeneralUnitaryMultiplicationGroup) = G.manifold
 
 @doc raw"""
-     exp_lie(G::Orthogonal{2}, X)
-     exp_lie(G::SpecialOrthogonal{2}, X)
+     exp_lie(G::Orthogonal{TypeParameter{Tuple{2}}}, X)
+     exp_lie(G::SpecialOrthogonal{TypeParameter{Tuple{2}}}, X)
 
 Compute the Lie group exponential map on the [`Orthogonal`](@ref)`(2)` or [`SpecialOrthogonal`](@ref)`(2)` group.
 Given ``X = \begin{pmatrix} 0 & -θ \\ θ & 0 \end{pmatrix}``, the group exponential is
@@ -55,11 +57,11 @@ Given ``X = \begin{pmatrix} 0 & -θ \\ θ & 0 \end{pmatrix}``, the group exponen
 \exp_e \colon X ↦ \begin{pmatrix} \cos θ & -\sin θ \\ \sin θ & \cos θ \end{pmatrix}.
 ```
 """
-exp_lie(::GeneralUnitaryMultiplicationGroup{2,ℝ}, X)
+exp_lie(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}},ℝ}, X)
 
 @doc raw"""
-     exp_lie(G::Orthogonal{4}, X)
-     exp_lie(G::SpecialOrthogonal{4}, X)
+     exp_lie(G::Orthogonal{TypeParameter{Tuple{4}}}, X)
+     exp_lie(G::SpecialOrthogonal{TypeParameter{Tuple{4}}}, X)
 
 Compute the group exponential map on the [`Orthogonal`](@ref)`(4)` or the [`SpecialOrthogonal`](@ref) group.
 The algorithm used is a more numerically stable form of those proposed in [^Gallier2002], [^Andrica2013].
@@ -75,9 +77,9 @@ The algorithm used is a more numerically stable form of those proposed in [^Gall
     > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
     > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
 """
-exp_lie(::GeneralUnitaryMultiplicationGroup{4,ℝ}, X)
+exp_lie(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},ℝ}, X)
 
-function exp_lie!(::GeneralUnitaryMultiplicationGroup{2,ℝ}, q, X)
+function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}},ℝ}, q, X)
     @assert size(X) == (2, 2)
     @inbounds θ = (X[2, 1] - X[1, 2]) / 2
     sinθ, cosθ = sincos(θ)
@@ -89,7 +91,7 @@ function exp_lie!(::GeneralUnitaryMultiplicationGroup{2,ℝ}, q, X)
     end
     return q
 end
-function exp_lie!(::GeneralUnitaryMultiplicationGroup{3,ℝ}, q, X)
+function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{3}},ℝ}, q, X)
     θ = norm(X) / sqrt(2)
     if θ ≈ 0
         a = 1 - θ^2 / 6
@@ -103,7 +105,7 @@ function exp_lie!(::GeneralUnitaryMultiplicationGroup{3,ℝ}, q, X)
     mul!(q, X, X, b, true)
     return q
 end
-function exp_lie!(::GeneralUnitaryMultiplicationGroup{4,ℝ}, q, X)
+function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},ℝ}, q, X)
     T = eltype(X)
     α, β = angles_4d_skew_sym_matrix(X)
     sinα, cosα = sincos(α)
@@ -209,23 +211,23 @@ function log!(
 end
 
 function log_lie!(
-    G::GeneralUnitaryMultiplicationGroup{n,ℝ},
+    G::GeneralUnitaryMultiplicationGroup{<:Any,ℝ},
     X::AbstractMatrix,
     q::AbstractMatrix,
-) where {n}
+)
     log_safe!(X, q)
     return project!(G, X, Identity(G), X)
 end
 function log_lie!(
-    ::GeneralUnitaryMultiplicationGroup{n,ℝ},
+    ::GeneralUnitaryMultiplicationGroup{<:Any,ℝ},
     X,
     ::Identity{MultiplicationOperation},
-) where {n}
+)
     fill!(X, 0)
     return X
 end
 function log_lie!(
-    G::GeneralUnitaryMultiplicationGroup{2,ℝ},
+    G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}},ℝ},
     X::AbstractMatrix,
     q::AbstractMatrix,
 )
@@ -234,7 +236,7 @@ function log_lie!(
     return get_vector!(G, X, Identity(G), θ, DefaultOrthogonalBasis())
 end
 function log_lie!(
-    G::GeneralUnitaryMultiplicationGroup{3,ℝ},
+    G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{3}},ℝ},
     X::AbstractMatrix,
     q::AbstractMatrix,
 )
@@ -251,7 +253,7 @@ function log_lie!(
     return project!(G, X, e, X)
 end
 function log_lie!(
-    G::GeneralUnitaryMultiplicationGroup{4,ℝ},
+    G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},ℝ},
     X::AbstractMatrix,
     q::AbstractMatrix,
 )

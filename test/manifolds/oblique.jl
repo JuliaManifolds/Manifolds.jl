@@ -6,8 +6,10 @@ include("../utils.jl")
         @test Sphere(2)^3 === Oblique(3, 3)
         @test Sphere(2)^(3,) === PowerManifold(Sphere(2), 3)
         @test ^(Sphere(2), 2) === Oblique(3, 2)
-        @test typeof(^(Sphere(2), 2)) == Oblique{3,2,ℝ,2}
-        @test repr(M) == "Oblique(3,2; field = ℝ)"
+        @test typeof(^(Sphere(2), 2)) == Oblique{Tuple{Int64,Int64},ℝ,Tuple{Int64}}
+        @test typeof(^(Sphere(2; parameter=:type), 2)) ==
+              Oblique{TypeParameter{Tuple{3,2}},ℝ,TypeParameter{Tuple{2}}}
+        @test repr(M) == "Oblique(3, 2; field = ℝ)"
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
         @test !is_flat(M)

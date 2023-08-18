@@ -1,7 +1,7 @@
 include("../utils.jl")
 
 @testset "Rotations" begin
-    M = Manifolds.Rotations(2)
+    M = Rotations(2)
     @test repr(M) == "Rotations(2)"
     @test representation_size(M) == (2, 2)
     @test is_flat(M)
@@ -24,18 +24,18 @@ include("../utils.jl")
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
 
     @testset "vee/hat" begin
-        M = Manifolds.Rotations(2)
+        M = Rotations(2)
         Xf = [1.23]
         p = Matrix{Float64}(I, 2, 2)
-        X = Manifolds.hat(M, p, Xf)
+        X = hat(M, p, Xf)
         @test isa(X, AbstractMatrix)
         @test norm(M, p, X) / sqrt(2) ≈ norm(Xf)
-        @test Manifolds.vee(M, p, X) == Xf
+        @test vee(M, p, X) == Xf
 
         X = project(M, p, randn(2, 2))
-        Xf = Manifolds.vee(M, p, X)
+        Xf = vee(M, p, X)
         @test isa(Xf, AbstractVector)
-        @test Manifolds.hat(M, p, Xf) == X
+        @test hat(M, p, Xf) == X
     end
 
     for T in types
@@ -107,7 +107,7 @@ include("../utils.jl")
     Random.seed!(42)
     for n in (3, 4, 5)
         @testset "Rotations: SO($n)" begin
-            SOn = Manifolds.Rotations(n)
+            SOn = Rotations(n)
             @test !is_flat(SOn)
             ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             tvd = Manifolds.normal_tvector_distribution(SOn, Matrix(1.0I, n, n), 1.0)
@@ -164,7 +164,7 @@ include("../utils.jl")
             )
             p = exp(SOn, pts[1], X)
             X2 = log(SOn, pts[1], p)
-            @test p ≈ exp(SOn, pts[1], X2)
+            @test distance(SOn, p, exp(SOn, pts[1], X2)) < 20 * eps()
         end
     end
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin

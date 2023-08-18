@@ -22,12 +22,27 @@ i.e. that the absolute value of the determinant is 1.
 struct AbsoluteDeterminantOneMatrices <: AbstractMatrixType end
 
 @doc raw"""
-    GeneralUnitaryMatrices{n,𝔽,S<:AbstractMatrixType} <: AbstractDecoratorManifold
+    GeneralUnitaryMatrices{T,𝔽,S<:AbstractMatrixType} <: AbstractDecoratorManifold
 
-A common parametric type for matrices with a unitary property of size ``n×n`` over the field ``\mathbb F``
+A common parametric type for matrices with a unitary property of size ``n×n`` over the field ``𝔽``
 which additionally have the `AbstractMatrixType`, e.g. are `DeterminantOneMatrices`.
 """
-struct GeneralUnitaryMatrices{n,𝔽,S<:AbstractMatrixType} <: AbstractDecoratorManifold{𝔽} end
+struct GeneralUnitaryMatrices{T,𝔽,S<:AbstractMatrixType} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
+
+function GeneralUnitaryMatrices(
+    n::Int,
+    field,
+    matrix_type::Type{<:AbstractMatrixType};
+    parameter::Symbol=:field,
+)
+    size = wrap_type_parameter(parameter, (n,))
+    return GeneralUnitaryMatrices{typeof(size),field,matrix_type}(size)
+end
+
+get_n(::GeneralUnitaryMatrices{TypeParameter{Tuple{n}}}) where {n} = n
+get_n(M::GeneralUnitaryMatrices{Tuple{Int}}) = get_parameter(M.size)[1]
 
 function active_traits(f, ::GeneralUnitaryMatrices, args...)
     return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
@@ -36,7 +51,7 @@ end
 @doc raw"""
     check_point(M::UnitaryMatrices, p; kwargs...)
     check_point(M::OrthogonalMatrices, p; kwargs...)
-    check_point(M::GeneralUnitaryMatrices{n,𝔽}, p; kwargs...)
+    check_point(M::GeneralUnitaryMatrices, p; kwargs...)
 
 Check whether `p` is a valid point on the [`UnitaryMatrices`](@ref) or [`OrthogonalMatrices`] `M`,
 i.e. that ``p`` has an determinante of absolute value one
@@ -44,10 +59,10 @@ i.e. that ``p`` has an determinante of absolute value one
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(
-    M::GeneralUnitaryMatrices{n,𝔽,AbsoluteDeterminantOneMatrices},
+    M::GeneralUnitaryMatrices{<:Any,𝔽,AbsoluteDeterminantOneMatrices},
     p;
     kwargs...,
-) where {n,𝔽}
+) where {𝔽}
     if !isapprox(abs(det(p)), 1; kwargs...)
         return DomainError(
             abs(det(p)),
@@ -72,10 +87,10 @@ i.e. that ``p`` has an determinante of absolute value one, i.e. that ``p^{\mathr
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(
-    M::GeneralUnitaryMatrices{n,𝔽,DeterminantOneMatrices},
+    M::GeneralUnitaryMatrices{<:Any,𝔽,DeterminantOneMatrices},
     p;
     kwargs...,
-) where {n,𝔽}
+) where {𝔽}
     if !isapprox(det(p), 1; kwargs...)
         return DomainError(det(p), "The determinant of $p has to be +1 but it is $(det(p))")
     end
@@ -88,7 +103,8 @@ function check_point(
     return nothing
 end
 
-function check_size(::GeneralUnitaryMatrices{n}, p) where {n}
+function check_size(M::GeneralUnitaryMatrices, p)
+    n = get_n(M)
     m = size(p)
     if length(m) != 2
         return DomainError(
@@ -104,7 +120,8 @@ function check_size(::GeneralUnitaryMatrices{n}, p) where {n}
     end
     return nothing
 end
-function check_size(::GeneralUnitaryMatrices{n}, p, X) where {n}
+function check_size(M::GeneralUnitaryMatrices, p, X)
+    n = get_n(M)
     m = size(X)
     if length(size(X)) != 2
         return DomainError(
@@ -122,10 +139,10 @@ function check_size(::GeneralUnitaryMatrices{n}, p, X) where {n}
 end
 
 @doc raw"""
-    check_vector(M::UnitaryMatrices{n}, p, X; kwargs... )
-    check_vector(M::OrthogonalMatrices{n}, p, X; kwargs... )
-    check_vector(M::Rotations{n}, p, X; kwargs... )
-    check_vector(M::GeneralUnitaryMatrices{n,𝔽}, p, X; kwargs... )
+    check_vector(M::UnitaryMatrices, p, X; kwargs... )
+    check_vector(M::OrthogonalMatrices, p, X; kwargs... )
+    check_vector(M::Rotations, p, X; kwargs... )
+    check_vector(M::GeneralUnitaryMatrices, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`UnitaryMatrices`](@ref)
 space `M`, i.e. after [`check_point`](@ref)`(M,p)`, `X` has to be skew symmetric (Hermitian)
@@ -133,7 +150,8 @@ and orthogonal to `p`.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_vector(M::GeneralUnitaryMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
+function check_vector(M::GeneralUnitaryMatrices{<:Any,𝔽}, p, X; kwargs...) where {𝔽}
+    n = get_n(M)
     return check_point(SkewHermitianMatrices(n, 𝔽), X; kwargs...)
 end
 
@@ -163,14 +181,14 @@ function cos_angles_4d_rotation_matrix(R)
     return ((a + b) / 4, (a - b) / 4)
 end
 
-function default_estimation_method(::GeneralUnitaryMatrices{n,ℝ}, ::typeof(mean)) where {n}
+function default_estimation_method(::GeneralUnitaryMatrices{<:Any,ℝ}, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 2 / √2)
 end
 
 embed(::GeneralUnitaryMatrices, p) = p
 
 @doc raw"""
-    embed(M::GeneralUnitaryMatrices{n,𝔽}, p, X)
+    embed(M::GeneralUnitaryMatrices, p, X)
 
 Embed the tangent vector `X` at point `p` in `M` from
 its Lie algebra representation (set of skew matrices) into the
@@ -198,7 +216,7 @@ Compute the exponential map, that is, since ``X`` is represented in the Lie alge
 exp_p(X) = p\mathrm{e}^X
 ```
 
-For different sizes, like ``n=2,3,4`` there is specialised implementations
+For different sizes, like ``n=2,3,4``, there are specialized implementations.
 
 The algorithm used is a more numerically stable form of those proposed in
 [^Gallier2002] and [^Andrica2013].
@@ -225,28 +243,35 @@ function exp!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
     return copyto!(M, q, p * exp(t * X))
 end
 
-function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix)
+function exp(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, p::SMatrix, X::SMatrix)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(θ)
     return p * SA[cosθ -sinθ; sinθ cosθ]
 end
-function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix, t::Real)
+function exp(
+    M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
+    p::SMatrix,
+    X::SMatrix,
+    t::Real,
+)
     return exp(M, p, t * X)
 end
-function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X)
+function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, q, p, X)
     @assert size(q) == (2, 2)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(θ)
     return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
 end
-function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X, t::Real)
+function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, q, p, X, t::Real)
     @assert size(q) == (2, 2)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(t * θ)
     return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
 end
-exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X) = exp!(M, q, p, X, one(eltype(X)))
-function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X, t::Real)
+function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, q, p, X)
+    return exp!(M, q, p, X, one(eltype(X)))
+end
+function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, q, p, X, t::Real)
     θ = abs(t) * norm(M, p, X) / sqrt(2)
     if θ ≈ 0
         a = 1 - θ^2 / 6
@@ -258,8 +283,10 @@ function exp!(M::GeneralUnitaryMatrices{3,ℝ}, q, p, X, t::Real)
     pinvq = I + a .* t .* X .+ b .* t^2 .* (X^2)
     return copyto!(q, p * pinvq)
 end
-exp!(M::GeneralUnitaryMatrices{4,ℝ}, q, p, X, t::Real) = exp!(M, q, p, t * X)
-function exp!(::GeneralUnitaryMatrices{4,ℝ}, q, p, X)
+function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ}, q, p, X, t::Real)
+    return exp!(M, q, p, t * X)
+end
+function exp!(::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ}, q, p, X)
     T = eltype(X)
     α, β = angles_4d_skew_sym_matrix(X)
     sinα, cosα = sincos(α)
@@ -319,9 +346,9 @@ along the axis of rotation.
 For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
 $X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
 """
-get_coordinates(::GeneralUnitaryMatrices{n,ℝ}, ::Any...) where {n}
+get_coordinates(::GeneralUnitaryMatrices{<:Any,ℝ}, ::Any...)
 function get_coordinates(
-    ::GeneralUnitaryMatrices{2,ℝ},
+    ::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
     p,
     X,
     ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
@@ -329,7 +356,7 @@ function get_coordinates(
     return [X[2]]
 end
 function get_coordinates(
-    ::GeneralUnitaryMatrices{2,ℝ},
+    ::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
     p::SMatrix,
     X::SMatrix,
     ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
@@ -337,20 +364,32 @@ function get_coordinates(
     return SA[X[2]]
 end
 
-function get_coordinates_orthogonal(M::GeneralUnitaryMatrices{n,ℝ}, p, X, N) where {n}
+function get_coordinates_orthogonal(M::GeneralUnitaryMatrices{<:Any,ℝ}, p, X, N)
     Y = allocate_result(M, get_coordinates, p, X, DefaultOrthogonalBasis(N))
     return get_coordinates_orthogonal!(M, Y, p, X, N)
 end
 
-function get_coordinates_orthogonal!(::GeneralUnitaryMatrices{1,ℝ}, Xⁱ, p, X, ::RealNumbers)
+function get_coordinates_orthogonal!(
+    ::GeneralUnitaryMatrices{TypeParameter{Tuple{1}},ℝ},
+    Xⁱ,
+    p,
+    X,
+    ::RealNumbers,
+)
     return Xⁱ
 end
-function get_coordinates_orthogonal!(::GeneralUnitaryMatrices{2,ℝ}, Xⁱ, p, X, ::RealNumbers)
+function get_coordinates_orthogonal!(
+    ::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
+    Xⁱ,
+    p,
+    X,
+    ::RealNumbers,
+)
     Xⁱ[1] = X[2]
     return Xⁱ
 end
 function get_coordinates_orthogonal!(
-    M::GeneralUnitaryMatrices{n,ℝ},
+    M::GeneralUnitaryMatrices{TypeParameter{Tuple{n}},ℝ},
     Xⁱ,
     p,
     X,
@@ -371,13 +410,40 @@ function get_coordinates_orthogonal!(
     end
     return Xⁱ
 end
+function get_coordinates_orthogonal!(
+    M::GeneralUnitaryMatrices{Tuple{Int},ℝ},
+    Xⁱ,
+    p,
+    X,
+    ::RealNumbers,
+)
+    n = get_n(M)
+    @assert length(Xⁱ) == manifold_dimension(M)
+    @assert size(X) == (n, n)
+    if n == 2
+        Xⁱ[1] = X[2]
+    elseif n > 2
+        @inbounds begin
+            Xⁱ[1] = X[3, 2]
+            Xⁱ[2] = X[1, 3]
+            Xⁱ[3] = X[2, 1]
+
+            k = 4
+            for i in 4:n, j in 1:(i - 1)
+                Xⁱ[k] = X[i, j]
+                k += 1
+            end
+        end
+    end
+    return Xⁱ
+end
 function get_coordinates_orthonormal!(
-    M::GeneralUnitaryMatrices{n,ℝ},
+    M::GeneralUnitaryMatrices{<:Any,ℝ},
     Xⁱ,
     p,
     X,
     num::RealNumbers,
-) where {n}
+)
     T = Base.promote_eltype(p, X)
     get_coordinates_orthogonal!(M, Xⁱ, p, X, num)
     Xⁱ .*= sqrt(T(2))
@@ -392,7 +458,13 @@ end
 Return the embedding, i.e. The ``\mathbb F^{n×n}``, where ``\mathbb F = \mathbb R`` for the
 first two and ``\mathbb F = \mathbb C`` for the unitary matrices.
 """
-get_embedding(::GeneralUnitaryMatrices{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
+function get_embedding(::GeneralUnitaryMatrices{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+    return Euclidean(n, n; field=𝔽, parameter=:type)
+end
+function get_embedding(M::GeneralUnitaryMatrices{Tuple{Int},𝔽}) where {𝔽}
+    n = get_n(M)
+    return Euclidean(n, n; field=𝔽, parameter=:field)
+end
 
 @doc raw"""
     get_vector(M::OrthogonalMatrices, p, Xⁱ, B::DefaultOrthogonalBasis)
@@ -401,32 +473,44 @@ get_embedding(::GeneralUnitaryMatrices{n,𝔽}) where {n,𝔽} = Euclidean(n, n;
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 or [`OrthogonalMatrices`](@ref)
 to the matrix representation $X$ of the tangent vector. See
-[`get_coordinates`](@ref get_coordinates(::GeneralUnitaryMatrices{n,ℝ} where {n}, ::Any...)) for the conventions used.
+[`get_coordinates`](@ref get_coordinates(::GeneralUnitaryMatrices, ::Any...)) for the conventions used.
 """
-get_vector(::GeneralUnitaryMatrices{n,ℝ}, ::Any...) where {n}
+get_vector(::GeneralUnitaryMatrices{<:Any,ℝ}, ::Any...)
 
-function get_vector_orthogonal(
-    M::GeneralUnitaryMatrices{n,ℝ},
-    p,
-    c,
-    N::RealNumbers,
-) where {n}
+function get_vector_orthogonal(M::GeneralUnitaryMatrices{<:Any,ℝ}, p, c, N::RealNumbers)
     Y = allocate_result(M, get_vector, p, c)
     return get_vector_orthogonal!(M, Y, p, c, N)
 end
 
-function get_vector_orthogonal(::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, Xⁱ, ::RealNumbers)
+function get_vector_orthogonal(
+    ::GeneralUnitaryMatrices{TypeParameter{2},ℝ},
+    p::SMatrix,
+    Xⁱ,
+    ::RealNumbers,
+)
     return @SMatrix [0 -Xⁱ[]; Xⁱ[] 0]
 end
 
-function get_vector_orthogonal!(::GeneralUnitaryMatrices{1,ℝ}, X, p, Xⁱ, N::RealNumbers)
+function get_vector_orthogonal!(
+    ::GeneralUnitaryMatrices{TypeParameter{1},ℝ},
+    X,
+    p,
+    Xⁱ,
+    N::RealNumbers,
+)
     return X .= 0
 end
-function get_vector_orthogonal!(M::GeneralUnitaryMatrices{2,ℝ}, X, p, Xⁱ, N::RealNumbers)
+function get_vector_orthogonal!(
+    M::GeneralUnitaryMatrices{TypeParameter{2},ℝ},
+    X,
+    p,
+    Xⁱ,
+    N::RealNumbers,
+)
     return get_vector_orthogonal!(M, X, p, Xⁱ[1], N)
 end
 function get_vector_orthogonal!(
-    ::GeneralUnitaryMatrices{2,ℝ},
+    ::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
     X,
     p,
     Xⁱ::Real,
@@ -442,7 +526,7 @@ function get_vector_orthogonal!(
     return X
 end
 function get_vector_orthogonal!(
-    M::GeneralUnitaryMatrices{n,ℝ},
+    M::GeneralUnitaryMatrices{TypeParameter{Tuple{n}},ℝ},
     X,
     p,
     Xⁱ,
@@ -450,6 +534,7 @@ function get_vector_orthogonal!(
 ) where {n}
     @assert size(X) == (n, n)
     @assert length(Xⁱ) == manifold_dimension(M)
+    @assert n > 2
     @inbounds begin
         X[1, 1] = 0
         X[1, 2] = -Xⁱ[3]
@@ -472,22 +557,60 @@ function get_vector_orthogonal!(
     end
     return X
 end
-function get_vector_orthonormal(
-    M::GeneralUnitaryMatrices{n,ℝ},
+function get_vector_orthogonal!(
+    M::GeneralUnitaryMatrices{Tuple{Int},ℝ},
+    X,
     p,
     Xⁱ,
-    N::RealNumbers,
-) where {n}
+    ::RealNumbers,
+)
+    n = get_n(M)
+    @assert size(X) == (n, n)
+    @assert length(Xⁱ) == manifold_dimension(M)
+    if n == 1
+        X .= 0
+    elseif n == 2
+        @inbounds begin
+            X[1] = 0
+            X[2] = Xⁱ[1]
+            X[3] = -Xⁱ[1]
+            X[4] = 0
+        end
+    else
+        @inbounds begin
+            X[1, 1] = 0
+            X[1, 2] = -Xⁱ[3]
+            X[1, 3] = Xⁱ[2]
+            X[2, 1] = Xⁱ[3]
+            X[2, 2] = 0
+            X[2, 3] = -Xⁱ[1]
+            X[3, 1] = -Xⁱ[2]
+            X[3, 2] = Xⁱ[1]
+            X[3, 3] = 0
+            k = 4
+            for i in 4:n
+                for j in 1:(i - 1)
+                    X[i, j] = Xⁱ[k]
+                    X[j, i] = -Xⁱ[k]
+                    k += 1
+                end
+                X[i, i] = 0
+            end
+        end
+    end
+    return X
+end
+function get_vector_orthonormal(M::GeneralUnitaryMatrices{<:Any,ℝ}, p, Xⁱ, N::RealNumbers)
     return get_vector_orthogonal(M, p, Xⁱ, N) ./ sqrt(eltype(Xⁱ)(2))
 end
 
 function get_vector_orthonormal!(
-    M::GeneralUnitaryMatrices{n,ℝ},
+    M::GeneralUnitaryMatrices{<:Any,ℝ},
     X,
     p,
     Xⁱ,
     N::RealNumbers,
-) where {n}
+)
     T = Base.promote_eltype(p, X)
     get_vector_orthogonal!(M, X, p, Xⁱ, N)
     X ./= sqrt(T(2))
@@ -506,7 +629,7 @@ Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 injectivity_radius(::GeneralUnitaryMatrices) = π
 
 @doc raw"""
-    injectivity_radius(G::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices})
+    injectivity_radius(G::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
 
 Return the injectivity radius for general complex unitary matrix manifolds, where the determinant is $+1$,
 which is[^1]
@@ -515,9 +638,7 @@ which is[^1]
     \operatorname{inj}_{\mathrm{SU}(n)} = π \sqrt{2}.
 ```
 """
-function injectivity_radius(
-    ::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices},
-) where {n,ℂ}
+function injectivity_radius(::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
     return π * sqrt(2.0)
 end
 
@@ -533,24 +654,23 @@ Return the radius of injectivity on the [`Rotations`](@ref) manifold `M`, which 
 [^1]:
     > For a derivation of the injectivity radius, see [sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/](https://sethaxen.com/blog/2023/02/the-injectivity-radii-of-the-unitary-groups/).
 """
-injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}) where {n} = π * sqrt(2.0)
-injectivity_radius(::GeneralUnitaryMatrices{1,ℝ}) = 0.0
-
-# Resolve ambiguity on Rotations and Orthogonal
-function _injectivity_radius(
-    ::GeneralUnitaryMatrices{n,ℝ},
-    ::ExponentialRetraction,
-) where {n}
+function injectivity_radius(::GeneralUnitaryMatrices{TypeParameter{Tuple{n}},ℝ}) where {n}
     return π * sqrt(2.0)
 end
-function _injectivity_radius(::GeneralUnitaryMatrices{n,ℝ}, ::PolarRetraction) where {n}
-    return π / sqrt(2.0)
+function injectivity_radius(M::GeneralUnitaryMatrices{Tuple{Int},ℝ})
+    n = get_n(M)
+    return n == 1 ? 0.0 : π * sqrt(2.0)
 end
-function _injectivity_radius(::GeneralUnitaryMatrices{1,ℝ}, ::ExponentialRetraction)
-    return 0.0
+injectivity_radius(::GeneralUnitaryMatrices{TypeParameter{Tuple{1}},ℝ}) = 0.0
+
+# Resolve ambiguity on Rotations and Orthogonal
+function _injectivity_radius(M::GeneralUnitaryMatrices{<:Any,ℝ}, ::ExponentialRetraction)
+    n = get_n(M)
+    return n == 1 ? 0.0 : π * sqrt(2.0)
 end
-function _injectivity_radius(::GeneralUnitaryMatrices{1,ℝ}, ::PolarRetraction)
-    return 0.0
+function _injectivity_radius(::GeneralUnitaryMatrices{<:Any,ℝ}, ::PolarRetraction)
+    n = get_n(M)
+    return n == 1 ? 0.0 : π / sqrt(2.0)
 end
 
 inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
@@ -561,8 +681,14 @@ inner(::GeneralUnitaryMatrices, p, X, Y) = dot(X, Y)
 Return true if [`GeneralUnitaryMatrices`](@ref) `M` is SO(2) or U(1) and false otherwise.
 """
 is_flat(M::GeneralUnitaryMatrices) = false
-is_flat(M::GeneralUnitaryMatrices{2,ℝ}) = true
-is_flat(M::GeneralUnitaryMatrices{1,ℂ}) = true
+is_flat(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}) = true
+is_flat(M::GeneralUnitaryMatrices{TypeParameter{Tuple{1}},ℂ}) = true
+function is_flat(M::GeneralUnitaryMatrices{Tuple{Int64},ℝ})
+    return M.size[1] == 2
+end
+function is_flat(M::GeneralUnitaryMatrices{Tuple{Int64},ℂ})
+    return M.size[1] == 1
+end
 
 @doc raw"""
     log(M::Rotations, p, X)
@@ -594,25 +720,26 @@ the result is projected onto the set of skew symmetric matrices.
 For antipodal rotations the function returns deterministically one of the tangent vectors
 that point at `q`.
 """
-log(::GeneralUnitaryMatrices{n,ℝ}, ::Any...) where {n}
-function ManifoldsBase.log(M::GeneralUnitaryMatrices{2,ℝ}, p, q)
+log(::GeneralUnitaryMatrices{<:Any,ℝ}, ::Any...)
+function ManifoldsBase.log(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, p, q)
     U = transpose(p) * q
     @assert size(U) == (2, 2)
     @inbounds θ = atan(U[2], U[1])
     return get_vector(M, p, θ, DefaultOrthogonalBasis())
 end
-function log!(::GeneralUnitaryMatrices{n,ℝ}, X, p, q) where {n}
+function log!(M::GeneralUnitaryMatrices{<:Any,ℝ}, X, p, q)
     U = transpose(p) * q
     X .= real(log_safe(U))
+    n = get_n(M)
     return project!(SkewSymmetricMatrices(n), X, p, X)
 end
-function log!(M::GeneralUnitaryMatrices{2,ℝ}, X, p, q)
+function log!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, X, p, q)
     U = transpose(p) * q
     @assert size(U) == (2, 2)
     @inbounds θ = atan(U[2], U[1])
     return get_vector!(M, X, p, θ, DefaultOrthogonalBasis())
 end
-function log!(M::GeneralUnitaryMatrices{3,ℝ}, X, p, q)
+function log!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, X, p, q)
     U = transpose(p) * q
     cosθ = (tr(U) - 1) / 2
     if cosθ ≈ -1
@@ -625,7 +752,7 @@ function log!(M::GeneralUnitaryMatrices{3,ℝ}, X, p, q)
     X .= U ./ usinc_from_cos(cosθ)
     return project!(SkewSymmetricMatrices(3), X, p, X)
 end
-function log!(::GeneralUnitaryMatrices{4,ℝ}, X, p, q)
+function log!(::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ}, X, p, q)
     U = transpose(p) * q
     cosα, cosβ = Manifolds.cos_angles_4d_rotation_matrix(U)
     α = acos(clamp(cosα, -1, 1))
@@ -651,8 +778,9 @@ function log!(::GeneralUnitaryMatrices{4,ℝ}, X, p, q)
     return project!(SkewSymmetricMatrices(4), X, p, X)
 end
 
-function log!(::GeneralUnitaryMatrices{n,𝔽}, X, p, q) where {n,𝔽}
+function log!(M::GeneralUnitaryMatrices{<:Any,𝔽}, X, p, q) where {𝔽}
     log_safe!(X, adjoint(p) * q)
+    n = get_n(M)
     project!(SkewHermitianMatrices(n, 𝔽), X, X)
     return X
 end
@@ -668,16 +796,22 @@ Return the dimension of the manifold orthogonal matrices and of the manifold of 
 \dim_{\mathrm{O}(n)} = \dim_{\mathrm{SO}(n)} = \frac{n(n-1)}{2}.
 ```
 """
-manifold_dimension(::GeneralUnitaryMatrices{n,ℝ}) where {n} = div(n * (n - 1), 2)
+function manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℝ})
+    n = get_n(M)
+    return div(n * (n - 1), 2)
+end
 @doc raw"""
-    manifold_dimension(M::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices})
+    manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
 
 Return the dimension of the manifold of special unitary matrices.
 ```math
 \dim_{\mathrm{SU}(n)} = n^2-1.
 ```
 """
-manifold_dimension(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n} = n^2 - 1
+function manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
+    n = get_n(M)
+    return n^2 - 1
+end
 
 """
     mean(
@@ -691,11 +825,11 @@ manifold_dimension(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::GeneralUnitaryMatrices{n,ℝ}, ::Any) where {n}
+mean(::GeneralUnitaryMatrices{<:Any,ℝ}, ::Any)
 
 @doc raw"""
-     project(G::UnitaryMatrices{n}, p)
-     project(G::OrthogonalMatrices{n}, p)
+     project(G::UnitaryMatrices, p)
+     project(G::OrthogonalMatrices, p)
 
 Project the point ``p ∈ 𝔽^{n × n}`` to the nearest point in
 ``\mathrm{U}(n,𝔽)=``[`Unitary(n,𝔽)`](@ref) under the Frobenius norm.
@@ -706,22 +840,22 @@ is
   \operatorname{proj}_{\mathrm{U}(n,𝔽)} \colon p ↦ U V^\mathrm{H}.
 ````
 """
-project(::GeneralUnitaryMatrices{n,𝔽,AbsoluteDeterminantOneMatrices}, p) where {n,𝔽}
+project(::GeneralUnitaryMatrices{<:Any,𝔽,AbsoluteDeterminantOneMatrices}, p) where {𝔽}
 
 function project!(
-    ::GeneralUnitaryMatrices{n,𝔽,AbsoluteDeterminantOneMatrices},
+    ::GeneralUnitaryMatrices{<:Any,𝔽,AbsoluteDeterminantOneMatrices},
     q,
     p,
-) where {n,𝔽}
+) where {𝔽}
     F = svd(p)
     mul!(q, F.U, F.Vt)
     return q
 end
 
 @doc raw"""
-     project(M::OrthogonalMatrices{n}, p, X)
-     project(M::Rotations{n}, p, X)
-     project(M::UnitaryMatrices{n}, p, X)
+    project(M::OrthogonalMatrices, p, X)
+    project(M::Rotations, p, X)
+    project(M::UnitaryMatrices, p, X)
 
 Orthogonally project the tangent vector ``X ∈ 𝔽^{n × n}``, ``\mathbb F ∈ \{\mathbb R, \mathbb C\}``
 to the tangent space of `M` at `p`,
@@ -733,7 +867,8 @@ and change the representer to use the corresponding Lie algebra, i.e. we compute
 """
 project(::GeneralUnitaryMatrices, p, X)
 
-function project!(::GeneralUnitaryMatrices{n,𝔽}, Y, p, X) where {n,𝔽}
+function project!(M::GeneralUnitaryMatrices{<:Any,𝔽}, Y, p, X) where {𝔽}
+    n = get_n(M)
     project!(SkewHermitianMatrices(n, 𝔽), Y, p \ X)
     return Y
 end
@@ -756,7 +891,7 @@ be the singular value decomposition, then the formula reads
 \operatorname{retr}_p X = UV^\mathrm{T}.
 ````
 """
-retract(::GeneralUnitaryMatrices{n,𝔽}, ::Any, ::Any, ::PolarRetraction) where {n,𝔽}
+retract(::GeneralUnitaryMatrices, ::Any, ::Any, ::PolarRetraction)
 
 @doc raw"""
     retract(M::Rotations, p, X, ::QRRetraction)
@@ -767,22 +902,22 @@ Compute the QR-based retraction on the [`Rotations`](@ref) and [`OrthogonalMatri
 
 This is also the default retraction on these manifolds.
 """
-retract(::GeneralUnitaryMatrices{n,𝔽}, ::Any, ::Any, ::QRRetraction) where {n,𝔽}
+retract(::GeneralUnitaryMatrices, ::Any, ::Any, ::QRRetraction)
 
 function retract_qr!(
-    ::GeneralUnitaryMatrices{n,𝔽},
+    ::GeneralUnitaryMatrices,
     q::AbstractArray{T},
     p,
     X,
     t::Number,
-) where {n,𝔽,T}
+) where {T}
     A = p + p * (t * X)
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
-function retract_polar!(M::GeneralUnitaryMatrices{n,𝔽}, q, p, X, t::Number) where {n,𝔽}
+function retract_polar!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
     A = p + p * (t * X)
     return project!(M, q, A; check_det=false)
 end

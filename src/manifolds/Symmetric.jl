@@ -13,7 +13,7 @@ and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
 Though it is slightly redundant, usually the matrices are stored as $n × n$ arrays.
 
 Note that in this representation, the complex valued case has to have a real-valued diagonal,
-which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}).
+which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::SymmetricMatrices)).
 
 # Constructor
 
@@ -21,10 +21,13 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 Generate the manifold of $n × n$ symmetric matrices.
 """
-struct SymmetricMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
+struct SymmetricMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
 
-function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
-    return SymmetricMatrices{n,field}()
+function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter=:field)
+    size = wrap_type_parameter(parameter, (n,))
+    return SymmetricMatrices{typeof(size),field}(size)
 end
 
 function active_traits(f, ::SymmetricMatrices, args...)
@@ -48,7 +51,7 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_point(M::SymmetricMatrices{n,𝔽}, p; kwargs...) where {n,𝔽}
+function check_point(M::SymmetricMatrices{<:Any,𝔽}, p; kwargs...) where {𝔽}
     if !isapprox(norm(p - p'), 0.0; kwargs...)
         return DomainError(
             norm(p - p'),
@@ -67,7 +70,7 @@ and its values have to be from the correct [`AbstractNumbers`](https://juliamani
 
 The tolerance for the symmetry of `X` can be set using `kwargs...`.
 """
-function check_vector(M::SymmetricMatrices{n,𝔽}, p, X; kwargs...) where {n,𝔽}
+function check_vector(M::SymmetricMatrices{<:Any,𝔽}, p, X; kwargs...) where {𝔽}
     if !isapprox(norm(X - X'), 0.0; kwargs...)
         return DomainError(
             norm(X - X'),
@@ -86,13 +89,8 @@ function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates_orthonormal!(
-    M::SymmetricMatrices{N,ℝ},
-    Y,
-    p,
-    X,
-    ::RealNumbers,
-) where {N}
+function get_coordinates_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, ::RealNumbers)
+    N = get_n(M)
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
@@ -106,12 +104,13 @@ function get_coordinates_orthonormal!(
     return Y
 end
 function get_coordinates_orthonormal!(
-    M::SymmetricMatrices{N,ℂ},
+    M::SymmetricMatrices{<:Any,ℂ},
     Y,
     p,
     X,
     ::ComplexNumbers,
-) where {N}
+)
+    N = get_n(M)
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
@@ -129,15 +128,16 @@ function get_coordinates_orthonormal!(
     return Y
 end
 
-get_embedding(::SymmetricMatrices{N,𝔽}) where {N,𝔽} = Euclidean(N, N; field=𝔽)
+function get_embedding(::SymmetricMatrices{TypeParameter{N},𝔽}) where {N,𝔽}
+    return Euclidean(N, N; field=𝔽, parameter=:type)
+end
+function get_embedding(M::SymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
+    N = get_n(M)
+    return Euclidean(N, N; field=𝔽)
+end
 
-function get_vector_orthonormal!(
-    M::SymmetricMatrices{N,ℝ},
-    Y,
-    p,
-    X,
-    ::RealNumbers,
-) where {N}
+function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, ::RealNumbers)
+    N = get_n(M)
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
@@ -150,13 +150,8 @@ function get_vector_orthonormal!(
     end
     return Y
 end
-function get_vector_orthonormal!(
-    M::SymmetricMatrices{N,ℂ},
-    Y,
-    p,
-    X,
-    ::ComplexNumbers,
-) where {N}
+function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℂ}, Y, p, X, ::ComplexNumbers)
+    N = get_n(M)
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
@@ -170,6 +165,9 @@ function get_vector_orthonormal!(
     return Y
 end
 ## unify within bases later.
+
+get_n(::SymmetricMatrices{TypeParameter{n}}) where {n} = n
+get_n(M::SymmetricMatrices{Tuple{Int}}) = get_parameter(M.size)[1]
 
 """
     is_flat(::SymmetricMatrices)
@@ -193,7 +191,8 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 
 where the last $-n$ is due to the zero imaginary part for Hermitian matrices
 """
-function manifold_dimension(::SymmetricMatrices{N,𝔽}) where {N,𝔽}
+function manifold_dimension(M::SymmetricMatrices{<:Any,𝔽}) where {𝔽}
+    N = get_n(M)
     return div(N * (N + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? N : 0)
 end
 

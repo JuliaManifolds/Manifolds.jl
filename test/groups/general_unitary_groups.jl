@@ -3,7 +3,7 @@ include("group_utils.jl")
 
 @testset "General Unitary Groups" begin
     # SpecialUnitary -> injectivity us also π√2
-    SU3 = Manifolds.GeneralUnitaryMatrices{3,ℂ,Manifolds.DeterminantOneMatrices}()
+    SU3 = SpecialUnitary(3)
     @test injectivity_radius(SU3) == π * √2
     @testset "Orthogonal Group" begin
         O2 = Orthogonal(2)
@@ -47,8 +47,8 @@ include("group_utils.jl")
     end
 
     @testset "Quaternionic Unitary Group" begin
-        QU1 = Unitary(1, ℍ)
-        @test repr(QU1) == "Unitary(1, ℍ)"
+        QU1 = Unitary(1, ℍ; parameter=:type)
+        @test repr(QU1) == "Unitary(1, ℍ; parameter=:type)"
 
         @test identity_element(QU1) === Quaternion(1.0)
 
@@ -86,8 +86,8 @@ include("group_utils.jl")
     end
 
     @testset "Special Unitary Group" begin
-        SU2 = SpecialUnitary(2)
-        @test repr(SU2) == "SpecialUnitary(2)"
+        SU2 = SpecialUnitary(2; parameter=:type)
+        @test repr(SU2) == "SpecialUnitary(2; parameter=:type)"
 
         p = ones(2, 2)
         q = project(SU2, p)
@@ -149,22 +149,22 @@ include("group_utils.jl")
         end
         E = diagm(ones(4))
         R1 = diagm([-1.0, -1.0, 1.0, 1.0])
-        X1a = log(Rotations(4), E, R1)
-        X1b = log_lie(SpecialOrthogonal(4), R1)
+        X1a = log(Rotations(4; parameter=:type), E, R1)
+        X1b = log_lie(SpecialOrthogonal(4; parameter=:type), R1)
         @test isapprox(X1a, X1b)
         @test is_vector(Rotations(4), E, X1b)
         @test X1a[1, 2] ≈ π
 
         R2 = diagm([-1.0, 1.0, -1.0, 1.0])
-        X2a = log(Rotations(4), E, R2)
-        X2b = log_lie(SpecialOrthogonal(4), R2)
+        X2a = log(Rotations(4; parameter=:type), E, R2)
+        X2b = log_lie(SpecialOrthogonal(4; parameter=:type), R2)
         @test isapprox(X2a, X2b)
         @test is_vector(Rotations(4), E, X2b)
         @test X2a[1, 3] ≈ π
 
         R3 = diagm([1.0, -1.0, -1.0, 1.0])
-        X3a = log(Rotations(4), E, R3)
-        X3b = log_lie(SpecialOrthogonal(4), R3)
+        X3a = log(Rotations(4; parameter=:type), E, R3)
+        X3b = log_lie(SpecialOrthogonal(4; parameter=:type), R3)
         @test isapprox(X3a, X3b)
         @test is_vector(Rotations(4), E, X3b)
         @test X3a[2, 3] ≈ π

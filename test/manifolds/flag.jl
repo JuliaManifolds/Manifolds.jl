@@ -267,6 +267,6 @@ using Random
         @test isapprox(Y_tmp, X1_ortho.value)
 
         @test retract(M, p1_ortho, X1_ortho, QRRetraction()).value ≈
-              retract(Orthogonal(5), p1_ortho.value, X1_ortho.value, QRRetraction())
+              retract(OrthogonalMatrices(5), p1_ortho.value, X1_ortho.value, QRRetraction())
     end
 end

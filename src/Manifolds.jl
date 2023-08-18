@@ -266,6 +266,7 @@ using ManifoldsBase:
     TCoTSpaceType,
     TFVector,
     TVector,
+    TypeParameter,
     ValidationManifold,
     ValidationMPoint,
     ValidationTVector,
@@ -276,6 +277,7 @@ using ManifoldsBase:
     combine_allocation_promotion_functions,
     geodesic,
     geodesic!,
+    get_parameter,
     merge_traits,
     next_trait,
     number_system,
@@ -284,7 +286,8 @@ using ManifoldsBase:
     shortest_geodesic,
     shortest_geodesic!,
     size_to_tuple,
-    trait
+    trait,
+    wrap_type_parameter
 using ManifoldDiff: ManifoldDiff
 using ManifoldDiff:
     default_differential_backend,

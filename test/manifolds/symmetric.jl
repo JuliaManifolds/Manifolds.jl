@@ -17,7 +17,7 @@ include("../utils.jl")
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test is_flat(M)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
         @test check_point(M, B_sym) === nothing
         @test_throws DomainError is_point(M, A, true)
         @test_throws ManifoldDomainError is_point(M, C, true)

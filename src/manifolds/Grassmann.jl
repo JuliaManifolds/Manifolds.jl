@@ -1,5 +1,5 @@
 @doc raw"""
-    Grassmann{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
+    Grassmann{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces spanned by $k$ linear independent
 vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
@@ -75,18 +75,23 @@ case `field = ℝ` is the default.
     > _A Grassmann Manifold Handbook: Basic Geometry and Computational Aspects_,
     > arXiv preprint [2011.13699](https://arxiv.org/abs/2011.13699), 2020.
 """
-struct Grassmann{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
+struct Grassmann{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
 
 #
 # Generic functions independent of the representation of points
 #
-Grassmann(n::Int, k::Int, field::AbstractNumbers=ℝ) = Grassmann{n,k,field}()
+function Grassmann(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+    size = wrap_type_parameter(parameter, (n, k))
+    return Grassmann{typeof(size),field}(size)
+end
 
 function active_traits(f, ::Grassmann, args...)
     return merge_traits(IsIsometricEmbeddedManifold(), IsQuotientManifold())
 end
 
-function allocation_promotion_function(::Grassmann{n,k,ℂ}, f, args::Tuple) where {n,k}
+function allocation_promotion_function(::Grassmann{<:Any,ℂ}, f, args::Tuple)
     return complex
 end
 
@@ -115,6 +120,9 @@ function change_metric!(::Grassmann, Y, ::EuclideanMetric, p, X)
     copyto!(Y, X)
     return Y
 end
+
+get_nk(::Grassmann{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
+get_nk(M::Grassmann{Tuple{Int,Int}}) = get_parameter(M.size)
 
 @doc raw"""
     injectivity_radius(M::Grassmann)
@@ -152,7 +160,10 @@ Return the dimension of the [`Grassmann(n,k,𝔽)`](@ref) manifold `M`, i.e.
 
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
-manifold_dimension(::Grassmann{n,k,𝔽}) where {n,k,𝔽} = k * (n - k) * real_dimension(𝔽)
+function manifold_dimension(M::Grassmann{<:Any,𝔽}) where {𝔽}
+    n, k = get_nk(M)
+    return k * (n - k) * real_dimension(𝔽)
+end
 
 """
     mean(
@@ -166,23 +177,30 @@ manifold_dimension(::Grassmann{n,k,𝔽}) where {n,k,𝔽} = k * (n - k) * real_
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::Grassmann{n,k} where {n,k}, ::Any...)
+mean(::Grassmann, ::Any...)
 
 function default_estimation_method(::Grassmann, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 4)
 end
 
-function get_orbit_action(M::Grassmann{n,k,ℝ}) where {n,k}
+function get_orbit_action(M::Grassmann{<:Any,ℝ})
+    n, k = get_nk(M)
     return RowwiseMultiplicationAction(M, Orthogonal(k))
 end
 
 @doc raw"""
-    get_total_space(::Grassmann{n,k})
+    get_total_space(::Grassmann)
 
 Return the total space of the [`Grassmann`](@ref) manifold, which is the corresponding Stiefel manifold,
 independent of whether the points are represented already in the total space or as [`ProjectorPoint`](@ref)s.
 """
-get_total_space(::Grassmann{n,k,𝔽}) where {n,k,𝔽} = Stiefel(n, k, 𝔽)
+function get_total_space(::Grassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return Stiefel(n, k, 𝔽; parameter=:type)
+end
+function get_total_space(M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_nk(M)
+    return Stiefel(n, k, 𝔽)
+end
 
 #
 # Reprenter specific implementations in their corresponding subfiles

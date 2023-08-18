@@ -24,11 +24,11 @@ as the default vector transport method for the [`Flag`](@ref) manifold.
 default_vector_transport_method(::Flag) = ProjectionTransport()
 
 function inner(
-    M::Flag{N,dp1},
+    M::Flag{<:Any,dp1},
     p::AbstractMatrix,
     X::AbstractMatrix,
     Y::AbstractMatrix,
-) where {N,dp1}
+) where {dp1}
     inner_prod = zero(eltype(X))
     pX = p' * X
     pY = p' * Y
@@ -84,11 +84,11 @@ X = \begin{bmatrix}
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
 """
 function check_vector(
-    M::Flag{N,dp1},
+    M::Flag{<:Any,dp1},
     p::AbstractMatrix,
     X::AbstractMatrix;
     atol=sqrt(eps(eltype(X))),
-) where {N,dp1}
+) where {dp1}
     for i in 1:(dp1 - 1)
         p_i = _extract_flag_stiefel(M, p, i)
         X_i = _extract_flag_stiefel(M, X, i)
@@ -132,11 +132,11 @@ matrices for consecutive subspaces of the flag.
 project(::Flag, p, X)
 
 function project!(
-    M::Flag{N,dp1},
+    M::Flag{<:Any,dp1},
     Y::AbstractMatrix,
     p::AbstractMatrix,
     X::AbstractMatrix,
-) where {N,dp1}
+) where {dp1}
     Xc = X .- p * (p' * X) ./ 2
     for i in 1:(dp1 - 1)
         Y_i = _extract_flag_stiefel(M, Y, i)
@@ -158,12 +158,7 @@ function project!(M::Flag, q::AbstractMatrix, p::AbstractMatrix)
     return project!(get_embedding(M), q, p)
 end
 
-function Random.rand!(
-    rng::AbstractRNG,
-    M::Flag{N,dp1},
-    pX::AbstractMatrix;
-    vector_at=nothing,
-) where {N,dp1}
+function Random.rand!(rng::AbstractRNG, M::Flag, pX::AbstractMatrix; vector_at=nothing)
     EM = get_embedding(M)
     if vector_at === nothing
         rand!(rng, EM, pX)

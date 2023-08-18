@@ -16,11 +16,11 @@ X = \begin{bmatrix}
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
 """
 function check_vector(
-    M::Flag{N,dp1},
+    M::Flag{<:Any,dp1},
     p::OrthogonalPoint,
     X::OrthogonalTVector;
     kwargs...,
-) where {N,dp1}
+) where {dp1}
     for i in 1:dp1
         for j in i:dp1
             if i == j
@@ -59,7 +59,10 @@ end
 
 Get embedding of [`Flag`](@ref) manifold `M`, i.e. the manifold [`OrthogonalMatrices`](@ref).
 """
-get_embedding(::Flag{N}, p::OrthogonalPoint) where {N} = OrthogonalMatrices(N)
+function get_embedding(::Flag{TypeParameter{N}}, p::OrthogonalPoint) where {N}
+    return OrthogonalMatrices(N; parameter=:type)
+end
+get_embedding(M::Flag{Tuple{Int}}, p::OrthogonalPoint) = OrthogonalMatrices(M.size[1])
 
 function _extract_flag(M::Flag, p::AbstractMatrix, i::Int)
     range = (M.subspace_dimensions[i - 1] + 1):M.subspace_dimensions[i]
@@ -77,11 +80,12 @@ function inner(::Flag, p::OrthogonalPoint, X::OrthogonalTVector, Y::OrthogonalTV
 end
 
 function project!(
-    M::Flag{N,dp1},
+    M::Flag{<:Any,dp1},
     Y::OrthogonalTVector,
     ::OrthogonalPoint,
     X::OrthogonalTVector,
-) where {N,dp1}
+) where {dp1}
+    N = get_n(M)
     project!(SkewHermitianMatrices(N), Y.value, X.value)
     for i in 1:dp1
         Bi = _extract_flag(M, Y.value, i)
@@ -107,7 +111,8 @@ X = \begin{bmatrix}
 ````
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
 """
-function project(M::Flag{N,dp1}, ::OrthogonalPoint, X::OrthogonalTVector) where {N,dp1}
+function project(M::Flag{<:Any,dp1}, ::OrthogonalPoint, X::OrthogonalTVector) where {dp1}
+    N = get_n(M)
     Y = project(SkewHermitianMatrices(N), X.value)
     for i in 1:dp1
         Bi = _extract_flag(M, Y, i)
@@ -118,11 +123,12 @@ end
 
 function Random.rand!(
     rng::AbstractRNG,
-    M::Flag{N,dp1},
+    M::Flag{<:Any,dp1},
     pX::Union{OrthogonalPoint,OrthogonalTVector};
     vector_at=nothing,
-) where {N,dp1}
+) where {dp1}
     if vector_at === nothing
+        N = get_n(M)
         RN = Rotations(N)
         rand!(rng, RN, pX.value)
     else

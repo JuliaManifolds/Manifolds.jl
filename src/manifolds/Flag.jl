@@ -45,7 +45,7 @@ function Base.getindex(t::ZeroTuple, i::Int)
 end
 
 @doc raw"""
-    Flag{N,d} <: AbstractDecoratorManifold{ℝ}
+    Flag{T,d} <: AbstractDecoratorManifold{ℝ}
 
 Flag manifold of ``d`` subspaces of ``ℝ^N``[^YeWongLim2022]. By default the manifold uses
 the Stiefel coordinates representation, embedding it in the [`Stiefel`](@ref) manifold.
@@ -56,7 +56,7 @@ Tangent space is represented in the block-skew-symmetric form.
 
 # Constructor
 
-    Flag(N, n1, n2, ..., nd)
+    Flag(N, n1, n2, ..., nd; parameter::Symbol=:field)
 
 Generate the manifold ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)`` of subspaces
 ```math
@@ -65,17 +65,20 @@ Generate the manifold ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)`` of subspace
 where ``𝕍_i`` for ``i ∈ 1, 2, …, d`` are subspaces of ``ℝ^N`` of dimension
 ``\operatorname{dim} 𝕍_i = n_i``.
 
+`parameter`: whether a type parameter should be used to store `n`. By default size
+is stored in a field. Value can either be `:field` or `:type`.
 
 [^YeWongLim2022]:
     > K. Ye, K. S.-W. Wong, and L.-H. Lim, “Optimization on flag manifolds,” Math. Program.,
     > vol. 194, no. 1, pp. 621–660, Jul. 2022,
     > doi: [10.1007/s10107-021-01640-3](https://doi.org/10.1007/s10107-021-01640-3).
 """
-struct Flag{N,dp1} <: AbstractDecoratorManifold{ℝ}
+struct Flag{T,dp1} <: AbstractDecoratorManifold{ℝ}
     subspace_dimensions::ZeroTuple{NTuple{dp1,Int}}
+    size::T
 end
 
-function Flag(N, ns::Vararg{Int,I}) where {I}
+function Flag(N, ns::Vararg{Int,I}; parameter::Symbol=:field) where {I}
     if ns[1] <= 0
         error(
             "First dimension in the sequence ns must be strictly positive, but is $(ns[1]).",
@@ -91,7 +94,8 @@ function Flag(N, ns::Vararg{Int,I}) where {I}
             "Last dimension in sequence (given: $(ns[end])) must be strictly lower than N (given: $N).",
         )
     end
-    return Flag{N,I + 1}(ZeroTuple(tuple(ns..., N)))
+    size = wrap_type_parameter(parameter, (N,))
+    return Flag{typeof(size),I + 1}(ZeroTuple(tuple(ns..., N)), size)
 end
 
 function active_traits(f, ::Flag, args...)
@@ -103,7 +107,15 @@ end
 
 Get the embedding of the [`Flag`](@ref) manifold `M`, i.e. the [`Stiefel`](@ref) manifold.
 """
-get_embedding(M::Flag{N,dp1}) where {N,dp1} = Stiefel(N, M.subspace_dimensions[dp1 - 1])
+function get_embedding(M::Flag{Tuple{Int},dp1}) where {dp1}
+    return Stiefel(M.size[1], M.subspace_dimensions[dp1 - 1])
+end
+function get_embedding(M::Flag{TypeParameter{N},dp1}) where {N,dp1}
+    return Stiefel(N, M.subspace_dimensions[dp1 - 1]; parameter=:type)
+end
+
+get_n(::Flag{TypeParameter{N}}) where {N} = N
+get_n(M::Flag{Tuple{Int}}) = get_parameter(M.size)[1]
 
 @doc raw"""
     injectivity_radius(M::Flag)
@@ -130,7 +142,8 @@ end
 Return dimension of flag manifold ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)``.
 The formula reads ``\sum_{i=1}^d (n_i-n_{i-1})(N-n_i)``.
 """
-function manifold_dimension(M::Flag{N,dp1}) where {N,dp1}
+function manifold_dimension(M::Flag{<:Any,dp1}) where {dp1}
+    N = get_n(M)
     dim = 0
     for i in 1:(dp1 - 1)
         dim +=
@@ -140,7 +153,15 @@ function manifold_dimension(M::Flag{N,dp1}) where {N,dp1}
     return dim
 end
 
-function Base.show(io::IO, M::Flag{N}) where {N}
+function Base.show(io::IO, M::Flag{TypeParameter{N}}) where {N}
+    print(io, "Flag($(N)")
+    for d_i in M.subspace_dimensions.x[1:(end - 1)]
+        print(io, ", $d_i")
+    end
+    return print(io, "; parameter=:type)")
+end
+function Base.show(io::IO, M::Flag{Tuple{Int}})
+    N = get_n(M)
     print(io, "Flag($(N)")
     for d_i in M.subspace_dimensions.x[1:(end - 1)]
         print(io, ", $d_i")

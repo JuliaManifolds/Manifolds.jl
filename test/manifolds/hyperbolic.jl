@@ -7,7 +7,7 @@ include("../utils.jl")
         @test base_manifold(M) == M
         @test manifold_dimension(M) == 2
         @test typeof(get_embedding(M)) ==
-              MetricManifold{ℝ,Euclidean{Tuple{3},ℝ},MinkowskiMetric}
+              MetricManifold{ℝ,Euclidean{Tuple{Int},ℝ},MinkowskiMetric}
         @test representation_size(M) == (3,)
         @test !is_flat(M)
         @test isinf(injectivity_radius(M))

@@ -26,7 +26,9 @@ See also [`Orthogonal(n)`](@ref) for the real-valued case.
 """
 const Unitary{n,𝔽} = GeneralUnitaryMultiplicationGroup{n,𝔽,AbsoluteDeterminantOneMatrices}
 
-Unitary(n, 𝔽::AbstractNumbers=ℂ) = Unitary{n,𝔽}(UnitaryMatrices(n, 𝔽))
+function Unitary(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:field)
+    return GeneralUnitaryMultiplicationGroup(UnitaryMatrices(n, 𝔽; parameter=parameter))
+end
 
 @doc raw"""
     exp_lie(G::Unitary{2,ℂ}, X)
@@ -39,18 +41,18 @@ Compute the group exponential map on the [`Unitary(2)`](@ref) group, which is
 
 where ``θ = \frac{1}{2} \sqrt{4\det(X) - \operatorname{tr}(X)^2}``.
 """
-exp_lie(::Unitary{2,ℂ}, X)
+exp_lie(::Unitary{TypeParameter{Tuple{2}},ℂ}, X)
 
-function exp_lie(::Unitary{1,ℍ}, X::Number)
+function exp_lie(::Unitary{TypeParameter{Tuple{1}},ℍ}, X::Number)
     return exp(X)
 end
 
-function exp_lie!(::Unitary{1}, q, X)
+function exp_lie!(::Unitary{TypeParameter{Tuple{1}}}, q, X)
     q[] = exp(X[])
     return q
 end
 
-function exp_lie!(::Unitary{2,ℂ}, q, X)
+function exp_lie!(::Unitary{TypeParameter{Tuple{2}},ℂ}, q, X)
     size(X) === (2, 2) && size(q) === (2, 2) || throw(DomainError())
     @inbounds a, d = imag(X[1, 1]), imag(X[2, 2])
     @inbounds b = (X[2, 1] - X[1, 2]') / 2
@@ -75,11 +77,11 @@ function exp_lie!(G::Unitary, q, X)
     return q
 end
 
-function log_lie!(::Unitary{1}, X, p)
+function log_lie!(::Unitary{TypeParameter{Tuple{1}}}, X, p)
     X[] = log(p[])
     return X
 end
-function log_lie!(::Unitary{1}, X::AbstractMatrix, p::AbstractMatrix)
+function log_lie!(::Unitary{TypeParameter{Tuple{1}}}, X::AbstractMatrix, p::AbstractMatrix)
     X[] = log(p[])
     return X
 end
@@ -89,13 +91,25 @@ function log_lie!(G::Unitary, X, p)
     return X
 end
 
-identity_element(::Unitary{1,ℍ}) = Quaternions.quat(1.0)
+identity_element(::Unitary{TypeParameter{Tuple{1}},ℍ}) = Quaternions.quat(1.0)
 
-function log_lie(::Unitary{1}, q::Number)
+function log_lie(::Unitary{TypeParameter{Tuple{1}}}, q::Number)
     return log(q)
 end
 
 Base.inv(::Unitary, p) = adjoint(p)
 
-show(io::IO, ::Unitary{n,ℂ}) where {n} = print(io, "Unitary($(n))")
-show(io::IO, ::Unitary{n,ℍ}) where {n} = print(io, "Unitary($(n), ℍ)")
+function Base.show(io::IO, ::Unitary{TypeParameter{Tuple{n}},ℂ}) where {n}
+    return print(io, "Unitary($(n); parameter=:type)")
+end
+function Base.show(io::IO, M::Unitary{Tuple{Int},ℂ})
+    n = get_n(M)
+    return print(io, "Unitary($(n))")
+end
+function Base.show(io::IO, ::Unitary{TypeParameter{Tuple{n}},ℍ}) where {n}
+    return print(io, "Unitary($(n), ℍ; parameter=:type)")
+end
+function Base.show(io::IO, M::Unitary{Tuple{Int},ℍ})
+    n = get_n(M)
+    return print(io, "Unitary($(n), ℍ)")
+end

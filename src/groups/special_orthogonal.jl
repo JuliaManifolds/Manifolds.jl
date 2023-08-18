@@ -8,9 +8,17 @@ Special orthogonal group ``\mathrm{SO}(n)`` represented by rotation matrices, se
 """
 const SpecialOrthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,DeterminantOneMatrices}
 
-SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n))
+function SpecialOrthogonal(n; parameter::Symbol=:field)
+    return GeneralUnitaryMultiplicationGroup(Rotations(n; parameter=parameter))
+end
 
 Base.inv(::SpecialOrthogonal, p) = transpose(p)
 Base.inv(::SpecialOrthogonal, e::Identity{MultiplicationOperation}) = e
 
-Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
+function Base.show(io::IO, ::SpecialOrthogonal{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "SpecialOrthogonal($(n); parameter=:type)")
+end
+function Base.show(io::IO, M::SpecialOrthogonal{Type{Int}})
+    n = get_n(M)
+    return print(io, "SpecialOrthogonal($(n))")
+end
