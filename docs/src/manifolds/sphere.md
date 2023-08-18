@@ -63,7 +63,7 @@ vecs = log.(Ref(M), pts2, Ref(p3))
 plot!(scene, M, pts2, vecs; wireframe = false, linewidth=1.5)
 ```
 
-# Literature
+## Literature
 
 ```@bibliography
 Pages = ["manifolds/sphere.md"]

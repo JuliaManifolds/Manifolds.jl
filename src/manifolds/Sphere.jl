@@ -530,6 +530,8 @@ The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 \mathcal W_p(X,V) = -Xp^{\mathrm{T}}V
 ```
 """
+Weingarten(::Sphere, p, X, V)
+
 function Weingarten!(::Sphere, Y, p, X, V)
     Y .= -X * p'V
     return Y

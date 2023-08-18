@@ -21,3 +21,11 @@ Modules = [Manifolds]
 Pages = ["manifolds/GrassmannProjector.jl"]
 Order = [:type,:function]
 ```
+
+
+## Literature
+
+```@bibliography
+Pages = ["manifolds/grassmann.md"]
+Canonical=false
+```

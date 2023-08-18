@@ -393,6 +393,25 @@ end
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""
+    Weingarten(M::Rotations, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Stiefel`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
+
+```math
+\mathcal W_p(X,V) = -\frac{1}{2}p\bigl(V^{\mathrm{T}}X - X^\mathrm{T}V\bigr)
+```
+"""
+Weingarten(::Rotations, p, X, V)
+
+function Weingarten!(::Rotations, Y, p, X, V)
+    Y .= -1 / 2 * p * (V' * X - X' * V)
+    return Y
+end
+
+@doc raw"""
     zero_vector(M::Rotations, p)
 
 Return the zero tangent vector from the tangent space art `p` on the [`Rotations`](@ref)
