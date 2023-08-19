@@ -37,6 +37,8 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\mathcal{G}`` | a (Lie) group | |
 | ``\log_p q`` | logarithmic map at ``p \in \mathcal M`` of a point ``q \in \mathcal M`` | ``\log_p(q)`` | |
 | ``\mathcal M`` | a manifold | ``\mathcal M_1, \mathcal M_2,\ldots,\mathcal N`` | |
+| ``N_p \mathcal M`` | the normal space of the tangent space ``T_p \mathcal M`` in some embedding ``\mathcal E`` that should be clear from context |
+| ``V`` | a normal vector from ``N_p \mathcal M`` | ``W`` | |
 | ``\operatorname{Exp}`` | the matrix exponential | |
 | ``\operatorname{Log}`` | the matrix logarithm | |
 | ``\mathcal P_{q\gets p}X`` | parallel transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``
@@ -52,5 +54,6 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``e_i \in \mathbb R^n`` | the ``i``th unit vector | ``e_i^n`` | the space dimension (``n``) is omited, when clear from context
 | ``B`` | a vector bundle | |
 | ``\mathcal T_{q\gets p}X`` | vector transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``
-| ``\mathcal T_{p,Y}X`` | vector transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, where ``q`` is deretmined by ``Y``, for example using the exponential map or some retraction.
+| ``\mathcal T_{p,Y}X`` | vector transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, where ``q`` is deretmined by ``Y``, for example using the exponential map or some retraction. |
+| ``\mathcal W`` | the Weingarten map ``\mathcal W: T_p\mathcal M × N_p\mathcal M → T_p\mathcal M`` | ``\mathcal W_p`` | the second notation to emphasize the dependency of the point ``p\in\mathcal M`` |
 | ``0_k`` | the ``k\times k`` zero matrix. | |
