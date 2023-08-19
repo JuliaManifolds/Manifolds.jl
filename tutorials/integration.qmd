@@ -49,7 +49,7 @@ function simple_mc_integrate(M::AbstractManifold, f; N::Int = 1000)
 end
 ```
 
-We used the function [`manifold_volume`](@ref) to get the volume of the set over which integration is performed, as described in the linked Wikipedia article.
+We used the function [`manifold_volume`](@ref) to get the volume of the set over which the integration is performed, as described in the linked Wikipedia article.
 
 ## Distributions
 
