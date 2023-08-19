@@ -413,6 +413,31 @@ function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) whe
 end
 
 @doc raw"""
+    riemannian_Hessian(M::SymmetricPositiveDefinite, p, eG, eH, X)
+
+The Riemannian Hessian can be computed as stated in Eq. (7.3) [Nguyen:2023](@cite).
+Let ``\nabla f(p)`` denote the Euclidean gradient `eG`,
+``\nabla^2 f(p)[X]`` the Euclidean Hessian `eH`, and
+``\operatorname{sym}(X) = \frac{1}{2}\bigl(X^{\mathrm{T}+X\bigr)```
+the symmetrization operator. Then the formula reads
+
+```math
+    \operatorname{Hess}f(p)[X]
+    =
+    p\operatorname{sym}(\nabla^2 f(p)[X])p
+    + \operatorname{sym}\Bigl( X\operatorname{sym}\bigl(\nabla f(p)\bigr)p)
+```
+"""
+riemannian_Hessian(M::SymmetricPositiveDefinite, p, eG, eH, X)
+function riemannian_Hessian(::SymmetricPositiveDefinite, Y, p, eG, eH, X)
+    # The following formulae even work for complex, H-symmetric positive definite matrices.
+    # the term within the seconds summands outer \sym:
+    Y .= X * 0.5 * (eG' + eG) * p
+    Y .= p * 1 / 2 * (eH' + eH) * p + 1 / 2 * (Y' + Y)
+    return Y
+end
+
+@doc raw"""
     riemann_tensor(::SymmetricPositiveDefinite, p, X, Y, Z)
 
 Compute the value of Riemann tensor on the [`SymmetricPositiveDefinite`](@ref) manifold.
