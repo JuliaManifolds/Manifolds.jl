@@ -390,6 +390,22 @@ function Base.show(io::IO, ::Rotations{n}) where {n}
     return print(io, "Rotations($(n))")
 end
 
+@doc raw"""
+riemannian_Hessian(M::Rotations, p, G, H, X)
+
+The Riemannian Hessian can be computed by adopting Eq. (5.6) [Nguyen:2023](@cite),
+so very similar to the Stiefel manifold.
+The only difference is, that here the tangent vectors are stored
+in the Lie algebra, u.e. the update direction is actually ``pX`` instead of jst ``X`` (in Stiefel).
+and that means the inverse has to be appliead to the (Euclidean) Hessian
+to map it into the Lie algebra.
+"""
+riemannian_Hessian(M::Rotations, p, G, H, X)
+function riemannian_Hessian(::Rotations{N}, Y, p, G, H, X) where {N}
+    project!(SkewSymmetricMatrices(N), Y, p, p' * H - 1 / 2 .* X * (G' * p + p' * G))
+    return Y
+end
+
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""
