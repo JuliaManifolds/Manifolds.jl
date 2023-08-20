@@ -295,6 +295,31 @@ function retract_qr!(::Grassmann{N,K}, q, p, X, t::Number) where {N,K}
 end
 
 @doc raw"""
+    riemannian_Hessian(M::Grassmann, p, G, H, X)
+
+The Riemannian Hessian can be computed by adopting Eq. (6.6) [Nguyen:2023](@cite),
+where we use for the [`EuclideanMetric`](@ref) ``α_0=α_1=1`` in their formula.
+Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
+``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`. Then the formula reads
+
+```math
+    \operatorname{Hess}f(p)[X]
+    =
+    \operatorname{proj}_{T_p\mathcal M}\Bigl(
+        ∇^2f(p)[X] - X p^{\mathrm{H}}∇f(p)
+    \Bigr).
+```
+
+Compared to Eq. (5.6) also the metric conversion simplifies to the identity.
+"""
+riemannian_Hessian(M::Grassmann, p, G, H, X)
+
+function riemannian_Hessian!(::Grassmann, Y, p, G, H, X)
+    project!(M, Y, p, H - X * p' * G)
+    return Y
+end
+
+@doc raw"""
     riemann_tensor(::Grassmann{n,k,ℝ}, p, X, Y, Z) where {n,k}
 
 Compute the value of Riemann tensor on the real [`Grassmann`](@ref) manifold.

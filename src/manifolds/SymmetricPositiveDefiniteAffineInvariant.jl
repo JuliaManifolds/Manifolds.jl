@@ -416,7 +416,7 @@ end
     riemannian_Hessian(M::SymmetricPositiveDefinite, p, g, H, X)
 
 The Riemannian Hessian can be computed as stated in Eq. (7.3) [Nguyen:2023](@cite).
-Let ``\nabla f(p)`` denote the Euclidean gradient `g`,
+Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
 ``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`, and
 ``\operatorname{sym}(X) = \frac{1}{2}\bigl(X^{\mathrm{T}+X\bigr)```
 the symmetrization operator. Then the formula reads
@@ -424,8 +424,8 @@ the symmetrization operator. Then the formula reads
 ```math
     \operatorname{Hess}f(p)[X]
     =
-    p\operatorname{sym}(\nabla^2 f(p)[X])p
-    + \operatorname{sym}\Bigl( X\operatorname{sym}\bigl(\nabla f(p)\bigr)p)
+    p\operatorname{sym}(∇^2 f(p)[X])p
+    + \operatorname{sym}\Bigl( X\operatorname{sym}\bigl(∇ f(p)\bigr)p)
 ```
 """
 riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)

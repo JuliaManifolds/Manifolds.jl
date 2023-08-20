@@ -3,7 +3,7 @@
 
 The manifold of ``m × n`` real-valued or complex-valued matrices of fixed rank ``k``, i.e.
 ````math
-\bigl\{ p ∈ 𝔽^{m × n}\ \big|\ \operatorname{rank}(p) = k \bigr\},
+\bigl\{ p ∈ 𝔽^{m × n}\ \big|\ \operatorname{rank}(p) = k\bigr\},
 ````
 where ``𝔽 ∈ \{ℝ,ℂ\}`` and the rank is the number of linearly independent columns of a matrix.
 
@@ -563,6 +563,23 @@ function retract_polar!(
     copyto!(q.Vt, @view(T.Vt[1:k, :]) * QV')
 
     return q
+end
+
+@doc raw"""
+    riemannian_Hessian(M::FixedRankMatrices, p, g, H, X)
+
+The Riemannian Hessian can be computed as stated in Remark 4.1 [Nguyen:2023](@cite)
+or Section 2.3 [Vandereycken:2013](@cite), that B. Vandereycken adopted for Manopt (Matlab).
+"""
+riemannian_Hessian(M::FixedRankMatrices, p, G, H, X)
+function riemannian_Hessian(::FixedRankMatrices, Y, p, G, H, X)
+    project!(M, Y, p, H)
+    g = embed(M, p, G)
+    T1 = g * X.Vt / p.S
+    Y.U .+= T - p.U * (p.U' * T1)
+    T2 = g * X.U' / p.S
+    Y.Vt .+= (T - p.Vt' * (p.Vt * T2))'
+    return Y
 end
 
 function Base.show(io::IO, ::FixedRankMatrices{M,N,K,𝔽}) where {M,N,K,𝔽}

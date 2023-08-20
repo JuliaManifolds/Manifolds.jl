@@ -440,6 +440,7 @@ The Riemannian Hessian can be computed by adopting Remark 4.1 in [Nguyen:2023](@
 Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
 ``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`, and
 ``\mathbf{g} = \mathbf{g}^{-1} = \operatorname{diag}(1,...,1,-1)``.
+The formula reads
 
 ```math
     \operatorname{Hess}f(p)[X]

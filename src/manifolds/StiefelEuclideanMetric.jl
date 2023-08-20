@@ -191,21 +191,22 @@ end
 The Riemannian Hessian can be computed by adopting Eq. (5.6) [Nguyen:2023](@cite),
 where we use for the [`EuclideanMetric`](@ref) ``α_0=α_1=1`` in their formula.
 Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
-``\nabla^2 f(p)[X]`` the Euclidean Hessian `H` as
+``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`. Then the formula reads
 
 ```math
     \operatorname{Hess}f(p)[X]
     =
-    ∇^2f(p)[X] - \frac{1}{2} X \bigl(G^{\mathrm{H}+p^{\mathrm{H}}\bigr).
+    \operatorname{proj}_{T_p\mathcal M}\Bigl(
+        ∇^2f(p)[X] - \frac{1}{2} X \bigl((∇f(p))^{\mathrm{H}p + p^{\mathrm{H}}∇f(p)\bigr)
+    \Bigr).
 ```
 
-Compared to Eq. (5.6) also the metric conversion as well as the projection
-simplify to the identity in this case.
+Compared to Eq. (5.6) also the metric conversion simplifies to the identity.
 """
 riemannian_Hessian(M::Stiefel, p, G, H, X)
 
 function riemannian_Hessian!(::Stiefel, Y, p, G, H, X)
-    Y .= H - 1 / 2 .* X * (G' * p + p' * G)
+    project!(M, Y, p, H - 1 / 2 .* X * (G' * p + p' * G))
     return Y
 end
 
