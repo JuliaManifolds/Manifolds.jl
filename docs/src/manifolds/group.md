@@ -256,10 +256,3 @@ Modules = [Manifolds]
 Pages = ["groups/connections.jl"]
 Order = [:type, :function]
 ```
-
-## Literature
-
-```@bibliography
-Pages = ["manifolds/group.md"]
-Canonical=false
-```

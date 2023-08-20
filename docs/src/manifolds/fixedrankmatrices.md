@@ -7,3 +7,8 @@ Order = [:type, :function]
 ```
 
 ## Literature
+
+```@bibliography
+Pages = ["manifolds/fixedrankmatrices.md"]
+Canonical=false
+```
