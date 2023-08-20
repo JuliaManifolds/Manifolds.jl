@@ -185,6 +185,30 @@ function retract_project!(M::Stiefel, q, p, X, t::Number)
     return q
 end
 
+@doc raw"""
+    riemannian_Hessian(M::Stiefel, p, G, H, X)
+
+The Riemannian Hessian can be computed by adopting Eq. (5.6) [Nguyen:2023](@cite),
+where we use for the [`EuclideanMetric`](@ref) ``α_0=α_1=1`` in their formula.
+Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
+``\nabla^2 f(p)[X]`` the Euclidean Hessian `H` as
+
+```math
+    \operatorname{Hess}f(p)[X]
+    =
+    ∇^2f(p)[X] - \frac{1}{2} X \bigl(G^{\mathrm{H}+p^{\mathrm{H}}\bigr).
+```
+
+Compared to Eq. (5.6) also the metric conversion as well as the projection
+simplify to the identity in this case.
+"""
+riemannian_Hessian(M::Stiefel, p, G, H, X)
+
+function riemannian_Hessian!(::Stiefel, Y, p, G, H, X)
+    Y .= H - 1 / 2 .* X * (G' * p + p' * G)
+    return Y
+end
+
 function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)
 end

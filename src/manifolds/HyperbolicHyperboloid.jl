@@ -450,8 +450,10 @@ Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
 riemannian_Hessian(M::Hyperbolic, p, G, H, X)
 
 function riemannian_Hessian!(M::Hyperbolic, Y, p, G, H, X)
-    g = copy(G); g[end] *= -1 # = g^{-1}G
-    h = copy(H); H[end] *= -1 # = g^{-1}H
+    g = copy(G)
+    g[end] *= -1 # = g^{-1}G
+    h = copy(H)
+    H[end] *= -1 # = g^{-1}H
     project!(M, Y, p, h + inner(M, p, g) .* X)
     return Y
 end
