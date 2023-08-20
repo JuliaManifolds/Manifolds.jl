@@ -25,9 +25,13 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``F`` | a fiber | | see [`VectorBundleFibers`](@ref) |
 | ``\mathbb F`` | a field, usually ``\mathbb F \in \{\mathbb R,\mathbb C, \mathbb H\}``, i.e. the real, complex, and quaternion numbers, respectively. | |field a manifold or a basis is based on |
 | ``\gamma`` | a geodesic | ``\gamma_{p;q}``, ``\gamma_{p,X}`` | connecting two points ``p,q`` or starting in ``p`` with velocity ``X``. |
-| ``∇ f(p)`` | gradient of function ``f \colon \mathcal{M} \to \mathbb{R}`` at ``p \in \mathcal{M}`` | | |
+| ``\operatorname{grad} f(p)`` | (Riemannian) gradient of function ``f \colon \mathcal{M} \to \mathbb{R}`` at ``p \in \mathcal{M}`` | | |
+| ``\nabla f(p)`` | (Euclidean) gradient of function ``f \colon \mathcal{M} \to \mathbb{R}`` at ``p \in \mathcal{M}`` but thought of as evaluated in the embedding | `G` | |
 | ``\circ`` | a group operation | |
 | ``\cdot^\mathrm{H}`` | Hermitian or conjugate transposed for both complex or quaternion matrices| |
+| ``\operatorname{Hess} f(p)`` | (Riemannian) Hessian of function ``f \colon T_p\mathcal{M} \to T_p\mathcal M`` (i.e. the 1-1-tensor form) at ``p \in \mathcal{M}`` | | |
+| ``\nabla^2 f(p)`` | (Euclidean) Hessian of function ``f`` in the embedding | `H` | |
+
 | ``e`` | identity element of a group | |
 | ``I_k`` | identity matrix of size ``k\times k`` | |
 | ``k`` | indices | ``i,j`` | |

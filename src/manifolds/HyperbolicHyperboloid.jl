@@ -432,3 +432,26 @@ function parallel_transport_to!(::Hyperbolic, Y, p, X, q)
         X .+ minkowski_metric(q, X) ./ (1 - minkowski_metric(p, q)) .* (p + q),
     )
 end
+
+@doc raw"""
+    riemannian_Hessian(M::Hyperbolic, p, G, H, X)
+
+The Riemannian Hessian can be computed by adopting Remark 4.1 in [Nguyen:2023](@cite).
+Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
+``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`, and
+``\mathbf{g} = \mathbf{g}^{-1} = \operatorname{diag}(1,...,1,-1)``.
+
+```math
+    \operatorname{Hess}f(p)[X]
+    =
+    \operatorname{proj}_{T_p\mathcal M}\bigl( \mathbf{g}^-1\nabla^2f(p)[X] + X⟨p,\mathbf{g}^{-1}∇f(p)⟩_p\bigr).
+```
+"""
+riemannian_Hessian(M::Hyperbolic, p, G, H, X)
+
+function riemannian_Hessian!(M::Hyperbolic, Y, p, G, H, X)
+    g = copy(G); g[end] *= -1 # = g^{-1}G
+    h = copy(H); H[end] *= -1 # = g^{-1}H
+    project!(M, Y, p, h + inner(M, p, g) .* X)
+    return Y
+end

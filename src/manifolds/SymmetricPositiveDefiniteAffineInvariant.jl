@@ -413,11 +413,11 @@ function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) whe
 end
 
 @doc raw"""
-    riemannian_Hessian(M::SymmetricPositiveDefinite, p, eG, eH, X)
+    riemannian_Hessian(M::SymmetricPositiveDefinite, p, g, H, X)
 
 The Riemannian Hessian can be computed as stated in Eq. (7.3) [Nguyen:2023](@cite).
-Let ``\nabla f(p)`` denote the Euclidean gradient `eG`,
-``\nabla^2 f(p)[X]`` the Euclidean Hessian `eH`, and
+Let ``\nabla f(p)`` denote the Euclidean gradient `g`,
+``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`, and
 ``\operatorname{sym}(X) = \frac{1}{2}\bigl(X^{\mathrm{T}+X\bigr)```
 the symmetrization operator. Then the formula reads
 
@@ -428,12 +428,12 @@ the symmetrization operator. Then the formula reads
     + \operatorname{sym}\Bigl( X\operatorname{sym}\bigl(\nabla f(p)\bigr)p)
 ```
 """
-riemannian_Hessian(M::SymmetricPositiveDefinite, p, eG, eH, X)
-function riemannian_Hessian(::SymmetricPositiveDefinite, Y, p, eG, eH, X)
+riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
+function riemannian_Hessian(::SymmetricPositiveDefinite, Y, p, G, H, X)
     # The following formulae even work for complex, H-symmetric positive definite matrices.
     # the term within the seconds summands outer \sym:
-    Y .= X * 0.5 * (eG' + eG) * p
-    Y .= p * 1 / 2 * (eH' + eH) * p + 1 / 2 * (Y' + Y)
+    Y .= X * 0.5 * (G' + G) * p
+    Y .= p * 1 / 2 * (H' + H) * p + 1 / 2 * (Y' + Y)
     return Y
 end
 
