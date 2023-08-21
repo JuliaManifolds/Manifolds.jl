@@ -257,6 +257,56 @@ function log!(
     return inverse_retract!(M, X, p, q, inverse_retraction)
 end
 
+@doc raw"""
+    Y = riemannian_Hessian(M::MetricManifold{ℝ,Stiefel{n,k,ℝ}, StiefelSubmersionMetric},, p, G, H, X)
+    riemannian_Hessian!(MetricManifold{ℝ,Stiefel{n,k,ℝ}, StiefelSubmersionMetric},, Y, p, G, H, X)
+
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+``α_0=1, α_1=\frac{1}{2}`` in their formula. The formula reads
+
+```math
+    \operatorname{Hess}f(p)[X]
+    =
+    \operatorname{proj}_{T_p\mathcal M}\Bigl(
+        ∇^2f(p)[X] - \frac{1}{2} X \bigl( (∇f(p))^{\mathrm{H}}p + p^{\mathrm{H}}∇f(p)\bigr)
+        - \frac{2α+1}{2(α+1)} \bigl( P ∇f(p) p^{\mathrm{H}} + p ∇f(p))^{\mathrm{H}} P)X
+    \Bigr),
+```
+where ``P = I-pp^{\mathrm{H}}``.
+
+Compared to Eq. (5.6) we have that their ``α_0 = 1``and ``\alpha_1 =  \frac{2α+1}{2(α+1)} + 1``.
+"""
+riemannian_Hessian(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    p,
+    G,
+    H,
+    X,
+) where {n,k}
+
+function riemannian_Hessian!(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    Y,
+    p,
+    G,
+    H,
+    X,
+) where {n,k}
+    α = metric(M).α
+    project!(
+        M,
+        Y,
+        p,
+        H - 1 / 2 .* X * (G' * p + p' * G) -
+        (2 * α + 1) / (2 * (α + 1)) * ((I - p * p') * G * p' + p * G' * (I - p * p')) * X,
+    )
+    return Y
+end
+
 # StiefelFactorization code
 # Note: intended only for internal use
 

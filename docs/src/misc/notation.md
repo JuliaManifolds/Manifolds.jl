@@ -31,7 +31,6 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\cdot^\mathrm{H}`` | Hermitian or conjugate transposed for both complex or quaternion matrices| |
 | ``\operatorname{Hess} f(p)`` | (Riemannian) Hessian of function ``f \colon T_p\mathcal{M} \to T_p\mathcal M`` (i.e. the 1-1-tensor form) at ``p \in \mathcal{M}`` | | |
 | ``\nabla^2 f(p)`` | (Euclidean) Hessian of function ``f`` in the embedding | `H` | |
-
 | ``e`` | identity element of a group | |
 | ``I_k`` | identity matrix of size ``k\times k`` | |
 | ``k`` | indices | ``i,j`` | |

@@ -186,12 +186,15 @@ function retract_project!(M::Stiefel, q, p, X, t::Number)
 end
 
 @doc raw"""
-    riemannian_Hessian(M::Stiefel, p, G, H, X)
+    Y = riemannian_Hessian(M::Stiefel, p, G, H, X)
+    riemannian_Hessian!(M::Stiefel, Y, p, G, H, X)
 
-The Riemannian Hessian can be computed by adopting Eq. (5.6) [Nguyen:2023](@cite),
-where we use for the [`EuclideanMetric`](@ref) ``α_0=α_1=1`` in their formula.
-Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
-``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`. Then the formula reads
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), where we use for the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+``α_0=α_1=1`` in their formula. Then the formula reads
 
 ```math
     \operatorname{Hess}f(p)[X]

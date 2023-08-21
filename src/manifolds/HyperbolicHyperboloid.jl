@@ -434,18 +434,22 @@ function parallel_transport_to!(::Hyperbolic, Y, p, X, q)
 end
 
 @doc raw"""
-    riemannian_Hessian(M::Hyperbolic, p, G, H, X)
+    Y = riemannian_Hessian(M::Hyperbolic, p, G, H, X)
+    riemannian_Hessian!(M::Hyperbolic, Y, p, G, H, X)
 
-The Riemannian Hessian can be computed by adopting Remark 4.1 in [Nguyen:2023](@cite).
-Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
-``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`, and
-``\mathbf{g} = \mathbf{g}^{-1} = \operatorname{diag}(1,...,1,-1)``.
-The formula reads
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+Let ``\mathbf{g} = \mathbf{g}^{-1} = \operatorname{diag}(1,...,1,-1)``.
+Then using Remark 4.1 [Nguyen:2023](@cite) the formula reads
 
 ```math
-    \operatorname{Hess}f(p)[X]
-    =
-    \operatorname{proj}_{T_p\mathcal M}\bigl( \mathbf{g}^-1\nabla^2f(p)[X] + X⟨p,\mathbf{g}^{-1}∇f(p)⟩_p\bigr).
+\operatorname{Hess}f(p)[X]
+=
+\operatorname{proj}_{T_p\mathcal M}\bigl(
+    \mathbf{g}^{-1}\nabla^2f(p)[X] + X⟨p,\mathbf{g}^{-1}∇f(p)⟩_p
+\bigr).
 ```
 """
 riemannian_Hessian(M::Hyperbolic, p, G, H, X)

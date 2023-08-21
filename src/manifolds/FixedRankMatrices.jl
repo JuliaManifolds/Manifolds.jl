@@ -566,10 +566,15 @@ function retract_polar!(
 end
 
 @doc raw"""
-    riemannian_Hessian(M::FixedRankMatrices, p, g, H, X)
+    Y = riemannian_Hessian(M::FixedRankMatrices, p, G, H, X)
+    riemannian_Hessian!(M::FixedRankMatrices, Y, p, G, H, X)
+
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
 
 The Riemannian Hessian can be computed as stated in Remark 4.1 [Nguyen:2023](@cite)
-or Section 2.3 [Vandereycken:2013](@cite), that B. Vandereycken adopted for Manopt (Matlab).
+or Section 2.3 [Vandereycken:2013](@cite), that B. Vandereycken adopted for [Manopt (Matlab)](https://www.manopt.org/reference/manopt/manifolds/fixedrank/fixedrankembeddedfactory.html).
 """
 riemannian_Hessian(M::FixedRankMatrices, p, G, H, X)
 function riemannian_Hessian(::FixedRankMatrices, Y, p, G, H, X)

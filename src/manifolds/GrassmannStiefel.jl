@@ -298,7 +298,7 @@ end
     riemannian_Hessian(M::Grassmann, p, G, H, X)
 
 The Riemannian Hessian can be computed by adopting Eq. (6.6) [Nguyen:2023](@cite),
-where we use for the [`EuclideanMetric`](@ref) ``α_0=α_1=1`` in their formula.
+where we use for the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric) ``α_0=α_1=1`` in their formula.
 Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
 ``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`. Then the formula reads
 

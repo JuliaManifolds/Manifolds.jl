@@ -1,7 +1,7 @@
 # The probability simplex
 
 ```@autodocs
-Modules = [Manifolds]
+Modules = [Manifolds, Base]
 Pages = ["manifolds/ProbabilitySimplex.jl"]
 Order = [:type, :function]
 Private=false
