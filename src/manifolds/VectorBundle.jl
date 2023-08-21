@@ -1267,6 +1267,19 @@ function zero_vector!(B::TangentBundleFibers, X, p)
 end
 
 @doc raw"""
+    Y = Weingarten(M::VectorSpaceAtPoint, p, X, V)
+    Weingarten!(M::VectorSpaceAtPoint, Y, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`VectorSpaceAtPoint`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+Since this a flat space by itself, the result is always the zero tangent vector
+"""
+Weingarten(::VectorSpaceAtPoint, p, X, V)
+
+Weingarten!(::VectorSpaceAtPoint, Y, p, X, V) = fill!(Y, 0)
+
+@doc raw"""
     zero_vector(B::VectorBundle, p)
 
 Zero tangent vector at point `p` from the vector bundle `B`

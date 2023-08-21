@@ -519,7 +519,8 @@ function riemann_tensor!(M::AbstractSphere{ℝ}, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
-    Weingarten(M::Sphere, p, X, V)
+    Y = Weingarten(M::Sphere, p, X, V)
+    Weingarten!(M::Sphere, Y, p, X, V)
 
 Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Sphere`](@ref) `M` with respect to the
 tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.

@@ -709,6 +709,19 @@ function Statistics.var(::Euclidean, x::AbstractVector{<:Number}, m::Number; kwa
     return sum(var(x; mean=m, kwargs...))
 end
 
+@doc raw"""
+    Y = Weingarten(M::Euclidean, p, X, V)
+    Weingarten!(M::Euclidean, Y, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Euclidean`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+Since this a flat space by itself, the result is always the zero tangent vector
+"""
+Weingarten(::Euclidean, p, X, V)
+
+Weingarten!(::Euclidean, Y, p, X, V) = fill!(Y, 0)
+
 """
     zero_vector(M::Euclidean, x)
 
