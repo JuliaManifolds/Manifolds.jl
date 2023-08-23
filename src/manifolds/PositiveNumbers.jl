@@ -300,6 +300,20 @@ function Random.rand!(
     return pX
 end
 
+@doc raw"""
+    riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
+
+The Riemannian Hessian can be computed as stated in Eq. (7.3) [Nguyen:2023](@cite).
+Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
+``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`.
+Then the formula reads
+
+```math
+    \operatorname{Hess}f(p)[X] = p\bigl(∇^2 f(p)[X]\bigr)p + X\bigl(∇f(p)\bigr)p
+```
+"""
+riemannian_Hessian(::PositiveNumbers, p, G, H, X) = p * H * p + X * G * p
+
 function vector_transport_direction(
     M::PositiveNumbers,
     p,

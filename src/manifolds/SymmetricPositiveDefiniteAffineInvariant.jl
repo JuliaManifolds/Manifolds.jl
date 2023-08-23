@@ -413,7 +413,7 @@ function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) whe
 end
 
 @doc raw"""
-    riemannian_Hessian(M::SymmetricPositiveDefinite, p, g, H, X)
+    riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
 
 The Riemannian Hessian can be computed as stated in Eq. (7.3) [Nguyen:2023](@cite).
 Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
