@@ -1345,7 +1345,7 @@ On a product manifold, this decouples and can be computed elementwise.
 """
 riemannian_Hessian(M::ProductManifold, p, G, H, X)
 
-function riemannian_Hessian!(::ProductManifold, Y, p, G, H, X)
+function riemannian_Hessian!(M::ProductManifold, Y, p, G, H, X)
     map(
         riemannian_Hessian!,
         M.manifolds,
@@ -1673,7 +1673,7 @@ Since the metric decouples, also the computation of the weingarten map
 """
 Weingarten(::ProductManifold, p, X, V)
 
-function Weingarten!(::ProductManifold, Y, p, X, V)
+function Weingarten!(M::ProductManifold, Y, p, X, V)
     map(
         Weingarten!,
         M.manifolds,

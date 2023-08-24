@@ -277,7 +277,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         M = TangentSpaceAtPoint(Sphere(2), p0)
         p = [0.0, 1.0, 1.0]
         X = [0.0, 1.0, 0.0]
-        N = [1.0, 0.0, 0.0]
+        V = [1.0, 0.0, 0.0]
         @test Weingarten(M, p, X, V) == zero_vector(M, p)
     end
 end

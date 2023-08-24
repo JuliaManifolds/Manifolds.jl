@@ -269,7 +269,7 @@ On an abstract power manifold, this decouples and can be computed elementwise.
 """
 riemannian_Hessian(M::AbstractPowerManifold, p, G, H, X)
 
-function riemannian_Hessian!(::AbstractPowerManifold, Y, p, G, H, X)
+function riemannian_Hessian!(M::AbstractPowerManifold, Y, p, G, H, X)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         riemannian_Hessian!(
@@ -330,7 +330,7 @@ Since the metric decouples, also the computation of the weingarten map
 """
 Weingarten(::AbstractPowerManifold, p, X, V)
 
-function Weingarten!(::AbstractPowerManifold, Y, p, X, V)
+function Weingarten!(M::AbstractPowerManifold, Y, p, X, V)
     rep_size = representation_size(M.manifold)
     for i in get_iterator(M)
         Weingarten!(

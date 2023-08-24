@@ -314,7 +314,7 @@ Compared to Eq. (5.6) also the metric conversion simplifies to the identity.
 """
 riemannian_Hessian(M::Grassmann, p, G, H, X)
 
-function riemannian_Hessian!(::Grassmann, Y, p, G, H, X)
+function riemannian_Hessian!(M::Grassmann, Y, p, G, H, X)
     project!(M, Y, p, H - X * p' * G)
     return Y
 end

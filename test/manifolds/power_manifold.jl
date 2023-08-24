@@ -423,6 +423,28 @@ end
         @test norm(N, P, Z .- Zc) ≈ 0
     end
 
+    @testset "Hessian conversion" begin
+        M = Sphere(2)
+        N = PowerManifold(M, 2)
+        p = [1.0 0.0; 0.0 0.0; 1.0 0.0]
+        q = 1 / sqrt(2) * [1.0 0.0; 1.0 1.0; 0.0 1.0]
+        q = 1 / sqrt(2) * [0.0 1.0; 1.0 1.0; 1.0 0.0]
+        r = 1 / sqrt(3) * [1.0 1.0; 1.0 1.0; 1.0 1.0]
+        X = log(M, p, q)
+        Y = log(M, p, r)
+        Z = -X
+        H1 = riemannian_Hessian(N, p, Y, Z, X)
+        H2 = cat(
+            [riemannian_Hessian(M, p[:, i], Y[:, i], Z[:, i], X[:, i]) for i in 1:2]...,
+            dims=2,
+        )
+        @test H1 == H2
+        V = [0.2 0.0; 0.0 0.0; 0.0 0.3]
+        W1 = Weingarten(N, p, X, V)
+        W2 = cat([Weingarten(M, p[:, i], X[:, i], V[:, i]) for i in 1:2]..., dims=2)
+        @test W1 == W2
+    end
+
     @testset "Nested replacing RNG" begin
         M = PowerManifold(Ms, NestedReplacingPowerRepresentation(), 2)
         @test is_point(M, rand(M))

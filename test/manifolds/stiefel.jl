@@ -60,6 +60,10 @@ include("../utils.jl")
             @test Y == X
             Z = change_representer(M, EuclideanMetric(), p, X)
             @test Z == X
+            # In this case it stays as is
+            @test riemannian_Hessian(M, p, Y, Z, X) == Z
+            V = [1.0 1.0; 0.0 0.0; 0.0 0.0] # From T\bot_pM.
+            @test Weingarten(M, p, X, V) == [0.0 0.0; 0.0 0.0; 1.0 1.0]
         end
         types = [Matrix{Float64}]
         TEST_FLOAT32 && push!(types, Matrix{Float32})

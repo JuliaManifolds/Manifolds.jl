@@ -208,7 +208,7 @@ Compared to Eq. (5.6) also the metric conversion simplifies to the identity.
 """
 riemannian_Hessian(M::Stiefel, p, G, H, X)
 
-function riemannian_Hessian!(::Stiefel, Y, p, G, H, X)
+function riemannian_Hessian!(M::Stiefel, Y, p, G, H, X)
     project!(M, Y, p, H - 1 / 2 .* X * (G' * p + p' * G))
     return Y
 end
@@ -226,7 +226,7 @@ tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal
 The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 
 ```math
-\mathcal W_p(X,V) = -Xp^{\mathrm{T}}V - \frac{1}{2}p\bigl(X^\mathrm{T}V + V^{\mathrm{T}}X\bigr)
+\mathcal W_p(X,V) = -Xp^{\mathrm{H}}V - \frac{1}{2}p\bigl(X^\mathrm{H}V + V^{\mathrm{H}}X\bigr)
 ```
 """
 Weingarten(::Stiefel, p, X, V)
