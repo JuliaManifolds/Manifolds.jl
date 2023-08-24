@@ -365,4 +365,14 @@ using Manifolds: induced_basis
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
         ) === 2.0
     end
+
+    @testset "Weingarten & Hessian" begin
+        M = Euclidean(2)
+        p = [1.0, 2.0]
+        G = [3.0, 4.0]
+        H = [5.0, 6.0]
+        X = [7.0, 8.0]
+        rH = riemannian_Hessian(M, p, G, H, X)
+        @test rH == H
+    end
 end

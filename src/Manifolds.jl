@@ -859,8 +859,9 @@ export ×,
     vertical_component,
     vertical_component!,
     Weingarten,
-    Weingarten!
-zero_vector, zero_vector!
+    Weingarten!,
+    zero_vector,
+    zero_vector!
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,

@@ -1671,9 +1671,9 @@ end
 Since the metric decouples, also the computation of the weingarten map
 ``\mathcal W_p`` can be computed elementwise on the single elements of the [`ProductManifold`](@ref) `M`.
 """
-Weingarten(::AbstractPowerManifold, p, X, V)
+Weingarten(::ProductManifold, p, X, V)
 
-function Weingarten!(::AbstractPowerManifold, Y, p, X, V)
+function Weingarten!(::ProductManifold, Y, p, X, V)
     map(
         Weingarten!,
         M.manifolds,

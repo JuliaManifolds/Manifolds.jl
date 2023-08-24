@@ -324,4 +324,13 @@ include("../utils.jl")
             end
         end
     end
+    @testset "Weingarten & Hessian" begin
+        M = PositiveNumbers()
+        p = 1.0
+        G = 2.0
+        H = 3.0
+        X = 4.0
+        rH = riemannian_Hessian(M, p, G, H, X)
+        @test rH == p * H * p + X * G * p
+    end
 end
