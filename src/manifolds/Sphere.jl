@@ -534,7 +534,7 @@ The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 Weingarten(::Sphere, p, X, V)
 
 function Weingarten!(::Sphere, Y, p, X, V)
-    Y .= -X * p'V
+    Y .= -X * (p'V)
     return Y
 end
 

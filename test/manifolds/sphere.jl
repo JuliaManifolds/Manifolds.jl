@@ -264,4 +264,12 @@ using ManifoldsBase: TFVector
         @test dpX[2][1] == 1.0
         @test dpX[2][2].X == normalize(X)
     end
+    @testset "Weingarten" begin
+        M = Sphere(2)
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 2.0, 0.0]
+        V = [0.3, 0.0, 0.0]
+        Y = -X * (p'V)
+        @test Weingarten(M, p, X, V) == Y
+    end
 end

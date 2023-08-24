@@ -188,14 +188,14 @@ function inverse_retract!(
 end
 
 @doc raw"""
-    Y = riemannian_Hessian(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, G, H, X)
-    riemannian_Hessian!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, Y, p, G, H, X)
+    Y = riemannian_Hessian(M::MetricManifold{ℝ, Stiefel{n,k}, CanonicalMetric}, p, G, H, X)
+    riemannian_Hessian!(M::MetricManifold{ℝ, Stiefel{n,k}, CanonicalMetric}, Y, p, G, H, X)
 
 Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
 Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
 where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
 
-Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](@ref)
 ``α_0=1, α_1=\frac{1}{2}`` in their formula. The formula reads
 
 ```math
@@ -211,21 +211,21 @@ where ``P = I-pp^{\mathrm{H}}``.
 Compared to Eq. (5.6) we have ``α_0 = 1`` and ``α_1 = \frac{1}{2}``.
 """
 riemannian_Hessian(
-    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    M::MetricManifold{𝔽,Stiefel{n,k,𝔽},CanonicalMetric},
     p,
     G,
     H,
     X,
-) where {n,k}
+) where {n,k,𝔽}
 
 function riemannian_Hessian!(
-    ::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    M::MetricManifold{𝔽,Stiefel{n,k,𝔽},CanonicalMetric},
     Y,
     p,
     G,
     H,
     X,
-) where {n,k}
+) where {n,k,𝔽}
     project!(
         M,
         Y,

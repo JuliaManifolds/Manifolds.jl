@@ -331,6 +331,8 @@ include("../utils.jl")
         @test inner(M3, p, X, Y) == 0
         @test inner(M3, p, X, 2 * X + 3 * Y) == 2 * inner(M3, p, X, X)
         @test norm(M3, p, X) ≈ distance(M3, p, q)
+        Z = [0.0 0.0; 0.0 0.0; -1.0 -1.0]
+        @test riemannian_Hessian(M3, p, Y, Z, X) == [0.0 0.5; -0.5 0.0; -1.0 -1.0]
         # check on a higher dimensional manifold, that the iterations are actually used
         M4 = MetricManifold(Stiefel(10, 2), CanonicalMetric())
         p = Matrix{Float64}(I, 10, 2)
