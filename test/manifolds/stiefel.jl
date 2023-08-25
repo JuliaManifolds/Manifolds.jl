@@ -532,6 +532,13 @@ include("../utils.jl")
             @test riemannian_Hessian(M1, p, Y, Z, X) == rH #Special case of submersion metric
             @test riemannian_Hessian(M2b, p, Y, Z, X) == rH # metric is default
             @test riemannian_Hessian(M3, p, Y, Z, X) == riemannian_Hessian(M4, p, Y, Z, X)
+
+            V = [0.0 -1.0; 1.0 0.0; 0.0 0.0]
+            W = zero_vector(M2, p)
+            Weingarten!(M2, W, p, X, V)
+            Wb = zero_vector(M2b, p)
+            Weingarten!(M2b, Wb, p, X, V)
+            @test W == Wb
         end
     end
 end

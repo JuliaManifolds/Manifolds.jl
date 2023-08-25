@@ -232,6 +232,6 @@ The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 Weingarten(::Stiefel, p, X, V)
 
 function Weingarten!(::Stiefel, Y, p, X, V)
-    Y .= -X * p'V - p * (X' * V + V' * X)
+    Y .= -X * p' * V - p * (X' * V + V' * X)
     return Y
 end
