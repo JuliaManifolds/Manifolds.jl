@@ -1,3 +1,21 @@
+#!/usr/bin/env julia
+#
+# To run the Manifolds.jl Tests as a script with Command line options,
+# You have to have TestEvn in your environment.
+#
+# Command Line Options (stil WIP)
+#
+
+if (abspath(PROGRAM_FILE) == @__FILE__) # Run as script
+    using TestEnv
+    println("Script.")
+    TestEnv.activate("Manifolds")
+    # Setup test variants
+    #...then continue with the test run in normal mode below
+end
+
+println("normal.")
+
 include("utils.jl")
 
 @info "Manifolds.jl Test settings:\n\n" *
