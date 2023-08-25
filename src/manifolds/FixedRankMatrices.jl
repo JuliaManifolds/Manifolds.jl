@@ -350,7 +350,7 @@ get_embedding(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽} = Euclidean(m,
     injectivity_radius(::FixedRankMatrices)
 
 Return the incjectivity radius of the manifold of [`FixedRankMatrices`](@ref), i.e. 0.
-See [HosseiniUschmajew:2017](@ref).
+See [HosseiniUschmajew:2017](@cite).
 """
 function injectivity_radius(::FixedRankMatrices{m,n,k}) where {m,n,k}
     return 0.0
