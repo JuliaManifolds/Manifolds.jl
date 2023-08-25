@@ -54,6 +54,16 @@ end
     @test isapprox(M, p, X, X2)
     r1 = exp(M, p, X, 1.0)
     @test isapprox(M, r, r1; atol=1e-10)
+
+    @testset "Riemannian Hessian" begin
+        p = Matrix{Float64}(I, 2, 2)
+        X = [0.0 3.0; -3.0 0.0]
+        V = [1.0 0.0; 1.0 0.0]
+        @test Weingarten(M, p, X, V) == -1 / 2 * p * (V' * X - X' * V)
+        G = [0.0 1.0; 0.0 0.0]
+        H = [0.0 0.0; 2.0 0.0]
+        @test riemannian_Hessian(M, p, G, H, X) == [0.0 -1.0; 1.0 0.0]
+    end
 end
 
 @testset "Special unitary matrices" begin

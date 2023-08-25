@@ -517,5 +517,18 @@ include("../utils.jl")
                 @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
             end
         end
+
+        @testset "Hessian Conversion" begin
+            M1 = MetricManifold(Stiefel(3, 2), StiefelSubmersionMetric(-0.5))
+            M2 = Stiefel(3, 2)
+            M3 = MetricManifold(Stiefel(3, 2), StiefelSubmersionMetric(0.0))
+            M4 = MetricManifold(Stiefel(3, 2), CanonicalMetric())
+            p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
+            Y = [0.0 0.0; 0.0 0.0; -1.0 1.0]
+            Z = [0.0 0.0; 0.0 0.0; -1.0 -1.0]
+            @test riemannian_Hessian(M1, p, Y, Z, X) == riemannian_Hessian(M1, p, Y, Z, X)
+            @test riemannian_Hessian(M3, p, Y, Z, X) == riemannian_Hessian(M4, p, Y, Z, X)
+        end
     end
 end

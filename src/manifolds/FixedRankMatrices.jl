@@ -577,13 +577,13 @@ The Riemannian Hessian can be computed as stated in Remark 4.1 [Nguyen:2023](@ci
 or Section 2.3 [Vandereycken:2013](@cite), that B. Vandereycken adopted for [Manopt (Matlab)](https://www.manopt.org/reference/manopt/manifolds/fixedrank/fixedrankembeddedfactory.html).
 """
 riemannian_Hessian(M::FixedRankMatrices, p, G, H, X)
-function riemannian_Hessian(::FixedRankMatrices, Y, p, G, H, X)
+
+function riemannian_Hessian!(M::FixedRankMatrices, Y, p, G, H, X)
     project!(M, Y, p, H)
-    g = embed(M, p, G)
-    T1 = g * X.Vt / p.S
-    Y.U .+= T - p.U * (p.U' * T1)
-    T2 = g * X.U' / p.S
-    Y.Vt .+= (T - p.Vt' * (p.Vt * T2))'
+    T1 = (G * X.Vt) / diagm(p.S)
+    Y.U .+= T1 - p.U * (p.U' * T1)
+    T2 = (G' * X.U) / diagm(p.S)
+    Y.Vt .+= (T2 - p.Vt' * (p.Vt * T2))
     return Y
 end
 

@@ -276,4 +276,15 @@ include("../utils.jl")
         ]
         @test is_point(M, p1)
     end
+
+    @testset "Riemannian Hessian Conversion" begin
+        M = SymmetricPositiveDefinite(2)
+        p = [2.0 1.0; 1.0 1.0]
+        G = [1.0 0.0; 1.0 0.1]
+        H = [2.0 1.0; 0.0 0.0]
+        X = [0.0 3.0; 3.0 0.0]
+        Y = X * 1 / 2 * (G' + G) * p
+        Y = 1 / 2 * p * (H' + H) * p + 1 / 2 * (Y' + Y)
+        @test riemannian_Hessian(M, p, G, H, X) == Y
+    end
 end

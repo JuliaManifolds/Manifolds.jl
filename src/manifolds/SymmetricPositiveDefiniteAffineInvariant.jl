@@ -429,7 +429,8 @@ the symmetrization operator. Then the formula reads
 ```
 """
 riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
-function riemannian_Hessian(::SymmetricPositiveDefinite, Y, p, G, H, X)
+
+function riemannian_Hessian!(::SymmetricPositiveDefinite, Y, p, G, H, X)
     # The following formulae even work for complex, H-symmetric positive definite matrices.
     # the term within the seconds summands outer \sym:
     Y .= X * 0.5 * (G' + G) * p

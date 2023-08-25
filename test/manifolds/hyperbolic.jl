@@ -339,4 +339,14 @@ include("../utils.jl")
         @test dpX[2][1] == -1.0
         @test dpX[2][2].X == 2 * normalize(X)
     end
+    @testset "Riemannian Hessian" begin
+        M = Hyperbolic(2)
+        p = [0.0, 0.0, 1.0]
+        G = [1.0, 0.2, 0.3]
+        H = [2.0, 0.3, 0.4]
+        X = [0.3, 0.4, 0.0]
+        D = diagm([1.0, 1.0, -1.0])
+        rH = project(M, p, D * H + dot(p, D * G) .* X)
+        @test riemannian_Hessian(M, p, G, H, X) == rH
+    end
 end
