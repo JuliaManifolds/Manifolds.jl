@@ -521,6 +521,7 @@ include("../utils.jl")
         @testset "Hessian Conversion" begin
             M1 = MetricManifold(Stiefel(3, 2), StiefelSubmersionMetric(-0.5))
             M2 = Stiefel(3, 2)
+            M2b = MetricManifold(Stiefel(3, 2), EuclideanMetric())
             M3 = MetricManifold(Stiefel(3, 2), StiefelSubmersionMetric(0.0))
             M4 = MetricManifold(Stiefel(3, 2), CanonicalMetric())
             p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -529,6 +530,8 @@ include("../utils.jl")
             Z = [0.0 0.0; 0.0 0.0; -1.0 -1.0]
             @test riemannian_Hessian(M1, p, Y, Z, X) == riemannian_Hessian(M1, p, Y, Z, X)
             @test riemannian_Hessian(M3, p, Y, Z, X) == riemannian_Hessian(M4, p, Y, Z, X)
+            @test_skip riemannian_Hessian(M2, p, Y, Z, X) ==
+                       riemannian_Hessian(M2b, p, Y, Z, X)
         end
     end
 end

@@ -401,7 +401,7 @@ and that means the inverse has to be appliead to the (Euclidean) Hessian
 to map it into the Lie algebra.
 """
 riemannian_Hessian(M::Rotations, p, G, H, X)
-function riemannian_Hessian(::Rotations{N}, Y, p, G, H, X) where {N}
+function riemannian_Hessian!(::Rotations{N}, Y, p, G, H, X) where {N}
     project!(SkewSymmetricMatrices(N), Y, p' * H - 1 / 2 .* X * (G' * p + p' * G))
     return Y
 end
