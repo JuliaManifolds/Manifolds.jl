@@ -495,7 +495,7 @@ To generate random tangent vectors at ``p`` then, this function sets ``B_X = 0``
 and generates a random Hamiltonian matrix ``Ω_X \in \mathfrak{sp}(2n,F)`` with
 Frobenius norm of `hamiltonian_norm` before returning ``X = pΩ_X``.
 """
-function Base.rand(
+function Random.rand(
     M::SymplecticStiefel{n};
     vector_at=nothing,
     hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),
