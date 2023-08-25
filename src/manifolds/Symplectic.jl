@@ -22,7 +22,7 @@ That is, the symplectic manifold consists of
 with ``0_n`` and ``I_n`` denoting the ``n × n`` zero-matrix
 and indentity matrix in ``ℝ^{n \times n}`` respectively.
 
-The tangent space at a point ``p`` is given by [^BendokatZimmermann2021]
+The tangent space at a point ``p`` is given by [BendokatZimmermann:2021](@cite)
 ````math
 \begin{align*}
     T_p\operatorname{Sp}(2n)
@@ -54,7 +54,7 @@ end
     RealSymplecticMetric <: RiemannianMetric
 
 The canonical Riemannian metric on the symplectic manifold,
-defined pointwise for ``p \in \operatorname{Sp}(2n)`` by [^Fiori2011]
+defined pointwise for ``p \in \operatorname{Sp}(2n)`` by [Fiori:2011](@cite)]
 ````math
 \begin{align*}
     & g_p \colon T_p\operatorname{Sp}(2n) \times T_p\operatorname{Sp}(2n) \rightarrow ℝ, \\
@@ -352,7 +352,7 @@ Compute the manifold gradient ``\text{grad}f(p)`` of a scalar function
 
 The element ``\text{grad}f(p)`` is found as the Riesz representer of the differential
 ``\text{D}f(p) \colon T_p\operatorname{Sp}(2n) \rightarrow ℝ`` w.r.t.
-the Riemannian metric inner product at ``p`` [^Fiori2011].
+the Riemannian metric inner product at ``p`` [Fiori:2011](@cite)].
 That is, ``\text{grad}f(p) \in T_p\operatorname{Sp}(2n)`` solves the relation
 ````math
     g_p(\text{grad}f(p), X) = \text{D}f(p) \quad\forall\; X \in T_p\operatorname{Sp}(2n).
@@ -372,13 +372,6 @@ w.r.t the Riemannian metric ``g_p`` extended to the entire embedding space.
     If `false`, compute the gradient by first projecting ``∇f(p)`` onto the
     tangent vector space, before changing the representer in the tangent
     vector space to comply with the [`RealSymplecticMetric`](@ref).
-
-
-[^Fiori2011]:
-    > Simone Fiori:
-    > Solving minimal-distance problems over the manifold of real-symplectic matrices,
-    > SIAM Journal on Matrix Analysis and Applications 32(3), pp. 938-968, 2011.
-    > doi [10.1137/100817115](https://doi.org/10.1137/100817115).
 """
 function ManifoldDiff.gradient(
     M::Symplectic,
@@ -503,7 +496,7 @@ end
 
 Compute the Cayley Inverse Retraction ``X = \mathcal{L}_p^{\operatorname{Sp}}(q)``
 such that the Cayley Retraction from ``p`` along ``X`` lands at ``q``, i.e.
-``\mathcal{R}_p(X) = q`` [^BendokatZimmermann2021].
+``\mathcal{R}_p(X) = q`` [BendokatZimmermann:2021](@cite).
 
 First, recall the definition the standard symplectic matrix
 ````math
@@ -527,7 +520,7 @@ If that is the case, the inverse cayley retration at ``p`` applied to ``q`` is
                                         ∈ T_p\operatorname{Sp}(2n).
 ````
 
-[^BendokatZimmermann2021]:
+[BendokatZimmermann:2021](@cite):
     > Bendokat, Thomas and Zimmermann, Ralf:
 	> The real symplectic Stiefel and Grassmann manifolds: metrics, geodesics and applications
 	> arXiv preprint arXiv:[2108.12447](https://arxiv.org/abs/2108.12447), 2021.
@@ -686,7 +679,7 @@ and then symmetrizes it as `S = S + S'`.
 Then ``S`` is normalized to have Frobenius norm of `hamiltonian_norm`
 and `X = pQS` is returned, where `Q` is the [`SymplecticMatrix`](@ref).
 """
-function Base.rand(
+function Random.rand(
     M::Symplectic;
     vector_at=nothing,
     hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),

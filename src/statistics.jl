@@ -279,7 +279,7 @@ between two iterates is small. For more stopping criteria check the
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction.
 
-The Theory stems from[^Karcher1977] and is also described in[^PennecArsigny2013]
+The Theory stems from [Karcher:1977](@cite) and is also described in[^PennecArsigny2013]
 as the exponential barycenter.
 The algorithm is further described in[^Afsari2013].
 
@@ -295,10 +295,6 @@ The algorithm is further described in[^Afsari2013].
     > In: Nielsen F., Bhatia R. (eds) Matrix Information Geometry, (2013), pp. 123-166.
     > doi: [10.1007/978-3-642-30232-9_7](https://doi.org/10.1007/978-3-642-30232-9_7),
     > hal: [https://hal.inria.fr/hal-00699361/document](https://hal.inria.fr/hal-00699361/document)
-[^Karcher1977]:
-    > Karcher, H.: Riemannian center of mass and mollifier smoothing.
-    > Communications on Pure Applied Mathematics (1977), 30, pp. 509–541.
-    > doi [10.1002/cpa.3160300502](https://doi.org/10.1002/cpa.3160300502)
 """
 mean(::AbstractManifold, ::Any...)
 function Statistics.mean(
@@ -646,9 +642,9 @@ change between two iterates is small. For more stopping criteria check the
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction.
 
-The algorithm is further described in [^Bačák2014].
+The algorithm is further described in [Bacak:2014](@cite).
 
-[^Bačák2014]:
+[Bacak:2014](@cite):
     > Bačák, M: Computing Medians and Means in Hadamard Spaces.
     > SIAM Journal on Optimization (2014), 24(3), pp. 1542–1566,
     > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),

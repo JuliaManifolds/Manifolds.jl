@@ -29,18 +29,12 @@ T_p\mathcal M = \bigl\{ U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mat
 where ``0_k`` is the ``k × k`` zero matrix. See [`UMVTVector`](@ref) for details.
 
 The (default) metric of this manifold is obtained by restricting the metric
-on ``ℝ^{m × n}`` to the tangent bundle[^Vandereycken2013].
+on ``ℝ^{m × n}`` to the tangent bundle [Vandereycken:2013](@cite).
 
 # Constructor
     FixedRankMatrices(m, n, k[, field=ℝ])
 
 Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
-
-[^Vandereycken2013]:
-    > Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
-    > SIAM Journal on Optiomoization, 23(2), pp. 1214–1236, 2013.
-    > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
-    > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 struct FixedRankMatrices{M,N,K,𝔽} <: AbstractDecoratorManifold{𝔽} end
 function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)

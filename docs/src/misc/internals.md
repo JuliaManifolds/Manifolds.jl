@@ -23,6 +23,8 @@ Manifolds.ziptuples
 
 ## Types in Extensions
 
-```@docs
-Manifolds.ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.StitchedChartSolution
+```@autodocs
+Modules = [Manifolds]
+Pages = ["../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.jl"]
+Order = [:type, :function]
 ```
