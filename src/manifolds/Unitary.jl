@@ -127,7 +127,7 @@ and that means the inverse has to be appliead to the (Euclidean) Hessian
 to map it into the Lie algebra.
 """
 riemannian_Hessian(M::UnitaryMatrices, p, G, H, X)
-function riemannian_Hessian!(::UnitaryMatrices, Y, p, G, H, X)
+function riemannian_Hessian!(M::UnitaryMatrices, Y, p, G, H, X)
     project!(M, Y, p, p' * H - 1 / 2 .* X * (G' * p + p' * G))
     return Y
 end
