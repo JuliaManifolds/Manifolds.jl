@@ -350,12 +350,7 @@ get_embedding(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽} = Euclidean(m,
     injectivity_radius(::FixedRankMatrices)
 
 Return the incjectivity radius of the manifold of [`FixedRankMatrices`](@ref), i.e. 0.
-See [^HosseiniUschmajew2017].
-
-[^HosseiniUschmajew2017]:
-    > S. Hosseini and A. Uschmajew, “A Riemannian Gradient Sampling Algorithm for Nonsmooth
-    > Optimization on Manifolds,” SIAM J. Optim., vol. 27, no. 1, pp. 173–189, Jan. 2017,
-    > doi: [10.1137/16M1069298](https://doi.org/10.1137/16M1069298).
+See [HosseiniUschmajew:2017](@ref).
 """
 function injectivity_radius(::FixedRankMatrices{m,n,k}) where {m,n,k}
     return 0.0

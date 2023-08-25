@@ -264,7 +264,7 @@ ManifoldsBase.default_retraction_method(::Symplectic) = CayleyRetraction()
     distance(M::Symplectic, p, q)
 
 Compute an approximate geodesic distance between two Symplectic matrices
-``p, q \in \operatorname{Sp}(2n)``, as done in [^WangSunFiori2018].
+``p, q \in \operatorname{Sp}(2n)``, as done in [WangSunFiori:2018](@cite).
 ````math
     \operatorname{dist}(p, q)
         ≈ ||\operatorname{Log}(p^+q)||_{\operatorname{Fr}},
@@ -317,18 +317,12 @@ The Exponential mapping on the Symplectic manifold with the
 [`RealSymplecticMetric`](@ref) Riemannian metric.
 
 For the point ``p \in \operatorname{Sp}(2n)`` the exponential mapping along the tangent
-vector ``X \in T_p\operatorname{Sp}(2n)`` is computed as [^WangSunFiori2018]
+vector ``X \in T_p\operatorname{Sp}(2n)`` is computed as [WangSunFiori:2018](@cite)
 ````math
     \operatorname{exp}_p(X) = p \operatorname{Exp}((p^{-1}X)^{\mathrm{T}})
                                 \operatorname{Exp}(p^{-1}X - (p^{-1}X)^{\mathrm{T}}),
 ````
 where ``\operatorname{Exp}(\cdot)`` denotes the matrix exponential.
-
-[^WangSunFiori2018]:
-    > Wang, Jing and Sun, Huafei and Fiori, Simone:
-    > A Riemannian-steepest-descent approach for optimization on the real symplectic group,
-    > Mathematical Methods in the Applied Sciences, 41(11) pp. 4273-4286, 2018
-    > doi [10.1002/mma.4890](https://doi.org/10.1002/mma.4890)
 """
 exp(::Symplectic, ::Any...)
 
@@ -596,10 +590,12 @@ end
 
 Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n, ℝ)`` w.r.t.
 the Riemannian metric ``g`` [`RealSymplecticMetric`](@ref).
-The closed form projection mapping is given by [^GaoSonAbsilStykel2021]
+The closed form projection mapping is given by [GaoSonAbsilStykel:2021](@cite)
+
 ````math
     \operatorname{P}^{T_p\operatorname{Sp}(2n)}_{g_p}(X) = pQ\operatorname{sym}(p^{\mathrm{T}}Q^{\mathrm{T}}X),
 ````
+
 where ``\operatorname{sym}(A) = \frac{1}{2}(A + A^{\mathrm{T}})``.
 This function is not exported.
 """
@@ -625,22 +621,20 @@ Project onto the normal of the tangent space ``(T_p\operatorname{Sp}(2n))^{\perp
 a point ``p ∈ \operatorname{Sp}(2n)``, relative to the riemannian metric
 ``g`` [`RealSymplecticMetric`](@ref).
 That is,
+
 ````math
 (T_p\operatorname{Sp}(2n))^{\perp_g} = \{Y \in \mathbb{R}^{2n \times 2n} :
                         g_p(Y, X) = 0 \;\forall\; X \in T_p\operatorname{Sp}(2n)\}.
 ````
-The closed form projection operator onto the normal space is given by [^GaoSonAbsilStykel2021]
+
+The closed form projection operator onto the normal space is given by [GaoSonAbsilStykel:2021](@cite)
+
 ````math
 \operatorname{P}^{(T_p\operatorname{Sp}(2n))\perp}_{g_p}(X) = pQ\operatorname{skew}(p^{\mathrm{T}}Q^{\mathrm{T}}X),
 ````
+
 where ``\operatorname{skew}(A) = \frac{1}{2}(A - A^{\mathrm{T}})``.
 This function is not exported.
-
-[^GaoSonAbsilStykel2021]:
-    > Gao, Bin and Son, Nguyen Thanh and Absil, P-A and Stykel, Tatjana:
-    > Riemannian optimization on the symplectic Stiefel manifold,
-    > SIAM Journal on Optimization 31(2), pp. 1546-1575, 2021.
-    > doi [10.1137/20M1348522](https://doi.org/10.1137/20M1348522)
 """
 function project_normal!(
     ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
