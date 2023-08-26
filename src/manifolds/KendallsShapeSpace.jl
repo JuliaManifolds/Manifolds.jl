@@ -47,12 +47,8 @@ end
     exp(M::KendallsShapeSpace, p, X)
 
 Compute the exponential map on [`KendallsShapeSpace`](@ref) `M`.
-See [^Guigui2021] for discussion about its computation.
+See [GuiguiMaignantTroouvePennec:2021](@cite) for discussion about its computation.
 
-[^Guigui2021]:
-    > N. Guigui, E. Maignant, A. Trouvé, and X. Pennec, “Parallel Transport on Kendall Shape
-    > Spaces,” in Geometric Science of Information, Cham, 2021, pp. 103–110.
-    > doi: [10.1007/978-3-030-80209-7_12](https://doi.org/10.1007/978-3-030-80209-7_12).
 """
 exp(M::KendallsShapeSpace, p, X)
 
@@ -78,7 +74,7 @@ end
     horizontal_component(::KendallsShapeSpace, p, X)
 
 Compute the horizontal component of tangent vector `X` at `p` on [`KendallsShapeSpace`](@ref)
-`M`. See [^Guigui2021], Section 2.3 for details.
+`M`. See [GuiguiMaignantTroouvePennec:2021](@cite), Section 2.3 for details.
 """
 horizontal_component(::KendallsShapeSpace, p, X)
 

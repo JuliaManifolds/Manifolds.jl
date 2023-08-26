@@ -350,12 +350,8 @@ Uniform distribution on given (real-valued) [`Grassmann`](@ref) `M`.
 Specifically, this is the normalized Haar measure on `M`.
 Generated points will be of similar type as `p`.
 
-The implementation is based on Section 2.5.1 in [^Chikuse2003];
-see also Theorem 2.2.2(iii) in [^Chikuse2003].
-
-[^Chikuse2003]:
-    > Y. Chikuse: "Statistics on Special Manifolds", Springer New York, 2003,
-    > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
+The implementation is based on Section 2.5.1 in [Chikuse:2003](@cite);
+see also Theorem 2.2.2(iii) in [Chikuse:2003](@cite).
 """
 function uniform_distribution(M::Grassmann{n,k,ℝ}, p) where {n,k}
     μ = Distributions.Zeros(n, k)

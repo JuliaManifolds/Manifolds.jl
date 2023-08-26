@@ -106,7 +106,7 @@ end
     struct SasakiRetraction <: AbstractRetractionMethod end
 
 Exponential map on [`TangentBundle`](@ref) computed via Euler integration as described
-in [^Muralidharan2012]. The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
+in [MuralidharanFlecther:2012](@cite). The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
 $\gamma(1) = \exp_{p,X}(X_M, X_F)$ and $\gamma(0)=(p, X)$ reads
 
 ```math
@@ -120,11 +120,6 @@ where $R$ is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
     SasakiRetraction(L::Int)
 
 In this constructor `L` is the number of integration steps.
-
-[^Muralidharan2012]:
-    > P. Muralidharan and P. T. Fletcher, “Sasaki Metrics for Analysis of Longitudinal Data
-    > on Manifolds,” Proc IEEE Comput Soc Conf Comput Vis Pattern Recognit, vol. 2012,
-    > pp. 1027–1034, Jun. 2012, doi: [10.1109/CVPR.2012.6247780](https://doi.org/10.1109/CVPR.2012.6247780).
 """
 struct SasakiRetraction <: AbstractRetractionMethod
     L::Int

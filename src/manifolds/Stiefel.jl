@@ -172,12 +172,7 @@ inverse_retract(::Stiefel, ::Any, ::Any, ::PolarInverseRetraction)
 Compute the inverse retraction based on a qr decomposition
 for two points `p`, `q` on the [`Stiefel`](@ref) manifold `M` and return
 the resulting tangent vector in `X`. The computation follows Algorithm 1
-in [^KanekoFioriTanaka2013].
-
-[^KanekoFioriTanaka2013]:
-    > T. Kaneko, S. Fiori, T. Tanaka: "Empirical Arithmetic Averaging over the
-    > Compact Stiefel AbstractManifold", IEEE Transactions on Signal Processing, 2013,
-    > doi: [10.1109/TSP.2012.2226167](https://doi.org/10.1109/TSP.2012.2226167).
+in [KanekoFioriTanaka:2013](@cite).
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
 
@@ -361,34 +356,38 @@ retract(::Stiefel, ::Any, ::Any, ::CayleyRetraction)
 @doc raw"""
     retract(M::Stiefel, p, X, ::PadeRetraction{m})
 
-Compute the retraction on the [`Stiefel`](@ref) manifold `M` based on the Padé approximation of order $m$[^ZhuDuan2018].
+Compute the retraction on the [`Stiefel`](@ref) manifold `M` based on the Padé approximation of order $m$ [ZhuDuan:2018](@cite).
 Let $p_m$ and $q_m$ be defined for any matrix $A ∈ ℝ^{n×x}$ as
+
 ````math
   p_m(A) = \sum_{k=0}^m \frac{(2m-k)!m!}{(2m)!(m-k)!}\frac{A^k}{k!}
 ````
+
 and
+
 ````math
   q_m(A) = \sum_{k=0}^m \frac{(2m-k)!m!}{(2m)!(m-k)!}\frac{(-A)^k}{k!}
 ````
+
 respectively. Then the Padé approximation (of the matrix exponential $\exp(A)$) reads
+
 ````math
   r_m(A) = q_m(A)^{-1}p_m(A)
 ````
+
 Defining further
+
 ````math
   W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
   \quad\text{where }
   \operatorname{P}_p = I - \frac{1}{2}pp^{\mathrm{H}}
 ````
+
 the retraction reads
+
 ````math
   \operatorname{retr}_pX = r_m(W_{p,X})p
 ````
-[^ZhuDuan2018]:
-    > X. Zhu, C. Duan:
-    > On matrix exponentials and their approximations related to optimization on the Stiefel manifold,
-    > Optimizazion Letters 13(5), pp. 1069–1083, 2018.
-    > doi [10.1007/s11590-018-1341-z](https://doi.org/10.1007/s11590-018-1341-z).
 """
 retract(::Stiefel, ::Any, ::Any, ::PadeRetraction)
 
@@ -483,12 +482,8 @@ Uniform distribution on given (real-valued) [`Stiefel`](@ref) `M`.
 Specifically, this is the normalized Haar and Hausdorff measure on `M`.
 Generated points will be of similar type as `p`.
 
-The implementation is based on Section 2.5.1 in [^Chikuse2003];
-see also Theorem 2.2.1(iii) in [^Chikuse2003].
-
-[^Chikuse2003]:
-    > Y. Chikuse: "Statistics on Special Manifolds", Springer New York, 2003,
-    > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
+The implementation is based on Section 2.5.1 in [Chikuse:2003](@cite);
+see also Theorem 2.2.1(iii) in [Chikuse:2003](@cite).
 """
 function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
     μ = Distributions.Zeros(n, k)
@@ -622,7 +617,7 @@ end
 
 Compute the vector transport by computing the push forward of the
 [`retract(M::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref), see
-Section 4 of [^HuangGallivanAbsil2015] or  Section 3.5 of [Zhu:2016](@cite):
+Section 4 of [HuangGallivanAbsil:2015](@cite) or  Section 3.5 of [Zhu:2016](@cite):
 
 ```math
 T_{q\gets p}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
@@ -634,12 +629,6 @@ and $Λ$ is the unique solution of the Sylvester equation
 ```math
     Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}} = q^\mathrm{T}X - X^\mathrm{T}q
 ```
-[^HuangGallivanAbsil2015]:
-    > Huang, W., Gallivan, K. A., and Absil, P.-A.:
-    > _A Broyden class of quasi-Newton methods for Riemannian optimization_
-    > SIAM Journal of Optimization, 2015, Vol. 25, No. 3, pp. 1660–1685
-    > doi: [10.1137/140955483](https://doi.org/10.1137/140955483)
-    > pdf: [tech. report](https://www.math.fsu.edu/~whuang2/pdf/RBroydenBasic_techrep.pdf)
 """
 vector_transport_to(
     ::Stiefel,

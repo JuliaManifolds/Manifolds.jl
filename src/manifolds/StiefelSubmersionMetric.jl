@@ -7,14 +7,8 @@ The family, with a single real parameter ``α>-1``, has two special cases:
 - ``α = -\frac{1}{2}``: [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
 - ``α = 0``: [`CanonicalMetric`](@ref)
 
-The family was described in [^HüperMarkinaLeite2021]. This implementation follows the
+The family was described in [HueperMarkinaSilvaLeite:2021](@cite). This implementation follows the
 description in [ZimmermannHueper:2022](@cite).
-
-[^HüperMarkinaLeite2021]:
-    > Hüper, M., Markina, A., Leite, R. T. (2021)
-    > "A Lagrangian approach to extremal curves on Stiefel manifolds"
-    > Journal of Geometric Mechanics, 13(1): 55-72.
-    > doi: [10.3934/jgm.2020031](http://dx.doi.org/10.3934/jgm.2020031)
 
 # Constructor
 
