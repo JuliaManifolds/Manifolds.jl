@@ -589,6 +589,8 @@ Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction.
 
 The algorithm is further described in [Bacak:2014](@cite).
+
+
 """
 Statistics.median(
     ::AbstractManifold,

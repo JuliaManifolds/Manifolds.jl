@@ -712,7 +712,7 @@ end
 
 Compute the Cayley retraction on ``p ∈ \operatorname{Sp}(2n, ℝ)`` in
 the direction of tangent vector ``X ∈ T_p\operatorname{Sp}(2n, ℝ)``,
-as defined in by Birtea et al in proposition 2 [^BirteaCaşuComănescu2020].
+as defined in by Birtea et al in proposition 2 [BirteaCaşuComănescu:2020](@cite).
 
 Using the symplectic inverse of a matrix ``A \in ℝ^{2n \times 2n}``,
 ``
@@ -739,12 +739,6 @@ is defined pointwise as
 Here
 ``\operatorname{exp}_{1/1}(z) = (2 - z)^{-1}(2 + z)``
 denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
-
-[^BirteaCaşuComănescu2020]:
-    > Birtea, Petre and Caşu, Ioan and Comănescu, Dan:
-    > Optimization on the real symplectic group,
-    > Monatshefte f{\"u}r Mathematik, Springer, 2020.
-    > doi [10.1007/s00605-020-01369-9](https://doi.org/10.1007/s00605-020-01369-9)
 """
 retract(M::Symplectic, p, X)
 
