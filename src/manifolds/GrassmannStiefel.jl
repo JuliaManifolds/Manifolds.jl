@@ -323,13 +323,8 @@ end
     riemann_tensor(::Grassmann{n,k,ℝ}, p, X, Y, Z) where {n,k}
 
 Compute the value of Riemann tensor on the real [`Grassmann`](@ref) manifold.
-The formula reads[^Rentmeesters2011]
+The formula reads [Rentmeesters:2011](@cite)
 ``R(X,Y)Z = (XY^\mathrm{T} - YX^\mathrm{T})Z + Z(Y^\mathrm{T}X - X^\mathrm{T}Y)``.
-
-[^Rentmeesters2011]:
-    > Q. Rentmeesters, “A gradient method for geodesic data fitting on some symmetric
-    > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
-    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: [10.1109/CDC.2011.6161280](https://doi.org/10.1109/CDC.2011.6161280).
 """
 riemann_tensor(::Grassmann{n,k,ℝ}, p, X, Y, Z) where {n,k}
 

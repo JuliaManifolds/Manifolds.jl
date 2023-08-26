@@ -563,7 +563,7 @@ vector_transport_direction(
 
 Compute the vector transport by computing the push forward of the
 [`retract(::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref),
-See [^AbsilMahonySepulchre2008], p. 173, or Section 3.5 of [^Zhu2017].
+See  [AbsilMahonySepulchre:2008](@cite), p. 173, or Section 3.5 of [^Zhu2017].
 ```math
 T_{p,d}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
 ```
@@ -577,7 +577,7 @@ A_{ij}&\text{ if } i > j\\
 -A_{ji} \text{ if } i < j.\\
 \end{cases}
 ```
-[^AbsilMahonySepulchre2008]:
+ [AbsilMahonySepulchre:2008](@cite):
     >Absil, P.-A., Mahony, R. and Sepulchre R.,
     > _Optimization Algorithms on Matrix Manifolds_
     > Princeton University Press, 2008,
@@ -660,7 +660,7 @@ vector_transport_to(
 
 Compute the vector transport by computing the push forward of the
 [`retract(M::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref),
-see [^AbsilMahonySepulchre2008], p. 173, or Section 3.5 of [^Zhu2017].
+see  [AbsilMahonySepulchre:2008](@cite), p. 173, or Section 3.5 of [^Zhu2017].
 
 ```math
 T_{q \gets p}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},

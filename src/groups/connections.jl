@@ -3,7 +3,7 @@
     AbstractCartanSchoutenConnection
 
 Abstract type for Cartan-Schouten connections, that is connections whose geodesics
-going through group identity are one-parameter subgroups. See[PennecLorenzi:2020](@cite) for details.
+going through group identity are one-parameter subgroups. See [PennecLorenzi:2020](@cite) for details.
 """
 abstract type AbstractCartanSchoutenConnection <: AbstractAffineConnection end
 

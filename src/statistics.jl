@@ -589,12 +589,6 @@ Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction.
 
 The algorithm is further described in [Bacak:2014](@cite).
-
-[Bacak:2014](@cite):
-    > Bačák, M: Computing Medians and Means in Hadamard Spaces.
-    > SIAM Journal on Optimization (2014), 24(3), pp. 1542–1566,
-    > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
-    > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
 """
 Statistics.median(
     ::AbstractManifold,

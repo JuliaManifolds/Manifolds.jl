@@ -209,15 +209,11 @@ end
 """
     TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
-Tangent bundle for manifold of type `M`, as a manifold with the Sasaki metric [^Sasaki1958].
+Tangent bundle for manifold of type `M`, as a manifold with the Sasaki metric [Sasaki:1958](@cite).
 
 Exact retraction and inverse retraction can be approximated using [`VectorBundleProductRetraction`](@ref),
 [`VectorBundleInverseProductRetraction`](@ref) and [`SasakiRetraction`](@ref).
 [`VectorBundleProductVectorTransport`](@ref) can be used as a vector transport.
-
-[^Sasaki1958]:
-    > S. Sasaki, “On the differential geometry of tangent bundles of Riemannian manifolds,”
-    > Tohoku Math. J. (2), vol. 10, no. 3, pp. 338–354, 1958, doi: [10.2748/tmj/1178244668](https://doi.org/10.2748/tmj/1178244668).
 
 # Constructors
 

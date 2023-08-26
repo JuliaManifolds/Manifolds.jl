@@ -201,20 +201,7 @@ exp_p(X) = p\mathrm{e}^X
 For different sizes, like ``n=2,3,4`` there is specialised implementations
 
 The algorithm used is a more numerically stable form of those proposed in
-[^Gallier2002] and [^Andrica2013].
-
-[^Gallier2002]:
-    > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
-    > and logarithms of orthogonal matrices.
-    > International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
-    > [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
-
-[^Andrica2013]:
-    > Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
-    > exponential map of the Lie groups of matrices.
-    > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
-    > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
-
+[GallierXu:2002](@cite) and [AndricaRohan:2013](@cite).
 """
 exp(::GeneralUnitaryMatrices, p, X)
 
@@ -791,12 +778,7 @@ end
     riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 
 Compute the value of Riemann tensor on the [`GeneralUnitaryMatrices`](@ref) manifold.
-The formula reads[^Rentmeesters2011] ``R(X,Y)Z=\frac{1}{4}[Z, [X, Y]]``.
-
-[^Rentmeesters2011]:
-    > Q. Rentmeesters, “A gradient method for geodesic data fitting on some symmetric
-    > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
-    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: [10.1109/CDC.2011.6161280](https://doi.org/10.1109/CDC.2011.6161280).
+The formula reads [Rentmeesters:2011](@cite) ``R(X,Y)Z=\frac{1}{4}[Z, [X, Y]]``.
 """
 riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 

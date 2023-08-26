@@ -6,7 +6,7 @@ Kendall's shape space, defined as quotient of a [`KendallsPreShapeSpace`](@ref)
 (represented by n×k matrices) by the action [`ColumnwiseMultiplicationAction`](@ref).
 
 The space can be interpreted as tuples of ``k`` points in ``ℝ^n`` up to simultaneous
-translation and scaling and rotation of all points [^Kendall1984][^Kendall1989].
+translation and scaling and rotation of all points [Kendall:1984](@cite)[Kendall:1989](@cite).
 
 This manifold possesses the [`IsQuotientManifold`](@ref) trait.
 
@@ -15,15 +15,6 @@ This manifold possesses the [`IsQuotientManifold`](@ref) trait.
     KendallsShapeSpace(n::Int, k::Int)
 
 # References
-
-[^Kendall1989]:
-    > D. G. Kendall, “A Survey of the Statistical Theory of Shape,” Statist. Sci., vol. 4,
-    > no. 2, pp. 87–99, May 1989
-    > doi: [10.1214/ss/1177012582](https://doi.org/10.1214/ss/1177012582).
-[^Kendall1984]:
-    > D. G. Kendall, “Shape Manifolds, Procrustean Metrics, and Complex Projective Spaces,”
-    > Bull. London Math. Soc., vol. 16, no. 2, pp. 81–121, Mar. 1984
-    > doi: [10.1112/blms/16.2.81](https://doi.org/10.1112/blms/16.2.81).
 """
 struct KendallsShapeSpace{n,k} <: AbstractDecoratorManifold{ℝ} end
 
@@ -140,7 +131,7 @@ end
 Return the dimension of the [`KendallsShapeSpace`](@ref) manifold `M`. The dimension is
 given by ``n(k - 1) - 1 - n(n - 1)/2`` in the typical case where ``k \geq n+1``, and
 ``(k + 1)(k - 2) / 2`` otherwise, unless ``k`` is equal to 1, in which case the dimension
-is 0. See [^Kendall1984] for a discussion of the over-dimensioned case.
+is 0. See [Kendall:1984](@cite) for a discussion of the over-dimensioned case.
 """
 function manifold_dimension(::KendallsShapeSpace{n,k}) where {n,k}
     if k < n + 1 # over-dimensioned case
