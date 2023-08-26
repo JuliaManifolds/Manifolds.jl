@@ -250,7 +250,7 @@ In this section we take a look how to implement generic functions on manifolds.
 
 For our example here, we want to implement the so-called [📖 Bézier curve](https://en.wikipedia.org
 /wiki/Bézier_curve) using the so-called [📖 de-Casteljau algorithm](https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm).
-The linked algorithm can easily be generalised to manifolds by replacing lines with geodesics. This was for example used in [BergmannGousenbourger:2018](@cite) and the following example is an extended version of an example from [AxenBaranBergmannRzecki:2022](@cite).
+The linked algorithm can easily be generalised to manifolds by replacing lines with geodesics. This was for example used in [BergmannGousenbourger:2018](@cite) and the following example is an extended version of an example from [AxenBaranBergmannRzecki:2023](@cite).
 
 The algorithm works recursively. For the case that we have a Bézier curve with just two points, the algorithm just evaluates the geodesic connecting both at some time point $t∈[0,1]$. The function to evaluate a shortest geodesic (it might not be unique, but then a deterministic choice is taken) between two points `p` and `q` on a manifold `M` [🔗 `shortest_geodesic(M, p, q, t)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any}).
 
@@ -428,7 +428,7 @@ Again, for all of these, the concrete types only have to be used if you want to 
 
 ````{=commonmark}
 ```@bibliography
-Pages = ["tutorials/gestarted.md"]
+Pages = ["tutorials/getstarted.md"]
 Canonical=false
 ```
 ````
