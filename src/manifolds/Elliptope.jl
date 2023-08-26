@@ -31,20 +31,13 @@ endowed with the [`Euclidean`](@ref) metric from the embedding, i.e. from the $�
 
 
 This manifold was for example
-investigated in[^JourneeBachAbsilSepulchre2010].
+investigated in[JourneeBachAbsilSepulchre:2010](@cite).
 
 # Constructor
 
     Elliptope(n,k)
 
 generates the manifold $\mathcal E(n,k) \subset ℝ^{n × n}$.
-
-[^JourneeBachAbsilSepulchre2010]:
-    > Journée, M., Bach, F., Absil, P.-A., and Sepulchre, R.:
-    > “Low-Rank Optimization on the Cone of Positive Semidefinite Matrices”,
-    > SIAM Journal on Optimization (20)5, pp. 2327–2351, 2010.
-    > doi: [10.1137/080731359](https://doi.org/10.1137/080731359),
-    > arXiv: [0807.4423](http://arxiv.org/abs/0807.4423).
 """
 struct Elliptope{N,K} <: AbstractDecoratorManifold{ℝ} end
 

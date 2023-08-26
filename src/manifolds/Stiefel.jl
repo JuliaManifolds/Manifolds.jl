@@ -342,7 +342,7 @@ end
 @doc raw"""
     retract(::Stiefel, p, X, ::CayleyRetraction)
 
-Compute the retraction on the [`Stiefel`](@ref) that is based on the Cayley transform[^Zhu2017].
+Compute the retraction on the [`Stiefel`](@ref) that is based on the Cayley transform[Zhu:2016](@cite).
 Using
 ````math
   W_{p,X} = \operatorname{P}_pXp^{\mathrm{H}} - pX^{\mathrm{H}}\operatorname{P_p}
@@ -355,12 +355,6 @@ the formula reads
 ````
 
 It is implemented as the case $m=1$ of the `PadeRetraction`.
-
-[^Zhu2017]:
-    > X. Zhu:
-    > A Riemannian conjugate gradient method for optimizazion on the Stiefel manifold,
-    > Computational Optimization and Applications 67(1), pp. 73–110, 2017.
-    > doi [10.1007/s10589-016-9883-4](https://doi.org/10.1007/s10589-016-9883-4).
 """
 retract(::Stiefel, ::Any, ::Any, ::CayleyRetraction)
 
@@ -509,7 +503,7 @@ end
 @doc raw"""
     vector_transport_direction(::Stiefel, p, X, d, ::DifferentiatedRetractionVectorTransport{CayleyRetraction})
 
-Compute the vector transport given by the differentiated retraction of the [`CayleyRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.CayleyRetraction), cf. [^Zhu2017] Equation (17).
+Compute the vector transport given by the differentiated retraction of the [`CayleyRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.CayleyRetraction), cf. [Zhu:2016](@cite) Equation (17).
 
 The formula reads
 ````math
@@ -538,7 +532,7 @@ vector_transport_direction(
     vector_transport_direction(M::Stiefel, p, X, d, DifferentiatedRetractionVectorTransport{PolarRetraction})
 
 Compute the vector transport by computing the push forward of
-[`retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref) Section 3.5 of [^Zhu2017]:
+[`retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref) Section 3.5 of [Zhu:2016](@cite):
 
 ```math
 T_{p,d}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
@@ -563,7 +557,7 @@ vector_transport_direction(
 
 Compute the vector transport by computing the push forward of the
 [`retract(::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref),
-See  [AbsilMahonySepulchre:2008](@cite), p. 173, or Section 3.5 of [^Zhu2017].
+See  [AbsilMahonySepulchre:2008](@cite), p. 173, or Section 3.5 of [Zhu:2016](@cite).
 ```math
 T_{p,d}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
 ```
@@ -628,7 +622,7 @@ end
 
 Compute the vector transport by computing the push forward of the
 [`retract(M::Stiefel, ::Any, ::Any, ::PolarRetraction)`](@ref), see
-Section 4 of [^HuangGallivanAbsil2015] or  Section 3.5 of [^Zhu2017]:
+Section 4 of [^HuangGallivanAbsil2015] or  Section 3.5 of [Zhu:2016](@cite):
 
 ```math
 T_{q\gets p}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
@@ -660,7 +654,7 @@ vector_transport_to(
 
 Compute the vector transport by computing the push forward of the
 [`retract(M::Stiefel, ::Any, ::Any, ::QRRetraction)`](@ref),
-see  [AbsilMahonySepulchre:2008](@cite), p. 173, or Section 3.5 of [^Zhu2017].
+see  [AbsilMahonySepulchre:2008](@cite), p. 173, or Section 3.5 of [Zhu:2016](@cite).
 
 ```math
 T_{q \gets p}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
