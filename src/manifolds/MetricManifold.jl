@@ -754,9 +754,6 @@ function vector_transport_to!(
     return vector_transport_to!(M.manifold, Y, p, X, q, m)
 end
 
-# Alreadu a PR on Base, then remove the following two lines
-@trait_function Weingarten(M::AbstractDecoratorManifold, p, X, V)
-@trait_function Weingarten!(M::AbstractDecoratorManifold, Y, p, X, V)
 function Weingarten(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},
