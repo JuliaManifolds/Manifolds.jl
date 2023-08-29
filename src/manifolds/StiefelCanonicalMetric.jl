@@ -214,12 +214,8 @@ function riemannian_Hessian!(
     H,
     X,
 ) where {n,k,𝔽}
-    project!(
-        M,
-        Y,
-        p,
-        H - 1 / 2 .* X * (G' * p + p' * G) -
-        1 / 2 * ((I - p * p') * G * p' + p * G' * (I - p * p')) * X,
-    )
+    Gp = symmetrize(G' * p)
+    Z = symmetrize((I - p * p') * G * p')
+    project!(M, Y, p, H - X * Gp - Z * X)
     return Y
 end

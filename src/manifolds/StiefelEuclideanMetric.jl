@@ -209,7 +209,8 @@ Compared to Eq. (5.6) also the metric conversion simplifies to the identity.
 riemannian_Hessian(M::Stiefel, p, G, H, X)
 
 function riemannian_Hessian!(M::Stiefel, Y, p, G, H, X)
-    project!(M, Y, p, H - 1 / 2 .* X * (G' * p + p' * G))
+    Z = symmetrize(G' * p)
+    project!(M, Y, p, H - X * Z)
     return Y
 end
 
@@ -232,6 +233,7 @@ The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 Weingarten(::Stiefel, p, X, V)
 
 function Weingarten!(::Stiefel, Y, p, X, V)
-    Y .= -X * p' * V - p * (X' * V + V' * X)
+    Z = symmetrize(X' * V)
+    Y .= -X * p' * V - p * Z
     return Y
 end

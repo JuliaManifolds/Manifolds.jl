@@ -128,7 +128,8 @@ to map it into the Lie algebra.
 """
 riemannian_Hessian(M::UnitaryMatrices, p, G, H, X)
 function riemannian_Hessian!(M::UnitaryMatrices, Y, p, G, H, X)
-    project!(M, Y, p, p' * H - 1 / 2 .* X * (G' * p + p' * G))
+    symmetrize!(Y, G' * p)
+    project!(M, Y, p, p' * H - X * Y)
     return Y
 end
 
@@ -147,7 +148,8 @@ The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 Weingarten(::UnitaryMatrices, p, X, V)
 
 function Weingarten!(::UnitaryMatrices, Y, p, X, V)
-    Y .= -1 / 2 * p * (V' * X - X' * V)
+    symmetrize!(Y, X' * V)
+    Y .= -p * Y
     return Y
 end
 

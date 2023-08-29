@@ -222,6 +222,25 @@ For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
 end
 
 @doc raw"""
+    symmetrize!(Y,X)
+
+Given a quare matrix `X` compute `1/2 .* (X' + X)` in place of `Y`
+"""
+function symmetrize!(Y, X)
+    Y .= 1 / 2 .* (X' .+ X)
+    return Y
+end
+
+@doc raw"""
+    symmetrize(X)
+
+Given a quare matrix `X` compute `1/2 .* (X' + X)`.
+"""
+function symmetrize(X)
+    return 1 / 2 .* (X' .+ X)
+end
+
+@doc raw"""
     vec2skew!(X, v, k)
 
 create a skew symmetric matrix inplace in `X` of size $k\times k$ from a vector `v`,

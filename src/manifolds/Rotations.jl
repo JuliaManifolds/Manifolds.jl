@@ -397,7 +397,8 @@ to map it into the Lie algebra.
 """
 riemannian_Hessian(M::Rotations, p, G, H, X)
 function riemannian_Hessian!(::Rotations{N}, Y, p, G, H, X) where {N}
-    project!(SkewSymmetricMatrices(N), Y, p' * H - 1 / 2 .* X * (G' * p + p' * G))
+    symmetrize!(Y, G' * p)
+    project!(SkewSymmetricMatrices(N), Y, p' * H - X * Y)
     return Y
 end
 
@@ -418,7 +419,8 @@ The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 Weingarten(::Rotations, p, X, V)
 
 function Weingarten!(::Rotations, Y, p, X, V)
-    Y .= -1 / 2 * p * (V' * X - X' * V)
+    symmetrize!(Y, V' * X)
+    Y .= -p * Y
     return Y
 end
 
