@@ -386,7 +386,7 @@ function Base.show(io::IO, ::Rotations{n}) where {n}
 end
 
 @doc raw"""
-riemannian_Hessian(M::Rotations, p, G, H, X)
+    riemannian_Hessian(M::Rotations, p, G, H, X)
 
 The Riemannian Hessian can be computed by adopting Eq. (5.6) [Nguyen:2023](@cite),
 so very similar to the Stiefel manifold.

@@ -569,9 +569,9 @@ riemannian_Hessian(M::FixedRankMatrices, p, G, H, X)
 
 function riemannian_Hessian!(M::FixedRankMatrices, Y, p, G, H, X)
     project!(M, Y, p, H)
-    T1 = (G * X.Vt) / diagm(p.S)
+    T1 = (G * X.Vt) / Diagonal(p.S)
     Y.U .+= T1 - p.U * (p.U' * T1)
-    T2 = (G' * X.U) / diagm(p.S)
+    T2 = (G' * X.U) / Diagonal(p.S)
     Y.Vt .+= (T2 - p.Vt' * (p.Vt * T2))
     return Y
 end
