@@ -566,12 +566,6 @@ A_{ij}&\text{ if } i > j\\
 -A_{ji} \text{ if } i < j.\\
 \end{cases}
 ```
- [AbsilMahonySepulchre:2008](@cite):
-    >Absil, P.-A., Mahony, R. and Sepulchre R.,
-    > _Optimization Algorithms on Matrix Manifolds_
-    > Princeton University Press, 2008,
-    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
-    > [open access](http://press.princeton.edu/chapters/absil/)
 """
 vector_transport_direction(
     ::Stiefel,
