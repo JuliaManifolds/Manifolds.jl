@@ -148,8 +148,8 @@ The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 Weingarten(::UnitaryMatrices, p, X, V)
 
 function Weingarten!(::UnitaryMatrices, Y, p, X, V)
-    symmetrize!(Y, X' * V)
-    Y .= -p * Y
+    Y .= V' * X
+    Y .= -p * 1 / 2 * (Y - Y')
     return Y
 end
 
