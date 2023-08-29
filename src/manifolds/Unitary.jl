@@ -117,7 +117,7 @@ show(io::IO, ::UnitaryMatrices{n,ℂ}) where {n} = print(io, "UnitaryMatrices($(
 show(io::IO, ::UnitaryMatrices{n,ℍ}) where {n} = print(io, "UnitaryMatrices($(n), ℍ)")
 
 @doc raw"""
-riemannian_Hessian(M::UnitaryMatrices, p, G, H, X)
+    riemannian_Hessian(M::UnitaryMatrices, p, G, H, X)
 
 The Riemannian Hessian can be computed by adopting Eq. (5.6) [Nguyen:2023](@cite),
 so very similar to the complex Stiefel manifold.
