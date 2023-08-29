@@ -13,10 +13,12 @@ Manifolds.mul!_safe
 Manifolds.nzsign
 Manifolds.realify
 Manifolds.realify!
-Manifolds.select_from_tuple
 Manifolds.unrealify!
 Manifolds.usinc
 Manifolds.usinc_from_cos
+Manifolds.select_from_tuple
+Manifolds.symmetrize
+Manifolds.symmetrize!
 Manifolds.vec2skew!
 Manifolds.ziptuples
 ```
