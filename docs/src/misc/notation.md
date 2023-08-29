@@ -40,7 +40,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\mathcal{G}`` | a (Lie) group | |
 | ``\log_p q`` | logarithmic map at ``p \in \mathcal M`` of a point ``q \in \mathcal M`` | ``\log_p(q)`` | |
 | ``\mathcal M`` | a manifold | ``\mathcal M_1, \mathcal M_2,\ldots,\mathcal N`` | |
-| ``N_p \mathcal M`` | the normal space of the tangent space ``T_p \mathcal M`` in some embedding ``\mathcal E`` that should be clear from context |
+| ``N_p \mathcal M`` | the normal space of the tangent space ``T_p \mathcal M`` in some embedding ``\mathcal E`` that should be clear from context | | |
 | ``V`` | a normal vector from ``N_p \mathcal M`` | ``W`` | |
 | ``\operatorname{Exp}`` | the matrix exponential | |
 | ``\operatorname{Log}`` | the matrix logarithm | |
