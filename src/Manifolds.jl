@@ -507,14 +507,9 @@ manifold_volume(::AbstractManifold)
 Volume density function of manifold `M`, i.e. determinant of the differential of exponential map
 `exp(M, p, X)`. Determinant can be understood as computed in a basis, from the matrix
 of the linear operator said differential corresponds to. Details are available in Section 4.1
-of [^ChevallierLiLuDunson2022].
+of [ChevallierLiLuDunson:2022](@cite).
 
 Note that volume density is well-defined only for `X` for which `exp(M, p, X)` is injective.
-
-[^ChevallierLiLuDunson2022]:
-    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
-    > symmetric spaces.” arXiv, Oct. 09, 2022.
-    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
 """
 volume_density(::AbstractManifold, p, X)
 

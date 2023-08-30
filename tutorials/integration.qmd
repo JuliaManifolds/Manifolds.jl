@@ -91,7 +91,7 @@ Note that our `pdf_manifold` implements a simplified version of $f_{X_M}$ which 
 In such case there is only one non-zero summand in the formula for $f_{X_M}(q)$, namely $X=\log_p(q)$.
 Otherwise we would have to consider other vectors $Y\in T_p \mathcal{M}$ such that $\exp_p(Y) = q$ in that sum.
 
-Remarkably, exponential-wrapped distributions possess three important qualities [^ChevallierLiLuDunson2022]:
+Remarkably, exponential-wrapped distributions possess three important qualities [ChevallierLiLuDunson:2022](@cite):
 
 * Densities of $X_M$ are explicit. There is no normalization constant that needs to be computed like in truncated distributions.
 * Sampling from $X_M$ is easy. It suffices to get a sample from $X_T$ and pass it to the exponential map.
@@ -180,8 +180,3 @@ See [BoyaSudarshanTilma:2003](@cite) for some considerations on symmetric spaces
     > A. le Brigant and S. Puechmorel, “Approximation of Densities on Riemannian Manifolds,”
     > Entropy, vol. 21, no. 1, Art. no. 1, Jan. 2019,
     > doi: [10.3390/e21010043](https://doi.org/10.3390/e21010043).
-
-[^ChevallierLiLuDunson2022]:
-    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
-    > symmetric spaces.” arXiv, Oct. 09, 2022.
-    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
