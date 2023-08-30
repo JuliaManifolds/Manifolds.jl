@@ -889,13 +889,8 @@ end
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
 exponential map `exp(M, p, X)`. It is derived from Eq. (4.1) and Corollary 4.4
-in [ChevallierLiLuDunson:2022](@ref). See also Theorem 4.1 in [^FalorsideHaanDavidsonForré2019],
+in [ChevallierLiLuDunson:2022](@ref). See also Theorem 4.1 in [FalorsideHaanDavidsonForre:2019](@cite),
 (note that it uses a different convention).
-
-[^FalorsideHaanDavidsonForré2019]:
-    > L. Falorsi, P. de Haan, T. R. Davidson, and P. Forré, “Reparameterizing Distributions
-    > on Lie Groups,” arXiv:1903.02958 [cs, math, stat], Mar. 2019
-    > doi: [10.48550/arXiv.1903.02958](https://doi.org/10.48550/arXiv.1903.02958)
 """
 function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
     dens = one(eltype(X))
@@ -921,7 +916,8 @@ end
 @doc raw"""
     volume_density(M::GeneralUnitaryMatrices{3,ℝ}, p, X)
 
-Compute the volume density on O(3)/SO(3). The formula reads [^FalorsideHaanDavidsonForré2019]:
+Compute the volume density on O(3)/SO(3). The formula reads [FalorsideHaanDavidsonForre:2019](@cite)
+
 ```math
 \frac{1-1\cos(\sqrt{2}\lVert X \rVert)}{\lVert X \rVert^2}.
 ```

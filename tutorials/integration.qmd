@@ -24,7 +24,7 @@ In principle, there are many ways in which a manifold can be equipped with a mea
 One of the most popular ways is based on pushing the Lebesgue measure on a tangent space through the exponential map.
 Any other suitable atlas could be used, not just the one defined by normal coordinates, though each one requires different volume density corrections due to the Jacobian determinant of the pushforward.
 `Manifolds.jl` provides the function [`volume_density`](@ref) that calculates that quantity, denoted $\theta_p(X)$.
-See for example [^leBrigantPuechmorel2019], Definition 11, for a precise description using Jacobi fields.
+See for example [LeBrignantPuechmorel:2019](@cite), Definition 11, for a precise description using Jacobi fields.
 
 While many sources define volume density as a function of two points, `Manifolds.jl` decided to use the more general point-tangent vector formulation. The two-points variant can be implemented as
 ```{julia}
@@ -159,7 +159,7 @@ However, once a constant is picked (and it must be picked before any useful comp
 ### Haar measures
 
 On Lie groups the situation regarding integration is more complicated.
-Invariance under left or right group action is a desired property that leads one to consider Haar measures [^Tornier2020].
+Invariance under left or right group action is a desired property that leads one to consider Haar measures [Tornier:2020](@cite).
 It is, however, unclear what are the practical benefits of considering Haar measures over the Lebesgue measure of the underlying manifold, which often turns out to be invariant anyway.
 
 ### Integration in charts
@@ -172,11 +172,9 @@ See [BoyaSudarshanTilma:2003](@cite) for some considerations on symmetric spaces
 
 ## References
 
-[^Tornier2020]:
-    > S. Tornier, “Haar Measures.” arXiv, Jun. 19, 2020.
-    > doi: [10.48550/arXiv.2006.10956](https://doi.org/10.48550/arXiv.2006.10956).
+## Literature
 
-[^leBrigantPuechmorel2019]:
-    > A. le Brigant and S. Puechmorel, “Approximation of Densities on Riemannian Manifolds,”
-    > Entropy, vol. 21, no. 1, Art. no. 1, Jan. 2019,
-    > doi: [10.3390/e21010043](https://doi.org/10.3390/e21010043).
+```@bibliography
+Pages = ["tutorials/integration.md"]
+Canonical=false
+```
