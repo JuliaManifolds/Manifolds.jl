@@ -467,12 +467,7 @@ end
 
 Compute volume density function of the hyperbolic manifold. The formula reads
 ``(\sinh(\lVert X\rVert)/\lVert X\rVert)^(n-1)`` where `n` is the dimension of `M`.
-It is derived from Eq. (4.1) in [^ChevallierLiLuDunson2022].
-
-[^ChevallierLiLuDunson2022]:
-    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
-    > symmetric spaces.” arXiv, Oct. 09, 2022.
-    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
+It is derived from Eq. (4.1) in[ChevallierLiLuDunson:2022](@cite).
 """
 function volume_density(M::Hyperbolic, p, X)
     Xnorm = norm(X)
