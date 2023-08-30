@@ -497,12 +497,7 @@ end
 
 Volume of manifold `M` defined through integration of Riemannian volume element in a chart.
 Note that for many manifolds there is no universal agreement over the exact ranges over
-which the integration should happen. For details see [^BoyaSudarshanTilma2003].
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
+which the integration should happen. For details see [BoyaSudarshanTilma:2003](@cite).
 """
 manifold_volume(::AbstractManifold)
 

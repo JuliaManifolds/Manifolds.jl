@@ -107,7 +107,7 @@ f(q) = \frac{1}{n h^d} \sum_{i=1}^n \frac{1}{\theta_q(\log_q(p_i))}K\left( \frac
 
 where $h$ is the bandwidth, a small positive number less than the injectivity radius of $\mathcal M$ and $K\colon\mathbb{R}\to\mathbb{R}$ is a kernel function.
 Note that Pelletier's estimator can only use radially-symmetric kernels.
-The radially symmetric multivariate Epanechnikov kernel used in the example below is described in [^LangrenéWarin2019].
+The radially symmetric multivariate Epanechnikov kernel used in the example below is described in [LangreneMarin:2019](@ref).
 
 ```{julia}
 struct PelletierKDE{TM<:AbstractManifold,TPts<:AbstractVector}
@@ -167,7 +167,7 @@ It is, however, unclear what are the practical benefits of considering Haar meas
 Integration through charts is an approach currently not supported by `Manifolds.jl`.
 One has to define a suitable set of disjoint charts covering the entire manifold and use a method for multivariate Euclidean integration.
 Note that ranges of parameters have to be adjusted for each manifold and scaling based on the metric needs to be applied.
-See [^BoyaSudarshanTilma2003] for some considerations on symmetric spaces.
+See [BoyaSudarshanTilma:2003](@cite) for some considerations on symmetric spaces.
 
 
 ## References
@@ -175,12 +175,6 @@ See [^BoyaSudarshanTilma2003] for some considerations on symmetric spaces.
 [^Tornier2020]:
     > S. Tornier, “Haar Measures.” arXiv, Jun. 19, 2020.
     > doi: [10.48550/arXiv.2006.10956](https://doi.org/10.48550/arXiv.2006.10956).
-
-[^LangrenéWarin2019]:
-    > N. Langrené and X. Warin, “Fast and Stable Multivariate Kernel Density Estimation by
-    > Fast Sum Updating,” Journal of Computational and Graphical Statistics, vol. 28, no. 3,
-    > pp. 596–608, Jul. 2019,
-    > doi: [10.1080/10618600.2018.1549052](https://doi.org/10.1080/10618600.2018.1549052).
 
 [^leBrigantPuechmorel2019]:
     > A. le Brigant and S. Puechmorel, “Approximation of Densities on Riemannian Manifolds,”
@@ -191,8 +185,3 @@ See [^BoyaSudarshanTilma2003] for some considerations on symmetric spaces.
     > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
     > symmetric spaces.” arXiv, Oct. 09, 2022.
     > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)

@@ -354,12 +354,7 @@ Volume of the ``n``-dimensional [`AbstractProjectiveSpace`](@ref) `M`. The formu
 ````
 
 where ``Γ`` denotes the [Gamma function](https://en.wikipedia.org/wiki/Gamma_function).
-For details see [^BoyaSudarshanTilma2003].
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
+For details see [BoyaSudarshanTilma:2003](@cite).
 """
 function manifold_volume(M::AbstractProjectiveSpace{ℝ})
     n = manifold_dimension(M) + 1
