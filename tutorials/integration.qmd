@@ -54,10 +54,10 @@ We used the function [`manifold_volume`](@ref) to get the volume of the set over
 ## Distributions
 
 We will now try to verify that volume density correction correctly changes probability density of an exponential-wrapped normal distribution.
-`pdf_tangent_space` represents probability density of a normally distributed random variable $X_T$ in the tangent space $T_p \mathcal{M}$.
+`pdf_tangent_space` (defined in the next code block) represents probability density of a normally distributed random variable $X_T$ in the tangent space $T_p \mathcal{M}$.
 Its probability density (with respect to the Lebesgue measure of the tangent space) is $f_{X_T}\colon T_p \mathcal{M} \to \mathbb{R}$.
 
-`pdf_manifold` refers to the probability density of the distribution $X_M$ from the tangent space $T_p \mathcal{M}$ wrapped using exponential map on the manifold.
+`pdf_manifold` (defined below) refers to the probability density of the distribution $X_M$ from the tangent space $T_p \mathcal{M}$ wrapped using exponential map on the manifold.
 The formula for probability density with respect to pushforward measure of the Lebesgue measure in the tangent space reads
 ```math
 f_{X_M}(q) = \sum_{X \in T_p\mathcal{M}, \exp_p(X)=q} \frac{f_{X_T}(X)}{\theta_p(X)}
