@@ -375,4 +375,8 @@ using Manifolds: induced_basis
         rH = riemannian_Hessian(M, p, G, H, X)
         @test rH == H
     end
+    @testset "Volume" begin
+        @test manifold_volume(Euclidean(2)) == Inf
+        @test volume_density(E, p, X) == 1.0
+    end
 end

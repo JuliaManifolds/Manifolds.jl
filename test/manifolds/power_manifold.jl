@@ -498,4 +498,11 @@ end
             }
         end
     end
+
+    @testset "Manifold volume" begin
+        @test manifold_volume(Ms1) ≈ manifold_volume(Ms)^5
+        p = repeat([1.0, 0.0, 0.0], 1, 5)
+        X = repeat([0.0, 1.0, 0.0], 1, 5)
+        @test volume_density(Ms1, p, X) ≈ volume_density(Ms, p[:, 1], X[:, 1])^5
+    end
 end

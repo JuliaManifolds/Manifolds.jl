@@ -666,6 +666,122 @@ Return the dimension of the manifold of special unitary matrices.
 """
 manifold_dimension(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n} = n^2 - 1
 
+@doc raw"""
+    manifold_volume(::GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}) where {n}
+
+Volume of the manifold of real orthogonal matrices of absolute determinant one. The
+formula reads [^BoyaSudarshanTilma2003]:
+
+```math
+\begin{cases}
+\frac{2^{k}(2\pi)^{k^2}}{\prod_{s=1}^{k-1} (2s)!} & \text{ if } n = 2k \\
+\frac{2^{k+1}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
+\end{cases}
+```
+
+[^BoyaSudarshanTilma2003]:
+    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
+    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
+    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
+"""
+function manifold_volume(
+    ::GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices},
+) where {n}
+    return 2 * manifold_volume(GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}())
+end
+@doc raw"""
+    manifold_volume(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}) where {n}
+
+Volume of the manifold of real orthogonal matrices of determinant one. The
+formula reads [^BoyaSudarshanTilma2003]:
+
+```math
+\begin{cases}
+2 & \text{ if } n = 0 \\
+\frac{2^{k-1/2}(2\pi)^{k^2}}{\prod_{s=1}^{k-1} (2s)!} & \text{ if } n = 2k+2 \\
+\frac{2^{k+1/2}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
+\end{cases}
+```
+
+It differs from the paper by a factor of `sqrt(2)` due to a different choice of
+normalization.
+
+[^BoyaSudarshanTilma2003]:
+    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
+    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
+    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
+"""
+function manifold_volume(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}) where {n}
+    vol = 1.0
+    if n % 2 == 0
+        k = div(n, 2)
+        vol *= 2^(k - 1) * (2π)^(k^2)
+        for s in 1:(k - 1)
+            vol /= factorial(2 * s)
+        end
+    else
+        k = div(n - 1, 2)
+        vol *= 2^k * (2π)^(k * (k + 1))
+        for s in 1:(k - 1)
+            vol /= factorial(2 * s + 1)
+        end
+    end
+    if n > 1
+        vol *= sqrt(2)
+    end
+    return vol
+end
+@doc raw"""
+    manifold_volume(::GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices}) where {n}
+
+Volume of the manifold of complex general unitary matrices of absolute determinant one. The
+formula reads [^BoyaSudarshanTilma2003]:
+
+```math
+\sqrt{n 2^{n+1}} π^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
+```
+
+[^BoyaSudarshanTilma2003]:
+    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
+    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
+    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
+"""
+function manifold_volume(
+    ::GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices},
+) where {n}
+    vol = sqrt(n * 2^(n + 1)) * π^(((n + 1) * n) // 2)
+    kf = 1
+    for k in 1:(n - 1)
+        kf *= k
+        vol /= kf
+    end
+    return vol
+end
+@doc raw"""
+    manifold_volume(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n}
+
+Volume of the manifold of complex general unitary matrices of determinant one. The formula
+reads [^BoyaSudarshanTilma2003]:
+
+```math
+\sqrt{n 2^{n-1}} π^{(n-1)(n+2)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
+```
+
+[^BoyaSudarshanTilma2003]:
+    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
+    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
+    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
+"""
+function manifold_volume(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n}
+    vol = sqrt(n * 2^(n - 1)) * π^(((n - 1) * (n + 2)) // 2)
+    kf = 1
+    for k in 1:(n - 1)
+        kf *= k
+        vol /= kf
+    end
+    return vol
+end
+
 """
     mean(
         M::Rotations,
@@ -786,4 +902,69 @@ function riemann_tensor!(::GeneralUnitaryMatrices, Xresult, p, X, Y, Z)
     Xtmp = X * Y - Y * X
     Xresult .= 1 // 4 .* (Z * Xtmp .- Xtmp * Z)
     return Xresult
+end
+
+@doc raw"""
+    volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
+
+Compute volume density function of a sphere, i.e. determinant of the differential of
+exponential map `exp(M, p, X)`. It is derived from Eq. (4.1) and Corollary 4.4
+in [^ChevallierLiLuDunson2022]. See also Theorem 4.1 in [^FalorsideHaanDavidsonForré2019],
+(note that it uses a different convention).
+
+[^ChevallierLiLuDunson2022]:
+    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
+    > symmetric spaces.” arXiv, Oct. 09, 2022.
+    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
+
+[^FalorsideHaanDavidsonForré2019]:
+    > L. Falorsi, P. de Haan, T. R. Davidson, and P. Forré, “Reparameterizing Distributions
+    > on Lie Groups,” arXiv:1903.02958 [cs, math, stat], Mar. 2019
+    > doi: [10.48550/arXiv.1903.02958](https://doi.org/10.48550/arXiv.1903.02958)
+"""
+function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
+    dens = one(eltype(X))
+    B = get_basis(M, p, DefaultOrthonormalBasis())
+    Ys = get_vectors(M, p, B)
+    Z = similar(X)
+    op_coeffs = similar(X, manifold_dimension(M), manifold_dimension(M))
+    for k in 1:manifold_dimension(M)
+        Y = Ys[k]
+        Z .= X * Y .- Y * X
+        get_coordinates!(M, view(op_coeffs, :, k), p, Z, DefaultOrthonormalBasis())
+    end
+    for ev in eigvals(op_coeffs)
+        if abs(ev) > eps(eltype(X))
+            cm = (1 - exp(-ev)) / ev
+            dens *= real(cm)
+        end
+    end
+
+    return dens
+end
+
+@doc raw"""
+    volume_density(M::GeneralUnitaryMatrices{3,ℝ}, p, X)
+
+Compute the volume density on O(3)/SO(3). The formula reads [^FalorsideHaanDavidsonForré2019]:
+```math
+\frac{1-1\cos(\sqrt{2}\lVert X \rVert)}{\lVert X \rVert^2}.
+```
+"""
+function volume_density(M::GeneralUnitaryMatrices{3,ℝ}, p, X)
+    nX = norm(M, p, X)
+    if nX > eps(eltype(X))
+        return (1 - 1 * cos(sqrt(2) * nX)) / nX^2
+    else
+        return one(nX)
+    end
+end
+
+@doc raw"""
+    volume_density(M::GeneralUnitaryMatrices{2,ℝ}, p, X)
+
+Volume density on O(2)/SO(2) is equal to 1.
+"""
+function volume_density(::GeneralUnitaryMatrices{2,ℝ}, p, X)
+    return one(eltype(X))
 end

@@ -10,6 +10,18 @@ function exp!(
 end
 
 @doc raw"""
+    manifold_volume(::MetricManifold{ℝ,<:ProbabilitySimplex{n},<:EuclideanMetric})) where {n}
+
+Return the volume of the [`ProbabilitySimplex`](@ref) with the Euclidean metric.
+The formula reads ``\frac{\sqrt{n+1}}{n!}``
+"""
+function manifold_volume(
+    ::MetricManifold{ℝ,<:ProbabilitySimplex{n},<:EuclideanMetric},
+) where {n}
+    return sqrt(n + 1) / factorial(n)
+end
+
+@doc raw"""
     rand(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}; vector_at=nothing, σ::Real=1.0)
 
 
@@ -38,4 +50,14 @@ function Random.rand!(
         pX .= (pX .- mean(pX)) .* σ
     end
     return pX
+end
+
+@doc raw"""
+    volume_density(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}, p, X)
+
+Compute the volume density at point `p` on [`ProbabilitySimplex`](@ref) `M` for tangent
+vector `X`. It is equal to 1.
+"""
+function volume_density(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}, p, X)
+    return one(eltype(X))
 end

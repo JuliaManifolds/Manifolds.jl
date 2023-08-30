@@ -177,6 +177,15 @@ Base.@propagate_inbounds function Base.getindex(
     return get_component(M, p, I...)
 end
 
+@doc raw"""
+    manifold_volume(M::PowerManifold)
+
+Return the manifold volume of an [`PowerManifold`](@ref) `M`.
+"""
+function manifold_volume(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
+    return manifold_volume(M.manifold)^prod(size_to_tuple(TSize))
+end
+
 function Random.rand(rng::AbstractRNG, d::PowerFVectorDistribution)
     fv = zero_vector(d.type, d.point)
     Distributions._rand!(rng, d, fv)
@@ -319,6 +328,23 @@ Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
 function vector_bundle_transport(fiber::VectorSpaceType, M::PowerManifold)
     return ParallelTransport()
+end
+
+@doc raw"""
+    volume_density(M::PowerManifold, p, X)
+
+Return volume density on the [`PowerManifold`](@ref) `M`, i.e. product of constituent
+volume densities.
+"""
+function volume_density(M::PowerManifold, p, X)
+    density = one(float(eltype(X)))
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        p_i = _read(M, rep_size, p, i)
+        X_i = _read(M, rep_size, X, i)
+        density *= volume_density(M.manifold, p_i, X_i)
+    end
+    return density
 end
 
 @doc raw"""

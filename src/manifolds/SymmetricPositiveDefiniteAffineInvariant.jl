@@ -368,6 +368,13 @@ function log!(::SymmetricPositiveDefinite{N}, X, p, q) where {N}
     return mul!(X, pUe, Se * transpose(pUe))
 end
 
+"""
+    manifold_volume(::SymmetricPositiveDefinite)
+
+Return volume of the [`SymmetricPositiveDefinite`](@ref) manifold, i.e. infinity.
+"""
+manifold_volume(::SymmetricPositiveDefinite) = Inf
+
 @doc raw"""
     parallel_transport_to(M::SymmetricPositiveDefinite, p, X, q)
     parallel_transport_to(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}, p, X, y)
@@ -457,4 +464,31 @@ function riemann_tensor!(::SymmetricPositiveDefinite, Xresult, p, X, Y, Z)
     Xtmp = XI * YI - YI * XI
     Xresult .= ps * (1 // 4 .* (ZI * Xtmp .- Xtmp * ZI)) * ps
     return Xresult
+end
+
+"""
+    volume_density(::SymmetricPositiveDefinite{n}, p, X) where {n}
+
+Compute the volume density of the [`SymmetricPositiveDefinite`](@ref) manifold at `p`
+in direction `X`. See [^ChevallierKalungaAngulo2017], Section 6.2 for details.
+Note that metric in Manifolds.jl has a different scaling factor than the reference.
+
+[^ChevallierKalungaAngulo2017]:
+    > E. Chevallier, E. Kalunga, and J. Angulo, “Kernel Density Estimation on Spaces of
+    > Gaussian Distributions and Symmetric Positive Definite Matrices,” SIAM J. Imaging Sci.,
+    > vol. 10, no. 1, pp. 191–215, Jan. 2017,
+    > doi: [10.1137/15M1053566](https://doi.org/10.1137/15M1053566).
+"""
+function volume_density(::SymmetricPositiveDefinite{n}, p, X) where {n}
+    eig = eigvals(X)
+    dens = 1.0
+    for i in 1:length(eig)
+        for j in (i + 1):length(eig)
+            absdiff = abs(eig[i] - eig[j])
+            if absdiff > eps(absdiff)
+                dens *= sinh(absdiff) / absdiff
+            end
+        end
+    end
+    return dens
 end

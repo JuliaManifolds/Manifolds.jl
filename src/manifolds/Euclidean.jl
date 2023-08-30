@@ -454,6 +454,13 @@ function manifold_dimension(M::Euclidean{N,𝔽}) where {N,𝔽}
 end
 manifold_dimension(::Euclidean{Tuple{},𝔽}) where {𝔽} = real_dimension(𝔽)
 
+"""
+    manifold_volume(::Euclidean)
+
+Return volume of the [`Euclidean`](@ref) manifold, i.e. infinity.
+"""
+manifold_volume(::Euclidean) = Inf
+
 Statistics.mean(::Euclidean{Tuple{}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
 function Statistics.mean(
     ::Euclidean{Tuple{}},
@@ -707,6 +714,15 @@ end
 Statistics.var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
 function Statistics.var(::Euclidean, x::AbstractVector{<:Number}, m::Number; kwargs...)
     return sum(var(x; mean=m, kwargs...))
+end
+
+@doc raw"""
+    volume_density(M::Euclidean, p, X)
+
+Return volume density function of [`Euclidean`](@ref) manifold `M`, i.e. 1.
+"""
+function volume_density(::Euclidean, p, X)
+    return one(eltype(X))
 end
 
 @doc raw"""

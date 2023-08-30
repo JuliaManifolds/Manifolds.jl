@@ -94,6 +94,7 @@ makedocs(
             "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
             "work in charts" => "tutorials/working-in-charts.md",
             "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
+            "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [
@@ -151,6 +152,7 @@ makedocs(
             "Atlases and charts" => "features/atlases.md",
             "Differentiation" => "features/differentiation.md",
             "Distributions" => "features/distributions.md",
+            "Integration" => "features/integration.md",
             "Statistics" => "features/statistics.md",
             "Testing" => "features/testing.md",
             "Utilities" => "features/utilities.md",

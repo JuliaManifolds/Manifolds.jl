@@ -14,7 +14,10 @@ Public=true
 Modules = [Manifolds]
 Pages = ["manifolds/ProbabilitySimplexEuclideanMetric.jl"]
 Order = [:type, :function]
+Private=false
+Public=true
 ```
+
 
 ## Real probability amplitudes
 
