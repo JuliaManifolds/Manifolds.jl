@@ -287,13 +287,9 @@ function riemannian_Hessian!(
     X,
 ) where {n,k}
     α = metric(M).α
-    project!(
-        M,
-        Y,
-        p,
-        H - 1 / 2 .* X * (G' * p + p' * G) -
-        (2 * α + 1) / (2 * (α + 1)) * ((I - p * p') * G * p' + p * G' * (I - p * p')) * X,
-    )
+    Gp = symmetrize(G' * p)
+    Z = symmetrize((I - p * p') * G * p')
+    project!(M, Y, p, H - X * Gp - (2 * α + 1) / (α + 1) * Z * X)
     return Y
 end
 
