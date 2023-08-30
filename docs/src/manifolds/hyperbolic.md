@@ -176,3 +176,10 @@ And we can again look at the corresponding geodesics, for example
 plot!(scene, M, [pts[1], origin], geodesic_interpolation=100)
 plot!(scene, M, [pts[2], origin], geodesic_interpolation=100)
 ```
+
+## Literature
+
+```@bibliography
+Pages = ["manifolds/hyperbolic.md"]
+Canonical=false
+```

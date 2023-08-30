@@ -201,7 +201,7 @@ Compute the exponential map on the [`Grassmann`](@ref) as
 ```
 where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = AB-BA`` denotes the matrix commutator.
 
-For details, see Proposition 3.2 in [^BendokatZimmermannAbsil2020].
+For details, see Proposition 3.2 in [BendokatZimmermannAbsil:2020](@cite).
 """
 exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTVector)
 
@@ -235,7 +235,7 @@ horizontal_lift!(::Stiefel, Y, q, X::ProjectorTVector) = copyto!(Y, X.value * q)
     )
 
 Compute the parallel transport of `X` from the tangent space at `p` into direction `d`,
-i.e. to ``q=\exp_pd``. The formula is given in Proposition 3.5 of [^BendokatZimmermannAbsil2020] as
+i.e. to ``q=\exp_pd``. The formula is given in Proposition 3.5 of [BendokatZimmermannAbsil:2020](@cite) as
 
 ```math
 \mathcal{P}_{q ← p}(X) = \operatorname{Exp}([d,p])X\operatorname{Exp}(-[d,p]),

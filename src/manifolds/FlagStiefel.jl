@@ -120,7 +120,7 @@ end
     project(::Flag, p, X)
 
 Project vector `X` in the Euclidean embedding to the tangent space at point `p` on
-[`Flag`](@ref) manifold. The formula reads[^YeWongLim2022]:
+[`Flag`](@ref) manifold. The formula reads [YeWongLim:2021](@cite):
 
 ```math
 Y_i = X_i - (p_i p_i^{\mathrm{T}}) X_i + \sum_{j \neq i} p_j X_j^{\mathrm{T}} p_i

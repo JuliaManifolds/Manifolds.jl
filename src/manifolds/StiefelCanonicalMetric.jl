@@ -2,14 +2,8 @@
     CanonicalMetric <: AbstractMetric
 
 The Canonical Metric refers to a metric for the [`Stiefel`](@ref)
-manifold, see[^EdelmanAriasSmith1998].
+manifold, see[EdelmanAriasSmith:1998](@cite).
 
-[^EdelmanAriasSmith1998]:
-    > Edelman, A., Ariar, T. A., Smith, S. T.:
-    > _The Geometry of Algorihthms with Orthogonality Constraints_,
-    > SIAM Journal on Matrix Analysis and Applications (20(2), pp. 303–353, 1998.
-    > doi: [10.1137/S0895479895290954](https://doi.org/10.1137/S0895479895290954)
-    > arxiv: [9806030](https://arxiv.org/abs/physics/9806030)
 """
 struct CanonicalMetric <: RiemannianMetric end
 
@@ -68,7 +62,7 @@ the exponential map reads
 ```math
 q = \exp_p X = pC + QB.
 ```
-For more details, see [^EdelmanAriasSmith1998][^Zimmermann2017].
+For more details, see [EdelmanAriasSmith:1998](@cite)[Zimmermann:2017](@cite).
 """
 exp(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any...) where {n,k}
 
@@ -111,14 +105,8 @@ Compute an approximation to the logarithmic map on the [`Stiefel`](@ref)`(n,k)` 
 using a matrix-algebraic based approach to an iterative inversion of the formula of the
 [`exp`](@ref exp(::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, ::Any...) where {n,k}).
 
-The algorithm is derived in[^Zimmermann2017] and it uses the `max_iterations` and the `tolerance` field
+The algorithm is derived in [Zimmermann:2017](@cite) and it uses the `max_iterations` and the `tolerance` field
 from the [`ApproximateLogarithmicMap`](@ref).
-
-[^Zimmermann2017]:
-    > Zimmermann, R.: _A matrix-algebraic algorithm for the Riemannian logarithm on the Stiefel manifold under the canoncial metric.
-    > SIAM Journal on Matrix Analysis and Applications 28(2), pp. 322-342, 2017.
-    > doi: [10.1137/16M1074485](https://doi.org/10.1137/16M1074485),
-    > arXiv: [1604.05054](https://arxiv.org/abs/1604.05054).
 """
 inverse_retract(
     ::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
@@ -185,4 +173,47 @@ function inverse_retract!(
     end
     @views mul!(X, qfact.U, LV[1:(2k), 1:k])
     return X
+end
+
+@doc raw"""
+    Y = riemannian_Hessian(M::MetricManifold{ℝ, Stiefel{n,k}, CanonicalMetric}, p, G, H, X)
+    riemannian_Hessian!(M::MetricManifold{ℝ, Stiefel{n,k}, CanonicalMetric}, Y, p, G, H, X)
+
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](@ref)
+``α_0=1, α_1=\frac{1}{2}`` in their formula. The formula reads
+
+```math
+    \operatorname{Hess}f(p)[X]
+    =
+    \operatorname{proj}_{T_p\mathcal M}\Bigl(
+        ∇^2f(p)[X] - \frac{1}{2} X \bigl( (∇f(p))^{\mathrm{H}}p + p^{\mathrm{H}}∇f(p)\bigr)
+        - \frac{1}{2} \bigl( P ∇f(p) p^{\mathrm{H}} + p ∇f(p))^{\mathrm{H}} P)X
+    \Bigr),
+```
+where ``P = I-pp^{\mathrm{H}}``.
+"""
+riemannian_Hessian(
+    M::MetricManifold{𝔽,Stiefel{n,k,𝔽},CanonicalMetric},
+    p,
+    G,
+    H,
+    X,
+) where {n,k,𝔽}
+
+function riemannian_Hessian!(
+    M::MetricManifold{𝔽,Stiefel{n,k,𝔽},CanonicalMetric},
+    Y,
+    p,
+    G,
+    H,
+    X,
+) where {n,k,𝔽}
+    Gp = symmetrize(G' * p)
+    Z = symmetrize((I - p * p') * G * p')
+    project!(M, Y, p, H - X * Gp - Z * X)
+    return Y
 end

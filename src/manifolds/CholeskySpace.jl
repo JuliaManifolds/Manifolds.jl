@@ -3,17 +3,13 @@
 
 The manifold of lower triangular matrices with positive diagonal and
 a metric based on the cholesky decomposition. The formulae for this manifold
-are for example summarized in Table 1 of [^Lin2019].
+are for example summarized in Table 1 of [Lin:2019](@cite).
 
 # Constructor
 
     CholeskySpace(n)
 
 Generate the manifold of $n× n$ lower triangular matrices with positive diagonal.
-
-[^Lin2019]:
-    > Lin, Zenhua: _Riemannian Geometry of Symmetric Positive Definite Matrices via
-    > Cholesky Decomposition_, arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
 """
 struct CholeskySpace{N} <: AbstractManifold{ℝ} end
 

@@ -756,6 +756,26 @@ using RecursiveArrayTools: ArrayPartition
               ArrayPartition([0.3535533905932738, -0.35355339059327373, 0.0], [1.0, 1.5])
     end
 
+    @testset "Hessian conversion" begin
+        M = Sphere(2)
+        N = M × M
+        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0, 1.0])
+        q = 1 / sqrt(2) * ArrayPartition([1.0, 1.0, 0.0], [0.0, 1.0, 1.0])
+        q = 1 / sqrt(2) * ArrayPartition([0.0, 1.0, 1.0], [1.0, 1.0, 0.0])
+        r = 1 / sqrt(3) * ArrayPartition([1.0, 1.0, 1.0], [1.0, 1.0, 1.0])
+        X = log(M, p, q)
+        Y = log(M, p, r)
+        Z = -X
+        H1 = riemannian_Hessian(N, p, Y, Z, X)
+        H2 = ArrayPartition(
+            [riemannian_Hessian(M, p[i, :], Y[i, :], Z[i, :], X[i, :]) for i in 1:2]...,
+        )
+        @test H1 == H2
+        V = ArrayPartition([0.2, 0.0, 0.0], [0.0, 0.0, 0.3])
+        W1 = Weingarten(N, p, X, V)
+        W2 = ArrayPartition([Weingarten(M, p[i, :], X[i, :], V[i, :]) for i in 1:2]...)
+        @test W1 == W2
+    end
     @testset "Manifold volume" begin
         MS2 = Sphere(2)
         MS3 = Sphere(3)

@@ -127,3 +127,16 @@ project!(::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X, dims=1))
 function Base.show(io::IO, ::CenteredMatrices{m,n,𝔽}) where {m,n,𝔽}
     return print(io, "CenteredMatrices($(m), $(n), $(𝔽))")
 end
+
+@doc raw"""
+    Y = Weingarten(M::CenteredMatrices, p, X, V)
+    Weingarten!(M::CenteredMatrices, Y, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`CenteredMatrices`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+Since this a flat space by itself, the result is always the zero tangent vector.
+"""
+Weingarten(::CenteredMatrices, p, X, V)
+
+Weingarten!(::CenteredMatrices, Y, p, X, V) = fill!(Y, 0)

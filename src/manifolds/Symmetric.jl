@@ -233,3 +233,16 @@ project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 function Base.show(io::IO, ::SymmetricMatrices{n,F}) where {n,F}
     return print(io, "SymmetricMatrices($(n), $(F))")
 end
+
+@doc raw"""
+    Y = Weingarten(M::SymmetricMatrices, p, X, V)
+    Weingarten!(M::SymmetricMatrices, Y, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`SymmetricMatrices`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+Since this a flat space by itself, the result is always the zero tangent vector.
+"""
+Weingarten(::SymmetricMatrices, p, X, V)
+
+Weingarten!(::SymmetricMatrices, Y, p, X, V) = fill!(Y, 0)

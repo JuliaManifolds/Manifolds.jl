@@ -25,7 +25,7 @@ on ``\mathcal N`` we have
     \mathcal M = \mathcal N / ∼ = \bigl\{ [p] : p ∈ \mathcal N \bigr\},
 ```
 where ``[p] ≔ \{ q ∈ \mathcal N : q ∼ p\}`` denotes the equivalence class containing ``p``.
-For more details see Subsection 3.4.1[^AbsilMahonySepulchre2008].
+For more details see Subsection 3.4.1 [AbsilMahonySepulchre:2008](@cite).
 
 This manifold type models an explicit quotient structure.
 This should be done if either the default implementation of ``\mathcal M``
@@ -42,13 +42,6 @@ it provides a (default) quotient structure that is different from the one introd
     QuotientManifold(M,N)
 
 Create a manifold where `M` is the quotient manifold and `N`is its total space.
-
-[^AbsilMahonySepulchre2008]:
-    > Absil, P.-A., Mahony, R. and Sepulchre R.,
-    > _Optimization Algorithms on Matrix Manifolds_
-    > Princeton University Press, 2008,
-    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
-    > [open access](http://press.princeton.edu/chapters/absil/)
 """
 struct QuotientManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
        AbstractDecoratorManifold{𝔽}
@@ -165,7 +158,7 @@ to ``T_q\mathcal N` in place of `Y`.
 horizontal_lift!(N::AbstractManifold, Y, q, X)
 
 """
-    horizontal_component(N::AbstractManifold, p, X)    
+    horizontal_component(N::AbstractManifold, p, X)
 
 Compute the horizontal component of tangent vector `X` at point `p`
 in the total space of quotient manifold `N`.
@@ -180,7 +173,7 @@ function Base.show(io::IO, M::QuotientManifold)
 end
 
 """
-    vertical_component(N::AbstractManifold, p, X)    
+    vertical_component(N::AbstractManifold, p, X)
 
 Compute the vertical component of tangent vector `X` at point `p`
 in the total space of quotient manifold `N`.

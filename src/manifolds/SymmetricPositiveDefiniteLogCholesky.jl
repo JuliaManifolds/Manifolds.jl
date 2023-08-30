@@ -2,11 +2,7 @@
     LogCholeskyMetric <: RiemannianMetric
 
 The Log-Cholesky metric imposes a metric based on the Cholesky decomposition as
-introduced by [^Lin2019].
-
-[^Lin2019]:
-    > Lin, Zenhua: "Riemannian Geometry of Symmetric Positive Definite Matrices via
-    > Cholesky Decomposition", arXiv: [1908.09326](https://arxiv.org/abs/1908.09326).
+introduced by [Lin:2019](@cite).
 """
 struct LogCholeskyMetric <: RiemannianMetric end
 

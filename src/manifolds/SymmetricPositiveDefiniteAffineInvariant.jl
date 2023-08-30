@@ -420,18 +420,38 @@ function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) whe
 end
 
 @doc raw"""
+    riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
+
+The Riemannian Hessian can be computed as stated in Eq. (7.3) [Nguyen:2023](@cite).
+Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
+``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`, and
+``\operatorname{sym}(X) = \frac{1}{2}\bigl(X^{\mathrm{T}}+X\bigr)``
+the symmetrization operator. Then the formula reads
+
+```math
+    \operatorname{Hess}f(p)[X]
+    =
+    p\operatorname{sym}(∇^2 f(p)[X])p
+    + \operatorname{sym}\bigl( X\operatorname{sym}\bigl(∇ f(p)\bigr)p)
+```
+"""
+riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
+
+function riemannian_Hessian!(::SymmetricPositiveDefinite, Y, p, G, H, X)
+    symmetrize!(Y, G)
+    symmetrize!(Y, X * Y * p)
+    Z = symmetrize(H)
+    Y .+= p * Z * p
+    return Y
+end
+
+@doc raw"""
     riemann_tensor(::SymmetricPositiveDefinite, p, X, Y, Z)
 
 Compute the value of Riemann tensor on the [`SymmetricPositiveDefinite`](@ref) manifold.
-The formula reads[^Rentmeesters2011] ``R(X,Y)Z=p^{1/2}R(X_I, Y_I)Z_Ip^{1/2}``, where
+The formula reads [Rentmeesters:2011](@cite) ``R(X,Y)Z=p^{1/2}R(X_I, Y_I)Z_Ip^{1/2}``, where
 ``R_I(X_I, Y_I)Z_I=\frac{1}{4}[Z_I, [X_I, Y_I]]``,  ``X_I=p^{-1/2}Xp^{-1/2}``,
 ``Y_I=p^{-1/2}Yp^{-1/2}`` and ``Z_I=p^{-1/2}Zp^{-1/2}``.
-
-[^Rentmeesters2011]:
-    > Q. Rentmeesters, “A gradient method for geodesic data fitting on some symmetric
-    > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
-    > European Control Conference, Dec. 2011, pp. 7141–7146.
-    > doi: [10.1109/CDC.2011.6161280](https://doi.org/10.1109/CDC.2011.6161280).
 """
 riemann_tensor(::SymmetricPositiveDefinite, p, X, Y, Z)
 
@@ -450,14 +470,8 @@ end
     volume_density(::SymmetricPositiveDefinite{n}, p, X) where {n}
 
 Compute the volume density of the [`SymmetricPositiveDefinite`](@ref) manifold at `p`
-in direction `X`. See [^ChevallierKalungaAngulo2017], Section 6.2 for details.
+in direction `X`. See [ChevallierKalungaAngulo:2017](@cite), Section 6.2 for details.
 Note that metric in Manifolds.jl has a different scaling factor than the reference.
-
-[^ChevallierKalungaAngulo2017]:
-    > E. Chevallier, E. Kalunga, and J. Angulo, “Kernel Density Estimation on Spaces of
-    > Gaussian Distributions and Symmetric Positive Definite Matrices,” SIAM J. Imaging Sci.,
-    > vol. 10, no. 1, pp. 191–215, Jan. 2017,
-    > doi: [10.1137/15M1053566](https://doi.org/10.1137/15M1053566).
 """
 function volume_density(::SymmetricPositiveDefinite{n}, p, X) where {n}
     eig = eigvals(X)

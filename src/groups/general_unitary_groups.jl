@@ -62,18 +62,7 @@ exp_lie(::GeneralUnitaryMultiplicationGroup{2,ℝ}, X)
      exp_lie(G::SpecialOrthogonal{4}, X)
 
 Compute the group exponential map on the [`Orthogonal`](@ref)`(4)` or the [`SpecialOrthogonal`](@ref) group.
-The algorithm used is a more numerically stable form of those proposed in [^Gallier2002], [^Andrica2013].
-
-[^Gallier2002]:
-    > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
-    > and logarithms of orthogonal matrices.
-    > International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
-    > [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
-[^Andrica2013]:
-    > Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
-    > exponential map of the Lie groups of matrices.
-    > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
-    > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
+The algorithm used is a more numerically stable form of those proposed in [GallierXu:2002](@cite), [AndricaRohan:2013](@cite).
 """
 exp_lie(::GeneralUnitaryMultiplicationGroup{4,ℝ}, X)
 

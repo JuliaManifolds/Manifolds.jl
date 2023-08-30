@@ -434,16 +434,40 @@ function parallel_transport_to!(::Hyperbolic, Y, p, X, q)
 end
 
 @doc raw"""
+    Y = riemannian_Hessian(M::Hyperbolic, p, G, H, X)
+    riemannian_Hessian!(M::Hyperbolic, Y, p, G, H, X)
+
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+Let ``\mathbf{g} = \mathbf{g}^{-1} = \operatorname{diag}(1,...,1,-1)``.
+Then using Remark 4.1 [Nguyen:2023](@cite) the formula reads
+
+```math
+\operatorname{Hess}f(p)[X]
+=
+\operatorname{proj}_{T_p\mathcal M}\bigl(
+    \mathbf{g}^{-1}\nabla^2f(p)[X] + X⟨p,\mathbf{g}^{-1}∇f(p)⟩_p
+\bigr).
+```
+"""
+riemannian_Hessian(M::Hyperbolic, p, G, H, X)
+
+function riemannian_Hessian!(M::Hyperbolic, Y, p, G, H, X)
+    g = copy(G)
+    g[end] *= -1 # = g^{-1}G
+    h = copy(H)
+    H[end] *= -1 # = g^{-1}H
+    project!(M, Y, p, h .+ dot(p, g) .* X)
+    return Y
+end
+@doc raw"""
     volume_density(M::Hyperbolic, p, X)
 
 Compute volume density function of the hyperbolic manifold. The formula reads
 ``(\sinh(\lVert X\rVert)/\lVert X\rVert)^(n-1)`` where `n` is the dimension of `M`.
-It is derived from Eq. (4.1) in [^ChevallierLiLuDunson2022].
-
-[^ChevallierLiLuDunson2022]:
-    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
-    > symmetric spaces.” arXiv, Oct. 09, 2022.
-    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
+It is derived from Eq. (4.1) in[ChevallierLiLuDunson:2022](@cite).
 """
 function volume_density(M::Hyperbolic, p, X)
     Xnorm = norm(X)

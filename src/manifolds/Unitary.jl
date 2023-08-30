@@ -116,4 +116,41 @@ end
 show(io::IO, ::UnitaryMatrices{n,ℂ}) where {n} = print(io, "UnitaryMatrices($(n))")
 show(io::IO, ::UnitaryMatrices{n,ℍ}) where {n} = print(io, "UnitaryMatrices($(n), ℍ)")
 
+@doc raw"""
+    riemannian_Hessian(M::UnitaryMatrices, p, G, H, X)
+
+The Riemannian Hessian can be computed by adopting Eq. (5.6) [Nguyen:2023](@cite),
+so very similar to the complex Stiefel manifold.
+The only difference is, that here the tangent vectors are stored
+in the Lie algebra, i.e. the update direction is actually ``pX`` instead of just ``X`` (in Stiefel).
+and that means the inverse has to be appliead to the (Euclidean) Hessian
+to map it into the Lie algebra.
+"""
+riemannian_Hessian(M::UnitaryMatrices, p, G, H, X)
+function riemannian_Hessian!(M::UnitaryMatrices, Y, p, G, H, X)
+    symmetrize!(Y, G' * p)
+    project!(M, Y, p, p' * H - X * Y)
+    return Y
+end
+
+@doc raw"""
+    Weingarten(M::UnitaryMatrices, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Stiefel`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
+
+```math
+\mathcal W_p(X,V) = -\frac{1}{2}p\bigl(V^{\mathrm{H}}X - X^\mathrm{H}V\bigr)
+```
+"""
+Weingarten(::UnitaryMatrices, p, X, V)
+
+function Weingarten!(::UnitaryMatrices, Y, p, X, V)
+    Y .= V' * X
+    Y .= -p * 1 / 2 * (Y - Y')
+    return Y
+end
+
 Manifolds.zero_vector(::UnitaryMatrices{1,ℍ}, p) = zero(p)

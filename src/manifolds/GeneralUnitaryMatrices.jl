@@ -201,20 +201,7 @@ exp_p(X) = p\mathrm{e}^X
 For different sizes, like ``n=2,3,4`` there is specialised implementations
 
 The algorithm used is a more numerically stable form of those proposed in
-[^Gallier2002] and [^Andrica2013].
-
-[^Gallier2002]:
-    > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
-    > and logarithms of orthogonal matrices.
-    > International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
-    > [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
-
-[^Andrica2013]:
-    > Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
-    > exponential map of the Lie groups of matrices.
-    > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
-    > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
-
+[GallierXu:2002](@cite) and [AndricaRohan:2013](@cite).
 """
 exp(::GeneralUnitaryMatrices, p, X)
 
@@ -683,7 +670,7 @@ manifold_dimension(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where
     manifold_volume(::GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}) where {n}
 
 Volume of the manifold of real orthogonal matrices of absolute determinant one. The
-formula reads [^BoyaSudarshanTilma2003]:
+formula reads [BoyaSudarshanTilma:2003](@cite):
 
 ```math
 \begin{cases}
@@ -691,11 +678,6 @@ formula reads [^BoyaSudarshanTilma2003]:
 \frac{2^{k+1}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
 \end{cases}
 ```
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
 """
 function manifold_volume(
     ::GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices},
@@ -706,7 +688,7 @@ end
     manifold_volume(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}) where {n}
 
 Volume of the manifold of real orthogonal matrices of determinant one. The
-formula reads [^BoyaSudarshanTilma2003]:
+formula reads [BoyaSudarshanTilma:2003](@cite):
 
 ```math
 \begin{cases}
@@ -718,11 +700,6 @@ formula reads [^BoyaSudarshanTilma2003]:
 
 It differs from the paper by a factor of `sqrt(2)` due to a different choice of
 normalization.
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
 """
 function manifold_volume(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}) where {n}
     vol = 1.0
@@ -748,16 +725,11 @@ end
     manifold_volume(::GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices}) where {n}
 
 Volume of the manifold of complex general unitary matrices of absolute determinant one. The
-formula reads [^BoyaSudarshanTilma2003]:
+formula reads [BoyaSudarshanTilma:2003](@cite)
 
 ```math
 \sqrt{n 2^{n+1}} π^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
 ```
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
 """
 function manifold_volume(
     ::GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices},
@@ -774,16 +746,11 @@ end
     manifold_volume(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n}
 
 Volume of the manifold of complex general unitary matrices of determinant one. The formula
-reads [^BoyaSudarshanTilma2003]:
+reads [BoyaSudarshanTilma:2003](@cite)
 
 ```math
 \sqrt{n 2^{n-1}} π^{(n-1)(n+2)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
 ```
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
 """
 function manifold_volume(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n}
     vol = sqrt(n * 2^(n - 1)) * π^(((n - 1) * (n + 2)) // 2)
@@ -907,12 +874,7 @@ end
     riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 
 Compute the value of Riemann tensor on the [`GeneralUnitaryMatrices`](@ref) manifold.
-The formula reads[^Rentmeesters2011] ``R(X,Y)Z=\frac{1}{4}[Z, [X, Y]]``.
-
-[^Rentmeesters2011]:
-    > Q. Rentmeesters, “A gradient method for geodesic data fitting on some symmetric
-    > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
-    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: [10.1109/CDC.2011.6161280](https://doi.org/10.1109/CDC.2011.6161280).
+The formula reads [Rentmeesters:2011](@cite) ``R(X,Y)Z=\frac{1}{4}[Z, [X, Y]]``.
 """
 riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 
@@ -927,18 +889,8 @@ end
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
 exponential map `exp(M, p, X)`. It is derived from Eq. (4.1) and Corollary 4.4
-in [^ChevallierLiLuDunson2022]. See also Theorem 4.1 in [^FalorsideHaanDavidsonForré2019],
+in [ChevallierLiLuDunson:2022](@ref). See also Theorem 4.1 in [FalorsideHaanDavidsonForre:2019](@cite),
 (note that it uses a different convention).
-
-[^ChevallierLiLuDunson2022]:
-    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
-    > symmetric spaces.” arXiv, Oct. 09, 2022.
-    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
-
-[^FalorsideHaanDavidsonForré2019]:
-    > L. Falorsi, P. de Haan, T. R. Davidson, and P. Forré, “Reparameterizing Distributions
-    > on Lie Groups,” arXiv:1903.02958 [cs, math, stat], Mar. 2019
-    > doi: [10.48550/arXiv.1903.02958](https://doi.org/10.48550/arXiv.1903.02958)
 """
 function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
     dens = one(eltype(X))
@@ -964,7 +916,8 @@ end
 @doc raw"""
     volume_density(M::GeneralUnitaryMatrices{3,ℝ}, p, X)
 
-Compute the volume density on O(3)/SO(3). The formula reads [^FalorsideHaanDavidsonForré2019]:
+Compute the volume density on O(3)/SO(3). The formula reads [FalorsideHaanDavidsonForre:2019](@cite)
+
 ```math
 \frac{1-1\cos(\sqrt{2}\lVert X \rVert)}{\lVert X \rVert^2}.
 ```

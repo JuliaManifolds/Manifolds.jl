@@ -340,7 +340,7 @@ end
     parallel_transport_direction(M::Rotations, p, X, d)
 
 Compute parallel transport of vector `X` tangent at `p` on the [`Rotations`](@ref)
-manifold in the direction `d`. The formula, provided in [^Rentmeesters2011], reads:
+manifold in the direction `d`. The formula, provided in [Rentmeesters:2011](@cite), reads:
 
 ```math
 \mathcal P_{q\gets p}X = q^\mathrm{T}p \operatorname{Exp}(d/2) X \operatorname{Exp}(d/2)
@@ -348,11 +348,6 @@ manifold in the direction `d`. The formula, provided in [^Rentmeesters2011], rea
 where ``q=\exp_p d``.
 
 The formula simplifies to identity for 2-D rotations.
-
-[^Rentmeesters2011]:
-    > Rentmeesters Q., “A gradient method for geodesic data fitting on some symmetric
-    > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
-    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: [10.1109/CDC.2011.6161280](https://doi.org/10.1109/CDC.2011.6161280).
 """
 parallel_transport_direction(M::Rotations, p, X, d)
 
@@ -390,7 +385,44 @@ function Base.show(io::IO, ::Rotations{n}) where {n}
     return print(io, "Rotations($(n))")
 end
 
+@doc raw"""
+    riemannian_Hessian(M::Rotations, p, G, H, X)
+
+The Riemannian Hessian can be computed by adopting Eq. (5.6) [Nguyen:2023](@cite),
+so very similar to the Stiefel manifold.
+The only difference is, that here the tangent vectors are stored
+in the Lie algebra, i.e. the update direction is actually ``pX`` instead of just ``X`` (in Stiefel).
+and that means the inverse has to be appliead to the (Euclidean) Hessian
+to map it into the Lie algebra.
+"""
+riemannian_Hessian(M::Rotations, p, G, H, X)
+function riemannian_Hessian!(::Rotations{N}, Y, p, G, H, X) where {N}
+    symmetrize!(Y, G' * p)
+    project!(SkewSymmetricMatrices(N), Y, p' * H - X * Y)
+    return Y
+end
+
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
+
+@doc raw"""
+    Weingarten(M::Rotations, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Stiefel`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
+
+```math
+\mathcal W_p(X,V) = -\frac{1}{2}p\bigl(V^{\mathrm{T}}X - X^\mathrm{T}V\bigr)
+```
+"""
+Weingarten(::Rotations, p, X, V)
+
+function Weingarten!(::Rotations, Y, p, X, V)
+    Y .= V' * X
+    Y .= -p * 1 / 2 * (Y - Y')
+    return Y
+end
 
 @doc raw"""
     zero_vector(M::Rotations, p)

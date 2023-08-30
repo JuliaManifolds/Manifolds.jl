@@ -7,18 +7,8 @@ The family, with a single real parameter ``α>-1``, has two special cases:
 - ``α = -\frac{1}{2}``: [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
 - ``α = 0``: [`CanonicalMetric`](@ref)
 
-The family was described in [^HüperMarkinaLeite2021]. This implementation follows the
-description in [^ZimmermanHüper2022].
-
-[^HüperMarkinaLeite2021]:
-    > Hüper, M., Markina, A., Leite, R. T. (2021)
-    > "A Lagrangian approach to extremal curves on Stiefel manifolds"
-    > Journal of Geometric Mechanics, 13(1): 55-72.
-    > doi: [10.3934/jgm.2020031](http://dx.doi.org/10.3934/jgm.2020031)
-[^ZimmermanHüper2022]:
-    > Ralf Zimmerman and Knut Hüper. (2022).
-    > "Computing the Riemannian logarithm on the Stiefel manifold: metrics, methods and performance."
-    > arXiv: [2103.12046](https://arxiv.org/abs/2103.12046)
+The family was described in [HueperMarkinaSilvaLeite:2021](@cite). This implementation follows the
+description in [ZimmermannHueper:2022](@cite).
 
 # Constructor
 
@@ -45,7 +35,7 @@ The exponential map is given by
     X p^\mathrm{T} - p X^\mathrm{T}
 \bigr) p \operatorname{Exp}\bigl(\frac{\alpha}{\alpha+1} p^\mathrm{T} X\bigr)
 ````
-This implementation is based on [^ZimmermanHüper2022].
+This implementation is based on [ZimmermannHueper:2022](@cite).
 
 For ``k < \frac{n}{2}`` the exponential is computed more efficiently using
 [`StiefelFactorization`](@ref).
@@ -207,8 +197,8 @@ end
 Compute the logarithmic map on the [`Stiefel(n,k)`](@ref) manifold with respect to the [`StiefelSubmersionMetric`](@ref).
 
 The logarithmic map is computed using [`ShootingInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ShootingInverseRetraction). For
-``k ≤ \lfloor\frac{n}{2}\rfloor``, this is sped up using the ``k``-shooting method of
-[^ZimmermanHüper2022]. Keyword arguments are forwarded to `ShootingInverseRetraction`; see
+``k ≤ \lfloor\frac{n}{2}\rfloor``, this is sped up using the ``k``-shooting method of [ZimmermannHueper:2022](@cite).
+Keyword arguments are forwarded to `ShootingInverseRetraction`; see
 that documentation for details. Their defaults are:
 - `num_transport_points=4`
 - `tolerance=sqrt(eps())`
@@ -257,13 +247,59 @@ function log!(
     return inverse_retract!(M, X, p, q, inverse_retraction)
 end
 
+@doc raw"""
+    Y = riemannian_Hessian(M::MetricManifold{ℝ,Stiefel{n,k,ℝ}, StiefelSubmersionMetric},, p, G, H, X)
+    riemannian_Hessian!(MetricManifold{ℝ,Stiefel{n,k,ℝ}, StiefelSubmersionMetric},, Y, p, G, H, X)
+
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+``α_0=1, α_1=\frac{1}{2}`` in their formula. The formula reads
+
+```math
+    \operatorname{Hess}f(p)[X]
+    =
+    \operatorname{proj}_{T_p\mathcal M}\Bigl(
+        ∇^2f(p)[X] - \frac{1}{2} X \bigl( (∇f(p))^{\mathrm{H}}p + p^{\mathrm{H}}∇f(p)\bigr)
+        - \frac{2α+1}{2(α+1)} \bigl( P ∇f(p) p^{\mathrm{H}} + p ∇f(p))^{\mathrm{H}} P)X
+    \Bigr),
+```
+where ``P = I-pp^{\mathrm{H}}``.
+
+Compared to Eq. (5.6) we have that their ``α_0 = 1``and ``\alpha_1 =  \frac{2α+1}{2(α+1)} + 1``.
+"""
+riemannian_Hessian(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    p,
+    G,
+    H,
+    X,
+) where {n,k}
+
+function riemannian_Hessian!(
+    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},<:StiefelSubmersionMetric},
+    Y,
+    p,
+    G,
+    H,
+    X,
+) where {n,k}
+    α = metric(M).α
+    Gp = symmetrize(G' * p)
+    Z = symmetrize((I - p * p') * G * p')
+    project!(M, Y, p, H - X * Gp - (2 * α + 1) / (α + 1) * Z * X)
+    return Y
+end
+
 # StiefelFactorization code
 # Note: intended only for internal use
 
 @doc raw"""
     StiefelFactorization{UT,XT} <: AbstractManifoldPoint
 
-Represent points (and vectors) on `Stiefel(n, k)` with ``2k × k`` factors.[^ZimmermanHüper2022]
+Represent points (and vectors) on `Stiefel(n, k)` with ``2k × k`` factors [ZimmermannHueper:2022](@cite).
 
 Given a point ``p ∈ \mathrm{St}(n, k)`` and another matrix ``B ∈ ℝ^{n × k}`` for
 ``k ≤ \lfloor\frac{n}{2}\rfloor`` the factorization is

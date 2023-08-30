@@ -513,17 +513,12 @@ end
     riemann_tensor(M::AbstractSphere{ℝ}, p, X, Y, Z)
 
 Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`AbstractSphere`](@ref) `M`.
-The formula reads [^MuralidharanFletcher2021] (though note that a different convention is
+The formula reads [MuralidharanFlecther:2012](@cite) (though note that a different convention is
 used in that paper than in Manifolds.jl):
 
 ````math
 R(X,Y)Z = \langle Z, Y \rangle X - \langle Z, X \rangle Y
 ````
-
-[^MuralidharanFletcher2021]:
-    > P. Muralidharan and P. T. Fletcher, “Sasaki Metrics for Analysis of Longitudinal Data
-    > on Manifolds,” Proc IEEE Comput Soc Conf Comput Vis Pattern Recognit, vol. 2012,
-    > pp. 1027–1034, Jun. 2012, doi: [10.1109/CVPR.2012.6247780](https://doi.org/10.1109/CVPR.2012.6247780).
 """
 riemann_tensor(M::AbstractSphere{ℝ}, p, X, Y, Z)
 
@@ -539,17 +534,32 @@ end
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
 exponential map `exp(M, p, X)`. The formula reads ``(\sin(\lVert X\rVert)/\lVert X\rVert)^(n-1)``
-where `n` is the dimension of `M`. It is derived from Eq. (4.1) in [^ChevallierLiLuDunson2022].
-
-[^ChevallierLiLuDunson2022]:
-    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
-    > symmetric spaces.” arXiv, Oct. 09, 2022.
-    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
+where `n` is the dimension of `M`. It is derived from Eq. (4.1) in [ChevallierLiLuDunson:2022](@cite).
 """
 function volume_density(M::AbstractSphere{ℝ}, p, X)
     Xnorm = norm(X)
     n = manifold_dimension(M) - 1
     return usinc(Xnorm)^n
+end
+
+@doc raw"""
+    Y = Weingarten(M::Sphere, p, X, V)
+    Weingarten!(M::Sphere, Y, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Sphere`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
+
+```math
+\mathcal W_p(X,V) = -Xp^{\mathrm{T}}V
+```
+"""
+Weingarten(::Sphere, p, X, V)
+
+function Weingarten!(::Sphere, Y, p, X, V)
+    Y .= -dot(p, V) .* X
+    return Y
 end
 
 """

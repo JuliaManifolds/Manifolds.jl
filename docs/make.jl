@@ -34,6 +34,7 @@ end
 
 # (c) load necessary packages for the docs
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
+using DocumenterCitations
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 # required for loading the manifold tests functions
@@ -61,7 +62,9 @@ open(joinpath(generated_path, "contributing.md"), "w") do io
 end
 
 # (e) ...finally! make docs
+bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style=:alpha)
 makedocs(
+    bib;
     # for development, we disable prettyurls
     format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
     modules=[
@@ -159,6 +162,7 @@ makedocs(
             "Contributing" => "misc/contributing.md",
             "Internals" => "misc/internals.md",
             "Notation" => "misc/notation.md",
+            "References" => "misc/references.md",
         ],
     ],
 )

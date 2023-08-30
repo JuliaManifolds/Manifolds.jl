@@ -85,7 +85,7 @@ TangentSpaceAtPoint(M::AbstractManifold, p) = VectorSpaceAtPoint(TangentBundleFi
 """
     TangentSpace(M::AbstractManifold, p)
 
-Return a [`TangentSpaceAtPoint`](@ref Manifolds.TangentSpaceAtPoint) representing tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold) `M`.
+Return a [`TangentSpaceAtPoint`](@ref) representing tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold) `M`.
 """
 TangentSpace(M::AbstractManifold, p) = VectorSpaceAtPoint(TangentBundleFibers(M), p)
 
@@ -106,7 +106,7 @@ end
     struct SasakiRetraction <: AbstractRetractionMethod end
 
 Exponential map on [`TangentBundle`](@ref) computed via Euler integration as described
-in [^Muralidharan2012]. The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
+in [MuralidharanFlecther:2012](@cite). The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
 $\gamma(1) = \exp_{p,X}(X_M, X_F)$ and $\gamma(0)=(p, X)$ reads
 
 ```math
@@ -120,11 +120,6 @@ where $R$ is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
     SasakiRetraction(L::Int)
 
 In this constructor `L` is the number of integration steps.
-
-[^Muralidharan2012]:
-    > P. Muralidharan and P. T. Fletcher, “Sasaki Metrics for Analysis of Longitudinal Data
-    > on Manifolds,” Proc IEEE Comput Soc Conf Comput Vis Pattern Recognit, vol. 2012,
-    > pp. 1027–1034, Jun. 2012, doi: [10.1109/CVPR.2012.6247780](https://doi.org/10.1109/CVPR.2012.6247780).
 """
 struct SasakiRetraction <: AbstractRetractionMethod
     L::Int
@@ -209,15 +204,11 @@ end
 """
     TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
-Tangent bundle for manifold of type `M`, as a manifold with the Sasaki metric [^Sasaki1958].
+Tangent bundle for manifold of type `M`, as a manifold with the Sasaki metric [Sasaki:1958](@cite).
 
 Exact retraction and inverse retraction can be approximated using [`VectorBundleProductRetraction`](@ref),
 [`VectorBundleInverseProductRetraction`](@ref) and [`SasakiRetraction`](@ref).
 [`VectorBundleProductVectorTransport`](@ref) can be used as a vector transport.
-
-[^Sasaki1958]:
-    > S. Sasaki, “On the differential geometry of tangent bundles of Riemannian manifolds,”
-    > Tohoku Math. J. (2), vol. 10, no. 3, pp. 338–354, 1958, doi: [10.2748/tmj/1178244668](https://doi.org/10.2748/tmj/1178244668).
 
 # Constructors
 
@@ -603,7 +594,7 @@ end
 @doc raw"""
     injectivity_radius(M::TangentSpaceAtPoint)
 
-Return the injectivity radius on the [`TangentSpaceAtPoint`](@ref Manifolds.TangentSpaceAtPoint) `M`, which is $∞$.
+Return the injectivity radius on the [`TangentSpaceAtPoint`](@ref) `M`, which is $∞$.
 """
 injectivity_radius(::TangentSpaceAtPoint) = Inf
 
@@ -726,7 +717,7 @@ end
 """
     is_flat(::TangentSpaceAtPoint)
 
-Return true. [`TangentSpaceAtPoint`](@ref Manifolds.TangentSpaceAtPoint) is a flat manifold.
+Return true. [`TangentSpaceAtPoint`](@ref) is a flat manifold.
 """
 is_flat(::TangentSpaceAtPoint) = true
 """
@@ -1265,6 +1256,19 @@ end
 function zero_vector!(B::TangentBundleFibers, X, p)
     return zero_vector!(B.manifold, X, p)
 end
+
+@doc raw"""
+    Y = Weingarten(M::VectorSpaceAtPoint, p, X, V)
+    Weingarten!(M::VectorSpaceAtPoint, Y, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`VectorSpaceAtPoint`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+Since this a flat space by itself, the result is always the zero tangent vector.
+"""
+Weingarten(::VectorSpaceAtPoint, p, X, V)
+
+Weingarten!(::VectorSpaceAtPoint, Y, p, X, V) = fill!(Y, 0)
 
 @doc raw"""
     zero_vector(B::VectorBundle, p)

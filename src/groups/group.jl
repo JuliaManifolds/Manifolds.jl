@@ -115,7 +115,7 @@ abstract type ActionDirection end
 @doc raw"""
     LeftForwardAction()
 
-Left action of a group on a manifold. For an action ``α: G × X → X`` it is characterized by 
+Left action of a group on a manifold. For an action ``α: G × X → X`` it is characterized by
 ```math
 α(g, α(h, x)) = α(gh, x)
 ```
@@ -126,7 +126,7 @@ struct LeftForwardAction <: ActionDirection end
 @doc raw"""
     LeftBackwardAction()
 
-Left action of a group on a manifold. For an action ``α: X × G → X`` it is characterized by 
+Left action of a group on a manifold. For an action ``α: X × G → X`` it is characterized by
 ```math
 α(α(x, h), g) = α(x, gh)
 ```
@@ -141,7 +141,7 @@ const LeftAction = LeftForwardAction
 """
     RightForwardAction()
 
-Right action of a group on a manifold. For an action ``α: G × X → X`` it is characterized by 
+Right action of a group on a manifold. For an action ``α: G × X → X`` it is characterized by
 ```math
 α(g, α(h, x)) = α(hg, x)
 ```
@@ -154,7 +154,7 @@ struct RightForwardAction <: ActionDirection end
 """
     RightBackwardAction()
 
-Right action of a group on a manifold. For an action ``α: X × G → X`` it is characterized by 
+Right action of a group on a manifold. For an action ``α: X × G → X`` it is characterized by
 ```math
 α(α(x, h), g) = α(x, hg)
 ```
@@ -947,7 +947,7 @@ the group $\mathcal{G}$, and $𝔤$ is its Lie algebra, the group exponential is
 \exp : 𝔤 → \mathcal{G},
 ````
 such that for $t,s ∈ ℝ$, $γ(t) = \exp (t X)$ defines a one-parameter subgroup with the
-following properties. Note that one-parameter subgroups are commutative (see [^Suhubi2013],
+following properties. Note that one-parameter subgroups are commutative (see [Suhubi:2013](@cite),
 section 3.5), even if the Lie group itself is not commutative.
 
 ````math
@@ -972,10 +972,6 @@ the Lie exponential is the numeric/matrix exponential.
 
 Since this function also depends on the group operation, make sure to implement
 the corresponding trait version `exp_lie(::TraitList{<:IsGroupManifold}, G, X)`.
-
-[^Suhubi2013]:
-    > E. Suhubi, Exterior Analysis: Using Applications of Differential Forms, 1st edition.
-    > Amsterdam: Academic Press, 2013.
 """
 exp_lie(G::AbstractManifold, X)
 @trait_function exp_lie(M::AbstractDecoratorManifold, X)
