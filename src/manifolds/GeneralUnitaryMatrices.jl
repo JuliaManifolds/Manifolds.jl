@@ -670,7 +670,7 @@ manifold_dimension(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where
     manifold_volume(::GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}) where {n}
 
 Volume of the manifold of real orthogonal matrices of absolute determinant one. The
-formula reads [^BoyaSudarshanTilma2003]:
+formula reads [BoyaSudarshanTilma:2003](@cite):
 
 ```math
 \begin{cases}
@@ -678,11 +678,6 @@ formula reads [^BoyaSudarshanTilma2003]:
 \frac{2^{k+1}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
 \end{cases}
 ```
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
 """
 function manifold_volume(
     ::GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices},
@@ -693,7 +688,7 @@ end
     manifold_volume(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}) where {n}
 
 Volume of the manifold of real orthogonal matrices of determinant one. The
-formula reads [^BoyaSudarshanTilma2003]:
+formula reads [BoyaSudarshanTilma:2003](@cite):
 
 ```math
 \begin{cases}
@@ -705,11 +700,6 @@ formula reads [^BoyaSudarshanTilma2003]:
 
 It differs from the paper by a factor of `sqrt(2)` due to a different choice of
 normalization.
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
 """
 function manifold_volume(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}) where {n}
     vol = 1.0
@@ -735,16 +725,11 @@ end
     manifold_volume(::GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices}) where {n}
 
 Volume of the manifold of complex general unitary matrices of absolute determinant one. The
-formula reads [^BoyaSudarshanTilma2003]:
+formula reads [BoyaSudarshanTilma:2003](@cite)
 
 ```math
 \sqrt{n 2^{n+1}} π^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
 ```
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
 """
 function manifold_volume(
     ::GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices},
@@ -761,16 +746,11 @@ end
     manifold_volume(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n}
 
 Volume of the manifold of complex general unitary matrices of determinant one. The formula
-reads [^BoyaSudarshanTilma2003]:
+reads [BoyaSudarshanTilma:2003](@cite)
 
 ```math
 \sqrt{n 2^{n-1}} π^{(n-1)(n+2)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
 ```
-
-[^BoyaSudarshanTilma2003]:
-    > L. J. Boya, E. C. G. Sudarshan, and T. Tilma, “Volumes of Compact Manifolds,” Reports
-    > on Mathematical Physics, vol. 52, no. 3, pp. 401–422, Dec. 2003,
-    > doi: [10.1016/S0034-4877(03)80038-1](https://doi.org/10.1016/S0034-4877(03)80038-1)
 """
 function manifold_volume(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n}
     vol = sqrt(n * 2^(n - 1)) * π^(((n - 1) * (n + 2)) // 2)
@@ -909,13 +889,8 @@ end
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
 exponential map `exp(M, p, X)`. It is derived from Eq. (4.1) and Corollary 4.4
-in [^ChevallierLiLuDunson2022]. See also Theorem 4.1 in [^FalorsideHaanDavidsonForré2019],
+in [ChevallierLiLuDunson:2022](@ref). See also Theorem 4.1 in [^FalorsideHaanDavidsonForré2019],
 (note that it uses a different convention).
-
-[^ChevallierLiLuDunson2022]:
-    > E. Chevallier, D. Li, Y. Lu, and D. B. Dunson, “Exponential-wrapped distributions on
-    > symmetric spaces.” arXiv, Oct. 09, 2022.
-    > doi: [10.48550/arXiv.2009.01983](https://doi.org/10.48550/arXiv.2009.01983).
 
 [^FalorsideHaanDavidsonForré2019]:
     > L. Falorsi, P. de Haan, T. R. Davidson, and P. Forré, “Reparameterizing Distributions

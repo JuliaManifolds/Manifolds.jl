@@ -470,14 +470,8 @@ end
     volume_density(::SymmetricPositiveDefinite{n}, p, X) where {n}
 
 Compute the volume density of the [`SymmetricPositiveDefinite`](@ref) manifold at `p`
-in direction `X`. See [^ChevallierKalungaAngulo2017], Section 6.2 for details.
+in direction `X`. See [ChevallierKalungaAngulo:2017](@cite), Section 6.2 for details.
 Note that metric in Manifolds.jl has a different scaling factor than the reference.
-
-[^ChevallierKalungaAngulo2017]:
-    > E. Chevallier, E. Kalunga, and J. Angulo, “Kernel Density Estimation on Spaces of
-    > Gaussian Distributions and Symmetric Positive Definite Matrices,” SIAM J. Imaging Sci.,
-    > vol. 10, no. 1, pp. 191–215, Jan. 2017,
-    > doi: [10.1137/15M1053566](https://doi.org/10.1137/15M1053566).
 """
 function volume_density(::SymmetricPositiveDefinite{n}, p, X) where {n}
     eig = eigvals(X)
