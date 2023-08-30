@@ -419,8 +419,8 @@ The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 Weingarten(::Rotations, p, X, V)
 
 function Weingarten!(::Rotations, Y, p, X, V)
-    symmetrize!(Y, V' * X)
-    Y .= -p * Y
+    Y .= V' * X
+    Y .= -p * 1 / 2 * (Y - Y')
     return Y
 end
 
