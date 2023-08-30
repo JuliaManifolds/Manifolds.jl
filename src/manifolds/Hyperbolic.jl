@@ -299,6 +299,13 @@ Return the dimension of the hyperbolic space manifold $\mathcal H^n$, i.e. $\dim
 """
 manifold_dimension(::Hyperbolic{N}) where {N} = N
 
+@doc raw"""
+    manifold_dimension(M::Hyperbolic)
+
+Return the volume of the hyperbolic space manifold $\mathcal H^n$, i.e. infinity.
+"""
+manifold_volume(::Hyperbolic) = Inf
+
 """
     mean(
         M::Hyperbolic,

@@ -279,6 +279,10 @@ function log_lie!(
     return project!(G, X, Identity(G), X)
 end
 
+function manifold_volume(M::GeneralUnitaryMultiplicationGroup)
+    return manifold_volume(M.manifold)
+end
+
 function Random.rand!(G::GeneralUnitaryMultiplicationGroup, pX; kwargs...)
     rand!(G.manifold, pX; kwargs...)
     return pX
@@ -327,4 +331,8 @@ function translate_diff!(
     ::RightBackwardAction,
 )
     return copyto!(G, Y, inv(G, p) * X * p)
+end
+
+function volume_density(M::GeneralUnitaryMultiplicationGroup, p, X)
+    return volume_density(M.manifold, p, X)
 end

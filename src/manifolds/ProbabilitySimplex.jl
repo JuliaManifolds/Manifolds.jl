@@ -328,6 +328,15 @@ Returns the manifold dimension of the probability simplex in $ℝ^{n+1}$, i.e.
 manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
 
 @doc raw"""
+    manifold_volume(::ProbabilitySimplex{n}) where {n}
+
+Return the volume of the [`ProbabilitySimplex`](@ref), i.e. volume of the `n`-dimensional
+[`Sphere`](@ref) divided by ``2^{n+1}``, corresponding to the volume of its positive
+orthant.
+"""
+manifold_volume(::ProbabilitySimplex{n}) where {n} = manifold_volume(Sphere(n)) / 2^(n + 1)
+
+@doc raw"""
     mean(
         M::ProbabilitySimplex,
         x::AbstractVector,
@@ -514,6 +523,17 @@ end
 
 function Base.show(io::IO, ::ProbabilitySimplex{n,boundary}) where {n,boundary}
     return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
+end
+
+@doc raw"""
+    volume_density(M::ProbabilitySimplex{N}, p, X) where {N}
+
+Compute the volume density at point `p` on [`ProbabilitySimplex`](@ref) `M` for tangent
+vector `X`. It is computed using isometry with positive orthant of a sphere.
+"""
+function volume_density(M::ProbabilitySimplex{N}, p, X) where {N}
+    pe = simplex_to_amplitude(M, p)
+    return volume_density(Sphere(N), pe, simplex_to_amplitude_diff(M, p, X))
 end
 
 @doc raw"""

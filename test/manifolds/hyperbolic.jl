@@ -339,4 +339,12 @@ include("../utils.jl")
         @test dpX[2][1] == -1.0
         @test dpX[2][2].X == 2 * normalize(X)
     end
+    @testset "Manifold volume" begin
+        M = Hyperbolic(2)
+        @test manifold_volume(M) == Inf
+        p = [1.0, 1.0, sqrt(3)]
+        X = [1.0, 2.0, sqrt(3)]
+        @test volume_density(M, p, X) ≈ 2.980406103535168
+        @test volume_density(M, p, [0.0, 0.0, 0.0]) ≈ 1.0
+    end
 end
