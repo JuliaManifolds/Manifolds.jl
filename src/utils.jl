@@ -222,12 +222,12 @@ For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
 end
 
 @doc raw"""
-    symmetrize!(Y,X)
+    symmetrize!(Y, X)
 
 Given a quare matrix `X` compute `1/2 .* (X' + X)` in place of `Y`
 """
 function symmetrize!(Y, X)
-    Y .= 1 / 2 .* (X' .+ X)
+    Y .= (X' .+ X) ./ 2
     return Y
 end
 
@@ -237,7 +237,7 @@ end
 Given a quare matrix `X` compute `1/2 .* (X' + X)`.
 """
 function symmetrize(X)
-    return 1 / 2 .* (X' .+ X)
+    return (X' .+ X) ./ 2
 end
 
 @doc raw"""
