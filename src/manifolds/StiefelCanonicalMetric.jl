@@ -195,8 +195,6 @@ Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](@ref)
     \Bigr),
 ```
 where ``P = I-pp^{\mathrm{H}}``.
-
-Compared to Eq. (5.6) we have ``α_0 = 1`` and ``α_1 = \frac{1}{2}``.
 """
 riemannian_Hessian(
     M::MetricManifold{𝔽,Stiefel{n,k,𝔽},CanonicalMetric},

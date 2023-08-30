@@ -200,7 +200,7 @@ Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), where we use for the [`EuclideanM
     \operatorname{Hess}f(p)[X]
     =
     \operatorname{proj}_{T_p\mathcal M}\Bigl(
-        ∇^2f(p)[X] - \frac{1}{2} X \bigl((∇f(p))^{\mathrm{H}p + p^{\mathrm{H}}∇f(p)\bigr)
+        ∇^2f(p)[X] - \frac{1}{2} X \bigl((∇f(p))^{\mathrm{H}}p + p^{\mathrm{H}}∇f(p)\bigr)
     \Bigr).
 ```
 
