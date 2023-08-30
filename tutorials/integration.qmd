@@ -107,7 +107,7 @@ f(q) = \frac{1}{n h^d} \sum_{i=1}^n \frac{1}{\theta_q(\log_q(p_i))}K\left( \frac
 
 where $h$ is the bandwidth, a small positive number less than the injectivity radius of $\mathcal M$ and $K\colon\mathbb{R}\to\mathbb{R}$ is a kernel function.
 Note that Pelletier's estimator can only use radially-symmetric kernels.
-The radially symmetric multivariate Epanechnikov kernel used in the example below is described in [LangreneMarin:2019](@ref).
+The radially symmetric multivariate Epanechnikov kernel used in the example below is described in [LangreneMarin:2019](@cite).
 
 ```{julia}
 struct PelletierKDE{TM<:AbstractManifold,TPts<:AbstractVector}

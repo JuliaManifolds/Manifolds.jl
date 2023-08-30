@@ -180,7 +180,7 @@ end
 @doc raw"""
     manifold_volume(M::PowerManifold)
 
-Return the manifold volume of an [`PowerManifold`](@ref) `M`.
+Return the manifold volume of an [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) `M`.
 """
 function manifold_volume(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
     return manifold_volume(M.manifold)^prod(size_to_tuple(TSize))
@@ -333,7 +333,7 @@ end
 @doc raw"""
     volume_density(M::PowerManifold, p, X)
 
-Return volume density on the [`PowerManifold`](@ref) `M`, i.e. product of constituent
+Return volume density on the [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) `M`, i.e. product of constituent
 volume densities.
 """
 function volume_density(M::PowerManifold, p, X)
