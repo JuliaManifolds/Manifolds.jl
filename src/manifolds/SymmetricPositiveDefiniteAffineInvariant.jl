@@ -434,7 +434,7 @@ function riemannian_Hessian!(::SymmetricPositiveDefinite, Y, p, G, H, X)
     symmetrize!(Y, G)
     symmetrize!(Y, X * Y * p)
     Z = symmetrize(H)
-    Y .= p * Z * p + Y
+    Y .+= p * Z * p
     return Y
 end
 

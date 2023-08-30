@@ -459,6 +459,6 @@ function riemannian_Hessian!(M::Hyperbolic, Y, p, G, H, X)
     g[end] *= -1 # = g^{-1}G
     h = copy(H)
     H[end] *= -1 # = g^{-1}H
-    project!(M, Y, p, h + dot(p, g) .* X)
+    project!(M, Y, p, h .+ dot(p, g) .* X)
     return Y
 end

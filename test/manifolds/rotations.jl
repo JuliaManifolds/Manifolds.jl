@@ -237,7 +237,7 @@ include("../utils.jl")
         @test injectivity_radius(M, p, PolarRetraction()) == 0.0
     end
     @testset "Riemannian Hessian" begin
-        M = Manifolds.Rotations(2)
+        M = Rotations(2)
         p = Matrix{Float64}(I, 2, 2)
         X = [0.0 3.0; -3.0 0.0]
         V = [1.0 0.0; 1.0 0.0]

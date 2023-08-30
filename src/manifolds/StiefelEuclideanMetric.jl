@@ -234,6 +234,6 @@ Weingarten(::Stiefel, p, X, V)
 
 function Weingarten!(::Stiefel, Y, p, X, V)
     Z = symmetrize(X' * V)
-    Y .= -X * p' * V - p * Z
+    Y .= -X * p' * V .- p * Z
     return Y
 end

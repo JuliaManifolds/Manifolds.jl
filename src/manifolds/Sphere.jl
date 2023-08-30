@@ -522,7 +522,7 @@ tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal
 
 The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 
-```
+```math
 \mathcal W_p(X,V) = -Xp^{\mathrm{T}}V
 ```
 """

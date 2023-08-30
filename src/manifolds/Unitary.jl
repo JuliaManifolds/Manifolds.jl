@@ -122,7 +122,7 @@ show(io::IO, ::UnitaryMatrices{n,ℍ}) where {n} = print(io, "UnitaryMatrices($(
 The Riemannian Hessian can be computed by adopting Eq. (5.6) [Nguyen:2023](@cite),
 so very similar to the complex Stiefel manifold.
 The only difference is, that here the tangent vectors are stored
-in the Lie algebra, u.e. the update direction is actually ``pX`` instead of jst ``X`` (in Stiefel).
+in the Lie algebra, i.e. the update direction is actually ``pX`` instead of just ``X`` (in Stiefel).
 and that means the inverse has to be appliead to the (Euclidean) Hessian
 to map it into the Lie algebra.
 """
