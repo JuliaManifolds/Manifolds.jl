@@ -801,7 +801,7 @@ function manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMa
 end
 
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}) where {n}
+    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℝ,AbsoluteDeterminantOneMatrices})
 
 Volume of the manifold of real orthogonal matrices of absolute determinant one. The
 formula reads [BoyaSudarshanTilma:2003](@cite):
@@ -813,13 +813,12 @@ formula reads [BoyaSudarshanTilma:2003](@cite):
 \end{cases}
 ```
 """
-function manifold_volume(
-    ::GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices},
-) where {n}
-    return 2 * manifold_volume(GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}())
+function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℝ,AbsoluteDeterminantOneMatrices})
+    n = get_n(M)
+    return 2 * manifold_volume(GeneralUnitaryMatrices(n, ℝ, DeterminantOneMatrices))
 end
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}) where {n}
+    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℝ,DeterminantOneMatrices})
 
 Volume of the manifold of real orthogonal matrices of determinant one. The
 formula reads [BoyaSudarshanTilma:2003](@cite):
@@ -835,7 +834,8 @@ formula reads [BoyaSudarshanTilma:2003](@cite):
 It differs from the paper by a factor of `sqrt(2)` due to a different choice of
 normalization.
 """
-function manifold_volume(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}) where {n}
+function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℝ,DeterminantOneMatrices})
+    n = get_n(M)
     vol = 1.0
     if n % 2 == 0
         k = div(n, 2)
@@ -856,7 +856,7 @@ function manifold_volume(::GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices})
     return vol
 end
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices}) where {n}
+    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℂ,AbsoluteDeterminantOneMatrices})
 
 Volume of the manifold of complex general unitary matrices of absolute determinant one. The
 formula reads [BoyaSudarshanTilma:2003](@cite)
@@ -865,9 +865,8 @@ formula reads [BoyaSudarshanTilma:2003](@cite)
 \sqrt{n 2^{n+1}} π^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
 ```
 """
-function manifold_volume(
-    ::GeneralUnitaryMatrices{n,ℂ,AbsoluteDeterminantOneMatrices},
-) where {n}
+function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℂ,AbsoluteDeterminantOneMatrices})
+    n = get_n(M)
     vol = sqrt(n * 2^(n + 1)) * π^(((n + 1) * n) // 2)
     kf = 1
     for k in 1:(n - 1)
@@ -877,7 +876,7 @@ function manifold_volume(
     return vol
 end
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n}
+    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
 
 Volume of the manifold of complex general unitary matrices of determinant one. The formula
 reads [BoyaSudarshanTilma:2003](@cite)
@@ -886,7 +885,8 @@ reads [BoyaSudarshanTilma:2003](@cite)
 \sqrt{n 2^{n-1}} π^{(n-1)(n+2)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
 ```
 """
-function manifold_volume(::GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}) where {n}
+function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
+    n = get_n(M)
     vol = sqrt(n * 2^(n - 1)) * π^(((n - 1) * (n + 2)) // 2)
     kf = 1
     for k in 1:(n - 1)
