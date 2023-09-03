@@ -42,14 +42,15 @@ ManifoldsRecipesBaseExt = ["Colors", "RecipesBase"]
 ManifoldsTestExt = "Test"
 
 [compat]
+BoundaryValueDiffEq = "3"
 Colors = "0.12"
 Distributions = "0.22.6, 0.23, 0.24, 0.25"
 Einsum = "0.4"
 Graphs = "1.4"
 HybridArrays = "0.4"
 Kronecker = "0.4, 0.5"
-ManifoldDiff = "0.3.3"
-ManifoldsBase = "0.14.9"
+ManifoldDiff = "0.3.6"
+ManifoldsBase = "0.14.11"
 MatrixEquations = "2.2"
 OrdinaryDiffEq = "6.31"
 Plots = "1"

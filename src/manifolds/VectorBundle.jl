@@ -3,7 +3,7 @@
     struct SasakiRetraction <: AbstractRetractionMethod end
 
 Exponential map on [`TangentBundle`](@ref) computed via Euler integration as described
-in [^Muralidharan2012]. The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
+in [MuralidharanFlecther:2012](@cite). The system of equations for $\gamma : ℝ \to T\mathcal M$ such that
 $\gamma(1) = \exp_{p,X}(X_M, X_F)$ and $\gamma(0)=(p, X)$ reads
 
 ```math
@@ -17,11 +17,6 @@ where $R$ is the Riemann curvature tensor (see [`riemann_tensor`](@ref)).
     SasakiRetraction(L::Int)
 
 In this constructor `L` is the number of integration steps.
-
-[^Muralidharan2012]:
-    > P. Muralidharan and P. T. Fletcher, “Sasaki Metrics for Analysis of Longitudinal Data
-    > on Manifolds,” Proc IEEE Comput Soc Conf Comput Vis Pattern Recognit, vol. 2012,
-    > pp. 1027–1034, Jun. 2012, doi: [10.1109/CVPR.2012.6247780](https://doi.org/10.1109/CVPR.2012.6247780).
 """
 struct SasakiRetraction <: AbstractRetractionMethod
     L::Int
@@ -59,15 +54,11 @@ end
 """
     TangentBundle{𝔽,M} = VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
-Tangent bundle for manifold of type `M`, as a manifold with the Sasaki metric [^Sasaki1958].
+Tangent bundle for manifold of type `M`, as a manifold with the Sasaki metric [Sasaki:1958](@cite).
 
 Exact retraction and inverse retraction can be approximated using [`FiberBundleProductRetraction`](@ref),
 [`FiberBundleInverseProductRetraction`](@ref) and [`SasakiRetraction`](@ref).
 [`FiberBundleProductVectorTransport`](@ref) can be used as a vector transport.
-
-[^Sasaki1958]:
-    > S. Sasaki, “On the differential geometry of tangent bundles of Riemannian manifolds,”
-    > Tohoku Math. J. (2), vol. 10, no. 3, pp. 338–354, 1958, doi: [10.2748/tmj/1178244668](https://doi.org/10.2748/tmj/1178244668).
 
 # Constructors
 
@@ -592,4 +583,53 @@ function zero_vector!(B::BundleFibers, X, p)
 end
 function zero_vector!(B::TangentBundleFibers, X, p)
     return zero_vector!(B.manifold, X, p)
+end
+
+@doc raw"""
+    Y = Weingarten(M::TangentSpaceAtPoint, p, X, V)
+    Weingarten!(M::TangentSpaceAtPoint, Y, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`TangentSpaceAtPoint`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+Since this a flat space by itself, the result is always the zero tangent vector.
+"""
+Weingarten(::TangentSpaceAtPoint, p, X, V)
+
+Weingarten!(::TangentSpaceAtPoint, Y, p, X, V) = fill!(Y, 0)
+
+@doc raw"""
+    zero_vector(B::VectorBundle, p)
+
+Zero tangent vector at point `p` from the vector bundle `B`
+over manifold `B.fiber` (denoted $\mathcal M$). The zero vector belongs to the space $T_{p}B$
+
+Notation:
+  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
+    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
+    canonical projection of that vector bundle $B$.
+
+The zero vector is calculated as
+
+$\mathbf{0}_{p} = (\mathbf{0}_{x_p}, \mathbf{0}_F)$
+
+where $\mathbf{0}_{x_p}$ is the zero tangent vector from $T_{x_p}\mathcal M$ and
+$\mathbf{0}_F$ is the zero element of the vector space $F$.
+"""
+zero_vector(::VectorBundle, ::Any...)
+
+@doc raw"""
+    zero_vector(M::TangentSpaceAtPoint, p)
+
+Zero tangent vector at point `p` from the tangent space `M`, that is the zero tangent vector
+at point `M.point`.
+"""
+zero_vector(::TangentSpaceAtPoint, ::Any...)
+
+function zero_vector!(B::VectorBundle, X, p)
+    xp, Vp = submanifold_components(B.manifold, p)
+    VXM, VXF = submanifold_components(B.manifold, X)
+    zero_vector!(B.manifold, VXM, xp)
+    zero_vector!(B.fiber, VXF, Vp)
+    return X
 end

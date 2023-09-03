@@ -10,21 +10,28 @@ function exp!(
 end
 
 @doc raw"""
+    manifold_volume(::MetricManifold{ℝ,<:ProbabilitySimplex{n},<:EuclideanMetric})) where {n}
+
+Return the volume of the [`ProbabilitySimplex`](@ref) with the Euclidean metric.
+The formula reads ``\frac{\sqrt{n+1}}{n!}``
+"""
+function manifold_volume(
+    ::MetricManifold{ℝ,<:ProbabilitySimplex{n},<:EuclideanMetric},
+) where {n}
+    return sqrt(n + 1) / factorial(n)
+end
+
+@doc raw"""
     rand(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}; vector_at=nothing, σ::Real=1.0)
 
 
 When `vector_at` is `nothing`, return a random (uniform) point `x` on the [`ProbabilitySimplex`](@ref) with the Euclidean metric
-manifold `M` by normalizing independent exponential draws to unit sum, see [^Devroye1986], Theorems 2.1 and 2.2 on p. 207 and 208, respectively.
+manifold `M` by normalizing independent exponential draws to unit sum, see [Devroye:1986](@cite), Theorems 2.1 and 2.2 on p. 207 and 208, respectively.
 
 When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
-``T_{p}\mathrm{\Delta}^n``by shifting a multivariate Gaussian with standard deviation `σ` 
+``T_{p}\mathrm{\Delta}^n``by shifting a multivariate Gaussian with standard deviation `σ`
 to have a zero component sum.
 
-[^Devroye1986]:
-    > Devroye, L.:
-    > _Non-Uniform Random Variate Generation_.
-    > Springer New York, NY, 1986.
-    > doi: [10.1007/978-1-4613-8643-8](https://doi.org/10.1007/978-1-4613-8643-8)
 """
 rand(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}; σ::Real=1.0)
 
@@ -43,4 +50,14 @@ function Random.rand!(
         pX .= (pX .- mean(pX)) .* σ
     end
     return pX
+end
+
+@doc raw"""
+    volume_density(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}, p, X)
+
+Compute the volume density at point `p` on [`ProbabilitySimplex`](@ref) `M` for tangent
+vector `X`. It is equal to 1.
+"""
+function volume_density(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}, p, X)
+    return one(eltype(X))
 end

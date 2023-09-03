@@ -56,12 +56,14 @@ If you have any questions regarding the Manifolds.jl ecosystem feel free to reac
 If you use `Manifolds.jl` in your work, please cite the following
 
 ```biblatex
-@online{2106.08777,
-  Author = {Seth D. Axen and Mateusz Baran and Ronny Bergmann and Krzysztof Rzecki},
-  Title = {Manifolds.jl: An Extensible {J}ulia Framework for Data Analysis on Manifolds},
-  Year = {2021},
-  Eprint = {2106.08777},
-  Eprinttype = {arXiv},
+@article{AxenBaranBergmannRzecki:2023,
+    AUTHOR     = {Seth D. Axen and Mateusz Baran and Ronny Bergmann and Krzysztof Rzecki},
+    EPRINT     = {2021.08777},
+    EPRINTTYPE = {arXiv},
+    JOURNAL    = {AMS Transactions on Mathematical Software},
+    NOTE       = {accepted for publication},
+    TITLE      = {Manifolds.jl: An Extensible {J}ulia Framework for Data Analysis on Manifolds},
+    YEAR       = {2023}
 }
 ```
 

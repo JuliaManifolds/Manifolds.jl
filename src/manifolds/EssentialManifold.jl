@@ -40,7 +40,7 @@ E = (R'_1)^T [T'_2 - T'_1]_{×} R'_2,
 
 where the poses of two cameras ``(R_i', T_i'), i=1,2``, are contained in the space of
 rigid body transformations $SE(3)$ and the operator $[⋅]_{×}\colon ℝ^3 \to \operatorname{SkewSym}(3)$
-denotes the matrix representation of the cross product operator. For more details see [^TronDaniilidis2017].
+denotes the matrix representation of the cross product operator. For more details see [TronDaniilidis:2017](@cite).
 
 # Constructor
     EssentialManifold(is_signed=true)
@@ -48,12 +48,6 @@ denotes the matrix representation of the cross product operator. For more detail
 Generate the manifold of essential matrices, either the signed (`is_signed=true`) or
 unsigned (`is_signed=false`) variant.
 
-[^TronDaniilidis2017]:
-    > Tron R.; Daniilidis K.; The Space of Essential Matrices as a Riemannian Quotient
-    > AbstractManifold.
-    > SIAM Journal on Imaging Sciences (2017),
-    > DOI: [10.1137/16M1091332](https://doi.org/10.1137/16M1091332),
-    > PDF: [https://www.cis.upenn.edu/~kostas/mypub.dir/tron17siam.pdf](https://www.cis.upenn.edu/~kostas/mypub.dir/tron17siam.pdf).
 """
 struct EssentialManifold <: AbstractPowerManifold{ℝ,Rotations{3},NestedPowerRepresentation}
     is_signed::Bool
@@ -110,7 +104,7 @@ $θ$ and $t_{\text{opt}}$ is the minimizer of the cost function
 ````math
 f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}) \text{ for } i=1,2,
 ````
-where $d(⋅,⋅)$ is the distance function in $SO(3)$[^TronDaniilidis2017].
+where $d(⋅,⋅)$ is the distance function in $SO(3)$ [TronDaniilidis:2017](@cite).
 """
 distance(M::EssentialManifold, p, q) = norm(M, p, log(M, p, q))
 
@@ -122,7 +116,7 @@ Compute the exponential map on the [`EssentialManifold`](@ref) from `p` into dir
 ````math
 \text{exp}_p(X) =\text{exp}_g( \tilde X),  \quad g \in \text(SO)(3)^2,
 ````
-where $\tilde X$ is the horizontal lift of $X$[^TronDaniilidis2017].
+where $\tilde X$ is the horizontal lift of $X$[TronDaniilidis:2017](@cite).
 """
 exp(::EssentialManifold, ::Any...)
 
@@ -168,7 +162,7 @@ as
 \log_p (S_z(t_{\text{opt}})q) = [\text{Log}(R_{p_i}^T R_z(t_{\text{opt}})R_{b_i})]_{i=1,2},
 ````
 where $\text{Log}$ is the [`logarithm`](@ref log(::Rotations, ::Any...)) on $SO(3)$. For more
-details see [^TronDaniilidis2017].
+details see [TronDaniilidis:2017](@cite).
 """
 log(M::EssentialManifold, ::Any, ::Any)
 
@@ -221,7 +215,7 @@ f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z
 for the given values. This is done by finding the discontinuity points $t_{d_i}, i=1,2$ of its derivative
 and using Newton's method to minimize the function over the intervals $[t_{d_1},t_{d_2}]$ and $[t_{d_2},t_{d_1}+2π]$
 separately. Then, the minimizer for which $f$ is minimal is chosen and given back together with the minimal value.
-For more details see Algorithm 1 in [^TronDaniilidis2017].
+For more details see Algorithm 1 in [TronDaniilidis:2017](@cite).
 """
 function dist_min_angle_pair(p, q)
     #compute rotations
@@ -321,7 +315,7 @@ This function computes the point $t_{\text{di}}$ for which the first derivative 
 f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}) \text{ for } i=1,2,
 ````
 does not exist. This is the case for $\sin(θ_i(t_{\text{di}})) = 0$. For more details see Proposition 9
-and its proof, as well as Lemma 1 in [^TronDaniilidis2017].
+and its proof, as well as Lemma 1 in [TronDaniilidis:2017](@cite).
 """
 function dist_min_angle_pair_discontinuity_distance(q)
     c1 = q[1, 1] + q[2, 2]
@@ -338,7 +332,7 @@ end
 @doc raw"""
     dist_min_angle_pair_compute_df_break(t_break, q)
 
-This function computes the derivatives of each term $f_i, i=1,2,$ at discontinuity point `t_break`. For more details see [^TronDaniilidis2017].
+This function computes the derivatives of each term $f_i, i=1,2,$ at discontinuity point `t_break`. For more details see [TronDaniilidis:2017](@cite).
 """
 function dist_min_angle_pair_compute_df_break(t_break, q)
     c = cos(t_break)
@@ -357,7 +351,7 @@ This function computes the minimizer of the function
 ````math
 f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}) \text{ for } i=1,2,
 ````
-in the interval $[$`t_low`, `t_high`$]$ using Newton's method. For more details see [^TronDaniilidis2017].
+in the interval $[$`t_low`, `t_high`$]$ using Newton's method. For more details see [TronDaniilidis:2017](@cite).
 """
 function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t_high)
     tol_dist = sqrt(eps(eltype(t_min)))
@@ -400,7 +394,7 @@ end
 @doc raw"""
     manifold_dimension(M::EssentialManifold{is_signed, ℝ})
 
-Return the manifold dimension of the [`EssentialManifold`](@ref), which is `5`[^TronDaniilidis2017].
+Return the manifold dimension of the [`EssentialManifold`](@ref), which is `5`[TronDaniilidis:2017](@cite).
 """
 function manifold_dimension(::EssentialManifold)
     return 5
@@ -483,7 +477,7 @@ Project `X` onto the vertical space $T_{\text{vp}}\text{SO}(3)^2$ with
 \text{vert\_proj}_p(X) = e_z^T(R_1 X_1 + R_2 X_2),
 ````
 where $e_z$ is the third unit vector, $X_i ∈ T_{p}\text{SO}(3)$ for $i=1,2,$ and it holds $R_i = R_0 R'_i, i=1,2,$ where $R'_i$ is part of the
-pose of camera $i$ $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$ [^TronDaniilidis2017].
+pose of camera $i$ $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$ [TronDaniilidis:2017](@cite).
 """
 function vert_proj(M::EssentialManifold, p, X)
     return sum(vert_proj.(Ref(M.manifold), p, X))

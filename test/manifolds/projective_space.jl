@@ -324,4 +324,11 @@ include("../utils.jl")
             end
         end
     end
+
+    @testset "Volume" begin
+        @test manifold_volume(ProjectiveSpace(0)) ≈ 1
+        @test manifold_volume(ProjectiveSpace(1)) ≈ π
+        @test manifold_volume(ProjectiveSpace(2)) ≈ 2 * π
+        @test manifold_volume(ProjectiveSpace(3)) ≈ π * π
+    end
 end

@@ -109,7 +109,7 @@ Alias for [`FiberAtPoint`](@ref) when the fiber is a vector space.
 const VectorSpaceAtPoint{𝔽,TFiber} = FiberAtPoint{
     𝔽,
     TFiber,
-} where {TFiber<:VectorBundleFibers{<:FiberType,<:AbstractManifold{𝔽}}}
+} where {𝔽,TFiber<:VectorBundleFibers{<:FiberType,<:AbstractManifold{𝔽}}}
 
 function VectorSpaceAtPoint(M::AbstractManifold, fiber::VectorSpaceFiberType, p)
     return FiberAtPoint(BundleFibers(fiber, M), p)
@@ -122,7 +122,7 @@ VectorSpaceAtPoint(fiber::BundleFibers{<:VectorSpaceFiberType}, p) = FiberAtPoin
 Alias for [`VectorSpaceAtPoint`](@ref) for the tangent space at a point.
 """
 const TangentSpaceAtPoint{𝔽,M} =
-    FiberAtPoint{𝔽,TangentBundleFibers{M}} where {𝔽,M<:AbstractManifold{𝔽}}
+    VectorSpaceAtPoint{𝔽,TangentBundleFibers{M}} where {𝔽,M<:AbstractManifold{𝔽}}
 
 """
     TangentSpaceAtPoint(M::AbstractManifold, p)
@@ -141,7 +141,7 @@ space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifo
 TangentSpace(M::AbstractManifold, p) = TangentSpaceAtPoint(M, p)
 
 const CotangentSpaceAtPoint{𝔽,M} =
-    VectorSpaceAtPoint{CotangentBundleFibers{M}} where {𝔽,M<:AbstractManifold{𝔽}}
+    VectorSpaceAtPoint{𝔽,CotangentBundleFibers{M}} where {𝔽,M<:AbstractManifold{𝔽}}
 
 """
     CotangentSpaceAtPoint(M::AbstractManifold, p)

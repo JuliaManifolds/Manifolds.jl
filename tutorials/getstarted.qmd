@@ -250,7 +250,7 @@ In this section we take a look how to implement generic functions on manifolds.
 
 For our example here, we want to implement the so-called [📖 Bézier curve](https://en.wikipedia.org
 /wiki/Bézier_curve) using the so-called [📖 de-Casteljau algorithm](https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm).
-The linked algorithm can easily be generalised to manifolds by replacing lines with geodesics. This was for example used in [^BergmannGousenbourger2018] and the following example is an extended version of an example from [^AxenBaranBergmannRzecki2022].
+The linked algorithm can easily be generalised to manifolds by replacing lines with geodesics. This was for example used in [BergmannGousenbourger:2018](@cite) and the following example is an extended version of an example from [AxenBaranBergmannRzecki:2023](@cite).
 
 The algorithm works recursively. For the case that we have a Bézier curve with just two points, the algorithm just evaluates the geodesic connecting both at some time point $t∈[0,1]$. The function to evaluate a shortest geodesic (it might not be unique, but then a deterministic choice is taken) between two points `p` and `q` on a manifold `M` [🔗 `shortest_geodesic(M, p, q, t)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any}).
 
@@ -271,7 +271,7 @@ end
 
 Which can now be used on any manifold where the shortest geodesic is implemented
 
-Now on several manifolds the [📖 exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see [^AbsilMahonySepulchre2008], Def. 4.1.1 for details) and its (local) inverse.
+Now on several manifolds the [📖 exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see  [AbsilMahonySepulchre:2008](@cite), Def. 4.1.1 for details) and its (local) inverse.
 
 The function itself is quite similar to the expponential map, just that [🔗 `retract(M, p, X, m)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.retract) has one further parameter, the type of retraction to take, so `m` is a subtype of [`AbstractRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractRetractionMethod) `m`, the same for the [🔗 `inverse_retract(M, p, q, n)`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.inverse_retract) with an [`AbstractInverseRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractInverseRetractionMethod) `n`.
 
@@ -424,22 +424,11 @@ The same approach is used for
 
 Again, for all of these, the concrete types only have to be used if you want to do a second, different from the details, property, for example a second way to embed a manfiold. If a manifold is (in its usual representation) an embedded manifold, this works with the default manifold type already, since then it is again set as the reasonable default.
 
-## References
+## Literature
 
-[^AbsilMahonySepulchre2008]:
-    > Absil, P.-A., Mahony, R. and Sepulchre R.,
-    > _Optimization Algorithms on Matrix Manifolds_
-    > Princeton University Press, 2008,
-    > doi: [10.1515/9781400830244](https://doi.org/10.1515/9781400830244)
-    > [open access](http://press.princeton.edu/chapters/absil/)
-[^AxenBaranBergmannRzecki2022]:
-    >Axen, S. D., Baran, M., Bergmann, R. and Rzecki, K:
-    > _Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds_,
-    > arXiv preprint, 2022, [2106.08777](https://arxiv.org/abs/2106.08777)
-[^BergmannGousenbourger2018]:
-    > Bergmann, R. and Gousenbourger, P.-Y.:
-    > _A variational model for data fitting on manifolds
-    > by minimizing the acceleration of a Bézier curve_.
-    > Frontiers in Applied Mathematics and Statistics, 2018.
-    > doi: [10.3389/fams.2018.00059](https://dx.doi.org/10.3389/fams.2018.00059),
-    > arXiv: [1807.10090](https://arxiv.org/abs/1807.10090)
+````{=commonmark}
+```@bibliography
+Pages = ["tutorials/getstarted.md"]
+Canonical=false
+```
+````

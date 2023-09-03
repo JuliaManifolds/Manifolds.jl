@@ -380,4 +380,12 @@ include("../utils.jl")
             end
         end
     end
+    @testset "Riemannian Hessian" begin
+        M = Grassmann(3, 2)
+        p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        X = [0.0 0.0; 0.0 0.0; 0.0 1.0]
+        Y = [0.0 1.0; -1.0 0.0; 1.0 0.0]
+        Z = [0.0 -1.0; 1.0 0.0; 1.0 0.0]
+        @test riemannian_Hessian(M, p, Y, Z, X) == [0.0 0.0; 0.0 0.0; 2.0 0.0]
+    end
 end

@@ -1,0 +1,180 @@
+---
+title: Integration
+---
+
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+using Pkg;
+cd(@__DIR__)
+Pkg.activate("."); # for reproducibility use the local tutorial environment.
+Pkg.develop(PackageSpec(; path=(@__DIR__) * "/../"))
+using Markdown
+```
+
+This part of documentation covers integration of scalar functions defined on manifolds $f \colon \mathcal{M} \to \mathbb{R}$:
+
+```math
+\int_{\mathcal M} f(p) \mathrm{d}p
+```
+
+The basic concepts are derived from geometric measure theory.
+In principle, there are many ways in which a manifold can be equipped with a measure that can be later used to define an integral.
+One of the most popular ways is based on pushing the Lebesgue measure on a tangent space through the exponential map.
+Any other suitable atlas could be used, not just the one defined by normal coordinates, though each one requires different volume density corrections due to the Jacobian determinant of the pushforward.
+`Manifolds.jl` provides the function [`volume_density`](@ref) that calculates that quantity, denoted $\theta_p(X)$.
+See for example [LeBrignantPuechmorel:2019](@cite), Definition 11, for a precise description using Jacobi fields.
+
+While many sources define volume density as a function of two points, `Manifolds.jl` decided to use the more general point-tangent vector formulation. The two-points variant can be implemented as
+```{julia}
+using Manifolds
+volume_density_two_points(M::AbstractManifold, p, q) = volume_density(M, p, log(M, p, q))
+```
+
+The simplest way to of integrating a function on a compact manifold is through a [📖 Monte Carlo integrator](https://en.wikipedia.org/wiki/Monte_Carlo_integration).
+A simple variant can be implemented as follows (assuming uniform distribution of `rand`):
+
+```{julia}
+using LinearAlgebra, Distributions, SpecialFunctions
+function simple_mc_integrate(M::AbstractManifold, f; N::Int = 1000)
+    V = manifold_volume(M)
+    sum = 0.0
+    q = rand(M)
+    for i in 1:N
+        sum += f(M, q)
+        rand!(M, q)
+    end
+    return V * sum/N
+end
+```
+
+We used the function [`manifold_volume`](@ref) to get the volume of the set over which the integration is performed, as described in the linked Wikipedia article.
+
+## Distributions
+
+We will now try to verify that volume density correction correctly changes probability density of an exponential-wrapped normal distribution.
+`pdf_tangent_space` (defined in the next code block) represents probability density of a normally distributed random variable $X_T$ in the tangent space $T_p \mathcal{M}$.
+Its probability density (with respect to the Lebesgue measure of the tangent space) is $f_{X_T}\colon T_p \mathcal{M} \to \mathbb{R}$.
+
+`pdf_manifold` (defined below) refers to the probability density of the distribution $X_M$ from the tangent space $T_p \mathcal{M}$ wrapped using exponential map on the manifold.
+The formula for probability density with respect to pushforward measure of the Lebesgue measure in the tangent space reads
+```math
+f_{X_M}(q) = \sum_{X \in T_p\mathcal{M}, \exp_p(X)=q} \frac{f_{X_T}(X)}{\theta_p(X)}
+```
+[`volume_density`](@ref) function calculates the correction $\theta_p(X)$.
+
+
+```{julia}
+function pdf_tangent_space(M::AbstractManifold, p)
+    return pdf(MvNormal(zeros(manifold_dimension(M)), 0.2*I), p)
+end
+
+function pdf_manifold(M::AbstractManifold, q)
+    p = [1.0, 0.0, 0.0]
+    X = log(M, p, q)
+    Xc = get_coordinates(M, p, X, DefaultOrthonormalBasis())
+    vd = abs(volume_density(M, p, X))
+    if vd > eps()
+        return pdf_tangent_space(M, Xc) / vd
+    else
+        return 0.0
+    end
+end
+
+println(simple_mc_integrate(Sphere(2), pdf_manifold; N=1000000))
+```
+
+The function `simple_mc_integrate`, defined in the previous section, is used to verify that the density integrates to 1 over the manifold.
+
+Note that our `pdf_manifold` implements a simplified version of $f_{X_M}$ which assumes that the probability mass of `pdf_tangent_space` outside of (local) injectivity radius at $p$ is negligible.
+In such case there is only one non-zero summand in the formula for $f_{X_M}(q)$, namely $X=\log_p(q)$.
+Otherwise we would have to consider other vectors $Y\in T_p \mathcal{M}$ such that $\exp_p(Y) = q$ in that sum.
+
+Remarkably, exponential-wrapped distributions possess three important qualities [ChevallierLiLuDunson:2022](@cite):
+
+* Densities of $X_M$ are explicit. There is no normalization constant that needs to be computed like in truncated distributions.
+* Sampling from $X_M$ is easy. It suffices to get a sample from $X_T$ and pass it to the exponential map.
+* If mean of $X_T$ is 0, then there is a simple correspondence between moments of $X_M$ and $X_T$, for example $p$ is the mean of $X_M$.
+
+## Kernel density estimation
+
+We can also make a Pelletier's isotropic kernel density estimator. Given points $p_1, p_2, \dots, p_n$ on $d$-dimensional manifold $\mathcal M$
+the density at point $q$ is defined as
+```math
+f(q) = \frac{1}{n h^d} \sum_{i=1}^n \frac{1}{\theta_q(\log_q(p_i))}K\left( \frac{d(q, p_i)}{h} \right),
+```
+
+where $h$ is the bandwidth, a small positive number less than the injectivity radius of $\mathcal M$ and $K\colon\mathbb{R}\to\mathbb{R}$ is a kernel function.
+Note that Pelletier's estimator can only use radially-symmetric kernels.
+The radially symmetric multivariate Epanechnikov kernel used in the example below is described in [LangreneMarin:2019](@cite).
+
+```{julia}
+struct PelletierKDE{TM<:AbstractManifold,TPts<:AbstractVector}
+    M::TM
+    bandwidth::Float64
+    pts::TPts
+end
+
+(kde::PelletierKDE)(::AbstractManifold, p) = kde(p)
+function (kde::PelletierKDE)(p)
+    n = length(kde.pts)
+    d = manifold_dimension(kde.M)
+    sum_kde = 0.0
+    function epanechnikov_kernel(x)
+        if x < 1
+            return gamma(2+d/2) * (1-x^2)/(π^(d/2))
+        else
+            return 0.0
+        end
+    end
+    for i in 1:n
+        X = log(kde.M, p, kde.pts[i])
+        Xn = norm(kde.M, p, X)
+        sum_kde += epanechnikov_kernel(Xn / kde.bandwidth) / volume_density(kde.M, p, X)
+    end
+    sum_kde /= n * kde.bandwidth^d
+    return sum_kde
+end
+
+M = Sphere(2)
+pts = rand(M, 8)
+kde = PelletierKDE(M, 0.7, pts)
+println(simple_mc_integrate(Sphere(2), kde; N=1000000))
+println(kde(rand(M)))
+```
+
+
+## Technical notes
+
+This section contains a few technical notes that are relevant to the problem of integration on manifolds but can be freely skipped on the first read of the tutorial.
+
+### Conflicting statements about volume of a manifold
+
+[`manifold_volume`](@ref) and [`volume_density`](@ref) are closely related to each other, though very few sources explore this connection, and some even claiming a certain level of arbitrariness in defining `manifold_volume`.
+Volume is sometimes considered arbitrary because Riemannian metrics on some spaces like the manifold of rotations are defined with arbitrary constants.
+However, once a constant is picked (and it must be picked before any useful computation can be performed), all geometric operations must follow in a consistent way: inner products, exponential and logarithmic maps, volume densities, etc.
+`Manifolds.jl` consistently picks such constants and provides a unified framework, though it sometimes results in picking a different constant than what is the most popular in some sub-communities.
+
+### Haar measures
+
+On Lie groups the situation regarding integration is more complicated.
+Invariance under left or right group action is a desired property that leads one to consider Haar measures [Tornier:2020](@cite).
+It is, however, unclear what are the practical benefits of considering Haar measures over the Lebesgue measure of the underlying manifold, which often turns out to be invariant anyway.
+
+### Integration in charts
+
+Integration through charts is an approach currently not supported by `Manifolds.jl`.
+One has to define a suitable set of disjoint charts covering the entire manifold and use a method for multivariate Euclidean integration.
+Note that ranges of parameters have to be adjusted for each manifold and scaling based on the metric needs to be applied.
+See [BoyaSudarshanTilma:2003](@cite) for some considerations on symmetric spaces.
+
+
+## References
+
+## Literature
+
+```@bibliography
+Pages = ["tutorials/integration.md"]
+Canonical=false
+```

@@ -65,3 +65,8 @@ Private = true
 ```
 
 ## Literature
+
+```@bibliography
+Pages = ["manifolds/stiefel.md"]
+Canonical=false
+```

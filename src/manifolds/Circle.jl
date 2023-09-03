@@ -332,6 +332,13 @@ i.e. $\dim(𝕊^1) = 1$.
 manifold_dimension(::Circle) = 1
 
 @doc raw"""
+    manifold_volume(M::Circle)
+
+Return the volume of the [`Circle`](@ref) `M`, i.e. ``2π``.
+"""
+manifold_volume(::Circle) = 2 * π
+
+@doc raw"""
     mean(M::Circle{ℝ}, x::AbstractVector[, w::AbstractWeights])
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
@@ -524,6 +531,13 @@ function parallel_transport_to!(M::Circle{ℂ}, Y, p, X, q)
     end
     return Y
 end
+
+"""
+    volume_density(::Circle, p, X)
+
+Return volume density of [`Circle`](@ref), i.e. 1.
+"""
+volume_density(::Circle, p, X) = one(eltype(X))
 
 zero_vector(::Circle, p::T) where {T<:Number} = zero(p)
 zero_vector!(::Circle, X, p) = fill!(X, 0)

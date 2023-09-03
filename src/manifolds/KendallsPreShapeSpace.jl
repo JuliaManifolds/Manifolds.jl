@@ -4,7 +4,7 @@
 
 Kendall's pre-shape space of ``k`` landmarks in ``ℝ^n`` represented by n×k matrices.
 In each row the sum of elements of a matrix is equal to 0. The Frobenius norm of the matrix
-is equal to 1 [^Kendall1984][^Kendall1989].
+is equal to 1 [Kendall:1984](@cite)[Kendall:1989](@cite).
 
 The space can be interpreted as tuples of ``k`` points in ``ℝ^n`` up to simultaneous
 translation and scaling of all points, so this can be thought of as a quotient manifold.
@@ -88,7 +88,7 @@ manifold_dimension(::KendallsPreShapeSpace{n,k}) where {n,k} = n * (k - 1) - 1
 
 Project point `p` from the embedding to [`KendallsPreShapeSpace`](@ref) by selecting
 the right element from the orthogonal section representing the quotient manifold `M`.
-See Section 3.7 of [^Srivastava2016] for details.
+See Section 3.7 of [SrivastavaKlassen:2016](@cite) for details.
 
 The method computes the mean of the landmarks and moves them to make their mean zero;
 afterwards the Frobenius norm of the landmarks (as a matrix) is normalised to fix the scaling.
@@ -106,14 +106,7 @@ end
 
 Project tangent vector `X` at point `p` from the embedding to [`KendallsPreShapeSpace`](@ref)
 by selecting the right element from the tangent space to orthogonal section representing the
-quotient manifold `M`. See Section 3.7 of [^Srivastava2016] for details.
-
-# References
-
-[^Srivastava2016]:
-    > A. Srivastava and E. P. Klassen, Functional and Shape Data Analysis. Springer New York, 2016.
-    > ISBN: 978-1-4939-4018-9.
-    > doi: [10.1007/978-1-4939-4020-2](https://doi.org/10.1007/978-1-4939-4020-2).
+quotient manifold `M`. See Section 3.7 of [SrivastavaKlassen:2016](@cite) for details.
 """
 project(::KendallsPreShapeSpace, p, X)
 

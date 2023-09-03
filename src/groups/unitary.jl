@@ -4,7 +4,7 @@
 The group of unitary matrices ``\mathrm{U}(n, 𝔽)``, either complex (when 𝔽=ℂ) or quaternionic
 (when 𝔽=ℍ)
 
-The group consists of all points ``p ∈ 𝔽^{n × n}`` where ``p^\mathrm{H}p = pp^\mathrm{H} = I``.
+The group consists of all points ``p ∈ 𝔽^{n × n}`` where ``p^{\mathrm{H}}p = pp^{\mathrm{H}} = I``.
 
 The tangent spaces are if the form
 

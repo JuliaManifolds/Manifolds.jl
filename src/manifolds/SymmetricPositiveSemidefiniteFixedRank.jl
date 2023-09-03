@@ -31,7 +31,7 @@ X ∈ 𝔽^{n × n}\,|\,X = qY^{\mathrm{H}} + Yq^{\mathrm{H}}
 ````
 
 Note that the metric used yields a non-complete manifold.
-The metric was used in[^JourneeBachAbsilSepulchre2010][^MassartAbsil2020].
+The metric was used in [JourneeBachAbsilSepulchre:2010](@cite)[MassartAbsil:2020](@cite).
 
 # Constructor
 
@@ -39,19 +39,6 @@ The metric was used in[^JourneeBachAbsilSepulchre2010][^MassartAbsil2020].
 
 Generate the manifold of $n × n$ symmetric positive semidefinite matrices of rank $k$
 over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
-
-[^JourneeBachAbsilSepulchre2010]:
-    > Journée, M., Bach, F., Absil, P.-A., and Sepulchre, R.:
-    > “Low-Rank Optimization on the Cone of Positive Semidefinite Matrices”,
-    > SIAM Journal on Optimization (20)5, pp. 2327–2351, 2010.
-    > doi: [10.1137/080731359](https://doi.org/10.1137/080731359),
-    > arXiv: [0807.4423](http://arxiv.org/abs/0807.4423).
-[^MassartAbsil2020]:
-    > Massart, E., Absil, P.-A.:
-    > "Quotient Geometry with Simple Geodesics for the AbstractManifold of Fixed-Rank Positive-Semidefinite Matrices",
-    > SIAM Journal on Matrix Analysis and Applications (41)1, pp. 171–198, 2020.
-    > doi: [10.1137/18m1231389](https://doi.org/10.1137/18m1231389),
-    > preprint: [sites.uclouvain.be/absil/2018.06](https://sites.uclouvain.be/absil/2018.06).
 """
 struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
 

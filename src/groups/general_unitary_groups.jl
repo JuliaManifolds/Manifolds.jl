@@ -64,18 +64,7 @@ exp_lie(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}},ℝ}, X)
      exp_lie(G::SpecialOrthogonal{TypeParameter{Tuple{4}}}, X)
 
 Compute the group exponential map on the [`Orthogonal`](@ref)`(4)` or the [`SpecialOrthogonal`](@ref) group.
-The algorithm used is a more numerically stable form of those proposed in [^Gallier2002], [^Andrica2013].
-
-[^Gallier2002]:
-    > Gallier J.; Xu D.; Computing exponentials of skew-symmetric matrices
-    > and logarithms of orthogonal matrices.
-    > International Journal of Robotics and Automation (2002), 17(4), pp. 1-11.
-    > [pdf](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.35.3205).
-[^Andrica2013]:
-    > Andrica D.; Rohan R.-A.; Computing the Rodrigues coefficients of the
-    > exponential map of the Lie groups of matrices.
-    > Balkan Journal of Geometry and Its Applications (2013), 18(2), pp. 1-2.
-    > [pdf](https://www.emis.de/journals/BJGA/v18n2/B18-2-an.pdf).
+The algorithm used is a more numerically stable form of those proposed in [GallierXu:2002](@cite), [AndricaRohan:2013](@cite).
 """
 exp_lie(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},ℝ}, X)
 
@@ -281,6 +270,10 @@ function log_lie!(
     return project!(G, X, Identity(G), X)
 end
 
+function manifold_volume(M::GeneralUnitaryMultiplicationGroup)
+    return manifold_volume(M.manifold)
+end
+
 function Random.rand!(G::GeneralUnitaryMultiplicationGroup, pX; kwargs...)
     rand!(G.manifold, pX; kwargs...)
     return pX
@@ -329,4 +322,8 @@ function translate_diff!(
     ::RightBackwardAction,
 )
     return copyto!(G, Y, inv(G, p) * X * p)
+end
+
+function volume_density(M::GeneralUnitaryMultiplicationGroup, p, X)
+    return volume_density(M.manifold, p, X)
 end

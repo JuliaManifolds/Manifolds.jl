@@ -47,7 +47,7 @@ end
 @doc raw"""
     Flag{T,d} <: AbstractDecoratorManifold{ℝ}
 
-Flag manifold of ``d`` subspaces of ``ℝ^N``[^YeWongLim2022]. By default the manifold uses
+Flag manifold of ``d`` subspaces of ``ℝ^N`` [YeWongLim:2021](@cite). By default the manifold uses
 the Stiefel coordinates representation, embedding it in the [`Stiefel`](@ref) manifold.
 The other available representation is an embedding in [`OrthogonalMatrices`](@ref).
 It can be utilized using [`OrthogonalPoint`](@ref) and [`OrthogonalTVector`](@ref) wrappers.
@@ -67,11 +67,6 @@ where ``𝕍_i`` for ``i ∈ 1, 2, …, d`` are subspaces of ``ℝ^N`` of dimens
 
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in a field. Value can either be `:field` or `:type`.
-
-[^YeWongLim2022]:
-    > K. Ye, K. S.-W. Wong, and L.-H. Lim, “Optimization on flag manifolds,” Math. Program.,
-    > vol. 194, no. 1, pp. 621–660, Jul. 2022,
-    > doi: [10.1007/s10107-021-01640-3](https://doi.org/10.1007/s10107-021-01640-3).
 """
 struct Flag{T,dp1} <: AbstractDecoratorManifold{ℝ}
     subspace_dimensions::ZeroTuple{NTuple{dp1,Int}}

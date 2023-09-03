@@ -967,6 +967,14 @@ manifold dimensions the product is made of.
 """
 manifold_dimension(M::ProductManifold) = mapreduce(manifold_dimension, +, M.manifolds)
 
+"""
+    manifold_dimension(M::ProductManifold)
+
+Return the volume of [`ProductManifold`](@ref) `M`, i.e. product of volumes of the
+manifolds `M` is constructed from.
+"""
+manifold_volume(M::ProductManifold) = mapreduce(manifold_volume, *, M.manifolds)
+
 function mid_point!(M::ProductManifold, q, p1, p2)
     map(
         mid_point!,
@@ -1334,6 +1342,31 @@ function representation_size(M::ProductManifold)
 end
 
 @doc raw"""
+    Y = riemannian_Hessian(M::ProductManifold, p, G, H, X)
+    riemannian_Hessian!(M::ProductManifold, Y, p, G, H, X)
+
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+On a product manifold, this decouples and can be computed elementwise.
+"""
+riemannian_Hessian(M::ProductManifold, p, G, H, X)
+
+function riemannian_Hessian!(M::ProductManifold, Y, p, G, H, X)
+    map(
+        riemannian_Hessian!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, G),
+        submanifold_components(M, H),
+        submanifold_components(M, X),
+    )
+    return Y
+end
+
+@doc raw"""
     riemann_tensor(M::ProductManifold, p, X, Y, Z)
 
 Compute the Riemann tensor at point from `p` with tangent vectors `X`, `Y` and `Z` on
@@ -1636,6 +1669,43 @@ function vector_transport_to!(M::ProductManifold, Y, p, X, q, m::ParallelTranspo
         submanifold_components(M, X),
         submanifold_components(M, q),
     ),
+    return Y
+end
+
+@doc raw"""
+    volume_density(M::ProductManifold, p, X)
+
+Return volume density on the [`ProductManifold`](@ref) `M`, i.e. product of constituent
+volume densities.
+"""
+function volume_density(M::ProductManifold, p, X)
+    dens = map(
+        volume_density,
+        M.manifolds,
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return prod(dens)
+end
+
+@doc raw"""
+    Y = Weingarten(M::ProductManifold, p, X, V)
+    Weingarten!(M::ProductManifold, Y, p, X, V)
+
+Since the metric decouples, also the computation of the Weingarten map
+``\mathcal W_p`` can be computed elementwise on the single elements of the [`ProductManifold`](@ref) `M`.
+"""
+Weingarten(::ProductManifold, p, X, V)
+
+function Weingarten!(M::ProductManifold, Y, p, X, V)
+    map(
+        Weingarten!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+        submanifold_components(M, V),
+    )
     return Y
 end
 

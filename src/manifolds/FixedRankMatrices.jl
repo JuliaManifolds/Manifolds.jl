@@ -3,7 +3,7 @@
 
 The manifold of ``m × n`` real-valued or complex-valued matrices of fixed rank ``k``, i.e.
 ````math
-\bigl\{ p ∈ 𝔽^{m × n}\ \big|\ \operatorname{rank}(p) = k \bigr\},
+\bigl\{ p ∈ 𝔽^{m × n}\ \big|\ \operatorname{rank}(p) = k\bigr\},
 ````
 where ``𝔽 ∈ \{ℝ,ℂ\}`` and the rank is the number of linearly independent columns of a matrix.
 
@@ -29,18 +29,12 @@ T_p\mathcal M = \bigl\{ U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mat
 where ``0_k`` is the ``k × k`` zero matrix. See [`UMVTVector`](@ref) for details.
 
 The (default) metric of this manifold is obtained by restricting the metric
-on ``ℝ^{m × n}`` to the tangent bundle[^Vandereycken2013].
+on ``ℝ^{m × n}`` to the tangent bundle [Vandereycken:2013](@cite).
 
 # Constructor
     FixedRankMatrices(m, n, k[, field=ℝ])
 
 Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
-
-[^Vandereycken2013]:
-    > Bart Vandereycken: "Low-rank matrix completion by Riemannian Optimization,
-    > SIAM Journal on Optiomoization, 23(2), pp. 1214–1236, 2013.
-    > doi: [10.1137/110845768](https://doi.org/10.1137/110845768),
-    > arXiv: [1209.3834](https://arxiv.org/abs/1209.3834).
 """
 struct FixedRankMatrices{M,N,K,𝔽} <: AbstractDecoratorManifold{𝔽} end
 function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)
@@ -356,12 +350,7 @@ get_embedding(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽} = Euclidean(m,
     injectivity_radius(::FixedRankMatrices)
 
 Return the incjectivity radius of the manifold of [`FixedRankMatrices`](@ref), i.e. 0.
-See [^HosseiniUschmajew2017].
-
-[^HosseiniUschmajew2017]:
-    > S. Hosseini and A. Uschmajew, “A Riemannian Gradient Sampling Algorithm for Nonsmooth
-    > Optimization on Manifolds,” SIAM J. Optim., vol. 27, no. 1, pp. 173–189, Jan. 2017,
-    > doi: [10.1137/16M1069298](https://doi.org/10.1137/16M1069298).
+See [HosseiniUschmajew:2017](@cite).
 """
 function injectivity_radius(::FixedRankMatrices{m,n,k}) where {m,n,k}
     return 0.0
@@ -563,6 +552,28 @@ function retract_polar!(
     copyto!(q.Vt, @view(T.Vt[1:k, :]) * QV')
 
     return q
+end
+
+@doc raw"""
+    Y = riemannian_Hessian(M::FixedRankMatrices, p, G, H, X)
+    riemannian_Hessian!(M::FixedRankMatrices, Y, p, G, H, X)
+
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+The Riemannian Hessian can be computed as stated in Remark 4.1 [Nguyen:2023](@cite)
+or Section 2.3 [Vandereycken:2013](@cite), that B. Vandereycken adopted for [Manopt (Matlab)](https://www.manopt.org/reference/manopt/manifolds/fixedrank/fixedrankembeddedfactory.html).
+"""
+riemannian_Hessian(M::FixedRankMatrices, p, G, H, X)
+
+function riemannian_Hessian!(M::FixedRankMatrices, Y, p, G, H, X)
+    project!(M, Y, p, H)
+    T1 = (G * X.Vt) / Diagonal(p.S)
+    Y.U .+= T1 .- p.U * (p.U' * T1)
+    T2 = (G' * X.U) / Diagonal(p.S)
+    Y.Vt .+= T2 .- p.Vt' * (p.Vt * T2)
+    return Y
 end
 
 function Base.show(io::IO, ::FixedRankMatrices{M,N,K,𝔽}) where {M,N,K,𝔽}

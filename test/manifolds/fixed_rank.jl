@@ -230,4 +230,13 @@ include("../utils.jl")
             )
         end
     end
+    @testset "Riemannian Hessian" begin
+        M = FixedRankMatrices(3, 2, 2)
+        pE = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+        p = SVDMPoint(pE)
+        X = UMVTVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], [1.0 0.0; 0.0 1.0])
+        G = [1.0 0.0; 0.0 2.0; 0.0 0.0]
+        H = [0.0 3.0; 0.0 4.0; 0.0 1.0]
+        @test is_vector(M, p, riemannian_Hessian(M, p, G, H, X))
+    end
 end

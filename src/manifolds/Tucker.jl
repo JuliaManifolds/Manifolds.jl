@@ -10,7 +10,7 @@ Segre manifold, i.e., the set of rank-1 tensors.
 
 Let ``\mathbb{F}`` be the real or complex numbers.
 Any tensor ``p`` on the Tucker manifold can be represented as a multilinear product in HOSVD
-[^DeLathauwer2000] form
+[DeLathauwerDeMoorVanderwalle:2000](@cite) form
 ```math
 p = (U_1,\dots,U_D) \cdot \mathcal{C}
 ```
@@ -21,7 +21,7 @@ the matrix ``U_d \in \mathbb{F}^{N_d \times R_d}`` contains the singular vectors
 # Tangent space
 
 The tangent space to the Tucker manifold at
-``p = (U_1,\dots,U_D) \cdot \mathcal{C}`` is [^Koch2010]
+``p = (U_1,\dots,U_D) \cdot \mathcal{C}`` is [KochLubich:2010](@cite)
 ```math
 T_p \mathcal{M} =
 \bigl\{
@@ -40,16 +40,6 @@ where ``\mathcal{C}^\prime`` is arbitrary, ``U_d^{\mathrm{H}}`` is the Hermitian
 
 Generate the manifold of `field`-valued tensors of dimensions  `N[1] × … × N[D]` and
 multilinear rank `R = (R[1], …, R[D])`.
-
-[^DeLathauwer2000]:
-    > Lieven De Lathauwer, Bart De Moor, Joos Vandewalle: "A multilinear singular value decomposition"
-    > SIAM Journal on Matrix Analysis and Applications, 21(4), pp. 1253-1278, 2000
-    > doi: [10.1137/S0895479896305696](https://doi.org/10.1137/S0895479896305696)
-
-[^Koch2010]:
-    > Othmar Koch, Christian Lubic, "Dynamical Tensor approximation"
-    > SIAM Journal on Matrix Analysis and Applications, 31(5), pp. 2360-2375, 2010
-    > doi: [10.1137/09076578X](https://doi.org/10.1137/09076578X)
 """
 struct Tucker{N,R,D,𝔽} <: AbstractManifold{𝔽} end
 function Tucker(n⃗::NTuple{D,Int}, r⃗::NTuple{D,Int}, field::AbstractNumbers=ℝ) where {D}
@@ -92,13 +82,7 @@ assumptions are made.
 The low-multilinear rank tensor arising from the sequentially truncated the higher-order
 singular value decomposition of the `D`-dimensional array `p` of type `T`. The singular
 values are truncated to get a multilinear rank `mlrank`
-[^Vannieuwenhoven2012].
-
-[^Vannieuwenhoven2012]:
-    > Nick Vannieuwenhoven, Raf Vandebril, Karl Meerbergen: "A new truncation strategy for the higher-order singular value decomposition"
-    > SIAM Journal on Scientific Computing, 34(2), pp. 1027-1052, 2012
-    > doi: [10.1137/110836067](https://doi.org/10.1137/110836067)
-
+[VannieuwenhovenVanderbrilMeerbergen:2012](@cite).
 """
 struct TuckerPoint{T,D} <: AbstractManifoldPoint
     hosvd::HOSVD{T,D}
@@ -322,7 +306,7 @@ end
     Base.convert(::Type{Matrix{T}}, basis::CachedBasis{𝔽,DefaultOrthonormalBasis{𝔽, TangentSpaceType},HOSVDBasis{T, D}}) where {𝔽, T, D}
     Base.convert(::Type{Matrix}, basis::CachedBasis{𝔽,DefaultOrthonormalBasis{𝔽, TangentSpaceType},HOSVDBasis{T, D}}) where {𝔽, T, D}
 
-Convert a HOSVD-derived cached basis from [^Dewaele2021] of the `D`th order
+Convert a HOSVD-derived cached basis from [DewaeleBreidingVannieuwenhoven:2021](@cite) of the `D`th order
 [`Tucker`](@ref) manifold with number type `T` to a matrix.
 The columns of this matrix are the vectorisations of the
 [`embed`](@ref)dings of the basis vectors.
@@ -454,7 +438,7 @@ An implicitly stored basis of the tangent space to the Tucker manifold.
 Assume ``p = (U_1,\dots,U_D) \cdot \mathcal{C}`` is in HOSVD format and that, for
 ``d=1,\dots,D``, the singular values of the
 ``d``'th unfolding are ``\sigma_{dj}``, with ``j = 1,\dots,R_d``.
-The basis of the tangent space is as follows: [^Dewaele2021]
+The basis of the tangent space is as follows: [DewaeleBreidingVannieuwenhoven:2021](@cite)
 
 ````math
 \bigl\{
@@ -467,10 +451,6 @@ The basis of the tangent space is as follows: [^Dewaele2021]
 for all ``d = 1,\dots,D`` and all canonical basis vectors ``e_i`` and ``e_j``.
 Every ``U_d^\perp`` is such that ``[U_d \quad U_d^{\perp}]`` forms an orthonormal basis
 of ``\mathbb{R}^{N_d}``.
-
-[^Dewaele2021]:
-    > Nick Dewaele, Paul Breiding, Nick Vannieuwenhoven, "The condition number of many tensor decompositions is invariant under Tucker compression"
-    > arxiv: [2106.13034](https://arxiv.org/abs/2106.13034)
 """
 function get_basis(
     ::Tucker,
@@ -681,17 +661,11 @@ end
 @doc raw"""
     retract(::Tucker, p::TuckerPoint, X::TuckerTVector, ::PolarRetraction)
 
-The truncated HOSVD-based retraction [^Kressner2014] to the Tucker manifold, i.e.
+The truncated HOSVD-based retraction [KressnerSteinlechnerVandereycken:2013](@cite) to the Tucker manifold, i.e.
 the result is the sequentially tuncated HOSVD approximation of ``p + X``.
 
 In the exceptional case that the multilinear rank of ``p + X`` is lower than that of ``p``, this
 retraction produces a boundary point, which is outside the manifold.
-
-[^Kressner2014]:
-    > Daniel Kressner, Michael Steinlechner, Bart Vandereycken: "Low-rank tensor completion by Riemannian optimization"
-    > BIT Numerical Mathematics, 54(2), pp. 447-468, 2014
-    > doi: [10.1007/s10543-013-0455-z](https://doi.org/10.1007/s10543-013-0455-z)
-
 """
 retract(::Tucker, ::Any, ::Any, ::PolarRetraction)
 

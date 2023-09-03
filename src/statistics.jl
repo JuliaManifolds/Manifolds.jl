@@ -67,52 +67,16 @@ points are in an open geodesic ball about the mean with corresponding radius
 (see [`GeodesicInterpolationWithinRadius`](@ref)):
 
 * All simply connected complete Riemannian manifolds with non-positive sectional
-  curvature at radius $∞$ [^Cheng2016], in particular:
+  curvature at radius $∞$ [ChengHoSalehianVemuri:2016](@cite), in particular:
     + [`Euclidean`](@ref)
-    + [`SymmetricPositiveDefinite`](@ref) [^Ho2013]
+    + [`SymmetricPositiveDefinite`](@ref) [HoChengSalehianVemuri:2013](@cite)
 * Other manifolds:
-    + [`Sphere`](@ref): $\frac{π}{2}$ [^Salehian2015]
-    + [`Grassmann`](@ref): $\frac{π}{4}$ [^Chakraborty2015]
-    + [`Stiefel`](@ref)/[`Rotations`](@ref): $\frac{π}{2 \sqrt 2}$ [^Chakraborty2019]
+    + [`Sphere`](@ref): $\frac{π}{2}$ [SalehianEtAl:2015](@cite)
+    + [`Grassmann`](@ref): $\frac{π}{4}$ [ChakrabortyVemuri:2015](@cite)
+    + [`Stiefel`](@ref)/[`Rotations`](@ref): $\frac{π}{2 \sqrt 2}$ [ChakrabortyVemuri:2019](@cite)
 
 For online variance computation, the algorithm additionally uses an analogous
-recursion to the weighted Welford algorithm [^West1979].
-
-[^Ho2013]:
-    > Ho J.; Cheng G.; Salehian H.; Vemuri B. C.; Recursive Karcher expectation
-    > estimators and geometric law of large numbers.
-    > Proceedings of the 16th International Conference on Artificial Intelligence
-    > and Statistics (2013), pp. 325–332.
-    > [pdf](http://proceedings.mlr.press/v31/ho13a.pdf).
-[^Salehian2015]:
-    > Salehian H.; Chakraborty R.; Ofori E.; Vaillancourt D.; An efficient
-    > recursive estimator of the Fréchet mean on a hypersphere with applications
-    > to Medical Image Analysis.
-    > Mathematical Foundations of Computational Anatomy (2015).
-    > [pdf](https://www-sop.inria.fr/asclepios/events/MFCA15/Papers/MFCA15_4_2.pdf).
-[^Chakraborty2015]:
-    > Chakraborty R.; Vemuri B. C.; Recursive Fréchet Mean Computation on the
-    > Grassmannian and Its Applications to Computer Vision.
-    > Proceedings of the IEEE International Conference on Computer Vision (ICCV) (2015),
-    > pp. 4229-4237.
-    > doi: [10.1109/ICCV.2015.481](https://doi.org/10.1109/ICCV.2015.481),
-    > [link](http://openaccess.thecvf.com/content_iccv_2015/html/Chakraborty_Recursive_Frechet_Mean_ICCV_2015_paper.html).
-[^Cheng2016]:
-    > Cheng G.; Ho J.; Salehian H.; Vemuri B. C.; Recursive Computation of the
-    > Fréchet Mean on Non-positively Curved Riemannian Manifolds with Applications.
-    > Riemannian Computing in Computer Vision. Springer, Cham (2016), pp. 21-43.
-    > doi: [10.1007/978-3-319-22957-7_2](https://doi.org/10.1007/978-3-319-22957-7_2),
-    > [pdf](https://www.cise.ufl.edu/~vemuri/paperphp/article.php?y=2016&i=5).
-[^Chakraborty2019]:
-    > Chakraborty R.; Vemuri B. C.; Statistics on the (compact) Stiefel manifold:
-    > Theory and Applications.
-    > The Annals of Statistics (2019), 47(1), pp. 415-438.
-    > doi: [10.1214/18-AOS1692](https://doi.org/10.1214/18-AOS1692),
-    > arxiv: [1708.00045](https://arxiv.org/abs/1708.00045).
-[^West1979]:
-    > West D. H. D.; Updating Mean and Variance Estimates: An Improved Method.
-    > Communications of the ACM (1979), 22(9), pp. 532–535.
-    > doi: [10.1145/359146.359153](https://doi.org/10.1145/359146.359153).
+recursion to the weighted Welford algorithm [West:1979](@cite).
 """
 struct GeodesicInterpolation <: AbstractEstimationMethod end
 
@@ -189,7 +153,7 @@ end
 
 Estimate the covariance matrix of a set of points `x` on manifold `M`. Since the covariance matrix
 on a manifold is a rank 2 tensor, the function returns its coefficients in basis induced by
-the given tangent space basis. See Section 5 of [^Pennec2006] for details.
+the given tangent space basis. See Section 5 of [Pennec:2006](@cite) for details.
 
 The mean is calculated using the specified `mean_estimation_method` using
 [mean](@ref Statistics.mean(::AbstractManifold, ::AbstractVector, ::AbstractEstimationMethod),
@@ -199,11 +163,6 @@ Finally, the covariance matrix in the tangent plane is estimated using the Eucli
  in [`StatsBase.jl`](https://juliastats.org/StatsBase.jl/stable/cov/#StatsBase.CovarianceEstimator)
  and examples of covariance estimation methods can be found in
  [`CovarianceEstimation.jl`](https://github.com/mateuszbaran/CovarianceEstimation.jl/).
-
-[^Pennec2006]:
-    > X. Pennec, “Intrinsic Statistics on Riemannian Manifolds: Basic Tools for Geometric
-    > Measurements,” J Math Imaging Vis, vol. 25, no. 1, p. 127, Jul. 2006,
-    > doi: [10.1007/s10851-006-6228-4](https:///doi.org/10.1007/s10851-006-6228-4).
 """
 function Statistics.cov(
     M::AbstractManifold,
@@ -279,26 +238,9 @@ between two iterates is small. For more stopping criteria check the
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction.
 
-The Theory stems from[^Karcher1977] and is also described in[^PennecArsigny2013]
+The Theory stems from [Karcher:1977](@cite) and is also described in [PennecArsigny:2012](@cite)
 as the exponential barycenter.
-The algorithm is further described in[^Afsari2013].
-
-[^Afsari2013]:
-    > Afsari, B; Tron, R.; Vidal, R.: On the Convergence of Gradient
-    > Descent for Finding the Riemannian Center of Mass,
-    > SIAM Journal on Control and Optimization (2013), 51(3), pp. 2230–2260,
-    > doi: [10.1137/12086282X](https://doi.org/10.1137/12086282X),
-    > arxiv: [1201.0925](https://arxiv.org/abs/1201.0925)
-[^PennecArsigny2013]:
-    > Pennec X., Arsigny V.: Exponential Barycenters of the Canonical Cartan Connection and
-    > Invariant Means on Lie Groups.
-    > In: Nielsen F., Bhatia R. (eds) Matrix Information Geometry, (2013), pp. 123-166.
-    > doi: [10.1007/978-3-642-30232-9_7](https://doi.org/10.1007/978-3-642-30232-9_7),
-    > hal: [https://hal.inria.fr/hal-00699361/document](https://hal.inria.fr/hal-00699361/document)
-[^Karcher1977]:
-    > Karcher, H.: Riemannian center of mass and mollifier smoothing.
-    > Communications on Pure Applied Mathematics (1977), 30, pp. 509–541.
-    > doi [10.1002/cpa.3160300502](https://doi.org/10.1002/cpa.3160300502)
+The algorithm is further described in[AfsariTronVidal:2013](@cite).
 """
 mean(::AbstractManifold, ::Any...)
 function Statistics.mean(
@@ -646,13 +588,9 @@ change between two iterates is small. For more stopping criteria check the
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction.
 
-The algorithm is further described in [^Bačák2014].
+The algorithm is further described in [Bacak:2014](@cite).
 
-[^Bačák2014]:
-    > Bačák, M: Computing Medians and Means in Hadamard Spaces.
-    > SIAM Journal on Optimization (2014), 24(3), pp. 1542–1566,
-    > doi: [10.1137/140953393](https://doi.org/10.1137/140953393),
-    > arxiv: [1210.2145](https://arxiv.org/abs/1210.2145)
+
 """
 Statistics.median(
     ::AbstractManifold,
@@ -710,7 +648,7 @@ change between two iterates is small. For more stopping criteria check the
 
 The parameter ``α\in (0,2]`` is a step size.
 
-The algorithm is further described in [^FletcherVenkatasubramanianJoshi2008],
+The algorithm is further described in [FletcherVenkatasubramanianJoshi:2008](@cite),
 especially the update rule in Eq. (6), i.e. Let ``q_{k}`` denote the current
 iterate, $n$ the number of points ``x_1,\ldots,x_n``, and
 
@@ -734,12 +672,6 @@ and where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction, which by default use the exponential and logarithmic map,
 respectively.
-
-[^FletcherVenkatasubramanianJoshi2008]:
-    > Fletcher, T., Venkatasubramanian, S., Joshi, S:
-    > Robust statistics on Riemannian manifolds via the geometric median
-    > 2008 IEEE Conference on Computer Vision and Pattern Recognition,
-    > doi: [10.1109/CVPR.2008.4587747](https://doi.org/10.1109/CVPR.2008.4587747),
 """
 Statistics.median(
     ::AbstractManifold,
