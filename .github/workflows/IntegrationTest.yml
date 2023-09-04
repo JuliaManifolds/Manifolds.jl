@@ -17,7 +17,7 @@ jobs:
         package:
           - {user: JuliaManifolds, repo: Manopt.jl}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.julia-version }}
@@ -25,7 +25,7 @@ jobs:
       - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@latest
       - name: Clone Downstream
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ matrix.package.user }}/${{ matrix.package.repo }}
           path: downstream
