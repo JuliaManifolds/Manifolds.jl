@@ -10,13 +10,13 @@ using FiniteDifferences
         EM = Manifolds.MetricManifold(E, Manifolds.EuclideanMetric())
         EH = Euclidean(2, 3; field=ℍ, parameter=param)
         if param === :type
+            @test repr(E) == "Euclidean(3; field = ℝ, parameter = :type)"
+            @test repr(Ec) == "Euclidean(3; field = ℂ, parameter = :type)"
+            @test repr(EH) == "Euclidean(2, 3; field = ℍ, parameter = :type)"
+        else
             @test repr(E) == "Euclidean(3; field = ℝ)"
             @test repr(Ec) == "Euclidean(3; field = ℂ)"
             @test repr(EH) == "Euclidean(2, 3; field = ℍ)"
-        else
-            @test repr(E) == "Euclidean(3; field = ℝ, parameter = :field)"
-            @test repr(Ec) == "Euclidean(3; field = ℂ, parameter = :field)"
-            @test repr(EH) == "Euclidean(2, 3; field = ℍ, parameter = :field)"
         end
 
         @test Manifolds.allocation_promotion_function(Ec, get_vector, ()) === complex
@@ -389,7 +389,10 @@ using FiniteDifferences
         @test rH == H
     end
     @testset "Volume" begin
-        @test manifold_volume(Euclidean(2)) == Inf
+        E = Euclidean(3)
+        @test manifold_volume(E) == Inf
+        p = zeros(3)
+        X = zeros(3)
         @test volume_density(E, p, X) == 1.0
     end
 end

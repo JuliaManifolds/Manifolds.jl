@@ -27,7 +27,7 @@ function Base.show(io::IO, A::RotationAction)
 end
 
 const RotationActionOnVector{TAD,𝔽,TE,TSO} = RotationAction{
-    Euclidean{TE,𝔽},
+    <:Union{Euclidean{TE,𝔽},TranslationGroup{TE,𝔽}},
     SpecialOrthogonal{TSO},
     TAD,
 } where {TAD<:ActionDirection,𝔽,TE,TSO}

@@ -35,7 +35,7 @@ const SpecialEuclidean{T} = SemidirectProductGroup{
 const SpecialEuclideanManifold{N} =
     ProductManifold{ℝ,Tuple{TranslationGroup{N,ℝ},SpecialOrthogonal{N}}}
 
-function SpecialEuclidean(n; parameter::Symbol=:type)
+function SpecialEuclidean(n; parameter::Symbol=:field)
     Tn = TranslationGroup(n; parameter=parameter)
     SOn = SpecialOrthogonal(n; parameter=parameter)
     A = RotationAction(Tn, SOn)
@@ -43,12 +43,12 @@ function SpecialEuclidean(n; parameter::Symbol=:type)
 end
 
 const SpecialEuclideanOperation{N} = SemidirectProductOperation{
-    RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftForwardAction},
+    RotationAction{TranslationGroup{N,ℝ},SpecialOrthogonal{N},LeftForwardAction},
 }
 const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
 function Base.show(io::IO, ::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "SpecialEuclidean($(n); field=:type)")
+    return print(io, "SpecialEuclidean($(n); parameter=:type)")
 end
 function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
     n = get_n(G)
@@ -60,7 +60,9 @@ end
 end
 
 get_n(::SpecialEuclidean{TypeParameter{Tuple{N}}}) where {N} = N
-get_n(M::SpecialEuclidean{Tuple{Int}}) = manifold_dimension(M.manifold.manifolds[1])
+get_n(M::SpecialEuclidean{Tuple{Int}}) = get_n(M.manifold)
+get_n(::SpecialEuclideanManifold{TypeParameter{Tuple{N}}}) where {N} = N
+get_n(M::SpecialEuclideanManifold{Tuple{Int}}) = manifold_dimension(M.manifolds[1])
 
 Base.@propagate_inbounds function Base.getindex(
     p::AbstractMatrix,
@@ -121,7 +123,7 @@ Base.@propagate_inbounds function _padpoint!(
 end
 
 Base.@propagate_inbounds function _padvector!(
-    ::Union{SpecialEuclidean,SpecialEuclideanManifold},
+    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     X::AbstractMatrix,
 )
     n = get_n(G)
@@ -132,7 +134,7 @@ Base.@propagate_inbounds function _padvector!(
 end
 
 @doc raw"""
-    adjoint_action(::SpecialEuclidean{3}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
+    adjoint_action(::SpecialEuclidean{TypeParameter{Tuple{3}}}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
 
 Adjoint action of the [`SpecialEuclidean`](@ref) group on the vector with coefficients `fX`
 tangent at point `p`.
@@ -142,7 +144,11 @@ The formula for the coefficients reads ``t×(R⋅ω) + R⋅r`` for the translati
 matrix part of `p`, `r` is the translation part of `fX` and `ω` is the rotation part of `fX`,
 ``×`` is the cross product and ``⋅`` is the matrix product.
 """
-function adjoint_action(::SpecialEuclidean{3}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
+function adjoint_action(
+    ::SpecialEuclidean{TypeParameter{Tuple{3}}},
+    p,
+    fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}},
+)
     t, R = submanifold_components(p)
     r = fX.data[SA[1, 2, 3]]
     ω = fX.data[SA[4, 5, 6]]
@@ -178,12 +184,18 @@ function affine_matrix(G::SpecialEuclidean, p)
     return pmat
 end
 affine_matrix(::SpecialEuclidean, p::AbstractMatrix) = p
-function affine_matrix(::SpecialEuclidean{n}, ::SpecialEuclideanIdentity{n}) where {n}
+function affine_matrix(
+    ::SpecialEuclidean{TypeParameter{Tuple{n}}},
+    ::SpecialEuclideanIdentity{TypeParameter{Tuple{n}}},
+) where {n}
     s = maybesize(Size(n, n))
     s isa Size && return SDiagonal{n,Float64}(I)
     return Diagonal{Float64}(I, n)
 end
-function affine_matrix(::SpecialEuclidean{Tuple{Int}}, ::SpecialEuclideanIdentity)
+function affine_matrix(
+    G::SpecialEuclidean{Tuple{Int}},
+    ::SpecialEuclideanIdentity{Tuple{Int}},
+)
     n = get_n(G)
     return Diagonal{Float64}(I, n)
 end

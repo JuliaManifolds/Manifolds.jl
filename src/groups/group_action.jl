@@ -10,16 +10,14 @@ abstract type AbstractGroupAction{AD<:ActionDirection} end
 
 The group that acts in action `A`.
 """
-base_group(A::AbstractGroupAction) = error("base_group not implemented for $(typeof(A)).")
+base_group(A::AbstractGroupAction)
 
 """
     group_manifold(A::AbstractGroupAction)
 
 The manifold the action `A` acts upon.
 """
-function group_manifold(A::AbstractGroupAction)
-    return error("group_manifold not implemented for $(typeof(A)).")
-end
+group_manifold(A::AbstractGroupAction)
 
 function allocate_result(A::AbstractGroupAction, f, p...)
     return allocate_result(group_manifold(A), f, p...)
@@ -65,11 +63,7 @@ end
 Apply action `a` to the point `p` with the rule specified by `A`.
 The result is saved in `q`.
 """
-function apply!(A::AbstractGroupAction{LeftForwardAction}, q, a, p)
-    return error(
-        "apply! not implemented for action $(typeof(A)) and points $(typeof(q)), $(typeof(p)) and $(typeof(a)).",
-    )
-end
+apply!(A::AbstractGroupAction, q, a, p)
 function apply!(A::AbstractGroupAction{RightForwardAction}, q, a, p)
     ainv = inv(base_group(A), a)
     apply!(switch_direction(A, LeftRightSwitch()), q, ainv, p)
@@ -111,17 +105,7 @@ differential transports vectors
 (\mathrm{d}τ_a)_p : T_p \mathcal M → T_{τ_a p} \mathcal M
 ````
 """
-function apply_diff(A::AbstractGroupAction, a, p, X)
-    return error(
-        "apply_diff not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), and vector $(typeof(X))",
-    )
-end
-
-function apply_diff!(A::AbstractGroupAction, Y, a, p, X)
-    return error(
-        "apply_diff! not implemented for action $(typeof(A)), points $(typeof(a)) and $(typeof(p)), vectors $(typeof(Y)) and $(typeof(X))",
-    )
-end
+apply_diff(A::AbstractGroupAction, a, p, X)
 
 @doc raw"""
     apply_diff_group(A::AbstractGroupAction, a, X, p)
@@ -208,11 +192,7 @@ the element closest to `q` in the metric of the G-manifold:
 ```
 where $\mathcal{G}$ is the group that acts on the G-manifold $\mathcal M$.
 """
-function optimal_alignment(A::AbstractGroupAction, p, q)
-    return error(
-        "optimal_alignment not implemented for $(typeof(A)) and points $(typeof(p)) and $(typeof(q)).",
-    )
-end
+optimal_alignment(A::AbstractGroupAction, p, q)
 
 """
     optimal_alignment!(A::AbstractGroupAction, x, p, q)

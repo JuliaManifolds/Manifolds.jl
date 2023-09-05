@@ -488,7 +488,7 @@ function get_vector_orthogonal!(
     return X .= 0
 end
 function get_vector_orthogonal!(
-    M::GeneralUnitaryMatrices{TypeParameter{2},ℝ},
+    M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
     X,
     p,
     Xⁱ,
