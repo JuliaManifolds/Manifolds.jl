@@ -669,7 +669,7 @@ export AbstractPowerManifold,
     QuotientManifold
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
-export ProductRepr, ArrayPartition
+export ArrayPartition
 export ProjectedPointDistribution, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
 export VectorBundleFibers

@@ -23,12 +23,12 @@ using RecursiveArrayTools: ArrayPartition
     @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
     @test injectivity_radius(
         Mse,
-        ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0]),
+        ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0]),
         ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
     ) ≈ π
     @test injectivity_radius(
         Mse,
-        ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0]),
+        ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0]),
         ExponentialRetraction(),
     ) ≈ π
     @test is_default_metric(Mse, ProductMetric())
@@ -60,11 +60,11 @@ using RecursiveArrayTools: ArrayPartition
     ]
 
     @testset "get_component, set_component!, getindex and setindex!" begin
-        p1 = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0])
-        @test get_component(Mse, p1, 1) == p1.parts[1]
-        @test get_component(Mse, p1, Val(1)) == p1.parts[1]
-        @test p1[Mse, 1] == p1.parts[1]
-        @test p1[Mse, Val(1)] == p1.parts[1]
+        p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
+        @test get_component(Mse, p1, 1) == p1.x[1]
+        @test get_component(Mse, p1, Val(1)) == p1.x[1]
+        @test p1[Mse, 1] == p1.x[1]
+        @test p1[Mse, Val(1)] == p1.x[1]
         @test p1[Mse, 1] isa Vector
         @test p1[Mse, Val(1)] isa Vector
         p2 = [10.0, 12.0]
@@ -96,13 +96,13 @@ using RecursiveArrayTools: ArrayPartition
         @test p1ap[Mse, Val(2)] == 2 * p3
 
         p1c = copy(p1)
-        p1c.parts[1][1] = -123.0
-        @test p1c.parts[1][1] == -123.0
-        @test p1.parts[1][1] == 0.0
+        p1c.x[1][1] = -123.0
+        @test p1c.x[1][1] == -123.0
+        @test p1.x[1][1] == 0.0
         copyto!(p1c, p1)
-        @test p1c.parts[1][1] == 0.0
+        @test p1c.x[1][1] == 0.0
 
-        p1c.parts[1][1] = -123.0
+        p1c.x[1][1] = -123.0
         copyto!(p1ap, p1c)
         @test p1ap.x[1][1] == -123.0
     end
@@ -122,43 +122,32 @@ using RecursiveArrayTools: ArrayPartition
         @test q[1] isa ArrayPartition
         @test q[1].x[1] isa Vector
 
-        p = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0])
+        p = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
         q = allocate([p])
-        @test q[1] isa ProductRepr
-        @test q[1].parts[1] isa Vector
-    end
-
-    @testset "copyto!" begin
-        p = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0])
-        X = ProductRepr([1.0, 0.0, 0.0], [1.0, 0.0])
-        q = allocate(p)
-        copyto!(Mse, q, p)
-        @test p.parts == q.parts
-        Y = allocate(X)
-        copyto!(Mse, Y, p, X)
-        @test Y.parts == X.parts
+        @test q[1] isa ArrayPartition
+        @test q[1].x[1] isa Vector
     end
 
     @testset "Broadcasting" begin
-        p1 = ProductRepr([0.0, 1.0, 0.0], [0.0, 1.0])
-        p2 = ProductRepr([3.0, 4.0, 5.0], [2.0, 5.0])
+        p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0, 1.0])
+        p2 = ArrayPartition([3.0, 4.0, 5.0], [2.0, 5.0])
         br_result = p1 .+ 2.0 .* p2
-        @test br_result isa ProductRepr
-        @test br_result.parts[1] ≈ [6.0, 9.0, 10.0]
-        @test br_result.parts[2] ≈ [4.0, 11.0]
+        @test br_result isa ArrayPartition
+        @test br_result.x[1] ≈ [6.0, 9.0, 10.0]
+        @test br_result.x[2] ≈ [4.0, 11.0]
 
         br_result .= 2.0 .* p1 .+ p2
-        @test br_result.parts[1] ≈ [3.0, 6.0, 5.0]
-        @test br_result.parts[2] ≈ [2.0, 7.0]
+        @test br_result.x[1] ≈ [3.0, 6.0, 5.0]
+        @test br_result.x[2] ≈ [2.0, 7.0]
 
         br_result .= p1
-        @test br_result.parts[1] ≈ [0.0, 1.0, 0.0]
-        @test br_result.parts[2] ≈ [0.0, 1.0]
+        @test br_result.x[1] ≈ [0.0, 1.0, 0.0]
+        @test br_result.x[2] ≈ [0.0, 1.0]
 
-        @test axes(p1) == (Base.OneTo(2),)
+        @test axes(p1) == (Base.OneTo(5),)
 
         # errors
-        p3 = ProductRepr([3.0, 4.0, 5.0], [2.0, 5.0], [3.0, 2.0])
+        p3 = ArrayPartition([3.0, 4.0, 5.0], [2.0, 5.0], [3.0, 2.0])
         @test_throws DimensionMismatch p1 .+ p3
         @test_throws DimensionMismatch p1 .= p3
     end
@@ -169,10 +158,10 @@ using RecursiveArrayTools: ArrayPartition
         p2 = [0.0, 1.0, 0.0]
         X1 = [0.0, 1.0, 0.2]
         X2 = [1.0, 0.0, 0.2]
-        p = ProductRepr(p1, p2)
-        X = ProductRepr(X1, X2)
-        pf = ProductRepr(p1, X1)
-        Xf = ProductRepr(X1, p2)
+        p = ArrayPartition(p1, p2)
+        X = ArrayPartition(X1, X2)
+        pf = ArrayPartition(p1, X1)
+        Xf = ArrayPartition(X1, p2)
         @test is_point(Mpr, p, true)
         @test_throws CompositeManifoldError is_point(Mpr, X, true)
         @test_throws ComponentManifoldError is_vector(Mpr, pf, X, true)
@@ -181,15 +170,15 @@ using RecursiveArrayTools: ArrayPartition
 
     @testset "arithmetic" begin
         Mee = ProductManifold(Euclidean(3), Euclidean(2))
-        p1 = ProductRepr([0.0, 1.0, 0.0], [0.0, 1.0])
-        p2 = ProductRepr([1.0, 2.0, 0.0], [2.0, 3.0])
+        p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0, 1.0])
+        p2 = ArrayPartition([1.0, 2.0, 0.0], [2.0, 3.0])
 
-        @test isapprox(Mee, p1 + p2, ProductRepr([1.0, 3.0, 0.0], [2.0, 4.0]))
-        @test isapprox(Mee, p1 - p2, ProductRepr([-1.0, -1.0, 0.0], [-2.0, -2.0]))
-        @test isapprox(Mee, -p1, ProductRepr([0.0, -1.0, 0.0], [0.0, -1.0]))
-        @test isapprox(Mee, p1 * 2, ProductRepr([0.0, 2.0, 0.0], [0.0, 2.0]))
-        @test isapprox(Mee, 2 * p1, ProductRepr([0.0, 2.0, 0.0], [0.0, 2.0]))
-        @test isapprox(Mee, p1 / 2, ProductRepr([0.0, 0.5, 0.0], [0.0, 0.5]))
+        @test isapprox(Mee, p1 + p2, ArrayPartition([1.0, 3.0, 0.0], [2.0, 4.0]))
+        @test isapprox(Mee, p1 - p2, ArrayPartition([-1.0, -1.0, 0.0], [-2.0, -2.0]))
+        @test isapprox(Mee, -p1, ArrayPartition([0.0, -1.0, 0.0], [0.0, -1.0]))
+        @test isapprox(Mee, p1 * 2, ArrayPartition([0.0, 2.0, 0.0], [0.0, 2.0]))
+        @test isapprox(Mee, 2 * p1, ArrayPartition([0.0, 2.0, 0.0], [0.0, 2.0]))
+        @test isapprox(Mee, p1 / 2, ArrayPartition([0.0, 0.5, 0.0], [0.0, 0.5]))
     end
 
     @testset "Show methods" begin
@@ -212,71 +201,6 @@ using RecursiveArrayTools: ArrayPartition
         ProductManifold with 2 submanifolds:
          ProductManifold(Sphere(2, ℝ), Euclidean(2; field = ℝ))
          ProductManifold(Sphere(2, ℝ), Euclidean(2; field = ℝ))"""
-
-        p = Manifolds.ProductRepr(Float64[1, 0, 0])
-        @test sprint(show, "text/plain", p) == """
-        ProductRepr with 1 submanifold component:
-         Component 1 =
-          3-element $(sprint(show, Vector{Float64})):
-           1.0
-           0.0
-           0.0"""
-
-        p = Manifolds.ProductRepr(
-            Float64[1, 0, 0],
-            Float64[0, 1, 0],
-            Float64[1, 2],
-            Float64[3, 4],
-        )
-        @test sprint(show, "text/plain", p) == """
-        ProductRepr with 4 submanifold components:
-         Component 1 =
-          3-element $(sprint(show, Vector{Float64})):
-           1.0
-           0.0
-           0.0
-         Component 2 =
-          3-element $(sprint(show, Vector{Float64})):
-           0.0
-           1.0
-           0.0
-         Component 3 =
-          2-element $(sprint(show, Vector{Float64})):
-           1.0
-           2.0
-         Component 4 =
-          2-element $(sprint(show, Vector{Float64})):
-           3.0
-           4.0"""
-
-        p = Manifolds.ProductRepr(
-            Float64[1, 0, 0],
-            Float64[0, 1, 0],
-            Float64[1, 2],
-            Float64[3, 4],
-            Float64[5, 6],
-        )
-        @test sprint(show, "text/plain", p) == """
-        ProductRepr with 5 submanifold components:
-         Component 1 =
-          3-element $(sprint(show, Vector{Float64})):
-           1.0
-           0.0
-           0.0
-         Component 2 =
-          3-element $(sprint(show, Vector{Float64})):
-           0.0
-           1.0
-           0.0
-         ⋮
-         Component 4 =
-          2-element $(sprint(show, Vector{Float64})):
-           3.0
-           4.0
-         Component 5 =
-          2-element $(sprint(show, Vector{Float64})):
-           5.0
-           6.0"""
     end
 
     M3 = Manifolds.Rotations(2)
@@ -291,122 +215,101 @@ using RecursiveArrayTools: ArrayPartition
     pts_r2 = [[0.0, 0.0], [1.0, 0.0], [0.0, 0.1]]
     angles = (0.0, π / 2, 2π / 3)
     pts_rot = [[cos(ϕ) sin(ϕ); -sin(ϕ) cos(ϕ)] for ϕ in angles]
-    for prod_type in [ProductRepr, ArrayPartition]
-        pts = [prod_type(p[1], p[2], p[3]) for p in zip(pts_sphere, pts_r2, pts_rot)]
-        test_manifold(
-            Mser,
-            pts,
-            test_injectivity_radius=false,
-            is_tangent_atol_multiplier=1,
-            exp_log_atol_multiplier=1,
-            test_inplace=true,
-            test_rand_point=true,
-            test_rand_tvector=true,
-        )
+    pts = [ArrayPartition(p[1], p[2], p[3]) for p in zip(pts_sphere, pts_r2, pts_rot)]
+    test_manifold(
+        Mser,
+        pts,
+        test_injectivity_radius=false,
+        is_tangent_atol_multiplier=1,
+        exp_log_atol_multiplier=1,
+        test_inplace=true,
+        test_rand_point=true,
+        test_rand_tvector=true,
+    )
 
-        @testset "product vector transport" begin
-            p = prod_type([1.0, 0.0, 0.0], [0.0, 0.0])
-            q = prod_type([0.0, 1.0, 0.0], [2.0, 0.0])
-            X = log(Mse, p, q)
-            m = ProductVectorTransport(ParallelTransport(), ParallelTransport())
-            Y = vector_transport_to(Mse, p, X, q, m)
-            Z = -log(Mse, q, p)
-            @test isapprox(Mse, q, Y, Z)
-        end
-
-        @testset "Implicit product vector transport" begin
-            p = prod_type([1.0, 0.0, 0.0], [0.0, 0.0])
-            q = prod_type([0.0, 1.0, 0.0], [2.0, 0.0])
-            X = log(Mse, p, q)
-            for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
-                Y = vector_transport_to(Mse, p, X, q, m)
-                Z1 = vector_transport_to(
-                    Mse.manifolds[1],
-                    submanifold_component.([p, X, q], Ref(1))...,
-                    m,
-                )
-                Z2 = vector_transport_to(
-                    Mse.manifolds[2],
-                    submanifold_component.([p, X, q], Ref(2))...,
-                    m,
-                )
-                Z = prod_type(Z1, Z2)
-                @test isapprox(Mse, q, Y, Z)
-                Y2 = allocate(Mse, Y)
-                vector_transport_to!(Mse, Y2, p, X, q, m)
-                @test isapprox(Mse, q, Y2, Z)
-            end
-            for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
-                Y = vector_transport_direction(Mse, p, X, X, m)
-                Z1 = vector_transport_direction(
-                    Mse.manifolds[1],
-                    submanifold_component.([p, X, X], Ref(1))...,
-                    m,
-                )
-                Z2 = vector_transport_direction(
-                    Mse.manifolds[2],
-                    submanifold_component.([p, X, X], Ref(2))...,
-                    m,
-                )
-                Z = prod_type(Z1, Z2)
-                @test isapprox(Mse, q, Y, Z)
-            end
-        end
-        @testset "Parallel transport" begin
-            p = prod_type([1.0, 0.0, 0.0], [0.0, 0.0])
-            q = prod_type([0.0, 1.0, 0.0], [2.0, 0.0])
-            X = log(Mse, p, q)
-            # to
-            Y = parallel_transport_to(Mse, p, X, q)
-            Z1 = parallel_transport_to(
-                Mse.manifolds[1],
-                submanifold_component.([p, X, q], Ref(1))...,
-            )
-            Z2 = parallel_transport_to(
-                Mse.manifolds[2],
-                submanifold_component.([p, X, q], Ref(2))...,
-            )
-            Z = prod_type(Z1, Z2)
-            @test isapprox(Mse, q, Y, Z)
-            Ym = allocate(Y)
-            parallel_transport_to!(Mse, Ym, p, X, q)
-            @test isapprox(Mse, q, Y, Z)
-
-            # direction
-            Y = parallel_transport_direction(Mse, p, X, X)
-            Z1 = parallel_transport_direction(
-                Mse.manifolds[1],
-                submanifold_component.([p, X, X], Ref(1))...,
-            )
-            Z2 = parallel_transport_direction(
-                Mse.manifolds[2],
-                submanifold_component.([p, X, X], Ref(2))...,
-            )
-            Z = prod_type(Z1, Z2)
-            @test isapprox(Mse, q, Y, Z)
-            Ym = allocate(Y)
-            parallel_transport_direction!(Mse, Ym, p, X, X)
-            @test isapprox(Mse, q, Ym, Z)
-        end
+    @testset "product vector transport" begin
+        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
+        q = ArrayPartition([0.0, 1.0, 0.0], [2.0, 0.0])
+        X = log(Mse, p, q)
+        m = ProductVectorTransport(ParallelTransport(), ParallelTransport())
+        Y = vector_transport_to(Mse, p, X, q, m)
+        Z = -log(Mse, q, p)
+        @test isapprox(Mse, q, Y, Z)
     end
 
-    @testset "ProductRepr" begin
-        @test (@inferred convert(
-            ProductRepr{Tuple{T,Float64,T} where T},
-            ProductRepr(9, 10, 11),
-        )) == ProductRepr(9, 10.0, 11)
-        p = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
-        @test (@inferred convert(ProductRepr, p)) === p
+    @testset "Implicit product vector transport" begin
+        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
+        q = ArrayPartition([0.0, 1.0, 0.0], [2.0, 0.0])
+        X = log(Mse, p, q)
+        for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
+            Y = vector_transport_to(Mse, p, X, q, m)
+            Z1 = vector_transport_to(
+                Mse.manifolds[1],
+                submanifold_component.([p, X, q], Ref(1))...,
+                m,
+            )
+            Z2 = vector_transport_to(
+                Mse.manifolds[2],
+                submanifold_component.([p, X, q], Ref(2))...,
+                m,
+            )
+            Z = ArrayPartition(Z1, Z2)
+            @test isapprox(Mse, q, Y, Z)
+            Y2 = allocate(Mse, Y)
+            vector_transport_to!(Mse, Y2, p, X, q, m)
+            @test isapprox(Mse, q, Y2, Z)
+        end
+        for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
+            Y = vector_transport_direction(Mse, p, X, X, m)
+            Z1 = vector_transport_direction(
+                Mse.manifolds[1],
+                submanifold_component.([p, X, X], Ref(1))...,
+                m,
+            )
+            Z2 = vector_transport_direction(
+                Mse.manifolds[2],
+                submanifold_component.([p, X, X], Ref(2))...,
+                m,
+            )
+            Z = ArrayPartition(Z1, Z2)
+            @test isapprox(Mse, q, Y, Z)
+        end
+    end
+    @testset "Parallel transport" begin
+        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
+        q = ArrayPartition([0.0, 1.0, 0.0], [2.0, 0.0])
+        X = log(Mse, p, q)
+        # to
+        Y = parallel_transport_to(Mse, p, X, q)
+        Z1 = parallel_transport_to(
+            Mse.manifolds[1],
+            submanifold_component.([p, X, q], Ref(1))...,
+        )
+        Z2 = parallel_transport_to(
+            Mse.manifolds[2],
+            submanifold_component.([p, X, q], Ref(2))...,
+        )
+        Z = ArrayPartition(Z1, Z2)
+        @test isapprox(Mse, q, Y, Z)
+        Ym = allocate(Y)
+        parallel_transport_to!(Mse, Ym, p, X, q)
+        @test isapprox(Mse, q, Y, Z)
 
-        @test p == ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
-        @test submanifold_component(Mse, p, 1) === p.parts[1]
-        @test submanifold_component(Mse, p, Val(1)) === p.parts[1]
-        @test submanifold_component(p, 1) === p.parts[1]
-        @test submanifold_component(p, Val(1)) === p.parts[1]
-        @test submanifold_components(Mse, p) === p.parts
-        @test submanifold_components(p) === p.parts
-        @test allocate(p, Int, 10) isa Vector{Int}
-        @test length(allocate(p, Int, 10)) == 10
+        # direction
+        Y = parallel_transport_direction(Mse, p, X, X)
+        Z1 = parallel_transport_direction(
+            Mse.manifolds[1],
+            submanifold_component.([p, X, X], Ref(1))...,
+        )
+        Z2 = parallel_transport_direction(
+            Mse.manifolds[2],
+            submanifold_component.([p, X, X], Ref(2))...,
+        )
+        Z = ArrayPartition(Z1, Z2)
+        @test isapprox(Mse, q, Y, Z)
+        Ym = allocate(Y)
+        parallel_transport_direction!(Mse, Ym, p, X, X)
+        @test isapprox(Mse, q, Ym, Z)
     end
 
     @testset "ArrayPartition" begin
@@ -419,103 +322,87 @@ using RecursiveArrayTools: ArrayPartition
         @test submanifold_components(p) === p.x
     end
 
-    for TP in [ProductRepr, ArrayPartition]
-        @testset "TP=$TP" begin
-            Ts = SizedVector{3,Float64}
-            Tr2 = SizedVector{2,Float64}
-            pts_sphere = [
-                convert(Ts, [1.0, 0.0, 0.0]),
-                convert(Ts, [0.0, 1.0, 0.0]),
-                convert(Ts, [0.0, 0.0, 1.0]),
-            ]
-            pts_r2 = [
-                convert(Tr2, [0.0, 0.0]),
-                convert(Tr2, [1.0, 0.0]),
-                convert(Tr2, [0.0, 0.1]),
-            ]
+    @testset "manifold tests (static size)" begin
+        Ts = SizedVector{3,Float64}
+        Tr2 = SizedVector{2,Float64}
+        pts_sphere = [
+            convert(Ts, [1.0, 0.0, 0.0]),
+            convert(Ts, [0.0, 1.0, 0.0]),
+            convert(Ts, [0.0, 0.0, 1.0]),
+        ]
+        pts_r2 =
+            [convert(Tr2, [0.0, 0.0]), convert(Tr2, [1.0, 0.0]), convert(Tr2, [0.0, 0.1])]
 
-            pts = [TP(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
-            basis_types = (
-                DefaultOrthonormalBasis(),
-                ProjectedOrthonormalBasis(:svd),
-                get_basis(Mse, pts[1], DefaultOrthonormalBasis()),
-                DiagonalizingOrthonormalBasis(
-                    TP(SizedVector{3}([0.0, 1.0, 0.0]), SizedVector{2}([1.0, 0.0])),
-                ),
-            )
-            distr_M1 = Manifolds.uniform_distribution(M1, pts_sphere[1])
-            distr_M2 = Manifolds.projected_distribution(
-                M2,
-                Distributions.MvNormal(zero(pts_r2[1]), 1.0),
-            )
-            distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_sphere[1], 1.0)
-            distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_r2[1], 1.0)
-            @test injectivity_radius(Mse, pts[1]) ≈ π
-            @test injectivity_radius(Mse) ≈ π
-            @test injectivity_radius(Mse, pts[1], ExponentialRetraction()) ≈ π
-            @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
+        pts = [ArrayPartition(p[1], p[2]) for p in zip(pts_sphere, pts_r2)]
+        basis_types = (
+            DefaultOrthonormalBasis(),
+            ProjectedOrthonormalBasis(:svd),
+            get_basis(Mse, pts[1], DefaultOrthonormalBasis()),
+            DiagonalizingOrthonormalBasis(
+                ArrayPartition(SizedVector{3}([0.0, 1.0, 0.0]), SizedVector{2}([1.0, 0.0])),
+            ),
+        )
+        distr_M1 = Manifolds.uniform_distribution(M1, pts_sphere[1])
+        distr_M2 = Manifolds.projected_distribution(
+            M2,
+            Distributions.MvNormal(zero(pts_r2[1]), 1.0),
+        )
+        distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_sphere[1], 1.0)
+        distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_r2[1], 1.0)
+        @test injectivity_radius(Mse, pts[1]) ≈ π
+        @test injectivity_radius(Mse) ≈ π
+        @test injectivity_radius(Mse, pts[1], ExponentialRetraction()) ≈ π
+        @test injectivity_radius(Mse, ExponentialRetraction()) ≈ π
 
-            @test ManifoldsBase.allocate_coordinates(
-                Mse,
-                pts[1],
-                Float64,
-                number_of_coordinates(Mse, DefaultOrthogonalBasis()),
-            ) isa Vector{Float64}
+        @test ManifoldsBase.allocate_coordinates(
+            Mse,
+            pts[1],
+            Float64,
+            number_of_coordinates(Mse, DefaultOrthogonalBasis()),
+        ) isa Vector{Float64}
 
-            Y = allocate(pts[1])
-            inverse_retract!(Mse, Y, pts[1], pts[2], default_inverse_retraction_method(Mse))
-            @test isapprox(
-                Mse,
-                pts[1],
-                Y,
-                inverse_retract(
-                    Mse,
-                    pts[1],
-                    pts[2],
-                    default_inverse_retraction_method(Mse),
-                ),
-            )
+        Y = allocate(pts[1])
+        inverse_retract!(Mse, Y, pts[1], pts[2], default_inverse_retraction_method(Mse))
+        @test isapprox(
+            Mse,
+            pts[1],
+            Y,
+            inverse_retract(Mse, pts[1], pts[2], default_inverse_retraction_method(Mse)),
+        )
 
-            test_manifold(
-                Mse,
-                pts;
-                point_distributions=[
-                    Manifolds.ProductPointDistribution(distr_M1, distr_M2),
-                ],
-                tvector_distributions=[
-                    Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
-                ],
-                test_injectivity_radius=true,
-                test_musical_isomorphisms=true,
-                musical_isomorphism_bases=[DefaultOrthonormalBasis()],
-                test_tangent_vector_broadcasting=true,
-                test_project_tangent=true,
-                test_project_point=true,
-                test_mutating_rand=false,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                test_riesz_representer=true,
-                test_default_vector_transport=true,
-                test_rand_point=true,
-                test_rand_tvector=true,
-                vector_transport_methods=[
-                    ProductVectorTransport(ParallelTransport(), ParallelTransport()),
-                    ProductVectorTransport(
-                        SchildsLadderTransport(),
-                        SchildsLadderTransport(),
-                    ),
-                    ProductVectorTransport(PoleLadderTransport(), PoleLadderTransport()),
-                ],
-                basis_types_vecs=(basis_types[1], basis_types[3], basis_types[4]),
-                basis_types_to_from=basis_types,
-                is_tangent_atol_multiplier=1,
-                exp_log_atol_multiplier=1,
-            )
-            @test number_eltype(pts[1]) === Float64
+        test_manifold(
+            Mse,
+            pts;
+            point_distributions=[Manifolds.ProductPointDistribution(distr_M1, distr_M2)],
+            tvector_distributions=[
+                Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
+            ],
+            test_injectivity_radius=true,
+            test_musical_isomorphisms=true,
+            musical_isomorphism_bases=[DefaultOrthonormalBasis()],
+            test_tangent_vector_broadcasting=true,
+            test_project_tangent=true,
+            test_project_point=true,
+            test_mutating_rand=false,
+            retraction_methods=retraction_methods,
+            inverse_retraction_methods=inverse_retraction_methods,
+            test_riesz_representer=true,
+            test_default_vector_transport=true,
+            test_rand_point=true,
+            test_rand_tvector=true,
+            vector_transport_methods=[
+                ProductVectorTransport(ParallelTransport(), ParallelTransport()),
+                ProductVectorTransport(SchildsLadderTransport(), SchildsLadderTransport()),
+                ProductVectorTransport(PoleLadderTransport(), PoleLadderTransport()),
+            ],
+            basis_types_vecs=(basis_types[1], basis_types[3], basis_types[4]),
+            basis_types_to_from=basis_types,
+            is_tangent_atol_multiplier=1,
+            exp_log_atol_multiplier=1,
+        )
+        @test number_eltype(pts[1]) === Float64
 
-            @test (@inferred ManifoldsBase._get_vector_cache_broadcast(pts[1])) ===
-                  Val(false)
-        end
+        @test (@inferred ManifoldsBase._get_vector_cache_broadcast(pts[1])) === Val(false)
     end
 
     @testset "vee/hat" begin
@@ -524,7 +411,7 @@ using RecursiveArrayTools: ArrayPartition
         M = M1 × M2
 
         e = Matrix{Float64}(I, 3, 3)
-        p = ProductRepr(exp(M1, e, hat(M1, e, [1.0, 2.0, 3.0])), [1.0, 2.0, 3.0])
+        p = ArrayPartition(exp(M1, e, hat(M1, e, [1.0, 2.0, 3.0])), [1.0, 2.0, 3.0])
         X = [0.1, 0.2, 0.3, -1.0, 2.0, -3.0]
 
         Xc = hat(M, p, X)
@@ -534,8 +421,8 @@ using RecursiveArrayTools: ArrayPartition
 
     @testset "get_coordinates" begin
         # make sure `get_coordinates` does not return an `ArrayPartition`
-        p1 = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0])
-        X1 = ProductRepr([1.0, 0.0, -1.0], [1.0, 0.0])
+        p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
+        X1 = ArrayPartition([1.0, 0.0, -1.0], [1.0, 0.0])
         Tp1Mse = TangentSpaceAtPoint(Mse, p1)
         c = get_coordinates(Tp1Mse, p1, X1, DefaultOrthonormalBasis())
         @test c isa Vector
@@ -548,7 +435,7 @@ using RecursiveArrayTools: ArrayPartition
     end
 
     @testset "Basis printing" begin
-        p = ProductRepr([1.0, 0.0, 0.0], [1.0, 0.0])
+        p = ArrayPartition([1.0, 0.0, 0.0], [1.0, 0.0])
         B = DefaultOrthonormalBasis()
         Bc = get_basis(Mse, p, B)
         Bc_components_s = sprint.(show, "text/plain", Bc.data.parts)
@@ -562,19 +449,19 @@ using RecursiveArrayTools: ArrayPartition
     end
 
     @testset "Basis-related errors" begin
-        a = ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0])
+        a = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
         B = CachedBasis(DefaultOrthonormalBasis(), ProductBasisData(([],)))
         @test_throws AssertionError get_vector!(
             Mse,
             a,
-            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0]),
+            ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0]),
             [1.0, 2.0, 3.0, 4.0, 5.0], # this is one element too long, hence assertionerror
             B,
         )
         @test_throws MethodError get_vector!(
             Mse,
             a,
-            ProductRepr([1.0, 0.0, 0.0], [0.0, 0.0]),
+            ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0]),
             [1.0, 2.0, 3.0, 4.0],
             B, # empty elements yield a submanifold MethodError
         )
@@ -601,58 +488,52 @@ using RecursiveArrayTools: ArrayPartition
         @test is_point(Mss, rand(uniform_distribution(Mss, p)))
     end
 
-    for TP in [ProductRepr, ArrayPartition]
-        @testset "Atlas & Induced Basis" begin
-            M = ProductManifold(Euclidean(2), Euclidean(2))
-            p = TP(zeros(2), ones(2))
-            X = TP(ones(2), 2 .* ones(2))
-            A = RetractionAtlas()
-            a = get_parameters(M, A, p, p)
-            p2 = get_point(M, A, p, a)
-            @test all(submanifold_components(p2) .== submanifold_components(p))
-        end
+    @testset "Atlas & Induced Basis" begin
+        M = ProductManifold(Euclidean(2), Euclidean(2))
+        p = ArrayPartition(zeros(2), ones(2))
+        X = ArrayPartition(ones(2), 2 .* ones(2))
+        A = RetractionAtlas()
+        a = get_parameters(M, A, p, p)
+        p2 = get_point(M, A, p, a)
+        @test all(submanifold_components(p2) .== submanifold_components(p))
+    end
 
-        @testset "metric conversion" begin
-            M = SymmetricPositiveDefinite(3)
-            N = ProductManifold(M, M)
-            e = EuclideanMetric()
-            p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
-            q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
-            P = TP(p, q)
-            X = TP(log(M, p, q), log(M, q, p))
-            Y = change_metric(N, e, P, X)
-            Yc = TP(
-                change_metric(M, e, p, log(M, p, q)),
-                change_metric(M, e, q, log(M, q, p)),
-            )
-            @test norm(N, P, Y - Yc) ≈ 0
-            Z = change_representer(N, e, P, X)
-            Zc = TP(
-                change_representer(M, e, p, log(M, p, q)),
-                change_representer(M, e, q, log(M, q, p)),
-            )
-            @test norm(N, P, Z - Zc) ≈ 0
-        end
+    @testset "metric conversion" begin
+        M = SymmetricPositiveDefinite(3)
+        N = ProductManifold(M, M)
+        e = EuclideanMetric()
+        p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
+        q = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
+        P = ArrayPartition(p, q)
+        X = ArrayPartition(log(M, p, q), log(M, q, p))
+        Y = change_metric(N, e, P, X)
+        Yc = ArrayPartition(
+            change_metric(M, e, p, log(M, p, q)),
+            change_metric(M, e, q, log(M, q, p)),
+        )
+        @test norm(N, P, Y - Yc) ≈ 0
+        Z = change_representer(N, e, P, X)
+        Zc = ArrayPartition(
+            change_representer(M, e, p, log(M, p, q)),
+            change_representer(M, e, q, log(M, q, p)),
+        )
+        @test norm(N, P, Z - Zc) ≈ 0
     end
 
     @testset "default retraction, inverse retraction and VT" begin
         Mstb = ProductManifold(M1, TangentBundle(M1))
         T_p_ap = ArrayPartition{
             Float64,
-            Tuple{Matrix{Float64},ProductRepr{Tuple{Matrix{Float64},Matrix{Float64}}}},
-        }
-        T_p_pr = ProductRepr{
-            Tuple{Matrix{Float64},ProductRepr{Tuple{Matrix{Float64},Matrix{Float64}}}},
+            Tuple{
+                Matrix{Float64},
+                ArrayPartition{Float64,Tuple{Matrix{Float64},Matrix{Float64}}},
+            },
         }
         @test Manifolds.default_retraction_method(Mstb) === ProductRetraction(
             ExponentialRetraction(),
             Manifolds.FiberBundleProductRetraction(),
         )
         @test Manifolds.default_retraction_method(Mstb, T_p_ap) === ProductRetraction(
-            ExponentialRetraction(),
-            Manifolds.FiberBundleProductRetraction(),
-        )
-        @test Manifolds.default_retraction_method(Mstb, T_p_pr) === ProductRetraction(
             ExponentialRetraction(),
             Manifolds.FiberBundleProductRetraction(),
         )
@@ -667,11 +548,6 @@ using RecursiveArrayTools: ArrayPartition
             LogarithmicInverseRetraction(),
             Manifolds.FiberBundleInverseProductRetraction(),
         )
-        @test Manifolds.default_inverse_retraction_method(Mstb, T_p_pr) ===
-              Manifolds.InverseProductRetraction(
-            LogarithmicInverseRetraction(),
-            Manifolds.FiberBundleInverseProductRetraction(),
-        )
 
         @test Manifolds.default_vector_transport_method(Mstb) === ProductVectorTransport(
             ParallelTransport(),
@@ -680,7 +556,7 @@ using RecursiveArrayTools: ArrayPartition
                 ParallelTransport(),
             ),
         )
-        @test Manifolds.default_vector_transport_method(Mstb, T_p_pr) ===
+        @test Manifolds.default_vector_transport_method(Mstb, T_p_ap) ===
               ProductVectorTransport(
             ParallelTransport(),
             Manifolds.FiberBundleProductVectorTransport(
@@ -688,7 +564,7 @@ using RecursiveArrayTools: ArrayPartition
                 ParallelTransport(),
             ),
         )
-        @test Manifolds.default_vector_transport_method(Mstb, T_p_pr) ===
+        @test Manifolds.default_vector_transport_method(Mstb, T_p_ap) ===
               ProductVectorTransport(
             ParallelTransport(),
             Manifolds.FiberBundleProductVectorTransport(

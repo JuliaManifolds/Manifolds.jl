@@ -37,8 +37,8 @@ The following code defines a point on the tangent bundle of the sphere $S^2$ and
 using Manifolds
 M = Sphere(2)
 TB = TangentBundle(M)
-p = ProductRepr([1.0, 0.0, 0.0], [0.0, 1.0, 3.0])
-X = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0, -2.0])
+p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 1.0, 3.0])
+X = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0, -2.0])
 ```
 
 An approximation of the exponential in the Sasaki metric using 1000 steps can be calculated as follows.

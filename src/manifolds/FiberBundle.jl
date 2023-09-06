@@ -261,23 +261,6 @@ end
 
 function get_vectors(
     M::FiberBundle,
-    p::ProductRepr,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:FiberBundleBasisData},
-) where {𝔽}
-    xp1 = submanifold_component(p, Val(1))
-    zero_m = zero_vector(M.manifold, xp1)
-    zero_f = zero_vector(M.fiber, xp1)
-    vs = typeof(ProductRepr(zero_m, zero_f))[]
-    for bv in get_vectors(M.manifold, xp1, B.data.base_basis)
-        push!(vs, ProductRepr(bv, zero_f))
-    end
-    for bv in get_vectors(M.fiber, xp1, B.data.fiber_basis)
-        push!(vs, ProductRepr(zero_m, bv))
-    end
-    return vs
-end
-function get_vectors(
-    M::FiberBundle,
     p::ArrayPartition,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:Manifolds.FiberBundleBasisData},
 ) where {𝔽}
@@ -297,19 +280,6 @@ function get_vectors(M::BundleFibers, p, B::CachedBasis)
     return get_vectors(M.manifold, p, B)
 end
 
-"""
-    getindex(p::ProductRepr, M::FiberBundle, s::Symbol)
-    p[M::FiberBundle, s]
-
-Access the element(s) at index `s` of a point `p` on a [`FiberBundle`](@ref) `M` by
-using the symbols `:point` and `:vector` or `:fiber` for the base and vector or fiber
-component, respectively.
-"""
-@inline function Base.getindex(p::ProductRepr, M::FiberBundle, s::Symbol)
-    (s === :point) && return submanifold_component(M, p, Val(1))
-    (s === :vector || s === :fiber) && return submanifold_component(M, p, Val(2))
-    return throw(DomainError(s, "unknown component $s on $M."))
-end
 """
     getindex(p::ArrayPartition, M::FiberBundle, s::Symbol)
     p[M::FiberBundle, s]
@@ -355,27 +325,6 @@ function Random.rand!(rng::AbstractRNG, M::FiberBundle, pX; vector_at=nothing)
     return pX
 end
 
-"""
-    setindex!(p::ProductRepr, val, M::FiberBundle, s::Symbol)
-    p[M::VectorBundle, s] = val
-
-Set the element(s) at index `s` of a point `p` on a [`FiberBundle`](@ref) `M` to `val` by
-using the symbols `:point` and `:fiber` or `:vector` for the base and fiber or vector
-component, respectively.
-
-!!! note
-
-    The *content* of element of `p` is replaced, not the element itself.
-"""
-@inline function Base.setindex!(x::ProductRepr, val, M::FiberBundle, s::Symbol)
-    if s === :point
-        return copyto!(submanifold_component(M, x, Val(1)), val)
-    elseif s === :vector || s === :fiber
-        return copyto!(submanifold_component(M, x, Val(2)), val)
-    else
-        throw(DomainError(s, "unknown component $s on $M."))
-    end
-end
 """
     setindex!(p::ArrayPartition, val, M::FiberBundle, s::Symbol)
     p[M::VectorBundle, s] = val

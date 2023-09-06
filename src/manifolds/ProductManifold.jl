@@ -226,7 +226,7 @@ components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_point(M::ProductManifold, p::Union{ProductRepr,ArrayPartition}; kwargs...)
+function check_point(M::ProductManifold, p::ArrayPartition; kwargs...)
     ts = ziptuples(Tuple(1:length(M.manifolds)), M.manifolds, submanifold_components(M, p))
     e = [(t[1], check_point(t[2:end]...; kwargs...)) for t in ts]
     errors = filter((x) -> !(x[2] === nothing), e)
@@ -238,7 +238,7 @@ end
 function check_point(M::ProductManifold, p; kwargs...)
     return DomainError(
         typeof(p),
-        "The point $p is not a point on $M, since currently only ProductRepr and ArrayPartition are supported types for points on arbitrary product manifolds",
+        "The point $p is not a point on $M, since currently only ArrayPartition is supported as type for points on arbitrary product manifolds",
     )
 end
 
@@ -251,7 +251,7 @@ components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_size(M::ProductManifold, p::Union{ProductRepr,ArrayPartition})
+function check_size(M::ProductManifold, p::ArrayPartition)
     ts = ziptuples(Tuple(1:length(M.manifolds)), M.manifolds, submanifold_components(M, p))
     e = [(t[1], check_size(t[2:end]...)) for t in ts]
     errors = filter((x) -> !(x[2] === nothing), e)
@@ -263,14 +263,10 @@ end
 function check_size(M::ProductManifold, p; kwargs...)
     return DomainError(
         typeof(p),
-        "The point $p is not a point on $M, since currently only ProductRepr and ArrayPartition are supported types for points on arbitrary product manifolds",
+        "The point $p is not a point on $M, since currently only ArrayPartition is supported as type for points on arbitrary product manifolds",
     )
 end
-function check_size(
-    M::ProductManifold,
-    p::Union{ProductRepr,ArrayPartition},
-    X::Union{ProductRepr,ArrayPartition},
-)
+function check_size(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
     ts = ziptuples(
         Tuple(1:length(M.manifolds)),
         M.manifolds,
@@ -287,7 +283,7 @@ end
 function check_size(M::ProductManifold, p, X; kwargs...)
     return DomainError(
         typeof(X),
-        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ProductRepr and ArrayPartition are supported types for tangent vectors on arbitrary product manifolds",
+        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ArrayPartition is a supported type for tangent vectors on arbitrary product manifolds",
     )
 end
 """
@@ -300,12 +296,7 @@ of all error messages of the components, for which the tests fail is returned.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_vector(
-    M::ProductManifold,
-    p::Union{ProductRepr,ArrayPartition},
-    X::Union{ProductRepr,ArrayPartition};
-    kwargs...,
-)
+function check_vector(M::ProductManifold, p::ArrayPartition, X::ArrayPartition; kwargs...)
     ts = ziptuples(
         Tuple(1:length(M.manifolds)),
         M.manifolds,
@@ -322,34 +313,28 @@ end
 function check_vector(M::ProductManifold, p, X; kwargs...)
     return DomainError(
         typeof(X),
-        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ProductRepr and ArrayPartition are supported types for tangent vectors on arbitrary product manifolds",
+        "The vector $X is not a tangent vector to any tangent space on $M, since currently only ArrayPartition is a supported type for tangent vectors on arbitrary product manifolds",
     )
 end
 
-for TP in [ProductRepr, ArrayPartition]
-    eval(
-        quote
-            function copyto!(M::ProductManifold, q::$TP, p::$TP)
-                map(
-                    copyto!,
-                    M.manifolds,
-                    submanifold_components(q),
-                    submanifold_components(p),
-                )
-                return q
-            end
-            function copyto!(M::ProductManifold, Y::$TP, p::$TP, X::$TP)
-                map(
-                    copyto!,
-                    M.manifolds,
-                    submanifold_components(Y),
-                    submanifold_components(p),
-                    submanifold_components(X),
-                )
-                return Y
-            end
-        end,
+function copyto!(M::ProductManifold, q::ArrayPartition, p::ArrayPartition)
+    map(copyto!, M.manifolds, submanifold_components(q), submanifold_components(p))
+    return q
+end
+function copyto!(
+    M::ProductManifold,
+    Y::ArrayPartition,
+    p::ArrayPartition,
+    X::ArrayPartition,
+)
+    map(
+        copyto!,
+        M.manifolds,
+        submanifold_components(Y),
+        submanifold_components(p),
+        submanifold_components(X),
     )
+    return Y
 end
 
 @doc raw"""
@@ -385,11 +370,6 @@ function default_retraction_method(M::ProductManifold, ::Type{T}) where {T<:Arra
         map(default_retraction_method, M.manifolds, T.parameters[2].parameters)...,
     )
 end
-function default_retraction_method(M::ProductManifold, ::Type{T}) where {T<:ProductRepr}
-    return ProductRetraction(
-        map(default_retraction_method, M.manifolds, T.parameters[1].parameters)...,
-    )
-end
 
 function default_inverse_retraction_method(M::ProductManifold)
     return InverseProductRetraction(map(default_inverse_retraction_method, M.manifolds)...)
@@ -402,14 +382,6 @@ function default_inverse_retraction_method(
         map(default_inverse_retraction_method, M.manifolds, T.parameters[2].parameters)...,
     )
 end
-function default_inverse_retraction_method(
-    M::ProductManifold,
-    ::Type{T},
-) where {T<:ProductRepr}
-    return InverseProductRetraction(
-        map(default_inverse_retraction_method, M.manifolds, T.parameters[1].parameters)...,
-    )
-end
 
 function default_vector_transport_method(M::ProductManifold)
     return ProductVectorTransport(map(default_vector_transport_method, M.manifolds)...)
@@ -420,14 +392,6 @@ function default_vector_transport_method(
 ) where {T<:ArrayPartition}
     return ProductVectorTransport(
         map(default_vector_transport_method, M.manifolds, T.parameters[2].parameters)...,
-    )
-end
-function default_vector_transport_method(
-    M::ProductManifold,
-    ::Type{T},
-) where {T<:ProductRepr}
-    return ProductVectorTransport(
-        map(default_vector_transport_method, M.manifolds, T.parameters[1].parameters)...,
     )
 end
 
@@ -457,30 +421,10 @@ compute the exponential map from `p` in the direction of `X` on the [`ProductMan
 which is the elementwise exponential map on the internal manifolds that build `M`.
 """
 exp(::ProductManifold, ::Any...)
-function Base.exp(M::ProductManifold, p::ProductRepr, X::ProductRepr)
-    return ProductRepr(
-        map(
-            exp,
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-        )...,
-    )
-end
 function Base.exp(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
     return ArrayPartition(
         map(
             exp,
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-        )...,
-    )
-end
-function Base.exp(M::ProductManifold, p::ProductRepr, X::ProductRepr, t::Number)
-    return ProductRepr(
-        map(
-            (N, pc, Xc) -> exp(N, pc, Xc, t),
             M.manifolds,
             submanifold_components(M, p),
             submanifold_components(M, X),
@@ -626,38 +570,31 @@ function _get_dim_ranges(dims::NTuple{N,Any}) where {N}
     return ntuple(i -> (dims_acc[i]:(dims_acc[i] + dims[i] - 1)), Val(N))
 end
 
-for TP in [ProductRepr, ArrayPartition]
-    eval(
-        quote
-            function get_vector(
-                M::ProductManifold,
-                p::$TP,
-                Xⁱ,
-                B::AbstractBasis{𝔽,TangentSpaceType},
-            ) where {𝔽}
-                dims = map(manifold_dimension, M.manifolds)
-                @assert length(Xⁱ) == sum(dims)
-                dim_ranges = _get_dim_ranges(dims)
-                tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
-                ts = ziptuples(M.manifolds, submanifold_components(M, p), tXⁱ)
-                return $TP(map((@inline t -> get_vector(t..., B)), ts))
-            end
-            function get_vector(
-                M::ProductManifold,
-                p::$TP,
-                Xⁱ,
-                B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
-            ) where {𝔽}
-                dims = map(manifold_dimension, M.manifolds)
-                @assert length(Xⁱ) == sum(dims)
-                dim_ranges = _get_dim_ranges(dims)
-                tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
-                ts =
-                    ziptuples(M.manifolds, submanifold_components(M, p), tXⁱ, B.data.parts)
-                return $TP(map((@inline t -> get_vector(t...)), ts))
-            end
-        end,
-    )
+function get_vector(
+    M::ProductManifold,
+    p::ArrayPartition,
+    Xⁱ,
+    B::AbstractBasis{𝔽,TangentSpaceType},
+) where {𝔽}
+    dims = map(manifold_dimension, M.manifolds)
+    @assert length(Xⁱ) == sum(dims)
+    dim_ranges = _get_dim_ranges(dims)
+    tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
+    ts = ziptuples(M.manifolds, submanifold_components(M, p), tXⁱ)
+    return ArrayPartition(map((@inline t -> get_vector(t..., B)), ts))
+end
+function get_vector(
+    M::ProductManifold,
+    p::ArrayPartition,
+    Xⁱ,
+    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
+) where {𝔽}
+    dims = map(manifold_dimension, M.manifolds)
+    @assert length(Xⁱ) == sum(dims)
+    dim_ranges = _get_dim_ranges(dims)
+    tXⁱ = map(dr -> (@inbounds view(Xⁱ, dr)), dim_ranges)
+    ts = ziptuples(M.manifolds, submanifold_components(M, p), tXⁱ, B.data.parts)
+    return ArrayPartition(map((@inline t -> get_vector(t...)), ts))
 end
 
 function get_vector!(M::ProductManifold, X, p, Xⁱ, B::AbstractBasis)
@@ -702,21 +639,6 @@ end
 
 function get_vectors(
     M::ProductManifold,
-    p::ProductRepr,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
-) where {𝔽}
-    N = number_of_components(M)
-    xparts = submanifold_components(p)
-    BVs = map(t -> get_vectors(t...), ziptuples(M.manifolds, xparts, B.data.parts))
-    zero_tvs = map(t -> zero_vector(t...), ziptuples(M.manifolds, xparts))
-    vs = typeof(ProductRepr(zero_tvs...))[]
-    for i in 1:N, k in 1:length(BVs[i])
-        push!(vs, ProductRepr(zero_tvs[1:(i - 1)]..., BVs[i][k], zero_tvs[(i + 1):end]...))
-    end
-    return vs
-end
-function get_vectors(
-    M::ProductManifold,
     p::ArrayPartition,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:ProductBasisData},
 ) where {𝔽}
@@ -742,13 +664,6 @@ Access the element(s) at index `i` of a point `p` on a [`ProductManifold`](@ref)
 linear indexing.
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
-Base.@propagate_inbounds function Base.getindex(
-    p::ProductRepr,
-    M::ProductManifold,
-    i::Union{Integer,Colon,AbstractVector,Val},
-)
-    return get_component(M, p, i)
-end
 Base.@propagate_inbounds function Base.getindex(
     p::ArrayPartition,
     M::ProductManifold,
@@ -823,26 +738,20 @@ so the encapsulated inverse retraction methods have to be available per factor.
 """
 inverse_retract(::ProductManifold, ::Any, ::Any, ::Any, ::InverseProductRetraction)
 
-for TP in [ProductRepr, ArrayPartition]
-    eval(
-        quote
-            function inverse_retract(
-                M::ProductManifold,
-                p::$TP,
-                q::$TP,
-                method::InverseProductRetraction,
-            )
-                return $TP(
-                    map(
-                        inverse_retract,
-                        M.manifolds,
-                        submanifold_components(M, p),
-                        submanifold_components(M, q),
-                        method.inverse_retractions,
-                    ),
-                )
-            end
-        end,
+function inverse_retract(
+    M::ProductManifold,
+    p::ArrayPartition,
+    q::ArrayPartition,
+    method::InverseProductRetraction,
+)
+    return ArrayPartition(
+        map(
+            inverse_retract,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, q),
+            method.inverse_retractions,
+        ),
     )
 end
 
@@ -893,16 +802,6 @@ which can be computed using the logarithmic maps of the manifolds elementwise.
 """
 log(::ProductManifold, ::Any...)
 
-function Base.log(M::ProductManifold, p::ProductRepr, q::ProductRepr)
-    return ProductRepr(
-        map(
-            log,
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, q),
-        )...,
-    )
-end
 function Base.log(M::ProductManifold, p::ArrayPartition, q::ArrayPartition)
     return ArrayPartition(
         map(
@@ -1013,7 +912,7 @@ number_of_components(::ProductManifold{𝔽,<:NTuple{N,Any}}) where {𝔽,N} = N
 
 function ProductFVectorDistribution(
     type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
-    p::Union{AbstractArray,AbstractManifoldPoint,ProductRepr},
+    p::Union{AbstractArray,AbstractManifoldPoint},
     distributions::FVectorDistribution...,
 )
     return ProductFVectorDistribution{typeof(type),typeof(distributions),typeof(p)}(
@@ -1026,7 +925,7 @@ function ProductFVectorDistribution(
     type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
     distributions::FVectorDistribution...,
 )
-    p = ProductRepr(map(d -> support(d).point, distributions))
+    p = ArrayPartition(map(d -> support(d).point, distributions))
     return ProductFVectorDistribution(type, p, distributions...)
 end
 function ProductFVectorDistribution(distributions::FVectorDistribution...)
@@ -1038,7 +937,7 @@ function ProductFVectorDistribution(distributions::FVectorDistribution...)
         )
     end
     # Probably worth considering sum spaces in the future?
-    x = ProductRepr(map(d -> support(d).point, distributions)...)
+    x = ArrayPartition(map(d -> support(d).point, distributions)...)
     return ProductFVectorDistribution(VectorBundleFibers(fiber, M), x, distributions...)
 end
 
@@ -1050,26 +949,20 @@ function ProductPointDistribution(distributions::MPointDistribution...)
     return ProductPointDistribution(M, distributions...)
 end
 
-for TP in [ProductRepr, ArrayPartition]
-    eval(
-        quote
-            function parallel_transport_direction(
-                M::ProductManifold,
-                p::$TP,
-                X::$TP,
-                d::$TP,
-            )
-                return $TP(
-                    map(
-                        parallel_transport_direction,
-                        M.manifolds,
-                        submanifold_components(M, p),
-                        submanifold_components(M, X),
-                        submanifold_components(M, d),
-                    ),
-                )
-            end
-        end,
+function parallel_transport_direction(
+    M::ProductManifold,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    d::ArrayPartition,
+)
+    return ArrayPartition(
+        map(
+            parallel_transport_direction,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+            submanifold_components(M, d),
+        ),
     )
 end
 function parallel_transport_direction!(M::ProductManifold, Y, p, X, d)
@@ -1084,21 +977,20 @@ function parallel_transport_direction!(M::ProductManifold, Y, p, X, d)
     return Y
 end
 
-for TP in [ProductRepr, ArrayPartition]
-    eval(
-        quote
-            function parallel_transport_to(M::ProductManifold, p::$TP, X::$TP, q::$TP)
-                return $TP(
-                    map(
-                        parallel_transport_to,
-                        M.manifolds,
-                        submanifold_components(M, p),
-                        submanifold_components(M, X),
-                        submanifold_components(M, q),
-                    ),
-                )
-            end
-        end,
+function parallel_transport_to(
+    M::ProductManifold,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    q::ArrayPartition,
+)
+    return ArrayPartition(
+        map(
+            parallel_transport_to,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+            submanifold_components(M, q),
+        ),
     )
 end
 function parallel_transport_to!(M::ProductManifold, Y, p, X, q)
@@ -1113,9 +1005,6 @@ function parallel_transport_to!(M::ProductManifold, Y, p, X, q)
     return Y
 end
 
-function project(M::ProductManifold, p::ProductRepr)
-    return ProductRepr(map(project, M.manifolds, submanifold_components(M, p))...)
-end
 function project(M::ProductManifold, p::ArrayPartition)
     return ArrayPartition(map(project, M.manifolds, submanifold_components(M, p))...)
 end
@@ -1125,16 +1014,6 @@ function project!(M::ProductManifold, q, p)
     return q
 end
 
-function project(M::ProductManifold, p::ProductRepr, X::ProductRepr)
-    return ProductRepr(
-        map(
-            project,
-            M.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-        )...,
-    )
-end
 function project(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
     return ArrayPartition(
         map(
@@ -1158,10 +1037,10 @@ function project!(M::ProductManifold, Y, p, X)
 end
 
 function Random.rand(rng::AbstractRNG, d::ProductPointDistribution)
-    return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
+    return ArrayPartition(map(d -> rand(rng, d), d.distributions)...)
 end
 function Random.rand(rng::AbstractRNG, d::ProductFVectorDistribution)
-    return ProductRepr(map(d -> rand(rng, d), d.distributions)...)
+    return ArrayPartition(map(d -> rand(rng, d), d.distributions)...)
 end
 
 @doc raw"""
@@ -1176,17 +1055,8 @@ function Random.rand(
     parts_kwargs=map(_ -> (;), M.manifolds),
 )
     if vector_at === nothing
-        return ProductRepr(
+        return ArrayPartition(
             map((N, kwargs) -> rand(N; kwargs...), M.manifolds, parts_kwargs)...,
-        )
-    elseif isa(vector_at, ProductRepr)
-        return ProductRepr(
-            map(
-                (N, p, kwargs) -> rand(N; vector_at=p, kwargs...),
-                M.manifolds,
-                submanifold_components(M, vector_at),
-                parts_kwargs,
-            )...,
         )
     else
         return ArrayPartition(
@@ -1206,17 +1076,8 @@ function Random.rand(
     parts_kwargs=map(_ -> (;), M.manifolds),
 )
     if vector_at === nothing
-        return ProductRepr(
+        return ArrayPartition(
             map((N, kwargs) -> rand(rng, N; kwargs...), M.manifolds, parts_kwargs)...,
-        )
-    elseif isa(vector_at, ProductRepr)
-        return ProductRepr(
-            map(
-                (N, p, kwargs) -> rand(rng, N; vector_at=p, kwargs...),
-                M.manifolds,
-                submanifold_components(M, vector_at),
-                parts_kwargs,
-            )...,
         )
     else
         return ArrayPartition(
@@ -1263,7 +1124,11 @@ function Distributions._rand!(
 )
     return copyto!(x, rand(rng, d))
 end
-function Distributions._rand!(rng::AbstractRNG, d::ProductPointDistribution, p::ProductRepr)
+function Distributions._rand!(
+    rng::AbstractRNG,
+    d::ProductPointDistribution,
+    p::ArrayPartition,
+)
     map(
         t -> Distributions._rand!(rng, t[1], t[2]),
         d.distributions,
@@ -1281,7 +1146,7 @@ end
 function Distributions._rand!(
     rng::AbstractRNG,
     d::ProductFVectorDistribution,
-    X::ProductRepr,
+    X::ArrayPartition,
 )
     map(
         t -> Distributions._rand!(rng, t[1], t[2]),
@@ -1301,27 +1166,21 @@ method has to be one that is available on the manifolds.
 """
 retract(::ProductManifold, ::Any...)
 
-for TP in [ProductRepr, ArrayPartition]
-    eval(
-        quote
-            function _retract(
-                M::ProductManifold,
-                p::$TP,
-                X::$TP,
-                t::Number,
-                method::ProductRetraction,
-            )
-                return $TP(
-                    map(
-                        (N, pc, Xc, rm) -> retract(N, pc, Xc, t, rm),
-                        M.manifolds,
-                        submanifold_components(M, p),
-                        submanifold_components(M, X),
-                        method.retractions,
-                    ),
-                )
-            end
-        end,
+function _retract(
+    M::ProductManifold,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    t::Number,
+    method::ProductRetraction,
+)
+    return ArrayPartition(
+        map(
+            (N, pc, Xc, rm) -> retract(N, pc, Xc, t, rm),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+            method.retractions,
+        ),
     )
 end
 
@@ -1374,22 +1233,22 @@ the [`ProductManifold`](@ref) `M`.
 """
 riemann_tensor(M::ProductManifold, p, X, Y, X)
 
-for TP in [ProductRepr, ArrayPartition]
-    eval(
-        quote
-            function riemann_tensor(M::ProductManifold, p::$TP, X::$TP, Y::$TP, Z::$TP)
-                return $TP(
-                    map(
-                        riemann_tensor,
-                        M.manifolds,
-                        submanifold_components(M, p),
-                        submanifold_components(M, X),
-                        submanifold_components(M, Y),
-                        submanifold_components(M, Z),
-                    ),
-                )
-            end
-        end,
+function riemann_tensor(
+    M::ProductManifold,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    Y::ArrayPartition,
+    Z::ArrayPartition,
+)
+    return ArrayPartition(
+        map(
+            riemann_tensor,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+            submanifold_components(M, Y),
+            submanifold_components(M, Z),
+        ),
     )
 end
 
@@ -1423,7 +1282,7 @@ set the element `[i...]` of a point `q` on a [`ProductManifold`](@ref) by linear
 See also [Array Indexing](https://docs.julialang.org/en/v1/manual/arrays/#man-array-indexing-1) in Julia.
 """
 Base.@propagate_inbounds function Base.setindex!(
-    q::Union{ProductRepr,ArrayPartition},
+    q::ArrayPartition,
     p,
     M::ProductManifold,
     i::Union{Integer,Colon,AbstractVector,Val},
@@ -1534,7 +1393,7 @@ Distributions.support(d::ProductPointDistribution) = MPointSupport(d.manifold)
 function Distributions.support(tvd::ProductFVectorDistribution)
     return FVectorSupport(
         tvd.type,
-        ProductRepr(map(d -> support(d).point, tvd.distributions)...),
+        ArrayPartition(map(d -> support(d).point, tvd.distributions)...),
     )
 end
 
@@ -1552,28 +1411,22 @@ function vector_bundle_transport(::FiberType, M::ProductManifold)
     return ProductVectorTransport(map(_ -> ParallelTransport(), M.manifolds))
 end
 
-for TP in [ProductRepr, ArrayPartition]
-    eval(
-        quote
-            function vector_transport_direction(
-                M::ProductManifold,
-                p::$TP,
-                X::$TP,
-                d::$TP,
-                m::ProductVectorTransport,
-            )
-                return $TP(
-                    map(
-                        vector_transport_direction,
-                        M.manifolds,
-                        submanifold_components(M, p),
-                        submanifold_components(M, X),
-                        submanifold_components(M, d),
-                        m.methods,
-                    ),
-                )
-            end
-        end,
+function vector_transport_direction(
+    M::ProductManifold,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    d::ArrayPartition,
+    m::ProductVectorTransport,
+)
+    return ArrayPartition(
+        map(
+            vector_transport_direction,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+            submanifold_components(M, d),
+            m.methods,
+        ),
     )
 end
 function vector_transport_direction!(
@@ -1606,45 +1459,39 @@ base manifold.
 """
 vector_transport_to(::ProductManifold, ::Any, ::Any, ::Any, ::ProductVectorTransport)
 
-for TP in [ProductRepr, ArrayPartition]
-    eval(
-        quote
-            function vector_transport_to(
-                M::ProductManifold,
-                p::$TP,
-                X::$TP,
-                q::$TP,
-                m::ProductVectorTransport,
-            )
-                return $TP(
-                    map(
-                        vector_transport_to,
-                        M.manifolds,
-                        submanifold_components(M, p),
-                        submanifold_components(M, X),
-                        submanifold_components(M, q),
-                        m.methods,
-                    ),
-                )
-            end
-            function vector_transport_to(
-                M::ProductManifold,
-                p::$TP,
-                X::$TP,
-                q::$TP,
-                m::ParallelTransport,
-            )
-                return $TP(
-                    map(
-                        (iM, ip, iX, id) -> vector_transport_to(iM, ip, iX, id, m),
-                        M.manifolds,
-                        submanifold_components(M, p),
-                        submanifold_components(M, X),
-                        submanifold_components(M, q),
-                    ),
-                )
-            end
-        end,
+function vector_transport_to(
+    M::ProductManifold,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    q::ArrayPartition,
+    m::ProductVectorTransport,
+)
+    return ArrayPartition(
+        map(
+            vector_transport_to,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+            submanifold_components(M, q),
+            m.methods,
+        ),
+    )
+end
+function vector_transport_to(
+    M::ProductManifold,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    q::ArrayPartition,
+    m::ParallelTransport,
+)
+    return ArrayPartition(
+        map(
+            (iM, ip, iX, id) -> vector_transport_to(iM, ip, iX, id, m),
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+            submanifold_components(M, q),
+        ),
     )
 end
 

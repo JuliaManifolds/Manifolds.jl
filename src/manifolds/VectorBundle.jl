@@ -618,14 +618,6 @@ $\mathbf{0}_F$ is the zero element of the vector space $F$.
 """
 zero_vector(::VectorBundle, ::Any...)
 
-@doc raw"""
-    zero_vector(M::TangentSpaceAtPoint, p)
-
-Zero tangent vector at point `p` from the tangent space `M`, that is the zero tangent vector
-at point `M.point`.
-"""
-zero_vector(::TangentSpaceAtPoint, ::Any...)
-
 function zero_vector!(B::VectorBundle, X, p)
     xp, Vp = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)

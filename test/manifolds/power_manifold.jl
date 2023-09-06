@@ -464,39 +464,29 @@ end
 
         SE2 = SpecialEuclidean(2)
         PSE2 = PowerManifold(SE2, NestedReplacingPowerRepresentation(), 2)
-        for prod_type in [ProductRepr, ArrayPartition]
-            pse = prod_type(
-                SA[1.0, 2.0],
-                SA[
-                    0.5403023058681398 -0.8414709848078965
-                    0.8414709848078965 0.5403023058681398
-                ],
-            )
-            p2 = [pse, pse]
-            if prod_type === ProductRepr
-                @test allocate(PSE2, p2) isa
-                      Vector{ProductRepr{Tuple{SVector{2,Float64},SMatrix{2,2,Float64,4}}}}
-            else
-                @test allocate(PSE2, p2) isa Vector{
-                    ArrayPartition{
-                        Float64,
-                        Tuple{SVector{2,Float64},SMatrix{2,2,Float64,4}},
-                    },
-                }
-            end
+        pse = ArrayPartition(
+            SA[1.0, 2.0],
+            SA[
+                0.5403023058681398 -0.8414709848078965
+                0.8414709848078965 0.5403023058681398
+            ],
+        )
+        p2 = [pse, pse]
+        @test allocate(PSE2, p2) isa Vector{
+            ArrayPartition{Float64,Tuple{SVector{2,Float64},SMatrix{2,2,Float64,4}}},
+        }
 
-            pse_ap = ArrayPartition(
-                SA[1.0, 2.0],
-                SA[
-                    0.5403023058681398 -0.8414709848078965
-                    0.8414709848078965 0.5403023058681398
-                ],
-            )
-            p2_ap = [pse_ap, pse_ap]
-            @test allocate(PSE2, p2_ap) isa Vector{
-                ArrayPartition{Float64,Tuple{SVector{2,Float64},SMatrix{2,2,Float64,4}}},
-            }
-        end
+        pse_ap = ArrayPartition(
+            SA[1.0, 2.0],
+            SA[
+                0.5403023058681398 -0.8414709848078965
+                0.8414709848078965 0.5403023058681398
+            ],
+        )
+        p2_ap = [pse_ap, pse_ap]
+        @test allocate(PSE2, p2_ap) isa Vector{
+            ArrayPartition{Float64,Tuple{SVector{2,Float64},SMatrix{2,2,Float64,4}}},
+        }
     end
 
     @testset "Manifold volume" begin

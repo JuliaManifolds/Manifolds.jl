@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `CholeskySpace{N}`,
     - `Euclidean`,
     - `GeneralUnitaryMultiplicationGroup{n}`,
+    - `GeneralizedGrassmann{n,k}`,
+    - `GeneralizedStiefel{n,k}`,
     - `Grassmann{n,k}`,
     - `Orthogonal{n}`,
     - `SpecialOrthogonal{n}`,
@@ -69,7 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   end
   ```
 
-- Argument order for type alias `RotationActionOnVector`: most often dispatched on argument is now first.
+- Argument order for type aliases `RotationActionOnVector` and `RotationTranslationActionOnVector`: most often dispatched on argument is now first.
 
 ### Removed
 

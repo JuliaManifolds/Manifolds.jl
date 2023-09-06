@@ -40,8 +40,11 @@ function MultitangentBundleFibers{N}(M::AbstractManifold) where {N}
     return VectorBundleFibers(DirectSumType(ntuple(f -> TangentSpace, N)), M)
 end
 
-const MultitangentSpaceAtPoint{N,M} =
-    VectorSpaceAtPoint{𝔽,MultitangentBundleFibers{N,M}} where {𝔽,M<:AbstractManifold{𝔽}}
+const MultitangentSpaceAtPoint{𝔽,N,M} = VectorSpaceAtPoint{
+    𝔽,
+    M,
+    DirectSumType{NTuple{N,TangentSpaceType}},
+} where {𝔽,M<:AbstractManifold{𝔽}}
 function MultitangentSpaceAtPoint{N}(M::AbstractManifold, p) where {N}
     return VectorSpaceAtPoint(MultitangentBundleFibers{N}(M), p)
 end

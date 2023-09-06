@@ -12,9 +12,9 @@ Left forward action corresponds to active transformations while right forward ac
 can be identified with passive transformations for a particular choice of a basis.
 """
 struct RotationTranslationAction{
+    TAD<:ActionDirection,
     TM<:AbstractManifold,
     TSE<:SpecialEuclidean,
-    TAD<:ActionDirection,
 } <: AbstractGroupAction{TAD}
     manifold::TM
     SEn::TSE
@@ -25,27 +25,27 @@ function RotationTranslationAction(
     SEn::SpecialEuclidean,
     ::TAD=LeftForwardAction(),
 ) where {TAD<:ActionDirection}
-    return RotationTranslationAction{typeof(M),typeof(SEn),TAD}(M, SEn)
+    return RotationTranslationAction{TAD,typeof(M),typeof(SEn)}(M, SEn)
 end
 
 function Base.show(io::IO, A::RotationTranslationAction)
     return print(io, "RotationTranslationAction($(A.manifold), $(A.SEn), $(direction(A)))")
 end
 
-const RotationTranslationActionOnVector{N,F,TAD} = RotationTranslationAction{
-    <:Union{Euclidean{Tuple{N},F},TranslationGroup{Tuple{N},F}},
-    SpecialEuclidean{N},
+const RotationTranslationActionOnVector{TAD,𝔽,TE,TSE} = RotationTranslationAction{
     TAD,
-} where {TAD<:ActionDirection}
+    <:Union{Euclidean{TE,𝔽},TranslationGroup{TE,𝔽}},
+    SpecialEuclidean{TSE},
+} where {TAD<:ActionDirection,𝔽,TE,TSE}
 
 base_group(A::RotationTranslationAction) = A.SEn
 
 group_manifold(A::RotationTranslationAction) = A.manifold
 
 function switch_direction(
-    A::RotationTranslationAction{TM,TSO,TAD},
+    A::RotationTranslationAction{TAD},
     ::LeftRightSwitch=LeftRightSwitch(),
-) where {TM<:AbstractManifold,TSO<:SpecialEuclidean,TAD<:ActionDirection}
+) where {TAD<:ActionDirection}
     return RotationTranslationAction(
         A.manifold,
         A.SEn,
@@ -53,175 +53,171 @@ function switch_direction(
     )
 end
 
-function apply(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
-    a::ArrayPartition,
-    p,
-) where {N,F}
+function apply(::RotationTranslationActionOnVector{LeftForwardAction}, a::ArrayPartition, p)
     return a.x[2] * p + a.x[1]
 end
 function apply(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
-    a::SpecialEuclideanIdentity{N},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
+    a::SpecialEuclideanIdentity,
     p,
-) where {N,F}
+)
     return p
 end
 function apply(
-    ::RotationTranslationActionOnVector{N,F,RightForwardAction},
+    ::RotationTranslationActionOnVector{RightForwardAction},
     a::ArrayPartition,
     p,
-) where {N,F}
+)
     return a.x[2] \ (p - a.x[1])
 end
 function apply(
-    ::RotationTranslationActionOnVector{N,F,RightForwardAction},
-    a::SpecialEuclideanIdentity{N},
+    ::RotationTranslationActionOnVector{RightForwardAction},
+    a::SpecialEuclideanIdentity,
     p,
-) where {N,F}
+)
     return p
 end
 
 function apply!(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
     q,
     a::ArrayPartition,
     p,
-) where {N,F}
+)
     mul!(q, a.x[2], p)
     q .+= a.x[1]
     return q
 end
 function apply!(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
     q,
-    a::SpecialEuclideanIdentity{N},
+    a::SpecialEuclideanIdentity,
     p,
-) where {N,F}
+)
     copyto!(q, p)
     return q
 end
 
 function inverse_apply(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
     a::ArrayPartition,
     p,
-) where {N,F}
+)
     return a.x[2] \ (p - a.x[1])
 end
 function inverse_apply(
-    ::RotationTranslationActionOnVector{N,F,RightForwardAction},
+    ::RotationTranslationActionOnVector{RightForwardAction},
     a::ArrayPartition,
     p,
-) where {N,F}
+)
     return a.x[2] * p + a.x[1]
 end
 
 function apply_diff(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
     a::ArrayPartition,
     p,
     X,
-) where {N,F}
+)
     return a.x[2] * X
 end
 function apply_diff(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
-    ::SpecialEuclideanIdentity{N},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
+    ::SpecialEuclideanIdentity,
     p,
     X,
-) where {N,F}
+)
     return X
 end
 function apply_diff(
-    ::RotationTranslationActionOnVector{N,F,RightForwardAction},
+    ::RotationTranslationActionOnVector{RightForwardAction},
     a::ArrayPartition,
     p,
     X,
-) where {N,F}
+)
     return a.x[2] \ X
 end
 function apply_diff(
-    ::RotationTranslationActionOnVector{N,F,RightForwardAction},
-    a::SpecialEuclideanIdentity{N},
+    ::RotationTranslationActionOnVector{RightForwardAction},
+    a::SpecialEuclideanIdentity,
     p,
     X,
-) where {N,F}
+)
     return X
 end
 
 function apply_diff!(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
     Y,
     a::ArrayPartition,
     p,
     X,
-) where {N,F}
+)
     return mul!(Y, a.x[2], X)
 end
 function apply_diff!(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
     Y,
-    a::SpecialEuclideanIdentity{N},
+    a::SpecialEuclideanIdentity,
     p,
     X,
-) where {N,F}
+)
     return copyto!(Y, X)
 end
 function apply_diff!(
-    ::RotationTranslationActionOnVector{N,F,RightForwardAction},
+    ::RotationTranslationActionOnVector{RightForwardAction},
     Y,
     a::ArrayPartition,
     p,
     X,
-) where {N,F}
+)
     Y .= a.x[2] \ X
     return Y
 end
 function apply_diff!(
-    ::RotationTranslationActionOnVector{N,F,RightForwardAction},
+    ::RotationTranslationActionOnVector{RightForwardAction},
     Y,
-    a::SpecialEuclideanIdentity{N},
+    a::SpecialEuclideanIdentity,
     p,
     X,
-) where {N,F}
+)
     return copyto!(Y, X)
 end
 
 function apply_diff_group(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
-    ::SpecialEuclideanIdentity{N},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
+    ::SpecialEuclideanIdentity,
     X,
     p,
-) where {N,F}
+)
     return X.x[2] * p
 end
 
 function apply_diff_group!(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
     Y,
-    ::SpecialEuclideanIdentity{N},
+    ::SpecialEuclideanIdentity,
     X::ArrayPartition,
     p,
-) where {N,F}
+)
     Y .= X.x[2] * p
     return Y
 end
 
 function inverse_apply_diff(
-    ::RotationTranslationActionOnVector{N,F,LeftForwardAction},
+    ::RotationTranslationActionOnVector{LeftForwardAction},
     a::ArrayPartition,
     p,
     X,
-) where {N,F}
+)
     return a.x[2] \ X
 end
 function inverse_apply_diff(
-    ::RotationTranslationActionOnVector{N,F,RightForwardAction},
+    ::RotationTranslationActionOnVector{RightForwardAction},
     a::ArrayPartition,
     p,
     X,
-) where {N,F}
+)
     return a.x[2] * X
 end
 
@@ -297,10 +293,11 @@ Compute optimal alignment of `p` to `q` under the forward left [`ColumnwiseSpeci
 The algorithm, in sequence, computes optimal translation and optimal rotation
 """
 function optimal_alignment(
-    A::LeftColumnwiseSpecialEuclideanAction{<:AbstractManifold,<:SpecialEuclidean{N}},
+    A::LeftColumnwiseSpecialEuclideanAction{<:AbstractManifold,<:SpecialEuclidean},
     p,
     q,
-) where {N}
+)
+    N = get_n(A.SE)
     tr_opt = mean(q; dims=1) - mean(p; dims=1)
     p_moved = p + tr_opt
 

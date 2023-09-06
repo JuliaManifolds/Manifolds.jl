@@ -2,7 +2,7 @@
 include("../utils.jl")
 include("group_utils.jl")
 
-@testset "Rotation action" begin
+@testset "Rotation-translation action" begin
     G = SpecialEuclidean(2)
     M = base_manifold(G)
     A_left = RotationTranslationAction(Euclidean(2), G)

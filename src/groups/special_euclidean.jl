@@ -584,20 +584,14 @@ function log!(M::SpecialEuclideanManifold, X::AbstractMatrix, p, q)
 end
 
 """
-    lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
     lie_bracket(G::SpecialEuclidean, X::ArrayPartition, Y::ArrayPartition)
     lie_bracket(G::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)
 
 Calculate the Lie bracket between elements `X` and `Y` of the special Euclidean Lie
 algebra. For the matrix representation (which can be obtained using [`screw_matrix`](@ref))
-the formula is ``[X, Y] = XY-YX``, while in the [`ProductRepr`](@ref) representation the
+the formula is ``[X, Y] = XY-YX``, while in the `ArrayPartition` representation the
 formula reads ``[X, Y] = [(t_1, R_1), (t_2, R_2)] = (R_1 t_2 - R_2 t_1, R_1 R_2 - R_2 R_1)``.
 """
-function lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
-    nX, hX = submanifold_components(G, X)
-    nY, hY = submanifold_components(G, Y)
-    return ProductRepr(hX * nY - hY * nX, lie_bracket(G.manifold.manifolds[2], hX, hY))
-end
 function lie_bracket(G::SpecialEuclidean, X::ArrayPartition, Y::ArrayPartition)
     nX, hX = submanifold_components(G, X)
     nY, hY = submanifold_components(G, Y)

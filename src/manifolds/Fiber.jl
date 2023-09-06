@@ -102,14 +102,14 @@ struct FiberAtPoint{𝔽,TFiber<:BundleFibers{<:FiberType,<:AbstractManifold{�
 end
 
 """
-    VectorSpaceAtPoint{𝔽,TFiber}
+    VectorSpaceAtPoint{𝔽,M,TFiber}
 
 Alias for [`FiberAtPoint`](@ref) when the fiber is a vector space.
 """
-const VectorSpaceAtPoint{𝔽,TFiber} = FiberAtPoint{
+const VectorSpaceAtPoint{𝔽,M,TSpaceType} = FiberAtPoint{
     𝔽,
-    TFiber,
-} where {𝔽,TFiber<:VectorBundleFibers{<:FiberType,<:AbstractManifold{𝔽}}}
+    VectorBundleFibers{TSpaceType,M},
+} where {𝔽,M<:AbstractManifold{𝔽},TSpaceType<:VectorSpaceType}
 
 function VectorSpaceAtPoint(M::AbstractManifold, fiber::VectorSpaceFiberType, p)
     return FiberAtPoint(BundleFibers(fiber, M), p)
@@ -122,7 +122,7 @@ VectorSpaceAtPoint(fiber::BundleFibers{<:VectorSpaceFiberType}, p) = FiberAtPoin
 Alias for [`VectorSpaceAtPoint`](@ref) for the tangent space at a point.
 """
 const TangentSpaceAtPoint{𝔽,M} =
-    VectorSpaceAtPoint{𝔽,TangentBundleFibers{M}} where {𝔽,M<:AbstractManifold{𝔽}}
+    VectorSpaceAtPoint{𝔽,M,TangentSpaceType} where {𝔽,M<:AbstractManifold{𝔽}}
 
 """
     TangentSpaceAtPoint(M::AbstractManifold, p)
@@ -397,6 +397,6 @@ at point `M.point`.
 """
 zero_vector(::TangentSpaceAtPoint, ::Any...)
 
-function zero_vector!(M::TangentSpaceAtPoint, X, p)
+function zero_vector!(M::VectorSpaceAtPoint, X, p)
     return zero_vector!(M.fiber.manifold, X, M.point)
 end

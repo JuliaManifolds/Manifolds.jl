@@ -98,8 +98,8 @@ N = 5
 GN = PowerManifold(G, NestedReplacingPowerRepresentation(), N)
 
 q = [1.0 0.0; 0.0 1.0]
-p1 = [ProductRepr(SVector{2,Float64}([i - 0.1, -i]), SMatrix{2,2,Float64}(exp(R2, q, hat(R2, q, i)))) for i in 1:N]
-p2 = [ProductRepr(SVector{2,Float64}([i - 0.1, -i]), SMatrix{2,2,Float64}(exp(R2, q, hat(R2, q, -i)))) for i in 1:N]
+p1 = [ArrayPartition(SVector{2,Float64}([i - 0.1, -i]), SMatrix{2,2,Float64}(exp(R2, q, hat(R2, q, i)))) for i in 1:N]
+p2 = [ArrayPartition(SVector{2,Float64}([i - 0.1, -i]), SMatrix{2,2,Float64}(exp(R2, q, hat(R2, q, -i)))) for i in 1:N]
 
 X = similar(p1);
 

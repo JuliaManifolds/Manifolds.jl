@@ -24,7 +24,6 @@ The following functions are of interest for extending and using the [`ProductMan
 ```@docs
 submanifold_component
 submanifold_components
-ProductRepr
 ```
 
 ## Specific exception types

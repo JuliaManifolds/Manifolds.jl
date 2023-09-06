@@ -65,12 +65,6 @@ function allocate(::PowerManifoldNestedReplacing, x::AbstractArray{<:SArray})
 end
 function allocate(
     ::PowerManifoldNestedReplacing,
-    x::AbstractArray{<:ProductRepr{<:NTuple{N,SArray}}},
-) where {N}
-    return similar(x)
-end
-function allocate(
-    ::PowerManifoldNestedReplacing,
     x::AbstractArray{<:ArrayPartition{T,<:NTuple{N,SArray}}},
 ) where {T,N}
     return similar(x)

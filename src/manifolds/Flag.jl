@@ -73,7 +73,7 @@ struct Flag{T,dp1} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function Flag(N, ns::Vararg{Int,I}; parameter::Symbol=:field) where {I}
+function Flag(N::Int, ns::Vararg{Int,I}; parameter::Symbol=:field) where {I}
     if ns[1] <= 0
         error(
             "First dimension in the sequence ns must be strictly positive, but is $(ns[1]).",

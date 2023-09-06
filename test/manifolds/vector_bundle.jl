@@ -12,17 +12,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
     @testset "Nice access to vector bundle components" begin
         TB = TangentBundle(M)
-        @testset "ProductRepr" begin
-            p = ProductRepr([1.0, 0.0, 0.0], [0.0, 2.0, 4.0])
-            @test p[TB, :point] === p.parts[1]
-            @test p[TB, :vector] === p.parts[2]
-            p[TB, :vector] = [0.0, 3.0, 1.0]
-            @test p.parts[2] == [0.0, 3.0, 1.0]
-            p[TB, :point] = [0.0, 1.0, 0.0]
-            @test p.parts[1] == [0.0, 1.0, 0.0]
-            @test_throws DomainError p[TB, :error]
-            @test_throws DomainError p[TB, :error] = [1, 2, 3]
-        end
         @testset "ArrayPartition" begin
             p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 2.0, 4.0])
             @test p[TB, :point] === p.x[1]
@@ -48,7 +37,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
     TEST_FLOAT32 && push!(types, Vector{Float32})
     TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
 
-    for T in types, prepr in [ProductRepr, ArrayPartition]
+    for T in types
         p = convert(T, [1.0, 0.0, 0.0])
         TB = TangentBundle(M)
         @test injectivity_radius(TB) == 0
@@ -69,19 +58,16 @@ struct TestVectorSpaceType <: VectorSpaceType end
               "VectorBundle(TestVectorSpaceType(), Sphere(2, ℝ))"
         @testset "Type $T" begin
             pts_tb = [
-                prepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
-                prepr(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
-                prepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0])),
+                ArrayPartition(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
+                ArrayPartition(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
+                ArrayPartition(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0])),
             ]
-            @inferred prepr(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0]))
-            if prepr === ProductRepr
-                for pt in pts_tb
-                    @test bundle_projection(TB, pt) ≈ pt.parts[1]
-                end
-            else
-                for pt in pts_tb
-                    @test bundle_projection(TB, pt) ≈ pt.x[1]
-                end
+            @inferred ArrayPartition(
+                convert(T, [1.0, 0.0, 0.0]),
+                convert(T, [0.0, -1.0, -1.0]),
+            )
+            for pt in pts_tb
+                @test bundle_projection(TB, pt) ≈ pt.x[1]
             end
             X12_prod = inverse_retract(TB, pts_tb[1], pts_tb[2], m_prod_invretr)
             X13_prod = inverse_retract(TB, pts_tb[1], pts_tb[3], m_prod_invretr)
@@ -205,18 +191,21 @@ struct TestVectorSpaceType <: VectorSpaceType end
     @testset "product retraction and inverse retraction on tangent bundle for power and product manifolds" begin
         M = PowerManifold(Circle(ℝ), 2)
         N = TangentBundle(M)
-        p1 = ProductRepr([0.0, 0.0], [0.0, 0.0])
-        p2 = ProductRepr([-1.047, -1.047], [0.0, 0.0])
+        p1 = ArrayPartition([0.0, 0.0], [0.0, 0.0])
+        p2 = ArrayPartition([-1.047, -1.047], [0.0, 0.0])
         X1 = inverse_retract(N, p1, p2, m_prod_invretr)
         @test isapprox(N, p2, retract(N, p1, X1, m_prod_retr))
         @test is_vector(N, p2, vector_transport_to(N, p1, X1, p2))
 
         M2 = ProductManifold(Circle(ℝ), Euclidean(2))
         N2 = TangentBundle(M2)
-        p1_2 = ProductRepr(ProductRepr([0.0], [0.0, 0.0]), ProductRepr([0.0], [0.0, 0.0]))
-        p2_2 = ProductRepr(
-            ProductRepr([-1.047], [1.0, 0.0]),
-            ProductRepr([-1.047], [0.0, 1.0]),
+        p1_2 = ArrayPartition(
+            ArrayPartition([0.0], [0.0, 0.0]),
+            ArrayPartition([0.0], [0.0, 0.0]),
+        )
+        p2_2 = ArrayPartition(
+            ArrayPartition([-1.047], [1.0, 0.0]),
+            ArrayPartition([-1.047], [0.0, 1.0]),
         )
         @test isapprox(
             N2,

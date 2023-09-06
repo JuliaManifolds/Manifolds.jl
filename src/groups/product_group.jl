@@ -103,8 +103,8 @@ end
 inv!(::ProductGroup, q::Identity{ProductOperation}, ::Identity{ProductOperation}) = q
 
 _compose(G::ProductGroup, p, q) = _compose(G.manifold, p, q)
-function _compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
-    return ProductRepr(
+function _compose(M::ProductManifold, p::ArrayPartition, q::ArrayPartition)
+    return ArrayPartition(
         map(
             compose,
             M.manifolds,
@@ -126,17 +126,6 @@ function _compose!(M::ProductManifold, x, p, q)
     return x
 end
 
-function translate(M::ProductGroup, p::ProductRepr, q::ProductRepr, conv::ActionDirection)
-    return ProductRepr(
-        map(
-            translate,
-            M.manifold.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, q),
-            repeated(conv),
-        )...,
-    )
-end
 function translate(
     M::ProductGroup,
     p::ArrayPartition,
@@ -168,7 +157,7 @@ end
 
 function inverse_translate(G::ProductGroup, p, q, conv::ActionDirection)
     M = G.manifold
-    return ProductRepr(
+    return ArrayPartition(
         map(
             inverse_translate,
             M.manifolds,
@@ -222,7 +211,7 @@ end
 
 function inverse_translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
     M = G.manifold
-    return ProductRepr(
+    return ArrayPartition(
         map(
             inverse_translate_diff,
             M.manifolds,
@@ -248,16 +237,6 @@ function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirect
     return Y
 end
 
-function Base.exp(M::ProductGroup, p::Identity{ProductOperation}, X::ProductRepr)
-    return ProductRepr(
-        map(
-            exp,
-            M.manifold.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-        )...,
-    )
-end
 function Base.exp(M::ProductGroup, p::Identity{ProductOperation}, X::ArrayPartition)
     return ArrayPartition(
         map(
@@ -291,16 +270,6 @@ function exp_lie!(G::ProductGroup, q, X)
     return q
 end
 
-function Base.log(M::ProductGroup, p::Identity{ProductOperation}, q::ProductRepr)
-    return ProductRepr(
-        map(
-            log,
-            M.manifold.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, q),
-        )...,
-    )
-end
 function Base.log(M::ProductGroup, p::Identity{ProductOperation}, q::ArrayPartition)
     return ArrayPartition(
         map(
@@ -338,7 +307,7 @@ function log_lie!(G::ProductGroup, X, q::Identity{ProductOperation})
 end
 
 Base.@propagate_inbounds function Base.getindex(
-    p::Union{ProductRepr,ArrayPartition},
+    p::ArrayPartition,
     M::ProductGroup,
     i::Union{Integer,Colon,AbstractVector,Val},
 )
@@ -346,7 +315,7 @@ Base.@propagate_inbounds function Base.getindex(
 end
 
 Base.@propagate_inbounds function Base.setindex!(
-    q::Union{ProductRepr,ArrayPartition},
+    q::ArrayPartition,
     p,
     M::ProductGroup,
     i::Union{Integer,Colon,AbstractVector,Val},
