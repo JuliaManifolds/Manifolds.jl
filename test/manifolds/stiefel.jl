@@ -2,10 +2,10 @@ include("../utils.jl")
 
 @testset "Stiefel" begin
     @testset "Real" begin
-        M = Stiefel(3, 2)
+        M = Stiefel(3, 2; parameter=:type)
         M2 = MetricManifold(M, EuclideanMetric())
         @testset "Basics" begin
-            @test repr(M) == "Stiefel(3, 2, ℝ)"
+            @test repr(M) == "Stiefel(3, 2, ℝ; parameter=:type)"
             p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             @test is_default_metric(M, EuclideanMetric())
             @test representation_size(M) == (3, 2)
@@ -206,9 +206,9 @@ include("../utils.jl")
     end
 
     @testset "Complex" begin
-        M = Stiefel(3, 2, ℂ)
+        M = Stiefel(3, 2, ℂ; parameter=:type)
         @testset "Basics" begin
-            @test repr(M) == "Stiefel(3, 2, ℂ)"
+            @test repr(M) == "Stiefel(3, 2, ℂ; parameter=:type)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
             @test !is_flat(M)

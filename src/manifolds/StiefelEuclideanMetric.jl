@@ -23,7 +23,8 @@ $0_k$ are the identity matrix and the zero matrix of dimension $k × k$, respect
 """
 exp(::Stiefel, ::Any...)
 
-function exp!(::Stiefel{n,k}, q, p, X) where {n,k}
+function exp!(M::Stiefel, q, p, X)
+    n, k = get_nk(M)
     A = p' * X
     B = exp([A -X'*X; I A])
     @views begin
@@ -35,7 +36,7 @@ function exp!(::Stiefel{n,k}, q, p, X) where {n,k}
 end
 
 @doc raw"""
-    get_basis(M::Stiefel{n,k,ℝ}, p, B::DefaultOrthonormalBasis) where {n,k}
+    get_basis(M::Stiefel{<:Any,ℝ}, p, B::DefaultOrthonormalBasis)
 
 Create the default basis using the parametrization for any $X ∈ T_p\mathcal M$.
 Set $p_\bot \in ℝ^{n\times(n-k)}$ the matrix such that the $n\times n$ matrix of the common
@@ -58,30 +59,24 @@ trangular entries of $a$ is set to $1$ its symmetric entry to $-1$ and we normal
 the factor $\frac{1}{\sqrt{2}}$ and for $b$ one can just use unit vectors reshaped to a matrix
 to obtain orthonormal set of parameters.
 """
-get_basis(M::Stiefel{n,k,ℝ}, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType}) where {n,k}
+get_basis(M::Stiefel{<:Any,ℝ}, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
 
 function _get_basis(
-    M::Stiefel{n,k,ℝ},
+    M::Stiefel{<:Any,ℝ},
     p,
     B::DefaultOrthonormalBasis{ℝ,TangentSpaceType};
     kwargs...,
-) where {n,k}
+)
     return CachedBasis(B, get_vectors(M, p, B))
 end
 
-function get_coordinates_orthonormal!(
-    M::Stiefel{n,k,ℝ},
-    c,
-    p,
-    X,
-    N::RealNumbers,
-) where {n,k}
+function get_coordinates_orthonormal!(M::Stiefel{<:Any,ℝ}, c, p, X, N::RealNumbers)
     V = get_vectors(M, p, DefaultOrthonormalBasis(N))
     c .= inner.(Ref(M), Ref(p), V, Ref(X))
     return c
 end
 
-function get_vector_orthonormal!(M::Stiefel{n,k,ℝ}, X, p, c, N::RealNumbers) where {n,k}
+function get_vector_orthonormal!(M::Stiefel{<:Any,ℝ}, X, p, c, N::RealNumbers)
     V = get_vectors(M, p, DefaultOrthonormalBasis(N))
     zero_vector!(M, X, p)
     length(c) < length(V) && error(
@@ -93,11 +88,8 @@ function get_vector_orthonormal!(M::Stiefel{n,k,ℝ}, X, p, c, N::RealNumbers) w
     return X
 end
 
-function get_vectors(
-    ::Stiefel{n,k,ℝ},
-    p,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {n,k}
+function get_vectors(M::Stiefel{<:Any,ℝ}, p, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+    n, k = get_nk(M)
     p⊥ = nullspace([p zeros(n, n - k)])
     an = div(k * (k - 1), 2)
     bn = (n - k) * k
@@ -126,7 +118,7 @@ function inverse_retract_project!(M::Stiefel, X, p, q)
     return X
 end
 
-function log!(M::Stiefel{n,k,ℝ}, X, p, q) where {n,k}
+function log!(M::Stiefel{<:Any,ℝ}, X, p, q)
     MM = MetricManifold(M, StiefelSubmersionMetric(-1 // 2))
     log!(MM, X, p, q)
     return X

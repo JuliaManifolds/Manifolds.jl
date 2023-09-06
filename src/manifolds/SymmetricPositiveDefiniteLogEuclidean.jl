@@ -7,7 +7,7 @@ into the Lie Algebra, i.e. performing a matrix logarithm beforehand.
 struct LogEuclideanMetric <: RiemannianMetric end
 
 @doc raw"""
-    distance(M::MetricManifold{SymmetricPositiveDefinite{N},LogEuclideanMetric}, p, q)
+    distance(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogEuclideanMetric}, p, q)
 
 Compute the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between
 `p` and `q` as a [`MetricManifold`](@ref) with [`LogEuclideanMetric`](@ref).
@@ -20,11 +20,7 @@ The formula reads
 where $\operatorname{Log}$ denotes the matrix logarithm and
 $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
-function distance(
-    ::MetricManifold{ℝ,SymmetricPositiveDefinite{N},LogEuclideanMetric},
-    p,
-    q,
-) where {N}
+function distance(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogEuclideanMetric}, p, q)
     return norm(log(Symmetric(p)) - log(Symmetric(q)))
 end
 

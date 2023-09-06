@@ -6,8 +6,8 @@ include("group_utils.jl")
         G = TranslationGroup(2, 3)
         @test repr(G) == "TranslationGroup(2, 3; field = ℝ)"
         @test repr(TranslationGroup(2, 3; field=ℂ)) == "TranslationGroup(2, 3; field = ℂ)"
-        @test repr(TranslationGroup(2, 3; field=ℂ, parameter=:field)) ==
-              "TranslationGroup(2, 3; field = ℂ, parameter = :field)"
+        @test repr(TranslationGroup(2, 3; field=ℂ, parameter=:type)) ==
+              "TranslationGroup(2, 3; field = ℂ, parameter = :type)"
 
         @test has_invariant_metric(G, LeftForwardAction())
         @test has_invariant_metric(G, RightBackwardAction())

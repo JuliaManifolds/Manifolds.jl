@@ -1,5 +1,5 @@
 @doc raw"""
-    Stiefel{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
+    Stiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The Stiefel manifold consists of all $n × k$, $n ≥ k$ unitary matrices, i.e.
 
@@ -27,19 +27,24 @@ The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
 
 # Constructor
-    Stiefel(n, k, field = ℝ)
+    Stiefel(n, k, field = ℝ; parameter::Symbol=:field)
 
 Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
 """
-struct Stiefel{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
+struct Stiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
 
-Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ) = Stiefel{n,k,field}()
+function Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+    size = wrap_type_parameter(parameter, (n, k))
+    return Stiefel{typeof(size),field}(size)
+end
 
 function active_traits(f, ::Stiefel, args...)
     return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
 end
 
-function allocation_promotion_function(::Stiefel{n,k,ℂ}, ::Any, ::Tuple) where {n,k}
+function allocation_promotion_function(::Stiefel{<:Any,ℂ}, ::Any, ::Tuple)
     return complex
 end
 
@@ -76,7 +81,7 @@ Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{S
 [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_point(M::Stiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+function check_point(M::Stiefel, p; kwargs...)
     cks = check_size(M, p)
     (cks === nothing) || return cks
     c = p' * p
@@ -98,7 +103,8 @@ it (approximately) holds that $p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0$
 where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (elementwise) complex conjugate.
 The settings for approximately can be set with `kwargs...`.
 """
-function check_vector(M::Stiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
+function check_vector(M::Stiefel, p, X; kwargs...)
+    n, k = get_nk(M)
     cks = check_size(M, p, X)
     cks === nothing || return cks
     if !isapprox(p' * X, -conj(X' * p); kwargs...)
@@ -138,9 +144,16 @@ end
 embed(::Stiefel, p) = p
 embed(::Stiefel, p, X) = X
 
-function get_embedding(::Stiefel{N,K,𝔽}) where {N,K,𝔽}
-    return Euclidean(N, K; field=𝔽)
+function get_embedding(::Stiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return Euclidean(n, k; field=𝔽, parameter=:type)
 end
+function get_embedding(M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_nk(M)
+    return Euclidean(n, k; field=𝔽)
+end
+
+get_nk(::Stiefel{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
+get_nk(M::Stiefel{Tuple{Int,Int}}) = get_parameter(M.size)
 
 @doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
@@ -176,7 +189,8 @@ in [KanekoFioriTanaka:2013](@cite).
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
 
-function _stiefel_inv_retr_qr_mul_by_r_generic!(::Stiefel{n,k}, X, q, R, A) where {n,k}
+function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
+    n, k = get_nk(M)
     @inbounds for i in 1:k
         b = zeros(eltype(R), i)
         b[i] = 1
@@ -188,12 +202,18 @@ function _stiefel_inv_retr_qr_mul_by_r_generic!(::Stiefel{n,k}, X, q, R, A) wher
     return mul!(X, q, R)
 end
 
-function _stiefel_inv_retr_qr_mul_by_r!(::Stiefel{n,1}, X, q, A, ::Type) where {n}
+function _stiefel_inv_retr_qr_mul_by_r!(
+    ::Stiefel{TypeParameter{Tuple{n,1}}},
+    X,
+    q,
+    A,
+    ::Type,
+) where {n}
     @inbounds R = SMatrix{1,1}(inv(A[1, 1]))
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{n,1},
+    M::Stiefel{TypeParameter{Tuple{n,1}}},
     X,
     q,
     A::StaticArray,
@@ -201,7 +221,13 @@ function _stiefel_inv_retr_qr_mul_by_r!(
 ) where {n,ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
-        Tuple{Stiefel{n,1},typeof(X),typeof(q),AbstractArray,typeof(ElT)},
+        Tuple{
+            Stiefel{TypeParameter{Tuple{n,1}}},
+            typeof(X),
+            typeof(q),
+            AbstractArray,
+            typeof(ElT),
+        },
         M,
         X,
         q,
@@ -209,7 +235,13 @@ function _stiefel_inv_retr_qr_mul_by_r!(
         ElT,
     )
 end
-function _stiefel_inv_retr_qr_mul_by_r!(::Stiefel{n,2}, X, q, A, ::Type{ElT}) where {n,ElT}
+function _stiefel_inv_retr_qr_mul_by_r!(
+    ::Stiefel{TypeParameter{Tuple{n,2}}},
+    X,
+    q,
+    A,
+    ::Type{ElT},
+) where {n,ElT}
     R11 = inv(A[1, 1])
     @inbounds R =
         hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
@@ -219,7 +251,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(::Stiefel{n,2}, X, q, A, ::Type{ElT}) wh
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{n,2},
+    M::Stiefel{TypeParameter{Tuple{n,2}}},
     X,
     q,
     A::StaticArray,
@@ -227,7 +259,13 @@ function _stiefel_inv_retr_qr_mul_by_r!(
 ) where {n,ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
-        Tuple{Stiefel{n,2},typeof(X),typeof(q),AbstractArray,typeof(ElT)},
+        Tuple{
+            Stiefel{TypeParameter{Tuple{n,2}}},
+            typeof(X),
+            typeof(q),
+            AbstractArray,
+            typeof(ElT),
+        },
         M,
         X,
         q,
@@ -236,7 +274,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{n,k},
+    M::Stiefel{TypeParameter{Tuple{n,k}}},
     X,
     q,
     A::StaticArray,
@@ -245,13 +283,8 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     R = zeros(MMatrix{k,k,ElT})
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
-function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{n,k},
-    X,
-    q,
-    A,
-    ::Type{ElT},
-) where {n,k,ElT}
+function _stiefel_inv_retr_qr_mul_by_r!(M::Stiefel, X, q, A, ::Type{ElT}) where {ElT}
+    n, k = get_nk(M)
     R = zeros(ElT, k, k)
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
@@ -264,7 +297,8 @@ function inverse_retract_polar!(::Stiefel, X, p, q)
     X .-= p
     return X
 end
-function inverse_retract_qr!(M::Stiefel{n,k}, X, p, q) where {n,k}
+function inverse_retract_qr!(M::Stiefel, X, p, q)
+    n, k = get_nk(M)
     A = p' * q
     @boundscheck size(A) === (k, k)
     ElT = typeof(one(eltype(p)) * one(eltype(q)))
@@ -298,9 +332,18 @@ The dimension is given by
 \end{aligned}
 ````
 """
-manifold_dimension(::Stiefel{n,k,ℝ}) where {n,k} = n * k - div(k * (k + 1), 2)
-manifold_dimension(::Stiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
-manifold_dimension(::Stiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
+function manifold_dimension(M::Stiefel{<:Any,ℝ})
+    n, k = get_nk(M)
+    return n * k - div(k * (k + 1), 2)
+end
+function manifold_dimension(M::Stiefel{<:Any,ℂ})
+    n, k = get_nk(M)
+    return 2 * n * k - k * k
+end
+function manifold_dimension(M::Stiefel{<:Any,ℍ})
+    n, k = get_nk(M)
+    return 4 * n * k - k * (2k - 1)
+end
 
 @doc raw"""
     rand(::Stiefel; vector_at=nothing, σ::Real=1.0)
@@ -318,11 +361,12 @@ rand(::Stiefel; σ::Real=1.0)
 
 function Random.rand!(
     rng::AbstractRNG,
-    M::Stiefel{n,k,𝔽},
+    M::Stiefel{<:Any,𝔽},
     pX;
     vector_at=nothing,
     σ::Real=one(real(eltype(pX))),
-) where {n,k,𝔽}
+) where {𝔽}
+    n, k = get_nk(M)
     if vector_at === nothing
         A = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, n, k)
         pX .= Matrix(qr(A).Q)
@@ -471,12 +515,18 @@ end
 Returns the representation size of the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
 i.e. `(n,k)`, which is the matrix dimensions.
 """
-@generated representation_size(::Stiefel{n,k}) where {n,k} = (n, k)
+representation_size(M::Stiefel) = get_nk(M)
 
-Base.show(io::IO, ::Stiefel{n,k,F}) where {n,k,F} = print(io, "Stiefel($(n), $(k), $(F))")
+function Base.show(io::IO, ::Stiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return print(io, "Stiefel($(n), $(k), $(𝔽); parameter=:type)")
+end
+function Base.show(io::IO, M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_nk(M)
+    return print(io, "Stiefel($(n), $(k), $(𝔽))")
+end
 
 """
-    uniform_distribution(M::Stiefel{n,k,ℝ}, p)
+    uniform_distribution(M::Stiefel{<:Any,ℝ}, p)
 
 Uniform distribution on given (real-valued) [`Stiefel`](@ref) `M`.
 Specifically, this is the normalized Haar and Hausdorff measure on `M`.
@@ -485,7 +535,8 @@ Generated points will be of similar type as `p`.
 The implementation is based on Section 2.5.1 in [Chikuse:2003](@cite);
 see also Theorem 2.2.1(iii) in [Chikuse:2003](@cite).
 """
-function uniform_distribution(M::Stiefel{n,k,ℝ}, p) where {n,k}
+function uniform_distribution(M::Stiefel{<:Any,ℝ}, p)
+    n, k = get_nk(M)
     μ = Distributions.Zeros(n, k)
     σ = one(eltype(p))
     Σ1 = Distributions.PDMats.ScalMat(n, σ)

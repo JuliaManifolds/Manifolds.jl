@@ -18,7 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sizes of all manifolds can now be either encoded in type or stored in a field to avoid over-specialization.
   The default is set to store the size in a field. To obtain the old behavior, pass the `parameter=:type` keyword
   argument to manifold constructor. Related changes:
-  - Statically sized `SpecialEuclidean{N}` is now `SpecialEuclidean{TypeParameter{Tuple{N}}}`, whereas the type of special Euclidean group with field-stored size is `SpecialEuclidean{Tuple{Int}}`. Similar change applies to `GeneralUnitaryMultiplicationGroup{n}`, `Orthogonal{n}`, `SpecialOrthogonal{n}`, `SpecialUnitary{n}`, `SpecialEuclideanManifold{n}`, `TranslationGroup`. For example
+  - Statically sized `SpecialEuclidean{N}` is now `SpecialEuclidean{TypeParameter{Tuple{N}}}`, whereas the type of special Euclidean group with field-stored size is `SpecialEuclidean{Tuple{Int}}`. Similar change applies to:
+    - `CholeskySpace{N}`,
+    - `Euclidean`,
+    - `GeneralUnitaryMultiplicationGroup{n}`,
+    - `Grassmann{n,k}`,
+    - `Orthogonal{n}`,
+    - `SpecialOrthogonal{n}`,
+    - `SpecialUnitary{n}`,
+    - `SpecialEuclideanManifold{n}`,
+    - `Stiefel{n,k}`,
+    - `SymmetricPositiveDefinite{n}`,
+    - `TranslationGroup`.
+  
+  For example
 
   ```{julia}
   function Base.show(io::IO, ::SpecialEuclidean{n}) where {n}
@@ -43,7 +56,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   end
   ```
 
-  for groups with size stored in field.
+  for groups with size stored in field. Alternatively, you can use a single generic method like this:
+  
+  ```{julia}
+  function Base.show(io::IO, G::SpecialEuclidean{T}) where {T}
+    n = get_n(G)
+    if T <: TypeParameter
+        return print(io, "SpecialEuclidean($(n); parameter=:type)")
+    else
+        return print(io, "SpecialEuclidean($(n))")
+    end
+  end
+  ```
+
 - Argument order for type alias `RotationActionOnVector`: most often dispatched on argument is now first.
 
 ### Removed

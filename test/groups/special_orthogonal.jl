@@ -3,10 +3,10 @@ include("group_utils.jl")
 
 @testset "Special Orthogonal group" begin
     for n in [2, 3]
-        G = SpecialOrthogonal(n)
-        @test repr(G) == "SpecialOrthogonal($n)"
+        G = SpecialOrthogonal(n; parameter=:type)
+        @test repr(G) == "SpecialOrthogonal($n; parameter=:type)"
         M = base_manifold(G)
-        @test M === Rotations(n)
+        @test M === Rotations(n; parameter=:type)
         p = Matrix(I, n, n)
         @test is_default_metric(MetricManifold(G, EuclideanMetric()))
         @test is_flat(G) == (n == 2)

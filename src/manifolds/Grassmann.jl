@@ -65,7 +65,7 @@ A good overview can be found in[BendokatZimmermannAbsil:2020](@cite).
 
 # Constructor
 
-    Grassmann(n,k,field=ℝ)
+    Grassmann(n, k, field=ℝ, parameter::Symbol=:field)
 
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case `field = ℝ` is the default.

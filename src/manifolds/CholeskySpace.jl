@@ -1,5 +1,5 @@
 @doc raw"""
-    CholeskySpace{N} <: AbstractManifold{ℝ}
+    CholeskySpace{T} <: AbstractManifold{ℝ}
 
 The manifold of lower triangular matrices with positive diagonal and
 a metric based on the cholesky decomposition. The formulae for this manifold
@@ -7,13 +7,18 @@ are for example summarized in Table 1 of [Lin:2019](@cite).
 
 # Constructor
 
-    CholeskySpace(n)
+    CholeskySpace(n; parameter::Symbol=:field)
 
 Generate the manifold of $n× n$ lower triangular matrices with positive diagonal.
 """
-struct CholeskySpace{N} <: AbstractManifold{ℝ} end
+struct CholeskySpace{T} <: AbstractManifold{ℝ}
+    size::T
+end
 
-CholeskySpace(n::Int) = CholeskySpace{n}()
+function CholeskySpace(n::Int; parameter::Symbol=:field)
+    size = wrap_type_parameter(parameter, (n,))
+    return CholeskySpace{typeof(size)}(size)
+end
 
 @doc raw"""
     check_point(M::CholeskySpace, p; kwargs...)
@@ -105,6 +110,9 @@ function exp!(::CholeskySpace, q, p, X)
     return q
 end
 
+get_n(::CholeskySpace{TypeParameter{N}}) where {N} = N
+get_n(M::CholeskySpace{Tuple{Int}}) = get_parameter(M.size)[1]
+
 @doc raw"""
     inner(M::CholeskySpace, p, X, Y)
 
@@ -164,16 +172,28 @@ Return the manifold dimension for the [`CholeskySpace`](@ref) `M`, i.e.
     \dim(\mathcal M) = \frac{N(N+1)}{2}.
 ````
 """
-@generated manifold_dimension(::CholeskySpace{N}) where {N} = div(N * (N + 1), 2)
+function manifold_dimension(M::CholeskySpace)
+    N = get_n(M)
+    return div(N * (N + 1), 2)
+end
 
 @doc raw"""
     representation_size(M::CholeskySpace)
 
 Return the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(N,N)`.
 """
-@generated representation_size(::CholeskySpace{N}) where {N} = (N, N)
+function representation_size(M::CholeskySpace)
+    N = get_n(M)
+    return (N, N)
+end
 
-Base.show(io::IO, ::CholeskySpace{N}) where {N} = print(io, "CholeskySpace($(N))")
+function Base.show(io::IO, ::CholeskySpace{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "CholeskySpace($(n); parameter=:type)")
+end
+function Base.show(io::IO, M::CholeskySpace{Tuple{Int}})
+    n = get_n(M)
+    return print(io, "CholeskySpace($(n))")
+end
 
 # two small helpers for strictly lower and upper triangulars
 strictlyLowerTriangular(p) = LowerTriangular(p) - Diagonal(diag(p))
