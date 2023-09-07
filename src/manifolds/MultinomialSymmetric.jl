@@ -1,5 +1,5 @@
 @doc raw"""
-    MultinomialSymmetric{n} <: AbstractMultinomialDoublyStochastic{N}
+    MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic{N}
 
 The multinomial symmetric matrices manifold consists of all symmetric $n×n$ matrices with
 positive entries such that each column sums to one, i.e.
@@ -39,10 +39,13 @@ More details can be found in Section IV [DouikHassibi:2019](@cite).
 
 Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic and symmetric.
 """
-struct MultinomialSymmetric{N} <: AbstractMultinomialDoublyStochastic{N} end
+struct MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic
+    size::T
+end
 
-function MultinomialSymmetric(n::Int)
-    return MultinomialSymmetric{n}()
+function MultinomialSymmetric(n::Int; parameter::Symbol=:field)
+    size = wrap_type_parameter(parameter, (n,))
+    return MultinomialSymmetric{typeof(size)}(size)
 end
 
 @doc raw"""
@@ -51,7 +54,8 @@ end
 Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(m,n)` `M`,
 i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
-function check_point(M::MultinomialSymmetric{n}, p; kwargs...) where {n}
+function check_point(M::MultinomialSymmetric, p; kwargs...)
+    n = get_n(M)
     return check_point(SymmetricMatrices(n, ℝ), p)
 end
 @doc raw"""
@@ -61,16 +65,24 @@ Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialSymmetri
 This means, that `p` is valid, that `X` is of correct dimension, symmetric, and sums to zero
 along any row.
 """
-function check_vector(M::MultinomialSymmetric{n}, p, X; kwargs...) where {n}
+function check_vector(M::MultinomialSymmetric, p, X; kwargs...)
+    n = get_n(M)
     return check_vector(SymmetricMatrices(n, ℝ), p, X; kwargs...)
-end
-
-function get_embedding(::MultinomialSymmetric{N}) where {N}
-    return MultinomialMatrices(N, N)
 end
 
 embed!(::MultinomialSymmetric, q, p) = copyto!(q, p)
 embed!(::MultinomialSymmetric, Y, ::Any, X) = copyto!(Y, X)
+
+function get_embedding(::MultinomialSymmetric{TypeParameter{Tuple{n}}}) where {n}
+    return MultinomialMatrices(n, n; parameter=:type)
+end
+function get_embedding(M::MultinomialSymmetric{Tuple{Int}})
+    n = get_n(M)
+    return MultinomialMatrices(n, n)
+end
+
+get_n(::MultinomialSymmetric{TypeParameter{Tuple{n}}}) where {n} = n
+get_n(M::MultinomialSymmetric{Tuple{Int}}) = get_parameter(M.size)[1]
 
 """
     is_flat(::MultinomialSymmetric)
@@ -80,7 +92,7 @@ Return false. [`MultinomialSymmetric`](@ref) is not a flat manifold.
 is_flat(M::MultinomialSymmetric) = false
 
 @doc raw"""
-    manifold_dimension(M::MultinomialSymmetric{n}) where {n}
+    manifold_dimension(M::MultinomialSymmetric)
 
 returns the dimension of the [`MultinomialSymmetric`](@ref) manifold
 namely
@@ -88,12 +100,13 @@ namely
 \operatorname{dim}_{\mathcal{SP}(n)} = \frac{n(n-1)}{2}.
 ````
 """
-@generated function manifold_dimension(::MultinomialSymmetric{n}) where {n}
+function manifold_dimension(M::MultinomialSymmetric)
+    n = get_n(M)
     return div(n * (n - 1), 2)
 end
 
 @doc raw"""
-    project(M::MultinomialSymmetric{n}, p, Y) where {n}
+    project(M::MultinomialSymmetric, p, Y)
 
 Project `Y` onto the tangent space at `p` on the [`MultinomialSymmetric`](@ref) `M`, return the result in `X`.
 The formula reads
@@ -110,12 +123,13 @@ where $I_n$ is teh $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length
 """
 project(::MultinomialSymmetric, ::Any, ::Any)
 
-function project!(::MultinomialSymmetric{n}, X, p, Y) where {n}
+function project!(::MultinomialSymmetric, X, p, Y)
     α = (I + p) \ sum(Y, dims=2) # Formula (49) from 1802.02628
     return X .= Y .- (repeat(α, 1, 3) .+ repeat(α', 3, 1)) .* p
 end
 
-@generated function representation_size(::MultinomialSymmetric{n}) where {n}
+function representation_size(M::MultinomialSymmetric)
+    n = get_n(M)
     return (n, n)
 end
 
@@ -132,6 +146,10 @@ function retract_project!(M::MultinomialSymmetric, q, p, X, t::Number)
     return project!(M, q, p .* exp.(t .* X ./ p))
 end
 
-function Base.show(io::IO, ::MultinomialSymmetric{n}) where {n}
+function Base.show(io::IO, ::MultinomialSymmetric{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "MultinomialSymmetric($(n); parameter=:type)")
+end
+function Base.show(io::IO, M::MultinomialSymmetric{Tuple{Int}})
+    n = get_n(M)
     return print(io, "MultinomialSymmetric($(n))")
 end

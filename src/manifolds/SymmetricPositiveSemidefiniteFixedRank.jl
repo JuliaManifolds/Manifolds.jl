@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
+    SymmetricPositiveSemidefiniteFixedRank{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
 symmetric positive semidefinite matrices of size $n × n$ and rank $k$, i.e. the set
@@ -35,15 +35,23 @@ The metric was used in [JourneeBachAbsilSepulchre:2010](@cite)[MassartAbsil:2020
 
 # Constructor
 
-    SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ)
+    SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
 
 Generate the manifold of $n × n$ symmetric positive semidefinite matrices of rank $k$
 over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
 """
-struct SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
+struct SymmetricPositiveSemidefiniteFixedRank{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
 
-function SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ)
-    return SymmetricPositiveSemidefiniteFixedRank{n,k,field}()
+function SymmetricPositiveSemidefiniteFixedRank(
+    n::Int,
+    k::Int,
+    field::AbstractNumbers=ℝ;
+    parameter::Symbol=:field,
+)
+    size = wrap_type_parameter(parameter, (n, k))
+    return SymmetricPositiveSemidefiniteFixedRank{typeof(size),field}(size)
 end
 
 function active_traits(f, ::SymmetricPositiveSemidefiniteFixedRank, args...)
@@ -51,7 +59,7 @@ function active_traits(f, ::SymmetricPositiveSemidefiniteFixedRank, args...)
 end
 
 @doc raw"""
-    check_point(M::SymmetricPositiveSemidefiniteFixedRank{n,𝔽}, q; kwargs...)
+    check_point(M::SymmetricPositiveSemidefiniteFixedRank, q; kwargs...)
 
 Check whether `q` is a valid manifold point on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e.
 whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corresponding
@@ -59,11 +67,8 @@ whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corr
 The symmetry of `p` is not explicitly checked since by using `q` p is symmetric by construction.
 The tolerance for the symmetry of `p` can and the rank of `q*q'` be set using `kwargs...`.
 """
-function check_point(
-    M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽},
-    q;
-    kwargs...,
-) where {n,k,𝔽}
+function check_point(M::SymmetricPositiveSemidefiniteFixedRank, q; kwargs...)
+    n, k = get_nk(M)
     p = q * q'
     r = rank(p * p'; kwargs...)
     if r < k
@@ -76,7 +81,7 @@ function check_point(
 end
 
 """
-    check_vector(M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽}, p, X; kwargs... )
+    check_vector(M::SymmetricPositiveSemidefiniteFixedRank, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
@@ -86,9 +91,24 @@ Due to the reduced representation this is fulfilled as soon as the matrix is of 
 """
 check_vector(M::SymmetricPositiveSemidefiniteFixedRank, q, Y; kwargs...)
 
-function get_embedding(::SymmetricPositiveSemidefiniteFixedRank{N,K,𝔽}) where {N,K,𝔽}
-    return Euclidean(N, K; field=𝔽)
+function get_embedding(
+    ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n,k}},𝔽},
+) where {n,k,𝔽}
+    return Euclidean(n, k; field=𝔽, parameter=:type)
 end
+function get_embedding(
+    M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int,Int},𝔽},
+) where {𝔽}
+    n, k = get_nk(M)
+    return Euclidean(n, k; field=𝔽)
+end
+
+function get_nk(
+    ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n,k}}},
+) where {n,k}
+    return (n, k)
+end
+get_nk(M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int,Int}}) = get_parameter(M.size)
 
 @doc raw"""
     distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q)
@@ -172,7 +192,7 @@ function log!(::SymmetricPositiveSemidefiniteFixedRank, Z, q, p)
 end
 
 @doc raw"""
-    manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank{n,k,𝔽})
+    manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank)
 
 Return the dimension of the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) matrix `M` over the number system
 `𝔽`, i.e.
@@ -188,15 +208,13 @@ where the last $k^2$ is due to the zero imaginary part for Hermitian matrices di
 """
 manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank)
 
-@generated function manifold_dimension(
-    ::SymmetricPositiveSemidefiniteFixedRank{N,K,ℝ},
-) where {N,K}
-    return K * N - div(K * (K - 1), 2)
+function manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank{<:Any,ℝ})
+    n, k = get_nk(M)
+    return k * n - div(k * (k - 1), 2)
 end
-@generated function manifold_dimension(
-    ::SymmetricPositiveSemidefiniteFixedRank{N,K,ℂ},
-) where {N,K}
-    return 2 * K * N - K * K
+function manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank{<:Any,ℂ})
+    n, k = get_nk(M)
+    return 2 * k * n - k * k
 end
 
 function project!(::SymmetricPositiveSemidefiniteFixedRank, Z, q, Y)
@@ -204,8 +222,21 @@ function project!(::SymmetricPositiveSemidefiniteFixedRank, Z, q, Y)
     return Z
 end
 
-function Base.show(io::IO, ::SymmetricPositiveSemidefiniteFixedRank{n,k,F}) where {n,k,F}
-    return print(io, "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(F))")
+function Base.show(
+    io::IO,
+    ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n,k}},𝔽},
+) where {n,k,𝔽}
+    return print(
+        io,
+        "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽); parameter=:type)",
+    )
+end
+function Base.show(
+    io::IO,
+    M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int,Int},𝔽},
+) where {𝔽}
+    n, k = get_nk(M)
+    return print(io, "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽))")
 end
 
 """

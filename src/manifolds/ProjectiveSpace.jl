@@ -91,7 +91,7 @@ end
 function ArrayProjectiveSpace(
     n::Vararg{Int,I};
     field::AbstractNumbers=ℝ,
-    parameter=:field,
+    parameter::Symbol=:field,
 ) where {I}
     size = wrap_type_parameter(parameter, n)
     return ArrayProjectiveSpace{typeof(size),field}(size)

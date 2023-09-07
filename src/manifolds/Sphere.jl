@@ -96,7 +96,11 @@ Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where $𝔽$ defaults to the rea
 struct ArraySphere{T,𝔽} <: AbstractSphere{𝔽}
     size::T
 end
-function ArraySphere(n::Vararg{Int,I}; field::AbstractNumbers=ℝ, parameter=:field) where {I}
+function ArraySphere(
+    n::Vararg{Int,I};
+    field::AbstractNumbers=ℝ,
+    parameter::Symbol=:field,
+) where {I}
     size = wrap_type_parameter(parameter, n)
     return ArraySphere{typeof(size),field}(size)
 end

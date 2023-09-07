@@ -25,7 +25,7 @@ struct SymmetricMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter=:field)
+function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
     size = wrap_type_parameter(parameter, (n,))
     return SymmetricMatrices{typeof(size),field}(size)
 end

@@ -1,5 +1,5 @@
 @doc raw"""
-    Elliptope{N,K} <: AbstractDecoratorManifold{ℝ}
+    Elliptope{T} <: AbstractDecoratorManifold{ℝ}
 
 The Elliptope manifold, also known as the set of correlation matrices, consists of all
 symmetric positive semidefinite matrices of rank $k$ with unit diagonal, i.e.,
@@ -35,15 +35,23 @@ investigated in[JourneeBachAbsilSepulchre:2010](@cite).
 
 # Constructor
 
-    Elliptope(n,k)
+    Elliptope(n::Int, k::Int; parameter::Symbol=:field)
 
 generates the manifold $\mathcal E(n,k) \subset ℝ^{n × n}$.
+
+`parameter`: whether a type parameter should be used to store `n` and `k`. By default size
+is stored in a field. Value can either be `:field` or `:type`.
 """
-struct Elliptope{N,K} <: AbstractDecoratorManifold{ℝ} end
+struct Elliptope{T} <: AbstractDecoratorManifold{ℝ}
+    size::T
+end
 
 active_traits(f, ::Elliptope, args...) = merge_traits(IsEmbeddedManifold())
 
-Elliptope(n::Int, k::Int) = Elliptope{n,k}()
+function Elliptope(n::Int, k::Int; parameter::Symbol=:field)
+    size = wrap_type_parameter(parameter, (n, k))
+    return Elliptope{typeof(size)}(size)
+end
 
 @doc raw"""
     check_point(M::Elliptope, q; kwargs...)
@@ -55,7 +63,7 @@ Since by construction $p$ is symmetric, this is not explicitly checked.
 Since $p$ is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
-function check_point(M::Elliptope{N,K}, q; kwargs...) where {N,K}
+function check_point(M::Elliptope, q; kwargs...)
     row_norms_sq = sum(abs2, q; dims=2)
     if !all(isapprox.(row_norms_sq, 1.0; kwargs...))
         return DomainError(
@@ -77,7 +85,7 @@ zero diagonal.
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
 Note that symmetric of $X$ holds by construction an is not explicitly checked.
 """
-function check_vector(M::Elliptope{N,K}, q, Y; kwargs...) where {N,K}
+function check_vector(M::Elliptope, q, Y; kwargs...)
     X = q * Y' + Y * q'
     n = diag(X)
     if !all(isapprox.(n, 0.0; kwargs...))
@@ -89,7 +97,16 @@ function check_vector(M::Elliptope{N,K}, q, Y; kwargs...) where {N,K}
     return nothing
 end
 
-get_embedding(M::Elliptope) = Euclidean(representation_size(M)...; field=ℝ)
+function get_embedding(::Elliptope{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return Euclidean(n, k; parameter=:type)
+end
+function get_embedding(M::Elliptope{Tuple{Int,Int}})
+    n, k = get_nk(M)
+    return Euclidean(n, k)
+end
+
+get_nk(::Elliptope{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
+get_nk(M::Elliptope{Tuple{Int,Int}}) = get_parameter(M.size)
 
 """
     is_flat(::Elliptope)
@@ -107,7 +124,8 @@ returns the dimension of
 \dim \mathcal E(n,k) = n(k-1) - \frac{k(k-1)}{2}.
 ````
 """
-@generated function manifold_dimension(::Elliptope{N,K}) where {N,K}
+function manifold_dimension(M::Elliptope)
+    N, K = get_nk(M)
     return N * (K - 1) - div(K * (K - 1), 2)
 end
 
@@ -154,10 +172,14 @@ Return the size of an array representing an element on the
 [`Elliptope`](@ref) manifold `M`, i.e. $n × k$, the size of such factor of $p=qq^{\mathrm{T}}$
 on $\mathcal M = \mathcal E(n,k)$.
 """
-@generated representation_size(::Elliptope{N,K}) where {N,K} = (N, K)
+representation_size(M::Elliptope) = get_nk(M)
 
-function Base.show(io::IO, ::Elliptope{N,K}) where {N,K}
-    return print(io, "Elliptope($(N), $(K))")
+function Base.show(io::IO, ::Elliptope{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return print(io, "Elliptope($(n), $(k); parameter=:type)")
+end
+function Base.show(io::IO, M::Elliptope{Tuple{Int,Int}})
+    n, k = get_nk(M)
+    return print(io, "Elliptope($(n), $(k))")
 end
 
 """
@@ -177,4 +199,4 @@ definite matrix `p` on the [`Elliptope`](@ref) manifold `M`.
 """
 zero_vector(::Elliptope, ::Any...)
 
-zero_vector!(::Elliptope{N,K}, v, ::Any) where {N,K} = fill!(v, 0)
+zero_vector!(::Elliptope, X, ::Any) = fill!(X, 0)

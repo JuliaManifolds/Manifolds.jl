@@ -1,6 +1,6 @@
 
 @doc raw"""
-    Tucker{N, R, D, 𝔽} <: AbstractManifold{𝔽}
+    Tucker{T, D, 𝔽} <: AbstractManifold{𝔽}
 
 The manifold of ``N_1 \times \dots \times N_D`` real-valued or complex-valued tensors of
 fixed multilinear rank ``(R_1, \dots, R_D)`` . If ``R_1 = \dots = R_D = 1``, this is the
@@ -36,15 +36,23 @@ where ``\mathcal{C}^\prime`` is arbitrary, ``U_d^{\mathrm{H}}`` is the Hermitian
 ``U_d``, and ``U_d^{\mathrm{H}} U_d^\prime = 0`` for all ``d``.
 
 # Constructor
-    Tucker(N::NTuple{D, Int}, R::NTuple{D, Int}[, field = ℝ])
+    Tucker(N::NTuple{D, Int}, R::NTuple{D, Int}[, field = ℝ]; parameter::Symbol=:field)
 
 Generate the manifold of `field`-valued tensors of dimensions  `N[1] × … × N[D]` and
 multilinear rank `R = (R[1], …, R[D])`.
 """
-struct Tucker{N,R,D,𝔽} <: AbstractManifold{𝔽} end
-function Tucker(n⃗::NTuple{D,Int}, r⃗::NTuple{D,Int}, field::AbstractNumbers=ℝ) where {D}
+struct Tucker{T,D,𝔽} <: AbstractManifold{𝔽}
+    size::T
+end
+function Tucker(
+    n⃗::NTuple{D,Int},
+    r⃗::NTuple{D,Int},
+    field::AbstractNumbers=ℝ;
+    parameter::Symbol=:field,
+) where {D}
     @assert is_valid_mlrank(n⃗, r⃗)
-    return Tucker{n⃗,r⃗,D,field}()
+    size = wrap_type_parameter(parameter, (n⃗, r⃗))
+    return Tucker{typeof(size),D,field}(size)
 end
 
 #=
@@ -207,7 +215,7 @@ end
 ####
 
 @doc raw"""
-    check_point(M::Tucker{N,R,D}, p; kwargs...) where {N,R,D}
+    check_point(M::Tucker, p; kwargs...)
 
 Check whether the multidimensional array or [`TuckerPoint`](@ref) `p` is a point on the
 [`Tucker`](@ref) manifold, i.e. it is a `D`th order `N[1] × … × N[D]` tensor of multilinear
@@ -215,7 +223,8 @@ rank `(R[1], …, R[D])`. The keyword arguments are passed to the matrix rank fu
 to the unfoldings.
 For a [`TuckerPoint`](@ref) it is checked that the point is in correct HOSVD form.
 """
-function check_point(M::Tucker{N,R,D}, x; kwargs...) where {N,R,D}
+function check_point(M::Tucker, x; kwargs...)
+    N, R = get_nr(M)
     s = "The point $(x) does not lie on $(M), "
     size(x) == N || return DomainError(size(x), s * "since its size is not $(N).")
     x_buffer = similar(x)
@@ -225,7 +234,8 @@ function check_point(M::Tucker{N,R,D}, x; kwargs...) where {N,R,D}
     end
     return nothing
 end
-function check_point(M::Tucker{N,R,D}, x::TuckerPoint; kwargs...) where {N,R,D}
+function check_point(M::Tucker, x::TuckerPoint; kwargs...)
+    N, R = get_nr(M)
     s = "The point $(x) does not lie on $(M), "
     U = x.hosvd.U
     ℭ = x.hosvd.core
@@ -269,7 +279,7 @@ function check_point(M::Tucker{N,R,D}, x::TuckerPoint; kwargs...) where {N,R,D}
 end
 
 @doc raw"""
-    check_vector(M::Tucker{N,R,D}, p::TuckerPoint{T,D}, X::TuckerTVector) where {N,R,T,D}
+    check_vector(M::Tucker{<:Any,D}, p::TuckerPoint{T,D}, X::TuckerTVector) where {T,D}
 
 Check whether a [`TuckerTVector`](@ref) `X` is is in the tangent space to
 the `D`th order [`Tucker`](@ref) manifold `M` at the `D`th order [`TuckerPoint`](@ref) `p`.
@@ -277,25 +287,21 @@ This
 is the case when the dimensions of the factors in `X` agree with those of `p` and the factor
 matrices of `X` are in the orthogonal complement of the HOSVD factors of `p`.
 """
-function check_vector(
-    M::Tucker{N,R,D},
-    p::TuckerPoint{T,D},
-    v::TuckerTVector,
-) where {N,R,T,D}
-    s = "The tangent vector $(v) is not a tangent vector to $(p) on $(M), "
-    if size(p.hosvd.core) ≠ size(v.Ċ) || any(size.(v.U̇) .≠ size.(p.hosvd.U))
+function check_vector(M::Tucker{<:Any,D}, p::TuckerPoint{T,D}, X::TuckerTVector) where {T,D}
+    s = "The tangent vector $(X) is not a tangent vector to $(p) on $(M), "
+    if size(p.hosvd.core) ≠ size(X.Ċ) || any(size.(X.U̇) .≠ size.(p.hosvd.U))
         return DomainError(
-            size(v.Ċ),
-            s * "since the array dimensons of $(p) and $(v)" * "do not agree.",
+            size(X.Ċ),
+            s * "since the array dimensons of $(p) and $(X)" * "do not agree.",
         )
     end
-    for (U, U̇) in zip(p.hosvd.U, v.U̇)
+    for (U, U̇) in zip(p.hosvd.U, X.U̇)
         if norm(U' * U̇) ≥ √eps(eltype(U)) * √length(U)
             return DomainError(
                 norm(U' * U̇),
                 s *
                 "since the columns of x.hosvd.U are not" *
-                "orthogonal to those of v.U̇.",
+                "orthogonal to those of X.U̇.",
             )
         end
     end
@@ -375,17 +381,19 @@ end
 end
 
 @doc raw"""
-    embed(::Tucker{N,R,D}, p::TuckerPoint) where {N,R,D}
+    embed(::Tucker, p::TuckerPoint)
 
 Convert a [`TuckerPoint`](@ref) `p` on the rank `R` [`Tucker`](@ref) manifold to a full
 `N[1] × … × N[D]`-array by evaluating the Tucker decomposition.
-
-    embed(::Tucker{N,R,D}, p::TuckerPoint, X::TuckerTVector) where {N,R,D}
+"""
+embed(::Tucker, ::TuckerPoint)
+@doc raw"""
+    embed(::Tucker, p::TuckerPoint, X::TuckerTVector)
 
 Convert a tangent vector `X` with base point `p` on the rank `R` [`Tucker`](@ref)
 manifold to a full tensor, represented as an `N[1] × … × N[D]`-array.
 """
-embed(::Tucker, ::Any, ::TuckerPoint)
+embed(::Tucker, p::TuckerPoint, X::TuckerTVector)
 
 function embed!(::Tucker, q, p::TuckerPoint)
     return copyto!(q, reshape(⊗ᴿ(p.hosvd.U...) * vec(p.hosvd.core), size(p)))
@@ -488,6 +496,9 @@ function get_coordinates(
 ) where {𝔽}
     return get_coordinates(M, 𝔄, X, get_basis(M, 𝔄, ℬ))
 end
+
+get_nr(::Tucker{TypeParameter{Tuple{n,r}}}) where {n,r} = (n, r)
+get_nr(M::Tucker{<:Tuple}) = get_parameter(M.size)
 
 #=
 get_vector(::Tucker, A, x, b)
@@ -623,7 +634,7 @@ function is_valid_mlrank(n⃗, r⃗)
 end
 
 @doc raw"""
-    manifold_dimension(::Tucker{N,R,D}) where {N,R,D}
+    manifold_dimension(::Tucker)
 
 The dimension of the manifold of ``N_1 \times \dots \times N_D`` tensors of multilinear
 rank ``(R_1, \dots, R_D)``, i.e.
@@ -631,7 +642,10 @@ rank ``(R_1, \dots, R_D)``, i.e.
 \mathrm{dim}(\mathcal{M}) = \prod_{d=1}^D R_d + \sum_{d=1}^D R_d (N_d - R_d).
 ````
 """
-manifold_dimension(::Tucker{n⃗,r⃗}) where {n⃗,r⃗} = prod(r⃗) + sum(r⃗ .* (n⃗ .- r⃗))
+function manifold_dimension(M::Tucker)
+    n⃗, r⃗ = get_nr(M)
+    return prod(r⃗) + sum(r⃗ .* (n⃗ .- r⃗))
+end
 
 @doc raw"""
     Base.ndims(p::TuckerPoint{T,D}) where {T,D}
@@ -711,9 +725,18 @@ function retract_polar!(
     return q
 end
 
-function Base.show(io::IO, ::MIME"text/plain", 𝒯::Tucker{N,R,D,𝔽}) where {N,R,D,𝔽}
-    return print(io, "Tucker(", N, ", ", R, ", ", 𝔽, ")")
+function Base.show(
+    io::IO,
+    ::MIME"text/plain",
+    ::Tucker{TypeParameter{Tuple{n,r}},D,𝔽},
+) where {n,r,D,𝔽}
+    return print(io, "Tucker($(n), $(r), $(𝔽); parameter=:type)")
 end
+function Base.show(io::IO, ::MIME"text/plain", M::Tucker{<:Tuple,D,𝔽}) where {D,𝔽}
+    n, r = get_nr(M)
+    return print(io, "Tucker($(n), $(r), $(𝔽))")
+end
+
 function Base.show(io::IO, ::MIME"text/plain", 𝔄::TuckerPoint)
     pre = " "
     summary(io, 𝔄)
@@ -858,7 +881,7 @@ for fun in [:get_vector, :inverse_retract, :project, :zero_vector]
     end
 end
 
-function ManifoldsBase.allocate_result(::Tucker{N}, f::typeof(embed), p, args...) where {N}
-    dims = N
+function ManifoldsBase.allocate_result(M::Tucker, f::typeof(embed), p, args...)
+    dims = get_nr(M)[1]
     return Array{number_eltype(p),length(dims)}(undef, dims)
 end
