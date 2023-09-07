@@ -16,7 +16,7 @@ see [`minkowski_metric`](@ref) for the formula.
 struct MinkowskiMetric <: LorentzMetric end
 
 @doc raw"""
-    Lorentz{N} = MetricManifold{Euclidean{N,ℝ},LorentzMetric}
+    Lorentz{T} = MetricManifold{Euclidean{T,ℝ},LorentzMetric}
 
 The Lorentz manifold (or Lorentzian) is a pseudo-Riemannian manifold.
 

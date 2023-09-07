@@ -1,5 +1,5 @@
 @doc raw"""
-    change_representer(M::Hyperbolic{n}, ::EuclideanMetric, p, X)
+    change_representer(M::Hyperbolic, ::EuclideanMetric, p, X)
 
 Change the Eucliden representer `X` of a cotangent vector at point `p`.
 We only have to correct for the metric, which means that the sign of the last entry changes, since
@@ -262,7 +262,8 @@ function _get_basis(
     return get_basis_orthonormal(M, p, ℝ)
 end
 
-function get_basis_orthonormal(M::Hyperbolic{n}, p, r::RealNumbers) where {n}
+function get_basis_orthonormal(M::Hyperbolic, p, r::RealNumbers)
+    n = get_n(M)
     V = [
         _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for
         i in 1:n
@@ -364,8 +365,8 @@ i.e. $X_{n+1} = \frac{⟨\tilde p, Y⟩}{p_{n+1}}$, where $\tilde p = (p_1,\ldot
 _hyperbolize(::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
 
 @doc raw"""
-    inner(M::Hyperbolic{n}, p, X, Y)
-    inner(M::Hyperbolic{n}, p::HyperboloidPoint, X::HyperboloidTVector, Y::HyperboloidTVector)
+    inner(M::Hyperbolic, p, X, Y)
+    inner(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTVector, Y::HyperboloidTVector)
 
 Cmpute the inner product in the Hyperboloid model, i.e. the [`minkowski_metric`](@ref) in
 the embedding. The formula reads
@@ -409,11 +410,12 @@ end
 
 function Random.rand!(
     rng::AbstractRNG,
-    M::Hyperbolic{N},
+    M::Hyperbolic,
     pX;
     vector_at=nothing,
-    σ=one(eltype(pX)),
-) where {N}
+    σ::Real=one(eltype(pX)),
+)
+    N = get_n(M)
     if vector_at === nothing
         a = randn(rng, N)
         f = 1 + σ * abs(randn(rng))
