@@ -1,6 +1,6 @@
 
 @doc raw"""
-    KendallsPreShapeSpace{n,k} <: AbstractSphere{ℝ}
+    KendallsPreShapeSpace{T} <: AbstractSphere{ℝ}
 
 Kendall's pre-shape space of ``k`` landmarks in ``ℝ^n`` represented by n×k matrices.
 In each row the sum of elements of a matrix is equal to 0. The Frobenius norm of the matrix
@@ -11,20 +11,25 @@ translation and scaling of all points, so this can be thought of as a quotient m
 
 # Constructor
 
-    KendallsPreShapeSpace(n::Int, k::Int)
+    KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol=:field)
 
 # See also
 [`KendallsShapeSpace`](@ref), esp. for the references
 """
-struct KendallsPreShapeSpace{n,k} <: AbstractSphere{ℝ} end
+struct KendallsPreShapeSpace{T} <: AbstractSphere{ℝ}
+    size::T
+end
 
-KendallsPreShapeSpace(n::Int, k::Int) = KendallsPreShapeSpace{n,k}()
+function KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol=:field)
+    size = wrap_type_parameter(parameter, (n, k))
+    return KendallsPreShapeSpace{typeof(size)}(size)
+end
 
 function active_traits(f, ::KendallsPreShapeSpace, args...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 
-representation_size(::KendallsPreShapeSpace{n,k}) where {n,k} = (n, k)
+representation_size(M::KendallsPreShapeSpace) = get_nk(M)
 
 """
     check_point(M::KendallsPreShapeSpace, p; atol=sqrt(max_eps(X, Y)), kwargs...)
@@ -71,9 +76,18 @@ embed(::KendallsPreShapeSpace, p, X) = X
 Return the space [`KendallsPreShapeSpace`](@ref) `M` is embedded in, i.e. [`ArraySphere`](@ref)
 of matrices of the same shape.
 """
-function get_embedding(::KendallsPreShapeSpace{N,K}) where {N,K}
-    return ArraySphere(N, K)
+get_embedding(::KendallsPreShapeSpace)
+
+function get_embedding(::KendallsPreShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return ArraySphere(n, k, parameter=:type)
 end
+function get_embedding(M::KendallsPreShapeSpace{Tuple{Int,Int}})
+    n, k = get_nk(M)
+    return ArraySphere(n, k)
+end
+
+get_nk(::KendallsPreShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
+get_nk(M::KendallsPreShapeSpace{Tuple{Int,Int}}) = get_parameter(M.size)
 
 @doc raw"""
     manifold_dimension(M::KendallsPreShapeSpace)
@@ -81,7 +95,10 @@ end
 Return the dimension of the [`KendallsPreShapeSpace`](@ref) manifold `M`. The dimension is
 given by ``n(k - 1) - 1``.
 """
-manifold_dimension(::KendallsPreShapeSpace{n,k}) where {n,k} = n * (k - 1) - 1
+function manifold_dimension(M::KendallsPreShapeSpace)
+    n, k = get_nk(M)
+    return n * (k - 1) - 1
+end
 
 """
     project(M::KendallsPreShapeSpace, p)

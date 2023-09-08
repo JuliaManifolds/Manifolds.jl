@@ -1,6 +1,5 @@
 @doc raw"""
-    GeneralLinear{n,𝔽} <:
-        AbstractDecoratorManifold{𝔽}
+    GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The general linear group, that is, the group of all invertible matrices in ``𝔽^{n×n}``.
 
@@ -16,7 +15,9 @@ vector in the Lie algebra, and ``⟨⋅,⋅⟩_\mathrm{F}`` denotes the Frobeniu
 By default, tangent vectors ``X_p`` are represented with their corresponding Lie algebra
 vectors ``X_e = p^{-1}X_p``.
 """
-struct GeneralLinear{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
+struct GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
 
 function active_traits(f, ::GeneralLinear, args...)
     return merge_traits(
@@ -27,9 +28,12 @@ function active_traits(f, ::GeneralLinear, args...)
     )
 end
 
-GeneralLinear(n, 𝔽::AbstractNumbers=ℝ) = GeneralLinear{n,𝔽}()
+function GeneralLinear(n::Int, 𝔽::AbstractNumbers=ℝ; parameter::Symbol=:field)
+    size = wrap_type_parameter(parameter, (n,))
+    return GeneralLinear{typeof(size),𝔽}(size)
+end
 
-function allocation_promotion_function(::GeneralLinear{n,ℂ}, f, ::Tuple) where {n}
+function allocation_promotion_function(::GeneralLinear{<:Any,ℂ}, f, ::Tuple)
     return complex
 end
 
@@ -88,12 +92,12 @@ end
 function exp!(G::GeneralLinear, q, p, X, t::Number)
     return exp!(G, q, p, t * X)
 end
-function exp!(::GeneralLinear{1}, q, p, X)
+function exp!(::GeneralLinear{TypeParameter{Tuple{1}}}, q, p, X)
     p1 = p isa Identity ? p : p[1]
     q[1] = p1 * exp(X[1])
     return q
 end
-function exp!(G::GeneralLinear{2}, q, p, X)
+function exp!(G::GeneralLinear{TypeParameter{Tuple{2}}}, q, p, X)
     if isnormal(X; atol=sqrt(eps(real(eltype(X)))))
         return compose!(G, q, p, exp(SizedMatrix{2,2}(X)))
     end
@@ -105,50 +109,62 @@ function exp!(G::GeneralLinear{2}, q, p, X)
 end
 
 function get_coordinates(
-    ::GeneralLinear{n,ℝ},
+    ::GeneralLinear{<:Any,ℝ},
     p,
     X,
     ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {n}
+)
     return vec(X)
 end
 
 function get_coordinates!(
-    ::GeneralLinear{n,ℝ},
+    ::GeneralLinear{<:Any,ℝ},
     Xⁱ,
     p,
     X,
     ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {n}
+)
     return copyto!(Xⁱ, X)
 end
 
-get_embedding(::GeneralLinear{n,𝔽}) where {n,𝔽} = Euclidean(n, n; field=𝔽)
+function get_embedding(::GeneralLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+    return Euclidean(n, n; field=𝔽, parameter=:type)
+end
+function get_embedding(M::GeneralLinear{Tuple{Int},𝔽}) where {𝔽}
+    n = get_n(M)
+    return Euclidean(n, n; field=𝔽)
+end
+
+get_n(::GeneralLinear{TypeParameter{Tuple{n}}}) where {n} = n
+get_n(M::GeneralLinear{Tuple{Int}}) = get_parameter(M.size)[1]
 
 function get_vector(
-    ::GeneralLinear{n,ℝ},
+    M::GeneralLinear{<:Any,ℝ},
     p,
     Xⁱ,
     ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {n}
+)
+    n = get_n(M)
     return reshape(Xⁱ, n, n)
 end
 
 function get_vector!(
-    ::GeneralLinear{n,ℝ},
+    ::GeneralLinear{<:Any,ℝ},
     X,
     p,
     Xⁱ,
     ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-) where {n}
+)
     return copyto!(X, Xⁱ)
 end
 
-function exp_lie!(::GeneralLinear{1}, q, X)
+function exp_lie!(::GeneralLinear{TypeParameter{Tuple{1}}}, q, X)
     q[1] = exp(X[1])
     return q
 end
-exp_lie!(::GeneralLinear{2}, q, X) = copyto!(q, exp(SizedMatrix{2,2}(X)))
+function exp_lie!(::GeneralLinear{TypeParameter{Tuple{2}}}, q, X)
+    return copyto!(q, exp(SizedMatrix{2,2}(X)))
+end
 
 inner(::GeneralLinear, p, X, Y) = dot(X, Y)
 
@@ -189,7 +205,8 @@ function log(M::GeneralLinear, p, q)
     return log!(M, X, p, q)
 end
 
-function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
+function log!(G::GeneralLinear{<:Any,𝔽}, X, p, q) where {𝔽}
+    n = get_n(G)
     pinvq = inverse_translate(G, p, q, LeftForwardAction())
     𝔽 === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
     if isnormal(pinvq; atol=sqrt(eps(real(eltype(pinvq)))))
@@ -208,13 +225,13 @@ function log!(G::GeneralLinear{n,𝔽}, X, p, q) where {n,𝔽}
     translate_diff!(G, X, p, Identity(G), X, LeftForwardAction())
     return X
 end
-function log!(::GeneralLinear{1}, X, p, q)
+function log!(::GeneralLinear{TypeParameter{Tuple{1}}}, X, p, q)
     p1 = p isa Identity ? p : p[1]
     X[1] = log(p1 \ q[1])
     return X
 end
 
-function _log_lie!(::GeneralLinear{1}, X, p)
+function _log_lie!(::GeneralLinear{TypeParameter{Tuple{1}}}, X, p)
     X[1] = log(p[1])
     return X
 end
@@ -253,7 +270,13 @@ function Random.rand!(rng::AbstractRNG, G::GeneralLinear, pX; kwargs...)
     return pX
 end
 
-Base.show(io::IO, ::GeneralLinear{n,𝔽}) where {n,𝔽} = print(io, "GeneralLinear($n, $𝔽)")
+function Base.show(io::IO, ::GeneralLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+    return print(io, "GeneralLinear($n, $𝔽; parameter=:type)")
+end
+function Base.show(io::IO, M::GeneralLinear{Tuple{Int},𝔽}) where {𝔽}
+    n = get_n(M)
+    return print(io, "GeneralLinear($n, $𝔽)")
+end
 
 translate_diff(::GeneralLinear, p, q, X, ::LeftForwardAction) = X
 translate_diff(::GeneralLinear, p, q, X, ::RightBackwardAction) = p \ X * p

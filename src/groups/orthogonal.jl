@@ -1,15 +1,15 @@
 @doc raw"""
-    Orthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,AbsoluteDeterminantOneMatrices}
+    Orthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatrices}
 
 Orthogonal group $\mathrm{O}(n)$ represented by [`OrthogonalMatrices`](@ref).
 
 # Constructor
 
-    Orthogonal(n)
+    Orthogonal(n::Int; parameter::Symbol=:field)
 """
-const Orthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,AbsoluteDeterminantOneMatrices}
+const Orthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatrices}
 
-function Orthogonal(n; parameter::Symbol=:field)
+function Orthogonal(n::Int; parameter::Symbol=:field)
     return GeneralUnitaryMultiplicationGroup(OrthogonalMatrices(n; parameter=parameter))
 end
 

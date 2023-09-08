@@ -3,9 +3,9 @@ include("group_utils.jl")
 using RecursiveArrayTools
 
 @testset "Product group" begin
-    SOn = SpecialOrthogonal(3)
+    SOn = SpecialOrthogonal(3; parameter=:type)
     Tn = TranslationGroup(2)
-    Rn = Rotations(3)
+    Rn = Rotations(3; parameter=:type)
     M = ProductManifold(SOn, Tn)
     G = ProductGroup(M)
     @test_throws ErrorException ProductGroup(ProductManifold(Rotations(3), Stiefel(3, 2)))
@@ -112,6 +112,6 @@ using RecursiveArrayTools
     )
     @test sprint(show, "text/plain", G) === """
     ProductGroup with 2 subgroups:
-     SpecialOrthogonal(3)
+     SpecialOrthogonal(3; parameter=:type)
      TranslationGroup(2; field = ℝ)"""
 end
