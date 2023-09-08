@@ -29,7 +29,7 @@ end
     @test power_dimensions(Ms2n) == (7,)
     @test manifold_dimension(Ms2n) == 70
 
-    Mr = Manifolds.Rotations(3)
+    Mr = Rotations(3; parameter=:type)
     Mr1 = PowerManifold(Mr, 5)
     Mrn1 = PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5)
     @test PowerManifold(PowerManifold(Mr, 2), 3) == PowerManifold(Mr, 2, 3)
@@ -46,7 +46,8 @@ end
     @test manifold_dimension(Mrn2) == 105
 
     @test repr(Ms1) == "PowerManifold(Sphere(2, ℝ), 5)"
-    @test repr(Mrn1) == "PowerManifold(Rotations(3), NestedPowerRepresentation(), 5)"
+    @test repr(Mrn1) ==
+          "PowerManifold(Rotations(3; parameter=:type), NestedPowerRepresentation(), 5)"
 
     @test Manifolds.allocation_promotion_function(Ms, exp, ([1],)) ==
           Manifolds.allocation_promotion_function(Ms1, exp, (1,))

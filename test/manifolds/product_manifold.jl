@@ -203,7 +203,7 @@ using RecursiveArrayTools: ArrayPartition
          ProductManifold(Sphere(2, ℝ), Euclidean(2; field = ℝ))"""
     end
 
-    M3 = Manifolds.Rotations(2)
+    M3 = Rotations(2; parameter=:type)
     Mser = ProductManifold(M1, M2, M3)
 
     @test submanifold(Mser, 2) == M2
@@ -406,7 +406,7 @@ using RecursiveArrayTools: ArrayPartition
     end
 
     @testset "vee/hat" begin
-        M1 = Rotations(3)
+        M1 = Rotations(3; parameter=:type)
         M2 = Euclidean(3)
         M = M1 × M2
 
