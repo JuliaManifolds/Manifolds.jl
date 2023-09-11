@@ -269,4 +269,11 @@ using Random
         @test retract(M, p1_ortho, X1_ortho, QRRetraction()).value ≈
               retract(OrthogonalMatrices(5), p1_ortho.value, X1_ortho.value, QRRetraction())
     end
+
+    @testset "static parameters" begin
+        M = Flag(5, 1, 2; parameter=:type)
+        @test Manifolds.get_n(M) == 5
+        @test get_embedding(M) == Stiefel(5, 2; parameter=:type)
+        @test repr(M) == "Flag(5, 1, 2; parameter=:type)"
+    end
 end

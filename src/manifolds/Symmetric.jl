@@ -128,7 +128,7 @@ function get_coordinates_orthonormal!(
     return Y
 end
 
-function get_embedding(::SymmetricMatrices{TypeParameter{N},𝔽}) where {N,𝔽}
+function get_embedding(::SymmetricMatrices{TypeParameter{Tuple{N}},𝔽}) where {N,𝔽}
     return Euclidean(N, N; field=𝔽, parameter=:type)
 end
 function get_embedding(M::SymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
@@ -166,7 +166,7 @@ function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℂ}, Y, p, X, ::Com
 end
 ## unify within bases later.
 
-get_n(::SymmetricMatrices{TypeParameter{n}}) where {n} = n
+get_n(::SymmetricMatrices{TypeParameter{Tuple{n}}}) where {n} = n
 get_n(M::SymmetricMatrices{Tuple{Int}}) = get_parameter(M.size)[1]
 
 """

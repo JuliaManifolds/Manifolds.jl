@@ -110,7 +110,7 @@ function exp!(::CholeskySpace, q, p, X)
     return q
 end
 
-get_n(::CholeskySpace{TypeParameter{N}}) where {N} = N
+get_n(::CholeskySpace{TypeParameter{Tuple{N}}}) where {N} = N
 get_n(M::CholeskySpace{Tuple{Int}}) = get_parameter(M.size)[1]
 
 @doc raw"""

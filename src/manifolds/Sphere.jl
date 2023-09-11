@@ -504,10 +504,10 @@ function Base.show(io::IO, M::Sphere{Tuple{Int},𝔽}) where {𝔽}
     n = get_n(M)
     return print(io, "Sphere($(n), $(𝔽))")
 end
-function Base.show(io::IO, ::ArraySphere{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+function Base.show(io::IO, ::ArraySphere{TypeParameter{tn},𝔽}) where {tn,𝔽}
     return print(
         io,
-        "ArraySphere($(join(n.parameters, ", ")); field = $(𝔽), parameter=:type)",
+        "ArraySphere($(join(tn.parameters, ", ")); field = $(𝔽), parameter=:type)",
     )
 end
 function Base.show(io::IO, M::ArraySphere{<:Tuple,𝔽}) where {𝔽}

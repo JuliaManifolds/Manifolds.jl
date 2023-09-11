@@ -232,7 +232,7 @@ function get_embedding(M::SymmetricPositiveDefinite)
     return Euclidean(representation_size(M)...; field=ℝ)
 end
 
-get_n(::SymmetricPositiveDefinite{TypeParameter{N}}) where {N} = N
+get_n(::SymmetricPositiveDefinite{TypeParameter{Tuple{N}}}) where {N} = N
 get_n(M::SymmetricPositiveDefinite{Tuple{Int}}) = get_parameter(M.size)[1]
 
 @doc raw"""

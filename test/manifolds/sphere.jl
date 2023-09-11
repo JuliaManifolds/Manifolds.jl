@@ -282,4 +282,10 @@ using ManifoldsBase: TFVector
         @test manifold_volume(Sphere(3)) ≈ 2 * π * π
         @test volume_density(M, p, [0.0, 0.5, 0.5]) ≈ 0.9187253698655684
     end
+
+    @testset "static parameter" begin
+        @test repr(Sphere(2; parameter=:type)) == "Sphere(2, ℝ; parameter=:type)"
+        @test repr(ArraySphere(2, 3; parameter=:type)) ==
+              "ArraySphere(2, 3; field = ℝ, parameter=:type)"
+    end
 end

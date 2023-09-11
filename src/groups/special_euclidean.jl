@@ -357,7 +357,7 @@ exponential (see [`exp_lie`](@ref)).
 exp_lie(::SpecialEuclidean, ::Any)
 
 @doc raw"""
-    exp_lie(G::SpecialEuclidean{2}, X)
+    exp_lie(G::SpecialEuclidean{TypeParameter{Tuple{2}}}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(2)$, where $b ∈ 𝔱(2)$ and $Ω ∈ 𝔰𝔬(2)$:
 
@@ -374,10 +374,10 @@ U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-exp_lie(::SpecialEuclidean{2}, ::Any)
+exp_lie(::SpecialEuclidean{TypeParameter{Tuple{2}}}, ::Any)
 
 @doc raw"""
-    exp_lie(G::SpecialEuclidean{3}, X)
+    exp_lie(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(3)$, where $b ∈ 𝔱(3)$ and $Ω ∈ 𝔰𝔬(3)$:
 
@@ -394,7 +394,7 @@ U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-exp_lie(::SpecialEuclidean{3}, ::Any)
+exp_lie(::SpecialEuclidean{TypeParameter{Tuple{3}}}, ::Any)
 
 function exp_lie!(G::SpecialEuclidean, q, X)
     Xmat = screw_matrix(G, X)
@@ -403,7 +403,7 @@ function exp_lie!(G::SpecialEuclidean, q, X)
     _padpoint!(G, q)
     return q
 end
-function exp_lie!(G::SpecialEuclidean{2}, q, X)
+function exp_lie!(G::SpecialEuclidean{TypeParameter{Tuple{2}}}, q, X)
     SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -432,7 +432,7 @@ function exp_lie!(G::SpecialEuclidean{2}, q, X)
     end
     return q
 end
-function exp_lie!(G::SpecialEuclidean{3}, q, X)
+function exp_lie!(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, q, X)
     SO3 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -461,7 +461,7 @@ function exp_lie!(G::SpecialEuclidean{3}, q, X)
 end
 
 @doc raw"""
-    log_lie(G::SpecialEuclidean{n}, p) where {n}
+    log_lie(G::SpecialEuclidean, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n)$
 and $R ∈ \mathrm{SO}(n)$:
@@ -478,7 +478,7 @@ In the [`affine_matrix`](@ref) representation, the group logarithm is the matrix
 log_lie(::SpecialEuclidean, ::Any)
 
 @doc raw"""
-    log_lie(G::SpecialEuclidean{2}, p)
+    log_lie(G::SpecialEuclidean{TypeParameter{Tuple{2}}}, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(2)$, where $t ∈ \mathrm{T}(2)$
 and $R ∈ \mathrm{SO}(2)$:
@@ -496,10 +496,10 @@ U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-log_lie(::SpecialEuclidean{2}, ::Any)
+log_lie(::SpecialEuclidean{TypeParameter{Tuple{2}}}, ::Any)
 
 @doc raw"""
-    log_lie(G::SpecialEuclidean{3}, p)
+    log_lie(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(3)$, where $t ∈ \mathrm{T}(3)$
 and $R ∈ \mathrm{SO}(3)$:
@@ -517,7 +517,7 @@ U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-log_lie(::SpecialEuclidean{3}, ::Any)
+log_lie(::SpecialEuclidean{TypeParameter{Tuple{3}}}, ::Any)
 
 function _log_lie!(G::SpecialEuclidean, X, q)
     qmat = affine_matrix(G, q)
@@ -526,7 +526,7 @@ function _log_lie!(G::SpecialEuclidean, X, q)
     _padvector!(G, X)
     return X
 end
-function _log_lie!(G::SpecialEuclidean{2}, X, q)
+function _log_lie!(G::SpecialEuclidean{TypeParameter{Tuple{2}}}, X, q)
     SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -544,7 +544,7 @@ function _log_lie!(G::SpecialEuclidean{2}, X, q)
     end
     return X
 end
-function _log_lie!(G::SpecialEuclidean{3}, X, q)
+function _log_lie!(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, X, q)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
     @assert size(Ω) == (3, 3)

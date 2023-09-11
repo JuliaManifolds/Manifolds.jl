@@ -36,7 +36,7 @@ function Random.rand!(
     return pX
 end
 
-function Base.show(io::IO, ::OrthogonalMatrices{TypeParameter{n}}) where {n}
+function Base.show(io::IO, ::OrthogonalMatrices{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "OrthogonalMatrices($(n); parameter=:type)")
 end
 function Base.show(io::IO, M::OrthogonalMatrices{Tuple{Int}})

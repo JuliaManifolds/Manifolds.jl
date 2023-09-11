@@ -93,7 +93,7 @@ function manifold_dimension(M::UnitaryMatrices{<:Any,ℂ})
     return n^2
 end
 @doc raw"""
-    manifold_dimension(M::UnitaryMatrices{n,ℍ})
+    manifold_dimension(M::UnitaryMatrices{<:Any,ℍ})
 
 Return the dimension of the manifold unitary matrices.
 ```math
@@ -183,4 +183,3 @@ function Weingarten!(::UnitaryMatrices, Y, p, X, V)
 end
 
 zero_vector(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p) = zero(p)
-zero_vector(::UnitaryMatrices{1,ℍ}, p) = zero(p)

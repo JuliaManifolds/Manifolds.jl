@@ -59,7 +59,7 @@ end
 
 Get embedding of [`Flag`](@ref) manifold `M`, i.e. the manifold [`OrthogonalMatrices`](@ref).
 """
-function get_embedding(::Flag{TypeParameter{N}}, p::OrthogonalPoint) where {N}
+function get_embedding(::Flag{TypeParameter{Tuple{N}}}, p::OrthogonalPoint) where {N}
     return OrthogonalMatrices(N; parameter=:type)
 end
 get_embedding(M::Flag{Tuple{Int}}, p::OrthogonalPoint) = OrthogonalMatrices(M.size[1])

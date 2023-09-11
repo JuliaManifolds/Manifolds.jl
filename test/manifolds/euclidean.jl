@@ -395,4 +395,36 @@ using FiniteDifferences
         X = zeros(3)
         @test volume_density(E, p, X) == 1.0
     end
+
+    @testset "static parameter" begin
+        Ms = Euclidean(1; parameter=:type)
+        M0s = Euclidean(; parameter=:type)
+
+        @test distance(Ms, 2.0, 4.0) == 2.0
+        @test distance(M0s, 2.0, 4.0) == 2.0
+        @test log(M0s, 2.0, 4.0) == 2.0
+        @test manifold_dimension(M0s) == 1
+        @test project(M0s, 2.0, 4.0) == 4.0
+        @test retract(M0s, 2.0, 4.0) == 6.0
+        @test retract(M0s, 2.0, 4.0, ExponentialRetraction()) == 6.0
+
+        @test ManifoldDiff.adjoint_Jacobi_field(
+            M0s,
+            0.0,
+            1.0,
+            0.5,
+            2.0,
+            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+        ) === 2.0
+        @test ManifoldDiff.diagonalizing_projectors(M0s, 0.0, 2.0) ==
+              ((0.0, ManifoldDiff.IdentityProjector()),)
+        @test ManifoldDiff.jacobi_field(
+            M0s,
+            0.0,
+            1.0,
+            0.5,
+            2.0,
+            ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+        ) === 2.0
+    end
 end

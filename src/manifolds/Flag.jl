@@ -105,11 +105,11 @@ Get the embedding of the [`Flag`](@ref) manifold `M`, i.e. the [`Stiefel`](@ref)
 function get_embedding(M::Flag{Tuple{Int},dp1}) where {dp1}
     return Stiefel(M.size[1], M.subspace_dimensions[dp1 - 1])
 end
-function get_embedding(M::Flag{TypeParameter{N},dp1}) where {N,dp1}
+function get_embedding(M::Flag{TypeParameter{Tuple{N}},dp1}) where {N,dp1}
     return Stiefel(N, M.subspace_dimensions[dp1 - 1]; parameter=:type)
 end
 
-get_n(::Flag{TypeParameter{N}}) where {N} = N
+get_n(::Flag{TypeParameter{Tuple{N}}}) where {N} = N
 get_n(M::Flag{Tuple{Int}}) = get_parameter(M.size)[1]
 
 @doc raw"""
@@ -148,7 +148,7 @@ function manifold_dimension(M::Flag{<:Any,dp1}) where {dp1}
     return dim
 end
 
-function Base.show(io::IO, M::Flag{TypeParameter{N}}) where {N}
+function Base.show(io::IO, M::Flag{TypeParameter{Tuple{N}}}) where {N}
     print(io, "Flag($(N)")
     for d_i in M.subspace_dimensions.x[1:(end - 1)]
         print(io, ", $d_i")
