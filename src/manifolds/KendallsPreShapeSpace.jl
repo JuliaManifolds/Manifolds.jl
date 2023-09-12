@@ -11,7 +11,7 @@ translation and scaling of all points, so this can be thought of as a quotient m
 
 # Constructor
 
-    KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol=:field)
+    KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
 
 # See also
 [`KendallsShapeSpace`](@ref), esp. for the references
@@ -20,7 +20,7 @@ struct KendallsPreShapeSpace{T} <: AbstractSphere{ℝ}
     size::T
 end
 
-function KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol=:field)
+function KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n, k))
     return KendallsPreShapeSpace{typeof(size)}(size)
 end
@@ -29,7 +29,7 @@ function active_traits(f, ::KendallsPreShapeSpace, args...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 
-representation_size(M::KendallsPreShapeSpace) = get_nk(M)
+representation_size(M::KendallsPreShapeSpace) = get_parameter(M.size)
 
 """
     check_point(M::KendallsPreShapeSpace, p; atol=sqrt(max_eps(X, Y)), kwargs...)
@@ -79,15 +79,12 @@ of matrices of the same shape.
 get_embedding(::KendallsPreShapeSpace)
 
 function get_embedding(::KendallsPreShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
-    return ArraySphere(n, k, parameter=:type)
-end
-function get_embedding(M::KendallsPreShapeSpace{Tuple{Int,Int}})
-    n, k = get_nk(M)
     return ArraySphere(n, k)
 end
-
-get_nk(::KendallsPreShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
-get_nk(M::KendallsPreShapeSpace{Tuple{Int,Int}}) = get_parameter(M.size)
+function get_embedding(M::KendallsPreShapeSpace{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return ArraySphere(n, k; parameter=:field)
+end
 
 @doc raw"""
     manifold_dimension(M::KendallsPreShapeSpace)
@@ -96,7 +93,7 @@ Return the dimension of the [`KendallsPreShapeSpace`](@ref) manifold `M`. The di
 given by ``n(k - 1) - 1``.
 """
 function manifold_dimension(M::KendallsPreShapeSpace)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return n * (k - 1) - 1
 end
 

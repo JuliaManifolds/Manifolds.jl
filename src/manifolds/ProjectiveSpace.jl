@@ -40,7 +40,7 @@ projective spaces.
 struct ProjectiveSpace{T,𝔽} <: AbstractProjectiveSpace{𝔽}
     size::T
 end
-function ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+function ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return ProjectiveSpace{typeof(size),field}(size)
 end
@@ -91,7 +91,7 @@ end
 function ArrayProjectiveSpace(
     n::Vararg{Int,I};
     field::AbstractNumbers=ℝ,
-    parameter::Symbol=:field,
+    parameter::Symbol=:type,
 ) where {I}
     size = wrap_type_parameter(parameter, n)
     return ArrayProjectiveSpace{typeof(size),field}(size)
@@ -177,7 +177,7 @@ function exp!(M::AbstractProjectiveSpace, q, p, X)
 end
 
 function get_basis(M::ProjectiveSpace{<:Any,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return get_basis(Sphere(n), p, B)
 end
 
@@ -250,9 +250,6 @@ function get_vector_orthonormal!(
     Y[2:(n + 1)] .= (X .- pend .* (pX / (1 + cosθ))) .* λ
     return Y
 end
-
-get_n(::ProjectiveSpace{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::ProjectiveSpace{Tuple{Int}}) = get_parameter(M.size)[1]
 
 injectivity_radius(::AbstractProjectiveSpace) = π / 2
 injectivity_radius(::AbstractProjectiveSpace, p) = π / 2
@@ -445,7 +442,7 @@ function representation_size(M::ArrayProjectiveSpace)
     return get_parameter(M.size)
 end
 function representation_size(M::ProjectiveSpace)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return (n + 1,)
 end
 
@@ -486,21 +483,21 @@ function retract_qr!(M::AbstractProjectiveSpace, q, p, X, t::Number)
 end
 
 function Base.show(io::IO, ::ProjectiveSpace{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return print(io, "ProjectiveSpace($(n), $(𝔽); parameter=:type)")
-end
-function Base.show(io::IO, M::ProjectiveSpace{Tuple{Int},𝔽}) where {𝔽}
-    n = get_n(M)
     return print(io, "ProjectiveSpace($(n), $(𝔽))")
 end
-function Base.show(io::IO, ::ArrayProjectiveSpace{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return print(
-        io,
-        "ArrayProjectiveSpace($(join(n.parameters, ", ")); field = $(𝔽), parameter=:type)",
-    )
+function Base.show(io::IO, M::ProjectiveSpace{Tuple{Int},𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return print(io, "ProjectiveSpace($(n), $(𝔽); parameter=:field)")
+end
+function Base.show(io::IO, ::ArrayProjectiveSpace{TypeParameter{tn},𝔽}) where {tn<:Tuple,𝔽}
+    return print(io, "ArrayProjectiveSpace($(join(tn.parameters, ", ")); field = $(𝔽))")
 end
 function Base.show(io::IO, M::ArrayProjectiveSpace{<:Tuple,𝔽}) where {𝔽}
     n = M.size
-    return print(io, "ArrayProjectiveSpace($(join(n, ", ")); field = $(𝔽))")
+    return print(
+        io,
+        "ArrayProjectiveSpace($(join(n, ", ")); field = $(𝔽), parameter=:field)",
+    )
 end
 
 """

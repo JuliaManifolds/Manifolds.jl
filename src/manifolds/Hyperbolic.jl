@@ -29,7 +29,7 @@ and the Poincaré half space model, see [`PoincareHalfSpacePoint`](@ref) and [`P
 
 # Constructor
 
-    Hyperbolic(n::Int; parameter::Symbol=:field)
+    Hyperbolic(n::Int; parameter::Symbol=:type)
 
 Generate the Hyperbolic manifold of dimension `n`.
 """
@@ -37,7 +37,7 @@ struct Hyperbolic{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function Hyperbolic(n::Int; parameter::Symbol=:field)
+function Hyperbolic(n::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return Hyperbolic{typeof(size)}(size)
 end
@@ -176,7 +176,7 @@ function check_vector(
     X::Union{PoincareBallTVector,PoincareHalfSpaceTVector};
     kwargs...,
 )
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return check_point(Euclidean(n), X.value; kwargs...)
 end
 
@@ -202,15 +202,12 @@ function diagonalizing_projectors(M::Hyperbolic, p, X)
 end
 
 function get_embedding(::Hyperbolic{TypeParameter{Tuple{n}}}) where {n}
-    return Lorentz(n + 1, MinkowskiMetric(); parameter=:type)
-end
-function get_embedding(M::Hyperbolic{Tuple{Int}})
-    n = get_n(M)
     return Lorentz(n + 1, MinkowskiMetric())
 end
-
-get_n(::Hyperbolic{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::Hyperbolic{Tuple{Int}}) = get_parameter(M.size)[1]
+function get_embedding(M::Hyperbolic{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return Lorentz(n + 1, MinkowskiMetric(); parameter=:field)
+end
 
 embed(::Hyperbolic, p::AbstractArray) = p
 embed(::Hyperbolic, p::AbstractArray, X::AbstractArray) = X
@@ -312,7 +309,7 @@ end
 
 Return the dimension of the hyperbolic space manifold $\mathcal H^n$, i.e. $\dim(\mathcal H^n) = n$.
 """
-manifold_dimension(M::Hyperbolic) = get_n(M)
+manifold_dimension(M::Hyperbolic) = get_parameter(M.size)[1]
 
 @doc raw"""
     manifold_dimension(M::Hyperbolic)
@@ -358,11 +355,11 @@ the [`Lorentz`](@ref)ian manifold.
 project(::Hyperbolic, ::Any, ::Any)
 
 function Base.show(io::IO, ::Hyperbolic{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "Hyperbolic($(n); parameter=:type)")
+    return print(io, "Hyperbolic($(n))")
 end
 function Base.show(io::IO, M::Hyperbolic{Tuple{Int}})
-    n = get_n(M)
-    return print(io, "Hyperbolic($(n))")
+    n = get_parameter(M.size)[1]
+    return print(io, "Hyperbolic($(n); parameter=:field)")
 end
 for T in _HyperbolicTypes
     @eval Base.show(io::IO, p::$T) = print(io, "$($T)($(p.value))")

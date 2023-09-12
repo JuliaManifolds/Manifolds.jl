@@ -45,7 +45,7 @@ function GeneralizedStiefel(
     k::Int,
     B::AbstractMatrix=Matrix{Float64}(I, n, n),
     𝔽::AbstractNumbers=ℝ;
-    parameter::Symbol=:field,
+    parameter::Symbol=:type,
 )
     size = wrap_type_parameter(parameter, (n, k))
     return GeneralizedStiefel{typeof(size),𝔽,typeof(B)}(size, B)
@@ -100,15 +100,12 @@ function check_vector(M::GeneralizedStiefel, p, X; kwargs...)
 end
 
 function get_embedding(::GeneralizedStiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return Euclidean(n, k; field=𝔽, parameter=:type)
-end
-function get_embedding(M::GeneralizedStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
-    n, k = get_nk(M)
     return Euclidean(n, k; field=𝔽)
 end
-
-get_nk(::GeneralizedStiefel{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
-get_nk(M::GeneralizedStiefel{Tuple{Int,Int}}) = get_parameter(M.size)
+function get_embedding(M::GeneralizedStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return Euclidean(n, k; field=𝔽, parameter=:field)
+end
 
 @doc raw"""
     inner(M::GeneralizedStiefel, p, X, Y)
@@ -146,15 +143,15 @@ The dimension is given by
 ````
 """
 function manifold_dimension(M::GeneralizedStiefel{<:Any,ℝ})
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return n * k - div(k * (k + 1), 2)
 end
 function manifold_dimension(M::GeneralizedStiefel{<:Any,ℂ})
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return 2 * n * k - k * k
 end
 function manifold_dimension(M::GeneralizedStiefel{<:Any,ℍ})
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return 4 * n * k - k * (2k - 1)
 end
 
@@ -218,7 +215,7 @@ function Random.rand!(
     vector_at=nothing,
     σ::Real=one(real(eltype(pX))),
 )
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     if vector_at === nothing
         A = σ * randn(rng, eltype(pX), n, k)
         project!(M, pX, Matrix(qr(A).Q))
@@ -258,9 +255,9 @@ function retract_project!(M::GeneralizedStiefel, q, p, X, t::Number)
 end
 
 function Base.show(io::IO, M::GeneralizedStiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽); parameter=:type)")
+    return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
 end
 function Base.show(io::IO, M::GeneralizedStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
-    n, k = get_nk(M)
-    return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
+    n, k = get_parameter(M.size)
+    return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽); parameter=:field)")
 end

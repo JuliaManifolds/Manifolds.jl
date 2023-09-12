@@ -35,12 +35,12 @@ investigated in[JourneeBachAbsilSepulchre:2010](@cite).
 
 # Constructor
 
-    Elliptope(n::Int, k::Int; parameter::Symbol=:field)
+    Elliptope(n::Int, k::Int; parameter::Symbol=:type)
 
 generates the manifold $\mathcal E(n,k) \subset ℝ^{n × n}$.
 
 `parameter`: whether a type parameter should be used to store `n` and `k`. By default size
-is stored in a field. Value can either be `:field` or `:type`.
+is stored in type. Value can either be `:field` or `:type`.
 """
 struct Elliptope{T} <: AbstractDecoratorManifold{ℝ}
     size::T
@@ -48,7 +48,7 @@ end
 
 active_traits(f, ::Elliptope, args...) = merge_traits(IsEmbeddedManifold())
 
-function Elliptope(n::Int, k::Int; parameter::Symbol=:field)
+function Elliptope(n::Int, k::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n, k))
     return Elliptope{typeof(size)}(size)
 end
@@ -98,15 +98,12 @@ function check_vector(M::Elliptope, q, Y; kwargs...)
 end
 
 function get_embedding(::Elliptope{TypeParameter{Tuple{n,k}}}) where {n,k}
-    return Euclidean(n, k; parameter=:type)
-end
-function get_embedding(M::Elliptope{Tuple{Int,Int}})
-    n, k = get_nk(M)
     return Euclidean(n, k)
 end
-
-get_nk(::Elliptope{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
-get_nk(M::Elliptope{Tuple{Int,Int}}) = get_parameter(M.size)
+function get_embedding(M::Elliptope{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return Euclidean(n, k; parameter=:field)
+end
 
 """
     is_flat(::Elliptope)
@@ -125,7 +122,7 @@ returns the dimension of
 ````
 """
 function manifold_dimension(M::Elliptope)
-    N, K = get_nk(M)
+    N, K = get_parameter(M.size)
     return N * (K - 1) - div(K * (K - 1), 2)
 end
 
@@ -172,14 +169,14 @@ Return the size of an array representing an element on the
 [`Elliptope`](@ref) manifold `M`, i.e. $n × k$, the size of such factor of $p=qq^{\mathrm{T}}$
 on $\mathcal M = \mathcal E(n,k)$.
 """
-representation_size(M::Elliptope) = get_nk(M)
+representation_size(M::Elliptope) = get_parameter(M.size)
 
 function Base.show(io::IO, ::Elliptope{TypeParameter{Tuple{n,k}}}) where {n,k}
-    return print(io, "Elliptope($(n), $(k); parameter=:type)")
+    return print(io, "Elliptope($(n), $(k))")
 end
 function Base.show(io::IO, M::Elliptope{Tuple{Int,Int}})
-    n, k = get_nk(M)
-    return print(io, "Elliptope($(n), $(k))")
+    n, k = get_parameter(M.size)
+    return print(io, "Elliptope($(n), $(k); parameter=:field)")
 end
 
 """

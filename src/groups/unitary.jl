@@ -26,7 +26,7 @@ See also [`Orthogonal(n)`](@ref) for the real-valued case.
 """
 const Unitary{n,𝔽} = GeneralUnitaryMultiplicationGroup{n,𝔽,AbsoluteDeterminantOneMatrices}
 
-function Unitary(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:field)
+function Unitary(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
     return GeneralUnitaryMultiplicationGroup(UnitaryMatrices(n, 𝔽; parameter=parameter))
 end
 
@@ -100,16 +100,16 @@ end
 Base.inv(::Unitary, p) = adjoint(p)
 
 function Base.show(io::IO, ::Unitary{TypeParameter{Tuple{n}},ℂ}) where {n}
-    return print(io, "Unitary($(n); parameter=:type)")
-end
-function Base.show(io::IO, M::Unitary{Tuple{Int},ℂ})
-    n = get_n(M)
     return print(io, "Unitary($(n))")
 end
+function Base.show(io::IO, M::Unitary{Tuple{Int},ℂ})
+    n = get_parameter(M.size)[1]
+    return print(io, "Unitary($(n); parameter=:field)")
+end
 function Base.show(io::IO, ::Unitary{TypeParameter{Tuple{n}},ℍ}) where {n}
-    return print(io, "Unitary($(n), ℍ; parameter=:type)")
+    return print(io, "Unitary($(n), ℍ)")
 end
 function Base.show(io::IO, M::Unitary{Tuple{Int},ℍ})
-    n = get_n(M)
-    return print(io, "Unitary($(n), ℍ)")
+    n = get_parameter(M.size)[1]
+    return print(io, "Unitary($(n), ℍ; parameter=:field)")
 end

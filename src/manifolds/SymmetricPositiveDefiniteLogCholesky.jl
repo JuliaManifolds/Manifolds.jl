@@ -36,7 +36,7 @@ $⌊\cdot⌋$ denbotes the strictly lower triangular matrix of its argument,
 and $\lVert\cdot\rVert_{\mathrm{F}}$ the Frobenius norm.
 """
 function distance(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
-    N = get_n(M.manifold)
+    N = get_parameter(M.manifold.size)[1]
     return distance(CholeskySpace(N), cholesky(p).L, cholesky(q).L)
 end
 
@@ -58,7 +58,7 @@ denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}
 exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 
 function exp!(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, q, p, X)
-    N = get_n(M.manifold)
+    N = get_parameter(M.manifold.size)[1]
     (y, W) = spd_to_cholesky(p, X)
     z = exp(CholeskySpace(N), y, W)
     return copyto!(q, z * z')
@@ -90,7 +90,7 @@ $a_z(W) = z (z^{-1}Wz^{-\mathrm{T}})_{\frac{1}{2}}$, and $(\cdot)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$
 """
 function inner(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, X, Y)
-    N = get_n(M.manifold)
+    N = get_parameter(M.manifold.size)[1]
     (z, Xz) = spd_to_cholesky(p, X)
     (z, Yz) = spd_to_cholesky(p, z, Y)
     return inner(CholeskySpace(N), z, Xz, Yz)
@@ -119,7 +119,7 @@ of $q$ and the just mentioned logarithmic map is the one on [`CholeskySpace`](@r
 log(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 
 function log!(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, X, p, q)
-    N = get_n(M.manifold)
+    N = get_parameter(M.manifold.size)[1]
     x = cholesky(p).L
     y = cholesky(q).L
     log!(CholeskySpace(N), X, x, y)
@@ -161,7 +161,7 @@ function parallel_transport_to!(
     X,
     q,
 )
-    N = get_n(M.manifold)
+    N = get_parameter(M.manifold.size)[1]
     y = cholesky(q).L
     (x, W) = spd_to_cholesky(p, X)
     parallel_transport_to!(CholeskySpace(N), Y, x, W, y)

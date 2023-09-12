@@ -16,7 +16,7 @@ Return the volume of the [`ProbabilitySimplex`](@ref) with the Euclidean metric.
 The formula reads ``\frac{\sqrt{n+1}}{n!}``
 """
 function manifold_volume(M::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric})
-    n = get_n(M.manifold)
+    n = get_parameter(M.manifold.size)[1]
     return sqrt(n + 1) / factorial(n)
 end
 

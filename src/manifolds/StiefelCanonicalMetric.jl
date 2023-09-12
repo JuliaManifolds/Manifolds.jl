@@ -67,7 +67,7 @@ For more details, see [EdelmanAriasSmith:1998](@cite)[Zimmermann:2017](@cite).
 exp(::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, ::Any...)
 
 function exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, q, p, X)
-    n, k = get_nk(M.manifold)
+    n, k = get_parameter(M.manifold.size)
     A = p' * X
     n == k && return mul!(q, p, exp(A))
     QR = qr(X - p * A)
@@ -90,7 +90,7 @@ g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{1}{2}pp^{\mathrm{T
 ```
 """
 function inner(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, p, X, Y)
-    n, k = get_nk(M.manifold)
+    n, k = get_parameter(M.manifold.size)
     T = Base.promote_eltype(p, X, Y)
     if n == k
         return T(dot(X, Y)) / 2
@@ -148,7 +148,7 @@ function inverse_retract!(
     q,
     a::ApproximateLogarithmicMap,
 )
-    n, k = get_nk(M.manifold)
+    n, k = get_parameter(M.manifold.size)
     qfact = stiefel_factorization(p, q)
     V = allocate(qfact.Z, Size(2k, 2k))
     LV = allocate(V)

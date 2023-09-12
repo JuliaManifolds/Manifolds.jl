@@ -10,13 +10,13 @@ using FiniteDifferences
         EM = Manifolds.MetricManifold(E, Manifolds.EuclideanMetric())
         EH = Euclidean(2, 3; field=ℍ, parameter=param)
         if param === :type
-            @test repr(E) == "Euclidean(3; field = ℝ, parameter = :type)"
-            @test repr(Ec) == "Euclidean(3; field = ℂ, parameter = :type)"
-            @test repr(EH) == "Euclidean(2, 3; field = ℍ, parameter = :type)"
-        else
             @test repr(E) == "Euclidean(3; field = ℝ)"
             @test repr(Ec) == "Euclidean(3; field = ℂ)"
             @test repr(EH) == "Euclidean(2, 3; field = ℍ)"
+        else
+            @test repr(E) == "Euclidean(3; field = ℝ, parameter = :field)"
+            @test repr(Ec) == "Euclidean(3; field = ℂ, parameter = :field)"
+            @test repr(EH) == "Euclidean(2, 3; field = ℍ, parameter = :field)"
         end
 
         @test Manifolds.allocation_promotion_function(Ec, get_vector, ()) === complex
@@ -319,7 +319,7 @@ using FiniteDifferences
     end
 
     @testset "StaticArrays specializations" begin
-        M1 = Euclidean(3; parameter=:type)
+        M1 = Euclidean(3)
         @test get_vector(
             M1,
             SA[1.0, 2.0, 3.0],
@@ -330,7 +330,7 @@ using FiniteDifferences
         c_sv = SizedVector{3}([-1.0, -2.0, -3.0])
         @test get_vector(M1, SA[1.0, 2.0, 3.0], c_sv, DefaultOrthonormalBasis()) === c_sv
 
-        M2 = Euclidean(2, 2; parameter=:type)
+        M2 = Euclidean(2, 2)
         @test get_vector(
             M2,
             SA[1.0 2.0; 3.0 4.0],
@@ -396,9 +396,9 @@ using FiniteDifferences
         @test volume_density(E, p, X) == 1.0
     end
 
-    @testset "static parameter" begin
-        Ms = Euclidean(1; parameter=:type)
-        M0s = Euclidean(; parameter=:type)
+    @testset "field parameter" begin
+        Ms = Euclidean(1; parameter=:field)
+        M0s = Euclidean(; parameter=:field)
 
         @test distance(Ms, 2.0, 4.0) == 2.0
         @test distance(M0s, 2.0, 4.0) == 2.0

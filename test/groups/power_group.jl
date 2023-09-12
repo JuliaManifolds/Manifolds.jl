@@ -2,7 +2,7 @@ include("../utils.jl")
 include("group_utils.jl")
 
 @testset "Power group" begin
-    Mr = SpecialOrthogonal(3; parameter=:type)
+    Mr = SpecialOrthogonal(3)
     Mr1 = PowerManifold(Mr, 5)
     Mrn1 = PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5)
     Mrnr1 = PowerManifold(Mr, Manifolds.NestedReplacingPowerRepresentation(), 5)

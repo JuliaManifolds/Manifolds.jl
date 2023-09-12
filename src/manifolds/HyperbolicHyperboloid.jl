@@ -263,7 +263,7 @@ function _get_basis(
 end
 
 function get_basis_orthonormal(M::Hyperbolic, p, r::RealNumbers)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     V = [
         _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for
         i in 1:n
@@ -415,7 +415,7 @@ function Random.rand!(
     vector_at=nothing,
     σ::Real=one(eltype(pX)),
 )
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     if vector_at === nothing
         a = randn(rng, N)
         f = 1 + σ * abs(randn(rng))

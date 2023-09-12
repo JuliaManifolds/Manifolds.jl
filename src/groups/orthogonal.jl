@@ -5,18 +5,18 @@ Orthogonal group $\mathrm{O}(n)$ represented by [`OrthogonalMatrices`](@ref).
 
 # Constructor
 
-    Orthogonal(n::Int; parameter::Symbol=:field)
+    Orthogonal(n::Int; parameter::Symbol=:type)
 """
 const Orthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatrices}
 
-function Orthogonal(n::Int; parameter::Symbol=:field)
+function Orthogonal(n::Int; parameter::Symbol=:type)
     return GeneralUnitaryMultiplicationGroup(OrthogonalMatrices(n; parameter=parameter))
 end
 
 function Base.show(io::IO, ::Orthogonal{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "Orthogonal($(n); parameter=:type)")
+    return print(io, "Orthogonal($(n))")
 end
 function Base.show(io::IO, M::Orthogonal{Tuple{Int}})
-    n = get_n(M)
-    return print(io, "Orthogonal($(n))")
+    n = get_parameter(M.size)[1]
+    return print(io, "Orthogonal($(n); parameter=:field)")
 end

@@ -94,11 +94,11 @@ function exp!(M::Grassmann, q, p, X)
 end
 
 function get_embedding(::Grassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return Stiefel(n, k, 𝔽; parameter=:type)
+    return Stiefel(n, k, 𝔽)
 end
 function get_embedding(M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
-    n, k = get_nk(M)
-    return Stiefel(n, k, 𝔽)
+    n, k = get_parameter(M.size)
+    return Stiefel(n, k, 𝔽; parameter=:field)
 end
 
 @doc raw"""
@@ -238,7 +238,7 @@ function Random.rand!(
     vector_at=nothing,
 ) where {𝔽}
     if vector_at === nothing
-        n, k = get_nk(M)
+        n, k = get_parameter(M.size)
         V = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
         pX .= qr(V).Q[:, 1:k]
     else
@@ -255,7 +255,7 @@ end
 Return the representation size or matrix dimension of a point on the [`Grassmann`](@ref)
 `M`, i.e. $(n,k)$ for both the real-valued and the complex value case.
 """
-representation_size(M::Grassmann) = get_nk(M)
+representation_size(M::Grassmann) = get_parameter(M.size)
 
 @doc raw"""
     retract(M::Grassmann, p, X, ::PolarRetraction)
@@ -343,11 +343,11 @@ function riemann_tensor!(::Grassmann{<:Any,ℝ}, Xresult, p, X, Y, Z)
 end
 
 function Base.show(io::IO, ::Grassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return print(io, "Grassmann($(n), $(k), $(𝔽); parameter=:type)")
+    return print(io, "Grassmann($(n), $(k), $(𝔽))")
 end
 function Base.show(io::IO, M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
-    n, k = get_nk(M)
-    return print(io, "Grassmann($(n), $(k), $(𝔽))")
+    n, k = get_parameter(M.size)
+    return print(io, "Grassmann($(n), $(k), $(𝔽); parameter=:field)")
 end
 Base.show(io::IO, p::StiefelPoint) = print(io, "StiefelPoint($(p.value))")
 Base.show(io::IO, X::StiefelTVector) = print(io, "StiefelTVector($(X.value))")
@@ -363,7 +363,7 @@ The implementation is based on Section 2.5.1 in [Chikuse:2003](@cite);
 see also Theorem 2.2.2(iii) in [Chikuse:2003](@cite).
 """
 function uniform_distribution(M::Grassmann{<:Any,ℝ}, p)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     μ = Distributions.Zeros(n, k)
     σ = one(eltype(p))
     Σ1 = Distributions.PDMats.ScalMat(n, σ)

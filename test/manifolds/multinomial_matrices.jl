@@ -6,8 +6,10 @@ include("../utils.jl")
         @test ProbabilitySimplex(2)^3 === MultinomialMatrices(3, 3)
         @test ProbabilitySimplex(2)^(3,) === PowerManifold(ProbabilitySimplex(2), 3)
         @test ^(ProbabilitySimplex(2), 2) === MultinomialMatrices(3, 2)
-        @test typeof(^(ProbabilitySimplex(2), 2)) ==
-              MultinomialMatrices{Tuple{Int64,Int64},ProbabilitySimplex{Tuple{Int64},:open}}
+        @test typeof(^(ProbabilitySimplex(2), 2)) == MultinomialMatrices{
+            TypeParameter{Tuple{3,2}},
+            ProbabilitySimplex{TypeParameter{Tuple{2}},:open},
+        }
         @test repr(M) == "MultinomialMatrices(3, 2)"
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
@@ -44,5 +46,10 @@ include("../utils.jl")
             is_tangent_atol_multiplier=5.0,
             test_inplace=true,
         )
+    end
+    @testset "field parameter" begin
+        M = ProbabilitySimplex(2; parameter=:field)
+        @test typeof(^(M, 2)) ==
+              MultinomialMatrices{Tuple{Int64,Int64},ProbabilitySimplex{Tuple{Int64},:open}}
     end
 end

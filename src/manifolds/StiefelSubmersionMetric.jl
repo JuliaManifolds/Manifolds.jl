@@ -43,7 +43,7 @@ For ``k < \frac{n}{2}`` the exponential is computed more efficiently using
 exp(::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric}, ::Any...)
 
 function exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric}, q, p, X)
-    n, k = get_nk(M.manifold)
+    n, k = get_parameter(M.manifold.size)
     α = metric(M).α
     T = Base.promote_eltype(q, p, X)
     if k ≤ div(n, 2)
@@ -88,7 +88,7 @@ g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{2α+1}{2(α+1)}pp^
 where ``α`` is the parameter of the metric.
 """
 function inner(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric}, p, X, Y)
-    n, k = get_nk(M.manifold)
+    n, k = get_parameter(M.manifold.size)
     α = metric(M).α
     T = typeof(one(Base.promote_eltype(p, X, Y, α)))
     if n == k
@@ -155,7 +155,7 @@ function inverse_retract_shooting!(
         <:Union{ProjectionTransport,ScaledVectorTransport{ProjectionTransport}},
     },
 )
-    n, k = get_nk(M.manifold)
+    n, k = get_parameter(M.manifold.size)
     if k > div(n, 2)
         # fall back to default method
         invoke(
@@ -410,7 +410,7 @@ function Base.copyto!(
     return dest
 end
 function project!(M::Stiefel{<:Any,ℝ}, q::StiefelFactorization, p::StiefelFactorization)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     project!(Stiefel(2k, k), q.Z, p.Z)
     return q
 end
@@ -420,7 +420,7 @@ function project!(
     p::StiefelFactorization,
     X::StiefelFactorization,
 )
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     project!(Stiefel(2k, k), Y.Z, p.Z, X.Z)
     return Y
 end
@@ -430,7 +430,7 @@ function inner(
     X::StiefelFactorization,
     Y::StiefelFactorization,
 )
-    n, k = get_nk(M.manifold)
+    n, k = get_parameter(M.manifold.size)
     Msub = MetricManifold(Stiefel(2k, k), metric(M))
     return inner(Msub, p.Z, X.Z, Y.Z)
 end
@@ -440,7 +440,7 @@ function exp!(
     p::StiefelFactorization,
     X::StiefelFactorization,
 )
-    n, k = get_nk(M.manifold)
+    n, k = get_parameter(M.manifold.size)
     α = metric(M).α
     @views begin
         ZM = X.Z[1:k, 1:k]

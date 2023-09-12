@@ -53,7 +53,7 @@ function check_point(M::Hyperbolic, p::PoincareBallPoint; kwargs...)
 end
 
 function check_size(M::Hyperbolic, p::PoincareBallPoint)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     if size(p.value, 1) != N
         !(norm(p.value) < 1)
         return DomainError(
@@ -64,7 +64,7 @@ function check_size(M::Hyperbolic, p::PoincareBallPoint)
 end
 
 function check_size(M::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector; kwargs...)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     if size(X.value, 1) != N
         return DomainError(
             size(X.value, 1),
@@ -272,11 +272,11 @@ embed(::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector) = X.value
 embed!(::Hyperbolic, Y, p::PoincareBallPoint, X::PoincareBallTVector) = copyto!(Y, X.value)
 
 function get_embedding(::Hyperbolic{TypeParameter{Tuple{n}}}, ::PoincareBallPoint) where {n}
-    return Euclidean(n; parameter=:type)
+    return Euclidean(n)
 end
 function get_embedding(M::Hyperbolic{Tuple{Int}}, ::PoincareBallPoint)
-    n = get_n(M)
-    return Euclidean(n)
+    n = get_parameter(M.size)[1]
+    return Euclidean(n; parameter=:field)
 end
 
 @doc raw"""

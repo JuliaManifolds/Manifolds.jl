@@ -13,7 +13,7 @@ include("../utils.jl")
     p2 = [r1, r3]
     p3 = [r2, r2]
     @testset "Essential manifold Basics" begin
-        @test M.manifold == Rotations(3; parameter=:type)
+        @test M.manifold == Rotations(3)
         @test repr(M) == "EssentialManifold(true)"
         @test manifold_dimension(M) == 5
         @test !is_flat(M)

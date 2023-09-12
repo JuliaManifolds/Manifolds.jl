@@ -41,7 +41,7 @@ More details can be found in Section III [DouikHassibi:2019](@cite).
 
 # Constructor
 
-    MultinomialDoubleStochastic(n::Int; parameter::Symbol=:field)
+    MultinomialDoubleStochastic(n::Int; parameter::Symbol=:type)
 
 Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic and symmetric.
 """
@@ -49,7 +49,7 @@ struct MultinomialDoubleStochastic{T} <: AbstractMultinomialDoublyStochastic
     size::T
 end
 
-function MultinomialDoubleStochastic(n::Int; parameter::Symbol=:field)
+function MultinomialDoubleStochastic(n::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return MultinomialDoubleStochastic{typeof(size)}(size)
 end
@@ -61,7 +61,7 @@ Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
 function check_point(M::MultinomialDoubleStochastic, p; kwargs...)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     r = sum(p, dims=2)
     if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
         return DomainError(
@@ -90,15 +90,12 @@ function check_vector(M::MultinomialDoubleStochastic, p, X; kwargs...)
 end
 
 function get_embedding(::MultinomialDoubleStochastic{TypeParameter{Tuple{n}}}) where {n}
-    return MultinomialMatrices(n, n; parameter=:type)
-end
-function get_embedding(M::MultinomialDoubleStochastic{Tuple{Int}})
-    n = get_n(M)
     return MultinomialMatrices(n, n)
 end
-
-get_n(::MultinomialDoubleStochastic{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::MultinomialDoubleStochastic{Tuple{Int}}) = get_parameter(M.size)[1]
+function get_embedding(M::MultinomialDoubleStochastic{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return MultinomialMatrices(n, n; parameter=:field)
+end
 
 """
     is_flat(::MultinomialDoubleStochastic)
@@ -117,7 +114,7 @@ namely
 ````
 """
 function manifold_dimension(M::MultinomialDoubleStochastic)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return (n - 1)^2
 end
 
@@ -143,7 +140,7 @@ where $I_n$ is the $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length
 project(::MultinomialDoubleStochastic, ::Any, ::Any)
 
 function project!(M::MultinomialDoubleStochastic, X, p, Y)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     ζ = [I p; p I] \ [sum(Y, dims=2); sum(Y, dims=1)'] # Formula (25) from 1802.02628
     return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[(n + 1):end]', 3, 1)) .* p
 end
@@ -194,7 +191,7 @@ function project!(
 end
 
 function representation_size(M::MultinomialDoubleStochastic)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return (n, n)
 end
 
@@ -212,9 +209,9 @@ function retract_project!(M::MultinomialDoubleStochastic, q, p, X, t::Number)
 end
 
 function Base.show(io::IO, ::MultinomialDoubleStochastic{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "MultinomialDoubleStochastic($(n); parameter=:type)")
+    return print(io, "MultinomialDoubleStochastic($(n))")
 end
 function Base.show(io::IO, M::MultinomialDoubleStochastic{Tuple{Int}})
-    n = get_n(M)
-    return print(io, "MultinomialDoubleStochastic($(n))")
+    n = get_parameter(M.size)[1]
+    return print(io, "MultinomialDoubleStochastic($(n); parameter=:field)")
 end

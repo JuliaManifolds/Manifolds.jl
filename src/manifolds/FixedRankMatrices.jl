@@ -45,7 +45,7 @@ function FixedRankMatrices(
     n::Int,
     k::Int,
     field::AbstractNumbers=ℝ;
-    parameter::Symbol=:field,
+    parameter::Symbol=:type,
 )
     size = wrap_type_parameter(parameter, (m, n, k))
     return FixedRankMatrices{typeof(size),field}(size)
@@ -128,7 +128,7 @@ function allocate(X::UMVTVector, ::Type{T}) where {T}
 end
 
 function allocate_result(M::FixedRankMatrices, ::typeof(project), X, p, vals...)
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     # vals are p and X, so we can use their fields to set up those of the UMVTVector
     return UMVTVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
 end
@@ -198,7 +198,7 @@ shape, i.e. `p.U` and `p.Vt` have to be unitary. The keyword arguments are passe
 `rank` function that verifies the rank of `p`.
 """
 function check_point(M::FixedRankMatrices, p; kwargs...)
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     r = rank(p; kwargs...)
     s = "The point $(p) does not lie on $(M), "
     if r > k
@@ -207,7 +207,7 @@ function check_point(M::FixedRankMatrices, p; kwargs...)
     return nothing
 end
 function check_point(M::FixedRankMatrices, p::SVDMPoint; kwargs...)
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     s = "The point $(p) does not lie on $(M), "
     if !isapprox(p.U' * p.U, one(zeros(k, k)); kwargs...)
         return DomainError(
@@ -225,7 +225,7 @@ function check_point(M::FixedRankMatrices, p::SVDMPoint; kwargs...)
 end
 
 function check_size(M::FixedRankMatrices, p::SVDMPoint)
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     if (size(p.U) != (m, k)) || (length(p.S) != k) || (size(p.Vt) != (k, n))
         return DomainError(
             [size(p.U)..., length(p.S), size(p.Vt)...],
@@ -234,7 +234,7 @@ function check_size(M::FixedRankMatrices, p::SVDMPoint)
     end
 end
 function check_size(M::FixedRankMatrices, p)
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     pS = svd(p)
     if (size(pS.U) != (m, k)) || (length(pS.S) != k) || (size(pS.Vt) != (k, n))
         return DomainError(
@@ -244,7 +244,7 @@ function check_size(M::FixedRankMatrices, p)
     end
 end
 function check_size(M::FixedRankMatrices, p, X::UMVTVector)
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))
         return DomainError(
             cat(size(X.U), size(X.M), size(X.Vt), dims=1),
@@ -261,7 +261,7 @@ Check whether the tangent [`UMVTVector`](@ref) `X` is from the tangent space of 
 respectively, and its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
 """
 function check_vector(M::FixedRankMatrices, p::SVDMPoint, X::UMVTVector; kwargs...)
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     if !isapprox(X.U' * p.U, zeros(k, k); kwargs...)
         return DomainError(
             norm(X.U' * p.U - zeros(k, k)),
@@ -351,15 +351,12 @@ function embed!(::FixedRankMatrices, Y, p::SVDMPoint, X::UMVTVector)
 end
 
 function get_embedding(::FixedRankMatrices{TypeParameter{Tuple{m,n,k}},𝔽}) where {m,n,k,𝔽}
-    return Euclidean(m, n; field=𝔽, parameter=:type)
-end
-function get_embedding(M::FixedRankMatrices{Tuple{Int,Int,Int},𝔽}) where {𝔽}
-    m, n, k = get_mnk(M)
     return Euclidean(m, n; field=𝔽)
 end
-
-get_mnk(::FixedRankMatrices{TypeParameter{Tuple{m,n,k}}}) where {m,n,k} = (m, n, k)
-get_mnk(M::FixedRankMatrices{Tuple{Int,Int,Int}}) = get_parameter(M.size)
+function get_embedding(M::FixedRankMatrices{Tuple{Int,Int,Int},𝔽}) where {𝔽}
+    m, n, k = get_parameter(M.size)
+    return Euclidean(m, n; field=𝔽, parameter=:field)
+end
 
 """
     injectivity_radius(::FixedRankMatrices)
@@ -425,7 +422,7 @@ of dimension `m`x`n` of rank `k`, namely
 where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(M::FixedRankMatrices{<:Any,𝔽}) where {𝔽}
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     return (m + n - k) * k * real_dimension(𝔽)
 end
 
@@ -468,7 +465,7 @@ function Random.rand(M::FixedRankMatrices; vector_at=nothing, kwargs...)
     return rand(Random.default_rng(), M; vector_at=vector_at, kwargs...)
 end
 function Random.rand(rng::AbstractRNG, M::FixedRankMatrices; vector_at=nothing, kwargs...)
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     if vector_at === nothing
         p = SVDMPoint(
             Matrix{Float64}(undef, m, k),
@@ -493,7 +490,7 @@ function Random.rand!(
     vector_at=nothing,
     kwargs...,
 )
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     if vector_at === nothing
         U = rand(rng, Stiefel(m, k); kwargs...)
         S = sort(rand(rng, k); rev=true)
@@ -522,7 +519,7 @@ Return the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.
 the size of matrices on this manifold ``(m,n)``.
 """
 function representation_size(M::FixedRankMatrices)
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     return (m, n)
 end
 
@@ -546,7 +543,7 @@ function retract_polar!(
     X::UMVTVector,
     t::Number,
 )
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     tX = t * X
     QU, RU = qr([p.U tX.U])
     QV, RV = qr([p.Vt' tX.Vt'])
@@ -597,11 +594,11 @@ function Base.show(
     io::IO,
     ::FixedRankMatrices{TypeParameter{Tuple{m,n,k}},𝔽},
 ) where {m,n,k,𝔽}
-    return print(io, "FixedRankMatrices($(m), $(n), $(k), $(𝔽); parameter=:type)")
+    return print(io, "FixedRankMatrices($(m), $(n), $(k), $(𝔽))")
 end
 function Base.show(io::IO, M::FixedRankMatrices{Tuple{Int,Int,Int},𝔽}) where {𝔽}
-    m, n, k = get_mnk(M)
-    return print(io, "FixedRankMatrices($(m), $(n), $(k), $(𝔽))")
+    m, n, k = get_parameter(M.size)
+    return print(io, "FixedRankMatrices($(m), $(n), $(k), $(𝔽); parameter=:field)")
 end
 function Base.show(io::IO, ::MIME"text/plain", p::SVDMPoint)
     pre = " "
@@ -657,7 +654,7 @@ Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangen
 structure are zero matrices.
 """
 function zero_vector(M::FixedRankMatrices, p::SVDMPoint)
-    m, n, k = get_mnk(M)
+    m, n, k = get_parameter(M.size)
     v = UMVTVector(
         zeros(eltype(p.U), m, k),
         zeros(eltype(p.S), k, k),

@@ -10,7 +10,7 @@ include("utils.jl")
         ENV["GKSwstype"] = "100"
         gr()
         #        function Hyp2PB_plot()
-        M = Hyperbolic(2; parameter=:type)
+        M = Hyperbolic(2)
         p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
         p2 = convert.(Ref(PoincareBallPoint), p)
         #            return
@@ -19,7 +19,7 @@ include("utils.jl")
         #       @plottest Hyp2PB_plot joinpath(references_folder, "Hyp2PBPlot.png") false
 
         #       function Hyp2PB_plot_geo()
-        M = Hyperbolic(2; parameter=:type)
+        M = Hyperbolic(2)
         p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
         p2 = convert.(Ref(PoincareBallPoint), p)
         #           return
@@ -28,7 +28,7 @@ include("utils.jl")
         #       @plottest Hyp2PB_plot_geo joinpath(references_folder, "Hyp2PBPlotGeo.png") false
 
         #        function Hyp2PB_quiver()
-        M = Hyperbolic(2; parameter=:type)
+        M = Hyperbolic(2)
         p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 0.0], [0.0, 1.0]])
         p2 = convert.(Ref(PoincareBallPoint), p)
         X = [log(M, p2[2], p2[1]), log(M, p2[1], p2[3])]
@@ -38,7 +38,7 @@ include("utils.jl")
         #        @plottest Hyp2PB_quiver joinpath(references_folder, "Hyp2PBQuiver.png") false
 
         #        function Hyp2PH_plot()
-        M = Hyperbolic(2; parameter=:type)
+        M = Hyperbolic(2)
         p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
         p2 = convert.(Ref(PoincareHalfSpacePoint), p)
         #            return
@@ -47,7 +47,7 @@ include("utils.jl")
         #        @plottest Hyp2PH_plot joinpath(references_folder, "Hyp2PHPlot.png") false
 
         #        function Hyp2PH_plot_geo()
-        M = Hyperbolic(2; parameter=:type)
+        M = Hyperbolic(2)
         p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
         p2 = convert.(Ref(PoincareHalfSpacePoint), p)
         #            return
@@ -56,7 +56,7 @@ include("utils.jl")
         #        @plottest Hyp2PH_plot_geo joinpath(references_folder, "Hyp2PHPlotGeo.png") false
 
         #        function Hyp2PH_quiver()
-        M = Hyperbolic(2; parameter=:type)
+        M = Hyperbolic(2)
         p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 0.0], [0.0, 1.0]])
         p2 = convert.(Ref(PoincareHalfSpacePoint), p)
         X = [log(M, p2[2], p2[1]), log(M, p2[1], p2[3])]
@@ -69,7 +69,7 @@ include("utils.jl")
         ENV["GKSwstype"] = "100"
         gr()
         #        function Hyp2_plot()
-        M = Hyperbolic(2; parameter=:type)
+        M = Hyperbolic(2)
         p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
         #            return
         plot(M, p)
@@ -77,7 +77,7 @@ include("utils.jl")
         #        @plottest Hyp2_plot joinpath(references_folder, "Hyp2Plot.png") false
 
         #        function Hyp2_surfplot()
-        M = Hyperbolic(2; parameter=:type)
+        M = Hyperbolic(2)
         p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
         #    return
         plot(M, p; surface=true)
@@ -85,7 +85,7 @@ include("utils.jl")
         #@plottest Hyp2_surfplot joinpath(references_folder, "Hyp2SurfPlot.png") false
 
         #        function Hyp2_plot_geo()
-        M = Hyperbolic(2; parameter=:type)
+        M = Hyperbolic(2)
         p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 1.0]])
         #            return
         plot(M, p; geodesic_interpolation=80)
@@ -93,7 +93,7 @@ include("utils.jl")
         #@plottest Hyp2_plot_geo joinpath(references_folder, "Hyp2PlotGeo.png") false
 
         #        function Hyp2_quiver()
-        M = Hyperbolic(2; parameter=:type)
+        M = Hyperbolic(2)
         p = Manifolds._hyperbolize.(Ref(M), [[1.0, 0.0], [0.0, 0.0], [0.0, 1.0]])
         X = [log(M, p[2], p[1]), log(M, p[1], p[3])]
         #           return
@@ -104,7 +104,7 @@ include("utils.jl")
     @testset "3D Recipes in pythonplot" begin
         pythonplot()
         #        function Sphere2_plot()
-        M = Sphere(2; parameter=:type)
+        M = Sphere(2)
         pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
         #           return
         plot(M, pts; wireframe_color=colorant"#CCCCCC", markersize=10)
@@ -112,7 +112,7 @@ include("utils.jl")
         #        @plottest Sphere2_plot joinpath(references_folder, "Sphere2Plot.png") false
 
         #        function Sphere2_surfplot()
-        M = Sphere(2; parameter=:type)
+        M = Sphere(2)
         pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
         #            return
         plot(M, pts; surface=true, wireframe_color=colorant"#CCCCCC", markersize=10)
@@ -120,7 +120,7 @@ include("utils.jl")
         #        @plottest Sphere2_surfplot joinpath(references_folder, "Sphere2SurfPlot.png") false
 
         #        function Sphere2_plot_geo()
-        M = Sphere(2; parameter=:type)
+        M = Sphere(2)
         pts = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]]
         #           return
         Plots.plot(M, pts; wireframe_color=colorant"#CCCCCC", geodesic_interpolation=80)
@@ -129,7 +129,7 @@ include("utils.jl")
 
         #        function Sphere2_quiver()
         pythonplot()
-        M = Sphere(2; parameter=:type)
+        M = Sphere(2)
         pts2 = [[1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]]
         p3 = 1 / sqrt(3) .* [1.0, -1.0, 1.0]
         vecs = log.(Ref(M), pts2, Ref(p3))

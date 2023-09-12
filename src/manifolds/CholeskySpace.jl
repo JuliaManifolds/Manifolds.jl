@@ -7,7 +7,7 @@ are for example summarized in Table 1 of [Lin:2019](@cite).
 
 # Constructor
 
-    CholeskySpace(n; parameter::Symbol=:field)
+    CholeskySpace(n; parameter::Symbol=:type)
 
 Generate the manifold of $n× n$ lower triangular matrices with positive diagonal.
 """
@@ -15,7 +15,7 @@ struct CholeskySpace{T} <: AbstractManifold{ℝ}
     size::T
 end
 
-function CholeskySpace(n::Int; parameter::Symbol=:field)
+function CholeskySpace(n::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return CholeskySpace{typeof(size)}(size)
 end
@@ -110,9 +110,6 @@ function exp!(::CholeskySpace, q, p, X)
     return q
 end
 
-get_n(::CholeskySpace{TypeParameter{Tuple{N}}}) where {N} = N
-get_n(M::CholeskySpace{Tuple{Int}}) = get_parameter(M.size)[1]
-
 @doc raw"""
     inner(M::CholeskySpace, p, X, Y)
 
@@ -173,7 +170,7 @@ Return the manifold dimension for the [`CholeskySpace`](@ref) `M`, i.e.
 ````
 """
 function manifold_dimension(M::CholeskySpace)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     return div(N * (N + 1), 2)
 end
 
@@ -183,16 +180,16 @@ end
 Return the representation size for the [`CholeskySpace`](@ref)`{N}` `M`, i.e. `(N,N)`.
 """
 function representation_size(M::CholeskySpace)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     return (N, N)
 end
 
 function Base.show(io::IO, ::CholeskySpace{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "CholeskySpace($(n); parameter=:type)")
+    return print(io, "CholeskySpace($(n))")
 end
 function Base.show(io::IO, M::CholeskySpace{Tuple{Int}})
-    n = get_n(M)
-    return print(io, "CholeskySpace($(n))")
+    n = get_parameter(M.size)[1]
+    return print(io, "CholeskySpace($(n); parameter=:field)")
 end
 
 # two small helpers for strictly lower and upper triangulars

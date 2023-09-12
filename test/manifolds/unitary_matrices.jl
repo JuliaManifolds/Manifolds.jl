@@ -5,8 +5,8 @@ using Quaternions
 @testset "Orthogonal Matrices" begin
     M = OrthogonalMatrices(3)
     @test repr(M) == "OrthogonalMatrices(3)"
-    @test repr(OrthogonalMatrices(3; parameter=:type)) ==
-          "OrthogonalMatrices(3; parameter=:type)"
+    @test repr(OrthogonalMatrices(3; parameter=:field)) ==
+          "OrthogonalMatrices(3; parameter=:field)"
     @test injectivity_radius(M, PolarRetraction()) == π / sqrt(2.0)
     @test manifold_dimension(M) == 3
     @test injectivity_radius(M) == π * sqrt(2.0)
@@ -24,7 +24,8 @@ end
 @testset "Unitary Matrices" begin
     M = UnitaryMatrices(2)
     @test repr(M) == "UnitaryMatrices(2)"
-    @test repr(UnitaryMatrices(2; parameter=:type)) == "UnitaryMatrices(2; parameter=:type)"
+    @test repr(UnitaryMatrices(2; parameter=:field)) ==
+          "UnitaryMatrices(2; parameter=:field)"
     @test manifold_dimension(M) == 4
     @test !is_flat(M)
     @test injectivity_radius(M) == π
@@ -76,9 +77,10 @@ end
 end
 
 @testset "Quaternionic Unitary Matrices" begin
-    M = UnitaryMatrices(1, ℍ; parameter=:type)
-    @test repr(M) == "UnitaryMatrices(1, ℍ; parameter=:type)"
-    @test repr(UnitaryMatrices(1, ℍ)) == "UnitaryMatrices(1, ℍ)"
+    M = UnitaryMatrices(1, ℍ)
+    @test repr(M) == "UnitaryMatrices(1, ℍ)"
+    @test repr(UnitaryMatrices(1, ℍ; parameter=:field)) ==
+          "UnitaryMatrices(1, ℍ; parameter=:field)"
     @test manifold_dimension(M) == 3
     @test injectivity_radius(M) == π
     @test !is_flat(M)

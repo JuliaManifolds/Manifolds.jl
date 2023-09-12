@@ -53,7 +53,7 @@ function GeneralizedGrassmann(
     k::Int,
     B::AbstractMatrix=Matrix{Float64}(I, n, n),
     𝔽::AbstractNumbers=ℝ;
-    parameter::Symbol=:field,
+    parameter::Symbol=:type,
 )
     size = wrap_type_parameter(parameter, (n, k))
     return GeneralizedGrassmann{typeof(size),𝔽,typeof(B)}(size, B)
@@ -191,16 +191,13 @@ Return true if [`GeneralizedGrassmann`](@ref) `M` is one-dimensional.
 """
 is_flat(M::GeneralizedGrassmann) = manifold_dimension(M) == 1
 
-function get_embedding(::GeneralizedGrassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return GeneralizedStiefel(n, k, M.B, 𝔽; parameter=:type)
-end
-function get_embedding(M::GeneralizedGrassmann{Tuple{Int,Int},𝔽}) where {𝔽}
-    n, k = get_nk(M)
+function get_embedding(M::GeneralizedGrassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
     return GeneralizedStiefel(n, k, M.B, 𝔽)
 end
-
-get_nk(::GeneralizedGrassmann{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
-get_nk(M::GeneralizedGrassmann{Tuple{Int,Int}}) = get_parameter(M.size)
+function get_embedding(M::GeneralizedGrassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return GeneralizedStiefel(n, k, M.B, 𝔽; parameter=:field)
+end
 
 @doc raw"""
     inner(M::GeneralizedGrassmann, p, X, Y)
@@ -265,7 +262,7 @@ Return the dimension of the [`GeneralizedGrassmann(n,k,𝔽)`](@ref) manifold `M
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(M::GeneralizedGrassmann{<:Any,𝔽}) where {𝔽}
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return k * (n - k) * real_dimension(𝔽)
 end
 
@@ -347,7 +344,7 @@ function Random.rand!(
     vector_at=nothing,
     σ::Real=one(real(eltype(pX))),
 )
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     if vector_at === nothing
         A = σ * randn(rng, eltype(pX), n, k)
         project!(M, pX, Matrix(qr(A).Q))
@@ -365,7 +362,7 @@ end
 Return the represenation size or matrix dimension of a point on the [`GeneralizedGrassmann`](@ref)
 `M`, i.e. $(n,k)$ for both the real-valued and the complex value case.
 """
-representation_size(M::GeneralizedGrassmann) = get_nk(M)
+representation_size(M::GeneralizedGrassmann) = get_parameter(M.size)
 
 @doc raw"""
     retract(M::GeneralizedGrassmann, p, X, ::PolarRetraction)
@@ -391,11 +388,11 @@ function Base.show(
     io::IO,
     M::GeneralizedGrassmann{TypeParameter{Tuple{n,k}},𝔽},
 ) where {n,k,𝔽}
-    return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽); parameter=:type)")
+    return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
 end
 function Base.show(io::IO, M::GeneralizedGrassmann{Tuple{Int,Int},𝔽}) where {𝔽}
-    n, k = get_nk(M)
-    return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
+    n, k = get_parameter(M.size)
+    return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽); parameter=:field)")
 end
 
 @doc raw"""

@@ -29,7 +29,7 @@ which is by default set to the [`MinkowskiMetric`](@ref).
 """
 const Lorentz = MetricManifold{ℝ,Euclidean{T,ℝ},<:LorentzMetric} where {T}
 
-function Lorentz(n::Int, m::LorentzMetric=MinkowskiMetric(); parameter::Symbol=:field)
+function Lorentz(n::Int, m::LorentzMetric=MinkowskiMetric(); parameter::Symbol=:type)
     E = Euclidean(n; parameter=parameter)
     return Lorentz(E, m)
 end
@@ -37,8 +37,8 @@ function Lorentz(E::Euclidean{T}, m::LorentzMetric=MinkowskiMetric()) where {T}
     return Lorentz{T,typeof(m)}(E, m)
 end
 
-function local_metric(M::Lorentz{Tuple{Int},MinkowskiMetric}, p)
-    n = M.manifold.size[1]
+function local_metric(M::Lorentz{<:Any,MinkowskiMetric}, p)
+    n = get_parameter(M.manifold.size)[1]
     return Diagonal([ones(n - 1)..., -1])
 end
 
@@ -46,7 +46,7 @@ function inner(::Lorentz{<:Any,MinkowskiMetric}, p, X, Y)
     return minkowski_metric(X, Y)
 end
 @doc raw"""
-    minkowski_metric(a,b)
+    minkowski_metric(a, b)
 
 Compute the minkowski metric on $\mathbb R^n$ is given by
 ````math

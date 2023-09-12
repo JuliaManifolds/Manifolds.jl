@@ -4,14 +4,14 @@
 Translation group $\mathrm{T}(n)$ represented by translation arrays.
 
 # Constructor
-    TranslationGroup(n₁,...,nᵢ; field = 𝔽, parameter::Symbol=:field)
+    TranslationGroup(n₁,...,nᵢ; field = 𝔽, parameter::Symbol=:type)
 
 Generate the translation group on
 $𝔽^{n₁,…,nᵢ}$ = `Euclidean(n₁,...,nᵢ; field = 𝔽)`, which is isomorphic to the group itself.
 """
 const TranslationGroup{T,𝔽} = GroupManifold{𝔽,Euclidean{T,𝔽},AdditionOperation}
 
-function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ, parameter::Symbol=:field)
+function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ, parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, n)
     return TranslationGroup{typeof(size),field}(
         Euclidean(n...; field=field, parameter=parameter),
@@ -47,12 +47,9 @@ end
 
 function Base.show(io::IO, M::TranslationGroup{N,𝔽}) where {N<:Tuple,𝔽}
     size = get_parameter(M.manifold.size)
-    return print(io, "TranslationGroup($(join(size, ", ")); field = $(𝔽))")
+    return print(io, "TranslationGroup($(join(size, ", ")); field=$(𝔽), parameter=:field)")
 end
 function Base.show(io::IO, M::TranslationGroup{N,𝔽}) where {N<:TypeParameter,𝔽}
     size = get_parameter(M.manifold.size)
-    return print(
-        io,
-        "TranslationGroup($(join(size, ", ")); field = $(𝔽), parameter = :type)",
-    )
+    return print(io, "TranslationGroup($(join(size, ", ")); field=$(𝔽))")
 end

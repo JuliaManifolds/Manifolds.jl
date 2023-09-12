@@ -18,7 +18,7 @@ struct SphereSymmetricMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function SphereSymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+function SphereSymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return SphereSymmetricMatrices{typeof(size),field}(size)
 end
@@ -68,15 +68,12 @@ embed(::SphereSymmetricMatrices, p) = p
 embed(::SphereSymmetricMatrices, p, X) = X
 
 function get_embedding(::SphereSymmetricMatrices{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return ArraySphere(n, n; field=𝔽, parameter=:type)
-end
-function get_embedding(M::SphereSymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
-    n = get_n(M)
     return ArraySphere(n, n; field=𝔽)
 end
-
-get_n(::SphereSymmetricMatrices{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::SphereSymmetricMatrices{Tuple{Int}}) = get_parameter(M.size)[1]
+function get_embedding(M::SphereSymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return ArraySphere(n, n; field=𝔽, parameter=:field)
+end
 
 """
     is_flat(::SphereSymmetricMatrices)
@@ -99,7 +96,7 @@ Frobenius norm over the number system `𝔽`, i.e.
 ````
 """
 function manifold_dimension(M::SphereSymmetricMatrices{<:Any,𝔽}) where {𝔽}
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return div(n * (n + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? n : 0) - 1
 end
 
@@ -136,14 +133,14 @@ function project!(M::SphereSymmetricMatrices, Y, p, X)
 end
 
 function representation_size(M::SphereSymmetricMatrices)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return (n, n)
 end
 
 function Base.show(io::IO, ::SphereSymmetricMatrices{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return print(io, "SphereSymmetricMatrices($(n), $(𝔽); parameter=:type)")
+    return print(io, "SphereSymmetricMatrices($(n), $(𝔽))")
 end
 function Base.show(io::IO, M::SphereSymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
-    n = get_n(M)
-    return print(io, "SphereSymmetricMatrices($(n), $(𝔽))")
+    n = get_parameter(M.size)[1]
+    return print(io, "SphereSymmetricMatrices($(n), $(𝔽); parameter=:field)")
 end

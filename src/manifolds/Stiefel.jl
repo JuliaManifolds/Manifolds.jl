@@ -27,7 +27,7 @@ The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
 
 # Constructor
-    Stiefel(n, k, field = ℝ; parameter::Symbol=:field)
+    Stiefel(n, k, field = ℝ; parameter::Symbol=:type)
 
 Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
 """
@@ -35,7 +35,7 @@ struct Stiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+function Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n, k))
     return Stiefel{typeof(size),field}(size)
 end
@@ -104,7 +104,7 @@ where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (ele
 The settings for approximately can be set with `kwargs...`.
 """
 function check_vector(M::Stiefel, p, X; kwargs...)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     cks = check_size(M, p, X)
     cks === nothing || return cks
     if !isapprox(p' * X, -conj(X' * p); kwargs...)
@@ -145,15 +145,12 @@ embed(::Stiefel, p) = p
 embed(::Stiefel, p, X) = X
 
 function get_embedding(::Stiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return Euclidean(n, k; field=𝔽, parameter=:type)
-end
-function get_embedding(M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
-    n, k = get_nk(M)
     return Euclidean(n, k; field=𝔽)
 end
-
-get_nk(::Stiefel{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
-get_nk(M::Stiefel{Tuple{Int,Int}}) = get_parameter(M.size)
+function get_embedding(M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return Euclidean(n, k; field=𝔽, parameter=:field)
+end
 
 @doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
@@ -190,7 +187,7 @@ in [KanekoFioriTanaka:2013](@cite).
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
 
 function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     @inbounds for i in 1:k
         b = zeros(eltype(R), i)
         b[i] = 1
@@ -284,7 +281,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(M::Stiefel, X, q, A, ::Type{ElT}) where {ElT}
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     R = zeros(ElT, k, k)
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
@@ -298,7 +295,7 @@ function inverse_retract_polar!(::Stiefel, X, p, q)
     return X
 end
 function inverse_retract_qr!(M::Stiefel, X, p, q)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     A = p' * q
     @boundscheck size(A) === (k, k)
     ElT = typeof(one(eltype(p)) * one(eltype(q)))
@@ -333,15 +330,15 @@ The dimension is given by
 ````
 """
 function manifold_dimension(M::Stiefel{<:Any,ℝ})
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return n * k - div(k * (k + 1), 2)
 end
 function manifold_dimension(M::Stiefel{<:Any,ℂ})
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return 2 * n * k - k * k
 end
 function manifold_dimension(M::Stiefel{<:Any,ℍ})
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return 4 * n * k - k * (2k - 1)
 end
 
@@ -366,7 +363,7 @@ function Random.rand!(
     vector_at=nothing,
     σ::Real=one(real(eltype(pX))),
 ) where {𝔽}
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     if vector_at === nothing
         A = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, n, k)
         pX .= Matrix(qr(A).Q)
@@ -515,14 +512,14 @@ end
 Returns the representation size of the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
 i.e. `(n,k)`, which is the matrix dimensions.
 """
-representation_size(M::Stiefel) = get_nk(M)
+representation_size(M::Stiefel) = get_parameter(M.size)
 
 function Base.show(io::IO, ::Stiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return print(io, "Stiefel($(n), $(k), $(𝔽); parameter=:type)")
+    return print(io, "Stiefel($(n), $(k), $(𝔽))")
 end
 function Base.show(io::IO, M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
-    n, k = get_nk(M)
-    return print(io, "Stiefel($(n), $(k), $(𝔽))")
+    n, k = get_parameter(M.size)
+    return print(io, "Stiefel($(n), $(k), $(𝔽); parameter=:field)")
 end
 
 """
@@ -536,7 +533,7 @@ The implementation is based on Section 2.5.1 in [Chikuse:2003](@cite);
 see also Theorem 2.2.1(iii) in [Chikuse:2003](@cite).
 """
 function uniform_distribution(M::Stiefel{<:Any,ℝ}, p)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     μ = Distributions.Zeros(n, k)
     σ = one(eltype(p))
     Σ1 = Distributions.PDMats.ScalMat(n, σ)

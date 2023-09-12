@@ -18,13 +18,13 @@ The [`ProbabilitySimplex`](@ref) is stored internally within `M.manifold`, such 
 
 # Constructor
 
-    MultinomialMatrices(n::Int, m::Int; parameter::Symbol=:field)
+    MultinomialMatrices(n::Int, m::Int; parameter::Symbol=:type)
 
 Generate the manifold of matrices $\mathbb R^{n×m}$ such that the $m$ columns are
 discrete probability distributions, i.e. sum up to one.
 
 `parameter`: whether a type parameter should be used to store `n` and `m`. By default size
-is stored in a field. Value can either be `:field` or `:type`.
+is stored in type. Value can either be `:field` or `:type`.
 """
 struct MultinomialMatrices{T,TPM<:ProbabilitySimplex} <:
        AbstractPowerManifold{ℝ,TPM,ArrayPowerRepresentation}
@@ -32,18 +32,18 @@ struct MultinomialMatrices{T,TPM<:ProbabilitySimplex} <:
     manifold::TPM
 end
 
-function MultinomialMatrices(n::Int, m::Int; parameter::Symbol=:field)
+function MultinomialMatrices(n::Int, m::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n, m))
     MPS = ProbabilitySimplex(n - 1; parameter=parameter)
     return MultinomialMatrices{typeof(size),typeof(MPS)}(size, MPS)
 end
 
 function Base.:^(::ProbabilitySimplex{TypeParameter{Tuple{N}}}, m::Int) where {N}
-    return MultinomialMatrices(N, m; parameter=:type)
+    return MultinomialMatrices(N + 1, m)
 end
 function Base.:^(M::ProbabilitySimplex{Tuple{Int}}, m::Int)
-    n = get_n(M)
-    return MultinomialMatrices(n + 1, m)
+    n = get_parameter(M.size)[1]
+    return MultinomialMatrices(n + 1, m; parameter=:field)
 end
 
 @doc raw"""
@@ -55,7 +55,7 @@ of `m` discrete probability distributions as columns from $\mathbb R^{n}$, i.e. 
 """
 check_point(::MultinomialMatrices, ::Any)
 function check_point(M::MultinomialMatrices, p; kwargs...)
-    n, m = get_nm(M)
+    n, m = get_parameter(M.size)
     return check_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
 
@@ -67,33 +67,30 @@ This means, that `p` is valid, that `X` is of correct dimension and columnswise
 a tangent vector to the columns of `p` on the [`ProbabilitySimplex`](@ref).
 """
 function check_vector(M::MultinomialMatrices, p, X; kwargs...)
-    n, m = get_nm(M)
+    n, m = get_parameter(M.size)
     return check_vector(PowerManifold(M.manifold, m), p, X; kwargs...)
 end
 
-get_nm(::MultinomialMatrices{TypeParameter{Tuple{n,m}}}) where {n,m} = (n, m)
-get_nm(M::MultinomialMatrices{Tuple{Int,Int}}) = get_parameter(M.size)
-
 function get_iterator(M::MultinomialMatrices)
-    n, m = get_nm(M)
+    n, m = get_parameter(M.size)
     return Base.OneTo(m)
 end
 
 function manifold_dimension(M::MultinomialMatrices)
-    n, m = get_nm(M)
+    n, m = get_parameter(M.size)
     return (n - 1) * m
 end
 function power_dimensions(M::MultinomialMatrices)
-    n, m = get_nm(M)
+    n, m = get_parameter(M.size)
     return (m,)
 end
 
-representation_size(M::MultinomialMatrices) = get_nm(M)
+representation_size(M::MultinomialMatrices) = get_parameter(M.size)
 
 function Base.show(io::IO, ::MultinomialMatrices{TypeParameter{Tuple{n,m}}}) where {n,m}
-    return print(io, "MultinomialMatrices($(n), $(m); parameter=:type)")
+    return print(io, "MultinomialMatrices($(n), $(m))")
 end
 function Base.show(io::IO, M::MultinomialMatrices{Tuple{Int,Int}})
-    n, m = get_nm(M)
-    return print(io, "MultinomialMatrices($(n), $(m))")
+    n, m = get_parameter(M.size)
+    return print(io, "MultinomialMatrices($(n), $(m); parameter=:field)")
 end

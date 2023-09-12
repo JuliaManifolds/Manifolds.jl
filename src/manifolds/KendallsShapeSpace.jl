@@ -12,7 +12,7 @@ This manifold possesses the [`IsQuotientManifold`](@ref) trait.
 
 # Constructor
 
-    KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:field)
+    KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
 
 # References
 """
@@ -20,7 +20,7 @@ struct KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:field)
+function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n, k))
     return KendallsShapeSpace{typeof(size)}(size)
 end
@@ -30,11 +30,11 @@ function active_traits(f, ::KendallsShapeSpace, args...)
 end
 
 function get_orbit_action(M::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
-    return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n; parameter=:type))
+    return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n))
 end
 function get_orbit_action(M::KendallsShapeSpace{Tuple{Int,Int}})
-    n, k = get_nk(M)
-    return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n))
+    n, k = get_parameter(M.size)
+    return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n; parameter=:field))
 end
 
 @doc raw"""
@@ -45,11 +45,11 @@ Return the total space of the [`KendallsShapeSpace`](@ref) manifold, which is th
 """
 get_total_space(::KendallsShapeSpace)
 function get_total_space(::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
-    return KendallsPreShapeSpace(n, k, parameter=:type)
+    return KendallsPreShapeSpace(n, k)
 end
 function get_total_space(M::KendallsShapeSpace{Tuple{Int,Int}})
-    n, k = get_nk(M)
-    return KendallsPreShapeSpace(n, k)
+    n, k = get_parameter(M.size)
+    return KendallsPreShapeSpace(n, k; parameter=:field)
 end
 
 function distance(M::KendallsShapeSpace, p, q)
@@ -85,15 +85,12 @@ Get the manifold in which [`KendallsShapeSpace`](@ref) `M` is embedded, i.e.
 get_embedding(::KendallsShapeSpace)
 
 function get_embedding(::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
-    return KendallsPreShapeSpace(n, k, parameter=:type)
-end
-function get_embedding(M::KendallsShapeSpace{Tuple{Int,Int}})
-    n, k = get_nk(M)
     return KendallsPreShapeSpace(n, k)
 end
-
-get_nk(::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
-get_nk(M::KendallsShapeSpace{Tuple{Int,Int}}) = get_parameter(M.size)
+function get_embedding(M::KendallsShapeSpace{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return KendallsPreShapeSpace(n, k; parameter=:field)
+end
 
 """
     horizontal_component(::KendallsShapeSpace, p, X)
@@ -155,7 +152,7 @@ given by ``n(k - 1) - 1 - n(n - 1)/2`` in the typical case where ``k \geq n+1``,
 is 0. See [Kendall:1984](@cite) for a discussion of the over-dimensioned case.
 """
 function manifold_dimension(M::KendallsShapeSpace)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     if k < n + 1 # over-dimensioned case
         if k == 1
             return 0

@@ -65,7 +65,7 @@ A good overview can be found in[BendokatZimmermannAbsil:2020](@cite).
 
 # Constructor
 
-    Grassmann(n, k, field=ℝ, parameter::Symbol=:field)
+    Grassmann(n, k, field=ℝ, parameter::Symbol=:type)
 
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
 case `field = ℝ` is the default.
@@ -77,7 +77,7 @@ end
 #
 # Generic functions independent of the representation of points
 #
-function Grassmann(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+function Grassmann(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n, k))
     return Grassmann{typeof(size),field}(size)
 end
@@ -116,9 +116,6 @@ function change_metric!(::Grassmann, Y, ::EuclideanMetric, p, X)
     return Y
 end
 
-get_nk(::Grassmann{TypeParameter{Tuple{n,k}}}) where {n,k} = (n, k)
-get_nk(M::Grassmann{Tuple{Int,Int}}) = get_parameter(M.size)
-
 @doc raw"""
     injectivity_radius(M::Grassmann)
     injectivity_radius(M::Grassmann, p)
@@ -156,7 +153,7 @@ Return the dimension of the [`Grassmann(n,k,𝔽)`](@ref) manifold `M`, i.e.
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(M::Grassmann{<:Any,𝔽}) where {𝔽}
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return k * (n - k) * real_dimension(𝔽)
 end
 
@@ -179,7 +176,7 @@ function default_estimation_method(::Grassmann, ::typeof(mean))
 end
 
 function get_orbit_action(M::Grassmann{<:Any,ℝ})
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return RowwiseMultiplicationAction(M, Orthogonal(k))
 end
 
@@ -190,11 +187,11 @@ Return the total space of the [`Grassmann`](@ref) manifold, which is the corresp
 independent of whether the points are represented already in the total space or as [`ProjectorPoint`](@ref)s.
 """
 function get_total_space(::Grassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return Stiefel(n, k, 𝔽; parameter=:type)
+    return Stiefel(n, k, 𝔽)
 end
 function get_total_space(M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
-    n, k = get_nk(M)
-    return Stiefel(n, k, 𝔽)
+    n, k = get_parameter(M.size)
+    return Stiefel(n, k, 𝔽; parameter=:field)
 end
 
 #

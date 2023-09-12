@@ -8,23 +8,18 @@ The manifold of $m × n$ real-valued or complex-valued matrices whose columns su
 where $𝔽 ∈ \{ℝ,ℂ\}$.
 
 # Constructor
-    CenteredMatrices(m, n[, field=ℝ]; parameter::Symbol=:field)
+    CenteredMatrices(m, n[, field=ℝ]; parameter::Symbol=:type)
 
 Generate the manifold of `m`-by-`n` (`field`-valued) matrices whose columns sum to zero.
 
 `parameter`: whether a type parameter should be used to store `m` and `n`. By default size
-is stored in a field. Value can either be `:field` or `:type`.
+is stored in type. Value can either be `:field` or `:type`.
 """
 struct CenteredMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function CenteredMatrices(
-    m::Int,
-    n::Int,
-    field::AbstractNumbers=ℝ;
-    parameter::Symbol=:field,
-)
+function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (m, n))
     return CenteredMatrices{typeof(size),field}(size)
 end
@@ -76,11 +71,11 @@ embed(::CenteredMatrices, p) = p
 embed(::CenteredMatrices, p, X) = X
 
 function get_embedding(::CenteredMatrices{TypeParameter{Tuple{m,n}},𝔽}) where {m,n,𝔽}
-    return Euclidean(m, n; field=𝔽, parameter=:type)
+    return Euclidean(m, n; field=𝔽)
 end
 function get_embedding(M::CenteredMatrices{Tuple{Int,Int},𝔽}) where {𝔽}
     m, n = get_mn(M)
-    return Euclidean(m, n; field=𝔽)
+    return Euclidean(m, n; field=𝔽, parameter=:field)
 end
 
 get_mn(::CenteredMatrices{TypeParameter{Tuple{m,n}}}) where {m,n} = (m, n)
@@ -148,11 +143,11 @@ project!(::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X, dims=1))
 representation_size(M::CenteredMatrices) = get_mn(M)
 
 function Base.show(io::IO, ::CenteredMatrices{TypeParameter{Tuple{m,n}},𝔽}) where {m,n,𝔽}
-    return print(io, "CenteredMatrices($(m), $(n), $(𝔽); parameter=:type)")
+    return print(io, "CenteredMatrices($(m), $(n), $(𝔽))")
 end
 function Base.show(io::IO, M::CenteredMatrices{Tuple{Int,Int},𝔽}) where {𝔽}
     m, n = get_mn(M)
-    return print(io, "CenteredMatrices($(m), $(n), $(𝔽))")
+    return print(io, "CenteredMatrices($(m), $(n), $(𝔽); parameter=:field)")
 end
 
 @doc raw"""

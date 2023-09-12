@@ -1,18 +1,18 @@
 @doc raw"""
-    Rotations{n} <: AbstractManifold{ℝ}
+    Rotations{T} <: AbstractManifold{ℝ}
 
 The manifold of rotation matrices of size ``n × n``, i.e.
 real-valued orthogonal matrices with determinant ``+1``.
 
 # Constructor
 
-    Rotations(n)
+    Rotations(n::Int; parameter::Symbol=:type)
 
 Generate the manifold of ``n × n`` rotation matrices.
 """
-const Rotations{n} = GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}
+const Rotations{T} = GeneralUnitaryMatrices{T,ℝ,DeterminantOneMatrices}
 
-function Rotations(n::Int; parameter::Symbol=:field)
+function Rotations(n::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return Rotations{typeof(size)}(size)
 end
@@ -125,7 +125,7 @@ function _ev_zero(tridiagonal_elements, unitary, evec, evals, fill_at; i)
 end
 
 function get_basis_diagonalizing(M::Rotations, p, B::DiagonalizingOrthonormalBasis{ℝ})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     decomp = schur(B.frame_direction)
     decomp = ordschur(decomp, map(v -> norm(v) > eps(eltype(p)), decomp.values))
 
@@ -162,7 +162,7 @@ Return the radius of injectivity for the [`PolarRetraction`](https://juliamanifo
 """
 injectivity_radius(::Rotations, ::PolarRetraction)
 function _injectivity_radius(M::Rotations, ::PolarRetraction)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return n == 1 ? 0.0 : π / sqrt(2.0)
 end
 
@@ -196,7 +196,7 @@ Compute a vector from the tangent space $T_p\mathrm{SO}(n)$ of the point `p` on 
 inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 
 function inverse_retract_polar!(M::Rotations, X, p, q)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     A = transpose(p) * q
     Amat = A isa StaticMatrix ? A : convert(Matrix, A)
     H = copyto!(allocate(Amat), -2I)
@@ -213,7 +213,7 @@ function inverse_retract_polar!(M::Rotations, X, p, q)
     return project!(SkewSymmetricMatrices(n), X, p, X)
 end
 function inverse_retract_qr!(M::Rotations, X, p, q)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     A = transpose(p) * q
     R = zero(X)
     for i in 1:n
@@ -249,7 +249,7 @@ and second columns are swapped.
 The argument `p` is used to determine the type of returned points.
 """
 function normal_rotation_distribution(M::Rotations, p, σ::Real)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     d = Distributions.MvNormal(zeros(n * n), σ)
     return NormalRotationDistribution(M, d, p)
 end
@@ -274,7 +274,7 @@ check with `check_det = false`.
 project(::Rotations, ::Any)
 
 function project!(M::Rotations, q, p; check_det::Bool=true)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     F = svd(p)
     mul!(q, F.U, F.Vt)
     if check_det && det(q) < 0
@@ -290,7 +290,7 @@ function Random.rand(
     rng::AbstractRNG,
     d::NormalRotationDistribution{TResult,<:Rotations},
 ) where {TResult}
-    n = get_n(d.manifold)
+    n = get_parameter(d.manifold.size)[1]
     return if n == 1
         convert(TResult, ones(1, 1))
     else
@@ -390,11 +390,11 @@ end
 parallel_transport_to(::Rotations{TypeParameter{Tuple{2}}}, p, X, q) = X
 
 function Base.show(io::IO, ::Rotations{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "Rotations($(n); parameter=:type)")
+    return print(io, "Rotations($(n))")
 end
 function Base.show(io::IO, M::Rotations{Tuple{Int}})
-    n = get_n(M)
-    return print(io, "Rotations($n)")
+    n = get_parameter(M.size)[1]
+    return print(io, "Rotations($n; parameter=:field)")
 end
 
 @doc raw"""
@@ -409,7 +409,7 @@ to map it into the Lie algebra.
 """
 riemannian_Hessian(M::Rotations, p, G, H, X)
 function riemannian_Hessian!(M::Rotations, Y, p, G, H, X)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     symmetrize!(Y, G' * p)
     project!(SkewSymmetricMatrices(N), Y, p' * H - X * Y)
     return Y

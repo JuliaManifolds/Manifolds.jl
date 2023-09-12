@@ -36,7 +36,7 @@ where ``\mathcal{C}^\prime`` is arbitrary, ``U_d^{\mathrm{H}}`` is the Hermitian
 ``U_d``, and ``U_d^{\mathrm{H}} U_d^\prime = 0`` for all ``d``.
 
 # Constructor
-    Tucker(N::NTuple{D, Int}, R::NTuple{D, Int}[, field = ℝ]; parameter::Symbol=:field)
+    Tucker(N::NTuple{D, Int}, R::NTuple{D, Int}[, field = ℝ]; parameter::Symbol=:type)
 
 Generate the manifold of `field`-valued tensors of dimensions  `N[1] × … × N[D]` and
 multilinear rank `R = (R[1], …, R[D])`.
@@ -48,7 +48,7 @@ function Tucker(
     n⃗::NTuple{D,Int},
     r⃗::NTuple{D,Int},
     field::AbstractNumbers=ℝ;
-    parameter::Symbol=:field,
+    parameter::Symbol=:type,
 ) where {D}
     @assert is_valid_mlrank(n⃗, r⃗)
     size = wrap_type_parameter(parameter, (n⃗, r⃗))
@@ -224,7 +224,7 @@ to the unfoldings.
 For a [`TuckerPoint`](@ref) it is checked that the point is in correct HOSVD form.
 """
 function check_point(M::Tucker, x; kwargs...)
-    N, R = get_nr(M)
+    N, R = get_parameter(M.size)
     s = "The point $(x) does not lie on $(M), "
     size(x) == N || return DomainError(size(x), s * "since its size is not $(N).")
     x_buffer = similar(x)
@@ -235,7 +235,7 @@ function check_point(M::Tucker, x; kwargs...)
     return nothing
 end
 function check_point(M::Tucker, x::TuckerPoint; kwargs...)
-    N, R = get_nr(M)
+    N, R = get_parameter(M.size)
     s = "The point $(x) does not lie on $(M), "
     U = x.hosvd.U
     ℭ = x.hosvd.core
@@ -497,9 +497,6 @@ function get_coordinates(
     return get_coordinates(M, 𝔄, X, get_basis(M, 𝔄, ℬ))
 end
 
-get_nr(::Tucker{TypeParameter{Tuple{n,r}}}) where {n,r} = (n, r)
-get_nr(M::Tucker{<:Tuple}) = get_parameter(M.size)
-
 #=
 get_vector(::Tucker, A, x, b)
 
@@ -643,7 +640,7 @@ rank ``(R_1, \dots, R_D)``, i.e.
 ````
 """
 function manifold_dimension(M::Tucker)
-    n⃗, r⃗ = get_nr(M)
+    n⃗, r⃗ = get_parameter(M.size)
     return prod(r⃗) + sum(r⃗ .* (n⃗ .- r⃗))
 end
 
@@ -730,11 +727,11 @@ function Base.show(
     ::MIME"text/plain",
     ::Tucker{TypeParameter{Tuple{n,r}},D,𝔽},
 ) where {n,r,D,𝔽}
-    return print(io, "Tucker($(n), $(r), $(𝔽); parameter=:type)")
+    return print(io, "Tucker($(n), $(r), $(𝔽))")
 end
 function Base.show(io::IO, ::MIME"text/plain", M::Tucker{<:Tuple,D,𝔽}) where {D,𝔽}
-    n, r = get_nr(M)
-    return print(io, "Tucker($(n), $(r), $(𝔽))")
+    n, r = get_parameter(M.size)
+    return print(io, "Tucker($(n), $(r), $(𝔽); parameter=:field)")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", 𝔄::TuckerPoint)
@@ -882,6 +879,6 @@ for fun in [:get_vector, :inverse_retract, :project, :zero_vector]
 end
 
 function ManifoldsBase.allocate_result(M::Tucker, f::typeof(embed), p, args...)
-    dims = get_nr(M)[1]
+    dims = get_parameter(M.size)[1]
     return Array{number_eltype(p),length(dims)}(undef, dims)
 end

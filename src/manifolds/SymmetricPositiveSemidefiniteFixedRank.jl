@@ -35,7 +35,7 @@ The metric was used in [JourneeBachAbsilSepulchre:2010](@cite)[MassartAbsil:2020
 
 # Constructor
 
-    SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+    SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of $n × n$ symmetric positive semidefinite matrices of rank $k$
 over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
@@ -48,7 +48,7 @@ function SymmetricPositiveSemidefiniteFixedRank(
     n::Int,
     k::Int,
     field::AbstractNumbers=ℝ;
-    parameter::Symbol=:field,
+    parameter::Symbol=:type,
 )
     size = wrap_type_parameter(parameter, (n, k))
     return SymmetricPositiveSemidefiniteFixedRank{typeof(size),field}(size)
@@ -68,7 +68,7 @@ The symmetry of `p` is not explicitly checked since by using `q` p is symmetric 
 The tolerance for the symmetry of `p` can and the rank of `q*q'` be set using `kwargs...`.
 """
 function check_point(M::SymmetricPositiveSemidefiniteFixedRank, q; kwargs...)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     p = q * q'
     r = rank(p * p'; kwargs...)
     if r < k
@@ -94,21 +94,14 @@ check_vector(M::SymmetricPositiveSemidefiniteFixedRank, q, Y; kwargs...)
 function get_embedding(
     ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n,k}},𝔽},
 ) where {n,k,𝔽}
-    return Euclidean(n, k; field=𝔽, parameter=:type)
+    return Euclidean(n, k; field=𝔽)
 end
 function get_embedding(
     M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int,Int},𝔽},
 ) where {𝔽}
-    n, k = get_nk(M)
-    return Euclidean(n, k; field=𝔽)
+    n, k = get_parameter(M.size)
+    return Euclidean(n, k; field=𝔽, parameter=:field)
 end
-
-function get_nk(
-    ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n,k}}},
-) where {n,k}
-    return (n, k)
-end
-get_nk(M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int,Int}}) = get_parameter(M.size)
 
 @doc raw"""
     distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q)
@@ -209,11 +202,11 @@ where the last $k^2$ is due to the zero imaginary part for Hermitian matrices di
 manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank)
 
 function manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank{<:Any,ℝ})
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return k * n - div(k * (k - 1), 2)
 end
 function manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank{<:Any,ℂ})
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return 2 * k * n - k * k
 end
 
@@ -226,17 +219,17 @@ function Base.show(
     io::IO,
     ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n,k}},𝔽},
 ) where {n,k,𝔽}
-    return print(
-        io,
-        "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽); parameter=:type)",
-    )
+    return print(io, "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽))")
 end
 function Base.show(
     io::IO,
     M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int,Int},𝔽},
 ) where {𝔽}
-    n, k = get_nk(M)
-    return print(io, "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽))")
+    n, k = get_parameter(M.size)
+    return print(
+        io,
+        "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽); parameter=:field)",
+    )
 end
 
 """

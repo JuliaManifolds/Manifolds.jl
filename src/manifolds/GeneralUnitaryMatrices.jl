@@ -35,14 +35,11 @@ function GeneralUnitaryMatrices(
     n::Int,
     field,
     matrix_type::Type{<:AbstractMatrixType};
-    parameter::Symbol=:field,
+    parameter::Symbol=:type,
 )
     size = wrap_type_parameter(parameter, (n,))
     return GeneralUnitaryMatrices{typeof(size),field,matrix_type}(size)
 end
-
-get_n(::GeneralUnitaryMatrices{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::GeneralUnitaryMatrices{Tuple{Int}}) = get_parameter(M.size)[1]
 
 function active_traits(f, ::GeneralUnitaryMatrices, args...)
     return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
@@ -104,7 +101,7 @@ function check_point(
 end
 
 function check_size(M::GeneralUnitaryMatrices, p)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     m = size(p)
     if length(m) != 2
         return DomainError(
@@ -121,7 +118,7 @@ function check_size(M::GeneralUnitaryMatrices, p)
     return nothing
 end
 function check_size(M::GeneralUnitaryMatrices, p, X)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     m = size(X)
     if length(size(X)) != 2
         return DomainError(
@@ -151,7 +148,7 @@ and orthogonal to `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::GeneralUnitaryMatrices{<:Any,𝔽}, p, X; kwargs...) where {𝔽}
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return check_point(SkewHermitianMatrices(n, 𝔽), X; kwargs...)
 end
 
@@ -404,7 +401,7 @@ function get_coordinates_orthogonal!(
     X,
     ::RealNumbers,
 )
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     @assert length(Xⁱ) == manifold_dimension(M)
     @assert size(X) == (n, n)
     if n == 2
@@ -438,18 +435,18 @@ function get_coordinates_orthonormal!(
 end
 
 @doc raw"""
-    get_embedding(M::OrthogonalMatrices{n})
-    get_embedding(M::Rotations{n})
-    get_embedding(M::UnitaryMatrices{n})
+    get_embedding(M::OrthogonalMatrices)
+    get_embedding(M::Rotations)
+    get_embedding(M::UnitaryMatrices)
 
 Return the embedding, i.e. The ``\mathbb F^{n×n}``, where ``\mathbb F = \mathbb R`` for the
 first two and ``\mathbb F = \mathbb C`` for the unitary matrices.
 """
 function get_embedding(::GeneralUnitaryMatrices{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return Euclidean(n, n; field=𝔽, parameter=:type)
+    return Euclidean(n, n; field=𝔽)
 end
 function get_embedding(M::GeneralUnitaryMatrices{Tuple{Int},𝔽}) where {𝔽}
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return Euclidean(n, n; field=𝔽, parameter=:field)
 end
 
@@ -470,7 +467,7 @@ function get_vector_orthogonal(M::GeneralUnitaryMatrices{<:Any,ℝ}, p, c, N::Re
 end
 
 function get_vector_orthogonal(
-    ::GeneralUnitaryMatrices{TypeParameter{2},ℝ},
+    ::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
     p::SMatrix,
     Xⁱ,
     ::RealNumbers,
@@ -479,7 +476,7 @@ function get_vector_orthogonal(
 end
 
 function get_vector_orthogonal!(
-    ::GeneralUnitaryMatrices{TypeParameter{1},ℝ},
+    ::GeneralUnitaryMatrices{TypeParameter{Tuple{1}},ℝ},
     X,
     p,
     Xⁱ,
@@ -551,7 +548,7 @@ function get_vector_orthogonal!(
     Xⁱ,
     ::RealNumbers,
 )
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     @assert size(X) == (n, n)
     @assert length(Xⁱ) == manifold_dimension(M)
     if n == 1
@@ -645,18 +642,18 @@ function injectivity_radius(::GeneralUnitaryMatrices{TypeParameter{Tuple{n}},ℝ
     return π * sqrt(2.0)
 end
 function injectivity_radius(M::GeneralUnitaryMatrices{Tuple{Int},ℝ})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return n == 1 ? 0.0 : π * sqrt(2.0)
 end
 injectivity_radius(::GeneralUnitaryMatrices{TypeParameter{Tuple{1}},ℝ}) = 0.0
 
 # Resolve ambiguity on Rotations and Orthogonal
 function _injectivity_radius(M::GeneralUnitaryMatrices{<:Any,ℝ}, ::ExponentialRetraction)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return n == 1 ? 0.0 : π * sqrt(2.0)
 end
 function _injectivity_radius(M::GeneralUnitaryMatrices{<:Any,ℝ}, ::PolarRetraction)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return n == 1 ? 0.0 : π / sqrt(2.0)
 end
 
@@ -717,7 +714,7 @@ end
 function log!(M::GeneralUnitaryMatrices{<:Any,ℝ}, X, p, q)
     U = transpose(p) * q
     X .= real(log_safe(U))
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return project!(SkewSymmetricMatrices(n), X, p, X)
 end
 function log!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, X, p, q)
@@ -767,7 +764,7 @@ end
 
 function log!(M::GeneralUnitaryMatrices{<:Any,𝔽}, X, p, q) where {𝔽}
     log_safe!(X, adjoint(p) * q)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     project!(SkewHermitianMatrices(n, 𝔽), X, X)
     return X
 end
@@ -784,7 +781,7 @@ Return the dimension of the manifold orthogonal matrices and of the manifold of 
 ```
 """
 function manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℝ})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return div(n * (n - 1), 2)
 end
 @doc raw"""
@@ -796,7 +793,7 @@ Return the dimension of the manifold of special unitary matrices.
 ```
 """
 function manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return n^2 - 1
 end
 
@@ -814,7 +811,7 @@ formula reads [BoyaSudarshanTilma:2003](@cite):
 ```
 """
 function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℝ,AbsoluteDeterminantOneMatrices})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return 2 * manifold_volume(GeneralUnitaryMatrices(n, ℝ, DeterminantOneMatrices))
 end
 @doc raw"""
@@ -835,7 +832,7 @@ It differs from the paper by a factor of `sqrt(2)` due to a different choice of
 normalization.
 """
 function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℝ,DeterminantOneMatrices})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     vol = 1.0
     if n % 2 == 0
         k = div(n, 2)
@@ -866,7 +863,7 @@ formula reads [BoyaSudarshanTilma:2003](@cite)
 ```
 """
 function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℂ,AbsoluteDeterminantOneMatrices})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     vol = sqrt(n * 2^(n + 1)) * π^(((n + 1) * n) // 2)
     kf = 1
     for k in 1:(n - 1)
@@ -886,7 +883,7 @@ reads [BoyaSudarshanTilma:2003](@cite)
 ```
 """
 function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     vol = sqrt(n * 2^(n - 1)) * π^(((n - 1) * (n + 2)) // 2)
     kf = 1
     for k in 1:(n - 1)
@@ -951,7 +948,7 @@ and change the representer to use the corresponding Lie algebra, i.e. we compute
 project(::GeneralUnitaryMatrices, p, X)
 
 function project!(M::GeneralUnitaryMatrices{<:Any,𝔽}, Y, p, X) where {𝔽}
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     project!(SkewHermitianMatrices(n, 𝔽), Y, p \ X)
     return Y
 end

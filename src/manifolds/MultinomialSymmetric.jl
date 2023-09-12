@@ -43,7 +43,7 @@ struct MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic
     size::T
 end
 
-function MultinomialSymmetric(n::Int; parameter::Symbol=:field)
+function MultinomialSymmetric(n::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return MultinomialSymmetric{typeof(size)}(size)
 end
@@ -55,7 +55,7 @@ Checks whether `p` is a valid point on the [`MultinomialSymmetric`](@ref)`(m,n)`
 i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
 function check_point(M::MultinomialSymmetric, p; kwargs...)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return check_point(SymmetricMatrices(n, ℝ), p)
 end
 @doc raw"""
@@ -66,7 +66,7 @@ This means, that `p` is valid, that `X` is of correct dimension, symmetric, and 
 along any row.
 """
 function check_vector(M::MultinomialSymmetric, p, X; kwargs...)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return check_vector(SymmetricMatrices(n, ℝ), p, X; kwargs...)
 end
 
@@ -74,15 +74,12 @@ embed!(::MultinomialSymmetric, q, p) = copyto!(q, p)
 embed!(::MultinomialSymmetric, Y, ::Any, X) = copyto!(Y, X)
 
 function get_embedding(::MultinomialSymmetric{TypeParameter{Tuple{n}}}) where {n}
-    return MultinomialMatrices(n, n; parameter=:type)
-end
-function get_embedding(M::MultinomialSymmetric{Tuple{Int}})
-    n = get_n(M)
     return MultinomialMatrices(n, n)
 end
-
-get_n(::MultinomialSymmetric{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::MultinomialSymmetric{Tuple{Int}}) = get_parameter(M.size)[1]
+function get_embedding(M::MultinomialSymmetric{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return MultinomialMatrices(n, n; parameter=:field)
+end
 
 """
     is_flat(::MultinomialSymmetric)
@@ -101,7 +98,7 @@ namely
 ````
 """
 function manifold_dimension(M::MultinomialSymmetric)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return div(n * (n - 1), 2)
 end
 
@@ -129,7 +126,7 @@ function project!(::MultinomialSymmetric, X, p, Y)
 end
 
 function representation_size(M::MultinomialSymmetric)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return (n, n)
 end
 
@@ -147,9 +144,9 @@ function retract_project!(M::MultinomialSymmetric, q, p, X, t::Number)
 end
 
 function Base.show(io::IO, ::MultinomialSymmetric{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "MultinomialSymmetric($(n); parameter=:type)")
+    return print(io, "MultinomialSymmetric($(n))")
 end
 function Base.show(io::IO, M::MultinomialSymmetric{Tuple{Int}})
-    n = get_n(M)
-    return print(io, "MultinomialSymmetric($(n))")
+    n = get_parameter(M.size)[1]
+    return print(io, "MultinomialSymmetric($(n); parameter=:field)")
 end

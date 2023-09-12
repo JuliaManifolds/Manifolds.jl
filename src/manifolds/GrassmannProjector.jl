@@ -28,7 +28,7 @@ i.e. the [`ProjectorPoint`](@ref) ``p ∈ \mathbb F^{n×n}``, ``\mathbb F ∈ \{
 has to fulfill ``p^{\mathrm{T}} = p``, ``p^2=p``, and ``\operatorname{rank} p = k`.
 """
 function check_point(M::Grassmann, p::ProjectorPoint; kwargs...)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     c = p.value * p.value
     if !isapprox(c, p.value; kwargs...)
         return DomainError(
@@ -106,11 +106,11 @@ function get_embedding(
     ::Grassmann{TypeParameter{Tuple{n,k}},𝔽},
     ::ProjectorPoint,
 ) where {n,k,𝔽}
-    return Euclidean(n, n; field=𝔽, parameter=:type)
+    return Euclidean(n, n; field=𝔽)
 end
 function get_embedding(M::Grassmann{Tuple{Int,Int},𝔽}, ::ProjectorPoint) where {𝔽}
-    n, k = get_nk(M)
-    return Euclidean(n, n; field=𝔽, parameter=:type)
+    n, k = get_parameter(M.size)
+    return Euclidean(n, n; field=𝔽, parameter=:field)
 end
 
 @doc raw"""
@@ -120,7 +120,7 @@ Return the represenation size or matrix dimension of a point on the [`Grassmann`
 `M` when using [`ProjectorPoint`](@ref)s, i.e. ``(n,n)``.
 """
 function representation_size(M::Grassmann, p::ProjectorPoint)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return (n, n)
 end
 
@@ -142,7 +142,7 @@ function canonical_project!(M::Grassmann, q::ProjectorPoint, p::StiefelPoint)
     return canonical_project!(M, q, p.value)
 end
 function allocate_result(M::Grassmann, ::typeof(canonical_project), p::StiefelPoint)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return ProjectorPoint(allocate(p.value, (n, n)))
 end
 
@@ -176,11 +176,11 @@ function allocate_result(
     p::StiefelPoint,
     X::StiefelTVector,
 )
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return ProjectorTVector(allocate(p.value, (n, n)))
 end
 function allocate_result(M::Grassmann, ::typeof(differential_canonical_project), p, X)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     return ProjectorTVector(allocate(p, (n, n)))
 end
 

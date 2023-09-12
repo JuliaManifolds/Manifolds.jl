@@ -8,7 +8,7 @@ function check_point(M::Hyperbolic, p::PoincareHalfSpacePoint; kwargs...)
 end
 
 function check_size(M::Hyperbolic, p::PoincareHalfSpacePoint)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     if size(p.value, 1) != N
         !(norm(p.value) < 1)
         return DomainError(
@@ -24,7 +24,7 @@ function check_size(
     X::PoincareHalfSpaceTVector;
     kwargs...,
 )
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     if size(X.value, 1) != N
         return DomainError(
             size(X.value, 1),
@@ -217,11 +217,11 @@ function get_embedding(
     ::Hyperbolic{TypeParameter{Tuple{n}}},
     ::PoincareHalfSpacePoint,
 ) where {n}
-    return Euclidean(n; parameter=:type)
+    return Euclidean(n)
 end
 function get_embedding(M::Hyperbolic{Tuple{Int}}, ::PoincareHalfSpacePoint)
-    n = get_n(M)
-    return Euclidean(n)
+    n = get_parameter(M.size)[1]
+    return Euclidean(n; parameter=:field)
 end
 
 @doc raw"""

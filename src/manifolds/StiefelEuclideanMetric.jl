@@ -24,7 +24,7 @@ $0_k$ are the identity matrix and the zero matrix of dimension $k × k$, respect
 exp(::Stiefel, ::Any...)
 
 function exp!(M::Stiefel, q, p, X)
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     A = p' * X
     B = exp([A -X'*X; I A])
     @views begin
@@ -89,7 +89,7 @@ function get_vector_orthonormal!(M::Stiefel{<:Any,ℝ}, X, p, c, N::RealNumbers)
 end
 
 function get_vectors(M::Stiefel{<:Any,ℝ}, p, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
-    n, k = get_nk(M)
+    n, k = get_parameter(M.size)
     p⊥ = nullspace([p zeros(n, n - k)])
     an = div(k * (k - 1), 2)
     bn = (n - k) * k

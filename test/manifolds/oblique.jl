@@ -6,10 +6,9 @@ include("../utils.jl")
         @test Sphere(2)^3 === Oblique(3, 3)
         @test Sphere(2)^(3,) === PowerManifold(Sphere(2), 3)
         @test ^(Sphere(2), 2) === Oblique(3, 2)
-        @test typeof(^(Sphere(2), 2)) == Oblique{Tuple{Int64,Int64},ℝ,Tuple{Int64}}
-        @test typeof(^(Sphere(2; parameter=:type), 2)) ==
+        @test typeof(^(Sphere(2), 2)) ==
               Oblique{TypeParameter{Tuple{3,2}},ℝ,TypeParameter{Tuple{2}}}
-        @test repr(M) == "Oblique(3, 2; field = ℝ)"
+        @test repr(M) == "Oblique(3, 2; field=ℝ)"
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
         @test !is_flat(M)
@@ -47,5 +46,9 @@ include("../utils.jl")
             exp_log_atol_multiplier=1,
             test_inplace=true,
         )
+    end
+    @testset "field parameter" begin
+        @test typeof(^(Sphere(2; parameter=:field), 2)) ==
+              Oblique{Tuple{Int,Int},ℝ,Tuple{Int}}
     end
 end

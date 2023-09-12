@@ -35,7 +35,7 @@ const SpecialEuclidean{T} = SemidirectProductGroup{
 const SpecialEuclideanManifold{N} =
     ProductManifold{ℝ,Tuple{TranslationGroup{N,ℝ},SpecialOrthogonal{N}}}
 
-function SpecialEuclidean(n; parameter::Symbol=:field)
+function SpecialEuclidean(n; parameter::Symbol=:type)
     Tn = TranslationGroup(n; parameter=parameter)
     SOn = SpecialOrthogonal(n; parameter=parameter)
     A = RotationAction(Tn, SOn)
@@ -48,11 +48,11 @@ const SpecialEuclideanOperation{N} = SemidirectProductOperation{
 const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
 function Base.show(io::IO, ::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "SpecialEuclidean($(n); parameter=:type)")
+    return print(io, "SpecialEuclidean($(n))")
 end
 function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
     n = get_n(G)
-    return print(io, "SpecialEuclidean($(n))")
+    return print(io, "SpecialEuclidean($(n); parameter=:field)")
 end
 
 @inline function active_traits(f, M::SpecialEuclidean, args...)

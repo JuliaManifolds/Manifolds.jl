@@ -52,7 +52,7 @@ generate the complex- and quaternionic-valued sphere.
 struct Sphere{T,𝔽} <: AbstractSphere{𝔽}
     size::T
 end
-function Sphere(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+function Sphere(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return Sphere{typeof(size),field}(size)
 end
@@ -89,7 +89,7 @@ several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product 
 
 # Constructor
 
-    ArraySphere(n₁,n₂,...,nᵢ; field=ℝ)
+    ArraySphere(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol=:type)
 
 Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where $𝔽$ defaults to the real-valued case $ℝ$.
 """
@@ -99,7 +99,7 @@ end
 function ArraySphere(
     n::Vararg{Int,I};
     field::AbstractNumbers=ℝ,
-    parameter::Symbol=:field,
+    parameter::Symbol=:type,
 ) where {I}
     size = wrap_type_parameter(parameter, n)
     return ArraySphere{typeof(size),field}(size)
@@ -198,7 +198,7 @@ function exp!(M::AbstractSphere, q, p, X, t::Number)
 end
 
 function get_basis_diagonalizing(M::Sphere{<:Any,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     A = zeros(n + 1, n + 1)
     A[1, :] = transpose(p)
     A[2, :] = transpose(B.frame_direction)
@@ -243,6 +243,9 @@ end
 function get_embedding(M::AbstractSphere{𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field=𝔽)
 end
+function get_embedding(M::Sphere{<:Tuple,𝔽}) where {𝔽}
+    return Euclidean(representation_size(M)...; field=𝔽, parameter=:field)
+end
 
 @doc raw"""
     get_vector(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
@@ -272,9 +275,6 @@ function get_vector_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNumbers)
     Y[2:(n + 1)] .= X .- pend .* factor
     return Y
 end
-
-get_n(::Sphere{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::Sphere{Tuple{Int}}) = get_parameter(M.size)[1]
 
 @doc raw"""
     injectivity_radius(M::AbstractSphere[, p])
@@ -330,7 +330,7 @@ the diagonal matrix of size ``n×n`` with ones on the diagonal, since the metric
 from the embedding by restriction to the tangent space ``T_p\mathcal M`` at ``p``.
 """
 function local_metric(M::Sphere{Tuple{Int},ℝ}, p, ::DefaultOrthonormalBasis)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return Diagonal(ones(eltype(p), n))
 end
 function local_metric(
@@ -477,7 +477,7 @@ function representation_size(M::ArraySphere)
     return get_parameter(M.size)
 end
 function representation_size(M::Sphere)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return (n + 1,)
 end
 
@@ -498,21 +498,18 @@ function retract_project!(M::AbstractSphere, q, p, X, t::Number)
 end
 
 function Base.show(io::IO, ::Sphere{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return print(io, "Sphere($(n), $(𝔽); parameter=:type)")
-end
-function Base.show(io::IO, M::Sphere{Tuple{Int},𝔽}) where {𝔽}
-    n = get_n(M)
     return print(io, "Sphere($(n), $(𝔽))")
 end
+function Base.show(io::IO, M::Sphere{Tuple{Int},𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return print(io, "Sphere($(n), $(𝔽); parameter=:field)")
+end
 function Base.show(io::IO, ::ArraySphere{TypeParameter{tn},𝔽}) where {tn,𝔽}
-    return print(
-        io,
-        "ArraySphere($(join(tn.parameters, ", ")); field = $(𝔽), parameter=:type)",
-    )
+    return print(io, "ArraySphere($(join(tn.parameters, ", ")); field=$(𝔽))")
 end
 function Base.show(io::IO, M::ArraySphere{<:Tuple,𝔽}) where {𝔽}
     n = M.size
-    return print(io, "ArraySphere($(join(n, ", ")); field = $(𝔽))")
+    return print(io, "ArraySphere($(join(n, ", ")); field=$(𝔽), parameter=:field)")
 end
 
 """
@@ -522,7 +519,7 @@ Uniform distribution on given [`Sphere`](@ref) `M`. Generated points will be of
 similar type as `p`.
 """
 function uniform_distribution(M::Sphere{<:Any,ℝ}, p)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     d = Distributions.MvNormal(zero(p), 1.0)
     return ProjectedPointDistribution(M, d, project!, p)
 end
@@ -644,7 +641,7 @@ function get_coordinates_induced_basis!(
     X,
     B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
 )
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     if B.i === :north
         for i in 1:n
             Y[i] = X[i + 1] / (1 + p[1]) - X[1] * p[i + 1] / (1 + p[1])^2
@@ -664,7 +661,7 @@ function get_vector_induced_basis!(
     X,
     B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
 )
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     a = get_parameters(M, B.A, B.i, p)
     mult = inv(1 + dot(a, a))^2
 

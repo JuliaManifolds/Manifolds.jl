@@ -26,7 +26,7 @@ struct SkewHermitianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+function SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return SkewHermitianMatrices{typeof(size),field}(size)
 end
@@ -43,7 +43,7 @@ This is equivalent to [`SkewHermitianMatrices(n, ℝ)`](@ref).
 """
 const SkewSymmetricMatrices{T} = SkewHermitianMatrices{T,ℝ}
 
-function SkewSymmetricMatrices(n::Int; parameter::Symbol=:field)
+function SkewSymmetricMatrices(n::Int; parameter::Symbol=:type)
     return SkewHermitianMatrices(n; parameter=parameter)
 end
 
@@ -97,7 +97,7 @@ function get_basis(M::SkewHermitianMatrices, p, B::DiagonalizingOrthonormalBasis
 end
 
 function get_coordinates_orthonormal!(M::SkewSymmetricMatrices, Y, p, X, ::RealNumbers)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
@@ -116,7 +116,7 @@ function get_coordinates_orthonormal!(
     X,
     ::ComplexNumbers,
 )
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
@@ -136,15 +136,15 @@ function get_coordinates_orthonormal!(
 end
 
 function get_embedding(::SkewHermitianMatrices{TypeParameter{Tuple{N}},𝔽}) where {N,𝔽}
-    return Euclidean(N, N; field=𝔽, parameter=:type)
+    return Euclidean(N, N; field=𝔽)
 end
 function get_embedding(M::SkewHermitianMatrices{Tuple{Int},𝔽}) where {𝔽}
-    N = get_n(M)
-    return Euclidean(N, N; field=𝔽)
+    N = get_parameter(M.size)[1]
+    return Euclidean(N, N; field=𝔽, parameter=:field)
 end
 
 function get_vector_orthonormal!(M::SkewSymmetricMatrices, Y, p, X, ::RealNumbers)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
@@ -166,7 +166,7 @@ function get_vector_orthonormal!(
     X,
     ::ComplexNumbers,
 )
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
@@ -183,9 +183,6 @@ function get_vector_orthonormal!(
     end
     return Y
 end
-
-get_n(::SkewHermitianMatrices{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::SkewHermitianMatrices{Tuple{Int}}) = get_parameter(M.size)[1]
 
 """
     is_flat(::SkewHermitianMatrices)
@@ -209,7 +206,7 @@ only the upper triangular elements of the matrix being unique, and the second te
 corresponds to the constraint that the real part of the diagonal be zero.
 """
 function manifold_dimension(M::SkewHermitianMatrices{<:Any,𝔽}) where {𝔽}
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     return div(N * (N + 1), 2) * real_dimension(𝔽) - N
 end
 
@@ -251,23 +248,23 @@ project(::SkewHermitianMatrices, ::Any, ::Any)
 project!(M::SkewHermitianMatrices, Y, p, X) = project!(M, Y, X)
 
 function representation_size(M::SkewHermitianMatrices)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     return (N, N)
 end
 
 function Base.show(io::IO, ::SkewHermitianMatrices{TypeParameter{Tuple{n}},F}) where {n,F}
-    return print(io, "SkewHermitianMatrices($(n), $(F); parameter=:type)")
-end
-function Base.show(io::IO, ::SkewSymmetricMatrices{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "SkewSymmetricMatrices($(n); parameter=:type)")
-end
-function Base.show(io::IO, M::SkewHermitianMatrices{Tuple{Int},F}) where {F}
-    n = get_n(M)
     return print(io, "SkewHermitianMatrices($(n), $(F))")
 end
-function Base.show(io::IO, M::SkewSymmetricMatrices{Tuple{Int}})
-    n = get_n(M)
+function Base.show(io::IO, ::SkewSymmetricMatrices{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "SkewSymmetricMatrices($(n))")
+end
+function Base.show(io::IO, M::SkewHermitianMatrices{Tuple{Int},F}) where {F}
+    n = get_parameter(M.size)[1]
+    return print(io, "SkewHermitianMatrices($(n), $(F); parameter=:field)")
+end
+function Base.show(io::IO, M::SkewSymmetricMatrices{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return print(io, "SkewSymmetricMatrices($(n); parameter=:field)")
 end
 
 @doc raw"""

@@ -22,7 +22,7 @@ i.e. the set of symmetric matrices,
 
 # Constructor
 
-    SymmetricPositiveDefinite(n; parameter::Symbol=:field)
+    SymmetricPositiveDefinite(n; parameter::Symbol=:type)
 
 generates the manifold $\mathcal P(n) \subset ℝ^{n × n}$
 """
@@ -30,7 +30,7 @@ struct SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function SymmetricPositiveDefinite(n::Int; parameter::Symbol=:field)
+function SymmetricPositiveDefinite(n::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return SymmetricPositiveDefinite{typeof(size)}(size)
 end
@@ -228,12 +228,13 @@ embed(::SymmetricPositiveDefinite, p) = p
 embed(::SymmetricPositiveDefinite, p::SPDPoint) = convert(AbstractMatrix, p)
 embed(::SymmetricPositiveDefinite, p, X) = X
 
-function get_embedding(M::SymmetricPositiveDefinite)
-    return Euclidean(representation_size(M)...; field=ℝ)
+function get_embedding(::SymmetricPositiveDefinite{TypeParameter{Tuple{n}}}) where {n}
+    return Euclidean(n, n; field=ℝ)
 end
-
-get_n(::SymmetricPositiveDefinite{TypeParameter{Tuple{N}}}) where {N} = N
-get_n(M::SymmetricPositiveDefinite{Tuple{Int}}) = get_parameter(M.size)[1]
+function get_embedding(M::SymmetricPositiveDefinite{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return Euclidean(n, n; field=ℝ, parameter=:field)
+end
 
 @doc raw"""
     injectivity_radius(M::SymmetricPositiveDefinite[, p])
@@ -270,7 +271,7 @@ returns the dimension of
 ````
 """
 function manifold_dimension(M::SymmetricPositiveDefinite)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return div(n * (n + 1), 2)
 end
 
@@ -421,7 +422,7 @@ function Random.rand!(
             (vector_at === nothing ? 1 : norm(convert(AbstractMatrix, vector_at))),
     tangent_distr=:Gaussian,
 )
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     if vector_at === nothing
         D = Diagonal(1 .+ rand(rng, N)) # random diagonal matrix
         s = qr(σ * randn(rng, N, N)) # random q
@@ -465,16 +466,16 @@ Return the size of an array representing an element on the
 symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
 """
 function representation_size(M::SymmetricPositiveDefinite)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     return (N, N)
 end
 
 function Base.show(io::IO, ::SymmetricPositiveDefinite{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "SymmetricPositiveDefinite($(n); parameter=:type)")
+    return print(io, "SymmetricPositiveDefinite($(n))")
 end
 function Base.show(io::IO, M::SymmetricPositiveDefinite{Tuple{Int}})
-    n = get_n(M)
-    return print(io, "SymmetricPositiveDefinite($(n))")
+    n = get_parameter(M.size)[1]
+    return print(io, "SymmetricPositiveDefinite($(n); parameter=:field)")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", p::SPDPoint)

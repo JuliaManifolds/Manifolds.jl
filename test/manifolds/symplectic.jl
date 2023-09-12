@@ -74,7 +74,7 @@ using ManifoldDiff
         ]
 
         @testset "Basics" begin
-            @test repr(Sp_2) == "Symplectic{$(2), ℝ}()"
+            @test repr(Sp_2) == "Symplectic($(2), ℝ)"
             @test representation_size(Sp_2) == (2, 2)
             @test base_manifold(Sp_2) === Sp_2
             @test !is_flat(Sp_2)
@@ -154,7 +154,7 @@ using ManifoldDiff
             # Project Project matrix A ∈ ℝ^{2 × 2} onto (T_pSp):
             A_2 = [5.0 -21.5; 3.14 14.9]
             A_2_proj = similar(A_2)
-            Manifolds.project!(Extended_Sp_2, A_2_proj, p_2, A_2)
+            project!(Extended_Sp_2, A_2_proj, p_2, A_2)
             @test is_vector(Sp_2, p_2, A_2_proj; atol=1.0e-16)
 
             # Change representer of A onto T_pSp:

@@ -36,7 +36,7 @@ using NLsolve
 
     @testset "GL(1,𝔽) special cases" begin
         @testset "real" begin
-            G = GeneralLinear(1; parameter=:type)
+            G = GeneralLinear(1)
             p = 3.0 * ones(1, 1)
             X = 1.0 * ones(1, 1)
             @test exp(G, p, X) ≈ p * exp(X)' * exp(X - X')
@@ -49,7 +49,7 @@ using NLsolve
             log_lie(G, Identity(G)) == zeros(1, 1) # Matrix to matrix
         end
         @testset "complex" begin
-            G = GeneralLinear(1, ℂ; parameter=:type)
+            G = GeneralLinear(1, ℂ)
             p = (1 + im) * ones(1, 1)
             X = (1 - im) * ones(1, 1)
             @test exp(G, p, X) ≈ p * exp(X)' * exp(X - X')
@@ -138,7 +138,7 @@ using NLsolve
     end
 
     @testset "Complex" begin
-        G = GeneralLinear(2, ℂ; parameter=:type)
+        G = GeneralLinear(2, ℂ)
 
         @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3), true)
         @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3), true)

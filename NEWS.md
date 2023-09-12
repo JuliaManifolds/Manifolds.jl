@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Sizes of all manifolds can now be either encoded in type or stored in a field to avoid over-specialization.
-  The default is set to store the size in a field. To obtain the old behavior, pass the `parameter=:type` keyword
+  The default is set to store the size in type parameter. For field storage, pass the `parameter=:type` keyword
   argument to manifold constructor. Related changes:
   - Statically sized `SpecialEuclidean{N}` is now `SpecialEuclidean{TypeParameter{Tuple{N}}}`, whereas the type of special Euclidean group with field-stored size is `SpecialEuclidean{Tuple{Int}}`. Similar change applies to:
     - `CenteredMatrices{m,n}`,
@@ -38,14 +38,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `MultinomialSymmetric{n}`,
     - `Orthogonal{n}`,
     - `ProbabilitySimplex{n}`,
+    - `SPDFixedDeterminant{n}`,
+    - `SpecialLinear{n}`,
     - `SpecialOrthogonal{n}`,
     - `SpecialUnitary{n}`,
     - `SpecialEuclideanManifold{n}`,
+    - `Spectrahedron{n,k}`,
     - `SphereSymmetricMatrices{N}`,
     - `Stiefel{n,k}`,
     - `SymmetricMatrices{N}`,
     - `SymmetricPositiveDefinite{n}`,
     - `SymmetricPositiveSemidefiniteFixedRank{n,k}`,
+    - `Symplectic{n}`,
+    - `SymplecticStiefel{n,k}`,
     - `TranslationGroup`,
     - `Tucker`.
   

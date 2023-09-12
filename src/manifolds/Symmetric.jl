@@ -25,7 +25,7 @@ struct SymmetricMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return SymmetricMatrices{typeof(size),field}(size)
 end
@@ -90,7 +90,7 @@ function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
 end
 
 function get_coordinates_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, ::RealNumbers)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
@@ -110,7 +110,7 @@ function get_coordinates_orthonormal!(
     X,
     ::ComplexNumbers,
 )
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
     @assert size(X) == (N, N)
@@ -129,15 +129,15 @@ function get_coordinates_orthonormal!(
 end
 
 function get_embedding(::SymmetricMatrices{TypeParameter{Tuple{N}},𝔽}) where {N,𝔽}
-    return Euclidean(N, N; field=𝔽, parameter=:type)
+    return Euclidean(N, N; field=𝔽)
 end
 function get_embedding(M::SymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
-    N = get_n(M)
-    return Euclidean(N, N; field=𝔽)
+    N = get_parameter(M.size)[1]
+    return Euclidean(N, N; field=𝔽, parameter=:field)
 end
 
 function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, ::RealNumbers)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
@@ -151,7 +151,7 @@ function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, ::Rea
     return Y
 end
 function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℂ}, Y, p, X, ::ComplexNumbers)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
     @assert size(Y) == (N, N)
@@ -165,9 +165,6 @@ function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℂ}, Y, p, X, ::Com
     return Y
 end
 ## unify within bases later.
-
-get_n(::SymmetricMatrices{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::SymmetricMatrices{Tuple{Int}}) = get_parameter(M.size)[1]
 
 """
     is_flat(::SymmetricMatrices)
@@ -192,7 +189,7 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 where the last $-n$ is due to the zero imaginary part for Hermitian matrices
 """
 function manifold_dimension(M::SymmetricMatrices{<:Any,𝔽}) where {𝔽}
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     return div(N * (N + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? N : 0)
 end
 
@@ -230,11 +227,11 @@ project(::SymmetricMatrices, ::Any, ::Any)
 project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
 function Base.show(io::IO, ::SymmetricMatrices{TypeParameter{Tuple{n}},F}) where {n,F}
-    return print(io, "SymmetricMatrices($(n), $(F); parameter=:type)")
+    return print(io, "SymmetricMatrices($(n), $(F))")
 end
 function Base.show(io::IO, M::SymmetricMatrices{Tuple{Int},F}) where {F}
-    n = get_n(M)
-    return print(io, "SymmetricMatrices($(n), $(F))")
+    n = get_parameter(M.size)[1]
+    return print(io, "SymmetricMatrices($(n), $(F); parameter=:field)")
 end
 
 @doc raw"""

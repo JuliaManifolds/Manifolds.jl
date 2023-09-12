@@ -11,7 +11,7 @@ The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all fun
 
 # Constructor
 
-    Oblique(n::Int, m::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+    Oblique(n::Int, m::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of matrices $\mathbb R^{n × m}$ such that the $m$ columns are unit
 vectors, i.e. from the [`Sphere`](@ref)`(n-1)`.
@@ -21,18 +21,18 @@ struct Oblique{T,𝔽,S} <: AbstractPowerManifold{𝔽,Sphere{S,𝔽},ArrayPower
     manifold::Sphere{S,𝔽}
 end
 
-function Oblique(n::Int, m::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:field)
+function Oblique(n::Int, m::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     sphere = Sphere(n - 1, field; parameter=parameter)
     size = wrap_type_parameter(parameter, (n, m))
     return Oblique{typeof(size),field,typeof(sphere).parameters[1]}(size, sphere)
 end
 
 function Base.:^(::Sphere{TypeParameter{Tuple{N}},𝔽}, m::Int) where {N,𝔽}
-    return Oblique(N + 1, m, 𝔽; parameter=:type)
+    return Oblique(N + 1, m, 𝔽)
 end
 function Base.:^(M::Sphere{Tuple{Int},𝔽}, m::Int) where {𝔽}
     N = M.size[1]
-    return Oblique(N + 1, m, 𝔽)
+    return Oblique(N + 1, m, 𝔽; parameter=:field)
 end
 
 @doc raw"""
@@ -44,7 +44,7 @@ of `m` unit columns from $\mathbb R^{n}$, i.e. each column is a point from
 """
 check_point(::Oblique, ::Any)
 function check_point(M::Oblique, p; kwargs...)
-    n, m = get_nm(M)
+    n, m = get_parameter(M.size)
     return check_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
 @doc raw"""
@@ -55,22 +55,19 @@ This means, that `p` is valid, that `X` is of correct dimension and columnswise
 a tangent vector to the columns of `p` on the [`Sphere`](@ref).
 """
 function check_vector(M::Oblique, p, X; kwargs...)
-    n, m = get_nm(M)
+    n, m = get_parameter(M.size)
     return check_vector(PowerManifold(M.manifold, m), p, X; kwargs...)
 end
 
-get_iterator(M::Oblique) = Base.OneTo(get_nm(M)[2])
-
-get_nm(::Oblique{TypeParameter{Tuple{n,m}}}) where {n,m} = (n, m)
-get_nm(M::Oblique{Tuple{Int,Int}}) = get_parameter(M.size)
+get_iterator(M::Oblique) = Base.OneTo(get_parameter(M.size)[2])
 
 function manifold_dimension(M::Oblique{<:Any,𝔽}) where {𝔽}
-    n, m = get_nm(M)
+    n, m = get_parameter(M.size)
     return (n * real_dimension(𝔽) - 1) * m
 end
-power_dimensions(M::Oblique) = get_nm(M)[2]
+power_dimensions(M::Oblique) = get_parameter(M.size)[2]
 
-representation_size(M::Oblique) = get_nm(M)
+representation_size(M::Oblique) = get_parameter(M.size)
 
 @doc raw"""
     parallel_transport_to(M::Oblique, p, X, q)
@@ -82,9 +79,9 @@ doing a column wise parallel transport on the [`Sphere`](@ref)
 parallel_transport_to(::Oblique, p, X, q)
 
 function Base.show(io::IO, ::Oblique{TypeParameter{Tuple{n,m}},𝔽}) where {n,m,𝔽}
-    return print(io, "Oblique($(n), $(m); field = $(𝔽), parameter=:type)")
+    return print(io, "Oblique($(n), $(m); field=$(𝔽))")
 end
 function Base.show(io::IO, M::Oblique{Tuple{Int,Int},𝔽}) where {𝔽}
-    n, m = get_nm(M)
-    return print(io, "Oblique($(n), $(m); field = $(𝔽))")
+    n, m = get_parameter(M.size)
+    return print(io, "Oblique($(n), $(m); field=$(𝔽), parameter=:field)")
 end

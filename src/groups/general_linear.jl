@@ -28,7 +28,7 @@ function active_traits(f, ::GeneralLinear, args...)
     )
 end
 
-function GeneralLinear(n::Int, 𝔽::AbstractNumbers=ℝ; parameter::Symbol=:field)
+function GeneralLinear(n::Int, 𝔽::AbstractNumbers=ℝ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return GeneralLinear{typeof(size),𝔽}(size)
 end
@@ -128,15 +128,12 @@ function get_coordinates!(
 end
 
 function get_embedding(::GeneralLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return Euclidean(n, n; field=𝔽, parameter=:type)
-end
-function get_embedding(M::GeneralLinear{Tuple{Int},𝔽}) where {𝔽}
-    n = get_n(M)
     return Euclidean(n, n; field=𝔽)
 end
-
-get_n(::GeneralLinear{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::GeneralLinear{Tuple{Int}}) = get_parameter(M.size)[1]
+function get_embedding(M::GeneralLinear{Tuple{Int},𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return Euclidean(n, n; field=𝔽, parameter=:field)
+end
 
 function get_vector(
     M::GeneralLinear{<:Any,ℝ},
@@ -144,7 +141,7 @@ function get_vector(
     Xⁱ,
     ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
 )
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return reshape(Xⁱ, n, n)
 end
 
@@ -206,7 +203,7 @@ function log(M::GeneralLinear, p, q)
 end
 
 function log!(G::GeneralLinear{<:Any,𝔽}, X, p, q) where {𝔽}
-    n = get_n(G)
+    n = get_parameter(G.size)[1]
     pinvq = inverse_translate(G, p, q, LeftForwardAction())
     𝔽 === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
     if isnormal(pinvq; atol=sqrt(eps(real(eltype(pinvq)))))
@@ -271,11 +268,11 @@ function Random.rand!(rng::AbstractRNG, G::GeneralLinear, pX; kwargs...)
 end
 
 function Base.show(io::IO, ::GeneralLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return print(io, "GeneralLinear($n, $𝔽; parameter=:type)")
+    return print(io, "GeneralLinear($n, $𝔽)")
 end
 function Base.show(io::IO, M::GeneralLinear{Tuple{Int},𝔽}) where {𝔽}
-    n = get_n(M)
-    return print(io, "GeneralLinear($n, $𝔽)")
+    n = get_parameter(M.size)[1]
+    return print(io, "GeneralLinear($n, $𝔽; parameter=:field)")
 end
 
 translate_diff(::GeneralLinear, p, q, X, ::LeftForwardAction) = X

@@ -7,7 +7,7 @@ The manifold of (real) orthogonal matrices ``\mathrm{O}(n)``.
 """
 const OrthogonalMatrices{n} = GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}
 
-function OrthogonalMatrices(n::Int; parameter::Symbol=:field)
+function OrthogonalMatrices(n::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return OrthogonalMatrices{typeof(size)}(size)
 end
@@ -37,9 +37,9 @@ function Random.rand!(
 end
 
 function Base.show(io::IO, ::OrthogonalMatrices{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "OrthogonalMatrices($(n); parameter=:type)")
+    return print(io, "OrthogonalMatrices($(n))")
 end
 function Base.show(io::IO, M::OrthogonalMatrices{Tuple{Int}})
-    n = get_n(M)
-    return print(io, "OrthogonalMatrices($n)")
+    n = get_parameter(M.size)[1]
+    return print(io, "OrthogonalMatrices($n; parameter=:field)")
 end

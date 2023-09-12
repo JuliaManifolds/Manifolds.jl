@@ -303,4 +303,8 @@ include("../utils.jl")
         ]
         @test volume_density(M, p, X) ≈ 5.141867280770719
     end
+    @testset "field parameter" begin
+        M = SymmetricPositiveDefinite(3; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+    end
 end

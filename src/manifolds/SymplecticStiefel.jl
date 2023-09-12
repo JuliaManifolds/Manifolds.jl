@@ -1,5 +1,5 @@
 @doc raw"""
-    SymplecticStiefel{n, k, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+    SymplecticStiefel{T,𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
 The symplectic Stiefel manifold consists of all
 $2n × 2k, \; n \geq k$ matrices satisfying the requirement
@@ -30,8 +30,7 @@ where ``Ω \in \mathfrak{sp}(2n,F)`` is Hamiltonian and ``p^s`` means
 the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
 
 # Constructor
-    SymplecticStiefel(2n::Int, 2k::Int, field::AbstractNumbers=ℝ)
-        -> SymplecticStiefel{div(2n, 2), div(2k, 2), field}()
+    SymplecticStiefel(2n::Int, 2k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the (real-valued) symplectic Stiefel manifold of ``2n \times 2k``
 matrices which span a ``2k`` dimensional symplectic subspace of ``ℝ^{2n \times 2n}``.
@@ -39,10 +38,18 @@ The constructor for the [`SymplecticStiefel`](@ref) manifold accepts the even co
 dimension ``2n`` and an even number of columns ``2k`` for
 the real symplectic Stiefel manifold with elements ``p \in ℝ^{2n × 2k}``.
 """
-struct SymplecticStiefel{n,k,𝔽} <: AbstractDecoratorManifold{𝔽} end
+struct SymplecticStiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
 
-function SymplecticStiefel(two_n::Int, two_k::Int, field::AbstractNumbers=ℝ)
-    return SymplecticStiefel{div(two_n, 2),div(two_k, 2),field}()
+function SymplecticStiefel(
+    two_n::Int,
+    two_k::Int,
+    field::AbstractNumbers=ℝ;
+    parameter::Symbol=:type,
+)
+    size = wrap_type_parameter(parameter, (div(two_n, 2), div(two_k, 2)))
+    return SymplecticStiefel{typeof(size),field}(size)
 end
 
 function active_traits(f, ::SymplecticStiefel, args...)
@@ -57,7 +64,7 @@ ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction(
 
 @doc raw"""
     canonical_project(::SymplecticStiefel, p_Sp)
-    canonical_project!(::SymplecticStiefel{n,k}, p, p_Sp)
+    canonical_project!(::SymplecticStiefel, p, p_Sp)
 
 Define the canonical projection from ``\operatorname{Sp}(2n, 2n)`` onto
 ``\operatorname{SpSt}(2n, 2k)``, by projecting onto the first ``k`` columns
@@ -65,12 +72,14 @@ and the ``n + 1``'th onto the ``n + k``'th columns [BendokatZimmermann:2021](@ci
 
 It is assumed that the point ``p`` is on ``\operatorname{Sp}(2n, 2n)``.
 """
-function canonical_project(M::SymplecticStiefel{n,k}, p_Sp) where {n,k}
+function canonical_project(M::SymplecticStiefel, p_Sp)
+    n, k = get_parameter(M.size)
     p_SpSt = similar(p_Sp, (2n, 2k))
     return canonical_project!(M, p_SpSt, p_Sp)
 end
 
-function canonical_project!(::SymplecticStiefel{n,k}, p, p_Sp) where {n,k}
+function canonical_project!(M::SymplecticStiefel, p, p_Sp)
+    n, k = get_parameter(M.size)
     p[:, (1:k)] .= p_Sp[:, (1:k)]
     p[:, ((k + 1):(2k))] .= p_Sp[:, ((n + 1):(n + k))]
     return p
@@ -94,7 +103,7 @@ Q_{2n} =
 ````
 The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
-function check_point(M::SymplecticStiefel{n,k}, p; kwargs...) where {n,k}
+function check_point(M::SymplecticStiefel, p; kwargs...)
     # Perform check that the matrix lives on the real symplectic manifold:
     expected_zero = norm(inv(M, p) * p - I)
     if !isapprox(expected_zero, 0; kwargs...)
@@ -133,7 +142,8 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 check_vector(::SymplecticStiefel, ::Any...)
 
-function check_vector(M::SymplecticStiefel{n,k,field}, p, X; kwargs...) where {n,k,field}
+function check_vector(M::SymplecticStiefel{<:Any,field}, p, X; kwargs...) where {field}
+    n, k = get_parameter(M.size)
     # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
     H = inv(M, p) * X  # ∈ ℝ^{2k × 2k}, should be Hamiltonian.
     H_star = inv(Symplectic(2k, field), H)
@@ -229,7 +239,8 @@ which only requires computing the matrix exponentials of
 """
 exp(::SymplecticStiefel, p, X)
 
-function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
+function exp!(M::SymplecticStiefel, q, p, X)
+    n, k = get_parameter(M.size)
     Q = SymplecticMatrix(p, X)
     pT_p = lu(p' * p) # ∈ ℝ^{2k × 2k}
 
@@ -276,17 +287,29 @@ function exp!(M::SymplecticStiefel{n,k}, q, p, X) where {n,k}
     return q
 end
 
-get_embedding(::SymplecticStiefel{n,k,ℝ}) where {n,k} = Euclidean(2n, 2k; field=ℝ)
+function get_embedding(::SymplecticStiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return Euclidean(2 * n, 2 * k; field=𝔽)
+end
+function get_embedding(M::SymplecticStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return Euclidean(2 * n, 2 * k; field=𝔽, parameter=:field)
+end
 
 @doc raw"""
     get_total_space(::SymplecticStiefel)
 
 Return the total space of the [`SymplecticStiefel`](@ref) manifold, which is the corresponding [`Symplectic`](@ref) manifold.
 """
-get_total_space(::SymplecticStiefel{n,k,𝔽}) where {n,k,𝔽} = Symplectic{n,𝔽}()
+function get_total_space(::SymplecticStiefel{TypeParameter{Tuple{n,k}},ℝ}) where {n,k}
+    return Symplectic(2 * n)
+end
+function get_total_space(M::SymplecticStiefel{Tuple{Int,Int},ℝ})
+    n, k = get_parameter(M.size)
+    return Symplectic(2 * n; parameter=:field)
+end
 
 @doc raw"""
-    inner(M::SymplecticStiefel{n, k}, p, X. Y)
+    inner(M::SymplecticStiefel, p, X. Y)
 
 Compute the Riemannian inner product ``g^{\operatorname{SpSt}}`` at
 ``p \in \operatorname{SpSt}`` between tangent vectors ``X, X \in T_p\operatorname{SpSt}``.
@@ -297,7 +320,7 @@ g^{\operatorname{SpSt}}_p(X, Y)
         \frac{1}{2}Q_{2n}^{\mathrm{T}}p(p^{\mathrm{T}}p)^{-1}p^{\mathrm{T}}Q_{2n}\right)Y(p^{\mathrm{T}}p)^{-1}\right).
 ````
 """
-function inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
+function inner(::SymplecticStiefel, p, X, Y)
     Q = SymplecticMatrix(p, X, Y)
     # Procompute lu(p'p) since we solve a^{-1}* 3 times
     a = lu(p' * p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
@@ -311,8 +334,8 @@ function inner(::SymplecticStiefel{n,k}, p, X, Y) where {n,k}
 end
 
 @doc raw"""
-    inv(::SymplecticStiefel{n, k}, A)
-    inv!(::SymplecticStiefel{n, k}, q, p)
+    inv(::SymplecticStiefel, A)
+    inv!(::SymplecticStiefel, q, p)
 
 Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2k}``. Given a matrix
 ````math
@@ -346,12 +369,13 @@ A^{+} =
 \end{bmatrix}.
 ````
 """
-function Base.inv(M::SymplecticStiefel{n,k}, p) where {n,k}
+function Base.inv(M::SymplecticStiefel, p)
     q = similar(p')
     return inv!(M, q, p)
 end
 
-function inv!(::SymplecticStiefel{n,k}, q, p) where {n,k}
+function inv!(M::SymplecticStiefel, q, p)
+    n, k = get_parameter(M.size)
     checkbounds(q, 1:(2k), 1:(2n))
     checkbounds(p, 1:(2n), 1:(2k))
     @inbounds for i in 1:k, j in 1:n
@@ -419,7 +443,7 @@ Return false. [`SymplecticStiefel`](@ref) is not a flat manifold.
 is_flat(M::SymplecticStiefel) = false
 
 @doc raw"""
-    manifold_dimension(::SymplecticStiefel{n, k})
+    manifold_dimension(::SymplecticStiefel)
 
 Returns the dimension of the symplectic Stiefel manifold embedded in ``ℝ^{2n \times 2k}``,
 i.e. [BendokatZimmermann:2021](@cite)
@@ -427,7 +451,10 @@ i.e. [BendokatZimmermann:2021](@cite)
     \operatorname{dim}(\operatorname{SpSt}(2n, 2k)) = (4n - 2k + 1)k.
 ````
 """
-manifold_dimension(::SymplecticStiefel{n,k}) where {n,k} = (4n - 2k + 1) * k
+function manifold_dimension(M::SymplecticStiefel)
+    n, k = get_parameter(M.size)
+    return (4n - 2k + 1) * k
+end
 
 @doc raw"""
     project(::SymplecticStiefel, p, A)
@@ -491,10 +518,11 @@ and generates a random Hamiltonian matrix ``Ω_X \in \mathfrak{sp}(2n,F)`` with
 Frobenius norm of `hamiltonian_norm` before returning ``X = pΩ_X``.
 """
 function Random.rand(
-    M::SymplecticStiefel{n};
+    M::SymplecticStiefel;
     vector_at=nothing,
     hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),
-) where {n}
+)
+    n, k = get_parameter(M.size)
     if vector_at === nothing
         return canonical_project(M, rand(Symplectic(2n); hamiltonian_norm=hamiltonian_norm))
     else
@@ -502,11 +530,8 @@ function Random.rand(
     end
 end
 
-function random_vector(
-    ::SymplecticStiefel{n,k},
-    p::AbstractMatrix;
-    hamiltonian_norm=1.0,
-) where {n,k}
+function random_vector(M::SymplecticStiefel, p::AbstractMatrix; hamiltonian_norm=1.0)
+    n, k = get_parameter(M.size)
     Ω = rand_hamiltonian(Symplectic(2k); frobenius_norm=hamiltonian_norm)
     return p * Ω
 end
@@ -597,8 +622,12 @@ function riemannian_gradient!(
     return X
 end
 
-function Base.show(io::IO, ::SymplecticStiefel{n,k,𝔽}) where {n,k,𝔽}
-    return print(io, "SymplecticStiefel{$(2n), $(2k), $(𝔽)}()")
+function Base.show(io::IO, ::SymplecticStiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return print(io, "SymplecticStiefel($(2n), $(2k), $(𝔽))")
+end
+function Base.show(io::IO, M::SymplecticStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return print(io, "SymplecticStiefel($(2n), $(2k), $(𝔽); parameter=:field)")
 end
 
 @doc raw"""
@@ -616,12 +645,14 @@ This function performs this common operation without allocating more than
 a ``2k \times 2k`` matrix to store the result in, or in the case of the in-place
 function, without allocating memory at all.
 """
-function symplectic_inverse_times(M::SymplecticStiefel{n,k}, p, q) where {n,k}
+function symplectic_inverse_times(M::SymplecticStiefel, p, q)
+    n, k = get_parameter(M.size)
     A = similar(p, (2k, 2k))
     return symplectic_inverse_times!(M, A, p, q)
 end
 
-function symplectic_inverse_times!(::SymplecticStiefel{n,k}, A, p, q) where {n,k}
+function symplectic_inverse_times!(M::SymplecticStiefel, A, p, q)
+    n, k = get_parameter(M.size)
     # we write p = [p1 p2; p3 p4] (and q, too), then
     p1 = @view(p[1:n, 1:k])
     p2 = @view(p[1:n, (k + 1):(2k)])

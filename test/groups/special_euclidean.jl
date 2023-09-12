@@ -16,9 +16,9 @@ Random.seed!(10)
             end
 
             if se_parameter === :field
-                @test repr(G) == "SpecialEuclidean($n)"
+                @test repr(G) == "SpecialEuclidean($n; parameter=:field)"
             else
-                @test repr(G) == "SpecialEuclidean($n; parameter=:type)"
+                @test repr(G) == "SpecialEuclidean($n)"
             end
             M = base_manifold(G)
             @test M ===

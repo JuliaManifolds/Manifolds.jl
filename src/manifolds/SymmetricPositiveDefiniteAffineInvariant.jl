@@ -162,7 +162,7 @@ function get_basis_diagonalizing(
     p,
     B::DiagonalizingOrthonormalBasis,
 )
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     eigv = eigen(Symmetric(p_sqrt_inv * B.frame_direction * p_sqrt_inv))
     V = eigv.vectors
@@ -210,7 +210,7 @@ We then form the ONB by
 get_basis(::SymmetricPositiveDefinite, p, B::DefaultOrthonormalBasis)
 
 function get_basis_orthonormal(M::SymmetricPositiveDefinite, p, Ns::RealNumbers)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     p_sqrt = spd_sqrt(p)
     Ξ = [similar(convert(AbstractMatrix, p)) for _ in 1:manifold_dimension(M)]
     k = 1
@@ -239,7 +239,7 @@ where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
 
 function get_coordinates_orthonormal!(M::SymmetricPositiveDefinite, c, p, X, ::RealNumbers)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(c) == (dim,)
     @assert size(X) == (N, N)
@@ -277,7 +277,7 @@ where $k$ is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 
 function get_vector_orthonormal!(M::SymmetricPositiveDefinite, X, p, c, ::RealNumbers)
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     @assert size(c) == (div(N * (N + 1), 2),)
     @assert size(X) == (N, N)
     p_sqrt = spd_sqrt(p)

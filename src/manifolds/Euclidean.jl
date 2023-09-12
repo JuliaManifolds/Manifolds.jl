@@ -21,7 +21,7 @@ The dimension of this space is ``k \dim_ℝ 𝔽``, where ``\dim_ℝ 𝔽`` is t
 [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the field ``𝔽``.
 
 `parameter`: whether a type parameter should be used to store `n`. By default size
-is stored in a field. Value can either be `:field` or `:type`.
+is stored in type. Value can either be `:field` or `:type`.
 
     Euclidean(; field=ℝ)
 
@@ -35,7 +35,7 @@ end
 function Euclidean(
     n::Vararg{Int,I};
     field::AbstractNumbers=ℝ,
-    parameter::Symbol=:field,
+    parameter::Symbol=:type,
 ) where {I}
     size = wrap_type_parameter(parameter, n)
     return Euclidean{typeof(size),field}(size)
@@ -700,11 +700,11 @@ end
 
 function Base.show(io::IO, M::Euclidean{N,𝔽}) where {N<:Tuple,𝔽}
     size = get_parameter(M.size)
-    return print(io, "Euclidean($(join(size, ", ")); field = $(𝔽))")
+    return print(io, "Euclidean($(join(size, ", ")); field = $(𝔽), parameter = :field)")
 end
 function Base.show(io::IO, M::Euclidean{N,𝔽}) where {N<:TypeParameter,𝔽}
     size = get_parameter(M.size)
-    return print(io, "Euclidean($(join(size, ", ")); field = $(𝔽), parameter = :type)")
+    return print(io, "Euclidean($(join(size, ", ")); field = $(𝔽))")
 end
 #
 # Vector Transport

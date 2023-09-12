@@ -38,7 +38,7 @@ struct ProbabilitySimplex{T,boundary} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function ProbabilitySimplex(n::Int; boundary::Symbol=:open, parameter::Symbol=:field)
+function ProbabilitySimplex(n::Int; boundary::Symbol=:open, parameter::Symbol=:type)
     if boundary !== :open && boundary !== :closed
         throw(
             ArgumentError(
@@ -184,7 +184,7 @@ function exp!(::ProbabilitySimplex, q, p, X)
 end
 
 function get_coordinates_orthonormal!(M::ProbabilitySimplex, Xc, p, X, R::RealNumbers)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     get_coordinates_orthonormal!(
         Sphere(n),
         Xc,
@@ -196,18 +196,15 @@ function get_coordinates_orthonormal!(M::ProbabilitySimplex, Xc, p, X, R::RealNu
 end
 
 function get_embedding(::ProbabilitySimplex{TypeParameter{Tuple{n}}}) where {n}
-    return Euclidean(n + 1; parameter=:type)
-end
-function get_embedding(M::ProbabilitySimplex{Tuple{Int}})
-    n = get_n(M)
     return Euclidean(n + 1)
 end
-
-get_n(::ProbabilitySimplex{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::ProbabilitySimplex{Tuple{Int}}) = get_parameter(M.size)[1]
+function get_embedding(M::ProbabilitySimplex{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return Euclidean(n + 1; parameter=:field)
+end
 
 function get_vector_orthonormal!(M::ProbabilitySimplex, Y, p, Xc, R::RealNumbers)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     ps = simplex_to_amplitude(M, p)
     X = get_vector_orthonormal(Sphere(n), ps, Xc, R)
     return amplitude_to_simplex_diff!(M, Y, ps, X)
@@ -315,7 +312,7 @@ Returns the manifold dimension of the probability simplex in $ℝ^{n+1}$, i.e.
     \dim_{Δ^n} = n.
 ````
 """
-manifold_dimension(M::ProbabilitySimplex) = get_n(M)
+manifold_dimension(M::ProbabilitySimplex) = get_parameter(M.size)[1]
 
 @doc raw"""
     manifold_volume(::ProbabilitySimplex)
@@ -325,7 +322,7 @@ Return the volume of the [`ProbabilitySimplex`](@ref), i.e. volume of the `n`-di
 orthant.
 """
 function manifold_volume(M::ProbabilitySimplex)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return manifold_volume(Sphere(n)) / 2^(n + 1)
 end
 
@@ -346,7 +343,7 @@ mean(::ProbabilitySimplex, ::Any...)
 default_estimation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
 
 function parallel_transport_to!(M::ProbabilitySimplex, Y, p, X, q)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     q_s = simplex_to_amplitude(M, q)
     Ys = parallel_transport_to(
         Sphere(n),
@@ -442,7 +439,7 @@ Return the representation size of points in the $n$-dimensional probability simp
 i.e. an array size of `(n+1,)`.
 """
 function representation_size(M::ProbabilitySimplex)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return (n + 1,)
 end
 
@@ -500,7 +497,7 @@ It is computed using isometry with positive orthant of a sphere.
 riemann_tensor(::ProbabilitySimplex, p, X, Y, Z)
 
 function riemann_tensor!(M::ProbabilitySimplex, Xresult, p, X, Y, Z)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     pe = simplex_to_amplitude(M, p)
     Xrs = riemann_tensor(
         Sphere(n),
@@ -517,11 +514,11 @@ function Base.show(
     io::IO,
     ::ProbabilitySimplex{TypeParameter{Tuple{n}},boundary},
 ) where {n,boundary}
-    return print(io, "ProbabilitySimplex($(n); boundary=:$boundary, parameter=:type)")
+    return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
 end
 function Base.show(io::IO, M::ProbabilitySimplex{Tuple{Int},boundary}) where {boundary}
-    n = get_n(M)
-    return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
+    n = get_parameter(M.size)[1]
+    return print(io, "ProbabilitySimplex($(n); boundary=:$boundary, parameter=:field)")
 end
 
 @doc raw"""
@@ -531,7 +528,7 @@ Compute the volume density at point `p` on [`ProbabilitySimplex`](@ref) `M` for 
 vector `X`. It is computed using isometry with positive orthant of a sphere.
 """
 function volume_density(M::ProbabilitySimplex, p, X)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     pe = simplex_to_amplitude(M, p)
     return volume_density(Sphere(n), pe, simplex_to_amplitude_diff(M, p, X))
 end

@@ -20,7 +20,7 @@ struct HeisenbergGroup{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function HeisenbergGroup(n::Int; parameter::Symbol=:field)
+function HeisenbergGroup(n::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return HeisenbergGroup{typeof(size)}(size)
 end
@@ -34,16 +34,16 @@ function active_traits(f, ::HeisenbergGroup, args...)
 end
 
 function _heisenberg_a_view(M::HeisenbergGroup, p)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return view(p, 1, 2:(n + 1))
 end
 function _heisenberg_b_view(M::HeisenbergGroup, p)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return view(p, 2:(n + 1), n + 2)
 end
 
 function check_point(G::HeisenbergGroup, p; kwargs...)
-    n = get_n(G)
+    n = get_parameter(G.size)[1]
     if !isone(p[1, 1])
         return DomainError(
             p[1, 1],
@@ -79,7 +79,7 @@ function check_point(G::HeisenbergGroup, p; kwargs...)
 end
 
 function check_vector(G::HeisenbergGroup, p, X; kwargs...)
-    n = get_n(G)
+    n = get_parameter(G.size)[1]
     if !iszero(X[1, 1])
         return DomainError(
             X[1, 1],
@@ -119,12 +119,12 @@ the coordinates are concatenated vectors ``\mathbf{a}``, ``\mathbf{b}``, and num
 get_coordinates(::HeisenbergGroup, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
 
 function get_coordinates_orthonormal(M::HeisenbergGroup, p, X, ::RealNumbers)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return vcat(_heisenberg_a_view(M, X), _heisenberg_b_view(M, X), X[1, n + 2])
 end
 
 function get_coordinates_orthonormal!(M::HeisenbergGroup, Xⁱ, p, X, ::RealNumbers)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     Xⁱ[1:n] .= _heisenberg_a_view(M, X)
     Xⁱ[(n + 1):(2 * n)] .= _heisenberg_b_view(M, X)
     Xⁱ[2 * n + 1] = X[1, n + 2]
@@ -132,15 +132,12 @@ function get_coordinates_orthonormal!(M::HeisenbergGroup, Xⁱ, p, X, ::RealNumb
 end
 
 function get_embedding(::HeisenbergGroup{TypeParameter{Tuple{n}}}) where {n}
-    return Euclidean(n + 2, n + 2; parameter=:type)
-end
-function get_embedding(M::HeisenbergGroup{Tuple{Int}})
-    n = get_n(M)
     return Euclidean(n + 2, n + 2)
 end
-
-get_n(::HeisenbergGroup{TypeParameter{Tuple{n}}}) where {n} = n
-get_n(M::HeisenbergGroup{Tuple{Int}}) = get_parameter(M.size)[1]
+function get_embedding(M::HeisenbergGroup{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return Euclidean(n + 2, n + 2; parameter=:field)
+end
 
 @doc raw"""
     get_vector(M::HeisenbergGroup, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
@@ -156,7 +153,7 @@ Given a vector of coordinates ``\begin{bmatrix}\mathbb{a} & \mathbb{b} & c\end{b
 get_vector(M::HeisenbergGroup, p, c, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
 
 function get_vector_orthonormal(M::HeisenbergGroup, p, Xⁱ, ::RealNumbers)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return [
         0 Xⁱ[1:n] Xⁱ[2 * n + 1]
         zeros(n, n + 1) Xⁱ[(n + 1):(2 * n)]'
@@ -165,7 +162,7 @@ function get_vector_orthonormal(M::HeisenbergGroup, p, Xⁱ, ::RealNumbers)
 end
 
 function get_vector_orthonormal!(M::HeisenbergGroup, X, p, Xⁱ, ::RealNumbers)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     fill!(X, 0)
     X[1, 2:(n + 1)] .= Xⁱ[1:n]
     X[2:(n + 1), n + 2] .= Xⁱ[(n + 1):(2 * n)]
@@ -191,7 +188,7 @@ and ``\mathbf{a}⋅\mathbf{b}`` is dot product of vectors.
 exp_lie(M::HeisenbergGroup, X)
 
 function exp_lie!(M::HeisenbergGroup, q, X)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     copyto!(q, I)
     a_view = _heisenberg_a_view(M, X)
     b_view = _heisenberg_b_view(M, X)
@@ -222,7 +219,7 @@ and ``\mathbf{a}⋅\mathbf{b}`` is dot product of vectors.
 exp(M::HeisenbergGroup, p, X)
 
 function exp!(M::HeisenbergGroup, q, p, X)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     copyto!(q, I)
     a_p_view = _heisenberg_a_view(M, p)
     b_p_view = _heisenberg_b_view(M, p)
@@ -243,7 +240,7 @@ Return the injectivity radius on the [`HeisenbergGroup`](@ref) `M`, which is ``�
 injectivity_radius(::HeisenbergGroup) = Inf
 
 function inner(M::HeisenbergGroup, p, X, Y)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     X_a_view = _heisenberg_a_view(M, X)
     X_b_view = _heisenberg_b_view(M, X)
     Y_a_view = _heisenberg_a_view(M, Y)
@@ -274,7 +271,7 @@ and ``\mathbf{a}⋅\mathbf{b}`` is dot product of vectors.
 log(::HeisenbergGroup, p, q)
 
 function log!(M::HeisenbergGroup, X, p, q)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     fill!(X, 0)
     a_p_view = _heisenberg_a_view(M, p)
     b_p_view = _heisenberg_b_view(M, p)
@@ -306,7 +303,7 @@ and ``\mathbf{a}⋅\mathbf{b}`` is dot product of vectors.
 log_lie(M::HeisenbergGroup, p)
 
 function log_lie!(M::HeisenbergGroup, X, p)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     fill!(X, 0)
     view_a_X = _heisenberg_a_view(M, X)
     view_b_X = _heisenberg_b_view(M, X)
@@ -321,7 +318,7 @@ function log_lie!(::HeisenbergGroup, X, ::Identity{MultiplicationOperation})
     return X
 end
 
-manifold_dimension(M::HeisenbergGroup) = 2 * get_n(M) + 1
+manifold_dimension(M::HeisenbergGroup) = 2 * get_parameter(M.size)[1] + 1
 
 parallel_transport_to(::HeisenbergGroup, p, X, q) = X
 
@@ -335,7 +332,7 @@ Sets the diagonal elements to 1 and all non-diagonal elements except the first r
 last column to 0.
 """
 function project(M::HeisenbergGroup, p)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return [
         1 p[1, 2:(n + 2)]'
         zeros(n, 1) Matrix(I, n, n) _heisenberg_b_view(M, p)
@@ -351,7 +348,7 @@ Sets the diagonal elements to 0 and all non-diagonal elements except the first r
 last column to 0.
 """
 function project(M::HeisenbergGroup, p, X)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return [
         0 X[1, 2:(n + 2)]'
         zeros(n, n + 1) _heisenberg_b_view(M, X)
@@ -360,14 +357,14 @@ function project(M::HeisenbergGroup, p, X)
 end
 
 function project!(M::HeisenbergGroup, q, p)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     copyto!(q, I)
     q[1, 2:(n + 2)] .= p[1, 2:(n + 2)]
     q[2:(n + 1), n + 2] .= _heisenberg_b_view(M, p)
     return q
 end
 function project!(M::HeisenbergGroup, Y, p, X)
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     fill!(Y, 0)
     Y[1, 2:(n + 2)] .= X[1, 2:(n + 2)]
     Y[2:(n + 1), n + 2] .= _heisenberg_b_view(M, X)
@@ -394,7 +391,7 @@ function Random.rand!(
     σ::Real=one(eltype(pX)),
     vector_at=nothing,
 )
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     if vector_at === nothing
         copyto!(pX, I)
         va = view(pX, 1, 2:(n + 2))
@@ -413,11 +410,11 @@ function Random.rand!(
 end
 
 function Base.show(io::IO, ::HeisenbergGroup{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "HeisenbergGroup($(n); parameter=:type)")
+    return print(io, "HeisenbergGroup($(n))")
 end
 function Base.show(io::IO, M::HeisenbergGroup{Tuple{Int}})
-    n = get_n(M)
-    return print(io, "HeisenbergGroup($(n))")
+    n = get_parameter(M.size)[1]
+    return print(io, "HeisenbergGroup($(n); parameter=:field)")
 end
 
 translate_diff(::HeisenbergGroup, p, q, X, ::LeftForwardAction) = X

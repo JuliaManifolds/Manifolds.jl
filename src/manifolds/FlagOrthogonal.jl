@@ -60,9 +60,11 @@ end
 Get embedding of [`Flag`](@ref) manifold `M`, i.e. the manifold [`OrthogonalMatrices`](@ref).
 """
 function get_embedding(::Flag{TypeParameter{Tuple{N}}}, p::OrthogonalPoint) where {N}
-    return OrthogonalMatrices(N; parameter=:type)
+    return OrthogonalMatrices(N)
 end
-get_embedding(M::Flag{Tuple{Int}}, p::OrthogonalPoint) = OrthogonalMatrices(M.size[1])
+function get_embedding(M::Flag{Tuple{Int}}, p::OrthogonalPoint)
+    return OrthogonalMatrices(M.size[1]; parameter=:field)
+end
 
 function _extract_flag(M::Flag, p::AbstractMatrix, i::Int)
     range = (M.subspace_dimensions[i - 1] + 1):M.subspace_dimensions[i]
@@ -85,7 +87,7 @@ function project!(
     ::OrthogonalPoint,
     X::OrthogonalTVector,
 ) where {dp1}
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     project!(SkewHermitianMatrices(N), Y.value, X.value)
     for i in 1:dp1
         Bi = _extract_flag(M, Y.value, i)
@@ -112,7 +114,7 @@ X = \begin{bmatrix}
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
 """
 function project(M::Flag{<:Any,dp1}, ::OrthogonalPoint, X::OrthogonalTVector) where {dp1}
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     Y = project(SkewHermitianMatrices(N), X.value)
     for i in 1:dp1
         Bi = _extract_flag(M, Y, i)
@@ -128,7 +130,7 @@ function Random.rand!(
     vector_at=nothing,
 ) where {dp1}
     if vector_at === nothing
-        N = get_n(M)
+        N = get_parameter(M.size)[1]
         RN = Rotations(N)
         rand!(rng, RN, pX.value)
     else

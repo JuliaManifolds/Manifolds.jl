@@ -56,7 +56,7 @@ Tangent space is represented in the block-skew-symmetric form.
 
 # Constructor
 
-    Flag(N, n1, n2, ..., nd; parameter::Symbol=:field)
+    Flag(N, n1, n2, ..., nd; parameter::Symbol=:type)
 
 Generate the manifold ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)`` of subspaces
 ```math
@@ -66,14 +66,14 @@ where ``𝕍_i`` for ``i ∈ 1, 2, …, d`` are subspaces of ``ℝ^N`` of dimens
 ``\operatorname{dim} 𝕍_i = n_i``.
 
 `parameter`: whether a type parameter should be used to store `n`. By default size
-is stored in a field. Value can either be `:field` or `:type`.
+is stored in type. Value can either be `:field` or `:type`.
 """
 struct Flag{T,dp1} <: AbstractDecoratorManifold{ℝ}
     subspace_dimensions::ZeroTuple{NTuple{dp1,Int}}
     size::T
 end
 
-function Flag(N::Int, ns::Vararg{Int,I}; parameter::Symbol=:field) where {I}
+function Flag(N::Int, ns::Vararg{Int,I}; parameter::Symbol=:type) where {I}
     if ns[1] <= 0
         error(
             "First dimension in the sequence ns must be strictly positive, but is $(ns[1]).",
@@ -103,14 +103,11 @@ end
 Get the embedding of the [`Flag`](@ref) manifold `M`, i.e. the [`Stiefel`](@ref) manifold.
 """
 function get_embedding(M::Flag{Tuple{Int},dp1}) where {dp1}
-    return Stiefel(M.size[1], M.subspace_dimensions[dp1 - 1])
+    return Stiefel(M.size[1], M.subspace_dimensions[dp1 - 1]; parameter=:field)
 end
 function get_embedding(M::Flag{TypeParameter{Tuple{N}},dp1}) where {N,dp1}
-    return Stiefel(N, M.subspace_dimensions[dp1 - 1]; parameter=:type)
+    return Stiefel(N, M.subspace_dimensions[dp1 - 1])
 end
-
-get_n(::Flag{TypeParameter{Tuple{N}}}) where {N} = N
-get_n(M::Flag{Tuple{Int}}) = get_parameter(M.size)[1]
 
 @doc raw"""
     injectivity_radius(M::Flag)
@@ -138,7 +135,7 @@ Return dimension of flag manifold ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)``
 The formula reads ``\sum_{i=1}^d (n_i-n_{i-1})(N-n_i)``.
 """
 function manifold_dimension(M::Flag{<:Any,dp1}) where {dp1}
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     dim = 0
     for i in 1:(dp1 - 1)
         dim +=
@@ -153,15 +150,15 @@ function Base.show(io::IO, M::Flag{TypeParameter{Tuple{N}}}) where {N}
     for d_i in M.subspace_dimensions.x[1:(end - 1)]
         print(io, ", $d_i")
     end
-    return print(io, "; parameter=:type)")
+    return print(io, ")")
 end
 function Base.show(io::IO, M::Flag{Tuple{Int}})
-    N = get_n(M)
+    N = get_parameter(M.size)[1]
     print(io, "Flag($(N)")
     for d_i in M.subspace_dimensions.x[1:(end - 1)]
         print(io, ", $d_i")
     end
-    return print(io, ")")
+    return print(io, "; parameter=:field)")
 end
 
 """

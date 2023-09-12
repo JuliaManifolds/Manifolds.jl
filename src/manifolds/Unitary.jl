@@ -29,7 +29,7 @@ see also [`OrthogonalMatrices`](@ref) for the real valued case.
 """
 const UnitaryMatrices{T,𝔽} = GeneralUnitaryMatrices{T,𝔽,AbsoluteDeterminantOneMatrices}
 
-function UnitaryMatrices(n::Int, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:field)
+function UnitaryMatrices(n::Int, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
     return UnitaryMatrices{typeof(size),𝔽}(size)
 end
@@ -89,7 +89,7 @@ Return the dimension of the manifold unitary matrices.
 ```
 """
 function manifold_dimension(M::UnitaryMatrices{<:Any,ℂ})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return n^2
 end
 @doc raw"""
@@ -101,7 +101,7 @@ Return the dimension of the manifold unitary matrices.
 ```
 """
 function manifold_dimension(M::UnitaryMatrices{<:Any,ℍ})
-    n = get_n(M)
+    n = get_parameter(M.size)[1]
     return n * (2n + 1)
 end
 
@@ -131,18 +131,18 @@ function Random.rand(
 end
 
 function Base.show(io::IO, ::UnitaryMatrices{TypeParameter{Tuple{n}},ℂ}) where {n}
-    return print(io, "UnitaryMatrices($(n); parameter=:type)")
+    return print(io, "UnitaryMatrices($(n))")
 end
 function Base.show(io::IO, M::UnitaryMatrices{Tuple{Int},ℂ})
-    n = get_n(M)
-    return print(io, "UnitaryMatrices($n)")
+    n = get_parameter(M.size)[1]
+    return print(io, "UnitaryMatrices($n; parameter=:field)")
 end
 function Base.show(io::IO, ::UnitaryMatrices{TypeParameter{Tuple{n}},ℍ}) where {n}
-    return print(io, "UnitaryMatrices($(n), ℍ; parameter=:type)")
+    return print(io, "UnitaryMatrices($(n), ℍ)")
 end
 function Base.show(io::IO, M::UnitaryMatrices{Tuple{Int},ℍ})
-    n = get_n(M)
-    return print(io, "UnitaryMatrices($n, ℍ)")
+    n = get_parameter(M.size)[1]
+    return print(io, "UnitaryMatrices($n, ℍ; parameter=:field)")
 end
 
 @doc raw"""
