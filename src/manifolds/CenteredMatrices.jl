@@ -36,7 +36,7 @@ zero.
 The tolerance for the column sums of `p` can be set using `kwargs...`.
 """
 function check_point(M::CenteredMatrices, p; kwargs...)
-    m, n = get_mn(M)
+    m, n = get_parameter(M.size)
     if !isapprox(sum(p, dims=1), zeros(1, n); kwargs...)
         return DomainError(
             p,
@@ -57,7 +57,7 @@ sum to zero and its values are from the correct [`AbstractNumbers`](https://juli
 The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(M::CenteredMatrices, p, X; kwargs...)
-    m, n = get_mn(M)
+    m, n = get_parameter(M.size)
     if !isapprox(sum(X, dims=1), zeros(1, n); kwargs...)
         return DomainError(
             X,
@@ -74,12 +74,9 @@ function get_embedding(::CenteredMatrices{TypeParameter{Tuple{m,n}},𝔽}) where
     return Euclidean(m, n; field=𝔽)
 end
 function get_embedding(M::CenteredMatrices{Tuple{Int,Int},𝔽}) where {𝔽}
-    m, n = get_mn(M)
+    m, n = get_parameter(M.size)
     return Euclidean(m, n; field=𝔽, parameter=:field)
 end
-
-get_mn(::CenteredMatrices{TypeParameter{Tuple{m,n}}}) where {m,n} = (m, n)
-get_mn(M::CenteredMatrices{Tuple{Int,Int}}) = get_parameter(M.size)
 
 """
     is_flat(::CenteredMatrices)
@@ -100,7 +97,7 @@ Return the manifold dimension of the [`CenteredMatrices`](@ref) `m`-by-`n` matri
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(M::CenteredMatrices{<:Any,𝔽}) where {𝔽}
-    m, n = get_mn(M)
+    m, n = get_parameter(M.size)
     return (m * n - n) * real_dimension(𝔽)
 end
 
@@ -140,13 +137,13 @@ project(::CenteredMatrices, ::Any, ::Any)
 
 project!(::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X, dims=1))
 
-representation_size(M::CenteredMatrices) = get_mn(M)
+representation_size(M::CenteredMatrices) = get_parameter(M.size)
 
 function Base.show(io::IO, ::CenteredMatrices{TypeParameter{Tuple{m,n}},𝔽}) where {m,n,𝔽}
     return print(io, "CenteredMatrices($(m), $(n), $(𝔽))")
 end
 function Base.show(io::IO, M::CenteredMatrices{Tuple{Int,Int},𝔽}) where {𝔽}
-    m, n = get_mn(M)
+    m, n = get_parameter(M.size)
     return print(io, "CenteredMatrices($(m), $(n), $(𝔽); parameter=:field)")
 end
 
