@@ -79,6 +79,7 @@ PythonPlot = "274fc56d-3b97-40fa-a1cd-1b4a50311bf9"
 QuartzImageIO = "dca85d43-d64c-5e67-8c65-017450d5d020"
 Quaternions = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+TestEnv = "1e6cf692-eddd-4d53-88a5-2d735e33781b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 VisualRegressionTests = "34922c18-7c2a-561c-bac1-01e79b2c4c92"
 
