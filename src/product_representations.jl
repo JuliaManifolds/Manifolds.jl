@@ -1,9 +1,9 @@
 
 @doc raw"""
     submanifold_component(M::AbstractManifold, p, i::Integer)
-    submanifold_component(M::AbstractManifold, p, ::Val(i)) where {i}
+    submanifold_component(M::AbstractManifold, p, ::Val{i}) where {i}
     submanifold_component(p, i::Integer)
-    submanifold_component(p, ::Val(i)) where {i}
+    submanifold_component(p, ::Val{i}) where {i}
 
 Project the product array `p` on `M` to its `i`th component. A new array is returned.
 """
@@ -12,7 +12,6 @@ submanifold_component(::Any...)
     return submanifold_component(M, p, Val(i))
 end
 @inline submanifold_component(M::AbstractManifold, p, i::Val) = submanifold_component(p, i)
-@inline submanifold_component(p, ::Val{I}) where {I} = p.parts[I]
 @inline submanifold_component(p::ArrayPartition, ::Val{I}) where {I} = p.x[I]
 @inline submanifold_component(p, i::Integer) = submanifold_component(p, Val(i))
 
@@ -24,7 +23,6 @@ Get the projected components of `p` on the submanifolds of `M`. The components a
 """
 submanifold_components(::Any...)
 @inline submanifold_components(::AbstractManifold, p) = submanifold_components(p)
-@inline submanifold_components(p) = p.parts
 @inline submanifold_components(p::ArrayPartition) = p.x
 
 ## ArrayPartition
