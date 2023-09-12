@@ -34,6 +34,7 @@ end
 
 # (c) load necessary packages for the docs
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
+using DocumenterCitations
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 # required for loading the manifold tests functions
@@ -61,7 +62,9 @@ open(joinpath(generated_path, "contributing.md"), "w") do io
 end
 
 # (e) ...finally! make docs
+bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style=:alpha)
 makedocs(
+    bib;
     # for development, we disable prettyurls
     format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
     modules=[
@@ -91,6 +94,7 @@ makedocs(
             "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
             "work in charts" => "tutorials/working-in-charts.md",
             "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
+            "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [
@@ -148,6 +152,7 @@ makedocs(
             "Atlases and charts" => "features/atlases.md",
             "Differentiation" => "features/differentiation.md",
             "Distributions" => "features/distributions.md",
+            "Integration" => "features/integration.md",
             "Statistics" => "features/statistics.md",
             "Testing" => "features/testing.md",
             "Utilities" => "features/utilities.md",
@@ -157,6 +162,7 @@ makedocs(
             "Contributing" => "misc/contributing.md",
             "Internals" => "misc/internals.md",
             "Notation" => "misc/notation.md",
+            "References" => "misc/references.md",
         ],
     ],
 )

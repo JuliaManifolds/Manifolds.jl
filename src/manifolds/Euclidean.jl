@@ -454,6 +454,13 @@ function manifold_dimension(M::Euclidean{N,𝔽}) where {N,𝔽}
 end
 manifold_dimension(::Euclidean{Tuple{},𝔽}) where {𝔽} = real_dimension(𝔽)
 
+"""
+    manifold_volume(::Euclidean)
+
+Return volume of the [`Euclidean`](@ref) manifold, i.e. infinity.
+"""
+manifold_volume(::Euclidean) = Inf
+
 Statistics.mean(::Euclidean{Tuple{}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
 function Statistics.mean(
     ::Euclidean{Tuple{}},
@@ -708,6 +715,28 @@ Statistics.var(::Euclidean, x::AbstractVector; kwargs...) = sum(var(x; kwargs...
 function Statistics.var(::Euclidean, x::AbstractVector{<:Number}, m::Number; kwargs...)
     return sum(var(x; mean=m, kwargs...))
 end
+
+@doc raw"""
+    volume_density(M::Euclidean, p, X)
+
+Return volume density function of [`Euclidean`](@ref) manifold `M`, i.e. 1.
+"""
+function volume_density(::Euclidean, p, X)
+    return one(eltype(X))
+end
+
+@doc raw"""
+    Y = Weingarten(M::Euclidean, p, X, V)
+    Weingarten!(M::Euclidean, Y, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Euclidean`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+Since this a flat space by itself, the result is always the zero tangent vector.
+"""
+Weingarten(::Euclidean, p, X, V)
+
+Weingarten!(::Euclidean, Y, p, X, V) = fill!(Y, 0)
 
 """
     zero_vector(M::Euclidean, x)

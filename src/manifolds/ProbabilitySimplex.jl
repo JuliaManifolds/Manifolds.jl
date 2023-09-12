@@ -28,17 +28,11 @@ simplex in the $n$-sphere of radius 2.
 The corresponding diffeomorphism $\varphi: \mathbb Δ^n → \mathcal N$,
 where $\mathcal N \subset 2𝕊^n$ is given by $\varphi(p) = 2\sqrt{p}$.
 
-This implementation follows the notation in [^ÅströmPetraSchmitzerSchnörr2017].
+This implementation follows the notation in [AastroemPetraSchmitzerSchnoerr:2017](@cite).
 
 # Constructor
 
     ProbabilitySimplex(n::Int; boundary::Symbol=:open)
-
-[^ÅströmPetraSchmitzerSchnörr2017]:
-    > F. Åström, S. Petra, B. Schmitzer, C. Schnörr: “Image Labeling by Assignment”,
-    > Journal of Mathematical Imaging and Vision, 58(2), pp. 221–238, 2017.
-    > doi: [10.1007/s10851-016-0702-4](https://doi.org/10.1007/s10851-016-0702-4)
-    > arxiv: [1603.05285](https://arxiv.org/abs/1603.05285).
 """
 struct ProbabilitySimplex{n,boundary} <: AbstractDecoratorManifold{ℝ} end
 
@@ -74,7 +68,7 @@ the representer of a linear functional on the tangent space is adapted as ``Z = 
 The first part “compensates” for the divsion by ``p`` in the Riemannian metric on the [`ProbabilitySimplex`](@ref)
 and the second part performs appropriate projection to keep the vector tangent.
 
-For details see Proposition 2.3 in [^ÅströmPetraSchmitzerSchnörr2017].
+For details see Proposition 2.3 in [AastroemPetraSchmitzerSchnoerr:2017](@cite).
 """
 change_representer(::ProbabilitySimplex, ::EuclideanMetric, ::Any, ::Any)
 
@@ -244,13 +238,7 @@ Compute the inner product of two tangent vectors `X`, `Y` from the tangent space
 g_p(X,Y) = \sum_{i=1}^{n+1}\frac{X_iY_i}{p_i}
 ````
 When `M` includes boundary, we can just skip coordinates where ``p_i`` is equal to 0, see
-Proposition 2.1 in [^AyJostLeSchwachhöfer2017].
-
-[^AyJostLeSchwachhöfer2017]:
-    > N. Ay, J. Jost, H. V. Le, and L. Schwachhöfer, Information Geometry. in Ergebnisse der
-    > Mathematik und ihrer Grenzgebiete. 3. Folge / A Series of Modern Surveys in
-    > Mathematics. Springer International Publishing, 2017.
-    > doi: [10.1007/978-3-319-56478-4](https://doi.org/10.1007/978-3-319-56478-4)
+Proposition 2.1 in [AyJostLeSchwachhoefer:2017](@cite).
 """
 function inner(::ProbabilitySimplex{n,boundary}, p, X, Y) where {n,boundary}
     d = zero(Base.promote_eltype(p, X, Y))
@@ -328,6 +316,15 @@ Returns the manifold dimension of the probability simplex in $ℝ^{n+1}$, i.e.
 manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
 
 @doc raw"""
+    manifold_volume(::ProbabilitySimplex{n}) where {n}
+
+Return the volume of the [`ProbabilitySimplex`](@ref), i.e. volume of the `n`-dimensional
+[`Sphere`](@ref) divided by ``2^{n+1}``, corresponding to the volume of its positive
+orthant.
+"""
+manifold_volume(::ProbabilitySimplex{n}) where {n} = manifold_volume(Sphere(n)) / 2^(n + 1)
+
+@doc raw"""
     mean(
         M::ProbabilitySimplex,
         x::AbstractVector,
@@ -359,18 +356,12 @@ end
 
 
 When `vector_at` is `nothing`, return a random (uniform over the Fisher-Rao metric; that is, uniform with respect to the `n`-sphere whose positive orthant is mapped to the simplex).
-point `x` on the [`ProbabilitySimplex`](@ref) manifold `M` according to the isometric embedding into 
-the `n`-sphere by normalizing the vector length of a sample from a multivariate Gaussian. See [^Marsaglia1972].
+point `x` on the [`ProbabilitySimplex`](@ref) manifold `M` according to the isometric embedding into
+the `n`-sphere by normalizing the vector length of a sample from a multivariate Gaussian. See [Marsaglia:1972](@cite).
 
 When `vector_at` is not `nothing`, return a (Gaussian) random vector from the tangent space
-``T_{p}\mathrm{\Delta}^n``by shifting a multivariate Gaussian with standard deviation `σ` 
+``T_{p}\mathrm{\Delta}^n``by shifting a multivariate Gaussian with standard deviation `σ`
 to have a zero component sum.
-
-[^Marsaglia1972]:
-    > Marsaglia, G.:
-    > _Choosing a Point from the Surface of a Sphere_.
-    > Annals of Mathematical Statistics, 43 (2): 645–646, 1972.
-    > doi: [10.1214/aoms/1177692644](https://doi.org/10.1214/aoms/1177692644)
 """
 rand(::ProbabilitySimplex; σ::Real=1.0)
 
@@ -514,6 +505,17 @@ end
 
 function Base.show(io::IO, ::ProbabilitySimplex{n,boundary}) where {n,boundary}
     return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
+end
+
+@doc raw"""
+    volume_density(M::ProbabilitySimplex{N}, p, X) where {N}
+
+Compute the volume density at point `p` on [`ProbabilitySimplex`](@ref) `M` for tangent
+vector `X`. It is computed using isometry with positive orthant of a sphere.
+"""
+function volume_density(M::ProbabilitySimplex{N}, p, X) where {N}
+    pe = simplex_to_amplitude(M, p)
+    return volume_density(Sphere(N), pe, simplex_to_amplitude_diff(M, p, X))
 end
 
 @doc raw"""

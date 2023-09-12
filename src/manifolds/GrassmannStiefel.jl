@@ -295,16 +295,36 @@ function retract_qr!(::Grassmann{N,K}, q, p, X, t::Number) where {N,K}
 end
 
 @doc raw"""
+    riemannian_Hessian(M::Grassmann, p, G, H, X)
+
+The Riemannian Hessian can be computed by adopting Eq. (6.6) [Nguyen:2023](@cite),
+where we use for the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric) ``α_0=α_1=1`` in their formula.
+Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
+``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`. Then the formula reads
+
+```math
+    \operatorname{Hess}f(p)[X]
+    =
+    \operatorname{proj}_{T_p\mathcal M}\Bigl(
+        ∇^2f(p)[X] - X p^{\mathrm{H}}∇f(p)
+    \Bigr).
+```
+
+Compared to Eq. (5.6) also the metric conversion simplifies to the identity.
+"""
+riemannian_Hessian(M::Grassmann, p, G, H, X)
+
+function riemannian_Hessian!(M::Grassmann, Y, p, G, H, X)
+    project!(M, Y, p, H - X * p' * G)
+    return Y
+end
+
+@doc raw"""
     riemann_tensor(::Grassmann{n,k,ℝ}, p, X, Y, Z) where {n,k}
 
 Compute the value of Riemann tensor on the real [`Grassmann`](@ref) manifold.
-The formula reads[^Rentmeesters2011]
+The formula reads [Rentmeesters:2011](@cite)
 ``R(X,Y)Z = (XY^\mathrm{T} - YX^\mathrm{T})Z + Z(Y^\mathrm{T}X - X^\mathrm{T}Y)``.
-
-[^Rentmeesters2011]:
-    > Q. Rentmeesters, “A gradient method for geodesic data fitting on some symmetric
-    > Riemannian manifolds,” in 2011 50th IEEE Conference on Decision and Control and
-    > European Control Conference, Dec. 2011, pp. 7141–7146. doi: [10.1109/CDC.2011.6161280](https://doi.org/10.1109/CDC.2011.6161280).
 """
 riemann_tensor(::Grassmann{n,k,ℝ}, p, X, Y, Z) where {n,k}
 
@@ -330,12 +350,8 @@ Uniform distribution on given (real-valued) [`Grassmann`](@ref) `M`.
 Specifically, this is the normalized Haar measure on `M`.
 Generated points will be of similar type as `p`.
 
-The implementation is based on Section 2.5.1 in [^Chikuse2003];
-see also Theorem 2.2.2(iii) in [^Chikuse2003].
-
-[^Chikuse2003]:
-    > Y. Chikuse: "Statistics on Special Manifolds", Springer New York, 2003,
-    > doi: [10.1007/978-0-387-21540-2](https://doi.org/10.1007/978-0-387-21540-2).
+The implementation is based on Section 2.5.1 in [Chikuse:2003](@cite);
+see also Theorem 2.2.2(iii) in [Chikuse:2003](@cite).
 """
 function uniform_distribution(M::Grassmann{n,k,ℝ}, p) where {n,k}
     μ = Distributions.Zeros(n, k)

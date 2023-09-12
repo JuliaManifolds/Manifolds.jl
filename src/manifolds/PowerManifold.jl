@@ -177,6 +177,15 @@ Base.@propagate_inbounds function Base.getindex(
     return get_component(M, p, I...)
 end
 
+@doc raw"""
+    manifold_volume(M::PowerManifold)
+
+Return the manifold volume of an [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) `M`.
+"""
+function manifold_volume(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
+    return manifold_volume(M.manifold)^prod(size_to_tuple(TSize))
+end
+
 function Random.rand(rng::AbstractRNG, d::PowerFVectorDistribution)
     fv = zero_vector(d.type, d.point)
     Distributions._rand!(rng, d, fv)
@@ -258,6 +267,33 @@ function representation_size(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) wh
 end
 
 @doc raw"""
+    Y = riemannian_Hessian(M::AbstractPowerManifold, p, G, H, X)
+    riemannian_Hessian!(M::AbstractPowerManifold, Y, p, G, H, X)
+
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+On an abstract power manifold, this decouples and can be computed elementwise.
+"""
+riemannian_Hessian(M::AbstractPowerManifold, p, G, H, X)
+
+function riemannian_Hessian!(M::AbstractPowerManifold, Y, p, G, H, X)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        riemannian_Hessian!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, G, i),
+            _read(M, rep_size, H, i),
+            _read(M, rep_size, X, i),
+        )
+    end
+    return Y
+end
+
+@doc raw"""
     sharp(M::AbstractPowerManifold, p, ξ::RieszRepresenterCotangentVector)
 
 Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
@@ -292,6 +328,46 @@ Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
 function vector_bundle_transport(fiber::VectorSpaceType, M::PowerManifold)
     return ParallelTransport()
+end
+
+@doc raw"""
+    volume_density(M::PowerManifold, p, X)
+
+Return volume density on the [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) `M`, i.e. product of constituent
+volume densities.
+"""
+function volume_density(M::PowerManifold, p, X)
+    density = one(float(eltype(X)))
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        p_i = _read(M, rep_size, p, i)
+        X_i = _read(M, rep_size, X, i)
+        density *= volume_density(M.manifold, p_i, X_i)
+    end
+    return density
+end
+
+@doc raw"""
+    Y = Weingarten(M::AbstractPowerManifold, p, X, V)
+    Weingarten!(M::AbstractPowerManifold, Y, p, X, V)
+
+Since the metric decouples, also the computation of the Weingarten map
+``\mathcal W_p`` can be computed elementwise on the single elements of the [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds/#sec-power-manifold) `M`.
+"""
+Weingarten(::AbstractPowerManifold, p, X, V)
+
+function Weingarten!(M::AbstractPowerManifold, Y, p, X, V)
+    rep_size = representation_size(M.manifold)
+    for i in get_iterator(M)
+        Weingarten!(
+            M.manifold,
+            _write(M, rep_size, Y, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, X, i),
+            _read(M, rep_size, V, i),
+        )
+    end
+    return Y
 end
 
 @inline function _write(

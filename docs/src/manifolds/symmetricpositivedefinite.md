@@ -13,7 +13,7 @@ The manifold can be equipped with different metrics
 ## Common and metric independent functions
 
 ```@autodocs
-Modules = [Manifolds]
+Modules = [Manifolds, ManifoldsBase]
 Pages = ["manifolds/SymmetricPositiveDefinite.jl"]
 Order = [:function]
 Public=true

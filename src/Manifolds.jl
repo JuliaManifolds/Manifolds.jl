@@ -165,6 +165,8 @@ import ManifoldsBase:
     _vector_transport_to!,
     vee,
     vee!,
+    Weingarten,
+    Weingarten!,
     zero_vector,
     zero_vector!,
     CotangentSpace,
@@ -176,7 +178,9 @@ import ManifoldDiff:
     jacobi_field,
     jacobi_field!,
     riemannian_gradient,
-    riemannian_gradient!
+    riemannian_gradient!,
+    riemannian_Hessian,
+    riemannian_Hessian!
 
 using Base.Iterators: repeated
 using Distributions
@@ -319,6 +323,7 @@ using Random
 using RecursiveArrayTools: ArrayPartition
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
+using SpecialFunctions
 using StaticArrays
 using Statistics
 using StatsBase
@@ -480,12 +485,33 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
     X ∈ TangentSpaceAtPoint(M,p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref Manifolds.TangentSpaceAtPoint) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
 This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
     return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
+
+@doc raw"""
+    manifold_volume(M::AbstractManifold)
+
+Volume of manifold `M` defined through integration of Riemannian volume element in a chart.
+Note that for many manifolds there is no universal agreement over the exact ranges over
+which the integration should happen. For details see [BoyaSudarshanTilma:2003](@cite).
+"""
+manifold_volume(::AbstractManifold)
+
+@doc raw"""
+    volume_density(M::AbstractManifold, p, X)
+
+Volume density function of manifold `M`, i.e. determinant of the differential of exponential map
+`exp(M, p, X)`. Determinant can be understood as computed in a basis, from the matrix
+of the linear operator said differential corresponds to. Details are available in Section 4.1
+of [ChevallierLiLuDunson:2022](@cite).
+
+Note that volume density is well-defined only for `X` for which `exp(M, p, X)` is injective.
+"""
+volume_density(::AbstractManifold, p, X)
 
 # functions populated with methods by extensions
 
@@ -789,6 +815,7 @@ export ×,
     log!,
     log_local_metric_density,
     manifold_dimension,
+    manifold_volume,
     metric,
     mean,
     mean!,
@@ -824,6 +851,8 @@ export ×,
     retract!,
     riemannian_gradient,
     riemannian_gradient!,
+    riemannian_Hessian,
+    riemannian_Hessian!,
     riemann_tensor,
     riemann_tensor!,
     set_component!,
@@ -852,6 +881,9 @@ export ×,
     vee!,
     vertical_component,
     vertical_component!,
+    volume_density,
+    Weingarten,
+    Weingarten!,
     zero_vector,
     zero_vector!
 # Lie group types & functions

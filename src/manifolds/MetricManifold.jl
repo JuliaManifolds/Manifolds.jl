@@ -754,6 +754,26 @@ function vector_transport_to!(
     return vector_transport_to!(M.manifold, Y, p, X, q, m)
 end
 
+function Weingarten(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    p,
+    X,
+    V,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return Weingarten(M.manifold, p, X, V)
+end
+function Weingarten!(
+    ::TraitList{IsDefaultMetric{G}},
+    M::MetricManifold{𝔽,TM,G},
+    Y,
+    p,
+    X,
+    V,
+) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    return Weingarten!(M.manifold, Y, p, X, V)
+end
+
 zero_vector(M::MetricManifold, p) = zero_vector(M.manifold, p)
 zero_vector!(M::MetricManifold, X, p) = zero_vector!(M.manifold, X, p)
 
@@ -804,6 +824,10 @@ for mf in [
     ricci_curvature,
     ricci_tensor,
     riemann_tensor,
+    riemannian_gradient,
+    riemannian_gradient!,
+    riemannian_Hessian,
+    riemannian_Hessian!,
     sharp!,
     vector_transport_along,
     vector_transport_along!,
@@ -811,6 +835,8 @@ for mf in [
     vector_transport_direction!,
     vector_transport_to,
     vector_transport_to!,
+    Weingarten,
+    Weingarten!,
 ]
     @eval is_metric_function(::typeof($mf)) = true
 end

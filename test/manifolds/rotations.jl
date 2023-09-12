@@ -1,7 +1,7 @@
 include("../utils.jl")
 
 @testset "Rotations" begin
-    M = Manifolds.Rotations(2)
+    M = Rotations(2)
     @test repr(M) == "Rotations(2)"
     @test representation_size(M) == (2, 2)
     @test is_flat(M)
@@ -16,15 +16,14 @@ include("../utils.jl")
     types = [Matrix{Float64}, SMatrix{2,2,Float64,4}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{2,2,Float64,4})
-    retraction_methods = [Manifolds.PolarRetraction(), Manifolds.QRRetraction()]
+    retraction_methods = [PolarRetraction(), QRRetraction()]
 
-    inverse_retraction_methods =
-        [Manifolds.PolarInverseRetraction(), Manifolds.QRInverseRetraction()]
+    inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
 
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
 
     @testset "vee/hat" begin
-        M = Manifolds.Rotations(2)
+        M = Rotations(2)
         Xf = [1.23]
         p = Matrix{Float64}(I, 2, 2)
         X = Manifolds.hat(M, p, Xf)
@@ -80,12 +79,12 @@ include("../utils.jl")
         exp!(M, q, q, X)
         @test norm(q - q2) ≈ 0
 
-        X14_polar = inverse_retract(M, pts[1], pts[4], Manifolds.PolarInverseRetraction())
-        p4_polar = retract(M, pts[1], X14_polar, Manifolds.PolarRetraction())
+        X14_polar = inverse_retract(M, pts[1], pts[4], PolarInverseRetraction())
+        p4_polar = retract(M, pts[1], X14_polar, PolarRetraction())
         @test isapprox(M, pts[4], p4_polar)
 
-        X14_qr = inverse_retract(M, pts[1], pts[4], Manifolds.QRInverseRetraction())
-        p4_qr = retract(M, pts[1], X14_qr, Manifolds.QRRetraction())
+        X14_qr = inverse_retract(M, pts[1], pts[4], QRInverseRetraction())
+        p4_qr = retract(M, pts[1], X14_qr, QRRetraction())
         @test isapprox(M, pts[4], p4_qr)
     end
 
@@ -107,7 +106,7 @@ include("../utils.jl")
     Random.seed!(42)
     for n in (3, 4, 5)
         @testset "Rotations: SO($n)" begin
-            SOn = Manifolds.Rotations(n)
+            SOn = Rotations(n)
             @test !is_flat(SOn)
             ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             tvd = Manifolds.normal_tvector_distribution(SOn, Matrix(1.0I, n, n), 1.0)
@@ -168,7 +167,7 @@ include("../utils.jl")
         end
     end
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin
-        M = Manifolds.Rotations(2)
+        M = Rotations(2)
         for p in [1, [2.0 0.0; 0.0 1.0], [1.0 0.5; 0.0 1.0]]
             @test_throws DomainError is_point(M, p, true)
             @test !is_point(M, p)
@@ -185,12 +184,12 @@ include("../utils.jl")
         @test is_vector(M, p, X, true)
     end
     @testset "Project point" begin
-        M = Manifolds.Rotations(2)
+        M = Rotations(2)
         p = Matrix{Float64}(I, 2, 2)
         p1 = project(M, p)
         @test is_point(M, p1, true)
 
-        M = Manifolds.Rotations(3)
+        M = Rotations(3)
         p = collect(reshape(1.0:9.0, (3, 3)))
         p2 = project(M, p)
         @test is_point(M, p2, true)
@@ -200,7 +199,7 @@ include("../utils.jl")
         @test is_point(M, x3, true)
     end
     @testset "Convert from Lie algebra representation of tangents to Riemannian submanifold representation" begin
-        M = Manifolds.Rotations(3)
+        M = Rotations(3)
         p = project(M, collect(reshape(1.0:9.0, (3, 3))))
         x = [[0, -1, 3] [1, 0, 2] [-3, -2, 0]]
         @test is_vector(M, p, x, true)
@@ -235,5 +234,44 @@ include("../utils.jl")
         @test injectivity_radius(M, p, ExponentialRetraction()) == 0.0
         @test injectivity_radius(M, PolarRetraction()) == 0.0
         @test injectivity_radius(M, p, PolarRetraction()) == 0.0
+    end
+    @testset "Riemannian Hessian" begin
+        M = Rotations(2)
+        p = Matrix{Float64}(I, 2, 2)
+        X = [0.0 3.0; -3.0 0.0]
+        V = [1.0 0.0; 1.0 0.0]
+        @test Weingarten(M, p, X, V) == -1 / 2 * p * (V' * X - X' * V)
+        G = [0.0 1.0; 0.0 0.0]
+        H = [0.0 0.0; 2.0 0.0]
+        @test riemannian_Hessian(M, p, G, H, X) == [0.0 -1.0; 1.0 0.0]
+    end
+
+    @testset "riemann_tensor" begin
+        M = Rotations(3)
+        p = [
+            -0.5908399013383766 -0.6241917041179139 0.5111681988316876
+            -0.7261666986267721 0.13535732881097293 -0.6740625485388226
+            0.35155388888753836 -0.7694563730631729 -0.5332417398896261
+        ]
+        X = [
+            0.0 -0.30777760628130063 0.5499897386953444
+            0.30777760628130063 0.0 -0.32059980100053004
+            -0.5499897386953444 0.32059980100053004 0.0
+        ]
+        Y = [
+            0.0 -0.4821890003925358 -0.3513148535122392
+            0.4821890003925358 0.0 0.37956770358148356
+            0.3513148535122392 -0.37956770358148356 0.0
+        ]
+        Z = [
+            0.0 0.3980141785048982 0.09735377380829331
+            -0.3980141785048982 0.0 -0.576287216962475
+            -0.09735377380829331 0.576287216962475 0.0
+        ]
+        @test riemann_tensor(M, p, X, Y, Z) ≈ [
+            0.0 0.04818900625787811 -0.050996416671166
+            -0.04818900625787811 0.0 0.024666891276861697
+            0.050996416671166 -0.024666891276861697 0.0
+        ]
     end
 end

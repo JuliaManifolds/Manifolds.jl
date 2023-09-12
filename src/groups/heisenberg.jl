@@ -2,7 +2,7 @@
 @doc raw"""
     HeisenbergGroup{n} <: AbstractDecoratorManifold{ℝ}
 
-Heisenberg group `HeisenbergGroup(n)` is the group of ``(n+2) × (n+2)`` matrices [^BinzPods2008]
+Heisenberg group `HeisenbergGroup(n)` is the group of ``(n+2) × (n+2)`` matrices [BinzPods:2008](@cite)
 
 ```math
 \begin{bmatrix} 1 & \mathbf{a} & c \\
@@ -15,10 +15,6 @@ where ``I_n`` is the ``n×n`` unit matrix, ``\mathbf{a}`` is a row vector of len
 The group operation is matrix multiplication.
 
 The left-invariant metric on the manifold is used.
-
-[^BinzPods2008]:
-    > E. Binz and S. Pods, The Geometry of Heisenberg Groups: With Applications in Signal
-    > Theory, Optics, Quantization, and Field Quantization. American Mathematical Soc., 2008.
 """
 struct HeisenbergGroup{n} <: AbstractDecoratorManifold{ℝ} end
 

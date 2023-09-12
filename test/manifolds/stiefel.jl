@@ -60,6 +60,10 @@ include("../utils.jl")
             @test Y == X
             Z = change_representer(M, EuclideanMetric(), p, X)
             @test Z == X
+            # In this case it stays as is
+            @test riemannian_Hessian(M, p, Y, Z, X) == Z
+            V = [1.0 1.0; 0.0 0.0; 0.0 0.0] # From T\bot_pM.
+            @test Weingarten(M, p, X, V) == [0.0 0.0; 0.0 0.0; 1.0 1.0]
         end
         types = [Matrix{Float64}]
         TEST_FLOAT32 && push!(types, Matrix{Float32})
@@ -331,6 +335,8 @@ include("../utils.jl")
         @test inner(M3, p, X, Y) == 0
         @test inner(M3, p, X, 2 * X + 3 * Y) == 2 * inner(M3, p, X, X)
         @test norm(M3, p, X) ≈ distance(M3, p, q)
+        Z = [0.0 0.0; 0.0 0.0; -1.0 -1.0]
+        @test riemannian_Hessian(M3, p, Y, Z, X) == [0.0 0.5; -0.5 0.0; -1.0 -1.0]
         # check on a higher dimensional manifold, that the iterations are actually used
         M4 = MetricManifold(Stiefel(10, 2), CanonicalMetric())
         p = Matrix{Float64}(I, 10, 2)
@@ -510,6 +516,29 @@ include("../utils.jl")
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
                 @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
             end
+        end
+
+        @testset "Hessian Conversion" begin
+            M1 = MetricManifold(Stiefel(3, 2), StiefelSubmersionMetric(-0.5))
+            M2 = Stiefel(3, 2)
+            M2b = MetricManifold(Stiefel(3, 2), EuclideanMetric())
+            M3 = MetricManifold(Stiefel(3, 2), StiefelSubmersionMetric(0.0))
+            M4 = MetricManifold(Stiefel(3, 2), CanonicalMetric())
+            p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
+            X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
+            Y = [0.0 0.0; 0.0 0.0; -1.0 1.0]
+            Z = [0.0 0.0; 0.0 0.0; -1.0 -1.0]
+            rH = riemannian_Hessian(M2, p, Y, Z, X)
+            @test riemannian_Hessian(M1, p, Y, Z, X) == rH #Special case of submersion metric
+            @test riemannian_Hessian(M2b, p, Y, Z, X) == rH # metric is default
+            @test riemannian_Hessian(M3, p, Y, Z, X) == riemannian_Hessian(M4, p, Y, Z, X)
+
+            V = [0.0 -1.0; 1.0 0.0; 0.0 0.0]
+            W = zero_vector(M2, p)
+            Weingarten!(M2, W, p, X, V)
+            Wb = zero_vector(M2b, p)
+            Weingarten!(M2b, Wb, p, X, V)
+            @test W == Wb
         end
     end
 end

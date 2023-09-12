@@ -37,20 +37,13 @@ X\mathbf{1}_n = X^{\mathrm{T}}\mathbf{1}_n = \mathbf{0}_n
 
 where $\mathbf{0}_n$ is the vector of length $n$ containing zeros.
 
-More details can be found in Section III[^DouikHassibi2019].
+More details can be found in Section III [DouikHassibi:2019](@cite).
 
 # Constructor
 
     MultinomialDoubleStochastic(n)
 
 Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic and symmetric.
-
-[^DouikHassibi2019]:
-    > A. Douik, B. Hassibi:
-    > AbstractManifold Optimization Over the Set of Doubly Stochastic Matrices: A Second-Order Geometry,
-    > IEEE Transactions on Signal Processing 67(22), pp. 5761–5774, 2019.
-    > doi: [10.1109/tsp.2019.2946024](http://doi.org/10.1109/tsp.2019.2946024),
-    > arXiv: [1802.02628](https://arxiv.org/abs/1802.02628).
 """
 struct MultinomialDoubleStochastic{N} <: AbstractMultinomialDoublyStochastic{N} end
 

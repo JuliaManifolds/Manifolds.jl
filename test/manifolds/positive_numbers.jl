@@ -77,4 +77,21 @@ include("../utils.jl")
             )
         end
     end
+    @testset "Weingarten & Hessian" begin
+        M = PositiveNumbers()
+        p = 1.0
+        G = 2.0
+        H = 3.0
+        X = 4.0
+        rH = riemannian_Hessian(M, p, G, H, X)
+        @test rH == p * H * p + X * G * p
+    end
+
+    @testset "Manifold volume" begin
+        M5 = PositiveVectors(3)
+        @test isinf(manifold_volume(M))
+        @test isinf(manifold_volume(M5))
+        @test volume_density(M, 0.5, 2.0) ≈ exp(4.0)
+        @test volume_density(M5, [0.5, 1.0, 2.0], [1.0, -1.0, 2.0]) ≈ exp(2.0)
+    end
 end

@@ -38,7 +38,7 @@ end
         a2,
         A::AbstractAtlas,
         i;
-        solver=GeneralMIRK4(),
+        solver=MIRK4(),
         dt=0.05,
         kwargs...,
     )
@@ -54,7 +54,7 @@ function solve_chart_log_bvp(
     a2,
     A::AbstractAtlas,
     i;
-    solver=GeneralMIRK4(),
+    solver=MIRK4(),
     dt=0.05,
     kwargs...,
 )
@@ -82,7 +82,7 @@ end
         a2,
         A::AbstractAtlas,
         i;
-        solver=GeneralMIRK4(),
+        solver=MIRK4(),
         dt=0.05,
         kwargs...,
     )
@@ -97,7 +97,7 @@ function estimate_distance_from_bvp(
     a2,
     A::AbstractAtlas,
     i;
-    solver=GeneralMIRK4(),
+    solver=MIRK4(),
     dt=0.05,
     kwargs...,
 )

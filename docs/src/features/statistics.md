@@ -7,3 +7,8 @@ Order = [:type, :function]
 ```
 
 ## Literature
+
+```@bibliography
+Pages = ["features/statistics.md"]
+Canonical=false
+```

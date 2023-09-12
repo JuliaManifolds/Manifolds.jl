@@ -276,4 +276,31 @@ include("../utils.jl")
         ]
         @test is_point(M, p1)
     end
+
+    @testset "Riemannian Hessian Conversion" begin
+        M = SymmetricPositiveDefinite(2)
+        p = [2.0 1.0; 1.0 1.0]
+        G = [1.0 0.0; 1.0 0.1]
+        H = [2.0 1.0; 0.0 0.0]
+        X = [0.0 3.0; 3.0 0.0]
+        Y = X * 1 / 2 * (G' + G) * p
+        Y = 1 / 2 * p * (H' + H) * p + 1 / 2 * (Y' + Y)
+        @test riemannian_Hessian(M, p, G, H, X) == Y
+    end
+
+    @testset "Volume density" begin
+        M = SymmetricPositiveDefinite(3)
+        @test manifold_volume(M) == Inf
+        p = [
+            1.680908185710701 -0.030208936760309613 -0.284402826783584
+            -0.030208936760309613 1.7199740873691465 -0.0066638025832747305
+            -0.284402826783584 -0.0066638025832747305 1.6842441059901379
+        ]
+        X = [
+            -1.3447374559982306 0.2591587910302816 0.9739140395169474
+            0.2591587910302816 0.3649975914025044 -0.2888865063584093
+            0.9739140395169474 -0.2888865063584093 -0.9564259306801289
+        ]
+        @test volume_density(M, p, X) ≈ 5.141867280770719
+    end
 end

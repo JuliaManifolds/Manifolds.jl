@@ -136,8 +136,8 @@ end
     project(M::Stiefel,p)
 
 Projects `p` from the embedding onto the [`Stiefel`](@ref) `M`, i.e. compute `q`
-as the polar decomposition of $p$ such that $q^{\mathrm{H}q$ is the identity,
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+as the polar decomposition of $p$ such that ``q^{\mathrm{H}}q`` is the identity,
+where ``\cdot^{\mathrm{H}}`` denotes the hermitian, i.e. complex conjugate transposed.
 """
 project(::Stiefel, ::Any, ::Any)
 
@@ -154,7 +154,7 @@ Project `X` onto the tangent space of `p` to the [`Stiefel`](@ref) manifold `M`.
 The formula reads
 
 ````math
-\operatorname{proj}_{\mathcal M}(p, X) = X - p \operatorname{Sym}(p^{\mathrm{H}}X),
+\operatorname{proj}_{T_p\mathcal M}(X) = X - p \operatorname{Sym}(p^{\mathrm{H}}X),
 ````
 
 where $\operatorname{Sym}(q)$ is the symmetrization of $q$, e.g. by
@@ -185,6 +185,55 @@ function retract_project!(M::Stiefel, q, p, X, t::Number)
     return q
 end
 
+@doc raw"""
+    Y = riemannian_Hessian(M::Stiefel, p, G, H, X)
+    riemannian_Hessian!(M::Stiefel, Y, p, G, H, X)
+
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), where we use for the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+``α_0=α_1=1`` in their formula. Then the formula reads
+
+```math
+    \operatorname{Hess}f(p)[X]
+    =
+    \operatorname{proj}_{T_p\mathcal M}\Bigl(
+        ∇^2f(p)[X] - \frac{1}{2} X \bigl((∇f(p))^{\mathrm{H}}p + p^{\mathrm{H}}∇f(p)\bigr)
+    \Bigr).
+```
+
+Compared to Eq. (5.6) also the metric conversion simplifies to the identity.
+"""
+riemannian_Hessian(M::Stiefel, p, G, H, X)
+
+function riemannian_Hessian!(M::Stiefel, Y, p, G, H, X)
+    Z = symmetrize(G' * p)
+    project!(M, Y, p, H - X * Z)
+    return Y
+end
+
 function vector_transport_to!(M::Stiefel, Y, ::Any, X, q, ::ProjectionTransport)
     return project!(M, Y, q, X)
+end
+
+@doc raw"""
+    Weingarten(M::Stiefel, p, X, V)
+
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Stiefel`](@ref) `M` with respect to the
+tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+
+The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
+
+```math
+\mathcal W_p(X,V) = -Xp^{\mathrm{H}}V - \frac{1}{2}p\bigl(X^\mathrm{H}V + V^{\mathrm{H}}X\bigr)
+```
+"""
+Weingarten(::Stiefel, p, X, V)
+
+function Weingarten!(::Stiefel, Y, p, X, V)
+    Z = symmetrize(X' * V)
+    Y .= -X * p' * V .- p * Z
+    return Y
 end

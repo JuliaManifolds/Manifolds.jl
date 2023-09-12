@@ -23,12 +23,68 @@ include("group_utils.jl")
             @test isapprox(On, e, X2, X)
             @test log_lie(On, e) == zeros(n, n)
         end
+
+        @test manifold_volume(Orthogonal(1)) ≈ 2
+        @test manifold_volume(Orthogonal(2)) ≈ 4 * π * sqrt(2)
+        @test manifold_volume(Orthogonal(3)) ≈ 16 * π^2 * sqrt(2)
+        @test manifold_volume(Orthogonal(4)) ≈ 2 * (2 * π)^4 * sqrt(2)
+        @test manifold_volume(Orthogonal(5)) ≈ 8 * (2 * π)^6 / 6 * sqrt(2)
+    end
+
+    @testset "Special Orthogonal Group" begin
+        @test manifold_volume(SpecialOrthogonal(1)) ≈ 1
+        @test manifold_volume(SpecialOrthogonal(2)) ≈ 2 * π * sqrt(2)
+        @test manifold_volume(SpecialOrthogonal(3)) ≈ 8 * π^2 * sqrt(2)
+        @test manifold_volume(SpecialOrthogonal(4)) ≈ (2 * π)^4 * sqrt(2)
+        @test manifold_volume(SpecialOrthogonal(5)) ≈ 4 * (2 * π)^6 / 6 * sqrt(2)
+
+        M = SpecialOrthogonal(2)
+        p = [
+            0.22632098602578843 0.9740527764368391
+            -0.9740527764368391 0.22632098602578843
+        ]
+        X = [0.0 -0.7071067811865475; 0.7071067811865475 0.0]
+        @test volume_density(M, p, X) ≈ 1.0
+
+        M = SpecialOrthogonal(3)
+        p = [
+            -0.5908399013383766 -0.6241917041179139 0.5111681988316876
+            -0.7261666986267721 0.13535732881097293 -0.6740625485388226
+            0.35155388888753836 -0.7694563730631729 -0.5332417398896261
+        ]
+        X = [
+            0.0 -0.30777760628130063 0.5499897386953444
+            0.30777760628130063 0.0 -0.32059980100053004
+            -0.5499897386953444 0.32059980100053004 0.0
+        ]
+        @test volume_density(M, p, X) ≈ 0.8440563052346255
+        @test volume_density(M, p, zero(X)) ≈ 1.0
+
+        M = SpecialOrthogonal(4)
+        p = [
+            -0.09091199873970474 -0.5676546886791307 -0.006808638869334249 0.8182034009599919
+            -0.8001176365300662 0.3161567169523502 -0.4938592872334223 0.12633171594159726
+            -0.5890394255366699 -0.2597679221590146 0.7267279425385695 -0.23962403743004465
+            -0.0676707570677516 -0.7143764493344514 -0.4774129704812182 -0.5071132150619608
+        ]
+        X = [
+            0.0 0.2554704296965055 0.26356215573144676 -0.4070678736115306
+            -0.2554704296965055 0.0 -0.04594199053786204 -0.10586374034761421
+            -0.26356215573144676 0.04594199053786204 0.0 0.43156436122007846
+            0.4070678736115306 0.10586374034761421 -0.43156436122007846 0.0
+        ]
+        @test volume_density(M, p, X) ≈ 0.710713830700454
     end
 
     @testset "Unitary Group" begin
         U2 = Unitary(2)
         @test repr(U2) == "Unitary(2)"
         @test injectivity_radius(U2) == π
+
+        @test manifold_volume(Unitary(1)) ≈ 2 * π
+        @test manifold_volume(Unitary(2)) ≈ 4 * π^3
+        @test manifold_volume(Unitary(3)) ≈ sqrt(3) * 2 * π^6
+        @test manifold_volume(Unitary(4)) ≈ sqrt(2) * 8 * π^10 / 12
 
         for n in [1, 2, 3]
             Un = Unitary(n)
@@ -115,6 +171,11 @@ include("group_utils.jl")
         ) # base point wrong
         e = Identity(MultiplicationOperation())
         @test_throws DomainError is_vector(SU2, e, Xe, true, true) # Xe not skew hermitian
+
+        @test manifold_volume(SpecialUnitary(1)) ≈ 1
+        @test manifold_volume(SpecialUnitary(2)) ≈ 2 * π^2
+        @test manifold_volume(SpecialUnitary(3)) ≈ sqrt(3) * π^5
+        @test manifold_volume(SpecialUnitary(4)) ≈ sqrt(2) * 4 * π^9 / 12
     end
 
     @testset "SO(4) and O(4) exp/log edge cases" begin
