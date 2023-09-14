@@ -16,79 +16,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Sizes of all manifolds can now be either encoded in type or stored in a field to avoid over-specialization.
-  The default is set to store the size in type parameter. For field storage, pass the `parameter=:type` keyword
-  argument to manifold constructor. Related changes:
-  - Statically sized `SpecialEuclidean{N}` is now `SpecialEuclidean{TypeParameter{Tuple{N}}}`, whereas the type of special Euclidean group with field-stored size is `SpecialEuclidean{Tuple{Int}}`. Similar change applies to:
-    - `CenteredMatrices{m,n}`,
-    - `CholeskySpace{N}`,
-    - `Elliptope{N,K}`,
-    - `Euclidean`,
-    - `FixedRankMatrices{m,n,k}`,
-    - `KendallsPreShapeSpace{n,k}`,
-    - `KendallsShapeSpace{n,k}`,
-    - `GeneralLinear{n}`,
-    - `GeneralUnitaryMultiplicationGroup{n}`,
-    - `GeneralizedGrassmann{n,k}`,
-    - `GeneralizedStiefel{n,k}`,
-    - `Grassmann{n,k}`,
-    - `Heisenberg{n}`,
-    - `Hyperbolic{n}`,
-    - `MultinomialMatrices{N,M}`,
-    - `MultinomialDoublyStochastic{n}`,
-    - `MultinomialSymmetric{n}`,
-    - `Orthogonal{n}`,
-    - `ProbabilitySimplex{n}`,
-    - `SPDFixedDeterminant{n}`,
-    - `SpecialLinear{n}`,
-    - `SpecialOrthogonal{n}`,
-    - `SpecialUnitary{n}`,
-    - `SpecialEuclideanManifold{n}`,
-    - `Spectrahedron{n,k}`,
-    - `SphereSymmetricMatrices{N}`,
-    - `Stiefel{n,k}`,
-    - `SymmetricMatrices{N}`,
-    - `SymmetricPositiveDefinite{n}`,
-    - `SymmetricPositiveSemidefiniteFixedRank{n,k}`,
-    - `Symplectic{n}`,
-    - `SymplecticStiefel{n,k}`,
-    - `TranslationGroup`,
-    - `Tucker`.
+  The default is set to store the size in type parameter. For field storage, pass the `parameter=:field` keyword
+  argument to manifold constructor.
+  For example statically sized `CenteredMatrices{m,n}` is now `CenteredMatrices{TypeParameter{Tuple{m,n}}}`, whereas the type of special Euclidean group with field-stored size is `CenteredMatrices{Tuple{Int,Int}}`. Similar change applies to:
+  - `CenteredMatrices{m,n}`,
+  - `CholeskySpace{N}`,
+  - `Elliptope{N,K}`,
+  - `Euclidean`,
+  - `FixedRankMatrices{m,n,k}`,
+  - `KendallsPreShapeSpace{n,k}`,
+  - `KendallsShapeSpace{n,k}`,
+  - `GeneralLinear{n}`,
+  - `GeneralUnitaryMultiplicationGroup{n}`,
+  - `GeneralizedGrassmann{n,k}`,
+  - `GeneralizedStiefel{n,k}`,
+  - `Grassmann{n,k}`,
+  - `Heisenberg{n}`,
+  - `Hyperbolic{n}`,
+  - `MultinomialMatrices{N,M}`,
+  - `MultinomialDoublyStochastic{n}`,
+  - `MultinomialSymmetric{n}`,
+  - `Orthogonal{n}`,
+  - `ProbabilitySimplex{n}`,
+  - `SPDFixedDeterminant{n}`,
+  - `SpecialLinear{n}`,
+  - `SpecialOrthogonal{n}`,
+  - `SpecialUnitary{n}`,
+  - `SpecialEuclidean{n}`,
+  - `SpecialEuclideanManifold{n}`,
+  - `Spectrahedron{n,k}`,
+  - `SphereSymmetricMatrices{N}`,
+  - `Stiefel{n,k}`,
+  - `SymmetricMatrices{N}`,
+  - `SymmetricPositiveDefinite{n}`,
+  - `SymmetricPositiveSemidefiniteFixedRank{n,k}`,
+  - `Symplectic{n}`,
+  - `SymplecticStiefel{n,k}`,
+  - `TranslationGroup`,
+  - `Tucker`.
   
   For example
 
   ```{julia}
-  function Base.show(io::IO, ::SpecialEuclidean{n}) where {n}
-      return print(io, "SpecialEuclidean($(n))")
+  function Base.show(io::IO, ::CenteredMatrices{m,n}) where {m,n}
+      return print(io, "CenteredMatrices($m, $n)")
   end
   ```
 
   needs to be replaced with
 
   ```{julia}
-  function Base.show(io::IO, ::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
-      return print(io, "SpecialEuclidean($(n); parameter=:type)")
+  function Base.show(io::IO, ::CenteredMatrices{TypeParameter{Tuple{m,n}}}) where {m,n}
+      return print(io, "CenteredMatrices($m, $n)")
   end
   ```
 
   for statically-sized groups and
 
   ```{julia}
-  function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
-    n = get_n(G)
-    return print(io, "SpecialEuclidean($(n))")
+  function Base.show(io::IO, M::CenteredMatrices{Tuple{Int,Int}})
+      m, n = get_parameter(M.size)
+      return print(io, "CenteredMatrices($m, $n; parameter=:field)")
   end
   ```
 
   for groups with size stored in field. Alternatively, you can use a single generic method like this:
   
   ```{julia}
-  function Base.show(io::IO, G::SpecialEuclidean{T}) where {T}
-    n = get_n(G)
-    if T <: TypeParameter
-        return print(io, "SpecialEuclidean($(n); parameter=:type)")
-    else
-        return print(io, "SpecialEuclidean($(n))")
-    end
+  function Base.show(io::IO, M::CenteredMatrices{T}) where {T}
+      m, n = get_parameter(M)
+      if T <: TypeParameter
+          return print(io, "CenteredMatrices($m, $n)")
+      else
+          return print(io, "CenteredMatrices($m, $n; parameter=:field)")
+      end
   end
   ```
 

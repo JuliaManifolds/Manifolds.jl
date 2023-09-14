@@ -51,7 +51,7 @@ function Base.show(io::IO, ::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n
     return print(io, "SpecialEuclidean($(n))")
 end
 function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
-    n = get_n(G)
+    n = _get_parameter(G)
     return print(io, "SpecialEuclidean($(n); parameter=:field)")
 end
 
@@ -59,10 +59,18 @@ end
     return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
 end
 
-get_n(::SpecialEuclidean{TypeParameter{Tuple{N}}}) where {N} = N
-get_n(M::SpecialEuclidean{Tuple{Int}}) = get_n(M.manifold)
-get_n(::SpecialEuclideanManifold{TypeParameter{Tuple{N}}}) where {N} = N
-get_n(M::SpecialEuclideanManifold{Tuple{Int}}) = manifold_dimension(M.manifolds[1])
+"""
+    _get_parameter(M::AbstractManifold)
+
+Similar to `get_parameter` but it can be specialized for manifolds without breaking
+manifolds being parametrized by other manifolds.
+"""
+_get_parameter(::AbstractManifold)
+
+_get_parameter(::SpecialEuclidean{TypeParameter{Tuple{N}}}) where {N} = N
+_get_parameter(M::SpecialEuclidean{Tuple{Int}}) = _get_parameter(M.manifold)
+_get_parameter(::SpecialEuclideanManifold{TypeParameter{Tuple{N}}}) where {N} = N
+_get_parameter(M::SpecialEuclideanManifold{Tuple{Int}}) = manifold_dimension(M.manifolds[1])
 
 Base.@propagate_inbounds function Base.getindex(
     p::AbstractMatrix,
@@ -87,7 +95,7 @@ Base.@propagate_inbounds function submanifold_component(
     p::AbstractMatrix,
     ::Val{1},
 )
-    n = get_n(G)
+    n = _get_parameter(G)
     return view(p, 1:n, n + 1)
 end
 Base.@propagate_inbounds function submanifold_component(
@@ -95,7 +103,7 @@ Base.@propagate_inbounds function submanifold_component(
     p::AbstractMatrix,
     ::Val{2},
 )
-    n = get_n(G)
+    n = _get_parameter(G)
     return view(p, 1:n, 1:n)
 end
 
@@ -103,7 +111,7 @@ function submanifold_components(
     G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     p::AbstractMatrix,
 )
-    n = get_n(G)
+    n = _get_parameter(G)
     @assert size(p) == (n + 1, n + 1)
     @inbounds t = submanifold_component(G, p, Val(1))
     @inbounds R = submanifold_component(G, p, Val(2))
@@ -114,7 +122,7 @@ Base.@propagate_inbounds function _padpoint!(
     G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     q::AbstractMatrix,
 )
-    n = get_n(G)
+    n = _get_parameter(G)
     for i in 1:n
         q[n + 1, i] = 0
     end
@@ -126,7 +134,7 @@ Base.@propagate_inbounds function _padvector!(
     G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     X::AbstractMatrix,
 )
-    n = get_n(G)
+    n = _get_parameter(G)
     for i in 1:(n + 1)
         X[n + 1, i] = 0
     end
@@ -196,12 +204,12 @@ function affine_matrix(
     G::SpecialEuclidean{Tuple{Int}},
     ::SpecialEuclideanIdentity{Tuple{Int}},
 )
-    n = get_n(G)
+    n = _get_parameter(G)
     return Diagonal{Float64}(I, n)
 end
 
 function check_point(G::SpecialEuclideanManifold, p::AbstractMatrix; kwargs...)
-    n = get_n(G)
+    n = _get_parameter(G)
     errs = DomainError[]
     # homogeneous
     if !isapprox(p[end, :], [zeros(size(p, 2) - 1)..., 1]; kwargs...)
@@ -226,7 +234,7 @@ function check_point(G::SpecialEuclideanManifold, p::AbstractMatrix; kwargs...)
 end
 
 function check_size(G::SpecialEuclideanManifold, p::AbstractMatrix; kwargs...)
-    n = get_n(G)
+    n = _get_parameter(G)
     return check_size(Euclidean(n + 1, n + 1), p)
 end
 function check_size(
@@ -235,7 +243,7 @@ function check_size(
     X::AbstractMatrix;
     kwargs...,
 )
-    n = get_n(G)
+    n = _get_parameter(G)
     return check_size(Euclidean(n + 1, n + 1), X)
 end
 
@@ -245,7 +253,7 @@ function check_vector(
     X::AbstractMatrix;
     kwargs...,
 )
-    n = get_n(G)
+    n = _get_parameter(G)
     errs = DomainError[]
     # homogeneous
     if !isapprox(X[end, :], zeros(size(X, 2)); kwargs...)
@@ -296,11 +304,11 @@ end
 screw_matrix(::SpecialEuclidean, X::AbstractMatrix) = X
 
 function allocate_result(G::SpecialEuclidean, ::typeof(affine_matrix), p...)
-    n = get_n(G)
+    n = _get_parameter(G)
     return allocate(p[1], Size(n + 1, n + 1))
 end
 function allocate_result(G::SpecialEuclidean, ::typeof(screw_matrix), X...)
-    n = get_n(G)
+    n = _get_parameter(G)
     return allocate(X[1], Size(n + 1, n + 1))
 end
 
