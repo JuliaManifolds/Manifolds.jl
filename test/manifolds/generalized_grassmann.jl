@@ -164,4 +164,12 @@ include("../utils.jl")
             end
         end
     end
+    @testset "field parameter" begin
+        B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
+        M = GeneralizedGrassmann(3, 2, B; parameter=:field)
+        @test repr(M) ==
+              "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ; parameter=:field)"
+        @test typeof(get_embedding(M)) ===
+              GeneralizedStiefel{Tuple{Int64,Int64},ℝ,Matrix{Float64}}
+    end
 end

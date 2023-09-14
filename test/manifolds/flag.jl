@@ -268,6 +268,11 @@ using Random
 
         @test retract(M, p1_ortho, X1_ortho, QRRetraction()).value ≈
               retract(OrthogonalMatrices(5), p1_ortho.value, X1_ortho.value, QRRetraction())
+
+        @testset "field parameters" begin
+            M = Flag(5, 1, 2; parameter=:field)
+            @test get_embedding(M, p1_ortho) == OrthogonalMatrices(5; parameter=:field)
+        end
     end
 
     @testset "field parameters" begin

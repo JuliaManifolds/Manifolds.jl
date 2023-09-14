@@ -27,7 +27,7 @@ The manifold is named after
 [Eduard L. Stiefel](https://en.wikipedia.org/wiki/Eduard_Stiefel) (1909–1978).
 
 # Constructor
-    Stiefel(n, k, field = ℝ; parameter::Symbol=:type)
+    Stiefel(n, k, field=ℝ; parameter::Symbol=:type)
 
 Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
 """

@@ -2,6 +2,7 @@ include("../utils.jl")
 
 @testset "KendallsPreShapeSpace" begin
     M = KendallsPreShapeSpace(2, 3)
+    @test repr(M) == "KendallsPreShapeSpace(2, 3)"
     @test representation_size(M) === (2, 3)
     @test manifold_dimension(M) == 3
     @test injectivity_radius(M) == pi
@@ -37,10 +38,16 @@ include("../utils.jl")
         test_rand_tvector=true,
         rand_tvector_atol_multiplier=5,
     )
+    @testset "field parameter" begin
+        M = KendallsPreShapeSpace(2, 3; parameter=:field)
+        @test repr(M) == "KendallsPreShapeSpace(2, 3; parameter=:field)"
+        @test get_embedding(M) === ArraySphere(2, 3; field=ℝ, parameter=:field)
+    end
 end
 
 @testset "KendallsShapeSpace" begin
     M = KendallsShapeSpace(2, 3)
+    @test repr(M) == "KendallsShapeSpace(2, 3)"
     @test manifold_dimension(M) == 2
     @test !is_flat(M)
     @test get_total_space(M) === KendallsPreShapeSpace(2, 3)
@@ -104,5 +111,15 @@ end
         Md2_1 = KendallsShapeSpace(2, 1)
         @test manifold_dimension(Md3_2) == 0
         @test manifold_dimension(Md2_1) == 0
+    end
+    @testset "field parameter" begin
+        M = KendallsShapeSpace(2, 3; parameter=:field)
+        @test repr(M) == "KendallsShapeSpace(2, 3; parameter=:field)"
+        @test get_embedding(M) === KendallsPreShapeSpace(2, 3; parameter=:field)
+        @test get_total_space(M) === KendallsPreShapeSpace(2, 3; parameter=:field)
+        @test get_orbit_action(M) === Manifolds.ColumnwiseMultiplicationAction(
+            M,
+            SpecialOrthogonal(2; parameter=:field),
+        )
     end
 end

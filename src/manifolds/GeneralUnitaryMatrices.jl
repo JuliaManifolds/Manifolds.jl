@@ -1017,14 +1017,14 @@ function riemann_tensor!(::GeneralUnitaryMatrices, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
-    volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
+    volume_density(M::GeneralUnitaryMatrices{<:Any,ℝ}, p, X)
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
 exponential map `exp(M, p, X)`. It is derived from Eq. (4.1) and Corollary 4.4
 in [ChevallierLiLuDunson:2022](@ref). See also Theorem 4.1 in [FalorsideHaanDavidsonForre:2019](@cite),
 (note that it uses a different convention).
 """
-function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
+function volume_density(M::GeneralUnitaryMatrices{<:Any,ℝ}, p, X)
     dens = one(eltype(X))
     B = get_basis(M, p, DefaultOrthonormalBasis())
     Ys = get_vectors(M, p, B)
@@ -1046,7 +1046,7 @@ function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
 end
 
 @doc raw"""
-    volume_density(M::GeneralUnitaryMatrices{3,ℝ}, p, X)
+    volume_density(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, p, X)
 
 Compute the volume density on O(3)/SO(3). The formula reads [FalorsideHaanDavidsonForre:2019](@cite)
 
@@ -1054,7 +1054,7 @@ Compute the volume density on O(3)/SO(3). The formula reads [FalorsideHaanDavids
 \frac{1-1\cos(\sqrt{2}\lVert X \rVert)}{\lVert X \rVert^2}.
 ```
 """
-function volume_density(M::GeneralUnitaryMatrices{3,ℝ}, p, X)
+function volume_density(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, p, X)
     nX = norm(M, p, X)
     if nX > eps(eltype(X))
         return (1 - 1 * cos(sqrt(2) * nX)) / nX^2
@@ -1064,10 +1064,10 @@ function volume_density(M::GeneralUnitaryMatrices{3,ℝ}, p, X)
 end
 
 @doc raw"""
-    volume_density(M::GeneralUnitaryMatrices{2,ℝ}, p, X)
+    volume_density(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, p, X)
 
 Volume density on O(2)/SO(2) is equal to 1.
 """
-function volume_density(::GeneralUnitaryMatrices{2,ℝ}, p, X)
+function volume_density(::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, p, X)
     return one(eltype(X))
 end

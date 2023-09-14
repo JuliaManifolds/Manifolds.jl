@@ -66,6 +66,8 @@ include("../utils.jl")
                 test_rand_tvector=true,
                 rand_tvector_atol_multiplier=20.0,
             )
+            X = similar(pts[1])
+            @test exp!(M_euc, X, pts[1], [0.0, 0.1, -0.1]) ≈ [0.5, 0.4, 0.1]
             test_manifold(
                 M_euc,
                 pts,
@@ -164,5 +166,11 @@ include("../utils.jl")
         @test volume_density(M, p, Y) ≈ 0.986956111346216
         @test manifold_volume(M_euc) ≈ sqrt(3) / 2
         @test volume_density(M_euc, p, Y) ≈ 1.0
+    end
+
+    @testset "field parameter" begin
+        M = ProbabilitySimplex(2; parameter=:field)
+        @test repr(M) == "ProbabilitySimplex(2; boundary=:open, parameter=:field)"
+        @test get_embedding(M) === Euclidean(3; parameter=:field)
     end
 end

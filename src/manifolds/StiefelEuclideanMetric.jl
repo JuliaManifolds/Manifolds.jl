@@ -27,7 +27,7 @@ function exp!(M::Stiefel, q, p, X)
     n, k = get_parameter(M.size)
     A = p' * X
     B = exp([A -X'*X; I A])
-    @views begin
+    @views begin # COV_EXCL_LINE
         r = p * B[1:k, 1:k]
         mul!(r, X, B[(k + 1):(2 * k), 1:k], true, true)
     end

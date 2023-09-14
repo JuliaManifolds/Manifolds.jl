@@ -289,7 +289,7 @@ include("../utils.jl")
     @testset "ArrayProjectiveSpace" begin
         M = ArrayProjectiveSpace(2, 2; field=ℝ)
         @test manifold_dimension(M) == 3
-        @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℝ)"
+        @test repr(M) == "ArrayProjectiveSpace(2, 2; field=ℝ)"
         @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2,2}},ℝ}
         @test representation_size(M) == (2, 2)
         p = ones(2, 2)
@@ -301,7 +301,7 @@ include("../utils.jl")
 
         M = ArrayProjectiveSpace(2, 2; field=ℂ)
         @test manifold_dimension(M) == 6
-        @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℂ)"
+        @test repr(M) == "ArrayProjectiveSpace(2, 2; field=ℂ)"
         @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2,2}},ℂ}
         @test representation_size(M) == (2, 2)
     end
@@ -330,5 +330,13 @@ include("../utils.jl")
         @test manifold_volume(ProjectiveSpace(1)) ≈ π
         @test manifold_volume(ProjectiveSpace(2)) ≈ 2 * π
         @test manifold_volume(ProjectiveSpace(3)) ≈ π * π
+    end
+
+    @testset "field parameter" begin
+        M = ProjectiveSpace(2; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int},ℝ}
+        @test repr(M) == "ProjectiveSpace(2, ℝ; parameter=:field)"
+        @test repr(ArrayProjectiveSpace(2, 3; parameter=:field)) ==
+              "ArrayProjectiveSpace(2, 3; field=ℝ, parameter=:field)"
     end
 end

@@ -346,7 +346,7 @@ function stiefel_factorization(p, x)
     U = allocate(p, T, Size(n, 2k))
     Z = allocate(p, T, Size(2k, k))
     xfact = StiefelFactorization(U, Z)
-    @views begin
+    @views begin # COV_EXCL_LINE
         U1 = U[1:n, 1:k]
         U2 = U[1:n, (k + 1):(2k)]
         Z1 = Z[1:k, 1:k]
@@ -442,7 +442,7 @@ function exp!(
 )
     n, k = get_parameter(M.manifold.size)
     α = metric(M).α
-    @views begin
+    @views begin # COV_EXCL_LINE
         ZM = X.Z[1:k, 1:k]
         ZN = X.Z[(k + 1):(2k), 1:k]
         qM = q.Z[1:k, 1:k]
@@ -450,7 +450,7 @@ function exp!(
     qM .= ZM .* (α / (α + 1))
     D = exp(qM)
     C = allocate(D, Size(2k, 2k))
-    @views begin
+    @views begin # COV_EXCL_LINE
         C[1:k, 1:k] .= ZM ./ (α + 1)
         C[1:k, (k + 1):(2k)] .= -ZN'
         C[(k + 1):(2k), 1:k] .= ZN

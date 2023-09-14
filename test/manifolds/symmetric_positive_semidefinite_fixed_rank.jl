@@ -41,4 +41,9 @@ include("../utils.jl")
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℂ)"
         @test manifold_dimension(M) == 12
     end
+    @testset "field parameter" begin
+        M = SymmetricPositiveSemidefiniteFixedRank(4, 2; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℝ; parameter=:field)"
+    end
 end

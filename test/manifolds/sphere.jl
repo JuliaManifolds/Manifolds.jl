@@ -289,5 +289,7 @@ using ManifoldsBase: TFVector
         @test repr(M) == "Sphere(2, ℝ; parameter=:field)"
         @test repr(ArraySphere(2, 3; parameter=:field)) ==
               "ArraySphere(2, 3; field=ℝ, parameter=:field)"
+        p = [1.0, 0.0, 0.0]
+        @test local_metric(M, p, DefaultOrthonormalBasis()) == Diagonal([1.0, 1.0])
     end
 end

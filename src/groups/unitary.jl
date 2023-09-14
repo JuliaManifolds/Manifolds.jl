@@ -103,13 +103,13 @@ function Base.show(io::IO, ::Unitary{TypeParameter{Tuple{n}},ℂ}) where {n}
     return print(io, "Unitary($(n))")
 end
 function Base.show(io::IO, M::Unitary{Tuple{Int},ℂ})
-    n = get_parameter(M.size)[1]
+    n = get_parameter(M.manifold.size)[1]
     return print(io, "Unitary($(n); parameter=:field)")
 end
 function Base.show(io::IO, ::Unitary{TypeParameter{Tuple{n}},ℍ}) where {n}
     return print(io, "Unitary($(n), ℍ)")
 end
 function Base.show(io::IO, M::Unitary{Tuple{Int},ℍ})
-    n = get_parameter(M.size)[1]
+    n = get_parameter(M.manifold.size)[1]
     return print(io, "Unitary($(n), ℍ; parameter=:field)")
 end

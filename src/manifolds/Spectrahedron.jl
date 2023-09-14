@@ -97,8 +97,12 @@ function check_vector(M::Spectrahedron, q, Y; kwargs...)
     return nothing
 end
 
-function get_embedding(M::Spectrahedron)
-    return Euclidean(representation_size(M)...; field=ℝ)
+function get_embedding(::Spectrahedron{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return Euclidean(n, k)
+end
+function get_embedding(M::Spectrahedron{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return Euclidean(n, k; parameter=:field)
 end
 
 """

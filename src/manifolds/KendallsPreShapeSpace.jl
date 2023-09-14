@@ -145,3 +145,11 @@ function Random.rand!(
     end
     return pX
 end
+
+function Base.show(io::IO, ::KendallsPreShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return print(io, "KendallsPreShapeSpace($n, $k)")
+end
+function Base.show(io::IO, M::KendallsPreShapeSpace{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return print(io, "KendallsPreShapeSpace($n, $k; parameter=:field)")
+end

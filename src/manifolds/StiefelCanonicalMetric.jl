@@ -72,7 +72,7 @@ function exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, q, p,
     n == k && return mul!(q, p, exp(A))
     QR = qr(X - p * A)
     BC_ext = exp([A -QR.R'; QR.R 0*I])
-    @views begin
+    @views begin # COV_EXCL_LINE
         mul!(q, p, BC_ext[1:k, 1:k])
         mul!(q, Matrix(QR.Q), BC_ext[(k + 1):(2 * k), 1:k], true, true)
     end
@@ -153,7 +153,7 @@ function inverse_retract!(
     V = allocate(qfact.Z, Size(2k, 2k))
     LV = allocate(V)
     Zcompl = qr(qfact.Z).Q[1:(2k), (k + 1):(2k)]
-    @views begin
+    @views begin # COV_EXCL_LINE
         Vpcols = V[1:(2k), (k + 1):(2k)] #second half of the columns
         B = LV[(k + 1):(2k), 1:k]
         C = LV[(k + 1):(2k), (k + 1):(2k)]

@@ -68,7 +68,7 @@ A good overview can be found in[BendokatZimmermannAbsil:2020](@cite).
     Grassmann(n, k, field=ℝ, parameter::Symbol=:type)
 
 Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
-case `field = ℝ` is the default.
+case `field=ℝ` is the default.
 """
 struct Grassmann{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T

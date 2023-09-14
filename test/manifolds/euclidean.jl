@@ -10,13 +10,13 @@ using FiniteDifferences
         EM = Manifolds.MetricManifold(E, Manifolds.EuclideanMetric())
         EH = Euclidean(2, 3; field=ℍ, parameter=param)
         if param === :type
-            @test repr(E) == "Euclidean(3; field = ℝ)"
-            @test repr(Ec) == "Euclidean(3; field = ℂ)"
-            @test repr(EH) == "Euclidean(2, 3; field = ℍ)"
+            @test repr(E) == "Euclidean(3; field=ℝ)"
+            @test repr(Ec) == "Euclidean(3; field=ℂ)"
+            @test repr(EH) == "Euclidean(2, 3; field=ℍ)"
         else
-            @test repr(E) == "Euclidean(3; field = ℝ, parameter = :field)"
-            @test repr(Ec) == "Euclidean(3; field = ℂ, parameter = :field)"
-            @test repr(EH) == "Euclidean(2, 3; field = ℍ, parameter = :field)"
+            @test repr(E) == "Euclidean(3; field=ℝ, parameter=:field)"
+            @test repr(Ec) == "Euclidean(3; field=ℂ, parameter=:field)"
+            @test repr(EH) == "Euclidean(2, 3; field=ℍ, parameter=:field)"
         end
 
         @test Manifolds.allocation_promotion_function(Ec, get_vector, ()) === complex
@@ -344,6 +344,14 @@ using FiniteDifferences
             SizedMatrix{2,2}([-1.0, -2.0, -3.0, -4.0]),
             DefaultOrthonormalBasis(),
         ) == SA[-1.0 -3.0; -2.0 -4.0]
+
+        M1c = Euclidean(3, field=ℂ)
+        get_vector(
+            M1c,
+            SizedVector{3}([1.0im, 2.0, 4.0im]),
+            SizedVector{3}([-1.0, -3.0, -4.0im]),
+            DefaultOrthonormalBasis(),
+        ) == SA[-1.0, -3.0, -4.0im]
     end
 
     @testset "Euclidean(1)" begin
@@ -404,6 +412,7 @@ using FiniteDifferences
         @test distance(M0s, 2.0, 4.0) == 2.0
         @test log(M0s, 2.0, 4.0) == 2.0
         @test manifold_dimension(M0s) == 1
+        @test project(M0s, 4.0) == 4.0
         @test project(M0s, 2.0, 4.0) == 4.0
         @test retract(M0s, 2.0, 4.0) == 6.0
         @test retract(M0s, 2.0, 4.0, ExponentialRetraction()) == 6.0

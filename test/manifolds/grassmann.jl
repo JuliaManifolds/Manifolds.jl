@@ -388,4 +388,14 @@ include("../utils.jl")
         Z = [0.0 -1.0; 1.0 0.0; 1.0 0.0]
         @test riemannian_Hessian(M, p, Y, Z, X) == [0.0 0.0; 0.0 0.0; 2.0 0.0]
     end
+    @testset "field parameter" begin
+        M = Grassmann(3, 2; parameter=:field)
+        @test repr(M) == "Grassmann(3, 2, ℝ; parameter=:field)"
+        @test get_total_space(M) == Stiefel(3, 2; parameter=:field)
+        @test typeof(get_embedding(M)) === Stiefel{Tuple{Int64,Int64},ℝ}
+
+        p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+        p2 = convert(ProjectorPoint, p)
+        @test get_embedding(M, p2) == Euclidean(3, 3; parameter=:field)
+    end
 end

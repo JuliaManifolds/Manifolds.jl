@@ -54,4 +54,9 @@ include("../utils.jl")
             )
         end
     end
+    @testset "field parameter" begin
+        M = Spectrahedron(4, 2; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(M) == "Spectrahedron(4, 2; parameter=:field)"
+    end
 end

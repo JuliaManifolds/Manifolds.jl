@@ -198,3 +198,11 @@ function Random.rand!(
     rand!(rng, get_embedding(M), pX; vector_at=vector_at, σ=σ)
     return pX
 end
+
+function Base.show(io::IO, ::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return print(io, "KendallsShapeSpace($n, $k)")
+end
+function Base.show(io::IO, M::KendallsShapeSpace{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return print(io, "KendallsShapeSpace($n, $k; parameter=:field)")
+end

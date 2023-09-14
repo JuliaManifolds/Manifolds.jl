@@ -68,4 +68,9 @@ include("../utils.jl")
             )
         end
     end
+    @testset "field parameter" begin
+        M = MultinomialSymmetric(3; parameter=:field)
+        @test repr(M) == "MultinomialSymmetric(3; parameter=:field)"
+        @test get_embedding(M) === MultinomialMatrices(3, 3; parameter=:field)
+    end
 end

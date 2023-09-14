@@ -199,8 +199,8 @@ using RecursiveArrayTools: ArrayPartition
 
         @test sprint(show, "text/plain", ProductManifold(Mse, Mse)) == """
         ProductManifold with 2 submanifolds:
-         ProductManifold(Sphere(2, ℝ), Euclidean(2; field = ℝ))
-         ProductManifold(Sphere(2, ℝ), Euclidean(2; field = ℝ))"""
+         ProductManifold(Sphere(2, ℝ), Euclidean(2; field=ℝ))
+         ProductManifold(Sphere(2, ℝ), Euclidean(2; field=ℝ))"""
     end
 
     M3 = Rotations(2)

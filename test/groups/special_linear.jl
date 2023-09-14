@@ -215,4 +215,9 @@ using NLsolve
             @test project(G, q, Y) ≈ Y
         end
     end
+    @testset "field parameter" begin
+        G = SpecialLinear(3; parameter=:field)
+        @test typeof(get_embedding(G)) === GeneralLinear{Tuple{Int64},ℝ}
+        @test repr(G) == "SpecialLinear(3, ℝ; parameter=:field)"
+    end
 end

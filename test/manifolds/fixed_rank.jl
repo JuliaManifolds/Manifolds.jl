@@ -239,4 +239,9 @@ include("../utils.jl")
         H = [0.0 3.0; 0.0 4.0; 0.0 1.0]
         @test is_vector(M, p, riemannian_Hessian(M, p, G, H, X))
     end
+    @testset "field parameter" begin
+        M = FixedRankMatrices(3, 2, 2; parameter=:field)
+        @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ; parameter=:field)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+    end
 end

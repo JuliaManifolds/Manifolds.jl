@@ -302,4 +302,10 @@ end
             @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-9)
         end
     end
+    @testset "field parameter" begin
+        SpSt_6_4 = SymplecticStiefel(2 * 3, 2 * 2; parameter=:field)
+        @test typeof(get_embedding(SpSt_6_4)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(SpSt_6_4) == "SymplecticStiefel(6, 4, ℝ; parameter=:field)"
+        @test get_total_space(SpSt_6_4) == Symplectic(6; parameter=:field)
+    end
 end

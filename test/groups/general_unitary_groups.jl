@@ -230,4 +230,18 @@ include("group_utils.jl")
         @test is_vector(Rotations(4), E, X3b)
         @test X3a[2, 3] ≈ π
     end
+
+    @testset "field parameter" begin
+        G = Orthogonal(2; parameter=:field)
+        @test repr(G) == "Orthogonal(2; parameter=:field)"
+
+        SU3 = SpecialUnitary(3; parameter=:field)
+        @test repr(SU3) == "SpecialUnitary(3; parameter=:field)"
+
+        G = Unitary(3, ℂ; parameter=:field)
+        @test repr(G) == "Unitary(3; parameter=:field)"
+
+        G = Unitary(3, ℍ; parameter=:field)
+        @test repr(G) == "Unitary(3, ℍ; parameter=:field)"
+    end
 end

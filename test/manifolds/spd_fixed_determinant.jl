@@ -34,4 +34,10 @@ include("../utils.jl")
     @test distance(M, q, exp(get_embedding(M), p, X)) ≈ 0 atol = 6e-16
     @test norm(M, p, log(M, p, q) - X) ≈ 0 atol = 3e-16
     @test norm(M, p, log(get_embedding(M), p, q) - X) ≈ 0 atol = 3e-16
+
+    @testset "field parameter" begin
+        M = SPDFixedDeterminant(2, 1.0; parameter=:field)
+        @test repr(M) == "SPDFixedDeterminant(2, 1.0; parameter=:field)"
+        @test get_embedding(M) == SymmetricPositiveDefinite(2; parameter=:field)
+    end
 end

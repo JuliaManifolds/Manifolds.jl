@@ -141,4 +141,5 @@ end
 
 @testset "Flatness edge cases" begin
     @test is_flat(SpecialUnitary(1))
+    @test is_flat(SpecialUnitary(1; parameter=:field))
 end

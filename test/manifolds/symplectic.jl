@@ -416,4 +416,9 @@ using ManifoldDiff
             @test ((Q' * pQ_1' * Q) * pQ_1 - I) == zeros(eltype(pQ_1), size(pQ_1)...)
         end
     end
+    @testset "field parameter" begin
+        Sp_2 = Symplectic(2; parameter=:field)
+        @test typeof(get_embedding(Sp_2)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(Sp_2) == "Symplectic(2, ℝ; parameter=:field)"
+    end
 end

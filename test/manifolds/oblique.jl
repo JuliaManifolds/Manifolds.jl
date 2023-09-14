@@ -50,5 +50,8 @@ include("../utils.jl")
     @testset "field parameter" begin
         @test typeof(^(Sphere(2; parameter=:field), 2)) ==
               Oblique{Tuple{Int,Int},ℝ,Tuple{Int}}
+
+        M = Oblique(3, 2; parameter=:field)
+        @test repr(M) == "Oblique(3, 2; field=ℝ, parameter=:field)"
     end
 end

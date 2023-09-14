@@ -51,5 +51,8 @@ include("../utils.jl")
         M = ProbabilitySimplex(2; parameter=:field)
         @test typeof(^(M, 2)) ==
               MultinomialMatrices{Tuple{Int64,Int64},ProbabilitySimplex{Tuple{Int64},:open}}
+
+        M = MultinomialMatrices(3, 2; parameter=:field)
+        @test repr(M) == "MultinomialMatrices(3, 2; parameter=:field)"
     end
 end

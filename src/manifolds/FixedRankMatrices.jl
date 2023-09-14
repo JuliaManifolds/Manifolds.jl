@@ -549,7 +549,7 @@ function retract_polar!(
     QV, RV = qr([p.Vt' tX.Vt'])
 
     # Compute T = svd(RU * [diagm(p.S) + X.M I; I zeros(k, k)] * RV')
-    @views begin
+    @views begin # COV_EXCL_LINE
         RU11 = RU[:, 1:k]
         RU12 = RU[:, (k + 1):(2 * k)]
         RV11 = RV[:, 1:k]

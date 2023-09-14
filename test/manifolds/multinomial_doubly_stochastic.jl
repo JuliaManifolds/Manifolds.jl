@@ -63,4 +63,9 @@ include("../utils.jl")
             )
         end
     end
+    @testset "field parameter" begin
+        M = MultinomialDoubleStochastic(3; parameter=:field)
+        @test repr(M) == "MultinomialDoubleStochastic(3; parameter=:field)"
+        @test get_embedding(M) === MultinomialMatrices(3, 3; parameter=:field)
+    end
 end

@@ -59,4 +59,9 @@ include("../utils.jl")
             test_inplace=true,
         )
     end
+    @testset "field parameter" begin
+        M = CenteredMatrices(3, 2; parameter=:field)
+        @test repr(M) == "CenteredMatrices(3, 2, ℝ; parameter=:field)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+    end
 end

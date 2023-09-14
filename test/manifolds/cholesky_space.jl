@@ -55,4 +55,8 @@ include("../utils.jl")
         @test_throws DomainError is_vector(M, pt4, pt3f, true)
         @test is_vector(M, pt4, pt2f)
     end
+    @testset "field parameter" begin
+        M = CholeskySpace(3; parameter=:field)
+        @test repr(M) == "CholeskySpace(3; parameter=:field)"
+    end
 end

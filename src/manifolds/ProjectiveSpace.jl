@@ -140,6 +140,9 @@ end
 function decorated_manifold(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field=𝔽)
 end
+function decorated_manifold(M::ProjectiveSpace{<:Tuple,𝔽}) where {𝔽}
+    return Euclidean(representation_size(M)...; field=𝔽, parameter=:field)
+end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
 
@@ -490,14 +493,11 @@ function Base.show(io::IO, M::ProjectiveSpace{Tuple{Int},𝔽}) where {𝔽}
     return print(io, "ProjectiveSpace($(n), $(𝔽); parameter=:field)")
 end
 function Base.show(io::IO, ::ArrayProjectiveSpace{TypeParameter{tn},𝔽}) where {tn<:Tuple,𝔽}
-    return print(io, "ArrayProjectiveSpace($(join(tn.parameters, ", ")); field = $(𝔽))")
+    return print(io, "ArrayProjectiveSpace($(join(tn.parameters, ", ")); field=$(𝔽))")
 end
 function Base.show(io::IO, M::ArrayProjectiveSpace{<:Tuple,𝔽}) where {𝔽}
     n = M.size
-    return print(
-        io,
-        "ArrayProjectiveSpace($(join(n, ", ")); field = $(𝔽), parameter=:field)",
-    )
+    return print(io, "ArrayProjectiveSpace($(join(n, ", ")); field=$(𝔽), parameter=:field)")
 end
 
 """

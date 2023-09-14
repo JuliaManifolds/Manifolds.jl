@@ -36,7 +36,8 @@ where ``\mathcal{C}^\prime`` is arbitrary, ``U_d^{\mathrm{H}}`` is the Hermitian
 ``U_d``, and ``U_d^{\mathrm{H}} U_d^\prime = 0`` for all ``d``.
 
 # Constructor
-    Tucker(N::NTuple{D, Int}, R::NTuple{D, Int}[, field = ℝ]; parameter::Symbol=:type)
+
+    Tucker(N::NTuple{D, Int}, R::NTuple{D, Int}[, field=ℝ]; parameter::Symbol=:type)
 
 Generate the manifold of `field`-valued tensors of dimensions  `N[1] × … × N[D]` and
 multilinear rank `R = (R[1], …, R[D])`.

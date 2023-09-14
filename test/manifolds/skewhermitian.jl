@@ -103,6 +103,9 @@ end
     end # for
     @testset "field parameter" begin
         M = SkewHermitianMatrices(3, ℝ; parameter=:field)
+        Mc = SkewHermitianMatrices(3, ℂ; parameter=:field)
         @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(M) == "SkewSymmetricMatrices(3; parameter=:field)"
+        @test repr(Mc) == "SkewHermitianMatrices(3, ℂ; parameter=:field)"
     end
 end # test SymmetricMatrices

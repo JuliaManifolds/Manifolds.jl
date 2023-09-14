@@ -248,7 +248,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
     Random.seed!(42)
     @testset "Metric Basics" begin
         @test repr(MetricManifold(Euclidean(3), EuclideanMetric())) ===
-              "MetricManifold(Euclidean(3; field = ℝ), EuclideanMetric())"
+              "MetricManifold(Euclidean(3; field=ℝ), EuclideanMetric())"
         @test repr(IsDefaultMetric(EuclideanMetric())) ===
               "IsDefaultMetric(EuclideanMetric())"
     end

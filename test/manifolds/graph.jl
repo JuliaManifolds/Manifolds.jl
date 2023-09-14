@@ -30,7 +30,7 @@ include("../utils.jl")
         Graph:
          {3, 2} undirected simple Int64 graph
         AbstractManifold on vertices:
-         Euclidean(2; field = ℝ)"""
+         Euclidean(2; field=ℝ)"""
 
         NE = GraphManifold(G, M, EdgeManifold())
         @test is_point(NE, x[1:2])
@@ -53,7 +53,7 @@ include("../utils.jl")
         Graph:
          {3, 2} undirected simple Int64 graph
         AbstractManifold on edges:
-         Euclidean(2; field = ℝ)"""
+         Euclidean(2; field=ℝ)"""
 
         G2 = SimpleDiGraph(3)
         add_edge!(G2, 1, 2)

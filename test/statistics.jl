@@ -515,6 +515,7 @@ end
                 x = [1.0, 2.0, 3.0, 4.0]
                 w = pweights(ones(length(x)) / length(x))
                 @test mean(M, x) ≈ mean(x)
+                @test mean(Euclidean(; parameter=:field), x) ≈ mean(x)
                 @test mean(M, x, w) ≈ mean(x, w)
                 @test median(M, x; rng=MersenneTwister(1212), atol=10^-12) ≈ median(x)
                 @test median(M, x, w; rng=MersenneTwister(1212), atol=10^-12) ≈ median(x, w)

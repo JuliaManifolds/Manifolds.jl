@@ -197,4 +197,9 @@ using NLsolve
             )
         end
     end
+    @testset "field parameter" begin
+        G = GeneralLinear(3; parameter=:field)
+        @test typeof(get_embedding(G)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(G) == "GeneralLinear(3, ℝ; parameter=:field)"
+    end
 end

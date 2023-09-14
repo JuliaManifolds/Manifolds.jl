@@ -307,7 +307,7 @@ function get_vector_orthonormal(
     # probably doesn't need rewrapping in SArray
     return c
 end
-function get_vector_orthonormal(
+function Manifolds.get_vector_orthonormal(
     ::Euclidean{TypeParameter{Tuple{N}}},
     ::SizedArray{S},
     c,
@@ -700,11 +700,11 @@ end
 
 function Base.show(io::IO, M::Euclidean{N,𝔽}) where {N<:Tuple,𝔽}
     size = get_parameter(M.size)
-    return print(io, "Euclidean($(join(size, ", ")); field = $(𝔽), parameter = :field)")
+    return print(io, "Euclidean($(join(size, ", ")); field=$(𝔽), parameter=:field)")
 end
 function Base.show(io::IO, M::Euclidean{N,𝔽}) where {N<:TypeParameter,𝔽}
     size = get_parameter(M.size)
-    return print(io, "Euclidean($(join(size, ", ")); field = $(𝔽))")
+    return print(io, "Euclidean($(join(size, ", ")); field=$(𝔽))")
 end
 #
 # Vector Transport

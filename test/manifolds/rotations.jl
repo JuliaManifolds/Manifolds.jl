@@ -274,4 +274,10 @@ include("../utils.jl")
             0.050996416671166 -0.024666891276861697 0.0
         ]
     end
+
+    @testset "field parameter" begin
+        M = Rotations(2; parameter=:field)
+        @test is_flat(M)
+        @test repr(M) == "Rotations(2; parameter=:field)"
+    end
 end

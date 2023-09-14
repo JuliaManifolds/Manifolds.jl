@@ -357,4 +357,14 @@ include("../utils.jl")
         @test volume_density(M, p, X) ≈ 2.980406103535168
         @test volume_density(M, p, [0.0, 0.0, 0.0]) ≈ 1.0
     end
+    @testset "field parameter" begin
+        M = Hyperbolic(2; parameter=:field)
+        @test repr(M) == "Hyperbolic(2; parameter=:field)"
+        @test typeof(get_embedding(M)) === Lorentz{Tuple{Int64},MinkowskiMetric}
+
+        for Tp in [PoincareBallPoint, PoincareHalfSpacePoint]
+            p = convert(Tp, [1.0, 0.0, sqrt(2.0)])
+            @test get_embedding(M, p) === Euclidean(2; parameter=:field)
+        end
+    end
 end

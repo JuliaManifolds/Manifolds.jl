@@ -19,6 +19,6 @@ function Base.show(io::IO, ::SpecialOrthogonal{TypeParameter{Tuple{n}}}) where {
     return print(io, "SpecialOrthogonal($(n))")
 end
 function Base.show(io::IO, M::SpecialOrthogonal{Tuple{Int}})
-    n = get_parameter(M.size)[1]
+    n = get_parameter(M.manifold.size)[1]
     return print(io, "SpecialOrthogonal($(n); parameter=:field)")
 end
