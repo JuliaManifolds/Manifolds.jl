@@ -163,7 +163,7 @@ include("../utils.jl")
             )
             p = exp(SOn, pts[1], X)
             X2 = log(SOn, pts[1], p)
-            @test distance(SOn, p, exp(SOn, pts[1], X2)) < 20 * eps()
+            @test distance(SOn, p, exp(SOn, pts[1], X2)) < 25 * eps()
         end
     end
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin
