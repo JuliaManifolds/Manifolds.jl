@@ -88,5 +88,6 @@ include("../utils.jl")
     @testset "field parameter" begin
         M = SymmetricMatrices(3, ℝ; parameter=:field)
         @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(M) == "SymmetricMatrices(3, ℝ; parameter=:field)"
     end
 end # test SymmetricMatrices

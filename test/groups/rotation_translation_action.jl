@@ -110,4 +110,6 @@ end
     q = similar(p1)
     apply!(A, q, a, p1)
     @test isapprox(q, apply(A, a, p1))
+    apply!(A, q, Identity(G), p1)
+    @test isapprox(q, p1)
 end

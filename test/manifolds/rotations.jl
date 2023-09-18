@@ -279,5 +279,11 @@ include("../utils.jl")
         M = Rotations(2; parameter=:field)
         @test is_flat(M)
         @test repr(M) == "Rotations(2; parameter=:field)"
+
+        M = Rotations(1; parameter=:field)
+        p = fill(1.0, 1, 1)
+        X = get_vector(M, p, Float64[], DefaultOrthonormalBasis())
+        @test X isa Matrix{Float64}
+        @test X == fill(0.0, 1, 1)
     end
 end
