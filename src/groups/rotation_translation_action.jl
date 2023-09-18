@@ -290,16 +290,16 @@ end
     optimal_alignment(A::LeftColumnwiseSpecialEuclideanAction, p, q)
 
 Compute optimal alignment of `p` to `q` under the forward left [`ColumnwiseSpecialEuclideanAction`](@ref).
-The algorithm, in sequence, computes optimal translation and optimal rotation
+The algorithm, in sequence, computes optimal translation and optimal rotation.
 """
 function optimal_alignment(
     A::LeftColumnwiseSpecialEuclideanAction{<:AbstractManifold,<:SpecialEuclidean},
     p,
     q,
 )
-    N = get_n(A.SE)
+    N = _get_parameter(A.SE)
     tr_opt = mean(q; dims=1) - mean(p; dims=1)
-    p_moved = p + tr_opt
+    p_moved = p .+ tr_opt
 
     Ostar = optimal_alignment(
         ColumnwiseMultiplicationAction(A.manifold, SpecialOrthogonal(N)),

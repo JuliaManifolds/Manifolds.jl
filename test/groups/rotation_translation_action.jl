@@ -88,19 +88,27 @@ end
     @test group_manifold(A) === M
     @test base_group(A) === SpecialEuclidean(2)
 
-    a = ArrayPartition(
+    a1 = ArrayPartition(
         [1.0, 2.0],
         [0.5851302132737501 -0.8109393525500014; 0.8109393525500014 0.5851302132737504],
     )
+    a2 = ArrayPartition(
+        [2.0, -1.0],
+        [0.903025374532402 -0.4295872122754759; 0.4295872122754759 0.9030253745324022],
+    )
+    a3 = ArrayPartition(
+        [2.0, 0.0],
+        [0.5851302132737501 -0.8109393525500014; 0.8109393525500014 0.5851302132737504],
+    )
     @test isapprox(
-        apply(A, a, p1),
+        apply(A, a1, p1),
         [
             1.567197334849809 0.3109111254828243 1.1218915396673668
             2.1314863675092206 1.6490786599533187 2.2194349725374605
         ],
     )
     @test isapprox(
-        inverse_apply(A, a, p1),
+        inverse_apply(A, a1, p1),
         [
             -2.2610332854401007 -2.3228048546690494 -2.0371886150121097
             -0.9390476037204165 0.40525761065242144 -0.5441732289245019
@@ -108,8 +116,17 @@ end
     )
     @test apply(A, Identity(G), p1) === p1
     q = similar(p1)
-    apply!(A, q, a, p1)
-    @test isapprox(q, apply(A, a, p1))
+    apply!(A, q, a1, p1)
+    @test isapprox(q, apply(A, a1, p1))
     apply!(A, q, Identity(G), p1)
     @test isapprox(q, p1)
+    test_action(
+        A,
+        [a1, a2, a3],
+        [p1, p2];
+        test_optimal_alignment=true,
+        test_diff=false,
+        test_switch_direction=false,
+        atol=1e-14,
+    )
 end
