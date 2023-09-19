@@ -396,6 +396,6 @@ riemann_tensor(::Hyperbolic, p, X, Y, Z)
 function riemann_tensor!(M::Hyperbolic, Xresult, p, X, Y, Z)
     innerZX = inner(M, p, Z, X)
     innerZY = inner(M, p, Z, Y)
-    Xresult .= -(innerZY .* X .- innerZX .* Y)
+    Xresult .= innerZX .* Y .- innerZY .* X
     return Xresult
 end
