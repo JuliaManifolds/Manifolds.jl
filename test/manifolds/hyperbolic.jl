@@ -330,7 +330,13 @@ include("../utils.jl")
     end
     @testset "other metric" begin
         M = Hyperbolic(2)
-        @test riemann_tensor(M, [0.0, 0.0, -1.0], [-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [-0.5, -0.5, 0.0]) == [0.5, -0.5, 0.0]
+        @test riemann_tensor(
+            M,
+            [0.0, 0.0, -1.0],
+            [-1.0, 0.0, 0.0],
+            [0.0, -1.0, 0.0],
+            [-0.5, -0.5, 0.0],
+        ) == [0.5, -0.5, 0.0]
     end
     @testset "ManifoldDiff" begin
         # ManifoldDiff
