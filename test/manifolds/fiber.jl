@@ -37,8 +37,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
         fiber_s = sprint(show, "text/plain", fiber)
         X_ps_test = "$(typeof(X_p))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
         @test X_ps == X_ps_test
-        @test_throws ErrorException project(fiber, p, X)
-        @test_throws ErrorException norm(fiber, p, X)
-        @test_throws ErrorException distance(fiber, p, X, X)
+        @test_throws MethodError project(fiber, p, X)
+        @test_throws MethodError norm(fiber, p, X)
+        @test_throws MethodError distance(fiber, p, X, X)
     end
 end

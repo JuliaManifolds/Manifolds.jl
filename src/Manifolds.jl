@@ -344,6 +344,7 @@ include("manifolds/MetricManifold.jl")
 include("manifolds/QuotientManifold.jl")
 include("manifolds/Fiber.jl")
 include("manifolds/FiberBundle.jl")
+include("manifolds/VectorFiber.jl")
 include("manifolds/VectorBundle.jl")
 include("manifolds/DirectSumBundle.jl")
 include("groups/group.jl")
@@ -672,7 +673,7 @@ export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ArrayPartition
 export ProjectedPointDistribution, TangentBundle, TangentBundleFibers
 export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
-export VectorBundleFibers
+export BundleFibers, VectorBundleFibers
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport

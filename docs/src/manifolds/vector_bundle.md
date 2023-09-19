@@ -1,11 +1,8 @@
 # [Vector bundles](@id VectorBundleSection)
 
-Vector bundle $E$ is a manifold that is built on top of another manifold $\mathcal M$ (base space).
-It is characterized by a continuous function $Π : E → \mathcal M$, such that for each point $p ∈ \mathcal M$ the preimage of $p$ by $Π$, $Π^{-1}(\{p\})$, has a structure of a vector space.
-These vector spaces are called fibers.
-Bundle projection can be performed using function [`bundle_projection`](@ref).
+Vector bundle $E$ is a special case of a [fiber bundle](@ref FiberBundleSection) where each fiber is a vector space.
 
-Tangent bundle is a simple example of a vector bundle, where each fiber is the tangent space at the specified point $x$.
+Tangent bundle is a simple example of a vector bundle, where each fiber is the tangent space at the specified point $p$.
 An object representing a tangent bundle can be obtained using the constructor called `TangentBundle`.
 
 Fibers of a vector bundle are represented by the type `VectorBundleFibers`.
@@ -25,7 +22,7 @@ It is used for example in musical isomorphisms (the [`flat`](@ref) and [`sharp`]
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
-Pages = ["manifolds/VectorBundle.jl"]
+Pages = ["manifolds/VectorFiber.jl", "manifolds/VectorBundle.jl"]
 Order = [:constant, :type, :function]
 ```
 

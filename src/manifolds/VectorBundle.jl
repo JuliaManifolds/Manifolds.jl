@@ -29,6 +29,11 @@ Deprecated: an alias for `FiberBundleProductVectorTransport`.
 """
 const VectorBundleVectorTransport = FiberBundleProductVectorTransport
 
+"""
+    VectorBundle{𝔽,TVS,TM,TVT}
+
+Alias for [`FiberBundle`](@ref) when fiber type is a [`VectorSpaceFiberType`](@ref) `TVS`.
+"""
 const VectorBundle{𝔽,TVS,TM,TVT} = FiberBundle{
     𝔽,
     VectorSpaceFiberType{TVS},

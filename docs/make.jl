@@ -137,6 +137,7 @@ makedocs(
                 "Unit-norm symmetric matrices" => "manifolds/spheresymmetricmatrices.md",
             ],
             "Combined manifolds" => [
+                "Fiber bundle" => "manifolds/fiber_bundle.md",
                 "Graph manifold" => "manifolds/graph.md",
                 "Power manifold" => "manifolds/power.md",
                 "Product manifold" => "manifolds/product.md",

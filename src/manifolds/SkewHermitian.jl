@@ -1,5 +1,5 @@
 @doc raw"""
-    SkewHermitianMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽}
+    SkewHermitianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{SkewHerm}(n)$ consisting of the real- or
 complex-valued skew-hermitian matrices of size ``n × n``, i.e. the set
@@ -14,11 +14,11 @@ Though it is slightly redundant, usually the matrices are stored as ``n × n`` a
 
 Note that in this representation, the real-valued part of the diagonal must be zero,
 which is also reflected in the
-[`manifold_dimension`](@ref manifold_dimension(::SkewHermitianMatrices{N,𝔽}) where {N,𝔽}).
+[`manifold_dimension`](@ref manifold_dimension(::SkewHermitianMatrices)).
 
 # Constructor
 
-    SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ)
+    SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of ``n × n`` skew-hermitian matrices.
 """
