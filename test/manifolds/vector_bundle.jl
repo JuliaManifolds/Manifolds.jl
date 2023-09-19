@@ -4,14 +4,14 @@ using RecursiveArrayTools
 
 struct TestVectorSpaceType <: VectorSpaceType end
 
-@testset "Tangent bundle" begin
+@testset "Vector bundle" begin
     M = Sphere(2)
+    TB = TangentBundle(M)
     m_prod_retr = Manifolds.FiberBundleProductRetraction()
     m_prod_invretr = Manifolds.FiberBundleInverseProductRetraction()
     m_sasaki = SasakiRetraction(5)
 
     @testset "Nice access to vector bundle components" begin
-        TB = TangentBundle(M)
         @testset "ArrayPartition" begin
             p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 2.0, 4.0])
             @test p[TB, :point] === p.x[1]
@@ -33,39 +33,43 @@ struct TestVectorSpaceType <: VectorSpaceType end
         end
     end
 
-    types = [Vector{Float64}]
-    TEST_FLOAT32 && push!(types, Vector{Float32})
-    TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
-
-    for T in types
-        p = convert(T, [1.0, 0.0, 0.0])
-        TB = TangentBundle(M)
+    @testset "basic tests" begin
         @test injectivity_radius(TB) == 0
-        TpM = TangentSpaceAtPoint(M, p)
         @test sprint(show, TB) == "TangentBundle(Sphere(2, ℝ))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2 * manifold_dimension(M)
         @test !is_flat(TB)
-        @test is_flat(TpM)
         @test representation_size(TB) === nothing
         @test default_inverse_retraction_method(TB) === m_prod_invretr
         @test default_retraction_method(TB) == m_prod_retr
         @test default_vector_transport_method(TB) isa
               Manifolds.FiberBundleProductVectorTransport
         CTB = CotangentBundle(M)
+        CTBF = CotangentBundleFibers(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
         @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
               "VectorBundle(TestVectorSpaceType(), Sphere(2, ℝ))"
+        @test sprint(show, CTBF) == "VectorBundleFibers(CotangentSpace, Sphere(2, ℝ))"
+        @test Manifolds.fiber_dimension(CTBF) == 2
+        @test Manifolds.fiber_dimension(M, ManifoldsBase.CotangentSpace) == 2
+        @test base_manifold(TangentBundle(M)) == M
+    end
+
+    types = [Vector{Float64}]
+    TEST_FLOAT32 && push!(types, Vector{Float32})
+    TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
+
+    for T in types
+        p = convert(T, [1.0, 0.0, 0.0])
+        TpM = TangentSpaceAtPoint(M, p)
+        @test is_flat(TpM)
+
         @testset "Type $T" begin
             pts_tb = [
                 ArrayPartition(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, -1.0, -1.0])),
                 ArrayPartition(convert(T, [0.0, 1.0, 0.0]), convert(T, [2.0, 0.0, 1.0])),
                 ArrayPartition(convert(T, [1.0, 0.0, 0.0]), convert(T, [0.0, 2.0, -1.0])),
             ]
-            @inferred ArrayPartition(
-                convert(T, [1.0, 0.0, 0.0]),
-                convert(T, [0.0, -1.0, -1.0]),
-            )
             for pt in pts_tb
                 @test bundle_projection(TB, pt) ≈ pt.x[1]
             end
@@ -87,7 +91,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 retraction_methods=[m_prod_retr, m_sasaki],
                 test_exp_log=false,
                 test_injectivity_radius=false,
-                test_tangent_vector_broadcasting=false,
+                test_tangent_vector_broadcasting=true,
                 test_vee_hat=true,
                 test_project_tangent=true,
                 test_project_point=true,
@@ -168,8 +172,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
     @test CotangentBundle{ℝ,Sphere{2,ℝ}} ==
           VectorBundle{ℝ,Manifolds.CotangentSpaceType,Sphere{2,ℝ}}
 
-    @test base_manifold(TangentBundle(M)) == M
-
     @testset "tensor product" begin
         TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)
         @test sprint(show, TT) == "TensorProductType(TangentSpace, TangentSpace)"
@@ -182,9 +184,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
     @testset "Error messages" begin
         vbf = VectorBundleFibers(TestVectorSpaceType(), Euclidean(3))
-        @test_throws ErrorException inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
-        @test_throws ErrorException Manifolds.project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
-        @test_throws ErrorException zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
+        @test_throws MethodError inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
+        @test_throws MethodError project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
+        @test_throws MethodError zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
         @test_throws MethodError vector_space_dimension(vbf)
     end
 

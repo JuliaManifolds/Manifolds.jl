@@ -202,7 +202,7 @@ function get_coordinates!(
     return Y
 end
 
-function _get_vector(M::FiberBundle, p, X, B::AbstractBasis)
+function get_vector(M::FiberBundle, p, X, B::AbstractBasis)
     n = manifold_dimension(M.manifold)
     xp1 = submanifold_component(p, Val(1))
     return ArrayPartition(

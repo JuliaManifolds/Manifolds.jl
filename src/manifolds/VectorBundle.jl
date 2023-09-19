@@ -154,13 +154,8 @@ end
 Inner product of vectors `X` and `Y` from the vector space of type `B.fiber`
 at point `p` from manifold `B.manifold`.
 """
-function inner(B::BundleFibers, p, X, Y)
-    return error(
-        "inner not defined for vector space family of type $(typeof(B)), " *
-        "point of type $(typeof(p)) and " *
-        "vectors of types $(typeof(X)) and $(typeof(Y)).",
-    )
-end
+inner(B::BundleFibers, p, X, Y)
+
 inner(B::TangentBundleFibers, p, X, Y) = inner(B.manifold, p, X, Y)
 function inner(B::CotangentBundleFibers, p, X, Y)
     return inner(B.manifold, p, sharp(B.manifold, p, X), sharp(B.manifold, p, Y))
@@ -304,11 +299,6 @@ end
 
 function project!(B::TangentBundleFibers, Y, p, X)
     return project!(B.manifold, Y, p, X)
-end
-function project!(B::BundleFibers, Y, p, X)
-    return error(
-        "project! not implemented for vector space family of type $(typeof(B)), output vector of type $(typeof(Y)) and input vector at point $(typeof(p)) with type of w $(typeof(X)).",
-    )
 end
 
 function _retract(M::VectorBundle, p, X, t::Number, ::FiberBundleProductRetraction)
@@ -576,11 +566,8 @@ end
 Save the zero vector from the vector space of type `B.fiber` at point `p`
 from manifold `B.manifold` to `X`.
 """
-function zero_vector!(B::BundleFibers, X, p)
-    return error(
-        "zero_vector! not implemented for vector space family of type $(typeof(B)).",
-    )
-end
+zero_vector!(B::BundleFibers, X, p)
+
 function zero_vector!(B::TangentBundleFibers, X, p)
     return zero_vector!(B.manifold, X, p)
 end
@@ -597,31 +584,3 @@ Since this a flat space by itself, the result is always the zero tangent vector.
 Weingarten(::TangentSpaceAtPoint, p, X, V)
 
 Weingarten!(::TangentSpaceAtPoint, Y, p, X, V) = fill!(Y, 0)
-
-@doc raw"""
-    zero_vector(B::VectorBundle, p)
-
-Zero tangent vector at point `p` from the vector bundle `B`
-over manifold `B.fiber` (denoted $\mathcal M$). The zero vector belongs to the space $T_{p}B$
-
-Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
-    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
-    canonical projection of that vector bundle $B$.
-
-The zero vector is calculated as
-
-$\mathbf{0}_{p} = (\mathbf{0}_{x_p}, \mathbf{0}_F)$
-
-where $\mathbf{0}_{x_p}$ is the zero tangent vector from $T_{x_p}\mathcal M$ and
-$\mathbf{0}_F$ is the zero element of the vector space $F$.
-"""
-zero_vector(::VectorBundle, ::Any...)
-
-function zero_vector!(B::VectorBundle, X, p)
-    xp, Vp = submanifold_components(B.manifold, p)
-    VXM, VXF = submanifold_components(B.manifold, X)
-    zero_vector!(B.manifold, VXM, xp)
-    zero_vector!(B.fiber, VXF, Vp)
-    return X
-end

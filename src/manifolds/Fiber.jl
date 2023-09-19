@@ -114,7 +114,6 @@ const VectorSpaceAtPoint{𝔽,M,TSpaceType} = FiberAtPoint{
 function VectorSpaceAtPoint(M::AbstractManifold, fiber::VectorSpaceFiberType, p)
     return FiberAtPoint(BundleFibers(fiber, M), p)
 end
-VectorSpaceAtPoint(fiber::BundleFibers{<:VectorSpaceFiberType}, p) = FiberAtPoint(fiber, p)
 
 """
     TangentSpaceAtPoint{𝔽,M}
