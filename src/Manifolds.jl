@@ -186,6 +186,7 @@ using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
 using HybridArrays
+using InteractiveUtils: subtypes
 using Kronecker
 using Graphs
 using LinearAlgebra

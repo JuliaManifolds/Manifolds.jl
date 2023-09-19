@@ -111,8 +111,8 @@ function find_manifold_retractions(M; p=rand(M), X=rand(M; vector_at=p), t=1.0)
     checks = AbstractRetractionMethod[]
     # The following can only be checked on certain manifolds and/or need parameters
     auto_excl = [
-        EmbeddedRetraction,
-        RetractionWithKeywords,
+        ManifoldsBase.EmbeddedRetraction,
+        ManifoldsBase.RetractionWithKeywords,
         ODEExponentialRetraction,
         PadeRetraction,
         ProductRetraction, # generic on Products
@@ -157,10 +157,10 @@ function find_manifold_inverse_retractions(M; p=rand(M), X=rand(M; vector_at=p),
     checks = AbstractInverseRetractionMethod[]
     # The following can only be checked on certain manifolds and/or need parameters
     auto_excl = [
-        EmbeddedInverseRetraction,
+        ManifoldsBase.EmbeddedInverseRetraction,
         PadeInverseRetraction,
         InverseProductRetraction,
-        InverseRetractionWithKeywords,
+        ManifoldsBase.InverseRetractionWithKeywords,
     ]
     for T in subtypes(AbstractInverseRetractionMethod) #Check all existing ones besides the abstract ones
         if !isabstracttype(T) && T ∉ auto_excl
@@ -201,9 +201,9 @@ function find_manifold_vector_transports(M; p=rand(M), X=rand(M; vector_at=p), t
     # The following can only be checked on certain manifolds and/or need parameters
     auto_excl = [
         ScaledVectorTransport,
-        VectorTransportWithKeywords,
+        ManifoldsBase.VectorTransportWithKeywords,
         DifferentiatedRetractionVectorTransport,
-        VectorTransportTo, #only generic for internal use
+        ManifoldsBase.VectorTransportTo, #only generic for internal use
     ]
     for T in [
         subtypes(AbstractVectorTransportMethod)...,
@@ -242,7 +242,6 @@ function find_manifold_properties(M::AbstractManifold)
     properties = Dict{Symbol,<:Any}()
     return properties
 end
-
 
 """
     ManifoldFeatures
@@ -310,18 +309,17 @@ function show(io::IO, mf::ManifoldFeatures)
     # Print features to terminal
     s = """
     ManifoldFeatures\n\n
-
     Functions
-    $(join(["  * $(f)" for f in mf.functions],"\n"))
+    $(join(sort(["  * $(f)" for f in mf.functions]),"\n"))
 
     Retractions
-    $(join(["  * $(typeof(r))" for r in mf.retractions],"\n"))
+    $(join(sort(["  * $((Base.typename(typeof(r)).name))" for r in mf.retractions]),"\n"))
 
     Inverse Retractions
-    $(join(["  * $(typeof(ir))" for ir in mf.inverse_retractions],"\n"))
+    $(join(sort(["  * $(Base.typename(typeof(ir)).name)" for ir in mf.inverse_retractions]),"\n"))
 
     Vector transports
-    $(join(["  * $(typeof(v))" for v in mf.vector_transports],"\n"))
+    $(join(sort(["  * $(Base.typename(typeof(v)).name)" for v in mf.vector_transports]),"\n"))
     """
     return print(io, s)
 end
