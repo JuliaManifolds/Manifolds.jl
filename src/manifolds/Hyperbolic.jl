@@ -385,10 +385,10 @@ end
     riemann_tensor(M::Hyperbolic{n}, p, X, Y, Z)
 
 Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`Hyperbolic`](@ref) `M`.
-The formula reads:
+The formula reads (see e.g., [Lee:2019](@cite) Proposition 8.36)
 
 ````math
-R(X,Y)Z = - \langle Z, Y \rangle X + \langle Z, X \rangle Y
+R(X,Y)Z = - (\langle Z, Y \rangle X - \langle Z, X \rangle Y)
 ````
 """
 riemann_tensor(::Hyperbolic, p, X, Y, Z)
