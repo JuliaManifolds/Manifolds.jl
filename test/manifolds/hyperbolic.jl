@@ -328,6 +328,10 @@ include("../utils.jl")
         A = change_metric(M, MinkowskiMetric(), p, X)
         @test A == X
     end
+    @testset "other metric" begin
+        M = Hyperbolic(2)
+        @test riemann_tensor(M, [0.0, 0.0, -1.0], [-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [-0.5, -0.5, 0.0]) == [0.5, -0.5, 0.0]
+    end
     @testset "ManifoldDiff" begin
         # ManifoldDiff
         M = Hyperbolic(2)
