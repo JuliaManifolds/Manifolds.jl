@@ -393,9 +393,7 @@ R(X,Y)Z = - (\langle Z, Y \rangle X - \langle Z, X \rangle Y)
 """
 riemann_tensor(::Hyperbolic, p, X, Y, Z)
 
-function riemann_tensor!(M::Hyperbolic, Xresult, p, X, Y, Z)
-    innerZX = inner(M, p, Z, X)
-    innerZY = inner(M, p, Z, Y)
-    Xresult .= innerZX .* Y .- innerZY .* X
-    return Xresult
+function riemann_tensor!(M::Hyperbolic, W, p, X, Y, Z)
+    W .= inner(M, p, Z, X) .* Y .- inner(M, p, Z, Y) .* X
+    return W
 end
