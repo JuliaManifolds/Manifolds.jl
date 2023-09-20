@@ -186,6 +186,7 @@ using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
 using HybridArrays
+using InteractiveUtils: subtypes
 using Kronecker
 using Graphs
 using LinearAlgebra
@@ -329,7 +330,7 @@ using Statistics
 using StatsBase
 using StatsBase: AbstractWeights
 
-include("utils.jl")
+include("utils/helpers.jl")
 
 include("product_representations.jl")
 
@@ -470,6 +471,7 @@ include("groups/special_euclidean.jl")
 
 # final utilities
 include("trait_recursion_breaking.jl")
+include("utils/features.jl")
 
 @doc raw"""
     Base.in(p, M::AbstractManifold; kwargs...)
