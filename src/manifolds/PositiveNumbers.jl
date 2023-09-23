@@ -307,6 +307,21 @@ function Random.rand(rng::AbstractRNG, ::PositiveNumbers; σ=1.0, vector_at=noth
     return pX
 end
 
+function Random.rand!(
+    rng::AbstractRNG,
+    ::PositiveNumbers,
+    pX;
+    σ=one(eltype(pX)),
+    vector_at=nothing,
+)
+    if vector_at === nothing
+        pX .= exp(randn(rng) * σ)
+    else
+        pX .= vector_at * randn(rng) * σ
+    end
+    return pX
+end
+
 @doc raw"""
     riemannian_Hessian(M::SymmetricPositiveDefinite, p, G, H, X)
 

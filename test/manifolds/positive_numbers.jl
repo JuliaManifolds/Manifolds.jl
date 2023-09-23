@@ -94,4 +94,12 @@ include("../utils.jl")
         @test volume_density(M, 0.5, 2.0) ≈ exp(4.0)
         @test volume_density(M5, [0.5, 1.0, 2.0], [1.0, -1.0, 2.0]) ≈ exp(2.0)
     end
+    @testset "Inplace random values" begin
+        p = fill(NaN)
+        X = fill(NaN)
+        rand!(M, p)
+        @test is_point(M, p)
+        rand!(M, X; vector_at=p)
+        @test is_vector(M, p, X)
+    end
 end
