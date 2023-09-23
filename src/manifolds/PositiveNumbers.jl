@@ -298,12 +298,7 @@ function Random.rand(M::PositiveNumbers; kwargs...)
     return rand(Random.default_rng(), M; kwargs...)
 end
 
-function Random.rand(
-    rng::AbstractRNG,
-    ::PositiveNumbers;
-    σ=1.0,
-    vector_at=nothing,
-)
+function Random.rand(rng::AbstractRNG, ::PositiveNumbers; σ=1.0, vector_at=nothing)
     if vector_at === nothing
         return exp(randn(rng) * σ)
     else
@@ -311,7 +306,6 @@ function Random.rand(
     end
     return pX
 end
-
 
 function Random.rand!(
     rng::AbstractRNG,
