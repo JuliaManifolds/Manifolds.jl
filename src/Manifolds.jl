@@ -346,7 +346,6 @@ include("manifolds/Fiber.jl")
 include("manifolds/FiberBundle.jl")
 include("manifolds/VectorFiber.jl")
 include("manifolds/VectorBundle.jl")
-include("manifolds/DirectSumBundle.jl")
 include("groups/group.jl")
 
 # Features I: Which are extended on Meta Manifolds

@@ -32,7 +32,10 @@ const VectorBundleVectorTransport = FiberBundleProductVectorTransport
 """
     VectorBundle{𝔽,TVS,TM,TVT}
 
-Alias for [`FiberBundle`](@ref) when fiber type is a [`VectorSpaceFiberType`](@ref) `TVS`.
+Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
+[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType).
+
+`VectorSpaceFiberType` is used to encode vector spaces as fiber types.
 """
 const VectorBundle{𝔽,TVS,TM,TVT} = FiberBundle{
     𝔽,

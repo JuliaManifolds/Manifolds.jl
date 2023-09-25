@@ -95,7 +95,6 @@ makedocs(
             "work in charts" => "tutorials/working-in-charts.md",
             "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
             "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
-            "do rigid body dynamics with geometry" => "tutorials/rigid-body-dynamics.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [

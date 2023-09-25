@@ -11,13 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Vector bundles are generalized to fiber bundles.
 - `RotationTranslationAction` is introduced.
-- `DirectSumType` for vector bundles: `MultitangentBundle`, `MultitangentBundleFibers`, `MultitangentSpaceAtPoint`.
 
 ### Changed
 
 - Sizes of all manifolds can now be either encoded in type or stored in a field to avoid over-specialization.
-  The default is set to store the size in type parameter. For field storage, pass the `parameter=:field` keyword
-  argument to manifold constructor.
+  The default is set to store the size in type parameter, replicating the previous behavior.
+  For field storage, pass the `parameter=:field` keyword argument to manifold constructor.
   For example statically sized `CenteredMatrices{m,n}` is now `CenteredMatrices{TypeParameter{Tuple{m,n}}}`, whereas the type of special Euclidean group with field-stored size is `CenteredMatrices{Tuple{Int,Int}}`. Similar change applies to:
   - `CenteredMatrices{m,n}`,
   - `CholeskySpace{N}`,
@@ -98,4 +97,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `ProductRepr` is removed; please use `ArrayPartition` instead.
-- Default methods throwing "not implemented" `ErrorException` for some group-related operations.
+- Default methods throwing "not implemented" `ErrorException` for some group-related operations. Standard `MethodError` is now thrown instead.

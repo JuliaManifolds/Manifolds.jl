@@ -179,7 +179,6 @@ include("utils.jl")
         include_test("manifolds/fiber.jl")
         include_test("manifolds/fiber_bundle.jl")
         include_test("manifolds/vector_bundle.jl")
-        include_test("manifolds/direct_sum_bundle.jl")
         include_test("manifolds/graph.jl")
 
         include_test("metric.jl")
