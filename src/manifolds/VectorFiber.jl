@@ -109,6 +109,10 @@ function CotangentSpaceAtPoint(M::AbstractManifold, p)
     return VectorSpaceAtPoint(M, CotangentFiber, p)
 end
 
+function allocate_result(M::TangentSpaceAtPoint, ::typeof(rand))
+    return zero_vector(M.fiber.manifold, M.point)
+end
+
 """
     distance(M::TangentSpaceAtPoint, p, q)
 

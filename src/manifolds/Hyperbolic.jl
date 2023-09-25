@@ -398,3 +398,20 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
     @eval zero_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
     @eval zero_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
 end
+
+@doc raw"""
+    riemann_tensor(M::Hyperbolic{n}, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`Hyperbolic`](@ref) `M`.
+The formula reads (see e.g., [Lee:2019](@cite) Proposition 8.36)
+
+````math
+R(X,Y)Z = - (\langle Z, Y \rangle X - \langle Z, X \rangle Y)
+````
+"""
+riemann_tensor(::Hyperbolic, p, X, Y, Z)
+
+function riemann_tensor!(M::Hyperbolic, W, p, X, Y, Z)
+    W .= inner(M, p, Z, X) .* Y .- inner(M, p, Z, Y) .* X
+    return W
+end

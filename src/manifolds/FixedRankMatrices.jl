@@ -132,6 +132,19 @@ function allocate_result(M::FixedRankMatrices, ::typeof(project), X, p, vals...)
     # vals are p and X, so we can use their fields to set up those of the UMVTVector
     return UMVTVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
 end
+function allocate_result(::FixedRankMatrices, ::typeof(rand), p)
+    m, n, k = get_parameter(M.size)
+    # vals are p and X, so we can use their fields to set up those of the UMVTVector
+    return UMVTVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
+end
+function allocate_result(::FixedRankMatrices, ::typeof(rand))
+    m, n, k = get_parameter(M.size)
+    return SVDMPoint(
+        Matrix{Float64}(undef, m, k),
+        Vector{Float64}(undef, k),
+        Matrix{Float64}(undef, k, n),
+    )
+end
 
 Base.copy(v::UMVTVector) = UMVTVector(copy(v.U), copy(v.M), copy(v.Vt))
 
