@@ -86,17 +86,6 @@ function CotangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTrans
     return VectorBundle(CotangentSpace, M, vtm)
 end
 
-base_manifold(B::VectorBundle) = base_manifold(B.manifold)
-
-"""
-    bundle_projection(B::VectorBundle, p::ArrayPartition)
-
-Projection of point `p` from the bundle `M` to the base manifold.
-Returns the point on the base manifold `B.manifold` at which the vector part
-of `p` is attached.
-"""
-bundle_projection(B::VectorBundle, p) = submanifold_component(B.manifold, p, Val(1))
-
 function default_inverse_retraction_method(::TangentBundle)
     return FiberBundleInverseProductRetraction()
 end

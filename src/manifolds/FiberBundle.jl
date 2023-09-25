@@ -135,6 +135,17 @@ See also [`FiberBundleInverseProductRetraction`](@ref).
 """
 struct FiberBundleProductRetraction <: AbstractRetractionMethod end
 
+base_manifold(B::FiberBundle) = base_manifold(B.manifold)
+
+"""
+    bundle_projection(B::FiberBundle, p::ArrayPartition)
+
+Projection of point `p` from the bundle `M` to the base manifold.
+Returns the point on the base manifold `B.manifold` at which the vector part
+of `p` is attached.
+"""
+bundle_projection(B::FiberBundle, p) = submanifold_component(B.manifold, p, Val(1))
+
 function get_basis(M::FiberBundle, p, B::AbstractBasis)
     xp1 = submanifold_component(p, Val(1))
     base_basis = get_basis(M.manifold, xp1, B)
