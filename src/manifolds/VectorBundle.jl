@@ -292,6 +292,10 @@ See also [`VectorBundleInverseProductRetraction`](@ref).
 """
 struct VectorBundleProductRetraction <: AbstractRetractionMethod end
 
+function allocate_result(M::TangentSpaceAtPoint, ::typeof(rand))
+    return zero_vector(M.fiber.manifold, M.point)
+end
+
 base_manifold(B::VectorBundleFibers) = base_manifold(B.manifold)
 base_manifold(B::VectorSpaceAtPoint) = base_manifold(B.fiber)
 base_manifold(B::VectorBundle) = base_manifold(B.manifold)
