@@ -26,7 +26,6 @@ end
     else
         return merge_traits(
             IsGroupManifold(M.op),
-            HasBiinvariantMetric(),
             IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(), #pass to Euclidean by default/last fallback
@@ -35,6 +34,11 @@ end
 end
 
 exp!(::TranslationGroup, q, ::Identity{AdditionOperation}, X) = copyto!(q, X)
+
+has_biinvariant_metric(::TranslationGroup) = true
+
+has_invariant_metric(::TranslationGroup) = true
+has_invariant_metric(::TranslationGroup, ::ActionDirectionAndSide) = true
 
 identity_element!(::TranslationGroup, p) = fill!(p, 0)
 

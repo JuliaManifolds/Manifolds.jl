@@ -4,6 +4,9 @@ using Base: decode_overlong
 include("../utils.jl")
 include("group_utils.jl")
 
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
+
 @testset "General group tests" begin
     @testset "Not implemented operation" begin
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
@@ -126,32 +129,17 @@ include("group_utils.jl")
     end
 
     @testset "Action direction" begin
-        @test switch_direction(LeftBackwardAction()) === RightForwardAction()
-        @test switch_direction(LeftForwardAction()) === RightBackwardAction()
-        @test switch_direction(RightBackwardAction()) === LeftForwardAction()
-        @test switch_direction(RightForwardAction()) === LeftBackwardAction()
-
-        @test switch_direction(LeftBackwardAction(), Manifolds.LeftRightSwitch()) ===
-              RightBackwardAction()
-        @test switch_direction(LeftForwardAction(), Manifolds.LeftRightSwitch()) ===
-              RightForwardAction()
-        @test switch_direction(RightBackwardAction(), Manifolds.LeftRightSwitch()) ===
-              LeftBackwardAction()
-        @test switch_direction(RightForwardAction(), Manifolds.LeftRightSwitch()) ===
-              LeftForwardAction()
-
-        @test switch_direction(LeftBackwardAction(), Manifolds.ForwardBackwardSwitch()) ===
-              LeftForwardAction()
-        @test switch_direction(LeftForwardAction(), Manifolds.ForwardBackwardSwitch()) ===
-              LeftBackwardAction()
-        @test switch_direction(RightBackwardAction(), Manifolds.ForwardBackwardSwitch()) ===
-              RightForwardAction()
-        @test switch_direction(RightForwardAction(), Manifolds.ForwardBackwardSwitch()) ===
-              RightBackwardAction()
+        @test switch_direction(LeftAction()) === RightAction()
+        @test switch_direction(RightAction()) === LeftAction()
 
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
         @test Manifolds._action_order(G, 1, 2, LeftForwardAction()) === (1, 2)
         @test Manifolds._action_order(G, 1, 2, RightBackwardAction()) === (2, 1)
+    end
+
+    @testset "Action side" begin
+        @test switch_side(LeftSide()) === RightSide()
+        @test switch_side(RightSide()) === LeftSide()
     end
 
     @testset "Addition operation" begin
@@ -296,7 +284,7 @@ include("group_utils.jl")
     end
 end
 
-struct NotImplementedAction <: AbstractGroupAction{LeftForwardAction} end
+struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
 
 @testset "General group action tests" begin
     @testset "Not implemented operations" begin

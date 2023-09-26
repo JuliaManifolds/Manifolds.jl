@@ -169,7 +169,7 @@ function inverse_translate_diff(
     p,
     q,
     X,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     return translate_diff(G, inv(G, p), q, X, conv)
 end
@@ -179,7 +179,7 @@ function inverse_translate_diff!(
     p,
     q,
     X,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end

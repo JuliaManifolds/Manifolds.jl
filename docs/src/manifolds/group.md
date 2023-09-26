@@ -185,16 +185,17 @@ Order = [:constant, :type, :function]
 Group actions represent actions of a given group on a specified manifold.
 The following operations are available:
 
+* [`action_side`](@ref): whether action acts from the [`LeftSide`](@ref) or [`RightSide`](@ref) (not to be confused with action direction).
 * [`apply`](@ref): performs given action of an element of the group on an object of compatible type.
 * [`apply_diff`](@ref): differential of [`apply`](@ref) with respect to the object it acts upon.
-* [`direction`](@ref): tells whether a given action is [`LeftForwardAction`](@ref), [`RightForwardAction`](@ref), [`LeftBackwardAction`](@ref) or [`RightBackwardAction`](@ref).
+* [`direction`](@ref): tells whether a given action is [`LeftAction`](@ref), [`RightAction`](@ref).
 * [`inverse_apply`](@ref): performs given action of the inverse of an element of the group on an object of compatible type. By default inverts the element and calls [`apply`](@ref) but it may be have a faster implementation for some actions.
 * [`inverse_apply_diff`](@ref): counterpart of [`apply_diff`](@ref) for [`inverse_apply`](@ref).
 * [`optimal_alignment`](@ref): determine the element of a group that, when it acts upon a point, produces the element closest to another given point in the metric of the G-manifold.
 
 Furthermore, group operation action features the following:
 
-* [`translate`](@ref Main.Manifolds.translate): an operation that performs either left ([`LeftForwardAction`](@ref)) or right ([`RightBackwardAction`](@ref)) translation, or actions by inverses of elements ([`RightForwardAction`](@ref) and [`LeftBackwardAction`](@ref)). This is by default performed by calling [`compose`](@ref) with appropriate order of arguments. This function is separated from `compose` mostly to easily represent its differential, [`translate_diff`](@ref).
+* [`translate`](@ref Main.Manifolds.translate): an operation that performs either ([`LeftAction`](@ref)) on the [`LeftSide`](@ref) or ([`RightAction`](@ref)) on the [`RightSide`](@ref) translation, or actions by inverses of elements ([`RightAction`](@ref) on the [`LeftSide`](@ref) and [`LeftAction`](@ref) on the [`RightSide`](@ref)). This is by default performed by calling [`compose`](@ref) with appropriate order of arguments. This function is separated from `compose` mostly to easily represent its differential, [`translate_diff`](@ref).
 * [`translate_diff`](@ref): differential of [`translate`](@ref Main.Manifolds.translate) with respect to the point being translated.
 * [`adjoint_action`](@ref): adjoint action of a given element of a Lie group on an element of its Lie algebra.
 * [`lie_bracket`](@ref): Lie bracket of two vectors from a Lie algebra corresponding to a given group.

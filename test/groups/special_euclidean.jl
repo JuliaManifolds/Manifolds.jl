@@ -5,6 +5,9 @@ using ManifoldsBase: VeeOrthogonalBasis
 
 Random.seed!(10)
 
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
+
 @testset "Special Euclidean group" begin
     for se_parameter in [:field, :type]
         @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
@@ -64,123 +67,112 @@ Random.seed!(10)
                 @test isapprox(G, identity_element(G), Identity(G))
             end
 
-            @testset "product repr" begin
-                pts = [ArrayPartition(tp...) for tp in tuple_pts]
-                X_pts = [ArrayPartition(tX...) for tX in tuple_X]
+            pts = [ArrayPartition(tp...) for tp in tuple_pts]
+            X_pts = [ArrayPartition(tX...) for tX in tuple_X]
 
-                @testset "setindex! and getindex" begin
-                    p1 = pts[1]
-                    p2 = allocate(p1)
-                    @test p1[G, 1] === p1[M, 1]
-                    p2[G, 1] = p1[M, 1]
-                    @test p2[G, 1] == p1[M, 1]
+            @testset "setindex! and getindex" begin
+                p1 = pts[1]
+                p2 = allocate(p1)
+                @test p1[G, 1] === p1[M, 1]
+                p2[G, 1] = p1[M, 1]
+                @test p2[G, 1] == p1[M, 1]
+            end
+
+            g1, g2 = pts[1:2]
+            t1, R1 = submanifold_components(g1)
+            t2, R2 = submanifold_components(g2)
+            g1g2 = ArrayPartition(R1 * t2 + t1, R1 * R2)
+            @test isapprox(G, compose(G, g1, g2), g1g2)
+            g1g2mat = affine_matrix(G, g1g2)
+            @test g1g2mat ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
+            @test affine_matrix(G, g1g2mat) === g1g2mat
+            if se_parameter === :type
+                @test affine_matrix(G, Identity(G)) isa SDiagonal{n,Float64}
+            end
+            @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
+
+            w = translate_diff(G, pts[1], Identity(G), X_pts[1])
+            w2 = allocate(w)
+            submanifold_component(w2, 1) .= submanifold_component(w, 1)
+            submanifold_component(w2, 2) .=
+                submanifold_component(pts[1], 2) * submanifold_component(w, 2)
+            w2mat = screw_matrix(G, w2)
+            @test w2mat ≈ affine_matrix(G, pts[1]) * screw_matrix(G, X_pts[1])
+            @test screw_matrix(G, w2mat) === w2mat
+
+            test_group(
+                G,
+                pts,
+                X_pts,
+                X_pts;
+                test_diff=true,
+                test_lie_bracket=true,
+                test_adjoint_action=true,
+                test_exp_from_identity=true,
+                test_log_from_identity=true,
+                test_vee_hat_from_identity=true,
+                diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+            )
+            test_manifold(
+                G,
+                pts;
+                basis_types_vecs=basis_types,
+                basis_types_to_from=basis_types,
+                is_mutating=true,
+                #test_inplace=true,
+                test_vee_hat=true,
+                exp_log_atol_multiplier=50,
+            )
+
+            for CS in [CartanSchoutenMinus(), CartanSchoutenPlus(), CartanSchoutenZero()]
+                @testset "$CS" begin
+                    G_TR = ConnectionManifold(G, CS)
+
+                    test_group(
+                        G_TR,
+                        pts,
+                        X_pts,
+                        X_pts;
+                        test_diff=true,
+                        test_lie_bracket=true,
+                        test_adjoint_action=true,
+                        diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+                    )
+
+                    test_manifold(
+                        G_TR,
+                        pts;
+                        is_mutating=true,
+                        exp_log_atol_multiplier=50,
+                        test_inner=false,
+                        test_norm=false,
+                    )
                 end
+            end
+            for MM in [LeftInvariantMetric()]
+                @testset "$MM" begin
+                    G_TR = MetricManifold(G, MM)
+                    @test base_group(G_TR) === G
 
-                g1, g2 = pts[1:2]
-                t1, R1 = submanifold_components(g1)
-                t2, R2 = submanifold_components(g2)
-                g1g2 = ArrayPartition(R1 * t2 + t1, R1 * R2)
-                @test isapprox(G, compose(G, g1, g2), g1g2)
-                g1g2mat = affine_matrix(G, g1g2)
-                @test g1g2mat ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
-                @test affine_matrix(G, g1g2mat) === g1g2mat
-                if se_parameter === :type
-                    @test affine_matrix(G, Identity(G)) isa SDiagonal{n,Float64}
-                end
-                @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
+                    test_group(
+                        G_TR,
+                        pts,
+                        X_pts,
+                        X_pts;
+                        test_diff=true,
+                        test_lie_bracket=true,
+                        test_adjoint_action=true,
+                        diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+                    )
 
-                w = translate_diff(G, pts[1], Identity(G), X_pts[1])
-                w2 = allocate(w)
-                submanifold_component(w2, 1) .= submanifold_component(w, 1)
-                submanifold_component(w2, 2) .=
-                    submanifold_component(pts[1], 2) * submanifold_component(w, 2)
-                w2mat = screw_matrix(G, w2)
-                @test w2mat ≈ affine_matrix(G, pts[1]) * screw_matrix(G, X_pts[1])
-                @test screw_matrix(G, w2mat) === w2mat
-
-                test_group(
-                    G,
-                    pts,
-                    X_pts,
-                    X_pts;
-                    test_diff=true,
-                    test_lie_bracket=true,
-                    test_adjoint_action=true,
-                    test_exp_from_identity=true,
-                    test_log_from_identity=true,
-                    test_vee_hat_from_identity=true,
-                    diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
-                )
-                test_manifold(
-                    G,
-                    pts;
-                    basis_types_vecs=basis_types,
-                    basis_types_to_from=basis_types,
-                    is_mutating=true,
-                    #test_inplace=true,
-                    test_vee_hat=true,
-                    exp_log_atol_multiplier=50,
-                )
-
-                for CS in
-                    [CartanSchoutenMinus(), CartanSchoutenPlus(), CartanSchoutenZero()]
-                    @testset "$CS" begin
-                        G_TR = ConnectionManifold(G, CS)
-
-                        test_group(
-                            G_TR,
-                            pts,
-                            X_pts,
-                            X_pts;
-                            test_diff=true,
-                            test_lie_bracket=true,
-                            test_adjoint_action=true,
-                            diff_convs=[
-                                (),
-                                (LeftForwardAction(),),
-                                (RightBackwardAction(),),
-                            ],
-                        )
-
-                        test_manifold(
-                            G_TR,
-                            pts;
-                            is_mutating=true,
-                            exp_log_atol_multiplier=50,
-                            test_inner=false,
-                            test_norm=false,
-                        )
-                    end
-                end
-                for MM in [LeftInvariantMetric()]
-                    @testset "$MM" begin
-                        G_TR = MetricManifold(G, MM)
-                        @test base_group(G_TR) === G
-
-                        test_group(
-                            G_TR,
-                            pts,
-                            X_pts,
-                            X_pts;
-                            test_diff=true,
-                            test_lie_bracket=true,
-                            test_adjoint_action=true,
-                            diff_convs=[
-                                (),
-                                (LeftForwardAction(),),
-                                (RightBackwardAction(),),
-                            ],
-                        )
-
-                        test_manifold(
-                            G_TR,
-                            pts;
-                            basis_types_vecs=basis_types,
-                            basis_types_to_from=basis_types,
-                            is_mutating=true,
-                            exp_log_atol_multiplier=50,
-                        )
-                    end
+                    test_manifold(
+                        G_TR,
+                        pts;
+                        basis_types_vecs=basis_types,
+                        basis_types_to_from=basis_types,
+                        is_mutating=true,
+                        exp_log_atol_multiplier=50,
+                    )
                 end
             end
 

@@ -6,6 +6,9 @@ import Manifolds: local_metric
 
 using Manifolds: LeftInvariantMetric, RightInvariantMetric
 
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
+
 struct TestInvariantMetricBase <: AbstractMetric end
 
 function active_traits(
@@ -126,10 +129,10 @@ end
     end
 
     @testset "invariant metric direction" begin
-        @test direction(HasRightInvariantMetric()) === RightBackwardAction()
-        @test direction(HasLeftInvariantMetric()) === LeftForwardAction()
-        @test direction(HasRightInvariantMetric) === RightBackwardAction()
-        @test direction(HasLeftInvariantMetric) === LeftForwardAction()
+        @test direction_and_side(HasRightInvariantMetric()) === RightBackwardAction()
+        @test direction_and_side(HasLeftInvariantMetric()) === LeftForwardAction()
+        @test direction_and_side(HasRightInvariantMetric) === RightBackwardAction()
+        @test direction_and_side(HasLeftInvariantMetric) === LeftForwardAction()
     end
 
     @testset "invariant metrics on SE(3)" begin

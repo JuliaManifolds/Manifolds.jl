@@ -64,9 +64,9 @@ Apply action `a` to the point `p` with the rule specified by `A`.
 The result is saved in `q`.
 """
 apply!(A::AbstractGroupAction, q, a, p)
-function apply!(A::AbstractGroupAction{RightForwardAction}, q, a, p)
+function apply!(A::AbstractGroupAction{RightAction}, q, a, p)
     ainv = inv(base_group(A), a)
-    apply!(switch_direction(A, LeftRightSwitch()), q, ainv, p)
+    apply!(switch_direction(A), q, ainv, p)
     return q
 end
 
@@ -150,35 +150,17 @@ function inverse_apply_diff!(A::AbstractGroupAction, Y, a, p, X)
     return apply_diff!(A, Y, inv(base_group(A), a), p, X)
 end
 
-function compose(
-    A::AbstractGroupAction{<:Union{LeftForwardAction,LeftBackwardAction}},
-    a,
-    b,
-)
+function compose(A::AbstractGroupAction{LeftAction}, a, b)
     return compose(base_group(A), a, b)
 end
-function compose(
-    A::AbstractGroupAction{<:Union{RightForwardAction,RightBackwardAction}},
-    a,
-    b,
-)
+function compose(A::AbstractGroupAction{RightAction}, a, b)
     return compose(base_group(A), b, a)
 end
 
-function compose!(
-    A::AbstractGroupAction{<:Union{LeftForwardAction,LeftBackwardAction}},
-    q,
-    a,
-    b,
-)
+function compose!(A::AbstractGroupAction{LeftAction}, q, a, b)
     return compose!(base_group(A), q, a, b)
 end
-function compose!(
-    A::AbstractGroupAction{<:Union{RightForwardAction,RightBackwardAction}},
-    q,
-    a,
-    b,
-)
+function compose!(A::AbstractGroupAction{RightAction}, q, a, b)
     return compose!(base_group(A), q, b, a)
 end
 

@@ -29,7 +29,7 @@ const SpecialEuclidean{T} = SemidirectProductGroup{
     ℝ,
     TranslationGroup{T,ℝ},
     SpecialOrthogonal{T},
-    RotationAction{TranslationGroup{T,ℝ},SpecialOrthogonal{T},LeftForwardAction},
+    RotationAction{LeftAction,TranslationGroup{T,ℝ},SpecialOrthogonal{T}},
 }
 
 const SpecialEuclideanManifold{N} =
@@ -43,7 +43,7 @@ function SpecialEuclidean(n; parameter::Symbol=:type)
 end
 
 const SpecialEuclideanOperation{N} = SemidirectProductOperation{
-    RotationAction{TranslationGroup{N,ℝ},SpecialOrthogonal{N},LeftForwardAction},
+    RotationAction{LeftAction,TranslationGroup{N,ℝ},SpecialOrthogonal{N}},
 }
 const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 

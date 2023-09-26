@@ -46,7 +46,7 @@ function inverse_retract(
     q,
     method::GroupLogarithmicInverseRetraction,
 )
-    conv = direction(method)
+    conv = direction_and_side(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = log_lie(G, pinvq)
     return translate_diff(G, p, Identity(G), Xₑ, conv)
@@ -60,7 +60,7 @@ function inverse_retract!(
     q,
     method::GroupLogarithmicInverseRetraction,
 )
-    conv = direction(method)
+    conv = direction_and_side(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = log_lie(G, pinvq)
     return translate_diff!(G, X, p, Identity(G), Xₑ, conv)

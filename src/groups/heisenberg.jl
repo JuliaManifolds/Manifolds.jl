@@ -26,11 +26,7 @@ function HeisenbergGroup(n::Int; parameter::Symbol=:type)
 end
 
 function active_traits(f, ::HeisenbergGroup, args...)
-    return merge_traits(
-        IsGroupManifold(MultiplicationOperation()),
-        IsEmbeddedManifold(),
-        HasLeftInvariantMetric(),
-    )
+    return merge_traits(IsGroupManifold(MultiplicationOperation()), IsEmbeddedManifold())
 end
 
 function _heisenberg_a_view(M::HeisenbergGroup, p)
@@ -420,6 +416,6 @@ end
 translate_diff(::HeisenbergGroup, p, q, X, ::LeftForwardAction) = X
 translate_diff(::HeisenbergGroup, p, q, X, ::RightBackwardAction) = p \ X * p
 
-function translate_diff!(G::HeisenbergGroup, Y, p, q, X, conv::ActionDirection)
+function translate_diff!(G::HeisenbergGroup, Y, p, q, X, conv::ActionDirectionAndSide)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end

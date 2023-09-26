@@ -46,27 +46,30 @@ abstract type AbstractInvarianceTrait <: AbstractTrait end
 """
     HasLeftInvariantMetric <: AbstractInvarianceTrait
 
-Specify that a certain the metric of a [`GroupManifold`](@ref) is a left-invariant metric
+Specify that the default metric functions for the left-invariant metric on a [`GroupManifold`](@ref)
+are to be used.
 """
 struct HasLeftInvariantMetric <: AbstractInvarianceTrait end
 
-direction(::HasLeftInvariantMetric) = LeftForwardAction()
-direction(::Type{HasLeftInvariantMetric}) = LeftForwardAction()
+direction_and_side(::HasLeftInvariantMetric) = LeftForwardAction()
+direction_and_side(::Type{HasLeftInvariantMetric}) = LeftForwardAction()
 
 """
     HasRightInvariantMetric <: AbstractInvarianceTrait
 
-Specify that a certain the metric of a [`GroupManifold`](@ref) is a right-invariant metric
+Specify that the default metric functions for the right-invariant metric on a [`GroupManifold`](@ref)
+are to be used.
 """
 struct HasRightInvariantMetric <: AbstractInvarianceTrait end
 
-direction(::HasRightInvariantMetric) = RightBackwardAction()
-direction(::Type{HasRightInvariantMetric}) = RightBackwardAction()
+direction_and_side(::HasRightInvariantMetric) = RightBackwardAction()
+direction_and_side(::Type{HasRightInvariantMetric}) = RightBackwardAction()
 
 """
     HasBiinvariantMetric <: AbstractInvarianceTrait
 
-Specify that a certain the metric of a [`GroupManifold`](@ref) is a bi-invariant metric
+Specify that the default metric functions for the bi-invariant metric on a [`GroupManifold`](@ref)
+are to be used.
 """
 struct HasBiinvariantMetric <: AbstractInvarianceTrait end
 function parent_trait(::HasBiinvariantMetric)
@@ -107,39 +110,23 @@ base_group(M::AbstractDecoratorManifold) = M
 """
     ActionDirection
 
-Direction of action on a manifold, either [`LeftForwardAction`](@ref),
-[`LeftBackwardAction`](@ref), [`RightForwardAction`](@ref) or [`RightBackwardAction`](@ref).
+Direction of action on a manifold, either [`LeftAction`](@ref) or [`RightAction`](@ref).
 """
 abstract type ActionDirection end
 
 @doc raw"""
-    LeftForwardAction()
+    LeftAction()
 
-Left action of a group on a manifold. For an action ``α: G × X → X`` it is characterized by
+Left action of a group on a manifold. For a forward action ``α: G × X → X`` it is characterized by
 ```math
 α(g, α(h, x)) = α(gh, x)
 ```
 for all ``g, h ∈ G`` and ``x ∈ X``.
 """
-struct LeftForwardAction <: ActionDirection end
-
-@doc raw"""
-    LeftBackwardAction()
-
-Left action of a group on a manifold. For an action ``α: X × G → X`` it is characterized by
-```math
-α(α(x, h), g) = α(x, gh)
-```
-for all ``g, h ∈ G`` and ``x ∈ X``.
-
-Note that a left action may still act from the right side in an expression.
-"""
-struct LeftBackwardAction <: ActionDirection end
-
-const LeftAction = LeftForwardAction
+struct LeftAction <: ActionDirection end
 
 """
-    RightForwardAction()
+    RightAction()
 
 Right action of a group on a manifold. For an action ``α: G × X → X`` it is characterized by
 ```math
@@ -149,70 +136,60 @@ for all ``g, h ∈ G`` and ``x ∈ X``.
 
 Note that a right action may still act from the left side in an expression.
 """
-struct RightForwardAction <: ActionDirection end
+struct RightAction <: ActionDirection end
 
 """
-    RightBackwardAction()
+    GroupActionSide
 
-Right action of a group on a manifold. For an action ``α: X × G → X`` it is characterized by
-```math
-α(α(x, h), g) = α(x, hg)
-```
-for all ``g, h ∈ G`` and ``x ∈ X``.
-
-Note that a right action may still act from the left side in an expression.
+Side of action on a manifold, either [`LeftSide`](@ref) or [`RightSide`](@ref).
 """
-struct RightBackwardAction <: ActionDirection end
-
-const RightAction = RightBackwardAction
-
-abstract type AbstractDirectionSwitchType end
+abstract type GroupActionSide end
 
 """
-    struct LeftRightSwitch <: AbstractDirectionSwitchType end
+    LeftSide()
 
-Switch between left and right action, maintaining forward/backward direction.
+An action of a group on a manifold that acts from the left side, i.e. ``α: G × X → X``.
 """
-struct LeftRightSwitch <: AbstractDirectionSwitchType end
-
-"""
-    struct ForwardBackwardSwitch <: AbstractDirectionSwitchType end
-
-Switch between forward and backward action, maintaining left/right direction.
-"""
-struct ForwardBackwardSwitch <: AbstractDirectionSwitchType end
+struct LeftSide <: GroupActionSide end
 
 """
-    struct LeftRightSwitch <: AbstractDirectionSwitchType end
+    RightSide()
 
-Simultaneously switch left/right and forward/backward directions.
+An action of a group on a manifold that acts from the right side, i.e. ``α: X × G→ X``.
 """
-struct SimultaneousSwitch <: AbstractDirectionSwitchType end
+struct RightSide <: GroupActionSide end
 
 """
-    switch_direction(::ActionDirection, type::AbstractDirectionSwitchType = SimultaneousSwitch())
+    switch_direction(::ActionDirection)
 
-Returns type of action between left and right, forward or backward, or both at the same type,
-depending on `type`, which is either of `LeftRightSwitch`, `ForwardBackwardSwitch` or
-`SimultaneousSwitch`.
+Returns type of action between left and right.
+This function does not affect side of action, see [`switch_side`](@ref).
 """
-switch_direction(::ActionDirection, type::AbstractDirectionSwitchType)
-switch_direction(AD::ActionDirection) = switch_direction(AD, SimultaneousSwitch())
+switch_direction(::ActionDirection)
+switch_direction(::LeftAction) = RightAction()
+switch_direction(::RightAction) = LeftAction()
 
-switch_direction(::LeftForwardAction, ::LeftRightSwitch) = RightForwardAction()
-switch_direction(::LeftBackwardAction, ::LeftRightSwitch) = RightBackwardAction()
-switch_direction(::RightForwardAction, ::LeftRightSwitch) = LeftForwardAction()
-switch_direction(::RightBackwardAction, ::LeftRightSwitch) = LeftBackwardAction()
+"""
+    switch_side(::GroupActionSide)
 
-switch_direction(::LeftForwardAction, ::ForwardBackwardSwitch) = LeftBackwardAction()
-switch_direction(::LeftBackwardAction, ::ForwardBackwardSwitch) = LeftForwardAction()
-switch_direction(::RightForwardAction, ::ForwardBackwardSwitch) = RightBackwardAction()
-switch_direction(::RightBackwardAction, ::ForwardBackwardSwitch) = RightForwardAction()
+Returns side of action between left and right.
+This function does not affect the action being left or right, see [`switch_direction`](@ref).
+"""
+switch_side(::GroupActionSide)
+switch_side(::LeftSide) = RightSide()
+switch_side(::RightSide) = LeftSide()
 
-switch_direction(::LeftForwardAction, ::SimultaneousSwitch) = RightBackwardAction()
-switch_direction(::LeftBackwardAction, ::SimultaneousSwitch) = RightForwardAction()
-switch_direction(::RightForwardAction, ::SimultaneousSwitch) = LeftBackwardAction()
-switch_direction(::RightBackwardAction, ::SimultaneousSwitch) = LeftForwardAction()
+const ActionDirectionAndSide = Tuple{ActionDirection,GroupActionSide}
+
+const LeftForwardAction = Tuple{LeftAction,LeftSide}
+const LeftBackwardAction = Tuple{LeftAction,RightSide}
+const RightForwardAction = Tuple{RightAction,LeftSide}
+const RightBackwardAction = Tuple{RightAction,RightSide}
+
+LeftForwardAction() = (LeftAction(), LeftSide())
+LeftBackwardAction() = (LeftAction(), RightSide())
+RightForwardAction() = (RightAction(), LeftSide())
+RightBackwardAction() = (RightAction(), RightSide())
 
 @doc raw"""
     Identity{O<:AbstractGroupOperation}
@@ -742,7 +719,7 @@ _action_order(BG::AbstractDecoratorManifold, p, q, ::RightForwardAction) = (inv(
 _action_order(BG::AbstractDecoratorManifold, p, q, ::RightBackwardAction) = (q, p)
 
 @doc raw"""
-    translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirection=LeftForwardAction()])
+    translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirectionAndSide=LeftForwardAction()])
 
 Translate group element $q$ by $p$ with the translation $τ_p$ with the specified
 `conv`ention, either left forward ($L_p$), left backward ($R'_p$), right backward ($R_p$)
@@ -761,14 +738,14 @@ translate(::AbstractDecoratorManifold, ::Any...)
     G::AbstractDecoratorManifold,
     p,
     q,
-    conv::ActionDirection=LeftForwardAction(),
+    conv::ActionDirectionAndSide=LeftForwardAction(),
 )
 function translate(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     q,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     BG = base_group(G)
     return compose(BG, _action_order(BG, p, q, conv)...)
@@ -779,7 +756,7 @@ end
     X,
     p,
     q,
-    conv::ActionDirection=LeftForwardAction(),
+    conv::ActionDirectionAndSide=LeftForwardAction(),
 )
 function translate!(
     ::TraitList{<:IsGroupManifold},
@@ -787,14 +764,14 @@ function translate!(
     X,
     p,
     q,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     BG = base_group(G)
     return compose!(BG, X, _action_order(BG, p, q, conv)...)
 end
 
 @doc raw"""
-    inverse_translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirection=LeftForwardAction())
+    inverse_translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirectionAndSide=LeftForwardAction())
 
 Inverse translate group element $q$ by $p$ with the inverse translation $τ_p^{-1}$ with the
 specified `conv`ention, either left ($L_p^{-1}$) or right ($R_p^{-1}$), defined as
@@ -810,14 +787,14 @@ inverse_translate(::AbstractDecoratorManifold, ::Any...)
     G::AbstractDecoratorManifold,
     p,
     q,
-    conv::ActionDirection=LeftForwardAction(),
+    conv::ActionDirectionAndSide=LeftForwardAction(),
 )
 function inverse_translate(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     q,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     BG = base_group(G)
     return translate(BG, inv(BG, p), q, conv)
@@ -828,7 +805,7 @@ end
     X,
     p,
     q,
-    conv::ActionDirection=LeftForwardAction(),
+    conv::ActionDirectionAndSide=LeftForwardAction(),
 )
 function inverse_translate!(
     ::TraitList{<:IsGroupManifold},
@@ -836,14 +813,14 @@ function inverse_translate!(
     X,
     p,
     q,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     BG = base_group(G)
     return translate!(BG, X, inv(BG, p), q, conv)
 end
 
 @doc raw"""
-    translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirection=LeftForwardAction())
+    translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirectionAndSide=LeftForwardAction())
 
 For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal{G}$, compute
 the action of the differential of the translation $τ_p$ by $p$ on $X$, with the specified
@@ -858,7 +835,7 @@ translate_diff(::AbstractDecoratorManifold, ::Any...)
     p,
     q,
     X,
-    conv::ActionDirection=LeftForwardAction(),
+    conv::ActionDirectionAndSide=LeftForwardAction(),
 )
 function translate_diff(
     ::TraitList{<:IsGroupManifold},
@@ -866,7 +843,7 @@ function translate_diff(
     p,
     q,
     X,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     Y = allocate_result(G, translate_diff, X, p, q)
     BG = base_group(G)
@@ -879,11 +856,11 @@ end
     p,
     q,
     X,
-    conv::ActionDirection=LeftForwardAction(),
+    conv::ActionDirectionAndSide=LeftForwardAction(),
 )
 
 @doc raw"""
-    inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirection=LeftForwardAction())
+    inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirectionAndSide=LeftForwardAction())
 
 For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal{G}$, compute
 the action on $X$ of the differential of the inverse translation $τ_p$ by $p$, with the
@@ -898,7 +875,7 @@ inverse_translate_diff(::AbstractDecoratorManifold, ::Any...)
     p,
     q,
     X,
-    conv::ActionDirection=LeftForwardAction(),
+    conv::ActionDirectionAndSide=LeftForwardAction(),
 )
 function inverse_translate_diff(
     ::TraitList{<:IsGroupManifold},
@@ -906,7 +883,7 @@ function inverse_translate_diff(
     p,
     q,
     X,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     BG = base_group(G)
     return translate_diff(BG, inv(BG, p), q, X, conv)
@@ -918,7 +895,7 @@ end
     p,
     q,
     X,
-    conv::ActionDirection=LeftForwardAction(),
+    conv::ActionDirectionAndSide=LeftForwardAction(),
 )
 function inverse_translate_diff!(
     ::TraitList{<:IsGroupManifold},
@@ -927,7 +904,7 @@ function inverse_translate_diff!(
     p,
     q,
     X,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     BG = base_group(G)
     return translate_diff!(BG, Y, inv(BG, p), q, X, conv)
@@ -1048,7 +1025,7 @@ function log_lie!(
 end
 
 """
-    GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod
+    GroupExponentialRetraction{D<:ActionDirectionAndSide} <: AbstractRetractionMethod
 
 Retraction using the group exponential [`exp_lie`](@ref) "translated" to any point on the
 manifold.
@@ -1058,16 +1035,16 @@ For more details, see
 
 # Constructor
 
-    GroupExponentialRetraction(conv::ActionDirection = LeftForwardAction())
+    GroupExponentialRetraction(conv::ActionDirectionAndSide = LeftAction())
 """
-struct GroupExponentialRetraction{D<:ActionDirection} <: AbstractRetractionMethod end
+struct GroupExponentialRetraction{D<:ActionDirectionAndSide} <: AbstractRetractionMethod end
 
-function GroupExponentialRetraction(conv::ActionDirection=LeftForwardAction())
+function GroupExponentialRetraction(conv::ActionDirectionAndSide=LeftForwardAction())
     return GroupExponentialRetraction{typeof(conv)}()
 end
 
 """
-    GroupLogarithmicInverseRetraction{D<:ActionDirection} <: AbstractInverseRetractionMethod
+    GroupLogarithmicInverseRetraction{D<:ActionDirectionAndSide} <: AbstractInverseRetractionMethod
 
 Retraction using the group logarithm [`log_lie`](@ref) "translated" to any point on the
 manifold.
@@ -1077,24 +1054,24 @@ For more details, see
 
 # Constructor
 
-    GroupLogarithmicInverseRetraction(conv::ActionDirection = LeftForwardAction())
+    GroupLogarithmicInverseRetraction(conv::ActionDirectionAndSide = LeftForwardAction())
 """
-struct GroupLogarithmicInverseRetraction{D<:ActionDirection} <:
+struct GroupLogarithmicInverseRetraction{D<:ActionDirectionAndSide} <:
        AbstractInverseRetractionMethod end
 
-function GroupLogarithmicInverseRetraction(conv::ActionDirection=LeftForwardAction())
+function GroupLogarithmicInverseRetraction(conv::ActionDirectionAndSide=LeftForwardAction())
     return GroupLogarithmicInverseRetraction{typeof(conv)}()
 end
 
-direction(::GroupExponentialRetraction{D}) where {D} = D()
-direction(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
+direction_and_side(::GroupExponentialRetraction{D}) where {D} = D()
+direction_and_side(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
 
 @doc raw"""
     retract(
         G::AbstractDecoratorManifold,
         p,
         X,
-        method::GroupExponentialRetraction{<:ActionDirection},
+        method::GroupExponentialRetraction,
     )
 
 Compute the retraction using the group exponential [`exp_lie`](@ref) "translated" to any
@@ -1117,7 +1094,7 @@ function retract(
     X,
     method::GroupExponentialRetraction,
 )
-    conv = direction(method)
+    conv = direction_and_side(method)
     Xₑ = inverse_translate_diff(G, p, p, X, conv)
     pinvq = exp_lie(G, Xₑ)
     q = translate(G, p, pinvq, conv)
@@ -1142,7 +1119,7 @@ function retract!(
     X,
     method::GroupExponentialRetraction,
 )
-    conv = direction(method)
+    conv = direction_and_side(method)
     Xₑ = inverse_translate_diff(G, p, p, X, conv)
     pinvq = exp_lie(G, Xₑ)
     return translate!(G, q, p, pinvq, conv)
@@ -1164,7 +1141,7 @@ end
         G::AbstractDecoratorManifold,
         p,
         X,
-        method::GroupLogarithmicInverseRetraction{<:ActionDirection},
+        method::GroupLogarithmicInverseRetraction,
     )
 
 Compute the inverse retraction using the group logarithm [`log_lie`](@ref) "translated"
@@ -1187,7 +1164,7 @@ function inverse_retract(
     q,
     method::GroupLogarithmicInverseRetraction,
 )
-    conv = direction(method)
+    conv = direction_and_side(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = log_lie(G, pinvq)
     return translate_diff(G, p, Identity(G), Xₑ, conv)
@@ -1201,7 +1178,7 @@ function inverse_retract!(
     q,
     method::GroupLogarithmicInverseRetraction,
 )
-    conv = direction(method)
+    conv = direction_and_side(method)
     pinvq = inverse_translate(G, p, q, conv)
     Xₑ = log_lie(G, pinvq)
     return translate_diff!(G, X, p, Identity(G), Xₑ, conv)

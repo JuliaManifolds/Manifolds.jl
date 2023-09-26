@@ -154,10 +154,10 @@ function _compose!(M::PowerManifoldNestedReplacing, x, p, q)
     return x
 end
 
-function translate!(G::PowerGroup, x, p, q, conv::ActionDirection)
+function translate!(G::PowerGroup, x, p, q, conv::ActionDirectionAndSide)
     return translate!(G.manifold, x, p, q, conv)
 end
-function translate!(M::AbstractPowerManifold, x, p, q, conv::ActionDirection)
+function translate!(M::AbstractPowerManifold, x, p, q, conv::ActionDirectionAndSide)
     N = M.manifold
     rep_size = representation_size(N)
     for i in get_iterator(M)
@@ -171,7 +171,7 @@ function translate!(M::AbstractPowerManifold, x, p, q, conv::ActionDirection)
     end
     return x
 end
-function translate!(M::PowerManifoldNestedReplacing, x, p, q, conv::ActionDirection)
+function translate!(M::PowerManifoldNestedReplacing, x, p, q, conv::ActionDirectionAndSide)
     N = M.manifold
     rep_size = representation_size(N)
     for i in get_iterator(M)
@@ -180,10 +180,10 @@ function translate!(M::PowerManifoldNestedReplacing, x, p, q, conv::ActionDirect
     return x
 end
 
-function inverse_translate!(G::PowerGroup, x, p, q, conv::ActionDirection)
+function inverse_translate!(G::PowerGroup, x, p, q, conv::ActionDirectionAndSide)
     return inverse_translate!(G.manifold, x, p, q, conv)
 end
-function inverse_translate!(M::AbstractPowerManifold, x, p, q, conv::ActionDirection)
+function inverse_translate!(M::AbstractPowerManifold, x, p, q, conv::ActionDirectionAndSide)
     N = M.manifold
     rep_size = representation_size(N)
     for i in get_iterator(M)
@@ -197,7 +197,13 @@ function inverse_translate!(M::AbstractPowerManifold, x, p, q, conv::ActionDirec
     end
     return x
 end
-function inverse_translate!(M::PowerManifoldNestedReplacing, x, p, q, conv::ActionDirection)
+function inverse_translate!(
+    M::PowerManifoldNestedReplacing,
+    x,
+    p,
+    q,
+    conv::ActionDirectionAndSide,
+)
     N = M.manifold
     rep_size = representation_size(N)
     for i in get_iterator(M)
@@ -207,7 +213,7 @@ function inverse_translate!(M::PowerManifoldNestedReplacing, x, p, q, conv::Acti
     return x
 end
 
-function translate_diff!(G::PowerGroup, Y, p, q, X, conv::ActionDirection)
+function translate_diff!(G::PowerGroup, Y, p, q, X, conv::ActionDirectionAndSide)
     GM = G.manifold
     N = GM.manifold
     rep_size = representation_size(N)
@@ -223,7 +229,14 @@ function translate_diff!(G::PowerGroup, Y, p, q, X, conv::ActionDirection)
     end
     return Y
 end
-function translate_diff!(G::PowerGroupNestedReplacing, Y, p, q, X, conv::ActionDirection)
+function translate_diff!(
+    G::PowerGroupNestedReplacing,
+    Y,
+    p,
+    q,
+    X,
+    conv::ActionDirectionAndSide,
+)
     GM = G.manifold
     N = GM.manifold
     rep_size = representation_size(N)
@@ -239,7 +252,7 @@ function translate_diff!(G::PowerGroupNestedReplacing, Y, p, q, X, conv::ActionD
     return Y
 end
 
-function inverse_translate_diff!(G::PowerGroup, Y, p, q, X, conv::ActionDirection)
+function inverse_translate_diff!(G::PowerGroup, Y, p, q, X, conv::ActionDirectionAndSide)
     GM = G.manifold
     N = GM.manifold
     rep_size = representation_size(N)
@@ -261,7 +274,7 @@ function inverse_translate_diff!(
     p,
     q,
     X,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     GM = G.manifold
     N = GM.manifold

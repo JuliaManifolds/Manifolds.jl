@@ -1,9 +1,8 @@
 include("../utils.jl")
 include("group_utils.jl")
 
-# TODO: remove after bug in StaticArray is fixed
-@inline Base.copy(a::SizedArray) = __copy(a)
-@inline __copy(a::SizedArray{S,T}) where {S,T} = SizedArray{S,T}(copy(a.data))
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
 
 @testset "Circle group" begin
     G = CircleGroup()

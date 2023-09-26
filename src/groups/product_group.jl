@@ -130,7 +130,7 @@ function translate(
     M::ProductGroup,
     p::ArrayPartition,
     q::ArrayPartition,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     return ArrayPartition(
         map(
@@ -143,7 +143,7 @@ function translate(
     )
 end
 
-function translate!(M::ProductGroup, x, p, q, conv::ActionDirection)
+function translate!(M::ProductGroup, x, p, q, conv::ActionDirectionAndSide)
     map(
         translate!,
         M.manifold.manifolds,
@@ -155,7 +155,7 @@ function translate!(M::ProductGroup, x, p, q, conv::ActionDirection)
     return x
 end
 
-function inverse_translate(G::ProductGroup, p, q, conv::ActionDirection)
+function inverse_translate(G::ProductGroup, p, q, conv::ActionDirectionAndSide)
     M = G.manifold
     return ArrayPartition(
         map(
@@ -168,7 +168,7 @@ function inverse_translate(G::ProductGroup, p, q, conv::ActionDirection)
     )
 end
 
-function inverse_translate!(G::ProductGroup, x, p, q, conv::ActionDirection)
+function inverse_translate!(G::ProductGroup, x, p, q, conv::ActionDirectionAndSide)
     M = G.manifold
     map(
         inverse_translate!,
@@ -181,7 +181,7 @@ function inverse_translate!(G::ProductGroup, x, p, q, conv::ActionDirection)
     return x
 end
 
-function translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
+function translate_diff(G::ProductGroup, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
     return ArrayPartition(
         map(
@@ -195,7 +195,7 @@ function translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
     )
 end
 
-function translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
     map(
         translate_diff!,
@@ -209,7 +209,7 @@ function translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
     return Y
 end
 
-function inverse_translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
+function inverse_translate_diff(G::ProductGroup, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
     return ArrayPartition(
         map(
@@ -223,7 +223,7 @@ function inverse_translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
     )
 end
 
-function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
+function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
     map(
         inverse_translate_diff!,

@@ -104,7 +104,7 @@ function compose!(M::ValidationManifold, x, p, q::Identity; kwargs...)
     return x
 end
 
-function translate(M::ValidationManifold, p, q, conv::ActionDirection; kwargs...)
+function translate(M::ValidationManifold, p, q, conv::ActionDirectionAndSide; kwargs...)
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
     x = array_point(translate(M.manifold, array_value(p), array_value(q), conv))
@@ -112,7 +112,7 @@ function translate(M::ValidationManifold, p, q, conv::ActionDirection; kwargs...
     return x
 end
 
-function translate!(M::ValidationManifold, x, p, q, conv::ActionDirection; kwargs...)
+function translate!(M::ValidationManifold, x, p, q, conv::ActionDirectionAndSide; kwargs...)
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
     translate!(M.manifold, array_value(x), array_value(p), array_value(q), conv)
@@ -120,7 +120,13 @@ function translate!(M::ValidationManifold, x, p, q, conv::ActionDirection; kwarg
     return x
 end
 
-function inverse_translate(M::ValidationManifold, p, q, conv::ActionDirection; kwargs...)
+function inverse_translate(
+    M::ValidationManifold,
+    p,
+    q,
+    conv::ActionDirectionAndSide;
+    kwargs...,
+)
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
     x = array_point(inverse_translate(M.manifold, array_value(p), array_value(q), conv))
@@ -133,7 +139,7 @@ function inverse_translate!(
     x,
     p,
     q,
-    conv::ActionDirection;
+    conv::ActionDirectionAndSide;
     kwargs...,
 )
     is_point(M, p, true; kwargs...)
@@ -143,7 +149,14 @@ function inverse_translate!(
     return x
 end
 
-function translate_diff(M::ValidationManifold, p, q, X, conv::ActionDirection; kwargs...)
+function translate_diff(
+    M::ValidationManifold,
+    p,
+    q,
+    X,
+    conv::ActionDirectionAndSide;
+    kwargs...,
+)
     is_point(M, p, true; kwargs...)
     is_point(M, q, true; kwargs...)
     is_vector(M, q, X, true; kwargs...)
@@ -161,7 +174,7 @@ function translate_diff!(
     p,
     q,
     X,
-    conv::ActionDirection;
+    conv::ActionDirectionAndSide;
     kwargs...,
 )
     is_point(M, p, true; kwargs...)
@@ -185,7 +198,7 @@ function inverse_translate_diff(
     p,
     q,
     X,
-    conv::ActionDirection;
+    conv::ActionDirectionAndSide;
     kwargs...,
 )
     is_point(M, p, true; kwargs...)
@@ -211,7 +224,7 @@ function inverse_translate_diff!(
     p,
     q,
     X,
-    conv::ActionDirection;
+    conv::ActionDirectionAndSide;
     kwargs...,
 )
     is_point(M, p, true; kwargs...)

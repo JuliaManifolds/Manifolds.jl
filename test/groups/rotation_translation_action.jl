@@ -6,12 +6,12 @@ include("group_utils.jl")
     G = SpecialEuclidean(2)
     M = base_manifold(G)
     A_left = RotationTranslationAction(Euclidean(2), G)
-    A_right = RotationTranslationAction(Euclidean(2), G, RightForwardAction())
+    A_right = RotationTranslationAction(Euclidean(2), G, RightAction())
 
     @test repr(A_left) ==
-          "RotationTranslationAction($(repr(Euclidean(2))), $(repr(G)), LeftForwardAction())"
+          "RotationTranslationAction($(repr(Euclidean(2))), $(repr(G)), LeftAction())"
     @test repr(A_right) ==
-          "RotationTranslationAction($(repr(Euclidean(2))), $(repr(G)), RightForwardAction())"
+          "RotationTranslationAction($(repr(Euclidean(2))), $(repr(G)), RightAction())"
 
     types_a = [ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}]
 
@@ -19,7 +19,7 @@ include("group_utils.jl")
 
     @test group_manifold(A_left) == Euclidean(2)
     @test base_group(A_left) == G
-    @test isa(A_left, AbstractGroupAction{<:LeftForwardAction})
+    @test isa(A_left, AbstractGroupAction{LeftAction})
     @test base_manifold(G) == M
 
     for (i, T_A, T_M) in zip(1:length(types_a), types_a, types_m)

@@ -93,6 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ```
 
 - Argument order for type aliases `RotationActionOnVector` and `RotationTranslationActionOnVector`: most often dispatched on argument is now first.
+- `HasLeftInvariantMetric`, `HasRightInvariantMetric` and `HasBiinvariantMetric` now explicitly refer to using default implementations of invariant metric functions. If you provide your own implementations, these traits should not be specified.
 
 ### Removed
 

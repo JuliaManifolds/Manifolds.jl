@@ -5,7 +5,7 @@
         X,
         Y,
         qs::AbstractVector,
-        conv::ActionDirection = LeftForwardAction();
+        conv::ActionDirectionAndSide = LeftForwardAction();
         kwargs...,
     ) -> Bool
 
@@ -22,14 +22,21 @@ This is necessary but not sufficient for invariance.
 
 Optionally, `kwargs` passed to `isapprox` may be provided.
 """
-has_approx_invariant_metric(::AbstractDecoratorManifold, p, X, Y, qs, ::ActionDirection)
+has_approx_invariant_metric(
+    ::AbstractDecoratorManifold,
+    p,
+    X,
+    Y,
+    qs,
+    ::ActionDirectionAndSide,
+)
 @trait_function has_approx_invariant_metric(
     M::AbstractDecoratorManifold,
     p,
     X,
     Y,
     qs,
-    conv::ActionDirection=LeftForwardAction();
+    conv::ActionDirectionAndSide=LeftForwardAction();
     kwargs...,
 )
 function has_approx_invariant_metric(
@@ -39,7 +46,7 @@ function has_approx_invariant_metric(
     X,
     Y,
     qs,
-    conv::ActionDirection;
+    conv::ActionDirectionAndSide;
     kwargs...,
 )
     gpXY = inner(M, p, X, Y)
@@ -55,17 +62,33 @@ end
 """
     direction(::AbstractDecoratorManifold) -> AD
 
-Get the direction of the action a certain Lie group with its implicit metric has
+Get the direction of the action a certain Lie group with its implicit metric has.
 """
 direction(::AbstractDecoratorManifold)
 
 @trait_function direction(M::AbstractDecoratorManifold)
 
 function direction(::TraitList{HasLeftInvariantMetric}, ::AbstractDecoratorManifold)
-    return LeftForwardAction()
+    return LeftAction()
 end
 
 function direction(::TraitList{HasRightInvariantMetric}, ::AbstractDecoratorManifold)
+    return RightAction()
+end
+
+@trait_function direction_and_side(M::AbstractDecoratorManifold)
+
+function direction_and_side(
+    ::TraitList{HasLeftInvariantMetric},
+    ::AbstractDecoratorManifold,
+)
+    return LeftForwardAction()
+end
+
+function direction_and_side(
+    ::TraitList{HasRightInvariantMetric},
+    ::AbstractDecoratorManifold,
+)
     return RightBackwardAction()
 end
 
@@ -139,7 +162,7 @@ function get_coordinates(
     X,
     B::AbstractBasis,
 ) where {IT<:AbstractInvarianceTrait}
-    conv = direction(t, M)
+    conv = direction_and_side(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     return get_coordinates_lie(next_trait(t), M, Xₑ, B)
 end
@@ -151,7 +174,7 @@ function get_coordinates!(
     X,
     B::AbstractBasis,
 ) where {IT<:AbstractInvarianceTrait}
-    conv = direction(t, M)
+    conv = direction_and_side(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     return get_coordinates_lie!(next_trait(t), M, c, Xₑ, B)
 end
@@ -163,7 +186,7 @@ function get_vector(
     c,
     B::AbstractBasis,
 ) where {IT<:AbstractInvarianceTrait}
-    conv = direction(t, M)
+    conv = direction_and_side(t, M)
     Xₑ = get_vector_lie(next_trait(t), M, c, B)
     return translate_diff(M, p, Identity(M), Xₑ, conv)
 end
@@ -175,15 +198,18 @@ function get_vector!(
     c,
     B::AbstractBasis,
 ) where {IT<:AbstractInvarianceTrait}
-    conv = direction(t, M)
+    conv = direction_and_side(t, M)
     Xₑ = get_vector_lie(next_trait(t), M, c, B)
     return translate_diff!(M, X, p, Identity(M), Xₑ, conv)
 end
 
-@trait_function has_invariant_metric(M::AbstractDecoratorManifold, op::ActionDirection)
+@trait_function has_invariant_metric(
+    M::AbstractDecoratorManifold,
+    op::ActionDirectionAndSide,
+)
 
 # Fallbacks / false
-has_invariant_metric(::AbstractManifold, op::ActionDirection) = false
+has_invariant_metric(::AbstractManifold, op::ActionDirectionAndSide) = false
 function has_invariant_metric(
     ::TraitList{<:HasLeftInvariantMetric},
     ::AbstractDecoratorManifold,
@@ -217,7 +243,7 @@ function inner(
     X,
     Y,
 ) where {IT<:AbstractInvarianceTrait}
-    conv = direction(t, M)
+    conv = direction_and_side(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     Yₑ = inverse_translate_diff(M, p, p, Y, conv)
     return inner(next_trait(t), M, Identity(M), Xₑ, Yₑ)
@@ -238,7 +264,7 @@ function inverse_translate_diff(
     p,
     q,
     X,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     return inverse_translate_diff(M.manifold, p, q, X, conv)
 end
@@ -249,7 +275,7 @@ function inverse_translate_diff!(
     p,
     q,
     X,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     return inverse_translate_diff!(M.manifold, Y, p, q, X, conv)
 end
@@ -296,7 +322,7 @@ function LinearAlgebra.norm(
     p,
     X,
 ) where {IT<:AbstractInvarianceTrait}
-    conv = direction(t, M)
+    conv = direction_and_side(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     return norm(next_trait(t), M, Identity(M), Xₑ)
 end
@@ -315,7 +341,7 @@ function translate_diff(
     p,
     q,
     X,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     return translate_diff(M.manifold, p, q, X, conv)
 end
@@ -326,7 +352,7 @@ function translate_diff!(
     p,
     q,
     X,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     return translate_diff!(M.manifold, Y, p, q, X, conv)
 end

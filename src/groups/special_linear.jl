@@ -75,7 +75,7 @@ end
 inverse_translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X
 inverse_translate_diff(::SpecialLinear, p, q, X, ::RightBackwardAction) = p * X / p
 
-function inverse_translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirection)
+function inverse_translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirectionAndSide)
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
@@ -150,6 +150,6 @@ end
 translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X
 translate_diff(::SpecialLinear, p, q, X, ::RightBackwardAction) = p \ X * p
 
-function translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirection)
+function translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirectionAndSide)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end

@@ -6,12 +6,11 @@ include("group_utils.jl")
     M = Rotations(2)
     G = SpecialOrthogonal(2)
     A_left = RotationAction(Euclidean(2), G)
-    A_right = RotationAction(Euclidean(2), G, RightForwardAction())
+    A_right = RotationAction(Euclidean(2), G, RightAction())
 
-    @test repr(A_left) ==
-          "RotationAction($(repr(Euclidean(2))), $(repr(G)), LeftForwardAction())"
+    @test repr(A_left) == "RotationAction($(repr(Euclidean(2))), $(repr(G)), LeftAction())"
     @test repr(A_right) ==
-          "RotationAction($(repr(Euclidean(2))), $(repr(G)), RightForwardAction())"
+          "RotationAction($(repr(Euclidean(2))), $(repr(G)), RightAction())"
 
     types_a = [Matrix{Float64}]
 
@@ -19,7 +18,7 @@ include("group_utils.jl")
 
     @test group_manifold(A_left) == Euclidean(2)
     @test base_group(A_left) == G
-    @test isa(A_left, AbstractGroupAction{<:LeftForwardAction})
+    @test isa(A_left, AbstractGroupAction{LeftAction})
     @test base_manifold(G) == M
 
     for (i, T_A, T_M) in zip(1:length(types_a), types_a, types_m)
@@ -76,7 +75,7 @@ end
 
     @test group_manifold(A) == Euclidean(3)
     @test base_group(A) == G
-    @test isa(A, AbstractGroupAction{LeftForwardAction})
+    @test isa(A, AbstractGroupAction{LeftAction})
     @test base_manifold(G) == M
 
     for (i, T_A, T_M) in zip(1:length(types_a), types_a, types_m)
