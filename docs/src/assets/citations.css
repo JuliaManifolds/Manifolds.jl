@@ -1,3 +1,5 @@
+/* Taken from https://juliadocs.org/DocumenterCitations.jl/v1.2/styling/ */
+
 .citation dl {
   display: grid;
   grid-template-columns: max-content auto; }
