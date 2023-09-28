@@ -63,10 +63,12 @@ end
 
 # (e) ...finally! make docs
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style=:alpha)
-makedocs(
-    bib;
+makedocs(;
     # for development, we disable prettyurls
-    format=Documenter.HTML(prettyurls=false, assets=["assets/favicon.ico"]),
+    format=Documenter.HTML(
+        prettyurls=false,
+        assets=["assets/favicon.ico", "assets/citations.css"],
+    ),
     modules=[
         Manifolds,
         isdefined(Base, :get_extension) ?
@@ -166,5 +168,7 @@ makedocs(
             "References" => "misc/references.md",
         ],
     ],
+    plugins=[bib],
+    warnonly=[:missing_docs],
 )
 deploydocs(repo="github.com/JuliaManifolds/Manifolds.jl.git", push_preview=true)
