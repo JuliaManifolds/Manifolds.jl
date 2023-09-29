@@ -403,6 +403,10 @@ Generate a random symmetric positive definite matrix on the
 """
 rand(M::SymmetricPositiveDefinite; σ::Real=1)
 
+function allocate_result(M::SymmetricPositiveDefinite, ::typeof(Random.rand), p::SPDPoint)
+    return zero_vector(M, p)
+end
+
 function Random.rand!(
     rng::AbstractRNG,
     M::SymmetricPositiveDefinite{N},

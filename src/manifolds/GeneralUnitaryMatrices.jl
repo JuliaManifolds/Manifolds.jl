@@ -889,7 +889,7 @@ end
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
 exponential map `exp(M, p, X)`. It is derived from Eq. (4.1) and Corollary 4.4
-in [ChevallierLiLuDunson:2022](@ref). See also Theorem 4.1 in [FalorsideHaanDavidsonForre:2019](@cite),
+in [ChevallierLiLuDunson:2022](@cite). See also Theorem 4.1 in [FalorsideHaanDavidsonForre:2019](@cite),
 (note that it uses a different convention).
 """
 function volume_density(M::GeneralUnitaryMatrices{n,ℝ}, p, X) where {n}
