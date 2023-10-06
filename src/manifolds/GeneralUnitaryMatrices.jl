@@ -220,6 +220,18 @@ end
 function exp(M::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, X::SMatrix, t::Real)
     return exp(M, p, t * X)
 end
+function exp(M::GeneralUnitaryMatrices{3,ℝ}, p::SMatrix, X::SMatrix)
+    θ = norm(M, p, X) / sqrt(2)
+    if θ ≈ 0
+        a = 1 - θ^2 / 6
+        b = θ / 2
+    else
+        a = sin(θ) / θ
+        b = (1 - cos(θ)) / θ^2
+    end
+    pinvq = I + a .* X .+ b .* (X^2)
+    return p * pinvq
+end
 function exp!(M::GeneralUnitaryMatrices{2,ℝ}, q, p, X)
     @assert size(q) == (2, 2)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
@@ -404,6 +416,9 @@ end
 
 function get_vector_orthogonal(::GeneralUnitaryMatrices{2,ℝ}, p::SMatrix, Xⁱ, ::RealNumbers)
     return @SMatrix [0 -Xⁱ[]; Xⁱ[] 0]
+end
+function get_vector_orthogonal(::GeneralUnitaryMatrices{3,ℝ}, p::SMatrix, Xⁱ, ::RealNumbers)
+    return @SMatrix [0 -Xⁱ[3] Xⁱ[2]; Xⁱ[3] 0 -Xⁱ[1]; -Xⁱ[2] Xⁱ[1] 0]
 end
 
 function get_vector_orthogonal!(::GeneralUnitaryMatrices{1,ℝ}, X, p, Xⁱ, N::RealNumbers)

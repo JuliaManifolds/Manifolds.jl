@@ -346,4 +346,27 @@ Random.seed!(10)
             @test isapprox(G, pts[1], hat(G, pts[1], fXp.data), fXp2)
         end
     end
+
+    @testset "performance of selected operations" begin
+        SE3 = SpecialEuclidean(3)
+        R3 = Rotations(3)
+
+        t = SVector{3}.([1:3, 2:4, 4:6])
+        p = SMatrix{3,3}(I)
+        ω = [SA[1.0, 2.0, 3.0], SA[3.0, 2.0, 1.0], SA[1.0, 3.0, 2.0]]
+        pts = [ArrayPartition(ti, exp(R3, p, hat(R3, p, ωi))) for (ti, ωi) in zip(t, ω)]
+        Xs = [
+            ArrayPartition(SA[-1.0, 2.0, 1.0], hat(R3, p, SA[1.0, 0.5, -0.5])),
+            ArrayPartition(SA[-2.0, 1.0, 0.5], hat(R3, p, SA[-1.0, -0.5, 1.1])),
+        ]
+        exp(SE3, pts[1], Xs[1])
+        compose(SE3, pts[1], pts[2])
+        log(SE3, pts[1], pts[2])
+        vee(SE3, pts[1], Xs[2])
+        # @btime shows 0 but `@allocations` is inaccurate
+        @test (@allocations exp(SE3, pts[1], Xs[1])) <= 4
+        @test (@allocations compose(SE3, pts[1], pts[2])) <= 4
+        @test (@allocations log(SE3, pts[1], pts[2])) <= 12
+        @test (@allocations vee(SE3, pts[1], Xs[2])) <= 13
+    end
 end
