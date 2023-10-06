@@ -335,7 +335,14 @@ function get_coordinates(
 )
     return SA[X[2]]
 end
-
+function get_coordinates(
+    ::Manifolds.GeneralUnitaryMatrices{3,ℝ},
+    p::SMatrix,
+    X::SMatrix,
+    ::DefaultOrthogonalBasis{ℝ,TangentSpaceType},
+)
+    return SA[X[3, 2], X[1, 3], X[2, 1]]
+end
 function get_coordinates_orthogonal(M::GeneralUnitaryMatrices{n,ℝ}, p, X, N) where {n}
     Y = allocate_result(M, get_coordinates, p, X, DefaultOrthogonalBasis(N))
     return get_coordinates_orthogonal!(M, Y, p, X, N)
@@ -602,6 +609,20 @@ function ManifoldsBase.log(M::GeneralUnitaryMatrices{2,ℝ}, p, q)
     @assert size(U) == (2, 2)
     @inbounds θ = atan(U[2], U[1])
     return get_vector(M, p, θ, DefaultOrthogonalBasis())
+end
+function log(M::Manifolds.GeneralUnitaryMatrices{3,ℝ}, p::SMatrix, q::SMatrix)
+    U = transpose(p) * q
+    cosθ = (tr(U) - 1) / 2
+    if cosθ ≈ -1
+        eig = Manifolds.eigen_safe(U)
+        ival = findfirst(λ -> isapprox(λ, 1), eig.values)
+        inds = SVector{3}(1:3)
+        #TODO this is to stop convert error of ax as a complex number
+        ax::Vector{Float64} = eig.vectors[inds, ival]
+        return get_vector(M, p, π * ax, DefaultOrthogonalBasis())
+    end
+    X = U ./ Manifolds.usinc_from_cos(cosθ)
+    return (X .- X') ./ 2
 end
 function log!(::GeneralUnitaryMatrices{n,ℝ}, X, p, q) where {n}
     U = transpose(p) * q

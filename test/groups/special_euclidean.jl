@@ -364,7 +364,7 @@ Random.seed!(10)
         log(SE3, pts[1], pts[2])
         vee(SE3, pts[1], Xs[2])
         # @btime shows 0 but `@allocations` is inaccurate
-        if VERSION >= v"1.9-DEV"
+        @static if VERSION >= v"1.9-DEV"
             @test (@allocations exp(SE3, pts[1], Xs[1])) <= 4
             @test (@allocations compose(SE3, pts[1], pts[2])) <= 4
             @test (@allocations log(SE3, pts[1], pts[2])) <= 12
