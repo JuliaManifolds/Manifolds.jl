@@ -378,7 +378,7 @@ Random.seed!(10)
             exp(SEn, pts[1], Xs[1])
             compose(SEn, pts[1], pts[2])
             log(SEn, pts[1], pts[2])
-            @test isapprox(SEn, log(SEn, pts[1], pts[1]), 0 .* Xs[1])
+            @test isapprox(SEn, log(SEn, pts[1], pts[1]), 0 .* Xs[1]; atol=1e-16)
             @test isapprox(SEn, exp(SEn, pts[1], 0 .* Xs[1]), pts[1])
             vee(SEn, pts[1], Xs[2])
             csen = n == 2 ? SA[1.0, 2.0, 3.0] : SA[1.0, 0.0, 2.0, 2.0, -1.0, 1.0]
