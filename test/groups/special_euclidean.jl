@@ -348,27 +348,49 @@ Random.seed!(10)
     end
 
     @testset "performance of selected operations" begin
-        SE3 = SpecialEuclidean(3)
-        R3 = Rotations(3)
+        for n in [2, 3]
+            SEn = SpecialEuclidean(n)
+            Rn = Rotations(n)
 
-        t = SVector{3}.([1:3, 2:4, 4:6])
-        p = SMatrix{3,3}(I)
-        ω = [SA[1.0, 2.0, 3.0], SA[3.0, 2.0, 1.0], SA[1.0, 3.0, 2.0]]
-        pts = [ArrayPartition(ti, exp(R3, p, hat(R3, p, ωi))) for (ti, ωi) in zip(t, ω)]
-        Xs = [
-            ArrayPartition(SA[-1.0, 2.0, 1.0], hat(R3, p, SA[1.0, 0.5, -0.5])),
-            ArrayPartition(SA[-2.0, 1.0, 0.5], hat(R3, p, SA[-1.0, -0.5, 1.1])),
-        ]
-        exp(SE3, pts[1], Xs[1])
-        compose(SE3, pts[1], pts[2])
-        log(SE3, pts[1], pts[2])
-        vee(SE3, pts[1], Xs[2])
-        # @btime shows 0 but `@allocations` is inaccurate
-        @static if VERSION >= v"1.9-DEV"
-            @test (@allocations exp(SE3, pts[1], Xs[1])) <= 4
-            @test (@allocations compose(SE3, pts[1], pts[2])) <= 4
-            @test (@allocations log(SE3, pts[1], pts[2])) <= 12
-            @test (@allocations vee(SE3, pts[1], Xs[2])) <= 13
+            p = SMatrix{n,n}(I)
+
+            if n == 2
+                t = SVector{2}.([1:2, 2:3, 3:4])
+                ω = [[1.0], [2.0], [1.0]]
+                pts = [
+                    ArrayPartition(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)
+                ]
+                Xs = [
+                    ArrayPartition(SA[-1.0, 2.0], hat(Rn, p, SA[1.0])),
+                    ArrayPartition(SA[1.0, -2.0], hat(Rn, p, SA[0.5])),
+                ]
+            elseif n == 3
+                t = SVector{3}.([1:3, 2:4, 4:6])
+                ω = [SA[1.0, 2.0, 3.0], SA[3.0, 2.0, 1.0], SA[1.0, 3.0, 2.0]]
+                pts = [
+                    ArrayPartition(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)
+                ]
+                Xs = [
+                    ArrayPartition(SA[-1.0, 2.0, 1.0], hat(Rn, p, SA[1.0, 0.5, -0.5])),
+                    ArrayPartition(SA[-2.0, 1.0, 0.5], hat(Rn, p, SA[-1.0, -0.5, 1.1])),
+                ]
+            end
+            exp(SEn, pts[1], Xs[1])
+            compose(SEn, pts[1], pts[2])
+            log(SEn, pts[1], pts[2])
+            @test isapprox(SEn, log(SEn, pts[1], pts[1]), 0 .* Xs[1])
+            @test isapprox(SEn, exp(SEn, pts[1], 0 .* Xs[1]), pts[1])
+            vee(SEn, pts[1], Xs[2])
+            csen = n == 2 ? SA[1.0, 2.0, 3.0] : SA[1.0, 0.0, 2.0, 2.0, -1.0, 1.0]
+            hat(SEn, pts[1], csen)
+            # @btime shows 0 but `@allocations` is inaccurate
+            @static if VERSION >= v"1.9-DEV"
+                @test (@allocations exp(SEn, pts[1], Xs[1])) <= 4
+                @test (@allocations compose(SEn, pts[1], pts[2])) <= 4
+                @test (@allocations log(SEn, pts[1], pts[2])) <= 12
+                @test (@allocations vee(SEn, pts[1], Xs[2])) <= 13
+                @test (@allocations hat(SEn, pts[1], csen)) <= 13
+            end
         end
     end
 end
