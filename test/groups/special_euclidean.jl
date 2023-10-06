@@ -366,7 +366,7 @@ Random.seed!(10)
                 ]
             elseif n == 3
                 t = SVector{3}.([1:3, 2:4, 4:6])
-                ω = [SA[1.0, 2.0, 3.0], SA[3.0, 2.0, 1.0], SA[1.0, 3.0, 2.0]]
+                ω = [SA[pi, 0.0, 0.0], SA[0.0, 0.0, 0.0], SA[1.0, 3.0, 2.0]]
                 pts = [
                     ArrayPartition(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)
                 ]
@@ -378,6 +378,7 @@ Random.seed!(10)
             exp(SEn, pts[1], Xs[1])
             compose(SEn, pts[1], pts[2])
             log(SEn, pts[1], pts[2])
+            log(SEn, pts[1], pts[3])
             @test isapprox(SEn, log(SEn, pts[1], pts[1]), 0 .* Xs[1]; atol=1e-16)
             @test isapprox(SEn, exp(SEn, pts[1], 0 .* Xs[1]), pts[1])
             vee(SEn, pts[1], Xs[2])
