@@ -224,6 +224,14 @@ end
 
 function allocate_result(
     ::FixedRankMatrices{m,n,k},
+    ::typeof(inverse_retract),
+    p,
+    q,
+) where {m,n,k}
+    return zero_vector(M, p)
+end
+function allocate_result(
+    ::FixedRankMatrices{m,n,k},
     ::typeof(project),
     X,
     p,
