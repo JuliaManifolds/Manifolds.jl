@@ -171,7 +171,7 @@ end
 
 # Layer III
 """
-    inverse_retract_polar!(M::AbstractManifold, X, p, q)
+    inverse_retract_orthographic!(M::AbstractManifold, X, p, q)
 
 Compute the in-place variant of the [`OrthographicInverseRetraction`](@ref).
 """
