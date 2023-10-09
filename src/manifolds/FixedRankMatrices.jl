@@ -108,6 +108,111 @@ Base.:-(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
 Base.:+(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
 Base.:(==)(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
 
+# Move to Base when name is established – i.e. used in more than one manifold
+# |/---
+"""
+    OrthographicRetraction <: AbstractRetractionMethod
+
+Retractions that are related to orthographic projections, which was first
+used in [AbsilMalick:2012](@cite).
+
+!!! note "Technical Note"
+    Though you would call e.g. [`retract`](@ref)`(M, p, X, OrthographicRetractionRetractiontraction())`,
+    to implement a orthographic retraction, define [`retract_orthographic`](@ref)`(M, p, X, t)`
+    or [`retract_orthographic!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
+"""
+struct OrthographicRetraction <: AbstractRetractionMethod end
+
+"""
+    OrthographicInverseRetraction <: AbstractInverseRetractionMethod
+
+Retractions that are related to orthographic projections, which was first
+used in [AbsilMalick:2012](@cite).
+
+!!! note "Technical Note"
+    Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, OrthographicRetractionInverseRetraction())`,
+    to implement an inverse orthographic retraction, define [`inverse_retract_orthographic`](@ref)`(M, p, q)`
+    or [`inverse_retract_orthographic!`](@ref)`(M, X, p, q)` for your manifold `M`.
+"""
+struct OrthographicInverseRetraction <: AbstractInverseRetractionMethod end
+
+# Layer II
+function _inverse_retract!(
+    M::AbstractManifold,
+    X,
+    p,
+    q,
+    ::OrthographicInverseRetraction;
+    kwargs...,
+)
+    return inverse_retract_orthographic!(M, X, p, q; kwargs...)
+end
+
+function _inverse_retract(
+    M::AbstractManifold,
+    p,
+    q,
+    ::OrthographicInverseRetraction;
+    kwargs...,
+)
+    return inverse_retract_orthographic(M, p, q; kwargs...)
+end
+
+"""
+    inverse_retract_orthographic(M::AbstractManifold, p, q)
+
+computes the allocating variant of the [`OrthographicInverseRetraction`](@ref),
+which by default allocates and calls [`inverse_retract_orthographic!`](@ref ManifoldsBase.inverse_retract_polar!).
+"""
+function inverse_retract_orthographic(M::AbstractManifold, p, q; kwargs...)
+    X = allocate_result(M, inverse_retract, p, q)
+    return inverse_retract_orthographic!(M, X, p, q; kwargs...)
+end
+
+# Layer III
+"""
+    inverse_retract_polar!(M::AbstractManifold, X, p, q)
+
+Compute the in-place variant of the [`OrthographicInverseRetraction`](@ref).
+"""
+inverse_retract_orthographic!(M::AbstractManifold, X, p, q)
+
+## Layer II
+function _retract!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::OrthographicRetraction;
+    kwargs...,
+)
+    return retract_orthographic!(M, q, p, X, t; kwargs...)
+end
+function _retract(M::AbstractManifold, p, X, t::Number, ::OrthographicRetraction; kwargs...)
+    return retract_orthographic(M, p, X, t; kwargs...)
+end
+
+## Layer III
+"""
+    retract_orthographic!(M::AbstractManifold, q, p, X, t::Number)
+
+Compute the in-place variant of the [`OrthographicRetraction`](@ref).
+"""
+retract_orthographic!(M::AbstractManifold, q, p, X, t::Number)
+
+"""
+    retract_orthographic(M::AbstractManifold, p, X, t::Number)
+
+computes the allocating variant of the [`PolarRetraction`](@ref),
+which by default allocates and calls [`retract_polar!`](@ref ManifoldsBase.retract_polar!).
+"""
+function retract_orthographic(M::AbstractManifold, p, X, t::Number; kwargs...)
+    q = allocate_result(M, retract, p, X)
+    return retract_orthographic!(M, q, p, X, t; kwargs...)
+end
+# \|---
+
 allocate(p::SVDMPoint) = SVDMPoint(allocate(p.U), allocate(p.S), allocate(p.Vt))
 function allocate(p::SVDMPoint, ::Type{T}) where {T}
     return SVDMPoint(allocate(p.U, T), allocate(p.S, T), allocate(p.Vt, T))
@@ -377,14 +482,20 @@ function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
     return dot(v.U, w.U) + dot(v.M, w.M) + dot(v.Vt, w.Vt)
 end
 
+@doc raw"""
+    inverse_retract(M, p, X, ::OrthographicInverseRetraction)
+
+**(ToDo Docs, but we already have [AbsilOseledets:2014](@cite))**
+"""
+inverse_retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicInverseRetraction)
+
 function inverse_retract_orthographic!(
     M::FixedRankMatrices{m,n,k},
     X::UMVTVector,
     p::SVDMPoint,
-    q::SVDMPoint
+    q::SVDMPoint,
 ) where {m,n,k}
-
-    project!(M, X, p, embed(M,q) - embed(M,p))
+    project!(M, X, p, embed(M, q) - embed(M, p))
 
     return X
 end
@@ -508,6 +619,13 @@ the size of matrices on this manifold ``(m,n)``.
 """
 @generated representation_size(::FixedRankMatrices{m,n}) where {m,n} = (m, n)
 
+@doc raw"""
+    retract(M, p, X, ::OrthographicRetraction)
+
+**(ToDo Docs, but we already have [AbsilOseledets:2014](@cite))**
+"""
+retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicRetraction)
+
 function retract_orthographic!(
     ::FixedRankMatrices{m,n,k},
     q::SVDMPoint,
@@ -515,12 +633,11 @@ function retract_orthographic!(
     X::UMVTVector,
     t::Number,
 ) where {m,n,k}
-
     tX = t * X
-    QU, RU = qr(p.U*(diagm(p.S)+ tX.M) + tX.U)
-    QV, RV = qr(p.Vt'*(diagm(p.S) + tX.M') + tX.Vt')
+    QU, RU = qr(p.U * (diagm(p.S) + tX.M) + tX.U)
+    QV, RV = qr(p.Vt' * (diagm(p.S) + tX.M') + tX.Vt')
 
-    Uk, Sk, Vtk = svd(RU*inv(diagm(p.S) + tX.M)* RV')
+    Uk, Sk, Vtk = svd(RU * inv(diagm(p.S) + tX.M) * RV')
 
     mul!(q.U, QU[:, 1:k], Uk)
     q.S .= Sk[1:k]
