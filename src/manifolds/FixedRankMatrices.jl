@@ -223,7 +223,7 @@ function allocate(X::UMVTVector, ::Type{T}) where {T}
 end
 
 function allocate_result(
-    ::FixedRankMatrices{m,n,k},
+    M::FixedRankMatrices{m,n,k},
     ::typeof(inverse_retract),
     p,
     q,
