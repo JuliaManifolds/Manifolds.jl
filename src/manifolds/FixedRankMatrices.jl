@@ -377,6 +377,18 @@ function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
     return dot(v.U, w.U) + dot(v.M, w.M) + dot(v.Vt, w.Vt)
 end
 
+function inverse_retract_orthographic!(
+    M::FixedRankMatrices{m,n,k},
+    X::UMVTVector,
+    p::SVDMPoint,
+    q::SVDMPoint
+) where {m,n,k}
+
+    project!(M, X, p, embed(M,q) - embed(M,p))
+
+    return X
+end
+
 function _isapprox(::FixedRankMatrices, p::SVDMPoint, q::SVDMPoint; kwargs...)
     return isapprox(p.U * Diagonal(p.S) * p.Vt, q.U * Diagonal(q.S) * q.Vt; kwargs...)
 end
@@ -495,6 +507,27 @@ Return the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.
 the size of matrices on this manifold ``(m,n)``.
 """
 @generated representation_size(::FixedRankMatrices{m,n}) where {m,n} = (m, n)
+
+function retract_orthographic!(
+    ::FixedRankMatrices{m,n,k},
+    q::SVDMPoint,
+    p::SVDMPoint,
+    X::UMVTVector,
+    t::Number,
+) where {m,n,k}
+
+    tX = t * X
+    QU, RU = qr(p.U*(diagm(p.S)+ tX.M) + tX.U)
+    QV, RV = qr(p.Vt'*(diagm(p.S) + tX.M') + tX.Vt')
+
+    Uk, Sk, Vtk = svd(RU*inv(diagm(p.S) + tX.M)* RV')
+
+    mul!(q.U, QU[:, 1:k], Uk)
+    q.S .= Sk[1:k]
+    mul!(q.Vt, Vtk, QV[:, 1:k]')
+
+    return q
+end
 
 @doc raw"""
     retract(M, p, X, ::PolarRetraction)
