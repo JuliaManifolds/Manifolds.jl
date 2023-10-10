@@ -410,7 +410,7 @@ function dual_basis(
     ::Any,
     B::InducedBasis{𝔽,TangentSpaceType},
 ) where {𝔽}
-    return induced_basis(M, B.A, B.i, CotangentSpace)
+    return induced_basis(M, B.A, B.i, CotangentSpaceType())
 end
 function dual_basis(
     M::AbstractManifold{𝔽},

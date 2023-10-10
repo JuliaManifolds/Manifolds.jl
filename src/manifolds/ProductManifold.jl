@@ -8,7 +8,7 @@ function allocate_coordinates(::ProductManifold, p, T, n::Int)
 end
 
 """
-    ProductFVectorDistribution([type::VectorBundleFibers], [x], distrs...)
+    ProductFVectorDistribution([type::VectorSpaceFiber], [x], distrs...)
 
 Generates a random vector at point `x` from vector space (a fiber of a tangent
 bundle) of type `type` using the product distribution of given distributions.
@@ -16,12 +16,10 @@ bundle) of type `type` using the product distribution of given distributions.
 Vector space type and `x` can be automatically inferred from distributions `distrs`.
 """
 struct ProductFVectorDistribution{
-    TSpace<:VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
+    TSpace<:VectorSpaceFiber{<:Any,<:ProductManifold},
     TD<:(NTuple{N,Distribution} where {N}),
-    TX,
-} <: FVectorDistribution{TSpace,TX}
+} <: FVectorDistribution{TSpace}
     type::TSpace
-    x::TX
     distributions::TD
 end
 
@@ -149,35 +147,17 @@ manifolds `M` is constructed from.
 """
 manifold_volume(M::ProductManifold) = mapreduce(manifold_volume, *, M.manifolds)
 
-function ProductFVectorDistribution(
-    type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
-    p::Union{AbstractArray,AbstractManifoldPoint},
-    distributions::FVectorDistribution...,
-)
-    return ProductFVectorDistribution{typeof(type),typeof(distributions),typeof(p)}(
-        type,
-        p,
-        distributions,
-    )
-end
-function ProductFVectorDistribution(
-    type::VectorBundleFibers{<:VectorSpaceType,<:ProductManifold},
-    distributions::FVectorDistribution...,
-)
-    p = ArrayPartition(map(d -> support(d).point, distributions))
-    return ProductFVectorDistribution(type, p, distributions...)
-end
 function ProductFVectorDistribution(distributions::FVectorDistribution...)
     M = ProductManifold(map(d -> support(d).space.manifold, distributions)...)
-    fiber = support(distributions[1]).space.fiber
-    if !all(d -> support(d).space.fiber == fiber, distributions)
+    fiber_type = support(distributions[1]).space.fiber_type
+    if !all(d -> support(d).space.fiber_type == fiber_type, distributions)
         error(
             "Not all distributions have support in vector spaces of the same type, which is currently not supported",
         )
     end
     # Probably worth considering sum spaces in the future?
-    x = ArrayPartition(map(d -> support(d).point, distributions)...)
-    return ProductFVectorDistribution(VectorBundleFibers(fiber, M), x, distributions...)
+    p = ArrayPartition(map(d -> support(d).space.point, distributions)...)
+    return ProductFVectorDistribution(Fiber(M, fiber_type, p), distributions)
 end
 
 function ProductPointDistribution(M::ProductManifold, distributions::MPointDistribution...)
@@ -270,10 +250,7 @@ sharp(::ProductManifold, ::Any...)
 
 Distributions.support(d::ProductPointDistribution) = MPointSupport(d.manifold)
 function Distributions.support(tvd::ProductFVectorDistribution)
-    return FVectorSupport(
-        tvd.type,
-        ArrayPartition(map(d -> support(d).point, tvd.distributions)...),
-    )
+    return FVectorSupport(tvd.type)
 end
 
 function uniform_distribution(M::ProductManifold)

@@ -45,13 +45,11 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test default_vector_transport_method(TB) isa
               Manifolds.FiberBundleProductVectorTransport
         CTB = CotangentBundle(M)
-        CTBF = CotangentBundleFibers(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
         @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
               "VectorBundle(TestVectorSpaceType(), Sphere(2, ℝ))"
-        @test sprint(show, CTBF) == "VectorBundleFibers(CotangentSpace, Sphere(2, ℝ))"
-        @test Manifolds.fiber_dimension(CTBF) == 2
-        @test Manifolds.fiber_dimension(M, ManifoldsBase.CotangentSpace) == 2
+
+        @test Manifolds.fiber_dimension(M, ManifoldsBase.CotangentSpaceType()) == 2
         @test base_manifold(TangentBundle(M)) == M
     end
 
@@ -61,7 +59,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
     for T in types
         p = convert(T, [1.0, 0.0, 0.0])
-        TpM = TangentSpaceAtPoint(M, p)
+        TpM = TangentSpace(M, p)
         @test is_flat(TpM)
 
         @testset "Type $T" begin
@@ -175,15 +173,17 @@ struct TestVectorSpaceType <: VectorSpaceType end
     @testset "tensor product" begin
         TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)
         @test sprint(show, TT) == "TensorProductType(TangentSpace, TangentSpace)"
-        @test vector_space_dimension(VectorBundleFibers(TT, Sphere(2))) == 4
-        @test vector_space_dimension(VectorBundleFibers(TT, Sphere(3))) == 9
-        @test base_manifold(VectorBundleFibers(TT, Sphere(2))) == M
-        @test sprint(show, VectorBundleFibers(TT, Sphere(2))) ==
-              "VectorBundleFibers(TensorProductType(TangentSpace, TangentSpace), Sphere(2, ℝ))"
+        @test vector_space_dimension(VectorSpaceFiber(TT, Sphere(2), [1.0, 0.0, 0.0])) == 4
+        @test vector_space_dimension(
+            VectorSpaceFiber(TT, Sphere(3), [1.0, 0.0, 0.0, 0.0]),
+        ) == 9
+        @test base_manifold(VectorSpaceFiber(TT, Sphere(2), [1.0, 0.0, 0.0])) == M
+        @test sprint(show, VectorSpaceFiber(TT, Sphere(2), [1.0, 0.0, 0.0])) ==
+              "VectorSpaceFiber(TensorProductType(TangentSpace, TangentSpace), Sphere(2, ℝ))"
     end
 
     @testset "Error messages" begin
-        vbf = VectorBundleFibers(TestVectorSpaceType(), Euclidean(3))
+        vbf = VectorSpaceFiber(TestVectorSpaceType(), Euclidean(3), [1.0, 0.0, 0.0])
         @test_throws MethodError inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws MethodError project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws MethodError zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
@@ -226,14 +226,5 @@ struct TestVectorSpaceType <: VectorSpaceType end
         M = TangentBundle(Euclidean(3))
         @test is_flat(M)
         @test injectivity_radius(M) == Inf
-    end
-
-    @testset "Weingarten Map" begin
-        p0 = [1.0, 0.0, 0.0]
-        M = TangentSpaceAtPoint(Sphere(2), p0)
-        p = [0.0, 1.0, 1.0]
-        X = [0.0, 1.0, 0.0]
-        V = [1.0, 0.0, 0.0]
-        @test Weingarten(M, p, X, V) == zero_vector(M, p)
     end
 end

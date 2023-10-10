@@ -156,12 +156,6 @@ function test_manifold(
     Test.@testset "dimension" begin
         Test.@test isa(manifold_dimension(M), expected_dimension_type)
         Test.@test manifold_dimension(M) ≥ 0
-        Test.@test manifold_dimension(M) == vector_space_dimension(
-            Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M),
-        )
-        Test.@test manifold_dimension(M) == vector_space_dimension(
-            Manifolds.VectorBundleFibers(Manifolds.CotangentSpace, M),
-        )
     end
 
     test_representation_size && Test.@testset "representation" begin
@@ -174,9 +168,6 @@ function test_manifold(
         end
 
         test_repr(Manifolds.representation_size(M))
-        for fiber in (Manifolds.TangentSpace, Manifolds.CotangentSpace)
-            test_repr(Manifolds.representation_size(Manifolds.VectorBundleFibers(fiber, M)))
-        end
     end
 
     test_injectivity_radius && Test.@testset "injectivity radius" begin
@@ -396,7 +387,7 @@ function test_manifold(
     test_vector_spaces && Test.@testset "vector spaces tests" begin
         for p in pts
             X = zero_vector(M, p)
-            mts = Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M)
+            mts = TangentSpace(M, p)
             Test.@test isapprox(M, p, X, zero_vector(mts, p))
             if is_mutating
                 zero_vector!(mts, X, p)
@@ -819,11 +810,11 @@ function test_manifold(
     Test.@testset "tangent vector distributions" begin
         for tvd in tvector_distributions
             supp = Manifolds.support(tvd)
-            Test.@test supp isa Manifolds.FVectorSupport{TangentBundleFibers{typeof(M)}}
+            Test.@test supp isa Manifolds.FVectorSupport{<:TangentSpace{ℝ,typeof(M)}}
             for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * find_eps(randtv)
-                Test.@test is_vector(M, supp.point, randtv, true; atol=atol)
+                Test.@test is_vector(M, supp.space.point, randtv, true; atol=atol)
             end
         end
     end

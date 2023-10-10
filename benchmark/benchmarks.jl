@@ -203,13 +203,11 @@ function add_manifold_benchmarks()
         sphere_tv_dist =
             Manifolds.normal_tvector_distribution(Ms, (@MVector [1.0, 0.0, 0.0]), 1.0)
         power_s1_tv_dist = Manifolds.PowerFVectorDistribution(
-            TangentBundleFibers(Ms1),
-            rand(power_s1_pt_dist),
+            TangentSpace(Ms1, rand(power_s1_pt_dist)),
             sphere_tv_dist,
         )
         power_s2_tv_dist = Manifolds.PowerFVectorDistribution(
-            TangentBundleFibers(Ms2),
-            rand(power_s2_pt_dist),
+            TangentSpace(Ms2, rand(power_s2_pt_dist)),
             sphere_tv_dist,
         )
 
@@ -224,13 +222,11 @@ function add_manifold_benchmarks()
         )
         rotations_tv_dist = Manifolds.normal_tvector_distribution(Mr, MMatrix(id_rot), 1.0)
         power_r1_tv_dist = Manifolds.PowerFVectorDistribution(
-            TangentBundleFibers(Mr1),
-            rand(power_r1_pt_dist),
+            TangentSpace(Mr1, rand(power_r1_pt_dist)),
             rotations_tv_dist,
         )
         power_r2_tv_dist = Manifolds.PowerFVectorDistribution(
-            TangentBundleFibers(Mr2),
-            rand(power_r2_pt_dist),
+            TangentSpace(Mr2, rand(power_r2_pt_dist)),
             rotations_tv_dist,
         )
 

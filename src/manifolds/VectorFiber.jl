@@ -1,15 +1,6 @@
 
-const CotangentFiberType = VectorSpaceFiberType{CotangentSpaceType}
-
-const CotangentBundleFibers{M} =
-    BundleFibers{CotangentFiberType,M} where {M<:AbstractManifold}
-
-CotangentBundleFibers(M::AbstractManifold) = BundleFibers(CotangentFiber, M)
-
-const CotangentFiber = VectorSpaceFiberType{CotangentSpaceType}(CotangentSpace)
-
 const CotangentSpaceAtPoint{𝔽,M} =
-    VectorSpaceAtPoint{𝔽,CotangentBundleFibers{M}} where {𝔽,M<:AbstractManifold{𝔽}}
+    Fiber{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
 
 """
     CotangentSpaceAtPoint(M::AbstractManifold, p)
@@ -17,11 +8,9 @@ const CotangentSpaceAtPoint{𝔽,M} =
 Return an object of type [`VectorSpaceAtPoint`](@ref) representing cotangent
 space at `p`.
 """
-function CotangentSpaceAtPoint(M::AbstractManifold, p)
-    return VectorSpaceAtPoint(M, CotangentFiber, p)
+function CotangentSpace(M::AbstractManifold, p)
+    return Fiber(M, CotangentSpaceType(), p)
 end
-
-fiber_dimension(M::CotangentBundleFibers) = manifold_dimension(M.manifold)
 
 """
     TensorProductType(spaces::VectorSpaceType...)

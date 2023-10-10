@@ -423,13 +423,13 @@ using RecursiveArrayTools: ArrayPartition
         # make sure `get_coordinates` does not return an `ArrayPartition`
         p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
         X1 = ArrayPartition([1.0, 0.0, -1.0], [1.0, 0.0])
-        Tp1Mse = TangentSpaceAtPoint(Mse, p1)
+        Tp1Mse = TangentSpace(Mse, p1)
         c = get_coordinates(Tp1Mse, p1, X1, DefaultOrthonormalBasis())
         @test c isa Vector
 
         p1ap = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
         X1ap = ArrayPartition([1.0, 0.0, -1.0], [1.0, 0.0])
-        Tp1apMse = TangentSpaceAtPoint(Mse, p1ap)
+        Tp1apMse = TangentSpace(Mse, p1ap)
         cap = get_coordinates(Tp1apMse, p1ap, X1ap, DefaultOrthonormalBasis())
         @test cap isa Vector
     end

@@ -38,20 +38,16 @@ struct PowerPointDistribution{TM<:AbstractPowerManifold,TD<:MPointDistribution,T
 end
 
 """
-    PowerFVectorDistribution([type::VectorBundleFibers], [x], distr)
+    PowerFVectorDistribution([type::VectorSpaceFiber], [x], distr)
 
 Generates a random vector at a `point` from vector space (a fiber of a tangent
 bundle) of type `type` using the power distribution of `distr`.
 
 Vector space type and `point` can be automatically inferred from distribution `distr`.
 """
-struct PowerFVectorDistribution{
-    TSpace<:VectorBundleFibers{<:VectorSpaceType,<:AbstractPowerManifold},
-    TD<:FVectorDistribution,
-    TX,
-} <: FVectorDistribution{TSpace,TX}
+struct PowerFVectorDistribution{TSpace<:VectorSpaceFiber,TD<:FVectorDistribution} <:
+       FVectorDistribution{TSpace}
     type::TSpace
-    point::TX
     distribution::TD
 end
 
@@ -157,7 +153,7 @@ function Distributions._rand!(
     PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
     for i in get_iterator(d.type.manifold)
-        copyto!(d.distribution.point, _read(PM, rep_size, d.point, i))
+        copyto!(d.distribution.point, _read(PM, rep_size, d.type.point, i))
         Distributions._rand!(rng, d.distribution, _read(PM, rep_size, v, i))
     end
     return v

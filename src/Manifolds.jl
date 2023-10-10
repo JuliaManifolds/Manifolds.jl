@@ -172,9 +172,7 @@ import ManifoldsBase:
     Weingarten,
     Weingarten!,
     zero_vector,
-    zero_vector!,
-    CotangentSpace,
-    TangentSpace
+    zero_vector!
 import ManifoldDiff:
     adjoint_Jacobi_field,
     adjoint_Jacobi_field!,
@@ -215,7 +213,6 @@ using ManifoldsBase:
     AbstractLinearVectorTransportMethod,
     ApproximateInverseRetraction,
     ApproximateRetraction,
-    BundleFibers,
     CachedBasis,
     CayleyRetraction,
     CayleyInverseRetraction,
@@ -235,9 +232,7 @@ using ManifoldsBase:
     EmptyTrait,
     EuclideanMetric,
     ExponentialRetraction,
-    FiberBundleInverseProductRetraction,
-    FiberBundleProductRetraction,
-    FiberBundleProductVectorTransport,
+    Fiber,
     FiberType,
     FVector,
     InverseProductRetraction,
@@ -275,14 +270,13 @@ using ManifoldsBase:
     QRRetraction,
     RealNumbers,
     RiemannianMetric,
+    SasakiRetraction,
     ScaledVectorTransport,
     SchildsLadderTransport,
     ShootingInverseRetraction,
     SoftmaxRetraction,
     SoftmaxInverseRetraction,
-    TangentBundle,
-    TangentBundleFibers,
-    TangentSpaceAtPoint,
+    TangentSpace,
     TangentSpaceType,
     TCoTSpaceType,
     TFVector,
@@ -291,10 +285,7 @@ using ManifoldsBase:
     ValidationManifold,
     ValidationMPoint,
     ValidationTVector,
-    VectorBundle,
-    VectorBundleFibers,
-    VectorSpaceAtPoint,
-    VectorSpaceFiberType,
+    VectorSpaceFiber,
     VectorSpaceType,
     VeeOrthogonalBasis,
     @invoke_maker,
@@ -386,7 +377,7 @@ METAMANIFOLDS = [
     PowerManifoldNested,
     PowerManifoldNestedReplacing,
     ProductManifold,
-    TangentSpaceAtPoint,
+    TangentSpace,
     ValidationManifold,
     VectorBundle,
 ]
@@ -512,14 +503,14 @@ This method employs [`is_point`](https://juliamanifolds.github.io/ManifoldsBase.
 Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
 @doc raw"""
-    Base.in(p, TpM::TangentSpaceAtPoint; kwargs...)
-    X ∈ TangentSpaceAtPoint(M,p)
+    Base.in(p, TpM::TangentSpace; kwargs...)
+    X ∈ TangentSpace(M, p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+the [`TangentSpace`](@ref) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
 This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.
 """
-function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
+function Base.in(X, TpM::TangentSpace; kwargs...)
     return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
 
@@ -681,8 +672,7 @@ export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
 export IsDefaultMetric, IsDefaultConnection, IsMetricManifold, IsConnectionManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
-export CotangentBundle,
-    CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
+export CotangentBundle, CotangentSpace, FVector
 export AbstractPowerManifold,
     AbstractPowerRepresentation,
     ArrayPowerRepresentation,
@@ -693,9 +683,8 @@ export AbstractPowerManifold,
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export ArrayPartition
-export ProjectedPointDistribution, TangentBundle, TangentBundleFibers
-export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
-export BundleFibers, VectorBundleFibers
+export ProjectedPointDistribution, TangentBundle
+export TangentSpace, VectorSpaceFiber, VectorSpaceType, VectorBundle
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport

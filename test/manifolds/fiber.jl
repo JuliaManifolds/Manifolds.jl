@@ -8,9 +8,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
     M = Sphere(2)
     @testset "tangent and cotangent space" begin
         p = [1.0, 0.0, 0.0]
-        t_p = TangentSpaceAtPoint(M, p)
-        t_p2 = TangentSpace(M, p)
-        @test t_p == t_p2
+        t_p = TangentSpace(M, p)
         ct_p = CotangentSpaceAtPoint(M, p)
         t_ps = sprint(show, "text/plain", t_p)
         sp = sprint(show, "text/plain", p)
@@ -30,15 +28,5 @@ struct TestVectorSpaceType <: VectorSpaceType end
         X = [0.0, 0.0, 1.0]
         @test embed(t_p, X) == X
         @test embed(t_p, X, X) == X
-        # generic vector space at
-        fiber = VectorBundleFibers(TestVectorSpaceType(), M)
-        X_p = Manifolds.FiberAtPoint(fiber, p)
-        X_ps = sprint(show, "text/plain", X_p)
-        fiber_s = sprint(show, "text/plain", fiber)
-        X_ps_test = "$(typeof(X_p))\nFiber:\n $(fiber_s)\nBase point:\n $(sp)"
-        @test X_ps == X_ps_test
-        @test_throws MethodError project(fiber, p, X)
-        @test_throws MethodError norm(fiber, p, X)
-        @test_throws MethodError distance(fiber, p, X, X)
     end
 end

@@ -5,12 +5,8 @@ Vector bundle $E$ is a special case of a [fiber bundle](@ref FiberBundleSection)
 Tangent bundle is a simple example of a vector bundle, where each fiber is the tangent space at the specified point $p$.
 An object representing a tangent bundle can be obtained using the constructor called `TangentBundle`.
 
-Fibers of a vector bundle are represented by the type `VectorBundleFibers`.
-The important difference between functions operating on `VectorBundle` and `VectorBundleFibers` is that in the first case both a point on the underlying manifold and the vector are represented together (by a single argument) while in the second case only the vector part is present, while the point is supplied in a different argument where needed.
-
-`VectorBundleFibers` refers to the whole set of fibers of a vector bundle.
-There is also another type, [`VectorSpaceAtPoint`](@ref), that represents a specific fiber at a given point.
-This distinction is made to reduce the need to repeatedly construct objects of type [`VectorSpaceAtPoint`](@ref) in certain usage scenarios.
+There is also another type, [`VectorSpaceFiber`](@ref), that represents a specific fiber at a given point.
+This distinction is made to reduce the need to repeatedly construct objects of type [`VectorSpaceFiber`](@ref) in certain usage scenarios.
 This is also considered a manifold.
 
 ## FVector

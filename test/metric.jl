@@ -614,8 +614,8 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         cofY = flat(M, p, fY)
         @test coX(X) ≈ norm(M, p, X)^2
         @test coY(X) ≈ inner(M, p, X, Y)
-        cotspace = CotangentBundleFibers(M)
-        cotspace2 = CotangentBundleFibers(MM)
+        cotspace = CotangentSpace(M, p)
+        cotspace2 = CotangentSpace(MM, p)
         @test coX.X ≈ X
         @test inner(M, p, X, Y) ≈ inner(cotspace, p, coX, coY)
         @test inner(MM, p, fX, fY) ≈ inner(cotspace, p, coX, coY)

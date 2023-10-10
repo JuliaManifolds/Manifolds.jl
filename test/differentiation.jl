@@ -180,7 +180,7 @@ end
 
     q2 = [1.0, 0.0, 0.0]
     f2(X) = [0.0 0.0 0.0; 0.0 2.0 -1.0; 0.0 -3.0 1.0] * X
-    Tq2s2 = TangentSpaceAtPoint(s2, q2)
+    Tq2s2 = TangentSpace(s2, q2)
     @test isapprox(
         Manifolds.jacobian(Tq2s2, Tq2s2, f2, zero_vector(s2, q2), rb_onb_default),
         [2.0 -1.0; -3.0 1.0],
@@ -188,7 +188,7 @@ end
 
     q3 = [0.0, 1.0, 0.0]
     f3(X) = [0.0 2.0 1.0; 0.0 0.0 0.0; 0.0 5.0 1.0] * X
-    Tq3s2 = TangentSpaceAtPoint(s2, q3)
+    Tq3s2 = TangentSpace(s2, q3)
     @test isapprox(
         Manifolds.jacobian(Tq2s2, Tq3s2, f3, zero_vector(s2, q2), rb_onb_default),
         [-2.0 -1.0; 5.0 1.0],

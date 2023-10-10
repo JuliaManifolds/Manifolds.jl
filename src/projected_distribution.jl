@@ -65,7 +65,7 @@ end
 Distributions.support(d::ProjectedPointDistribution) = MPointSupport(d.manifold)
 
 """
-    ProjectedFVectorDistribution(type::VectorBundleFibers, p, d, project!)
+    ProjectedFVectorDistribution(type::VectorSpaceFiber, p, d, project!)
 
 Generates a random vector from ambient space of manifold `type.manifold`
 at point `p` and projects it to vector space of type `type` using function
@@ -74,33 +74,23 @@ Generated arrays are of type `TResult`.
 """
 struct ProjectedFVectorDistribution{
     TResult,
-    TSpace<:VectorBundleFibers,
-    ManifoldPoint,
+    TSpace<:VectorSpaceFiber,
     TD<:Distribution,
     TProj,
-} <: FVectorDistribution{TSpace,ManifoldPoint}
+} <: FVectorDistribution{TSpace}
     type::TSpace
-    point::ManifoldPoint
     distribution::TD
     project!::TProj
 end
 
 function ProjectedFVectorDistribution(
-    type::VectorBundleFibers,
-    p,
+    type::VectorSpaceFiber,
     d::Distribution,
     project!,
     ::TResult,
 ) where {TResult}
-    return ProjectedFVectorDistribution{
-        TResult,
-        typeof(type),
-        typeof(p),
-        typeof(d),
-        typeof(project!),
-    }(
+    return ProjectedFVectorDistribution{TResult,typeof(type),typeof(d),typeof(project!)}(
         type,
-        p,
         d,
         project!,
     )
@@ -110,8 +100,8 @@ function Random.rand(
     rng::AbstractRNG,
     d::ProjectedFVectorDistribution{TResult},
 ) where {TResult}
-    X = convert(TResult, reshape(rand(rng, d.distribution), size(d.point)))
-    return d.project!(d.type, X, d.point, X)
+    X = convert(TResult, reshape(rand(rng, d.distribution), size(d.type.point)))
+    return d.project!(d.type.manifold, X, d.type.point, X)
 end
 
 function Distributions._rand!(
@@ -131,9 +121,9 @@ projected to tangent space at `p`.
 """
 function normal_tvector_distribution(M::AbstractManifold, p, σ)
     d = Distributions.MvNormal(zero(vec(p)), σ)
-    return ProjectedFVectorDistribution(TangentBundleFibers(M), p, d, project!, p)
+    return ProjectedFVectorDistribution(TangentSpace(M, p), d, project!, p)
 end
 
 function Distributions.support(tvd::ProjectedFVectorDistribution)
-    return FVectorSupport(tvd.type, tvd.point)
+    return FVectorSupport(tvd.type)
 end
