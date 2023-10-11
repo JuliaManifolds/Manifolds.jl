@@ -53,7 +53,7 @@ const TangentBundle{𝔽,M} =
 
 TangentBundle(M::AbstractManifold) = FiberBundle(TangentSpaceType(), M)
 function TangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTransport)
-    return VectorBundle(TangentSpaceType(), M, vtm)
+    return FiberBundle(TangentSpaceType(), M, vtm)
 end
 
 const CotangentBundle{𝔽,M} =
@@ -61,7 +61,7 @@ const CotangentBundle{𝔽,M} =
 
 CotangentBundle(M::AbstractManifold) = FiberBundle(CotangentSpaceType(), M)
 function CotangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTransport)
-    return VectorBundle(CotangentSpaceType(), M, vtm)
+    return FiberBundle(CotangentSpaceType(), M, vtm)
 end
 
 function bundle_transport_to!(B::TangentBundle, Y, p, X, q)
@@ -119,9 +119,10 @@ function inner(B::FiberBundle, p, X, Y)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
+    F = Fiber(B.manifold, px, B.type)
     # for tangent bundle Vx is discarded by the method of inner for TangentSpace
     # and px is actually used as the base point
-    return inner(B.manifold, px, VXM, VYM) + inner(FiberAtPoint(B.fiber, px), Vx, VXF, VYF)
+    return inner(B.manifold, px, VXM, VYM) + inner(F, Vx, VXF, VYF)
 end
 
 function _inverse_retract(M::FiberBundle, p, q, ::FiberBundleInverseProductRetraction)
@@ -183,7 +184,8 @@ function project!(B::VectorBundle, q, p)
     px, pVx = submanifold_components(B.manifold, p)
     qx, qVx = submanifold_components(B.manifold, q)
     project!(B.manifold, qx, px)
-    project!(B.fiber, qVx, qx, pVx)
+    F = Fiber(B.manifold, qx, B.type)
+    project!(F, qVx, pVx)
     return q
 end
 
@@ -211,8 +213,9 @@ function project!(B::VectorBundle, Y, p, X)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
+    F = Fiber(B.manifold, px, B.type)
     project!(B.manifold, VYM, px, VXM)
-    project!(B.fiber, VYF, px, VXF)
+    project!(F, VYF, Vx, VXF)
     return Y
 end
 

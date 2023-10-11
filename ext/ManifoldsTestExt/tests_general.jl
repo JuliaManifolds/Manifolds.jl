@@ -388,9 +388,9 @@ function test_manifold(
         for p in pts
             X = zero_vector(M, p)
             mts = TangentSpace(M, p)
-            Test.@test isapprox(M, p, X, zero_vector(mts, p))
+            Test.@test isapprox(M, p, X, zero_vector(mts, X))
             if is_mutating
-                zero_vector!(mts, X, p)
+                zero_vector!(mts, X, X)
                 Test.@test isapprox(M, p, X, zero_vector(M, p))
             end
         end

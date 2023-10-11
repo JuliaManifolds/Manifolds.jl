@@ -135,7 +135,7 @@ function manifold_volume(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where 
 end
 
 function Random.rand(rng::AbstractRNG, d::PowerFVectorDistribution)
-    fv = zero_vector(d.type, d.point)
+    fv = zero_vector(d.type.manifold, d.type.point)
     Distributions._rand!(rng, d, fv)
     return fv
 end
@@ -153,7 +153,7 @@ function Distributions._rand!(
     PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
     for i in get_iterator(d.type.manifold)
-        copyto!(d.distribution.point, _read(PM, rep_size, d.type.point, i))
+        copyto!(d.distribution.type.point, _read(PM, rep_size, d.type.point, i))
         Distributions._rand!(rng, d.distribution, _read(PM, rep_size, v, i))
     end
     return v
@@ -271,7 +271,7 @@ function Base.show(
     return print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
 end
 
-Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
+Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type)
 Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""

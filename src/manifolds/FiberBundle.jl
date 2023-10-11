@@ -35,7 +35,7 @@ struct FiberBundleProductVectorTransport{
     method_fiber::TMV
 end
 function FiberBundleProductVectorTransport(
-    M::AbstractManifold=DefaultManifold();
+    M::AbstractManifold=ManifoldsBase.DefaultManifold();
     vector_tansport_method_point=default_vector_transport_method(M),
     vector_transport_method_fiber=default_vector_transport_method(M),
 )
@@ -182,7 +182,7 @@ end
 function get_coordinates(M::FiberBundle, p, X, B::AbstractBasis)
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
-    F = Fiber(M.manifold, xp1, M.type)
+    F = Fiber(M.manifold, px, M.type)
     return vcat(get_coordinates(M.manifold, px, VXM, B), get_coordinates(F, Vx, VXF, B))
 end
 
@@ -204,7 +204,7 @@ function get_coordinates(
 ) where {𝔽}
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
-    F = Fiber(M.manifold, xp1, M.type)
+    F = Fiber(M.manifold, px, M.type)
     return vcat(
         get_coordinates(M.manifold, px, VXM, B.data.base_basis),
         get_coordinates(F, Vx, VXF, B.data.fiber_basis),
@@ -221,7 +221,7 @@ function get_coordinates!(
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     n = manifold_dimension(M.manifold)
-    F = Fiber(M.manifold, xp1, M.type)
+    F = Fiber(M.manifold, px, M.type)
     get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B.data.base_basis)
     get_coordinates!(F, view(Y, (n + 1):length(Y)), Vx, VXF, B.data.fiber_basis)
     return Y
@@ -291,32 +291,35 @@ end
     zero_vector(B::FiberBundle, p)
 
 Zero tangent vector at point `p` from the fiber bundle `B`
-over manifold `B.fiber` (denoted $\mathcal M$). The zero vector belongs to the space $T_{p}B$
+over manifold `B.fiber` (denoted ``\mathcal M``). The zero vector belongs to the space ``T_{p}B``
 
 Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
-    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
-    canonical projection of that vector bundle $B$.
+  * The point ``p = (x_p, V_p)`` where ``x_p ∈ \mathcal M`` and ``V_p`` belongs to the
+    fiber ``F=π^{-1}(\{x_p\})`` of the vector bundle ``B`` where ``π`` is the
+    canonical projection of that vector bundle ``B``.
 
 The zero vector is calculated as
 
-$\mathbf{0}_{p} = (\mathbf{0}_{x_p}, \mathbf{0}_F)$
+``\mathbf{0}_{p} = (\mathbf{0}_{x_p}, \mathbf{0}_F)``
 
-where $\mathbf{0}_{x_p}$ is the zero tangent vector from $T_{x_p}\mathcal M$ and
-$\mathbf{0}_F$ is the zero element of the vector space $F$.
+where ``\mathbf{0}_{x_p}`` is the zero tangent vector from ``T_{x_p}\mathcal M`` and
+``\mathbf{0}_F`` is the zero element of the vector space ``F``.
 """
 zero_vector(::FiberBundle, ::Any...)
 
 function zero_vector!(B::FiberBundle, X, p)
     xp, Vp = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
+    F = Fiber(B.manifold, xp, B.type)
     zero_vector!(B.manifold, VXM, xp)
-    zero_vector!(B.fiber, VXF, Vp)
+    zero_vector!(F, VXF, Vp)
     return X
 end
 
 @inline function allocate_result(M::FiberBundle, f::TF) where {TF}
-    return ArrayPartition(allocate_result(M.manifold, f), allocate_result(M.fiber, f))
+    p = allocate_result(M.manifold, f)
+    X = allocate_result(Fiber(M.manifold, p, M.type), f)
+    return ArrayPartition(p, X)
 end
 
 function get_vector(M::FiberBundle, p, X, B::AbstractBasis)
@@ -336,7 +339,7 @@ function get_vector(
 ) where {𝔽}
     n = manifold_dimension(M.manifold)
     xp1, xp2 = submanifold_components(M, p)
-    F = Fiber(M.manifold, M.type, xp1)
+    F = Fiber(M.manifold, xp1, M.type)
     return ArrayPartition(
         get_vector(M.manifold, xp1, X[1:n], B.data.base_basis),
         get_vector(F, xp2, X[(n + 1):end], B.data.fiber_basis),
@@ -350,9 +353,9 @@ function get_vectors(
 ) where {𝔽}
     xp1, xp2 = submanifold_components(M, p)
     zero_m = zero_vector(M.manifold, xp1)
-    zero_f = zero_vector(M.fiber, xp1)
+    F = Fiber(M.manifold, xp1, M.type)
+    zero_f = zero_vector(F, xp1)
     vs = typeof(ArrayPartition(zero_m, zero_f))[]
-    F = Fiber(M.manifold, M.type, xp1)
     for bv in get_vectors(M.manifold, xp1, B.data.base_basis)
         push!(vs, ArrayPartition(bv, zero_f))
     end

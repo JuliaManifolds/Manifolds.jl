@@ -139,6 +139,7 @@ import ManifoldsBase:
     retract_polar!,
     retract_project!,
     retract_qr!,
+    retract_sasaki!,
     retract_softmax!,
     riemann_tensor,
     riemann_tensor!,
@@ -261,6 +262,7 @@ using ManifoldsBase:
     ProductManifold,
     ProductMetric,
     ProductRetraction,
+    ProductVectorTransport,
     ProjectedOrthonormalBasis,
     ProjectionInverseRetraction,
     ProjectionRetraction,
@@ -282,6 +284,7 @@ using ManifoldsBase:
     TFVector,
     TVector,
     TypeParameter,
+    ValidationCoTVector,
     ValidationManifold,
     ValidationMPoint,
     ValidationTVector,
@@ -672,7 +675,7 @@ export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
 export IsDefaultMetric, IsDefaultConnection, IsMetricManifold, IsConnectionManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
-export FiberBundle, CotangentBundle, CotangentSpace, FVector
+export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector
 export AbstractPowerManifold,
     AbstractPowerRepresentation,
     ArrayPowerRepresentation,
@@ -689,8 +692,7 @@ export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport
 export ProductVectorTransport
-export AbstractAffineConnection,
-    AbstractConnectionManifold, ConnectionManifold, LeviCivitaConnection
+export AbstractAffineConnection, ConnectionManifold, LeviCivitaConnection
 export AbstractCartanSchoutenConnection,
     CartanSchoutenMinus, CartanSchoutenPlus, CartanSchoutenZero
 export MetricManifold

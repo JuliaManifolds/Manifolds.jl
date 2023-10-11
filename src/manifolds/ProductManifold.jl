@@ -157,7 +157,7 @@ function ProductFVectorDistribution(distributions::FVectorDistribution...)
     end
     # Probably worth considering sum spaces in the future?
     p = ArrayPartition(map(d -> support(d).space.point, distributions)...)
-    return ProductFVectorDistribution(Fiber(M, fiber_type, p), distributions)
+    return ProductFVectorDistribution(Fiber(M, p, fiber_type), distributions)
 end
 
 function ProductPointDistribution(M::ProductManifold, distributions::MPointDistribution...)

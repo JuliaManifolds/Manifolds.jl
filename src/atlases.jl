@@ -393,7 +393,7 @@ function induced_basis(
     ::AbstractManifold{𝔽},
     A::AbstractAtlas,
     i,
-    VST::VectorSpaceType=TangentSpace,
+    VST::VectorSpaceType=TangentSpaceType(),
 ) where {𝔽}
     return InducedBasis{𝔽,typeof(VST),typeof(A),typeof(i)}(VST, A, i)
 end

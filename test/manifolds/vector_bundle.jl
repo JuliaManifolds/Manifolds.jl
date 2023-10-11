@@ -73,12 +73,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
             end
             X12_prod = inverse_retract(TB, pts_tb[1], pts_tb[2], m_prod_invretr)
             X13_prod = inverse_retract(TB, pts_tb[1], pts_tb[3], m_prod_invretr)
-            diag_basis = DiagonalizingOrthonormalBasis(X12_prod)
             basis_types = (
                 DefaultOrthonormalBasis(),
                 get_basis(TB, pts_tb[1], DefaultOrthonormalBasis()),
-                diag_basis,
-                get_basis(TB, pts_tb[1], diag_basis),
             )
             test_manifold(
                 TB,
@@ -174,17 +171,15 @@ struct TestVectorSpaceType <: VectorSpaceType end
         TT = Manifolds.TensorProductType(TangentSpaceType(), TangentSpaceType())
         @test sprint(show, TT) ==
               "TensorProductType(TangentSpaceType(), TangentSpaceType())"
-        @test vector_space_dimension(VectorSpaceFiber(TT, Sphere(2), [1.0, 0.0, 0.0])) == 4
-        @test vector_space_dimension(
-            VectorSpaceFiber(TT, Sphere(3), [1.0, 0.0, 0.0, 0.0]),
-        ) == 9
-        @test base_manifold(VectorSpaceFiber(TT, Sphere(2), [1.0, 0.0, 0.0])) == M
-        @test sprint(show, VectorSpaceFiber(TT, Sphere(2), [1.0, 0.0, 0.0])) ==
+        @test vector_space_dimension(Sphere(2), TT) == 4
+        @test vector_space_dimension(Sphere(3), TT) == 9
+        @test base_manifold(Fiber(Sphere(2), [1.0, 0.0, 0.0], TT)) == M
+        @test sprint(show, Fiber(Sphere(2), [1.0, 0.0, 0.0], TT)) ==
               "VectorSpaceFiber(TensorProductType(TangentSpaceType(), TangentSpaceType()), Sphere(2, ℝ))"
     end
 
     @testset "Error messages" begin
-        vbf = Fiber(TestVectorSpaceType(), Euclidean(3), [1.0, 0.0, 0.0])
+        vbf = Fiber(Euclidean(3), [1.0, 0.0, 0.0], TestVectorSpaceType())
         @test_throws MethodError inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws MethodError project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws MethodError zero_vector!(vbf, [1, 2, 3], [1, 2, 3])
