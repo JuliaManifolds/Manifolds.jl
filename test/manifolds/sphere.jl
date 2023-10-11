@@ -203,7 +203,7 @@ using ManifoldsBase: TFVector
             p3 ./= norm(p3)
             X2 = log(M, p, p2)
             X3 = log(M, p, p3)
-            B = induced_basis(M, A, i, TangentSpace)
+            B = induced_basis(M, A, i, TangentSpaceType())
 
             X2B = get_coordinates(M, p, X2, B)
             X3B = get_coordinates(M, p, X3, B)

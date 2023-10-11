@@ -64,6 +64,10 @@ function CotangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTrans
     return VectorBundle(CotangentSpaceType(), M, vtm)
 end
 
+function bundle_transport_to!(B::TangentBundle, Y, p, X, q)
+    return vector_transport_to!(B.manifold, Y, p, X, q, B.vector_transport.method_fiber)
+end
+
 function default_inverse_retraction_method(::TangentBundle)
     return FiberBundleInverseProductRetraction()
 end
@@ -146,7 +150,7 @@ function inverse_retract_product!(B::VectorBundle, X, p, q)
     py, Vy = submanifold_components(B.manifold, q)
     VXM, VXF = submanifold_components(B.manifold, X)
     log!(B.manifold, VXM, px, py)
-    vector_transport_to!(B.fiber, VXF, py, Vy, px, B.vector_transport.method_fiber)
+    bundle_transport_to!(B, VXF, py, Vy, px)
     copyto!(VXF, VXF - Vx)
     return X
 end
@@ -210,16 +214,6 @@ function project!(B::VectorBundle, Y, p, X)
     project!(B.manifold, VYM, px, VXM)
     project!(B.fiber, VYF, px, VXF)
     return Y
-end
-
-"""
-    project(B::BundleFibers, p, X)
-
-Project vector `X` from the vector space of type `B.fiber` at point `p`.
-"""
-function project(B::BundleFibers, p, X)
-    Y = allocate_result(B, project, p, X)
-    return project!(B, Y, p, X)
 end
 
 function _retract(M::VectorBundle, p, X, t::Number, ::FiberBundleProductRetraction)
@@ -296,9 +290,6 @@ function retract_sasaki!(B::TangentBundle, q, p, X, t::Number, m::SasakiRetracti
     return q
 end
 
-function Base.show(io::IO, vb::VectorBundle)
-    return print(io, "VectorBundle($(vb.type.fiber), $(vb.manifold))")
-end
 Base.show(io::IO, vb::TangentBundle) = print(io, "TangentBundle($(vb.manifold))")
 
 function vector_transport_direction(M::VectorBundle, p, X, d)

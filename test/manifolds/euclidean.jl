@@ -24,7 +24,7 @@ using FiniteDifferences
         @test is_flat(Ec)
         p = zeros(3)
         A = Manifolds.RetractionAtlas()
-        B = induced_basis(EM, A, p, TangentSpace)
+        B = induced_basis(EM, A, p, TangentSpaceType())
         @test det_local_metric(EM, p, B) == one(eltype(p))
         @test log_local_metric_density(EM, p, B) == zero(eltype(p))
         @test project!(E, p, p) == p
@@ -264,7 +264,7 @@ using FiniteDifferences
         p = zeros(2)
         A = Manifolds.get_default_atlas(M)
         i = Manifolds.get_chart_index(M, A, p)
-        B = Manifolds.induced_basis(M, A, i, TangentSpace)
+        B = Manifolds.induced_basis(M, A, i, TangentSpaceType())
         C1 = christoffel_symbols_first(M, p, B)
         @test size(C1) == (2, 2, 2)
         @test norm(C1) ≈ 0.0 atol = 1e-13
@@ -294,7 +294,7 @@ using FiniteDifferences
         p = zeros(3)
         M = DefaultManifold()
         TpM = TangentSpace(M, p)
-        B = induced_basis(M, Manifolds.get_default_atlas(M), p, TangentSpace)
+        B = induced_basis(M, Manifolds.get_default_atlas(M), p, TangentSpaceType())
         MM = MetricManifold(M, EuclideanMetric())
         @test local_metric(MM, p, B) == Diagonal(ones(3))
         @test inverse_local_metric(MM, p, B) == Diagonal(ones(3))
@@ -302,7 +302,7 @@ using FiniteDifferences
         DB1 = dual_basis(MM, p, B)
         @test DB1 isa InducedBasis
         @test DB1.vs isa ManifoldsBase.CotangentSpaceType
-        DB2 = induced_basis(M, Manifolds.get_default_atlas(M), p, CotangentSpace)
+        DB2 = induced_basis(M, Manifolds.get_default_atlas(M), p, CotangentSpaceType())
         @test DB2 isa InducedBasis
         @test DB2.vs isa ManifoldsBase.CotangentSpaceType
         DDB = dual_basis(MM, p, DB2)

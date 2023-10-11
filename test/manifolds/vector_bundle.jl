@@ -46,8 +46,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
               Manifolds.FiberBundleProductVectorTransport
         CTB = CotangentBundle(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
-        @test sprint(show, VectorBundle(TestVectorSpaceType(), M)) ==
-              "VectorBundle(TestVectorSpaceType(), Sphere(2, ℝ))"
+        @test sprint(show, FiberBundle(TestVectorSpaceType(), M)) ==
+              "FiberBundle(TestVectorSpaceType(), Sphere(2, ℝ), Manifolds.FiberBundleProductVectorTransport{ParallelTransport, ParallelTransport}(ParallelTransport(), ParallelTransport()))"
 
         @test Manifolds.fiber_dimension(M, ManifoldsBase.CotangentSpaceType()) == 2
         @test base_manifold(TangentBundle(M)) == M
@@ -171,19 +171,20 @@ struct TestVectorSpaceType <: VectorSpaceType end
           VectorBundle{ℝ,Manifolds.CotangentSpaceType,Sphere{2,ℝ}}
 
     @testset "tensor product" begin
-        TT = Manifolds.TensorProductType(TangentSpace, TangentSpace)
-        @test sprint(show, TT) == "TensorProductType(TangentSpace, TangentSpace)"
+        TT = Manifolds.TensorProductType(TangentSpaceType(), TangentSpaceType())
+        @test sprint(show, TT) ==
+              "TensorProductType(TangentSpaceType(), TangentSpaceType())"
         @test vector_space_dimension(VectorSpaceFiber(TT, Sphere(2), [1.0, 0.0, 0.0])) == 4
         @test vector_space_dimension(
             VectorSpaceFiber(TT, Sphere(3), [1.0, 0.0, 0.0, 0.0]),
         ) == 9
         @test base_manifold(VectorSpaceFiber(TT, Sphere(2), [1.0, 0.0, 0.0])) == M
         @test sprint(show, VectorSpaceFiber(TT, Sphere(2), [1.0, 0.0, 0.0])) ==
-              "VectorSpaceFiber(TensorProductType(TangentSpace, TangentSpace), Sphere(2, ℝ))"
+              "VectorSpaceFiber(TensorProductType(TangentSpaceType(), TangentSpaceType()), Sphere(2, ℝ))"
     end
 
     @testset "Error messages" begin
-        vbf = VectorSpaceFiber(TestVectorSpaceType(), Euclidean(3), [1.0, 0.0, 0.0])
+        vbf = Fiber(TestVectorSpaceType(), Euclidean(3), [1.0, 0.0, 0.0])
         @test_throws MethodError inner(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws MethodError project!(vbf, [1, 2, 3], [1, 2, 3], [1, 2, 3])
         @test_throws MethodError zero_vector!(vbf, [1, 2, 3], [1, 2, 3])

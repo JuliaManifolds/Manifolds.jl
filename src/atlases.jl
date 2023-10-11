@@ -380,7 +380,7 @@ struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractB
 end
 
 """
-    induced_basis(::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType = TangentSpace)
+    induced_basis(::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType = TangentSpaceType())
 
 Get the basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
 space of type `vs`. Returns an object of type [`InducedBasis`](@ref).
@@ -417,7 +417,7 @@ function dual_basis(
     ::Any,
     B::InducedBasis{𝔽,CotangentSpaceType},
 ) where {𝔽}
-    return induced_basis(M, B.A, B.i, TangentSpace)
+    return induced_basis(M, B.A, B.i, TangentSpaceType())
 end
 
 function ManifoldsBase._get_coordinates(M::AbstractManifold, p, X, B::InducedBasis)

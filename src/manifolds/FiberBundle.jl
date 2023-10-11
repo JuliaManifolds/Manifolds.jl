@@ -67,17 +67,9 @@ struct FiberBundle{
 } <: AbstractManifold{𝔽}
     type::TF
     manifold::TM
-    fiber::BundleFibers{TF,TM}
     vector_transport::TVT
 end
 
-function FiberBundle(
-    fiber::TVS,
-    M::TM,
-    vtm::FiberBundleProductVectorTransport,
-) where {TVS<:FiberType,TM<:AbstractManifold{𝔽}} where {𝔽}
-    return FiberBundle{𝔽,TVS,TM,typeof(vtm)}(fiber, M, BundleFibers(fiber, M), vtm)
-end
 function FiberBundle(fiber::FiberType, M::AbstractManifold)
     vtmm = vector_bundle_transport(fiber, M)
     vtbm = FiberBundleProductVectorTransport(vtmm, vtmm)
@@ -157,6 +149,16 @@ Return the manifold the [`FiberBundle`](@ref)s is build on.
 """
 base_manifold(B::FiberBundle) = base_manifold(B.manifold)
 
+@doc raw"""
+    bundle_transport_to(B::FiberBundle, p, X, q)
+
+Given a fiber bundle ``B=F \mathcal M``, points ``p, q\in\mathcal M``, an element ``X`` of
+the fiber over ``p``, transport ``X`` to fiber over ``q``.
+
+Exact meaning of the operation depends on the fiber bundle, or may even be undefined.
+"""
+bundle_transport_to(B::FiberBundle, p, X, q)
+
 """
     bundle_projection(B::FiberBundle, p)
 
@@ -167,32 +169,21 @@ of `p` is attached.
 bundle_projection(B::FiberBundle, p) = submanifold_component(B.manifold, p, Val(1))
 
 function get_basis(M::FiberBundle, p, B::AbstractBasis)
-    xp1 = submanifold_component(p, Val(1))
+    xp1, xp2 = submanifold_components(M, p)
     base_basis = get_basis(M.manifold, xp1, B)
-    fiber_basis = get_basis(M.fiber, xp1, B)
+    F = Fiber(M.manifold, xp1, M.type)
+    fiber_basis = get_basis(F, xp2, B)
     return CachedBasis(B, FiberBundleBasisData(base_basis, fiber_basis))
 end
 function get_basis(M::FiberBundle, p, B::CachedBasis)
     return invoke(get_basis, Tuple{AbstractManifold,Any,CachedBasis}, M, p, B)
 end
 
-function get_basis(M::FiberBundle, p, B::DiagonalizingOrthonormalBasis)
-    xp1 = submanifold_component(p, Val(1))
-    bv1 = DiagonalizingOrthonormalBasis(submanifold_component(B.frame_direction, Val(1)))
-    b1 = get_basis(M.manifold, xp1, bv1)
-    bv2 = DiagonalizingOrthonormalBasis(submanifold_component(B.frame_direction, Val(2)))
-    b2 = get_basis(M.fiber, xp1, bv2)
-    return CachedBasis(B, FiberBundleBasisData(b1, b2))
-end
-
 function get_coordinates(M::FiberBundle, p, X, B::AbstractBasis)
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
-    n = manifold_dimension(M.manifold)
-    return vcat(
-        get_coordinates(M.manifold, px, VXM, B),
-        get_coordinates(M.fiber, px, VXF, B),
-    )
+    F = Fiber(M.manifold, xp1, M.type)
+    return vcat(get_coordinates(M.manifold, px, VXM, B), get_coordinates(F, Vx, VXF, B))
 end
 
 function get_coordinates!(M::FiberBundle, Y, p, X, B::AbstractBasis)
@@ -200,7 +191,8 @@ function get_coordinates!(M::FiberBundle, Y, p, X, B::AbstractBasis)
     VXM, VXF = submanifold_components(M.manifold, X)
     n = manifold_dimension(M.manifold)
     get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B)
-    get_coordinates!(M.fiber, view(Y, (n + 1):length(Y)), px, VXF, B)
+    F = Fiber(M.manifold, px, M.type)
+    get_coordinates!(F, view(Y, (n + 1):length(Y)), Vx, VXF, B)
     return Y
 end
 
@@ -212,9 +204,10 @@ function get_coordinates(
 ) where {𝔽}
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
+    F = Fiber(M.manifold, xp1, M.type)
     return vcat(
         get_coordinates(M.manifold, px, VXM, B.data.base_basis),
-        get_coordinates(M.fiber, px, VXF, B.data.fiber_basis),
+        get_coordinates(F, Vx, VXF, B.data.fiber_basis),
     )
 end
 
@@ -228,16 +221,19 @@ function get_coordinates!(
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     n = manifold_dimension(M.manifold)
+    F = Fiber(M.manifold, xp1, M.type)
     get_coordinates!(M.manifold, view(Y, 1:n), px, VXM, B.data.base_basis)
-    get_coordinates!(M.fiber, view(Y, (n + 1):length(Y)), px, VXF, B.data.fiber_basis)
+    get_coordinates!(F, view(Y, (n + 1):length(Y)), Vx, VXF, B.data.fiber_basis)
     return Y
 end
 
 function get_vector!(M::FiberBundle, Y, p, X, B::AbstractBasis)
     n = manifold_dimension(M.manifold)
-    xp1 = submanifold_component(p, Val(1))
-    get_vector!(M.manifold, submanifold_component(Y, Val(1)), xp1, X[1:n], B)
-    get_vector!(M.fiber, submanifold_component(Y, Val(2)), xp1, X[(n + 1):end], B)
+    xp1, xp2 = submanifold_components(M, p)
+    Yp1, Yp2 = submanifold_components(M, Y)
+    F = Fiber(M.manifold, xp1, M.type)
+    get_vector!(M.manifold, Yp1, xp1, X[1:n], B)
+    get_vector!(F, Yp2, xp2, X[(n + 1):end], B)
     return Y
 end
 
@@ -249,44 +245,30 @@ function get_vector!(
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:FiberBundleBasisData},
 ) where {𝔽}
     n = manifold_dimension(M.manifold)
-    xp1 = submanifold_component(p, Val(1))
-    get_vector!(
-        M.manifold,
-        submanifold_component(Y, Val(1)),
-        xp1,
-        X[1:n],
-        B.data.base_basis,
-    )
-    get_vector!(
-        M.fiber,
-        submanifold_component(Y, Val(2)),
-        xp1,
-        X[(n + 1):end],
-        B.data.fiber_basis,
-    )
+    xp1, xp2 = submanifold_components(M, p)
+    Yp1, Yp2 = submanifold_components(M, Y)
+    F = Fiber(M.manifold, M.type, xp1)
+    get_vector!(M.manifold, Yp1, xp1, X[1:n], B.data.base_basis)
+    get_vector!(F, Yp2, xp2, X[(n + 1):end], B.data.fiber_basis)
     return Y
-end
-
-function get_vectors(M::BundleFibers, p, B::CachedBasis)
-    return get_vectors(M.manifold, p, B)
 end
 
 function _isapprox(B::FiberBundle, p, q; kwargs...)
     xp, Vp = submanifold_components(B.manifold, p)
     xq, Vq = submanifold_components(B.manifold, q)
     return isapprox(B.manifold, xp, xq; kwargs...) &&
-           isapprox(FiberAtPoint(B.fiber, xp), Vp, Vq; kwargs...)
+           isapprox(Fiber(B.manifold, xp, B.type), Vp, Vq; kwargs...)
 end
 function _isapprox(B::FiberBundle, p, X, Y; kwargs...)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
     return isapprox(B.manifold, VXM, VYM; kwargs...) &&
-           isapprox(FiberAtPoint(B.fiber, px), VXF, VYF; kwargs...)
+           isapprox(Fiber(B.manifold, px, B.type), Vx, VXF, VYF; kwargs...)
 end
 
 function manifold_dimension(B::FiberBundle)
-    return manifold_dimension(B.manifold) + fiber_dimension(B.fiber)
+    return manifold_dimension(B.manifold) + fiber_dimension(B.manifold, B.type)
 end
 
 function Random.rand!(M::FiberBundle, pX; vector_at=nothing)
@@ -296,11 +278,11 @@ function Random.rand!(rng::AbstractRNG, M::FiberBundle, pX; vector_at=nothing)
     pXM, pXF = submanifold_components(M.manifold, pX)
     if vector_at === nothing
         rand!(rng, M.manifold, pXM)
-        rand!(rng, FiberAtPoint(M.fiber, pXM), pXF)
+        rand!(rng, Fiber(M.manifold, pXM, M.type), pXF)
     else
         vector_atM, vector_atF = submanifold_components(M.manifold, vector_at)
         rand!(rng, M.manifold, pXM; vector_at=vector_atM)
-        rand!(rng, FiberAtPoint(M.fiber, pXM), pXF; vector_at=vector_atF)
+        rand!(rng, Fiber(M.manifold, pXM, M.type), pXF; vector_at=vector_atF)
     end
     return pX
 end
@@ -339,10 +321,11 @@ end
 
 function get_vector(M::FiberBundle, p, X, B::AbstractBasis)
     n = manifold_dimension(M.manifold)
-    xp1 = submanifold_component(p, Val(1))
+    xp1, xp2 = submanifold_components(M, p)
+    F = Fiber(M.manifold, xp1, M.type)
     return ArrayPartition(
         get_vector(M.manifold, xp1, X[1:n], B),
-        get_vector(M.fiber, xp1, X[(n + 1):end], B),
+        get_vector(F, xp2, X[(n + 1):end], B),
     )
 end
 function get_vector(
@@ -352,10 +335,11 @@ function get_vector(
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:FiberBundleBasisData},
 ) where {𝔽}
     n = manifold_dimension(M.manifold)
-    xp1 = submanifold_component(p, Val(1))
+    xp1, xp2 = submanifold_components(M, p)
+    F = Fiber(M.manifold, M.type, xp1)
     return ArrayPartition(
         get_vector(M.manifold, xp1, X[1:n], B.data.base_basis),
-        get_vector(M.fiber, xp1, X[(n + 1):end], B.data.fiber_basis),
+        get_vector(F, xp2, X[(n + 1):end], B.data.fiber_basis),
     )
 end
 
@@ -364,14 +348,15 @@ function get_vectors(
     p::ArrayPartition,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:FiberBundleBasisData},
 ) where {𝔽}
-    xp1 = submanifold_component(p, Val(1))
+    xp1, xp2 = submanifold_components(M, p)
     zero_m = zero_vector(M.manifold, xp1)
     zero_f = zero_vector(M.fiber, xp1)
     vs = typeof(ArrayPartition(zero_m, zero_f))[]
+    F = Fiber(M.manifold, M.type, xp1)
     for bv in get_vectors(M.manifold, xp1, B.data.base_basis)
         push!(vs, ArrayPartition(bv, zero_f))
     end
-    for bv in get_vectors(M.fiber, xp1, B.data.fiber_basis)
+    for bv in get_vectors(F, xp2, B.data.fiber_basis)
         push!(vs, ArrayPartition(zero_m, bv))
     end
     return vs
@@ -411,6 +396,10 @@ component, respectively.
     else
         throw(DomainError(s, "unknown component $s on $M."))
     end
+end
+
+function Base.show(io::IO, B::FiberBundle)
+    return print(io, "FiberBundle($(B.type), $(B.manifold), $(B.vector_transport))")
 end
 
 @inline function Base.view(x::ArrayPartition, M::FiberBundle, s::Symbol)

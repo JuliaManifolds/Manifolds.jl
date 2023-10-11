@@ -810,7 +810,8 @@ function test_manifold(
     Test.@testset "tangent vector distributions" begin
         for tvd in tvector_distributions
             supp = Manifolds.support(tvd)
-            Test.@test supp isa Manifolds.FVectorSupport{<:TangentSpace{ℝ,typeof(M)}}
+            Test.@test supp isa
+                       Manifolds.FVectorSupport{<:TangentSpace{number_system(M),typeof(M)}}
             for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * find_eps(randtv)
