@@ -42,7 +42,7 @@ ManifoldsRecipesBaseExt = ["Colors", "RecipesBase"]
 ManifoldsTestExt = "Test"
 
 [compat]
-BoundaryValueDiffEq = "4"
+BoundaryValueDiffEq = "4, 5"
 Colors = "0.12"
 Distributions = "0.22.6, 0.23, 0.24, 0.25"
 Einsum = "0.4"
