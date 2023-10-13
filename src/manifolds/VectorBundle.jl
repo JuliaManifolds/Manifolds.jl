@@ -68,6 +68,28 @@ function bundle_transport_to!(B::TangentBundle, Y, p, X, q)
     return vector_transport_to!(B.manifold, Y, p, X, q, B.vector_transport.method_fiber)
 end
 
+function bundle_transport_tangent_direction!(
+    B::TangentBundle,
+    Y,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
+)
+    return vector_transport_direction!(B.manifold, Y, p, X, d, m)
+end
+
+function bundle_transport_tangent_to!(
+    B::TangentBundle,
+    Y,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
+)
+    return vector_transport_to!(B.manifold, Y, p, X, q, m)
+end
+
 function default_inverse_retraction_method(::TangentBundle)
     return FiberBundleInverseProductRetraction()
 end
@@ -100,20 +122,20 @@ end
     inner(B::VectorBundle, p, X, Y)
 
 Inner product of tangent vectors `X` and `Y` at point `p` from the
-vector bundle `B` over manifold `B.fiber` (denoted $\mathcal M$).
+vector bundle `B` over manifold `B.fiber` (denoted ``\mathcal M``).
 
 Notation:
-  * The point $p = (x_p, V_p)$ where $x_p ∈ \mathcal M$ and $V_p$ belongs to the
-    fiber $F=π^{-1}(\{x_p\})$ of the vector bundle $B$ where $π$ is the
-    canonical projection of that vector bundle $B$.
-  * The tangent vector $v = (V_{X,M}, V_{X,F}) ∈ T_{x}B$ where
-    $V_{X,M}$ is a tangent vector from the tangent space $T_{x_p}\mathcal M$ and
-    $V_{X,F}$ is a tangent vector from the tangent space $T_{V_p}F$ (isomorphic to $F$).
-    Similarly for the other tangent vector $w = (V_{Y,M}, V_{Y,F}) ∈ T_{x}B$.
+  * The point ``p = (x_p, V_p)`` where ``x_p ∈ \mathcal M`` and ``V_p`` belongs to the
+    fiber ``F=π^{-1}(\{x_p\})`` of the vector bundle ``B`` where ``π`` is the
+    canonical projection of that vector bundle ``B``.
+  * The tangent vector ``v = (V_{X,M}, V_{X,F}) ∈ T_{x}B`` where
+    ``V_{X,M}`` is a tangent vector from the tangent space ``T_{x_p}\mathcal M`` and
+    ``V_{X,F}`` is a tangent vector from the tangent space ``T_{V_p}F`` (isomorphic to ``F``).
+    Similarly for the other tangent vector ``w = (V_{Y,M}, V_{Y,F}) ∈ T_{x}B``.
 
 The inner product is calculated as
 
-$⟨X, Y⟩_p = ⟨V_{X,M}, V_{Y,M}⟩_{x_p} + ⟨V_{X,F}, V_{Y,F}⟩_{V_p}.$
+``⟨X, Y⟩_p = ⟨V_{X,M}, V_{Y,M}⟩_{x_p} + ⟨V_{X,F}, V_{Y,F}⟩_{V_p}.``
 """
 function inner(B::FiberBundle, p, X, Y)
     px, Vx = submanifold_components(B.manifold, p)
@@ -354,7 +376,7 @@ function vector_transport_to!(
     VYM, VYF = submanifold_components(M.manifold, Y)
     qx, qVx = submanifold_components(M.manifold, q)
     vector_transport_to!(M.manifold, VYM, px, VXM, qx, m.method_point)
-    vector_transport_to!(M.manifold, VYF, px, VXF, qx, m.method_fiber)
+    bundle_transport_tangent_to!(M, VYF, px, VXF, qx, m.method_fiber)
     return Y
 end
 
@@ -370,7 +392,7 @@ function _vector_transport_direction(
     dx, dVx = submanifold_components(M.manifold, d)
     return ArrayPartition(
         vector_transport_direction(M.manifold, px, VXM, dx, m.method_point),
-        vector_transport_direction(M.fiber, px, VXF, dx, m.method_fiber),
+        bundle_transport_tangent_direction(M, px, VXF, dx, m.method_fiber),
     )
 end
 
@@ -386,7 +408,7 @@ function _vector_transport_to(
     qx, qVx = submanifold_components(M.manifold, q)
     return ArrayPartition(
         vector_transport_to(M.manifold, px, VXM, qx, m.method_point),
-        vector_transport_to(M.manifold, px, VXF, qx, m.method_fiber),
+        bundle_transport_tangent_to(M, px, VXF, qx, m.method_fiber),
     )
 end
 

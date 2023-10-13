@@ -157,7 +157,44 @@ the fiber over ``p``, transport ``X`` to fiber over ``q``.
 
 Exact meaning of the operation depends on the fiber bundle, or may even be undefined.
 """
-bundle_transport_to(B::FiberBundle, p, X, q)
+function bundle_transport_to(B::FiberBundle, p, X, q)
+    Y = allocate(X)
+    return bundle_transport_to!(B, Y, p, X, q)
+end
+
+@doc raw"""
+    bundle_transport_tangent_direction(B::FiberBundle, p, X, d)
+
+TODO
+"""
+function bundle_transport_tangent_direction(
+    B::FiberBundle,
+    p,
+    X,
+    d,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
+)
+    Y = allocate(X)
+    return bundle_transport_tangent_direction!(B, Y, p, X, d, m)
+end
+
+@doc raw"""
+    bundle_transport_tangent_to(B::FiberBundle, p, X, q)
+
+TODO
+
+Ehresmann connection; ``X`` is an element of the vertical bundle ``VF\mathcal M`` from tangent to fiber ``\pi^{-1}({p})``, ``p\in \mathcal M``.
+"""
+function bundle_transport_tangent_to(
+    B::FiberBundle,
+    p,
+    X,
+    q,
+    m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
+)
+    Y = allocate(X)
+    return bundle_transport_tangent_to!(B, Y, p, X, q, m)
+end
 
 """
     bundle_projection(B::FiberBundle, p)
@@ -247,7 +284,7 @@ function get_vector!(
     n = manifold_dimension(M.manifold)
     xp1, xp2 = submanifold_components(M, p)
     Yp1, Yp2 = submanifold_components(M, Y)
-    F = Fiber(M.manifold, M.type, xp1)
+    F = Fiber(M.manifold, xp1, M.type)
     get_vector!(M.manifold, Yp1, xp1, X[1:n], B.data.base_basis)
     get_vector!(F, Yp2, xp2, X[(n + 1):end], B.data.fiber_basis)
     return Y

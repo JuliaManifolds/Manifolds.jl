@@ -103,26 +103,8 @@ struct TestVectorSpaceType <: VectorSpaceType end
             Xir = allocate(pts_tb[1])
             inverse_retract!(TB, Xir, pts_tb[1], pts_tb[2], m_prod_invretr)
             @test isapprox(TB, pts_tb[1], Xir, X12_prod)
-            @test isapprox(
-                norm(TB.fiber, pts_tb[1][TB, :point], pts_tb[1][TB, :vector]),
-                sqrt(
-                    inner(
-                        TB.fiber,
-                        pts_tb[1][TB, :point],
-                        pts_tb[1][TB, :vector],
-                        pts_tb[1][TB, :vector],
-                    ),
-                ),
-            )
-            @test isapprox(
-                distance(
-                    TB.fiber,
-                    pts_tb[1][TB, :point],
-                    pts_tb[1][TB, :vector],
-                    [0.0, 2.0, 3.0],
-                ),
-                5.0,
-            )
+            F = Fiber(M, pts_tb[1][TB, :point], TangentSpaceType())
+            @test isapprox(distance(F, pts_tb[1][TB, :vector], [0.0, 2.0, 3.0]), 5.0)
             Xir2 = allocate(pts_tb[1])
             vector_transport_to!(
                 TB,
@@ -175,7 +157,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test vector_space_dimension(Sphere(3), TT) == 9
         @test base_manifold(Fiber(Sphere(2), [1.0, 0.0, 0.0], TT)) == M
         @test sprint(show, Fiber(Sphere(2), [1.0, 0.0, 0.0], TT)) ==
-              "VectorSpaceFiber(TensorProductType(TangentSpaceType(), TangentSpaceType()), Sphere(2, ℝ))"
+              "VectorSpaceFiber{ℝ, Sphere{TypeParameter{Tuple{2}}, ℝ}, Manifolds.TensorProductType{Tuple{TangentSpaceType, TangentSpaceType}}, Vector{Float64}}(Sphere(2, ℝ), [1.0, 0.0, 0.0], TensorProductType(TangentSpaceType(), TangentSpaceType()))"
     end
 
     @testset "Error messages" begin
@@ -215,7 +197,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         tbvt = Manifolds.FiberBundleProductVectorTransport(ppt, ppt)
         @test TangentBundle(M, tbvt).vector_transport === tbvt
         @test CotangentBundle(M, tbvt).vector_transport === tbvt
-        @test VectorBundle(TangentSpace, M, tbvt).vector_transport === tbvt
+        @test TangentBundle(M, tbvt).vector_transport === tbvt
     end
 
     @testset "Extended flatness tests" begin
