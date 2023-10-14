@@ -62,7 +62,7 @@ function Base.show(io::IO, ::MIME"text/plain", G::ProductGroup)
         io,
         "ProductGroup with $(length(base_manifold(G).manifolds)) subgroup$(length(base_manifold(G).manifolds) == 1 ? "" : "s"):",
     )
-    return _show_product_manifold_no_header(io, base_manifold(G))
+    return ManifoldsBase._show_product_manifold_no_header(io, base_manifold(G))
 end
 
 function Base.show(io::IO, G::ProductGroup)

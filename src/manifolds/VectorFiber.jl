@@ -1,16 +1,4 @@
 
-const CotangentSpaceAtPoint{𝔽,M} =
-    Fiber{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
-
-"""
-    CotangentSpaceAtPoint(M::AbstractManifold, p)
-
-Return an object of type [`VectorSpaceAtPoint`](@ref) representing cotangent
-space at `p`.
-"""
-function CotangentSpace(M::AbstractManifold, p)
-    return Fiber(M, CotangentSpaceType(), p)
-end
 
 """
     TensorProductType(spaces::VectorSpaceType...)
@@ -23,6 +11,10 @@ struct TensorProductType{TS<:Tuple} <: VectorSpaceType
 end
 
 TensorProductType(spaces::VectorSpaceType...) = TensorProductType{typeof(spaces)}(spaces)
+
+function inner(B::CotangentSpace, p, X, Y)
+    return inner(B.manifold, B.point, sharp(B.manifold, B.point, X), sharp(B.manifold, B.point, Y))
+end
 
 function Base.show(io::IO, tpt::TensorProductType)
     return print(io, "TensorProductType(", join(tpt.spaces, ", "), ")")

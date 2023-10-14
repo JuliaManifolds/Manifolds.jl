@@ -617,15 +617,16 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         cotspace = CotangentSpace(M, p)
         cotspace2 = CotangentSpace(MM, p)
         @test coX.X ≈ X
-        @test inner(M, p, X, Y) ≈ inner(cotspace, p, coX, coY)
-        @test inner(MM, p, fX, fY) ≈ inner(cotspace, p, coX, coY)
+        X0p = zero_vector(MM, p)
+        @test inner(M, p, X, Y) ≈ inner(cotspace, X0p, coX, coY)
+        @test inner(MM, p, fX, fY) ≈ inner(cotspace, X0p, coX, coY)
 
-        @test inner(MM, p, fX, fY) ≈ inner(cotspace2, p, cofX, cofY)
+        @test inner(MM, p, fX, fY) ≈ inner(cotspace2, X0p, cofX, cofY)
         @test sharp(M, p, coX) ≈ X
 
         coMMfX = flat(MM, p, fX)
         coMMfY = flat(MM, p, fY)
-        @test inner(MM, p, fX, fY) ≈ inner(cotspace2, p, coMMfX, coMMfY)
+        @test inner(MM, p, fX, fY) ≈ inner(cotspace2, X0p, coMMfX, coMMfY)
         @test isapprox(sharp(MM, p, coMMfX).data, fX.data)
 
         @testset "Mutating flat/sharp" begin

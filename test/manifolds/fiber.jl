@@ -9,7 +9,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
     @testset "tangent and cotangent space" begin
         p = [1.0, 0.0, 0.0]
         t_p = TangentSpace(M, p)
-        ct_p = CotangentSpaceAtPoint(M, p)
+        ct_p = CotangentSpace(M, p)
         t_ps = sprint(show, "text/plain", t_p)
         sp = sprint(show, "text/plain", p)
         sp = replace(sp, '\n' => "\n ")
@@ -17,10 +17,10 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test t_ps == t_ps_test
         @test base_manifold(t_p) == M
         @test base_manifold(ct_p) == M
-        @test t_p.fiber.manifold == M
-        @test ct_p.fiber.manifold == M
-        @test t_p.fiber.fiber == Manifolds.TangentFiber
-        @test ct_p.fiber.fiber == Manifolds.CotangentFiber
+        @test t_p.manifold == M
+        @test ct_p.manifold == M
+        @test t_p.fiber_type == TangentSpaceType()
+        @test ct_p.fiber_type == CotangentSpaceType()
         @test t_p.point == p
         @test ct_p.point == p
         @test injectivity_radius(t_p) == Inf
