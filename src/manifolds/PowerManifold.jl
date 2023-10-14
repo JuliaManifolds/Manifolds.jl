@@ -21,8 +21,13 @@ tangent space of the power manifold.
 """
 struct PowerMetric <: AbstractMetric end
 
-function PowerManifold(M::AbstractManifold{𝔽}, size::Integer...) where {𝔽}
-    return PowerManifold{𝔽,typeof(M),Tuple{size...},ArrayPowerRepresentation}(M)
+function PowerManifold(
+    M::AbstractManifold{𝔽},
+    size::Integer...;
+    parameter::Symbol=:field,
+) where {𝔽}
+    size_w = wrap_type_parameter(parameter, size)
+    return PowerManifold{𝔽,typeof(M),typeof(size_w),ArrayPowerRepresentation}(M, size_w)
 end
 
 """
@@ -130,8 +135,9 @@ end
 
 Return the manifold volume of an [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) `M`.
 """
-function manifold_volume(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
-    return manifold_volume(M.manifold)^prod(size_to_tuple(TSize))
+function manifold_volume(M::PowerManifold)
+    size = get_parameter(M.size)
+    return manifold_volume(M.manifold)^prod(size)
 end
 
 function Random.rand(rng::AbstractRNG, d::PowerFVectorDistribution)
@@ -210,8 +216,8 @@ function Base.view(
     return _write(M, rep_size, p, I...)
 end
 
-function representation_size(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
-    return (representation_size(M.manifold)..., size_to_tuple(TSize)...)
+function representation_size(M::PowerManifold)
+    return (representation_size(M.manifold)..., get_parameter(M.size)...)
 end
 
 @doc raw"""
@@ -266,9 +272,19 @@ end
 
 function Base.show(
     io::IO,
-    M::PowerManifold{𝔽,TM,TSize,ArrayPowerRepresentation},
-) where {𝔽,TM,TSize}
-    return print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
+    M::PowerManifold{𝔽,TM,TypeParameter{TSize},ArrayPowerRepresentation},
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize}
+    return print(
+        io,
+        "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")), parameter=:type)",
+    )
+end
+function Base.show(
+    io::IO,
+    M::PowerManifold{𝔽,TM,<:Tuple,ArrayPowerRepresentation},
+) where {𝔽,TM<:AbstractManifold{𝔽}}
+    size = get_parameter(M.size)
+    return print(io, "PowerManifold($(M.manifold), $(join(size, ", ")))")
 end
 
 Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type)

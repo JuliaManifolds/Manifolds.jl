@@ -489,4 +489,10 @@ end
         X = repeat([0.0, 1.0, 0.0], 1, 5)
         @test volume_density(Ms1, p, X) ≈ volume_density(Ms, p[:, 1], X[:, 1])^5
     end
+
+    @testset "Static type parameter" begin
+        Ms1s = PowerManifold(Ms, 5; parameter=:type)
+        @test sprint(show, "text/plain", Ms1s) ==
+              "PowerManifold(Sphere(2, ℝ), 5, parameter=:type)"
+    end
 end

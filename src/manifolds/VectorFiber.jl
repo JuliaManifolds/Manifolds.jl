@@ -1,5 +1,4 @@
 
-
 """
     TensorProductType(spaces::VectorSpaceType...)
 
@@ -13,7 +12,12 @@ end
 TensorProductType(spaces::VectorSpaceType...) = TensorProductType{typeof(spaces)}(spaces)
 
 function inner(B::CotangentSpace, p, X, Y)
-    return inner(B.manifold, B.point, sharp(B.manifold, B.point, X), sharp(B.manifold, B.point, Y))
+    return inner(
+        B.manifold,
+        B.point,
+        sharp(B.manifold, B.point, X),
+        sharp(B.manifold, B.point, Y),
+    )
 end
 
 function Base.show(io::IO, tpt::TensorProductType)
