@@ -163,7 +163,7 @@ function Distributions._rand!(
     p::ArrayPartition,
 )
     map(
-        t -> Distributions._rand!(rng, t[1], t[2]),
+        (t1, t2) -> Distributions._rand!(rng, t1, t2),
         d.distributions,
         submanifold_components(d.manifold, p),
     )

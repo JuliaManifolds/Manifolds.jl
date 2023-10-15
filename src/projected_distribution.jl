@@ -120,7 +120,7 @@ Normal distribution in ambient space with standard deviation `σ`
 projected to tangent space at `p`.
 """
 function normal_tvector_distribution(M::AbstractManifold, p, σ)
-    d = Distributions.MvNormal(zero(vec(p)), σ)
+    d = Distributions.MvNormal(zero(vec(p)), σ * I)
     return ProjectedFVectorDistribution(TangentSpace(M, p), d, project!, p)
 end
 

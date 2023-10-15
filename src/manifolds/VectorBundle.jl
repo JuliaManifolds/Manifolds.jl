@@ -72,6 +72,7 @@ function bundle_transport_tangent_direction!(
     B::TangentBundle,
     Y,
     p,
+    pf,
     X,
     d,
     m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
@@ -83,6 +84,7 @@ function bundle_transport_tangent_to!(
     B::TangentBundle,
     Y,
     p,
+    pf,
     X,
     q,
     m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
@@ -376,7 +378,7 @@ function vector_transport_to!(
     VYM, VYF = submanifold_components(M.manifold, Y)
     qx, qVx = submanifold_components(M.manifold, q)
     vector_transport_to!(M.manifold, VYM, px, VXM, qx, m.method_point)
-    bundle_transport_tangent_to!(M, VYF, px, VXF, qx, m.method_fiber)
+    bundle_transport_tangent_to!(M, VYF, px, pVx, VXF, qx, m.method_fiber)
     return Y
 end
 
@@ -392,7 +394,7 @@ function _vector_transport_direction(
     dx, dVx = submanifold_components(M.manifold, d)
     return ArrayPartition(
         vector_transport_direction(M.manifold, px, VXM, dx, m.method_point),
-        bundle_transport_tangent_direction(M, px, VXF, dx, m.method_fiber),
+        bundle_transport_tangent_direction(M, px, pVx, VXF, dx, m.method_fiber),
     )
 end
 
@@ -408,7 +410,7 @@ function _vector_transport_to(
     qx, qVx = submanifold_components(M.manifold, q)
     return ArrayPartition(
         vector_transport_to(M.manifold, px, VXM, qx, m.method_point),
-        bundle_transport_tangent_to(M, px, VXF, qx, m.method_fiber),
+        bundle_transport_tangent_to(M, px, pVx, VXF, qx, m.method_fiber),
     )
 end
 

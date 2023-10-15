@@ -520,7 +520,7 @@ similar type as `p`.
 """
 function uniform_distribution(M::Sphere{<:Any,ℝ}, p)
     n = get_parameter(M.size)[1]
-    d = Distributions.MvNormal(zero(p), 1.0)
+    d = Distributions.MvNormal(zero(p), 1.0 * I)
     return ProjectedPointDistribution(M, d, project!, p)
 end
 

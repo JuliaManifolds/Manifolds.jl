@@ -595,10 +595,13 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test is_point(MM2, p) === is_point(M, p)
         @test is_vector(MM2, p, X) === is_vector(M, p, X)
 
-        a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))
+        a = Manifolds.projected_distribution(
+            M,
+            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
+        )
         b = Manifolds.projected_distribution(
             MM2,
-            Distributions.MvNormal(zero(zeros(3)), 1.0),
+            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
         )
         @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
         @test isapprox(a.distribution.μ, b.distribution.μ)

@@ -507,7 +507,7 @@ Uniform distribution on given [`ProjectiveSpace`](@ref) `M`. Generated points wi
 similar type as `p`.
 """
 function uniform_distribution(M::ProjectiveSpace{<:Any,ℝ}, p)
-    d = Distributions.MvNormal(zero(p), 1.0)
+    d = Distributions.MvNormal(zero(p), 1.0 * I)
     return ProjectedPointDistribution(M, d, project!, p)
 end
 

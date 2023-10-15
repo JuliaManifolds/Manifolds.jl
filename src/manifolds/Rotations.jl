@@ -43,7 +43,7 @@ end
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
-The Lie algebra of [`Rotations(4)`](@ref) in $ℝ^{4 × 4}$, $𝔰𝔬(4)$, consists of $4 × 4$
+The Lie algebra of [`Rotations(4)`](@ref) in ``ℝ^{4 × 4}``, ``𝔰𝔬(4)``, consists of ``4 × 4``
 skew-symmetric matrices. The unique imaginary components of their eigenvalues are the
 angles of the two plane rotations. This function computes these more efficiently than
 `eigvals`.
@@ -158,7 +158,7 @@ end
     injectivity_radius(M::Rotations, ::PolarRetraction)
 
 Return the radius of injectivity for the [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
-[`Rotations`](@ref) `M` which is $\frac{π}{\sqrt{2}}$.
+[`Rotations`](@ref) `M` which is ``\frac{π}{\sqrt{2}}``.
 """
 injectivity_radius(::Rotations, ::PolarRetraction)
 function _injectivity_radius(M::Rotations, ::PolarRetraction)
@@ -169,7 +169,7 @@ end
 @doc raw"""
     inverse_retract(M, p, q, ::PolarInverseRetraction)
 
-Compute a vector from the tangent space $T_p\mathrm{SO}(n)$
+Compute a vector from the tangent space ``T_p\mathrm{SO}(n)``
 of the point `p` on the [`Rotations`](@ref) manifold `M`
 with which the point `q` can be reached by the
 [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) from the point `p` after time 1.
@@ -180,16 +180,16 @@ The formula reads
 = -\frac{1}{2}(p^{\mathrm{T}}qs - (p^{\mathrm{T}}qs)^{\mathrm{T}})
 ````
 
-where $s$ is the solution to the Sylvester equation
+where ``s`` is the solution to the Sylvester equation
 
-$p^{\mathrm{T}}qs + s(p^{\mathrm{T}}q)^{\mathrm{T}} + 2I_n = 0.$
+``p^{\mathrm{T}}qs + s(p^{\mathrm{T}}q)^{\mathrm{T}} + 2I_n = 0.``
 """
 inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
 
 @doc raw"""
     inverse_retract(M::Rotations, p, q, ::QRInverseRetraction)
 
-Compute a vector from the tangent space $T_p\mathrm{SO}(n)$ of the point `p` on the
+Compute a vector from the tangent space ``T_p\mathrm{SO}(n)`` of the point `p` on the
 [`Rotations`](@ref) manifold `M` with which the point `q` can be reached by the
 [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) from the point `q` after time 1.
 """
@@ -230,18 +230,18 @@ end
     normal_rotation_distribution(M::Rotations, p, σ::Real)
 
 Return a random point on the manifold [`Rotations`](@ref) `M`
-by generating a (Gaussian) random orthogonal matrix with determinant $+1$. Let
+by generating a (Gaussian) random orthogonal matrix with determinant ``+1``. Let
 
-$QR = A$
+``QR = A``
 
-be the QR decomposition of a random matrix $A$, then the formula reads
+be the QR decomposition of a random matrix ``A``, then the formula reads
 
-$p = QD$
+``p = QD``
 
-where $D$ is a diagonal matrix with the signs of the diagonal entries of $R$,
+where ``D`` is a diagonal matrix with the signs of the diagonal entries of ``R``,
 i.e.
 
-$D_{ij}=\begin{cases} \operatorname{sgn}(R_{ij}) & \text{if} \; i=j \\ 0 & \, \text{otherwise} \end{cases}.$
+``D_{ij}=\begin{cases} \operatorname{sgn}(R_{ij}) & \text{if} \; i=j \\ 0 & \, \text{otherwise} \end{cases}.``
 
 It can happen that the matrix gets -1 as a determinant. In this case, the first
 and second columns are swapped.
@@ -250,7 +250,7 @@ The argument `p` is used to determine the type of returned points.
 """
 function normal_rotation_distribution(M::Rotations, p, σ::Real)
     n = get_parameter(M.size)[1]
-    d = Distributions.MvNormal(zeros(n * n), σ)
+    d = Distributions.MvNormal(zeros(n * n), σ * I)
     return NormalRotationDistribution(M, d, p)
 end
 
@@ -259,7 +259,7 @@ end
 
 Project `p` to the nearest point on manifold `M`.
 
-Given the singular value decomposition $p = U Σ V^\mathrm{T}$, with the
+Given the singular value decomposition ``p = U Σ V^\mathrm{T}``, with the
 singular values sorted in descending order, the projection is
 
 ````math
@@ -267,7 +267,7 @@ singular values sorted in descending order, the projection is
 U\operatorname{diag}\left[1,1,…,\det(U V^\mathrm{T})\right] V^\mathrm{T}
 ````
 
-The diagonal matrix ensures that the determinant of the result is $+1$.
+The diagonal matrix ensures that the determinant of the result is ``+1``.
 If `p` is expected to be almost special orthogonal, then you may avoid this
 check with `check_det = false`.
 """

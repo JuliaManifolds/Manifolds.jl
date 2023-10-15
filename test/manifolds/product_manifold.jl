@@ -345,7 +345,7 @@ using RecursiveArrayTools: ArrayPartition
         distr_M1 = Manifolds.uniform_distribution(M1, pts_sphere[1])
         distr_M2 = Manifolds.projected_distribution(
             M2,
-            Distributions.MvNormal(zero(pts_r2[1]), 1.0),
+            Distributions.MvNormal(zero(pts_r2[1]), 1.0 * I),
         )
         distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_sphere[1], 1.0)
         distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_r2[1], 1.0)
@@ -383,7 +383,7 @@ using RecursiveArrayTools: ArrayPartition
             test_tangent_vector_broadcasting=true,
             test_project_tangent=true,
             test_project_point=true,
-            test_mutating_rand=false,
+            test_mutating_rand=true,
             retraction_methods=retraction_methods,
             inverse_retraction_methods=inverse_retraction_methods,
             test_riesz_representer=true,

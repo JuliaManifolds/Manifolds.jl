@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Sizes of all manifolds can now be either encoded in type or stored in a field to avoid over-specialization.
-  The default is set to store the size in type parameter, replicating the previous behavior.
+  The default is set to store the size in type parameter (except for `PowerManifold` and its variants), replicating the previous behavior.
   For field storage, pass the `parameter=:field` keyword argument to manifold constructor.
   For example statically sized `CenteredMatrices{m,n}` is now `CenteredMatrices{TypeParameter{Tuple{m,n}}}`, whereas the type of special Euclidean group with field-stored size is `CenteredMatrices{Tuple{Int,Int}}`. Similar change applies to:
   - `CenteredMatrices{m,n}`,
@@ -36,6 +36,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `MultinomialDoublyStochastic{n}`,
   - `MultinomialSymmetric{n}`,
   - `Orthogonal{n}`,
+  - `PowerManifold`,
+  - `PositiveArrays`,
+  - `PositiveMatrices`,
+  - `PositiveNumbers`,
   - `ProbabilitySimplex{n}`,
   - `SPDFixedDeterminant{n}`,
   - `SpecialLinear{n}`,
@@ -93,7 +97,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ```
 
 - Argument order for type aliases `RotationActionOnVector` and `RotationTranslationActionOnVector`: most often dispatched on argument is now first.
-- `HasLeftInvariantMetric`, `HasRightInvariantMetric` and `HasBiinvariantMetric` now explicitly refer to using default implementations of invariant metric functions. If you provide your own implementations, these traits should not be specified.
 
 ### Removed
 

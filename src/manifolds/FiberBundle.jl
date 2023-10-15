@@ -156,6 +156,8 @@ Given a fiber bundle ``B=F \mathcal M``, points ``p, q\in\mathcal M``, an elemen
 the fiber over ``p``, transport ``X`` to fiber over ``q``.
 
 Exact meaning of the operation depends on the fiber bundle, or may even be undefined.
+Some fiber bundles may declare a default local section around each point crossing `X`,
+represented by this function.
 """
 function bundle_transport_to(B::FiberBundle, p, X, q)
     Y = allocate(X)
@@ -163,37 +165,43 @@ function bundle_transport_to(B::FiberBundle, p, X, q)
 end
 
 @doc raw"""
-    bundle_transport_tangent_direction(B::FiberBundle, p, X, d)
+    bundle_transport_tangent_direction(B::FiberBundle, p, pf, X, d)
 
-TODO
+Compute parallel transport of vertical vector `X` according to Ehresmann connection on
+[`FiberBundle`](@ref) `B`, in direction ``d\in T_p \mathcal M``. ``X`` is an element of the
+vertical bundle ``VF\mathcal M`` at `pf` from tangent to fiber ``\pi^{-1}({p})``,
+``p\in \mathcal M``.
 """
 function bundle_transport_tangent_direction(
     B::FiberBundle,
     p,
+    pf,
     X,
     d,
     m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
 )
     Y = allocate(X)
-    return bundle_transport_tangent_direction!(B, Y, p, X, d, m)
+    return bundle_transport_tangent_direction!(B, Y, p, pf, X, d, m)
 end
 
 @doc raw"""
-    bundle_transport_tangent_to(B::FiberBundle, p, X, q)
+    bundle_transport_tangent_to(B::FiberBundle, p, pf, X, q)
 
-TODO
-
-Ehresmann connection; ``X`` is an element of the vertical bundle ``VF\mathcal M`` from tangent to fiber ``\pi^{-1}({p})``, ``p\in \mathcal M``.
+Compute parallel transport of vertical vector `X` according to Ehresmann connection on
+[`FiberBundle`](@ref) `B`, to point ``q\in \mathcal M``. ``X`` is an element of the vertical
+bundle ``VF\mathcal M`` at `pf` from tangent to fiber ``\pi^{-1}({p})``,
+``p\in \mathcal M``.
 """
 function bundle_transport_tangent_to(
     B::FiberBundle,
     p,
+    pf,
     X,
     q,
     m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
 )
     Y = allocate(X)
-    return bundle_transport_tangent_to!(B, Y, p, X, q, m)
+    return bundle_transport_tangent_to!(B, Y, p, pf, X, q, m)
 end
 
 """
