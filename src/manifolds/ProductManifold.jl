@@ -71,31 +71,6 @@ function adjoint_Jacobi_field!(M::ProductManifold, Y, p, q, t, X, β::Tβ) where
 end
 
 @doc raw"""
-    cross(M, N)
-    cross(M1, M2, M3,...)
-
-Return the [`ProductManifold`](@ref) For two `AbstractManifold`s `M` and `N`,
-where for the case that one of them is a [`ProductManifold`](@ref) itself,
-the other is either prepended (if `N` is a product) or appenden (if `M`) is.
-If both are product manifold, they are combined into one product manifold,
-keeping the order.
-
-For the case that more than one is a product manifold of these is build with the
-same approach as above
-"""
-cross(::AbstractManifold...)
-LinearAlgebra.cross(M1::AbstractManifold, M2::AbstractManifold) = ProductManifold(M1, M2)
-function LinearAlgebra.cross(M1::ProductManifold, M2::AbstractManifold)
-    return ProductManifold(M1.manifolds..., M2)
-end
-function LinearAlgebra.cross(M1::AbstractManifold, M2::ProductManifold)
-    return ProductManifold(M1, M2.manifolds...)
-end
-function LinearAlgebra.cross(M1::ProductManifold, M2::ProductManifold)
-    return ProductManifold(M1.manifolds..., M2.manifolds...)
-end
-
-@doc raw"""
     flat(M::ProductManifold, p, X::FVector{TangentSpaceType})
 
 use the musical isomorphism to transform the tangent vector `X` from the tangent space at

@@ -102,4 +102,13 @@ include("../utils.jl")
         rand!(M, X; vector_at=p)
         @test is_vector(M, p, X)
     end
+
+    @testset "field parameter" begin
+        M1 = PositiveVectors(3; parameter=:field)
+        @test repr(M1) == "PositiveVectors(3; parameter=:field)"
+        M2 = PositiveMatrices(3, 4; parameter=:field)
+        @test repr(M2) == "PositiveMatrices(3, 4; parameter=:field)"
+        M3 = PositiveArrays(3, 4, 5; parameter=:field)
+        @test repr(M3) == "PositiveArrays(3, 4, 5; parameter=:field)"
+    end
 end
