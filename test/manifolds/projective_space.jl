@@ -120,14 +120,14 @@ include("../utils.jl")
             @test_throws DomainError is_vector(
                 M,
                 [1.0 + 0im, 0.0, 0.0],
-                [1.0 + 0im, 0.0, 0.0],
-                true,
+                [1.0 + 0im, 0.0, 0.0];
+                error=:error,
             )
             @test_throws DomainError is_vector(
                 M,
                 [1.0 + 0im, 0.0, 0.0],
-                [-0.5im, 0.0, 0.0],
-                true,
+                [-0.5im, 0.0, 0.0];
+                error=:error,
             )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2

@@ -40,22 +40,22 @@ using NLsolve
         @test_throws ManifoldDomainError is_vector(
             G,
             Float64[2 3 2; 3 1 2; 1 1 1],
-            randn(3, 3),
-            true;
+            randn(3, 3);
+            error=:error,
             atol=1e-6,
         )
         @test_throws DomainError is_vector(
             G,
             Float64[2 1 2; 3 2 2; 2 2 1],
-            Float64[2 1 -1; 2 2 1; 1 1 -1],
-            true;
+            Float64[2 1 -1; 2 2 1; 1 1 -1];
+            error=:error,
             atol=1e-6,
         )
         @test is_vector(
             G,
             Float64[2 1 2; 3 2 2; 2 2 1],
-            Float64[-1 -1 -1; 1 -1 2; -1 -1 2],
-            true;
+            Float64[-1 -1 -1; 1 -1 2; -1 -1 2];
+            error=:error,
             atol=1e-6,
         )
 
@@ -130,8 +130,8 @@ using NLsolve
         @test_throws DomainError is_point(G, randn(2, 2); error=:error)
         @test_throws ManifoldDomainError is_point(
             G,
-            ComplexF64[1 0 im; im 0 0; 0 -1 0],
-            true,
+            ComplexF64[1 0 im; im 0 0; 0 -1 0];
+            error=:error,
         )
         @test_throws DomainError is_point(G, ComplexF64[1 im; im 1]; error=:error)
         @test is_point(G, ComplexF64[im 1; -2 im]; error=:error)
@@ -139,22 +139,22 @@ using NLsolve
         @test_throws ManifoldDomainError is_vector(
             G,
             ComplexF64[-1+im -1; -im 1],
-            ComplexF64[1-im 1+im; 1 -1+im],
-            true;
+            ComplexF64[1-im 1+im; 1 -1+im];
+            error=:error,
             atol=1e-6,
         )
         @test_throws DomainError is_vector(
             G,
             ComplexF64[1 1+im; -1+im -1],
-            ComplexF64[1-im -1-im; -im im],
-            true;
+            ComplexF64[1-im -1-im; -im im];
+            error=:error,
             atol=1e-6,
         )
         @test is_vector(
             G,
             ComplexF64[1 1+im; -1+im -1],
-            ComplexF64[1-im 1+im; 1 -1+im],
-            true;
+            ComplexF64[1-im 1+im; 1 -1+im];
+            error=:error,
             atol=1e-6,
         )
 

@@ -148,7 +148,13 @@ end
 
             @test is_vector(SpSt_6_4, p_6_4, X1; atol=1.0e-12)
             @test is_vector(SpSt_6_4, p_6_4, X2; atol=1.0e-6)
-            @test_throws DomainError is_vector(SpSt_6_4, p_6_4, X2, true; atol=1.0e-12)
+            @test_throws DomainError is_vector(
+                SpSt_6_4,
+                p_6_4,
+                X2;
+                error=:error,
+                atol=1.0e-12,
+            )
             @test is_vector(SpSt_6_4, p_6_4, X1 + X2; atol=1.0e-6)
             @test_throws DomainError is_vector(SpSt_6_4, p_6_4, X1 + p_6_4; error=:error)
         end
@@ -223,14 +229,14 @@ end
             ])
             A_6_4_proj = similar(A_6_4)
             Manifolds.project!(SpSt_6_4, A_6_4_proj, p_6_4, A_6_4)
-            @test is_vector(SpSt_6_4, p_6_4, A_6_4_proj, true; atol=2.0e-12)
+            @test is_vector(SpSt_6_4, p_6_4, A_6_4_proj; error=:error, atol=2.0e-12)
         end
         @testset "Generate random points/tangent vectors" begin
             M_big = SymplecticStiefel(20, 10)
             p_big = rand(M_big)
-            @test is_point(M_big, p_big, true; atol=1.0e-14)
+            @test is_point(M_big, p_big; error=:error, atol=1.0e-14)
             X_big = rand(M_big; vector_at=p_big, hamiltonian_norm=1.0)
-            @test is_vector(M_big, p_big, X_big, true; atol=1.0e-14)
+            @test is_vector(M_big, p_big, X_big; error=:error, atol=1.0e-14)
         end
         @testset "test_manifold(Symplectic(6), ...)" begin
             types = [Matrix{Float64}]

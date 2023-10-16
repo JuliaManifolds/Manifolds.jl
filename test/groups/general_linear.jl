@@ -74,8 +74,8 @@ using NLsolve
         @test_throws ManifoldDomainError is_vector(
             G,
             Float64[0 1 1; 0 1 1; 1 0 0],
-            randn(3, 3),
-            true,
+            randn(3, 3);
+            error=:error,
         )
         @test is_vector(G, Float64[0 0 1; 0 1 1; 1 1 1], randn(3, 3); error=:error)
 
@@ -154,8 +154,8 @@ using NLsolve
         @test_throws ManifoldDomainError is_vector(
             G,
             ComplexF64[im im; im im],
-            randn(ComplexF64, 2, 2),
-            true,
+            randn(ComplexF64, 2, 2);
+            error=:error,
         )
         @test is_vector(G, ComplexF64[1 im; im im], randn(ComplexF64, 2, 2); error=:error)
 
