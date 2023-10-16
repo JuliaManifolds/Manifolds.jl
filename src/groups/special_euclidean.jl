@@ -717,7 +717,7 @@ function get_coordinates(
     M::SpecialEuclidean,
     p::ArrayPartition,
     X::ArrayPartition,
-    basis::AbstractBasis,
+    basis::DefaultOrthogonalBasis,
 )
     M1, M2 = M.manifold.manifolds
     return vcat(
@@ -736,7 +736,7 @@ function get_vector(
     M::SpecialEuclidean{2},
     p::ArrayPartition,
     c::AbstractVector,
-    basis::AbstractOrthogonalBasis,
+    basis::DefaultOrthogonalBasis,
 )
     return ArrayPartition(
         get_vector(M.manifold.manifolds[1].manifold, p.x[1], view(c, 1:2), basis),
@@ -754,7 +754,7 @@ function get_vector(
     M::SpecialEuclidean{3},
     p::ArrayPartition,
     Xc::AbstractVector,
-    basis::AbstractOrthogonalBasis,
+    basis::DefaultOrthogonalBasis,
 )
     return ArrayPartition(
         get_vector(M.manifold.manifolds[1].manifold, p.x[1], view(Xc, 1:3), basis),
