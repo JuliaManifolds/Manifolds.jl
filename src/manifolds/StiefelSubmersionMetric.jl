@@ -69,7 +69,7 @@ function exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetr
         mul!(C, X, p')
         C .-= C'
         mul!(tmp, p, A)
-        mul!(C, tmp, p', -(2α + 1) / (α + 1); error=:error)
+        mul!(C, tmp, p', -(2α + 1) / (α + 1), true)
         rmul!(A, α / (α + 1))
         mul!(tmp, p, exp(A))
         mul!(q, exp(C), tmp)
