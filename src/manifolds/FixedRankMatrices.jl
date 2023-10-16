@@ -491,8 +491,13 @@ function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
 end
 
 @doc raw"""
-    inverse_retract(M, p, X, ::OrthographicInverseRetraction)
+    inverse_retract(M, p, q, ::OrthographicInverseRetraction)
 
+Compute the OrthographicInverseRetraction [`FixedRankMatrices`](@ref) `M` by computing
+''''math
+    X = P_{T_{p}M }(q - p) = qVt^{\top}Vt \ + \ UU^{\top}q - UU^{\top}qVt^{\top}Vt - p, 
+''''
+where ''p'' is a [`SVDMPoint'](@ref) `(U,S,Vt)` and ''P_{T_{p}M }'' is the projection [`project'](@ref) into the tangent space at ""p"".
 **(ToDo Docs, but we already have [AbsilOseledets:2014](@cite))**
 """
 inverse_retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicInverseRetraction)
@@ -629,7 +634,16 @@ the size of matrices on this manifold ``(m,n)``.
 
 @doc raw"""
     retract(M, p, X, ::OrthographicRetraction)
-
+Compute the OrthographicRetraction on the [`FixedRankMatrices`](@ref) `M` by finding the nearest point to ''p + X'' in
+''''math
+    p + X + T^{\bot}_{p}M   \cap M
+'''
+where ''T^{\bot}_{p}M '' is the Normal Space of ''T_{p}M ''. \\
+If ''X'' is sufficiently small, then the nearest is unique and can be expressed by
+''''math
+    q = (U(S + M) + U_{p})(S + M)^{-1}((S + M)Vt + Vt_{p}),
+''''
+where ''p'' is a [`SVDMPoint](@ref) `(U,S,Vt)` and X is an [`UMVTVector](@ref) `(U_{p},M,Vt_{p})`.
 **(ToDo Docs, but we already have [AbsilOseledets:2014](@cite))**
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicRetraction)
