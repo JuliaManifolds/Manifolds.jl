@@ -748,7 +748,7 @@ function hat(M::SpecialEuclidean{3}, p::ArrayPartition, c)
     M1, M2 = M.manifold.manifolds
     return ArrayPartition(
         get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(3)], ℝ),
-        get_vector_orthogonal(M2.manifold, p.x[2], c[SA[4,5,6]], ℝ),
+        get_vector_orthogonal(M2.manifold, p.x[2], c[SA[4, 5, 6]], ℝ),
     )
 end
 function get_vector(
@@ -759,7 +759,7 @@ function get_vector(
 )
     return ArrayPartition(
         get_vector(M.manifold.manifolds[1].manifold, p.x[1], c[SOneTo(3)], basis),
-        get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[4,5,6]], basis),
+        get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[4, 5, 6]], basis),
     )
 end
 function compose(::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
