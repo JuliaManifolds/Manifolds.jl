@@ -149,6 +149,10 @@ function inner(B::FiberBundle, p, X, Y)
     return inner(B.manifold, px, VXM, VYM) + inner(F, Vx, VXF, VYF)
 end
 
+function _inverse_retract(M::FiberBundle, p, q, ::FiberBundleInverseProductRetraction)
+    return inverse_retract_product(M, p, q)
+end
+
 function _inverse_retract!(M::FiberBundle, X, p, q, ::FiberBundleInverseProductRetraction)
     return inverse_retract_product!(M, X, p, q)
 end
@@ -250,6 +254,10 @@ Compute the allocating variant of the [`FiberBundleProductRetraction`](@ref),
 which by default allocates and calls `retract_product!`.
 """
 retract(::VectorBundle, p, q, t::Number, ::FiberBundleProductRetraction)
+
+function _retract(M::VectorBundle, p, X, t::Number, ::FiberBundleProductRetraction)
+    return retract_product(M, p, X, t)
+end
 
 function retract_product(M::VectorBundle, p, X, t::Number)
     q = allocate_result(M, retract, p, X)
