@@ -750,12 +750,12 @@ function test_manifold(
     test_rand_point && Test.@testset "Base.rand point generation" begin
         rng_a = MersenneTwister(123)
         rng_b = MersenneTwister(123)
-        Test.@test is_point(M, rand(M), true)
+        Test.@test is_point(M, rand(M); error=:error)
         # ensure that the RNG source is actually used
         Test.@test rand(rng_a, M) == rand(rng_b, M)
         # generation of multiple points
-        Test.@test all(p -> is_point(M, p, true), rand(M, 3))
-        Test.@test all(p -> is_point(M, p, true), rand(rng_a, M, 3))
+        Test.@test all(p -> is_point(M, p; error=:error), rand(M, 3))
+        Test.@test all(p -> is_point(M, p; error=:error), rand(rng_a, M, 3))
 
         if test_inplace && is_mutating
             rng_a = MersenneTwister(123)
@@ -763,10 +763,10 @@ function test_manifold(
 
             p = allocate(pts[1])
             rand!(M, p)
-            Test.@test is_point(M, p, true)
+            Test.@test is_point(M, p; error=:error)
             p = allocate(pts[1])
             rand!(rng_a, M, p)
-            Test.@test is_point(M, p, true)
+            Test.@test is_point(M, p; error=:error)
             # ensure that the RNG source is actually used
             q = allocate(pts[1])
             rand!(rng_b, M, q)
@@ -799,7 +799,7 @@ function test_manifold(
             Test.@test is_vector(M, p, X, true; atol=atol)
             X = allocate(tv[1])
             rand!(rng_a, M, X; vector_at=p)
-            Test.@test is_point(M, p, true)
+            Test.@test is_point(M, p; error=:error)
             # ensure that the RNG source is actually used
             Y = allocate(tv[1])
             rand!(rng_b, M, Y; vector_at=p)
@@ -889,7 +889,7 @@ function test_parallel_transport(
                         Test.@test isapprox(M, q, Y1, Y2)
                     end
                     # Test that Y is a tangent vector at q
-                    Test.@test is_vector(M, p, Y1, true)
+                    Test.@test is_vector(M, p, Y1; error=:error)
                 end
             end
         end

@@ -18,9 +18,9 @@ include("../utils.jl")
         p = [2, 0, 0]
         p2 = [p p]
         @test !is_point(M, p)
-        @test_throws DomainError is_point(M, p, true)
+        @test_throws DomainError is_point(M, p; error=:error)
         @test !is_point(M, p2)
-        @test_throws CompositeManifoldError is_point(M, p2, true)
+        @test_throws CompositeManifoldError is_point(M, p2; error=:error)
         @test !is_vector(M, p2, 0.0)
         @test_throws CompositeManifoldError{ComponentManifoldError{Int64,DomainError}} is_vector(
             M,
@@ -29,10 +29,10 @@ include("../utils.jl")
             true,
         )
         @test !is_vector(M, p2, [-1.0, 0.0, 0.0])
-        @test_throws DomainError is_vector(M, p, [-1.0, 0.0, 0.0], true)
+        @test_throws DomainError is_vector(M, p, [-1.0, 0.0, 0.0]; error=:error)
         @test injectivity_radius(M) ≈ 0
         x = [0.5 0.4 0.1; 0.5 0.4 0.1]'
-        @test_throws DomainError is_vector(M, x, [0.0, 0.0, 0.0], true) # tangent wrong
+        @test_throws DomainError is_vector(M, x, [0.0, 0.0, 0.0]; error=:error) # tangent wrong
         y = [0.6 0.3 0.1; 0.4 0.5 0.1]'
         z = [0.3 0.6 0.1; 0.6 0.3 0.1]'
         test_manifold(

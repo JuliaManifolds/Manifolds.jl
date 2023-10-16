@@ -13,13 +13,13 @@ using Manifolds: TFVector, CoTFVector
         @test !is_point(M, zeros(3, 3))
         @test Manifolds.check_size(M, [9.0]) === nothing
         @test Manifolds.check_size(M, [1.0], [-2.0]) === nothing
-        @test_throws DomainError is_point(M, 9.0, true)
-        @test_throws DomainError is_point(M, zeros(3, 3), true)
+        @test_throws DomainError is_point(M, 9.0; error=:error)
+        @test_throws DomainError is_point(M, zeros(3, 3); error=:error)
         @test !is_vector(M, 9.0, 0.0)
         @test !is_vector(M, zeros(3, 3), zeros(3, 3))
-        @test_throws DomainError is_vector(M, 9.0, 0.0, true)
-        @test_throws DomainError is_vector(M, zeros(3, 3), zeros(3, 3), true)
-        @test_throws DomainError is_vector(M, 0.0, zeros(3, 3), true)
+        @test_throws DomainError is_vector(M, 9.0, 0.0; error=:error)
+        @test_throws DomainError is_vector(M, zeros(3, 3), zeros(3, 3); error=:error)
+        @test_throws DomainError is_vector(M, 0.0, zeros(3, 3); error=:error)
         @test is_vector(M, 0.0, 0.0)
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(
@@ -206,11 +206,11 @@ using Manifolds: TFVector, CoTFVector
         @test is_vector(Mc, 1im, 0.0)
         @test is_point(Mc, 1im)
         @test !is_point(Mc, 1 + 1im)
-        @test_throws DomainError is_point(Mc, 1 + 1im, true)
+        @test_throws DomainError is_point(Mc, 1 + 1im; error=:error)
         @test !is_vector(Mc, 1 + 1im, 0.0)
-        @test_throws DomainError is_vector(Mc, 1 + 1im, 0.0, true)
+        @test_throws DomainError is_vector(Mc, 1 + 1im, 0.0; error=:error)
         @test !is_vector(Mc, 1im, 2im)
-        @test_throws DomainError is_vector(Mc, 1im, 2im, true)
+        @test_throws DomainError is_vector(Mc, 1im, 2im; error=:error)
         rrcv = Manifolds.RieszRepresenterCotangentVector(Mc, 0.0 + 0.0im, 1.0im)
         @test flat(Mc, 0.0 + 0.0im, 1.0im) == rrcv
         @test sharp(Mc, 0.0 + 0.0im, rrcv) == 1.0im

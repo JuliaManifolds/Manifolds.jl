@@ -11,16 +11,16 @@ include("../utils.jl")
     Y = [-0.1, 0.05, 0.05]
     @test repr(M) == "ProbabilitySimplex(2; boundary=:open)"
     @test is_point(M, p)
-    @test_throws DomainError is_point(M, p .+ 1, true)
-    @test_throws ManifoldDomainError is_point(M, [0], true)
-    @test_throws DomainError is_point(M, -ones(3), true)
+    @test_throws DomainError is_point(M, p .+ 1; error=:error)
+    @test_throws ManifoldDomainError is_point(M, [0]; error=:error)
+    @test_throws DomainError is_point(M, -ones(3); error=:error)
     @test manifold_dimension(M) == 2
     @test !is_flat(M)
     @test is_vector(M, p, X)
     @test is_vector(M, p, Y)
-    @test_throws ManifoldDomainError is_vector(M, p .+ 1, X, true)
-    @test_throws ManifoldDomainError is_vector(M, p, zeros(4), true)
-    @test_throws DomainError is_vector(M, p, Y .+ 1, true)
+    @test_throws ManifoldDomainError is_vector(M, p .+ 1, X; error=:error)
+    @test_throws ManifoldDomainError is_vector(M, p, zeros(4); error=:error)
+    @test_throws DomainError is_vector(M, p, Y .+ 1; error=:error)
 
     @test injectivity_radius(M, p) == injectivity_radius(M, p, ExponentialRetraction())
     @test injectivity_radius(M, p, SoftmaxRetraction()) == injectivity_radius(M, p)
@@ -131,7 +131,7 @@ include("../utils.jl")
         X = [0, 1, -1]
         Y = [0, 2, -2]
         @test is_point(Mb, p)
-        @test_throws DomainError is_point(Mb, p .- 1, true)
+        @test_throws DomainError is_point(Mb, p .- 1; error=:error)
         @test inner(Mb, p, X, Y) == 8
 
         @test_throws ArgumentError ProbabilitySimplex(2; boundary=:tomato)

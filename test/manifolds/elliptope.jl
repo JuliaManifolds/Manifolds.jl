@@ -11,11 +11,11 @@ include("../utils.jl")
     @test is_point(M, q, true; atol=10^-15)
     @test base_manifold(M) === M
     qN = [2.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
-    @test_throws DomainError is_point(M, qN, true)
+    @test_throws DomainError is_point(M, qN; error=:error)
     Y = [0.0 1.0; 1.0 0.0; 0.0 0.0; 0.0 0.0]
-    @test is_vector(M, q, Y, true)
+    @test is_vector(M, q, Y; error=:error)
     YN = [0.1 1.0; 1.0 0.1; 0.0 0.0; 0.0 0.0]
-    @test_throws DomainError is_vector(M, q, YN, true)
+    @test_throws DomainError is_vector(M, q, YN; error=:error)
     qE = similar(q)
     embed!(M, qE, q)
     qE2 = embed(M, q)

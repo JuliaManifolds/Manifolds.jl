@@ -282,8 +282,8 @@ where ``U \Sigma V^{\mathrm{T}}`` is the SVD decomposition of ``p q^{\mathrm{T}}
 is the unit diagonal matrix with the last element on the diagonal replaced with -1.
 """
 function optimal_alignment(A::LeftColumnwiseMultiplicationAction, p, q)
-    is_point(A.manifold, p, true)
-    is_point(A.manifold, q, true)
+    is_point(A.manifold, p; error=:error)
+    is_point(A.manifold, q; error=:error)
 
     Xmul = p * transpose(q)
     F = svd(Xmul)

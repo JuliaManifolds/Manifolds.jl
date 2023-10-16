@@ -80,12 +80,17 @@ using ManifoldDiff
             @test !is_flat(Sp_2)
 
             @test is_point(Sp_2, p_2)
-            @test_throws DomainError is_point(Sp_2, p_2 + I, true)
+            @test_throws DomainError is_point(Sp_2, p_2 + I; error=:error)
 
             @test is_vector(Sp_2, p_2, X1; atol=1.0e-6)
             @test is_vector(Sp_2, p_2, X2; atol=1.0e-12)
             @test is_vector(Sp_2, p_2, X1 + X2; atol=1.0e-6)
-            @test_throws DomainError is_vector(Sp_2, p_2, X1 + [0.1 0.1; -0.1 0.1], true)
+            @test_throws DomainError is_vector(
+                Sp_2,
+                p_2,
+                X1 + [0.1 0.1; -0.1 0.1];
+                error=:error,
+            )
         end
         @testset "Symplectic Inverse" begin
             I_2n = Array(I, 2, 2)

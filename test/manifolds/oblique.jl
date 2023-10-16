@@ -15,9 +15,9 @@ include("../utils.jl")
         p = [2, 0, 0]
         p2 = [p p]
         @test !is_point(M, p)
-        @test_throws DomainError is_point(M, p, true)
+        @test_throws DomainError is_point(M, p; error=:error)
         @test !is_point(M, p2)
-        @test_throws CompositeManifoldError is_point(M, p2, true)
+        @test_throws CompositeManifoldError is_point(M, p2; error=:error)
         @test !is_vector(M, p2, 0.0)
         @test_throws CompositeManifoldError{ComponentManifoldError{Int64,DomainError}} is_vector(
             M,
@@ -26,10 +26,10 @@ include("../utils.jl")
             true,
         )
         @test !is_vector(M, p2, [0.0, 0.0, 0.0])
-        @test_throws DomainError is_vector(M, p, [0.0, 0.0, 0.0], true) # p wrong
+        @test_throws DomainError is_vector(M, p, [0.0, 0.0, 0.0]; error=:error) # p wrong
         @test injectivity_radius(M) ≈ π
         x = [1.0 0.0 0.0; 1.0 0.0 0.0]'
-        @test_throws DomainError is_vector(M, x, [0.0, 0.0, 0.0], true) # tangent wrong
+        @test_throws DomainError is_vector(M, x, [0.0, 0.0, 0.0]; error=:error) # tangent wrong
         y = [1.0 0.0 0.0; 1/sqrt(2) 1/sqrt(2) 0.0]'
         z = [1/sqrt(2) 1/sqrt(2) 0.0; 1.0 0.0 0.0]'
         basis_types = (DefaultOrthonormalBasis(),)

@@ -144,13 +144,13 @@ end
             @test !is_flat(SpSt_6_4)
 
             @test is_point(SpSt_6_4, p_6_4)
-            @test_throws DomainError is_point(SpSt_6_4, 2 * p_6_4, true)
+            @test_throws DomainError is_point(SpSt_6_4, 2 * p_6_4; error=:error)
 
             @test is_vector(SpSt_6_4, p_6_4, X1; atol=1.0e-12)
             @test is_vector(SpSt_6_4, p_6_4, X2; atol=1.0e-6)
             @test_throws DomainError is_vector(SpSt_6_4, p_6_4, X2, true; atol=1.0e-12)
             @test is_vector(SpSt_6_4, p_6_4, X1 + X2; atol=1.0e-6)
-            @test_throws DomainError is_vector(SpSt_6_4, p_6_4, X1 + p_6_4, true)
+            @test_throws DomainError is_vector(SpSt_6_4, p_6_4, X1 + p_6_4; error=:error)
         end
         @testset "Symplectic Inverse" begin
             I_2k = Array(I, 4, 4)

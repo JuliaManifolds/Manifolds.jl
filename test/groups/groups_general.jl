@@ -29,7 +29,7 @@ using Manifolds:
             Identity(AdditionOperation()),
             Identity(MultiplicationOperation()),
         )
-        @test_throws DomainError is_point(G, Identity(AdditionOperation()), true)
+        @test_throws DomainError is_point(G, Identity(AdditionOperation()); error=:error)
         @test is_point(G, eg)
         @test_throws MethodError is_identity(G, 1) # same error as before i.e. dispatch isapprox works
         @test Manifolds.check_size(G, eg) === nothing
@@ -40,9 +40,14 @@ using Manifolds:
         ) isa DomainError
         @test !is_vector(G, Identity(AdditionOperation()), X)
         # wrong identity
-        @test_throws DomainError is_vector(G, Identity(AdditionOperation()), X, true)
+        @test_throws DomainError is_vector(
+            G,
+            Identity(AdditionOperation()),
+            X;
+            error=:error,
+        )
         # identity_element for G not implemented
-        @test_throws MethodError is_vector(G, eg, X, true)
+        @test_throws MethodError is_vector(G, eg, X; error=:error)
         @test Identity(NotImplementedOperation()) === eg
         @test Identity(NotImplementedOperation) === eg
         @test !is_point(G, Identity(AdditionOperation()))

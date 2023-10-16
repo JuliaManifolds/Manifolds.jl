@@ -30,13 +30,13 @@ using NLsolve
     @testset "Real" begin
         G = SpecialLinear(3)
 
-        @test_throws ManifoldDomainError is_point(G, randn(2, 3), true)
-        @test_throws ManifoldDomainError is_point(G, Float64[2 1; 1 1], true)
-        @test_throws ManifoldDomainError is_point(G, [1 0 im; im 0 0; 0 -1 0], true)
-        @test_throws ManifoldDomainError is_point(G, zeros(3, 3), true)
-        @test_throws DomainError is_point(G, Float64[1 3 3; 1 1 2; 1 2 3], true)
-        @test is_point(G, Float64[1 1 1; 2 2 1; 2 3 3], true)
-        @test is_point(G, Identity(G), true)
+        @test_throws ManifoldDomainError is_point(G, randn(2, 3); error=:error)
+        @test_throws ManifoldDomainError is_point(G, Float64[2 1; 1 1]; error=:error)
+        @test_throws ManifoldDomainError is_point(G, [1 0 im; im 0 0; 0 -1 0]; error=:error)
+        @test_throws ManifoldDomainError is_point(G, zeros(3, 3); error=:error)
+        @test_throws DomainError is_point(G, Float64[1 3 3; 1 1 2; 1 2 3]; error=:error)
+        @test is_point(G, Float64[1 1 1; 2 2 1; 2 3 3]; error=:error)
+        @test is_point(G, Identity(G); error=:error)
         @test_throws ManifoldDomainError is_vector(
             G,
             Float64[2 3 2; 3 1 2; 1 1 1],
@@ -126,16 +126,16 @@ using NLsolve
     @testset "Complex" begin
         G = SpecialLinear(2, ℂ)
 
-        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3), true)
-        @test_throws DomainError is_point(G, randn(2, 2), true)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3); error=:error)
+        @test_throws DomainError is_point(G, randn(2, 2); error=:error)
         @test_throws ManifoldDomainError is_point(
             G,
             ComplexF64[1 0 im; im 0 0; 0 -1 0],
             true,
         )
-        @test_throws DomainError is_point(G, ComplexF64[1 im; im 1], true)
-        @test is_point(G, ComplexF64[im 1; -2 im], true)
-        @test is_point(G, Identity(G), true)
+        @test_throws DomainError is_point(G, ComplexF64[1 im; im 1]; error=:error)
+        @test is_point(G, ComplexF64[im 1; -2 im]; error=:error)
+        @test is_point(G, Identity(G); error=:error)
         @test_throws ManifoldDomainError is_vector(
             G,
             ComplexF64[-1+im -1; -im 1],

@@ -210,21 +210,21 @@ using Manifolds:
                 p = copy(G, pts[1])
                 X = copy(G, p, X_pts[1])
                 X[n + 1, n + 1] = 0.1
-                @test_throws DomainError is_vector(G, p, X, true)
+                @test_throws DomainError is_vector(G, p, X; error=:error)
                 X2 = zeros(n + 2, n + 2)
                 # nearly correct just too large (and the error from before)
                 X2[1:n, 1:n] .= X[1:n, 1:n]
                 X2[1:n, end] .= X[1:n, end]
                 X2[end, end] = X[end, end]
-                @test_throws DomainError is_vector(G, p, X2, true)
+                @test_throws DomainError is_vector(G, p, X2; error=:error)
                 p[n + 1, n + 1] = 0.1
-                @test_throws DomainError is_point(G, p, true)
+                @test_throws DomainError is_point(G, p; error=:error)
                 p2 = zeros(n + 2, n + 2)
                 # nearly correct just too large (and the error from before)
                 p2[1:n, 1:n] .= p[1:n, 1:n]
                 p2[1:n, end] .= p[1:n, end]
                 p2[end, end] = p[end, end]
-                @test_throws DomainError is_point(G, p2, true)
+                @test_throws DomainError is_point(G, p2; error=:error)
                 # exp/log_lie for ProductGroup on arrays
                 X = copy(G, p, X_pts[1])
                 p3 = exp_lie(G, X)

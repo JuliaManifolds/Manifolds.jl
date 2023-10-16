@@ -157,8 +157,8 @@ end
         M = PowerManifold(Sphere(2), NestedPowerRepresentation(), 2)
         p = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         X = [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
-        @test_throws ComponentManifoldError is_point(M, X, true)
-        @test_throws ComponentManifoldError is_vector(M, p, X, true)
+        @test_throws ComponentManifoldError is_point(M, X; error=:error)
+        @test_throws ComponentManifoldError is_vector(M, p, X; error=:error)
     end
 
     @testset "power vector transport" begin

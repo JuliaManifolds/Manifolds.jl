@@ -169,40 +169,40 @@ include("../utils.jl")
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin
         M = Rotations(2)
         for p in [1, [2.0 0.0; 0.0 1.0], [1.0 0.5; 0.0 1.0]]
-            @test_throws DomainError is_point(M, p, true)
+            @test_throws DomainError is_point(M, p; error=:error)
             @test !is_point(M, p)
         end
         p = one(zeros(2, 2))
         @test is_point(M, p)
-        @test is_point(M, p, true)
+        @test is_point(M, p; error=:error)
         for X in [1, [0.0 1.0; 0.0 0.0]]
-            @test_throws DomainError is_vector(M, p, X, true)
+            @test_throws DomainError is_vector(M, p, X; error=:error)
             @test !is_vector(M, p, X)
         end
         X = [0.0 1.0; -1.0 0.0]
         @test is_vector(M, p, X)
-        @test is_vector(M, p, X, true)
+        @test is_vector(M, p, X; error=:error)
     end
     @testset "Project point" begin
         M = Rotations(2)
         p = Matrix{Float64}(I, 2, 2)
         p1 = project(M, p)
-        @test is_point(M, p1, true)
+        @test is_point(M, p1; error=:error)
 
         M = Rotations(3)
         p = collect(reshape(1.0:9.0, (3, 3)))
         p2 = project(M, p)
-        @test is_point(M, p2, true)
+        @test is_point(M, p2; error=:error)
 
         rng = MersenneTwister(44)
         x3 = project(M, randn(rng, 3, 3))
-        @test is_point(M, x3, true)
+        @test is_point(M, x3; error=:error)
     end
     @testset "Convert from Lie algebra representation of tangents to Riemannian submanifold representation" begin
         M = Rotations(3)
         p = project(M, collect(reshape(1.0:9.0, (3, 3))))
         x = [[0, -1, 3] [1, 0, 2] [-3, -2, 0]]
-        @test is_vector(M, p, x, true)
+        @test is_vector(M, p, x; error=:error)
         @test embed(M, p, x) == p * x
         Y = zeros((3, 3))
         embed!(M, Y, p, x)

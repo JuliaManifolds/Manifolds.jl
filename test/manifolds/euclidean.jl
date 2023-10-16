@@ -58,15 +58,25 @@ using FiniteDifferences
         @test Y == X
 
         # real manifold does not allow complex values
-        @test_throws DomainError is_point(Ec, [:a, :b, :b], true)
-        @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], true)
-        @test_throws DomainError is_point(E, [1], true)
-        @test_throws DomainError is_vector(Ec, [:a, :b, :b], [1.0, 1.0, 0.0], true)
-        @test_throws DomainError is_vector(E, [1.0, 1.0im, 0.0], [1.0, 1.0, 0.0], true) # real manifold does not allow complex values
-        @test_throws DomainError is_vector(E, [1], [1.0, 1.0, 0.0], true)
-        @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0], true)
-        @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0, 0.0, 1.0im], true)
-        @test_throws DomainError is_vector(Ec, [0.0, 0.0, 0.0], [:a, :b, :c], true)
+        @test_throws DomainError is_point(Ec, [:a, :b, :b]; error=:error)
+        @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], error=:error)
+        @test_throws DomainError is_point(E, [1]; error=:error)
+        @test_throws DomainError is_vector(Ec, [:a, :b, :b], [1.0, 1.0, 0.0]; error=:error)
+        @test_throws DomainError is_vector(
+            E,
+            [1.0, 1.0im, 0.0],
+            [1.0, 1.0, 0.0];
+            error=:error,
+        ) # real manifold does not allow complex values
+        @test_throws DomainError is_vector(E, [1], [1.0, 1.0, 0.0]; error=:error)
+        @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0]; error=:error)
+        @test_throws DomainError is_vector(
+            E,
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 1.0im];
+            error=:error,
+        )
+        @test_throws DomainError is_vector(Ec, [0.0, 0.0, 0.0], [:a, :b, :c]; error=:error)
 
         @test E^2 === Euclidean(3, 2, parameter=param)
         @test ^(E, 2) === Euclidean(3, 2, parameter=param)

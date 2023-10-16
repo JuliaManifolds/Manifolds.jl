@@ -107,7 +107,7 @@ Note that the `LoadError:` is due to quarto, on `REPL` you would just get the `D
 
 ```{julia}
 #| error: true
-is_point(M₂, [0, 0, 1.001], true)
+is_point(M₂, [0, 0, 1.001]; error=:error)
 ```
 
 #### 3. ``[The sphere](@ref SphereSection)``{=commonmark}
@@ -152,7 +152,7 @@ and for these we again get informative error messages
 
 ```{julia}
 #| error: true
-@expect_error is_vector(M₃, [1, 0, 0], [0.1, 1, 1], true) DomainError
+@expect_error is_vector(M₃, [1, 0, 0], [0.1, 1, 1]; error=:error) DomainError
 ```
 
 To learn about how to define a manifold youself check out the [🔗 How to define your own manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/example.html) tutorial of [🔗 `ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/)."
@@ -229,7 +229,7 @@ p₃ = Manifolds.ArrayPartition([0, 0, 1], [0, 1, 0])
 Here `ArrayPartition` taken from [🔗 `RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient access to the product elements.
 
 ```{julia}
-is_point(M₆, p₃, true)
+is_point(M₆, p₃; error=:error)
 ```
 
 But accessing single components still works the same."

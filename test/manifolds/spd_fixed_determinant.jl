@@ -7,13 +7,13 @@ include("../utils.jl")
     @test is_point(M, p)
     # Determinant is 4
     @test !is_point(M, 2.0 .* p)
-    @test_throws DomainError is_point(M, 2.0 .* p, true)
+    @test_throws DomainError is_point(M, 2.0 .* p; error=:error)
     #
     X = [0.0 0.1; 0.1 0.0]
     @test is_vector(M, p, X)
     Y = [1.0 0.1; 0.1 1.0]
     @test !is_vector(M, p, Y)
-    @test_throws DomainError is_vector(M, p, Y, true)
+    @test_throws DomainError is_vector(M, p, Y; error=:error)
 
     @test project(M, 2.0 .* p) == p
     @test project(M, p, Y) == X

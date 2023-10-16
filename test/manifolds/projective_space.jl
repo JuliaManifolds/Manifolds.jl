@@ -11,10 +11,15 @@ include("../utils.jl")
             @test is_flat(ProjectiveSpace(1))
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0])
-            @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
+            @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error=:error)
             @test !is_point(M, [2.0, 0.0, 0.0])
             @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-            @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], true)
+            @test_throws DomainError is_vector(
+                M,
+                [1.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0];
+                error=:error,
+            )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, [1.0, 0.0, 0.0]) == π / 2
@@ -108,7 +113,7 @@ include("../utils.jl")
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
             @test !is_point(M, [1.0 + 0im, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0, 0.0], [0.0 + 0im, 1.0, 0.0])
-            @test_throws DomainError is_point(M, [1.0, im, 0.0], true)
+            @test_throws DomainError is_point(M, [1.0, im, 0.0]; error=:error)
             @test !is_point(M, [1.0, im, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0], [1.0 + 0im, 0.0, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0], [-0.5im, 0.0, 0.0])
@@ -198,21 +203,21 @@ include("../utils.jl")
             @test !is_flat(M)
             @test !is_point(M, quat([1.0, 0.0, 0.0, 0.0]))
             @test !is_vector(M, quat([1.0, 0.0, 0.0, 0.0]), quat([0.0, 1.0, 0.0]))
-            @test_throws DomainError is_point(M, [1.0, quat(0, 1, 0, 0), 0.0], true)
+            @test_throws DomainError is_point(M, [1.0, quat(0, 1, 0, 0), 0.0]; error=:error)
             @test !is_point(M, [1.0, quat(0, 1, 0, 0), 0.0])
             @test !is_vector(M, quat([1.0, 0.0, 0.0]), quat([1.0, 0.0, 0.0]))
             @test !is_vector(M, quat([1.0, 0.0, 0.0]), [quat(0, -0.5, 0, 0), 0.0, 0.0])
             @test_throws DomainError is_vector(
                 M,
                 Quaternion[1.0, 0.0, 0.0],
-                Quaternion[1.0, 0.0, 0.0],
-                true,
+                Quaternion[1.0, 0.0, 0.0];
+                error=:error,
             )
             @test_throws DomainError is_vector(
                 M,
                 quat([1.0, 0.0, 0.0]),
-                quat([-0.5, 0.0, 0.0]),
-                true,
+                quat([-0.5, 0.0, 0.0]);
+                error=:error,
             )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2

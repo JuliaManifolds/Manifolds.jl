@@ -35,7 +35,7 @@ using RecursiveArrayTools: ArrayPartition
 
     @test Manifolds.number_of_components(Mse) == 2
     # test that arrays are not points
-    @test_throws DomainError is_point(Mse, [1, 2], true)
+    @test_throws DomainError is_point(Mse, [1, 2]; error=:error)
     @test check_point(Mse, [1, 2]) isa DomainError
     @test_throws DomainError is_vector(Mse, 1, [1, 2], true; check_base_point=false)
     @test check_vector(Mse, 1, [1, 2]; check_base_point=false) isa DomainError
@@ -161,10 +161,10 @@ using RecursiveArrayTools: ArrayPartition
         X = ArrayPartition(X1, X2)
         pf = ArrayPartition(p1, X1)
         Xf = ArrayPartition(X1, p2)
-        @test is_point(Mpr, p, true)
-        @test_throws CompositeManifoldError is_point(Mpr, X, true)
-        @test_throws ComponentManifoldError is_vector(Mpr, pf, X, true)
-        @test_throws ComponentManifoldError is_vector(Mpr, p, Xf, true)
+        @test is_point(Mpr, p; error=:error)
+        @test_throws CompositeManifoldError is_point(Mpr, X; error=:error)
+        @test_throws ComponentManifoldError is_vector(Mpr, pf, X; error=:error)
+        @test_throws ComponentManifoldError is_vector(Mpr, p, Xf; error=:error)
     end
 
     @testset "arithmetic" begin

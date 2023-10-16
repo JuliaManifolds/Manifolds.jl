@@ -147,21 +147,21 @@ include("group_utils.jl")
 
         p = ones(2, 2)
         q = project(SU2, p)
-        @test is_point(SU2, q, true)
+        @test is_point(SU2, q; error=:error)
         q2 = allocate(q)
         project!(SU2, q2, p)
         @test q == q2
         p2 = copy(p)
         p2[1, 1] = -1
         q2 = project(SU2, p2)
-        @test is_point(SU2, q2, true)
+        @test is_point(SU2, q2; error=:error)
         p3 = [2.0 0; 0.0 2.0] #real pos determinant
         @test project(SU2, p3) == p3 ./ 2
         Xe = ones(2, 2)
         X = project(SU2, q, Xe)
         @test is_vector(SU2, q, X)
-        @test_throws ManifoldDomainError is_vector(SU2, p, X, true, true) # base point wrong
-        @test_throws DomainError is_vector(SU2, q, Xe, true, true) # Xe not skew hermitian
+        @test_throws ManifoldDomainError is_vector(SU2, p, X, true; error=:error) # base point wrong
+        @test_throws DomainError is_vector(SU2, q, Xe, true; error=:error) # Xe not skew hermitian
         @test_throws DomainError is_vector(
             SU2,
             Identity(AdditionOperation()),
@@ -170,7 +170,7 @@ include("group_utils.jl")
             true,
         ) # base point wrong
         e = Identity(MultiplicationOperation())
-        @test_throws DomainError is_vector(SU2, e, Xe, true, true) # Xe not skew hermitian
+        @test_throws DomainError is_vector(SU2, e, Xe, true; error=:error) # Xe not skew hermitian
 
         @test manifold_volume(SpecialUnitary(1)) ≈ 1
         @test manifold_volume(SpecialUnitary(2)) ≈ 2 * π^2

@@ -19,13 +19,13 @@ include("../utils.jl")
         @test is_flat(M)
         @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3,3}},ℝ}
         @test check_point(M, B_sym) === nothing
-        @test_throws DomainError is_point(M, A, true)
-        @test_throws ManifoldDomainError is_point(M, C, true)
-        @test_throws ManifoldDomainError is_point(M, D, true) #embedding changes type
+        @test_throws DomainError is_point(M, A; error=:error)
+        @test_throws ManifoldDomainError is_point(M, C; error=:error)
+        @test_throws ManifoldDomainError is_point(M, D; error=:error) #embedding changes type
         @test check_vector(M, B_sym, B_sym) === nothing
-        @test_throws DomainError is_vector(M, B_sym, A, true)
-        @test_throws ManifoldDomainError is_vector(M, A, B_sym, true)
-        @test_throws ManifoldDomainError is_vector(M, B_sym, D, true)
+        @test_throws DomainError is_vector(M, B_sym, A; error=:error)
+        @test_throws ManifoldDomainError is_vector(M, A, B_sym; error=:error)
+        @test_throws ManifoldDomainError is_vector(M, B_sym, D; error=:error)
         @test_throws ManifoldDomainError is_vector(
             M,
             B_sym,

@@ -27,7 +27,7 @@ using Manifolds:
         @test identity_element(G, fill(1.0f0)) == fill(1.0f0)
         @test !is_point(G, Identity(AdditionOperation()))
         ef = Identity(AdditionOperation())
-        @test_throws DomainError is_point(G, ef, true)
+        @test_throws DomainError is_point(G, ef; error=:error)
         @test_throws DomainError is_vector(G, ef, X, true; check_base_point=true)
     end
 

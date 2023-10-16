@@ -19,10 +19,15 @@ using ManifoldsBase: TFVector
         @test !is_default_metric(M, AffineInvariantMetric())
         @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0])
-        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
+        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error=:error)
         @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], true)
+        @test_throws DomainError is_vector(
+            M,
+            [1.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0];
+            error=:error,
+        )
         @test injectivity_radius(M, [1.0, 0.0, 0.0], ProjectionRetraction()) == π / 2
     end
     types = [Vector{Float64}]
