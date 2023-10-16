@@ -47,16 +47,15 @@ using RecursiveArrayTools: ArrayPartition
     TEST_STATIC_SIZED && push!(types, MVector{5,Float64})
 
     retraction_methods = [
-        Manifolds.ProductRetraction(
-            ManifoldsBase.ExponentialRetraction(),
-            ManifoldsBase.ExponentialRetraction(),
-        ),
+        ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
+        ExponentialRetraction(),
     ]
     inverse_retraction_methods = [
-        Manifolds.InverseProductRetraction(
-            ManifoldsBase.LogarithmicInverseRetraction(),
-            ManifoldsBase.LogarithmicInverseRetraction(),
+        InverseProductRetraction(
+            LogarithmicInverseRetraction(),
+            LogarithmicInverseRetraction(),
         ),
+        LogarithmicInverseRetraction(),
     ]
 
     @testset "get_component, set_component!, getindex and setindex!" begin

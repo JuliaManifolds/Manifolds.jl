@@ -149,10 +149,6 @@ function inner(B::FiberBundle, p, X, Y)
     return inner(B.manifold, px, VXM, VYM) + inner(F, Vx, VXF, VYF)
 end
 
-function _inverse_retract(M::FiberBundle, p, q, ::FiberBundleInverseProductRetraction)
-    return inverse_retract_product(M, p, q)
-end
-
 function _inverse_retract!(M::FiberBundle, X, p, q, ::FiberBundleInverseProductRetraction)
     return inverse_retract_product!(M, X, p, q)
 end
@@ -241,10 +237,6 @@ function project!(B::VectorBundle, Y, p, X)
     project!(B.manifold, VYM, px, VXM)
     project!(F, VYF, Vx, VXF)
     return Y
-end
-
-function _retract(M::VectorBundle, p, X, t::Number, ::FiberBundleProductRetraction)
-    return retract_product(M, p, X, t)
 end
 
 function _retract!(M::VectorBundle, q, p, X, t::Number, ::FiberBundleProductRetraction)
