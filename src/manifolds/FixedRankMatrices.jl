@@ -641,18 +641,18 @@ Compute the OrthographicRetraction on the [`FixedRankMatrices`](@ref) `M` by fin
 the nearest point to ``p + X`` in
 
 ```math
-    p + X + T^{\bot}_{p}M   \cap M
-``'
-
-where ``T^{\bot}_{p}M `` is the Normal Space of ``T_{p}M ``.
-
-If ``X`` is sufficiently small, then the nearest is unique and can be expressed by
-
-```math
-    q = (U(S + M) + U_{p})(S + M)^{-1}((S + M)Vt + Vt_{p}),
+    p + X + N_{p}\mathcal M \cap \mathcal M
 ```
 
-where ``p`` is a [`SVDMPoint`](@ref)`(U,S,Vt)` and X is an [`UMVTVector`](@ref)`(Up,M,Vtp)`.
+where ``N_{p}\mathcal M `` is the Normal Space of ``T_{p}\mathcal M ``.
+
+If ``X`` is sufficiently small, then the nearest such point is unique and can be expressed by
+
+```math
+    q = (U(S + M) + U_{p})(S + M)^{-1}((S + M)V^{\mathrm{T}} + V^{\mathrm{T}}_{p}),
+```
+
+where ``p`` is a [`SVDMPoint`](@ref)`(U,S,Vt)` and ``X`` is an [`UMVTVector`](@ref)`(Up,M,Vtp)`.
 
 For more details, see [AbsilOseledets:2014](@cite).
 """
