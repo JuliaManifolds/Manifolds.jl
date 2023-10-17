@@ -160,14 +160,14 @@ include("group_utils.jl")
         Xe = ones(2, 2)
         X = project(SU2, q, Xe)
         @test is_vector(SU2, q, X)
-        @test_throws ManifoldDomainError is_vector(SU2, p, X, true; error=:error) # base point wrong
+        @test_throws DomainError is_vector(SU2, p, X, true; error=:error) # base point wrong
         @test_throws DomainError is_vector(SU2, q, Xe, true; error=:error) # Xe not skew hermitian
         @test_throws DomainError is_vector(
             SU2,
             Identity(AdditionOperation()),
             Xe,
-            true,
-            true,
+            true;
+            error = :error,
         ) # base point wrong
         e = Identity(MultiplicationOperation())
         @test_throws DomainError is_vector(SU2, e, Xe, true; error=:error) # Xe not skew hermitian
