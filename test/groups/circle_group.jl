@@ -28,7 +28,7 @@ using Manifolds:
         @test !is_point(G, Identity(AdditionOperation()))
         ef = Identity(AdditionOperation())
         @test_throws DomainError is_point(G, ef; error=:error)
-        @test_throws DomainError is_vector(G, ef, X, true; check_base_point=true)
+        @test_throws DomainError is_vector(G, ef, X, true; error=:error)
     end
 
     @testset "scalar points" begin

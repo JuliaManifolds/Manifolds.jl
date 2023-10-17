@@ -69,12 +69,17 @@ end
 function is_point(
     ::TraitList{<:IsGroupManifold},
     G::GroupManifold,
-    e::Identity,
-    te::Bool=false;
+    e::Identity;
+    error::Symbol=:none,
     kwargs...,
 )
     ie = is_identity(G, e; kwargs...)
-    (te && !ie) && throw(DomainError(e, "The provided identity is not a point on $G."))
+    if !ie
+        s = "The provided identity is not a point on $G."
+        (error === :error) && throw(DomainError(e, s))
+        (error === :info) && @info s
+        (error === :warn) && @warn s
+    end
     return ie
 end
 
@@ -83,16 +88,21 @@ function is_vector(
     G::GroupManifold,
     e::Identity,
     X,
-    te::Bool=false,
-    cbp=true;
+    cbp::Bool;
+    error::Symbol=:none,
     kwargs...,
 )
     if cbp
         ie = is_identity(G, e; kwargs...)
-        (te && !ie) && throw(DomainError(e, "The provided identity is not a point on $G."))
-        (!te && !ie) && return false
+        if !ie
+            s = "The provided identity is not a point on $G."
+            (error === :error) && throw(DomainError(e, s))
+            (error === :info) && @info s
+            (error === :warn) && @warn s
+            return false
+        end
     end
-    return is_vector(G.manifold, identity_element(G), X, te, false; kwargs...)
+    return is_vector(G.manifold, identity_element(G), X, false, te; kwargs...)
 end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
