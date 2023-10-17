@@ -205,7 +205,7 @@ retract_orthographic!(M::AbstractManifold, q, p, X, t::Number)
     retract_orthographic(M::AbstractManifold, p, X, t::Number)
 
 computes the allocating variant of the [`OrthographicRetraction`](@ref),
-which by default allocates and calls [`retract_polar!`](@ref ManifoldsBase.retract_orthographic!).
+which by default allocates and calls [`retract_polar!`](@ref retract_orthographic!).
 """
 function retract_orthographic(M::AbstractManifold, p, X, t::Number; kwargs...)
     q = allocate_result(M, retract, p, X)
