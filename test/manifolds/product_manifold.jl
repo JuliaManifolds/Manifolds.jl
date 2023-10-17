@@ -37,7 +37,14 @@ using RecursiveArrayTools: ArrayPartition
     # test that arrays are not points
     @test_throws DomainError is_point(Mse, [1, 2]; error=:error)
     @test check_point(Mse, [1, 2]) isa DomainError
-    @test_throws DomainError is_vector(Mse, 1, [1, 2], true; check_base_point=false)
+    @test_throws DomainError is_vector(
+        Mse,
+        1,
+        [1, 2];
+        error=:error,
+        true;
+        check_base_point=false,
+    )
     @test check_vector(Mse, 1, [1, 2]; check_base_point=false) isa DomainError
     #default fallbacks for check_size, Product not working with Arrays
     @test Manifolds.check_size(Mse, zeros(2)) isa DomainError

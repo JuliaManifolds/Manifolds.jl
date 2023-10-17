@@ -29,13 +29,13 @@ end
         @test_throws DomainError is_point(M, D; error=:error)
         @test check_vector(M, B_skewsym, B_skewsym) === nothing
         @test_throws DomainError is_vector(M, B_skewsym, A; error=:error)
-        @test_throws ManifoldDomainError is_vector(M, A, B_skewsym; error=:error)
+        @test_throws DomainError is_vector(M, A, B_skewsym; error=:error)
         @test_throws DomainError is_vector(M, B_skewsym, D; error=:error)
         @test_throws ManifoldDomainError is_vector(
             M,
             B_skewsym,
-            1 * im * zero_vector(M, B_skewsym),
-            true,
+            1 * im * zero_vector(M, B_skewsym);
+            error=:error,
         )
         @test manifold_dimension(M) == 3
         @test manifold_dimension(M_complex) == 9

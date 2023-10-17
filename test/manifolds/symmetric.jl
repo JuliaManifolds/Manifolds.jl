@@ -24,13 +24,13 @@ include("../utils.jl")
         @test_throws ManifoldDomainError is_point(M, D; error=:error) #embedding changes type
         @test check_vector(M, B_sym, B_sym) === nothing
         @test_throws DomainError is_vector(M, B_sym, A; error=:error)
-        @test_throws ManifoldDomainError is_vector(M, A, B_sym; error=:error)
+        @test_throws DomainError is_vector(M, A, B_sym; error=:error)
         @test_throws ManifoldDomainError is_vector(M, B_sym, D; error=:error)
         @test_throws ManifoldDomainError is_vector(
             M,
             B_sym,
-            1 * im * zero_vector(M, B_sym),
-            true,
+            1 * im * zero_vector(M, B_sym);
+            error=:error,
         )
         @test manifold_dimension(M) == 6
         @test manifold_dimension(M_complex) == 9
