@@ -391,9 +391,9 @@ function is_point(
     ie = is_identity(G, e; kwargs...)
     if !ie
         s = "The provided identity is not a point on $G."
-        (error == :error) && throw(DomainError(e, s))
-        (error == :info) && @info s
-        (error == :warn) && @warn s
+        (error === :error) && throw(DomainError(e, s))
+        (error === :info) && @info s
+        (error === :warn) && @warn s
     end
     return ie
 end
