@@ -713,18 +713,53 @@ function vee(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
     M1, M2 = M.manifold.manifolds
     return vcat(vee(M1.manifold, p.x[1], X.x[1]), vee(M2.manifold, p.x[2], X.x[2]))
 end
-function hat(M::SpecialEuclidean{2}, p::ArrayPartition, c::SVector)
+function get_coordinates(
+    M::SpecialEuclidean,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    basis::DefaultOrthogonalBasis,
+)
+    M1, M2 = M.manifold.manifolds
+    return vcat(
+        get_coordinates(M1.manifold, p.x[1], X.x[1], basis),
+        get_coordinates(M2.manifold, p.x[2], X.x[2], basis),
+    )
+end
+function hat(M::SpecialEuclidean{2}, p::ArrayPartition, c::AbstractVector)
     M1, M2 = M.manifold.manifolds
     return ArrayPartition(
         get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(2)], ℝ),
         get_vector_orthogonal(M2.manifold, p.x[2], c[SA[3]], ℝ),
     )
 end
-function hat(M::SpecialEuclidean{3}, p::ArrayPartition, c::SVector)
+function get_vector(
+    M::SpecialEuclidean{2},
+    p::ArrayPartition,
+    c::AbstractVector,
+    basis::DefaultOrthogonalBasis,
+)
+    return ArrayPartition(
+        get_vector(M.manifold.manifolds[1].manifold, p.x[1], c[SOneTo(2)], basis),
+        get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[3]], basis),
+    )
+end
+
+function hat(M::SpecialEuclidean{3}, p::ArrayPartition, c::AbstractVector)
     M1, M2 = M.manifold.manifolds
     return ArrayPartition(
         get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(3)], ℝ),
         get_vector_orthogonal(M2.manifold, p.x[2], c[SA[4, 5, 6]], ℝ),
+    )
+end
+function get_vector(
+    M::SpecialEuclidean{3},
+    p::ArrayPartition,
+    c::AbstractVector,
+    basis::DefaultOrthogonalBasis,
+)
+    return ArrayPartition(
+        get_vector(M.manifold.manifolds[1].manifold, p.x[1], c[SOneTo(3)], basis),
+        get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[4, 5, 6]], basis),
     )
 end
 function compose(::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
