@@ -398,16 +398,13 @@ function is_vector(
     G::AbstractDecoratorManifold,
     e::Identity,
     X,
-    te::Bool=false,
     cbp=true;
     kwargs...,
 )
-    if cbp
-        # pass te down so this throws an error if te=true
-        # if !te and is_point was false -> return false, otherwise continue
-        (!te && !is_point(G, e, te; kwargs...)) && return false
-    end
-    return is_vector(next_trait(t), G, identity_element(G), X, te, false; kwargs...)
+    # Check POint on group
+    cbp && (!is_point(G, e; kwargs...)) && (return false)
+    # set check to false on next trait to not check again
+    return is_vector(next_trait(t), G, identity_element(G), X, false; kwargs...)
 end
 
 @doc raw"""
