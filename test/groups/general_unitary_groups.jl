@@ -167,7 +167,7 @@ include("group_utils.jl")
             Identity(AdditionOperation()),
             Xe,
             true;
-            error = :error,
+            error=:error,
         ) # base point wrong
         e = Identity(MultiplicationOperation())
         @test_throws DomainError is_vector(SU2, e, Xe, true; error=:error) # Xe not skew hermitian
