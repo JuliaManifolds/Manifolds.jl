@@ -384,12 +384,18 @@ end
 function is_point(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
-    e::Identity,
-    te::Bool=false;
+    e::Identity;
+    error::Symbol=:none,
     kwargs...,
 )
     ie = is_identity(G, e; kwargs...)
-    (te && !ie) && throw(DomainError(e, "The provided identity is not a point on $G."))
+    if !ie
+        s = "The provided identity is not a point on $G."
+        (error === :error) && throw(DomainError(e, s))
+        (error === :info) && @info s
+        (error === :warn) && @warn s
+    end
+
     return ie
 end
 
@@ -398,16 +404,24 @@ function is_vector(
     G::AbstractDecoratorManifold,
     e::Identity,
     X,
-    te::Bool=false,
-    cbp=true;
+    cbp::Bool=true;
+    error::Symbol=:none,
     kwargs...,
 )
     if cbp
-        # pass te down so this throws an error if te=true
-        # if !te and is_point was false -> return false, otherwise continue
-        (!te && !is_point(G, e, te; kwargs...)) && return false
+        # pass te down so this throws an error if error=:error
+        # if error is not `:error` and is_point was false -> return false, otherwise continue
+        (!is_point(G, e; error=error, kwargs...)) && return false
     end
-    return is_vector(next_trait(t), G, identity_element(G), X, te, false; kwargs...)
+    return is_vector(
+        next_trait(t),
+        G,
+        identity_element(G),
+        X,
+        false;
+        error=error,
+        kwargs...,
+    )
 end
 
 @doc raw"""

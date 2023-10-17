@@ -26,7 +26,7 @@ include("../utils.jl")
         @test_throws DomainError is_vector(M, B_sym, A; error=:error)
         @test_throws DomainError is_vector(M, A, B_sym; error=:error)
         @test_throws ManifoldDomainError is_vector(M, B_sym, D; error=:error)
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_vector(
             M,
             B_sym,
             1 * im * zero_vector(M, B_sym);
