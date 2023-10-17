@@ -162,7 +162,7 @@ end
     inverse_retract_orthographic(M::AbstractManifold, p, q)
 
 computes the allocating variant of the [`OrthographicInverseRetraction`](@ref),
-which by default allocates and calls [`inverse_retract_orthographic!`](@ref ManifoldsBase.inverse_retract_polar!).
+which by default allocates and calls [`inverse_retract_orthographic!`](@ref inverse_retract_orthographic!).
 """
 function inverse_retract_orthographic(M::AbstractManifold, p, q; kwargs...)
     X = allocate_result(M, inverse_retract, p, q)
@@ -204,8 +204,8 @@ retract_orthographic!(M::AbstractManifold, q, p, X, t::Number)
 """
     retract_orthographic(M::AbstractManifold, p, X, t::Number)
 
-computes the allocating variant of the [`PolarRetraction`](@ref),
-which by default allocates and calls [`retract_polar!`](@ref ManifoldsBase.retract_polar!).
+computes the allocating variant of the [`OrthographicRetraction`](@ref),
+which by default allocates and calls [`retract_polar!`](@ref ManifoldsBase.retract_orthographic!).
 """
 function retract_orthographic(M::AbstractManifold, p, X, t::Number; kwargs...)
     q = allocate_result(M, retract, p, X)
@@ -498,7 +498,7 @@ Compute the OrthographicInverseRetraction [`FixedRankMatrices`](@ref) `M` by com
 ```math
     X = P_{T_{p}M}(q - p) = qVV^\mathrm{T} + UU^{\mathrm{T}}q - UU^{\mathrm{T}}qVV^{\mathrm{T}} - p,
 ```
-where ``p`` is a [`SVDMPoint`](@ref)`(U,S,Vt)` and ``P_{T_{p}M}`` is the [`project'](@ref)ion
+where ``p`` is a [`SVDMPoint`](@ref)`(U,S,Vt)` and ``P_{T_{p}M}`` is the [`project`](@ref)ion
 onto the tangent space at ``p``.
 
 For more details, see [AbsilOseledets:2014](@cite).
