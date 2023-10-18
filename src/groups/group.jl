@@ -1,7 +1,7 @@
 @doc raw"""
     AbstractGroupOperation
 
-Abstract type for smooth binary operations $∘$ on elements of a Lie group $\mathcal{G}$:
+Abstract type for smooth binary operations ``∘`` on elements of a Lie group ``\mathcal{G}``:
 ```math
 ∘ : \mathcal{G} × \mathcal{G} → \mathcal{G}
 ```
@@ -436,7 +436,7 @@ The formula reads
 ````math
 \operatorname{Ad}_p(X) = dΨ_p(e)[X]
 ````
-where $e$ is the identity element of `G`.
+where ``e`` is the identity element of `G`.
 
 Note that the adjoint representation of a Lie group isn't generally faithful.
 Notably the adjoint representation of SO(2) is trivial.
@@ -488,9 +488,9 @@ end
 @doc raw"""
     inv(G::AbstractDecoratorManifold, p)
 
-Inverse $p^{-1} ∈ \mathcal{G}$ of an element $p ∈ \mathcal{G}$, such that
-$p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}$, where $e$ is the [`Identity`](@ref)
-element of $\mathcal{G}$.
+Inverse ``p^{-1} ∈ \mathcal{G}`` of an element ``p ∈ \mathcal{G}``, such that
+``p \circ p^{-1} = p^{-1} \circ p = e ∈ \mathcal{G}``, where ``e`` is the [`Identity`](@ref)
+element of ``\mathcal{G}``.
 """
 inv(::AbstractDecoratorManifold, ::Any...)
 @trait_function Base.inv(G::AbstractDecoratorManifold, p)
@@ -633,7 +633,7 @@ Base.transpose(e::Identity) = e
 @doc raw"""
     hat(M::AbstractDecoratorManifold{𝔽,O}, ::Identity{O}, Xⁱ) where {𝔽,O<:AbstractGroupOperation}
 
-Given a basis $e_i$ on the tangent space at a the [`Identity`](@ref) and tangent
+Given a basis ``e_i`` on the tangent space at a the [`Identity`](@ref) and tangent
 component vector ``X^i``, compute the equivalent vector representation
 ``X=X^i e_i**, where Einstein summation notation is used:
 
@@ -675,8 +675,8 @@ end
 @doc raw"""
     vee(M::AbstractManifold, p, X)
 
-Given a basis $e_i$ on the tangent space at a point `p` and tangent
-vector `X`, compute the vector components $X^i$, such that $X = X^i e_i$, where
+Given a basis ``e_i`` on the tangent space at a point `p` and tangent
+vector `X`, compute the vector components ``X^i``, such that ``X = X^i e_i``, where
 Einstein summation notation is used:
 
 ````math
@@ -734,9 +734,9 @@ _action_order(BG::AbstractDecoratorManifold, p, q, ::RightBackwardAction) = (q, 
 @doc raw"""
     translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirectionAndSide=LeftForwardAction()])
 
-Translate group element $q$ by $p$ with the translation $τ_p$ with the specified
-`conv`ention, either left forward ($L_p$), left backward ($R'_p$), right backward ($R_p$)
-or right forward ($L'_p$), defined as
+Translate group element ``q`` by ``p`` with the translation ``τ_p`` with the specified
+`conv`ention, either left forward (``L_p``), left backward (``R'_p``), right backward (``R_p``)
+or right forward (``L'_p``), defined as
 ```math
 \begin{aligned}
 L_p &: q ↦ p \circ q\\
@@ -786,14 +786,16 @@ end
 @doc raw"""
     inverse_translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirectionAndSide=LeftForwardAction())
 
-Inverse translate group element $q$ by $p$ with the inverse translation $τ_p^{-1}$ with the
-specified `conv`ention, either left ($L_p^{-1}$) or right ($R_p^{-1}$), defined as
+Inverse translate group element ``q`` by ``p`` with the translation ``τ_p^{-1}``
+with the specified `conv`ention, either left forward (``L_p^{-1}``), left backward
+(``R'_p^{-1}``), right backward (``R_p^{-1}``) or right forward (``L'_p^{-1}``), defined as
 ```math
 \begin{aligned}
 L_p^{-1} &: q ↦ p^{-1} \circ q\\
-R_p^{-1} &: q ↦ q \circ p^{-1}.
+L'_p^{-1} &: q ↦ p \circ q\\
+R_p^{-1} &: q ↦ q \circ p^{-1}\\
+R'_p^{-1} &: q ↦ q \circ p.
 \end{aligned}
-```
 """
 inverse_translate(::AbstractDecoratorManifold, ::Any...)
 @trait_function inverse_translate(
@@ -835,8 +837,8 @@ end
 @doc raw"""
     translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirectionAndSide=LeftForwardAction())
 
-For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal{G}$, compute
-the action of the differential of the translation $τ_p$ by $p$ on $X$, with the specified
+For group elements ``p, q ∈ \mathcal{G}`` and tangent vector ``X ∈ T_q \mathcal{G}``, compute
+the action of the differential of the translation ``τ_p`` by ``p`` on ``X``, with the specified
 left or right `conv`ention. The differential transports vectors:
 ```math
 (\mathrm{d}τ_p)_q : T_q \mathcal{G} → T_{τ_p q} \mathcal{G}\\
@@ -875,8 +877,8 @@ end
 @doc raw"""
     inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirectionAndSide=LeftForwardAction())
 
-For group elements $p, q ∈ \mathcal{G}$ and tangent vector $X ∈ T_q \mathcal{G}$, compute
-the action on $X$ of the differential of the inverse translation $τ_p$ by $p$, with the
+For group elements ``p, q ∈ \mathcal{G}`` and tangent vector ``X ∈ T_q \mathcal{G}``, compute
+the action on ``X`` of the differential of the inverse translation ``τ_p`` by ``p``, with the
 specified left or right `conv`ention. The differential transports vectors:
 ```math
 (\mathrm{d}τ_p^{-1})_q : T_q \mathcal{G} → T_{τ_p^{-1} q} \mathcal{G}\\
@@ -930,13 +932,13 @@ end
 Compute the group exponential of the Lie algebra element `X`. It is equivalent to the
 exponential map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
-Given an element $X ∈ 𝔤 = T_e \mathcal{G}$, where $e$ is the [`Identity`](@ref) element of
-the group $\mathcal{G}$, and $𝔤$ is its Lie algebra, the group exponential is the map
+Given an element ``X ∈ 𝔤 = T_e \mathcal{G}``, where ``e`` is the [`Identity`](@ref) element of
+the group ``\mathcal{G}``, and ``𝔤`` is its Lie algebra, the group exponential is the map
 
 ````math
 \exp : 𝔤 → \mathcal{G},
 ````
-such that for $t,s ∈ ℝ$, $γ(t) = \exp (t X)$ defines a one-parameter subgroup with the
+such that for ``t,s ∈ ℝ``, ``γ(t) = \exp (t X)`` defines a one-parameter subgroup with the
 following properties. Note that one-parameter subgroups are commutative (see [Suhubi:2013](@cite),
 section 3.5), even if the Lie group itself is not commutative.
 
@@ -980,9 +982,9 @@ end
 Compute the Lie group logarithm of the Lie group element `q`. It is equivalent to the
 logarithmic map defined by the [`CartanSchoutenMinus`](@ref) connection.
 
-Given an element $q ∈ \mathcal{G}$, compute the right inverse of the group exponential map
-[`exp_lie`](@ref), that is, the element $\log q = X ∈ 𝔤 = T_e \mathcal{G}$, such that
-$q = \exp X$
+Given an element ``q ∈ \mathcal{G}``, compute the right inverse of the group exponential map
+[`exp_lie`](@ref), that is, the element ``\log q = X ∈ 𝔤 = T_e \mathcal{G}``, such that
+``q = \exp X``
 
 !!! note
     In general, the group logarithm map is distinct from the Riemannian logarithm map
@@ -994,8 +996,8 @@ $q = \exp X$
 \log q = \operatorname{Log} q = \sum_{n=1}^∞ \frac{(-1)^{n+1}}{n} (q - e)^n,
 ````
 
-where $e$ here is the [`Identity`](@ref) element, that is, $1$ for numeric $q$ or the
-identity matrix $I_m$ for matrix $q ∈ ℝ^{m × m}$.
+where ``e`` here is the [`Identity`](@ref) element, that is, ``1`` for numeric ``q`` or the
+identity matrix ``I_m`` for matrix ``q ∈ ℝ^{m × m}``.
 
 Since this function also depends on the group operation, make sure to implement
 either
@@ -1089,15 +1091,15 @@ direction_and_side(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
 
 Compute the retraction using the group exponential [`exp_lie`](@ref) "translated" to any
 point on the manifold.
-With a group translation ([`translate`](@ref)) $τ_p$ in a specified direction, the
+With a group translation ([`translate`](@ref)) ``τ_p`` in a specified direction, the
 retraction is
 
 ````math
 \operatorname{retr}_p = τ_p \circ \exp \circ (\mathrm{d}τ_p^{-1})_p,
 ````
 
-where $\exp$ is the group exponential ([`exp_lie`](@ref)), and $(\mathrm{d}τ_p^{-1})_p$ is
-the action of the differential of inverse translation $τ_p^{-1}$ evaluated at $p$ (see
+where ``\exp`` is the group exponential ([`exp_lie`](@ref)), and ``(\mathrm{d}τ_p^{-1})_p`` is
+the action of the differential of inverse translation ``τ_p^{-1}`` evaluated at ``p`` (see
 [`inverse_translate_diff`](@ref)).
 """
 function retract(
@@ -1159,15 +1161,15 @@ end
 
 Compute the inverse retraction using the group logarithm [`log_lie`](@ref) "translated"
 to any point on the manifold.
-With a group translation ([`translate`](@ref)) $τ_p$ in a specified direction, the
+With a group translation ([`translate`](@ref)) ``τ_p`` in a specified direction, the
 retraction is
 
 ````math
 \operatorname{retr}_p^{-1} = (\mathrm{d}τ_p)_e \circ \log \circ τ_p^{-1},
 ````
 
-where $\log$ is the group logarithm ([`log_lie`](@ref)), and $(\mathrm{d}τ_p)_e$ is the
-action of the differential of translation $τ_p$ evaluated at the identity element $e$
+where ``\log`` is the group logarithm ([`log_lie`](@ref)), and ``(\mathrm{d}τ_p)_e`` is the
+action of the differential of translation ``τ_p`` evaluated at the identity element ``e``
 (see [`translate_diff`](@ref)).
 """
 function inverse_retract(
