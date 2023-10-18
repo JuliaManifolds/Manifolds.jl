@@ -177,8 +177,8 @@ include("../utils.jl")
             @test_throws ManifoldDomainError is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                ones(3, 2),
-                true,
+                ones(3, 2);
+                error=:error,
             )
             @test is_vector(
                 M,

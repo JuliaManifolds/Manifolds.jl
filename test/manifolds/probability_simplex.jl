@@ -18,7 +18,7 @@ include("../utils.jl")
     @test !is_flat(M)
     @test is_vector(M, p, X)
     @test is_vector(M, p, Y)
-    @test_throws ManifoldDomainError is_vector(M, p .+ 1, X; error=:error)
+    @test_throws DomainError is_vector(M, p .+ 1, X; error=:error)
     @test_throws ManifoldDomainError is_vector(M, p, zeros(4); error=:error)
     @test_throws DomainError is_vector(M, p, Y .+ 1; error=:error)
 

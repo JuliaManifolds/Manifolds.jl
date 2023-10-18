@@ -31,8 +31,8 @@ include("../utils.jl")
         @test_throws DomainError is_vector(
             M,
             p1,
-            [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0],
-            true,
+            [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0];
+            error=:error,
         )
         @test !is_vector(M, np1, [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0])
         @test !is_vector(M, p1, p2)

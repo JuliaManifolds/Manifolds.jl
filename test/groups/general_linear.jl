@@ -71,7 +71,7 @@ using NLsolve
         @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1]; error=:error)
         @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1]; error=:error)
         @test is_point(G, Identity(G); error=:error)
-        @test_throws ManifoldDomainError is_vector(
+        @test_throws DomainError is_vector(
             G,
             Float64[0 1 1; 0 1 1; 1 0 0],
             randn(3, 3);
@@ -151,7 +151,7 @@ using NLsolve
             Float64[0 0 0; 0 1 1; 1 1 1];
             error=:error,
         )
-        @test_throws ManifoldDomainError is_vector(
+        @test_throws DomainError is_vector(
             G,
             ComplexF64[im im; im im],
             randn(ComplexF64, 2, 2);

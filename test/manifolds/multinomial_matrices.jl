@@ -25,8 +25,8 @@ include("../utils.jl")
         @test_throws CompositeManifoldError{ComponentManifoldError{Int64,DomainError}} is_vector(
             M,
             p2,
-            [-1.0, 0.0, 0.0],
-            true,
+            [-1.0, 0.0, 0.0];
+            error=:error,
         )
         @test !is_vector(M, p2, [-1.0, 0.0, 0.0])
         @test_throws DomainError is_vector(M, p, [-1.0, 0.0, 0.0]; error=:error)
