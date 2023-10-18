@@ -763,8 +763,11 @@ function get_coordinates(
         get_coordinates(M2.manifold, p.x[2], X.x[2], basis),
     )
 end
-function hat(M::SpecialEuclidean{TypeParameter{Tuple{2}}}, p::ArrayPartition, c::AbstractVector)
-
+function hat(
+    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
+    p::ArrayPartition,
+    c::AbstractVector,
+)
     M1, M2 = M.manifold.manifolds
     return ArrayPartition(
         get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(2)], ℝ),
@@ -783,7 +786,11 @@ function get_vector(
     )
 end
 
-function hat(M::SpecialEuclidean{TypeParameter{Tuple{3}}}, p::ArrayPartition, c::AbstractVector)
+function hat(
+    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
+    p::ArrayPartition,
+    c::AbstractVector,
+)
     M1, M2 = M.manifold.manifolds
     return ArrayPartition(
         get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(3)], ℝ),
