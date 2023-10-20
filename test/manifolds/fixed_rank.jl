@@ -220,7 +220,7 @@ include("../utils.jl")
                 test_tangent_vector_broadcasting=true,
                 projection_atol_multiplier=15,
                 retraction_methods=[PolarRetraction(), OrthographicRetraction()],
-                inverse_retraction_methods = [OrthographicInverseRetraction()],
+                inverse_retraction_methods=[OrthographicInverseRetraction()],
                 vector_transport_methods=[ProjectionTransport()],
                 vector_transport_retractions=[PolarRetraction()],
                 vector_transport_inverse_retractions=[PolarInverseRetraction()],
