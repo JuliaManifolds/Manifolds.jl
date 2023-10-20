@@ -493,7 +493,7 @@ end
 @doc raw"""
     inverse_retract(M, p, q, ::OrthographicInverseRetraction)
 
-Compute the OrthographicInverseRetraction [`FixedRankMatrices`](@ref) `M` by computing
+Compute the orthographic inverse retraction [`FixedRankMatrices`](@ref) `M` by computing
 
 ```math
     X = P_{T_{p}M}(q - p) = qVV^\mathrm{T} + UU^{\mathrm{T}}q - UU^{\mathrm{T}}qVV^{\mathrm{T}} - p,
