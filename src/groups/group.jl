@@ -13,7 +13,8 @@ number system `𝔽` or in general, by defining for an operation `Op` the follow
     _compose!(::AbstractDecoratorManifold, x, p, q)
 
 Note that a manifold is connected with an operation by wrapping it with a decorator,
-[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold) using the [`IsGroupManifold`](@ref) to specify the operation.
+[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold)
+using the [`IsGroupManifold`](@ref) to specify the operation.
 For a concrete case the concrete wrapper [`GroupManifold`](@ref) can be used.
 """
 abstract type AbstractGroupOperation end
@@ -30,7 +31,7 @@ see [`GroupManifold`](@ref).
 
 # Constructor
 
-    IsGroupManifold(op)
+    IsGroupManifold(op::AbstractGroupOperation)
 """
 struct IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
     op::O
@@ -78,10 +79,10 @@ end
 
 """
     is_group_manifold(G::GroupManifold)
-    is_group_manifoldd(G::AbstractManifold, o::AbstractGroupOperation)
+    is_group_manifold(G::AbstractManifold, o::AbstractGroupOperation)
 
-returns whether an [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold) is a group manifold with
-[`AbstractGroupOperation`](@ref) `o`.
+returns whether an [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold)
+is a group manifold with [`AbstractGroupOperation`](@ref) `o`.
 For a [`GroupManifold`](@ref) `G` this checks whether the right operations is stored within `G`.
 """
 is_group_manifold(::AbstractManifold, ::AbstractGroupOperation) = false
@@ -128,13 +129,13 @@ struct LeftAction <: ActionDirection end
 """
     RightAction()
 
-Right action of a group on a manifold. For an action ``α: G × X → X`` it is characterized by
+Right action of a group on a manifold. For a forward action ``α: G × X → X`` it is characterized by
 ```math
 α(g, α(h, x)) = α(hg, x)
 ```
 for all ``g, h ∈ G`` and ``x ∈ X``.
 
-Note that a right action may still act from the left side in an expression.
+Note that a right action may act from either left or right side in an expression.
 """
 struct RightAction <: ActionDirection end
 
@@ -155,7 +156,7 @@ struct LeftSide <: GroupActionSide end
 """
     RightSide()
 
-An action of a group on a manifold that acts from the right side, i.e. ``α: X × G→ X``.
+An action of a group on a manifold that acts from the right side, i.e. ``α: X × G → X``.
 """
 struct RightSide <: GroupActionSide end
 
@@ -226,7 +227,7 @@ Identity(::Type{O}) where {O<:AbstractGroupOperation} = Identity{O}()
 number_eltype(::Identity) = Bool
 
 @doc raw"""
-    identity_element(G)
+    identity_element(G::AbstractDecoratorManifold)
 
 Return a point representation of the [`Identity`](@ref) on the [`IsGroupManifold`](@ref) `G`.
 By default this representation is the default array or number representation.

@@ -1,14 +1,15 @@
 """
-    AbstractGroupAction
+    AbstractGroupAction{AD<:ActionDirection}
 
-An abstract group action on a manifold.
+An abstract group action on a manifold. [`ActionDirection``](@ref)`AD` indicates whether it
+is a left or right action.
 """
 abstract type AbstractGroupAction{AD<:ActionDirection} end
 
 """
     base_group(A::AbstractGroupAction)
 
-The group that acts in action `A`.
+The group that acts in [`AbstractGroupAction`](@ref) `A`.
 """
 base_group(A::AbstractGroupAction)
 
@@ -26,7 +27,7 @@ end
 """
     direction(::AbstractGroupAction{AD}) -> AD
 
-Get the direction of the action
+Get the direction of the action: either [`LeftAction`](@ref) or [`RightAction`](@ref).
 """
 direction(::AbstractGroupAction{AD}) where {AD} = AD()
 
@@ -44,7 +45,7 @@ adjoint_apply_diff_group(A::AbstractGroupAction, a, X, p)
 @doc raw"""
     apply(A::AbstractGroupAction, a, p)
 
-Apply action `a` to the point `p` using map $τ_a$, specified by `A`.
+Apply action `a` to the point `p` using map ``τ_a``, specified by `A`.
 Unless otherwise specified, the right action is defined in terms of the left action:
 
 ````math
@@ -96,9 +97,9 @@ end
 @doc raw"""
     apply_diff(A::AbstractGroupAction, a, p, X)
 
-For point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action
-on $X$ of the differential of the action of $a ∈ \mathcal{G}$, specified by rule `A`.
-Written as $(\mathrm{d}τ_a)_p$, with the specified left or right convention, the
+For point ``p ∈ \mathcal M`` and tangent vector ``X ∈ T_p \mathcal M``, compute the action
+on ``X`` of the differential of the action of ``a ∈ \mathcal{G}``, specified by rule `A`.
+Written as ``(\mathrm{d}τ_a)_p``, with the specified left or right convention, the
 differential transports vectors
 
 ````math
@@ -133,10 +134,10 @@ apply_diff_group(A::AbstractGroupAction, a, X, p)
 @doc raw"""
     inverse_apply_diff(A::AbstractGroupAction, a, p, X)
 
-For group point $p ∈ \mathcal M$ and tangent vector $X ∈ T_p \mathcal M$, compute the action
-on $X$ of the differential of the inverse action of $a ∈ \mathcal{G}$, specified by rule
-`A`. Written as $(\mathrm{d}τ_a^{-1})_p$, with the specified left or right convention,
-the differential transports vectors
+For group point ``p ∈ \mathcal M`` and tangent vector ``X ∈ T_p \mathcal M``, compute the
+action on ``X`` of the differential of the inverse action of ``a ∈ \mathcal{G}``, specified
+by rule `A`. Written as ``(\mathrm{d}τ_a^{-1})_p``, with the specified left or right
+convention, the differential transports vectors.
 
 ````math
 (\mathrm{d}τ_a^{-1})_p : T_p \mathcal M → T_{τ_a^{-1} p} \mathcal M
@@ -167,12 +168,12 @@ end
 @doc raw"""
     optimal_alignment(A::AbstractGroupAction, p, q)
 
-Calculate an action element $a$ of action `A` that acts upon `p` to produce
+Calculate an action element ``a`` of action `A` that acts upon `p` to produce
 the element closest to `q` in the metric of the G-manifold:
 ```math
 \arg\min_{a ∈ \mathcal{G}} d_{\mathcal M}(τ_a p, q)
 ```
-where $\mathcal{G}$ is the group that acts on the G-manifold $\mathcal M$.
+where ``\mathcal{G}`` is the group that acts on the G-manifold ``\mathcal M``.
 """
 optimal_alignment(A::AbstractGroupAction, p, q)
 
@@ -195,11 +196,11 @@ end
         mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
     )
 
-Calculate an action element $a$ of action `A` that is the mean element of the orbit of `p`
+Calculate an action element ``a`` of action `A` that is the mean element of the orbit of `p`
 with respect to given set of points `pts`. The [`mean`](@ref) is calculated using the method
 `mean_method`.
 
-The orbit of $p$ with respect to the action of a group $\mathcal{G}$ is the set
+The orbit of ``p`` with respect to the action of a group ``\mathcal{G}`` is the set
 ````math
 O = \{ τ_a p : a ∈ \mathcal{G} \}.
 ````

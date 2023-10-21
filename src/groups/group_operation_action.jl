@@ -1,7 +1,12 @@
 @doc raw"""
     GroupOperationAction{AD<:ActionDirection,AS<:GroupActionSide,G<:AbstractDecoratorManifold} <: AbstractGroupAction{AD}
 
-Action of a group upon itself via left or right translation.
+Action of a group upon itself via left or right translation, either from left or right side.
+An element `p` of the group can act upon another another element by either:
+* left action from the left side: ``L_p: q ↦ p \circ q``,
+* right action from the left side: ``L'_p: q ↦ p^{-1} \circ q``,
+* right action from the right side: ``R_p: q ↦ q \circ p``,
+* left action from the right side: ``R'_p &: q ↦ q \circ p^{-1}``.
 
 # Constructor
 
