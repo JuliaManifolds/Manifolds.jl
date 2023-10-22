@@ -140,6 +140,8 @@ end
         for inv_metric in [LeftInvariantMetric(), RightInvariantMetric()]
             G = MetricManifold(SpecialEuclidean(3), inv_metric)
 
+            @test direction(G) == direction(inv_metric)
+
             M = base_manifold(G)
             Rn = Rotations(3)
             p = Matrix(I, 3, 3)

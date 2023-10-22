@@ -166,4 +166,7 @@ end
 
     # issue #489
     @test vee(G, [0.0], [1.5]) isa Vector
+
+    # basis
+    @test number_of_coordinates(G, DefaultOrthonormalBasis()) == 1
 end

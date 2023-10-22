@@ -263,6 +263,7 @@ end
         pts_t = [[0.0, 1.0, 2.0], [1.0, 1.0, 2.4], [0.0, 2.0, 1.0]]
         MT = PowerManifold(Circle(), 3)
         @test representation_size(MT) == (3,)
+        @test pts_t[2][MT, 3] == 2.4
         test_manifold(
             MT,
             pts_t;
@@ -279,6 +280,9 @@ end
             test_rand_point=true,
             test_rand_tvector=true,
         )
+
+        ph = HybridVector{3}(pts_t[1])
+        @test Manifolds._read(MT, (), ph, 3) == 2.0
     end
 
     @testset "Basis printing" begin

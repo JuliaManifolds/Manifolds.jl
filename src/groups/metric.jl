@@ -392,3 +392,6 @@ end
 )
     return merge_traits(HasRightInvariantMetric(), IsExplicitDecorator())
 end
+
+direction(::LeftInvariantMetric) = LeftAction()
+direction(::RightInvariantMetric) = RightAction()
