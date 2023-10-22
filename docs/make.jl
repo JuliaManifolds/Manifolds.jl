@@ -21,11 +21,11 @@ if "--quarto" ∈ ARGS
     using CondaPkg
     CondaPkg.withenv() do
         @info "Rendering Quarto"
-        tutorials_folder = (@__DIR__) * "/../tutorials"
-        # instantiate the tutorials environment if necessary
-        Pkg.activate(tutorials_folder)
-        Pkg.resolve()
-        Pkg.instantiate()
+        # tutorials_folder = (@__DIR__) * "/../tutorials"
+        # # instantiate the tutorials environment if necessary
+        # Pkg.activate(tutorials_folder)
+        # Pkg.resolve()
+        # Pkg.instantiate()
         Pkg.activate(@__DIR__) # but return to the docs one before
         run(`quarto render $(tutorials_folder)`)
         return nothing
