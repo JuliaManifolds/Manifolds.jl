@@ -19,7 +19,7 @@ fiber_bundle_transport(::VectorSpaceType, ::AbstractManifold) = ParallelTranspor
     VectorBundle{𝔽,TVS,TM,VTV} =  = FiberBundle{𝔽,VectorSpaceFiberType{TVS},TM,TVT}
 
 Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
-[`VectorSpaceType`](@ref).
+[`VectorSpaceType`]https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases/#ManifoldsBase.VectorSpaceType).
 
 `VectorSpaceFiberType` is used to encode vector spaces as fiber types.
 """

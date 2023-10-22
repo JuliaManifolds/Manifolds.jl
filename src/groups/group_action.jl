@@ -1,7 +1,7 @@
 """
     AbstractGroupAction{AD<:ActionDirection}
 
-An abstract group action on a manifold. [`ActionDirection``](@ref)`AD` indicates whether it
+An abstract group action on a manifold. [`ActionDirection`](@ref)`AD` indicates whether it
 is a left or right action.
 """
 abstract type AbstractGroupAction{AD<:ActionDirection} end
