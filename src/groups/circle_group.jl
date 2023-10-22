@@ -49,7 +49,6 @@ end
 
 has_biinvariant_metric(::CircleGroup) = true
 
-has_invariant_metric(::CircleGroup) = true
 has_invariant_metric(::CircleGroup, ::ActionDirectionAndSide) = true
 
 identity_element(G::CircleGroup) = 1.0

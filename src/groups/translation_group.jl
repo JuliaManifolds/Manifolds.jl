@@ -37,7 +37,6 @@ exp!(::TranslationGroup, q, ::Identity{AdditionOperation}, X) = copyto!(q, X)
 
 has_biinvariant_metric(::TranslationGroup) = true
 
-has_invariant_metric(::TranslationGroup) = true
 has_invariant_metric(::TranslationGroup, ::ActionDirectionAndSide) = true
 
 identity_element!(::TranslationGroup, p) = fill!(p, 0)
