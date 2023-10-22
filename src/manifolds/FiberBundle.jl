@@ -9,8 +9,8 @@ Vector transport type on [`FiberBundle`](@ref).
 
 # Fields
 
-* `method_point` – vector transport method of the point part
-* `method_fiber` – vector transport method of the fiber part.
+* `method_horizonal` – vector transport method of the horizontal part (related to manifold M)
+* `method_vertical` – vector transport method of the vertical part (related to fibers).
 
 The vector transport is derived as a product manifold-style vector transport.
 The considered product manifold is the product between the manifold ``\mathcal M``
@@ -20,8 +20,8 @@ and the topological vector space isometric to the fiber.
 
     FiberBundleProductVectorTransport(
         M::AbstractManifold=DefaultManifold();
-        vector_transport_method_point::AbstractVectorTransportMethod = default_vector_transport_method(M),
-        vector_transport_method_fiber::AbstractVectorTransportMethod = default_vector_transport_method(M),
+        vector_transport_method_horizontal::AbstractVectorTransportMethod = default_vector_transport_method(M),
+        vector_transport_method_vertical::AbstractVectorTransportMethod = default_vector_transport_method(M),
     )
 
 Construct the `FiberBundleProductVectorTransport` using the [`default_vector_transport_method`](@ref),
@@ -32,21 +32,23 @@ struct FiberBundleProductVectorTransport{
     TMP<:AbstractVectorTransportMethod,
     TMV<:AbstractVectorTransportMethod,
 } <: AbstractVectorTransportMethod
-    method_point::TMP
-    method_fiber::TMV
+    method_horizontal::TMP
+    method_vertical::TMV
 end
 function FiberBundleProductVectorTransport(
-    M::AbstractManifold=ManifoldsBase.DefaultManifold();
-    vector_transport_method_point::AbstractVectorTransportMethod=default_vector_transport_method(
+    M::AbstractManifold=ManifoldsBase.DefaultManifold(),
+    fiber::FiberType=ManifoldsBase.TangentSpaceType();
+    vector_transport_method_horizontal::AbstractVectorTransportMethod=default_vector_transport_method(
         M,
     ),
-    vector_transport_method_fiber::AbstractVectorTransportMethod=default_vector_transport_method(
+    vector_transport_method_vertical::AbstractVectorTransportMethod=fiber_bundle_transport(
         M,
+        fiber,
     ),
 )
     return FiberBundleProductVectorTransport(
-        vector_transport_method_point,
-        vector_transport_method_fiber,
+        vector_transport_method_horizontal,
+        vector_transport_method_vertical,
     )
 end
 

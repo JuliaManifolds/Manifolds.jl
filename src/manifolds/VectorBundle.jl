@@ -7,16 +7,17 @@ Deprecated: an alias for `FiberBundleProductVectorTransport`.
 const VectorBundleVectorTransport = FiberBundleProductVectorTransport
 
 """
-    fiber_bundle_transport(fiber::FiberType, M::AbstractManifold)
+    fiber_bundle_transport(M::AbstractManifold, fiber::FiberType)
 
-Determine the vector tranport used for [`exp`](@ref exp(::FiberBundle, ::Any...)) and
+Determine the vector transport used for [`exp`](@ref exp(::FiberBundle, ::Any...)) and
 [`log`](@ref log(::FiberBundle, ::Any...)) maps on a vector bundle with fiber type
 `fiber` and manifold `M`.
 """
-fiber_bundle_transport(::VectorSpaceType, ::AbstractManifold) = ParallelTransport()
+fiber_bundle_transport(M::AbstractManifold, ::FiberType) =
+    default_vector_transport_method(M)
 
 """
-    VectorBundle{𝔽,TVS,TM,VTV} =  = FiberBundle{𝔽,VectorSpaceFiberType{TVS},TM,TVT}
+    VectorBundle{𝔽,TVS,TM,VTV} = FiberBundle{𝔽,TVS,TM,TVT} where {TVS<:VectorSpaceType}
 
 Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
 [`VectorSpaceType`]https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases/#ManifoldsBase.VectorSpaceType).
@@ -65,7 +66,7 @@ function CotangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTrans
 end
 
 function bundle_transport_to!(B::TangentBundle, Y, p, X, q)
-    return vector_transport_to!(B.manifold, Y, p, X, q, B.vector_transport.method_fiber)
+    return vector_transport_to!(B.manifold, Y, p, X, q, B.vector_transport.method_vertical)
 end
 
 function bundle_transport_tangent_direction!(
@@ -277,7 +278,7 @@ function retract_product!(B::VectorBundle, q, p, X, t::Number)
         xp,
         Xp + VXF,
         VXM,
-        B.vector_transport.method_point,
+        B.vector_transport.method_horizontal,
     )
     copyto!(B.manifold, xq, xqt)
     return q
@@ -339,8 +340,8 @@ function _vector_transport_direction!(
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     dx, dVx = submanifold_components(M.manifold, d)
-    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_point),
-    vector_transport_direction!(M.manifold, VYF, px, VXF, dx, m.method_fiber),
+    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal),
+    vector_transport_direction!(M.manifold, VYF, px, VXF, dx, m.method_vertical),
     return Y
 end
 
@@ -377,8 +378,8 @@ function vector_transport_to!(
     VXM, VXF = submanifold_components(M.manifold, X)
     VYM, VYF = submanifold_components(M.manifold, Y)
     qx, qVx = submanifold_components(M.manifold, q)
-    vector_transport_to!(M.manifold, VYM, px, VXM, qx, m.method_point)
-    bundle_transport_tangent_to!(M, VYF, px, pVx, VXF, qx, m.method_fiber)
+    vector_transport_to!(M.manifold, VYM, px, VXM, qx, m.method_horizontal)
+    bundle_transport_tangent_to!(M, VYF, px, pVx, VXF, qx, m.method_vertical)
     return Y
 end
 
@@ -393,8 +394,8 @@ function _vector_transport_direction(
     VXM, VXF = submanifold_components(M.manifold, X)
     dx, dVx = submanifold_components(M.manifold, d)
     return ArrayPartition(
-        vector_transport_direction(M.manifold, px, VXM, dx, m.method_point),
-        bundle_transport_tangent_direction(M, px, pVx, VXF, dx, m.method_fiber),
+        vector_transport_direction(M.manifold, px, VXM, dx, m.method_horizontal),
+        bundle_transport_tangent_direction(M, px, pVx, VXF, dx, m.method_vertical),
     )
 end
 
@@ -409,8 +410,8 @@ function _vector_transport_to(
     VXM, VXF = submanifold_components(M.manifold, X)
     qx, qVx = submanifold_components(M.manifold, q)
     return ArrayPartition(
-        vector_transport_to(M.manifold, px, VXM, qx, m.method_point),
-        bundle_transport_tangent_to(M, px, pVx, VXF, qx, m.method_fiber),
+        vector_transport_to(M.manifold, px, VXM, qx, m.method_horizontal),
+        bundle_transport_tangent_to(M, px, pVx, VXF, qx, m.method_vertical),
     )
 end
 
