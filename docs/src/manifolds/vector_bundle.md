@@ -5,8 +5,7 @@ Vector bundle $E$ is a special case of a [fiber bundle](@ref FiberBundleSection)
 Tangent bundle is a simple example of a vector bundle, where each fiber is the tangent space at the specified point $p$.
 An object representing a tangent bundle can be obtained using the constructor called `TangentBundle`.
 
-There is also another type, [`VectorSpaceFiber`](@ref), that represents a specific fiber at a given point.
-This distinction is made to reduce the need to repeatedly construct objects of type [`VectorSpaceFiber`](@ref) in certain usage scenarios.
+There is also another type, [`VectorSpaceFiber`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.VectorSpaceFiber), that represents a specific fiber at a given point.
 This is also considered a manifold.
 
 ## FVector

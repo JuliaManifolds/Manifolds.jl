@@ -74,9 +74,9 @@ end
     flat(M::ProductManifold, p, X::FVector{TangentSpaceType})
 
 use the musical isomorphism to transform the tangent vector `X` from the tangent space at
-`p` on the [`ProductManifold`](@ref) `M` to a cotangent vector.
-This can be done elementwise for every entry of `X` (with respect to the corresponding
-entry in `p`) separately.
+`p` on the [`ProductManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.ProductManifold)
+`M` to a cotangent vector. This can be done elementwise for every entry of `X` (with respect
+to the corresponding entry in `p`) separately.
 """
 flat(::ProductManifold, ::Any...)
 
@@ -117,8 +117,8 @@ end
 """
     manifold_volume(M::ProductManifold)
 
-Return the volume of [`ProductManifold`](@ref) `M`, i.e. product of volumes of the
-manifolds `M` is constructed from.
+Return the volume of [`ProductManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.ProductManifold)
+`M`, i.e. product of volumes of the manifolds `M` is constructed from.
 """
 manifold_volume(M::ProductManifold) = mapreduce(manifold_volume, *, M.manifolds)
 
@@ -218,8 +218,9 @@ end
     sharp(M::ProductManifold, p, ξ::FVector{CotangentSpaceType})
 
 Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
-`p` on the [`ProductManifold`](@ref) `M` to a tangent vector.
-This can be done elementwise for every entry of `ξ` (and `p`) separately
+`p` on the [`ProductManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.ProductManifold)
+`M` to a tangent vector. This can be done elementwise for every entry of `ξ` (and `p`)
+separately
 """
 sharp(::ProductManifold, ::Any...)
 
@@ -241,8 +242,8 @@ end
 @doc raw"""
     volume_density(M::ProductManifold, p, X)
 
-Return volume density on the [`ProductManifold`](@ref) `M`, i.e. product of constituent
-volume densities.
+Return volume density on the [`ProductManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.ProductManifold)
+`M`, i.e. product of constituent volume densities.
 """
 function volume_density(M::ProductManifold, p, X)
     dens = map(

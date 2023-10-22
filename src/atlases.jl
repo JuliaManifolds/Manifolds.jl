@@ -352,7 +352,8 @@ end
 The basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
 space of type `vs`.
 
-For the `vs` a [`TangentSpace`](@ref) this works as  follows:
+For the `vs` a [`TangentSpace`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.TangentSpace)
+this works as  follows:
 
 Let ``n`` denote the dimension of the manifold ``\mathcal M``.
 

@@ -40,7 +40,7 @@ const VectorBundle{𝔽,TVS,TM,TVT} = FiberBundle{
 Tangent bundle for manifold of type `M`, as a manifold with the Sasaki metric [Sasaki:1958](@cite).
 
 Exact retraction and inverse retraction can be approximated using [`FiberBundleProductRetraction`](@ref),
-[`FiberBundleInverseProductRetraction`](@ref) and [`SasakiRetraction`](@ref).
+[`FiberBundleInverseProductRetraction`](@ref) and [`SasakiRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions/#ManifoldsBase.SasakiRetraction).
 [`FiberBundleProductVectorTransport`](@ref) can be used as a vector transport.
 
 # Constructors

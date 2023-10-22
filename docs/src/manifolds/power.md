@@ -70,7 +70,7 @@ which is again a valid point so `is_point(M, p)` here also yields true.
 A disadvantage might be that with nested arrays one loses a little bit of performance.
 The data however is nicely encapsulated. Accessing the first data item is just `p[1]`.
 
-For accessing points on power manifolds in both representations you can use [`get_component`](@ref) and [`set_component!`](@ref) functions.
+For accessing points on power manifolds in both representations you can use [`get_component`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.get_component-Tuple%7BAbstractPowerManifold,%20Any,%20Vararg%7BAny%7D%7D) and [`set_component!`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.set_component!-Tuple%7BAbstractPowerManifold,%20Any,%20Any,%20Vararg%7BAny%7D%7D) functions.
 They work work both point representations.
 
 ```@example 3

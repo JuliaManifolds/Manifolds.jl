@@ -19,10 +19,9 @@ Order = [:type, :function]
 
 # Public documentation
 
-The following functions are of interest for extending and using the [`ProductManifold`](@ref).
+The following functions are of interest for extending and using the [`ProductManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.ProductManifold).
 
 ```@docs
-submanifold_component
 submanifold_components
 ```
 

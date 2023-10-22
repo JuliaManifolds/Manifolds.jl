@@ -20,12 +20,13 @@ and the topological vector space isometric to the fiber.
 
     FiberBundleProductVectorTransport(
         M::AbstractManifold=DefaultManifold();
-        vector_tansport_method_point = default_vector_transport_method(M),
-        vector_transport_method_fiber = default_vector_transport_method(M),
+        vector_transport_method_point::AbstractVectorTransportMethod = default_vector_transport_method(M),
+        vector_transport_method_fiber::AbstractVectorTransportMethod = default_vector_transport_method(M),
     )
 
 Construct the `FiberBundleProductVectorTransport` using the [`default_vector_transport_method`](@ref),
-which uses [`ParallelTransport`](@ref) if no manifold is provied.
+which uses [`ParallelTransport`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports/#ManifoldsBase.ParallelTransport)
+if no manifold is provided.
 """
 struct FiberBundleProductVectorTransport{
     TMP<:AbstractVectorTransportMethod,
@@ -36,11 +37,15 @@ struct FiberBundleProductVectorTransport{
 end
 function FiberBundleProductVectorTransport(
     M::AbstractManifold=ManifoldsBase.DefaultManifold();
-    vector_tansport_method_point=default_vector_transport_method(M),
-    vector_transport_method_fiber=default_vector_transport_method(M),
+    vector_transport_method_point::AbstractVectorTransportMethod=default_vector_transport_method(
+        M,
+    ),
+    vector_transport_method_fiber::AbstractVectorTransportMethod=default_vector_transport_method(
+        M,
+    ),
 )
     return FiberBundleProductVectorTransport(
-        vector_tansport_method_point,
+        vector_transport_method_point,
         vector_transport_method_fiber,
     )
 end
@@ -48,11 +53,13 @@ end
 """
     FiberBundle{𝔽,TVS<:FiberType,TM<:AbstractManifold{𝔽},TVT<:FiberBundleProductVectorTransport} <: AbstractManifold{𝔽}
 
-Fiber bundle on a [`AbstractManifold`](@ref) `M` of type [`FiberType`](@ref).
+Fiber bundle on a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types/#ManifoldsBase.AbstractManifold)
+`M` of type [`FiberType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.FiberType).
 Examples include vector bundles, principal bundles or unit tangent bundles, see also [📖 Fiber Bundle](https://en.wikipedia.org/wiki/Fiber_bundle).
 
 # Fields
-* `manifold` – the [`AbstractManifold`](@ref) manifold the Fiber bundle is defined on
+* `manifold` – the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types/#ManifoldsBase.AbstractManifold)
+               manifold the Fiber bundle is defined on,
 * `type`     – representing the type of fiber we use.
 
 # Constructor
