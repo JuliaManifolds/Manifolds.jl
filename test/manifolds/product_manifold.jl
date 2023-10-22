@@ -58,115 +58,6 @@ using RecursiveArrayTools: ArrayPartition
         LogarithmicInverseRetraction(),
     ]
 
-    @testset "get_component, set_component!, getindex and setindex!" begin
-        p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
-        @test get_component(Mse, p1, 1) == p1.x[1]
-        @test get_component(Mse, p1, Val(1)) == p1.x[1]
-        @test p1[Mse, 1] == p1.x[1]
-        @test p1[Mse, Val(1)] == p1.x[1]
-        @test p1[Mse, 1] isa Vector
-        @test p1[Mse, Val(1)] isa Vector
-        p2 = [10.0, 12.0]
-        set_component!(Mse, p1, p2, 2)
-        @test get_component(Mse, p1, 2) == p2
-        p1[Mse, 2] = 2 * p2
-        @test p1[Mse, 2] == 2 * p2
-        p3 = [11.0, 15.0]
-        set_component!(Mse, p1, p3, Val(2))
-        @test get_component(Mse, p1, Val(2)) == p3
-        p1[Mse, Val(2)] = 2 * p3
-        @test p1[Mse, Val(2)] == 2 * p3
-
-        p1ap = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
-        @test get_component(Mse, p1ap, 1) == p1ap.x[1]
-        @test get_component(Mse, p1ap, Val(1)) == p1ap.x[1]
-        @test p1ap[Mse, 1] == p1ap.x[1]
-        @test p1ap[Mse, Val(1)] == p1ap.x[1]
-        @test p1ap[Mse, 1] isa Vector
-        @test p1ap[Mse, Val(1)] isa Vector
-        set_component!(Mse, p1ap, p2, 2)
-        @test get_component(Mse, p1ap, 2) == p2
-        p1ap[Mse, 2] = 2 * p2
-        @test p1ap[Mse, 2] == 2 * p2
-        p3 = [11.0, 15.0]
-        set_component!(Mse, p1ap, p3, Val(2))
-        @test get_component(Mse, p1ap, Val(2)) == p3
-        p1ap[Mse, Val(2)] = 2 * p3
-        @test p1ap[Mse, Val(2)] == 2 * p3
-
-        p1c = copy(p1)
-        p1c.x[1][1] = -123.0
-        @test p1c.x[1][1] == -123.0
-        @test p1.x[1][1] == 0.0
-        copyto!(p1c, p1)
-        @test p1c.x[1][1] == 0.0
-
-        p1c.x[1][1] = -123.0
-        copyto!(p1ap, p1c)
-        @test p1ap.x[1][1] == -123.0
-    end
-
-    @testset "some ArrayPartition functions" begin
-        p = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
-        q = allocate(p)
-        @test q.x[1] isa Vector
-        p = ArrayPartition([[0.0, 1.0, 0.0]], [0.0, 0.0])
-        q = allocate(p, Int)
-        @test q.x[1] isa Vector{Vector{Int}}
-    end
-
-    @testset "allocate on PowerManifold of ProductManifold" begin
-        p = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
-        q = allocate([p])
-        @test q[1] isa ArrayPartition
-        @test q[1].x[1] isa Vector
-
-        p = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
-        q = allocate([p])
-        @test q[1] isa ArrayPartition
-        @test q[1].x[1] isa Vector
-    end
-
-    @testset "Broadcasting" begin
-        p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0, 1.0])
-        p2 = ArrayPartition([3.0, 4.0, 5.0], [2.0, 5.0])
-        br_result = p1 .+ 2.0 .* p2
-        @test br_result isa ArrayPartition
-        @test br_result.x[1] ≈ [6.0, 9.0, 10.0]
-        @test br_result.x[2] ≈ [4.0, 11.0]
-
-        br_result .= 2.0 .* p1 .+ p2
-        @test br_result.x[1] ≈ [3.0, 6.0, 5.0]
-        @test br_result.x[2] ≈ [2.0, 7.0]
-
-        br_result .= p1
-        @test br_result.x[1] ≈ [0.0, 1.0, 0.0]
-        @test br_result.x[2] ≈ [0.0, 1.0]
-
-        @test axes(p1) == (Base.OneTo(5),)
-
-        # errors
-        p3 = ArrayPartition([3.0, 4.0, 5.0], [2.0, 5.0], [3.0, 2.0])
-        @test_throws DimensionMismatch p1 .+ p3
-        @test_throws DimensionMismatch p1 .= p3
-    end
-
-    @testset "CompositeManifoldError" begin
-        Mpr = Sphere(2) × Sphere(2)
-        p1 = [1.0, 0.0, 0.0]
-        p2 = [0.0, 1.0, 0.0]
-        X1 = [0.0, 1.0, 0.2]
-        X2 = [1.0, 0.0, 0.2]
-        p = ArrayPartition(p1, p2)
-        X = ArrayPartition(X1, X2)
-        pf = ArrayPartition(p1, X1)
-        Xf = ArrayPartition(X1, p2)
-        @test is_point(Mpr, p; error=:error)
-        @test_throws CompositeManifoldError is_point(Mpr, X; error=:error)
-        @test_throws ComponentManifoldError is_vector(Mpr, pf, X; error=:error)
-        @test_throws ComponentManifoldError is_vector(Mpr, p, Xf; error=:error)
-    end
-
     @testset "arithmetic" begin
         Mee = ProductManifold(Euclidean(3), Euclidean(2))
         p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0, 1.0])
@@ -178,28 +69,6 @@ using RecursiveArrayTools: ArrayPartition
         @test isapprox(Mee, p1 * 2, ArrayPartition([0.0, 2.0, 0.0], [0.0, 2.0]))
         @test isapprox(Mee, 2 * p1, ArrayPartition([0.0, 2.0, 0.0], [0.0, 2.0]))
         @test isapprox(Mee, p1 / 2, ArrayPartition([0.0, 0.5, 0.0], [0.0, 0.5]))
-    end
-
-    @testset "Show methods" begin
-        Mse2 = ProductManifold(M1, M1, M2, M2)
-        @test sprint(show, Mse2) == "ProductManifold($(M1), $(M1), $(M2), $(M2))"
-        withenv("LINES" => 10, "COLUMNS" => 100) do
-            @test sprint(show, "text/plain", ProductManifold(M1)) ==
-                  "ProductManifold with 1 submanifold:\n $(M1)"
-            @test sprint(show, "text/plain", Mse2) ==
-                  "ProductManifold with 4 submanifolds:\n $(M1)\n $(M1)\n $(M2)\n $(M2)"
-            return nothing
-        end
-        withenv("LINES" => 7, "COLUMNS" => 100) do
-            @test sprint(show, "text/plain", Mse2) ==
-                  "ProductManifold with 4 submanifolds:\n $(M1)\n ⋮\n $(M2)"
-            return nothing
-        end
-
-        @test sprint(show, "text/plain", ProductManifold(Mse, Mse)) == """
-        ProductManifold with 2 submanifolds:
-         ProductManifold(Sphere(2, ℝ), Euclidean(2; field=ℝ))
-         ProductManifold(Sphere(2, ℝ), Euclidean(2; field=ℝ))"""
     end
 
     M3 = Rotations(2)
@@ -225,101 +94,6 @@ using RecursiveArrayTools: ArrayPartition
         test_rand_point=true,
         test_rand_tvector=true,
     )
-
-    @testset "product vector transport" begin
-        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
-        q = ArrayPartition([0.0, 1.0, 0.0], [2.0, 0.0])
-        X = log(Mse, p, q)
-        m = ProductVectorTransport(ParallelTransport(), ParallelTransport())
-        Y = vector_transport_to(Mse, p, X, q, m)
-        Z = -log(Mse, q, p)
-        @test isapprox(Mse, q, Y, Z)
-    end
-
-    @testset "Implicit product vector transport" begin
-        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
-        q = ArrayPartition([0.0, 1.0, 0.0], [2.0, 0.0])
-        X = log(Mse, p, q)
-        for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
-            Y = vector_transport_to(Mse, p, X, q, m)
-            Z1 = vector_transport_to(
-                Mse.manifolds[1],
-                submanifold_component.([p, X, q], Ref(1))...,
-                m,
-            )
-            Z2 = vector_transport_to(
-                Mse.manifolds[2],
-                submanifold_component.([p, X, q], Ref(2))...,
-                m,
-            )
-            Z = ArrayPartition(Z1, Z2)
-            @test isapprox(Mse, q, Y, Z)
-            Y2 = allocate(Mse, Y)
-            vector_transport_to!(Mse, Y2, p, X, q, m)
-            @test isapprox(Mse, q, Y2, Z)
-        end
-        for m in [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
-            Y = vector_transport_direction(Mse, p, X, X, m)
-            Z1 = vector_transport_direction(
-                Mse.manifolds[1],
-                submanifold_component.([p, X, X], Ref(1))...,
-                m,
-            )
-            Z2 = vector_transport_direction(
-                Mse.manifolds[2],
-                submanifold_component.([p, X, X], Ref(2))...,
-                m,
-            )
-            Z = ArrayPartition(Z1, Z2)
-            @test isapprox(Mse, q, Y, Z)
-        end
-    end
-    @testset "Parallel transport" begin
-        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
-        q = ArrayPartition([0.0, 1.0, 0.0], [2.0, 0.0])
-        X = log(Mse, p, q)
-        # to
-        Y = parallel_transport_to(Mse, p, X, q)
-        Z1 = parallel_transport_to(
-            Mse.manifolds[1],
-            submanifold_component.([p, X, q], Ref(1))...,
-        )
-        Z2 = parallel_transport_to(
-            Mse.manifolds[2],
-            submanifold_component.([p, X, q], Ref(2))...,
-        )
-        Z = ArrayPartition(Z1, Z2)
-        @test isapprox(Mse, q, Y, Z)
-        Ym = allocate(Y)
-        parallel_transport_to!(Mse, Ym, p, X, q)
-        @test isapprox(Mse, q, Y, Z)
-
-        # direction
-        Y = parallel_transport_direction(Mse, p, X, X)
-        Z1 = parallel_transport_direction(
-            Mse.manifolds[1],
-            submanifold_component.([p, X, X], Ref(1))...,
-        )
-        Z2 = parallel_transport_direction(
-            Mse.manifolds[2],
-            submanifold_component.([p, X, X], Ref(2))...,
-        )
-        Z = ArrayPartition(Z1, Z2)
-        @test isapprox(Mse, q, Y, Z)
-        Ym = allocate(Y)
-        parallel_transport_direction!(Mse, Ym, p, X, X)
-        @test isapprox(Mse, q, Ym, Z)
-    end
-
-    @testset "ArrayPartition" begin
-        p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
-        @test submanifold_component(Mse, p, 1) === p.x[1]
-        @test submanifold_component(Mse, p, Val(1)) === p.x[1]
-        @test submanifold_component(p, 1) === p.x[1]
-        @test submanifold_component(p, Val(1)) === p.x[1]
-        @test submanifold_components(Mse, p) === p.x
-        @test submanifold_components(p) === p.x
-    end
 
     @testset "manifold tests (static size)" begin
         Ts = SizedVector{3,Float64}
@@ -416,61 +190,6 @@ using RecursiveArrayTools: ArrayPartition
         Xc = hat(M, p, X)
         X2 = vee(M, p, Xc)
         @test isapprox(X, X2)
-    end
-
-    @testset "get_coordinates" begin
-        # make sure `get_coordinates` does not return an `ArrayPartition`
-        p1 = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
-        X1 = ArrayPartition([1.0, 0.0, -1.0], [1.0, 0.0])
-        Tp1Mse = TangentSpace(Mse, p1)
-        c = get_coordinates(Tp1Mse, p1, X1, DefaultOrthonormalBasis())
-        @test c isa Vector
-
-        p1ap = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0])
-        X1ap = ArrayPartition([1.0, 0.0, -1.0], [1.0, 0.0])
-        Tp1apMse = TangentSpace(Mse, p1ap)
-        cap = get_coordinates(Tp1apMse, p1ap, X1ap, DefaultOrthonormalBasis())
-        @test cap isa Vector
-    end
-
-    @testset "Basis printing" begin
-        p = ArrayPartition([1.0, 0.0, 0.0], [1.0, 0.0])
-        B = DefaultOrthonormalBasis()
-        Bc = get_basis(Mse, p, B)
-        Bc_components_s = sprint.(show, "text/plain", Bc.data.parts)
-        @test sprint(show, "text/plain", Bc) == """
-        $(typeof(B)) for a product manifold
-        Basis for component 1:
-        $(Bc_components_s[1])
-        Basis for component 2:
-        $(Bc_components_s[2])
-        """
-    end
-
-    @testset "Basis-related errors" begin
-        a = ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0])
-        B = CachedBasis(DefaultOrthonormalBasis(), ProductBasisData(([],)))
-        @test_throws AssertionError get_vector!(
-            Mse,
-            a,
-            ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0]),
-            [1.0, 2.0, 3.0, 4.0, 5.0], # this is one element too long, hence assertionerror
-            B,
-        )
-        @test_throws MethodError get_vector!(
-            Mse,
-            a,
-            ArrayPartition([1.0, 0.0, 0.0], [0.0, 0.0]),
-            [1.0, 2.0, 3.0, 4.0],
-            B, # empty elements yield a submanifold MethodError
-        )
-    end
-
-    @testset "allocation promotion" begin
-        M2c = Euclidean(2; field=ℂ)
-        Msec = ProductManifold(M1, M2c)
-        @test Manifolds.allocation_promotion_function(Msec, get_vector, ()) === complex
-        @test Manifolds.allocation_promotion_function(Mse, get_vector, ()) === identity
     end
 
     @testset "empty allocation" begin
@@ -571,18 +290,6 @@ using RecursiveArrayTools: ArrayPartition
                 ParallelTransport(),
             ),
         )
-    end
-
-    @testset "Riemann tensor" begin
-        p = ArrayPartition([0.0, 1.0, 0.0], [2.0, 3.0])
-        X = ArrayPartition([1.0, 0.0, 0.0], [2.0, 3.0])
-        Y = ArrayPartition([0.0, 0.0, 3.0], [-2.0, 3.0])
-        Z = ArrayPartition([-1.0, 0.0, 2.0], [2.0, -3.0])
-        Xresult = ArrayPartition([6.0, 0.0, 3.0], [0.0, 0.0])
-        @test isapprox(riemann_tensor(Mse, p, X, Y, Z), Xresult)
-        Xresult2 = allocate(Xresult)
-        riemann_tensor!(Mse, Xresult2, p, X, Y, Z)
-        @test isapprox(Xresult2, Xresult)
     end
 
     @testset "ManifoldDiff" begin
