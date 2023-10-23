@@ -274,7 +274,7 @@ of computation are described in Section 2.2.1 of [SrivastavaKlassen:2016](@cite)
 The formula reads
 ```math
 O^{*} = \begin{cases}
-UV^T & \text{if } \operatorname{det}(p q^{\mathrm{T}})\\
+UV^T & \text{if } \operatorname{det}(p q^{\mathrm{T}}) \geq 0\\
 U K V^{\mathrm{T}} & \text{otherwise}
 \end{cases}
 ```

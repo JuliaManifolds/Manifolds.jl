@@ -32,6 +32,13 @@ function Base.show(io::IO, A::RotationTranslationAction)
     return print(io, "RotationTranslationAction($(A.manifold), $(A.SEn), $(direction(A)))")
 end
 
+"""
+    RotationTranslationActionOnVector{TAD,𝔽,TE,TSE}
+
+Alias for [`RotationTranslationAction`](@ref) where the manifold `M` is [`Euclidean`](@ref)
+or [`TranslationGroup`](@ref) with size of type `TE`, and [`SpecialEuclidean`](@ref)
+group has size type `TSE`.
+"""
 const RotationTranslationActionOnVector{TAD,𝔽,TE,TSE} = RotationTranslationAction{
     TAD,
     <:Union{Euclidean{TE,𝔽},TranslationGroup{TE,𝔽}},

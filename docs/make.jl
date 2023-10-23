@@ -155,6 +155,7 @@ makedocs(;
             "Atlases and charts" => "features/atlases.md",
             "Differentiation" => "features/differentiation.md",
             "Distributions" => "features/distributions.md",
+            "Group actions" => "features/group_actions.md",
             "Integration" => "features/integration.md",
             "Statistics" => "features/statistics.md",
             "Testing" => "features/testing.md",

@@ -6,7 +6,7 @@ An element `p` of the group can act upon another another element by either:
 * left action from the left side: ``L_p: q ↦ p \circ q``,
 * right action from the left side: ``L'_p: q ↦ p^{-1} \circ q``,
 * right action from the right side: ``R_p: q ↦ q \circ p``,
-* left action from the right side: ``R'_p &: q ↦ q \circ p^{-1}``.
+* left action from the right side: ``R'_p: q ↦ q \circ p^{-1}``.
 
 # Constructor
 
