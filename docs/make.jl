@@ -41,23 +41,25 @@ using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 using Test, FiniteDifferences
 ENV["GKSwstype"] = "100"
 
-# (d) add contributing.md to docs
+# (d) add CONTRIBUTING.md and NEWS.md to docs
 generated_path = joinpath(@__DIR__, "src", "misc")
 base_url = "https://github.com/JuliaManifolds/Manifolds.jl/blob/master/"
 isdir(generated_path) || mkdir(generated_path)
-open(joinpath(generated_path, "contributing.md"), "w") do io
-    # Point to source license file
-    println(
-        io,
-        """
-        ```@meta
-        EditURL = "$(base_url)CONTRIBUTING.md"
-        ```
-        """,
-    )
-    # Write the contents out below the meta block
-    for line in eachline(joinpath(dirname(@__DIR__), "CONTRIBUTING.md"))
-        println(io, line)
+for fname in ["CONTRIBUTING.md", "NEWS.md"]
+    open(joinpath(generated_path, fname), "w") do io
+        # Point to source license file
+        println(
+            io,
+            """
+            ```@meta
+            EditURL = "$(base_url)$(fname)"
+            ```
+            """,
+        )
+        # Write the contents out below the meta block
+        for line in eachline(joinpath(dirname(@__DIR__), fname))
+            println(io, line)
+        end
     end
 end
 
@@ -163,7 +165,8 @@ makedocs(;
         ],
         "Miscellanea" => [
             "About" => "misc/about.md",
-            "Contributing" => "misc/contributing.md",
+            "Changelog" => "misc/NEWS.md",
+            "Contributing" => "misc/CONTRIBUTING.md",
             "Internals" => "misc/internals.md",
             "Notation" => "misc/notation.md",
             "References" => "misc/references.md",
