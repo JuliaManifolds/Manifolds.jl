@@ -232,16 +232,25 @@ end
 Return a random point on the manifold [`Rotations`](@ref) `M`
 by generating a (Gaussian) random orthogonal matrix with determinant ``+1``. Let
 
-``QR = A``
+```math
+QR = A
+```
 
 be the QR decomposition of a random matrix ``A``, then the formula reads
 
-``p = QD``
+```math
+p = QD
+```
 
 where ``D`` is a diagonal matrix with the signs of the diagonal entries of ``R``,
 i.e.
 
-``D_{ij}=\begin{cases} \operatorname{sgn}(R_{ij}) & \text{if} \; i=j \\ 0 & \, \text{otherwise} \end{cases}.``
+```math
+D_{ij}=\begin{cases}
+ \operatorname{sgn}(R_{ij}) & \text{if} \; i=j \\
+ 0 & \, \text{otherwise}
+\end{cases}.
+```
 
 It can happen that the matrix gets -1 as a determinant. In this case, the first
 and second columns are swapped.
