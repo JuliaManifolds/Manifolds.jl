@@ -6,6 +6,9 @@ import Manifolds: local_metric
 
 using Manifolds: LeftInvariantMetric, RightInvariantMetric
 
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
+
 struct TestInvariantMetricBase <: AbstractMetric end
 
 function active_traits(
@@ -126,16 +129,18 @@ end
     end
 
     @testset "invariant metric direction" begin
-        @test direction(HasRightInvariantMetric()) === RightBackwardAction()
-        @test direction(HasLeftInvariantMetric()) === LeftForwardAction()
-        @test direction(HasRightInvariantMetric) === RightBackwardAction()
-        @test direction(HasLeftInvariantMetric) === LeftForwardAction()
+        @test direction_and_side(HasRightInvariantMetric()) === RightBackwardAction()
+        @test direction_and_side(HasLeftInvariantMetric()) === LeftForwardAction()
+        @test direction_and_side(HasRightInvariantMetric) === RightBackwardAction()
+        @test direction_and_side(HasLeftInvariantMetric) === LeftForwardAction()
     end
 
     @testset "invariant metrics on SE(3)" begin
         basis_types = (DefaultOrthonormalBasis(),)
         for inv_metric in [LeftInvariantMetric(), RightInvariantMetric()]
             G = MetricManifold(SpecialEuclidean(3), inv_metric)
+
+            @test direction(G) == direction(inv_metric)
 
             M = base_manifold(G)
             Rn = Rotations(3)
@@ -149,37 +154,35 @@ end
                 ([-2.0, 1.0, 0.5], hat(Rn, p, [-1.0, -0.5, 1.1])),
             ]
 
-            for prod_type in [ProductRepr, ArrayPartition]
-                pts = [prod_type(tp...) for tp in tuple_pts]
-                X_pts = [prod_type(tX...) for tX in tuple_X]
+            pts = [ArrayPartition(tp...) for tp in tuple_pts]
+            X_pts = [ArrayPartition(tX...) for tX in tuple_X]
 
-                g1, g2 = pts[1:2]
-                t1, R1 = submanifold_components(g1)
-                t2, R2 = submanifold_components(g2)
-                g1g2 = prod_type(R1 * t2 + t1, R1 * R2)
-                @test isapprox(G, compose(G, g1, g2), g1g2)
+            g1, g2 = pts[1:2]
+            t1, R1 = submanifold_components(g1)
+            t2, R2 = submanifold_components(g2)
+            g1g2 = ArrayPartition(R1 * t2 + t1, R1 * R2)
+            @test isapprox(G, compose(G, g1, g2), g1g2)
 
-                test_group(
-                    G,
-                    pts,
-                    X_pts,
-                    X_pts;
-                    test_diff=true,
-                    test_lie_bracket=true,
-                    test_adjoint_action=true,
-                    diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
-                )
-                test_manifold(
-                    G,
-                    pts;
-                    #basis_types_vecs=basis_types,
-                    basis_types_to_from=basis_types,
-                    is_mutating=true,
-                    #test_inplace=true,
-                    test_vee_hat=false,
-                    exp_log_atol_multiplier=50,
-                )
-            end
+            test_group(
+                G,
+                pts,
+                X_pts,
+                X_pts;
+                test_diff=true,
+                test_lie_bracket=true,
+                test_adjoint_action=true,
+                diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+            )
+            test_manifold(
+                G,
+                pts;
+                #basis_types_vecs=basis_types,
+                basis_types_to_from=basis_types,
+                is_mutating=true,
+                #test_inplace=true,
+                test_vee_hat=false,
+                exp_log_atol_multiplier=50,
+            )
         end
     end
 end

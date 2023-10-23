@@ -15,7 +15,6 @@ CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
     else
         return merge_traits(
             IsGroupManifold(M.op),
-            HasBiinvariantMetric(),
             IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(), #pass to Euclidean by default/last fallback
@@ -48,6 +47,10 @@ function compose!(
     return copyto!(x, compose(G, p, q))
 end
 
+has_biinvariant_metric(::CircleGroup) = true
+
+has_invariant_metric(::CircleGroup, ::ActionDirectionAndSide) = true
+
 identity_element(G::CircleGroup) = 1.0
 identity_element(::CircleGroup, p::Number) = one(p)
 
@@ -74,18 +77,20 @@ lie_bracket(::CircleGroup, X, Y) = zero(X)
 
 lie_bracket!(::CircleGroup, Z, X, Y) = fill!(Z, 0)
 
-translate_diff(::GT, p, q, X, ::ActionDirection) where {GT<:CircleGroup} = map(*, p, X)
+function translate_diff(::GT, p, q, X, ::ActionDirectionAndSide) where {GT<:CircleGroup}
+    return map(*, p, X)
+end
 function translate_diff(
     ::CircleGroup,
     ::Identity{MultiplicationOperation},
     q,
     X,
-    ::ActionDirection,
+    ::ActionDirectionAndSide,
 )
     return X
 end
 
-function translate_diff!(G::CircleGroup, Y, p, q, X, conv::ActionDirection)
+function translate_diff!(G::CircleGroup, Y, p, q, X, conv::ActionDirectionAndSide)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end
 

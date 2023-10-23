@@ -14,18 +14,18 @@ include("../utils.jl")
             @test !is_flat(M2)
             @test is_flat(Stiefel(2, 1))
             base_manifold(M) === M
-            @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
+            @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error=:error)
             @test_throws ManifoldDomainError is_point(
                 M,
-                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                true,
+                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
+                error=:error,
             )
             @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
             @test_throws ManifoldDomainError is_vector(
                 M,
                 p,
-                1 * im * zero_vector(M, p),
-                true,
+                1 * im * zero_vector(M, p);
+                error=:error,
             )
             @test default_retraction_method(M) === PolarRetraction()
             @test default_inverse_retraction_method(M) === PolarInverseRetraction()
@@ -126,11 +126,11 @@ include("../utils.jl")
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
             @test !is_point(M, 2 * x)
-            @test_throws DomainError !is_point(M, 2 * x, true)
+            @test_throws DomainError !is_point(M, 2 * x; error=:error)
             @test !is_vector(M, 2 * x, v)
-            @test_throws ManifoldDomainError !is_vector(M, 2 * x, v, true)
+            @test_throws DomainError !is_vector(M, 2 * x, v; error=:error)
             @test !is_vector(M, x, y)
-            @test_throws DomainError is_vector(M, x, y, true)
+            @test_throws DomainError is_vector(M, x, y; error=:error)
             test_manifold(
                 M,
                 pts,
@@ -225,11 +225,11 @@ include("../utils.jl")
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
             @test !is_point(M, 2 * x)
-            @test_throws DomainError !is_point(M, 2 * x, true)
+            @test_throws DomainError !is_point(M, 2 * x; error=:error)
             @test !is_vector(M, 2 * x, v)
-            @test_throws ManifoldDomainError !is_vector(M, 2 * x, v, true)
+            @test_throws DomainError !is_vector(M, 2 * x, v; error=:error)
             @test !is_vector(M, x, y)
-            @test_throws DomainError is_vector(M, x, y, true)
+            @test_throws DomainError is_vector(M, x, y; error=:error)
             test_manifold(
                 M,
                 pts,
@@ -540,5 +540,10 @@ include("../utils.jl")
             Weingarten!(M2b, Wb, p, X, V)
             @test W == Wb
         end
+    end
+    @testset "field parameter" begin
+        M = Stiefel(3, 2; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(M) == "Stiefel(3, 2, ℝ; parameter=:field)"
     end
 end

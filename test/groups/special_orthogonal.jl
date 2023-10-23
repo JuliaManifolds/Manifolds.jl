@@ -1,6 +1,8 @@
 include("../utils.jl")
 include("group_utils.jl")
 
+using Manifolds: LeftForwardAction, RightBackwardAction
+
 @testset "Special Orthogonal group" begin
     for n in [2, 3]
         G = SpecialOrthogonal(n)

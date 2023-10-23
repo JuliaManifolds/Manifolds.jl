@@ -5,174 +5,180 @@ using ManifoldsBase: VeeOrthogonalBasis
 
 Random.seed!(10)
 
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
+
 @testset "Special Euclidean group" begin
-    @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
-        G = SpecialEuclidean(n)
-        @test isa(G, SpecialEuclidean{n})
-        @test repr(G) == "SpecialEuclidean($n)"
-        M = base_manifold(G)
-        @test M === TranslationGroup(n) × SpecialOrthogonal(n)
-        @test submanifold(G, 1) === TranslationGroup(n)
-        @test submanifold(G, 2) === SpecialOrthogonal(n)
-        Rn = Rotations(n)
-        p = Matrix(I, n, n)
+    for se_parameter in [:field, :type]
+        @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
+            G = SpecialEuclidean(n; parameter=se_parameter)
+            if se_parameter === :field
+                @test isa(G, SpecialEuclidean{Tuple{Int}})
+            else
+                @test isa(G, SpecialEuclidean{TypeParameter{Tuple{n}}})
+            end
 
-        if n == 2
-            t = Vector{Float64}.([1:2, 2:3, 3:4])
-            ω = [[1.0], [2.0], [1.0]]
-            tuple_pts = [(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
-            tuple_X = [([-1.0, 2.0], hat(Rn, p, [1.0])), ([1.0, -2.0], hat(Rn, p, [0.5]))]
-        elseif n == 3
-            t = Vector{Float64}.([1:3, 2:4, 4:6])
-            ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
-            tuple_pts = [(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
-            tuple_X = [
-                ([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5])),
-                ([-2.0, 1.0, 0.5], hat(Rn, p, [-1.0, -0.5, 1.1])),
-            ]
-        else # n == 4
-            t = Vector{Float64}.([1:4, 2:5, 3:6])
-            ω = [
-                [1.0, 2.0, 3.0, 1.0, 2.0, 3.0],
-                [3.0, 2.0, 1.0, 1.0, 2.0, 3.0],
-                [1.0, 3.0, 2.0, 1.0, 2.0, 3.0],
-            ]
-            tuple_pts = [(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
-            tuple_X = [
-                ([-1.0, 2.0, 1.0, 3.0], hat(Rn, p, [1.0, 0.5, -0.5, 0.0, 2.0, 1.0])),
-                ([-2.0, 1.5, -1.0, 2.0], hat(Rn, p, [1.0, -0.5, 0.5, 1.0, 0.0, 1.0])),
-            ]
-        end
+            if se_parameter === :field
+                @test repr(G) == "SpecialEuclidean($n; parameter=:field)"
+            else
+                @test repr(G) == "SpecialEuclidean($n)"
+            end
+            M = base_manifold(G)
+            @test M ===
+                  TranslationGroup(n; parameter=se_parameter) ×
+                  SpecialOrthogonal(n; parameter=se_parameter)
+            @test submanifold(G, 1) === TranslationGroup(n; parameter=se_parameter)
+            @test submanifold(G, 2) === SpecialOrthogonal(n; parameter=se_parameter)
+            Rn = Rotations(n)
+            p = Matrix(I, n, n)
 
-        basis_types = (DefaultOrthonormalBasis(),)
+            if n == 2
+                t = Vector{Float64}.([1:2, 2:3, 3:4])
+                ω = [[1.0], [2.0], [1.0]]
+                tuple_pts = [(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
+                tuple_X =
+                    [([-1.0, 2.0], hat(Rn, p, [1.0])), ([1.0, -2.0], hat(Rn, p, [0.5]))]
+            elseif n == 3
+                t = Vector{Float64}.([1:3, 2:4, 4:6])
+                ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
+                tuple_pts = [(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
+                tuple_X = [
+                    ([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5])),
+                    ([-2.0, 1.0, 0.5], hat(Rn, p, [-1.0, -0.5, 1.1])),
+                ]
+            else # n == 4
+                t = Vector{Float64}.([1:4, 2:5, 3:6])
+                ω = [
+                    [1.0, 2.0, 3.0, 1.0, 2.0, 3.0],
+                    [3.0, 2.0, 1.0, 1.0, 2.0, 3.0],
+                    [1.0, 3.0, 2.0, 1.0, 2.0, 3.0],
+                ]
+                tuple_pts = [(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
+                tuple_X = [
+                    ([-1.0, 2.0, 1.0, 3.0], hat(Rn, p, [1.0, 0.5, -0.5, 0.0, 2.0, 1.0])),
+                    ([-2.0, 1.5, -1.0, 2.0], hat(Rn, p, [1.0, -0.5, 0.5, 1.0, 0.0, 1.0])),
+                ]
+            end
 
-        @testset "isapprox with identity" begin
-            @test isapprox(G, Identity(G), identity_element(G))
-            @test isapprox(G, identity_element(G), Identity(G))
-        end
+            basis_types = (DefaultOrthonormalBasis(),)
 
-        for prod_type in [ProductRepr, ArrayPartition]
-            @testset "product repr" begin
-                pts = [prod_type(tp...) for tp in tuple_pts]
-                X_pts = [prod_type(tX...) for tX in tuple_X]
+            @testset "isapprox with identity" begin
+                @test isapprox(G, Identity(G), identity_element(G))
+                @test isapprox(G, identity_element(G), Identity(G))
+            end
 
-                @testset "setindex! and getindex" begin
-                    p1 = pts[1]
-                    p2 = allocate(p1)
-                    @test p1[G, 1] === p1[M, 1]
-                    p2[G, 1] = p1[M, 1]
-                    @test p2[G, 1] == p1[M, 1]
-                end
+            pts = [ArrayPartition(tp...) for tp in tuple_pts]
+            X_pts = [ArrayPartition(tX...) for tX in tuple_X]
 
-                g1, g2 = pts[1:2]
-                t1, R1 = submanifold_components(g1)
-                t2, R2 = submanifold_components(g2)
-                g1g2 = prod_type(R1 * t2 + t1, R1 * R2)
-                @test isapprox(G, compose(G, g1, g2), g1g2)
-                g1g2mat = affine_matrix(G, g1g2)
-                @test g1g2mat ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
-                @test affine_matrix(G, g1g2mat) === g1g2mat
+            @testset "setindex! and getindex" begin
+                p1 = pts[1]
+                p2 = allocate(p1)
+                @test p1[G, 1] === p1[M, 1]
+                p2[G, 1] = p1[M, 1]
+                @test p2[G, 1] == p1[M, 1]
+            end
+
+            g1, g2 = pts[1:2]
+            t1, R1 = submanifold_components(g1)
+            t2, R2 = submanifold_components(g2)
+            g1g2 = ArrayPartition(R1 * t2 + t1, R1 * R2)
+            @test isapprox(G, compose(G, g1, g2), g1g2)
+            g1g2mat = affine_matrix(G, g1g2)
+            @test g1g2mat ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
+            @test affine_matrix(G, g1g2mat) === g1g2mat
+            if se_parameter === :type
                 @test affine_matrix(G, Identity(G)) isa SDiagonal{n,Float64}
-                @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
+            end
+            @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
 
-                w = translate_diff(G, pts[1], Identity(G), X_pts[1])
-                w2 = allocate(w)
-                submanifold_component(w2, 1) .= submanifold_component(w, 1)
-                submanifold_component(w2, 2) .=
-                    submanifold_component(pts[1], 2) * submanifold_component(w, 2)
-                w2mat = screw_matrix(G, w2)
-                @test w2mat ≈ affine_matrix(G, pts[1]) * screw_matrix(G, X_pts[1])
-                @test screw_matrix(G, w2mat) === w2mat
+            w = translate_diff(G, pts[1], Identity(G), X_pts[1])
+            w2 = allocate(w)
+            submanifold_component(w2, 1) .= submanifold_component(w, 1)
+            submanifold_component(w2, 2) .=
+                submanifold_component(pts[1], 2) * submanifold_component(w, 2)
+            w2mat = screw_matrix(G, w2)
+            @test w2mat ≈ affine_matrix(G, pts[1]) * screw_matrix(G, X_pts[1])
+            @test screw_matrix(G, w2mat) === w2mat
 
-                test_group(
-                    G,
-                    pts,
-                    X_pts,
-                    X_pts;
-                    test_diff=true,
-                    test_lie_bracket=true,
-                    test_adjoint_action=true,
-                    test_exp_from_identity=true,
-                    test_log_from_identity=true,
-                    test_vee_hat_from_identity=true,
-                    diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
-                )
-                test_manifold(
-                    G,
-                    pts;
-                    basis_types_vecs=basis_types,
-                    basis_types_to_from=basis_types,
-                    is_mutating=true,
-                    #test_inplace=true,
-                    test_vee_hat=true,
-                    exp_log_atol_multiplier=50,
-                )
+            test_group(
+                G,
+                pts,
+                X_pts,
+                X_pts;
+                test_diff=true,
+                test_lie_bracket=true,
+                test_adjoint_action=true,
+                test_exp_from_identity=true,
+                test_log_from_identity=true,
+                test_vee_hat_from_identity=true,
+                diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+            )
+            test_manifold(
+                G,
+                pts;
+                basis_types_vecs=basis_types,
+                basis_types_to_from=basis_types,
+                is_mutating=true,
+                #test_inplace=true,
+                test_vee_hat=true,
+                exp_log_atol_multiplier=50,
+            )
 
-                for CS in
-                    [CartanSchoutenMinus(), CartanSchoutenPlus(), CartanSchoutenZero()]
-                    @testset "$CS" begin
-                        G_TR = ConnectionManifold(G, CS)
+            for CS in [CartanSchoutenMinus(), CartanSchoutenPlus(), CartanSchoutenZero()]
+                @testset "$CS" begin
+                    G_TR = ConnectionManifold(G, CS)
 
-                        test_group(
-                            G_TR,
-                            pts,
-                            X_pts,
-                            X_pts;
-                            test_diff=true,
-                            test_lie_bracket=true,
-                            test_adjoint_action=true,
-                            diff_convs=[
-                                (),
-                                (LeftForwardAction(),),
-                                (RightBackwardAction(),),
-                            ],
-                        )
+                    test_group(
+                        G_TR,
+                        pts,
+                        X_pts,
+                        X_pts;
+                        test_diff=true,
+                        test_lie_bracket=true,
+                        test_adjoint_action=true,
+                        diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+                    )
 
-                        test_manifold(
-                            G_TR,
-                            pts;
-                            is_mutating=true,
-                            exp_log_atol_multiplier=50,
-                            test_inner=false,
-                            test_norm=false,
-                        )
-                    end
+                    test_manifold(
+                        G_TR,
+                        pts;
+                        is_mutating=true,
+                        exp_log_atol_multiplier=50,
+                        test_inner=false,
+                        test_norm=false,
+                    )
                 end
-                for MM in [LeftInvariantMetric()]
-                    @testset "$MM" begin
-                        G_TR = MetricManifold(G, MM)
-                        @test base_group(G_TR) === G
+            end
+            for MM in [LeftInvariantMetric()]
+                @testset "$MM" begin
+                    G_TR = MetricManifold(G, MM)
+                    @test base_group(G_TR) === G
 
-                        test_group(
-                            G_TR,
-                            pts,
-                            X_pts,
-                            X_pts;
-                            test_diff=true,
-                            test_lie_bracket=true,
-                            test_adjoint_action=true,
-                            diff_convs=[
-                                (),
-                                (LeftForwardAction(),),
-                                (RightBackwardAction(),),
-                            ],
-                        )
+                    test_group(
+                        G_TR,
+                        pts,
+                        X_pts,
+                        X_pts;
+                        test_diff=true,
+                        test_lie_bracket=true,
+                        test_adjoint_action=true,
+                        diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+                    )
 
-                        test_manifold(
-                            G_TR,
-                            pts;
-                            basis_types_vecs=basis_types,
-                            basis_types_to_from=basis_types,
-                            is_mutating=true,
-                            exp_log_atol_multiplier=50,
-                        )
-                    end
+                    test_manifold(
+                        G_TR,
+                        pts;
+                        basis_types_vecs=basis_types,
+                        basis_types_to_from=basis_types,
+                        is_mutating=true,
+                        exp_log_atol_multiplier=50,
+                    )
                 end
             end
 
             @testset "affine matrix" begin
-                pts = [affine_matrix(G, prod_type(tp...)) for tp in tuple_pts]
-                X_pts = [screw_matrix(G, prod_type(tX...)) for tX in tuple_X]
+                pts = [affine_matrix(G, ArrayPartition(tp...)) for tp in tuple_pts]
+                X_pts = [screw_matrix(G, ArrayPartition(tX...)) for tX in tuple_X]
 
                 @testset "setindex! and getindex" begin
                     p1 = pts[1]
@@ -204,21 +210,21 @@ Random.seed!(10)
                 p = copy(G, pts[1])
                 X = copy(G, p, X_pts[1])
                 X[n + 1, n + 1] = 0.1
-                @test_throws DomainError is_vector(G, p, X, true)
+                @test_throws DomainError is_vector(G, p, X; error=:error)
                 X2 = zeros(n + 2, n + 2)
                 # nearly correct just too large (and the error from before)
                 X2[1:n, 1:n] .= X[1:n, 1:n]
                 X2[1:n, end] .= X[1:n, end]
                 X2[end, end] = X[end, end]
-                @test_throws DomainError is_vector(G, p, X2, true)
+                @test_throws DomainError is_vector(G, p, X2; error=:error)
                 p[n + 1, n + 1] = 0.1
-                @test_throws DomainError is_point(G, p, true)
+                @test_throws DomainError is_point(G, p; error=:error)
                 p2 = zeros(n + 2, n + 2)
                 # nearly correct just too large (and the error from before)
                 p2[1:n, 1:n] .= p[1:n, 1:n]
                 p2[1:n, end] .= p[1:n, end]
                 p2[end, end] = p[end, end]
-                @test_throws DomainError is_point(G, p2, true)
+                @test_throws DomainError is_point(G, p2; error=:error)
                 # exp/log_lie for ProductGroup on arrays
                 X = copy(G, p, X_pts[1])
                 p3 = exp_lie(G, X)
@@ -227,8 +233,8 @@ Random.seed!(10)
             end
 
             @testset "hat/vee" begin
-                p = prod_type(tuple_pts[1]...)
-                X = prod_type(tuple_X[1]...)
+                p = ArrayPartition(tuple_pts[1]...)
+                X = ArrayPartition(tuple_X[1]...)
                 Xexp = [
                     submanifold_component(X, 1)
                     vee(Rn, submanifold_component(p, 2), submanifold_component(X, 2))
@@ -266,22 +272,22 @@ Random.seed!(10)
                 hat!(G, Ye2, identity_element(G), Xc)
                 @test isapprox(G, e, Ye, Ye2)
             end
-        end
 
-        G = SpecialEuclidean(11)
-        @test affine_matrix(G, Identity(G)) isa Diagonal{Float64,Vector{Float64}}
-        @test affine_matrix(G, Identity(G)) == Diagonal(ones(11))
+            G = SpecialEuclidean(11)
+            @test affine_matrix(G, Identity(G)) isa Diagonal{Float64,Vector{Float64}}
+            @test affine_matrix(G, Identity(G)) == Diagonal(ones(11))
 
-        @testset "Explicit embedding in GL(n+1)" begin
-            G = SpecialEuclidean(3)
-            t = Vector{Float64}.([1:3, 2:4, 4:6])
-            ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
-            p = Matrix(I, 3, 3)
-            Rn = Rotations(3)
-            for prod_type in [ProductRepr, ArrayPartition]
-                pts = [prod_type(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
-                X = prod_type([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5]))
-                q = prod_type([0.0, 0.0, 0.0], p)
+            @testset "Explicit embedding in GL(n+1)" begin
+                G = SpecialEuclidean(3)
+                t = Vector{Float64}.([1:3, 2:4, 4:6])
+                ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
+                p = Matrix(I, 3, 3)
+                Rn = Rotations(3)
+                pts = [
+                    ArrayPartition(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)
+                ]
+                X = ArrayPartition([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5]))
+                q = ArrayPartition([0.0, 0.0, 0.0], p)
 
                 GL = GeneralLinear(4)
                 SEGL = EmbeddedManifold(G, GL)
@@ -329,22 +335,20 @@ Random.seed!(10)
     end
 
     @testset "Adjoint action on 𝔰𝔢(3)" begin
-        G = SpecialEuclidean(3)
+        G = SpecialEuclidean(3; parameter=:type)
         t = Vector{Float64}.([1:3, 2:4, 4:6])
         ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
         p = Matrix(I, 3, 3)
         Rn = Rotations(3)
-        for prod_type in [ProductRepr, ArrayPartition]
-            pts = [prod_type(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
-            X = prod_type([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5]))
-            q = prod_type([0.0, 0.0, 0.0], p)
+        pts = [ArrayPartition(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
+        X = ArrayPartition([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5]))
+        q = ArrayPartition([0.0, 0.0, 0.0], p)
 
-            # adjoint action of SE(3)
-            fX = TFVector(vee(G, q, X), VeeOrthogonalBasis())
-            fXp = adjoint_action(G, pts[1], fX)
-            fXp2 = adjoint_action(G, pts[1], X)
-            @test isapprox(G, pts[1], hat(G, pts[1], fXp.data), fXp2)
-        end
+        # adjoint action of SE(3)
+        fX = TFVector(vee(G, q, X), VeeOrthogonalBasis())
+        fXp = adjoint_action(G, pts[1], fX)
+        fXp2 = adjoint_action(G, pts[1], X)
+        @test isapprox(G, pts[1], hat(G, pts[1], fXp.data), fXp2)
     end
 
     @testset "performance of selected operations" begin

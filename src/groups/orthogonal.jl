@@ -1,14 +1,22 @@
 @doc raw"""
-    Orthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,AbsoluteDeterminantOneMatrices}
+    Orthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatrices}
 
 Orthogonal group $\mathrm{O}(n)$ represented by [`OrthogonalMatrices`](@ref).
 
 # Constructor
 
-    Orthogonal(n)
+    Orthogonal(n::Int; parameter::Symbol=:type)
 """
-const Orthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,AbsoluteDeterminantOneMatrices}
+const Orthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatrices}
 
-Orthogonal(n) = Orthogonal{n}(OrthogonalMatrices(n))
+function Orthogonal(n::Int; parameter::Symbol=:type)
+    return GeneralUnitaryMultiplicationGroup(OrthogonalMatrices(n; parameter=parameter))
+end
 
-show(io::IO, ::Orthogonal{n}) where {n} = print(io, "Orthogonal($(n))")
+function Base.show(io::IO, ::Orthogonal{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "Orthogonal($(n))")
+end
+function Base.show(io::IO, M::Orthogonal{Tuple{Int}})
+    n = get_parameter(M.manifold.size)[1]
+    return print(io, "Orthogonal($(n); parameter=:field)")
+end

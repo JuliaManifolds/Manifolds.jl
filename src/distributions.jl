@@ -7,26 +7,25 @@ is a vector from a fiber of a vector bundle.
 struct FVectorvariate <: VariateForm end
 
 """
-    FVectorSupport(space::AbstractManifold, VectorBundleFibers)
+    FVectorSupport(space::AbstractManifold, VectorSpaceFiber)
 
 Value support for vector bundle fiber-valued distributions (values from a fiber of a vector
 bundle at a `point` from the given manifold).
 For example used for tangent vector-valued distributions.
 """
-struct FVectorSupport{TSpace<:VectorBundleFibers,T} <: ValueSupport
+struct FVectorSupport{TSpace<:VectorSpaceFiber} <: ValueSupport
     space::TSpace
-    point::T
 end
 
 """
-    FVectorDistribution{TSpace<:VectorBundleFibers, T}
+    FVectorDistribution{TSpace<:VectorSpaceFiber, T}
 
 An abstract distribution for vector bundle fiber-valued distributions (values from a fiber
 of a vector bundle at point `x` from the given manifold).
 For example used for tangent vector-valued distributions.
 """
-abstract type FVectorDistribution{TSpace<:VectorBundleFibers,T} <:
-              Distribution{FVectorvariate,FVectorSupport{TSpace,T}} end
+abstract type FVectorDistribution{TSpace<:VectorSpaceFiber} <:
+              Distribution{FVectorvariate,FVectorSupport{TSpace}} end
 
 """
     MPointvariate

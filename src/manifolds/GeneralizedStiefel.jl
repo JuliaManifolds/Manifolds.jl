@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralizedStiefel{n,k,𝔽,B} <: AbstractDecoratorManifold{𝔽}
+    GeneralizedStiefel{T,𝔽,B} <: AbstractDecoratorManifold{𝔽}
 
 The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal
 matrices w.r.t. an arbitrary scalar product with symmetric positive definite matrix
@@ -35,7 +35,8 @@ The manifold is named after
 Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedStiefel{n,k,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
+struct GeneralizedStiefel{T,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
+    size::T
     B::TB
 end
 
@@ -43,9 +44,11 @@ function GeneralizedStiefel(
     n::Int,
     k::Int,
     B::AbstractMatrix=Matrix{Float64}(I, n, n),
-    𝔽::AbstractNumbers=ℝ,
+    𝔽::AbstractNumbers=ℝ;
+    parameter::Symbol=:type,
 )
-    return GeneralizedStiefel{n,k,𝔽,typeof(B)}(B)
+    size = wrap_type_parameter(parameter, (n, k))
+    return GeneralizedStiefel{typeof(size),𝔽,typeof(B)}(size, B)
 end
 
 active_traits(f, ::GeneralizedStiefel, args...) = merge_traits(IsEmbeddedManifold())
@@ -58,7 +61,7 @@ i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/
 is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
-function check_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+function check_point(M::GeneralizedStiefel, p; kwargs...)
     c = p' * M.B * p
     if !isapprox(c, one(c); kwargs...)
         return DomainError(
@@ -70,10 +73,10 @@ function check_point(M::GeneralizedStiefel{n,k,𝔽}, p; kwargs...) where {n,k,�
 end
 
 # overwrite passing to embedding
-function check_size(M::GeneralizedStiefel{n,k,𝔽}, p) where {n,k,𝔽}
+function check_size(M::GeneralizedStiefel, p)
     return check_size(get_embedding(M), p) #avoid embed, since it uses copyto!
 end
-function check_size(M::GeneralizedStiefel{n,k,𝔽}, p, X) where {n,k,𝔽}
+function check_size(M::GeneralizedStiefel, p, X)
     return check_size(get_embedding(M), p, X) #avoid embed, since it uses copyto!
 end
 
@@ -86,7 +89,7 @@ Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`]
 it (approximately) holds that $p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0$, where
 `kwargs...` is passed to the `isapprox`.
 """
-function check_vector(M::GeneralizedStiefel{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
+function check_vector(M::GeneralizedStiefel, p, X; kwargs...)
     if !isapprox(p' * M.B * X, -conj(X' * M.B * p); kwargs...)
         return DomainError(
             norm(p' * M.B * X + conj(X' * M.B * p)),
@@ -96,7 +99,13 @@ function check_vector(M::GeneralizedStiefel{n,k,𝔽}, p, X; kwargs...) where {n
     return nothing
 end
 
-get_embedding(::GeneralizedStiefel{N,K,𝔽}) where {N,K,𝔽} = Euclidean(N, K; field=𝔽)
+function get_embedding(::GeneralizedStiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return Euclidean(n, k; field=𝔽)
+end
+function get_embedding(M::GeneralizedStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return Euclidean(n, k; field=𝔽, parameter=:field)
+end
 
 @doc raw"""
     inner(M::GeneralizedStiefel, p, X, Y)
@@ -133,14 +142,21 @@ The dimension is given by
 \end{aligned}
 ````
 """
-function manifold_dimension(::GeneralizedStiefel{n,k,ℝ}) where {n,k}
+function manifold_dimension(M::GeneralizedStiefel{<:Any,ℝ})
+    n, k = get_parameter(M.size)
     return n * k - div(k * (k + 1), 2)
 end
-manifold_dimension(::GeneralizedStiefel{n,k,ℂ}) where {n,k} = 2 * n * k - k * k
-manifold_dimension(::GeneralizedStiefel{n,k,ℍ}) where {n,k} = 4 * n * k - k * (2k - 1)
+function manifold_dimension(M::GeneralizedStiefel{<:Any,ℂ})
+    n, k = get_parameter(M.size)
+    return 2 * n * k - k * k
+end
+function manifold_dimension(M::GeneralizedStiefel{<:Any,ℍ})
+    n, k = get_parameter(M.size)
+    return 4 * n * k - k * (2k - 1)
+end
 
 @doc raw"""
-    project(M::GeneralizedStiefel,p)
+    project(M::GeneralizedStiefel, p)
 
 Project `p` from the embedding onto the [`GeneralizedStiefel`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of $p$ such that $q^{\mathrm{H}}Bq$ is the identity,
@@ -194,11 +210,12 @@ rand(::GeneralizedStiefel; σ::Real=1.0)
 
 function Random.rand!(
     rng::AbstractRNG,
-    M::GeneralizedStiefel{n,k,ℝ},
+    M::GeneralizedStiefel{<:Any,ℝ},
     pX;
     vector_at=nothing,
     σ::Real=one(real(eltype(pX))),
-) where {n,k}
+)
+    n, k = get_parameter(M.size)
     if vector_at === nothing
         A = σ * randn(rng, eltype(pX), n, k)
         project!(M, pX, Matrix(qr(A).Q))
@@ -237,6 +254,10 @@ function retract_project!(M::GeneralizedStiefel, q, p, X, t::Number)
     return q
 end
 
-function Base.show(io::IO, M::GeneralizedStiefel{n,k,𝔽}) where {n,k,𝔽}
+function Base.show(io::IO, M::GeneralizedStiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
     return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
+end
+function Base.show(io::IO, M::GeneralizedStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽); parameter=:field)")
 end

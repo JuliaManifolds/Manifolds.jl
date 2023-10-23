@@ -26,15 +26,15 @@ include("../utils.jl")
         M = Rotations(2)
         Xf = [1.23]
         p = Matrix{Float64}(I, 2, 2)
-        X = Manifolds.hat(M, p, Xf)
+        X = hat(M, p, Xf)
         @test isa(X, AbstractMatrix)
         @test norm(M, p, X) / sqrt(2) ≈ norm(Xf)
-        @test Manifolds.vee(M, p, X) == Xf
+        @test vee(M, p, X) == Xf
 
         X = project(M, p, randn(2, 2))
-        Xf = Manifolds.vee(M, p, X)
+        Xf = vee(M, p, X)
         @test isa(Xf, AbstractVector)
-        @test Manifolds.hat(M, p, Xf) == X
+        @test hat(M, p, Xf) == X
     end
 
     for T in types
@@ -163,46 +163,46 @@ include("../utils.jl")
             )
             p = exp(SOn, pts[1], X)
             X2 = log(SOn, pts[1], p)
-            @test p ≈ exp(SOn, pts[1], X2)
+            @test distance(SOn, p, exp(SOn, pts[1], X2)) < 25 * eps()
         end
     end
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin
         M = Rotations(2)
         for p in [1, [2.0 0.0; 0.0 1.0], [1.0 0.5; 0.0 1.0]]
-            @test_throws DomainError is_point(M, p, true)
+            @test_throws DomainError is_point(M, p; error=:error)
             @test !is_point(M, p)
         end
         p = one(zeros(2, 2))
         @test is_point(M, p)
-        @test is_point(M, p, true)
+        @test is_point(M, p; error=:error)
         for X in [1, [0.0 1.0; 0.0 0.0]]
-            @test_throws DomainError is_vector(M, p, X, true)
+            @test_throws DomainError is_vector(M, p, X; error=:error)
             @test !is_vector(M, p, X)
         end
         X = [0.0 1.0; -1.0 0.0]
         @test is_vector(M, p, X)
-        @test is_vector(M, p, X, true)
+        @test is_vector(M, p, X; error=:error)
     end
     @testset "Project point" begin
         M = Rotations(2)
         p = Matrix{Float64}(I, 2, 2)
         p1 = project(M, p)
-        @test is_point(M, p1, true)
+        @test is_point(M, p1; error=:error)
 
         M = Rotations(3)
         p = collect(reshape(1.0:9.0, (3, 3)))
         p2 = project(M, p)
-        @test is_point(M, p2, true)
+        @test is_point(M, p2; error=:error)
 
         rng = MersenneTwister(44)
         x3 = project(M, randn(rng, 3, 3))
-        @test is_point(M, x3, true)
+        @test is_point(M, x3; error=:error)
     end
     @testset "Convert from Lie algebra representation of tangents to Riemannian submanifold representation" begin
         M = Rotations(3)
         p = project(M, collect(reshape(1.0:9.0, (3, 3))))
         x = [[0, -1, 3] [1, 0, 2] [-3, -2, 0]]
-        @test is_vector(M, p, x, true)
+        @test is_vector(M, p, x; error=:error)
         @test embed(M, p, x) == p * x
         Y = zeros((3, 3))
         embed!(M, Y, p, x)
@@ -273,5 +273,17 @@ include("../utils.jl")
             -0.04818900625787811 0.0 0.024666891276861697
             0.050996416671166 -0.024666891276861697 0.0
         ]
+    end
+
+    @testset "field parameter" begin
+        M = Rotations(2; parameter=:field)
+        @test is_flat(M)
+        @test repr(M) == "Rotations(2; parameter=:field)"
+
+        M = Rotations(1; parameter=:field)
+        p = fill(1.0, 1, 1)
+        X = get_vector(M, p, Float64[], DefaultOrthonormalBasis())
+        @test X isa Matrix{Float64}
+        @test X == fill(0.0, 1, 1)
     end
 end

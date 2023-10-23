@@ -155,7 +155,7 @@ function inverse_translate!(
     x,
     p,
     q,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     return copyto!(x, inverse_translate(G, p, q, conv))
 end

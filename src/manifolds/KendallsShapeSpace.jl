@@ -1,6 +1,6 @@
 
 @doc raw"""
-    KendallsShapeSpace{n,k} <: AbstractDecoratorManifold{ℝ}
+    KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
 
 Kendall's shape space, defined as quotient of a [`KendallsPreShapeSpace`](@ref)
 (represented by n×k matrices) by the action [`ColumnwiseMultiplicationAction`](@ref).
@@ -12,29 +12,45 @@ This manifold possesses the [`IsQuotientManifold`](@ref) trait.
 
 # Constructor
 
-    KendallsShapeSpace(n::Int, k::Int)
+    KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
 
 # References
 """
-struct KendallsShapeSpace{n,k} <: AbstractDecoratorManifold{ℝ} end
+struct KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
+    size::T
+end
 
-KendallsShapeSpace(n::Int, k::Int) = KendallsShapeSpace{n,k}()
+function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
+    size = wrap_type_parameter(parameter, (n, k))
+    return KendallsShapeSpace{typeof(size)}(size)
+end
 
 function active_traits(f, ::KendallsShapeSpace, args...)
     return merge_traits(IsIsometricEmbeddedManifold(), IsQuotientManifold())
 end
 
-function get_orbit_action(M::KendallsShapeSpace{n,k}) where {n,k}
+function get_orbit_action(M::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
     return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n))
+end
+function get_orbit_action(M::KendallsShapeSpace{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n; parameter=:field))
 end
 
 @doc raw"""
-    get_total_space(::Grassmann{n,k})
+    get_total_space(::KendallsShapeSpace)
 
 Return the total space of the [`KendallsShapeSpace`](@ref) manifold, which is the
 [`KendallsPreShapeSpace`](@ref) manifold.
 """
-get_total_space(::KendallsShapeSpace{n,k}) where {n,k} = KendallsPreShapeSpace(n, k)
+get_total_space(::KendallsShapeSpace)
+function get_total_space(::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return KendallsPreShapeSpace(n, k)
+end
+function get_total_space(M::KendallsShapeSpace{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return KendallsPreShapeSpace(n, k; parameter=:field)
+end
 
 function distance(M::KendallsShapeSpace, p, q)
     A = get_orbit_action(M)
@@ -66,8 +82,14 @@ embed(::KendallsShapeSpace, p, X) = X
 Get the manifold in which [`KendallsShapeSpace`](@ref) `M` is embedded, i.e.
 [`KendallsPreShapeSpace`](@ref) of matrices of the same shape.
 """
-function get_embedding(::KendallsShapeSpace{N,K}) where {N,K}
-    return KendallsPreShapeSpace(N, K)
+get_embedding(::KendallsShapeSpace)
+
+function get_embedding(::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return KendallsPreShapeSpace(n, k)
+end
+function get_embedding(M::KendallsShapeSpace{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return KendallsPreShapeSpace(n, k; parameter=:field)
 end
 
 """
@@ -129,7 +151,8 @@ given by ``n(k - 1) - 1 - n(n - 1)/2`` in the typical case where ``k \geq n+1``,
 ``(k + 1)(k - 2) / 2`` otherwise, unless ``k`` is equal to 1, in which case the dimension
 is 0. See [Kendall:1984](@cite) for a discussion of the over-dimensioned case.
 """
-function manifold_dimension(::KendallsShapeSpace{n,k}) where {n,k}
+function manifold_dimension(M::KendallsShapeSpace)
+    n, k = get_parameter(M.size)
     if k < n + 1 # over-dimensioned case
         if k == 1
             return 0
@@ -167,11 +190,19 @@ rand(::KendallsShapeSpace; σ::Real=1.0)
 
 function Random.rand!(
     rng::AbstractRNG,
-    M::KendallsShapeSpace{n,k},
+    M::KendallsShapeSpace,
     pX;
     vector_at=nothing,
     σ::Real=one(eltype(pX)),
-) where {n,k}
+)
     rand!(rng, get_embedding(M), pX; vector_at=vector_at, σ=σ)
     return pX
+end
+
+function Base.show(io::IO, ::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return print(io, "KendallsShapeSpace($n, $k)")
+end
+function Base.show(io::IO, M::KendallsShapeSpace{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return print(io, "KendallsShapeSpace($n, $k; parameter=:field)")
 end

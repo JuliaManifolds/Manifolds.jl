@@ -37,8 +37,13 @@ Generate the projective space $𝔽ℙ^{n} ⊂ 𝔽^{n+1}$, defaulting to the re
 $ℝℙ^n$, where `field` can also be used to generate the complex- and right-quaternionic
 projective spaces.
 """
-struct ProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} end
-ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ) = ProjectiveSpace{n,field}()
+struct ProjectiveSpace{T,𝔽} <: AbstractProjectiveSpace{𝔽}
+    size::T
+end
+function ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+    size = wrap_type_parameter(parameter, (n,))
+    return ProjectiveSpace{typeof(size),field}(size)
+end
 
 function active_traits(f, ::AbstractProjectiveSpace, args...)
     return merge_traits(IsIsometricEmbeddedManifold())
@@ -80,9 +85,16 @@ Generate the projective space $𝔽ℙ^{n_1, n_2, …, n_i}$, defaulting to the 
 space, where `field` can also be used to generate the complex- and right-quaternionic
 projective spaces.
 """
-struct ArrayProjectiveSpace{N,𝔽} <: AbstractProjectiveSpace{𝔽} where {N<:Tuple} end
-function ArrayProjectiveSpace(n::Vararg{Int,I}; field::AbstractNumbers=ℝ) where {I}
-    return ArrayProjectiveSpace{Tuple{n...},field}()
+struct ArrayProjectiveSpace{T,𝔽} <: AbstractProjectiveSpace{𝔽}
+    size::T
+end
+function ArrayProjectiveSpace(
+    n::Vararg{Int,I};
+    field::AbstractNumbers=ℝ,
+    parameter::Symbol=:type,
+) where {I}
+    size = wrap_type_parameter(parameter, n)
+    return ArrayProjectiveSpace{typeof(size),field}(size)
 end
 
 function allocation_promotion_function(::AbstractProjectiveSpace{ℂ}, f, args::Tuple)
@@ -128,6 +140,9 @@ end
 function decorated_manifold(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field=𝔽)
 end
+function decorated_manifold(M::ProjectiveSpace{<:Tuple,𝔽}) where {𝔽}
+    return Euclidean(representation_size(M)...; field=𝔽, parameter=:field)
+end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
 
@@ -164,8 +179,9 @@ function exp!(M::AbstractProjectiveSpace, q, p, X)
     return q
 end
 
-function get_basis(::ProjectiveSpace{n,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ}) where {n}
-    return get_basis(Sphere{n,ℝ}(), p, B)
+function get_basis(M::ProjectiveSpace{<:Any,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ})
+    n = get_parameter(M.size)[1]
+    return get_basis(Sphere(n), p, B)
 end
 
 @doc raw"""
@@ -425,8 +441,13 @@ project!(::AbstractProjectiveSpace, Y, p, X) = (Y .= X .- p .* dot(p, X))
 Return the size points on the [`AbstractProjectiveSpace`](@ref) `M` are represented as,
 i.e., the representation size of the embedding.
 """
-@generated representation_size(::ArrayProjectiveSpace{N}) where {N} = size_to_tuple(N)
-@generated representation_size(::ProjectiveSpace{N}) where {N} = (N + 1,)
+function representation_size(M::ArrayProjectiveSpace)
+    return get_parameter(M.size)
+end
+function representation_size(M::ProjectiveSpace)
+    n = get_parameter(M.size)[1]
+    return (n + 1,)
+end
 
 @doc raw"""
     retract(M::AbstractProjectiveSpace, p, X, method::ProjectionRetraction)
@@ -464,21 +485,29 @@ function retract_qr!(M::AbstractProjectiveSpace, q, p, X, t::Number)
     return project!(M, q, q)
 end
 
-function Base.show(io::IO, ::ProjectiveSpace{n,𝔽}) where {n,𝔽}
+function Base.show(io::IO, ::ProjectiveSpace{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
     return print(io, "ProjectiveSpace($(n), $(𝔽))")
 end
-function Base.show(io::IO, ::ArrayProjectiveSpace{N,𝔽}) where {N,𝔽}
-    return print(io, "ArrayProjectiveSpace($(join(N.parameters, ", ")); field = $(𝔽))")
+function Base.show(io::IO, M::ProjectiveSpace{Tuple{Int},𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return print(io, "ProjectiveSpace($(n), $(𝔽); parameter=:field)")
+end
+function Base.show(io::IO, ::ArrayProjectiveSpace{TypeParameter{tn},𝔽}) where {tn<:Tuple,𝔽}
+    return print(io, "ArrayProjectiveSpace($(join(tn.parameters, ", ")); field=$(𝔽))")
+end
+function Base.show(io::IO, M::ArrayProjectiveSpace{<:Tuple,𝔽}) where {𝔽}
+    n = M.size
+    return print(io, "ArrayProjectiveSpace($(join(n, ", ")); field=$(𝔽), parameter=:field)")
 end
 
 """
-    uniform_distribution(M::ProjectiveSpace{n,ℝ}, p) where {n}
+    uniform_distribution(M::ProjectiveSpace{<:Any,ℝ}, p)
 
 Uniform distribution on given [`ProjectiveSpace`](@ref) `M`. Generated points will be of
 similar type as `p`.
 """
-function uniform_distribution(M::ProjectiveSpace{n,ℝ}, p) where {n}
-    d = Distributions.MvNormal(zero(p), 1.0)
+function uniform_distribution(M::ProjectiveSpace{<:Any,ℝ}, p)
+    d = Distributions.MvNormal(zero(p), 1.0 * I)
     return ProjectedPointDistribution(M, d, project!, p)
 end
 

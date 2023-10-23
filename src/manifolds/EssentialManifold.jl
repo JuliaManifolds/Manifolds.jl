@@ -49,12 +49,15 @@ Generate the manifold of essential matrices, either the signed (`is_signed=true`
 unsigned (`is_signed=false`) variant.
 
 """
-struct EssentialManifold <: AbstractPowerManifold{ℝ,Rotations{3},NestedPowerRepresentation}
+struct EssentialManifold <:
+       AbstractPowerManifold{ℝ,Rotations{TypeParameter{Tuple{3}}},NestedPowerRepresentation}
     is_signed::Bool
-    manifold::Rotations{3}
+    manifold::Rotations{TypeParameter{Tuple{3}}}
 end
 
-EssentialManifold(is_signed::Bool=true) = EssentialManifold(is_signed, Rotations(3))
+function EssentialManifold(is_signed::Bool=true)
+    return EssentialManifold(is_signed, Rotations(3; parameter=:type))
+end
 
 @doc raw"""
     check_point(M::EssentialManifold, p; kwargs...)
@@ -482,6 +485,6 @@ pose of camera $i$ $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)
 function vert_proj(M::EssentialManifold, p, X)
     return sum(vert_proj.(Ref(M.manifold), p, X))
 end
-function vert_proj(M::Rotations{3}, p, X)
+function vert_proj(M::Rotations{TypeParameter{Tuple{3}}}, p, X)
     return (p[3, :]' * get_coordinates(M, p, X, DefaultOrthogonalBasis()))
 end

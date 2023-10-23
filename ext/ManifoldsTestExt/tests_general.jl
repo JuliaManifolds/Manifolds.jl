@@ -156,12 +156,6 @@ function test_manifold(
     Test.@testset "dimension" begin
         Test.@test isa(manifold_dimension(M), expected_dimension_type)
         Test.@test manifold_dimension(M) ≥ 0
-        Test.@test manifold_dimension(M) == vector_space_dimension(
-            Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M),
-        )
-        Test.@test manifold_dimension(M) == vector_space_dimension(
-            Manifolds.VectorBundleFibers(Manifolds.CotangentSpace, M),
-        )
     end
 
     test_representation_size && Test.@testset "representation" begin
@@ -174,9 +168,6 @@ function test_manifold(
         end
 
         test_repr(Manifolds.representation_size(M))
-        for fiber in (Manifolds.TangentSpace, Manifolds.CotangentSpace)
-            test_repr(Manifolds.representation_size(Manifolds.VectorBundleFibers(fiber, M)))
-        end
     end
 
     test_injectivity_radius && Test.@testset "injectivity radius" begin
@@ -396,10 +387,10 @@ function test_manifold(
     test_vector_spaces && Test.@testset "vector spaces tests" begin
         for p in pts
             X = zero_vector(M, p)
-            mts = Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M)
-            Test.@test isapprox(M, p, X, zero_vector(mts, p))
+            mts = TangentSpace(M, p)
+            Test.@test isapprox(M, p, X, zero_vector(mts, X))
             if is_mutating
-                zero_vector!(mts, X, p)
+                zero_vector!(mts, X, X)
                 Test.@test isapprox(M, p, X, zero_vector(M, p))
             end
         end
@@ -759,12 +750,12 @@ function test_manifold(
     test_rand_point && Test.@testset "Base.rand point generation" begin
         rng_a = MersenneTwister(123)
         rng_b = MersenneTwister(123)
-        Test.@test is_point(M, rand(M), true)
+        Test.@test is_point(M, rand(M); error=:error)
         # ensure that the RNG source is actually used
         Test.@test rand(rng_a, M) == rand(rng_b, M)
         # generation of multiple points
-        Test.@test all(p -> is_point(M, p, true), rand(M, 3))
-        Test.@test all(p -> is_point(M, p, true), rand(rng_a, M, 3))
+        Test.@test all(p -> is_point(M, p; error=:error), rand(M, 3))
+        Test.@test all(p -> is_point(M, p; error=:error), rand(rng_a, M, 3))
 
         if test_inplace && is_mutating
             rng_a = MersenneTwister(123)
@@ -772,10 +763,10 @@ function test_manifold(
 
             p = allocate(pts[1])
             rand!(M, p)
-            Test.@test is_point(M, p, true)
+            Test.@test is_point(M, p; error=:error)
             p = allocate(pts[1])
             rand!(rng_a, M, p)
-            Test.@test is_point(M, p, true)
+            Test.@test is_point(M, p; error=:error)
             # ensure that the RNG source is actually used
             q = allocate(pts[1])
             rand!(rng_b, M, q)
@@ -808,7 +799,7 @@ function test_manifold(
             Test.@test is_vector(M, p, X, true; atol=atol)
             X = allocate(tv[1])
             rand!(rng_a, M, X; vector_at=p)
-            Test.@test is_point(M, p, true)
+            Test.@test is_point(M, p; error=:error)
             # ensure that the RNG source is actually used
             Y = allocate(tv[1])
             rand!(rng_b, M, Y; vector_at=p)
@@ -819,11 +810,12 @@ function test_manifold(
     Test.@testset "tangent vector distributions" begin
         for tvd in tvector_distributions
             supp = Manifolds.support(tvd)
-            Test.@test supp isa Manifolds.FVectorSupport{TangentBundleFibers{typeof(M)}}
+            Test.@test supp isa
+                       Manifolds.FVectorSupport{<:TangentSpace{number_system(M),typeof(M)}}
             for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * find_eps(randtv)
-                Test.@test is_vector(M, supp.point, randtv, true; atol=atol)
+                Test.@test is_vector(M, supp.space.point, randtv, true; atol=atol)
             end
         end
     end
@@ -897,7 +889,7 @@ function test_parallel_transport(
                         Test.@test isapprox(M, q, Y1, Y2)
                     end
                     # Test that Y is a tangent vector at q
-                    Test.@test is_vector(M, p, Y1, true)
+                    Test.@test is_vector(M, p, Y1; error=:error)
                 end
             end
         end

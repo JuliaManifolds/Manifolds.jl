@@ -2,7 +2,7 @@
     TranslationAction(
         M::AbstractManifold,
         Rn::TranslationGroup,
-        AD::ActionDirection = LeftForwardAction(),
+        AD::ActionDirection = LeftAction(),
     )
 
 Space of actions of the [`TranslationGroup`](@ref) $\mathrm{T}(n)$ on a Euclidean-like
@@ -10,7 +10,7 @@ manifold `M`.
 
 The left and right actions are equivalent.
 """
-struct TranslationAction{TM<:AbstractManifold,TRn<:TranslationGroup,TAD<:ActionDirection} <:
+struct TranslationAction{TAD<:ActionDirection,TM<:AbstractManifold,TRn<:TranslationGroup} <:
        AbstractGroupAction{TAD}
     manifold::TM
     Rn::TRn
@@ -19,9 +19,9 @@ end
 function TranslationAction(
     M::AbstractManifold,
     Rn::TranslationGroup,
-    ::TAD=LeftForwardAction(),
+    ::TAD=LeftAction(),
 ) where {TAD<:ActionDirection}
-    return TranslationAction{typeof(M),typeof(Rn),TAD}(M, Rn)
+    return TranslationAction{TAD,typeof(M),typeof(Rn)}(M, Rn)
 end
 
 function Base.show(io::IO, A::TranslationAction)
@@ -32,11 +32,8 @@ base_group(A::TranslationAction) = A.Rn
 
 group_manifold(A::TranslationAction) = A.manifold
 
-function switch_direction(
-    A::TranslationAction{TM,TSO,TAD},
-    ::LeftRightSwitch=LeftRightSwitch(),
-) where {TM<:AbstractManifold,TSO<:TranslationGroup,TAD<:ActionDirection}
-    return TranslationAction(A.manifold, A.Rn, switch_direction(TAD(), LeftRightSwitch()))
+function switch_direction(A::TranslationAction{TAD}) where {TAD<:ActionDirection}
+    return TranslationAction(A.manifold, A.Rn, switch_direction(TAD()))
 end
 
 adjoint_apply_diff_group(::TranslationAction, a, X, p) = X
@@ -48,7 +45,7 @@ end
 apply(::TranslationAction, a, p) = p + a
 
 apply!(::TranslationAction, q, a, p) = (q .= p .+ a)
-function apply!(A::TranslationAction, q, e::Identity{AdditionOperation}, p)
+function apply!(A::TranslationAction, q, ::Identity{AdditionOperation}, p)
     return copyto!(A.manifold, q, p)
 end
 
@@ -65,17 +62,11 @@ function apply_diff!(A::TranslationAction, Y, a, p, X)
     return copyto!(A.manifold, Y, p, X)
 end
 
-function apply_diff_group(::TranslationAction{N,F,LeftForwardAction}, a, X, p) where {N,F}
+function apply_diff_group(::TranslationAction{LeftAction}, a, X, p)
     return X
 end
 
-function apply_diff_group!(
-    A::TranslationAction{N,F,LeftForwardAction},
-    Y,
-    a,
-    X,
-    p,
-) where {N,F}
+function apply_diff_group!(A::TranslationAction{LeftAction}, Y, a, X, p)
     copyto!(A.manifold, Y, p, X)
     return Y
 end

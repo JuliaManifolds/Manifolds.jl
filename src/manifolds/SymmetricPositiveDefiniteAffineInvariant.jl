@@ -31,7 +31,7 @@ function change_representer!(::SymmetricPositiveDefinite, Y, ::EuclideanMetric, 
 end
 
 @doc raw"""
-    change_metric(M::SymmetricPositiveDefinite{n}, E::EuclideanMetric, p, X)
+    change_metric(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
 `g_E`, this function changes into the [`AffineInvariantMetric`](@ref) (default) metric on the
@@ -67,7 +67,7 @@ d_{\mathcal P(n)}(p,q)
 where $\operatorname{Log}$ denotes the matrix logarithm and
 $\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
-function distance(::SymmetricPositiveDefinite{N}, p, q) where {N}
+function distance(::SymmetricPositiveDefinite, p, q)
     # avoid numerical instabilities in cholesky
     norm(p - q) < eps(eltype(p + q)) && return zero(eltype(p + q))
     cq = cholesky(Symmetric(q)) # to avoid numerical inaccuracies
@@ -80,7 +80,7 @@ end
 
 @doc raw"""
     exp(M::SymmetricPositiveDefinite, p, X)
-    exp(M::MetricManifold{SymmetricPositiveDefinite{N},AffineInvariantMetric}, p, X)
+    exp(M::MetricManifold{<:SymmetricPositiveDefinite,AffineInvariantMetric}, p, X)
 
 Compute the exponential map from `p` with tangent vector `X` on the
 [`SymmetricPositiveDefinite`](@ref) `M` with its default [`MetricManifold`](@ref) having the
@@ -95,7 +95,7 @@ where $\operatorname{Exp}$ denotes to the matrix exponential.
 exp(::SymmetricPositiveDefinite, ::Any...)
 
 exp(M::SymmetricPositiveDefinite, p::SPDPoint, X, t::Number) = exp(M, p, t * X)
-function exp(::SymmetricPositiveDefinite{N}, p::SPDPoint, X) where {N}
+function exp(::SymmetricPositiveDefinite, p::SPDPoint, X)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
@@ -114,7 +114,7 @@ end
 function exp!(M::SymmetricPositiveDefinite, q, p, X, t::Number)
     return exp!(M, q, p, t * X)
 end
-function exp!(::SymmetricPositiveDefinite{N}, q, p, X) where {N}
+function exp!(::SymmetricPositiveDefinite, q, p, X)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
@@ -123,7 +123,7 @@ function exp!(::SymmetricPositiveDefinite{N}, q, p, X) where {N}
     pUe = p_sqrt * Ue
     return copyto!(q, pUe * Se * transpose(pUe))
 end
-function exp!(::SymmetricPositiveDefinite{N}, q::SPDPoint, p, X) where {N}
+function exp!(::SymmetricPositiveDefinite, q::SPDPoint, p, X)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
@@ -146,7 +146,7 @@ end
 
 @doc raw"""
     [Ξ,κ] = get_basis_diagonalizing(M::SymmetricPositiveDefinite, p, B::DiagonalizingOrthonormalBasis)
-    [Ξ,κ] = get_basis_diagonalizing(M::MetricManifold{SymmetricPositiveDefinite{N},AffineInvariantMetric}, p, B::DiagonalizingOrthonormalBasis)
+    [Ξ,κ] = get_basis_diagonalizing(M::MetricManifold{<:SymmetricPositiveDefinite,AffineInvariantMetric}, p, B::DiagonalizingOrthonormalBasis)
 
 Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
@@ -158,10 +158,11 @@ The construction is based on an ONB for the symmetric matrices similar to [`get_
 just that the ONB here is build from the eigen vectors of ``p^{\frac{1}{2}}Vp^{\frac{1}{2}}``.
 """
 function get_basis_diagonalizing(
-    ::SymmetricPositiveDefinite{N},
+    M::SymmetricPositiveDefinite,
     p,
     B::DiagonalizingOrthonormalBasis,
-) where {N}
+)
+    N = get_parameter(M.size)[1]
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     eigv = eigen(Symmetric(p_sqrt_inv * B.frame_direction * p_sqrt_inv))
     V = eigv.vectors
@@ -178,7 +179,7 @@ end
 
 @doc raw"""
     [Ξ,κ] = get_basis(M::SymmetricPositiveDefinite, p, B::DefaultOrthonormalBasis)
-    [Ξ,κ] = get_basis(M::MetricManifold{SymmetricPositiveDefinite{N},AffineInvariantMetric}, p, B::DefaultOrthonormalBasis)
+    [Ξ,κ] = get_basis(M::MetricManifold{<:SymmetricPositiveDefinite,AffineInvariantMetric}, p, B::DefaultOrthonormalBasis)
 
 Return a default ONB for the tangent space ``T_p\mathcal P(n)`` of the [`SymmetricPositiveDefinite`](@ref) with respect to the [`AffineInvariantMetric`](@ref).
 
@@ -208,11 +209,8 @@ We then form the ONB by
 """
 get_basis(::SymmetricPositiveDefinite, p, B::DefaultOrthonormalBasis)
 
-function get_basis_orthonormal(
-    M::SymmetricPositiveDefinite{N},
-    p,
-    Ns::RealNumbers,
-) where {N}
+function get_basis_orthonormal(M::SymmetricPositiveDefinite, p, Ns::RealNumbers)
+    N = get_parameter(M.size)[1]
     p_sqrt = spd_sqrt(p)
     Ξ = [similar(convert(AbstractMatrix, p)) for _ in 1:manifold_dimension(M)]
     k = 1
@@ -240,13 +238,8 @@ where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 """
 get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates_orthonormal!(
-    M::SymmetricPositiveDefinite{N},
-    c,
-    p,
-    X,
-    ::RealNumbers,
-) where {N}
+function get_coordinates_orthonormal!(M::SymmetricPositiveDefinite, c, p, X, ::RealNumbers)
+    N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(c) == (dim,)
     @assert size(X) == (N, N)
@@ -283,13 +276,8 @@ where $k$ is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 """
 get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector_orthonormal!(
-    ::SymmetricPositiveDefinite{N},
-    X,
-    p,
-    c,
-    ::RealNumbers,
-) where {N}
+function get_vector_orthonormal!(M::SymmetricPositiveDefinite, X, p, c, ::RealNumbers)
+    N = get_parameter(M.size)[1]
     @assert size(c) == (div(N * (N + 1), 2),)
     @assert size(X) == (N, N)
     p_sqrt = spd_sqrt(p)
@@ -359,7 +347,7 @@ function allocate_result(
     return allocate_result(M, log, convert(AbstractMatrix, q), convert(AbstractMatrix, p))
 end
 
-function log!(::SymmetricPositiveDefinite{N}, X, p, q) where {N}
+function log!(::SymmetricPositiveDefinite, X, p, q)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv)
     e2 = eigen(T)
@@ -402,7 +390,7 @@ and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 """
 parallel_transport_to(::SymmetricPositiveDefinite, ::Any, ::Any, ::Any)
 
-function parallel_transport_to!(M::SymmetricPositiveDefinite{N}, Y, p, X, q) where {N}
+function parallel_transport_to!(M::SymmetricPositiveDefinite, Y, p, X, q)
     distance(M, p, q) < 2 * eps(eltype(p)) && copyto!(Y, X)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     tv = Symmetric(p_sqrt_inv * X * p_sqrt_inv) # p^(-1/2)Xp^{-1/2}
@@ -467,13 +455,13 @@ function riemann_tensor!(::SymmetricPositiveDefinite, Xresult, p, X, Y, Z)
 end
 
 """
-    volume_density(::SymmetricPositiveDefinite{n}, p, X) where {n}
+    volume_density(::SymmetricPositiveDefinite, p, X)
 
 Compute the volume density of the [`SymmetricPositiveDefinite`](@ref) manifold at `p`
 in direction `X`. See [ChevallierKalungaAngulo:2017](@cite), Section 6.2 for details.
 Note that metric in Manifolds.jl has a different scaling factor than the reference.
 """
-function volume_density(::SymmetricPositiveDefinite{n}, p, X) where {n}
+function volume_density(::SymmetricPositiveDefinite, p, X)
     eig = eigvals(X)
     dens = 1.0
     for i in 1:length(eig)

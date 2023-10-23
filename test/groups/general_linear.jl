@@ -64,20 +64,20 @@ using NLsolve
     @testset "Real" begin
         G = GeneralLinear(3)
 
-        @test_throws ManifoldDomainError is_point(G, randn(2, 3), true)
-        @test_throws ManifoldDomainError is_point(G, randn(2, 2), true)
-        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3), true)
-        @test_throws DomainError is_point(G, zeros(3, 3), true)
-        @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
-        @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1], true)
-        @test is_point(G, Identity(G), true)
-        @test_throws ManifoldDomainError is_vector(
+        @test_throws ManifoldDomainError is_point(G, randn(2, 3); error=:error)
+        @test_throws ManifoldDomainError is_point(G, randn(2, 2); error=:error)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3); error=:error)
+        @test_throws DomainError is_point(G, zeros(3, 3); error=:error)
+        @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1]; error=:error)
+        @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1]; error=:error)
+        @test is_point(G, Identity(G); error=:error)
+        @test_throws DomainError is_vector(
             G,
             Float64[0 1 1; 0 1 1; 1 0 0],
-            randn(3, 3),
-            true,
+            randn(3, 3);
+            error=:error,
         )
-        @test is_vector(G, Float64[0 0 1; 0 1 1; 1 1 1], randn(3, 3), true)
+        @test is_vector(G, Float64[0 0 1; 0 1 1; 1 1 1], randn(3, 3); error=:error)
 
         types = [Matrix{Float64}]
         pts = [
@@ -140,20 +140,24 @@ using NLsolve
     @testset "Complex" begin
         G = GeneralLinear(2, ℂ)
 
-        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3), true)
-        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3), true)
-        @test_throws DomainError is_point(G, zeros(2, 2), true)
-        @test_throws DomainError is_point(G, ComplexF64[1 im; 1 im], true)
-        @test is_point(G, ComplexF64[1 1; im 1], true)
-        @test is_point(G, Identity(G), true)
-        @test_throws ManifoldDomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1], true)
-        @test_throws ManifoldDomainError is_vector(
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3); error=:error)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3); error=:error)
+        @test_throws DomainError is_point(G, zeros(2, 2); error=:error)
+        @test_throws DomainError is_point(G, ComplexF64[1 im; 1 im]; error=:error)
+        @test is_point(G, ComplexF64[1 1; im 1]; error=:error)
+        @test is_point(G, Identity(G); error=:error)
+        @test_throws ManifoldDomainError is_point(
+            G,
+            Float64[0 0 0; 0 1 1; 1 1 1];
+            error=:error,
+        )
+        @test_throws DomainError is_vector(
             G,
             ComplexF64[im im; im im],
-            randn(ComplexF64, 2, 2),
-            true,
+            randn(ComplexF64, 2, 2);
+            error=:error,
         )
-        @test is_vector(G, ComplexF64[1 im; im im], randn(ComplexF64, 2, 2), true)
+        @test is_vector(G, ComplexF64[1 im; im im], randn(ComplexF64, 2, 2); error=:error)
 
         types = [Matrix{ComplexF64}]
         pts = [
@@ -196,5 +200,10 @@ using NLsolve
                 retraction_atol_multiplier=1e8,
             )
         end
+    end
+    @testset "field parameter" begin
+        G = GeneralLinear(3; parameter=:field)
+        @test typeof(get_embedding(G)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(G) == "GeneralLinear(3, ℝ; parameter=:field)"
     end
 end

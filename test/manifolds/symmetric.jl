@@ -17,20 +17,20 @@ include("../utils.jl")
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test is_flat(M)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3,3}},ℝ}
         @test check_point(M, B_sym) === nothing
-        @test_throws DomainError is_point(M, A, true)
-        @test_throws ManifoldDomainError is_point(M, C, true)
-        @test_throws ManifoldDomainError is_point(M, D, true) #embedding changes type
+        @test_throws DomainError is_point(M, A; error=:error)
+        @test_throws ManifoldDomainError is_point(M, C; error=:error)
+        @test_throws ManifoldDomainError is_point(M, D; error=:error) #embedding changes type
         @test check_vector(M, B_sym, B_sym) === nothing
-        @test_throws DomainError is_vector(M, B_sym, A, true)
-        @test_throws ManifoldDomainError is_vector(M, A, B_sym, true)
-        @test_throws ManifoldDomainError is_vector(M, B_sym, D, true)
+        @test_throws DomainError is_vector(M, B_sym, A; error=:error)
+        @test_throws DomainError is_vector(M, A, B_sym; error=:error)
+        @test_throws ManifoldDomainError is_vector(M, B_sym, D; error=:error)
         @test_throws ManifoldDomainError is_vector(
             M,
             B_sym,
-            1 * im * zero_vector(M, B_sym),
-            true,
+            1 * im * zero_vector(M, B_sym);
+            error=:error,
         )
         @test manifold_dimension(M) == 6
         @test manifold_dimension(M_complex) == 9
@@ -85,4 +85,9 @@ include("../utils.jl")
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end # testset type $T
     end # for
+    @testset "field parameter" begin
+        M = SymmetricMatrices(3, ℝ; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(M) == "SymmetricMatrices(3, ℝ; parameter=:field)"
+    end
 end # test SymmetricMatrices

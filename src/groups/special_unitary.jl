@@ -18,9 +18,13 @@ or in other words we represent the tangent spaces employing the Lie algebra ``\m
 
 Generate the Lie group of ``n×n`` unitary matrices with determinant +1.
 """
-const SpecialUnitary{n} = GeneralUnitaryMultiplicationGroup{n,ℂ,DeterminantOneMatrices}
+const SpecialUnitary{T} = GeneralUnitaryMultiplicationGroup{T,ℂ,DeterminantOneMatrices}
 
-SpecialUnitary(n) = SpecialUnitary{n}(GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}())
+function SpecialUnitary(n::Int; parameter::Symbol=:type)
+    return GeneralUnitaryMultiplicationGroup(
+        GeneralUnitaryMatrices(n, ℂ, DeterminantOneMatrices; parameter=parameter),
+    )
+end
 
 @doc raw"""
     project(G::SpecialUnitary, p)
@@ -50,7 +54,8 @@ function project(G::SpecialUnitary, p, X)
     return Y
 end
 
-function project!(::SpecialUnitary{n}, q, p) where {n}
+function project!(G::SpecialUnitary, q, p)
+    n = get_parameter(G.manifold.size)[1]
     F = svd(p)
     detUVt = det(F.U) * det(F.Vt)
     if !isreal(detUVt) || real(detUVt) < 0
@@ -63,7 +68,8 @@ function project!(::SpecialUnitary{n}, q, p) where {n}
     end
     return q
 end
-function project!(G::SpecialUnitary{n}, Y, p, X) where {n}
+function project!(G::SpecialUnitary, Y, p, X)
+    n = get_parameter(G.manifold.size)[1]
     inverse_translate_diff!(G, Y, p, p, X, LeftForwardAction())
     project!(SkewHermitianMatrices(n, ℂ), Y, Y)
     Y[diagind(n, n)] .-= tr(Y) / n
@@ -71,4 +77,10 @@ function project!(G::SpecialUnitary{n}, Y, p, X) where {n}
     return Y
 end
 
-Base.show(io::IO, ::SpecialUnitary{n}) where {n} = print(io, "SpecialUnitary($(n))")
+function Base.show(io::IO, ::SpecialUnitary{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "SpecialUnitary($(n))")
+end
+function Base.show(io::IO, G::SpecialUnitary{Tuple{Int}})
+    n = get_parameter(G.manifold.size)[1]
+    return print(io, "SpecialUnitary($(n); parameter=:field)")
+end

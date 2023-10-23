@@ -137,20 +137,26 @@ end
         ]
 
         @testset "Basics" begin
-            @test repr(SpSt_6_4) == "SymplecticStiefel{6, 4, ℝ}()"
+            @test repr(SpSt_6_4) == "SymplecticStiefel(6, 4, ℝ)"
             @test representation_size(SpSt_6_4) == (6, 4)
             @test base_manifold(SpSt_6_4) === SpSt_6_4
             @test get_total_space(SpSt_6_4) == Symplectic(6)
             @test !is_flat(SpSt_6_4)
 
             @test is_point(SpSt_6_4, p_6_4)
-            @test_throws DomainError is_point(SpSt_6_4, 2 * p_6_4, true)
+            @test_throws DomainError is_point(SpSt_6_4, 2 * p_6_4; error=:error)
 
             @test is_vector(SpSt_6_4, p_6_4, X1; atol=1.0e-12)
             @test is_vector(SpSt_6_4, p_6_4, X2; atol=1.0e-6)
-            @test_throws DomainError is_vector(SpSt_6_4, p_6_4, X2, true; atol=1.0e-12)
+            @test_throws DomainError is_vector(
+                SpSt_6_4,
+                p_6_4,
+                X2;
+                error=:error,
+                atol=1.0e-12,
+            )
             @test is_vector(SpSt_6_4, p_6_4, X1 + X2; atol=1.0e-6)
-            @test_throws DomainError is_vector(SpSt_6_4, p_6_4, X1 + p_6_4, true)
+            @test_throws DomainError is_vector(SpSt_6_4, p_6_4, X1 + p_6_4; error=:error)
         end
         @testset "Symplectic Inverse" begin
             I_2k = Array(I, 4, 4)
@@ -223,14 +229,14 @@ end
             ])
             A_6_4_proj = similar(A_6_4)
             Manifolds.project!(SpSt_6_4, A_6_4_proj, p_6_4, A_6_4)
-            @test is_vector(SpSt_6_4, p_6_4, A_6_4_proj, true; atol=2.0e-12)
+            @test is_vector(SpSt_6_4, p_6_4, A_6_4_proj; error=:error, atol=2.0e-12)
         end
         @testset "Generate random points/tangent vectors" begin
             M_big = SymplecticStiefel(20, 10)
             p_big = rand(M_big)
-            @test is_point(M_big, p_big, true; atol=1.0e-14)
+            @test is_point(M_big, p_big; error=:error, atol=1.0e-14)
             X_big = rand(M_big; vector_at=p_big, hamiltonian_norm=1.0)
-            @test is_vector(M_big, p_big, X_big, true; atol=1.0e-14)
+            @test is_vector(M_big, p_big, X_big; error=:error, atol=1.0e-14)
         end
         @testset "test_manifold(Symplectic(6), ...)" begin
             types = [Matrix{Float64}]
@@ -301,5 +307,11 @@ end
             Manifolds.gradient!(SpSt_6_4, test_f, grad_f_p, p_grad, fd_diff)
             @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-9)
         end
+    end
+    @testset "field parameter" begin
+        SpSt_6_4 = SymplecticStiefel(2 * 3, 2 * 2; parameter=:field)
+        @test typeof(get_embedding(SpSt_6_4)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(SpSt_6_4) == "SymplecticStiefel(6, 4, ℝ; parameter=:field)"
+        @test get_total_space(SpSt_6_4) == Symplectic(6; parameter=:field)
     end
 end
