@@ -141,6 +141,13 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 test_rand_point=true,
                 test_rand_tvector=true,
             )
+
+            @test Manifolds.bundle_transport_to(
+                TB,
+                p,
+                convert(T, [0.0, -1.0, -1.0]),
+                convert(T, [0.0, 1.0, 0.0]),
+            ) ≈ convert(T, [1.0, 0.0, -1.0])
         end
     end
 

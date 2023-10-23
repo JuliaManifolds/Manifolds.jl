@@ -266,6 +266,7 @@ include("../utils.jl")
         @test isapprox(exp!(M, pS, p, zero_vector(M, p)), p)
         @test ismissing(pS.sqrt)
         @test ismissing(pS.sqrt_inv)
+        @test allocate_result(M1, zero_vector, p) isa Matrix
     end
 
     @testset "test BigFloat" begin
