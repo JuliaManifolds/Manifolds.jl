@@ -14,4 +14,4 @@
 
 See the [GitHub contributors page](https://github.com/JuliaManifolds/Manifolds.jl/graphs/contributors).
 
-[Contributions](contributing.md) are welcome!
+[Contributions](CONTRIBUTING.md) are welcome!
