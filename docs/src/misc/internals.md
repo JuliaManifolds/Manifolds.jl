@@ -13,14 +13,12 @@ Manifolds.mul!_safe
 Manifolds.nzsign
 Manifolds.realify
 Manifolds.realify!
-Manifolds.select_from_tuple
 Manifolds.symmetrize
 Manifolds.symmetrize!
 Manifolds.unrealify!
 Manifolds.usinc
 Manifolds.usinc_from_cos
 Manifolds.vec2skew!
-Manifolds.ziptuples
 ```
 
 ## Types in Extensions

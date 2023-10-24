@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralizedGrassmann{n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
+    GeneralizedGrassmann{T,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
 
 The generalized Grassmann manifold $\operatorname{Gr}(n,k,B)$ consists of all subspaces
 spanned by $k$ linear independent vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
@@ -43,7 +43,8 @@ The manifold is named after
 Generate the (real-valued) Generalized Grassmann manifold of $n\times k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedGrassmann{n,k,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
+struct GeneralizedGrassmann{T,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
+    size::T
     B::TB
 end
 
@@ -51,9 +52,11 @@ function GeneralizedGrassmann(
     n::Int,
     k::Int,
     B::AbstractMatrix=Matrix{Float64}(I, n, n),
-    field::AbstractNumbers=ℝ,
+    𝔽::AbstractNumbers=ℝ;
+    parameter::Symbol=:type,
 )
-    return GeneralizedGrassmann{n,k,field,typeof(B)}(B)
+    size = wrap_type_parameter(parameter, (n, k))
+    return GeneralizedGrassmann{typeof(size),𝔽,typeof(B)}(size, B)
 end
 
 active_traits(f, ::GeneralizedGrassmann, args...) = merge_traits(IsEmbeddedManifold())
@@ -93,18 +96,18 @@ function change_metric!(M::GeneralizedGrassmann, Y, ::EuclideanMetric, p, X)
 end
 
 @doc raw"""
-    check_point(M::GeneralizedGrassmann{n,k,𝔽}, p)
+    check_point(M::GeneralizedGrassmann, p)
 
 Check whether `p` is representing a point on the [`GeneralizedGrassmann`](@ref) `M`, i.e. its
 a `n`-by-`k` matrix of unitary column vectors with respect to the B inner prudct and
 of correct `eltype` with respect to `𝔽`.
 """
-function check_point(M::GeneralizedGrassmann{n,k,𝔽}, p; kwargs...) where {n,k,𝔽}
+function check_point(M::GeneralizedGrassmann, p; kwargs...)
     return nothing # everything already checked in the embedding (generalized Stiefel)
 end
 
 @doc raw"""
-    check_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; kwargs...)
+    check_vector(M::GeneralizedGrassmann, p, X; kwargs...)
 
 Check whether `X` is a tangent vector in the tangent space of `p` on
 the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as well as that
@@ -116,7 +119,7 @@ the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as wel
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
 $\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
 """
-function check_vector(M::GeneralizedGrassmann{n,k,𝔽}, p, X; kwargs...) where {n,k,𝔽}
+function check_vector(M::GeneralizedGrassmann, p, X; kwargs...)
     return nothing # everything already checked in the embedding (generalized Stiefel)
 end
 
@@ -188,8 +191,12 @@ Return true if [`GeneralizedGrassmann`](@ref) `M` is one-dimensional.
 """
 is_flat(M::GeneralizedGrassmann) = manifold_dimension(M) == 1
 
-function get_embedding(M::GeneralizedGrassmann{N,K,𝔽}) where {N,K,𝔽}
-    return GeneralizedStiefel(N, K, M.B, 𝔽)
+function get_embedding(M::GeneralizedGrassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return GeneralizedStiefel(n, k, M.B, 𝔽)
+end
+function get_embedding(M::GeneralizedGrassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return GeneralizedStiefel(n, k, M.B, 𝔽; parameter=:field)
 end
 
 @doc raw"""
@@ -204,7 +211,7 @@ g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}BY),
 
 where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
-inner(M::GeneralizedGrassmann{n,k}, p, X, Y) where {n,k} = dot(X, M.B, Y)
+inner(M::GeneralizedGrassmann, p, X, Y) = dot(X, M.B, Y)
 
 function _isapprox(M::GeneralizedGrassmann, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
     return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
@@ -254,7 +261,8 @@ Return the dimension of the [`GeneralizedGrassmann(n,k,𝔽)`](@ref) manifold `M
 
 where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
-function manifold_dimension(::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
+function manifold_dimension(M::GeneralizedGrassmann{<:Any,𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
     return k * (n - k) * real_dimension(𝔽)
 end
 
@@ -270,7 +278,7 @@ end
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
 [`GeodesicInterpolationWithinRadius`](@ref).
 """
-mean(::GeneralizedGrassmann{n,k} where {n,k}, ::Any...)
+mean(::GeneralizedGrassmann, ::Any...)
 
 function default_estimation_method(::GeneralizedGrassmann, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 4)
@@ -331,11 +339,12 @@ rand(::GeneralizedGrassmann; σ::Real=1.0)
 
 function Random.rand!(
     rng::AbstractRNG,
-    M::GeneralizedGrassmann{n,k,ℝ},
+    M::GeneralizedGrassmann{<:Any,ℝ},
     pX;
     vector_at=nothing,
     σ::Real=one(real(eltype(pX))),
-) where {n,k}
+)
+    n, k = get_parameter(M.size)
     if vector_at === nothing
         A = σ * randn(rng, eltype(pX), n, k)
         project!(M, pX, Matrix(qr(A).Q))
@@ -348,12 +357,12 @@ function Random.rand!(
 end
 
 @doc raw"""
-    representation_size(M::GeneralizedGrassmann{n,k})
+    representation_size(M::GeneralizedGrassmann)
 
 Return the represenation size or matrix dimension of a point on the [`GeneralizedGrassmann`](@ref)
 `M`, i.e. $(n,k)$ for both the real-valued and the complex value case.
 """
-@generated representation_size(::GeneralizedGrassmann{n,k}) where {n,k} = (n, k)
+representation_size(M::GeneralizedGrassmann) = get_parameter(M.size)
 
 @doc raw"""
     retract(M::GeneralizedGrassmann, p, X, ::PolarRetraction)
@@ -375,8 +384,15 @@ function retract_project!(M::GeneralizedGrassmann, q, p, X, t::Number)
     return q
 end
 
-function Base.show(io::IO, M::GeneralizedGrassmann{n,k,𝔽}) where {n,k,𝔽}
+function Base.show(
+    io::IO,
+    M::GeneralizedGrassmann{TypeParameter{Tuple{n,k}},𝔽},
+) where {n,k,𝔽}
     return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
+end
+function Base.show(io::IO, M::GeneralizedGrassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽); parameter=:field)")
 end
 
 @doc raw"""

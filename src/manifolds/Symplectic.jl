@@ -1,5 +1,5 @@
 @doc raw"""
-    Symplectic{n, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+    Symplectic{T, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
 The symplectic manifold consists of all ``2n \times 2n`` matrices which preserve
 the canonical symplectic form over ``𝔽^{2n × 2n} \times 𝔽^{2n × 2n}``,
@@ -32,22 +32,26 @@ The tangent space at a point ``p`` is given by [BendokatZimmermann:2021](@cite)
 ````
 
 # Constructor
-    Symplectic(2n, field=ℝ) -> Symplectic{div(2n, 2), field}()
+
+    Symplectic(2n, field=ℝ; parameter::Symbol=:type)
 
 Generate the (real-valued) symplectic manifold of ``2n \times 2n`` symplectic matrices.
 The constructor for the [`Symplectic`](@ref) manifold accepts the even column/row embedding
 dimension ``2n`` for the real symplectic manifold, ``ℝ^{2n × 2n}``.
 """
-struct Symplectic{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
+struct Symplectic{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
 
 function active_traits(f, ::Symplectic, args...)
     return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
 end
 
-function Symplectic(n::Int, field::AbstractNumbers=ℝ)
+function Symplectic(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     n % 2 == 0 || throw(ArgumentError("The dimension of the symplectic manifold
                         embedding space must be even. Was odd, n % 2 == $(n % 2)."))
-    return Symplectic{div(n, 2),field}()
+    size = wrap_type_parameter(parameter, (div(n, 2),))
+    return Symplectic{typeof(size),field}(size)
 end
 
 @doc raw"""
@@ -148,9 +152,9 @@ function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
 end
 
 @doc raw"""
-    change_representer(MetMan::MetricManifold{𝔽, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric},
+    change_representer(MetMan::MetricManifold{<:Any, <:Euclidean, ExtendedSymplecticMetric},
                        EucMet::EuclideanMetric, p, X)
-    change_representer!(MetMan::MetricManifold{𝔽, Euclidean{Tuple{m, n}, 𝔽}, ExtendedSymplecticMetric},
+    change_representer!(MetMan::MetricManifold{<:Any, <:Euclidean, ExtendedSymplecticMetric},
                         Y, EucMet::EuclideanMetric, p, X)
 
 Change the representation of a matrix ``ξ ∈ \mathbb{R}^{2n \times 2n}``
@@ -174,21 +178,21 @@ In this case, we compute the mapping
 ````
 """
 function change_representer(
-    ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
+    ::MetricManifold{<:Any,<:Euclidean,ExtendedSymplecticMetric},
     ::EuclideanMetric,
     p,
     X,
-) where {𝔽,m,n}
+)
     return p * p' * X
 end
 
 function change_representer!(
-    ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
+    ::MetricManifold{<:Any,<:Euclidean,ExtendedSymplecticMetric},
     Y,
     ::EuclideanMetric,
     p,
     X,
-) where {𝔽,m,n}
+)
     Y .= p * p' * X
     return Y
 end
@@ -208,7 +212,7 @@ Q_{2n} =
 ````
 The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
-function check_point(M::Symplectic{n,ℝ}, p; kwargs...) where {n,ℝ}
+function check_point(M::Symplectic, p; kwargs...)
     # Perform check that the matrix lives on the real symplectic manifold:
     expected_zero = norm(inv(M, p) * p - LinearAlgebra.I)
     if !isapprox(expected_zero, zero(eltype(p)); kwargs...)
@@ -241,7 +245,7 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 check_vector(::Symplectic, ::Any...)
 
-function check_vector(M::Symplectic{n}, p, X; kwargs...) where {n}
+function check_vector(M::Symplectic, p, X; kwargs...)
     Q = SymplecticMatrix(p, X)
     tangent_requirement_norm = norm(X' * Q * p + p' * Q * X, 2)
     if !isapprox(tangent_requirement_norm, 0.0; kwargs...)
@@ -302,7 +306,7 @@ we see that
     \end{align*}
 ````
 """
-function distance(M::Symplectic{n}, p, q) where {n}
+function distance(M::Symplectic, p, q)
     return norm(log(symplectic_inverse_times(M, p, q)))
 end
 
@@ -332,7 +336,13 @@ function exp!(M::Symplectic, q, p, X)
     return q
 end
 
-get_embedding(::Symplectic{n,ℝ}) where {n} = Euclidean(2n, 2n; field=ℝ)
+function get_embedding(::Symplectic{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+    return Euclidean(2 * n, 2 * n; field=𝔽)
+end
+function get_embedding(M::Symplectic{Tuple{Int},𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return Euclidean(2 * n, 2 * n; field=𝔽, parameter=:field)
+end
 
 @doc raw"""
     gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
@@ -398,7 +408,7 @@ function ManifoldDiff.gradient!(
 end
 
 @doc raw"""
-    inner(::Symplectic{n, ℝ}, p, X, Y)
+    inner(::Symplectic{<:Any,ℝ}, p, X, Y)
 
 Compute the canonical Riemannian inner product [`RealSymplecticMetric`](@ref)
 ````math
@@ -406,7 +416,7 @@ Compute the canonical Riemannian inner product [`RealSymplecticMetric`](@ref)
 ````
 between the two tangent vectors ``X, Y \in T_p\operatorname{Sp}(2n)``.
 """
-function inner(M::Symplectic{n,ℝ}, p, X, Y) where {n}
+function inner(M::Symplectic{<:Any,ℝ}, p, X, Y)
     p_star = inv(M, p)
     return dot((p_star * X), (p_star * Y))
 end
@@ -445,7 +455,8 @@ A^{+} =
 \end{bmatrix}.
 ````
 """
-function Base.inv(::Symplectic{n,ℝ}, A) where {n}
+function Base.inv(M::Symplectic{<:Any,ℝ}, A)
+    n = get_parameter(M.size)[1]
     Ai = similar(A)
     checkbounds(A, 1:(2n), 1:(2n))
     @inbounds for i in 1:n, j in 1:n
@@ -463,7 +474,8 @@ function Base.inv(::Symplectic{n,ℝ}, A) where {n}
     return Ai
 end
 
-function inv!(::Symplectic{n,ℝ}, A) where {n}
+function inv!(M::Symplectic{<:Any,ℝ}, A)
+    n = get_parameter(M.size)[1]
     checkbounds(A, 1:(2n), 1:(2n))
     @inbounds for i in 1:n, j in 1:n
         A[i, j], A[j + n, i + n] = A[j + n, i + n], A[i, j]
@@ -537,7 +549,7 @@ Return false. [`Symplectic`](@ref) is not a flat manifold.
 is_flat(M::Symplectic) = false
 
 @doc raw"""
-    manifold_dimension(::Symplectic{n})
+    manifold_dimension(::Symplectic)
 
 Returns the dimension of the symplectic manifold
 embedded in ``ℝ^{2n \times 2n}``, i.e.
@@ -545,7 +557,10 @@ embedded in ``ℝ^{2n \times 2n}``, i.e.
     \operatorname{dim}(\operatorname{Sp}(2n)) = (2n + 1)n.
 ````
 """
-manifold_dimension(::Symplectic{n}) where {n} = (2n + 1) * n
+function manifold_dimension(M::Symplectic)
+    n = get_parameter(M.size)[1]
+    return (2n + 1) * n
+end
 
 @doc raw"""
     project(::Symplectic, p, A)
@@ -586,7 +601,7 @@ function project!(::Symplectic, Y, p, A)
 end
 
 @doc raw"""
-    project!(::MetricManifold{𝔽,Euclidean,ExtendedSymplecticMetric}, Y, p, X) where {𝔽}
+    project!(::MetricManifold{𝔽,<:Euclidean,ExtendedSymplecticMetric}, Y, p, X) where {𝔽}
 
 Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\operatorname{Sp}(2n, ℝ)`` w.r.t.
 the Riemannian metric ``g`` [`RealSymplecticMetric`](@ref).
@@ -599,12 +614,7 @@ The closed form projection mapping is given by [GaoSonAbsilStykel:2021](@cite)
 where ``\operatorname{sym}(A) = \frac{1}{2}(A + A^{\mathrm{T}})``.
 This function is not exported.
 """
-function project!(
-    ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
-    Y,
-    p,
-    X,
-) where {m,n,𝔽}
+function project!(::MetricManifold{<:Any,<:Euclidean,ExtendedSymplecticMetric}, Y, p, X)
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
@@ -615,7 +625,7 @@ function project!(
 end
 
 @doc raw"""
-    project_normal!(::MetricManifold{𝔽,Euclidean,ExtendedSymplecticMetric}, Y, p, X)
+    project_normal!(::MetricManifold{𝔽,<:Euclidean,ExtendedSymplecticMetric}, Y, p, X)
 
 Project onto the normal of the tangent space ``(T_p\operatorname{Sp}(2n))^{\perp_g}`` at
 a point ``p ∈ \operatorname{Sp}(2n)``, relative to the riemannian metric
@@ -637,11 +647,11 @@ where ``\operatorname{skew}(A) = \frac{1}{2}(A - A^{\mathrm{T}})``.
 This function is not exported.
 """
 function project_normal!(
-    ::MetricManifold{𝔽,Euclidean{Tuple{m,n},𝔽},ExtendedSymplecticMetric},
+    M::MetricManifold{𝔽,<:Euclidean,ExtendedSymplecticMetric},
     Y,
     p,
     X,
-) where {m,n,𝔽}
+) where {𝔽}
     Q = SymplecticMatrix(p, X)
 
     pT_QT_X = p' * Q' * X
@@ -686,7 +696,8 @@ function Random.rand(
     end
 end
 
-function random_vector(::Symplectic{n}, p::AbstractMatrix; symmetric_norm=1.0) where {n}
+function random_vector(M::Symplectic, p::AbstractMatrix; symmetric_norm=1.0)
+    n = get_parameter(M.size)[1]
     # Generate random symmetric matrix:
     S = randn(2n, 2n)
     S .= (S + S')
@@ -696,7 +707,8 @@ function random_vector(::Symplectic{n}, p::AbstractMatrix; symmetric_norm=1.0) w
     return p * S
 end
 
-function rand_hamiltonian(::Symplectic{n}; frobenius_norm=1.0) where {n}
+function rand_hamiltonian(M::Symplectic; frobenius_norm=1.0)
+    n = get_parameter(M.size)[1]
     A = randn(n, n)
     B = randn(n, n)
     C = randn(n, n)
@@ -750,7 +762,13 @@ function retract_cayley!(M::Symplectic, q, p, X, t::Number)
     return q
 end
 
-Base.show(io::IO, ::Symplectic{n,𝔽}) where {n,𝔽} = print(io, "Symplectic{$(2n), $(𝔽)}()")
+function Base.show(io::IO, ::Symplectic{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+    return print(io, "Symplectic($(2n), $(𝔽))")
+end
+function Base.show(io::IO, M::Symplectic{Tuple{Int},𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return print(io, "Symplectic($(2n), $(𝔽); parameter=:field)")
+end
 
 @doc raw"""
     symplectic_inverse_times(::Symplectic, p, q)
@@ -763,12 +781,13 @@ That is, this function efficiently computes
 where ``Q_{2n}`` is the [`SymplecticMatrix`](@ref)
 of size ``2n \times 2n``.
 """
-function symplectic_inverse_times(M::Symplectic{n}, p, q) where {n}
+function symplectic_inverse_times(M::Symplectic, p, q)
     A = similar(p)
     return symplectic_inverse_times!(M, A, p, q)
 end
 
-function symplectic_inverse_times!(::Symplectic{n}, A, p, q) where {n}
+function symplectic_inverse_times!(M::Symplectic, A, p, q)
+    n = get_parameter(M.size)[1]
     # we write p = [p1 p2; p3 p4] (and q, too), then
     p1 = @view(p[1:n, 1:n])
     p2 = @view(p[1:n, (n + 1):(2n)])

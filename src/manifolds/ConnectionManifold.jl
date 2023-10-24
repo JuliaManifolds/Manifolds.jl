@@ -372,7 +372,7 @@ function solve_exp_ode end
 
 @doc raw"""
     solve_exp_ode(
-        M::AbstractConnectionManifold,
+        M::ConnectionManifold,
         p,
         X,
         t::Number,

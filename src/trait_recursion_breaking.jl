@@ -1,5 +1,6 @@
 
 # An unfortunate consequence of Julia's method recursion limitations
+# (the code below makes some calls of `isapprox` faster)
 
 for trait_type in [
     TraitList{<:IsDefaultMetric},

@@ -9,14 +9,14 @@ include("../utils.jl")
     @test !is_flat(M)
     q = [1.0 0.0; 0.0 1.0; 1.0 1.0; -1.0 1.0]
     q = q / norm(q)
-    @test is_point(M, q, true)
+    @test is_point(M, q; error=:error)
     @test base_manifold(M) === M
     qN = [2.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
-    @test_throws DomainError is_point(M, qN, true)
+    @test_throws DomainError is_point(M, qN; error=:error)
     Y = [0.0 1.0; 1.0 0.0; 0.0 0.0; 0.0 0.0]
-    @test is_vector(M, q, Y, true)
+    @test is_vector(M, q, Y; error=:error)
     YN = [0.1 1.0; 1.0 0.1; 0.0 0.0; 0.0 0.0]
-    @test_throws DomainError is_vector(M, q, YN, true)
+    @test_throws DomainError is_vector(M, q, YN; error=:error)
     qE = similar(q)
     embed!(M, qE, q)
     qE2 = embed(M, q)
@@ -53,5 +53,10 @@ include("../utils.jl")
                 test_inplace=true,
             )
         end
+    end
+    @testset "field parameter" begin
+        M = Spectrahedron(4, 2; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(M) == "Spectrahedron(4, 2; parameter=:field)"
     end
 end

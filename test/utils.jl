@@ -5,7 +5,7 @@ TEST_GROUP = get(ENV, "MANIFOLDS_TEST_GROUP", "all")
 
 using Manifolds
 using ManifoldsBase
-using ManifoldsBase: number_of_coordinates
+using ManifoldsBase: number_of_coordinates, TypeParameter
 import ManifoldsBase: active_traits, merge_traits
 
 using ManifoldDiff

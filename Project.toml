@@ -1,7 +1,7 @@
 name = "Manifolds"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.8.80"
+version = "0.9.0"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -49,8 +49,8 @@ Einsum = "0.4"
 Graphs = "1.4"
 HybridArrays = "0.4"
 Kronecker = "0.4, 0.5"
-ManifoldDiff = "0.3.6"
-ManifoldsBase = "0.14.12"
+ManifoldDiff = "0.3.7"
+ManifoldsBase = "0.15.0"
 MatrixEquations = "2.2"
 OrdinaryDiffEq = "6.31"
 Plots = "1"

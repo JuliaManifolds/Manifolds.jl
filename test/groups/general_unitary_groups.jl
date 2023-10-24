@@ -3,7 +3,7 @@ include("group_utils.jl")
 
 @testset "General Unitary Groups" begin
     # SpecialUnitary -> injectivity us also π√2
-    SU3 = Manifolds.GeneralUnitaryMatrices{3,ℂ,Manifolds.DeterminantOneMatrices}()
+    SU3 = SpecialUnitary(3)
     @test injectivity_radius(SU3) == π * √2
     @testset "Orthogonal Group" begin
         O2 = Orthogonal(2)
@@ -147,30 +147,30 @@ include("group_utils.jl")
 
         p = ones(2, 2)
         q = project(SU2, p)
-        @test is_point(SU2, q, true)
+        @test is_point(SU2, q; error=:error)
         q2 = allocate(q)
         project!(SU2, q2, p)
         @test q == q2
         p2 = copy(p)
         p2[1, 1] = -1
         q2 = project(SU2, p2)
-        @test is_point(SU2, q2, true)
+        @test is_point(SU2, q2; error=:error)
         p3 = [2.0 0; 0.0 2.0] #real pos determinant
         @test project(SU2, p3) == p3 ./ 2
         Xe = ones(2, 2)
         X = project(SU2, q, Xe)
         @test is_vector(SU2, q, X)
-        @test_throws ManifoldDomainError is_vector(SU2, p, X, true, true) # base point wrong
-        @test_throws DomainError is_vector(SU2, q, Xe, true, true) # Xe not skew hermitian
+        @test_throws DomainError is_vector(SU2, p, X, true; error=:error) # base point wrong
+        @test_throws DomainError is_vector(SU2, q, Xe, true; error=:error) # Xe not skew hermitian
         @test_throws DomainError is_vector(
             SU2,
             Identity(AdditionOperation()),
             Xe,
-            true,
-            true,
+            true;
+            error=:error,
         ) # base point wrong
         e = Identity(MultiplicationOperation())
-        @test_throws DomainError is_vector(SU2, e, Xe, true, true) # Xe not skew hermitian
+        @test_throws DomainError is_vector(SU2, e, Xe, true; error=:error) # Xe not skew hermitian
 
         @test manifold_volume(SpecialUnitary(1)) ≈ 1
         @test manifold_volume(SpecialUnitary(2)) ≈ 2 * π^2
@@ -229,5 +229,19 @@ include("group_utils.jl")
         @test isapprox(X3a, X3b)
         @test is_vector(Rotations(4), E, X3b)
         @test X3a[2, 3] ≈ π
+    end
+
+    @testset "field parameter" begin
+        G = Orthogonal(2; parameter=:field)
+        @test repr(G) == "Orthogonal(2; parameter=:field)"
+
+        SU3 = SpecialUnitary(3; parameter=:field)
+        @test repr(SU3) == "SpecialUnitary(3; parameter=:field)"
+
+        G = Unitary(3, ℂ; parameter=:field)
+        @test repr(G) == "Unitary(3; parameter=:field)"
+
+        G = Unitary(3, ℍ; parameter=:field)
+        @test repr(G) == "Unitary(3, ℍ; parameter=:field)"
     end
 end

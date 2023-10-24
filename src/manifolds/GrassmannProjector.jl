@@ -21,13 +21,14 @@ ManifoldsBase.@manifold_vector_forwards ProjectorTVector value
 ManifoldsBase.@manifold_element_forwards ProjectorPoint value
 
 @doc raw"""
-    check_point(::Grassmann{n,k}, p::ProjectorPoint; kwargs...)
+    check_point(::Grassmann, p::ProjectorPoint; kwargs...)
 
 Check whether an orthogonal projector is a point from the [`Grassmann`](@ref)`(n,k)` manifold,
 i.e. the [`ProjectorPoint`](@ref) ``p ∈ \mathbb F^{n×n}``, ``\mathbb F ∈ \{\mathbb R, \mathbb C\}``
 has to fulfill ``p^{\mathrm{T}} = p``, ``p^2=p``, and ``\operatorname{rank} p = k`.
 """
-function check_point(M::Grassmann{n,k,𝔽}, p::ProjectorPoint; kwargs...) where {n,k,𝔽}
+function check_point(M::Grassmann, p::ProjectorPoint; kwargs...)
+    n, k = get_parameter(M.size)
     c = p.value * p.value
     if !isapprox(c, p.value; kwargs...)
         return DomainError(
@@ -52,16 +53,16 @@ function check_point(M::Grassmann{n,k,𝔽}, p::ProjectorPoint; kwargs...) where
 end
 
 @doc raw"""
-    check_size(M::Grassmann{n,k,𝔽}, p::ProjectorPoint; kwargs...) where {n,k}
+    check_size(M::Grassmann, p::ProjectorPoint; kwargs...)
 
 Check that the [`ProjectorPoint`](@ref) is of correct size, i.e. from ``\mathbb F^{n×n}``
 """
-function check_size(M::Grassmann{n,k,𝔽}, p::ProjectorPoint; kwargs...) where {n,k,𝔽}
+function check_size(M::Grassmann, p::ProjectorPoint; kwargs...)
     return check_size(get_embedding(M, p), p.value; kwargs...)
 end
 
 @doc raw"""
-    check_vector(::Grassmann{n,k,𝔽}, p::ProjectorPoint, X::ProjectorTVector; kwargs...) where {n,k,𝔽}
+    check_vector(::Grassmann, p::ProjectorPoint, X::ProjectorTVector; kwargs...)
 
 Check whether the [`ProjectorTVector`](@ref) `X` is from the tangent space ``T_p\operatorname{Gr}(n,k) ``
 at the [`ProjectorPoint`](@ref) `p` on the [`Grassmann`](@ref) manifold ``\operatorname{Gr}(n,k)``.
@@ -74,12 +75,7 @@ Xp + pX = X
 must hold, where the `kwargs` can be used to check both for symmetrix of ``X```
 and this equality up to a certain tolerance.
 """
-function check_vector(
-    M::Grassmann{n,k,𝔽},
-    p::ProjectorPoint,
-    X::ProjectorTVector;
-    kwargs...,
-) where {n,k,𝔽}
+function check_vector(M::Grassmann, p::ProjectorPoint, X::ProjectorTVector; kwargs...)
     if !isapprox(X.value, X.value'; kwargs...)
         return DomainError(
             norm(X.value - X.value'),
@@ -101,23 +97,35 @@ embed(::Grassmann, p::ProjectorPoint) = p.value
 embed(::Grassmann, p, X::ProjectorTVector) = X.value
 
 @doc raw"""
-    get_embedding(M::Grassmann{n,k,𝔽}, p::ProjectorPoint) where {n,k,𝔽}
+    get_embedding(M::Grassmann, p::ProjectorPoint)
 
 Return the embedding of the [`ProjectorPoint`](@ref) representation of the [`Grassmann`](@ref)
 manifold, i.e. the Euclidean space ``\mathbb F^{n×n}``.
 """
-get_embedding(::Grassmann{n,k,𝔽}, ::ProjectorPoint) where {n,k,𝔽} = Euclidean(n, n; field=𝔽)
+function get_embedding(
+    ::Grassmann{TypeParameter{Tuple{n,k}},𝔽},
+    ::ProjectorPoint,
+) where {n,k,𝔽}
+    return Euclidean(n, n; field=𝔽)
+end
+function get_embedding(M::Grassmann{Tuple{Int,Int},𝔽}, ::ProjectorPoint) where {𝔽}
+    n, k = get_parameter(M.size)
+    return Euclidean(n, n; field=𝔽, parameter=:field)
+end
 
 @doc raw"""
-    representation_size(M::Grassmann{n,k}, p::ProjectorPoint)
+    representation_size(M::Grassmann, p::ProjectorPoint)
 
 Return the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)
 `M` when using [`ProjectorPoint`](@ref)s, i.e. ``(n,n)``.
 """
-@generated representation_size(::Grassmann{n,k}, p::ProjectorPoint) where {n,k} = (n, n)
+function representation_size(M::Grassmann, p::ProjectorPoint)
+    n, k = get_parameter(M.size)
+    return (n, n)
+end
 
 @doc raw"""
-    canonical_project!(M::Grassmann{n,k}, q::ProjectorPoint, p)
+    canonical_project!(M::Grassmann, q::ProjectorPoint, p)
 
 Compute the canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold onto the [`Grassmann`](@ref)
 manifold when represented as [`ProjectorPoint`](@ref), i.e.
@@ -126,27 +134,20 @@ manifold when represented as [`ProjectorPoint`](@ref), i.e.
     π^{\mathrm{SG}}(p) = pp^{\mathrm{T}}
 ```
 """
-function canonical_project!(::Grassmann{n,k}, q::ProjectorPoint, p) where {n,k}
+function canonical_project!(::Grassmann, q::ProjectorPoint, p)
     q.value .= p * p'
     return q
 end
-function canonical_project!(
-    M::Grassmann{n,k},
-    q::ProjectorPoint,
-    p::StiefelPoint,
-) where {n,k}
+function canonical_project!(M::Grassmann, q::ProjectorPoint, p::StiefelPoint)
     return canonical_project!(M, q, p.value)
 end
-function allocate_result(
-    ::Grassmann{n,k},
-    ::typeof(canonical_project),
-    p::StiefelPoint,
-) where {n,k}
+function allocate_result(M::Grassmann, ::typeof(canonical_project), p::StiefelPoint)
+    n, k = get_parameter(M.size)
     return ProjectorPoint(allocate(p.value, (n, n)))
 end
 
 @doc raw"""
-    canonical_project!(M::Grassmann{n,k}, q::ProjectorPoint, p)
+    canonical_project!(M::Grassmann, q::ProjectorPoint, p)
 
 Compute the canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold onto the [`Grassmann`](@ref)
 manifold when represented as [`ProjectorPoint`](@ref), i.e.
@@ -155,39 +156,31 @@ manifold when represented as [`ProjectorPoint`](@ref), i.e.
     Dπ^{\mathrm{SG}}(p)[X] = Xp^{\mathrm{T}} + pX^{\mathrm{T}}
 ```
 """
-function differential_canonical_project!(
-    ::Grassmann{n,k},
-    Y::ProjectorTVector,
-    p,
-    X,
-) where {n,k}
+function differential_canonical_project!(::Grassmann, Y::ProjectorTVector, p, X)
     Xpt = X * p'
     Y.value .= Xpt .+ Xpt'
     return Y
 end
 function differential_canonical_project!(
-    M::Grassmann{n,k},
+    M::Grassmann,
     Y::ProjectorTVector,
     p::StiefelPoint,
     X::StiefelTVector,
-) where {n,k}
+)
     differential_canonical_project!(M, Y, p.value, X.value)
     return Y
 end
 function allocate_result(
-    ::Grassmann{n,k},
+    M::Grassmann,
     ::typeof(differential_canonical_project),
     p::StiefelPoint,
     X::StiefelTVector,
-) where {n,k}
+)
+    n, k = get_parameter(M.size)
     return ProjectorTVector(allocate(p.value, (n, n)))
 end
-function allocate_result(
-    ::Grassmann{n,k},
-    ::typeof(differential_canonical_project),
-    p,
-    X,
-) where {n,k}
+function allocate_result(M::Grassmann, ::typeof(differential_canonical_project), p, X)
+    n, k = get_parameter(M.size)
     return ProjectorTVector(allocate(p, (n, n)))
 end
 

@@ -1,19 +1,20 @@
 @doc raw"""
-    TranslationGroup{T<:Tuple,𝔽} <: GroupManifold{Euclidean{T,𝔽},AdditionOperation}
+    TranslationGroup{T,𝔽} <: GroupManifold{Euclidean{T,𝔽},AdditionOperation}
 
 Translation group $\mathrm{T}(n)$ represented by translation arrays.
 
 # Constructor
-    TranslationGroup(n₁,...,nᵢ; field = 𝔽)
+    TranslationGroup(n₁,...,nᵢ; field=𝔽, parameter::Symbol=:type)
 
 Generate the translation group on
-$𝔽^{n₁,…,nᵢ}$ = `Euclidean(n₁,...,nᵢ; field = 𝔽)`, which is isomorphic to the group itself.
+$𝔽^{n₁,…,nᵢ}$ = `Euclidean(n₁,...,nᵢ; field=𝔽)`, which is isomorphic to the group itself.
 """
-const TranslationGroup{T<:Tuple,𝔽} = GroupManifold{𝔽,Euclidean{T,𝔽},AdditionOperation}
+const TranslationGroup{T,𝔽} = GroupManifold{𝔽,Euclidean{T,𝔽},AdditionOperation}
 
-function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ)
-    return TranslationGroup{Tuple{n...},field}(
-        Euclidean(n...; field=field),
+function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ, parameter::Symbol=:type)
+    size = wrap_type_parameter(parameter, n)
+    return TranslationGroup{typeof(size),field}(
+        Euclidean(n...; field=field, parameter=parameter),
         AdditionOperation(),
     )
 end
@@ -25,7 +26,6 @@ end
     else
         return merge_traits(
             IsGroupManifold(M.op),
-            HasBiinvariantMetric(),
             IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(), #pass to Euclidean by default/last fallback
@@ -34,6 +34,10 @@ end
 end
 
 exp!(::TranslationGroup, q, ::Identity{AdditionOperation}, X) = copyto!(q, X)
+
+has_biinvariant_metric(::TranslationGroup) = true
+
+has_invariant_metric(::TranslationGroup, ::ActionDirectionAndSide) = true
 
 identity_element!(::TranslationGroup, p) = fill!(p, 0)
 
@@ -44,6 +48,11 @@ function log!(::TranslationGroup, X, p::Identity{AdditionOperation}, q)
     return X
 end
 
-function Base.show(io::IO, ::TranslationGroup{N,𝔽}) where {N,𝔽}
-    return print(io, "TranslationGroup($(join(N.parameters, ", ")); field = $(𝔽))")
+function Base.show(io::IO, M::TranslationGroup{N,𝔽}) where {N<:Tuple,𝔽}
+    size = get_parameter(M.manifold.size)
+    return print(io, "TranslationGroup($(join(size, ", ")); field=$(𝔽), parameter=:field)")
+end
+function Base.show(io::IO, M::TranslationGroup{N,𝔽}) where {N<:TypeParameter,𝔽}
+    size = get_parameter(M.manifold.size)
+    return print(io, "TranslationGroup($(join(size, ", ")); field=$(𝔽))")
 end

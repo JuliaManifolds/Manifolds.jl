@@ -1,18 +1,18 @@
 @doc raw"""
-    AbstractMultinomialDoublyStochastic{N} <: AbstractDecoratorManifold{ℝ}
+    AbstractMultinomialDoublyStochastic <: AbstractDecoratorManifold{ℝ}
 
 A common type for manifolds that are doubly stochastic, for example by direct constraint
 [`MultinomialDoubleStochastic`](@ref) or by symmetry [`MultinomialSymmetric`](@ref),
 as long as they are also modeled as [`IsIsometricEmbeddedManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.IsIsometricEmbeddedManifold).
 """
-abstract type AbstractMultinomialDoublyStochastic{N} <: AbstractDecoratorManifold{ℝ} end
+abstract type AbstractMultinomialDoublyStochastic <: AbstractDecoratorManifold{ℝ} end
 
 function active_traits(f, ::AbstractMultinomialDoublyStochastic, args...)
     return merge_traits(IsIsometricEmbeddedManifold())
 end
 
 @doc raw"""
-    MultinomialDoublyStochastic{n} <: AbstractMultinomialDoublyStochastic{N}
+    MultinomialDoublyStochastic{T} <: AbstractMultinomialDoublyStochastic
 
 The set of doubly stochastic multinomial matrices consists of all $n×n$ matrices with
 stochastic columns and rows, i.e.
@@ -41,14 +41,17 @@ More details can be found in Section III [DouikHassibi:2019](@cite).
 
 # Constructor
 
-    MultinomialDoubleStochastic(n)
+    MultinomialDoubleStochastic(n::Int; parameter::Symbol=:type)
 
 Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic and symmetric.
 """
-struct MultinomialDoubleStochastic{N} <: AbstractMultinomialDoublyStochastic{N} end
+struct MultinomialDoubleStochastic{T} <: AbstractMultinomialDoublyStochastic
+    size::T
+end
 
-function MultinomialDoubleStochastic(n::Int)
-    return MultinomialDoubleStochastic{n}()
+function MultinomialDoubleStochastic(n::Int; parameter::Symbol=:type)
+    size = wrap_type_parameter(parameter, (n,))
+    return MultinomialDoubleStochastic{typeof(size)}(size)
 end
 
 @doc raw"""
@@ -57,7 +60,8 @@ end
 Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)`(n)` `M`,
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
-function check_point(M::MultinomialDoubleStochastic{n}, p; kwargs...) where {n}
+function check_point(M::MultinomialDoubleStochastic, p; kwargs...)
+    n = get_parameter(M.size)[1]
     r = sum(p, dims=2)
     if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
         return DomainError(
@@ -74,7 +78,7 @@ Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialDoubleSt
 This means, that `p` is valid, that `X` is of correct dimension and sums to zero along any
 column or row.
 """
-function check_vector(M::MultinomialDoubleStochastic{n}, p, X; kwargs...) where {n}
+function check_vector(M::MultinomialDoubleStochastic, p, X; kwargs...)
     r = sum(X, dims=2) # check for stochastic rows
     if !isapprox(norm(r), 0.0; kwargs...)
         return DomainError(
@@ -85,8 +89,12 @@ function check_vector(M::MultinomialDoubleStochastic{n}, p, X; kwargs...) where 
     return nothing
 end
 
-function get_embedding(::MultinomialDoubleStochastic{N}) where {N}
-    return MultinomialMatrices(N, N)
+function get_embedding(::MultinomialDoubleStochastic{TypeParameter{Tuple{n}}}) where {n}
+    return MultinomialMatrices(n, n)
+end
+function get_embedding(M::MultinomialDoubleStochastic{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return MultinomialMatrices(n, n; parameter=:field)
 end
 
 """
@@ -97,7 +105,7 @@ Return false. [`MultinomialDoubleStochastic`](@ref) is not a flat manifold.
 is_flat(M::MultinomialDoubleStochastic) = false
 
 @doc raw"""
-    manifold_dimension(M::MultinomialDoubleStochastic{n}) where {n}
+    manifold_dimension(M::MultinomialDoubleStochastic)
 
 returns the dimension of the [`MultinomialDoubleStochastic`](@ref) manifold
 namely
@@ -105,12 +113,13 @@ namely
 \operatorname{dim}_{\mathcal{DP}(n)} = (n-1)^2.
 ````
 """
-@generated function manifold_dimension(::MultinomialDoubleStochastic{n}) where {n}
+function manifold_dimension(M::MultinomialDoubleStochastic)
+    n = get_parameter(M.size)[1]
     return (n - 1)^2
 end
 
 @doc raw"""
-    project(M::MultinomialDoubleStochastic{n}, p, Y) where {n}
+    project(M::MultinomialDoubleStochastic, p, Y)
 
 Project `Y` onto the tangent space at `p` on the [`MultinomialDoubleStochastic`](@ref) `M`, return the result in `X`.
 The formula reads
@@ -130,7 +139,8 @@ where $I_n$ is the $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length
 """
 project(::MultinomialDoubleStochastic, ::Any, ::Any)
 
-function project!(::MultinomialDoubleStochastic{n}, X, p, Y) where {n}
+function project!(M::MultinomialDoubleStochastic, X, p, Y)
+    n = get_parameter(M.size)[1]
     ζ = [I p; p I] \ [sum(Y, dims=2); sum(Y, dims=1)'] # Formula (25) from 1802.02628
     return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[(n + 1):end]', 3, 1)) .* p
 end
@@ -153,12 +163,12 @@ function project(M::AbstractMultinomialDoublyStochastic, p; kwargs...)
 end
 
 function project!(
-    ::AbstractMultinomialDoublyStochastic{n},
+    ::AbstractMultinomialDoublyStochastic,
     q,
     p;
     maxiter=100,
     tolerance=eps(eltype(p)),
-) where {n}
+)
     any(p .<= 0) && throw(
         DomainError(
             "The matrix $p can not be projected, since it has nonpositive entries.",
@@ -180,7 +190,8 @@ function project!(
     return q
 end
 
-@generated function representation_size(::MultinomialDoubleStochastic{n}) where {n}
+function representation_size(M::MultinomialDoubleStochastic)
+    n = get_parameter(M.size)[1]
     return (n, n)
 end
 
@@ -197,6 +208,10 @@ function retract_project!(M::MultinomialDoubleStochastic, q, p, X, t::Number)
     return project!(M, q, p .* exp.(t .* X ./ p))
 end
 
-function Base.show(io::IO, ::MultinomialDoubleStochastic{n}) where {n}
+function Base.show(io::IO, ::MultinomialDoubleStochastic{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "MultinomialDoubleStochastic($(n))")
+end
+function Base.show(io::IO, M::MultinomialDoubleStochastic{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return print(io, "MultinomialDoubleStochastic($(n); parameter=:field)")
 end

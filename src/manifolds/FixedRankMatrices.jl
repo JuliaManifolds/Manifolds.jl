@@ -1,5 +1,5 @@
 @doc raw"""
-    FixedRankMatrices{m,n,k,𝔽} <: AbstractDecoratorManifold{𝔽}
+    FixedRankMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The manifold of ``m × n`` real-valued or complex-valued matrices of fixed rank ``k``, i.e.
 ````math
@@ -36,9 +36,19 @@ on ``ℝ^{m × n}`` to the tangent bundle [Vandereycken:2013](@cite).
 
 Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
 """
-struct FixedRankMatrices{M,N,K,𝔽} <: AbstractDecoratorManifold{𝔽} end
-function FixedRankMatrices(m::Int, n::Int, k::Int, field::AbstractNumbers=ℝ)
-    return FixedRankMatrices{m,n,k,field}()
+struct FixedRankMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
+
+function FixedRankMatrices(
+    m::Int,
+    n::Int,
+    k::Int,
+    field::AbstractNumbers=ℝ;
+    parameter::Symbol=:type,
+)
+    size = wrap_type_parameter(parameter, (m, n, k))
+    return FixedRankMatrices{typeof(size),field}(size)
 end
 
 active_traits(f, ::FixedRankMatrices, args...) = merge_traits(IsEmbeddedManifold())
@@ -115,11 +125,6 @@ Base.:(==)(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt
 
 Retractions that are related to orthographic projections, which was first
 used in [AbsilMalick:2012](@cite).
-
-!!! note "Technical Note"
-    Though you would call e.g. [`retract`](@ref)`(M, p, X, OrthographicRetractionRetractiontraction())`,
-    to implement a orthographic retraction, define [`retract_orthographic`](@ref)`(M, p, X, t)`
-    or [`retract_orthographic!`](@ref)`(M, q, p, X, t)` for your manifold `M`.
 """
 struct OrthographicRetraction <: AbstractRetractionMethod end
 
@@ -128,11 +133,6 @@ struct OrthographicRetraction <: AbstractRetractionMethod end
 
 Retractions that are related to orthographic projections, which was first
 used in [AbsilMalick:2012](@cite).
-
-!!! note "Technical Note"
-    Though you would call e.g. [`inverse_retract`](@ref)`(M, p, q, OrthographicRetractionInverseRetraction())`,
-    to implement an inverse orthographic retraction, define [`inverse_retract_orthographic`](@ref)`(M, p, q)`
-    or [`inverse_retract_orthographic!`](@ref)`(M, X, p, q)` for your manifold `M`.
 """
 struct OrthographicInverseRetraction <: AbstractInverseRetractionMethod end
 
@@ -145,27 +145,6 @@ function _inverse_retract!(
     ::OrthographicInverseRetraction;
     kwargs...,
 )
-    return inverse_retract_orthographic!(M, X, p, q; kwargs...)
-end
-
-function _inverse_retract(
-    M::AbstractManifold,
-    p,
-    q,
-    ::OrthographicInverseRetraction;
-    kwargs...,
-)
-    return inverse_retract_orthographic(M, p, q; kwargs...)
-end
-
-"""
-    inverse_retract_orthographic(M::AbstractManifold, p, q)
-
-computes the allocating variant of the [`OrthographicInverseRetraction`](@ref),
-which by default allocates and calls [`inverse_retract_orthographic!`](@ref inverse_retract_orthographic!).
-"""
-function inverse_retract_orthographic(M::AbstractManifold, p, q; kwargs...)
-    X = allocate_result(M, inverse_retract, p, q)
     return inverse_retract_orthographic!(M, X, p, q; kwargs...)
 end
 
@@ -189,9 +168,6 @@ function _retract!(
 )
     return retract_orthographic!(M, q, p, X, t; kwargs...)
 end
-function _retract(M::AbstractManifold, p, X, t::Number, ::OrthographicRetraction; kwargs...)
-    return retract_orthographic(M, p, X, t; kwargs...)
-end
 
 ## Layer III
 """
@@ -201,16 +177,6 @@ Compute the in-place variant of the [`OrthographicRetraction`](@ref).
 """
 retract_orthographic!(M::AbstractManifold, q, p, X, t::Number)
 
-"""
-    retract_orthographic(M::AbstractManifold, p, X, t::Number)
-
-computes the allocating variant of the [`OrthographicRetraction`](@ref),
-which by default allocates and calls [`retract_polar!`](@ref retract_orthographic!).
-"""
-function retract_orthographic(M::AbstractManifold, p, X, t::Number; kwargs...)
-    q = allocate_result(M, retract, p, X)
-    return retract_orthographic!(M, q, p, X, t; kwargs...)
-end
 # \|---
 
 allocate(p::SVDMPoint) = SVDMPoint(allocate(p.U), allocate(p.S), allocate(p.Vt))
@@ -222,34 +188,13 @@ function allocate(X::UMVTVector, ::Type{T}) where {T}
     return UMVTVector(allocate(X.U, T), allocate(X.M, T), allocate(X.Vt, T))
 end
 
-function allocate_result(
-    M::FixedRankMatrices{m,n,k},
-    ::typeof(inverse_retract),
-    p,
-    q,
-) where {m,n,k}
+function allocate_result(M::FixedRankMatrices, ::typeof(inverse_retract), p, q)
     return zero_vector(M, p)
 end
-function allocate_result(
-    ::FixedRankMatrices{m,n,k},
-    ::typeof(project),
-    X,
-    p,
-    vals...,
-) where {m,n,k}
+function allocate_result(M::FixedRankMatrices, ::typeof(project), X, p, vals...)
+    m, n, k = get_parameter(M.size)
     # vals are p and X, so we can use their fields to set up those of the UMVTVector
     return UMVTVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
-end
-function allocate_result(::FixedRankMatrices{m,n,k}, ::typeof(rand), p) where {m,n,k}
-    # vals are p and X, so we can use their fields to set up those of the UMVTVector
-    return UMVTVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
-end
-function allocate_result(::FixedRankMatrices{m,n,k}, ::typeof(rand)) where {m,n,k}
-    return SVDMPoint(
-        Matrix{Float64}(undef, m, k),
-        Vector{Float64}(undef, k),
-        Matrix{Float64}(undef, k, n),
-    )
 end
 
 Base.copy(v::UMVTVector) = UMVTVector(copy(v.U), copy(v.M), copy(v.Vt))
@@ -308,15 +253,16 @@ Base.axes(::UMVTVector) = ()
 end
 
 @doc raw"""
-    check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...)
+    check_point(M::FixedRankMatrices, p; kwargs...)
 
 Check whether the matrix or [`SVDMPoint`](@ref) `x` ids a valid point on the
-[`FixedRankMatrices`](@ref)`{m,n,k,𝔽}` `M`, i.e. is an `m`-by`n` matrix of
+[`FixedRankMatrices`](@ref) `M`, i.e. is an `m`-by`n` matrix of
 rank `k`. For the [`SVDMPoint`](@ref) the internal representation also has to have the right
 shape, i.e. `p.U` and `p.Vt` have to be unitary. The keyword arguments are passed to the
 `rank` function that verifies the rank of `p`.
 """
-function check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
+function check_point(M::FixedRankMatrices, p; kwargs...)
+    m, n, k = get_parameter(M.size)
     r = rank(p; kwargs...)
     s = "The point $(p) does not lie on $(M), "
     if r > k
@@ -324,7 +270,8 @@ function check_point(M::FixedRankMatrices{m,n,k}, p; kwargs...) where {m,n,k}
     end
     return nothing
 end
-function check_point(M::FixedRankMatrices{m,n,k}, p::SVDMPoint; kwargs...) where {m,n,k}
+function check_point(M::FixedRankMatrices, p::SVDMPoint; kwargs...)
+    m, n, k = get_parameter(M.size)
     s = "The point $(p) does not lie on $(M), "
     if !isapprox(p.U' * p.U, one(zeros(k, k)); kwargs...)
         return DomainError(
@@ -341,7 +288,8 @@ function check_point(M::FixedRankMatrices{m,n,k}, p::SVDMPoint; kwargs...) where
     return nothing
 end
 
-function check_size(M::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
+function check_size(M::FixedRankMatrices, p::SVDMPoint)
+    m, n, k = get_parameter(M.size)
     if (size(p.U) != (m, k)) || (length(p.S) != k) || (size(p.Vt) != (k, n))
         return DomainError(
             [size(p.U)..., length(p.S), size(p.Vt)...],
@@ -349,7 +297,8 @@ function check_size(M::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
         )
     end
 end
-function check_size(M::FixedRankMatrices{m,n,k}, p) where {m,n,k}
+function check_size(M::FixedRankMatrices, p)
+    m, n, k = get_parameter(M.size)
     pS = svd(p)
     if (size(pS.U) != (m, k)) || (length(pS.S) != k) || (size(pS.Vt) != (k, n))
         return DomainError(
@@ -358,7 +307,8 @@ function check_size(M::FixedRankMatrices{m,n,k}, p) where {m,n,k}
         )
     end
 end
-function check_size(M::FixedRankMatrices{m,n,k}, p, X::UMVTVector) where {m,n,k}
+function check_size(M::FixedRankMatrices, p, X::UMVTVector)
+    m, n, k = get_parameter(M.size)
     if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))
         return DomainError(
             cat(size(X.U), size(X.M), size(X.Vt), dims=1),
@@ -368,18 +318,14 @@ function check_size(M::FixedRankMatrices{m,n,k}, p, X::UMVTVector) where {m,n,k}
 end
 
 @doc raw"""
-    check_vector(M:FixedRankMatrices{m,n,k}, p, X; kwargs...)
+    check_vector(M:FixedRankMatrices, p, X; kwargs...)
 
 Check whether the tangent [`UMVTVector`](@ref) `X` is from the tangent space of the [`SVDMPoint`](@ref) `p` on the
 [`FixedRankMatrices`](@ref) `M`, i.e. that `v.U` and `v.Vt` are (columnwise) orthogonal to `x.U` and `x.Vt`,
 respectively, and its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
 """
-function check_vector(
-    M::FixedRankMatrices{m,n,k},
-    p::SVDMPoint,
-    X::UMVTVector;
-    kwargs...,
-) where {m,n,k}
+function check_vector(M::FixedRankMatrices, p::SVDMPoint, X::UMVTVector; kwargs...)
+    m, n, k = get_parameter(M.size)
     if !isapprox(X.U' * p.U, zeros(k, k); kwargs...)
         return DomainError(
             norm(X.U' * p.U - zeros(k, k)),
@@ -468,7 +414,13 @@ function embed!(::FixedRankMatrices, Y, p::SVDMPoint, X::UMVTVector)
     return mul!(Y, p.U, X.Vt, true, true)
 end
 
-get_embedding(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽} = Euclidean(m, n; field=𝔽)
+function get_embedding(::FixedRankMatrices{TypeParameter{Tuple{m,n,k}},𝔽}) where {m,n,k,𝔽}
+    return Euclidean(m, n; field=𝔽)
+end
+function get_embedding(M::FixedRankMatrices{Tuple{Int,Int,Int},𝔽}) where {𝔽}
+    m, n, k = get_parameter(M.size)
+    return Euclidean(m, n; field=𝔽, parameter=:field)
+end
 
 """
     injectivity_radius(::FixedRankMatrices)
@@ -476,7 +428,7 @@ get_embedding(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽} = Euclidean(m,
 Return the incjectivity radius of the manifold of [`FixedRankMatrices`](@ref), i.e. 0.
 See [HosseiniUschmajew:2017](@cite).
 """
-function injectivity_radius(::FixedRankMatrices{m,n,k}) where {m,n,k}
+function injectivity_radius(::FixedRankMatrices)
     return 0.0
 end
 
@@ -506,13 +458,12 @@ For more details, see [AbsilOseledets:2014](@cite).
 inverse_retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicInverseRetraction)
 
 function inverse_retract_orthographic!(
-    M::FixedRankMatrices{m,n,k},
+    M::FixedRankMatrices,
     X::UMVTVector,
     p::SVDMPoint,
     q::SVDMPoint,
-) where {m,n,k}
+)
     project!(M, X, p, embed(M, q) - embed(M, p))
-
     return X
 end
 
@@ -548,7 +499,7 @@ function number_eltype(X::UMVTVector)
 end
 
 @doc raw"""
-    manifold_dimension(M::FixedRankMatrices{m,n,k,𝔽})
+    manifold_dimension(M::FixedRankMatrices)
 
 Return the manifold dimension for the `𝔽`-valued [`FixedRankMatrices`](@ref) `M`
 of dimension `m`x`n` of rank `k`, namely
@@ -559,7 +510,8 @@ of dimension `m`x`n` of rank `k`, namely
 
 where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
-function manifold_dimension(::FixedRankMatrices{m,n,k,𝔽}) where {m,n,k,𝔽}
+function manifold_dimension(M::FixedRankMatrices{<:Any,𝔽}) where {𝔽}
+    m, n, k = get_parameter(M.size)
     return (m + n - k) * k * real_dimension(𝔽)
 end
 
@@ -598,14 +550,36 @@ and the singular values are sampled uniformly at random.
 If `vector_at` is not `nothing`, generate a random tangent vector in the tangent space of
 the point `vector_at` on the `FixedRankMatrices` manifold `M`.
 """
-Random.rand(M::FixedRankMatrices; vector_at=nothing, kwargs...)
+function Random.rand(M::FixedRankMatrices; vector_at=nothing, kwargs...)
+    return rand(Random.default_rng(), M; vector_at=vector_at, kwargs...)
+end
+function Random.rand(rng::AbstractRNG, M::FixedRankMatrices; vector_at=nothing, kwargs...)
+    m, n, k = get_parameter(M.size)
+    if vector_at === nothing
+        p = SVDMPoint(
+            Matrix{Float64}(undef, m, k),
+            Vector{Float64}(undef, k),
+            Matrix{Float64}(undef, k, n),
+        )
+        return rand!(rng, M, p; kwargs...)
+    else
+        X = UMVTVector(
+            Matrix{Float64}(undef, m, k),
+            Matrix{Float64}(undef, k, k),
+            Matrix{Float64}(undef, k, n),
+        )
+        return rand!(rng, M, X; vector_at, kwargs...)
+    end
+end
+
 function Random.rand!(
     rng::AbstractRNG,
-    ::FixedRankMatrices{m,n,k},
+    M::FixedRankMatrices,
     pX;
     vector_at=nothing,
     kwargs...,
-) where {m,n,k}
+)
+    m, n, k = get_parameter(M.size)
     if vector_at === nothing
         U = rand(rng, Stiefel(m, k); kwargs...)
         S = sort(rand(rng, k); rev=true)
@@ -628,12 +602,15 @@ function Random.rand!(
 end
 
 @doc raw"""
-    representation_size(M::FixedRankMatrices{m,n,k})
+    representation_size(M::FixedRankMatrices)
 
 Return the element size of a point on the [`FixedRankMatrices`](@ref) `M`, i.e.
 the size of matrices on this manifold ``(m,n)``.
 """
-@generated representation_size(::FixedRankMatrices{m,n}) where {m,n} = (m, n)
+function representation_size(M::FixedRankMatrices)
+    m, n, k = get_parameter(M.size)
+    return (m, n)
+end
 
 @doc raw"""
     retract(M, p, X, ::OrthographicRetraction)
@@ -659,12 +636,13 @@ For more details, see [AbsilOseledets:2014](@cite).
 retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicRetraction)
 
 function retract_orthographic!(
-    ::FixedRankMatrices{m,n,k},
+    M::FixedRankMatrices,
     q::SVDMPoint,
     p::SVDMPoint,
     X::UMVTVector,
     t::Number,
-) where {m,n,k}
+)
+    m, n, k = get_parameter(M.size)
     tX = t * X
     QU, RU = qr(p.U * (diagm(p.S) + tX.M) + tX.U)
     QV, RV = qr(p.Vt' * (diagm(p.S) + tX.M') + tX.Vt')
@@ -692,18 +670,19 @@ singular values and ``U`` and ``V`` are shortened accordingly.
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
 
 function retract_polar!(
-    ::FixedRankMatrices{m,n,k},
+    M::FixedRankMatrices,
     q::SVDMPoint,
     p::SVDMPoint,
     X::UMVTVector,
     t::Number,
-) where {m,n,k}
+)
+    m, n, k = get_parameter(M.size)
     tX = t * X
     QU, RU = qr([p.U tX.U])
     QV, RV = qr([p.Vt' tX.Vt'])
 
     # Compute T = svd(RU * [diagm(p.S) + X.M I; I zeros(k, k)] * RV')
-    @views begin
+    @views begin # COV_EXCL_LINE
         RU11 = RU[:, 1:k]
         RU12 = RU[:, (k + 1):(2 * k)]
         RV11 = RV[:, 1:k]
@@ -744,8 +723,15 @@ function riemannian_Hessian!(M::FixedRankMatrices, Y, p, G, H, X)
     return Y
 end
 
-function Base.show(io::IO, ::FixedRankMatrices{M,N,K,𝔽}) where {M,N,K,𝔽}
-    return print(io, "FixedRankMatrices($(M), $(N), $(K), $(𝔽))")
+function Base.show(
+    io::IO,
+    ::FixedRankMatrices{TypeParameter{Tuple{m,n,k}},𝔽},
+) where {m,n,k,𝔽}
+    return print(io, "FixedRankMatrices($(m), $(n), $(k), $(𝔽))")
+end
+function Base.show(io::IO, M::FixedRankMatrices{Tuple{Int,Int,Int},𝔽}) where {𝔽}
+    m, n, k = get_parameter(M.size)
+    return print(io, "FixedRankMatrices($(m), $(n), $(k), $(𝔽); parameter=:field)")
 end
 function Base.show(io::IO, ::MIME"text/plain", p::SVDMPoint)
     pre = " "
@@ -800,7 +786,8 @@ Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangen
 `p` on the [`FixedRankMatrices`](@ref) `M`, for example all three elements of the resulting
 structure are zero matrices.
 """
-function zero_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
+function zero_vector(M::FixedRankMatrices, p::SVDMPoint)
+    m, n, k = get_parameter(M.size)
     v = UMVTVector(
         zeros(eltype(p.U), m, k),
         zeros(eltype(p.S), k, k),
@@ -809,9 +796,9 @@ function zero_vector(::FixedRankMatrices{m,n,k}, p::SVDMPoint) where {m,n,k}
     return v
 end
 
-function zero_vector!(::FixedRankMatrices{m,n,k}, X::UMVTVector, p::SVDMPoint) where {m,n,k}
-    X.U .= zeros(eltype(X.U), m, k)
-    X.M .= zeros(eltype(X.M), k, k)
-    X.Vt .= zeros(eltype(X.Vt), k, n)
+function zero_vector!(::FixedRankMatrices, X::UMVTVector, p::SVDMPoint)
+    X.U .= zero(eltype(X.U))
+    X.M .= zero(eltype(X.M))
+    X.Vt .= zero(eltype(X.Vt))
     return X
 end

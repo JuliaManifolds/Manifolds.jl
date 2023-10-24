@@ -30,32 +30,32 @@ using NLsolve
     @testset "Real" begin
         G = SpecialLinear(3)
 
-        @test_throws ManifoldDomainError is_point(G, randn(2, 3), true)
-        @test_throws ManifoldDomainError is_point(G, Float64[2 1; 1 1], true)
-        @test_throws ManifoldDomainError is_point(G, [1 0 im; im 0 0; 0 -1 0], true)
-        @test_throws ManifoldDomainError is_point(G, zeros(3, 3), true)
-        @test_throws DomainError is_point(G, Float64[1 3 3; 1 1 2; 1 2 3], true)
-        @test is_point(G, Float64[1 1 1; 2 2 1; 2 3 3], true)
-        @test is_point(G, Identity(G), true)
-        @test_throws ManifoldDomainError is_vector(
+        @test_throws ManifoldDomainError is_point(G, randn(2, 3); error=:error)
+        @test_throws ManifoldDomainError is_point(G, Float64[2 1; 1 1]; error=:error)
+        @test_throws ManifoldDomainError is_point(G, [1 0 im; im 0 0; 0 -1 0]; error=:error)
+        @test_throws ManifoldDomainError is_point(G, zeros(3, 3); error=:error)
+        @test_throws DomainError is_point(G, Float64[1 3 3; 1 1 2; 1 2 3]; error=:error)
+        @test is_point(G, Float64[1 1 1; 2 2 1; 2 3 3]; error=:error)
+        @test is_point(G, Identity(G); error=:error)
+        @test_throws DomainError is_vector(
             G,
             Float64[2 3 2; 3 1 2; 1 1 1],
-            randn(3, 3),
-            true;
+            randn(3, 3);
+            error=:error,
             atol=1e-6,
         )
         @test_throws DomainError is_vector(
             G,
             Float64[2 1 2; 3 2 2; 2 2 1],
-            Float64[2 1 -1; 2 2 1; 1 1 -1],
-            true;
+            Float64[2 1 -1; 2 2 1; 1 1 -1];
+            error=:error,
             atol=1e-6,
         )
         @test is_vector(
             G,
             Float64[2 1 2; 3 2 2; 2 2 1],
-            Float64[-1 -1 -1; 1 -1 2; -1 -1 2],
-            true;
+            Float64[-1 -1 -1; 1 -1 2; -1 -1 2];
+            error=:error,
             atol=1e-6,
         )
 
@@ -126,35 +126,35 @@ using NLsolve
     @testset "Complex" begin
         G = SpecialLinear(2, ℂ)
 
-        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3), true)
-        @test_throws DomainError is_point(G, randn(2, 2), true)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3); error=:error)
+        @test_throws DomainError is_point(G, randn(2, 2); error=:error)
         @test_throws ManifoldDomainError is_point(
             G,
-            ComplexF64[1 0 im; im 0 0; 0 -1 0],
-            true,
+            ComplexF64[1 0 im; im 0 0; 0 -1 0];
+            error=:error,
         )
-        @test_throws DomainError is_point(G, ComplexF64[1 im; im 1], true)
-        @test is_point(G, ComplexF64[im 1; -2 im], true)
-        @test is_point(G, Identity(G), true)
-        @test_throws ManifoldDomainError is_vector(
+        @test_throws DomainError is_point(G, ComplexF64[1 im; im 1]; error=:error)
+        @test is_point(G, ComplexF64[im 1; -2 im]; error=:error)
+        @test is_point(G, Identity(G); error=:error)
+        @test_throws DomainError is_vector(
             G,
             ComplexF64[-1+im -1; -im 1],
-            ComplexF64[1-im 1+im; 1 -1+im],
-            true;
+            ComplexF64[1-im 1+im; 1 -1+im];
+            error=:error,
             atol=1e-6,
         )
         @test_throws DomainError is_vector(
             G,
             ComplexF64[1 1+im; -1+im -1],
-            ComplexF64[1-im -1-im; -im im],
-            true;
+            ComplexF64[1-im -1-im; -im im];
+            error=:error,
             atol=1e-6,
         )
         @test is_vector(
             G,
             ComplexF64[1 1+im; -1+im -1],
-            ComplexF64[1-im 1+im; 1 -1+im],
-            true;
+            ComplexF64[1-im 1+im; 1 -1+im];
+            error=:error,
             atol=1e-6,
         )
 
@@ -214,5 +214,10 @@ using NLsolve
             @test is_vector(G, q, Y; atol=1e-6)
             @test project(G, q, Y) ≈ Y
         end
+    end
+    @testset "field parameter" begin
+        G = SpecialLinear(3; parameter=:field)
+        @test typeof(get_embedding(G)) === GeneralLinear{Tuple{Int64},ℝ}
+        @test repr(G) == "SpecialLinear(3, ℝ; parameter=:field)"
     end
 end

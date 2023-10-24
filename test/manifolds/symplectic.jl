@@ -74,18 +74,23 @@ using ManifoldDiff
         ]
 
         @testset "Basics" begin
-            @test repr(Sp_2) == "Symplectic{$(2), ℝ}()"
+            @test repr(Sp_2) == "Symplectic($(2), ℝ)"
             @test representation_size(Sp_2) == (2, 2)
             @test base_manifold(Sp_2) === Sp_2
             @test !is_flat(Sp_2)
 
             @test is_point(Sp_2, p_2)
-            @test_throws DomainError is_point(Sp_2, p_2 + I, true)
+            @test_throws DomainError is_point(Sp_2, p_2 + I; error=:error)
 
             @test is_vector(Sp_2, p_2, X1; atol=1.0e-6)
             @test is_vector(Sp_2, p_2, X2; atol=1.0e-12)
             @test is_vector(Sp_2, p_2, X1 + X2; atol=1.0e-6)
-            @test_throws DomainError is_vector(Sp_2, p_2, X1 + [0.1 0.1; -0.1 0.1], true)
+            @test_throws DomainError is_vector(
+                Sp_2,
+                p_2,
+                X1 + [0.1 0.1; -0.1 0.1];
+                error=:error,
+            )
         end
         @testset "Symplectic Inverse" begin
             I_2n = Array(I, 2, 2)
@@ -154,7 +159,7 @@ using ManifoldDiff
             # Project Project matrix A ∈ ℝ^{2 × 2} onto (T_pSp):
             A_2 = [5.0 -21.5; 3.14 14.9]
             A_2_proj = similar(A_2)
-            Manifolds.project!(Extended_Sp_2, A_2_proj, p_2, A_2)
+            project!(Extended_Sp_2, A_2_proj, p_2, A_2)
             @test is_vector(Sp_2, p_2, A_2_proj; atol=1.0e-16)
 
             # Change representer of A onto T_pSp:
@@ -185,9 +190,9 @@ using ManifoldDiff
         @testset "Generate random points/tangent vectors" begin
             M_big = Symplectic(20)
             p_big = rand(M_big)
-            @test is_point(M_big, p_big, true; atol=1.0e-12)
+            @test is_point(M_big, p_big; error=:error, atol=1.0e-12)
             X_big = rand(M_big; vector_at=p_big)
-            @test is_vector(M_big, p_big, X_big, true; atol=1.0e-12)
+            @test is_vector(M_big, p_big, X_big; error=:error, atol=1.0e-12)
         end
         @testset "test_manifold(Symplectic(6), ...)" begin
             @testset "Type $(Matrix{Float64})" begin
@@ -415,5 +420,10 @@ using ManifoldDiff
         @testset "Symplectic Inverse Ops." begin
             @test ((Q' * pQ_1' * Q) * pQ_1 - I) == zeros(eltype(pQ_1), size(pQ_1)...)
         end
+    end
+    @testset "field parameter" begin
+        Sp_2 = Symplectic(2; parameter=:field)
+        @test typeof(get_embedding(Sp_2)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(Sp_2) == "Symplectic(2, ℝ; parameter=:field)"
     end
 end

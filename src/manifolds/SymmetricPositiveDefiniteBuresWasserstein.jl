@@ -6,7 +6,7 @@ The Bures Wasserstein metric for symmetric positive definite matrices [MalagoMon
 struct BuresWassersteinMetric <: RiemannianMetric end
 
 @doc raw"""
-    change_representer(M::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, E::EuclideanMetric, p, X)
+    change_representer(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric}, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
 space at `p` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
@@ -23,7 +23,7 @@ for all ``Y`` and hence we get
 ``Z``= 2(A+A^{\mathrm{T}})`` with ``A=Xp``.
 """
 change_representer(
-    ::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric},
+    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
     ::EuclideanMetric,
     p,
     X,
@@ -73,7 +73,7 @@ the [`BuresWassersteinMetric`](@ref) given by
 
 where ``q=L_p(X)`` denotes the Lyapunov operator, i.e. it solves ``pq + qp = X``.
 """
-exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, p, X)
+exp(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric}, p, X)
 
 function exp!(
     ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
@@ -127,7 +127,7 @@ the [`BuresWassersteinMetric`](@ref) given by
 
 where ``q=L_p(X)`` denotes the Lyapunov operator, i.e. it solves ``pq + qp = X``.
 """
-log(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
+log(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 
 function log!(
     ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},

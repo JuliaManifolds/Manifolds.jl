@@ -1,5 +1,5 @@
 @doc raw"""
-    SpecialLinear{n,𝔽} <: AbstractDecoratorManifold
+    SpecialLinear{T,𝔽} <: AbstractDecoratorManifold
 
 The special linear group ``\mathrm{SL}(n,𝔽)`` that is, the group of all invertible matrices
 with unit determinant in ``𝔽^{n×n}``.
@@ -15,9 +15,14 @@ metric used for [`GeneralLinear(n, 𝔽)`](@ref). The resulting geodesic on
 an element of ``𝔰𝔩(n, 𝔽)`` is a closed subgroup of ``\mathrm{SL}(n,𝔽)``. As a result, most
 metric functions forward to [`GeneralLinear`](@ref).
 """
-struct SpecialLinear{n,𝔽} <: AbstractDecoratorManifold{𝔽} end
+struct SpecialLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
 
-SpecialLinear(n, 𝔽::AbstractNumbers=ℝ) = SpecialLinear{n,𝔽}()
+function SpecialLinear(n, 𝔽::AbstractNumbers=ℝ; parameter::Symbol=:type)
+    size = wrap_type_parameter(parameter, (n,))
+    return SpecialLinear{typeof(size),𝔽}(size)
+end
 
 @inline function active_traits(f, ::SpecialLinear, args...)
     return merge_traits(
@@ -28,11 +33,11 @@ SpecialLinear(n, 𝔽::AbstractNumbers=ℝ) = SpecialLinear{n,𝔽}()
     )
 end
 
-function allocation_promotion_function(::SpecialLinear{n,ℂ}, f, args::Tuple) where {n}
+function allocation_promotion_function(::SpecialLinear{<:Any,ℂ}, f, args::Tuple)
     return complex
 end
 
-function check_point(G::SpecialLinear{n,𝔽}, p; kwargs...) where {n,𝔽}
+function check_point(G::SpecialLinear, p; kwargs...)
     detp = det(p)
     if !isapprox(detp, 1; kwargs...)
         return DomainError(
@@ -59,12 +64,18 @@ end
 embed(::SpecialLinear, p) = p
 embed(::SpecialLinear, p, X) = X
 
-get_embedding(::SpecialLinear{n,𝔽}) where {n,𝔽} = GeneralLinear(n, 𝔽)
+function get_embedding(::SpecialLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+    return GeneralLinear(n, 𝔽)
+end
+function get_embedding(M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return GeneralLinear(n, 𝔽; parameter=:field)
+end
 
 inverse_translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X
 inverse_translate_diff(::SpecialLinear, p, q, X, ::RightBackwardAction) = p * X / p
 
-function inverse_translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirection)
+function inverse_translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirectionAndSide)
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
@@ -95,7 +106,8 @@ D_{ij} = δ_{ij} \begin{cases}
 """
 project(::SpecialLinear, p)
 
-function project!(::SpecialLinear{n}, q, p) where {n}
+function project!(M::SpecialLinear, q, p)
+    n = get_parameter(M.size)[1]
     detp = det(p)
     isapprox(detp, 1) && return copyto!(q, p)
     F = svd(p)
@@ -119,18 +131,25 @@ where the last expression uses the tangent space representation as the Lie algeb
 """
 project(::SpecialLinear, p, X)
 
-function project!(G::SpecialLinear{n}, Y, p, X) where {n}
+function project!(G::SpecialLinear, Y, p, X)
+    n = get_parameter(G.size)[1]
     inverse_translate_diff!(G, Y, p, p, X, LeftForwardAction())
     Y[diagind(n, n)] .-= tr(Y) / n
     translate_diff!(G, Y, p, p, Y, LeftForwardAction())
     return Y
 end
 
-Base.show(io::IO, ::SpecialLinear{n,𝔽}) where {n,𝔽} = print(io, "SpecialLinear($n, $𝔽)")
+function Base.show(io::IO, ::SpecialLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+    return print(io, "SpecialLinear($n, $𝔽)")
+end
+function Base.show(io::IO, M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    return print(io, "SpecialLinear($n, $𝔽; parameter=:field)")
+end
 
 translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X
 translate_diff(::SpecialLinear, p, q, X, ::RightBackwardAction) = p \ X * p
 
-function translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirection)
+function translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirectionAndSide)
     return copyto!(Y, translate_diff(G, p, q, X, conv))
 end

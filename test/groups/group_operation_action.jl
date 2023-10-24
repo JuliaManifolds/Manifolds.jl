@@ -2,6 +2,9 @@
 include("../utils.jl")
 include("group_utils.jl")
 
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
+
 @testset "Group operation action" begin
     G = GroupManifold(NotImplementedManifold(), Manifolds.MultiplicationOperation())
     A_left_fwd = GroupOperationAction(G)
@@ -13,11 +16,9 @@ include("group_utils.jl")
 
     @test group_manifold(A_left_fwd) === G
     @test base_group(A_left_fwd) == G
-    @test repr(A_left_fwd) == "GroupOperationAction($(repr(G)), LeftForwardAction())"
-    @test repr(A_right_back) == "GroupOperationAction($(repr(G)), RightBackwardAction())"
-
-    @test switch_direction(LeftForwardAction()) === RightBackwardAction()
-    @test switch_direction(RightBackwardAction()) === LeftForwardAction()
+    @test repr(A_left_fwd) == "GroupOperationAction($(repr(G)), (LeftAction(), LeftSide()))"
+    @test repr(A_right_back) ==
+          "GroupOperationAction($(repr(G)), (RightAction(), RightSide()))"
 
     for type in types
         a_pts = convert.(type, [reshape(i:(i + 3), 2, 2) for i in 1:3])
@@ -32,7 +33,7 @@ include("group_utils.jl")
             test_optimal_alignment=false,
             test_diff=false,
             atol=atol,
-            test_switch_direction=Manifolds.SimultaneousSwitch(),
+            test_switch_direction=true,
         )
 
         test_action(
@@ -42,7 +43,7 @@ include("group_utils.jl")
             test_optimal_alignment=false,
             test_diff=false,
             atol=atol,
-            test_switch_direction=Manifolds.SimultaneousSwitch(),
+            test_switch_direction=true,
         )
     end
 
@@ -66,8 +67,9 @@ include("group_utils.jl")
 
     @test group_manifold(A_left_fwd) === G
     @test base_group(A_left_fwd) == G
-    @test repr(A_left_fwd) == "GroupOperationAction($(repr(G)), LeftForwardAction())"
-    @test repr(A_right_back) == "GroupOperationAction($(repr(G)), RightBackwardAction())"
+    @test repr(A_left_fwd) == "GroupOperationAction($(repr(G)), (LeftAction(), LeftSide()))"
+    @test repr(A_right_back) ==
+          "GroupOperationAction($(repr(G)), (RightAction(), RightSide()))"
 
     test_action(
         A_left_fwd,
@@ -76,7 +78,7 @@ include("group_utils.jl")
         X_pts;
         test_optimal_alignment=true,
         test_diff=true,
-        test_switch_direction=Manifolds.SimultaneousSwitch(),
+        test_switch_direction=true,
     )
 
     test_action(
@@ -86,7 +88,7 @@ include("group_utils.jl")
         X_pts;
         test_optimal_alignment=true,
         test_diff=true,
-        test_switch_direction=Manifolds.SimultaneousSwitch(),
+        test_switch_direction=true,
     )
 
     test_action(
@@ -96,7 +98,7 @@ include("group_utils.jl")
         X_pts;
         test_optimal_alignment=true,
         test_diff=true,
-        test_switch_direction=Manifolds.SimultaneousSwitch(),
+        test_switch_direction=true,
     )
 
     test_action(
@@ -106,7 +108,7 @@ include("group_utils.jl")
         X_pts;
         test_optimal_alignment=true,
         test_diff=true,
-        test_switch_direction=Manifolds.SimultaneousSwitch(),
+        test_switch_direction=true,
     )
 
     @testset "apply_diff_group" begin

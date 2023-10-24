@@ -53,9 +53,9 @@ include("../utils.jl")
         @test !is_flat(M)
         @test !is_flat(Mc)
         @test !is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2))
-        @test_throws DomainError is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), true)
+        @test_throws DomainError is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2); error=:error)
         @test is_point(M2, p2)
-        @test_throws DomainError is_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+        @test_throws DomainError is_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]; error=:error)
         @test Manifolds.check_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]) isa DomainError
 
         @test default_retraction_method(M) === PolarRetraction()
@@ -68,16 +68,26 @@ include("../utils.jl")
             UMVTVector(zeros(2, 1), zeros(1, 2), zeros(2, 2)),
         )
         @test !is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), X)
-        @test_throws ManifoldDomainError is_vector(
+        @test_throws DomainError is_vector(
             M,
             SVDMPoint([1.0 0.0; 0.0 0.0], 2),
-            X,
-            true,
+            X;
+            error=:error,
         )
         @test !is_vector(M, p, UMVTVector(p.U, X.M, p.Vt, 2))
-        @test_throws DomainError is_vector(M, p, UMVTVector(p.U, X.M, p.Vt, 2), true)
+        @test_throws DomainError is_vector(
+            M,
+            p,
+            UMVTVector(p.U, X.M, p.Vt, 2);
+            error=:error,
+        )
         @test !is_vector(M, p, UMVTVector(X.U, X.M, p.Vt, 2))
-        @test_throws DomainError is_vector(M, p, UMVTVector(X.U, X.M, p.Vt, 2), true)
+        @test_throws DomainError is_vector(
+            M,
+            p,
+            UMVTVector(X.U, X.M, p.Vt, 2);
+            error=:error,
+        )
 
         @test is_point(M, p)
         @test is_vector(M, p, X)
@@ -134,15 +144,23 @@ include("../utils.jl")
                 xM = embed(M, p)
                 @test is_point(M, xM)
                 @test !is_point(M, xM[1:2, :])
-                @test_throws DomainError is_point(M, xM[1:2, :], true)
-                @test_throws DomainError is_point(FixedRankMatrices(3, 2, 1), p, true)
-                @test_throws DomainError is_point(FixedRankMatrices(3, 2, 1), xM, true)
+                @test_throws DomainError is_point(M, xM[1:2, :]; error=:error)
+                @test_throws DomainError is_point(
+                    FixedRankMatrices(3, 2, 1),
+                    p;
+                    error=:error,
+                )
+                @test_throws DomainError is_point(
+                    FixedRankMatrices(3, 2, 1),
+                    xM;
+                    error=:error,
+                )
                 xF1 = SVDMPoint(2 * p.U, p.S, p.Vt)
                 @test !is_point(M, xF1)
-                @test_throws DomainError is_point(M, xF1, true)
+                @test_throws DomainError is_point(M, xF1; error=:error)
                 xF2 = SVDMPoint(p.U, p.S, 2 * p.Vt)
                 @test !is_point(M, xF2)
-                @test_throws DomainError is_point(M, xF2, true)
+                @test_throws DomainError is_point(M, xF2; error=:error)
                 # copyto
                 yC = allocate(y)
                 copyto!(M, yC, y)
@@ -239,5 +257,10 @@ include("../utils.jl")
         G = [1.0 0.0; 0.0 2.0; 0.0 0.0]
         H = [0.0 3.0; 0.0 4.0; 0.0 1.0]
         @test is_vector(M, p, riemannian_Hessian(M, p, G, H, X))
+    end
+    @testset "field parameter" begin
+        M = FixedRankMatrices(3, 2, 2; parameter=:field)
+        @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ; parameter=:field)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
     end
 end

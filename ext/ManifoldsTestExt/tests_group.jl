@@ -1,4 +1,8 @@
 using Base: IdentityUnitRange
+
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
+
 """
     test_group(
         G,
@@ -552,18 +556,18 @@ function test_action(
     test_mutating_group=true,
     test_mutating_action=true,
     test_diff=false,
-    test_switch_direction=Manifolds.LeftRightSwitch(),
+    test_switch_direction=true,
 )
     G = base_group(A)
     M = group_manifold(A)
     e = Identity(G)
 
     Test.@testset "Basic action properties" begin # COV_EXCL_LINE
-        test_switch_direction !== false && Test.@testset "Direction" begin
+        test_switch_direction && Test.@testset "Direction" begin
             Aswitch = switch_direction(A)
 
             Test.@test direction(A) === _direction_from_type(A)
-            sd = switch_direction(_direction_from_type(A), test_switch_direction)
+            sd = switch_direction(_direction_from_type(A))
             Test.@test isa(Aswitch, AbstractGroupAction{typeof(sd)})
             Test.@test direction(Aswitch) === sd
         end
@@ -741,10 +745,10 @@ function test_action(
 
                 eX = allocate(X)
                 Test.@test apply_diff!(A, eX, e, m, X) === eX
-                Test.@test isapprox(G, m, eX, X; atol=atol)
+                Test.@test isapprox(M, m, eX, X; atol=atol)
                 eX = allocate(X)
                 Test.@test inverse_apply_diff!(A, eX, e, m, X) === eX
-                Test.@test isapprox(G, m, eX, X; atol=atol)
+                Test.@test isapprox(M, m, eX, X; atol=atol)
             end
         end
     end
