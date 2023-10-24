@@ -613,7 +613,8 @@ function representation_size(M::FixedRankMatrices)
 end
 
 @doc raw"""
-    retract(M, p, X, ::OrthographicRetraction)
+    retract(M::FixedRankMatrices, p, X, ::OrthographicRetraction)
+
 Compute the OrthographicRetraction on the [`FixedRankMatrices`](@ref) `M` by finding
 the nearest point to ``p + X`` in
 
