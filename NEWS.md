@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.0] - 2023-mm-dd
+## [0.9.1] - 2023-10-25
+
+### Added
+
+- a new retraction and its inverse for the fixed Rank Manifolds, the orthographic retraction.
+
+## [0.9.0] - 2023-10-24
 
 ### Added
 
@@ -57,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `SymplecticStiefel{n,k}`,
   - `TranslationGroup`,
   - `Tucker`.
-  
+
   For example
 
   ```{julia}
@@ -84,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ```
 
   for groups with size stored in field. Alternatively, you can use a single generic method like this:
-  
+
   ```{julia}
   function Base.show(io::IO, M::CenteredMatrices{T}) where {T}
       m, n = get_parameter(M)
