@@ -207,9 +207,9 @@ end
 
 @doc raw"""
     ColumnwiseMultiplicationAction{
+        TAD<:ActionDirection,
         TM<:AbstractManifold,
         TO<:GeneralUnitaryMultiplicationGroup,
-        TAD<:ActionDirection,
     } <: AbstractGroupAction{TAD}
 
 Action of the (special) unitary or orthogonal group [`GeneralUnitaryMultiplicationGroup`](@ref)
