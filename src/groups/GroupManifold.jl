@@ -102,7 +102,7 @@ function is_vector(
             return false
         end
     end
-    return is_vector(G.manifold, identity_element(G), X, false, te; kwargs...)
+    return is_vector(G.manifold, identity_element(G), X, false; error=error, kwargs...)
 end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")

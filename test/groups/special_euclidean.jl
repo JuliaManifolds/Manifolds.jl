@@ -100,6 +100,8 @@ using Manifolds:
             @test w2mat ≈ affine_matrix(G, pts[1]) * screw_matrix(G, X_pts[1])
             @test screw_matrix(G, w2mat) === w2mat
 
+            @test is_vector(G, Identity(G), rand(G; vector_at=Identity(G)))
+
             test_group(
                 G,
                 pts,

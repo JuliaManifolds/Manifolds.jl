@@ -1,6 +1,8 @@
 include("../utils.jl")
 include("group_utils.jl")
 
+using Manifolds: LeftForwardAction, RightBackwardAction
+
 @testset "Translation group" begin
     @testset "real" begin
         G = TranslationGroup(2, 3)
@@ -42,6 +44,8 @@ include("group_utils.jl")
                 test_vee_hat_from_identity=true,
             )
         end
+
+        @test is_vector(G, Identity(G), rand(G; vector_at=Identity(G)))
     end
 
     @testset "complex" begin
