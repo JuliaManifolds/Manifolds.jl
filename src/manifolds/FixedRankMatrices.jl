@@ -118,6 +118,67 @@ Base.:-(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
 Base.:+(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
 Base.:(==)(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
 
+# Move to Base when name is established – i.e. used in more than one manifold
+# |/---
+"""
+    OrthographicRetraction <: AbstractRetractionMethod
+
+Retractions that are related to orthographic projections, which was first
+used in [AbsilMalick:2012](@cite).
+"""
+struct OrthographicRetraction <: AbstractRetractionMethod end
+
+"""
+    OrthographicInverseRetraction <: AbstractInverseRetractionMethod
+
+Retractions that are related to orthographic projections, which was first
+used in [AbsilMalick:2012](@cite).
+"""
+struct OrthographicInverseRetraction <: AbstractInverseRetractionMethod end
+
+# Layer II
+function _inverse_retract!(
+    M::AbstractManifold,
+    X,
+    p,
+    q,
+    ::OrthographicInverseRetraction;
+    kwargs...,
+)
+    return inverse_retract_orthographic!(M, X, p, q; kwargs...)
+end
+
+# Layer III
+"""
+    inverse_retract_orthographic!(M::AbstractManifold, X, p, q)
+
+Compute the in-place variant of the [`OrthographicInverseRetraction`](@ref).
+"""
+inverse_retract_orthographic!(M::AbstractManifold, X, p, q)
+
+## Layer II
+function _retract!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::OrthographicRetraction;
+    kwargs...,
+)
+    return retract_orthographic!(M, q, p, X, t; kwargs...)
+end
+
+## Layer III
+"""
+    retract_orthographic!(M::AbstractManifold, q, p, X, t::Number)
+
+Compute the in-place variant of the [`OrthographicRetraction`](@ref).
+"""
+retract_orthographic!(M::AbstractManifold, q, p, X, t::Number)
+
+# \|---
+
 allocate(p::SVDMPoint) = SVDMPoint(allocate(p.U), allocate(p.S), allocate(p.Vt))
 function allocate(p::SVDMPoint, ::Type{T}) where {T}
     return SVDMPoint(allocate(p.U, T), allocate(p.S, T), allocate(p.Vt, T))
@@ -127,6 +188,9 @@ function allocate(X::UMVTVector, ::Type{T}) where {T}
     return UMVTVector(allocate(X.U, T), allocate(X.M, T), allocate(X.Vt, T))
 end
 
+function allocate_result(M::FixedRankMatrices, ::typeof(inverse_retract), p, q)
+    return zero_vector(M, p)
+end
 function allocate_result(M::FixedRankMatrices, ::typeof(project), X, p, vals...)
     m, n, k = get_parameter(M.size)
     # vals are p and X, so we can use their fields to set up those of the UMVTVector
@@ -378,6 +442,31 @@ function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
     return dot(v.U, w.U) + dot(v.M, w.M) + dot(v.Vt, w.Vt)
 end
 
+@doc raw"""
+    inverse_retract(M, p, q, ::OrthographicInverseRetraction)
+
+Compute the orthographic inverse retraction [`FixedRankMatrices`](@ref) `M` by computing
+
+```math
+    X = P_{T_{p}M}(q - p) = qVV^\mathrm{T} + UU^{\mathrm{T}}q - UU^{\mathrm{T}}qVV^{\mathrm{T}} - p,
+```
+where ``p`` is a [`SVDMPoint`](@ref)`(U,S,Vt)` and ``P_{T_{p}M}`` is the [`project`](@ref)ion
+onto the tangent space at ``p``.
+
+For more details, see [AbsilOseledets:2014](@cite).
+"""
+inverse_retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicInverseRetraction)
+
+function inverse_retract_orthographic!(
+    M::FixedRankMatrices,
+    X::UMVTVector,
+    p::SVDMPoint,
+    q::SVDMPoint,
+)
+    project!(M, X, p, embed(M, q) - embed(M, p))
+    return X
+end
+
 function _isapprox(::FixedRankMatrices, p::SVDMPoint, q::SVDMPoint; kwargs...)
     return isapprox(p.U * Diagonal(p.S) * p.Vt, q.U * Diagonal(q.S) * q.Vt; kwargs...)
 end
@@ -521,6 +610,51 @@ the size of matrices on this manifold ``(m,n)``.
 function representation_size(M::FixedRankMatrices)
     m, n, k = get_parameter(M.size)
     return (m, n)
+end
+
+@doc raw"""
+    retract(M::FixedRankMatrices, p, X, ::OrthographicRetraction)
+
+Compute the OrthographicRetraction on the [`FixedRankMatrices`](@ref) `M` by finding
+the nearest point to ``p + X`` in
+
+```math
+    p + X + N_{p}\mathcal M \cap \mathcal M
+```
+
+where ``N_{p}\mathcal M `` is the Normal Space of ``T_{p}\mathcal M ``.
+
+If ``X`` is sufficiently small, then the nearest such point is unique and can be expressed by
+
+```math
+    q = (U(S + M) + U_{p})(S + M)^{-1}((S + M)V^{\mathrm{T}} + V^{\mathrm{T}}_{p}),
+```
+
+where ``p`` is a [`SVDMPoint`](@ref)`(U,S,Vt)` and ``X`` is an [`UMVTVector`](@ref)`(Up,M,Vtp)`.
+
+For more details, see [AbsilOseledets:2014](@cite).
+"""
+retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicRetraction)
+
+function retract_orthographic!(
+    M::FixedRankMatrices,
+    q::SVDMPoint,
+    p::SVDMPoint,
+    X::UMVTVector,
+    t::Number,
+)
+    m, n, k = get_parameter(M.size)
+    tX = t * X
+    QU, RU = qr(p.U * (diagm(p.S) + tX.M) + tX.U)
+    QV, RV = qr(p.Vt' * (diagm(p.S) + tX.M') + tX.Vt')
+
+    Uk, Sk, Vtk = svd(RU * inv(diagm(p.S) + tX.M) * RV')
+
+    mul!(q.U, QU[:, 1:k], Uk)
+    q.S .= Sk[1:k]
+    mul!(q.Vt, Vtk, QV[:, 1:k]')
+
+    return q
 end
 
 @doc raw"""

@@ -333,21 +333,36 @@ function test_manifold(
                         Test.@test isapprox(M, p2, q; atol=point_atol)
                         # This test is not reasonable for `inverse_retract!(M, X, p, q, m)`,
                         # since X is of different type/concept than p,q
+
                     end
             end
         end
         for p in pts
             epsx = find_eps(p)
             for inv_retr_method in inverse_retraction_methods
+                X = inverse_retract(M, p, p, inv_retr_method)
                 Test.@test isapprox(
                     M,
                     p,
                     zero_vector(M, p),
-                    inverse_retract(M, p, p, inv_retr_method);
+                    X;
                     atol=epsx * retraction_atol_multiplier,
                     rtol=retraction_atol_multiplier == 0 ?
                          sqrt(epsx) * retraction_rtol_multiplier : 0,
                 )
+                if (test_inplace && is_mutating)
+                    Y = copy(M, p, X)
+                    inverse_retract!(M, Y, p, p, inv_retr_method)
+                    Test.@test isapprox(
+                        M,
+                        p,
+                        zero_vector(M, p),
+                        Y;
+                        atol=epsx * retraction_atol_multiplier,
+                        rtol=retraction_atol_multiplier == 0 ?
+                             sqrt(epsx) * retraction_rtol_multiplier : 0,
+                    )
+                end
             end
         end
     end
