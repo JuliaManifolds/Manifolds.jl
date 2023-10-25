@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `rand(G; vector_at=Identity(G))` now works for translation, special orthogonal and special Euclidean groups `G`.
+- `rand(G; vector_at=Identity(G))` now works for translation, special orthogonal and special Euclidean groups `G` (issue [#665](https://github.com/JuliaManifolds/Manifolds.jl/issues/665)).
 
 ## [0.9.1] - 2023-10-25
 
