@@ -34,12 +34,15 @@ function allocate_result(
     return allocate(X)
 end
 function allocate_result(
-    ::GeneralUnitaryMultiplicationGroup,
+    M::GeneralUnitaryMultiplicationGroup,
     ::typeof(log),
     ::Identity{MultiplicationOperation},
     q,
 )
     return allocate(q)
+end
+function allocate_result(M::Rotations, ::typeof(rand), ::Identity{MultiplicationOperation})
+    return similar(Matrix{Float64}, representation_size(M)...)
 end
 
 decorated_manifold(G::GeneralUnitaryMultiplicationGroup) = G.manifold

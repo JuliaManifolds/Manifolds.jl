@@ -33,6 +33,10 @@ end
     end
 end
 
+function allocate_result(M::Euclidean, ::typeof(rand), ::Identity{AdditionOperation})
+    return similar(Array{Float64}, representation_size(M)...)
+end
+
 exp!(::TranslationGroup, q, ::Identity{AdditionOperation}, X) = copyto!(q, X)
 
 has_biinvariant_metric(::TranslationGroup) = true

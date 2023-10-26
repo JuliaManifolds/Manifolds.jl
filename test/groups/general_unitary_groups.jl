@@ -74,6 +74,9 @@ include("group_utils.jl")
             0.4070678736115306 0.10586374034761421 -0.43156436122007846 0.0
         ]
         @test volume_density(M, p, X) ≈ 0.710713830700454
+
+        # random Lie algebra element
+        @test is_vector(M, Identity(M), rand(M; vector_at=Identity(M)))
     end
 
     @testset "Unitary Group" begin
