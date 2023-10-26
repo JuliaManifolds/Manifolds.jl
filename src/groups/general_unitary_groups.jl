@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralUnitaryMultiplicationGroup{T,𝔽,M} = GroupManifold{𝔽,M,MultiplicationOperation}
+    GeneralUnitaryMultiplicationGroup{T,𝔽,S} <: AbstractDecoratorManifold{𝔽}
 
 A generic type for Lie groups based on a unitary property and matrix multiplcation,
 see e.g. [`Orthogonal`](@ref), [`SpecialOrthogonal`](@ref), [`Unitary`](@ref), and [`SpecialUnitary`](@ref)
@@ -134,6 +134,10 @@ function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},�
     X³ = X² * X
     q = a₀ * I + a₁ .* X .+ a₂ .* X² .+ a₃ .* X³
     return q
+end
+
+function get_embedding(G::GeneralUnitaryMultiplicationGroup)
+    return get_embedding(G.manifold)
 end
 
 function inverse_translate(G::GeneralUnitaryMultiplicationGroup, p, q, ::LeftForwardAction)

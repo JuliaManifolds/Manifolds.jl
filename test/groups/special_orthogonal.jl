@@ -13,6 +13,8 @@ using Manifolds: LeftForwardAction, RightBackwardAction
         @test is_default_metric(MetricManifold(G, EuclideanMetric()))
         @test is_flat(G) == (n == 2)
 
+        @test get_embedding(G) == Euclidean(n, n)
+
         types = [Matrix{Float64}]
 
         if n == 2
