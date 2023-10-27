@@ -115,14 +115,15 @@ Compute the value of differential of action [`AbstractGroupAction`](@ref) `A` on
 where element `a` is acting on `p`, with respect to the group element.
 
 Let ``\mathcal G`` be the group acting on manifold ``\mathcal M`` by the action `A`.
-The action is of element ``g ∈ \mathcal G`` on a point ``p ∈ \mathcal M``.
-The differential transforms vector `X` from the tangent space at ``a ∈ \mathcal G``, 
-``X ∈ T_a \mathcal G`` into a tangent space of the manifold ``\mathcal M``.
-When action on element `p` is written as ``\mathrm{d}τ^p``, with the specified left or right
-convention, the differential transforms vectors
+The action is of element ``a ∈ \mathcal G`` on a point ``p ∈ \mathcal M``,
+and is denoted ``τ^p(a)``.
+The tangent map ``T τ^p`` thus transforms a vector ``X ∈ T_a \mathcal G``
+from the tangent space at ``a ∈ \mathcal G``, 
+ into a vector of the tangent space at ``τ^p(a) ∈ \mathcal M``.
+In other words, the tangent map ``Tτ^p`` transforms vectors as:
 
 ````math
-(\mathrm{d}τ^p) : T_{a} \mathcal G → T_{τ_a p} \mathcal M
+T τ^p : T_{a} \mathcal G → T_{τ^p(a)} \mathcal M
 ````
 
 # See also
