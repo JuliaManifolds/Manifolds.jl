@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.3] - 2023-10-xx
+
+### Added
+
+- Functions `inv_diff` and `inv_diff!` that correspond to differentials of group inversion.
+
+### Fixed
+
+- Fixed issue with incorrect implementation of `apply_diff_group` in `GroupOperationAction` with left backward and right forward action [#669](https://github.com/JuliaManifolds/Manifolds.jl/issues/669).
+
 ## [0.9.2] - 2023-10-27
 
 ### Added
