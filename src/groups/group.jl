@@ -529,6 +529,22 @@ function inv!(
     return e
 end
 
+@doc raw"""
+    inv_diff(G::AbstractDecoratorManifold, p, X)
+
+Compute the value of differential of inverse ``p^{-1} ∈ \mathcal{G}`` of an element
+``p ∈ \mathcal{G}`` at tangent vector `X` at `p`. The result is a tangent vector at ``p^{-1}``.
+"""
+inv_diff(G::AbstractDecoratorManifold, p)
+
+@trait_function inv_diff(G::AbstractDecoratorManifold, p, X)
+function inv_diff(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
+    Y = allocate_result(G, inv_diff, X, p)
+    return inv_diff!(G, Y, p, X)
+end
+
+@trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
+
 function Base.copyto!(
     ::TraitList{IsGroupManifold{O}},
     ::AbstractDecoratorManifold,

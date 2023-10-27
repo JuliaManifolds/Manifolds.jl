@@ -124,6 +124,24 @@ function inv!(
     return q
 end
 
+"""
+    inv_diff(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, X)
+
+Compute the value of differential of matrix inversion ``p ↦ p^{-1}`` at ``X``.
+The formula reads ``-p^{-1}Xp^{-1}``.
+"""
+function inv_diff(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, X)
+    p_inv = inv(p)
+    return -p_inv * X * p_inv
+end
+function inv_diff!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, Y, p, X)
+    p_inv = inv(p)
+    Z = X * p_inv
+    mul!(Y, p_inv, Z)
+    Y .*= -1
+    return Y
+end
+
 compose(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, q) = p * q
 
 function compose!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, x, p, q)

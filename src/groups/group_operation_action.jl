@@ -97,11 +97,34 @@ end
 
 function apply_diff_group(A::GroupOperationAction, a, X, p)
     G = base_group(A)
-    return translate_diff(G, p, a, X, reverse_direction_and_side(A))
+    if direction_and_side(A) === LeftForwardAction() ||
+       direction_and_side(A) === RightBackwardAction()
+        return translate_diff(G, p, a, X, reverse_direction_and_side(A))
+    else
+        return translate_diff(
+            G,
+            p,
+            a,
+            inv_diff(G, a, X),
+            (direction(A), switch_side(action_side(A))),
+        )
+    end
 end
 function apply_diff_group!(A::GroupOperationAction, Y, a, X, p)
     G = base_group(A)
-    return translate_diff!(G, Y, p, a, X, reverse_direction_and_side(A))
+    if direction_and_side(A) === LeftForwardAction() ||
+       direction_and_side(A) === RightBackwardAction()
+        return translate_diff!(G, Y, p, a, X, reverse_direction_and_side(A))
+    else
+        return translate_diff!(
+            G,
+            Y,
+            p,
+            a,
+            inv_diff(G, a, X),
+            (direction(A), switch_side(action_side(A))),
+        )
+    end
 end
 
 function inverse_apply_diff(A::GroupOperationAction, a, p, X)
