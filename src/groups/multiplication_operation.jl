@@ -23,6 +23,8 @@ Base.:\(p, ::Identity{MultiplicationOperation}) = inv(p)
 Base.:\(::Identity{MultiplicationOperation}, p) = p
 Base.:\(e::Identity{MultiplicationOperation}, ::Identity{MultiplicationOperation}) = e
 
+Base.inv(e::Identity{MultiplicationOperation}) = e
+
 LinearAlgebra.det(::Identity{MultiplicationOperation}) = true
 LinearAlgebra.adjoint(e::Identity{MultiplicationOperation}) = e
 
@@ -132,7 +134,16 @@ The formula reads ``-p^{-1}Xp^{-1}``.
 """
 function inv_diff(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, X)
     p_inv = inv(p)
-    return -p_inv * X * p_inv
+    return -(p_inv * X * p_inv)
+end
+function inv_diff(
+    ::MultiplicationGroupTrait,
+    G::AbstractDecoratorManifold,
+    p::AbstractArray{<:Number,0},
+    X::AbstractArray{<:Number,0},
+)
+    p_inv = inv(p[])
+    return -(p_inv * X * p_inv)
 end
 function inv_diff!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, Y, p, X)
     p_inv = inv(p)

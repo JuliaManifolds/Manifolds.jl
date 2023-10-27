@@ -65,12 +65,48 @@ end
 
 function adjoint_apply_diff_group(A::GroupOperationAction, a, X, p)
     G = base_group(A)
-    return inverse_translate_diff(G, a, p, X, reverse_direction_and_side(A))
+    if direction_and_side(A) === LeftForwardAction() ||
+       direction_and_side(A) === RightBackwardAction()
+        return inverse_translate_diff(
+            G,
+            a,
+            p,
+            X,
+            (direction(A), switch_side(action_side(A))),
+        )
+    else
+        return inverse_translate_diff(
+            G,
+            p,
+            a,
+            inv_diff(G, a, X),
+            (direction(A), switch_side(action_side(A))),
+        )
+    end
 end
 
 function adjoint_apply_diff_group!(A::GroupOperationAction, Y, a, X, p)
     G = base_group(A)
-    return inverse_translate_diff!(G, Y, a, p, X, reverse_direction_and_side(A))
+    if direction_and_side(A) === LeftForwardAction() ||
+       direction_and_side(A) === RightBackwardAction()
+        return inverse_translate_diff!(
+            G,
+            Y,
+            a,
+            p,
+            X,
+            (direction(A), switch_side(action_side(A))),
+        )
+    else
+        return inverse_translate_diff!(
+            G,
+            Y,
+            p,
+            a,
+            inv_diff(G, a, X),
+            (direction(A), switch_side(action_side(A))),
+        )
+    end
 end
 
 apply(A::GroupOperationAction, a, p) = translate(A.group, a, p, direction_and_side(A))

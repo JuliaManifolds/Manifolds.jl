@@ -128,6 +128,20 @@ function inv!(
     return q
 end
 
+function inv_diff!(G::PowerGroup, Y, p, X)
+    GM = G.manifold
+    rep_size = representation_size(GM.manifold)
+    for i in get_iterator(GM)
+        inv_diff!(
+            GM,
+            _write(GM, rep_size, Y, i),
+            _read(GM, rep_size, p, i),
+            _read(GM, rep_size, X, i),
+        )
+    end
+    return Y
+end
+
 # lower level methods are added instead of top level ones to not have to deal
 # with `Identity` disambiguation
 
