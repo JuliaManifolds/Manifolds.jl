@@ -215,6 +215,7 @@ using Manifolds:
         @test one(ge) === ge
         @test transpose(ge) === ge
         @test det(ge) == 1
+        @test inv(ge) === ge
         @test ge * p ≈ p
         @test p * ge ≈ p
         @test ge * ge === ge
@@ -286,6 +287,28 @@ using Manifolds:
         @test e_add * e_mul === e_add
         @test e_mul * e_add === e_add
         @test mul!(e_mul, e_mul, e_mul) === e_mul
+    end
+
+    @testset "Issue #669" begin
+        G = SpecialOrthogonal(3)
+
+        id = identity_element(G)
+        X = hat(G, Identity(G), [1.0, 2.0, 3.0])
+        function apply_at_id(X, d, s)
+            A = GroupOperationAction(G, (d, s))
+            return apply_diff_group(A, id, X, id)
+        end
+
+        _get_sign(::LeftAction, ::LeftSide) = 1 # former case
+        _get_sign(::LeftAction, ::RightSide) = -1 # new case
+        _get_sign(::RightAction, ::LeftSide) = -1 # new case
+        _get_sign(::RightAction, ::RightSide) = 1 # former case
+
+        for d in [LeftAction(), RightAction()]
+            for s in [LeftSide(), RightSide()]
+                @test apply_at_id(X, d, s) ≈ _get_sign(d, s) * X
+            end
+        end
     end
 end
 
