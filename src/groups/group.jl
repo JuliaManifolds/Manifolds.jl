@@ -918,7 +918,7 @@ function inverse_translate_diff(
     conv::ActionDirectionAndSide,
 )
     BG = base_group(G)
-    return translate_diff(BG, inv(BG, p), q, X, conv)
+    return translate_diff(BG, inv(BG, p), q, inv_diff(BG, p, X), conv)
 end
 
 @trait_function inverse_translate_diff!(
@@ -939,7 +939,7 @@ function inverse_translate_diff!(
     conv::ActionDirectionAndSide,
 )
     BG = base_group(G)
-    return translate_diff!(BG, Y, inv(BG, p), q, X, conv)
+    return translate_diff!(BG, Y, inv(BG, p), q, inv_diff(BG, p, X), conv)
 end
 
 @doc raw"""
