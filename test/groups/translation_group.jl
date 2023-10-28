@@ -42,6 +42,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
                 test_exp_from_identity=true,
                 test_log_from_identity=true,
                 test_vee_hat_from_identity=true,
+                test_inv_diff=true,
             )
         end
 

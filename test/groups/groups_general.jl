@@ -298,15 +298,22 @@ using Manifolds:
             A = GroupOperationAction(G, (d, s))
             return apply_diff_group(A, id, X, id)
         end
+        function apply_at_id!(Y, X, d, s)
+            A = GroupOperationAction(G, (d, s))
+            return apply_diff_group!(A, Y, id, X, id)
+        end
 
         _get_sign(::LeftAction, ::LeftSide) = 1 # former case
         _get_sign(::LeftAction, ::RightSide) = -1 # new case
         _get_sign(::RightAction, ::LeftSide) = -1 # new case
         _get_sign(::RightAction, ::RightSide) = 1 # former case
+        Y = similar(X)
 
         for d in [LeftAction(), RightAction()]
             for s in [LeftSide(), RightSide()]
                 @test apply_at_id(X, d, s) ≈ _get_sign(d, s) * X
+                apply_at_id!(Y, X, d, s)
+                @test Y ≈ _get_sign(d, s) * X
             end
         end
     end
