@@ -124,5 +124,14 @@ using Manifolds:
         adjoint_apply_diff_group!(A_left_fwd, Y, a_pts[1], X_pts[1], m_pts[1])
         @test Y ≈
               inverse_translate_diff(G, a_pts[1], m_pts[1], X_pts[1], RightBackwardAction())
+
+        @test adjoint_apply_diff_group(A_right_fwd, a_pts[1], X_pts[1], m_pts[1]) ≈
+              inverse_translate_diff(
+            G,
+            m_pts[1],
+            a_pts[1],
+            inv_diff(G, a_pts[1], X_pts[1]),
+            RightBackwardAction(),
+        )
     end
 end
