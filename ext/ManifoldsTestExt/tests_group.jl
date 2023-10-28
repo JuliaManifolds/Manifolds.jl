@@ -16,6 +16,7 @@ using Manifolds:
         test_invariance = false,
         test_lie_bracket=false,
         test_adjoint_action=false,
+        test_inv_diff=false,
         diff_convs = [(), (LeftForwardAction(),), (RightBackwardAction(),)],
     )
 
@@ -41,6 +42,7 @@ function test_group(
     test_invariance=false,
     test_lie_bracket=false,
     test_adjoint_action=false,
+    test_inv_diff=false,
     diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
     test_log_from_identity=false,
     test_exp_from_identity=false,
@@ -298,6 +300,15 @@ function test_group(
                 Test.@test isapprox(G, g_pts[1], Z, X; atol=atol)
             end
         end
+    end
+
+    test_inv_diff && Test.@testset "Differential of inverse" begin # COV_EXCL_LINE
+        Test.@test isapprox(inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
+        Test.@test isapprox(
+            inv_diff(G, inv(G, g_pts[1]), inv_diff(G, g_pts[1], X_pts[1])),
+            X_pts[1];
+            atol=atol,
+        )
     end
 
     test_exp_lie_log && Test.@testset "group exp/log properties" begin

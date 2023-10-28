@@ -46,6 +46,7 @@ using Manifolds:
             test_invariance=true,
             test_lie_bracket=true,
             test_adjoint_action=true,
+            test_inv_diff=true,
         )
     end
 
