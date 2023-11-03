@@ -130,25 +130,15 @@ end
     inv_diff(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, X)
 
 Compute the value of differential of matrix inversion ``p ↦ p^{-1}`` at ``X``.
-The formula reads ``-p^{-1}Xp^{-1}``.
+When tangent vectors are represented in Lie algebra in a left-invariant way, the formula
+reads ``-X``. For matrix groups with ambient space tangent vectors, the formula would
+read ``-p^{-1}Xp^{-1}``.
 """
 function inv_diff(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, X)
-    p_inv = inv(p)
-    return -(p_inv * X * p_inv)
-end
-function inv_diff(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    p::AbstractArray{<:Number,0},
-    X::AbstractArray{<:Number,0},
-)
-    p_inv = inv(p[])
-    return -(p_inv * X * p_inv)
+    return -X
 end
 function inv_diff!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, Y, p, X)
-    p_inv = inv(p)
-    Z = X * p_inv
-    mul!(Y, p_inv, Z)
+    copyto!(Y, X)
     Y .*= -1
     return Y
 end

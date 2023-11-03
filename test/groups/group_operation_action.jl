@@ -133,5 +133,8 @@ using Manifolds:
             inv_diff(G, a_pts[1], X_pts[1]),
             RightBackwardAction(),
         )
+
+        @test apply_diff_group(A_right_fwd, a_pts[1], X_pts[1], m_pts[1]) ≈
+              -m_pts[1] \ X_pts[1] * m_pts[1]
     end
 end
