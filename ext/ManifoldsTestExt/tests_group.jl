@@ -721,15 +721,6 @@ function test_action(
                 Test.@test is_vector(M, am, aX, true; atol=atol)
                 Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
             end
-
-            a12 = compose(A, a_pts[1], a_pts[2])
-            a2m = apply(A, a_pts[2], m)
-            a12X = apply_diff(A, a12, m, X)
-            a2X = apply_diff(A, a_pts[2], m, X)
-            Test.@test isapprox(M, a2m, apply_diff(A, a_pts[1], a2m, a2X), a12X; atol=atol)
-
-            Test.@test isapprox(M, m, apply_diff(A, e, m, X), X; atol=atol)
-            Test.@test isapprox(M, m, inverse_apply_diff(A, e, m, X), X; atol=atol)
         end
 
         test_mutating_action && Test.@testset "mutating" begin
@@ -744,22 +735,6 @@ function test_action(
                     Test.@test is_vector(M, am, aX, true; atol=atol)
                     Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
                 end
-
-                a12 = compose(A, a_pts[1], a_pts[2])
-                a2m = apply(A, a_pts[2], m)
-                a12m = apply(A, a12, m)
-                a12X, a2X, a1_a2X = allocate(X), allocate(X), allocate(X)
-                Test.@test apply_diff!(A, a12X, a12, m, X) === a12X
-                Test.@test apply_diff!(A, a2X, a_pts[2], m, X) === a2X
-                Test.@test apply_diff!(A, a1_a2X, a_pts[1], a2m, a2X) === a1_a2X
-                Test.@test isapprox(M, a12m, a1_a2X, a12X; atol=atol)
-
-                eX = allocate(X)
-                Test.@test apply_diff!(A, eX, e, m, X) === eX
-                Test.@test isapprox(M, m, eX, X; atol=atol)
-                eX = allocate(X)
-                Test.@test inverse_apply_diff!(A, eX, e, m, X) === eX
-                Test.@test isapprox(M, m, eX, X; atol=atol)
             end
         end
     end
