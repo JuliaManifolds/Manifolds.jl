@@ -307,7 +307,6 @@ function translate_diff!(
     ::RightForwardAction,
 )
     copyto!(G, Y, X)
-    Y .*= -1
     return Y
 end
 function translate_diff!(
@@ -319,7 +318,6 @@ function translate_diff!(
     ::LeftBackwardAction,
 )
     copyto!(G, Y, p * X * inv(G, p))
-    Y .*= -1
     return Y
 end
 function translate_diff!(

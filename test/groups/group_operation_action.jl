@@ -121,10 +121,10 @@ using Manifolds:
         @test isapprox(M, m, apply_diff(A_right_back, e, m, X), X)
         @test isapprox(M, m, inverse_apply_diff(A_right_back, e, m, X), X)
 
-        @test isapprox(M, m, apply_diff(A_left_back, e, m, X), -X)
-        @test isapprox(M, m, inverse_apply_diff(A_left_back, e, m, X), -X)
-        @test isapprox(M, m, apply_diff(A_right_fwd, e, m, X), -X)
-        @test isapprox(M, m, inverse_apply_diff(A_right_fwd, e, m, X), -X)
+        @test isapprox(M, m, apply_diff(A_left_back, e, m, X), X)
+        @test isapprox(M, m, inverse_apply_diff(A_left_back, e, m, X), X)
+        @test isapprox(M, m, apply_diff(A_right_fwd, e, m, X), X)
+        @test isapprox(M, m, inverse_apply_diff(A_right_fwd, e, m, X), X)
 
         eX = allocate(X)
         @test apply_diff!(A_left_fwd, eX, e, m, X) === eX
