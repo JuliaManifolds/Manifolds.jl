@@ -158,9 +158,16 @@ using Manifolds:
 
         Y = similar(X)
         adjoint_apply_diff_group!(A_right_fwd, Y, a_pts[1], X, m)
-        @test Y ≈ inverse_translate_diff(G, m, a_pts[1], -X, RightBackwardAction())
+        @test Y ≈ inverse_translate_diff(
+            G,
+            m,
+            a_pts[1],
+            -a_pts[1] * X / a_pts[1],
+            RightBackwardAction(),
+        )
 
-        @test apply_diff_group(A_right_fwd, a_pts[1], X, m) ≈ -m \ X * m
-        @test apply_diff_group(A_left_back, a_pts[1], X, m) ≈ -X
+        @test apply_diff_group(A_right_fwd, a_pts[1], X, m) ≈
+              -m \ (a_pts[1] * X / a_pts[1]) * m
+        @test apply_diff_group(A_left_back, a_pts[1], X, m) ≈ -a_pts[1] * X / a_pts[1]
     end
 end
