@@ -18,7 +18,10 @@ using Manifolds:
         @test repr(eg) === "Identity(NotImplementedOperation)"
         @test adjoint(eg) == eg
         @test number_eltype(eg) == Bool
+        @test !is_group_manifold(NotImplementedManifold())
         @test !is_group_manifold(NotImplementedManifold(), NotImplementedOperation())
+        @test !has_biinvariant_metric(NotImplementedManifold())
+        @test !has_invariant_metric(NotImplementedManifold(), LeftForwardAction())
         @test is_identity(G, eg) # identity transparent
         @test_throws MethodError identity_element(G) # but for a NotImplOp there is no concrete id.
         @test isapprox(G, eg, eg)
