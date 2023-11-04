@@ -11,16 +11,16 @@ include("../utils.jl")
     Y = [-0.1, 0.05, 0.05]
     @test repr(M) == "ProbabilitySimplex(2; boundary=:open)"
     @test is_point(M, p)
-    @test_throws DomainError is_point(M, p .+ 1, true)
-    @test_throws ManifoldDomainError is_point(M, [0], true)
-    @test_throws DomainError is_point(M, -ones(3), true)
+    @test_throws DomainError is_point(M, p .+ 1; error=:error)
+    @test_throws ManifoldDomainError is_point(M, [0]; error=:error)
+    @test_throws DomainError is_point(M, -ones(3); error=:error)
     @test manifold_dimension(M) == 2
     @test !is_flat(M)
     @test is_vector(M, p, X)
     @test is_vector(M, p, Y)
-    @test_throws ManifoldDomainError is_vector(M, p .+ 1, X, true)
-    @test_throws ManifoldDomainError is_vector(M, p, zeros(4), true)
-    @test_throws DomainError is_vector(M, p, Y .+ 1, true)
+    @test_throws DomainError is_vector(M, p .+ 1, X; error=:error)
+    @test_throws ManifoldDomainError is_vector(M, p, zeros(4); error=:error)
+    @test_throws DomainError is_vector(M, p, Y .+ 1; error=:error)
 
     @test injectivity_radius(M, p) == injectivity_radius(M, p, ExponentialRetraction())
     @test injectivity_radius(M, p, SoftmaxRetraction()) == injectivity_radius(M, p)
@@ -66,6 +66,8 @@ include("../utils.jl")
                 test_rand_tvector=true,
                 rand_tvector_atol_multiplier=20.0,
             )
+            X = similar(pts[1])
+            @test exp!(M_euc, X, pts[1], [0.0, 0.1, -0.1]) ≈ [0.5, 0.4, 0.1]
             test_manifold(
                 M_euc,
                 pts,
@@ -129,7 +131,7 @@ include("../utils.jl")
         X = [0, 1, -1]
         Y = [0, 2, -2]
         @test is_point(Mb, p)
-        @test_throws DomainError is_point(Mb, p .- 1, true)
+        @test_throws DomainError is_point(Mb, p .- 1; error=:error)
         @test inner(Mb, p, X, Y) == 8
 
         @test_throws ArgumentError ProbabilitySimplex(2; boundary=:tomato)
@@ -164,5 +166,11 @@ include("../utils.jl")
         @test volume_density(M, p, Y) ≈ 0.986956111346216
         @test manifold_volume(M_euc) ≈ sqrt(3) / 2
         @test volume_density(M_euc, p, Y) ≈ 1.0
+    end
+
+    @testset "field parameter" begin
+        M = ProbabilitySimplex(2; parameter=:field)
+        @test repr(M) == "ProbabilitySimplex(2; boundary=:open, parameter=:field)"
+        @test get_embedding(M) === Euclidean(3; parameter=:field)
     end
 end

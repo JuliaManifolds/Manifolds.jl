@@ -29,93 +29,89 @@ using RecursiveArrayTools
         @test submanifold_component(G, i, 2) == Identity(Tn)
     end
 
-    for TRepr in (ProductRepr, ArrayPartition)
-        @testset "$TRepr" begin
-            pts = [TRepr(tp...) for tp in tuple_pts]
-            X_pts = [TRepr(tuple_v...)]
+    pts = [ArrayPartition(tp...) for tp in tuple_pts]
+    X_pts = [ArrayPartition(tuple_v...)]
 
-            @testset "setindex! and getindex" begin
-                p1 = pts[1]
-                p2 = allocate(p1)
-                @test p1[G, 1] === p1[M, 1]
-                p2[G, 1] = p1[M, 1]
-                @test p2[G, 1] == p1[M, 1]
-            end
-
-            @test compose(G, pts[1], Identity(G)) == pts[1]
-            @test compose(G, Identity(G), pts[1]) == pts[1]
-            test_group(
-                G,
-                pts,
-                X_pts,
-                X_pts;
-                test_diff=true,
-                test_exp_from_identity=true,
-                test_log_from_identity=true,
-                test_vee_hat_from_identity=true,
-            )
-            @test isapprox(
-                G,
-                Identity(G),
-                exp_lie(G, X_pts[1]),
-                TRepr(
-                    exp_lie(SOn, submanifold_component(X_pts[1], 1)),
-                    exp_lie(Tn, submanifold_component(X_pts[1], 2)),
-                ),
-            )
-            @test isapprox(
-                G,
-                Identity(G),
-                log_lie(G, pts[1]),
-                TRepr(
-                    log_lie(SOn, submanifold_component(pts[1], 1)),
-                    log_lie(Tn, submanifold_component(pts[1], 2)),
-                ),
-            )
-            X = log_lie(G, pts[1])
-            Z = zero_vector(G, pts[1])
-            log_lie!(G, Z, pts[1])
-            @test isapprox(G, pts[1], X, Z)
-            p = exp_lie(G, X)
-            q = identity_element(G)
-            @test is_identity(G, q)
-            @test isapprox(G, q, Identity(G))
-            @test isapprox(G, Identity(G), q)
-            exp_lie!(G, q, X)
-            @test isapprox(G, p, q)
-            log_lie!(G, Z, Identity(G))
-            @test isapprox(G, Identity(G), Z, zero_vector(G, identity_element(G)))
-            @test isapprox(
-                G,
-                Identity(G),
-                log_lie(G, Identity(G)),
-                zero_vector(G, identity_element(G)),
-            )
-
-            @test compose(G, pts[1], Identity(G)) == pts[1]
-            @test compose(G, Identity(G), pts[1]) == pts[1]
-            test_group(G, pts, X_pts, X_pts; test_diff=true, test_mutating=false)
-            test_manifold(G, pts; is_mutating=false)
-            @test isapprox(
-                G,
-                exp_lie(G, X_pts[1]),
-                TRepr(
-                    exp_lie(SOn, submanifold_component(X_pts[1], 1)),
-                    exp_lie(Tn, submanifold_component(X_pts[1], 2)),
-                ),
-            )
-            @test isapprox(
-                G,
-                log_lie(G, pts[1]),
-                TRepr(
-                    log_lie(SOn, submanifold_component(pts[1], 1)),
-                    log_lie(Tn, submanifold_component(pts[1], 2)),
-                ),
-            )
-        end
+    @testset "setindex! and getindex" begin
+        p1 = pts[1]
+        p2 = allocate(p1)
+        @test p1[G, 1] === p1[M, 1]
+        p2[G, 1] = p1[M, 1]
+        @test p2[G, 1] == p1[M, 1]
     end
+
+    @test compose(G, pts[1], Identity(G)) == pts[1]
+    @test compose(G, Identity(G), pts[1]) == pts[1]
+    test_group(
+        G,
+        pts,
+        X_pts,
+        X_pts;
+        test_diff=true,
+        test_exp_from_identity=true,
+        test_log_from_identity=true,
+        test_vee_hat_from_identity=true,
+    )
+    @test isapprox(
+        G,
+        Identity(G),
+        exp_lie(G, X_pts[1]),
+        ArrayPartition(
+            exp_lie(SOn, submanifold_component(X_pts[1], 1)),
+            exp_lie(Tn, submanifold_component(X_pts[1], 2)),
+        ),
+    )
+    @test isapprox(
+        G,
+        Identity(G),
+        log_lie(G, pts[1]),
+        ArrayPartition(
+            log_lie(SOn, submanifold_component(pts[1], 1)),
+            log_lie(Tn, submanifold_component(pts[1], 2)),
+        ),
+    )
+    X = log_lie(G, pts[1])
+    Z = zero_vector(G, pts[1])
+    log_lie!(G, Z, pts[1])
+    @test isapprox(G, pts[1], X, Z)
+    p = exp_lie(G, X)
+    q = identity_element(G)
+    @test is_identity(G, q)
+    @test isapprox(G, q, Identity(G))
+    @test isapprox(G, Identity(G), q)
+    exp_lie!(G, q, X)
+    @test isapprox(G, p, q)
+    log_lie!(G, Z, Identity(G))
+    @test isapprox(G, Identity(G), Z, zero_vector(G, identity_element(G)))
+    @test isapprox(
+        G,
+        Identity(G),
+        log_lie(G, Identity(G)),
+        zero_vector(G, identity_element(G)),
+    )
+
+    @test compose(G, pts[1], Identity(G)) == pts[1]
+    @test compose(G, Identity(G), pts[1]) == pts[1]
+    test_group(G, pts, X_pts, X_pts; test_diff=true, test_mutating=false)
+    test_manifold(G, pts; is_mutating=false)
+    @test isapprox(
+        G,
+        exp_lie(G, X_pts[1]),
+        ArrayPartition(
+            exp_lie(SOn, submanifold_component(X_pts[1], 1)),
+            exp_lie(Tn, submanifold_component(X_pts[1], 2)),
+        ),
+    )
+    @test isapprox(
+        G,
+        log_lie(G, pts[1]),
+        ArrayPartition(
+            log_lie(SOn, submanifold_component(pts[1], 1)),
+            log_lie(Tn, submanifold_component(pts[1], 2)),
+        ),
+    )
     @test sprint(show, "text/plain", G) === """
     ProductGroup with 2 subgroups:
      SpecialOrthogonal(3)
-     TranslationGroup(2; field = ℝ)"""
+     TranslationGroup(2; field=ℝ)"""
 end

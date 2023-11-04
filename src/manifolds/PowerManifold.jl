@@ -21,8 +21,13 @@ tangent space of the power manifold.
 """
 struct PowerMetric <: AbstractMetric end
 
-function PowerManifold(M::AbstractManifold{𝔽}, size::Integer...) where {𝔽}
-    return PowerManifold{𝔽,typeof(M),Tuple{size...},ArrayPowerRepresentation}(M)
+function PowerManifold(
+    M::AbstractManifold{𝔽},
+    size::Integer...;
+    parameter::Symbol=:field,
+) where {𝔽}
+    size_w = wrap_type_parameter(parameter, size)
+    return PowerManifold{𝔽,typeof(M),typeof(size_w),ArrayPowerRepresentation}(M, size_w)
 end
 
 """
@@ -38,20 +43,16 @@ struct PowerPointDistribution{TM<:AbstractPowerManifold,TD<:MPointDistribution,T
 end
 
 """
-    PowerFVectorDistribution([type::VectorBundleFibers], [x], distr)
+    PowerFVectorDistribution([type::VectorSpaceFiber], [x], distr)
 
 Generates a random vector at a `point` from vector space (a fiber of a tangent
 bundle) of type `type` using the power distribution of `distr`.
 
 Vector space type and `point` can be automatically inferred from distribution `distr`.
 """
-struct PowerFVectorDistribution{
-    TSpace<:VectorBundleFibers{<:VectorSpaceType,<:AbstractPowerManifold},
-    TD<:FVectorDistribution,
-    TX,
-} <: FVectorDistribution{TSpace,TX}
+struct PowerFVectorDistribution{TSpace<:VectorSpaceFiber,TD<:FVectorDistribution} <:
+       FVectorDistribution{TSpace}
     type::TSpace
-    point::TX
     distribution::TD
 end
 
@@ -61,12 +62,6 @@ const PowerManifoldMultidimensional =
 Base.:^(M::AbstractManifold, n) = PowerManifold(M, n...)
 
 function allocate(::PowerManifoldNestedReplacing, x::AbstractArray{<:SArray})
-    return similar(x)
-end
-function allocate(
-    ::PowerManifoldNestedReplacing,
-    x::AbstractArray{<:ProductRepr{<:NTuple{N,SArray}}},
-) where {N}
     return similar(x)
 end
 function allocate(
@@ -95,48 +90,6 @@ end
 
 function allocate_result(M::PowerManifoldNestedReplacing, f, ::Identity, x...)
     return allocate_result(M, f, x...)
-end
-
-"""
-    change_representer(M::AbstractPowerManifold, ::AbstractMetric, p, X)
-
-Since the metric on a power manifold decouples, the change of a representer can be done elementwise
-"""
-change_representer(::AbstractPowerManifold, ::AbstractMetric, ::Any, ::Any)
-
-function change_representer!(M::AbstractPowerManifold, Y, G::AbstractMetric, p, X)
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        change_representer!(
-            M.manifold,
-            _write(M, rep_size, Y, i),
-            G,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-        )
-    end
-    return Y
-end
-
-"""
-    change_metric(M::AbstractPowerManifold, ::AbstractMetric, p, X)
-
-Since the metric on a power manifold decouples, the change of metric can be done elementwise.
-"""
-change_metric(M::AbstractPowerManifold, ::AbstractMetric, ::Any, ::Any)
-
-function change_metric!(M::AbstractPowerManifold, Y, G::AbstractMetric, p, X)
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        change_metric!(
-            M.manifold,
-            _write(M, rep_size, Y, i),
-            G,
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-        )
-    end
-    return Y
 end
 
 @doc raw"""
@@ -182,12 +135,13 @@ end
 
 Return the manifold volume of an [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) `M`.
 """
-function manifold_volume(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
-    return manifold_volume(M.manifold)^prod(size_to_tuple(TSize))
+function manifold_volume(M::PowerManifold)
+    size = get_parameter(M.size)
+    return manifold_volume(M.manifold)^prod(size)
 end
 
 function Random.rand(rng::AbstractRNG, d::PowerFVectorDistribution)
-    fv = zero_vector(d.type, d.point)
+    fv = zero_vector(d.type.manifold, d.type.point)
     Distributions._rand!(rng, d, fv)
     return fv
 end
@@ -205,7 +159,7 @@ function Distributions._rand!(
     PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
     for i in get_iterator(d.type.manifold)
-        copyto!(d.distribution.point, _read(PM, rep_size, d.point, i))
+        copyto!(d.distribution.type.point, _read(PM, rep_size, d.type.point, i))
         Distributions._rand!(rng, d.distribution, _read(PM, rep_size, v, i))
     end
     return v
@@ -262,8 +216,8 @@ function Base.view(
     return _write(M, rep_size, p, I...)
 end
 
-function representation_size(M::PowerManifold{𝔽,<:AbstractManifold,TSize}) where {𝔽,TSize}
-    return (representation_size(M.manifold)..., size_to_tuple(TSize)...)
+function representation_size(M::PowerManifold)
+    return (representation_size(M.manifold)..., get_parameter(M.size)...)
 end
 
 @doc raw"""
@@ -318,17 +272,23 @@ end
 
 function Base.show(
     io::IO,
-    M::PowerManifold{𝔽,TM,TSize,ArrayPowerRepresentation},
-) where {𝔽,TM,TSize}
-    return print(io, "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")))")
+    M::PowerManifold{𝔽,TM,TypeParameter{TSize},ArrayPowerRepresentation},
+) where {𝔽,TM<:AbstractManifold{𝔽},TSize}
+    return print(
+        io,
+        "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")), parameter=:type)",
+    )
+end
+function Base.show(
+    io::IO,
+    M::PowerManifold{𝔽,TM,<:Tuple,ArrayPowerRepresentation},
+) where {𝔽,TM<:AbstractManifold{𝔽}}
+    size = get_parameter(M.size)
+    return print(io, "PowerManifold($(M.manifold), $(join(size, ", ")))")
 end
 
-Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type, tvd.point)
+Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type)
 Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
-
-function vector_bundle_transport(fiber::VectorSpaceType, M::PowerManifold)
-    return ParallelTransport()
-end
 
 @doc raw"""
     volume_density(M::PowerManifold, p, X)
@@ -345,29 +305,6 @@ function volume_density(M::PowerManifold, p, X)
         density *= volume_density(M.manifold, p_i, X_i)
     end
     return density
-end
-
-@doc raw"""
-    Y = Weingarten(M::AbstractPowerManifold, p, X, V)
-    Weingarten!(M::AbstractPowerManifold, Y, p, X, V)
-
-Since the metric decouples, also the computation of the Weingarten map
-``\mathcal W_p`` can be computed elementwise on the single elements of the [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds/#sec-power-manifold) `M`.
-"""
-Weingarten(::AbstractPowerManifold, p, X, V)
-
-function Weingarten!(M::AbstractPowerManifold, Y, p, X, V)
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        Weingarten!(
-            M.manifold,
-            _write(M, rep_size, Y, i),
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, X, i),
-            _read(M, rep_size, V, i),
-        )
-    end
-    return Y
 end
 
 @inline function _write(

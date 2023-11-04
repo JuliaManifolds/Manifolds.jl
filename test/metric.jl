@@ -248,7 +248,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
     Random.seed!(42)
     @testset "Metric Basics" begin
         @test repr(MetricManifold(Euclidean(3), EuclideanMetric())) ===
-              "MetricManifold(Euclidean(3; field = ℝ), EuclideanMetric())"
+              "MetricManifold(Euclidean(3; field=ℝ), EuclideanMetric())"
         @test repr(IsDefaultMetric(EuclideanMetric())) ===
               "IsDefaultMetric(EuclideanMetric())"
     end
@@ -295,7 +295,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         p = [3, 4]
         i = get_chart_index(M, A, p)
 
-        B = induced_basis(M, A, i, TangentSpace)
+        B = induced_basis(M, A, i, TangentSpaceType())
         @test_throws MethodError local_metric(M, p, B)
     end
     @testset "scaled Euclidean metric" begin
@@ -317,7 +317,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test metric(M) === g
 
         i_zeros = get_chart_index(M, A, zeros(3))
-        B_i_zeros = induced_basis(M, A, i_zeros, TangentSpace)
+        B_i_zeros = induced_basis(M, A, i_zeros, TangentSpaceType())
         @test_throws MethodError local_metric_jacobian(E, zeros(3), B_i_zeros)
         @test_throws MethodError christoffel_symbols_second_jacobian(E, zeros(3), B_i_zeros)
 
@@ -325,7 +325,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
             p, X, Y = vtype(randn(n)), vtype(randn(n)), vtype(randn(n))
 
             chart_p = get_chart_index(M, A, p)
-            B_chart_p = induced_basis(M, A, chart_p, TangentSpace)
+            B_chart_p = induced_basis(M, A, chart_p, TangentSpaceType())
 
             @test check_point(M, p) == check_point(E, p)
             @test check_vector(M, p, X) == check_vector(E, p, X)
@@ -404,7 +404,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         for vtype in (Vector, MVector{n})
             p = vtype([θ, ϕ])
             chart_p = get_chart_index(M, A, p)
-            B_p = induced_basis(M, A, chart_p, TangentSpace)
+            B_p = induced_basis(M, A, chart_p, TangentSpaceType())
             G = Diagonal(vtype([1, sin(θ)^2])) .* r^2
             invG = Diagonal(vtype([1, 1 / sin(θ)^2])) ./ r^2
             X, Y = normalize(randn(n)), normalize(randn(n))
@@ -511,7 +511,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         X = [0.5, 0.7, 0.11]
 
         chart_p = get_chart_index(M, A, p)
-        B_p = induced_basis(M, A, chart_p, TangentSpace)
+        B_p = induced_basis(M, A, chart_p, TangentSpaceType())
         fX = ManifoldsBase.TFVector(X, B_p)
         fY = ManifoldsBase.TFVector(Y, B_p)
 
@@ -550,7 +550,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
 
         A = Manifolds.get_default_atlas(MM2)
         chart_p = get_chart_index(MM2, A, p)
-        B_p = induced_basis(MM2, A, chart_p, TangentSpace)
+        B_p = induced_basis(MM2, A, chart_p, TangentSpaceType())
         @test_throws MethodError local_metric(MM2, p, B_p)
         @test_throws MethodError local_metric_jacobian(MM2, p, B_p)
         @test_throws MethodError christoffel_symbols_second_jacobian(MM2, p, B_p)
@@ -595,10 +595,13 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test is_point(MM2, p) === is_point(M, p)
         @test is_vector(MM2, p, X) === is_vector(M, p, X)
 
-        a = Manifolds.projected_distribution(M, Distributions.MvNormal(zero(zeros(3)), 1.0))
+        a = Manifolds.projected_distribution(
+            M,
+            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
+        )
         b = Manifolds.projected_distribution(
             MM2,
-            Distributions.MvNormal(zero(zeros(3)), 1.0),
+            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
         )
         @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
         @test isapprox(a.distribution.μ, b.distribution.μ)
@@ -614,18 +617,19 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         cofY = flat(M, p, fY)
         @test coX(X) ≈ norm(M, p, X)^2
         @test coY(X) ≈ inner(M, p, X, Y)
-        cotspace = CotangentBundleFibers(M)
-        cotspace2 = CotangentBundleFibers(MM)
+        cotspace = CotangentSpace(M, p)
+        cotspace2 = CotangentSpace(MM, p)
         @test coX.X ≈ X
-        @test inner(M, p, X, Y) ≈ inner(cotspace, p, coX, coY)
-        @test inner(MM, p, fX, fY) ≈ inner(cotspace, p, coX, coY)
+        X0p = zero_vector(MM, p)
+        @test inner(M, p, X, Y) ≈ inner(cotspace, X0p, coX, coY)
+        @test inner(MM, p, fX, fY) ≈ inner(cotspace, X0p, coX, coY)
 
-        @test inner(MM, p, fX, fY) ≈ inner(cotspace2, p, cofX, cofY)
+        @test inner(MM, p, fX, fY) ≈ inner(cotspace2, X0p, cofX, cofY)
         @test sharp(M, p, coX) ≈ X
 
         coMMfX = flat(MM, p, fX)
         coMMfY = flat(MM, p, fY)
-        @test inner(MM, p, fX, fY) ≈ inner(cotspace2, p, coMMfX, coMMfY)
+        @test inner(MM, p, fX, fY) ≈ inner(cotspace2, X0p, coMMfX, coMMfY)
         @test isapprox(sharp(MM, p, coMMfX).data, fX.data)
 
         @testset "Mutating flat/sharp" begin

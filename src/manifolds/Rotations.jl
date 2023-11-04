@@ -1,18 +1,21 @@
 @doc raw"""
-    Rotations{N} <: AbstractManifold{ℝ}
+    Rotations{T} <: AbstractManifold{ℝ}
 
-The manifold of rotation matrices of sice ``n × n``, i.e.
+The manifold of rotation matrices of size ``n × n``, i.e.
 real-valued orthogonal matrices with determinant ``+1``.
 
 # Constructor
 
-    Rotations(n)
+    Rotations(n::Int; parameter::Symbol=:type)
 
 Generate the manifold of ``n × n`` rotation matrices.
 """
-const Rotations{n} = GeneralUnitaryMatrices{n,ℝ,DeterminantOneMatrices}
+const Rotations{T} = GeneralUnitaryMatrices{T,ℝ,DeterminantOneMatrices}
 
-Rotations(n::Int) = Rotations{n}()
+function Rotations(n::Int; parameter::Symbol=:type)
+    size = wrap_type_parameter(parameter, (n,))
+    return Rotations{typeof(size)}(size)
+end
 
 """
     NormalRotationDistribution(M::Rotations, d::Distribution, x::TResult)
@@ -40,7 +43,7 @@ end
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
-The Lie algebra of [`Rotations(4)`](@ref) in $ℝ^{4 × 4}$, $𝔰𝔬(4)$, consists of $4 × 4$
+The Lie algebra of [`Rotations(4)`](@ref) in ``ℝ^{4 × 4}``, ``𝔰𝔬(4)``, consists of ``4 × 4``
 skew-symmetric matrices. The unique imaginary components of their eigenvalues are the
 angles of the two plane rotations. This function computes these more efficiently than
 `eigvals`.
@@ -121,11 +124,8 @@ function _ev_zero(tridiagonal_elements, unitary, evec, evals, fill_at; i)
     return (values=evals, vectors=evec)
 end
 
-function get_basis_diagonalizing(
-    M::Rotations{N},
-    p,
-    B::DiagonalizingOrthonormalBasis{ℝ},
-) where {N}
+function get_basis_diagonalizing(M::Rotations, p, B::DiagonalizingOrthonormalBasis{ℝ})
+    n = get_parameter(M.size)[1]
     decomp = schur(B.frame_direction)
     decomp = ordschur(decomp, map(v -> norm(v) > eps(eltype(p)), decomp.values))
 
@@ -135,7 +135,7 @@ function get_basis_diagonalizing(
     evals = Vector{eltype(B.frame_direction)}(undef, manifold_dimension(M))
     i = 1
     fill_at = Ref(1)
-    while i <= N
+    while i <= n
         if trian_elem[i] == 0
             evs = _ev_zero(trian_elem, unitary, evec, evals, fill_at; i=i)
             i += 1
@@ -158,15 +158,18 @@ end
     injectivity_radius(M::Rotations, ::PolarRetraction)
 
 Return the radius of injectivity for the [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
-[`Rotations`](@ref) `M` which is $\frac{π}{\sqrt{2}}$.
+[`Rotations`](@ref) `M` which is ``\frac{π}{\sqrt{2}}``.
 """
 injectivity_radius(::Rotations, ::PolarRetraction)
-_injectivity_radius(::Rotations, ::PolarRetraction) = π / sqrt(2.0)
+function _injectivity_radius(M::Rotations, ::PolarRetraction)
+    n = get_parameter(M.size)[1]
+    return n == 1 ? 0.0 : π / sqrt(2.0)
+end
 
 @doc raw"""
     inverse_retract(M, p, q, ::PolarInverseRetraction)
 
-Compute a vector from the tangent space $T_p\mathrm{SO}(n)$
+Compute a vector from the tangent space ``T_p\mathrm{SO}(n)``
 of the point `p` on the [`Rotations`](@ref) manifold `M`
 with which the point `q` can be reached by the
 [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) from the point `p` after time 1.
@@ -177,22 +180,23 @@ The formula reads
 = -\frac{1}{2}(p^{\mathrm{T}}qs - (p^{\mathrm{T}}qs)^{\mathrm{T}})
 ````
 
-where $s$ is the solution to the Sylvester equation
+where ``s`` is the solution to the Sylvester equation
 
-$p^{\mathrm{T}}qs + s(p^{\mathrm{T}}q)^{\mathrm{T}} + 2I_n = 0.$
+``p^{\mathrm{T}}qs + s(p^{\mathrm{T}}q)^{\mathrm{T}} + 2I_n = 0.``
 """
 inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
 
 @doc raw"""
     inverse_retract(M::Rotations, p, q, ::QRInverseRetraction)
 
-Compute a vector from the tangent space $T_p\mathrm{SO}(n)$ of the point `p` on the
+Compute a vector from the tangent space ``T_p\mathrm{SO}(n)`` of the point `p` on the
 [`Rotations`](@ref) manifold `M` with which the point `q` can be reached by the
 [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) from the point `q` after time 1.
 """
 inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 
-function inverse_retract_polar!(M::Rotations{n}, X, p, q) where {n}
+function inverse_retract_polar!(M::Rotations, X, p, q)
+    n = get_parameter(M.size)[1]
     A = transpose(p) * q
     Amat = A isa StaticMatrix ? A : convert(Matrix, A)
     H = copyto!(allocate(Amat), -2I)
@@ -208,7 +212,8 @@ function inverse_retract_polar!(M::Rotations{n}, X, p, q) where {n}
     end
     return project!(SkewSymmetricMatrices(n), X, p, X)
 end
-function inverse_retract_qr!(::Rotations{n}, X, p, q) where {n}
+function inverse_retract_qr!(M::Rotations, X, p, q)
+    n = get_parameter(M.size)[1]
     A = transpose(p) * q
     R = zero(X)
     for i in 1:n
@@ -225,26 +230,36 @@ end
     normal_rotation_distribution(M::Rotations, p, σ::Real)
 
 Return a random point on the manifold [`Rotations`](@ref) `M`
-by generating a (Gaussian) random orthogonal matrix with determinant $+1$. Let
+by generating a (Gaussian) random orthogonal matrix with determinant ``+1``. Let
 
-$QR = A$
+```math
+QR = A
+```
 
-be the QR decomposition of a random matrix $A$, then the formula reads
+be the QR decomposition of a random matrix ``A``, then the formula reads
 
-$p = QD$
+```math
+p = QD
+```
 
-where $D$ is a diagonal matrix with the signs of the diagonal entries of $R$,
+where ``D`` is a diagonal matrix with the signs of the diagonal entries of ``R``,
 i.e.
 
-$D_{ij}=\begin{cases} \operatorname{sgn}(R_{ij}) & \text{if} \; i=j \\ 0 & \, \text{otherwise} \end{cases}.$
+```math
+D_{ij}=\begin{cases}
+ \operatorname{sgn}(R_{ij}) & \text{if} \; i=j \\
+ 0 & \, \text{otherwise}
+\end{cases}.
+```
 
 It can happen that the matrix gets -1 as a determinant. In this case, the first
 and second columns are swapped.
 
 The argument `p` is used to determine the type of returned points.
 """
-function normal_rotation_distribution(M::Rotations{N}, p, σ::Real) where {N}
-    d = Distributions.MvNormal(zeros(N * N), σ)
+function normal_rotation_distribution(M::Rotations, p, σ::Real)
+    n = get_parameter(M.size)[1]
+    d = Distributions.MvNormal(zeros(n * n), σ * I)
     return NormalRotationDistribution(M, d, p)
 end
 
@@ -253,7 +268,7 @@ end
 
 Project `p` to the nearest point on manifold `M`.
 
-Given the singular value decomposition $p = U Σ V^\mathrm{T}$, with the
+Given the singular value decomposition ``p = U Σ V^\mathrm{T}``, with the
 singular values sorted in descending order, the projection is
 
 ````math
@@ -261,19 +276,20 @@ singular values sorted in descending order, the projection is
 U\operatorname{diag}\left[1,1,…,\det(U V^\mathrm{T})\right] V^\mathrm{T}
 ````
 
-The diagonal matrix ensures that the determinant of the result is $+1$.
+The diagonal matrix ensures that the determinant of the result is ``+1``.
 If `p` is expected to be almost special orthogonal, then you may avoid this
 check with `check_det = false`.
 """
 project(::Rotations, ::Any)
 
-function project!(::Rotations{N}, q, p; check_det=true) where {N}
+function project!(M::Rotations, q, p; check_det::Bool=true)
+    n = get_parameter(M.size)[1]
     F = svd(p)
     mul!(q, F.U, F.Vt)
     if check_det && det(q) < 0
         d = similar(F.S)
-        @inbounds fill!(view(d, 1:(N - 1)), 1)
-        @inbounds d[N] = -1
+        @inbounds fill!(view(d, 1:(n - 1)), 1)
+        @inbounds d[n] = -1
         copyto!(q, F.U * Diagonal(d) * F.Vt)
     end
     return q
@@ -281,12 +297,13 @@ end
 
 function Random.rand(
     rng::AbstractRNG,
-    d::NormalRotationDistribution{TResult,Rotations{N}},
-) where {TResult,N}
-    return if N == 1
+    d::NormalRotationDistribution{TResult,<:Rotations},
+) where {TResult}
+    n = get_parameter(d.manifold.size)[1]
+    return if n == 1
         convert(TResult, ones(1, 1))
     else
-        A = reshape(rand(rng, d.distr), (N, N))
+        A = reshape(rand(rng, d.distr), (n, n))
         convert(TResult, _fix_random_rotation(A))
     end
 end
@@ -320,9 +337,9 @@ end
 
 function Distributions._rand!(
     rng::AbstractRNG,
-    d::NormalRotationDistribution{TResult,Rotations{N}},
+    d::NormalRotationDistribution,
     x::AbstractArray{<:Real},
-) where {TResult,N}
+)
     return copyto!(x, rand(rng, d))
 end
 
@@ -356,7 +373,7 @@ function parallel_transport_direction!(M::Rotations, Y, p, X, d)
     q = exp(M, p, d)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
-function parallel_transport_direction!(::Rotations{2}, Y, p, X, d)
+function parallel_transport_direction!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, d)
     return copyto!(Y, X)
 end
 function parallel_transport_direction(M::Rotations, p, X, d)
@@ -364,14 +381,14 @@ function parallel_transport_direction(M::Rotations, p, X, d)
     q = exp(M, p, d)
     return transpose(q) * p * expdhalf * X * expdhalf
 end
-parallel_transport_direction(::Rotations{2}, p, X, d) = X
+parallel_transport_direction(::Rotations{TypeParameter{Tuple{2}}}, p, X, d) = X
 
 function parallel_transport_to!(M::Rotations, Y, p, X, q)
     d = log(M, p, q)
     expdhalf = exp(d / 2)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
-function parallel_transport_to!(::Rotations{2}, Y, p, X, q)
+function parallel_transport_to!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, q)
     return copyto!(Y, X)
 end
 function parallel_transport_to(M::Rotations, p, X, q)
@@ -379,10 +396,14 @@ function parallel_transport_to(M::Rotations, p, X, q)
     expdhalf = exp(d / 2)
     return transpose(q) * p * expdhalf * X * expdhalf
 end
-parallel_transport_to(::Rotations{2}, p, X, q) = X
+parallel_transport_to(::Rotations{TypeParameter{Tuple{2}}}, p, X, q) = X
 
-function Base.show(io::IO, ::Rotations{n}) where {n}
+function Base.show(io::IO, ::Rotations{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "Rotations($(n))")
+end
+function Base.show(io::IO, M::Rotations{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return print(io, "Rotations($n; parameter=:field)")
 end
 
 @doc raw"""
@@ -396,7 +417,8 @@ and that means the inverse has to be appliead to the (Euclidean) Hessian
 to map it into the Lie algebra.
 """
 riemannian_Hessian(M::Rotations, p, G, H, X)
-function riemannian_Hessian!(::Rotations{N}, Y, p, G, H, X) where {N}
+function riemannian_Hessian!(M::Rotations, Y, p, G, H, X)
+    N = get_parameter(M.size)[1]
     symmetrize!(Y, G' * p)
     project!(SkewSymmetricMatrices(N), Y, p' * H - X * Y)
     return Y

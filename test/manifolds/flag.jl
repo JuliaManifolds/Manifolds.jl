@@ -267,6 +267,18 @@ using Random
         @test isapprox(Y_tmp, X1_ortho.value)
 
         @test retract(M, p1_ortho, X1_ortho, QRRetraction()).value ≈
-              retract(Orthogonal(5), p1_ortho.value, X1_ortho.value, QRRetraction())
+              retract(OrthogonalMatrices(5), p1_ortho.value, X1_ortho.value, QRRetraction())
+
+        @testset "field parameters" begin
+            M = Flag(5, 1, 2; parameter=:field)
+            @test get_embedding(M, p1_ortho) == OrthogonalMatrices(5; parameter=:field)
+        end
+    end
+
+    @testset "field parameters" begin
+        M = Flag(5, 1, 2; parameter=:field)
+        @test Manifolds.get_parameter(M.size)[1] == 5
+        @test get_embedding(M) == Stiefel(5, 2; parameter=:field)
+        @test repr(M) == "Flag(5, 1, 2; parameter=:field)"
     end
 end

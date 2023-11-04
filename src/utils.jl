@@ -207,20 +207,6 @@ unrealify!(Y, X, ::typeof(ℝ), args...) = copyto!(Y, X)
 
 @generated maybesize(s::Size{S}) where {S} = prod(S) > 100 ? S : :(s)
 
-"""
-    select_from_tuple(t::NTuple{N, Any}, positions::Val{P})
-
-Selects elements of tuple `t` at positions specified by the second argument.
-For example `select_from_tuple(("a", "b", "c"), Val((3, 1, 1)))` returns
-`("c", "a", "a")`.
-"""
-@generated function select_from_tuple(t::NTuple{N,Any}, positions::Val{P}) where {N,P}
-    for k in P
-        (k < 0 || k > N) && error("positions must be between 1 and $N")
-    end
-    return Expr(:tuple, [Expr(:ref, :t, k) for k in P]...)
-end
-
 @doc raw"""
     symmetrize!(Y, X)
 
@@ -285,56 +271,6 @@ function isnormal(x; kwargs...)
     return isapprox(x * x', x' * x; kwargs...)
 end
 isnormal(::LinearAlgebra.RealHermSymComplexHerm; kwargs...) = true
-
-"""
-    ziptuples(a, b[, c[, d[, e]]])
-
-Zips tuples `a`, `b`, and remaining in a fast, type-stable way. If they have different
-lengths, the result is trimmed to the length of the shorter tuple.
-"""
-@generated function ziptuples(a::NTuple{N,Any}, b::NTuple{M,Any}) where {N,M}
-    ex = Expr(:tuple)
-    for i in 1:min(N, M)
-        push!(ex.args, :((a[$i], b[$i])))
-    end
-    return ex
-end
-@generated function ziptuples(
-    a::NTuple{N,Any},
-    b::NTuple{M,Any},
-    c::NTuple{L,Any},
-) where {N,M,L}
-    ex = Expr(:tuple)
-    for i in 1:min(N, M, L)
-        push!(ex.args, :((a[$i], b[$i], c[$i])))
-    end
-    return ex
-end
-@generated function ziptuples(
-    a::NTuple{N,Any},
-    b::NTuple{M,Any},
-    c::NTuple{L,Any},
-    d::NTuple{K,Any},
-) where {N,M,L,K}
-    ex = Expr(:tuple)
-    for i in 1:min(N, M, L, K)
-        push!(ex.args, :((a[$i], b[$i], c[$i], d[$i])))
-    end
-    return ex
-end
-@generated function ziptuples(
-    a::NTuple{N,Any},
-    b::NTuple{M,Any},
-    c::NTuple{L,Any},
-    d::NTuple{K,Any},
-    e::NTuple{J,Any},
-) where {N,M,L,K,J}
-    ex = Expr(:tuple)
-    for i in 1:min(N, M, L, K, J)
-        push!(ex.args, :((a[$i], b[$i], c[$i], d[$i], e[$i])))
-    end
-    return ex
-end
 
 _eps_safe(::Type{T}) where {T<:Integer} = zero(T)
 _eps_safe(::Type{T}) where {T<:Real} = eps(T)

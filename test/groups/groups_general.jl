@@ -4,6 +4,9 @@ using Base: decode_overlong
 include("../utils.jl")
 include("group_utils.jl")
 
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
+
 @testset "General group tests" begin
     @testset "Not implemented operation" begin
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
@@ -26,7 +29,7 @@ include("group_utils.jl")
             Identity(AdditionOperation()),
             Identity(MultiplicationOperation()),
         )
-        @test_throws DomainError is_point(G, Identity(AdditionOperation()), true)
+        @test_throws DomainError is_point(G, Identity(AdditionOperation()); error=:error)
         @test is_point(G, eg)
         @test_throws MethodError is_identity(G, 1) # same error as before i.e. dispatch isapprox works
         @test Manifolds.check_size(G, eg) === nothing
@@ -37,9 +40,14 @@ include("group_utils.jl")
         ) isa DomainError
         @test !is_vector(G, Identity(AdditionOperation()), X)
         # wrong identity
-        @test_throws DomainError is_vector(G, Identity(AdditionOperation()), X, true)
+        @test_throws DomainError is_vector(
+            G,
+            Identity(AdditionOperation()),
+            X;
+            error=:error,
+        )
         # identity_element for G not implemented
-        @test_throws MethodError is_vector(G, eg, X, true)
+        @test_throws MethodError is_vector(G, eg, X; error=:error)
         @test Identity(NotImplementedOperation()) === eg
         @test Identity(NotImplementedOperation) === eg
         @test !is_point(G, Identity(AdditionOperation()))
@@ -126,32 +134,17 @@ include("group_utils.jl")
     end
 
     @testset "Action direction" begin
-        @test switch_direction(LeftBackwardAction()) === RightForwardAction()
-        @test switch_direction(LeftForwardAction()) === RightBackwardAction()
-        @test switch_direction(RightBackwardAction()) === LeftForwardAction()
-        @test switch_direction(RightForwardAction()) === LeftBackwardAction()
-
-        @test switch_direction(LeftBackwardAction(), Manifolds.LeftRightSwitch()) ===
-              RightBackwardAction()
-        @test switch_direction(LeftForwardAction(), Manifolds.LeftRightSwitch()) ===
-              RightForwardAction()
-        @test switch_direction(RightBackwardAction(), Manifolds.LeftRightSwitch()) ===
-              LeftBackwardAction()
-        @test switch_direction(RightForwardAction(), Manifolds.LeftRightSwitch()) ===
-              LeftForwardAction()
-
-        @test switch_direction(LeftBackwardAction(), Manifolds.ForwardBackwardSwitch()) ===
-              LeftForwardAction()
-        @test switch_direction(LeftForwardAction(), Manifolds.ForwardBackwardSwitch()) ===
-              LeftBackwardAction()
-        @test switch_direction(RightBackwardAction(), Manifolds.ForwardBackwardSwitch()) ===
-              RightForwardAction()
-        @test switch_direction(RightForwardAction(), Manifolds.ForwardBackwardSwitch()) ===
-              RightBackwardAction()
+        @test switch_direction(LeftAction()) === RightAction()
+        @test switch_direction(RightAction()) === LeftAction()
 
         G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
         @test Manifolds._action_order(G, 1, 2, LeftForwardAction()) === (1, 2)
         @test Manifolds._action_order(G, 1, 2, RightBackwardAction()) === (2, 1)
+    end
+
+    @testset "Action side" begin
+        @test switch_side(LeftSide()) === RightSide()
+        @test switch_side(RightSide()) === LeftSide()
     end
 
     @testset "Addition operation" begin
@@ -296,7 +289,7 @@ include("group_utils.jl")
     end
 end
 
-struct NotImplementedAction <: AbstractGroupAction{LeftForwardAction} end
+struct NotImplementedAction <: AbstractGroupAction{LeftAction} end
 
 @testset "General group action tests" begin
     @testset "Not implemented operations" begin
@@ -305,17 +298,17 @@ struct NotImplementedAction <: AbstractGroupAction{LeftForwardAction} end
         a = [1.0, 2.0]
         X = [1.0, 2.0]
 
-        @test_throws ErrorException apply(A, a, p)
-        @test_throws ErrorException apply!(A, p, a, p)
-        @test_throws ErrorException inverse_apply(A, a, p)
-        @test_throws ErrorException inverse_apply!(A, p, a, p)
-        @test_throws ErrorException apply_diff(A, a, p, X)
-        @test_throws ErrorException apply_diff!(A, X, p, a, X)
-        @test_throws ErrorException inverse_apply_diff(A, a, p, X)
-        @test_throws ErrorException inverse_apply_diff!(A, X, p, a, X)
-        @test_throws ErrorException compose(A, a, a)
-        @test_throws ErrorException compose!(A, a, a, a)
-        @test_throws ErrorException optimal_alignment(A, p, p)
-        @test_throws ErrorException optimal_alignment!(A, a, p, p)
+        @test_throws MethodError apply(A, a, p)
+        @test_throws MethodError apply!(A, p, a, p)
+        @test_throws MethodError inverse_apply(A, a, p)
+        @test_throws MethodError inverse_apply!(A, p, a, p)
+        @test_throws MethodError apply_diff(A, a, p, X)
+        @test_throws MethodError apply_diff!(A, X, p, a, X)
+        @test_throws MethodError inverse_apply_diff(A, a, p, X)
+        @test_throws MethodError inverse_apply_diff!(A, X, p, a, X)
+        @test_throws MethodError compose(A, a, a)
+        @test_throws MethodError compose!(A, a, a, a)
+        @test_throws MethodError optimal_alignment(A, p, p)
+        @test_throws MethodError optimal_alignment!(A, a, p, p)
     end
 end

@@ -93,7 +93,7 @@ function inverse_translate_diff(
     p,
     q,
     X,
-    ::ActionDirection,
+    ::ActionDirectionAndSide,
 )
     return X
 end
@@ -105,7 +105,7 @@ function inverse_translate_diff!(
     p,
     q,
     X,
-    ::ActionDirection,
+    ::ActionDirectionAndSide,
 )
     return copyto!(G, Y, p, X)
 end
@@ -138,7 +138,7 @@ function translate_diff(
     p,
     q,
     X,
-    ::ActionDirection,
+    ::ActionDirectionAndSide,
 )
     return X
 end
@@ -150,7 +150,7 @@ function translate_diff!(
     p,
     q,
     X,
-    ::ActionDirection,
+    ::ActionDirectionAndSide,
 )
     return copyto!(G, Y, p, X)
 end

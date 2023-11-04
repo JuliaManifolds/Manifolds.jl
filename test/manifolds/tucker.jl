@@ -184,4 +184,9 @@ include("../utils.jl")
             )
         end
     end
+    @testset "field parameter" begin
+        M = Tucker(n⃗, r⃗; parameter=:field)
+        @test sprint(show, "text/plain", M) ==
+              "Tucker((4, 5, 6), (2, 3, 4), ℝ; parameter=:field)"
+    end
 end

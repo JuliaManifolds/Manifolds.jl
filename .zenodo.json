@@ -1,6 +1,12 @@
 {
         "contributors": [
         {
+            "affiliation": "NTNU Trondheim",
+            "name": "Jasa, Hajg",
+            "type": "ProjectMember",
+            "orcid": "0009-0002-7917-0530"
+        },
+        {
             "name": "Mathieu Besançon",
             "type": "Other",
             "orcid": "0000-0002-6284-3033"
@@ -23,6 +29,11 @@
         },
         {
             "name": "Weiß, Manuel",
+            "type": "ProjectMember"
+        },
+        {
+            "affiliation": "Georg-August-University Göttingen",
+            "name": "Klingbiel, Lukas",
             "type": "ProjectMember"
         },
         {

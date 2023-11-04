@@ -39,7 +39,7 @@ end
         A::AbstractAtlas,
         i;
         solver=MIRK4(),
-        dt=0.05,
+        dt::Real=0.05,
         kwargs...,
     )
 
@@ -55,22 +55,18 @@ function solve_chart_log_bvp(
     A::AbstractAtlas,
     i;
     solver=MIRK4(),
-    dt=0.05,
+    dt::Real=0.05,
     kwargs...,
 )
     tspan = (0.0, 1.0)
     function bc1!(residual, u, p, t)
         mid = div(length(u[1]), 2)
         residual[1:mid] = u[1][1:mid] - a1
-        return residual[(mid + 1):end] = u[end][1:mid] - a2
+        residual[(mid + 1):end] = u[end][1:mid] - a2
+        return residual
     end
-    bvp1 = BVProblem(
-        chart_log_problem!,
-        bc1!,
-        (p, t) -> vcat(t * a1 + (1 - t) * a2, zero(a1)),
-        tspan,
-        (M, A, i),
-    )
+    u0 = [vcat(a1, zero(a1)), vcat(a2, zero(a1))]
+    bvp1 = BVProblem(chart_log_problem!, bc1!, u0, tspan, (M, A, i))
     sol1 = solve(bvp1, solver, dt=dt)
     return sol1
 end

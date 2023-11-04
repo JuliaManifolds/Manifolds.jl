@@ -25,33 +25,52 @@ $\mathrm{T}(n) × \mathrm{SO}(n)$. For group-specific functions, they may also b
 represented as affine matrices with size `(n + 1, n + 1)` (see [`affine_matrix`](@ref)), for
 which the group operation is [`MultiplicationOperation`](@ref).
 """
-const SpecialEuclidean{N} = SemidirectProductGroup{
+const SpecialEuclidean{T} = SemidirectProductGroup{
     ℝ,
-    TranslationGroup{Tuple{N},ℝ},
-    SpecialOrthogonal{N},
-    RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftForwardAction},
+    TranslationGroup{T,ℝ},
+    SpecialOrthogonal{T},
+    RotationAction{LeftAction,TranslationGroup{T,ℝ},SpecialOrthogonal{T}},
 }
 
 const SpecialEuclideanManifold{N} =
-    ProductManifold{ℝ,Tuple{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N}}}
+    ProductManifold{ℝ,Tuple{TranslationGroup{N,ℝ},SpecialOrthogonal{N}}}
 
-function SpecialEuclidean(n)
-    Tn = TranslationGroup(n)
-    SOn = SpecialOrthogonal(n)
+function SpecialEuclidean(n; parameter::Symbol=:type)
+    Tn = TranslationGroup(n; parameter=parameter)
+    SOn = SpecialOrthogonal(n; parameter=parameter)
     A = RotationAction(Tn, SOn)
     return SemidirectProductGroup(Tn, SOn, A)
 end
 
 const SpecialEuclideanOperation{N} = SemidirectProductOperation{
-    RotationAction{TranslationGroup{Tuple{N},ℝ},SpecialOrthogonal{N},LeftForwardAction},
+    RotationAction{LeftAction,TranslationGroup{N,ℝ},SpecialOrthogonal{N}},
 }
 const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
-Base.show(io::IO, ::SpecialEuclidean{n}) where {n} = print(io, "SpecialEuclidean($(n))")
+function Base.show(io::IO, ::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "SpecialEuclidean($(n))")
+end
+function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
+    n = _get_parameter(G)
+    return print(io, "SpecialEuclidean($(n); parameter=:field)")
+end
 
 @inline function active_traits(f, M::SpecialEuclidean, args...)
     return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
 end
+
+"""
+    _get_parameter(M::AbstractManifold)
+
+Similar to `get_parameter` but it can be specialized for manifolds without breaking
+manifolds being parametrized by other manifolds.
+"""
+_get_parameter(::AbstractManifold)
+
+_get_parameter(::SpecialEuclidean{TypeParameter{Tuple{N}}}) where {N} = N
+_get_parameter(M::SpecialEuclidean{Tuple{Int}}) = _get_parameter(M.manifold)
+_get_parameter(::SpecialEuclideanManifold{TypeParameter{Tuple{N}}}) where {N} = N
+_get_parameter(M::SpecialEuclideanManifold{Tuple{Int}}) = manifold_dimension(M.manifolds[1])
 
 Base.@propagate_inbounds function Base.getindex(
     p::AbstractMatrix,
@@ -72,24 +91,27 @@ Base.@propagate_inbounds function Base.setindex!(
 end
 
 Base.@propagate_inbounds function submanifold_component(
-    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     p::AbstractMatrix,
     ::Val{1},
-) where {n}
+)
+    n = _get_parameter(G)
     return view(p, 1:n, n + 1)
 end
 Base.@propagate_inbounds function submanifold_component(
-    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     p::AbstractMatrix,
     ::Val{2},
-) where {n}
+)
+    n = _get_parameter(G)
     return view(p, 1:n, 1:n)
 end
 
 function submanifold_components(
-    G::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     p::AbstractMatrix,
-) where {n}
+)
+    n = _get_parameter(G)
     @assert size(p) == (n + 1, n + 1)
     @inbounds t = submanifold_component(G, p, Val(1))
     @inbounds R = submanifold_component(G, p, Val(2))
@@ -97,9 +119,10 @@ function submanifold_components(
 end
 
 Base.@propagate_inbounds function _padpoint!(
-    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     q::AbstractMatrix,
-) where {n}
+)
+    n = _get_parameter(G)
     for i in 1:n
         q[n + 1, i] = 0
     end
@@ -108,9 +131,10 @@ Base.@propagate_inbounds function _padpoint!(
 end
 
 Base.@propagate_inbounds function _padvector!(
-    ::Union{SpecialEuclidean{n},SpecialEuclideanManifold{n}},
+    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
     X::AbstractMatrix,
-) where {n}
+)
+    n = _get_parameter(G)
     for i in 1:(n + 1)
         X[n + 1, i] = 0
     end
@@ -118,7 +142,7 @@ Base.@propagate_inbounds function _padvector!(
 end
 
 @doc raw"""
-    adjoint_action(::SpecialEuclidean{3}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
+    adjoint_action(::SpecialEuclidean{TypeParameter{Tuple{3}}}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
 
 Adjoint action of the [`SpecialEuclidean`](@ref) group on the vector with coefficients `fX`
 tangent at point `p`.
@@ -128,7 +152,11 @@ The formula for the coefficients reads ``t×(R⋅ω) + R⋅r`` for the translati
 matrix part of `p`, `r` is the translation part of `fX` and `ω` is the rotation part of `fX`,
 ``×`` is the cross product and ``⋅`` is the matrix product.
 """
-function adjoint_action(::SpecialEuclidean{3}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
+function adjoint_action(
+    ::SpecialEuclidean{TypeParameter{Tuple{3}}},
+    p,
+    fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}},
+)
     t, R = submanifold_components(p)
     r = fX.data[SA[1, 2, 3]]
     ω = fX.data[SA[4, 5, 6]]
@@ -156,21 +184,32 @@ It is an isometric embedding and group homomorphism [RicoMartinez:1988](@cite).
 See also [`screw_matrix`](@ref) for matrix representations of the Lie algebra.
 
 """
-function affine_matrix(G::SpecialEuclidean{n}, p) where {n}
+function affine_matrix(G::SpecialEuclidean, p)
     pis = submanifold_components(G, p)
     pmat = allocate_result(G, affine_matrix, pis...)
     map(copyto!, submanifold_components(G, pmat), pis)
     @inbounds _padpoint!(G, pmat)
     return pmat
 end
-affine_matrix(::SpecialEuclidean{n}, p::AbstractMatrix) where {n} = p
-function affine_matrix(::SpecialEuclidean{n}, ::SpecialEuclideanIdentity{n}) where {n}
+affine_matrix(::SpecialEuclidean, p::AbstractMatrix) = p
+function affine_matrix(
+    ::SpecialEuclidean{TypeParameter{Tuple{n}}},
+    ::SpecialEuclideanIdentity{TypeParameter{Tuple{n}}},
+) where {n}
     s = maybesize(Size(n, n))
     s isa Size && return SDiagonal{n,Float64}(I)
     return Diagonal{Float64}(I, n)
 end
+function affine_matrix(
+    G::SpecialEuclidean{Tuple{Int}},
+    ::SpecialEuclideanIdentity{Tuple{Int}},
+)
+    n = _get_parameter(G)
+    return Diagonal{Float64}(I, n)
+end
 
-function check_point(G::SpecialEuclideanManifold{n}, p::AbstractMatrix; kwargs...) where {n}
+function check_point(G::SpecialEuclideanManifold, p::AbstractMatrix; kwargs...)
+    n = _get_parameter(G)
     errs = DomainError[]
     # homogeneous
     if !isapprox(p[end, :], [zeros(size(p, 2) - 1)..., 1]; kwargs...)
@@ -194,24 +233,27 @@ function check_point(G::SpecialEuclideanManifold{n}, p::AbstractMatrix; kwargs..
     return length(errs) == 0 ? nothing : first(errs)
 end
 
-function check_size(G::SpecialEuclideanManifold{n}, p::AbstractMatrix; kwargs...) where {n}
+function check_size(G::SpecialEuclideanManifold, p::AbstractMatrix; kwargs...)
+    n = _get_parameter(G)
     return check_size(Euclidean(n + 1, n + 1), p)
 end
 function check_size(
-    G::SpecialEuclideanManifold{n},
+    G::SpecialEuclideanManifold,
     p::AbstractMatrix,
     X::AbstractMatrix;
     kwargs...,
-) where {n}
+)
+    n = _get_parameter(G)
     return check_size(Euclidean(n + 1, n + 1), X)
 end
 
 function check_vector(
-    G::SpecialEuclideanManifold{n},
+    G::SpecialEuclideanManifold,
     p::AbstractMatrix,
     X::AbstractMatrix;
     kwargs...,
-) where {n}
+)
+    n = _get_parameter(G)
     errs = DomainError[]
     # homogeneous
     if !isapprox(X[end, :], zeros(size(X, 2)); kwargs...)
@@ -252,19 +294,21 @@ a homomorphic embedding (see [`SpecialEuclideanInGeneralLinear`](@ref) for a hom
 
 See also [`affine_matrix`](@ref) for matrix representations of the Lie group.
 """
-function screw_matrix(G::SpecialEuclidean{n}, X) where {n}
+function screw_matrix(G::SpecialEuclidean, X)
     Xis = submanifold_components(G, X)
     Xmat = allocate_result(G, screw_matrix, Xis...)
     map(copyto!, submanifold_components(G, Xmat), Xis)
     @inbounds _padvector!(G, Xmat)
     return Xmat
 end
-screw_matrix(::SpecialEuclidean{n}, X::AbstractMatrix) where {n} = X
+screw_matrix(::SpecialEuclidean, X::AbstractMatrix) = X
 
-function allocate_result(::SpecialEuclidean{n}, ::typeof(affine_matrix), p...) where {n}
+function allocate_result(G::SpecialEuclidean, ::typeof(affine_matrix), p...)
+    n = _get_parameter(G)
     return allocate(p[1], Size(n + 1, n + 1))
 end
-function allocate_result(::SpecialEuclidean{n}, ::typeof(screw_matrix), X...) where {n}
+function allocate_result(G::SpecialEuclidean, ::typeof(screw_matrix), X...)
+    n = _get_parameter(G)
     return allocate(X[1], Size(n + 1, n + 1))
 end
 
@@ -321,7 +365,7 @@ exponential (see [`exp_lie`](@ref)).
 exp_lie(::SpecialEuclidean, ::Any)
 
 @doc raw"""
-    exp_lie(G::SpecialEuclidean{2}, X)
+    exp_lie(G::SpecialEuclidean{TypeParameter{Tuple{2}}}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(2)$, where $b ∈ 𝔱(2)$ and $Ω ∈ 𝔰𝔬(2)$:
 
@@ -338,10 +382,10 @@ U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-exp_lie(::SpecialEuclidean{2}, ::Any)
+exp_lie(::SpecialEuclidean{TypeParameter{Tuple{2}}}, ::Any)
 
 @doc raw"""
-    exp_lie(G::SpecialEuclidean{3}, X)
+    exp_lie(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, X)
 
 Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(3)$, where $b ∈ 𝔱(3)$ and $Ω ∈ 𝔰𝔬(3)$:
 
@@ -358,7 +402,7 @@ U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-exp_lie(::SpecialEuclidean{3}, ::Any)
+exp_lie(::SpecialEuclidean{TypeParameter{Tuple{3}}}, ::Any)
 
 function exp_lie!(G::SpecialEuclidean, q, X)
     Xmat = screw_matrix(G, X)
@@ -367,7 +411,7 @@ function exp_lie!(G::SpecialEuclidean, q, X)
     _padpoint!(G, q)
     return q
 end
-function exp_lie!(G::SpecialEuclidean{2}, q, X)
+function exp_lie!(G::SpecialEuclidean{TypeParameter{Tuple{2}}}, q, X)
     SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -396,7 +440,7 @@ function exp_lie!(G::SpecialEuclidean{2}, q, X)
     end
     return q
 end
-function exp_lie!(G::SpecialEuclidean{3}, q, X)
+function exp_lie!(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, q, X)
     SO3 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -425,7 +469,7 @@ function exp_lie!(G::SpecialEuclidean{3}, q, X)
 end
 
 @doc raw"""
-    log_lie(G::SpecialEuclidean{n}, p) where {n}
+    log_lie(G::SpecialEuclidean, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n)$
 and $R ∈ \mathrm{SO}(n)$:
@@ -442,7 +486,7 @@ In the [`affine_matrix`](@ref) representation, the group logarithm is the matrix
 log_lie(::SpecialEuclidean, ::Any)
 
 @doc raw"""
-    log_lie(G::SpecialEuclidean{2}, p)
+    log_lie(G::SpecialEuclidean{TypeParameter{Tuple{2}}}, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(2)$, where $t ∈ \mathrm{T}(2)$
 and $R ∈ \mathrm{SO}(2)$:
@@ -460,10 +504,10 @@ U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-log_lie(::SpecialEuclidean{2}, ::Any)
+log_lie(::SpecialEuclidean{TypeParameter{Tuple{2}}}, ::Any)
 
 @doc raw"""
-    log_lie(G::SpecialEuclidean{3}, p)
+    log_lie(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, p)
 
 Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(3)$, where $t ∈ \mathrm{T}(3)$
 and $R ∈ \mathrm{SO}(3)$:
@@ -481,7 +525,7 @@ U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
-log_lie(::SpecialEuclidean{3}, ::Any)
+log_lie(::SpecialEuclidean{TypeParameter{Tuple{3}}}, ::Any)
 
 function _log_lie!(G::SpecialEuclidean, X, q)
     qmat = affine_matrix(G, q)
@@ -490,7 +534,7 @@ function _log_lie!(G::SpecialEuclidean, X, q)
     _padvector!(G, X)
     return X
 end
-function _log_lie!(G::SpecialEuclidean{2}, X, q)
+function _log_lie!(G::SpecialEuclidean{TypeParameter{Tuple{2}}}, X, q)
     SO2 = submanifold(G, 2)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
@@ -508,7 +552,7 @@ function _log_lie!(G::SpecialEuclidean{2}, X, q)
     end
     return X
 end
-function _log_lie!(G::SpecialEuclidean{3}, X, q)
+function _log_lie!(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, X, q)
     b, Ω = submanifold_components(G, X)
     t, R = submanifold_components(G, q)
     @assert size(Ω) == (3, 3)
@@ -548,20 +592,14 @@ function log!(M::SpecialEuclideanManifold, X::AbstractMatrix, p, q)
 end
 
 """
-    lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
     lie_bracket(G::SpecialEuclidean, X::ArrayPartition, Y::ArrayPartition)
     lie_bracket(G::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)
 
 Calculate the Lie bracket between elements `X` and `Y` of the special Euclidean Lie
 algebra. For the matrix representation (which can be obtained using [`screw_matrix`](@ref))
-the formula is ``[X, Y] = XY-YX``, while in the [`ProductRepr`](@ref) representation the
+the formula is ``[X, Y] = XY-YX``, while in the `ArrayPartition` representation the
 formula reads ``[X, Y] = [(t_1, R_1), (t_2, R_2)] = (R_1 t_2 - R_2 t_1, R_1 R_2 - R_2 R_1)``.
 """
-function lie_bracket(G::SpecialEuclidean, X::ProductRepr, Y::ProductRepr)
-    nX, hX = submanifold_components(G, X)
-    nY, hY = submanifold_components(G, Y)
-    return ProductRepr(hX * nY - hY * nX, lie_bracket(G.manifold.manifolds[2], hX, hY))
-end
 function lie_bracket(G::SpecialEuclidean, X::ArrayPartition, Y::ArrayPartition)
     nX, hX = submanifold_components(G, X)
     nY, hY = submanifold_components(G, Y)
@@ -691,4 +729,85 @@ function project!(M::SpecialEuclideanInGeneralLinear, q, p)
 end
 function project!(M::SpecialEuclideanInGeneralLinear, Y, p, X)
     return copyto!(Y, project(M, p, X))
+end
+
+### Special methods for better performance of selected operations
+
+function exp(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
+    M1, M2 = M.manifold.manifolds
+    return ArrayPartition(
+        exp(M1.manifold, p.x[1], X.x[1]),
+        exp(M2.manifold, p.x[2], X.x[2]),
+    )
+end
+function log(M::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
+    M1, M2 = M.manifold.manifolds
+    return ArrayPartition(
+        log(M1.manifold, p.x[1], q.x[1]),
+        log(M2.manifold, p.x[2], q.x[2]),
+    )
+end
+function vee(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
+    M1, M2 = M.manifold.manifolds
+    return vcat(vee(M1.manifold, p.x[1], X.x[1]), vee(M2.manifold, p.x[2], X.x[2]))
+end
+function get_coordinates(
+    M::SpecialEuclidean,
+    p::ArrayPartition,
+    X::ArrayPartition,
+    basis::DefaultOrthogonalBasis,
+)
+    M1, M2 = M.manifold.manifolds
+    return vcat(
+        get_coordinates(M1.manifold, p.x[1], X.x[1], basis),
+        get_coordinates(M2.manifold, p.x[2], X.x[2], basis),
+    )
+end
+function hat(
+    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
+    p::ArrayPartition,
+    c::AbstractVector,
+)
+    M1, M2 = M.manifold.manifolds
+    return ArrayPartition(
+        get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(2)], ℝ),
+        get_vector_orthogonal(M2.manifold, p.x[2], c[SA[3]], ℝ),
+    )
+end
+function get_vector(
+    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
+    p::ArrayPartition,
+    c::AbstractVector,
+    basis::DefaultOrthogonalBasis,
+)
+    return ArrayPartition(
+        get_vector(M.manifold.manifolds[1].manifold, p.x[1], c[SOneTo(2)], basis),
+        get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[3]], basis),
+    )
+end
+
+function hat(
+    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
+    p::ArrayPartition,
+    c::AbstractVector,
+)
+    M1, M2 = M.manifold.manifolds
+    return ArrayPartition(
+        get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(3)], ℝ),
+        get_vector_orthogonal(M2.manifold, p.x[2], c[SA[4, 5, 6]], ℝ),
+    )
+end
+function get_vector(
+    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
+    p::ArrayPartition,
+    c::AbstractVector,
+    basis::DefaultOrthogonalBasis,
+)
+    return ArrayPartition(
+        get_vector(M.manifold.manifolds[1].manifold, p.x[1], c[SOneTo(3)], basis),
+        get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[4, 5, 6]], basis),
+    )
+end
+function compose(::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
+    return ArrayPartition(p.x[2] * q.x[1] + p.x[1], p.x[2] * q.x[2])
 end

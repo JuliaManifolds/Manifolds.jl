@@ -1,5 +1,5 @@
 @doc raw"""
-    Hyperbolic{N} <: AbstractDecoratorManifold{ℝ}
+    Hyperbolic{T} <: AbstractDecoratorManifold{ℝ}
 
 The hyperbolic space $\mathcal H^n$ represented by $n+1$-Tuples, i.e. embedded in the
 [`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
@@ -29,13 +29,18 @@ and the Poincaré half space model, see [`PoincareHalfSpacePoint`](@ref) and [`P
 
 # Constructor
 
-    Hyperbolic(n)
+    Hyperbolic(n::Int; parameter::Symbol=:type)
 
 Generate the Hyperbolic manifold of dimension `n`.
 """
-struct Hyperbolic{N} <: AbstractDecoratorManifold{ℝ} end
+struct Hyperbolic{T} <: AbstractDecoratorManifold{ℝ}
+    size::T
+end
 
-Hyperbolic(n::Int) = Hyperbolic{n}()
+function Hyperbolic(n::Int; parameter::Symbol=:type)
+    size = wrap_type_parameter(parameter, (n,))
+    return Hyperbolic{typeof(size)}(size)
+end
 
 function active_traits(f, ::Hyperbolic, args...)
     return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(MinkowskiMetric()))
@@ -152,7 +157,7 @@ last entry, i.e. $p_n>0$
 check_point(::Hyperbolic, ::Any)
 
 @doc raw"""
-    check_vector(M::Hyperbolic{n}, p, X; kwargs... )
+    check_vector(M::Hyperbolic, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`Hyperbolic`](@ref) `M`, i.e.
 after [`check_point`](@ref)`(M,p)`, `X` has to be of the same dimension as `p`.
@@ -166,12 +171,13 @@ For a the Poincaré ball as well as the Poincaré half plane model, `X` has to b
 check_vector(::Hyperbolic, ::Any, ::Any)
 
 function check_vector(
-    M::Hyperbolic{N},
+    M::Hyperbolic,
     p,
     X::Union{PoincareBallTVector,PoincareHalfSpaceTVector};
     kwargs...,
-) where {N}
-    return check_point(Euclidean(N), X.value; kwargs...)
+)
+    n = get_parameter(M.size)[1]
+    return check_point(Euclidean(n), X.value; kwargs...)
 end
 
 # Define self conversions
@@ -195,7 +201,13 @@ function diagonalizing_projectors(M::Hyperbolic, p, X)
     )
 end
 
-get_embedding(::Hyperbolic{N}) where {N} = Lorentz(N + 1, MinkowskiMetric())
+function get_embedding(::Hyperbolic{TypeParameter{Tuple{n}}}) where {n}
+    return Lorentz(n + 1, MinkowskiMetric())
+end
+function get_embedding(M::Hyperbolic{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return Lorentz(n + 1, MinkowskiMetric(); parameter=:field)
+end
 
 embed(::Hyperbolic, p::AbstractArray) = p
 embed(::Hyperbolic, p::AbstractArray, X::AbstractArray) = X
@@ -297,7 +309,7 @@ end
 
 Return the dimension of the hyperbolic space manifold $\mathcal H^n$, i.e. $\dim(\mathcal H^n) = n$.
 """
-manifold_dimension(::Hyperbolic{N}) where {N} = N
+manifold_dimension(M::Hyperbolic) = get_parameter(M.size)[1]
 
 @doc raw"""
     manifold_dimension(M::Hyperbolic)
@@ -342,7 +354,13 @@ the [`Lorentz`](@ref)ian manifold.
 """
 project(::Hyperbolic, ::Any, ::Any)
 
-Base.show(io::IO, ::Hyperbolic{N}) where {N} = print(io, "Hyperbolic($(N))")
+function Base.show(io::IO, ::Hyperbolic{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "Hyperbolic($(n))")
+end
+function Base.show(io::IO, M::Hyperbolic{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return print(io, "Hyperbolic($(n); parameter=:field)")
+end
 for T in _HyperbolicTypes
     @eval Base.show(io::IO, p::$T) = print(io, "$($T)($(p.value))")
 end
@@ -379,4 +397,21 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
     end
     @eval zero_vector(::Hyperbolic, p::$P) = $T(zero(p.value))
     @eval zero_vector!(::Hyperbolic, X::$T, ::$P) = fill!(X.value, 0)
+end
+
+@doc raw"""
+    riemann_tensor(M::Hyperbolic{n}, p, X, Y, Z)
+
+Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`Hyperbolic`](@ref) `M`.
+The formula reads (see e.g., [Lee:2019](@cite) Proposition 8.36)
+
+````math
+R(X,Y)Z = - (\langle Z, Y \rangle X - \langle Z, X \rangle Y)
+````
+"""
+riemann_tensor(::Hyperbolic, p, X, Y, Z)
+
+function riemann_tensor!(M::Hyperbolic, W, p, X, Y, Z)
+    W .= inner(M, p, Z, X) .* Y .- inner(M, p, Z, Y) .* X
+    return W
 end

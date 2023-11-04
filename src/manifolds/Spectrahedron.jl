@@ -1,5 +1,5 @@
 @doc raw"""
-    Spectrahedron{N,K} <: AbstractDecoratorManifold{ℝ}
+    Spectrahedron{T} <: AbstractDecoratorManifold{ℝ}
 
 The Spectrahedron manifold, also known as the set of correlation matrices (symmetric
 positive semidefinite matrices) of rank $k$ with unit trace.
@@ -38,13 +38,18 @@ investigated in [JourneeBachAbsilSepulchre:2010](@cite).
 
 # Constructor
 
-    Spectrahedron(n,k)
+    Spectrahedron(n::Int, k::Int; parameter::Symbol=:type)
 
 generates the manifold $\mathcal S(n,k) \subset ℝ^{n × n}$.
 """
-struct Spectrahedron{N,K} <: AbstractDecoratorManifold{ℝ} end
+struct Spectrahedron{T} <: AbstractDecoratorManifold{ℝ}
+    size::T
+end
 
-Spectrahedron(n::Int, k::Int) = Spectrahedron{n,k}()
+function Spectrahedron(n::Int, k::Int; parameter::Symbol=:type)
+    size = wrap_type_parameter(parameter, (n, k))
+    return Spectrahedron{typeof(size)}(size)
+end
 
 active_traits(f, ::Spectrahedron, args...) = merge_traits(IsIsometricEmbeddedManifold())
 
@@ -59,7 +64,7 @@ Since by construction $p$ is symmetric, this is not explicitly checked.
 Since $p$ is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
-function check_point(M::Spectrahedron{N,K}, q; kwargs...) where {N,K}
+function check_point(M::Spectrahedron, q; kwargs...)
     fro_n = norm(q)
     if !isapprox(fro_n, 1.0; kwargs...)
         return DomainError(
@@ -80,7 +85,7 @@ and a $X$ has to be a symmetric matrix with trace.
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
 Note that symmetry of $X$ holds by construction and is not explicitly checked.
 """
-function check_vector(M::Spectrahedron{N,K}, q, Y; kwargs...) where {N,K}
+function check_vector(M::Spectrahedron, q, Y; kwargs...)
     X = q * Y' + Y * q'
     n = tr(X)
     if !isapprox(n, 0.0; kwargs...)
@@ -92,8 +97,12 @@ function check_vector(M::Spectrahedron{N,K}, q, Y; kwargs...) where {N,K}
     return nothing
 end
 
-function get_embedding(M::Spectrahedron)
-    return Euclidean(representation_size(M)...; field=ℝ)
+function get_embedding(::Spectrahedron{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return Euclidean(n, k)
+end
+function get_embedding(M::Spectrahedron{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return Euclidean(n, k; parameter=:field)
 end
 
 """
@@ -112,7 +121,8 @@ returns the dimension of
 \dim \mathcal S(n,k) = nk - 1 - \frac{k(k-1)}{2}.
 ````
 """
-@generated function manifold_dimension(::Spectrahedron{N,K}) where {N,K}
+function manifold_dimension(M::Spectrahedron)
+    N, K = get_parameter(M.size)
     return N * K - 1 - div(K * (K - 1), 2)
 end
 
@@ -155,10 +165,14 @@ Return the size of an array representing an element on the
 [`Spectrahedron`](@ref) manifold `M`, i.e. $n × k$, the size of such factor of $p=qq^{\mathrm{T}}$
 on $\mathcal M = \mathcal S(n,k)$.
 """
-@generated representation_size(::Spectrahedron{N,K}) where {N,K} = (N, K)
+representation_size(M::Spectrahedron) = get_parameter(M.size)
 
-function Base.show(io::IO, ::Spectrahedron{N,K}) where {N,K}
-    return print(io, "Spectrahedron($(N), $(K))")
+function Base.show(io::IO, M::Spectrahedron{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return print(io, "Spectrahedron($n, $k)")
+end
+function Base.show(io::IO, M::Spectrahedron{Tuple{Int,Int}})
+    n, k = get_parameter(M.size)
+    return print(io, "Spectrahedron($n, $k; parameter=:field)")
 end
 
 """
@@ -182,4 +196,4 @@ definite matrix `p` on the [`Spectrahedron`](@ref) manifold `M`.
 """
 zero_vector(::Spectrahedron, ::Any...)
 
-zero_vector!(::Spectrahedron{N,K}, v, ::Any) where {N,K} = fill!(v, 0)
+zero_vector!(::Spectrahedron, X, ::Any) = fill!(X, 0)

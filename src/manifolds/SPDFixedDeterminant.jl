@@ -1,5 +1,5 @@
 @doc raw"""
-    SPDFixedDeterminant{N,D} <: AbstractDecoratorManifold{ℝ}
+    SPDFixedDeterminant{T,D} <: AbstractDecoratorManifold{ℝ}
 
 The manifold of symmetric positive definite matrices of fixed determinant ``d > 0``, i.e.
 
@@ -29,18 +29,23 @@ Additionally we store the tangent vectors as `X=p^{-1}Z`, i.e. symmetric matrice
 
 # Constructor
 
-    SPDFixedDeterminant(n::Int, d::Real=1.0)
+    SPDFixedDeterminant(n::Int, d::Real=1.0; parameter::Symbol=:type)
 
-generates the manifold $\mathcal P_d(n) \subset \mathcal P(n)$ of determinant ``d``,
+Generate the manifold $\mathcal P_d(n) \subset \mathcal P(n)$ of determinant ``d``,
 which defaults to 1.
+
+`parameter`: whether a type parameter should be used to store `n`. By default size
+is stored in type. Value can either be `:field` or `:type`.
 """
-struct SPDFixedDeterminant{N,TD<:Real} <: AbstractDecoratorManifold{ℝ}
+struct SPDFixedDeterminant{T,TD<:Real} <: AbstractDecoratorManifold{ℝ}
+    size::T
     d::TD
 end
 
-function SPDFixedDeterminant(n::Int, d::F=1.0) where {F<:Real}
+function SPDFixedDeterminant(n::Int, d::F=1.0; parameter::Symbol=:type) where {F<:Real}
     @assert d > 0 "The determinant has to be positive but was provided as $d."
-    return SPDFixedDeterminant{n,F}(d)
+    size = wrap_type_parameter(parameter, (n,))
+    return SPDFixedDeterminant{typeof(size),F}(size, d)
 end
 
 function active_traits(f, ::SPDFixedDeterminant, args...)
@@ -48,7 +53,7 @@ function active_traits(f, ::SPDFixedDeterminant, args...)
 end
 
 @doc raw"""
-    check_point(M::SPDFixedDeterminant{n}, p; kwargs...)
+    check_point(M::SPDFixedDeterminant, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`SPDFixedDeterminant`](@ref)`(n,d)` `M`, i.e.
 whether `p` is a [`SymmetricPositiveDefinite`](@ref) matrix of size `(n, n)`
@@ -57,7 +62,7 @@ with determinant ``\det(p) = ```M.d`.
 
 The tolerance for the determinant of `p` can be set using `kwargs...`.
 """
-function check_point(M::SPDFixedDeterminant{n}, p; kwargs...) where {n}
+function check_point(M::SPDFixedDeterminant, p; kwargs...)
     if det(p) ≉ M.d
         return DomainError(
             det(p),
@@ -92,8 +97,12 @@ embed(M::SPDFixedDeterminant, p, X) = copy(M, X)
 embed!(M::SPDFixedDeterminant, q, p) = copyto!(M, q, p)
 embed!(M::SPDFixedDeterminant, Y, p, X) = copyto!(M, Y, p, X)
 
-function get_embedding(::SPDFixedDeterminant{n}) where {n}
+function get_embedding(::SPDFixedDeterminant{TypeParameter{Tuple{n}}}) where {n}
     return SymmetricPositiveDefinite(n)
+end
+function get_embedding(M::SPDFixedDeterminant{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return SymmetricPositiveDefinite(n; parameter=:field)
 end
 
 @doc raw"""
@@ -112,8 +121,8 @@ function manifold_dimension(M::SPDFixedDeterminant)
 end
 
 @doc raw"""
-    q = project(M::SPDFixedDeterminant{n}, p)
-    project!(M::SPDFixedDeterminant{n}, q, p)
+    q = project(M::SPDFixedDeterminant, p)
+    project!(M::SPDFixedDeterminant, q, p)
 
 Project the symmetric positive definite (s.p.d.) matrix `p` from the embedding onto the
 (sub-)manifold of s.p.d. matrices of determinant `M.d` (in place of `q`).
@@ -126,14 +135,15 @@ q = \Bigl(\frac{d}{\det(p)}\Bigr)^{\frac{1}{n}}p
 """
 project(M::SPDFixedDeterminant, p)
 
-function project!(M::SPDFixedDeterminant{n}, q, p) where {n}
+function project!(M::SPDFixedDeterminant, q, p)
+    n = get_parameter(M.size)[1]
     q .= (M.d / det(p))^(1 / n) .* p
     return
 end
 
 @doc raw"""
-    Y = project(M::SPDFixedDeterminant{n}, p, X)
-    project!(M::SPDFixedDeterminant{n}, Y, p, X)
+    Y = project(M::SPDFixedDeterminant, p, X)
+    project!(M::SPDFixedDeterminant, Y, p, X)
 
 Project the symmetric matrix `X` onto the tangent space at `p` of the
 (sub-)manifold of s.p.d. matrices of determinant `M.d` (in place of `Y`),
@@ -148,6 +158,10 @@ function project!(M::SPDFixedDeterminant, Y, p, X)
     return Y
 end
 
-function Base.show(io::IO, M::SPDFixedDeterminant{n}) where {n}
+function Base.show(io::IO, M::SPDFixedDeterminant{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "SPDFixedDeterminant($n, $(M.d))")
+end
+function Base.show(io::IO, M::SPDFixedDeterminant{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return print(io, "SPDFixedDeterminant($n, $(M.d); parameter=:field)")
 end

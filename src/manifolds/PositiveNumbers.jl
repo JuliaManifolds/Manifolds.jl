@@ -15,28 +15,40 @@ please use [`SymmetricPositiveDefinite`](@ref)`(1)`.
 struct PositiveNumbers <: AbstractManifold{ℝ} end
 
 """
-    PositiveVectors(n)
+    PositiveVectors(n::Integer; parameter::Symbol=:type)
 
 Generate the manifold of vectors with positive entries.
 This manifold is modeled as a [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of [`PositiveNumbers`](@ref).
+
+`parameter`: whether a type parameter should be used to store `n`. By default size
+is stored in a type parameter. Value can either be `:field` or `:type`.
 """
-PositiveVectors(n::Integer) = PositiveNumbers()^n
+PositiveVectors(n::Integer; parameter::Symbol=:type) =
+    PowerManifold(PositiveNumbers(), n; parameter=parameter)
 
 """
-    PositiveMatrices(m,n)
+    PositiveMatrices(m::Integer, n::Integer; parameter::Symbol=:type)
 
 Generate the manifold of matrices with positive entries.
 This manifold is modeled as a [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of [`PositiveNumbers`](@ref).
+
+`parameter`: whether a type parameter should be used to store `n`. By default size
+is stored in a type parameter. Value can either be `:field` or `:type`.
 """
-PositiveMatrices(n::Integer, m::Integer) = PositiveNumbers()^(n, m)
+PositiveMatrices(n::Integer, m::Integer; parameter::Symbol=:type) =
+    PowerManifold(PositiveNumbers(), n, m; parameter=parameter)
 
 """
-    PositiveArrays(n₁,n₂,...,nᵢ)
+    PositiveArrays(n₁, n₂, ..., nᵢ; parameter::Symbol=:type)
 
 Generate the manifold of `i`-dimensional arrays with positive entries.
 This manifold is modeled as a [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of [`PositiveNumbers`](@ref).
+
+`parameter`: whether a type parameter should be used to store `n`. By default size
+is stored in a type parameter. Value can either be `:field` or `:type`.
 """
-PositiveArrays(n::Vararg{Int,I}) where {I} = PositiveNumbers()^(n)
+PositiveArrays(n::Vararg{Int,I}; parameter::Symbol=:type) where {I} =
+    PowerManifold(PositiveNumbers(), n...; parameter=parameter)
 
 @doc raw"""
     change_representer(M::PositiveNumbers, E::EuclideanMetric, p, X)
@@ -267,12 +279,22 @@ Base.show(io::IO, ::PositiveNumbers) = print(io, "PositiveNumbers()")
 
 function Base.show(
     io::IO,
-    ::PowerManifold{ℝ,PositiveNumbers,TSize,ArrayPowerRepresentation},
-) where {TSize}
-    s = [TSize.parameters...]
+    M::PowerManifold{ℝ,PositiveNumbers,TSize,ArrayPowerRepresentation},
+) where {TSize<:TypeParameter}
+    s = get_parameter(M.size)
     (length(s) == 1) && return print(io, "PositiveVectors($(s[1]))")
     (length(s) == 2) && return print(io, "PositiveMatrices($(s[1]), $(s[2]))")
     return print(io, "PositiveArrays($(join(s, ", ")))")
+end
+function Base.show(
+    io::IO,
+    M::PowerManifold{ℝ,PositiveNumbers,TSize,ArrayPowerRepresentation},
+) where {TSize<:Tuple}
+    s = get_parameter(M.size)
+    (length(s) == 1) && return print(io, "PositiveVectors($(s[1]); parameter=:field)")
+    (length(s) == 2) &&
+        return print(io, "PositiveMatrices($(s[1]), $(s[2]); parameter=:field)")
+    return print(io, "PositiveArrays($(join(s, ", ")); parameter=:field)")
 end
 
 @doc raw"""
@@ -292,6 +314,19 @@ end
 
 function parallel_transport_to!(::PositiveNumbers, Y, p, X, q)
     return (Y .= X .* q ./ p)
+end
+
+function Random.rand(M::PositiveNumbers; kwargs...)
+    return rand(Random.default_rng(), M; kwargs...)
+end
+
+function Random.rand(rng::AbstractRNG, ::PositiveNumbers; σ=1.0, vector_at=nothing)
+    if vector_at === nothing
+        pX = exp(randn(rng) * σ)
+    else
+        pX = vector_at * randn(rng) * σ
+    end
+    return pX
 end
 
 function Random.rand!(

@@ -1,19 +1,11 @@
 # [Vector bundles](@id VectorBundleSection)
 
-Vector bundle $E$ is a manifold that is built on top of another manifold $\mathcal M$ (base space).
-It is characterized by a continuous function $Π : E → \mathcal M$, such that for each point $p ∈ \mathcal M$ the preimage of $p$ by $Π$, $Π^{-1}(\{p\})$, has a structure of a vector space.
-These vector spaces are called fibers.
-Bundle projection can be performed using function [`bundle_projection`](@ref).
+Vector bundle $E$ is a special case of a [fiber bundle](@ref FiberBundleSection) where each fiber is a vector space.
 
-Tangent bundle is a simple example of a vector bundle, where each fiber is the tangent space at the specified point $x$.
+Tangent bundle is a simple example of a vector bundle, where each fiber is the tangent space at the specified point $p$.
 An object representing a tangent bundle can be obtained using the constructor called `TangentBundle`.
 
-Fibers of a vector bundle are represented by the type `VectorBundleFibers`.
-The important difference between functions operating on `VectorBundle` and `VectorBundleFibers` is that in the first case both a point on the underlying manifold and the vector are represented together (by a single argument) while in the second case only the vector part is present, while the point is supplied in a different argument where needed.
-
-`VectorBundleFibers` refers to the whole set of fibers of a vector bundle.
-There is also another type, [`VectorSpaceAtPoint`](@ref), that represents a specific fiber at a given point.
-This distinction is made to reduce the need to repeatedly construct objects of type [`VectorSpaceAtPoint`](@ref) in certain usage scenarios.
+There is also another type, [`VectorSpaceFiber`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.VectorSpaceFiber), that represents a specific fiber at a given point.
 This is also considered a manifold.
 
 ## FVector
@@ -25,7 +17,7 @@ It is used for example in musical isomorphisms (the [`flat`](@ref) and [`sharp`]
 
 ```@autodocs
 Modules = [Manifolds, ManifoldsBase]
-Pages = ["manifolds/VectorBundle.jl"]
+Pages = ["manifolds/VectorFiber.jl", "manifolds/VectorBundle.jl"]
 Order = [:constant, :type, :function]
 ```
 
@@ -37,8 +29,8 @@ The following code defines a point on the tangent bundle of the sphere $S^2$ and
 using Manifolds
 M = Sphere(2)
 TB = TangentBundle(M)
-p = ProductRepr([1.0, 0.0, 0.0], [0.0, 1.0, 3.0])
-X = ProductRepr([0.0, 1.0, 0.0], [0.0, 0.0, -2.0])
+p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 1.0, 3.0])
+X = ArrayPartition([0.0, 1.0, 0.0], [0.0, 0.0, -2.0])
 ```
 
 An approximation of the exponential in the Sasaki metric using 1000 steps can be calculated as follows.

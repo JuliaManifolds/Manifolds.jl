@@ -14,22 +14,22 @@ include("../utils.jl")
             @test manifold_dimension(M) == 3
             @test base_manifold(M) === M
             @test !is_flat(M)
-            @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0], true)
+            @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error=:error)
             @test_throws ManifoldDomainError is_point(
                 M,
-                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                true,
+                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
+                error=:error,
             )
-            @test_throws DomainError is_point(M, 2 * p, true)
+            @test_throws DomainError is_point(M, 2 * p; error=:error)
             @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_vector(M, p, [0.0, 0.0, 1.0, 0.0], true)
+            @test_throws DomainError is_vector(M, p, [0.0, 0.0, 1.0, 0.0]; error=:error)
             @test_throws ManifoldDomainError is_vector(
                 M,
                 p,
-                1 * im * zero_vector(M, p),
-                true,
+                1 * im * zero_vector(M, p);
+                error=:error,
             )
-            @test_throws DomainError is_vector(M, p, X, true)
+            @test_throws DomainError is_vector(M, p, X; error=:error)
             @test default_retraction_method(M) == ProjectionRetraction()
             @test is_point(M, rand(M))
             @test is_vector(M, p, rand(M; vector_at=p))
@@ -79,9 +79,9 @@ include("../utils.jl")
         @testset "Type $T" for T in types
             pts = convert.(T, [p, y, z])
             @test !is_point(M, 2 * p)
-            @test_throws DomainError !is_point(M, 2 * p, true)
+            @test_throws DomainError !is_point(M, 2 * p; error=:error)
             @test !is_vector(M, p, y)
-            @test_throws DomainError is_vector(M, p, y, true)
+            @test_throws DomainError is_vector(M, p, y; error=:error)
             test_manifold(
                 M,
                 pts,
@@ -133,5 +133,13 @@ include("../utils.jl")
             @test manifold_dimension(M) == 18
             @test !is_flat(M)
         end
+    end
+
+    @testset "field parameter" begin
+        B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
+        M = GeneralizedStiefel(3, 2, B; parameter=:field)
+        @test repr(M) ==
+              "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ; parameter=:field)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int64,Int64},ℝ}
     end
 end

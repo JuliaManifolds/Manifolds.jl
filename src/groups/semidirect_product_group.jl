@@ -249,7 +249,7 @@ function isapprox(
 end
 
 Base.@propagate_inbounds function Base.getindex(
-    p::Union{ProductRepr,ArrayPartition},
+    p::ArrayPartition,
     M::SemidirectProductGroup,
     i::Union{Integer,Colon,AbstractVector,Val},
 )
@@ -257,7 +257,7 @@ Base.@propagate_inbounds function Base.getindex(
 end
 
 Base.@propagate_inbounds function Base.setindex!(
-    q::Union{ProductRepr,ArrayPartition},
+    q::ArrayPartition,
     p,
     M::SemidirectProductGroup,
     i::Union{Integer,Colon,AbstractVector,Val},

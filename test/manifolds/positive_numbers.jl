@@ -11,7 +11,7 @@ include("../utils.jl")
         @test manifold_dimension(M) == 1
         @test !is_flat(M)
         @test !is_point(M, -1.0)
-        @test_throws DomainError is_point(M, -1.0, true)
+        @test_throws DomainError is_point(M, -1.0; error=:error)
         @test is_vector(M, 1.0, 0.0)
         @test vector_transport_to(M, 1.0, 3.0, 2.0, ParallelTransport()) == 6.0
         @test retract(M, 1.0, 1.0) == exp(M, 1.0, 1.0)
@@ -93,5 +93,22 @@ include("../utils.jl")
         @test isinf(manifold_volume(M5))
         @test volume_density(M, 0.5, 2.0) ≈ exp(4.0)
         @test volume_density(M5, [0.5, 1.0, 2.0], [1.0, -1.0, 2.0]) ≈ exp(2.0)
+    end
+    @testset "Inplace random values" begin
+        p = fill(NaN)
+        X = fill(NaN)
+        rand!(M, p)
+        @test is_point(M, p)
+        rand!(M, X; vector_at=p)
+        @test is_vector(M, p, X)
+    end
+
+    @testset "field parameter" begin
+        M1 = PositiveVectors(3; parameter=:field)
+        @test repr(M1) == "PositiveVectors(3; parameter=:field)"
+        M2 = PositiveMatrices(3, 4; parameter=:field)
+        @test repr(M2) == "PositiveMatrices(3, 4; parameter=:field)"
+        M3 = PositiveArrays(3, 4, 5; parameter=:field)
+        @test repr(M3) == "PositiveArrays(3, 4, 5; parameter=:field)"
     end
 end

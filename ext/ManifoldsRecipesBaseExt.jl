@@ -2,6 +2,7 @@ module ManifoldsRecipesBaseExt
 
 if isdefined(Base, :get_extension)
     using Manifolds
+    using Manifolds: TypeParameter
 
     using Colors: RGBA
     using RecipesBase: @recipe, @series
@@ -9,6 +10,7 @@ else
     # imports need to be relative for Requires.jl-based workflows:
     # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
     using ..Manifolds
+    using ..Manifolds: TypeParameter
 
     using ..RecipesBase: @recipe, @series
     using ..Colors: RGBA
@@ -24,7 +26,7 @@ SURFACE_RESOLUTION_DEFAULT = 32
 # Plotting Recipe – Poincaré Ball
 #
 @recipe function f(
-    M::Hyperbolic{2},
+    M::Hyperbolic{TypeParameter{Tuple{2}}},
     pts::AbstractVector{P},
     vecs::Union{AbstractVector{T},Nothing}=nothing;
     circle_points=CIRCLE_DEFAULT_PLOT_POINTS,
@@ -87,7 +89,7 @@ end
 # Plotting Recipe – Poincaré Half plane
 #
 @recipe function f(
-    M::Hyperbolic{2},
+    M::Hyperbolic{TypeParameter{Tuple{2}}},
     pts::AbstractVector{P},
     vecs::Union{AbstractVector{T},Nothing}=nothing;
     geodesic_interpolation=-1,
@@ -133,7 +135,7 @@ end
 # Plotting Recipe – Hyperboloid
 #
 @recipe function f(
-    M::Hyperbolic{2},
+    M::Hyperbolic{TypeParameter{Tuple{2}}},
     pts::Union{AbstractVector{P},Nothing}=nothing,
     vecs::Union{AbstractVector{T},Nothing}=nothing;
     geodesic_interpolation=-1,
@@ -229,7 +231,7 @@ end
 # Plotting Recipe – Sphere
 #
 @recipe function f(
-    M::Sphere{2,ℝ},
+    M::Sphere{TypeParameter{Tuple{2}},ℝ},
     pts::Union{AbstractVector{P},Nothing}=nothing,
     vecs::Union{AbstractVector{T},Nothing}=nothing;
     geodesic_interpolation=-1,

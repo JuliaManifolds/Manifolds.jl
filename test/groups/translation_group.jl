@@ -1,11 +1,13 @@
 include("../utils.jl")
 include("group_utils.jl")
 
+using Manifolds: LeftForwardAction, RightBackwardAction
+
 @testset "Translation group" begin
     @testset "real" begin
         G = TranslationGroup(2, 3)
-        @test repr(G) == "TranslationGroup(2, 3; field = ℝ)"
-        @test repr(TranslationGroup(2, 3; field=ℂ)) == "TranslationGroup(2, 3; field = ℂ)"
+        @test repr(G) == "TranslationGroup(2, 3; field=ℝ)"
+        @test repr(TranslationGroup(2, 3; field=ℂ)) == "TranslationGroup(2, 3; field=ℂ)"
 
         @test has_invariant_metric(G, LeftForwardAction())
         @test has_invariant_metric(G, RightBackwardAction())
@@ -42,11 +44,13 @@ include("group_utils.jl")
                 test_vee_hat_from_identity=true,
             )
         end
+
+        @test is_vector(G, Identity(G), rand(G; vector_at=Identity(G)))
     end
 
     @testset "complex" begin
         G = TranslationGroup(2, 3; field=ℂ)
-        @test repr(G) == "TranslationGroup(2, 3; field = ℂ)"
+        @test repr(G) == "TranslationGroup(2, 3; field=ℂ)"
 
         types = [Matrix{ComplexF64}]
         @test base_manifold(G) === Euclidean(2, 3; field=ℂ)
@@ -69,5 +73,9 @@ include("group_utils.jl")
                 test_adjoint_action=true,
             )
         end
+    end
+    @testset "field parameter" begin
+        @test repr(TranslationGroup(2, 3; field=ℂ, parameter=:field)) ==
+              "TranslationGroup(2, 3; field=ℂ, parameter=:field)"
     end
 end

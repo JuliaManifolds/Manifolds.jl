@@ -1,5 +1,5 @@
 @doc raw"""
-    SymmetricPositiveDefinite{N} <: AbstractDecoratorManifold{ℝ}
+    SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
 
 The manifold of symmetric positive definite matrices, i.e.
 
@@ -22,13 +22,18 @@ i.e. the set of symmetric matrices,
 
 # Constructor
 
-    SymmetricPositiveDefinite(n)
+    SymmetricPositiveDefinite(n; parameter::Symbol=:type)
 
 generates the manifold $\mathcal P(n) \subset ℝ^{n × n}$
 """
-struct SymmetricPositiveDefinite{N} <: AbstractDecoratorManifold{ℝ} end
+struct SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
+    size::T
+end
 
-SymmetricPositiveDefinite(n::Int) = SymmetricPositiveDefinite{n}()
+function SymmetricPositiveDefinite(n::Int; parameter::Symbol=:type)
+    size = wrap_type_parameter(parameter, (n,))
+    return SymmetricPositiveDefinite{typeof(size)}(size)
+end
 
 @doc raw"""
     SPDPoint <: AbstractManifoldsPoint
@@ -131,7 +136,7 @@ checks, whether `p` is a valid point on the [`SymmetricPositiveDefinite`](@ref) 
 of size `(N,N)`, symmetric and positive definite.
 The tolerance for the second to last test can be set using the `kwargs...`.
 """
-function check_point(M::SymmetricPositiveDefinite{N}, p; kwargs...) where {N}
+function check_point(M::SymmetricPositiveDefinite, p; kwargs...)
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
             norm(p - transpose(p)),
@@ -159,7 +164,7 @@ and a symmetric matrix, i.e. this stores tangent vetors as elements of the corre
 Lie group.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_vector(M::SymmetricPositiveDefinite{N}, p, X; kwargs...) where {N}
+function check_vector(M::SymmetricPositiveDefinite, p, X; kwargs...)
     if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
         return DomainError(
             X,
@@ -223,8 +228,12 @@ embed(::SymmetricPositiveDefinite, p) = p
 embed(::SymmetricPositiveDefinite, p::SPDPoint) = convert(AbstractMatrix, p)
 embed(::SymmetricPositiveDefinite, p, X) = X
 
-function get_embedding(M::SymmetricPositiveDefinite)
-    return Euclidean(representation_size(M)...; field=ℝ)
+function get_embedding(::SymmetricPositiveDefinite{TypeParameter{Tuple{n}}}) where {n}
+    return Euclidean(n, n; field=ℝ)
+end
+function get_embedding(M::SymmetricPositiveDefinite{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return Euclidean(n, n; field=ℝ, parameter=:field)
 end
 
 @doc raw"""
@@ -261,8 +270,9 @@ returns the dimension of
 \dim \mathcal P(n) = \frac{n(n+1)}{2}.
 ````
 """
-@generated function manifold_dimension(::SymmetricPositiveDefinite{N}) where {N}
-    return div(N * (N + 1), 2)
+function manifold_dimension(M::SymmetricPositiveDefinite)
+    n = get_parameter(M.size)[1]
+    return div(n * (n + 1), 2)
 end
 
 """
@@ -403,15 +413,20 @@ Generate a random symmetric positive definite matrix on the
 """
 rand(M::SymmetricPositiveDefinite; σ::Real=1)
 
+function allocate_result(M::SymmetricPositiveDefinite, ::typeof(Random.rand), p::SPDPoint)
+    return zero_vector(M, p)
+end
+
 function Random.rand!(
     rng::AbstractRNG,
-    M::SymmetricPositiveDefinite{N},
+    M::SymmetricPositiveDefinite,
     pX;
     vector_at=nothing,
     σ::Real=one(eltype(pX)) /
             (vector_at === nothing ? 1 : norm(convert(AbstractMatrix, vector_at))),
     tangent_distr=:Gaussian,
-) where {N}
+)
+    N = get_parameter(M.size)[1]
     if vector_at === nothing
         D = Diagonal(1 .+ rand(rng, N)) # random diagonal matrix
         s = qr(σ * randn(rng, N, N)) # random q
@@ -454,10 +469,17 @@ Return the size of an array representing an element on the
 [`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. $n × n$, the size of such a
 symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
 """
-@generated representation_size(::SymmetricPositiveDefinite{N}) where {N} = (N, N)
+function representation_size(M::SymmetricPositiveDefinite)
+    N = get_parameter(M.size)[1]
+    return (N, N)
+end
 
-function Base.show(io::IO, ::SymmetricPositiveDefinite{N}) where {N}
-    return print(io, "SymmetricPositiveDefinite($(N))")
+function Base.show(io::IO, ::SymmetricPositiveDefinite{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "SymmetricPositiveDefinite($(n))")
+end
+function Base.show(io::IO, M::SymmetricPositiveDefinite{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return print(io, "SymmetricPositiveDefinite($(n); parameter=:field)")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", p::SPDPoint)
@@ -489,4 +511,4 @@ function zero_vector(M::SymmetricPositiveDefinite, p::SPDPoint)
     return zero_vector(M, convert(AbstractMatrix, p))
 end
 
-zero_vector!(::SymmetricPositiveDefinite{N}, X, ::Any) where {N} = fill!(X, 0)
+zero_vector!(::SymmetricPositiveDefinite, X, ::Any) = fill!(X, 0)

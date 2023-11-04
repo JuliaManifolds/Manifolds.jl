@@ -1,7 +1,7 @@
 name = "Manifolds"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.8.76"
+version = "0.9.3"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -42,25 +42,29 @@ ManifoldsRecipesBaseExt = ["Colors", "RecipesBase"]
 ManifoldsTestExt = "Test"
 
 [compat]
-BoundaryValueDiffEq = "4"
+BoundaryValueDiffEq = "4, 5"
 Colors = "0.12"
 Distributions = "0.22.6, 0.23, 0.24, 0.25"
 Einsum = "0.4"
 Graphs = "1.4"
 HybridArrays = "0.4"
 Kronecker = "0.4, 0.5"
-ManifoldDiff = "0.3.6"
-ManifoldsBase = "0.14.11"
+LinearAlgebra = "1.6"
+ManifoldDiff = "0.3.7"
+ManifoldsBase = "0.15.0"
+Markdown = "1.6"
 MatrixEquations = "2.2"
 OrdinaryDiffEq = "6.31"
 Plots = "1"
 Quaternions = "0.5, 0.6, 0.7"
+Random = "1.6"
 RecipesBase = "1.1"
 RecursiveArrayTools = "2"
 Requires = "0.5, 1"
 SimpleWeightedGraphs = "1.2"
 SpecialFunctions = "0.8, 0.9, 0.10, 1.0, 2"
 StaticArrays = "1.4.3"
+Statistics = "1.6"
 StatsBase = "0.32, 0.33, 0.34"
 julia = "1.6"
 

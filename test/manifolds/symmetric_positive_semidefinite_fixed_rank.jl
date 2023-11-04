@@ -9,7 +9,7 @@ include("../utils.jl")
         q = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
         @test is_point(M, q)
         Y = [1.0 0.0; 0.0 0.0; 0.0 0.0; 0.0 0.0]
-        @test_throws DomainError is_point(M, Y, true)
+        @test_throws DomainError is_point(M, Y; error=:error)
         @test is_vector(M, q, Y)
         q2 = [2.0 1.0; 0.0 0.0; 0.0 1.0; 0.0 0.0]
         q3 = [0.0 0.0; 1.0 0.0; 0.0 1.0; 0.0 0.0]
@@ -40,5 +40,10 @@ include("../utils.jl")
         M = SymmetricPositiveSemidefiniteFixedRank(4, 2, ℂ)
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℂ)"
         @test manifold_dimension(M) == 12
+    end
+    @testset "field parameter" begin
+        M = SymmetricPositiveSemidefiniteFixedRank(4, 2; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℝ; parameter=:field)"
     end
 end
