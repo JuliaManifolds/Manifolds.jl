@@ -137,6 +137,16 @@ read ``-p^{-1}Xp^{-1}``. See the section about matrix inverse in [Giles:2008](@c
 function inv_diff(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, X)
     return -(p * X * inv(G, p))
 end
+function inv_diff(
+    ::MultiplicationGroupTrait,
+    G::AbstractDecoratorManifold,
+    p::AbstractArray{<:Number,0},
+    X::AbstractArray{<:Number,0},
+)
+    p_inv = inv(p[])
+    return -(p[] * X * p_inv)
+end
+
 function inv_diff!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, Y, p, X)
     p_inv = inv(p)
     Z = X * p_inv
