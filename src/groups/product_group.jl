@@ -40,6 +40,18 @@ end
     end
 end
 
+function adjoint_inv_diff!(G::ProductGroup, Y, p, X)
+    M = G.manifold
+    map(
+        adjoint_inv_diff!,
+        M.manifolds,
+        submanifold_components(G, Y),
+        submanifold_components(G, p),
+        submanifold_components(G, X),
+    )
+    return Y
+end
+
 function identity_element(G::ProductGroup)
     M = G.manifold
     return ArrayPartition(map(identity_element, M.manifolds))

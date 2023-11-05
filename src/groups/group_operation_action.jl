@@ -73,7 +73,7 @@ function adjoint_apply_diff_group(A::GroupOperationAction, a, X, p)
             G,
             p,
             a,
-            inv_diff(G, apply(A, a, p), X),
+            adjoint_inv_diff(G, apply(A, a, p), X),
             (direction(A), switch_side(action_side(A))),
         )
     end
@@ -90,7 +90,7 @@ function adjoint_apply_diff_group!(A::GroupOperationAction, Y, a, X, p)
             Y,
             p,
             a,
-            inv_diff(G, apply(A, a, p), X),
+            adjoint_inv_diff(G, apply(A, a, p), X),
             (direction(A), switch_side(action_side(A))),
         )
     end

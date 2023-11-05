@@ -37,6 +37,7 @@ include("group_utils.jl")
             test_vee_hat_from_identity=true,
             test_adjoint_action=true,
             test_inv_diff=true,
+            test_adjoint_inv_diff=true,
         )
 
         X = log_lie(G, pts[1])

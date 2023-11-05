@@ -28,6 +28,42 @@ Base.inv(e::Identity{MultiplicationOperation}) = e
 LinearAlgebra.det(::Identity{MultiplicationOperation}) = true
 LinearAlgebra.adjoint(e::Identity{MultiplicationOperation}) = e
 
+@doc raw"""
+    adjoint_inv_diff(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, X)
+
+Compute the value of differential of matrix inversion ``p ↦ p^{-1}`` at ``X``.
+When tangent vectors are represented in Lie algebra in a left-invariant way, the formula
+reads ``-p^\mathrm{T}X(p^{-1})^\mathrm{T}``. For matrix groups with ambient space tangent
+vectors, the formula would read ``-(p^{-1})^\mathrm{T}X(p^{-1})^\mathrm{T}``. See the
+section about matrix inverse in [Giles:2008](@cite).
+"""
+function adjoint_inv_diff(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, X)
+    return -(p' * X * inv(G, p)')
+end
+function adjoint_inv_diff(
+    ::MultiplicationGroupTrait,
+    G::AbstractDecoratorManifold,
+    p::AbstractArray{<:Number,0},
+    X::AbstractArray{<:Number,0},
+)
+    p_inv = inv(p[])
+    return -(p[] * X * p_inv)
+end
+
+function adjoint_inv_diff!(
+    ::MultiplicationGroupTrait,
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+)
+    p_inv = inv(p)
+    Z = X * p_inv'
+    mul!(Y, p', Z)
+    Y .*= -1
+    return Y
+end
+
 function identity_element!(
     ::MultiplicationGroupTrait,
     G::AbstractDecoratorManifold,

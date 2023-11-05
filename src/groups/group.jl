@@ -463,6 +463,28 @@ function adjoint_action!(
     return Y
 end
 
+@doc raw"""
+    adjoint_inv_diff(G::AbstractDecoratorManifold, p, X)
+
+Compute the value of pullback of inverse ``p^{-1} ∈ \mathcal{G}`` of an element
+``p ∈ \mathcal{G}`` at tangent vector `X` at ``p^{-1}``. The result is a tangent vector
+at ``p``.
+"""
+adjoint_inv_diff(G::AbstractDecoratorManifold, p)
+
+@trait_function adjoint_inv_diff(G::AbstractDecoratorManifold, p, X)
+function adjoint_inv_diff(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    X,
+)
+    Y = allocate_result(G, inv_diff, X, p)
+    return adjoint_inv_diff!(G, Y, p, X)
+end
+
+@trait_function adjoint_inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
+
 function ManifoldDiff.differential_exp_argument_lie_approx!(
     M::AbstractManifold,
     Z,

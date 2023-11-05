@@ -85,6 +85,7 @@ end
         test_lie_bracket::Bool=false,
         test_adjoint_action::Bool=false,
         test_inv_diff::Bool=false,
+        test_adjoint_inv_diff::Bool=false,
         test_apply_diff_group::Bool=false,
         diff_convs = [(), (LeftForwardAction(),), (RightBackwardAction(),)],
     )
@@ -112,6 +113,7 @@ function test_group(
     test_lie_bracket::Bool=false,
     test_adjoint_action::Bool=false,
     test_inv_diff::Bool=false,
+    test_adjoint_inv_diff::Bool=false,
     diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
     test_log_from_identity::Bool=false,
     test_exp_from_identity::Bool=false,
@@ -374,14 +376,17 @@ function test_group(
 
     test_inv_diff && Test.@testset "Differential of inverse" begin # COV_EXCL_LINE
         Test.@test isapprox(inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
-        Test.@test isapprox(
-            inv_diff(G, inv(G, g_pts[1]), inv_diff(G, g_pts[1], X_pts[1])),
-            X_pts[1];
-            atol=atol,
-        )
         Test.@testset "test_inv_diff" for side in [LeftSide(), RightSide()]
             test_inv_diff_fn(G, g_pts[1], X_pts[1], side)
         end
+    end
+    test_adjoint_inv_diff && Test.@testset "Differential of inverse" begin # COV_EXCL_LINE
+        Test.@test isapprox(adjoint_inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
+        Test.@test isapprox(
+            adjoint_inv_diff(G, g_pts[1], inv_diff(G, g_pts[1], X_pts[1])),
+            X_pts[1];
+            atol=atol,
+        )
     end
 
     test_exp_lie_log && Test.@testset "group exp/log properties" begin
