@@ -60,6 +60,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
                 test_log_from_identity=true,
                 test_vee_hat_from_identity=true,
                 test_inv_diff=true,
+                test_apply_diff_group=true,
             )
 
             @testset "log_lie edge cases" begin

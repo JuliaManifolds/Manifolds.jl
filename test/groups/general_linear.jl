@@ -111,6 +111,7 @@ using NLsolve
                 test_invariance=true,
                 test_lie_bracket=true,
                 test_adjoint_action=true,
+                test_apply_diff_group=true,
             )
             test_manifold(
                 G,
