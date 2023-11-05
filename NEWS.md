@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Functions `inv_diff` and `inv_diff!` that correspond to differentials of group inversion.
+- Functions `inv_diff`, `inv_diff!`, `adjoint_inv_diff` and `adjoint_inv_diff!` that correspond to differentials and pullbacks of group inversion.
 - Julia 1.10-rc CI workflow.
 
 ### Fixed
