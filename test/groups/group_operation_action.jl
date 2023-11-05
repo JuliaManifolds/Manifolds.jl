@@ -152,7 +152,7 @@ using Manifolds:
             G,
             m,
             a_pts[1],
-            inv_diff(G, a_pts[1], X),
+            adjoint_inv_diff(G, a_pts[1], X),
             RightBackwardAction(),
         )
 
