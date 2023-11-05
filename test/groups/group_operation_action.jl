@@ -162,7 +162,7 @@ using Manifolds:
             G,
             m,
             a_pts[1],
-            -a_pts[1] * X / a_pts[1],
+            -a_pts[1]' * X / a_pts[1]',
             RightBackwardAction(),
         )
 
