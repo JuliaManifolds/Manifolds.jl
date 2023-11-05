@@ -378,7 +378,7 @@ function test_group(
         Test.@test isapprox(inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
         Test.@testset "test_inv_diff" for side in [LeftSide(), RightSide()]
             test_inv_diff_fn(G, g_pts[1], X_pts[1], side)
-        end
+        end # COV_EXCL_LINE
     end
     test_adjoint_inv_diff && Test.@testset "Differential of inverse" begin # COV_EXCL_LINE
         Test.@test isapprox(adjoint_inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
@@ -406,7 +406,7 @@ function test_group(
             end
         end
 
-        Test.@testset "X = log(exp(X))" begin
+        Test.@testset "X = log(exp(X))" begin # COV_EXCL_LINE
             for X in Xe_pts
                 g = exp_lie(G, X)
                 Test.@test is_point(G, g; atol=atol)
@@ -616,7 +616,7 @@ function test_group(
                 X_pts[1],
                 g_pts[2],
             )
-        end
+        end # COV_EXCL_LINE
     end
 
     return nothing
