@@ -18,7 +18,10 @@ using Manifolds:
         @test repr(eg) === "Identity(NotImplementedOperation)"
         @test adjoint(eg) == eg
         @test number_eltype(eg) == Bool
+        @test !is_group_manifold(NotImplementedManifold())
         @test !is_group_manifold(NotImplementedManifold(), NotImplementedOperation())
+        @test !has_biinvariant_metric(NotImplementedManifold())
+        @test !has_invariant_metric(NotImplementedManifold(), LeftForwardAction())
         @test is_identity(G, eg) # identity transparent
         @test_throws MethodError identity_element(G) # but for a NotImplOp there is no concrete id.
         @test isapprox(G, eg, eg)
@@ -215,6 +218,7 @@ using Manifolds:
         @test one(ge) === ge
         @test transpose(ge) === ge
         @test det(ge) == 1
+        @test inv(ge) === ge
         @test ge * p ≈ p
         @test p * ge ≈ p
         @test ge * ge === ge
@@ -286,6 +290,35 @@ using Manifolds:
         @test e_add * e_mul === e_add
         @test e_mul * e_add === e_add
         @test mul!(e_mul, e_mul, e_mul) === e_mul
+    end
+
+    @testset "Issue #669" begin
+        G = SpecialOrthogonal(3)
+
+        id = identity_element(G)
+        X = hat(G, Identity(G), [1.0, 2.0, 3.0])
+        function apply_at_id(X, d, s)
+            A = GroupOperationAction(G, (d, s))
+            return apply_diff_group(A, id, X, id)
+        end
+        function apply_at_id!(Y, X, d, s)
+            A = GroupOperationAction(G, (d, s))
+            return apply_diff_group!(A, Y, id, X, id)
+        end
+
+        _get_sign(::LeftAction, ::LeftSide) = 1 # former case
+        _get_sign(::LeftAction, ::RightSide) = -1 # new case
+        _get_sign(::RightAction, ::LeftSide) = -1 # new case
+        _get_sign(::RightAction, ::RightSide) = 1 # former case
+        Y = similar(X)
+
+        for d in [LeftAction(), RightAction()]
+            for s in [LeftSide(), RightSide()]
+                @test apply_at_id(X, d, s) ≈ _get_sign(d, s) * X
+                apply_at_id!(Y, X, d, s)
+                @test Y ≈ _get_sign(d, s) * X
+            end
+        end
     end
 end
 

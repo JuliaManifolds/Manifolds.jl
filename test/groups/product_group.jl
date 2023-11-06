@@ -51,6 +51,8 @@ using RecursiveArrayTools
         test_exp_from_identity=true,
         test_log_from_identity=true,
         test_vee_hat_from_identity=true,
+        test_inv_diff=true,
+        test_adjoint_inv_diff=true,
     )
     @test isapprox(
         G,

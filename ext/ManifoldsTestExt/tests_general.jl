@@ -153,7 +153,7 @@ function test_manifold(
             ) for i in 1:n
         ]
     end
-    Test.@testset "dimension" begin
+    Test.@testset "dimension" begin # COV_EXCL_LINE
         Test.@test isa(manifold_dimension(M), expected_dimension_type)
         Test.@test manifold_dimension(M) ≥ 0
     end
@@ -180,7 +180,7 @@ function test_manifold(
         end
     end
 
-    Test.@testset "is_point" begin
+    Test.@testset "is_point" begin # COV_EXCL_LINE
         for pt in pts
             atol = is_point_atol_multiplier * find_eps(pt)
             Test.@test is_point(M, pt; atol=atol)
@@ -303,7 +303,7 @@ function test_manifold(
         mutating=is_mutating,
     )
 
-    Test.@testset "(inverse &) retraction tests" begin
+    Test.@testset "(inverse &) retraction tests" begin # COV_EXCL_LINE
         for (p, X) in zip(pts, tv)
             epsx = find_eps(p)
             point_atol = is_point_atol_multiplier * find_eps(p)
@@ -325,7 +325,7 @@ function test_manifold(
                 end
                 Test.@test is_point(M, new_pt; atol=point_atol)
                 (test_inplace && is_mutating) &&
-                    Test.@testset "inplace test for retract!" begin
+                    Test.@testset "inplace test for retract!" begin # COV_EXCL_LINE
                         p2 = copy(M, p)
                         X2 = copy(M, p, X)
                         q = retract(M, p2, X2, retr_method)
@@ -367,7 +367,7 @@ function test_manifold(
         end
     end
 
-    Test.@testset "atlases" begin
+    Test.@testset "atlases" begin # COV_EXCL_LINE
         if !isempty(test_atlases)
             Test.@test get_default_atlas(M) isa AbstractAtlas{ℝ}
         end
@@ -411,7 +411,7 @@ function test_manifold(
         end
     end
 
-    Test.@testset "basic linear algebra in tangent space" begin
+    Test.@testset "basic linear algebra in tangent space" begin # COV_EXCL_LINE
         for (p, X) in zip(pts, tv)
             Test.@test isapprox(M, p, 0 * X, zero_vector(M, p); atol=find_eps(pts[1]))
             Test.@test isapprox(M, p, 2 * X, X + X)
@@ -421,7 +421,7 @@ function test_manifold(
     end
 
     test_tangent_vector_broadcasting &&
-        Test.@testset "broadcasted linear algebra in tangent space" begin
+        Test.@testset "broadcasted linear algebra in tangent space" begin # COV_EXCL_LINE
             for (p, X) in zip(pts, tv)
                 Test.@test isapprox(M, p, 3 * X, 2 .* X .+ X)
                 Test.@test isapprox(M, p, -X, X .- 2 .* X)
@@ -469,7 +469,7 @@ function test_manifold(
     !(
         default_retraction_method === nothing ||
         default_inverse_retraction_method === nothing
-    ) && Test.@testset "vector transport" begin
+    ) && Test.@testset "vector transport" begin # COV_EXCL_LINE
         tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
         X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
         X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
@@ -499,7 +499,7 @@ function test_manifold(
             vector_transport_retractions,
             vector_transport_inverse_retractions,
         )
-            Test.@testset "vector transport method $(vtm)" begin
+            Test.@testset "vector transport method $(vtm)" begin # COV_EXCL_LINE
                 tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
                 X1 = inverse_retract(M, pts[1], pts[2], irtr_m)
                 X2 = inverse_retract(M, pts[1], pts[3], irtr_m)
@@ -531,7 +531,7 @@ function test_manifold(
                         vector_transport_to!(M, v1t1_m, pts[1], X1, pts32, vtm)
                         Test.@test isapprox(M, pts32, v1t1, v1t1_m; atol=tvatol)
                         test_inplace &&
-                            Test.@testset "inplace test for vector_transport_to!" begin
+                            Test.@testset "inplace test for vector_transport_to!" begin # COV_EXCL_LINE
                                 X1a = copy(M, pts[1], X1)
                                 Xt = vector_transport_to(M, pts[1], X1, pts32, vtm)
                                 vector_transport_to!(M, X1a, pts[1], X1a, pts32, vtm)
@@ -559,7 +559,7 @@ function test_manifold(
     end
 
     for btype in basis_types_vecs
-        Test.@testset "Basis support for $(btype)" begin
+        Test.@testset "Basis support for $(btype)" begin # COV_EXCL_LINE
             p = pts[1]
             b = get_basis(M, p, btype)
             Test.@test isa(b, CachedBasis)
@@ -713,7 +713,7 @@ function test_manifold(
         end
     end
 
-    Test.@testset "number_eltype" begin
+    Test.@testset "number_eltype" begin # COV_EXCL_LINE
         for (p, X) in zip(pts, tv)
             Test.@test number_eltype(X) == number_eltype(p)
             p = retract(M, p, X, default_retraction_method)
@@ -822,7 +822,7 @@ function test_manifold(
         end
     end
 
-    Test.@testset "tangent vector distributions" begin
+    Test.@testset "tangent vector distributions" begin # COV_EXCL_LINE
         for tvd in tvector_distributions
             supp = Manifolds.support(tvd)
             Test.@test supp isa
@@ -864,9 +864,10 @@ function test_parallel_transport(
 )
     length(P) < 2 &&
         error("The Parallel Transport test set requires at least 2 points in P")
-    Test.@testset "Test Parallel Transport" begin
+    Test.@testset "Test Parallel Transport" begin # COV_EXCL_LINE
         along && @warn "parallel transport along test not yet implemented"
-        Test.@testset "To (a point)" begin # even with to =false this displays no tests
+        Test.@testset "To (a point)" begin # COV_EXCL_LINE
+            # even with to =false this displays no tests
             if to
                 for i in 1:(length(P) - 1)
                     p = P[i]
@@ -890,7 +891,7 @@ function test_parallel_transport(
                 end
             end
         end
-        Test.@testset "(Tangent Vector) Direction" begin
+        Test.@testset "(Tangent Vector) Direction" begin # COV_EXCL_LINE
             if direction
                 for i in 1:(length(P) - 1)
                     p = P[i]

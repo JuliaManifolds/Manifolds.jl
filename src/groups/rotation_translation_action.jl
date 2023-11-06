@@ -186,7 +186,8 @@ function apply_diff!(
     p,
     X,
 )
-    return mul!(Y, a.x[2], X)
+    mul!(Y, a.x[2], X)
+    return Y
 end
 function apply_diff!(
     ::RotationTranslationActionOnVector{LeftAction},

@@ -69,6 +69,30 @@ include("group_utils.jl")
             apply_diff_group!(A_left, Y, Identity(G), a_X_pts[1], m_pts[1])
             @test Y ≈ a_X_pts[1].x[2] * m_pts[1]
         end
+
+        @testset "apply_diff" begin
+            @test apply_diff(A_left, Identity(G), m_pts[1], X_pts[1]) ≈ X_pts[1]
+            Y = similar(X_pts[1])
+            apply_diff!(A_left, Y, Identity(G), m_pts[1], X_pts[1])
+            @test Y ≈ X_pts[1]
+
+            @test apply_diff(A_left, a_pts[1], m_pts[1], X_pts[1]) ≈
+                  a_pts[1].x[2] * X_pts[1]
+            Y = similar(X_pts[1])
+            apply_diff!(A_left, Y, a_pts[1], m_pts[1], X_pts[1])
+            @test Y ≈ a_pts[1].x[2] * X_pts[1]
+
+            @test apply_diff(A_right, Identity(G), m_pts[1], X_pts[1]) ≈ X_pts[1]
+            Y = similar(X_pts[1])
+            apply_diff!(A_right, Y, Identity(G), m_pts[1], X_pts[1])
+            @test Y ≈ X_pts[1]
+
+            @test apply_diff(A_right, a_pts[1], m_pts[1], X_pts[1]) ≈
+                  a_pts[1].x[2] \ X_pts[1]
+            Y = similar(X_pts[1])
+            apply_diff!(A_right, Y, a_pts[1], m_pts[1], X_pts[1])
+            @test Y ≈ a_pts[1].x[2] \ X_pts[1]
+        end
     end
 end
 

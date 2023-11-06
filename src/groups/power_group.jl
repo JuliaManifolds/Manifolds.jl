@@ -61,6 +61,29 @@ end
     end
 end
 
+function adjoint_inv_diff!(G::PowerGroup, Y, p, X)
+    GM = G.manifold
+    rep_size = representation_size(GM.manifold)
+    for i in get_iterator(GM)
+        adjoint_inv_diff!(
+            GM.manifold,
+            _write(GM, rep_size, Y, i),
+            _read(GM, rep_size, p, i),
+            _read(GM, rep_size, X, i),
+        )
+    end
+    return Y
+end
+function adjoint_inv_diff!(G::PowerGroupNestedReplacing, Y, p, X)
+    GM = G.manifold
+    N = GM.manifold
+    rep_size = representation_size(N)
+    for i in get_iterator(GM)
+        Y[i...] = adjoint_inv_diff(N, _read(GM, rep_size, p, i), _read(GM, rep_size, X, i))
+    end
+    return Y
+end
+
 function identity_element!(G::PowerGroup, p)
     GM = G.manifold
     N = GM.manifold
@@ -126,6 +149,29 @@ function inv!(
     ::Identity{ProductOperation},
 )
     return q
+end
+
+function inv_diff!(G::PowerGroup, Y, p, X)
+    GM = G.manifold
+    rep_size = representation_size(GM.manifold)
+    for i in get_iterator(GM)
+        inv_diff!(
+            GM.manifold,
+            _write(GM, rep_size, Y, i),
+            _read(GM, rep_size, p, i),
+            _read(GM, rep_size, X, i),
+        )
+    end
+    return Y
+end
+function inv_diff!(G::PowerGroupNestedReplacing, Y, p, X)
+    GM = G.manifold
+    N = GM.manifold
+    rep_size = representation_size(N)
+    for i in get_iterator(GM)
+        Y[i...] = inv_diff(N, _read(GM, rep_size, p, i), _read(GM, rep_size, X, i))
+    end
+    return Y
 end
 
 # lower level methods are added instead of top level ones to not have to deal

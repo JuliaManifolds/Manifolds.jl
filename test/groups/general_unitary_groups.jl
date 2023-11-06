@@ -19,7 +19,7 @@ include("group_utils.jl")
             X2 = log_lie(On, p)
             e = Identity(MultiplicationOperation())
             # They are not yet inverting, p2 is on the “other half”
-            # but taking the log again should also be X ahain
+            # but taking the log again should also be X again
             @test isapprox(On, e, X2, X)
             @test log_lie(On, e) == zeros(n, n)
         end

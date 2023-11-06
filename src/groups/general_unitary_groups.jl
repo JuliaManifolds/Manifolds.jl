@@ -306,7 +306,8 @@ function translate_diff!(
     X,
     ::RightForwardAction,
 )
-    return copyto!(G, Y, X)
+    copyto!(G, Y, X)
+    return Y
 end
 function translate_diff!(
     G::GeneralUnitaryMultiplicationGroup,
@@ -316,7 +317,8 @@ function translate_diff!(
     X,
     ::LeftBackwardAction,
 )
-    return copyto!(G, Y, p * X * inv(G, p))
+    copyto!(G, Y, p * X * inv(G, p))
+    return Y
 end
 function translate_diff!(
     G::GeneralUnitaryMultiplicationGroup,
