@@ -244,8 +244,9 @@ end
 
 @trait_function identity_element!(G::AbstractDecoratorManifold, p)
 
-function allocate_result(G::AbstractDecoratorManifold, ::typeof(identity_element))
-    return zeros(representation_size(G)...)
+function allocate_result(G::AbstractDecoratorManifold, f::typeof(identity_element))
+    apf = allocation_promotion_function(G, f, ())
+    return zeros(apf(Float64), representation_size(G)...)
 end
 
 @doc raw"""
