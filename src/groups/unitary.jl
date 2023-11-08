@@ -31,7 +31,7 @@ function Unitary(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
 end
 
 @doc raw"""
-    exp_lie(G::Unitary{2,ℂ}, X)
+    exp_lie(G::Unitary{TypeParameter{Tuple{2}},ℂ}, X)
 
 Compute the group exponential map on the [`Unitary(2)`](@ref) group, which is
 

@@ -45,6 +45,14 @@ function allocate_result(M::Rotations, ::typeof(rand), ::Identity{Multiplication
     return similar(Matrix{Float64}, representation_size(M)...)
 end
 
+function allocation_promotion_function(
+    ::GeneralUnitaryMultiplicationGroup{<:Any,ℂ},
+    ::typeof(identity_element),
+    args::Tuple,
+)
+    return complex
+end
+
 decorated_manifold(G::GeneralUnitaryMultiplicationGroup) = G.manifold
 
 @doc raw"""

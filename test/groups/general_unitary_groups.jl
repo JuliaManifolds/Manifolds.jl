@@ -89,6 +89,8 @@ include("group_utils.jl")
         @test manifold_volume(Unitary(3)) ≈ sqrt(3) * 2 * π^6
         @test manifold_volume(Unitary(4)) ≈ sqrt(2) * 8 * π^10 / 12
 
+        @test identity_element(U2) isa Matrix{ComplexF64}
+
         for n in [1, 2, 3]
             Un = Unitary(n)
             X = zeros(ComplexF64, n, n)

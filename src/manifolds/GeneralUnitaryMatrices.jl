@@ -51,7 +51,7 @@ end
     check_point(M::GeneralUnitaryMatrices, p; kwargs...)
 
 Check whether `p` is a valid point on the [`UnitaryMatrices`](@ref) or [`OrthogonalMatrices`] `M`,
-i.e. that ``p`` has an determinante of absolute value one
+i.e. that ``p`` has a determinant of absolute value one
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
@@ -79,7 +79,7 @@ end
     check_point(M::Rotations, p; kwargs...)
 
 Check whether `p` is a valid point on the [`UnitaryMatrices`](@ref) `M`,
-i.e. that ``p`` has an determinante of absolute value one, i.e. that ``p^{\mathrm{H}}p``
+i.e. that ``p`` has a determinant of absolute value one, i.e. that ``p^{\mathrm{H}}p``
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
@@ -157,7 +157,7 @@ end
 
 4D rotations can be described by two orthogonal planes that are unchanged by
 the action of the rotation (vectors within a plane rotate only within the
-plane). The cosines of the two angles $α,β$ of rotation about these planes may be
+plane). The cosines of the two angles ``α,β`` of rotation about these planes may be
 obtained from the distinct real parts of the eigenvalues of the rotation
 matrix. This function computes these more efficiently by solving the system
 
@@ -329,18 +329,18 @@ end
     get_coordinates(M::OrthogonalMatrices, p, X)
     get_coordinates(M::UnitaryMatrices, p, X)
 
-Extract the unique tangent vector components $X^i$ at point `p` on [`Rotations`](@ref)
-$\mathrm{SO}(n)$ from the matrix representation `X` of the tangent
+Extract the unique tangent vector components ``X^i`` at point `p` on [`Rotations`](@ref)
+``\mathrm{SO}(n)`` from the matrix representation `X` of the tangent
 vector.
 
-The basis on the Lie algebra $𝔰𝔬(n)$ is chosen such that
-for $\mathrm{SO}(2)$, $X^1 = θ = X_{21}$ is the angle of rotation, and
-for $\mathrm{SO}(3)$, $(X^1, X^2, X^3) = (X_{32}, X_{13}, X_{21}) = θ u$ is the
-angular velocity and axis-angle representation, where $u$ is the unit vector
+The basis on the Lie algebra ``𝔰𝔬(n)`` is chosen such that
+for ``\mathrm{SO}(2)``, ``X^1 = θ = X_{21}`` is the angle of rotation, and
+for ``\mathrm{SO}(3)``, ``(X^1, X^2, X^3) = (X_{32}, X_{13}, X_{21}) = θ u`` is the
+angular velocity and axis-angle representation, where ``u`` is the unit vector
 along the axis of rotation.
 
-For $\mathrm{SO}(n)$ where $n ≥ 4$, the additional elements of $X^i$ are
-$X^{j (j - 3)/2 + k + 1} = X_{jk}$, for $j ∈ [4,n], k ∈ [1,j)$.
+For ``\mathrm{SO}(n)`` where ``n ≥ 4``, the additional elements of ``X^i`` are
+``X^{j (j - 3)/2 + k + 1} = X_{jk}``, for ``j ∈ [4,n], k ∈ [1,j)``.
 """
 get_coordinates(::GeneralUnitaryMatrices{<:Any,ℝ}, ::Any...)
 function get_coordinates(
@@ -476,7 +476,7 @@ end
 
 Convert the unique tangent vector components `Xⁱ` at point `p` on [`Rotations`](@ref)
 or [`OrthogonalMatrices`](@ref)
-to the matrix representation $X$ of the tangent vector. See
+to the matrix representation ``X`` of the tangent vector. See
 [`get_coordinates`](@ref get_coordinates(::GeneralUnitaryMatrices, ::Any...)) for the conventions used.
 """
 get_vector(::GeneralUnitaryMatrices{<:Any,ℝ}, ::Any...)
@@ -643,7 +643,7 @@ injectivity_radius(::GeneralUnitaryMatrices) = π
 @doc raw"""
     injectivity_radius(G::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
 
-Return the injectivity radius for general complex unitary matrix manifolds, where the determinant is $+1$,
+Return the injectivity radius for general complex unitary matrix manifolds, where the determinant is ``+1``,
 which is[^1]
 
 ```math
@@ -726,7 +726,7 @@ Compute the logarithmic map on the [`Rotations`](@ref) manifold
 \log_p q = \operatorname{log}(p^{\mathrm{T}}q)
 ```
 
-where $\operatorname{Log}$ denotes the matrix logarithm. For numerical stability,
+where ``\operatorname{Log}`` denotes the matrix logarithm. For numerical stability,
 the result is projected onto the set of skew symmetric matrices.
 
 For antipodal rotations the function returns deterministically one of the tangent vectors
