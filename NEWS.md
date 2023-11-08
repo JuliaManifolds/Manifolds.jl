@@ -5,11 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.5] - 2023-11-dd
+## [0.9.5] - 2023-11-08
 
 ### Changed
 
 - `identity_element` now returns a complex matrix for unitary group.
+- `number_of_coordinates` is now exported.
 
 ## [0.9.4] - 2023-11-06
 
