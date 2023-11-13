@@ -560,6 +560,7 @@ end
 
 @trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
 
+# true only if tangent vectors are stored with the left-invariant convention
 inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X) = -adjoint_action!(G, Y, p, X)
 
 function Base.copyto!(
@@ -907,13 +908,13 @@ end
     X,
     conv::ActionDirectionAndSide=LeftForwardAction(),
 )
-translate_diff(::AbstractDecoratorManifold, ::Any, ::Any, X, ::LeftForwardAction) = X
-translate_diff(::AbstractDecoratorManifold, ::Any, ::Any, X, ::RightForwardAction) = X
+# the following are true if the tangent vectors are stored with the left invariant convention
 translate_diff!(G::AbstractDecoratorManifold, Y, ::Any, ::Any, X, ::LeftForwardAction) = copyto!(G, Y, X)
 translate_diff!(G::AbstractDecoratorManifold, Y, ::Any, ::Any, X, ::RightForwardAction) = copyto!(G, Y, X)
 translate_diff!(G::AbstractDecoratorManifold, Y, p, ::Any, X, ::LeftBackwardAction) = adjoint_action!(G, Y, p, X, LeftAction())
 translate_diff!(G::AbstractDecoratorManifold, Y, p, ::Any, X, ::RightBackwardAction) = adjoint_action!(G, Y, p, X, RightAction())
 
+# the following are true regardless of how the tangent vectors are stored:
 translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftForwardAction) = X
 translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightForwardAction) = X
 translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftBackwardAction) = X

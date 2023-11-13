@@ -644,6 +644,18 @@ function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightBackwardAction)
     return Y
 end
 
+function adjoint_action!(
+    G::SpecialEuclidean,
+    Y,
+    p,
+    Xₑ,
+    ::LeftAction
+)
+    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
+    inverse_translate_diff!(G, Y, p, p, Xₚ, RightBackwardAction())
+    return Y
+end
+
 @doc raw"""
     SpecialEuclideanInGeneralLinear
 
