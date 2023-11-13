@@ -132,9 +132,9 @@ end
 """
     is_flat(::CholeskySpace)
 
-Return false. [`CholeskySpace`](@ref) is not a flat manifold.
+Return true. [`CholeskySpace`](@ref) is a flat manifold.
 """
-is_flat(M::CholeskySpace) = false
+is_flat(M::CholeskySpace) = true
 
 @doc raw"""
     log(M::CholeskySpace, X, p, q)
