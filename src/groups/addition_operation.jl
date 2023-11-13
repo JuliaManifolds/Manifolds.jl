@@ -74,14 +74,7 @@ end
 
 Compute the value of differential of additive matrix inversion ``p ↦ -p`` at ``X``, i.e. ``-X``.
 """
-function inv_diff(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X)
-    return -X
-end
-function inv_diff!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Y, p, X)
-    Y .= X
-    Y .*= -1
-    return Y
-end
+inv_diff(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X)
 
 function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, q; kwargs...)
     return isapprox(G, q, zero(q); kwargs...)

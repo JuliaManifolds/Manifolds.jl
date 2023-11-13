@@ -560,6 +560,8 @@ end
 
 @trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
 
+inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X) = -adjoint_action!(G, Y, p, X)
+
 function Base.copyto!(
     ::TraitList{IsGroupManifold{O}},
     ::AbstractDecoratorManifold,

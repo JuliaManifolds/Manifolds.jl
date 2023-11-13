@@ -114,17 +114,6 @@ function inv!(G::ProductGroup, q, p)
 end
 inv!(::ProductGroup, q::Identity{ProductOperation}, ::Identity{ProductOperation}) = q
 
-function inv_diff!(G::ProductGroup, Y, p, X)
-    M = G.manifold
-    map(
-        inv_diff!,
-        M.manifolds,
-        submanifold_components(G, Y),
-        submanifold_components(G, p),
-        submanifold_components(G, X),
-    )
-    return Y
-end
 
 _compose(G::ProductGroup, p, q) = _compose(G.manifold, p, q)
 function _compose(M::ProductManifold, p::ArrayPartition, q::ArrayPartition)
