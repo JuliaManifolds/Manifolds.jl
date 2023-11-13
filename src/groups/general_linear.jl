@@ -278,5 +278,3 @@ end
 # note: this implementation is not optimal
 adjoint_action!(::GeneralLinear, Y, p, X, ::LeftAction) = copyto!(Y, p * X * inv(p))
 adjoint_action!(::GeneralLinear, Y, p, X, ::RightAction) = copyto!(Y, p \ X * p)
-
-

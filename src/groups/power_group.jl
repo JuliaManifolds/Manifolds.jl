@@ -151,7 +151,6 @@ function inv!(
     return q
 end
 
-
 # lower level methods are added instead of top level ones to not have to deal
 # with `Identity` disambiguation
 
@@ -252,7 +251,9 @@ function _common_power_adjoint_action!(G, Y, p, X, conv)
     end
     return Y
 end
-adjoint_action!(G::PowerGroup, Y, p, X, conv::LeftAction) = _common_power_adjoint_action!(G, Y, p, X, conv)
+function adjoint_action!(G::PowerGroup, Y, p, X, conv::LeftAction)
+    return _common_power_adjoint_action!(G, Y, p, X, conv)
+end
 function adjoint_action!(G::PowerGroup, Y, p, X, conv::RightAction)
     return _common_power_adjoint_action!(G, Y, p, X, conv)
 end
@@ -270,13 +271,7 @@ end
 function adjoint_action!(G::PowerGroupNestedReplacing, Y, p, X, conv::LeftAction)
     return _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
 end
-function adjoint_action!(
-    G::PowerGroupNestedReplacing,
-    Y,
-    p,
-    X,
-    conv::RightAction,
-)
+function adjoint_action!(G::PowerGroupNestedReplacing, Y, p, X, conv::RightAction)
     return _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
 end
 

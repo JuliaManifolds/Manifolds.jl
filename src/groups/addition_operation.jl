@@ -163,4 +163,3 @@ function adjoint_action!(
 )
     return copyto!(Y, X)
 end
-

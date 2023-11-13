@@ -296,23 +296,11 @@ function Random.rand!(rng::AbstractRNG, G::GeneralUnitaryMultiplicationGroup, pX
     return pX
 end
 
-function adjoint_action!(
-    G::GeneralUnitaryMultiplicationGroup,
-    Y,
-    p,
-    X,
-    ::LeftAction
-)
+function adjoint_action!(G::GeneralUnitaryMultiplicationGroup, Y, p, X, ::LeftAction)
     copyto!(G, Y, p * X * inv(G, p))
     return Y
 end
-function adjoint_action!(
-    G::GeneralUnitaryMultiplicationGroup,
-    Y,
-    p,
-    X,
-    ::RightAction,
-)
+function adjoint_action!(G::GeneralUnitaryMultiplicationGroup, Y, p, X, ::RightAction)
     return copyto!(G, Y, inv(G, p) * X * p)
 end
 

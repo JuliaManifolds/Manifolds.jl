@@ -114,7 +114,6 @@ function inv!(G::ProductGroup, q, p)
 end
 inv!(::ProductGroup, q::Identity{ProductOperation}, ::Identity{ProductOperation}) = q
 
-
 _compose(G::ProductGroup, p, q) = _compose(G.manifold, p, q)
 function _compose(M::ProductManifold, p::ArrayPartition, q::ArrayPartition)
     return ArrayPartition(

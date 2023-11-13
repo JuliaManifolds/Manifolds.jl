@@ -90,16 +90,56 @@ end
 function translate_diff(G::GT, p, q, X, ::RightBackwardAction) where {GT<:CircleGroup}
     return _common_translate_diff(G, p, q, X)
 end
-translate_diff(::CircleGroup, ::Identity{MultiplicationOperation}, q, X, ::LeftForwardAction) = X
-translate_diff(::CircleGroup, ::Identity{MultiplicationOperation}, q, X, ::RightForwardAction) = X
-translate_diff(::CircleGroup, ::Identity{MultiplicationOperation}, q, X, ::LeftBackwardAction) = X
-translate_diff(::CircleGroup, ::Identity{MultiplicationOperation}, q, X, ::RightBackwardAction) = X
+function translate_diff(
+    ::CircleGroup,
+    ::Identity{MultiplicationOperation},
+    q,
+    X,
+    ::LeftForwardAction,
+)
+    return X
+end
+function translate_diff(
+    ::CircleGroup,
+    ::Identity{MultiplicationOperation},
+    q,
+    X,
+    ::RightForwardAction,
+)
+    return X
+end
+function translate_diff(
+    ::CircleGroup,
+    ::Identity{MultiplicationOperation},
+    q,
+    X,
+    ::LeftBackwardAction,
+)
+    return X
+end
+function translate_diff(
+    ::CircleGroup,
+    ::Identity{MultiplicationOperation},
+    q,
+    X,
+    ::RightBackwardAction,
+)
+    return X
+end
 
 _common_translate_diff!(G, Y, p, q, X, conv) = copyto!(Y, translate_diff(G, p, q, X, conv))
-translate_diff!(G::CircleGroup, Y, p, q, X, conv::LeftForwardAction) = _common_translate_diff!(G, Y, p, q, X, conv)
-translate_diff!(G::CircleGroup, Y, p, q, X, conv::RightForwardAction) = _common_translate_diff!(G, Y, p, q, X, conv)
-translate_diff!(G::CircleGroup, Y, p, q, X, conv::LeftBackwardAction) = _common_translate_diff!(G, Y, p, q, X, conv)
-translate_diff!(G::CircleGroup, Y, p, q, X, conv::RightBackwardAction) = _common_translate_diff!(G, Y, p, q, X, conv)
+function translate_diff!(G::CircleGroup, Y, p, q, X, conv::LeftForwardAction)
+    return _common_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::CircleGroup, Y, p, q, X, conv::RightForwardAction)
+    return _common_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::CircleGroup, Y, p, q, X, conv::LeftBackwardAction)
+    return _common_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::CircleGroup, Y, p, q, X, conv::RightBackwardAction)
+    return _common_translate_diff!(G, Y, p, q, X, conv)
+end
 
 function exp_lie(::CircleGroup, X)
     return map(X) do imθ

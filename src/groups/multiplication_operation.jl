@@ -162,7 +162,6 @@ function inv!(
     return q
 end
 
-
 compose(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, q) = p * q
 
 function compose!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, x, p, q)

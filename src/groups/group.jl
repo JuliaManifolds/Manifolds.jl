@@ -446,15 +446,25 @@ Notably the adjoint representation of SO(2) is trivial.
 adjoint_action(G::AbstractDecoratorManifold, p, X, dir)
 @trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ, dir)
 @trait_function adjoint_action!(G::AbstractDecoratorManifold, Y, p, Xₑ, dir)
-function adjoint_action(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, Xₑ, dir)
+function adjoint_action(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    Xₑ,
+    dir,
+)
     Y = allocate_result(G, adjoint_action, Xₑ, p)
     return adjoint_action!(G, Y, p, Xₑ, dir)
 end
 # backward compatibility
 adjoint_action(G::AbstractDecoratorManifold, p, X) = adjoint_action(G, p, X, LeftAction())
-adjoint_action!(G::AbstractDecoratorManifold, Y, p, X) = adjoint_action!(G, Y, p, X, LeftAction())
+function adjoint_action!(G::AbstractDecoratorManifold, Y, p, X)
+    return adjoint_action!(G, Y, p, X, LeftAction())
+end
 # fall back method: the right action is defined from the left action
-adjoint_action!(G::AbstractDecoratorManifold, Y, p, X, ::RightAction) = adjoint_action!(G, Y, inv(G, p), X, LeftAction())
+function adjoint_action!(G::AbstractDecoratorManifold, Y, p, X, ::RightAction)
+    return adjoint_action!(G, Y, inv(G, p), X, LeftAction())
+end
 
 @doc raw"""
     adjoint_inv_diff(G::AbstractDecoratorManifold, p, X)
@@ -561,7 +571,9 @@ end
 @trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
 
 # true only if tangent vectors are stored with the left-invariant convention
-inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X) = -adjoint_action!(G, Y, p, X)
+function inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
+    return -adjoint_action!(G, Y, p, X)
+end
 
 function Base.copyto!(
     ::TraitList{IsGroupManifold{O}},
@@ -909,17 +921,45 @@ end
     conv::ActionDirectionAndSide=LeftForwardAction(),
 )
 # the following are true if the tangent vectors are stored with the left invariant convention
-translate_diff!(G::AbstractDecoratorManifold, Y, ::Any, ::Any, X, ::LeftForwardAction) = copyto!(G, Y, X)
-translate_diff!(G::AbstractDecoratorManifold, Y, ::Any, ::Any, X, ::RightForwardAction) = copyto!(G, Y, X)
-translate_diff!(G::AbstractDecoratorManifold, Y, p, ::Any, X, ::LeftBackwardAction) = adjoint_action!(G, Y, p, X, LeftAction())
-translate_diff!(G::AbstractDecoratorManifold, Y, p, ::Any, X, ::RightBackwardAction) = adjoint_action!(G, Y, p, X, RightAction())
+function translate_diff!(
+    G::AbstractDecoratorManifold,
+    Y,
+    ::Any,
+    ::Any,
+    X,
+    ::LeftForwardAction,
+)
+    return copyto!(G, Y, X)
+end
+function translate_diff!(
+    G::AbstractDecoratorManifold,
+    Y,
+    ::Any,
+    ::Any,
+    X,
+    ::RightForwardAction,
+)
+    return copyto!(G, Y, X)
+end
+function translate_diff!(G::AbstractDecoratorManifold, Y, p, ::Any, X, ::LeftBackwardAction)
+    return adjoint_action!(G, Y, p, X, LeftAction())
+end
+function translate_diff!(
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    ::Any,
+    X,
+    ::RightBackwardAction,
+)
+    return adjoint_action!(G, Y, p, X, RightAction())
+end
 
 # the following are true regardless of how the tangent vectors are stored:
 translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftForwardAction) = X
 translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightForwardAction) = X
 translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftBackwardAction) = X
 translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightBackwardAction) = X
-
 
 @doc raw"""
     inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirectionAndSide=LeftForwardAction())
