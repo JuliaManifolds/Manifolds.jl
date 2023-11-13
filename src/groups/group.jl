@@ -426,7 +426,7 @@ function is_vector(
 end
 
 @doc raw"""
-    adjoint_action(G::AbstractDecoratorManifold, p, X)
+    adjoint_action(G::AbstractDecoratorManifold, p, X, dir)
 
 Adjoint action of the element `p` of the Lie group `G` on the element `X`
 of the corresponding Lie algebra.
@@ -443,26 +443,18 @@ where ``e`` is the identity element of `G`.
 Note that the adjoint representation of a Lie group isn't generally faithful.
 Notably the adjoint representation of SO(2) is trivial.
 """
-adjoint_action(G::AbstractDecoratorManifold, p, X)
-@trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ)
-function adjoint_action(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, Xₑ)
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
-    Y = inverse_translate_diff(G, p, p, Xₚ, RightBackwardAction())
-    return Y
+adjoint_action(G::AbstractDecoratorManifold, p, X, dir)
+@trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ, dir)
+@trait_function adjoint_action!(G::AbstractDecoratorManifold, Y, p, Xₑ, dir)
+function adjoint_action(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, Xₑ, dir)
+    Y = allocate_result(G, adjoint_action, Xₑ, p)
+    return adjoint_action!(G, Y, p, Xₑ, dir)
 end
-
-@trait_function adjoint_action!(G::AbstractDecoratorManifold, Y, p, Xₑ)
-function adjoint_action!(
-    ::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    Xₑ,
-)
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
-    inverse_translate_diff!(G, Y, p, p, Xₚ, RightBackwardAction())
-    return Y
-end
+# backward compatibility
+adjoint_action(G::AbstractDecoratorManifold, p, X) = adjoint_action(G, p, X, LeftAction())
+adjoint_action!(G::AbstractDecoratorManifold, Y, p, X) = adjoint_action!(G, Y, p, X, LeftAction())
+# fall back method: the right action is defined from the left action
+adjoint_action!(G::AbstractDecoratorManifold, Y, p, X, ::RightAction) = adjoint_action!(G, Y, inv(G, p), X, LeftAction())
 
 @doc raw"""
     adjoint_inv_diff(G::AbstractDecoratorManifold, p, X)
@@ -913,6 +905,18 @@ end
     X,
     conv::ActionDirectionAndSide=LeftForwardAction(),
 )
+translate_diff(::AbstractDecoratorManifold, ::Any, ::Any, X, ::LeftForwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Any, ::Any, X, ::RightForwardAction) = X
+translate_diff!(G::AbstractDecoratorManifold, Y, ::Any, ::Any, X, ::LeftForwardAction) = copyto!(G, Y, X)
+translate_diff!(G::AbstractDecoratorManifold, Y, ::Any, ::Any, X, ::RightForwardAction) = copyto!(G, Y, X)
+translate_diff!(G::AbstractDecoratorManifold, Y, p, ::Any, X, ::LeftBackwardAction) = adjoint_action!(G, Y, p, X, LeftAction())
+translate_diff!(G::AbstractDecoratorManifold, Y, p, ::Any, X, ::RightBackwardAction) = adjoint_action!(G, Y, p, X, RightAction())
+
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftForwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightForwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftBackwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightBackwardAction) = X
+
 
 @doc raw"""
     inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirectionAndSide=LeftForwardAction())

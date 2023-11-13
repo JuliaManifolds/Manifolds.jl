@@ -160,25 +160,14 @@ lie_bracket(::AdditionGroupTrait, G::AbstractDecoratorManifold, X, Y) = zero(X)
 
 lie_bracket!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Z, X, Y) = fill!(Z, 0)
 
-function translate_diff(
-    ::AdditionGroupTrait,
-    G::AbstractDecoratorManifold,
-    p,
-    q,
-    X,
-    ::ActionDirectionAndSide,
-)
-    return X
-end
-
-function translate_diff!(
+function adjoint_action!(
     ::AdditionGroupTrait,
     G::AbstractDecoratorManifold,
     Y,
     p,
-    q,
     X,
-    ::ActionDirectionAndSide,
+    ::ActionDirection,
 )
-    return copyto!(G, Y, p, X)
+    return copyto!(Y, X)
 end
+

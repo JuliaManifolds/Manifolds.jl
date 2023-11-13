@@ -296,45 +296,22 @@ function Random.rand!(rng::AbstractRNG, G::GeneralUnitaryMultiplicationGroup, pX
     return pX
 end
 
-function translate_diff!(
+function adjoint_action!(
     G::GeneralUnitaryMultiplicationGroup,
     Y,
     p,
-    q,
     X,
-    ::LeftForwardAction,
-)
-    return copyto!(G, Y, X)
-end
-function translate_diff!(
-    G::GeneralUnitaryMultiplicationGroup,
-    Y,
-    p,
-    q,
-    X,
-    ::RightForwardAction,
-)
-    copyto!(G, Y, X)
-    return Y
-end
-function translate_diff!(
-    G::GeneralUnitaryMultiplicationGroup,
-    Y,
-    p,
-    q,
-    X,
-    ::LeftBackwardAction,
+    ::LeftAction
 )
     copyto!(G, Y, p * X * inv(G, p))
     return Y
 end
-function translate_diff!(
+function adjoint_action!(
     G::GeneralUnitaryMultiplicationGroup,
     Y,
     p,
-    q,
     X,
-    ::RightBackwardAction,
+    ::RightAction,
 )
     return copyto!(G, Y, inv(G, p) * X * p)
 end

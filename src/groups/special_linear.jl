@@ -72,8 +72,9 @@ function get_embedding(M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
     return GeneralLinear(n, 𝔽; parameter=:field)
 end
 
-inverse_translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X
-inverse_translate_diff(::SpecialLinear, p, q, X, ::RightBackwardAction) = p * X / p
+# note: this implementation is not optimal
+adjoint_action!(::SpecialLinear, Y, p, X, ::LeftAction) = copyto!(Y, p * X * inv(p))
+adjoint_action!(::SpecialLinear, Y, p, X, ::RightAction) = copyto!(Y, p \ X * p)
 
 function inverse_translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirectionAndSide)
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
@@ -147,9 +148,5 @@ function Base.show(io::IO, M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
     return print(io, "SpecialLinear($n, $𝔽; parameter=:field)")
 end
 
-translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X
-translate_diff(::SpecialLinear, p, q, X, ::RightBackwardAction) = p \ X * p
 
-function translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirectionAndSide)
-    return copyto!(Y, translate_diff(G, p, q, X, conv))
-end
+adjoint_action!(G::SpecialLinear, Y, p, q, X, conv::LeftAction) = p \ X * p

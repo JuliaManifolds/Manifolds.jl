@@ -24,9 +24,9 @@ end
 
 Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
-adjoint_action(::CircleGroup, p, X) = X
+adjoint_action(::CircleGroup, p, X, ::ActionDirection) = X
 
-adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)
+adjoint_action!(::CircleGroup, Y, p, X, ::ActionDirection) = copyto!(Y, X)
 
 function compose(
     ::MultiplicationGroupTrait,
@@ -77,22 +77,29 @@ lie_bracket(::CircleGroup, X, Y) = zero(X)
 
 lie_bracket!(::CircleGroup, Z, X, Y) = fill!(Z, 0)
 
-function translate_diff(::GT, p, q, X, ::ActionDirectionAndSide) where {GT<:CircleGroup}
-    return map(*, p, X)
+_common_translate_diff(::Any, p, q, X) = map(*, p, X)
+function translate_diff(G::GT, p, q, X, ::LeftForwardAction) where {GT<:CircleGroup}
+    return _common_translate_diff(G, p, q, X)
 end
-function translate_diff(
-    ::CircleGroup,
-    ::Identity{MultiplicationOperation},
-    q,
-    X,
-    ::ActionDirectionAndSide,
-)
-    return X
+function translate_diff(G::GT, p, q, X, ::RightForwardAction) where {GT<:CircleGroup}
+    return _common_translate_diff(G, p, q, X)
 end
+function translate_diff(G::GT, p, q, X, ::LeftBackwardAction) where {GT<:CircleGroup}
+    return _common_translate_diff(G, p, q, X)
+end
+function translate_diff(G::GT, p, q, X, ::RightBackwardAction) where {GT<:CircleGroup}
+    return _common_translate_diff(G, p, q, X)
+end
+translate_diff(::CircleGroup, ::Identity{MultiplicationOperation}, q, X, ::LeftForwardAction) = X
+translate_diff(::CircleGroup, ::Identity{MultiplicationOperation}, q, X, ::RightForwardAction) = X
+translate_diff(::CircleGroup, ::Identity{MultiplicationOperation}, q, X, ::LeftBackwardAction) = X
+translate_diff(::CircleGroup, ::Identity{MultiplicationOperation}, q, X, ::RightBackwardAction) = X
 
-function translate_diff!(G::CircleGroup, Y, p, q, X, conv::ActionDirectionAndSide)
-    return copyto!(Y, translate_diff(G, p, q, X, conv))
-end
+_common_translate_diff!(G, Y, p, q, X, conv) = copyto!(Y, translate_diff(G, p, q, X, conv))
+translate_diff!(G::CircleGroup, Y, p, q, X, conv::LeftForwardAction) = _common_translate_diff!(G, Y, p, q, X, conv)
+translate_diff!(G::CircleGroup, Y, p, q, X, conv::RightForwardAction) = _common_translate_diff!(G, Y, p, q, X, conv)
+translate_diff!(G::CircleGroup, Y, p, q, X, conv::LeftBackwardAction) = _common_translate_diff!(G, Y, p, q, X, conv)
+translate_diff!(G::CircleGroup, Y, p, q, X, conv::RightBackwardAction) = _common_translate_diff!(G, Y, p, q, X, conv)
 
 function exp_lie(::CircleGroup, X)
     return map(X) do imθ

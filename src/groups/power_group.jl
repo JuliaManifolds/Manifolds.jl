@@ -259,43 +259,47 @@ function inverse_translate!(
     return x
 end
 
-function translate_diff!(G::PowerGroup, Y, p, q, X, conv::ActionDirectionAndSide)
+function _common_power_adjoint_action!(G, Y, p, X, conv)
     GM = G.manifold
     N = GM.manifold
     rep_size = representation_size(N)
     for i in get_iterator(GM)
-        translate_diff!(
+        adjoint_action!(
             N,
             _write(GM, rep_size, Y, i),
             _read(GM, rep_size, p, i),
-            _read(GM, rep_size, q, i),
             _read(GM, rep_size, X, i),
             conv,
         )
     end
     return Y
 end
-function translate_diff!(
-    G::PowerGroupNestedReplacing,
-    Y,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+adjoint_action!(G::PowerGroup, Y, p, X, conv::LeftAction) = _common_power_adjoint_action!(G, Y, p, X, conv)
+function adjoint_action!(G::PowerGroup, Y, p, X, conv::RightAction)
+    return _common_power_adjoint_action!(G, Y, p, X, conv)
+end
+
+function _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
     GM = G.manifold
     N = GM.manifold
     rep_size = representation_size(N)
     for i in get_iterator(GM)
-        Y[i...] = translate_diff(
-            N,
-            _read(GM, rep_size, p, i),
-            _read(GM, rep_size, q, i),
-            _read(GM, rep_size, X, i),
-            conv,
-        )
+        Y[i...] =
+            adjoint_action(N, _read(GM, rep_size, p, i), _read(GM, rep_size, X, i), conv)
     end
     return Y
+end
+function adjoint_action!(G::PowerGroupNestedReplacing, Y, p, X, conv::LeftAction)
+    return _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
+end
+function adjoint_action!(
+    G::PowerGroupNestedReplacing,
+    Y,
+    p,
+    X,
+    conv::RightAction,
+)
+    return _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
 end
 
 function inverse_translate_diff!(G::PowerGroup, Y, p, q, X, conv::ActionDirectionAndSide)

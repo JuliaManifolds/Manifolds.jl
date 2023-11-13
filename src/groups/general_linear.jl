@@ -275,9 +275,8 @@ function Base.show(io::IO, M::GeneralLinear{Tuple{Int},𝔽}) where {𝔽}
     return print(io, "GeneralLinear($n, $𝔽; parameter=:field)")
 end
 
-translate_diff(::GeneralLinear, p, q, X, ::LeftForwardAction) = X
-translate_diff(::GeneralLinear, p, q, X, ::RightBackwardAction) = p \ X * p
+# note: this implementation is not optimal
+adjoint_action!(::GeneralLinear, Y, p, X, ::LeftAction) = copyto!(Y, p * X * inv(p))
+adjoint_action!(::GeneralLinear, Y, p, X, ::RightAction) = copyto!(Y, p \ X * p)
 
-function translate_diff!(G::GeneralLinear, Y, p, q, X, conv::ActionDirectionAndSide)
-    return copyto!(Y, translate_diff(G, p, q, X, conv))
-end
+
