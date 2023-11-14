@@ -100,7 +100,7 @@ end
     is_flat(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric})
 
 Return true. [`SymmetricPositiveDefinite`](@ref) with [`LogCholeskyMetric`](@ref)
-is a flat manifold.
+is a flat manifold. See Proposition 8 of [Lin:2019](@cite).
 """
 is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}) = true
 
