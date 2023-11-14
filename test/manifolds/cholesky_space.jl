@@ -4,7 +4,7 @@ include("../utils.jl")
     M = Manifolds.CholeskySpace(3)
     @test repr(M) == "CholeskySpace(3)"
 
-    @test !is_flat(M)
+    @test is_flat(M)
 
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})

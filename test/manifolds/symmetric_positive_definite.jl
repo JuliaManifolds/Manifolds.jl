@@ -34,7 +34,11 @@ include("../utils.jl")
         end
         @testset "$(typeof(M))" begin
             @test representation_size(M) == (3, 3)
-            @test !is_flat(M)
+            if M === M3
+                @test is_flat(M)
+            else
+                @test !is_flat(M)
+            end
             for T in types
                 exp_log_atol_multiplier = 8.0
                 if T <: MMatrix{3,3,Float64}
