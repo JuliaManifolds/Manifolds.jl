@@ -156,7 +156,7 @@ end
 """
     is_flat(::SymmetricPositiveSemidefiniteFixedRank)
 
-Return false. [`SymmetricPositiveSemidefiniteFixedRank`](@ref) is not a flat manifold.
+Return false. [`SymmetricPositiveSemidefiniteFixedRank`](@ref) is not a flat manifold. See Theorem A.18 in [MassartAbsil:2020](@cite).
 """
 is_flat(M::SymmetricPositiveSemidefiniteFixedRank) = false
 
