@@ -213,6 +213,78 @@ function adjoint_action!(G::ProductGroup, Y, p, X, conv::RightAction)
     return _common_product_adjoint_action!(G, Y, p, X, conv)
 end
 
+function _common_product_translate_diff(
+    G::ProductGroup,
+    p,
+    q,
+    X,
+    conv::ActionDirectionAndSide,
+)
+    M = G.manifold
+    return ArrayPartition(
+        map(
+            translate_diff,
+            M.manifolds,
+            submanifold_components(G, p),
+            submanifold_components(G, q),
+            submanifold_components(G, X),
+            repeated(conv),
+        )...,
+    )
+end
+
+function translate_diff(G::ProductGroup, p, q, X, conv::LeftForwardAction)
+    return _common_product_translate_diff(G, p, q, X, conv)
+end
+function translate_diff(G::ProductGroup, p, q, X, conv::RightForwardAction)
+    return _common_product_translate_diff(G, p, q, X, conv)
+end
+function translate_diff(G::ProductGroup, p, q, X, conv::LeftBackwardAction)
+    return _common_product_translate_diff(G, p, q, X, conv)
+end
+function translate_diff(G::ProductGroup, p, q, X, conv::RightBackwardAction)
+    return _common_product_translate_diff(G, p, q, X, conv)
+end
+
+translate_diff(::ProductGroup, ::Identity, q, X, ::LeftForwardAction) = X
+translate_diff(::ProductGroup, ::Identity, q, X, ::RightForwardAction) = X
+translate_diff(::ProductGroup, ::Identity, q, X, ::LeftBackwardAction) = X
+translate_diff(::ProductGroup, ::Identity, q, X, ::RightBackwardAction) = X
+
+function _common_product_translate_diff!(
+    G::ProductGroup,
+    Y,
+    p,
+    q,
+    X,
+    conv::ActionDirectionAndSide,
+)
+    M = G.manifold
+    map(
+        translate_diff!,
+        M.manifolds,
+        submanifold_components(G, Y),
+        submanifold_components(G, p),
+        submanifold_components(G, q),
+        submanifold_components(G, X),
+        repeated(conv),
+    )
+    return Y
+end
+
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::LeftForwardAction)
+    return _common_product_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::RightForwardAction)
+    return _common_product_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::LeftBackwardAction)
+    return _common_product_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::RightBackwardAction)
+    return _common_product_translate_diff!(G, Y, p, q, X, conv)
+end
+
 function inverse_translate_diff(G::ProductGroup, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
     return ArrayPartition(
