@@ -21,7 +21,7 @@ include("group_utils.jl")
         @test G isa PowerGroup
         @test is_point(G, rand(Random.GLOBAL_RNG, G))
         pts = [rand(G) for _ in 1:3]
-        X_pts = [rand(G; vector_at=pts[1]) for _ in 1:3]
+        X_pts = [0.5 * rand(G; vector_at=pts[1]) for _ in 1:3]
 
         @test compose(G, pts[1], Identity(G)) == pts[1]
         @test compose(G, Identity(G), pts[1]) == pts[1]
