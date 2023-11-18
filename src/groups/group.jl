@@ -564,15 +564,16 @@ inv_diff(G::AbstractDecoratorManifold, p)
 
 @trait_function inv_diff(G::AbstractDecoratorManifold, p, X)
 function inv_diff(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    Y = allocate_result(G, inv_diff, X, p)
-    return inv_diff!(G, Y, p, X)
+    return -adjoint_action(G, p, X)
 end
 
 @trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
 
 # true only if tangent vectors are stored with the left-invariant convention
 function inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
-    return -adjoint_action!(G, Y, p, X)
+    adjoint_action!(G, Y, p, X)
+    Y .*= -1
+    return Y
 end
 
 function Base.copyto!(
