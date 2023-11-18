@@ -426,7 +426,7 @@ function is_vector(
 end
 
 @doc raw"""
-    adjoint_action(G::AbstractDecoratorManifold, p, X)
+    adjoint_action(G::AbstractDecoratorManifold, p, X, dir)
 
 Adjoint action of the element `p` of the Lie group `G` on the element `X`
 of the corresponding Lie algebra.
@@ -443,25 +443,27 @@ where ``e`` is the identity element of `G`.
 Note that the adjoint representation of a Lie group isn't generally faithful.
 Notably the adjoint representation of SO(2) is trivial.
 """
-adjoint_action(G::AbstractDecoratorManifold, p, X)
-@trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ)
-function adjoint_action(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, Xₑ)
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
-    Y = inverse_translate_diff(G, p, p, Xₚ, RightBackwardAction())
-    return Y
-end
-
-@trait_function adjoint_action!(G::AbstractDecoratorManifold, Y, p, Xₑ)
-function adjoint_action!(
+adjoint_action(G::AbstractDecoratorManifold, p, X, dir)
+@trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ, dir)
+@trait_function adjoint_action!(G::AbstractDecoratorManifold, Y, p, Xₑ, dir)
+function adjoint_action(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
-    Y,
     p,
     Xₑ,
+    dir,
 )
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
-    inverse_translate_diff!(G, Y, p, p, Xₚ, RightBackwardAction())
-    return Y
+    Y = allocate_result(G, adjoint_action, Xₑ, p)
+    return adjoint_action!(G, Y, p, Xₑ, dir)
+end
+# backward compatibility
+adjoint_action(G::AbstractDecoratorManifold, p, X) = adjoint_action(G, p, X, LeftAction())
+function adjoint_action!(G::AbstractDecoratorManifold, Y, p, X)
+    return adjoint_action!(G, Y, p, X, LeftAction())
+end
+# fall back method: the right action is defined from the left action
+function adjoint_action!(G::AbstractDecoratorManifold, Y, p, X, ::RightAction)
+    return adjoint_action!(G, Y, inv(G, p), X, LeftAction())
 end
 
 @doc raw"""
@@ -562,11 +564,17 @@ inv_diff(G::AbstractDecoratorManifold, p)
 
 @trait_function inv_diff(G::AbstractDecoratorManifold, p, X)
 function inv_diff(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    Y = allocate_result(G, inv_diff, X, p)
-    return inv_diff!(G, Y, p, X)
+    return -adjoint_action(G, p, X)
 end
 
 @trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
+
+# true only if tangent vectors are stored with the left-invariant convention
+function inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
+    adjoint_action!(G, Y, p, X)
+    Y .*= -1
+    return Y
+end
 
 function Base.copyto!(
     ::TraitList{IsGroupManifold{O}},
@@ -913,6 +921,46 @@ end
     X,
     conv::ActionDirectionAndSide=LeftForwardAction(),
 )
+# the following are true if the tangent vectors are stored with the left invariant convention
+function translate_diff!(
+    G::AbstractDecoratorManifold,
+    Y,
+    ::Any,
+    ::Any,
+    X,
+    ::LeftForwardAction,
+)
+    return copyto!(G, Y, X)
+end
+function translate_diff!(
+    G::AbstractDecoratorManifold,
+    Y,
+    ::Any,
+    ::Any,
+    X,
+    ::RightForwardAction,
+)
+    return copyto!(G, Y, X)
+end
+function translate_diff!(G::AbstractDecoratorManifold, Y, p, ::Any, X, ::LeftBackwardAction)
+    return adjoint_action!(G, Y, p, X, LeftAction())
+end
+function translate_diff!(
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    ::Any,
+    X,
+    ::RightBackwardAction,
+)
+    return adjoint_action!(G, Y, p, X, RightAction())
+end
+
+# the following are true regardless of how the tangent vectors are stored:
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftForwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightForwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftBackwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightBackwardAction) = X
 
 @doc raw"""
     inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirectionAndSide=LeftForwardAction())

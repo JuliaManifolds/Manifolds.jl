@@ -74,14 +74,7 @@ end
 
 Compute the value of differential of additive matrix inversion ``p ↦ -p`` at ``X``, i.e. ``-X``.
 """
-function inv_diff(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X)
-    return -X
-end
-function inv_diff!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Y, p, X)
-    Y .= X
-    Y .*= -1
-    return Y
-end
+inv_diff(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X)
 
 function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, q; kwargs...)
     return isapprox(G, q, zero(q); kwargs...)
@@ -160,25 +153,13 @@ lie_bracket(::AdditionGroupTrait, G::AbstractDecoratorManifold, X, Y) = zero(X)
 
 lie_bracket!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Z, X, Y) = fill!(Z, 0)
 
-function translate_diff(
-    ::AdditionGroupTrait,
-    G::AbstractDecoratorManifold,
-    p,
-    q,
-    X,
-    ::ActionDirectionAndSide,
-)
-    return X
-end
-
-function translate_diff!(
+function adjoint_action!(
     ::AdditionGroupTrait,
     G::AbstractDecoratorManifold,
     Y,
     p,
-    q,
     X,
-    ::ActionDirectionAndSide,
+    ::ActionDirection,
 )
-    return copyto!(G, Y, p, X)
+    return copyto!(Y, X)
 end
