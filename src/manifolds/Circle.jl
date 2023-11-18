@@ -465,7 +465,7 @@ function Random.rand(rng::AbstractRNG, M::Circle{ℂ}; vector_at=nothing, σ::Re
         return sign(randn(rng, ComplexF64))
     else
         # written like that to properly handle `vector_at` being a number or a one-element array
-        return map(p -> project(M, p, σ * rand(rng, typeof(p))), vector_at)
+        return map(p -> project(M, p, σ * randn(rng, complex(typeof(p)))), vector_at)
     end
 end
 

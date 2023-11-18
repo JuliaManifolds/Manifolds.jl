@@ -330,7 +330,6 @@ function Random.rand!(
         (manifold_dimension(M) == 0) && return fill!(pX, 0)
         A = σ .* randn(rng, representation_size(M))
         pX .= triu(A, 1) .- transpose(triu(A, 1))
-        normalize!(pX)
     end
     return pX
 end
