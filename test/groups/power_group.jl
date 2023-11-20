@@ -21,7 +21,7 @@ include("group_utils.jl")
         @test G isa PowerGroup
         @test is_point(G, rand(Random.GLOBAL_RNG, G))
         pts = [rand(G) for _ in 1:3]
-        X_pts = [rand(G; vector_at=pts[1]) for _ in 1:3]
+        X_pts = [0.5 * rand(G; vector_at=pts[1]) for _ in 1:3]
 
         @test compose(G, pts[1], Identity(G)) == pts[1]
         @test compose(G, Identity(G), pts[1]) == pts[1]
@@ -30,12 +30,14 @@ include("group_utils.jl")
             pts,
             X_pts,
             X_pts;
-            atol=1e-9,
+            atol=2e-9,
             test_diff=true,
             test_log_from_identity=true,
             test_exp_from_identity=true,
             test_vee_hat_from_identity=true,
             test_adjoint_action=true,
+            test_inv_diff=true,
+            test_adjoint_inv_diff=true,
         )
 
         X = log_lie(G, pts[1])

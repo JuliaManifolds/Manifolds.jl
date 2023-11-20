@@ -1,5 +1,5 @@
 @doc raw"""
-    SpecialOrthogonal{n} <: GroupManifold{ℝ,Rotations{n},MultiplicationOperation}
+    SpecialOrthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,DeterminantOneMatrices}
 
 Special orthogonal group ``\mathrm{SO}(n)`` represented by rotation matrices, see [`Rotations`](@ref).
 
@@ -8,9 +8,17 @@ Special orthogonal group ``\mathrm{SO}(n)`` represented by rotation matrices, se
 """
 const SpecialOrthogonal{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,DeterminantOneMatrices}
 
-SpecialOrthogonal(n) = SpecialOrthogonal{n}(Rotations(n))
+function SpecialOrthogonal(n; parameter::Symbol=:type)
+    return GeneralUnitaryMultiplicationGroup(Rotations(n; parameter=parameter))
+end
 
 Base.inv(::SpecialOrthogonal, p) = transpose(p)
 Base.inv(::SpecialOrthogonal, e::Identity{MultiplicationOperation}) = e
 
-Base.show(io::IO, ::SpecialOrthogonal{n}) where {n} = print(io, "SpecialOrthogonal($(n))")
+function Base.show(io::IO, ::SpecialOrthogonal{TypeParameter{Tuple{n}}}) where {n}
+    return print(io, "SpecialOrthogonal($(n))")
+end
+function Base.show(io::IO, M::SpecialOrthogonal{Tuple{Int}})
+    n = get_parameter(M.manifold.size)[1]
+    return print(io, "SpecialOrthogonal($(n); parameter=:field)")
+end

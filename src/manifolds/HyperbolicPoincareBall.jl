@@ -1,5 +1,5 @@
 @doc raw"""
-    change_representer(M::Hyperbolic{n}, ::EuclideanMetric, p::PoincareBallPoint, X::PoincareBallTVector)
+    change_representer(M::Hyperbolic, ::EuclideanMetric, p::PoincareBallPoint, X::PoincareBallTVector)
 
 Since in the metric we have the term `` α = \frac{2}{1-\sum_{i=1}^n p_i^2}`` per element,
 the correction for the gradient reads `` Y = \frac{1}{α^2}X``.
@@ -24,7 +24,7 @@ function change_representer!(
 end
 
 @doc raw"""
-    change_metric(M::Hyperbolic{n}, ::EuclideanMetric, p::PoincareBallPoint, X::PoincareBallTVector)
+    change_metric(M::Hyperbolic, ::EuclideanMetric, p::PoincareBallPoint, X::PoincareBallTVector)
 
 Since in the metric we always have the term `` α = \frac{2}{1-\sum_{i=1}^n p_i^2}`` per element,
 the correction for the metric reads ``Z = \frac{1}{α}X``.
@@ -43,7 +43,7 @@ function change_metric!(
     return Y
 end
 
-function check_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...) where {N}
+function check_point(M::Hyperbolic, p::PoincareBallPoint; kwargs...)
     if !(norm(p.value) < 1)
         return DomainError(
             norm(p.value),
@@ -52,7 +52,8 @@ function check_point(M::Hyperbolic{N}, p::PoincareBallPoint; kwargs...) where {N
     end
 end
 
-function check_size(M::Hyperbolic{N}, p::PoincareBallPoint) where {N}
+function check_size(M::Hyperbolic, p::PoincareBallPoint)
+    N = get_parameter(M.size)[1]
     if size(p.value, 1) != N
         !(norm(p.value) < 1)
         return DomainError(
@@ -62,12 +63,8 @@ function check_size(M::Hyperbolic{N}, p::PoincareBallPoint) where {N}
     end
 end
 
-function check_size(
-    M::Hyperbolic{N},
-    p::PoincareBallPoint,
-    X::PoincareBallTVector;
-    kwargs...,
-) where {N}
+function check_size(M::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector; kwargs...)
+    N = get_parameter(M.size)[1]
     if size(X.value, 1) != N
         return DomainError(
             size(X.value, 1),
@@ -273,12 +270,19 @@ embed(::Hyperbolic, p::PoincareBallPoint) = p.value
 embed!(::Hyperbolic, q, p::PoincareBallPoint) = copyto!(q, p.value)
 embed(::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector) = X.value
 embed!(::Hyperbolic, Y, p::PoincareBallPoint, X::PoincareBallTVector) = copyto!(Y, X.value)
-get_embedding(::Hyperbolic{n}, p::PoincareBallPoint) where {n} = Euclidean(n)
+
+function get_embedding(::Hyperbolic{TypeParameter{Tuple{n}}}, ::PoincareBallPoint) where {n}
+    return Euclidean(n)
+end
+function get_embedding(M::Hyperbolic{Tuple{Int}}, ::PoincareBallPoint)
+    n = get_parameter(M.size)[1]
+    return Euclidean(n; parameter=:field)
+end
 
 @doc raw"""
     inner(::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTVector, Y::PoincareBallTVector)
 
-Compute the inner producz in the Poincaré ball model. The formula reads
+Compute the inner product in the Poincaré ball model. The formula reads
 ````math
 g_p(X,Y) = \frac{4}{(1-\lVert p \rVert^2)^2}  ⟨X, Y⟩ .
 ````

@@ -1,5 +1,5 @@
 @doc raw"""
-    Oblique{N,M,𝔽} <: AbstractPowerManifold{𝔽}
+    Oblique{T,𝔽,S} <: AbstractPowerManifold{𝔽}
 
 The oblique manifold $\mathcal{OB}(n,m)$ is the set of 𝔽-valued matrices with unit norm
 column endowed with the metric from the embedding. This yields exactly the same metric as
@@ -11,31 +11,40 @@ The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all fun
 
 # Constructor
 
-    Oblique(n,m)
+    Oblique(n::Int, m::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the manifold of matrices $\mathbb R^{n × m}$ such that the $m$ columns are unit
 vectors, i.e. from the [`Sphere`](@ref)`(n-1)`.
 """
-struct Oblique{N,M,𝔽,S} <:
-       AbstractPowerManifold{𝔽,Sphere{S,𝔽},ArrayPowerRepresentation} where {N,M}
+struct Oblique{T,𝔽,S} <: AbstractPowerManifold{𝔽,Sphere{S,𝔽},ArrayPowerRepresentation}
+    size::T
     manifold::Sphere{S,𝔽}
 end
 
-function Oblique(n::Int, m::Int, field::AbstractNumbers=ℝ)
-    return Oblique{n,m,field,n - 1}(Sphere(n - 1, field))
+function Oblique(n::Int, m::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+    sphere = Sphere(n - 1, field; parameter=parameter)
+    size = wrap_type_parameter(parameter, (n, m))
+    return Oblique{typeof(size),field,typeof(sphere).parameters[1]}(size, sphere)
 end
 
-Base.:^(M::Sphere{N,𝔽}, m::Int) where {N,𝔽} = Oblique{manifold_dimension(M) + 1,m,𝔽,N}(M)
+function Base.:^(::Sphere{TypeParameter{Tuple{N}},𝔽}, m::Int) where {N,𝔽}
+    return Oblique(N + 1, m, 𝔽)
+end
+function Base.:^(M::Sphere{Tuple{Int},𝔽}, m::Int) where {𝔽}
+    N = M.size[1]
+    return Oblique(N + 1, m, 𝔽; parameter=:field)
+end
 
 @doc raw"""
-    check_point(M::Oblique{n,m},p)
+    check_point(M::Oblique, p)
 
 Checks whether `p` is a valid point on the [`Oblique`](@ref)`{m,n}` `M`, i.e. is a matrix
 of `m` unit columns from $\mathbb R^{n}$, i.e. each column is a point from
 [`Sphere`](@ref)`(n-1)`.
 """
 check_point(::Oblique, ::Any)
-function check_point(M::Oblique{n,m}, p; kwargs...) where {n,m}
+function check_point(M::Oblique, p; kwargs...)
+    n, m = get_parameter(M.size)
     return check_point(PowerManifold(M.manifold, m), p; kwargs...)
 end
 @doc raw"""
@@ -45,18 +54,20 @@ Checks whether `X` is a valid tangent vector to `p` on the [`Oblique`](@ref) `M`
 This means, that `p` is valid, that `X` is of correct dimension and columnswise
 a tangent vector to the columns of `p` on the [`Sphere`](@ref).
 """
-function check_vector(M::Oblique{n,m}, p, X; kwargs...) where {n,m}
+function check_vector(M::Oblique, p, X; kwargs...)
+    n, m = get_parameter(M.size)
     return check_vector(PowerManifold(M.manifold, m), p, X; kwargs...)
 end
 
-get_iterator(::Oblique{n,m}) where {n,m} = Base.OneTo(m)
+get_iterator(M::Oblique) = Base.OneTo(get_parameter(M.size)[2])
 
-@generated function manifold_dimension(::Oblique{n,m,𝔽}) where {n,m,𝔽}
+function manifold_dimension(M::Oblique{<:Any,𝔽}) where {𝔽}
+    n, m = get_parameter(M.size)
     return (n * real_dimension(𝔽) - 1) * m
 end
-power_dimensions(::Oblique{n,m}) where {n,m} = (m,)
+power_dimensions(M::Oblique) = get_parameter(M.size)[2]
 
-@generated representation_size(::Oblique{n,m}) where {n,m} = (n, m)
+representation_size(M::Oblique) = get_parameter(M.size)
 
 @doc raw"""
     parallel_transport_to(M::Oblique, p, X, q)
@@ -67,6 +78,10 @@ doing a column wise parallel transport on the [`Sphere`](@ref)
 """
 parallel_transport_to(::Oblique, p, X, q)
 
-function Base.show(io::IO, ::Oblique{n,m,𝔽}) where {n,m,𝔽}
-    return print(io, "Oblique($(n),$(m); field = $(𝔽))")
+function Base.show(io::IO, ::Oblique{TypeParameter{Tuple{n,m}},𝔽}) where {n,m,𝔽}
+    return print(io, "Oblique($(n), $(m); field=$(𝔽))")
+end
+function Base.show(io::IO, M::Oblique{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, m = get_parameter(M.size)
+    return print(io, "Oblique($(n), $(m); field=$(𝔽), parameter=:field)")
 end

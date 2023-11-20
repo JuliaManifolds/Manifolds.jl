@@ -12,7 +12,7 @@ struct GeneralizedBuresWassersteinMetric{T<:AbstractMatrix} <: RiemannianMetric
 end
 
 @doc raw"""
-    change_representer(M::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, E::EuclideanMetric, p, X)
+    change_representer(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric}, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
 space at `p` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
@@ -28,7 +28,7 @@ it holds
 for all ``Y`` and hence we get ``Z = 2pXM + 2MXp``.
 """
 change_representer(
-    ::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric},
+    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
     ::EuclideanMetric,
     p,
     X,
@@ -67,7 +67,7 @@ function distance(
 end
 
 @doc raw"""
-    exp(::MatricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, X)
+    exp(::MatricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric}, p, X)
 
 Compute the exponential map on [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`GeneralizedBuresWassersteinMetric`](@ref) given by
@@ -78,7 +78,11 @@ the [`GeneralizedBuresWassersteinMetric`](@ref) given by
 
 where ``q=L_{M,p}(X)`` denotes the generalized Lyapunov operator, i.e. it solves ``pqM + Mqp = X``.
 """
-exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, X)
+exp(
+    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
+    p,
+    X,
+)
 
 function exp!(
     M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
@@ -95,7 +99,7 @@ function exp!(
 end
 
 @doc raw"""
-    inner(::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, X, Y)
+    inner(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric}, p, X, Y)
 
 Compute the inner product [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`GeneralizedBuresWassersteinMetric`](@ref) given by
@@ -122,13 +126,13 @@ Return false. [`SymmetricPositiveDefinite`](@ref) with [`GeneralizedBuresWassers
 is not a flat manifold.
 """
 function is_flat(
-    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
+    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
 )
     return false
 end
 
 @doc raw"""
-    log(::MatricManifold{SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, q)
+    log(::MatricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric}, p, q)
 
 Compute the logarithmic map on [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`BuresWassersteinMetric`](@ref) given by
@@ -137,7 +141,11 @@ the [`BuresWassersteinMetric`](@ref) given by
     \log_p(q) = M(M^{-1}pM^{-1}q)^{\frac{1}{2}} + (qM^{-1}pM^{-1})^{\frac{1}{2}}M - 2 p.
 ```
 """
-log(::MetricManifold{ℝ,SymmetricPositiveDefinite,GeneralizedBuresWassersteinMetric}, p, q)
+log(
+    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
+    p,
+    q,
+)
 
 function log!(
     M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},

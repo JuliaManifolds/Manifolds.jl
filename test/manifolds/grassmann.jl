@@ -19,36 +19,40 @@ include("../utils.jl")
                   Manifolds.RowwiseMultiplicationAction(M, Orthogonal(2))
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
-            @test_throws ManifoldDomainError is_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws ManifoldDomainError is_point(
+                M,
+                [2.0 0.0; 0.0 1.0; 0.0 0.0];
+                error=:error,
+            )
             @test_throws ManifoldDomainError is_vector(
                 M,
                 [2.0 0.0; 0.0 1.0; 0.0 0.0],
-                zeros(3, 2),
-                true,
+                zeros(3, 2);
+                error=:error,
             )
             @test_throws ManifoldDomainError is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                ones(3, 2),
-                true,
+                ones(3, 2);
+                error=:error,
             )
-            @test is_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test is_point(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]; error=:error)
             @test_throws ManifoldDomainError is_point(
                 M,
-                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                true,
+                1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
+                error=:error,
             )
             @test is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),
-                true,
+                zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]);
+                error=:error,
             )
             @test_throws ManifoldDomainError is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                1im * zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]),
-                true,
+                1im * zero_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0]);
+                error=:error,
             )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
@@ -135,8 +139,8 @@ include("../utils.jl")
             @test is_vector(
                 M,
                 p2,
-                vector_transport_to(M, p1, X, p2, ProjectionTransport()),
-                true;
+                vector_transport_to(M, p1, X, p2, ProjectionTransport());
+                error=:error,
                 atol=10^-15,
             )
         end
@@ -159,18 +163,22 @@ include("../utils.jl")
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
-            @test_throws ManifoldDomainError is_point(M, [2.0 0.0; 0.0 1.0; 0.0 0.0], true)
+            @test_throws ManifoldDomainError is_point(
+                M,
+                [2.0 0.0; 0.0 1.0; 0.0 0.0];
+                error=:error,
+            )
             @test_throws ManifoldDomainError is_vector(
                 M,
                 [2.0 0.0; 0.0 1.0; 0.0 0.0],
-                zeros(3, 2),
-                true,
+                zeros(3, 2);
+                error=:error,
             )
             @test_throws ManifoldDomainError is_vector(
                 M,
                 [1.0 0.0; 0.0 1.0; 0.0 0.0],
-                ones(3, 2),
-                true,
+                ones(3, 2);
+                error=:error,
             )
             @test is_vector(
                 M,
@@ -230,7 +238,7 @@ include("../utils.jl")
         p = reshape([im, 0.0, 0.0], 3, 1)
         @test is_point(G, p)
         X = reshape([-0.5; 0.5; 0], 3, 1)
-        @test_throws ManifoldDomainError is_vector(G, p, X, true)
+        @test_throws ManifoldDomainError is_vector(G, p, X; error=:error)
         Y = project(G, p, X)
         @test is_vector(G, p, Y)
     end
@@ -307,16 +315,16 @@ include("../utils.jl")
         M = Grassmann(3, 2)
         p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
         X = StiefelTVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
-        @test is_point(M, p, true)
-        @test is_vector(M, p, X, true)
+        @test is_point(M, p; error=:error)
+        @test is_vector(M, p, X; error=:error)
         @test repr(p) == "StiefelPoint($(p.value))"
         @test repr(X) == "StiefelTVector($(X.value))"
         M2 = Stiefel(3, 2)
-        @test is_point(M2, p, true)
-        @test is_vector(M2, p, X, true)
+        @test is_point(M2, p; error=:error)
+        @test is_vector(M2, p, X; error=:error)
 
         p2 = convert(ProjectorPoint, p)
-        @test is_point(M, p2, true)
+        @test is_point(M, p2; error=:error)
         p3 = convert(ProjectorPoint, p.value)
         @test p2.value == p3.value
         X2 = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 1.0 0.0])
@@ -326,20 +334,20 @@ include("../utils.jl")
 
         # rank just 1
         pF1 = ProjectorPoint([1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0])
-        @test_throws DomainError is_point(M, pF1, true)
+        @test_throws DomainError is_point(M, pF1; error=:error)
         # not equal to its square
         pF2 = ProjectorPoint([1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 1.0 0.0])
-        @test_throws DomainError is_point(M, pF2, true)
+        @test_throws DomainError is_point(M, pF2; error=:error)
         # not symmetric
         pF3 = ProjectorPoint([0.0 1.0 0.0; 0.0 1.0 0.0; 0.0 0.0 0.0])
-        @test_throws DomainError is_point(M, pF3, true)
+        @test_throws DomainError is_point(M, pF3; error=:error)
 
         # not symmetric
         XF1 = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 0.0 0.0])
-        @test_throws DomainError is_vector(M, p2, XF1, true)
+        @test_throws DomainError is_vector(M, p2, XF1; error=:error)
         # XF2 is not p2*XF2 + XF2*p2
         XF2 = ProjectorTVector(ones(3, 3))
-        @test_throws DomainError is_vector(M, p2, XF2, true)
+        @test_throws DomainError is_vector(M, p2, XF2; error=:error)
 
         # embed for Stiefel with its point
         M2 = Stiefel(3, 2)
@@ -387,5 +395,15 @@ include("../utils.jl")
         Y = [0.0 1.0; -1.0 0.0; 1.0 0.0]
         Z = [0.0 -1.0; 1.0 0.0; 1.0 0.0]
         @test riemannian_Hessian(M, p, Y, Z, X) == [0.0 0.0; 0.0 0.0; 2.0 0.0]
+    end
+    @testset "field parameter" begin
+        M = Grassmann(3, 2; parameter=:field)
+        @test repr(M) == "Grassmann(3, 2, ℝ; parameter=:field)"
+        @test get_total_space(M) == Stiefel(3, 2; parameter=:field)
+        @test typeof(get_embedding(M)) === Stiefel{Tuple{Int64,Int64},ℝ}
+
+        p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
+        p2 = convert(ProjectorPoint, p)
+        @test get_embedding(M, p2) == Euclidean(3, 3; parameter=:field)
     end
 end

@@ -40,6 +40,18 @@ end
     end
 end
 
+function adjoint_inv_diff!(G::ProductGroup, Y, p, X)
+    M = G.manifold
+    map(
+        adjoint_inv_diff!,
+        M.manifolds,
+        submanifold_components(G, Y),
+        submanifold_components(G, p),
+        submanifold_components(G, X),
+    )
+    return Y
+end
+
 function identity_element(G::ProductGroup)
     M = G.manifold
     return ArrayPartition(map(identity_element, M.manifolds))
@@ -62,7 +74,7 @@ function Base.show(io::IO, ::MIME"text/plain", G::ProductGroup)
         io,
         "ProductGroup with $(length(base_manifold(G).manifolds)) subgroup$(length(base_manifold(G).manifolds) == 1 ? "" : "s"):",
     )
-    return _show_product_manifold_no_header(io, base_manifold(G))
+    return ManifoldsBase._show_product_manifold_no_header(io, base_manifold(G))
 end
 
 function Base.show(io::IO, G::ProductGroup)
@@ -102,9 +114,21 @@ function inv!(G::ProductGroup, q, p)
 end
 inv!(::ProductGroup, q::Identity{ProductOperation}, ::Identity{ProductOperation}) = q
 
+function inv_diff!(G::ProductGroup, Y, p, X)
+    M = G.manifold
+    map(
+        inv_diff!,
+        M.manifolds,
+        submanifold_components(G, Y),
+        submanifold_components(G, p),
+        submanifold_components(G, X),
+    )
+    return Y
+end
+
 _compose(G::ProductGroup, p, q) = _compose(G.manifold, p, q)
-function _compose(M::ProductManifold, p::ProductRepr, q::ProductRepr)
-    return ProductRepr(
+function _compose(M::ProductManifold, p::ArrayPartition, q::ArrayPartition)
+    return ArrayPartition(
         map(
             compose,
             M.manifolds,
@@ -126,22 +150,11 @@ function _compose!(M::ProductManifold, x, p, q)
     return x
 end
 
-function translate(M::ProductGroup, p::ProductRepr, q::ProductRepr, conv::ActionDirection)
-    return ProductRepr(
-        map(
-            translate,
-            M.manifold.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, q),
-            repeated(conv),
-        )...,
-    )
-end
 function translate(
     M::ProductGroup,
     p::ArrayPartition,
     q::ArrayPartition,
-    conv::ActionDirection,
+    conv::ActionDirectionAndSide,
 )
     return ArrayPartition(
         map(
@@ -154,7 +167,7 @@ function translate(
     )
 end
 
-function translate!(M::ProductGroup, x, p, q, conv::ActionDirection)
+function translate!(M::ProductGroup, x, p, q, conv::ActionDirectionAndSide)
     map(
         translate!,
         M.manifold.manifolds,
@@ -166,9 +179,9 @@ function translate!(M::ProductGroup, x, p, q, conv::ActionDirection)
     return x
 end
 
-function inverse_translate(G::ProductGroup, p, q, conv::ActionDirection)
+function inverse_translate(G::ProductGroup, p, q, conv::ActionDirectionAndSide)
     M = G.manifold
-    return ProductRepr(
+    return ArrayPartition(
         map(
             inverse_translate,
             M.manifolds,
@@ -179,7 +192,7 @@ function inverse_translate(G::ProductGroup, p, q, conv::ActionDirection)
     )
 end
 
-function inverse_translate!(G::ProductGroup, x, p, q, conv::ActionDirection)
+function inverse_translate!(G::ProductGroup, x, p, q, conv::ActionDirectionAndSide)
     M = G.manifold
     map(
         inverse_translate!,
@@ -192,7 +205,7 @@ function inverse_translate!(G::ProductGroup, x, p, q, conv::ActionDirection)
     return x
 end
 
-function translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
+function translate_diff(G::ProductGroup, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
     return ArrayPartition(
         map(
@@ -206,7 +219,7 @@ function translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
     )
 end
 
-function translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
     map(
         translate_diff!,
@@ -220,9 +233,9 @@ function translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
     return Y
 end
 
-function inverse_translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
+function inverse_translate_diff(G::ProductGroup, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
-    return ProductRepr(
+    return ArrayPartition(
         map(
             inverse_translate_diff,
             M.manifolds,
@@ -234,7 +247,7 @@ function inverse_translate_diff(G::ProductGroup, p, q, X, conv::ActionDirection)
     )
 end
 
-function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirection)
+function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
     map(
         inverse_translate_diff!,
@@ -248,16 +261,6 @@ function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirect
     return Y
 end
 
-function Base.exp(M::ProductGroup, p::Identity{ProductOperation}, X::ProductRepr)
-    return ProductRepr(
-        map(
-            exp,
-            M.manifold.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, X),
-        )...,
-    )
-end
 function Base.exp(M::ProductGroup, p::Identity{ProductOperation}, X::ArrayPartition)
     return ArrayPartition(
         map(
@@ -291,16 +294,6 @@ function exp_lie!(G::ProductGroup, q, X)
     return q
 end
 
-function Base.log(M::ProductGroup, p::Identity{ProductOperation}, q::ProductRepr)
-    return ProductRepr(
-        map(
-            log,
-            M.manifold.manifolds,
-            submanifold_components(M, p),
-            submanifold_components(M, q),
-        )...,
-    )
-end
 function Base.log(M::ProductGroup, p::Identity{ProductOperation}, q::ArrayPartition)
     return ArrayPartition(
         map(
@@ -338,7 +331,7 @@ function log_lie!(G::ProductGroup, X, q::Identity{ProductOperation})
 end
 
 Base.@propagate_inbounds function Base.getindex(
-    p::Union{ProductRepr,ArrayPartition},
+    p::ArrayPartition,
     M::ProductGroup,
     i::Union{Integer,Colon,AbstractVector,Val},
 )
@@ -346,7 +339,7 @@ Base.@propagate_inbounds function Base.getindex(
 end
 
 Base.@propagate_inbounds function Base.setindex!(
-    q::Union{ProductRepr,ArrayPartition},
+    q::ArrayPartition,
     p,
     M::ProductGroup,
     i::Union{Integer,Colon,AbstractVector,Val},

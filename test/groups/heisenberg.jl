@@ -55,4 +55,9 @@ include("group_utils.jl")
         test_rand_point=true,
         test_rand_tvector=true,
     )
+    @testset "field parameter" begin
+        G = HeisenbergGroup(1; parameter=:field)
+        @test typeof(get_embedding(G)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(G) == "HeisenbergGroup(1; parameter=:field)"
+    end
 end

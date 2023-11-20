@@ -1,5 +1,5 @@
 @doc raw"""
-    ProbabilitySimplex{n,boundary} <: AbstractDecoratorManifold{𝔽}
+    ProbabilitySimplex{T,boundary} <: AbstractDecoratorManifold{𝔽}
 
 The (relative interior of) the probability simplex is the set
 ````math
@@ -34,9 +34,11 @@ This implementation follows the notation in [AastroemPetraSchmitzerSchnoerr:2017
 
     ProbabilitySimplex(n::Int; boundary::Symbol=:open)
 """
-struct ProbabilitySimplex{n,boundary} <: AbstractDecoratorManifold{ℝ} end
+struct ProbabilitySimplex{T,boundary} <: AbstractDecoratorManifold{ℝ}
+    size::T
+end
 
-function ProbabilitySimplex(n::Int; boundary::Symbol=:open)
+function ProbabilitySimplex(n::Int; boundary::Symbol=:open, parameter::Symbol=:type)
     if boundary !== :open && boundary !== :closed
         throw(
             ArgumentError(
@@ -44,7 +46,8 @@ function ProbabilitySimplex(n::Int; boundary::Symbol=:open)
             ),
         )
     end
-    return ProbabilitySimplex{n,boundary}()
+    size = wrap_type_parameter(parameter, (n,))
+    return ProbabilitySimplex{typeof(size),boundary}(size)
 end
 
 """
@@ -96,7 +99,7 @@ Check whether `p` is a valid point on the [`ProbabilitySimplex`](@ref) `M`, i.e.
 the embedding with positive entries that sum to one
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_point(M::ProbabilitySimplex{n,boundary}, p; kwargs...) where {n,boundary}
+function check_point(M::ProbabilitySimplex{<:Any,boundary}, p; kwargs...) where {boundary}
     if boundary === :closed && minimum(p) < 0
         return DomainError(
             minimum(p),
@@ -180,15 +183,10 @@ function exp!(::ProbabilitySimplex, q, p, X)
     return q
 end
 
-function get_coordinates_orthonormal!(
-    M::ProbabilitySimplex{N},
-    Xc,
-    p,
-    X,
-    R::RealNumbers,
-) where {N}
+function get_coordinates_orthonormal!(M::ProbabilitySimplex, Xc, p, X, R::RealNumbers)
+    n = get_parameter(M.size)[1]
     get_coordinates_orthonormal!(
-        Sphere(N),
+        Sphere(n),
         Xc,
         simplex_to_amplitude(M, p),
         simplex_to_amplitude_diff(M, p, X),
@@ -197,28 +195,29 @@ function get_coordinates_orthonormal!(
     return Xc
 end
 
-get_embedding(M::ProbabilitySimplex) = Euclidean(representation_size(M)...; field=ℝ)
+function get_embedding(::ProbabilitySimplex{TypeParameter{Tuple{n}}}) where {n}
+    return Euclidean(n + 1)
+end
+function get_embedding(M::ProbabilitySimplex{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return Euclidean(n + 1; parameter=:field)
+end
 
-function get_vector_orthonormal!(
-    M::ProbabilitySimplex{N},
-    Y,
-    p,
-    Xc,
-    R::RealNumbers,
-) where {N}
+function get_vector_orthonormal!(M::ProbabilitySimplex, Y, p, Xc, R::RealNumbers)
+    n = get_parameter(M.size)[1]
     ps = simplex_to_amplitude(M, p)
-    X = get_vector_orthonormal(Sphere(N), ps, Xc, R)
+    X = get_vector_orthonormal(Sphere(n), ps, Xc, R)
     return amplitude_to_simplex_diff!(M, Y, ps, X)
 end
 
 @doc raw"""
-    injectivity_radius(M, p)
+    injectivity_radius(M::ProbabilitySimplex, p)
 
 Compute the injectivity radius on the [`ProbabilitySimplex`](@ref) `M` at the point `p`,
 i.e. the distanceradius to a point near/on the boundary, that could be reached by following the
 geodesic.
 """
-function injectivity_radius(::ProbabilitySimplex{n}, p) where {n}
+function injectivity_radius(::ProbabilitySimplex, p)
     i = argmin(p)
     s = sum(p) - p[i]
     return 2 * acos(sqrt(s))
@@ -240,7 +239,7 @@ g_p(X,Y) = \sum_{i=1}^{n+1}\frac{X_iY_i}{p_i}
 When `M` includes boundary, we can just skip coordinates where ``p_i`` is equal to 0, see
 Proposition 2.1 in [AyJostLeSchwachhoefer:2017](@cite).
 """
-function inner(::ProbabilitySimplex{n,boundary}, p, X, Y) where {n,boundary}
+function inner(::ProbabilitySimplex{<:Any,boundary}, p, X, Y) where {boundary}
     d = zero(Base.promote_eltype(p, X, Y))
     if boundary === :closed
         @inbounds for i in eachindex(p, X, Y)
@@ -267,7 +266,7 @@ where $\mathbb{1}^{m,n}$ is the size `(m,n)` matrix containing ones, and $\log$ 
 """
 inverse_retract(::ProbabilitySimplex, ::Any, ::Any, ::SoftmaxInverseRetraction)
 
-function inverse_retract_softmax!(::ProbabilitySimplex{n}, X, p, q) where {n}
+function inverse_retract_softmax!(::ProbabilitySimplex, X, p, q)
     X .= log.(q) .- log.(p)
     meanlogdiff = mean(X)
     X .-= meanlogdiff
@@ -306,23 +305,26 @@ function log!(::ProbabilitySimplex, X, p, q)
 end
 
 @doc raw"""
-    manifold_dimension(M::ProbabilitySimplex{n})
+    manifold_dimension(M::ProbabilitySimplex)
 
 Returns the manifold dimension of the probability simplex in $ℝ^{n+1}$, i.e.
 ````math
     \dim_{Δ^n} = n.
 ````
 """
-manifold_dimension(::ProbabilitySimplex{n}) where {n} = n
+manifold_dimension(M::ProbabilitySimplex) = get_parameter(M.size)[1]
 
 @doc raw"""
-    manifold_volume(::ProbabilitySimplex{n}) where {n}
+    manifold_volume(::ProbabilitySimplex)
 
 Return the volume of the [`ProbabilitySimplex`](@ref), i.e. volume of the `n`-dimensional
 [`Sphere`](@ref) divided by ``2^{n+1}``, corresponding to the volume of its positive
 orthant.
 """
-manifold_volume(::ProbabilitySimplex{n}) where {n} = manifold_volume(Sphere(n)) / 2^(n + 1)
+function manifold_volume(M::ProbabilitySimplex)
+    n = get_parameter(M.size)[1]
+    return manifold_volume(Sphere(n)) / 2^(n + 1)
+end
 
 @doc raw"""
     mean(
@@ -340,10 +342,11 @@ mean(::ProbabilitySimplex, ::Any...)
 
 default_estimation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
 
-function parallel_transport_to!(M::ProbabilitySimplex{N}, Y, p, X, q) where {N}
+function parallel_transport_to!(M::ProbabilitySimplex, Y, p, X, q)
+    n = get_parameter(M.size)[1]
     q_s = simplex_to_amplitude(M, q)
     Ys = parallel_transport_to(
-        Sphere(N),
+        Sphere(n),
         simplex_to_amplitude(M, p),
         simplex_to_amplitude_diff(M, p, X),
         q_s,
@@ -430,12 +433,15 @@ function project!(::ProbabilitySimplex, q, p)
 end
 
 @doc raw"""
-    representation_size(::ProbabilitySimplex{n})
+    representation_size(::ProbabilitySimplex)
 
 Return the representation size of points in the $n$-dimensional probability simplex,
 i.e. an array size of `(n+1,)`.
 """
-representation_size(::ProbabilitySimplex{n}) where {n} = (n + 1,)
+function representation_size(M::ProbabilitySimplex)
+    n = get_parameter(M.size)[1]
+    return (n + 1,)
+end
 
 @doc raw"""
     retract(M::ProbabilitySimplex, p, X, ::SoftmaxRetraction)
@@ -461,8 +467,8 @@ function retract_softmax!(::ProbabilitySimplex, q, p, X, t::Number)
 end
 
 @doc raw"""
-    X = riemannian_gradient(M::ProbabilitySimplex{n}, p, Y)
-    riemannian_gradient!(M::ProbabilitySimplex{n}, X, p, Y)
+    X = riemannian_gradient(M::ProbabilitySimplex, p, Y)
+    riemannian_gradient!(M::ProbabilitySimplex, X, p, Y)
 
 Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{n+1}`` of the
 [`ProbabilitySimplex`](@ref) ``Δ^n``, this function computes the Riemannian gradient
@@ -490,10 +496,11 @@ It is computed using isometry with positive orthant of a sphere.
 """
 riemann_tensor(::ProbabilitySimplex, p, X, Y, Z)
 
-function riemann_tensor!(M::ProbabilitySimplex{N}, Xresult, p, X, Y, Z) where {N}
+function riemann_tensor!(M::ProbabilitySimplex, Xresult, p, X, Y, Z)
+    n = get_parameter(M.size)[1]
     pe = simplex_to_amplitude(M, p)
     Xrs = riemann_tensor(
-        Sphere(N),
+        Sphere(n),
         pe,
         simplex_to_amplitude_diff(M, p, X),
         simplex_to_amplitude_diff(M, p, Y),
@@ -503,19 +510,27 @@ function riemann_tensor!(M::ProbabilitySimplex{N}, Xresult, p, X, Y, Z) where {N
     return Xresult
 end
 
-function Base.show(io::IO, ::ProbabilitySimplex{n,boundary}) where {n,boundary}
+function Base.show(
+    io::IO,
+    ::ProbabilitySimplex{TypeParameter{Tuple{n}},boundary},
+) where {n,boundary}
     return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
+end
+function Base.show(io::IO, M::ProbabilitySimplex{Tuple{Int},boundary}) where {boundary}
+    n = get_parameter(M.size)[1]
+    return print(io, "ProbabilitySimplex($(n); boundary=:$boundary, parameter=:field)")
 end
 
 @doc raw"""
-    volume_density(M::ProbabilitySimplex{N}, p, X) where {N}
+    volume_density(M::ProbabilitySimplex, p, X)
 
 Compute the volume density at point `p` on [`ProbabilitySimplex`](@ref) `M` for tangent
 vector `X`. It is computed using isometry with positive orthant of a sphere.
 """
-function volume_density(M::ProbabilitySimplex{N}, p, X) where {N}
+function volume_density(M::ProbabilitySimplex, p, X)
+    n = get_parameter(M.size)[1]
     pe = simplex_to_amplitude(M, p)
-    return volume_density(Sphere(N), pe, simplex_to_amplitude_diff(M, p, X))
+    return volume_density(Sphere(n), pe, simplex_to_amplitude_diff(M, p, X))
 end
 
 @doc raw"""
@@ -545,7 +560,7 @@ function simplex_to_amplitude!(::ProbabilitySimplex, q, p)
 end
 
 @doc raw"""
-    amplitude_to_simplex(M::ProbabilitySimplex{N}, p) where {N}
+    amplitude_to_simplex(M::ProbabilitySimplex, p)
 
 Convert point (real) probability amplitude `p` on to a point on [`ProbabilitySimplex`](@ref Manifolds.ProbabilitySimplex).
 The formula reads ``(p_1^2, p_2^2, …, p_{N+1}^2)``. This is an isometry from the interior of

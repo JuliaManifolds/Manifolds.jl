@@ -11,7 +11,7 @@ struct CanonicalMetric <: RiemannianMetric end
     ApproximateLogarithmicMap <: ApproximateInverseRetraction
 
 An approximate implementation of the logarithmic map, which is an [`inverse_retract`](@ref)ion.
-See [`inverse_retract(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any, ::Any, ::ApproximateLogarithmicMap) where {n,k}`](@ref) for a use case.
+See [`inverse_retract(::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, ::Any, ::Any, ::ApproximateLogarithmicMap)`](@ref) for a use case.
 
 # Fields
 
@@ -24,15 +24,15 @@ struct ApproximateLogarithmicMap{T} <: ApproximateInverseRetraction
     tolerance::T
 end
 
-function distance(M::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, q, p) where {n,k}
+function distance(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, q, p)
     return norm(M, p, log(M, p, q))
 end
 
 @doc raw"""
-    q = exp(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, X)
-    exp!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, q, CanonicalMetric}, p, X)
+    q = exp(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, p, X)
+    exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, q, p, X)
 
-Compute the exponential map on the [`Stiefel`](@ref)`(n,k)` manifold with respect to the [`CanonicalMetric`](@ref).
+Compute the exponential map on the [`Stiefel`](@ref)`(n, k)` manifold with respect to the [`CanonicalMetric`](@ref).
 
 First, decompose The tangent vector ``X`` into its horizontal and vertical component with
 respect to ``p``, i.e.
@@ -64,14 +64,15 @@ q = \exp_p X = pC + QB.
 ```
 For more details, see [EdelmanAriasSmith:1998](@cite)[Zimmermann:2017](@cite).
 """
-exp(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, ::Any...) where {n,k}
+exp(::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, ::Any...)
 
-function exp!(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, q, p, X) where {n,k}
+function exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, q, p, X)
+    n, k = get_parameter(M.manifold.size)
     A = p' * X
     n == k && return mul!(q, p, exp(A))
     QR = qr(X - p * A)
     BC_ext = exp([A -QR.R'; QR.R 0*I])
-    @views begin
+    @views begin # COV_EXCL_LINE
         mul!(q, p, BC_ext[1:k, 1:k])
         mul!(q, Matrix(QR.Q), BC_ext[(k + 1):(2 * k), 1:k], true, true)
     end
@@ -79,7 +80,7 @@ function exp!(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, q, p, X) w
 end
 
 @doc raw"""
-    inner(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p, X, Y)
+    inner(M::MetricManifold{ℝ, Stiefel{<:Any,ℝ}, X, CanonicalMetric}, p, X, Y)
 
 Compute the inner product on the [`Stiefel`](@ref) manifold with respect to the
 [`CanonicalMetric`](@ref). The formula reads
@@ -88,7 +89,8 @@ Compute the inner product on the [`Stiefel`](@ref) manifold with respect to the
 g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{1}{2}pp^{\mathrm{T}})Y \bigr).
 ```
 """
-function inner(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, p, X, Y) where {n,k}
+function inner(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, p, X, Y)
+    n, k = get_parameter(M.manifold.size)
     T = Base.promote_eltype(p, X, Y)
     if n == k
         return T(dot(X, Y)) / 2
@@ -98,59 +100,60 @@ function inner(::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric}, p, X, Y) 
 end
 
 @doc raw"""
-    X = inverse_retract(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
-    inverse_retract!(M::MetricManifold{ℝ, Stiefel{n,k,ℝ}, X, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
+    X = inverse_retract(M::MetricManifold{ℝ, Stiefel{<:Any,ℝ}, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
+    inverse_retract!(M::MetricManifold{ℝ, Stiefel{<:Any,ℝ}, X, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
 
-Compute an approximation to the logarithmic map on the [`Stiefel`](@ref)`(n,k)` manifold with respect to the [`CanonicalMetric`](@ref)
+Compute an approximation to the logarithmic map on the [`Stiefel`](@ref)`(n, k)` manifold with respect to the [`CanonicalMetric`](@ref)
 using a matrix-algebraic based approach to an iterative inversion of the formula of the
-[`exp`](@ref exp(::MetricManifold{ℝ, Stiefel{n,k,ℝ}, CanonicalMetric}, ::Any...) where {n,k}).
+[`exp`](@ref exp(::MetricManifold{ℝ, Stiefel{<:Any,ℝ}, CanonicalMetric}, ::Any...)).
 
 The algorithm is derived in [Zimmermann:2017](@cite) and it uses the `max_iterations` and the `tolerance` field
 from the [`ApproximateLogarithmicMap`](@ref).
 """
 inverse_retract(
-    ::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    ::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric},
     ::Any,
     ::Any,
     ::ApproximateLogarithmicMap,
-) where {n,k}
+)
 
 function log(
-    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric},
     p,
     q;
     maxiter::Int=10000,
     tolerance=1e-9,
-) where {n,k}
+)
     X = allocate_result(M, log, p, q)
     inverse_retract!(M, X, p, q, ApproximateLogarithmicMap(maxiter, tolerance))
     return X
 end
 
 function log!(
-    M::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric},
     X,
     p,
     q;
     maxiter::Int=10000,
     tolerance=1e-9,
-) where {n,k}
+)
     inverse_retract!(M, X, p, q, ApproximateLogarithmicMap(maxiter, tolerance))
     return X
 end
 
 function inverse_retract!(
-    ::MetricManifold{ℝ,Stiefel{n,k,ℝ},CanonicalMetric},
+    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric},
     X,
     p,
     q,
     a::ApproximateLogarithmicMap,
-) where {n,k}
+)
+    n, k = get_parameter(M.manifold.size)
     qfact = stiefel_factorization(p, q)
     V = allocate(qfact.Z, Size(2k, 2k))
     LV = allocate(V)
     Zcompl = qr(qfact.Z).Q[1:(2k), (k + 1):(2k)]
-    @views begin
+    @views begin # COV_EXCL_LINE
         Vpcols = V[1:(2k), (k + 1):(2k)] #second half of the columns
         B = LV[(k + 1):(2k), 1:k]
         C = LV[(k + 1):(2k), (k + 1):(2k)]
@@ -176,8 +179,8 @@ function inverse_retract!(
 end
 
 @doc raw"""
-    Y = riemannian_Hessian(M::MetricManifold{ℝ, Stiefel{n,k}, CanonicalMetric}, p, G, H, X)
-    riemannian_Hessian!(M::MetricManifold{ℝ, Stiefel{n,k}, CanonicalMetric}, Y, p, G, H, X)
+    Y = riemannian_Hessian(M::MetricManifold{ℝ, Stiefel, CanonicalMetric}, p, G, H, X)
+    riemannian_Hessian!(M::MetricManifold{ℝ, Stiefel, CanonicalMetric}, Y, p, G, H, X)
 
 Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
 Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
@@ -196,22 +199,16 @@ Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](@ref)
 ```
 where ``P = I-pp^{\mathrm{H}}``.
 """
-riemannian_Hessian(
-    M::MetricManifold{𝔽,Stiefel{n,k,𝔽},CanonicalMetric},
-    p,
-    G,
-    H,
-    X,
-) where {n,k,𝔽}
+riemannian_Hessian(M::MetricManifold{𝔽,Stiefel,CanonicalMetric}, p, G, H, X) where {𝔽}
 
 function riemannian_Hessian!(
-    M::MetricManifold{𝔽,Stiefel{n,k,𝔽},CanonicalMetric},
+    M::MetricManifold{𝔽,<:Stiefel{<:Any,𝔽},CanonicalMetric},
     Y,
     p,
     G,
     H,
     X,
-) where {n,k,𝔽}
+) where {𝔽}
     Gp = symmetrize(G' * p)
     Z = symmetrize((I - p * p') * G * p')
     project!(M, Y, p, H - X * Gp - Z * X)

@@ -34,7 +34,11 @@ include("../utils.jl")
         end
         @testset "$(typeof(M))" begin
             @test representation_size(M) == (3, 3)
-            @test !is_flat(M)
+            if M === M3
+                @test is_flat(M)
+            else
+                @test !is_flat(M)
+            end
             for T in types
                 exp_log_atol_multiplier = 8.0
                 if T <: MMatrix{3,3,Float64}
@@ -266,6 +270,7 @@ include("../utils.jl")
         @test isapprox(exp!(M, pS, p, zero_vector(M, p)), p)
         @test ismissing(pS.sqrt)
         @test ismissing(pS.sqrt_inv)
+        @test allocate_result(M1, zero_vector, p) isa Matrix
     end
 
     @testset "test BigFloat" begin
@@ -302,5 +307,10 @@ include("../utils.jl")
             0.9739140395169474 -0.2888865063584093 -0.9564259306801289
         ]
         @test volume_density(M, p, X) ≈ 5.141867280770719
+    end
+    @testset "field parameter" begin
+        M = SymmetricPositiveDefinite(3; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(M) == "SymmetricPositiveDefinite(3; parameter=:field)"
     end
 end

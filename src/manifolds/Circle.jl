@@ -1,9 +1,9 @@
 @doc raw"""
     Circle{𝔽} <: AbstractManifold{𝔽}
 
-The circle $𝕊^1$ is a manifold here represented by
-real-valued points in $[-π,π)$ or complex-valued points $z ∈ ℂ$ of absolute value
-$\lvert z\rvert = 1$.
+The circle ``𝕊^1`` is a manifold here represented by
+real-valued points in ``[-π,π)`` or complex-valued points ``z ∈ ℂ`` of absolute value
+``\lvert z\rvert = 1``.
 # Constructor
 
     Circle(𝔽=ℝ)
@@ -24,8 +24,8 @@ end
     check_point(M::Circle, p)
 
 Check whether `p` is a point on the [`Circle`](@ref) `M`.
-For the real-valued case, `p` is an angle and hence it checks that $p  ∈ [-π,π)$.
-for the complex-valued case, it is a unit number, $p ∈ ℂ$ with $\lvert p \rvert = 1$.
+For the real-valued case, `p` is an angle and hence it checks that ``p ∈ [-π,π)``.
+for the complex-valued case, it is a unit number, ``p ∈ ℂ`` with ``\lvert p \rvert = 1``.
 """
 check_point(::Circle, ::Any...)
 
@@ -142,9 +142,9 @@ Compute the exponential map on the [`Circle`](@ref).
 ````math
 \exp_p X = (p+X)_{2π},
 ````
-where $(\cdot)_{2π}$ is the (symmetric) remainder with respect to division by $2π$, i.e. in $[-π,π)$.
+where ``(\cdot)_{2π}`` is the (symmetric) remainder with respect to division by ``2π``, i.e. in ``[-π,π)``.
 
-For the complex-valued case, the same formula as for the [`Sphere`](@ref) $𝕊^1$ is applied to values in the
+For the complex-valued case, the same formula as for the [`Sphere`](@ref) ``𝕊^1`` is applied to values in the
 complex plane.
 """
 exp(::Circle, ::Any...)
@@ -202,11 +202,17 @@ end
 Return tangent vector coordinates in the Lie algebra of the [`Circle`](@ref).
 """
 get_coordinates(::Circle{ℂ}, p, X, ::DefaultOrthonormalBasis{<:Any,TangentSpaceType})
-function get_coordinates_orthonormal!(M::Circle{ℂ}, Y, p, X, n::RealNumbers)
+function get_coordinates_orthonormal!(
+    M::Circle{ℂ},
+    Y,
+    p,
+    X,
+    n::Union{RealNumbers,ComplexNumbers},
+)
     Y[] = get_coordinates_orthonormal(M, p, X, n)[]
     return Y
 end
-function get_coordinates_orthonormal(::Circle{ℂ}, p, X, ::RealNumbers)
+function get_coordinates_orthonormal(::Circle{ℂ}, p, X, ::Union{RealNumbers,ComplexNumbers})
     X, p = X[1], p[1]
     Xⁱ = imag(X) * real(p) - real(X) * imag(p)
     return @SVector [Xⁱ]
@@ -226,10 +232,10 @@ end
 
 Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-function get_vector_orthonormal(::Circle{ℂ}, p, c, ::RealNumbers)
+function get_vector_orthonormal(::Circle{ℂ}, p, c, ::Union{RealNumbers,ComplexNumbers})
     @SArray fill(1im * c[1] * p[1])
 end
-function get_vector_orthonormal!(::Circle{ℂ}, X, p, c, ::RealNumbers)
+function get_vector_orthonormal!(::Circle{ℂ}, X, p, c, ::Union{RealNumbers,ComplexNumbers})
     X .= 1im * c[1] * p[1]
     return X
 end
@@ -237,7 +243,7 @@ end
 @doc raw"""
     injectivity_radius(M::Circle[, p])
 
-Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. $π$.
+Return the injectivity radius on the [`Circle`](@ref) `M`, i.e. ``π``.
 """
 injectivity_radius(::Circle) = π
 
@@ -287,9 +293,9 @@ Compute the logarithmic map on the [`Circle`](@ref) `M`.
 ````math
 \log_p q = (q-p)_{2π},
 ````
-where $(\cdot)_{2π}$ is the (symmetric) remainder with respect to division by $2π$, i.e. in $[-π,π)$.
+where ``(\cdot)_{2π}`` is the (symmetric) remainder with respect to division by ``2π``, i.e. in ``[-π,π)``.
 
-For the complex-valued case, the same formula as for the [`Sphere`](@ref) $𝕊^1$ is applied to values in the
+For the complex-valued case, the same formula as for the [`Sphere`](@ref) ``𝕊^1`` is applied to values in the
 complex plane.
 """
 log(::Circle, ::Any...)
@@ -327,7 +333,7 @@ end
     manifold_dimension(M::Circle)
 
 Return the dimension of the [`Circle`](@ref) `M`,
-i.e. $\dim(𝕊^1) = 1$.
+i.e. ``\dim(𝕊^1) = 1``.
 """
 manifold_dimension(::Circle) = 1
 
@@ -342,7 +348,7 @@ manifold_volume(::Circle) = 2 * π
     mean(M::Circle{ℝ}, x::AbstractVector[, w::AbstractWeights])
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
-the [`Circle`](@ref) $𝕊^1$, reprsented by real numbers, i.e. the angular mean
+the [`Circle`](@ref) ``𝕊^1``, reprsented by real numbers, i.e. the angular mean
 ````math
 \operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\sin(x_i) \Bigr).
 ````
@@ -363,15 +369,15 @@ end
     mean(M::Circle{ℂ}, x::AbstractVector[, w::AbstractWeights])
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
-the [`Circle`](@ref) $𝕊^1$, reprsented by complex numbers, i.e. embedded in the complex plane.
+the [`Circle`](@ref) ``𝕊^1``, reprsented by complex numbers, i.e. embedded in the complex plane.
 Comuting the sum
 ````math
 s = \sum_{i=1}^n x_i
 ````
-the mean is the angle of the complex number $s$, so represented in the complex plane as
-$\frac{s}{\lvert s \rvert}$, whenever $s \neq 0$.
+the mean is the angle of the complex number ``s``, so represented in the complex plane as
+``\frac{s}{\lvert s \rvert}``, whenever ``s \neq 0``.
 
-If the sum $s=0$, the mean is not unique. For example for opposite points or equally spaced
+If the sum ``s=0``, the mean is not unique. For example for opposite points or equally spaced
 angles.
 """
 mean(::Circle{ℂ}, ::Any)
@@ -407,7 +413,7 @@ number_of_coordinates(::Circle, ::AbstractBasis) = 1
     project(M::Circle, p)
 
 Project a point `p` onto the [`Circle`](@ref) `M`.
-For the real-valued case this is the remainder with respect to modulus $2π$.
+For the real-valued case this is the remainder with respect to modulus ``2π``.
 For the complex-valued case the result is the projection of `p` onto the unit circle in the
 complex plane.
 """
@@ -459,7 +465,7 @@ function Random.rand(rng::AbstractRNG, M::Circle{ℂ}; vector_at=nothing, σ::Re
         return sign(randn(rng, ComplexF64))
     else
         # written like that to properly handle `vector_at` being a number or a one-element array
-        return map(p -> project(M, p, σ * rand(rng, typeof(p))), vector_at)
+        return map(p -> project(M, p, σ * randn(rng, complex(typeof(p)))), vector_at)
     end
 end
 
@@ -485,7 +491,7 @@ Base.show(io::IO, ::Circle{𝔽}) where {𝔽} = print(io, "Circle($(𝔽))")
     sym_rem(x,[T=π])
 
 Compute symmetric remainder of `x` with respect to the interall 2*`T`, i.e.
-`(x+T)%2T`, where the default for `T` is $π$
+`(x+T)%2T`, where the default for `T` is ``π``
 """
 function sym_rem(x::N, T=π) where {N<:Number}
     return (x ≈ T ? convert(N, -T) : rem(x, convert(N, 2 * T), RoundNearest))

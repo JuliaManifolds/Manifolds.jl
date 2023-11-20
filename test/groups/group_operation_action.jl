@@ -2,6 +2,9 @@
 include("../utils.jl")
 include("group_utils.jl")
 
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
+
 @testset "Group operation action" begin
     G = GroupManifold(NotImplementedManifold(), Manifolds.MultiplicationOperation())
     A_left_fwd = GroupOperationAction(G)
@@ -13,11 +16,9 @@ include("group_utils.jl")
 
     @test group_manifold(A_left_fwd) === G
     @test base_group(A_left_fwd) == G
-    @test repr(A_left_fwd) == "GroupOperationAction($(repr(G)), LeftForwardAction())"
-    @test repr(A_right_back) == "GroupOperationAction($(repr(G)), RightBackwardAction())"
-
-    @test switch_direction(LeftForwardAction()) === RightBackwardAction()
-    @test switch_direction(RightBackwardAction()) === LeftForwardAction()
+    @test repr(A_left_fwd) == "GroupOperationAction($(repr(G)), (LeftAction(), LeftSide()))"
+    @test repr(A_right_back) ==
+          "GroupOperationAction($(repr(G)), (RightAction(), RightSide()))"
 
     for type in types
         a_pts = convert.(type, [reshape(i:(i + 3), 2, 2) for i in 1:3])
@@ -32,7 +33,7 @@ include("group_utils.jl")
             test_optimal_alignment=false,
             test_diff=false,
             atol=atol,
-            test_switch_direction=Manifolds.SimultaneousSwitch(),
+            test_switch_direction=true,
         )
 
         test_action(
@@ -42,7 +43,7 @@ include("group_utils.jl")
             test_optimal_alignment=false,
             test_diff=false,
             atol=atol,
-            test_switch_direction=Manifolds.SimultaneousSwitch(),
+            test_switch_direction=true,
         )
     end
 
@@ -66,8 +67,9 @@ include("group_utils.jl")
 
     @test group_manifold(A_left_fwd) === G
     @test base_group(A_left_fwd) == G
-    @test repr(A_left_fwd) == "GroupOperationAction($(repr(G)), LeftForwardAction())"
-    @test repr(A_right_back) == "GroupOperationAction($(repr(G)), RightBackwardAction())"
+    @test repr(A_left_fwd) == "GroupOperationAction($(repr(G)), (LeftAction(), LeftSide()))"
+    @test repr(A_right_back) ==
+          "GroupOperationAction($(repr(G)), (RightAction(), RightSide()))"
 
     test_action(
         A_left_fwd,
@@ -76,7 +78,7 @@ include("group_utils.jl")
         X_pts;
         test_optimal_alignment=true,
         test_diff=true,
-        test_switch_direction=Manifolds.SimultaneousSwitch(),
+        test_switch_direction=true,
     )
 
     test_action(
@@ -86,7 +88,7 @@ include("group_utils.jl")
         X_pts;
         test_optimal_alignment=true,
         test_diff=true,
-        test_switch_direction=Manifolds.SimultaneousSwitch(),
+        test_switch_direction=true,
     )
 
     test_action(
@@ -96,7 +98,7 @@ include("group_utils.jl")
         X_pts;
         test_optimal_alignment=true,
         test_diff=true,
-        test_switch_direction=Manifolds.SimultaneousSwitch(),
+        test_switch_direction=true,
     )
 
     test_action(
@@ -106,21 +108,66 @@ include("group_utils.jl")
         X_pts;
         test_optimal_alignment=true,
         test_diff=true,
-        test_switch_direction=Manifolds.SimultaneousSwitch(),
+        test_switch_direction=true,
     )
 
-    @testset "apply_diff_group" begin
-        @test apply_diff_group(A_left_fwd, a_pts[1], X_pts[1], m_pts[1]) ≈
-              translate_diff(G, m_pts[1], a_pts[1], X_pts[1], RightBackwardAction())
-        Y = similar(X_pts[1])
-        apply_diff_group!(A_left_fwd, Y, a_pts[1], X_pts[1], m_pts[1])
-        @test Y ≈ translate_diff(G, m_pts[1], a_pts[1], X_pts[1], RightBackwardAction())
+    m = m_pts[1]
+    X = X_pts[1]
+    e = identity_element(G)
 
-        @test adjoint_apply_diff_group(A_left_fwd, a_pts[1], X_pts[1], m_pts[1]) ≈
-              inverse_translate_diff(G, a_pts[1], m_pts[1], X_pts[1], RightBackwardAction())
-        Y = similar(X_pts[1])
-        adjoint_apply_diff_group!(A_left_fwd, Y, a_pts[1], X_pts[1], m_pts[1])
-        @test Y ≈
-              inverse_translate_diff(G, a_pts[1], m_pts[1], X_pts[1], RightBackwardAction())
+    @testset "apply_diff" begin
+        @test isapprox(M, m, apply_diff(A_left_fwd, e, m, X), X)
+        @test isapprox(M, m, inverse_apply_diff(A_left_fwd, e, m, X), X)
+        @test isapprox(M, m, apply_diff(A_right_back, e, m, X), X)
+        @test isapprox(M, m, inverse_apply_diff(A_right_back, e, m, X), X)
+
+        @test isapprox(M, m, apply_diff(A_left_back, e, m, X), X)
+        @test isapprox(M, m, inverse_apply_diff(A_left_back, e, m, X), X)
+        @test isapprox(M, m, apply_diff(A_right_fwd, e, m, X), X)
+        @test isapprox(M, m, inverse_apply_diff(A_right_fwd, e, m, X), X)
+
+        eX = allocate(X)
+        @test apply_diff!(A_left_fwd, eX, e, m, X) === eX
+        @test isapprox(M, m, eX, X)
+        eX = allocate(X)
+        @test inverse_apply_diff!(A_left_fwd, eX, e, m, X) === eX
+        @test isapprox(M, m, eX, X)
+    end
+
+    @testset "apply_diff_group" begin
+        @test apply_diff_group(A_left_fwd, a_pts[1], X, m) ≈
+              translate_diff(G, m, a_pts[1], X, RightBackwardAction())
+        Y = similar(X)
+        apply_diff_group!(A_left_fwd, Y, a_pts[1], X, m)
+        @test Y ≈ translate_diff(G, m, a_pts[1], X, RightBackwardAction())
+
+        @test adjoint_apply_diff_group(A_left_fwd, a_pts[1], X, m) ≈
+              inverse_translate_diff(G, a_pts[1], m, X, RightBackwardAction())
+        Y = similar(X)
+        adjoint_apply_diff_group!(A_left_fwd, Y, a_pts[1], X, m)
+        @test Y ≈ inverse_translate_diff(G, a_pts[1], m, X, RightBackwardAction())
+
+        @test adjoint_apply_diff_group(A_right_fwd, a_pts[1], X, m) ≈
+              inverse_translate_diff(
+            G,
+            m,
+            a_pts[1],
+            adjoint_inv_diff(G, a_pts[1], X),
+            RightBackwardAction(),
+        )
+
+        Y = similar(X)
+        adjoint_apply_diff_group!(A_right_fwd, Y, a_pts[1], X, m)
+        @test Y ≈ inverse_translate_diff(
+            G,
+            m,
+            a_pts[1],
+            -a_pts[1]' * X / a_pts[1]',
+            RightBackwardAction(),
+        )
+
+        @test apply_diff_group(A_right_fwd, a_pts[1], X, m) ≈
+              -m \ (a_pts[1] * X / a_pts[1]) * m
+        @test apply_diff_group(A_left_back, a_pts[1], X, m) ≈ -a_pts[1] * X / a_pts[1]
     end
 end

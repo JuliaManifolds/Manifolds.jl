@@ -1,6 +1,8 @@
 include("../utils.jl")
 include("group_utils.jl")
 
+using Manifolds: LeftForwardAction, RightBackwardAction
+
 @testset "Special Orthogonal group" begin
     for n in [2, 3]
         G = SpecialOrthogonal(n)
@@ -10,6 +12,8 @@ include("group_utils.jl")
         p = Matrix(I, n, n)
         @test is_default_metric(MetricManifold(G, EuclideanMetric()))
         @test is_flat(G) == (n == 2)
+
+        @test get_embedding(G) == Euclidean(n, n)
 
         types = [Matrix{Float64}]
 
@@ -55,6 +59,9 @@ include("group_utils.jl")
                 test_exp_from_identity=true,
                 test_log_from_identity=true,
                 test_vee_hat_from_identity=true,
+                test_inv_diff=true,
+                test_adjoint_inv_diff=true,
+                test_apply_diff_group=true,
             )
 
             @testset "log_lie edge cases" begin

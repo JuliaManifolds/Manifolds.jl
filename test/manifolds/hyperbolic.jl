@@ -7,7 +7,7 @@ include("../utils.jl")
         @test base_manifold(M) == M
         @test manifold_dimension(M) == 2
         @test typeof(get_embedding(M)) ==
-              MetricManifold{ℝ,Euclidean{Tuple{3},ℝ},MinkowskiMetric}
+              MetricManifold{ℝ,Euclidean{TypeParameter{Tuple{3}},ℝ},MinkowskiMetric}
         @test representation_size(M) == (3,)
         @test !is_flat(M)
         @test isinf(injectivity_radius(M))
@@ -16,17 +16,22 @@ include("../utils.jl")
         @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0], ExponentialRetraction()))
         @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
         @test !is_vector(M, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0])
-        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
+        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error=:error)
         @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test_throws ManifoldDomainError is_vector(
+        @test_throws DomainError is_vector(
             M,
             [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            true,
+            [1.0, 0.0, 0.0];
+            error=:error,
         )
         @test !is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
-        @test_throws DomainError is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], true)
+        @test_throws DomainError is_vector(
+            M,
+            [0.0, 0.0, 1.0],
+            [1.0, 0.0, 1.0];
+            error=:error,
+        )
         @test is_default_metric(M, MinkowskiMetric())
         @test manifold_dimension(M) == 2
 
@@ -71,22 +76,34 @@ include("../utils.jl")
         @test is_point(M, pB)
         @test convert(AbstractVector, pB) == p # convert back yields again p
         @test convert(HyperboloidPoint, pB).value == pH.value
-        @test_throws DomainError is_point(M, PoincareBallPoint([0.9, 0.0, 0.0]), true)
-        @test_throws DomainError is_point(M, PoincareBallPoint([1.1, 0.0]), true)
+        @test_throws DomainError is_point(
+            M,
+            PoincareBallPoint([0.9, 0.0, 0.0]);
+            error=:error,
+        )
+        @test_throws DomainError is_point(M, PoincareBallPoint([1.1, 0.0]); error=:error)
 
         @test is_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
         @test_throws DomainError is_vector(
             M,
             pB,
-            PoincareBallTVector([2.0, 2.0, 3.0]),
-            true,
+            PoincareBallTVector([2.0, 2.0, 3.0]);
+            error=:error,
         )
         pS = convert(PoincareHalfSpacePoint, p)
         pS2 = convert(PoincareHalfSpacePoint, pB)
         pS3 = convert(PoincareHalfSpacePoint, pH)
 
-        @test_throws DomainError is_point(M, PoincareHalfSpacePoint([0.0, 0.0, 1.0]), true)
-        @test_throws DomainError is_point(M, PoincareHalfSpacePoint([0.0, -1.0]), true)
+        @test_throws DomainError is_point(
+            M,
+            PoincareHalfSpacePoint([0.0, 0.0, 1.0]);
+            error=:error,
+        )
+        @test_throws DomainError is_point(
+            M,
+            PoincareHalfSpacePoint([0.0, -1.0]);
+            error=:error,
+        )
 
         @test pS.value == pS2.value
         @test pS.value == pS3.value
@@ -255,7 +272,7 @@ include("../utils.jl")
         B = get_basis(M, p, DefaultOrthonormalBasis())
         V = get_vectors(M, p, B)
         for v in V
-            @test is_vector(M, p, v, true)
+            @test is_vector(M, p, v; error=:error)
             for b in [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(V[1])]
                 @test isapprox(M, p, v, get_vector(M, p, get_coordinates(M, p, v, b), b))
             end
@@ -376,5 +393,15 @@ include("../utils.jl")
         X = [1.0, 2.0, sqrt(3)]
         @test volume_density(M, p, X) ≈ 2.980406103535168
         @test volume_density(M, p, [0.0, 0.0, 0.0]) ≈ 1.0
+    end
+    @testset "field parameter" begin
+        M = Hyperbolic(2; parameter=:field)
+        @test repr(M) == "Hyperbolic(2; parameter=:field)"
+        @test typeof(get_embedding(M)) === Lorentz{Tuple{Int64},MinkowskiMetric}
+
+        for Tp in [PoincareBallPoint, PoincareHalfSpacePoint]
+            p = convert(Tp, [1.0, 0.0, sqrt(2.0)])
+            @test get_embedding(M, p) === Euclidean(2; parameter=:field)
+        end
     end
 end

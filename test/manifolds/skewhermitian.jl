@@ -2,7 +2,6 @@ include("../utils.jl")
 
 @testset "SkewSymmetricMatrices" begin
     @test SkewSymmetricMatrices(3) === SkewHermitianMatrices(3)
-    @test SkewSymmetricMatrices(3, ℂ) === SkewHermitianMatrices(3, ℂ)
 end
 
 @testset "SkewHermitianMatrices" begin
@@ -23,20 +22,20 @@ end
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test is_flat(M)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{3,3},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3,3}},ℝ}
         @test check_point(M, B_skewsym) === nothing
-        @test_throws DomainError is_point(M, A, true)
-        @test_throws ManifoldDomainError is_point(M, C, true)
-        @test_throws DomainError is_point(M, D, true)
+        @test_throws DomainError is_point(M, A; error=:error)
+        @test_throws ManifoldDomainError is_point(M, C; error=:error)
+        @test_throws DomainError is_point(M, D; error=:error)
         @test check_vector(M, B_skewsym, B_skewsym) === nothing
-        @test_throws DomainError is_vector(M, B_skewsym, A, true)
-        @test_throws ManifoldDomainError is_vector(M, A, B_skewsym, true)
-        @test_throws DomainError is_vector(M, B_skewsym, D, true)
+        @test_throws DomainError is_vector(M, B_skewsym, A; error=:error)
+        @test_throws DomainError is_vector(M, A, B_skewsym; error=:error)
+        @test_throws DomainError is_vector(M, B_skewsym, D; error=:error)
         @test_throws ManifoldDomainError is_vector(
             M,
             B_skewsym,
-            1 * im * zero_vector(M, B_skewsym),
-            true,
+            1 * im * zero_vector(M, B_skewsym);
+            error=:error,
         )
         @test manifold_dimension(M) == 3
         @test manifold_dimension(M_complex) == 9
@@ -102,4 +101,11 @@ end
             )
         end # testset type $T
     end # for
+    @testset "field parameter" begin
+        M = SkewHermitianMatrices(3, ℝ; parameter=:field)
+        Mc = SkewHermitianMatrices(3, ℂ; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test repr(M) == "SkewSymmetricMatrices(3; parameter=:field)"
+        @test repr(Mc) == "SkewHermitianMatrices(3, ℂ; parameter=:field)"
+    end
 end # test SymmetricMatrices

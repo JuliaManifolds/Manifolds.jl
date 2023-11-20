@@ -178,6 +178,7 @@
         include_test("manifolds/product_manifold.jl")
         include_test("manifolds/power_manifold.jl")
         include_test("manifolds/quotient_manifold.jl")
+        include_test("manifolds/fiber_bundle.jl")
         include_test("manifolds/vector_bundle.jl")
         include_test("manifolds/graph.jl")
 
@@ -210,6 +211,7 @@
         include_test("groups/group_operation_action.jl")
         include_test("groups/rotation_action.jl")
         include_test("groups/translation_action.jl")
+        include_test("groups/rotation_translation_action.jl")
         include_test("groups/connections.jl")
         include_test("groups/metric.jl")
     end

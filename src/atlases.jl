@@ -352,7 +352,8 @@ end
 The basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
 space of type `vs`.
 
-For the `vs` a [`TangentSpace`](@ref) this works as  follows:
+For the `vs` a [`TangentSpace`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.TangentSpace)
+this works as  follows:
 
 Let ``n`` denote the dimension of the manifold ``\mathcal M``.
 
@@ -380,7 +381,7 @@ struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractB
 end
 
 """
-    induced_basis(::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType = TangentSpace)
+    induced_basis(::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType = TangentSpaceType())
 
 Get the basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
 space of type `vs`. Returns an object of type [`InducedBasis`](@ref).
@@ -393,7 +394,7 @@ function induced_basis(
     ::AbstractManifold{𝔽},
     A::AbstractAtlas,
     i,
-    VST::VectorSpaceType=TangentSpace,
+    VST::VectorSpaceType=TangentSpaceType(),
 ) where {𝔽}
     return InducedBasis{𝔽,typeof(VST),typeof(A),typeof(i)}(VST, A, i)
 end
@@ -410,14 +411,14 @@ function dual_basis(
     ::Any,
     B::InducedBasis{𝔽,TangentSpaceType},
 ) where {𝔽}
-    return induced_basis(M, B.A, B.i, CotangentSpace)
+    return induced_basis(M, B.A, B.i, CotangentSpaceType())
 end
 function dual_basis(
     M::AbstractManifold{𝔽},
     ::Any,
     B::InducedBasis{𝔽,CotangentSpaceType},
 ) where {𝔽}
-    return induced_basis(M, B.A, B.i, TangentSpace)
+    return induced_basis(M, B.A, B.i, TangentSpaceType())
 end
 
 function ManifoldsBase._get_coordinates(M::AbstractManifold, p, X, B::InducedBasis)

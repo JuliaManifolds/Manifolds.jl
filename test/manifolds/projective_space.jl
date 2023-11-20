@@ -11,10 +11,15 @@ include("../utils.jl")
             @test is_flat(ProjectiveSpace(1))
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0])
-            @test_throws DomainError is_point(M, [2.0, 0.0, 0.0], true)
+            @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error=:error)
             @test !is_point(M, [2.0, 0.0, 0.0])
             @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-            @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], true)
+            @test_throws DomainError is_vector(
+                M,
+                [1.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0];
+                error=:error,
+            )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, [1.0, 0.0, 0.0]) == π / 2
@@ -108,21 +113,21 @@ include("../utils.jl")
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
             @test !is_point(M, [1.0 + 0im, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0, 0.0], [0.0 + 0im, 1.0, 0.0])
-            @test_throws DomainError is_point(M, [1.0, im, 0.0], true)
+            @test_throws DomainError is_point(M, [1.0, im, 0.0]; error=:error)
             @test !is_point(M, [1.0, im, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0], [1.0 + 0im, 0.0, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0], [-0.5im, 0.0, 0.0])
             @test_throws DomainError is_vector(
                 M,
                 [1.0 + 0im, 0.0, 0.0],
-                [1.0 + 0im, 0.0, 0.0],
-                true,
+                [1.0 + 0im, 0.0, 0.0];
+                error=:error,
             )
             @test_throws DomainError is_vector(
                 M,
                 [1.0 + 0im, 0.0, 0.0],
-                [-0.5im, 0.0, 0.0],
-                true,
+                [-0.5im, 0.0, 0.0];
+                error=:error,
             )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
@@ -198,21 +203,21 @@ include("../utils.jl")
             @test !is_flat(M)
             @test !is_point(M, quat([1.0, 0.0, 0.0, 0.0]))
             @test !is_vector(M, quat([1.0, 0.0, 0.0, 0.0]), quat([0.0, 1.0, 0.0]))
-            @test_throws DomainError is_point(M, [1.0, quat(0, 1, 0, 0), 0.0], true)
+            @test_throws DomainError is_point(M, [1.0, quat(0, 1, 0, 0), 0.0]; error=:error)
             @test !is_point(M, [1.0, quat(0, 1, 0, 0), 0.0])
             @test !is_vector(M, quat([1.0, 0.0, 0.0]), quat([1.0, 0.0, 0.0]))
             @test !is_vector(M, quat([1.0, 0.0, 0.0]), [quat(0, -0.5, 0, 0), 0.0, 0.0])
             @test_throws DomainError is_vector(
                 M,
                 Quaternion[1.0, 0.0, 0.0],
-                Quaternion[1.0, 0.0, 0.0],
-                true,
+                Quaternion[1.0, 0.0, 0.0];
+                error=:error,
             )
             @test_throws DomainError is_vector(
                 M,
                 quat([1.0, 0.0, 0.0]),
-                quat([-0.5, 0.0, 0.0]),
-                true,
+                quat([-0.5, 0.0, 0.0]);
+                error=:error,
             )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
@@ -289,8 +294,8 @@ include("../utils.jl")
     @testset "ArrayProjectiveSpace" begin
         M = ArrayProjectiveSpace(2, 2; field=ℝ)
         @test manifold_dimension(M) == 3
-        @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℝ)"
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℝ}
+        @test repr(M) == "ArrayProjectiveSpace(2, 2; field=ℝ)"
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2,2}},ℝ}
         @test representation_size(M) == (2, 2)
         p = ones(2, 2)
         q = project(M, p)
@@ -301,8 +306,8 @@ include("../utils.jl")
 
         M = ArrayProjectiveSpace(2, 2; field=ℂ)
         @test manifold_dimension(M) == 6
-        @test repr(M) == "ArrayProjectiveSpace(2, 2; field = ℂ)"
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{2,2},ℂ}
+        @test repr(M) == "ArrayProjectiveSpace(2, 2; field=ℂ)"
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2,2}},ℂ}
         @test representation_size(M) == (2, 2)
     end
 
@@ -330,5 +335,13 @@ include("../utils.jl")
         @test manifold_volume(ProjectiveSpace(1)) ≈ π
         @test manifold_volume(ProjectiveSpace(2)) ≈ 2 * π
         @test manifold_volume(ProjectiveSpace(3)) ≈ π * π
+    end
+
+    @testset "field parameter" begin
+        M = ProjectiveSpace(2; parameter=:field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int},ℝ}
+        @test repr(M) == "ProjectiveSpace(2, ℝ; parameter=:field)"
+        @test repr(ArrayProjectiveSpace(2, 3; parameter=:field)) ==
+              "ArrayProjectiveSpace(2, 3; field=ℝ, parameter=:field)"
     end
 end

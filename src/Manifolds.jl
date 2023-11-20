@@ -58,6 +58,7 @@ import ManifoldsBase:
     embed!,
     exp,
     exp!,
+    fiber_dimension,
     get_basis,
     get_basis_default,
     get_basis_diagonalizing,
@@ -99,7 +100,6 @@ import ManifoldsBase:
     is_vector,
     inverse_retract,
     inverse_retract!,
-    _inverse_retract,
     _inverse_retract!,
     inverse_retract_cayley!,
     inverse_retract_embedded!,
@@ -132,16 +132,22 @@ import ManifoldsBase:
     representation_size,
     retract,
     retract!,
+    _retract,
+    retract!,
     retract_cayley!,
     retract_exp_ode!,
     retract_pade!,
     retract_polar!,
     retract_project!,
     retract_qr!,
+    retract_sasaki!,
     retract_softmax!,
     riemann_tensor,
     riemann_tensor!,
     set_component!,
+    submanifold,
+    submanifold_component,
+    submanifold_components,
     vector_space_dimension,
     vector_transport_along, # just specified in Euclidean - the next 5 as well
     vector_transport_along_diff,
@@ -168,9 +174,7 @@ import ManifoldsBase:
     Weingarten,
     Weingarten!,
     zero_vector,
-    zero_vector!,
-    CotangentSpace,
-    TangentSpace
+    zero_vector!
 import ManifoldDiff:
     adjoint_Jacobi_field,
     adjoint_Jacobi_field!,
@@ -218,8 +222,10 @@ using ManifoldsBase:
     ComplexNumbers,
     ComponentManifoldError,
     CompositeManifoldError,
+    CotangentSpace,
     CotangentSpaceType,
     CoTFVector,
+    CoTVector,
     DefaultBasis,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
@@ -231,7 +237,10 @@ using ManifoldsBase:
     EmptyTrait,
     EuclideanMetric,
     ExponentialRetraction,
+    Fiber,
+    FiberType,
     FVector,
+    InverseProductRetraction,
     IsIsometricEmbeddedManifold,
     IsEmbeddedManifold,
     IsEmbeddedSubmanifold,
@@ -250,9 +259,15 @@ using ManifoldsBase:
     PolarInverseRetraction,
     PolarRetraction,
     PoleLadderTransport,
+    PowerBasisData,
     PowerManifold,
     PowerManifoldNested,
     PowerManifoldNestedReplacing,
+    ProductBasisData,
+    ProductManifold,
+    ProductMetric,
+    ProductRetraction,
+    ProductVectorTransport,
     ProjectedOrthonormalBasis,
     ProjectionInverseRetraction,
     ProjectionRetraction,
@@ -262,18 +277,23 @@ using ManifoldsBase:
     QRRetraction,
     RealNumbers,
     RiemannianMetric,
+    SasakiRetraction,
     ScaledVectorTransport,
     SchildsLadderTransport,
     ShootingInverseRetraction,
     SoftmaxRetraction,
     SoftmaxInverseRetraction,
+    TangentSpace,
     TangentSpaceType,
     TCoTSpaceType,
     TFVector,
     TVector,
+    TypeParameter,
+    ValidationCoTVector,
     ValidationManifold,
     ValidationMPoint,
     ValidationTVector,
+    VectorSpaceFiber,
     VectorSpaceType,
     VeeOrthogonalBasis,
     @invoke_maker,
@@ -281,15 +301,19 @@ using ManifoldsBase:
     combine_allocation_promotion_functions,
     geodesic,
     geodesic!,
+    get_parameter,
     merge_traits,
     next_trait,
+    number_of_components,
     number_system,
     real_dimension,
     rep_size_to_colons,
     shortest_geodesic,
     shortest_geodesic!,
     size_to_tuple,
-    trait
+    trait,
+    wrap_type_parameter,
+    ziptuples
 using ManifoldDiff: ManifoldDiff
 using ManifoldDiff:
     default_differential_backend,
@@ -340,6 +364,9 @@ include("manifold_fallbacks.jl")
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
 include("manifolds/QuotientManifold.jl")
+include("manifolds/Fiber.jl")
+include("manifolds/FiberBundle.jl")
+include("manifolds/VectorFiber.jl")
 include("manifolds/VectorBundle.jl")
 include("groups/group.jl")
 
@@ -358,7 +385,7 @@ METAMANIFOLDS = [
     PowerManifoldNested,
     PowerManifoldNestedReplacing,
     ProductManifold,
-    TangentSpaceAtPoint,
+    TangentSpace,
     ValidationManifold,
     VectorBundle,
 ]
@@ -469,6 +496,8 @@ include("groups/rotation_action.jl")
 
 include("groups/special_euclidean.jl")
 
+include("groups/rotation_translation_action.jl")
+
 # final utilities
 include("trait_recursion_breaking.jl")
 include("utils/features.jl")
@@ -483,14 +512,15 @@ This method employs [`is_point`](https://juliamanifolds.github.io/ManifoldsBase.
 Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
 @doc raw"""
-    Base.in(p, TpM::TangentSpaceAtPoint; kwargs...)
-    X ∈ TangentSpaceAtPoint(M,p)
+    Base.in(p, TpM::TangentSpace; kwargs...)
+    X ∈ TangentSpace(M, p)
 
 Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpaceAtPoint`](@ref) at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+the [`TangentSpace`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.TangentSpace)
+at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
 This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.
 """
-function Base.in(X, TpM::TangentSpaceAtPoint; kwargs...)
+function Base.in(X, TpM::TangentSpace; kwargs...)
     return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
 end
 
@@ -652,8 +682,7 @@ export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
 export IsDefaultMetric, IsDefaultConnection, IsMetricManifold, IsConnectionManifold
 export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
-export CotangentBundle,
-    CotangentSpaceAtPoint, CotangentBundleFibers, CotangentSpace, FVector
+export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector
 export AbstractPowerManifold,
     AbstractPowerRepresentation,
     ArrayPowerRepresentation,
@@ -663,16 +692,14 @@ export AbstractPowerManifold,
     QuotientManifold
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
-export ProductRepr, ArrayPartition
-export ProjectedPointDistribution, TangentBundle, TangentBundleFibers
-export TangentSpace, TangentSpaceAtPoint, VectorSpaceAtPoint, VectorSpaceType, VectorBundle
-export VectorBundleFibers
+export ArrayPartition
+export ProjectedPointDistribution, TangentBundle
+export TangentSpace, VectorSpaceFiber, VectorSpaceType, VectorBundle
 export AbstractVectorTransportMethod,
     DifferentiatedRetractionVectorTransport, ParallelTransport, ProjectedPointDistribution
 export PoleLadderTransport, SchildsLadderTransport
 export ProductVectorTransport
-export AbstractAffineConnection,
-    AbstractConnectionManifold, ConnectionManifold, LeviCivitaConnection
+export AbstractAffineConnection, ConnectionManifold, LeviCivitaConnection
 export AbstractCartanSchoutenConnection,
     CartanSchoutenMinus, CartanSchoutenPlus, CartanSchoutenZero
 export MetricManifold
@@ -706,9 +733,9 @@ export AbstractRetractionMethod,
     ProjectionRetraction,
     SoftmaxRetraction,
     ODEExponentialRetraction,
+    OrthographicRetraction,
     PadeRetraction,
     ProductRetraction,
-    PowerRetraction,
     SasakiRetraction
 # Inverse Retraction types
 export AbstractInverseRetractionMethod,
@@ -717,6 +744,7 @@ export AbstractInverseRetractionMethod,
     CayleyInverseRetraction,
     LogarithmicInverseRetraction,
     QRInverseRetraction,
+    OrthographicInverseRetraction,
     PolarInverseRetraction,
     ProjectionInverseRetraction,
     ShootingInverseRetraction,
@@ -740,6 +768,7 @@ export CachedBasis,
 export ComponentManifoldError, CompositeManifoldError
 # Functions on Manifolds
 export ×,
+    action_side,
     allocate,
     allocate_result,
     base_manifold,
@@ -772,7 +801,6 @@ export ×,
     einstein_tensor,
     embed,
     embed!,
-    equiv,
     exp,
     exp!,
     flat,
@@ -785,8 +813,6 @@ export ×,
     get_embedding,
     get_orbit_action,
     get_total_space,
-    grad_euclidean_to_manifold,
-    grad_euclidean_to_manifold!,
     hat,
     hat!,
     horizontal_component,
@@ -832,6 +858,7 @@ export ×,
     norm,
     normal_tvector_distribution,
     number_eltype,
+    number_of_coordinates,
     one,
     power_dimensions,
     parallel_transport_along,
@@ -898,11 +925,9 @@ export AbstractGroupAction,
     GroupManifold,
     GroupOperationAction,
     Identity,
-    InvariantMetric,
     LeftAction,
-    LeftBackwardAction,
-    LeftForwardAction,
     LeftInvariantMetric,
+    LeftSide,
     MultiplicationOperation,
     Orthogonal,
     PowerGroup,
@@ -910,10 +935,11 @@ export AbstractGroupAction,
     ProductOperation,
     RealCircleGroup,
     RightAction,
-    RightBackwardAction,
-    RightForwardAction,
     RightInvariantMetric,
+    RightSide,
     RotationAction,
+    RotationTranslationAction,
+    RotationTranslationActionOnVector,
     SemidirectProductGroup,
     SpecialEuclidean,
     SpecialLinear,
@@ -930,6 +956,8 @@ export adjoint_action,
     adjoint_action!,
     adjoint_apply_diff_group,
     adjoint_apply_diff_group!,
+    adjoint_inv_diff,
+    adjoint_inv_diff!,
     affine_matrix,
     apply,
     apply!,
@@ -943,6 +971,7 @@ export adjoint_action,
     compose,
     compose!,
     direction,
+    direction_and_side,
     exp_lie,
     exp_lie!,
     group_manifold,
@@ -965,6 +994,8 @@ export adjoint_action,
     identity_element!,
     inv,
     inv!,
+    inv_diff,
+    inv_diff!,
     inverse_apply,
     inverse_apply!,
     inverse_apply_diff,
@@ -981,6 +1012,7 @@ export adjoint_action,
     optimal_alignment!,
     screw_matrix,
     switch_direction,
+    switch_side,
     translate,
     translate!,
     translate_diff,

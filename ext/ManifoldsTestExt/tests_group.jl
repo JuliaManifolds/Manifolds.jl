@@ -1,17 +1,92 @@
 using Base: IdentityUnitRange
+
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
+
+translate_diff_id(G, q, X, conv) = translate_diff(G, q, identity_element(G), X, conv)
+
+"""
+    _move(G::AbstractManifold, q, X, ::LeftSide)
+
+The left translation ``τ_L(g, X) = gX``.
+"""
+_move(G::AbstractManifold, q, X, ::LeftSide) =
+    translate_diff_id(G, q, X, (LeftAction(), LeftSide()))
+"""
+    _move(G::AbstractManifold, q, X, ::RightSide)
+
+The right translation ``τ_R(g, X) = Xg``.
+"""
+_move(G::AbstractManifold, q, X, ::RightSide) =
+    translate_diff_id(G, q, X, (RightAction(), RightSide()))
+
+"""
+    test_inv_diff_fn(G::AbstractManifold, q, X, conv)
+
+Test the differential of the inverse on a Lie group.
+Denote this inverse by ``I(g) := g^{-1}``.
+If the left and right transports are ``τ_L(g,X) := gX``
+and ``τ_R(g,X) := Xg`` respectively, then
+```math
+⟨DI(g), τ_L(g,X)⟩ = -τ_R(g^{-1}, X)
+```
+and
+``` math
+⟨DI(g), τ_R(g,X)⟩ = -τ_L(g^{-1}, X)
+```
+"""
+function test_inv_diff_fn(G::AbstractManifold, q, X, conv)
+    q_ = inv(G, q)
+    Test.@test isapprox(
+        TangentSpace(G, q_),
+        inv_diff(G, q, _move(G, q, X, conv)),
+        -_move(G, q_, X, switch_side(conv)),
+    )
+end
+
+_get_side(::LeftAction) = RightSide()
+_get_side(::RightAction) = LeftSide()
+
+_transporter(G::AbstractManifold, q, X, dir) = _move(G, q, X, _get_side(dir))
+
+@doc raw"""
+    test_apply_diff_group_fn(A::AbstractGroupAction{TAD}, q, X, p) where {TAD}
+
+This should hold for *any* group action ``A`` on any manifold.
+If you define ``π_p(g) := A(g, p)`` for ``g ∈ \mathcal G`` and ``p ∈ \mathcal M``,
+and define, for ``X in Alg(G)``,
+    ``τ_R(g, X) := Xg`` (the right translation),
+and ``τ_L(g, X) := gX`` (the left translation), then we have the identity:
+```math
+⟨Dπ_{q}(g), τ(g, X)⟩ = ⟨Dπ_{A(g, q)}(1), X⟩
+```
+where, for a *left* action, ``τ`` is the *right* translation,
+and for a *right* action, ``τ`` is the *left* translation.
+"""
+function test_apply_diff_group_fn(A::AbstractGroupAction{TAD}, q, X, p) where {TAD}
+    G = base_group(A)
+    p_ = apply(A, q, p)
+    X1 = apply_diff_group(A, q, _transporter(G, q, X, TAD()), p)
+    X2 = apply_diff_group(A, identity_element(G), X, p_)
+    Test.@test isapprox(TangentSpace(G, p_), X1, X2)
+end
+
 """
     test_group(
         G,
         g_pts::AbstractVector,
-        X_pts::AbstractVector = [],
-        Xe_pts::AbstractVector = [];
-        atol = 1e-10,
-        test_mutating = true,
-        test_exp_lie_log = true,
-        test_diff = false,
-        test_invariance = false,
-        test_lie_bracket=false,
-        test_adjoint_action=false,
+        X_pts::AbstractVector=[],
+        Xe_pts::AbstractVector=[];
+        atol::Real=1e-10,
+        test_mutating::Bool=true,
+        test_exp_lie_log::Bool=true,
+        test_diff::Bool=false,
+        test_invariance::Bool=false,
+        test_lie_bracket::Bool=false,
+        test_adjoint_action::Bool=false,
+        test_inv_diff::Bool=false,
+        test_adjoint_inv_diff::Bool=false,
+        test_apply_diff_group::Bool=false,
         diff_convs = [(), (LeftForwardAction(),), (RightBackwardAction(),)],
     )
 
@@ -29,18 +104,21 @@ function test_group(
     g_pts::AbstractVector,
     X_pts::AbstractVector=[],
     Xe_pts::AbstractVector=[];
-    atol=1e-10,
-    test_mutating=true,
-    test_exp_lie_log=true,
-    test_one_arg_identity_element=true,
-    test_diff=false,
-    test_invariance=false,
-    test_lie_bracket=false,
-    test_adjoint_action=false,
+    atol::Real=1e-10,
+    test_mutating::Bool=true,
+    test_exp_lie_log::Bool=true,
+    test_one_arg_identity_element::Bool=true,
+    test_diff::Bool=false,
+    test_invariance::Bool=false,
+    test_lie_bracket::Bool=false,
+    test_adjoint_action::Bool=false,
+    test_inv_diff::Bool=false,
+    test_adjoint_inv_diff::Bool=false,
     diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
-    test_log_from_identity=false,
-    test_exp_from_identity=false,
-    test_vee_hat_from_identity=false,
+    test_log_from_identity::Bool=false,
+    test_exp_from_identity::Bool=false,
+    test_vee_hat_from_identity::Bool=false,
+    test_apply_diff_group::Bool=false,
 )
     e = Identity(G)
 
@@ -296,6 +374,21 @@ function test_group(
         end
     end
 
+    test_inv_diff && Test.@testset "Differential of inverse" begin # COV_EXCL_LINE
+        Test.@test isapprox(inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
+        Test.@testset "test_inv_diff" for side in [LeftSide(), RightSide()]
+            test_inv_diff_fn(G, g_pts[1], X_pts[1], side)
+        end # COV_EXCL_LINE
+    end
+    test_adjoint_inv_diff && Test.@testset "Differential of inverse" begin # COV_EXCL_LINE
+        Test.@test isapprox(adjoint_inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
+        Test.@test isapprox(
+            adjoint_inv_diff(G, g_pts[1], inv_diff(G, g_pts[1], X_pts[1])),
+            X_pts[1];
+            atol=atol,
+        )
+    end
+
     test_exp_lie_log && Test.@testset "group exp/log properties" begin
         Test.@testset "e = exp(0)" begin
             X = log_lie(G, Identity(G))
@@ -313,7 +406,7 @@ function test_group(
             end
         end
 
-        Test.@testset "X = log(exp(X))" begin
+        Test.@testset "X = log(exp(X))" begin # COV_EXCL_LINE
             for X in Xe_pts
                 g = exp_lie(G, X)
                 Test.@test is_point(G, g; atol=atol)
@@ -513,6 +606,19 @@ function test_group(
         end
     end
 
+    test_apply_diff_group && Test.@testset "apply_diff_group" begin
+        Test.@testset "$dir, $side" for side in [LeftSide(), RightSide()],
+            dir in [LeftAction(), RightAction()]
+
+            test_apply_diff_group_fn(
+                GroupOperationAction(G, (dir, side)),
+                g_pts[1],
+                X_pts[1],
+                g_pts[2],
+            )
+        end # COV_EXCL_LINE
+    end
+
     return nothing
 end
 
@@ -552,18 +658,18 @@ function test_action(
     test_mutating_group=true,
     test_mutating_action=true,
     test_diff=false,
-    test_switch_direction=Manifolds.LeftRightSwitch(),
+    test_switch_direction=true,
 )
     G = base_group(A)
     M = group_manifold(A)
     e = Identity(G)
 
     Test.@testset "Basic action properties" begin # COV_EXCL_LINE
-        test_switch_direction !== false && Test.@testset "Direction" begin
+        test_switch_direction && Test.@testset "Direction" begin
             Aswitch = switch_direction(A)
 
             Test.@test direction(A) === _direction_from_type(A)
-            sd = switch_direction(_direction_from_type(A), test_switch_direction)
+            sd = switch_direction(_direction_from_type(A))
             Test.@test isa(Aswitch, AbstractGroupAction{typeof(sd)})
             Test.@test direction(Aswitch) === sd
         end
@@ -706,15 +812,6 @@ function test_action(
                 Test.@test is_vector(M, am, aX, true; atol=atol)
                 Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
             end
-
-            a12 = compose(A, a_pts[1], a_pts[2])
-            a2m = apply(A, a_pts[2], m)
-            a12X = apply_diff(A, a12, m, X)
-            a2X = apply_diff(A, a_pts[2], m, X)
-            Test.@test isapprox(M, a2m, apply_diff(A, a_pts[1], a2m, a2X), a12X; atol=atol)
-
-            Test.@test isapprox(M, m, apply_diff(A, e, m, X), X; atol=atol)
-            Test.@test isapprox(M, m, inverse_apply_diff(A, e, m, X), X; atol=atol)
         end
 
         test_mutating_action && Test.@testset "mutating" begin
@@ -729,22 +826,6 @@ function test_action(
                     Test.@test is_vector(M, am, aX, true; atol=atol)
                     Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
                 end
-
-                a12 = compose(A, a_pts[1], a_pts[2])
-                a2m = apply(A, a_pts[2], m)
-                a12m = apply(A, a12, m)
-                a12X, a2X, a1_a2X = allocate(X), allocate(X), allocate(X)
-                Test.@test apply_diff!(A, a12X, a12, m, X) === a12X
-                Test.@test apply_diff!(A, a2X, a_pts[2], m, X) === a2X
-                Test.@test apply_diff!(A, a1_a2X, a_pts[1], a2m, a2X) === a1_a2X
-                Test.@test isapprox(M, a12m, a1_a2X, a12X; atol=atol)
-
-                eX = allocate(X)
-                Test.@test apply_diff!(A, eX, e, m, X) === eX
-                Test.@test isapprox(G, m, eX, X; atol=atol)
-                eX = allocate(X)
-                Test.@test inverse_apply_diff!(A, eX, e, m, X) === eX
-                Test.@test isapprox(G, m, eX, X; atol=atol)
             end
         end
     end

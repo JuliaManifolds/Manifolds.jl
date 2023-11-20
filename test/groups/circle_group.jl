@@ -1,9 +1,8 @@
 include("../utils.jl")
 include("group_utils.jl")
 
-# TODO: remove after bug in StaticArray is fixed
-@inline Base.copy(a::SizedArray) = __copy(a)
-@inline __copy(a::SizedArray{S,T}) where {S,T} = SizedArray{S,T}(copy(a.data))
+using Manifolds:
+    LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
 
 @testset "Circle group" begin
     G = CircleGroup()
@@ -28,8 +27,8 @@ include("group_utils.jl")
         @test identity_element(G, fill(1.0f0)) == fill(1.0f0)
         @test !is_point(G, Identity(AdditionOperation()))
         ef = Identity(AdditionOperation())
-        @test_throws DomainError is_point(G, ef, true)
-        @test_throws DomainError is_vector(G, ef, X, true; check_base_point=true)
+        @test_throws DomainError is_point(G, ef; error=:error)
+        @test_throws DomainError is_vector(G, ef, X, true; error=:error)
     end
 
     @testset "scalar points" begin
@@ -47,6 +46,8 @@ include("group_utils.jl")
             test_invariance=true,
             test_lie_bracket=true,
             test_adjoint_action=true,
+            test_inv_diff=true,
+            test_adjoint_inv_diff=true,
         )
     end
 
@@ -66,6 +67,8 @@ include("group_utils.jl")
             test_invariance=true,
             test_lie_bracket=true,
             test_adjoint_action=true,
+            test_inv_diff=true,
+            test_adjoint_inv_diff=true,
         )
     end
 
@@ -167,4 +170,7 @@ end
 
     # issue #489
     @test vee(G, [0.0], [1.5]) isa Vector
+
+    # basis
+    @test number_of_coordinates(G, DefaultOrthonormalBasis()) == 1
 end

@@ -153,15 +153,9 @@ function test_manifold(
             ) for i in 1:n
         ]
     end
-    Test.@testset "dimension" begin
+    Test.@testset "dimension" begin # COV_EXCL_LINE
         Test.@test isa(manifold_dimension(M), expected_dimension_type)
         Test.@test manifold_dimension(M) ≥ 0
-        Test.@test manifold_dimension(M) == vector_space_dimension(
-            Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M),
-        )
-        Test.@test manifold_dimension(M) == vector_space_dimension(
-            Manifolds.VectorBundleFibers(Manifolds.CotangentSpace, M),
-        )
     end
 
     test_representation_size && Test.@testset "representation" begin
@@ -174,9 +168,6 @@ function test_manifold(
         end
 
         test_repr(Manifolds.representation_size(M))
-        for fiber in (Manifolds.TangentSpace, Manifolds.CotangentSpace)
-            test_repr(Manifolds.representation_size(Manifolds.VectorBundleFibers(fiber, M)))
-        end
     end
 
     test_injectivity_radius && Test.@testset "injectivity radius" begin
@@ -189,7 +180,7 @@ function test_manifold(
         end
     end
 
-    Test.@testset "is_point" begin
+    Test.@testset "is_point" begin # COV_EXCL_LINE
         for pt in pts
             atol = is_point_atol_multiplier * find_eps(pt)
             Test.@test is_point(M, pt; atol=atol)
@@ -312,7 +303,7 @@ function test_manifold(
         mutating=is_mutating,
     )
 
-    Test.@testset "(inverse &) retraction tests" begin
+    Test.@testset "(inverse &) retraction tests" begin # COV_EXCL_LINE
         for (p, X) in zip(pts, tv)
             epsx = find_eps(p)
             point_atol = is_point_atol_multiplier * find_eps(p)
@@ -334,7 +325,7 @@ function test_manifold(
                 end
                 Test.@test is_point(M, new_pt; atol=point_atol)
                 (test_inplace && is_mutating) &&
-                    Test.@testset "inplace test for retract!" begin
+                    Test.@testset "inplace test for retract!" begin # COV_EXCL_LINE
                         p2 = copy(M, p)
                         X2 = copy(M, p, X)
                         q = retract(M, p2, X2, retr_method)
@@ -342,26 +333,41 @@ function test_manifold(
                         Test.@test isapprox(M, p2, q; atol=point_atol)
                         # This test is not reasonable for `inverse_retract!(M, X, p, q, m)`,
                         # since X is of different type/concept than p,q
+
                     end
             end
         end
         for p in pts
             epsx = find_eps(p)
             for inv_retr_method in inverse_retraction_methods
+                X = inverse_retract(M, p, p, inv_retr_method)
                 Test.@test isapprox(
                     M,
                     p,
                     zero_vector(M, p),
-                    inverse_retract(M, p, p, inv_retr_method);
+                    X;
                     atol=epsx * retraction_atol_multiplier,
                     rtol=retraction_atol_multiplier == 0 ?
                          sqrt(epsx) * retraction_rtol_multiplier : 0,
                 )
+                if (test_inplace && is_mutating)
+                    Y = copy(M, p, X)
+                    inverse_retract!(M, Y, p, p, inv_retr_method)
+                    Test.@test isapprox(
+                        M,
+                        p,
+                        zero_vector(M, p),
+                        Y;
+                        atol=epsx * retraction_atol_multiplier,
+                        rtol=retraction_atol_multiplier == 0 ?
+                             sqrt(epsx) * retraction_rtol_multiplier : 0,
+                    )
+                end
             end
         end
     end
 
-    Test.@testset "atlases" begin
+    Test.@testset "atlases" begin # COV_EXCL_LINE
         if !isempty(test_atlases)
             Test.@test get_default_atlas(M) isa AbstractAtlas{ℝ}
         end
@@ -396,16 +402,16 @@ function test_manifold(
     test_vector_spaces && Test.@testset "vector spaces tests" begin
         for p in pts
             X = zero_vector(M, p)
-            mts = Manifolds.VectorBundleFibers(Manifolds.TangentSpace, M)
-            Test.@test isapprox(M, p, X, zero_vector(mts, p))
+            mts = TangentSpace(M, p)
+            Test.@test isapprox(M, p, X, zero_vector(mts, X))
             if is_mutating
-                zero_vector!(mts, X, p)
+                zero_vector!(mts, X, X)
                 Test.@test isapprox(M, p, X, zero_vector(M, p))
             end
         end
     end
 
-    Test.@testset "basic linear algebra in tangent space" begin
+    Test.@testset "basic linear algebra in tangent space" begin # COV_EXCL_LINE
         for (p, X) in zip(pts, tv)
             Test.@test isapprox(M, p, 0 * X, zero_vector(M, p); atol=find_eps(pts[1]))
             Test.@test isapprox(M, p, 2 * X, X + X)
@@ -415,7 +421,7 @@ function test_manifold(
     end
 
     test_tangent_vector_broadcasting &&
-        Test.@testset "broadcasted linear algebra in tangent space" begin
+        Test.@testset "broadcasted linear algebra in tangent space" begin # COV_EXCL_LINE
             for (p, X) in zip(pts, tv)
                 Test.@test isapprox(M, p, 3 * X, 2 .* X .+ X)
                 Test.@test isapprox(M, p, -X, X .- 2 .* X)
@@ -463,7 +469,7 @@ function test_manifold(
     !(
         default_retraction_method === nothing ||
         default_inverse_retraction_method === nothing
-    ) && Test.@testset "vector transport" begin
+    ) && Test.@testset "vector transport" begin # COV_EXCL_LINE
         tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
         X1 = inverse_retract(M, pts[1], pts[2], default_inverse_retraction_method)
         X2 = inverse_retract(M, pts[1], pts[3], default_inverse_retraction_method)
@@ -493,7 +499,7 @@ function test_manifold(
             vector_transport_retractions,
             vector_transport_inverse_retractions,
         )
-            Test.@testset "vector transport method $(vtm)" begin
+            Test.@testset "vector transport method $(vtm)" begin # COV_EXCL_LINE
                 tvatol = is_tangent_atol_multiplier * find_eps(pts[1])
                 X1 = inverse_retract(M, pts[1], pts[2], irtr_m)
                 X2 = inverse_retract(M, pts[1], pts[3], irtr_m)
@@ -525,7 +531,7 @@ function test_manifold(
                         vector_transport_to!(M, v1t1_m, pts[1], X1, pts32, vtm)
                         Test.@test isapprox(M, pts32, v1t1, v1t1_m; atol=tvatol)
                         test_inplace &&
-                            Test.@testset "inplace test for vector_transport_to!" begin
+                            Test.@testset "inplace test for vector_transport_to!" begin # COV_EXCL_LINE
                                 X1a = copy(M, pts[1], X1)
                                 Xt = vector_transport_to(M, pts[1], X1, pts32, vtm)
                                 vector_transport_to!(M, X1a, pts[1], X1a, pts32, vtm)
@@ -553,7 +559,7 @@ function test_manifold(
     end
 
     for btype in basis_types_vecs
-        Test.@testset "Basis support for $(btype)" begin
+        Test.@testset "Basis support for $(btype)" begin # COV_EXCL_LINE
             p = pts[1]
             b = get_basis(M, p, btype)
             Test.@test isa(b, CachedBasis)
@@ -643,7 +649,10 @@ function test_manifold(
         q = pts[2]
         X = inverse_retract(M, p, q, default_inverse_retraction_method)
         Y = vee(M, p, X)
-        Test.@test length(Y) == number_of_coordinates(M, ManifoldsBase.VeeOrthogonalBasis())
+        Test.@test length(Y) == number_of_coordinates(
+            M,
+            ManifoldsBase.VeeOrthogonalBasis(number_system(M)),
+        )
         Test.@test isapprox(M, p, X, hat(M, p, Y))
         Y2 = allocate(Y)
         vee_ret = vee!(M, Y2, p, X)
@@ -707,7 +716,7 @@ function test_manifold(
         end
     end
 
-    Test.@testset "number_eltype" begin
+    Test.@testset "number_eltype" begin # COV_EXCL_LINE
         for (p, X) in zip(pts, tv)
             Test.@test number_eltype(X) == number_eltype(p)
             p = retract(M, p, X, default_retraction_method)
@@ -759,12 +768,12 @@ function test_manifold(
     test_rand_point && Test.@testset "Base.rand point generation" begin
         rng_a = MersenneTwister(123)
         rng_b = MersenneTwister(123)
-        Test.@test is_point(M, rand(M), true)
+        Test.@test is_point(M, rand(M); error=:error)
         # ensure that the RNG source is actually used
         Test.@test rand(rng_a, M) == rand(rng_b, M)
         # generation of multiple points
-        Test.@test all(p -> is_point(M, p, true), rand(M, 3))
-        Test.@test all(p -> is_point(M, p, true), rand(rng_a, M, 3))
+        Test.@test all(p -> is_point(M, p; error=:error), rand(M, 3))
+        Test.@test all(p -> is_point(M, p; error=:error), rand(rng_a, M, 3))
 
         if test_inplace && is_mutating
             rng_a = MersenneTwister(123)
@@ -772,10 +781,10 @@ function test_manifold(
 
             p = allocate(pts[1])
             rand!(M, p)
-            Test.@test is_point(M, p, true)
+            Test.@test is_point(M, p; error=:error)
             p = allocate(pts[1])
             rand!(rng_a, M, p)
-            Test.@test is_point(M, p, true)
+            Test.@test is_point(M, p; error=:error)
             # ensure that the RNG source is actually used
             q = allocate(pts[1])
             rand!(rng_b, M, q)
@@ -808,7 +817,7 @@ function test_manifold(
             Test.@test is_vector(M, p, X, true; atol=atol)
             X = allocate(tv[1])
             rand!(rng_a, M, X; vector_at=p)
-            Test.@test is_point(M, p, true)
+            Test.@test is_point(M, p; error=:error)
             # ensure that the RNG source is actually used
             Y = allocate(tv[1])
             rand!(rng_b, M, Y; vector_at=p)
@@ -816,14 +825,15 @@ function test_manifold(
         end
     end
 
-    Test.@testset "tangent vector distributions" begin
+    Test.@testset "tangent vector distributions" begin # COV_EXCL_LINE
         for tvd in tvector_distributions
             supp = Manifolds.support(tvd)
-            Test.@test supp isa Manifolds.FVectorSupport{TangentBundleFibers{typeof(M)}}
+            Test.@test supp isa
+                       Manifolds.FVectorSupport{<:TangentSpace{number_system(M),typeof(M)}}
             for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * find_eps(randtv)
-                Test.@test is_vector(M, supp.point, randtv, true; atol=atol)
+                Test.@test is_vector(M, supp.space.point, randtv, true; atol=atol)
             end
         end
     end
@@ -857,9 +867,10 @@ function test_parallel_transport(
 )
     length(P) < 2 &&
         error("The Parallel Transport test set requires at least 2 points in P")
-    Test.@testset "Test Parallel Transport" begin
+    Test.@testset "Test Parallel Transport" begin # COV_EXCL_LINE
         along && @warn "parallel transport along test not yet implemented"
-        Test.@testset "To (a point)" begin # even with to =false this displays no tests
+        Test.@testset "To (a point)" begin # COV_EXCL_LINE
+            # even with to =false this displays no tests
             if to
                 for i in 1:(length(P) - 1)
                     p = P[i]
@@ -883,7 +894,7 @@ function test_parallel_transport(
                 end
             end
         end
-        Test.@testset "(Tangent Vector) Direction" begin
+        Test.@testset "(Tangent Vector) Direction" begin # COV_EXCL_LINE
             if direction
                 for i in 1:(length(P) - 1)
                     p = P[i]
@@ -897,7 +908,7 @@ function test_parallel_transport(
                         Test.@test isapprox(M, q, Y1, Y2)
                     end
                     # Test that Y is a tangent vector at q
-                    Test.@test is_vector(M, p, Y1, true)
+                    Test.@test is_vector(M, p, Y1; error=:error)
                 end
             end
         end

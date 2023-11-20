@@ -28,6 +28,20 @@ function adjoint_action!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Y, 
     return copyto!(G, Y, p, X)
 end
 
+"""
+    adjoint_inv_diff(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X)
+
+Compute the value of pullback of additive matrix inversion ``p ↦ -p`` at ``X``, i.e. ``-X``.
+"""
+function adjoint_inv_diff(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X)
+    return -X
+end
+function adjoint_inv_diff!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Y, p, X)
+    Y .= X
+    Y .*= -1
+    return Y
+end
+
 identity_element(::AdditionGroupTrait, G::AbstractDecoratorManifold, p::Number) = zero(p)
 
 function identity_element!(::AdditionGroupTrait, G::AbstractDecoratorManifold, p)
@@ -53,6 +67,20 @@ function inv!(
     e::Identity{AdditionOperation},
 )
     return q
+end
+
+"""
+    inv_diff(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X)
+
+Compute the value of differential of additive matrix inversion ``p ↦ -p`` at ``X``, i.e. ``-X``.
+"""
+function inv_diff(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X)
+    return -X
+end
+function inv_diff!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Y, p, X)
+    Y .= X
+    Y .*= -1
+    return Y
 end
 
 function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, q; kwargs...)
@@ -93,7 +121,7 @@ function inverse_translate_diff(
     p,
     q,
     X,
-    ::ActionDirection,
+    ::ActionDirectionAndSide,
 )
     return X
 end
@@ -105,7 +133,7 @@ function inverse_translate_diff!(
     p,
     q,
     X,
-    ::ActionDirection,
+    ::ActionDirectionAndSide,
 )
     return copyto!(G, Y, p, X)
 end
@@ -138,7 +166,7 @@ function translate_diff(
     p,
     q,
     X,
-    ::ActionDirection,
+    ::ActionDirectionAndSide,
 )
     return X
 end
@@ -150,7 +178,7 @@ function translate_diff!(
     p,
     q,
     X,
-    ::ActionDirection,
+    ::ActionDirectionAndSide,
 )
     return copyto!(G, Y, p, X)
 end
