@@ -64,12 +64,6 @@ Base.:^(M::AbstractManifold, n) = PowerManifold(M, n...)
 function allocate(::PowerManifoldNestedReplacing, x::AbstractArray{<:SArray})
     return similar(x)
 end
-function allocate(
-    ::PowerManifoldNestedReplacing,
-    x::AbstractArray{<:ArrayPartition{T,<:NTuple{N,SArray}}},
-) where {T,N}
-    return similar(x)
-end
 
 for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
     @eval begin

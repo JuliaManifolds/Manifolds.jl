@@ -10,7 +10,7 @@ if isdefined(Base, :get_extension)
         transition_map_diff!
     import Manifolds: solve_chart_exp_ode, solve_chart_parallel_transport_ode
     using ManifoldsBase
-
+    using RecursiveArrayTools: ArrayPartition
     using DiffEqCallbacks
     using OrdinaryDiffEq: OrdinaryDiffEq, SciMLBase, Rodas5, AutoVern9, ODEProblem, solve
 else
@@ -27,6 +27,7 @@ else
     using ..ManifoldsBase
 
     using ..DiffEqCallbacks
+    using ..RecursiveArrayTools: ArrayPartition
     using ..OrdinaryDiffEq: OrdinaryDiffEq, SciMLBase, Rodas5, AutoVern9, ODEProblem, solve
 end
 

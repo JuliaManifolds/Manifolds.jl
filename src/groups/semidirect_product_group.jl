@@ -46,19 +46,12 @@ function SemidirectProductGroup(
     return GroupManifold(M, op)
 end
 
-function allocate_result(G::SemidirectProductGroup, ::typeof(identity_element))
-    M = base_manifold(G)
-    N, H = M.manifolds
-    np = allocate_result(N, identity_element)
-    hp = allocate_result(H, identity_element)
-    return ArrayPartition(np, hp)
-end
 
 """
     identity_element(G::SemidirectProductGroup)
 
-Get the identity element of [`SemidirectProductGroup`](@ref) `G`. Uses `ArrayPartition`
-from `RecursiveArrayTools.jl` to represent the point.
+Get the identity element of [`SemidirectProductGroup`](@ref) `G`.
+Requires `ArrayPartition` from `RecursiveArrayTools.jl` to represent the point.
 """
 identity_element(G::SemidirectProductGroup)
 
@@ -246,23 +239,6 @@ function isapprox(
     kwargs...,
 ) where {𝔽,N<:AbstractManifold,H<:AbstractManifold,A<:AbstractGroupAction}
     return isapprox(G, identity_element(G), X, Y; kwargs...)
-end
-
-Base.@propagate_inbounds function Base.getindex(
-    p::ArrayPartition,
-    M::SemidirectProductGroup,
-    i::Union{Integer,Colon,AbstractVector,Val},
-)
-    return getindex(p, base_manifold(M), i)
-end
-
-Base.@propagate_inbounds function Base.setindex!(
-    q::ArrayPartition,
-    p,
-    M::SemidirectProductGroup,
-    i::Union{Integer,Colon,AbstractVector,Val},
-)
-    return setindex!(q, p, base_manifold(M), i)
 end
 
 function submanifold_components(

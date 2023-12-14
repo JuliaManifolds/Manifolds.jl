@@ -54,13 +54,11 @@ function switch_direction(A::RotationTranslationAction{TAD}) where {TAD<:ActionD
 end
 
 """
-    apply(::RotationTranslationActionOnVector{LeftAction}, a::ArrayPartition, p)
+    apply(::RotationTranslationActionOnVector{LeftAction}, a, p)
 
-Rotate point `p` by `a.x[2]` and translate it by `a.x[1]`.
+Rotate point `p` by the second compnent of `a` and translate its first.
 """
-function apply(::RotationTranslationActionOnVector{LeftAction}, a::ArrayPartition, p)
-    return a.x[2] * p + a.x[1]
-end
+apply(::RotationTranslationActionOnVector{LeftAction}, a, p)
 function apply(
     ::RotationTranslationActionOnVector{LeftAction},
     a::SpecialEuclideanIdentity,
@@ -69,13 +67,15 @@ function apply(
     return p
 end
 """
-    apply(::RotationTranslationActionOnVector{RightAction}, a::ArrayPartition, p)
+    apply(::RotationTranslationActionOnVector{RightAction}, a, p)
 
-Translate point `p` by `-a.x[1]` and rotate it by inverse of `a.x[2]`.
+Translate point `p` by minus à`s first component and rotate by the inverse of its second.
 """
-function apply(::RotationTranslationActionOnVector{RightAction}, a::ArrayPartition, p)
-    return a.x[2] \ (p - a.x[1])
-end
+apply(
+    ::RotationTranslationActionOnVector{RightAction},
+    a,
+    p,
+)
 function apply(
     ::RotationTranslationActionOnVector{RightAction},
     a::SpecialEuclideanIdentity,
@@ -84,11 +84,6 @@ function apply(
     return p
 end
 
-function apply!(::RotationTranslationActionOnVector{LeftAction}, q, a::ArrayPartition, p)
-    mul!(q, a.x[2], p)
-    q .+= a.x[1]
-    return q
-end
 function apply!(
     ::RotationTranslationActionOnVector{LeftAction},
     q,
@@ -100,49 +95,36 @@ function apply!(
 end
 
 """
-    inverse_apply(::RotationTranslationActionOnVector{LeftAction}, a::ArrayPartition, p)
+    inverse_apply(::RotationTranslationActionOnVector{LeftAction}, a, p)
 
-Translate point `p` by `-a.x[1]` and rotate it by inverse of `a.x[2]`.
+Translate point `p` by minus `a`s first component and rotate by the inverse of its second.
 """
-function inverse_apply(
-    ::RotationTranslationActionOnVector{LeftAction},
-    a::ArrayPartition,
-    p,
-)
-    return a.x[2] \ (p - a.x[1])
-end
-"""
-    inverse_apply(::RotationTranslationActionOnVector{RightAction}, a::ArrayPartition, p)
+inverse_apply(::RotationTranslationActionOnVector{LeftAction}, a, p)
 
-Rotate point `p` by `a.x[2]` and translate it by `a.x[1]`.
 """
-function inverse_apply(
-    ::RotationTranslationActionOnVector{RightAction},
-    a::ArrayPartition,
-    p,
-)
-    return a.x[2] * p + a.x[1]
-end
+    inverse_apply(::RotationTranslationActionOnVector{RightAction}, a, p)
+
+Rotate point `p` by the second compnent of `a` and translate its first.
+"""
+inverse_apply(::RotationTranslationActionOnVector{RightAction}, a, p)
 
 """
     apply_diff(
         ::RotationTranslationActionOnVector{LeftAction},
-        a::ArrayPartition,
+        a,
         p,
         X,
     )
 
-Compute differential of `apply` on left [`RotationTranslationActionOnVector`](@ref), 
-with respect to `p`, i.e. left-multiply vector `X` tangent at `p` by `a.x[2]`.
+Compute differential of `apply` on left [`RotationTranslationActionOnVector`](@ref),
+with respect to `p`, i.e. left-multiply vector `X` tangent at `p` by the second component of `a`.
 """
-function apply_diff(
+apply_diff(
     ::RotationTranslationActionOnVector{LeftAction},
-    a::ArrayPartition,
+    a,
     p,
     X,
 )
-    return a.x[2] * X
-end
 function apply_diff(
     ::RotationTranslationActionOnVector{LeftAction},
     ::SpecialEuclideanIdentity,
@@ -154,22 +136,20 @@ end
 """
     apply_diff(
         ::RotationTranslationActionOnVector{RightAction},
-        a::ArrayPartition,
+        a,
         p,
         X,
     )
 
-Compute differential of `apply` on right [`RotationTranslationActionOnVector`](@ref), 
-with respect to `p`, i.e. left-divide vector `X` tangent at `p` by `a.x[2]`.
+Compute differential of `apply` on right [`RotationTranslationActionOnVector`](@ref),
+with respect to `p`, i.e. left-divide vector `X` tangent at `p` by the second component of `a`.
 """
-function apply_diff(
+apply_diff(
     ::RotationTranslationActionOnVector{RightAction},
-    a::ArrayPartition,
+    a,
     p,
     X,
 )
-    return a.x[2] \ X
-end
 function apply_diff(
     ::RotationTranslationActionOnVector{RightAction},
     a::SpecialEuclideanIdentity,
@@ -177,17 +157,6 @@ function apply_diff(
     X,
 )
     return X
-end
-
-function apply_diff!(
-    ::RotationTranslationActionOnVector{LeftAction},
-    Y,
-    a::ArrayPartition,
-    p,
-    X,
-)
-    mul!(Y, a.x[2], X)
-    return Y
 end
 function apply_diff!(
     ::RotationTranslationActionOnVector{LeftAction},
@@ -197,16 +166,6 @@ function apply_diff!(
     X,
 )
     return copyto!(Y, X)
-end
-function apply_diff!(
-    ::RotationTranslationActionOnVector{RightAction},
-    Y,
-    a::ArrayPartition,
-    p,
-    X,
-)
-    Y .= a.x[2] \ X
-    return Y
 end
 function apply_diff!(
     ::RotationTranslationActionOnVector{RightAction},
@@ -226,7 +185,7 @@ end
         p,
     )
 
-Compute differential of `apply` on left [`RotationTranslationActionOnVector`](@ref), 
+Compute differential of `apply` on left [`RotationTranslationActionOnVector`](@ref),
 with respect to `a` at identity, i.e. left-multiply point `p` by `X.x[2]`.
 """
 function apply_diff_group(
@@ -237,37 +196,6 @@ function apply_diff_group(
 )
     return X.x[2] * p
 end
-
-function apply_diff_group!(
-    ::RotationTranslationActionOnVector{LeftAction},
-    Y,
-    ::SpecialEuclideanIdentity,
-    X::ArrayPartition,
-    p,
-)
-    Y .= X.x[2] * p
-    return Y
-end
-
-function inverse_apply_diff(
-    ::RotationTranslationActionOnVector{LeftAction},
-    a::ArrayPartition,
-    p,
-    X,
-)
-    return a.x[2] \ X
-end
-function inverse_apply_diff(
-    ::RotationTranslationActionOnVector{RightAction},
-    a::ArrayPartition,
-    p,
-    X,
-)
-    return a.x[2] * X
-end
-
-###
-
 @doc raw"""
     ColumnwiseSpecialEuclideanAction{
         TM<:AbstractManifold,
@@ -306,18 +234,10 @@ end
 const LeftColumnwiseSpecialEuclideanAction{TM<:AbstractManifold,TSE<:SpecialEuclidean} =
     ColumnwiseSpecialEuclideanAction{LeftAction,TM,TSE}
 
-function apply(::LeftColumnwiseSpecialEuclideanAction, a::ArrayPartition, p)
-    return a.x[2] * p .+ a.x[1]
-end
 function apply(::LeftColumnwiseSpecialEuclideanAction, ::SpecialEuclideanIdentity, p)
     return p
 end
 
-function apply!(::LeftColumnwiseSpecialEuclideanAction, q, a::ArrayPartition, p)
-    map((qrow, prow) -> mul!(qrow, a.x[2], prow), eachcol(q), eachcol(p))
-    q .+= a.x[1]
-    return q
-end
 function apply!(::LeftColumnwiseSpecialEuclideanAction, q, a::SpecialEuclideanIdentity, p)
     copyto!(q, p)
     return q
@@ -327,29 +247,10 @@ base_group(A::LeftColumnwiseSpecialEuclideanAction) = A.SE
 
 group_manifold(A::LeftColumnwiseSpecialEuclideanAction) = A.manifold
 
-function inverse_apply(::LeftColumnwiseSpecialEuclideanAction, a::ArrayPartition, p)
-    return a.x[2] \ (p .- a.x[1])
-end
-
 @doc raw"""
     optimal_alignment(A::LeftColumnwiseSpecialEuclideanAction, p, q)
 
 Compute optimal alignment of `p` to `q` under the forward left [`ColumnwiseSpecialEuclideanAction`](@ref).
 The algorithm, in sequence, computes optimal translation and optimal rotation.
 """
-function optimal_alignment(
-    A::LeftColumnwiseSpecialEuclideanAction{<:AbstractManifold,<:SpecialEuclidean},
-    p,
-    q,
-)
-    N = _get_parameter(A.SE)
-    tr_opt = mean(q; dims=1) - mean(p; dims=1)
-    p_moved = p .+ tr_opt
-
-    Ostar = optimal_alignment(
-        ColumnwiseMultiplicationAction(A.manifold, SpecialOrthogonal(N)),
-        p_moved,
-        q,
-    )
-    return ArrayPartition(tr_opt, Ostar)
-end
+optimal_alignment(A::LeftColumnwiseSpecialEuclideanAction{<:AbstractManifold,<:SpecialEuclidean}, p, q)
