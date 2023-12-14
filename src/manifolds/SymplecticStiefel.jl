@@ -148,16 +148,16 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 check_vector(::SymplecticStiefel, ::Any...)
 
 function check_vector(
-    M::SymplecticStiefel,
+    M::SymplecticStiefel{S,𝔽},
     p,
     X::T;
     atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-) where {T}
+) where {S,T,𝔽}
     n, k = get_parameter(M.size)
     # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
     H = inv(M, p) * X  # ∈ ℝ^{2k × 2k}, should be Hamiltonian.
-    H_star = inv(Symplectic(2k, field), H)
+    H_star = inv(Symplectic(2k, 𝔽), H)
     hamiltonian_identity_norm = norm(H + H_star)
 
     if !isapprox(hamiltonian_identity_norm, 0; atol=atol, kwargs...)
