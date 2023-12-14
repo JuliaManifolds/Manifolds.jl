@@ -41,8 +41,7 @@ if isdefined(Base, :get_extension)
         _vector_transport_direction,
         _vector_transport_to,
         vee,
-
-else
+        else
     # imports need to be relative for Requires.jl-based workflows:
     # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
     using ..Manifolds
@@ -77,13 +76,6 @@ else
         translate_diff,
         _vector_transport_direction,
         _vector_transport_to
-end
-
-function allocate(
-    ::PowerManifoldNestedReplacing,
-    x::AbstractArray{<:ArrayPartition{T,<:NTuple{N,SArray}}},
-) where {T,N}
-    return similar(x)
 end
 
 include("FiberBundleRATExt.jl")

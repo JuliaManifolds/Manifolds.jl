@@ -61,10 +61,6 @@ const PowerManifoldMultidimensional =
 
 Base.:^(M::AbstractManifold, n) = PowerManifold(M, n...)
 
-function allocate(::PowerManifoldNestedReplacing, x::AbstractArray{<:SArray})
-    return similar(x)
-end
-
 for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
     @eval begin
         function allocate_result(::$PowerRepr, ::typeof(get_point), a)

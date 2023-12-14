@@ -48,7 +48,6 @@ function get_vectors(
     return vs
 end
 
-
 """
     getindex(p::ArrayPartition, M::FiberBundle, s::Symbol)
     p[M::FiberBundle, s]

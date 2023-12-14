@@ -19,7 +19,6 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 SimpleWeightedGraphs = "47aef6b3-ad0c-573a-a1e2-d07658019622"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
-StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
@@ -31,14 +30,17 @@ NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [extensions]
 ManifoldsBoundaryValueDiffEqExt = "BoundaryValueDiffEq"
 ManifoldsNLsolveExt = "NLsolve"
 ManifoldsOrdinaryDiffEqDiffEqCallbacksRecursiveArrayToolsExt = ["DiffEqCallbacks", "OrdinaryDiffEq", "RecursiveArrayTools"]
-ManifoldsOrdinaryDiffEqExt = "OrdinaryDiffEq"
-ManifoldsRecursiveArrayToolsExt = ["RecursiveArrayTools"]
+ManifoldsOrdinaryDiffEqStaticArraysExt = ["OrdinaryDiffEq", "StaticArrays"]
+ManifoldsRecursiveArrayToolsExt = ["RecursiveArrayTools", "StaticArrays"]
+ManifoldsRecursiveArrayToolsStaticArraysExt = ["RecursiveArrayTools", "StaticArrays"]
+ManifoldsStaticArraysExt = ["StaticArrays"]
 ManifoldsRecipesBaseExt = ["Colors", "RecipesBase"]
 ManifoldsTestExt = "Test"
 
@@ -89,4 +91,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 VisualRegressionTests = "34922c18-7c2a-561c-bac1-01e79b2c4c92"
 
 [targets]
-test = ["Test", "BoundaryValueDiffEq", "Colors", "DiffEqCallbacks", "DoubleFloats", "FiniteDifferences", "Gtk", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "NLsolve", "Plots", "PythonPlot", "Quaternions", "QuartzImageIO", "RecipesBase"]
+test = ["Test", "BoundaryValueDiffEq", "Colors", "DiffEqCallbacks", "DoubleFloats", "FiniteDifferences", "Gtk", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "NLsolve", "Plots", "PythonPlot", "Quaternions", "QuartzImageIO", "RecipesBase", "StaticArrays"]

@@ -96,12 +96,6 @@ Compute the inner product of two (complex) numbers with in the complex plane.
 complex_dot(a, b) = dot(map(real, a), map(real, b)) + dot(map(imag, a), map(imag, b))
 complex_dot(a::Number, b::Number) = (real(a) * real(b) + imag(a) * imag(b))
 
-function diagonalizing_projectors(M::Circle{ℝ}, p, X)
-    sbv = sign(X[])
-    proj = ProjectorOntoVector(M, p, @SVector [sbv == 0 ? one(sbv) : sbv])
-    return ((zero(number_eltype(p)), proj),)
-end
-
 @doc raw"""
     distance(M::Circle, p, q)
 
@@ -172,13 +166,6 @@ function exp!(M::Circle{ℂ}, q, p, X, t::Number)
     return q
 end
 
-function get_basis_diagonalizing(::Circle{ℝ}, p, B::DiagonalizingOrthonormalBasis)
-    sbv = sign(B.frame_direction[])
-    vs = @SVector [@SVector [sbv == 0 ? one(sbv) : sbv]]
-    return CachedBasis(B, (@SVector [0]), vs)
-end
-
-get_coordinates_orthonormal(::Circle{ℝ}, p, X, ::RealNumbers) = @SVector [X[]]
 get_coordinates_orthonormal(::Circle{ℝ}, p, X::AbstractArray, ::RealNumbers) = copy(vec(X))
 get_coordinates_orthonormal!(::Circle{ℝ}, c, p, X, ::RealNumbers) = (c .= X)
 function get_coordinates_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
@@ -212,11 +199,6 @@ function get_coordinates_orthonormal!(
     Y[] = get_coordinates_orthonormal(M, p, X, n)[]
     return Y
 end
-function get_coordinates_orthonormal(::Circle{ℂ}, p, X, ::Union{RealNumbers,ComplexNumbers})
-    X, p = X[1], p[1]
-    Xⁱ = imag(X) * real(p) - real(X) * imag(p)
-    return @SVector [Xⁱ]
-end
 
 get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = Scalar(c[])
 # the method below is required for FD and AD differentiation in ManifoldDiff.jl
@@ -232,9 +214,6 @@ end
 
 Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-function get_vector_orthonormal(::Circle{ℂ}, p, c, ::Union{RealNumbers,ComplexNumbers})
-    @SArray fill(1im * c[1] * p[1])
-end
 function get_vector_orthonormal!(::Circle{ℂ}, X, p, c, ::Union{RealNumbers,ComplexNumbers})
     X .= 1im * c[1] * p[1]
     return X
@@ -403,7 +382,6 @@ end
 
 mid_point(M::Circle{ℝ}, p1, p2) = exp(M, p1, 0.5 * log(M, p1, p2))
 mid_point(::Circle{ℂ}, p1::Complex, p2::Complex) = exp(im * (angle(p1) + angle(p2)) / 2)
-mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = Scalar(mid_point(M, p1[], p2[]))
 
 @inline LinearAlgebra.norm(::Circle, p, X) = sum(abs, X)
 

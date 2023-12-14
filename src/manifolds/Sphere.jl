@@ -329,16 +329,9 @@ return the local representation of the metric in a [`DefaultOrthonormalBasis`](h
 the diagonal matrix of size ``n×n`` with ones on the diagonal, since the metric is obtained
 from the embedding by restriction to the tangent space ``T_p\mathcal M`` at ``p``.
 """
-function local_metric(M::Sphere{Tuple{Int},ℝ}, p, ::DefaultOrthonormalBasis)
+function local_metric(M::Sphere, p, ::DefaultOrthonormalBasis)
     n = get_parameter(M.size)[1]
     return Diagonal(ones(eltype(p), n))
-end
-function local_metric(
-    ::Sphere{TypeParameter{Tuple{n}},ℝ},
-    p,
-    B::DefaultOrthonormalBasis,
-) where {n}
-    return Diagonal(ones(SVector{n,eltype(p)}))
 end
 
 @doc raw"""

@@ -58,11 +58,7 @@ end
 function rand(rng::AbstractRNG, d::ProductFVectorDistribution)
     return ArrayPartition(map(d -> rand(rng, d), d.distributions)...)
 end
-function _rand!(
-    rng::AbstractRNG,
-    d::ProductPointDistribution,
-    p::ArrayPartition,
-)
+function _rand!(rng::AbstractRNG, d::ProductPointDistribution, p::ArrayPartition)
     map(
         (t1, t2) -> Distributions._rand!(rng, t1, t2),
         d.distributions,
@@ -70,11 +66,7 @@ function _rand!(
     )
     return p
 end
-function _rand!(
-    rng::AbstractRNG,
-    d::ProductFVectorDistribution,
-    X::ArrayPartition,
-)
+function _rand!(rng::AbstractRNG, d::ProductFVectorDistribution, X::ArrayPartition)
     map(
         t -> Distributions._rand!(rng, t[1], t[2]),
         d.distributions,

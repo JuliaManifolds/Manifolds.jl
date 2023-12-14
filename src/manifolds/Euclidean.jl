@@ -290,23 +290,6 @@ function get_vector_orthonormal(::Euclidean{Tuple{Int},ℝ}, ::Any, c, ::RealNum
     # this method is defined just to skip a reshape
     return c
 end
-function get_vector_orthonormal(
-    ::Euclidean{<:TypeParameter},
-    ::SArray{S},
-    c,
-    ::RealNumbers,
-) where {S}
-    return SArray{S}(c)
-end
-function get_vector_orthonormal(
-    ::Euclidean{TypeParameter{Tuple{N}},ℝ},
-    ::SArray{S},
-    c,
-    ::RealNumbers,
-) where {N,S}
-    # probably doesn't need rewrapping in SArray
-    return c
-end
 function Manifolds.get_vector_orthonormal(
     ::Euclidean{TypeParameter{Tuple{N}}},
     ::SizedArray{S},
@@ -443,21 +426,6 @@ function jacobi_field(::Euclidean{TypeParameter{Tuple{}}}, p, q, t, X, β::Tβ) 
 end
 function jacobi_field(::Euclidean{Tuple{}}, p, q, t, X, β::Tβ) where {Tβ}
     return X
-end
-
-function local_metric(
-    ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
-    p,
-    B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
-) where {𝔽}
-    return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
-end
-function local_metric(
-    ::Euclidean,
-    p,
-    B::InducedBasis{𝔽,TangentSpaceType,<:RetractionAtlas},
-) where {𝔽}
-    return Diagonal(ones(SVector{size(p, 1),eltype(p)}))
 end
 
 @doc raw"""

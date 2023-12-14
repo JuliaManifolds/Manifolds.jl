@@ -370,8 +370,6 @@ function zero_vector!(B::FiberBundle, X, p)
     return X
 end
 
-
-
 function Base.show(io::IO, B::FiberBundle)
     return print(io, "FiberBundle($(B.type), $(B.manifold), $(B.vector_transport))")
 end

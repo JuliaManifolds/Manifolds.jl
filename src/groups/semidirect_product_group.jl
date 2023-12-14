@@ -46,7 +46,6 @@ function SemidirectProductGroup(
     return GroupManifold(M, op)
 end
 
-
 """
     identity_element(G::SemidirectProductGroup)
 

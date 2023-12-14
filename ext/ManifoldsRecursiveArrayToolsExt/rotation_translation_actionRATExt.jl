@@ -99,3 +99,19 @@ end
 function inverse_apply(::LeftColumnwiseSpecialEuclideanAction, a::ArrayPartition, p)
     return a.x[2] \ (p .- a.x[1])
 end
+function optimal_alignment(
+    A::LeftColumnwiseSpecialEuclideanAction{<:AbstractManifold,<:SpecialEuclidean},
+    p,
+    q,
+)
+    N = _get_parameter(A.SE)
+    tr_opt = mean(q; dims=1) - mean(p; dims=1)
+    p_moved = p .+ tr_opt
+
+    Ostar = optimal_alignment(
+        ColumnwiseMultiplicationAction(A.manifold, SpecialOrthogonal(N)),
+        p_moved,
+        q,
+    )
+    return ArrayPartition(tr_opt, Ostar)
+end

@@ -175,8 +175,6 @@ function translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirectionAndSi
     return Y
 end
 
-
-
 function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
     map(
@@ -190,8 +188,6 @@ function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirect
     )
     return Y
 end
-
-
 
 function exp!(M::ProductGroup, q, p::Identity{ProductOperation}, X)
     map(
@@ -234,7 +230,6 @@ function log_lie!(G::ProductGroup, X, q::Identity{ProductOperation})
     map(log_lie!, M.manifolds, submanifold_components(G, X), submanifold_components(G, q))
     return X
 end
-
 
 # these isapprox methods are here just to reduce time-to-first-isapprox
 function isapprox(G::ProductGroup, ::Identity{ProductOperation}, X, Y; kwargs...)

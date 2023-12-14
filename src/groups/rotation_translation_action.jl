@@ -71,11 +71,7 @@ end
 
 Translate point `p` by minus à`s first component and rotate by the inverse of its second.
 """
-apply(
-    ::RotationTranslationActionOnVector{RightAction},
-    a,
-    p,
-)
+apply(::RotationTranslationActionOnVector{RightAction}, a, p)
 function apply(
     ::RotationTranslationActionOnVector{RightAction},
     a::SpecialEuclideanIdentity,
@@ -119,12 +115,7 @@ inverse_apply(::RotationTranslationActionOnVector{RightAction}, a, p)
 Compute differential of `apply` on left [`RotationTranslationActionOnVector`](@ref),
 with respect to `p`, i.e. left-multiply vector `X` tangent at `p` by the second component of `a`.
 """
-apply_diff(
-    ::RotationTranslationActionOnVector{LeftAction},
-    a,
-    p,
-    X,
-)
+apply_diff(::RotationTranslationActionOnVector{LeftAction}, a, p, X)
 function apply_diff(
     ::RotationTranslationActionOnVector{LeftAction},
     ::SpecialEuclideanIdentity,
@@ -144,12 +135,7 @@ end
 Compute differential of `apply` on right [`RotationTranslationActionOnVector`](@ref),
 with respect to `p`, i.e. left-divide vector `X` tangent at `p` by the second component of `a`.
 """
-apply_diff(
-    ::RotationTranslationActionOnVector{RightAction},
-    a,
-    p,
-    X,
-)
+apply_diff(::RotationTranslationActionOnVector{RightAction}, a, p, X)
 function apply_diff(
     ::RotationTranslationActionOnVector{RightAction},
     a::SpecialEuclideanIdentity,
@@ -253,4 +239,8 @@ group_manifold(A::LeftColumnwiseSpecialEuclideanAction) = A.manifold
 Compute optimal alignment of `p` to `q` under the forward left [`ColumnwiseSpecialEuclideanAction`](@ref).
 The algorithm, in sequence, computes optimal translation and optimal rotation.
 """
-optimal_alignment(A::LeftColumnwiseSpecialEuclideanAction{<:AbstractManifold,<:SpecialEuclidean}, p, q)
+optimal_alignment(
+    A::LeftColumnwiseSpecialEuclideanAction{<:AbstractManifold,<:SpecialEuclidean},
+    p,
+    q,
+)

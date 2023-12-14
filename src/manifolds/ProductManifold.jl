@@ -36,7 +36,6 @@ struct ProductPointDistribution{
     distributions::TD
 end
 
-
 function adjoint_Jacobi_field!(M::ProductManifold, Y, p, q, t, X, β::Tβ) where {Tβ}
     map(
         adjoint_Jacobi_field!,
@@ -91,7 +90,6 @@ function ProductPointDistribution(distributions::MPointDistribution...)
     return ProductPointDistribution(M, distributions...)
 end
 
-
 function Distributions._rand!(
     rng::AbstractRNG,
     d::ProductPointDistribution,
@@ -107,7 +105,6 @@ function Distributions._rand!(
 )
     return copyto!(v, rand(rng, d))
 end
-
 
 @doc raw"""
     Y = riemannian_Hessian(M::ProductManifold, p, G, H, X)
