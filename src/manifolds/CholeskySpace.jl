@@ -30,10 +30,10 @@ The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_point(
     M::CholeskySpace,
-    p;
-    atol=sqrt(prod(representation_size(M)) * eps(eltype(p))),
+    p::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     cks = check_size(M, p)
     cks === nothing || return cks
     if !isapprox(norm(strictlyUpperTriangular(p)), 0.0; atol=atol, kwargs...)

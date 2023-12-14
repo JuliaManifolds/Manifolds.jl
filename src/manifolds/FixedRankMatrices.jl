@@ -328,7 +328,7 @@ function check_vector(
     M::FixedRankMatrices,
     p::SVDMPoint,
     X::UMVTVector;
-    atol=sqrt(prod(representation_size(M)) * eps(p.U)),
+    atol=sqrt(prod(representation_size(M)) * eps(float(eltype(p.U)))),
     kwargs...,
 )
     m, n, k = get_parameter(M.size)

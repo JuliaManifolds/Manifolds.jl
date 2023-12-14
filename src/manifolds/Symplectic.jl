@@ -214,10 +214,10 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 function check_point(
     M::Symplectic,
-    p;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(p)),
+    p::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     # Perform check that the matrix lives on the real symplectic manifold:
     expected_zero = norm(inv(M, p) * p - LinearAlgebra.I)
     if !isapprox(expected_zero, 0; atol=atol, kwargs...)
@@ -253,10 +253,10 @@ check_vector(::Symplectic, ::Any...)
 function check_vector(
     M::Symplectic,
     p,
-    X;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    X::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     Q = SymplecticMatrix(p, X)
     tangent_requirement_norm = norm(X' * Q * p + p' * Q * X, 2)
     if !isapprox(tangent_requirement_norm, 0; atol=atol, kwargs...)

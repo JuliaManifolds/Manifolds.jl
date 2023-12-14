@@ -132,10 +132,10 @@ The tolerance for the last test can be set using the `kwargs...`.
 function check_vector(
     M::ProbabilitySimplex,
     p,
-    X;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    X::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     if !isapprox(sum(X), 0.0; atol=atol, kwargs...)
         return DomainError(
             sum(X),

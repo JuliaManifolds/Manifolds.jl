@@ -62,10 +62,10 @@ i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
 function check_point(
     M::MultinomialDoubleStochastic,
-    p;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(p)),
+    p::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     n = get_parameter(M.size)[1]
     r = sum(p, dims=2)
     if !isapprox(norm(r - ones(n, 1)), 0.0; atol=atol, kwargs...)
@@ -86,10 +86,10 @@ column or row.
 function check_vector(
     M::MultinomialDoubleStochastic,
     p,
-    X;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    X::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     r = sum(X, dims=2) # check for stochastic rows
     if !isapprox(norm(r), 0.0; atol=atol, kwargs...)
         return DomainError(

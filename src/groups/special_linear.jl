@@ -52,10 +52,10 @@ end
 function check_vector(
     G::SpecialLinear,
     p,
-    X;
-    atol=sqrt(prod(representation_size(G)) * eps(typeof(eltype(X)))),
+    X::T;
+    atol=sqrt(prod(representation_size(G))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     trX = tr(inverse_translate_diff(G, p, p, X, LeftForwardAction()))
     if !isapprox(trX, 0; atol=atol, kwargs...)
         return DomainError(

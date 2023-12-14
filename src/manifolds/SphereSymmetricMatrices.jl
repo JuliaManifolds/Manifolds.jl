@@ -37,10 +37,10 @@ The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_point(
     M::SphereSymmetricMatrices,
-    p;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(p)),
+    p::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     if !isapprox(norm(p - p'), 0; atol=atol, kwargs...)
         return DomainError(
             norm(p - p'),
@@ -62,10 +62,10 @@ The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 function check_vector(
     M::SphereSymmetricMatrices,
     p,
-    X;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    X::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     if !isapprox(norm(X - X'), 0; atol=atol, kwargs...)
         return DomainError(
             norm(X - X'),

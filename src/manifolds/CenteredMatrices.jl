@@ -37,10 +37,10 @@ The tolerance for the column sums of `p` can be set using `kwargs...`.
 """
 function check_point(
     M::CenteredMatrices,
-    p;
-    atol=sqrt(prod(representation_size(M)) * eps(eltype(p))),
+    p::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     m, n = get_parameter(M.size)
     if !isapprox(sum(p, dims=1), zeros(1, n); atol=atol, kwargs...)
         return DomainError(
@@ -64,10 +64,10 @@ The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
 function check_vector(
     M::CenteredMatrices,
     p,
-    X;
-    atol=sqrt(prod(representation_size(M)) * eps(eltype(p))),
+    X::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     m, n = get_parameter(M.size)
     if !isapprox(sum(X, dims=1), zeros(1, n); atol=atol, kwargs...)
         return DomainError(

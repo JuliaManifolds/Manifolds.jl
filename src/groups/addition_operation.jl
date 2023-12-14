@@ -87,7 +87,7 @@ function is_identity(
     ::AdditionGroupTrait,
     G::AbstractDecoratorManifold,
     q::T;
-    atol=sqrt(prod(representation_size(G)) * eps(T)),
+    atol=sqrt(prod(representation_size(G))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     return isapprox(G, q, zero(q); atol=atol, kwargs...)

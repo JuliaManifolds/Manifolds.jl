@@ -85,11 +85,11 @@ The tolerance for the trace check of `X` can be set using `kwargs...`, which inf
 function check_vector(
     M::SPDFixedDeterminant,
     p,
-    X;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    X::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
-    if !isapprox(tr(X), 0.0; atol=atol, kwargs...)
+) where {T}
+    if !isapprox(tr(X), 0; atol=atol, kwargs...)
         return DomainError(
             tr(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it does not have a zero trace.",

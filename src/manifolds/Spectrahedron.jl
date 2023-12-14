@@ -88,10 +88,10 @@ Note that symmetry of $X$ holds by construction and is not explicitly checked.
 function check_vector(
     M::Spectrahedron,
     q,
-    Y;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(Y)),
+    Y::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     X = q * Y' + Y * q'
     n = tr(X)
     if !isapprox(n, 0; atol=atol, kwargs...)

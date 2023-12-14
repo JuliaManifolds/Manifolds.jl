@@ -150,11 +150,11 @@ The `kwargs...` are passed on to this accordingly.
 """
 function _isapprox(
     M::SymmetricPositiveSemidefiniteFixedRank,
-    p,
+    p::T,
     q;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(p)),
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     return isapprox(norm(p - q), 0; atol=atol, kwargs...) ||
            isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
 end

@@ -88,10 +88,10 @@ Note that symmetric of $X$ holds by construction an is not explicitly checked.
 function check_vector(
     M::Elliptope,
     q,
-    Y;
-    atol=sqrt(prod(representation_size(M)) * eps(eltype(q))),
+    Y::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     X = q * Y' + Y * q'
     n = diag(X)
     if !all(isapprox.(n, 0.0; atol=atol, kwargs...))

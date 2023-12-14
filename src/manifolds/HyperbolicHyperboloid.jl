@@ -38,10 +38,10 @@ end
 function check_vector(
     M::Hyperbolic,
     p,
-    X;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    X::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     if !isapprox(minkowski_metric(p, X), 0; atol=atol, kwargs...)
         return DomainError(
             abs(minkowski_metric(p, X)),

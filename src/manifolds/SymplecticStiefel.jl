@@ -105,10 +105,10 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 function check_point(
     M::SymplecticStiefel,
-    p;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(p)),
+    p::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-)
+) where {T}
     # Perform check that the matrix lives on the real symplectic manifold:
     expected_zero = norm(inv(M, p) * p - I)
     if !isapprox(expected_zero, 0; atol=atol, kwargs...)
@@ -148,12 +148,12 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 check_vector(::SymplecticStiefel, ::Any...)
 
 function check_vector(
-    M::SymplecticStiefel{<:Any,field},
+    M::SymplecticStiefel,
     p,
-    X;
-    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    X::T;
+    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
-) where {field}
+) where {T}
     n, k = get_parameter(M.size)
     # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
     H = inv(M, p) * X  # ∈ ℝ^{2k × 2k}, should be Hamiltonian.
