@@ -130,8 +130,14 @@ after [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and orthogonal to `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_vector(M::AbstractSphere, p, X; kwargs...)
-    if !isapprox(abs(real(dot(p, X))), 0.0; kwargs...)
+function check_vector(
+    M::AbstractSphere,
+    p,
+    X;
+    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    kwargs...,
+)
+    if !isapprox(abs(real(dot(p, X))), 0; atol=atol, kwargs...)
         return DomainError(
             abs(dot(p, X)),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",

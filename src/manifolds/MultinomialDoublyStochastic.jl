@@ -60,10 +60,15 @@ end
 Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)`(n)` `M`,
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
-function check_point(M::MultinomialDoubleStochastic, p; kwargs...)
+function check_point(
+    M::MultinomialDoubleStochastic,
+    p;
+    atol=sqrt(prod(representation_size(M))) * eps(eltype(p)),
+    kwargs...,
+)
     n = get_parameter(M.size)[1]
     r = sum(p, dims=2)
-    if !isapprox(norm(r - ones(n, 1)), 0.0; kwargs...)
+    if !isapprox(norm(r - ones(n, 1)), 0.0; atol=atol, kwargs...)
         return DomainError(
             r,
             "The point $(p) does not lie on $M, since its rows do not sum up to one.",
@@ -78,9 +83,15 @@ Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialDoubleSt
 This means, that `p` is valid, that `X` is of correct dimension and sums to zero along any
 column or row.
 """
-function check_vector(M::MultinomialDoubleStochastic, p, X; kwargs...)
+function check_vector(
+    M::MultinomialDoubleStochastic,
+    p,
+    X;
+    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    kwargs...,
+)
     r = sum(X, dims=2) # check for stochastic rows
-    if !isapprox(norm(r), 0.0; kwargs...)
+    if !isapprox(norm(r), 0.0; atol=atol, kwargs...)
         return DomainError(
             r,
             "The matrix $(X) is not a tangent vector to $(p) on $(M), since its rows do not sum up to zero.",

@@ -82,8 +82,14 @@ and additionally fulfill ``\operatorname{tr}(X) = 0``.
 
 The tolerance for the trace check of `X` can be set using `kwargs...`, which influences the `isapprox`-check.
 """
-function check_vector(M::SPDFixedDeterminant, p, X; kwargs...)
-    if !isapprox(tr(X), 0.0; kwargs...)
+function check_vector(
+    M::SPDFixedDeterminant,
+    p,
+    X;
+    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    kwargs...,
+)
+    if !isapprox(tr(X), 0.0; atol=atol, kwargs...)
         return DomainError(
             tr(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it does not have a zero trace.",

@@ -85,10 +85,16 @@ and a $X$ has to be a symmetric matrix with trace.
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
 Note that symmetry of $X$ holds by construction and is not explicitly checked.
 """
-function check_vector(M::Spectrahedron, q, Y; kwargs...)
+function check_vector(
+    M::Spectrahedron,
+    q,
+    Y;
+    atol=sqrt(prod(representation_size(M))) * eps(eltype(Y)),
+    kwargs...,
+)
     X = q * Y' + Y * q'
     n = tr(X)
-    if !isapprox(n, 0.0; kwargs...)
+    if !isapprox(n, 0; atol=atol, kwargs...)
         return DomainError(
             n,
             "The vector $(X) is not a tangent to a point on $(M) (represented py $(q) and $(Y), since its trace is nonzero.",

@@ -164,8 +164,14 @@ and a symmetric matrix, i.e. this stores tangent vetors as elements of the corre
 Lie group.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_vector(M::SymmetricPositiveDefinite, p, X; kwargs...)
-    if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
+function check_vector(
+    M::SymmetricPositiveDefinite,
+    p,
+    X;
+    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    kwargs...,
+)
+    if !isapprox(norm(X - transpose(X)), 0; atol=atol, kwargs...)
         return DomainError(
             X,
             "The vector $(X) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.",

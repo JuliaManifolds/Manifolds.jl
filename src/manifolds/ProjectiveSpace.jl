@@ -126,8 +126,14 @@ Check whether `X` is a tangent vector in the tangent space of `p` on the
 tangent space of the embedding and that the Frobenius inner product
 $⟨p, X⟩_{\mathrm{F}} = 0$.
 """
-function check_vector(M::AbstractProjectiveSpace, p, X; kwargs...)
-    if !isapprox(dot(p, X), 0; kwargs...)
+function check_vector(
+    M::AbstractProjectiveSpace,
+    p,
+    X;
+    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    kwargs...,
+)
+    if !isapprox(dot(p, X), 0; atol=atol, kwargs...)
         return DomainError(
             dot(p, X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not" *

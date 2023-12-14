@@ -54,7 +54,7 @@ see [`normal_vector`](@ref). Absolute tolerance can be set using `atol`.
 """
 function check_vector(M::EmbeddedTorus, p, X; atol=eps(eltype(p)), kwargs...)
     dot_nX = dot(normal_vector(M, p), X)
-    if !isapprox(dot_nX, 0; atol, kwargs...)
+    if !isapprox(dot_nX, 0; atol=atol, kwargs...)
         return DomainError(dot_nX, "The vector $(X) is not tangent to $(p) from $(M).")
     end
     return nothing

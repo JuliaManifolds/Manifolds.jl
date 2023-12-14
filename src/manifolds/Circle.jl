@@ -78,8 +78,8 @@ check_vector(::Circle{ℝ}, ::Any...; ::Any...)
 function check_vector(M::Circle{ℝ}, p, X; kwargs...)
     return nothing
 end
-function check_vector(M::Circle{ℂ}, p, X; kwargs...)
-    if !isapprox(abs(complex_dot(p, X)), 0.0; kwargs...)
+function check_vector(M::Circle{ℂ}, p, X; atol=eps(X), kwargs...)
+    if !isapprox(abs(complex_dot(p, X)), 0.0; atol=atol, kwargs...)
         return DomainError(
             abs(complex_dot(p, X)),
             "The value $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",

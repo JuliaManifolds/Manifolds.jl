@@ -129,8 +129,14 @@ after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
 `X` has to be of same dimension as `p` and its elements have to sum to one.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_vector(M::ProbabilitySimplex, p, X; kwargs...)
-    if !isapprox(sum(X), 0.0; kwargs...)
+function check_vector(
+    M::ProbabilitySimplex,
+    p,
+    X;
+    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    kwargs...,
+)
+    if !isapprox(sum(X), 0.0; atol=atol, kwargs...)
         return DomainError(
             sum(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its elements do not sum up to 0.",

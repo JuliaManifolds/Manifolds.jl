@@ -35,8 +35,13 @@ i.e. is an `n`-by-`n` symmetric matrix of unit Frobenius norm.
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_point(M::SphereSymmetricMatrices, p; kwargs...)
-    if !isapprox(norm(p - p'), 0.0; kwargs...)
+function check_point(
+    M::SphereSymmetricMatrices,
+    p;
+    atol=sqrt(prod(representation_size(M))) * eps(eltype(p)),
+    kwargs...,
+)
+    if !isapprox(norm(p - p'), 0; atol=atol, kwargs...)
         return DomainError(
             norm(p - p'),
             "The point $(p) does not lie on $M, since it is not symmetric.",
@@ -54,8 +59,14 @@ of unit Frobenius norm.
 
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
-function check_vector(M::SphereSymmetricMatrices, p, X; kwargs...)
-    if !isapprox(norm(X - X'), 0.0; kwargs...)
+function check_vector(
+    M::SphereSymmetricMatrices,
+    p,
+    X;
+    atol=sqrt(prod(representation_size(M))) * eps(eltype(X)),
+    kwargs...,
+)
+    if !isapprox(norm(X - X'), 0; atol=atol, kwargs...)
         return DomainError(
             norm(X - X'),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not symmetric.",

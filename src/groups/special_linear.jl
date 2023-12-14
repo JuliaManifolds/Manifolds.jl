@@ -49,9 +49,15 @@ function check_point(G::SpecialLinear, p; kwargs...)
     return nothing
 end
 
-function check_vector(G::SpecialLinear, p, X; kwargs...)
+function check_vector(
+    G::SpecialLinear,
+    p,
+    X;
+    atol=sqrt(prod(representation_size(G)) * eps(typeof(eltype(X)))),
+    kwargs...,
+)
     trX = tr(inverse_translate_diff(G, p, p, X, LeftForwardAction()))
-    if !isapprox(trX, 0; kwargs...)
+    if !isapprox(trX, 0; atol=atol, kwargs...)
         return DomainError(
             trX,
             "The matrix $(X) does not lie in the tangent space of $(G) at $(p), since " *
