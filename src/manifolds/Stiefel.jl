@@ -209,29 +209,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     @inbounds R = SMatrix{1,1}(inv(A[1, 1]))
     return mul!(X, q, R)
 end
-function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{TypeParameter{Tuple{n,1}}},
-    X,
-    q,
-    A::StaticArray,
-    ::Type{ElT},
-) where {n,ElT}
-    return invoke(
-        _stiefel_inv_retr_qr_mul_by_r!,
-        Tuple{
-            Stiefel{TypeParameter{Tuple{n,1}}},
-            typeof(X),
-            typeof(q),
-            AbstractArray,
-            typeof(ElT),
-        },
-        M,
-        X,
-        q,
-        A,
-        ElT,
-    )
-end
+
 function _stiefel_inv_retr_qr_mul_by_r!(
     ::Stiefel{TypeParameter{Tuple{n,2}}},
     X,
@@ -246,44 +224,6 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     #TODO: replace with this once it's supported by StaticArrays
     #return mul!(X, q, UpperTriangular(R))
     return mul!(X, q, R)
-end
-function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{TypeParameter{Tuple{n,2}}},
-    X,
-    q,
-    A::StaticArray,
-    ::Type{ElT},
-) where {n,ElT}
-    return invoke(
-        _stiefel_inv_retr_qr_mul_by_r!,
-        Tuple{
-            Stiefel{TypeParameter{Tuple{n,2}}},
-            typeof(X),
-            typeof(q),
-            AbstractArray,
-            typeof(ElT),
-        },
-        M,
-        X,
-        q,
-        A,
-        ElT,
-    )
-end
-function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{TypeParameter{Tuple{n,k}}},
-    X,
-    q,
-    A::StaticArray,
-    ::Type{ElT},
-) where {n,k,ElT}
-    R = zeros(MMatrix{k,k,ElT})
-    return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
-end
-function _stiefel_inv_retr_qr_mul_by_r!(M::Stiefel, X, q, A, ::Type{ElT}) where {ElT}
-    n, k = get_parameter(M.size)
-    R = zeros(ElT, k, k)
-    return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
 
 function inverse_retract_polar!(::Stiefel, X, p, q)
@@ -469,7 +409,6 @@ where $\operatorname{sgn}(p) = \begin{cases}
 retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 
 _qrfac_to_q(qrfac) = Matrix(qrfac.Q)
-_qrfac_to_q(qrfac::StaticArrays.QR) = qrfac.Q
 
 function retract_pade!(::Stiefel, q, p, X, t::Number, ::PadeRetraction{m}) where {m}
     tX = t * X

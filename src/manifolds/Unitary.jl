@@ -48,15 +48,6 @@ function exp(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number, t::Nu
     return p * exp(t * X)
 end
 
-function get_coordinates_orthonormal(
-    ::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ},
-    p,
-    X::Quaternions.Quaternion,
-    ::QuaternionNumbers,
-)
-    return @SVector [X.v1, X.v2, X.v3]
-end
-
 function get_vector_orthonormal(
     ::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ},
     p::Quaternions.Quaternion,

@@ -237,23 +237,7 @@ function log_lie!(
     @inbounds θ = atan(q[2, 1], q[1, 1])
     return get_vector!(G, X, Identity(G), θ, DefaultOrthogonalBasis())
 end
-function log_lie!(
-    G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{3}},ℝ},
-    X::AbstractMatrix,
-    q::AbstractMatrix,
-)
-    e = Identity(G)
-    cosθ = (tr(q) - 1) / 2
-    if cosθ ≈ -1
-        eig = eigen_safe(q)
-        ival = findfirst(λ -> isapprox(λ, 1), eig.values)
-        inds = SVector{3}(1:3)
-        ax = eig.vectors[inds, ival]
-        return get_vector!(G, X, e, π * ax, DefaultOrthogonalBasis())
-    end
-    X .= q ./ usinc_from_cos(cosθ)
-    return project!(G, X, e, X)
-end
+
 function log_lie!(
     G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},ℝ},
     X::AbstractMatrix,
