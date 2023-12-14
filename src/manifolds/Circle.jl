@@ -538,6 +538,11 @@ function parallel_transport_to!(M::Circle{ℂ}, Y, p, X, q)
     return Y
 end
 
+# dispatch before allocation
+function _vector_transport_direction(M::Circle, p, X, d, ::ParallelTransport)
+    return parallel_transport_to(M, p, X, exp(M, p, d))
+end
+
 """
     volume_density(::Circle, p, X)
 
