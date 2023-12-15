@@ -63,7 +63,7 @@ i.e. is a  matrix with positive entries whose rows and columns sum to one.
 function check_point(
     M::MultinomialDoubleStochastic,
     p::T;
-    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     n = get_parameter(M.size)[1]
@@ -87,7 +87,7 @@ function check_vector(
     M::MultinomialDoubleStochastic,
     p,
     X::T;
-    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     r = sum(X, dims=2) # check for stochastic rows

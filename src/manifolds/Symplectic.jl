@@ -215,7 +215,7 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 function check_point(
     M::Symplectic,
     p::T;
-    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     # Perform check that the matrix lives on the real symplectic manifold:
@@ -254,7 +254,7 @@ function check_vector(
     M::Symplectic,
     p,
     X::T;
-    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     Q = SymplecticMatrix(p, X)

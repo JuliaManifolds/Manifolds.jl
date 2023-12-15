@@ -130,7 +130,7 @@ function check_vector(
     M::AbstractProjectiveSpace,
     p,
     X::T;
-    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     if !isapprox(dot(p, X), 0; atol=atol, kwargs...)

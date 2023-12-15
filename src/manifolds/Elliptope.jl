@@ -89,7 +89,7 @@ function check_vector(
     M::Elliptope,
     q,
     Y::T;
-    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     X = q * Y' + Y * q'

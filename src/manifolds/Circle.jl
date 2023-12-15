@@ -82,7 +82,7 @@ function check_vector(
     M::Circle{ℂ},
     p,
     X::T;
-    atol=sqrt(eps(real(float(number_eltype(T))))),
+    atol::Real=sqrt(eps(real(float(number_eltype(T))))),
     kwargs...,
 ) where {T}
     if !isapprox(abs(complex_dot(p, X)), 0; atol=atol, kwargs...)

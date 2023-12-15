@@ -38,7 +38,7 @@ The tolerance for the column sums of `p` can be set using `kwargs...`.
 function check_point(
     M::CenteredMatrices,
     p::T;
-    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     m, n = get_parameter(M.size)
@@ -65,7 +65,7 @@ function check_vector(
     M::CenteredMatrices,
     p,
     X::T;
-    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     m, n = get_parameter(M.size)

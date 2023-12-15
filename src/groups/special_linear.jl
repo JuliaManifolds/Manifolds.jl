@@ -53,7 +53,7 @@ function check_vector(
     G::SpecialLinear,
     p,
     X::T;
-    atol=sqrt(prod(representation_size(G))) * eps(real(float(number_eltype(T)))),
+    atol::Real=sqrt(prod(representation_size(G))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     trX = tr(inverse_translate_diff(G, p, p, X, LeftForwardAction()))

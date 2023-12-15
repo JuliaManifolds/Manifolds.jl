@@ -152,7 +152,7 @@ function _isapprox(
     M::SymmetricPositiveSemidefiniteFixedRank,
     p::T,
     q;
-    atol=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
 ) where {T}
     return isapprox(norm(p - q), 0; atol=atol, kwargs...) ||

@@ -40,7 +40,7 @@ each row has zero mean. Other conditions are checked via embedding in [`ArraySph
 function check_point(
     M::KendallsPreShapeSpace,
     p;
-    atol=sqrt(eps(float(eltype(p)))),
+    atol::Real=sqrt(eps(float(eltype(p)))),
     kwargs...,
 )
     for p_row in eachrow(p)
@@ -64,7 +64,7 @@ function check_vector(
     M::KendallsPreShapeSpace,
     p,
     X;
-    atol=sqrt(eps(float(eltype(X)))),
+    atol::Real=sqrt(eps(float(eltype(X)))),
     kwargs...,
 )
     for X_row in eachrow(X)
