@@ -166,7 +166,7 @@ function Base.exp(M::Circle{ℂ}, p::Number, X::Number, t::Number)
 end
 
 exp!(::Circle{ℝ}, q, p, X) = (q .= sym_rem(p + X))
-exp!(::Circle{ℝ}, q, p, X, t::Number) = (q .= sym_rem(p + t * X))
+exp!(::Circle{ℝ}, q, p, X, t::Number) = (q .= sym_rem(p[] + t * X[]))
 function exp!(M::Circle{ℂ}, q, p, X)
     θ = norm(M, p, X)
     q .= cos(θ) * p + usinc(θ) * X
