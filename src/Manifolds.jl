@@ -182,6 +182,7 @@ import ManifoldDiff:
     riemannian_Hessian!
 
 import Statistics: mean, mean!, median, median!, cov, var
+import StatsBase: mean_and_var
 
 using Base.Iterators: repeated
 using Distributions

@@ -414,8 +414,16 @@ function Statistics.mean!(
     x::AbstractVector,
     w::AbstractVector,
     e::ExtrinsicEstimation;
+    extrinsic_method = nothing,
     kwargs...,
 )
+    if !isnothing(extrinsic_method)
+        Base.depwarn(
+            "The Keyword Argument `extrinsic_method` is deprecated use `ExtrinsicEstimators field instead",
+            mean!,
+        )
+        e = ExtrinsicEstimation(extrinsic_method)
+    end
     embedded_x = map(p -> embed(M, p), x)
     embedded_y = mean(get_embedding(M), embedded_x, w, e.extrinsic_estimation; kwargs...)
     project!(M, y, embedded_y)
@@ -663,8 +671,16 @@ function Statistics.median!(
     x::AbstractVector,
     w::AbstractVector,
     e::ExtrinsicEstimation;
+    extrinsic_method = nothing,
     kwargs...,
 )
+    if !isnothing(extrinsic_method)
+        Base.depwarn(
+            "The Keyword Argument `extrinsic_method` is deprecated use `ExtrinsicEstimators field instead",
+            mean!,
+        )
+        e = ExtrinsicEstimation(extrinsic_method)
+    end
     embedded_x = map(p -> embed(M, p), x)
     embedded_y = median(get_embedding(M), embedded_x, w, e.extrinsic_estimation; kwargs...)
     project!(M, y, embedded_y)
