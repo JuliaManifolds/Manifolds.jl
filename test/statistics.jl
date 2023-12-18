@@ -802,7 +802,7 @@ end
     end
 
     @testset "Covariance Default" begin
-        @test default_approximation_mthod(TestStatsSphere{2}(), cov) ==
+        @test default_approximation_method(TestStatsSphere{2}(), cov) ==
               GradientDescentEstimation()
     end
 
