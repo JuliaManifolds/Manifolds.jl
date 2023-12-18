@@ -181,6 +181,8 @@ import ManifoldDiff:
     riemannian_Hessian,
     riemannian_Hessian!
 
+import Statistics: mean, mean!, median, median!, cov, var
+
 using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
@@ -610,8 +612,9 @@ include("deprecated.jl")
 export test_manifold
 export test_group, test_action
 
-#
+# Abstract main types
 export CoTVector, AbstractManifold, AbstractManifoldPoint, TVector
+# Manifolds
 export AbstractSphere, AbstractProjectiveSpace
 export Euclidean,
     ArrayProjectiveSpace,
@@ -751,9 +754,10 @@ export AbstractInverseRetractionMethod,
     ShootingInverseRetraction,
     SoftmaxInverseRetraction
 # Estimation methods for median and mean
-export AbstractEstimationMethod,
+export AbstractApproximationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,
+    EfficientEstimator,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius,
     ExtrinsicEstimation

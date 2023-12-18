@@ -419,7 +419,7 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::AbstractSphere, ::Any...)
 
-function default_estimation_method(::AbstractSphere, ::typeof(mean))
+function default_approximation_mthod(::AbstractSphere, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 2)
 end
 

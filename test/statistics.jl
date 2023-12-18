@@ -12,13 +12,14 @@ import ManifoldsBase:
     base_manifold,
     get_embedding
 using Manifolds:
-    AbstractEstimationMethod,
+    AbstractApproximationMethod,
     CyclicProximalPointEstimation,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius,
     GradientDescentEstimation,
     WeiszfeldEstimation
-import Manifolds: mean, mean!, median, median!, var, mean_and_var, default_estimation_method
+import Manifolds:
+    mean, mean!, median, median!, var, mean_and_var, default_approximation_mthod
 
 struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
@@ -114,7 +115,7 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
             y,
             x,
             pweights(ones(n + 1)),
-            Manifolds.default_estimation_method(M, mean);
+            Manifolds.default_approximation_mthod(M, mean);
             kwargs...,
         )
     end
@@ -125,7 +126,7 @@ function test_median(
     M,
     x,
     yexp=nothing;
-    method::Union{Nothing,AbstractEstimationMethod}=nothing,
+    method::Union{Nothing,AbstractApproximationMethod}=nothing,
     kwargs...,
 )
     @testset "median unweighted$(!isnothing(method) ? " ($method)" : "")" begin
@@ -301,7 +302,7 @@ function test_moments(M, x)
 end
 
 struct TestStatsOverload1 <: AbstractManifold{ℝ} end
-struct TestStatsMethod1 <: AbstractEstimationMethod end
+struct TestStatsMethod1 <: AbstractApproximationMethod end
 
 function mean!(
     ::TestStatsOverload1,
@@ -401,8 +402,8 @@ end
             @test std(M, x, w) == 2.0
             @test std(M, x, w, 2) == 2.0
 
-            @test Manifolds.default_estimation_method(M, mean_and_std) ==
-                  Manifolds.default_estimation_method(M, mean)
+            @test Manifolds.default_approximation_mthod(M, mean_and_std) ==
+                  Manifolds.default_approximation_mthod(M, mean)
             @test mean_and_var(M, x, TestStatsMethod1()) == ([5.0], 16)
             @test mean_and_var(M, x, w, TestStatsMethod1()) == ([5.0], 9)
             @test mean_and_std(M, x, TestStatsMethod1()) == ([5.0], 4.0)
@@ -786,7 +787,7 @@ end
         x = [normalize(randn(rng, 3)) for _ in 1:10]
         w = pweights([rand(rng) for _ in 1:length(x)])
         m = normalize(mean(reduce(hcat, x), w; dims=2)[:, 1])
-        mg = mean(S, x, w, ExtrinsicEstimation())
+        mg = mean(S, x, w, ExtrinsicEstimation(EfficientEstimator()))
         @test isapprox(S, m, mg)
     end
 
@@ -796,12 +797,12 @@ end
         x = [normalize(randn(rng, 3)) for _ in 1:10]
         w = pweights([rand(rng) for _ in 1:length(x)])
         m = normalize(median(Euclidean(3), x, w))
-        mg = median(S, x, w, ExtrinsicEstimation())
+        mg = median(S, x, w, ExtrinsicEstimation(EfficientEstimator()))
         @test isapprox(S, m, mg)
     end
 
     @testset "Covariance Default" begin
-        @test default_estimation_method(TestStatsSphere{2}(), cov) ==
+        @test default_approximation_mthod(TestStatsSphere{2}(), cov) ==
               GradientDescentEstimation()
     end
 

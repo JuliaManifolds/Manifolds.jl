@@ -199,7 +199,7 @@ function center_of_orbit(
     A::GroupOperationAction,
     pts::AbstractVector,
     p,
-    mean_method::AbstractEstimationMethod,
+    mean_method::AbstractApproximationMethod,
 )
     μ = mean(A.group, pts, mean_method)
     return inverse_apply(switch_direction_and_side(A), p, μ)

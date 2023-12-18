@@ -507,7 +507,8 @@ manifold_volume(::Euclidean) = Inf
 Statistics.mean(::Euclidean{Tuple{}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
 function Statistics.mean(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector{<:Number};
+    x::AbstractVector{<:Number},
+    ::EfficientEstimator;
     kwargs...,
 )
     return mean(x)
@@ -515,7 +516,8 @@ end
 function Statistics.mean(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector{<:Number},
-    w::AbstractWeights;
+    w::AbstractWeights,
+    ::EfficientEstimator;
     kwargs...,
 )
     return mean(x, w)

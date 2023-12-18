@@ -193,7 +193,7 @@ end
         A::AbstractGroupAction,
         pts,
         p,
-        mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
+        mean_method::AbstractApproximationMethod = GradientDescentEstimation(),
     )
 
 Calculate an action element ``a`` of action `A` that is the mean element of the orbit of `p`
@@ -210,7 +210,7 @@ function center_of_orbit(
     A::AbstractGroupAction,
     pts::AbstractVector,
     q,
-    mean_method::AbstractEstimationMethod=GradientDescentEstimation(),
+    mean_method::AbstractApproximationMethod=GradientDescentEstimation(),
 )
     alignments = map(p -> optimal_alignment(A, q, p), pts)
     return mean(base_group(A), alignments, mean_method)
