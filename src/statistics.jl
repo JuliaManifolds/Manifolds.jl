@@ -414,7 +414,7 @@ function Statistics.mean!(
     x::AbstractVector,
     w::AbstractVector,
     e::ExtrinsicEstimation;
-    extrinsic_method = nothing,
+    extrinsic_method=nothing,
     kwargs...,
 )
     if !isnothing(extrinsic_method)
@@ -671,7 +671,7 @@ function Statistics.median!(
     x::AbstractVector,
     w::AbstractVector,
     e::ExtrinsicEstimation;
-    extrinsic_method = nothing,
+    extrinsic_method=nothing,
     kwargs...,
 )
     if !isnothing(extrinsic_method)
