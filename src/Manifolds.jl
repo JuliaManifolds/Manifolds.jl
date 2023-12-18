@@ -149,19 +149,14 @@ import ManifoldsBase:
     submanifold_component,
     submanifold_components,
     vector_space_dimension,
-    vector_transport_along, # just specified in Euclidean - the next 5 as well
-    vector_transport_along_diff,
-    vector_transport_along_project,
+    vector_transport_along,           # just specified in Euclidean - the next 5 as well
     vector_transport_along!,
-    vector_transport_along_diff!,
-    vector_transport_along_project!,
+    vector_transport_along_diff!,     # For consistency these are imported, but for now not
+    vector_transport_along_project!,  # overwritten with new definitons.
     vector_transport_direction,
-    vector_transport_direction_diff,
     vector_transport_direction!,
     vector_transport_direction_diff!,
     vector_transport_to,
-    vector_transport_to_diff,
-    vector_transport_to_project,
     vector_transport_to!,
     vector_transport_to_diff!,
     vector_transport_to_project!, # some overwrite layer 2
