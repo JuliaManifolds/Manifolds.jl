@@ -114,6 +114,9 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
     return nothing
 end
 
+default_approximation_mthod(::Euclidean, ::typeof(mean)) = EfficientEstimator()
+default_approximation_mthod(::Euclidean, ::typeof(median)) = EfficientEstimator()
+
 function det_local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
     p,
@@ -504,9 +507,8 @@ Return volume of the [`Euclidean`](@ref) manifold, i.e. infinity.
 """
 manifold_volume(::Euclidean) = Inf
 
-Statistics.mean(::Euclidean{Tuple{}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
 function Statistics.mean(
-    ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
+    ::Euclidean{Tuple{}},
     x::AbstractVector{<:Number},
     ::EfficientEstimator;
     kwargs...,
@@ -515,14 +517,67 @@ function Statistics.mean(
 end
 function Statistics.mean(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector{<:Number},
+    x::AbstractVector,
+    ::EfficientEstimator;
+    kwargs...,
+)
+    return mean(x)
+end
+function Statistics.mean(
+    ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
+    x::AbstractVector,
     w::AbstractWeights,
     ::EfficientEstimator;
     kwargs...,
 )
     return mean(x, w)
 end
-Statistics.mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
+function Statistics.mean(::Euclidean, x::AbstractVector, ::EfficientEstimator, kwargs...)
+    return mean(x)
+end
+#
+# When Statistics / Statsbase.mean! is consistent with mean, we can pass this on to them as well
+function Statistics.mean!(
+    ::Euclidean,
+    y,
+    x::AbstractVector,
+    ::EfficientEstimator;
+    kwargs...,
+)
+    n = length(x)
+    copyto!(y, first(x))
+    @inbounds for j in 2:n
+        y .+= x[j]
+    end
+    y ./= n
+    return y
+end
+function Statistics.mean!(
+    ::Euclidean,
+    y,
+    x::AbstractVector,
+    w::AbstractWeights,
+    ::EfficientEstimator;
+    kwargs...,
+)
+    n = length(x)
+    if length(w) != n
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
+    end
+    copyto!(y, first(x))
+    y .*= first(w)
+    @inbounds for j in 2:n
+        iszero(w[j]) && continue
+        y .+= w[j] .* x[j]
+    end
+    println(y)
+    y ./= sum(w)
+    return y
+end
 
 function StatsBase.mean_and_var(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
