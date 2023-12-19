@@ -289,7 +289,7 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::SymmetricPositiveDefinite, ::Any)
 
-function default_approximation_mthod(::SymmetricPositiveDefinite, ::typeof(mean))
+function default_approximation_method(::SymmetricPositiveDefinite, ::typeof(mean))
     return GeodesicInterpolation()
 end
 

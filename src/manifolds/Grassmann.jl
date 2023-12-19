@@ -171,7 +171,7 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::Grassmann, ::Any...)
 
-function default_approximation_mthod(::Grassmann, ::typeof(mean))
+function default_approximation_method(::Grassmann, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 4)
 end
 

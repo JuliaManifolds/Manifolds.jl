@@ -397,7 +397,7 @@ using [`GeodesicInterpolationWithinRadius`](@ref).
 """
 mean(::AbstractProjectiveSpace, ::Any...)
 
-function default_approximation_mthod(::AbstractProjectiveSpace, ::typeof(mean))
+function default_approximation_method(::AbstractProjectiveSpace, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 4)
 end
 

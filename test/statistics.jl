@@ -19,7 +19,7 @@ using Manifolds:
     GradientDescentEstimation,
     WeiszfeldEstimation
 import Manifolds:
-    mean, mean!, median, median!, var, mean_and_var, default_approximation_mthod
+    mean, mean!, median, median!, var, mean_and_var, default_approximation_method
 
 struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
@@ -115,7 +115,7 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
             y,
             x,
             pweights(ones(n + 1)),
-            Manifolds.default_approximation_mthod(M, mean);
+            Manifolds.default_approximation_method(M, mean);
             kwargs...,
         )
     end
@@ -402,8 +402,8 @@ end
             @test std(M, x, w) == 2.0
             @test std(M, x, w, 2) == 2.0
 
-            @test Manifolds.default_approximation_mthod(M, mean_and_std) ==
-                  Manifolds.default_approximation_mthod(M, mean)
+            @test Manifolds.default_approximation_method(M, mean_and_std) ==
+                  Manifolds.default_approximation_method(M, mean)
             @test mean_and_var(M, x, TestStatsMethod1()) == ([5.0], 16)
             @test mean_and_var(M, x, w, TestStatsMethod1()) == ([5.0], 9)
             @test mean_and_std(M, x, TestStatsMethod1()) == ([5.0], 4.0)

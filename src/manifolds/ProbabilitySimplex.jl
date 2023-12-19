@@ -346,7 +346,7 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::ProbabilitySimplex, ::Any...)
 
-default_approximation_mthod(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
+default_approximation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
 
 function parallel_transport_to!(M::ProbabilitySimplex, Y, p, X, q)
     n = get_parameter(M.size)[1]

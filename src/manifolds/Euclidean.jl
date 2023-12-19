@@ -114,8 +114,11 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
     return nothing
 end
 
-default_approximation_mthod(::Euclidean, ::typeof(mean)) = EfficientEstimator()
-default_approximation_mthod(::Euclidean, ::typeof(median)) = EfficientEstimator()
+default_approximation_method(::Euclidean, ::typeof(mean)) = EfficientEstimator()
+default_approximation_method(::Euclidean, ::typeof(median), ::Number) = EfficientEstimator()
+function default_approximation_method(::Euclidean, ::typeof(median), ::Array{T,0}) where {T}
+    return EfficientEstimator()
+end
 
 function det_local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
@@ -574,7 +577,6 @@ function Statistics.mean!(
         iszero(w[j]) && continue
         y .+= w[j] .* x[j]
     end
-    println(y)
     y ./= sum(w)
     return y
 end
@@ -600,7 +602,8 @@ end
 
 function Statistics.median(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector{<:Number};
+    x::AbstractVector{<:Number},
+    ::EfficientEstimator;
     kwargs...,
 )
     return median(x)
@@ -608,7 +611,8 @@ end
 function Statistics.median(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector{<:Number},
-    w::AbstractWeights;
+    w::AbstractWeights,
+    ::EfficientEstimator;
     kwargs...,
 )
     return median(x, w)

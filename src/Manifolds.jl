@@ -48,6 +48,7 @@ import ManifoldsBase:
     check_vector,
     copy,
     copyto!,
+    default_approximation_method,
     default_inverse_retraction_method,
     default_retraction_method,
     default_vector_transport_method,
