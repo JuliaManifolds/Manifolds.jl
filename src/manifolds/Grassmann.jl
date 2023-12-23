@@ -144,7 +144,7 @@ is_flat(M::Grassmann) = manifold_dimension(M) == 1
 @doc raw"""
     manifold_dimension(M::Grassmann)
 
-Return the dimension of the [`Grassmann(n,k,𝔽)`](@ref) manifold `M`, i.e.
+Return the dimension of the [`Grassmann`](@ref)`(n,k,𝔽)` manifold `M`, i.e.
 
 ````math
 \dim \operatorname{Gr}(n,k) = k(n-k) \dim_ℝ 𝔽,

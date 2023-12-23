@@ -2,32 +2,29 @@
     SymplecticStiefel{T,𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
 The symplectic Stiefel manifold consists of all
-$2n × 2k, \; n \geq k$ matrices satisfying the requirement
+``2n × 2k, n ≥ k`` matrices satisfying the requirement
 ````math
 \operatorname{SpSt}(2n, 2k, ℝ)
-    = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^{\mathrm{T}}Q_{2n}p = Q_{2k} \bigr\},
+    := \bigl\{ p ∈ ℝ^{2n × 2n} \ \big| \ p^{\mathrm{T}}J_{2n}p = J_{2k} \bigr\},
 ````
 where
 ````math
-Q_{2n} =
-\begin{bmatrix}
-  0_n & I_n \\
- -I_n & 0_n
-\end{bmatrix}.
+J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}.
 ````
 
 The symplectic Stiefel tangent space at ``p`` can be parametrized as [BendokatZimmermann:2021](@cite)
 ````math
-    \begin{align*}
+\begin{align*}
     T_p\operatorname{SpSt}(2n, 2k)
-    = \{&X \in \mathbb{R}^{2n \times 2k} \;|\; p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0 \}, \\
-    = \{&X = pΩ + p^sB \;|\;
+    &= \{X ∈ \mathbb{R}^{2n × 2k} ∣ p^{T}Q_{2n}X + X^{T}Q_{2n}p = 0 \}, \\
+    &= \{X = pΩ + p^sB \mid
         Ω ∈ ℝ^{2k × 2k}, Ω^+ = -Ω, \\
-        &\; p^s ∈ \operatorname{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k) × 2k}, \},
-    \end{align*}
+        &\qquad & p^s ∈ \operatorname{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k) × 2k}, \},
+\end{align*}
 ````
 where ``Ω \in \mathfrak{sp}(2n,F)`` is Hamiltonian and ``p^s`` means
 the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
+Here ``p^+`` denotes the symplecic inverse ``p^+ := J_{2k}^{\mathrm{T}}p^{\mathrm{T}}J_{2n}``.
 
 # Constructor
     SymplecticStiefel(2n::Int, 2k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
@@ -89,11 +86,11 @@ end
     check_point(M::SymplecticStiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`SymplecticStiefel`](@ref),
-$\operatorname{SpSt}(2n, 2k)$ manifold.
-That is, the point has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{+}p$ is
+``\operatorname{SpSt}(2n, 2k)`` manifold.
+That is, the point has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and ``p^{+}p`` is
 (approximately) the identity,
-where for $A \in \mathbb{R}^{2n \times 2k}$,
-$A^{+} = Q_{2k}^{\mathrm{T}}A^{\mathrm{T}}Q_{2n}$ is the symplectic inverse, with
+where for ``A \in \mathbb{R}^{2n \times 2k}``,
+``A^{+} = Q_{2k}^{\mathrm{T}}A^{\mathrm{T}}Q_{2n}`` is the symplectic inverse, with
 ````math
 Q_{2n} =
 \begin{bmatrix}
@@ -110,7 +107,7 @@ function check_point(M::SymplecticStiefel, p; kwargs...)
         return DomainError(
             expected_zero,
             (
-                "The point p does not lie on $(M) because its symplectic" *
+                "The point p does not lie on ``(M) because its symplectic" *
                 " inverse composed with itself is not the identity."
             ),
         )
@@ -123,8 +120,8 @@ end
 
 Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticStiefel`](@ref),
 ``\operatorname{SpSt}(2n, 2k)`` manifold. First recall the definition of the symplectic
-inverse for $A \in \mathbb{R}^{2n \times 2k}$,
-$A^{+} = Q_{2k}^{\mathrm{T}}A^{\mathrm{T}}Q_{2n}$ is the symplectic inverse, with
+inverse for ``A \in \mathbb{R}^{2n \times 2k}``,
+``A^{+} = Q_{2k}^{\mathrm{T}}A^{\mathrm{T}}Q_{2n}`` is the symplectic inverse, with
 ````math
     Q_{2n} =
     \begin{bmatrix}
@@ -154,7 +151,7 @@ function check_vector(M::SymplecticStiefel{<:Any,field}, p, X; kwargs...) where 
             hamiltonian_identity_norm,
             (
                 "The matrix X is not in the tangent space at point p of the" *
-                " $(M) manifold, as p^{+}X is not a Hamiltonian matrix."
+                " ``(M) manifold, as p^{+}X is not a Hamiltonian matrix."
             ),
         )
     end
@@ -623,11 +620,11 @@ function riemannian_gradient!(
 end
 
 function Base.show(io::IO, ::SymplecticStiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return print(io, "SymplecticStiefel($(2n), $(2k), $(𝔽))")
+    return print(io, "SymplecticStiefel(``(2n), ``(2k), ``(𝔽))")
 end
 function Base.show(io::IO, M::SymplecticStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
-    return print(io, "SymplecticStiefel($(2n), $(2k), $(𝔽); parameter=:field)")
+    return print(io, "SymplecticStiefel(``(2n), ``(2k), ``(𝔽); parameter=:field)")
 end
 
 @doc raw"""
