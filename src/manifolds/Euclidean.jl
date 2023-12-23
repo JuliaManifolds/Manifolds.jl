@@ -613,7 +613,7 @@ function Statistics.median(
 end
 function Statistics.median(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector,
+    x::AbstractVector{<:Number},
     w::AbstractWeights,
     ::EfficientEstimator;
     kwargs...,
