@@ -115,7 +115,10 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
 end
 
 default_approximation_method(::Euclidean, ::typeof(mean)) = EfficientEstimator()
-default_approximation_method(::Euclidean, ::typeof(median), ::Number) = EfficientEstimator()
+function default_approximation_method(::Euclidean, ::typeof(median), ::Type{<:Number})
+    return EfficientEstimator()
+end
+
 function default_approximation_method(::Euclidean, ::typeof(median), ::Array{T,0}) where {T}
     return EfficientEstimator()
 end
@@ -610,7 +613,7 @@ function Statistics.median(
 end
 function Statistics.median(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector{<:Number},
+    x::AbstractVector,
     w::AbstractWeights,
     ::EfficientEstimator;
     kwargs...,

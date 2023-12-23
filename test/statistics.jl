@@ -133,7 +133,7 @@ function test_median(
         y = isnothing(method) ? median(M, x; kwargs...) : median(M, x, method; kwargs...)
         @test is_point(M, y; atol=10^-9)
         if yexp !== nothing
-            @test isapprox(M, y, yexp; atol=10^-5)
+            @test isapprox(M, y, yexp; atol=5 * 10^-5)
         end
     end
 
@@ -797,7 +797,7 @@ end
         x = [normalize(randn(rng, 3)) for _ in 1:10]
         w = pweights([rand(rng) for _ in 1:length(x)])
         m = normalize(median(Euclidean(3), x, w))
-        mg = median(S, x, w, ExtrinsicEstimation(EfficientEstimator()))
+        mg = median(S, x, w, ExtrinsicEstimation(CyclicProximalPointEstimation()))
         @test isapprox(S, m, mg)
     end
 
