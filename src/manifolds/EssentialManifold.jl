@@ -129,7 +129,7 @@ function _isapprox(
     M::EssentialManifold,
     p,
     q::T;
-    atol=eps(real(float(number_eltype(number_eltype(T))))),
+    atol::Real=eps(real(float(number_eltype(number_eltype(T))))),
     kwargs...,
 ) where {T}
     return isapprox(distance(M, p, q), 0.0; atol=atol, kwargs...)
