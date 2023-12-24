@@ -407,7 +407,7 @@ function Statistics.mean!(
     x::AbstractVector,
     w::AbstractVector,
     e::ExtrinsicEstimation;
-    extrinsic_method=nothing,
+    extrinsic_method::Union{AbstractEstimationMethod,Nothing}=nothing,
     kwargs...,
 )
     if !isnothing(extrinsic_method)
