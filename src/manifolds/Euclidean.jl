@@ -526,9 +526,6 @@ function Statistics.mean(
 )
     return mean(x, w)
 end
-function Statistics.mean(::Euclidean, x::AbstractVector, ::EfficientEstimator, kwargs...)
-    return mean(x)
-end
 #
 # When Statistics / Statsbase.mean! is consistent with mean, we can pass this on to them as well
 function Statistics.mean!(

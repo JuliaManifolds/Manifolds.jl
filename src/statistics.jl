@@ -1092,14 +1092,6 @@ for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
             )
                 return default_approximation_method(get_embedding(M), f)
             end
-            function default_approximation_method(
-                ::TraitList{IsEmbeddedSubmanifold},
-                M::AbstractDecoratorManifold,
-                f::typeof($mf),
-                T,
-            )
-                return default_approximation_method(get_embedding(M), f, T)
-            end
         end,
     )
 end
