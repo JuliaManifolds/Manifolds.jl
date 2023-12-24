@@ -28,5 +28,6 @@ using Random: GLOBAL_RNG, seed!
             ExtrinsicEstimation(CyclicProximalPointEstimation());
             extrinsic_method=CyclicProximalPointEstimation(),
         )
+        @test isapprox(S, mg3, mg4)
     end
 end

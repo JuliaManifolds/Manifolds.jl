@@ -413,7 +413,7 @@ function Statistics.mean!(
     if !isnothing(extrinsic_method)
         Base.depwarn(
             "The Keyword Argument `extrinsic_method` is deprecated use `ExtrinsicEstimators` field instead",
-            typeof(mean!),
+            :mean!,
         )
         e = ExtrinsicEstimation(extrinsic_method)
     end
@@ -691,7 +691,7 @@ function Statistics.median!(
     if !isnothing(extrinsic_method)
         Base.depwarn(
             "The Keyword Argument `extrinsic_method` is deprecated use `ExtrinsicEstimators` field instead",
-            typeof(median!),
+            :median!,
         )
         e = ExtrinsicEstimation(extrinsic_method)
     end
