@@ -375,12 +375,6 @@ end
 function parallel_transport_direction!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, d)
     return copyto!(Y, X)
 end
-function parallel_transport_direction(M::Rotations, p, X, d)
-    expdhalf = exp(d / 2)
-    q = exp(M, p, d)
-    return transpose(q) * p * expdhalf * X * expdhalf
-end
-parallel_transport_direction(::Rotations{TypeParameter{Tuple{2}}}, p, X, d) = X
 
 function parallel_transport_to!(M::Rotations, Y, p, X, q)
     d = log(M, p, q)
