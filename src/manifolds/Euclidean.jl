@@ -119,10 +119,6 @@ function default_approximation_method(::Euclidean, ::typeof(median), ::Type{<:Nu
     return EfficientEstimator()
 end
 
-function default_approximation_method(::Euclidean, ::typeof(median), ::Array{T,0}) where {T}
-    return EfficientEstimator()
-end
-
 function det_local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
     p,
@@ -513,14 +509,6 @@ Return volume of the [`Euclidean`](@ref) manifold, i.e. infinity.
 """
 manifold_volume(::Euclidean) = Inf
 
-function Statistics.mean(
-    ::Euclidean{Tuple{}},
-    x::AbstractVector{<:Number},
-    ::EfficientEstimator;
-    kwargs...,
-)
-    return mean(x)
-end
 function Statistics.mean(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector,

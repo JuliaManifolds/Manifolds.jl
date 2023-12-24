@@ -413,7 +413,7 @@ function Statistics.mean!(
     if !isnothing(extrinsic_method)
         Base.depwarn(
             "The Keyword Argument `extrinsic_method` is deprecated use `ExtrinsicEstimators` field instead",
-            mean!,
+            typeof(mean!),
         )
         e = ExtrinsicEstimation(extrinsic_method)
     end
@@ -631,7 +631,7 @@ function Statistics.median!(
     M::AbstractManifold,
     q,
     x::AbstractVector,
-    method::AbstractApproximationMethod=default_approximation_method(M, median);
+    method::AbstractApproximationMethod=default_approximation_method(M, median, eltype(x));
     kwargs...,
 )
     w = _unit_weights(length(x))
@@ -691,7 +691,7 @@ function Statistics.median!(
     if !isnothing(extrinsic_method)
         Base.depwarn(
             "The Keyword Argument `extrinsic_method` is deprecated use `ExtrinsicEstimators` field instead",
-            mean!,
+            typeof(median!),
         )
         e = ExtrinsicEstimation(extrinsic_method)
     end
@@ -835,7 +835,7 @@ function StatsBase.mean_and_var(
     M::AbstractManifold,
     x::AbstractVector,
     w::AbstractWeights,
-    method::AbstractApproximationMethod=default_approximation_method(M, mean);
+    method::AbstractApproximationMethod=default_approximation_method(M, mean, eltype(x));
     corrected=false,
     kwargs...,
 )
@@ -846,7 +846,11 @@ end
 function StatsBase.mean_and_var(
     M::AbstractManifold,
     x::AbstractVector,
-    method::AbstractApproximationMethod=default_approximation_method(M, mean_and_var);
+    method::AbstractApproximationMethod=default_approximation_method(
+        M,
+        mean_and_var,
+        eltype(x),
+    );
     corrected=true,
     kwargs...,
 )
@@ -1087,6 +1091,14 @@ for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
                 f::typeof($mf),
             )
                 return default_approximation_method(get_embedding(M), f)
+            end
+            function default_approximation_method(
+                ::TraitList{IsEmbeddedSubmanifold},
+                M::AbstractDecoratorManifold,
+                f::typeof($mf),
+                T,
+            )
+                return default_approximation_method(get_embedding(M), f, T)
             end
         end,
     )

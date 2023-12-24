@@ -548,6 +548,9 @@ end
                 test_var(M, x)
                 test_std(M, x)
                 test_moments(M, x)
+                y = copy(x[1])
+                mean!(M, y, x)
+                @test y == mean(x)
             end
         end
     end
