@@ -87,7 +87,7 @@ as the point that satisfies the minimizer
 ````
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 
-In the general case, the [`GradientDescentEstimation`](@ref) is used to compute the mean.
+In the general case, the [`GradientDescentEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GradientDescentEstimation) is used to compute the mean.
     mean(
         M::AbstractManifold,
         x::AbstractVector,
@@ -110,7 +110,7 @@ Compute the mean using the specified `method`.
         kwargs...,
     )
 
-Compute the mean using the gradient descent scheme [`GradientDescentEstimation`](@ref).
+Compute the mean using the gradient descent scheme [`GradientDescentEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GradientDescentEstimation).
 
 Optionally, provide `p0`, the starting point (by default set to the first data
 point). `stop_iter` denotes the maximal number of iterations to perform and the
@@ -243,7 +243,7 @@ end
 
 Estimate the Riemannian center of mass of `x` in an online fashion using
 repeated weighted geodesic interpolation. See
-[`GeodesicInterpolation`](@ref) for details.
+[`GeodesicInterpolation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolation) for details.
 
 If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered for computing the mean.
@@ -305,7 +305,7 @@ end
     )
 
 Estimate the Riemannian center of mass of `x` using
-[`GeodesicInterpolationWithinRadius`](@ref).
+[`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius).
 
 See [`mean`](@ref mean(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
 for a description of `kwargs`.
@@ -388,7 +388,7 @@ end
     )
 
 Estimate the Riemannian center of mass of `x` using
-[`ExtrinsicEstimation`](@ref), i.e. by computing the mean in the embedding and projecting
+[`ExtrinsicEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.ExtrinsicEstimation), i.e. by computing the mean in the embedding and projecting
 the result back.
 
 See [`mean`](@ref mean(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
@@ -448,7 +448,7 @@ Compute the (optionally weighted) Riemannian median of the vector `x` of points 
 where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).
 
-In the general case, the [`CyclicProximalPointEstimation`](@ref) is used to compute the
+In the general case, the [`CyclicProximalPointEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.CyclicProximalPointEstimation) is used to compute the
 median. However, this default may be overloaded for specific manifolds.
 
 Compute the median using the specified `method`.
@@ -479,7 +479,7 @@ end
         kwargs...,
     )
 
-Compute the median using [`CyclicProximalPointEstimation`](@ref).
+Compute the median using [`CyclicProximalPointEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.CyclicProximalPointEstimation).
 
 Optionally, provide `p0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
@@ -510,7 +510,7 @@ Statistics.median(
         kwargs...,
     )
 
-Estimate the median of `x` using [`ExtrinsicEstimation`](@ref), i.e. by computing the median
+Estimate the median of `x` using [`ExtrinsicEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.ExtrinsicEstimation), i.e. by computing the median
 in the embedding and projecting the result back.
 
 See [`median`](@ref median(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::CyclicProximalPointEstimation))
@@ -537,7 +537,7 @@ Statistics.median(
         kwargs...,
     )
 
-Compute the median using [`WeiszfeldEstimation`](@ref).
+Compute the median using [`WeiszfeldEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.WeiszfeldEstimation).
 
 Optionally, provide `p0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
@@ -888,7 +888,7 @@ If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered. Optionally, pass `retraction` and `inverse_retraction`
 method types to specify the (inverse) retraction.
 
-See [`GeodesicInterpolation`](@ref) for details on the geodesic
+See [`GeodesicInterpolation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolation) for details on the geodesic
 interpolation method.
 
 !!! note
@@ -954,7 +954,7 @@ end
 Use repeated weighted geodesic interpolation to estimate the mean.
 Simultaneously, use a Welford-like recursion to estimate the variance.
 
-See [`GeodesicInterpolationWithinRadius`](@ref) and
+See [`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius) and
 [`mean_and_var`](@ref mean_and_var(::AbstractManifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolation))
 for more information.
 """

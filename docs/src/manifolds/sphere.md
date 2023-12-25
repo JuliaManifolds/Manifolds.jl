@@ -66,6 +66,6 @@ plot!(scene, M, pts2, vecs; wireframe = false, linewidth=1.5)
 ## Literature
 
 ```@bibliography
-Pages = ["manifolds/sphere.md"]
+Pages = ["sphere.md"]
 Canonical=false
 ```
