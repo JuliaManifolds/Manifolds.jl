@@ -393,7 +393,7 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of points in vector `x`
-using [`GeodesicInterpolationWithinRadius`](@ref).
+using [`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius).
 """
 mean(::AbstractProjectiveSpace, ::Any...)
 

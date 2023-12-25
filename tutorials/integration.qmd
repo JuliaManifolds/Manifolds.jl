@@ -175,6 +175,6 @@ See [BoyaSudarshanTilma:2003](@cite) for some considerations on symmetric spaces
 ## Literature
 
 ```@bibliography
-Pages = ["tutorials/integration.md"]
+Pages = ["integration.md"]
 Canonical=false
 ```

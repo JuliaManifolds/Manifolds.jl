@@ -39,6 +39,6 @@ Order = [:type, :function]
 ## Literature
 
 ```@bibliography
-Pages = ["manifolds/rotations.md"]
+Pages = ["rotations.md"]
 Canonical=false
 ```

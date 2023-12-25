@@ -180,6 +180,6 @@ plot!(scene, M, [pts[2], origin], geodesic_interpolation=100)
 ## Literature
 
 ```@bibliography
-Pages = ["manifolds/hyperbolic.md"]
+Pages = ["hyperbolic.md"]
 Canonical=false
 ```

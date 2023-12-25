@@ -31,6 +31,6 @@ Order = [:type, :function]
 ## Literature
 
 ```@bibliography
-Pages = ["manifolds/symplecticstiefel.md"]
+Pages = ["symplecticstiefel.md"]
 Canonical=false
 ```
