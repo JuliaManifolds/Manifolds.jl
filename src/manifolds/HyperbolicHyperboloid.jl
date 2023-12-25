@@ -35,8 +35,14 @@ function check_point(M::Hyperbolic, p; kwargs...)
     return nothing
 end
 
-function check_vector(M::Hyperbolic, p, X; kwargs...)
-    if !isapprox(minkowski_metric(p, X), 0.0; kwargs...)
+function check_vector(
+    M::Hyperbolic,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    if !isapprox(minkowski_metric(p, X), 0; atol=atol, kwargs...)
         return DomainError(
             abs(minkowski_metric(p, X)),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal (with respect to the Minkowski inner product) in the embedding.",

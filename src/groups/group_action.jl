@@ -116,7 +116,7 @@ where element `a` is acting on `p`, with respect to the group element.
 
 Let ``\mathcal G`` be the group acting on manifold ``\mathcal M`` by the action `A`.
 The action is of element ``g ∈ \mathcal G`` on a point ``p ∈ \mathcal M``.
-The differential transforms vector `X` from the tangent space at `a ∈ \mathcal G`, 
+The differential transforms vector `X` from the tangent space at `a ∈ \mathcal G`,
 ``X ∈ T_a \mathcal G`` into a tangent space of the manifold ``\mathcal M``.
 When action on element `p` is written as ``\mathrm{d}τ^p``, with the specified left or right
 convention, the differential transforms vectors
@@ -193,7 +193,7 @@ end
         A::AbstractGroupAction,
         pts,
         p,
-        mean_method::AbstractEstimationMethod = GradientDescentEstimation(),
+        mean_method::AbstractApproximationMethod = GradientDescentEstimation(),
     )
 
 Calculate an action element ``a`` of action `A` that is the mean element of the orbit of `p`
@@ -210,7 +210,7 @@ function center_of_orbit(
     A::AbstractGroupAction,
     pts::AbstractVector,
     q,
-    mean_method::AbstractEstimationMethod=GradientDescentEstimation(),
+    mean_method::AbstractApproximationMethod=GradientDescentEstimation(),
 )
     alignments = map(p -> optimal_alignment(A, q, p), pts)
     return mean(base_group(A), alignments, mean_method)

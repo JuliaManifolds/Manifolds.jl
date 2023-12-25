@@ -78,8 +78,14 @@ check_vector(::Circle{ℝ}, ::Any...; ::Any...)
 function check_vector(M::Circle{ℝ}, p, X; kwargs...)
     return nothing
 end
-function check_vector(M::Circle{ℂ}, p, X; kwargs...)
-    if !isapprox(abs(complex_dot(p, X)), 0.0; kwargs...)
+function check_vector(
+    M::Circle{ℂ},
+    p,
+    X::T;
+    atol::Real=sqrt(eps(real(float(number_eltype(T))))),
+    kwargs...,
+) where {T}
+    if !isapprox(abs(complex_dot(p, X)), 0; atol=atol, kwargs...)
         return DomainError(
             abs(complex_dot(p, X)),
             "The value $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",
@@ -160,7 +166,7 @@ function Base.exp(M::Circle{ℂ}, p::Number, X::Number, t::Number)
 end
 
 exp!(::Circle{ℝ}, q, p, X) = (q .= sym_rem(p + X))
-exp!(::Circle{ℝ}, q, p, X, t::Number) = (q .= sym_rem(p + t * X))
+exp!(::Circle{ℝ}, q, p, X, t::Number) = (q .= sym_rem(p[] + t * X[]))
 function exp!(M::Circle{ℂ}, q, p, X)
     θ = norm(M, p, X)
     q .= cos(θ) * p + usinc(θ) * X
@@ -536,6 +542,11 @@ function parallel_transport_to!(M::Circle{ℂ}, Y, p, X, q)
         Y .-= factor .* (p + q)
     end
     return Y
+end
+
+# dispatch before allocation
+function _vector_transport_direction(M::Circle, p, X, d, ::ParallelTransport)
+    return parallel_transport_to(M, p, X, exp(M, p, d))
 end
 
 """

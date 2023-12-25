@@ -288,4 +288,10 @@ using Manifolds: TFVector, CoTFVector
             )
         end
     end
+    @testset "Mixed array dimensions for exp" begin
+        M = Circle()
+        p = fill(0.0)
+        exp!(M, p, p, [1.0], 2.0)
+        @test p ≈ fill(2.0)
+    end
 end

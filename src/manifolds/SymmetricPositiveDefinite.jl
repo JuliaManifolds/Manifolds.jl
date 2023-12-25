@@ -165,7 +165,7 @@ Lie group.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::SymmetricPositiveDefinite, p, X; kwargs...)
-    if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
+    if !isapprox(X, transpose(X); kwargs...)
         return DomainError(
             X,
             "The vector $(X) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.",
@@ -289,7 +289,7 @@ Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` 
 """
 mean(::SymmetricPositiveDefinite, ::Any)
 
-function default_estimation_method(::SymmetricPositiveDefinite, ::typeof(mean))
+function default_approximation_method(::SymmetricPositiveDefinite, ::typeof(mean))
     return GeodesicInterpolation()
 end
 

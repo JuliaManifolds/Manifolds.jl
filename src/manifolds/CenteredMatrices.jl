@@ -35,9 +35,14 @@ zero.
 
 The tolerance for the column sums of `p` can be set using `kwargs...`.
 """
-function check_point(M::CenteredMatrices, p; kwargs...)
+function check_point(
+    M::CenteredMatrices,
+    p::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
     m, n = get_parameter(M.size)
-    if !isapprox(sum(p, dims=1), zeros(1, n); kwargs...)
+    if !isapprox(sum(p, dims=1), zeros(1, n); atol=atol, kwargs...)
         return DomainError(
             p,
             string(
@@ -56,9 +61,15 @@ Check whether `X` is a tangent vector to manifold point `p` on the
 sum to zero and its values are from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
 The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
 """
-function check_vector(M::CenteredMatrices, p, X; kwargs...)
+function check_vector(
+    M::CenteredMatrices,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
     m, n = get_parameter(M.size)
-    if !isapprox(sum(X, dims=1), zeros(1, n); kwargs...)
+    if !isapprox(sum(X, dims=1), zeros(1, n); atol=atol, kwargs...)
         return DomainError(
             X,
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum to zero.",

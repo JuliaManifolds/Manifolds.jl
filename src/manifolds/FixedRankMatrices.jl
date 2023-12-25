@@ -324,15 +324,21 @@ Check whether the tangent [`UMVTVector`](@ref) `X` is from the tangent space of 
 [`FixedRankMatrices`](@ref) `M`, i.e. that `v.U` and `v.Vt` are (columnwise) orthogonal to `x.U` and `x.Vt`,
 respectively, and its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
 """
-function check_vector(M::FixedRankMatrices, p::SVDMPoint, X::UMVTVector; kwargs...)
+function check_vector(
+    M::FixedRankMatrices,
+    p::SVDMPoint,
+    X::UMVTVector;
+    atol::Real=sqrt(prod(representation_size(M)) * eps(float(eltype(p.U)))),
+    kwargs...,
+)
     m, n, k = get_parameter(M.size)
-    if !isapprox(X.U' * p.U, zeros(k, k); kwargs...)
+    if !isapprox(X.U' * p.U, zeros(k, k); atol=atol, kwargs...)
         return DomainError(
             norm(X.U' * p.U - zeros(k, k)),
             "The tangent vector $(X) is not a tangent vector to $(p) on $(M) since v.U'x.U is not zero. ",
         )
     end
-    if !isapprox(X.Vt * p.Vt', zeros(k, k); kwargs...)
+    if !isapprox(X.Vt * p.Vt', zeros(k, k); atol=atol, kwargs...)
         return DomainError(
             norm(X.Vt * p.Vt - zeros(k, k)),
             "The tangent vector $(X) is not a tangent vector to $(p) on $(M) since v.V'x.V is not zero.",
