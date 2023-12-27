@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.10] – 2023-12-27
 
+### Added
+
+* Compatibility with `RecursiveArrayTools` v3.
+
 ### Fixed
 
 * Fixed mixed array index number in-place `parallel_transport_to!` on real `Circle`, on Julia 1.6.
