@@ -213,6 +213,8 @@ Base.exp(::Euclidean, p, X, t::Number) = p .+ t .* X
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 exp!(::Euclidean, q, p, X, t::Number) = (q .= p .+ t .* X)
+exp!(::Euclidean{TypeParameter{Tuple{}}}, q, p, X, t::Number) = (q .= p[] + t * X[])
+exp!(::Euclidean{Tuple{}}, q, p, X, t::Number) = (q .= p[] + t * X[])
 
 function get_basis_diagonalizing(
     M::Euclidean,
@@ -677,6 +679,10 @@ the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
 """
 parallel_transport_to(::Euclidean, ::Any, X, ::Any) = X
 parallel_transport_to!(::Euclidean, Y, ::Any, X, ::Any) = copyto!(Y, X)
+function parallel_transport_to!(::Euclidean{TypeParameter{Tuple{}}}, Y, ::Any, X, ::Any)
+    return copyto!(Y, X[])
+end
+parallel_transport_to!(::Euclidean{Tuple{}}, Y, ::Any, X, ::Any) = copyto!(Y, X[])
 
 @doc raw"""
     project(M::Euclidean, p)
