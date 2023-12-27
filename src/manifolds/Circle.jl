@@ -532,7 +532,7 @@ function parallel_transport_to(M::Circle{ℂ}, p::Number, X::Number, q::Number)
     return Y
 end
 
-parallel_transport_to!(::Circle{ℝ}, Y, p, X, q) = (Y .= X)
+parallel_transport_to!(::Circle{ℝ}, Y, p, X, q) = (Y .= X[])
 function parallel_transport_to!(M::Circle{ℂ}, Y, p, X, q)
     X_pq = log(M, p, q)
     Xnorm = norm(M, p, X_pq)
