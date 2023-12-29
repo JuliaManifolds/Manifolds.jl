@@ -328,11 +328,11 @@ manifold_volume(::Hyperbolic) = Inf
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` on the
-[`Hyperbolic`](@ref) space using [`CyclicProximalPointEstimation`](@ref).
+[`Hyperbolic`](@ref) space using [`CyclicProximalPointEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.CyclicProximalPointEstimation).
 """
 mean(::Hyperbolic, ::Any...)
 
-default_estimation_method(::Hyperbolic, ::typeof(mean)) = CyclicProximalPointEstimation()
+default_approximation_method(::Hyperbolic, ::typeof(mean)) = CyclicProximalPointEstimation()
 
 @doc raw"""
     project(M::Hyperbolic, p, X)

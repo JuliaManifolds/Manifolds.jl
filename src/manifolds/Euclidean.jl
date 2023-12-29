@@ -114,6 +114,11 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
     return nothing
 end
 
+default_approximation_method(::Euclidean, ::typeof(mean)) = EfficientEstimator()
+function default_approximation_method(::Euclidean, ::typeof(median), ::Type{<:Number})
+    return EfficientEstimator()
+end
+
 function det_local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,EuclideanMetric},
     p,
@@ -208,6 +213,8 @@ Base.exp(::Euclidean, p, X, t::Number) = p .+ t .* X
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 exp!(::Euclidean, q, p, X, t::Number) = (q .= p .+ t .* X)
+exp!(::Euclidean{TypeParameter{Tuple{}}}, q, p, X, t::Number) = (q .= p[] + t * X[])
+exp!(::Euclidean{Tuple{}}, q, p, X, t::Number) = (q .= p[] + t * X[])
 
 function get_basis_diagonalizing(
     M::Euclidean,
@@ -504,23 +511,65 @@ Return volume of the [`Euclidean`](@ref) manifold, i.e. infinity.
 """
 manifold_volume(::Euclidean) = Inf
 
-Statistics.mean(::Euclidean{Tuple{}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
 function Statistics.mean(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector{<:Number};
+    x::AbstractVector,
+    ::EfficientEstimator;
     kwargs...,
 )
     return mean(x)
 end
 function Statistics.mean(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector{<:Number},
-    w::AbstractWeights;
+    x::AbstractVector,
+    w::AbstractWeights,
+    ::EfficientEstimator;
     kwargs...,
 )
     return mean(x, w)
 end
-Statistics.mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
+#
+# When Statistics / Statsbase.mean! is consistent with mean, we can pass this on to them as well
+function Statistics.mean!(
+    ::Euclidean,
+    y,
+    x::AbstractVector,
+    ::EfficientEstimator;
+    kwargs...,
+)
+    n = length(x)
+    copyto!(y, first(x))
+    @inbounds for j in 2:n
+        y .+= x[j]
+    end
+    y ./= n
+    return y
+end
+function Statistics.mean!(
+    ::Euclidean,
+    y,
+    x::AbstractVector,
+    w::AbstractWeights,
+    ::EfficientEstimator;
+    kwargs...,
+)
+    n = length(x)
+    if length(w) != n
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
+    end
+    copyto!(y, first(x))
+    y .*= first(w)
+    @inbounds for j in 2:n
+        iszero(w[j]) && continue
+        y .+= w[j] .* x[j]
+    end
+    y ./= sum(w)
+    return y
+end
 
 function StatsBase.mean_and_var(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
@@ -543,7 +592,8 @@ end
 
 function Statistics.median(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector{<:Number};
+    x::AbstractVector{<:Number},
+    ::EfficientEstimator;
     kwargs...,
 )
     return median(x)
@@ -551,7 +601,8 @@ end
 function Statistics.median(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector{<:Number},
-    w::AbstractWeights;
+    w::AbstractWeights,
+    ::EfficientEstimator;
     kwargs...,
 )
     return median(x, w)
@@ -628,6 +679,10 @@ the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
 """
 parallel_transport_to(::Euclidean, ::Any, X, ::Any) = X
 parallel_transport_to!(::Euclidean, Y, ::Any, X, ::Any) = copyto!(Y, X)
+function parallel_transport_to!(::Euclidean{TypeParameter{Tuple{}}}, Y, ::Any, X, ::Any)
+    return copyto!(Y, X[])
+end
+parallel_transport_to!(::Euclidean{Tuple{}}, Y, ::Any, X, ::Any) = copyto!(Y, X[])
 
 @doc raw"""
     project(M::Euclidean, p)

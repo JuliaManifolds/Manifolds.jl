@@ -125,8 +125,14 @@ exp(::EssentialManifold, ::Any...)
 
 get_iterator(::EssentialManifold) = Base.OneTo(2)
 
-function _isapprox(M::EssentialManifold, p, q; kwargs...)
-    return isapprox(distance(M, p, q), 0.0; kwargs...)
+function _isapprox(
+    M::EssentialManifold,
+    p,
+    q::T;
+    atol::Real=eps(real(float(number_eltype(number_eltype(T))))),
+    kwargs...,
+) where {T}
+    return isapprox(distance(M, p, q), 0.0; atol=atol, kwargs...)
 end
 
 """

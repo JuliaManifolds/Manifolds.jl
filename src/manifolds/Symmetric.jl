@@ -51,8 +51,8 @@ whether `p` is a symmetric matrix of size `(n,n)` with values from the correspon
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_point(M::SymmetricMatrices{<:Any,𝔽}, p; kwargs...) where {𝔽}
-    if !isapprox(norm(p - p'), 0.0; kwargs...)
+function check_point(M::SymmetricMatrices, p; kwargs...)
+    if !isapprox(p, p'; kwargs...)
         return DomainError(
             norm(p - p'),
             "The point $(p) does not lie on $M, since it is not symmetric.",
@@ -70,8 +70,8 @@ and its values have to be from the correct [`AbstractNumbers`](https://juliamani
 
 The tolerance for the symmetry of `X` can be set using `kwargs...`.
 """
-function check_vector(M::SymmetricMatrices{<:Any,𝔽}, p, X; kwargs...) where {𝔽}
-    if !isapprox(norm(X - X'), 0.0; kwargs...)
+function check_vector(M::SymmetricMatrices, p, X; kwargs...)
+    if !isapprox(X, X'; kwargs...)
         return DomainError(
             norm(X - X'),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not symmetric.",

@@ -10,7 +10,7 @@ Order = [:type,:function]
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/GrassmannStiefel.jl"]
+Pages = ["GrassmannStiefel.jl"]
 Order = [:type,:function]
 ```
 
@@ -26,6 +26,6 @@ Order = [:type,:function]
 ## Literature
 
 ```@bibliography
-Pages = ["manifolds/grassmann.md"]
+Pages = ["grassmann.md"]
 Canonical=false
 ```

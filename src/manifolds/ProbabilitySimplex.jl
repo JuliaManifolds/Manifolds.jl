@@ -129,8 +129,14 @@ after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
 `X` has to be of same dimension as `p` and its elements have to sum to one.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_vector(M::ProbabilitySimplex, p, X; kwargs...)
-    if !isapprox(sum(X), 0.0; kwargs...)
+function check_vector(
+    M::ProbabilitySimplex,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    if !isapprox(sum(X), 0.0; atol=atol, kwargs...)
         return DomainError(
             sum(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its elements do not sum up to 0.",
@@ -336,11 +342,11 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolation`](@ref).
+[`GeodesicInterpolation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolation).
 """
 mean(::ProbabilitySimplex, ::Any...)
 
-default_estimation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
+default_approximation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
 
 function parallel_transport_to!(M::ProbabilitySimplex, Y, p, X, q)
     n = get_parameter(M.size)[1]

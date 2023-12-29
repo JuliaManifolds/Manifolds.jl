@@ -276,11 +276,11 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolationWithinRadius`](@ref).
+[`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius).
 """
 mean(::GeneralizedGrassmann, ::Any...)
 
-function default_estimation_method(::GeneralizedGrassmann, ::typeof(mean))
+function default_approximation_method(::GeneralizedGrassmann, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 4)
 end
 

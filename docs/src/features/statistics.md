@@ -9,6 +9,6 @@ Order = [:type, :function]
 ## Literature
 
 ```@bibliography
-Pages = ["features/statistics.md"]
+Pages = ["statistics.md"]
 Canonical=false
 ```

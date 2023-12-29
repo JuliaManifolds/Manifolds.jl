@@ -126,8 +126,14 @@ Check whether `X` is a tangent vector in the tangent space of `p` on the
 tangent space of the embedding and that the Frobenius inner product
 $⟨p, X⟩_{\mathrm{F}} = 0$.
 """
-function check_vector(M::AbstractProjectiveSpace, p, X; kwargs...)
-    if !isapprox(dot(p, X), 0; kwargs...)
+function check_vector(
+    M::AbstractProjectiveSpace,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    if !isapprox(dot(p, X), 0; atol=atol, kwargs...)
         return DomainError(
             dot(p, X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not" *
@@ -387,11 +393,11 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of points in vector `x`
-using [`GeodesicInterpolationWithinRadius`](@ref).
+using [`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius).
 """
 mean(::AbstractProjectiveSpace, ::Any...)
 
-function default_estimation_method(::AbstractProjectiveSpace, ::typeof(mean))
+function default_approximation_method(::AbstractProjectiveSpace, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 4)
 end
 

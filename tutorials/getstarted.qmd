@@ -429,7 +429,7 @@ Again, for all of these, the concrete types only have to be used if you want to 
 
 ````{=commonmark}
 ```@bibliography
-Pages = ["tutorials/getstarted.md"]
+Pages = ["getstarted.md"]
 Canonical=false
 ```
 ````

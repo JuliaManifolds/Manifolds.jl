@@ -212,10 +212,15 @@ Q_{2n} =
 ````
 The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
-function check_point(M::Symplectic, p; kwargs...)
+function check_point(
+    M::Symplectic,
+    p::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
     # Perform check that the matrix lives on the real symplectic manifold:
     expected_zero = norm(inv(M, p) * p - LinearAlgebra.I)
-    if !isapprox(expected_zero, zero(eltype(p)); kwargs...)
+    if !isapprox(expected_zero, 0; atol=atol, kwargs...)
         return DomainError(
             expected_zero,
             (
@@ -245,10 +250,16 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 check_vector(::Symplectic, ::Any...)
 
-function check_vector(M::Symplectic, p, X; kwargs...)
+function check_vector(
+    M::Symplectic,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
     Q = SymplecticMatrix(p, X)
     tangent_requirement_norm = norm(X' * Q * p + p' * Q * X, 2)
-    if !isapprox(tangent_requirement_norm, 0.0; kwargs...)
+    if !isapprox(tangent_requirement_norm, 0; atol=atol, kwargs...)
         return DomainError(
             tangent_requirement_norm,
             (

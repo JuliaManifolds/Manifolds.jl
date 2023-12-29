@@ -350,12 +350,12 @@ using RecursiveArrayTools: ArrayPartition
         Z = -X
         H1 = riemannian_Hessian(N, p, Y, Z, X)
         H2 = ArrayPartition(
-            [riemannian_Hessian(M, p[i, :], Y[i, :], Z[i, :], X[i, :]) for i in 1:2]...,
+            [riemannian_Hessian(M, p.x[i], Y.x[i], Z.x[i], X.x[i]) for i in 1:2]...,
         )
         @test H1 == H2
         V = ArrayPartition([0.2, 0.0, 0.0], [0.0, 0.0, 0.3])
         W1 = Weingarten(N, p, X, V)
-        W2 = ArrayPartition([Weingarten(M, p[i, :], X[i, :], V[i, :]) for i in 1:2]...)
+        W2 = ArrayPartition([Weingarten(M, p.x[i], X.x[i], V.x[i]) for i in 1:2]...)
         @test W1 == W2
     end
     @testset "Manifold volume" begin

@@ -40,6 +40,6 @@ Order = [:type, :function]
 ## Literature
 
 ```@bibliography
-Pages = ["manifolds/symplectic.md"]
+Pages = ["symplectic.md"]
 Canonical=false
 ```

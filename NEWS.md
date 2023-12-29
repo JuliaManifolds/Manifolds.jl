@@ -11,7 +11,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * added the real symplectic Grassmann manifold `SymplecticGrassmann`
 
-## [0.9.8] * 2023-11-17
+## [0.9.11] – 2023-12-27
+
+### Fixed
+
+* Fixed mixed array index number in-place `parallel_transport_to!` on zero-index `Euclidean`, on Julia 1.6.
+
+## [0.9.10] – 2023-12-27
+
+### Added
+
+* Compatibility with `RecursiveArrayTools` v3.
+
+### Fixed
+
+* Fixed mixed array index number in-place `parallel_transport_to!` on real `Circle`, on Julia 1.6.
+* Violations of MD004 lint rule in this file.
+
+## [0.9.9] – 2023-12-25
+
+### Fixed
+
+* introduced a nonzero `atol` for all point and vector checks that compre to zero.
+  This makes those checks a bit more relaxed by default and resolves [#630](https://github.com/JuliaManifolds/Manifolds.jl/issues/630).
+* `default_estimation_method(M, f)` is deprecated, use `default_approximation_method(M, f)` for your specific method `f` on the manifold `M`.
+* `AbstractEstimationMethod` is deprecated, use `AbstractApproximationMethod` instead.
+
+## [0.9.8] - 2023-11-17
 
 ### Fixed
 

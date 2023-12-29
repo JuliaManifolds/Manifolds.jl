@@ -148,9 +148,15 @@ their distance, if they are not the same, i.e. that $d_{\mathcal M}(p,q) \approx
 the comparison is performed with the classical `isapprox`.
 The `kwargs...` are passed on to this accordingly.
 """
-function _isapprox(M::SymmetricPositiveSemidefiniteFixedRank, p, q; kwargs...)
-    return isapprox(norm(p - q), 0.0; kwargs...) ||
-           isapprox(distance(M, p, q), 0.0; kwargs...)
+function _isapprox(
+    M::SymmetricPositiveSemidefiniteFixedRank,
+    p::T,
+    q;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    return isapprox(norm(p - q), 0; atol=atol, kwargs...) ||
+           isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
 end
 
 """
