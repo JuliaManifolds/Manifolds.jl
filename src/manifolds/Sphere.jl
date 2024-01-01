@@ -12,31 +12,31 @@ end
 @doc raw"""
     Sphere{T,𝔽} <: AbstractSphere{𝔽}
 
-The (unit) sphere manifold $𝕊^{n}$ is the set of all unit norm vectors in $𝔽^{n+1}$.
+The (unit) sphere manifold ``𝕊^{n}`` is the set of all unit norm vectors in ``𝔽^{n+1}``.
 The sphere is represented in the embedding, i.e.
 
 ````math
 𝕊^{n} := \bigl\{ p \in 𝔽^{n+1}\ \big|\ \lVert p \rVert = 1 \bigr\}
 ````
 
-where $𝔽\in\{ℝ,ℂ,ℍ\}$. Note that compared to the [`ArraySphere`](@ref), here the
-argument `n` of the manifold is the dimension of the manifold, i.e. $𝕊^{n} ⊂ 𝔽^{n+1}$, $n\in ℕ$.
+where ``𝔽\in\{ℝ,ℂ,ℍ\}``. Note that compared to the [`ArraySphere`](@ref), here the
+argument `n` of the manifold is the dimension of the manifold, i.e. ``𝕊^{n} ⊂ 𝔽^{n+1}``, ``n\in ℕ``.
 
-The tangent space at point $p$ is given by
+The tangent space at point ``p`` is given by
 
 ````math
 T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ \Re(⟨p,X⟩) = 0 \bigr \},
 ````
 
-where $𝔽\in\{ℝ,ℂ,ℍ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
-embedding $𝔽^{n+1}$.
+where ``𝔽\in\{ℝ,ℂ,ℍ\}`` and ``⟨\cdot,\cdot⟩`` denotes the inner product in the
+embedding ``𝔽^{n+1}``.
 
-For $𝔽=ℂ$, the manifold is the complex sphere, written $ℂ𝕊^n$, embedded in $ℂ^{n+1}$.
-$ℂ𝕊^n$ is the complexification of the real sphere $𝕊^{2n+1}$.
-Likewise, the quaternionic sphere $ℍ𝕊^n$ is the quaternionification of the real sphere
-$𝕊^{4n+3}$.
-Consequently, $ℂ𝕊^0$ is equivalent to $𝕊^1$ and [`Circle`](@ref), while $ℂ𝕊^1$ and $ℍ𝕊^0$
-are equivalent to $𝕊^3$, though with different default representations.
+For ``𝔽=ℂ``, the manifold is the complex sphere, written ``ℂ𝕊^n``, embedded in ``ℂ^{n+1}``.
+``ℂ𝕊^n`` is the complexification of the real sphere ``𝕊^{2n+1}``.
+Likewise, the quaternionic sphere ``ℍ𝕊^n`` is the quaternionification of the real sphere
+``𝕊^{4n+3}``.
+Consequently, ``ℂ𝕊^0`` is equivalent to ``𝕊^1`` and [`Circle`](@ref), while ``ℂ𝕊^1`` and ``ℍ𝕊^0``
+are equivalent to ``𝕊^3``, though with different default representations.
 
 This manifold is modeled as a special case of the more general case, i.e. as an embedded
 manifold to the [`Euclidean`](@ref), and several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product
@@ -46,7 +46,7 @@ and the [`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited f
 
     Sphere(n[, field=ℝ])
 
-Generate the (real-valued) sphere $𝕊^{n} ⊂ ℝ^{n+1}$, where `field` can also be used to
+Generate the (real-valued) sphere ``𝕊^{n} ⊂ ℝ^{n+1}``, where `field` can also be used to
 generate the complex- and quaternionic-valued sphere.
 """
 struct Sphere{T,𝔽} <: AbstractSphere{𝔽}
@@ -60,8 +60,8 @@ end
 @doc raw"""
     ArraySphere{T<:Tuple,𝔽} <: AbstractSphere{𝔽}
 
-The (unit) sphere manifold $𝕊^{n₁,n₂,...,nᵢ}$ is the set of all unit (Frobenius) norm elements of
-$𝔽^{n₁,n₂,...,nᵢ}$, where $𝔽\in\{ℝ,ℂ,ℍ\}. The generalized sphere is
+The (unit) sphere manifold ``𝕊^{n₁,n₂,...,nᵢ}`` is the set of all unit (Frobenius) norm elements of
+``𝔽^{n₁,n₂,...,nᵢ}``, where ``𝔽\in\{ℝ,ℂ,ℍ\}. The generalized sphere is
 represented in the embedding, and supports arbitrary sized arrays or in other words arbitrary
 tensors of unit norm. The set formally reads
 
@@ -69,19 +69,19 @@ tensors of unit norm. The set formally reads
 𝕊^{n_1, n_2, …, n_i} := \bigl\{ p \in 𝔽^{n_1, n_2, …, n_i}\ \big|\ \lVert p \rVert = 1 \bigr\}
 ````
 
-where $𝔽\in\{ℝ,ℂ,ℍ\}$. Setting $i=1$ and $𝔽=ℝ$  this  simplifies to unit vectors in $ℝ^n$, see
+where ``𝔽\in\{ℝ,ℂ,ℍ\}``. Setting ``i=1`` and ``𝔽=ℝ``  this  simplifies to unit vectors in ``ℝ^n``, see
 [`Sphere`](@ref) for this special case. Note that compared to this classical case,
 the argument for the generalized case here is given by the dimension of the embedding.
 This means that `Sphere(2)` and `ArraySphere(3)` are the same manifold.
 
-The tangent space at point $p$ is given by
+The tangent space at point ``p`` is given by
 
 ````math
 T_p 𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ \Re(⟨p,X⟩) = 0 \bigr \},
 ````
 
-where $𝔽\in\{ℝ,ℂ,ℍ\}$ and $⟨\cdot,\cdot⟩$ denotes the (Frobenius) inner product in the
-embedding $𝔽^{n_1, n_2, …, n_i}$.
+where ``𝔽\in\{ℝ,ℂ,ℍ\}`` and ``⟨\cdot,\cdot⟩`` denotes the (Frobenius) inner product in the
+embedding ``𝔽^{n_1, n_2, …, n_i}``.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
@@ -91,7 +91,7 @@ several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product 
 
     ArraySphere(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol=:type)
 
-Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where $𝔽$ defaults to the real-valued case $ℝ$.
+Generate sphere in ``𝔽^{n_1, n_2, …, n_i}``, where ``𝔽`` defaults to the real-valued case ``ℝ``.
 """
 struct ArraySphere{T,𝔽} <: AbstractSphere{𝔽}
     size::T
@@ -187,7 +187,7 @@ Compute the exponential map from `p` in the tangent direction `X` on the [`Abstr
 ````math
 \exp_p X = \cos(\lVert X \rVert_p)p + \sin(\lVert X \rVert_p)\frac{X}{\lVert X \rVert_p},
 ````
-where $\lVert X \rVert_p$ is the [`norm`](@ref norm(::AbstractSphere,p,X)) on the
+where ``\lVert X \rVert_p`` is the [`norm`](@ref norm(::AbstractSphere,p,X)) on the
 tangent space at `p` of the [`AbstractSphere`](@ref) `M`.
 """
 exp(::AbstractSphere, ::Any...)
@@ -221,19 +221,24 @@ function get_basis_diagonalizing(M::Sphere{<:Any,ℝ}, p, B::DiagonalizingOrthon
 end
 
 @doc raw"""
-    get_coordinates(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
+    get_coordinates(M::AbstractSphere, p, X, B::DefaultOrthonormalBasis)
 
 Represent the tangent vector `X` at point `p` from the [`AbstractSphere`](@ref) `M` in
 an orthonormal basis by rotating the hyperplane containing `X` to a hyperplane whose
-normal is the $x$-axis.
+normal is the ``x``-axis.
 
-Given $q = p λ + x$, where $λ = \operatorname{sgn}(⟨x, p⟩)$, and $⟨⋅, ⋅⟩_{\mathrm{F}}$
-denotes the Frobenius inner product, the formula for $Y$ is
+Given ``q = p λ + x``, where ``λ = \operatorname{sgn}(⟨x, p⟩)``, and ``⟨⋅, ⋅⟩_{\mathrm{F}}``
+denotes the Frobenius inner product.
+The formula for ``Y`` is then for the real-valued case
 ````math
 \begin{pmatrix}0 \\ Y\end{pmatrix} = X - q\frac{2 ⟨q, X⟩_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}.
 ````
+
+for the complex valued case, the first component will still feature a nonzero value, which
+has to be taken into account; this is done by considering the real entries of `Y` first,
+then this first (imaginary) entry followed by the imaginary ones.
 """
-get_coordinates(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
+get_coordinates(::AbstractSphere, p, X, ::DefaultOrthonormalBasis)
 
 function get_coordinates_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNumbers)
     n = manifold_dimension(M)
@@ -243,6 +248,21 @@ function get_coordinates_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNum
     pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
     factor = λ * X[1] / (1 + cosθ)
     Y .= Xend .- pend .* factor
+    return Y
+end
+
+function get_coordinates_orthonormal!(M::AbstractSphere{ℂ}, Y, p, X, ::RealNumbers)
+    m = manifold_dimension(M)   # length of Y
+    n = div(m + 1, 2)              # number of components in p, X
+    p1, X1 = p[1], X[1]
+    cosθ = abs(real(p1))
+    λ = nzsign(p1, cosθ)
+    pend, Xend = view(p, 2:n), view(X, 2:n)
+    factor = λ * real(X1) / (1 + cosθ)
+    print(Y)
+    Y[1:n] .= real.(Xend .- pend .* factor)
+    Y[n + 1] = X[1] - p1 * factor
+    Y[(n + 2):m] .= imag.(Xend .- pend .* factor)
     return Y
 end
 
@@ -258,14 +278,20 @@ end
 
 Convert a one-dimensional vector of coefficients `X` in the basis `B` of the tangent space
 at `p` on the [`AbstractSphere`](@ref) `M` to a tangent vector `Y` at `p` by rotating the
-hyperplane containing `X`, whose normal is the $x$-axis, to the hyperplane whose normal is
+hyperplane containing `X`, whose normal is the ``x``-axis, to the hyperplane whose normal is
 `p`.
 
-Given $q = p λ + x$, where $λ = \operatorname{sgn}(⟨x, p⟩)$, and $⟨⋅, ⋅⟩_{\mathrm{F}}$
-denotes the Frobenius inner product, the formula for $Y$ is
+Given ``q = p λ + X``, where ``λ = \operatorname{sgn}(⟨X, p⟩)``, and ``⟨⋅, ⋅⟩_{\mathrm{F}}``
+denotes the Frobenius inner product.
+
+The formula for ``Y`` is then for the real-valued case
+
 ````math
 Y = X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}.
 ````
+
+For the complex valued case, the same is added for the complex (second half) of X, where
+the first entry of the inner product is also nonzero
 """
 get_vector(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
@@ -282,15 +308,32 @@ function get_vector_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNumbers)
     return Y
 end
 
+function get_vector_orthonormal!(M::AbstractSphere{ℂ}, Y, p, X, ::RealNumbers)
+    m = manifold_dimension(M)   # length of X
+    n = div(m + 1) / 2          # number of components in p, Y
+    p1 = p[1]
+    cosθ = abs(real(p1))
+    λ = nzsign(p1, cosθ)
+    pend = view(p, 2:n)
+    pX = dot(pend, X[1:(n - 1)])
+    factor = pX / (1 + cosθ)
+    # Real updte the same as for the real sphere above
+    Y[1] = -λ * pX
+    Y[2:(n + 1)] .= X[1:(n - 1)] .- pend .* factor
+    # complex update
+    Y .+= 1im * (X[n:m] .- pend .* factor)
+    return Y
+end
+
 @doc raw"""
     injectivity_radius(M::AbstractSphere[, p])
 
-Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is globally $π$.
+Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is globally ``π``.
 
     injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
 
 Return the injectivity radius for the [`ProjectionRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionRetraction) on the
-[`AbstractSphere`](@ref), which is globally $\frac{π}{2}$.
+[`AbstractSphere`](@ref), which is globally ``\frac{π}{2}``.
 """
 injectivity_radius(::AbstractSphere) = π
 injectivity_radius(::AbstractSphere, p) = π
@@ -308,8 +351,8 @@ _injectivity_radius(::AbstractSphere, ::ProjectionRetraction) = π / 2
     inverse_retract(M::AbstractSphere, p, q, ::ProjectionInverseRetraction)
 
 Compute the inverse of the projection based retraction on the [`AbstractSphere`](@ref) `M`,
-i.e. rearranging $p+X = q\lVert p+X\rVert_2$ yields
-since $\Re(⟨p,X⟩) = 0$ and when $d_{𝕊^2}(p,q) ≤ \frac{π}{2}$ that
+i.e. rearranging ``p+X = q\lVert p+X\rVert_2`` yields
+since ``\Re(⟨p,X⟩) = 0`` and when ``d_{𝕊^2}(p,q) ≤ \frac{π}{2}`` that
 
 ````math
 \operatorname{retr}_p^{-1}(q) = \frac{q}{\Re(⟨p, q⟩)} - p.
@@ -352,13 +395,13 @@ end
 
 Compute the logarithmic map on the [`AbstractSphere`](@ref) `M`, i.e. the tangent vector,
 whose geodesic starting from `p` reaches `q` after time 1.
-The formula reads for $x ≠ -y$
+The formula reads for ``x ≠ -y``
 
 ````math
 \log_p q = d_{𝕊}(p,q) \frac{q-\Re(⟨p,q⟩) p}{\lVert q-\Re(⟨p,q⟩) p \rVert_2},
 ````
 
-and a deterministic choice from the set of tangent vectors is returned if $x=-y$, i.e. for
+and a deterministic choice from the set of tangent vectors is returned if ``x=-y``, i.e. for
 opposite points.
 """
 log(::AbstractSphere, ::Any...)
@@ -437,8 +480,8 @@ Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 ````math
 \operatorname{proj}(p) = \frac{p}{\lVert p \rVert},
 ````
-where $\lVert\cdot\rVert$ denotes the usual 2-norm for vectors if $m=1$ and the Frobenius
-norm for the case $m>1$.
+where ``\lVert\cdot\rVert`` denotes the usual 2-norm for vectors if ``m=1`` and the Frobenius
+norm for the case ``m>1``.
 """
 project(::AbstractSphere, ::Any)
 
