@@ -251,7 +251,18 @@ function get_coordinates_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNum
     return Y
 end
 
-function get_coordinates_orthonormal!(M::AbstractSphere{ℂ}, Y, p, X, ::RealNumbers)
+# this could maybe even be done in general for this kind of basis coeffs?
+# Maybe even for all manifolds where the manifold field type and the basis field types agree?
+function allocate_result(
+    M::AbstractSphere{ℂ},
+    ::typeof(get_coordinates),
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℂ},
+)
+    return zeros(real(eltype(p)), manifold_dimension(M))
+end
+function get_coordinates_orthonormal!(M::AbstractSphere{ℂ}, Y, p, X, ::ComplexNumbers)
     m = manifold_dimension(M)   # length of Y
     n = div(m + 1, 2)              # number of components in p, X
     p1, X1 = p[1], X[1]
@@ -259,10 +270,10 @@ function get_coordinates_orthonormal!(M::AbstractSphere{ℂ}, Y, p, X, ::RealNum
     λ = nzsign(p1, cosθ)
     pend, Xend = view(p, 2:n), view(X, 2:n)
     factor = λ * real(X1) / (1 + cosθ)
-    print(Y)
-    Y[1:n] .= real.(Xend .- pend .* factor)
-    Y[n + 1] = X[1] - p1 * factor
-    Y[(n + 2):m] .= imag.(Xend .- pend .* factor)
+    Y[1:(n - 1)] .= real.(Xend .- pend .* factor)
+    println(X[1] - p1 * factor)
+    Y[n] = imag(X[1] - p1 * factor)
+    Y[(n + 1):m] .= imag.(Xend .- pend .* factor)
     return Y
 end
 
@@ -308,9 +319,9 @@ function get_vector_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNumbers)
     return Y
 end
 
-function get_vector_orthonormal!(M::AbstractSphere{ℂ}, Y, p, X, ::RealNumbers)
+function get_vector_orthonormal!(M::AbstractSphere{ℂ}, Y, p, X, ::ComplexNumbers)
     m = manifold_dimension(M)   # length of X
-    n = div(m + 1) / 2          # number of components in p, Y
+    n = div(m + 1, 2)          # number of components in p, Y
     p1 = p[1]
     cosθ = abs(real(p1))
     λ = nzsign(p1, cosθ)
@@ -319,9 +330,9 @@ function get_vector_orthonormal!(M::AbstractSphere{ℂ}, Y, p, X, ::RealNumbers)
     factor = pX / (1 + cosθ)
     # Real updte the same as for the real sphere above
     Y[1] = -λ * pX
-    Y[2:(n + 1)] .= X[1:(n - 1)] .- pend .* factor
+    Y[2:n] .= X[1:(n - 1)] .- pend .* factor
     # complex update
-    Y .+= 1im * (X[n:m] .- pend .* factor)
+    Y .+= 1im * (X[n:m] .- p .* factor)
     return Y
 end
 
