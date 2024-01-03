@@ -4,6 +4,7 @@
 module Manifolds
 
 import Base:
+    ^,
     angle,
     copyto!,
     convert,
@@ -445,7 +446,9 @@ include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
 include("manifolds/Symplectic.jl")
+include("manifolds/Hamiltonian.jl") # Hamiltonian requires symplectic
 include("manifolds/SymplecticStiefel.jl")
+include("manifolds/SymplecticGrassmann.jl") # Requires SymplecticStiefel
 include("manifolds/Tucker.jl")
 #
 include("manifolds/ProbabilitySimplex.jl")
@@ -659,6 +662,7 @@ export Euclidean,
     SPDFixedDeterminant,
     SymmetricPositiveSemidefiniteFixedRank,
     Symplectic,
+    SymplecticGrassmann,
     SymplecticStiefel,
     SymplecticMatrix,
     Torus,
@@ -682,7 +686,7 @@ export HyperboloidTVector,
     ProjectorTVector,
     StiefelTVector
 export AbstractNumbers, ℝ, ℂ, ℍ
-
+export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
@@ -775,6 +779,7 @@ export CachedBasis,
 export ComponentManifoldError, CompositeManifoldError
 # Functions on Manifolds
 export ×,
+    ^,
     action_side,
     allocate,
     allocate_result,
@@ -900,6 +905,8 @@ export ×,
     skewness,
     std,
     sym_rem,
+    symplectic_inverse,
+    symplectic_inverse!,
     symplectic_inverse_times,
     symplectic_inverse_times!,
     submanifold,

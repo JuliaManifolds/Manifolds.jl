@@ -433,60 +433,78 @@ function inner(M::Symplectic{<:Any,ℝ}, p, X, Y)
 end
 
 @doc raw"""
-    inv(::Symplectic, A)
-    inv!(::Symplectic, A)
+    symplectic_inverse(A)
 
-Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2n}``. Given a matrix
-````math
-A ∈ ℝ^{2n × 2n},\quad
-A =
-\begin{bmatrix}
-A_{1,1} & A_{1,2} \\
-A_{2,1} & A_{2, 2}
-\end{bmatrix}
-````
+Given a matrix
+``math
+  A ∈ ℝ^{2n × 2k},\quad
+  A =
+  \begin{bmatrix}
+  A_{1,1} & A_{1,2} \\
+  A_{2,1} & A_{2, 2}
+  \end{bmatrix}
+```
+
 the symplectic inverse is defined as:
-````math
-A^{+} := Q_{2n}^{\mathrm{T}} A^{\mathrm{T}} Q_{2n},
-````
+
+```math
+A^{+} := Q_{2k}^{\mathrm{T}} A^{\mathrm{T}} Q_{2n},
+```
+
 where
-````math
-Q_{2n} =
-\begin{bmatrix}
-0_n & I_n \\
- -I_n & 0_n
-\end{bmatrix}.
-````
+
+```math
+  Q_{2n} = \begin{bmatrix} 0_n & I_n \\  -I_n & 0_n \end{bmatrix}.
+```
+
 The symplectic inverse of A can be expressed explicitly as:
-````math
+
+```math
 A^{+} =
-\begin{bmatrix}
-  A_{2, 2}^{\mathrm{T}} & -A_{1, 2}^{\mathrm{T}} \\[1.2mm]
- -A_{2, 1}^{\mathrm{T}} &  A_{1, 1}^{\mathrm{T}}
-\end{bmatrix}.
-````
+  \begin{bmatrix}
+    A_{2, 2}^{\mathrm{T}} & -A_{1, 2}^{\mathrm{T}} \\[1.2mm]
+   -A_{2, 1}^{\mathrm{T}} &  A_{1, 1}^{\mathrm{T}}
+  \end{bmatrix}.
+```
+
 """
-function Base.inv(M::Symplectic{<:Any,ℝ}, A)
-    n = get_parameter(M.size)[1]
-    Ai = similar(A)
-    checkbounds(A, 1:(2n), 1:(2n))
-    @inbounds for i in 1:n, j in 1:n
-        Ai[i, j] = A[j + n, i + n]
+function symplectic_inverse(A::AbstractMatrix)
+    N, K = size(A)
+    @assert iseven(N) "The first matrix dimension of A ($N) has to be even"
+    @assert iseven(K) "The second matrix dimension of A ($K) has to be even"
+    n = div(N, 2)
+    k = div(K, 2)
+    Ai = similar(A')
+    checkbounds(A, 1:(2n), 1:(2k))
+    @inbounds for i in 1:k, j in 1:n
+        Ai[i, j] = A[j + n, i + k]
     end
-    @inbounds for i in 1:n, j in 1:n
-        Ai[i + n, j] = -A[j + n, i]
+    @inbounds for i in 1:k, j in 1:n
+        Ai[i + k, j] = -A[j + n, i]
     end
-    @inbounds for i in 1:n, j in 1:n
-        Ai[i, j + n] = -A[j, i + n]
+    @inbounds for i in 1:k, j in 1:n
+        Ai[i, j + n] = -A[j, i + k]
     end
-    @inbounds for i in 1:n, j in 1:n
-        Ai[i + n, j + n] = A[j, i]
+    @inbounds for i in 1:k, j in 1:n
+        Ai[i + k, j + n] = A[j, i]
     end
     return Ai
 end
 
-function inv!(M::Symplectic{<:Any,ℝ}, A)
-    n = get_parameter(M.size)[1]
+@doc raw"""
+    inv(::Symplectic, A)
+    inv!(::Symplectic, A)
+
+Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2n}``. See [`symplectic_inverse`](@ref)
+for details.
+
+"""
+function Base.inv(M::Symplectic{<:Any,ℝ}, A)
+    return symplectic_inverse(A)
+end
+
+function symplectic_inverse!(A)
+    n = div(size(A, 1), 1)
     checkbounds(A, 1:(2n), 1:(2n))
     @inbounds for i in 1:n, j in 1:n
         A[i, j], A[j + n, i + n] = A[j + n, i + n], A[i, j]
@@ -506,6 +524,15 @@ function inv!(M::Symplectic{<:Any,ℝ}, A)
         end
     end
     return A
+end
+
+@doc raw"""
+    inv!(M::Symplectic, A)
+
+Compute the symplectic inverse of a suqare matrix A inplace of A
+"""
+function inv!(M::Symplectic{<:Any,ℝ}, A)
+    return symplectic_inverse!(A)
 end
 
 @doc raw"""
