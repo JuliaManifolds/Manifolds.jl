@@ -31,6 +31,24 @@ J_{2n} =
 See also [`ProjectorPoint`](@ref) and [`StiefelPoint`](@ref) for these two representations,
 where arrays are interpreted as those on the Stiefel manifold.
 
+The tangent space is either the tangent space from the symplecti Stiefel manifold, where
+tangent vectors are representers of their corresponding congruence classes, or for the
+representation as projectors, using a [`ProjectorTVector`](@ref) as
+
+```math
+  T_p\operatorname{SpGr}(2n, 2k, ℝ)
+  = \bigl\{
+    [X,p] \ \mid\ X ∈ \mathfrac{sp(2n,\mathbb R), Xp+pX = X
+  \bigr\},
+```
+where
+``[X,p] = Xp-pX`` denotes the matrix commutator and
+``\mathfrac{sp}(2n,\mathbb R) = \{ X \in \mathbb R^{2n × 2n} \ \mid\ X^+ = -X\}``
+is the Lie algebra of the Hamiltonian matrices.
+
+For simplicity, the [`ProjectorTVector`](@ref) is stored as just ``X`` from the representation above.
+
+For the tangent space, arrays are interpreted as being [`StiefelTVector`](@ref)s.
 
 The manifold was first introduced in [BendokatZimmermann:2021](@cite)
 
