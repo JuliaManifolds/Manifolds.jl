@@ -43,27 +43,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Improved distribution of random vector generation for rotation matrices and complex circle.
 
-## [0.9.7] * 2023-11-14
+## [0.9.7] – 2023-11-14
 
 ### Fixed
 
 * Fixed `is_flat` for `CholeskySpace` and `SymmetricPositiveDefinite` with `LogCholeskyMetric` [https://github.com/JuliaManifolds/Manifolds.jl/issues/684](https://github.com/JuliaManifolds/Manifolds.jl/issues/684).
 
-## [0.9.6] * 2023-11-09
+## [0.9.6] - 2023-11-09
 
 ### Fixed
 
 * Fixed real coefficient basis for complex circle (an issue exposed by [https://github.com/JuliaManifolds/ManifoldsBase.jl/pull/173](https://github.com/JuliaManifolds/ManifoldsBase.jl/pull/173)).
 * Fixed `VeeOrthogonalBasis` test for non-real manifolds.
 
-## [0.9.5] * 2023-11-08
+## [0.9.5] - 2023-11-08
 
 ### Changed
 
 * `identity_element` now returns a complex matrix for unitary group.
 * `number_of_coordinates` is now exported.
 
-## [0.9.4] * 2023-11-06
+## [0.9.4] - 2023-11-06
 
 ### Added
 
@@ -78,13 +78,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Fixed issue with incorrect implementation of `apply_diff_group` in `GroupOperationAction` with left backward and right forward action [#669](https://github.com/JuliaManifolds/Manifolds.jl/issues/669).
 
-## [0.9.3] * 2023-10-28
+## [0.9.3] - 2023-10-28
 
 ### Added
 
 * Support for `BoundaryValueDiffEq` v5.
 
-## [0.9.2] * 2023-10-27
+## [0.9.2] - 2023-10-27
 
 ### Added
 
@@ -92,13 +92,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `get_embedding` now works for `GeneralUnitaryMultiplicationGroup`.
 * Github action that checks for NEWS.md changes.
 
-## [0.9.1] * 2023-10-25
+## [0.9.1] - 2023-10-25
 
 ### Added
 
 * a new retraction and its inverse for the fixed Rank Manifolds, the orthographic retraction.
 
-## [0.9.0] * 2023-10-24
+## [0.9.0] - 2023-10-24
 
 ### Added
 
