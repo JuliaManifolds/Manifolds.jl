@@ -7,7 +7,7 @@ The symplectic Grassmann manifold consists of all symplectic subspaces of
 This manifold can be represented as corresponding representers on the [`SymplecticStiefel`](@ref)
 
 ````math
-\operatorname{SpGr}(n,k) := \bigl\{ \operatorname{span}(p)  \ \big| \ p ∈ \operatorname{SpSt}(2n, 2k, \mathhb R)\},
+\operatorname{SpGr}(2n,2k) := \bigl\{ \operatorname{span}(p)  \ \big| \ p ∈ \operatorname{SpSt}(2n, 2k, \mathhb R)\},
 ````
 
 or as projectors
@@ -78,6 +78,9 @@ function active_traits(f, ::SymplecticGrassmann, args...)
     return merge_traits(IsEmbeddedManifold(), IsQuotientManifold())
 end
 
+# Define Stiefel as the array fallback
+ManifoldsBase.@default_manifold_fallbacks SymplecticGrassmann StiefelPoint StiefelTVector value value
+
 @doc raw"""
     manifold_dimension(::SymplecticGrassmann)
 
@@ -89,7 +92,13 @@ Return the dimension of the [`SymplecticGrassmann`](@ref)`(2n,2k)`, which is
 
 see [BendokatZimmermann](@cite), Section 4.
 """
-function manifold_dimension(::SymplecticGrassmann)
+function manifold_dimension(::SymplecticGrassmann{<:Any,ℝ})
     n, k = get_parameter(M.size)
     return 4 * (n - k) * k
 end
+
+#
+# Representer specific implementations in their corrsponding subfiles
+#
+include("SymplecticGrassmannStiefel.jl")
+include("SymplecticGrassmannProjector.jl")

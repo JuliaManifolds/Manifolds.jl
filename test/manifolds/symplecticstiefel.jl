@@ -137,7 +137,7 @@ end
         ]
 
         @testset "Basics" begin
-            @test repr(SpSt_6_4) == "SymplecticStiefel(6, 4, ℝ)"
+            @test repr(SpSt_6_4) == "SymplecticStiefel(6, 4; field=ℝ)"
             @test representation_size(SpSt_6_4) == (6, 4)
             @test base_manifold(SpSt_6_4) === SpSt_6_4
             @test get_total_space(SpSt_6_4) == Symplectic(6)

@@ -445,10 +445,6 @@ include("manifolds/SymmetricPositiveDefiniteAffineInvariant.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
-include("manifolds/Symplectic.jl")
-include("manifolds/Hamiltonian.jl") # Hamiltonian requires symplectic
-include("manifolds/SymplecticStiefel.jl")
-include("manifolds/SymplecticGrassmann.jl") # Requires SymplecticStiefel
 include("manifolds/Tucker.jl")
 #
 include("manifolds/ProbabilitySimplex.jl")
@@ -464,6 +460,13 @@ include("manifolds/KendallsShapeSpace.jl")
 
 # Introduce the quotient, Grassmann, only after Stiefel
 include("manifolds/Grassmann.jl")
+
+# Introduce Symplectic and so on manifolds only after Grassmann
+# Since that defines the StiefelPoint, StiefelTVector
+include("manifolds/Symplectic.jl")
+include("manifolds/Hamiltonian.jl") # Hamiltonian requires symplectic
+include("manifolds/SymplecticStiefel.jl")
+include("manifolds/SymplecticGrassmann.jl") # Requires SymplecticStiefel
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")

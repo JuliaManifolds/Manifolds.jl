@@ -3,16 +3,20 @@
 
 The symplectic Stiefel manifold consists of all
 ``2n × 2k, n ≥ k`` matrices satisfying the requirement
+
 ````math
 \operatorname{SpSt}(2n, 2k, ℝ)
     := \bigl\{ p ∈ ℝ^{2n × 2n} \ \big| \ p^{\mathrm{T}}J_{2n}p = J_{2k} \bigr\},
 ````
+
 where
+
 ````math
 J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}.
 ````
 
 The symplectic Stiefel tangent space at ``p`` can be parametrized as [BendokatZimmermann:2021](@cite)
+
 ````math
 \begin{align*}
     T_p\operatorname{SpSt}(2n, 2k)
@@ -22,9 +26,13 @@ The symplectic Stiefel tangent space at ``p`` can be parametrized as [BendokatZi
         &\qquad & p^s ∈ \operatorname{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k) × 2k}, \},
 \end{align*}
 ````
-where ``Ω \in \mathfrak{sp}(2n,F)`` is Hamiltonian and ``p^s`` means
+
+where ``Ω \in \mathfrak{sp}(2n,F)`` is [`Hamiltonian`](@ref) and ``p^s`` means
 the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
 Here ``p^+`` denotes the symplecic inverse ``p^+ := J_{2k}^{\mathrm{T}}p^{\mathrm{T}}J_{2n}``.
+
+You can also use [`StiefelPoint`](@ref) and [`StiefelTVector`](@ref) with this manifold,
+they are equivalent to using arrays.
 
 # Constructor
     SymplecticStiefel(2n::Int, 2k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
@@ -52,6 +60,9 @@ end
 function active_traits(f, ::SymplecticStiefel, args...)
     return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
 end
+
+# Define Stiefel as the array fallback
+ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel StiefelPoint StiefelTVector value value
 
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
     return CayleyInverseRetraction()
@@ -100,19 +111,13 @@ Q_{2n} =
 ````
 The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
-function check_point(
-    M::SymplecticStiefel,
-    p::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
+function check_point(M::SymplecticStiefel{<:Any,ℝ}, p::T; kwargs...) where {T}
     # Perform check that the matrix lives on the real symplectic manifold:
-    expected_zero = norm(inv(M, p) * p - I)
-    if !isapprox(expected_zero, 0; atol=atol, kwargs...)
+    if !isapprox(inv(M, p) * p, I; kwargs...)
         return DomainError(
-            expected_zero,
+            norm(inv(M, p) * p - I),
             (
-                "The point p does not lie on ``(M) because its symplectic" *
+                "The point p does not lie on $(M) because its symplectic" *
                 " inverse composed with itself is not the identity."
             ),
         )
@@ -144,25 +149,16 @@ The tolerance can be set with `kwargs...` (e.g. `atol = 1.0e-14`).
 """
 check_vector(::SymplecticStiefel, ::Any...)
 
-function check_vector(
-    M::SymplecticStiefel{S,𝔽},
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {S,T,𝔽}
+function check_vector(M::SymplecticStiefel{S,𝔽}, p, X::T; kwargs...) where {S,T,𝔽}
     n, k = get_parameter(M.size)
     # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
     H = inv(M, p) * X  # ∈ ℝ^{2k × 2k}, should be Hamiltonian.
-    H_star = inv(Symplectic(2k, 𝔽), H)
-    hamiltonian_identity_norm = norm(H + H_star)
 
-    if !isapprox(hamiltonian_identity_norm, 0; atol=atol, kwargs...)
+    if !is_hamiltonian(H; kwargs...)
         return DomainError(
-            hamiltonian_identity_norm,
+            norm(Hamiltonian(H)^+H),
             (
-                "The matrix X is not in the tangent space at point p of the" *
-                " ``(M) manifold, as p^{+}X is not a Hamiltonian matrix."
+                "The matrix X is not in the tangent space at point p of $M at $p, since p^{+}X is not a Hamiltonian matrix."
             ),
         )
     end
@@ -631,11 +627,11 @@ function riemannian_gradient!(
 end
 
 function Base.show(io::IO, ::SymplecticStiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return print(io, "SymplecticStiefel(``(2n), ``(2k), ``(𝔽))")
+    return print(io, "SymplecticStiefel($(2n), $(2k); field=$(𝔽))")
 end
 function Base.show(io::IO, M::SymplecticStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
-    return print(io, "SymplecticStiefel(``(2n), ``(2k), ``(𝔽); parameter=:field)")
+    return print(io, "SymplecticStiefel($(2n), $(2k); field=$(𝔽); parameter=:field)")
 end
 
 @doc raw"""

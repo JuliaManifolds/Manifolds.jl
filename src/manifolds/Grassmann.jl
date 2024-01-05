@@ -195,7 +195,7 @@ function get_total_space(M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
 end
 
 #
-# Reprenter specific implementations in their corresponding subfiles
+# Representer specific implementations in their corresponding subfiles
 #
 include("GrassmannStiefel.jl")
 include("GrassmannProjector.jl")

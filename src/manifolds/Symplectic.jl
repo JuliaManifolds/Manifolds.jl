@@ -219,8 +219,7 @@ function check_point(
     kwargs...,
 ) where {T}
     # Perform check that the matrix lives on the real symplectic manifold:
-    expected_zero = norm(inv(M, p) * p - LinearAlgebra.I)
-    if !isapprox(expected_zero, 0; atol=atol, kwargs...)
+    if !isapprox(inv(M, p) * p, LinearAlgebra.I; atol=atol, kwargs...)
         return DomainError(
             expected_zero,
             (
@@ -282,7 +281,7 @@ Compute an approximate geodesic distance between two Symplectic matrices
 ``p, q \in \operatorname{Sp}(2n)``, as done in [WangSunFiori:2018](@cite).
 ````math
     \operatorname{dist}(p, q)
-        ≈ ||\operatorname{Log}(p^+q)||_{\operatorname{Fr}},
+        ≈ \lVert\operatorname{Log}(p^+q)\rVert_{\operatorname{Fr}},
 ````
 where the ``\operatorname{Log}(\cdot)`` operator is the matrix logarithm.
 
@@ -302,18 +301,20 @@ Then we write the expression for the exponential map from ``p`` to ``q`` as
     X \in T_p\operatorname{Sp},
 ````
 and with the geodesic distance between ``p`` and ``q`` given by
-``\operatorname{dist}(p, q) = ||X||_p = ||p^+X||_{\operatorname{Fr}}``
+``\operatorname{dist}(p, q) = \lVertX\rVert_p = \lVertp^+X\rVert_{\operatorname{Fr}}``
 we see that
 ````math
     \begin{align*}
-    ||\operatorname{Log}(p^+q)||_{\operatorname{Fr}}
-    &= ||\operatorname{Log}\left(
-        \operatorname{Exp}((p^{+}X)^{\mathrm{T}})
-        \operatorname{Exp}(p^{+}X - (p^{+}X)^{\mathrm{T}})
-    \right)||_{\operatorname{Fr}} \\
-    &= ||p^{+}X + \frac{1}{2}[(p^{+}X)^{\mathrm{T}}, p^{+}X - (p^{+}X)^{\mathrm{T}}]
-            + \ldots ||_{\operatorname{Fr}} \\
-    &≈ ||p^{+}X||_{\operatorname{Fr}} = \operatorname{dist}(p, q).
+   \lVert\operatorname{Log}(p^+q)\rVert_{\operatorname{Fr}}
+    &=\Bigl\lVert
+        \operatorname{Log}\bigl(
+            \operatorname{Exp}((p^{+}X)^{\mathrm{T}})
+            \operatorname{Exp}(p^{+}X - (p^{+}X)^{\mathrm{T}})
+        \bigr)
+    \Bigr\rVert_{\operatorname{Fr}} \\
+    &=\lVertp^{+}X + \frac{1}{2}[(p^{+}X)^{\mathrm{T}}, p^{+}X - (p^{+}X)^{\mathrm{T}}]
+            + \ldots\lVert_{\operatorname{Fr}} \\
+    &≈\lVertp^{+}X\rVert_{\operatorname{Fr}} = \operatorname{dist}(p, q).
     \end{align*}
 ````
 """
@@ -504,7 +505,7 @@ function Base.inv(M::Symplectic{<:Any,ℝ}, A)
 end
 
 function symplectic_inverse!(A)
-    n = div(size(A, 1), 1)
+    n = div(size(A, 1), 2)
     checkbounds(A, 1:(2n), 1:(2n))
     @inbounds for i in 1:n, j in 1:n
         A[i, j], A[j + n, i + n] = A[j + n, i + n], A[i, j]
@@ -612,8 +613,8 @@ the euclidean metric of the embedding ``\mathbb{R}^{2n \times 2n}``.
 That is, we find the element ``X \in T_p\operatorname{SpSt}(2n, 2k)``
 which solves the constrained optimization problem
 ````math
-    \operatorname{min}_{X \in \mathbb{R}^{2n \times 2n}} \frac{1}{2}||X - A||^2, \quad
-    \text{s.t.}\;
+    \operatorname{min}_{X \in \mathbb{R}^{2n \times 2n}} \frac{1}{2}\lVert X - A\rVert^2, \quad
+    \text{such that}\;
     h(X) \colon= X^{\mathrm{T}} Q p + p^{\mathrm{T}} Q X = 0,
 ````
 where ``h\colon\mathbb{R}^{2n \times 2n} \rightarrow \operatorname{skew}(2n)`` defines
