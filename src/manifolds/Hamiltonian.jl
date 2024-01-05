@@ -29,6 +29,43 @@ function Matrix(A::Hamiltonian)
 end
 
 @doc raw"""
+    HamiltonianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)
+consisting of (real-valued) hamiltonian matrices of size ``n × n``, i.e. the set
+
+````math
+\mathfrak{sp}(2n,𝔽) = \bigl\{p  ∈ 𝔽^{2n × 2n}\ \big|\ p^+ = p \bigr\},
+````
+where ``\cdot^{+}`` denotes the [`symplectic_inverse`](@ref),. and ``𝔽 ∈ \{ ℝ, ℂ\}``.
+
+Though it is slightly redundant, usually the matrices are stored as ``2n × 2n`` arrays.
+
+The symbol refers to the main usage within `Manifolds.jl` that is the
+Lie algebra to the [`Symplectic`](@ref) as a Lie group with the matrix operation as group operation.
+
+# Constructor
+
+    HamiltonianMatrices(n::Int, field::AbstractNumbers=ℝ)
+
+Generate the manifold of ``n × n`` symmetric matrices.
+"""
+struct HamiltonianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    size::T
+end
+
+function HamiltonianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+    size = wrap_type_parameter(parameter, (n,))
+    return HamiltonianMatrices{typeof(size),field}(size)
+end
+
+function active_traits(f, ::HamiltonianMatrices, args...)
+    return merge_traits(IsEmbeddedSubmanifold())
+end
+
+ManifoldsBase.@default_manifold_fallbacks HamiltonianMatrices Hamiltonian Hamiltonian value value
+
+@doc raw"""
     ^(A::Hamilonian, ::typeof(+))
 
 Compute the [`symplectic_inverse`](@ref) of a Hamiltonian (A)
@@ -36,6 +73,59 @@ Compute the [`symplectic_inverse`](@ref) of a Hamiltonian (A)
 function ^(A::Hamiltonian, ::typeof(+))
     return Hamiltonian(symplectic_inverse(A.value))
 end
+
+@doc raw"""
+    check_point(M::HamiltonianMatrices{n,𝔽}, p; kwargs...)
+
+Check whether `p` is a valid manifold point on the [`HamiltonianMatrices`](@ref) `M`, i.e.
+whether `p` [`is_hamiltonian`](@ref).
+
+The tolerance for the test of `p` can be set using `kwargs...`.
+"""
+function check_point(M::HamiltonianMatrices, p; kwargs...)
+    if !is_hamiltonian(p; kwargs...)
+        return DomainError(
+            norm((Hamiltonian(p)^+) + p),
+            "The point $(p) does not lie on $M, since it is not hamiltonian.",
+        )
+    end
+    return nothing
+end
+
+"""
+    check_vector(M::HamiltonianMatrices{n,𝔽}, p, X; kwargs... )
+
+Check whether `X` is a tangent vector to manifold point `p` on the
+[`HamiltonianMatrices`](@ref) `M`, i.e. `X` has to be a Hamiltonian matrix
+The tolerance for [`is_hamiltonian`](@ref) `X` can be set using `kwargs...`.
+"""
+function check_vector(M::HamiltonianMatrices, p, X; kwargs...)
+    if !is_hamiltonian(X; kwargs...)
+        return DomainError(
+            norm((Hamiltonian(X)^+) + X),
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not hamiltonian.",
+        )
+    end
+    return nothing
+end
+
+embed(::HamiltonianMatrices, p) = p
+embed(::HamiltonianMatrices, p, X) = X
+
+function get_embedding(::HamiltonianMatrices{TypeParameter{Tuple{N}},𝔽}) where {N,𝔽}
+    return Euclidean(N, N; field=𝔽)
+end
+function get_embedding(M::HamiltonianMatrices{Tuple{Int},𝔽}) where {𝔽}
+    N = get_parameter(M.size)[1]
+    return Euclidean(N, N; field=𝔽, parameter=:field)
+end
+
+"""
+    is_flat(::HamiltonianMatrices)
+
+Return true. [`HamiltonianMatrices`](@ref) is a flat manifold.
+"""
+is_flat(M::HamiltonianMatrices) = true
 
 @doc raw"""
     is_hamiltonian(A; kwargs...)
@@ -48,7 +138,7 @@ A^+ = -A
 ```
 where ``A^+`` denotes the [`symplectic_inverse`](@ref) of `A`.
 
-The passed keyword arguments are passed on to the [`isapprox`](@ref)
+The passed keyword arguments are passed on to `isapprox`
 check within
 """
 function is_hamiltonian(A::AbstractMatrix; kwargs...)
@@ -61,5 +151,11 @@ end
 function show(io::IO, ::MIME"text/plain", A::Hamiltonian)
     return print(io, "Hamiltonian($(A.value))")
 end
-
+function Base.show(io::IO, ::HamiltonianMatrices{TypeParameter{Tuple{n}},F}) where {n,F}
+    return print(io, "HamiltonianMatrices($(n), $(F))")
+end
+function Base.show(io::IO, M::HamiltonianMatrices{Tuple{Int},F}) where {F}
+    n = get_parameter(M.size)[1]
+    return print(io, "HamiltonianMatrices($(n), $(F); parameter=:field)")
+end
 size(A::Hamiltonian) = size(A.value)

@@ -19,7 +19,7 @@ Check whether `X` is a valid tangent vector at `p` on the [`SymplecticGrassmann`
 is a valid representer of an equivalence class of the corersponding
 [`SymplecticStiefel`](@ref) manifolds tangent space at `p`.
 """
-function check_point(M::SymplecticGrassmann, p, X; kwargs...)
+function check_vector(M::SymplecticGrassmann, p, X; kwargs...)
     n, k = get_parameter(M.size)
     return check_vector(SymplecticStiefel(2 * n, 2 * k), p, X; kwargs...)
 end

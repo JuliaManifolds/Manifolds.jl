@@ -5,7 +5,7 @@ Check whether `p` is a valid point on the [`SymplecticGrassmann`](@ref),
 ``\operatorname{SpGr}(2n, 2k)``, that is a propoer symplectic projection:
 
 * ``p^2 = p``, that is ``p`` is a projection
-* ``\operatorname{rank(p) = 2k``, that is, the supspace projected onto is of right dimension
+* ``\operatorname{rank}(p) = 2k``, that is, the supspace projected onto is of right dimension
 * ``p^+ = p`` the projection is symplectic.
 """
 function check_point(M::SymplecticGrassmann, p::ProjectorPoint; kwargs...)
@@ -42,10 +42,10 @@ Check whether `X` is a valid tangent vector at `p` on the [`SymplecticGrassmann`
 * ``X^+ = -X``, verify that `X` is [`Hamiltonian`](@ref)
 * ``X = Xp + pX``
 
-For details see Proposition 4.2 in [BendokatZimmermannAbsil:2020](@cite) and the definition of ``\mathfrac{sp}_P(2n)`` before,
+For details see Proposition 4.2 in [BendokatZimmermann:2021](@cite) and the definition of ``\mathfrak{sp}_P(2n)`` before,
 especially the ``\bar{Ω}``, which is the representation for ``X`` used here.
 """
-function check_point(
+function check_vector(
     M::SymplecticGrassmann,
     p::ProjectorPoint,
     X::ProjectorTVector;
@@ -54,7 +54,7 @@ function check_point(
     n, k = get_parameter(M.size)
     if !is_hamiltonian(X.value; kwargs...)
         return DomainError(
-            norm(Hamiltonian(X.value)^+X.value),
+            norm((Hamiltonian(X.value)^+) + X.value),
             (
                 "The matrix X is not in the tangent space at $p of $M, since X is not Hamiltonian."
             ),

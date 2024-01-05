@@ -6,27 +6,17 @@ The symplectic Grassmann manifold consists of all symplectic subspaces of
 
 This manifold can be represented as corresponding representers on the [`SymplecticStiefel`](@ref)
 
-````math
-\operatorname{SpGr}(2n,2k) := \bigl\{ \operatorname{span}(p)  \ \big| \ p ∈ \operatorname{SpSt}(2n, 2k, \mathhb R)\},
-````
+```math
+\operatorname{SpGr}(2n,2k) = \bigl\{ \operatorname{span}(p)\ \big| \ p ∈ \operatorname{SpSt}(2n, 2k, ℝ)\},
+```
 
 or as projectors
 
-````math
+```math
 \operatorname{SpGr}(2n, 2k, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \ \big| \ p^2 = p, \operatorname{rank}(p) = 2k, p^+=p \bigr\},
-````
+```
 
-where ``⋅^+`` is defined even more general for ``q∈\mathbb R^{2n × 2k}`` matrices as
-
-````math
-q^+ := J_{2k}^{\mathrm{T}}q^{\mathrm{T}}J_{2n}
-\quad\text{ with }\quad
-J_{2n} =
-\begin{bmatrix}
-  0_n & I_n \\
- -I_n & 0_n
-\end{bmatrix}.
-````
+where ``⋅^+`` is the [`symplectic_inverse`](@ref).
 
 See also [`ProjectorPoint`](@ref) and [`StiefelPoint`](@ref) for these two representations,
 where arrays are interpreted as those on the Stiefel manifold.
@@ -36,15 +26,12 @@ tangent vectors are representers of their corresponding congruence classes, or f
 representation as projectors, using a [`ProjectorTVector`](@ref) as
 
 ```math
-  T_p\operatorname{SpGr}(2n, 2k, ℝ)
-  = \bigl\{
-    [X,p] \ \mid\ X ∈ \mathfrac{sp(2n,\mathbb R), Xp+pX = X
-  \bigr\},
+  T_p\operatorname{SpGr}(2n, 2k, ℝ) =
+  \bigl\{ [X,p] \ \mid\ X ∈ \mathfrak{sp}(2n,ℝ), Xp+pX = X \bigr\},
 ```
-where
-``[X,p] = Xp-pX`` denotes the matrix commutator and
-``\mathfrac{sp}(2n,\mathbb R) = \{ X \in \mathbb R^{2n × 2n} \ \mid\ X^+ = -X\}``
-is the Lie algebra of the Hamiltonian matrices.
+
+where ``[X,p] = Xp-pX`` denotes the matrix commutator and
+``\mathfrak{sp}(2n,ℝ)`` is the Lie algebra of the symplectic group consisting of [`HamiltonianMatrices`](@ref)
 
 For simplicity, the [`ProjectorTVector`](@ref) is stored as just ``X`` from the representation above.
 
@@ -90,7 +77,7 @@ Return the dimension of the [`SymplecticGrassmann`](@ref)`(2n,2k)`, which is
 \operatorname{dim}\operatorname{SpGr}(2n, 2k) = 4(n-k)k,
 ````
 
-see [BendokatZimmermann](@cite), Section 4.
+see [BendokatZimmermann:2021](@cite), Section 4.
 """
 function manifold_dimension(::SymplecticGrassmann{<:Any,ℝ})
     n, k = get_parameter(M.size)

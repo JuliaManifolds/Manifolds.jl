@@ -1,4 +1,4 @@
-# Symmetric matrices
+# Hamiltonian matrices
 
 ```@autodocs
 Modules = [Manifolds]
