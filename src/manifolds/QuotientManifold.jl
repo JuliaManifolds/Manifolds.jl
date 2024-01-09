@@ -136,7 +136,7 @@ get_orbit_action(::AbstractManifold)
 
 @doc raw"""
     horizontal_lift(N::AbstractManifold, q, X)
-    horizontal_lift(::QuotientManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold}, p, X) where {𝔽}
+    horizontal_lift(::QuotientManifold{𝔽,M,N}, p, X)
 
 Given a point `q` in total space of quotient manifold `N` such that ``p=π(q)`` is a point on
 a quotient manifold `M` (implicitly given for the first case) and a tangent vector `X` this
@@ -150,18 +150,21 @@ end
 
 @doc raw"""
     horizontal_lift!(N, Y, q, X)
-    horizontal_lift!(QuotientManifold{M,N}, Y, p, X)
+    horizontal_lift!(QuotientManifold{𝔽,M,N}, Y, p, X)
 
-Compute the [`horizontal_lift`](@ref) of `X` from ``T_p\mathcal M``, ``p=π(q)``.
+Compute the horizontal lift of `X` from ``T_p\mathcal M``, ``p=π(q)``.
 to ``T_q\mathcal N` in place of `Y`.
 """
 horizontal_lift!(N::AbstractManifold, Y, q, X)
 
-"""
+@doc raw"""
     horizontal_component(N::AbstractManifold, p, X)
+    horizontal_compontent(QuotientManifold{M,N}, p, X)
 
 Compute the horizontal component of tangent vector `X` at point `p`
 in the total space of quotient manifold `N`.
+
+This is often written as the space ``\mathrm{Hor}_p^π\mathcal N``.
 """
 function horizontal_component(N::AbstractManifold, p, X)
     Y = allocate_result(N, horizontal_component, X, p)
@@ -172,11 +175,14 @@ function Base.show(io::IO, M::QuotientManifold)
     return print(io, "QuotientManifold($(M.manifold), $(M.total_space))")
 end
 
-"""
+@doc raw"""
     vertical_component(N::AbstractManifold, p, X)
+    vertical_compontent(QuotientManifold{M,N}, p, X)
 
 Compute the vertical component of tangent vector `X` at point `p`
 in the total space of quotient manifold `N`.
+
+This is often written as the space ``\mathrm{ver}_p^π\mathcal N``.
 """
 function vertical_component(N::AbstractManifold, p, X)
     return X - horizontal_component(N, p, X)

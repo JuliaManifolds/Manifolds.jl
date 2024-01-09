@@ -308,7 +308,7 @@ function get_total_space(::SymplecticStiefel{TypeParameter{Tuple{n,k}},ℝ}) whe
     return Symplectic(2 * n)
 end
 function get_total_space(M::SymplecticStiefel{Tuple{Int,Int},ℝ})
-    n, k = get_parameter(M.size)
+    n, _ = get_parameter(M.size)
     return Symplectic(2 * n; parameter=:field)
 end
 
@@ -320,12 +320,14 @@ Compute the Riemannian inner product ``g^{\operatorname{SpSt}}`` at
 Given by Proposition 3.10 in [BendokatZimmermann:2021](@cite).
 ````math
 g^{\operatorname{SpSt}}_p(X, Y)
-    = \operatorname{tr}\left(X^{\mathrm{T}}\left(I_{2n} -
-        \frac{1}{2}Q_{2n}^{\mathrm{T}}p(p^{\mathrm{T}}p)^{-1}p^{\mathrm{T}}Q_{2n}\right)Y(p^{\mathrm{T}}p)^{-1}\right).
+    = \operatorname{tr}\Bigl(
+            X^{\mathrm{T}}\bigl(
+                I_{2n} - \frac{1}{2}Q_{2n}^{\mathrm{T}} p(p^{\mathrm{T}}p)^{-1}p^{\mathrm{T}}Q_{2n}
+            \bigr) Y (p^{\mathrm{T}}p)^{-1}\Bigr).
 ````
 """
 function inner(::SymplecticStiefel, p, X, Y)
-    Q = SymplecticMatrix(p, X, Y)
+    Q = SymplecticMatrix(p, X, Y) # in BZ21 also J
     # Procompute lu(p'p) since we solve a^{-1}* 3 times
     a = lu(p' * p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
     b = Q' * p
@@ -544,8 +546,8 @@ end
     retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
     retract!(::SymplecticStiefel, q, p, X, ::CayleyRetraction)
 
-Compute the Cayley retraction on the Symplectic Stiefel manifold, computed inplace
-of `q` from `p` along `X`.
+Compute the Cayley retraction on the Symplectic Stiefel manifold,
+from `p` along `X` (computed inplace of `q`).
 
 Given a point ``p \in \operatorname{SpSt}(2n, 2k)``, every tangent vector
 ``X \in T_p\operatorname{SpSt}(2n, 2k)`` is of the form
