@@ -2,10 +2,10 @@
     Symplectic{T, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
 The symplectic manifold consists of all ``2n×2n`` matrices which preserve
-the canonical symplectic form over ``𝔽^{2n × 2n}×𝔽^{2n × 2n}``,
+the canonical symplectic form over ``𝔽^{2n×2n}×𝔽^{2n×2n}``,
 ```math
-  \omega\colon 𝔽^{2n × 2n}×𝔽^{2n × 2n} → 𝔽,
-  \quad \omega(x, y) = p^{\mathrm{T}} J_{2n} q, \  x, y \in 𝔽^{2n × 2n},
+  \omega\colon 𝔽^{2n×2n}×𝔽^{2n×2n} → 𝔽,
+  \quad \omega(x, y) = p^{\mathrm{T}} J_{2n} q, \  x, y \in 𝔽^{2n×2n},
 ```
 
 where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
@@ -13,7 +13,7 @@ where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes
 The symplectic manifold consists of
 
 ```math
-\mathrm{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \, \big| \, p^{\mathrm{T}}J_{2n}p = J_{2n} \bigr\},
+\mathrm{Sp}(2n, ℝ) = \bigl\{ p ∈ ℝ^{2n×2n} \, \big| \, p^{\mathrm{T}}J_{2n}p = J_{2n} \bigr\},
 ```
 
 The tangent space at a point ``p`` is given by [BendokatZimmermann:2021](@cite)
@@ -22,7 +22,7 @@ The tangent space at a point ``p`` is given by [BendokatZimmermann:2021](@cite)
 \begin{align*}
   T_p\mathrm{Sp}(2n)
     &= \{X \in ℝ^{2n×2n} \ |\ p^{T}J_{2n}X + X^{T}J_{2n}p = 0 \}, \\
-    &= \{X = pJ_{2n}S \ \mid\ S ∈ R^{2n × 2n}, S^{\mathrm{T}} = S \}.
+    &= \{X = pJ_{2n}S \ \mid\ S ∈ R^{2n×2n}, S^{\mathrm{T}} = S \}.
 \end{align*}
 ```
 
@@ -30,9 +30,9 @@ The tangent space at a point ``p`` is given by [BendokatZimmermann:2021](@cite)
 
     Symplectic(2n, field=ℝ; parameter::Symbol=:type)
 
-Generate the (real-valued) symplectic manifold of ``2n × 2n`` symplectic matrices.
+Generate the (real-valued) symplectic manifold of ``2n×2n`` symplectic matrices.
 The constructor for the [`Symplectic`](@ref) manifold accepts the even column/row embedding
-dimension ``2n`` for the real symplectic manifold, ``ℝ^{2n × 2n}``.
+dimension ``2n`` for the real symplectic manifold, ``ℝ^{2n×2n}``.
 """
 struct Symplectic{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
@@ -74,7 +74,7 @@ as an inner product over the embedding space ``ℝ^{2n×2n}``, i.e.
 
 ```math
     ⟨x, y⟩_p = ⟨p^{-1}x, p^{-1}⟩_{\mathrm{Fr}}
-    = \operatorname{tr}(x^{\mathrm{T}}(pp^{\mathrm{T}})^{-1}y), \text{ for all } x, y \in ℝ^{2n × 2n}.
+    = \operatorname{tr}(x^{\mathrm{T}}(pp^{\mathrm{T}})^{-1}y), \text{ for all } x, y \in ℝ^{2n×2n}.
 ```
 """
 struct ExtendedSymplecticMetric <: AbstractMetric end
@@ -89,7 +89,7 @@ representation of the canonical symplectic form,
 J_{2n}(λ) = λ\begin{bmatrix}
 0_n & I_n \\
  -I_n & 0_n
-\end{bmatrix} ∈ ℝ^{2n × 2n},
+\end{bmatrix} ∈ ℝ^{2n×2n},
 ```
 
 where we write ``J_{2n} = J_{2n}(1)`` for short.
@@ -436,7 +436,7 @@ end
 
 Given a matrix
 ```math
-  A ∈ ℝ^{2n × 2k},\quad
+  A ∈ ℝ^{2n×2k},\quad
   A =
   \begin{bmatrix}
   A_{1,1} & A_{1,2} \\
@@ -489,7 +489,7 @@ end
     inv(::Symplectic, A)
     inv!(::Symplectic, A)
 
-Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2n}``.
+Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n×2n}``.
 See [`symplectic_inverse`](@ref) for details.
 
 """
@@ -597,7 +597,7 @@ which solves the constrained optimization problem
     \text{such that}\;
     h(X) := X^{\mathrm{T}} J_{2n} p + p^{\mathrm{T}} J_{2n} X = 0,
 ````
-where ``h: ℝ^{2n × 2n} → \operatorname{skew}(2n)`` denotes
+where ``h: ℝ^{2n×2n} → \operatorname{skew}(2n)`` denotes
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``
 and ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
 """
@@ -613,7 +613,7 @@ function project!(::Symplectic, Y, p, A)
     end
 
     # Solve for Λ (Lagrange mutliplier):
-    pT_p = p' * p  # (2k × 2k)
+    pT_p = p' * p  # (2k×2k)
     Λ = sylvester(pT_p, pT_p, h(A) ./ 2)
 
     Y[:, :] = A .- Jp * (Λ .- Λ')
@@ -623,7 +623,7 @@ end
 @doc raw"""
     project!(::MetricManifold{𝔽,<:Euclidean,ExtendedSymplecticMetric}, Y, p, X) where {𝔽}
 
-Compute the projection of ``X ∈ R^{2n × 2n}`` onto ``T_p\mathrm{Sp}(2n, ℝ)`` with respect to
+Compute the projection of ``X ∈ R^{2n×2n}`` onto ``T_p\mathrm{Sp}(2n, ℝ)`` with respect to
 the [`RealSymplecticMetric`](@ref) ``g``.
 
 The closed form projection mapping is given by [GaoSonAbsilStykel:2021](@cite)
@@ -654,7 +654,7 @@ That is,
 
 ````math
 (T_p\mathrm{Sp}(2n))^{\perp_g}
- = \{Y ∈ ℝ^{2n × 2n} : g_p(Y, X) = 0 \test{ for all } X \in T_p\mathrm{Sp}(2n)\}.
+ = \{Y ∈ ℝ^{2n×2n} : g_p(Y, X) = 0 \test{ for all } X \in T_p\mathrm{Sp}(2n)\}.
 ````
 
 The closed form projection operator onto the normal space is given by [GaoSonAbsilStykel:2021](@cite)

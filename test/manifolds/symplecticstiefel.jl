@@ -218,7 +218,7 @@ end
                 atol=1.0e-6,
             )
 
-            # Project Project matrix A ∈ ℝ^{6 × 4} onto (T_pSpSt):
+            # Project Project matrix A ∈ ℝ^{6×4} onto (T_pSpSt):
             A_6_4 = Array{Float64}([
                 -7 2 12 0
                 4 0 1 -2

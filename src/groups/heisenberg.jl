@@ -2,7 +2,7 @@
 @doc raw"""
     HeisenbergGroup{T} <: AbstractDecoratorManifold{ℝ}
 
-Heisenberg group `HeisenbergGroup(n)` is the group of ``(n+2) × (n+2)`` matrices [BinzPods:2008](@cite)
+Heisenberg group `HeisenbergGroup(n)` is the group of ``(n+2)×(n+2)`` matrices [BinzPods:2008](@cite)
 
 ```math
 \begin{bmatrix} 1 & \mathbf{a} & c \\

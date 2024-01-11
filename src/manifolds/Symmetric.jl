@@ -2,15 +2,15 @@
     SymmetricMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  ``\operatorname{Sym}(n)`` consisting of the real- or complex-valued
-symmetric matrices of size ``n × n``, i.e. the set
+symmetric matrices of size ``n×n``, i.e. the set
 
 ````math
-\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p \bigr\},
+\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n×n}\ \big|\ p^{\mathrm{H}} = p \bigr\},
 ````
 where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
 and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
-Though it is slightly redundant, usually the matrices are stored as ``n × n`` arrays.
+Though it is slightly redundant, usually the matrices are stored as ``n×n`` arrays.
 
 Note that in this representation, the complex valued case has to have a real-valued diagonal,
 which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::SymmetricMatrices)).
@@ -19,7 +19,7 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
     SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
 
-Generate the manifold of ``n × n`` symmetric matrices.
+Generate the manifold of ``n×n`` symmetric matrices.
 """
 struct SymmetricMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T

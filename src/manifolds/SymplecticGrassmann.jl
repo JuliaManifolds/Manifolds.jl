@@ -13,7 +13,7 @@ This manifold can be represented as corresponding representers on the [`Symplect
 or as projectors
 
 ```math
-\operatorname{SpGr}(2n, 2k, ℝ) = \bigl\{ p ∈ ℝ^{2n × 2n} \ \big| \ p^2 = p, \operatorname{rank}(p) = 2k, p^+=p \bigr\},
+\operatorname{SpGr}(2n, 2k, ℝ) = \bigl\{ p ∈ ℝ^{2n×2n} \ \big| \ p^2 = p, \operatorname{rank}(p) = 2k, p^+=p \bigr\},
 ```
 
 where ``⋅^+`` is the [`symplectic_inverse`](@ref).

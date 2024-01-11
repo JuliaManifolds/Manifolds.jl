@@ -10,7 +10,7 @@ A type to store an hamiltonien matrix, i.e. A square matrix matrix for which ``A
 A^+ = J_{2n}A^{\mathrm{T}}J_{2n}, \qquad J_{2n} \begin{pmatrix} 0 & I_n\\-I_n & 0 \end{pmatrix},
 ```
 
-and ``I_n`` denotes the ``n × n``
+and ``I_n`` denotes the ``n×n``
 """
 struct Hamiltonian{T,S<:AbstractMatrix{<:T}} <: AbstractMatrix{T}
     value::S
@@ -32,14 +32,14 @@ end
     HamiltonianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)
-consisting of (real-valued) hamiltonian matrices of size ``n × n``, i.e. the set
+consisting of (real-valued) hamiltonian matrices of size ``n×n``, i.e. the set
 
 ````math
-\mathfrak{sp}(2n,𝔽) = \bigl\{p  ∈ 𝔽^{2n × 2n}\ \big|\ p^+ = p \bigr\},
+\mathfrak{sp}(2n,𝔽) = \bigl\{p  ∈ 𝔽^{2n×2n}\ \big|\ p^+ = p \bigr\},
 ````
 where ``⋅^{+}`` denotes the [`symplectic_inverse`](@ref),. and ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
-Though it is slightly redundant, usually the matrices are stored as ``2n × 2n`` arrays.
+Though it is slightly redundant, usually the matrices are stored as ``2n×2n`` arrays.
 
 The symbol refers to the main usage within `Manifolds.jl` that is the
 Lie algebra to the [`Symplectic`](@ref) as a Lie group with the matrix operation as group operation.
@@ -48,7 +48,7 @@ Lie algebra to the [`Symplectic`](@ref) as a Lie group with the matrix operation
 
     HamiltonianMatrices(n::Int, field::AbstractNumbers=ℝ)
 
-Generate the manifold of ``n × n`` symmetric matrices.
+Generate the manifold of ``n×n`` symmetric matrices.
 """
 struct HamiltonianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T

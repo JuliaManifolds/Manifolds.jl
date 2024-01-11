@@ -6,7 +6,7 @@ The manifold of symmetric positive definite matrices, i.e.
 ````math
 \mathcal P(n) =
 \bigl\{
-p ∈ ℝ^{n × n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
+p ∈ ℝ^{n×n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
 \bigr\}
 ````
 
@@ -24,7 +24,7 @@ i.e. the set of symmetric matrices,
 
     SymmetricPositiveDefinite(n; parameter::Symbol=:type)
 
-generates the manifold $\mathcal P(n) \subset ℝ^{n × n}$
+generates the manifold $\mathcal P(n) \subset ℝ^{n×n}$
 """
 struct SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
     size::T
@@ -466,7 +466,7 @@ end
     representation_size(M::SymmetricPositiveDefinite)
 
 Return the size of an array representing an element on the
-[`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. $n × n$, the size of such a
+[`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. $n×n$, the size of such a
 symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
 """
 function representation_size(M::SymmetricPositiveDefinite)

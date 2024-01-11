@@ -1,23 +1,23 @@
 @doc raw"""
     Stiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The Stiefel manifold consists of all $n × k$, $n ≥ k$ unitary matrices, i.e.
+The Stiefel manifold consists of all ``n×k``, ``n ≥ k`` unitary matrices, i.e.
 
 ````math
-\operatorname{St}(n,k) = \bigl\{ p ∈ 𝔽^{n × k}\ \big|\ p^{\mathrm{H}}p = I_k \bigr\},
+\operatorname{St}(n,k) = \bigl\{ p ∈ 𝔽^{n×k}\ \big|\ p^{\mathrm{H}}p = I_k \bigr\},
 ````
 
-where $𝔽 ∈ \{ℝ, ℂ\}$,
-$⋅^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
-$I_k ∈ ℝ^{k × k}$ denotes the $k × k$ identity matrix.
+where ``𝔽 ∈ \{ℝ, ℂ\}``,
+``⋅^{\mathrm{H}}`` denotes the complex conjugate transpose or Hermitian, and
+``I_k ∈ ℝ^{k×k}`` denotes the ``k×k`` identity matrix.
 
-The tangent space at a point $p ∈ \mathcal M$ is given by
+The tangent space at a point ``p ∈ \mathcal M`` is given by
 
 ````math
-T_p \mathcal M = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0_k\},
+T_p \mathcal M = \{ X ∈ 𝔽^{n×k} : p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0_k\},
 ````
 
-where $0_k$ is the $k × k$ zero matrix and $\overline{⋅}$ the (elementwise) complex conjugate.
+where ``0_k`` is the ``k×k`` zero matrix and ``\overline{⋅}`` the (elementwise) complex conjugate.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
@@ -29,7 +29,7 @@ The manifold is named after
 # Constructor
     Stiefel(n, k, field=ℝ; parameter::Symbol=:type)
 
-Generate the (real-valued) Stiefel manifold of $n × k$ dimensional orthonormal matrices.
+Generate the (real-valued) Stiefel manifold of ``n×k`` dimensional orthonormal matrices.
 """
 struct Stiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
@@ -77,8 +77,8 @@ end
 @doc raw"""
     check_point(M::Stiefel, p; kwargs...)
 
-Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$, i.e. that it has the right
-[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $⋅^{\mathrm{H}}$ is the
+Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=``\operatorname{St}(n,k)``, i.e. that it has the right
+[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and ``p^{\mathrm{H}}p`` is (approximately) the identity, where ``⋅^{\mathrm{H}}`` is the
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::Stiefel, p; kwargs...)
@@ -98,9 +98,9 @@ end
     check_vector(M::Stiefel, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
-`M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits and
-it (approximately) holds that $p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0$,
-where $⋅^{\mathrm{H}}$ denotes the Hermitian and $\overline{⋅}$ the (elementwise) complex conjugate.
+`M`=``\operatorname{St}(n,k)``, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits and
+it (approximately) holds that ``p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0``,
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian and ``\overline{⋅}`` the (elementwise) complex conjugate.
 The settings for approximately can be set with `kwargs...`.
 """
 function check_vector(M::Stiefel, p, X; kwargs...)
@@ -163,8 +163,8 @@ This follows the folloing approach: From the Polar retraction we know that
 \operatorname{retr}_p^{-1}q = qs - t
 ````
 
-if such a symmetric positive definite $k × k$ matrix exists. Since $qs - t$
-is also a tangent vector at $p$ we obtain
+if such a symmetric positive definite ``k×k`` matrix exists. Since ``qs - t``
+is also a tangent vector at ``p`` we obtain
 
 ````math
 p^{\mathrm{H}}qs + s(p^{\mathrm{H}}q)^{\mathrm{H}} + 2I_k = 0,
@@ -318,7 +318,7 @@ is_flat(M::Stiefel) = manifold_dimension(M) == 1
 @doc raw"""
     manifold_dimension(M::Stiefel)
 
-Return the dimension of the [`Stiefel`](@ref) manifold `M`=$\operatorname{St}(n,k,𝔽)$.
+Return the dimension of the [`Stiefel`](@ref) manifold `M`=``\operatorname{St}(n,k,𝔽)``.
 The dimension is given by
 
 ````math
@@ -390,15 +390,15 @@ the formula reads
     \operatorname{retr}_pX = \Bigl(I - \frac{1}{2}W_{p,X}\Bigr)^{-1}\Bigl(I + \frac{1}{2}W_{p,X}\Bigr)p.
 ````
 
-It is implemented as the case $m=1$ of the `PadeRetraction`.
+It is implemented as the case ``m=1`` of the `PadeRetraction`.
 """
 retract(::Stiefel, ::Any, ::Any, ::CayleyRetraction)
 
 @doc raw"""
     retract(M::Stiefel, p, X, ::PadeRetraction{m})
 
-Compute the retraction on the [`Stiefel`](@ref) manifold `M` based on the Padé approximation of order $m$ [ZhuDuan:2018](@cite).
-Let $p_m$ and $q_m$ be defined for any matrix $A ∈ ℝ^{n×x}$ as
+Compute the retraction on the [`Stiefel`](@ref) manifold `M` based on the Padé approximation of order ``m`` [ZhuDuan:2018](@cite).
+Let ``p_m`` and ``q_m`` be defined for any matrix ``A ∈ ℝ^{n×x}`` as
 
 ````math
   p_m(A) = \sum_{k=0}^m \frac{(2m-k)!m!}{(2m)!(m-k)!}\frac{A^k}{k!}
@@ -410,7 +410,7 @@ and
   q_m(A) = \sum_{k=0}^m \frac{(2m-k)!m!}{(2m)!(m-k)!}\frac{(-A)^k}{k!}
 ````
 
-respectively. Then the Padé approximation (of the matrix exponential $\exp(A)$) reads
+respectively. Then the Padé approximation (of the matrix exponential ``\exp(A)``) reads
 
 ````math
   r_m(A) = q_m(A)^{-1}p_m(A)
@@ -436,7 +436,7 @@ retract(::Stiefel, ::Any, ::Any, ::PadeRetraction)
     retract(M::Stiefel, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
-[`Stiefel`](@ref) manifold `M`. With $USV = p + X$ the retraction reads
+[`Stiefel`](@ref) manifold `M`. With ``USV = p + X`` the retraction reads
 
 ````math
 \operatorname{retr}_p X = U\bar{V}^\mathrm{H}.
@@ -448,23 +448,23 @@ retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
     retract(M::Stiefel, p, X, ::QRRetraction)
 
 Compute the QR-based retraction [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) on the
-[`Stiefel`](@ref) manifold `M`. With $QR = p + X$ the retraction reads
+[`Stiefel`](@ref) manifold `M`. With ``QR = p + X`` the retraction reads
 
 ````math
 \operatorname{retr}_p X = QD,
 ````
 
-where $D$ is a $n × k$ matrix with
+where ``D`` is a ``n×k`` matrix with
 
 ````math
 D = \operatorname{diag}\bigl(\operatorname{sgn}(R_{ii}+0,5)_{i=1}^k \bigr),
 ````
 
-where $\operatorname{sgn}(p) = \begin{cases}
+where ``\operatorname{sgn}(p) = \begin{cases}
 1 & \text{ for } p > 0,\\
 0 & \text{ for } p = 0,\\
 -1& \text{ for } p < 0.
-\end{cases}$
+\end{cases}``
 """
 retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 
@@ -509,7 +509,7 @@ end
 @doc raw"""
     representation_size(M::Stiefel)
 
-Returns the representation size of the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$,
+Returns the representation size of the [`Stiefel`](@ref) `M`=``\operatorname{St}(n,k)``,
 i.e. `(n,k)`, which is the matrix dimensions.
 """
 representation_size(M::Stiefel) = get_parameter(M.size)
@@ -561,7 +561,7 @@ with
 ````
 
 Since this is the differentiated retraction as a vector transport, the result will be in the
-tangent space at $q=\operatorname{retr}_p(d)$ using the [`CayleyRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.CayleyRetraction).
+tangent space at ``q=\operatorname{retr}_p(d)`` using the [`CayleyRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.CayleyRetraction).
 """
 vector_transport_direction(
     M::Stiefel,
@@ -581,7 +581,7 @@ Compute the vector transport by computing the push forward of
 T_{p,d}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
 ```
 
-where $q = \operatorname{retr}^{\mathrm{Pol}}_p(d)$, and $Λ$ is the unique solution of the Sylvester equation
+where ``q = \operatorname{retr}^{\mathrm{Pol}}_p(d)``, and ``Λ`` is the unique solution of the Sylvester equation
 
 ```math
     Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}} = q^\mathrm{T}X - X^\mathrm{T}q
@@ -604,8 +604,8 @@ See  [AbsilMahonySepulchre:2008](@cite), p. 173, or Section 3.5 of [Zhu:2016](@c
 ```math
 T_{p,d}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
 ```
-where $q = \operatorname{retr}^{\mathrm{QR}}_p(d)$, $R$ is the $R$ factor of the QR
-decomposition of $p + d$, and
+where ``q = \operatorname{retr}^{\mathrm{QR}}_p(d)``, ``R`` is the ``R`` factor of the QR
+decomposition of ``p + d``, and
 ```math
 \bigl( \rho_{\mathrm{s}}(A) \bigr)_{ij}
 = \begin{cases}
@@ -665,8 +665,8 @@ Section 4 of [HuangGallivanAbsil:2015](@cite) or  Section 3.5 of [Zhu:2016](@cit
 T_{q\gets p}^{\text{Pol}}(X) = q*Λ + (I-qq^{\mathrm{T}})X(1+d^\mathrm{T}d)^{-\frac{1}{2}},
 ```
 
-where $d = \bigl( \operatorname{retr}^{\mathrm{Pol}}_p\bigr)^{-1}(q)$,
-and $Λ$ is the unique solution of the Sylvester equation
+where ``d = \bigl( \operatorname{retr}^{\mathrm{Pol}}_p\bigr)^{-1}(q)``,
+and ``Λ`` is the unique solution of the Sylvester equation
 
 ```math
     Λ(I+d^\mathrm{T}d)^{\frac{1}{2}} + (I + d^\mathrm{T}d)^{\frac{1}{2}} = q^\mathrm{T}X - X^\mathrm{T}q
@@ -690,8 +690,8 @@ see  [AbsilMahonySepulchre:2008](@cite), p. 173, or Section 3.5 of [Zhu:2016](@c
 ```math
 T_{q \gets p}^{\text{QR}}(X) = q*\rho_{\mathrm{s}}(q^\mathrm{T}XR^{-1}) + (I-qq^{\mathrm{T}})XR^{-1},
 ```
-where $d = \bigl(\operatorname{retr}^{\mathrm{QR}}\bigr)^{-1}_p(q)$, $R$ is the $R$ factor of the QR
-decomposition of $p+X$, and
+where ``d = \bigl(\operatorname{retr}^{\mathrm{QR}}\bigr)^{-1}_p(q)``, ``R`` is the ``R`` factor of the QR
+decomposition of ``p+X``, and
 ```math
 \bigl( \rho_{\mathrm{s}}(A) \bigr)_{ij}
 = \begin{cases}

@@ -7,9 +7,9 @@ positive semidefinite matrices) of rank $k$ with unit trace.
 ````math
 \begin{aligned}
 \mathcal S(n,k) =
-\bigl\{p ∈ ℝ^{n × n}\ \big|\ &a^\mathrm{T}pa \geq 0 \text{ for all } a ∈ ℝ^{n},\\
+\bigl\{p ∈ ℝ^{n×n}\ \big|\ &a^\mathrm{T}pa \geq 0 \text{ for all } a ∈ ℝ^{n},\\
 &\operatorname{tr}(p) = \sum_{i=1}^n p_{ii} = 1,\\
-&\text{and } p = qq^{\mathrm{T}} \text{ for } q \in  ℝ^{n × k}
+&\text{and } p = qq^{\mathrm{T}} \text{ for } q \in  ℝ^{n×k}
 \text{ with } \operatorname{rank}(p) = \operatorname{rank}(q) = k
 \bigr\}.
 \end{aligned}
@@ -22,15 +22,15 @@ unit frobenius norm of $q$.
 
 
 The tangent space at $p$, denoted $T_p\mathcal E(n,k)$, is also represented by matrices
-$Y\in ℝ^{n × k}$ and reads as
+$Y\in ℝ^{n×k}$ and reads as
 
 ````math
 T_p\mathcal S(n,k) = \bigl\{
-X ∈ ℝ^{n × n}\,|\,X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}
+X ∈ ℝ^{n×n}\,|\,X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}
 \text{ with } \operatorname{tr}(X) = \sum_{i=1}^{n}X_{ii} = 0
 \bigr\}
 ````
-endowed with the [`Euclidean`](@ref) metric from the embedding, i.e. from the $ℝ^{n × k}$
+endowed with the [`Euclidean`](@ref) metric from the embedding, i.e. from the $ℝ^{n×k}$
 
 
 This manifold was for example
@@ -40,7 +40,7 @@ investigated in [JourneeBachAbsilSepulchre:2010](@cite).
 
     Spectrahedron(n::Int, k::Int; parameter::Symbol=:type)
 
-generates the manifold $\mathcal S(n,k) \subset ℝ^{n × n}$.
+generates the manifold $\mathcal S(n,k) \subset ℝ^{n×n}$.
 """
 struct Spectrahedron{T} <: AbstractDecoratorManifold{ℝ}
     size::T
@@ -168,7 +168,7 @@ retract_project!(M::Spectrahedron, r, q, Y, t::Number) = project!(M, r, q .+ t .
     representation_size(M::Spectrahedron)
 
 Return the size of an array representing an element on the
-[`Spectrahedron`](@ref) manifold `M`, i.e. $n × k$, the size of such factor of $p=qq^{\mathrm{T}}$
+[`Spectrahedron`](@ref) manifold `M`, i.e. $n×k$, the size of such factor of $p=qq^{\mathrm{T}}$
 on $\mathcal M = \mathcal S(n,k)$.
 """
 representation_size(M::Spectrahedron) = get_parameter(M.size)

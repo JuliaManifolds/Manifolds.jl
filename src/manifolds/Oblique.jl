@@ -13,7 +13,7 @@ The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all fun
 
     Oblique(n::Int, m::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
-Generate the manifold of matrices $\mathbb R^{n × m}$ such that the $m$ columns are unit
+Generate the manifold of matrices $\mathbb R^{n×m}$ such that the $m$ columns are unit
 vectors, i.e. from the [`Sphere`](@ref)`(n-1)`.
 """
 struct Oblique{T,𝔽,S} <: AbstractPowerManifold{𝔽,Sphere{S,𝔽},ArrayPowerRepresentation}

@@ -2,32 +2,32 @@
     Elliptope{T} <: AbstractDecoratorManifold{ℝ}
 
 The Elliptope manifold, also known as the set of correlation matrices, consists of all
-symmetric positive semidefinite matrices of rank $k$ with unit diagonal, i.e.,
+symmetric positive semidefinite matrices of rank ``k`` with unit diagonal, i.e.,
 
 ````math
 \begin{aligned}
 \mathcal E(n,k) =
-\bigl\{p ∈ ℝ^{n × n}\ \big|\ &a^\mathrm{T}pa \geq 0 \text{ for all } a ∈ ℝ^{n},\\
+\bigl\{p ∈ ℝ^{n×n}\ \big|\ &a^\mathrm{T}pa \geq 0 \text{ for all } a ∈ ℝ^{n},\\
 &p_{ii} = 1 \text{ for all } i=1,\ldots,n,\\
-&\text{and } p = qq^{\mathrm{T}} \text{ for } q \in  ℝ^{n × k} \text{ with } \operatorname{rank}(p) = \operatorname{rank}(q) = k
+&\text{and } p = qq^{\mathrm{T}} \text{ for } q \in  ℝ^{n×k} \text{ with } \operatorname{rank}(p) = \operatorname{rank}(q) = k
 \bigr\}.
 \end{aligned}
 ````
 
-And this manifold is working solely on the matrices $q$. Note that this $q$ is not unique,
-indeed for any orthogonal matrix $A$ we have $(qA)(qA)^{\mathrm{T}} = qq^{\mathrm{T}} = p$,
+And this manifold is working solely on the matrices ``q``. Note that this ``q`` is not unique,
+indeed for any orthogonal matrix ``A`` we have ``(qA)(qA)^{\mathrm{T}} = qq^{\mathrm{T}} = p``,
 so the manifold implemented here is the quotient manifold. The unit diagonal translates to
-unit norm columns of $q$.
+unit norm columns of ``q``.
 
-The tangent space at $p$, denoted $T_p\mathcal E(n,k)$, is also represented by matrices
-$Y\in ℝ^{n × k}$ and reads as
+The tangent space at ``p``, denoted ``T_p\mathcal E(n,k)``, is also represented by matrices
+``Y\in ℝ^{n×k}`` and reads as
 
 ````math
 T_p\mathcal E(n,k) = \bigl\{
-X ∈ ℝ^{n × n}\,|\,X = qY^{\mathrm{T}} + Yq^{\mathrm{T}} \text{ with } X_{ii} = 0 \text{ for } i=1,\ldots,n
+X ∈ ℝ^{n×n}\,|\,X = qY^{\mathrm{T}} + Yq^{\mathrm{T}} \text{ with } X_{ii} = 0 \text{ for } i=1,\ldots,n
 \bigr\}
 ````
-endowed with the [`Euclidean`](@ref) metric from the embedding, i.e. from the $ℝ^{n × k}$
+endowed with the [`Euclidean`](@ref) metric from the embedding, i.e. from the ``ℝ^{n×k}``
 
 
 This manifold was for example
@@ -37,7 +37,7 @@ investigated in[JourneeBachAbsilSepulchre:2010](@cite).
 
     Elliptope(n::Int, k::Int; parameter::Symbol=:type)
 
-generates the manifold $\mathcal E(n,k) \subset ℝ^{n × n}$.
+generates the manifold ``\mathcal E(n,k) \subset ℝ^{n×n}``.
 
 `parameter`: whether a type parameter should be used to store `n` and `k`. By default size
 is stored in type. Value can either be `:field` or `:type`.
@@ -56,11 +56,11 @@ end
 @doc raw"""
     check_point(M::Elliptope, q; kwargs...)
 
-checks, whether `q` is a valid reprsentation of a point $p=qq^{\mathrm{T}}$ on the
+checks, whether `q` is a valid reprsentation of a point ``p=qq^{\mathrm{T}}`` on the
 [`Elliptope`](@ref) `M`, i.e. is a matrix
-of size `(N,K)`, such that $p$ is symmetric positive semidefinite and has unit trace.
-Since by construction $p$ is symmetric, this is not explicitly checked.
-Since $p$ is by construction positive semidefinite, this is not checked.
+of size `(N,K)`, such that ``p`` is symmetric positive semidefinite and has unit trace.
+Since by construction ``p`` is symmetric, this is not explicitly checked.
+Since ``p`` is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
 function check_point(M::Elliptope, q; kwargs...)
@@ -77,13 +77,13 @@ end
 @doc raw"""
     check_vector(M::Elliptope, q, Y; kwargs... )
 
-Check whether $X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}$ is a tangent vector to
-$p=qq^{\mathrm{T}}$ on the [`Elliptope`](@ref) `M`,
-i.e. `Y` has to be of same dimension as `q` and a $X$ has to be a symmetric matrix with
+Check whether ``X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}`` is a tangent vector to
+``p=qq^{\mathrm{T}}`` on the [`Elliptope`](@ref) `M`,
+i.e. `Y` has to be of same dimension as `q` and a ``X`` has to be a symmetric matrix with
 zero diagonal.
 
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
-Note that symmetric of $X$ holds by construction an is not explicitly checked.
+Note that symmetric of ``X`` holds by construction an is not explicitly checked.
 """
 function check_vector(
     M::Elliptope,
@@ -122,7 +122,7 @@ is_flat(M::Elliptope) = false
     manifold_dimension(M::Elliptope)
 
 returns the dimension of
-[`Elliptope`](@ref) `M`$=\mathcal E(n,k), n,k ∈ ℕ$, i.e.
+[`Elliptope`](@ref) `M` ``=\mathcal E(n,k), n,k ∈ ℕ``, i.e.
 ````math
 \dim \mathcal E(n,k) = n(k-1) - \frac{k(k-1)}{2}.
 ````
@@ -158,7 +158,7 @@ end
 @doc raw"""
     retract(M::Elliptope, q, Y, ::ProjectionRetraction)
 
-compute a projection based retraction by projecting $q+Y$ back onto the manifold.
+compute a projection based retraction by projecting ``q+Y`` back onto the manifold.
 """
 retract(::Elliptope, ::Any, ::Any, ::ProjectionRetraction)
 
@@ -172,8 +172,8 @@ end
     representation_size(M::Elliptope)
 
 Return the size of an array representing an element on the
-[`Elliptope`](@ref) manifold `M`, i.e. $n × k$, the size of such factor of $p=qq^{\mathrm{T}}$
-on $\mathcal M = \mathcal E(n,k)$.
+[`Elliptope`](@ref) manifold `M`, i.e. ``n×k``, the size of such factor of ``p=qq^{\mathrm{T}}``
+on ``\mathcal M = \mathcal E(n,k)``.
 """
 representation_size(M::Elliptope) = get_parameter(M.size)
 

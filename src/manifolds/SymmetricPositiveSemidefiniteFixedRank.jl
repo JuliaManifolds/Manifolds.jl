@@ -2,11 +2,11 @@
     SymmetricPositiveSemidefiniteFixedRank{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
-symmetric positive semidefinite matrices of size $n × n$ and rank $k$, i.e. the set
+symmetric positive semidefinite matrices of size $n×n$ and rank $k$, i.e. the set
 
 ````math
 \operatorname{SPS}_k(n) = \bigl\{
-p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p,
+p  ∈ 𝔽^{n×n}\ \big|\ p^{\mathrm{H}} = p,
 apa^{\mathrm{H}} \geq 0 \text{ for all } a ∈ 𝔽
 \text{ and } \operatorname{rank}(p) = k\bigr\},
 ````
@@ -15,17 +15,17 @@ and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
 We sometimes $\operatorname{SPS}_{k,𝔽}(n)$, when distinguishing the real- and complex-valued
 manifold is important.
 
-An element is represented by $q ∈ 𝔽^{n × k}$ from the factorization $p = qq^{\mathrm{H}}$.
-Note that since for any unitary (orthogonal) $A ∈ 𝔽^{n × n}$ we have
+An element is represented by $q ∈ 𝔽^{n×k}$ from the factorization $p = qq^{\mathrm{H}}$.
+Note that since for any unitary (orthogonal) $A ∈ 𝔽^{n×n}$ we have
 $(Aq)(Aq)^{\mathrm{H}} = qq^{\mathrm{H}} = p$, the representation is not unique, or in
-other words, the manifold is a quotient manifold of $𝔽^{n × k}$.
+other words, the manifold is a quotient manifold of $𝔽^{n×k}$.
 
 The tangent space at $p$, $T_p\operatorname{SPS}_k(n)$, is also represented
-by matrices $Y ∈ 𝔽^{n × k}$ and reads as
+by matrices $Y ∈ 𝔽^{n×k}$ and reads as
 
 ````math
 T_p\operatorname{SPS}_k(n) = \bigl\{
-X ∈ 𝔽^{n × n}\,|\,X = qY^{\mathrm{H}} + Yq^{\mathrm{H}}
+X ∈ 𝔽^{n×n}\,|\,X = qY^{\mathrm{H}} + Yq^{\mathrm{H}}
 \text{ i.e. } X = X^{\mathrm{H}}
 \bigr\}.
 ````
@@ -37,7 +37,7 @@ The metric was used in [JourneeBachAbsilSepulchre:2010](@cite)[MassartAbsil:2020
 
     SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
-Generate the manifold of $n × n$ symmetric positive semidefinite matrices of rank $k$
+Generate the manifold of $n×n$ symmetric positive semidefinite matrices of rank $k$
 over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
 """
 struct SymmetricPositiveSemidefiniteFixedRank{T,𝔽} <: AbstractDecoratorManifold{𝔽}

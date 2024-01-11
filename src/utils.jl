@@ -2,7 +2,7 @@
 @doc raw"""
     usinc(θ::Real)
 
-Unnormalized version of `sinc` function, i.e. $\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}$.
+Unnormalized version of `sinc` function, i.e. ``\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}``.
 This is equivalent to `sinc(θ/π)`.
 """
 @inline usinc(θ::Real) = θ == 0 ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
@@ -10,8 +10,8 @@ This is equivalent to `sinc(θ/π)`.
 @doc raw"""
     usinc_from_cos(x::Real)
 
-Unnormalized version of `sinc` function, i.e. $\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}$,
-computed from $x = cos(θ)$.
+Unnormalized version of `sinc` function, i.e. ``\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}``,
+computed from ``x = cos(θ)``.
 """
 @inline function usinc_from_cos(x::Real)
     return if x >= 1
@@ -140,15 +140,15 @@ mul!_safe(Y, A, B) = (Y === A || Y === B) ? copyto!(Y, A * B) : mul!(Y, A, B)
 @doc raw"""
     realify(X::AbstractMatrix{T𝔽}, 𝔽::AbstractNumbers) -> Y::AbstractMatrix{<:Real}
 
-Given a matrix $X ∈ 𝔽^{n × n}$, compute $Y ∈ ℝ^{m × m}$, where $m = n \operatorname{dim}_𝔽$,
-and $\operatorname{dim}_𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the number field $𝔽$, using
-the map $ϕ \colon X ↦ Y$, that preserves the matrix product, so that for all
-$C,D ∈ 𝔽^{n × n}$,
+Given a matrix ``X ∈ 𝔽^{n×n}``, compute ``Y ∈ ℝ^{m×m}``, where ``m = n \operatorname{dim}_𝔽``,
+and ``\operatorname{dim}_𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the number field ``𝔽``, using
+the map ``ϕ \colon X ↦ Y``, that preserves the matrix product, so that for all
+``C,D ∈ 𝔽^{n×n}``,
 ````math
 ϕ(C) ϕ(D) = ϕ(CD).
 ````
 See [`realify!`](@ref) for an in-place version, and [`unrealify!`](@ref) to compute the
-inverse of $ϕ$.
+inverse of ``ϕ``.
 """
 function realify(X, 𝔽)
     n = LinearAlgebra.checksquare(X)
@@ -168,8 +168,8 @@ realify!(Y, X, 𝔽)
 @doc raw"""
     realify!(Y::AbstractMatrix{<:Real}, X::AbstractMatrix{<:Complex}, ::typeof(ℂ))
 
-Given a complex matrix $X = A + iB ∈ ℂ^{n × n}$, compute its realified matrix
-$Y ∈ ℝ^{2n × 2n}$, written
+Given a complex matrix ``X = A + iB ∈ ℂ^{n×n}``, compute its realified matrix
+``Y ∈ ℝ^{2n×2n}``, written
 where
 ````math
 Y = \begin{pmatrix}A & -B \\ B & A \end{pmatrix}.
@@ -188,10 +188,10 @@ end
 @doc raw"""
     unrealify!(X::AbstractMatrix{T𝔽}, Y::AbstractMatrix{<:Real}, 𝔽::AbstractNumbers[, n])
 
-Given a real matrix $Y ∈ ℝ^{m × m}$, where $m = n \operatorname{dim}_𝔽$, and
-$\operatorname{dim}_𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the number field $𝔽$, compute
-in-place its equivalent matrix $X ∈ 𝔽^{n × n}$. Note that this function does not check that
-$Y$ has a valid structure to be un-realified.
+Given a real matrix ``Y ∈ ℝ^{m×m}``, where ``m = n \operatorname{dim}_𝔽``, and
+``\operatorname{dim}_𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the number field ``𝔽``, compute
+in-place its equivalent matrix ``X ∈ 𝔽^{n×n}``. Note that this function does not check that
+``Y`` has a valid structure to be un-realified.
 
 See [`realify!`](@ref) for the inverse of this function.
 """
@@ -229,7 +229,7 @@ end
 @doc raw"""
     vec2skew!(X, v, k)
 
-create a skew symmetric matrix inplace in `X` of size $k×k$ from a vector `v`,
+create a skew symmetric matrix inplace in `X` of size ``k×k`` from a vector `v`,
 for example for `v=[1,2,3]` and `k=3` this
 yields
 ````julia

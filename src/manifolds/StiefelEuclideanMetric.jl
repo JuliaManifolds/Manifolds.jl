@@ -19,7 +19,7 @@ emanating from `p` in tangent direction `X`.
 
 where $\operatorname{Exp}$ denotes matrix exponential,
 $⋅^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $I_k$ and
-$0_k$ are the identity matrix and the zero matrix of dimension $k × k$, respectively.
+$0_k$ are the identity matrix and the zero matrix of dimension $k×k$, respectively.
 """
 exp(::Stiefel, ::Any...)
 

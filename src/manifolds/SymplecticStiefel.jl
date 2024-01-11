@@ -2,11 +2,11 @@
     SymplecticStiefel{T,𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
 The symplectic Stiefel manifold consists of all
-``2n × 2k, n ≥ k`` matrices satisfying the requirement
+``2n×2k, n ≥ k`` matrices satisfying the requirement
 
 ````math
 \mathrm{SpSt}(2n, 2k, ℝ)
-    := \bigl\{ p ∈ ℝ^{2n × 2n} \ \big| \ p^{\mathrm{T}}J_{2n}p = J_{2k} \bigr\},
+    := \bigl\{ p ∈ ℝ^{2n×2n} \ \big| \ p^{\mathrm{T}}J_{2n}p = J_{2k} \bigr\},
 ````
 
 where ``J_{2n}`` denotes the [`SymplecticMatrix`](@ref)
@@ -20,10 +20,10 @@ The symplectic Stiefel tangent space at ``p`` can be parametrized as [BendokatZi
 ```math
 \begin{align*}
     T_p\mathrm{SpSt}(2n, 2k)
-    &= \{X ∈ ℝ^{2n × 2k} ∣ p^{T}J_{2n}X + X^{T}J_{2n}p = 0 \}, \\
+    &= \{X ∈ ℝ^{2n×2k} ∣ p^{T}J_{2n}X + X^{T}J_{2n}p = 0 \}, \\
     &= \{X = pΩ + p^sB \mid
-        Ω ∈ ℝ^{2k × 2k}, Ω^+ = -Ω, \\
-        &\qquad & p^s ∈ \mathrm{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k) × 2k}, \},
+        Ω ∈ ℝ^{2k×2k}, Ω^+ = -Ω, \\
+        &\qquad & p^s ∈ \mathrm{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k)×2k}, \},
 \end{align*}
 ```
 
@@ -41,7 +41,7 @@ Generate the (real-valued) symplectic Stiefel manifold of ``2n×2k``
 matrices which span a ``2k`` dimensional symplectic subspace of ``ℝ^{2n×2n}``.
 The constructor for the [`SymplecticStiefel`](@ref) manifold accepts the even column
 dimension ``2n`` and an even number of columns ``2k`` for
-the real symplectic Stiefel manifold with elements ``p ∈ ℝ^{2n × 2k}``.
+the real symplectic Stiefel manifold with elements ``p ∈ ℝ^{2n×2k}``.
 """
 struct SymplecticStiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
@@ -129,7 +129,7 @@ check_vector(::SymplecticStiefel, ::Any...)
 function check_vector(M::SymplecticStiefel{S,𝔽}, p, X::T; kwargs...) where {S,T,𝔽}
     n, k = get_parameter(M.size)
     # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
-    H = inv(M, p) * X  # ∈ ℝ^{2k × 2k}, should be Hamiltonian.
+    H = inv(M, p) * X  # ∈ ℝ^{2k×2k}, should be Hamiltonian.
 
     if !is_hamiltonian(H; kwargs...)
         return DomainError(
@@ -226,9 +226,9 @@ exp(::SymplecticStiefel, p, X)
 function exp!(M::SymplecticStiefel, q, p, X)
     n, k = get_parameter(M.size)
     J = SymplecticMatrix(p, X)
-    pT_p = lu(p' * p) # ∈ ℝ^{2k × 2k}
+    pT_p = lu(p' * p) # ∈ ℝ^{2k×2k}
 
-    C = pT_p \ X' # ∈ ℝ^{2k × 2n}
+    C = pT_p \ X' # ∈ ℝ^{2k×2n}
 
     # Construct A-bar:
     # First A-term: J * (p^{\mathrm{T}} * C^{\mathrm{T}}) * J
@@ -256,17 +256,17 @@ function exp!(M::SymplecticStiefel, q, p, X)
     Δ_bar = H_bar
 
     γ_1 = Δ_bar - (1 / 2) .* p * symplectic_inverse_times(M, p, Δ_bar)
-    γ = [γ_1 -p] # ∈ ℝ^{2n × 4k}
+    γ = [γ_1 -p] # ∈ ℝ^{2n×4k}
 
     Δ_bar_star = rmul!(J' * Δ_bar', J)
     λ_1 = lmul!(J', p * J)
     λ_2 = (Δ_bar_star .- (1 / 2) .* (Δ_bar_star * p) * λ_1')'
-    λ = [λ_1 λ_2] # ∈ ℝ^{2n × 4k}
+    λ = [λ_1 λ_2] # ∈ ℝ^{2n×4k}
 
-    Γ = [λ -γ] # ∈ ℝ^{2n × 8k}
-    Λ = [γ λ] # ∈ ℝ^{2n × 8k}
+    Γ = [λ -γ] # ∈ ℝ^{2n×8k}
+    Λ = [γ λ] # ∈ ℝ^{2n×8k}
 
-    # At last compute the (8k × 8k) and (4k × 4k) matrix exponentials:
+    # At last compute the (8k×8k) and (4k×4k) matrix exponentials:
     q .= Γ * (exp(Λ' * Γ)[:, (4k + 1):end]) * (exp(λ' * γ)[:, (2k + 1):end])
     return q
 end
@@ -323,15 +323,15 @@ end
     inv(::SymplecticStiefel, A)
     inv!(::SymplecticStiefel, q, p)
 
-Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n × 2k}``.
+Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n×2k}``.
 Given a matrix
 ````math
-A ∈ ℝ^{2n × 2k},\quad
+A ∈ ℝ^{2n×2k},\quad
 A =
 \begin{bmatrix}
 A_{1, 1} & A_{1, 2} \\
 A_{2, 1} & A_{2, 2}
-\end{bmatrix}, \quad A_{i, j} ∈ ℝ^{2n × 2k}
+\end{bmatrix}, \quad A_{i, j} ∈ ℝ^{2n×2k}
 ````
 
 the symplectic inverse is defined as:
@@ -462,7 +462,7 @@ function project!(::SymplecticStiefel, Y, p, A)
     end
 
     # Solve for Λ (Lagrange mutliplier):
-    pT_p = p' * p  # (2k × 2k)
+    pT_p = p' * p  # (2k×2k)
     Λ = sylvester(pT_p, pT_p, h(A) ./ 2)
 
     Y[:, :] = A .- Jp * (Λ .- Λ')
@@ -550,7 +550,7 @@ function retract_cayley!(M::SymplecticStiefel, q, p, X, t::Number)
     # Define intermediate matrices for later use:
     A = symplectic_inverse_times(M, p, tX)
 
-    H = tX .- p * A  # Allocates (2n × 2k).
+    H = tX .- p * A  # Allocates (2n×2k).
 
     # A = I - A/2 + H^{+}H/4:
     A .= (symplectic_inverse_times(M, H, H) ./ 4) .- (A ./ 2)

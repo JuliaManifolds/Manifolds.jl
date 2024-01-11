@@ -39,7 +39,7 @@ default_vector_transport_method(::Grassmann, ::Type{<:StiefelPoint}) = Projectio
 @doc raw"""
     distance(M::Grassmann, p, q)
 
-Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M`$= \mathrm{Gr}(n,k)$.
+Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M```= \mathrm{Gr}(n,k)``.
 
 The distance is given by
 ````math
@@ -68,17 +68,17 @@ embed(::Stiefel, p::StiefelPoint, X::StiefelTVector) = X.value
 @doc raw"""
     exp(M::Grassmann, p, X)
 
-Compute the exponential map on the [`Grassmann`](@ref) `M`$= \mathrm{Gr}(n,k)$ starting in
-`p` with tangent vector (direction) `X`. Let $X = USV$ denote the SVD decomposition of $X$.
+Compute the exponential map on the [`Grassmann`](@ref) `M` ``= \mathrm{Gr}(n,k)`` starting in
+`p` with tangent vector (direction) `X`. Let ``X = USV`` denote the SVD decomposition of ``X``.
 Then the exponential map is written using
 
 ````math
 z = p V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
 ````
 
-where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian and the
-cosine and sine are applied element wise to the diagonal entries of $S$. A final QR
-decomposition $z=QR$ is performed for numerical stability reasons, yielding the result as
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian and the
+cosine and sine are applied element wise to the diagonal entries of ``S``. A final QR
+decomposition ``z=QR`` is performed for numerical stability reasons, yielding the result as
 
 ````math
 \exp_p X = Q.
@@ -111,7 +111,7 @@ of `p` on the [`Grassmann`](@ref) manifold `M`. The formula reads
 g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 ````
 
-where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
 """
 inner(::Grassmann, p, X, Y) = dot(X, Y)
 
@@ -125,7 +125,7 @@ Compute the inverse retraction for the [`PolarRetraction`](https://juliamanifold
 \operatorname{retr}_p^{-1}q = q*(p^\mathrm{H}q)^{-1} - p,
 ````
 
-where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
 
@@ -143,7 +143,7 @@ Compute the inverse retraction for the [`QRRetraction`](https://juliamanifolds.g
 ````math
 \operatorname{retr}_p^{-1}q = q(p^\mathrm{H}q)^{-1} - p,
 ````
-where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
@@ -155,7 +155,7 @@ end
 @doc raw"""
     log(M::Grassmann, p, q)
 
-Compute the logarithmic map on the [`Grassmann`](@ref) `M`$ = \mathcal M=\mathrm{Gr}(n,k)$,
+Compute the logarithmic map on the [`Grassmann`](@ref) `M` `` = \mathcal M=\mathrm{Gr}(n,k)``,
 i.e. the tangent vector `X` whose corresponding [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) starting from `p`
 reaches `q` after time 1 on `M`. The formula reads
 
@@ -163,15 +163,15 @@ reaches `q` after time 1 on `M`. The formula reads
 \log_p q = V⋅ \operatorname{atan}(S) ⋅ U^\mathrm{H},
 ````
 
-where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
-The matrices $U$ and $V$ are the unitary matrices, and $S$ is the diagonal matrix
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
+The matrices ``U`` and ``V`` are the unitary matrices, and ``S`` is the diagonal matrix
 containing the singular values of the SVD-decomposition
 
 ````math
 USV = (q^\mathrm{H}p)^{-1} ( q^\mathrm{H} - q^\mathrm{H}pp^\mathrm{H}).
 ````
 
-In this formula the $\operatorname{atan}$ is meant elementwise.
+In this formula the ``\operatorname{atan}`` is meant elementwise.
 """
 log(::Grassmann, ::Any...)
 
@@ -186,8 +186,8 @@ end
     project(M::Grassmann, p)
 
 Project `p` from the embedding onto the [`Grassmann`](@ref) `M`, i.e. compute `q`
-as the polar decomposition of $p$ such that $q^{\mathrm{H}}q$ is the identity,
-where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+as the polar decomposition of ``p`` such that ``q^{\mathrm{H}}q`` is the identity,
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::Grassmann, ::Any)
 
@@ -207,7 +207,7 @@ which is computed by
 \operatorname{proj_p}(X) = X - pp^{\mathrm{H}}X,
 ````
 
-where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
 """
 project(::Grassmann, ::Any...)
 
@@ -253,7 +253,7 @@ end
     representation_size(M::Grassmann)
 
 Return the representation size or matrix dimension of a point on the [`Grassmann`](@ref)
-`M`, i.e. $(n,k)$ for both the real-valued and the complex value case.
+`M`, i.e. ``(n,k)`` for both the real-valued and the complex value case.
 """
 representation_size(M::Grassmann) = get_parameter(M.size)
 
@@ -261,12 +261,12 @@ representation_size(M::Grassmann) = get_parameter(M.size)
     retract(M::Grassmann, p, X, ::PolarRetraction)
 
 Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
-[`Grassmann`](@ref) `M`. With $USV = p + X$ the retraction reads
+[`Grassmann`](@ref) `M`. With ``USV = p + X`` the retraction reads
 ````math
 \operatorname{retr}_p X = UV^\mathrm{H},
 ````
 
-where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
 """
 retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
 
@@ -280,11 +280,11 @@ end
     retract(M::Grassmann, p, X, ::QRRetraction )
 
 Compute the QR-based retraction [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) on the
-[`Grassmann`](@ref) `M`. With $QR = p + X$ the retraction reads
+[`Grassmann`](@ref) `M`. With ``QR = p + X`` the retraction reads
 ````math
 \operatorname{retr}_p X = QD,
 ````
-where D is a $m × n$ matrix with
+where D is a ``m×n`` matrix with
 ````math
 D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_{i=1}^n \right).
 ````

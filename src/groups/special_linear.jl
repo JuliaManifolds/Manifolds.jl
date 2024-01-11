@@ -126,7 +126,7 @@ end
 @doc raw"""
     project(G::SpecialLinear, p, X)
 
-Orthogonally project ``X ∈ 𝔽^{n × n}`` onto the tangent space of ``p`` to the
+Orthogonally project ``X ∈ 𝔽^{n×n}`` onto the tangent space of ``p`` to the
 [`SpecialLinear`](@ref) ``G = \mathrm{SL}(n, 𝔽)``. The formula reads
 ````math
 \operatorname{proj}_{p}

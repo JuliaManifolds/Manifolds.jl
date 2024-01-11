@@ -2,15 +2,15 @@
     SkewHermitianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{SkewHerm}(n)$ consisting of the real- or
-complex-valued skew-hermitian matrices of size ``n × n``, i.e. the set
+complex-valued skew-hermitian matrices of size ``n×n``, i.e. the set
 
 ````math
-\operatorname{SkewHerm}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
+\operatorname{SkewHerm}(n) = \bigl\{p  ∈ 𝔽^{n×n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
 ````
 where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
 and the field $𝔽 ∈ \{ ℝ, ℂ, ℍ\}$.
 
-Though it is slightly redundant, usually the matrices are stored as ``n × n`` arrays.
+Though it is slightly redundant, usually the matrices are stored as ``n×n`` arrays.
 
 Note that in this representation, the real-valued part of the diagonal must be zero,
 which is also reflected in the
@@ -20,7 +20,7 @@ which is also reflected in the
 
     SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
-Generate the manifold of ``n × n`` skew-hermitian matrices.
+Generate the manifold of ``n×n`` skew-hermitian matrices.
 """
 struct SkewHermitianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
@@ -34,7 +34,7 @@ end
 @doc raw"""
     SkewSymmetricMatrices{T}
 
-Generate the manifold of ``n × n`` real skew-symmetric matrices.
+Generate the manifold of ``n×n`` real skew-symmetric matrices.
 This is equivalent to [`SkewHermitianMatrices(n, ℝ)`](@ref).
 
 # Constructor
