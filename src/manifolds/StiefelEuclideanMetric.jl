@@ -18,7 +18,7 @@ emanating from `p` in tangent direction `X`.
 ````
 
 where $\operatorname{Exp}$ denotes matrix exponential,
-$\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $I_k$ and
+$⋅^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $I_k$ and
 $0_k$ are the identity matrix and the zero matrix of dimension $k × k$, respectively.
 """
 exp(::Stiefel, ::Any...)
@@ -39,9 +39,9 @@ end
     get_basis(M::Stiefel{<:Any,ℝ}, p, B::DefaultOrthonormalBasis)
 
 Create the default basis using the parametrization for any $X ∈ T_p\mathcal M$.
-Set $p_\bot \in ℝ^{n\times(n-k)}$ the matrix such that the $n\times n$ matrix of the common
+Set $p_\bot \in ℝ^{n×(n-k)}$ the matrix such that the $n×n$ matrix of the common
 columns $[p\ p_\bot]$ is an ONB.
-For any skew symmetric matrix $a ∈ ℝ^{k\times k}$ and any $b ∈ ℝ^{(n-k)\times k}$ the matrix
+For any skew symmetric matrix $a ∈ ℝ^{k×k}$ and any $b ∈ ℝ^{(n-k)×k}$ the matrix
 
 ````math
 X = pa + p_\bot b ∈ T_p\mathcal M
@@ -53,7 +53,7 @@ using unit vectors for constructing both
 the upper matrix of $a$ to build a skew symmetric matrix and the matrix b, the default
 basis is constructed.
 
-Since $[p\ p_\bot]$ is an automorphism on $ℝ^{n\times p}$ the elements of $a$ and $b$ are
+Since $[p\ p_\bot]$ is an automorphism on $ℝ^{n×p}$ the elements of $a$ and $b$ are
 orthonormal coordinates for the tangent space. To be precise exactly one element in the upper
 trangular entries of $a$ is set to $1$ its symmetric entry to $-1$ and we normalize with
 the factor $\frac{1}{\sqrt{2}}$ and for $b$ one can just use unit vectors reshaped to a matrix
@@ -129,7 +129,7 @@ end
 
 Projects `p` from the embedding onto the [`Stiefel`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of $p$ such that ``q^{\mathrm{H}}q`` is the identity,
-where ``\cdot^{\mathrm{H}}`` denotes the hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the hermitian, i.e. complex conjugate transposed.
 """
 project(::Stiefel, ::Any, ::Any)
 

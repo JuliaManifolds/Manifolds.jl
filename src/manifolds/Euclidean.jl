@@ -12,7 +12,7 @@ Generate the ``n``-dimensional vector space ``ℝ^n``.
     Euclidean(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol = :field)
     𝔽^(n₁,n₂,...,nᵢ) = Euclidean(n₁,n₂,...,nᵢ; field=𝔽)
 
-Generate the vector space of ``k = n_1 \cdot n_2 \cdot … \cdot n_i`` values, i.e. the
+Generate the vector space of ``k = n_1 ⋅ n_2 ⋅ … ⋅ n_i`` values, i.e. the
 manifold ``𝔽^{n_1, n_2, …, n_i}``, ``𝔽\in\{ℝ,ℂ\}``, whose
 elements are interpreted as ``n_1 × n_2 × … × n_i`` arrays.
 For ``i=2`` we obtain a matrix space.
@@ -402,7 +402,7 @@ g_p(X,Y) = \sum_{k ∈ I} \overline{X}_{k} Y_{k},
 
 where ``I`` is the set of vectors ``k ∈ ℕ^i``, such that for all
 
-``i ≤ j ≤ i`` it holds ``1 ≤ k_j ≤ n_j`` and ``\overline{\cdot}`` denotes the complex conjugate.
+``i ≤ j ≤ i`` it holds ``1 ≤ k_j ≤ n_j`` and ``\overline{⋅}`` denotes the complex conjugate.
 
 For the special case of ``i ≤ 2``, i.e. matrices and vectors, this simplifies to
 
@@ -410,7 +410,7 @@ For the special case of ``i ≤ 2``, i.e. matrices and vectors, this simplifies 
 g_p(X,Y) = X^{\mathrm{H}}Y,
 ````
 
-where ``\cdot^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, p, X, Y) = dot(X, Y)

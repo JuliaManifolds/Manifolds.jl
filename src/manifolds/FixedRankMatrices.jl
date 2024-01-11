@@ -10,7 +10,7 @@ where ``𝔽 ∈ \{ℝ,ℂ\}`` and the rank is the number of linearly independen
 # Representation with 3 matrix factors
 
 A point ``p ∈ \mathcal M`` can be stored using unitary matrices ``U ∈ 𝔽^{m × k}``, ``V ∈ 𝔽^{n × k}`` as well as the ``k``
-singular values of ``p = U_p S V_p^\mathrm{H}``, where ``\cdot^{\mathrm{H}}`` denotes the complex conjugate transpose or
+singular values of ``p = U_p S V_p^\mathrm{H}``, where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transpose or
 Hermitian. In other words, ``U`` and ``V`` are from the manifolds [`Stiefel`](@ref)`(m,k,𝔽)` and [`Stiefel`](@ref)`(n,k,𝔽)`,
 respectively; see [`SVDMPoint`](@ref) for details.
 

@@ -76,7 +76,7 @@ Then the exponential map is written using
 z = p V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian and the
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian and the
 cosine and sine are applied element wise to the diagonal entries of $S$. A final QR
 decomposition $z=QR$ is performed for numerical stability reasons, yielding the result as
 
@@ -111,7 +111,7 @@ of `p` on the [`Grassmann`](@ref) manifold `M`. The formula reads
 g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inner(::Grassmann, p, X, Y) = dot(X, Y)
 
@@ -125,7 +125,7 @@ Compute the inverse retraction for the [`PolarRetraction`](https://juliamanifold
 \operatorname{retr}_p^{-1}q = q*(p^\mathrm{H}q)^{-1} - p,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
 
@@ -143,7 +143,7 @@ Compute the inverse retraction for the [`QRRetraction`](https://juliamanifolds.g
 ````math
 \operatorname{retr}_p^{-1}q = q(p^\mathrm{H}q)^{-1} - p,
 ````
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
@@ -160,10 +160,10 @@ i.e. the tangent vector `X` whose corresponding [`geodesic`](https://juliamanifo
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
-\log_p q = V\cdot \operatorname{atan}(S) \cdot U^\mathrm{H},
+\log_p q = V⋅ \operatorname{atan}(S) ⋅ U^\mathrm{H},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 The matrices $U$ and $V$ are the unitary matrices, and $S$ is the diagonal matrix
 containing the singular values of the SVD-decomposition
 
@@ -187,7 +187,7 @@ end
 
 Project `p` from the embedding onto the [`Grassmann`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of $p$ such that $q^{\mathrm{H}}q$ is the identity,
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::Grassmann, ::Any)
 
@@ -207,7 +207,7 @@ which is computed by
 \operatorname{proj_p}(X) = X - pp^{\mathrm{H}}X,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 project(::Grassmann, ::Any...)
 
@@ -266,7 +266,7 @@ Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.gith
 \operatorname{retr}_p X = UV^\mathrm{H},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
 

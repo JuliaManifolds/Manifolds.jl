@@ -7,10 +7,10 @@ Check whether `X` is a tangent vector to point `p` on the [`Flag`](@ref) manifol
 i.e. that `X` is block-skew-symmetric with zero diagonal:
 ````math
 X = \begin{bmatrix}
-0                     & B_{1,2}               & \cdots & B_{1,d+1} \\
--B_{1,2}^\mathrm{T}   & 0                     & \cdots & B_{2,d+1} \\
-\vdots                & \vdots                & \ddots & \vdots    \\
--B_{1,d+1}^\mathrm{T} & -B_{2,d+1}^\mathrm{T} & \cdots & 0            
+0                     & B_{1,2}               & ⋯ & B_{1,d+1} \\
+-B_{1,2}^\mathrm{T}   & 0                     & ⋯ & B_{2,d+1} \\
+\vdots                & \vdots                & ⋱ & \vdots    \\
+-B_{1,d+1}^\mathrm{T} & -B_{2,d+1}^\mathrm{T} & ⋯ & 0
 \end{bmatrix}
 ````
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
@@ -105,10 +105,10 @@ It works by first projecting `X` to the space of [`SkewHermitianMatrices`](@ref)
 setting diagonal blocks to 0:
 ````math
 X = \begin{bmatrix}
-0                     & B_{1,2}               & \cdots & B_{1,d+1} \\
--B_{1,2}^\mathrm{T}   & 0                     & \cdots & B_{2,d+1} \\
-\vdots                & \vdots                & \ddots & \vdots    \\
--B_{1,d+1}^\mathrm{T} & -B_{2,d+1}^\mathrm{T} & \cdots & 0            
+0                     & B_{1,2}               & ⋯ & B_{1,d+1} \\
+-B_{1,2}^\mathrm{T}   & 0                     & ⋯ & B_{2,d+1} \\
+\vdots                & \vdots                & ⋱ & \vdots    \\
+-B_{1,d+1}^\mathrm{T} & -B_{2,d+1}^\mathrm{T} & ⋯ & 0
 \end{bmatrix}
 ````
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.

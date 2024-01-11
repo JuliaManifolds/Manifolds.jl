@@ -32,8 +32,8 @@ d_{\mathcal P(n)}(p,q) = \sqrt{
 ````
 
 where $x$ and $y$ are the cholesky factors of $p$ and $q$, respectively,
-$⌊\cdot⌋$ denbotes the strictly lower triangular matrix of its argument,
-and $\lVert\cdot\rVert_{\mathrm{F}}$ the Frobenius norm.
+$⌊⋅⌋$ denbotes the strictly lower triangular matrix of its argument,
+and $\lVert⋅\rVert_{\mathrm{F}}$ the Frobenius norm.
 """
 function distance(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
     N = get_parameter(M.manifold.size)[1]
@@ -52,7 +52,7 @@ Compute the exponential map on the [`SymmetricPositiveDefinite`](@ref) `M` with
 
 where $\exp_xW$ is the exponential map on [`CholeskySpace`](@ref), $y$ is the cholesky
 decomposition of $p$, $W = y(y^{-1}Xy^{-\mathrm{T}})_\frac{1}{2}$,
-and $(\cdot)_\frac{1}{2}$
+and $(⋅)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$.
 """
 exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
@@ -84,9 +84,9 @@ a [`MetricManifold`](@ref) with [`LogCholeskyMetric`](@ref). The formula reads
     g_p(X,Y) = ⟨a_z(X),a_z(Y)⟩_z,
 ````
 
-where $⟨\cdot,\cdot⟩_x$ denotes inner product on the [`CholeskySpace`](@ref),
+where $⟨⋅,⋅⟩_x$ denotes inner product on the [`CholeskySpace`](@ref),
 $z$ is the cholesky factor of $p$,
-$a_z(W) = z (z^{-1}Wz^{-\mathrm{T}})_{\frac{1}{2}}$, and $(\cdot)_\frac{1}{2}$
+$a_z(W) = z (z^{-1}Wz^{-\mathrm{T}})_{\frac{1}{2}}$, and $(⋅)_\frac{1}{2}$
 denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$
 """
 function inner(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, X, Y)
@@ -139,7 +139,7 @@ Parallel transport the tangent vector `X` at `p` along the geodesic to `q` with 
 the [`SymmetricPositiveDefinite`](@ref) manifold `M` and [`LogCholeskyMetric`](@ref).
 The parallel transport is based on the parallel transport on [`CholeskySpace`](@ref):
 Let $x$ and $y$ denote the cholesky factors of `p` and `q`, respectively and
-$W = x(x^{-1}Xx^{-\mathrm{T}})_\frac{1}{2}$, where $(\cdot)_\frac{1}{2}$ denotes the lower
+$W = x(x^{-1}Xx^{-\mathrm{T}})_\frac{1}{2}$, where $(⋅)_\frac{1}{2}$ denotes the lower
 triangular matrix with the diagonal multiplied by $\frac{1}{2}$. With $V$ the parallel
 transport on [`CholeskySpace`](@ref) from $x$ to $y$. The formula hear reads
 

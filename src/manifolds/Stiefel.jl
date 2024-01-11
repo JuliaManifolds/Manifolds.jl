@@ -8,7 +8,7 @@ The Stiefel manifold consists of all $n × k$, $n ≥ k$ unitary matrices, i.e.
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,
-$\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
+$⋅^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
 $I_k ∈ ℝ^{k × k}$ denotes the $k × k$ identity matrix.
 
 The tangent space at a point $p ∈ \mathcal M$ is given by
@@ -17,7 +17,7 @@ The tangent space at a point $p ∈ \mathcal M$ is given by
 T_p \mathcal M = \{ X ∈ 𝔽^{n × k} : p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0_k\},
 ````
 
-where $0_k$ is the $k × k$ zero matrix and $\overline{\cdot}$ the (elementwise) complex conjugate.
+where $0_k$ is the $k × k$ zero matrix and $\overline{⋅}$ the (elementwise) complex conjugate.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
@@ -78,7 +78,7 @@ end
     check_point(M::Stiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`Stiefel`](@ref) `M`=$\operatorname{St}(n,k)$, i.e. that it has the right
-[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the
+[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{\mathrm{H}}p$ is (approximately) the identity, where $⋅^{\mathrm{H}}$ is the
 complex conjugate transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::Stiefel, p; kwargs...)
@@ -100,7 +100,7 @@ end
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 `M`=$\operatorname{St}(n,k)$, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits and
 it (approximately) holds that $p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0$,
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian and $\overline{\cdot}$ the (elementwise) complex conjugate.
+where $⋅^{\mathrm{H}}$ denotes the Hermitian and $\overline{⋅}$ the (elementwise) complex conjugate.
 The settings for approximately can be set with `kwargs...`.
 """
 function check_vector(M::Stiefel, p, X; kwargs...)

@@ -65,7 +65,7 @@ d_{\mathcal P(n)}(p,q)
 = \lVert \operatorname{Log}(p^{-\frac{1}{2}}qp^{-\frac{1}{2}})\rVert_{\mathrm{F}}.,
 ```
 where $\operatorname{Log}$ denotes the matrix logarithm and
-$\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
+$\lVert⋅\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
 function distance(::SymmetricPositiveDefinite, p, q)
     # avoid numerical instabilities in cholesky

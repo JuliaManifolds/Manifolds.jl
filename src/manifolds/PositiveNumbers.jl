@@ -304,7 +304,7 @@ Compute the parallel transport of `X` from the tangent space at `p` to the tange
 `q` on the [`PositiveNumbers`](@ref) `M`.
 
 ````math
-\mathcal P_{q\gets p}(X) = X\cdot\frac{q}{p}.
+\mathcal P_{q\gets p}(X) = X⋅\frac{q}{p}.
 ````
 """
 parallel_transport_to(::PositiveNumbers, ::Any, ::Any, ::Any)

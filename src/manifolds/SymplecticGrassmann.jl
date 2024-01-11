@@ -85,11 +85,11 @@ g^{\mathrm{SpGr}_p(X,Y) = \operatorname{tr}\bigl(
         (p^{\mathrm{T}p)^{-1}X^{\mathrm{T}}(I_{2n} - pp^+)Y
     \bigr),
 ```
-where ``I_{2n}`` denotes the identity matrix and ``(\cdot)^+`` the [`symplectic_inverse`](@ref).
+where ``I_{2n}`` denotes the identity matrix and ``(⋅)^+`` the [`symplectic_inverse`](@ref).
 """
 function inner(M::SymplecticGrassmann, p, X, Y)
     n, k = get_parameter(M.size)
-    Q = SymplecticMatrix(p, X, Y) # in BZ21 also J
+    J = SymplecticMatrix(p, X, Y) # in BZ21 also J
     # Procompute lu(p'p) since we solve a^{-1}* 3 times
     a = lu(p' * p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
     # we split the original trace into two one with I -> (X'Yc)

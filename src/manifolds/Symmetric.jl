@@ -7,7 +7,7 @@ symmetric matrices of size ``n × n``, i.e. the set
 ````math
 \operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p \bigr\},
 ````
-where ``\cdot^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
 and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 Though it is slightly redundant, usually the matrices are stored as ``n × n`` arrays.
@@ -202,7 +202,7 @@ Projects `p` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 \operatorname{proj}_{\operatorname{Sym}(n)}(p) = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
 ````
 
-where ``\cdot^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SymmetricMatrices, ::Any)
 
@@ -220,7 +220,7 @@ Project the matrix `X` onto the tangent space at `p` on the [`SymmetricMatrices`
 \operatorname{proj}_p(X) = \frac{1}{2} \bigl( X + X^{\mathrm{H}} \bigr),
 ````
 
-where ``\cdot^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SymmetricMatrices, ::Any, ::Any)
 

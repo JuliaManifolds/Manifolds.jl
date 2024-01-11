@@ -229,7 +229,7 @@ end
 @doc raw"""
     vec2skew!(X, v, k)
 
-create a skew symmetric matrix inplace in `X` of size $k\times k$ from a vector `v`,
+create a skew symmetric matrix inplace in `X` of size $k×k$ from a vector `v`,
 for example for `v=[1,2,3]` and `k=3` this
 yields
 ````julia

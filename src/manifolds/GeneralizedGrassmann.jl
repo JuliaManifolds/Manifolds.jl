@@ -12,7 +12,7 @@ The manifold can be represented as
 \operatorname{Gr}(n, k, B) := \bigl\{ \operatorname{span}(p)\ \big|\ p ∈ 𝔽^{n × k}, p^\mathrm{H}Bp = I_k\},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate (or Hermitian) transpose and
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate (or Hermitian) transpose and
 $I_k$ is the $k × k$ identity matrix. This means, that the columns of $p$
 form an unitary basis of the subspace with respect to the scaled inner product, that is a
 point on $\operatorname{Gr}(n,k,B)$, and hence the subspace can actually be represented by
@@ -40,7 +40,7 @@ The manifold is named after
 
     GeneralizedGrassmann(n, k, B=I_n, field=ℝ)
 
-Generate the (real-valued) Generalized Grassmann manifold of $n\times k$ dimensional
+Generate the (real-valued) Generalized Grassmann manifold of $n×k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
 struct GeneralizedGrassmann{T,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
@@ -116,8 +116,8 @@ the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as wel
     p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0_k,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
-$\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
+$\overline{⋅}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
 """
 function check_vector(M::GeneralizedGrassmann, p, X; kwargs...)
     return nothing # everything already checked in the embedding (generalized Stiefel)
@@ -157,7 +157,7 @@ SVD decomposition of $X^{\mathrm{H}}BX$. Then the exponential map is written usi
 \exp_p X = p V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian and the
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian and the
 cosine and sine are applied element wise to the diagonal entries of $S$.
 """
 exp(::GeneralizedGrassmann, ::Any...)
@@ -209,7 +209,7 @@ of `p` on the [`GeneralizedGrassmann`](@ref) manifold `M`. The formula reads
 g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}BY),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 """
 inner(M::GeneralizedGrassmann, p, X, Y) = dot(X, M.B, Y)
 
@@ -228,10 +228,10 @@ i.e. the tangent vector `X` whose corresponding [`geodesic`](https://juliamanifo
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
-\log_p q = V\cdot \operatorname{atan}(S) \cdot U^\mathrm{H},
+\log_p q = V⋅ \operatorname{atan}(S) ⋅ U^\mathrm{H},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
 The matrices $U$ and $V$ are the unitary matrices, and $S$ is the diagonal matrix
 containing the singular values of the SVD-decomposition
 
@@ -289,7 +289,7 @@ end
 
 Project `p` from the embedding onto the [`GeneralizedGrassmann`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of $p$ such that $q^{\mathrm{H}}Bq$ is the identity,
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose.
+where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose.
 """
 project(::GeneralizedGrassmann, ::Any)
 
@@ -311,8 +311,8 @@ Project the `n`-by-`k` `X` onto the tangent space of `p` on the
 \operatorname{proj_p}(X) = X - pp^{\mathrm{H}}B^\mathrm{T}X,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
-and $\cdot^{\mathrm{T}}$ the transpose.
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
+and $⋅^{\mathrm{T}}$ the transpose.
 """
 project(::GeneralizedGrassmann, ::Any, ::Any)
 

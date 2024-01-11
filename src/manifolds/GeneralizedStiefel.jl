@@ -1,7 +1,7 @@
 @doc raw"""
     GeneralizedStiefel{T,𝔽,B} <: AbstractDecoratorManifold{𝔽}
 
-The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal
+The Generalized Stiefel manifold consists of all $n×k$, $n\geq k$ orthonormal
 matrices w.r.t. an arbitrary scalar product with symmetric positive definite matrix
 $B\in R^{n × n}$, i.e.
 
@@ -10,7 +10,7 @@ $B\in R^{n × n}$, i.e.
 ````
 
 where $𝔽 ∈ \{ℝ, ℂ\}$,
-$\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
+$⋅^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
 $I_k \in \mathbb R^{k × k}$ denotes the $k × k$ identity matrix.
 
 
@@ -32,7 +32,7 @@ The manifold is named after
 # Constructor
     GeneralizedStiefel(n, k, B=I_n, F=ℝ)
 
-Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
+Generate the (real-valued) Generalized Stiefel manifold of $n×k$ dimensional
 orthonormal matrices with scalar product `B`.
 """
 struct GeneralizedStiefel{T,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
@@ -58,7 +58,7 @@ active_traits(f, ::GeneralizedStiefel, args...) = merge_traits(IsEmbeddedManifol
 
 Check whether `p` is a valid point on the [`GeneralizedStiefel`](@ref) `M`=$\operatorname{St}(n,k,B)$,
 i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $x^{\mathrm{H}}Bx$
-is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
+is (approximately) the identity, where $⋅^{\mathrm{H}}$ is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::GeneralizedStiefel, p; kwargs...)
@@ -160,7 +160,7 @@ end
 
 Project `p` from the embedding onto the [`GeneralizedStiefel`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of $p$ such that $q^{\mathrm{H}}Bq$ is the identity,
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+where $⋅^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
 """
 project(::GeneralizedStiefel, ::Any)
 

@@ -10,7 +10,7 @@ p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p,
 apa^{\mathrm{H}} \geq 0 \text{ for all } a ∈ 𝔽
 \text{ and } \operatorname{rank}(p) = k\bigr\},
 ````
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
+where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
 and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
 We sometimes $\operatorname{SPS}_{k,𝔽}(n)$, when distinguishing the real- and complex-valued
 manifold is important.

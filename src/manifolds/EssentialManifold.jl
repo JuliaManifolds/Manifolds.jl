@@ -4,7 +4,7 @@
 The essential manifold is the space of the essential matrices which is represented as
 a quotient space of the [`Rotations`](@ref) manifold product ``\mathrm{SO}(3)^2``.
 
-Let ``R_x(θ), R_y(θ), R_x(θ) \in ℝ^{x\times 3}`` denote the rotation around the ``z``,
+Let ``R_x(θ), R_y(θ), R_x(θ) \in ℝ^{x×3}`` denote the rotation around the ``z``,
 ``y``, and ``x`` axis in ``ℝ^3``, respectively, and further the groups
 
 ```math

@@ -107,7 +107,7 @@ The formula reads
 \operatorname{diag}(p)\exp\bigl( \operatorname{diag}(X)\operatorname{diag}(p)^{-1}\bigr),
 ````
 
-where $⌊\cdot⌋$ denotes the strictly lower triangular matrix,
+where $⌊⋅⌋$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 exp(::CholeskySpace, ::Any...)
@@ -158,7 +158,7 @@ The formula reads
 \log_p q = ⌊ p ⌋ - ⌊ q ⌋ + \operatorname{diag}(p)\log\bigl(\operatorname{diag}(q)\operatorname{diag}(p)^{-1}\bigr),
 ````
 
-where $⌊\cdot⌋$ denotes the strictly lower triangular matrix,
+where $⌊⋅⌋$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 log(::Cholesky, ::Any...)
@@ -219,7 +219,7 @@ on the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 + \operatorname{diag}(q)\operatorname{diag}(p)^{-1}\operatorname{diag}(X),
 ````
 
-where $⌊\cdot⌋$ denotes the strictly lower triangular matrix,
+where $⌊⋅⌋$ denotes the strictly lower triangular matrix,
 and $\operatorname{diag}$ extracts the diagonal matrix.
 """
 parallel_transport_to(::CholeskySpace, ::Any, ::Any, ::Any)

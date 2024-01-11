@@ -12,7 +12,7 @@ The manifold can be represented as
 \operatorname{Gr}(n,k) := \bigl\{ \operatorname{span}(p) : p ∈ 𝔽^{n × k}, p^\mathrm{H}p = I_k\},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and
+where $⋅^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and
 $I_k$ is the $k × k$ identity matrix. This means, that the columns of $p$
 form an unitary basis of the subspace, that is a point on
 $\operatorname{Gr}(n,k)$, and hence the subspace can actually be represented by

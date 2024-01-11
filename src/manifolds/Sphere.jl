@@ -28,7 +28,7 @@ The tangent space at point $p$ is given by
 T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ \Re(⟨p,X⟩) = 0 \bigr \},
 ````
 
-where $𝔽\in\{ℝ,ℂ,ℍ\}$ and $⟨\cdot,\cdot⟩$ denotes the inner product in the
+where $𝔽\in\{ℝ,ℂ,ℍ\}$ and $⟨⋅,⋅⟩$ denotes the inner product in the
 embedding $𝔽^{n+1}$.
 
 For $𝔽=ℂ$, the manifold is the complex sphere, written $ℂ𝕊^n$, embedded in $ℂ^{n+1}$.
@@ -80,7 +80,7 @@ The tangent space at point $p$ is given by
 T_p 𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ \Re(⟨p,X⟩) = 0 \bigr \},
 ````
 
-where $𝔽\in\{ℝ,ℂ,ℍ\}$ and $⟨\cdot,\cdot⟩$ denotes the (Frobenius) inner product in the
+where $𝔽\in\{ℝ,ℂ,ℍ\}$ and $⟨⋅,⋅⟩$ denotes the (Frobenius) inner product in the
 embedding $𝔽^{n_1, n_2, …, n_i}$.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
@@ -437,7 +437,7 @@ Project the point `p` from the embedding onto the [`Sphere`](@ref) `M`.
 ````math
 \operatorname{proj}(p) = \frac{p}{\lVert p \rVert},
 ````
-where $\lVert\cdot\rVert$ denotes the usual 2-norm for vectors if $m=1$ and the Frobenius
+where $\lVert⋅\rVert$ denotes the usual 2-norm for vectors if $m=1$ and the Frobenius
 norm for the case $m>1$.
 """
 project(::AbstractSphere, ::Any)

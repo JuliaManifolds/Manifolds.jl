@@ -449,7 +449,7 @@ end
 Return the local matrix representation at the point `p` of the metric tensor ``g`` with
 respect to the [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) `B` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M`.
 Let ``d``denote the dimension of the manifold and $b_1,\ldots,b_d$ the basis vectors.
-Then the local matrix representation is a matrix ``G\in 𝔽^{n\times n}`` whose entries are
+Then the local matrix representation is a matrix ``G\in 𝔽^{n×n}`` whose entries are
 given by ``g_{ij} = g_p(b_i,b_j), i,j\in\{1,…,d\}``.
 
 This yields the property for two tangent vectors (using Einstein summation convention)
