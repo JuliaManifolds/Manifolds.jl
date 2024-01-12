@@ -1,11 +1,16 @@
-include("utils.jl")
+include("header.jl")
 
 @info "Manifolds.jl Test settings:\n\n" *
       "Testing Float32:  $(TEST_FLOAT32)\n" *
       "Testing Double64: $(TEST_DOUBLE64)\n" *
       "Testing Static:   $(TEST_STATIC_SIZED)\n\n" *
       "Test group:       $(TEST_GROUP)\n\n" *
-      "These settings are stored in environment variables, see in test/utils.jl"
+      "These settings are stored in environment variables, see in test/header.jl"
+
+function include_test(path)
+    @info "Testing $path"
+    @time include(path)  # show basic timing, (this will print a newline at end)
+end
 
 @testset "Manifolds.jl" begin
     if TEST_GROUP ∈ ["all", "test_manifolds"]

@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Multinomial doubly stochastic Matrices" begin
     M = MultinomialDoubleStochastic(3)

@@ -1,13 +1,13 @@
 @doc raw"""
     SphereSymmetricMatrices{T,𝔽} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
 
-The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  consisting of the $n×n$ symmetric matrices
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  consisting of the ``n×n`` symmetric matrices
 of unit Frobenius norm, i.e.
 ````math
 \mathcal{S}_{\text{sym}} :=\bigl\{p  ∈ 𝔽^{n×n}\ \big|\ p^{\mathrm{H}} = p, \lVert p \rVert = 1 \bigr\},
 ````
-where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
-and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
+and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 # Constructor
     SphereSymmetricMatrices(n[, field=ℝ])
@@ -119,7 +119,7 @@ Projects `p` from the embedding onto the [`SphereSymmetricMatrices`](@ref) `M`, 
 ````math
 \operatorname{proj}_{\mathcal{S}_{\text{sym}}}(p) = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
 ````
-where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SphereSymmetricMatrices, ::Any)
 
@@ -135,7 +135,7 @@ Project the matrix `X` onto the tangent space at `p` on the [`SphereSymmetricMat
 ````math
 \operatorname{proj}_p(X) = \frac{X + X^{\mathrm{H}}}{2} - ⟨p, \frac{X + X^{\mathrm{H}}}{2}⟩p,
 ````
-where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SphereSymmetricMatrices, ::Any, ::Any)
 

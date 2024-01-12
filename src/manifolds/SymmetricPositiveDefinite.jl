@@ -24,7 +24,7 @@ i.e. the set of symmetric matrices,
 
     SymmetricPositiveDefinite(n; parameter::Symbol=:type)
 
-generates the manifold $\mathcal P(n) \subset ℝ^{n×n}$
+generates the manifold ``\mathcal P(n) \subset ℝ^{n×n}``
 """
 struct SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
     size::T
@@ -243,7 +243,7 @@ end
 
 Return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref).
 Since `M` is a Hadamard manifold with respect to the [`AffineInvariantMetric`](@ref) and the
-[`LogCholeskyMetric`](@ref), the injectivity radius is globally $∞$.
+[`LogCholeskyMetric`](@ref), the injectivity radius is globally ``∞``.
 """
 injectivity_radius(::SymmetricPositiveDefinite) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, p) = Inf
@@ -265,7 +265,7 @@ is_flat(M::SymmetricPositiveDefinite) = false
     manifold_dimension(M::SymmetricPositiveDefinite)
 
 returns the dimension of
-[`SymmetricPositiveDefinite`](@ref) `M`$=\mathcal P(n), n ∈ ℕ$, i.e.
+[`SymmetricPositiveDefinite`](@ref) `M` ``=\mathcal P(n), n ∈ ℕ``, i.e.
 ````math
 \dim \mathcal P(n) = \frac{n(n+1)}{2}.
 ````
@@ -466,8 +466,8 @@ end
     representation_size(M::SymmetricPositiveDefinite)
 
 Return the size of an array representing an element on the
-[`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. $n×n$, the size of such a
-symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
+[`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. ``n×n``, the size of such a
+symmetric positive definite matrix on ``\mathcal M = \mathcal P(n)``.
 """
 function representation_size(M::SymmetricPositiveDefinite)
     N = get_parameter(M.size)[1]

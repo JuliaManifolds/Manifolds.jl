@@ -1,3 +1,14 @@
+"""
+    has_type_in_signature(sig, T)
+    Test whether the signature `sig` has an argument of type `T` as one of its paramaters
+"""
+function has_type_in_signature(sig, T::Type)
+    return any(map(Base.unwrap_unionall(sig.sig).parameters) do x
+        xw = Base.rewrap_unionall(x, sig.sig)
+        return (xw isa Type ? xw : xw.T) <: T
+    end)
+end
+
 @testset "Ambiguities" begin
     if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.10.0"
         mbs = Test.detect_ambiguities(ManifoldsBase)

@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Multinomial symmetric matrices" begin
     M = MultinomialSymmetric(3)

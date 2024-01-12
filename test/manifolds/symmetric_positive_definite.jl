@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Symmetric Positive Definite Matrices" begin
     M1 = SymmetricPositiveDefinite(3)

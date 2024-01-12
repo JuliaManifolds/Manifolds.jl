@@ -1,7 +1,7 @@
 @doc raw"""
     MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic{N}
 
-The multinomial symmetric matrices manifold consists of all symmetric $n×n$ matrices with
+The multinomial symmetric matrices manifold consists of all symmetric ``n×n`` matrices with
 positive entries such that each column sums to one, i.e.
 
 ````math
@@ -13,7 +13,7 @@ positive entries such that each column sums to one, i.e.
 \end{aligned}
 ````
 
-where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
+where ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
 
 It is modeled as [`IsIsometricEmbeddedManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.IsIsometricEmbeddedManifold).
 via the [`AbstractMultinomialDoublyStochastic`](@ref) type, since it shares a few functions
@@ -29,7 +29,7 @@ X\mathbf{1}_n = \mathbf{0}_n
 \bigr\},
 ````
 
-where $\mathbf{0}_n$ is the vector of length $n$ containing zeros.
+where ``\mathbf{0}_n`` is the vector of length ``n`` containing zeros.
 
 More details can be found in Section IV [DouikHassibi:2019](@cite).
 
@@ -37,7 +37,7 @@ More details can be found in Section IV [DouikHassibi:2019](@cite).
 
     MultinomialSymmetric(n)
 
-Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic and symmetric.
+Generate the manifold of matrices ``\mathbb R^{n×n}`` that are doubly stochastic and symmetric.
 """
 struct MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic
     size::T
@@ -110,12 +110,12 @@ The formula reads
 ````math
     \operatorname{proj}_p(Y) = Y - (α\mathbf{1}_n^{\mathrm{T}} + \mathbf{1}_n α^{\mathrm{T}}) ⊙ p,
 ````
-where $⊙$ denotes the Hadamard or elementwise product and $\mathbb{1}_n$ is the vector of length $n$ containing ones.
-The two vector $α ∈ ℝ^{n×n}$ is given by solving
+where ``⊙`` denotes the Hadamard or elementwise product and ``\mathbb{1}_n`` is the vector of length ``n`` containing ones.
+The two vector ``α ∈ ℝ^{n×n}`` is given by solving
 ````math
     (I_n+p)α =  Y\mathbf{1},
 ````
-where $I_n$ is teh $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length $n$ containing ones.
+where ``I_n`` is teh ``n×n`` unit matrix and ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
 
 """
 project(::MultinomialSymmetric, ::Any, ::Any)
@@ -133,8 +133,8 @@ end
 @doc raw"""
     retract(M::MultinomialSymmetric, p, X, ::ProjectionRetraction)
 
-compute a projection based retraction by projecting $p\odot\exp(X⨸p)$ back onto the manifold,
-where $⊙,⨸$ are elementwise multiplication and division, respectively. Similarly, $\exp$
+compute a projection based retraction by projecting ``p⊙\exp(X⨸p)`` back onto the manifold,
+where ``⊙,⨸`` are elementwise multiplication and division, respectively. Similarly, ``\exp``
 refers to the elementwise exponentiation.
 """
 retract(::MultinomialSymmetric, ::Any, ::Any, ::ProjectionRetraction)
