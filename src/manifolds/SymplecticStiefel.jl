@@ -133,7 +133,7 @@ function check_vector(M::SymplecticStiefel{S,𝔽}, p, X::T; kwargs...) where {S
 
     if !is_hamiltonian(H; kwargs...)
         return DomainError(
-            norm(Hamiltonian(H)^+H),
+            norm(Matrix(Hamiltonian(H)^+) + H),
             (
                 "The matrix X is not in the tangent space at point p of $M at $p, since p^{+}X is not a Hamiltonian matrix."
             ),

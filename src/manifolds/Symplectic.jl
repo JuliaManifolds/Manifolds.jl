@@ -228,7 +228,7 @@ function check_point(
     # Perform check that the matrix lives on the real symplectic manifold:
     if !isapprox(inv(M, p) * p, LinearAlgebra.I; atol=atol, kwargs...)
         return DomainError(
-            expected_zero,
+            norm(inv(M, p) * p - LinearAlgebra.I),
             (
                 "The point p does not lie on $(M) because its symplectic" *
                 " inverse composed with itself is not the identity."
@@ -747,7 +747,7 @@ Compute the Cayley retraction on ``p ∈ \mathrm{Sp}(2n, ℝ)`` in
 the direction of tangent vector ``X ∈ T_p\mathrm{Sp}(2n, ℝ)``,
 as defined in by Birtea et al in proposition 2 [BirteaCaşuComănescu:2020](@cite).
 
-Using the [symplectic_inverse](@ref) ``A^+`` of a matrix ``A \in ℝ^{2n×2n}``
+Using the [`symplectic_inverse`](@ref) ``A^+`` of a matrix ``A \in ℝ^{2n×2n}``
 the retraction ``\mathcal{R}: T\mathrm{Sp}(2n) → \mathrm{Sp}(2n)``
 is defined pointwise as
 ````math
