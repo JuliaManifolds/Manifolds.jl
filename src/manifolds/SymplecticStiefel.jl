@@ -505,8 +505,8 @@ function Random.rand(
 end
 
 function random_vector(M::SymplecticStiefel, p::AbstractMatrix; hamiltonian_norm=1.0)
-    n, k = get_parameter(M.size)
-    Ω = rand_hamiltonian(Symplectic(2k); frobenius_norm=hamiltonian_norm)
+    k = get_parameter(M.size)[2]
+    Ω = rand(HamiltonianMatrices(2k); σ=hamiltonian_norm)
     return p * Ω
 end
 
@@ -538,10 +538,12 @@ above can be reduced down to inverting a ``2k×2k`` matrix due to Proposition
 
 Let ``A = p^+X`` and ``H = X - pA``. Then an equivalent expression for the Cayley
 retraction defined pointwise above is
-````math
-    \mathcal{R}_p(X) = -p + (H + 2p)(H^+H/4 - A/2 + I_{2k})^{-1}.
-````
-It is this expression we compute inplace of `q`.
+
+```math
+  \mathcal{R}_p(X) = -p + (H + 2p)(H^+H/4 - A/2 + I_{2k})^{-1}.
+```
+
+This expression is computed inplace of `q`.
 """
 retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
 

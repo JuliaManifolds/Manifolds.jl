@@ -710,8 +710,9 @@ function Random.rand(
     vector_at=nothing,
     hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),
 )
+    n = get_parameter(M.size)[1]
     if vector_at === nothing
-        Ω = rand_hamiltonian(M; frobenius_norm=hamiltonian_norm)
+        Ω = rand(HamiltonianMatrices(2n); σ=hamiltonian_norm)
         return (I - Ω) \ (I + Ω)
     else
         random_vector(M, vector_at; symmetric_norm=hamiltonian_norm)
@@ -730,13 +731,10 @@ end
 
 function rand_hamiltonian(M::Symplectic; frobenius_norm=1.0)
     n = get_parameter(M.size)[1]
-    A = randn(n, n)
-    B = randn(n, n)
-    C = randn(n, n)
-    B = (1 / 2) .* (B .+ B')
-    C = (1 / 2) .* (C .+ C')
-    Ω = [A B; C -A']
-    return frobenius_norm * Ω / norm(Ω, 2)
+    Base.depwarn(
+        "`rand_hamiltonian(M::Symplectic($(2n)); frobeniusnorm=$(frobeniusnorm)) is deprecated. Use `rand(HamiltonianMatrices($(2n); σ=$(frobenius_norm))` instead",
+    )
+    return rand(HamiltonianMatrices(2n); σ=frobenius_norm)
 end
 
 @doc raw"""

@@ -46,16 +46,18 @@ Lie algebra to the [`Symplectic`](@ref) as a Lie group with the matrix operation
 
 # Constructor
 
-    HamiltonianMatrices(n::Int, field::AbstractNumbers=ℝ)
+    HamiltonianMatrices(2n::Int, field::AbstractNumbers=ℝ)
 
-Generate the manifold of ``n×n`` symmetric matrices.
+Generate the manifold of ``2n×2n`` Hamiltonian matrices.
 """
 struct HamiltonianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
 function HamiltonianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
-    size = wrap_type_parameter(parameter, (n,))
+    n % 2 == 0 || throw(ArgumentError("The dimension of the symplectic manifold
+                        embedding space must be even. Was odd, n % 2 == $(n % 2)."))
+    size = wrap_type_parameter(parameter, (div(n, 2),))
     return HamiltonianMatrices{typeof(size),field}(size)
 end
 
@@ -113,11 +115,11 @@ embed(::HamiltonianMatrices, p) = p
 embed(::HamiltonianMatrices, p, X) = X
 
 function get_embedding(::HamiltonianMatrices{TypeParameter{Tuple{N}},𝔽}) where {N,𝔽}
-    return Euclidean(N, N; field=𝔽)
+    return Euclidean(2 * N, 2 * N; field=𝔽)
 end
 function get_embedding(M::HamiltonianMatrices{Tuple{Int},𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
-    return Euclidean(N, N; field=𝔽, parameter=:field)
+    return Euclidean(2 * N, 2 * N; field=𝔽, parameter=:field)
 end
 
 """
@@ -159,3 +161,42 @@ function Base.show(io::IO, M::HamiltonianMatrices{Tuple{Int},F}) where {F}
     return print(io, "HamiltonianMatrices($(n), $(F); parameter=:field)")
 end
 size(A::Hamiltonian) = size(A.value)
+
+@doc raw"""
+    p = rand(M::HamiltonianMatrices; σ::Real=1.0, vector_at=nothing)
+    rand(M::HamiltonianMatrices; σ::Real=1.0, vector_at=nothing)
+
+Generate a Hamiltonian matrix. Since these are a submanifold of ``ℝ^{2n×2n}``,
+the same method applies for points and tangent vectors.
+
+The generation is based on generating one normally-distributed
+``n×n`` matrix ``A`` and two symmetric ``n×n`` matrices ``B,C`` to generate
+
+```math
+p = \begin{pmatrix} A & B\\ C & -A^{\mathrm{T}} \end{pmatrix}
+```
+
+"""
+rand(M::HamiltonianMatrices; σ::Real=1.0)
+
+function rand!(
+    rng::AbstractRNG,
+    M::HamiltonianMatrices{<:Any,ℝ},
+    pX;
+    σ::Real=one(real(eltype(pX))),
+    vector_at=nothing,
+)
+    n = get_parameter(M.size)[1]
+    p1 = @view(pX[1:n, 1:n])
+    p2 = @view(pX[1:n, (n + 1):(2n)])
+    p3 = @view(pX[(n + 1):(2n), 1:n])
+    p4 = @view(pX[(n + 1):(2n), (n + 1):(2n)])
+    randn!(rng, p1)
+    p4 .= -p1'
+    randn!(rng, p2)
+    randn!(rng, p3)
+    p2 .= (1 / 2) .* (p2 .+ p2')
+    p3 .= (1 / 2) .* (p2 .+ p2')
+    pX .= (σ / norm(pX, 2)) .* pX
+    return pX
+end
