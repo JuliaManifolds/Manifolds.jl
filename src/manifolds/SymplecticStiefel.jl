@@ -74,11 +74,11 @@ ManifoldsBase.default_retraction_method(::SymplecticStiefel) = CayleyRetraction(
     canonical_project(::SymplecticStiefel, p_Sp)
     canonical_project!(::SymplecticStiefel, p, p_Sp)
 
-Define the canonical projection from ``\operatorname{Sp}(2n, 2n)`` onto
+Define the canonical projection from ``\mathrm{Sp}(2n, 2n)`` onto
 ``\mathrm{SpSt}(2n, 2k)``, by projecting onto the first ``k`` columns
 and the ``n + 1``'th onto the ``n + k``'th columns [BendokatZimmermann:2021](@cite).
 
-It is assumed that the point ``p`` is on ``\operatorname{Sp}(2n, 2n)``.
+It is assumed that the point ``p`` is on ``\mathrm{Sp}(2n, 2n)``.
 """
 function canonical_project(M::SymplecticStiefel, p_Sp)
     n, k = get_parameter(M.size)
@@ -121,7 +121,7 @@ Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticStiefel`]
 ``\mathrm{SpSt}(2n, 2k)`` manifold.
 
 The check consists of verifying that ``H = p^{+}X ∈ 𝔤_{2k}``, where ``𝔤``
-is the Lie Algebra of the symplectic group ``\operatorname{Sp}(2k)``, that is
+is the Lie Algebra of the symplectic group ``\mathrm{Sp}(2k)``, that is
 the set of [`HamiltonianMatrices`])(@ref), where ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
 """
 check_vector(::SymplecticStiefel, ::Any...)
@@ -395,8 +395,7 @@ where ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
 
 THen the inverse retraction reads
 ````math
-\mathcal{L}_p^{\operatorname{Sp}}(q) = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr)
-                                        ∈ T_p\operatorname{Sp}(2n).
+\mathcal{L}_p^{\mathrm{Sp}}(q) = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr) ∈ T_p\mathrm{Sp}(2n).
 ````
 """
 inverse_retract(::SymplecticStiefel, p, q, ::CayleyInverseRetraction)
@@ -475,13 +474,13 @@ end
 
 Generate a random point ``p ∈ \mathrm{SpSt}(2n, 2k)`` or
 a random tangent vector ``X ∈ T_p\mathrm{SpSt}(2n, 2k)``
-if `vector_at` is set to a point ``p ∈ \operatorname{Sp}(2n)``.
+if `vector_at` is set to a point ``p ∈ \mathrm{Sp}(2n)``.
 
 A random point on ``\mathrm{SpSt}(2n, 2k)`` is found by first generating a
-random point on the symplectic manifold ``\operatorname{Sp}(2n)``,
+random point on the symplectic manifold ``\mathrm{Sp}(2n)``,
 and then projecting onto the Symplectic Stiefel manifold using the
 [`canonical_project`](@ref) ``π_{\mathrm{SpSt}(2n, 2k)}``.
-That is, ``p = π_{\mathrm{SpSt}(2n, 2k)}(p_{\operatorname{Sp}})``.
+That is, ``p = π_{\mathrm{SpSt}(2n, 2k)}(p_{\mathrm{Sp}})``.
 
 To generate a random tangent vector in ``T_p\mathrm{SpSt}(2n, 2k)``
 this code exploits the second tangent vector space parametrization of
