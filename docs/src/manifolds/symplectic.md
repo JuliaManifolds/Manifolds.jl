@@ -1,6 +1,6 @@
-# Symplectic
+# Symplectic matrices
 
-The [`Symplectic`](@ref) manifold, denoted $\operatorname{Sp}(2n, 𝔽)$, is a closed, embedded, submanifold of
+The [`SymplecticMatrices`](@ref) manifold, denoted $\operatorname{Sp}(2n, 𝔽)$, is a closed, embedded, submanifold of
 $𝔽^{2n×2n}$ that represents transformations into symplectic subspaces which keep the
 canonical symplectic form over $𝔽^{2n×2n}$ invariant under the standard embedding inner product.
 The canonical symplectic form is a non-degenerate bilinear and skew symmetric map

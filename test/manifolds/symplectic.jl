@@ -3,9 +3,9 @@ using FiniteDifferences
 using Manifolds: RiemannianProjectionBackend
 using ManifoldDiff
 
-@testset "Symplectic" begin
+@testset "SymplecticMatrices" begin
     @testset "Real" begin
-        Sp_2 = Symplectic(2 * 1)
+        Sp_2 = SymplecticMatrices(2 * 1)
         Metr_Sp_2 = MetricManifold(Sp_2, RealSymplecticMetric())
 
         p_2 = [0.0 1.0/2.0; -2.0 -2.0]
@@ -18,7 +18,7 @@ using ManifoldDiff
             0.0 -1.0
         ]
 
-        Sp_6 = Symplectic(6)
+        Sp_6 = SymplecticMatrices(6)
         points = [
             [
                 1 1 3 0 0 0
@@ -74,7 +74,7 @@ using ManifoldDiff
         ]
 
         @testset "Basics" begin
-            @test repr(Sp_2) == "Symplectic($(2), ℝ)"
+            @test repr(Sp_2) == "SymplecticMatrices($(2), ℝ)"
             @test representation_size(Sp_2) == (2, 2)
             @test base_manifold(Sp_2) === Sp_2
             @test !is_flat(Sp_2)
@@ -188,13 +188,13 @@ using ManifoldDiff
             end
         end
         @testset "Generate random points/tangent vectors" begin
-            M_big = Symplectic(20)
+            M_big = SymplecticMatrices(20)
             p_big = rand(M_big)
             @test is_point(M_big, p_big; error=:error, atol=1.0e-12)
             X_big = rand(M_big; vector_at=p_big)
             @test is_vector(M_big, p_big, X_big; error=:error, atol=1.0e-12)
         end
-        @testset "test_manifold(Symplectic(6), ...)" begin
+        @testset "test_manifold(SymplecticMatrices(6), ...)" begin
             @testset "Type $(Matrix{Float64})" begin
                 type = Matrix{Float64}
                 pts = convert.(type, points)
@@ -294,7 +294,7 @@ using ManifoldDiff
     @testset "SymplecticMatrix" begin
         # TODO: Test for different type matrices.
         @test SymplecticMatrix() == SymplecticMatrix(1)
-        Sp_4 = Symplectic(4)
+        Sp_4 = SymplecticMatrices(4)
         pQ_1 = [
             0 0 -2 3
             0 0 1 -1
@@ -422,8 +422,8 @@ using ManifoldDiff
         end
     end
     @testset "field parameter" begin
-        Sp_2 = Symplectic(2; parameter=:field)
+        Sp_2 = SymplecticMatrices(2; parameter=:field)
         @test typeof(get_embedding(Sp_2)) === Euclidean{Tuple{Int,Int},ℝ}
-        @test repr(Sp_2) == "Symplectic(2, ℝ; parameter=:field)"
+        @test repr(Sp_2) == "SymplecticMatrices(2, ℝ; parameter=:field)"
     end
 end

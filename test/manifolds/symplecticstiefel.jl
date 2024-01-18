@@ -140,7 +140,7 @@ end
             @test repr(SpSt_6_4) == "SymplecticStiefel(6, 4; field=ℝ)"
             @test representation_size(SpSt_6_4) == (6, 4)
             @test base_manifold(SpSt_6_4) === SpSt_6_4
-            @test get_total_space(SpSt_6_4) == Symplectic(6)
+            @test get_total_space(SpSt_6_4) == SymplecticMatrices(6)
             @test !is_flat(SpSt_6_4)
 
             @test is_point(SpSt_6_4, p_6_4)
@@ -238,7 +238,7 @@ end
             X_big = rand(M_big; vector_at=p_big, hamiltonian_norm=1.0)
             @test is_vector(M_big, p_big, X_big; error=:error, atol=1.0e-14)
         end
-        @testset "test_manifold(Symplectic(6), ...)" begin
+        @testset "test_manifold(SymplecticMatrices(6), ...)" begin
             types = [Matrix{Float64}]
             TEST_FLOAT32 && push!(types, Matrix{Float32})
             TEST_STATIC_SIZED && push!(types, MMatrix{6,4,Float64,24})
@@ -312,6 +312,6 @@ end
         SpSt_6_4 = SymplecticStiefel(2 * 3, 2 * 2; parameter=:field)
         @test typeof(get_embedding(SpSt_6_4)) === Euclidean{Tuple{Int,Int},ℝ}
         @test repr(SpSt_6_4) == "SymplecticStiefel(6, 4; field=ℝ; parameter=:field)"
-        @test get_total_space(SpSt_6_4) == Symplectic(6; parameter=:field)
+        @test get_total_space(SpSt_6_4) == SymplecticMatrices(6; parameter=:field)
     end
 end

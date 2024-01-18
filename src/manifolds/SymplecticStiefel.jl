@@ -115,7 +115,7 @@ function check_point(M::SymplecticStiefel{<:Any,ℝ}, p::T; kwargs...) where {T}
 end
 
 @doc raw"""
-    check_vector(M::Symplectic, p, X; kwargs...)
+    check_vector(M::SymplecticMatrices, p, X; kwargs...)
 
 Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticStiefel`](@ref),
 ``\mathrm{SpSt}(2n, 2k)`` manifold.
@@ -282,14 +282,14 @@ end
 @doc raw"""
     get_total_space(::SymplecticStiefel)
 
-Return the total space of the [`SymplecticStiefel`](@ref) manifold, which is the corresponding [`Symplectic`](@ref) manifold.
+Return the total space of the [`SymplecticStiefel`](@ref) manifold, which is the corresponding [`SymplecticMatrices`](@ref) manifold.
 """
 function get_total_space(::SymplecticStiefel{TypeParameter{Tuple{n,k}},ℝ}) where {n,k}
-    return Symplectic(2 * n)
+    return SymplecticMatrices(2 * n)
 end
 function get_total_space(M::SymplecticStiefel{Tuple{Int,Int},ℝ})
     n, _ = get_parameter(M.size)
-    return Symplectic(2 * n; parameter=:field)
+    return SymplecticMatrices(2 * n; parameter=:field)
 end
 
 @doc raw"""
@@ -497,7 +497,10 @@ function Random.rand(
 )
     n, k = get_parameter(M.size)
     if vector_at === nothing
-        return canonical_project(M, rand(Symplectic(2n); hamiltonian_norm=hamiltonian_norm))
+        return canonical_project(
+            M,
+            rand(SymplecticMatrices(2n); hamiltonian_norm=hamiltonian_norm),
+        )
     else
         return random_vector(M, vector_at; hamiltonian_norm=hamiltonian_norm)
     end

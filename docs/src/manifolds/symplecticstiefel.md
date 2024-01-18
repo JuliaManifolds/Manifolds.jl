@@ -20,7 +20,7 @@ Specifically given an element $p \in \operatorname{SpSt}(2n, 2k)$ we require tha
     \omega_{2n} (p x, p y) = x^T(p^TQ_{2n}p)y = x^TQ_{2k}y = \omega_{2k}(x, y) \;\forall\; x, y \in 𝔽^{2k},
 ````
 leading to the requirement on $p$ that $p^TQ_{2n}p = Q_{2k}$.
-In the case that $k = n$, this manifold reduces to the [`Symplectic`](@ref) manifold, which is also known as the symplectic group.
+In the case that $k = n$, this manifold reduces to the [`SymplecticMatrices`](@ref) manifold, which is also known as the symplectic group.
 
 ```@autodocs
 Modules = [Manifolds]

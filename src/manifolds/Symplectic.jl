@@ -1,5 +1,5 @@
 @doc raw"""
-    Symplectic{T, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+    SymplecticMatricesMatrices{T, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
 The symplectic manifold consists of all ``2n×2n`` matrices which preserve
 the canonical symplectic form over ``𝔽^{2n×2n}×𝔽^{2n×2n}``,
@@ -28,25 +28,25 @@ The tangent space at a point ``p`` is given by [BendokatZimmermann:2021](@cite)
 
 # Constructor
 
-    Symplectic(2n, field=ℝ; parameter::Symbol=:type)
+    SymplecticMatrices(2n, field=ℝ; parameter::Symbol=:type)
 
 Generate the (real-valued) symplectic manifold of ``2n×2n`` symplectic matrices.
-The constructor for the [`Symplectic`](@ref) manifold accepts the even column/row embedding
+The constructor for the [`SymplecticMatrices`](@ref) manifold accepts the even column/row embedding
 dimension ``2n`` for the real symplectic manifold, ``ℝ^{2n×2n}``.
 """
-struct Symplectic{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct SymplecticMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function active_traits(f, ::Symplectic, args...)
+function active_traits(f, ::SymplecticMatrices, args...)
     return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
 end
 
-function Symplectic(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function SymplecticMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     n % 2 == 0 || throw(ArgumentError("The dimension of the symplectic manifold
                         embedding space must be even. Was odd, n % 2 == $(n % 2)."))
     size = wrap_type_parameter(parameter, (div(n, 2),))
-    return Symplectic{typeof(size),field}(size)
+    return SymplecticMatrices{typeof(size),field}(size)
 end
 
 @doc raw"""
@@ -62,7 +62,7 @@ defined pointwise for ``p \in \mathrm{Sp}(2n)`` by [Fiori:2011](@cite)]
 \end{align*}
 ```
 
-This metric is also the default metric for the [`Symplectic`](@ref) manifold.
+This metric is also the default metric for the [`SymplecticMatrices`](@ref) manifold.
 """
 struct RealSymplecticMetric <: RiemannianMetric end
 
@@ -122,8 +122,8 @@ function SymplecticMatrix(arrays::Vararg{AbstractArray})
 end
 
 @doc raw"""
-    change_representer(::Symplectic, ::EuclideanMetric, p, X)
-    change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
+    change_representer(::SymplecticMatrices, ::EuclideanMetric, p, X)
+    change_representer!(::SymplecticMatrices, Y, ::EuclideanMetric, p, X)
 
 Compute the representation of a tangent vector ``ξ ∈ T_p\mathrm{Sp}(2n, ℝ)`` s.t.
 ```math
@@ -155,9 +155,9 @@ for ``i \in {1, 2}``. However the range of each function alone is not confined t
 
 does have the correct range ``T_p\mathrm{Sp}(2n, ℝ)``.
 """
-change_representer(::Symplectic, ::EuclideanMetric, p, X)
+change_representer(::SymplecticMatrices, ::EuclideanMetric, p, X)
 
-function change_representer!(::Symplectic, Y, ::EuclideanMetric, p, X)
+function change_representer!(::SymplecticMatrices, Y, ::EuclideanMetric, p, X)
     J = SymplecticMatrix(p, X) # J_{2n}
     pT_X = p' * X
     Y .= (1 / 2) .* p * (pT_X .+ J * pT_X' * J)
@@ -211,16 +211,16 @@ function change_representer!(
 end
 
 @doc raw"""
-    check_point(M::Symplectic, p; kwargs...)
+    check_point(M::SymplecticMatrices, p; kwargs...)
 
-Check whether `p` is a valid point on the [`Symplectic`](@ref) `M`=$\mathrm{Sp}(2n)$,
+Check whether `p` is a valid point on the [`SymplecticMatrices`](@ref) `M`=$\mathrm{Sp}(2n)$,
 i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{+}p$ is (approximately)
 the identity, where ``A^+`` denotes the [`symplectic_inverse`]/@ref).
 
 The tolerance can be set with `kwargs...`.
 """
 function check_point(
-    M::Symplectic,
+    M::SymplecticMatrices,
     p::T;
     atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
     kwargs...,
@@ -239,9 +239,9 @@ function check_point(
 end
 
 @doc raw"""
-    check_vector(M::Symplectic, p, X; kwargs...)
+    check_vector(M::SymplecticMatrices, p, X; kwargs...)
 
-Checks whether `X` is a valid tangent vector at `p` on the [`Symplectic`](@ref)
+Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticMatrices`](@ref)
 `M`=``\mathrm{Sp}(2n)``, which requires that
 
 ```math
@@ -251,9 +251,9 @@ holds (approximately), where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n 
 
 The tolerance can be set with `kwargs...`
 """
-check_vector(::Symplectic, ::Any...)
+check_vector(::SymplecticMatrices, ::Any...)
 
-function check_vector(M::Symplectic, p, X::T; kwargs...) where {T}
+function check_vector(M::SymplecticMatrices, p, X::T; kwargs...) where {T}
     J = SymplecticMatrix(p, X)
     if !isapprox(X' * J * p, -p' * J * X; kwargs...)
         return DomainError(
@@ -267,12 +267,14 @@ function check_vector(M::Symplectic, p, X::T; kwargs...) where {T}
     return nothing
 end
 
-ManifoldsBase.default_inverse_retraction_method(::Symplectic) = CayleyInverseRetraction()
+function ManifoldsBase.default_inverse_retraction_method(::SymplecticMatrices)
+    return CayleyInverseRetraction()
+end
 
-ManifoldsBase.default_retraction_method(::Symplectic) = CayleyRetraction()
+ManifoldsBase.default_retraction_method(::SymplecticMatrices) = CayleyRetraction()
 
 @doc raw"""
-    distance(M::Symplectic, p, q)
+    distance(M::SymplecticMatrices, p, q)
 
 Compute an approximate geodesic distance between two Symplectic matrices
 ``p, q \in \mathrm{Sp}(2n)``, as done in [WangSunFiori:2018](@cite).
@@ -316,16 +318,16 @@ we see that
     \end{align*}
 ````
 """
-function distance(M::Symplectic, p, q)
+function distance(M::SymplecticMatrices, p, q)
     return norm(log(symplectic_inverse_times(M, p, q)))
 end
 
-embed(::Symplectic, p) = p
-embed(::Symplectic, p, X) = X
+embed(::SymplecticMatrices, p) = p
+embed(::SymplecticMatrices, p, X) = X
 
 @doc raw"""
-    exp(M::Symplectic, p, X)
-    exp!(M::Symplectic, q, p, X)
+    exp(M::SymplecticMatrices, p, X)
+    exp!(M::SymplecticMatrices, q, p, X)
 
 The Exponential mapping on the Symplectic manifold with the
 [`RealSymplecticMetric`](@ref) Riemannian metric.
@@ -338,26 +340,26 @@ vector ``X \in T_p\mathrm{Sp}(2n)`` is computed as [WangSunFiori:2018](@cite)
 ````
 where ``\operatorname{Exp}(⋅)`` denotes the matrix exponential.
 """
-exp(::Symplectic, ::Any...)
+exp(::SymplecticMatrices, ::Any...)
 
-function exp!(M::Symplectic, q, p, X)
+function exp!(M::SymplecticMatrices, q, p, X)
     p_star_X = symplectic_inverse_times(M, p, X)
     q .= p * exp(Array(p_star_X')) * exp(p_star_X - p_star_X')
     return q
 end
 
-function get_embedding(::Symplectic{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+function get_embedding(::SymplecticMatrices{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
     return Euclidean(2 * n, 2 * n; field=𝔽)
 end
-function get_embedding(M::Symplectic{Tuple{Int},𝔽}) where {𝔽}
+function get_embedding(M::SymplecticMatrices{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return Euclidean(2 * n, 2 * n; field=𝔽, parameter=:field)
 end
 
 @doc raw"""
-    gradient(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
+    gradient(M::SymplecticMatrices, f, p, backend::RiemannianProjectionBackend;
              extended_metric=true)
-    gradient!(M::Symplectic, f, p, backend::RiemannianProjectionBackend;
+    gradient!(M::SymplecticMatrices, f, p, backend::RiemannianProjectionBackend;
              extended_metric=true)
 
 Compute the manifold gradient ``\text{grad}f(p)`` of a scalar function
@@ -388,7 +390,7 @@ w.r.t the Riemannian metric ``g_p`` extended to the entire embedding space.
     vector space to comply with the [`RealSymplecticMetric`](@ref).
 """
 function ManifoldDiff.gradient(
-    M::Symplectic,
+    M::SymplecticMatrices,
     f,
     p,
     backend::RiemannianProjectionBackend;
@@ -399,7 +401,7 @@ function ManifoldDiff.gradient(
 end
 
 function ManifoldDiff.gradient!(
-    M::Symplectic,
+    M::SymplecticMatrices,
     f,
     X,
     p,
@@ -418,7 +420,7 @@ function ManifoldDiff.gradient!(
 end
 
 @doc raw"""
-    inner(::Symplectic{<:Any,ℝ}, p, X, Y)
+    inner(::SymplecticMatrices{<:Any,ℝ}, p, X, Y)
 
 Compute the canonical Riemannian inner product [`RealSymplecticMetric`](@ref)
 ````math
@@ -426,7 +428,7 @@ Compute the canonical Riemannian inner product [`RealSymplecticMetric`](@ref)
 ````
 between the two tangent vectors ``X, Y \in T_p\mathrm{Sp}(2n)``.
 """
-function inner(M::Symplectic{<:Any,ℝ}, p, X, Y)
+function inner(M::SymplecticMatrices{<:Any,ℝ}, p, X, Y)
     p_star = inv(M, p)
     return dot((p_star * X), (p_star * Y))
 end
@@ -486,14 +488,14 @@ function symplectic_inverse(A::AbstractMatrix)
 end
 
 @doc raw"""
-    inv(::Symplectic, A)
-    inv!(::Symplectic, A)
+    inv(::SymplecticMatrices, A)
+    inv!(::SymplecticMatrices, A)
 
 Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n×2n}``.
 See [`symplectic_inverse`](@ref) for details.
 
 """
-function Base.inv(M::Symplectic{<:Any,ℝ}, A)
+function Base.inv(M::SymplecticMatrices{<:Any,ℝ}, A)
     return symplectic_inverse(A)
 end
 
@@ -521,16 +523,16 @@ function symplectic_inverse!(A)
 end
 
 @doc raw"""
-    inv!(M::Symplectic, A)
+    inv!(M::SymplecticMatrices, A)
 
 Compute the [`symplectic_inverse`](@ref) of a suqare matrix A inplace of A
 """
-function inv!(M::Symplectic{<:Any,ℝ}, A)
+function inv!(M::SymplecticMatrices{<:Any,ℝ}, A)
     return symplectic_inverse!(A)
 end
 
 @doc raw"""
-    inverse_retract(M::Symplectic, p, q, ::CayleyInverseRetraction)
+    inverse_retract(M::SymplecticMatrices, p, q, ::CayleyInverseRetraction)
 
 Compute the Cayley Inverse Retraction ``X = \mathcal{L}_p^{\mathrm{Sp}}(q)``
 such that the Cayley Retraction from ``p`` along ``X`` lands at ``q``, i.e.
@@ -550,9 +552,9 @@ Then inverse cayley retration at ``p`` applied to ``q`` is
   = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr) ∈ T_p\mathrm{Sp}(2n).
 ```
 """
-inverse_retract(::Symplectic, p, q, ::CayleyInverseRetraction)
+inverse_retract(::SymplecticMatrices, p, q, ::CayleyInverseRetraction)
 
-function inverse_retract_cayley!(M::Symplectic, X, p, q)
+function inverse_retract_cayley!(M::SymplecticMatrices, X, p, q)
     U_inv = lu(add_scaled_I!(symplectic_inverse_times(M, p, q), 1))
     V_inv = lu(add_scaled_I!(symplectic_inverse_times(M, q, p), 1))
 
@@ -561,14 +563,14 @@ function inverse_retract_cayley!(M::Symplectic, X, p, q)
 end
 
 """
-    is_flat(::Symplectic)
+    is_flat(::SymplecticMatrices)
 
-Return false. [`Symplectic`](@ref) is not a flat manifold.
+Return false. [`SymplecticMatrices`](@ref) is not a flat manifold.
 """
-is_flat(M::Symplectic) = false
+is_flat(M::SymplecticMatrices) = false
 
 @doc raw"""
-    manifold_dimension(::Symplectic)
+    manifold_dimension(::SymplecticMatrices)
 
 Returns the dimension of the symplectic manifold
 embedded in ``ℝ^{2n×2n}``, i.e.
@@ -576,14 +578,14 @@ embedded in ``ℝ^{2n×2n}``, i.e.
   \operatorname{dim}(\mathrm{Sp}(2n)) = (2n + 1)n.
 ```
 """
-function manifold_dimension(M::Symplectic)
+function manifold_dimension(M::SymplecticMatrices)
     n = get_parameter(M.size)[1]
     return (2n + 1) * n
 end
 
 @doc raw"""
-    project(::Symplectic, p, A)
-    project!(::Symplectic, Y, p, A)
+    project(::SymplecticMatrices, p, A)
+    project!(::SymplecticMatrices, Y, p, A)
 
 Given a point ``p \in \mathrm{Sp}(2n)``,
 project an element ``A \in ℝ^{2n×2n}`` onto
@@ -601,9 +603,9 @@ where ``h: ℝ^{2n×2n} → \operatorname{skew}(2n)`` denotes
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``
 and ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
 """
-project(::Symplectic, p, A)
+project(::SymplecticMatrices, p, A)
 
-function project!(::Symplectic, Y, p, A)
+function project!(::SymplecticMatrices, Y, p, A)
     J = SymplecticMatrix(Y, p, A)
     Jp = J * p
 
@@ -699,14 +701,14 @@ and then transforming it to a symplectic matrix by applying the Cayley transform
 ```
 
 To generate a random tangent vector in ``T_p\mathrm{Sp}(2n)``, this code employs the
-second tangent vector space parametrization of [Symplectic](@ref).
+second tangent vector space parametrization of [`SymplecticMatrices`](@ref).
 It first generates a random symmetric matrix ``S`` by `S = randn(2n, 2n)`
 and then symmetrizes it as `S = S + S'`.
 Then ``S`` is normalized to have Frobenius norm of `hamiltonian_norm`
 and `X = pJS` is returned, where `J` is the [`SymplecticMatrix`](@ref).
 """
 function Random.rand(
-    M::Symplectic;
+    M::SymplecticMatrices;
     vector_at=nothing,
     hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),
 )
@@ -719,7 +721,7 @@ function Random.rand(
     end
 end
 
-function random_vector(M::Symplectic, p::AbstractMatrix; symmetric_norm=1.0)
+function random_vector(M::SymplecticMatrices, p::AbstractMatrix; symmetric_norm=1.0)
     n = get_parameter(M.size)[1]
     # Generate random symmetric matrix:
     S = randn(2n, 2n)
@@ -729,7 +731,7 @@ function random_vector(M::Symplectic, p::AbstractMatrix; symmetric_norm=1.0)
     return p * S
 end
 
-function rand_hamiltonian(M::Symplectic; frobenius_norm=1.0)
+function rand_hamiltonian(M::SymplecticMatrices; frobenius_norm=1.0)
     n = get_parameter(M.size)[1]
     Base.depwarn(
         "`rand_hamiltonian(M::Symplectic($(2n)); frobeniusnorm=$(frobeniusnorm)) is deprecated. Use `rand(HamiltonianMatrices($(2n); σ=$(frobenius_norm))` instead",
@@ -738,8 +740,8 @@ function rand_hamiltonian(M::Symplectic; frobenius_norm=1.0)
 end
 
 @doc raw"""
-    retract(::Symplectic, p, X, ::CayleyRetraction)
-    retract!(::Symplectic, q, p, X, ::CayleyRetraction)
+    retract(::SymplecticMatrices, p, X, ::CayleyRetraction)
+    retract!(::SymplecticMatrices, q, p, X, ::CayleyRetraction)
 
 Compute the Cayley retraction on ``p ∈ \mathrm{Sp}(2n, ℝ)`` in
 the direction of tangent vector ``X ∈ T_p\mathrm{Sp}(2n, ℝ)``,
@@ -759,9 +761,9 @@ Here
 ``\operatorname{exp}_{1/1}(z) = (2 - z)^{-1}(2 + z)``
 denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
 """
-retract(M::Symplectic, p, X)
+retract(M::SymplecticMatrices, p, X)
 
-function retract_cayley!(M::Symplectic, q, p, X, t::Number)
+function retract_cayley!(M::SymplecticMatrices, q, p, X, t::Number)
     p_star_X = symplectic_inverse_times(M, p, t * X)
 
     divisor = lu(2 * I - p_star_X)
@@ -769,17 +771,17 @@ function retract_cayley!(M::Symplectic, q, p, X, t::Number)
     return q
 end
 
-function Base.show(io::IO, ::Symplectic{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return print(io, "Symplectic($(2n), $(𝔽))")
+function Base.show(io::IO, ::SymplecticMatrices{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+    return print(io, "SymplecticMatrices($(2n), $(𝔽))")
 end
-function Base.show(io::IO, M::Symplectic{Tuple{Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::SymplecticMatrices{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return print(io, "Symplectic($(2n), $(𝔽); parameter=:field)")
+    return print(io, "SymplecticMatrices($(2n), $(𝔽); parameter=:field)")
 end
 
 @doc raw"""
-    symplectic_inverse_times(::Symplectic, p, q)
-    symplectic_inverse_times!(::Symplectic, A, p, q)
+    symplectic_inverse_times(::SymplecticMatrices, p, q)
+    symplectic_inverse_times!(::SymplecticMatrices, A, p, q)
 
 Directly compute the symplectic inverse of ``p \in \mathrm{Sp}(2n)``,
 multiplied with ``q \in \mathrm{Sp}(2n)``.
@@ -788,12 +790,12 @@ That is, this function efficiently computes
 where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
 
 """
-function symplectic_inverse_times(M::Symplectic, p, q)
+function symplectic_inverse_times(M::SymplecticMatrices, p, q)
     A = similar(p)
     return symplectic_inverse_times!(M, A, p, q)
 end
 
-function symplectic_inverse_times!(M::Symplectic, A, p, q)
+function symplectic_inverse_times!(M::SymplecticMatrices, A, p, q)
     n = get_parameter(M.size)[1]
     # we write p = [p1 p2; p3 p4] (and q, too), then
     p1 = @view(p[1:n, 1:n])
