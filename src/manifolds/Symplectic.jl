@@ -8,7 +8,7 @@ the canonical symplectic form over ``𝔽^{2n×2n}×𝔽^{2n×2n}``,
   \quad \omega(x, y) = p^{\mathrm{T}} J_{2n} q, \  x, y \in 𝔽^{2n×2n},
 ```
 
-where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 
 The symplectic manifold consists of
 
@@ -80,7 +80,7 @@ as an inner product over the embedding space ``ℝ^{2n×2n}``, i.e.
 struct ExtendedSymplecticMetric <: AbstractMetric end
 
 @doc raw"""
-    SymplecticMatrix{T}
+    SymplecticElement{T}
 
 A lightweight structure to represent the action of the matrix
 representation of the canonical symplectic form,
@@ -101,24 +101,24 @@ The canonical symplectic form is represented by
 
 The entire matrix is however not instantiated in memory, instead a scalar
 ``λ`` of type `T` is stored, which is used to keep track of scaling and transpose operations
-applied  to each `SymplecticMatrix`.
+applied  to each `SymplecticElement`.
 This type acts similar to `I` from `LinearAlgeba`.
 
 # Constructor
 
-    SymplecticMatrix(λ=1)
+    SymplecticElement(λ=1)
 
 Generate the sumplectic matrix with scaling ``1``.
 """
-struct SymplecticMatrix{T}
+struct SymplecticElement{T}
     λ::T
 end
-SymplecticMatrix() = SymplecticMatrix(1)
-SymplecticMatrix(λ::T) where {T<:Number} = SymplecticMatrix{T}(λ)
+SymplecticElement() = SymplecticElement(1)
+SymplecticElement(λ::T) where {T<:Number} = SymplecticElement{T}(λ)
 
-function SymplecticMatrix(arrays::Vararg{AbstractArray})
+function SymplecticElement(arrays::Vararg{AbstractArray})
     TS = Base.promote_type(map(eltype, arrays)...)
-    return SymplecticMatrix(one(TS))
+    return SymplecticElement(one(TS))
 end
 
 @doc raw"""
@@ -136,7 +136,7 @@ with the conversion function
   c_p(ξ) = \frac{1}{2} pp^{\mathrm{T}} ξ + \frac{1}{2} pJ_{2n} ξ^{\mathrm{T}} pJ_{2n},
 ```
 
-where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 
 Each of the terms ``c_p^1(ξ) = p p^{\mathrm{T}} ξ`` and ``c_p^2(ξ) = pJ_{2n} ξ^{\mathrm{T}} pJ_{2n}`` from the
 above definition of ``c_p(η)`` are themselves metric compatible in the sense that
@@ -158,7 +158,7 @@ does have the correct range ``T_p\mathrm{Sp}(2n, ℝ)``.
 change_representer(::SymplecticMatrices, ::EuclideanMetric, p, X)
 
 function change_representer!(::SymplecticMatrices, Y, ::EuclideanMetric, p, X)
-    J = SymplecticMatrix(p, X) # J_{2n}
+    J = SymplecticElement(p, X) # J_{2n}
     pT_X = p' * X
     Y .= (1 / 2) .* p * (pT_X .+ J * pT_X' * J)
     return Y
@@ -247,14 +247,14 @@ Checks whether `X` is a valid tangent vector at `p` on the [`SymplecticMatrices`
 ```math
 p^{T}J_{2n}X + X^{T}J_{2n}p = 0
 ```
-holds (approximately), where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+holds (approximately), where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 
 The tolerance can be set with `kwargs...`
 """
 check_vector(::SymplecticMatrices, ::Any...)
 
 function check_vector(M::SymplecticMatrices, p, X::T; kwargs...) where {T}
-    J = SymplecticMatrix(p, X)
+    J = SymplecticElement(p, X)
     if !isapprox(X' * J * p, -p' * J * X; kwargs...)
         return DomainError(
             norm(X' * J * p + p' * J * X, 2),
@@ -452,7 +452,7 @@ the symplectic inverse is defined as:
 A^{+} := J_{2k}^{\mathrm{T}} A^{\mathrm{T}} J_{2n},
 ```
 
-where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 
 The symplectic inverse of A can be expressed explicitly as:
 
@@ -601,12 +601,12 @@ which solves the constrained optimization problem
 ````
 where ``h: ℝ^{2n×2n} → \operatorname{skew}(2n)`` denotes
 the restriction of ``X`` onto the tangent space ``T_p\operatorname{SpSt}(2n, 2k)``
-and ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+and ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 """
 project(::SymplecticMatrices, p, A)
 
 function project!(::SymplecticMatrices, Y, p, A)
-    J = SymplecticMatrix(Y, p, A)
+    J = SymplecticElement(Y, p, A)
     Jp = J * p
 
     function h(X)
@@ -634,10 +634,10 @@ The closed form projection mapping is given by [GaoSonAbsilStykel:2021](@cite)
   \operatorname{P}^{T_p\mathrm{Sp}(2n)}_{g_p}(X) = pJ_{2n}\operatorname{sym}(p^{\mathrm{T}}J_{2n}^{\mathrm{T}}X),
 ````
 
-where ``\operatorname{sym}(A) = \frac{1}{2}(A + A^{\mathrm{T}})`` and and ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+where ``\operatorname{sym}(A) = \frac{1}{2}(A + A^{\mathrm{T}})`` and and ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 """
 function project!(::MetricManifold{<:Any,<:Euclidean,ExtendedSymplecticMetric}, Y, p, X)
-    J = SymplecticMatrix(p, X)
+    J = SymplecticElement(p, X)
 
     pTJTX = p' * J' * X
     sym_pTJTX = (1 / 2) .* (pTJTX + pTJTX')
@@ -666,7 +666,7 @@ The closed form projection operator onto the normal space is given by [GaoSonAbs
 ````
 
 where ``\operatorname{skew}(A) = \frac{1}{2}(A - A^{\mathrm{T}})``
-and ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+and ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 
 This function is not exported.
 """
@@ -676,7 +676,7 @@ function project_normal!(
     p,
     X,
 ) where {𝔽}
-    J = SymplecticMatrix(p, X)
+    J = SymplecticElement(p, X)
     pTJTX = p' * J' * X
     skew_pTJTX = (1 / 2) .* (pTJTX .- pTJTX')
     Y .= p * J * skew_pTJTX
@@ -705,7 +705,7 @@ second tangent vector space parametrization of [`SymplecticMatrices`](@ref).
 It first generates a random symmetric matrix ``S`` by `S = randn(2n, 2n)`
 and then symmetrizes it as `S = S + S'`.
 Then ``S`` is normalized to have Frobenius norm of `hamiltonian_norm`
-and `X = pJS` is returned, where `J` is the [`SymplecticMatrix`](@ref).
+and `X = pJS` is returned, where `J` is the [`SymplecticElement`](@ref).
 """
 function Random.rand(
     M::SymplecticMatrices;
@@ -727,7 +727,7 @@ function random_vector(M::SymplecticMatrices, p::AbstractMatrix; symmetric_norm=
     S = randn(2n, 2n)
     S .= (S + S')
     S *= symmetric_norm / norm(S)
-    lmul!(SymplecticMatrix(p), S)
+    lmul!(SymplecticElement(p), S)
     return p * S
 end
 
@@ -787,7 +787,7 @@ Directly compute the symplectic inverse of ``p \in \mathrm{Sp}(2n)``,
 multiplied with ``q \in \mathrm{Sp}(2n)``.
 That is, this function efficiently computes
 ``p^+q = (J_{2n}p^{\mathrm{T}}J_{2n})q ∈ ℝ^{2n×2n}``,
-where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 
 """
 function symplectic_inverse_times(M::SymplecticMatrices, p, q)
@@ -821,14 +821,14 @@ function symplectic_inverse_times!(M::SymplecticMatrices, A, p, q)
     return A
 end
 
-ndims(J::SymplecticMatrix) = 2
-copy(J::SymplecticMatrix) = SymplecticMatrix(copy(J.λ))
-Base.eltype(::SymplecticMatrix{T}) where {T} = T
-function Base.convert(::Type{SymplecticMatrix{T}}, J::SymplecticMatrix) where {T}
-    return SymplecticMatrix(convert(T, J.λ))
+ndims(J::SymplecticElement) = 2
+copy(J::SymplecticElement) = SymplecticElement(copy(J.λ))
+Base.eltype(::SymplecticElement{T}) where {T} = T
+function Base.convert(::Type{SymplecticElement{T}}, J::SymplecticElement) where {T}
+    return SymplecticElement(convert(T, J.λ))
 end
 
-function Base.show(io::IO, J::SymplecticMatrix)
+function Base.show(io::IO, J::SymplecticElement)
     s = "$(J.λ)"
     if occursin(r"\w+\s*[\+\-]\s*\w+", s)
         s = "($s)"
@@ -836,31 +836,31 @@ function Base.show(io::IO, J::SymplecticMatrix)
     return print(io, typeof(J), "(): $(s)*[0 I; -I 0]")
 end
 
-(Base.:-)(J::SymplecticMatrix) = SymplecticMatrix(-J.λ)
+(Base.:-)(J::SymplecticElement) = SymplecticElement(-J.λ)
 
-function (Base.:^)(J::SymplecticMatrix, n::Integer)
+function (Base.:^)(J::SymplecticElement, n::Integer)
     return ifelse(
         n % 2 == 0,
         UniformScaling((-1)^(div(n, 2)) * (J.λ)^n),
-        SymplecticMatrix((-1)^(div(n - 1, 2)) * (J.λ)^n),
+        SymplecticElement((-1)^(div(n - 1, 2)) * (J.λ)^n),
     )
 end
 
-(Base.:*)(x::Number, J::SymplecticMatrix) = SymplecticMatrix(x * J.λ)
-(Base.:*)(J::SymplecticMatrix, x::Number) = SymplecticMatrix(x * J.λ)
-function (Base.:*)(J::SymplecticMatrix, K::SymplecticMatrix)
+(Base.:*)(x::Number, J::SymplecticElement) = SymplecticElement(x * J.λ)
+(Base.:*)(J::SymplecticElement, x::Number) = SymplecticElement(x * J.λ)
+function (Base.:*)(J::SymplecticElement, K::SymplecticElement)
     return LinearAlgebra.UniformScaling(-J.λ * K.λ)
 end
 
-Base.transpose(J::SymplecticMatrix) = -J
-Base.adjoint(J::SymplecticMatrix) = SymplecticMatrix(-conj(J.λ))
-Base.inv(J::SymplecticMatrix) = SymplecticMatrix(-(1 / J.λ))
+Base.transpose(J::SymplecticElement) = -J
+Base.adjoint(J::SymplecticElement) = SymplecticElement(-conj(J.λ))
+Base.inv(J::SymplecticElement) = SymplecticElement(-(1 / J.λ))
 
-(Base.:+)(J::SymplecticMatrix, K::SymplecticMatrix) = SymplecticMatrix(J.λ + K.λ)
-(Base.:-)(J::SymplecticMatrix, K::SymplecticMatrix) = SymplecticMatrix(J.λ - K.λ)
+(Base.:+)(J::SymplecticElement, K::SymplecticElement) = SymplecticElement(J.λ + K.λ)
+(Base.:-)(J::SymplecticElement, K::SymplecticElement) = SymplecticElement(J.λ - K.λ)
 
-(Base.:+)(J::SymplecticMatrix, p::AbstractMatrix) = p + J
-function (Base.:+)(p::AbstractMatrix, J::SymplecticMatrix)
+(Base.:+)(J::SymplecticElement, p::AbstractMatrix) = p + J
+function (Base.:+)(p::AbstractMatrix, J::SymplecticElement)
     # When we are adding, the Matrices must match in size:
     two_n, two_k = size(p)
     if (two_n % 2 != 0) || (two_n != two_k)
@@ -883,10 +883,10 @@ function (Base.:+)(p::AbstractMatrix, J::SymplecticMatrix)
 end
 
 # Binary minus:
-(Base.:-)(J::SymplecticMatrix, p::AbstractMatrix) = J + (-p)
-(Base.:-)(p::AbstractMatrix, J::SymplecticMatrix) = p + (-J)
+(Base.:-)(J::SymplecticElement, p::AbstractMatrix) = J + (-p)
+(Base.:-)(p::AbstractMatrix, J::SymplecticElement) = p + (-J)
 
-function (Base.:*)(J::SymplecticMatrix, p::AbstractVecOrMat)
+function (Base.:*)(J::SymplecticElement, p::AbstractVecOrMat)
     two_n = size(p)[1]
     if two_n % 2 != 0
         throw(ArgumentError("'p' must have even row dimension, was: $(two_n) != 2n."))
@@ -904,7 +904,7 @@ function (Base.:*)(J::SymplecticMatrix, p::AbstractVecOrMat)
     return Jp
 end
 
-function (Base.:*)(p::AbstractMatrix, J::SymplecticMatrix)
+function (Base.:*)(p::AbstractMatrix, J::SymplecticElement)
     two_k = size(p)[2]
     if two_k % 2 != 0
         throw(ArgumentError("'p' must have even column dimension, was: $(two_k) != 2k."))
@@ -921,7 +921,7 @@ function (Base.:*)(p::AbstractMatrix, J::SymplecticMatrix)
     return pJ
 end
 
-function LinearAlgebra.lmul!(J::SymplecticMatrix, p::AbstractVecOrMat)
+function LinearAlgebra.lmul!(J::SymplecticElement, p::AbstractVecOrMat)
     # Perform left multiplication by a symplectic matrix,
     # overwriting the matrix p in place:
     two_n = size(p)[1]
@@ -942,7 +942,7 @@ function LinearAlgebra.lmul!(J::SymplecticMatrix, p::AbstractVecOrMat)
     return p
 end
 
-function LinearAlgebra.rmul!(p::AbstractMatrix, J::SymplecticMatrix)
+function LinearAlgebra.rmul!(p::AbstractMatrix, J::SymplecticElement)
     # Perform right multiplication by a symplectic matrix,
     # overwriting the matrix p in place:
     two_k = size(p)[2]
@@ -964,7 +964,7 @@ function LinearAlgebra.rmul!(p::AbstractMatrix, J::SymplecticMatrix)
     return p
 end
 
-function LinearAlgebra.mul!(A::AbstractVecOrMat, J::SymplecticMatrix, p::AbstractVecOrMat)
+function LinearAlgebra.mul!(A::AbstractVecOrMat, J::SymplecticElement, p::AbstractVecOrMat)
     size_p = size(p)
     two_n = size_p[1]
     if two_n % 2 != 0
@@ -982,7 +982,7 @@ function LinearAlgebra.mul!(A::AbstractVecOrMat, J::SymplecticMatrix, p::Abstrac
     return A
 end
 
-function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractMatrix, J::SymplecticMatrix)
+function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractMatrix, J::SymplecticElementt)
     two_n, two_k = size(p)
     if two_k % 2 != 0
         throw(ArgumentError("'p' must have even col dimension, was: $(two_k) != 2k."))

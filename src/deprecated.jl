@@ -6,4 +6,4 @@
 @deprecate ExtrinsicEstimation() ExtrinsicEstimation(EfficientEstimator())
 
 Base.@deprecate_binding Symplectic SymplecticMatrices
-#Base.@deprecate_binding SynplecticMatrix SymplecticElement
+Base.@deprecate_binding SymplecticMatrix SymplecticElement

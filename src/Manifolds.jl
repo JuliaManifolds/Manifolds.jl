@@ -669,7 +669,7 @@ export Euclidean,
     SymplecticGrassmann,
     SymplecticMatrices,
     SymplecticStiefel,
-    SymplecticMatrix,
+    SymplecticElement,
     Torus,
     Tucker,
     UnitaryMatrices

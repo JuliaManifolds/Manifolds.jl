@@ -50,7 +50,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``p`` | a point on ``\mathcal M`` | ``p_1, p_2, \ldots,q`` | for 3 points one might use ``x,y,z`` |
 | ``\operatorname{retr}_pX``|  a retraction | |
 | ``ξ`` | a set of tangent vectors | ``\{X_1,\ldots,X_n\}`` | |
-| ``J_{2n} \in ℝ^{2n×2n}`` | the [`SymplecticMatrix`](@ref) | | |
+| ``J_{2n} \in ℝ^{2n×2n}`` | the [`SymplecticElement`](@ref) | | |
 | ``T_p \mathcal M`` | the tangent space at ``p`` | | |
 | ``X`` | a tangent vector from ``T_p \mathcal M`` | ``X_1,X_2,\ldots,Y,Z`` | sometimes written with base point ``X_p`` |
 | ``\operatorname{tr}`` | trace (of a matrix) | |

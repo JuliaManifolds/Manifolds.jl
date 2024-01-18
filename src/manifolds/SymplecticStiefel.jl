@@ -9,7 +9,7 @@ The symplectic Stiefel manifold consists of all
     := \bigl\{ p ∈ ℝ^{2n×2n} \ \big| \ p^{\mathrm{T}}J_{2n}p = J_{2k} \bigr\},
 ````
 
-where ``J_{2n}`` denotes the [`SymplecticMatrix`](@ref)
+where ``J_{2n}`` denotes the [`SymplecticElement`](@ref)
 
 ````math
 J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}.
@@ -163,7 +163,7 @@ The tangent vector ``X`` can be written in the form
     ∈ ℝ^{2n×2n},
 ```
 
-where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 
 Using this expression for ``X``,
 the exponential mapping can be computed as
@@ -225,7 +225,7 @@ exp(::SymplecticStiefel, p, X)
 
 function exp!(M::SymplecticStiefel, q, p, X)
     n, k = get_parameter(M.size)
-    J = SymplecticMatrix(p, X)
+    J = SymplecticElement(p, X)
     pT_p = lu(p' * p) # ∈ ℝ^{2k×2k}
 
     C = pT_p \ X' # ∈ ℝ^{2k×2n}
@@ -307,7 +307,7 @@ g^{\mathrm{SpSt}}_p(X, Y)
 ```
 """
 function inner(::SymplecticStiefel, p, X, Y)
-    J = SymplecticMatrix(p, X, Y) # in BZ21 also J
+    J = SymplecticElement(p, X, Y) # in BZ21 also J
     # Procompute lu(p'p) since we solve a^{-1}* 3 times
     a = lu(p' * p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
     b = J' * p
@@ -340,7 +340,7 @@ the symplectic inverse is defined as:
 A^{+} := J_{2k}^{\mathrm{T}} A^{\mathrm{T}} J_{2n},
 ```
 
-where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 
 The symplectic inverse of a matrix A can be expressed explicitly as:
 ```math
@@ -452,7 +452,7 @@ the restriction of ``X`` onto the tangent space ``T_p\mathrm{SpSt}(2n, 2k)``.
 project(::SymplecticStiefel, p, A)
 
 function project!(::SymplecticStiefel, Y, p, A)
-    J = SymplecticMatrix(Y, p, A)
+    J = SymplecticElement(Y, p, A)
     Jp = J * p
 
     function h(X)
@@ -581,12 +581,12 @@ The manifold gradient `X` is computed from `Y` as
     X = Yp^{\mathrm{T}}p + J_{2n}pY^{\mathrm{T}}J_{2n}p,
 ```
 
-where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticMatrix`](@ref).
+where ``J_{2n} = \begin{bmatrix} 0_n & I_n \\ -I_n & 0_n \end{bmatrix}`` denotes the [`SymplecticElement`](@ref).
 
 
 """
 function riemannian_gradient(::SymplecticStiefel, p, Y)
-    Jp = SymplecticMatrix(p, Y) * p
+    Jp = SymplecticElement(p, Y) * p
     return Y * (p' * p) .+ Jp * (Y' * Jp)
 end
 
@@ -597,7 +597,7 @@ function riemannian_gradient!(
     Y;
     embedding_metric::EuclideanMetric=EuclideanMetric(),
 )
-    Jp = SymplecticMatrix(p, Y) * p
+    Jp = SymplecticElement(p, Y) * p
     X .= Y * (p' * p) .+ Jp * (Y' * Jp)
     return X
 end
@@ -618,7 +618,7 @@ Directly compute the symplectic inverse of ``p ∈ \mathrm{SpSt}(2n, 2k)``,
 multiplied with ``q ∈ \mathrm{SpSt}(2n, 2k)``.
 That is, this function efficiently computes
 ``p^+q = (J_{2k}p^{\mathrm{T}}J_{2n})q ∈ ℝ^{2k×2k}``,
-where ``J_{2n}, J_{2k}`` are the [`SymplecticMatrix`](@ref)
+where ``J_{2n}, J_{2k}`` are the [`SymplecticElement`](@ref)
 of sizes ``2n×2n`` and ``2k×2k`` respectively.
 
 This function performs this common operation without allocating more than

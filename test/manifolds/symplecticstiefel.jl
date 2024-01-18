@@ -4,7 +4,7 @@ using Manifolds: RiemannianProjectionBackend
 using ManifoldDiff
 
 function Ω(::SymplecticStiefel, p, X)
-    Q = SymplecticMatrix(X, p)
+    Q = SymplecticElement(X, p)
     pT_p = lu(p' * p)
 
     inv_pTp_pT = pT_p \ p'
@@ -284,7 +284,7 @@ end
         end
 
         @testset "Gradient Computations" begin
-            Q_grad = SymplecticMatrix(points[1])
+            Q_grad = SymplecticElement(points[1])
             function test_f(p)
                 k = size(p)[2]
                 return tr(p[1:k, 1:k])

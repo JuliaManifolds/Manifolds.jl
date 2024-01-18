@@ -258,7 +258,7 @@ using ManifoldDiff
 
         @testset "Gradient Computations" begin
             test_f(p) = tr(p)
-            Q_grad = SymplecticMatrix(points[1])
+            Q_grad = SymplecticElement(points[1])
             analytical_grad_f(p) = (1 / 2) * (p * Q_grad * p * Q_grad + p * p')
 
             p_grad = convert(Array{Float64}, points[1])
@@ -291,9 +291,9 @@ using ManifoldDiff
         end
     end
 
-    @testset "SymplecticMatrix" begin
+    @testset "SymplecticElement" begin
         # TODO: Test for different type matrices.
-        @test SymplecticMatrix() == SymplecticMatrix(1)
+        @test SymplecticElement() == SymplecticElement(1)
         Sp_4 = SymplecticMatrices(4)
         pQ_1 = [
             0 0 -2 3
@@ -318,30 +318,30 @@ using ManifoldDiff
             -1 0 0
             -2 4 -8
         ]
-        Q = SymplecticMatrix(pQ_1, pQ_2)
-        Q2 = SymplecticMatrix(1)
+        Q = SymplecticElement(pQ_1, pQ_2)
+        Q2 = SymplecticElement(1)
 
         @testset "Type Basics" begin
             @test Q == Q2
             @test ndims(Q) == 2
             @test copy(Q) == Q
-            @test eltype(SymplecticMatrix(1 // 1)) == Rational{Int64}
-            @test convert(SymplecticMatrix{Float64}, Q) == SymplecticMatrix(1.0)
-            @test "$Q" == "SymplecticMatrix{Int64}(): 1*[0 I; -I 0]"
+            @test eltype(SymplecticElement(1 // 1)) == Rational{Int64}
+            @test convert(SymplecticElement{Float64}, Q) == SymplecticElement(1.0)
+            @test "$Q" == "SymplecticElement{Int64}(): 1*[0 I; -I 0]"
             @test (
-                "$(SymplecticMatrix(1 + 2im))" ==
-                "SymplecticMatrix{Complex{Int64}}(): (1 + 2im)*[0 I; -I 0]"
+                "$(SymplecticElement(1 + 2im))" ==
+                "SymplecticElement{Complex{Int64}}(): (1 + 2im)*[0 I; -I 0]"
             )
         end
 
         @testset "Matrix Operations" begin
-            @test -Q == SymplecticMatrix(-1)
-            @test (2 * Q) * (5 // 6) == SymplecticMatrix(5 // 3)
+            @test -Q == SymplecticElement(-1)
+            @test (2 * Q) * (5 // 6) == SymplecticElement(5 // 3)
 
             @testset "Powers" begin
                 @test inv(Q) * Q == I
                 @test (
-                    inv(SymplecticMatrix(-4.0 + 8im)) * SymplecticMatrix(-4.0 + 8im) ==
+                    inv(SymplecticElement(-4.0 + 8im)) * SymplecticElement(-4.0 + 8im) ==
                     UniformScaling(1.0 + 0.0im)
                 )
                 @test Q * Q == -I
@@ -351,7 +351,7 @@ using ManifoldDiff
             end
             @testset "Addition (subtraction)" begin
                 @test Q + Q == 2 * Q
-                @test Q - SymplecticMatrix(1.0) == SymplecticMatrix(0.0)
+                @test Q - SymplecticElement(1.0) == SymplecticElement(0.0)
                 @test Q + pQ_1 == [
                     0 0 -1 3
                     0 0 1 0
@@ -375,13 +375,14 @@ using ManifoldDiff
                 @test_throws ArgumentError Q + p_odd_row
             end
             @testset "Transpose-Adjoint" begin
-                @test Q' == SymplecticMatrix(-1)
-                @test transpose(SymplecticMatrix(10)) == SymplecticMatrix(-10)
-                @test transpose(SymplecticMatrix(1 - 2.0im)) == SymplecticMatrix(-1 + 2.0im)
+                @test Q' == SymplecticElement(-1)
+                @test transpose(SymplecticElement(10)) == SymplecticElement(-10)
+                @test transpose(SymplecticElement(1 - 2.0im)) ==
+                      SymplecticElement(-1 + 2.0im)
                 @test adjoint(Q) == -Q
-                @test adjoint(SymplecticMatrix(1 - 2.0im)) == SymplecticMatrix(-1 - 2.0im)
-                @test adjoint(SymplecticMatrix(-1im)) == SymplecticMatrix(-1im)
-                @test adjoint(SymplecticMatrix(2.0)) == SymplecticMatrix(-2.0)
+                @test adjoint(SymplecticElement(1 - 2.0im)) == SymplecticElement(-1 - 2.0im)
+                @test adjoint(SymplecticElement(-1im)) == SymplecticElement(-1im)
+                @test adjoint(SymplecticElement(2.0)) == SymplecticElement(-2.0)
             end
             @testset "Inplace mul!" begin
                 z1 = [1 + 2im; 1 - 2im]
