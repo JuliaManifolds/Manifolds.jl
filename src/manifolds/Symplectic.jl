@@ -982,7 +982,7 @@ function LinearAlgebra.mul!(A::AbstractVecOrMat, J::SymplecticElement, p::Abstra
     return A
 end
 
-function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractMatrix, J::SymplecticElementt)
+function LinearAlgebra.mul!(A::AbstractVecOrMat, p::AbstractMatrix, J::SymplecticElement)
     two_n, two_k = size(p)
     if two_k % 2 != 0
         throw(ArgumentError("'p' must have even col dimension, was: $(two_k) != 2k."))
