@@ -1,6 +1,7 @@
 """
-    has_type_in_signature(sig, T)
-    Test whether the signature `sig` has an argument of type `T` as one of its paramaters
+    has_type_in_signature(sig, T::Type)
+
+Test whether the signature `sig` has an argument of type `T` as one of its parameters.
 """
 function has_type_in_signature(sig, T::Type)
     return any(map(Base.unwrap_unionall(sig.sig).parameters) do x

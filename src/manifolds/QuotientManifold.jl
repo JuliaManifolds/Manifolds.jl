@@ -177,7 +177,7 @@ end
 
 @doc raw"""
     vertical_component(N::AbstractManifold, p, X)
-    vertical_compontent(QuotientManifold{M,N}, p, X)
+    vertical_component(QuotientManifold{M,N}, p, X)
 
 Compute the vertical component of tangent vector `X` at point `p`
 in the total space of quotient manifold `N`.
