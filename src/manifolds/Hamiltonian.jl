@@ -42,7 +42,7 @@ where ``⋅^{+}`` denotes the [`symplectic_inverse`](@ref),. and ``𝔽 ∈ \{ �
 Though it is slightly redundant, usually the matrices are stored as ``2n×2n`` arrays.
 
 The symbol refers to the main usage within `Manifolds.jl` that is the
-Lie algebra to the [`Symplectic`](@ref) as a Lie group with the matrix operation as group operation.
+Lie algebra to the [`SymplecticMatrices`](@ref) as a Lie group with the matrix operation as group operation.
 
 # Constructor
 

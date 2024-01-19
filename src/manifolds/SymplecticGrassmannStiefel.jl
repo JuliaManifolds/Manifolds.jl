@@ -52,8 +52,7 @@ end
 Compute the Cayley Inverse Retraction on the Symplectic Grassmann manifold,
 when the points are represented as symplectic bases, i.e. on the [`SymplecticStiefel`](@ref).
 
-Here we can directly employ the [`CaleyInverseRetraction`](@ref) on the symplectic Stiefel manifold
-itself, see [`inverse_retract(::SymplecticStiefel, p, q, ::CayleyInverseRetraction)``](@ref).
+Here we can directly employ the `CaleyInverseRetraction` on the symplectic Stiefel manifold.
 """
 inverse_retract(::SymplecticGrassmann, p, q, ::CayleyInverseRetraction)
 
@@ -69,8 +68,7 @@ end
 Compute the Cayley retraction on the Symplectic Grassmann manifold,
 when the points are represented as symplectic bases, i.e. on the [`SymplecticStiefel`](@ref).
 
-Here we can directly employ the [`CaleyRetraction`](@ref) on the symplectic Stiefel manifold
-itself, see [`retract(::SymplecticStiefel, p, X, ::CayleyRetraction)``](@ref).
+Here we can directly employ the `CaleyRetraction` on the symplectic Stiefel manifold.
 """
 retract(::SymplecticGrassmann, p, X, ::CayleyRetraction)
 
