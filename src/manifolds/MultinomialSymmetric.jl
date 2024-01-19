@@ -1,7 +1,7 @@
 @doc raw"""
-    MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic{N}
+    MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic
 
-The multinomial symmetric matrices manifold consists of all symmetric $n×n$ matrices with
+The multinomial symmetric matrices manifold consists of all symmetric ``n×n`` matrices with
 positive entries such that each column sums to one, i.e.
 
 ````math
@@ -13,7 +13,7 @@ positive entries such that each column sums to one, i.e.
 \end{aligned}
 ````
 
-where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
+where ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
 
 It is modeled as [`IsIsometricEmbeddedManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.IsIsometricEmbeddedManifold).
 via the [`AbstractMultinomialDoublyStochastic`](@ref) type, since it shares a few functions
@@ -29,7 +29,7 @@ X\mathbf{1}_n = \mathbf{0}_n
 \bigr\},
 ````
 
-where $\mathbf{0}_n$ is the vector of length $n$ containing zeros.
+where ``\mathbf{0}_n`` is the vector of length ``n`` containing zeros.
 
 More details can be found in Section IV [DouikHassibi:2019](@cite).
 
@@ -37,7 +37,7 @@ More details can be found in Section IV [DouikHassibi:2019](@cite).
 
     MultinomialSymmetric(n)
 
-Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic and symmetric.
+Generate the manifold of matrices ``\mathbb R^{n×n}`` that are doubly stochastic and symmetric.
 """
 struct MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic
     size::T
@@ -56,22 +56,10 @@ i.e. is a symmetric matrix with positive entries whose rows sum to one.
 """
 function check_point(M::MultinomialSymmetric, p; kwargs...)
     n = get_parameter(M.size)[1]
-    s = check_point(SymmetricMatrices(n, ℝ), p)
+    s = check_point(SymmetricMatrices(n, ℝ), p; kwargs...)
     isnothing(s) && return s
-    r = sum(p, dims=2)
-    if !isapprox(r, ones(n, 1); kwargs...)
-        return DomainError(
-            r,
-            "The point $(p) does not lie on $M, since its rows do not sum up to one.",
-        )
-    end
-    if !(minimum(p) > 0) || !(maximum(p) < 1)
-        return DomainError(
-            minimum(p),
-            "The point $(p) does not lie on $M, since at least one of its entries is nonpositive.",
-        )
-    end
-    return nothing
+    s2 = check_point(MultinomialMatrices(n, n), p; kwargs...)
+    return s2
 end
 @doc raw"""
     check_vector(M::MultinomialSymmetric p, X; kwargs...)
@@ -84,14 +72,8 @@ function check_vector(M::MultinomialSymmetric, p, X; kwargs...)
     n = get_parameter(M.size)[1]
     s = check_vector(SymmetricMatrices(n, ℝ), p, X; kwargs...)
     isnothing(s) && return s
-    r = sum(X, dims=2) # due to symmetry, we only have to check columns
-    if !isapprox(r, zeros(n); kwargs...)
-        return DomainError(
-            r,
-            "The matrix $(X) is not a tangent vector to $(p) on $(M), since its columns/rows do not sum up to zero.",
-        )
-    end
-    return nothing
+    s2 = check_vector(MultinomialMatrices(n, n), p, X)
+    return s2
 end
 
 embed!(::MultinomialSymmetric, q, p) = copyto!(q, p)
@@ -130,12 +112,14 @@ end
     project(M::MultinomialSymmetric, p, Y)
 
 Project `Y` onto the tangent space at `p` on the [`MultinomialSymmetric`](@ref) `M`, return the result in `X`.
-The formula reads
+
+The formula from [DouikHassibi:2019](@cite), Sec. VI reads
+
 ````math
     \operatorname{proj}_p(Y) = Y - (α\mathbf{1}_n^{\mathrm{T}} + \mathbf{1}_n α^{\mathrm{T}}) ⊙ p,
 ````
-where $⊙$ denotes the Hadamard or elementwise product and $\mathbb{1}_n$ is the vector of length $n$ containing ones.
-The two vector $α ∈ ℝ^{n×n}$ is given by solving
+where ``⊙`` denotes the Hadamard or elementwise product and ``\mathbb{1}_n`` is the vector of length ``n`` containing ones.
+The two vector ``α ∈ ℝ^{n×n}`` is given by solving
 ````math
     (I_n+p)α =  Y\mathbf{1},
 ````
@@ -148,6 +132,41 @@ function project!(::MultinomialSymmetric, X, p, Y)
     return X .= Y .- (repeat(α, 1, 3) .+ repeat(α', 3, 1)) .* p
 end
 
+@doc raw"""
+    rand(::MultinomialSymmetric; vector_at=nothing, σ::Real=1.0, kwargs...)
+
+Generate random points on the [`MultinomialSymmetric`](@ref) manifold
+or tangent vectors at the point `vector_at` if that is not `nothing`.
+
+Let ``n×n`` denote the matrix dimension of the [`MultinomialSymmetric`](@ref).
+
+When `vector_at` is nothing, this is done by generating a random matrix`rand(n,n)`
+with positive entries and projecting it onto the manifold. The `kwargs...` are
+passed to this projection.
+
+When `vector_at` is not `nothing`, a random matrix in the ambient space is generated
+and projected onto the tangent space
+"""
+rand(::MultinomialSymmetric; σ::Real=1.0)
+
+function Random.rand!(
+    rng::AbstractRNG,
+    M::MultinomialSymmetric,
+    pX;
+    vector_at=nothing,
+    σ::Real=one(real(eltype(pX))),
+    kwargs...,
+)
+    rand!(rng, pX)
+    pX .*= σ
+    if vector_at === nothing
+        project!(M, pX, pX; kwargs...)
+    else
+        project!(M, pX, vector_at, pX)
+    end
+    return pX
+end
+
 function representation_size(M::MultinomialSymmetric)
     n = get_parameter(M.size)[1]
     return (n, n)
@@ -156,8 +175,8 @@ end
 @doc raw"""
     retract(M::MultinomialSymmetric, p, X, ::ProjectionRetraction)
 
-compute a projection based retraction by projecting $p\odot\exp(X⨸p)$ back onto the manifold,
-where $⊙,⨸$ are elementwise multiplication and division, respectively. Similarly, $\exp$
+compute a projection based retraction by projecting ``p\odot\exp(X⨸p)`` back onto the manifold,
+where ``⊙,⨸`` are elementwise multiplication and division, respectively. Similarly, ``\exp``
 refers to the elementwise exponentiation.
 """
 retract(::MultinomialSymmetric, ::Any, ::Any, ::ProjectionRetraction)
