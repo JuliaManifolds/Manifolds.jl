@@ -12,8 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * added the real symplectic Grassmann manifold `SymplecticGrassmann`
 * Introduce the manifold of `HamiltonianMatrices` and a wrapper for `Hamiltonian` matrices
 * introduce `rand(:HamiltonianMatrices)`
+* extend `rand` to also `rand!` for `HamiltonianMatrices`, `SymplecticMatrices` and `SymplecticStiefel`
+* implement `riemannian_gradient` conversion for `SymplecticMatrices` and `SymplecticGrassmann`
 * Rename (deprecate) `Symplectic` to `SimplecticMatrices` in order to have a `Symplectic` wrapper for such matrices as well
-* Rename (deprecate) `SymplecticMatrix` to `SymplecticElement` to cclarify that it is the special matrix ``J_{2n}`` and not an arbitrary symplectic matrix.
+* Rename (deprecate) `SymplecticMatrix` to `SymplecticElement` to clarify that it is the special matrix ``J_{2n}`` and not an arbitrary symplectic matrix.
 
 ## [0.9.11] – 2023-12-27
 

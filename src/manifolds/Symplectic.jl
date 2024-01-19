@@ -684,15 +684,14 @@ function project_normal!(
 end
 
 @doc raw"""
-    rand(::SymplecticStiefel; vector_at=nothing,
-        hamiltonian_norm = (vector_at === nothing ? 1/2 : 1.0))
+    rand(::SymplecticStiefel; vector_at=nothing, σ=1.0)
 
 Generate a random point on ``\mathrm{Sp}(2n)`` or a random
 tangent vector ``X \in T_p\mathrm{Sp}(2n)`` if `vector_at` is set to
 a point ``p \in \mathrm{Sp}(2n)``.
 
 A random point on ``\mathrm{Sp}(2n)`` is constructed by generating a
-random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)`` with norm `hamiltonian_norm`,
+random Hamiltonian matrix ``Ω \in \mathfrak{sp}(2n,F)`` with norm `σ`,
 and then transforming it to a symplectic matrix by applying the Cayley transform
 
 ```math
@@ -704,31 +703,43 @@ To generate a random tangent vector in ``T_p\mathrm{Sp}(2n)``, this code employs
 second tangent vector space parametrization of [`SymplecticMatrices`](@ref).
 It first generates a random symmetric matrix ``S`` by `S = randn(2n, 2n)`
 and then symmetrizes it as `S = S + S'`.
-Then ``S`` is normalized to have Frobenius norm of `hamiltonian_norm`
+Then ``S`` is normalized to have Frobenius norm of `σ`
 and `X = pJS` is returned, where `J` is the [`SymplecticElement`](@ref).
 """
-function Random.rand(
-    M::SymplecticMatrices;
+rand(SymplecticMatrices; σ::Rieal=1.0, kwargs...)
+
+function Random.rand!(
+    rng::AbstractRNG,
+    M::SymplecticMatrices,
+    pX;
     vector_at=nothing,
-    hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),
+    hamiltonian_norm=nothing,
+    σ=hamiltonian_norm === nothing ? 1.0 : hamiltonian_norm,
 )
+    !(hamiltonian_norm === nothing) && Base.depwarn(
+        Random.rand!,
+        "hamiltonian_norm is deprecated as a keyword, please use the default σ.",
+    )
     n = get_parameter(M.size)[1]
     if vector_at === nothing
-        Ω = rand(HamiltonianMatrices(2n); σ=hamiltonian_norm)
-        return (I - Ω) \ (I + Ω)
+        rand!(rng, HamiltonianMatrices(2n), pX; σ=σ)
+        pX .= (I - pX) \ (I + pX)
+        return pX
     else
-        random_vector(M, vector_at; symmetric_norm=hamiltonian_norm)
+        random_vector!(M, pX, vector_at; σ=σ)
+        return pX
     end
 end
 
-function random_vector(M::SymplecticMatrices, p::AbstractMatrix; symmetric_norm=1.0)
+function random_vector!(M::SymplecticMatrices, X, p; σ=1.0)
     n = get_parameter(M.size)[1]
     # Generate random symmetric matrix:
-    S = randn(2n, 2n)
-    S .= (S + S')
-    S *= symmetric_norm / norm(S)
-    lmul!(SymplecticElement(p), S)
-    return p * S
+    randn!(X)
+    X .= 0.5 * (X + X')
+    X .*= σ / norm(X)
+    lmul!(SymplecticElement(p), X)
+    X .= p * X
+    return X
 end
 
 function rand_hamiltonian(M::SymplecticMatrices; frobenius_norm=1.0)
@@ -769,6 +780,32 @@ function retract_cayley!(M::SymplecticMatrices, q, p, X, t::Number)
     divisor = lu(2 * I - p_star_X)
     q .= p * (divisor \ add_scaled_I!(p_star_X, 2.0))
     return q
+end
+
+@doc raw"""
+    riemannian_gradient(M::SymplecticMatrices, p, Y)
+
+Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{2n×2n}`` or at
+least around the [`SymplecicMatrices`](@ref) `M` where `p` (the embedding of) a point on `M`,
+we restrict ``\tilde f`` to the manifold and denote that by ``f``.
+Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
+
+```math
+  X = Yp^{\mathrm{T}}p + J_{2n}pY^{\mathrm{T}}J_{2n}p,
+```
+
+where ``J_{2n}`` denotes the [`SymplecticElement`)(@ref).
+
+"""
+function riemannian_gradient(::SymplecticMatrices, p, Y; kwargs...)
+    J = SymplecticElement(p, X)
+    return Y * p'p .+ (J * p) * Y' * (J * p)
+end
+
+function riemannian_gradient!(M::SymplecticMatrices, X, p, Y; kwargs...)
+    J = SymplecticElement(p, X)
+    X .= Y * p'p .+ (J * p) * Y' * (J * p)
+    return X
 end
 
 function Base.show(io::IO, ::SymplecticMatrices{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}

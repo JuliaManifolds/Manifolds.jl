@@ -469,8 +469,7 @@ function project!(::SymplecticStiefel, Y, p, A)
 end
 
 @doc raw"""
-    rand(M::SymplecticStiefel; vector_at=nothing,
-        hamiltonian_norm=(vector_at === nothing ? 1/2 : 1.0))
+    rand(M::SymplecticStiefel; vector_at=nothing, σ = 1.0)
 
 Generate a random point ``p ∈ \mathrm{SpSt}(2n, 2k)`` or
 a random tangent vector ``X ∈ T_p\mathrm{SpSt}(2n, 2k)``
@@ -488,28 +487,36 @@ this code exploits the second tangent vector space parametrization of
 can be written as ``X = pΩ_X + p^sB_X``.
 To generate random tangent vectors at ``p`` then, this function sets ``B_X = 0``
 and generates a random Hamiltonian matrix ``Ω_X ∈ \mathfrak{sp}(2n,F)`` with
-Frobenius norm of `hamiltonian_norm` before returning ``X = pΩ_X``.
+Frobenius norm of `σ` before returning ``X = pΩ_X``.
 """
-function Random.rand(
-    M::SymplecticStiefel;
+rand(M::SymplecticStiefel; σ::Real=1.0, kwargs...)
+
+function Random.rand!(
+    rng::AbstractRNG,
+    M::SymplecticStiefel,
+    pX;
     vector_at=nothing,
-    hamiltonian_norm=(vector_at === nothing ? 1 / 2 : 1.0),
+    hamiltonian_norm=nothing,
+    σ=hamiltonian_norm === nothing ? 1.0 : hamiltonian_norm,
 )
+    !(hamiltonian_norm === nothing) && Base.depwarn(
+        Random.rand!,
+        "hamiltonian_norm is deprecated as a keyword, please use the default σ.",
+    )
     n, k = get_parameter(M.size)
     if vector_at === nothing
-        return canonical_project(
-            M,
-            rand(SymplecticMatrices(2n); hamiltonian_norm=hamiltonian_norm),
-        )
+        canonical_project!(M, pX, rand(SymplecticMatrices(2n); σ=σ))
+        return pX
     else
-        return random_vector(M, vector_at; hamiltonian_norm=hamiltonian_norm)
+        return random_vector!(M, pX, vector_at; σ=σ)
     end
 end
 
-function random_vector(M::SymplecticStiefel, p::AbstractMatrix; hamiltonian_norm=1.0)
+function random_vector!(M::SymplecticStiefel, X, p; σ=1.0)
     k = get_parameter(M.size)[2]
-    Ω = rand(HamiltonianMatrices(2k); σ=hamiltonian_norm)
-    return p * Ω
+    rand!(HamiltonianMatrices(2k), X; σ=σ)
+    X .= p * X
+    return X
 end
 
 @doc raw"""

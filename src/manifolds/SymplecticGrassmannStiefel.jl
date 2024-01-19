@@ -77,3 +77,38 @@ function retract_cayley!(M::SymplecticGrassmann, q, p, X, t::Number)
     retract_cayley!(SymplecticStiefel(2 * n, 2 * k), q, p, X, t)
     return q
 end
+
+@doc raw"""
+    riemannian_gradient(M::SymplecticGrassmann, p, Y)
+
+Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{2n×2k}`` or at
+least around the [`SymplecicGrassmann`](@ref) `M` where `p` (the embedding of) a point on `M`,
+and the restriction ``\tilde f`` to the [`SymplecticStiefel`] be invariant for the equivalence classes.
+In other words ``f(p) = f(qp)`` for ``q \in \mathrm{Sp}(2k, ℝ)``.
+Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
+
+```math
+  X = J_{2n}^THJ_{2k}p^{\mathrm{T}}p - J_{2n}^TpJ_{2k}H^{\mathrm{T}}p,
+```
+
+where ``J_{2n}`` denotes the [`SymplecticElement`)(@ref), and
+``H = (I_{2n} - pp^+)J_{2n}^{\mathrm{T}YJ``.
+"""
+function riemannian_gradient(::SymplecticGrassmann, p, Y; kwargs...)
+    n, k = get_parameter(M.size)
+    J = SymplecticElement(p, X)
+    # Since J' = -J We can write (J'YJ) = -J * (YJ)
+    JTYJ = (-J * (Y * J))
+    H = (I - symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, p)) * JTYJ
+    return (-J * (H * J)) * (p' * p) .- JTYJ * (H' * p)
+end
+
+function riemannian_gradient!(M::SymplecticGrassmann, X, p, Y; kwargs...)
+    n, k = get_parameter(M.size)
+    J = SymplecticElement(p, X)
+    # Since J' = -J We can write (J'YJ) = -J * (YJ)
+    JTYJ = (-J * (Y * J))
+    H = (I - symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, p)) * JTYJ
+    X .= (-J * (H * J)) * (p' * p) .- JTYJ * (H' * p)
+    return X
+end
