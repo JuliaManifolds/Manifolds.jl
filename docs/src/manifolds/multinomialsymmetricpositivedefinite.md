@@ -2,7 +2,7 @@
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/MultinomialSymmetricPoitiveDefinite.jl"]
+Pages = ["manifolds/MultinomialSymmetricPositiveDefinite.jl"]
 Order = [:type, :function]
 ```
 

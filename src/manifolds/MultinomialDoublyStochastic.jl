@@ -3,13 +3,49 @@
 
 A common type for manifolds that are doubly stochastic, for example by direct constraint
 [`MultinomialDoubleStochastic`](@ref) or by symmetry [`MultinomialSymmetric`](@ref),
-or additionally by positife definiteness [`MultinomialSymmetricPoitiveDefinite`](@ref)
+or additionally by symmetric positive definiteness [`MultinomialSymmetricPositiveDefinite`](@ref)
 as long as they are also modeled as [`IsIsometricEmbeddedManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.IsIsometricEmbeddedManifold).
+
+That way they share the inner product (just by restriction), and even the Riemannian gradient
 """
 abstract type AbstractMultinomialDoublyStochastic <: AbstractDecoratorManifold{ℝ} end
 
 function active_traits(f, ::AbstractMultinomialDoublyStochastic, args...)
     return merge_traits(IsIsometricEmbeddedManifold())
+end
+
+@doc raw"""
+    representation_size(M::AbstractMultinomialDoublyStochastic)
+
+return the representation size of doubly stochastic matrices, whic are embedded
+in the ``ℝ^{n×n}`` matrices and hence the answer here is ``
+"""
+function representation_size(M::AbstractMultinomialDoublyStochastic)
+    n = get_parameter(M.size)[1]
+    return (n, n)
+end
+
+@doc raw"""
+    riemannian_gradient(M::AbstractMultinomialDoublyStochastic, p, Y; kwargs...)
+
+Let ``Y`` denote the Euclidean gradient of a function ``\tilde f`` defined in the
+embedding neighborhood of `M`, then the Riemannian gradient is given by
+Lemma 1 [DouikHassibi:2019](@cite) as
+
+```math
+  \operatorname{grad} f(p) = \proj_{T_p\mathcal M}(Y⊙p)
+```
+
+where ``⊙`` denotes the Hadamard or elementwise product, and the projection
+is the projection onto the tangent space of the corresponding manifold.
+
+"""
+riemannian_gradient(M::AbstractMultinomialDoublyStochastic, p, Y; kwargs...)
+
+function riemannian_gradient!(M::AbstractMultinomialDoublyStochastic, X, p, Y; kwargs...)
+    X .= p .* Y
+    project!(M, X, p, X)
+    return X
 end
 
 @doc raw"""
@@ -69,6 +105,7 @@ function check_point(M::MultinomialDoubleStochastic, p::T; kwargs...) where {T}
     s2 = check_point(MultinomialMatrices(n, n), p'; kwargs...)
     return s2
 end
+
 @doc raw"""
     check_vector(M::MultinomialDoubleStochastic p, X; kwargs...)
 
@@ -77,10 +114,11 @@ This means, that `p` is valid, that `X` is of correct dimension and sums to zero
 column or row.
 """
 function check_vector(M::MultinomialDoubleStochastic, p, X::T; kwargs...) where {T}
+    n = get_parameter(M.size)[1]
     s = check_vector(MultinomialMatrices(n, n), p, X; kwargs...)
     isnothing(s) && return s
     s2 = check_vector(MultinomialMatrices(n, n), p, X'; kwargs...)
-    return s
+    return s2
 end
 
 function get_embedding(::MultinomialDoubleStochastic{TypeParameter{Tuple{n}}}) where {n}
@@ -186,11 +224,6 @@ function project!(
     end
     q .= p .* (d2 * d1)
     return q
-end
-
-function representation_size(M::MultinomialDoubleStochastic)
-    n = get_parameter(M.size)[1]
-    return (n, n)
 end
 
 @doc raw"""

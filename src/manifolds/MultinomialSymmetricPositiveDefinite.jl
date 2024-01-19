@@ -1,5 +1,5 @@
 @doc raw"""
-    MultinomialSymmetricPoitiveDefinite <: AbstractMultinomialDoublyStochastic
+    MultinomialSymmetricPositiveDefinite <: AbstractMultinomialDoublyStochastic
 
 The symmetric positive definite multinomial matrices manifold consists of all
 symmetric ``n×n`` matrices with positive eigenvalues, and
@@ -17,14 +17,14 @@ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{\mathbf{0}_n\}
 ````
 
 where ``\mathbf{1}_n`` and ``\mathbr{0}_n`` are the vectors of length ``n``
-containing ones and zeros, respectively.
+containing ones and zeros, respectively. More details for this manifold can b found in
+[DouikHassibi:2019](@cite).
 
 # Constructor
 
     MultinomialSymmetricPositiveDefinite(n)
 
-Generate the manifold of matrices ``\mathbb R^{n×n}`` that are doubly stochastic and symmetric.
-
+Generate the manifold of matrices ``\mathbb R^{n×n}`` that are symmetric, positive definite, and doubly stochastic.
 """
 struct MultinomialSymmetricPositiveDefinite{T} <: AbstractMultinomialDoublyStochastic
     size::T

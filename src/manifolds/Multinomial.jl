@@ -88,6 +88,29 @@ function power_dimensions(M::MultinomialMatrices)
     return (m,)
 end
 
+
+@doc raw"""
+    riemannian_gradient(M::MultinomialMatrices, p, Y; kwargs...)
+
+Let ``Y`` denote the Euclidean gradient of a function ``\tilde f`` defined in the
+embedding neighborhood of `M`, then the Riemannian gradient is given by
+Equation 5 of [DouikHassibi:2019](@cite) as
+
+```math
+  \operatorname{grad} f(p) = \proj_{T_p\mathcal M}(Y⊙p)
+```
+
+where ``⊙`` denotes the Hadamard or elementwise product.
+
+"""
+riemannian_gradient(M::MultinomialMatrices, p, Y; kwargs...)
+
+function riemannian_gradient!(M::MultinomialMatrices, X, p, Y; kwargs...)
+    X .= p .* Y
+    project!(M, X, p, X)
+    return X
+end
+
 representation_size(M::MultinomialMatrices) = get_parameter(M.size)
 
 function Base.show(io::IO, ::MultinomialMatrices{TypeParameter{Tuple{n,m}}}) where {n,m}

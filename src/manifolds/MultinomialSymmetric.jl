@@ -128,8 +128,9 @@ where ``I_n`` is teh ``n×n`` unit matrix and ``\mathbf{1}_n`` is the vector of 
 project(::MultinomialSymmetric, ::Any, ::Any)
 
 function project!(::MultinomialSymmetric, X, p, Y)
+    n = get_parameter(M.size)[1]
     α = (I + p) \ sum(Y, dims=2) # Formula (49) from 1802.02628
-    return X .= Y .- (repeat(α, 1, 3) .+ repeat(α', 3, 1)) .* p
+    return X .= Y .- (repeat(α, 1, n) .+ repeat(α', n, 1)) .* p
 end
 
 @doc raw"""
@@ -183,6 +184,35 @@ retract(::MultinomialSymmetric, ::Any, ::Any, ::ProjectionRetraction)
 
 function retract_project!(M::MultinomialSymmetric, q, p, X, t::Number)
     return project!(M, q, p .* exp.(t .* X ./ p))
+end
+
+@doc raw"""
+    Y = riemannian_Hessian(M::MultinomialSymmetric, p, G, H, X)
+    riemannian_Hessian!(M::MultinomialSymmetric, Y, p, G, H, X)
+
+Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
+Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
+where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
+
+The Riemannian Hessian can be computed as stated in Corollary 3 [DouikHassibi:2019](@cite).
+"""
+riemannian_Hessian(M::MultinomialSymmetric, p, G, H, X)
+
+function riemannian_Hessian!(M::MultinomialSymmetric, Y, p, G, H, X)
+    # The notation here is the same as in (53) DouikHassibi:2019
+    # with the small change their X is our p their ξ_X is our X , Hessf is H, Gradf is G
+    n = get_parameter(M.size)[1]
+    ov = ones(n) # \bf 1
+    I_p = lu(I .+ p)
+    α = I_p\(γ*ov)
+    α_sq = (repeat(α, 1, n) .+ repeat(α', n, 1))
+    γ = G .* p
+    δ = γ .-  α_sq .* p
+    γ_dot = H .* p + G .* X
+    α_dot = ( I_p \ γ_dot .- (I_p \ X)*(I_p \ γ) ) * ov
+    δ_dot = γ_dot .- (repeat(α_dot, 1, n) .+ repeat(α_dot', n, 1)) .* p .- α_sq .* X
+    project!(M, Y, p, δ_dot .- 0.5 * ((δ .* X) ./ p) )
+    return Y
 end
 
 function Base.show(io::IO, ::MultinomialSymmetric{TypeParameter{Tuple{n}}}) where {n}
