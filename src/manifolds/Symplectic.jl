@@ -786,7 +786,7 @@ end
     riemannian_gradient(M::SymplecticMatrices, p, Y)
 
 Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{2n×2n}`` or at
-least around the [`SymplecicMatrices`](@ref) `M` where `p` (the embedding of) a point on `M`,
+least around the [`SymplecticMatrices`](@ref) `M` where `p` (the embedding of) a point on `M`,
 we restrict ``\tilde f`` to the manifold and denote that by ``f``.
 Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
 
