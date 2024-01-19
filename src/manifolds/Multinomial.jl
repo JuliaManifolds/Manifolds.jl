@@ -88,7 +88,6 @@ function power_dimensions(M::MultinomialMatrices)
     return (m,)
 end
 
-
 @doc raw"""
     riemannian_gradient(M::MultinomialMatrices, p, Y; kwargs...)
 

@@ -204,14 +204,14 @@ function riemannian_Hessian!(M::MultinomialSymmetric, Y, p, G, H, X)
     n = get_parameter(M.size)[1]
     ov = ones(n) # \bf 1
     I_p = lu(I .+ p)
-    α = I_p\(γ*ov)
+    α = I_p \ (γ * ov)
     α_sq = (repeat(α, 1, n) .+ repeat(α', n, 1))
     γ = G .* p
-    δ = γ .-  α_sq .* p
+    δ = γ .- α_sq .* p
     γ_dot = H .* p + G .* X
-    α_dot = ( I_p \ γ_dot .- (I_p \ X)*(I_p \ γ) ) * ov
+    α_dot = (I_p \ γ_dot .- (I_p \ X) * (I_p \ γ)) * ov
     δ_dot = γ_dot .- (repeat(α_dot, 1, n) .+ repeat(α_dot', n, 1)) .* p .- α_sq .* X
-    project!(M, Y, p, δ_dot .- 0.5 * ((δ .* X) ./ p) )
+    project!(M, Y, p, δ_dot .- 0.5 * ((δ .* X) ./ p))
     return Y
 end
 
