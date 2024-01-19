@@ -127,7 +127,7 @@ where ``I_n`` is teh ``n×n`` unit matrix and ``\mathbf{1}_n`` is the vector of 
 """
 project(::MultinomialSymmetric, ::Any, ::Any)
 
-function project!(::MultinomialSymmetric, X, p, Y)
+function project!(M::MultinomialSymmetric, X, p, Y)
     n = get_parameter(M.size)[1]
     α = (I + p) \ sum(Y, dims=2) # Formula (49) from 1802.02628
     return X .= Y .- (repeat(α, 1, n) .+ repeat(α', n, 1)) .* p
