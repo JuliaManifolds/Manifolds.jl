@@ -42,10 +42,13 @@ function active_traits(f, ::SymplecticMatrices, args...)
     return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
 end
 
-function SymplecticMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
-    n % 2 == 0 || throw(ArgumentError("The dimension of the symplectic manifold
-                        embedding space must be even. Was odd, n % 2 == $(n % 2)."))
-    size = wrap_type_parameter(parameter, (div(n, 2),))
+function SymplecticMatrices(two_n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+    two_n % 2 == 0 || throw(
+        ArgumentError(
+            "The matrix size `2n` of the symplectic manifold must be even, but was $(two_n).",
+        ),
+    )
+    size = wrap_type_parameter(parameter, (div(two_n, 2),))
     return SymplecticMatrices{typeof(size),field}(size)
 end
 
