@@ -1,6 +1,6 @@
 # Metric manifold
 
-A Riemannian manifold always consists of a [topological manifold](https://en.wikipedia.org/wiki/Topological_manifold) together with a smoothly varying metric $g$.
+A Riemannian manifold always consists of a [topological manifold](https://en.wikipedia.org/wiki/Topological_manifold) together with a smoothly varying metric ``g``.
 
 However, often there is an implicitly assumed (default) metric, like the usual inner product on [`Euclidean`](@ref) space.
 This decorator takes this into account.
@@ -17,7 +17,7 @@ Pages = ["metric.md"]
 Depth = 2
 ```
 
-Note that a metric manifold is has a [`IsConnectionManifold`](@ref) trait referring to the [`LeviCivitaConnection`](@ref) of the metric $g$, and thus a large part of metric manifold's functionality relies on this.
+Note that a metric manifold is has a [`IsConnectionManifold`](@ref) trait referring to the [`LeviCivitaConnection`](@ref) of the metric ``g``, and thus a large part of metric manifold's functionality relies on this.
 
 Let's first look at the provided types.
 

@@ -308,7 +308,7 @@ end
     get_coordinates(M::Hyperbolic, p, X, ::DefaultOrthonormalBasis)
 
 Compute the coordinates of the vector `X` with respect to the orthogonalized version of
-the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hyperbolic`](@ref)
+the unit vectors from $ℝ^n$, where ``n`` is the manifold dimension of the [`Hyperbolic`](@ref)
  `M`, utting them intop the tangent space at `p` and orthonormalizing them.
 """
 get_coordinates(M::Hyperbolic, p, X, ::DefaultOrthonormalBasis)
@@ -335,7 +335,7 @@ end
     get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)
 
 Compute the vector from the coordinates with respect to the orthogonalized version of
-the unit vectors from $ℝ^n$, where $n$ is the manifold dimension of the [`Hyperbolic`](@ref)
+the unit vectors from $ℝ^n$, where ``n`` is the manifold dimension of the [`Hyperbolic`](@ref)
  `M`, utting them intop the tangent space at `p` and orthonormalizing them.
 """
 get_vector(M::Hyperbolic, p, c, ::DefaultOrthonormalBasis)

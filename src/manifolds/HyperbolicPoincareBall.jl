@@ -120,7 +120,7 @@ end
 
 convert a [`HyperboloidTVector`](@ref) `X` at `p` to a [`PoincareBallTVector`](@ref)
 on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
-the isometry $π$ that maps from the Hyperboloid to the Poincaré ball,
+the isometry ``π`` that maps from the Hyperboloid to the Poincaré ball,
 cf. [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref).
 
 The formula reads
@@ -184,7 +184,7 @@ end
 
 convert a [`PoincareHalfSpaceTVector`](@ref) `X` at `p` to a [`PoincareBallTVector`](@ref)
 on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
-the isometry $π$ that maps from the Poincaré half space to the Poincaré ball,
+the isometry ``π`` that maps from the Poincaré half space to the Poincaré ball,
 cf. [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref).
 
 The formula reads

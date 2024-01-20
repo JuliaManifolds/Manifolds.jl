@@ -22,7 +22,7 @@ The sphere is represented in the embedding, i.e.
 where $𝔽\in\{ℝ,ℂ,ℍ\}$. Note that compared to the [`ArraySphere`](@ref), here the
 argument `n` of the manifold is the dimension of the manifold, i.e. $𝕊^{n} ⊂ 𝔽^{n+1}$, $n\in ℕ$.
 
-The tangent space at point $p$ is given by
+The tangent space at point ``p`` is given by
 
 ````math
 T_p𝕊^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ |\ \Re(⟨p,X⟩) = 0 \bigr \},
@@ -74,7 +74,7 @@ where $𝔽\in\{ℝ,ℂ,ℍ\}$. Setting $i=1$ and $𝔽=ℝ$  this  simplifies t
 the argument for the generalized case here is given by the dimension of the embedding.
 This means that `Sphere(2)` and `ArraySphere(3)` are the same manifold.
 
-The tangent space at point $p$ is given by
+The tangent space at point ``p`` is given by
 
 ````math
 T_p 𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ \Re(⟨p,X⟩) = 0 \bigr \},
@@ -91,7 +91,7 @@ several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product 
 
     ArraySphere(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol=:type)
 
-Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where $𝔽$ defaults to the real-valued case $ℝ$.
+Generate sphere in $𝔽^{n_1, n_2, …, n_i}$, where ``𝔽`` defaults to the real-valued case ``ℝ``.
 """
 struct ArraySphere{T,𝔽} <: AbstractSphere{𝔽}
     size::T
@@ -225,10 +225,10 @@ end
 
 Represent the tangent vector `X` at point `p` from the [`AbstractSphere`](@ref) `M` in
 an orthonormal basis by rotating the hyperplane containing `X` to a hyperplane whose
-normal is the $x$-axis.
+normal is the ``x``-axis.
 
 Given $q = p λ + x$, where $λ = \operatorname{sgn}(⟨x, p⟩)$, and $⟨⋅, ⋅⟩_{\mathrm{F}}$
-denotes the Frobenius inner product, the formula for $Y$ is
+denotes the Frobenius inner product, the formula for ``Y`` is
 ````math
 \begin{pmatrix}0 \\ Y\end{pmatrix} = X - q\frac{2 ⟨q, X⟩_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}.
 ````
@@ -258,11 +258,11 @@ end
 
 Convert a one-dimensional vector of coefficients `X` in the basis `B` of the tangent space
 at `p` on the [`AbstractSphere`](@ref) `M` to a tangent vector `Y` at `p` by rotating the
-hyperplane containing `X`, whose normal is the $x$-axis, to the hyperplane whose normal is
+hyperplane containing `X`, whose normal is the ``x``-axis, to the hyperplane whose normal is
 `p`.
 
 Given $q = p λ + x$, where $λ = \operatorname{sgn}(⟨x, p⟩)$, and $⟨⋅, ⋅⟩_{\mathrm{F}}$
-denotes the Frobenius inner product, the formula for $Y$ is
+denotes the Frobenius inner product, the formula for ``Y`` is
 ````math
 Y = X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}.
 ````
@@ -285,7 +285,7 @@ end
 @doc raw"""
     injectivity_radius(M::AbstractSphere[, p])
 
-Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is globally $π$.
+Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is globally ``π``.
 
     injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
 

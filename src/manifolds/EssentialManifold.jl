@@ -103,7 +103,7 @@ are equal (up to a sign flip). Using the logarithmic map, the distance is given 
 \text{dist}([p],[q]) = \| \text{log}_{[p]} [q] \| = \| \log_p (S_z(t_{\text{opt}})q) \|,
 ````
 where $S_z ∈ H_z = \{(R_z(θ),R_z(θ))\colon θ \in [-π,π) \}$ in which $R_z(θ)$ is the rotation around the z axis with angle
-$θ$ and $t_{\text{opt}}$ is the minimizer of the cost function
+``θ`` and $t_{\text{opt}}$ is the minimizer of the cost function
 ````math
 f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}) \text{ for } i=1,2,
 ````
@@ -119,7 +119,7 @@ Compute the exponential map on the [`EssentialManifold`](@ref) from `p` into dir
 ````math
 \text{exp}_p(X) =\text{exp}_g( \tilde X),  \quad g \in \text(SO)(3)^2,
 ````
-where $\tilde X$ is the horizontal lift of $X$[TronDaniilidis:2017](@cite).
+where $\tilde X$ is the horizontal lift of ``X``[TronDaniilidis:2017](@cite).
 """
 exp(::EssentialManifold, ::Any...)
 
@@ -164,7 +164,7 @@ on the left on $SO(3)^2$ is defined as
 ````math
 H_z = \{(R_z(θ),R_z(θ))\colon θ \in [-π,π) \},
 ````
-where $R_z(θ)$ is the rotation around the z axis with angle $θ$. Points in $H_z$ are denoted by
+where $R_z(θ)$ is the rotation around the z axis with angle ``θ``. Points in $H_z$ are denoted by
 $S_z$. Then, the logarithm is defined
 as
 ````math
@@ -223,7 +223,7 @@ f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z
 ````
 for the given values. This is done by finding the discontinuity points $t_{d_i}, i=1,2$ of its derivative
 and using Newton's method to minimize the function over the intervals $[t_{d_1},t_{d_2}]$ and $[t_{d_2},t_{d_1}+2π]$
-separately. Then, the minimizer for which $f$ is minimal is chosen and given back together with the minimal value.
+separately. Then, the minimizer for which ``f`` is minimal is chosen and given back together with the minimal value.
 For more details see Algorithm 1 in [TronDaniilidis:2017](@cite).
 """
 function dist_min_angle_pair(p, q)
@@ -360,7 +360,7 @@ This function computes the minimizer of the function
 ````math
 f(t) = f_1 + f_2, \quad f_i = \frac{1}{2} θ^2_i(t), \quad θ_i(t)=d(R_{p_i},R_z(t)R_{b_i}) \text{ for } i=1,2,
 ````
-in the interval $[$`t_low`, `t_high`$]$ using Newton's method. For more details see [TronDaniilidis:2017](@cite).
+in the interval ``[```t_low`, `t_high```]`` using Newton's method. For more details see [TronDaniilidis:2017](@cite).
 """
 function dist_min_angle_pair_df_newton(m1, Φ1, c1, m2, Φ2, c2, t_min, t_low, t_high)
     tol_dist = sqrt(eps(eltype(t_min)))
@@ -425,7 +425,7 @@ Then the orthogonal projection of `X` onto the horizontal space $T_{\text{hp}}\t
 ````math
 \Pi_h(X) = X - \frac{\text{vert\_proj}_p(X)}{2} \begin{bmatrix} R_1^T e_z \\ R_2^T e_z \end{bmatrix},
 ````
-with $R_i = R_0 R'_i, i=1,2,$ where $R'_i$ is part of the pose of camera $i$ $g_i = (R'_i,T'_i) ∈ \text{SE}(3)$
+with $R_i = R_0 R'_i, i=1,2,$ where $R'_i$ is part of the pose of camera ``i`` $g_i = (R'_i,T'_i) ∈ \text{SE}(3)$
 and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$.
 """
 project(::EssentialManifold, ::Any, ::Any)
@@ -486,7 +486,7 @@ Project `X` onto the vertical space $T_{\text{vp}}\text{SO}(3)^2$ with
 \text{vert\_proj}_p(X) = e_z^T(R_1 X_1 + R_2 X_2),
 ````
 where $e_z$ is the third unit vector, $X_i ∈ T_{p}\text{SO}(3)$ for $i=1,2,$ and it holds $R_i = R_0 R'_i, i=1,2,$ where $R'_i$ is part of the
-pose of camera $i$ $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$ [TronDaniilidis:2017](@cite).
+pose of camera ``i`` $g_i = (R_i,T'_i) ∈ \text{SE}(3)$ and $R_0 ∈ \text{SO}(3)$ such that $R_0(T'_2-T'_1) = e_z$ [TronDaniilidis:2017](@cite).
 """
 function vert_proj(M::EssentialManifold, p, X)
     return sum(vert_proj.(Ref(M.manifold), p, X))

@@ -14,7 +14,7 @@ end
 @doc raw"""
     MultinomialDoublyStochastic{T} <: AbstractMultinomialDoublyStochastic
 
-The set of doubly stochastic multinomial matrices consists of all $n×n$ matrices with
+The set of doubly stochastic multinomial matrices consists of all ``n×n`` matrices with
 stochastic columns and rows, i.e.
 ````math
 \begin{aligned}
@@ -24,7 +24,7 @@ stochastic columns and rows, i.e.
 \end{aligned}
 ````
 
-where $\mathbf{1}_n$ is the vector of length $n$ containing ones.
+where ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
 
 The tangent space can be written as
 
@@ -35,7 +35,7 @@ X\mathbf{1}_n = X^{\mathrm{T}}\mathbf{1}_n = \mathbf{0}_n
 \bigr\},
 ````
 
-where $\mathbf{0}_n$ is the vector of length $n$ containing zeros.
+where ``\mathbf{0}_n`` is the vector of length ``n`` containing zeros.
 
 More details can be found in Section III [DouikHassibi:2019](@cite).
 
@@ -43,7 +43,7 @@ More details can be found in Section III [DouikHassibi:2019](@cite).
 
     MultinomialDoubleStochastic(n::Int; parameter::Symbol=:type)
 
-Generate the manifold of matrices $\mathbb R^{n×n}$ that are doubly stochastic and symmetric.
+Generate the manifold of matrices ``ℝ^{n×n}`` that are doubly stochastic and symmetric.
 """
 struct MultinomialDoubleStochastic{T} <: AbstractMultinomialDoublyStochastic
     size::T
@@ -137,15 +137,15 @@ The formula reads
 ````math
     \operatorname{proj}_p(Y) = Y - (α\mathbf{1}_n^{\mathrm{T}} + \mathbf{1}_nβ^{\mathrm{T}}) ⊙ p,
 ````
-where $⊙$ denotes the Hadamard or elementwise product and $\mathbb{1}_n$ is the vector of length $n$ containing ones.
-The two vectors $α,β ∈ ℝ^{n×n}$ are computed as a solution (typically using the left pseudo inverse) of
+where ``⊙`` denotes the Hadamard or elementwise product and ``\mathbb{1}_n`` is the vector of length ``n`` containing ones.
+The two vectors ``α,β ∈ ℝ^{n×n}`` are computed as a solution (typically using the left pseudo inverse) of
 ````math
     \begin{pmatrix} I_n & p\\p^{\mathrm{T}} & I_n \end{pmatrix}
     \begin{pmatrix} α\\ β\end{pmatrix}
     =
     \begin{pmatrix} Y\mathbf{1}\\Y^{\mathrm{T}}\mathbf{1}\end{pmatrix},
 ````
-where $I_n$ is the $n×n$ unit matrix and $\mathbf{1}_n$ is the vector of length $n$ containing ones.
+where ``I_n`` is the ``n×n`` unit matrix and ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
 
 """
 project(::MultinomialDoubleStochastic, ::Any, ::Any)
@@ -210,7 +210,7 @@ end
     retract(M::MultinomialDoubleStochastic, p, X, ::ProjectionRetraction)
 
 compute a projection based retraction by projecting $p\odot\exp(X⨸p)$ back onto the manifold,
-where $⊙,⨸$ are elementwise multiplication and division, respectively. Similarly, $\exp$
+where ``⊙,⨸`` are elementwise multiplication and division, respectively. Similarly, ``\exp``
 refers to the elementwise exponentiation.
 """
 retract(::MultinomialDoubleStochastic, ::Any, ::Any, ::ProjectionRetraction)

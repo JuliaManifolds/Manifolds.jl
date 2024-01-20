@@ -1,11 +1,11 @@
 # Torus
 
-The torus $𝕋^d ≅ [-π,π)^d$ is modeled as an [`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  of the (real-valued) [`Circle`](@ref) and uses [`ArrayPowerRepresentation`](@ref).
-Points on the torus are hence row vectors, $x ∈ ℝ^{d}$.
+The torus ``𝕋^d ≅ [-π,π)^d`` is modeled as an [`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  of the (real-valued) [`Circle`](@ref) and uses [`ArrayPowerRepresentation`](@ref).
+Points on the torus are hence row vectors, ``x ∈ ℝ^{d}``.
 
 ## Example
 
-The following code can be used to make a three-dimensional torus $𝕋^3$ and compute a tangent vector:
+The following code can be used to make a three-dimensional torus ``𝕋^3`` and compute a tangent vector:
 
 ```@example
 using Manifolds
@@ -27,7 +27,7 @@ Order = [:type, :function]
 
 ## Embedded Torus
 
-Two-dimensional torus embedded in $ℝ^3$.
+Two-dimensional torus embedded in ``ℝ^3``.
 
 ```@autodocs
 Modules = [Manifolds]

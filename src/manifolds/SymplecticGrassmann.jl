@@ -2,7 +2,7 @@
     SymplecticGrassmann{T,𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
 The symplectic Grassmann manifold consists of all symplectic subspaces of
-``\mathbb R^{2n}`` of dimension ``2k``, ``n ≥ k``.
+``ℝ^{2n}`` of dimension ``2k``, ``n ≥ k``.
 
 This manifold can be represented as corresponding representers on the [`SymplecticStiefel`](@ref)
 

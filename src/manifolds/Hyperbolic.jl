@@ -63,7 +63,7 @@ end
 
 In the Hyperboloid model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vctors are represented
 as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) $⟨p,X⟩_{\mathrm{M}}=0$ to their base
-point $p$.
+point ``p``.
 
 This representation is the default, i.e. vectors are assumed to have this repesentation.
 """
@@ -253,7 +253,7 @@ end
     injectivity_radius(M::Hyperbolic)
     injectivity_radius(M::Hyperbolic, p)
 
-Return the injectivity radius on the [`Hyperbolic`](@ref), which is $∞$.
+Return the injectivity radius on the [`Hyperbolic`](@ref), which is ``∞``.
 """
 injectivity_radius(::Hyperbolic) = Inf
 

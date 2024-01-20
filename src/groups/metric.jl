@@ -10,7 +10,7 @@
     ) -> Bool
 
 Check whether the metric on the group $\mathcal{G}$ is (approximately) invariant using a set of predefined
-points. Namely, for $p ∈ \mathcal{G}$, $X,Y ∈ T_p \mathcal{G}$, a metric $g$, and a
+points. Namely, for $p ∈ \mathcal{G}$, $X,Y ∈ T_p \mathcal{G}$, a metric ``g``, and a
 translation map $τ_q$ in the specified direction, check for each $q ∈ \mathcal{G}$ that the
 following condition holds:
 

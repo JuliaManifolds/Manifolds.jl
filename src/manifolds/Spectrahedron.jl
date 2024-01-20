@@ -2,7 +2,7 @@
     Spectrahedron{T} <: AbstractDecoratorManifold{ℝ}
 
 The Spectrahedron manifold, also known as the set of correlation matrices (symmetric
-positive semidefinite matrices) of rank $k$ with unit trace.
+positive semidefinite matrices) of rank ``k`` with unit trace.
 
 ````math
 \begin{aligned}
@@ -15,13 +15,13 @@ positive semidefinite matrices) of rank $k$ with unit trace.
 \end{aligned}
 ````
 
-This manifold is working solely on the matrices $q$. Note that this $q$ is not unique,
-indeed for any orthogonal matrix $A$ we have $(qA)(qA)^{\mathrm{T}} = qq^{\mathrm{T}} = p$,
+This manifold is working solely on the matrices ``q``. Note that this ``q`` is not unique,
+indeed for any orthogonal matrix ``A`` we have $(qA)(qA)^{\mathrm{T}} = qq^{\mathrm{T}} = p$,
 so the manifold implemented here is the quotient manifold. The unit trace translates to
-unit frobenius norm of $q$.
+unit frobenius norm of ``q``.
 
 
-The tangent space at $p$, denoted $T_p\mathcal E(n,k)$, is also represented by matrices
+The tangent space at ``p``, denoted $T_p\mathcal E(n,k)$, is also represented by matrices
 $Y\in ℝ^{n×k}$ and reads as
 
 ````math
@@ -58,10 +58,10 @@ active_traits(f, ::Spectrahedron, args...) = merge_traits(IsIsometricEmbeddedMan
 
 checks, whether `q` is a valid reprsentation of a point $p=qq^{\mathrm{T}}$ on the
 [`Spectrahedron`](@ref) `M`, i.e. is a matrix
-of size `(N,K)`, such that $p$ is symmetric positive semidefinite and has unit trace,
-i.e. $q$ has to have unit frobenius norm.
-Since by construction $p$ is symmetric, this is not explicitly checked.
-Since $p$ is by construction positive semidefinite, this is not checked.
+of size `(N,K)`, such that ``p`` is symmetric positive semidefinite and has unit trace,
+i.e. ``q`` has to have unit frobenius norm.
+Since by construction ``p`` is symmetric, this is not explicitly checked.
+Since ``p`` is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
 function check_point(M::Spectrahedron, q; kwargs...)
@@ -81,9 +81,9 @@ end
 Check whether $X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}$ is a tangent vector to
 $p=qq^{\mathrm{T}}$ on the [`Spectrahedron`](@ref) `M`,
 i.e. atfer [`check_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
-and a $X$ has to be a symmetric matrix with trace.
+and a ``X`` has to be a symmetric matrix with trace.
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
-Note that symmetry of $X$ holds by construction and is not explicitly checked.
+Note that symmetry of ``X`` holds by construction and is not explicitly checked.
 """
 function check_vector(
     M::Spectrahedron,

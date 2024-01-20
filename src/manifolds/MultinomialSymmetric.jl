@@ -37,7 +37,7 @@ More details can be found in Section IV [DouikHassibi:2019](@cite).
 
     MultinomialSymmetric(n)
 
-Generate the manifold of matrices ``\mathbb R^{n×n}`` that are doubly stochastic and symmetric.
+Generate the manifold of matrices ``ℝ^{n×n}`` that are doubly stochastic and symmetric.
 """
 struct MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic
     size::T

@@ -214,7 +214,7 @@ end
     check_point(M::SymplecticMatrices, p; kwargs...)
 
 Check whether `p` is a valid point on the [`SymplecticMatrices`](@ref) `M`=$\mathrm{Sp}(2n)$,
-i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $p^{+}p$ is (approximately)
+i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and ``p^{+}p`` is (approximately)
 the identity, where ``A^+`` denotes the [`symplectic_inverse`]/@ref).
 
 The tolerance can be set with `kwargs...`.

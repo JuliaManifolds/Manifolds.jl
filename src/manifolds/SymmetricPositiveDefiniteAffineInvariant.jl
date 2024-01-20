@@ -234,7 +234,7 @@ the coordinates with respect to this ONB can be simplified to
 ```math
    c_k = \mathrm{tr}(p^{-\frac{1}{2}}\Delta_{i,j} X)
 ```
-where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+where ``k`` is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 """
 get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
 
@@ -272,7 +272,7 @@ the vector reconstruction with respect to this ONB can be simplified to
 ```math
    X = p^{\frac{1}{2}} \Biggl( \sum_{i=1,j=i}^n c_k \Delta_{i,j} \Biggr) p^{\frac{1}{2}}
 ```
-where $k$ is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+where ``k`` is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 """
 get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 

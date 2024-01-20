@@ -15,11 +15,11 @@ $𝔽^{n+1}$:
 ````math
 𝔽ℙ^n := \bigl\{ [p] ⊂ 𝔽^{n+1} \ \big|\ \lVert p \rVert = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\},
 ````
-where $[p]$ is an equivalence class of points $p$, and $∼$ indicates equivalence.
+where $[p]$ is an equivalence class of points ``p``, and ``∼`` indicates equivalence.
 For example, the real projective space $ℝℙ^n$ is represented as the unit sphere $𝕊^n$, where
 antipodal points are considered equivalent.
 
-The tangent space at point $p$ is given by
+The tangent space at point ``p`` is given by
 
 ````math
 T_p 𝔽ℙ^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ \big|\ ⟨p,X⟩ = 0 \bigr \},
@@ -59,7 +59,7 @@ $𝔽^{n₁,n₂,…,nᵢ}$:
 ````math
 𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ [p] ⊂ 𝔽^{n_1, n_2, …, n_i} \ \big|\ \lVert p \rVert_{\mathrm{F}} = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\}.
 ````
-where $[p]$ is an equivalence class of points $p$, $\sim$ indicates equivalence, and
+where $[p]$ is an equivalence class of points ``p``, $\sim$ indicates equivalence, and
 $\lVert ⋅ \rVert_{\mathrm{F}}$ is the Frobenius norm.
 Note that unlike [`ProjectiveSpace`](@ref), the argument for `ArrayProjectiveSpace`
 is given by the size of the embedding.
@@ -68,7 +68,7 @@ manifold.
 Additionally, `ArrayProjectiveSpace(n,1;field=𝔽)` and [`Grassmann(n,1;field=𝔽)`](@ref) are
 the same.
 
-The tangent space at point $p$ is given by
+The tangent space at point ``p`` is given by
 
 ````math
 T_p 𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ ⟨p,X⟩_{\mathrm{F}} = 0 \bigr \},
@@ -193,14 +193,14 @@ end
 @doc raw"""
     get_coordinates(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
-Represent the tangent vector $X$ at point $p$ from the [`AbstractProjectiveSpace`](@ref)
-$M = 𝔽ℙ^n$ in an orthonormal basis by unitarily transforming the hyperplane containing $X$,
-whose normal is $p$, to the hyperplane whose normal is the $x$-axis.
+Represent the tangent vector ``X`` at point ``p`` from the [`AbstractProjectiveSpace`](@ref)
+$M = 𝔽ℙ^n$ in an orthonormal basis by unitarily transforming the hyperplane containing ``X``,
+whose normal is ``p``, to the hyperplane whose normal is the ``x``-axis.
 
 Given $q = p \overline{λ} + x$, where
 $λ = \frac{⟨x, p⟩_{\mathrm{F}}}{|⟨x, p⟩_{\mathrm{F}}|}$, $⟨⋅, ⋅⟩_{\mathrm{F}}$ denotes the
 Frobenius inner product, and $\overline{⋅}$ denotes complex or quaternionic conjugation, the
-formula for $Y$ is
+formula for ``Y`` is
 ````math
 \begin{pmatrix}0 \\ Y\end{pmatrix} = \left(X - q\frac{2 ⟨q, X⟩_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}\right)\overline{λ}.
 ````
@@ -227,15 +227,15 @@ end
 @doc raw"""
     get_vector(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
-Convert a one-dimensional vector of coefficients $X$ in the basis `B` of the tangent space
-at $p$ on the [`AbstractProjectiveSpace`](@ref) $M=𝔽ℙ^n$ to a tangent vector $Y$ at $p$ by
-unitarily transforming the hyperplane containing $X$, whose normal is the $x$-axis, to the
-hyperplane whose normal is $p$.
+Convert a one-dimensional vector of coefficients ``X`` in the basis `B` of the tangent space
+at ``p`` on the [`AbstractProjectiveSpace`](@ref) $M=𝔽ℙ^n$ to a tangent vector ``Y`` at ``p`` by
+unitarily transforming the hyperplane containing ``X``, whose normal is the ``x``-axis, to the
+hyperplane whose normal is ``p``.
 
 Given $q = p \overline{λ} + x$, where
 $λ = \frac{⟨x, p⟩_{\mathrm{F}}}{|⟨x, p⟩_{\mathrm{F}}|}$, $⟨⋅, ⋅⟩_{\mathrm{F}}$ denotes the
 Frobenius inner product, and $\overline{⋅}$ denotes complex or quaternionic conjugation, the
-formula for $Y$ is
+formula for ``Y`` is
 ````math
 Y = \left(X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}\right) λ.
 ````
@@ -335,16 +335,16 @@ reaches `q` after time 1 on `M`. The formula reads
 \log_p q = (q λ - \cos θ p) \frac{θ}{\sin θ},
 ````
 where $θ = \arccos|⟨q, p⟩_{\mathrm{F}}|$ is the
-[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between $p$ and $q$,
+[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between ``p`` and ``q``,
 $⟨⋅, ⋅⟩_{\mathrm{F}}$ is the Frobenius inner product, and
 $λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that
 minimizes $d_{𝔽^{n+1}}(p - q λ)$.
-That is, $q λ$ is the member of the equivalence class $[q]$ that is closest to $p$ in the
+That is, $q λ$ is the member of the equivalence class $[q]$ that is closest to ``p`` in the
 embedding.
 As a result, $\exp_p \circ \log_p \colon q ↦ q λ$.
 
 The logarithmic maps for the real [`AbstractSphere`](@ref) $𝕊^n$ and the real projective
-space $ℝℙ^n$ are identical when $p$ and $q$ are in the same hemisphere.
+space $ℝℙ^n$ are identical when ``p`` and ``q`` are in the same hemisphere.
 """
 log(::AbstractProjectiveSpace, p, q)
 
@@ -523,10 +523,10 @@ end
 Parallel transport a vector `X` from the tangent space at a point `p` on the
 [`AbstractProjectiveSpace`](@ref) `M`$=𝔽ℙ^n$ to the tangent space at another point `q`.
 
-This implementation proceeds by transporting $X$ to $T_{q λ} M$ using the same approach as
+This implementation proceeds by transporting ``X`` to $T_{q λ} M$ using the same approach as
 [`parallel_transport_direction`](@ref parallel_transport_direction(::AbstractProjectiveSpace, p, X, d)),
 where $λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that
-takes $q$ to the member $q λ$ of its equivalence class $[q]$ closest to $p$ in the
+takes ``q`` to the member $q λ$ of its equivalence class $[q]$ closest to ``p`` in the
 embedding.
 It then maps the transported vector from $T_{q λ} M$ to $T_{q} M$.
 The resulting transport to $T_{q} M$ is
@@ -534,7 +534,7 @@ The resulting transport to $T_{q} M$ is
 \mathcal{P}_{q ← p}(X) = \left(X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p\right) \overline{λ},
 ````
 where $d = \log_p q$ is the direction of the transport, $θ = \lVert d \rVert_p$ is the
-[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between $p$ and $q$, and
+[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between ``p`` and ``q``, and
 $\overline{⋅}$ denotes complex or quaternionic conjugation.
 """
 parallel_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any)
@@ -564,7 +564,7 @@ indicated by the tangent vector `d`, i.e.
 ````math
 \mathcal{P}_{\exp_p (d) ← p}(X) = X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p,
 ````
-where $θ = \lVert d \rVert$, and $⟨⋅, ⋅⟩_p$ is the [`inner`](@ref) product at the point $p$.
+where $θ = \lVert d \rVert$, and $⟨⋅, ⋅⟩_p$ is the [`inner`](@ref) product at the point ``p``.
 For the real projective space, this is equivalent to the same vector transport on the real
 [`AbstractSphere`](@ref).
 """

@@ -526,7 +526,7 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
     Base.in(p, TpM::TangentSpace; kwargs...)
     X ∈ TangentSpace(M, p)
 
-Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
+Check whether `X` is a tangent vector from (in) the tangent space ``T_p\mathcal M``, i.e.
 the [`TangentSpace`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.TangentSpace)
 at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
 This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.

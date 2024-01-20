@@ -2,7 +2,7 @@
 
 ## Ease of notation
 
-The following terms introduce a nicer notation for some operations, for example using the ∈ operator, $p ∈ \mathcal M$, to determine whether $p$ is a point on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $\mathcal M$.
+The following terms introduce a nicer notation for some operations, for example using the ∈ operator, `` ∈ \mathcal M`` to determine whether ``p`` is a point on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  ``\mathcal M``.
 
 ````@docs
 in
