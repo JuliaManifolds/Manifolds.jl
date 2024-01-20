@@ -81,8 +81,8 @@ is a point on the [`SymplecticStiefel`](@ref) manifold and ``X,Y \in \mathrm{Hor
 are horizontal tangent vectors. The formula reads according to Proposition Lemma 4.8 [BendokatZimmermann:2021](@cite).
 
 ```math
-g^{\mathrm{SpGr}_p(X,Y) = \operatorname{tr}\bigl(
-        (p^{\mathrm{T}p)^{-1}X^{\mathrm{T}}(I_{2n} - pp^+)Y
+g^{\mathrm{SpGr}}_p(X,Y) = \operatorname{tr}\bigl(
+        (p^{\mathrm{T}}p)^{-1}X^{\mathrm{T}}(I_{2n} - pp^+)Y
     \bigr),
 ```
 where ``I_{2n}`` denotes the identity matrix and ``(⋅)^+`` the [`symplectic_inverse`](@ref).

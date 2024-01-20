@@ -91,8 +91,8 @@ Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
   X = J_{2n}^THJ_{2k}p^{\mathrm{T}}p - J_{2n}^TpJ_{2k}H^{\mathrm{T}}p,
 ```
 
-where ``J_{2n}`` denotes the [`SymplecticElement`)(@ref), and
-``H = (I_{2n} - pp^+)J_{2n}^{\mathrm{T}YJ``.
+where ``J_{2n}`` denotes the [`SymplecticElement`](@ref), and
+``H = (I_{2n} - pp^+)J_{2n}^{\mathrm{T}}YJ``.
 """
 function riemannian_gradient(::SymplecticGrassmann, p, Y; kwargs...)
     n, k = get_parameter(M.size)
