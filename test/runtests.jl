@@ -168,6 +168,7 @@ end
         include_test("manifolds/spd_fixed_determinant.jl")
         include_test("manifolds/symmetric_positive_semidefinite_fixed_rank.jl")
         include_test("manifolds/symplectic.jl")
+        include_test("manifolds/symplecticgrassmann.jl")
         include_test("manifolds/symplecticstiefel.jl")
         include_test("manifolds/tucker.jl")
         include_test("manifolds/unitary_matrices.jl")

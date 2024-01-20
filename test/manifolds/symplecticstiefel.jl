@@ -25,22 +25,22 @@ end
     @testset "Real" begin
         SpSt_6_4 = SymplecticStiefel(2 * 3, 2 * 2)
 
-        p_6_4 = Array{Float64}([
-            0 0 -5 -1
-            0 0 9 -2
-            0 0 -2 1
-            -2 -9 -3 6
-            -3 -13 -21 9
-            -8 -36 18 -6
-        ])
-        q_6_4 = Array{Float64}([
-            0 0 -3 1
-            0 0 8 -3
-            0 0 -2 1
-            -1 -4 -6 3
-            -1 -3 -21 9
-            -2 -6 18 -6
-        ])
+        p_6_4 = [
+            0.0 0.0 -5.0 -1.0
+            0.0 0.0 9.0 -2.0
+            0.0 0.0 -2.0 1.0
+            -2.0 -9.0 -3.0 6.0
+            -3.0 -13.0 -21.0 9.0
+            -8.0 -36.0 18.0 -6.0
+        ]
+        q_6_4 = [
+            0.0 0.0 -3.0 1.0
+            0.0 0.0 8.0 -3.0
+            0.0 0.0 -2.0 1.0
+            -1.0 -4.0 -6.0 3.0
+            -1.0 -3.0 -21.0 9.0
+            -2.0 -6.0 18.0 -6.0
+        ]
         X1 = [
             0.0 0.0 4.25 4.25
             0.0 0.0 0.125 0.125
@@ -235,7 +235,7 @@ end
             M_big = SymplecticStiefel(20, 10)
             p_big = rand(M_big)
             @test is_point(M_big, p_big; error=:error, atol=1.0e-14)
-            X_big = rand(M_big; vector_at=p_big, hamiltonian_norm=1.0)
+            X_big = rand(M_big; vector_at=p_big)
             @test is_vector(M_big, p_big, X_big; error=:error, atol=1.0e-14)
         end
         @testset "test_manifold(SymplecticMatrices(6), ...)" begin

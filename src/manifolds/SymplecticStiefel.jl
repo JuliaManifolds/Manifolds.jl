@@ -483,7 +483,7 @@ That is, ``p = π_{\mathrm{SpSt}(2n, 2k)}(p_{\mathrm{Sp}})``.
 
 To generate a random tangent vector in ``T_p\mathrm{SpSt}(2n, 2k)``
 this code exploits the second tangent vector space parametrization of
-[`SymplecticStiefel`](@ref), showing that any ``X ∈ T_p\mathrm{SpSt}(2n, 2k)``
+[`SymplecticStiefel`](@ref), that any ``X ∈ T_p\mathrm{SpSt}(2n, 2k)``
 can be written as ``X = pΩ_X + p^sB_X``.
 To generate random tangent vectors at ``p`` then, this function sets ``B_X = 0``
 and generates a random Hamiltonian matrix ``Ω_X ∈ \mathfrak{sp}(2n,F)`` with
@@ -505,17 +505,17 @@ function Random.rand!(
     )
     n, k = get_parameter(M.size)
     if vector_at === nothing
-        canonical_project!(M, pX, rand(SymplecticMatrices(2n); σ=σ))
+        canonical_project!(M, pX, rand(rng, SymplecticMatrices(2n); σ=σ))
         return pX
     else
-        return random_vector!(M, pX, vector_at; σ=σ)
+        return random_vector!(rng, M, pX, vector_at; σ=σ)
     end
 end
 
-function random_vector!(M::SymplecticStiefel, X, p; σ=1.0)
+function random_vector!(rng, M::SymplecticStiefel, X, p; σ=1.0)
     k = get_parameter(M.size)[2]
-    rand!(HamiltonianMatrices(2k), X; σ=σ)
-    X .= p * X
+    Ω = rand(rng, HamiltonianMatrices(2k); σ=σ)
+    X .= p * Ω
     return X
 end
 
