@@ -514,7 +514,8 @@ end
 
 function random_vector!(rng, M::SymplecticStiefel, X, p; σ=1.0)
     k = get_parameter(M.size)[2]
-    Ω = rand(rng, HamiltonianMatrices(2k); σ=σ)
+    Ω = @view(X[1:(2k), 1:(2k)]) # use this memory
+    rand!(rng, HamiltonianMatrices(2k), Ω; σ=σ)
     X .= p * Ω
     return X
 end
