@@ -82,7 +82,7 @@ end
 @doc raw"""
     change_metric(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
-To change the metric, we are looking for a function ``c\colon T_pΔ^n \to T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
+To change the metric, we are looking for a function ``c\colon T_pΔ^n → T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
 This can be achieved by rewriting representer change in matrix form as `(Diagonal(p) - p * p') * X`
 and taking square root of the matrix
 """

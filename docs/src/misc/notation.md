@@ -18,18 +18,18 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\frac{\mathrm{D}}{\mathrm{d}t}`` | covariant derivative of a vector field ``X(t)`` | | |
 | ``T^*_p \mathcal M`` | the cotangent space at ``p`` | | |
 | ``ξ`` | a cotangent vector from ``T^*_p \mathcal M`` | ``ξ_1, ξ_2,… ,η,\zeta`` | sometimes written with base point ``ξ_p``. |
-| ``\mathrm{d}\phi_p(q)`` | Differential of a map ``\phi: \mathcal M \to \mathcal N`` with respect to ``p`` at a point ``q``. For functions of multiple variables, for example ``\phi(p, p_1)`` where ``p \in \mathcal M`` and ``p_1 \in \mathcal M_1``, variable ``p`` is explicitly stated to specify with respect to which argument the differential is calculated. | ``\mathrm{d}\phi_q``, ``(\mathrm{d}\phi)_q``, ``(\phi_*)_q``, ``D_p\phi(q)`` | pushes tangent vectors ``X \in T_q \mathcal M`` forward to ``\mathrm{d}\phi_p(q)[X] \in T_{\phi(q)} \mathcal N`` |
+| ``\mathrm{d}\phi_p(q)`` | Differential of a map ``\phi: \mathcal M → \mathcal N`` with respect to ``p`` at a point ``q``. For functions of multiple variables, for example ``\phi(p, p_1)`` where ``p \in \mathcal M`` and ``p_1 \in \mathcal M_1``, variable ``p`` is explicitly stated to specify with respect to which argument the differential is calculated. | ``\mathrm{d}\phi_q``, ``(\mathrm{d}\phi)_q``, ``(\phi_*)_q``, ``D_p\phi(q)`` | pushes tangent vectors ``X \in T_q \mathcal M`` forward to ``\mathrm{d}\phi_p(q)[X] \in T_{\phi(q)} \mathcal N`` |
 | ``n`` | dimension (of a manifold) | ``n_1,n_2,\ldots,m, \dim(\mathcal M)``| for the real dimension sometimes also ``\dim_{\mathbb R}(\mathcal M)``|
 | ``d(⋅,⋅)`` | (Riemannian) distance | ``d_{\mathcal M}(⋅,⋅)`` | |
 | ``\exp_p X`` | exponential map at ``p \in \mathcal M`` of a vector ``X \in T_p \mathcal M`` | ``\exp_p(X)`` | |
 | ``F`` | a fiber | | see [`Fiber`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#Fiber) |
 | ``\mathbb F`` | a field, usually ``\mathbb F \in \{\mathbb R,\mathbb C, \mathbb H\}``, i.e. the real, complex, and quaternion numbers, respectively. | |field a manifold or a basis is based on |
 | ``\gamma`` | a geodesic | ``\gamma_{p;q}``, ``\gamma_{p,X}`` | connecting two points ``p,q`` or starting in ``p`` with velocity ``X``. |
-| ``\operatorname{grad} f(p)`` | (Riemannian) gradient of function ``f \colon \mathcal{M} \to ℝ`` at ``p \in \mathcal{M}`` | | |
-| ``\nabla f(p)`` | (Euclidean) gradient of function ``f \colon \mathcal{M} \to ℝ`` at ``p \in \mathcal{M}`` but thought of as evaluated in the embedding | `G` | |
+| ``\operatorname{grad} f(p)`` | (Riemannian) gradient of function ``f \colon \mathcal{M} → ℝ`` at ``p \in \mathcal{M}`` | | |
+| ``\nabla f(p)`` | (Euclidean) gradient of function ``f \colon \mathcal{M} → ℝ`` at ``p \in \mathcal{M}`` but thought of as evaluated in the embedding | `G` | |
 | ``\circ`` | a group operation | |
 | ``⋅^\mathrm{H}`` | Hermitian or conjugate transposed for both complex or quaternion matrices| |
-| ``\operatorname{Hess} f(p)`` | (Riemannian) Hessian of function ``f \colon T_p\mathcal{M} \to T_p\mathcal M`` (i.e. the 1-1-tensor form) at ``p \in \mathcal{M}`` | | |
+| ``\operatorname{Hess} f(p)`` | (Riemannian) Hessian of function ``f \colon T_p\mathcal{M} → T_p\mathcal M`` (i.e. the 1-1-tensor form) at ``p \in \mathcal{M}`` | | |
 | ``\nabla^2 f(p)`` | (Euclidean) Hessian of function ``f`` in the embedding | `H` | |
 | ``e`` | identity element of a group | |
 | ``I_k`` | identity matrix of size ``k×k`` | |

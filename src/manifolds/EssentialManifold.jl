@@ -39,7 +39,7 @@ E = (R'_1)^T [T'_2 - T'_1]_{×} R'_2,
 ````
 
 where the poses of two cameras ``(R_i', T_i'), i=1,2``, are contained in the space of
-rigid body transformations $SE(3)$ and the operator $[⋅]_{×}\colon ℝ^3 \to \operatorname{SkewSym}(3)$
+rigid body transformations $SE(3)$ and the operator $[⋅]_{×}\colon ℝ^3 → \operatorname{SkewSym}(3)$
 denotes the matrix representation of the cross product operator. For more details see [TronDaniilidis:2017](@cite).
 
 # Constructor

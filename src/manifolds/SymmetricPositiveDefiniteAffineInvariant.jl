@@ -37,7 +37,7 @@ Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`Euclidea
 `g_E`, this function changes into the [`AffineInvariantMetric`](@ref) (default) metric on the
 [`SymmetricPositiveDefinite`](@ref) `M`.
 
-To be precise we are looking for ``c\colon T_p\mathcal P(n) \to T_p\mathcal P(n) ``
+To be precise we are looking for ``c\colon T_p\mathcal P(n) → T_p\mathcal P(n) ``
 such that for all ``Y,Z ∈ T_p\mathcal P(n)``` it holds
 
 ```math
