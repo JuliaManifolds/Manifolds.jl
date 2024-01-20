@@ -745,14 +745,6 @@ function random_vector!(M::SymplecticMatrices, X, p; σ=1.0)
     return X
 end
 
-function rand_hamiltonian(M::SymplecticMatrices; frobenius_norm=1.0)
-    n = get_parameter(M.size)[1]
-    Base.depwarn(
-        "`rand_hamiltonian(M::Symplectic($(2n)); frobeniusnorm=$(frobeniusnorm)) is deprecated. Use `rand(HamiltonianMatrices($(2n); σ=$(frobenius_norm))` instead",
-    )
-    return rand(HamiltonianMatrices(2n); σ=frobenius_norm)
-end
-
 @doc raw"""
     retract(::SymplecticMatrices, p, X, ::CayleyRetraction)
     retract!(::SymplecticMatrices, q, p, X, ::CayleyRetraction)
@@ -797,12 +789,11 @@ Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
   X = Yp^{\mathrm{T}}p + J_{2n}pY^{\mathrm{T}}J_{2n}p,
 ```
 
-where ``J_{2n}`` denotes the [`SymplecticElement`)(@ref).
-
+where ``J_{2n}`` denotes the [`SymplecticElement`](@ref).
 """
 function riemannian_gradient(::SymplecticMatrices, p, Y; kwargs...)
-    J = SymplecticElement(p, X)
-    return Y * p'p .+ (J * p) * Y' * (J * p)
+    J = SymplecticElement(p)
+    return Y * p' * p .+ (J * p) * Y' * (J * p)
 end
 
 function riemannian_gradient!(M::SymplecticMatrices, X, p, Y; kwargs...)
