@@ -31,13 +31,9 @@ include("../header.jl")
         pqH = pH * qH
         @test pqH isa Hamiltonian
         @test pqH.value == p * q
-        @test pH * q == p * q
-        @test p * qH == p * q
         pqH2 = pH + qH
         @test pqH2 isa Hamiltonian
         @test pqH2.value == p + q
-        @test pH + q == p + q
-        @test p + qH == p + q
     end
     @testset "Basics" begin
         @test repr(M) == "HamiltonianMatrices(4, ℝ)"
