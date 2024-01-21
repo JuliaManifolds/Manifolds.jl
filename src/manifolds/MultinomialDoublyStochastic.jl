@@ -101,7 +101,7 @@ i.e. is a  matrix with positive entries whose rows and columns sum to one.
 function check_point(M::MultinomialDoubleStochastic, p::T; kwargs...) where {T}
     n = get_parameter(M.size)[1]
     s = check_point(MultinomialMatrices(n, n), p; kwargs...)
-    isnothing(s) && return s
+    !isnothing(s) && return s
     s2 = check_point(MultinomialMatrices(n, n), p'; kwargs...)
     return s2
 end
@@ -116,7 +116,7 @@ column or row.
 function check_vector(M::MultinomialDoubleStochastic, p, X::T; kwargs...) where {T}
     n = get_parameter(M.size)[1]
     s = check_vector(MultinomialMatrices(n, n), p, X; kwargs...)
-    isnothing(s) && return s
+    !isnothing(s) && return s
     s2 = check_vector(MultinomialMatrices(n, n), p, X'; kwargs...)
     return s2
 end
