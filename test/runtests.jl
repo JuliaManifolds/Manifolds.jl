@@ -149,6 +149,7 @@ end
         include_test("manifolds/generalized_grassmann.jl")
         include_test("manifolds/generalized_stiefel.jl")
         include_test("manifolds/grassmann.jl")
+        include_test("manifolds/hamiltonian.jl")
         include_test("manifolds/hyperbolic.jl")
         include_test("manifolds/lorentz.jl")
         include_test("manifolds/multinomial_doubly_stochastic.jl")

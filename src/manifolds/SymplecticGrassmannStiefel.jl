@@ -138,12 +138,12 @@ Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
 where ``J_{2n}`` denotes the [`SymplecticElement`](@ref), and
 ``H = (I_{2n} - pp^+)J_{2n}^{\mathrm{T}}YJ``.
 """
-function riemannian_gradient(::SymplecticGrassmann, p, Y; kwargs...)
+function riemannian_gradient(M::SymplecticGrassmann, p, Y; kwargs...)
     n, k = get_parameter(M.size)
-    J = SymplecticElement(p, X)
+    J = SymplecticElement(p)
     # Since J' = -J We can write (J'YJ) = -J * (YJ)
     JTYJ = (-J * (Y * J))
-    H = (I - symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, p)) * JTYJ
+    H = (I - p * symplectic_inverse(p)) * JTYJ
     return (-J * (H * J)) * (p' * p) .- JTYJ * (H' * p)
 end
 
@@ -152,7 +152,7 @@ function riemannian_gradient!(M::SymplecticGrassmann, X, p, Y; kwargs...)
     J = SymplecticElement(p, X)
     # Since J' = -J We can write (J'YJ) = -J * (YJ)
     JTYJ = (-J * (Y * J))
-    H = (I - symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, p)) * JTYJ
+    H = (I - p * symplectic_inverse(p)) * JTYJ
     X .= (-J * (H * J)) * (p' * p) .- JTYJ * (H' * p)
     return X
 end

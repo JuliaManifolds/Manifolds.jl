@@ -28,6 +28,24 @@ function Matrix(A::Hamiltonian)
     return copy(A.value)
 end
 
+Base.:*(H::Hamiltonian, K::Hamiltonian) = Hamiltonian(H.value * K.value)
+Base.:*(H::Hamiltonian, A::AbstractMatrix) = H.value * A
+Base.:*(A::AbstractMatrix, K::Hamiltonian) = A * K.value
+Base.:+(H::Hamiltonian, K::Hamiltonian) = Hamiltonian(H.value .+ K.value)
+Base.:+(H::Hamiltonian, A::AbstractMatrix) = H.value .+ A
+Base.:+(A::AbstractMatrix, K::Hamiltonian) = A .+ K.value
+Base.:-(H::Hamiltonian, K::Hamiltonian) = Hamiltonian(H.value .- K.value)
+Base.:-(H::Hamiltonian, A::AbstractMatrix) = H.value .- A
+Base.:-(A::AbstractMatrix, K::Hamiltonian) = A .- K.value
+
+function show(io::IO, A::Hamiltonian)
+    return print(io, "Hamiltonian($(A.value))")
+end
+function show(io::IO, ::MIME"text/plain", A::Hamiltonian)
+    return print(io, "Hamiltonian($(A.value))")
+end
+size(A::Hamiltonian) = size(A.value)
+
 @doc raw"""
     HamiltonianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
@@ -73,6 +91,9 @@ ManifoldsBase.@default_manifold_fallbacks HamiltonianMatrices Hamiltonian Hamilt
 Compute the [`symplectic_inverse`](@ref) of a Hamiltonian (A)
 """
 function ^(A::Hamiltonian, ::typeof(+))
+    return Hamiltonian(symplectic_inverse(A.value))
+end
+function symplectic_inverse(A::Hamiltonian)
     return Hamiltonian(symplectic_inverse(A.value))
 end
 
@@ -150,17 +171,13 @@ function is_hamiltonian(A::Hamiltonian; kwargs...)
     return isapprox((A^+).value, -A.value; kwargs...)
 end
 
-function show(io::IO, ::MIME"text/plain", A::Hamiltonian)
-    return print(io, "Hamiltonian($(A.value))")
-end
 function Base.show(io::IO, ::HamiltonianMatrices{TypeParameter{Tuple{n}},F}) where {n,F}
-    return print(io, "HamiltonianMatrices($(n), $(F))")
+    return print(io, "HamiltonianMatrices($(2n), $(F))")
 end
 function Base.show(io::IO, M::HamiltonianMatrices{Tuple{Int},F}) where {F}
     n = get_parameter(M.size)[1]
-    return print(io, "HamiltonianMatrices($(n), $(F); parameter=:field)")
+    return print(io, "HamiltonianMatrices($(2n), $(F); parameter=:field)")
 end
-size(A::Hamiltonian) = size(A.value)
 
 @doc raw"""
     p = rand(M::HamiltonianMatrices; σ::Real=1.0, vector_at=nothing)

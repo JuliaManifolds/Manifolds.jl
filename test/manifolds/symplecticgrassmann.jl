@@ -43,5 +43,42 @@ include("../header.jl")
             @test is_point(M, p)
             @test is_vector(_M, p, X)
         end
+        @test get_embedding(M) == SymplecticStiefel(6, 4)
+    end
+    @testset "Embedding / Total Space" begin
+        @test get_embedding(M) == SymplecticStiefel(6, 4)
+        pE = similar(p)
+        embed!(M, pE, p)
+        @test p == pE
+        embed!(M, pE, StiefelPoint(p))
+        @test p == pE
+        @test embed(M, StiefelPoint(p)) == p
+        XE = similar(X)
+        embed!(M, XE, p, X)
+        @test XE == X
+        embed!(M, XE, StiefelPoint(p), StiefelTVector(X))
+        @test XE == X
+        @test embed(M, StiefelPoint(p), StiefelTVector(X)) == X
+    end
+    @testset "Expnential and Retractions" begin
+        @test inner(M, p, X, X) == norm(M, p, X)^2
+        N = get_embedding(M)
+        @test isapprox(N, exp(M, p, X), exp(N, p, X))
+        rtm = CayleyRetraction()
+        r = retract(M, p, X, rtm)
+        @test is_point(M, r)
+        irtm = CayleyInverseRetraction()
+        X2 = inverse_retract(M, p, r, irtm)
+        @test isapprox(M, p, X, X2)
+        @test is_vector(M, p, X2)
+    end
+    @testset "Riemannian Gradient conversion" begin
+        A = Matrix{Float64}(I, 6, 6)[:, 1:4]
+        Z = riemannian_gradient(M, p, A)
+        Z2 = similar(Z)
+        riemannian_gradient!(M, Z2, p, A)
+        @test isapprox(M, Z2, Z)
+        # How can we better test that this is a correct gradient?
+        # Or what can we further test here?
     end
 end
