@@ -63,6 +63,33 @@ function get_embedding(M::SymplecticGrassmann{Tuple{Int,Int},𝔽}) where {𝔽}
 end
 
 @doc raw"""
+    inner(::SymplecticGrassmann, p, X, Y)
+
+Compute the Riemannian inner product ``g^{\mathrm{SpGr}}_p(X,Y)``, where ``p``
+is a point on the [`SymplecticStiefel`](@ref) manifold and ``X,Y \in \mathrm{Hor}_p^π\operatorname{SpSt}(2n,2k)``
+are horizontal tangent vectors. The formula reads according to Proposition Lemma 4.8 [BendokatZimmermann:2021](@cite).
+
+```math
+g^{\mathrm{SpGr}}_p(X,Y) = \operatorname{tr}\bigl(
+        (p^{\mathrm{T}}p)^{-1}X^{\mathrm{T}}(I_{2n} - pp^+)Y
+    \bigr),
+```
+where ``I_{2n}`` denotes the identity matrix and ``(⋅)^+`` the [`symplectic_inverse`](@ref).
+"""
+function inner(M::SymplecticGrassmann, p, X, Y)
+    n, k = get_parameter(M.size)
+    J = SymplecticElement(p, X, Y) # in BZ21 also J
+    # Procompute lu(p'p) since we solve a^{-1}* 3 times
+    a = lu(p' * p) # note that p'p is symmetric, thus so is its inverse c=a^{-1}
+    # we split the original trace into two one with I -> (X'Yc)
+    # 1) we permute X' and Y c to c^{\mathrm{T}}Y^{\mathrm{T}}X = a\(Y'X) (avoids a large interims matrix)
+    # 2) the second we compute as c (X'p)(p^+Y) since both brackets are the smaller matrices
+    return tr(a \ (Y' * X)) - tr(
+        a \ ((X' * p) * symplectic_inverse_times(SymplecticStiefel(2 * n, 2 * k), p, Y)),
+    )
+end
+
+@doc raw"""
     inverse_retract(::SymplecticGrassmann, p, q, ::CayleyInverseRetraction)
     inverse_retract!(::SymplecticGrassmann, q, p, X, ::CayleyInverseRetraction)
 

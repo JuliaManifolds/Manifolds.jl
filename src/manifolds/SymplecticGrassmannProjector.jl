@@ -70,3 +70,21 @@ function check_vector(
         )
     end
 end
+
+embed!(::SymplecticGrassmann, q, p::ProjectorPoint) = copyto!(q, p.value)
+function embed!(::SymplecticGrassmann, Y, p::ProjectorPoint, X::ProjectorTVector)
+    return copyto!(Y, X.value)
+end
+embed(::SymplecticGrassmann, p::ProjectorPoint) = p.value
+embed(::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTVector) = X.value
+
+function get_embedding(
+    ::SymplecticGrassmann{TypeParameter{Tuple{n,k}},𝔽},
+    p::ProjectorPoint,
+) where {n,k,𝔽}
+    return Euclidean(2n, 2n; field=𝔽)
+end
+function get_embedding(M::SymplecticGrassmann{Tuple{Int,Int},𝔽}, ::ProjectorPoint) where {𝔽}
+    n, _ = get_parameter(M.size)
+    return Euclidean(2n, 2n; field=𝔽, parameter=:field)
+end
