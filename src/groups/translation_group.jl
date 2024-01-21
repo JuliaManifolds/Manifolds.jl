@@ -60,5 +60,3 @@ function Base.show(io::IO, M::TranslationGroup{N,𝔽}) where {N<:TypeParameter,
     size = get_parameter(M.manifold.size)
     return print(io, "TranslationGroup($(join(size, ", ")); field=$(𝔽))")
 end
-
-Statistics.var(M::TranslationGroup, x::AbstractVector; kwargs...) = var(M.manifold, x)
