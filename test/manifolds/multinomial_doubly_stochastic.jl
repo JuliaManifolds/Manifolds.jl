@@ -68,4 +68,19 @@ include("../utils.jl")
         @test repr(M) == "MultinomialDoubleStochastic(3; parameter=:field)"
         @test get_embedding(M) === MultinomialMatrices(3, 3; parameter=:field)
     end
+    @testset "random" begin
+        Random.seed!(42)
+        p = rand(M)
+        @test is_point(M, p)
+        X = rand(M; vector_at=p)
+        @test is_vector(M, p, X)
+    end
+    @testset "Riemannian Gradient" begin
+        M = MultinomialDoubleStochastic(3)
+        p = ones(3, 3) ./ 3
+        Y = [1.0; -1.0; 0.0 0.0; -1.0 1.0]
+        G = project(M, p, p .* Y)
+        X = riemannian_gradient(M, p, Y)
+        @test isapprox(M, p, G, X)
+    end
 end

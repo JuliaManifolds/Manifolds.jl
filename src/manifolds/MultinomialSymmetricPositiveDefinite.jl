@@ -50,3 +50,24 @@ function check_vector(M::MultinomialSymmetricPositiveDefinite, p, X; kwargs...)
     s2 = check_vector(MultinomialMatrices(n, n), p, X)
     return s2
 end
+
+function get_embedding(
+    ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}},
+) where {n}
+    return MultinomialMatrices(n, n)
+end
+function get_embedding(M::MultinomialSymmetricPositiveDefinite{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return MultinomialMatrices(n, n; parameter=:field)
+end
+
+function Base.show(
+    io::IO,
+    ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}},
+) where {n}
+    return print(io, "MultinomialSymmetricPositiveDefinite($(n))")
+end
+function Base.show(io::IO, M::MultinomialSymmetricPositiveDefinite{Tuple{Int}})
+    n = get_parameter(M.size)[1]
+    return print(io, "MultinomialSymmetricPositiveDefinite($(n); parameter=:field)")
+end

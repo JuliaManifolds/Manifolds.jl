@@ -226,6 +226,18 @@ project(::SymmetricMatrices, ::Any, ::Any)
 
 project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
+function Random.rand!(
+    rng::AbstractRNG,
+    M::SymmetricMatrices,
+    pX;
+    σ::Real=one(real(eltype(pX))),
+    kwargs...,
+)
+    rand!(rng, pX)
+    pX .= (σ / (2 * norm(pX))) .* (pX + pX')
+    return pX
+end
+
 function Base.show(io::IO, ::SymmetricMatrices{TypeParameter{Tuple{n}},F}) where {n,F}
     return print(io, "SymmetricMatrices($(n), $(F))")
 end

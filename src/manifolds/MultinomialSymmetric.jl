@@ -57,7 +57,7 @@ i.e. is a symmetric matrix with positive entries whose rows sum to one.
 function check_point(M::MultinomialSymmetric, p; kwargs...)
     n = get_parameter(M.size)[1]
     s = check_point(SymmetricMatrices(n, ℝ), p; kwargs...)
-    isnothing(s) && return s
+    !isnothing(s) && return s
     s2 = check_point(MultinomialMatrices(n, n), p; kwargs...)
     return s2
 end
@@ -71,7 +71,7 @@ along any row.
 function check_vector(M::MultinomialSymmetric, p, X; kwargs...)
     n = get_parameter(M.size)[1]
     s = check_vector(SymmetricMatrices(n, ℝ), p, X; kwargs...)
-    isnothing(s) && return s
+    !isnothing(s) && return s
     s2 = check_vector(MultinomialMatrices(n, n), p, X)
     return s2
 end
@@ -155,13 +155,12 @@ function Random.rand!(
     M::MultinomialSymmetric,
     pX;
     vector_at=nothing,
-    σ::Real=one(real(eltype(pX))),
     kwargs...,
 )
-    rand!(rng, pX)
-    pX .*= σ
+    n = get_parameter(M.size)[1]
+    rand!(rng, SymmetricMatrices(n), pX; kwargs...)
     if vector_at === nothing
-        project!(M, pX, pX; kwargs...)
+        project!(M, pX, pX)
     else
         project!(M, pX, vector_at, pX)
     end
@@ -203,10 +202,10 @@ function riemannian_Hessian!(M::MultinomialSymmetric, Y, p, G, H, X)
     # with the small change their X is our p their ξ_X is our X , Hessf is H, Gradf is G
     n = get_parameter(M.size)[1]
     ov = ones(n) # \bf 1
-    I_p = lu(I .+ p)
+    I_p = lu(I + p)
+    γ = G .* p
     α = I_p \ (γ * ov)
     α_sq = (repeat(α, 1, n) .+ repeat(α', n, 1))
-    γ = G .* p
     δ = γ .- α_sq .* p
     γ_dot = H .* p + G .* X
     α_dot = (I_p \ γ_dot .- (I_p \ X) * (I_p \ γ)) * ov

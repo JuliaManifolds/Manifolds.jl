@@ -73,4 +73,22 @@ include("../utils.jl")
         @test repr(M) == "MultinomialSymmetric(3; parameter=:field)"
         @test get_embedding(M) === MultinomialMatrices(3, 3; parameter=:field)
     end
+    @testset "random" begin
+        Random.seed!(42)
+        p = rand(M)
+        @test is_point(M, p)
+        X = rand(M; vector_at=p)
+        @test is_vector(M, p, X)
+    end
+    @testset "Hessian call" begin
+        p = ones(3, 3) ./ 3
+        Y = one(p)
+        G = zero(p)
+        H = 0.5 * one(p)
+        X = riemannian_Hessian(M, p, G, H, Y)
+        X2 = similar(X)
+        riemannian_Hessian!(M, X, p, G, H, Y)
+        @test isapprox(M, p, X, X2)
+        @test is_vector(M, p, X)
+    end
 end
