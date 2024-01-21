@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * the new manifold of `MultinomialSymmetricPositiveDefinite` matrices
 * `rand!` for `MultinomialDoublyStochastic` and `MultinomialSymmetric`
 
+## [0.9.12] – 2024-01-21
+
+### Fixed
+
+* Fixed `var` on `TranslationGroup`.
+
 ## [0.9.11] – 2023-12-27
 
 ### Fixed
