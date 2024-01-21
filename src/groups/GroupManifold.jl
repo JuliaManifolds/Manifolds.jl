@@ -107,4 +107,6 @@ end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
 
-Statistics.var(M::GroupManifold, x::AbstractVector; kwargs...) = var(M.manifold, x)
+function Statistics.var(M::GroupManifold, x::AbstractVector; kwargs...)
+    return var(M.manifold, x; kwargs...)
+end
