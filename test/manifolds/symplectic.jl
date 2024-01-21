@@ -211,11 +211,10 @@ using ManifoldDiff
         Manifolds.gradient!(Sp_6, test_f, grad_f_p, p_grad, fd_diff; extended_metric=false)
         @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-9)
 
-        Euclidean_gradient(p) = one(p)
-        X = riemannian_gradient(Sp_6, p, one(p))
+        X = riemannian_gradient(Sp_6, p_grad, one(p_grad))
         X2 = similar(X)
-        riemannian_gradient!(Sp_6, X2, p, one(p))
-        @test isapprox(Sp_6, p, X, X2)
+        riemannian_gradient!(Sp_6, X2, p_grad, one(p_grad))
+        @test isapprox(Sp_6, p_grad, X, X2)
     end
     @testset "SymplecticElement" begin
         @test SymplecticElement() == SymplecticElement(1)
