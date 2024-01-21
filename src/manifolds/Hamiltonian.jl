@@ -29,14 +29,8 @@ function Matrix(A::Hamiltonian)
 end
 
 Base.:*(H::Hamiltonian, K::Hamiltonian) = Hamiltonian(H.value * K.value)
-Base.:*(H::Hamiltonian, A::AbstractMatrix) = H.value * A
-Base.:*(A::AbstractMatrix, K::Hamiltonian) = A * K.value
 Base.:+(H::Hamiltonian, K::Hamiltonian) = Hamiltonian(H.value .+ K.value)
-Base.:+(H::Hamiltonian, A::AbstractMatrix) = H.value .+ A
-Base.:+(A::AbstractMatrix, K::Hamiltonian) = A .+ K.value
 Base.:-(H::Hamiltonian, K::Hamiltonian) = Hamiltonian(H.value .- K.value)
-Base.:-(H::Hamiltonian, A::AbstractMatrix) = H.value .- A
-Base.:-(A::AbstractMatrix, K::Hamiltonian) = A .- K.value
 
 function show(io::IO, A::Hamiltonian)
     return print(io, "Hamiltonian($(A.value))")

@@ -110,7 +110,7 @@ Check whether `p` is a valid point on the [`SymplecticStiefel`](@ref),
 ``\mathrm{SpSt}(2n, 2k)`` manifold, that is ``p^{+}p`` is the identity,
 ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
 """
-function check_point(M::SymplecticStiefel{<:Any,ℝ}, p::T; kwargs...) where {T}
+function check_point(M::SymplecticStiefel{<:Any,ℝ}, p; kwargs...)
     # Perform check that the matrix lives on the real symplectic manifold:
     if !isapprox(inv(M, p) * p, I; kwargs...)
         return DomainError(
