@@ -78,7 +78,7 @@ include("../utils.jl")
     @testset "Riemannian Gradient" begin
         M = MultinomialDoubleStochastic(3)
         p = ones(3, 3) ./ 3
-        Y = [1.0; -1.0; 0.0 0.0; -1.0 1.0]
+        Y = [1.0 -1.0 0.0; 0.0 0.0 1.0; -1.0 1.0 1.1]
         G = project(M, p, p .* Y)
         X = riemannian_gradient(M, p, Y)
         @test isapprox(M, p, G, X)

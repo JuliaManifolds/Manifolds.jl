@@ -58,7 +58,7 @@ include("../utils.jl")
     @testset "Riemannian Gradient" begin
         M = MultinomialMatrices(3, 2)
         p = [0.5 0.4 0.1; 0.5 0.4 0.1]'
-        Y = [1.0; -1.0; 0.0 0.0; -1.0 1.0]
+        Y = [1.0 -1.0; 0.0 0.0; -1.0 1.0]
         G = project(M, p, p .* Y)
         X = riemannian_gradient(M, p, Y)
         @test isapprox(M, p, G, X)

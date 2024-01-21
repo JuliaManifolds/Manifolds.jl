@@ -87,7 +87,7 @@ include("../utils.jl")
         H = 0.5 * one(p)
         X = riemannian_Hessian(M, p, G, H, Y)
         X2 = similar(X)
-        riemannian_Hessian!(M, X, p, G, H, Y)
+        riemannian_Hessian!(M, X2, p, G, H, Y)
         @test isapprox(M, p, X, X2)
         @test is_vector(M, p, X)
     end
