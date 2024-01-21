@@ -34,6 +34,11 @@ include("../header.jl")
         pqH2 = pH + qH
         @test pqH2 isa Hamiltonian
         @test pqH2.value == p + q
+        pqH3 = pH - qH
+        @test pqH3 isa Hamiltonian
+        @test pqH3.value == p - q
+        @test_throws DomainError is_point(M, ones(4, 4), true)
+        @test_throws DomainError is_vector(M, p, ones(4, 4), true, true)
     end
     @testset "Basics" begin
         @test repr(M) == "HamiltonianMatrices(4, ℝ)"

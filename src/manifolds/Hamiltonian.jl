@@ -102,7 +102,7 @@ The tolerance for the test of `p` can be set using `kwargs...`.
 function check_point(M::HamiltonianMatrices, p; kwargs...)
     if !is_hamiltonian(p; kwargs...)
         return DomainError(
-            norm((Hamiltonian(p)^+) + p),
+            norm((Hamiltonian(p)^+).value + p),
             "The point $(p) does not lie on $M, since it is not hamiltonian.",
         )
     end
@@ -119,7 +119,7 @@ The tolerance for [`is_hamiltonian`](@ref) `X` can be set using `kwargs...`.
 function check_vector(M::HamiltonianMatrices, p, X; kwargs...)
     if !is_hamiltonian(X; kwargs...)
         return DomainError(
-            norm((Hamiltonian(X)^+) + X),
+            norm((Hamiltonian(X)^+).value + X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not hamiltonian.",
         )
     end
