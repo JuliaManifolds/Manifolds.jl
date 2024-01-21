@@ -17,7 +17,7 @@ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{\mathbf{0}_n\}
 ````
 
 where ``\mathbf{1}_n`` and ``\mathbr{0}_n`` are the vectors of length ``n``
-containing ones and zeros, respectively. More details for this manifold can b found in
+containing ones and zeros, respectively. More details about this manifold can be found in
 [DouikHassibi:2019](@cite).
 
 # Constructor
