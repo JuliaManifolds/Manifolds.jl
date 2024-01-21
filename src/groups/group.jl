@@ -1301,5 +1301,3 @@ function ManifoldsBase._pick_basic_allocation_argument(
 )
     return x[1]
 end
-
-Statistics.var(M::GroupManifold, x::AbstractVector; kwargs...) = var(M.manifold, x)

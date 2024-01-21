@@ -106,3 +106,5 @@ function is_vector(
 end
 
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
+
+Statistics.var(M::GroupManifold, x::AbstractVector; kwargs...) = var(M.manifold, x)
