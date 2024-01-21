@@ -111,9 +111,17 @@ Return the dimension of the [`SymplecticGrassmann`](@ref)`(2n,2k)`, which is
 
 see [BendokatZimmermann:2021](@cite), Section 4.
 """
-function manifold_dimension(::SymplecticGrassmann{<:Any,ℝ})
+function manifold_dimension(M::SymplecticGrassmann{<:Any,ℝ})
     n, k = get_parameter(M.size)
     return 4 * (n - k) * k
+end
+
+function Base.show(io::IO, ::SymplecticGrassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return print(io, "SymplecticStiefel($(2n), $(2k); field=$(𝔽))")
+end
+function Base.show(io::IO, M::SymplecticGrassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return print(io, "SymplecticStiefel($(2n), $(2k); field=$(𝔽); parameter=:field)")
 end
 
 #

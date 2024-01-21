@@ -24,6 +24,15 @@ function check_vector(M::SymplecticGrassmann, p, X; kwargs...)
     return check_vector(SymplecticStiefel(2 * n, 2 * k), p, X; kwargs...)
 end
 
+embed(::SymplecticGrassmann, p) = p
+embed(::SymplecticGrassmann, p, X) = X
+embed!(::SymplecticGrassmann, q, p) = copyto!(q, p)
+embed!(::SymplecticGrassmann, Y, p, X) = copyto!(Y, X)
+embed!(::SymplecticGrassmann, q, p::StiefelPoint) = copyto!(q, p.value)
+embed!(::SymplecticGrassmann, Y, p::StiefelPoint, X::StiefelTVector) = copyto!(Y, X.value)
+embed(::SymplecticGrassmann, p::StiefelPoint) = p.value
+embed(::SymplecticGrassmann, p::StiefelPoint, X::StiefelTVector) = X.value
+
 @doc raw"""
     exp(::SymplecticGrassmann, p, X)
     exp!(M::SymplecticGrassmann, q, p, X)
@@ -43,6 +52,14 @@ function exp!(M::SymplecticGrassmann, q, p, X)
     n, k = get_parameter(M.size)
     exp!(SymplecticStiefel(2 * n, 2 * k), q, p, X)
     return q
+end
+
+function get_embedding(::SymplecticGrassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+    return SymplecticStiefel(2n, 2k, 𝔽)
+end
+function get_embedding(M::SymplecticGrassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+    n, k = get_parameter(M.size)
+    return SymplecticStiefel(2n, 2k, 𝔽; parameter=:field)
 end
 
 @doc raw"""
