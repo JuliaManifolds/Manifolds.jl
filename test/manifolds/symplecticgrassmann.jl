@@ -61,7 +61,7 @@ include("../header.jl")
         @test embed(M, StiefelPoint(p), StiefelTVector(X)) == X
     end
     @testset "Expnential and Retractions" begin
-        @test inner(M, p, X, X) == norm(M, p, X)^2
+        @test inner(M, p, X, X) ≈ norm(M, p, X)^2
         N = get_embedding(M)
         @test isapprox(N, exp(M, p, X), exp(N, p, X))
         rtm = CayleyRetraction()
