@@ -54,7 +54,7 @@ function check_vector(
     n, k = get_parameter(M.size)
     if !is_hamiltonian(X.value; kwargs...)
         return DomainError(
-            norm((Hamiltonian(X.value)^+) + X.value),
+            norm((Hamiltonian(X.value)^+).value + X.value),
             (
                 "The matrix X is not in the tangent space at $p of $M, since X is not Hamiltonian."
             ),

@@ -36,8 +36,8 @@ include("../header.jl")
         -0.02823014 0.00029946 -0.04196034 -0.04145413
     ]
     @testset "Basics" begin
-        @test repr(M) == "SymplecticStiefel(6, 4; field=ℝ)"
-        @test repr(Mf) == "SymplecticStiefel(6, 4; field=ℝ; parameter=:field)"
+        @test repr(M) == "SymplecticGrassmann(6, 4; field=ℝ)"
+        @test repr(Mf) == "SymplecticGrassmann(6, 4; field=ℝ; parameter=:field)"
         @test manifold_dimension(M) == 4 * (6 - 4)
         for _M in [M, Mf]
             @test is_point(M, p)
@@ -80,5 +80,44 @@ include("../header.jl")
         @test isapprox(M, Z2, Z)
         # How can we better test that this is a correct gradient?
         # Or what can we further test here?
+    end
+    @testset "Projector representation" begin
+        # cf. Propo 4.3 BendokatZimmermann, φ and
+        φ(p) = p * symplectic_inverse(p)
+        #  for dφ the proof we keve to consider their Ω, hence the /p
+        function dφ(p, X)
+            # This still needs to be fixed
+            p_plus = symplectic_inverse(p)
+            X_plus = symplectic_inverse(p)
+            A = (I - 0.5 * p * p_plus)
+            Ω = A * X * p_plus - p * X_plus * A
+            P = φ(p)
+            Ωbar = Ω * P + P * Ω - 2 * P * Ω * P # From the representation discussion before
+            return Ωbar
+        end
+        pP = ProjectorPoint(φ(p))
+        XP = ProjectorTVector(dφ(p, X))
+        @test is_point(M, pP)
+        # Fix
+        @test_broken is_vector(M, pP, XP)
+        Pf1 = zeros(6, 6)
+        Pf1[1, 2] = 1.0
+        # No projector
+        @test_throws DomainError is_point(M, ProjectorPoint(Pf1), true)
+        Pf2 = zeros(6, 6)
+        Pf2[1, 1] = 1.0
+        # Pf2 not equal to its symplectic inverse
+        @test_throws DomainError is_point(M, ProjectorPoint(Pf1), true)
+        # Missing: Rank test, maybe best with a p from SpSt(6,2)?
+
+        @test get_embedding(M, pP) == Euclidean(6, 6)
+        get_embedding(Mf, pP) == Euclidean(6, 6; parameter=:field)
+        @test embed(M, pP) == pP.value
+        pE = zeros(6, 6)
+        embed!(M, pE, pP)
+        @test pE == pP.value
+        @test embed(M, pP, XP) == XP.value
+        embed!(M, pE, pP, XP)
+        @test pE == XP.value
     end
 end
