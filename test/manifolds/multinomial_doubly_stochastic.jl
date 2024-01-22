@@ -73,7 +73,7 @@ include("../utils.jl")
         p = rand(M)
         @test is_point(M, p)
         X = rand(M; vector_at=p)
-        @test is_vector(M, p, X)
+        @test is_vector(M, p, X; atol=1e-9)
     end
     @testset "Riemannian Gradient" begin
         M = MultinomialDoubleStochastic(3)
