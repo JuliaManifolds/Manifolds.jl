@@ -9,4 +9,10 @@ include("../utils.jl")
         @test get_embedding(M) == MultinomialMatrices(3, 3)
         @test get_embedding(Mf) == MultinomialMatrices(3, 3; parameter=:field)
     end
+
+    @testset "Random" begin
+        q = zeros(3, 3)
+        M = MultinomialSymmetricPositiveDefinite(3)
+        @test is_point(M, rand!(Random.Xoshiro(), M, q))
+    end
 end
