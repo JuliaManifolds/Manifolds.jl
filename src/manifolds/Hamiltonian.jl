@@ -35,9 +35,6 @@ Base.:-(H::Hamiltonian, K::Hamiltonian) = Hamiltonian(H.value .- K.value)
 function show(io::IO, A::Hamiltonian)
     return print(io, "Hamiltonian($(A.value))")
 end
-function show(io::IO, ::MIME"text/plain", A::Hamiltonian)
-    return print(io, "Hamiltonian($(A.value))")
-end
 size(A::Hamiltonian) = size(A.value)
 
 @doc raw"""
