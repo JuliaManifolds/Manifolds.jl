@@ -107,8 +107,18 @@ include("../header.jl")
         Pf2 = zeros(6, 6)
         Pf2[1, 1] = 1.0
         # Pf2 not equal to its symplectic inverse
-        @test_throws DomainError is_point(M, ProjectorPoint(Pf1), true)
-        # Missing: Rank test, maybe best with a p from SpSt(6,2)?
+        @test_throws DomainError is_point(M, ProjectorPoint(Pf2), true)
+        # Missing: Rank test, maybe best with a p from SpSt(6,2)
+        ps = p[:, [1, 3]] # This is on SpSt(6,2)
+        Pf3 = φ(ps) # too low rank
+        @test_throws DomainError is_point(M, ProjectorPoint(Pf3), true)
+
+        # Not Hamiltonian
+        Xf1 = ProjectorTVector(Matrix{Float64}(I, 6, 6))
+        @test_throws DomainError is_vector(M, pP, Xf1; error=:error)
+        # Hamiltonian but Xp + pX not correct
+        Xf2 = ProjectorTVector(SymplecticElement(1.0) * Matrix{Float64}(I, 6, 6))
+        @test_throws DomainError is_vector(M, pP, Xf2; error=:error)
 
         @test get_embedding(M, pP) == Euclidean(6, 6)
         get_embedding(Mf, pP) == Euclidean(6, 6; parameter=:field)
