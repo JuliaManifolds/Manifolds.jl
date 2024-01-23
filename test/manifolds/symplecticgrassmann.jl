@@ -86,13 +86,13 @@ include("../header.jl")
         φ(p) = p * symplectic_inverse(p)
         #  for dφ the proof we keve to consider their Ω, hence the /p
         function dφ(p, X)
-            # This still needs to be fixed
-            p_plus = symplectic_inverse(p)
-            X_plus = symplectic_inverse(p)
-            A = (I - 0.5 * p * p_plus)
-            Ω = A * X * p_plus - p * X_plus * A
-            P = φ(p)
-            Ωbar = Ω * P + P * Ω - 2 * P * Ω * P # From the representation discussion before
+            # Following (3.15) - this has still to be debugged
+            pTp = lu(p' * p)
+            pTp_I_pT = pTp \ (p')
+            J2n = Matrix{Float64}(I, 6, 6) * (SymplecticElement(1.0))
+            Ωbar =
+                X * pTp_I_pT +
+                J2n * p * (pTp \ (X')) * (I - J2n' * p * pTp_I_pT * J2n) * J2n
             return Ωbar
         end
         pP = ProjectorPoint(φ(p))
