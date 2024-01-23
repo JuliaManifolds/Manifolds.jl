@@ -69,6 +69,7 @@ function check_vector(
             ),
         )
     end
+    return nothing
 end
 
 embed!(::SymplecticGrassmann, q, p::ProjectorPoint) = copyto!(q, p.value)
