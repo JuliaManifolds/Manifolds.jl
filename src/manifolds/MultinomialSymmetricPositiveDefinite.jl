@@ -93,7 +93,11 @@ function Random.rand!(
     n = get_parameter(M.size)[1]
     L = sort(exp.(randn(rng, n)))
     V = reduce(hcat, map(xi -> [xi^k for k in 0:(n - 1)], L))'
-    Vlu = lu(V, LinearAlgebra.RowNonZero())
+    @static if VERSION < v"1.7"
+        Vlu = lu(V, Val(false))
+    else
+        Vlu = lu(V, LinearAlgebra.RowNonZero())
+    end
     dm = Diagonal(Vlu.U)
     uutd = dm \ Vlu.U
     random_totally_positive = uutd * dm * Vlu.L
