@@ -36,19 +36,23 @@ function MultinomialSymmetricPositiveDefinite(n::Int; parameter::Symbol=:type)
 end
 
 function check_point(M::MultinomialSymmetricPositiveDefinite, p; kwargs...)
+    # Multinomial checked first via embedding
     n = get_parameter(M.size)[1]
     s = check_point(SymmetricPositiveDefinite(n), p; kwargs...)
-    isnothing(s) && return s
-    s2 = check_point(MultinomialMatrices(n, n), p; kwargs...)
-    return s2
+    !isnothing(s) &&
+        return ManifoldDomainError("The point $(p) does not lie on the $(M).", s)
+    return nothing
 end
 
 function check_vector(M::MultinomialSymmetricPositiveDefinite, p, X; kwargs...)
+    # Multinomial checked first via embedding
     n = get_parameter(M.size)[1]
     s = check_vector(SymmetricPositiveDefinite(n), p, X; kwargs...)
-    isnothing(s) && return s
-    s2 = check_vector(MultinomialMatrices(n, n), p, X)
-    return s2
+    !isnothing(s) && return ManifoldDomainError(
+        "The vector $(X) is not a tangent vector to $(p) on $(M)",
+        s,
+    )
+    return nothing
 end
 
 function get_embedding(

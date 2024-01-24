@@ -251,6 +251,7 @@ using ManifoldsBase:
     IsEmbeddedSubmanifold,
     IsExplicitDecorator,
     LogarithmicInverseRetraction,
+    ManifoldDomainError,
     ManifoldsBase,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
@@ -774,7 +775,7 @@ export CachedBasis,
     InducedBasis,
     ProjectedOrthonormalBasis
 # Errors on Manifolds
-export ComponentManifoldError, CompositeManifoldError
+export ComponentManifoldError, CompositeManifoldError, ManifoldDomainError
 # Functions on Manifolds
 export ×,
     action_side,
