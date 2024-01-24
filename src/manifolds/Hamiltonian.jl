@@ -177,8 +177,8 @@ end
 Generate a Hamiltonian matrix. Since these are a submanifold of ``ℝ^{2n×2n}``,
 the same method applies for points and tangent vectors.
 
-The generation is based on generating one normally-distributed
-``n×n`` matrix ``A`` and two symmetric ``n×n`` matrices ``B,C`` to generate
+The construction is based on generating one normally-distributed
+``n×n`` matrix ``A`` and two symmetric ``n×n`` matrices ``B, C`` which are then stacked:
 
 ```math
 p = \begin{pmatrix} A & B\\ C & -A^{\mathrm{T}} \end{pmatrix}

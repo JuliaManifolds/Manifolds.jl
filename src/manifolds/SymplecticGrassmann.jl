@@ -4,7 +4,7 @@
 The symplectic Grassmann manifold consists of all symplectic subspaces of
 ``ℝ^{2n}`` of dimension ``2k``, ``n ≥ k``.
 
-This manifold can be represented as corresponding representers on the [`SymplecticStiefel`](@ref)
+Points on this manifold can be represented as corresponding representers on the [`SymplecticStiefel`](@ref)
 
 ```math
 \operatorname{SpGr}(2n,2k) = \bigl\{ \operatorname{span}(p)\ \big| \ p ∈ \operatorname{SpSt}(2n, 2k, ℝ)\},
