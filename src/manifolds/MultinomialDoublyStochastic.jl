@@ -98,7 +98,7 @@ end
 Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)`(n)` `M`,
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
-function check_point(M::MultinomialDoubleStochastic, p::T; kwargs...) where {T}
+function check_point(M::MultinomialDoubleStochastic, p; kwargs...)
     n = get_parameter(M.size)[1]
     s = check_point(MultinomialMatrices(n, n), p; kwargs...)
     !isnothing(s) && return s
@@ -113,7 +113,7 @@ Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialDoubleSt
 This means, that `p` is valid, that `X` is of correct dimension and sums to zero along any
 column or row.
 """
-function check_vector(M::MultinomialDoubleStochastic, p, X::T; kwargs...) where {T}
+function check_vector(M::MultinomialDoubleStochastic, p, X; kwargs...)
     n = get_parameter(M.size)[1]
     s = check_vector(MultinomialMatrices(n, n), p, X; kwargs...)
     !isnothing(s) && return s
