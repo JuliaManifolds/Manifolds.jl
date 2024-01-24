@@ -127,7 +127,7 @@ end
 
 Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{2n×2k}`` or at
 least around the [`SymplecticGrassmann`](@ref) `M` where `p` (the embedding of) a point on `M`,
-and the restriction ``\tilde f`` to the [`SymplecticStiefel`] be invariant for the equivalence classes.
+and the restriction ``\tilde f`` to the [`SymplecticStiefel`](@ref) be invariant for the equivalence classes.
 In other words ``f(p) = f(qp)`` for ``q \in \mathrm{Sp}(2k, ℝ)``.
 Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
 
