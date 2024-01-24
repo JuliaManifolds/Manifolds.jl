@@ -46,7 +46,7 @@ consisting of (real-valued) hamiltonian matrices of size ``n×n``, i.e. the set
 ````math
 \mathfrak{sp}(2n,𝔽) = \bigl\{p  ∈ 𝔽^{2n×2n}\ \big|\ p^+ = p \bigr\},
 ````
-where ``⋅^{+}`` denotes the [`symplectic_inverse`](@ref),. and ``𝔽 ∈ \{ ℝ, ℂ\}``.
+where ``⋅^{+}`` denotes the [`symplectic_inverse`](@ref), and ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 Though it is slightly redundant, usually the matrices are stored as ``2n×2n`` arrays.
 
