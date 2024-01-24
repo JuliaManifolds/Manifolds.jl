@@ -174,7 +174,7 @@ end
     pX = rand(M::HamiltonianMatrices; σ::Real=1.0, vector_at=nothing)
     rand!(M::HamiltonianMatrices, pX; σ::Real=1.0, vector_at=nothing)
 
-Generate a Hamiltonian matrix. Since these are a submanifold of ``ℝ^{2n×2n}``,
+Generate a random Hamiltonian matrix. Since these are a submanifold of ``ℝ^{2n×2n}``,
 the same method applies for points and tangent vectors.
 This can also be done in-place of `pX`.
 
