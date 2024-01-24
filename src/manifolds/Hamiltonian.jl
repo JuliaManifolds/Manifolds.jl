@@ -4,7 +4,7 @@
 @doc raw"""
     Hamiltonian{T,S<:AbstractMatrix{<:T}} <: AbstractMatrix{T}
 
-A type to store an hamiltonien matrix, i.e. A square matrix matrix for which ``A^+ = -A`` where
+A type to store a Hamiltonian matrix, that is a square matrix for which ``A^+ = -A`` where
 
 ```math
 A^+ = J_{2n}A^{\mathrm{T}}J_{2n}, \qquad J_{2n} \begin{pmatrix} 0 & I_n\\-I_n & 0 \end{pmatrix},
