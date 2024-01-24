@@ -90,7 +90,8 @@ include("../header.jl")
             return X * symplectic_inverse(p) + p * symplectic_inverse(X)
         end
         pP = ProjectorPoint(φ(p))
-        XP = ProjectorTVector(dφ(p, X))
+        Xe = dφ(p, X)
+        XP = ProjectorTVector(Xe)
         @test is_point(M, pP)
         # Fix
         @test is_vector(M, pP, XP; atol=1e-9, error=:error)
@@ -109,10 +110,9 @@ include("../header.jl")
         # Not Hamiltonian
         Xf1 = ProjectorTVector(Matrix{Float64}(I, 6, 6))
         @test_throws DomainError is_vector(M, pP, Xf1; error=:error)
-        # Hamiltonian but Xp + pX not correct
-        Xf2 = ProjectorTVector(SymplecticElement(1.0) * Matrix{Float64}(I, 6, 6))
+        # X^+ = X, but Xp + pX not correct
+        Xf2 = ProjectorTVector(0.5 .* (symplectic_inverse(X * X') + X * X'))
         @test_throws DomainError is_vector(M, pP, Xf2; error=:error)
-
         @test get_embedding(M, pP) == Euclidean(6, 6)
         get_embedding(Mf, pP) == Euclidean(6, 6; parameter=:field)
         @test embed(M, pP) == pP.value
