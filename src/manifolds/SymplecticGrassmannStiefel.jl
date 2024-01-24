@@ -128,7 +128,8 @@ end
 Given a gradient ``Y = \operatorname{grad} \tilde f(p)`` in the embedding ``ℝ^{2n×2k}`` or at
 least around the [`SymplecticGrassmann`](@ref) `M` where `p` (the embedding of) a point on `M`,
 and the restriction ``\tilde f`` to the [`SymplecticStiefel`](@ref) be invariant for the equivalence classes.
-In other words ``f(p) = f(qp)`` for ``q \in \mathrm{Sp}(2k, ℝ)``.
+In other words ``f(p) = f(qp)`` for ``q \in \mathrm{Sp}(2k, ℝ)``,
+where ``\mathrm{Sp}(2k, ℝ)`` denotes the [`SymplecticMatricesMatrices`](@ref) manifold.
 Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
 
 ```math
@@ -138,14 +139,7 @@ Then the Riemannian gradient ``X = \operatorname{grad} f(p)`` is given by
 where ``J_{2n}`` denotes the [`SymplecticElement`](@ref), and
 ``H = (I_{2n} - pp^+)J_{2n}^{\mathrm{T}}YJ``.
 """
-function riemannian_gradient(M::SymplecticGrassmann, p, Y; kwargs...)
-    n, k = get_parameter(M.size)
-    J = SymplecticElement(p)
-    # Since J' = -J We can write (J'YJ) = -J * (YJ)
-    JTYJ = (-J * (Y * J))
-    H = (I - p * symplectic_inverse(p)) * JTYJ
-    return (-J * (H * J)) * (p' * p) .- JTYJ * (H' * p)
-end
+riemannian_gradient(M::SymplecticGrassmann, p, Y; kwargs...)
 
 function riemannian_gradient!(M::SymplecticGrassmann, X, p, Y; kwargs...)
     n, k = get_parameter(M.size)
