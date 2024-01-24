@@ -29,7 +29,7 @@ Algebra
     \mathfrak{sp}(2n,F) = \{H \in 𝔽^{2n×2n} \;|\; Q H + H^{T} Q = 0\}.
 ````
 This set is also known as the [Hamiltonian matrices](https://en.wikipedia.org/wiki/Hamiltonian_matrix), which have the
-property that $(QH)^T = QH`` and are commonly used in physics.
+property that ``(QH)^T = QH`` and are commonly used in physics.
 
 ```@autodocs
 Modules = [Manifolds]

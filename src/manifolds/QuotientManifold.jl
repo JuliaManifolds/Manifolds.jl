@@ -159,7 +159,7 @@ horizontal_lift!(N::AbstractManifold, Y, q, X)
 
 @doc raw"""
     horizontal_component(N::AbstractManifold, p, X)
-    horizontal_compontent(QuotientManifold{M,N}, p, X)
+    horizontal_compontent(QuotientManifold{𝔽,M,N}, p, X)
 
 Compute the horizontal component of tangent vector `X` at point `p`
 in the total space of quotient manifold `N`.
@@ -177,7 +177,7 @@ end
 
 @doc raw"""
     vertical_component(N::AbstractManifold, p, X)
-    vertical_component(QuotientManifold{M,N}, p, X)
+    vertical_component(QuotientManifold{𝔽,M,N}, p, X)
 
 Compute the vertical component of tangent vector `X` at point `p`
 in the total space of quotient manifold `N`.

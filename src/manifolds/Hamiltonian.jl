@@ -25,7 +25,7 @@ end
 Hamiltonian(A::Hamiltonian) = Hamiltonian(A.value)
 # Conversion
 function Matrix(A::Hamiltonian)
-    return copy(A.value)
+    return Matrix(A.value)
 end
 
 Base.:*(H::Hamiltonian, K::Hamiltonian) = Hamiltonian(H.value * K.value)
