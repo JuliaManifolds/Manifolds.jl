@@ -205,6 +205,6 @@ function rand!(
     randn!(rng, p3)
     p2 .= (1 / 2) .* (p2 .+ p2')
     p3 .= (1 / 2) .* (p2 .+ p2')
-    pX .= (σ / norm(pX, 2)) .* pX
+    pX .*= σ
     return pX
 end

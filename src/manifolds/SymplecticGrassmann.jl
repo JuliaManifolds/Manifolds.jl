@@ -36,12 +36,28 @@ representation as projectors, using a [`ProjectorTVector`](@ref) as
 ```
 
 where ``[X,p] = Xp-pX`` denotes the matrix commutator and
-``\mathfrak{sp}(2n,ℝ)`` is the Lie algebra of the symplectic group consisting of [`HamiltonianMatrices`](@ref)
+``\mathfrak{sp}(2n,ℝ)`` is the Lie algebra of the symplectic group consisting of [`HamiltonianMatrices`](@ref).
 
-For simplicity, the [`ProjectorTVector`](@ref) is stored as just ``X`` from the representation above.
+The first repesentation is in [`StiefelPoints`](@ref) and [`StiefelTVectors`](@ref),
+which both represent their symplectic Grassmann equivalence class. Arrays are interpreted
+in this representation as well
 
-For the tangent space, arrays are interpreted as being [`StiefelTVector`](@ref)s.
+For the representation in [`ProjectorPoint`](@ref) and [`ProjectorTVector`](@ref)s,
+we use the representation from the surjective submersion
 
+```math
+ρ: \mathrm{SpSt}(2n,2k) → \mathrm{SpGr}(2n,2k),
+\qquad
+ρ(p) = pp^+
+```
+
+and its differential
+
+```math
+\mathrm{d}ρ(p,X) = Xp^+ + pX^+,
+```
+
+respectively.
 The manifold was first introduced in [BendokatZimmermann:2021](@cite)
 
 # Constructor
