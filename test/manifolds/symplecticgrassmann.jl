@@ -86,20 +86,14 @@ include("../header.jl")
         φ(p) = p * symplectic_inverse(p)
         #  for dφ the proof we keve to consider their Ω, hence the /p
         function dφ(p, X)
-            # Following (3.15) - this has still to be debugged
-            pTp = lu(p' * p)
-            pTp_I_pT = pTp \ (p')
-            J2n = Matrix{Float64}(I, 6, 6) * (SymplecticElement(1.0))
-            Ωbar =
-                X * pTp_I_pT +
-                J2n * p * (pTp \ (X')) * (I - J2n' * p * pTp_I_pT * J2n) * J2n
-            return Ωbar
+            # \bar Ω is Xp^+ + pX^+
+            return X * symplectic_inverse(p) + p * symplectic_inverse(X)
         end
         pP = ProjectorPoint(φ(p))
         XP = ProjectorTVector(dφ(p, X))
         @test is_point(M, pP)
         # Fix
-        @test_broken is_vector(M, pP, XP)
+        @test is_vector(M, pP, XP; atol=1e-9, error=:error)
         Pf1 = zeros(6, 6)
         Pf1[1, 2] = 1.0
         # No projector
@@ -108,7 +102,6 @@ include("../header.jl")
         Pf2[1, 1] = 1.0
         # Pf2 not equal to its symplectic inverse
         @test_throws DomainError is_point(M, ProjectorPoint(Pf2), true)
-        # Missing: Rank test, maybe best with a p from SpSt(6,2)
         ps = p[:, [1, 3]] # This is on SpSt(6,2)
         Pf3 = φ(ps) # too low rank
         @test_throws DomainError is_point(M, ProjectorPoint(Pf3), true)

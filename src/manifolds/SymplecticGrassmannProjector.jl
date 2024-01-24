@@ -39,7 +39,7 @@ end
 Check whether `X` is a valid tangent vector at `p` on the [`SymplecticGrassmann`](@ref),
 ``\operatorname{SpGr}(2n, 2k)`` manifold by verifying that it
 
-* ``X^+ = -X``, verify that `X` is [`Hamiltonian`](@ref)
+* ``X^+ = X``
 * ``X = Xp + pX``
 
 For details see Proposition 4.2 in [BendokatZimmermann:2021](@cite) and the definition of ``\mathfrak{sp}_P(2n)`` before,
@@ -52,11 +52,11 @@ function check_vector(
     kwargs...,
 )
     n, k = get_parameter(M.size)
-    if !is_hamiltonian(X.value; kwargs...)
+    if !isapprox((Hamiltonian(X.value)^+).value, X.value; kwargs...)
         return DomainError(
-            norm((Hamiltonian(X.value)^+).value + X.value),
+            norm((Hamiltonian(X.value)^+).value - X.value),
             (
-                "The matrix X is not in the tangent space at $p of $M, since X is not Hamiltonian."
+                "The matrix X is not in the tangent space at $p of $M, since X is not equal to ist symplectic inverse."
             ),
         )
     end
