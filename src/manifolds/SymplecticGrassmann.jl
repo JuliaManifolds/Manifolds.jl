@@ -26,7 +26,7 @@ With respect to the quotient structure, the canonical projection ``π = π_{\mat
 π: \mathrm{SpSt}(2n2k) → \mathrm{SpGr}(2n,2k), p ↦ π(p) = pp^+.
 ```
 
-The tangent space is either the tangent space from the symplecti Stiefel manifold, where
+The tangent space is either the tangent space from the symplectic Stiefel manifold, where
 tangent vectors are representers of their corresponding congruence classes, or for the
 representation as projectors, using a [`ProjectorTVector`](@ref) as
 
