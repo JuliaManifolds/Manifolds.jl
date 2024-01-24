@@ -268,11 +268,11 @@ function Random.rand!(rng::AbstractRNG, G::GeneralLinear, pX; kwargs...)
 end
 
 function Base.show(io::IO, ::GeneralLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return print(io, "GeneralLinear($n, $𝔽)")
+    return print(io, "GeneralLinear($n, $(𝔽))")
 end
 function Base.show(io::IO, M::GeneralLinear{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return print(io, "GeneralLinear($n, $𝔽; parameter=:field)")
+    return print(io, "GeneralLinear($n, $(𝔽); parameter=:field)")
 end
 
 translate_diff(::GeneralLinear, p, q, X, ::LeftForwardAction) = X

@@ -38,7 +38,7 @@ representation as projectors, using a [`ProjectorTVector`](@ref) as
 where ``[X,p] = Xp-pX`` denotes the matrix commutator and
 ``\mathfrak{sp}(2n,ℝ)`` is the Lie algebra of the symplectic group consisting of [`HamiltonianMatrices`](@ref).
 
-The first repesentation is in [`StiefelPoints`](@ref) and [`StiefelTVectors`](@ref),
+The first repesentation is in [`StiefelPoint`](@ref)s and [`StiefelTVector`](@ref)s,
 which both represent their symplectic Grassmann equivalence class. Arrays are interpreted
 in this representation as well
 

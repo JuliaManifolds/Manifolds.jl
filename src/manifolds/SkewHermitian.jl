@@ -1,14 +1,14 @@
 @doc raw"""
     SkewHermitianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{SkewHerm}(n)$ consisting of the real- or
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  ``\operatorname{SkewHerm}(n)`` consisting of the real- or
 complex-valued skew-hermitian matrices of size ``n×n``, i.e. the set
 
 ````math
 \operatorname{SkewHerm}(n) = \bigl\{p  ∈ 𝔽^{n×n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
 ````
-where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
-and the field $𝔽 ∈ \{ ℝ, ℂ, ℍ\}$.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
+and the field ``𝔽 ∈ \{ ℝ, ℂ, ℍ\}``.
 
 Though it is slightly redundant, usually the matrices are stored as ``n×n`` arrays.
 
@@ -223,7 +223,7 @@ Projects `p` from the embedding onto the [`SkewHermitianMatrices`](@ref) `M`, i.
 \operatorname{proj}_{\operatorname{SkewHerm}(n)}(p) = \frac{1}{2} \bigl( p - p^{\mathrm{H}} \bigr),
 ````
 
-where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SkewHermitianMatrices, ::Any)
 
@@ -241,7 +241,7 @@ Project the matrix `X` onto the tangent space at `p` on the [`SkewHermitianMatri
 \operatorname{proj}_p(X) = \frac{1}{2} \bigl( X - X^{\mathrm{H}} \bigr),
 ````
 
-where $⋅^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SkewHermitianMatrices, ::Any, ::Any)
 
