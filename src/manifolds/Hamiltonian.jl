@@ -142,7 +142,7 @@ Return true. [`HamiltonianMatrices`](@ref) is a flat manifold.
 is_flat(M::HamiltonianMatrices) = true
 
 @doc raw"""
-    is_hamiltonian(A; kwargs...)
+    is_hamiltonian(A::AbstractMatrix; kwargs...)
 
 Test whether a matrix `A` is hamiltonian.
 The test consists of verifying whether
