@@ -10,7 +10,7 @@ Order = [:type,:function]
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["GrassmannStiefel.jl"]
+Pages = ["manifolds/GrassmannStiefel.jl"]
 Order = [:type,:function]
 ```
 

@@ -24,7 +24,7 @@ T_pΔ^n = \biggl\{ X ∈ ℝ^{n+1}\ \big|\ ⟨\mathbb{1},X⟩ = \sum_{i=1}^{n+1}
 
 The manifold is implemented assuming the Fisher-Rao metric for the multinomial distribution,
 which is equivalent to the induced metric from isometrically embedding the probability
-simplex in the $n$-sphere of radius 2.
+simplex in the ``n``-sphere of radius 2.
 The corresponding diffeomorphism $\varphi: \mathbb Δ^n → \mathcal N$,
 where $\mathcal N \subset 2𝕊^n$ is given by $\varphi(p) = 2\sqrt{p}$.
 
@@ -82,7 +82,7 @@ end
 @doc raw"""
     change_metric(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
-To change the metric, we are looking for a function ``c\colon T_pΔ^n \to T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
+To change the metric, we are looking for a function ``c\colon T_pΔ^n → T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
 This can be achieved by rewriting representer change in matrix form as `(Diagonal(p) - p * p') * X`
 and taking square root of the matrix
 """
@@ -441,7 +441,7 @@ end
 @doc raw"""
     representation_size(::ProbabilitySimplex)
 
-Return the representation size of points in the $n$-dimensional probability simplex,
+Return the representation size of points in the ``n``-dimensional probability simplex,
 i.e. an array size of `(n+1,)`.
 """
 function representation_size(M::ProbabilitySimplex)

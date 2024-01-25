@@ -1,16 +1,16 @@
 @doc raw"""
     SymmetricMatrices{n,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{Sym}(n)$ consisting of the real- or complex-valued
-symmetric matrices of size $n × n$, i.e. the set
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  ``\operatorname{Sym}(n)`` consisting of the real- or complex-valued
+symmetric matrices of size ``n×n``, i.e. the set
 
 ````math
-\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p \bigr\},
+\operatorname{Sym}(n) = \bigl\{p  ∈ 𝔽^{n×n}\ \big|\ p^{\mathrm{H}} = p \bigr\},
 ````
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
-and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
+and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
-Though it is slightly redundant, usually the matrices are stored as $n × n$ arrays.
+Though it is slightly redundant, usually the matrices are stored as ``n×n`` arrays.
 
 Note that in this representation, the complex valued case has to have a real-valued diagonal,
 which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::SymmetricMatrices)).
@@ -19,7 +19,7 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
     SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ)
 
-Generate the manifold of $n × n$ symmetric matrices.
+Generate the manifold of ``n×n`` symmetric matrices.
 """
 struct SymmetricMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
@@ -186,7 +186,7 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 \end{aligned}
 ````
 
-where the last $-n$ is due to the zero imaginary part for Hermitian matrices
+where the last ``-n`` is due to the zero imaginary part for Hermitian matrices
 """
 function manifold_dimension(M::SymmetricMatrices{<:Any,𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
@@ -202,7 +202,7 @@ Projects `p` from the embedding onto the [`SymmetricMatrices`](@ref) `M`, i.e.
 \operatorname{proj}_{\operatorname{Sym}(n)}(p) = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SymmetricMatrices, ::Any)
 
@@ -220,7 +220,7 @@ Project the matrix `X` onto the tangent space at `p` on the [`SymmetricMatrices`
 \operatorname{proj}_p(X) = \frac{1}{2} \bigl( X + X^{\mathrm{H}} \bigr),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SymmetricMatrices, ::Any, ::Any)
 

@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "MultinomialMatrices manifold" begin
     M = MultinomialMatrices(3, 2)

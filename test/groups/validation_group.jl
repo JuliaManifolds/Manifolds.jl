@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Group wrapped in ValidationManifold" begin
     G = SpecialOrthogonal(3)

@@ -6,7 +6,7 @@ import ManifoldsBase: default_retraction_method
 import Manifolds: solve_exp_ode
 using Manifolds: InducedBasis, connection, get_chart_index, induced_basis, mean!, median!
 using ManifoldDiff: FiniteDifferencesBackend
-include("utils.jl")
+include("header.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
 struct TestEuclideanMetric <: AbstractMetric end

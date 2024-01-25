@@ -1,10 +1,10 @@
 @doc raw"""
     Oblique{T,𝔽,S} <: AbstractPowerManifold{𝔽}
 
-The oblique manifold $\mathcal{OB}(n,m)$ is the set of 𝔽-valued matrices with unit norm
+The oblique manifold ``\mathcal{OB}(n,m)`` is the set of 𝔽-valued matrices with unit norm
 column endowed with the metric from the embedding. This yields exactly the same metric as
 considering the product metric of the unit norm vectors, i.e. [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of the
-$(n-1)$-dimensional [`Sphere`](@ref).
+``(n-1)``-dimensional [`Sphere`](@ref).
 
 The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all functions of
 [`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  can be used directly.
@@ -13,7 +13,7 @@ The [`Sphere`](@ref) is stored internally within `M.manifold`, such that all fun
 
     Oblique(n::Int, m::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
-Generate the manifold of matrices $\mathbb R^{n × m}$ such that the $m$ columns are unit
+Generate the manifold of matrices ``\mathbb R^{n×m}`` such that the ``m`` columns are unit
 vectors, i.e. from the [`Sphere`](@ref)`(n-1)`.
 """
 struct Oblique{T,𝔽,S} <: AbstractPowerManifold{𝔽,Sphere{S,𝔽},ArrayPowerRepresentation}
@@ -39,7 +39,7 @@ end
     check_point(M::Oblique, p)
 
 Checks whether `p` is a valid point on the [`Oblique`](@ref)`{m,n}` `M`, i.e. is a matrix
-of `m` unit columns from $\mathbb R^{n}$, i.e. each column is a point from
+of `m` unit columns from ``\mathbb R^{n}``, i.e. each column is a point from
 [`Sphere`](@ref)`(n-1)`.
 """
 check_point(::Oblique, ::Any)

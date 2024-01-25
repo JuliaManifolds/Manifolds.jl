@@ -148,7 +148,7 @@ Compute the exponential map on the [`Circle`](@ref).
 ````math
 \exp_p X = (p+X)_{2π},
 ````
-where ``(\cdot)_{2π}`` is the (symmetric) remainder with respect to division by ``2π``, i.e. in ``[-π,π)``.
+where ``(⋅)_{2π}`` is the (symmetric) remainder with respect to division by ``2π``, i.e. in ``[-π,π)``.
 
 For the complex-valued case, the same formula as for the [`Sphere`](@ref) ``𝕊^1`` is applied to values in the
 complex plane.
@@ -299,7 +299,7 @@ Compute the logarithmic map on the [`Circle`](@ref) `M`.
 ````math
 \log_p q = (q-p)_{2π},
 ````
-where ``(\cdot)_{2π}`` is the (symmetric) remainder with respect to division by ``2π``, i.e. in ``[-π,π)``.
+where ``(⋅)_{2π}`` is the (symmetric) remainder with respect to division by ``2π``, i.e. in ``[-π,π)``.
 
 For the complex-valued case, the same formula as for the [`Sphere`](@ref) ``𝕊^1`` is applied to values in the
 complex plane.
