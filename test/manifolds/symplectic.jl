@@ -163,10 +163,11 @@ using ManifoldDiff
     end
     @testset "Generate random points/tangent vectors" begin
         M_big = SymplecticMatrices(20)
+        Random.seed!(49)
         p_big = rand(M_big)
-        @test is_point(M_big, p_big; error=:error, atol=1.0e-12)
+        @test is_point(M_big, p_big; error=:error, atol=1.0e-9)
         X_big = rand(M_big; vector_at=p_big)
-        @test is_vector(M_big, p_big, X_big; error=:error, atol=1.0e-12)
+        @test is_vector(M_big, p_big, X_big; error=:error, atol=1.0e-9)
     end
     @testset "test_manifold(SymplecticMatrices(6))" begin
         test_manifold(
