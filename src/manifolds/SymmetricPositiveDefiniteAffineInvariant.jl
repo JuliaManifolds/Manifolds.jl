@@ -37,7 +37,7 @@ Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`Euclidea
 `g_E`, this function changes into the [`AffineInvariantMetric`](@ref) (default) metric on the
 [`SymmetricPositiveDefinite`](@ref) `M`.
 
-To be precise we are looking for ``c\colon T_p\mathcal P(n) \to T_p\mathcal P(n) ``
+To be precise we are looking for ``c\colon T_p\mathcal P(n) → T_p\mathcal P(n) ``
 such that for all ``Y,Z ∈ T_p\mathcal P(n)``` it holds
 
 ```math
@@ -65,7 +65,7 @@ d_{\mathcal P(n)}(p,q)
 = \lVert \operatorname{Log}(p^{-\frac{1}{2}}qp^{-\frac{1}{2}})\rVert_{\mathrm{F}}.,
 ```
 where $\operatorname{Log}$ denotes the matrix logarithm and
-$\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
+$\lVert⋅\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
 function distance(::SymmetricPositiveDefinite, p, q)
     # avoid numerical instabilities in cholesky
@@ -234,7 +234,7 @@ the coordinates with respect to this ONB can be simplified to
 ```math
    c_k = \mathrm{tr}(p^{-\frac{1}{2}}\Delta_{i,j} X)
 ```
-where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+where ``k`` is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 """
 get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
 
@@ -272,7 +272,7 @@ the vector reconstruction with respect to this ONB can be simplified to
 ```math
    X = p^{\frac{1}{2}} \Biggl( \sum_{i=1,j=i}^n c_k \Delta_{i,j} \Biggr) p^{\frac{1}{2}}
 ```
-where $k$ is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+where ``k`` is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
 """
 get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 

@@ -81,7 +81,7 @@ More details can be found in Section III [DouikHassibi:2019](@cite).
 
     MultinomialDoubleStochastic(n::Int; parameter::Symbol=:type)
 
-Generate the manifold of matrices ``\mathbb R^{n×n}`` that are doubly stochastic and symmetric.
+Generate the manifold of matrices ``ℝ^{n×n}`` that are doubly stochastic and symmetric.
 """
 struct MultinomialDoubleStochastic{T} <: AbstractMultinomialDoublyStochastic
     size::T
@@ -169,7 +169,6 @@ The two vectors ``α,β ∈ ℝ^{n×n}`` are computed as a solution (typically u
     =
     \begin{pmatrix} Y\mathbf{1}\\Y^{\mathrm{T}}\mathbf{1}\end{pmatrix},
 ````
-
 where ``I_n`` is the ``n×n`` unit matrix and ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
 
 """

@@ -85,7 +85,7 @@ as the point that satisfies the minimizer
 ````math
 \argmin_{y ∈ \mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
 ````
-where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
+where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 
 In the general case, the [`GradientDescentEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GradientDescentEstimation) is used to compute the mean.
     mean(
@@ -445,7 +445,7 @@ Compute the (optionally weighted) Riemannian median of the vector `x` of points 
 ````math
 \argmin_{y ∈ \mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
-where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
+where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).
 
 In the general case, the [`CyclicProximalPointEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.CyclicProximalPointEstimation) is used to compute the
@@ -549,7 +549,7 @@ The parameter ``α\in (0,2]`` is a step size.
 
 The algorithm is further described in [FletcherVenkatasubramanianJoshi:2008](@cite),
 especially the update rule in Eq. (6), i.e. Let ``q_{k}`` denote the current
-iterate, $n$ the number of points ``x_1,\ldots,x_n``, and
+iterate, ``n`` the number of points ``x_1,\ldots,x_n``, and
 
 ```math
 I_k = \bigl\{ i \in \{1,\ldots,n\} \big| x_i \neq q_k \bigr\}
@@ -566,7 +566,7 @@ X = \frac{1}{s}\sum_{i\in I_k} \frac{w_i}{d_{\mathcal M}(q_k,x_i)}\log_{q_k}x_i
 s = \sum_{i\in I_k} \frac{w_i}{d_{\mathcal M}(q_k,x_i)},
 ```
 
-and where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
+and where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction, which by default use the exponential and logarithmic map,

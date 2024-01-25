@@ -37,7 +37,7 @@ More details can be found in Section IV [DouikHassibi:2019](@cite).
 
     MultinomialSymmetric(n)
 
-Generate the manifold of matrices ``\mathbb R^{n×n}`` that are doubly stochastic and symmetric.
+Generate the manifold of matrices ``ℝ^{n×n}`` that are doubly stochastic and symmetric.
 """
 struct MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic
     size::T
@@ -175,7 +175,7 @@ end
 @doc raw"""
     retract(M::MultinomialSymmetric, p, X, ::ProjectionRetraction)
 
-compute a projection based retraction by projecting ``p\odot\exp(X⨸p)`` back onto the manifold,
+compute a projection based retraction by projecting ``p⊙\exp(X⨸p)`` back onto the manifold,
 where ``⊙,⨸`` are elementwise multiplication and division, respectively. Similarly, ``\exp``
 refers to the elementwise exponentiation.
 """

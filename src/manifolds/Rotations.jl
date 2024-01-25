@@ -1,14 +1,14 @@
 @doc raw"""
     Rotations{T} <: AbstractManifold{ℝ}
 
-The manifold of rotation matrices of size ``n × n``, i.e.
+The manifold of rotation matrices of size ``n×n``, i.e.
 real-valued orthogonal matrices with determinant ``+1``.
 
 # Constructor
 
     Rotations(n::Int; parameter::Symbol=:type)
 
-Generate the manifold of ``n × n`` rotation matrices.
+Generate the manifold of ``n×n`` rotation matrices.
 """
 const Rotations{T} = GeneralUnitaryMatrices{T,ℝ,DeterminantOneMatrices}
 
@@ -43,7 +43,7 @@ end
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
-The Lie algebra of [`Rotations(4)`](@ref) in ``ℝ^{4 × 4}``, ``𝔰𝔬(4)``, consists of ``4 × 4``
+The Lie algebra of [`Rotations(4)`](@ref) in ``ℝ^{4×4}``, ``𝔰𝔬(4)``, consists of ``4×4``
 skew-symmetric matrices. The unique imaginary components of their eigenvalues are the
 angles of the two plane rotations. This function computes these more efficiently than
 `eigvals`.

@@ -29,7 +29,7 @@ from the vector space of type `M` at point `p` from the underlying `AbstractMani
 
 The function can be used for example to transform vectors
 from the tangent bundle to vectors from the cotangent bundle
-$♭ : T\mathcal M → T^{*}\mathcal M$
+``♭ : T\mathcal M → T^{*}\mathcal M``
 """
 flat(M::AbstractManifold, p, X) = RieszRepresenterCotangentVector(M, p, X)
 function flat(M::AbstractManifold, p, X::TFVector{<:Any,<:AbstractBasis})
@@ -145,7 +145,7 @@ from the vector space `M` at point `p` from the underlying `AbstractManifold`.
 
 The function can be used for example to transform vectors
 from the cotangent bundle to vectors from the tangent bundle
-$♯ : T^{*}\mathcal M → T\mathcal M$
+``♯ : T^{*}\mathcal M → T\mathcal M``
 """
 sharp(::AbstractManifold, p, ξ)
 

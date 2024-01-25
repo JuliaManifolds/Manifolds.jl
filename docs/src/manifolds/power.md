@@ -1,8 +1,8 @@
 # [Power manifold](@id PowerManifoldSection)
 
-A power manifold is based on a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $\mathcal M$ to build a $\mathcal M^{n_1 \times n_2 \times \cdots \times n_m}$.
-In the case where $m=1$ we can represent a manifold-valued vector of data of length $n_1$, for example a time series.
-The case where $m=2$ is useful for representing manifold-valued matrices of data of size $n_1 \times n_2$, for example certain types of images.
+A power manifold is based on a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  ``\mathcal M`` to build a ``\mathcal M^{n_1×n_2 ×⋯×n_m}``.
+In the case where ``m=1`` we can represent a manifold-valued vector of data of length ``n_1``, for example a time series.
+The case where ``m=2`` is useful for representing manifold-valued matrices of data of size ``n_1×n_2``, for example certain types of images.
 
 There are three available representations for points and vectors on a power manifold:
 
@@ -17,7 +17,7 @@ Below are some examples of usage of these representations.
 There are two ways to store the data: in a multidimensional array or in a nested array.
 
 Let's look at an example for both.
-Let $\mathcal M$ be `Sphere(2)` the 2-sphere and we want to look at vectors of length 4.
+Let ``\mathcal M`` be `Sphere(2)` the 2-sphere and we want to look at vectors of length 4.
 
 ### `ArrayPowerRepresentation`
 

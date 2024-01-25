@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 struct DummyManifold <: AbstractManifold{ℝ} end
 struct DummyTotalSpace <: AbstractManifold{ℝ} end

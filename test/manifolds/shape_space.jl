@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "KendallsPreShapeSpace" begin
     M = KendallsPreShapeSpace(2, 3)

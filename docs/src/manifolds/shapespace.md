@@ -1,6 +1,6 @@
 # Shape spaces
 
-Shape spaces are spaces of ``k`` points in ``\mathbb{R}^n`` up to simultaneous action of a group on all points.
+Shape spaces are spaces of ``k`` points in ``ℝ^n`` up to simultaneous action of a group on all points.
 The most commonly encountered are Kendall's pre-shape and shape spaces.
 In the case of the Kendall's pre-shape spaces the action is translation and scaling.
 In the case of the Kendall's shape spaces the action is translation, scaling and rotation.

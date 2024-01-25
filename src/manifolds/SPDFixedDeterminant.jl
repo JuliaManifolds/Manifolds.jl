@@ -6,7 +6,7 @@ The manifold of symmetric positive definite matrices of fixed determinant ``d > 
 ````math
 \mathcal P_d(n) =
 \bigl\{
-p ∈ ℝ^{n × n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
+p ∈ ℝ^{n×n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
   \text{ and } \det(p) = d
 \bigr\}.
 ````

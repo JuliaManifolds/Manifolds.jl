@@ -4,6 +4,7 @@
 module Manifolds
 
 import Base:
+    ^,
     angle,
     copyto!,
     convert,
@@ -446,8 +447,6 @@ include("manifolds/SymmetricPositiveDefiniteAffineInvariant.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
-include("manifolds/Symplectic.jl")
-include("manifolds/SymplecticStiefel.jl")
 include("manifolds/Tucker.jl")
 #
 include("manifolds/ProbabilitySimplex.jl")
@@ -463,6 +462,13 @@ include("manifolds/KendallsShapeSpace.jl")
 
 # Introduce the quotient, Grassmann, only after Stiefel
 include("manifolds/Grassmann.jl")
+
+# Introduce Symplectic and so on manifolds only after Grassmann
+# Since that defines the StiefelPoint, StiefelTVector
+include("manifolds/Symplectic.jl")
+include("manifolds/Hamiltonian.jl") # Hamiltonian requires symplectic
+include("manifolds/SymplecticStiefel.jl")
+include("manifolds/SymplecticGrassmann.jl") # Requires SymplecticStiefel
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -522,7 +528,7 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
     Base.in(p, TpM::TangentSpace; kwargs...)
     X ∈ TangentSpace(M, p)
 
-Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
+Check whether `X` is a tangent vector from (in) the tangent space ``T_p\mathcal M``, i.e.
 the [`TangentSpace`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.TangentSpace)
 at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
 This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.
@@ -633,6 +639,7 @@ export Euclidean,
     GeneralizedGrassmann,
     GeneralizedStiefel,
     Grassmann,
+    HamiltonianMatrices,
     HeisenbergGroup,
     Hyperbolic,
     KendallsPreShapeSpace,
@@ -662,8 +669,10 @@ export Euclidean,
     SPDFixedDeterminant,
     SymmetricPositiveSemidefiniteFixedRank,
     Symplectic,
+    SymplecticGrassmann,
+    SymplecticMatrices,
     SymplecticStiefel,
-    SymplecticMatrix,
+    SymplecticElement,
     Torus,
     Tucker,
     UnitaryMatrices
@@ -685,7 +694,7 @@ export HyperboloidTVector,
     ProjectorTVector,
     StiefelTVector
 export AbstractNumbers, ℝ, ℂ, ℍ
-
+export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
@@ -778,6 +787,7 @@ export CachedBasis,
 export ComponentManifoldError, CompositeManifoldError, ManifoldDomainError
 # Functions on Manifolds
 export ×,
+    ^,
     action_side,
     allocate,
     allocate_result,
@@ -844,6 +854,7 @@ export ×,
     is_default_metric,
     is_flat,
     is_group_manifold,
+    is_hamiltonian,
     is_identity,
     is_point,
     is_vector,
@@ -903,6 +914,8 @@ export ×,
     skewness,
     std,
     sym_rem,
+    symplectic_inverse,
+    symplectic_inverse!,
     symplectic_inverse_times,
     symplectic_inverse_times!,
     submanifold,

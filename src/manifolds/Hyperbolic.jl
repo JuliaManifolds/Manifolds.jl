@@ -3,7 +3,7 @@
 
 The hyperbolic space $\mathcal H^n$ represented by $n+1$-Tuples, i.e. embedded in the
 [`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
-$⟨\cdot,\cdot⟩_{\mathrm{M}}$. The space is defined as
+$⟨⋅,⋅⟩_{\mathrm{M}}$. The space is defined as
 
 ```math
 \mathcal H^n = \Bigl\{p ∈ ℝ^{n+1}\ \Big|\ ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
@@ -63,7 +63,7 @@ end
 
 In the Hyperboloid model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vctors are represented
 as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) $⟨p,X⟩_{\mathrm{M}}=0$ to their base
-point $p$.
+point ``p``.
 
 This representation is the default, i.e. vectors are assumed to have this repesentation.
 """
@@ -223,7 +223,7 @@ from `p` towards `X`. The formula reads
 + \sinh(\sqrt{⟨X,X⟩_{\mathrm{M}}})\frac{X}{\sqrt{⟨X,X⟩_{\mathrm{M}}}},
 ````
 
-where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+where $⟨⋅,⋅⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 """
 exp(::Hyperbolic, ::Any...)
@@ -253,7 +253,7 @@ end
     injectivity_radius(M::Hyperbolic)
     injectivity_radius(M::Hyperbolic, p)
 
-Return the injectivity radius on the [`Hyperbolic`](@ref), which is $∞$.
+Return the injectivity radius on the [`Hyperbolic`](@ref), which is ``∞``.
 """
 injectivity_radius(::Hyperbolic) = Inf
 
@@ -287,7 +287,7 @@ reaches `q` after time 1. The formula reads for $p ≠ q$
 \frac{q-⟨p,q⟩_{\mathrm{M}} p}{\lVert q-⟨p,q⟩_{\mathrm{M}} p \rVert_2},
 ```
 
-where $⟨\cdot,\cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+where $⟨⋅,⋅⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold. For $p=q$ the logarihmic map is equal to the zero vector.
 """
 log(::Hyperbolic, ::Any...)
@@ -344,7 +344,7 @@ The formula reads
 ````math
 Y = X + ⟨p,X⟩_{\mathrm{M}} p,
 ````
-where $⟨\cdot, \cdot⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+where $⟨⋅, ⋅⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 
 !!! note
@@ -376,7 +376,7 @@ connecting `p` and `q`. The formula reads
 \mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_p}{d^2_{\mathcal H^n}(p,q)}
 \bigl(\log_p q + \log_qp \bigr),
 ````
-where $⟨\cdot,\cdot⟩_p$ denotes the inner product in the tangent space at `p`.
+where $⟨⋅,⋅⟩_p$ denotes the inner product in the tangent space at `p`.
 """
 parallel_transport_to(::Hyperbolic, ::Any, ::Any, ::Any)
 

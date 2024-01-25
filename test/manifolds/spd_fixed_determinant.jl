@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Isochoric matrices" begin
     M = SPDFixedDeterminant(2, 1.0)

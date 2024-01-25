@@ -1,47 +1,47 @@
 @doc raw"""
     Grassmann{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The Grassmann manifold $\operatorname{Gr}(n,k)$ consists of all subspaces spanned by $k$ linear independent
-vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
-This yields all $k$-dimensional subspaces of $ℝ^n$ for the real-valued case and all $2k$-dimensional subspaces
-of $ℂ^n$ for the second.
+The Grassmann manifold ``\mathrm{Gr}(n,k)`` consists of all subspaces spanned by ``k`` linear independent
+vectors ``𝔽^n``, where ``𝔽  ∈ \{ℝ, ℂ\}`` is either the real- (or complex-) valued vectors.
+This yields all ``k``-dimensional subspaces of ``ℝ^n`` for the real-valued case and all ``2k``-dimensional subspaces
+of ``ℂ^n`` for the second.
 
 The manifold can be represented as
 
 ````math
-\operatorname{Gr}(n,k) := \bigl\{ \operatorname{span}(p) : p ∈ 𝔽^{n × k}, p^\mathrm{H}p = I_k\},
+\mathrm{Gr}(n,k) := \bigl\{ \operatorname{span}(p) : p ∈ 𝔽^{n×k}, p^\mathrm{H}p = I_k\},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian and
-$I_k$ is the $k × k$ identity matrix. This means, that the columns of $p$
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transpose or Hermitian and
+``I_k`` is the ``k×k`` identity matrix. This means, that the columns of ``p``
 form an unitary basis of the subspace, that is a point on
-$\operatorname{Gr}(n,k)$, and hence the subspace can actually be represented by
+``\operatorname{Gr}(n,k)``, and hence the subspace can actually be represented by
 a whole equivalence class of representers.
 Another interpretation is, that
 
 ````math
-\operatorname{Gr}(n,k) = \operatorname{St}(n,k) / \operatorname{O}(k),
+\mathrm{Gr}(n,k) = \mathrm{St}(n,k) / \operatorname{O}(k),
 ````
 
 i.e the Grassmann manifold is the quotient of the [`Stiefel`](@ref) manifold and
-the orthogonal group $\operatorname{O}(k)$ of orthogonal $k × k$ matrices.
+the orthogonal group ``\operatorname{O}(k)`` of orthogonal ``k×k`` matrices.
 Note that it doesn't matter whether we start from the Euclidean or canonical metric
 on the Stiefel manifold, the resulting quotient metric on Grassmann is the same.
 
-The tangent space at a point (subspace) $p$ is given by
+The tangent space at a point (subspace) ``p`` is given by
 
 ````math
 T_p\mathrm{Gr}(n,k) = \bigl\{
-X ∈ 𝔽^{n × k} :
+X ∈ 𝔽^{n×k} :
 X^{\mathrm{H}}p + p^{\mathrm{H}}X = 0_{k} \bigr\},
 ````
 
-where $0_k$ is the $k × k$ zero matrix.
+where ``0_k`` is the ``k×k`` zero matrix.
 
-Note that a point $p ∈ \operatorname{Gr}(n,k)$ might be represented by
+Note that a point ``p ∈ \operatorname{Gr}(n,k)`` might be represented by
 different matrices (i.e. matrices with unitary column vectors that span
-the same subspace). Different representations of $p$ also lead to different
-representation matrices for the tangent space $T_p\mathrm{Gr}(n,k)$
+the same subspace). Different representations of ``p`` also lead to different
+representation matrices for the tangent space ``T_p\mathrm{Gr}(n,k)``
 
 For a representation of points as orthogonal projectors. Here
 
@@ -53,7 +53,7 @@ with tangent space
 
 ```math
 T_p\mathrm{Gr}(n,k) = \bigl\{
-X ∈ \mathbb R^{n × n} : X=X^{\mathrm{T}} \text{ and } X = pX+Xp \bigr\},
+X ∈ \mathbb R^{n×n} : X=X^{\mathrm{T}} \text{ and } X = pX+Xp \bigr\},
 ```
 
 see also [`ProjectorPoint`](@ref) and [`ProjectorTVector`](@ref).
@@ -67,7 +67,7 @@ A good overview can be found in[BendokatZimmermannAbsil:2020](@cite).
 
     Grassmann(n, k, field=ℝ, parameter::Symbol=:type)
 
-Generate the Grassmann manifold $\operatorname{Gr}(n,k)$, where the real-valued
+Generate the Grassmann manifold ``\operatorname{Gr}(n,k)``, where the real-valued
 case `field=ℝ` is the default.
 """
 struct Grassmann{T,𝔽} <: AbstractDecoratorManifold{𝔽}
@@ -120,7 +120,7 @@ end
     injectivity_radius(M::Grassmann)
     injectivity_radius(M::Grassmann, p)
 
-Return the injectivity radius on the [`Grassmann`](@ref) `M`, which is $\frac{π}{2}$.
+Return the injectivity radius on the [`Grassmann`](@ref) `M`, which is ``\frac{π}{2}``.
 """
 injectivity_radius(::Grassmann) = π / 2
 injectivity_radius(::Grassmann, p) = π / 2
@@ -144,13 +144,13 @@ is_flat(M::Grassmann) = manifold_dimension(M) == 1
 @doc raw"""
     manifold_dimension(M::Grassmann)
 
-Return the dimension of the [`Grassmann(n,k,𝔽)`](@ref) manifold `M`, i.e.
+Return the dimension of the [`Grassmann`](@ref)`(n,k,𝔽)` manifold `M`, i.e.
 
 ````math
 \dim \operatorname{Gr}(n,k) = k(n-k) \dim_ℝ 𝔽,
 ````
 
-where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(M::Grassmann{<:Any,𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
@@ -195,7 +195,7 @@ function get_total_space(M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
 end
 
 #
-# Reprenter specific implementations in their corresponding subfiles
+# Representer specific implementations in their corresponding subfiles
 #
 include("GrassmannStiefel.jl")
 include("GrassmannProjector.jl")

@@ -118,7 +118,7 @@ abstract type ActionDirection end
 @doc raw"""
     LeftAction()
 
-Left action of a group on a manifold. For a forward action ``α: G × X → X`` it is characterized by
+Left action of a group on a manifold. For a forward action ``α: G×X → X`` it is characterized by
 ```math
 α(g, α(h, x)) = α(gh, x)
 ```
@@ -129,7 +129,7 @@ struct LeftAction <: ActionDirection end
 """
     RightAction()
 
-Right action of a group on a manifold. For a forward action ``α: G × X → X`` it is characterized by
+Right action of a group on a manifold. For a forward action ``α: G×X → X`` it is characterized by
 ```math
 α(g, α(h, x)) = α(hg, x)
 ```
@@ -149,14 +149,14 @@ abstract type GroupActionSide end
 """
     LeftSide()
 
-An action of a group on a manifold that acts from the left side, i.e. ``α: G × X → X``.
+An action of a group on a manifold that acts from the left side, i.e. ``α: G×X → X``.
 """
 struct LeftSide <: GroupActionSide end
 
 """
     RightSide()
 
-An action of a group on a manifold that acts from the right side, i.e. ``α: X × G → X``.
+An action of a group on a manifold that acts from the right side, i.e. ``α: X×G → X``.
 """
 struct RightSide <: GroupActionSide end
 
@@ -1037,7 +1037,7 @@ Given an element ``q ∈ \mathcal{G}``, compute the right inverse of the group e
 ````
 
 where ``e`` here is the [`Identity`](@ref) element, that is, ``1`` for numeric ``q`` or the
-identity matrix ``I_m`` for matrix ``q ∈ ℝ^{m × m}``.
+identity matrix ``I_m`` for matrix ``q ∈ ℝ^{m×m}``.
 
 Since this function also depends on the group operation, make sure to implement
 either
