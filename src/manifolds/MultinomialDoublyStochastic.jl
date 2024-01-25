@@ -3,7 +3,10 @@
 
 A common type for manifolds that are doubly stochastic, for example by direct constraint
 [`MultinomialDoubleStochastic`](@ref) or by symmetry [`MultinomialSymmetric`](@ref),
+or additionally by symmetric positive definiteness [`MultinomialSymmetricPositiveDefinite`](@ref)
 as long as they are also modeled as [`IsIsometricEmbeddedManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.IsIsometricEmbeddedManifold).
+
+That way they share the inner product (just by restriction), and even the Riemannian gradient
 """
 abstract type AbstractMultinomialDoublyStochastic <: AbstractDecoratorManifold{ℝ} end
 
@@ -12,10 +15,45 @@ function active_traits(f, ::AbstractMultinomialDoublyStochastic, args...)
 end
 
 @doc raw"""
+    representation_size(M::AbstractMultinomialDoublyStochastic)
+
+return the representation size of doubly stochastic matrices, whic are embedded
+in the ``ℝ^{n×n}`` matrices and hence the answer here is ``
+"""
+function representation_size(M::AbstractMultinomialDoublyStochastic)
+    n = get_parameter(M.size)[1]
+    return (n, n)
+end
+
+@doc raw"""
+    riemannian_gradient(M::AbstractMultinomialDoublyStochastic, p, Y; kwargs...)
+
+Let ``Y`` denote the Euclidean gradient of a function ``\tilde f`` defined in the
+embedding neighborhood of `M`, then the Riemannian gradient is given by
+Lemma 1 [DouikHassibi:2019](@cite) as
+
+```math
+  \operatorname{grad} f(p) = \proj_{T_p\mathcal M}(Y⊙p)
+```
+
+where ``⊙`` denotes the Hadamard or elementwise product, and the projection
+is the projection onto the tangent space of the corresponding manifold.
+
+"""
+riemannian_gradient(M::AbstractMultinomialDoublyStochastic, p, Y; kwargs...)
+
+function riemannian_gradient!(M::AbstractMultinomialDoublyStochastic, X, p, Y; kwargs...)
+    X .= p .* Y
+    project!(M, X, p, X)
+    return X
+end
+
+@doc raw"""
     MultinomialDoublyStochastic{T} <: AbstractMultinomialDoublyStochastic
 
 The set of doubly stochastic multinomial matrices consists of all ``n×n`` matrices with
 stochastic columns and rows, i.e.
+
 ````math
 \begin{aligned}
 \mathcal{DP}(n) \coloneqq \bigl\{p ∈ ℝ^{n×n}\ \big|\ &p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m,\\
@@ -60,22 +98,14 @@ end
 Checks whether `p` is a valid point on the [`MultinomialDoubleStochastic`](@ref)`(n)` `M`,
 i.e. is a  matrix with positive entries whose rows and columns sum to one.
 """
-function check_point(
-    M::MultinomialDoubleStochastic,
-    p::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
+function check_point(M::MultinomialDoubleStochastic, p; kwargs...)
     n = get_parameter(M.size)[1]
-    r = sum(p, dims=2)
-    if !isapprox(norm(r - ones(n, 1)), 0.0; atol=atol, kwargs...)
-        return DomainError(
-            r,
-            "The point $(p) does not lie on $M, since its rows do not sum up to one.",
-        )
-    end
-    return nothing
+    s = check_point(MultinomialMatrices(n, n), p; kwargs...)
+    !isnothing(s) && return s
+    s2 = check_point(MultinomialMatrices(n, n), p'; kwargs...)
+    return s2
 end
+
 @doc raw"""
     check_vector(M::MultinomialDoubleStochastic p, X; kwargs...)
 
@@ -83,21 +113,12 @@ Checks whether `X` is a valid tangent vector to `p` on the [`MultinomialDoubleSt
 This means, that `p` is valid, that `X` is of correct dimension and sums to zero along any
 column or row.
 """
-function check_vector(
-    M::MultinomialDoubleStochastic,
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
-    r = sum(X, dims=2) # check for stochastic rows
-    if !isapprox(norm(r), 0.0; atol=atol, kwargs...)
-        return DomainError(
-            r,
-            "The matrix $(X) is not a tangent vector to $(p) on $(M), since its rows do not sum up to zero.",
-        )
-    end
-    return nothing
+function check_vector(M::MultinomialDoubleStochastic, p, X; kwargs...)
+    n = get_parameter(M.size)[1]
+    s = check_vector(MultinomialMatrices(n, n), p, X; kwargs...)
+    !isnothing(s) && return s
+    s2 = check_vector(MultinomialMatrices(n, n), p, X'; kwargs...)
+    return s2
 end
 
 function get_embedding(::MultinomialDoubleStochastic{TypeParameter{Tuple{n}}}) where {n}
@@ -134,11 +155,14 @@ end
 
 Project `Y` onto the tangent space at `p` on the [`MultinomialDoubleStochastic`](@ref) `M`, return the result in `X`.
 The formula reads
+
 ````math
     \operatorname{proj}_p(Y) = Y - (α\mathbf{1}_n^{\mathrm{T}} + \mathbf{1}_nβ^{\mathrm{T}}) ⊙ p,
 ````
+
 where ``⊙`` denotes the Hadamard or elementwise product and ``\mathbb{1}_n`` is the vector of length ``n`` containing ones.
 The two vectors ``α,β ∈ ℝ^{n×n}`` are computed as a solution (typically using the left pseudo inverse) of
+
 ````math
     \begin{pmatrix} I_n & p\\p^{\mathrm{T}} & I_n \end{pmatrix}
     \begin{pmatrix} α\\ β\end{pmatrix}
@@ -152,8 +176,8 @@ project(::MultinomialDoubleStochastic, ::Any, ::Any)
 
 function project!(M::MultinomialDoubleStochastic, X, p, Y)
     n = get_parameter(M.size)[1]
-    ζ = [I p; p I] \ [sum(Y, dims=2); sum(Y, dims=1)'] # Formula (25) from 1802.02628
-    return X .= Y .- (repeat(ζ[1:n], 1, 3) .+ repeat(ζ[(n + 1):end]', 3, 1)) .* p
+    ζ = [I p; p' I] \ [sum(Y, dims=2); sum(Y, dims=1)'] # Formula (25) from 1802.02628
+    return X .= Y .- (repeat(ζ[1:n], 1, n) .+ repeat(ζ[(n + 1):end]', n, 1)) .* p
 end
 
 @doc raw"""
@@ -201,15 +225,45 @@ function project!(
     return q
 end
 
-function representation_size(M::MultinomialDoubleStochastic)
-    n = get_parameter(M.size)[1]
-    return (n, n)
+@doc raw"""
+    rand(::MultinomialDoubleStochastic; vector_at=nothing, σ::Real=1.0, kwargs...)
+
+Generate random points on the [`MultinomialDoubleStochastic`](@ref) manifold
+or tangent vectors at the point `vector_at` if that is not `nothing`.
+
+Let ``n×n`` denote the matrix dimension of the [`MultinomialDoubleStochastic`](@ref).
+
+When `vector_at` is nothing, this is done by generating a random matrix`rand(n,n)`
+with positive entries and projecting it onto the manifold. The `kwargs...` are
+passed to this projection.
+
+When `vector_at` is not `nothing`, a random matrix in the ambient space is generated
+and projected onto the tangent space
+"""
+rand(::MultinomialDoubleStochastic; σ::Real=1.0)
+
+function Random.rand!(
+    rng::AbstractRNG,
+    M::MultinomialDoubleStochastic,
+    pX;
+    vector_at=nothing,
+    σ::Real=one(real(eltype(pX))),
+    kwargs...,
+)
+    rand!(rng, pX)
+    pX .*= σ
+    if vector_at === nothing
+        project!(M, pX, pX; kwargs...)
+    else
+        project!(M, pX, vector_at, pX)
+    end
+    return pX
 end
 
 @doc raw"""
     retract(M::MultinomialDoubleStochastic, p, X, ::ProjectionRetraction)
 
-compute a projection based retraction by projecting $p\odot\exp(X⨸p)$ back onto the manifold,
+compute a projection based retraction by projecting ``p\odot\exp(X⨸p)`` back onto the manifold,
 where ``⊙,⨸`` are elementwise multiplication and division, respectively. Similarly, ``\exp``
 refers to the elementwise exponentiation.
 """

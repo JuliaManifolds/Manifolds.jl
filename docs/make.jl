@@ -119,6 +119,7 @@ makedocs(;
                 "Multinomial doubly stochastic matrices" => "manifolds/multinomialdoublystochastic.md",
                 "Multinomial matrices" => "manifolds/multinomial.md",
                 "Multinomial symmetric matrices" => "manifolds/multinomialsymmetric.md",
+                "Multinomial symmetric positive definite matrices" => "manifolds/multinomialsymmetricpositivedefinite.md",
                 "Oblique manifold" => "manifolds/oblique.md",
                 "Probability simplex" => "manifolds/probabilitysimplex.md",
                 "Positive numbers" => "manifolds/positivenumbers.md",

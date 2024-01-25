@@ -252,6 +252,7 @@ using ManifoldsBase:
     IsEmbeddedSubmanifold,
     IsExplicitDecorator,
     LogarithmicInverseRetraction,
+    ManifoldDomainError,
     ManifoldsBase,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
@@ -426,6 +427,7 @@ include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
+include("manifolds/MultinomialSymmetricPositiveDefinite.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
 include("manifolds/SkewHermitian.jl")
@@ -646,6 +648,7 @@ export Euclidean,
     MultinomialDoubleStochastic,
     MultinomialMatrices,
     MultinomialSymmetric,
+    MultinomialSymmetricPositiveDefinite,
     Oblique,
     OrthogonalMatrices,
     PositiveArrays,
@@ -781,7 +784,7 @@ export CachedBasis,
     InducedBasis,
     ProjectedOrthonormalBasis
 # Errors on Manifolds
-export ComponentManifoldError, CompositeManifoldError
+export ComponentManifoldError, CompositeManifoldError, ManifoldDomainError
 # Functions on Manifolds
 export ×,
     ^,

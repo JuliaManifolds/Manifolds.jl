@@ -154,6 +154,7 @@ end
         include_test("manifolds/lorentz.jl")
         include_test("manifolds/multinomial_doubly_stochastic.jl")
         include_test("manifolds/multinomial_symmetric.jl")
+        include_test("manifolds/multinomial_spd.jl")
         include_test("manifolds/positive_numbers.jl")
         include_test("manifolds/probability_simplex.jl")
         include_test("manifolds/projective_space.jl")
