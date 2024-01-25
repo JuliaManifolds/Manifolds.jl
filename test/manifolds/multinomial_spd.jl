@@ -1,4 +1,5 @@
-include("../utils.jl")
+include("../header.jl")
+
 
 @testset "Multinomial symmetric positive definite matrices" begin
     @testset "Basics" begin
