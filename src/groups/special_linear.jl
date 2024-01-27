@@ -49,9 +49,15 @@ function check_point(G::SpecialLinear, p; kwargs...)
     return nothing
 end
 
-function check_vector(G::SpecialLinear, p, X; kwargs...)
+function check_vector(
+    G::SpecialLinear,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(G))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
     trX = tr(inverse_translate_diff(G, p, p, X, LeftForwardAction()))
-    if !isapprox(trX, 0; kwargs...)
+    if !isapprox(trX, 0; atol=atol, kwargs...)
         return DomainError(
             trX,
             "The matrix $(X) does not lie in the tangent space of $(G) at $(p), since " *
@@ -120,7 +126,7 @@ end
 @doc raw"""
     project(G::SpecialLinear, p, X)
 
-Orthogonally project ``X ∈ 𝔽^{n × n}`` onto the tangent space of ``p`` to the
+Orthogonally project ``X ∈ 𝔽^{n×n}`` onto the tangent space of ``p`` to the
 [`SpecialLinear`](@ref) ``G = \mathrm{SL}(n, 𝔽)``. The formula reads
 ````math
 \operatorname{proj}_{p}
@@ -140,11 +146,11 @@ function project!(G::SpecialLinear, Y, p, X)
 end
 
 function Base.show(io::IO, ::SpecialLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return print(io, "SpecialLinear($n, $𝔽)")
+    return print(io, "SpecialLinear($n, $(𝔽))")
 end
 function Base.show(io::IO, M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return print(io, "SpecialLinear($n, $𝔽; parameter=:field)")
+    return print(io, "SpecialLinear($n, $(𝔽); parameter=:field)")
 end
 
 translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X

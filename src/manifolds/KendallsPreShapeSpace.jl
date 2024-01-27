@@ -37,9 +37,14 @@ representation_size(M::KendallsPreShapeSpace) = get_parameter(M.size)
 Check whether `p` is a valid point on [`KendallsPreShapeSpace`](@ref), i.e. whether
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
 """
-function check_point(M::KendallsPreShapeSpace, p; atol=sqrt(eps(eltype(p))), kwargs...)
+function check_point(
+    M::KendallsPreShapeSpace,
+    p;
+    atol::Real=sqrt(eps(float(eltype(p)))),
+    kwargs...,
+)
     for p_row in eachrow(p)
-        if !isapprox(mean(p_row), 0; atol, kwargs...)
+        if !isapprox(mean(p_row), 0; atol=atol, kwargs...)
             return DomainError(
                 mean(p_row),
                 "The point $(p) does not lie on the $(M) since one of the rows does not have zero mean.",
@@ -55,9 +60,15 @@ end
 Check whether `X` is a valid tangent vector on [`KendallsPreShapeSpace`](@ref), i.e. whether
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
 """
-function check_vector(M::KendallsPreShapeSpace, p, X; atol=sqrt(eps(eltype(X))), kwargs...)
+function check_vector(
+    M::KendallsPreShapeSpace,
+    p,
+    X;
+    atol::Real=sqrt(eps(float(eltype(X)))),
+    kwargs...,
+)
     for X_row in eachrow(X)
-        if !isapprox(mean(X_row), 0; atol, kwargs...)
+        if !isapprox(mean(X_row), 0; atol=atol, kwargs...)
             return DomainError(
                 mean(X_row),
                 "The vector $(X) is not a tangent vector to $(p) on $(M), since one of the rows does not have zero mean.",

@@ -75,6 +75,6 @@ if (abspath(PROGRAM_FILE) == @__FILE__) # Run as script
     # Setup test variants
     #...then continue with the test run in normal mode below
 end
-include("utils.jl")
+include("header.jl")
 
 include("run_legacy_tests.jl")

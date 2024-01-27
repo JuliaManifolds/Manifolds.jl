@@ -1,13 +1,14 @@
-#
-# This is the old test run, that should slowly be reduced in size
-#
-
 @info "Manifolds.jl Test settings:\n\n" *
       "Testing Float32:  $(TEST_FLOAT32)\n" *
       "Testing Double64: $(TEST_DOUBLE64)\n" *
       "Testing Static:   $(TEST_STATIC_SIZED)\n\n" *
       "Test group:       $(TEST_GROUP)\n\n" *
-      "These settings are stored in environment variables, see in test/utils.jl"
+      "These settings are stored in environment variables, see in test/header.jl"
+
+function include_test(path)
+    @info "Testing $path"
+    @time include(path)  # show basic timing, (this will print a newline at end)
+end
 
 @testset "Manifolds.jl" begin
     if TEST_GROUP ∈ ["all", "test_manifolds"]
@@ -146,10 +147,12 @@
         include_test("manifolds/generalized_grassmann.jl")
         include_test("manifolds/generalized_stiefel.jl")
         include_test("manifolds/grassmann.jl")
+        include_test("manifolds/hamiltonian.jl")
         include_test("manifolds/hyperbolic.jl")
         include_test("manifolds/lorentz.jl")
         include_test("manifolds/multinomial_doubly_stochastic.jl")
         include_test("manifolds/multinomial_symmetric.jl")
+        include_test("manifolds/multinomial_spd.jl")
         include_test("manifolds/positive_numbers.jl")
         include_test("manifolds/probability_simplex.jl")
         include_test("manifolds/projective_space.jl")
@@ -165,6 +168,7 @@
         include_test("manifolds/spd_fixed_determinant.jl")
         include_test("manifolds/symmetric_positive_semidefinite_fixed_rank.jl")
         include_test("manifolds/symplectic.jl")
+        include_test("manifolds/symplecticgrassmann.jl")
         include_test("manifolds/symplecticstiefel.jl")
         include_test("manifolds/tucker.jl")
         include_test("manifolds/unitary_matrices.jl")

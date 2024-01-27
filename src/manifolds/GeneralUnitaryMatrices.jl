@@ -178,7 +178,7 @@ function cos_angles_4d_rotation_matrix(R)
     return ((a + b) / 4, (a - b) / 4)
 end
 
-function default_estimation_method(::GeneralUnitaryMatrices{<:Any,ℝ}, ::typeof(mean))
+function default_approximation_method(::GeneralUnitaryMatrices{<:Any,ℝ}, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 2 / √2)
 end
 
@@ -946,7 +946,7 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolationWithinRadius`](@ref).
+[`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius).
 """
 mean(::GeneralUnitaryMatrices{<:Any,ℝ}, ::Any)
 
@@ -954,7 +954,7 @@ mean(::GeneralUnitaryMatrices{<:Any,ℝ}, ::Any)
      project(G::UnitaryMatrices, p)
      project(G::OrthogonalMatrices, p)
 
-Project the point ``p ∈ 𝔽^{n × n}`` to the nearest point in
+Project the point ``p ∈ 𝔽^{n×n}`` to the nearest point in
 ``\mathrm{U}(n,𝔽)=``[`Unitary(n,𝔽)`](@ref) under the Frobenius norm.
 If ``p = U S V^\mathrm{H}`` is the singular value decomposition of ``p``, then the projection
 is
@@ -980,7 +980,7 @@ end
     project(M::Rotations, p, X)
     project(M::UnitaryMatrices, p, X)
 
-Orthogonally project the tangent vector ``X ∈ 𝔽^{n × n}``, ``\mathbb F ∈ \{\mathbb R, \mathbb C\}``
+Orthogonally project the tangent vector ``X ∈ 𝔽^{n×n}``, ``\mathbb F ∈ \{\mathbb R, \mathbb C\}``
 to the tangent space of `M` at `p`,
 and change the representer to use the corresponding Lie algebra, i.e. we compute
 

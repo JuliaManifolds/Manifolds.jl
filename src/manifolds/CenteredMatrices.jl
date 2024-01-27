@@ -1,11 +1,11 @@
 @doc raw"""
     CenteredMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The manifold of $m × n$ real-valued or complex-valued matrices whose columns sum to zero, i.e.
+The manifold of ``m×n`` real-valued or complex-valued matrices whose columns sum to zero, i.e.
 ````math
-\bigl\{ p ∈ 𝔽^{m × n}\ \big|\ [1 … 1] * p = [0 … 0] \bigr\},
+\bigl\{ p ∈ 𝔽^{m×n}\ \big|\ [1 … 1] * p = [0 … 0] \bigr\},
 ````
-where $𝔽 ∈ \{ℝ,ℂ\}$.
+where ``𝔽 ∈ \{ℝ,ℂ\}``.
 
 # Constructor
     CenteredMatrices(m, n[, field=ℝ]; parameter::Symbol=:type)
@@ -35,9 +35,14 @@ zero.
 
 The tolerance for the column sums of `p` can be set using `kwargs...`.
 """
-function check_point(M::CenteredMatrices, p; kwargs...)
+function check_point(
+    M::CenteredMatrices,
+    p::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
     m, n = get_parameter(M.size)
-    if !isapprox(sum(p, dims=1), zeros(1, n); kwargs...)
+    if !isapprox(sum(p, dims=1), zeros(1, n); atol=atol, kwargs...)
         return DomainError(
             p,
             string(
@@ -56,9 +61,15 @@ Check whether `X` is a tangent vector to manifold point `p` on the
 sum to zero and its values are from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
 The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
 """
-function check_vector(M::CenteredMatrices, p, X; kwargs...)
+function check_vector(
+    M::CenteredMatrices,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
     m, n = get_parameter(M.size)
-    if !isapprox(sum(X, dims=1), zeros(1, n); kwargs...)
+    if !isapprox(sum(X, dims=1), zeros(1, n); atol=atol, kwargs...)
         return DomainError(
             X,
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum to zero.",
@@ -94,7 +105,7 @@ Return the manifold dimension of the [`CenteredMatrices`](@ref) `m`-by-`n` matri
 ````math
 \dim(\mathcal M) = (m*n - n) \dim_ℝ 𝔽,
 ````
-where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
 """
 function manifold_dimension(M::CenteredMatrices{<:Any,𝔽}) where {𝔽}
     m, n = get_parameter(M.size)
@@ -113,7 +124,7 @@ Projects `p` from the embedding onto the [`CenteredMatrices`](@ref) `M`, i.e.
 1
 \end{bmatrix} * [c_1 \dots c_n],
 ````
-where $c_i = \frac{1}{m}\sum_{j=1}^m p_{j,i}$ for $i = 1, \dots, n$.
+where ``c_i = \frac{1}{m}\sum_{j=1}^m p_{j,i}`` for ``i = 1, \dots, n``.
 """
 project(::CenteredMatrices, ::Any)
 
@@ -131,7 +142,7 @@ Project the matrix `X` onto the tangent space at `p` on the [`CenteredMatrices`]
 1
 \end{bmatrix} * [c_1 \dots c_n],
 ````
-where $c_i = \frac{1}{m}\sum_{j=1}^m x_{j,i}$  for $i = 1, \dots, n$.
+where ``c_i = \frac{1}{m}\sum_{j=1}^m x_{j,i}``  for ``i = 1, \dots, n``.
 """
 project(::CenteredMatrices, ::Any, ::Any)
 

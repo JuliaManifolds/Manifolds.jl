@@ -18,7 +18,7 @@ The formula reads
 ```
 
 where $\operatorname{Log}$ denotes the matrix logarithm and
-$\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
+$\lVert⋅\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
 function distance(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogEuclideanMetric}, p, q)
     return norm(log(Symmetric(p)) - log(Symmetric(q)))

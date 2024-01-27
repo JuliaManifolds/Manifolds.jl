@@ -1,7 +1,7 @@
 using StaticArrays: identity_perm
 using Base: decode_overlong
 
-include("../utils.jl")
+include("../header.jl")
 include("group_utils.jl")
 
 using Manifolds:

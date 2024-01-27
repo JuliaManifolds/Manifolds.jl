@@ -73,7 +73,7 @@ manifold_dimension(M₁)
 The $d$-dimensional ``[hyperbolic space](@ref HyperbolicSpace)``{=commonmark} is usually represented in $\mathbb R^{d+1}$ as the set of points $p\in\mathbb R^3$ fulfilling
 
 ```math
-p_1^2+p_2^2+\cdots+p_d^2-p_{d+1}^2 = -1.
+p_1^2+p_2^2+⋅s+p_d^2-p_{d+1}^2 = -1.
 ```
 
 We define the manifold using
@@ -190,7 +190,7 @@ Note that nested power manifolds are combined into one as in
 M₄₂ = M₄^4
 ```
 
-which represents $2\times 4$ – matrices of hyperbolic points represented in $3\times 2\times 4$ arrays.
+which represents $2×4$ – matrices of hyperbolic points represented in $3×2×4$ arrays.
 
 We can – alternatively – use a power manifold with nested arrays
 
@@ -429,7 +429,7 @@ Again, for all of these, the concrete types only have to be used if you want to 
 
 ````{=commonmark}
 ```@bibliography
-Pages = ["tutorials/getstarted.md"]
+Pages = ["getstarted.md"]
 Canonical=false
 ```
 ````

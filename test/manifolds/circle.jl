@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 using Manifolds: TFVector, CoTFVector
 
@@ -287,5 +287,14 @@ using Manifolds: TFVector, CoTFVector
                 test_rand_tvector=true,
             )
         end
+    end
+    @testset "Mixed array dimensions for exp and PT" begin
+        # this is an issue on Julia 1.6 but not later releases
+        M = Circle()
+        p = fill(0.0)
+        exp!(M, p, p, [1.0], 2.0)
+        @test p ≈ fill(2.0)
+        parallel_transport_to!(M, p, p, [4.0], p)
+        @test p ≈ fill(4.0)
     end
 end

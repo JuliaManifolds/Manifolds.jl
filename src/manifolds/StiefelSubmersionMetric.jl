@@ -292,15 +292,15 @@ end
 @doc raw"""
     StiefelFactorization{UT,XT} <: AbstractManifoldPoint
 
-Represent points (and vectors) on `Stiefel(n, k)` with ``2k × k`` factors [ZimmermannHueper:2022](@cite).
+Represent points (and vectors) on `Stiefel(n, k)` with ``2k×k`` factors [ZimmermannHueper:2022](@cite).
 
-Given a point ``p ∈ \mathrm{St}(n, k)`` and another matrix ``B ∈ ℝ^{n × k}`` for
+Given a point ``p ∈ \mathrm{St}(n, k)`` and another matrix ``B ∈ ℝ^{n×k}`` for
 ``k ≤ \lfloor\frac{n}{2}\rfloor`` the factorization is
 ````math
 \begin{aligned}
 B &= UZ\\
 U &= \begin{bmatrix}p & Q\end{bmatrix} ∈ \mathrm{St}(n, 2k)\\
-Z &= \begin{bmatrix}Z_1 \\ Z_2\end{bmatrix}, \quad Z_1,Z_2 ∈ ℝ^{k × k}.
+Z &= \begin{bmatrix}Z_1 \\ Z_2\end{bmatrix}, \quad Z_1,Z_2 ∈ ℝ^{k×k}.
 \end{aligned}
 ````
 If ``B ∈ \mathrm{St}(n, k)``, then ``Z ∈ \mathrm{St}(2k, k)``.
@@ -310,7 +310,7 @@ For a fixed ``U``, if ``r ∈ \mathrm{St}(n, k)`` has the factor ``Z_r ∈ \math
 then ``X_r ∈ T_r \mathrm{St}(n, k)`` has the factor
 ``Z_{X_r} ∈ T_{Z_r} \mathrm{St}(2k, k)``.
 
-``Q`` is determined by choice of a second matrix ``A ∈ ℝ^{n × k}`` with the decomposition
+``Q`` is determined by choice of a second matrix ``A ∈ ℝ^{n×k}`` with the decomposition
 ````math
 \begin{aligned}
 A &= UZ\\
@@ -325,7 +325,7 @@ This factorization is useful because it is closed under addition, subtraction, s
 projection, and the Riemannian exponential and logarithm under the
 [`StiefelSubmersionMetric`](@ref). That is, if all matrices involved are factorized to have
 the same ``U``, then all of these operations and any algorithm that depends only on them can
-be performed in terms of the ``2k × k`` matrices ``Z``. For ``n ≫ k``, this can be much more
+be performed in terms of the ``2k×k`` matrices ``Z``. For ``n ≫ k``, this can be much more
 efficient than working with the full matrices.
 
 !!! warning

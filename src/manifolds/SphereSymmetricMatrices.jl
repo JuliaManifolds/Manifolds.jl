@@ -1,13 +1,13 @@
 @doc raw"""
     SphereSymmetricMatrices{T,𝔽} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
 
-The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  consisting of the $n × n$ symmetric matrices
+The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  consisting of the ``n×n`` symmetric matrices
 of unit Frobenius norm, i.e.
 ````math
-\mathcal{S}_{\text{sym}} :=\bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p, \lVert p \rVert = 1 \bigr\},
+\mathcal{S}_{\text{sym}} :=\bigl\{p  ∈ 𝔽^{n×n}\ \big|\ p^{\mathrm{H}} = p, \lVert p \rVert = 1 \bigr\},
 ````
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
-and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
+and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 # Constructor
     SphereSymmetricMatrices(n[, field=ℝ])
@@ -35,8 +35,13 @@ i.e. is an `n`-by-`n` symmetric matrix of unit Frobenius norm.
 
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
-function check_point(M::SphereSymmetricMatrices, p; kwargs...)
-    if !isapprox(norm(p - p'), 0.0; kwargs...)
+function check_point(
+    M::SphereSymmetricMatrices,
+    p::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    if !isapprox(norm(p - p'), 0; atol=atol, kwargs...)
         return DomainError(
             norm(p - p'),
             "The point $(p) does not lie on $M, since it is not symmetric.",
@@ -54,8 +59,14 @@ of unit Frobenius norm.
 
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
-function check_vector(M::SphereSymmetricMatrices, p, X; kwargs...)
-    if !isapprox(norm(X - X'), 0.0; kwargs...)
+function check_vector(
+    M::SphereSymmetricMatrices,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    if !isapprox(norm(X - X'), 0; atol=atol, kwargs...)
         return DomainError(
             norm(X - X'),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not symmetric.",
@@ -108,7 +119,7 @@ Projects `p` from the embedding onto the [`SphereSymmetricMatrices`](@ref) `M`, 
 ````math
 \operatorname{proj}_{\mathcal{S}_{\text{sym}}}(p) = \frac{1}{2} \bigl( p + p^{\mathrm{H}} \bigr),
 ````
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SphereSymmetricMatrices, ::Any)
 
@@ -124,7 +135,7 @@ Project the matrix `X` onto the tangent space at `p` on the [`SphereSymmetricMat
 ````math
 \operatorname{proj}_p(X) = \frac{X + X^{\mathrm{H}}}{2} - ⟨p, \frac{X + X^{\mathrm{H}}}{2}⟩p,
 ````
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SphereSymmetricMatrices, ::Any, ::Any)
 

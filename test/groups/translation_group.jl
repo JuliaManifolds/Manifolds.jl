@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 include("group_utils.jl")
 
 using Manifolds: LeftForwardAction, RightBackwardAction
@@ -79,5 +79,11 @@ using Manifolds: LeftForwardAction, RightBackwardAction
     @testset "field parameter" begin
         @test repr(TranslationGroup(2, 3; field=ℂ, parameter=:field)) ==
               "TranslationGroup(2, 3; field=ℂ, parameter=:field)"
+    end
+
+    @testset "statistics" begin
+        G = TranslationGroup(2)
+        pts = [[1.0, 2.0], [3.0, -1.0], [2.0, 2.0]]
+        @test var(G, pts) ≈ 4.0
     end
 end
