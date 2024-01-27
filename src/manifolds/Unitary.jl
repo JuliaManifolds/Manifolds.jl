@@ -130,6 +130,22 @@ function Random.rand(
     end
 end
 
+function Random.rand!(
+    rng::AbstractRNG,
+    M::UnitaryMatrices,
+    pX;
+    vector_at=nothing,
+)
+    if vector_at === nothing
+        rand!(rng, pX)
+        project!(M, pX, pX)
+    else
+        rand!(rng, pX)
+        project(M, pX, vector_at, pX)
+    end
+    return pX
+end
+
 function Base.show(io::IO, ::UnitaryMatrices{TypeParameter{Tuple{n}},ℂ}) where {n}
     return print(io, "UnitaryMatrices($(n))")
 end
