@@ -125,15 +125,15 @@ Random.rand(::GroupManifold; kwargs...)
 function Random.rand(
     ::TraitList{<:IsGroupManifold},
     M::AbstractDecoratorManifold;
-    vector_at = nothing,
-    kwargs...
+    vector_at=nothing,
+    kwargs...,
 )
     if vector_at === nothing
         pX = allocate_result(M, rand)
     else
         pX = allocate_result(M, rand, vector_at)
     end
-    rand!(M, pX; vector_at = vector_at, kwargs...)
+    rand!(M, pX; vector_at=vector_at, kwargs...)
     return pX
 end
 
@@ -141,9 +141,9 @@ function Random.rand!(
     T::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     pX;
-    kwargs...
+    kwargs...,
 )
-    return rand!(T,Random.default_rng(), G, pX; kwargs...)
+    return rand!(T, Random.default_rng(), G, pX; kwargs...)
 end
 
 function Random.rand!(
@@ -152,7 +152,7 @@ function Random.rand!(
     G::AbstractDecoratorManifold,
     pX;
     vector_at=nothing,
-    kwargs...
+    kwargs...,
 )
     M = base_manifold(G)
     if vector_at === nothing

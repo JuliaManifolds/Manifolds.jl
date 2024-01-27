@@ -130,12 +130,7 @@ function Random.rand(
     end
 end
 
-function Random.rand!(
-    rng::AbstractRNG,
-    M::UnitaryMatrices,
-    pX;
-    vector_at=nothing,
-)
+function Random.rand!(rng::AbstractRNG, M::UnitaryMatrices, pX; vector_at=nothing)
     if vector_at === nothing
         rand!(rng, pX)
         project!(M, pX, pX)
