@@ -126,21 +126,6 @@ For tangent vectors, an element in the Lie Algebra is generated.
 """
 Random.rand(::GroupManifold; kwargs...)
 
-function Random.rand(
-    ::TraitList{<:IsGroupManifold},
-    M::AbstractDecoratorManifold;
-    vector_at=nothing,
-    kwargs...,
-)
-    if vector_at === nothing
-        pX = allocate_result(M, rand)
-    else
-        pX = allocate_result(M, rand, vector_at)
-    end
-    rand!(M, pX; vector_at=vector_at, kwargs...)
-    return pX
-end
-
 function Random.rand!(
     T::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
