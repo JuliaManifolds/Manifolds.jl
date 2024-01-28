@@ -20,6 +20,7 @@ The tangent spaces are given by
 
 But note that tangent vectors are represented in the Lie algebra, i.e. just using ``Y`` in
 the representation above.
+If you prefer the representation as `X` you can use the [`Stiefel`](@ref)`(n, n, ℂ)` manifold.
 
 # Constructor
 
@@ -111,6 +112,45 @@ project(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p) = sign(p)
 
 project(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X) = (X - conj(X)) / 2
 
+@doc raw"""
+    project(M::UnitaryMatrices,p)
+
+Projects `p` from the embedding onto the [`UnitaryMatrices`](@ref) `M`, i.e. compute `q`
+as the polar decomposition of ``p`` such that ``q^{\mathrm{H}}q`` is the identity,
+where ``⋅^{\mathrm{H}}`` denotes the hermitian, i.e. complex conjugate transposed.
+"""
+project(::UnitaryMatrices, ::Any, ::Any)
+
+function project!(::UnitaryMatrices, q, p)
+    s = svd(p)
+    mul!(q, s.U, s.Vt)
+    return q
+end
+
+@doc raw"""
+    project(M::UnitaryMatrices, p, X)
+
+Project `X` onto the tangent space of `p` to the [`UnitaryMatrices`](@ref) manifold `M`.
+The formula reads
+
+````math
+\operatorname{proj}_{T_p\mathcal M}(X) = X - p \operatorname{Sym}(p^{\mathrm{H}}X),
+````
+
+where ``\operatorname{Sym}(q)`` is the symmetrization of ``q``, e.g. by
+``\operatorname{Sym}(q) = \frac{q^{\mathrm{H}}+q}{2}``.
+"""
+project(::UnitaryMatrices, ::Any...)
+
+function project!(::UnitaryMatrices, Y, p, X)
+    A = p' * X
+    T = eltype(Y)
+    copyto!(Y, X)
+    mul!(Y, p, A + A', T(-0.5), true)
+    ldiv!(qr(p), Y) # different than Stiefel we store this in the Lie algebra already
+    return Y
+end
+
 function Random.rand(M::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}; vector_at=nothing)
     if vector_at === nothing
         return sign(rand(Quaternions.QuaternionF64))
@@ -128,6 +168,36 @@ function Random.rand(
     else
         project(M, vector_at, rand(rng, Quaternions.QuaternionF64))
     end
+end
+
+@doc raw"""
+    rand(::Unitary; vector_at=nothing, σ::Real=1.0)
+
+Gereate a random point on the [`UnitaryMatrices`](@ref) manifold,
+if `vector_at` is nothing, by computing the QR decomposition of
+a ``n×x`` matrix.
+
+Generate a tangent vector at `vector_at` by projecting a normally
+distributed matrix onto the tangent space.
+"""
+rand(::UnitaryMatrices; σ::Real=1.0)
+
+function Random.rand!(
+    rng::AbstractRNG,
+    M::UnitaryMatrices,
+    pX;
+    vector_at=nothing,
+    σ::Real=one(real(eltype(pX))),
+)
+    n = get_parameter(M.size)[1]
+    if vector_at === nothing
+        A = σ * randn(rng, eltype(pX), n, n)
+        pX .= Matrix(qr(A).Q)
+    else
+        Z = σ * randn(rng, eltype(pX), size(pX))
+        project!(M, pX, vector_at, Z)
+    end
+    return pX
 end
 
 function Base.show(io::IO, ::UnitaryMatrices{TypeParameter{Tuple{n}},ℂ}) where {n}
