@@ -48,6 +48,32 @@ function ManifoldsBase._access_nested(
     return Identity(M.manifold)
 end
 
+# lower level methods are added instead of top level ones to not have to deal
+# with `Identity` disambiguation
+
+_compose!(G::PowerGroup, x, p, q) = _compose!(G.manifold, x, p, q)
+function _compose!(M::AbstractPowerManifold, x, p, q)
+    N = M.manifold
+    rep_size = representation_size(N)
+    for i in get_iterator(M)
+        compose!(
+            N,
+            _write(M, rep_size, x, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, q, i),
+        )
+    end
+    return x
+end
+function _compose!(M::PowerManifoldNestedReplacing, x, p, q)
+    N = M.manifold
+    rep_size = representation_size(N)
+    for i in get_iterator(M)
+        x[i...] = compose(N, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
+    end
+    return x
+end
+
 @inline function active_traits(f, M::PowerGroup, args...)
     if is_metric_function(f)
         #pass to manifold by default - but keep Group Decorator for the retraction
@@ -172,32 +198,6 @@ function inv_diff!(G::PowerGroupNestedReplacing, Y, p, X)
         Y[i...] = inv_diff(N, _read(GM, rep_size, p, i), _read(GM, rep_size, X, i))
     end
     return Y
-end
-
-# lower level methods are added instead of top level ones to not have to deal
-# with `Identity` disambiguation
-
-_compose!(G::PowerGroup, x, p, q) = _compose!(G.manifold, x, p, q)
-function _compose!(M::AbstractPowerManifold, x, p, q)
-    N = M.manifold
-    rep_size = representation_size(N)
-    for i in get_iterator(M)
-        compose!(
-            N,
-            _write(M, rep_size, x, i),
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, q, i),
-        )
-    end
-    return x
-end
-function _compose!(M::PowerManifoldNestedReplacing, x, p, q)
-    N = M.manifold
-    rep_size = representation_size(N)
-    for i in get_iterator(M)
-        x[i...] = compose(N, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
-    end
-    return x
 end
 
 function translate!(G::PowerGroup, x, p, q, conv::ActionDirectionAndSide)

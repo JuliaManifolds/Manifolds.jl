@@ -33,6 +33,10 @@ end
         IsExplicitDecorator(),
     )
 end
+# This could maybe even moved to ManifoldsBase?
+@inline function active_traits(f, ::AbstractRNG, M::AbstractDecoratorManifold, args...)
+    return active_traits(f, M, args...)
+end
 
 decorated_manifold(G::GroupManifold) = G.manifold
 
