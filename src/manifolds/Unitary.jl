@@ -113,21 +113,6 @@ project(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p) = sign(p)
 project(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X) = (X - conj(X)) / 2
 
 @doc raw"""
-    project(M::UnitaryMatrices,p)
-
-Projects `p` from the embedding onto the [`UnitaryMatrices`](@ref) `M`, i.e. compute `q`
-as the polar decomposition of ``p`` such that ``q^{\mathrm{H}}q`` is the identity,
-where ``⋅^{\mathrm{H}}`` denotes the hermitian, i.e. complex conjugate transposed.
-"""
-project(::UnitaryMatrices, ::Any, ::Any)
-
-function project!(::UnitaryMatrices, q, p)
-    s = svd(p)
-    mul!(q, s.U, s.Vt)
-    return q
-end
-
-@doc raw"""
     project(M::UnitaryMatrices, p, X)
 
 Project `X` onto the tangent space of `p` to the [`UnitaryMatrices`](@ref) manifold `M`.
