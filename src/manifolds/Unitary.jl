@@ -112,21 +112,6 @@ project(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p) = sign(p)
 
 project(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X) = (X - conj(X)) / 2
 
-@doc raw"""
-    project(M::UnitaryMatrices, p, X)
-
-Project `X` onto the tangent space of `p` to the [`UnitaryMatrices`](@ref) manifold `M`.
-The formula reads
-
-````math
-\operatorname{proj}_{T_p\mathcal M}(X) = X - p \operatorname{Sym}(p^{\mathrm{H}}X),
-````
-
-where ``\operatorname{Sym}(q)`` is the symmetrization of ``q``, e.g. by
-``\operatorname{Sym}(q) = \frac{q^{\mathrm{H}}+q}{2}``.
-"""
-project(::UnitaryMatrices, ::Any...)
-
 function Random.rand(M::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}; vector_at=nothing)
     if vector_at === nothing
         return sign(rand(Quaternions.QuaternionF64))
