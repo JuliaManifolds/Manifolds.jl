@@ -1,8 +1,8 @@
 """
     GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽}
 
-Concrete Decorator for a smooth manifold that equips the manifold with a group operation, thus making
-it a Lie group. See [`IsGroupManifold`](@ref) for more details.
+Concrete decorator for a smooth manifold that equips the manifold with a group operation,
+thus making it a Lie group. See [`IsGroupManifold`](@ref) for more details.
 
 Group manifolds by default forward metric-related operations to the wrapped manifold.
 
@@ -112,8 +112,8 @@ function is_vector(
 end
 
 @doc raw"""
-    rand(::Groupmanifold; vector_at=nothing, σ=1.0)
-    rand!(::Groupmanifold, pX; vector_at=nothing, kwargs...)
+    rand(::GroupManifold; vector_at=nothing, σ=1.0)
+    rand!(::GroupManifold, pX; vector_at=nothing, kwargs...)
     rand(::TraitList{IsGroupManifold}, M; vector_at=nothing, σ=1.0)
     rand!(TraitList{IsGroupManifold}, M, pX; vector_at=nothing, kwargs...)
 
