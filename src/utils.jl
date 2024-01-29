@@ -210,7 +210,7 @@ unrealify!(Y, X, ::typeof(ℝ), args...) = copyto!(Y, X)
 @doc raw"""
     symmetrize!(Y, X)
 
-Given a quare matrix `X` compute `1/2 .* (X' + X)` in place of `Y`
+Given a square matrix `X` compute `1/2 .* (X' + X)` in place of `Y`.
 """
 function symmetrize!(Y, X)
     Y .= (X' .+ X) ./ 2
@@ -220,7 +220,7 @@ end
 @doc raw"""
     symmetrize(X)
 
-Given a quare matrix `X` compute `1/2 .* (X' + X)`.
+Given a square matrix `X` compute `1/2 .* (X' + X)`.
 """
 function symmetrize(X)
     return (X' .+ X) ./ 2
@@ -229,7 +229,7 @@ end
 @doc raw"""
     vec2skew!(X, v, k)
 
-create a skew symmetric matrix inplace in `X` of size ``k×k`` from a vector `v`,
+Create a skew symmetric matrix in-place in `X` of size ``k×k`` from a vector `v`,
 for example for `v=[1,2,3]` and `k=3` this
 yields
 ````julia

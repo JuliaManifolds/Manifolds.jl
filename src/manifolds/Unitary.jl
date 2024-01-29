@@ -127,15 +127,6 @@ where ``\operatorname{Sym}(q)`` is the symmetrization of ``q``, e.g. by
 """
 project(::UnitaryMatrices, ::Any...)
 
-function project!(::UnitaryMatrices, Y, p, X)
-    A = p' * X
-    T = eltype(Y)
-    copyto!(Y, X)
-    mul!(Y, p, A + A', T(-0.5), true)
-    ldiv!(qr(p), Y) # different than Stiefel we store this in the Lie algebra already
-    return Y
-end
-
 function Random.rand(M::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}; vector_at=nothing)
     if vector_at === nothing
         return sign(rand(Quaternions.QuaternionF64))
