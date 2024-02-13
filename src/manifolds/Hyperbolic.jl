@@ -1,16 +1,16 @@
 @doc raw"""
     Hyperbolic{T} <: AbstractDecoratorManifold{ℝ}
 
-The hyperbolic space $\mathcal H^n$ represented by $n+1$-Tuples, i.e. embedded in the
+The hyperbolic space ``\mathcal H^n`` represented by ``n+1``-Tuples, i.e. embedded in the
 [`Lorentz`](@ref)ian manifold equipped with the [`MinkowskiMetric`](@ref)
-$⟨⋅,⋅⟩_{\mathrm{M}}$. The space is defined as
+``⟨⋅,⋅⟩_{\mathrm{M}}``. The space is defined as
 
 ```math
 \mathcal H^n = \Bigl\{p ∈ ℝ^{n+1}\ \Big|\ ⟨p,p⟩_{\mathrm{M}}= -p_{n+1}^2
   + \displaystyle\sum_{k=1}^n p_k^2 = -1, p_{n+1} > 0\Bigr\},.
 ```
 
-The tangent space $T_p \mathcal H^n$ is given by
+The tangent space ``T_p \mathcal H^n`` is given by
 
 ````math
 T_p \mathcal H^n := \bigl\{
@@ -19,7 +19,7 @@ X ∈ ℝ^{n+1} : ⟨p,X⟩_{\mathrm{M}} = 0
 ````
 Note that while the [`MinkowskiMetric`](@ref) renders the [`Lorentz`](@ref) manifold (only)
 pseudo-Riemannian, on the tangent bundle of the Hyperbolic space it induces a Riemannian
-metric. The corresponding sectional curvature is $-1$.
+metric. The corresponding sectional curvature is ``-1``.
 
 If `p` and `X` are `Vector`s of length `n+1` they are assumed to be
 a [`HyperboloidPoint`](@ref) and a [`HyperboloidTVector`](@ref), respectively
@@ -49,8 +49,8 @@ end
 @doc raw"""
     HyperboloidPoint <: AbstractManifoldPoint
 
-In the Hyperboloid model of the [`Hyperbolic`](@ref) $\mathcal H^n$ points are represented
-as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) equal to $-1$.
+In the Hyperboloid model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` points are represented
+as vectors in ``ℝ^{n+1}`` with [`MinkowskiMetric`](@ref) equal to ``-1``.
 
 This representation is the default, i.e. `AbstractVector`s are assumed to have this repesentation.
 """
@@ -61,8 +61,8 @@ end
 @doc raw"""
     HyperboloidTVector <: TVector
 
-In the Hyperboloid model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vctors are represented
-as vectors in $ℝ^{n+1}$ with [`MinkowskiMetric`](@ref) $⟨p,X⟩_{\mathrm{M}}=0$ to their base
+In the Hyperboloid model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` tangent vctors are represented
+as vectors in ``ℝ^{n+1}`` with [`MinkowskiMetric`](@ref) ``⟨p,X⟩_{\mathrm{M}}=0`` to their base
 point ``p``.
 
 This representation is the default, i.e. vectors are assumed to have this repesentation.
@@ -74,8 +74,8 @@ end
 @doc raw"""
     PoincareBallPoint <: AbstractManifoldPoint
 
-A point on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ can be represented as a vector of norm
-less than one in $\mathbb R^n$.
+A point on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` can be represented as a vector of norm
+less than one in ``\mathbb R^n``.
 """
 struct PoincareBallPoint{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
@@ -84,8 +84,8 @@ end
 @doc raw"""
     PoincareBallTVector <: TVector
 
-In the Poincaré ball model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vectors are represented
-as vectors in $ℝ^{n}$.
+In the Poincaré ball model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` tangent vectors are represented
+as vectors in ``ℝ^{n}``.
 """
 struct PoincareBallTVector{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
@@ -94,8 +94,8 @@ end
 @doc raw"""
     PoincareHalfSpacePoint <: AbstractManifoldPoint
 
-A point on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ can be represented as a vector in the
-half plane, i.e. $x ∈ ℝ^n$ with $x_d > 0$.
+A point on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` can be represented as a vector in the
+half plane, i.e. ``x ∈ ℝ^n`` with ``x_d > 0``.
 """
 struct PoincareHalfSpacePoint{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
@@ -104,8 +104,8 @@ end
 @doc raw"""
     PoincareHalfPlaneTVector <: TVector
 
-In the Poincaré half plane model of the [`Hyperbolic`](@ref) $\mathcal H^n$ tangent vectors are
-represented as vectors in $ℝ^{n}$.
+In the Poincaré half plane model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` tangent vectors are
+represented as vectors in ``ℝ^{n}``.
 """
 struct PoincareHalfSpaceTVector{TValue<:AbstractVector} <: TVector
     value::TValue
@@ -145,14 +145,14 @@ end
 Check whether `p` is a valid point on the [`Hyperbolic`](@ref) `M`.
 
 For the [`HyperboloidPoint`](@ref) or plain vectors this means that, `p` is a vector of
-length $n+1$ with inner product in the embedding of -1, see [`MinkowskiMetric`](@ref).
+length ``n+1`` with inner product in the embedding of -1, see [`MinkowskiMetric`](@ref).
 The tolerance for the last test can be set using the `kwargs...`.
 
-For the [`PoincareBallPoint`](@ref) a valid point is a vector $p ∈ ℝ^n$ with a norm stricly
+For the [`PoincareBallPoint`](@ref) a valid point is a vector ``p ∈ ℝ^n`` with a norm stricly
 less than 1.
 
-For the [`PoincareHalfSpacePoint`](@ref) a valid point is a vector from $p ∈ ℝ^n$ with a positive
-last entry, i.e. $p_n>0$
+For the [`PoincareHalfSpacePoint`](@ref) a valid point is a vector from ``p ∈ ℝ^n`` with a positive
+last entry, i.e. ``p_n>0``
 """
 check_point(::Hyperbolic, ::Any)
 
@@ -166,7 +166,7 @@ The tolerance for the last test can be set using the `kwargs...`.
 For a the hyperboloid model or vectors, `X` has to be  orthogonal to `p` with respect
 to the inner product from the embedding, see [`MinkowskiMetric`](@ref).
 
-For a the Poincaré ball as well as the Poincaré half plane model, `X` has to be a vector from $ℝ^{n}$.
+For a the Poincaré ball as well as the Poincaré half plane model, `X` has to be a vector from ``ℝ^{n}``.
 """
 check_vector(::Hyperbolic, ::Any, ::Any)
 
@@ -215,7 +215,7 @@ embed(::Hyperbolic, p::AbstractArray, X::AbstractArray) = X
 @doc raw"""
     exp(M::Hyperbolic, p, X)
 
-Compute the exponential map on the [`Hyperbolic`](@ref) space $\mathcal H^n$ emanating
+Compute the exponential map on the [`Hyperbolic`](@ref) space ``\mathcal H^n`` emanating
 from `p` towards `X`. The formula reads
 
 ````math
@@ -223,7 +223,7 @@ from `p` towards `X`. The formula reads
 + \sinh(\sqrt{⟨X,X⟩_{\mathrm{M}}})\frac{X}{\sqrt{⟨X,X⟩_{\mathrm{M}}}},
 ````
 
-where $⟨⋅,⋅⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 """
 exp(::Hyperbolic, ::Any...)
@@ -278,17 +278,17 @@ is_flat(M::Hyperbolic) = false
 @doc raw"""
     log(M::Hyperbolic, p, q)
 
-Compute the logarithmic map on the [`Hyperbolic`](@ref) space $\mathcal H^n$, the tangent
+Compute the logarithmic map on the [`Hyperbolic`](@ref) space ``\mathcal H^n``, the tangent
 vector representing the [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) starting from `p`
-reaches `q` after time 1. The formula reads for $p ≠ q$
+reaches `q` after time 1. The formula reads for ``p ≠ q``
 
 ```math
 \log_p q = d_{\mathcal H^n}(p,q)
 \frac{q-⟨p,q⟩_{\mathrm{M}} p}{\lVert q-⟨p,q⟩_{\mathrm{M}} p \rVert_2},
 ```
 
-where $⟨⋅,⋅⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
-the [`Lorentz`](@ref)ian manifold. For $p=q$ the logarihmic map is equal to the zero vector.
+where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
+the [`Lorentz`](@ref)ian manifold. For ``p=q`` the logarihmic map is equal to the zero vector.
 """
 log(::Hyperbolic, ::Any...)
 
@@ -307,14 +307,14 @@ end
 @doc raw"""
     manifold_dimension(M::Hyperbolic)
 
-Return the dimension of the hyperbolic space manifold $\mathcal H^n$, i.e. $\dim(\mathcal H^n) = n$.
+Return the dimension of the hyperbolic space manifold ``\mathcal H^n``, i.e. ``\dim(\mathcal H^n) = n``.
 """
 manifold_dimension(M::Hyperbolic) = get_parameter(M.size)[1]
 
 @doc raw"""
     manifold_dimension(M::Hyperbolic)
 
-Return the volume of the hyperbolic space manifold $\mathcal H^n$, i.e. infinity.
+Return the volume of the hyperbolic space manifold ``\mathcal H^n``, i.e. infinity.
 """
 manifold_volume(::Hyperbolic) = Inf
 
@@ -344,7 +344,7 @@ The formula reads
 ````math
 Y = X + ⟨p,X⟩_{\mathrm{M}} p,
 ````
-where $⟨⋅, ⋅⟩_{\mathrm{M}}$ denotes the [`MinkowskiMetric`](@ref) on the embedding,
+where ``⟨⋅, ⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
 the [`Lorentz`](@ref)ian manifold.
 
 !!! note
@@ -369,14 +369,14 @@ end
     parallel_transport_to(M::Hyperbolic, p, X, q)
 
 Compute the paralllel transport of the `X` from the tangent space at `p` on the
-[`Hyperbolic`](@ref) space $\mathcal H^n$ to the tangent at `q` along the [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any})
+[`Hyperbolic`](@ref) space ``\mathcal H^n`` to the tangent at `q` along the [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any})
 connecting `p` and `q`. The formula reads
 
 ````math
 \mathcal P_{q←p}X = X - \frac{⟨\log_p q,X⟩_p}{d^2_{\mathcal H^n}(p,q)}
 \bigl(\log_p q + \log_qp \bigr),
 ````
-where $⟨⋅,⋅⟩_p$ denotes the inner product in the tangent space at `p`.
+where ``⟨⋅,⋅⟩_p`` denotes the inner product in the tangent space at `p`.
 """
 parallel_transport_to(::Hyperbolic, ::Any, ::Any, ::Any)
 

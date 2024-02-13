@@ -32,8 +32,8 @@ d_{\mathcal P(n)}(p,q) = \sqrt{
 ````
 
 where ``x`` and ``y`` are the cholesky factors of ``p`` and ``q``, respectively,
-$⌊⋅⌋$ denbotes the strictly lower triangular matrix of its argument,
-and $\lVert⋅\rVert_{\mathrm{F}}$ the Frobenius norm.
+``⌊⋅⌋`` denbotes the strictly lower triangular matrix of its argument,
+and ``\lVert⋅\rVert_{\mathrm{F}}`` the Frobenius norm.
 """
 function distance(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
     N = get_parameter(M.manifold.size)[1]
@@ -50,10 +50,10 @@ Compute the exponential map on the [`SymmetricPositiveDefinite`](@ref) `M` with
 \exp_p X = (\exp_y W)(\exp_y W)^\mathrm{T}
 ````
 
-where $\exp_xW$ is the exponential map on [`CholeskySpace`](@ref), ``y`` is the cholesky
-decomposition of ``p``, $W = y(y^{-1}Xy^{-\mathrm{T}})_\frac{1}{2}$,
-and $(⋅)_\frac{1}{2}$
-denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$.
+where ``\exp_xW`` is the exponential map on [`CholeskySpace`](@ref), ``y`` is the cholesky
+decomposition of ``p``, ``W = y(y^{-1}Xy^{-\mathrm{T}})_\frac{1}{2}``,
+and ``(⋅)_\frac{1}{2}``
+denotes the lower triangular matrix with the diagonal multiplied by ``\frac{1}{2}``.
 """
 exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 
@@ -84,10 +84,10 @@ a [`MetricManifold`](@ref) with [`LogCholeskyMetric`](@ref). The formula reads
     g_p(X,Y) = ⟨a_z(X),a_z(Y)⟩_z,
 ````
 
-where $⟨⋅,⋅⟩_x$ denotes inner product on the [`CholeskySpace`](@ref),
+where ``⟨⋅,⋅⟩_x`` denotes inner product on the [`CholeskySpace`](@ref),
 ``z`` is the cholesky factor of ``p``,
-$a_z(W) = z (z^{-1}Wz^{-\mathrm{T}})_{\frac{1}{2}}$, and $(⋅)_\frac{1}{2}$
-denotes the lower triangular matrix with the diagonal multiplied by $\frac{1}{2}$
+``a_z(W) = z (z^{-1}Wz^{-\mathrm{T}})_{\frac{1}{2}}``, and ``(⋅)_\frac{1}{2}``
+denotes the lower triangular matrix with the diagonal multiplied by ``\frac{1}{2}``
 """
 function inner(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, X, Y)
     N = get_parameter(M.manifold.size)[1]
@@ -113,7 +113,7 @@ The formula can be adapted from the [`CholeskySpace`](@ref) as
 ````math
 \log_p q = xW^{\mathrm{T}} + Wx^{\mathrm{T}},
 ````
-where ``x`` is the cholesky factor of ``p`` and $W=\log_x y$ for ``y`` the cholesky factor
+where ``x`` is the cholesky factor of ``p`` and ``W=\log_x y`` for ``y`` the cholesky factor
 of ``q`` and the just mentioned logarithmic map is the one on [`CholeskySpace`](@ref).
 """
 log(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
@@ -139,8 +139,8 @@ Parallel transport the tangent vector `X` at `p` along the geodesic to `q` with 
 the [`SymmetricPositiveDefinite`](@ref) manifold `M` and [`LogCholeskyMetric`](@ref).
 The parallel transport is based on the parallel transport on [`CholeskySpace`](@ref):
 Let ``x`` and ``y`` denote the cholesky factors of `p` and `q`, respectively and
-$W = x(x^{-1}Xx^{-\mathrm{T}})_\frac{1}{2}$, where $(⋅)_\frac{1}{2}$ denotes the lower
-triangular matrix with the diagonal multiplied by $\frac{1}{2}$. With ``V`` the parallel
+``W = x(x^{-1}Xx^{-\mathrm{T}})_\frac{1}{2}``, where ``(⋅)_\frac{1}{2}`` denotes the lower
+triangular matrix with the diagonal multiplied by ``\frac{1}{2}``. With ``V`` the parallel
 transport on [`CholeskySpace`](@ref) from ``x`` to ``y``. The formula hear reads
 
 ````math

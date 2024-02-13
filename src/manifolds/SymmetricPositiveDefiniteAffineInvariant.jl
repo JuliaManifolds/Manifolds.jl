@@ -64,8 +64,8 @@ as a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula 
 d_{\mathcal P(n)}(p,q)
 = \lVert \operatorname{Log}(p^{-\frac{1}{2}}qp^{-\frac{1}{2}})\rVert_{\mathrm{F}}.,
 ```
-where $\operatorname{Log}$ denotes the matrix logarithm and
-$\lVert⋅\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
+where ``\operatorname{Log}`` denotes the matrix logarithm and
+``\lVert⋅\rVert_{\mathrm{F}}`` denotes the matrix Frobenius norm.
 """
 function distance(::SymmetricPositiveDefinite, p, q)
     # avoid numerical instabilities in cholesky
@@ -90,7 +90,7 @@ Compute the exponential map from `p` with tangent vector `X` on the
 \exp_p X = p^{\frac{1}{2}}\operatorname{Exp}(p^{-\frac{1}{2}} X p^{-\frac{1}{2}})p^{\frac{1}{2}},
 ```
 
-where $\operatorname{Exp}$ denotes to the matrix exponential.
+where ``\operatorname{Exp}`` denotes to the matrix exponential.
 """
 exp(::SymmetricPositiveDefinite, ::Any...)
 
@@ -151,7 +151,7 @@ end
 Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
 [`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
-[`AffineInvariantMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
+[`AffineInvariantMetric`](@ref) that diagonalizes the curvature tensor ``R(u,v)w``
 with eigenvalues `κ` and where the direction `B.frame_direction` ``V`` has curvature `0`.
 
 The construction is based on an ONB for the symmetric matrices similar to [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
@@ -234,7 +234,7 @@ the coordinates with respect to this ONB can be simplified to
 ```math
    c_k = \mathrm{tr}(p^{-\frac{1}{2}}\Delta_{i,j} X)
 ```
-where ``k`` is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+where ``k`` is trhe linearized index of the ``i=1,\ldots,n, j=i,\ldots,n``.
 """
 get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
 
@@ -272,7 +272,7 @@ the vector reconstruction with respect to this ONB can be simplified to
 ```math
    X = p^{\frac{1}{2}} \Biggl( \sum_{i=1,j=i}^n c_k \Delta_{i,j} \Biggr) p^{\frac{1}{2}}
 ```
-where ``k`` is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+where ``k`` is the linearized index of the ``i=1,\ldots,n, j=i,\ldots,n``.
 """
 get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 
@@ -334,7 +334,7 @@ as a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula 
 \log_p q =
 p^{\frac{1}{2}}\operatorname{Log}(p^{-\frac{1}{2}}qp^{-\frac{1}{2}})p^{\frac{1}{2}},
 ```
-where $\operatorname{Log}$ denotes to the matrix logarithm.
+where ``\operatorname{Log}`` denotes to the matrix logarithm.
 """
 log(::SymmetricPositiveDefinite, ::Any...)
 
@@ -384,7 +384,7 @@ p^{-\frac{1}{2}}X p^{-\frac{1}{2}}
 p^{\frac{1}{2}},
 ```
 
-where $\operatorname{Exp}$ denotes the matrix exponential
+where ``\operatorname{Exp}`` denotes the matrix exponential
 and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 (again with respect to the [`AffineInvariantMetric`](@ref)).
 """
