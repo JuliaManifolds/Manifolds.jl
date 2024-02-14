@@ -218,7 +218,7 @@ end
 
 Check whether `p` is a valid point on the [`SymplecticMatrices`](@ref) `M`=$\mathrm{Sp}(2n)$,
 i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and ``p^{+}p`` is (approximately)
-the identity, where ``A^+`` denotes the [`symplectic_inverse`]/@ref).
+the identity, where ``A^+`` denotes the [`symplectic_inverse`](@ref).
 
 The tolerance can be set with `kwargs...`.
 """
@@ -284,17 +284,20 @@ Compute an approximate geodesic distance between two Symplectic matrices
 
 ````math
   \operatorname{dist}(p, q)
-    ≈ \lVert\operatorname{Log}(p^+q)\rVert_{\\mathrm{Fr}},
+    ≈ \lVert\operatorname{Log}(p^+q)\rVert_{\mathrm{Fr}},
 ````
 where the ``\operatorname{Log}(⋅)`` operator is the matrix logarithm.
 
 This approximation is justified by first recalling the Baker-Campbell-Hausdorf formula,
+
 ````math
 \operatorname{Log}(\operatorname{Exp}(A)\operatorname{Exp}(B))
  = A + B + \frac{1}{2}[A, B] + \frac{1}{12}[A, [A, B]] + \frac{1}{12}[B, [B, A]]
     + \ldots \;.
 ````
+
 Then we write the expression for the exponential map from ``p`` to ``q`` as
+
 ````math
     q =
     \operatorname{exp}_p(X)
@@ -303,23 +306,29 @@ Then we write the expression for the exponential map from ``p`` to ``q`` as
     \operatorname{Exp}([p^{+}X - (p^{+}X)^{\mathrm{T}}]),
     X \in T_p\mathrm{Sp},
 ````
+
 and with the geodesic distance between ``p`` and ``q`` given by
-``\operatorname{dist}(p, q) = \lVertX\rVert_p = \lVertp^+X\rVert_{\\mathrm{Fr}}``
+
+```math
+\operatorname{dist}(p, q) = \lVert X \rVert_p = \lVert p^+ X \rVert_{\mathrm{Fr}}
+```
+
 we see that
-````math
-    \begin{align*}
-   \lVert\operatorname{Log}(p^+q)\rVert_{\\mathrm{Fr}}
+
+```math
+  \begin{align*}
+   \lVert\operatorname{Log}(p^+q)\rVert_{\mathrm{Fr}}
     &=\Bigl\lVert
         \operatorname{Log}\bigl(
             \operatorname{Exp}((p^{+}X)^{\mathrm{T}})
             \operatorname{Exp}(p^{+}X - (p^{+}X)^{\mathrm{T}})
         \bigr)
-    \Bigr\rVert_{\\mathrm{Fr}} \\
-    &=\lVertp^{+}X + \frac{1}{2}[(p^{+}X)^{\mathrm{T}}, p^{+}X - (p^{+}X)^{\mathrm{T}}]
-            + \ldots\lVert_{\\mathrm{Fr}} \\
-    &≈\lVertp^{+}X\rVert_{\\mathrm{Fr}} = \operatorname{dist}(p, q).
-    \end{align*}
-````
+    \Bigr\rVert_{\mathrm{Fr}} \\
+    &=\lVert p^{+}X + \frac{1}{2}[(p^{+}X)^{\mathrm{T}}, p^{+}X - (p^{+}X)^{\mathrm{T}}]
+        + \ldots\lVert_{\mathrm{Fr}} \\
+    &≈\lVert p^{+}X\rVert_{\mathrm{Fr}} = \operatorname{dist}(p, q).
+  \end{align*}
+```
 """
 function distance(M::SymplecticMatrices, p, q)
     return norm(log(symplectic_inverse_times(M, p, q)))

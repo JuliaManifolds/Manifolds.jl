@@ -83,7 +83,7 @@ Compute the (optionally weighted) Riemannian center of mass also known as
 Karcher mean of the vector `x` of points on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, defined
 as the point that satisfies the minimizer
 ````math
-\argmin_{y ∈ \mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
+\operatorname{argmin}_{y ∈ \mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
 ````
 where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 
@@ -443,7 +443,7 @@ end;
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
 [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, defined as the point that satisfies the minimizer
 ````math
-\argmin_{y ∈ \mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
+\operatorname{argmin}_{y ∈ \mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
 where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).
