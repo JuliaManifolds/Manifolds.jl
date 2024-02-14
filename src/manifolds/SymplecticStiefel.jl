@@ -452,7 +452,7 @@ That is, we find the element ``X ∈ T_p\mathrm{SpSt}(2n, 2k)``
 which solves the constrained optimization problem
 
 ````math
-    \displazstyle\operatorname{min}_{X ∈ ℝ^{2n×2k}} \frac{1}{2}||X - A||^2, \quad
+    \displaystyle\operatorname{min}_{X ∈ ℝ^{2n×2k}} \frac{1}{2}||X - A||^2, \quad
     \text{s.t.}\;
     h(X) := X^{\mathrm{T}} J p + p^{\mathrm{T}} J X = 0,
 ````
