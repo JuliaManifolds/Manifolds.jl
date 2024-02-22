@@ -740,20 +740,6 @@ function ManifoldsBase.log(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ
     return get_vector(M, p, θ, DefaultOrthogonalBasis())
 end
 
-function log(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, p::SMatrix, q::SMatrix)
-    U = transpose(p) * q
-    cosθ = (tr(U) - 1) / 2
-    if cosθ ≈ -1
-        eig = eigen_safe(U)
-        ival = findfirst(λ -> isapprox(λ, 1), eig.values)
-        inds = SVector{3}(1:3)
-        #TODO this is to stop convert error of ax as a complex number
-        ax::Vector{Float64} = eig.vectors[inds, ival]
-        return get_vector(M, p, π * ax, DefaultOrthogonalBasis())
-    end
-    X = U ./ usinc_from_cos(cosθ)
-    return (X .- X') ./ 2
-end
 function log!(M::GeneralUnitaryMatrices{<:Any,ℝ}, X, p, q)
     U = transpose(p) * q
     X .= real(log_safe(U))
@@ -765,19 +751,6 @@ function log!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, X, p, q)
     @assert size(U) == (2, 2)
     @inbounds θ = atan(U[2], U[1])
     return get_vector!(M, X, p, θ, DefaultOrthogonalBasis())
-end
-function log!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, X, p, q)
-    U = transpose(p) * q
-    cosθ = (tr(U) - 1) / 2
-    if cosθ ≈ -1
-        eig = eigen_safe(U)
-        ival = findfirst(λ -> isapprox(λ, 1), eig.values)
-        inds = SVector{3}(1:3)
-        ax = eig.vectors[inds, ival]
-        return get_vector!(M, X, p, π * ax, DefaultOrthogonalBasis())
-    end
-    X .= U ./ usinc_from_cos(cosθ)
-    return project!(SkewSymmetricMatrices(3), X, p, X)
 end
 function log!(::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ}, X, p, q)
     U = transpose(p) * q

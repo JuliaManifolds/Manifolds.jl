@@ -353,11 +353,9 @@ using Markdown: @doc_str
 using MatrixEquations: lyapc, sylvc
 using Quaternions: Quaternions
 using Random
-using RecursiveArrayTools: ArrayPartition
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using SpecialFunctions
-using StaticArrays
 using Statistics
 using StatsBase
 using StatsBase: AbstractWeights
@@ -587,12 +585,18 @@ function __init__()
     @static if !isdefined(Base, :get_extension)
         @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
             @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
-                include("../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.jl")
+                @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
+                    include(
+                        "../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksRecursiveArrayToolsExt.jl",
+                    )
+                end
             end
         end
 
         @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-            include("../ext/ManifoldsOrdinaryDiffEqExt.jl")
+            @require StaticArrays = "90137ffa-7385-5640-81b9-e52037218182" begin
+                include("../ext/ManifoldsOrdinaryDiffEqStaticArraysExt.jl")
+            end
         end
 
         @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
@@ -607,6 +611,20 @@ function __init__()
             @require Colors = "5ae59095-9a9b-59fe-a467-6f913c188581" begin
                 include("../ext/ManifoldsRecipesBaseExt.jl")
             end
+        end
+
+        @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
+            include("../ext/ManifoldsRecursiveArrayToolsExt.jl")
+        end
+
+        @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
+            @require StaticArrays = "90137ffa-7385-5640-81b9-e52037218182" begin
+                include("../ext/ManifoldsRecursiveArrayToolsStaticArraysExt.jl")
+            end
+        end
+
+        @require StaticArrays = "90137ffa-7385-5640-81b9-e52037218182" begin
+            include("../ext/ManifoldsStaticArraysExt.jl")
         end
 
         @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
@@ -710,7 +728,6 @@ export AbstractPowerManifold,
     QuotientManifold
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
-export ArrayPartition
 export ProjectedPointDistribution, TangentBundle
 export TangentSpace, VectorSpaceFiber, VectorSpaceType, VectorBundle
 export AbstractVectorTransportMethod,
