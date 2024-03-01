@@ -23,7 +23,7 @@ The symplectic Stiefel tangent space at ``p`` can be parametrized as [BendokatZi
     &= \{X ∈ ℝ^{2n×2k} ∣ p^{T}J_{2n}X + X^{T}J_{2n}p = 0 \}, \\
     &= \{X = pΩ + p^sB \mid
         Ω ∈ ℝ^{2k×2k}, Ω^+ = -Ω, \\
-        &\qquad & p^s ∈ \mathrm{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k)×2k}, \},
+        &\quad\qquad p^s ∈ \mathrm{SpSt}(2n, 2(n- k)), B ∈ ℝ^{2(n-k)×2k}, \},
 \end{align*}
 ```
 
@@ -452,9 +452,9 @@ That is, we find the element ``X ∈ T_p\mathrm{SpSt}(2n, 2k)``
 which solves the constrained optimization problem
 
 ````math
-    \operatorname{min}_{X ∈ ℝ^{2n×2k}} \frac{1}{2}||X - A||^2, \quad
+    \displaystyle\operatorname{min}_{X ∈ ℝ^{2n×2k}} \frac{1}{2}||X - A||^2, \quad
     \text{s.t.}\;
-    h(X)\colon= X^{\mathrm{T}} J p + p^{\mathrm{T}} J X = 0,
+    h(X) := X^{\mathrm{T}} J p + p^{\mathrm{T}} J X = 0,
 ````
 where ``h : ℝ^{2n×2k} → \operatorname{skew}(2k)`` defines
 the restriction of ``X`` onto the tangent space ``T_p\mathrm{SpSt}(2n, 2k)``.
