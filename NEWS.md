@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+* typographical errors in tutorials/working-in-charts.jl.
 * several typographical errors in the docs
 * unifies to use two backticks ``` `` ``` for math instead of ` $ ` further in the docs
 
