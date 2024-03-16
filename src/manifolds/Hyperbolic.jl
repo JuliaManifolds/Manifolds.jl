@@ -415,3 +415,42 @@ function riemann_tensor!(M::Hyperbolic, W, p, X, Y, Z)
     W .= inner(M, p, Z, X) .* Y .- inner(M, p, Z, Y) .* X
     return W
 end
+
+@doc raw"""
+    sectional_curvature(::Hyperbolic, p, X, Y)
+
+Sectional curvature of [`Hyperbolic`](@ref) `M` is -1 if dimension is > 1 and 0 otherwise.
+"""
+function sectional_curvature(M::Hyperbolic, p, X, Y)
+    if manifold_dimension(M) > 1
+        return -1.0
+    else
+        return 0.0
+    end
+end
+
+@doc raw"""
+    sectional_curvature_max(::Hyperbolic)
+
+Sectional curvature of [`Hyperbolic`](@ref) `M` is -1 if dimension is > 1 and 0 otherwise.
+"""
+function sectional_curvature_max(M::Hyperbolic)
+    if manifold_dimension(M) > 1
+        return -1.0
+    else
+        return 0.0
+    end
+end
+
+@doc raw"""
+    sectional_curvature_min(M::Hyperbolic)
+
+Sectional curvature of [`Hyperbolic`](@ref) `M` is -1 if dimension is > 1 and 0 otherwise.
+"""
+function sectional_curvature_min(M::Hyperbolic)
+    if manifold_dimension(M) > 1
+        return -1.0
+    else
+        return 0.0
+    end
+end

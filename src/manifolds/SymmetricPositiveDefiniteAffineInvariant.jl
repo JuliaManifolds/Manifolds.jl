@@ -455,6 +455,30 @@ function riemann_tensor!(::SymmetricPositiveDefinite, Xresult, p, X, Y, Z)
 end
 
 """
+    sectional_curvature_min(M::SymmetricPositiveDefinite)
+
+Return minimum sectional curvature of [`SymmetricPositiveDefinite`](@ref) manifold,
+that is 0 for SPD(1) and SPD(2) and -0.25 otherwise.
+"""
+function sectional_curvature_min(M::SymmetricPositiveDefinite)
+    if manifold_dimension(M) < 2
+        return 0.0
+    else
+        return -0.25
+    end
+end
+
+"""
+    sectional_curvature_max(M::SymmetricPositiveDefinite)
+
+Return minimum sectional curvature of [`SymmetricPositiveDefinite`](@ref) manifold,
+that is 0.
+"""
+function sectional_curvature_max(::SymmetricPositiveDefinite)
+    return 0.0
+end
+
+"""
     volume_density(::SymmetricPositiveDefinite, p, X)
 
 Compute the volume density of the [`SymmetricPositiveDefinite`](@ref) manifold at `p`

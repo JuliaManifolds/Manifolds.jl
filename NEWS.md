@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.15] unreleased
 
+## Added
+
+* Implementation of `sectional_curvature`, `sectional_curvature_min` and `sectional_curvature_max` for several manifolds.
+* `sectional_curvature_matrix` function and a tutorial on coordinate-free curvature.
+
 ## Fixed
 
 * several typographical errors in the docs

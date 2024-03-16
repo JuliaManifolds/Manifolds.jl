@@ -255,7 +255,18 @@ using ManifoldsBase: TFVector
 
     @testset "other metric" begin
         M = Sphere(2)
-        @test riemann_tensor(M, [0, 1, 0], [1, 0, 0], [1, 0, 4], [0, 0, 1]) == [4, 0, 0]
+        p = [0, 1, 0]
+        X = [1, 0, 0]
+        Y = [1, 0, 4]
+        Z = [0, 0, 1]
+        @test riemann_tensor(M, p, X, Y, Z) == [4, 0, 0]
+        @test sectional_curvature(M, p, X, Y) == 1.0
+        @test sectional_curvature_max(M) == 1.0
+        @test sectional_curvature_min(M) == 1.0
+        M1 = Sphere(1)
+        @test sectional_curvature(M1, p, X, Y) == 0.0
+        @test sectional_curvature_max(M1) == 0.0
+        @test sectional_curvature_min(M1) == 0.0
     end
 
     @testset "ManifoldDiff" begin

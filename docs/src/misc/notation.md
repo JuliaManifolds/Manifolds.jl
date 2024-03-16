@@ -49,6 +49,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\mathcal P_{t_1\gets t_0}^cX`` | parallel transport along the curve ``c``| ``\mathcal P^cX=\mathcal P_{1\gets 0}^cX`` | of the vector ``X`` from ``p=c(0)`` to ``c(1)``
 | ``p`` | a point on ``\mathcal M`` | ``p_1, p_2, \ldots,q`` | for 3 points one might use ``x,y,z`` |
 | ``\operatorname{retr}_pX``|  a retraction | |
+| ``\kappa_p(X, Y)`` | sectional curvature | |
 | ``ξ`` | a set of tangent vectors | ``\{X_1,\ldots,X_n\}`` | |
 | ``J_{2n} \in ℝ^{2n×2n}`` | the [`SymplecticElement`](@ref) | | |
 | ``T_p \mathcal M`` | the tangent space at ``p`` | | |

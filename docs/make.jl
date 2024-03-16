@@ -101,6 +101,7 @@ makedocs(;
             "work in charts" => "tutorials/working-in-charts.md",
             "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
             "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
+            "explore curvature without coordinates" => "tutorials/exploring-curvature.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [
