@@ -320,7 +320,7 @@ function sectional_curvature_bdp(M::AbstractManifold, p, X, Y; r::Real=1e-3, N::
     p_i = similar(p)
     p_ip1 = similar(p)
     for i in 1:N
-        θ_i = 2π * (i-1) / N
+        θ_i = 2π * (i - 1) / N
         θ_ip1 = 2π * (i) / N
         exp!(M, p_i, p, r .* (sin(θ_i) .* X .+ cos(θ_i) .* Y))
         exp!(M, p_ip1, p, r .* (sin(θ_ip1) .* X .+ cos(θ_ip1) .* Y))
@@ -337,7 +337,13 @@ Estimate the matrix of sectional curvatures of manifold `M` at point `p` using
 `sectional_curvature_bdp`. Entry `(i, j)`` corresponds to sectional curvature of the
 surface spanned by vectors `i`  and `j` from basis `B`.
 """
-function sectional_curvature_matrix_bdp(M::AbstractManifold, p, B::AbstractBasis; r::Real=1e-3, N_pts::Int=10000)
+function sectional_curvature_matrix_bdp(
+    M::AbstractManifold,
+    p,
+    B::AbstractBasis;
+    r::Real=1e-3,
+    N_pts::Int=10000,
+)
     V = get_vectors(M, p, get_basis(M, p, B))
     N = length(V)
     result = zeros(N, N)
@@ -351,4 +357,3 @@ function sectional_curvature_matrix_bdp(M::AbstractManifold, p, B::AbstractBasis
     end
     return result
 end
-
