@@ -13,7 +13,7 @@ number system `𝔽` or in general, by defining for an operation `Op` the follow
     _compose!(::AbstractDecoratorManifold, x, p, q)
 
 Note that a manifold is connected with an operation by wrapping it with a decorator,
-[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold)
+[`AbstractDecoratorManifold`](@extref `ManifoldsBase.AbstractDecoratorManifold`)
 using the [`IsGroupManifold`](@ref) to specify the operation.
 For a concrete case the concrete wrapper [`GroupManifold`](@ref) can be used.
 """
@@ -22,7 +22,7 @@ abstract type AbstractGroupOperation end
 """
     IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
 
-A trait to declare an [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  as a manifold with group structure
+A trait to declare an [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  as a manifold with group structure
 with operation of type `O`.
 
 Using this trait you can turn a manifold that you implement _implictly_ into a Lie group.
@@ -40,7 +40,7 @@ end
 """
     AbstractInvarianceTrait <: AbstractTrait
 
-A common supertype for anz [`AbstractTrait`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractTrait) related to metric invariance
+A common supertype for anz [`AbstractTrait`](@extref `ManifoldsBase.AbstractTrait`) related to metric invariance
 """
 abstract type AbstractInvarianceTrait <: AbstractTrait end
 
@@ -81,7 +81,7 @@ end
     is_group_manifold(G::GroupManifold)
     is_group_manifold(G::AbstractManifold, o::AbstractGroupOperation)
 
-returns whether an [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold)
+returns whether an [`AbstractDecoratorManifold`](@extref `ManifoldsBase.AbstractDecoratorManifold`)
 is a group manifold with [`AbstractGroupOperation`](@ref) `o`.
 For a [`GroupManifold`](@ref) `G` this checks whether the right operations is stored within `G`.
 """
@@ -201,7 +201,7 @@ with [`AbstractGroupOperation`](@ref) of type `O`.
 Similar to the philosophy that points are agnostic of their group at hand, the identity
 does not store the group `g` it belongs to. However it depends on the type of the [`AbstractGroupOperation`](@ref) used.
 
-See also [`identity_element`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifoldPoint) or array representation.
+See also [`identity_element`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@extref `ManifoldsBase.AbstractManifoldPoint`) or array representation.
 
 # Constructors
 

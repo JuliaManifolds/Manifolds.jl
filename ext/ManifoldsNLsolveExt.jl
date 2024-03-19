@@ -18,12 +18,12 @@ end
     inverse_retract(M, p, q method::NLSolveInverseRetraction; kwargs...)
 
 Approximate the inverse of the retraction specified by `method.retraction` from `p` with
-respect to `q` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M` using NLsolve. This inverse retraction is
+respect to `q` on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M` using NLsolve. This inverse retraction is
 not guaranteed to succeed and probably will not unless `q` is close to `p` and the initial
 guess `X0` is close.
 
-If the solver fails to converge, an [`OutOfInjectivityRadiusError`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.OutOfInjectivityRadiusError) is raised.
-See [`NLSolveInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.NLSolveInverseRetraction) for configurable parameters.
+If the solver fails to converge, an [`OutOfInjectivityRadiusError`](@extref `ManifoldsBase.OutOfInjectivityRadiusError`) is raised.
+See [`NLSolveInverseRetraction`](@extref `ManifoldsBase.NLSolveInverseRetraction`) for configurable parameters.
 """
 inverse_retract(::AbstractManifold, p, q, ::NLSolveInverseRetraction; kwargs...)
 

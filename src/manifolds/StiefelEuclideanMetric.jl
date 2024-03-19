@@ -185,7 +185,7 @@ Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
 Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
 where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
 
-Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), where we use for the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), where we use for the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
 ``α_0=α_1=1`` in their formula. Then the formula reads
 
 ```math

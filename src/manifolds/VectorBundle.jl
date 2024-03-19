@@ -20,7 +20,7 @@ fiber_bundle_transport(M::AbstractManifold, ::FiberType) =
     VectorBundle{𝔽,TVS,TM,VTV} = FiberBundle{𝔽,TVS,TM,TVT} where {TVS<:VectorSpaceType}
 
 Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
-[`VectorSpaceType`]https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases/#ManifoldsBase.VectorSpaceType).
+[`VectorSpaceType`]@extref `ManifoldsBase.VectorSpaceType`).
 
 `VectorSpaceFiberType` is used to encode vector spaces as fiber types.
 """
@@ -41,7 +41,7 @@ const VectorBundle{𝔽,TVS,TM,TVT} = FiberBundle{
 Tangent bundle for manifold of type `M`, as a manifold with the Sasaki metric [Sasaki:1958](@cite).
 
 Exact retraction and inverse retraction can be approximated using [`FiberBundleProductRetraction`](@ref),
-[`FiberBundleInverseProductRetraction`](@ref) and [`SasakiRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions/#ManifoldsBase.SasakiRetraction).
+[`FiberBundleInverseProductRetraction`](@ref) and [`SasakiRetraction`](@extref `ManifoldsBase.SasakiRetraction`).
 [`FiberBundleProductVectorTransport`](@ref) can be used as a vector transport.
 
 # Constructors

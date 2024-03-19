@@ -279,7 +279,7 @@ is_flat(M::Hyperbolic) = false
     log(M::Hyperbolic, p, q)
 
 Compute the logarithmic map on the [`Hyperbolic`](@ref) space ``\mathcal H^n``, the tangent
-vector representing the [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) starting from `p`
+vector representing the [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) starting from `p`
 reaches `q` after time 1. The formula reads for ``p ≠ q``
 
 ```math
@@ -328,7 +328,7 @@ manifold_volume(::Hyperbolic) = Inf
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` on the
-[`Hyperbolic`](@ref) space using [`CyclicProximalPointEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.CyclicProximalPointEstimation).
+[`Hyperbolic`](@ref) space using [`CyclicProximalPointEstimation`](@extref `ManifoldsBase.CyclicProximalPointEstimation`).
 """
 mean(::Hyperbolic, ::Any...)
 
@@ -369,7 +369,7 @@ end
     parallel_transport_to(M::Hyperbolic, p, X, q)
 
 Compute the paralllel transport of the `X` from the tangent space at `p` on the
-[`Hyperbolic`](@ref) space ``\mathcal H^n`` to the tangent at `q` along the [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any})
+[`Hyperbolic`](@ref) space ``\mathcal H^n`` to the tangent at `q` along the [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`)
 connecting `p` and `q`. The formula reads
 
 ````math

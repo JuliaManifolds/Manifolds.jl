@@ -413,11 +413,11 @@ end
 @doc raw"""
     Base.foreach(f, M::Tucker, p::TuckerPoint, basis::AbstractBasis, indices=1:manifold_dimension(M))
 
-Let `basis` be and [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) at a point `p` on `M`. Suppose `f` is a function
+Let `basis` be and [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`) at a point `p` on `M`. Suppose `f` is a function
 that takes an index and a vector as an argument.
 This function applies `f` to `i` and the `i`th basis vector sequentially for each `i` in
 `indices`.
-Using a [`CachedBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.CachedBasis) may speed up the computation.
+Using a [`CachedBasis`](@extref `ManifoldsBase.CachedBasis`) may speed up the computation.
 
 **NOTE**: The i'th basis vector is overwritten in each iteration. If any information about
 the vector is to be stored, `f` must make a copy.

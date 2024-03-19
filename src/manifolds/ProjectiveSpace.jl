@@ -270,8 +270,8 @@ injectivity_radius(::AbstractProjectiveSpace, p, ::AbstractRetractionMethod) = �
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::PolarInverseRetraction)
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::QRInverseRetraction)
 
-Compute the equivalent inverse retraction [`ProjectionInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionInverseRetraction),
-[`PolarInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarInverseRetraction), and [`QRInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRInverseRetraction) on the
+Compute the equivalent inverse retraction [`ProjectionInverseRetraction`](@extref `ManifoldsBase.ProjectionInverseRetraction`),
+[`PolarInverseRetraction`](@extref `ManifoldsBase.QRInverseRetraction`) on the
 [`AbstractProjectiveSpace`](@ref) manifold `M```=𝔽ℙ^n``, i.e.
 ````math
 \operatorname{retr}_p^{-1} q = q \frac{1}{⟨p, q⟩_{\mathrm{F}}} - p,
@@ -328,7 +328,7 @@ is_flat(M::AbstractProjectiveSpace) = manifold_dimension(M) == 1
     log(M::AbstractProjectiveSpace, p, q)
 
 Compute the logarithmic map on [`AbstractProjectiveSpace`](@ref) `M``` = 𝔽ℙ^n``,
-i.e. the tangent vector whose corresponding [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) starting from `p`
+i.e. the tangent vector whose corresponding [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) starting from `p`
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
@@ -393,7 +393,7 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of points in vector `x`
-using [`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius).
+using [`GeodesicInterpolationWithinRadius`](@extref `ManifoldsBase.GeodesicInterpolationWithinRadius`).
 """
 mean(::AbstractProjectiveSpace, ::Any...)
 
@@ -460,8 +460,8 @@ end
     retract(M::AbstractProjectiveSpace, p, X, method::PolarRetraction)
     retract(M::AbstractProjectiveSpace, p, X, method::QRRetraction)
 
-Compute the equivalent retraction [`ProjectionRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionRetraction), [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction),
-and [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) on the [`AbstractProjectiveSpace`](@ref) manifold `M```=𝔽ℙ^n``,
+Compute the equivalent retraction [`ProjectionRetraction`](@extref `ManifoldsBase.PolarRetraction`),
+and [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) on the [`AbstractProjectiveSpace`](@ref) manifold `M```=𝔽ℙ^n``,
 i.e.
 ````math
 \operatorname{retr}_p X = \operatorname{proj}_p(p + X).
@@ -559,7 +559,7 @@ end
     parallel_transport_direction(M::AbstractProjectiveSpace, p, X, d)
 
 Parallel transport a vector `X` from the tangent space at a point `p` on the
-[`AbstractProjectiveSpace`](@ref) `M` along the [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) in the direction
+[`AbstractProjectiveSpace`](@ref) `M` along the [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) in the direction
 indicated by the tangent vector `d`, i.e.
 ````math
 \mathcal{P}_{\exp_p (d) ← p}(X) = X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p,

@@ -39,7 +39,7 @@ parent_trait(::IsDefaultConnection) = IsConnectionManifold()
 
     ConnectionManifold(M, C)
 
-Decorate the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M` with [`AbstractAffineConnection`](@ref) `C`.
+Decorate the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M` with [`AbstractAffineConnection`](@ref) `C`.
 """
 struct ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnection} <:
        AbstractDecoratorManifold{𝔽}
@@ -191,7 +191,7 @@ end
     connection(M::AbstractManifold)
 
 Get the connection (an object of a subtype of [`AbstractAffineConnection`](@ref))
-of [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
+of [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`.
 """
 connection(::AbstractManifold)
 
@@ -286,7 +286,7 @@ end
 
 returns whether an [`AbstractAffineConnection`](@ref) is the default metric on the manifold `M` or not.
 This can be set by defining this function, or setting the [`IsDefaultConnection`](@ref) trait for an
-[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold).
+[`AbstractDecoratorManifold`](@extref `ManifoldsBase.AbstractDecoratorManifold`).
 """
 is_default_connection(M::AbstractManifold, G::AbstractAffineConnection)
 @trait_function is_default_connection(

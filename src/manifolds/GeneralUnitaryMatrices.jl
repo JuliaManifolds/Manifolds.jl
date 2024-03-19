@@ -946,7 +946,7 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius).
+[`GeodesicInterpolationWithinRadius`](@extref `ManifoldsBase.GeodesicInterpolationWithinRadius`).
 """
 mean(::GeneralUnitaryMatrices{<:Any,ℝ}, ::Any)
 
