@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.15] unreleased
 
-## Fixed
+### Added
+
+* using `DocumenterInterLinks` for links to other Julia packages documentation.
+
+### Fixed
 
 * several typographical errors in the docs
 * unifies to use two backticks ``` `` ``` for math instead of ` $ ` further in the docs
