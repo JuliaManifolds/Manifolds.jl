@@ -301,7 +301,7 @@ function sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis)
 end
 
 @doc raw"""
-    sectional_curvature_bdp(M::AbstractManifold, p, X, Y; r::Real=1e-3, N::Int=10000)
+    estimated_sectional_curvature(M::AbstractManifold, p, X, Y; r::Real=1e-3, N::Int=10000)
 
 Approximate sectional curvature of manifold `M` in the plane spanned by vectors `X` and `Y`
 from tangent space at `p` using a circle on `M` of radius `r` divided into `N` segments.
@@ -315,7 +315,14 @@ where ``C(r)`` is the circumference of the circle of radius ``r`` around `p` in 
 of `M` spanned by `X` and `Y`. The circumference calculation method has a tendency to
 return curvature values larger than the exact ones.
 """
-function sectional_curvature_bdp(M::AbstractManifold, p, X, Y; r::Real=1e-3, N::Int=10000)
+function estimated_sectional_curvature(
+    M::AbstractManifold,
+    p,
+    X,
+    Y;
+    r::Real=1e-3,
+    N::Int=10000,
+)
     circumference = 0.0
     p_i = similar(p)
     p_ip1 = similar(p)
@@ -331,13 +338,13 @@ function sectional_curvature_bdp(M::AbstractManifold, p, X, Y; r::Real=1e-3, N::
 end
 
 """
-    sectional_curvature_matrix_bdp(M::AbstractManifold, p, B::AbstractBasis; r::Real=1e-3, N::Int=10000)
+    estimated_sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis; r::Real=1e-3, N::Int=10000)
 
 Estimate the matrix of sectional curvatures of manifold `M` at point `p` using
-`sectional_curvature_bdp`. Entry `(i, j)`` corresponds to sectional curvature of the
+`estimated_sectional_curvature`. Entry `(i, j)`` corresponds to sectional curvature of the
 surface spanned by vectors `i`  and `j` from basis `B`.
 """
-function sectional_curvature_matrix_bdp(
+function estimated_sectional_curvature_matrix(
     M::AbstractManifold,
     p,
     B::AbstractBasis;
@@ -350,7 +357,7 @@ function sectional_curvature_matrix_bdp(
     for (i, e_i) in enumerate(V)
         for (j, e_j) in enumerate(V)
             if i < j
-                result[i, j] = sectional_curvature_bdp(M, p, e_i, e_j; r=r, N=N_pts)
+                result[i, j] = estimated_sectional_curvature(M, p, e_i, e_j; r=r, N=N_pts)
                 result[j, i] = result[i, j]
             end
         end

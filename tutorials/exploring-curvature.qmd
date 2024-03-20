@@ -34,7 +34,7 @@ cm = sectional_curvature_matrix(M, p, DefaultOrthonormalBasis())
 
 We can verify that the curvature is consistent with an approximation based on the Bertrand–Diguet–Puiseux theorem, which relies only on an ONB, exponential map and distance calculation:
 ```{julia}
-cm_bdp = Manifolds.sectional_curvature_matrix_bdp(M, p, DefaultOrthonormalBasis(); r=1e-3, N_pts=100000)
+cm_bdp = Manifolds.estimated_sectional_curvature_matrix(M, p, DefaultOrthonormalBasis(); r=1e-3, N_pts=100000)
 println(norm(cm - cm_bdp))
 ```
 
