@@ -27,6 +27,7 @@ It has nonpositive sectional curvature:
 
 ```{julia}
 using Manifolds
+using LinearAlgebra
 M = SymmetricPositiveDefinite(3)
 p = rand(M)
 cm = sectional_curvature_matrix(M, p, DefaultOrthonormalBasis())
@@ -54,7 +55,37 @@ end
 The flat planes correspond to directions where the matrix changes independently.
 In other cases sectional curvature indicates hyperbolic characteristic of a submanifold.
 
+Sectional curvature can be either larger or smaller than entries in the matrix on other planes.
+Consider for example the manifold of rotation matrices in four dimensions, and a function that computes plane of maximum curvature using random search.
 
+```{julia}
+function max_curvature(M::AbstractManifold, p)
+    mc = -Inf
+    X = zero_vector(M, p)
+    Y = zero_vector(M, p)
+    for _ in 1:10000
+        X_c = rand(M; vector_at=p)
+        Y_c = rand(M; vector_at=p)
+        sc = sectional_curvature(M, p, X_c, Y_c)
+        if sc > mc
+            mc = sc
+            X .= X_c
+            Y .= Y_c
+        end
+    end
+    return mc, X, Y
+end
+
+M = Rotations(4)
+p = Matrix(I(4) * 1.0)
+println(sectional_curvature_matrix(M, p, DefaultOrthonormalBasis()))
+mc, X, Y = max_curvature(M, p)
+println(mc)
+println(X)
+println(Y)
+```
+
+In the planes corresponding to orthonormal basis, the maximum sectional curvature is 0.125 but the true upper bound is 0.25.
 
 ## Literature
 

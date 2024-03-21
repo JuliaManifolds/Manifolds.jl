@@ -423,6 +423,35 @@ function riemannian_Hessian!(M::Rotations, Y, p, G, H, X)
     return Y
 end
 
+@doc raw"""
+    sectional_curvature_max(::Rotations)
+
+Sectional curvature of [`Rotations`](@ref) `M` is equal to 0 for `Rotations(1)` and
+`Rotations(2)`, less than or equal to 1/8 for `Rotations(3)` and less than or equal to 1/4
+for higher-dimensional rotations manifolds.
+
+For reference, see [Ge:2014](@cite), Lemma 2.5 and [CheegerEbin:2008](@cite), Corollary 3.19.
+"""
+function sectional_curvature_max(M::Rotations)
+    N = manifold_dimension(M)
+    if N <= 1
+        return 0.0
+    elseif N == 3
+        return 1 / 8
+    else
+        return 1 / 4
+    end
+end
+
+@doc raw"""
+    sectional_curvature_min(M::Rotations)
+
+Sectional curvature of [`Rotations`](@ref) `M` is greater than or equal to 0.
+"""
+function sectional_curvature_min(::Rotations)
+    return 0.0
+end
+
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""

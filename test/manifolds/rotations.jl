@@ -275,6 +275,14 @@ include("../header.jl")
         ]
     end
 
+    @testset "sectional curvature" begin
+        @test sectional_curvature_min(Rotations(3)) == 0.0
+        @test sectional_curvature_max(Rotations(1)) == 0.0
+        @test sectional_curvature_max(Rotations(2)) == 0.0
+        @test sectional_curvature_max(Rotations(3)) == 1 / 8
+        @test sectional_curvature_max(Rotations(4)) == 1 / 4
+    end
+
     @testset "field parameter" begin
         M = Rotations(2; parameter=:field)
         @test is_flat(M)
