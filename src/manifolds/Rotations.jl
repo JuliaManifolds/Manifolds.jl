@@ -62,6 +62,8 @@ function angles_4d_skew_sym_matrix(A)
     return sqrt(halfb + sqrtdisc), sqrt(halfb - sqrtdisc)
 end
 
+default_vector_transport_method(::Rotations) = ParallelTransport()
+
 # from https://github.com/JuliaManifolds/Manifolds.jl/issues/453#issuecomment-1046057557
 function _get_tridiagonal_elements(trian)
     N = size(trian, 1)

@@ -17,6 +17,7 @@ include("../header.jl")
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{2,2,Float64,4})
     retraction_methods = [PolarRetraction(), QRRetraction()]
+    @test default_vector_transport_method(M) === ParallelTransport()
 
     inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
 

@@ -7,12 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.15] unreleased
 
-## Added
+### Added
 
 * Implementation of `sectional_curvature`, `sectional_curvature_min` and `sectional_curvature_max` for several manifolds.
 * `sectional_curvature_matrix` function and a tutorial on coordinate-free curvature.
 
-## Fixed
+### Changed
+
+* `default_vector_transport_method` for `GeneralUnitaryMatrices` other than `Rotations` was changed to `ProjectionTransport`.
+
+### Fixed
 
 * several typographical errors in the docs
 * unifies to use two backticks ``` `` ``` for math instead of ` $ ` further in the docs

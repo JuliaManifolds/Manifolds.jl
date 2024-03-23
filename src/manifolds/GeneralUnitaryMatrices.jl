@@ -182,6 +182,8 @@ function default_approximation_method(::GeneralUnitaryMatrices{<:Any,ℝ}, ::typ
     return GeodesicInterpolationWithinRadius(π / 2 / √2)
 end
 
+default_vector_transport_method(::GeneralUnitaryMatrices) = ProjectionTransport()
+
 embed(::GeneralUnitaryMatrices, p) = p
 
 @doc raw"""
