@@ -40,7 +40,7 @@ size(A::Hamiltonian) = size(A.value)
 @doc raw"""
     HamiltonianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)
+The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
 consisting of (real-valued) hamiltonian matrices of size ``n×n``, i.e. the set
 
 ````math

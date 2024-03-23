@@ -285,7 +285,7 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolation).
+[`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`).
 """
 mean(::SymmetricPositiveDefinite, ::Any)
 

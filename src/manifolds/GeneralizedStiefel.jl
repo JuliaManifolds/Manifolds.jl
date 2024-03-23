@@ -57,7 +57,7 @@ active_traits(f, ::GeneralizedStiefel, args...) = merge_traits(IsEmbeddedManifol
     check_point(M::GeneralizedStiefel, p; kwargs...)
 
 Check whether `p` is a valid point on the [`GeneralizedStiefel`](@ref) `M`=``\operatorname{St}(n,k,B)``,
-i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and ``x^{\mathrm{H}}Bx``
+i.e. that it has the right [`AbstractNumbers`](@extref ManifoldsBase number-system) type and ``x^{\mathrm{H}}Bx``
 is (approximately) the identity, where ``⋅^{\mathrm{H}}`` is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
@@ -84,7 +84,7 @@ end
     check_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
-`M`=``\operatorname{St}(n,k,B)``, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits,
+`M`=``\operatorname{St}(n,k,B)``, i.e. the [`AbstractNumbers`](@extref ManifoldsBase number-system) fits,
 `p` is a valid point on `M` and
 it (approximately) holds that ``p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0``, where
 `kwargs...` is passed to the `isapprox`.
@@ -232,12 +232,12 @@ end
     retract(M::GeneralizedStiefel, p, X, ::PolarRetraction)
     retract(M::GeneralizedStiefel, p, X, ::ProjectionRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
+Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
 [`GeneralizedStiefel`](@ref) manifold `M`, which in this case is the same as
 the projection based retraction employing the exponential map in the embedding
 and projecting the result back to the manifold.
 
-The default retraction for this manifold is the [`ProjectionRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionRetraction).
+The default retraction for this manifold is the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`).
 """
 retract(::GeneralizedStiefel, ::Any...)
 

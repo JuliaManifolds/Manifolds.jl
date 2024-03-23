@@ -522,8 +522,8 @@ include("trait_recursion_breaking.jl")
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
 
-Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
-This method employs [`is_point`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_point) deactivating the error throwing option.
+Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`.
+This method employs [`is_point`](@extref `ManifoldsBase.is_point-Tuple{AbstractManifold, Any, Bool}`) deactivating the error throwing option.
 """
 Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
@@ -532,9 +532,9 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
     X ∈ TangentSpace(M, p)
 
 Check whether `X` is a tangent vector from (in) the tangent space ``T_p\mathcal M``, i.e.
-the [`TangentSpace`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.TangentSpace)
-at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
-This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.
+the [`TangentSpace`](@extref `ManifoldsBase.TangentSpace`)
+at `p` on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`.
+This method uses [`is_vector`](@extref `ManifoldsBase.is_vector-Tuple{AbstractManifold, Any, Any, Bool, Bool}`) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpace; kwargs...)
     return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)

@@ -39,7 +39,7 @@ struct MPointvariate <: VariateForm end
     MPointSupport(M::AbstractManifold)
 
 Value support for manifold-valued distributions (values from given
-[`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`).
+[`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`).
 """
 struct MPointSupport{TM<:AbstractManifold} <: ValueSupport
     manifold::TM

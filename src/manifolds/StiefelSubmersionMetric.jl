@@ -4,7 +4,7 @@
 The submersion (or normal) metric family on the [`Stiefel`](@ref) manifold.
 
 The family, with a single real parameter ``α>-1``, has two special cases:
-- ``α = -\frac{1}{2}``: [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+- ``α = -\frac{1}{2}``: [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
 - ``α = 0``: [`CanonicalMetric`](@ref)
 
 The family was described in [HueperMarkinaSilvaLeite:2021](@cite). This implementation follows the
@@ -117,7 +117,7 @@ end
         method::ShootingInverseRetraction,
     )
 
-Compute the inverse retraction using [`ShootingInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ShootingInverseRetraction).
+Compute the inverse retraction using [`ShootingInverseRetraction`](@extref `ManifoldsBase.ShootingInverseRetraction`).
 
 In general the retraction is computed using the generic shooting method.
 
@@ -132,7 +132,7 @@ In general the retraction is computed using the generic shooting method.
         },
     )
 
-Compute the inverse retraction using [`ShootingInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ShootingInverseRetraction) more efficiently.
+Compute the inverse retraction using [`ShootingInverseRetraction`](@extref `ManifoldsBase.ShootingInverseRetraction`) more efficiently.
 
 For ``k < \frac{n}{2}`` the retraction is computed more efficiently using
 [`StiefelFactorization`](@ref).
@@ -189,7 +189,7 @@ end
 
 Compute the logarithmic map on the [`Stiefel(n,k)`](@ref) manifold with respect to the [`StiefelSubmersionMetric`](@ref).
 
-The logarithmic map is computed using [`ShootingInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ShootingInverseRetraction). For
+The logarithmic map is computed using [`ShootingInverseRetraction`](@extref `ManifoldsBase.ShootingInverseRetraction`). For
 ``k ≤ \lfloor\frac{n}{2}\rfloor``, this is sped up using the ``k``-shooting method of [ZimmermannHueper:2022](@cite).
 Keyword arguments are forwarded to `ShootingInverseRetraction`; see
 that documentation for details. Their defaults are:
@@ -248,7 +248,7 @@ Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
 Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
 where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
 
-Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](@extref `ManifoldsBase.EuclideanMetric`)
 ``α_0=1, α_1=\frac{1}{2}`` in their formula. The formula reads
 
 ```math

@@ -118,7 +118,7 @@ inner(::Grassmann, p, X, Y) = dot(X, Y)
 @doc raw"""
     inverse_retract(M::Grassmann, p, q, ::PolarInverseRetraction)
 
-Compute the inverse retraction for the [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction), on the
+Compute the inverse retraction for the [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`), on the
 [`Grassmann`](@ref) manifold `M`, i.e.,
 
 ````math
@@ -137,7 +137,7 @@ end
 @doc raw"""
     inverse_retract(M, p, q, ::QRInverseRetraction)
 
-Compute the inverse retraction for the [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction), on the
+Compute the inverse retraction for the [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`), on the
 [`Grassmann`](@ref) manifold `M`, i.e.,
 
 ````math
@@ -156,7 +156,7 @@ end
     log(M::Grassmann, p, q)
 
 Compute the logarithmic map on the [`Grassmann`](@ref) `M` `` = \mathcal M=\mathrm{Gr}(n,k)``,
-i.e. the tangent vector `X` whose corresponding [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) starting from `p`
+i.e. the tangent vector `X` whose corresponding [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) starting from `p`
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
@@ -260,7 +260,7 @@ representation_size(M::Grassmann) = get_parameter(M.size)
 @doc raw"""
     retract(M::Grassmann, p, X, ::PolarRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
+Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
 [`Grassmann`](@ref) `M`. With ``USV = p + X`` the retraction reads
 ````math
 \operatorname{retr}_p X = UV^\mathrm{H},
@@ -279,7 +279,7 @@ end
 @doc raw"""
     retract(M::Grassmann, p, X, ::QRRetraction )
 
-Compute the QR-based retraction [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) on the
+Compute the QR-based retraction [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) on the
 [`Grassmann`](@ref) `M`. With ``QR = p + X`` the retraction reads
 ````math
 \operatorname{retr}_p X = QD,
@@ -303,7 +303,7 @@ end
     riemannian_Hessian(M::Grassmann, p, G, H, X)
 
 The Riemannian Hessian can be computed by adopting Eq. (6.6) [Nguyen:2023](@cite),
-where we use for the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric) ``α_0=α_1=1`` in their formula.
+where we use for the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) ``α_0=α_1=1`` in their formula.
 Let ``\nabla f(p)`` denote the Euclidean gradient `G`,
 ``\nabla^2 f(p)[X]`` the Euclidean Hessian `H`. Then the formula reads
 

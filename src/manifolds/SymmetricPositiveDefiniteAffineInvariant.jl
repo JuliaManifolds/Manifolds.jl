@@ -10,7 +10,7 @@ struct AffineInvariantMetric <: RiemannianMetric end
     change_representer(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
-space at `p` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+space at `p` with respect to the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
 `g_E`, this is turned into the representer with respect to the (default) metric,
 the [`AffineInvariantMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
 
@@ -33,7 +33,7 @@ end
 @doc raw"""
     change_metric(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
 `g_E`, this function changes into the [`AffineInvariantMetric`](@ref) (default) metric on the
 [`SymmetricPositiveDefinite`](@ref) `M`.
 

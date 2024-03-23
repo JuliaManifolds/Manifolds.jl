@@ -363,7 +363,7 @@ end
 """
     default_inverse_retraction_method(M::FixedRankMatrices)
 
-Return [`PolarInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarInverseRetraction)
+Return [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`)
 as the default inverse retraction for the [`FixedRankMatrices`](@ref) manifold.
 """
 default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction()
@@ -371,7 +371,7 @@ default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction(
 """
     default_retraction_method(M::FixedRankMatrices)
 
-Return [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction)
+Return [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
 as the default retraction for the [`FixedRankMatrices`](@ref) manifold.
 """
 default_retraction_method(::FixedRankMatrices) = PolarRetraction()
@@ -379,7 +379,7 @@ default_retraction_method(::FixedRankMatrices) = PolarRetraction()
 """
     default_vector_transport_method(M::FixedRankMatrices)
 
-Return the [`ProjectionTransport`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.ProjectionTransport)
+Return the [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`)
 as the default vector transport method for the [`FixedRankMatrices`](@ref) manifold.
 """
 default_vector_transport_method(::FixedRankMatrices) = ProjectionTransport()
@@ -514,7 +514,7 @@ of dimension `m`x`n` of rank `k`, namely
 \dim(\mathcal M) = k(m + n - k) \dim_ℝ 𝔽,
 ````
 
-where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of `𝔽`.
 """
 function manifold_dimension(M::FixedRankMatrices{<:Any,𝔽}) where {𝔽}
     m, n, k = get_parameter(M.size)

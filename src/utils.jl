@@ -141,7 +141,7 @@ mul!_safe(Y, A, B) = (Y === A || Y === B) ? copyto!(Y, A * B) : mul!(Y, A, B)
     realify(X::AbstractMatrix{T𝔽}, 𝔽::AbstractNumbers) -> Y::AbstractMatrix{<:Real}
 
 Given a matrix ``X ∈ 𝔽^{n×n}``, compute ``Y ∈ ℝ^{m×m}``, where ``m = n \operatorname{dim}_𝔽``,
-and ``\operatorname{dim}_𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the number field ``𝔽``, using
+and ``\operatorname{dim}_𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the number field ``𝔽``, using
 the map ``ϕ \colon X ↦ Y``, that preserves the matrix product, so that for all
 ``C,D ∈ 𝔽^{n×n}``,
 ````math
@@ -189,7 +189,7 @@ end
     unrealify!(X::AbstractMatrix{T𝔽}, Y::AbstractMatrix{<:Real}, 𝔽::AbstractNumbers[, n])
 
 Given a real matrix ``Y ∈ ℝ^{m×m}``, where ``m = n \operatorname{dim}_𝔽``, and
-``\operatorname{dim}_𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the number field ``𝔽``, compute
+``\operatorname{dim}_𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the number field ``𝔽``, compute
 in-place its equivalent matrix ``X ∈ 𝔽^{n×n}``. Note that this function does not check that
 ``Y`` has a valid structure to be un-realified.
 
