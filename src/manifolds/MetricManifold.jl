@@ -10,7 +10,7 @@ struct IsMetricManifold <: AbstractTrait end
 """
     IsDefaultMetric{G<:AbstractMetric}
 
-Specify that a certain [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+Specify that a certain [`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`)
 is the default metric for a manifold.
 This way the corresponding [`MetricManifold`](@ref) falls back to the default methods
 of the manifold it decorates.
@@ -28,7 +28,7 @@ parent_trait(::IsDefaultMetric) = IsMetricManifold()
     MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <: AbstractDecoratorManifold{𝔽}
 
 Equip a [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) explicitly with an
-[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G`.
+[`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`) `G`.
 
 For a Metric AbstractManifold, by default, assumes, that you implement the linear form
 from [`local_metric`](@ref) in order to evaluate the exponential map.
@@ -203,7 +203,7 @@ end
 
 Compute the musical isomorphism to transform the tangent vector `X` from the
 [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with
-[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G` to a cotangent by
+[`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`) `G` to a cotangent by
 computing
 
 ````math
@@ -289,7 +289,7 @@ end
 
 Return the local matrix representation of the inverse metric (cometric) tensor
 of the tangent space at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` with respect
-to the [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) basis `B`.
+to the [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`) basis `B`.
 
 The metric tensor (see [`local_metric`](@ref)) is usually denoted by ``G = (g_{ij}) ∈ 𝔽^{d×d}``,
 where ``d`` is the dimension of the manifold.
@@ -370,7 +370,7 @@ end
 
 Compute the inner product of `X` and `Y` from the tangent space at `p` on the
 [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` using the
-[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G`.
+[`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`) `G`.
 If `M` has `G` as its [`IsDefaultMetric`](@ref) trait,
 this is done using `inner(M, p, X, Y)`, otherwise the [`local_metric`](@ref)`(M, p)` is employed as
 
@@ -405,10 +405,10 @@ end
 """
     is_default_metric(M::AbstractManifold, G::AbstractMetric)
 
-returns whether an [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+returns whether an [`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`)
 is the default metric on the manifold `M` or not.
 This can be set by defining this function, or setting the [`IsDefaultMetric`](@ref) trait for an
-[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold).
+[`AbstractDecoratorManifold`](@extref `ManifoldsBase.AbstractDecoratorManifold`).
 """
 is_default_metric(M::AbstractManifold, G::AbstractMetric)
 
@@ -447,7 +447,7 @@ end
     local_metric(M::AbstractManifold{𝔽}, p, B::AbstractBasis)
 
 Return the local matrix representation at the point `p` of the metric tensor ``g`` with
-respect to the [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) `B` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M`.
+respect to the [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`) `B` on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M`.
 Let ``d``denote the dimension of the manifold and $b_1,\ldots,b_d$ the basis vectors.
 Then the local matrix representation is a matrix ``G\in 𝔽^{n×n}`` whose entries are
 given by ``g_{ij} = g_p(b_i,b_j), i,j\in\{1,…,d\}``.
@@ -501,7 +501,7 @@ end
     log(N::MetricManifold{M,G}, p, q)
 
 Copute the logarithmic map on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with the
-[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G`.
+[`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`) `G`.
 
 If the metric was declared the default metric using the [`IsDefaultMetric`](@ref) trait or [`is_default_metric`](@ref), this method
 falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for the non-default
@@ -646,7 +646,7 @@ end
 
 Compute the musical isomorphism to transform the cotangent vector `ξ` from the
 [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with
-[`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric) `G` to a tangent by
+[`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`) `G` to a tangent by
 computing
 
 ````math

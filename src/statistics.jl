@@ -80,14 +80,14 @@ end
     mean(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian center of mass also known as
-Karcher mean of the vector `x` of points on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, defined
+Karcher mean of the vector `x` of points on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`, defined
 as the point that satisfies the minimizer
 ````math
 \operatorname{argmin}_{y ∈ \mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
 ````
 where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 
-In the general case, the [`GradientDescentEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GradientDescentEstimation) is used to compute the mean.
+In the general case, the [`GradientDescentEstimation`](@extref `ManifoldsBase.GradientDescentEstimation`) is used to compute the mean.
     mean(
         M::AbstractManifold,
         x::AbstractVector,
@@ -110,11 +110,11 @@ Compute the mean using the specified `method`.
         kwargs...,
     )
 
-Compute the mean using the gradient descent scheme [`GradientDescentEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GradientDescentEstimation).
+Compute the mean using the gradient descent scheme [`GradientDescentEstimation`](@extref `ManifoldsBase.GradientDescentEstimation`).
 
 Optionally, provide `p0`, the starting point (by default set to the first data
 point). `stop_iter` denotes the maximal number of iterations to perform and the
-`kwargs...` are passed to [`isapprox`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.isapprox-Tuple{AbstractManifold,%20Any,%20Any}) to stop, when the minimal change
+`kwargs...` are passed to [`isapprox`](@extref `Base.isapprox-Tuple{AbstractManifold, Any, Any, Any}`) to stop, when the minimal change
 between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
@@ -243,7 +243,7 @@ end
 
 Estimate the Riemannian center of mass of `x` in an online fashion using
 repeated weighted geodesic interpolation. See
-[`GeodesicInterpolation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolation) for details.
+[`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`) for details.
 
 If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered for computing the mean.
@@ -305,7 +305,7 @@ end
     )
 
 Estimate the Riemannian center of mass of `x` using
-[`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius).
+[`GeodesicInterpolationWithinRadius`](@extref `ManifoldsBase.GeodesicInterpolationWithinRadius`).
 
 See [`mean`](@ref mean(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
 for a description of `kwargs`.
@@ -388,7 +388,7 @@ end
     )
 
 Estimate the Riemannian center of mass of `x` using
-[`ExtrinsicEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.ExtrinsicEstimation), i.e. by computing the mean in the embedding and projecting
+[`ExtrinsicEstimation`](@extref `ManifoldsBase.ExtrinsicEstimation`), i.e. by computing the mean in the embedding and projecting
 the result back.
 
 See [`mean`](@ref mean(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
@@ -441,14 +441,14 @@ end;
     )
 
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
-[`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, defined as the point that satisfies the minimizer
+[`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`, defined as the point that satisfies the minimizer
 ````math
 \operatorname{argmin}_{y ∈ \mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
 where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).
 
-In the general case, the [`CyclicProximalPointEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.CyclicProximalPointEstimation) is used to compute the
+In the general case, the [`CyclicProximalPointEstimation`](@extref `ManifoldsBase.CyclicProximalPointEstimation`) is used to compute the
 median. However, this default may be overloaded for specific manifolds.
 
 Compute the median using the specified `method`.
@@ -479,11 +479,11 @@ end
         kwargs...,
     )
 
-Compute the median using [`CyclicProximalPointEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.CyclicProximalPointEstimation).
+Compute the median using [`CyclicProximalPointEstimation`](@extref `ManifoldsBase.CyclicProximalPointEstimation`).
 
 Optionally, provide `p0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
-and the `kwargs...` are passed to [`isapprox`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.isapprox-Tuple{AbstractManifold,%20Any,%20Any}) to stop, when the minimal
+and the `kwargs...` are passed to [`isapprox`](@extref `Base.isapprox-Tuple{AbstractManifold, Any, Any, Any}`) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
@@ -510,7 +510,7 @@ Statistics.median(
         kwargs...,
     )
 
-Estimate the median of `x` using [`ExtrinsicEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.ExtrinsicEstimation), i.e. by computing the median
+Estimate the median of `x` using [`ExtrinsicEstimation`](@extref `ManifoldsBase.ExtrinsicEstimation`), i.e. by computing the median
 in the embedding and projecting the result back.
 
 See [`median`](@ref median(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::CyclicProximalPointEstimation))
@@ -537,11 +537,11 @@ Statistics.median(
         kwargs...,
     )
 
-Compute the median using [`WeiszfeldEstimation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.WeiszfeldEstimation).
+Compute the median using [`WeiszfeldEstimation`](@extref `ManifoldsBase.WeiszfeldEstimation`).
 
 Optionally, provide `p0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
-and the `kwargs...` are passed to [`isapprox`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.isapprox-Tuple{AbstractManifold,%20Any,%20Any}) to stop, when the minimal
+and the `kwargs...` are passed to [`isapprox`](@extref `Base.isapprox-Tuple{AbstractManifold, Any, Any, Any}`) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
@@ -752,7 +752,7 @@ end
     var(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false)
 
 compute the (optionally weighted) variance of a `Vector` `x` of `n` data points
-on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, i.e.
+on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`, i.e.
 
 ````math
 \frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
@@ -800,7 +800,7 @@ end
     std(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
 
 compute the optionally weighted standard deviation of a `Vector` `x` of `n` data
-points on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, i.e.
+points on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`, i.e.
 
 ````math
 \sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)},
@@ -888,7 +888,7 @@ If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered. Optionally, pass `retraction` and `inverse_retraction`
 method types to specify the (inverse) retraction.
 
-See [`GeodesicInterpolation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolation) for details on the geodesic
+See [`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`) for details on the geodesic
 interpolation method.
 
 !!! note
@@ -954,7 +954,7 @@ end
 Use repeated weighted geodesic interpolation to estimate the mean.
 Simultaneously, use a Welford-like recursion to estimate the variance.
 
-See [`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius) and
+See [`GeodesicInterpolationWithinRadius`](@extref `ManifoldsBase.GeodesicInterpolationWithinRadius`) and
 [`mean_and_var`](@ref mean_and_var(::AbstractManifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolation))
 for more information.
 """

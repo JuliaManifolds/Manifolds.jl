@@ -18,7 +18,7 @@ struct PositiveNumbers <: AbstractManifold{ℝ} end
     PositiveVectors(n::Integer; parameter::Symbol=:type)
 
 Generate the manifold of vectors with positive entries.
-This manifold is modeled as a [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of [`PositiveNumbers`](@ref).
+This manifold is modeled as a [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) of [`PositiveNumbers`](@ref).
 
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in a type parameter. Value can either be `:field` or `:type`.
@@ -30,7 +30,7 @@ PositiveVectors(n::Integer; parameter::Symbol=:type) =
     PositiveMatrices(m::Integer, n::Integer; parameter::Symbol=:type)
 
 Generate the manifold of matrices with positive entries.
-This manifold is modeled as a [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of [`PositiveNumbers`](@ref).
+This manifold is modeled as a [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) of [`PositiveNumbers`](@ref).
 
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in a type parameter. Value can either be `:field` or `:type`.
@@ -42,7 +42,7 @@ PositiveMatrices(n::Integer, m::Integer; parameter::Symbol=:type) =
     PositiveArrays(n₁, n₂, ..., nᵢ; parameter::Symbol=:type)
 
 Generate the manifold of `i`-dimensional arrays with positive entries.
-This manifold is modeled as a [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of [`PositiveNumbers`](@ref).
+This manifold is modeled as a [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) of [`PositiveNumbers`](@ref).
 
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in a type parameter. Value can either be `:field` or `:type`.
@@ -54,7 +54,7 @@ PositiveArrays(n::Vararg{Int,I}; parameter::Symbol=:type) where {I} =
     change_representer(M::PositiveNumbers, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect
-to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric) `g_E`, this function changes the representer into the one
+to the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) `g_E`, this function changes the representer into the one
 with respect to the positivity metric representation of
 [`PositiveNumbers`](@ref) `M`.
 
@@ -79,7 +79,7 @@ end
     change_metric(M::PositiveNumbers, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function with respect to
-the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric) `g_E`,
+the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) `g_E`,
 this function changes the representer into the one with respect to the positivity metric
 of [`PositiveNumbers`](@ref) `M`.
 

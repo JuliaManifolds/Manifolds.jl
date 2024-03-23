@@ -5,7 +5,7 @@ const PowerGroup{𝔽,M<:AbstractManifold{𝔽},TPR<:AbstractPowerRepresentation
 """
     PowerGroupNested
 
-Alias to [`PowerGroup`](@ref) with [`NestedPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedPowerRepresentation)
+Alias to [`PowerGroup`](@ref) with [`NestedPowerRepresentation`](@extref `ManifoldsBase.NestedPowerRepresentation`)
 representation.
 """
 const PowerGroupNested{𝔽,M<:AbstractManifold{𝔽}} = PowerGroup{𝔽,M,NestedPowerRepresentation}
@@ -13,7 +13,7 @@ const PowerGroupNested{𝔽,M<:AbstractManifold{𝔽}} = PowerGroup{𝔽,M,Neste
 """
     PowerGroupNestedReplacing
 
-Alias to [`PowerGroup`](@ref) with [`NestedReplacingPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedReplacingPowerRepresentation)
+Alias to [`PowerGroup`](@ref) with [`NestedReplacingPowerRepresentation`](@extref `ManifoldsBase.NestedReplacingPowerRepresentation`)
 representation.
 """
 const PowerGroupNestedReplacing{𝔽,M<:AbstractManifold{𝔽}} =

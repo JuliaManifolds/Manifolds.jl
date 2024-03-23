@@ -34,7 +34,7 @@ end
 
 # (c) load necessary packages for the docs
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
-using DocumenterCitations
+using DocumenterCitations, DocumenterInterLinks
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
 # required for loading the manifold tests functions
@@ -65,6 +65,9 @@ end
 
 # (e) ...finally! make docs
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style=:alpha)
+links = InterLinks(
+    "ManifoldsBase" => ("https://juliamanifolds.github.io/ManifoldsBase.jl/stable/"),
+)
 makedocs(;
     # for development, we disable prettyurls
     format=Documenter.HTML(
@@ -177,7 +180,7 @@ makedocs(;
             "References" => "misc/references.md",
         ],
     ],
-    plugins=[bib],
+    plugins=[bib, links],
     warnonly=[:missing_docs],
 )
 deploydocs(repo="github.com/JuliaManifolds/Manifolds.jl.git", push_preview=true)

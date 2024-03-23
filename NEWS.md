@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.15] unreleased
 
-## Fixed
+### Added
+
+* using `DocumenterInterLinks` for links to other Julia packages documentation.
+
+### Fixed
 
 * typographical errors in tutorials/working-in-charts.jl.
 * several typographical errors in the docs
