@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* using `DocumenterInterLinks` for links to other Julia packages documentation.
 * Implementation of `sectional_curvature`, `sectional_curvature_min` and `sectional_curvature_max` for several manifolds.
 * `sectional_curvature_matrix` function and a tutorial on coordinate-free curvature.
 
@@ -18,7 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* using `DocumenterInterLinks` for links to other Julia packages documentation.
 * typographical errors in tutorials/working-in-charts.jl.
 * several typographical errors in the docs
 * unifies to use two backticks ``` `` ``` for math instead of ` $ ` further in the docs
