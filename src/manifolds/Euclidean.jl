@@ -753,6 +753,33 @@ function riemann_tensor!(::Euclidean, Xresult, p, X, Y, Z)
     return fill!(Xresult, 0)
 end
 
+@doc raw"""
+    sectional_curvature(::Euclidean, p, X, Y)
+
+Sectional curvature of [`Euclidean`](@ref) manifold `M` is 0.
+"""
+function sectional_curvature(::Euclidean, p, X, Y)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_max(::Euclidean)
+
+Sectional curvature of [`Euclidean`](@ref) manifold `M` is 0.
+"""
+function sectional_curvature_max(::Euclidean)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::Euclidean)
+
+Sectional curvature of [`Euclidean`](@ref) manifold `M` is 0.
+"""
+function sectional_curvature_min(::Euclidean)
+    return 0.0
+end
+
 function Base.show(io::IO, M::Euclidean{N,𝔽}) where {N<:Tuple,𝔽}
     size = get_parameter(M.size)
     return print(io, "Euclidean($(join(size, ", ")); field=$(𝔽), parameter=:field)")

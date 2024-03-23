@@ -1,0 +1,95 @@
+---
+title: Exploring curvature without coordinates
+---
+
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+using Pkg;
+cd(@__DIR__)
+Pkg.activate("."); # for reproducibility use the local tutorial environment.
+Pkg.develop(PackageSpec(; path=(@__DIR__) * "/../"))
+using Markdown
+```
+
+This part of documentation covers exploration of curvature of manifolds $\mathcal{M}$.
+There are multiple ways to describe curvature: Christoffel symbols, Riemann tensor, Ricci tensor, sectional curvature, and many other.
+They are usually considered only in coordinates but there is a way to demonstrate curvature in coordinate-free way.
+
+## Sectional curvature matrix
+
+Curvature of a manifold can be explored using the [`sectional_curvature_matrix`](@ref) function.
+Note that Riemann tensor and sectional curvature are equivalently full specifications of curvature in a manifold, see [CheegerEbin:2008](@cite), Eq. (1.12).
+
+Let's take the [`SymmetricPositiveDefinite`](@ref) manifold as our first example.
+It has nonpositive sectional curvature:
+
+```{julia}
+using Manifolds
+using LinearAlgebra
+M = SymmetricPositiveDefinite(3)
+p = rand(M)
+cm = sectional_curvature_matrix(M, p, DefaultOrthonormalBasis())
+```
+
+We can verify that the curvature is consistent with an approximation based on the Bertrand–Diguet–Puiseux theorem, which relies only on an ONB, exponential map and distance calculation:
+```{julia}
+cm_bdp = Manifolds.estimated_sectional_curvature_matrix(M, p, DefaultOrthonormalBasis(); r=1e-3, N_pts=100000)
+println(norm(cm - cm_bdp))
+```
+
+This approximation converges quite slowly with `N_pts` and is prone to numerical errors at low values of `r` and large values of `N_pts`.
+
+You can also take the vectors from the basis and see what kind of planes they correspond to.
+It may be easier to see for the identity matrix as the base point.
+```{julia}
+p = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
+V = get_vectors(M, p, get_basis(M, p, DefaultOrthonormalBasis()))
+cm = sectional_curvature_matrix(M, p, DefaultOrthonormalBasis())
+for X in V
+    println(exp(M, p, X))
+end
+```
+
+The flat planes correspond to directions where the matrix changes independently.
+In other cases sectional curvature indicates hyperbolic characteristic of a submanifold.
+
+Sectional curvature can be either larger or smaller than entries in the matrix on other planes.
+Consider for example the manifold of rotation matrices in four dimensions, and a function that computes plane of maximum curvature using random search.
+
+```{julia}
+function max_curvature(M::AbstractManifold, p)
+    mc = -Inf
+    X = zero_vector(M, p)
+    Y = zero_vector(M, p)
+    for _ in 1:10000
+        X_c = rand(M; vector_at=p)
+        Y_c = rand(M; vector_at=p)
+        sc = sectional_curvature(M, p, X_c, Y_c)
+        if sc > mc
+            mc = sc
+            X .= X_c
+            Y .= Y_c
+        end
+    end
+    return mc, X, Y
+end
+
+M = Rotations(4)
+p = Matrix(I(4) * 1.0)
+println(sectional_curvature_matrix(M, p, DefaultOrthonormalBasis()))
+mc, X, Y = max_curvature(M, p)
+println(mc)
+println(X)
+println(Y)
+```
+
+In the planes corresponding to orthonormal basis, the maximum sectional curvature is 0.125 but the true upper bound is 0.25.
+
+## Literature
+
+```@bibliography
+Pages = ["exploring-curvature.md"]
+Canonical=false
+```

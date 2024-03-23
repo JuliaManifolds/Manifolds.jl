@@ -19,6 +19,7 @@ using Quaternions
     @test is_point(M, rand(MersenneTwister(), M); error=:error)
     @test abs(rand(MersenneTwister(), OrthogonalMatrices(1))[]) == 1
     @test is_vector(M, p, rand(MersenneTwister(), M; vector_at=p))
+    @test default_vector_transport_method(M) === ProjectionTransport()
 end
 
 @testset "Unitary Matrices" begin

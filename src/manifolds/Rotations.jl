@@ -62,6 +62,8 @@ function angles_4d_skew_sym_matrix(A)
     return sqrt(halfb + sqrtdisc), sqrt(halfb - sqrtdisc)
 end
 
+default_vector_transport_method(::Rotations) = ParallelTransport()
+
 # from https://github.com/JuliaManifolds/Manifolds.jl/issues/453#issuecomment-1046057557
 function _get_tridiagonal_elements(trian)
     N = size(trian, 1)
@@ -421,6 +423,35 @@ function riemannian_Hessian!(M::Rotations, Y, p, G, H, X)
     symmetrize!(Y, G' * p)
     project!(SkewSymmetricMatrices(N), Y, p' * H - X * Y)
     return Y
+end
+
+@doc raw"""
+    sectional_curvature_max(::Rotations)
+
+Sectional curvature of [`Rotations`](@ref) `M` is equal to 0 for `Rotations(1)` and
+`Rotations(2)`, less than or equal to 1/8 for `Rotations(3)` and less than or equal to 1/4
+for higher-dimensional rotations manifolds.
+
+For reference, see [Ge:2014](@cite), Lemma 2.5 and [CheegerEbin:2008](@cite), Corollary 3.19.
+"""
+function sectional_curvature_max(M::Rotations)
+    N = manifold_dimension(M)
+    if N <= 1
+        return 0.0
+    elseif N == 3
+        return 1 / 8
+    else
+        return 1 / 4
+    end
+end
+
+@doc raw"""
+    sectional_curvature_min(M::Rotations)
+
+Sectional curvature of [`Rotations`](@ref) `M` is greater than or equal to 0.
+"""
+function sectional_curvature_min(::Rotations)
+    return 0.0
 end
 
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)

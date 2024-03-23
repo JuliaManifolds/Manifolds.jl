@@ -572,6 +572,48 @@ function riemann_tensor!(M::AbstractSphere{ℝ}, Xresult, p, X, Y, Z)
 end
 
 @doc raw"""
+    sectional_curvature(::AbstractSphere, p, X, Y)
+
+Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater than 1
+and 0 otherwise.
+"""
+function sectional_curvature(M::AbstractSphere, p, X, Y)
+    if manifold_dimension(M) > 1
+        return 1.0
+    else
+        return 0.0
+    end
+end
+
+@doc raw"""
+    sectional_curvature_max(::AbstractSphere)
+
+Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater than 1
+and 0 otherwise.
+"""
+function sectional_curvature_max(M::AbstractSphere)
+    if manifold_dimension(M) > 1
+        return 1.0
+    else
+        return 0.0
+    end
+end
+
+@doc raw"""
+    sectional_curvature_min(M::AbstractSphere)
+
+Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater than 1
+and 0 otherwise.
+"""
+function sectional_curvature_min(M::AbstractSphere)
+    if manifold_dimension(M) > 1
+        return 1.0
+    else
+        return 0.0
+    end
+end
+
+@doc raw"""
     volume_density(M::AbstractSphere{ℝ}, p, X)
 
 Compute volume density function of a sphere, i.e. determinant of the differential of

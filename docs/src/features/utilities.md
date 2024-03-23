@@ -8,17 +8,11 @@ The following terms introduce a nicer notation for some operations, for example 
 in
 ````
 
-## Fallback for the exponential map: Solving the corresponding ODE
-
-When additionally loading [`NLSolve.jl`](https://github.com/JuliaNLSolvers/NLsolve.jl) the following fallback for the exponential map is available.
-
-```@autodocs
-Modules = [Manifolds]
-Pages = ["nlsolve.jl"]
-Order = [:type, :function]
-```
-
 ## Public documentation
+
+```@docs
+sectional_curvature_matrix
+```
 
 ### Specific exception types
 
