@@ -20,7 +20,7 @@ fiber_bundle_transport(M::AbstractManifold, ::FiberType) =
     VectorBundle{𝔽,TVS,TM,VTV} = FiberBundle{𝔽,TVS,TM,TVT} where {TVS<:VectorSpaceType}
 
 Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
-[`VectorSpaceType`]@extref `ManifoldsBase.VectorSpaceType`).
+[`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`).
 
 `VectorSpaceFiberType` is used to encode vector spaces as fiber types.
 """
