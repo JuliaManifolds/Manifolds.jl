@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `NonlinearSolve.jl` is no longer an upper bounded dependency (the bug was fixed).
 
-## [0.9.15] – 2024-01-31
+## [0.9.15] – 2024-03-24
 
 ### Added
 
