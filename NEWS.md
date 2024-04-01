@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* `NonlinearSolve.jl` is no longer an upper bounded dependency (the bug was fixed).
+* `NonlinearSolve.jl` and `PythonCall.jl` are no longer an upper bounded dependency (bugs were fixed).
 
 ## [0.9.15] – 2024-03-24
 
