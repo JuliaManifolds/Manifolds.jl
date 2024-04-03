@@ -745,7 +745,6 @@ end
 
 Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`Euclidean`](@ref) manifold `M`.
 Its value is always the zero tangent vector.
-````
 """
 riemann_tensor(M::Euclidean, p, X, Y, Z)
 

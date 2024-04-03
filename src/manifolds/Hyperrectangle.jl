@@ -178,24 +178,24 @@ injectivity_radius(::Hyperrectangle) = Inf
     inner(M::Hyperrectangle, p, X, Y)
 
 Compute the inner product on the [`Hyperrectangle`](@ref) `M`, which is just
-the inner product on the real-valued or complex valued vector space
-of arrays (or tensors) of size ``n_1 × n_2  ×  …  × n_i``, i.e.
+the inner product on the real-valued vector space of arrays (or tensors)
+of size ``n_1 × n_2  ×  …  × n_i``, i.e.
 
 ````math
-g_p(X,Y) = \sum_{k ∈ I} \overline{X}_{k} Y_{k},
+g_p(X,Y) = \sum_{k ∈ I} X_{k} Y_{k},
 ````
 
 where ``I`` is the set of vectors ``k ∈ ℕ^i``, such that for all
 
-``i ≤ j ≤ i`` it holds ``1 ≤ k_j ≤ n_j`` and ``\overline{⋅}`` denotes the complex conjugate.
+``i ≤ j ≤ i`` it holds ``1 ≤ k_j ≤ n_j``.
 
 For the special case of ``i ≤ 2``, i.e. matrices and vectors, this simplifies to
 
 ````math
-g_p(X,Y) = X^{\mathrm{H}}Y,
+g_p(X,Y) = X^{\mathrm{T}}Y,
 ````
 
-where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{T}}`` denotes transposition.
 """
 @inline inner(::Hyperrectangle, p, X, Y) = dot(X, Y)
 """
@@ -399,7 +399,6 @@ end
 
 Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`Hyperrectangle`](@ref) manifold `M`.
 Its value is always the zero tangent vector.
-````
 """
 riemann_tensor(M::Hyperrectangle, p, X, Y, Z)
 
@@ -507,8 +506,8 @@ end
     Y = Weingarten(M::Hyperrectangle, p, X, V)
     Weingarten!(M::Hyperrectangle, Y, p, X, V)
 
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Hyperrectangle`](@ref) `M` with respect to the
-tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`Hyperrectangle`](@ref) `M` with
+respect to the tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
 
 Since this a flat space by itself, the result is always the zero tangent vector.
 """
