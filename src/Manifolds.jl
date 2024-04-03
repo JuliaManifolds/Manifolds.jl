@@ -428,6 +428,7 @@ include("manifolds/FlagStiefel.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Hyperbolic.jl")
+include("manifolds/Hyperrectangle.jl")
 include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
 include("manifolds/MultinomialSymmetricPositiveDefinite.jl")
@@ -645,6 +646,7 @@ export Euclidean,
     HamiltonianMatrices,
     HeisenbergGroup,
     Hyperbolic,
+    Hyperrectangle,
     KendallsPreShapeSpace,
     KendallsShapeSpace,
     Lorentz,
