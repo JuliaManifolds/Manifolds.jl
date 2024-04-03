@@ -28,6 +28,13 @@ struct Hyperrectangle{T<:AbstractArray} <: AbstractDecoratorManifold{ℝ}
     end
 end
 
+function active_traits(f, ::Hyperrectangle, args...)
+    return merge_traits(
+        IsDefaultMetric(EuclideanMetric()),
+        IsDefaultConnection(LeviCivitaConnection()),
+    )
+end
+
 function check_point(M::Hyperrectangle, p)
     if !(eltype(p) <: Real)
         return DomainError(
@@ -380,6 +387,12 @@ Return the array dimensions required to represent an element on the
 [`Hyperrectangle`](@ref) `M`, i.e. the vector of all array dimensions.
 """
 representation_size(M::Hyperrectangle) = size(M.lb)
+
+function retract_project!(M::Hyperrectangle, r, q, Y, t::Number)
+    r .= q .+ t .* Y
+    project!(M, r, r)
+    return r
+end
 
 @doc raw"""
     riemann_tensor(M::Hyperrectangle, p, X, Y, Z)
