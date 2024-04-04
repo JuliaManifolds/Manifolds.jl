@@ -70,9 +70,6 @@ function check_vector(M::Hyperrectangle, p, X; kwargs...)
 end
 
 default_approximation_method(::Hyperrectangle, ::typeof(mean)) = EfficientEstimator()
-function default_approximation_method(::Hyperrectangle, ::typeof(median), ::Type{<:Number})
-    return EfficientEstimator()
-end
 
 """
     default_retraction_method(M::Hyperrectangle)
@@ -304,14 +301,6 @@ in this case, just the (Frobenius) norm of `X`.
 LinearAlgebra.norm(::Hyperrectangle, ::Any, X) = norm(X)
 
 """
-    parallel_transport_along(M::Hyperrectangle, p, X, c)
-
-the parallel transport on [`Hyperrectangle`](@ref) is the identiy, i.e. returns `X`.
-"""
-parallel_transport_along(::Hyperrectangle, ::Any, X, c::AbstractVector) = X
-parallel_transport_along!(::Hyperrectangle, Y, ::Any, X, c::AbstractVector) = copyto!(Y, X)
-
-"""
     parallel_transport_direction(M::Hyperrectangle, p, X, d)
 
 the parallel transport on [`Hyperrectangle`](@ref) is the identiy, i.e. returns `X`.
@@ -489,9 +478,6 @@ function vector_transport_to!(
 end
 
 Statistics.var(::Hyperrectangle, x::AbstractVector; kwargs...) = sum(var(x; kwargs...))
-function Statistics.var(::Hyperrectangle, x::AbstractVector{<:Number}, m::Number; kwargs...)
-    return sum(var(x; mean=m, kwargs...))
-end
 
 @doc raw"""
     volume_density(M::Hyperrectangle, p, X)

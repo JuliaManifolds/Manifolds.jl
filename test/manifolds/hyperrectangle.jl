@@ -17,6 +17,8 @@ include("../header.jl")
     @test Y == X
     @test embed(M, p, X) == X
 
+    @test_throws DomainError is_point(M, [1.0im, 0.0, 0.0]; error=:error)
+    @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0im, 0.0, 0.0]; error=:error)
     @test_throws DomainError is_vector(M, [1], [1.0, 1.0, 0.0]; error=:error)
     @test_throws DomainError is_vector(M, [0.0, 0.0, 0.0], [1.0]; error=:error)
     @test_throws DomainError is_vector(M, [0.0, 0.0, 0.0], [1.0, 0.0, 1.0im]; error=:error)
@@ -28,13 +30,16 @@ include("../header.jl")
 
     basis_types = (DefaultOrthonormalBasis(),)
     pts = [[1.0, 2.0, 0.0], [0.0, 3.0, 0.0], [0.0, 3.5, 1.0]]
+
     test_manifold(
         M,
         pts,
+        parallel_transport=true,
         test_project_point=true,
         test_project_tangent=true,
         test_default_vector_transport=true,
         vector_transport_methods=[ParallelTransport()],
+        retraction_methods=[ProjectionRetraction()],
         test_mutating_rand=true,
         basis_types_vecs=basis_types,
         basis_types_to_from=basis_types,
@@ -42,6 +47,28 @@ include("../header.jl")
         test_rand_point=true,
         test_rand_tvector=true,
     )
+    @testset "Array Hyperrectangle" begin
+        MA = Hyperrectangle([-1.0 2.0 3.0; 2.0 5.0 10.0], [10.0 12.0 13.0; 12.0 15.0 20.0])
+        pts_a = [
+            [2.0 2.0 3.0; 2.0 6.0 10.0],
+            [-1.0 5.0 3.0; 4.0 5.0 10.0],
+            [-1.0 2.0 5.0; 6.0 6.0 15.0],
+        ]
+        test_manifold(
+            MA,
+            pts_a,
+            test_project_point=true,
+            test_project_tangent=true,
+            test_default_vector_transport=true,
+            vector_transport_methods=[ParallelTransport()],
+            test_mutating_rand=true,
+            basis_types_vecs=basis_types,
+            basis_types_to_from=basis_types,
+            test_inplace=true,
+            test_rand_point=true,
+            test_rand_tvector=true,
+        )
+    end
 
     @testset "Hyperrectangle(1)" begin
         M = Hyperrectangle([0.0], [5.0])
@@ -68,5 +95,24 @@ include("../header.jl")
         p = zeros(3)
         X = zeros(3)
         @test volume_density(M, p, X) == 1.0
+    end
+
+    @testset "statistics" begin
+        @test default_approximation_method(M, mean) === EfficientEstimator()
+        @test mean(M, pts) ≈ [1 / 3, 17 / 6, 1 / 3]
+        @test var(M, pts) ≈ 1.25
+    end
+
+    @testset "Euclidean metric tests" begin
+        @test riemann_tensor(
+            M,
+            pts[1],
+            pts[2] - pts[1],
+            pts[3] - pts[1],
+            (pts[3] - pts[1]) / 2,
+        ) == [0.0, 0.0, 0.0]
+        @test sectional_curvature(M, p, [1.0, 0.0], [0.0, 1.0]) == 0.0
+        @test sectional_curvature_max(M) == 0.0
+        @test sectional_curvature_min(M) == 0.0
     end
 end
