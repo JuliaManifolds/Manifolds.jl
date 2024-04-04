@@ -98,7 +98,7 @@ Base.@propagate_inbounds function distance(M::Hyperrectangle, p, q)
             p_i = p[I]
             q_i = q[I]
             s += abs2(p_i - q_i)
-        end
+        end # COV_EXCL_LINE
     end
     return sqrt(s)
 end

@@ -102,6 +102,7 @@ include("../header.jl")
         @test default_approximation_method(M, mean) === EfficientEstimator()
         @test mean(M, pts) ≈ [1 / 3, 17 / 6, 1 / 3]
         @test mean(M, pts, pweights(ones(3) / 3)) ≈ [1 / 3, 17 / 6, 1 / 3]
+        @test_throws DimensionMismatch mean(M, pts, pweights(ones(4) / 4))
         @test var(M, pts) ≈ 1.25
     end
 
