@@ -18,7 +18,8 @@ include("../header.jl")
     @test embed(M, p, X) == X
 
     @test_throws DomainError is_point(M, [1.0im, 0.0, 0.0]; error=:error)
-    @test_throws DomainError is_vector(M, [1.0, 0.0, 0.0], [1.0im, 0.0, 0.0]; error=:error)
+    @test_throws DomainError is_point(M, [10.0, 3.0, 0.0]; error=:error)
+    @test_throws DomainError is_vector(M, [1.0, 2.0, 0.0], [1.0im, 0.0, 0.0]; error=:error)
     @test_throws DomainError is_vector(M, [1], [1.0, 1.0, 0.0]; error=:error)
     @test_throws DomainError is_vector(M, [0.0, 0.0, 0.0], [1.0]; error=:error)
     @test_throws DomainError is_vector(M, [0.0, 0.0, 0.0], [1.0, 0.0, 1.0im]; error=:error)
@@ -100,6 +101,7 @@ include("../header.jl")
     @testset "statistics" begin
         @test default_approximation_method(M, mean) === EfficientEstimator()
         @test mean(M, pts) ≈ [1 / 3, 17 / 6, 1 / 3]
+        @test mean(M, pts, pweights(ones(3) / 3)) ≈ [1 / 3, 17 / 6, 1 / 3]
         @test var(M, pts) ≈ 1.25
     end
 
