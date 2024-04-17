@@ -1,8 +1,8 @@
 @doc raw"""
     Hyperrectangle{T} <: AbstractManifold{ℝ}
 
-Hyperrectangle, also known as orthotope or box. This is a manifold with boundary with the
-standard Euclidean metric.
+Hyperrectangle, also known as orthotope or box. This is a manifold with corners [Joyce:2010](@cite)
+with the standard Euclidean metric.
 
 # Constructor
 
