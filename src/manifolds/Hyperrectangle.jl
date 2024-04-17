@@ -518,11 +518,11 @@ Weingarten(::Hyperrectangle, p, X, V)
 Weingarten!(::Hyperrectangle, Y, p, X, V) = fill!(Y, 0)
 
 """
-    zero_vector(M::Hyperrectangle, x)
+    zero_vector(M::Hyperrectangle, p)
 
-Return the zero vector in the tangent space of `x` on the [`Hyperrectangle`](@ref)
-`M`, which here is just a zero filled array the same size as `x`.
+Return the zero vector in the tangent space of `p` on the [`Hyperrectangle`](@ref)
+`M`, which here is just a zero filled array the same size as `p`.
 """
 zero_vector(::Hyperrectangle, ::Any...)
 
-zero_vector!(::Hyperrectangle, v, ::Any) = fill!(v, 0)
+zero_vector!(::Hyperrectangle, X, ::Any) = fill!(X, 0)

@@ -893,13 +893,13 @@ Weingarten(::Euclidean, p, X, V)
 Weingarten!(::Euclidean, Y, p, X, V) = fill!(Y, 0)
 
 """
-    zero_vector(M::Euclidean, x)
+    zero_vector(M::Euclidean, p)
 
-Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
-`M`, which here is just a zero filled array the same size as `x`.
+Return the zero vector in the tangent space of `p` on the [`Euclidean`](@ref)
+`M`, which here is just a zero filled array the same size as `p`.
 """
 zero_vector(::Euclidean, ::Any...)
 zero_vector(::Euclidean{TypeParameter{Tuple{}}}, p::Number) = zero(p)
 zero_vector(::Euclidean{Tuple{}}, p::Number) = zero(p)
 
-zero_vector!(::Euclidean, v, ::Any) = fill!(v, 0)
+zero_vector!(::Euclidean, X, ::Any) = fill!(X, 0)
