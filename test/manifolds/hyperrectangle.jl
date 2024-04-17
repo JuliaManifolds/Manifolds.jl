@@ -30,6 +30,8 @@ include("../header.jl")
     end
 
     @testset "injectivity_radius" begin
+        @test injectivity_radius(M) == 0.0
+        @test injectivity_radius(M, ExponentialRetraction()) == 0.0
         @test injectivity_radius(M, [0.0, 2.5, 1.0]) == 0.5
         @test injectivity_radius(M, [0.0, 2.5, 1.0], ExponentialRetraction()) == 0.5
         @test injectivity_radius(M, [0.0, 2.5, 1.0], ProjectionRetraction()) == 0.5

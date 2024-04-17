@@ -184,6 +184,8 @@ function injectivity_radius(M::Hyperrectangle, p)
     end
     return ir
 end
+injectivity_radius(M::Hyperrectangle) = 0.0
+injectivity_radius(M::Hyperrectangle, ::AbstractRetractionMethod) = 0.0
 injectivity_radius(M::Hyperrectangle, p, ::ProjectionRetraction) = injectivity_radius(M, p)
 injectivity_radius(M::Hyperrectangle, p, ::ExponentialRetraction) = injectivity_radius(M, p)
 
@@ -205,7 +207,7 @@ where ``I`` is the set of vectors ``k ∈ ℕ^i``, such that for all
 For the special case of ``i ≤ 2``, i.e. matrices and vectors, this simplifies to
 
 ````math
-g_p(X,Y) = X^{\mathrm{T}}Y,
+g_p(X,Y) = \operatorname{tr}(X^{\mathrm{T}}Y),
 ````
 
 where ``⋅^{\mathrm{T}}`` denotes transposition.

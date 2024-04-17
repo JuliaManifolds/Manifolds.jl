@@ -407,7 +407,7 @@ where ``I`` is the set of vectors ``k ∈ ℕ^i``, such that for all
 For the special case of ``i ≤ 2``, i.e. matrices and vectors, this simplifies to
 
 ````math
-g_p(X,Y) = X^{\mathrm{H}}Y,
+g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 ````
 
 where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
