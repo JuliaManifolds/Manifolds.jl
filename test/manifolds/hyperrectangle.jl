@@ -29,12 +29,24 @@ include("../header.jl")
         @test project(M, [1.0, 2.0, 3.0], [2.0, 0.5, -10.0]) ≈ [0.0, 0.5, -6.0]
     end
 
+    @testset "injectivity_radius" begin
+        @test injectivity_radius(M, [0.0, 2.5, 1.0]) == 0.5
+        @test injectivity_radius(M, [0.0, 2.5, 1.0], ExponentialRetraction()) == 0.5
+        @test injectivity_radius(M, [0.0, 2.5, 1.0], ProjectionRetraction()) == 0.5
+        @test injectivity_radius(M, [0.0, 2.0, 1.0]) == 1.0
+        @test injectivity_radius(M, [0.5, 4.0, 1.0]) == 0.5
+
+        M2 = Hyperrectangle([-1.0, 2.0, -3.0], [1.0, 2.0, 9.0])
+        @test injectivity_radius(M2, [0.0, 2.0, 1.0]) == 1.0
+    end
+
     basis_types = (DefaultOrthonormalBasis(),)
     pts = [[1.0, 2.0, 0.0], [0.0, 3.0, 0.0], [0.0, 3.5, 1.0]]
 
     test_manifold(
         M,
         pts,
+        test_injectivity_radius=false,
         parallel_transport=true,
         test_project_point=true,
         test_project_tangent=true,
@@ -58,6 +70,7 @@ include("../header.jl")
         test_manifold(
             MA,
             pts_a,
+            test_injectivity_radius=false,
             test_project_point=true,
             test_project_tangent=true,
             test_default_vector_transport=true,

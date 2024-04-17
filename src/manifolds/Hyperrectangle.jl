@@ -165,11 +165,27 @@ function get_vector_orthonormal!(M::Hyperrectangle, Y, ::Any, c, ::RealNumbers)
 end
 
 @doc raw"""
-    injectivity_radius(M::Hyperrectangle)
+    injectivity_radius(M::Hyperrectangle, p)
 
-Return the injectivity radius on the [`Hyperrectangle`](@ref) `M`, which is ``∞``.
+Return the injectivity radius on the [`Hyperrectangle`](@ref) `M` at point `p`, which is
+the distance to the nearest boundary the point is not on.
 """
-injectivity_radius(::Hyperrectangle) = Inf
+function injectivity_radius(M::Hyperrectangle, p)
+    ir = Inf
+    for i in eachindex(M.lb, p)
+        dist_ub = M.ub[i] - p[i]
+        if dist_ub > 0
+            ir = min(ir, dist_ub)
+        end
+        dist_lb = p[i] - M.lb[i]
+        if dist_lb > 0
+            ir = min(ir, dist_lb)
+        end
+    end
+    return ir
+end
+injectivity_radius(M::Hyperrectangle, p, ::ProjectionRetraction) = injectivity_radius(M, p)
+injectivity_radius(M::Hyperrectangle, p, ::ExponentialRetraction) = injectivity_radius(M, p)
 
 @doc raw"""
     inner(M::Hyperrectangle, p, X, Y)
