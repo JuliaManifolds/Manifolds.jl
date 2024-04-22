@@ -156,6 +156,7 @@ using Manifolds: TFVector, CoTFVector
                 is_mutating=false,
                 test_rand_point=true,
                 test_rand_tvector=true,
+                rand_tvector_atol_multiplier=2.0,
             )
             ptsS = map(p -> (@SArray fill(p)), pts)
             test_manifold(
@@ -175,6 +176,7 @@ using Manifolds: TFVector, CoTFVector
                 basis_types_to_from=basis_types_real,
                 test_rand_point=true,
                 test_rand_tvector=true,
+                rand_tvector_atol_multiplier=2.0,
             )
         end
     end

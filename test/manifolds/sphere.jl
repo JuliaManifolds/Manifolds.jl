@@ -308,4 +308,23 @@ using ManifoldsBase: TFVector
         p = [1.0, 0.0, 0.0]
         @test local_metric(M, p, DefaultOrthonormalBasis()) == Diagonal([1.0, 1.0])
     end
+
+    @testset "sectional curvature" begin
+        M = Sphere(2; parameter=:field)
+        K = Manifolds.sectional_curvature_matrix(
+            M,
+            [1.0, 0.0, 0.0],
+            DefaultOrthonormalBasis(),
+        )
+        @test isapprox(K, [0 1; 1 0])
+        @test isapprox(
+            Manifolds.estimated_sectional_curvature_matrix(
+                M,
+                [1.0, 0.0, 0.0],
+                DefaultOrthonormalBasis(),
+            ),
+            [0.0 1.0; 1.0 0.0],
+            atol=0.15,
+        )
+    end
 end

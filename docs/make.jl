@@ -121,6 +121,7 @@ makedocs(;
                 "Grassmann" => "manifolds/grassmann.md",
                 "Hamiltonian" => "manifolds/hamiltonian.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
+                "Hyperrectangle" => "manifolds/hyperrectangle.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",
                 "Multinomial doubly stochastic matrices" => "manifolds/multinomialdoublystochastic.md",
                 "Multinomial matrices" => "manifolds/multinomial.md",

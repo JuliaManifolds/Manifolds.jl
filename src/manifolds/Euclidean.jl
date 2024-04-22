@@ -407,7 +407,7 @@ where ``I`` is the set of vectors ``k ∈ ℕ^i``, such that for all
 For the special case of ``i ≤ 2``, i.e. matrices and vectors, this simplifies to
 
 ````math
-g_p(X,Y) = X^{\mathrm{H}}Y,
+g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 ````
 
 where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
@@ -745,7 +745,6 @@ end
 
 Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`Euclidean`](@ref) manifold `M`.
 Its value is always the zero tangent vector.
-````
 """
 riemann_tensor(M::Euclidean, p, X, Y, Z)
 
@@ -894,13 +893,13 @@ Weingarten(::Euclidean, p, X, V)
 Weingarten!(::Euclidean, Y, p, X, V) = fill!(Y, 0)
 
 """
-    zero_vector(M::Euclidean, x)
+    zero_vector(M::Euclidean, p)
 
-Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
-`M`, which here is just a zero filled array the same size as `x`.
+Return the zero vector in the tangent space of `p` on the [`Euclidean`](@ref)
+`M`, which here is just a zero filled array the same size as `p`.
 """
 zero_vector(::Euclidean, ::Any...)
 zero_vector(::Euclidean{TypeParameter{Tuple{}}}, p::Number) = zero(p)
 zero_vector(::Euclidean{Tuple{}}, p::Number) = zero(p)
 
-zero_vector!(::Euclidean, v, ::Any) = fill!(v, 0)
+zero_vector!(::Euclidean, X, ::Any) = fill!(X, 0)
