@@ -16,7 +16,6 @@ using Aqua, Manifolds, Test, StaticArrays # Last package temporary
                 Manifolds.SemidirectProductOperation,
                 setindex!,
                 Manifolds.TranslationGroup,
-                Manifolds.GroupManifold,
             ],
             broken=false,
         ),
