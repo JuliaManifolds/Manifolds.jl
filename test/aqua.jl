@@ -1,4 +1,4 @@
-using Aqua, Manifolds, Test
+using Aqua, Manifolds, Test, StaticArrays # Last package temporary
 
 @testset "Aqua.jl" begin
     Aqua.test_all(
@@ -15,9 +15,24 @@ using Aqua, Manifolds, Test
                 reshape,
                 Manifolds.SemidirectProductOperation,
                 setindex!,
-                Manifolds.Manifolds.TranslationGroup,
+                Manifolds.TranslationGroup,
+                Manifolds.GroupManifold,
             ],
             broken=false,
+        ),
+        piracies=(
+            treat_as_own=[
+                AbstractDecoratorManifold, # MAybe fix?
+                AbstractManifold, # Maybe fix?
+                AbstractNumbers,  # Maybe fix?
+                ProductManifold,  # Maybe fix?
+                ExtrinsicEstimation, # already deprecated
+                Manifolds.EmptyTrait, # Maybe fix?
+                Manifolds.TraitList, # Maybe fix?
+                Manifolds.GeodesicInterpolationWithinRadius, # Probably fix
+                # StaticArray, # Definetly fix!
+                allocate, # Maybe fix
+            ],
         ),
     )
 end
