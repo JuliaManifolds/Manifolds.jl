@@ -14,9 +14,6 @@
 [![ACM TOMS](https://img.shields.io/badge/ACM%20TOMS-10.1145%2F3618296-blue.svg)](http://doi.org/10.1145/3618296)
 [![DOI](https://zenodo.org/badge/190447542.svg)](https://zenodo.org/badge/latestdoi/190447542)
 
-
-https://img.shields.io/badge/arXiv%20CS.MS-2106.08777-blue.svg
-https://img.shields.io/badge/AC%20TOMS-10.1145%2F3618296-blue.svg
 Package __Manifolds.jl__ aims to provide both a unified interface to define and
 use manifolds as well as a library of manifolds to use for your projects.
 This package is mostly stable, see https://github.com/JuliaManifolds/Manifolds.jl/issues/438 for planned upcoming changes.
