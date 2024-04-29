@@ -76,5 +76,9 @@ if (abspath(PROGRAM_FILE) == @__FILE__) # Run as script
     #...then continue with the test run in normal mode below
 end
 include("header.jl")
+include("aqua.jl")
 
+# new tests here
+
+# run old / legacy tests
 include("run_legacy_tests.jl")

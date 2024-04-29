@@ -153,6 +153,11 @@ function find_manifold_retractions(M; p=rand(M), X=rand(M; vector_at=p), t=1.0)
     return retr_features
 end
 
+@doc raw"""
+    find_manifold_inverse_retractions(M; kwargs...)
+
+Find inverse retractions that are available on a manifold by trying to call them.
+"""
 function find_manifold_inverse_retractions(M; p=rand(M), X=rand(M; vector_at=p), t=1.0)
     checks = AbstractInverseRetractionMethod[]
     # The following can only be checked on certain manifolds and/or need parameters
@@ -184,7 +189,7 @@ function find_manifold_inverse_retractions(M; p=rand(M), X=rand(M; vector_at=p),
         )
     end
     #
-    # Ok – Let's check them
+    # After we collected all possible ones, let check whether they exist
     inv_retr_features = AbstractInverseRetractionMethod[]
     for inv_retr in checks
         try
@@ -196,6 +201,11 @@ function find_manifold_inverse_retractions(M; p=rand(M), X=rand(M; vector_at=p),
     return inv_retr_features
 end
 
+@doc raw"""
+    find_manifold_inverse_retractions(M; kwargs...)
+
+Find vector transports that are available on a manifold by trying to call them.
+"""
 function find_manifold_vector_transports(M; p=rand(M), X=rand(M; vector_at=p), t=1.0)
     checks = AbstractVectorTransportMethod[]
     # The following can only be checked on certain manifolds and/or need parameters
@@ -237,6 +247,7 @@ end
 """
     find_manifold_properties(M)
 
+Find properties of a manifold, that are not related to a function.
 """
 function find_manifold_properties(M::AbstractManifold)
     properties = Dict{Symbol,<:Any}()
@@ -325,8 +336,9 @@ function show(io::IO, mf::ManifoldFeatures)
 end
 
 function show(io::IO, ::MIME"test/markdown", mf::ManifoldFeatures)
-    # Print the features in a nice Markdown table for the docs
+    # TODO: Print the features in a nice Markdown table for the docs
 end
+
 @doc """
     ManifoldExpectations
 
@@ -366,13 +378,11 @@ end
 For a current set of features and expectations infer whether they provide information
 for a symbol `s`.
 
-For example for `has_feature_expectations(F,E,:exp)` to return `true`
+For example for `has_feature_expectations(F,E, exp)` to return `true`
 * the function `exp` has to be in the features
 * the expectations have to have a tolerance present
 """
-function has_feature_expectations(F::ManifoldFeatures, E::ManifoldExpectations, s::Symbol)
-    # default cases
-    f = getfield(Main, s) #default: is test a function name or a type?
+function has_feature_expectations(F::ManifoldFeatures, E::ManifoldExpectations, f)
     (f isa Function) && (f in F.functions) && (return true)
     (f isa AbstractRetractionMethod) && (f in F.retractions) && (return true)
     (f isa AbstractInverseRetractionMethod) && (f in F.retractions) && (return true)
