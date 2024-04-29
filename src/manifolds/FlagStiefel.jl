@@ -2,7 +2,7 @@
 """
     default_inverse_retraction_method(M::Flag)
 
-Return [`PolarInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarInverseRetraction)
+Return [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`)
 as the default inverse retraction for the [`Flag`](@ref) manifold.
 """
 default_inverse_retraction_method(::Flag) = PolarInverseRetraction()
@@ -10,7 +10,7 @@ default_inverse_retraction_method(::Flag) = PolarInverseRetraction()
 """
     default_retraction_method(M::Flag)
 
-Return [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction)
+Return [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
 as the default retraction for the [`Flag`](@ref) manifold.
 """
 default_retraction_method(::Flag) = PolarRetraction()
@@ -18,7 +18,7 @@ default_retraction_method(::Flag) = PolarRetraction()
 """
     default_vector_transport_method(M::Flag)
 
-Return the [`ProjectionTransport`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports.html#ManifoldsBase.ProjectionTransport)
+Return the [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`)
 as the default vector transport method for the [`Flag`](@ref) manifold.
 """
 default_vector_transport_method(::Flag) = ProjectionTransport()
@@ -48,7 +48,7 @@ end
 @doc raw"""
     inverse_retract(M::Flag, p, q, ::PolarInverseRetraction)
 
-Compute the inverse retraction for the [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction), on the
+Compute the inverse retraction for the [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`), on the
 [`Flag`](@ref) manifold `M`.
 """
 inverse_retract(::Flag, ::Any, ::Any, ::PolarInverseRetraction)
@@ -172,7 +172,7 @@ end
 @doc raw"""
     retract(M::Flag, p, X, ::PolarRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
+Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
 [`Flag`](@ref) `M`. With $USV = p + X$ the retraction reads
 ````math
 \operatorname{retr}_p X = UV^\mathrm{H},

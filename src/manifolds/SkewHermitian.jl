@@ -1,7 +1,7 @@
 @doc raw"""
     SkewHermitianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  ``\operatorname{SkewHerm}(n)`` consisting of the real- or
+The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  ``\operatorname{SkewHerm}(n)`` consisting of the real- or
 complex-valued skew-hermitian matrices of size ``n×n``, i.e. the set
 
 ````math
@@ -64,7 +64,7 @@ end
 
 Check whether `p` is a valid manifold point on the [`SkewHermitianMatrices`](@ref) `M`, i.e.
 whether `p` is a skew-hermitian matrix of size `(n,n)` with values from the corresponding
-[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) `𝔽`.
+[`AbstractNumbers`](@extref ManifoldsBase number-system) `𝔽`.
 
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
@@ -83,7 +83,7 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SkewHermitianMatrices`](@ref) `M`, i.e. `X` must be a skew-hermitian matrix of size `(n,n)`
-and its values have to be from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
+and its values have to be from the correct [`AbstractNumbers`](@extref ManifoldsBase number-system).
 The tolerance for the skew-symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(M::SkewHermitianMatrices, p, X; kwargs...)
@@ -201,7 +201,7 @@ system `𝔽`, i.e.
 \dim \mathrm{SkewHerm}(n,ℝ) = \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,
 ````
 
-where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of ``𝔽``. The first term corresponds to
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of ``𝔽``. The first term corresponds to
 only the upper triangular elements of the matrix being unique, and the second term
 corresponds to the constraint that the real part of the diagonal be zero.
 """

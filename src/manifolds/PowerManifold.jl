@@ -14,7 +14,7 @@ struct ArrayPowerRepresentation <: AbstractPowerRepresentation end
 @doc raw"""
     PowerMetric <: AbstractMetric
 
-Represent the [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+Represent the [`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`)
 on an `AbstractPowerManifold`, i.e. the inner
 product on the tangent space is the sum of the inner product of each elements
 tangent space of the power manifold.
@@ -96,7 +96,7 @@ end
     flat(M::AbstractPowerManifold, p, X)
 
 use the musical isomorphism to transform the tangent vector `X` from the tangent space at
-`p` on an [`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  `M` to a cotangent vector.
+`p` on an [`AbstractPowerManifold`](@extref `ManifoldsBase.AbstractPowerManifold`)  `M` to a cotangent vector.
 This can be done elementwise for each entry of `X` (and `p`).
 """
 flat(::AbstractPowerManifold, ::Any...)
@@ -133,7 +133,7 @@ end
 @doc raw"""
     manifold_volume(M::PowerManifold)
 
-Return the manifold volume of an [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) `M`.
+Return the manifold volume of an [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) `M`.
 """
 function manifold_volume(M::PowerManifold)
     size = get_parameter(M.size)
@@ -251,7 +251,7 @@ end
     sharp(M::AbstractPowerManifold, p, ξ::RieszRepresenterCotangentVector)
 
 Use the musical isomorphism to transform the cotangent vector `ξ` from the tangent space at
-`p` on an [`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  `M` to a tangent vector.
+`p` on an [`AbstractPowerManifold`](@extref `ManifoldsBase.AbstractPowerManifold`)  `M` to a tangent vector.
 This can be done elementwise for every entry of `ξ` (and `p`).
 """
 sharp(::AbstractPowerManifold, ::Any...)
@@ -293,7 +293,7 @@ Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 @doc raw"""
     volume_density(M::PowerManifold, p, X)
 
-Return volume density on the [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) `M`, i.e. product of constituent
+Return volume density on the [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) `M`, i.e. product of constituent
 volume densities.
 """
 function volume_density(M::PowerManifold, p, X)

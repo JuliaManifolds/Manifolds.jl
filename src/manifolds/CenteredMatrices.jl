@@ -58,7 +58,7 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`CenteredMatrices`](@ref) `M`, i.e. that `X` is a matrix of size `(m, n)` whose columns
-sum to zero and its values are from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
+sum to zero and its values are from the correct [`AbstractNumbers`](@extref ManifoldsBase number-system).
 The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(
@@ -105,7 +105,7 @@ Return the manifold dimension of the [`CenteredMatrices`](@ref) `m`-by-`n` matri
 ````math
 \dim(\mathcal M) = (m*n - n) \dim_ℝ 𝔽,
 ````
-where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of `𝔽`.
 """
 function manifold_dimension(M::CenteredMatrices{<:Any,𝔽}) where {𝔽}
     m, n = get_parameter(M.size)

@@ -289,7 +289,7 @@ Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is glo
 
     injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
 
-Return the injectivity radius for the [`ProjectionRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionRetraction) on the
+Return the injectivity radius for the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) on the
 [`AbstractSphere`](@ref), which is globally ``\frac{π}{2}``.
 """
 injectivity_radius(::AbstractSphere) = π
@@ -331,7 +331,7 @@ is_flat(M::AbstractSphere) = manifold_dimension(M) == 1
 @doc raw"""
     local_metric(M::Sphere{n}, p, ::DefaultOrthonormalBasis)
 
-return the local representation of the metric in a [`DefaultOrthonormalBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.DefaultOrthonormalBasis), namely
+return the local representation of the metric in a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`), namely
 the diagonal matrix of size ``n×n`` with ones on the diagonal, since the metric is obtained
 from the embedding by restriction to the tangent space ``T_p\mathcal M`` at ``p``.
 """
@@ -415,7 +415,7 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolationWithinRadius`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/#ManifoldsBase.GeodesicInterpolationWithinRadius).
+[`GeodesicInterpolationWithinRadius`](@extref `ManifoldsBase.GeodesicInterpolationWithinRadius`).
 """
 mean(::AbstractSphere, ::Any...)
 
@@ -534,7 +534,7 @@ end
     parallel_transport_to(M::AbstractSphere, p, X, q)
 
 Compute the parallel transport on the [`Sphere`](@ref) of the tangent vector `X` at `p`
-to `q`, provided, the [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) between `p` and `q` is unique. The formula reads
+to `q`, provided, the [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) between `p` and `q` is unique. The formula reads
 
 ````math
 P_{p←q}(X) = X - \frac{\Re(⟨\log_p q,X⟩_p)}{d^2_𝕊(p,q)}
@@ -569,6 +569,48 @@ function riemann_tensor!(M::AbstractSphere{ℝ}, Xresult, p, X, Y, Z)
     innerZY = inner(M, p, Z, Y)
     Xresult .= innerZY .* X .- innerZX .* Y
     return Xresult
+end
+
+@doc raw"""
+    sectional_curvature(::AbstractSphere, p, X, Y)
+
+Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater than 1
+and 0 otherwise.
+"""
+function sectional_curvature(M::AbstractSphere, p, X, Y)
+    if manifold_dimension(M) > 1
+        return 1.0
+    else
+        return 0.0
+    end
+end
+
+@doc raw"""
+    sectional_curvature_max(::AbstractSphere)
+
+Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater than 1
+and 0 otherwise.
+"""
+function sectional_curvature_max(M::AbstractSphere)
+    if manifold_dimension(M) > 1
+        return 1.0
+    else
+        return 0.0
+    end
+end
+
+@doc raw"""
+    sectional_curvature_min(M::AbstractSphere)
+
+Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater than 1
+and 0 otherwise.
+"""
+function sectional_curvature_min(M::AbstractSphere)
+    if manifold_dimension(M) > 1
+        return 1.0
+    else
+        return 0.0
+    end
 end
 
 @doc raw"""

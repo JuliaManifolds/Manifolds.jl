@@ -3,7 +3,7 @@
     AbstractAtlas{𝔽}
 
 An abstract class for atlases whith charts that have values in the vector space `𝔽ⁿ`
-for some value of `n`. `𝔽` is a number system determined by an [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system)
+for some value of `n`. `𝔽` is a number system determined by an [`AbstractNumbers`](@extref ManifoldsBase number-system)
 object.
 """
 abstract type AbstractAtlas{𝔽} end
@@ -28,8 +28,8 @@ In short: The coordinates with respect to a basis are used together with a retra
 
 # See also
 
-[`AbstractAtlas`](@ref), [`AbstractInverseRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractInverseRetractionMethod),
-[`AbstractRetractionMethod`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.AbstractRetractionMethod), [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis)
+[`AbstractAtlas`](@ref), [`AbstractInverseRetractionMethod`](@extref `ManifoldsBase.AbstractInverseRetractionMethod`),
+[`AbstractRetractionMethod`](@extref `ManifoldsBase.AbstractRetractionMethod`), [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`)
 """
 struct RetractionAtlas{
     𝔽,
@@ -315,7 +315,7 @@ chart (`A`, `i`).
 
 # See also
 
-[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType), [`AbstractAtlas`](@ref)
+[`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`), [`AbstractAtlas`](@ref)
 """
 induced_basis(M::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType)
 
@@ -352,7 +352,7 @@ end
 The basis induced by chart with index `i` from an [`AbstractAtlas`](@ref) `A` of vector
 space of type `vs`.
 
-For the `vs` a [`TangentSpace`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.TangentSpace)
+For the `vs` a [`TangentSpace`](@extref `ManifoldsBase.TangentSpace`)
 this works as  follows:
 
 Let ``n`` denote the dimension of the manifold ``\mathcal M``.
@@ -372,7 +372,7 @@ and the set ``\{X_1,\ldots,X_n\}`` is the chart-induced basis of ``T_p\mathcal M
 
 # See also
 
-[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType), [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis)
+[`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`), [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`)
 """
 struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractBasis{𝔽,VST}
     vs::VST
@@ -388,7 +388,7 @@ space of type `vs`. Returns an object of type [`InducedBasis`](@ref).
 
 # See also
 
-[`VectorSpaceType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.VectorSpaceType), [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis)
+[`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`), [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`)
 """
 function induced_basis(
     ::AbstractManifold{𝔽},

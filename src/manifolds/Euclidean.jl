@@ -18,7 +18,7 @@ elements are interpreted as ``n_1 × n_2 × … × n_i`` arrays.
 For ``i=2`` we obtain a matrix space.
 The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is ``k \dim_ℝ 𝔽``, where ``\dim_ℝ 𝔽`` is the
-[`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the field ``𝔽``.
+[`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the field ``𝔽``.
 
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in type. Value can either be `:field` or `:type`.
@@ -407,7 +407,7 @@ where ``I`` is the set of vectors ``k ∈ ℕ^i``, such that for all
 For the special case of ``i ≤ 2``, i.e. matrices and vectors, this simplifies to
 
 ````math
-g_p(X,Y) = X^{\mathrm{H}}Y,
+g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 ````
 
 where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
@@ -496,7 +496,7 @@ _product_of_dimensions(M::Euclidean) = prod(get_parameter(M.size))
     manifold_dimension(M::Euclidean)
 
 Return the manifold dimension of the [`Euclidean`](@ref) `M`, i.e.
-the product of all array dimensions and the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the
+the product of all array dimensions and the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the
 underlying number system.
 """
 function manifold_dimension(M::Euclidean{<:Any,𝔽}) where {𝔽}
@@ -745,12 +745,38 @@ end
 
 Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`Euclidean`](@ref) manifold `M`.
 Its value is always the zero tangent vector.
-````
 """
 riemann_tensor(M::Euclidean, p, X, Y, Z)
 
 function riemann_tensor!(::Euclidean, Xresult, p, X, Y, Z)
     return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(::Euclidean, p, X, Y)
+
+Sectional curvature of [`Euclidean`](@ref) manifold `M` is 0.
+"""
+function sectional_curvature(::Euclidean, p, X, Y)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_max(::Euclidean)
+
+Sectional curvature of [`Euclidean`](@ref) manifold `M` is 0.
+"""
+function sectional_curvature_max(::Euclidean)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::Euclidean)
+
+Sectional curvature of [`Euclidean`](@ref) manifold `M` is 0.
+"""
+function sectional_curvature_min(::Euclidean)
+    return 0.0
 end
 
 function Base.show(io::IO, M::Euclidean{N,𝔽}) where {N<:Tuple,𝔽}
@@ -867,13 +893,13 @@ Weingarten(::Euclidean, p, X, V)
 Weingarten!(::Euclidean, Y, p, X, V) = fill!(Y, 0)
 
 """
-    zero_vector(M::Euclidean, x)
+    zero_vector(M::Euclidean, p)
 
-Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
-`M`, which here is just a zero filled array the same size as `x`.
+Return the zero vector in the tangent space of `p` on the [`Euclidean`](@ref)
+`M`, which here is just a zero filled array the same size as `p`.
 """
 zero_vector(::Euclidean, ::Any...)
 zero_vector(::Euclidean{TypeParameter{Tuple{}}}, p::Number) = zero(p)
 zero_vector(::Euclidean{Tuple{}}, p::Number) = zero(p)
 
-zero_vector!(::Euclidean, v, ::Any) = fill!(v, 0)
+zero_vector!(::Euclidean, X, ::Any) = fill!(X, 0)

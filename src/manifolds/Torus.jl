@@ -4,7 +4,7 @@
 The n-dimensional torus is the ``n``-dimensional product of the [`Circle`](@ref).
 
 The [`Circle`](@ref) is stored internally within `M.manifold`, such that all functions of
-[`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  can be used directly.
+[`AbstractPowerManifold`](@extref `ManifoldsBase.AbstractPowerManifold`)  can be used directly.
 """
 struct Torus{N} <: AbstractPowerManifold{ℝ,Circle{ℝ},ArrayPowerRepresentation}
     manifold::Circle{ℝ}

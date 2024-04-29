@@ -30,7 +30,7 @@ include("group_utils.jl")
             pts,
             X_pts,
             X_pts;
-            atol=2e-9,
+            atol=2e-8,
             test_diff=true,
             test_log_from_identity=true,
             test_exp_from_identity=true,

@@ -11,8 +11,8 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 |:--:|:--------------- |:--:|:-- |
 | ``\tau_p`` | action map by group element ``p`` | ``\mathrm{L}_p``, ``\mathrm{R}_p`` | either left or right |
 | ``\operatorname{Ad}_p(X)`` | adjoint action of element ``p`` of a Lie group on the element ``X`` of the corresponding Lie algebra | | |
-| ``×`` | Cartesian product of two manifolds | | see [`ProductManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.ProductManifold) |
-| ``^{\wedge}`` | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) |
+| ``×`` | Cartesian product of two manifolds | | see [`ProductManifold`](@extref `ManifoldsBase.ProductManifold`) |
+| ``^{\wedge}`` | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) |
 | ``⋅^\mathrm{H}`` | conjugate/Hermitian transpose | |
 | ``a`` | coordinates of a point in a chart | | see [`get_parameters`](@ref) |
 | ``\frac{\mathrm{D}}{\mathrm{d}t}`` | covariant derivative of a vector field ``X(t)`` | | |
@@ -22,7 +22,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``n`` | dimension (of a manifold) | ``n_1,n_2,\ldots,m, \dim(\mathcal M)``| for the real dimension sometimes also ``\dim_{\mathbb R}(\mathcal M)``|
 | ``d(⋅,⋅)`` | (Riemannian) distance | ``d_{\mathcal M}(⋅,⋅)`` | |
 | ``\exp_p X`` | exponential map at ``p \in \mathcal M`` of a vector ``X \in T_p \mathcal M`` | ``\exp_p(X)`` | |
-| ``F`` | a fiber | | see [`Fiber`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#Fiber) |
+| ``F`` | a fiber | | see [`Fiber`](@extref `ManifoldsBase.Fiber`) |
 | ``\mathbb F`` | a field, usually ``\mathbb F \in \{\mathbb R,\mathbb C, \mathbb H\}``, i.e. the real, complex, and quaternion numbers, respectively. | |field a manifold or a basis is based on |
 | ``\gamma`` | a geodesic | ``\gamma_{p;q}``, ``\gamma_{p,X}`` | connecting two points ``p,q`` or starting in ``p`` with velocity ``X``. |
 | ``\operatorname{grad} f(p)`` | (Riemannian) gradient of function ``f \colon \mathcal{M} → ℝ`` at ``p \in \mathcal{M}`` | | |
@@ -49,6 +49,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\mathcal P_{t_1\gets t_0}^cX`` | parallel transport along the curve ``c``| ``\mathcal P^cX=\mathcal P_{1\gets 0}^cX`` | of the vector ``X`` from ``p=c(0)`` to ``c(1)``
 | ``p`` | a point on ``\mathcal M`` | ``p_1, p_2, \ldots,q`` | for 3 points one might use ``x,y,z`` |
 | ``\operatorname{retr}_pX``|  a retraction | |
+| ``\kappa_p(X, Y)`` | sectional curvature | |
 | ``ξ`` | a set of tangent vectors | ``\{X_1,\ldots,X_n\}`` | |
 | ``J_{2n} \in ℝ^{2n×2n}`` | the [`SymplecticElement`](@ref) | | |
 | ``T_p \mathcal M`` | the tangent space at ``p`` | | |

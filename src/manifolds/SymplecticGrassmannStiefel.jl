@@ -119,7 +119,7 @@ end
 Compute the Cayley retraction on the Symplectic Grassmann manifold,
 when the points are represented as symplectic bases, i.e. on the [`SymplecticStiefel`](@ref).
 
-Here we can directly employ the `CaleyRetraction` on the symplectic Stiefel manifold.
+Here we can directly employ the [`CaleyRetraction`](@extref `ManifoldsBase.CayleyRetraction`) on the symplectic Stiefel manifold.
 """
 retract(::SymplecticGrassmann, p, X, ::CayleyRetraction)
 

@@ -24,4 +24,4 @@ format:
     variant: -raw_html+tex_math_dollars
     wrap: preserve
 
-jupyter: julia-1.9
+jupyter: julia-1.10

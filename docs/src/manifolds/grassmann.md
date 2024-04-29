@@ -22,7 +22,6 @@ Pages = ["manifolds/GrassmannProjector.jl"]
 Order = [:type,:function]
 ```
 
-
 ## Literature
 
 ```@bibliography

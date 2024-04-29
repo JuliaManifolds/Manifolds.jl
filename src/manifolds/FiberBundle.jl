@@ -25,7 +25,7 @@ and the topological vector space isometric to the fiber.
     )
 
 Construct the `FiberBundleProductVectorTransport` using the [`default_vector_transport_method`](@ref),
-which uses [`ParallelTransport`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/vector_transports/#ManifoldsBase.ParallelTransport)
+which uses [`ParallelTransport`](@extref `ManifoldsBase.ParallelTransport`)
 if no manifold is provided.
 """
 struct FiberBundleProductVectorTransport{
@@ -55,12 +55,12 @@ end
 """
     FiberBundle{𝔽,TVS<:FiberType,TM<:AbstractManifold{𝔽},TVT<:FiberBundleProductVectorTransport} <: AbstractManifold{𝔽}
 
-Fiber bundle on a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types/#ManifoldsBase.AbstractManifold)
-`M` of type [`FiberType`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.FiberType).
+Fiber bundle on a [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
+`M` of type [`FiberType`](@extref `ManifoldsBase.FiberType`).
 Examples include vector bundles, principal bundles or unit tangent bundles, see also [📖 Fiber Bundle](https://en.wikipedia.org/wiki/Fiber_bundle).
 
 # Fields
-* `manifold` – the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types/#ManifoldsBase.AbstractManifold)
+* `manifold` – the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
                manifold the Fiber bundle is defined on,
 * `type`     – representing the type of fiber we use.
 

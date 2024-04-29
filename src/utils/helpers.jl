@@ -141,7 +141,7 @@ mul!_safe(Y, A, B) = (Y === A || Y === B) ? copyto!(Y, A * B) : mul!(Y, A, B)
     realify(X::AbstractMatrix{T𝔽}, 𝔽::AbstractNumbers) -> Y::AbstractMatrix{<:Real}
 
 Given a matrix ``X ∈ 𝔽^{n×n}``, compute ``Y ∈ ℝ^{m×m}``, where ``m = n \operatorname{dim}_𝔽``,
-and ``\operatorname{dim}_𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the number field ``𝔽``, using
+and ``\operatorname{dim}_𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the number field ``𝔽``, using
 the map ``ϕ \colon X ↦ Y``, that preserves the matrix product, so that for all
 ``C,D ∈ 𝔽^{n×n}``,
 ````math
@@ -189,7 +189,7 @@ end
     unrealify!(X::AbstractMatrix{T𝔽}, Y::AbstractMatrix{<:Real}, 𝔽::AbstractNumbers[, n])
 
 Given a real matrix ``Y ∈ ℝ^{m×m}``, where ``m = n \operatorname{dim}_𝔽``, and
-``\operatorname{dim}_𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the number field ``𝔽``, compute
+``\operatorname{dim}_𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the number field ``𝔽``, compute
 in-place its equivalent matrix ``X ∈ 𝔽^{n×n}``. Note that this function does not check that
 ``Y`` has a valid structure to be un-realified.
 
@@ -277,3 +277,90 @@ _eps_safe(::Type{T}) where {T<:Real} = eps(T)
 _eps_safe(::Type{T}) where {T<:Number} = eps(real(T))
 
 max_eps(xs...) = maximum(_eps_safe ∘ eltype, xs)
+
+"""
+    sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis)
+
+Compute the matrix of sectional curvatures of manifold `M` at point `p`.
+Entry `(i, j)` corresponds to sectional curvature of the surface spanned by vectors
+`i`  and `j` from basis `B`.
+"""
+function sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis)
+    V = get_vectors(M, p, get_basis(M, p, B))
+    N = length(V)
+    result = zeros(N, N)
+    for (i, e_i) in enumerate(V)
+        for (j, e_j) in enumerate(V)
+            if i < j
+                result[i, j] = sectional_curvature(M, p, e_i, e_j)
+                result[j, i] = result[i, j]
+            end
+        end
+    end
+    return result
+end
+
+@doc raw"""
+    estimated_sectional_curvature(M::AbstractManifold, p, X, Y; r::Real=1e-3, N::Int=10000)
+
+Approximate sectional curvature of manifold `M` in the plane spanned by vectors `X` and `Y`
+from tangent space at `p` using a circle on `M` of radius `r` divided into `N` segments.
+
+The approximation is derived from the [Bertrand–Diguet–Puiseux theorem](https://en.wikipedia.org/wiki/Bertrand%E2%80%93Diguet%E2%80%93Puiseux_theorem)
+which states that
+````math
+\kappa_p(X, Y) = \lim_{r \to 0^+} 3\frac{2\pi r-C(r)}{\pi r^3},
+````
+where ``C(r)`` is the circumference of the circle of radius ``r`` around `p` in submanifold
+of `M` spanned by `X` and `Y`. The circumference calculation method has a tendency to
+return curvature values larger than the exact ones.
+"""
+function estimated_sectional_curvature(
+    M::AbstractManifold,
+    p,
+    X,
+    Y;
+    r::Real=1e-3,
+    N::Int=10000,
+)
+    circumference = 0.0
+    p_i = similar(p)
+    p_ip1 = similar(p)
+    for i in 1:N
+        θ_i = 2π * (i - 1) / N
+        θ_ip1 = 2π * (i) / N
+        exp!(M, p_i, p, r .* (sin(θ_i) .* X .+ cos(θ_i) .* Y))
+        exp!(M, p_ip1, p, r .* (sin(θ_ip1) .* X .+ cos(θ_ip1) .* Y))
+
+        circumference += distance(M, p_i, p_ip1)
+    end
+    return 3 * (2π * r - circumference) / (π * r^3)
+end
+
+"""
+    estimated_sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis; r::Real=1e-3, N::Int=10000)
+
+Estimate the matrix of sectional curvatures of manifold `M` at point `p` using
+`estimated_sectional_curvature`. Entry `(i, j)`` corresponds to sectional curvature of the
+surface spanned by vectors `i`  and `j` from basis `B`.
+"""
+function estimated_sectional_curvature_matrix(
+    M::AbstractManifold,
+    p,
+    B::AbstractBasis;
+    r::Real=1e-3,
+    N_pts::Int=10000,
+)
+    V = get_vectors(M, p, get_basis(M, p, B))
+    N = length(V)
+    result = zeros(N, N)
+    for (i, e_i) in enumerate(V)
+        for (j, e_j) in enumerate(V)
+            if i < j
+                result[i, j] = estimated_sectional_curvature(M, p, e_i, e_j; r=r, N=N_pts)
+                result[j, i] = result[i, j]
+            end
+        end
+    end
+    return result
+end

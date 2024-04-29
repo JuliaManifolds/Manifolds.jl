@@ -17,6 +17,7 @@ include("../header.jl")
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{2,2,Float64,4})
     retraction_methods = [PolarRetraction(), QRRetraction()]
+    @test default_vector_transport_method(M) === ParallelTransport()
 
     inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
 
@@ -273,6 +274,14 @@ include("../header.jl")
             -0.04818900625787811 0.0 0.024666891276861697
             0.050996416671166 -0.024666891276861697 0.0
         ]
+    end
+
+    @testset "sectional curvature" begin
+        @test sectional_curvature_min(Rotations(3)) == 0.0
+        @test sectional_curvature_max(Rotations(1)) == 0.0
+        @test sectional_curvature_max(Rotations(2)) == 0.0
+        @test sectional_curvature_max(Rotations(3)) == 1 / 8
+        @test sectional_curvature_max(Rotations(4)) == 1 / 4
     end
 
     @testset "field parameter" begin

@@ -5,10 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.15] unreleased
+## [0.9.17] – unreleased
 
-## Fixed
+### Added
 
+* `Hyperrectangle` manifold with boundary.
+
+## [0.9.16] – 2024-04-01
+
+### Changed
+
+* `NonlinearSolve.jl` and `PythonCall.jl` are no longer an upper bounded dependency (bugs were fixed).
+
+## [0.9.15] – 2024-03-24
+
+### Added
+
+* using `DocumenterInterLinks` for links to other Julia packages documentation.
+* Implementation of `sectional_curvature`, `sectional_curvature_min` and `sectional_curvature_max` for several manifolds.
+* `sectional_curvature_matrix` function and a tutorial on coordinate-free curvature.
+
+### Changed
+
+* `default_vector_transport_method` for `GeneralUnitaryMatrices` other than `Rotations` was changed to `ProjectionTransport`.
+
+### Fixed
+
+* typographical errors in tutorials/working-in-charts.jl.
 * several typographical errors in the docs
 * unifies to use two backticks ``` `` ``` for math instead of ` $ ` further in the docs
 
