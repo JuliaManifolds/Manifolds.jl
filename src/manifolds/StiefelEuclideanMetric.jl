@@ -110,7 +110,6 @@ which is globally ``π`` [ZimmermannStoye:2024](@cite).
 """
 injectivity_radius(::Stiefel) = π
 
-
 @doc raw"""
     inverse_retract(M::Stiefel, p, q, method::ProjectionInverseRetraction)
 
