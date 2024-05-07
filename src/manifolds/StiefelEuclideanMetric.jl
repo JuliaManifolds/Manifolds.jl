@@ -101,7 +101,6 @@ function get_vectors(M::Stiefel{<:Any,ℝ}, p, ::DefaultOrthonormalBasis{ℝ,Tan
 end
 
 _euclidean_unit_vector(n, i) = [k == i ? 1.0 : 0.0 for k in 1:n]
-@
 
 @doc raw"""
     injectivity_radius(M::Stiefel[, p])
@@ -112,7 +111,7 @@ which is globally ``π`` [ZimmermannStoye:2024](@cite).
 injectivity_radius(::Stiefel) = π
 injectivity_radius(::Stiefel, p) = π
 
-"""
+@doc raw"""
     inverse_retract(M::Stiefel, p, q, method::ProjectionInverseRetraction)
 
 Compute a projection-based inverse retraction.
