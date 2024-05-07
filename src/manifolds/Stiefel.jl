@@ -152,7 +152,6 @@ function get_embedding(M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
     return Euclidean(n, k; field=𝔽, parameter=:field)
 end
 
-
 @doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
 
