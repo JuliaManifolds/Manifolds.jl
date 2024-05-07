@@ -152,14 +152,6 @@ function get_embedding(M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
     return Euclidean(n, k; field=𝔽, parameter=:field)
 end
 
-@doc raw"""
-    injectivity_radius(M::Stiefel[, p])
-
-Return the injectivity radius for the [`Stiefel`](@ref) manifold `M`,
-which is globally ``π`` [ZimmermannStoye:2024](@cite).
-"""
-injectivity_radius(::Stiefel) = π
-injectivity_radius(::Stiefel, p) = π
 
 @doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
