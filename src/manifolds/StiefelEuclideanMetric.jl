@@ -103,7 +103,7 @@ end
 _euclidean_unit_vector(n, i) = [k == i ? 1.0 : 0.0 for k in 1:n]
 
 @doc raw"""
-    injectivity_radius(M::Stiefel[, p])
+    injectivity_radius(M::Stiefel)
 
 Return the injectivity radius for the [`Stiefel`](@ref) manifold `M`,
 which is globally ``π`` [ZimmermannStoye:2024](@cite).
