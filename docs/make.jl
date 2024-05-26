@@ -37,6 +37,7 @@ using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
 using DocumenterCitations, DocumenterInterLinks
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
+using NLsolve
 # required for loading the manifold tests functions
 using Test, FiniteDifferences
 ENV["GKSwstype"] = "100"
