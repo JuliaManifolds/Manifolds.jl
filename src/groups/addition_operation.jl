@@ -22,9 +22,9 @@ Base.:*(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
 
 const AdditionGroupTrait = TraitList{<:IsGroupManifold{AdditionOperation}}
 
-adjoint_action(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X) = X
+adjoint_action(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X, ::LeftAction) = X
 
-function adjoint_action!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Y, p, X)
+function adjoint_action!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Y, p, X, ::LeftAction)
     return copyto!(G, Y, p, X)
 end
 
@@ -153,13 +153,3 @@ lie_bracket(::AdditionGroupTrait, G::AbstractDecoratorManifold, X, Y) = zero(X)
 
 lie_bracket!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Z, X, Y) = fill!(Z, 0)
 
-function adjoint_action!(
-    ::AdditionGroupTrait,
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-    ::ActionDirection,
-)
-    return copyto!(Y, X)
-end
