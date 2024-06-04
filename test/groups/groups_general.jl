@@ -108,26 +108,12 @@ using Manifolds:
         @test_throws MethodError inverse_translate!(G, p, p, p, LeftForwardAction())
         @test_throws MethodError inverse_translate!(G, p, p, p, RightBackwardAction())
 
-        @test_throws MethodError translate_diff(G, p, p, X)
-        @test_throws MethodError translate_diff(G, p, p, X, LeftForwardAction())
-        @test_throws MethodError translate_diff(G, p, p, X, RightBackwardAction())
-        @test_throws MethodError translate_diff!(G, X, p, p, X)
-        @test_throws MethodError translate_diff!(G, X, p, p, X, LeftForwardAction())
-        @test_throws MethodError translate_diff!(G, X, p, p, X, RightBackwardAction())
-
-        @test_throws MethodError inverse_translate_diff(G, p, p, X)
-        @test_throws MethodError inverse_translate_diff(G, p, p, X, LeftForwardAction())
-        @test_throws MethodError inverse_translate_diff(G, p, p, X, RightBackwardAction())
-        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X)
-        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X, LeftForwardAction())
-        @test_throws MethodError inverse_translate_diff!(
-            G,
-            X,
-            p,
-            p,
-            X,
-            RightBackwardAction(),
-        )
+        @test_throws MethodError adjoint_action(G, p, X)
+        @test_throws MethodError adjoint_action(G, p, X, LeftAction())
+        @test_throws MethodError adjoint_action(G, p, X, RightAction())
+        @test_throws MethodError adjoint_action!(G, p, X, X)
+        @test_throws MethodError adjoint_action!(G, p, X, X, LeftAction())
+        @test_throws MethodError adjoint_action!(G, p, X, X, RightAction())
 
         @test_throws MethodError exp_lie(G, X)
         @test_throws MethodError exp_lie!(G, p, X)
