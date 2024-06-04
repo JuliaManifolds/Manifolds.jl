@@ -28,7 +28,7 @@ include("group_utils.jl")
         @test p2[G, 1] == p1[M, 1]
     end
 
-    X = log(G, pts[1], pts[1])
+    X = log(base_manifold(G), pts[1], pts[1])
     Y = zero_vector(G, pts[1])
     Z = Manifolds.allocate_result(G, zero_vector, pts[1])
     Z = zero_vector!(M, Z, pts[1])
@@ -51,7 +51,7 @@ include("group_utils.jl")
     eA = identity_element(G)
     @test isapprox(G, eA, e)
     @test isapprox(G, e, eA)
-    W = log(G, eA, pts[1])
-    Z = log(G, eA, pts[1])
+    W = log(base_manifold(G), eA, pts[1])
+    Z = log(base_manifold(G), eA, pts[1])
     @test isapprox(G, e, W, Z)
 end

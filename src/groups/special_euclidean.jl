@@ -324,29 +324,6 @@ function compose!(
     return x
 end
 
-# More generic default was mostly OK but it lacks padding
-function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X)
-    map(
-        exp!,
-        M.manifolds,
-        submanifold_components(M, q),
-        submanifold_components(M, p),
-        submanifold_components(M, X),
-    )
-    @inbounds _padpoint!(M, q)
-    return q
-end
-function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X, t::Number)
-    map(
-        (N, qc, pc, Xc) -> exp!(N, qc, pc, Xc, t),
-        M.manifolds,
-        submanifold_components(M, q),
-        submanifold_components(M, p),
-        submanifold_components(M, X),
-    )
-    @inbounds _padpoint!(M, q)
-    return q
-end
 
 @doc raw"""
     exp_lie(G::SpecialEuclidean{n}, X)
@@ -578,18 +555,6 @@ function _log_lie!(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, X, q)
     return X
 end
 
-# More generic default was mostly OK but it lacks padding
-function log!(M::SpecialEuclideanManifold, X::AbstractMatrix, p, q)
-    map(
-        log!,
-        M.manifolds,
-        submanifold_components(M, X),
-        submanifold_components(M, p),
-        submanifold_components(M, q),
-    )
-    @inbounds _padvector!(M, X)
-    return X
-end
 
 """
     lie_bracket(G::SpecialEuclidean, X::ArrayPartition, Y::ArrayPartition)
@@ -719,20 +684,6 @@ end
 
 ### Special methods for better performance of selected operations
 
-function exp(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        exp(M1.manifold, p.x[1], X.x[1]),
-        exp(M2.manifold, p.x[2], X.x[2]),
-    )
-end
-function log(M::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        log(M1.manifold, p.x[1], q.x[1]),
-        log(M2.manifold, p.x[2], q.x[2]),
-    )
-end
 function vee(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
     M1, M2 = M.manifold.manifolds
     return vcat(vee(M1.manifold, p.x[1], X.x[1]), vee(M2.manifold, p.x[2], X.x[2]))
