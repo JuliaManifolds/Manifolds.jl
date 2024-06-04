@@ -620,8 +620,14 @@ function lie_bracket!(G::SpecialEuclidean, Z, X, Y)
 end
 
 function adjoint_action!(G::SpecialEuclidean, Y, p, Xₑ, ::LeftAction)
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
-    inverse_translate_diff!(G, Y, p, p, Xₚ, RightBackwardAction())
+    np, hp = submanifold_components(G, p)
+    n, h = submanifold_components(G, Y)
+    nX, hX = submanifold_components(G, Xₑ)
+    H = submanifold(G, 2)
+    adjoint_action!(H, h, hp, hX, LeftAction())
+    A = G.op.action
+    apply!(A, n, hp, nX)
+    LinearAlgebra.axpy!(-1, apply_diff_group(A, Identity(H), h, np), n)
     return Y
 end
 
