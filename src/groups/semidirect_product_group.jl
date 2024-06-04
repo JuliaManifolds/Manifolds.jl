@@ -135,40 +135,6 @@ function _compose!(G::SemidirectProductGroup, x, p, q)
     return x
 end
 
-@doc raw"""
-    translate_diff(G::SemidirectProductGroup, p, q, X, conX::LeftForwardAction)
-
-Perform differential of the left translation on the semidirect product group `G`.
-
-Since the left translation is defined as (cf. [`SemidirectProductGroup`](@ref)):
-
-````math
-L_{(n', h')} (n, h) = ( L_{n'} θ_{h'}(n), L_{h'} h)
-````
-
-then its differential can be computed as
-
-````math
-\mathrm{d}L_{(n', h')}(X_n, X_h) = ( \mathrm{d}L_{n'} (\mathrm{d}θ_{h'}(X_n)), \mathrm{d}L_{h'} X_h).
-````
-"""
-translate_diff(G::SemidirectProductGroup, p, q, X, conX::LeftForwardAction)
-
-function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::LeftForwardAction)
-    M = base_manifold(G)
-    N, H = M.manifolds
-    A = G.op.action
-    np, hp = submanifold_components(G, p)
-    nq, hq = submanifold_components(G, q)
-    nX, hX = submanifold_components(G, X)
-    nY, hY = submanifold_components(G, Y)
-    translate_diff!(H, hY, hp, hq, hX, conX)
-    nZ = apply_diff(A, hp, nq, nX)
-    nr = apply(A, hp, nq)
-    translate_diff!(N, nY, np, nr, nZ, conX)
-    @inbounds _padvector!(G, Y)
-    return Y
-end
 
 # We need to prevent decorator unwrapping so that the correct `get_vector!` gets called
 # and applies proper padding to the result if `X` happens to be a matrix.

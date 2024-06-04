@@ -619,31 +619,6 @@ function lie_bracket!(G::SpecialEuclidean, Z, X, Y)
     return Z
 end
 
-"""
-    translate_diff(G::SpecialEuclidean, p, q, X, ::RightBackwardAction)
-
-Differential of the right action of the [`SpecialEuclidean`](@ref) group on itself.
-The formula for the rotation part is the differential of the right rotation action, while
-the formula for the translation part reads
-````math
-R_q⋅X_R⋅t_p + X_t
-````
-where ``R_q`` is the rotation part of `q`, ``X_R`` is the rotation part of `X`, ``t_p``
-is the translation part of `p` and ``X_t`` is the translation part of `X`.
-"""
-translate_diff(G::SpecialEuclidean, p, q, X, ::RightBackwardAction)
-
-function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightBackwardAction)
-    np, hp = submanifold_components(G, p)
-    nq, hq = submanifold_components(G, q)
-    nX, hX = submanifold_components(G, X)
-    nY, hY = submanifold_components(G, Y)
-    hY .= hp' * hX * hp
-    copyto!(nY, hq * (hX * np) + nX)
-    @inbounds _padvector!(G, Y)
-    return Y
-end
-
 function adjoint_action!(G::SpecialEuclidean, Y, p, Xₑ, ::LeftAction)
     Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
     inverse_translate_diff!(G, Y, p, p, Xₚ, RightBackwardAction())
