@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 using Quaternions
 
@@ -19,6 +19,7 @@ using Quaternions
     @test is_point(M, rand(MersenneTwister(), M); error=:error)
     @test abs(rand(MersenneTwister(), OrthogonalMatrices(1))[]) == 1
     @test is_vector(M, p, rand(MersenneTwister(), M; vector_at=p))
+    @test default_vector_transport_method(M) === ProjectionTransport()
 end
 
 @testset "Unitary Matrices" begin
@@ -59,6 +60,22 @@ end
     r1 = exp(M, p, X, 1.0)
     @test isapprox(M, r, r1; atol=1e-10)
 
+    @testset "Projection" begin
+        M = UnitaryMatrices(2)
+        pE = [2im 0.0; 0.0 2im]
+        p = project(M, pE)
+        @test is_point(M, p; error=:error)
+        pE[2, 1] = 1.0
+        X = project(M, p, pE)
+        @test is_vector(M, p, X; error=:error)
+    end
+    @testset "Random" begin
+        M = UnitaryMatrices(2)
+        Random.seed!(23)
+        p = rand(M)
+        @test is_point(M, p; error=:error)
+        @test is_vector(M, p, rand(M; vector_at=p); error=:error)
+    end
     @testset "Riemannian Hessian" begin
         p = Matrix{Float64}(I, 2, 2)
         X = [0.0 3.0; -3.0 0.0]

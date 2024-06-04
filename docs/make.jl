@@ -34,9 +34,10 @@ end
 
 # (c) load necessary packages for the docs
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
-using DocumenterCitations
+using DocumenterCitations, DocumenterInterLinks
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
+using NLsolve
 # required for loading the manifold tests functions
 using Test, FiniteDifferences
 ENV["GKSwstype"] = "100"
@@ -65,31 +66,40 @@ end
 
 # (e) ...finally! make docs
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style=:alpha)
+links = InterLinks(
+    "ManifoldsBase" => ("https://juliamanifolds.github.io/ManifoldsBase.jl/stable/"),
+)
+modules = [
+    Manifolds,
+    isdefined(Base, :get_extension) ?
+    Base.get_extension(Manifolds, :ManifoldsBoundaryValueDiffEqExt) :
+    Manifolds.ManifoldsBoundaryValueDiffEqExt,
+    isdefined(Base, :get_extension) ?
+    Base.get_extension(Manifolds, :ManifoldsNLsolveExt) : Manifolds.ManifoldsNLsolveExt,
+    isdefined(Base, :get_extension) ?
+    Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqDiffEqCallbacksExt) :
+    Manifolds.ManifoldsOrdinaryDiffEqDiffEqCallbacksExt,
+    isdefined(Base, :get_extension) ?
+    Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqExt) :
+    Manifolds.ManifoldsOrdinaryDiffEqExt,
+    isdefined(Base, :get_extension) ?
+    Base.get_extension(Manifolds, :ManifoldsRecipesBaseExt) :
+    Manifolds.ManifoldsRecipesBaseExt,
+    isdefined(Base, :get_extension) ? Base.get_extension(Manifolds, :ManifoldsTestExt) :
+    Manifolds.ManifoldsTestExt,
+]
+if modules isa Vector{Union{Nothing,Module}}
+    error("At least one module has not been properly loaded: ", modules)
+end
 makedocs(;
     # for development, we disable prettyurls
     format=Documenter.HTML(
         prettyurls=false,
         assets=["assets/favicon.ico", "assets/citations.css"],
+        size_threshold_warn=200 * 2^10, # raise slightly from 100 to 200 KiB
+        size_threshold=300 * 2^10,      # raise slightly 200 to to 300 KiB
     ),
-    modules=[
-        Manifolds,
-        isdefined(Base, :get_extension) ?
-        Base.get_extension(Manifolds, :ManifoldsBoundaryValueDiffEqExt) :
-        Manifolds.ManifoldsBoundaryValueDiffEqExt,
-        isdefined(Base, :get_extension) ?
-        Base.get_extension(Manifolds, :ManifoldsNLsolveExt) : Manifolds.ManifoldsNLsolveExt,
-        isdefined(Base, :get_extension) ?
-        Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqDiffEqCallbacksExt) :
-        Manifolds.ManifoldsOrdinaryDiffEqDiffEqCallbacksExt,
-        isdefined(Base, :get_extension) ?
-        Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqExt) :
-        Manifolds.ManifoldsOrdinaryDiffEqExt,
-        isdefined(Base, :get_extension) ?
-        Base.get_extension(Manifolds, :ManifoldsRecipesBaseExt) :
-        Manifolds.ManifoldsRecipesBaseExt,
-        isdefined(Base, :get_extension) ? Base.get_extension(Manifolds, :ManifoldsTestExt) :
-        Manifolds.ManifoldsTestExt,
-    ],
+    modules=modules,
     authors="Seth Axen, Mateusz Baran, Ronny Bergmann, and contributors.",
     sitename="Manifolds.jl",
     pages=[
@@ -99,6 +109,7 @@ makedocs(;
             "work in charts" => "tutorials/working-in-charts.md",
             "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
             "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
+            "explore curvature without coordinates" => "tutorials/exploring-curvature.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [
@@ -113,11 +124,14 @@ makedocs(;
                 "Generalized Stiefel" => "manifolds/generalizedstiefel.md",
                 "Generalized Grassmann" => "manifolds/generalizedgrassmann.md",
                 "Grassmann" => "manifolds/grassmann.md",
+                "Hamiltonian" => "manifolds/hamiltonian.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
+                "Hyperrectangle" => "manifolds/hyperrectangle.md",
                 "Lorentzian manifold" => "manifolds/lorentz.md",
                 "Multinomial doubly stochastic matrices" => "manifolds/multinomialdoublystochastic.md",
                 "Multinomial matrices" => "manifolds/multinomial.md",
                 "Multinomial symmetric matrices" => "manifolds/multinomialsymmetric.md",
+                "Multinomial symmetric positive definite matrices" => "manifolds/multinomialsymmetricpositivedefinite.md",
                 "Oblique manifold" => "manifolds/oblique.md",
                 "Probability simplex" => "manifolds/probabilitysimplex.md",
                 "Positive numbers" => "manifolds/positivenumbers.md",
@@ -133,7 +147,8 @@ makedocs(;
                 "Symmetric positive definite" => "manifolds/symmetricpositivedefinite.md",
                 "SPD, fixed determinant" => "manifolds/spdfixeddeterminant.md",
                 "Symmetric positive semidefinite fixed rank" => "manifolds/symmetricpsdfixedrank.md",
-                "Symplectic" => "manifolds/symplectic.md",
+                "Symplectic Grassmann" => "manifolds/symplecticgrassmann.md",
+                "Symplectic matrices" => "manifolds/symplectic.md",
                 "Symplectic Stiefel" => "manifolds/symplecticstiefel.md",
                 "Torus" => "manifolds/torus.md",
                 "Tucker" => "manifolds/tucker.md",
@@ -172,7 +187,7 @@ makedocs(;
             "References" => "misc/references.md",
         ],
     ],
-    plugins=[bib],
+    plugins=[bib, links],
     warnonly=[:missing_docs],
 )
 deploydocs(repo="github.com/JuliaManifolds/Manifolds.jl.git", push_preview=true)

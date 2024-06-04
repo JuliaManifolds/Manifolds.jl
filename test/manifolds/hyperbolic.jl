@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Hyperbolic Space" begin
     M = Hyperbolic(2)
@@ -347,23 +347,22 @@ include("../utils.jl")
     end
     @testset "other metric" begin
         M = Hyperbolic(2)
-        @test riemann_tensor(
-            M,
-            [0.0, 0.0, -1.0],
-            [-1.0, 0.0, 0.0],
-            [0.0, -1.0, 0.0],
-            [-0.5, -0.5, 0.0],
-        ) == [0.5, -0.5, 0.0]
-        X = [0.0, 0.0, 0.0]
-        @test riemann_tensor!(
-            M,
-            X,
-            [0.0, 0.0, -1.0],
-            [-1.0, 0.0, 0.0],
-            [0.0, -1.0, 0.0],
-            [-0.5, -0.5, 0.0],
-        ) === X
-        @test X == [0.5, -0.5, 0.0]
+        p = [0.0, 0.0, -1.0]
+        X = [-1.0, 0.0, 0.0]
+        Y = [0.0, -1.0, 0.0]
+        Z = [-0.5, -0.5, 0.0]
+        @test riemann_tensor(M, p, X, Y, Z) == [0.5, -0.5, 0.0]
+        Xout = [0.0, 0.0, 0.0]
+        @test riemann_tensor!(M, Xout, p, X, Y, Z) === Xout
+        @test Xout == [0.5, -0.5, 0.0]
+
+        @test sectional_curvature(M, p, X, Y) == -1.0
+        @test sectional_curvature_max(M) == -1.0
+        @test sectional_curvature_min(M) == -1.0
+        M1 = Hyperbolic(1)
+        @test sectional_curvature(M1, p, X, Y) == 0.0
+        @test sectional_curvature_max(M1) == 0.0
+        @test sectional_curvature_min(M1) == 0.0
     end
     @testset "ManifoldDiff" begin
         # ManifoldDiff

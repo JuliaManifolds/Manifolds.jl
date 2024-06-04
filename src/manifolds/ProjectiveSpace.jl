@@ -9,32 +9,32 @@ abstract type AbstractProjectiveSpace{𝔽} <: AbstractDecoratorManifold{𝔽} e
 @doc raw"""
     ProjectiveSpace{n,𝔽} <: AbstractProjectiveSpace{𝔽}
 
-The projective space $𝔽ℙ^n$ is the manifold of all lines in $𝔽^{n+1}$.
+The projective space ``𝔽ℙ^n`` is the manifold of all lines in ``𝔽^{n+1}``.
 The default representation is in the embedding, i.e. as unit norm vectors in
-$𝔽^{n+1}$:
+``𝔽^{n+1}``:
 ````math
 𝔽ℙ^n := \bigl\{ [p] ⊂ 𝔽^{n+1} \ \big|\ \lVert p \rVert = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\},
 ````
-where $[p]$ is an equivalence class of points $p$, and $∼$ indicates equivalence.
-For example, the real projective space $ℝℙ^n$ is represented as the unit sphere $𝕊^n$, where
+where ``[p]`` is an equivalence class of points ``p``, and ``∼`` indicates equivalence.
+For example, the real projective space ``ℝℙ^n`` is represented as the unit sphere ``𝕊^n``, where
 antipodal points are considered equivalent.
 
-The tangent space at point $p$ is given by
+The tangent space at point ``p`` is given by
 
 ````math
 T_p 𝔽ℙ^{n} := \bigl\{ X ∈ 𝔽^{n+1}\ \big|\ ⟨p,X⟩ = 0 \bigr \},
 ````
-where $⟨⋅,⋅⟩$ denotes the inner product in the embedding $𝔽^{n+1}$.
+where ``⟨⋅,⋅⟩`` denotes the inner product in the embedding ``𝔽^{n+1}``.
 
-When $𝔽 = ℍ$, this implementation of $ℍℙ^n$ is the right-quaternionic projective
+When ``𝔽 = ℍ``, this implementation of ``ℍℙ^n`` is the right-quaternionic projective
 space.
 
 # Constructor
 
     ProjectiveSpace(n[, field=ℝ])
 
-Generate the projective space $𝔽ℙ^{n} ⊂ 𝔽^{n+1}$, defaulting to the real projective space
-$ℝℙ^n$, where `field` can also be used to generate the complex- and right-quaternionic
+Generate the projective space ``𝔽ℙ^{n} ⊂ 𝔽^{n+1}``, defaulting to the real projective space
+``ℝℙ^n``, where `field` can also be used to generate the complex- and right-quaternionic
 projective spaces.
 """
 struct ProjectiveSpace{T,𝔽} <: AbstractProjectiveSpace{𝔽}
@@ -52,15 +52,15 @@ end
 @doc raw"""
     ArrayProjectiveSpace{T<:Tuple,𝔽} <: AbstractProjectiveSpace{𝔽}
 
-The projective space $𝔽ℙ^{n₁,n₂,…,nᵢ}$ is the manifold of all lines in $𝔽^{n₁,n₂,…,nᵢ}$.
+The projective space ``𝔽ℙ^{n₁,n₂,…,nᵢ}`` is the manifold of all lines in ``𝔽^{n₁,n₂,…,nᵢ}``.
 The default representation is in the embedding, i.e. as unit (Frobenius) norm matrices in
-$𝔽^{n₁,n₂,…,nᵢ}$:
+``𝔽^{n₁,n₂,…,nᵢ}``:
 
 ````math
 𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ [p] ⊂ 𝔽^{n_1, n_2, …, n_i} \ \big|\ \lVert p \rVert_{\mathrm{F}} = 1, λ ∈ 𝔽, |λ| = 1, p ∼ p λ \bigr\}.
 ````
-where $[p]$ is an equivalence class of points $p$, $\sim$ indicates equivalence, and
-$\lVert ⋅ \rVert_{\mathrm{F}}$ is the Frobenius norm.
+where ``[p]`` is an equivalence class of points ``p``, ``∼`` indicates equivalence, and
+``\lVert ⋅ \rVert_{\mathrm{F}}`` is the Frobenius norm.
 Note that unlike [`ProjectiveSpace`](@ref), the argument for `ArrayProjectiveSpace`
 is given by the size of the embedding.
 This means that [`ProjectiveSpace(2)`](@ref) and `ArrayProjectiveSpace(3)` are the same
@@ -68,20 +68,20 @@ manifold.
 Additionally, `ArrayProjectiveSpace(n,1;field=𝔽)` and [`Grassmann(n,1;field=𝔽)`](@ref) are
 the same.
 
-The tangent space at point $p$ is given by
+The tangent space at point ``p`` is given by
 
 ````math
 T_p 𝔽ℙ^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ ⟨p,X⟩_{\mathrm{F}} = 0 \bigr \},
 ````
 
-where $⟨⋅,⋅⟩_{\mathrm{F}}$ denotes the (Frobenius) inner product in the embedding
-$𝔽^{n_1, n_2, …, n_i}$.
+where ``⟨⋅,⋅⟩_{\mathrm{F}}`` denotes the (Frobenius) inner product in the embedding
+``𝔽^{n_1, n_2, …, n_i}``.
 
 # Constructor
 
     ArrayProjectiveSpace(n₁,n₂,...,nᵢ; field=ℝ)
 
-Generate the projective space $𝔽ℙ^{n_1, n_2, …, n_i}$, defaulting to the real projective
+Generate the projective space ``𝔽ℙ^{n_1, n_2, …, n_i}``, defaulting to the real projective
 space, where `field` can also be used to generate the complex- and right-quaternionic
 projective spaces.
 """
@@ -124,10 +124,16 @@ end
 Check whether `X` is a tangent vector in the tangent space of `p` on the
 [`AbstractProjectiveSpace`](@ref) `M`, i.e. that `X` has the same size as elements of the
 tangent space of the embedding and that the Frobenius inner product
-$⟨p, X⟩_{\mathrm{F}} = 0$.
+``⟨p, X⟩_{\mathrm{F}} = 0``.
 """
-function check_vector(M::AbstractProjectiveSpace, p, X; kwargs...)
-    if !isapprox(dot(p, X), 0; kwargs...)
+function check_vector(
+    M::AbstractProjectiveSpace,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    if !isapprox(dot(p, X), 0; atol=atol, kwargs...)
         return DomainError(
             dot(p, X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not" *
@@ -152,7 +158,7 @@ embed(::AbstractProjectiveSpace, p, X) = X
 @doc raw"""
     distance(M::AbstractProjectiveSpace, p, q)
 
-Compute the Riemannian distance on [`AbstractProjectiveSpace`](@ref) `M`$=𝔽ℙ^n$ between
+Compute the Riemannian distance on [`AbstractProjectiveSpace`](@ref) `M```=𝔽ℙ^n`` between
 points `p` and `q`, i.e.
 ````math
 d_{𝔽ℙ^n}(p, q) = \arccos\bigl| ⟨p, q⟩_{\mathrm{F}} \bigr|.
@@ -187,14 +193,14 @@ end
 @doc raw"""
     get_coordinates(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
-Represent the tangent vector $X$ at point $p$ from the [`AbstractProjectiveSpace`](@ref)
-$M = 𝔽ℙ^n$ in an orthonormal basis by unitarily transforming the hyperplane containing $X$,
-whose normal is $p$, to the hyperplane whose normal is the $x$-axis.
+Represent the tangent vector ``X`` at point ``p`` from the [`AbstractProjectiveSpace`](@ref)
+``M = 𝔽ℙ^n`` in an orthonormal basis by unitarily transforming the hyperplane containing ``X``,
+whose normal is ``p``, to the hyperplane whose normal is the ``x``-axis.
 
-Given $q = p \overline{λ} + x$, where
-$λ = \frac{⟨x, p⟩_{\mathrm{F}}}{|⟨x, p⟩_{\mathrm{F}}|}$, $⟨⋅, ⋅⟩_{\mathrm{F}}$ denotes the
-Frobenius inner product, and $\overline{⋅}$ denotes complex or quaternionic conjugation, the
-formula for $Y$ is
+Given ``q = p \overline{λ} + x``, where
+``λ = \frac{⟨x, p⟩_{\mathrm{F}}}{|⟨x, p⟩_{\mathrm{F}}|}``, ``⟨⋅, ⋅⟩_{\mathrm{F}}`` denotes the
+Frobenius inner product, and ``\overline{⋅}`` denotes complex or quaternionic conjugation, the
+formula for ``Y`` is
 ````math
 \begin{pmatrix}0 \\ Y\end{pmatrix} = \left(X - q\frac{2 ⟨q, X⟩_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}\right)\overline{λ}.
 ````
@@ -221,15 +227,15 @@ end
 @doc raw"""
     get_vector(M::AbstractProjectiveSpace, p, X, B::DefaultOrthonormalBasis{ℝ})
 
-Convert a one-dimensional vector of coefficients $X$ in the basis `B` of the tangent space
-at $p$ on the [`AbstractProjectiveSpace`](@ref) $M=𝔽ℙ^n$ to a tangent vector $Y$ at $p$ by
-unitarily transforming the hyperplane containing $X$, whose normal is the $x$-axis, to the
-hyperplane whose normal is $p$.
+Convert a one-dimensional vector of coefficients ``X`` in the basis `B` of the tangent space
+at ``p`` on the [`AbstractProjectiveSpace`](@ref) ``M=𝔽ℙ^n`` to a tangent vector ``Y`` at ``p`` by
+unitarily transforming the hyperplane containing ``X``, whose normal is the ``x``-axis, to the
+hyperplane whose normal is ``p``.
 
-Given $q = p \overline{λ} + x$, where
-$λ = \frac{⟨x, p⟩_{\mathrm{F}}}{|⟨x, p⟩_{\mathrm{F}}|}$, $⟨⋅, ⋅⟩_{\mathrm{F}}$ denotes the
-Frobenius inner product, and $\overline{⋅}$ denotes complex or quaternionic conjugation, the
-formula for $Y$ is
+Given ``q = p \overline{λ} + x``, where
+``λ = \frac{⟨x, p⟩_{\mathrm{F}}}{|⟨x, p⟩_{\mathrm{F}}|}``, ``⟨⋅, ⋅⟩_{\mathrm{F}}`` denotes the
+Frobenius inner product, and ``\overline{⋅}`` denotes complex or quaternionic conjugation, the
+formula for ``Y`` is
 ````math
 Y = \left(X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}\right) λ.
 ````
@@ -264,18 +270,18 @@ injectivity_radius(::AbstractProjectiveSpace, p, ::AbstractRetractionMethod) = �
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::PolarInverseRetraction)
     inverse_retract(M::AbstractProjectiveSpace, p, q, method::QRInverseRetraction)
 
-Compute the equivalent inverse retraction [`ProjectionInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionInverseRetraction),
-[`PolarInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarInverseRetraction), and [`QRInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRInverseRetraction) on the
-[`AbstractProjectiveSpace`](@ref) manifold `M`$=𝔽ℙ^n$, i.e.
+Compute the equivalent inverse retraction [`ProjectionInverseRetraction`](@extref `ManifoldsBase.ProjectionInverseRetraction`),
+[`PolarInverseRetraction`](@extref `ManifoldsBase.QRInverseRetraction`) on the
+[`AbstractProjectiveSpace`](@ref) manifold `M```=𝔽ℙ^n``, i.e.
 ````math
 \operatorname{retr}_p^{-1} q = q \frac{1}{⟨p, q⟩_{\mathrm{F}}} - p,
 ````
-where $⟨⋅, ⋅⟩_{\mathrm{F}}$ is the Frobenius inner product.
+where ``⟨⋅, ⋅⟩_{\mathrm{F}}`` is the Frobenius inner product.
 
 Note that this inverse retraction is equivalent to the three corresponding inverse
 retractions on [`Grassmann(n+1,1,𝔽)`](@ref), where the three inverse retractions in this
 case coincide.
-For $ℝℙ^n$, it is the same as the `ProjectionInverseRetraction` on the real
+For ``ℝℙ^n``, it is the same as the `ProjectionInverseRetraction` on the real
 [`Sphere`](@ref).
 """
 inverse_retract(
@@ -301,9 +307,9 @@ end
 @doc raw"""
     isapprox(M::AbstractProjectiveSpace, p, q; kwargs...)
 
-Check that points `p` and `q` on the [`AbstractProjectiveSpace`](@ref) `M`$=𝔽ℙ^n$ are
-members of the same equivalence class, i.e. that $p = q λ$ for some element $λ ∈ 𝔽$ with
-unit absolute value, that is, $|λ| = 1$.
+Check that points `p` and `q` on the [`AbstractProjectiveSpace`](@ref) `M```=𝔽ℙ^n`` are
+members of the same equivalence class, i.e. that ``p = q λ`` for some element ``λ ∈ 𝔽`` with
+unit absolute value, that is, ``|λ| = 1``.
 This is equivalent to the Riemannian
 [`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) being 0.
 """
@@ -321,24 +327,24 @@ is_flat(M::AbstractProjectiveSpace) = manifold_dimension(M) == 1
 @doc raw"""
     log(M::AbstractProjectiveSpace, p, q)
 
-Compute the logarithmic map on [`AbstractProjectiveSpace`](@ref) `M`$ = 𝔽ℙ^n$,
-i.e. the tangent vector whose corresponding [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) starting from `p`
+Compute the logarithmic map on [`AbstractProjectiveSpace`](@ref) `M``` = 𝔽ℙ^n``,
+i.e. the tangent vector whose corresponding [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) starting from `p`
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
 \log_p q = (q λ - \cos θ p) \frac{θ}{\sin θ},
 ````
-where $θ = \arccos|⟨q, p⟩_{\mathrm{F}}|$ is the
-[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between $p$ and $q$,
-$⟨⋅, ⋅⟩_{\mathrm{F}}$ is the Frobenius inner product, and
-$λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that
-minimizes $d_{𝔽^{n+1}}(p - q λ)$.
-That is, $q λ$ is the member of the equivalence class $[q]$ that is closest to $p$ in the
+where ``θ = \arccos|⟨q, p⟩_{\mathrm{F}}|`` is the
+[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between ``p`` and ``q``,
+``⟨⋅, ⋅⟩_{\mathrm{F}}`` is the Frobenius inner product, and
+``λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽`` is the unit scalar that
+minimizes ``d_{𝔽^{n+1}}(p - q λ)``.
+That is, ``q λ`` is the member of the equivalence class ``[q]`` that is closest to ``p`` in the
 embedding.
-As a result, $\exp_p \circ \log_p \colon q ↦ q λ$.
+As a result, ``\exp_p \circ \log_p \colon q ↦ q λ``.
 
-The logarithmic maps for the real [`AbstractSphere`](@ref) $𝕊^n$ and the real projective
-space $ℝℙ^n$ are identical when $p$ and $q$ are in the same hemisphere.
+The logarithmic maps for the real [`AbstractSphere`](@ref) ``𝕊^n`` and the real projective
+space ``ℝℙ^n`` are identical when ``p`` and ``q`` are in the same hemisphere.
 """
 log(::AbstractProjectiveSpace, p, q)
 
@@ -387,11 +393,11 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of points in vector `x`
-using [`GeodesicInterpolationWithinRadius`](@ref).
+using [`GeodesicInterpolationWithinRadius`](@extref `ManifoldsBase.GeodesicInterpolationWithinRadius`).
 """
 mean(::AbstractProjectiveSpace, ::Any...)
 
-function default_estimation_method(::AbstractProjectiveSpace, ::typeof(mean))
+function default_approximation_method(::AbstractProjectiveSpace, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 4)
 end
 
@@ -411,7 +417,7 @@ Orthogonally project the point `p` from the embedding onto the
 ````math
 \operatorname{proj}(p) = \frac{p}{\lVert p \rVert}_{\mathrm{F}},
 ````
-where $\lVert ⋅ \rVert_{\mathrm{F}}$ denotes the Frobenius norm.
+where ``\lVert ⋅ \rVert_{\mathrm{F}}`` denotes the Frobenius norm.
 This is identical to projection onto the [`AbstractSphere`](@ref).
 """
 project(::AbstractProjectiveSpace, ::Any)
@@ -427,7 +433,7 @@ Orthogonally project the point `X` onto the tangent space at `p` on the
 ````math
 \operatorname{proj}_p (X) = X - p⟨p, X⟩_{\mathrm{F}},
 ````
-where $⟨⋅, ⋅⟩_{\mathrm{F}}$ denotes the Frobenius inner product.
+where ``⟨⋅, ⋅⟩_{\mathrm{F}}`` denotes the Frobenius inner product.
 For the real [`AbstractSphere`](@ref) and `AbstractProjectiveSpace`, this projection is the
 same.
 """
@@ -454,8 +460,8 @@ end
     retract(M::AbstractProjectiveSpace, p, X, method::PolarRetraction)
     retract(M::AbstractProjectiveSpace, p, X, method::QRRetraction)
 
-Compute the equivalent retraction [`ProjectionRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionRetraction), [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction),
-and [`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) on the [`AbstractProjectiveSpace`](@ref) manifold `M`$=𝔽ℙ^n$,
+Compute the equivalent retraction [`ProjectionRetraction`](@extref `ManifoldsBase.PolarRetraction`),
+and [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) on the [`AbstractProjectiveSpace`](@ref) manifold `M```=𝔽ℙ^n``,
 i.e.
 ````math
 \operatorname{retr}_p X = \operatorname{proj}_p(p + X).
@@ -463,7 +469,7 @@ i.e.
 
 Note that this retraction is equivalent to the three corresponding retractions on
 [`Grassmann(n+1,1,𝔽)`](@ref), where in this case they coincide.
-For $ℝℙ^n$, it is the same as the `ProjectionRetraction` on the real [`Sphere`](@ref).
+For ``ℝℙ^n``, it is the same as the `ProjectionRetraction` on the real [`Sphere`](@ref).
 """
 retract(
     ::AbstractProjectiveSpace,
@@ -515,21 +521,21 @@ end
     parallel_transport_to(M::AbstractProjectiveSpace, p, X, q)
 
 Parallel transport a vector `X` from the tangent space at a point `p` on the
-[`AbstractProjectiveSpace`](@ref) `M`$=𝔽ℙ^n$ to the tangent space at another point `q`.
+[`AbstractProjectiveSpace`](@ref) `M```=𝔽ℙ^n`` to the tangent space at another point `q`.
 
-This implementation proceeds by transporting $X$ to $T_{q λ} M$ using the same approach as
+This implementation proceeds by transporting ``X`` to ``T_{q λ} M`` using the same approach as
 [`parallel_transport_direction`](@ref parallel_transport_direction(::AbstractProjectiveSpace, p, X, d)),
-where $λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽$ is the unit scalar that
-takes $q$ to the member $q λ$ of its equivalence class $[q]$ closest to $p$ in the
+where ``λ = \frac{⟨q, p⟩_{\mathrm{F}}}{|⟨q, p⟩_{\mathrm{F}}|} ∈ 𝔽`` is the unit scalar that
+takes ``q`` to the member ``q λ`` of its equivalence class ``[q]`` closest to ``p`` in the
 embedding.
-It then maps the transported vector from $T_{q λ} M$ to $T_{q} M$.
-The resulting transport to $T_{q} M$ is
+It then maps the transported vector from ``T_{q λ} M`` to ``T_{q} M``.
+The resulting transport to ``T_{q} M`` is
 ````math
 \mathcal{P}_{q ← p}(X) = \left(X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p\right) \overline{λ},
 ````
-where $d = \log_p q$ is the direction of the transport, $θ = \lVert d \rVert_p$ is the
-[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between $p$ and $q$, and
-$\overline{⋅}$ denotes complex or quaternionic conjugation.
+where ``d = \log_p q`` is the direction of the transport, ``θ = \lVert d \rVert_p`` is the
+[`distance`](@ref distance(::AbstractProjectiveSpace, p, q)) between ``p`` and ``q``, and
+``\overline{⋅}`` denotes complex or quaternionic conjugation.
 """
 parallel_transport_to(::AbstractProjectiveSpace, ::Any, ::Any, ::Any)
 
@@ -553,12 +559,12 @@ end
     parallel_transport_direction(M::AbstractProjectiveSpace, p, X, d)
 
 Parallel transport a vector `X` from the tangent space at a point `p` on the
-[`AbstractProjectiveSpace`](@ref) `M` along the [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) in the direction
+[`AbstractProjectiveSpace`](@ref) `M` along the [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) in the direction
 indicated by the tangent vector `d`, i.e.
 ````math
 \mathcal{P}_{\exp_p (d) ← p}(X) = X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p,
 ````
-where $θ = \lVert d \rVert$, and $⟨⋅, ⋅⟩_p$ is the [`inner`](@ref) product at the point $p$.
+where ``θ = \lVert d \rVert``, and ``⟨⋅, ⋅⟩_p`` is the [`inner`](@ref) product at the point ``p``.
 For the real projective space, this is equivalent to the same vector transport on the real
 [`AbstractSphere`](@ref).
 """

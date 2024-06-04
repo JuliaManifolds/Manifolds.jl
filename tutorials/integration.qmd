@@ -13,7 +13,7 @@ Pkg.develop(PackageSpec(; path=(@__DIR__) * "/../"))
 using Markdown
 ```
 
-This part of documentation covers integration of scalar functions defined on manifolds $f \colon \mathcal{M} \to \mathbb{R}$:
+This part of documentation covers integration of scalar functions defined on manifolds $f \colon \mathcal{M} \to ℝ$:
 
 ```math
 \int_{\mathcal M} f(p) \mathrm{d}p
@@ -55,7 +55,7 @@ We used the function [`manifold_volume`](@ref) to get the volume of the set over
 
 We will now try to verify that volume density correction correctly changes probability density of an exponential-wrapped normal distribution.
 `pdf_tangent_space` (defined in the next code block) represents probability density of a normally distributed random variable $X_T$ in the tangent space $T_p \mathcal{M}$.
-Its probability density (with respect to the Lebesgue measure of the tangent space) is $f_{X_T}\colon T_p \mathcal{M} \to \mathbb{R}$.
+Its probability density (with respect to the Lebesgue measure of the tangent space) is $f_{X_T}\colon T_p \mathcal{M} \to ℝ$.
 
 `pdf_manifold` (defined below) refers to the probability density of the distribution $X_M$ from the tangent space $T_p \mathcal{M}$ wrapped using exponential map on the manifold.
 The formula for probability density with respect to pushforward measure of the Lebesgue measure in the tangent space reads
@@ -105,7 +105,7 @@ the density at point $q$ is defined as
 f(q) = \frac{1}{n h^d} \sum_{i=1}^n \frac{1}{\theta_q(\log_q(p_i))}K\left( \frac{d(q, p_i)}{h} \right),
 ```
 
-where $h$ is the bandwidth, a small positive number less than the injectivity radius of $\mathcal M$ and $K\colon\mathbb{R}\to\mathbb{R}$ is a kernel function.
+where $h$ is the bandwidth, a small positive number less than the injectivity radius of $\mathcal M$ and $K\colonℝ\toℝ$ is a kernel function.
 Note that Pelletier's estimator can only use radially-symmetric kernels.
 The radially symmetric multivariate Epanechnikov kernel used in the example below is described in [LangreneMarin:2019](@cite).
 
@@ -175,6 +175,6 @@ See [BoyaSudarshanTilma:2003](@cite) for some considerations on symmetric spaces
 ## Literature
 
 ```@bibliography
-Pages = ["tutorials/integration.md"]
+Pages = ["integration.md"]
 Canonical=false
 ```

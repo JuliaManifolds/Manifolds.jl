@@ -1,15 +1,17 @@
 """
     GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽}
 
-Decorator for a smooth manifold that equips the manifold with a group operation, thus making
-it a Lie group. See [`IsGroupManifold`](@ref) for more details.
+Concrete decorator for a smooth manifold that equips the manifold with a group operation,
+thus making it a Lie group. See [`IsGroupManifold`](@ref) for more details.
 
 Group manifolds by default forward metric-related operations to the wrapped manifold.
-
 
 # Constructor
 
     GroupManifold(manifold, op)
+
+Define the group operation `op` acting on the manifold `manifold`, hence if `op` acts smoothly,
+this forms a Lie group.
 """
 struct GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <:
        AbstractDecoratorManifold{𝔽}
@@ -30,6 +32,10 @@ end
         active_traits(f, M.manifold, args...),
         IsExplicitDecorator(),
     )
+end
+# This could maybe even moved to ManifoldsBase?
+@inline function active_traits(f, ::AbstractRNG, M::AbstractDecoratorManifold, args...)
+    return active_traits(f, M, args...)
 end
 
 decorated_manifold(G::GroupManifold) = G.manifold
@@ -105,4 +111,51 @@ function is_vector(
     return is_vector(G.manifold, identity_element(G), X, false; error=error, kwargs...)
 end
 
+@doc raw"""
+    rand(::GroupManifold; vector_at=nothing, σ=1.0)
+    rand!(::GroupManifold, pX; vector_at=nothing, kwargs...)
+    rand(::TraitList{IsGroupManifold}, M; vector_at=nothing, σ=1.0)
+    rand!(TraitList{IsGroupManifold}, M, pX; vector_at=nothing, kwargs...)
+
+Compute a random point or tangent vector on a Lie group.
+
+For points this just means to generate a random point on the
+underlying manifold itself.
+
+For tangent vectors, an element in the Lie Algebra is generated.
+"""
+Random.rand(::GroupManifold; kwargs...)
+
+function Random.rand!(
+    T::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    pX;
+    kwargs...,
+)
+    return rand!(T, Random.default_rng(), G, pX; kwargs...)
+end
+
+function Random.rand!(
+    ::TraitList{<:IsGroupManifold},
+    rng::AbstractRNG,
+    G::AbstractDecoratorManifold,
+    pX;
+    vector_at=nothing,
+    kwargs...,
+)
+    M = base_manifold(G)
+    if vector_at === nothing
+        # points we produce the same as on manifolds
+        rand!(rng, M, pX, kwargs...)
+    else
+        # tangent vectors are represented in the Lie algebra
+        # => materialize the identity and produce a tangent vector there
+        rand!(rng, M, pX; vector_at=identity_element(G), kwargs...)
+    end
+end
+
 Base.show(io::IO, G::GroupManifold) = print(io, "GroupManifold($(G.manifold), $(G.op))")
+
+function Statistics.var(M::GroupManifold, x::AbstractVector; kwargs...)
+    return var(M.manifold, x; kwargs...)
+end

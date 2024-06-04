@@ -40,7 +40,7 @@ respect to ``p``, i.e.
 ```math
 X = pp^{\mathrm{T}}X + (I_n-pp^{\mathrm{T}})X,
 ```
-where ``I_n`` is the ``n\times n`` identity matrix.
+where ``I_n`` is the ``n×n`` identity matrix.
 We introduce ``A=p^{\mathrm{T}}X`` and ``QR = (I_n-pp^{\mathrm{T}})X`` the `qr` decomposition
 of the vertical component. Then using the matrix exponential ``\operatorname{Exp}`` we introduce ``B`` and ``C`` as
 

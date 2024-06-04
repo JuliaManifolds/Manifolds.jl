@@ -1,141 +1,15 @@
 """
     AbstractEstimationMethod
 
-Abstract type for defining statistical estimation methods.
+Deprecated alias for `AbstractApproximationMethod`
 """
-abstract type AbstractEstimationMethod end
-
-"""
-    GradientDescentEstimation <: AbstractEstimationMethod
-
-Method for estimation using gradient descent.
-"""
-struct GradientDescentEstimation <: AbstractEstimationMethod end
-
-"""
-    CyclicProximalPointEstimation <: AbstractEstimationMethod
-
-Method for estimation using the cyclic proximal point technique.
-"""
-struct CyclicProximalPointEstimation <: AbstractEstimationMethod end
-
-"""
-    ExtrinsicEstimation <: AbstractEstimationMethod
-
-Method for estimation in the ambient space and projecting to the manifold.
-
-For [`mean`](@ref) estimation, [`GeodesicInterpolation`](@ref) is used for mean estimation
-in the ambient space.
-"""
-struct ExtrinsicEstimation <: AbstractEstimationMethod end
-
-"""
-    WeiszfeldEstimation <: AbstractEstimationMethod
-
-Method for estimation using the Weiszfeld algorithm for the [`median`](@ref)
-"""
-struct WeiszfeldEstimation <: AbstractEstimationMethod end
+const AbstractEstimationMethod = AbstractApproximationMethod
 
 _unit_weights(n::Int) = StatsBase.UnitWeights{Float64}(n)
-
-@doc raw"""
-    GeodesicInterpolation <: AbstractEstimationMethod
-
-Repeated weighted geodesic interpolation method for estimating the Riemannian
-center of mass.
-
-The algorithm proceeds with the following simple online update:
-
-```math
-\begin{aligned}
-μ_1 &= x_1\\
-t_k &= \frac{w_k}{\sum_{i=1}^k w_i}\\
-μ_{k} &= γ_{μ_{k-1}}(x_k; t_k),
-\end{aligned}
-```
-
-where $x_k$ are points, $w_k$ are weights, $μ_k$ is the $k$th estimate of the
-mean, and $γ_x(y; t)$ is the point at time $t$ along the
-[`shortest_geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold,%20Any,%20Any})
-between points $x,y ∈ \mathcal M$. The algorithm
-terminates when all $x_k$ have been considered. In the [`Euclidean`](@ref) case,
-this exactly computes the weighted mean.
-
-The algorithm has been shown to converge asymptotically with the sample size for
-the following manifolds equipped with their default metrics when all sampled
-points are in an open geodesic ball about the mean with corresponding radius
-(see [`GeodesicInterpolationWithinRadius`](@ref)):
-
-* All simply connected complete Riemannian manifolds with non-positive sectional
-  curvature at radius $∞$ [ChengHoSalehianVemuri:2016](@cite), in particular:
-    + [`Euclidean`](@ref)
-    + [`SymmetricPositiveDefinite`](@ref) [HoChengSalehianVemuri:2013](@cite)
-* Other manifolds:
-    + [`Sphere`](@ref): $\frac{π}{2}$ [SalehianEtAl:2015](@cite)
-    + [`Grassmann`](@ref): $\frac{π}{4}$ [ChakrabortyVemuri:2015](@cite)
-    + [`Stiefel`](@ref)/[`Rotations`](@ref): $\frac{π}{2 \sqrt 2}$ [ChakrabortyVemuri:2019](@cite)
-
-For online variance computation, the algorithm additionally uses an analogous
-recursion to the weighted Welford algorithm [West:1979](@cite).
-"""
-struct GeodesicInterpolation <: AbstractEstimationMethod end
-
-"""
-    GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
-
-Estimation of Riemannian center of mass using [`GeodesicInterpolation`](@ref)
-with fallback to [`GradientDescentEstimation`](@ref) if any points are outside of a
-geodesic ball of specified `radius` around the mean.
-
-# Constructor
-
-    GeodesicInterpolationWithinRadius(radius)
-"""
-struct GeodesicInterpolationWithinRadius{T} <: AbstractEstimationMethod
-    radius::T
-
-    function GeodesicInterpolationWithinRadius(radius::T) where {T}
-        radius > 0 && return new{T}(radius)
-        return throw(
-            DomainError("The radius must be strictly postive, received $(radius)."),
-        )
-    end
-end
 
 function Base.show(io::IO, method::GeodesicInterpolationWithinRadius)
     return print(io, "GeodesicInterpolationWithinRadius($(method.radius))")
 end
-
-"""
-    default_estimation_method(M::AbstractManifold, f)
-
-Specify a default [`AbstractEstimationMethod`](@ref) for an `AbstractManifold`
-for a function `f`, e.g. the `median` or the `mean`.
-
-Note that his function is decorated, so it can inherit from the embedding, for example for the
-`IsEmbeddedSubmanifold` trait.
-"""
-default_estimation_method(M::AbstractManifold, f)
-
-for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
-    @eval @trait_function default_estimation_method(
-        M::AbstractDecoratorManifold,
-        f::typeof($mf),
-    ) (no_empty,)
-    eval(
-        quote
-            function default_estimation_method(
-                ::TraitList{IsEmbeddedSubmanifold},
-                M::AbstractDecoratorManifold,
-                f::typeof($mf),
-            )
-                return default_estimation_method(get_embedding(M), f)
-            end
-        end,
-    )
-end
-
-@trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector)
 
 """
     Statistics.cov(
@@ -145,7 +19,7 @@ end
         tangent_space_covariance_estimator::CovarianceEstimator=SimpleCovariance(;
             corrected=true,
         ),
-        mean_estimation_method::AbstractEstimationMethod=GradientDescentEstimation(),
+        mean_estimation_method::AbstractApproximationMethod=GradientDescentEstimation(),
         inverse_retraction_method::AbstractInverseRetractionMethod=default_inverse_retraction_method(
             M, eltype(x),
         ),
@@ -156,7 +30,7 @@ on a manifold is a rank 2 tensor, the function returns its coefficients in basis
 the given tangent space basis. See Section 5 of [Pennec:2006](@cite) for details.
 
 The mean is calculated using the specified `mean_estimation_method` using
-[mean](@ref Statistics.mean(::AbstractManifold, ::AbstractVector, ::AbstractEstimationMethod),
+[mean](@ref Statistics.mean(::AbstractManifold, ::AbstractVector, ::AbstractApproximationMethod),
 and tangent vectors at this mean are calculated using the provided `inverse_retraction_method`.
 Finally, the covariance matrix in the tangent plane is estimated using the Euclidean space
  estimator `tangent_space_covariance_estimator`. The type `CovarianceEstimator` is defined
@@ -171,7 +45,10 @@ function Statistics.cov(
     tangent_space_covariance_estimator::CovarianceEstimator=SimpleCovariance(;
         corrected=true,
     ),
-    mean_estimation_method::AbstractEstimationMethod=default_estimation_method(M, cov),
+    mean_estimation_method::AbstractApproximationMethod=default_approximation_method(
+        M,
+        cov,
+    ),
     inverse_retraction_method::AbstractInverseRetractionMethod=default_inverse_retraction_method(
         M,
         eltype(x),
@@ -188,28 +65,34 @@ function Statistics.cov(
     )
 end
 
-function default_estimation_method(::EmptyTrait, ::AbstractDecoratorManifold, ::typeof(cov))
+function default_approximation_method(
+    ::EmptyTrait,
+    ::AbstractDecoratorManifold,
+    ::typeof(cov),
+)
     return GradientDescentEstimation()
 end
-default_estimation_method(::AbstractManifold, ::typeof(cov)) = GradientDescentEstimation()
+function default_approximation_method(::AbstractManifold, ::typeof(cov))
+    return GradientDescentEstimation()
+end
 
 @doc raw"""
     mean(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
 
 Compute the (optionally weighted) Riemannian center of mass also known as
-Karcher mean of the vector `x` of points on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, defined
+Karcher mean of the vector `x` of points on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`, defined
 as the point that satisfies the minimizer
 ````math
-\argmin_{y ∈ \mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
+\operatorname{argmin}_{y ∈ \mathcal M} \frac{1}{2 \sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}^2(y,x_i),
 ````
-where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
+where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 
-In the general case, the [`GradientDescentEstimation`](@ref) is used to compute the mean.
+In the general case, the [`GradientDescentEstimation`](@extref `ManifoldsBase.GradientDescentEstimation`) is used to compute the mean.
     mean(
         M::AbstractManifold,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method::AbstractEstimationMethod=default_estimation_method(M);
+        method::AbstractApproximationMethod=default_approximation_method(M, mean);
         kwargs...,
     )
 
@@ -227,11 +110,11 @@ Compute the mean using the specified `method`.
         kwargs...,
     )
 
-Compute the mean using the gradient descent scheme [`GradientDescentEstimation`](@ref).
+Compute the mean using the gradient descent scheme [`GradientDescentEstimation`](@extref `ManifoldsBase.GradientDescentEstimation`).
 
 Optionally, provide `p0`, the starting point (by default set to the first data
 point). `stop_iter` denotes the maximal number of iterations to perform and the
-`kwargs...` are passed to [`isapprox`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.isapprox-Tuple{AbstractManifold,%20Any,%20Any}) to stop, when the minimal change
+`kwargs...` are passed to [`isapprox`](@extref `Base.isapprox-Tuple{AbstractManifold, Any, Any, Any}`) to stop, when the minimal change
 between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
@@ -243,10 +126,25 @@ as the exponential barycenter.
 The algorithm is further described in[AfsariTronVidal:2013](@cite).
 """
 mean(::AbstractManifold, ::Any...)
+
+#
+# dispatch on method first to allow Euclidean defaults to hit
+function Statistics.mean(M::AbstractManifold, x::AbstractVector, kwargs...)
+    return mean(M, x, default_approximation_method(M, mean, eltype(x)); kwargs...)
+end
 function Statistics.mean(
     M::AbstractManifold,
     x::AbstractVector,
-    method::AbstractEstimationMethod=default_estimation_method(M, mean);
+    w::AbstractVector,
+    kwargs...,
+)
+    return mean(M, x, w, default_approximation_method(M, mean, eltype(x)); kwargs...)
+end
+
+function Statistics.mean(
+    M::AbstractManifold,
+    x::AbstractVector,
+    method::AbstractApproximationMethod;
     kwargs...,
 )
     y = allocate_result(M, mean, x[1])
@@ -256,17 +154,12 @@ function Statistics.mean(
     M::AbstractManifold,
     x::AbstractVector,
     w::AbstractVector,
-    method::AbstractEstimationMethod=default_estimation_method(M, mean);
+    method::AbstractApproximationMethod;
     kwargs...,
 )
     y = allocate_result(M, mean, x[1])
     return mean!(M, y, x, w, method; kwargs...)
 end
-
-function default_estimation_method(::EmptyTrait, ::AbstractManifold, ::typeof(mean))
-    return GradientDescentEstimation()
-end;
-default_estimation_method(::AbstractManifold, ::typeof(mean)) = GradientDescentEstimation();
 
 @doc raw"""
     mean!(M::AbstractManifold, y, x::AbstractVector[, w::AbstractWeights]; kwargs...)
@@ -275,7 +168,7 @@ default_estimation_method(::AbstractManifold, ::typeof(mean)) = GradientDescentE
         y,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method::AbstractEstimationMethod;
+        method::AbstractApproximationMethod;
         kwargs...,
     )
 
@@ -287,7 +180,7 @@ function Statistics.mean!(
     M::AbstractManifold,
     y,
     x::AbstractVector,
-    method::AbstractEstimationMethod=default_estimation_method(M, mean);
+    method::AbstractApproximationMethod=default_approximation_method(M, mean);
     kwargs...,
 )
     w = _unit_weights(length(x))
@@ -350,7 +243,7 @@ end
 
 Estimate the Riemannian center of mass of `x` in an online fashion using
 repeated weighted geodesic interpolation. See
-[`GeodesicInterpolation`](@ref) for details.
+[`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`) for details.
 
 If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered for computing the mean.
@@ -412,7 +305,7 @@ end
     )
 
 Estimate the Riemannian center of mass of `x` using
-[`GeodesicInterpolationWithinRadius`](@ref).
+[`GeodesicInterpolationWithinRadius`](@extref `ManifoldsBase.GeodesicInterpolationWithinRadius`).
 
 See [`mean`](@ref mean(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
 for a description of `kwargs`.
@@ -495,10 +388,8 @@ end
     )
 
 Estimate the Riemannian center of mass of `x` using
-[`ExtrinsicEstimation`](@ref), i.e. by computing the mean in the embedding and projecting
+[`ExtrinsicEstimation`](@extref `ManifoldsBase.ExtrinsicEstimation`), i.e. by computing the mean in the embedding and projecting
 the result back.
-You can specify an `extrinsic_method` to specify which mean estimation method to use in the embedding,
-which defaults to [`GeodesicInterpolation`](@ref).
 
 See [`mean`](@ref mean(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::GeodesicInterpolation))
 for a description of the remaining `kwargs`.
@@ -515,18 +406,29 @@ function Statistics.mean!(
     y,
     x::AbstractVector,
     w::AbstractVector,
-    ::ExtrinsicEstimation;
-    extrinsic_method::AbstractEstimationMethod=default_estimation_method(
-        get_embedding(M),
-        mean,
-    ),
+    e::ExtrinsicEstimation;
+    extrinsic_method::Union{AbstractEstimationMethod,Nothing}=nothing,
     kwargs...,
 )
+    if !isnothing(extrinsic_method)
+        Base.depwarn(
+            "The Keyword Argument `extrinsic_method` is deprecated use `ExtrinsicEstimators` field instead",
+            :mean!,
+        )
+        e = ExtrinsicEstimation(extrinsic_method)
+    end
     embedded_x = map(p -> embed(M, p), x)
-    embedded_y = mean(get_embedding(M), embedded_x, w, extrinsic_method; kwargs...)
+    embedded_y = mean(get_embedding(M), embedded_x, w, e.extrinsic_estimation; kwargs...)
     project!(M, y, embedded_y)
     return y
 end
+
+function default_approximation_method(::EmptyTrait, ::AbstractManifold, ::typeof(mean))
+    return GradientDescentEstimation()
+end;
+function default_approximation_method(::AbstractManifold, ::typeof(mean))
+    return GradientDescentEstimation()
+end;
 
 @doc raw"""
     median(M::AbstractManifold, x::AbstractVector[, w::AbstractWeights]; kwargs...)
@@ -534,33 +436,33 @@ end
         M::AbstractManifold,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method::AbstractEstimationMethod;
+        method::AbstractApproximationMethod;
         kwargs...,
     )
 
 Compute the (optionally weighted) Riemannian median of the vector `x` of points on the
-[`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, defined as the point that satisfies the minimizer
+[`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`, defined as the point that satisfies the minimizer
 ````math
-\argmin_{y ∈ \mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
+\operatorname{argmin}_{y ∈ \mathcal M} \frac{1}{\sum_{i=1}^n w_i} \sum_{i=1}^n w_i\mathrm{d}_{\mathcal M}(y,x_i),
 ````
-where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
+where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 This function is nonsmooth (i.e nondifferentiable).
 
-In the general case, the [`CyclicProximalPointEstimation`](@ref) is used to compute the
+In the general case, the [`CyclicProximalPointEstimation`](@extref `ManifoldsBase.CyclicProximalPointEstimation`) is used to compute the
 median. However, this default may be overloaded for specific manifolds.
 
 Compute the median using the specified `method`.
 """
 Statistics.median(::AbstractManifold, ::Any...)
 
-function default_estimation_method(
+function default_approximation_method(
     ::EmptyTrait,
     ::AbstractDecoratorManifold,
     ::typeof(median),
 )
     return CyclicProximalPointEstimation()
 end
-function default_estimation_method(::AbstractManifold, ::typeof(median))
+function default_approximation_method(::AbstractManifold, ::typeof(median))
     return CyclicProximalPointEstimation()
 end
 
@@ -577,11 +479,11 @@ end
         kwargs...,
     )
 
-Compute the median using [`CyclicProximalPointEstimation`](@ref).
+Compute the median using [`CyclicProximalPointEstimation`](@extref `ManifoldsBase.CyclicProximalPointEstimation`).
 
 Optionally, provide `p0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
-and the `kwargs...` are passed to [`isapprox`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.isapprox-Tuple{AbstractManifold,%20Any,%20Any}) to stop, when the minimal
+and the `kwargs...` are passed to [`isapprox`](@extref `Base.isapprox-Tuple{AbstractManifold, Any, Any, Any}`) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
@@ -605,14 +507,11 @@ Statistics.median(
         x::AbstractVector,
         [w::AbstractWeights,]
         method::ExtrinsicEstimation;
-        extrinsic_method = CyclicProximalPointEstimation(),
         kwargs...,
     )
 
-Estimate the median of `x` using [`ExtrinsicEstimation`](@ref), i.e. by computing the median
+Estimate the median of `x` using [`ExtrinsicEstimation`](@extref `ManifoldsBase.ExtrinsicEstimation`), i.e. by computing the median
 in the embedding and projecting the result back.
-You can specify an `extrinsic_method` to specify which median estimation method to use in
-the embedding, which defaults to [`CyclicProximalPointEstimation`](@ref).
 
 See [`median`](@ref median(::AbstractManifold, ::AbstractVector, ::AbstractVector, ::CyclicProximalPointEstimation))
 for a description of `kwargs`.
@@ -638,11 +537,11 @@ Statistics.median(
         kwargs...,
     )
 
-Compute the median using [`WeiszfeldEstimation`](@ref).
+Compute the median using [`WeiszfeldEstimation`](@extref `ManifoldsBase.WeiszfeldEstimation`).
 
 Optionally, provide `p0`, the starting point (by default set to the first
 data point). `stop_iter` denotes the maximal number of iterations to perform
-and the `kwargs...` are passed to [`isapprox`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.isapprox-Tuple{AbstractManifold,%20Any,%20Any}) to stop, when the minimal
+and the `kwargs...` are passed to [`isapprox`](@extref `Base.isapprox-Tuple{AbstractManifold, Any, Any, Any}`) to stop, when the minimal
 change between two iterates is small. For more stopping criteria check the
 [`Manopt.jl`](https://manoptjl.org) package and use a solver therefrom.
 
@@ -650,7 +549,7 @@ The parameter ``α\in (0,2]`` is a step size.
 
 The algorithm is further described in [FletcherVenkatasubramanianJoshi:2008](@cite),
 especially the update rule in Eq. (6), i.e. Let ``q_{k}`` denote the current
-iterate, $n$ the number of points ``x_1,\ldots,x_n``, and
+iterate, ``n`` the number of points ``x_1,\ldots,x_n``, and
 
 ```math
 I_k = \bigl\{ i \in \{1,\ldots,n\} \big| x_i \neq q_k \bigr\}
@@ -667,7 +566,7 @@ X = \frac{1}{s}\sum_{i\in I_k} \frac{w_i}{d_{\mathcal M}(q_k,x_i)}\log_{q_k}x_i
 s = \sum_{i\in I_k} \frac{w_i}{d_{\mathcal M}(q_k,x_i)},
 ```
 
-and where $\mathrm{d}_{\mathcal M}$ denotes the Riemannian [`distance`](@ref).
+and where ``\mathrm{d}_{\mathcal M}`` denotes the Riemannian [`distance`](@ref).
 
 Optionally, pass `retraction` and `inverse_retraction` method types to specify
 the (inverse) retraction, which by default use the exponential and logarithmic map,
@@ -680,10 +579,24 @@ Statistics.median(
     ::WeiszfeldEstimation,
 )
 
+#
+# dispatch on the method first before allocating to allow Euclidean defaults to hit
+function Statistics.median(M::AbstractManifold, x::AbstractVector; kwargs...)
+    return median(M, x, default_approximation_method(M, median, eltype(x)))
+end
 function Statistics.median(
     M::AbstractManifold,
     x::AbstractVector,
-    method::AbstractEstimationMethod=default_estimation_method(M, median);
+    w::AbstractVector;
+    kwargs...,
+)
+    return median(M, x, w, default_approximation_method(M, median, eltype(x)))
+end
+
+function Statistics.median(
+    M::AbstractManifold,
+    x::AbstractVector,
+    method::AbstractApproximationMethod;
     kwargs...,
 )
     y = allocate_result(M, median, x[1])
@@ -693,7 +606,7 @@ function Statistics.median(
     M::AbstractManifold,
     x::AbstractVector,
     w::AbstractVector,
-    method::AbstractEstimationMethod=default_estimation_method(M, median);
+    method::AbstractApproximationMethod;
     kwargs...,
 )
     y = allocate_result(M, median, x[1])
@@ -707,7 +620,7 @@ end
         y,
         x::AbstractVector,
         [w::AbstractWeights,]
-        method::AbstractEstimationMethod;
+        method::AbstractApproximationMethod;
         kwargs...,
     )
 
@@ -718,7 +631,7 @@ function Statistics.median!(
     M::AbstractManifold,
     q,
     x::AbstractVector,
-    method::AbstractEstimationMethod=default_estimation_method(M, median);
+    method::AbstractApproximationMethod=default_approximation_method(M, median, eltype(x));
     kwargs...,
 )
     w = _unit_weights(length(x))
@@ -771,15 +684,19 @@ function Statistics.median!(
     y,
     x::AbstractVector,
     w::AbstractVector,
-    ::ExtrinsicEstimation;
-    extrinsic_method::AbstractEstimationMethod=default_estimation_method(
-        get_embedding(M),
-        median,
-    ),
+    e::ExtrinsicEstimation;
+    extrinsic_method=nothing,
     kwargs...,
 )
+    if !isnothing(extrinsic_method)
+        Base.depwarn(
+            "The Keyword Argument `extrinsic_method` is deprecated use `ExtrinsicEstimators` field instead",
+            :median!,
+        )
+        e = ExtrinsicEstimation(extrinsic_method)
+    end
     embedded_x = map(p -> embed(M, p), x)
-    embedded_y = median(get_embedding(M), embedded_x, w, extrinsic_method; kwargs...)
+    embedded_y = median(get_embedding(M), embedded_x, w, e.extrinsic_estimation; kwargs...)
     project!(M, y, embedded_y)
     return y
 end
@@ -835,7 +752,7 @@ end
     var(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false)
 
 compute the (optionally weighted) variance of a `Vector` `x` of `n` data points
-on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, i.e.
+on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`, i.e.
 
 ````math
 \frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m),
@@ -883,7 +800,7 @@ end
     std(M, x, w::AbstractWeights, m=mean(M, x, w); corrected=false, kwargs...)
 
 compute the optionally weighted standard deviation of a `Vector` `x` of `n` data
-points on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`, i.e.
+points on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`, i.e.
 
 ````math
 \sqrt{\frac{1}{c} \sum_{i=1}^n w_i d_{\mathcal M}^2 (x_i,m)},
@@ -905,7 +822,7 @@ simultaneously. See those functions for a description of the arguments.
         M::AbstractManifold,
         x::AbstractVector
         [w::AbstractWeights,]
-        method::AbstractEstimationMethod;
+        method::AbstractApproximationMethod;
         kwargs...,
     ) -> (mean, var)
 
@@ -918,7 +835,7 @@ function StatsBase.mean_and_var(
     M::AbstractManifold,
     x::AbstractVector,
     w::AbstractWeights,
-    method::AbstractEstimationMethod=default_estimation_method(M, mean);
+    method::AbstractApproximationMethod=default_approximation_method(M, mean, eltype(x));
     corrected=false,
     kwargs...,
 )
@@ -929,7 +846,11 @@ end
 function StatsBase.mean_and_var(
     M::AbstractManifold,
     x::AbstractVector,
-    method::AbstractEstimationMethod=default_estimation_method(M, mean_and_var);
+    method::AbstractApproximationMethod=default_approximation_method(
+        M,
+        mean_and_var,
+        eltype(x),
+    );
     corrected=true,
     kwargs...,
 )
@@ -937,15 +858,15 @@ function StatsBase.mean_and_var(
     w = _unit_weights(n)
     return mean_and_var(M, x, w, method; corrected=corrected, kwargs...)
 end
-function default_estimation_method(
+function default_approximation_method(
     ::EmptyTrait,
     M::AbstractDecoratorManifold,
     ::typeof(mean_and_var),
 )
-    return default_estimation_method(M, mean)
+    return default_approximation_method(M, mean)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(mean_and_var))
-    return default_estimation_method(M, mean)
+function default_approximation_method(M::AbstractManifold, ::typeof(mean_and_var))
+    return default_approximation_method(M, mean)
 end
 
 @doc raw"""
@@ -967,7 +888,7 @@ If `shuffle_rng` is provided, it is used to shuffle the order in which the
 points are considered. Optionally, pass `retraction` and `inverse_retraction`
 method types to specify the (inverse) retraction.
 
-See [`GeodesicInterpolation`](@ref) for details on the geodesic
+See [`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`) for details on the geodesic
 interpolation method.
 
 !!! note
@@ -1033,7 +954,7 @@ end
 Use repeated weighted geodesic interpolation to estimate the mean.
 Simultaneously, use a Welford-like recursion to estimate the variance.
 
-See [`GeodesicInterpolationWithinRadius`](@ref) and
+See [`GeodesicInterpolationWithinRadius`](@extref `ManifoldsBase.GeodesicInterpolationWithinRadius`) and
 [`mean_and_var`](@ref mean_and_var(::AbstractManifold, ::AbstractVector, ::AbstractWeights, ::GeodesicInterpolation))
 for more information.
 """
@@ -1077,7 +998,7 @@ Compute the [`mean`](@ref mean(::AbstractManifold, args...)) and the standard de
         M::AbstractManifold,
         x::AbstractVector
         [w::AbstractWeights,]
-        method::AbstractEstimationMethod;
+        method::AbstractApproximationMethod;
         kwargs...,
     ) -> (mean, var)
 
@@ -1089,8 +1010,8 @@ function StatsBase.mean_and_std(M::AbstractManifold, args...; kwargs...)
     m, v = mean_and_var(M, args...; kwargs...)
     return m, sqrt(v)
 end
-function default_estimation_method(M::AbstractManifold, ::typeof(mean_and_std))
-    return default_estimation_method(M, mean)
+function default_approximation_method(M::AbstractManifold, ::typeof(mean_and_std))
+    return default_approximation_method(M, mean)
 end
 
 """
@@ -1154,3 +1075,24 @@ function StatsBase.kurtosis(M::AbstractManifold, x::AbstractVector, args...)
     w = _unit_weights(length(x))
     return kurtosis(M, x, w, args...)
 end
+
+#
+# decorate default method for a few functions
+for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
+    @eval @trait_function default_approximation_method(
+        M::AbstractDecoratorManifold,
+        f::typeof($mf),
+    ) (no_empty,)
+    eval(
+        quote
+            function default_approximation_method(
+                ::TraitList{IsEmbeddedSubmanifold},
+                M::AbstractDecoratorManifold,
+                f::typeof($mf),
+            )
+                return default_approximation_method(get_embedding(M), f)
+            end
+        end,
+    )
+end
+@trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector)

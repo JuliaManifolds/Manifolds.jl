@@ -9,6 +9,6 @@ Order = [:type, :function]
 ## Literature
 
 ```@bibliography
-Pages = ["manifolds/fixedrankmatrices.md"]
+Pages = ["fixedrankmatrices.md"]
 Canonical=false
 ```

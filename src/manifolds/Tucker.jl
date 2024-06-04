@@ -2,33 +2,33 @@
 @doc raw"""
     Tucker{T, D, 𝔽} <: AbstractManifold{𝔽}
 
-The manifold of ``N_1 \times \dots \times N_D`` real-valued or complex-valued tensors of
+The manifold of ``N_1×\dots×N_D`` real-valued or complex-valued tensors of
 fixed multilinear rank ``(R_1, \dots, R_D)`` . If ``R_1 = \dots = R_D = 1``, this is the
 Segre manifold, i.e., the set of rank-1 tensors.
 
 # Representation in HOSVD format
 
-Let ``\mathbb{F}`` be the real or complex numbers.
+Let ``𝔽`` be the real or complex numbers.
 Any tensor ``p`` on the Tucker manifold can be represented as a multilinear product in HOSVD
 [DeLathauwerDeMoorVanderwalle:2000](@cite) form
 ```math
-p = (U_1,\dots,U_D) \cdot \mathcal{C}
+p = (U_1,\dots,U_D) ⋅ \mathcal{C}
 ```
-where ``\mathcal C \in \mathbb{F}^{R_1 \times \dots \times R_D}`` and, for ``d=1,\dots,D``,
-the matrix ``U_d \in \mathbb{F}^{N_d \times R_d}`` contains the singular vectors of the
+where ``\mathcal C \in 𝔽^{R_1×\dots×R_D}`` and, for ``d=1,\dots,D``,
+the matrix ``U_d \in 𝔽^{N_d×R_d}`` contains the singular vectors of the
 ``d``th unfolding of ``\mathcal{A}``
 
 # Tangent space
 
 The tangent space to the Tucker manifold at
-``p = (U_1,\dots,U_D) \cdot \mathcal{C}`` is [KochLubich:2010](@cite)
+``p = (U_1,\dots,U_D) ⋅ \mathcal{C}`` is [KochLubich:2010](@cite)
 ```math
 T_p \mathcal{M} =
 \bigl\{
-(U_1,\dots,U_D) \cdot \mathcal{C}^\prime
+(U_1,\dots,U_D) ⋅ \mathcal{C}^\prime
 + \sum_{d=1}^D \bigl(
     (U_1, \dots, U_{d-1}, U_d^\prime, U_{d+1}, \dots, U_D)
-    \cdot \mathcal{C}
+    ⋅ \mathcal{C}
 \bigr)
 \bigr\}
 ```
@@ -124,8 +124,8 @@ Tangent vector to the `D`-th order [`Tucker`](@ref) manifold at
 represented as
 ````math
 X =
-(U_1,\dots,U_D) \cdot \mathcal{C}^\prime +
-\sum_{d=1}^D (U_1,\dots,U_{d-1},U_d^\prime,U_{d+1},\dots,U_D) \cdot \mathcal{C}
+(U_1,\dots,U_D) ⋅ \mathcal{C}^\prime +
+\sum_{d=1}^D (U_1,\dots,U_{d-1},U_d^\prime,U_{d+1},\dots,U_D) ⋅ \mathcal{C}
 ````
 where ``U_d^\mathrm{H} U_d^\prime = 0``.
 
@@ -413,11 +413,11 @@ end
 @doc raw"""
     Base.foreach(f, M::Tucker, p::TuckerPoint, basis::AbstractBasis, indices=1:manifold_dimension(M))
 
-Let `basis` be and [`AbstractBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.AbstractBasis) at a point `p` on `M`. Suppose `f` is a function
+Let `basis` be and [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`) at a point `p` on `M`. Suppose `f` is a function
 that takes an index and a vector as an argument.
 This function applies `f` to `i` and the `i`th basis vector sequentially for each `i` in
 `indices`.
-Using a [`CachedBasis`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/bases.html#ManifoldsBase.CachedBasis) may speed up the computation.
+Using a [`CachedBasis`](@extref `ManifoldsBase.CachedBasis`) may speed up the computation.
 
 **NOTE**: The i'th basis vector is overwritten in each iteration. If any information about
 the vector is to be stored, `f` must make a copy.
@@ -444,7 +444,7 @@ end
     get_basis(:: Tucker, p::TuckerPoint, basisType::DefaultOrthonormalBasis{𝔽, TangentSpaceType}) where 𝔽
 
 An implicitly stored basis of the tangent space to the Tucker manifold.
-Assume ``p = (U_1,\dots,U_D) \cdot \mathcal{C}`` is in HOSVD format and that, for
+Assume ``p = (U_1,\dots,U_D) ⋅ \mathcal{C}`` is in HOSVD format and that, for
 ``d=1,\dots,D``, the singular values of the
 ``d``'th unfolding are ``\sigma_{dj}``, with ``j = 1,\dots,R_d``.
 The basis of the tangent space is as follows: [DewaeleBreidingVannieuwenhoven:2021](@cite)
@@ -453,13 +453,13 @@ The basis of the tangent space is as follows: [DewaeleBreidingVannieuwenhoven:20
 \bigl\{
 (U_1,\dots,U_D) e_i
 \bigr\} \cup \bigl\{
-(U_1,\dots, \sigma_{dj}^{-1} U_d^{\perp} e_i e_j^T,\dots,U_D) \cdot \mathcal{C}
+(U_1,\dots, \sigma_{dj}^{-1} U_d^{\perp} e_i e_j^T,\dots,U_D) ⋅ \mathcal{C}
 \bigr\}
 ````
 
 for all ``d = 1,\dots,D`` and all canonical basis vectors ``e_i`` and ``e_j``.
 Every ``U_d^\perp`` is such that ``[U_d \quad U_d^{\perp}]`` forms an orthonormal basis
-of ``\mathbb{R}^{N_d}``.
+of ``ℝ^{N_d}``.
 """
 function get_basis(
     ::Tucker,
@@ -634,7 +634,7 @@ end
 @doc raw"""
     manifold_dimension(::Tucker)
 
-The dimension of the manifold of ``N_1 \times \dots \times N_D`` tensors of multilinear
+The dimension of the manifold of ``N_1×\dots×N_D`` tensors of multilinear
 rank ``(R_1, \dots, R_D)``, i.e.
 ````math
 \mathrm{dim}(\mathcal{M}) = \prod_{d=1}^D R_d + \sum_{d=1}^D R_d (N_d - R_d).

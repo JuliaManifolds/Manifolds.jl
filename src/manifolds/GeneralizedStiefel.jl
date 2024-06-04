@@ -1,27 +1,27 @@
 @doc raw"""
     GeneralizedStiefel{T,𝔽,B} <: AbstractDecoratorManifold{𝔽}
 
-The Generalized Stiefel manifold consists of all $n\times k$, $n\geq k$ orthonormal
+The Generalized Stiefel manifold consists of all ``n×k``, ``n\geq k`` orthonormal
 matrices w.r.t. an arbitrary scalar product with symmetric positive definite matrix
-$B\in R^{n × n}$, i.e.
+``B\in R^{n×n}``, i.e.
 
 ````math
-\operatorname{St}(n,k,B) = \bigl\{ p \in \mathbb F^{n × k}\ \big|\ p^{\mathrm{H}} B p = I_k \bigr\},
+\operatorname{St}(n,k,B) = \bigl\{ p \in \mathbb F^{n×k}\ \big|\ p^{\mathrm{H}} B p = I_k \bigr\},
 ````
 
-where $𝔽 ∈ \{ℝ, ℂ\}$,
-$\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and
-$I_k \in \mathbb R^{k × k}$ denotes the $k × k$ identity matrix.
+where ``𝔽 ∈ \{ℝ, ℂ\}``,
+``⋅^{\mathrm{H}}`` denotes the complex conjugate transpose or Hermitian, and
+``I_k \in \mathbb R^{k×k}`` denotes the ``k×k`` identity matrix.
 
 
-In the case $B=I_k$ one gets the usual [`Stiefel`](@ref) manifold.
+In the case ``B=I_k`` one gets the usual [`Stiefel`](@ref) manifold.
 
-The tangent space at a point $p\in\mathcal M=\operatorname{St}(n,k,B)$ is given by
+The tangent space at a point ``p\in\mathcal M=\operatorname{St}(n,k,B)`` is given by
 
 ````math
-T_p\mathcal M = \{ X \in 𝔽^{n × k} : p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp=0_n\},
+T_p\mathcal M = \{ X \in 𝔽^{n×k} : p^{\mathrm{H}}BX + X^{\mathrm{H}}Bp=0_n\},
 ````
-where $0_k$ is the $k × k$ zero matrix.
+where ``0_k`` is the ``k×k`` zero matrix.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`zero_vector`](@ref) are inherited from the embedding.
@@ -32,7 +32,7 @@ The manifold is named after
 # Constructor
     GeneralizedStiefel(n, k, B=I_n, F=ℝ)
 
-Generate the (real-valued) Generalized Stiefel manifold of $n\times k$ dimensional
+Generate the (real-valued) Generalized Stiefel manifold of ``n×k`` dimensional
 orthonormal matrices with scalar product `B`.
 """
 struct GeneralizedStiefel{T,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
@@ -56,9 +56,9 @@ active_traits(f, ::GeneralizedStiefel, args...) = merge_traits(IsEmbeddedManifol
 @doc raw"""
     check_point(M::GeneralizedStiefel, p; kwargs...)
 
-Check whether `p` is a valid point on the [`GeneralizedStiefel`](@ref) `M`=$\operatorname{St}(n,k,B)$,
-i.e. that it has the right [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) type and $x^{\mathrm{H}}Bx$
-is (approximately) the identity, where $\cdot^{\mathrm{H}}$ is the complex conjugate
+Check whether `p` is a valid point on the [`GeneralizedStiefel`](@ref) `M`=``\operatorname{St}(n,k,B)``,
+i.e. that it has the right [`AbstractNumbers`](@extref ManifoldsBase number-system) type and ``x^{\mathrm{H}}Bx``
+is (approximately) the identity, where ``⋅^{\mathrm{H}}`` is the complex conjugate
 transpose. The settings for approximately can be set with `kwargs...`.
 """
 function check_point(M::GeneralizedStiefel, p; kwargs...)
@@ -84,9 +84,9 @@ end
     check_vector(M::GeneralizedStiefel, p, X; kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`GeneralizedStiefel`](@ref)
-`M`=$\operatorname{St}(n,k,B)$, i.e. the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) fits,
+`M`=``\operatorname{St}(n,k,B)``, i.e. the [`AbstractNumbers`](@extref ManifoldsBase number-system) fits,
 `p` is a valid point on `M` and
-it (approximately) holds that $p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0$, where
+it (approximately) holds that ``p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0``, where
 `kwargs...` is passed to the `isapprox`.
 """
 function check_vector(M::GeneralizedStiefel, p, X; kwargs...)
@@ -131,7 +131,7 @@ is_flat(M::GeneralizedStiefel) = manifold_dimension(M) == 1
 @doc raw"""
     manifold_dimension(M::GeneralizedStiefel)
 
-Return the dimension of the [`GeneralizedStiefel`](@ref) manifold `M`=$\operatorname{St}(n,k,B,𝔽)$.
+Return the dimension of the [`GeneralizedStiefel`](@ref) manifold `M`=``\operatorname{St}(n,k,B,𝔽)``.
 The dimension is given by
 
 ````math
@@ -159,8 +159,8 @@ end
     project(M::GeneralizedStiefel, p)
 
 Project `p` from the embedding onto the [`GeneralizedStiefel`](@ref) `M`, i.e. compute `q`
-as the polar decomposition of $p$ such that $q^{\mathrm{H}}Bq$ is the identity,
-where $\cdot^{\mathrm{H}}$ denotes the hermitian, i.e. complex conjugate transposed.
+as the polar decomposition of ``p`` such that ``q^{\mathrm{H}}Bq`` is the identity,
+where ``⋅^{\mathrm{H}}`` denotes the hermitian, i.e. complex conjugate transposed.
 """
 project(::GeneralizedStiefel, ::Any)
 
@@ -182,8 +182,8 @@ The formula reads
 \operatorname{proj}_{\operatorname{St}(n,k)}(p,X) = X - p\operatorname{Sym}(p^{\mathrm{H}}BX),
 ````
 
-where $\operatorname{Sym}(y)$ is the symmetrization of $y$, e.g. by
-$\operatorname{Sym}(y) = \frac{y^{\mathrm{H}}+y}{2}$.
+where ``\operatorname{Sym}(y)`` is the symmetrization of ``y``, e.g. by
+``\operatorname{Sym}(y) = \frac{y^{\mathrm{H}}+y}{2}``.
 """
 project(::GeneralizedStiefel, ::Any, ::Any)
 
@@ -232,12 +232,12 @@ end
     retract(M::GeneralizedStiefel, p, X, ::PolarRetraction)
     retract(M::GeneralizedStiefel, p, X, ::ProjectionRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
+Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
 [`GeneralizedStiefel`](@ref) manifold `M`, which in this case is the same as
 the projection based retraction employing the exponential map in the embedding
 and projecting the result back to the manifold.
 
-The default retraction for this manifold is the [`ProjectionRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ProjectionRetraction).
+The default retraction for this manifold is the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`).
 """
 retract(::GeneralizedStiefel, ::Any...)
 

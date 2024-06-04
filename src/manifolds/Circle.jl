@@ -9,7 +9,7 @@ real-valued points in ``[-π,π)`` or complex-valued points ``z ∈ ℂ`` of abs
     Circle(𝔽=ℝ)
 
 Generate the `ℝ`-valued Circle represented by angles, which
-alternatively can be set to use the [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) `𝔽=ℂ` to obtain the circle
+alternatively can be set to use the [`AbstractNumbers`](@extref ManifoldsBase number-system) `𝔽=ℂ` to obtain the circle
 represented by `ℂ`-valued circle of unit numbers.
 """
 struct Circle{𝔽} <: AbstractManifold{𝔽} end
@@ -78,8 +78,14 @@ check_vector(::Circle{ℝ}, ::Any...; ::Any...)
 function check_vector(M::Circle{ℝ}, p, X; kwargs...)
     return nothing
 end
-function check_vector(M::Circle{ℂ}, p, X; kwargs...)
-    if !isapprox(abs(complex_dot(p, X)), 0.0; kwargs...)
+function check_vector(
+    M::Circle{ℂ},
+    p,
+    X::T;
+    atol::Real=sqrt(eps(real(float(number_eltype(T))))),
+    kwargs...,
+) where {T}
+    if !isapprox(abs(complex_dot(p, X)), 0; atol=atol, kwargs...)
         return DomainError(
             abs(complex_dot(p, X)),
             "The value $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",
@@ -142,7 +148,7 @@ Compute the exponential map on the [`Circle`](@ref).
 ````math
 \exp_p X = (p+X)_{2π},
 ````
-where ``(\cdot)_{2π}`` is the (symmetric) remainder with respect to division by ``2π``, i.e. in ``[-π,π)``.
+where ``(⋅)_{2π}`` is the (symmetric) remainder with respect to division by ``2π``, i.e. in ``[-π,π)``.
 
 For the complex-valued case, the same formula as for the [`Sphere`](@ref) ``𝕊^1`` is applied to values in the
 complex plane.
@@ -160,7 +166,7 @@ function Base.exp(M::Circle{ℂ}, p::Number, X::Number, t::Number)
 end
 
 exp!(::Circle{ℝ}, q, p, X) = (q .= sym_rem(p + X))
-exp!(::Circle{ℝ}, q, p, X, t::Number) = (q .= sym_rem(p + t * X))
+exp!(::Circle{ℝ}, q, p, X, t::Number) = (q .= sym_rem(p[] + t * X[]))
 function exp!(M::Circle{ℂ}, q, p, X)
     θ = norm(M, p, X)
     q .= cos(θ) * p + usinc(θ) * X
@@ -293,7 +299,7 @@ Compute the logarithmic map on the [`Circle`](@ref) `M`.
 ````math
 \log_p q = (q-p)_{2π},
 ````
-where ``(\cdot)_{2π}`` is the (symmetric) remainder with respect to division by ``2π``, i.e. in ``[-π,π)``.
+where ``(⋅)_{2π}`` is the (symmetric) remainder with respect to division by ``2π``, i.e. in ``[-π,π)``.
 
 For the complex-valued case, the same formula as for the [`Sphere`](@ref) ``𝕊^1`` is applied to values in the
 complex plane.
@@ -526,7 +532,7 @@ function parallel_transport_to(M::Circle{ℂ}, p::Number, X::Number, q::Number)
     return Y
 end
 
-parallel_transport_to!(::Circle{ℝ}, Y, p, X, q) = (Y .= X)
+parallel_transport_to!(::Circle{ℝ}, Y, p, X, q) = (Y .= X[])
 function parallel_transport_to!(M::Circle{ℂ}, Y, p, X, q)
     X_pq = log(M, p, q)
     Xnorm = norm(M, p, X_pq)
@@ -536,6 +542,11 @@ function parallel_transport_to!(M::Circle{ℂ}, Y, p, X, q)
         Y .-= factor .* (p + q)
     end
     return Y
+end
+
+# dispatch before allocation
+function _vector_transport_direction(M::Circle, p, X, d, ::ParallelTransport)
+    return parallel_transport_to(M, p, X, exp(M, p, d))
 end
 
 """

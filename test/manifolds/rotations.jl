@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Rotations" begin
     M = Rotations(2)
@@ -17,6 +17,7 @@ include("../utils.jl")
     TEST_FLOAT32 && push!(types, Matrix{Float32})
     TEST_STATIC_SIZED && push!(types, MMatrix{2,2,Float64,4})
     retraction_methods = [PolarRetraction(), QRRetraction()]
+    @test default_vector_transport_method(M) === ParallelTransport()
 
     inverse_retraction_methods = [PolarInverseRetraction(), QRInverseRetraction()]
 
@@ -275,6 +276,14 @@ include("../utils.jl")
         ]
     end
 
+    @testset "sectional curvature" begin
+        @test sectional_curvature_min(Rotations(3)) == 0.0
+        @test sectional_curvature_max(Rotations(1)) == 0.0
+        @test sectional_curvature_max(Rotations(2)) == 0.0
+        @test sectional_curvature_max(Rotations(3)) == 1 / 8
+        @test sectional_curvature_max(Rotations(4)) == 1 / 4
+    end
+
     @testset "field parameter" begin
         M = Rotations(2; parameter=:field)
         @test is_flat(M)
@@ -285,5 +294,34 @@ include("../utils.jl")
         X = get_vector(M, p, Float64[], DefaultOrthonormalBasis())
         @test X isa Matrix{Float64}
         @test X == fill(0.0, 1, 1)
+    end
+
+    @testset "Specializations" begin
+        M = Rotations(2)
+        p = Matrix{Float64}(I, 2, 2)
+        X = [0.0 3.0; -3.0 0.0]
+        @test parallel_transport_direction(M, p, X, X) === X
+
+        M = Rotations(3)
+        p = @SMatrix [
+            -0.5908399013383766 -0.6241917041179139 0.5111681988316876
+            -0.7261666986267721 0.13535732881097293 -0.6740625485388226
+            0.35155388888753836 -0.7694563730631729 -0.5332417398896261
+        ]
+        X = @SMatrix [
+            0.0 -0.30777760628130063 0.5499897386953444
+            0.30777760628130063 0.0 -0.32059980100053004
+            -0.5499897386953444 0.32059980100053004 0.0
+        ]
+        d = @SMatrix [
+            0.0 -0.4821890003925358 -0.3513148535122392
+            0.4821890003925358 0.0 0.37956770358148356
+            0.3513148535122392 -0.37956770358148356 0.0
+        ]
+        @test parallel_transport_direction(M, p, X, d) ≈ [
+            0.0 -0.3258778314599828 0.3903114578816008
+            0.32587783145998306 0.0 -0.49138641089195584
+            -0.3903114578816011 0.4913864108919558 0.0
+        ]
     end
 end

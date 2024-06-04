@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "MultinomialMatrices manifold" begin
     M = MultinomialMatrices(3, 2)
@@ -54,5 +54,13 @@ include("../utils.jl")
 
         M = MultinomialMatrices(3, 2; parameter=:field)
         @test repr(M) == "MultinomialMatrices(3, 2; parameter=:field)"
+    end
+    @testset "Riemannian Gradient" begin
+        M = MultinomialMatrices(3, 2)
+        p = [0.5 0.4 0.1; 0.5 0.4 0.1]'
+        Y = [1.0 -1.0; 0.0 0.0; -1.0 1.0]
+        G = project(M, p, p .* Y)
+        X = riemannian_gradient(M, p, Y)
+        @test isapprox(M, p, G, X)
     end
 end

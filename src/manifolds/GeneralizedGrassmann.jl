@@ -1,37 +1,37 @@
 @doc raw"""
     GeneralizedGrassmann{T,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
 
-The generalized Grassmann manifold $\operatorname{Gr}(n,k,B)$ consists of all subspaces
-spanned by $k$ linear independent vectors $𝔽^n$, where $𝔽  ∈ \{ℝ, ℂ\}$ is either the real- (or complex-) valued vectors.
-This yields all $k$-dimensional subspaces of $ℝ^n$ for the real-valued case and all $2k$-dimensional subspaces
-of $ℂ^n$ for the second.
+The generalized Grassmann manifold ``\operatorname{Gr}(n,k,B)`` consists of all subspaces
+spanned by ``k`` linear independent vectors ``𝔽^n``, where ``𝔽  ∈ \{ℝ, ℂ\}`` is either the real- (or complex-) valued vectors.
+This yields all ``k``-dimensional subspaces of ``ℝ^n`` for the real-valued case and all ``2k``-dimensional subspaces
+of ``ℂ^n`` for the second.
 
 The manifold can be represented as
 
 ````math
-\operatorname{Gr}(n, k, B) := \bigl\{ \operatorname{span}(p)\ \big|\ p ∈ 𝔽^{n × k}, p^\mathrm{H}Bp = I_k\},
+\operatorname{Gr}(n, k, B) := \bigl\{ \operatorname{span}(p)\ \big|\ p ∈ 𝔽^{n×k}, p^\mathrm{H}Bp = I_k\},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate (or Hermitian) transpose and
-$I_k$ is the $k × k$ identity matrix. This means, that the columns of $p$
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate (or Hermitian) transpose and
+``I_k`` is the ``k×k`` identity matrix. This means, that the columns of ``p``
 form an unitary basis of the subspace with respect to the scaled inner product, that is a
-point on $\operatorname{Gr}(n,k,B)$, and hence the subspace can actually be represented by
-a whole equivalence class of representers. For $B=I_n$ this simplifies to the [`Grassmann`](@ref) manifold.
+point on ``\operatorname{Gr}(n,k,B)``, and hence the subspace can actually be represented by
+a whole equivalence class of representers. For ``B=I_n`` this simplifies to the [`Grassmann`](@ref) manifold.
 
-The tangent space at a point (subspace) $p$ is given by
+The tangent space at a point (subspace) ``p`` is given by
 
 ````math
 T_x\mathrm{Gr}(n,k,B) = \bigl\{
-X ∈ 𝔽^{n × k} :
+X ∈ 𝔽^{n×k} :
 X^{\mathrm{H}}Bp + p^{\mathrm{H}}BX = 0_{k} \bigr\},
 ````
 
-where $0_{k}$ denotes the $k × k$ zero matrix.
+where ``0_{k}`` denotes the ``k×k`` zero matrix.
 
-Note that a point $p ∈ \operatorname{Gr}(n,k,B)$ might be represented by
-different matrices (i.e. matrices with $B$-unitary column vectors that span
-the same subspace). Different representations of $p$ also lead to different
-representation matrices for the tangent space $T_p\mathrm{Gr}(n,k,B)$
+Note that a point ``p ∈ \operatorname{Gr}(n,k,B)`` might be represented by
+different matrices (i.e. matrices with ``B``-unitary column vectors that span
+the same subspace). Different representations of ``p`` also lead to different
+representation matrices for the tangent space ``T_p\mathrm{Gr}(n,k,B)``
 
 The manifold is named after
 [Hermann G. Graßmann](https://en.wikipedia.org/wiki/Hermann_Grassmann) (1809-1877).
@@ -40,7 +40,7 @@ The manifold is named after
 
     GeneralizedGrassmann(n, k, B=I_n, field=ℝ)
 
-Generate the (real-valued) Generalized Grassmann manifold of $n\times k$ dimensional
+Generate the (real-valued) Generalized Grassmann manifold of ``n×k`` dimensional
 orthonormal matrices with scalar product `B`.
 """
 struct GeneralizedGrassmann{T,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
@@ -116,8 +116,8 @@ the [`GeneralizedGrassmann`](@ref) `M`, i.e. that `X` is of size and type as wel
     p^{\mathrm{H}}BX + \overline{X^{\mathrm{H}}Bp} = 0_k,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian,
-$\overline{\cdot}$ the (elementwise) complex conjugate, and $0_k$ denotes the $k × k$ zero natrix.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transpose or Hermitian,
+``\overline{⋅}`` the (elementwise) complex conjugate, and ``0_k`` denotes the ``k×k`` zero natrix.
 """
 function check_vector(M::GeneralizedGrassmann, p, X; kwargs...)
     return nothing # everything already checked in the embedding (generalized Stiefel)
@@ -127,7 +127,7 @@ end
     distance(M::GeneralizedGrassmann, p, q)
 
 Compute the Riemannian distance on [`GeneralizedGrassmann`](@ref)
-manifold `M`$= \mathrm{Gr}(n,k,B)$.
+manifold `M```= \mathrm{Gr}(n,k,B)``.
 
 The distance is given by
 ````math
@@ -149,16 +149,16 @@ embed(::GeneralizedGrassmann, p, X) = X
 @doc raw"""
     exp(M::GeneralizedGrassmann, p, X)
 
-Compute the exponential map on the [`GeneralizedGrassmann`](@ref) `M`$= \mathrm{Gr}(n,k,B)$
-starting in `p` with tangent vector (direction) `X`. Let $X^{\mathrm{H}}BX = USV$ denote the
-SVD decomposition of $X^{\mathrm{H}}BX$. Then the exponential map is written using
+Compute the exponential map on the [`GeneralizedGrassmann`](@ref) `M` ``= \mathrm{Gr}(n,k,B)``
+starting in `p` with tangent vector (direction) `X`. Let ``X^{\mathrm{H}}BX = USV`` denote the
+SVD decomposition of ``X^{\mathrm{H}}BX``. Then the exponential map is written using
 
 ````math
 \exp_p X = p V\cos(S)V^\mathrm{H} + U\sin(S)V^\mathrm{H},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian and the
-cosine and sine are applied element wise to the diagonal entries of $S$.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian and the
+cosine and sine are applied element wise to the diagonal entries of ``S``.
 """
 exp(::GeneralizedGrassmann, ::Any...)
 
@@ -177,7 +177,7 @@ end
     injectivity_radius(M::GeneralizedGrassmann, p)
 
 Return the injectivity radius on the [`GeneralizedGrassmann`](@ref) `M`,
-which is $\frac{π}{2}$.
+which is ``\frac{π}{2}``.
 """
 injectivity_radius(::GeneralizedGrassmann) = π / 2
 injectivity_radius(::GeneralizedGrassmann, p) = π / 2
@@ -209,7 +209,7 @@ of `p` on the [`GeneralizedGrassmann`](@ref) manifold `M`. The formula reads
 g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}BY),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
 """
 inner(M::GeneralizedGrassmann, p, X, Y) = dot(X, M.B, Y)
 
@@ -223,23 +223,23 @@ end
 @doc raw"""
     log(M::GeneralizedGrassmann, p, q)
 
-Compute the logarithmic map on the [`GeneralizedGrassmann`](@ref) `M`$ = \mathcal M=\mathrm{Gr}(n,k,B)$,
-i.e. the tangent vector `X` whose corresponding [`geodesic`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.geodesic-Tuple{AbstractManifold,%20Any,%20Any}) starting from `p`
+Compute the logarithmic map on the [`GeneralizedGrassmann`](@ref) `M` `` = \mathcal M=\mathrm{Gr}(n,k,B)``,
+i.e. the tangent vector `X` whose corresponding [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) starting from `p`
 reaches `q` after time 1 on `M`. The formula reads
 
 ````math
-\log_p q = V\cdot \operatorname{atan}(S) \cdot U^\mathrm{H},
+\log_p q = V⋅ \operatorname{atan}(S) ⋅ U^\mathrm{H},
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian.
-The matrices $U$ and $V$ are the unitary matrices, and $S$ is the diagonal matrix
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian.
+The matrices ``U`` and ``V`` are the unitary matrices, and ``S`` is the diagonal matrix
 containing the singular values of the SVD-decomposition
 
 ````math
 USV = (q^\mathrm{H}Bp)^{-1} ( q^\mathrm{H} - q^\mathrm{H}Bpp^\mathrm{H}).
 ````
 
-In this formula the $\operatorname{atan}$ is meant elementwise.
+In this formula the ``\operatorname{atan}`` is meant elementwise.
 """
 log(::GeneralizedGrassmann, ::Any...)
 
@@ -259,7 +259,7 @@ Return the dimension of the [`GeneralizedGrassmann(n,k,𝔽)`](@ref) manifold `M
 \dim \operatorname{Gr}(n,k,B) = k(n-k) \dim_ℝ 𝔽,
 ````
 
-where $\dim_ℝ 𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of `𝔽`.
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of `𝔽`.
 """
 function manifold_dimension(M::GeneralizedGrassmann{<:Any,𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
@@ -276,11 +276,11 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolationWithinRadius`](@ref).
+[`GeodesicInterpolationWithinRadius`](@extref `ManifoldsBase.GeodesicInterpolationWithinRadius`).
 """
 mean(::GeneralizedGrassmann, ::Any...)
 
-function default_estimation_method(::GeneralizedGrassmann, ::typeof(mean))
+function default_approximation_method(::GeneralizedGrassmann, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 4)
 end
 
@@ -288,8 +288,8 @@ end
     project(M::GeneralizedGrassmann, p)
 
 Project `p` from the embedding onto the [`GeneralizedGrassmann`](@ref) `M`, i.e. compute `q`
-as the polar decomposition of $p$ such that $q^{\mathrm{H}}Bq$ is the identity,
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose.
+as the polar decomposition of ``p`` such that ``q^{\mathrm{H}}Bq`` is the identity,
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose.
 """
 project(::GeneralizedGrassmann, ::Any)
 
@@ -311,8 +311,8 @@ Project the `n`-by-`k` `X` onto the tangent space of `p` on the
 \operatorname{proj_p}(X) = X - pp^{\mathrm{H}}B^\mathrm{T}X,
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
-and $\cdot^{\mathrm{T}}$ the transpose.
+where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
+and ``⋅^{\mathrm{T}}`` the transpose.
 """
 project(::GeneralizedGrassmann, ::Any, ::Any)
 
@@ -360,16 +360,16 @@ end
     representation_size(M::GeneralizedGrassmann)
 
 Return the represenation size or matrix dimension of a point on the [`GeneralizedGrassmann`](@ref)
-`M`, i.e. $(n,k)$ for both the real-valued and the complex value case.
+`M`, i.e. ``(n,k)`` for both the real-valued and the complex value case.
 """
 representation_size(M::GeneralizedGrassmann) = get_parameter(M.size)
 
 @doc raw"""
     retract(M::GeneralizedGrassmann, p, X, ::PolarRetraction)
 
-Compute the SVD-based retraction [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
+Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
 [`GeneralizedGrassmann`](@ref) `M`, by
-[`project`](@ref project(M::GeneralizedGrassmann, p))ing $p + X$ onto `M`.
+[`project`](@ref project(M::GeneralizedGrassmann, p))ing ``p + X`` onto `M`.
 """
 retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarRetraction)
 

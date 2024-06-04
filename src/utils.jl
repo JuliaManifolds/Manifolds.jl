@@ -2,7 +2,7 @@
 @doc raw"""
     usinc(θ::Real)
 
-Unnormalized version of `sinc` function, i.e. $\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}$.
+Unnormalized version of `sinc` function, i.e. ``\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}``.
 This is equivalent to `sinc(θ/π)`.
 """
 @inline usinc(θ::Real) = θ == 0 ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
@@ -10,8 +10,8 @@ This is equivalent to `sinc(θ/π)`.
 @doc raw"""
     usinc_from_cos(x::Real)
 
-Unnormalized version of `sinc` function, i.e. $\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}$,
-computed from $x = cos(θ)$.
+Unnormalized version of `sinc` function, i.e. ``\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}``,
+computed from ``x = cos(θ)``.
 """
 @inline function usinc_from_cos(x::Real)
     return if x >= 1
@@ -140,15 +140,15 @@ mul!_safe(Y, A, B) = (Y === A || Y === B) ? copyto!(Y, A * B) : mul!(Y, A, B)
 @doc raw"""
     realify(X::AbstractMatrix{T𝔽}, 𝔽::AbstractNumbers) -> Y::AbstractMatrix{<:Real}
 
-Given a matrix $X ∈ 𝔽^{n × n}$, compute $Y ∈ ℝ^{m × m}$, where $m = n \operatorname{dim}_𝔽$,
-and $\operatorname{dim}_𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the number field $𝔽$, using
-the map $ϕ \colon X ↦ Y$, that preserves the matrix product, so that for all
-$C,D ∈ 𝔽^{n × n}$,
+Given a matrix ``X ∈ 𝔽^{n×n}``, compute ``Y ∈ ℝ^{m×m}``, where ``m = n \operatorname{dim}_𝔽``,
+and ``\operatorname{dim}_𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the number field ``𝔽``, using
+the map ``ϕ \colon X ↦ Y``, that preserves the matrix product, so that for all
+``C,D ∈ 𝔽^{n×n}``,
 ````math
 ϕ(C) ϕ(D) = ϕ(CD).
 ````
 See [`realify!`](@ref) for an in-place version, and [`unrealify!`](@ref) to compute the
-inverse of $ϕ$.
+inverse of ``ϕ``.
 """
 function realify(X, 𝔽)
     n = LinearAlgebra.checksquare(X)
@@ -168,8 +168,8 @@ realify!(Y, X, 𝔽)
 @doc raw"""
     realify!(Y::AbstractMatrix{<:Real}, X::AbstractMatrix{<:Complex}, ::typeof(ℂ))
 
-Given a complex matrix $X = A + iB ∈ ℂ^{n × n}$, compute its realified matrix
-$Y ∈ ℝ^{2n × 2n}$, written
+Given a complex matrix ``X = A + iB ∈ ℂ^{n×n}``, compute its realified matrix
+``Y ∈ ℝ^{2n×2n}``, written
 where
 ````math
 Y = \begin{pmatrix}A & -B \\ B & A \end{pmatrix}.
@@ -188,10 +188,10 @@ end
 @doc raw"""
     unrealify!(X::AbstractMatrix{T𝔽}, Y::AbstractMatrix{<:Real}, 𝔽::AbstractNumbers[, n])
 
-Given a real matrix $Y ∈ ℝ^{m × m}$, where $m = n \operatorname{dim}_𝔽$, and
-$\operatorname{dim}_𝔽$ is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the number field $𝔽$, compute
-in-place its equivalent matrix $X ∈ 𝔽^{n × n}$. Note that this function does not check that
-$Y$ has a valid structure to be un-realified.
+Given a real matrix ``Y ∈ ℝ^{m×m}``, where ``m = n \operatorname{dim}_𝔽``, and
+``\operatorname{dim}_𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the number field ``𝔽``, compute
+in-place its equivalent matrix ``X ∈ 𝔽^{n×n}``. Note that this function does not check that
+``Y`` has a valid structure to be un-realified.
 
 See [`realify!`](@ref) for the inverse of this function.
 """
@@ -210,7 +210,7 @@ unrealify!(Y, X, ::typeof(ℝ), args...) = copyto!(Y, X)
 @doc raw"""
     symmetrize!(Y, X)
 
-Given a quare matrix `X` compute `1/2 .* (X' + X)` in place of `Y`
+Given a square matrix `X` compute `1/2 .* (X' + X)` in place of `Y`.
 """
 function symmetrize!(Y, X)
     Y .= (X' .+ X) ./ 2
@@ -220,7 +220,7 @@ end
 @doc raw"""
     symmetrize(X)
 
-Given a quare matrix `X` compute `1/2 .* (X' + X)`.
+Given a square matrix `X` compute `1/2 .* (X' + X)`.
 """
 function symmetrize(X)
     return (X' .+ X) ./ 2
@@ -229,7 +229,7 @@ end
 @doc raw"""
     vec2skew!(X, v, k)
 
-create a skew symmetric matrix inplace in `X` of size $k\times k$ from a vector `v`,
+Create a skew symmetric matrix in-place in `X` of size ``k×k`` from a vector `v`,
 for example for `v=[1,2,3]` and `k=3` this
 yields
 ````julia
@@ -277,3 +277,90 @@ _eps_safe(::Type{T}) where {T<:Real} = eps(T)
 _eps_safe(::Type{T}) where {T<:Number} = eps(real(T))
 
 max_eps(xs...) = maximum(_eps_safe ∘ eltype, xs)
+
+"""
+    sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis)
+
+Compute the matrix of sectional curvatures of manifold `M` at point `p`.
+Entry `(i, j)` corresponds to sectional curvature of the surface spanned by vectors
+`i`  and `j` from basis `B`.
+"""
+function sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis)
+    V = get_vectors(M, p, get_basis(M, p, B))
+    N = length(V)
+    result = zeros(N, N)
+    for (i, e_i) in enumerate(V)
+        for (j, e_j) in enumerate(V)
+            if i < j
+                result[i, j] = sectional_curvature(M, p, e_i, e_j)
+                result[j, i] = result[i, j]
+            end
+        end
+    end
+    return result
+end
+
+@doc raw"""
+    estimated_sectional_curvature(M::AbstractManifold, p, X, Y; r::Real=1e-3, N::Int=10000)
+
+Approximate sectional curvature of manifold `M` in the plane spanned by vectors `X` and `Y`
+from tangent space at `p` using a circle on `M` of radius `r` divided into `N` segments.
+
+The approximation is derived from the [Bertrand–Diguet–Puiseux theorem](https://en.wikipedia.org/wiki/Bertrand%E2%80%93Diguet%E2%80%93Puiseux_theorem)
+which states that
+````math
+\kappa_p(X, Y) = \lim_{r \to 0^+} 3\frac{2\pi r-C(r)}{\pi r^3},
+````
+where ``C(r)`` is the circumference of the circle of radius ``r`` around `p` in submanifold
+of `M` spanned by `X` and `Y`. The circumference calculation method has a tendency to
+return curvature values larger than the exact ones.
+"""
+function estimated_sectional_curvature(
+    M::AbstractManifold,
+    p,
+    X,
+    Y;
+    r::Real=1e-3,
+    N::Int=10000,
+)
+    circumference = 0.0
+    p_i = similar(p)
+    p_ip1 = similar(p)
+    for i in 1:N
+        θ_i = 2π * (i - 1) / N
+        θ_ip1 = 2π * (i) / N
+        exp!(M, p_i, p, r .* (sin(θ_i) .* X .+ cos(θ_i) .* Y))
+        exp!(M, p_ip1, p, r .* (sin(θ_ip1) .* X .+ cos(θ_ip1) .* Y))
+
+        circumference += distance(M, p_i, p_ip1)
+    end
+    return 3 * (2π * r - circumference) / (π * r^3)
+end
+
+"""
+    estimated_sectional_curvature_matrix(M::AbstractManifold, p, B::AbstractBasis; r::Real=1e-3, N::Int=10000)
+
+Estimate the matrix of sectional curvatures of manifold `M` at point `p` using
+`estimated_sectional_curvature`. Entry `(i, j)`` corresponds to sectional curvature of the
+surface spanned by vectors `i`  and `j` from basis `B`.
+"""
+function estimated_sectional_curvature_matrix(
+    M::AbstractManifold,
+    p,
+    B::AbstractBasis;
+    r::Real=1e-3,
+    N_pts::Int=10000,
+)
+    V = get_vectors(M, p, get_basis(M, p, B))
+    N = length(V)
+    result = zeros(N, N)
+    for (i, e_i) in enumerate(V)
+        for (j, e_j) in enumerate(V)
+            if i < j
+                result[i, j] = estimated_sectional_curvature(M, p, e_i, e_j; r=r, N=N_pts)
+                result[j, i] = result[i, j]
+            end
+        end
+    end
+    return result
+end

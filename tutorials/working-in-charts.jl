@@ -26,7 +26,7 @@ There are two conceptually different approaches to working on a manifold: workin
 
 The first one, widespread in differential geometry textbooks, is based on defining an atlas on the manifold and performing computations in selected charts. This approach, while generic, is not ideally suitable in all circumstances. For example, working in charts that do not cover the entire manifold causes issues with having to switch charts when operating on a manifold.
 
-The second one is beneficital, if there exist a representation of points and tangent vectors for a manifold, which allow for efficient closed-form formulas for standard functions like the exponential map or Riemannian distance in this representation. These computations are then chart-free. `Manifolds.jl` supports both approaches, although the chart-free approach is the main focus of the library.
+The second one is beneficial if there exists a representation of points and tangent vectors for a manifold which allows for efficient closed-form formulas for standard functions like the exponential map or Riemannian distance in this representation. These computations are then chart-free. `Manifolds.jl` supports both approaches, although the chart-free approach is the main focus of the library.
 
 In this tutorial we focsus on chart-based computation.
 """
@@ -228,7 +228,7 @@ begin
 end
 
 # ╔═╡ a941fd19-faf5-49d0-8f68-ae2fbe45130d
-md" ### Solving the logairthmic map ODE"
+md" ### Solving the logarithmic map ODE"
 
 # ╔═╡ 922461b0-55a0-447b-b59d-cfff7b448858
 if interactive

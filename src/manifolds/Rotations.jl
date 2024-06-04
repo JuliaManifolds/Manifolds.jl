@@ -1,14 +1,14 @@
 @doc raw"""
     Rotations{T} <: AbstractManifold{ℝ}
 
-The manifold of rotation matrices of size ``n × n``, i.e.
+The manifold of rotation matrices of size ``n×n``, i.e.
 real-valued orthogonal matrices with determinant ``+1``.
 
 # Constructor
 
     Rotations(n::Int; parameter::Symbol=:type)
 
-Generate the manifold of ``n × n`` rotation matrices.
+Generate the manifold of ``n×n`` rotation matrices.
 """
 const Rotations{T} = GeneralUnitaryMatrices{T,ℝ,DeterminantOneMatrices}
 
@@ -43,7 +43,7 @@ end
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
-The Lie algebra of [`Rotations(4)`](@ref) in ``ℝ^{4 × 4}``, ``𝔰𝔬(4)``, consists of ``4 × 4``
+The Lie algebra of [`Rotations(4)`](@ref) in ``ℝ^{4×4}``, ``𝔰𝔬(4)``, consists of ``4×4``
 skew-symmetric matrices. The unique imaginary components of their eigenvalues are the
 angles of the two plane rotations. This function computes these more efficiently than
 `eigvals`.
@@ -61,6 +61,8 @@ function angles_4d_skew_sym_matrix(A)
     sqrtdisc = sqrt(halfb^2 - c)
     return sqrt(halfb + sqrtdisc), sqrt(halfb - sqrtdisc)
 end
+
+default_vector_transport_method(::Rotations) = ParallelTransport()
 
 # from https://github.com/JuliaManifolds/Manifolds.jl/issues/453#issuecomment-1046057557
 function _get_tridiagonal_elements(trian)
@@ -157,7 +159,7 @@ end
 @doc raw"""
     injectivity_radius(M::Rotations, ::PolarRetraction)
 
-Return the radius of injectivity for the [`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) on the
+Return the radius of injectivity for the [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) on the
 [`Rotations`](@ref) `M` which is ``\frac{π}{\sqrt{2}}``.
 """
 injectivity_radius(::Rotations, ::PolarRetraction)
@@ -172,7 +174,7 @@ end
 Compute a vector from the tangent space ``T_p\mathrm{SO}(n)``
 of the point `p` on the [`Rotations`](@ref) manifold `M`
 with which the point `q` can be reached by the
-[`PolarRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.PolarRetraction) from the point `p` after time 1.
+[`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) from the point `p` after time 1.
 
 The formula reads
 ````math
@@ -191,7 +193,7 @@ inverse_retract(::Rotations, ::Any, ::Any, ::PolarInverseRetraction)
 
 Compute a vector from the tangent space ``T_p\mathrm{SO}(n)`` of the point `p` on the
 [`Rotations`](@ref) manifold `M` with which the point `q` can be reached by the
-[`QRRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.QRRetraction) from the point `q` after time 1.
+[`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) from the point `q` after time 1.
 """
 inverse_retract(::Rotations, ::Any, ::Any, ::QRInverseRetraction)
 
@@ -366,6 +368,12 @@ where ``q=\exp_p d``.
 The formula simplifies to identity for 2-D rotations.
 """
 parallel_transport_direction(M::Rotations, p, X, d)
+function parallel_transport_direction(M::Rotations, p, X, d)
+    expdhalf = exp(d / 2)
+    q = exp(M, p, d)
+    return transpose(q) * p * expdhalf * X * expdhalf
+end
+parallel_transport_direction(::Rotations{TypeParameter{Tuple{2}}}, p, X, d) = X
 
 function parallel_transport_direction!(M::Rotations, Y, p, X, d)
     expdhalf = exp(d / 2)
@@ -375,12 +383,6 @@ end
 function parallel_transport_direction!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, d)
     return copyto!(Y, X)
 end
-function parallel_transport_direction(M::Rotations, p, X, d)
-    expdhalf = exp(d / 2)
-    q = exp(M, p, d)
-    return transpose(q) * p * expdhalf * X * expdhalf
-end
-parallel_transport_direction(::Rotations{TypeParameter{Tuple{2}}}, p, X, d) = X
 
 function parallel_transport_to!(M::Rotations, Y, p, X, q)
     d = log(M, p, q)
@@ -421,6 +423,35 @@ function riemannian_Hessian!(M::Rotations, Y, p, G, H, X)
     symmetrize!(Y, G' * p)
     project!(SkewSymmetricMatrices(N), Y, p' * H - X * Y)
     return Y
+end
+
+@doc raw"""
+    sectional_curvature_max(::Rotations)
+
+Sectional curvature of [`Rotations`](@ref) `M` is equal to 0 for `Rotations(1)` and
+`Rotations(2)`, less than or equal to 1/8 for `Rotations(3)` and less than or equal to 1/4
+for higher-dimensional rotations manifolds.
+
+For reference, see [Ge:2014](@cite), Lemma 2.5 and [CheegerEbin:2008](@cite), Corollary 3.19.
+"""
+function sectional_curvature_max(M::Rotations)
+    N = manifold_dimension(M)
+    if N <= 1
+        return 0.0
+    elseif N == 3
+        return 1 / 8
+    else
+        return 1 / 4
+    end
+end
+
+@doc raw"""
+    sectional_curvature_min(M::Rotations)
+
+Sectional curvature of [`Rotations`](@ref) `M` is greater than or equal to 0.
+"""
+function sectional_curvature_min(::Rotations)
+    return 0.0
 end
 
 Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)

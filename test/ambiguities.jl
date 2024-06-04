@@ -1,5 +1,18 @@
+include("header.jl")
+"""
+    has_type_in_signature(sig, T::Type)
+
+Test whether the signature `sig` has an argument of type `T` as one of its parameters.
+"""
+function has_type_in_signature(sig, T::Type)
+    return any(map(Base.unwrap_unionall(sig.sig).parameters) do x
+        xw = Base.rewrap_unionall(x, sig.sig)
+        return (xw isa Type ? xw : xw.T) <: T
+    end)
+end
+
 @testset "Ambiguities" begin
-    if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.10.0"
+    if VERSION.prerelease == () && !Sys.iswindows() && VERSION < v"1.11.0"
         mbs = Test.detect_ambiguities(ManifoldsBase)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2

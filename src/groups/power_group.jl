@@ -5,7 +5,7 @@ const PowerGroup{𝔽,M<:AbstractManifold{𝔽},TPR<:AbstractPowerRepresentation
 """
     PowerGroupNested
 
-Alias to [`PowerGroup`](@ref) with [`NestedPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedPowerRepresentation)
+Alias to [`PowerGroup`](@ref) with [`NestedPowerRepresentation`](@extref `ManifoldsBase.NestedPowerRepresentation`)
 representation.
 """
 const PowerGroupNested{𝔽,M<:AbstractManifold{𝔽}} = PowerGroup{𝔽,M,NestedPowerRepresentation}
@@ -13,7 +13,7 @@ const PowerGroupNested{𝔽,M<:AbstractManifold{𝔽}} = PowerGroup{𝔽,M,Neste
 """
     PowerGroupNestedReplacing
 
-Alias to [`PowerGroup`](@ref) with [`NestedReplacingPowerRepresentation`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.NestedReplacingPowerRepresentation)
+Alias to [`PowerGroup`](@ref) with [`NestedReplacingPowerRepresentation`](@extref `ManifoldsBase.NestedReplacingPowerRepresentation`)
 representation.
 """
 const PowerGroupNestedReplacing{𝔽,M<:AbstractManifold{𝔽}} =
@@ -46,6 +46,32 @@ function ManifoldsBase._access_nested(
     i::Tuple,
 )
     return Identity(M.manifold)
+end
+
+# lower level methods are added instead of top level ones to not have to deal
+# with `Identity` disambiguation
+
+_compose!(G::PowerGroup, x, p, q) = _compose!(G.manifold, x, p, q)
+function _compose!(M::AbstractPowerManifold, x, p, q)
+    N = M.manifold
+    rep_size = representation_size(N)
+    for i in get_iterator(M)
+        compose!(
+            N,
+            _write(M, rep_size, x, i),
+            _read(M, rep_size, p, i),
+            _read(M, rep_size, q, i),
+        )
+    end
+    return x
+end
+function _compose!(M::PowerManifoldNestedReplacing, x, p, q)
+    N = M.manifold
+    rep_size = representation_size(N)
+    for i in get_iterator(M)
+        x[i...] = compose(N, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
+    end
+    return x
 end
 
 @inline function active_traits(f, M::PowerGroup, args...)
@@ -151,30 +177,27 @@ function inv!(
     return q
 end
 
-# lower level methods are added instead of top level ones to not have to deal
-# with `Identity` disambiguation
-
-_compose!(G::PowerGroup, x, p, q) = _compose!(G.manifold, x, p, q)
-function _compose!(M::AbstractPowerManifold, x, p, q)
-    N = M.manifold
-    rep_size = representation_size(N)
-    for i in get_iterator(M)
-        compose!(
-            N,
-            _write(M, rep_size, x, i),
-            _read(M, rep_size, p, i),
-            _read(M, rep_size, q, i),
+function inv_diff!(G::PowerGroup, Y, p, X)
+    GM = G.manifold
+    rep_size = representation_size(GM.manifold)
+    for i in get_iterator(GM)
+        inv_diff!(
+            GM.manifold,
+            _write(GM, rep_size, Y, i),
+            _read(GM, rep_size, p, i),
+            _read(GM, rep_size, X, i),
         )
     end
-    return x
+    return Y
 end
-function _compose!(M::PowerManifoldNestedReplacing, x, p, q)
-    N = M.manifold
+function inv_diff!(G::PowerGroupNestedReplacing, Y, p, X)
+    GM = G.manifold
+    N = GM.manifold
     rep_size = representation_size(N)
-    for i in get_iterator(M)
-        x[i...] = compose(N, _read(M, rep_size, p, i), _read(M, rep_size, q, i))
+    for i in get_iterator(GM)
+        Y[i...] = inv_diff(N, _read(GM, rep_size, p, i), _read(GM, rep_size, X, i))
     end
-    return x
+    return Y
 end
 
 function translate!(G::PowerGroup, x, p, q, conv::ActionDirectionAndSide)

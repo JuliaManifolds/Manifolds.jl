@@ -121,7 +121,7 @@ The formula reads
 ````math
 p_{rot} = (\cos(θ))p + (k×p) \sin(θ) + k (k⋅p) (1-\cos(θ)),
 ````
-where $k$ is the vector `A.axis` and `⋅` is the dot product.
+where ``k`` is the vector `A.axis` and `⋅` is the dot product.
 """
 function apply(A::RotationAroundAxisAction, θ, p)
     sθ, cθ = sincos(θ)

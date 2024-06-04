@@ -6,12 +6,14 @@ The manifold of symmetric positive definite matrices of fixed determinant ``d > 
 ````math
 \mathcal P_d(n) =
 \bigl\{
-p ∈ ℝ^{n × n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
+p ∈ ℝ^{n×n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
   \text{ and } \det(p) = d
 \bigr\}.
 ````
 
-This manifold is modelled as a submanifold of [`SymmetricPositiveDefinite`](@ref)`(n)`.
+This manifold is modelled as a submanifold of [`SymmetricPositiveDefinite`](@ref)`(n)`,
+see [`IsEmbeddedSubmanifold`](@ref `ManifoldsBase.IsEmbeddedSubmanifold`) for the implications,
+but for example retractions and inverse retractions are all available
 
 These matrices are sometimes also called [isochoric](https://en.wiktionary.org/wiki/isochoric), which refers to the interpretation of
 the matrix representing an ellipsoid. All ellipsoids that represent points on this manifold have the same volume.
@@ -21,18 +23,18 @@ and consists of all symmetric matrices with zero trace
 ```math
     T_p\mathcal P_d(n) =
     \bigl\{
-        X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T} \text{ and } \operatorname{tr}(p) = 0
+        X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T} \text{ and } \operatorname{tr}(X) = 0
     \bigr\},
 ```
-since for a constant determinant we require that `0 = D\det(p)[Z] = \det(p)\operatorname{tr}(p^{-1}Z)` for all tangent vectors ``Z``.
-Additionally we store the tangent vectors as `X=p^{-1}Z`, i.e. symmetric matrices.
+since for a constant determinant we require that ``0 = D\det(p)[Z] = \det(p)\operatorname{tr}(p^{-1}Z)`` for all tangent vectors ``Z``.
+Additionally we store the tangent vectors as ``X=p^{-1}Z``, i.e. symmetric matrices.
 
 # Constructor
 
     SPDFixedDeterminant(n::Int, d::Real=1.0; parameter::Symbol=:type)
 
 Generate the manifold $\mathcal P_d(n) \subset \mathcal P(n)$ of determinant ``d``,
-which defaults to 1.
+which defaults to `1.0`.
 
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in type. Value can either be `:field` or `:type`.
@@ -82,8 +84,14 @@ and additionally fulfill ``\operatorname{tr}(X) = 0``.
 
 The tolerance for the trace check of `X` can be set using `kwargs...`, which influences the `isapprox`-check.
 """
-function check_vector(M::SPDFixedDeterminant, p, X; kwargs...)
-    if !isapprox(tr(X), 0.0; kwargs...)
+function check_vector(
+    M::SPDFixedDeterminant,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    if !isapprox(tr(X), 0; atol=atol, kwargs...)
         return DomainError(
             tr(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it does not have a zero trace.",
@@ -148,7 +156,6 @@ end
 Project the symmetric matrix `X` onto the tangent space at `p` of the
 (sub-)manifold of s.p.d. matrices of determinant `M.d` (in place of `Y`),
 by setting its diagonal (and hence its trace) to zero.
-
 """
 project(M::SPDFixedDeterminant, p, X)
 

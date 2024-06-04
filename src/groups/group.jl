@@ -13,7 +13,7 @@ number system `𝔽` or in general, by defining for an operation `Op` the follow
     _compose!(::AbstractDecoratorManifold, x, p, q)
 
 Note that a manifold is connected with an operation by wrapping it with a decorator,
-[`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold)
+[`AbstractDecoratorManifold`](@extref `ManifoldsBase.AbstractDecoratorManifold`)
 using the [`IsGroupManifold`](@ref) to specify the operation.
 For a concrete case the concrete wrapper [`GroupManifold`](@ref) can be used.
 """
@@ -22,7 +22,7 @@ abstract type AbstractGroupOperation end
 """
     IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
 
-A trait to declare an [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  as a manifold with group structure
+A trait to declare an [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  as a manifold with group structure
 with operation of type `O`.
 
 Using this trait you can turn a manifold that you implement _implictly_ into a Lie group.
@@ -40,7 +40,7 @@ end
 """
     AbstractInvarianceTrait <: AbstractTrait
 
-A common supertype for anz [`AbstractTrait`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractTrait) related to metric invariance
+A common supertype for anz [`AbstractTrait`](@extref `ManifoldsBase.AbstractTrait`) related to metric invariance
 """
 abstract type AbstractInvarianceTrait <: AbstractTrait end
 
@@ -81,7 +81,7 @@ end
     is_group_manifold(G::GroupManifold)
     is_group_manifold(G::AbstractManifold, o::AbstractGroupOperation)
 
-returns whether an [`AbstractDecoratorManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/decorator.html#ManifoldsBase.AbstractDecoratorManifold)
+returns whether an [`AbstractDecoratorManifold`](@extref `ManifoldsBase.AbstractDecoratorManifold`)
 is a group manifold with [`AbstractGroupOperation`](@ref) `o`.
 For a [`GroupManifold`](@ref) `G` this checks whether the right operations is stored within `G`.
 """
@@ -118,7 +118,7 @@ abstract type ActionDirection end
 @doc raw"""
     LeftAction()
 
-Left action of a group on a manifold. For a forward action ``α: G × X → X`` it is characterized by
+Left action of a group on a manifold. For a forward action ``α: G×X → X`` it is characterized by
 ```math
 α(g, α(h, x)) = α(gh, x)
 ```
@@ -129,7 +129,7 @@ struct LeftAction <: ActionDirection end
 """
     RightAction()
 
-Right action of a group on a manifold. For a forward action ``α: G × X → X`` it is characterized by
+Right action of a group on a manifold. For a forward action ``α: G×X → X`` it is characterized by
 ```math
 α(g, α(h, x)) = α(hg, x)
 ```
@@ -149,14 +149,14 @@ abstract type GroupActionSide end
 """
     LeftSide()
 
-An action of a group on a manifold that acts from the left side, i.e. ``α: G × X → X``.
+An action of a group on a manifold that acts from the left side, i.e. ``α: G×X → X``.
 """
 struct LeftSide <: GroupActionSide end
 
 """
     RightSide()
 
-An action of a group on a manifold that acts from the right side, i.e. ``α: X × G → X``.
+An action of a group on a manifold that acts from the right side, i.e. ``α: X×G → X``.
 """
 struct RightSide <: GroupActionSide end
 
@@ -201,7 +201,7 @@ with [`AbstractGroupOperation`](@ref) of type `O`.
 Similar to the philosophy that points are agnostic of their group at hand, the identity
 does not store the group `g` it belongs to. However it depends on the type of the [`AbstractGroupOperation`](@ref) used.
 
-See also [`identity_element`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifoldPoint) or array representation.
+See also [`identity_element`](@ref) on how to obtain the corresponding [`AbstractManifoldPoint`](@extref `ManifoldsBase.AbstractManifoldPoint`) or array representation.
 
 # Constructors
 
@@ -1107,7 +1107,7 @@ Given an element ``q ∈ \mathcal{G}``, compute the right inverse of the group e
 ````
 
 where ``e`` here is the [`Identity`](@ref) element, that is, ``1`` for numeric ``q`` or the
-identity matrix ``I_m`` for matrix ``q ∈ ℝ^{m × m}``.
+identity matrix ``I_m`` for matrix ``q ∈ ℝ^{m×m}``.
 
 Since this function also depends on the group operation, make sure to implement
 either

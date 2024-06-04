@@ -20,6 +20,7 @@ The tangent spaces are given by
 
 But note that tangent vectors are represented in the Lie algebra, i.e. just using ``Y`` in
 the representation above.
+If you prefer the representation as `X` you can use the [`Stiefel`](@ref)`(n, n, ℂ)` manifold.
 
 # Constructor
 
@@ -128,6 +129,36 @@ function Random.rand(
     else
         project(M, vector_at, rand(rng, Quaternions.QuaternionF64))
     end
+end
+
+@doc raw"""
+    rand(::Unitary; vector_at=nothing, σ::Real=1.0)
+
+Generate a random point on the [`UnitaryMatrices`](@ref) manifold,
+if `vector_at` is nothing, by computing the QR decomposition of
+a ``n×x`` matrix.
+
+Generate a tangent vector at `vector_at` by projecting a normally
+distributed matrix onto the tangent space.
+"""
+rand(::UnitaryMatrices; σ::Real=1.0)
+
+function Random.rand!(
+    rng::AbstractRNG,
+    M::UnitaryMatrices,
+    pX;
+    vector_at=nothing,
+    σ::Real=one(real(eltype(pX))),
+)
+    n = get_parameter(M.size)[1]
+    if vector_at === nothing
+        A = σ * randn(rng, eltype(pX), n, n)
+        pX .= Matrix(qr(A).Q)
+    else
+        Z = σ * randn(rng, eltype(pX), size(pX))
+        project!(M, pX, vector_at, Z)
+    end
+    return pX
 end
 
 function Base.show(io::IO, ::UnitaryMatrices{TypeParameter{Tuple{n}},ℂ}) where {n}

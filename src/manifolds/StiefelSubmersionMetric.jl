@@ -4,7 +4,7 @@
 The submersion (or normal) metric family on the [`Stiefel`](@ref) manifold.
 
 The family, with a single real parameter ``α>-1``, has two special cases:
-- ``α = -\frac{1}{2}``: [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+- ``α = -\frac{1}{2}``: [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
 - ``α = 0``: [`CanonicalMetric`](@ref)
 
 The family was described in [HueperMarkinaSilvaLeite:2021](@cite). This implementation follows the
@@ -117,7 +117,7 @@ end
         method::ShootingInverseRetraction,
     )
 
-Compute the inverse retraction using [`ShootingInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ShootingInverseRetraction).
+Compute the inverse retraction using [`ShootingInverseRetraction`](@extref `ManifoldsBase.ShootingInverseRetraction`).
 
 In general the retraction is computed using the generic shooting method.
 
@@ -132,7 +132,7 @@ In general the retraction is computed using the generic shooting method.
         },
     )
 
-Compute the inverse retraction using [`ShootingInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ShootingInverseRetraction) more efficiently.
+Compute the inverse retraction using [`ShootingInverseRetraction`](@extref `ManifoldsBase.ShootingInverseRetraction`) more efficiently.
 
 For ``k < \frac{n}{2}`` the retraction is computed more efficiently using
 [`StiefelFactorization`](@ref).
@@ -189,7 +189,7 @@ end
 
 Compute the logarithmic map on the [`Stiefel(n,k)`](@ref) manifold with respect to the [`StiefelSubmersionMetric`](@ref).
 
-The logarithmic map is computed using [`ShootingInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.ShootingInverseRetraction). For
+The logarithmic map is computed using [`ShootingInverseRetraction`](@extref `ManifoldsBase.ShootingInverseRetraction`). For
 ``k ≤ \lfloor\frac{n}{2}\rfloor``, this is sped up using the ``k``-shooting method of [ZimmermannHueper:2022](@cite).
 Keyword arguments are forwarded to `ShootingInverseRetraction`; see
 that documentation for details. Their defaults are:
@@ -248,7 +248,7 @@ Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
 Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
 where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
 
-Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](@extref `ManifoldsBase.EuclideanMetric`)
 ``α_0=1, α_1=\frac{1}{2}`` in their formula. The formula reads
 
 ```math
@@ -292,15 +292,15 @@ end
 @doc raw"""
     StiefelFactorization{UT,XT} <: AbstractManifoldPoint
 
-Represent points (and vectors) on `Stiefel(n, k)` with ``2k × k`` factors [ZimmermannHueper:2022](@cite).
+Represent points (and vectors) on `Stiefel(n, k)` with ``2k×k`` factors [ZimmermannHueper:2022](@cite).
 
-Given a point ``p ∈ \mathrm{St}(n, k)`` and another matrix ``B ∈ ℝ^{n × k}`` for
+Given a point ``p ∈ \mathrm{St}(n, k)`` and another matrix ``B ∈ ℝ^{n×k}`` for
 ``k ≤ \lfloor\frac{n}{2}\rfloor`` the factorization is
 ````math
 \begin{aligned}
 B &= UZ\\
 U &= \begin{bmatrix}p & Q\end{bmatrix} ∈ \mathrm{St}(n, 2k)\\
-Z &= \begin{bmatrix}Z_1 \\ Z_2\end{bmatrix}, \quad Z_1,Z_2 ∈ ℝ^{k × k}.
+Z &= \begin{bmatrix}Z_1 \\ Z_2\end{bmatrix}, \quad Z_1,Z_2 ∈ ℝ^{k×k}.
 \end{aligned}
 ````
 If ``B ∈ \mathrm{St}(n, k)``, then ``Z ∈ \mathrm{St}(2k, k)``.
@@ -310,7 +310,7 @@ For a fixed ``U``, if ``r ∈ \mathrm{St}(n, k)`` has the factor ``Z_r ∈ \math
 then ``X_r ∈ T_r \mathrm{St}(n, k)`` has the factor
 ``Z_{X_r} ∈ T_{Z_r} \mathrm{St}(2k, k)``.
 
-``Q`` is determined by choice of a second matrix ``A ∈ ℝ^{n × k}`` with the decomposition
+``Q`` is determined by choice of a second matrix ``A ∈ ℝ^{n×k}`` with the decomposition
 ````math
 \begin{aligned}
 A &= UZ\\
@@ -325,7 +325,7 @@ This factorization is useful because it is closed under addition, subtraction, s
 projection, and the Riemannian exponential and logarithm under the
 [`StiefelSubmersionMetric`](@ref). That is, if all matrices involved are factorized to have
 the same ``U``, then all of these operations and any algorithm that depends only on them can
-be performed in terms of the ``2k × k`` matrices ``Z``. For ``n ≫ k``, this can be much more
+be performed in terms of the ``2k×k`` matrices ``Z``. For ``n ≫ k``, this can be much more
 efficient than working with the full matrices.
 
 !!! warning

@@ -11,30 +11,30 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 |:--:|:--------------- |:--:|:-- |
 | ``\tau_p`` | action map by group element ``p`` | ``\mathrm{L}_p``, ``\mathrm{R}_p`` | either left or right |
 | ``\operatorname{Ad}_p(X)`` | adjoint action of element ``p`` of a Lie group on the element ``X`` of the corresponding Lie algebra | | |
-| ``\times`` | Cartesian product of two manifolds | | see [`ProductManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.ProductManifold) |
-| ``^{\wedge}`` | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) |
-| ``\cdot^\mathrm{H}`` | conjugate/Hermitian transpose | |
+| ``×`` | Cartesian product of two manifolds | | see [`ProductManifold`](@extref `ManifoldsBase.ProductManifold`) |
+| ``^{\wedge}`` | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) |
+| ``⋅^\mathrm{H}`` | conjugate/Hermitian transpose | |
 | ``a`` | coordinates of a point in a chart | | see [`get_parameters`](@ref) |
 | ``\frac{\mathrm{D}}{\mathrm{d}t}`` | covariant derivative of a vector field ``X(t)`` | | |
 | ``T^*_p \mathcal M`` | the cotangent space at ``p`` | | |
 | ``ξ`` | a cotangent vector from ``T^*_p \mathcal M`` | ``ξ_1, ξ_2,… ,η,\zeta`` | sometimes written with base point ``ξ_p``. |
-| ``\mathrm{d}\phi_p(q)`` | Differential of a map ``\phi: \mathcal M \to \mathcal N`` with respect to ``p`` at a point ``q``. For functions of multiple variables, for example ``\phi(p, p_1)`` where ``p \in \mathcal M`` and ``p_1 \in \mathcal M_1``, variable ``p`` is explicitly stated to specify with respect to which argument the differential is calculated. | ``\mathrm{d}\phi_q``, ``(\mathrm{d}\phi)_q``, ``(\phi_*)_q``, ``D_p\phi(q)`` | pushes tangent vectors ``X \in T_q \mathcal M`` forward to ``\mathrm{d}\phi_p(q)[X] \in T_{\phi(q)} \mathcal N`` |
+| ``\mathrm{d}\phi_p(q)`` | Differential of a map ``\phi: \mathcal M → \mathcal N`` with respect to ``p`` at a point ``q``. For functions of multiple variables, for example ``\phi(p, p_1)`` where ``p \in \mathcal M`` and ``p_1 \in \mathcal M_1``, variable ``p`` is explicitly stated to specify with respect to which argument the differential is calculated. | ``\mathrm{d}\phi_q``, ``(\mathrm{d}\phi)_q``, ``(\phi_*)_q``, ``D_p\phi(q)`` | pushes tangent vectors ``X \in T_q \mathcal M`` forward to ``\mathrm{d}\phi_p(q)[X] \in T_{\phi(q)} \mathcal N`` |
 | ``n`` | dimension (of a manifold) | ``n_1,n_2,\ldots,m, \dim(\mathcal M)``| for the real dimension sometimes also ``\dim_{\mathbb R}(\mathcal M)``|
-| ``d(\cdot,\cdot)`` | (Riemannian) distance | ``d_{\mathcal M}(\cdot,\cdot)`` | |
+| ``d(⋅,⋅)`` | (Riemannian) distance | ``d_{\mathcal M}(⋅,⋅)`` | |
 | ``\exp_p X`` | exponential map at ``p \in \mathcal M`` of a vector ``X \in T_p \mathcal M`` | ``\exp_p(X)`` | |
-| ``F`` | a fiber | | see [`Fiber`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#Fiber) |
+| ``F`` | a fiber | | see [`Fiber`](@extref `ManifoldsBase.Fiber`) |
 | ``\mathbb F`` | a field, usually ``\mathbb F \in \{\mathbb R,\mathbb C, \mathbb H\}``, i.e. the real, complex, and quaternion numbers, respectively. | |field a manifold or a basis is based on |
 | ``\gamma`` | a geodesic | ``\gamma_{p;q}``, ``\gamma_{p,X}`` | connecting two points ``p,q`` or starting in ``p`` with velocity ``X``. |
-| ``\operatorname{grad} f(p)`` | (Riemannian) gradient of function ``f \colon \mathcal{M} \to \mathbb{R}`` at ``p \in \mathcal{M}`` | | |
-| ``\nabla f(p)`` | (Euclidean) gradient of function ``f \colon \mathcal{M} \to \mathbb{R}`` at ``p \in \mathcal{M}`` but thought of as evaluated in the embedding | `G` | |
+| ``\operatorname{grad} f(p)`` | (Riemannian) gradient of function ``f \colon \mathcal{M} → ℝ`` at ``p \in \mathcal{M}`` | | |
+| ``\nabla f(p)`` | (Euclidean) gradient of function ``f \colon \mathcal{M} → ℝ`` at ``p \in \mathcal{M}`` but thought of as evaluated in the embedding | `G` | |
 | ``\circ`` | a group operation | |
-| ``\cdot^\mathrm{H}`` | Hermitian or conjugate transposed for both complex or quaternion matrices| |
-| ``\operatorname{Hess} f(p)`` | (Riemannian) Hessian of function ``f \colon T_p\mathcal{M} \to T_p\mathcal M`` (i.e. the 1-1-tensor form) at ``p \in \mathcal{M}`` | | |
+| ``⋅^\mathrm{H}`` | Hermitian or conjugate transposed for both complex or quaternion matrices| |
+| ``\operatorname{Hess} f(p)`` | (Riemannian) Hessian of function ``f \colon T_p\mathcal{M} → T_p\mathcal M`` (i.e. the 1-1-tensor form) at ``p \in \mathcal{M}`` | | |
 | ``\nabla^2 f(p)`` | (Euclidean) Hessian of function ``f`` in the embedding | `H` | |
 | ``e`` | identity element of a group | |
-| ``I_k`` | identity matrix of size ``k\times k`` | |
+| ``I_k`` | identity matrix of size ``k×k`` | |
 | ``k`` | indices | ``i,j`` | |
-| ``\langle\cdot,\cdot\rangle`` | inner product (in ``T_p \mathcal M``) | ``\langle\cdot,\cdot\rangle_p, g_p(\cdot,\cdot)`` |
+| ``\langle⋅,⋅\rangle`` | inner product (in ``T_p \mathcal M``) | ``\langle⋅,⋅\rangle_p, g_p(⋅,⋅)`` |
 | ``\operatorname{retr}^{-1}_pq``|  an inverse retraction | |
 | ``\mathfrak g`` | a Lie algebra | |
 | ``\mathcal{G}`` | a (Lie) group | |
@@ -49,16 +49,18 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\mathcal P_{t_1\gets t_0}^cX`` | parallel transport along the curve ``c``| ``\mathcal P^cX=\mathcal P_{1\gets 0}^cX`` | of the vector ``X`` from ``p=c(0)`` to ``c(1)``
 | ``p`` | a point on ``\mathcal M`` | ``p_1, p_2, \ldots,q`` | for 3 points one might use ``x,y,z`` |
 | ``\operatorname{retr}_pX``|  a retraction | |
+| ``\kappa_p(X, Y)`` | sectional curvature | |
 | ``ξ`` | a set of tangent vectors | ``\{X_1,\ldots,X_n\}`` | |
+| ``J_{2n} \in ℝ^{2n×2n}`` | the [`SymplecticElement`](@ref) | | |
 | ``T_p \mathcal M`` | the tangent space at ``p`` | | |
 | ``X`` | a tangent vector from ``T_p \mathcal M`` | ``X_1,X_2,\ldots,Y,Z`` | sometimes written with base point ``X_p`` |
 | ``\operatorname{tr}`` | trace (of a matrix) | |
-| ``\cdot^\mathrm{T}`` | transposed | |
-| ``e_i \in \mathbb R^n`` | the ``i``th unit vector | ``e_i^n`` | the space dimension (``n``) is omited, when clear from context
+| ``⋅^\mathrm{T}`` | transposed | |
+| ``e_i \in \mathbb R^n`` | the ``i``th unit vector | ``e_i^n`` | the space dimension (``n``) is omitted, when clear from context
 | ``B`` | a vector bundle | |
 | ``\mathcal T_{q\gets p}X`` | vector transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``
 | ``\mathcal T_{p,Y}X`` | vector transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, where ``q`` is deretmined by ``Y``, for example using the exponential map or some retraction. |
 | ``\operatorname{Vol}(\mathcal M)`` | volume of manifold ``\mathcal M`` | |
 | ``\theta_p(X)`` | volume density for vector ``X`` tangent at point ``p`` | |
 | ``\mathcal W`` | the Weingarten map ``\mathcal W: T_p\mathcal M × N_p\mathcal M → T_p\mathcal M`` | ``\mathcal W_p`` | the second notation to emphasize the dependency of the point ``p\in\mathcal M`` |
-| ``0_k`` | the ``k\times k`` zero matrix. | |
+| ``0_k`` | the ``k×k`` zero matrix. | |

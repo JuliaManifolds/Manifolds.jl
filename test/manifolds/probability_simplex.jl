@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Probability simplex" begin
     M = ProbabilitySimplex(2)
@@ -78,7 +78,7 @@ include("../utils.jl")
                 test_vee_hat=false,
                 is_tangent_atol_multiplier=40.0,
                 default_inverse_retraction_method=nothing,
-                test_inplace=false,
+                test_inplace=true,
                 test_rand_point=true,
                 test_rand_tvector=true,
                 rand_tvector_atol_multiplier=40.0,

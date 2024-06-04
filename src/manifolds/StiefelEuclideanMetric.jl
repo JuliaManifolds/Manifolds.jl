@@ -17,9 +17,9 @@ emanating from `p` in tangent direction `X`.
 \begin{pmatrix}  \exp( -p^{\mathrm{H}}X) \\ 0_n\end{pmatrix},
 ````
 
-where $\operatorname{Exp}$ denotes matrix exponential,
-$\cdot^{\mathrm{H}}$ denotes the complex conjugate transpose or Hermitian, and $I_k$ and
-$0_k$ are the identity matrix and the zero matrix of dimension $k × k$, respectively.
+where ``\operatorname{Exp}`` denotes matrix exponential,
+``⋅^{\mathrm{H}}`` denotes the complex conjugate transpose or Hermitian, and ``I_k`` and
+``0_k`` are the identity matrix and the zero matrix of dimension ``k×k``, respectively.
 """
 exp(::Stiefel, ::Any...)
 
@@ -38,25 +38,25 @@ end
 @doc raw"""
     get_basis(M::Stiefel{<:Any,ℝ}, p, B::DefaultOrthonormalBasis)
 
-Create the default basis using the parametrization for any $X ∈ T_p\mathcal M$.
-Set $p_\bot \in ℝ^{n\times(n-k)}$ the matrix such that the $n\times n$ matrix of the common
-columns $[p\ p_\bot]$ is an ONB.
-For any skew symmetric matrix $a ∈ ℝ^{k\times k}$ and any $b ∈ ℝ^{(n-k)\times k}$ the matrix
+Create the default basis using the parametrization for any ``X ∈ T_p\mathcal M``.
+Set ``p_\bot \in ℝ^{n×(n-k)}`` the matrix such that the ``n×n`` matrix of the common
+columns ``[p\ p_\bot]`` is an ONB.
+For any skew symmetric matrix ``a ∈ ℝ^{k×k}`` and any ``b ∈ ℝ^{(n-k)×k}`` the matrix
 
 ````math
 X = pa + p_\bot b ∈ T_p\mathcal M
 ````
 
-and we can use the $\frac{1}{2}k(k-1) + (n-k)k = nk-\frac{1}{2}k(k+1)$ entries
-of $a$ and $b$ to specify a basis for the tangent space.
+and we can use the ``\frac{1}{2}k(k-1) + (n-k)k = nk-\frac{1}{2}k(k+1)`` entries
+of ``a`` and ``b`` to specify a basis for the tangent space.
 using unit vectors for constructing both
-the upper matrix of $a$ to build a skew symmetric matrix and the matrix b, the default
+the upper matrix of ``a`` to build a skew symmetric matrix and the matrix b, the default
 basis is constructed.
 
-Since $[p\ p_\bot]$ is an automorphism on $ℝ^{n\times p}$ the elements of $a$ and $b$ are
+Since ``[p\ p_⊥]`` is an automorphism on ``ℝ^{n×p}`` the elements of ``a`` and ``b`` are
 orthonormal coordinates for the tangent space. To be precise exactly one element in the upper
-trangular entries of $a$ is set to $1$ its symmetric entry to $-1$ and we normalize with
-the factor $\frac{1}{\sqrt{2}}$ and for $b$ one can just use unit vectors reshaped to a matrix
+trangular entries of ``a`` is set to ``1`` its symmetric entry to ``-1`` and we normalize with
+the factor ``\frac{1}{\sqrt{2}}`` and for ``b`` one can just use unit vectors reshaped to a matrix
 to obtain orthonormal set of parameters.
 """
 get_basis(M::Stiefel{<:Any,ℝ}, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
@@ -102,7 +102,15 @@ end
 
 _euclidean_unit_vector(n, i) = [k == i ? 1.0 : 0.0 for k in 1:n]
 
+@doc raw"""
+    injectivity_radius(M::Stiefel)
+
+Return the injectivity radius for the [`Stiefel`](@ref) manifold `M`,
+which is globally ``π`` [ZimmermannStoye:2024](@cite).
 """
+injectivity_radius(::Stiefel) = π
+
+@doc raw"""
     inverse_retract(M::Stiefel, p, q, method::ProjectionInverseRetraction)
 
 Compute a projection-based inverse retraction.
@@ -128,8 +136,8 @@ end
     project(M::Stiefel,p)
 
 Projects `p` from the embedding onto the [`Stiefel`](@ref) `M`, i.e. compute `q`
-as the polar decomposition of $p$ such that ``q^{\mathrm{H}}q`` is the identity,
-where ``\cdot^{\mathrm{H}}`` denotes the hermitian, i.e. complex conjugate transposed.
+as the polar decomposition of ``p`` such that ``q^{\mathrm{H}}q`` is the identity,
+where ``⋅^{\mathrm{H}}`` denotes the hermitian, i.e. complex conjugate transposed.
 """
 project(::Stiefel, ::Any, ::Any)
 
@@ -149,8 +157,8 @@ The formula reads
 \operatorname{proj}_{T_p\mathcal M}(X) = X - p \operatorname{Sym}(p^{\mathrm{H}}X),
 ````
 
-where $\operatorname{Sym}(q)$ is the symmetrization of $q$, e.g. by
-$\operatorname{Sym}(q) = \frac{q^{\mathrm{H}}+q}{2}$.
+where ``\operatorname{Sym}(q)`` is the symmetrization of ``q``, e.g. by
+``\operatorname{Sym}(q) = \frac{q^{\mathrm{H}}+q}{2}``.
 """
 project(::Stiefel, ::Any...)
 
@@ -185,7 +193,7 @@ Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
 Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
 where ``\tilde p, \tilde X`` are the representations of ``p,X`` in the embedding,.
 
-Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), where we use for the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), where we use for the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
 ``α_0=α_1=1`` in their formula. Then the formula reads
 
 ```math

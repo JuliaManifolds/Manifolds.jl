@@ -1,16 +1,16 @@
 @doc raw"""
     SpecialEuclidean(n)
 
-Special Euclidean group $\mathrm{SE}(n)$, the group of rigid motions.
+Special Euclidean group ``\mathrm{SE}(n)``, the group of rigid motions.
 
-``\mathrm{SE}(n)`` is the semidirect product of the [`TranslationGroup`](@ref) on $ℝ^n$ and
+``\mathrm{SE}(n)`` is the semidirect product of the [`TranslationGroup`](@ref) on ``ℝ^n`` and
 [`SpecialOrthogonal`](@ref)`(n)`
 
 ````math
 \mathrm{SE}(n) ≐ \mathrm{T}(n) ⋊_θ \mathrm{SO}(n),
 ````
 
-where $θ$ is the canonical action of $\mathrm{SO}(n)$ on $\mathrm{T}(n)$ by vector rotation.
+where ``θ`` is the canonical action of ``\mathrm{SO}(n)`` on ``\mathrm{T}(n)`` by vector rotation.
 
 This constructor is equivalent to calling
 
@@ -20,8 +20,8 @@ SOn = SpecialOrthogonal(n)
 SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn))
 ```
 
-Points on $\mathrm{SE}(n)$ may be represented as points on the underlying product manifold
-$\mathrm{T}(n) × \mathrm{SO}(n)$. For group-specific functions, they may also be
+Points on ``\mathrm{SE}(n)`` may be represented as points on the underlying product manifold
+``\mathrm{T}(n) × \mathrm{SO}(n)``. For group-specific functions, they may also be
 represented as affine matrices with size `(n + 1, n + 1)` (see [`affine_matrix`](@ref)), for
 which the group operation is [`MultiplicationOperation`](@ref).
 """
@@ -167,9 +167,9 @@ end
 @doc raw"""
     affine_matrix(G::SpecialEuclidean, p) -> AbstractMatrix
 
-Represent the point $p ∈ \mathrm{SE}(n)$ as an affine matrix.
-For $p = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n), R ∈ \mathrm{SO}(n)$, the
-affine representation is the $n + 1 × n + 1$ matrix
+Represent the point ``p ∈ \mathrm{SE}(n)`` as an affine matrix.
+For ``p = (t, R) ∈ \mathrm{SE}(n)``, where ``t ∈ \mathrm{T}(n), R ∈ \mathrm{SO}(n)``, the
+affine representation is the ``n + 1 × n + 1`` matrix
 
 ````math
 \begin{pmatrix}
@@ -178,7 +178,7 @@ R & t \\
 \end{pmatrix}.
 ````
 
-This function embeds $\mathrm{SE}(n)$ in the general linear group $\mathrm{GL}(n+1)$.
+This function embeds ``\mathrm{SE}(n)`` in the general linear group ``\mathrm{GL}(n+1)``.
 It is an isometric embedding and group homomorphism [RicoMartinez:1988](@cite).
 
 See also [`screw_matrix`](@ref) for matrix representations of the Lie algebra.
@@ -278,9 +278,9 @@ end
 @doc raw"""
     screw_matrix(G::SpecialEuclidean, X) -> AbstractMatrix
 
-Represent the Lie algebra element $X ∈ 𝔰𝔢(n) = T_e \mathrm{SE}(n)$ as a screw matrix.
-For $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $Ω ∈ 𝔰𝔬(n) = T_e \mathrm{SO}(n)$, the screw representation is
-the $n + 1 × n + 1$ matrix
+Represent the Lie algebra element ``X ∈ 𝔰𝔢(n) = T_e \mathrm{SE}(n)`` as a screw matrix.
+For ``X = (b, Ω) ∈ 𝔰𝔢(n)``, where ``Ω ∈ 𝔰𝔬(n) = T_e \mathrm{SO}(n)``, the screw representation is
+the ``n + 1 × n + 1`` matrix
 
 ````math
 \begin{pmatrix}
@@ -289,7 +289,7 @@ the $n + 1 × n + 1$ matrix
 \end{pmatrix}.
 ````
 
-This function embeds $𝔰𝔢(n)$ in the general linear Lie algebra $𝔤𝔩(n+1)$ but it's not
+This function embeds ``𝔰𝔢(n)`` in the general linear Lie algebra ``𝔤𝔩(n+1)`` but it's not
 a homomorphic embedding (see [`SpecialEuclideanInGeneralLinear`](@ref) for a homomorphic one).
 
 See also [`affine_matrix`](@ref) for matrix representations of the Lie group.
@@ -328,13 +328,13 @@ end
 @doc raw"""
     exp_lie(G::SpecialEuclidean{n}, X)
 
-Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(n)$, where $b ∈ 𝔱(n)$ and $Ω ∈ 𝔰𝔬(n)$:
+Compute the group exponential of ``X = (b, Ω) ∈ 𝔰𝔢(n)``, where ``b ∈ 𝔱(n)`` and ``Ω ∈ 𝔰𝔬(n)``:
 
 ````math
 \exp X = (t, R),
 ````
 
-where $t ∈ \mathrm{T}(n)$ and $R = \exp Ω$ is the group exponential on $\mathrm{SO}(n)$.
+where ``t ∈ \mathrm{T}(n)`` and ``R = \exp Ω`` is the group exponential on ``\mathrm{SO}(n)``.
 
 In the [`screw_matrix`](@ref) representation, the group exponential is the matrix
 exponential (see [`exp_lie`](@ref)).
@@ -344,19 +344,19 @@ exp_lie(::SpecialEuclidean, ::Any)
 @doc raw"""
     exp_lie(G::SpecialEuclidean{TypeParameter{Tuple{2}}}, X)
 
-Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(2)$, where $b ∈ 𝔱(2)$ and $Ω ∈ 𝔰𝔬(2)$:
+Compute the group exponential of ``X = (b, Ω) ∈ 𝔰𝔢(2)``, where ``b ∈ 𝔱(2)`` and ``Ω ∈ 𝔰𝔬(2)``:
 
 ````math
 \exp X = (t, R) = (U(θ) b, \exp Ω),
 ````
 
-where $t ∈ \mathrm{T}(2)$, $R = \exp Ω$ is the group exponential on $\mathrm{SO}(2)$,
+where ``t ∈ \mathrm{T}(2)``, ``R = \exp Ω`` is the group exponential on ``\mathrm{SO}(2)``,
 
 ````math
 U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 ````
 
-and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
+and ``θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e``
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
 exp_lie(::SpecialEuclidean{TypeParameter{Tuple{2}}}, ::Any)
@@ -364,19 +364,19 @@ exp_lie(::SpecialEuclidean{TypeParameter{Tuple{2}}}, ::Any)
 @doc raw"""
     exp_lie(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, X)
 
-Compute the group exponential of $X = (b, Ω) ∈ 𝔰𝔢(3)$, where $b ∈ 𝔱(3)$ and $Ω ∈ 𝔰𝔬(3)$:
+Compute the group exponential of ``X = (b, Ω) ∈ 𝔰𝔢(3)``, where ``b ∈ 𝔱(3)`` and ``Ω ∈ 𝔰𝔬(3)``:
 
 ````math
 \exp X = (t, R) = (U(θ) b, \exp Ω),
 ````
 
-where $t ∈ \mathrm{T}(3)$, $R = \exp Ω$ is the group exponential on $\mathrm{SO}(3)$,
+where ``t ∈ \mathrm{T}(3)``, ``R = \exp Ω`` is the group exponential on ``\mathrm{SO}(3)``,
 
 ````math
 U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 ````
 
-and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
+and ``θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e``
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
 exp_lie(::SpecialEuclidean{TypeParameter{Tuple{3}}}, ::Any)
@@ -448,14 +448,14 @@ end
 @doc raw"""
     log_lie(G::SpecialEuclidean, p)
 
-Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(n)$, where $t ∈ \mathrm{T}(n)$
-and $R ∈ \mathrm{SO}(n)$:
+Compute the group logarithm of ``p = (t, R) ∈ \mathrm{SE}(n)``, where ``t ∈ \mathrm{T}(n)``
+and ``R ∈ \mathrm{SO}(n)``:
 
 ````math
 \log p = (b, Ω),
 ````
 
-where $b ∈ 𝔱(n)$ and $Ω = \log R ∈ 𝔰𝔬(n)$ is the group logarithm on $\mathrm{SO}(n)$.
+where ``b ∈ 𝔱(n)`` and ``Ω = \log R ∈ 𝔰𝔬(n)`` is the group logarithm on ``\mathrm{SO}(n)``.
 
 In the [`affine_matrix`](@ref) representation, the group logarithm is the matrix logarithm
 (see [`log_lie`](@ref)):
@@ -465,20 +465,20 @@ log_lie(::SpecialEuclidean, ::Any)
 @doc raw"""
     log_lie(G::SpecialEuclidean{TypeParameter{Tuple{2}}}, p)
 
-Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(2)$, where $t ∈ \mathrm{T}(2)$
-and $R ∈ \mathrm{SO}(2)$:
+Compute the group logarithm of ``p = (t, R) ∈ \mathrm{SE}(2)``, where ``t ∈ \mathrm{T}(2)``
+and ``R ∈ \mathrm{SO}(2)``:
 
 ````math
 \log p = (b, Ω) = (U(θ)^{-1} t, \log R),
 ````
 
-where $b ∈ 𝔱(2)$, $Ω = \log R ∈ 𝔰𝔬(2)$ is the group logarithm on $\mathrm{SO}(2)$,
+where ``b ∈ 𝔱(2)``, ``Ω = \log R ∈ 𝔰𝔬(2)`` is the group logarithm on ``\mathrm{SO}(2)``,
 
 ````math
 U(θ) = \frac{\sin θ}{θ} I_2 + \frac{1 - \cos θ}{θ^2} Ω,
 ````
 
-and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
+and ``θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e``
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
 log_lie(::SpecialEuclidean{TypeParameter{Tuple{2}}}, ::Any)
@@ -486,20 +486,20 @@ log_lie(::SpecialEuclidean{TypeParameter{Tuple{2}}}, ::Any)
 @doc raw"""
     log_lie(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, p)
 
-Compute the group logarithm of $p = (t, R) ∈ \mathrm{SE}(3)$, where $t ∈ \mathrm{T}(3)$
-and $R ∈ \mathrm{SO}(3)$:
+Compute the group logarithm of ``p = (t, R) ∈ \mathrm{SE}(3)``, where ``t ∈ \mathrm{T}(3)``
+and ``R ∈ \mathrm{SO}(3)``:
 
 ````math
 \log p = (b, Ω) = (U(θ)^{-1} t, \log R),
 ````
 
-where $b ∈ 𝔱(3)$, $Ω = \log R ∈ 𝔰𝔬(3)$ is the group logarithm on $\mathrm{SO}(3)$,
+where ``b ∈ 𝔱(3)``, ``Ω = \log R ∈ 𝔰𝔬(3)`` is the group logarithm on ``\mathrm{SO}(3)``,
 
 ````math
 U(θ) = I_3 + \frac{1 - \cos θ}{θ^2} Ω + \frac{θ - \sin θ}{θ^3} Ω^2,
 ````
 
-and $θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e$
+and ``θ = \frac{1}{\sqrt{2}} \lVert Ω \rVert_e``
 (see [`norm`](@ref norm(M::Rotations, p, X))) is the angle of the rotation.
 """
 log_lie(::SpecialEuclidean{TypeParameter{Tuple{3}}}, ::Any)
@@ -599,8 +599,8 @@ end
 @doc raw"""
     SpecialEuclideanInGeneralLinear
 
-An explicit isometric and homomorphic embedding of $\mathrm{SE}(n)$ in $\mathrm{GL}(n+1)$
-and $𝔰𝔢(n)$ in $𝔤𝔩(n+1)$.
+An explicit isometric and homomorphic embedding of ``\mathrm{SE}(n)`` in ``\mathrm{GL}(n+1)``
+and ``𝔰𝔢(n)`` in ``𝔤𝔩(n+1)``.
 Note that this is *not* a transparently isometric embedding.
 
 # Constructor

@@ -22,10 +22,9 @@ Pages = ["manifolds/GrassmannProjector.jl"]
 Order = [:type,:function]
 ```
 
-
 ## Literature
 
 ```@bibliography
-Pages = ["manifolds/grassmann.md"]
+Pages = ["grassmann.md"]
 Canonical=false
 ```

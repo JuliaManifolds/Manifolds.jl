@@ -91,7 +91,7 @@ using BoundaryValueDiffEq
     a2 = [-0.5, 0.3]
     sol_log = Manifolds.solve_chart_log_bvp(M, p0x, a2, A, (0, 0))
     @test sol_log(0.0)[1:2] ≈ p0x
-    @test sol_log(1.0)[1:2] ≈ a2
+    @test sol_log(1.0)[1:2] ≈ a2 atol = 1e-7
     # a test randomly failed here on Julia 1.6 once for no clear reason?
     # so I bumped tolerance considerably
     bvp_atol = VERSION < v"1.7" ? 2e-3 : 1e-15

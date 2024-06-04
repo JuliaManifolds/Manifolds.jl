@@ -12,13 +12,13 @@ Generate the ``n``-dimensional vector space ``ℝ^n``.
     Euclidean(n₁,n₂,...,nᵢ; field=ℝ, parameter::Symbol = :field)
     𝔽^(n₁,n₂,...,nᵢ) = Euclidean(n₁,n₂,...,nᵢ; field=𝔽)
 
-Generate the vector space of ``k = n_1 \cdot n_2 \cdot … \cdot n_i`` values, i.e. the
+Generate the vector space of ``k = n_1 ⋅ n_2 ⋅ … ⋅ n_i`` values, i.e. the
 manifold ``𝔽^{n_1, n_2, …, n_i}``, ``𝔽\in\{ℝ,ℂ\}``, whose
 elements are interpreted as ``n_1 × n_2 × … × n_i`` arrays.
 For ``i=2`` we obtain a matrix space.
 The default `field=ℝ` can also be set to `field=ℂ`.
 The dimension of this space is ``k \dim_ℝ 𝔽``, where ``\dim_ℝ 𝔽`` is the
-[`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the field ``𝔽``.
+[`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the field ``𝔽``.
 
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in type. Value can either be `:field` or `:type`.
@@ -112,6 +112,11 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
         )
     end
     return nothing
+end
+
+default_approximation_method(::Euclidean, ::typeof(mean)) = EfficientEstimator()
+function default_approximation_method(::Euclidean, ::typeof(median), ::Type{<:Number})
+    return EfficientEstimator()
 end
 
 function det_local_metric(
@@ -208,6 +213,8 @@ Base.exp(::Euclidean, p, X, t::Number) = p .+ t .* X
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 exp!(::Euclidean, q, p, X, t::Number) = (q .= p .+ t .* X)
+exp!(::Euclidean{TypeParameter{Tuple{}}}, q, p, X, t::Number) = (q .= p[] + t * X[])
+exp!(::Euclidean{Tuple{}}, q, p, X, t::Number) = (q .= p[] + t * X[])
 
 function get_basis_diagonalizing(
     M::Euclidean,
@@ -395,15 +402,15 @@ g_p(X,Y) = \sum_{k ∈ I} \overline{X}_{k} Y_{k},
 
 where ``I`` is the set of vectors ``k ∈ ℕ^i``, such that for all
 
-``i ≤ j ≤ i`` it holds ``1 ≤ k_j ≤ n_j`` and ``\overline{\cdot}`` denotes the complex conjugate.
+``i ≤ j ≤ i`` it holds ``1 ≤ k_j ≤ n_j`` and ``\overline{⋅}`` denotes the complex conjugate.
 
 For the special case of ``i ≤ 2``, i.e. matrices and vectors, this simplifies to
 
 ````math
-g_p(X,Y) = X^{\mathrm{H}}Y,
+g_p(X,Y) = \operatorname{tr}(X^{\mathrm{H}}Y),
 ````
 
-where ``\cdot^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 inner(::Euclidean, ::Any...)
 @inline inner(::Euclidean, p, X, Y) = dot(X, Y)
@@ -489,7 +496,7 @@ _product_of_dimensions(M::Euclidean) = prod(get_parameter(M.size))
     manifold_dimension(M::Euclidean)
 
 Return the manifold dimension of the [`Euclidean`](@ref) `M`, i.e.
-the product of all array dimensions and the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of the
+the product of all array dimensions and the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the
 underlying number system.
 """
 function manifold_dimension(M::Euclidean{<:Any,𝔽}) where {𝔽}
@@ -504,23 +511,65 @@ Return volume of the [`Euclidean`](@ref) manifold, i.e. infinity.
 """
 manifold_volume(::Euclidean) = Inf
 
-Statistics.mean(::Euclidean{Tuple{}}, x::AbstractVector{<:Number}; kwargs...) = mean(x)
 function Statistics.mean(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector{<:Number};
+    x::AbstractVector,
+    ::EfficientEstimator;
     kwargs...,
 )
     return mean(x)
 end
 function Statistics.mean(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector{<:Number},
-    w::AbstractWeights;
+    x::AbstractVector,
+    w::AbstractWeights,
+    ::EfficientEstimator;
     kwargs...,
 )
     return mean(x, w)
 end
-Statistics.mean(::Euclidean, x::AbstractVector; kwargs...) = mean(x)
+#
+# When Statistics / Statsbase.mean! is consistent with mean, we can pass this on to them as well
+function Statistics.mean!(
+    ::Euclidean,
+    y,
+    x::AbstractVector,
+    ::EfficientEstimator;
+    kwargs...,
+)
+    n = length(x)
+    copyto!(y, first(x))
+    @inbounds for j in 2:n
+        y .+= x[j]
+    end
+    y ./= n
+    return y
+end
+function Statistics.mean!(
+    ::Euclidean,
+    y,
+    x::AbstractVector,
+    w::AbstractWeights,
+    ::EfficientEstimator;
+    kwargs...,
+)
+    n = length(x)
+    if length(w) != n
+        throw(
+            DimensionMismatch(
+                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+            ),
+        )
+    end
+    copyto!(y, first(x))
+    y .*= first(w)
+    @inbounds for j in 2:n
+        iszero(w[j]) && continue
+        y .+= w[j] .* x[j]
+    end
+    y ./= sum(w)
+    return y
+end
 
 function StatsBase.mean_and_var(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
@@ -543,7 +592,8 @@ end
 
 function Statistics.median(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
-    x::AbstractVector{<:Number};
+    x::AbstractVector{<:Number},
+    ::EfficientEstimator;
     kwargs...,
 )
     return median(x)
@@ -551,7 +601,8 @@ end
 function Statistics.median(
     ::Union{Euclidean{TypeParameter{Tuple{}}},Euclidean{Tuple{}}},
     x::AbstractVector{<:Number},
-    w::AbstractWeights;
+    w::AbstractWeights,
+    ::EfficientEstimator;
     kwargs...,
 )
     return median(x, w)
@@ -628,6 +679,10 @@ the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
 """
 parallel_transport_to(::Euclidean, ::Any, X, ::Any) = X
 parallel_transport_to!(::Euclidean, Y, ::Any, X, ::Any) = copyto!(Y, X)
+function parallel_transport_to!(::Euclidean{TypeParameter{Tuple{}}}, Y, ::Any, X, ::Any)
+    return copyto!(Y, X[])
+end
+parallel_transport_to!(::Euclidean{Tuple{}}, Y, ::Any, X, ::Any) = copyto!(Y, X[])
 
 @doc raw"""
     project(M::Euclidean, p)
@@ -690,12 +745,38 @@ end
 
 Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`Euclidean`](@ref) manifold `M`.
 Its value is always the zero tangent vector.
-````
 """
 riemann_tensor(M::Euclidean, p, X, Y, Z)
 
 function riemann_tensor!(::Euclidean, Xresult, p, X, Y, Z)
     return fill!(Xresult, 0)
+end
+
+@doc raw"""
+    sectional_curvature(::Euclidean, p, X, Y)
+
+Sectional curvature of [`Euclidean`](@ref) manifold `M` is 0.
+"""
+function sectional_curvature(::Euclidean, p, X, Y)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_max(::Euclidean)
+
+Sectional curvature of [`Euclidean`](@ref) manifold `M` is 0.
+"""
+function sectional_curvature_max(::Euclidean)
+    return 0.0
+end
+
+@doc raw"""
+    sectional_curvature_min(M::Euclidean)
+
+Sectional curvature of [`Euclidean`](@ref) manifold `M` is 0.
+"""
+function sectional_curvature_min(::Euclidean)
+    return 0.0
 end
 
 function Base.show(io::IO, M::Euclidean{N,𝔽}) where {N<:Tuple,𝔽}
@@ -812,13 +893,13 @@ Weingarten(::Euclidean, p, X, V)
 Weingarten!(::Euclidean, Y, p, X, V) = fill!(Y, 0)
 
 """
-    zero_vector(M::Euclidean, x)
+    zero_vector(M::Euclidean, p)
 
-Return the zero vector in the tangent space of `x` on the [`Euclidean`](@ref)
-`M`, which here is just a zero filled array the same size as `x`.
+Return the zero vector in the tangent space of `p` on the [`Euclidean`](@ref)
+`M`, which here is just a zero filled array the same size as `p`.
 """
 zero_vector(::Euclidean, ::Any...)
 zero_vector(::Euclidean{TypeParameter{Tuple{}}}, p::Number) = zero(p)
 zero_vector(::Euclidean{Tuple{}}, p::Number) = zero(p)
 
-zero_vector!(::Euclidean, v, ::Any) = fill!(v, 0)
+zero_vector!(::Euclidean, X, ::Any) = fill!(X, 0)

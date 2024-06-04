@@ -6,7 +6,7 @@ The manifold of symmetric positive definite matrices, i.e.
 ````math
 \mathcal P(n) =
 \bigl\{
-p ∈ ℝ^{n × n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
+p ∈ ℝ^{n×n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
 \bigr\}
 ````
 
@@ -24,7 +24,7 @@ i.e. the set of symmetric matrices,
 
     SymmetricPositiveDefinite(n; parameter::Symbol=:type)
 
-generates the manifold $\mathcal P(n) \subset ℝ^{n × n}$
+generates the manifold ``\mathcal P(n) \subset ℝ^{n×n}``
 """
 struct SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
     size::T
@@ -165,7 +165,7 @@ Lie group.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(M::SymmetricPositiveDefinite, p, X; kwargs...)
-    if !isapprox(norm(X - transpose(X)), 0.0; kwargs...)
+    if !isapprox(X, transpose(X); kwargs...)
         return DomainError(
             X,
             "The vector $(X) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.",
@@ -243,7 +243,7 @@ end
 
 Return the injectivity radius of the [`SymmetricPositiveDefinite`](@ref).
 Since `M` is a Hadamard manifold with respect to the [`AffineInvariantMetric`](@ref) and the
-[`LogCholeskyMetric`](@ref), the injectivity radius is globally $∞$.
+[`LogCholeskyMetric`](@ref), the injectivity radius is globally ``∞``.
 """
 injectivity_radius(::SymmetricPositiveDefinite) = Inf
 injectivity_radius(::SymmetricPositiveDefinite, p) = Inf
@@ -265,7 +265,7 @@ is_flat(M::SymmetricPositiveDefinite) = false
     manifold_dimension(M::SymmetricPositiveDefinite)
 
 returns the dimension of
-[`SymmetricPositiveDefinite`](@ref) `M`$=\mathcal P(n), n ∈ ℕ$, i.e.
+[`SymmetricPositiveDefinite`](@ref) `M` ``=\mathcal P(n), n ∈ ℕ``, i.e.
 ````math
 \dim \mathcal P(n) = \frac{n(n+1)}{2}.
 ````
@@ -285,11 +285,11 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolation`](@ref).
+[`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`).
 """
 mean(::SymmetricPositiveDefinite, ::Any)
 
-function default_estimation_method(::SymmetricPositiveDefinite, ::typeof(mean))
+function default_approximation_method(::SymmetricPositiveDefinite, ::typeof(mean))
     return GeodesicInterpolation()
 end
 
@@ -466,8 +466,8 @@ end
     representation_size(M::SymmetricPositiveDefinite)
 
 Return the size of an array representing an element on the
-[`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. $n × n$, the size of such a
-symmetric positive definite matrix on $\mathcal M = \mathcal P(n)$.
+[`SymmetricPositiveDefinite`](@ref) manifold `M`, i.e. ``n×n``, the size of such a
+symmetric positive definite matrix on ``\mathcal M = \mathcal P(n)``.
 """
 function representation_size(M::SymmetricPositiveDefinite)
     N = get_parameter(M.size)[1]

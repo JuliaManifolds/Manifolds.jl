@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Spectrahedron" begin
     M = Spectrahedron(4, 2)

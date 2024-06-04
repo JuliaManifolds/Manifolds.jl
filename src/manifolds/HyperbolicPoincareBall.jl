@@ -77,8 +77,8 @@ end
     convert(::Type{PoincareBallPoint}, p::HyperboloidPoint)
     convert(::Type{PoincareBallPoint}, p::T) where {T<:AbstractVector}
 
-convert a [`HyperboloidPoint`](@ref) $p∈ℝ^{n+1}$ from the hyperboloid model of the [`Hyperbolic`](@ref)
-manifold $\mathcal H^n$ to a [`PoincareBallPoint`](@ref) $π(p)∈ℝ^{n}$ in the Poincaré ball model.
+convert a [`HyperboloidPoint`](@ref) ``p∈ℝ^{n+1}`` from the hyperboloid model of the [`Hyperbolic`](@ref)
+manifold ``\mathcal H^n`` to a [`PoincareBallPoint`](@ref) ``π(p)∈ℝ^{n}`` in the Poincaré ball model.
 The isometry is defined by
 
 ````math
@@ -98,9 +98,9 @@ end
 @doc raw"""
     convert(::Type{PoincareBallPoint}, p::PoincareHalfSpacePoint)
 
-convert a point [`PoincareHalfSpacePoint`](@ref) `p` (from $ℝ^n$) from the
-Poincaré half plane model of the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ to a [`PoincareBallPoint`](@ref) $π(p) ∈ ℝ^n$.
-Denote by $\tilde p = (p_1,\ldots,p_{d-1})^{\mathrm{T}}$. Then the isometry is defined by
+convert a point [`PoincareHalfSpacePoint`](@ref) `p` (from ``ℝ^n``) from the
+Poincaré half plane model of the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` to a [`PoincareBallPoint`](@ref) ``π(p) ∈ ℝ^n``.
+Denote by ``\tilde p = (p_1,\ldots,p_{d-1})^{\mathrm{T}}``. Then the isometry is defined by
 
 ````math
 π(p) = \frac{1}{\lVert \tilde p \rVert^2 + (p_n+1)^2}
@@ -119,8 +119,8 @@ end
     convert(::Type{PoincareBallTVector}, p::P, X::T) where {P<:AbstractVector, T<:AbstractVector}
 
 convert a [`HyperboloidTVector`](@ref) `X` at `p` to a [`PoincareBallTVector`](@ref)
-on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
-the isometry $π$ that maps from the Hyperboloid to the Poincaré ball,
+on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` by computing the push forward ``π_*(p)[X]`` of
+the isometry ``π`` that maps from the Hyperboloid to the Poincaré ball,
 cf. [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref).
 
 The formula reads
@@ -129,8 +129,8 @@ The formula reads
 π_*(p)[X] = \frac{1}{p_{n+1}+1}\Bigl(\tilde X - \frac{X_{n+1}}{p_{n+1}+1}\tilde p \Bigl),
 ````
 
-where $\tilde X = \begin{pmatrix}X_1\\⋮\\X_n\end{pmatrix}$
-and $\tilde p = \begin{pmatrix}p_1\\⋮\\p_n\end{pmatrix}$.
+where ``\tilde X = \begin{pmatrix}X_1\\⋮\\X_n\end{pmatrix}``
+and ``\tilde p = \begin{pmatrix}p_1\\⋮\\p_n\end{pmatrix}``.
 """
 convert(::Type{PoincareBallTVector}, ::Any)
 function convert(t::Type{PoincareBallTVector}, p::HyperboloidPoint, X::HyperboloidTVector)
@@ -183,8 +183,8 @@ end
     )
 
 convert a [`PoincareHalfSpaceTVector`](@ref) `X` at `p` to a [`PoincareBallTVector`](@ref)
-on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ by computing the push forward $π_*(p)[X]$ of
-the isometry $π$ that maps from the Poincaré half space to the Poincaré ball,
+on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` by computing the push forward ``π_*(p)[X]`` of
+the isometry ``π`` that maps from the Poincaré half space to the Poincaré ball,
 cf. [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref).
 
 The formula reads
@@ -207,7 +207,7 @@ The formula reads
 (\lVert p \rVert^2-1)(⟨X,p⟩+X_n)
 \end{pmatrix}
 ````
-where $\tilde p = \begin{pmatrix}p_1\\⋮\\p_{n-1}\end{pmatrix}$.
+where ``\tilde p = \begin{pmatrix}p_1\\⋮\\p_{n-1}\end{pmatrix}``.
 """
 function convert(
     ::Type{PoincareBallTVector},
@@ -249,7 +249,7 @@ end
 @doc raw"""
     distance(::Hyperbolic, p::PoincareBallPoint, q::PoincareBallPoint)
 
-Compute the distance on the [`Hyperbolic`](@ref) manifold $\mathcal H^n$ represented in the
+Compute the distance on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` represented in the
 Poincaré ball model. The formula reads
 
 ````math
@@ -304,7 +304,7 @@ end
     project(::Hyperbolic, ::PoincareBallPoint, ::PoincareBallTVector)
 
 projction of tangent vectors in the Poincaré ball model is just the identity, since
-the tangent space consists of all $ℝ^n$.
+the tangent space consists of all ``ℝ^n``.
 """
 project(::Hyperbolic, ::PoincareBallPoint, ::PoincareBallTVector)
 

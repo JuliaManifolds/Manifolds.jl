@@ -10,7 +10,7 @@ Order = [:type, :function]
 
 ## Default metric: the Euclidean metric
 
-The [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric) is obtained from the embedding of the Stiefel manifold in ``ℝ^{n,k}``.
+The [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`) is obtained from the embedding of the Stiefel manifold in ``ℝ^{n,k}``.
 
 ```@autodocs
 Modules = [Manifolds]
@@ -29,7 +29,7 @@ A ∈ ℝ^{p×p} \text{ skew-symmetric},
 B ∈ ℝ^{n×p} \text{ arbitrary.}
 ```
 
-In the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric), the elements from ``A`` are counted twice (i.e. weighted with a factor of 2).
+In the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`), the elements from ``A`` are counted twice (i.e. weighted with a factor of 2).
 The canonical metric avoids this.
 
 ```@autodocs
@@ -67,6 +67,6 @@ Private = true
 ## Literature
 
 ```@bibliography
-Pages = ["manifolds/stiefel.md"]
+Pages = ["stiefel.md"]
 Canonical=false
 ```

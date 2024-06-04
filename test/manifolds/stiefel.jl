@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Stiefel" begin
     @testset "Real" begin
@@ -10,6 +10,8 @@ include("../utils.jl")
             @test is_default_metric(M, EuclideanMetric())
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
+            @test injectivity_radius(M) == π
+            @test injectivity_radius(M2) == π
             @test !is_flat(M)
             @test !is_flat(M2)
             @test is_flat(Stiefel(2, 1))

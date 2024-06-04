@@ -10,7 +10,7 @@
     ) -> Bool
 
 Check whether the metric on the group $\mathcal{G}$ is (approximately) invariant using a set of predefined
-points. Namely, for $p ∈ \mathcal{G}$, $X,Y ∈ T_p \mathcal{G}$, a metric $g$, and a
+points. Namely, for $p ∈ \mathcal{G}$, $X,Y ∈ T_p \mathcal{G}$, a metric ``g``, and a
 translation map $τ_q$ in the specified direction, check for each $q ∈ \mathcal{G}$ that the
 following condition holds:
 
@@ -360,7 +360,7 @@ end
 """
     LeftInvariantMetric <: AbstractMetric
 
-An [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+An [`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`)
 that changes the metric of a Lie group to the left-invariant
 metric obtained by left-translations to the identity. Adds the
 [`HasLeftInvariantMetric`](@ref) trait.
@@ -370,7 +370,7 @@ struct LeftInvariantMetric <: AbstractMetric end
 """
     RightInvariantMetric <: AbstractMetric
 
-An [`AbstractMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractMetric)
+An [`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`)
 that changes the metric of a Lie group to the right-invariant
 metric obtained by right-translations to the identity. Adds the
 [`HasRightInvariantMetric`](@ref) trait.

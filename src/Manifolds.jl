@@ -4,6 +4,7 @@
 module Manifolds
 
 import Base:
+    ^,
     angle,
     copyto!,
     convert,
@@ -48,6 +49,7 @@ import ManifoldsBase:
     check_vector,
     copy,
     copyto!,
+    default_approximation_method,
     default_inverse_retraction_method,
     default_retraction_method,
     default_vector_transport_method,
@@ -144,24 +146,22 @@ import ManifoldsBase:
     retract_softmax!,
     riemann_tensor,
     riemann_tensor!,
+    sectional_curvature,
+    sectional_curvature_max,
+    sectional_curvature_min,
     set_component!,
     submanifold,
     submanifold_component,
     submanifold_components,
     vector_space_dimension,
-    vector_transport_along, # just specified in Euclidean - the next 5 as well
-    vector_transport_along_diff,
-    vector_transport_along_project,
+    vector_transport_along,           # just specified in Euclidean - the next 5 as well
     vector_transport_along!,
-    vector_transport_along_diff!,
-    vector_transport_along_project!,
+    vector_transport_along_diff!,     # For consistency these are imported, but for now not
+    vector_transport_along_project!,  # overwritten with new definitons.
     vector_transport_direction,
-    vector_transport_direction_diff,
     vector_transport_direction!,
     vector_transport_direction_diff!,
     vector_transport_to,
-    vector_transport_to_diff,
-    vector_transport_to_project,
     vector_transport_to!,
     vector_transport_to_diff!,
     vector_transport_to_project!, # some overwrite layer 2
@@ -186,6 +186,9 @@ import ManifoldDiff:
     riemannian_Hessian,
     riemannian_Hessian!
 
+import Statistics: mean, mean!, median, median!, cov, var
+import StatsBase: mean_and_var
+
 using Base.Iterators: repeated
 using Distributions
 using Einsum: @einsum
@@ -198,6 +201,7 @@ using ManifoldsBase:
     ℝ,
     ℂ,
     ℍ,
+    AbstractApproximationMethod,
     AbstractBasis,
     AbstractDecoratorManifold,
     AbstractInverseRetractionMethod,
@@ -225,6 +229,7 @@ using ManifoldsBase:
     CotangentSpaceType,
     CoTFVector,
     CoTVector,
+    CyclicProximalPointEstimation,
     DefaultBasis,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
@@ -232,19 +237,25 @@ using ManifoldsBase:
     DiagonalizingBasisData,
     DiagonalizingOrthonormalBasis,
     DifferentiatedRetractionVectorTransport,
+    EfficientEstimator,
     EmbeddedManifold,
     EmptyTrait,
     EuclideanMetric,
     ExponentialRetraction,
+    ExtrinsicEstimation,
     Fiber,
     FiberType,
     FVector,
+    GeodesicInterpolation,
+    GeodesicInterpolationWithinRadius,
+    GradientDescentEstimation,
     InverseProductRetraction,
     IsIsometricEmbeddedManifold,
     IsEmbeddedManifold,
     IsEmbeddedSubmanifold,
     IsExplicitDecorator,
     LogarithmicInverseRetraction,
+    ManifoldDomainError,
     ManifoldsBase,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
@@ -295,6 +306,7 @@ using ManifoldsBase:
     VectorSpaceFiber,
     VectorSpaceType,
     VeeOrthogonalBasis,
+    WeiszfeldEstimation,
     @invoke_maker,
     _euclidean_basis_vector,
     combine_allocation_promotion_functions,
@@ -416,8 +428,10 @@ include("manifolds/FlagStiefel.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Hyperbolic.jl")
+include("manifolds/Hyperrectangle.jl")
 include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
+include("manifolds/MultinomialSymmetricPositiveDefinite.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
 include("manifolds/SkewHermitian.jl")
@@ -437,8 +451,6 @@ include("manifolds/SymmetricPositiveDefiniteAffineInvariant.jl")
 include("manifolds/SymmetricPositiveDefiniteLogCholesky.jl")
 include("manifolds/SymmetricPositiveDefiniteLogEuclidean.jl")
 include("manifolds/SymmetricPositiveSemidefiniteFixedRank.jl")
-include("manifolds/Symplectic.jl")
-include("manifolds/SymplecticStiefel.jl")
 include("manifolds/Tucker.jl")
 #
 include("manifolds/ProbabilitySimplex.jl")
@@ -454,6 +466,13 @@ include("manifolds/KendallsShapeSpace.jl")
 
 # Introduce the quotient, Grassmann, only after Stiefel
 include("manifolds/Grassmann.jl")
+
+# Introduce Symplectic and so on manifolds only after Grassmann
+# Since that defines the StiefelPoint, StiefelTVector
+include("manifolds/Symplectic.jl")
+include("manifolds/Hamiltonian.jl") # Hamiltonian requires symplectic
+include("manifolds/SymplecticStiefel.jl")
+include("manifolds/SymplecticGrassmann.jl") # Requires SymplecticStiefel
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -504,8 +523,8 @@ include("trait_recursion_breaking.jl")
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
 
-Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
-This method employs [`is_point`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_point) deactivating the error throwing option.
+Check, whether a point `p` is a valid point (i.e. in) a [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`.
+This method employs [`is_point`](@extref `ManifoldsBase.is_point-Tuple{AbstractManifold, Any, Bool}`) deactivating the error throwing option.
 """
 Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
 
@@ -513,10 +532,10 @@ Base.in(p, M::AbstractManifold; kwargs...) = is_point(M, p, false; kwargs...)
     Base.in(p, TpM::TangentSpace; kwargs...)
     X ∈ TangentSpace(M, p)
 
-Check whether `X` is a tangent vector from (in) the tangent space $T_p\mathcal M$, i.e.
-the [`TangentSpace`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/metamanifolds/#ManifoldsBase.TangentSpace)
-at `p` on the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  `M`.
-This method uses [`is_vector`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.is_vector) deactivating the error throw option.
+Check whether `X` is a tangent vector from (in) the tangent space ``T_p\mathcal M``, i.e.
+the [`TangentSpace`](@extref `ManifoldsBase.TangentSpace`)
+at `p` on the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`.
+This method uses [`is_vector`](@extref `ManifoldsBase.is_vector-Tuple{AbstractManifold, Any, Any, Bool, Bool}`) deactivating the error throw option.
 """
 function Base.in(X, TpM::TangentSpace; kwargs...)
     return is_vector(base_manifold(TpM), TpM.point, X, false; kwargs...)
@@ -607,8 +626,9 @@ include("deprecated.jl")
 export test_manifold
 export test_group, test_action
 
-#
+# Abstract main types
 export CoTVector, AbstractManifold, AbstractManifoldPoint, TVector
+# Manifolds
 export AbstractSphere, AbstractProjectiveSpace
 export Euclidean,
     ArrayProjectiveSpace,
@@ -623,14 +643,17 @@ export Euclidean,
     GeneralizedGrassmann,
     GeneralizedStiefel,
     Grassmann,
+    HamiltonianMatrices,
     HeisenbergGroup,
     Hyperbolic,
+    Hyperrectangle,
     KendallsPreShapeSpace,
     KendallsShapeSpace,
     Lorentz,
     MultinomialDoubleStochastic,
     MultinomialMatrices,
     MultinomialSymmetric,
+    MultinomialSymmetricPositiveDefinite,
     Oblique,
     OrthogonalMatrices,
     PositiveArrays,
@@ -651,8 +674,10 @@ export Euclidean,
     SPDFixedDeterminant,
     SymmetricPositiveSemidefiniteFixedRank,
     Symplectic,
+    SymplecticGrassmann,
+    SymplecticMatrices,
     SymplecticStiefel,
-    SymplecticMatrix,
+    SymplecticElement,
     Torus,
     Tucker,
     UnitaryMatrices
@@ -674,7 +699,7 @@ export HyperboloidTVector,
     ProjectorTVector,
     StiefelTVector
 export AbstractNumbers, ℝ, ℂ, ℍ
-
+export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
@@ -748,9 +773,10 @@ export AbstractInverseRetractionMethod,
     ShootingInverseRetraction,
     SoftmaxInverseRetraction
 # Estimation methods for median and mean
-export AbstractEstimationMethod,
+export AbstractApproximationMethod,
     GradientDescentEstimation,
     CyclicProximalPointEstimation,
+    EfficientEstimator,
     GeodesicInterpolation,
     GeodesicInterpolationWithinRadius,
     ExtrinsicEstimation
@@ -763,9 +789,10 @@ export CachedBasis,
     InducedBasis,
     ProjectedOrthonormalBasis
 # Errors on Manifolds
-export ComponentManifoldError, CompositeManifoldError
+export ComponentManifoldError, CompositeManifoldError, ManifoldDomainError
 # Functions on Manifolds
 export ×,
+    ^,
     action_side,
     allocate,
     allocate_result,
@@ -788,9 +815,10 @@ export ×,
     convert,
     complex_dot,
     decorated_manifold,
-    default_vector_transport_method,
+    default_approximation_method,
     default_inverse_retraction_method,
     default_retraction_method,
+    default_vector_transport_method,
     det_local_metric,
     differential_canonical_project,
     differential_canonical_project!,
@@ -831,6 +859,7 @@ export ×,
     is_default_metric,
     is_flat,
     is_group_manifold,
+    is_hamiltonian,
     is_identity,
     is_point,
     is_vector,
@@ -882,6 +911,10 @@ export ×,
     riemannian_Hessian!,
     riemann_tensor,
     riemann_tensor!,
+    sectional_curvature,
+    sectional_curvature_matrix,
+    sectional_curvature_max,
+    sectional_curvature_min,
     set_component!,
     sharp,
     sharp!,
@@ -890,6 +923,8 @@ export ×,
     skewness,
     std,
     sym_rem,
+    symplectic_inverse,
+    symplectic_inverse!,
     symplectic_inverse_times,
     symplectic_inverse_times!,
     submanifold,

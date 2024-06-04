@@ -1,31 +1,31 @@
 @doc raw"""
     SymmetricPositiveSemidefiniteFixedRank{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{SPS}_k(n)$ consisting of the real- or complex-valued
-symmetric positive semidefinite matrices of size $n × n$ and rank $k$, i.e. the set
+The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `` \operatorname{SPS}_k(n)`` consisting of the real- or complex-valued
+symmetric positive semidefinite matrices of size ``n×n`` and rank ``k``, i.e. the set
 
 ````math
 \operatorname{SPS}_k(n) = \bigl\{
-p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = p,
+p  ∈ 𝔽^{n×n}\ \big|\ p^{\mathrm{H}} = p,
 apa^{\mathrm{H}} \geq 0 \text{ for all } a ∈ 𝔽
 \text{ and } \operatorname{rank}(p) = k\bigr\},
 ````
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
-and the field $𝔽 ∈ \{ ℝ, ℂ\}$.
-We sometimes $\operatorname{SPS}_{k,𝔽}(n)$, when distinguishing the real- and complex-valued
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
+and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
+We sometimes ``\operatorname{SPS}_{k,𝔽}(n)``, when distinguishing the real- and complex-valued
 manifold is important.
 
-An element is represented by $q ∈ 𝔽^{n × k}$ from the factorization $p = qq^{\mathrm{H}}$.
-Note that since for any unitary (orthogonal) $A ∈ 𝔽^{n × n}$ we have
-$(Aq)(Aq)^{\mathrm{H}} = qq^{\mathrm{H}} = p$, the representation is not unique, or in
-other words, the manifold is a quotient manifold of $𝔽^{n × k}$.
+An element is represented by ``q ∈ 𝔽^{n×k}`` from the factorization ``p = qq^{\mathrm{H}}``.
+Note that since for any unitary (orthogonal) ``A ∈ 𝔽^{n×n}`` we have
+``(Aq)(Aq)^{\mathrm{H}} = qq^{\mathrm{H}} = p``, the representation is not unique, or in
+other words, the manifold is a quotient manifold of ``𝔽^{n×k}``.
 
-The tangent space at $p$, $T_p\operatorname{SPS}_k(n)$, is also represented
-by matrices $Y ∈ 𝔽^{n × k}$ and reads as
+The tangent space at ``p``, ``T_p\operatorname{SPS}_k(n)``, is also represented
+by matrices ``Y ∈ 𝔽^{n×k}`` and reads as
 
 ````math
 T_p\operatorname{SPS}_k(n) = \bigl\{
-X ∈ 𝔽^{n × n}\,|\,X = qY^{\mathrm{H}} + Yq^{\mathrm{H}}
+X ∈ 𝔽^{n×n}\,|\,X = qY^{\mathrm{H}} + Yq^{\mathrm{H}}
 \text{ i.e. } X = X^{\mathrm{H}}
 \bigr\}.
 ````
@@ -37,7 +37,7 @@ The metric was used in [JourneeBachAbsilSepulchre:2010](@cite)[MassartAbsil:2020
 
     SymmetricPositiveSemidefiniteFixedRank(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
-Generate the manifold of $n × n$ symmetric positive semidefinite matrices of rank $k$
+Generate the manifold of ``n×n`` symmetric positive semidefinite matrices of rank ``k``
 over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
 """
 struct SymmetricPositiveSemidefiniteFixedRank{T,𝔽} <: AbstractDecoratorManifold{𝔽}
@@ -63,7 +63,7 @@ end
 
 Check whether `q` is a valid manifold point on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e.
 whether `p=q*q'` is a symmetric matrix of size `(n,n)` with values from the corresponding
-[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) `𝔽`.
+[`AbstractNumbers`](@extref ManifoldsBase number-system) `𝔽`.
 The symmetry of `p` is not explicitly checked since by using `q` p is symmetric by construction.
 The tolerance for the symmetry of `p` can and the rank of `q*q'` be set using `kwargs...`.
 """
@@ -85,7 +85,7 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SymmetricPositiveSemidefiniteFixedRank`](@ref) `M`, i.e. `X` has to be a symmetric matrix of size `(n,n)`
-and its values have to be from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
+and its values have to be from the correct [`AbstractNumbers`](@extref ManifoldsBase number-system).
 
 Due to the reduced representation this is fulfilled as soon as the matrix is of correct size.
 """
@@ -107,8 +107,8 @@ end
     distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q)
 
 Compute the distance between two points `p`, `q` on the
-[`SymmetricPositiveSemidefiniteFixedRank`](@ref), which is the Frobenius norm of $Y$ which
-minimizes $\lVert p - qY\rVert$ with respect to $Y$.
+[`SymmetricPositiveSemidefiniteFixedRank`](@ref), which is the Frobenius norm of ``Y`` which
+minimizes ``\lVert p - qY\rVert`` with respect to ``Y``.
 """
 distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q) = norm(M, p, log(M, p, q))
 
@@ -129,8 +129,8 @@ which just reads
     ````math
         q_2 = \exp_p(\log_pq)
     ````
-    might yield a matrix $q_2\neq q$, but they represent the same point on the quotient
-    manifold, i.e. $d_{\operatorname{SPS}_k(n)}(q_2,q) = 0$.
+    might yield a matrix ``q_2\neq q``, but they represent the same point on the quotient
+    manifold, i.e. ``d_{\operatorname{SPS}_k(n)}(q_2,q) = 0``.
 """
 exp(::SymmetricPositiveSemidefiniteFixedRank, ::Any, ::Any)
 
@@ -144,13 +144,19 @@ end
 
 test, whether two points `p`, `q` are (approximately) nearly the same.
 Since this is a quotient manifold in the embedding, the test is performed by checking
-their distance, if they are not the same, i.e. that $d_{\mathcal M}(p,q) \approx 0$, where
+their distance, if they are not the same, i.e. that ``d_{\mathcal M}(p,q) \approx 0``, where
 the comparison is performed with the classical `isapprox`.
 The `kwargs...` are passed on to this accordingly.
 """
-function _isapprox(M::SymmetricPositiveSemidefiniteFixedRank, p, q; kwargs...)
-    return isapprox(norm(p - q), 0.0; kwargs...) ||
-           isapprox(distance(M, p, q), 0.0; kwargs...)
+function _isapprox(
+    M::SymmetricPositiveSemidefiniteFixedRank,
+    p::T,
+    q;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    return isapprox(norm(p - q), 0; atol=atol, kwargs...) ||
+           isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
 end
 
 """
@@ -164,7 +170,7 @@ is_flat(M::SymmetricPositiveSemidefiniteFixedRank) = false
     log(M::SymmetricPositiveSemidefiniteFixedRank, q, p)
 
 Compute the logarithmic map on the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) manifold
-by minimizing $\lVert p - qY\rVert$ with respect to $Y$.
+by minimizing ``\lVert p - qY\rVert`` with respect to ``Y``.
 
 !!! note
 
@@ -174,8 +180,8 @@ by minimizing $\lVert p - qY\rVert$ with respect to $Y$.
     ````math
         q_2 = \exp_p(\log_pq)
     ````
-    might yield a matrix $q_2\neq q$, but they represent the same point on the quotient
-    manifold, i.e. $d_{\operatorname{SPS}_k(n)}(q_2,q) = 0$.
+    might yield a matrix ``q_2≠q``, but they represent the same point on the quotient
+    manifold, i.e. ``d_{\operatorname{SPS}_k(n)}(q_2,q) = 0``.
 """
 log(::SymmetricPositiveSemidefiniteFixedRank, q, p)
 
@@ -197,7 +203,7 @@ Return the dimension of the [`SymmetricPositiveSemidefiniteFixedRank`](@ref) mat
 \end{aligned}
 ````
 
-where the last $k^2$ is due to the zero imaginary part for Hermitian matrices diagonal
+where the last ``k^2`` is due to the zero imaginary part for Hermitian matrices diagonal
 """
 manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank)
 

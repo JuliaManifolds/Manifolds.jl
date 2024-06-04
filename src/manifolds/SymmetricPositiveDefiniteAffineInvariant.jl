@@ -10,7 +10,7 @@ struct AffineInvariantMetric <: RiemannianMetric end
     change_representer(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
 Given a tangent vector ``X ∈ T_p\mathcal M`` representing a linear function on the tangent
-space at `p` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+space at `p` with respect to the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
 `g_E`, this is turned into the representer with respect to the (default) metric,
 the [`AffineInvariantMetric`](@ref) on the [`SymmetricPositiveDefinite`](@ref) `M`.
 
@@ -33,11 +33,11 @@ end
 @doc raw"""
     change_metric(M::SymmetricPositiveDefinite, E::EuclideanMetric, p, X)
 
-Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric)
+Given a tangent vector ``X ∈ T_p\mathcal P(n)`` with respect to the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`)
 `g_E`, this function changes into the [`AffineInvariantMetric`](@ref) (default) metric on the
 [`SymmetricPositiveDefinite`](@ref) `M`.
 
-To be precise we are looking for ``c\colon T_p\mathcal P(n) \to T_p\mathcal P(n) ``
+To be precise we are looking for ``c\colon T_p\mathcal P(n) → T_p\mathcal P(n) ``
 such that for all ``Y,Z ∈ T_p\mathcal P(n)``` it holds
 
 ```math
@@ -64,8 +64,8 @@ as a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula 
 d_{\mathcal P(n)}(p,q)
 = \lVert \operatorname{Log}(p^{-\frac{1}{2}}qp^{-\frac{1}{2}})\rVert_{\mathrm{F}}.,
 ```
-where $\operatorname{Log}$ denotes the matrix logarithm and
-$\lVert\cdot\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
+where ``\operatorname{Log}`` denotes the matrix logarithm and
+``\lVert⋅\rVert_{\mathrm{F}}`` denotes the matrix Frobenius norm.
 """
 function distance(::SymmetricPositiveDefinite, p, q)
     # avoid numerical instabilities in cholesky
@@ -90,7 +90,7 @@ Compute the exponential map from `p` with tangent vector `X` on the
 \exp_p X = p^{\frac{1}{2}}\operatorname{Exp}(p^{-\frac{1}{2}} X p^{-\frac{1}{2}})p^{\frac{1}{2}},
 ```
 
-where $\operatorname{Exp}$ denotes to the matrix exponential.
+where ``\operatorname{Exp}`` denotes to the matrix exponential.
 """
 exp(::SymmetricPositiveDefinite, ::Any...)
 
@@ -151,7 +151,7 @@ end
 Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
 [`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
-[`AffineInvariantMetric`](@ref) that diagonalizes the curvature tensor $R(u,v)w$
+[`AffineInvariantMetric`](@ref) that diagonalizes the curvature tensor ``R(u,v)w``
 with eigenvalues `κ` and where the direction `B.frame_direction` ``V`` has curvature `0`.
 
 The construction is based on an ONB for the symmetric matrices similar to [`get_basis(::SymmetricPositiveDefinite, p, ::DefaultOrthonormalBasis`](@ref  get_basis(M::SymmetricPositiveDefinite,p,B::DefaultOrthonormalBasis{<:Any,ManifoldsBase.TangentSpaceType}))
@@ -234,7 +234,7 @@ the coordinates with respect to this ONB can be simplified to
 ```math
    c_k = \mathrm{tr}(p^{-\frac{1}{2}}\Delta_{i,j} X)
 ```
-where $k$ is trhe linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+where ``k`` is trhe linearized index of the ``i=1,\ldots,n, j=i,\ldots,n``.
 """
 get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
 
@@ -272,7 +272,7 @@ the vector reconstruction with respect to this ONB can be simplified to
 ```math
    X = p^{\frac{1}{2}} \Biggl( \sum_{i=1,j=i}^n c_k \Delta_{i,j} \Biggr) p^{\frac{1}{2}}
 ```
-where $k$ is the linearized index of the $i=1,\ldots,n, j=i,\ldots,n$.
+where ``k`` is the linearized index of the ``i=1,\ldots,n, j=i,\ldots,n``.
 """
 get_vector(::SymmetricPositiveDefinite, X, p, c, ::DefaultOrthonormalBasis)
 
@@ -334,7 +334,7 @@ as a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula 
 \log_p q =
 p^{\frac{1}{2}}\operatorname{Log}(p^{-\frac{1}{2}}qp^{-\frac{1}{2}})p^{\frac{1}{2}},
 ```
-where $\operatorname{Log}$ denotes to the matrix logarithm.
+where ``\operatorname{Log}`` denotes to the matrix logarithm.
 """
 log(::SymmetricPositiveDefinite, ::Any...)
 
@@ -384,7 +384,7 @@ p^{-\frac{1}{2}}X p^{-\frac{1}{2}}
 p^{\frac{1}{2}},
 ```
 
-where $\operatorname{Exp}$ denotes the matrix exponential
+where ``\operatorname{Exp}`` denotes the matrix exponential
 and `log` the logarithmic map on [`SymmetricPositiveDefinite`](@ref)
 (again with respect to the [`AffineInvariantMetric`](@ref)).
 """
@@ -452,6 +452,30 @@ function riemann_tensor!(::SymmetricPositiveDefinite, Xresult, p, X, Y, Z)
     Xtmp = XI * YI - YI * XI
     Xresult .= ps * (1 // 4 .* (ZI * Xtmp .- Xtmp * ZI)) * ps
     return Xresult
+end
+
+"""
+    sectional_curvature_min(M::SymmetricPositiveDefinite)
+
+Return minimum sectional curvature of [`SymmetricPositiveDefinite`](@ref) manifold,
+that is 0 for SPD(1) and SPD(2) and -0.25 otherwise.
+"""
+function sectional_curvature_min(M::SymmetricPositiveDefinite)
+    if manifold_dimension(M) < 2
+        return 0.0
+    else
+        return -0.25
+    end
+end
+
+"""
+    sectional_curvature_max(M::SymmetricPositiveDefinite)
+
+Return minimum sectional curvature of [`SymmetricPositiveDefinite`](@ref) manifold,
+that is 0.
+"""
+function sectional_curvature_max(::SymmetricPositiveDefinite)
+    return 0.0
 end
 
 """

@@ -43,6 +43,6 @@ Public=false
 ## Literature
 
 ```@bibliography
-Pages = ["manifolds/probabilitysimplex.md"]
+Pages = ["probabilitysimplex.md"]
 Canonical=false
 ```

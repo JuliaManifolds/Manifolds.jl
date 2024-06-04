@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 using Manifolds: induced_basis
 using FiniteDifferences
@@ -296,8 +296,12 @@ using FiniteDifferences
         @test size(RT) == (2, 2, 2, 2)
         @test norm(RT) ≈ 0.0 atol = 1e-16
 
-        @test riemann_tensor(M, p, [1, 2], [1, 3], [1, 4]) == [0, 0]
         @test !Manifolds.check_chart_switch(M, A, i, p)
+
+        @test riemann_tensor(M, p, [1, 2], [1, 3], [1, 4]) == [0, 0]
+        @test sectional_curvature(M, p, [1.0, 0.0], [0.0, 1.0]) == 0.0
+        @test sectional_curvature_max(M) == 0.0
+        @test sectional_curvature_min(M) == 0.0
     end
     @testset "Induced Basis and local metric for EuclideanMetric" begin
         struct DefaultManifold <: AbstractManifold{ℝ} end
@@ -445,5 +449,16 @@ using FiniteDifferences
             2.0,
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
         ) === 2.0
+    end
+
+    @testset "Mixed array dimensions for exp and PT" begin
+        # this is an issue on Julia 1.6 but not later releases
+        for M in [Euclidean(), Euclidean(; parameter=:field)]
+            p = fill(0.0)
+            exp!(M, p, p, [1.0], 2.0)
+            @test p ≈ fill(2.0)
+            parallel_transport_to!(M, p, p, [4.0], p)
+            @test p ≈ fill(4.0)
+        end
     end
 end

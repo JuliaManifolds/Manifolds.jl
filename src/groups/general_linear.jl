@@ -190,7 +190,7 @@ The algorithm proceeds in two stages. First, the point ``r = p^{-1} q`` is proje
 nearest element (under the Frobenius norm) of the direct product subgroup
 ``\mathrm{O}(n) × S^+``, whose logarithmic map is exactly computed using the matrix
 logarithm. This initial tangent vector is then refined using the
-[`NLSolveInverseRetraction`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/retractions.html#ManifoldsBase.NLSolveInverseRetraction).
+[`NLSolveInverseRetraction`](@extref `ManifoldsBase.NLSolveInverseRetraction`).
 
 For `GeneralLinear(n, ℂ)`, the logarithmic map is instead computed on the realified
 supergroup `GeneralLinear(2n)` and the resulting tangent vector is then complexified.
@@ -268,11 +268,11 @@ function Random.rand!(rng::AbstractRNG, G::GeneralLinear, pX; kwargs...)
 end
 
 function Base.show(io::IO, ::GeneralLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return print(io, "GeneralLinear($n, $𝔽)")
+    return print(io, "GeneralLinear($n, $(𝔽))")
 end
 function Base.show(io::IO, M::GeneralLinear{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return print(io, "GeneralLinear($n, $𝔽; parameter=:field)")
+    return print(io, "GeneralLinear($n, $(𝔽); parameter=:field)")
 end
 
 # note: this implementation is not optimal

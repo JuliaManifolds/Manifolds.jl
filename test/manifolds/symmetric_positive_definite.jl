@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "Symmetric Positive Definite Matrices" begin
     M1 = SymmetricPositiveDefinite(3)
@@ -312,5 +312,11 @@ include("../utils.jl")
         M = SymmetricPositiveDefinite(3; parameter=:field)
         @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
         @test repr(M) == "SymmetricPositiveDefinite(3; parameter=:field)"
+    end
+
+    @testset "Curvature" begin
+        @test sectional_curvature_min(SymmetricPositiveDefinite(1)) == 0.0
+        @test sectional_curvature_min(SymmetricPositiveDefinite(3)) == -0.25
+        @test sectional_curvature_max(SymmetricPositiveDefinite(3)) == 0.0
     end
 end

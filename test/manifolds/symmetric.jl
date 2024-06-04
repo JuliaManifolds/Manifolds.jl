@@ -1,4 +1,4 @@
-include("../utils.jl")
+include("../header.jl")
 
 @testset "SymmetricMatrices" begin
     M = SymmetricMatrices(3, ℝ)

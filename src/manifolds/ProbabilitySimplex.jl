@@ -24,7 +24,7 @@ T_pΔ^n = \biggl\{ X ∈ ℝ^{n+1}\ \big|\ ⟨\mathbb{1},X⟩ = \sum_{i=1}^{n+1}
 
 The manifold is implemented assuming the Fisher-Rao metric for the multinomial distribution,
 which is equivalent to the induced metric from isometrically embedding the probability
-simplex in the $n$-sphere of radius 2.
+simplex in the ``n``-sphere of radius 2.
 The corresponding diffeomorphism $\varphi: \mathbb Δ^n → \mathcal N$,
 where $\mathcal N \subset 2𝕊^n$ is given by $\varphi(p) = 2\sqrt{p}$.
 
@@ -66,7 +66,7 @@ active_traits(f, ::ProbabilitySimplex, args...) = merge_traits(IsEmbeddedManifol
 @doc raw"""
     change_representer(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
-Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.EuclideanMetric),
+Given a tangent vector with respect to the metric from the embedding, the [`EuclideanMetric`](@extref `ManifoldsBase.EuclideanMetric`),
 the representer of a linear functional on the tangent space is adapted as ``Z = p .* X .- p .* dot(p, X)``.
 The first part “compensates” for the divsion by ``p`` in the Riemannian metric on the [`ProbabilitySimplex`](@ref)
 and the second part performs appropriate projection to keep the vector tangent.
@@ -82,7 +82,7 @@ end
 @doc raw"""
     change_metric(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
-To change the metric, we are looking for a function ``c\colon T_pΔ^n \to T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
+To change the metric, we are looking for a function ``c\colon T_pΔ^n → T_pΔ^n`` such that for all ``X,Y ∈ T_pΔ^n``
 This can be achieved by rewriting representer change in matrix form as `(Diagonal(p) - p * p') * X`
 and taking square root of the matrix
 """
@@ -129,8 +129,14 @@ after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
 `X` has to be of same dimension as `p` and its elements have to sum to one.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_vector(M::ProbabilitySimplex, p, X; kwargs...)
-    if !isapprox(sum(X), 0.0; kwargs...)
+function check_vector(
+    M::ProbabilitySimplex,
+    p,
+    X::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    if !isapprox(sum(X), 0.0; atol=atol, kwargs...)
         return DomainError(
             sum(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its elements do not sum up to 0.",
@@ -336,11 +342,11 @@ end
     )
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` using
-[`GeodesicInterpolation`](@ref).
+[`GeodesicInterpolation`](@extref `ManifoldsBase.GeodesicInterpolation`).
 """
 mean(::ProbabilitySimplex, ::Any...)
 
-default_estimation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
+default_approximation_method(::ProbabilitySimplex, ::typeof(mean)) = GeodesicInterpolation()
 
 function parallel_transport_to!(M::ProbabilitySimplex, Y, p, X, q)
     n = get_parameter(M.size)[1]
@@ -435,7 +441,7 @@ end
 @doc raw"""
     representation_size(::ProbabilitySimplex)
 
-Return the representation size of points in the $n$-dimensional probability simplex,
+Return the representation size of points in the ``n``-dimensional probability simplex,
 i.e. an array size of `(n+1,)`.
 """
 function representation_size(M::ProbabilitySimplex)

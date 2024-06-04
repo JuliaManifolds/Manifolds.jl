@@ -1,16 +1,16 @@
 @doc raw"""
     SkewHermitianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold)  $ \operatorname{SkewHerm}(n)$ consisting of the real- or
-complex-valued skew-hermitian matrices of size ``n × n``, i.e. the set
+The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  ``\operatorname{SkewHerm}(n)`` consisting of the real- or
+complex-valued skew-hermitian matrices of size ``n×n``, i.e. the set
 
 ````math
-\operatorname{SkewHerm}(n) = \bigl\{p  ∈ 𝔽^{n × n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
+\operatorname{SkewHerm}(n) = \bigl\{p  ∈ 𝔽^{n×n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
 ````
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transpose,
-and the field $𝔽 ∈ \{ ℝ, ℂ, ℍ\}$.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
+and the field ``𝔽 ∈ \{ ℝ, ℂ, ℍ\}``.
 
-Though it is slightly redundant, usually the matrices are stored as ``n × n`` arrays.
+Though it is slightly redundant, usually the matrices are stored as ``n×n`` arrays.
 
 Note that in this representation, the real-valued part of the diagonal must be zero,
 which is also reflected in the
@@ -20,7 +20,7 @@ which is also reflected in the
 
     SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
-Generate the manifold of ``n × n`` skew-hermitian matrices.
+Generate the manifold of ``n×n`` skew-hermitian matrices.
 """
 struct SkewHermitianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
@@ -34,7 +34,7 @@ end
 @doc raw"""
     SkewSymmetricMatrices{T}
 
-Generate the manifold of ``n × n`` real skew-symmetric matrices.
+Generate the manifold of ``n×n`` real skew-symmetric matrices.
 This is equivalent to [`SkewHermitianMatrices(n, ℝ)`](@ref).
 
 # Constructor
@@ -64,7 +64,7 @@ end
 
 Check whether `p` is a valid manifold point on the [`SkewHermitianMatrices`](@ref) `M`, i.e.
 whether `p` is a skew-hermitian matrix of size `(n,n)` with values from the corresponding
-[`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system) `𝔽`.
+[`AbstractNumbers`](@extref ManifoldsBase number-system) `𝔽`.
 
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
@@ -83,7 +83,7 @@ end
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`SkewHermitianMatrices`](@ref) `M`, i.e. `X` must be a skew-hermitian matrix of size `(n,n)`
-and its values have to be from the correct [`AbstractNumbers`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#number-system).
+and its values have to be from the correct [`AbstractNumbers`](@extref ManifoldsBase number-system).
 The tolerance for the skew-symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(M::SkewHermitianMatrices, p, X; kwargs...)
@@ -201,7 +201,7 @@ system `𝔽`, i.e.
 \dim \mathrm{SkewHerm}(n,ℝ) = \frac{n(n+1)}{2} \dim_ℝ 𝔽 - n,
 ````
 
-where ``\dim_ℝ 𝔽`` is the [`real_dimension`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}) of ``𝔽``. The first term corresponds to
+where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of ``𝔽``. The first term corresponds to
 only the upper triangular elements of the matrix being unique, and the second term
 corresponds to the constraint that the real part of the diagonal be zero.
 """
@@ -223,7 +223,7 @@ Projects `p` from the embedding onto the [`SkewHermitianMatrices`](@ref) `M`, i.
 \operatorname{proj}_{\operatorname{SkewHerm}(n)}(p) = \frac{1}{2} \bigl( p - p^{\mathrm{H}} \bigr),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SkewHermitianMatrices, ::Any)
 
@@ -241,7 +241,7 @@ Project the matrix `X` onto the tangent space at `p` on the [`SkewHermitianMatri
 \operatorname{proj}_p(X) = \frac{1}{2} \bigl( X - X^{\mathrm{H}} \bigr),
 ````
 
-where $\cdot^{\mathrm{H}}$ denotes the Hermitian, i.e. complex conjugate transposed.
+where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transposed.
 """
 project(::SkewHermitianMatrices, ::Any, ::Any)
 

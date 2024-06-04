@@ -9,7 +9,7 @@ are for example summarized in Table 1 of [Lin:2019](@cite).
 
     CholeskySpace(n; parameter::Symbol=:type)
 
-Generate the manifold of $n× n$ lower triangular matrices with positive diagonal.
+Generate the manifold of ``n×n`` lower triangular matrices with positive diagonal.
 """
 struct CholeskySpace{T} <: AbstractManifold{ℝ}
     size::T
@@ -28,10 +28,15 @@ it's size fits the manifold, it is a lower triangular matrix and has positive
 entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function check_point(M::CholeskySpace, p; kwargs...)
+function check_point(
+    M::CholeskySpace,
+    p::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
     cks = check_size(M, p)
     cks === nothing || return cks
-    if !isapprox(norm(strictlyUpperTriangular(p)), 0.0; kwargs...)
+    if !isapprox(norm(strictlyUpperTriangular(p)), 0.0; atol=atol, kwargs...)
         return DomainError(
             norm(UpperTriangular(p) - Diagonal(p)),
             "The point $(p) does not lie on $(M), since it strictly upper triangular nonzero entries",
@@ -54,8 +59,14 @@ after [`check_point`](@ref)`(M,p)`, `X` has to have the same dimension as `p`
 and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
-function check_vector(M::CholeskySpace, p, X; kwargs...)
-    if !isapprox(norm(strictlyUpperTriangular(X)), 0.0; kwargs...)
+function check_vector(
+    M::CholeskySpace,
+    p,
+    X;
+    atol::Real=sqrt(prod(representation_size(M)) * eps(float(eltype(p)))),
+    kwargs...,
+)
+    if !isapprox(norm(strictlyUpperTriangular(X)), 0.0; atol=atol, kwargs...)
         return DomainError(
             norm(UpperTriangular(X) - Diagonal(X)),
             "The matrix $(X) is not a tangent vector at $(p) (represented as an element of the Lie algebra) since it is not lower triangular.",
@@ -96,8 +107,8 @@ The formula reads
 \operatorname{diag}(p)\exp\bigl( \operatorname{diag}(X)\operatorname{diag}(p)^{-1}\bigr),
 ````
 
-where $⌊\cdot⌋$ denotes the strictly lower triangular matrix,
-and $\operatorname{diag}$ extracts the diagonal matrix.
+where ``⌊⋅⌋`` denotes the strictly lower triangular matrix,
+and ``\operatorname{diag}`` extracts the diagonal matrix.
 """
 exp(::CholeskySpace, ::Any...)
 
@@ -147,8 +158,8 @@ The formula reads
 \log_p q = ⌊ p ⌋ - ⌊ q ⌋ + \operatorname{diag}(p)\log\bigl(\operatorname{diag}(q)\operatorname{diag}(p)^{-1}\bigr),
 ````
 
-where $⌊\cdot⌋$ denotes the strictly lower triangular matrix,
-and $\operatorname{diag}$ extracts the diagonal matrix.
+where ``⌊⋅⌋`` denotes the strictly lower triangular matrix,
+and ``\operatorname{diag}`` extracts the diagonal matrix.
 """
 log(::Cholesky, ::Any...)
 
@@ -208,8 +219,8 @@ on the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 + \operatorname{diag}(q)\operatorname{diag}(p)^{-1}\operatorname{diag}(X),
 ````
 
-where $⌊\cdot⌋$ denotes the strictly lower triangular matrix,
-and $\operatorname{diag}$ extracts the diagonal matrix.
+where ``⌊⋅⌋`` denotes the strictly lower triangular matrix,
+and ``\operatorname{diag}`` extracts the diagonal matrix.
 """
 parallel_transport_to(::CholeskySpace, ::Any, ::Any, ::Any)
 

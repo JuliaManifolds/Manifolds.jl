@@ -76,8 +76,14 @@ Compute the value of differential of additive matrix inversion ``p ↦ -p`` at `
 """
 inv_diff(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X)
 
-function is_identity(::AdditionGroupTrait, G::AbstractDecoratorManifold, q; kwargs...)
-    return isapprox(G, q, zero(q); kwargs...)
+function is_identity(
+    ::AdditionGroupTrait,
+    G::AbstractDecoratorManifold,
+    q::T;
+    atol::Real=sqrt(prod(representation_size(G))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
+    return isapprox(G, q, zero(q); atol=atol, kwargs...)
 end
 # resolve ambiguities
 function is_identity(

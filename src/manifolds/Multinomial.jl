@@ -5,22 +5,25 @@ The multinomial manifold consists of `m` column vectors, where each column is of
 `n` and unit norm, i.e.
 
 ````math
-\mathcal{MN}(n,m) \coloneqq \bigl\{ p ∈ ℝ^{n×m}\ \big|\ p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m \text{ and } p^{\mathrm{T}}\mathbb{1}_m = \mathbb{1}_n\bigr\},
+\mathcal{MN}(n,m) \coloneqq \bigl\{
+    p ∈ ℝ^{n×m}\ \big|\ p_{i,j} > 0 \text{ for all } i=1,…,n, j=1,…,m
+    \text{ and } p^{\mathrm{T}}\mathbb{1}_m = \mathbb{1}_n\bigr\},
 ````
-where $\mathbb{1}_k$ is the vector of length $k$ containing ones.
+
+where ``\mathbb{1}_k`` is the vector of length ``k`` containing ones.
 
 This yields exactly the same metric as
-considering the product metric of the probablity vectors, i.e. [`PowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.PowerManifold) of the
-$(n-1)$-dimensional [`ProbabilitySimplex`](@ref).
+considering the product metric of the probablity vectors, i.e. [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) of the
+``(n-1)``-dimensional [`ProbabilitySimplex`](@ref).
 
 The [`ProbabilitySimplex`](@ref) is stored internally within `M.manifold`, such that all functions of
-[`AbstractPowerManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/manifolds.html#ManifoldsBase.AbstractPowerManifold)  can be used directly.
+[`AbstractPowerManifold`](@extref `ManifoldsBase.AbstractPowerManifold`)  can be used directly.
 
 # Constructor
 
     MultinomialMatrices(n::Int, m::Int; parameter::Symbol=:type)
 
-Generate the manifold of matrices $\mathbb R^{n×m}$ such that the $m$ columns are
+Generate the manifold of matrices ``ℝ^{n×m}`` such that the ``m`` columns are
 discrete probability distributions, i.e. sum up to one.
 
 `parameter`: whether a type parameter should be used to store `n` and `m`. By default size
@@ -50,7 +53,7 @@ end
     check_point(M::MultinomialMatrices, p)
 
 Checks whether `p` is a valid point on the [`MultinomialMatrices`](@ref)`(m,n)` `M`, i.e. is a matrix
-of `m` discrete probability distributions as columns from $\mathbb R^{n}$, i.e. each column is a point from
+of `m` discrete probability distributions as columns from ``ℝ^n``, i.e. each column is a point from
 [`ProbabilitySimplex`](@ref)`(n-1)`.
 """
 check_point(::MultinomialMatrices, ::Any)
@@ -83,6 +86,28 @@ end
 function power_dimensions(M::MultinomialMatrices)
     n, m = get_parameter(M.size)
     return (m,)
+end
+
+@doc raw"""
+    riemannian_gradient(M::MultinomialMatrices, p, Y; kwargs...)
+
+Let ``Y`` denote the Euclidean gradient of a function ``\tilde f`` defined in the
+embedding neighborhood of `M`, then the Riemannian gradient is given by
+Equation 5 of [DouikHassibi:2019](@cite) as
+
+```math
+  \operatorname{grad} f(p) = \proj_{T_p\mathcal M}(Y⊙p)
+```
+
+where ``⊙`` denotes the Hadamard or elementwise product.
+
+"""
+riemannian_gradient(M::MultinomialMatrices, p, Y; kwargs...)
+
+function riemannian_gradient!(M::MultinomialMatrices, X, p, Y; kwargs...)
+    X .= p .* Y
+    project!(M, X, p, X)
+    return X
 end
 
 representation_size(M::MultinomialMatrices) = get_parameter(M.size)

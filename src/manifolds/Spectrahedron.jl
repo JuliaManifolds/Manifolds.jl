@@ -2,35 +2,35 @@
     Spectrahedron{T} <: AbstractDecoratorManifold{ℝ}
 
 The Spectrahedron manifold, also known as the set of correlation matrices (symmetric
-positive semidefinite matrices) of rank $k$ with unit trace.
+positive semidefinite matrices) of rank ``k`` with unit trace.
 
 ````math
 \begin{aligned}
 \mathcal S(n,k) =
-\bigl\{p ∈ ℝ^{n × n}\ \big|\ &a^\mathrm{T}pa \geq 0 \text{ for all } a ∈ ℝ^{n},\\
+\bigl\{p ∈ ℝ^{n×n}\ \big|\ &a^\mathrm{T}pa \geq 0 \text{ for all } a ∈ ℝ^{n},\\
 &\operatorname{tr}(p) = \sum_{i=1}^n p_{ii} = 1,\\
-&\text{and } p = qq^{\mathrm{T}} \text{ for } q \in  ℝ^{n × k}
+&\text{and } p = qq^{\mathrm{T}} \text{ for } q \in  ℝ^{n×k}
 \text{ with } \operatorname{rank}(p) = \operatorname{rank}(q) = k
 \bigr\}.
 \end{aligned}
 ````
 
-This manifold is working solely on the matrices $q$. Note that this $q$ is not unique,
-indeed for any orthogonal matrix $A$ we have $(qA)(qA)^{\mathrm{T}} = qq^{\mathrm{T}} = p$,
+This manifold is working solely on the matrices ``q``. Note that this ``q`` is not unique,
+indeed for any orthogonal matrix ``A`` we have ``(qA)(qA)^{\mathrm{T}} = qq^{\mathrm{T}} = p``,
 so the manifold implemented here is the quotient manifold. The unit trace translates to
-unit frobenius norm of $q$.
+unit frobenius norm of ``q``.
 
 
-The tangent space at $p$, denoted $T_p\mathcal E(n,k)$, is also represented by matrices
-$Y\in ℝ^{n × k}$ and reads as
+The tangent space at ``p``, denoted ``T_p\mathcal E(n,k)``, is also represented by matrices
+``Y\in ℝ^{n×k}`` and reads as
 
 ````math
 T_p\mathcal S(n,k) = \bigl\{
-X ∈ ℝ^{n × n}\,|\,X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}
+X ∈ ℝ^{n×n}\,|\,X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}
 \text{ with } \operatorname{tr}(X) = \sum_{i=1}^{n}X_{ii} = 0
 \bigr\}
 ````
-endowed with the [`Euclidean`](@ref) metric from the embedding, i.e. from the $ℝ^{n × k}$
+endowed with the [`Euclidean`](@ref) metric from the embedding, i.e. from the ``ℝ^{n×k}``
 
 
 This manifold was for example
@@ -40,7 +40,7 @@ investigated in [JourneeBachAbsilSepulchre:2010](@cite).
 
     Spectrahedron(n::Int, k::Int; parameter::Symbol=:type)
 
-generates the manifold $\mathcal S(n,k) \subset ℝ^{n × n}$.
+generates the manifold ``\mathcal S(n,k) \subset ℝ^{n×n}``.
 """
 struct Spectrahedron{T} <: AbstractDecoratorManifold{ℝ}
     size::T
@@ -56,12 +56,12 @@ active_traits(f, ::Spectrahedron, args...) = merge_traits(IsIsometricEmbeddedMan
 @doc raw"""
     check_point(M::Spectrahedron, q; kwargs...)
 
-checks, whether `q` is a valid reprsentation of a point $p=qq^{\mathrm{T}}$ on the
+checks, whether `q` is a valid reprsentation of a point ``p=qq^{\mathrm{T}}`` on the
 [`Spectrahedron`](@ref) `M`, i.e. is a matrix
-of size `(N,K)`, such that $p$ is symmetric positive semidefinite and has unit trace,
-i.e. $q$ has to have unit frobenius norm.
-Since by construction $p$ is symmetric, this is not explicitly checked.
-Since $p$ is by construction positive semidefinite, this is not checked.
+of size `(N,K)`, such that ``p`` is symmetric positive semidefinite and has unit trace,
+i.e. ``q`` has to have unit frobenius norm.
+Since by construction ``p`` is symmetric, this is not explicitly checked.
+Since ``p`` is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
 function check_point(M::Spectrahedron, q; kwargs...)
@@ -78,17 +78,23 @@ end
 @doc raw"""
     check_vector(M::Spectrahedron, q, Y; kwargs...)
 
-Check whether $X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}$ is a tangent vector to
-$p=qq^{\mathrm{T}}$ on the [`Spectrahedron`](@ref) `M`,
+Check whether ``X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}`` is a tangent vector to
+``p=qq^{\mathrm{T}}`` on the [`Spectrahedron`](@ref) `M`,
 i.e. atfer [`check_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
-and a $X$ has to be a symmetric matrix with trace.
+and a ``X`` has to be a symmetric matrix with trace.
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
-Note that symmetry of $X$ holds by construction and is not explicitly checked.
+Note that symmetry of ``X`` holds by construction and is not explicitly checked.
 """
-function check_vector(M::Spectrahedron, q, Y; kwargs...)
+function check_vector(
+    M::Spectrahedron,
+    q,
+    Y::T;
+    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+    kwargs...,
+) where {T}
     X = q * Y' + Y * q'
     n = tr(X)
-    if !isapprox(n, 0.0; kwargs...)
+    if !isapprox(n, 0; atol=atol, kwargs...)
         return DomainError(
             n,
             "The vector $(X) is not a tangent to a point on $(M) (represented py $(q) and $(Y), since its trace is nonzero.",
@@ -116,7 +122,7 @@ is_flat(M::Spectrahedron) = false
     manifold_dimension(M::Spectrahedron)
 
 returns the dimension of
-[`Spectrahedron`](@ref) `M`$=\mathcal S(n,k), n,k ∈ ℕ$, i.e.
+[`Spectrahedron`](@ref) `M```=\mathcal S(n,k), n,k ∈ ℕ``, i.e.
 ````math
 \dim \mathcal S(n,k) = nk - 1 - \frac{k(k-1)}{2}.
 ````
@@ -152,7 +158,7 @@ end
 @doc raw"""
     retract(M::Spectrahedron, q, Y, ::ProjectionRetraction)
 
-compute a projection based retraction by projecting $q+Y$ back onto the manifold.
+compute a projection based retraction by projecting ``q+Y`` back onto the manifold.
 """
 retract(::Spectrahedron, ::Any, ::Any, ::ProjectionRetraction)
 
@@ -162,8 +168,8 @@ retract_project!(M::Spectrahedron, r, q, Y, t::Number) = project!(M, r, q .+ t .
     representation_size(M::Spectrahedron)
 
 Return the size of an array representing an element on the
-[`Spectrahedron`](@ref) manifold `M`, i.e. $n × k$, the size of such factor of $p=qq^{\mathrm{T}}$
-on $\mathcal M = \mathcal S(n,k)$.
+[`Spectrahedron`](@ref) manifold `M`, i.e. ``n×k``, the size of such factor of ``p=qq^{\mathrm{T}}``
+on ``\mathcal M = \mathcal S(n,k)``.
 """
 representation_size(M::Spectrahedron) = get_parameter(M.size)
 
