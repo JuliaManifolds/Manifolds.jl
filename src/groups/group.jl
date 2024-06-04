@@ -457,33 +457,35 @@ function adjoint_action(
     Y = allocate_result(BG, adjoint_action, Xₑ, p)
     return adjoint_action!(BG, Y, p, Xₑ, dir)
 end
-function adjoint_action(
-    ::AbstractDecoratorManifold,
-    ::Identity,
-    Xₑ,
-    ::LeftAction,
-)
+function adjoint_action(::AbstractDecoratorManifold, ::Identity, Xₑ, ::LeftAction)
     return Xₑ
 end
 # backward compatibility
-function adjoint_action(
-    G::AbstractDecoratorManifold, p, X)
+function adjoint_action(G::AbstractDecoratorManifold, p, X)
     return adjoint_action(G, p, X, LeftAction())
 end
-function adjoint_action!(
-    G::AbstractDecoratorManifold, Y, p, X)
+function adjoint_action!(G::AbstractDecoratorManifold, Y, p, X)
     return adjoint_action!(G, Y, p, X, LeftAction())
 end
 function adjoint_action!(
     ::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold, Y, p, X)
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+)
     BG = base_group(G)
     return adjoint_action!(BG, Y, p, X, LeftAction())
 end
 # fall back method: the right action is defined from the left action
 function adjoint_action!(
     ::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold, Y, p, X, ::RightAction)
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    ::RightAction,
+)
     BG = base_group(G)
     return adjoint_action!(BG, Y, inv(BG, p), X, LeftAction())
 end
@@ -1207,13 +1209,19 @@ function log!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, p
     log_lie!(BG, X, x)
     return X
 end
-function exp(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X, t::Number=1)
+function exp(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    X,
+    t::Number=1,
+)
     # TODO: use the following version when `allocate_result` is fixed
     # q = allocate_result(G, exp)
     # return exp!(G, q, p, t*X)
     # --
     BG = base_group(G)
-    return compose(BG, p, exp_lie(BG, t*X))
+    return compose(BG, p, exp_lie(BG, t * X))
 end
 function exp!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p, X)
     BG = base_group(G)

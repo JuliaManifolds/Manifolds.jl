@@ -135,7 +135,6 @@ function _compose!(G::SemidirectProductGroup, x, p, q)
     return x
 end
 
-
 # We need to prevent decorator unwrapping so that the correct `get_vector!` gets called
 # and applies proper padding to the result if `X` happens to be a matrix.
 # Otherwise rare random bugs happen where the padding is not applied.

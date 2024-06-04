@@ -324,7 +324,6 @@ function compose!(
     return x
 end
 
-
 @doc raw"""
     exp_lie(G::SpecialEuclidean{n}, X)
 
@@ -554,7 +553,6 @@ function _log_lie!(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, X, q)
     @inbounds _padvector!(G, X)
     return X
 end
-
 
 """
     lie_bracket(G::SpecialEuclidean, X::ArrayPartition, Y::ArrayPartition)

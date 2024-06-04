@@ -24,7 +24,14 @@ const AdditionGroupTrait = TraitList{<:IsGroupManifold{AdditionOperation}}
 
 adjoint_action(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X, ::LeftAction) = X
 
-function adjoint_action!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Y, p, X, ::LeftAction)
+function adjoint_action!(
+    ::AdditionGroupTrait,
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    ::LeftAction,
+)
     return copyto!(G, Y, p, X)
 end
 
@@ -158,4 +165,3 @@ end
 lie_bracket(::AdditionGroupTrait, G::AbstractDecoratorManifold, X, Y) = zero(X)
 
 lie_bracket!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Z, X, Y) = fill!(Z, 0)
-
