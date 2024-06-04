@@ -664,8 +664,7 @@ end
 
 Embed the tangent vector X at point `p` on [`SpecialEuclidean`](@ref) in the
 [`GeneralLinear`](@ref) group. Point `p` can use any representation valid for
-`SpecialEuclidean`. The embedding is similar from the one defined by [`screw_matrix`](@ref)
-but the translation part is multiplied by inverse of the rotation part.
+`SpecialEuclidean`. The embedding is similar from the one defined by [`screw_matrix`](@ref).
 """
 function embed(M::SpecialEuclideanInGeneralLinear, p, X)
     G = M.manifold
@@ -674,7 +673,7 @@ function embed(M::SpecialEuclideanInGeneralLinear, p, X)
     Y = allocate_result(G, screw_matrix, nX, hX)
     nY, hY = submanifold_components(G, Y)
     copyto!(hY, hX)
-    copyto!(nY, hp' * nX)
+    copyto!(nY, nX)
     @inbounds _padvector!(G, Y)
     return Y
 end
@@ -708,7 +707,7 @@ function project(M::SpecialEuclideanInGeneralLinear, p, X)
     G = M.manifold
     np, hp = submanifold_components(G, p)
     nX, hX = submanifold_components(G, X)
-    return ArrayPartition(hp * nX, hX)
+    return ArrayPartition(nX, hX)
 end
 
 function project!(M::SpecialEuclideanInGeneralLinear, q, p)

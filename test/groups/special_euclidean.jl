@@ -92,12 +92,8 @@ using Manifolds:
             @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
 
             w = translate_diff(G, pts[1], Identity(G), X_pts[1])
-            w2 = allocate(w)
-            submanifold_component(w2, 1) .= submanifold_component(w, 1)
-            submanifold_component(w2, 2) .=
-                submanifold_component(pts[1], 2) * submanifold_component(w, 2)
-            w2mat = screw_matrix(G, w2)
-            @test w2mat ≈ affine_matrix(G, pts[1]) * screw_matrix(G, X_pts[1])
+            w2mat = screw_matrix(G, w)
+            @test w2mat ≈ screw_matrix(G, X_pts[1])
             @test screw_matrix(G, w2mat) === w2mat
 
             @test is_vector(G, Identity(G), rand(G; vector_at=Identity(G)))
