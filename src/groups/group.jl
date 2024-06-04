@@ -1191,6 +1191,37 @@ end
 direction_and_side(::GroupExponentialRetraction{D}) where {D} = D()
 direction_and_side(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
 
+function log(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
+    # TODO: use the following version when `allocate_result` is fixed
+    # X = allocate_result(G, log)
+    # return log!(G, X, p, q)
+    # --
+    BG = base_group(G)
+    return log_lie(BG, compose(BG, inv(BG, p), q))
+end
+function log!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, p, q)
+    x = allocate_result(G, inv)
+    BG = base_group(G)
+    inv!(BG, x, p)
+    compose!(BG, x, x, q)
+    log_lie!(BG, X, x)
+    return X
+end
+function exp(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X, t::Number=1)
+    # TODO: use the following version when `allocate_result` is fixed
+    # q = allocate_result(G, exp)
+    # return exp!(G, q, p, t*X)
+    # --
+    BG = base_group(G)
+    return compose(BG, p, exp_lie(BG, t*X))
+end
+function exp!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p, X)
+    BG = base_group(G)
+    exp_lie!(BG, q, X)
+    compose!(BG, q, p, q)
+    return q
+end
+
 @doc raw"""
     retract(
         G::AbstractDecoratorManifold,
