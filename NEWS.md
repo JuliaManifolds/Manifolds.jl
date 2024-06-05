@@ -5,19 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.20] - 2024-06-04
-
-### Changed
-
-- `translate_diff`, `inv_diff` and thus `apply_diff_group`, are available for all the groups
-- `adjoint_action` takes a direction argument
-- `adjoint_action!` is the necessary method to implement in any given group for the above to work properly
-- On groups, `exp` and `log` are based on `exp_lie` and `log_lie` and thus group invariant
 
 ## [0.9.19] – unreleased
 
 ### Changed
 
+* `translate_diff`, `inv_diff` and thus `apply_diff_group`, are available for all the groups
+* `adjoint_action` takes a direction argument
+* `adjoint_action!` is the necessary method to implement in any given group for the above to work properly
+* On groups, `exp` and `log` are based on `exp_lie` and `log_lie` and thus group invariant
 * fixed a few typos in the doc string of the SPD fixed determinant description.
 * Updated `Project.toml` compatibility entries.
 
