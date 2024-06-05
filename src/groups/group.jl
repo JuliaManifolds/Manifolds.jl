@@ -426,7 +426,7 @@ function is_vector(
 end
 
 @doc raw"""
-    adjoint_action(G::AbstractDecoratorManifold, p, X)
+    adjoint_action(G::AbstractDecoratorManifold, p, X, dir)
 
 Adjoint action of the element `p` of the Lie group `G` on the element `X`
 of the corresponding Lie algebra.
@@ -443,25 +443,51 @@ where ``e`` is the identity element of `G`.
 Note that the adjoint representation of a Lie group isn't generally faithful.
 Notably the adjoint representation of SO(2) is trivial.
 """
-adjoint_action(G::AbstractDecoratorManifold, p, X)
-@trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ)
-function adjoint_action(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, Xₑ)
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
-    Y = inverse_translate_diff(G, p, p, Xₚ, RightBackwardAction())
-    return Y
+adjoint_action(G::AbstractDecoratorManifold, p, X, dir)
+@trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ, dir)
+@trait_function adjoint_action!(G::AbstractDecoratorManifold, Y, p, Xₑ, dir)
+function adjoint_action(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    Xₑ,
+    dir,
+)
+    BG = base_group(G)
+    Y = allocate_result(BG, adjoint_action, Xₑ, p)
+    return adjoint_action!(BG, Y, p, Xₑ, dir)
 end
-
-@trait_function adjoint_action!(G::AbstractDecoratorManifold, Y, p, Xₑ)
+function adjoint_action(::AbstractDecoratorManifold, ::Identity, Xₑ, ::LeftAction)
+    return Xₑ
+end
+# backward compatibility
+function adjoint_action(G::AbstractDecoratorManifold, p, X)
+    return adjoint_action(G, p, X, LeftAction())
+end
+function adjoint_action!(G::AbstractDecoratorManifold, Y, p, X)
+    return adjoint_action!(G, Y, p, X, LeftAction())
+end
 function adjoint_action!(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     Y,
     p,
-    Xₑ,
+    X,
 )
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
-    inverse_translate_diff!(G, Y, p, p, Xₚ, RightBackwardAction())
-    return Y
+    BG = base_group(G)
+    return adjoint_action!(BG, Y, p, X, LeftAction())
+end
+# fall back method: the right action is defined from the left action
+function adjoint_action!(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    ::RightAction,
+)
+    BG = base_group(G)
+    return adjoint_action!(BG, Y, inv(BG, p), X, LeftAction())
 end
 
 @doc raw"""
@@ -562,11 +588,17 @@ inv_diff(G::AbstractDecoratorManifold, p)
 
 @trait_function inv_diff(G::AbstractDecoratorManifold, p, X)
 function inv_diff(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    Y = allocate_result(G, inv_diff, X, p)
-    return inv_diff!(G, Y, p, X)
+    return -adjoint_action(base_group(G), p, X)
 end
 
 @trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
+
+# true only if tangent vectors are stored with the left-invariant convention
+function inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
+    adjoint_action!(G, Y, p, X)
+    Y .*= -1
+    return Y
+end
 
 function Base.copyto!(
     ::TraitList{IsGroupManifold{O}},
@@ -913,6 +945,46 @@ end
     X,
     conv::ActionDirectionAndSide=LeftForwardAction(),
 )
+# the following are true if the tangent vectors are stored with the left invariant convention
+function translate_diff!(
+    G::AbstractDecoratorManifold,
+    Y,
+    ::Any,
+    ::Any,
+    X,
+    ::LeftForwardAction,
+)
+    return copyto!(G, Y, X)
+end
+function translate_diff!(
+    G::AbstractDecoratorManifold,
+    Y,
+    ::Any,
+    ::Any,
+    X,
+    ::RightForwardAction,
+)
+    return copyto!(G, Y, X)
+end
+function translate_diff!(G::AbstractDecoratorManifold, Y, p, ::Any, X, ::LeftBackwardAction)
+    return adjoint_action!(G, Y, p, X, LeftAction())
+end
+function translate_diff!(
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    ::Any,
+    X,
+    ::RightBackwardAction,
+)
+    return adjoint_action!(G, Y, p, X, RightAction())
+end
+
+# the following are true regardless of how the tangent vectors are stored:
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftForwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightForwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftBackwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightBackwardAction) = X
 
 @doc raw"""
     inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirectionAndSide=LeftForwardAction())
@@ -1120,6 +1192,43 @@ end
 
 direction_and_side(::GroupExponentialRetraction{D}) where {D} = D()
 direction_and_side(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
+
+function log(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
+    # TODO: use the following version when `allocate_result` is fixed
+    # X = allocate_result(G, log)
+    # return log!(G, X, p, q)
+    # --
+    BG = base_group(G)
+    return log_lie(BG, compose(BG, inv(BG, p), q))
+end
+function log!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, p, q)
+    x = allocate_result(G, inv)
+    BG = base_group(G)
+    inv!(BG, x, p)
+    compose!(BG, x, x, q)
+    log_lie!(BG, X, x)
+    return X
+end
+function exp(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    X,
+    t::Number=1,
+)
+    # TODO: use the following version when `allocate_result` is fixed
+    # q = allocate_result(G, exp)
+    # return exp!(G, q, p, t*X)
+    # --
+    BG = base_group(G)
+    return compose(BG, p, exp_lie(BG, t * X))
+end
+function exp!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q, p, X)
+    BG = base_group(G)
+    exp_lie!(BG, q, X)
+    compose!(BG, q, p, q)
+    return q
+end
 
 @doc raw"""
     retract(
