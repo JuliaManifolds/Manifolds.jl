@@ -487,7 +487,7 @@ function local_metric_jacobian(
     backend::AbstractDiffBackend=default_differential_backend(),
 )
     n = size(p, 1)
-    ∂g = reshape(_jacobian(q -> local_metric(M, q, B), p, backend), n, n, n)
+    ∂g = reshape(_jacobian(q -> local_metric(M, q, B), copy(M, p), backend), n, n, n)
     return ∂g
 end
 @trait_function local_metric_jacobian(
