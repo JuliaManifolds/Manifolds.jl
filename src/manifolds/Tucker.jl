@@ -674,7 +674,7 @@ end
     retract(::Tucker, p::TuckerPoint, X::TuckerTVector, ::PolarRetraction)
 
 The truncated HOSVD-based retraction [KressnerSteinlechnerVandereycken:2013](@cite) to the Tucker manifold, i.e.
-the result is the sequentially tuncated HOSVD approximation of ``p + X``.
+the result is the sequentially truncated HOSVD approximation of ``p + X``.
 
 In the exceptional case that the multilinear rank of ``p + X`` is lower than that of ``p``, this
 retraction produces a boundary point, which is outside the manifold.

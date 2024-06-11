@@ -1,6 +1,6 @@
 
 project:
-  title: "Manonifolds.jl"
+  title: "Manifolds.jl"
   #execute-dir: project
 
 crossref:

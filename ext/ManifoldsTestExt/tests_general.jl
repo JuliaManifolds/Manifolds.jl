@@ -63,7 +63,7 @@ that lie on it (contained in `pts`).
 - `test_mutating_rand = false` : test the mutating random function for points on manifolds.
 - `test_project_point = false`: test projections onto the manifold.
 - `test_project_tangent = false` : test projections on tangent spaces.
-- `test_representation_size = true` : test repersentation size of points/tvectprs.
+- `test_representation_size = true` : test representation size of points/tvectprs.
 - `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace.
 - `test_vector_spaces = true` : test Vector bundle of this manifold.
 - `test_default_vector_transport = false` : test the default vector transport (usually
@@ -841,12 +841,12 @@ function test_manifold(
 end
 
 """
-    test_parallel_transport(M,P; along=false, to=true, diretion=true)
+    test_parallel_transport(M,P; along=false, to=true, direction=true)
 
 Generic tests for parallel transport on `M`given at least two pointsin `P`.
 
 The single functions to transport `along` (a curve), `to` (a point) or (towards a) `direction`
-are sub-tests that can be activated by the keywords arguemnts
+are sub-tests that can be activated by the keywords arguments
 
 !!! Note
 Since the interface to specify curves is not yet provided, the along keyword does not have an effect yet

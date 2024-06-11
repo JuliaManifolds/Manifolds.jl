@@ -500,7 +500,7 @@ end
 @doc raw"""
     log(N::MetricManifold{M,G}, p, q)
 
-Copute the logarithmic map on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with the
+Compute the logarithmic map on the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` equipped with the
 [`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`) `G`.
 
 If the metric was declared the default metric using the [`IsDefaultMetric`](@ref) trait or [`is_default_metric`](@ref), this method
