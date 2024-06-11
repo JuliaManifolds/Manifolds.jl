@@ -303,7 +303,7 @@ end
 @doc raw"""
     project(::Hyperbolic, ::PoincareBallPoint, ::PoincareBallTVector)
 
-projction of tangent vectors in the Poincaré ball model is just the identity, since
+projection of tangent vectors in the Poincaré ball model is just the identity, since
 the tangent space consists of all ``ℝ^n``.
 """
 project(::Hyperbolic, ::PoincareBallPoint, ::PoincareBallTVector)

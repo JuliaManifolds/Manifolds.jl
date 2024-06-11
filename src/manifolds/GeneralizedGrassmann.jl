@@ -99,7 +99,7 @@ end
     check_point(M::GeneralizedGrassmann, p)
 
 Check whether `p` is representing a point on the [`GeneralizedGrassmann`](@ref) `M`, i.e. its
-a `n`-by-`k` matrix of unitary column vectors with respect to the B inner prudct and
+a `n`-by-`k` matrix of unitary column vectors with respect to the B inner product and
 of correct `eltype` with respect to `𝔽`.
 """
 function check_point(M::GeneralizedGrassmann, p; kwargs...)
@@ -359,7 +359,7 @@ end
 @doc raw"""
     representation_size(M::GeneralizedGrassmann)
 
-Return the represenation size or matrix dimension of a point on the [`GeneralizedGrassmann`](@ref)
+Return the representation size or matrix dimension of a point on the [`GeneralizedGrassmann`](@ref)
 `M`, i.e. ``(n,k)`` for both the real-valued and the complex value case.
 """
 representation_size(M::GeneralizedGrassmann) = get_parameter(M.size)

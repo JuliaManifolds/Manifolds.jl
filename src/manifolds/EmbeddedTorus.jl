@@ -34,7 +34,7 @@ Check whether `p` is a valid point on the [`EmbeddedTorus`](@ref) `M`.
 The tolerance for the last test can be set using the `kwargs...`.
 
 The method checks if ``(p_1^2 + p_2^2 + p_3^2 + R^2 - r^2)^2``
-is apprximately equal to ``4R^2(p_1^2 + p_2^2)``.
+is approximately equal to ``4R^2(p_1^2 + p_2^2)``.
 """
 function check_point(M::EmbeddedTorus, p; kwargs...)
     A = (dot(p, p) + M.R^2 - M.r^2)^2

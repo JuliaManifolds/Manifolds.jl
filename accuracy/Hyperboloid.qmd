@@ -12,7 +12,7 @@ cd(@__DIR__)
 Pkg.activate("."); # for reproducibility use the local accuracy environment.
 ```
 
-In this small note we compare different implementations of several functions on the [Hyperboloic]().
+In this small note we compare different implementations of several functions on the [Hyperbolic]().
 We compare the functions prior [PR #]() to vs those introduced therein.
 We compare the previous version (always called `_1`) and the new version `_2`, where we leave out the manifold to indicate, that these are the local functions here.
 We compare this to the one given in `Manifolds.jl` at time of writing (which is the first one), on `BigFloat` on several scales of magnitudes.
@@ -29,7 +29,7 @@ teal = paul_tol["mutedteal"]
 
 ## Reference Data
 
-We choose a “base point”, a direction and create tangent vectors and correcponding points in several magnutudes of distances
+We choose a “base point”, a direction and create tangent vectors and corresponding points in several magnitudes of distances
 ```{julia}
 #| output: false
 M = Hyperbolic(2)

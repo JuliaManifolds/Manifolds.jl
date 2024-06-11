@@ -68,7 +68,7 @@ The easiest to check is the dimension of a manifold. Here we have three “direc
 manifold_dimension(M₁)
 ```
 
-#### 2. ``[The hyperpolic space](@ref HyperbolicSpace)``{=commonmark}
+#### 2. ``[The hyperbolic space](@ref HyperbolicSpace)``{=commonmark}
 
 The $d$-dimensional ``[hyperbolic space](@ref HyperbolicSpace)``{=commonmark} is usually represented in $\mathbb R^{d+1}$ as the set of points $p\in\mathbb R^3$ fulfilling
 
@@ -101,7 +101,7 @@ or
 is_point(M₂, [1, 0, 1])
 ```
 
-Keyword arguments are passed on to any numerical checks, for example an absolute tolerance when checking the above equiality.
+Keyword arguments are passed on to any numerical checks, for example an absolute tolerance when checking the above equality.
 
 But in an interactive session an error message might be helpful. A positional (third) argument is present to activate this. Setting this parameter to true, we obtain an error message that gives insight into why the point is not a point on `M₂`.
 Note that the `LoadError:` is due to quarto, on `REPL` you would just get the `DomainError`.
@@ -119,7 +119,7 @@ is_point(M₂, [0, 0, 1.001]; error=:error)
 M₃ = Sphere(2)
 ```
 
-If we only have a point that is approximately on the manifold, we can allow for a tolerance. Usually these are the same values of `atol` and `rtol` alowed in `isapprox`,
+If we only have a point that is approximately on the manifold, we can allow for a tolerance. Usually these are the same values of `atol` and `rtol` allowed in `isapprox`,
 i.e. we get
 
 ```{julia}
@@ -128,7 +128,7 @@ is_point(M₃, [0, 0, 1.001]; atol=1e-3)
 
 Here we can show a last nice check: ``[🔗 `is_vector`](@extref `ManifoldsBase.is_vector-Tuple{AbstractManifold, Any, Any, Bool, Bool}`)``{=commonmark} to check whether a tangent vector `X` is a representation of a tangent vector $X∈T_p\mathcal M$ to a point `p` on the manifold.
 
-This function has two positional asrguments, the first to again indicate whether to throw an error, the second to disable the check that `p` is a valid point on the manifold. Usually this validity is essential for the tangent check, but if it was for example performed before, it can be turned off to spare time.
+This function has two positional arguments, the first to again indicate whether to throw an error, the second to disable the check that `p` is a valid point on the manifold. Usually this validity is essential for the tangent check, but if it was for example performed before, it can be turned off to spare time.
 
 For example in our first example the point is not of unit norm
 
@@ -156,7 +156,7 @@ and for these we again get informative error messages
 @expect_error is_vector(M₃, [1, 0, 0], [0.1, 1, 1]; error=:error) DomainError
 ```
 
-To learn about how to define a manifold youself check out the ``[🔗 How to define your own manifold](@extref ManifoldsBase :doc:`tutorials/implement-a-manifold`)``{=commonmark} tutorial of ``[🔗 `ManifoldsBase.jl`](@extref ManifoldsBase :doc:`index`)``{=commonmark}."
+To learn about how to define a manifold yourself check out the ``[🔗 How to define your own manifold](@extref ManifoldsBase :doc:`tutorials/implement-a-manifold`)``{=commonmark} tutorial of ``[🔗 `ManifoldsBase.jl`](@extref ManifoldsBase :doc:`index`)``{=commonmark}."
 
 ### Building more advanced manifolds
 
@@ -214,7 +214,7 @@ p[M₄, 1]
 p₂[M₅, 2]
 ```
 
-Another construtor is the ``[ProductManifold](@ref ProductManifoldSection)``{=commonmark} to combine different manifolds.
+Another constructor is the ``[ProductManifold](@ref ProductManifoldSection)``{=commonmark} to combine different manifolds.
 Here of course the order matters. First we construct these using $×$
 
 ```{julia}
@@ -274,7 +274,7 @@ Which can now be used on any manifold where the shortest geodesic is implemented
 
 Now on several manifolds the [📖 exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see  [AbsilMahonySepulchre:2008](@cite), Def. 4.1.1 for details) and its (local) inverse.
 
-The function itself is quite similar to the expponential map, just that ``[🔗 `retract(M, p, X, m)`](@extref `ManifoldsBase.retract`)``{=commonmark} has one further parameter, the type of retraction to take, so `m` is a subtype of ``[🔗 `AbstractRetractionMethod`](@extref `ManifoldsBase.AbstractRetractionMethod`)``{=commoonmark} `m`, the same for the ``[🔗 `inverse_retract(M, p, q, n)`](@extref `ManifoldsBase.inverse_retract`)``{=commonmark} with an ``[`AbstractInverseRetractionMethod`](@extref `ManifoldsBase.AbstractInverseRetractionMethod`)``{=commonmark} `n`.
+The function itself is quite similar to the exponential map, just that ``[🔗 `retract(M, p, X, m)`](@extref `ManifoldsBase.retract`)``{=commonmark} has one further parameter, the type of retraction to take, so `m` is a subtype of ``[🔗 `AbstractRetractionMethod`](@extref `ManifoldsBase.AbstractRetractionMethod`)``{=commoonmark} `m`, the same for the ``[🔗 `inverse_retract(M, p, q, n)`](@extref `ManifoldsBase.inverse_retract`)``{=commonmark} with an ``[`AbstractInverseRetractionMethod`](@extref `ManifoldsBase.AbstractInverseRetractionMethod`)``{=commonmark} `n`.
 
 Thinking of a generic implementation, we would like to have a way to specify one, that is available. This can be done by using ``[🔗 `default_retraction_method`](@extref `ManifoldsBase.default_retraction_method-Tuple{AbstractManifold}`)``{=commonmark} and ``[🔗 `default_inverse_retraction_method`](@extref `ManifoldsBase.default_inverse_retraction_method-Tuple{AbstractManifold}`)``{=commonmark}, respectively. We implement
 
@@ -315,7 +315,7 @@ The same mechanism exists for ``[🔗 `parallel_transport_to(M, p, X, q)`](@extr
 
 ## Allocating and in-place computations
 
-Memory allocation is a [🔗 critical performace issue](https://docs.julialang.org/en/v1/manual/performance-tips/#Measure-performance-with-[@time](@ref)-and-pay-attention-to-memory-allocation) when programming in Julia. To take this into account, `Manifolds.jl` provides special functions to reduce the amount of allocations.
+Memory allocation is a [🔗 critical performance issue](https://docs.julialang.org/en/v1/manual/performance-tips/#Measure-performance-with-[@time](@ref)-and-pay-attention-to-memory-allocation) when programming in Julia. To take this into account, `Manifolds.jl` provides special functions to reduce the amount of allocations.
 
 We again look at the [📖 exponential map](https://en.wikip edia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` (see ``[🔗 `exp(M, p, X)`](@extref `Base.exp-Tuple{AbstractManifold, Any, Any}`)``{=commonmark}). This function returns the resulting point `q`, which requires to allocate new memory.
 
@@ -423,7 +423,7 @@ The same approach is used for
 * specifying a certain ``[🔗 embedding](@extref ManifoldsBase The-Manifold-decorator)``{=commonmark}s
 * specify a certain ``[group action](@ref GroupManifoldSection)``{=commonmark}
 
-Again, for all of these, the concrete types only have to be used if you want to do a second, different from the details, property, for example a second way to embed a manfiold. If a manifold is (in its usual representation) an embedded manifold, this works with the default manifold type already, since then it is again set as the reasonable default.
+Again, for all of these, the concrete types only have to be used if you want to do a second, different from the details, property, for example a second way to embed a manifold. If a manifold is (in its usual representation) an embedded manifold, this works with the default manifold type already, since then it is again set as the reasonable default.
 
 ## Literature
 

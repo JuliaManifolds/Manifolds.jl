@@ -56,7 +56,7 @@ end
 @doc raw"""
     check_point(M::Elliptope, q; kwargs...)
 
-checks, whether `q` is a valid reprsentation of a point ``p=qq^{\mathrm{T}}`` on the
+checks, whether `q` is a valid representation of a point ``p=qq^{\mathrm{T}}`` on the
 [`Elliptope`](@ref) `M`, i.e. is a matrix
 of size `(N,K)`, such that ``p`` is symmetric positive semidefinite and has unit trace.
 Since by construction ``p`` is symmetric, this is not explicitly checked.

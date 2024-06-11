@@ -2,7 +2,7 @@
     check_point(M::SymplecticGrassmann, p::ProjectorPoint; kwargs...)
 
 Check whether `p` is a valid point on the [`SymplecticGrassmann`](@ref),
-``\operatorname{SpGr}(2n, 2k)``, that is a propoer symplectic projection:
+``\operatorname{SpGr}(2n, 2k)``, that is a proper symplectic projection:
 
 * ``p^2 = p``, that is ``p`` is a projection
 * ``\operatorname{rank}(p) = 2k``, that is, the supspace projected onto is of right dimension

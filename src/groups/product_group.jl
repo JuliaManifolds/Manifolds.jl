@@ -65,7 +65,7 @@ end
 
 function is_identity(G::ProductGroup, p::Identity{<:ProductOperation}; kwargs...)
     pes = submanifold_components(G, p)
-    M = G.manifold # Inner prodct manifold (of groups)
+    M = G.manifold # Inner product manifold (of groups)
     return all(map((M, pe) -> is_identity(M, pe; kwargs...), M.manifolds, pes))
 end
 

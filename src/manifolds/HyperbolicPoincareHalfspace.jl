@@ -253,7 +253,7 @@ end
 @doc raw"""
     project(::Hyperbolic, ::PoincareHalfSpacePoint ::PoincareHalfSpaceTVector)
 
-projction of tangent vectors in the Poincaré half space model is just the identity, since
+projection of tangent vectors in the Poincaré half space model is just the identity, since
 the tangent space consists of all $ℝ^n$.
 """
 project(::Hyperbolic, ::PoincareHalfSpacePoint::PoincareHalfSpaceTVector)

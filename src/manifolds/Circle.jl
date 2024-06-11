@@ -354,7 +354,7 @@ manifold_volume(::Circle) = 2 * π
     mean(M::Circle{ℝ}, x::AbstractVector[, w::AbstractWeights])
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
-the [`Circle`](@ref) ``𝕊^1``, reprsented by real numbers, i.e. the angular mean
+the [`Circle`](@ref) ``𝕊^1``, represented by real numbers, i.e. the angular mean
 ````math
 \operatorname{atan}\Bigl( \sum_{i=1}^n w_i\sin(x_i),  \sum_{i=1}^n w_i\sin(x_i) \Bigr).
 ````
@@ -375,7 +375,7 @@ end
     mean(M::Circle{ℂ}, x::AbstractVector[, w::AbstractWeights])
 
 Compute the Riemannian [`mean`](@ref mean(M::AbstractManifold, args...)) of `x` of points on
-the [`Circle`](@ref) ``𝕊^1``, reprsented by complex numbers, i.e. embedded in the complex plane.
+the [`Circle`](@ref) ``𝕊^1``, represented by complex numbers, i.e. embedded in the complex plane.
 Comuting the sum
 ````math
 s = \sum_{i=1}^n x_i
@@ -510,7 +510,7 @@ sym_rem(x, T=π) = map(sym_rem, x, Ref(T))
 Compute the parallel transport of `X` from the tangent space at `p` to the tangent space at
 `q` on the [`Circle`](@ref) `M`.
 For the real-valued case this results in the identity.
-For the complex-valud case, the formula is the same as for the [`Sphere`](@ref)`(1)` in the
+For the complex-valued case, the formula is the same as for the [`Sphere`](@ref)`(1)` in the
 complex plane.
 ````math
 \mathcal P_{q←p} X = X - \frac{⟨\log_p q,X⟩_p}{d^2_{ℂ}(p,q)}

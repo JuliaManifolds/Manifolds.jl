@@ -56,7 +56,7 @@ active_traits(f, ::Spectrahedron, args...) = merge_traits(IsIsometricEmbeddedMan
 @doc raw"""
     check_point(M::Spectrahedron, q; kwargs...)
 
-checks, whether `q` is a valid reprsentation of a point ``p=qq^{\mathrm{T}}`` on the
+checks, whether `q` is a valid representation of a point ``p=qq^{\mathrm{T}}`` on the
 [`Spectrahedron`](@ref) `M`, i.e. is a matrix
 of size `(N,K)`, such that ``p`` is symmetric positive semidefinite and has unit trace,
 i.e. ``q`` has to have unit frobenius norm.

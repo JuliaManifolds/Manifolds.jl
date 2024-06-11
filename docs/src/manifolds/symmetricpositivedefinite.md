@@ -29,7 +29,7 @@ Pages = ["manifolds/SymmetricPositiveDefiniteAffineInvariant.jl"]
 Order = [:type]
 ```
 
-This metric is also the default metric, i.e. any call of the following functions with `P=SymmetricPositiveDefinite(3)` will result in `MetricManifold(P,AffineInvariantMetric())`and hence yield the formulae described in this seciton.
+This metric is also the default metric, i.e. any call of the following functions with `P=SymmetricPositiveDefinite(3)` will result in `MetricManifold(P,AffineInvariantMetric())`and hence yield the formulae described in this section.
 
 ```@autodocs
 Modules = [Manifolds]

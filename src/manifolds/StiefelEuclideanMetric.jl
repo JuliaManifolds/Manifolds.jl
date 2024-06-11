@@ -55,7 +55,7 @@ basis is constructed.
 
 Since ``[p\ p_⊥]`` is an automorphism on ``ℝ^{n×p}`` the elements of ``a`` and ``b`` are
 orthonormal coordinates for the tangent space. To be precise exactly one element in the upper
-trangular entries of ``a`` is set to ``1`` its symmetric entry to ``-1`` and we normalize with
+triangular entries of ``a`` is set to ``1`` its symmetric entry to ``-1`` and we normalize with
 the factor ``\frac{1}{\sqrt{2}}`` and for ``b`` one can just use unit vectors reshaped to a matrix
 to obtain orthonormal set of parameters.
 """
@@ -80,7 +80,7 @@ function get_vector_orthonormal!(M::Stiefel{<:Any,ℝ}, X, p, c, N::RealNumbers)
     V = get_vectors(M, p, DefaultOrthonormalBasis(N))
     zero_vector!(M, X, p)
     length(c) < length(V) && error(
-        "Coordinate vector too short. Excpected $(length(V)), but only got $(length(c)) entries.",
+        "Coordinate vector too short. Expected $(length(V)), but only got $(length(c)) entries.",
     )
     @inbounds for i in 1:length(V)
         X .+= c[i] .* V[i]

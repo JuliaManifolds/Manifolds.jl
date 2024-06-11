@@ -160,7 +160,7 @@ end
 
 Check whether `X` is a tangent vector to `p` on the [`SymmetricPositiveDefinite`](@ref) `M`,
 i.e. atfer [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
-and a symmetric matrix, i.e. this stores tangent vetors as elements of the corresponding
+and a symmetric matrix, i.e. this stores tangent vectors as elements of the corresponding
 Lie group.
 The tolerance for the last test can be set using the `kwargs...`.
 """
