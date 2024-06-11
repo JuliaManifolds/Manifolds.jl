@@ -157,7 +157,7 @@ import ManifoldsBase:
     vector_transport_along,           # just specified in Euclidean - the next 5 as well
     vector_transport_along!,
     vector_transport_along_diff!,     # For consistency these are imported, but for now not
-    vector_transport_along_project!,  # overwritten with new definitons.
+    vector_transport_along_project!,  # overwritten with new definitions.
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_direction_diff!,
@@ -496,7 +496,7 @@ include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 include("groups/power_group.jl")
 
-# generic group - commopn (special) unitary/orthogonal functions
+# generic group - common (special) unitary/orthogonal functions
 include("groups/general_unitary_groups.jl")
 # Special Group Manifolds
 include("groups/general_linear.jl")

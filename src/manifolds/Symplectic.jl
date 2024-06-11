@@ -558,7 +558,7 @@ inverse cayley retraction as long as the following matrices exist.
 
 where ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
 
-Then inverse cayley retration at ``p`` applied to ``q`` is
+Then inverse cayley retraction at ``p`` applied to ``q`` is
 ```math
 \mathcal{L}_p^{\mathrm{Sp}}(q)
   = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr) ∈ T_p\mathrm{Sp}(2n).

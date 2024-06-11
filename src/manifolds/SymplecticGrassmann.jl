@@ -38,7 +38,7 @@ representation as projectors, using a [`ProjectorTVector`](@ref) as
 where ``[X,p] = Xp-pX`` denotes the matrix commutator and
 ``\mathfrak{sp}(2n,ℝ)`` is the Lie algebra of the symplectic group consisting of [`HamiltonianMatrices`](@ref).
 
-The first repesentation is in [`StiefelPoint`](@ref)s and [`StiefelTVector`](@ref)s,
+The first representation is in [`StiefelPoint`](@ref)s and [`StiefelTVector`](@ref)s,
 which both represent their symplectic Grassmann equivalence class. Arrays are interpreted
 in this representation as well
 
@@ -114,7 +114,7 @@ function Base.show(io::IO, M::SymplecticGrassmann{Tuple{Int,Int},𝔽}) where {�
 end
 
 #
-# Representer specific implementations in their corrsponding subfiles
+# Representer specific implementations in their corresponding subfiles
 #
 include("SymplecticGrassmannStiefel.jl")
 include("SymplecticGrassmannProjector.jl")

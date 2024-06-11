@@ -183,7 +183,7 @@ The Riemannian Hessian can be computed by adopting Eq. (5.6) [Nguyen:2023](@cite
 so very similar to the complex Stiefel manifold.
 The only difference is, that here the tangent vectors are stored
 in the Lie algebra, i.e. the update direction is actually ``pX`` instead of just ``X`` (in Stiefel).
-and that means the inverse has to be appliead to the (Euclidean) Hessian
+and that means the inverse has to be applied to the (Euclidean) Hessian
 to map it into the Lie algebra.
 """
 riemannian_Hessian(M::UnitaryMatrices, p, G, H, X)

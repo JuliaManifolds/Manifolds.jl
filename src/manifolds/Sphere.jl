@@ -158,7 +158,7 @@ end
 @doc raw"""
     distance(M::AbstractSphere, p, q)
 
-Compute the geodesic distance betweeen `p` and `q` on the [`AbstractSphere`](@ref) `M`.
+Compute the geodesic distance between `p` and `q` on the [`AbstractSphere`](@ref) `M`.
 The formula is given by the (shorter) great arc length on the (or a) great circle
 both `p` and `q` lie on.
 
@@ -182,7 +182,7 @@ embed(::AbstractSphere, p, X) = copy(X)
     exp(M::AbstractSphere, p, X)
 
 Compute the exponential map from `p` in the tangent direction `X` on the [`AbstractSphere`](@ref)
-`M` by following the great arc eminating from `p` in direction `X`.
+`M` by following the great arc emanating from `p` in direction `X`.
 
 ````math
 \exp_p X = \cos(\lVert X \rVert_p)p + \sin(\lVert X \rVert_p)\frac{X}{\lVert X \rVert_p},
