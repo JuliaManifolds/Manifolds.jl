@@ -177,12 +177,7 @@ end
 
 Outward-pointing normal vector on the [`EmbeddedTorus`](@ref) at the point `p`.
 """
-function normal_vector(M::EmbeddedTorus, p)
-    θ, φ = _torus_theta_phi(M, p)
-    t = @SVector [-sin(φ), cos(φ), 0]
-    s = @SVector [cos(φ) * (-sin(θ)), sin(φ) * (-sin(θ)), cos(θ)]
-    return normalize(cross(t, s))
-end
+normal_vector(M::EmbeddedTorus, p)
 
 function get_chart_index(M::EmbeddedTorus, ::DefaultTorusAtlas, p)
     return _torus_theta_phi(M, p)
@@ -199,27 +194,6 @@ end
 function get_point!(M::EmbeddedTorus, p, ::DefaultTorusAtlas, i, x)
     p .= _torus_param(M, (x .+ i)...)
     return p
-end
-
-function get_coordinates_induced_basis!(
-    M::EmbeddedTorus,
-    Y,
-    p,
-    X,
-    B::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas},
-)
-    θ, φ = get_parameters(M, B.A, B.i, p)
-
-    sinθ, cosθ = sincos(θ + B.i[1])
-    sinφ, cosφ = sincos(φ + B.i[2])
-
-    A = @SMatrix [
-        (-M.r*sinθ*cosφ) (-M.R * sinφ-M.r * cosθ * sinφ)
-        (-M.r*sinθ*sinφ) (M.R * cosφ+M.r * cosθ * cosφ)
-        (M.r*cosθ) 0
-    ]
-    Y .= A \ SVector{3}(X)
-    return Y
 end
 
 function get_vector_induced_basis!(

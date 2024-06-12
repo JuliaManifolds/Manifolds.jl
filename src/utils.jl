@@ -40,9 +40,7 @@ Compute a modified `sign(z)` that is always nonzero, i.e. where
 end
 
 allocate(p, s::Size{S}) where {S} = similar(p, S...)
-allocate(p::StaticArray, s::Size{S}) where {S} = similar(p, maybesize(s))
 allocate(p, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, S...)
-allocate(p::StaticArray, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, maybesize(s))
 
 quat_promote(T::Type{<:Number}) = typeof(Quaternions.quat(zero(T)))
 
