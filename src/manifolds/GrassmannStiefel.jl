@@ -183,6 +183,46 @@ function log!(M::Grassmann, X, p, q)
 end
 
 @doc raw"""
+    parallel_transport_direction(M::Grassmann, p, X, Y)
+
+Compute the parallel transport of ``X \in   T_p\mathcal M`` along the
+geodesic starting in direction ``\dot γ (0) = Y``.
+
+ Let ``Y = USV`` denote the SVD decomposition of ``Y``.
+Then the parallel transport is given by the formula according to Equation (8.5) (p. 171) [AbsilMahonySepulchre:2008](@cite), Eq. (8.5) (p.171)
+
+```math
+\mathcal P_{p,Y} X = -pV \sin(S)U^{\mathrm{T}}X + U\cos(S)U^{\mathrm{T}}X + (I-UU^{\mathrm{T}})X
+````
+
+where the since and cosine applied to the diagonal matrix ``S`` are meant to be elementwise
+"""
+parallel_transport_direction(M::Grassmann, p, X, Y)
+
+function parallel_transport_direction!(M::Grassmann, Z, p, X, Y)
+    d = svd(Y)
+    return copyto!(
+        Z,
+        (-p * d.V .* sin.(d.S') + d.U * cos.(d.S')) * (d.U' * X) + (I - d.U * d.U') * X,
+    )
+end
+
+@doc raw"""
+    parallel_transport_to(M::Grassmann, p, X, q)
+
+Compute the parallel transport of ``X ∈  T_p\mathcal M`` along the
+geodesic connecting ``p`` to ``q``.
+
+This method uses the logarithmic map and the parallel transport in that direction.
+"""
+parallel_transport_to(M::Grassmann, p, X, q)
+
+function parallel_transport_to!(M::Grassmann, Z, p, X, q)
+    Y = log(M, p, q)
+    return parallel_transport_direction!(M, Z, p, X, Y)
+end
+
+@doc raw"""
     project(M::Grassmann, p)
 
 Project `p` from the embedding onto the [`Grassmann`](@ref) `M`, i.e. compute `q`
