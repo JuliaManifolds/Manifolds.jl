@@ -130,8 +130,7 @@ where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
 
-function inverse_retract_polar!(M::Grassmann, X, p, q)
-    isapprox(p, q) && return zero_vector!(M, X, p)
+function inverse_retract_polar!(::Grassmann, X, p, q)
     X .= q / (p' * q) .- p
     return X
 end
@@ -149,8 +148,7 @@ where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
-function inverse_retract_qr!(M::Grassmann, X, p, q)
-    isapprox(p, q) && return zero_vector!(M, X, p)
+function inverse_retract_qr!(::Grassmann, X, p, q)
     X .= q / (p' * q) .- p
     return X
 end
