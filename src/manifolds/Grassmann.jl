@@ -214,7 +214,7 @@ to a projector representation of said subspace, i.e. compute the [`canonical_pro
 for
 
 ```math
-  π^{\mathrm{SG}}(p) = pp^{\mathrm{T)}.
+  π^{\mathrm{SG}}(p) = pp^{\mathrm{T}}.
 ```
 """
 convert(::Type{ProjectorPoint}, p::AbstractMatrix) = ProjectorPoint(p * p')

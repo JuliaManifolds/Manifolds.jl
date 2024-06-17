@@ -32,9 +32,9 @@ ManifoldsBase.@default_manifold_fallbacks (Stiefel{<:Any,ℝ}) StiefelPoint Stie
 ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTVector value value
 
 function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
-    return ProjectionTransport()
+    return ParallelTransport()
 end
-default_vector_transport_method(::Grassmann, ::Type{<:StiefelPoint}) = ProjectionTransport()
+default_vector_transport_method(::Grassmann, ::Type{<:StiefelPoint}) = ParallelTransport()
 
 @doc raw"""
     distance(M::Grassmann, p, q)
@@ -42,6 +42,7 @@ default_vector_transport_method(::Grassmann, ::Type{<:StiefelPoint}) = Projectio
 Compute the Riemannian distance on [`Grassmann`](@ref) manifold `M```= \mathrm{Gr}(n,k)``.
 
 The distance is given by
+
 ````math
 d_{\mathrm{Gr}(n,k)}(p,q) = \operatorname{norm}(\log_p(q)).
 ````
@@ -193,15 +194,23 @@ Then the parallel transport is given by the formula according to Equation (8.5) 
 
 ```math
 \mathcal P_{p,Y} X = -pV \sin(S)U^{\mathrm{T}}X + U\cos(S)U^{\mathrm{T}}X + (I-UU^{\mathrm{T}})X
-````
+```
 
 where the since and cosine applied to the diagonal matrix ``S`` are meant to be elementwise
 """
 parallel_transport_direction(M::Grassmann, p, X, Y)
 
+# Hook into default since here we have direction first
+function parallel_transport_direction(M::Grassmann, p, X, Y)
+    Z = zero_vector(M, exp(M, p, X))
+    return parallel_transport_direction!(M, Z, p, X, Y)
+end
+
 function parallel_transport_direction!(M::Grassmann, Z, p, X, Y)
     d = svd(Y)
     return copyto!(
+        M,
+        p,
         Z,
         (-p * d.V .* sin.(d.S') + d.U * cos.(d.S')) * (d.U' * X) + (I - d.U * d.U') * X,
     )
@@ -369,7 +378,10 @@ end
 
 Compute the value of Riemann tensor on the real [`Grassmann`](@ref) manifold.
 The formula reads [Rentmeesters:2011](@cite)
-``R(X,Y)Z = (XY^\mathrm{T} - YX^\mathrm{T})Z + Z(Y^\mathrm{T}X - X^\mathrm{T}Y)``.
+
+```math
+R(X,Y)Z = (XY^\mathrm{T} - YX^\mathrm{T})Z + Z(Y^\mathrm{T}X - X^\mathrm{T}Y).
+```
 """
 riemann_tensor(::Grassmann{<:Any,ℝ}, p, X, Y, Z)
 
