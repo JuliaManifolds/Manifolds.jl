@@ -477,8 +477,8 @@ function test_manifold(
         test_default_vector_transport && Test.@testset "default vector transport" begin
             v1t1 = vector_transport_to(M, pts[1], X1, pts32)
             v1t2 = vector_transport_direction(M, pts[1], X1, X2)
-            Test.@test is_vector(M, pts32, v1t1; atol=tvatol)
-            Test.@test is_vector(M, pts32, v1t2; atol=tvatol)
+            Test.@test is_vector(M, pts32, v1t1; atol=tvatol, error=:warn)
+            Test.@test is_vector(M, pts32, v1t2; atol=tvatol, error=:warn)
             Test.@test isapprox(M, pts32, v1t1, v1t2)
             Test.@test isapprox(M, pts[1], vector_transport_to(M, pts[1], X1, pts[1]), X1)
 
@@ -506,8 +506,10 @@ function test_manifold(
                 pts32 = retract(M, pts[1], X2, rtr_m)
                 test_to && (v1t1 = vector_transport_to(M, pts[1], X1, pts32, vtm))
                 test_dir && (v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm))
-                test_to && Test.@test is_vector(M, pts32, v1t1, true; atol=tvatol)
-                test_dir && Test.@test is_vector(M, pts32, v1t2, true; atol=tvatol)
+                test_to &&
+                    Test.@test is_vector(M, pts32, v1t1; atol=tvatol, error=:warn)
+                test_dir &&
+                    Test.@test is_vector(M, pts32, v1t2; atol=tvatol, error=:warn)
                 (test_to && test_dir) &&
                     Test.@test isapprox(M, pts32, v1t1, v1t2, atol=tvatol)
                 test_to && Test.@test isapprox(

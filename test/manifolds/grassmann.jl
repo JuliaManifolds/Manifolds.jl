@@ -9,11 +9,11 @@ include("../header.jl")
             @test manifold_dimension(M) == 2
             @test !is_flat(M)
             @test is_flat(Grassmann(2, 1))
-            @test default_retraction_method(M) == PolarRetraction()
-            @test default_retraction_method(M, typeof(zeros(3, 2))) == PolarRetraction()
+            @test default_retraction_method(M) == ExponentialRetraction()
+            @test default_retraction_method(M, typeof(zeros(3, 2))) ==
+                  ExponentialRetraction()
             @test default_retraction_method(M, ProjectorPoint) == ExponentialRetraction()
-            @test default_retraction_method(M) == PolarRetraction()
-            @test default_vector_transport_method(M) == ProjectionTransport()
+            @test default_vector_transport_method(M) == ParallelTransport()
             @test get_total_space(M) == Stiefel(3, 2, ℝ)
             @test get_orbit_action(M) ==
                   Manifolds.RowwiseMultiplicationAction(M, Orthogonal(2))
@@ -82,7 +82,8 @@ include("../header.jl")
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_project_point=true,
-                test_default_vector_transport=false,
+                test_default_vector_transport=true,
+                vector_transport_methods=[ParallelTransport(), ProjectionTransport()],
                 point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
                 test_vee_hat=false,
                 test_rand_point=true,
@@ -148,8 +149,8 @@ include("../header.jl")
         @testset "default_* functions" begin
             p = [1.0 0.0; 0.0 1.0; 0.0 0.0]
             pS = StiefelPoint(p)
-            @test default_vector_transport_method(M, typeof(p)) == ProjectionTransport()
-            @test default_vector_transport_method(M, typeof(pS)) == ProjectionTransport()
+            @test default_vector_transport_method(M, typeof(p)) == ParallelTransport()
+            @test default_vector_transport_method(M, typeof(pS)) == ParallelTransport()
         end
     end
 

@@ -130,7 +130,8 @@ where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::PolarInverseRetraction)
 
-function inverse_retract_polar!(::Grassmann, X, p, q)
+function inverse_retract_polar!(M::Grassmann, X, p, q)
+    isapprox(p, q) && return zero_vector!(M, X, p)
     X .= q / (p' * q) .- p
     return X
 end
@@ -148,7 +149,8 @@ where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
 """
 inverse_retract(::Grassmann, ::Any, ::Any, ::QRInverseRetraction)
 
-function inverse_retract_qr!(::Grassmann, X, p, q)
+function inverse_retract_qr!(M::Grassmann, X, p, q)
+    isapprox(p, q) && return zero_vector!(M, X, p)
     X .= q / (p' * q) .- p
     return X
 end
@@ -190,7 +192,7 @@ Compute the parallel transport of ``X \in   T_p\mathcal M`` along the
 geodesic starting in direction ``\dot γ (0) = Y``.
 
  Let ``Y = USV`` denote the SVD decomposition of ``Y``.
-Then the parallel transport is given by the formula according to Equation (8.5) (p. 171) [AbsilMahonySepulchre:2008](@cite), Eq. (8.5) (p.171)
+Then the parallel transport is given by the formula according to Equation (8.5) (p. 171) [AbsilMahonySepulchre:2008](@cite) as
 
 ```math
 \mathcal P_{p,Y} X = -pV \sin(S)U^{\mathrm{T}}X + U\cos(S)U^{\mathrm{T}}X + (I-UU^{\mathrm{T}})X
@@ -210,9 +212,9 @@ function parallel_transport_direction!(M::Grassmann, Z, p, X, Y)
     d = svd(Y)
     return copyto!(
         M,
-        p,
         Z,
-        (-p * d.V .* sin.(d.S') + d.U * cos.(d.S')) * (d.U' * X) + (I - d.U * d.U') * X,
+        p,
+        (-p * d.V .* sin.(d.S') + d.U .* cos.(d.S')) * (d.U' * X) + (I - d.U * d.U') * X,
     )
 end
 
@@ -222,7 +224,7 @@ end
 Compute the parallel transport of ``X ∈  T_p\mathcal M`` along the
 geodesic connecting ``p`` to ``q``.
 
-This method uses the logarithmic map and the parallel transport in that direction.
+This method uses the [logarithmic map](@ref log(::Grassmann, ::Any...)) and the [parallel transport in that direction](@ref parallel_transport_direction(M::Grassmann, p, X, Y)).
 """
 parallel_transport_to(M::Grassmann, p, X, q)
 
@@ -423,6 +425,14 @@ function uniform_distribution(M::Grassmann{<:Any,ℝ}, p)
     d = MatrixNormal(μ, Σ1, Σ2)
 
     return ProjectedPointDistribution(M, d, (M, q, p) -> (q .= svd(p).U), p)
+end
+
+# switch order and not dispatch on the _to variant
+function vector_transport_direction(M::Grassmann, p, X, Y, ::ParallelTransport)
+    return parallel_transport_direction(M, p, X, Y)
+end
+function vector_transport_direction!(M::Grassmann, Z, p, X, Y, ::ParallelTransport)
+    return parallel_transport_direction!(M, Z, p, X, Y)
 end
 
 @doc raw"""
