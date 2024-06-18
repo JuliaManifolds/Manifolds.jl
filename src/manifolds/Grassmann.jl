@@ -214,7 +214,7 @@ to a projector representation of said subspace, i.e. compute the [`canonical_pro
 for
 
 ```math
-  π^{\mathrm{SG}}(p) = pp^{\mathrm{T)}.
+  π^{\mathrm{SG}}(p) = pp^{\mathrm{T}}.
 ```
 """
 convert(::Type{ProjectorPoint}, p::AbstractMatrix) = ProjectorPoint(p * p')
@@ -232,24 +232,19 @@ for
 convert(::Type{ProjectorPoint}, p::StiefelPoint) = ProjectorPoint(p.value * p.value')
 
 """
+    default_retraction_method(M::Grassmann)
+    default_retraction_method(M::Grassmann, ::Type{StiefelPoint})
     default_retraction_method(M::Grassmann, ::Type{ProjectorPoint})
 
 Return `ExponentialRetraction` as the default on the [`Grassmann`](@ref) manifold
-with projection matrices
+for both representations.
 """
-default_retraction_method(::Grassmann, ::Type{ProjectorPoint}) = ExponentialRetraction()
-"""
-    default_retraction_method(M::Grassmann)
-    default_retraction_method(M::Grassmann, ::Type{StiefelPoint})
+default_retraction_method(::Grassmann) = ExponentialRetraction()
 
-Return `PolarRetracion` as the default on the [`Grassmann`](@ref) manifold
-with projection matrices
-"""
-default_retraction_method(::Grassmann) = PolarRetraction()
 """
     default_vector_transport_method(M::Grassmann)
 
-Return the `ProjectionTransport` as the default vector transport method
-for the [`Grassmann`](@ref) manifold.
+Return the default vector transport method for the [`Grassmann`](@ref) manifold,
+which is `ParallelTransport``()`.
 """
-default_vector_transport_method(::Grassmann) = ProjectionTransport()
+default_vector_transport_method(::Grassmann) = ParallelTransport()

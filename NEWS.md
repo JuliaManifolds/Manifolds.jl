@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.20] – 2024-06-17
+
+### Added
+
+* implemented parallel transport on the Grassmann manifold with respect to Stiefel representation
+
+### Changed
+
+* since now all exp/log/parallel transport are available for all representations of `Grassmann`,
+  these are now also set as defaults, since they are more exact.
+
 ## [0.9.19] – 2024-06-12
 
 ### Changed
