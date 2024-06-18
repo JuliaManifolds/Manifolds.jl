@@ -196,7 +196,7 @@ Then the parallel transport is given by the formula according to Equation (8.5) 
 \mathcal P_{p,Y} X = -pV \sin(S)U^{\mathrm{T}}X + U\cos(S)U^{\mathrm{T}}X + (I-UU^{\mathrm{T}})X
 ```
 
-where the since and cosine applied to the diagonal matrix ``S`` are meant to be elementwise
+where the sine and cosine applied to the diagonal matrix ``S`` are meant to be elementwise
 """
 parallel_transport_direction(M::Grassmann, p, X, Y)
 
