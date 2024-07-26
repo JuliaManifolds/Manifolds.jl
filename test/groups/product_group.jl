@@ -95,7 +95,15 @@ using RecursiveArrayTools
 
     @test compose(G, pts[1], Identity(G)) == pts[1]
     @test compose(G, Identity(G), pts[1]) == pts[1]
-    test_group(G, pts, X_pts, X_pts; test_diff=true, test_mutating=false, test_adjoint_action=true)
+    test_group(
+        G,
+        pts,
+        X_pts,
+        X_pts;
+        test_diff=true,
+        test_mutating=false,
+        test_adjoint_action=true,
+    )
     test_manifold(G, pts; is_mutating=false)
     @test isapprox(
         G,
