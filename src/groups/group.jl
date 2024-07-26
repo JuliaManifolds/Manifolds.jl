@@ -460,6 +460,9 @@ end
 function adjoint_action(::AbstractDecoratorManifold, ::Identity, Xₑ, ::LeftAction)
     return Xₑ
 end
+function adjoint_action(::AbstractDecoratorManifold, ::Identity, Xₑ, ::RightAction)
+    return Xₑ
+end
 # backward compatibility
 function adjoint_action(G::AbstractDecoratorManifold, p, X)
     return adjoint_action(G, p, X, LeftAction())

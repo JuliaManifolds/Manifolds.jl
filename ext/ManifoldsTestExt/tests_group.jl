@@ -557,7 +557,7 @@ function test_group(
         for conv in [LeftAction(), RightAction()]
             isapprox(
                 TangentSpace(G, identity_element(G)),
-                adjoint_action(G, e, Xe_pts[1]),
+                adjoint_action(G, e, Xe_pts[1], conv),
                 Xe_pts[1],
             )
         end

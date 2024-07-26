@@ -164,9 +164,10 @@ RealCircleGroup() = GroupManifold(Circle{ℝ}(), AdditionOperation())
 end
 
 adjoint_action(::RealCircleGroup, p, X) = X
-adjoint_action(::RealCircleGroup, p, X, ::ActionDirection) = X
-
-adjoint_action!(::RealCircleGroup, Y, p, X, ::ActionDirection) = copyto!(Y, X)
+adjoint_action(::RealCircleGroup, p, X, ::LeftAction) = X
+adjoint_action(::RealCircleGroup, p, X, ::RightAction) = X
+adjoint_action(::RealCircleGroup, ::Identity, X, ::LeftAction) = X
+adjoint_action(::RealCircleGroup, ::Identity, X, ::RightAction) = X
 
 for AD in [LeftAction, RightAction]
     @eval begin
