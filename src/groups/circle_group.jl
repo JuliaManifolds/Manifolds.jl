@@ -166,7 +166,6 @@ end
 adjoint_action(::RealCircleGroup, p, X) = X
 adjoint_action(::RealCircleGroup, p, X, ::ActionDirection) = X
 
-adjoint_action!(::RealCircleGroup, Y, p, X) = copyto!(Y, X)
 adjoint_action!(::RealCircleGroup, Y, p, X, ::ActionDirection) = copyto!(Y, X)
 
 for AD in [LeftAction, RightAction]

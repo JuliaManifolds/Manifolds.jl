@@ -467,16 +467,6 @@ end
 function adjoint_action!(G::AbstractDecoratorManifold, Y, p, X)
     return adjoint_action!(G, Y, p, X, LeftAction())
 end
-function adjoint_action!(
-    ::TraitList{<:IsGroupManifold},
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-)
-    BG = base_group(G)
-    return adjoint_action!(BG, Y, p, X, LeftAction())
-end
 # fall back method: the right action is defined from the left action
 function adjoint_action!(
     ::TraitList{<:IsGroupManifold},
