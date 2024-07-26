@@ -385,6 +385,12 @@ function test_group(
         Test.@testset "test_inv_diff" for side in [LeftSide(), RightSide()]
             test_inv_diff_fn(G, g_pts[1], X_pts[1], side)
         end # COV_EXCL_LINE
+        if test_mutating
+            Y = inv_diff(G, e, Xe_pts[1])
+            Z = allocate(Y)
+            inv_diff!(G, Z, e, Xe_pts[1])
+            Test.@test isapprox(TangentSpace(G, e), Y, Z)
+        end
     end
     test_adjoint_inv_diff && Test.@testset "Differential of inverse" begin # COV_EXCL_LINE
         Test.@test isapprox(adjoint_inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
