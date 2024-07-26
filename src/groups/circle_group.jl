@@ -163,7 +163,6 @@ RealCircleGroup() = GroupManifold(Circle{ℝ}(), AdditionOperation())
     end
 end
 
-adjoint_action(::RealCircleGroup, p, X) = X
 adjoint_action(::RealCircleGroup, p, X, ::LeftAction) = X
 adjoint_action(::RealCircleGroup, p, X, ::RightAction) = X
 adjoint_action(::RealCircleGroup, ::Identity, X, ::LeftAction) = X
