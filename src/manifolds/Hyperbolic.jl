@@ -24,7 +24,7 @@ metric. The corresponding sectional curvature is ``-1``.
 If `p` and `X` are `Vector`s of length `n+1` they are assumed to be
 a [`HyperboloidPoint`](@ref) and a [`HyperboloidTVector`](@ref), respectively
 
-Other models are the Poincaré ball model, see [`PoincareBallPoint`](@ref) and [`PoincareBallTVector`](@ref), respectiely
+Other models are the Poincaré ball model, see [`PoincareBallPoint`](@ref) and [`PoincareBallTVector`](@ref), respectively
 and the Poincaré half space model, see [`PoincareHalfSpacePoint`](@ref) and [`PoincareHalfSpaceTVector`](@ref), respectively.
 
 # Constructor
@@ -52,7 +52,7 @@ end
 In the Hyperboloid model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` points are represented
 as vectors in ``ℝ^{n+1}`` with [`MinkowskiMetric`](@ref) equal to ``-1``.
 
-This representation is the default, i.e. `AbstractVector`s are assumed to have this repesentation.
+This representation is the default, i.e. `AbstractVector`s are assumed to have this representation.
 """
 struct HyperboloidPoint{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
@@ -65,7 +65,7 @@ In the Hyperboloid model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` tangent vc
 as vectors in ``ℝ^{n+1}`` with [`MinkowskiMetric`](@ref) ``⟨p,X⟩_{\mathrm{M}}=0`` to their base
 point ``p``.
 
-This representation is the default, i.e. vectors are assumed to have this repesentation.
+This representation is the default, i.e. vectors are assumed to have this representation.
 """
 struct HyperboloidTVector{TValue<:AbstractVector} <: TVector
     value::TValue
@@ -148,7 +148,7 @@ For the [`HyperboloidPoint`](@ref) or plain vectors this means that, `p` is a ve
 length ``n+1`` with inner product in the embedding of -1, see [`MinkowskiMetric`](@ref).
 The tolerance for the last test can be set using the `kwargs...`.
 
-For the [`PoincareBallPoint`](@ref) a valid point is a vector ``p ∈ ℝ^n`` with a norm stricly
+For the [`PoincareBallPoint`](@ref) a valid point is a vector ``p ∈ ℝ^n`` with a norm strictly
 less than 1.
 
 For the [`PoincareHalfSpacePoint`](@ref) a valid point is a vector from ``p ∈ ℝ^n`` with a positive
@@ -288,7 +288,7 @@ reaches `q` after time 1. The formula reads for ``p ≠ q``
 ```
 
 where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
-the [`Lorentz`](@ref)ian manifold. For ``p=q`` the logarihmic map is equal to the zero vector.
+the [`Lorentz`](@ref)ian manifold. For ``p=q`` the logarithmic map is equal to the zero vector.
 """
 log(::Hyperbolic, ::Any...)
 
@@ -368,7 +368,7 @@ end
 @doc raw"""
     parallel_transport_to(M::Hyperbolic, p, X, q)
 
-Compute the paralllel transport of the `X` from the tangent space at `p` on the
+Compute the parallel transport of the `X` from the tangent space at `p` on the
 [`Hyperbolic`](@ref) space ``\mathcal H^n`` to the tangent at `q` along the [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`)
 connecting `p` and `q`. The formula reads
 

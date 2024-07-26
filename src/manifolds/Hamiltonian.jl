@@ -78,7 +78,7 @@ end
 ManifoldsBase.@default_manifold_fallbacks HamiltonianMatrices Hamiltonian Hamiltonian value value
 
 @doc raw"""
-    ^(A::Hamilonian, ::typeof(+))
+    ^(A::Hamiltonian, ::typeof(+))
 
 Compute the [`symplectic_inverse`](@ref) of a Hamiltonian (A)
 """

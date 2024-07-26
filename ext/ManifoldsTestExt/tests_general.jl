@@ -63,7 +63,7 @@ that lie on it (contained in `pts`).
 - `test_mutating_rand = false` : test the mutating random function for points on manifolds.
 - `test_project_point = false`: test projections onto the manifold.
 - `test_project_tangent = false` : test projections on tangent spaces.
-- `test_representation_size = true` : test repersentation size of points/tvectprs.
+- `test_representation_size = true` : test representation size of points/tvectprs.
 - `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace.
 - `test_vector_spaces = true` : test Vector bundle of this manifold.
 - `test_default_vector_transport = false` : test the default vector transport (usually
@@ -477,8 +477,8 @@ function test_manifold(
         test_default_vector_transport && Test.@testset "default vector transport" begin
             v1t1 = vector_transport_to(M, pts[1], X1, pts32)
             v1t2 = vector_transport_direction(M, pts[1], X1, X2)
-            Test.@test is_vector(M, pts32, v1t1; atol=tvatol)
-            Test.@test is_vector(M, pts32, v1t2; atol=tvatol)
+            Test.@test is_vector(M, pts32, v1t1; atol=tvatol, error=:warn)
+            Test.@test is_vector(M, pts32, v1t2; atol=tvatol, error=:warn)
             Test.@test isapprox(M, pts32, v1t1, v1t2)
             Test.@test isapprox(M, pts[1], vector_transport_to(M, pts[1], X1, pts[1]), X1)
 
@@ -506,8 +506,10 @@ function test_manifold(
                 pts32 = retract(M, pts[1], X2, rtr_m)
                 test_to && (v1t1 = vector_transport_to(M, pts[1], X1, pts32, vtm))
                 test_dir && (v1t2 = vector_transport_direction(M, pts[1], X1, X2, vtm))
-                test_to && Test.@test is_vector(M, pts32, v1t1, true; atol=tvatol)
-                test_dir && Test.@test is_vector(M, pts32, v1t2, true; atol=tvatol)
+                test_to &&
+                    Test.@test is_vector(M, pts32, v1t1; atol=tvatol, error=:warn)
+                test_dir &&
+                    Test.@test is_vector(M, pts32, v1t2; atol=tvatol, error=:warn)
                 (test_to && test_dir) &&
                     Test.@test isapprox(M, pts32, v1t1, v1t2, atol=tvatol)
                 test_to && Test.@test isapprox(
@@ -841,12 +843,12 @@ function test_manifold(
 end
 
 """
-    test_parallel_transport(M,P; along=false, to=true, diretion=true)
+    test_parallel_transport(M,P; along=false, to=true, direction=true)
 
 Generic tests for parallel transport on `M`given at least two pointsin `P`.
 
 The single functions to transport `along` (a curve), `to` (a point) or (towards a) `direction`
-are sub-tests that can be activated by the keywords arguemnts
+are sub-tests that can be activated by the keywords arguments
 
 !!! Note
 Since the interface to specify curves is not yet provided, the along keyword does not have an effect yet

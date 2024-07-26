@@ -28,13 +28,13 @@ The first one, widespread in differential geometry textbooks, is based on defini
 
 The second one is beneficial if there exists a representation of points and tangent vectors for a manifold which allows for efficient closed-form formulas for standard functions like the exponential map or Riemannian distance in this representation. These computations are then chart-free. `Manifolds.jl` supports both approaches, although the chart-free approach is the main focus of the library.
 
-In this tutorial we focsus on chart-based computation.
+In this tutorial we focus on chart-based computation.
 """
 
 # ╔═╡ b85a56ad-3b74-402d-8fbe-9f0d130253e6
 md"""
 The manifold we consider is the `M` is the torus in form of the [`EmbeddedTorus`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/torus.html#Manifolds.EmbeddedTorus), that is the representation defined as a surface of revolution of a circle of radius 2 around a circle of radius 3.
-The atlas we will perform computations in is its [`DefaultTorusAtlas`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/torus.html#Manifolds.DefaultTorusAtlas) `A`, consistting of a family of charts indexed by two angles, that specify the base point of the chart.
+The atlas we will perform computations in is its [`DefaultTorusAtlas`](https://juliamanifolds.github.io/Manifolds.jl/latest/manifolds/torus.html#Manifolds.DefaultTorusAtlas) `A`, consisting of a family of charts indexed by two angles, that specify the base point of the chart.
 
 We will draw geodesics time between `0` and `t_end`, and then sample the solution at multiples of `dt` and draw a line connecting sampled points.
 """

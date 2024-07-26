@@ -321,7 +321,7 @@ LinearAlgebra.norm(::Hyperrectangle, ::Any, X) = norm(X)
 """
     parallel_transport_direction(M::Hyperrectangle, p, X, d)
 
-the parallel transport on [`Hyperrectangle`](@ref) is the identiy, i.e. returns `X`.
+the parallel transport on [`Hyperrectangle`](@ref) is the identity, i.e. returns `X`.
 """
 parallel_transport_direction(::Hyperrectangle, ::Any, X, ::Any) = X
 parallel_transport_direction!(::Hyperrectangle, Y, ::Any, X, ::Any) = copyto!(Y, X)
@@ -329,7 +329,7 @@ parallel_transport_direction!(::Hyperrectangle, Y, ::Any, X, ::Any) = copyto!(Y,
 """
     parallel_transport_to(M::Hyperrectangle, p, X, q)
 
-the parallel transport on [`Hyperrectangle`](@ref) is the identiy, i.e. returns `X`.
+the parallel transport on [`Hyperrectangle`](@ref) is the identity, i.e. returns `X`.
 """
 parallel_transport_to(::Hyperrectangle, ::Any, X, ::Any) = X
 parallel_transport_to!(::Hyperrectangle, Y, ::Any, X, ::Any) = copyto!(Y, X)

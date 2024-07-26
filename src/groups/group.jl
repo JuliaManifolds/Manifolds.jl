@@ -223,7 +223,7 @@ end
 Identity(::O) where {O<:AbstractGroupOperation} = Identity(O)
 Identity(::Type{O}) where {O<:AbstractGroupOperation} = Identity{O}()
 
-# To ensure allocate_result_type works in general if idenitty apears in the tuple
+# To ensure allocate_result_type works in general if identity appears in the tuple
 number_eltype(::Identity) = Bool
 
 @doc raw"""
@@ -431,7 +431,7 @@ end
 Adjoint action of the element `p` of the Lie group `G` on the element `X`
 of the corresponding Lie algebra.
 
-It is defined as the differential of the group authomorphism ``Ψ_p(q) = pqp⁻¹`` at
+It is defined as the differential of the group automorphism ``Ψ_p(q) = pqp⁻¹`` at
 the identity of `G`.
 
 The formula reads
@@ -735,10 +735,10 @@ function hat!(
     return get_vector_lie!(M, Y, X, VeeOrthogonalBasis())
 end
 function hat(M::AbstractManifold, e::Identity, ::Any)
-    return throw(ErrorException("On $M there exsists no identity $e"))
+    return throw(ErrorException("On $M there exists no identity $e"))
 end
 function hat!(M::AbstractManifold, c, e::Identity, X)
-    return throw(ErrorException("On $M there exsists no identity $e"))
+    return throw(ErrorException("On $M there exists no identity $e"))
 end
 
 @trait_function vee(M::AbstractDecoratorManifold, e::Identity, X)
@@ -777,10 +777,10 @@ function vee!(
     return get_coordinates_lie!(M, Y, X, VeeOrthogonalBasis())
 end
 function vee(M::AbstractManifold, e::Identity, X)
-    return throw(ErrorException("On $M there exsists no identity $e"))
+    return throw(ErrorException("On $M there exists no identity $e"))
 end
 function vee!(M::AbstractManifold, c, e::Identity, X)
-    return throw(ErrorException("On $M there exsists no identity $e"))
+    return throw(ErrorException("On $M there exists no identity $e"))
 end
 
 """
@@ -1354,7 +1354,7 @@ end
 @doc raw"""
     get_vector_lie(G::AbstractDecoratorManifold, a, B::AbstractBasis)
 
-Reconstruct a tangent vector from the Lie algebra of `G` from cooordinates `a` of a basis `B`.
+Reconstruct a tangent vector from the Lie algebra of `G` from coordinates `a` of a basis `B`.
 This is similar to calling [`get_vector`](@ref) at the `p=`[`Identity`](@ref)`(G)`.
 """
 function get_vector_lie(

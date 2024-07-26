@@ -659,7 +659,7 @@ end
 """
     parallel_transport_along(M::Euclidean, p, X, c)
 
-the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
+the parallel transport on [`Euclidean`](@ref) is the identity, i.e. returns `X`.
 """
 parallel_transport_along(::Euclidean, ::Any, X, c::AbstractVector) = X
 parallel_transport_along!(::Euclidean, Y, ::Any, X, c::AbstractVector) = copyto!(Y, X)
@@ -667,7 +667,7 @@ parallel_transport_along!(::Euclidean, Y, ::Any, X, c::AbstractVector) = copyto!
 """
     parallel_transport_direction(M::Euclidean, p, X, d)
 
-the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
+the parallel transport on [`Euclidean`](@ref) is the identity, i.e. returns `X`.
 """
 parallel_transport_direction(::Euclidean, ::Any, X, ::Any) = X
 parallel_transport_direction!(::Euclidean, Y, ::Any, X, ::Any) = copyto!(Y, X)
@@ -675,7 +675,7 @@ parallel_transport_direction!(::Euclidean, Y, ::Any, X, ::Any) = copyto!(Y, X)
 """
     parallel_transport_to(M::Euclidean, p, X, q)
 
-the parallel transport on [`Euclidean`](@ref) is the identiy, i.e. returns `X`.
+the parallel transport on [`Euclidean`](@ref) is the identity, i.e. returns `X`.
 """
 parallel_transport_to(::Euclidean, ::Any, X, ::Any) = X
 parallel_transport_to!(::Euclidean, Y, ::Any, X, ::Any) = copyto!(Y, X)

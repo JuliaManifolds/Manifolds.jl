@@ -85,7 +85,7 @@ Now let's show explained variance of each principal component.
 plot(principalvars(fp), title="explained variance", label="Tangent PCA")
 ```
 
-The next plot shows how projections on the first two pricipal components look like.
+The next plot shows how projections on the first two principal components look like.
 ```{julia}
 fig = plot(; title="coordinates per gesture of the first two principal components")
 for label_num in [0, 1]

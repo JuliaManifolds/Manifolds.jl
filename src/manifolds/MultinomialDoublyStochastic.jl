@@ -17,7 +17,7 @@ end
 @doc raw"""
     representation_size(M::AbstractMultinomialDoublyStochastic)
 
-return the representation size of doubly stochastic matrices, whic are embedded
+return the representation size of doubly stochastic matrices, which are embedded
 in the ``ℝ^{n×n}`` matrices and hence the answer here is ``
 """
 function representation_size(M::AbstractMultinomialDoublyStochastic)
@@ -189,7 +189,7 @@ end
     )
 
 project a matrix `p` with positive entries applying Sinkhorn's algorithm.
-Note that this projct method – different from the usual case, accepts keywords.
+Note that this project method – different from the usual case, accepts keywords.
 """
 function project(M::AbstractMultinomialDoublyStochastic, p; kwargs...)
     q = allocate_result(M, project, p)

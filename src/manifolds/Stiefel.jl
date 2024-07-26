@@ -157,7 +157,7 @@ end
 
 Compute the inverse retraction based on a singular value decomposition
 for two points `p`, `q` on the [`Stiefel`](@ref) manifold `M`.
-This follows the folloing approach: From the Polar retraction we know that
+This follows the following approach: From the Polar retraction we know that
 
 ````math
 \operatorname{retr}_p^{-1}q = qs - t
