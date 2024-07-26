@@ -555,7 +555,11 @@ function test_group(
         )
         # adjoint action at identity
         for conv in [LeftAction(), RightAction()]
-            isapprox(TangentSpace(G, identity_element(G)), adjoint_action(G, e, Xe_pts[1]), Xe_pts[1])
+            isapprox(
+                TangentSpace(G, identity_element(G)),
+                adjoint_action(G, e, Xe_pts[1]),
+                Xe_pts[1],
+            )
         end
         if test_mutating
             Z = allocate(X)
