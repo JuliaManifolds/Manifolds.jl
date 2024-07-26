@@ -26,8 +26,11 @@ Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
 adjoint_action(::CircleGroup, p, X, ::LeftAction) = X
 adjoint_action(::CircleGroup, ::Identity, X, ::LeftAction) = X
+adjoint_action(::CircleGroup, p, X, ::RightAction) = X
+adjoint_action(::CircleGroup, ::Identity, X, ::RightAction) = X
 
 adjoint_action!(::CircleGroup, Y, p, X, ::LeftAction) = copyto!(Y, X)
+adjoint_action!(::CircleGroup, Y, p, X, ::RightAction) = copyto!(Y, X)
 
 function compose(
     ::MultiplicationGroupTrait,

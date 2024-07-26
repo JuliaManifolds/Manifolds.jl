@@ -534,10 +534,19 @@ function test_group(
             adjoint_action(G, g_pts[2], adjoint_action(G, inv(G, g_pts[2]), X)),
             X,
         )
+        # right adjoint action
+        Test.@test isapprox(
+            G,
+            e,
+            adjoint_action(G, g_pts[2], adjoint_action(G, g_pts[2], X, RightAction())),
+            X,
+        )
         if test_mutating
             Z = allocate(X)
             adjoint_action!(G, Z, g_pts[2], X)
             Test.@test isapprox(G, e, Z, adjoint_action(G, g_pts[2], X))
+            adjoint_action!(G, Z, g_pts[2], X, RightAction())
+            Test.@test isapprox(G, e, Z, adjoint_action(G, g_pts[2], X, RightAction()))
         end
 
         # interaction with Lie bracket
