@@ -426,12 +426,12 @@ function is_vector(
 end
 
 @doc raw"""
-    adjoint_action(G::AbstractDecoratorManifold, p, X, dir)
+    adjoint_action(G::AbstractDecoratorManifold, p, X, dir=LeftAction())
 
 Adjoint action of the element `p` of the Lie group `G` on the element `X`
 of the corresponding Lie algebra.
 
-It is defined as the differential of the group automorphism ``Ψ_p(q) = pqp⁻¹`` at
+If `dir` is `LeftAction()`, it is defined as the differential of the group automorphism ``Ψ_p(q) = pqp⁻¹`` at
 the identity of `G`.
 
 The formula reads
@@ -439,6 +439,11 @@ The formula reads
 \operatorname{Ad}_p(X) = dΨ_p(e)[X]
 ````
 where ``e`` is the identity element of `G`.
+
+If `dir` is `RightAction()`, then the formula is
+````math
+\operatorname{Ad}_p(X) = dΨ_{p^{-1}}(e)[X]
+````
 
 Note that the adjoint representation of a Lie group isn't generally faithful.
 Notably the adjoint representation of SO(2) is trivial.
