@@ -581,6 +581,11 @@ end
 
 Compute the value of differential of inverse ``p^{-1} ∈ \mathcal{G}`` of an element
 ``p ∈ \mathcal{G}`` at tangent vector `X` at `p`. The result is a tangent vector at ``p^{-1}``.
+
+*Note*: the default implementation of `inv_diff` and `inv_diff!`
+assumes that the tangent vector ``X`` is stored at
+the point ``p ∈ \mathcal{G}`` as the vector ``Y ∈ \mathfrak{g}``
+ where ``X = pY``.
 """
 inv_diff(G::AbstractDecoratorManifold, p)
 
@@ -591,7 +596,6 @@ end
 
 @trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
 
-# true only if tangent vectors are stored with the left-invariant convention
 function inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
     adjoint_action!(G, Y, p, X)
     Y .*= -1
@@ -913,6 +917,12 @@ left or right `conv`ention. The differential transports vectors:
 ```math
 (\mathrm{d}τ_p)_q : T_q \mathcal{G} → T_{τ_p q} \mathcal{G}\\
 ```
+
+*Note*: the default implementation of `translate_diff` and `translate_diff!`
+assumes that the tangent vector ``X`` is stored at
+the point ``p ∈ \mathcal{G}`` as the vector ``Y ∈ \mathfrak{g}``
+ where ``X = pY``.
+The implementation at `p = Identity` is independent of the storage choice.
 """
 translate_diff(::AbstractDecoratorManifold, ::Any...)
 @trait_function translate_diff(
@@ -943,7 +953,7 @@ end
     X,
     conv::ActionDirectionAndSide=LeftForwardAction(),
 )
-# the following are true if the tangent vectors are stored with the left invariant convention
+
 function translate_diff!(
     G::AbstractDecoratorManifold,
     Y,
@@ -978,7 +988,6 @@ function translate_diff!(
     return adjoint_action!(G, Y, p, X, RightAction())
 end
 
-# the following are true regardless of how the tangent vectors are stored:
 translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftForwardAction) = X
 translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightForwardAction) = X
 translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftBackwardAction) = X
