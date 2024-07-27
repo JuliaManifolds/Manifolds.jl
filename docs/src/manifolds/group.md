@@ -43,15 +43,15 @@ Pages = ["groups/GroupManifold.jl"]
 Order = [:constant, :type, :function]
 ```
 
-### Default Storage of Tangent Vectors
+### Default Representation of Tangent Vectors
 
-In most groups, the storage of a tangent vector
+In most groups, the representation of a tangent vector
  ``X`` at the point ``p ∈ \mathcal{G}`` is stored
  as a vector ``Y ∈ \mathfrak{g}``.
 This helps to compute the derivatives of the composition and inverse.
 
 To explain this, let us assume that *the group consists of matrices* (this is always possible).
-The storage of a tangent vector
+The representation of a tangent vector
  ``X`` at the point ``p ∈ \mathcal{G}`` is stored
  as the vector ``Y ∈ \mathfrak{g}`` given by
 ```math
@@ -65,7 +65,7 @@ the direction ``X``, tangent at ``p`` is given by
 ```math
 Xq = pYq = pq(q^{-1}Yq)
 ```
-We see that with this storage convention, this derivative is just the
+We see that with this representation convention, this derivative is just the
 adjoint action of ``q^{-1}`` on the vector ``Y``.
 
 #### Derivative of the Group Composition on the Right
@@ -75,7 +75,7 @@ stored as ``Y`` with ``X = qY``, we have similarly
 ```math
 pX = pqY
 ```
-With the storage convention above, this derivative is just the identity.
+With the representation convention above, this derivative is just the identity.
 
 #### Derivative of the Group Inverse
 
@@ -85,7 +85,7 @@ The result is a tangent vector at ``p^{-1}`` given by
 ```math
 -p^{-1}Xp^{-1} = - Yp^{-1} = -p^{-1}(p Y p^{-1})
 ```
-With the storage convention above, this derivative is thus ``-pYp^{-1}``, that is, the opposite of the adjoint action of ``p`` on the vector ``Y``.
+With the representation convention above, this derivative is thus ``-pYp^{-1}``, that is, the opposite of the adjoint action of ``p`` on the vector ``Y``.
 
 #### Implication for Creating New Groups
 
