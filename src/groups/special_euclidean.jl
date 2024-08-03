@@ -600,11 +600,6 @@ algebra. For the matrix representation (which can be obtained using [`screw_matr
 the formula is ``[X, Y] = XY-YX``, while in the `ArrayPartition` representation the
 formula reads ``[X, Y] = [(t_1, R_1), (t_2, R_2)] = (R_1 t_2 - R_2 t_1, R_1 R_2 - R_2 R_1)``.
 """
-function lie_bracket(G::SpecialEuclidean, X::ArrayPartition, Y::ArrayPartition)
-    nX, hX = submanifold_components(G, X)
-    nY, hY = submanifold_components(G, Y)
-    return ArrayPartition(hX * nY - hY * nX, lie_bracket(G.manifold.manifolds[2], hX, hY))
-end
 function lie_bracket(::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)
     return X * Y - Y * X
 end
@@ -699,115 +694,9 @@ function embed!(M::SpecialEuclideanInGeneralLinear, Y, p, X)
     return copyto!(Y, embed(M, p, X))
 end
 
-"""
-    project(M::SpecialEuclideanInGeneralLinear, p)
-
-Project point `p` in [`GeneralLinear`](@ref) to the [`SpecialEuclidean`](@ref) group.
-This is performed by extracting the rotation and translation part as in [`affine_matrix`](@ref).
-"""
-function project(M::SpecialEuclideanInGeneralLinear, p)
-    G = M.manifold
-    np, hp = submanifold_components(G, p)
-    return ArrayPartition(np, hp)
-end
-"""
-    project(M::SpecialEuclideanInGeneralLinear, p, X)
-
-Project tangent vector `X` at point `p` in [`GeneralLinear`](@ref) to the
-[`SpecialEuclidean`](@ref) Lie algebra.
-This reverses the transformation performed by [`embed`](@ref embed(M::SpecialEuclideanInGeneralLinear, p, X))
-"""
-function project(M::SpecialEuclideanInGeneralLinear, p, X)
-    G = M.manifold
-    np, hp = submanifold_components(G, p)
-    nX, hX = submanifold_components(G, X)
-    return ArrayPartition(hp * nX, hX)
-end
-
 function project!(M::SpecialEuclideanInGeneralLinear, q, p)
     return copyto!(q, project(M, p))
 end
 function project!(M::SpecialEuclideanInGeneralLinear, Y, p, X)
     return copyto!(Y, project(M, p, X))
-end
-
-### Special methods for better performance of selected operations
-
-function exp(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        exp(M1.manifold, p.x[1], X.x[1]),
-        exp(M2.manifold, p.x[2], X.x[2]),
-    )
-end
-function log(M::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        log(M1.manifold, p.x[1], q.x[1]),
-        log(M2.manifold, p.x[2], q.x[2]),
-    )
-end
-function vee(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
-    M1, M2 = M.manifold.manifolds
-    return vcat(vee(M1.manifold, p.x[1], X.x[1]), vee(M2.manifold, p.x[2], X.x[2]))
-end
-function get_coordinates(
-    M::SpecialEuclidean,
-    p::ArrayPartition,
-    X::ArrayPartition,
-    basis::DefaultOrthogonalBasis,
-)
-    M1, M2 = M.manifold.manifolds
-    return vcat(
-        get_coordinates(M1.manifold, p.x[1], X.x[1], basis),
-        get_coordinates(M2.manifold, p.x[2], X.x[2], basis),
-    )
-end
-function hat(
-    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
-    p::ArrayPartition,
-    c::AbstractVector,
-)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(2)], ℝ),
-        get_vector_orthogonal(M2.manifold, p.x[2], c[SA[3]], ℝ),
-    )
-end
-function get_vector(
-    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
-    p::ArrayPartition,
-    c::AbstractVector,
-    basis::DefaultOrthogonalBasis,
-)
-    return ArrayPartition(
-        get_vector(M.manifold.manifolds[1].manifold, p.x[1], c[SOneTo(2)], basis),
-        get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[3]], basis),
-    )
-end
-
-function hat(
-    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
-    p::ArrayPartition,
-    c::AbstractVector,
-)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(3)], ℝ),
-        get_vector_orthogonal(M2.manifold, p.x[2], c[SA[4, 5, 6]], ℝ),
-    )
-end
-function get_vector(
-    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
-    p::ArrayPartition,
-    c::AbstractVector,
-    basis::DefaultOrthogonalBasis,
-)
-    return ArrayPartition(
-        get_vector(M.manifold.manifolds[1].manifold, p.x[1], c[SOneTo(3)], basis),
-        get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[4, 5, 6]], basis),
-    )
-end
-function compose(::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
-    return ArrayPartition(p.x[2] * q.x[1] + p.x[1], p.x[2] * q.x[2])
 end

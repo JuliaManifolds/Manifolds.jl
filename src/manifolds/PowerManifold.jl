@@ -30,44 +30,12 @@ function PowerManifold(
     return PowerManifold{𝔽,typeof(M),typeof(size_w),ArrayPowerRepresentation}(M, size_w)
 end
 
-"""
-    PowerPointDistribution(M::AbstractPowerManifold, distribution)
-
-Power distribution on manifold `M`, based on `distribution`.
-"""
-struct PowerPointDistribution{TM<:AbstractPowerManifold,TD<:MPointDistribution,TX} <:
-       MPointDistribution{TM}
-    manifold::TM
-    distribution::TD
-    point::TX
-end
-
-"""
-    PowerFVectorDistribution([type::VectorSpaceFiber], [x], distr)
-
-Generates a random vector at a `point` from vector space (a fiber of a tangent
-bundle) of type `type` using the power distribution of `distr`.
-
-Vector space type and `point` can be automatically inferred from distribution `distr`.
-"""
-struct PowerFVectorDistribution{TSpace<:VectorSpaceFiber,TD<:FVectorDistribution} <:
-       FVectorDistribution{TSpace}
-    type::TSpace
-    distribution::TD
-end
-
 const PowerManifoldMultidimensional =
     AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},ArrayPowerRepresentation} where {𝔽}
 
 Base.:^(M::AbstractManifold, n) = PowerManifold(M, n...)
 
 function allocate(::PowerManifoldNestedReplacing, x::AbstractArray{<:SArray})
-    return similar(x)
-end
-function allocate(
-    ::PowerManifoldNestedReplacing,
-    x::AbstractArray{<:ArrayPartition{T,<:NTuple{N,SArray}}},
-) where {T,N}
     return similar(x)
 end
 
@@ -138,39 +106,6 @@ Return the manifold volume of an [`PowerManifold`](@extref `ManifoldsBase.PowerM
 function manifold_volume(M::PowerManifold)
     size = get_parameter(M.size)
     return manifold_volume(M.manifold)^prod(size)
-end
-
-function Random.rand(rng::AbstractRNG, d::PowerFVectorDistribution)
-    fv = zero_vector(d.type.manifold, d.type.point)
-    Distributions._rand!(rng, d, fv)
-    return fv
-end
-function Random.rand(rng::AbstractRNG, d::PowerPointDistribution)
-    x = allocate_result(d.manifold, rand, d.point)
-    Distributions._rand!(rng, d, x)
-    return x
-end
-
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::PowerFVectorDistribution,
-    v::AbstractArray,
-)
-    PM = d.type.manifold
-    rep_size = representation_size(PM.manifold)
-    for i in get_iterator(d.type.manifold)
-        copyto!(d.distribution.type.point, _read(PM, rep_size, d.type.point, i))
-        Distributions._rand!(rng, d.distribution, _read(PM, rep_size, v, i))
-    end
-    return v
-end
-function Distributions._rand!(rng::AbstractRNG, d::PowerPointDistribution, x::AbstractArray)
-    M = d.manifold
-    rep_size = representation_size(M.manifold)
-    for i in get_iterator(M)
-        Distributions._rand!(rng, d.distribution, _write(M, rep_size, x, i))
-    end
-    return x
 end
 
 Base.@propagate_inbounds @inline function _read(
@@ -286,9 +221,6 @@ function Base.show(
     size = get_parameter(M.size)
     return print(io, "PowerManifold($(M.manifold), $(join(size, ", ")))")
 end
-
-Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type)
-Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""
     volume_density(M::PowerManifold, p, X)

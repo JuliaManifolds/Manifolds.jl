@@ -190,7 +190,6 @@ import Statistics: mean, mean!, median, median!, cov, var
 import StatsBase: mean_and_var
 
 using Base.Iterators: repeated
-using Distributions
 using Einsum: @einsum
 using HybridArrays
 using Kronecker
@@ -356,7 +355,6 @@ using Markdown: @doc_str
 using MatrixEquations: lyapc, sylvc
 using Quaternions: Quaternions
 using Random
-using RecursiveArrayTools: ArrayPartition
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using SpecialFunctions
@@ -367,9 +365,23 @@ using StatsBase: AbstractWeights
 
 include("utils.jl")
 
-include("product_representations.jl")
-
 include("manifold_fallbacks.jl")
+
+"""
+    projected_distribution(M::AbstractManifold, d, [p=rand(d)])
+
+Wrap the standard distribution `d` into a manifold-valued distribution. Generated
+points will be of similar type to `p`. By default, the type is not changed.
+"""
+function projected_distribution end
+
+"""
+    normal_tvector_distribution(M::AbstractManifold, p, σ)
+
+Normal distribution in ambient space with standard deviation `σ`
+projected to tangent space at `p`.
+"""
+function normal_tvector_distribution end
 
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
@@ -382,8 +394,6 @@ include("manifolds/VectorBundle.jl")
 include("groups/group.jl")
 
 # Features I: Which are extended on Meta Manifolds
-include("distributions.jl")
-include("projected_distribution.jl")
 include("statistics.jl")
 
 # Meta Manifolds II: Products
@@ -616,6 +626,16 @@ function __init__()
         @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
             include("../ext/ManifoldsTestExt/ManifoldsTestExt.jl")
         end
+
+        @require Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f" begin
+            include("../ext/ManifoldsDistributionsExt/ManifoldsDistributionsExt.jl")
+        end
+
+        @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
+            include(
+                "../ext/ManifoldsRecursiveArrayToolsExt/ManifoldsRecursiveArrayToolsExt.jl",
+            )
+        end
     end
 
     return nothing
@@ -715,11 +735,10 @@ export AbstractPowerManifold,
     QuotientManifold
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
-export ArrayPartition
-export ProjectedPointDistribution, TangentBundle
+export TangentBundle
 export TangentSpace, VectorSpaceFiber, VectorSpaceType, VectorBundle
 export AbstractVectorTransportMethod,
-    DifferentiatedRetractionVectorTransport, ParallelTransport, ProjectedPointDistribution
+    DifferentiatedRetractionVectorTransport, ParallelTransport
 export PoleLadderTransport, SchildsLadderTransport
 export ProductVectorTransport
 export AbstractAffineConnection, ConnectionManifold, LeviCivitaConnection

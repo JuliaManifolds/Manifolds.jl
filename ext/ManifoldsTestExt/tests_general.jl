@@ -755,7 +755,6 @@ function test_manifold(
         for p in pts
             prand = allocate(p)
             for pd in point_distributions
-                Test.@test Manifolds.support(pd) isa Manifolds.MPointSupport{typeof(M)}
                 for _ in 1:10
                     Test.@test is_point(M, rand(pd))
                     if test_mutating_rand
@@ -829,13 +828,10 @@ function test_manifold(
 
     Test.@testset "tangent vector distributions" begin # COV_EXCL_LINE
         for tvd in tvector_distributions
-            supp = Manifolds.support(tvd)
-            Test.@test supp isa
-                       Manifolds.FVectorSupport{<:TangentSpace{number_system(M),typeof(M)}}
             for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * find_eps(randtv)
-                Test.@test is_vector(M, supp.space.point, randtv, true; atol=atol)
+                Test.@test is_vector(M, pts[1], randtv, true; atol=atol)
             end
         end
     end

@@ -192,12 +192,18 @@ function Manifolds.get_vector_orthonormal!(
 )
     return Y .= X
 end
-Manifolds.is_default_metric(::BaseManifold, ::DefaultBaseManifoldMetric) = true
-function Manifolds.projected_distribution(M::BaseManifold, d)
-    return ProjectedPointDistribution(M, d, project!, rand(d))
-end
-function Manifolds.projected_distribution(M::BaseManifold, d, p)
-    return ProjectedPointDistribution(M, d, project!, p)
+
+if VERSION >= v"1.9"
+    const ProjectedPointDistribution =
+        Base.get_extension(Manifolds, :ManifoldsDistributionsExt).ProjectedPointDistribution
+
+    Manifolds.is_default_metric(::BaseManifold, ::DefaultBaseManifoldMetric) = true
+    function Manifolds.projected_distribution(M::BaseManifold, d)
+        return ProjectedPointDistribution(M, d, project!, rand(d))
+    end
+    function Manifolds.projected_distribution(M::BaseManifold, d, p)
+        return ProjectedPointDistribution(M, d, project!, p)
+    end
 end
 
 function Manifolds.flat!(
@@ -555,8 +561,10 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test_throws MethodError local_metric_jacobian(MM2, p, B_p)
         @test_throws MethodError christoffel_symbols_second_jacobian(MM2, p, B_p)
         # MM falls back to nondefault error
-        @test_throws MethodError projected_distribution(MM, 1, p)
-        @test_throws MethodError projected_distribution(MM, 1)
+        if VERSION >= v"1.9"
+            @test_throws MethodError projected_distribution(MM, 1, p)
+            @test_throws MethodError projected_distribution(MM, 1)
+        end
 
         @test inner(MM2, p, X, Y) === inner(M, p, X, Y)
         @test norm(MM2, p, X) === norm(M, p, X)
@@ -595,16 +603,18 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test is_point(MM2, p) === is_point(M, p)
         @test is_vector(MM2, p, X) === is_vector(M, p, X)
 
-        a = Manifolds.projected_distribution(
-            M,
-            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
-        )
-        b = Manifolds.projected_distribution(
-            MM2,
-            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
-        )
-        @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
-        @test isapprox(a.distribution.μ, b.distribution.μ)
+        if VERSION >= v"1.9"
+            a = Manifolds.projected_distribution(
+                M,
+                Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
+            )
+            b = Manifolds.projected_distribution(
+                MM2,
+                Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
+            )
+            @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
+            @test isapprox(a.distribution.μ, b.distribution.μ)
+        end
         @test get_basis(M, p, DefaultOrthonormalBasis()).data ==
               get_basis(MM2, p, DefaultOrthonormalBasis()).data
         @test_throws MethodError get_basis(MM, p, DefaultOrthonormalBasis())

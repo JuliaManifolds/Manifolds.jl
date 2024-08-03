@@ -17,29 +17,6 @@ function Rotations(n::Int; parameter::Symbol=:type)
     return Rotations{typeof(size)}(size)
 end
 
-"""
-    NormalRotationDistribution(M::Rotations, d::Distribution, x::TResult)
-
-Distribution that returns a random point on the manifold [`Rotations`](@ref)
-`M`. Random point is generated using base distribution `d` and the type
-of the result is adjusted to `TResult`.
-
-See [`normal_rotation_distribution`](@ref) for details.
-"""
-struct NormalRotationDistribution{TResult,TM<:Rotations,TD<:Distribution} <:
-       MPointDistribution{TM}
-    manifold::TM
-    distr::TD
-end
-
-function NormalRotationDistribution(
-    M::Rotations,
-    d::Distribution,
-    x::TResult,
-) where {TResult}
-    return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
-end
-
 @doc raw"""
     angles_4d_skew_sym_matrix(A)
 
@@ -259,11 +236,7 @@ and second columns are swapped.
 
 The argument `p` is used to determine the type of returned points.
 """
-function normal_rotation_distribution(M::Rotations, p, σ::Real)
-    n = get_parameter(M.size)[1]
-    d = Distributions.MvNormal(zeros(n * n), σ * I)
-    return NormalRotationDistribution(M, d, p)
-end
+function normal_rotation_distribution end
 
 @doc raw"""
     project(M::Rotations, p; check_det = true)
@@ -297,19 +270,6 @@ function project!(M::Rotations, q, p; check_det::Bool=true)
     return q
 end
 
-function Random.rand(
-    rng::AbstractRNG,
-    d::NormalRotationDistribution{TResult,<:Rotations},
-) where {TResult}
-    n = get_parameter(d.manifold.size)[1]
-    return if n == 1
-        convert(TResult, ones(1, 1))
-    else
-        A = reshape(rand(rng, d.distr), (n, n))
-        convert(TResult, _fix_random_rotation(A))
-    end
-end
-
 function Random.rand!(
     rng::AbstractRNG,
     M::Rotations,
@@ -334,14 +294,6 @@ function Random.rand!(
         pX .= triu(A, 1) .- transpose(triu(A, 1))
     end
     return pX
-end
-
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::NormalRotationDistribution,
-    x::AbstractArray{<:Real},
-)
-    return copyto!(x, rand(rng, d))
 end
 
 function _fix_random_rotation(A::AbstractMatrix)
@@ -453,8 +405,6 @@ Sectional curvature of [`Rotations`](@ref) `M` is greater than or equal to 0.
 function sectional_curvature_min(::Rotations)
     return 0.0
 end
-
-Distributions.support(d::NormalRotationDistribution) = MPointSupport(d.manifold)
 
 @doc raw"""
     Weingarten(M::Rotations, p, X, V)
