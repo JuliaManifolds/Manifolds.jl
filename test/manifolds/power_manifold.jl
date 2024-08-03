@@ -67,54 +67,81 @@ end
     inverse_retraction_methods = [ManifoldsBase.LogarithmicInverseRetraction()]
 
     sphere_dist = Manifolds.uniform_distribution(Ms, @SVector [1.0, 0.0, 0.0])
-    power_s1_pt_dist =
-        Manifolds.PowerPointDistribution(Ms1, sphere_dist, randn(Float64, 3, 5))
-    power_s2_pt_dist =
-        Manifolds.PowerPointDistribution(Ms2, sphere_dist, randn(Float64, 3, 5, 7))
-    sphere_tv_dist =
-        Manifolds.normal_tvector_distribution(Ms, (@MVector [1.0, 0.0, 0.0]), 1.0)
-    power_s1_tv_dist = Manifolds.PowerFVectorDistribution(
-        TangentSpace(Ms1, rand(power_s1_pt_dist)),
-        sphere_tv_dist,
-    )
-    power_s2_tv_dist = Manifolds.PowerFVectorDistribution(
-        TangentSpace(Ms2, rand(power_s2_pt_dist)),
-        sphere_tv_dist,
-    )
 
-    id_rot = @SMatrix [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
-    rotations_dist = Manifolds.normal_rotation_distribution(Mr, id_rot, 1.0)
-    power_r1_pt_dist =
-        Manifolds.PowerPointDistribution(Mr1, rotations_dist, randn(Float64, 3, 3, 5))
-    power_rn1_pt_dist = Manifolds.PowerPointDistribution(
-        Mrn1,
-        rotations_dist,
-        [randn(Float64, 3, 3) for i in 1:5],
-    )
-    power_r2_pt_dist =
-        Manifolds.PowerPointDistribution(Mr2, rotations_dist, randn(Float64, 3, 3, 5, 7))
-    power_rn2_pt_dist = Manifolds.PowerPointDistribution(
-        Mrn2,
-        rotations_dist,
-        [randn(Float64, 3, 3) for i in 1:5, j in 1:7],
-    )
-    rotations_tv_dist = Manifolds.normal_tvector_distribution(Mr, MMatrix(id_rot), 1.0)
-    power_r1_tv_dist = Manifolds.PowerFVectorDistribution(
-        TangentSpace(Mr1, rand(power_r1_pt_dist)),
-        rotations_tv_dist,
-    )
-    power_rn1_tv_dist = Manifolds.PowerFVectorDistribution(
-        TangentSpace(Mrn1, rand(power_rn1_pt_dist)),
-        rotations_tv_dist,
-    )
-    power_r2_tv_dist = Manifolds.PowerFVectorDistribution(
-        TangentSpace(Mr2, rand(power_r2_pt_dist)),
-        rotations_tv_dist,
-    )
-    power_rn2_tv_dist = Manifolds.PowerFVectorDistribution(
-        TangentSpace(Mrn2, rand(power_rn2_pt_dist)),
-        rotations_tv_dist,
-    )
+    point_distributions_Mrn1 = []
+    tvector_distributions_Mrn1 = []
+    point_distributions_Mr2 = []
+    tvector_distributions_Mr2 = []
+    point_distributions_Mrn2 = []
+    tvector_distributions_Mrn2 = []
+    point_distributions_Ms2 = []
+    tvector_distributions_Ms2 = []
+    if VERSION >= v"1.9"
+        PowerPointDistribution =
+            Base.get_extension(Manifolds, :ManifoldsDistributionsExt).PowerPointDistribution
+
+        PowerFVectorDistribution =
+            Base.get_extension(
+                Manifolds,
+                :ManifoldsDistributionsExt,
+            ).PowerFVectorDistribution
+        power_s1_pt_dist = PowerPointDistribution(Ms1, sphere_dist, randn(Float64, 3, 5))
+        power_s2_pt_dist = PowerPointDistribution(Ms2, sphere_dist, randn(Float64, 3, 5, 7))
+        push!(point_distributions_Ms2, power_s2_pt_dist)
+
+        sphere_tv_dist =
+            Manifolds.normal_tvector_distribution(Ms, (@MVector [1.0, 0.0, 0.0]), 1.0)
+        power_s1_tv_dist = Manifolds.PowerFVectorDistribution(
+            TangentSpace(Ms1, rand(power_s1_pt_dist)),
+            sphere_tv_dist,
+        )
+        power_s2_tv_dist = Manifolds.PowerFVectorDistribution(
+            TangentSpace(Ms2, rand(power_s2_pt_dist)),
+            sphere_tv_dist,
+        )
+        push!(tvector_distributions_Ms2, power_s2_tv_dist)
+
+        id_rot = @SMatrix [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
+        rotations_dist = Manifolds.normal_rotation_distribution(Mr, id_rot, 1.0)
+        power_r1_pt_dist =
+            Manifolds.PowerPointDistribution(Mr1, rotations_dist, randn(Float64, 3, 3, 5))
+        power_rn1_pt_dist = Manifolds.PowerPointDistribution(
+            Mrn1,
+            rotations_dist,
+            [randn(Float64, 3, 3) for i in 1:5],
+        )
+        push!(point_distributions_Mrn1, power_rn1_pt_dist)
+        power_r2_pt_dist = Manifolds.PowerPointDistribution(
+            Mr2,
+            rotations_dist,
+            randn(Float64, 3, 3, 5, 7),
+        )
+        power_rn2_pt_dist = Manifolds.PowerPointDistribution(
+            Mrn2,
+            rotations_dist,
+            [randn(Float64, 3, 3) for i in 1:5, j in 1:7],
+        )
+        push!(point_distributions_Mrn1, power_rn2_pt_dist)
+        rotations_tv_dist = Manifolds.normal_tvector_distribution(Mr, MMatrix(id_rot), 1.0)
+        power_r1_tv_dist = Manifolds.PowerFVectorDistribution(
+            TangentSpace(Mr1, rand(power_r1_pt_dist)),
+            rotations_tv_dist,
+        )
+        power_rn1_tv_dist = Manifolds.PowerFVectorDistribution(
+            TangentSpace(Mrn1, rand(power_rn1_pt_dist)),
+            rotations_tv_dist,
+        )
+        push!(tvector_distributions_Mrn1, power_rn1_tv_dist)
+        power_r2_tv_dist = Manifolds.PowerFVectorDistribution(
+            TangentSpace(Mr2, rand(power_r2_pt_dist)),
+            rotations_tv_dist,
+        )
+        power_rn2_tv_dist = Manifolds.PowerFVectorDistribution(
+            TangentSpace(Mrn2, rand(power_rn2_pt_dist)),
+            rotations_tv_dist,
+        )
+        push!(tvector_distributions_Mrn2, power_rn2_tv_dist)
+    end
 
     @testset "get_component, set_component!, getindex and setindex!" begin
         p1 = randn(3, 5)
@@ -172,7 +199,7 @@ end
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types_s2
         @testset "Type $(trim(string(T)))..." begin
-            pts2 = [convert(T, rand(power_s2_pt_dist)) for _ in 1:3]
+            pts2 = [convert(T, rand(Ms2)) for _ in 1:3]
             test_manifold(
                 Ms2,
                 pts2;
@@ -181,8 +208,8 @@ end
                 test_vee_hat=true,
                 retraction_methods=retraction_methods,
                 inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[power_s2_pt_dist],
-                tvector_distributions=[power_s2_tv_dist],
+                point_distributions=point_distributions_Ms2,
+                tvector_distributions=tvector_distributions_Ms2,
                 rand_tvector_atol_multiplier=6.0,
                 retraction_atol_multiplier=12,
                 is_tangent_atol_multiplier=12.0,
@@ -194,7 +221,7 @@ end
 
     for T in types_rn1
         @testset "Type $(trim(string(T)))..." begin
-            pts1 = [convert(T, rand(power_rn1_pt_dist)) for _ in 1:3]
+            pts1 = [convert(T, rand(Mrn1)) for _ in 1:3]
             test_manifold(
                 Mrn1,
                 pts1;
@@ -203,8 +230,8 @@ end
                 test_vee_hat=true,
                 retraction_methods=retraction_methods,
                 inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[power_rn1_pt_dist],
-                tvector_distributions=[power_rn1_tv_dist],
+                point_distributions=point_distributions_Mrn1,
+                tvector_distributions=tvector_distributions_Mrn1,
                 basis_types_to_from=basis_types,
                 rand_tvector_atol_multiplier=500.0,
                 retraction_atol_multiplier=12,
@@ -218,7 +245,7 @@ end
     end
     for T in types_r2
         @testset "Type $(trim(string(T)))..." begin
-            pts2 = [convert(T, rand(power_r2_pt_dist)) for _ in 1:3]
+            pts2 = [convert(T, rand(Mr2)) for _ in 1:3]
             test_manifold(
                 Mr2,
                 pts2;
@@ -227,8 +254,8 @@ end
                 test_vee_hat=true,
                 retraction_methods=retraction_methods,
                 inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[power_r2_pt_dist],
-                tvector_distributions=[power_r2_tv_dist],
+                point_distributions=point_distributions_Mr2,
+                tvector_distributions=tvector_distributions_Mr2,
                 rand_tvector_atol_multiplier=8.0,
                 retraction_atol_multiplier=12,
                 is_tangent_atol_multiplier=12.0,
@@ -239,7 +266,7 @@ end
     end
     for T in types_rn2
         @testset "Type $(trim(string(T)))..." begin
-            pts2 = [convert(T, rand(power_rn2_pt_dist)) for _ in 1:3]
+            pts2 = [convert(T, rand(Mrn2)) for _ in 1:3]
             test_manifold(
                 Mrn2,
                 pts2;
@@ -248,8 +275,8 @@ end
                 test_vee_hat=true,
                 retraction_methods=retraction_methods,
                 inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[power_rn2_pt_dist],
-                tvector_distributions=[power_rn2_tv_dist],
+                point_distributions=point_distributions_Mrn2,
+                tvector_distributions=tvector_distributions_Mrn2,
                 rand_tvector_atol_multiplier=8.0,
                 retraction_atol_multiplier=12,
                 is_tangent_atol_multiplier=12.0,

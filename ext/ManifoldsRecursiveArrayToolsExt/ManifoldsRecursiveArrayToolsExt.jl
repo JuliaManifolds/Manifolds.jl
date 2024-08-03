@@ -15,6 +15,8 @@ if isdefined(Base, :get_extension)
         SpecialEuclideanInGeneralLinear,
         TypeParameter
 
+    using Manifolds: bundle_transport_tangent_direction
+
     import Manifolds:
         adjoint_Jacobi_field,
         allocate,
@@ -48,6 +50,8 @@ else
     using ..Manifolds
     using ..RecursiveArrayTools: ArrayPartition
     using ..StaticArrays
+
+    using ..Manifolds: bundle_transport_tangent_direction
 
     using ..Manifolds:
         ActionDirectionAndSide,

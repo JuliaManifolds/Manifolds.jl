@@ -383,6 +383,10 @@ projected to tangent space at `p`.
 """
 function normal_tvector_distribution end
 
+function uniform_distribution(M::AbstractManifold)
+    return uniform_distribution(M, allocate_result(M, uniform_distribution))
+end
+
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
@@ -949,7 +953,6 @@ export ×,
     submanifold,
     submanifold_component,
     submanifold_components,
-    uniform_distribution,
     var,
     vector_space_dimension,
     vector_transport_along,

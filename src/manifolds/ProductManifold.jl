@@ -88,16 +88,6 @@ separately
 """
 sharp(::ProductManifold, ::Any...)
 
-function uniform_distribution(M::ProductManifold)
-    return ProductPointDistribution(M, map(uniform_distribution, M.manifolds))
-end
-function uniform_distribution(M::ProductManifold, p)
-    return ProductPointDistribution(
-        M,
-        map(uniform_distribution, M.manifolds, submanifold_components(M, p)),
-    )
-end
-
 @doc raw"""
     volume_density(M::ProductManifold, p, X)
 
