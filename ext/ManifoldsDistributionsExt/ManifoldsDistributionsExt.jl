@@ -31,6 +31,7 @@ else
 end
 
 include("distributions.jl")
+include("distributions_for_manifolds.jl")
 include("projected_distribution.jl")
 
 end

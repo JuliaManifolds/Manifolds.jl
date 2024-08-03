@@ -296,16 +296,6 @@ function Random.rand!(
     return pX
 end
 
-function _fix_random_rotation(A::AbstractMatrix)
-    s = diag(sign.(qr(A).R))
-    D = Diagonal(s)
-    C = qr(A).Q * D
-    if det(C) < 0
-        C[:, [1, 2]] = C[:, [2, 1]]
-    end
-    return C
-end
-
 @doc raw"""
     parallel_transport_direction(M::Rotations, p, X, d)
 

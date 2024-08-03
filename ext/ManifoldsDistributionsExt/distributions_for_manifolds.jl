@@ -1,21 +1,5 @@
 
 """
-    ProductFVectorDistribution([type::VectorSpaceFiber], [x], distrs...)
-
-Generates a random vector at point `x` from vector space (a fiber of a tangent
-bundle) of type `type` using the product distribution of given distributions.
-
-Vector space type and `x` can be automatically inferred from distributions `distrs`.
-"""
-struct ProductFVectorDistribution{
-    TSpace<:VectorSpaceFiber{<:Any,<:ProductManifold},
-    TD<:(NTuple{N,Distribution} where {N}),
-} <: FVectorDistribution{TSpace}
-    type::TSpace
-    distributions::TD
-end
-
-"""
     ProductPointDistribution(M::ProductManifold, distributions)
 
 Product distribution on manifold `M`, combined from `distributions`.
@@ -26,80 +10,6 @@ struct ProductPointDistribution{
 } <: MPointDistribution{TM}
     manifold::TM
     distributions::TD
-end
-
-# product manifold
-
-function ProductFVectorDistribution(distributions::FVectorDistribution...)
-    M = ProductManifold(map(d -> support(d).space.manifold, distributions)...)
-    fiber_type = support(distributions[1]).space.fiber_type
-    if !all(d -> support(d).space.fiber_type == fiber_type, distributions)
-        error(
-            "Not all distributions have support in vector spaces of the same type, which is currently not supported",
-        )
-    end
-    # Probably worth considering sum spaces in the future?
-    p = ArrayPartition(map(d -> support(d).space.point, distributions)...)
-    return ProductFVectorDistribution(Fiber(M, p, fiber_type), distributions)
-end
-
-function ProductPointDistribution(M::ProductManifold, distributions::MPointDistribution...)
-    return ProductPointDistribution{typeof(M),typeof(distributions)}(M, distributions)
-end
-function ProductPointDistribution(distributions::MPointDistribution...)
-    M = ProductManifold(map(d -> support(d).manifold, distributions)...)
-    return ProductPointDistribution(M, distributions...)
-end
-
-function Random.rand(rng::AbstractRNG, d::ProductPointDistribution)
-    return ArrayPartition(map(d -> rand(rng, d), d.distributions)...)
-end
-function Random.rand(rng::AbstractRNG, d::ProductFVectorDistribution)
-    return ArrayPartition(map(d -> rand(rng, d), d.distributions)...)
-end
-
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProductPointDistribution,
-    x::AbstractArray{<:Number},
-)
-    return copyto!(x, rand(rng, d))
-end
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProductPointDistribution,
-    p::ArrayPartition,
-)
-    map(
-        (t1, t2) -> Distributions._rand!(rng, t1, t2),
-        d.distributions,
-        submanifold_components(d.manifold, p),
-    )
-    return p
-end
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProductFVectorDistribution,
-    v::AbstractArray{<:Number},
-)
-    return copyto!(v, rand(rng, d))
-end
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProductFVectorDistribution,
-    X::ArrayPartition,
-)
-    map(
-        t -> Distributions._rand!(rng, t[1], t[2]),
-        d.distributions,
-        submanifold_components(d.space.manifold, X),
-    )
-    return X
-end
-
-Distributions.support(d::ProductPointDistribution) = MPointSupport(d.manifold)
-function Distributions.support(tvd::ProductFVectorDistribution)
-    return FVectorSupport(tvd.type)
 end
 
 ## power manifold
@@ -166,30 +76,6 @@ end
 Distributions.support(tvd::PowerFVectorDistribution) = FVectorSupport(tvd.type)
 Distributions.support(d::PowerPointDistribution) = MPointSupport(d.manifold)
 
-# 
-"""
-    NormalRotationDistribution(M::Rotations, d::Distribution, x::TResult)
-
-Distribution that returns a random point on the manifold [`Rotations`](@ref)
-`M`. Random point is generated using base distribution `d` and the type
-of the result is adjusted to `TResult`.
-
-See [`normal_rotation_distribution`](@ref) for details.
-"""
-struct NormalRotationDistribution{TResult,TM<:Rotations,TD<:Distribution} <:
-       MPointDistribution{TM}
-    manifold::TM
-    distr::TD
-end
-
-function NormalRotationDistribution(
-    M::Rotations,
-    d::Distribution,
-    x::TResult,
-) where {TResult}
-    return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
-end
-
 # Rotations
 
 """
@@ -215,10 +101,20 @@ function NormalRotationDistribution(
     return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
 end
 
-function Manifolds.normal_rotation_distribution(M::Rotations, p, σ::Real)
+function normal_rotation_distribution(M::Rotations, p, σ::Real)
     n = get_parameter(M.size)[1]
     d = Distributions.MvNormal(zeros(n * n), σ * I)
     return NormalRotationDistribution(M, d, p)
+end
+
+function _fix_random_rotation(A::AbstractMatrix)
+    s = diag(sign.(qr(A).R))
+    D = Diagonal(s)
+    C = qr(A).Q * D
+    if det(C) < 0
+        C[:, [1, 2]] = C[:, [2, 1]]
+    end
+    return C
 end
 
 function Random.rand(
