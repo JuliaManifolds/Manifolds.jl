@@ -91,11 +91,11 @@ end
 
         sphere_tv_dist =
             Manifolds.normal_tvector_distribution(Ms, (@MVector [1.0, 0.0, 0.0]), 1.0)
-        power_s1_tv_dist = Manifolds.PowerFVectorDistribution(
+        power_s1_tv_dist = PowerFVectorDistribution(
             TangentSpace(Ms1, rand(power_s1_pt_dist)),
             sphere_tv_dist,
         )
-        power_s2_tv_dist = Manifolds.PowerFVectorDistribution(
+        power_s2_tv_dist = PowerFVectorDistribution(
             TangentSpace(Ms2, rand(power_s2_pt_dist)),
             sphere_tv_dist,
         )
@@ -104,39 +104,36 @@ end
         id_rot = @SMatrix [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
         rotations_dist = Manifolds.normal_rotation_distribution(Mr, id_rot, 1.0)
         power_r1_pt_dist =
-            Manifolds.PowerPointDistribution(Mr1, rotations_dist, randn(Float64, 3, 3, 5))
-        power_rn1_pt_dist = Manifolds.PowerPointDistribution(
+            PowerPointDistribution(Mr1, rotations_dist, randn(Float64, 3, 3, 5))
+        power_rn1_pt_dist = PowerPointDistribution(
             Mrn1,
             rotations_dist,
             [randn(Float64, 3, 3) for i in 1:5],
         )
         push!(point_distributions_Mrn1, power_rn1_pt_dist)
-        power_r2_pt_dist = Manifolds.PowerPointDistribution(
-            Mr2,
-            rotations_dist,
-            randn(Float64, 3, 3, 5, 7),
-        )
-        power_rn2_pt_dist = Manifolds.PowerPointDistribution(
+        power_r2_pt_dist =
+            PowerPointDistribution(Mr2, rotations_dist, randn(Float64, 3, 3, 5, 7))
+        power_rn2_pt_dist = PowerPointDistribution(
             Mrn2,
             rotations_dist,
             [randn(Float64, 3, 3) for i in 1:5, j in 1:7],
         )
-        push!(point_distributions_Mrn1, power_rn2_pt_dist)
+        push!(point_distributions_Mr2, power_r2_pt_dist)
         rotations_tv_dist = Manifolds.normal_tvector_distribution(Mr, MMatrix(id_rot), 1.0)
-        power_r1_tv_dist = Manifolds.PowerFVectorDistribution(
+        power_r1_tv_dist = PowerFVectorDistribution(
             TangentSpace(Mr1, rand(power_r1_pt_dist)),
             rotations_tv_dist,
         )
-        power_rn1_tv_dist = Manifolds.PowerFVectorDistribution(
+        power_rn1_tv_dist = PowerFVectorDistribution(
             TangentSpace(Mrn1, rand(power_rn1_pt_dist)),
             rotations_tv_dist,
         )
         push!(tvector_distributions_Mrn1, power_rn1_tv_dist)
-        power_r2_tv_dist = Manifolds.PowerFVectorDistribution(
+        power_r2_tv_dist = PowerFVectorDistribution(
             TangentSpace(Mr2, rand(power_r2_pt_dist)),
             rotations_tv_dist,
         )
-        power_rn2_tv_dist = Manifolds.PowerFVectorDistribution(
+        power_rn2_tv_dist = PowerFVectorDistribution(
             TangentSpace(Mrn2, rand(power_rn2_pt_dist)),
             rotations_tv_dist,
         )

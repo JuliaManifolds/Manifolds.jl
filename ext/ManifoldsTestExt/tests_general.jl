@@ -828,10 +828,11 @@ function test_manifold(
 
     Test.@testset "tangent vector distributions" begin # COV_EXCL_LINE
         for tvd in tvector_distributions
+            p = tvd.type.point
             for _ in 1:10
                 randtv = rand(tvd)
                 atol = rand_tvector_atol_multiplier * find_eps(randtv)
-                Test.@test is_vector(M, pts[1], randtv, true; atol=atol)
+                Test.@test is_vector(M, p, randtv, true; atol=atol)
             end
         end
     end

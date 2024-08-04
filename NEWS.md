@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `Distributions.jl` and `RecursiveArrayTools.jl` were moved to weak dependencies to reduce load time and improve extensibility.
 
+### Removed
+
+* Deprecated bindings:
+  * `ExtrinsicEstimation()` (should be replaced with `ExtrinsicEstimation(EfficientEstimator())`),
+  * `Symplectic` (renamed to `SymplecticMatrices`),
+  * `SymplecticMatrix` (renamed to `SymplecticElement`).
+* As a result of making `Distributions.jl` and `RecursiveArrayTools.jl` weak dependencies the following symbols are no longer exported from `Manifolds.jl`. Essential functionality is still available but distribution-related features may change in the future without a breaking release.
+  * `ArrayPartition`,
+  * `ProjectedPointDistribution`,
+  * `uniform_distribution`.
+
 ## [0.9.20] – 2024-06-17
 
 ### Added

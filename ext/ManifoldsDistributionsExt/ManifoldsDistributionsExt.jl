@@ -12,7 +12,7 @@ if isdefined(Base, :get_extension)
         projected_distribution,
         uniform_distribution
 
-    using Manifolds: get_parameter
+    using Manifolds: get_iterator, get_parameter, _read, _write
 
     using RecursiveArrayTools: ArrayPartition
 else
@@ -29,7 +29,7 @@ else
         projected_distribution,
         uniform_distribution
 
-    using ..Manifolds: get_parameter
+    using ..Manifolds: get_iterator, get_parameter, _read, _write
 
     using ..RecursiveArrayTools: ArrayPartition
 end

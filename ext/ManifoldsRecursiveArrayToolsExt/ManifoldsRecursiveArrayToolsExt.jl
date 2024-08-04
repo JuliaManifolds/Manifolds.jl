@@ -4,9 +4,11 @@ if isdefined(Base, :get_extension)
     using Manifolds
     using RecursiveArrayTools: ArrayPartition
     using StaticArrays
+    using LinearAlgebra
 
     using Manifolds:
         ActionDirectionAndSide,
+        ColumnwiseMultiplicationAction,
         FiberBundleBasisData,
         FiberBundleProductVectorTransport,
         LeftColumnwiseSpecialEuclideanAction,
@@ -15,7 +17,7 @@ if isdefined(Base, :get_extension)
         SpecialEuclideanInGeneralLinear,
         TypeParameter
 
-    using Manifolds: bundle_transport_tangent_direction
+    using Manifolds: bundle_transport_tangent_direction, _get_parameter
 
     import Manifolds:
         adjoint_Jacobi_field,
@@ -23,6 +25,7 @@ if isdefined(Base, :get_extension)
         allocate_result,
         apply,
         apply!,
+        apply_diff,
         apply_diff!,
         apply_diff_group!,
         _compose,
@@ -50,11 +53,13 @@ else
     using ..Manifolds
     using ..RecursiveArrayTools: ArrayPartition
     using ..StaticArrays
+    using ..LinearAlgebra
 
-    using ..Manifolds: bundle_transport_tangent_direction
+    using ..Manifolds: bundle_transport_tangent_direction, _get_parameter
 
     using ..Manifolds:
         ActionDirectionAndSide,
+        ColumnwiseMultiplicationAction,
         FiberBundleBasisData,
         FiberBundleProductVectorTransport,
         LeftColumnwiseSpecialEuclideanAction,
@@ -69,6 +74,7 @@ else
         allocate_result,
         apply,
         apply!,
+        apply_diff,
         apply_diff!,
         apply_diff_group!,
         _compose,
