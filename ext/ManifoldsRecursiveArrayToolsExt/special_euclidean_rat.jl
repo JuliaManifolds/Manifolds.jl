@@ -32,14 +32,14 @@ end
 
 ### Special methods for better performance of selected operations
 
-function exp(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
+function Base.exp(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
     M1, M2 = M.manifold.manifolds
     return ArrayPartition(
         exp(M1.manifold, p.x[1], X.x[1]),
         exp(M2.manifold, p.x[2], X.x[2]),
     )
 end
-function log(M::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
+function Base.log(M::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
     M1, M2 = M.manifold.manifolds
     return ArrayPartition(
         log(M1.manifold, p.x[1], q.x[1]),
