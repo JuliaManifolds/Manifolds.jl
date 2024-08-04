@@ -100,4 +100,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 VisualRegressionTests = "34922c18-7c2a-561c-bac1-01e79b2c4c92"
 
 [targets]
-test = ["Test", "BoundaryValueDiffEq", "Colors", "DiffEqCallbacks", "Distributions", "DoubleFloats", "FiniteDifferences", "Gtk", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "NLsolve", "Plots", "PythonPlot", "Quaternions", "QuartzImageIO", "RecipesBase", "RecursiveArrayTools"]
+test = ["Test", "BoundaryValueDiffEq", "Colors", "DiffEqCallbacks", "Distributions", "DoubleFloats", "FiniteDifferences", "Gtk", "HybridArrays", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "NLsolve", "Plots", "PythonPlot", "Quaternions", "QuartzImageIO", "RecipesBase", "RecursiveArrayTools"]
