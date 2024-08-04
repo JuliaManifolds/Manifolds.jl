@@ -630,14 +630,13 @@ function __init__()
             include("../ext/ManifoldsTestExt/ManifoldsTestExt.jl")
         end
 
-        @require Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f" begin
-            include("../ext/ManifoldsDistributionsExt/ManifoldsDistributionsExt.jl")
-        end
-
         @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
             include(
                 "../ext/ManifoldsRecursiveArrayToolsExt/ManifoldsRecursiveArrayToolsExt.jl",
             )
+            @require Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f" begin
+                include("../ext/ManifoldsDistributionsExt/ManifoldsDistributionsExt.jl")
+            end
         end
 
         @require HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9" begin
@@ -908,7 +907,6 @@ export ×,
     minkowski_metric,
     moment,
     norm,
-    normal_tvector_distribution,
     number_eltype,
     number_of_coordinates,
     one,
@@ -921,7 +919,6 @@ export ×,
     parallel_transport_to!,
     project,
     project!,
-    projected_distribution,
     rand,
     rand!,
     real_dimension,

@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * As a result of making `Distributions.jl` and `RecursiveArrayTools.jl` weak dependencies the following symbols are no longer exported from `Manifolds.jl`. Essential functionality is still available but distribution-related features may change in the future without a breaking release.
   * `ArrayPartition`,
   * `ProjectedPointDistribution`,
+  * `normal_tvector_distribution`,
+  * `projected_distribution`,
   * `uniform_distribution`.
 
 ## [0.9.20] – 2024-06-17
