@@ -193,11 +193,12 @@ function Manifolds.get_vector_orthonormal!(
     return Y .= X
 end
 
+Manifolds.is_default_metric(::BaseManifold, ::DefaultBaseManifoldMetric) = true
+
 if VERSION >= v"1.9"
     const ProjectedPointDistribution =
         Base.get_extension(Manifolds, :ManifoldsDistributionsExt).ProjectedPointDistribution
 
-    Manifolds.is_default_metric(::BaseManifold, ::DefaultBaseManifoldMetric) = true
     function Manifolds.projected_distribution(M::BaseManifold, d)
         return ProjectedPointDistribution(M, d, project!, rand(d))
     end
@@ -562,8 +563,8 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test_throws MethodError christoffel_symbols_second_jacobian(MM2, p, B_p)
         # MM falls back to nondefault error
         if VERSION >= v"1.9"
-            @test_throws MethodError projected_distribution(MM, 1, p)
-            @test_throws MethodError projected_distribution(MM, 1)
+            @test_throws MethodError Manifolds.projected_distribution(MM, 1, p)
+            @test_throws MethodError Manifolds.projected_distribution(MM, 1)
         end
 
         @test inner(MM2, p, X, Y) === inner(M, p, X, Y)

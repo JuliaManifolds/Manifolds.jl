@@ -603,12 +603,6 @@ function __init__()
 
     @static if !isdefined(Base, :get_extension)
         @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-            @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
-                include("../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.jl")
-            end
-        end
-
-        @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
             include("../ext/ManifoldsOrdinaryDiffEqExt.jl")
         end
 
@@ -634,8 +628,15 @@ function __init__()
             include(
                 "../ext/ManifoldsRecursiveArrayToolsExt/ManifoldsRecursiveArrayToolsExt.jl",
             )
+
             @require Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f" begin
                 include("../ext/ManifoldsDistributionsExt/ManifoldsDistributionsExt.jl")
+            end
+
+            @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
+                @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
+                    include("../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.jl")
+                end
             end
         end
 
