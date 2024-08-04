@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* `Distributions.jl` and `RecursiveArrayTools.jl` were moved to weak dependencies to reduce load time and improve extensibility.
+* `Distributions.jl`, `RecursiveArrayTools.jl` and `HybridArrays.jl` were moved to weak dependencies to reduce load time and improve extensibility.
 
 ### Removed
 

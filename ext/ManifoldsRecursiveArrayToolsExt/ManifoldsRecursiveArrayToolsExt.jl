@@ -6,6 +6,8 @@ if isdefined(Base, :get_extension)
     using StaticArrays
     using LinearAlgebra
 
+    using Base.Iterators: repeated
+
     using Manifolds:
         ActionDirectionAndSide,
         ColumnwiseMultiplicationAction,
@@ -28,6 +30,7 @@ if isdefined(Base, :get_extension)
         apply_diff,
         apply_diff!,
         apply_diff_group!,
+        compose,
         _compose,
         exp_lie,
         get_coordinates,
@@ -55,6 +58,8 @@ else
     using ..StaticArrays
     using ..LinearAlgebra
 
+    using ..Base.Iterators: repeated
+
     using ..Manifolds: bundle_transport_tangent_direction, _get_parameter
 
     using ..Manifolds:
@@ -77,6 +82,7 @@ else
         apply_diff,
         apply_diff!,
         apply_diff_group!,
+        compose,
         _compose,
         exp_lie,
         get_coordinates,

@@ -191,7 +191,6 @@ import StatsBase: mean_and_var
 
 using Base.Iterators: repeated
 using Einsum: @einsum
-using HybridArrays
 using Kronecker
 using Graphs
 using LinearAlgebra
@@ -639,6 +638,10 @@ function __init__()
             include(
                 "../ext/ManifoldsRecursiveArrayToolsExt/ManifoldsRecursiveArrayToolsExt.jl",
             )
+        end
+
+        @require HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9" begin
+            include("../ext/ManifoldsDistributionsExt/ManifoldsHybridArraysExt.jl")
         end
     end
 

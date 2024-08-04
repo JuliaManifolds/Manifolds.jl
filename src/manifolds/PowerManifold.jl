@@ -124,23 +124,6 @@ Base.@propagate_inbounds @inline function _read(
 ) where {N}
     return x[i...]
 end
-Base.@propagate_inbounds @inline function _read(
-    ::PowerManifoldMultidimensional,
-    rep_size::Tuple,
-    x::HybridArray,
-    i::Tuple,
-)
-    return x[rep_size_to_colons(rep_size)..., i...]
-end
-Base.@propagate_inbounds @inline function _read(
-    ::PowerManifoldMultidimensional,
-    rep_size::Tuple{},
-    x::HybridArray,
-    i::NTuple{N,Int},
-) where {N}
-    # disambiguation
-    return x[i...]
-end
 
 function Base.view(
     p::AbstractArray,
