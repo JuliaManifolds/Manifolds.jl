@@ -641,7 +641,7 @@ function __init__()
         end
 
         @require HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9" begin
-            include("../ext/ManifoldsDistributionsExt/ManifoldsHybridArraysExt.jl")
+            include("../ext/ManifoldsHybridArraysExt.jl")
         end
     end
 
