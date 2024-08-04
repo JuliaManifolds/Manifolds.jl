@@ -161,7 +161,7 @@ using RecursiveArrayTools: ArrayPartition
                     :ManifoldsDistributionsExt,
                 ).ProductFVectorDistribution
             push!(
-                Mse_point_distributions,
+                Mse_tvector_distributions,
                 ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
             )
         end

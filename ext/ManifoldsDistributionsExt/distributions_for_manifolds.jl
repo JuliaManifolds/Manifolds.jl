@@ -71,9 +71,9 @@ function Distributions._rand!(
     X::ArrayPartition,
 )
     map(
-        t -> Distributions._rand!(rng, t[1], t[2]),
+        (t1, t2) -> Distributions._rand!(rng, t1, t2),
         d.distributions,
-        submanifold_components(d.space.manifold, X),
+        submanifold_components(d.type.manifold, X),
     )
     return X
 end
