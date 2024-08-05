@@ -30,7 +30,7 @@ using RecursiveArrayTools
     end
 
     pts = [ArrayPartition(tp...) for tp in tuple_pts]
-    X_pts = [ArrayPartition(tuple_v...)]
+    X_pts = [ArrayPartition(tuple_v...), ArrayPartition(tuple_v...)]
 
     @testset "setindex! and getindex" begin
         p1 = pts[1]
@@ -53,6 +53,7 @@ using RecursiveArrayTools
         test_vee_hat_from_identity=true,
         test_inv_diff=true,
         test_adjoint_inv_diff=true,
+        test_adjoint_action=true,
     )
     @test isapprox(
         G,
@@ -94,7 +95,15 @@ using RecursiveArrayTools
 
     @test compose(G, pts[1], Identity(G)) == pts[1]
     @test compose(G, Identity(G), pts[1]) == pts[1]
-    test_group(G, pts, X_pts, X_pts; test_diff=true, test_mutating=false)
+    test_group(
+        G,
+        pts,
+        X_pts,
+        X_pts;
+        test_diff=true,
+        test_mutating=false,
+        test_adjoint_action=true,
+    )
     test_manifold(G, pts; is_mutating=false)
     @test isapprox(
         G,

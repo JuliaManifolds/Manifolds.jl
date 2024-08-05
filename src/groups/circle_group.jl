@@ -24,9 +24,13 @@ end
 
 Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
-adjoint_action(::CircleGroup, p, X) = X
+adjoint_action(::CircleGroup, p, X, ::LeftAction) = X
+adjoint_action(::CircleGroup, ::Identity, X, ::LeftAction) = X
+adjoint_action(::CircleGroup, p, X, ::RightAction) = X
+adjoint_action(::CircleGroup, ::Identity, X, ::RightAction) = X
 
-adjoint_action!(::CircleGroup, Y, p, X) = copyto!(Y, X)
+adjoint_action!(::CircleGroup, Y, p, X, ::LeftAction) = copyto!(Y, X)
+adjoint_action!(::CircleGroup, Y, p, X, ::RightAction) = copyto!(Y, X)
 
 function compose(
     ::MultiplicationGroupTrait,
@@ -77,21 +81,37 @@ lie_bracket(::CircleGroup, X, Y) = zero(X)
 
 lie_bracket!(::CircleGroup, Z, X, Y) = fill!(Z, 0)
 
-function translate_diff(::GT, p, q, X, ::ActionDirectionAndSide) where {GT<:CircleGroup}
-    return map(*, p, X)
-end
-function translate_diff(
-    ::CircleGroup,
-    ::Identity{MultiplicationOperation},
-    q,
-    X,
-    ::ActionDirectionAndSide,
-)
-    return X
+translate_diff(::CircleGroup, p, q, X) = map(*, p, X)
+translate_diff(::CircleGroup, p::Identity{MultiplicationOperation}, q, X) = X
+for AD in [LeftForwardAction, RightForwardAction, LeftBackwardAction, RightBackwardAction]
+    @eval begin
+        function translate_diff(G::CircleGroup, p, q, X, ::$AD)
+            return translate_diff(G, p, q, X)
+        end
+        function translate_diff(
+            ::CircleGroup,
+            ::Identity{MultiplicationOperation},
+            q,
+            X,
+            ::$AD,
+        )
+            return X
+        end
+    end
 end
 
-function translate_diff!(G::CircleGroup, Y, p, q, X, conv::ActionDirectionAndSide)
-    return copyto!(Y, translate_diff(G, p, q, X, conv))
+_common_translate_diff!(G, Y, p, q, X, conv) = copyto!(Y, translate_diff(G, p, q, X, conv))
+function translate_diff!(G::CircleGroup, Y, p, q, X, conv::LeftForwardAction)
+    return _common_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::CircleGroup, Y, p, q, X, conv::RightForwardAction)
+    return _common_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::CircleGroup, Y, p, q, X, conv::LeftBackwardAction)
+    return _common_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::CircleGroup, Y, p, q, X, conv::RightBackwardAction)
+    return _common_translate_diff!(G, Y, p, q, X, conv)
 end
 
 function exp_lie(::CircleGroup, X)
@@ -140,6 +160,17 @@ RealCircleGroup() = GroupManifold(Circle{ℝ}(), AdditionOperation())
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(), #pass to Euclidean by default/last fallback
         )
+    end
+end
+
+adjoint_action(::RealCircleGroup, p, X, ::LeftAction) = X
+adjoint_action(::RealCircleGroup, p, X, ::RightAction) = X
+adjoint_action(::RealCircleGroup, ::Identity, X, ::LeftAction) = X
+adjoint_action(::RealCircleGroup, ::Identity, X, ::RightAction) = X
+
+for AD in [LeftAction, RightAction]
+    @eval begin
+        adjoint_action!(::RealCircleGroup, Y, p, X, ::$AD) = copyto!(Y, X)
     end
 end
 
@@ -198,3 +229,21 @@ function exp_lie(::RealCircleGroup, X)
 end
 
 exp_lie!(::RealCircleGroup, q, X) = (q .= sym_rem(X))
+
+translate_diff(::RealCircleGroup, p, q, X) = X
+for AD in [LeftForwardAction, RightForwardAction, LeftBackwardAction, RightBackwardAction]
+    @eval begin
+        function translate_diff(::RealCircleGroup, p, q, X, ::$AD)
+            return X
+        end
+        function translate_diff(
+            ::RealCircleGroup,
+            ::Identity{AdditionOperation},
+            q,
+            X,
+            ::$AD,
+        )
+            return X
+        end
+    end
+end

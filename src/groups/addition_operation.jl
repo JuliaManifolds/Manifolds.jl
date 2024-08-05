@@ -22,9 +22,16 @@ Base.:*(e::Identity{AdditionOperation}, ::Identity{AdditionOperation}) = e
 
 const AdditionGroupTrait = TraitList{<:IsGroupManifold{AdditionOperation}}
 
-adjoint_action(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X) = X
+adjoint_action(::AdditionGroupTrait, G::AbstractDecoratorManifold, p, X, ::LeftAction) = X
 
-function adjoint_action!(::AdditionGroupTrait, G::AbstractDecoratorManifold, Y, p, X)
+function adjoint_action!(
+    ::AdditionGroupTrait,
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    X,
+    ::LeftAction,
+)
     return copyto!(G, Y, p, X)
 end
 

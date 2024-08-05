@@ -287,6 +287,15 @@ function manifold_volume(M::GeneralUnitaryMultiplicationGroup)
     return manifold_volume(M.manifold)
 end
 
+function Random.rand!(G::GeneralUnitaryMultiplicationGroup, pX; kwargs...)
+    rand!(G.manifold, pX; kwargs...)
+    return pX
+end
+function Random.rand!(rng::AbstractRNG, G::GeneralUnitaryMultiplicationGroup, pX; kwargs...)
+    rand!(rng, G.manifold, pX; kwargs...)
+    return pX
+end
+
 function translate_diff!(
     G::GeneralUnitaryMultiplicationGroup,
     Y,
@@ -327,6 +336,14 @@ function translate_diff!(
     X,
     ::RightBackwardAction,
 )
+    return copyto!(G, Y, inv(G, p) * X * p)
+end
+
+function adjoint_action!(G::GeneralUnitaryMultiplicationGroup, Y, p, X, ::LeftAction)
+    copyto!(G, Y, p * X * inv(G, p))
+    return Y
+end
+function adjoint_action!(G::GeneralUnitaryMultiplicationGroup, Y, p, X, ::RightAction)
     return copyto!(G, Y, inv(G, p) * X * p)
 end
 

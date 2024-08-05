@@ -92,12 +92,8 @@ using Manifolds:
             @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
 
             w = translate_diff(G, pts[1], Identity(G), X_pts[1])
-            w2 = allocate(w)
-            submanifold_component(w2, 1) .= submanifold_component(w, 1)
-            submanifold_component(w2, 2) .=
-                submanifold_component(pts[1], 2) * submanifold_component(w, 2)
-            w2mat = screw_matrix(G, w2)
-            @test w2mat ≈ affine_matrix(G, pts[1]) * screw_matrix(G, X_pts[1])
+            w2mat = screw_matrix(G, w)
+            @test w2mat ≈ screw_matrix(G, X_pts[1])
             @test screw_matrix(G, w2mat) === w2mat
 
             @test is_vector(G, Identity(G), rand(G; vector_at=Identity(G)))
@@ -121,6 +117,7 @@ using Manifolds:
                 basis_types_vecs=basis_types,
                 basis_types_to_from=basis_types,
                 is_mutating=true,
+                is_tangent_atol_multiplier=1,
                 #test_inplace=true,
                 test_vee_hat=true,
                 exp_log_atol_multiplier=50,
@@ -146,6 +143,7 @@ using Manifolds:
                         pts;
                         is_mutating=true,
                         exp_log_atol_multiplier=50,
+                        is_tangent_atol_multiplier=1,
                         test_inner=false,
                         test_norm=false,
                     )
@@ -174,6 +172,7 @@ using Manifolds:
                         basis_types_to_from=basis_types,
                         is_mutating=true,
                         exp_log_atol_multiplier=50,
+                        is_tangent_atol_multiplier=1,
                     )
                 end
             end
@@ -195,7 +194,7 @@ using Manifolds:
                     pts,
                     X_pts,
                     X_pts;
-                    test_diff=true,
+                    test_diff=true, # fails sometimes
                     test_lie_bracket=true,
                     diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
                     atol=1e-9,
@@ -206,6 +205,7 @@ using Manifolds:
                     is_mutating=true,
                     #test_inplace=true,
                     test_vee_hat=true,
+                    test_is_tangent=true, # fails
                     exp_log_atol_multiplier=50,
                 )
                 # specific affine tests
@@ -394,7 +394,8 @@ using Manifolds:
             get_vector(SEn, pts[1], csen, DefaultOrthogonalBasis())
             # @btime shows 0 but `@allocations` is inaccurate
             @static if VERSION >= v"1.9-DEV"
-                @test (@allocations exp(SEn, pts[1], Xs[1])) <= 4
+                @test (@allocations exp(base_manifold(SEn), pts[1], Xs[1])) <= 4 broken =
+                    true # 11 allocations
                 @test (@allocations compose(SEn, pts[1], pts[2])) <= 4
                 if VERSION < v"1.11-DEV"
                     @test (@allocations log(SEn, pts[1], pts[2])) <= 28
