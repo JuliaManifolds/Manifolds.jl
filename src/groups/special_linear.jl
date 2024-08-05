@@ -152,4 +152,3 @@ function Base.show(io::IO, M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "SpecialLinear($n, $(𝔽); parameter=:field)")
 end
-
