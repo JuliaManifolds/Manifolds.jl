@@ -153,4 +153,3 @@ function Base.show(io::IO, M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
     return print(io, "SpecialLinear($n, $(𝔽); parameter=:field)")
 end
 
-adjoint_action!(G::SpecialLinear, Y, p, q, X, conv::LeftAction) = p \ X * p
