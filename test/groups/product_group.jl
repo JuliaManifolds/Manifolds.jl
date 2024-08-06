@@ -7,8 +7,11 @@ using RecursiveArrayTools
     Tn = TranslationGroup(2)
     Rn = Rotations(3)
     M = ProductManifold(SOn, Tn)
-    G = ProductGroup(M)
-    @test_throws ErrorException ProductGroup(ProductManifold(Rotations(3), Stiefel(3, 2)))
+    G = ProductGroup(M, Manifolds.LeftInvariantRepresentation())
+    @test_throws ErrorException ProductGroup(
+        ProductManifold(Rotations(3), Stiefel(3, 2)),
+        Manifolds.LeftInvariantRepresentation(),
+    )
     @test G isa ProductGroup
     @test submanifold(G, 1) === SOn
     @test submanifold(G, 2) === Tn

@@ -7,6 +7,26 @@ function allocate_result(G::SemidirectProductGroup, ::typeof(identity_element))
     return ArrayPartition(np, hp)
 end
 
+function _common_product_translate_diff(
+    G::ProductGroup,
+    p,
+    q,
+    X::ArrayPartition,
+    conv::ActionDirectionAndSide,
+)
+    M = G.manifold
+    return ArrayPartition(
+        map(
+            translate_diff,
+            M.manifolds,
+            submanifold_components(G, p),
+            submanifold_components(G, q),
+            submanifold_components(G, X),
+            repeated(conv),
+        )...,
+    )
+end
+
 function _compose(M::ProductManifold, p::ArrayPartition, q::ArrayPartition)
     return ArrayPartition(
         map(
@@ -132,26 +152,6 @@ function translate(
             M.manifold.manifolds,
             submanifold_components(M, p),
             submanifold_components(M, q),
-            repeated(conv),
-        )...,
-    )
-end
-
-function translate_diff(
-    G::ProductGroup,
-    p::ArrayPartition,
-    q::ArrayPartition,
-    X::ArrayPartition,
-    conv::ActionDirectionAndSide,
-)
-    M = G.manifold
-    return ArrayPartition(
-        map(
-            translate_diff,
-            M.manifolds,
-            submanifold_components(G, p),
-            submanifold_components(G, q),
-            submanifold_components(G, X),
             repeated(conv),
         )...,
     )

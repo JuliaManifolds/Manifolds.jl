@@ -4,10 +4,11 @@ include("group_utils.jl")
 @testset "Semidirect product group" begin
     M1 = TranslationGroup(2)
     A = TranslationAction(M1, M1)
-    G = SemidirectProductGroup(M1, M1, A)
+    G = SemidirectProductGroup(M1, M1, A, Manifolds.LeftInvariantRepresentation())
     @test G === GroupManifold(
         TranslationGroup(2) × TranslationGroup(2),
         Manifolds.SemidirectProductOperation(A),
+        Manifolds.LeftInvariantRepresentation(),
     )
     @test repr(G) == "SemidirectProductGroup($(M1), $(M1), $(A))"
     @test repr(G.op) == "SemidirectProductOperation($(A))"
