@@ -324,30 +324,6 @@ function compose!(
     return x
 end
 
-# More generic default was mostly OK but it lacks padding
-function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X)
-    map(
-        exp!,
-        M.manifolds,
-        submanifold_components(M, q),
-        submanifold_components(M, p),
-        submanifold_components(M, X),
-    )
-    @inbounds _padpoint!(M, q)
-    return q
-end
-function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X, t::Number)
-    map(
-        (N, qc, pc, Xc) -> exp!(N, qc, pc, Xc, t),
-        M.manifolds,
-        submanifold_components(M, q),
-        submanifold_components(M, p),
-        submanifold_components(M, X),
-    )
-    @inbounds _padpoint!(M, q)
-    return q
-end
-
 @doc raw"""
     exp_lie(G::SpecialEuclidean{n}, X)
 
@@ -578,19 +554,6 @@ function _log_lie!(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, X, q)
     return X
 end
 
-# More generic default was mostly OK but it lacks padding
-function log!(M::SpecialEuclideanManifold, X::AbstractMatrix, p, q)
-    map(
-        log!,
-        M.manifolds,
-        submanifold_components(M, X),
-        submanifold_components(M, p),
-        submanifold_components(M, q),
-    )
-    @inbounds _padvector!(M, X)
-    return X
-end
-
 """
     lie_bracket(G::SpecialEuclidean, X::ArrayPartition, Y::ArrayPartition)
     lie_bracket(G::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)
@@ -619,28 +582,15 @@ function lie_bracket!(G::SpecialEuclidean, Z, X, Y)
     return Z
 end
 
-"""
-    translate_diff(G::SpecialEuclidean, p, q, X, ::RightBackwardAction)
-
-Differential of the right action of the [`SpecialEuclidean`](@ref) group on itself.
-The formula for the rotation part is the differential of the right rotation action, while
-the formula for the translation part reads
-````math
-R_q⋅X_R⋅t_p + X_t
-````
-where ``R_q`` is the rotation part of `q`, ``X_R`` is the rotation part of `X`, ``t_p``
-is the translation part of `p` and ``X_t`` is the translation part of `X`.
-"""
-translate_diff(G::SpecialEuclidean, p, q, X, ::RightBackwardAction)
-
-function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightBackwardAction)
+function adjoint_action!(G::SpecialEuclidean, Y, p, Xₑ, ::LeftAction)
     np, hp = submanifold_components(G, p)
-    nq, hq = submanifold_components(G, q)
-    nX, hX = submanifold_components(G, X)
-    nY, hY = submanifold_components(G, Y)
-    hY .= hp' * hX * hp
-    copyto!(nY, hq * (hX * np) + nX)
-    @inbounds _padvector!(G, Y)
+    n, h = submanifold_components(G, Y)
+    nX, hX = submanifold_components(G, Xₑ)
+    H = submanifold(G, 2)
+    adjoint_action!(H, h, hp, hX, LeftAction())
+    A = G.op.action
+    apply!(A, n, hp, nX)
+    LinearAlgebra.axpy!(-1, apply_diff_group(A, Identity(H), h, np), n)
     return Y
 end
 
@@ -677,8 +627,7 @@ end
 
 Embed the tangent vector X at point `p` on [`SpecialEuclidean`](@ref) in the
 [`GeneralLinear`](@ref) group. Point `p` can use any representation valid for
-`SpecialEuclidean`. The embedding is similar from the one defined by [`screw_matrix`](@ref)
-but the translation part is multiplied by inverse of the rotation part.
+`SpecialEuclidean`. The embedding is similar from the one defined by [`screw_matrix`](@ref).
 """
 function embed(M::SpecialEuclideanInGeneralLinear, p, X)
     G = M.manifold
@@ -687,7 +636,7 @@ function embed(M::SpecialEuclideanInGeneralLinear, p, X)
     Y = allocate_result(G, screw_matrix, nX, hX)
     nY, hY = submanifold_components(G, Y)
     copyto!(hY, hX)
-    copyto!(nY, hp' * nX)
+    copyto!(nY, nX)
     @inbounds _padvector!(G, Y)
     return Y
 end
@@ -721,7 +670,7 @@ function project(M::SpecialEuclideanInGeneralLinear, p, X)
     G = M.manifold
     np, hp = submanifold_components(G, p)
     nX, hX = submanifold_components(G, X)
-    return ArrayPartition(hp * nX, hX)
+    return ArrayPartition(nX, hX)
 end
 
 function project!(M::SpecialEuclideanInGeneralLinear, q, p)
@@ -733,20 +682,6 @@ end
 
 ### Special methods for better performance of selected operations
 
-function exp(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        exp(M1.manifold, p.x[1], X.x[1]),
-        exp(M2.manifold, p.x[2], X.x[2]),
-    )
-end
-function log(M::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        log(M1.manifold, p.x[1], q.x[1]),
-        log(M2.manifold, p.x[2], q.x[2]),
-    )
-end
 function vee(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
     M1, M2 = M.manifold.manifolds
     return vcat(vee(M1.manifold, p.x[1], X.x[1]), vee(M2.manifold, p.x[2], X.x[2]))
