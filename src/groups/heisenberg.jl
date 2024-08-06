@@ -417,11 +417,9 @@ function Base.show(io::IO, M::HeisenbergGroup{Tuple{Int}})
 end
 
 translate_diff(::HeisenbergGroup, p, q, X, ::LeftForwardAction) = X
+translate_diff(::HeisenbergGroup, ::Identity, q, X, ::LeftForwardAction) = X
 translate_diff(::HeisenbergGroup, p, q, X, ::RightBackwardAction) = p \ X * p
-
-function translate_diff!(G::HeisenbergGroup, Y, p, q, X, conv::ActionDirectionAndSide)
-    return copyto!(Y, translate_diff(G, p, q, X, conv))
-end
+translate_diff(::HeisenbergGroup, ::Identity, q, X, ::RightBackwardAction) = X
 
 # note: this implementation is not optimal
 adjoint_action!(::HeisenbergGroup, Y, p, X, ::LeftAction) = copyto!(Y, p * X * inv(p))

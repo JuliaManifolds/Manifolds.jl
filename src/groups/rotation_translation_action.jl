@@ -39,11 +39,11 @@ Alias for [`RotationTranslationAction`](@ref) where the manifold `M` is [`Euclid
 or [`TranslationGroup`](@ref) with size of type `TE`, and [`SpecialEuclidean`](@ref)
 group has size type `TSE`.
 """
-const RotationTranslationActionOnVector{TAD,𝔽,TE,TSE} = RotationTranslationAction{
+const RotationTranslationActionOnVector{TAD,𝔽,TE,TSE,SE_GVR} = RotationTranslationAction{
     TAD,
     <:Union{Euclidean{TE,𝔽},TranslationGroup{TE,𝔽}},
-    SpecialEuclidean{TSE},
-} where {TAD<:ActionDirection,𝔽,TE,TSE}
+    SpecialEuclidean{TSE,SE_GVR},
+} where {TAD<:ActionDirection,𝔽,TE,TSE,SE_GVR<:AbstractGroupVectorRepresentation}
 
 base_group(A::RotationTranslationAction) = A.SEn
 

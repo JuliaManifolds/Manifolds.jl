@@ -155,10 +155,3 @@ function Base.show(io::IO, M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "SpecialLinear($n, $(𝔽); parameter=:field)")
 end
-
-translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X
-translate_diff(::SpecialLinear, p, q, X, ::RightBackwardAction) = p \ X * p
-
-function translate_diff!(G::SpecialLinear, Y, p, q, X, conv::ActionDirectionAndSide)
-    return copyto!(Y, translate_diff(G, p, q, X, conv))
-end

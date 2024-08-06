@@ -378,7 +378,7 @@ function isapprox(
 end
 
 @inline function isapprox(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p::Identity{O},
     X,
@@ -568,7 +568,7 @@ function Base.inv(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, 
 end
 
 function Base.inv(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     ::AbstractDecoratorManifold,
     e::Identity{O},
 ) where {O<:AbstractGroupOperation}
@@ -578,7 +578,7 @@ end
 @trait_function inv!(G::AbstractDecoratorManifold, q, p)
 
 function inv!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     q,
     ::Identity{O},
@@ -587,7 +587,7 @@ function inv!(
     return identity_element!(BG, q)
 end
 function inv!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     ::Identity{O},
     e::Identity{O},
@@ -622,7 +622,7 @@ function inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold,
 end
 
 function Base.copyto!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     ::AbstractDecoratorManifold,
     e::Identity{O},
     ::Identity{O},
@@ -630,7 +630,7 @@ function Base.copyto!(
     return e
 end
 function Base.copyto!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p,
     ::Identity{O},
@@ -739,7 +739,7 @@ vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
 function hat(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     ::Identity{O},
     X,
@@ -747,7 +747,7 @@ function hat(
     return get_vector_lie(M, X, VeeOrthogonalBasis())
 end
 function hat!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     Y,
     ::Identity{O},
@@ -781,7 +781,7 @@ vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
 function vee(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     ::Identity{O},
     X,
@@ -789,7 +789,7 @@ function vee(
     return get_coordinates_lie(M, X, VeeOrthogonalBasis())
 end
 function vee!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     Y,
     ::Identity{O},

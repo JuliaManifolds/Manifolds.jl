@@ -4,9 +4,16 @@
 The circle group is the complex circle ([`Circle(ℂ)`](@ref)) equipped with
 the group operation of complex multiplication ([`MultiplicationOperation`](@ref)).
 """
-const CircleGroup = GroupManifold{ℂ,Circle{ℂ},MultiplicationOperation}
+const CircleGroup =
+    GroupManifold{ℂ,Circle{ℂ},MultiplicationOperation,TangentVectorRepresentation}
 
-CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
+function CircleGroup()
+    return GroupManifold(
+        Circle{ℂ}(),
+        MultiplicationOperation(),
+        TangentVectorRepresentation(),
+    )
+end
 
 @inline function active_traits(f, M::CircleGroup, args...)
     if is_metric_function(f)

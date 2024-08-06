@@ -1,5 +1,8 @@
 @doc raw"""
-    SpecialEuclidean(n)
+    SpecialEuclidean(
+        n::Int;
+        gvr::AbstractGroupVectorRepresentation=TangentVectorRepresentation()
+    )
 
 Special Euclidean group ``\mathrm{SE}(n)``, the group of rigid motions.
 
@@ -17,13 +20,20 @@ This constructor is equivalent to calling
 ```julia
 Tn = TranslationGroup(n)
 SOn = SpecialOrthogonal(n)
-SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn))
+SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn), gvr)
 ```
 
 Points on ``\mathrm{SE}(n)`` may be represented as points on the underlying product manifold
 ``\mathrm{T}(n) × \mathrm{SO}(n)``. For group-specific functions, they may also be
 represented as affine matrices with size `(n + 1, n + 1)` (see [`affine_matrix`](@ref)), for
 which the group operation is [`MultiplicationOperation`](@ref).
+
+There are two supported conventions for tangent vector storage, which can be selected
+using the `gvr` keyword argument:
+* [`TangentVectorRepresentation`](@ref) (default one) which corresponds to the
+  representation implied by product manifold structure
+* [`LeftInvariantRepresentation`](@ref), which corresponds to left-invariant storage
+  commonly used in other Lie groups.
 """
 const SpecialEuclidean{T} = SemidirectProductGroup{
     ℝ,
@@ -35,11 +45,15 @@ const SpecialEuclidean{T} = SemidirectProductGroup{
 const SpecialEuclideanManifold{N} =
     ProductManifold{ℝ,Tuple{TranslationGroup{N,ℝ},SpecialOrthogonal{N}}}
 
-function SpecialEuclidean(n; parameter::Symbol=:type)
+function SpecialEuclidean(
+    n::Int;
+    gvr::AbstractGroupVectorRepresentation=TangentVectorRepresentation(),
+    parameter::Symbol=:type,
+)
     Tn = TranslationGroup(n; parameter=parameter)
     SOn = SpecialOrthogonal(n; parameter=parameter)
     A = RotationAction(Tn, SOn)
-    return SemidirectProductGroup(Tn, SOn, A)
+    return SemidirectProductGroup(Tn, SOn, A, gvr)
 end
 
 const SpecialEuclideanOperation{N} = SemidirectProductOperation{

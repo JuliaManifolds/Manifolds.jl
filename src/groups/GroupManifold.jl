@@ -52,9 +52,17 @@ end
 
 decorated_manifold(G::GroupManifold) = G.manifold
 
-(op::AbstractGroupOperation)(M::AbstractManifold) = GroupManifold(M, op)
-function (::Type{T})(M::AbstractManifold) where {T<:AbstractGroupOperation}
-    return GroupManifold(M, T())
+function (op::AbstractGroupOperation)(
+    M::AbstractManifold,
+    gvr::AbstractGroupVectorRepresentation,
+)
+    return GroupManifold(M, op, gvr)
+end
+function (::Type{T})(
+    M::AbstractManifold,
+    gvr::AbstractGroupVectorRepresentation,
+) where {T<:AbstractGroupOperation}
+    return GroupManifold(M, T(), gvr)
 end
 
 function inverse_retract(
@@ -126,8 +134,8 @@ end
 @doc raw"""
     rand(::GroupManifold; vector_at=nothing, σ=1.0)
     rand!(::GroupManifold, pX; vector_at=nothing, kwargs...)
-    rand(::TraitList{IsGroupManifold}, M; vector_at=nothing, σ=1.0)
-    rand!(TraitList{IsGroupManifold}, M, pX; vector_at=nothing, kwargs...)
+    rand(::TraitList{<:IsGroupManifold}, M; vector_at=nothing, σ=1.0)
+    rand!(TraitList{<:IsGroupManifold}, M, pX; vector_at=nothing, kwargs...)
 
 Compute a random point or tangent vector on a Lie group.
 

@@ -8,6 +8,8 @@ struct GeneralUnitaryMultiplicationGroup{T,𝔽,S} <: AbstractDecoratorManifold{
     manifold::GeneralUnitaryMatrices{T,𝔽,S}
 end
 
+vector_representation(::GeneralUnitaryMultiplicationGroup) = LeftInvariantRepresentation()
+
 @inline function active_traits(f, ::GeneralUnitaryMultiplicationGroup, args...)
     if is_metric_function(f)
         #pass to Rotations by default - but keep Group Decorator for the retraction

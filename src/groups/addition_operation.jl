@@ -183,15 +183,3 @@ function translate_diff(
 )
     return X
 end
-
-function translate_diff!(
-    ::AdditionGroupTrait,
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    q,
-    X,
-    ::ActionDirectionAndSide,
-)
-    return copyto!(G, Y, p, X)
-end

@@ -37,7 +37,7 @@ function PowerGroup(manifold::AbstractPowerManifold)
         error("All powered manifold must be or decorate a group.")
     end
     op = ProductOperation()
-    return GroupManifold(manifold, op, vector_representation(M))
+    return GroupManifold(manifold, op, vector_representation(manifold.manifold))
 end
 
 function ManifoldsBase._access_nested(

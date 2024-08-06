@@ -2,6 +2,8 @@ include("../header.jl")
 include("group_utils.jl")
 using NLsolve
 
+using Manifolds: LeftForwardAction, RightBackwardAction
+
 @testset "Special Linear group" begin
     @testset "basic properties" begin
         G = SpecialLinear(3)
