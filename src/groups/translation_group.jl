@@ -16,16 +16,17 @@ function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ, parameter::Symb
     return TranslationGroup{typeof(size),field}(
         Euclidean(n...; field=field, parameter=parameter),
         AdditionOperation(),
+        LeftInvariantRepresentation(),
     )
 end
 
 @inline function active_traits(f, M::TranslationGroup, args...)
     if is_metric_function(f)
         #pass to Euclidean by default - but keep Group Decorator for the retraction
-        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+        return merge_traits(IsGroupManifold(M.op, M.gvr), IsExplicitDecorator())
     else
         return merge_traits(
-            IsGroupManifold(M.op),
+            IsGroupManifold(M.op, M.gvr),
             IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(), #pass to Euclidean by default/last fallback

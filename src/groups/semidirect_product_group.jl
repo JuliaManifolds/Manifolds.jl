@@ -13,8 +13,13 @@ function Base.show(io::IO, op::SemidirectProductOperation)
     return print(io, "SemidirectProductOperation($(op.action))")
 end
 
-const SemidirectProductGroup{𝔽,N,H,A<:AbstractGroupAction} =
-    GroupManifold{𝔽,ProductManifold{𝔽,Tuple{N,H}},SemidirectProductOperation{A}}
+const SemidirectProductGroup{
+    𝔽,
+    N,
+    H,
+    A<:AbstractGroupAction,
+    GVR<:AbstractGroupVectorRepresentation,
+} = GroupManifold{𝔽,ProductManifold{𝔽,Tuple{N,H}},SemidirectProductOperation{A},GVR}
 
 @doc raw"""
     SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
@@ -38,12 +43,13 @@ function SemidirectProductGroup(
     N::AbstractDecoratorManifold{𝔽},
     H::AbstractDecoratorManifold{𝔽},
     A::AbstractGroupAction,
+    gvr::AbstractGroupVectorRepresentation,
 ) where {𝔽}
     N === group_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")
     H === base_group(A) || error("Subgroup $(H) must be the base group of action $(A)")
     op = SemidirectProductOperation(A)
     M = ProductManifold(N, H)
-    return GroupManifold(M, op)
+    return GroupManifold(M, op, gvr)
 end
 
 """

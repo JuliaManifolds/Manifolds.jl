@@ -13,22 +13,34 @@ Group manifolds by default forward metric-related operations to the wrapped mani
 Define the group operation `op` acting on the manifold `manifold`, hence if `op` acts smoothly,
 this forms a Lie group.
 """
-struct GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <:
-       AbstractDecoratorManifold{𝔽}
+struct GroupManifold{
+    𝔽,
+    M<:AbstractManifold{𝔽},
+    O<:AbstractGroupOperation,
+    GVR<:AbstractGroupVectorRepresentation,
+} <: AbstractDecoratorManifold{𝔽}
     manifold::M
     op::O
+    gvr::GVR
 end
+
+"""
+    vector_representation(M::GroupManifold)
+
+Get the [`AbstractGroupVectorRepresentation`](@ref) of [`GroupManifold`](@ref) `M`.
+"""
+vector_representation(M::GroupManifold) = M.gvr
 
 @inline function active_traits(f, M::GroupManifold, args...)
     return merge_traits(
-        IsGroupManifold(M.op),
+        IsGroupManifold(M.op, M.gvr),
         active_traits(f, M.manifold, args...),
         IsExplicitDecorator(),
     )
 end
 @inline function active_traits(f, ::AbstractRNG, M::GroupManifold, args...)
     return merge_traits(
-        IsGroupManifold(M.op),
+        IsGroupManifold(M.op, M.gvr),
         active_traits(f, M.manifold, args...),
         IsExplicitDecorator(),
     )

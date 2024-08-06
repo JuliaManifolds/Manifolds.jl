@@ -19,22 +19,41 @@ For a concrete case the concrete wrapper [`GroupManifold`](@ref) can be used.
 """
 abstract type AbstractGroupOperation end
 
+abstract type AbstractGroupVectorRepresentation end
+
+"""
+    TangentVectorRepresentation
+
+Specify that tangent vectors in a group are stored in a non-invariant way.
+"""
+struct TangentVectorRepresentation <: AbstractGroupVectorRepresentation end
+
+"""
+    LeftInvariantRepresentation
+
+Specify that tangent vectors in a group are stored in Lie algebra using left-invariant
+representation.
+"""
+struct LeftInvariantRepresentation <: AbstractGroupVectorRepresentation end
+
 """
     IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
 
 A trait to declare an [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  as a manifold with group structure
 with operation of type `O`.
 
-Using this trait you can turn a manifold that you implement _implictly_ into a Lie group.
+Using this trait you can turn a manifold that you implement _implicitly_ into a Lie group.
 If you wish to decorate an existing manifold with one (or different) [`AbstractGroupAction`](@ref)s,
 see [`GroupManifold`](@ref).
 
 # Constructor
 
-    IsGroupManifold(op::AbstractGroupOperation)
+    IsGroupManifold(op::AbstractGroupOperation, gvr::AbstractGroupVectorRepresentation)
 """
-struct IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
+struct IsGroupManifold{O<:AbstractGroupOperation,GVR<:AbstractGroupVectorRepresentation} <:
+       AbstractTrait
     op::O
+    gvr::GVR
 end
 
 """
@@ -955,6 +974,7 @@ end
 )
 
 function translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
     G::AbstractDecoratorManifold,
     Y,
     ::Any,
@@ -965,6 +985,7 @@ function translate_diff!(
     return copyto!(G, Y, X)
 end
 function translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
     G::AbstractDecoratorManifold,
     Y,
     ::Any,
@@ -974,10 +995,19 @@ function translate_diff!(
 )
     return copyto!(G, Y, X)
 end
-function translate_diff!(G::AbstractDecoratorManifold, Y, p, ::Any, X, ::LeftBackwardAction)
+function translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    ::Any,
+    X,
+    ::LeftBackwardAction,
+)
     return adjoint_action!(G, Y, p, X, LeftAction())
 end
 function translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
     G::AbstractDecoratorManifold,
     Y,
     p,

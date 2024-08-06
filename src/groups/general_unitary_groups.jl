@@ -12,12 +12,12 @@ end
     if is_metric_function(f)
         #pass to Rotations by default - but keep Group Decorator for the retraction
         return merge_traits(
-            IsGroupManifold(MultiplicationOperation()),
+            IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
             IsExplicitDecorator(),
         )
     else
         return merge_traits(
-            IsGroupManifold(MultiplicationOperation()),
+            IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
             HasBiinvariantMetric(),
             IsDefaultMetric(EuclideanMetric()),
             IsExplicitDecorator(), #pass to the inner M by default/last fallback

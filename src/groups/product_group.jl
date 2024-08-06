@@ -30,10 +30,10 @@ end
 @inline function active_traits(f, M::ProductGroup, args...)
     if is_metric_function(f)
         #pass to manifold by default - but keep Group Decorator for the retraction
-        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+        return merge_traits(IsGroupManifold(M.op, M.gvr), IsExplicitDecorator())
     else
         return merge_traits(
-            IsGroupManifold(M.op),
+            IsGroupManifold(M.op, M.gvr),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(),
         )

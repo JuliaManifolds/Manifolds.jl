@@ -37,7 +37,7 @@ function PowerGroup(manifold::AbstractPowerManifold)
         error("All powered manifold must be or decorate a group.")
     end
     op = ProductOperation()
-    return GroupManifold(manifold, op)
+    return GroupManifold(manifold, op, vector_representation(M))
 end
 
 function ManifoldsBase._access_nested(
@@ -77,10 +77,10 @@ end
 @inline function active_traits(f, M::PowerGroup, args...)
     if is_metric_function(f)
         #pass to manifold by default - but keep Group Decorator for the retraction
-        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+        return merge_traits(IsGroupManifold(M.op, M.gvr), IsExplicitDecorator())
     else
         return merge_traits(
-            IsGroupManifold(M.op),
+            IsGroupManifold(M.op, M.gvr),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(),
         )

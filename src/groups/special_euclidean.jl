@@ -56,7 +56,7 @@ function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
 end
 
 @inline function active_traits(f, M::SpecialEuclidean, args...)
-    return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+    return merge_traits(IsGroupManifold(M.op, M.gvr), IsExplicitDecorator())
 end
 
 """

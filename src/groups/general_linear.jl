@@ -21,7 +21,7 @@ end
 
 function active_traits(f, ::GeneralLinear, args...)
     return merge_traits(
-        IsGroupManifold(MultiplicationOperation()),
+        IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
         IsEmbeddedManifold(),
         HasLeftInvariantMetric(),
         IsDefaultMetric(EuclideanMetric()),

@@ -11,10 +11,13 @@ CircleGroup() = GroupManifold(Circle{ℂ}(), MultiplicationOperation())
 @inline function active_traits(f, M::CircleGroup, args...)
     if is_metric_function(f)
         #pass to Euclidean by default - but keep Group Decorator for the retraction
-        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+        return merge_traits(
+            IsGroupManifold(M.op, TangentVectorRepresentation()),
+            IsExplicitDecorator(),
+        )
     else
         return merge_traits(
-            IsGroupManifold(M.op),
+            IsGroupManifold(M.op, TangentVectorRepresentation()),
             IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(), #pass to Euclidean by default/last fallback
@@ -144,17 +147,20 @@ end
 The real circle group is the real circle ([`Circle(ℝ)`](@ref)) equipped with
 the group operation of addition ([`AdditionOperation`](@ref)).
 """
-const RealCircleGroup = GroupManifold{ℝ,Circle{ℝ},AdditionOperation}
+const RealCircleGroup =
+    GroupManifold{ℝ,Circle{ℝ},AdditionOperation,LeftInvariantRepresentation}
 
-RealCircleGroup() = GroupManifold(Circle{ℝ}(), AdditionOperation())
+function RealCircleGroup()
+    return GroupManifold(Circle{ℝ}(), AdditionOperation(), LeftInvariantRepresentation())
+end
 
 @inline function active_traits(f, M::RealCircleGroup, args...)
     if is_metric_function(f)
         #pass to Euclidean by default - but keep Group Decorator for the retraction
-        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+        return merge_traits(IsGroupManifold(M.op, M.gvr), IsExplicitDecorator())
     else
         return merge_traits(
-            IsGroupManifold(M.op),
+            IsGroupManifold(M.op, M.gvr),
             HasBiinvariantMetric(),
             IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),
