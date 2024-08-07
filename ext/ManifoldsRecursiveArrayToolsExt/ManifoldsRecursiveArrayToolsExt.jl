@@ -14,9 +14,11 @@ if isdefined(Base, :get_extension)
         FiberBundleBasisData,
         FiberBundleProductVectorTransport,
         LeftColumnwiseSpecialEuclideanAction,
+        LeftInvariantRepresentation,
         PowerManifoldNestedReplacing,
         SpecialEuclideanIdentity,
         SpecialEuclideanInGeneralLinear,
+        TangentVectorRepresentation,
         TypeParameter
 
     using Manifolds: bundle_transport_tangent_direction, _get_parameter
@@ -49,6 +51,7 @@ if isdefined(Base, :get_extension)
         project,
         translate,
         translate_diff,
+        vector_representation,
         _vector_transport_direction,
         vee
 else
@@ -69,9 +72,11 @@ else
         FiberBundleBasisData,
         FiberBundleProductVectorTransport,
         LeftColumnwiseSpecialEuclideanAction,
+        LeftInvariantRepresentation,
         PowerManifoldNestedReplacing,
         SpecialEuclideanIdentity,
         SpecialEuclideanInGeneralLinear,
+        TangentVectorRepresentation,
         TypeParameter
 
     import ..Manifolds:
@@ -102,6 +107,7 @@ else
         project,
         translate,
         translate_diff,
+        vector_representation,
         _vector_transport_direction,
         vee
 end

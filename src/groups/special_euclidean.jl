@@ -61,12 +61,23 @@ const SpecialEuclideanOperation{N} = SemidirectProductOperation{
 }
 const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
-function Base.show(io::IO, ::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "SpecialEuclidean($(n))")
+function Base.show(io::IO, G::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
+    if vector_representation(G) isa TangentVectorRepresentation
+        return print(io, "SpecialEuclidean($(n))")
+    else
+        return print(io, "SpecialEuclidean($(n); gvr=LeftInvariantRepresentation())")
+    end
 end
 function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
     n = _get_parameter(G)
-    return print(io, "SpecialEuclidean($(n); parameter=:field)")
+    if vector_representation(G) isa TangentVectorRepresentation
+        return print(io, "SpecialEuclidean($(n); parameter=:field)")
+    else
+        return print(
+            io,
+            "SpecialEuclidean($(n); parameter=:field, gvr=LeftInvariantRepresentation())",
+        )
+    end
 end
 
 @inline function active_traits(f, M::SpecialEuclidean, args...)
@@ -167,7 +178,7 @@ matrix part of `p`, `r` is the translation part of `fX` and `ω` is the rotation
 ``×`` is the cross product and ``⋅`` is the matrix product.
 """
 function adjoint_action(
-    ::SpecialEuclidean{TypeParameter{Tuple{3}}},
+    ::SpecialEuclidean{TypeParameter{Tuple{3}},<:TangentVectorRepresentation},
     p,
     fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}},
 )
@@ -642,7 +653,14 @@ is the translation part of `p` and ``X_t`` is the translation part of `X`.
 """
 translate_diff(G::SpecialEuclidean, p, q, X, ::RightBackwardAction)
 
-function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightBackwardAction)
+function translate_diff!(
+    G::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    Y,
+    p,
+    q,
+    X,
+    ::RightBackwardAction,
+) where {T}
     np, hp = submanifold_components(G, p)
     nq, hq = submanifold_components(G, q)
     nX, hX = submanifold_components(G, X)
@@ -707,7 +725,11 @@ function embed(M::SpecialEuclideanInGeneralLinear, p, X)
     Y = allocate_result(G, screw_matrix, nX, hX)
     nY, hY = submanifold_components(G, Y)
     copyto!(hY, hX)
-    copyto!(nY, nX)
+    if vector_representation(M.manifold) isa LeftInvariantRepresentation
+        copyto!(nY, nX)
+    else
+        copyto!(nY, hp' * nX)
+    end
     @inbounds _padvector!(G, Y)
     return Y
 end

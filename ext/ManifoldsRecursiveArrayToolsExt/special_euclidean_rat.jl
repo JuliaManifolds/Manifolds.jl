@@ -27,35 +27,51 @@ function project(M::SpecialEuclideanInGeneralLinear, p, X)
     G = M.manifold
     np, hp = submanifold_components(G, p)
     nX, hX = submanifold_components(G, X)
-    return ArrayPartition(hp * nX, hX)
+    if vector_representation(M.manifold) isa LeftInvariantRepresentation
+        return ArrayPartition(nX, hX)
+    else
+        return ArrayPartition(hp * nX, hX)
+    end
 end
 
 ### Special methods for better performance of selected operations
 
-function Base.exp(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
+function Base.exp(
+    M::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    p::ArrayPartition,
+    X::ArrayPartition,
+) where {T}
     M1, M2 = M.manifold.manifolds
     return ArrayPartition(
         exp(M1.manifold, p.x[1], X.x[1]),
         exp(M2.manifold, p.x[2], X.x[2]),
     )
 end
-function Base.log(M::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
+function Base.log(
+    M::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    p::ArrayPartition,
+    q::ArrayPartition,
+) where {T}
     M1, M2 = M.manifold.manifolds
     return ArrayPartition(
         log(M1.manifold, p.x[1], q.x[1]),
         log(M2.manifold, p.x[2], q.x[2]),
     )
 end
-function vee(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
+function vee(
+    M::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    p::ArrayPartition,
+    X::ArrayPartition,
+) where {T}
     M1, M2 = M.manifold.manifolds
     return vcat(vee(M1.manifold, p.x[1], X.x[1]), vee(M2.manifold, p.x[2], X.x[2]))
 end
 function get_coordinates(
-    M::SpecialEuclidean,
+    M::SpecialEuclidean{T,<:TangentVectorRepresentation},
     p::ArrayPartition,
     X::ArrayPartition,
     basis::DefaultOrthogonalBasis,
-)
+) where {T}
     M1, M2 = M.manifold.manifolds
     return vcat(
         get_coordinates(M1.manifold, p.x[1], X.x[1], basis),
@@ -63,7 +79,7 @@ function get_coordinates(
     )
 end
 function hat(
-    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
+    M::SpecialEuclidean{TypeParameter{Tuple{2}},<:TangentVectorRepresentation},
     p::ArrayPartition,
     c::AbstractVector,
 )
@@ -74,7 +90,7 @@ function hat(
     )
 end
 function get_vector(
-    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
+    M::SpecialEuclidean{TypeParameter{Tuple{2}},<:TangentVectorRepresentation},
     p::ArrayPartition,
     c::AbstractVector,
     basis::DefaultOrthogonalBasis,
@@ -86,7 +102,7 @@ function get_vector(
 end
 
 function hat(
-    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
+    M::SpecialEuclidean{TypeParameter{Tuple{3}},<:TangentVectorRepresentation},
     p::ArrayPartition,
     c::AbstractVector,
 )
@@ -97,7 +113,7 @@ function hat(
     )
 end
 function get_vector(
-    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
+    M::SpecialEuclidean{TypeParameter{Tuple{3}},<:TangentVectorRepresentation},
     p::ArrayPartition,
     c::AbstractVector,
     basis::DefaultOrthogonalBasis,
@@ -107,6 +123,10 @@ function get_vector(
         get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[4, 5, 6]], basis),
     )
 end
-function compose(::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
+function compose(
+    ::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    p::ArrayPartition,
+    q::ArrayPartition,
+) where {T}
     return ArrayPartition(p.x[2] * q.x[1] + p.x[1], p.x[2] * q.x[2])
 end

@@ -9,19 +9,29 @@ using Manifolds:
     LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
 
 @testset "Special Euclidean group" begin
-    for se_parameter in [:field, :type]
-        @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
-            G = SpecialEuclidean(n; parameter=se_parameter)
+    for (se_parameter, se_gvr) in [
+        (:field, Manifolds.TangentVectorRepresentation()),
+        (:type, Manifolds.TangentVectorRepresentation()),
+        (:field, Manifolds.LeftInvariantRepresentation()),
+    ]
+        @testset "SpecialEuclidean($n; parameter=$se_parameter, gvr=$se_gvr)" for n in
+                                                                                  (2, 3, 4)
+            G = SpecialEuclidean(n; parameter=se_parameter, gvr=se_gvr)
             if se_parameter === :field
                 @test isa(G, SpecialEuclidean{Tuple{Int}})
             else
                 @test isa(G, SpecialEuclidean{TypeParameter{Tuple{n}}})
             end
 
-            if se_parameter === :field
+            if se_parameter === :field && se_gvr === Manifolds.TangentVectorRepresentation()
                 @test repr(G) == "SpecialEuclidean($n; parameter=:field)"
-            else
+            elseif se_parameter === :type &&
+                   se_gvr === Manifolds.TangentVectorRepresentation()
                 @test repr(G) == "SpecialEuclidean($n)"
+            elseif se_parameter === :field &&
+                   se_gvr === Manifolds.LeftInvariantRepresentation()
+                @test repr(G) ==
+                      "SpecialEuclidean($n; parameter=:field, gvr=LeftInvariantRepresentation())"
             end
             M = base_manifold(G)
             @test M ===
@@ -92,9 +102,11 @@ using Manifolds:
             @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
 
             w = translate_diff(G, pts[1], Identity(G), X_pts[1])
-            w2mat = screw_matrix(G, w)
-            @test w2mat ≈ screw_matrix(G, X_pts[1])
-            @test screw_matrix(G, w2mat) === w2mat
+            if se_gvr isa Manifolds.LeftInvariantRepresentation
+                w2mat = screw_matrix(G, w)
+                @test w2mat ≈ screw_matrix(G, X_pts[1])
+                @test screw_matrix(G, w2mat) === w2mat
+            end
 
             @test is_vector(G, Identity(G), rand(G; vector_at=Identity(G)))
 
