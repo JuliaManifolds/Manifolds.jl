@@ -385,7 +385,7 @@ include("groups/group.jl")
 include("distributions.jl")
 include("projected_distribution.jl")
 include("statistics.jl")
-
+include("submersion.jl")
 # Meta Manifolds II: Products
 include("manifolds/ProductManifold.jl")
 
@@ -822,6 +822,7 @@ export ×,
     det_local_metric,
     differential_canonical_project,
     differential_canonical_project!,
+    differential_submersion,
     distance,
     dual_basis,
     einstein_tensor,
@@ -922,14 +923,15 @@ export ×,
     shortest_geodesic!,
     skewness,
     std,
+    submanifold,
+    submanifold_component,
+    submanifold_components,
+    submersion,
     sym_rem,
     symplectic_inverse,
     symplectic_inverse!,
     symplectic_inverse_times,
     symplectic_inverse_times!,
-    submanifold,
-    submanifold_component,
-    submanifold_components,
     uniform_distribution,
     var,
     vector_space_dimension,

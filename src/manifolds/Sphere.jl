@@ -614,6 +614,36 @@ function sectional_curvature_min(M::AbstractSphere)
 end
 
 @doc raw"""
+    submersion(M::M::AbstractSphere{ℝ}, q)
+
+compute the submersion on the [`Sphere`](@ref) `M` for a point `q` from the embedding.
+
+```
+c(q) = q^{\mathrm{T}}q - 1, \qquad q ∈ ℝ^{n+1},
+```
+
+such that ``q \in \mathcal M ⇔ c(q) = 0``.
+"""
+submersion(::AbstractSphere{ℝ}, q) = dot(q, q)
+
+@doc raw"""
+    differential_submersion(M::AbstractSphere{ℝ}, q)
+    differential_submersion(M::AbstractSphere{ℝ}, q, X)
+
+compute the differential of the submersion on the [`Sphere`](@ref) `M` for a point `q` from the embedding.
+
+```
+Dc(q)[X] = 2q^{\mathrm{T}}X, \qquad q, X ∈ ℝ^{n+1}.
+```
+
+For the first signature ``2q^{\mathrm{T}}`` is returned.
+
+Note that for ``q ∈ \mathcal M`` we get that ``X \in T_q\mathcal M`` if and only if ``Dc(q)[X] = 0``.
+"""
+differential_submersion(::AbstractSphere{ℝ}, q, X) = 2 * dot(q, X)
+differential_submersion(::AbstractSphere{ℝ}, q) = 2 * q'
+
+@doc raw"""
     volume_density(M::AbstractSphere{ℝ}, p, X)
 
 Compute volume density function of a sphere, i.e. determinant of the differential of
