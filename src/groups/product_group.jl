@@ -222,6 +222,19 @@ function _common_product_translate_diff!(
     return Y
 end
 
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::LeftForwardAction)
+    return _common_product_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::RightForwardAction)
+    return _common_product_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::LeftBackwardAction)
+    return _common_product_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::ProductGroup, Y, p, q, X, conv::RightBackwardAction)
+    return _common_product_translate_diff!(G, Y, p, q, X, conv)
+end
+
 function inverse_translate_diff!(G::ProductGroup, Y, p, q, X, conv::ActionDirectionAndSide)
     M = G.manifold
     map(

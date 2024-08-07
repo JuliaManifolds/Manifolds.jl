@@ -102,6 +102,8 @@ include("../header.jl")
         gtsd_mvector =
             Manifolds.normal_tvector_distribution(M, (@MMatrix [1.0 0.0; 0.0 1.0]), 1.0)
         @test isa(rand(gtsd_mvector), MMatrix)
+
+        Test.@test Distributions.support(usd_mmatrix).manifold == M
     end
 
     Random.seed!(42)

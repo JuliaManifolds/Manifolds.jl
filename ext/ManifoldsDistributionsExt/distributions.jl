@@ -58,9 +58,7 @@ abstract type MPointDistribution{TM<:AbstractManifold} <:
 
 Get the object of type `FVectorSupport` for the distribution `d`.
 """
-function Distributions.support(::T) where {T<:FVectorDistribution}
-    return error("support not implemented for type $T")
-end
+function Distributions.support(::FVectorDistribution) end
 
 """
     uniform_distribution(M::Grassmann{<:Any,ℝ}, p)

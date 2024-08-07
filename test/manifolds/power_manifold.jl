@@ -138,6 +138,9 @@ end
             rotations_tv_dist,
         )
         push!(tvector_distributions_Mrn2, power_rn2_tv_dist)
+
+        Test.@test Distributions.support(power_s1_pt_dist) isa PowerPointDistribution
+        Test.@test Distributions.support(power_s1_tv_dist) isa PowerFVectorDistribution
     end
 
     @testset "get_component, set_component!, getindex and setindex!" begin

@@ -164,6 +164,11 @@ using RecursiveArrayTools: ArrayPartition
                 Mse_tvector_distributions,
                 ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
             )
+
+            Test.@test Distributions.support(Mse_point_distributions[1]) isa
+                       ProductPointDistribution
+            Test.@test Distributions.support(Mse_tvector_distributions[1]) isa
+                       ProductFVectorDistribution
         end
 
         test_manifold(

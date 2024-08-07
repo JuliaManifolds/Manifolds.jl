@@ -21,7 +21,8 @@ if isdefined(Base, :get_extension)
         TangentVectorRepresentation,
         TypeParameter
 
-    using Manifolds: bundle_transport_tangent_direction, _get_parameter
+    using Manifolds:
+        bundle_transport_tangent_direction, bundle_transport_tangent_to, _get_parameter
 
     import Manifolds:
         adjoint_Jacobi_field,
@@ -45,6 +46,7 @@ if isdefined(Base, :get_extension)
         inverse_apply_diff,
         inverse_translate,
         inverse_translate_diff,
+        isapprox,
         jacobi_field,
         lie_bracket,
         optimal_alignment,
@@ -53,6 +55,7 @@ if isdefined(Base, :get_extension)
         translate_diff,
         vector_representation,
         _vector_transport_direction,
+        _vector_transport_to,
         vee
 else
     # imports need to be relative for Requires.jl-based workflows:
@@ -64,7 +67,8 @@ else
 
     using ..Base.Iterators: repeated
 
-    using ..Manifolds: bundle_transport_tangent_direction, _get_parameter
+    using ..Manifolds:
+        bundle_transport_tangent_direction, bundle_transport_tangent_to, _get_parameter
 
     using ..Manifolds:
         ActionDirectionAndSide,
@@ -101,6 +105,7 @@ else
         inverse_apply_diff,
         inverse_translate,
         inverse_translate_diff,
+        isapprox,
         jacobi_field,
         lie_bracket,
         optimal_alignment,
@@ -109,6 +114,7 @@ else
         translate_diff,
         vector_representation,
         _vector_transport_direction,
+        _vector_transport_to,
         vee
 end
 
