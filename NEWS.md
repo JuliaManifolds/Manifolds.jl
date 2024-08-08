@@ -11,9 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `Distributions.jl`, `RecursiveArrayTools.jl` and `HybridArrays.jl` were moved to weak dependencies to reduce load time and improve extensibility.
 * `translate_diff`, `inv_diff` and thus `apply_diff_group`, are available for all the groups with invariant tangent vector storage
-* `adjoint_action` takes a direction argument
-* `adjoint_action!` is the necessary method to implement in any given group for the above to work properly
-* On groups with invariant vector storage, `exp` and `log` are based on `exp_lie` and `log_lie` and thus group invariant
+* `adjoint_action` takes a direction argument; by default it is `LeftAction`.
+* `adjoint_action!` is the necessary method to implement in groups with left-invariant tangent vector storage.
+* On groups with invariant vector storage, `exp` and `log` are based on `exp_lie` and `log_lie` and thus group invariant.
 * Fixed a few typos in the doc string of the SPD fixed determinant description.
 
 ### Removed
@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `ExtrinsicEstimation()` (should be replaced with `ExtrinsicEstimation(EfficientEstimator())`),
   * `Symplectic` (renamed to `SymplecticMatrices`),
   * `SymplecticMatrix` (renamed to `SymplecticElement`).
+  * `rand` on `SymplecticMatrices` and `SymplecticStiefel` no longer accepts `hamiltonian_norm` as an alias for `σ`.
+  * `mean!` and `median!` no longer accept `extrinsic_method` (should be replaced with `e = ExtrinsicEstimation(extrinsic_method)`).
 * As a result of making `Distributions.jl` and `RecursiveArrayTools.jl` weak dependencies the following symbols are no longer exported from `Manifolds.jl`. Essential functionality is still available but distribution-related features may change in the future without a breaking release.
   * `ArrayPartition`,
   * `ProjectedPointDistribution`,

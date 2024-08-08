@@ -19,12 +19,20 @@ For a concrete case the concrete wrapper [`GroupManifold`](@ref) can be used.
 """
 abstract type AbstractGroupOperation end
 
+"""
+    abstract type AbstractGroupVectorRepresentation end
+
+An abstract supertype for indicating representation of tangent vectors on a group manifold.
+The two most common representations are [`LeftInvariantRepresentation`](@ref)
+and [`TangentVectorRepresentation`](@ref)
+"""
 abstract type AbstractGroupVectorRepresentation end
 
 """
     TangentVectorRepresentation
 
-Specify that tangent vectors in a group are stored in a non-invariant way.
+Specify that tangent vectors in a group are stored in a non-invariant way, corresponding to
+the storage implied by the underlying manifold.
 """
 struct TangentVectorRepresentation <: AbstractGroupVectorRepresentation end
 
