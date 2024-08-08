@@ -288,60 +288,60 @@ using Manifolds:
             G = SpecialEuclidean(11)
             @test affine_matrix(G, Identity(G)) isa Diagonal{Float64,Vector{Float64}}
             @test affine_matrix(G, Identity(G)) == Diagonal(ones(11))
+        end
+    end
 
-            @testset "Explicit embedding in GL(n+1)" begin
-                G = SpecialEuclidean(3)
-                t = Vector{Float64}.([1:3, 2:4, 4:6])
-                ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
-                p = Matrix(I, 3, 3)
-                Rn = Rotations(3)
-                pts = [
-                    ArrayPartition(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)
-                ]
-                X = ArrayPartition([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5]))
-                q = ArrayPartition([0.0, 0.0, 0.0], p)
+    for se_gvr in [LeftInvariantRepresentation(), HybridTangentRepresentation()]
+        @testset "Explicit embedding in GL(n+1)" begin
+            G = SpecialEuclidean(3; gvr=se_gvr)
+            t = Vector{Float64}.([1:3, 2:4, 4:6])
+            ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
+            p = Matrix(I, 3, 3)
+            Rn = Rotations(3)
+            pts = [ArrayPartition(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
+            X = ArrayPartition([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5]))
+            q = ArrayPartition([0.0, 0.0, 0.0], p)
 
-                GL = GeneralLinear(4)
-                SEGL = EmbeddedManifold(G, GL)
-                @test Manifolds.SpecialEuclideanInGeneralLinear(3) === SEGL
-                pts_gl = [embed(SEGL, pp) for pp in pts]
-                q_gl = embed(SEGL, q)
-                X_gl = embed(SEGL, pts_gl[1], X)
+            GL = GeneralLinear(4)
+            SEGL = EmbeddedManifold(G, GL)
+            @test Manifolds.SpecialEuclideanInGeneralLinear(3) === SEGL
+            pts_gl = [embed(SEGL, pp) for pp in pts]
+            q_gl = embed(SEGL, q)
+            X_gl = embed(SEGL, pts_gl[1], X)
 
-                q_gl2 = allocate(q_gl)
-                embed!(SEGL, q_gl2, q)
-                @test isapprox(SEGL, q_gl2, q_gl)
+            q_gl2 = allocate(q_gl)
+            embed!(SEGL, q_gl2, q)
+            @test isapprox(SEGL, q_gl2, q_gl)
 
-                q2 = allocate(q)
-                project!(SEGL, q2, q_gl)
-                @test isapprox(G, q, q2)
+            q2 = allocate(q)
+            project!(SEGL, q2, q_gl)
+            @test isapprox(G, q, q2)
 
-                @test isapprox(G, pts[1], project(SEGL, pts_gl[1]))
-                @test isapprox(G, pts[1], X, project(SEGL, pts_gl[1], X_gl))
+            @test isapprox(G, pts[1], project(SEGL, pts_gl[1]))
+            @test isapprox(G, pts[1], X, project(SEGL, pts_gl[1], X_gl))
 
-                X_gl2 = allocate(X_gl)
-                embed!(SEGL, X_gl2, pts_gl[1], X)
-                @test isapprox(SEGL, pts_gl[1], X_gl2, X_gl)
+            X_gl2 = allocate(X_gl)
+            embed!(SEGL, X_gl2, pts_gl[1], X)
+            @test isapprox(SEGL, pts_gl[1], X_gl2, X_gl)
 
-                X2 = allocate(X)
-                project!(SEGL, X2, pts_gl[1], X_gl)
-                @test isapprox(G, pts[1], X, X2)
+            X2 = allocate(X)
+            project!(SEGL, X2, pts_gl[1], X_gl)
+            @test isapprox(G, pts[1], X, X2)
 
-                for conv in [LeftForwardAction(), RightBackwardAction()]
-                    tpgl = translate(GL, pts_gl[2], pts_gl[1], conv)
-                    tXgl = translate_diff(GL, pts_gl[2], pts_gl[1], X_gl, conv)
-                    tpse = translate(G, pts[2], pts[1], conv)
-                    tXse = translate_diff(G, pts[2], pts[1], X, conv)
-                    @test isapprox(G, tpse, project(SEGL, tpgl))
-                    @test isapprox(G, tpse, tXse, project(SEGL, tpgl, tXgl))
+            for conv in [LeftForwardAction(), RightBackwardAction()]
+                tpgl = translate(GL, pts_gl[2], pts_gl[1], conv)
+                tXgl = translate_diff(GL, pts_gl[2], pts_gl[1], X_gl, conv)
+                tpse = translate(G, pts[2], pts[1], conv)
+                tXse = translate_diff(G, pts[2], pts[1], X, conv)
+                @test isapprox(G, tpse, project(SEGL, tpgl))
+                @test isapprox(G, tpse, tXse, project(SEGL, tpgl, tXgl))
 
-                    @test isapprox(
-                        G,
-                        pts_gl[1],
-                        X_gl,
-                        translate_diff(G, Identity(G), pts_gl[1], X_gl, conv),
-                    )
-                end
+                @test isapprox(
+                    G,
+                    pts_gl[1],
+                    X_gl,
+                    translate_diff(G, Identity(G), pts_gl[1], X_gl, conv),
+                )
             end
         end
     end
