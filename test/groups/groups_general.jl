@@ -90,6 +90,8 @@ using Manifolds:
         @test_throws MethodError inv!(G, p, p)
         @test_throws MethodError inv!(G, p, eg)
         @test_throws MethodError inv(G, p)
+        @test_throws MethodError inv_diff(G, p, X)
+        @test_throws MethodError inv_diff!(G, X, p, X)
 
         # no function defined to return the identity array representation
         @test_throws MethodError copyto!(G, p, eg)
