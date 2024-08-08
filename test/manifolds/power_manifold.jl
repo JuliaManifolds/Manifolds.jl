@@ -139,8 +139,13 @@ end
         )
         push!(tvector_distributions_Mrn2, power_rn2_tv_dist)
 
-        Test.@test Distributions.support(power_s1_pt_dist) isa PowerPointDistribution
-        Test.@test Distributions.support(power_s1_tv_dist) isa PowerFVectorDistribution
+        MPointSupport =
+            Base.get_extension(Manifolds, :ManifoldsDistributionsExt).MPointSupport
+        FVectorSupport =
+            Base.get_extension(Manifolds, :ManifoldsDistributionsExt).FVectorSupport
+
+        Test.@test Distributions.support(power_s1_pt_dist) isa MPointSupport
+        Test.@test Distributions.support(power_s1_tv_dist) isa FVectorSupport
     end
 
     @testset "get_component, set_component!, getindex and setindex!" begin

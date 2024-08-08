@@ -165,10 +165,14 @@ using RecursiveArrayTools: ArrayPartition
                 ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
             )
 
-            Test.@test Distributions.support(Mse_point_distributions[1]) isa
-                       ProductPointDistribution
+            MPointSupport =
+                Base.get_extension(Manifolds, :ManifoldsDistributionsExt).MPointSupport
+            FVectorSupport =
+                Base.get_extension(Manifolds, :ManifoldsDistributionsExt).FVectorSupport
+
+            Test.@test Distributions.support(Mse_point_distributions[1]) isa MPointSupport
             Test.@test Distributions.support(Mse_tvector_distributions[1]) isa
-                       ProductFVectorDistribution
+                       FVectorSupport
         end
 
         test_manifold(
