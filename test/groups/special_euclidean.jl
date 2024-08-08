@@ -392,6 +392,7 @@ using Manifolds:
                 ]
             end
             exp(SEn, pts[1], Xs[1])
+            exp(base_manifold(SEn), pts[1], Xs[1])
             compose(SEn, pts[1], pts[2])
             log(SEn, pts[1], pts[2])
             log(SEn, pts[1], pts[3])
