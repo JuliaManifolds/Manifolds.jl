@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `Distributions.jl`, `RecursiveArrayTools.jl` and `HybridArrays.jl` were moved to weak dependencies to reduce load time and improve extensibility.
 * `translate_diff`, `inv_diff` and thus `apply_diff_group`, are available for all the groups with invariant tangent vector storage
 * `adjoint_action` takes a direction argument; by default it is `LeftAction`.
-* `adjoint_action!` is the necessary method to implement in groups with left-invariant tangent vector storage.
+* `adjoint_action!` is the necessary method to implement in groups with left-invariant tangent vector representation.
 * On groups with invariant vector storage, `exp` and `log` are based on `exp_lie` and `log_lie` and thus group invariant.
 * Fixed a few typos in the doc string of the SPD fixed determinant description.
 
