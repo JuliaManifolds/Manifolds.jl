@@ -37,7 +37,7 @@ end
 ### Special methods for better performance of selected operations
 
 function Base.exp(
-    M::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    M::SpecialEuclidean{T,<:HybridTangentRepresentation},
     p::ArrayPartition,
     X::ArrayPartition,
 ) where {T}
@@ -48,7 +48,7 @@ function Base.exp(
     )
 end
 function Base.log(
-    M::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    M::SpecialEuclidean{T,<:HybridTangentRepresentation},
     p::ArrayPartition,
     q::ArrayPartition,
 ) where {T}
@@ -59,7 +59,7 @@ function Base.log(
     )
 end
 function vee(
-    M::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    M::SpecialEuclidean{T,<:HybridTangentRepresentation},
     p::ArrayPartition,
     X::ArrayPartition,
 ) where {T}
@@ -67,7 +67,7 @@ function vee(
     return vcat(vee(M1.manifold, p.x[1], X.x[1]), vee(M2.manifold, p.x[2], X.x[2]))
 end
 function get_coordinates(
-    M::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    M::SpecialEuclidean{T,<:HybridTangentRepresentation},
     p::ArrayPartition,
     X::ArrayPartition,
     basis::DefaultOrthogonalBasis,
@@ -79,7 +79,7 @@ function get_coordinates(
     )
 end
 function hat(
-    M::SpecialEuclidean{TypeParameter{Tuple{2}},<:TangentVectorRepresentation},
+    M::SpecialEuclidean{TypeParameter{Tuple{2}},<:HybridTangentRepresentation},
     p::ArrayPartition,
     c::AbstractVector,
 )
@@ -90,7 +90,7 @@ function hat(
     )
 end
 function get_vector(
-    M::SpecialEuclidean{TypeParameter{Tuple{2}},<:TangentVectorRepresentation},
+    M::SpecialEuclidean{TypeParameter{Tuple{2}},<:HybridTangentRepresentation},
     p::ArrayPartition,
     c::AbstractVector,
     basis::DefaultOrthogonalBasis,
@@ -102,7 +102,7 @@ function get_vector(
 end
 
 function hat(
-    M::SpecialEuclidean{TypeParameter{Tuple{3}},<:TangentVectorRepresentation},
+    M::SpecialEuclidean{TypeParameter{Tuple{3}},<:HybridTangentRepresentation},
     p::ArrayPartition,
     c::AbstractVector,
 )
@@ -113,7 +113,7 @@ function hat(
     )
 end
 function get_vector(
-    M::SpecialEuclidean{TypeParameter{Tuple{3}},<:TangentVectorRepresentation},
+    M::SpecialEuclidean{TypeParameter{Tuple{3}},<:HybridTangentRepresentation},
     p::ArrayPartition,
     c::AbstractVector,
     basis::DefaultOrthogonalBasis,
@@ -124,7 +124,7 @@ function get_vector(
     )
 end
 function compose(
-    ::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    ::SpecialEuclidean{T,<:HybridTangentRepresentation},
     p::ArrayPartition,
     q::ArrayPartition,
 ) where {T}

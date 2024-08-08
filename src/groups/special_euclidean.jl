@@ -1,7 +1,7 @@
 @doc raw"""
     SpecialEuclidean(
         n::Int;
-        gvr::AbstractGroupVectorRepresentation=TangentVectorRepresentation()
+        gvr::AbstractGroupVectorRepresentation=LeftInvariantRepresentation()
     )
 
 Special Euclidean group ``\mathrm{SE}(n)``, the group of rigid motions.
@@ -30,10 +30,10 @@ which the group operation is [`MultiplicationOperation`](@ref).
 
 There are two supported conventions for tangent vector storage, which can be selected
 using the `gvr` keyword argument:
-* [`TangentVectorRepresentation`](@ref) (default one) which corresponds to the
-  representation implied by product manifold structure
-* [`LeftInvariantRepresentation`](@ref), which corresponds to left-invariant storage
-  commonly used in other Lie groups.
+* [`LeftInvariantRepresentation`](@ref) (default one), which corresponds to left-invariant 
+  storage commonly used in other Lie groups.
+* [`HybridTangentRepresentation`](@ref) which corresponds to the representation implied by
+  product manifold structure of underlying groups.
 """
 const SpecialEuclidean{T} = SemidirectProductGroup{
     ℝ,
@@ -47,7 +47,7 @@ const SpecialEuclideanManifold{N} =
 
 function SpecialEuclidean(
     n::Int;
-    gvr::AbstractGroupVectorRepresentation=TangentVectorRepresentation(),
+    gvr::AbstractGroupVectorRepresentation=LeftInvariantRepresentation(),
     parameter::Symbol=:type,
 )
     Tn = TranslationGroup(n; parameter=parameter)
@@ -62,21 +62,18 @@ const SpecialEuclideanOperation{N} = SemidirectProductOperation{
 const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
 function Base.show(io::IO, G::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
-    if vector_representation(G) isa TangentVectorRepresentation
+    if vector_representation(G) isa LeftInvariantRepresentation
         return print(io, "SpecialEuclidean($(n))")
     else
-        return print(io, "SpecialEuclidean($(n); gvr=LeftInvariantRepresentation())")
+        return print(io, "SpecialEuclidean($(n); gvr=$(G.gvr))")
     end
 end
 function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
     n = _get_parameter(G)
-    if vector_representation(G) isa TangentVectorRepresentation
+    if vector_representation(G) isa LeftInvariantRepresentation
         return print(io, "SpecialEuclidean($(n); parameter=:field)")
     else
-        return print(
-            io,
-            "SpecialEuclidean($(n); parameter=:field, gvr=LeftInvariantRepresentation())",
-        )
+        return print(io, "SpecialEuclidean($(n); parameter=:field, gvr=$(G.gvr))")
     end
 end
 
@@ -167,7 +164,11 @@ Base.@propagate_inbounds function _padvector!(
 end
 
 @doc raw"""
-    adjoint_action(::SpecialEuclidean{TypeParameter{Tuple{3}}}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
+    adjoint_action(
+        ::SpecialEuclidean{TypeParameter{Tuple{3}},<:HybridTangentRepresentation},
+        p,
+        fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}},
+    )
 
 Adjoint action of the [`SpecialEuclidean`](@ref) group on the vector with coefficients `fX`
 tangent at point `p`.
@@ -178,7 +179,7 @@ matrix part of `p`, `r` is the translation part of `fX` and `ω` is the rotation
 ``×`` is the cross product and ``⋅`` is the matrix product.
 """
 function adjoint_action(
-    ::SpecialEuclidean{TypeParameter{Tuple{3}},<:TangentVectorRepresentation},
+    ::SpecialEuclidean{TypeParameter{Tuple{3}},<:HybridTangentRepresentation},
     p,
     fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}},
 )
@@ -654,7 +655,7 @@ is the translation part of `p` and ``X_t`` is the translation part of `X`.
 translate_diff(G::SpecialEuclidean, p, q, X, ::RightBackwardAction)
 
 function translate_diff!(
-    G::SpecialEuclidean{T,<:TangentVectorRepresentation},
+    G::SpecialEuclidean{T,<:HybridTangentRepresentation},
     Y,
     p,
     q,
@@ -680,6 +681,7 @@ function adjoint_action!(G::SpecialEuclidean, Y, p, Xₑ, ::LeftAction)
     A = G.op.action
     apply!(A, n, hp, nX)
     LinearAlgebra.axpy!(-1, apply_diff_group(A, Identity(H), h, np), n)
+    @inbounds _padvector!(G, Y)
     return Y
 end
 

@@ -10,9 +10,9 @@ using Manifolds:
 
 @testset "Special Euclidean group" begin
     for (se_parameter, se_gvr) in [
-        (:field, Manifolds.TangentVectorRepresentation()),
-        (:type, Manifolds.TangentVectorRepresentation()),
-        (:field, Manifolds.LeftInvariantRepresentation()),
+        (:field, LeftInvariantRepresentation()),
+        (:type, LeftInvariantRepresentation()),
+        (:field, HybridTangentRepresentation()),
     ]
         @testset "SpecialEuclidean($n; parameter=$se_parameter, gvr=$se_gvr)" for n in
                                                                                   (2, 3, 4)
@@ -23,15 +23,13 @@ using Manifolds:
                 @test isa(G, SpecialEuclidean{TypeParameter{Tuple{n}}})
             end
 
-            if se_parameter === :field && se_gvr === Manifolds.TangentVectorRepresentation()
+            if se_parameter === :field && se_gvr === LeftInvariantRepresentation()
                 @test repr(G) == "SpecialEuclidean($n; parameter=:field)"
-            elseif se_parameter === :type &&
-                   se_gvr === Manifolds.TangentVectorRepresentation()
+            elseif se_parameter === :type && se_gvr === LeftInvariantRepresentation()
                 @test repr(G) == "SpecialEuclidean($n)"
-            elseif se_parameter === :field &&
-                   se_gvr === Manifolds.LeftInvariantRepresentation()
+            elseif se_parameter === :field && se_gvr === HybridTangentRepresentation()
                 @test repr(G) ==
-                      "SpecialEuclidean($n; parameter=:field, gvr=LeftInvariantRepresentation())"
+                      "SpecialEuclidean($n; parameter=:field, gvr=HybridTangentRepresentation())"
             end
             M = base_manifold(G)
             @test M ===
@@ -349,7 +347,7 @@ using Manifolds:
     end
 
     @testset "Adjoint action on 𝔰𝔢(3)" begin
-        G = SpecialEuclidean(3; parameter=:type)
+        G = SpecialEuclidean(3; parameter=:type, gvr=HybridTangentRepresentation())
         t = Vector{Float64}.([1:3, 2:4, 4:6])
         ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
         p = Matrix(I, 3, 3)
@@ -367,7 +365,7 @@ using Manifolds:
 
     @testset "performance of selected operations" begin
         for n in [2, 3]
-            SEn = SpecialEuclidean(n)
+            SEn = SpecialEuclidean(n; gvr=HybridTangentRepresentation())
             Rn = Rotations(n)
 
             p = SMatrix{n,n}(I)
@@ -406,8 +404,7 @@ using Manifolds:
             get_vector(SEn, pts[1], csen, DefaultOrthogonalBasis())
             # @btime shows 0 but `@allocations` is inaccurate
             @static if VERSION >= v"1.9-DEV"
-                @test (@allocations exp(base_manifold(SEn), pts[1], Xs[1])) <= 4 broken =
-                    true # 11 allocations
+                @test (@allocations exp(base_manifold(SEn), pts[1], Xs[1])) <= 4
                 @test (@allocations compose(SEn, pts[1], pts[2])) <= 4
                 if VERSION < v"1.11-DEV"
                     @test (@allocations log(SEn, pts[1], pts[2])) <= 28

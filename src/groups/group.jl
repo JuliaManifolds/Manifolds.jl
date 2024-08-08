@@ -23,8 +23,8 @@ abstract type AbstractGroupOperation end
     abstract type AbstractGroupVectorRepresentation end
 
 An abstract supertype for indicating representation of tangent vectors on a group manifold.
-The two most common representations are [`LeftInvariantRepresentation`](@ref)
-and [`TangentVectorRepresentation`](@ref)
+The most common representations are [`LeftInvariantRepresentation`](@ref),
+[`TangentVectorRepresentation`](@ref) and [`HybridTangentRepresentation`](@ref).
 """
 abstract type AbstractGroupVectorRepresentation end
 

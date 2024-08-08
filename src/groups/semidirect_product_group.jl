@@ -13,6 +13,15 @@ function Base.show(io::IO, op::SemidirectProductOperation)
     return print(io, "SemidirectProductOperation($(op.action))")
 end
 
+"""
+    struct HybridTangentRepresentation <: AbstractGroupVectorRepresentation end
+
+Tangent vector representation on [`SemidirectProductGroup`](@ref) such as
+[`SpecialEuclidean`](@ref) that corresponds to simple product structure of underlying
+groups.
+"""
+struct HybridTangentRepresentation <: AbstractGroupVectorRepresentation end
+
 const SemidirectProductGroup{
     𝔽,
     N,
@@ -21,8 +30,8 @@ const SemidirectProductGroup{
     GVR<:AbstractGroupVectorRepresentation,
 } = GroupManifold{𝔽,ProductManifold{𝔽,Tuple{N,H}},SemidirectProductOperation{A},GVR}
 
-const SemidirectProductGroupTVR{𝔽,N,H,A<:AbstractGroupAction} =
-    SemidirectProductGroup{𝔽,N,H,A,TangentVectorRepresentation}
+const SemidirectProductGroupHVR{𝔽,N,H,A<:AbstractGroupAction} =
+    SemidirectProductGroup{𝔽,N,H,A,HybridTangentRepresentation}
 
 @doc raw"""
     SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
@@ -137,10 +146,10 @@ function _compose!(G::SemidirectProductGroup, x, p, q)
 end
 
 @doc raw"""
-    translate_diff(G::SemidirectProductGroupTVR, p, q, X, conX::LeftForwardAction)
+    translate_diff(G::SemidirectProductGroupHVR, p, q, X, conX::LeftForwardAction)
 
 Perform differential of the left translation on the semidirect product group `G`
-with `TangentVectorRepresentation`.
+with `HybridTangentRepresentation`.
 
 Since the left translation is defined as (cf. [`SemidirectProductGroup`](@ref)):
 
@@ -154,9 +163,9 @@ then its differential can be computed as
 \mathrm{d}L_{(n', h')}(X_n, X_h) = ( \mathrm{d}L_{n'} (\mathrm{d}θ_{h'}(X_n)), \mathrm{d}L_{h'} X_h).
 ````
 """
-translate_diff(G::SemidirectProductGroupTVR, p, q, X, conX::LeftForwardAction)
+translate_diff(G::SemidirectProductGroupHVR, p, q, X, conX::LeftForwardAction)
 
-function translate_diff!(G::SemidirectProductGroupTVR, Y, p, q, X, conX::LeftForwardAction)
+function translate_diff!(G::SemidirectProductGroupHVR, Y, p, q, X, conX::LeftForwardAction)
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action
