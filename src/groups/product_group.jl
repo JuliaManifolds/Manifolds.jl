@@ -19,21 +19,21 @@ one. This type is mostly useful for equipping the direct product of group manifo
 # Constructor
     ProductGroup(manifold::ProductManifold)
 """
-function ProductGroup(manifold::ProductManifold, gvr::AbstractGroupVectorRepresentation)
+function ProductGroup(manifold::ProductManifold, vectors::AbstractGroupVectorRepresentation)
     if !all(is_group_manifold, manifold.manifolds)
         error("All submanifolds of product manifold must be or decorate groups.")
     end
     op = ProductOperation()
-    return GroupManifold(manifold, op, gvr)
+    return GroupManifold(manifold, op, vectors)
 end
 
 @inline function active_traits(f, M::ProductGroup, args...)
     if is_metric_function(f)
         #pass to manifold by default - but keep Group Decorator for the retraction
-        return merge_traits(IsGroupManifold(M.op, M.gvr), IsExplicitDecorator())
+        return merge_traits(IsGroupManifold(M.op, M.vectors), IsExplicitDecorator())
     else
         return merge_traits(
-            IsGroupManifold(M.op, M.gvr),
+            IsGroupManifold(M.op, M.vectors),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(),
         )

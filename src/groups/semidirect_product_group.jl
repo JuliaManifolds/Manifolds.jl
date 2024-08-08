@@ -55,13 +55,13 @@ function SemidirectProductGroup(
     N::AbstractDecoratorManifold{𝔽},
     H::AbstractDecoratorManifold{𝔽},
     A::AbstractGroupAction,
-    gvr::AbstractGroupVectorRepresentation,
+    vectors::AbstractGroupVectorRepresentation,
 ) where {𝔽}
     N === group_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")
     H === base_group(A) || error("Subgroup $(H) must be the base group of action $(A)")
     op = SemidirectProductOperation(A)
     M = ProductManifold(N, H)
-    return GroupManifold(M, op, gvr)
+    return GroupManifold(M, op, vectors)
 end
 
 """

@@ -164,10 +164,10 @@ end
 @inline function active_traits(f, M::RealCircleGroup, args...)
     if is_metric_function(f)
         #pass to Euclidean by default - but keep Group Decorator for the retraction
-        return merge_traits(IsGroupManifold(M.op, M.gvr), IsExplicitDecorator())
+        return merge_traits(IsGroupManifold(M.op, M.vectors), IsExplicitDecorator())
     else
         return merge_traits(
-            IsGroupManifold(M.op, M.gvr),
+            IsGroupManifold(M.op, M.vectors),
             HasBiinvariantMetric(),
             IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),

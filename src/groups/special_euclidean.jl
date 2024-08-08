@@ -1,7 +1,7 @@
 @doc raw"""
     SpecialEuclidean(
         n::Int;
-        gvr::AbstractGroupVectorRepresentation=LeftInvariantRepresentation()
+        vectors::AbstractGroupVectorRepresentation=LeftInvariantRepresentation()
     )
 
 Special Euclidean group ``\mathrm{SE}(n)``, the group of rigid motions.
@@ -20,7 +20,7 @@ This constructor is equivalent to calling
 ```julia
 Tn = TranslationGroup(n)
 SOn = SpecialOrthogonal(n)
-SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn), gvr)
+SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn), vectors)
 ```
 
 Points on ``\mathrm{SE}(n)`` may be represented as points on the underlying product manifold
@@ -29,7 +29,7 @@ represented as affine matrices with size `(n + 1, n + 1)` (see [`affine_matrix`]
 which the group operation is [`MultiplicationOperation`](@ref).
 
 There are two supported conventions for tangent vector storage, which can be selected
-using the `gvr` keyword argument:
+using the `vectors` keyword argument:
 * [`LeftInvariantRepresentation`](@ref) (default one), which corresponds to left-invariant 
   storage commonly used in other Lie groups.
 * [`HybridTangentRepresentation`](@ref) which corresponds to the representation implied by
@@ -47,13 +47,13 @@ const SpecialEuclideanManifold{N} =
 
 function SpecialEuclidean(
     n::Int;
-    gvr::AbstractGroupVectorRepresentation=LeftInvariantRepresentation(),
+    vectors::AbstractGroupVectorRepresentation=LeftInvariantRepresentation(),
     parameter::Symbol=:type,
 )
     Tn = TranslationGroup(n; parameter=parameter)
     SOn = SpecialOrthogonal(n; parameter=parameter)
     A = RotationAction(Tn, SOn)
-    return SemidirectProductGroup(Tn, SOn, A, gvr)
+    return SemidirectProductGroup(Tn, SOn, A, vectors)
 end
 
 const SpecialEuclideanOperation{N} = SemidirectProductOperation{
@@ -65,7 +65,7 @@ function Base.show(io::IO, G::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {
     if vector_representation(G) isa LeftInvariantRepresentation
         return print(io, "SpecialEuclidean($(n))")
     else
-        return print(io, "SpecialEuclidean($(n); gvr=$(G.gvr))")
+        return print(io, "SpecialEuclidean($(n); vectors=$(G.vectors))")
     end
 end
 function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
@@ -73,12 +73,12 @@ function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
     if vector_representation(G) isa LeftInvariantRepresentation
         return print(io, "SpecialEuclidean($(n); parameter=:field)")
     else
-        return print(io, "SpecialEuclidean($(n); parameter=:field, gvr=$(G.gvr))")
+        return print(io, "SpecialEuclidean($(n); parameter=:field, vectors=$(G.vectors))")
     end
 end
 
 @inline function active_traits(f, M::SpecialEuclidean, args...)
-    return merge_traits(IsGroupManifold(M.op, M.gvr), IsExplicitDecorator())
+    return merge_traits(IsGroupManifold(M.op, M.vectors), IsExplicitDecorator())
 end
 
 """
@@ -694,13 +694,22 @@ Note that this is *not* a transparently isometric embedding.
 
 # Constructor
 
-    SpecialEuclideanInGeneralLinear(n)
+    SpecialEuclideanInGeneralLinear(
+        n::Int;
+        se_vectors::AbstractGroupVectorRepresentation=LeftInvariantVectorRepresentation(),
+    )
+
+Where `se_vectors` is the tangent vector representation of the [`SpecialEuclidean`](@ref)
+group to be used.
 """
 const SpecialEuclideanInGeneralLinear =
     EmbeddedManifold{ℝ,<:SpecialEuclidean,<:GeneralLinear}
 
-function SpecialEuclideanInGeneralLinear(n)
-    return EmbeddedManifold(SpecialEuclidean(n), GeneralLinear(n + 1))
+function SpecialEuclideanInGeneralLinear(
+    n::Int;
+    se_vectors::AbstractGroupVectorRepresentation=LeftInvariantVectorRepresentation(),
+)
+    return EmbeddedManifold(SpecialEuclidean(n; vectors=se_vectors), GeneralLinear(n + 1))
 end
 
 """
@@ -716,7 +725,7 @@ end
 """
     embed(M::SpecialEuclideanInGeneralLinear, p, X)
 
-Embed the tangent vector X at point `p` on [`SpecialEuclidean`](@ref) in the
+Embed the tangent vector `X`` at point `p` on [`SpecialEuclidean`](@ref) in the
 [`GeneralLinear`](@ref) group. Point `p` can use any representation valid for
 `SpecialEuclidean`. The embedding is similar from the one defined by [`screw_matrix`](@ref).
 """

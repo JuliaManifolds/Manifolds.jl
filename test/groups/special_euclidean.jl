@@ -9,27 +9,31 @@ using Manifolds:
     LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
 
 @testset "Special Euclidean group" begin
-    for (se_parameter, se_gvr) in [
+    for (se_parameter, se_vectors) in [
         (:field, LeftInvariantRepresentation()),
         (:type, LeftInvariantRepresentation()),
         (:field, HybridTangentRepresentation()),
     ]
-        @testset "SpecialEuclidean($n; parameter=$se_parameter, gvr=$se_gvr)" for n in
-                                                                                  (2, 3, 4)
-            G = SpecialEuclidean(n; parameter=se_parameter, gvr=se_gvr)
+        @testset "SpecialEuclidean($n; parameter=$se_parameter, vectors=$se_vectors)" for n in
+                                                                                          (
+            2,
+            3,
+            4,
+        )
+            G = SpecialEuclidean(n; parameter=se_parameter, vectors=se_vectors)
             if se_parameter === :field
                 @test isa(G, SpecialEuclidean{Tuple{Int}})
             else
                 @test isa(G, SpecialEuclidean{TypeParameter{Tuple{n}}})
             end
 
-            if se_parameter === :field && se_gvr === LeftInvariantRepresentation()
+            if se_parameter === :field && se_vectors === LeftInvariantRepresentation()
                 @test repr(G) == "SpecialEuclidean($n; parameter=:field)"
-            elseif se_parameter === :type && se_gvr === LeftInvariantRepresentation()
+            elseif se_parameter === :type && se_vectors === LeftInvariantRepresentation()
                 @test repr(G) == "SpecialEuclidean($n)"
-            elseif se_parameter === :field && se_gvr === HybridTangentRepresentation()
+            elseif se_parameter === :field && se_vectors === HybridTangentRepresentation()
                 @test repr(G) ==
-                      "SpecialEuclidean($n; parameter=:field, gvr=HybridTangentRepresentation())"
+                      "SpecialEuclidean($n; parameter=:field, vectors=HybridTangentRepresentation())"
             end
             M = base_manifold(G)
             @test M ===
@@ -100,7 +104,7 @@ using Manifolds:
             @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
 
             w = translate_diff(G, pts[1], Identity(G), X_pts[1])
-            if se_gvr isa Manifolds.LeftInvariantRepresentation
+            if se_vectors isa Manifolds.LeftInvariantRepresentation
                 w2mat = screw_matrix(G, w)
                 @test w2mat ≈ screw_matrix(G, X_pts[1])
                 @test screw_matrix(G, w2mat) === w2mat
@@ -291,9 +295,9 @@ using Manifolds:
         end
     end
 
-    for se_gvr in [LeftInvariantRepresentation(), HybridTangentRepresentation()]
+    for se_vectors in [LeftInvariantRepresentation(), HybridTangentRepresentation()]
         @testset "Explicit embedding in GL(n+1)" begin
-            G = SpecialEuclidean(3; gvr=se_gvr)
+            G = SpecialEuclidean(3; vectors=se_vectors)
             t = Vector{Float64}.([1:3, 2:4, 4:6])
             ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
             p = Matrix(I, 3, 3)
@@ -304,7 +308,8 @@ using Manifolds:
 
             GL = GeneralLinear(4)
             SEGL = EmbeddedManifold(G, GL)
-            @test Manifolds.SpecialEuclideanInGeneralLinear(3) === SEGL
+            @test Manifolds.SpecialEuclideanInGeneralLinear(3; se_vectors=se_vectors) ===
+                  SEGL
             pts_gl = [embed(SEGL, pp) for pp in pts]
             q_gl = embed(SEGL, q)
             X_gl = embed(SEGL, pts_gl[1], X)
@@ -347,7 +352,7 @@ using Manifolds:
     end
 
     @testset "Adjoint action on 𝔰𝔢(3)" begin
-        G = SpecialEuclidean(3; parameter=:type, gvr=HybridTangentRepresentation())
+        G = SpecialEuclidean(3; parameter=:type, vectors=HybridTangentRepresentation())
         t = Vector{Float64}.([1:3, 2:4, 4:6])
         ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
         p = Matrix(I, 3, 3)
@@ -365,7 +370,7 @@ using Manifolds:
 
     @testset "performance of selected operations" begin
         for n in [2, 3]
-            SEn = SpecialEuclidean(n; gvr=HybridTangentRepresentation())
+            SEn = SpecialEuclidean(n; vectors=HybridTangentRepresentation())
             Rn = Rotations(n)
 
             p = SMatrix{n,n}(I)

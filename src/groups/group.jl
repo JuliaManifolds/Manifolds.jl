@@ -56,12 +56,12 @@ see [`GroupManifold`](@ref).
 
 # Constructor
 
-    IsGroupManifold(op::AbstractGroupOperation, gvr::AbstractGroupVectorRepresentation)
+    IsGroupManifold(op::AbstractGroupOperation, vectors::AbstractGroupVectorRepresentation)
 """
-struct IsGroupManifold{O<:AbstractGroupOperation,GVR<:AbstractGroupVectorRepresentation} <:
+struct IsGroupManifold{O<:AbstractGroupOperation,VR<:AbstractGroupVectorRepresentation} <:
        AbstractTrait
     op::O
-    gvr::GVR
+    vectors::VR
 end
 
 """

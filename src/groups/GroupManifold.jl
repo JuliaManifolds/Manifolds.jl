@@ -17,11 +17,11 @@ struct GroupManifold{
     𝔽,
     M<:AbstractManifold{𝔽},
     O<:AbstractGroupOperation,
-    GVR<:AbstractGroupVectorRepresentation,
+    VR<:AbstractGroupVectorRepresentation,
 } <: AbstractDecoratorManifold{𝔽}
     manifold::M
     op::O
-    gvr::GVR
+    vectors::VR
 end
 
 """
@@ -29,18 +29,18 @@ end
 
 Get the [`AbstractGroupVectorRepresentation`](@ref) of [`GroupManifold`](@ref) `M`.
 """
-vector_representation(M::GroupManifold) = M.gvr
+vector_representation(M::GroupManifold) = M.vectors
 
 @inline function active_traits(f, M::GroupManifold, args...)
     return merge_traits(
-        IsGroupManifold(M.op, M.gvr),
+        IsGroupManifold(M.op, M.vectors),
         active_traits(f, M.manifold, args...),
         IsExplicitDecorator(),
     )
 end
 @inline function active_traits(f, ::AbstractRNG, M::GroupManifold, args...)
     return merge_traits(
-        IsGroupManifold(M.op, M.gvr),
+        IsGroupManifold(M.op, M.vectors),
         active_traits(f, M.manifold, args...),
         IsExplicitDecorator(),
     )
@@ -54,15 +54,15 @@ decorated_manifold(G::GroupManifold) = G.manifold
 
 function (op::AbstractGroupOperation)(
     M::AbstractManifold,
-    gvr::AbstractGroupVectorRepresentation,
+    vectors::AbstractGroupVectorRepresentation,
 )
-    return GroupManifold(M, op, gvr)
+    return GroupManifold(M, op, vectors)
 end
 function (::Type{T})(
     M::AbstractManifold,
-    gvr::AbstractGroupVectorRepresentation,
+    vectors::AbstractGroupVectorRepresentation,
 ) where {T<:AbstractGroupOperation}
-    return GroupManifold(M, T(), gvr)
+    return GroupManifold(M, T(), vectors)
 end
 
 function inverse_retract(
