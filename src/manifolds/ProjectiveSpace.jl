@@ -506,17 +506,6 @@ function Base.show(io::IO, M::ArrayProjectiveSpace{<:Tuple,𝔽}) where {𝔽}
     return print(io, "ArrayProjectiveSpace($(join(n, ", ")); field=$(𝔽), parameter=:field)")
 end
 
-"""
-    uniform_distribution(M::ProjectiveSpace{<:Any,ℝ}, p)
-
-Uniform distribution on given [`ProjectiveSpace`](@ref) `M`. Generated points will be of
-similar type as `p`.
-"""
-function uniform_distribution(M::ProjectiveSpace{<:Any,ℝ}, p)
-    d = Distributions.MvNormal(zero(p), 1.0 * I)
-    return ProjectedPointDistribution(M, d, project!, p)
-end
-
 @doc raw"""
     parallel_transport_to(M::AbstractProjectiveSpace, p, X, q)
 

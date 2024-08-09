@@ -26,7 +26,10 @@ function HeisenbergGroup(n::Int; parameter::Symbol=:type)
 end
 
 function active_traits(f, ::HeisenbergGroup, args...)
-    return merge_traits(IsGroupManifold(MultiplicationOperation()), IsEmbeddedManifold())
+    return merge_traits(
+        IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
+        IsEmbeddedManifold(),
+    )
 end
 
 function _heisenberg_a_view(M::HeisenbergGroup, p)
@@ -414,8 +417,10 @@ function Base.show(io::IO, M::HeisenbergGroup{Tuple{Int}})
 end
 
 translate_diff(::HeisenbergGroup, p, q, X, ::LeftForwardAction) = X
+translate_diff(::HeisenbergGroup, ::Identity, q, X, ::LeftForwardAction) = X
 translate_diff(::HeisenbergGroup, p, q, X, ::RightBackwardAction) = p \ X * p
+translate_diff(::HeisenbergGroup, ::Identity, q, X, ::RightBackwardAction) = X
 
-function translate_diff!(G::HeisenbergGroup, Y, p, q, X, conv::ActionDirectionAndSide)
-    return copyto!(Y, translate_diff(G, p, q, X, conv))
-end
+# note: this implementation is not optimal
+adjoint_action!(::HeisenbergGroup, Y, p, X, ::LeftAction) = copyto!(Y, p * X * inv(p))
+adjoint_action!(::HeisenbergGroup, Y, p, X, ::RightAction) = copyto!(Y, p \ X * p)

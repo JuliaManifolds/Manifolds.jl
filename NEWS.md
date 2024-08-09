@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] – unreleased
+
+### Changed
+
+* `Distributions.jl`, `RecursiveArrayTools.jl` and `HybridArrays.jl` were moved to weak dependencies to reduce load time and improve extensibility.
+* `translate_diff`, `inv_diff` and thus `apply_diff_group`, are available for all the groups with invariant tangent vector storage.
+* `SpecialEuclidean` group now has a different default tangent vector representation, the left-invariant one; to get the old representation pass `vectors=HybridTangentRepresentation()` to the constructor of `SpecialEuclidean`.
+* `adjoint_action` takes a direction argument; by default it is `LeftAction`.
+* `adjoint_action!` is the necessary method to implement in groups with left-invariant tangent vector representation.
+* On semidirect product groups with left-invariant vector storage, `exp` and `log` are based on `exp_lie` and `log_lie` and thus group invariant.
+* Fixed a few typos in the doc string of the SPD fixed determinant description.
+
+### Removed
+
+* Deprecated bindings:
+  * `ExtrinsicEstimation()` (should be replaced with `ExtrinsicEstimation(EfficientEstimator())`),
+  * `Symplectic` (renamed to `SymplecticMatrices`),
+  * `SymplecticMatrix` (renamed to `SymplecticElement`).
+  * `rand` on `SymplecticMatrices` and `SymplecticStiefel` no longer accepts `hamiltonian_norm` as an alias for `σ`.
+  * `mean!` and `median!` no longer accept `extrinsic_method` (should be replaced with `e = ExtrinsicEstimation(extrinsic_method)`).
+* As a result of making `Distributions.jl` and `RecursiveArrayTools.jl` weak dependencies the following symbols are no longer exported from `Manifolds.jl`. Essential functionality is still available but distribution-related features may change in the future without a breaking release.
+  * `ArrayPartition`,
+  * `ProjectedPointDistribution`,
+  * `normal_tvector_distribution`,
+  * `projected_distribution`,
+  * `uniform_distribution`.
+
 ## [0.9.20] – 2024-06-17
 
 ### Added

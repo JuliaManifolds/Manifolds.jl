@@ -20,21 +20,48 @@ For a concrete case the concrete wrapper [`GroupManifold`](@ref) can be used.
 abstract type AbstractGroupOperation end
 
 """
+    abstract type AbstractGroupVectorRepresentation end
+
+An abstract supertype for indicating representation of tangent vectors on a group manifold.
+The most common representations are [`LeftInvariantRepresentation`](@ref),
+[`TangentVectorRepresentation`](@ref) and [`HybridTangentRepresentation`](@ref).
+"""
+abstract type AbstractGroupVectorRepresentation end
+
+"""
+    TangentVectorRepresentation
+
+Specify that tangent vectors in a group are stored in a non-invariant way, corresponding to
+the storage implied by the underlying manifold.
+"""
+struct TangentVectorRepresentation <: AbstractGroupVectorRepresentation end
+
+"""
+    LeftInvariantRepresentation
+
+Specify that tangent vectors in a group are stored in Lie algebra using left-invariant
+representation.
+"""
+struct LeftInvariantRepresentation <: AbstractGroupVectorRepresentation end
+
+"""
     IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
 
 A trait to declare an [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  as a manifold with group structure
 with operation of type `O`.
 
-Using this trait you can turn a manifold that you implement _implictly_ into a Lie group.
+Using this trait you can turn a manifold that you implement _implicitly_ into a Lie group.
 If you wish to decorate an existing manifold with one (or different) [`AbstractGroupAction`](@ref)s,
 see [`GroupManifold`](@ref).
 
 # Constructor
 
-    IsGroupManifold(op::AbstractGroupOperation)
+    IsGroupManifold(op::AbstractGroupOperation, vectors::AbstractGroupVectorRepresentation)
 """
-struct IsGroupManifold{O<:AbstractGroupOperation} <: AbstractTrait
+struct IsGroupManifold{O<:AbstractGroupOperation,VR<:AbstractGroupVectorRepresentation} <:
+       AbstractTrait
     op::O
+    vectors::VR
 end
 
 """
@@ -359,7 +386,7 @@ function isapprox(
 end
 
 @inline function isapprox(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p::Identity{O},
     X,
@@ -426,12 +453,12 @@ function is_vector(
 end
 
 @doc raw"""
-    adjoint_action(G::AbstractDecoratorManifold, p, X)
+    adjoint_action(G::AbstractDecoratorManifold, p, X, dir=LeftAction())
 
 Adjoint action of the element `p` of the Lie group `G` on the element `X`
 of the corresponding Lie algebra.
 
-It is defined as the differential of the group automorphism ``Ψ_p(q) = pqp⁻¹`` at
+If `dir` is `LeftAction()`, it is defined as the differential of the group automorphism ``Ψ_p(q) = pqp⁻¹`` at
 the identity of `G`.
 
 The formula reads
@@ -440,28 +467,52 @@ The formula reads
 ````
 where ``e`` is the identity element of `G`.
 
+If `dir` is `RightAction()`, then the formula is
+````math
+\operatorname{Ad}_p(X) = dΨ_{p^{-1}}(e)[X]
+````
+
 Note that the adjoint representation of a Lie group isn't generally faithful.
 Notably the adjoint representation of SO(2) is trivial.
 """
-adjoint_action(G::AbstractDecoratorManifold, p, X)
-@trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ)
-function adjoint_action(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, Xₑ)
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
-    Y = inverse_translate_diff(G, p, p, Xₚ, RightBackwardAction())
-    return Y
+adjoint_action(G::AbstractDecoratorManifold, p, X, dir)
+@trait_function adjoint_action(G::AbstractDecoratorManifold, p, Xₑ, dir)
+@trait_function adjoint_action!(G::AbstractDecoratorManifold, Y, p, Xₑ, dir)
+function adjoint_action(
+    ::TraitList{<:IsGroupManifold},
+    G::AbstractDecoratorManifold,
+    p,
+    Xₑ,
+    dir,
+)
+    BG = base_group(G)
+    Y = allocate_result(BG, adjoint_action, Xₑ, p)
+    return adjoint_action!(BG, Y, p, Xₑ, dir)
 end
-
-@trait_function adjoint_action!(G::AbstractDecoratorManifold, Y, p, Xₑ)
+function adjoint_action(::AbstractDecoratorManifold, ::Identity, Xₑ, ::LeftAction)
+    return Xₑ
+end
+function adjoint_action(::AbstractDecoratorManifold, ::Identity, Xₑ, ::RightAction)
+    return Xₑ
+end
+# backward compatibility
+function adjoint_action(G::AbstractDecoratorManifold, p, X)
+    return adjoint_action(G, p, X, LeftAction())
+end
+function adjoint_action!(G::AbstractDecoratorManifold, Y, p, X)
+    return adjoint_action!(G, Y, p, X, LeftAction())
+end
+# fall back method: the right action is defined from the left action
 function adjoint_action!(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     Y,
     p,
-    Xₑ,
+    X,
+    ::RightAction,
 )
-    Xₚ = translate_diff(G, p, Identity(G), Xₑ, LeftForwardAction())
-    inverse_translate_diff!(G, Y, p, p, Xₚ, RightBackwardAction())
-    return Y
+    BG = base_group(G)
+    return adjoint_action!(BG, Y, inv(BG, p), X, LeftAction())
 end
 
 @doc raw"""
@@ -525,7 +576,7 @@ function Base.inv(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, 
 end
 
 function Base.inv(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     ::AbstractDecoratorManifold,
     e::Identity{O},
 ) where {O<:AbstractGroupOperation}
@@ -535,7 +586,7 @@ end
 @trait_function inv!(G::AbstractDecoratorManifold, q, p)
 
 function inv!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     q,
     ::Identity{O},
@@ -544,7 +595,7 @@ function inv!(
     return identity_element!(BG, q)
 end
 function inv!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     ::Identity{O},
     e::Identity{O},
@@ -557,19 +608,29 @@ end
 
 Compute the value of differential of inverse ``p^{-1} ∈ \mathcal{G}`` of an element
 ``p ∈ \mathcal{G}`` at tangent vector `X` at `p`. The result is a tangent vector at ``p^{-1}``.
+
+*Note*: the default implementation of `inv_diff` and `inv_diff!`
+assumes that the tangent vector ``X`` is stored at
+the point ``p ∈ \mathcal{G}`` as the vector ``Y ∈ \mathfrak{g}``
+ where ``X = pY``.
 """
 inv_diff(G::AbstractDecoratorManifold, p)
 
 @trait_function inv_diff(G::AbstractDecoratorManifold, p, X)
 function inv_diff(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
-    Y = allocate_result(G, inv_diff, X, p)
-    return inv_diff!(G, Y, p, X)
+    return -adjoint_action(base_group(G), p, X)
 end
 
 @trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
 
+function inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
+    adjoint_action!(G, Y, p, X)
+    Y .*= -1
+    return Y
+end
+
 function Base.copyto!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     ::AbstractDecoratorManifold,
     e::Identity{O},
     ::Identity{O},
@@ -577,7 +638,7 @@ function Base.copyto!(
     return e
 end
 function Base.copyto!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     G::AbstractDecoratorManifold,
     p,
     ::Identity{O},
@@ -686,7 +747,7 @@ vector to an array representation. The [`vee`](@ref) map is the `hat` map's
 inverse.
 """
 function hat(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     ::Identity{O},
     X,
@@ -694,7 +755,7 @@ function hat(
     return get_vector_lie(M, X, VeeOrthogonalBasis())
 end
 function hat!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     Y,
     ::Identity{O},
@@ -728,7 +789,7 @@ vector to a vector representation. The [`hat`](@ref) map is the `vee` map's
 inverse.
 """
 function vee(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     ::Identity{O},
     X,
@@ -736,7 +797,7 @@ function vee(
     return get_coordinates_lie(M, X, VeeOrthogonalBasis())
 end
 function vee!(
-    ::TraitList{IsGroupManifold{O}},
+    ::TraitList{<:IsGroupManifold{O}},
     M::AbstractDecoratorManifold,
     Y,
     ::Identity{O},
@@ -883,6 +944,12 @@ left or right `conv`ention. The differential transports vectors:
 ```math
 (\mathrm{d}τ_p)_q : T_q \mathcal{G} → T_{τ_p q} \mathcal{G}\\
 ```
+
+*Note*: the default implementation of `translate_diff` and `translate_diff!`
+assumes that the tangent vector ``X`` is stored at
+the point ``p ∈ \mathcal{G}`` as the vector ``Y ∈ \mathfrak{g}``
+ where ``X = pY``.
+The implementation at `p = Identity` is independent of the storage choice.
 """
 translate_diff(::AbstractDecoratorManifold, ::Any...)
 @trait_function translate_diff(
@@ -913,6 +980,56 @@ end
     X,
     conv::ActionDirectionAndSide=LeftForwardAction(),
 )
+
+function translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
+    G::AbstractDecoratorManifold,
+    Y,
+    ::Any,
+    ::Any,
+    X,
+    ::LeftForwardAction,
+)
+    return copyto!(G, Y, X)
+end
+function translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
+    G::AbstractDecoratorManifold,
+    Y,
+    ::Any,
+    ::Any,
+    X,
+    ::RightForwardAction,
+)
+    return copyto!(G, Y, X)
+end
+function translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    ::Any,
+    X,
+    ::LeftBackwardAction,
+)
+    return adjoint_action!(G, Y, p, X, LeftAction())
+end
+function translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    ::Any,
+    X,
+    ::RightBackwardAction,
+)
+    return adjoint_action!(G, Y, p, X, RightAction())
+end
+
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftForwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightForwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::LeftBackwardAction) = X
+translate_diff(::AbstractDecoratorManifold, ::Identity, q, X, ::RightBackwardAction) = X
 
 @doc raw"""
     inverse_translate_diff(G::AbstractDecoratorManifold, p, q, X, conv::ActionDirectionAndSide=LeftForwardAction())

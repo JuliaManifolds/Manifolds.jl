@@ -26,7 +26,7 @@ Order = [:constant, :type, :function]
 The following code defines a point on the tangent bundle of the sphere ``S^2`` and a tangent vector to that point.
 
 ```@example tangent-bundle
-using Manifolds
+using Manifolds, RecursiveArrayTools
 M = Sphere(2)
 TB = TangentBundle(M)
 p = ArrayPartition([1.0, 0.0, 0.0], [0.0, 1.0, 3.0])

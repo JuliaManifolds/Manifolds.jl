@@ -506,13 +506,8 @@ function Random.rand!(
     M::SymplecticStiefel,
     pX;
     vector_at=nothing,
-    hamiltonian_norm=nothing,
-    σ=hamiltonian_norm === nothing ? 1.0 : hamiltonian_norm,
+    σ::Real=1.0,
 )
-    !(hamiltonian_norm === nothing) && Base.depwarn(
-        Random.rand!,
-        "hamiltonian_norm is deprecated as a keyword, please use the default σ.",
-    )
     n, k = get_parameter(M.size)
     if vector_at === nothing
         canonical_project!(M, pX, rand(rng, SymplecticMatrices(2n); σ=σ))

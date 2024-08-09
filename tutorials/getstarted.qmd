@@ -224,7 +224,8 @@ M₆ = M₂ × M₃
 Since now the representations might differ from element to element, we have to encapsulate these in their own type.
 
 ```{julia}
-p₃ = Manifolds.ArrayPartition([0, 0, 1], [0, 1, 0])
+using RecursiveArrayTools: ArrayPartition
+p₃ = ArrayPartition([0, 0, 1], [0, 1, 0])
 ```
 
 Here `ArrayPartition` taken from [🔗 `RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient access to the product elements.

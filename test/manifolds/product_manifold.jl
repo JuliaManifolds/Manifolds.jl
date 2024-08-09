@@ -120,8 +120,6 @@ using RecursiveArrayTools: ArrayPartition
             M2,
             Distributions.MvNormal(zero(pts_r2[1]), 1.0 * I),
         )
-        distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_sphere[1], 1.0)
-        distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_r2[1], 1.0)
         @test injectivity_radius(Mse, pts[1]) ≈ π
         @test injectivity_radius(Mse) ≈ π
         @test injectivity_radius(Mse, pts[1], ExponentialRetraction()) ≈ π
@@ -143,13 +141,45 @@ using RecursiveArrayTools: ArrayPartition
             inverse_retract(Mse, pts[1], pts[2], default_inverse_retraction_method(Mse)),
         )
 
+        Mse_point_distributions = []
+        Mse_tvector_distributions = []
+
+        if VERSION >= v"1.9"
+            distr_tv_M1 = Manifolds.normal_tvector_distribution(M1, pts_sphere[1], 1.0)
+            distr_tv_M2 = Manifolds.normal_tvector_distribution(M2, pts_r2[1], 1.0)
+
+            ProductPointDistribution =
+                Base.get_extension(
+                    Manifolds,
+                    :ManifoldsDistributionsExt,
+                ).ProductPointDistribution
+            push!(Mse_point_distributions, ProductPointDistribution(distr_M1, distr_M2))
+
+            ProductFVectorDistribution =
+                Base.get_extension(
+                    Manifolds,
+                    :ManifoldsDistributionsExt,
+                ).ProductFVectorDistribution
+            push!(
+                Mse_tvector_distributions,
+                ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
+            )
+
+            MPointSupport =
+                Base.get_extension(Manifolds, :ManifoldsDistributionsExt).MPointSupport
+            FVectorSupport =
+                Base.get_extension(Manifolds, :ManifoldsDistributionsExt).FVectorSupport
+
+            Test.@test Distributions.support(Mse_point_distributions[1]) isa MPointSupport
+            Test.@test Distributions.support(Mse_tvector_distributions[1]) isa
+                       FVectorSupport
+        end
+
         test_manifold(
             Mse,
             pts;
-            point_distributions=[Manifolds.ProductPointDistribution(distr_M1, distr_M2)],
-            tvector_distributions=[
-                Manifolds.ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
-            ],
+            point_distributions=Mse_point_distributions,
+            tvector_distributions=Mse_tvector_distributions,
             test_injectivity_radius=true,
             test_musical_isomorphisms=true,
             musical_isomorphism_bases=[DefaultOrthonormalBasis()],
@@ -193,7 +223,7 @@ using RecursiveArrayTools: ArrayPartition
     end
 
     @testset "empty allocation" begin
-        p = allocate_result(Mse, uniform_distribution)
+        p = allocate_result(Mse, Manifolds.uniform_distribution)
         @test isa(p, ArrayPartition)
         @test size(p[Mse, 1]) == (3,)
         @test size(p[Mse, 2]) == (2,)
@@ -201,9 +231,9 @@ using RecursiveArrayTools: ArrayPartition
 
     @testset "Uniform distribution" begin
         Mss = ProductManifold(Sphere(2), Sphere(2))
-        p = rand(uniform_distribution(Mss))
+        p = rand(Manifolds.uniform_distribution(Mss))
         @test is_point(Mss, p)
-        @test is_point(Mss, rand(uniform_distribution(Mss, p)))
+        @test is_point(Mss, rand(Manifolds.uniform_distribution(Mss, p)))
     end
 
     @testset "Atlas & Induced Basis" begin

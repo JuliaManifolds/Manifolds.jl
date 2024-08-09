@@ -404,27 +404,6 @@ end
 Base.show(io::IO, p::StiefelPoint) = print(io, "StiefelPoint($(p.value))")
 Base.show(io::IO, X::StiefelTVector) = print(io, "StiefelTVector($(X.value))")
 
-"""
-    uniform_distribution(M::Grassmann{<:Any,ℝ}, p)
-
-Uniform distribution on given (real-valued) [`Grassmann`](@ref) `M`.
-Specifically, this is the normalized Haar measure on `M`.
-Generated points will be of similar type as `p`.
-
-The implementation is based on Section 2.5.1 in [Chikuse:2003](@cite);
-see also Theorem 2.2.2(iii) in [Chikuse:2003](@cite).
-"""
-function uniform_distribution(M::Grassmann{<:Any,ℝ}, p)
-    n, k = get_parameter(M.size)
-    μ = Distributions.Zeros(n, k)
-    σ = one(eltype(p))
-    Σ1 = Distributions.PDMats.ScalMat(n, σ)
-    Σ2 = Distributions.PDMats.ScalMat(k, σ)
-    d = MatrixNormal(μ, Σ1, Σ2)
-
-    return ProjectedPointDistribution(M, d, (M, q, p) -> (q .= svd(p).U), p)
-end
-
 # switch order and not dispatch on the _to variant
 function vector_transport_direction(M::Grassmann, p, X, Y, ::ParallelTransport)
     return parallel_transport_direction(M, p, X, Y)

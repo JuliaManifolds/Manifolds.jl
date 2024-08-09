@@ -53,6 +53,8 @@ include("group_utils.jl")
             atol=atol,
         )
 
+        @test apply_diff(A_left, Identity(G), m_pts[1], X_pts[1]) === X_pts[1]
+
         @testset "apply_diff_group" begin
             @test apply_diff_group(A_left, Identity(G), a_X_pts[1], m_pts[1]) ≈
                   a_X_pts[1] * m_pts[1]

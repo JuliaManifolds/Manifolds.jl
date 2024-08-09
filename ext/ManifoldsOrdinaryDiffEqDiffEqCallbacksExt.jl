@@ -13,6 +13,8 @@ if isdefined(Base, :get_extension)
 
     using DiffEqCallbacks
     using OrdinaryDiffEq: OrdinaryDiffEq, SciMLBase, Rodas5, AutoVern9, ODEProblem, solve
+
+    using RecursiveArrayTools: ArrayPartition
 else
     # imports need to be relative for Requires.jl-based workflows:
     # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
@@ -28,6 +30,8 @@ else
 
     using ..DiffEqCallbacks
     using ..OrdinaryDiffEq: OrdinaryDiffEq, SciMLBase, Rodas5, AutoVern9, ODEProblem, solve
+
+    using ..RecursiveArrayTools: ArrayPartition
 end
 
 """

@@ -756,7 +756,7 @@ end
             @test m == mf
 
             μ = project(R, randn(3, 3))
-            d = normal_tvector_distribution(R, μ, 0.1)
+            d = Manifolds.normal_tvector_distribution(R, μ, 0.1)
             x = [exp(R, μ, rand(rng, d)) for _ in 1:10]
             w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(R, x, w)

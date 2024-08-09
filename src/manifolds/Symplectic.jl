@@ -696,7 +696,7 @@ function project_normal!(
 end
 
 @doc raw"""
-    rand(::SymplecticStiefel; vector_at=nothing, σ=1.0)
+    rand(::SymplecticStiefel; vector_at=nothing, σ::Real=1.0)
 
 Generate a random point on ``\mathrm{Sp}(2n)`` or a random
 tangent vector ``X \in T_p\mathrm{Sp}(2n)`` if `vector_at` is set to
@@ -718,20 +718,15 @@ and then symmetrizes it as `S = S + S'`.
 Then ``S`` is normalized to have Frobenius norm of `σ`
 and `X = pJS` is returned, where `J` is the [`SymplecticElement`](@ref).
 """
-rand(SymplecticMatrices; σ::Rieal=1.0, kwargs...)
+rand(SymplecticMatrices; σ::Real=1.0, kwargs...)
 
 function Random.rand!(
     rng::AbstractRNG,
     M::SymplecticMatrices,
     pX;
     vector_at=nothing,
-    hamiltonian_norm=nothing,
-    σ=hamiltonian_norm === nothing ? 1.0 : hamiltonian_norm,
+    σ::Real=1.0,
 )
-    !(hamiltonian_norm === nothing) && Base.depwarn(
-        Random.rand!,
-        "hamiltonian_norm is deprecated as a keyword, please use the default σ.",
-    )
     n = get_parameter(M.size)[1]
     if vector_at === nothing
         rand!(rng, HamiltonianMatrices(2n), pX; σ=σ)
@@ -743,7 +738,7 @@ function Random.rand!(
     end
 end
 
-function random_vector!(M::SymplecticMatrices, X, p; σ=1.0)
+function random_vector!(M::SymplecticMatrices, X, p; σ::Real=1.0)
     n = get_parameter(M.size)[1]
     # Generate random symmetric matrix:
     randn!(X)

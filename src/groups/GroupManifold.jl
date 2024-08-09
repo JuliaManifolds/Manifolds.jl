@@ -13,22 +13,34 @@ Group manifolds by default forward metric-related operations to the wrapped mani
 Define the group operation `op` acting on the manifold `manifold`, hence if `op` acts smoothly,
 this forms a Lie group.
 """
-struct GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <:
-       AbstractDecoratorManifold{𝔽}
+struct GroupManifold{
+    𝔽,
+    M<:AbstractManifold{𝔽},
+    O<:AbstractGroupOperation,
+    VR<:AbstractGroupVectorRepresentation,
+} <: AbstractDecoratorManifold{𝔽}
     manifold::M
     op::O
+    vectors::VR
 end
+
+"""
+    vector_representation(M::GroupManifold)
+
+Get the [`AbstractGroupVectorRepresentation`](@ref) of [`GroupManifold`](@ref) `M`.
+"""
+vector_representation(M::GroupManifold) = M.vectors
 
 @inline function active_traits(f, M::GroupManifold, args...)
     return merge_traits(
-        IsGroupManifold(M.op),
+        IsGroupManifold(M.op, M.vectors),
         active_traits(f, M.manifold, args...),
         IsExplicitDecorator(),
     )
 end
 @inline function active_traits(f, ::AbstractRNG, M::GroupManifold, args...)
     return merge_traits(
-        IsGroupManifold(M.op),
+        IsGroupManifold(M.op, M.vectors),
         active_traits(f, M.manifold, args...),
         IsExplicitDecorator(),
     )
@@ -40,9 +52,17 @@ end
 
 decorated_manifold(G::GroupManifold) = G.manifold
 
-(op::AbstractGroupOperation)(M::AbstractManifold) = GroupManifold(M, op)
-function (::Type{T})(M::AbstractManifold) where {T<:AbstractGroupOperation}
-    return GroupManifold(M, T())
+function (op::AbstractGroupOperation)(
+    M::AbstractManifold,
+    vectors::AbstractGroupVectorRepresentation,
+)
+    return GroupManifold(M, op, vectors)
+end
+function (::Type{T})(
+    M::AbstractManifold,
+    vectors::AbstractGroupVectorRepresentation,
+) where {T<:AbstractGroupOperation}
+    return GroupManifold(M, T(), vectors)
 end
 
 function inverse_retract(
@@ -114,8 +134,8 @@ end
 @doc raw"""
     rand(::GroupManifold; vector_at=nothing, σ=1.0)
     rand!(::GroupManifold, pX; vector_at=nothing, kwargs...)
-    rand(::TraitList{IsGroupManifold}, M; vector_at=nothing, σ=1.0)
-    rand!(TraitList{IsGroupManifold}, M, pX; vector_at=nothing, kwargs...)
+    rand(::TraitList{<:IsGroupManifold}, M; vector_at=nothing, σ=1.0)
+    rand!(TraitList{<:IsGroupManifold}, M, pX; vector_at=nothing, kwargs...)
 
 Compute a random point or tangent vector on a Lie group.
 

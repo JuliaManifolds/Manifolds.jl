@@ -90,7 +90,7 @@ get_component(M, p, 4)
 The final representation is the [`NestedReplacingPowerRepresentation`](@extref `ManifoldsBase.NestedReplacingPowerRepresentation`). It is similar to the [`NestedPowerRepresentation`](@extref `ManifoldsBase.NestedPowerRepresentation`) but it does not perform in-place operations on the points on the underlying manifold. The example below uses this representation to store points on a power manifold of the [`SpecialEuclidean`](@ref) group in-line in an `Vector` for improved efficiency. When having a mixture of both, i.e. an array structure that is nested (like [´NestedPowerRepresentation](@ref)) in the sense that the elements of the main vector are immutable, then changing the elements can not be done in an in-place way and hence [`NestedReplacingPowerRepresentation`](@extref `ManifoldsBase.NestedReplacingPowerRepresentation`) has to be used.
 
 ```@example 4
-using Manifolds, StaticArrays
+using Manifolds, StaticArrays, RecursiveArrayTools
 R2 = Rotations(2)
 
 G = SpecialEuclidean(2)

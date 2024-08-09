@@ -37,7 +37,7 @@ function PowerGroup(manifold::AbstractPowerManifold)
         error("All powered manifold must be or decorate a group.")
     end
     op = ProductOperation()
-    return GroupManifold(manifold, op)
+    return GroupManifold(manifold, op, vector_representation(manifold.manifold))
 end
 
 function ManifoldsBase._access_nested(
@@ -77,10 +77,10 @@ end
 @inline function active_traits(f, M::PowerGroup, args...)
     if is_metric_function(f)
         #pass to manifold by default - but keep Group Decorator for the retraction
-        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+        return merge_traits(IsGroupManifold(M.op, M.vectors), IsExplicitDecorator())
     else
         return merge_traits(
-            IsGroupManifold(M.op),
+            IsGroupManifold(M.op, M.vectors),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(),
         )
@@ -259,7 +259,66 @@ function inverse_translate!(
     return x
 end
 
-function translate_diff!(G::PowerGroup, Y, p, q, X, conv::ActionDirectionAndSide)
+function _common_power_adjoint_action!(G, Y, p, X, conv)
+    GM = G.manifold
+    N = GM.manifold
+    rep_size = representation_size(N)
+    for i in get_iterator(GM)
+        adjoint_action!(
+            N,
+            _write(GM, rep_size, Y, i),
+            _read(GM, rep_size, p, i),
+            _read(GM, rep_size, X, i),
+            conv,
+        )
+    end
+    return Y
+end
+function adjoint_action!(G::PowerGroup, Y, p, X, conv::LeftAction)
+    return _common_power_adjoint_action!(G, Y, p, X, conv)
+end
+function adjoint_action!(G::PowerGroup, Y, p, X, conv::RightAction)
+    return _common_power_adjoint_action!(G, Y, p, X, conv)
+end
+
+function _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
+    GM = G.manifold
+    N = GM.manifold
+    rep_size = representation_size(N)
+    for i in get_iterator(GM)
+        Y[i...] =
+            adjoint_action(N, _read(GM, rep_size, p, i), _read(GM, rep_size, X, i), conv)
+    end
+    return Y
+end
+function adjoint_action!(G::PowerGroupNestedReplacing, Y, p, X, conv::LeftAction)
+    return _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
+end
+function adjoint_action!(G::PowerGroupNestedReplacing, Y, p, X, conv::RightAction)
+    return _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
+end
+
+function translate_diff!(G::PowerGroup, Y, p, q, X, conv::LeftForwardAction)
+    return _common_power_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::PowerGroup, Y, p, q, X, conv::RightForwardAction)
+    return _common_power_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::PowerGroup, Y, p, q, X, conv::LeftBackwardAction)
+    return _common_power_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::PowerGroup, Y, p, q, X, conv::RightBackwardAction)
+    return _common_power_translate_diff!(G, Y, p, q, X, conv)
+end
+
+function _common_power_translate_diff!(
+    G::PowerGroup,
+    Y,
+    p,
+    q,
+    X,
+    conv::ActionDirectionAndSide,
+)
     GM = G.manifold
     N = GM.manifold
     rep_size = representation_size(N)
@@ -275,7 +334,27 @@ function translate_diff!(G::PowerGroup, Y, p, q, X, conv::ActionDirectionAndSide
     end
     return Y
 end
+
+function translate_diff!(G::PowerGroupNestedReplacing, Y, p, q, X, conv::LeftForwardAction)
+    return _common_power_replacing_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::PowerGroupNestedReplacing, Y, p, q, X, conv::RightForwardAction)
+    return _common_power_replacing_translate_diff!(G, Y, p, q, X, conv)
+end
+function translate_diff!(G::PowerGroupNestedReplacing, Y, p, q, X, conv::LeftBackwardAction)
+    return _common_power_replacing_translate_diff!(G, Y, p, q, X, conv)
+end
 function translate_diff!(
+    G::PowerGroupNestedReplacing,
+    Y,
+    p,
+    q,
+    X,
+    conv::RightBackwardAction,
+)
+    return _common_power_replacing_translate_diff!(G, Y, p, q, X, conv)
+end
+function _common_power_replacing_translate_diff!(
     G::PowerGroupNestedReplacing,
     Y,
     p,

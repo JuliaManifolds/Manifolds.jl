@@ -522,27 +522,6 @@ function Base.show(io::IO, M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
     return print(io, "Stiefel($(n), $(k), $(𝔽); parameter=:field)")
 end
 
-"""
-    uniform_distribution(M::Stiefel{<:Any,ℝ}, p)
-
-Uniform distribution on given (real-valued) [`Stiefel`](@ref) `M`.
-Specifically, this is the normalized Haar and Hausdorff measure on `M`.
-Generated points will be of similar type as `p`.
-
-The implementation is based on Section 2.5.1 in [Chikuse:2003](@cite);
-see also Theorem 2.2.1(iii) in [Chikuse:2003](@cite).
-"""
-function uniform_distribution(M::Stiefel{<:Any,ℝ}, p)
-    n, k = get_parameter(M.size)
-    μ = Distributions.Zeros(n, k)
-    σ = one(eltype(p))
-    Σ1 = Distributions.PDMats.ScalMat(n, σ)
-    Σ2 = Distributions.PDMats.ScalMat(k, σ)
-    d = MatrixNormal(μ, Σ1, Σ2)
-
-    return ProjectedPointDistribution(M, d, project!, p)
-end
-
 @doc raw"""
     vector_transport_direction(::Stiefel, p, X, d, ::DifferentiatedRetractionVectorTransport{CayleyRetraction})
 

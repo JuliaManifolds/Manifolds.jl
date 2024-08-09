@@ -13,8 +13,25 @@ function Base.show(io::IO, op::SemidirectProductOperation)
     return print(io, "SemidirectProductOperation($(op.action))")
 end
 
-const SemidirectProductGroup{𝔽,N,H,A<:AbstractGroupAction} =
-    GroupManifold{𝔽,ProductManifold{𝔽,Tuple{N,H}},SemidirectProductOperation{A}}
+"""
+    struct HybridTangentRepresentation <: AbstractGroupVectorRepresentation end
+
+Tangent vector representation on [`SemidirectProductGroup`](@ref) such as
+[`SpecialEuclidean`](@ref) that corresponds to simple product structure of underlying
+groups.
+"""
+struct HybridTangentRepresentation <: AbstractGroupVectorRepresentation end
+
+const SemidirectProductGroup{
+    𝔽,
+    N,
+    H,
+    A<:AbstractGroupAction,
+    GVR<:AbstractGroupVectorRepresentation,
+} = GroupManifold{𝔽,ProductManifold{𝔽,Tuple{N,H}},SemidirectProductOperation{A},GVR}
+
+const SemidirectProductGroupHVR{𝔽,N,H,A<:AbstractGroupAction} =
+    SemidirectProductGroup{𝔽,N,H,A,HybridTangentRepresentation}
 
 @doc raw"""
     SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
@@ -38,20 +55,13 @@ function SemidirectProductGroup(
     N::AbstractDecoratorManifold{𝔽},
     H::AbstractDecoratorManifold{𝔽},
     A::AbstractGroupAction,
+    vectors::AbstractGroupVectorRepresentation,
 ) where {𝔽}
     N === group_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")
     H === base_group(A) || error("Subgroup $(H) must be the base group of action $(A)")
     op = SemidirectProductOperation(A)
     M = ProductManifold(N, H)
-    return GroupManifold(M, op)
-end
-
-function allocate_result(G::SemidirectProductGroup, ::typeof(identity_element))
-    M = base_manifold(G)
-    N, H = M.manifolds
-    np = allocate_result(N, identity_element)
-    hp = allocate_result(H, identity_element)
-    return ArrayPartition(np, hp)
+    return GroupManifold(M, op, vectors)
 end
 
 """
@@ -136,9 +146,10 @@ function _compose!(G::SemidirectProductGroup, x, p, q)
 end
 
 @doc raw"""
-    translate_diff(G::SemidirectProductGroup, p, q, X, conX::LeftForwardAction)
+    translate_diff(G::SemidirectProductGroupHVR, p, q, X, conX::LeftForwardAction)
 
-Perform differential of the left translation on the semidirect product group `G`.
+Perform differential of the left translation on the semidirect product group `G`
+with `HybridTangentRepresentation`.
 
 Since the left translation is defined as (cf. [`SemidirectProductGroup`](@ref)):
 
@@ -152,9 +163,9 @@ then its differential can be computed as
 \mathrm{d}L_{(n', h')}(X_n, X_h) = ( \mathrm{d}L_{n'} (\mathrm{d}θ_{h'}(X_n)), \mathrm{d}L_{h'} X_h).
 ````
 """
-translate_diff(G::SemidirectProductGroup, p, q, X, conX::LeftForwardAction)
+translate_diff(G::SemidirectProductGroupHVR, p, q, X, conX::LeftForwardAction)
 
-function translate_diff!(G::SemidirectProductGroup, Y, p, q, X, conX::LeftForwardAction)
+function translate_diff!(G::SemidirectProductGroupHVR, Y, p, q, X, conX::LeftForwardAction)
     M = base_manifold(G)
     N, H = M.manifolds
     A = G.op.action
@@ -248,26 +259,63 @@ function isapprox(
     return isapprox(G, identity_element(G), X, Y; kwargs...)
 end
 
-Base.@propagate_inbounds function Base.getindex(
-    p::ArrayPartition,
-    M::SemidirectProductGroup,
-    i::Union{Integer,Colon,AbstractVector,Val},
-)
-    return getindex(p, base_manifold(M), i)
-end
-
-Base.@propagate_inbounds function Base.setindex!(
-    q::ArrayPartition,
-    p,
-    M::SemidirectProductGroup,
-    i::Union{Integer,Colon,AbstractVector,Val},
-)
-    return setindex!(q, p, base_manifold(M), i)
-end
-
 function submanifold_components(
     M::ProductManifold,
     ::Identity{<:SemidirectProductOperation},
 )
     return map(N -> Identity(N), M.manifolds)
+end
+
+function log(
+    ::TraitList{
+        <:IsGroupManifold{<:SemidirectProductOperation,<:LeftInvariantRepresentation},
+    },
+    G::AbstractDecoratorManifold,
+    p,
+    q,
+)
+    BG = base_group(G)
+    return log_lie(BG, compose(BG, inv(BG, p), q))
+end
+function log!(
+    ::TraitList{
+        <:IsGroupManifold{<:SemidirectProductOperation,<:LeftInvariantRepresentation},
+    },
+    G::AbstractDecoratorManifold,
+    X,
+    p,
+    q,
+)
+    x = allocate_result(G, inv)
+    BG = base_group(G)
+    inv!(BG, x, p)
+    compose!(BG, x, x, q)
+    log_lie!(BG, X, x)
+    return X
+end
+function exp(
+    ::TraitList{
+        <:IsGroupManifold{<:SemidirectProductOperation,<:LeftInvariantRepresentation},
+    },
+    G::AbstractDecoratorManifold,
+    p,
+    X,
+    t::Number=1,
+)
+    BG = base_group(G)
+    return compose(BG, p, exp_lie(BG, t * X))
+end
+function exp!(
+    ::TraitList{
+        <:IsGroupManifold{<:SemidirectProductOperation,<:LeftInvariantRepresentation},
+    },
+    G::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+)
+    BG = base_group(G)
+    exp_lie!(BG, q, X)
+    compose!(BG, q, p, q)
+    return q
 end
