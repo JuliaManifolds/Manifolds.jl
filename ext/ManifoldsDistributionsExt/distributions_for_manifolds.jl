@@ -61,13 +61,6 @@ end
 function Distributions._rand!(
     rng::AbstractRNG,
     d::ProductFVectorDistribution,
-    v::AbstractArray{<:Number},
-)
-    return copyto!(v, rand(rng, d))
-end
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProductFVectorDistribution,
     X::ArrayPartition,
 )
     map(
@@ -76,13 +69,6 @@ function Distributions._rand!(
         submanifold_components(d.type.manifold, X),
     )
     return X
-end
-function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProductPointDistribution,
-    x::AbstractArray{<:Number},
-)
-    return copyto!(x, rand(rng, d))
 end
 function Distributions._rand!(
     rng::AbstractRNG,
