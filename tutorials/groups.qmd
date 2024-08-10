@@ -1,0 +1,40 @@
+---
+title: work with groups
+---
+
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+using Pkg;
+cd(@__DIR__)
+Pkg.activate("."); # for reproducibility use the local tutorial environment.
+Pkg.develop(path="../") # a trick to work on the local dev version
+using Markdown
+```
+
+This is a short overview of group support in [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/) and how to get started working with them.
+
+Groups currently available in `Manifolds.jl` are listed in ``[group section](@ref GroupManifoldSection)``{=commonmark}.
+
+First, let's load libraries we will use
+
+```{julia}
+using Manifolds, RecursiveArrayTools
+```
+
+
+## Relationship between groups, metrics and connections
+
+
+Mention invariance and the difference between `exp` and `exp_lie`.
+
+
+## Literature
+
+````{=commonmark}
+```@bibliography
+Pages = ["groups.md"]
+Canonical=false
+```
+````
