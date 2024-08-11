@@ -17,6 +17,9 @@ This is a short overview of group support in [`Manifolds.jl`](https://juliamanif
 
 Groups currently available in `Manifolds.jl` are listed in ``[group section](@ref GroupManifoldSection)``{=commonmark}.
 
+You can read more about the theory of Lie groups for example in [Chirikjian:2012](@cite).
+An example application of Lie groups in robotics is described in [SolaDerayAtchuthan:2021](@cite).
+
 First, let's load libraries we will use
 
 ```{julia}
