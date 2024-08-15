@@ -14,8 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `SpecialEuclidean` group now has a different default tangent vector representation, the left-invariant one; to get the old representation pass `vectors=HybridTangentRepresentation()` to the constructor of `SpecialEuclidean`.
 * `adjoint_action` takes a direction argument; by default it is `LeftAction`.
 * `adjoint_action!` is the necessary method to implement in groups with left-invariant tangent vector representation.
-* On semidirect product groups with left-invariant vector storage, `exp` and `log` are based on `exp_lie` and `log_lie` and thus group invariant.
 * Fixed a few typos in the doc string of the SPD fixed determinant description.
+
+### Added
+
+* Introduced `exp_inv` and `log_inv` based on `exp_lie` and `log_lie`. They are invariant to group operation.
 
 ### Removed
 

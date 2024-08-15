@@ -1082,6 +1082,44 @@ function inverse_translate_diff!(
     return translate_diff!(BG, Y, inv(BG, p), q, X, conv)
 end
 
+"""
+    log_inv(G::AbstractManifold, p, q)
+
+Compute logarithmic map on a Lie group `G` invariant to group operation. For groups with a
+bi-invariant metric or a Cartan-Schouten connection, this is the same as `log` but for
+other groups it may differ.
+"""
+function log_inv(G::AbstractManifold, p, q)
+    BG = base_group(G)
+    return log_lie(BG, compose(BG, inv(BG, p), q))
+end
+function log_inv!(G::AbstractManifold, X, p, q)
+    x = allocate_result(G, inv, p)
+    BG = base_group(G)
+    inv!(BG, x, p)
+    compose!(BG, x, x, q)
+    log_lie!(BG, X, x)
+    return X
+end
+
+"""
+    exp_inv(G::AbstractManifold, p, X, t::Number=1)
+
+Compute exponential map on a Lie group `G` invariant to group operation. For groups with a
+bi-invariant metric or a Cartan-Schouten connection, this is the same as `exp` but for
+other groups it may differ.
+"""
+function exp_inv(G::AbstractManifold, p, X, t::Number=1)
+    BG = base_group(G)
+    return compose(BG, p, exp_lie(BG, t * X))
+end
+function exp_inv!(G::AbstractManifold, q, p, X)
+    BG = base_group(G)
+    exp_lie!(BG, q, X)
+    compose!(BG, q, p, q)
+    return q
+end
+
 @doc raw"""
     exp_lie(G, X)
     exp_lie!(G, q, X)
