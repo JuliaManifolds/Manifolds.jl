@@ -398,6 +398,14 @@ using Manifolds:
         @test isapprox(G, q, q_ref)
         Y = log_inv(G, p, q)
         @test isapprox(G, p, X, Y)
+
+        q2 = similar(q)
+        exp_inv!(G, q2, p, X)
+        @test isapprox(G, q, q2)
+
+        Y2 = similar(Y)
+        log_inv!(G, Y2, p, q)
+        @test isapprox(G, p, Y, Y2)
     end
 
     @testset "performance of selected operations" begin

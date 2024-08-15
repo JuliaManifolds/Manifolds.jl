@@ -172,7 +172,7 @@ for i in 1:5
 end
 
 # drop back to a algebra, then coordinate
-ArrayPartition([1.0, 0.0, -1.0], xRi) = log(G, p0, aRi)
+aXi = log(G, p0, aRi)
 aθi = get_coordinates(G, p0, aXi, B)
 
 # should wrap around to 3rd quadrant of xy-plane
