@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Introduced `exp_inv` and `log_inv` based on `exp_lie` and `log_lie`. They are invariant to group operation.
+* Introduced `exp_inv` and `log_inv` based on `exp_lie` and `log_lie`. They are invariant to the group operation.
 
 ### Removed
 
