@@ -153,8 +153,9 @@ for aV in [aV1; aV2; aV3]
 end
 ```
 
-!!! note
-    In general, actions are usually non-commutative and the user must therefore be weary of [`LeftAction`](@ref) or [`RightAction`](@ref) needs.  As in this case, the default `LeftAction()` is used.
+::: {.callout-note}
+In general, actions are usually non-commutative and the user must therefore be weary of [`LeftAction`](@ref) or [`RightAction`](@ref) needs. As in this case, the default `LeftAction()` is used.
+:::
 
 Finally, the actions (i.e. points from a manifold) can be [`compose`](@ref)d together.  Consider putting together two rotations `aRb` and `bRc` such that a single composite rotation `aRc` is found.  The next bit of code composes five rotations of `π/4` increments:
 ```{julia}
@@ -187,7 +188,7 @@ As a last note, other rotation representations, including quaternions, Pauli mat
 
 ## Relationship between groups, metrics and connections
 
-Group structure provides a canonical way to define [📖 exponential](https://en.wikipedia.org/wiki/Exponential_map_(Lie_theory)) and 📖 logarithmic maps from the Lie algebra.
+Group structure provides a canonical way to define [📖 exponential](https://en.wikipedia.org/wiki/Exponential_map_(Lie_theory)) and logarithmic maps from the Lie algebra.
 They can be calculated in `Manifolds.jl` using the [`exp_lie`](@ref) and [`log_lie`](@ref) functions. Such exponential and logarithmic maps can be extended invariantly to tangent spaces at any point of the Lie group. This extension is implemented using functions [`exp_inv`](@ref) and [`log_inv`](@ref).
 
 Finally, there are `log` and `exp` functions which are metric (or connection)-related functions in `Manifolds.jl`. For groups which can be equipped with a bi-invariant metric, `log` and `log_inv` return the same result, similarly `exp` and `exp_inv`. However, only compact groups and their products with Euclidean spaces can have a bi-invariant metric (see for example Theorem 21.9 in [GallierQuaintance:2020](@cite)). A prominent example of a Lie group without a bi-invariant metric is the special Euclidean group (in two or more dimensions). Then we have a choice between a metric but non-invariant exponential map (which is generally the default choice for `exp`) or a non-metric, invariant exponential map (`exp_inv`). Which one should be used depends on whether being metric or being invariant is more important in a particular application.
@@ -220,14 +221,14 @@ Now, `q1_m` and `q2_m` are different due to non-invariance of the metric connect
 The following table outlines invariance of `exp` and `log` of various groups.
 
 | Group | Zero torsion connection | Invariant |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | `ProductGroup` | Product of connections in each submanifold | Yes if both connections are invariant separately, otherwise no |
 | `SemidirectProductGroup` | Same as underlying product | ❌ |
 | `TranslationGroup` | `CartanSchoutenZero` | ✅ |
 | `CircleGroup` | `CartanSchoutenZero` |✅|
 | `GeneralLinearGroup` | Metric connection from the left invariant metric induced from the standard basis on the Lie algebra | ❌ |
-| `GeneralUnitaryMultiplicationGroup` | `CartanSchoutenZero` (explicitly as such in `GeneralUnitaryMatrices.jl:225`)  | ✅ |
-| `HeisenbergGroup` | `CartanSchoutenZero`? (probably defined explicitly as such in `heisenberg.jl:220`) | ✅ |
+| `GeneralUnitaryMultiplicationGroup` | `CartanSchoutenZero` (explicitly)  | ✅ |
+| `HeisenbergGroup` | `CartanSchoutenZero` | ✅ |
 | `SpecialLinearGroup` | Same as `GeneralLinear` | ❌ |
 
 : Invariance of `exp` and `log` for various groups {#tbl-exp-log-inv}
