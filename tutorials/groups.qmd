@@ -120,7 +120,7 @@ _xθi_ = get_coordinates(M, p0, xXi_, B)[1]
 # confirm all versions are correct
 @assert isapprox(xθi, xθi_); @assert isapprox(xθi, _xθi_)
 @assert isapprox(xθi, xθi__); @assert isapprox(xθi, _xθi__)
-```  
+```
 
 ::: {.callout-note}
 The disadvantage might be that the representation of `X` is not nice, i.e. it uses too much space or doing vector-calculations is not so easy.  E.g. fixed rank matrices are overloaded for all vector operations, but maybe that is “not enough” for a general user application that really wants vectors. But: Given a basis `B` one can look at the coefficients of the tangent vector `X` with respect to basis `B`.  From the Sphere example note above the basis vectors would be `Y1=[0.0, 1.0, 0.0]` and `Y2=[0.0, 0.0, 1.0]`, so to get the coordinates would be `c = get_coordinates(Sphere(2), p, X, B)`.  Vice versa, if you have a coordinate vector with respect to a basis `B` of the tangent space at `p` and want the vector back, then you do `X2 = get_vector(M, p, c, B)` (and you should have `X2==X`).  The coordinate vector `c` might also have the advantage of saving memory. For example SPD matrix tangent vectors take $n^2$ entries to save, i.e. storing the full matrix, but the coordinate vectors only take $\frac{n(n+1)}{2}$.
@@ -129,7 +129,7 @@ The disadvantage might be that the representation of `X` is not nice, i.e. it us
 
 ### Actions and Operations
 
-With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a `Rotations(n)` manifold is the mathematical representation, but the points have an application purpose in retaining information regarding a specific rotation.     
+With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a `Rotations(n)` manifold is the mathematical representation, but the points have an application purpose in retaining information regarding a specific rotation.
 
 Points from a Lie group may have an associated action (i.e. a rotation) which we [`apply`](@ref).  Consider rotating through `θ = π/6` three vectors `V` from their native domain `Euclidean(2)`, from the reference point `a` to a new point `b`. Engineering disciplines sometimes refer to the action of a manifold point `a` or `b` as reference frames. More generally, by taking the tangent space at point `p`, we are defining a local coordinate frame with basis `B`, and should not be confused with "reference frame" `a` or `b`.
 
@@ -223,7 +223,7 @@ The following table outlines invariance of `exp` and `log` of various groups.
 
 ````{=commonmark}
 | Group | Zero torsion connection | Invariant |
-|---|---|---|
+|:---|:---|:---:|
 | `ProductGroup` | Product of connections in each submanifold | Yes if all component connections are invariant separately, otherwise no |
 | `SemidirectProductGroup` | Same as underlying product | ❌ |
 | `TranslationGroup` | `CartanSchoutenZero` | ✅ |

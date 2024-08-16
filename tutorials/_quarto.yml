@@ -21,7 +21,7 @@ execute:
 
 format:
   commonmark:
-    variant: -raw_html+tex_math_dollars
+    variant: -raw_html+tex_math_dollars+pipe_tables
     wrap: preserve
 
 jupyter: julia-1.10
