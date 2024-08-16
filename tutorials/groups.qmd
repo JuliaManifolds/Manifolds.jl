@@ -1,5 +1,6 @@
 ---
 title: work with groups
+toc: true
 ---
 
 ```{julia}
@@ -220,19 +221,18 @@ Now, `q1_m` and `q2_m` are different due to non-invariance of the metric connect
 
 The following table outlines invariance of `exp` and `log` of various groups.
 
+````{=commonmark}
 | Group | Zero torsion connection | Invariant |
-| --- | --- | --- |
+|---|---|---|
 | `ProductGroup` | Product of connections in each submanifold | Yes if both connections are invariant separately, otherwise no |
 | `SemidirectProductGroup` | Same as underlying product | ❌ |
 | `TranslationGroup` | `CartanSchoutenZero` | ✅ |
-| `CircleGroup` | `CartanSchoutenZero` |✅|
+| `CircleGroup` | `CartanSchoutenZero` | ✅ |
 | `GeneralLinearGroup` | Metric connection from the left invariant metric induced from the standard basis on the Lie algebra | ❌ |
 | `GeneralUnitaryMultiplicationGroup` | `CartanSchoutenZero` (explicitly)  | ✅ |
 | `HeisenbergGroup` | `CartanSchoutenZero` | ✅ |
 | `SpecialLinearGroup` | Same as `GeneralLinear` | ❌ |
-
-: Invariance of `exp` and `log` for various groups {#tbl-exp-log-inv}
-
+````
 
 ## Literature
 
