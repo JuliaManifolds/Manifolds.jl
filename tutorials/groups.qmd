@@ -221,7 +221,6 @@ Now, `q1_m` and `q2_m` are different due to non-invariance of the metric connect
 
 The following table outlines invariance of `exp` and `log` of various groups.
 
-````{=commonmark}
 | Group | Zero torsion connection | Invariant |
 |:---|:---|:---:|
 | `ProductGroup` | Product of connections in each submanifold | Yes if all component connections are invariant separately, otherwise no |
@@ -232,7 +231,6 @@ The following table outlines invariance of `exp` and `log` of various groups.
 | `GeneralUnitaryMultiplicationGroup` | `CartanSchoutenZero` (explicitly)  | ✅ |
 | `HeisenbergGroup` | `CartanSchoutenZero` | ✅ |
 | `SpecialLinearGroup` | Same as `GeneralLinear` | ❌ |
-````
 
 ## Literature
 
