@@ -72,14 +72,9 @@ struct SymplecticGrassmann{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function SymplecticGrassmann(
-    two_n::Int,
-    two_k::Int,
-    field::AbstractNumbers=ℝ;
-    parameter::Symbol=:type,
-)
+function SymplecticGrassmann(two_n::Int, two_k::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (div(two_n, 2), div(two_k, 2)))
-    return SymplecticGrassmann{typeof(size),field}(size)
+    return SymplecticGrassmann{typeof(size),ℝ}(size)
 end
 
 function active_traits(f, ::SymplecticGrassmann, args...)
@@ -105,12 +100,12 @@ function manifold_dimension(M::SymplecticGrassmann{<:Any,ℝ})
     return 4 * (n - k) * k
 end
 
-function Base.show(io::IO, ::SymplecticGrassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return print(io, "SymplecticGrassmann($(2n), $(2k); field=$(𝔽))")
+function Base.show(io::IO, ::SymplecticGrassmann{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return print(io, "SymplecticGrassmann($(2n), $(2k))")
 end
-function Base.show(io::IO, M::SymplecticGrassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::SymplecticGrassmann{Tuple{Int,Int}})
     n, k = get_parameter(M.size)
-    return print(io, "SymplecticGrassmann($(2n), $(2k); field=$(𝔽); parameter=:field)")
+    return print(io, "SymplecticGrassmann($(2n), $(2k); parameter=:field)")
 end
 
 #

@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `normal_tvector_distribution`,
   * `projected_distribution`,
   * `uniform_distribution`.
-* Ability to create non-real `SymplecticStiefel` manifolds; essential functionality was missing so it was removed until a more developed version is developed.
+* Ability to create non-real `SymplecticStiefel` and `SymplecticGrassmann` manifolds; essential functionality was missing so it was removed until a more developed version is developed.
 
 ## [0.9.20] – 2024-06-17
 

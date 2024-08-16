@@ -224,7 +224,7 @@ The following table outlines invariance of `exp` and `log` of various groups.
 ````{=commonmark}
 | Group | Zero torsion connection | Invariant |
 |---|---|---|
-| `ProductGroup` | Product of connections in each submanifold | Yes if both connections are invariant separately, otherwise no |
+| `ProductGroup` | Product of connections in each submanifold | Yes if all component connections are invariant separately, otherwise no |
 | `SemidirectProductGroup` | Same as underlying product | ❌ |
 | `TranslationGroup` | `CartanSchoutenZero` | ✅ |
 | `CircleGroup` | `CartanSchoutenZero` | ✅ |
