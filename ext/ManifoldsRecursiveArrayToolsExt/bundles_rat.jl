@@ -19,27 +19,27 @@ component, respectively.
     return throw(DomainError(s, "unknown component $s on $M."))
 end
 
-function get_vector(M::FiberBundle, p::ArrayPartition, X::ArrayPartition, B::AbstractBasis)
+function get_vector(M::FiberBundle, p::ArrayPartition, c::AbstractVector, B::AbstractBasis)
     n = manifold_dimension(M.manifold)
     xp1, xp2 = submanifold_components(M, p)
     F = Fiber(M.manifold, xp1, M.type)
     return ArrayPartition(
-        get_vector(M.manifold, xp1, X[1:n], B),
-        get_vector(F, xp2, X[(n + 1):end], B),
+        get_vector(M.manifold, xp1, c[1:n], B),
+        get_vector(F, xp2, c[(n + 1):end], B),
     )
 end
 function get_vector(
     M::FiberBundle,
-    p,
-    X,
+    p::ArrayPartition,
+    c::AbstractVector,
     B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:FiberBundleBasisData},
 ) where {𝔽}
     n = manifold_dimension(M.manifold)
     xp1, xp2 = submanifold_components(M, p)
     F = Fiber(M.manifold, xp1, M.type)
     return ArrayPartition(
-        get_vector(M.manifold, xp1, X[1:n], B.data.base_basis),
-        get_vector(F, xp2, X[(n + 1):end], B.data.fiber_basis),
+        get_vector(M.manifold, xp1, c[1:n], B.data.base_basis),
+        get_vector(F, xp2, c[(n + 1):end], B.data.fiber_basis),
     )
 end
 

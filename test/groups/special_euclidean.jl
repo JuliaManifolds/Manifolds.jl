@@ -9,6 +9,8 @@ using Manifolds:
     LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
 
 @testset "Special Euclidean group" begin
+    @test repr(SpecialEuclidean(3; vectors=HybridTangentRepresentation())) ==
+          "SpecialEuclidean(3; vectors=HybridTangentRepresentation())"
     for (se_parameter, se_vectors) in [
         (:field, LeftInvariantRepresentation()),
         (:type, LeftInvariantRepresentation()),
