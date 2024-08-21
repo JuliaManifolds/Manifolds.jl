@@ -370,7 +370,7 @@ using Manifolds:
         @test isapprox(G, pts[1], hat(G, pts[1], fXp.data), fXp2)
     end
 
-    @testset "Invariant exp and log" begin
+    @testset "Invariant exp and log, inv_diff" begin
         G = SpecialEuclidean(3)
         p = ArrayPartition(
             [-0.3879800256554809, -1.480242310944754, 0.6859001130634623],
@@ -408,8 +408,20 @@ using Manifolds:
         Y2 = similar(Y)
         log_inv!(G, Y2, p, q)
         @test isapprox(G, p, Y, Y2)
-    end
 
+        X_inv_diff_ref = ArrayPartition(
+            [0.8029663714810721, -0.5577248382341342, -1.8086993509926863],
+            [
+                -0.0 0.1952891277629885 0.40160273972404353
+                -0.1952891277629885 -5.204170427930421e-17 0.8826592119716654
+                -0.4016027397240436 -0.8826592119716655 2.7755575615628914e-17
+            ],
+        )
+        @test isapprox(inv_diff(G, p, X), X_inv_diff_ref)
+        Y3 = similar(Y)
+        inv_diff!(G, Y3, p, X)
+        @test isapprox(Y3, X_inv_diff_ref)
+    end
     @testset "performance of selected operations" begin
         for n in [2, 3]
             SEn = SpecialEuclidean(n; vectors=HybridTangentRepresentation())

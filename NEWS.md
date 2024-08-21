@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `adjoint_action` takes a direction argument; by default it is `LeftAction`.
 * `adjoint_action!` is the necessary method to implement in groups with left-invariant tangent vector representation.
 * Fixed a few typos in the doc string of the SPD fixed determinant description.
+* Random point on the `MultinomialSymmetricPositiveDefinite` manifold was improved to make it more robust.
 
 ### Added
 
