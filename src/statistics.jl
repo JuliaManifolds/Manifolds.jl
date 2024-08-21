@@ -1,9 +1,3 @@
-"""
-    AbstractEstimationMethod
-
-Deprecated alias for `AbstractApproximationMethod`
-"""
-const AbstractEstimationMethod = AbstractApproximationMethod
 
 _unit_weights(n::Int) = StatsBase.UnitWeights{Float64}(n)
 

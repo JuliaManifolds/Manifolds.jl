@@ -1,12 +1,5 @@
 
 """
-    const VectorBundleVectorTransport = FiberBundleProductVectorTransport
-
-Deprecated: an alias for `FiberBundleProductVectorTransport`.
-"""
-const VectorBundleVectorTransport = FiberBundleProductVectorTransport
-
-"""
     fiber_bundle_transport(M::AbstractManifold, fiber::FiberType)
 
 Determine the vector transport used for [`exp`](@ref exp(::FiberBundle, ::Any...)) and

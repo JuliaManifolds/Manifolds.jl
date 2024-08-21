@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `ExtrinsicEstimation()` (should be replaced with `ExtrinsicEstimation(EfficientEstimator())`),
   * `Symplectic` (renamed to `SymplecticMatrices`),
   * `SymplecticMatrix` (renamed to `SymplecticElement`).
+  * `AbstractEstimationMethod` (renamed to `AbstractApproximationMethod`).
+  * `VectorBundleVectorTransport` (renamed to `FiberBundleProductVectorTransport`).
   * `rand` on `SymplecticMatrices` and `SymplecticStiefel` no longer accepts `hamiltonian_norm` as an alias for `σ`.
   * `mean!` and `median!` no longer accept `extrinsic_method` (should be replaced with `e = ExtrinsicEstimation(extrinsic_method)`).
 * As a result of making `Distributions.jl` and `RecursiveArrayTools.jl` weak dependencies the following symbols are no longer exported from `Manifolds.jl`. Essential functionality is still available but distribution-related features may change in the future without a breaking release.

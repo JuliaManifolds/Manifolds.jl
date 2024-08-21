@@ -9,12 +9,12 @@ Vector transport type on [`FiberBundle`](@ref).
 
 # Fields
 
-* `method_horizonal` – vector transport method of the horizontal part (related to manifold M)
+* `method_horizontal` – vector transport method of the horizontal part (related to manifold M)
 * `method_vertical` – vector transport method of the vertical part (related to fibers).
 
 The vector transport is derived as a product manifold-style vector transport.
 The considered product manifold is the product between the manifold ``\mathcal M``
-and the topological vector space isometric to the fiber.
+and the space corresponding to the fiber.
 
 # Constructor
 
@@ -37,7 +37,7 @@ struct FiberBundleProductVectorTransport{
 end
 function FiberBundleProductVectorTransport(
     M::AbstractManifold=ManifoldsBase.DefaultManifold(),
-    fiber::FiberType=ManifoldsBase.TangentSpaceType();
+    fiber::FiberType=TangentSpaceType();
     vector_transport_method_horizontal::AbstractVectorTransportMethod=default_vector_transport_method(
         M,
     ),
