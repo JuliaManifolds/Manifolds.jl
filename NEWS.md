@@ -33,11 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `rand` on `SymplecticMatrices` and `SymplecticStiefel` no longer accepts `hamiltonian_norm` as an alias for `σ`.
   * `mean!` and `median!` no longer accept `extrinsic_method` (should be replaced with `e = ExtrinsicEstimation(extrinsic_method)`).
 * As a result of making `Distributions.jl` and `RecursiveArrayTools.jl` weak dependencies the following symbols are no longer exported from `Manifolds.jl`. Essential functionality is still available but distribution-related features may change in the future without a breaking release.
-  * `ArrayPartition`,
-  * `ProjectedPointDistribution`,
-  * `normal_tvector_distribution`,
-  * `projected_distribution`,
-  * `uniform_distribution`.
+  * `ArrayPartition` (`RecursiveArrayTools.jl` needs to be explicitly imported),
+  * `ProjectedPointDistribution` (not exported),
+  * `normal_tvector_distribution` (not exported),
+  * `projected_distribution` (not exported),
+  * `uniform_distribution` (not exported).
 * Ability to create non-real `SymplecticStiefel` and `SymplecticGrassmann` manifolds; essential functionality was missing so it was removed until a more developed version is developed.
 
 ## [0.9.20] – 2024-06-17

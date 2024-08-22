@@ -22,8 +22,8 @@ You can read more about the theory of Lie groups for example in [Chirikjian:2012
 An example application of Lie groups in robotics is described in [SolaDerayAtchuthan:2021](@cite).
 
 First, let's load libraries we will use.
-`RecursiveArrayTools` is necessary because `ArrayPartition` defined in it is used as one of the possible representations of elements of product and semidirect product groups.
-`StaticArrays` can be used to speed up some operations.
+[`RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) is necessary because its `ArrayPartition` is used as one of the possible representations of elements of product and semidirect product groups.
+[`StaticArrays.jl`](https://github.com/JuliaArrays/StaticArrays.jl) can be used to speed up some operations.
 
 ```{julia}
 using Manifolds, RecursiveArrayTools, StaticArrays
@@ -67,11 +67,11 @@ xθi = π/6
 
 ### From Coordinates
 
-To get our first Lie algebra element we can use the textbook [`hat`](@ref), or equivaliently a more generalized [`get_vector`](@ref), function:
+To get our first Lie algebra element we can use the [`hat`](@ref) function which is commonly used in robotics, or equivalently a more generalized [`get_vector`](@ref), function:
 
 ```{julia}
-X_ = hat(G, IG, xθi)              # specific definition to Lie groups
-xXi = get_vector(G, p0, xθi, B)   # generalized definition beyond Lie groups
+X_ = hat(G, IG, xθi)              # specific definition to Lie algebras
+xXi = get_vector(G, p0, xθi, B)   # generalized definition beyond Lie algebras
 println(xXi)
 @assert isapprox(X_, xXi)
 ```
@@ -88,7 +88,7 @@ _X = get_vector(M, p0, xθi, B)   # generalized definition
 One more caveat here is that for the Rotation matrices, the tangent vectors are always stored as elements from the Lie algebra.
 :::
 
-Now, let's place this algebra element on the manifold using the exponential map [`exp`](@ref):
+Now, we can transform this algebra element to a point on the manifold using the exponential map [`exp`](@ref):
 ```{julia}
 xRi = exp(G, p0, xXi)
 # similarly for known underlying manifold
@@ -99,14 +99,14 @@ xRi_ = exp(M, p0, xXi)
 
 ### To Coordinates
 
-The logarithm transform from the group back to algebra (or coordinates) is:
+The logarithmic map transforms elements of the group back to its Lie algebra:
 ```{julia}
 xXi_ = log(G, p0, xRi)
 xXi__ = log(M, p0, xRi)
 @assert xXi ≈ xXi__
 ```
 
-Similarly, the coordinate value can be extracted from the algebra using [`vee`](@ref), or directly from the group using the more generalized [`get_coordinates`](@ref):
+Similarly, the coordinate values can be extracted from the algebra elements using [`vee`](@ref), or using the more generalized [`get_coordinates`](@ref):
 
 ```{julia}
 # extracting coordinates using vee
@@ -122,14 +122,10 @@ _xθi_ = get_coordinates(M, p0, xXi_, B)[1]
 @assert isapprox(xθi, xθi__); @assert isapprox(xθi, _xθi__)
 ```
 
-::: {.callout-note}
-The disadvantage might be that the representation of `X` is not nice, i.e. it uses too much space or doing vector-calculations is not so easy.  E.g. fixed rank matrices are overloaded for all vector operations, but maybe that is “not enough” for a general user application that really wants vectors. But: Given a basis `B` one can look at the coefficients of the tangent vector `X` with respect to basis `B`.  From the Sphere example note above the basis vectors would be `Y1=[0.0, 1.0, 0.0]` and `Y2=[0.0, 0.0, 1.0]`, so to get the coordinates would be `c = get_coordinates(Sphere(2), p, X, B)`.  Vice versa, if you have a coordinate vector with respect to a basis `B` of the tangent space at `p` and want the vector back, then you do `X2 = get_vector(M, p, c, B)` (and you should have `X2==X`).  The coordinate vector `c` might also have the advantage of saving memory. For example SPD matrix tangent vectors take $n^2$ entries to save, i.e. storing the full matrix, but the coordinate vectors only take $\frac{n(n+1)}{2}$.
-:::
-
 
 ### Actions and Operations
 
-With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a `Rotations(n)` manifold is the mathematical representation, but the points have an application purpose in retaining information regarding a specific rotation.
+With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a [`Rotations`](@ref) manifold is the mathematical representation, but the points have an application purpose in retaining information regarding a specific rotation.
 
 Points from a Lie group may have an associated action (i.e. a rotation) which we [`apply`](@ref).  Consider rotating through `θ = π/6` three vectors `V` from their native domain `Euclidean(2)`, from the reference point `a` to a new point `b`. Engineering disciplines sometimes refer to the action of a manifold point `a` or `b` as reference frames. More generally, by taking the tangent space at point `p`, we are defining a local coordinate frame with basis `B`, and should not be confused with "reference frame" `a` or `b`.
 
@@ -155,7 +151,7 @@ end
 ```
 
 ::: {.callout-note}
-In general, actions are usually non-commutative and the user must therefore be weary of [`LeftAction`](@ref) or [`RightAction`](@ref) needs. As in this case, the default `LeftAction()` is used.
+In general, actions are usually non-commutative and the user must therefore be aware whether they want to use [`LeftAction`](@ref) or [`RightAction`](@ref). In this case, the default `LeftAction()` is used.
 :::
 
 Finally, the actions (i.e. points from a manifold) can be [`compose`](@ref)d together.  Consider putting together two rotations `aRb` and `bRc` such that a single composite rotation `aRc` is found.  The next bit of code composes five rotations of `π/4` increments:
