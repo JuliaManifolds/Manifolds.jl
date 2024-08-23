@@ -1081,6 +1081,50 @@ function inverse_translate_diff!(
     BG = base_group(G)
     return translate_diff!(BG, Y, inv(BG, p), q, X, conv)
 end
+function inverse_translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
+    G::AbstractDecoratorManifold,
+    Y,
+    ::Any,
+    ::Any,
+    X,
+    ::LeftForwardAction,
+)
+    return copyto!(G, Y, X)
+end
+function inverse_translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
+    G::AbstractDecoratorManifold,
+    Y,
+    ::Any,
+    ::Any,
+    X,
+    ::RightForwardAction,
+)
+    return copyto!(G, Y, X)
+end
+function inverse_translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    ::Any,
+    X,
+    ::LeftBackwardAction,
+)
+    return adjoint_action!(G, Y, p, X, RightAction())
+end
+function inverse_translate_diff!(
+    ::TraitList{<:IsGroupManifold{<:AbstractGroupOperation,LeftInvariantRepresentation}},
+    G::AbstractDecoratorManifold,
+    Y,
+    p,
+    ::Any,
+    X,
+    ::RightBackwardAction,
+)
+    return adjoint_action!(G, Y, p, X, LeftAction())
+end
 
 """
     log_inv(G::AbstractManifold, p, q)
