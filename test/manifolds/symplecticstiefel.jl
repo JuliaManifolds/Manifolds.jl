@@ -138,7 +138,7 @@ end
     @testset "Basics" begin
         @test_throws ArgumentError SymplecticStiefel(5, 4)
         @test_throws ArgumentError SymplecticStiefel(6, 3)
-        @test repr(M) == "SymplecticStiefel(6, 4; field=ℝ)"
+        @test repr(M) == "SymplecticStiefel(6, 4)"
         @test representation_size(M) == (6, 4)
         @test base_manifold(M) === M
         @test get_total_space(M) == SymplecticMatrices(6)
@@ -306,7 +306,7 @@ end
     @testset "field parameter" begin
         M = SymplecticStiefel(6, 4; parameter=:field)
         @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
-        @test repr(M) == "SymplecticStiefel(6, 4; field=ℝ; parameter=:field)"
+        @test repr(M) == "SymplecticStiefel(6, 4; parameter=:field)"
         @test get_total_space(M) == SymplecticMatrices(6; parameter=:field)
     end
 end

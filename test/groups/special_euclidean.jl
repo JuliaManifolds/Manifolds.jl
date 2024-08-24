@@ -9,19 +9,33 @@ using Manifolds:
     LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
 
 @testset "Special Euclidean group" begin
-    for se_parameter in [:field, :type]
-        @testset "SpecialEuclidean($n)" for n in (2, 3, 4)
-            G = SpecialEuclidean(n; parameter=se_parameter)
+    @test repr(SpecialEuclidean(3; vectors=HybridTangentRepresentation())) ==
+          "SpecialEuclidean(3; vectors=HybridTangentRepresentation())"
+    for (se_parameter, se_vectors) in [
+        (:field, LeftInvariantRepresentation()),
+        (:type, LeftInvariantRepresentation()),
+        (:field, HybridTangentRepresentation()),
+    ]
+        @testset "SpecialEuclidean($n; parameter=$se_parameter, vectors=$se_vectors)" for n in
+                                                                                          (
+            2,
+            3,
+            4,
+        )
+            G = SpecialEuclidean(n; parameter=se_parameter, vectors=se_vectors)
             if se_parameter === :field
                 @test isa(G, SpecialEuclidean{Tuple{Int}})
             else
                 @test isa(G, SpecialEuclidean{TypeParameter{Tuple{n}}})
             end
 
-            if se_parameter === :field
+            if se_parameter === :field && se_vectors === LeftInvariantRepresentation()
                 @test repr(G) == "SpecialEuclidean($n; parameter=:field)"
-            else
+            elseif se_parameter === :type && se_vectors === LeftInvariantRepresentation()
                 @test repr(G) == "SpecialEuclidean($n)"
+            elseif se_parameter === :field && se_vectors === HybridTangentRepresentation()
+                @test repr(G) ==
+                      "SpecialEuclidean($n; parameter=:field, vectors=HybridTangentRepresentation())"
             end
             M = base_manifold(G)
             @test M ===
@@ -92,13 +106,11 @@ using Manifolds:
             @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
 
             w = translate_diff(G, pts[1], Identity(G), X_pts[1])
-            w2 = allocate(w)
-            submanifold_component(w2, 1) .= submanifold_component(w, 1)
-            submanifold_component(w2, 2) .=
-                submanifold_component(pts[1], 2) * submanifold_component(w, 2)
-            w2mat = screw_matrix(G, w2)
-            @test w2mat ≈ affine_matrix(G, pts[1]) * screw_matrix(G, X_pts[1])
-            @test screw_matrix(G, w2mat) === w2mat
+            if se_vectors isa Manifolds.LeftInvariantRepresentation
+                w2mat = screw_matrix(G, w)
+                @test w2mat ≈ screw_matrix(G, X_pts[1])
+                @test screw_matrix(G, w2mat) === w2mat
+            end
 
             @test is_vector(G, Identity(G), rand(G; vector_at=Identity(G)))
 
@@ -121,6 +133,7 @@ using Manifolds:
                 basis_types_vecs=basis_types,
                 basis_types_to_from=basis_types,
                 is_mutating=true,
+                is_tangent_atol_multiplier=1,
                 #test_inplace=true,
                 test_vee_hat=true,
                 exp_log_atol_multiplier=50,
@@ -146,6 +159,7 @@ using Manifolds:
                         pts;
                         is_mutating=true,
                         exp_log_atol_multiplier=50,
+                        is_tangent_atol_multiplier=1,
                         test_inner=false,
                         test_norm=false,
                     )
@@ -174,6 +188,7 @@ using Manifolds:
                         basis_types_to_from=basis_types,
                         is_mutating=true,
                         exp_log_atol_multiplier=50,
+                        is_tangent_atol_multiplier=1,
                     )
                 end
             end
@@ -195,7 +210,7 @@ using Manifolds:
                     pts,
                     X_pts,
                     X_pts;
-                    test_diff=true,
+                    test_diff=true, # fails sometimes
                     test_lie_bracket=true,
                     diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
                     atol=1e-9,
@@ -206,6 +221,7 @@ using Manifolds:
                     is_mutating=true,
                     #test_inplace=true,
                     test_vee_hat=true,
+                    test_is_tangent=true, # fails
                     exp_log_atol_multiplier=50,
                 )
                 # specific affine tests
@@ -278,66 +294,67 @@ using Manifolds:
             G = SpecialEuclidean(11)
             @test affine_matrix(G, Identity(G)) isa Diagonal{Float64,Vector{Float64}}
             @test affine_matrix(G, Identity(G)) == Diagonal(ones(11))
+        end
+    end
 
-            @testset "Explicit embedding in GL(n+1)" begin
-                G = SpecialEuclidean(3)
-                t = Vector{Float64}.([1:3, 2:4, 4:6])
-                ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
-                p = Matrix(I, 3, 3)
-                Rn = Rotations(3)
-                pts = [
-                    ArrayPartition(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)
-                ]
-                X = ArrayPartition([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5]))
-                q = ArrayPartition([0.0, 0.0, 0.0], p)
+    for se_vectors in [LeftInvariantRepresentation(), HybridTangentRepresentation()]
+        @testset "Explicit embedding in GL(n+1)" begin
+            G = SpecialEuclidean(3; vectors=se_vectors)
+            t = Vector{Float64}.([1:3, 2:4, 4:6])
+            ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
+            p = Matrix(I, 3, 3)
+            Rn = Rotations(3)
+            pts = [ArrayPartition(ti, exp(Rn, p, hat(Rn, p, ωi))) for (ti, ωi) in zip(t, ω)]
+            X = ArrayPartition([-1.0, 2.0, 1.0], hat(Rn, p, [1.0, 0.5, -0.5]))
+            q = ArrayPartition([0.0, 0.0, 0.0], p)
 
-                GL = GeneralLinear(4)
-                SEGL = EmbeddedManifold(G, GL)
-                @test Manifolds.SpecialEuclideanInGeneralLinear(3) === SEGL
-                pts_gl = [embed(SEGL, pp) for pp in pts]
-                q_gl = embed(SEGL, q)
-                X_gl = embed(SEGL, pts_gl[1], X)
+            GL = GeneralLinear(4)
+            SEGL = EmbeddedManifold(G, GL)
+            @test Manifolds.SpecialEuclideanInGeneralLinear(3; se_vectors=se_vectors) ===
+                  SEGL
+            pts_gl = [embed(SEGL, pp) for pp in pts]
+            q_gl = embed(SEGL, q)
+            X_gl = embed(SEGL, pts_gl[1], X)
 
-                q_gl2 = allocate(q_gl)
-                embed!(SEGL, q_gl2, q)
-                @test isapprox(SEGL, q_gl2, q_gl)
+            q_gl2 = allocate(q_gl)
+            embed!(SEGL, q_gl2, q)
+            @test isapprox(SEGL, q_gl2, q_gl)
 
-                q2 = allocate(q)
-                project!(SEGL, q2, q_gl)
-                @test isapprox(G, q, q2)
+            q2 = allocate(q)
+            project!(SEGL, q2, q_gl)
+            @test isapprox(G, q, q2)
 
-                @test isapprox(G, pts[1], project(SEGL, pts_gl[1]))
-                @test isapprox(G, pts[1], X, project(SEGL, pts_gl[1], X_gl))
+            @test isapprox(G, pts[1], project(SEGL, pts_gl[1]))
+            @test isapprox(G, pts[1], X, project(SEGL, pts_gl[1], X_gl))
 
-                X_gl2 = allocate(X_gl)
-                embed!(SEGL, X_gl2, pts_gl[1], X)
-                @test isapprox(SEGL, pts_gl[1], X_gl2, X_gl)
+            X_gl2 = allocate(X_gl)
+            embed!(SEGL, X_gl2, pts_gl[1], X)
+            @test isapprox(SEGL, pts_gl[1], X_gl2, X_gl)
 
-                X2 = allocate(X)
-                project!(SEGL, X2, pts_gl[1], X_gl)
-                @test isapprox(G, pts[1], X, X2)
+            X2 = allocate(X)
+            project!(SEGL, X2, pts_gl[1], X_gl)
+            @test isapprox(G, pts[1], X, X2)
 
-                for conv in [LeftForwardAction(), RightBackwardAction()]
-                    tpgl = translate(GL, pts_gl[2], pts_gl[1], conv)
-                    tXgl = translate_diff(GL, pts_gl[2], pts_gl[1], X_gl, conv)
-                    tpse = translate(G, pts[2], pts[1], conv)
-                    tXse = translate_diff(G, pts[2], pts[1], X, conv)
-                    @test isapprox(G, tpse, project(SEGL, tpgl))
-                    @test isapprox(G, tpse, tXse, project(SEGL, tpgl, tXgl))
+            for conv in [LeftForwardAction(), RightBackwardAction()]
+                tpgl = translate(GL, pts_gl[2], pts_gl[1], conv)
+                tXgl = translate_diff(GL, pts_gl[2], pts_gl[1], X_gl, conv)
+                tpse = translate(G, pts[2], pts[1], conv)
+                tXse = translate_diff(G, pts[2], pts[1], X, conv)
+                @test isapprox(G, tpse, project(SEGL, tpgl))
+                @test isapprox(G, tpse, tXse, project(SEGL, tpgl, tXgl))
 
-                    @test isapprox(
-                        G,
-                        pts_gl[1],
-                        X_gl,
-                        translate_diff(G, Identity(G), pts_gl[1], X_gl, conv),
-                    )
-                end
+                @test isapprox(
+                    G,
+                    pts_gl[1],
+                    X_gl,
+                    translate_diff(G, Identity(G), pts_gl[1], X_gl, conv),
+                )
             end
         end
     end
 
     @testset "Adjoint action on 𝔰𝔢(3)" begin
-        G = SpecialEuclidean(3; parameter=:type)
+        G = SpecialEuclidean(3; parameter=:type, vectors=HybridTangentRepresentation())
         t = Vector{Float64}.([1:3, 2:4, 4:6])
         ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
         p = Matrix(I, 3, 3)
@@ -353,9 +370,61 @@ using Manifolds:
         @test isapprox(G, pts[1], hat(G, pts[1], fXp.data), fXp2)
     end
 
+    @testset "Invariant exp and log, inv_diff" begin
+        G = SpecialEuclidean(3)
+        p = ArrayPartition(
+            [-0.3879800256554809, -1.480242310944754, 0.6859001130634623],
+            [
+                0.07740722383491305 0.37616397751531383 0.9233140222687134
+                -0.8543895289705175 0.5023190688041862 -0.13301911855531234
+                -0.513835240601215 -0.7785731918937062 0.36027368816045613
+            ],
+        )
+        X = ArrayPartition(
+            [-0.13357857168916804, -0.6285892085394564, -0.5876201702680527],
+            [
+                0.0 -0.9387500040623927 -0.02175499382616511
+                0.9387500040623927 0.0 -0.31110293886623697
+                0.02175499382616511 0.31110293886623697 0.0
+            ],
+        )
+        q_ref = ArrayPartition(
+            [-1.188881359581349, -1.7593716755284188, 0.7643154032226447],
+            [
+                0.4842416235264354 0.37906436972889457 0.788555802493722
+                -0.13102724697252144 0.9225290425378667 -0.3630041683300185
+                -0.8650675757391926 0.07245943193403166 0.49639472209977575
+            ],
+        )
+        q = exp_inv(G, p, X)
+        @test isapprox(G, q, q_ref)
+        Y = log_inv(G, p, q)
+        @test isapprox(G, p, X, Y)
+
+        q2 = similar(q)
+        exp_inv!(G, q2, p, X)
+        @test isapprox(G, q, q2)
+
+        Y2 = similar(Y)
+        log_inv!(G, Y2, p, q)
+        @test isapprox(G, p, Y, Y2)
+
+        X_inv_diff_ref = ArrayPartition(
+            [0.8029663714810721, -0.5577248382341342, -1.8086993509926863],
+            [
+                -0.0 0.1952891277629885 0.40160273972404353
+                -0.1952891277629885 -5.204170427930421e-17 0.8826592119716654
+                -0.4016027397240436 -0.8826592119716655 2.7755575615628914e-17
+            ],
+        )
+        @test isapprox(inv_diff(G, p, X), X_inv_diff_ref)
+        Y3 = similar(Y)
+        inv_diff!(G, Y3, p, X)
+        @test isapprox(Y3, X_inv_diff_ref)
+    end
     @testset "performance of selected operations" begin
         for n in [2, 3]
-            SEn = SpecialEuclidean(n)
+            SEn = SpecialEuclidean(n; vectors=HybridTangentRepresentation())
             Rn = Rotations(n)
 
             p = SMatrix{n,n}(I)
@@ -382,6 +451,7 @@ using Manifolds:
                 ]
             end
             exp(SEn, pts[1], Xs[1])
+            exp(base_manifold(SEn), pts[1], Xs[1])
             compose(SEn, pts[1], pts[2])
             log(SEn, pts[1], pts[2])
             log(SEn, pts[1], pts[3])
@@ -394,7 +464,7 @@ using Manifolds:
             get_vector(SEn, pts[1], csen, DefaultOrthogonalBasis())
             # @btime shows 0 but `@allocations` is inaccurate
             @static if VERSION >= v"1.9-DEV"
-                @test (@allocations exp(SEn, pts[1], Xs[1])) <= 4
+                @test (@allocations exp(base_manifold(SEn), pts[1], Xs[1])) <= 4
                 @test (@allocations compose(SEn, pts[1], pts[2])) <= 4
                 if VERSION < v"1.11-DEV"
                     @test (@allocations log(SEn, pts[1], pts[2])) <= 28

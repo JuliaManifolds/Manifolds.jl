@@ -190,9 +190,7 @@ import Statistics: mean, mean!, median, median!, cov, var
 import StatsBase: mean_and_var
 
 using Base.Iterators: repeated
-using Distributions
 using Einsum: @einsum
-using HybridArrays
 using Kronecker
 using Graphs
 using LinearAlgebra
@@ -356,7 +354,6 @@ using Markdown: @doc_str
 using MatrixEquations: lyapc, sylvc
 using Quaternions: Quaternions
 using Random
-using RecursiveArrayTools: ArrayPartition
 using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using SpecialFunctions
@@ -367,9 +364,27 @@ using StatsBase: AbstractWeights
 
 include("utils.jl")
 
-include("product_representations.jl")
-
 include("manifold_fallbacks.jl")
+
+"""
+    projected_distribution(M::AbstractManifold, d, [p=rand(d)])
+
+Wrap the standard distribution `d` into a manifold-valued distribution. Generated
+points will be of similar type to `p`. By default, the type is not changed.
+"""
+function projected_distribution end
+
+"""
+    normal_tvector_distribution(M::AbstractManifold, p, σ)
+
+Normal distribution in ambient space with standard deviation `σ`
+projected to tangent space at `p`.
+"""
+function normal_tvector_distribution end
+
+function uniform_distribution(M::AbstractManifold)
+    return uniform_distribution(M, allocate_result(M, uniform_distribution))
+end
 
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
@@ -382,8 +397,6 @@ include("manifolds/VectorBundle.jl")
 include("groups/group.jl")
 
 # Features I: Which are extended on Meta Manifolds
-include("distributions.jl")
-include("projected_distribution.jl")
 include("statistics.jl")
 
 # Meta Manifolds II: Products
@@ -590,12 +603,6 @@ function __init__()
 
     @static if !isdefined(Base, :get_extension)
         @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-            @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
-                include("../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.jl")
-            end
-        end
-
-        @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
             include("../ext/ManifoldsOrdinaryDiffEqExt.jl")
         end
 
@@ -615,6 +622,26 @@ function __init__()
 
         @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
             include("../ext/ManifoldsTestExt/ManifoldsTestExt.jl")
+        end
+
+        @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
+            include(
+                "../ext/ManifoldsRecursiveArrayToolsExt/ManifoldsRecursiveArrayToolsExt.jl",
+            )
+
+            @require Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f" begin
+                include("../ext/ManifoldsDistributionsExt/ManifoldsDistributionsExt.jl")
+            end
+
+            @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
+                @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
+                    include("../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.jl")
+                end
+            end
+        end
+
+        @require HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9" begin
+            include("../ext/ManifoldsHybridArraysExt.jl")
         end
     end
 
@@ -673,7 +700,6 @@ export Euclidean,
     SymmetricPositiveDefinite,
     SPDFixedDeterminant,
     SymmetricPositiveSemidefiniteFixedRank,
-    Symplectic,
     SymplecticGrassmann,
     SymplecticMatrices,
     SymplecticStiefel,
@@ -715,11 +741,10 @@ export AbstractPowerManifold,
     QuotientManifold
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
-export ArrayPartition
-export ProjectedPointDistribution, TangentBundle
+export TangentBundle
 export TangentSpace, VectorSpaceFiber, VectorSpaceType, VectorBundle
 export AbstractVectorTransportMethod,
-    DifferentiatedRetractionVectorTransport, ParallelTransport, ProjectedPointDistribution
+    DifferentiatedRetractionVectorTransport, ParallelTransport
 export PoleLadderTransport, SchildsLadderTransport
 export ProductVectorTransport
 export AbstractAffineConnection, ConnectionManifold, LeviCivitaConnection
@@ -883,7 +908,6 @@ export ×,
     minkowski_metric,
     moment,
     norm,
-    normal_tvector_distribution,
     number_eltype,
     number_of_coordinates,
     one,
@@ -896,7 +920,6 @@ export ×,
     parallel_transport_to!,
     project,
     project!,
-    projected_distribution,
     rand,
     rand!,
     real_dimension,
@@ -930,7 +953,6 @@ export ×,
     submanifold,
     submanifold_component,
     submanifold_components,
-    uniform_distribution,
     var,
     vector_space_dimension,
     vector_transport_along,
@@ -951,15 +973,18 @@ export ×,
 # Lie group types & functions
 export AbstractGroupAction,
     AbstractGroupOperation,
+    AbstractGroupVectorRepresentation,
     ActionDirection,
     AdditionOperation,
     CircleGroup,
     GeneralLinear,
     GroupManifold,
     GroupOperationAction,
+    HybridTangentRepresentation,
     Identity,
     LeftAction,
     LeftInvariantMetric,
+    LeftInvariantRepresentation,
     LeftSide,
     MultiplicationOperation,
     Orthogonal,
@@ -978,6 +1003,7 @@ export AbstractGroupAction,
     SpecialLinear,
     SpecialOrthogonal,
     SpecialUnitary,
+    TangentVectorRepresentation,
     TranslationGroup,
     TranslationAction,
     Unitary
@@ -1005,6 +1031,8 @@ export adjoint_action,
     compose!,
     direction,
     direction_and_side,
+    exp_inv,
+    exp_inv!,
     exp_lie,
     exp_lie!,
     group_manifold,
@@ -1039,6 +1067,8 @@ export adjoint_action,
     inverse_translate_diff!,
     lie_bracket,
     lie_bracket!,
+    log_inv,
+    log_inv!,
     log_lie,
     log_lie!,
     optimal_alignment,

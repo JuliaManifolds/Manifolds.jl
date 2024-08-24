@@ -8,16 +8,18 @@ struct GeneralUnitaryMultiplicationGroup{T,𝔽,S} <: AbstractDecoratorManifold{
     manifold::GeneralUnitaryMatrices{T,𝔽,S}
 end
 
+vector_representation(::GeneralUnitaryMultiplicationGroup) = LeftInvariantRepresentation()
+
 @inline function active_traits(f, ::GeneralUnitaryMultiplicationGroup, args...)
     if is_metric_function(f)
         #pass to Rotations by default - but keep Group Decorator for the retraction
         return merge_traits(
-            IsGroupManifold(MultiplicationOperation()),
+            IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
             IsExplicitDecorator(),
         )
     else
         return merge_traits(
-            IsGroupManifold(MultiplicationOperation()),
+            IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
             HasBiinvariantMetric(),
             IsDefaultMetric(EuclideanMetric()),
             IsExplicitDecorator(), #pass to the inner M by default/last fallback
@@ -287,6 +289,15 @@ function manifold_volume(M::GeneralUnitaryMultiplicationGroup)
     return manifold_volume(M.manifold)
 end
 
+function Random.rand!(G::GeneralUnitaryMultiplicationGroup, pX; kwargs...)
+    rand!(G.manifold, pX; kwargs...)
+    return pX
+end
+function Random.rand!(rng::AbstractRNG, G::GeneralUnitaryMultiplicationGroup, pX; kwargs...)
+    rand!(rng, G.manifold, pX; kwargs...)
+    return pX
+end
+
 function translate_diff!(
     G::GeneralUnitaryMultiplicationGroup,
     Y,
@@ -327,6 +338,14 @@ function translate_diff!(
     X,
     ::RightBackwardAction,
 )
+    return copyto!(G, Y, inv(G, p) * X * p)
+end
+
+function adjoint_action!(G::GeneralUnitaryMultiplicationGroup, Y, p, X, ::LeftAction)
+    copyto!(G, Y, p * X * inv(G, p))
+    return Y
+end
+function adjoint_action!(G::GeneralUnitaryMultiplicationGroup, Y, p, X, ::RightAction)
     return copyto!(G, Y, inv(G, p) * X * p)
 end
 

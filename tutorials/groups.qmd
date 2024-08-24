@@ -1,0 +1,238 @@
+---
+title: work with groups
+toc: true
+---
+
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+using Pkg;
+cd(@__DIR__)
+Pkg.activate("."); # for reproducibility use the local tutorial environment.
+Pkg.develop(path="../") # a trick to work on the local dev version
+using Markdown
+```
+
+This is a short overview of group support in [`Manifolds.jl`](https://juliamanifolds.github.io/Manifolds.jl/) and how to get started working with them.
+
+Groups currently available in `Manifolds.jl` are listed in ``[group section](@ref GroupManifoldSection)``{=commonmark}.
+
+You can read more about the theory of Lie groups for example in [Chirikjian:2012](@cite).
+An example application of Lie groups in robotics is described in [SolaDerayAtchuthan:2021](@cite).
+
+First, let's load libraries we will use.
+[`RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) is necessary because its `ArrayPartition` is used as one of the possible representations of elements of product and semidirect product groups.
+[`StaticArrays.jl`](https://github.com/JuliaArrays/StaticArrays.jl) can be used to speed up some operations.
+
+```{julia}
+using Manifolds, RecursiveArrayTools, StaticArrays
+```
+
+## Introduction: group of rotations on a plane
+
+Let's first consider an example of the group of rotations of a plane, $\operatorname{SO}(2)$.
+They can be represented in several ways, for example as angles of rotation (which corresponds to [`RealCircleGroup`](@ref)), unit complex numbers ([`CircleGroup`](@ref)), or rotation matrices ([`SpecialOrthogonal`](@ref)).
+Let's consider the last representation since it is the most nontrivial one and can be more easily generalized to other groups.
+
+The associated manifolds and groups are defined by:
+
+```{julia}
+G = SpecialOrthogonal(2)
+M = base_manifold(G)
+@assert M === Rotations(2)
+```
+
+This duality (Lie group and the underlying manifold being separate) is a common pattern in `Manifolds.jl`. The group `G` can be used for both Lie group-specific operations and metric-specific operation, while the manifold `M` only allows using manifold and metric operations. This way groups can be specialized in ways not relevant to plain manifolds, and if someone doesn't use the groups structure, they don't have to consider it by just using the manifold.
+
+Some basic definitions
+
+```{julia}
+# default basis
+B = DefaultOrthogonalBasis()
+# Identity rotation
+p0 = @SMatrix [1.0 0; 0 1]
+
+# Group identity element of a special type
+IG = Identity(G)
+```
+
+
+Let's say we want to define a manifold point `p_i` some rotation θ from the [`identity_element`](@ref) reference rotation `p0` (another point on the manifold that we will use as reference)
+
+```{julia}
+# + radians rotation from x-axis on plane to point i
+xθi = π/6
+```
+
+### From Coordinates
+
+To get our first Lie algebra element we can use the [`hat`](@ref) function which is commonly used in robotics, or equivalently a more generalized [`get_vector`](@ref), function:
+
+```{julia}
+X_ = hat(G, IG, xθi)              # specific definition to Lie algebras
+xXi = get_vector(G, p0, xθi, B)   # generalized definition beyond Lie algebras
+println(xXi)
+@assert isapprox(X_, xXi)
+```
+
+Note that `hat` here assumes a default (orthogonal) basis for the more general `get_vector`.
+
+::: {.callout-note}
+In this case, the same would work given the base manifold [`Rotations(2)`](@ref):
+```{julia}
+_X_ = hat(M, p0, xθi)             # Lie groups definition
+_X = get_vector(M, p0, xθi, B)   # generalized definition
+@assert _X_ == xXi; @assert _X == xXi
+```
+One more caveat here is that for the Rotation matrices, the tangent vectors are always stored as elements from the Lie algebra.
+:::
+
+Now, we can transform this algebra element to a point on the manifold using the exponential map [`exp`](@ref):
+```{julia}
+xRi = exp(G, p0, xXi)
+# similarly for known underlying manifold
+xRi_ = exp(M, p0, xXi)
+
+@assert isapprox(xRi, xRi_)
+```
+
+### To Coordinates
+
+The logarithmic map transforms elements of the group back to its Lie algebra:
+```{julia}
+xXi_ = log(G, p0, xRi)
+xXi__ = log(M, p0, xRi)
+@assert xXi ≈ xXi__
+```
+
+Similarly, the coordinate values can be extracted from the algebra elements using [`vee`](@ref), or using the more generalized [`get_coordinates`](@ref):
+
+```{julia}
+# extracting coordinates using vee
+xθi__ = vee(G, p0, xXi_)[1]
+_xθi__ = vee(M, p0, xXi_)[1]
+
+# OR, the preferred generalized get_coordinate function
+xθi_ = get_coordinates(G, p0, xXi_, B)[1]
+_xθi_ = get_coordinates(M, p0, xXi_, B)[1]
+
+# confirm all versions are correct
+@assert isapprox(xθi, xθi_); @assert isapprox(xθi, _xθi_)
+@assert isapprox(xθi, xθi__); @assert isapprox(xθi, _xθi__)
+```
+
+
+### Actions and Operations
+
+With the basics in hand on how to move between the coordinate, algebra, and group representations, let's briefly look at composition and application of points on the manifold.  For example, a [`Rotations`](@ref) manifold is the mathematical representation, but the points have an application purpose in retaining information regarding a specific rotation.
+
+Points from a Lie group may have an associated action (i.e. a rotation) which we [`apply`](@ref).  Consider rotating through `θ = π/6` three vectors `V` from their native domain `Euclidean(2)`, from the reference point `a` to a new point `b`. Engineering disciplines sometimes refer to the action of a manifold point `a` or `b` as reference frames. More generally, by taking the tangent space at point `p`, we are defining a local coordinate frame with basis `B`, and should not be confused with "reference frame" `a` or `b`.
+
+Keeping with our two-dimensional example above:
+```{julia}
+aV1 = [1; 0]
+aV2 = [0; 1]
+aV3 = [10; 10]
+
+A_left = RotationAction(Euclidean(2), G)
+
+bθa = π/6
+bXa = get_vector(base_manifold(G), p0, bθa, B)
+
+bRa = exp(G, p0, bXa)
+
+for aV in [aV1; aV2; aV3]
+    bV = apply(A_left, bRa, aV)
+    # test we are getting the rotated vectors in Euclidean(2) as expected
+    @assert isapprox(bV[1], norm(aV) * cos(bθa))
+    @assert isapprox(bV[2], norm(aV) * sin(bθa))
+end
+```
+
+::: {.callout-note}
+In general, actions are usually non-commutative and the user must therefore be aware whether they want to use [`LeftAction`](@ref) or [`RightAction`](@ref). In this case, the default `LeftAction()` is used.
+:::
+
+Finally, the actions (i.e. points from a manifold) can be [`compose`](@ref)d together.  Consider putting together two rotations `aRb` and `bRc` such that a single composite rotation `aRc` is found.  The next bit of code composes five rotations of `π/4` increments:
+```{julia}
+A_left = RotationAction(M, G)
+aRi = copy(p0)
+
+iθi_ = π/4
+x_θ = get_vector(M, p0, iθi_, B) #hat(Rn, R0, θ)
+iRi_ = exp(M, p0, x_θ)
+
+# do 5 times over:
+# Ri_ = Ri*iRi_
+for i in 1:5
+    aRi = compose(A_left, aRi, iRi_)
+end
+
+# drop back to a algebra, then coordinate
+aXi = log(G, p0, aRi)
+aθi = get_coordinates(G, p0, aXi, B)
+
+# should wrap around to 3rd quadrant of xy-plane
+@assert isapprox(-3π/4, aθi[1])
+```
+
+::: {.callout-warning}
+`compose` or `apply` must be done with group (not algebra) elements. This example shows how these two element types can easily be confused, since both the manifold group and algebra elements can have exactly the same data storage type -- i.e. a 2x2 matrix.
+:::
+
+As a last note, other rotation representations, including quaternions, Pauli matrices, etc., have similar features. A contrasting example in rotations, however, are Euler angles which can also store rotation information but quickly becomes problematic with familiar problems such as ["gimbal-lock"](https://en.wikipedia.org/wiki/Gimbal_lock).
+
+## Relationship between groups, metrics and connections
+
+Group structure provides a canonical way to define [📖 exponential](https://en.wikipedia.org/wiki/Exponential_map_(Lie_theory)) and logarithmic maps from the Lie algebra.
+They can be calculated in `Manifolds.jl` using the [`exp_lie`](@ref) and [`log_lie`](@ref) functions. Such exponential and logarithmic maps can be extended invariantly to tangent spaces at any point of the Lie group. This extension is implemented using functions [`exp_inv`](@ref) and [`log_inv`](@ref).
+
+Finally, there are `log` and `exp` functions which are metric (or connection)-related functions in `Manifolds.jl`. For groups which can be equipped with a bi-invariant metric, `log` and `log_inv` return the same result, similarly `exp` and `exp_inv`. However, only compact groups and their products with Euclidean spaces can have a bi-invariant metric (see for example Theorem 21.9 in [GallierQuaintance:2020](@cite)). A prominent example of a Lie group without a bi-invariant metric is the special Euclidean group (in two or more dimensions). Then we have a choice between a metric but non-invariant exponential map (which is generally the default choice for `exp`) or a non-metric, invariant exponential map (`exp_inv`). Which one should be used depends on whether being metric or being invariant is more important in a particular application.
+
+```{julia}
+G = SpecialEuclidean(2)
+p = ArrayPartition([1.0, -1.0], xRi)
+X = ArrayPartition([2.0, -3.0], aXi)
+q_m = exp(G, p, X)
+println(q_m)
+q_i = exp_inv(G, p, X)
+println(q_i)
+
+```
+
+As we can see, the results differ. We can observe the invariance as follows:
+```{julia}
+p2 = ArrayPartition([2.0, -1.0], xRi)
+q1_m = exp(G, translate(G, p2, p), translate_diff(G, p2, p, X))
+q2_m = translate(G, p2, exp(G, p, X))
+println(isapprox(q1_m, q2_m))
+
+q1_i = exp_inv(G, translate(G, p2, p), translate_diff(G, p2, p, X))
+q2_i = translate(G, p2, exp_inv(G, p, X))
+println(isapprox(q1_i, q2_i))
+```
+
+Now, `q1_m` and `q2_m` are different due to non-invariance of the metric connection but `q1_i` and `q2_i` are equal due to invarianced of `exp_inv`.
+
+The following table outlines invariance of `exp` and `log` of various groups.
+
+| Group | Zero torsion connection | Invariant |
+|:---|:---|:---:|
+| `ProductGroup` | Product of connections in each submanifold | 🟡^[Yes if all component connections are invariant separately, otherwise no] |
+| `SemidirectProductGroup` | Same as underlying product | ❌ |
+| `TranslationGroup` | `CartanSchoutenZero` | ✅ |
+| `CircleGroup` | `CartanSchoutenZero` | ✅ |
+| `GeneralLinearGroup` | Metric connection from the left invariant metric induced from the standard basis on the Lie algebra | ❌ |
+| `GeneralUnitaryMultiplicationGroup` | `CartanSchoutenZero` (explicitly)  | ✅ |
+| `HeisenbergGroup` | `CartanSchoutenZero` | ✅ |
+| `SpecialLinearGroup` | Same as `GeneralLinear` | ❌ |
+
+## Literature
+
+````{=commonmark}
+```@bibliography
+Pages = ["groups.md"]
+Canonical=false
+```
+````

@@ -95,19 +95,25 @@ function Random.rand!(
     p::AbstractMatrix,
 )
     n = get_parameter(M.size)[1]
-    L = sort(exp.(randn(rng, n)))
-    V = reduce(hcat, map(xi -> [xi^k for k in 0:(n - 1)], L))'
-    @static if VERSION < v"1.7"
-        Vlu = lu(V, Val(false))
-    else
-        Vlu = lu(V, LinearAlgebra.RowNonZero())
+    is_spd = false
+    while !is_spd
+        L = sort(exp.(randn(rng, n)))
+        V = reduce(hcat, map(xi -> [xi^k for k in 0:(n - 1)], L))'
+        @static if VERSION < v"1.7" # COV_EXCL_LINE
+            Vlu = lu(V, Val(false))
+        else
+            Vlu = lu(V, LinearAlgebra.RowNonZero())
+        end
+        dm = Diagonal(Vlu.U)
+        uutd = dm \ Vlu.U
+        random_totally_positive = uutd * dm * Vlu.L
+        MMDS = MultinomialDoubleStochastic(n)
+        ds = project(MMDS, random_totally_positive; maxiter=1000)
+        p .= (ds .+ ds') ./ 2
+        if eigmin(p) > 0
+            is_spd = true
+        end
     end
-    dm = Diagonal(Vlu.U)
-    uutd = dm \ Vlu.U
-    random_totally_positive = uutd * dm * Vlu.L
-    MMDS = MultinomialDoubleStochastic(n)
-    ds = project(MMDS, random_totally_positive)
-    p .= (ds .+ ds') ./ 2
     return p
 end
 

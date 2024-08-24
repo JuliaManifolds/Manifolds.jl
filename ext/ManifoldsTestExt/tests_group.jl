@@ -114,7 +114,13 @@ function test_group(
     test_adjoint_action::Bool=false,
     test_inv_diff::Bool=false,
     test_adjoint_inv_diff::Bool=false,
-    diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+    diff_convs=[
+        (),
+        (LeftForwardAction(),),
+        (RightBackwardAction(),),
+        (LeftBackwardAction(),),
+        (RightForwardAction(),),
+    ],
     test_log_from_identity::Bool=false,
     test_exp_from_identity::Bool=false,
     test_vee_hat_from_identity::Bool=false,
@@ -379,6 +385,12 @@ function test_group(
         Test.@testset "test_inv_diff" for side in [LeftSide(), RightSide()]
             test_inv_diff_fn(G, g_pts[1], X_pts[1], side)
         end # COV_EXCL_LINE
+        if test_mutating
+            Y = inv_diff(G, e, Xe_pts[1])
+            Z = allocate(Y)
+            inv_diff!(G, Z, e, Xe_pts[1])
+            Test.@test isapprox(TangentSpace(G, e), Y, Z)
+        end
     end
     test_adjoint_inv_diff && Test.@testset "Differential of inverse" begin # COV_EXCL_LINE
         Test.@test isapprox(adjoint_inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
@@ -534,10 +546,27 @@ function test_group(
             adjoint_action(G, g_pts[2], adjoint_action(G, inv(G, g_pts[2]), X)),
             X,
         )
+        # right adjoint action
+        Test.@test isapprox(
+            G,
+            e,
+            adjoint_action(G, g_pts[2], adjoint_action(G, g_pts[2], X, RightAction())),
+            X,
+        )
+        # adjoint action at identity
+        for conv in [LeftAction(), RightAction()]
+            isapprox(
+                TangentSpace(G, identity_element(G)),
+                adjoint_action(G, e, Xe_pts[1], conv),
+                Xe_pts[1],
+            )
+        end
         if test_mutating
             Z = allocate(X)
             adjoint_action!(G, Z, g_pts[2], X)
             Test.@test isapprox(G, e, Z, adjoint_action(G, g_pts[2], X))
+            adjoint_action!(G, Z, g_pts[2], X, RightAction())
+            Test.@test isapprox(G, e, Z, adjoint_action(G, g_pts[2], X, RightAction()))
         end
 
         # interaction with Lie bracket

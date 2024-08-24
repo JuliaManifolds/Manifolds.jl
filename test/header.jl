@@ -17,6 +17,7 @@ using DoubleFloats
 using Quaternions
 using Random
 using StaticArrays
+using RecursiveArrayTools
 using Statistics
 using StatsBase
 using Test

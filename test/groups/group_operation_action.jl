@@ -6,7 +6,11 @@ using Manifolds:
     LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
 
 @testset "Group operation action" begin
-    G = GroupManifold(NotImplementedManifold(), Manifolds.MultiplicationOperation())
+    G = GroupManifold(
+        NotImplementedManifold(),
+        Manifolds.MultiplicationOperation(),
+        Manifolds.LeftInvariantRepresentation(),
+    )
     A_left_fwd = GroupOperationAction(G)
     A_left_back = GroupOperationAction(G, LeftBackwardAction())
     A_right_fwd = GroupOperationAction(G, RightForwardAction())

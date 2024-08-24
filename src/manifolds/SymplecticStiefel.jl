@@ -47,12 +47,7 @@ struct SymplecticStiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function SymplecticStiefel(
-    two_n::Int,
-    two_k::Int,
-    field::AbstractNumbers=ℝ;
-    parameter::Symbol=:type,
-)
+function SymplecticStiefel(two_n::Int, two_k::Int; parameter::Symbol=:type)
     two_n % 2 == 0 || throw(
         ArgumentError(
             "The first matrix size of the symplectic Stiefel manifold must be even, but was $(two_n).",
@@ -64,7 +59,7 @@ function SymplecticStiefel(
         ),
     )
     size = wrap_type_parameter(parameter, (div(two_n, 2), div(two_k, 2)))
-    return SymplecticStiefel{typeof(size),field}(size)
+    return SymplecticStiefel{typeof(size),ℝ}(size)
 end
 
 function active_traits(f, ::SymplecticStiefel, args...)
@@ -72,7 +67,7 @@ function active_traits(f, ::SymplecticStiefel, args...)
 end
 
 # Define Stiefel as the array fallback
-ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel StiefelPoint StiefelTVector value value
+ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{<:Any,ℝ} StiefelPoint StiefelTVector value value
 
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
     return CayleyInverseRetraction()
@@ -506,13 +501,8 @@ function Random.rand!(
     M::SymplecticStiefel,
     pX;
     vector_at=nothing,
-    hamiltonian_norm=nothing,
-    σ=hamiltonian_norm === nothing ? 1.0 : hamiltonian_norm,
+    σ::Real=1.0,
 )
-    !(hamiltonian_norm === nothing) && Base.depwarn(
-        Random.rand!,
-        "hamiltonian_norm is deprecated as a keyword, please use the default σ.",
-    )
     n, k = get_parameter(M.size)
     if vector_at === nothing
         canonical_project!(M, pX, rand(rng, SymplecticMatrices(2n); σ=σ))
@@ -620,12 +610,12 @@ function riemannian_gradient!(
     return X
 end
 
-function Base.show(io::IO, ::SymplecticStiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return print(io, "SymplecticStiefel($(2n), $(2k); field=$(𝔽))")
+function Base.show(io::IO, ::SymplecticStiefel{TypeParameter{Tuple{n,k}}}) where {n,k}
+    return print(io, "SymplecticStiefel($(2n), $(2k))")
 end
-function Base.show(io::IO, M::SymplecticStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::SymplecticStiefel{Tuple{Int,Int}})
     n, k = get_parameter(M.size)
-    return print(io, "SymplecticStiefel($(2n), $(2k); field=$(𝔽); parameter=:field)")
+    return print(io, "SymplecticStiefel($(2n), $(2k); parameter=:field)")
 end
 
 @doc raw"""

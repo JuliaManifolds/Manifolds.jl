@@ -2,6 +2,8 @@ include("../header.jl")
 include("group_utils.jl")
 using NLsolve
 
+using Manifolds: LeftForwardAction, RightBackwardAction
+
 @testset "Special Linear group" begin
     @testset "basic properties" begin
         G = SpecialLinear(3)
@@ -60,9 +62,8 @@ using NLsolve
         )
 
         types = [Matrix{Float64}]
-        pts =
-            [[2 -1 -3; 4 -1 -6; -1 1 2], [0 2 1; 0 -3 -1; 1 0 2], [-2 0 -1; 1 0 0; -1 -1 2]]
-        vpts = [[0 -1 -5; 1 2 0; 1 2 -2], [0 -2 1; -2 1 2; -4 2 -1]]
+        vpts = [[0 -1 -5; 1 2 0; 1 2 -2], [0 -2 1; -2 1 2; -4 2 -1], [0 1 0; 0 0 0; 0 0 0]]
+        pts = exp.(0.1 .* vpts)
 
         retraction_methods = [
             Manifolds.GroupExponentialRetraction(LeftForwardAction()),

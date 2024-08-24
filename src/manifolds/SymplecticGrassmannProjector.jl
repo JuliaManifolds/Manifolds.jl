@@ -80,12 +80,12 @@ embed(::SymplecticGrassmann, p::ProjectorPoint) = p.value
 embed(::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTVector) = X.value
 
 function get_embedding(
-    ::SymplecticGrassmann{TypeParameter{Tuple{n,k}},𝔽},
+    ::SymplecticGrassmann{TypeParameter{Tuple{n,k}}},
     p::ProjectorPoint,
-) where {n,k,𝔽}
-    return Euclidean(2n, 2n; field=𝔽)
+) where {n,k}
+    return Euclidean(2n, 2n;)
 end
-function get_embedding(M::SymplecticGrassmann{Tuple{Int,Int},𝔽}, ::ProjectorPoint) where {𝔽}
+function get_embedding(M::SymplecticGrassmann{Tuple{Int,Int}}, ::ProjectorPoint)
     n, _ = get_parameter(M.size)
-    return Euclidean(2n, 2n; field=𝔽, parameter=:field)
+    return Euclidean(2n, 2n; parameter=:field)
 end

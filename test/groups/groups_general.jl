@@ -9,7 +9,11 @@ using Manifolds:
 
 @testset "General group tests" begin
     @testset "Not implemented operation" begin
-        G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
+        G = GroupManifold(
+            NotImplementedManifold(),
+            NotImplementedOperation(),
+            Manifolds.LeftInvariantRepresentation(),
+        )
         @test repr(G) ==
               "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
         p = [1.0, 2.0]
@@ -57,8 +61,14 @@ using Manifolds:
         @test !isapprox(G, eg, Identity(AdditionOperation()))
         @test !isapprox(G, Identity(AdditionOperation()), eg)
 
-        @test NotImplementedOperation(NotImplementedManifold()) === G
-        @test (NotImplementedOperation())(NotImplementedManifold()) === G
+        @test NotImplementedOperation(
+            NotImplementedManifold(),
+            Manifolds.LeftInvariantRepresentation(),
+        ) === G
+        @test (NotImplementedOperation())(
+            NotImplementedManifold(),
+            Manifolds.LeftInvariantRepresentation(),
+        ) === G
 
         @test_throws ErrorException hat(Rotations(3), eg, [1, 2, 3])
         @test_throws ErrorException hat!(Rotations(3), randn(3, 3), eg, [1, 2, 3])
@@ -80,6 +90,8 @@ using Manifolds:
         @test_throws MethodError inv!(G, p, p)
         @test_throws MethodError inv!(G, p, eg)
         @test_throws MethodError inv(G, p)
+        @test_throws MethodError inv_diff(G, p, X)
+        @test_throws MethodError inv_diff!(G, X, p, X)
 
         # no function defined to return the identity array representation
         @test_throws MethodError copyto!(G, p, eg)
@@ -108,26 +120,12 @@ using Manifolds:
         @test_throws MethodError inverse_translate!(G, p, p, p, LeftForwardAction())
         @test_throws MethodError inverse_translate!(G, p, p, p, RightBackwardAction())
 
-        @test_throws MethodError translate_diff(G, p, p, X)
-        @test_throws MethodError translate_diff(G, p, p, X, LeftForwardAction())
-        @test_throws MethodError translate_diff(G, p, p, X, RightBackwardAction())
-        @test_throws MethodError translate_diff!(G, X, p, p, X)
-        @test_throws MethodError translate_diff!(G, X, p, p, X, LeftForwardAction())
-        @test_throws MethodError translate_diff!(G, X, p, p, X, RightBackwardAction())
-
-        @test_throws MethodError inverse_translate_diff(G, p, p, X)
-        @test_throws MethodError inverse_translate_diff(G, p, p, X, LeftForwardAction())
-        @test_throws MethodError inverse_translate_diff(G, p, p, X, RightBackwardAction())
-        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X)
-        @test_throws MethodError inverse_translate_diff!(G, X, p, p, X, LeftForwardAction())
-        @test_throws MethodError inverse_translate_diff!(
-            G,
-            X,
-            p,
-            p,
-            X,
-            RightBackwardAction(),
-        )
+        @test_throws MethodError adjoint_action(G, p, X)
+        @test_throws MethodError adjoint_action(G, p, X, LeftAction())
+        @test_throws MethodError adjoint_action(G, p, X, RightAction())
+        @test_throws MethodError adjoint_action!(G, p, X, X)
+        @test_throws MethodError adjoint_action!(G, p, X, X, LeftAction())
+        @test_throws MethodError adjoint_action!(G, p, X, X, RightAction())
 
         @test_throws MethodError exp_lie(G, X)
         @test_throws MethodError exp_lie!(G, p, X)
@@ -140,7 +138,11 @@ using Manifolds:
         @test switch_direction(LeftAction()) === RightAction()
         @test switch_direction(RightAction()) === LeftAction()
 
-        G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
+        G = GroupManifold(
+            NotImplementedManifold(),
+            NotImplementedOperation(),
+            Manifolds.LeftInvariantRepresentation(),
+        )
         @test Manifolds._action_order(G, 1, 2, LeftForwardAction()) === (1, 2)
         @test Manifolds._action_order(G, 1, 2, RightBackwardAction()) === (2, 1)
     end
@@ -151,7 +153,11 @@ using Manifolds:
     end
 
     @testset "Addition operation" begin
-        G = GroupManifold(NotImplementedManifold(), Manifolds.AdditionOperation())
+        G = GroupManifold(
+            NotImplementedManifold(),
+            Manifolds.AdditionOperation(),
+            Manifolds.LeftInvariantRepresentation(),
+        )
         test_group(
             G,
             [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]],
@@ -197,7 +203,11 @@ using Manifolds:
     end
 
     @testset "Multiplication operation" begin
-        G = GroupManifold(NotImplementedManifold(), Manifolds.MultiplicationOperation())
+        G = GroupManifold(
+            NotImplementedManifold(),
+            Manifolds.MultiplicationOperation(),
+            Manifolds.LeftInvariantRepresentation(),
+        )
         test_group(
             G,
             [[2.0 1.0; 3.0 4.0], [3.0 2.0; 4.0 5.0], [4.0 3.0; 5.0 6.0]],

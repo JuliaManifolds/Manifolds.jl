@@ -1,5 +1,5 @@
 @doc raw"""
-    TranslationGroup{T,𝔽} <: GroupManifold{Euclidean{T,𝔽},AdditionOperation}
+    TranslationGroup{T,𝔽} <: GroupManifold{Euclidean{T,𝔽},AdditionOperation,LeftInvariantRepresentation}
 
 Translation group ``\mathrm{T}(n)`` represented by translation arrays.
 
@@ -9,23 +9,25 @@ Translation group ``\mathrm{T}(n)`` represented by translation arrays.
 Generate the translation group on
 ``𝔽^{n₁,…,nᵢ}`` = `Euclidean(n₁,...,nᵢ; field=𝔽)`, which is isomorphic to the group itself.
 """
-const TranslationGroup{T,𝔽} = GroupManifold{𝔽,Euclidean{T,𝔽},AdditionOperation}
+const TranslationGroup{T,𝔽} =
+    GroupManifold{𝔽,Euclidean{T,𝔽},AdditionOperation,LeftInvariantRepresentation}
 
 function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ, parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, n)
     return TranslationGroup{typeof(size),field}(
         Euclidean(n...; field=field, parameter=parameter),
         AdditionOperation(),
+        LeftInvariantRepresentation(),
     )
 end
 
 @inline function active_traits(f, M::TranslationGroup, args...)
     if is_metric_function(f)
         #pass to Euclidean by default - but keep Group Decorator for the retraction
-        return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+        return merge_traits(IsGroupManifold(M.op, M.vectors), IsExplicitDecorator())
     else
         return merge_traits(
-            IsGroupManifold(M.op),
+            IsGroupManifold(M.op, M.vectors),
             IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(), #pass to Euclidean by default/last fallback

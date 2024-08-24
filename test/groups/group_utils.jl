@@ -24,7 +24,7 @@ if !s
     end
     function active_traits(f, M::DefaultTransparencyGroup, args...)
         return merge_traits(
-            Manifolds.IsGroupManifold(M.op),
+            Manifolds.IsGroupManifold(M.op, LeftInvariantRepresentation()),
             active_traits(f, M.manifold, args...),
         )
     end

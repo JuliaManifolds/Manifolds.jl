@@ -1,5 +1,8 @@
 @doc raw"""
-    SpecialEuclidean(n)
+    SpecialEuclidean(
+        n::Int;
+        vectors::AbstractGroupVectorRepresentation=LeftInvariantRepresentation()
+    )
 
 Special Euclidean group ``\mathrm{SE}(n)``, the group of rigid motions.
 
@@ -17,13 +20,20 @@ This constructor is equivalent to calling
 ```julia
 Tn = TranslationGroup(n)
 SOn = SpecialOrthogonal(n)
-SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn))
+SemidirectProductGroup(Tn, SOn, RotationAction(Tn, SOn), vectors)
 ```
 
 Points on ``\mathrm{SE}(n)`` may be represented as points on the underlying product manifold
 ``\mathrm{T}(n) × \mathrm{SO}(n)``. For group-specific functions, they may also be
 represented as affine matrices with size `(n + 1, n + 1)` (see [`affine_matrix`](@ref)), for
 which the group operation is [`MultiplicationOperation`](@ref).
+
+There are two supported conventions for tangent vector storage, which can be selected
+using the `vectors` keyword argument:
+* [`LeftInvariantRepresentation`](@ref) (default one), which corresponds to left-invariant 
+  storage commonly used in other Lie groups.
+* [`HybridTangentRepresentation`](@ref) which corresponds to the representation implied by
+  product manifold structure of underlying groups.
 """
 const SpecialEuclidean{T} = SemidirectProductGroup{
     ℝ,
@@ -35,11 +45,15 @@ const SpecialEuclidean{T} = SemidirectProductGroup{
 const SpecialEuclideanManifold{N} =
     ProductManifold{ℝ,Tuple{TranslationGroup{N,ℝ},SpecialOrthogonal{N}}}
 
-function SpecialEuclidean(n; parameter::Symbol=:type)
+function SpecialEuclidean(
+    n::Int;
+    vectors::AbstractGroupVectorRepresentation=LeftInvariantRepresentation(),
+    parameter::Symbol=:type,
+)
     Tn = TranslationGroup(n; parameter=parameter)
     SOn = SpecialOrthogonal(n; parameter=parameter)
     A = RotationAction(Tn, SOn)
-    return SemidirectProductGroup(Tn, SOn, A)
+    return SemidirectProductGroup(Tn, SOn, A, vectors)
 end
 
 const SpecialEuclideanOperation{N} = SemidirectProductOperation{
@@ -47,16 +61,24 @@ const SpecialEuclideanOperation{N} = SemidirectProductOperation{
 }
 const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
-function Base.show(io::IO, ::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "SpecialEuclidean($(n))")
+function Base.show(io::IO, G::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
+    if vector_representation(G) isa LeftInvariantRepresentation
+        return print(io, "SpecialEuclidean($(n))")
+    else
+        return print(io, "SpecialEuclidean($(n); vectors=$(G.vectors))")
+    end
 end
 function Base.show(io::IO, G::SpecialEuclidean{Tuple{Int}})
     n = _get_parameter(G)
-    return print(io, "SpecialEuclidean($(n); parameter=:field)")
+    if vector_representation(G) isa LeftInvariantRepresentation
+        return print(io, "SpecialEuclidean($(n); parameter=:field)")
+    else
+        return print(io, "SpecialEuclidean($(n); parameter=:field, vectors=$(G.vectors))")
+    end
 end
 
 @inline function active_traits(f, M::SpecialEuclidean, args...)
-    return merge_traits(IsGroupManifold(M.op), IsExplicitDecorator())
+    return merge_traits(IsGroupManifold(M.op, M.vectors), IsExplicitDecorator())
 end
 
 """
@@ -142,7 +164,11 @@ Base.@propagate_inbounds function _padvector!(
 end
 
 @doc raw"""
-    adjoint_action(::SpecialEuclidean{TypeParameter{Tuple{3}}}, p, fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}})
+    adjoint_action(
+        ::SpecialEuclidean{TypeParameter{Tuple{3}},<:HybridTangentRepresentation},
+        p,
+        fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}},
+    )
 
 Adjoint action of the [`SpecialEuclidean`](@ref) group on the vector with coefficients `fX`
 tangent at point `p`.
@@ -153,7 +179,7 @@ matrix part of `p`, `r` is the translation part of `fX` and `ω` is the rotation
 ``×`` is the cross product and ``⋅`` is the matrix product.
 """
 function adjoint_action(
-    ::SpecialEuclidean{TypeParameter{Tuple{3}}},
+    ::SpecialEuclidean{TypeParameter{Tuple{3}},<:HybridTangentRepresentation},
     p,
     fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}},
 )
@@ -600,11 +626,6 @@ algebra. For the matrix representation (which can be obtained using [`screw_matr
 the formula is ``[X, Y] = XY-YX``, while in the `ArrayPartition` representation the
 formula reads ``[X, Y] = [(t_1, R_1), (t_2, R_2)] = (R_1 t_2 - R_2 t_1, R_1 R_2 - R_2 R_1)``.
 """
-function lie_bracket(G::SpecialEuclidean, X::ArrayPartition, Y::ArrayPartition)
-    nX, hX = submanifold_components(G, X)
-    nY, hY = submanifold_components(G, Y)
-    return ArrayPartition(hX * nY - hY * nX, lie_bracket(G.manifold.manifolds[2], hX, hY))
-end
 function lie_bracket(::SpecialEuclidean, X::AbstractMatrix, Y::AbstractMatrix)
     return X * Y - Y * X
 end
@@ -633,13 +654,33 @@ is the translation part of `p` and ``X_t`` is the translation part of `X`.
 """
 translate_diff(G::SpecialEuclidean, p, q, X, ::RightBackwardAction)
 
-function translate_diff!(G::SpecialEuclidean, Y, p, q, X, ::RightBackwardAction)
+function translate_diff!(
+    G::SpecialEuclidean{T,<:HybridTangentRepresentation},
+    Y,
+    p,
+    q,
+    X,
+    ::RightBackwardAction,
+) where {T}
     np, hp = submanifold_components(G, p)
     nq, hq = submanifold_components(G, q)
     nX, hX = submanifold_components(G, X)
     nY, hY = submanifold_components(G, Y)
     hY .= hp' * hX * hp
     copyto!(nY, hq * (hX * np) + nX)
+    @inbounds _padvector!(G, Y)
+    return Y
+end
+
+function adjoint_action!(G::SpecialEuclidean, Y, p, Xₑ, ::LeftAction)
+    np, hp = submanifold_components(G, p)
+    n, h = submanifold_components(G, Y)
+    nX, hX = submanifold_components(G, Xₑ)
+    H = submanifold(G, 2)
+    adjoint_action!(H, h, hp, hX, LeftAction())
+    A = G.op.action
+    apply!(A, n, hp, nX)
+    LinearAlgebra.axpy!(-1, apply_diff_group(A, Identity(H), h, np), n)
     @inbounds _padvector!(G, Y)
     return Y
 end
@@ -653,13 +694,22 @@ Note that this is *not* a transparently isometric embedding.
 
 # Constructor
 
-    SpecialEuclideanInGeneralLinear(n)
+    SpecialEuclideanInGeneralLinear(
+        n::Int;
+        se_vectors::AbstractGroupVectorRepresentation=LeftInvariantVectorRepresentation(),
+    )
+
+Where `se_vectors` is the tangent vector representation of the [`SpecialEuclidean`](@ref)
+group to be used.
 """
 const SpecialEuclideanInGeneralLinear =
     EmbeddedManifold{ℝ,<:SpecialEuclidean,<:GeneralLinear}
 
-function SpecialEuclideanInGeneralLinear(n)
-    return EmbeddedManifold(SpecialEuclidean(n), GeneralLinear(n + 1))
+function SpecialEuclideanInGeneralLinear(
+    n::Int;
+    se_vectors::AbstractGroupVectorRepresentation=LeftInvariantVectorRepresentation(),
+)
+    return EmbeddedManifold(SpecialEuclidean(n; vectors=se_vectors), GeneralLinear(n + 1))
 end
 
 """
@@ -675,10 +725,9 @@ end
 """
     embed(M::SpecialEuclideanInGeneralLinear, p, X)
 
-Embed the tangent vector X at point `p` on [`SpecialEuclidean`](@ref) in the
+Embed the tangent vector `X`` at point `p` on [`SpecialEuclidean`](@ref) in the
 [`GeneralLinear`](@ref) group. Point `p` can use any representation valid for
-`SpecialEuclidean`. The embedding is similar from the one defined by [`screw_matrix`](@ref)
-but the translation part is multiplied by inverse of the rotation part.
+`SpecialEuclidean`. The embedding is similar from the one defined by [`screw_matrix`](@ref).
 """
 function embed(M::SpecialEuclideanInGeneralLinear, p, X)
     G = M.manifold
@@ -687,7 +736,11 @@ function embed(M::SpecialEuclideanInGeneralLinear, p, X)
     Y = allocate_result(G, screw_matrix, nX, hX)
     nY, hY = submanifold_components(G, Y)
     copyto!(hY, hX)
-    copyto!(nY, hp' * nX)
+    if vector_representation(M.manifold) isa LeftInvariantRepresentation
+        copyto!(nY, nX)
+    else
+        copyto!(nY, hp' * nX)
+    end
     @inbounds _padvector!(G, Y)
     return Y
 end
@@ -699,115 +752,9 @@ function embed!(M::SpecialEuclideanInGeneralLinear, Y, p, X)
     return copyto!(Y, embed(M, p, X))
 end
 
-"""
-    project(M::SpecialEuclideanInGeneralLinear, p)
-
-Project point `p` in [`GeneralLinear`](@ref) to the [`SpecialEuclidean`](@ref) group.
-This is performed by extracting the rotation and translation part as in [`affine_matrix`](@ref).
-"""
-function project(M::SpecialEuclideanInGeneralLinear, p)
-    G = M.manifold
-    np, hp = submanifold_components(G, p)
-    return ArrayPartition(np, hp)
-end
-"""
-    project(M::SpecialEuclideanInGeneralLinear, p, X)
-
-Project tangent vector `X` at point `p` in [`GeneralLinear`](@ref) to the
-[`SpecialEuclidean`](@ref) Lie algebra.
-This reverses the transformation performed by [`embed`](@ref embed(M::SpecialEuclideanInGeneralLinear, p, X))
-"""
-function project(M::SpecialEuclideanInGeneralLinear, p, X)
-    G = M.manifold
-    np, hp = submanifold_components(G, p)
-    nX, hX = submanifold_components(G, X)
-    return ArrayPartition(hp * nX, hX)
-end
-
 function project!(M::SpecialEuclideanInGeneralLinear, q, p)
     return copyto!(q, project(M, p))
 end
 function project!(M::SpecialEuclideanInGeneralLinear, Y, p, X)
     return copyto!(Y, project(M, p, X))
-end
-
-### Special methods for better performance of selected operations
-
-function exp(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        exp(M1.manifold, p.x[1], X.x[1]),
-        exp(M2.manifold, p.x[2], X.x[2]),
-    )
-end
-function log(M::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        log(M1.manifold, p.x[1], q.x[1]),
-        log(M2.manifold, p.x[2], q.x[2]),
-    )
-end
-function vee(M::SpecialEuclidean, p::ArrayPartition, X::ArrayPartition)
-    M1, M2 = M.manifold.manifolds
-    return vcat(vee(M1.manifold, p.x[1], X.x[1]), vee(M2.manifold, p.x[2], X.x[2]))
-end
-function get_coordinates(
-    M::SpecialEuclidean,
-    p::ArrayPartition,
-    X::ArrayPartition,
-    basis::DefaultOrthogonalBasis,
-)
-    M1, M2 = M.manifold.manifolds
-    return vcat(
-        get_coordinates(M1.manifold, p.x[1], X.x[1], basis),
-        get_coordinates(M2.manifold, p.x[2], X.x[2], basis),
-    )
-end
-function hat(
-    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
-    p::ArrayPartition,
-    c::AbstractVector,
-)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(2)], ℝ),
-        get_vector_orthogonal(M2.manifold, p.x[2], c[SA[3]], ℝ),
-    )
-end
-function get_vector(
-    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
-    p::ArrayPartition,
-    c::AbstractVector,
-    basis::DefaultOrthogonalBasis,
-)
-    return ArrayPartition(
-        get_vector(M.manifold.manifolds[1].manifold, p.x[1], c[SOneTo(2)], basis),
-        get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[3]], basis),
-    )
-end
-
-function hat(
-    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
-    p::ArrayPartition,
-    c::AbstractVector,
-)
-    M1, M2 = M.manifold.manifolds
-    return ArrayPartition(
-        get_vector_orthogonal(M1.manifold, p.x[1], c[SOneTo(3)], ℝ),
-        get_vector_orthogonal(M2.manifold, p.x[2], c[SA[4, 5, 6]], ℝ),
-    )
-end
-function get_vector(
-    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
-    p::ArrayPartition,
-    c::AbstractVector,
-    basis::DefaultOrthogonalBasis,
-)
-    return ArrayPartition(
-        get_vector(M.manifold.manifolds[1].manifold, p.x[1], c[SOneTo(3)], basis),
-        get_vector(M.manifold.manifolds[2].manifold, p.x[2], c[SA[4, 5, 6]], basis),
-    )
-end
-function compose(::SpecialEuclidean, p::ArrayPartition, q::ArrayPartition)
-    return ArrayPartition(p.x[2] * q.x[1] + p.x[1], p.x[2] * q.x[2])
 end

@@ -201,8 +201,8 @@ function project!(
     ::AbstractMultinomialDoublyStochastic,
     q,
     p;
-    maxiter=100,
-    tolerance=eps(eltype(p)),
+    maxiter::Int=100,
+    tolerance::Real=eps(eltype(p)),
 )
     any(p .<= 0) && throw(
         DomainError(

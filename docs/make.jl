@@ -24,6 +24,7 @@ if "--quarto" ∈ ARGS
         tutorials_folder = (@__DIR__) * "/../tutorials"
         # instantiate the tutorials environment if necessary
         Pkg.activate(tutorials_folder)
+        Pkg.develop(PackageSpec(; path=(@__DIR__) * "/../"))
         Pkg.resolve()
         Pkg.instantiate()
         Pkg.activate(@__DIR__) # but return to the docs one before
@@ -110,6 +111,7 @@ makedocs(;
             "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
             "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
             "explore curvature without coordinates" => "tutorials/exploring-curvature.md",
+            "work with groups" => "tutorials/groups.md",
         ],
         "Manifolds" => [
             "Basic manifolds" => [

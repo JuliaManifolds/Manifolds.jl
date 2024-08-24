@@ -1,13 +1,11 @@
 name = "Manifolds"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.9.20"
+version = "0.10.0"
 
 [deps]
-Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Einsum = "b7d42ee7-0b51-5a75-98ca-779d3107e4c0"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
-HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
 Kronecker = "2c470bb0-bcc8-11e8-3dad-c9649493f05e"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 ManifoldDiff = "af67fdf4-a580-4b9f-bbec-742ef357defd"
@@ -16,7 +14,6 @@ Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 MatrixEquations = "99c1a7ee-ab34-5fd5-8076-27c950a045f4"
 Quaternions = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 SimpleWeightedGraphs = "47aef6b3-ad0c-573a-a1e2-d07658019622"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
@@ -28,17 +25,23 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
 NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [extensions]
 ManifoldsBoundaryValueDiffEqExt = "BoundaryValueDiffEq"
+ManifoldsDistributionsExt = ["Distributions", "RecursiveArrayTools"]
+ManifoldsHybridArraysExt = "HybridArrays"
 ManifoldsNLsolveExt = "NLsolve"
-ManifoldsOrdinaryDiffEqDiffEqCallbacksExt = ["DiffEqCallbacks", "OrdinaryDiffEq"]
+ManifoldsOrdinaryDiffEqDiffEqCallbacksExt = ["DiffEqCallbacks", "OrdinaryDiffEq", "RecursiveArrayTools"]
 ManifoldsOrdinaryDiffEqExt = "OrdinaryDiffEq"
 ManifoldsRecipesBaseExt = ["Colors", "RecipesBase"]
+ManifoldsRecursiveArrayToolsExt = "RecursiveArrayTools"
 ManifoldsTestExt = "Test"
 
 [compat]
@@ -76,9 +79,11 @@ julia = "1.6"
 BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DoubleFloats = "497a8b3b-efae-58df-a0af-a86822472b78"
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
+HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9"
 ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
 ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
 NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
@@ -90,8 +95,9 @@ PythonPlot = "274fc56d-3b97-40fa-a1cd-1b4a50311bf9"
 QuartzImageIO = "dca85d43-d64c-5e67-8c65-017450d5d020"
 Quaternions = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 VisualRegressionTests = "34922c18-7c2a-561c-bac1-01e79b2c4c92"
 
 [targets]
-test = ["Test", "BoundaryValueDiffEq", "Colors", "DiffEqCallbacks", "DoubleFloats", "FiniteDifferences", "Gtk", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "NLsolve", "Plots", "PythonPlot", "Quaternions", "QuartzImageIO", "RecipesBase"]
+test = ["Test", "BoundaryValueDiffEq", "Colors", "DiffEqCallbacks", "Distributions", "DoubleFloats", "FiniteDifferences", "Gtk", "HybridArrays", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "NLsolve", "Plots", "PythonPlot", "Quaternions", "QuartzImageIO", "RecipesBase", "RecursiveArrayTools"]

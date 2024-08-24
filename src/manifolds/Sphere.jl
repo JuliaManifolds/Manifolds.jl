@@ -518,18 +518,6 @@ function Base.show(io::IO, M::ArraySphere{<:Tuple,𝔽}) where {𝔽}
     return print(io, "ArraySphere($(join(n, ", ")); field=$(𝔽), parameter=:field)")
 end
 
-"""
-    uniform_distribution(M::Sphere{n,ℝ}, p) where {n}
-
-Uniform distribution on given [`Sphere`](@ref) `M`. Generated points will be of
-similar type as `p`.
-"""
-function uniform_distribution(M::Sphere{<:Any,ℝ}, p)
-    n = get_parameter(M.size)[1]
-    d = Distributions.MvNormal(zero(p), 1.0 * I)
-    return ProjectedPointDistribution(M, d, project!, p)
-end
-
 @doc raw"""
     parallel_transport_to(M::AbstractSphere, p, X, q)
 
