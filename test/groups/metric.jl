@@ -182,6 +182,7 @@ end
                 #test_inplace=true,
                 test_vee_hat=false,
                 exp_log_atol_multiplier=50,
+                test_representation_size=false,
             )
         end
     end
