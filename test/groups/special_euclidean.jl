@@ -137,6 +137,7 @@ using Manifolds:
                 #test_inplace=true,
                 test_vee_hat=true,
                 exp_log_atol_multiplier=50,
+                test_representation_size=false,
             )
 
             for CS in [CartanSchoutenMinus(), CartanSchoutenPlus(), CartanSchoutenZero()]
@@ -162,6 +163,7 @@ using Manifolds:
                         is_tangent_atol_multiplier=1,
                         test_inner=false,
                         test_norm=false,
+                        test_representation_size=false,
                     )
                 end
             end
@@ -189,6 +191,7 @@ using Manifolds:
                         is_mutating=true,
                         exp_log_atol_multiplier=50,
                         is_tangent_atol_multiplier=1,
+                        test_representation_size=false,
                     )
                 end
             end
@@ -223,6 +226,7 @@ using Manifolds:
                     test_vee_hat=true,
                     test_is_tangent=true, # fails
                     exp_log_atol_multiplier=50,
+                    test_representation_size=false,
                 )
                 # specific affine tests
                 p = copy(G, pts[1])

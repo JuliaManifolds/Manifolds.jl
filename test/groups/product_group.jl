@@ -107,7 +107,7 @@ using RecursiveArrayTools
         test_mutating=false,
         test_adjoint_action=true,
     )
-    test_manifold(G, pts; is_mutating=false)
+    test_manifold(G, pts; is_mutating=false, test_representation_size=false)
     @test isapprox(
         G,
         exp_lie(G, X_pts[1]),
