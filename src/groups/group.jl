@@ -273,7 +273,8 @@ end
 
 function allocate_result(G::AbstractDecoratorManifold, f::typeof(identity_element))
     apf = allocation_promotion_function(G, f, ())
-    return zeros(apf(Float64), representation_size(G)...)
+    rs = representation_size(G)
+    return ManifoldsBase.allocate_result_array(G, f, apf(Float64), rs)
 end
 
 @doc raw"""
