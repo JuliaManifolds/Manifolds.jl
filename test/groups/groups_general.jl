@@ -27,7 +27,7 @@ using Manifolds:
         @test !has_biinvariant_metric(NotImplementedManifold())
         @test !has_invariant_metric(NotImplementedManifold(), LeftForwardAction())
         @test is_identity(G, eg) # identity transparent
-        @test_throws MethodError identity_element(G) # but for a NotImplOp there is no concrete id.
+        @test_throws ErrorException identity_element(G) # but for a NotImplOp there is no concrete id.
         @test isapprox(G, eg, eg)
         @test !isapprox(G, Identity(AdditionOperation()), eg)
         @test !isapprox(G, Identity(AdditionOperation()), eg)
@@ -38,7 +38,7 @@ using Manifolds:
         )
         @test_throws DomainError is_point(G, Identity(AdditionOperation()); error=:error)
         @test is_point(G, eg)
-        @test_throws MethodError is_identity(G, 1) # same error as before i.e. dispatch isapprox works
+        @test_throws ErrorException is_identity(G, 1) # same error as before i.e. dispatch isapprox works
         @test Manifolds.check_size(G, eg) === nothing
         @test Manifolds.check_size(
             Manifolds.EmptyTrait(),
@@ -54,7 +54,7 @@ using Manifolds:
             error=:error,
         )
         # identity_element for G not implemented
-        @test_throws MethodError is_vector(G, eg, X; error=:error)
+        @test_throws ErrorException is_vector(G, eg, X; error=:error)
         @test Identity(NotImplementedOperation()) === eg
         @test Identity(NotImplementedOperation) === eg
         @test !is_point(G, Identity(AdditionOperation()))
