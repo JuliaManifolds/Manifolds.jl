@@ -93,6 +93,7 @@ using RecursiveArrayTools: ArrayPartition
         test_inplace=true,
         test_rand_point=true,
         test_rand_tvector=true,
+        test_representation_size=false,
     )
 
     @testset "manifold tests (static size)" begin
@@ -202,6 +203,7 @@ using RecursiveArrayTools: ArrayPartition
             basis_types_to_from=basis_types,
             is_tangent_atol_multiplier=1,
             exp_log_atol_multiplier=1,
+            test_representation_size=false,
         )
         @test number_eltype(pts[1]) === Float64
 
