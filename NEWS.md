@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.2] - unreleased
 
-* fix a few typographical errors.
+### Changed
+
+* fixes a few typographical errors.
 
 ## [0.10.1] – 2024-08-29
 
