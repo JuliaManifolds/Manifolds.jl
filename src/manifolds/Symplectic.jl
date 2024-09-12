@@ -72,7 +72,7 @@ struct RealSymplecticMetric <: RiemannianMetric end
 @doc raw"""
     ExtendedSymplecticMetric <: AbstractMetric
 
-The extension of the [`RealSymplecticMetric`](@ref) at a point `p \in \mathrm{Sp}(2n)`
+The extension of the [`RealSymplecticMetric`](@ref) at a point ``p \in \mathrm{Sp}(2n)``
 as an inner product over the embedding space ``ℝ^{2n×2n}``, i.e.
 
 ```math
