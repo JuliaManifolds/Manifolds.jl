@@ -6,7 +6,7 @@ The symplectic Stiefel manifold consists of all
 
 ````math
 \mathrm{SpSt}(2n, 2k, ℝ)
-    := \bigl\{ p ∈ ℝ^{2n×2n} \ \big| \ p^{\mathrm{T}}J_{2n}p = J_{2k} \bigr\},
+    := \bigl\{ p ∈ ℝ^{2n×2k} \ \big| \ p^{\mathrm{T}}J_{2n}p = J_{2k} \bigr\},
 ````
 
 where ``J_{2n}`` denotes the [`SymplecticElement`](@ref)
@@ -38,7 +38,7 @@ they are equivalent to using arrays.
     SymplecticStiefel(2n::Int, 2k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
 
 Generate the (real-valued) symplectic Stiefel manifold of ``2n×2k``
-matrices which span a ``2k`` dimensional symplectic subspace of ``ℝ^{2n×2n}``.
+matrices which span a ``2k`` dimensional symplectic subspace of ``ℝ^{2n×2k}``.
 The constructor for the [`SymplecticStiefel`](@ref) manifold accepts the even column
 dimension ``2n`` and an even number of columns ``2k`` for
 the real symplectic Stiefel manifold with elements ``p ∈ ℝ^{2n×2k}``.
