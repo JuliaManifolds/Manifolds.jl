@@ -947,10 +947,10 @@ left or right `conv`ention. The differential transports vectors:
 ```
 
 *Note*: the default implementation of `translate_diff` and `translate_diff!`
-assumes that the tangent vector ``X`` is stored at
-the point ``p ∈ \mathcal{G}`` as the vector ``Y ∈ \mathfrak{g}``
- where ``X = pY``.
-The implementation at `p = Identity` is independent of the storage choice.
+assumes that a tangent vector ``X`` at
+a point ``q ∈ \mathcal{G}`` is stored  as the vector ``Y ∈ \mathfrak{g}``
+ where ``X = qY``.
+The implementation at `q = Identity` is independent of the storage choice.
 """
 translate_diff(::AbstractDecoratorManifold, ::Any...)
 @trait_function translate_diff(
