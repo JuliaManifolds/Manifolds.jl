@@ -837,16 +837,11 @@ _action_order(BG::AbstractDecoratorManifold, p, q, ::RightBackwardAction) = (q, 
     translate(G::AbstractDecoratorManifold, p, q, conv::ActionDirectionAndSide=LeftForwardAction()])
 
 Translate group element ``q`` by ``p`` with the translation ``τ_p`` with the specified
-`conv`ention, either left forward (``L_p``), left backward (``R'_p``), right backward (``R_p``)
-or right forward (``L'_p``), defined as
-```math
-\begin{aligned}
-L_p &: q ↦ p \circ q\\
-L'_p &: q ↦ p^{-1} \circ q\\
-R_p &: q ↦ q \circ p\\
-R'_p &: q ↦ q \circ p^{-1}.
-\end{aligned}
-```
+`conv`ention, either
+- left forward ``τ_p(q) = p \circ q``
+- left backward ``τ_p(q) = q \circ p^{-1}``
+- right backward ``τ_p(q) = q \circ p``
+- right forward ``τ_p(q) = p^{-1} \circ q``
 """
 translate(::AbstractDecoratorManifold, ::Any...)
 @trait_function translate(
