@@ -375,8 +375,8 @@ function solve_exp_ode end
         M::ConnectionManifold,
         p,
         X,
-        t::Number,
-        B::AbstractBasis;
+        t::Number;
+        B::AbstractBasis = DefaultOrthonormalBasis(),
         backend::AbstractDiffBackend = default_differential_backend(),
         solver = AutoVern9(Rodas5()),
         kwargs...,
