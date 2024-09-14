@@ -296,6 +296,23 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         N2 = ConnectionManifold(E, TestConnection())
         @test exp(N2, p, X) == X
     end
+
+    # see also Issue #744 (https://github.com/JuliaManifolds/Manifolds.jl/issues/744) 
+    @testset "solve_exp_ode values" begin
+        E = TestEuclidean{3}()
+        g = TestEuclideanMetric()
+        g_scaled = TestScaledEuclideanMetric()
+        M = MetricManifold(E, g)
+        default_retraction_method(::TestEuclidean) = TestRetraction()
+        p = [1.0, 2.0, 3.0]
+        X = [2.0, 3.0, 4.0]
+        t = 2.5
+
+        # we're testing on a flat euclidean space 
+        @test exp(M, p, X) ≈ p + X
+        @test exp(M, p, X, t) ≈ p + t * X
+    end
+
     @testset "Local Metric Error message" begin
         M = MetricManifold(BaseManifold{2}(), NotImplementedMetric())
         A = Manifolds.get_default_atlas(M)
