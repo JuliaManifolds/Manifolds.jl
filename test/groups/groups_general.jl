@@ -138,11 +138,7 @@ using Manifolds:
         @test switch_direction(LeftAction()) === RightAction()
         @test switch_direction(RightAction()) === LeftAction()
 
-        G = GroupManifold(
-            NotImplementedManifold(),
-            NotImplementedOperation(),
-            Manifolds.LeftInvariantRepresentation(),
-        )
+        G = GroupManifold(NotImplementedManifold(), NotImplementedOperation())
         @test Manifolds._action_order(G, 1, 2, LeftForwardAction()) === (1, 2)
         @test Manifolds._action_order(G, 1, 2, RightBackwardAction()) === (2, 1)
     end
@@ -153,11 +149,7 @@ using Manifolds:
     end
 
     @testset "Addition operation" begin
-        G = GroupManifold(
-            NotImplementedManifold(),
-            Manifolds.AdditionOperation(),
-            Manifolds.LeftInvariantRepresentation(),
-        )
+        G = GroupManifold(NotImplementedManifold(), Manifolds.AdditionOperation())
         test_group(
             G,
             [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]],

@@ -24,6 +24,14 @@ struct GroupManifold{
     vectors::VR
 end
 
+function GroupManifold(
+    M::AbstractManifold{𝔽},
+    op,
+    rep=LeftInvariantRepresentation(),
+) where {𝔽}
+    return GroupManifold{𝔽,typeof(M),typeof(op),typeof(rep)}(M, op, rep)
+end
+
 """
     vector_representation(M::GroupManifold)
 
