@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.3] - unreleased
+
+* Fixed `solve_exp_ode` only returning the starting position ([#744](https://github.com/JuliaManifolds/Manifolds.jl/issues/744))
+* Fixed documentation of `solve_exp_ode` function signature ([#740](https://github.com/JuliaManifolds/Manifolds.jl/issues/740))  
+
 ## [0.10.2] - unreleased
 
 ### Changed
