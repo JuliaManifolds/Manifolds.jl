@@ -61,7 +61,7 @@ function solve_exp_ode(
     params = (M,)
     prob = ODEProblem(exp_problem, u0, (0.0, t), params)
     sol = solve(prob, solver; kwargs...)
-    q = sol.u[1][(n + 1):(2 * n)]
+    q = sol.u[end][(n + 1):(2 * n)]
     return q
 end
 # also define exp! for metric manifold anew in this case
