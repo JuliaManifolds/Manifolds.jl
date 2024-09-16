@@ -26,8 +26,8 @@ end
 
 function GroupManifold(
     M::AbstractManifold{𝔽},
-    op,
-    rep=LeftInvariantRepresentation(),
+    op::AbstractGroupOperation,
+    rep::AbstractGroupVectorRepresentation=LeftInvariantRepresentation(),
 ) where {𝔽}
     return GroupManifold{𝔽,typeof(M),typeof(op),typeof(rep)}(M, op, rep)
 end
