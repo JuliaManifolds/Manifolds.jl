@@ -28,11 +28,8 @@ struct GroupManifold{
     vectors::VR
 end
 
-function GroupManifold(
-    M::AbstractManifold{𝔽},
-    op::AbstractGroupOperation,
-    rep::AbstractGroupVectorRepresentation=LeftInvariantRepresentation(),
-) where {𝔽}
+function GroupManifold(M::AbstractManifold{𝔽}, op::AbstractGroupOperation) where {𝔽}
+    rep = LeftInvariantRepresentation()
     return GroupManifold{𝔽,typeof(M),typeof(op),typeof(rep)}(M, op, rep)
 end
 
