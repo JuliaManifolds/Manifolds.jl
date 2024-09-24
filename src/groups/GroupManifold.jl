@@ -8,7 +8,11 @@ Group manifolds by default forward metric-related operations to the wrapped mani
 
 # Constructor
 
-    GroupManifold(manifold, op)
+    GroupManifold(
+        manifold::AbstractManifold,
+        op::AbstractGroupOperation,
+        vectors::AbstractGroupVectorRepresentation=LeftInvariantRepresentation(),
+    )
 
 Define the group operation `op` acting on the manifold `manifold`, hence if `op` acts smoothly,
 this forms a Lie group.
@@ -22,6 +26,11 @@ struct GroupManifold{
     manifold::M
     op::O
     vectors::VR
+end
+
+function GroupManifold(M::AbstractManifold{𝔽}, op::AbstractGroupOperation) where {𝔽}
+    rep = LeftInvariantRepresentation()
+    return GroupManifold{𝔽,typeof(M),typeof(op),typeof(rep)}(M, op, rep)
 end
 
 """

@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.2] - unreleased
 
+### Added
+
+* `GroupManifold` can now be called with two arguments, the third one defaulting to `LeftInvariantRepresentation`.
+
 ### Changed
 
 * fixes a few typographical errors.
