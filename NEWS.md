@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.3] - unreleased
 
+### Changed
+
+* **Mildly breaking**: the number system parameter now corresponds to the coefficients standing in front of basis vectors in a linear combination instead of components of a vector. For example, `DefaultOrthonormalBasis() == DefaultOrthonormalBasis(ℝ)` of `Euclidean(3, field=ℂ)` now has 6 vectors, and `DefaultOrthonormalBasis(ℂ)` of the same manifold has 3 basis vectors.
+
+### Fixed
+
 * Fixed `solve_exp_ode` only returning the starting position ([#744](https://github.com/JuliaManifolds/Manifolds.jl/issues/744))
 * Fixed documentation of `solve_exp_ode` function signature ([#740](https://github.com/JuliaManifolds/Manifolds.jl/issues/740))  
 
-## [0.10.2] - unreleased
+## [0.10.2] - 2024-09-24
 
 ### Added
 
