@@ -53,7 +53,7 @@ function get_coordinates_orthonormal(
     ::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ},
     p,
     X::Quaternions.Quaternion,
-    ::QuaternionNumbers,
+    ::RealNumbers,
 )
     return @SVector [X.v1, X.v2, X.v3]
 end
@@ -62,7 +62,7 @@ function get_vector_orthonormal(
     ::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ},
     p::Quaternions.Quaternion,
     c,
-    ::QuaternionNumbers,
+    ::RealNumbers,
 )
     i = firstindex(c)
     return Quaternions.quat(0, c[i], c[i + 1], c[i + 2])

@@ -103,13 +103,7 @@ function get_coordinates_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, 
     end
     return Y
 end
-function get_coordinates_orthonormal!(
-    M::SymmetricMatrices{<:Any,ℂ},
-    Y,
-    p,
-    X,
-    ::ComplexNumbers,
-)
+function get_coordinates_orthonormal!(M::SymmetricMatrices{<:Any,ℂ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -150,7 +144,7 @@ function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, ::Rea
     end
     return Y
 end
-function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℂ}, Y, p, X, ::ComplexNumbers)
+function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℂ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
