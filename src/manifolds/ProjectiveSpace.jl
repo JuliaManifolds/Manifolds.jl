@@ -207,21 +207,38 @@ formula for ``Y`` is
 """
 get_coordinates(::AbstractProjectiveSpace{ℝ}, p, X, ::DefaultOrthonormalBasis)
 
-function get_coordinates_orthonormal!(
-    M::AbstractProjectiveSpace{𝔽},
-    Y,
-    p,
-    X,
-    ::RealNumbers,
-) where {𝔽}
-    n = div(manifold_dimension(M), real_dimension(𝔽))
+function _gc_impl!(c, p, X, n::Int)
     z = p[1]
     cosθ = abs(z)
     λ = nzsign(z, cosθ)
     pend, Xend = view(p, 2:(n + 1)), view(X, 2:(n + 1))
     factor = λ' * X[1] / (1 + cosθ)
-    Y .= (Xend .- pend .* factor) .* λ'
-    return Y
+    c .= (Xend .- pend .* factor) .* λ'
+    return c
+end
+function get_coordinates_orthonormal!(M::AbstractProjectiveSpace{ℝ}, c, p, X, ::RealNumbers)
+    n = manifold_dimension(M)
+    return _gc_impl!(c, p, X, n)
+end
+function get_coordinates_orthonormal!(
+    M::AbstractProjectiveSpace{ℂ},
+    c,
+    p,
+    X,
+    ::ComplexNumbers,
+)
+    n = div(manifold_dimension(M), 2)
+    return _gc_impl!(c, p, X, n)
+end
+function get_coordinates_orthonormal!(
+    M::AbstractProjectiveSpace{ℍ},
+    c,
+    p,
+    X,
+    ::QuaternionNumbers,
+)
+    n = div(manifold_dimension(M), 4)
+    return _gc_impl!(c, p, X, n)
 end
 
 @doc raw"""
@@ -242,14 +259,7 @@ Y = \left(X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\
 """
 get_vector(::AbstractProjectiveSpace, p, X, ::DefaultOrthonormalBasis{ℝ})
 
-function get_vector_orthonormal!(
-    M::AbstractProjectiveSpace{𝔽},
-    Y,
-    p,
-    X,
-    ::RealNumbers,
-) where {𝔽}
-    n = div(manifold_dimension(M), real_dimension(𝔽))
+function _gv_impl!(Y, p, X, n::Int)
     z = p[1]
     cosθ = abs(z)
     λ = nzsign(z, cosθ)
@@ -258,6 +268,24 @@ function get_vector_orthonormal!(
     Y[1] = -λ * pX * λ
     Y[2:(n + 1)] .= (X .- pend .* (pX / (1 + cosθ))) .* λ
     return Y
+end
+function get_vector_orthonormal!(M::AbstractProjectiveSpace{ℝ}, Y, p, X, ::RealNumbers)
+    n = manifold_dimension(M)
+    return _gv_impl!(Y, p, X, n)
+end
+function get_vector_orthonormal!(M::AbstractProjectiveSpace{ℂ}, Y, p, X, ::ComplexNumbers)
+    n = div(manifold_dimension(M), 2)
+    return _gv_impl!(Y, p, X, n)
+end
+function get_vector_orthonormal!(
+    M::AbstractProjectiveSpace{ℍ},
+    Y,
+    p,
+    X,
+    ::QuaternionNumbers,
+)
+    n = div(manifold_dimension(M), 4)
+    return _gv_impl!(Y, p, X, n)
 end
 
 injectivity_radius(::AbstractProjectiveSpace) = π / 2
