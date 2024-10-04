@@ -60,9 +60,9 @@ function solve_chart_log_bvp(
 )
     tspan = (0.0, 1.0)
     function bc1!(residual, u, p, t)
-        mid = div(length(u[1]), 2)
-        residual[1:mid] = u[1][1:mid] - a1
-        residual[(mid + 1):end] = u[end][1:mid] - a2
+        mid = div(length(u[:, 1]), 2)
+        residual[1:mid] = u[:, 1][1:mid] - a1
+        residual[(mid + 1):end] = u[:, end][1:mid] - a2
         return residual
     end
     u0 = [vcat(a1, zero(a1)), vcat(a2, zero(a1))]
