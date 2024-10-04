@@ -137,12 +137,12 @@ include("../header.jl")
         end
         types = [Vector{ComplexF64}]
         @testset "Type $T" for T in types
-            x = [0.5 + 0.5im, 0.5 + 0.5im, 0]
-            v = [0.0, 0.0, 1.0 - im]
-            y = im * exp(M, x, v)
-            w = [0.5, -0.5, 0.5im]
-            z = (sqrt(0.5) - sqrt(0.5) * im) * exp(M, x, w)
-            pts = convert.(T, [x, y, z])
+            p1 = [0.5 + 0.5im, 0.5 + 0.5im, 0]
+            X = [0.0, 0.0, 1.0 - im]
+            p2 = im * exp(M, p1, X)
+            Y = [0.5, -0.5, 0.5im]
+            p3 = (sqrt(0.5) - sqrt(0.5) * im) * exp(M, p1, Y)
+            pts = convert.(T, [p1, p2, p3])
             test_manifold(
                 M,
                 pts,
@@ -157,7 +157,7 @@ include("../header.jl")
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                basis_types_to_from=(DefaultOrthonormalBasis(),),
+                basis_types_to_from=(DefaultOrthonormalBasis(ℂ),),
                 test_vee_hat=false,
                 retraction_methods=[
                     ProjectionRetraction(),
@@ -254,7 +254,7 @@ include("../header.jl")
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                basis_types_to_from=(DefaultOrthonormalBasis(),),
+                basis_types_to_from=(DefaultOrthonormalBasis(ℍ),),
                 test_vee_hat=false,
                 retraction_methods=[
                     ProjectionRetraction(),

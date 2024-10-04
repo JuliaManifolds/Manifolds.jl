@@ -364,7 +364,7 @@ using FiniteDifferences
             M1c,
             SizedVector{3}([1.0im, 2.0, 4.0im]),
             SizedVector{3}([-1.0, -3.0, -4.0im]),
-            DefaultOrthonormalBasis(),
+            DefaultOrthonormalBasis(ℂ),
         ) == SA[-1.0, -3.0, -4.0im]
     end
 

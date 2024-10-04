@@ -226,11 +226,18 @@ function get_basis_diagonalizing(
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates_orthonormal(::Euclidean, p, X, ::RealNumbers)
+function get_coordinates_orthonormal(::Euclidean{<:Any,ℝ}, p, X, ::RealNumbers)
+    return vec(X)
+end
+function get_coordinates_orthonormal(::Euclidean{<:Any,ℂ}, p, X, ::ComplexNumbers)
     return vec(X)
 end
 
-function get_coordinates_orthonormal!(::Euclidean, c, p, X, ::RealNumbers)
+function get_coordinates_orthonormal!(::Euclidean{<:Any,ℝ}, c, p, X, ::RealNumbers)
+    copyto!(c, vec(X))
+    return c
+end
+function get_coordinates_orthonormal!(::Euclidean{<:Any,ℂ}, c, p, X, ::ComplexNumbers)
     copyto!(c, vec(X))
     return c
 end
@@ -248,7 +255,7 @@ function get_coordinates_induced_basis!(
     return c
 end
 
-function get_coordinates_orthonormal!(M::Euclidean{<:Any,ℂ}, c, ::Any, X, ::ComplexNumbers)
+function get_coordinates_orthonormal!(M::Euclidean{<:Any,ℂ}, c, ::Any, X, ::RealNumbers)
     S = representation_size(M)
     PS = prod(S)
     c .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
@@ -260,7 +267,7 @@ function get_coordinates_diagonalizing!(
     c,
     ::Any,
     X,
-    ::DiagonalizingOrthonormalBasis{ℂ},
+    ::DiagonalizingOrthonormalBasis{ℝ},
 )
     S = representation_size(M)
     PS = prod(S)
@@ -268,19 +275,23 @@ function get_coordinates_diagonalizing!(
     return c
 end
 function get_coordinates_diagonalizing!(
-    M::Euclidean,
+    M::Euclidean{<:Any,𝔽},
     c,
     p,
     X,
-    ::DiagonalizingOrthonormalBasis{ℝ},
-)
+    ::DiagonalizingOrthonormalBasis{𝔽},
+) where {𝔽}
     S = representation_size(M)
     PS = prod(S)
     copyto!(c, reshape(X, PS))
     return c
 end
 
-function get_vector_orthonormal(M::Euclidean, ::Any, c, ::RealNumbers)
+function get_vector_orthonormal(M::Euclidean{<:Any,ℝ}, ::Any, c, ::RealNumbers)
+    S = representation_size(M)
+    return reshape(c, S)
+end
+function get_vector_orthonormal(M::Euclidean{<:Any,ℂ}, ::Any, c, ::ComplexNumbers)
     S = representation_size(M)
     return reshape(c, S)
 end
@@ -298,7 +309,7 @@ function get_vector_orthonormal(::Euclidean{Tuple{Int},ℝ}, ::Any, c, ::RealNum
     return c
 end
 function get_vector_orthonormal(
-    ::Euclidean{<:TypeParameter},
+    ::Euclidean{<:TypeParameter,ℝ},
     ::SArray{S},
     c,
     ::RealNumbers,
@@ -313,14 +324,6 @@ function get_vector_orthonormal(
 ) where {N,S}
     # probably doesn't need rewrapping in SArray
     return c
-end
-function Manifolds.get_vector_orthonormal(
-    ::Euclidean{TypeParameter{Tuple{N}}},
-    ::SizedArray{S},
-    c,
-    ::RealNumbers,
-) where {N,S}
-    return SizedArray{S}(c)
 end
 function get_vector_orthonormal(
     ::Euclidean{TypeParameter{Tuple{N}},ℝ},
@@ -343,7 +346,12 @@ function get_vector_orthonormal!(
     copyto!(Y, c)
     return Y
 end
-function get_vector_orthonormal!(M::Euclidean, Y, ::Any, c, ::RealNumbers)
+function get_vector_orthonormal!(M::Euclidean{<:Any,ℝ}, Y, ::Any, c, ::RealNumbers)
+    S = representation_size(M)
+    copyto!(Y, reshape(c, S))
+    return Y
+end
+function get_vector_orthonormal!(M::Euclidean{<:Any,ℂ}, Y, ::Any, c, ::ComplexNumbers)
     S = representation_size(M)
     copyto!(Y, reshape(c, S))
     return Y
@@ -364,7 +372,7 @@ function get_vector_induced_basis!(M::Euclidean, Y, ::Any, c, B::InducedBasis)
     copyto!(Y, reshape(c, S))
     return Y
 end
-function get_vector_orthonormal!(M::Euclidean{<:Any,ℂ}, Y, ::Any, c, ::ComplexNumbers)
+function get_vector_orthonormal!(M::Euclidean{<:Any,ℂ}, Y, ::Any, c, ::RealNumbers)
     S = representation_size(M)
     N = div(length(c), 2)
     copyto!(Y, reshape(c[1:N] + im * c[(N + 1):end], S))
@@ -375,7 +383,7 @@ function get_vector_diagonalizing!(
     Y,
     ::Any,
     c,
-    ::DiagonalizingOrthonormalBasis{ℂ},
+    ::DiagonalizingOrthonormalBasis{ℝ},
 )
     S = representation_size(M)
     N = div(length(c), 2)
