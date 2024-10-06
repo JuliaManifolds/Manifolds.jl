@@ -771,7 +771,7 @@ export AbstractMetric,
     ProductMetric,
     RealSymplecticMetric,
     RiemannianMetric,
-    SegreWarpedMetric,
+    WarpedMetric,
     StiefelSubmersionMetric
 export AbstractAtlas, RetractionAtlas
 # Vector transport types

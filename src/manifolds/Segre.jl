@@ -17,30 +17,22 @@ The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](
 
 Generate a valence `V` Segre manifold.
 """
-struct Segre{V, 𝔽} <: AbstractManifold{𝔽} end
+struct Segre{𝔽,V} <: AbstractManifold{𝔽} end
 
-function Segre(
-    valence::NTuple{V, Int};
-    field::AbstractNumbers=ℝ,
-    ) where {V}
-
-    return Segre{valence, field}()
+function Segre(valence::NTuple{V,Int}; field::AbstractNumbers=ℝ) where {V}
+    return Segre{valence,field}()
 end
 
-valence(::Segre{V, 𝔽}) where {V, 𝔽} = V
-ndims(::Segre{V, 𝔽}) where {V, 𝔽} = length(V)
-manifold_dimension(::Segre{V, 𝔽}) where {V, 𝔽} = (1 + sum(V .- 1))
+valence(::Segre{𝔽,V}) where {𝔽,V} = V
+ndims(::Segre{𝔽,V}) where {𝔽,V} = length(V)
+manifold_dimension(::Segre{𝔽,V}) where {𝔽,V} = (1 + sum(V .- 1))
 
 """
-    check_size(M::Segre{V, 𝔽}, p)
+    check_size(M::Segre{𝔽, V}, p)
 
 Check whether `p` has the right size for `Segre` manifold `M`.
 """
-function check_size(#={{{=#
-    M::Segre{V, 𝔽},
-    p;
-    ) where {V, 𝔽}
-
+function check_size(M::Segre{𝔽,V}, p;) where {𝔽,V}
     p_size = only.(size.(p))
     M_size = [1, V...]
 
@@ -48,23 +40,18 @@ function check_size(#={{{=#
         return DomainError(
             p_size,
             "The point $(p) can not belong to the manifold $(M), since its size $(p_size) is not equal to the manifolds representation size ($(M_size)).",
-            )
+        )
     end
 
     return nothing
-end#=}}}=#
+end
 
 """
-    check_size(M::Segre{V, 𝔽}, p, v)
+    check_size(M::Segre{𝔽, V}, p, v)
 
 Check whether `p` and `v` have the right size for `Segre` manifold `M`.
 """
-function check_size(#={{{=#
-    M::Segre{V, 𝔽},
-    p,
-    v;
-    ) where {V, 𝔽}
-
+function check_size(M::Segre{𝔽,V}, p, v;) where {𝔽,V}
     p_size = only.(size.(p))
     v_size = only.(size.(v))
     M_size = [1, V...]
@@ -73,97 +60,89 @@ function check_size(#={{{=#
         return DomainError(
             p_size,
             "The point $(p) can not belong to the manifold $(M), since its size $(p_size) is not equal to the manifolds representation size ($(M_size)).",
-            )
+        )
     end
 
     if v_size != M_size
         return DomainError(
             v_size,
             "The vector $(v) can not belong to the manifold $(M), since its size $(v_size) is not equal to the manifolds representation size ($(M_size)).",
-            )
+        )
     end
 
     return nothing
-end#=}}}=#
+end
 
 """
-    check_point(M::Segre{V, ℝ}, p; kwargs...)
+    check_point(M::Segre{ℝ, V}, p; kwargs...)
 
 Check whether `p` is a valid point on `M`, i.e. `p[1]` is a singleton containing a positive number and `p[i + 1]` is a point on `Sphere(V[i])`. The tolerance can be set using the `kwargs...`.
 """
-function check_point(#={{{=#
-    M::Segre{V, ℝ},
-    p;
-    kwargs...
-    ) where {V}
-
+function check_point({ℝ, V}M::Segre{ℝ,V}, p; kwargs...) where {V}
     if p[1][1] <= 0.0
-        return DomainError(
-            p[1][1],
-            "$(p) has non-positive modulus."
-            )
+        return DomainError(p[1][1], "$(p) has non-positive modulus.")
     end
 
     for (x, n) in zip(p[2:end], V)
         e = check_point(Sphere(n - 1)::AbstractSphere, x; rtol=1e-10, atol=1e-10, kwargs...)
-        if !isnothing(e); return e; end
+        if !isnothing(e)
+            return e
+        end
     end
-    
+
     return nothing
-end#=}}}=#
+end
 
 """
-    function check_vector(M::Segre{V, ℝ}, p, v, kwargs...)
+    function check_vector(M::Segre{ℝ, V}, p, v, kwargs...)
 
 Check whether `v` is a tangent vector to `p` on `M`, i.e. after `check_point(M, p)`, `v` has to be of same dimension as `p` and orthogonal to `p`. The tolerance can be set using the `kwargs...`.
 """
-function check_vector(#={{{=#
-    M::Segre{V, ℝ},
-    p,
-    v,
-    kwargs...
-    ) where {V}
-
+function check_vector(M::Segre{ℝ,V}, p, v, kwargs...) where {V}
     e = check_point(M, p, kwargs...)
-    if !isnothing(e); return e; end
+    if !isnothing(e)
+        return e
+    end
 
     for (x, xdot, n) in zip(p[2:end], v[2:end], V)
         # check_vector(::AbstractSphere, ...) uses isapprox to compare the dot product to 0, which by default sets atol=0
-        e = check_vector(Sphere(n - 1)::AbstractSphere, x, xdot; rtol=1e-10, atol=1e-10, kwargs...)
-        if !isnothing(e); return e; end
+        e = check_vector(
+            Sphere(n - 1)::AbstractSphere,
+            x,
+            xdot;
+            rtol=1e-10,
+            atol=1e-10,
+            kwargs...,
+        )
+        if !isnothing(e)
+            return e
+        end
     end
-    
+
     return nothing
-end#=}}}=#
+end
 
 """
-    function get_coordinates(M::Segre{V, 𝔽}, p, v; kwargs...)
+    function get_coordinates(M::Segre{𝔽, V}, p, v; kwargs...)
 """
-function get_coordinates(#={{{=#
-    M::Segre{V, 𝔽},
-    p,
-    v;
-    kwargs...
-    ) where {V, 𝔽}
-
+function get_coordinates(M::Segre{𝔽,V}, p, v; kwargs...) where {𝔽,V}
     @assert(is_point(M, p))
     @assert(is_vector(M, p, v))
 
-    coords = [v[1], [get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis(); kwargs...) for (n, x, xdot) in zip(V, p[2:end], v[2:end])]...]
+    coords = [
+        v[1],
+        [
+            get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis(); kwargs...) for (n, x, xdot) in zip(V, p[2:end], v[2:end])
+        ]...,
+    ]
 
     return vcat(coords...)
-end#=}}}=#
+end
 
 """
-    function get_vector( M::Segre{V, 𝔽}, p, X; kwargs...)
+    function get_vector( M::Segre{𝔽, V}, p, X; kwargs...)
 """
-function get_vector(#={{{=#
-    M::Segre{V, 𝔽},
-    p,
-    X;
-    kwargs...
-    ) where {V, 𝔽}
-
+function get_vector(M::Segre{𝔽,V}, p, X; kwargs...) where {𝔽,V}
     @assert(is_point(M, p))
 
     X_ = deepcopy(X)
@@ -171,7 +150,13 @@ function get_vector(#={{{=#
     v[1] = [X_[1]]
     X_ = drop(X_, 1)
     for (i, n) in enumerate(V)
-        v[i + 1] = get_vector(Sphere(n - 1), p[i + 1], take(X_, n - 1), DefaultOrthonormalBasis(); kwargs...)
+        v[i + 1] = get_vector(
+            Sphere(n - 1),
+            p[i + 1],
+            take(X_, n - 1),
+            DefaultOrthonormalBasis();
+            kwargs...,
+        )
         X_ = drop(X_, n - 1)
     end
 
@@ -179,10 +164,10 @@ function get_vector(#={{{=#
     check_vector(M, p, v)
 
     return v
-end#=}}}=#
+end
 
 @doc raw"""
-    function inner(M::Segre{V, ℝ}, p, u, v,)
+    function inner(M::Segre{ℝ, V}, p, u, v,)
 
 Inner product between two tangent vectors ``u = (\nu, u_1, \dots, u_d)`` and ``v = (\xi, v_1, \dots, v_d)`` at ``p = (\lambda, x_1, \dots, x_d``. This inner product is obtained by embedding the Segre manifold in the space of tensors equipped with the Euclidean metric:
 ````math
@@ -190,45 +175,30 @@ Inner product between two tangent vectors ``u = (\nu, u_1, \dots, u_d)`` and ``v
 ````
 where ``\nu``, ``\xi \in T_{\lambda} ℝ^{+} = ℝ`` and ``u_i``, ``v_i \in T_{x_i} S^{n_i - 1} \subset ℝ^{n_i}``.
 """
-function inner(#={{{=#
-    M::Segre{V, ℝ},
-    p,
-    u,
-    v,
-    ) where {V}
-
+function inner(M::Segre{ℝ,V}, p, u, v) where {V}
     @assert(is_point(M, p))
     @assert(is_vector(M, p, u))
     @assert(is_vector(M, p, v))
 
     return u[1][1] * v[1][1] + p[1][1]^2 * dot(u[2:end], v[2:end])
-end#=}}}=#
+end
 
 @doc raw"""
-    function norm(M::Segre{V, 𝔽}, p, v)
+    function norm(M::Segre{𝔽, V}, p, v)
 
 Norm of tangent vector ``v`` at ``p``.
 """
-function norm(#={{{=#
-    M::Segre{V, 𝔽},
-    p,
-    v,
-    ) where {V, 𝔽}
-
+function norm(M::Segre{𝔽,V}, p, v) where {𝔽,V}
     @assert(is_point(M, p))
     @assert(is_vector(M, p, v))
 
     return sqrt(inner(M, p, v, v))
-end#=}}}=#
+end
 
 """
-    function rand(M::Segre{V, ℝ}; vector_at=nothing)
+    function rand(M::Segre{ℝ, V}; vector_at=nothing)
 """
-function rand(#={{{=#
-    M::Segre{V, ℝ};
-    vector_at=nothing,
-    ) where {V}
-
+function rand(M::Segre{ℝ,V}; vector_at=nothing) where {V}
     if isnothing(vector_at)
         lambda = abs.(rand(Euclidean(1)))
         xs = [rand(Sphere(n - 1)) for n in V]
@@ -240,96 +210,67 @@ function rand(#={{{=#
         xdots = [rand(Sphere(n - 1); vector_at=vector_at[i + 1]) for (i, n) in enumerate(V)]
         return [lambdadot, xdots...]
     end
-end#=}}}=#
+end
 
 @doc raw"""
-    function embed(M::Segre{V, 𝔽}, v)
+    function embed(M::Segre{𝔽, V}, v)
 
 Embed ``p = (\lambda, x_1, \dots, x_d)`` in ``𝔽^{n_1 \times \dots \times n_d}`` using the Krönecker product:
 ````math
     (\lambda, x_1, \dots, x_d) \mapsto \lambda x_1 \otimes \dots \otimes x_d.
 ````
 """
-function embed(#={{{=#
-    M::Segre{V, 𝔽},
-    p,
-    ) where {V, 𝔽}
-
+function embed(M::Segre{𝔽,V}, p) where {𝔽,V}
     @assert(is_point(M, p))
 
     return kronecker(p...)[:]
-end#=}}}=#
+end
 
 @doc raw"""
-    function embed_vector(M::Segre{V, 𝔽}, p, v)
+    function embed_vector(M::Segre{𝔽, V}, p, v)
 
 Embed tangent vector ``v = (\nu, u_1, \dots, u_d)`` at ``p = (\lambda, x_1, \dots, x_d`` in ``𝔽^{n_1 \times \dots \times n_d}`` using the Krönecker product:
 ````math
     (\nu, u_1, \dots, u_d) \mapsto \nu x_1 \otimes \dots \otimes x_d + \lambda u_1 \otimes x_2 \otimes \dots \otimes x_d + \dots + \lambda x_1 \otimes \dots \otimes x_{d - 1} \otimes u_d.
 ````
 """
-function embed_vector(#={{{=#
-    M::Segre{V, 𝔽},
-    p,
-    v,
-    ) where {V, 𝔽}
-
+function embed_vector(M::Segre{𝔽,V}, p, v) where {𝔽,V}
     @assert(is_point(M, p))
     @assert(is_vector(M, p, v))
 
     # Product rule
     return sum([
-        kronecker([
-            i == j ?
-            xdot :
-            x
-            for (j, (x, xdot)) in enumerate(zip(p, v))
-            ]...)[:]
-        for (i, _) in enumerate(p)
-        ])
-end#=}}}=#
+        kronecker([i == j ? xdot : x for (j, (x, xdot)) in enumerate(zip(p, v))]...)[:] for
+        (i, _) in enumerate(p)
+    ])
+end
 
 @doc raw"""
-    function m(M::Segre{V, ℝ}, p, q)
+    function m(M::Segre{ℝ, V}, p, q)
 
 When ``p``, ``q \in ℝ^{+} \times S^{n_1 - 1} \times \dots \times S^{n_d - 1}``, this is the distance between the ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}`` parts of ``p`` and ``q``.
 """
-function m(#={{{=#
-    M::Segre{V, ℝ},
-    p,
-    q
-    ) where {V}
-
-    return sqrt(sum([
-        distance(Sphere(n - 1), x, y)^2
-        for (n, x, y) in zip(V, a[2:end], b[2:end])
-        ]))
-end#=}}}=#
+function m(M::Segre{ℝ,V}, p, q) where {V}
+    return sqrt(
+        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, a[2:end], b[2:end])]),
+    )
+end
 
 """
-    function compatible(M::Segre{V, ℝ}, p, q)
+    function compatible(M::Segre{ℝ, V}, p, q)
 
 Check if two representations, `p` and `q`, are compatible. To check if two points are compatible, compose with `closest_representation`.
 """
-function compatible(#={{{=#
-    M::Segre{V, ℝ},
-    p,
-    q
-    ) where {V}
-
+function compatible(M::Segre{ℝ,V}, p, q) where {V}
     return m(p, q) < pi
-end#=}}}=#
+end
 
 """
-    function closest_representation(M::Segre{V, ℝ}, p, q)
+    function closest_representation(M::Segre{ℝ, V}, p, q)
 
 Find the representation of `q` that is closest to `p`.
 """
-function closest_representation(#={{{=#
-    M::Segre{V, ℝ},
-    p,
-    q
-    ) where {V}
+function closest_representation(M::Segre{ℝ,V}, p, q) where {V}
 
     # Find closest representation by flipping an even number of signs.
     ds = [distance(Sphere(n - 1), x, y) for (n, x, y) in zip(V, p[2:end], q[2:end])]
@@ -362,10 +303,10 @@ function closest_representation(#={{{=#
     @assert(iseven(sum(flips))) # Should not be necessary but you never know...
 
     return q_
-end#=}}}=#
+end
 
 @doc raw"""
-    function exp(M::Segre{V, ℝ}, p, v)
+    function exp(M::Segre{ℝ, V}, p, v)
 
 Exponential map on the Segre manifold.
 
@@ -389,12 +330,7 @@ If ``M = 0`` and ``\nu t < \lambda``, then ``\operatorname{exp}_p(v) = p + v``.
 
 For a proof, see proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
-function exp(#={{{=#
-    M::Segre{V, ℝ},
-    p,
-    v,
-    ) where {V}
-
+function exp(M::Segre{ℝ,V}, p, v) where {V}
     @assert(is_point(M, p))
     @assert(is_vector(M, p, v))
 
@@ -402,14 +338,9 @@ function exp(#={{{=#
     exp!(M, q, p, v)
 
     return q
-end#=}}}=#
+end
 
-function exp!(#={{{=#
-    M::Segre{V, ℝ},
-    q,
-    p,
-    v,
-    ) where {V}
+function exp!(M::Segre{ℝ,V}, q, p, v) where {V}
     m_ = m(p, q)
 
     if m_ == 0.0
@@ -423,27 +354,23 @@ function exp!(#={{{=#
     f = atan(sqrt(P^2 + 1.0) * t / p[1][1] + P) - atan(P)
 
     q[1][1] = sqrt(
-        t^2 +
-        2 * p[1][1] * P * t / sqrt(P^2 + 1.0) +
-        p[1][1]^2 # This factor is wrong in Swijsen21 on arxiv
-        )
+        t^2 + 2 * p[1][1] * P * t / sqrt(P^2 + 1.0) + p[1][1]^2, # This factor is wrong in Swijsen21 on arxiv
+    )
 
     for (n, x, y, xdot) in zip(V, p[2:end], q[2:end], v[2:end])
         if all(xdot .== 0.0)
             y .= deepcopy(x)
         else
             a = norm(Sphere(n - 1), x, xdot)
-            y .=
-                x * cos(a * f / m_) .+
-                xdot * sin(a * f / m_) / a
+            y .= x * cos(a * f / m_) .+ xdot * sin(a * f / m_) / a
         end
     end
 
     return 0
-end#=}}}=#
+end
 
 @doc raw"""
-    function log(M::Segre{V, ℝ}, p, q)
+    function log(M::Segre{ℝ, V}, p, q)
 
 Logarithmic map on the Segre manifold.
 
@@ -463,12 +390,7 @@ where ``a_i`` is the distance on ``S^{n_i - 1}`` from ``x_i`` to ``y_i``, ``M = 
 
 For a proof, see theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
-function log(#={{{=#
-    M::Segre{V, ℝ},
-    p,
-    q,
-    ) where {V}
-
+function log(M::Segre{ℝ,V}, p, q) where {V}
     @assert(is_point(M, p))
     @assert(is_point(M, q))
 
@@ -479,15 +401,9 @@ function log(#={{{=#
     log!(M, v, p, q_)
 
     return v
-end#=}}}=#
+end
 
-function log!(#={{{=#
-    M::Segre{V, ℝ},
-    v,
-    p,
-    q
-    ) where {V}
-
+function log!(M::Segre{ℝ,V}, v, p, q) where {V}
     for (n, xdot, x, y) in zip(V, v[2:end], p[2:end], q[2:end])
         a = distance(Sphere(n - 1), x, y)
         if a == 0.0
@@ -497,10 +413,9 @@ function log!(#={{{=#
         end
     end
 
-    m = sqrt(sum([
-        distance(Sphere(n - 1), x, y)^2
-        for (n, x, y) in zip(V, p[2:end], q[2:end])
-        ]))
+    m = sqrt(
+        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
+    )
     if m == 0.0
         v[1][1] = q[1][1] - p[1][1]
     else
@@ -511,10 +426,10 @@ function log!(#={{{=#
     end
 
     return 0
-end#=}}}=#
+end
 
 @doc raw"""
-    function distance(M::Segre{V, ℝ}, p, q)
+    function distance(M::Segre{ℝ, V}, p, q)
 
 Riemannian distance between two points `p` and `q` on the Segre manifold.
 
@@ -524,12 +439,7 @@ Assume ``p = (\lambda, x_1, \dots, x_d)``, ``q = (\mu, y_1, \dots, y_d) \in \mat
 ````
 where ``M = \sqrt{\operatorname{dist}_{S^{n_1}}(x_1, y_1)^2 + \dots + \operatorname{dist}_{S^{n_d}}(x_d, y_d)^2}``.
 """
-function distance(#={{{=#
-    M::Segre{V, ℝ},
-    p,
-    q
-    ) where {V}
-
+function distance(M::Segre{ℝ,V}, p, q) where {V}
     @assert(is_point(M, p))
     @assert(is_point(M, q))
     q_ = closest_representation(M, p, q)
@@ -537,10 +447,10 @@ function distance(#={{{=#
 
     return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(m(p, q_) / 2)^2)
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(m)) but more stable for small m
-end#=}}}=#
+end
 
 @doc raw"""
-    function riemann_tensor(M::Segre{V, ℝ}, p, u, v, w)
+    function riemann_tensor(M::Segre{ℝ, V}, p, u, v, w)
 
 Riemann tensor of the Segre manifold at `p`.
 
@@ -551,28 +461,30 @@ If ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}`` and ``u``, ``v``, ``w \in 
 ````
 ``R_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
 """
-function riemann_tensor(#={{{=#
-    M::Segre{V, ℝ},
-    p,
-    u,
-    v,
-    w,
-    ) where {V}
-    
+function riemann_tensor(M::Segre{ℝ,V}, p, u, v, w) where {V}
     @assert(is_point(M, p))
     @assert(is_vector(M, p, u))
     @assert(is_vector(M, p, v))
     @assert(is_vector(M, p, w))
 
-    u_ = deepcopy(u); u_[1][1] = 0.0
-    v_ = deepcopy(v); v_[1][1] = 0.0
-    w_ = deepcopy(w); w_[1][1] = 0.0
+    u_ = deepcopy(u)
+    u_[1][1] = 0.0
+    v_ = deepcopy(v)
+    v_[1][1] = 0.0
+    w_ = deepcopy(w)
+    w_[1][1] = 0.0
 
-    return [[0.0], [riemann_tensor(Sphere(n - 1), x, xdot1, xdot2, xdot3) for (n, x, xdot1, xdot2, xdot3) in zip(V, p[2:end], u_[2:end], v_[2:end], w_[2:end])]...] + (1 / p[1][1]^2) * (inner(M, p, u_, w_) * v_ - inner(M, p, v_, w_) * u_)
-end#=}}}=#
+    return [
+        [0.0],
+        [
+            riemann_tensor(Sphere(n - 1), x, xdot1, xdot2, xdot3) for
+            (n, x, xdot1, xdot2, xdot3) in zip(V, p[2:end], u_[2:end], v_[2:end], w_[2:end])
+        ]...,
+    ] + (1 / p[1][1]^2) * (inner(M, p, u_, w_) * v_ - inner(M, p, v_, w_) * u_)
+end
 
 @doc raw"""
-    function sectional_curvature(M::Segre{V, ℝ}, p, u, v)
+    function sectional_curvature(M::Segre{ℝ, V}, p, u, v)
 
 Sectional curvature of the Segre manifold at ``p``.
 
@@ -583,16 +495,11 @@ If ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}``, ``u_i \in T_{x_i} S^{n_i 
 ````
 ``K_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
 """
-function sectional_curvature(#={{{=#
-    M::Segre{V, ℝ},
-    p,
-    u,
-    v
-    ) where {V}
-
+function sectional_curvature(M::Segre{ℝ,V}, p, u, v) where {V}
     @assert(is_point(M, p))
     @assert(is_vector(M, p, u))
     @assert(is_vector(M, p, v))
 
-    return inner(M, p, riemann_tensor(M, p, u, v, v), u) / (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)
-end#=}}}=#
+    return inner(M, p, riemann_tensor(M, p, u, v, v), u) /
+           (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)
+end

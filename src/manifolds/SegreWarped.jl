@@ -15,37 +15,35 @@ The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](
 """
 struct WarpedMetric{A} <: AbstractMetric end
 
-valence(::MetricManifold{𝔽, Segre{V, 𝔽}, WarpedMetric{A}}) where {V, A, 𝔽} = V
-ndims(::MetricManifold{𝔽, Segre{V, 𝔽}, WarpedMetric{A}}) where {V, A, 𝔽} = length(V)
+valence(::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}}) where {V,A,𝔽} = V
+ndims(::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}}) where {V,A,𝔽} = length(V)
 
 """
-    function get_coordinates(M::MetricManifold{𝔽, Segre{V, 𝔽}, WarpedMetric{A}}, p, v; kwargs...)
+    function get_coordinates(M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, v; kwargs...)
 """
-function get_coordinates(#={{{=#
-    M::MetricManifold{𝔽, Segre{V, 𝔽}, WarpedMetric{A}},
+function get_coordinates(
+    M::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}},
     p,
     v;
-    kwargs...
-    ) where {V, A, 𝔽}
-
+    kwargs...,
+) where {V,A,𝔽}
     return get_coordinates(M.manifold, p, v; kwargs...)
-end#=}}}=#
+end
 
 """
-    function get_vector(M::MetricManifold{𝔽, Segre{V, 𝔽}, WarpedMetric{A}}, p, X; kwargs...)
+    function get_vector(M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, X; kwargs...)
 """
-function get_vector(#={{{=#
-    M::MetricManifold{𝔽, Segre{V, 𝔽}, WarpedMetric{A}},
+function get_vector(
+    M::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}},
     p,
     X;
-    kwargs...
-    ) where {V, A, 𝔽}
-
+    kwargs...,
+) where {V,A,𝔽}
     return get_vector(M.manifold, p, X; kwargs...)
-end#=}}}=#
+end
 
 @doc raw"""
-    function inner( M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}}, p, u, v)
+    function inner( M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, u, v)
 
 Inner product between two tangent vectors ``u = (\nu, u_1, \dots, u_d)`` and ``v = (\xi, v_1, \dots, v_d)`` at ``p = (\lambda, x_1, \dots, x_d``:
 ````math
@@ -53,84 +51,50 @@ Inner product between two tangent vectors ``u = (\nu, u_1, \dots, u_d)`` and ``v
 ````
 where ``\nu``, ``\xi \in T_{\lambda} ℝ^{+} = ℝ`` and ``u_i``, ``v_i \in T_{x_i} S^{n_i - 1} \subset ℝ^{n_i}``.
 """
-function inner(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
-    p,
-    u,
-    v,
-    ) where {V, A}
-
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, u))
-    @assert(is_vector(M, p, v))
-
+function inner(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, u, v) where {A}
     return u[1][1] * v[1][1] + (A * p[1][1])^2 * dot(u[2:end], v[2:end])
-end#=}}}=#
+end
 
 @doc raw"""
-    function norm(M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}}, p, v)
+    function norm(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, v)
 
 Norm of tangent vector ``v`` at ``p``.
 """
-function norm(#={{{=#
-    M::MetricManifold{𝔽, Segre{V, 𝔽}, WarpedMetric{A}},
-    p,
-    v,
-    ) where {V, A, 𝔽}
-
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, v))
-
+function norm(M::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}}, p, v) where {V,A,𝔽}
     return sqrt(inner(M, p, v, v))
-end#=}}}=#
+end
 
 @doc raw"""
-    function m(M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}}, p, q)
+    function m(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, q)
 
 When ``p``, ``q \in ℝ^{+} \times S^{n_1 - 1} \times \dots \times S^{n_d - 1}``, this is the distance between the ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}`` parts of ``p`` and ``q``.
 """
-function m(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
-    p,
-    q
-    ) where {V}
-
-    return sqrt(sum([
-        distance(Sphere(n - 1), x, y)^2
-        for (n, x, y) in zip(V, a[2:end], b[2:end])
-        ]))
-end#=}}}=#
+function m(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric}, p, q)
+    return sqrt(
+        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
+    )
+end
 
 """
-    function compatible(M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}}, p, q)
+    function compatible(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, q)
 
 Check if two representations, `p` and `q`, are compatible. To check if two points are compatible, compose with `closest_representation`.
 """
-function compatible(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
-    p,
-    q
-    ) where {V, A}
-
+function compatible(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, q) where {A}
     return A * m(p, q) < pi
-end#=}}}=#
+end
 
 """
-    function closest_representation(M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}}, p, q)
+    function closest_representation(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, q)
 
 Find the representation of ``q`` that is closest to ``p``.
 """
-function closest_representation(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
-    p,
-    q
-    ) where {V}
-
-    return closest_representation(M.manifold, p ,q)
-end#=}}}=#
+function closest_representation(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric}, p, q)
+    return closest_representation(M.manifold, p, q)
+end
 
 @doc raw"""
-    function exp(M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}}, p, v)
+    function exp(M::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}, p, v)
 
 Exponential map on the warped Segre manifold.
 
@@ -154,28 +118,9 @@ If ``M = 0`` and ``\nu t < \lambda``, then ``\operatorname{exp}_p(v) = p + v``.
 
 For a proof, see proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
-function exp(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
-    p,
-    v,
-    ) where {V, A}
+exp(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric}, p, v)
 
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, v))
-
-    q = zeros.(size.(p)) # Initialize
-    exp!(M, q, p, v)
-
-    return q
-end#=}}}=#
-
-function exp!(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
-    q,
-    p,
-    v,
-    ) where {V, A}
-
+function exp!(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, q, p, v) where {A}
     m_ = m(p, q)
     if m_ == 0.0
         q .= deepcopy(p) # Initialize
@@ -187,28 +132,22 @@ function exp!(#={{{=#
     P = v[1][1] / (p[1][1] * A * m_)
     f = atan(sqrt(P^2 + 1.0) * t / p[1][1] + P) - atan(P)
 
-    q[1][1] = sqrt(
-        t^2 +
-        2 * p[1][1] * P * t / sqrt(P^2 + 1.0) +
-        p[1][1]^2
-        )
+    q[1][1] = sqrt(t^2 + 2 * p[1][1] * P * t / sqrt(P^2 + 1.0) + p[1][1]^2)
 
     for (n, x, y, xdot) in zip(V, p[2:end], q[2:end], v[2:end])
         if all(xdot .== 0.0)
             y .= deepcopy(x)
         else
             a = norm(Sphere(n - 1), x, xdot)
-            y .=
-                x * cos(a * f / (A * m_)) .+
-                xdot * sin(a * f / (A * m_)) / a
+            y .= x * cos(a * f / (A * m_)) .+ xdot * sin(a * f / (A * m_)) / a
         end
     end
 
     return 0
-end#=}}}=#
+end
 
 @doc raw"""
-    function log(M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}}, p, q)
+    function log(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, q)
 
 Logarithmic map on the warped Segre manifold.
 
@@ -228,17 +167,16 @@ where ``a_i`` is the distance on ``S^{n_i - 1}`` from ``x_i`` to ``y_i``, ``M = 
 
 For a proof, see theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
-function log(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
-    p,
-    q,
-    ) where {V, A}
-
-    @assert(is_point(M, p))
-    @assert(is_point(M, q))
+function log(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, q) where {A}
 
     # Check for compatability
-    m(a, b) = sqrt(sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, a[2:end], b[2:end])]))
+    function m(a, b)
+        return sqrt(
+            sum([
+                distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, a[2:end], b[2:end])
+            ]),
+        )
+    end
     if A * m(p, q) < pi # Even if there are closer representations, we prioritize log being continuous
         v = zeros.(size.(p)) # Initialize
         log!(M, v, p, q)
@@ -268,26 +206,16 @@ function log(#={{{=#
                 m(p, q1) < m(p, q2) ? flips = flips1 : flips = flips2
             end
         end
-
         q_ = deepcopy(q)
         q_[flips] = -q[flips]
-        @assert(iseven(sum(flips))) # Should not be necessary but you never know...
-        @assert(A * m(p, q_) < pi)
-
-        v = zeros.(size.(p)) # Initialize
+        v = zeros.(size.(p))
         log!(M, v, p, q_)
     end
 
     return v
-end#=}}}=#
+end
 
-function log!(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
-    v,
-    p,
-    q
-    ) where {V, A}
-
+function log!(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, v, p, q) where {A}
     for (n, xdot, x, y) in zip(V, v[2:end], p[2:end], q[2:end])
         a = distance(Sphere(n - 1), x, y)
         if a == 0.0
@@ -297,10 +225,9 @@ function log!(#={{{=#
         end
     end
 
-    m = sqrt(sum([
-        distance(Sphere(n - 1), x, y)^2
-        for (n, x, y) in zip(V, p[2:end], q[2:end])
-        ]))
+    m = sqrt(
+        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
+    )
     if m == 0.0
         v[1][1] = q[1][1] - p[1][1]
     else
@@ -311,10 +238,10 @@ function log!(#={{{=#
     end
 
     return 0
-end#=}}}=#
+end
 
 @doc raw"""
-    function distance(M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}}, p, q)
+    function distance(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, q)
 
 Riemannian distance between two points `p` and `q` on the warped Segre manifold.
 
@@ -324,26 +251,17 @@ Assume ``p = (\lambda, x_1, \dots, x_d)``, ``q = (\mu, y_1, \dots, y_d) \in \mat
 ````
 where ``M = \sqrt{\operatorname{dist}_{S^{n_1}}(x_1, y_1)^2 + \dots + \operatorname{dist}_{S^{n_d}}(x_d, y_d)^2}``.
 """
-function distance(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
-    p,
-    q,
-    ) where {V, A}
-
-    @assert(is_point(M, p))
-    @assert(is_point(M, q))
-
-    m = sqrt(sum([
-        distance(Sphere(n - 1), x, y)^2
-        for (n, x, y) in zip(V, p[2:end], q[2:end])
-        ]))
+function distance(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, q) where {A}
+    m = sqrt(
+        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
+    )
 
     return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(A * m / 2)^2)
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(A * m)) but more stable for small m
-end#=}}}=#
+end
 
 @doc raw"""
-    function riemann_tensor(M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}}, p, u, v)
+    function riemann_tensor(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, u, v)
 
 Riemann tensor of the warped Segre manifold at ``p``.
 
@@ -354,28 +272,25 @@ If ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}_A`` and ``u``, ``v``, ``w \i
 ````
 ``R_{\mathcal{S}_A}`` is zero in the remaining (orthogonal) directions.
 """
-function riemann_tensor(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
-    p,
-    u,
-    v,
-    w
-    ) where {V, A}
-    
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, u))
-    @assert(is_vector(M, p, v))
-    @assert(is_vector(M, p, w))
-
-    u_ = deepcopy(u); u_[1][1] = 0.0
-    v_ = deepcopy(v); v_[1][1] = 0.0
-    w_ = deepcopy(w); w_[1][1] = 0.0
-
-    return [[0.0], [riemann_tensor(Sphere(n - 1), x, xdot1, xdot2, xdot3) for (n, x, xdot1, xdot2, xdot3) in zip(V, p[2:end], u_[2:end], v_[2:end], w_[2:end])]...] + (1 / p[1][1]^2) * (inner(M, p, u_, w_) * v_ - inner(M, p, v_, w_) * u_)
-end#=}}}=#
+function riemann_tensor(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, u, v, w) where {A}
+    # Can we avoid the deep-copies here? That looks a bit inefficient
+    u_ = deepcopy(u)
+    u_[1][1] = 0.0
+    v_ = deepcopy(v)
+    v_[1][1] = 0.0
+    w_ = deepcopy(w)
+    w_[1][1] = 0.0
+    return [
+        [0.0],
+        [
+            riemann_tensor(Sphere(n - 1), x, xdot1, xdot2, xdot3) for
+            (n, x, xdot1, xdot2, xdot3) in zip(V, p[2:end], u_[2:end], v_[2:end], w_[2:end])
+        ]...,
+    ] + (1 / p[1][1]^2) * (inner(M, p, u_, w_) * v_ - inner(M, p, v_, w_) * u_)
+end
 
 @doc raw"""
-    function sectional_curvature(M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}}, p, u, v)
+    function sectional_curvature(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, u, v)
 
 Sectional curvature of the warped Segre manifold at ``p``.
 
@@ -386,16 +301,12 @@ If ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}``, ``u_i \in T_{x_i} S^{n_i 
 ````
 ``K_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
 """
-function sectional_curvature(#={{{=#
-    M::MetricManifold{ℝ, Segre{V, ℝ}, WarpedMetric{A}},
+function sectional_curvature(
+    M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}},
     p,
     u,
-    v
-    ) where {V, A, ℝ}
-
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, u))
-    @assert(is_vector(M, p, v))
-
-    return inner(M, p, riemann_tensor(M, p, u, v, v), u) / (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)
-end#=}}}=#
+    v,
+) where {A}
+    return inner(M, p, riemann_tensor(M, p, u, v, v), u) /
+           (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)
+end

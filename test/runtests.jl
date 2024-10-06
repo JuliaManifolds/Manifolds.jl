@@ -160,6 +160,7 @@ end
         include_test("manifolds/probability_simplex.jl")
         include_test("manifolds/projective_space.jl")
         include_test("manifolds/rotations.jl")
+        include_test("manifolds/segre.jl")
         include_test("manifolds/shape_space.jl")
         include_test("manifolds/skewhermitian.jl")
         include_test("manifolds/spectrahedron.jl")
