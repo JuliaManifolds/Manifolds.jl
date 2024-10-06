@@ -1,4 +1,4 @@
-using Manifolds
+using Manifolds, Test
 
 # Tests are written for manifolds with this type
 T = Union{Segre{V,ℝ},MetricManifold{ℝ,Segre{V,ℝ},AlphaWarpedMetric{A}}} where {V,A}
