@@ -1,8 +1,7 @@
 using Manifolds, Test
 
 @testset "The Segre manifold" begin
-    @testset "Basic functions on the Segre manifold" begin
-    end
+    @testset "Basic functions on the Segre manifold" begin end
     @testset "The warped metric" begin end
     #=
     # Tests are written for manifolds with this type
