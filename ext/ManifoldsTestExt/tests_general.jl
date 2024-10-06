@@ -651,10 +651,7 @@ function test_manifold(
         q = pts[2]
         X = inverse_retract(M, p, q, default_inverse_retraction_method)
         Y = vee(M, p, X)
-        Test.@test length(Y) == number_of_coordinates(
-            M,
-            ManifoldsBase.VeeOrthogonalBasis(number_system(M)),
-        )
+        Test.@test length(Y) == number_of_coordinates(M, ManifoldsBase.VeeOrthogonalBasis())
         Test.@test isapprox(M, p, X, hat(M, p, Y))
         Y2 = allocate(Y)
         vee_ret = vee!(M, Y2, p, X)
