@@ -5,7 +5,7 @@ using Manifolds, Test
     @testset "The warped metric" begin end
     #=
     # Tests are written for manifolds with this type
-    T = Union{Segre{V,ℝ},MetricManifold{ℝ,Segre{V,ℝ},AlphaWarpedMetric{A}}} where {V,A}
+    T = Union{Segre{V,ℝ},MetricManifold{ℝ,Segre{V,ℝ},WarpedMetric{A}}} where {V,A}
 
     # Approximate derivative of f at x
     function finite_difference(f::Function, x::Float64, h::Float64; order=1::Int64)
@@ -40,7 +40,7 @@ using Manifolds, Test
 
     # Segre is a special case of warped Segre, with warping factor 1
     get_warping_factor(M::Segre{V,ℝ}) = 1.0
-    get_warping_factor(M::MetricManifold{ℝ,Segre{V,ℝ},AlphaWarpedMetric{A}}) where {A} = A
+    get_warping_factor(M::MetricManifold{ℝ,Segre{V,ℝ},WarpedMetric{A}}) where {A} = A
 
     # List of manifolds to test
     Ms = [
@@ -51,25 +51,25 @@ using Manifolds, Test
         [
             MetricManifold(
                 Segre(Tuple([rand(range(2, 7)) for _ in 1:1])),
-                AlphaWarpedMetric{rand() + 0.5}(),
+                WarpedMetric{rand() + 0.5}(),
             ) for _ in 1:5
         ]...,
         [
             MetricManifold(
                 Segre(Tuple([rand(range(2, 7)) for _ in 1:2])),
-                AlphaWarpedMetric{rand() + 0.5}(),
+                WarpedMetric{rand() + 0.5}(),
             ) for _ in 1:5
         ]...,
         [
             MetricManifold(
                 Segre(Tuple([rand(range(2, 7)) for _ in 1:3])),
-                AlphaWarpedMetric{rand() + 0.5}(),
+                WarpedMetric{rand() + 0.5}(),
             ) for _ in 1:5
         ]...,
         [
             MetricManifold(
                 Segre(Tuple([rand(range(2, 7)) for _ in 1:4])),
-                AlphaWarpedMetric{rand() + 0.5}(),
+                WarpedMetric{rand() + 0.5}(),
             ) for _ in 1:5
         ]...,
     ]

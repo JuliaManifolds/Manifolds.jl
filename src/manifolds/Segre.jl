@@ -1,14 +1,17 @@
 @doc raw"""
+    Segre{𝔽,V} <: AbstractManifold{𝔽}
+
+The Segre manifold
 ````math
     \mathcal{S} = \operatorname{Seg}(𝔽^{n_1} \times \dots \times 𝔽^{n_d})
 ````
-is the space of rank-one tensors in ``𝔽^{n_1} \otimes \dots \otimes 𝔽^{n_d}``.
+is the set of rank-one tensors in ``𝔽^{n_1} \otimes \dots \otimes 𝔽^{n_d}``.
 
 When ``𝔽 = ℝ``, the Segre manifold is represented as
 ````math
     \mathcal{S} \sim ℝ^{+} \times S^{n_1 - 1} \times \dots \times S^{n_d - 1}.
 ````
-This is a local diffeomorphism, and the manifold is a locally a [warped product](https://en.wikipedia.org/wiki/Warped_product) of ``ℝ^{+}`` and ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``. The tuple ``(n_1, \dots, n_d)`` is called the _valence_ of the manifold.
+This is a local diffeomorphism, and the metric is a locally a [warped product](https://en.wikipedia.org/wiki/Warped_product) of ``ℝ^{+}`` and ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``. The tuple ``(n_1, \dots, n_d)`` is called the _valence_ of the manifold.
 
 The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 
@@ -20,7 +23,7 @@ Generate a valence `V` Segre manifold.
 struct Segre{𝔽,V} <: AbstractManifold{𝔽} end
 
 function Segre(valence::NTuple{V,Int}; field::AbstractNumbers=ℝ) where {V}
-    return Segre{valence,field}()
+    return Segre{field, valence}()
 end
 
 valence(::Segre{𝔽,V}) where {𝔽,V} = V
@@ -169,16 +172,13 @@ end
 @doc raw"""
     function inner(M::Segre{ℝ, V}, p, u, v,)
 
-Inner product between two tangent vectors ``u = (\nu, u_1, \dots, u_d)`` and ``v = (\xi, v_1, \dots, v_d)`` at ``p = (\lambda, x_1, \dots, x_d``. This inner product is obtained by embedding the Segre manifold in the space of tensors equipped with the Euclidean metric:
+Inner product between two tangent vectors ``u = (\nu, u_1, \dots, u_d)`` and ``v = (\xi, v_1, \dots, v_d)`` at ``p \doteq (\lambda, x_1, \dots, x_d)``. This inner product is obtained by embedding the Segre manifold in the space of tensors equipped with the Euclidean metric:
 ````math
     \langle u, v \rangle_{p} = \nu \xi + \lambda^2 (\langle u_1, v_1 \rangle_{x_1} + \dots + \langle u_d, v_d \rangle_{x_d}),
 ````
 where ``\nu``, ``\xi \in T_{\lambda} ℝ^{+} = ℝ`` and ``u_i``, ``v_i \in T_{x_i} S^{n_i - 1} \subset ℝ^{n_i}``.
 """
 function inner(M::Segre{ℝ,V}, p, u, v) where {V}
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, u))
-    @assert(is_vector(M, p, v))
 
     return u[1][1] * v[1][1] + p[1][1]^2 * dot(u[2:end], v[2:end])
 end
@@ -189,8 +189,6 @@ end
 Norm of tangent vector ``v`` at ``p``.
 """
 function norm(M::Segre{𝔽,V}, p, v) where {𝔽,V}
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, v))
 
     return sqrt(inner(M, p, v, v))
 end
@@ -215,13 +213,12 @@ end
 @doc raw"""
     function embed(M::Segre{𝔽, V}, v)
 
-Embed ``p = (\lambda, x_1, \dots, x_d)`` in ``𝔽^{n_1 \times \dots \times n_d}`` using the Krönecker product:
+Embed ``p \doteq (\lambda, x_1, \dots, x_d)`` in ``𝔽^{n_1 \times \dots \times n_d}`` using the Krönecker product:
 ````math
     (\lambda, x_1, \dots, x_d) \mapsto \lambda x_1 \otimes \dots \otimes x_d.
 ````
 """
 function embed(M::Segre{𝔽,V}, p) where {𝔽,V}
-    @assert(is_point(M, p))
 
     return kronecker(p...)[:]
 end
@@ -229,14 +226,12 @@ end
 @doc raw"""
     function embed_vector(M::Segre{𝔽, V}, p, v)
 
-Embed tangent vector ``v = (\nu, u_1, \dots, u_d)`` at ``p = (\lambda, x_1, \dots, x_d`` in ``𝔽^{n_1 \times \dots \times n_d}`` using the Krönecker product:
+Embed tangent vector ``v = (\nu, u_1, \dots, u_d)`` at ``p \doteq (\lambda, x_1, \dots, x_d)`` in ``𝔽^{n_1 \times \dots \times n_d}`` using the Krönecker product:
 ````math
     (\nu, u_1, \dots, u_d) \mapsto \nu x_1 \otimes \dots \otimes x_d + \lambda u_1 \otimes x_2 \otimes \dots \otimes x_d + \dots + \lambda x_1 \otimes \dots \otimes x_{d - 1} \otimes u_d.
 ````
 """
 function embed_vector(M::Segre{𝔽,V}, p, v) where {𝔽,V}
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, v))
 
     # Product rule
     return sum([
@@ -248,11 +243,16 @@ end
 @doc raw"""
     function m(M::Segre{ℝ, V}, p, q)
 
-When ``p``, ``q \in ℝ^{+} \times S^{n_1 - 1} \times \dots \times S^{n_d - 1}``, this is the distance between the ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}`` parts of ``p`` and ``q``.
+Let ``p \doteq (\lambda, x_1, \dots, x_d)``, ``q \doteq (\mu, y_1, \dots, y_d) \in \mathcal{S}``.
+Then
+````math
+    m(p, q) = \sqrt{\sphericalangle(x_1, y_1)^2 + \dots + \sphericalangle(x_d, y_d)^2}
+````
+is the distance between ``(x_1, \dots, x_d)`` and ``(y_1, \dots, y_d)`` on ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``.
 """
 function m(M::Segre{ℝ,V}, p, q) where {V}
     return sqrt(
-        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, a[2:end], b[2:end])]),
+        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
     )
 end
 
@@ -262,7 +262,7 @@ end
 Check if two representations, `p` and `q`, are compatible. To check if two points are compatible, compose with `closest_representation`.
 """
 function compatible(M::Segre{ℝ,V}, p, q) where {V}
-    return m(p, q) < pi
+    return m(M, p, q) < pi
 end
 
 """
@@ -294,7 +294,7 @@ function closest_representation(M::Segre{ℝ,V}, p, q) where {V}
             q2 = deepcopy(q)
             q2[flips2] = -q2[flips2]
 
-            m(p, q1) < m(p, q2) ? flips = flips1 : flips = flips2
+            m(M, p, q1) < m(M, p, q2) ? flips = flips1 : flips = flips2
         end
     end
 
@@ -310,38 +310,37 @@ end
 
 Exponential map on the Segre manifold.
 
-Let ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}`` and ``v = (\nu, u_1, \dots, u_d) \in T_p \mathcal{S}``.
+Let ``p \doteq (\lambda, x_1, \dots, x_d) \in \mathcal{S}`` and ``v = (\nu, u_1, \dots, u_d) \in T_p \mathcal{S}``.
 Then
 ````math
-    \operatorname{exp}_p(v) =
+    \operatorname{exp}_p(v) \doteq
     \left(
-        \sqrt{t^2 + 2 \lambda \nu t + \lambda^2},
-        x_1 \cos(\norm{u_1}_{T_{x_1} S^{n_1}} g(t) / M) + u_1 \sin(\norm{u_1}_{T_{x_1} S^{n_1}} g(t) / M),
-        \dots,
-        x_d \cos(\norm{u_d}_{T_{x_d} S^{n_d}} g(t) / M) + u_d \sin(\norm{u_d}_{T_{x_d} S^{n_d}} g(t) / M)
+        \sqrt{t^2 + 2 \lambda \nu t + \lambda^2},\\
+        x_1 \cos\mathopen{\Big(} \frac{g \lVert u_1 \rVert_{x_1}}{m} \mathclose{\Big)} + \frac{u_1}{\lVert u_1 \rVert_{x_1}} \sin\mathopen{\Big(} \frac{g \lVert u_1 \rVert_{x_1}}{m} \mathclose{\Big)},\\
+        \dots,\\
+        x_d \cos\mathopen{\Big(} \frac{g \lVert u_d \rVert_{x_d}}{m} \mathclose{\Big)} + \frac{u_d}{\lVert u_d \rVert_{x_d}} \sin\mathopen{\Big(} \frac{g \lVert u_d \rVert_{x_d}}{m} \mathclose{\Big)}
     \right),
 ````
-where ``t = \norm{v}_{T_p \mathcal{S}}``, ``M = \sqrt{\norm{u_1}_{T_{x_1} S^{n_1}}^2 + \dots + \norm{u_d}_{T_{x_d} S^{n_d}}^2}``, and
+where
 ````math
-    g(t) = \tan^{-1}(t \sqrt{P^2 + 1} / \lambda + P) - \tan^{-1}(P),\\
-    P = \nu / (\lambda M).
+    g = \tan^{-1}\mathopen{\Big(} t \frac{\sqrt{P^2 + 1}}{\lambda} + P \mathclose{\Big)} - \tan^{-1}(P),\\
+    m = \sqrt{\lVert u_1 \rVert_{x_1}^2 + \dots + \lVert u_d \rVert_{x_d}^2},\\
+    P = \frac{\nu}{\lambda m},\\
+    t = \lVert v \rVert_{p}.
 ````
-If ``M = 0`` and ``\nu t < \lambda``, then ``\operatorname{exp}_p(v) = p + v``.
+If ``m = 0`` and ``\nu t < \lambda``, then ``\operatorname{exp}_p(v) = p + v``.
 
 For a proof, see proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
 function exp(M::Segre{ℝ,V}, p, v) where {V}
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, v))
 
     q = zeros.(size.(p)) # Initialize
     exp!(M, q, p, v)
-
     return q
 end
 
 function exp!(M::Segre{ℝ,V}, q, p, v) where {V}
-    m_ = m(p, q)
+    m_ = m(M, p, q)
 
     if m_ == 0.0
         q .= deepcopy(p) # Initialize
@@ -374,32 +373,31 @@ end
 
 Logarithmic map on the Segre manifold.
 
-Let ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}`` and ``q = (\mu, y_1, \dots, y_d) \in T_p \mathcal{S}``.
-Also, assume ``p`` and ``q`` are connected by a minimizing geodesic.
-Then
+Let ``p \doteq (\lambda, x_1, \dots, x_d)``, ``q \doteq (\mu, y_1, \dots, y_d) \in \mathcal{S}``.
+Assume ``p`` and ``q`` are connected by a geodesic.
+Let
+````math
+    m = \sqrt{\sphericalangle(x_1, y_1)^2 + \dots + \sphericalangle(x_d, y_d)^2}
+````
+and assume ``(\mu, y_1, \dots, y_d)`` is the representation of ``q`` that minimizes ``m``. Then
 ````math
     \operatorname{log}_p(q) =
     c \left(
-        \frac{\lambda M (\operatorname{cos}(M) - \lambda / \mu)}{\operatorname{sin}(M)},
-        a_1 (y_1 - \langle x_1, y_1 \rangle_{ℝ^{n_1 + 1}} x_1) / \operatorname{sin}(a_1),
+        \frac{\lambda m \mathopen{\Big(} \operatorname{cos}(m) - \frac{\lambda}{\mu} \mathclose{\Big)}}{\operatorname{sin}(m)},
+        \frac{\sphericalangle(x_1, y_1) (y_1 - \langle x_1, y_1 \rangle x_1)}{\sin(\sphericalangle(x_1, y_1))},
         \dots,
-        a_d (y_d - \langle x_d, y_d \rangle_{ℝ^{n_d + 1}} x_d) / \operatorname{sin}(a_d)
+        \frac{\sphericalangle(x_d, y_d) (y_d - \langle x_d, y_d \rangle x_d)}{\sin(\sphericalangle(x_d, y_d))}
     \right),
 ````
-where ``a_i`` is the distance on ``S^{n_i - 1}`` from ``x_i`` to ``y_i``, ``M = \sqrt{a_1^2 + \dots + a_d^2}``, and ``c`` is determined by ``\norm{\operatorname{log}_p(q)}_{T_p \mathcal{S}} = \operatorname{dist}(p, q)``.
+where ``c`` is determined by ``\lVert \operatorname{log}_p(q) \rVert_{p} = \operatorname{dist}(p, q)``.
 
 For a proof, see theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
 function log(M::Segre{ℝ,V}, p, q) where {V}
-    @assert(is_point(M, p))
-    @assert(is_point(M, q))
 
     q_ = closest_representation(M, p, q)
-    @assert(compatible(M, p, q_))
-
     v = zeros.(size.(p)) # Initialize
     log!(M, v, p, q_)
-
     return v
 end
 
@@ -413,13 +411,11 @@ function log!(M::Segre{ℝ,V}, v, p, q) where {V}
         end
     end
 
-    m = sqrt(
-        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
-    )
-    if m == 0.0
+    m_ = m(M, p, q)
+    if m_ == 0.0
         v[1][1] = q[1][1] - p[1][1]
     else
-        v[1][1] = m * p[1][1] * (q[1][1] * cos(m) - p[1][1]) / (q[1][1] * sin(m))
+        v[1][1] = m_ * p[1][1] * (q[1][1] * cos(m_) - p[1][1]) / (q[1][1] * sin(m_))
 
         t = distance(M, p, q)
         v .= t * v / norm(M, p, v)
@@ -433,40 +429,35 @@ end
 
 Riemannian distance between two points `p` and `q` on the Segre manifold.
 
-Assume ``p = (\lambda, x_1, \dots, x_d)``, ``q = (\mu, y_1, \dots, y_d) \in \mathcal{S}`` are connected by a minimizing geodesic. Then
+Assume ``p \doteq (\lambda, x_1, \dots, x_d)``, ``q \doteq (\mu, y_1, \dots, y_d) \in \mathcal{S}`` are connected by a geodesic. Let
 ````math
-    \operatorname{dist}_{\mathcal{S}}(p, q) = \sqrt{\lambda^2 - 2 \lambda \mu \cos(M) + \mu^2},
+    m = \sqrt{\sphericalangle(x_1, y_1)^2 + \dots + \sphericalangle(x_d, y_d)^2}
 ````
-where ``M = \sqrt{\operatorname{dist}_{S^{n_1}}(x_1, y_1)^2 + \dots + \operatorname{dist}_{S^{n_d}}(x_d, y_d)^2}``.
+and assume ``(\mu, y_1, \dots, y_d)`` is the representation of ``q`` that minimizes ``m``. Then
+````math
+    \operatorname{dist}_{\mathcal{S}}(p, q) = \sqrt{\lambda^2 - 2 \lambda \mu \cos(m) + \mu^2}.
+````
 """
 function distance(M::Segre{ℝ,V}, p, q) where {V}
-    @assert(is_point(M, p))
-    @assert(is_point(M, q))
-    q_ = closest_representation(M, p, q)
-    @assert(compatible(M, p, q_))
 
-    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(m(p, q_) / 2)^2)
+    q_ = closest_representation(M, p, q)
+    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(m(M, p, q_) / 2)^2)
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(m)) but more stable for small m
 end
 
 @doc raw"""
     function riemann_tensor(M::Segre{ℝ, V}, p, u, v, w)
 
-Riemann tensor of the Segre manifold at `p`.
+Riemann tensor of the Segre manifold at ``p``.
 
-``\mathcal{S}`` is locally a warped product of ``ℝ^{+}`` and ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``
-If ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}`` and ``u``, ``v``, ``w \in T_p (S^{n_1 - 1} \times \dots \times S^{n_d - 1}) \subset T_p \mathcal{S}`` then
+``\mathcal{S}`` is locally a warped product of ``ℝ^{+}`` and ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``.
+If ``p \doteq (\lambda, x_1, \dots, x_d) \in \mathcal{S}`` and ``u``, ``v``, ``w \in T_p (S^{n_1 - 1} \times \dots \times S^{n_d - 1}) \subset T_p \mathcal{S}`` then
 ````math
     R_{\mathcal{S}}(u, v) w = R_{S^{n_1 - 1} \times \dots \times S^{n_d - 1}}(u, v) w + \lambda^{-2}(\langle u, w \rangle_p v - \langle v, w \rangle_p u).
 ````
 ``R_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
 """
 function riemann_tensor(M::Segre{ℝ,V}, p, u, v, w) where {V}
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, u))
-    @assert(is_vector(M, p, v))
-    @assert(is_vector(M, p, w))
-
     u_ = deepcopy(u)
     u_[1][1] = 0.0
     v_ = deepcopy(v)
@@ -489,16 +480,13 @@ end
 Sectional curvature of the Segre manifold at ``p``.
 
 ``\mathcal{S}`` is locally a warped product of ``ℝ^{+}`` and ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``
-If ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}``, ``u_i \in T_{x_i} S^{n_i - 1}``, and ``v_j \in T_{x_j} S^{n_j - 1}``, then
+If ``p \doteq (\lambda, x_1, \dots, x_d) \in \mathcal{S}``, ``u_i \in T_{x_i} S^{n_i - 1}``, and ``v_j \in T_{x_j} S^{n_j - 1}``, then
 ````math
-    K_{\mathcal{S}}(u_i, v_j) = -(1 - \delta_{i j}) \lambda^2.
+    K_{\mathcal{S}}(u_i, v_j) = \frac{\delta_{i j} - 1}{\lambda^2}.
 ````
 ``K_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
 """
 function sectional_curvature(M::Segre{ℝ,V}, p, u, v) where {V}
-    @assert(is_point(M, p))
-    @assert(is_vector(M, p, u))
-    @assert(is_vector(M, p, v))
 
     return inner(M, p, riemann_tensor(M, p, u, v, v), u) /
            (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)

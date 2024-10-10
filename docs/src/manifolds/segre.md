@@ -1,4 +1,4 @@
-# The Segre-Veronese manifold
+# The Segre manifold
 
 ```@docs
 Segre
@@ -26,6 +26,6 @@ Order = [:function]
 ## Literature
 
 ```@bibliography
-Pages = ["sphere.md"]
+Pages = ["segre.md"]
 Canonical=false
 ```

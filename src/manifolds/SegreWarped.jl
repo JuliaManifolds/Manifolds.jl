@@ -1,7 +1,7 @@
 @doc raw"""
     WarpedMetric{A} <: AbstractMetric
 
-is the warped metric on the Segre manifold ``\mathcal{S}``. We denote it ``\mathcal{S}_A``. It is a generalization of the metric
+is the ``A``-warped metric on the Segre manifold ``\mathcal{S}``. We denote it ``\mathcal{S}_A``. It is a generalization of the metric
 ````math
     \langle (\nu, u_1, \dots, u_d), (\xi, v_1, \dots, v_d) \rangle_{(\lambda, x_1, \dots, x_d)} = \nu \xi + \lambda^2 (\langle u_1, v_1 \rangle + \dots + \langle u_d, v_d \rangle),
 ````
@@ -81,7 +81,7 @@ end
 Check if two representations, `p` and `q`, are compatible. To check if two points are compatible, compose with `closest_representation`.
 """
 function compatible(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, q) where {A}
-    return A * m(p, q) < pi
+    return A * m(M, p, q) < pi
 end
 
 """
@@ -98,30 +98,32 @@ end
 
 Exponential map on the warped Segre manifold.
 
-Let ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}_A`` and ``v = (\nu, u_1, \dots, u_d) \in T_p \mathcal{S}_A``.
+Let ``p \doteq (\lambda, x_1, \dots, x_d) \in \mathcal{S}_A`` and ``v = (\nu, u_1, \dots, u_d) \in T_p \mathcal{S}_A``.
 Then
 ````math
-    \operatorname{exp}_p(v) =
+    \operatorname{exp}_p(v) \doteq
     \left(
-        \sqrt{t^2 + 2 \lambda \nu t + \lambda^2},
-        x_1 \cos(\norm{u_1}_{T_{x_1} S^{n_1}} g(t) / (A M)) + u_1 \sin(\norm{u_1}_{T_{x_1} S^{n_1}} g(t) / (A M)),
-        \dots,
-        x_d \cos(\norm{u_d}_{T_{x_d} S^{n_d}} g(t) / (A M)) + u_d \sin(\norm{u_d}_{T_{x_d} S^{n_d}} g(t) / (A M))
+        \sqrt{t^2 + 2 \lambda \nu t + \lambda^2},\\
+        x_1 \cos\mathopen{\Big(} \frac{g \lVert u_1 \rVert_{x_1}}{A m} \mathclose{\Big)} + \frac{u_1}{\lVert u_1 \rVert_{x_1}} \sin\mathopen{\Big(} \frac{g \lVert u_1 \rVert_{x_1}}{A m} \mathclose{\Big)},\\
+        \dots,\\
+        x_d \cos\mathopen{\Big(} \frac{g \lVert u_d \rVert_{x_d}}{A m} \mathclose{\Big)} + \frac{u_d}{\lVert u_d \rVert_{x_d}} \sin\mathopen{\Big(} \frac{g \lVert u_d \rVert_{x_d}}{A m} \mathclose{\Big)}
     \right),
 ````
-where ``t = \norm{v}_{T_p \mathcal{S}_A}``, ``M = \sqrt{\norm{u_1}_{T_{x_1} S^{n_1}}^2 + \dots + \norm{u_d}_{T_{x_d} S^{n_d}}^2}``, and
+where
 ````math
-    g(t) = \tan^{-1}(t \sqrt{P^2 + 1} / \lambda + P) - \tan^{-1}(P),\\
-    P = \nu / (\lambda A M).
+    g = \tan^{-1}\mathopen{\Big(} t \frac{\sqrt{P^2 + 1}}{\lambda} + P \mathclose{\Big)} - \tan^{-1}(P),\\
+    m = \sqrt{\lVert u_1 \rVert_{x_1}^2 + \dots + \lVert u_d \rVert_{x_d}^2},\\
+    P = \frac{\nu}{\lambda A m},\\
+    t = \lVert v \rVert_{p}.
 ````
-If ``M = 0`` and ``\nu t < \lambda``, then ``\operatorname{exp}_p(v) = p + v``.
+If ``m = 0`` and ``\nu t < \lambda``, then ``\operatorname{exp}_p(v) = p + v``.
 
 For a proof, see proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
 exp(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric}, p, v)
 
 function exp!(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, q, p, v) where {A}
-    m_ = m(p, q)
+    m_ = m(M, p, q)
     if m_ == 0.0
         q .= deepcopy(p) # Initialize
         q[1] .= q[1] .+ v[1]
@@ -151,67 +153,31 @@ end
 
 Logarithmic map on the warped Segre manifold.
 
-Let ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}_A`` and ``q = (\mu, y_1, \dots, y_d) \in T_p \mathcal{S}_A``.
-Also, assume ``p`` and ``q`` are connected by a minimizing geodesic.
-Then
+Let ``p \doteq (\lambda, x_1, \dots, x_d)``, ``q \doteq (\mu, y_1, \dots, y_d) \in \mathcal{S}_A``.
+Assume ``p`` and ``q`` are connected by a geodesic.
+Let
+````math
+    m = \sqrt{\sphericalangle(x_1, y_1)^2 + \dots + \sphericalangle(x_d, y_d)^2}
+````
+and assume ``(\mu, y_1, \dots, y_d)`` is the representation of ``q`` that minimizes ``m``. Then
 ````math
     \operatorname{log}_p(q) =
     c \left(
-        \frac{\lambda A M (\cos(A M) - \lambda / \mu)}{\sin(A M)},
-        a_1 (y_1 - \langle x_1, y_1 \rangle_{ℝ^{n_1 + 1}} x_1) / \sin(a_1),
+        \frac{\lambda A m \mathopen{\Big(} \cos(A m) - \frac{\lambda}{\mu} \mathclose{\Big)}}{\sin(A m)},
+        \frac{\sphericalangle(x_1, y_1) (y_1 - \langle x_1, y_1 \rangle x_1)}{\sin(\sphericalangle(x_1, y_1))},
         \dots,
-        a_d (y_d - \langle x_d, y_d \rangle_{ℝ^{n_d + 1}} x_d) / \sin(a_d)
+        \frac{\sphericalangle(x_d, y_d) (y_d - \langle x_d, y_d \rangle x_d)}{\sin(\sphericalangle(x_d, y_d))}
     \right),
 ````
-where ``a_i`` is the distance on ``S^{n_i - 1}`` from ``x_i`` to ``y_i``, ``M = \sqrt{a_1^2 + \dots + a_d^2}``, and ``c`` is determined by ``\norm{\operatorname{log}_p(q)}_{T_p \mathcal{S}_A} = \operatorname{dist}(p, q)``.
+where ``c`` is determined by ``\lVert \operatorname{log}_p(q) \rVert_{p} = \operatorname{dist}(p, q)``.
 
 For a proof, see theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
 function log(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, q) where {A}
 
-    # Check for compatability
-    function m(a, b)
-        return sqrt(
-            sum([
-                distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, a[2:end], b[2:end])
-            ]),
-        )
-    end
-    if A * m(p, q) < pi # Even if there are closer representations, we prioritize log being continuous
-        v = zeros.(size.(p)) # Initialize
-        log!(M, v, p, q)
-    else
-        # Find closest representation by flipping an even number of signs.
-        ds = [distance(Sphere(n - 1), x, y) for (n, x, y) in zip(V, p[2:end], q[2:end])]
-        flips = [false, (ds .> (pi / 2))...]
-        nbr_flips = sum(flips)
-
-        # This code is pretty ugly. It can also be implemented slightly more efficiently, O(d) rather than O(log(d) d), by not sorting ds.
-        if isodd(nbr_flips)
-            if nbr_flips == length(V)
-                flips[argmin(ds) + 1] = false
-            else
-                is = sortperm(ds; rev=true)
-
-                flips1 = deepcopy(flips)
-                flips1[is[nbr_flips] + 1] = false
-                q1 = deepcopy(q)
-                q1[flips1] = -q1[flips1]
-
-                flips2 = deepcopy(flips)
-                flips2[is[nbr_flips + 1] + 1] = true
-                q2 = deepcopy(q)
-                q2[flips2] = -q2[flips2]
-
-                m(p, q1) < m(p, q2) ? flips = flips1 : flips = flips2
-            end
-        end
-        q_ = deepcopy(q)
-        q_[flips] = -q[flips]
-        v = zeros.(size.(p))
-        log!(M, v, p, q_)
-    end
-
+    q_ = closest_representation(M, p, q)
+    v = zeros.(size.(p)) # Initialize
+    log!(M, v, p, q_)
     return v
 end
 
@@ -225,13 +191,11 @@ function log!(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, v, p, q) where 
         end
     end
 
-    m = sqrt(
-        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
-    )
+    m_ = m(p, q)
     if m == 0.0
         v[1][1] = q[1][1] - p[1][1]
     else
-        v[1][1] = p[1][1] * A * m * (cos(A * m) - p[1][1] / q[1][1]) / sin(A * m)
+        v[1][1] = p[1][1] * A * m_ * (cos(A * m_) - p[1][1] / q[1][1]) / sin(A * m_)
 
         t = distance(M, p, q)
         v .= t * v / norm(M, p, v)
@@ -245,18 +209,20 @@ end
 
 Riemannian distance between two points `p` and `q` on the warped Segre manifold.
 
-Assume ``p = (\lambda, x_1, \dots, x_d)``, ``q = (\mu, y_1, \dots, y_d) \in \mathcal{S}_A`` are connected by a minimizing geodesic. Then
+Assume ``p \doteq (\lambda, x_1, \dots, x_d)``, ``q \doteq (\mu, y_1, \dots, y_d) \in \mathcal{S}_A`` are connected by a geodesic. Let
 ````math
-    \operatorname{dist}_{\operatorname{Seg}(ℝ^{n_1} \times \dots \times ℝ^{n_d})}(p, q) = \sqrt{\lambda^2 - 2 \lambda \mu \cos(A M) + \mu^2},
+    m = \sqrt{\sphericalangle(x_1, y_1)^2 + \dots + \sphericalangle(x_d, y_d)^2}
 ````
-where ``M = \sqrt{\operatorname{dist}_{S^{n_1}}(x_1, y_1)^2 + \dots + \operatorname{dist}_{S^{n_d}}(x_d, y_d)^2}``.
+and assume ``(\mu, y_1, \dots, y_d)`` is the representation of ``q`` that minimizes ``m``. Then
+````math
+    \operatorname{dist}_{\mathcal{S}_A}(p, q) = \sqrt{\lambda^2 - 2 \lambda \mu \cos(A m) + \mu^2}.
+````
 """
 function distance(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, q) where {A}
-    m = sqrt(
-        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
-    )
 
-    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(A * m / 2)^2)
+    q_ = closest_representation(M, p, q)
+    m_ = m(p, q_)
+    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(A * m_ / 2)^2)
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(A * m)) but more stable for small m
 end
 
@@ -265,8 +231,7 @@ end
 
 Riemann tensor of the warped Segre manifold at ``p``.
 
-``\mathcal{S}_A`` is locally a warped product of ``ℝ^{+}`` and ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``
-If ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}_A`` and ``u``, ``v``, ``w \in T_{(x_1, \dots, x_d)} (S^{n_1 - 1} \times \dots \times S^{n_d - 1}) \subset T_p \mathcal{S}_A`` then
+``\mathcal{S}_A`` is locally a warped product of ``ℝ^{+}`` and ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``. If ``p \doteq (\lambda, x_1, \dots, x_d) \in \mathcal{S}_A`` and ``u``, ``v``, ``w \in T_{(x_1, \dots, x_d)} (S^{n_1 - 1} \times \dots \times S^{n_d - 1}) \subset T_p \mathcal{S}_A`` then
 ````math
     R_{\mathcal{S}_A}(u, v) w = R_{S^{n_1 - 1} \times \dots \times S^{n_d - 1}}(u, v) w + \lambda^{-2}(\langle u, w \rangle_{p} v - \langle v, w \rangle_{p} u).
 ````
@@ -297,9 +262,9 @@ Sectional curvature of the warped Segre manifold at ``p``.
 ``\mathcal{S}_A`` is locally a warped product of ``ℝ^{+}`` and ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``
 If ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}``, ``u_i \in T_{x_i} S^{n_i - 1}``, and ``v_j \in T_{x_j} S^{n_j - 1}``, then
 ````math
-    K_{\mathcal{S}}(u_i, v_j) = -(1 - \delta_{i j}) \lambda^2.
+    K_{\mathcal{S}_A}(u_i, v_j) = -(1 - \delta_{i j}) \lambda^2.
 ````
-``K_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
+``K_{\mathcal{S}_A}`` is zero in the remaining (orthogonal) directions.
 """
 function sectional_curvature(
     M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}},
