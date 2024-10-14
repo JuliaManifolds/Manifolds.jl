@@ -240,10 +240,8 @@ function ColumnwiseMultiplicationAction(
     return ColumnwiseMultiplicationAction{TAD,typeof(M),typeof(On)}(M, On)
 end
 
-const LeftColumnwiseMultiplicationAction{
-    TM<:AbstractManifold,
-    TO<:AbstractMatrixGroup,
-} = ColumnwiseMultiplicationAction{LeftAction,TM,TO}
+const LeftColumnwiseMultiplicationAction{TM<:AbstractManifold,TO<:AbstractMatrixGroup} =
+    ColumnwiseMultiplicationAction{LeftAction,TM,TO}
 
 function apply(::LeftColumnwiseMultiplicationAction, a, p)
     return a * p
