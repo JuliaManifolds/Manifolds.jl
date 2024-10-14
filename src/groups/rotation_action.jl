@@ -226,7 +226,7 @@ of type `On` columns of points on a matrix manifold `M`.
 struct ColumnwiseMultiplicationAction{
     TAD<:ActionDirection,
     TM<:AbstractManifold,
-    TO<:GeneralUnitaryMultiplicationGroup,
+    TO<:AbstractMatrixGroup,
 } <: AbstractGroupAction{TAD}
     manifold::TM
     On::TO
@@ -234,7 +234,7 @@ end
 
 function ColumnwiseMultiplicationAction(
     M::AbstractManifold,
-    On::GeneralUnitaryMultiplicationGroup,
+    On::AbstractMatrixGroup,
     ::TAD=LeftAction(),
 ) where {TAD<:ActionDirection}
     return ColumnwiseMultiplicationAction{TAD,typeof(M),typeof(On)}(M, On)
@@ -242,7 +242,7 @@ end
 
 const LeftColumnwiseMultiplicationAction{
     TM<:AbstractManifold,
-    TO<:GeneralUnitaryMultiplicationGroup,
+    TO<:AbstractMatrixGroup,
 } = ColumnwiseMultiplicationAction{LeftAction,TM,TO}
 
 function apply(::LeftColumnwiseMultiplicationAction, a, p)

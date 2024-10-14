@@ -1,3 +1,5 @@
+abstract type AbstractMatrixGroup{T,𝔽} <: AbstractDecoratorManifold{𝔽} end
+
 @doc raw"""
     GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
@@ -15,7 +17,7 @@ vector in the Lie algebra, and ``⟨⋅,⋅⟩_\mathrm{F}`` denotes the Frobeniu
 By default, tangent vectors ``X_p`` are represented with their corresponding Lie algebra
 vectors ``X_e = p^{-1}X_p``.
 """
-struct GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct GeneralLinear{T,𝔽} <: AbstractMatrixGroup{T,𝔽}
     size::T
 end
 

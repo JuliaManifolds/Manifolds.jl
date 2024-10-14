@@ -509,10 +509,10 @@ include("groups/product_group.jl")
 include("groups/semidirect_product_group.jl")
 include("groups/power_group.jl")
 
+include("groups/general_linear.jl")
 # generic group - common (special) unitary/orthogonal functions
 include("groups/general_unitary_groups.jl")
 # Special Group Manifolds
-include("groups/general_linear.jl")
 include("groups/special_linear.jl")
 include("groups/translation_group.jl")
 include("groups/unitary.jl")
