@@ -1,9 +1,10 @@
 """
-    AbstractMatrixGroup{𝔽}
-    
+    AbstractMatrixGroup{T, 𝔽}
+
 A supertype for matrix Lie groups, that is groups whose elements can be represented by matrices with composition implemented as matrix multiplication.
+The matrix size is encoded in the type `T`.
 """
-abstract type AbstractMatrixGroup{𝔽} <: AbstractDecoratorManifold{𝔽} end
+abstract type AbstractMatrixGroup{T,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 @doc raw"""
     GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
