@@ -13,6 +13,8 @@ if isdefined(Base, :get_extension)
         uniform_distribution
 
     using Manifolds: get_iterator, get_parameter, _read, _write
+
+    using RecursiveArrayTools: ArrayPartition
 else
     # imports need to be relative for Requires.jl-based workflows:
     # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
@@ -28,6 +30,8 @@ else
         uniform_distribution
 
     using ..Manifolds: get_iterator, get_parameter, _read, _write
+
+    using ..RecursiveArrayTools: ArrayPartition
 end
 
 include("distributions.jl")

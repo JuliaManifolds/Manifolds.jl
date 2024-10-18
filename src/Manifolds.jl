@@ -600,9 +600,9 @@ function __init__()
             elseif exc.f === uniform_distribution
                 print(
                     io,
-                    "\nDid you forget to load Distributions or RecurisveArrayTools? For example: ",
+                    "\nDid you forget to load Distributions and RecurisveArrayTools? For example: ",
                 )
-                printstyled(io, "`using Distributions`", color=:cyan)
+                printstyled(io, "`using Distributions, RecurisveArrayTools`", color=:cyan)
             end
         end
     end
@@ -614,10 +614,6 @@ function __init__()
 
         @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
             include("../ext/ManifoldsBoundaryValueDiffEqExt.jl")
-        end
-
-        @require Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f" begin
-            include("../ext/ManifoldsDistributionsExt/ManifoldsDistributionsExt.jl")
         end
 
         @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
@@ -640,7 +636,7 @@ function __init__()
             )
 
             @require Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f" begin
-                include("../ext/ManifoldsDistributionsRecursiveArrayToolsExt.jl")
+                include("../ext/ManifoldsDistributionsExt/ManifoldsDistributionsExt.jl")
             end
 
             @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin

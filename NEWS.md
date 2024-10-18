@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.4] - 2024-10-18
 
-### Changed
+### Added
 
-* The `Distributions.jl` extension has been split into an extension that additionally requires `RecursiveArrayTools.jl` and one that does not.
+* `uniform_distribution` now has an error hint explaining what has to be done to make it work.
 
 ## [0.10.3] - 2024-10-04
 
