@@ -598,7 +598,10 @@ function __init__()
                 print(io, "\nDid you forget to load OrdinaryDiffEq? For example: ")
                 printstyled(io, "`using OrdinaryDiffEq`", color=:cyan)
             elseif exc.f === uniform_distribution
-                print(io, "\nDid you forget to load Distributions or RecurisveArrayTools? For example: ")
+                print(
+                    io,
+                    "\nDid you forget to load Distributions or RecurisveArrayTools? For example: ",
+                )
                 printstyled(io, "`using Distributions`", color=:cyan)
             end
         end

@@ -120,5 +120,4 @@ function uniform_distribution(M::ProductManifold, p)
     )
 end
 
-
 end
