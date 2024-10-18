@@ -600,9 +600,9 @@ function __init__()
             elseif exc.f === uniform_distribution
                 print(
                     io,
-                    "\nDid you forget to load Distributions and RecurisveArrayTools? For example: ",
+                    "\nDid you forget to load Distributions and RecursiveArrayTools? For example: ",
                 )
-                printstyled(io, "`using Distributions, RecurisveArrayTools`", color=:cyan)
+                printstyled(io, "`using Distributions, RecursiveArrayTools`", color=:cyan)
             end
         end
     end
