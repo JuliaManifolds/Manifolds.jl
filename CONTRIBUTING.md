@@ -7,78 +7,98 @@ The following is a set of guidelines to [`Manifolds.jl`](https://juliamanifolds.
 
 #### Table of Contents
 
-- [Contributing to `Manifolds.jl`](#contributing-to-manifoldsjl)
-      - [Table of Contents](#table-of-contents)
-  - [I just have a question](#i-just-have-a-question)
-  - [How can I file an issue?](#how-can-i-file-an-issue)
-  - [How can I contribute?](#how-can-i-contribute)
-    - [Add a missing method](#add-a-missing-method)
-    - [Provide a new manifold](#provide-a-new-manifold)
-    - [Code style](#code-style)
+* [Contributing to `Manifolds.jl`](#contributing-to-manifoldsjl)
+  * [Table of Contents](#table-of-contents)
+  * [How to ask a question](#how-to-ask-a-question)
+  * [How to file an issue](#How-to-file-an-issue)
+  * [How to contribute](#How-to-contribute)
+    * [Add a missing method](#add-a-missing-method)
+    * [Provide a new manifold](#provide-a-new-manifold)
+  * [Code style](#Code-style)
 
-## I just have a question
+## How to ask a question
 
 The developers can most easily be reached in the Julia Slack channel [#manifolds](https://julialang.slack.com/archives/CP4QF0K5Z).
 You can apply for the Julia Slack workspace [here](https://julialang.org/slack/) if you haven't joined yet.
 You can also ask your question on [discourse.julialang.org](https://discourse.julialang.org).
 
-## How can I file an issue?
+## How to file an issue
 
 If you found a bug or want to propose a feature, we track our issues within the [GitHub repository](https://github.com/JuliaManifolds/Manifolds.jl/issues).
 
-## How can I contribute?
+## How to contribute
+
+### Overview of resources
+
+* [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/) documents the [main design principles](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/design/) for Riemannian manifolds in the [`JuliaManifolds`](https://github.com/JuliaManifolds) ecosystem
+* The [main set of functions](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions/) serves as a guide, showing which functions the Library of manifolds in `Manifolds.jl` provides.
+* A [tutorial on how to define a manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/tutorials/implement-a-manifold/) serves as a starting point on how to start a new manifold
+* The [changelog](https://juliamanifolds.github.io/Manifolds.jl/stable/misc/NEWS.html) documents all additions and changes.
+* This file providing a technical introduction to contributing to `Manifolds.jl`
 
 ### Add a missing method
 
-Not all methods from our interface [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/) have been implemented for every manifold.
-If you notice a method missing and can contribute an implementation, please do so!
-Even providing a single new method is a good contribution.
+Within `Manifolds.jl`, there might be manifolds, that are only partially implement the list of methods from the interface given in [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/).
+If you notice a missing method but are aware of an algorithm or theory about it,
+contributing the method is welcome.
+Even just the smallest function is a good contribution.
 
 ### Provide a new manifold
 
 A main contribution you can provide is another manifold that is not yet included in the
 package.
 A manifold is a concrete type of [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold) from [`ManifoldsBase.jl`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#The-Manifold-interface).
-This package also provides the main set of functions a manifold can/should implement.
-Don't worry if you can only implement some of the functions.
-If the application you have in mind only requires a subset of these functions, implement those.
-The [`ManifoldsBase.jl` interface](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#The-Manifold-interface) provides concrete error messages for the remaining unimplemented functions.
+A [tutorial on how to define a manifold](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/tutorials/implement-a-manifold/) helps to get started on a new manifold.
+Every new manifold is welcome, also if only a few functions are implemented,
+for example when your application for now does not require more features.
 
-One important detail is that the interface usually provides an in-place as well as a non-mutating variant
+One important detail is that the interface provides an in-place as well as a non-mutating variant
 See for example [exp!](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#ManifoldsBase.exp!-Tuple{AbstractManifold, Any, Any, Any}) and [exp](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/functions.html#Base.exp-Tuple{AbstractManifold, Any, Any}).
-The non-mutating one (e.g. `exp`) always falls back to use the in-place one, so in most cases it should
-suffice to implement the in-place one (e.g. `exp!`).
+The non-mutating one, `exp`, always falls back to allocating the according memory,
+here a point on the manifold, to then call the in-place variant.
+This way it suffices to implement the in-place variant, `exp!`.
+The allocating variant only needs to be implemented if a more efficient version
+than the default is available.
 
 Note that since the first argument is _always_ the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold), the mutated argument is always the second one in the signature.
-In the example we have `exp(M, p, X, t)` for the exponential map and `exp!(M, q, p, X, t)` for the in-place one, which stores the result in `q`.
+In the example there are `exp(M, p, X, t)` for the exponential map that allocates
+its result `q`, and `exp!(M, q, p, X, t)` for the in-place one, which computes and returns the `q`.
 
-On the other hand, the user will most likely look for the documentation of the non-mutating version, so we recommend adding the docstring for the non-mutating one, where all different signatures should be collected in one string when reasonable.
-This can best be achieved by adding a docstring to the method with a general signature with the first argument being your manifold:
+Since a user probably looks for the documentation on the allocating variant,
+we recommend to attach the documentation string to this variant, mentioning all
+possible function signatures including the mutating one.
+You can best achieve this by adding a documentation string to the method with a general signature with the first argument being your manifold:
 
-````julia
+```julia
 struct MyManifold <: AbstractManifold end
 
-@doc raw"""
+@doc """
     exp(M::MyManifold, p, X)
+    exp!(M::MyManifold, q, p, X)
 
-Describe the function.
+Describe the function, its input and output as well as a mathematical formula.
 """
 exp(::MyManifold, ::Any...)
-````
+```
 
-### Code style
+Alternatively, you can save the string to a variable, for example `_doc_myM_exp` and attaching it to both functions
 
-We try to follow the [documentation guidelines](https://docs.julialang.org/en/v1/manual/documentation/) from the Julia documentation as well as [Blue Style](https://github.com/invenia/BlueStyle).
-We run [`JuliaFormatter.jl`](https://github.com/domluna/JuliaFormatter.jl) on the repo in the way set in the `.JuliaFormatter.toml` file, which enforces a number of conventions consistent with the Blue Style.
+## Code style
 
-We also follow a few internal conventions:
+Please follow the [documentation guidelines](https://docs.julialang.org/en/v1/manual/documentation/) from the Julia documentation as well as [Blue Style](https://github.com/invenia/BlueStyle).
+Run [`JuliaFormatter.jl`](https://github.com/domluna/JuliaFormatter.jl) on the repository running `using JuliaFormatter; format(".")` on the main folder of the project.
 
-- It is preferred that the `AbstractManifold`'s struct contain a reference to the general theory.
-- Any implemented function should be accompanied by its mathematical formulae if a closed form exists.
-- Within the source code of one manifold, the type of the manifold should be the first element of the file, and an alphabetical order of the functions is preferable.
-- The above implies that the in-place variant of a function follows the non-mutating variant.
-- There should be no dangling `=` signs.
-- Always add a newline between things of different types (struct/method/const).
-- Always add a newline between methods for different functions (including in-place/nonmutating variants).
-- Prefer to have no newline between methods for the same function; when reasonable, merge the docstrings.
-- All `import`/`using`/`include` should be in the main module file.
+Please follow a few internal conventions:
+
+* Please include a description of the manifold and a reference to the general theory in the `struct` of your manifold that inherits from `AbstractManifold`'.
+* Include the mathematical formulae for any implemented function if a closed form exists.
+* Within the source code of one manifold, the `struct` the manifold should be the first element of the file.
+* an alphabetical order of functions in every file is preferable.
+* The preceding implies that the mutating variant of a function follows the non-mutating variant.
+* There should be no dangling `=` signs.
+* Always add a newline between things of different types (`struct`/method/const).
+* Always add a newline between methods for different functions (including allocating and in-place variants).
+* Prefer to have no newline between methods for the same function; when reasonable, merge the documentation string.
+* Always document all input variables and keyword arguments
+* if possible provide both mathematical formulae and literature references using [DocumenterCitations.jl](https://juliadocs.org/DocumenterCitations.jl/stable/) and BibTeX where possible
+* All `import`/`using`/`include` should be in the main module file.
