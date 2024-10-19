@@ -597,6 +597,12 @@ function __init__()
             if exc.f === solve_exp_ode
                 print(io, "\nDid you forget to load OrdinaryDiffEq? For example: ")
                 printstyled(io, "`using OrdinaryDiffEq`", color=:cyan)
+            elseif exc.f === uniform_distribution
+                print(
+                    io,
+                    "\nDid you forget to load Distributions and RecursiveArrayTools? For example: ",
+                )
+                printstyled(io, "`using Distributions, RecursiveArrayTools`", color=:cyan)
             end
         end
     end
