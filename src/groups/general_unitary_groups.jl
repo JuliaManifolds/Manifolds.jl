@@ -4,7 +4,7 @@
 A generic type for Lie groups based on a unitary property and matrix multiplication,
 see e.g. [`Orthogonal`](@ref), [`SpecialOrthogonal`](@ref), [`Unitary`](@ref), and [`SpecialUnitary`](@ref)
 """
-struct GeneralUnitaryMultiplicationGroup{T,𝔽,S} <: AbstractMatrixGroup{T,𝔽}
+struct GeneralUnitaryMultiplicationGroup{T,𝔽,S} <: AbstractDecoratorManifold{𝔽}
     manifold::GeneralUnitaryMatrices{T,𝔽,S}
 end
 

@@ -1,10 +1,3 @@
-"""
-    AbstractMatrixGroup{T, 𝔽}
-
-A supertype for matrix Lie groups, that is groups whose elements can be represented by matrices with composition implemented as matrix multiplication.
-The matrix size is encoded in the type `T`.
-"""
-abstract type AbstractMatrixGroup{T,𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 @doc raw"""
     GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
@@ -23,7 +16,7 @@ vector in the Lie algebra, and ``⟨⋅,⋅⟩_\mathrm{F}`` denotes the Frobeniu
 By default, tangent vectors ``X_p`` are represented with their corresponding Lie algebra
 vectors ``X_e = p^{-1}X_p``.
 """
-struct GeneralLinear{T,𝔽} <: AbstractMatrixGroup{T,𝔽}
+struct GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
