@@ -640,8 +640,15 @@ Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 `M`, i.e. since every tangent space can be identified with `M` itself
 in this case, just the (Frobenius) norm of `X`.
 """
-LinearAlgebra.norm(::Euclidean, ::Any, X, r::Real=2) = norm(X,r)
-LinearAlgebra.norm(::MetricManifold{ℝ,<:AbstractManifold,EuclideanMetric}, p, X, r::Real=2) = norm(X,r)
+LinearAlgebra.norm(::Euclidean, ::Any, X, r::Real=2) = norm(X, r)
+function LinearAlgebra.norm(
+    ::MetricManifold{ℝ,<:AbstractManifold,EuclideanMetric},
+    p,
+    X,
+    r::Real=2,
+)
+    return norm(X, r)
+end
 
 function project!(
     ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},
