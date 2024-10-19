@@ -390,6 +390,9 @@ function get_vector_diagonalizing!(
     copyto!(Y, reshape(c[1:N] + im * c[(N + 1):end], S))
     return Y
 end
+
+has_components(::Euclidean) = true
+
 @doc raw"""
     injectivity_radius(M::Euclidean)
 
@@ -637,8 +640,8 @@ Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 `M`, i.e. since every tangent space can be identified with `M` itself
 in this case, just the (Frobenius) norm of `X`.
 """
-LinearAlgebra.norm(::Euclidean, ::Any, X) = norm(X)
-LinearAlgebra.norm(::MetricManifold{ℝ,<:AbstractManifold,EuclideanMetric}, p, X) = norm(X)
+LinearAlgebra.norm(::Euclidean, ::Any, X, r::Real=2) = norm(X,r)
+LinearAlgebra.norm(::MetricManifold{ℝ,<:AbstractManifold,EuclideanMetric}, p, X, r::Real=2) = norm(X,r)
 
 function project!(
     ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},

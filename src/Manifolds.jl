@@ -89,6 +89,7 @@ import ManifoldsBase:
     get_vector_orthonormal!,
     get_vectors,
     gram_schmidt,
+    has_components,
     hat,
     hat!,
     injectivity_radius,
