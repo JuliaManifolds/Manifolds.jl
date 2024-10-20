@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `uniform_distribution` now has an error hint explaining what has to be done to make it work.
 * `Euclidean` now follows the new `has_components` function from `ManifoldsBase.jl` (0.15.18)
   and can handle also the `r`-norms now.
+- Union type `MatrixGroup`
+- Columnwise group action with arbitrary matrix groups
+- `uniform_distribution` now has an error hint explaining what has to be done to make it work.
 
 ## [0.10.3] - 2024-10-04
 
