@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* `uniform_distribution` now has an error hint explaining what has to be done to make it work.
+* `Euclidean` now follows the new `has_components` function from `ManifoldsBase.jl` (0.15.18)
+  and can handle also the `r`-norms now.
 - Union type `MatrixGroup`
 - Columnwise group action with arbitrary matrix groups
 - `uniform_distribution` now has an error hint explaining what has to be done to make it work.
@@ -22,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 * Fixed `solve_exp_ode` only returning the starting position ([#744](https://github.com/JuliaManifolds/Manifolds.jl/issues/744))
-* Fixed documentation of `solve_exp_ode` function signature ([#740](https://github.com/JuliaManifolds/Manifolds.jl/issues/740))  
+* Fixed documentation of `solve_exp_ode` function signature ([#740](https://github.com/JuliaManifolds/Manifolds.jl/issues/740))
 
 ## [0.10.2] - 2024-09-24
 
