@@ -205,28 +205,35 @@ end
 
 ###
 
+const MatrixGroup{T,𝔽} = Union{
+    GeneralUnitaryMultiplicationGroup{T,𝔽},
+    GeneralLinear{T,𝔽},
+    SpecialLinear{T,𝔽},
+} where {T,𝔽}
+
 @doc raw"""
     ColumnwiseMultiplicationAction{
         TAD<:ActionDirection,
         TM<:AbstractManifold,
-        TO<:GeneralUnitaryMultiplicationGroup,
+        TO<:MatrixGroup,
     } <: AbstractGroupAction{TAD}
 
 Action of the (special) unitary or orthogonal group [`GeneralUnitaryMultiplicationGroup`](@ref)
+or [`GeneralLinear`](@ref) group
 of type `On` columns of points on a matrix manifold `M`.
 
 # Constructor
 
     ColumnwiseMultiplicationAction(
         M::AbstractManifold,
-        On::GeneralUnitaryMultiplicationGroup,
+        On::MatrixGroup,
         AD::ActionDirection = LeftAction(),
     )
 """
 struct ColumnwiseMultiplicationAction{
     TAD<:ActionDirection,
     TM<:AbstractManifold,
-    TO<:GeneralUnitaryMultiplicationGroup,
+    TO<:MatrixGroup,
 } <: AbstractGroupAction{TAD}
     manifold::TM
     On::TO
@@ -234,16 +241,14 @@ end
 
 function ColumnwiseMultiplicationAction(
     M::AbstractManifold,
-    On::GeneralUnitaryMultiplicationGroup,
+    On::MatrixGroup,
     ::TAD=LeftAction(),
 ) where {TAD<:ActionDirection}
     return ColumnwiseMultiplicationAction{TAD,typeof(M),typeof(On)}(M, On)
 end
 
-const LeftColumnwiseMultiplicationAction{
-    TM<:AbstractManifold,
-    TO<:GeneralUnitaryMultiplicationGroup,
-} = ColumnwiseMultiplicationAction{LeftAction,TM,TO}
+const LeftColumnwiseMultiplicationAction{TM<:AbstractManifold,TO<:MatrixGroup} =
+    ColumnwiseMultiplicationAction{LeftAction,TM,TO}
 
 function apply(::LeftColumnwiseMultiplicationAction, a, p)
     return a * p
@@ -281,7 +286,14 @@ U K V^{\mathrm{T}} & \text{otherwise}
 where ``U \Sigma V^{\mathrm{T}}`` is the SVD decomposition of ``p q^{\mathrm{T}}`` and ``K``
 is the unit diagonal matrix with the last element on the diagonal replaced with -1.
 """
-function optimal_alignment(A::LeftColumnwiseMultiplicationAction, p, q)
+function optimal_alignment(
+    A::LeftColumnwiseMultiplicationAction{
+        <:AbstractManifold,
+        <:GeneralUnitaryMultiplicationGroup,
+    },
+    p,
+    q,
+)
     is_point(A.manifold, p; error=:error)
     is_point(A.manifold, q; error=:error)
 
