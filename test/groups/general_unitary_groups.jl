@@ -46,6 +46,15 @@ include("group_utils.jl")
         X = [0.0 -0.7071067811865475; 0.7071067811865475 0.0]
         @test volume_density(M, p, X) ≈ 1.0
 
+        @testset "SO(2) Lie Bracket == 0" begin
+            Y = [0.0 0.7071067811865475; -0.7071067811865475 0.0]
+            X_ = copy(X)
+            X_[1,2] += 1e-16
+            @test is_vector(M, identity_element(M), X_)
+            @test lie_bracket(M, X_, Y) == zeros(2,2)
+            @test lie_bracket!(M, similar(X_), X_, Y) == zeros(2,2)
+        end
+
         M = SpecialOrthogonal(3)
         p = [
             -0.5908399013383766 -0.6241917041179139 0.5111681988316876

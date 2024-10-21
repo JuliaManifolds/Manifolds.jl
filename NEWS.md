@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Union type `MatrixGroup`
 - Columnwise group action with arbitrary matrix groups
 - `uniform_distribution` now has an error hint explaining what has to be done to make it work.
+- `lie_bracket` is exactly zero on orthogonal Lie algebra in 2D
 
 ## [0.10.3] - 2024-10-04
 
