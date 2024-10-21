@@ -349,8 +349,21 @@ function adjoint_action!(G::GeneralUnitaryMultiplicationGroup, Y, p, X, ::RightA
     return copyto!(G, Y, inv(G, p) * X * p)
 end
 
-Manifolds.lie_bracket(G::Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}}, ℝ}, ::Any, ::Any) = zeros(2,2)
-Manifolds.lie_bracket!(G::Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}}, ℝ}, X, ::Any, ::Any) = copyto!(X, zeros(2,2))
+function Manifolds.lie_bracket(
+    G::Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}},ℝ},
+    ::Any,
+    ::Any,
+)
+    return zeros(2, 2)
+end
+function Manifolds.lie_bracket!(
+    G::Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}},ℝ},
+    X,
+    ::Any,
+    ::Any,
+)
+    return copyto!(X, zeros(2, 2))
+end
 
 function volume_density(M::GeneralUnitaryMultiplicationGroup, p, X)
     return volume_density(M.manifold, p, X)

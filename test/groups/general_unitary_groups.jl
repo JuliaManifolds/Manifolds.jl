@@ -49,10 +49,10 @@ include("group_utils.jl")
         @testset "SO(2) Lie Bracket == 0" begin
             Y = [0.0 0.7071067811865475; -0.7071067811865475 0.0]
             X_ = copy(X)
-            X_[1,2] += 1e-16
+            X_[1, 2] += 1e-16
             @test is_vector(M, identity_element(M), X_)
-            @test lie_bracket(M, X_, Y) == zeros(2,2)
-            @test lie_bracket!(M, similar(X_), X_, Y) == zeros(2,2)
+            @test lie_bracket(M, X_, Y) == zeros(2, 2)
+            @test lie_bracket!(M, similar(X_), X_, Y) == zeros(2, 2)
         end
 
         M = SpecialOrthogonal(3)
