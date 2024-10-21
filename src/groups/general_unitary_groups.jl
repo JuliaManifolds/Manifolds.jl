@@ -351,10 +351,10 @@ end
 
 function Manifolds.lie_bracket(
     G::Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}},ℝ},
-    ::Any,
+    X,
     ::Any,
 )
-    return zeros(2, 2)
+    return zero(X)
 end
 function Manifolds.lie_bracket!(
     G::Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}},ℝ},
@@ -362,7 +362,7 @@ function Manifolds.lie_bracket!(
     ::Any,
     ::Any,
 )
-    return copyto!(X, zeros(2, 2))
+    return fill!(X, 0)
 end
 
 function volume_density(M::GeneralUnitaryMultiplicationGroup, p, X)
