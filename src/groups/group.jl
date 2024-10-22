@@ -1244,9 +1244,11 @@ For more details, see
 """
 struct GroupExponentialRetraction{D<:ActionDirectionAndSide} <: AbstractRetractionMethod end
 
-function GroupExponentialRetraction(conv::ActionDirectionAndSide=LeftForwardAction())
-    return GroupExponentialRetraction{typeof(conv)}()
+function GroupExponentialRetraction()
+    return GroupExponentialRetraction{LeftForwardAction}()
 end
+
+@deprecate GroupExponentialRetraction(conv::ActionDirectionAndSide) GroupExponentialRetraction()
 
 """
     GroupLogarithmicInverseRetraction <: AbstractInverseRetractionMethod
@@ -1263,9 +1265,11 @@ For more details, see
 struct GroupLogarithmicInverseRetraction{D<:ActionDirectionAndSide} <:
        AbstractInverseRetractionMethod end
 
-function GroupLogarithmicInverseRetraction(conv::ActionDirectionAndSide=LeftForwardAction())
-    return GroupLogarithmicInverseRetraction{typeof(conv)}()
+function GroupLogarithmicInverseRetraction()
+    return GroupLogarithmicInverseRetraction{LeftForwardAction}()
 end
+
+@deprecate GroupLogarithmicInverseRetraction(conv::ActionDirectionAndSide) GroupLogarithmicInverseRetraction()
 
 direction_and_side(::GroupExponentialRetraction{D}) where {D} = D()
 direction_and_side(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
