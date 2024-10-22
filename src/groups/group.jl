@@ -1231,17 +1231,16 @@ function log_lie!(
 end
 
 """
-    GroupExponentialRetraction{D<:ActionDirectionAndSide} <: AbstractRetractionMethod
+    GroupExponentialRetraction <: AbstractRetractionMethod
 
-Retraction using the group exponential [`exp_lie`](@ref) "translated" to any point on the
-manifold.
+Retraction using the invariant group exponential [`exp_inv`](@ref).
 
 For more details, see
 [`retract`](@ref retract(::GroupManifold, p, X, ::GroupExponentialRetraction)).
 
 # Constructor
 
-    GroupExponentialRetraction(conv::ActionDirectionAndSide = LeftAction())
+    GroupExponentialRetraction()
 """
 struct GroupExponentialRetraction{D<:ActionDirectionAndSide} <: AbstractRetractionMethod end
 
@@ -1250,17 +1249,16 @@ function GroupExponentialRetraction(conv::ActionDirectionAndSide=LeftForwardActi
 end
 
 """
-    GroupLogarithmicInverseRetraction{D<:ActionDirectionAndSide} <: AbstractInverseRetractionMethod
+    GroupLogarithmicInverseRetraction <: AbstractInverseRetractionMethod
 
-Retraction using the group logarithm [`log_lie`](@ref) "translated" to any point on the
-manifold.
+Retraction using the invariant group logarithm [`log_inv`](@ref).
 
 For more details, see
 [`inverse_retract`](@ref inverse_retract(::GroupManifold, p, q ::GroupLogarithmicInverseRetraction)).
 
 # Constructor
 
-    GroupLogarithmicInverseRetraction(conv::ActionDirectionAndSide = LeftForwardAction())
+    GroupLogarithmicInverseRetraction()
 """
 struct GroupLogarithmicInverseRetraction{D<:ActionDirectionAndSide} <:
        AbstractInverseRetractionMethod end
@@ -1280,18 +1278,13 @@ direction_and_side(::GroupLogarithmicInverseRetraction{D}) where {D} = D()
         method::GroupExponentialRetraction,
     )
 
-Compute the retraction using the group exponential [`exp_lie`](@ref) "translated" to any
-point on the manifold.
-With a group translation ([`translate`](@ref)) ``τ_p`` in a specified direction, the
-retraction is
+Compute the retraction using the invariant group exponential [`exp_inv`](@ref) 
 
 ````math
-\operatorname{retr}_p = τ_p \circ \exp \circ (\mathrm{d}τ_p^{-1})_p,
+\operatorname{retr}_p = \exp_p
 ````
 
-where ``\exp`` is the group exponential ([`exp_lie`](@ref)), and ``(\mathrm{d}τ_p^{-1})_p`` is
-the action of the differential of inverse translation ``τ_p^{-1}`` evaluated at ``p`` (see
-[`inverse_translate_diff`](@ref)).
+where ``\exp`` is the invariant exponential associated to the Cartan–Schouten connection.
 """
 function retract(
     ::TraitList{<:IsGroupManifold},
@@ -1300,11 +1293,7 @@ function retract(
     X,
     method::GroupExponentialRetraction,
 )
-    conv = direction_and_side(method)
-    Xₑ = inverse_translate_diff(G, p, p, X, conv)
-    pinvq = exp_lie(G, Xₑ)
-    q = translate(G, p, pinvq, conv)
-    return q
+    return exp_inv(G, p, X)
 end
 function retract(
     tl::TraitList{<:IsGroupManifold},
@@ -1325,10 +1314,7 @@ function retract!(
     X,
     method::GroupExponentialRetraction,
 )
-    conv = direction_and_side(method)
-    Xₑ = inverse_translate_diff(G, p, p, X, conv)
-    pinvq = exp_lie(G, Xₑ)
-    return translate!(G, q, p, pinvq, conv)
+    return exp_inv!(G, q, p, X)
 end
 function retract!(
     tl::TraitList{<:IsGroupManifold},
@@ -1350,18 +1336,13 @@ end
         method::GroupLogarithmicInverseRetraction,
     )
 
-Compute the inverse retraction using the group logarithm [`log_lie`](@ref) "translated"
-to any point on the manifold.
-With a group translation ([`translate`](@ref)) ``τ_p`` in a specified direction, the
-retraction is
+Compute the inverse retraction using the invariant group logarithm [`log_inv`](@ref) 
 
 ````math
-\operatorname{retr}_p^{-1} = (\mathrm{d}τ_p)_e \circ \log \circ τ_p^{-1},
+\operatorname{retr}_p^{-1} = \log_p
 ````
 
-where ``\log`` is the group logarithm ([`log_lie`](@ref)), and ``(\mathrm{d}τ_p)_e`` is the
-action of the differential of translation ``τ_p`` evaluated at the identity element ``e``
-(see [`translate_diff`](@ref)).
+where ``\log`` is the invariant group logarithm ([`log_inv`](@ref)), the inverse of the group exponential [`exp_inv`](@ref).
 """
 function inverse_retract(
     ::TraitList{<:IsGroupManifold},
@@ -1370,10 +1351,7 @@ function inverse_retract(
     q,
     method::GroupLogarithmicInverseRetraction,
 )
-    conv = direction_and_side(method)
-    pinvq = inverse_translate(G, p, q, conv)
-    Xₑ = log_lie(G, pinvq)
-    return translate_diff(G, p, Identity(G), Xₑ, conv)
+    return log_inv(G, p, q)
 end
 
 function inverse_retract!(
@@ -1384,10 +1362,7 @@ function inverse_retract!(
     q,
     method::GroupLogarithmicInverseRetraction,
 )
-    conv = direction_and_side(method)
-    pinvq = inverse_translate(G, p, q, conv)
-    Xₑ = log_lie(G, pinvq)
-    return translate_diff!(G, X, p, Identity(G), Xₑ, conv)
+    return log_inv!(G, X, p, q)
 end
 
 @trait_function get_vector_lie(G::AbstractManifold, X, B::AbstractBasis)
