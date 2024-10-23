@@ -1085,18 +1085,22 @@ Compute logarithmic map on a Lie group `G` invariant to group operation. For gro
 bi-invariant metric or a Cartan-Schouten connection, this is the same as `log` but for
 other groups it may differ.
 """
-function log_inv(G::AbstractManifold, p, q)
-    BG = base_group(G)
-    return log_lie(BG, compose(BG, inv(BG, p), q))
+log_group(G, p, q) = apply_diff(
+    GroupOperationAction(G, (LeftAction(), LeftSide())),
+    p,
+    Identity(G),
+    log_lie(G, apply(GroupOperationAction(G, (RightAction(), LeftSide())), p, q)),
+)
+log_inv(G::AbstractManifold, p, q) = log_group(base_group(G), p, q)
+
+function log_group!(G, Y, p, q)
+    pinvq = apply(GroupOperationAction(G, (RightAction(), LeftSide())), p, q)
+    X = log_lie(G, pinvq)
+    apply_diff!(GroupOperationAction(G, (LeftAction(), LeftSide())), Y, p, Identity(G), X)
+    return Y
 end
-function log_inv!(G::AbstractManifold, X, p, q)
-    x = allocate_result(G, inv, p)
-    BG = base_group(G)
-    inv!(BG, x, p)
-    compose!(BG, x, x, q)
-    log_lie!(BG, X, x)
-    return X
-end
+
+log_inv!(G::AbstractManifold, X, p, q) = log_group!(base_group(G), X, p, q)
 
 """
     exp_inv(G::AbstractManifold, p, X, t::Number=1)
@@ -1105,16 +1109,25 @@ Compute exponential map on a Lie group `G` invariant to group operation. For gro
 bi-invariant metric or a Cartan-Schouten connection, this is the same as `exp` but for
 other groups it may differ.
 """
-function exp_inv(G::AbstractManifold, p, X, t::Number=1)
+function exp_inv(G, p, X)
     BG = base_group(G)
-    return compose(BG, p, exp_lie(BG, t * X))
+    return exp_group(G, p, X)
 end
-function exp_inv!(G::AbstractManifold, q, p, X)
-    BG = base_group(G)
-    exp_lie!(BG, q, X)
-    compose!(BG, q, p, q)
-    return q
+
+function exp_group(G, p, X)
+    translated = apply_diff(GroupOperationAction(G, (RightAction(), LeftSide())), p, p, X)
+    return apply(
+        GroupOperationAction(G, (LeftAction(), LeftSide())),
+        p,
+        exp_lie(G, translated),
+    )
 end
+
+function exp_group!(G, q, p, X)
+    ξ = apply_diff(GroupOperationAction(G, (RightAction(), LeftSide())), p, p, X)
+    return apply!(GroupOperationAction(G, (LeftAction(), LeftSide())), q, p, exp_lie(G, ξ))
+end
+exp_inv!(G, q, p, X) = return exp_group!(base_group(G), q, p, X)
 
 @doc raw"""
     exp_lie(G, X)
