@@ -397,7 +397,7 @@ include("manifolds/VectorFiber.jl")
 include("manifolds/VectorBundle.jl")
 include("groups/group.jl")
 
-# Features I: Which are extended on Meta Manifolds
+# Features I: Extending Meta Manifolds
 include("statistics.jl")
 
 # Meta Manifolds II: Products
@@ -415,7 +415,7 @@ METAMANIFOLDS = [
     VectorBundle,
 ]
 
-# Features II: That require metas
+# Features II: That require MetaManifolds
 include("atlases.jl")
 include("differentiation/ode_callback.jl")
 include("cotangent_space.jl")
@@ -443,6 +443,7 @@ include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/Hyperrectangle.jl")
+include("manifolds/InvertibleMatrices.jl")
 include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
 include("manifolds/MultinomialSymmetricPositiveDefinite.jl")
@@ -681,6 +682,7 @@ export Euclidean,
     HeisenbergGroup,
     Hyperbolic,
     Hyperrectangle,
+    InvertibleMatrices,
     KendallsPreShapeSpace,
     KendallsShapeSpace,
     Lorentz,
