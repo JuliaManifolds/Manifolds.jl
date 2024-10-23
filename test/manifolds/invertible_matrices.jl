@@ -27,7 +27,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         @test repr(Mc) == "InvertibleMatrices(3, ℂ)"
         Mc2 = InvertibleMatrices(3, ℂ; parameter=:field)
         @test repr(Mc2) == "InvertibleMatrices(3, ℂ; parameter=:field)"
-        @test manifold_dimension(Mc) == 2*3^2
+        @test manifold_dimension(Mc) == 2 * 3^2
         @test check_point(Mc, Ac) == nothing
         @test_throws DomainError is_point(Mc, Bc; error=:error)
         @test_throws DomainError is_point(Mc, B; error=:error)
