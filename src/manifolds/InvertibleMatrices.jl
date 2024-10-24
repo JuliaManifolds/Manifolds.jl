@@ -1,7 +1,7 @@
 @doc raw"""
     InvertibleMatrices{𝔽,T} <: AbstractDecoratorManifold{𝔽}
 
-The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  ``\operatorname{Sym}(n)``
+The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
 consisting of the real- or complex-valued invertible matrices, that is the set
 
 ```math
@@ -40,10 +40,8 @@ end
     check_point(M::InvertibleMatrices{n,𝔽}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`InvertibleMatrices`](@ref) `M`, i.e.
-whether `p` is a symmetric matrix of size `(n,n)` with values from the corresponding
+whether `p` is an invertible matrix of size `(n,n)` with values from the corresponding
 [`AbstractNumbers`](@extref ManifoldsBase number-system) `𝔽`.
-
-The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_point(M::InvertibleMatrices, p; kwargs...)
     if det(p) == 0
