@@ -14,9 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.5] – 2024-10-24
 
+### Added
+
+* the manifold `InvertibleMatrices` of invertible matrices
+
 ### Changed
 
-* rewrote the `CONTRIBUTING.md` and adapt it to todays links and references.
+* rewrote the `CONTRIBUTING.md` and adapt it to today's links and references.
 
 ## [0.10.4] - 2024-10-20
 
