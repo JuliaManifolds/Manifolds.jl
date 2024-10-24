@@ -28,14 +28,6 @@ function active_traits(f, ::InvertibleMatrices, args...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
 
-function allocation_promotion_function(
-    ::InvertibleMatrices{ℂ,<:Any},
-    ::typeof(get_vector),
-    args::Tuple,
-)
-    return complex
-end
-
 @doc raw"""
     check_point(M::InvertibleMatrices{n,𝔽}, p; kwargs...)
 

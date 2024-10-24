@@ -15,8 +15,9 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         @test_throws DomainError is_point(M, B; error=:error)
         @test_throws ManifoldDomainError is_point(M, Ac; error=:error)
         @test_throws ManifoldDomainError is_vector(M, A, Ac; error=:error)
+        @test is_vector(M, A, A)
         @test is_flat(M)
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3,3}},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ManifoldsBase.TypeParameter{Tuple{3,3}},ℝ}
         @test typeof(get_embedding(M2)) === Euclidean{Tuple{Int64,Int64},ℝ}
         @test embed(M, A) === A
         @test embed(M, A, A) === A
