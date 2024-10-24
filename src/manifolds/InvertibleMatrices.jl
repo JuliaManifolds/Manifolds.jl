@@ -49,7 +49,7 @@ end
     check_vector(M::InvertibleMatrices{n,𝔽}, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
-[`InvertibleMatrices`](@ref) `M`, which are all matrces of size ``n×n```
+[`InvertibleMatrices`](@ref) `M`, which are all matrices of size ``n×n``
 its values have to be from the correct [`AbstractNumbers`](@extref ManifoldsBase number-system).
 """
 function check_vector(M::InvertibleMatrices, p, X; kwargs...)
@@ -78,7 +78,7 @@ is_flat(M::InvertibleMatrices) = true
     manifold_dimension(M::InvertibleMatrices{n,𝔽})
 
 Return the dimension of the [`InvertibleMatrices`](@ref) matrix `M` over the number system
-`𝔽`, which is the same dimension as its embedding, the [`Euclidean`](@ref)`(n,n)`.
+`𝔽`, which is the same dimension as its embedding, the [`Euclidean`](@ref)`(n, n; field=𝔽)`.
 """
 function manifold_dimension(M::InvertibleMatrices{<:Any,𝔽}) where {𝔽}
     return manifold_dimension(get_embedding(M))
