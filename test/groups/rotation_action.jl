@@ -186,7 +186,7 @@ end
 @testset "ComplexPlanarRotation" begin
     M = Euclidean(2)
     G = CircleGroup()
-    A = Manifolds.ComplexPlanarRotation()
+    A = ComplexPlanarRotation()
 
     @test group_manifold(A) === M
     @test base_group(A) === G
@@ -204,7 +204,7 @@ end
 @testset "QuaternionRotation" begin
     M = Euclidean(3)
     G = Unitary(1, ℍ)
-    A = Manifolds.QuaternionRotation()
+    A = QuaternionRotation()
 
     @test group_manifold(A) === M
     @test base_group(A) === G
