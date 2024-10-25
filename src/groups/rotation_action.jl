@@ -345,7 +345,7 @@ end
 @doc raw"""
     QuaternionRotation
 
-Action of the unit quaternion group [`UnitaryMatrices`](@ref)`(1, ℍ)` on ``ℝ^3``.
+Action of the unit quaternion group [`Unitary`](@ref)`(1, ℍ)` on ``ℝ^3``.
 """
 struct QuaternionRotation <: AbstractGroupAction{LeftAction} end
 
@@ -356,7 +356,7 @@ group_manifold(::QuaternionRotation) = Euclidean(3)
 @doc raw"""
     apply(A::QuaternionRotation, g::Quaternion, p)
 
-Rotate point `p` from [`Euclidean(3)`](@ref) manifold through conjugation by the group
+Rotate point `p` from [`Euclidean`](@ref)`(3)` manifold through conjugation by the group
 element `g`.
 The formula reads
 ````math
@@ -385,7 +385,7 @@ function apply!(::QuaternionRotation, q, ::Identity{MultiplicationOperation}, p)
 end
 
 """
-    quaternionic_rotation_matrix(g::Quaternions.Quaternion)
+    quaternion_rotation_matrix(g::Quaternions.Quaternion)
 
 Compute rotation matrix for [`RotationAction`](@ref) corresponding to
 [`QuaternionRotation`](@ref) by `g`.
