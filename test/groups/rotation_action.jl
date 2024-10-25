@@ -182,3 +182,42 @@ end
     apply!(A, q, a, p1)
     @test isapprox(q, apply(A, a, p1))
 end
+
+@testset "ComplexPlanarRotation" begin
+    M = Euclidean(2)
+    G = CircleGroup()
+    A = ComplexPlanarRotation()
+
+    @test group_manifold(A) === M
+    @test base_group(A) === G
+
+    p = [1.0, 2.0]
+    @test apply(A, 1.0im, p) ≈ [-2.0, 1.0]
+    @test apply(A, Identity(G), p) == p
+    q = similar(p)
+    apply!(A, q, 1.0im, p)
+    @test isapprox(q, [-2.0, 1.0])
+    apply!(A, q, Identity(G), p)
+    @test q == p
+end
+
+@testset "QuaternionRotation" begin
+    M = Euclidean(3)
+    G = Unitary(1, ℍ)
+    A = QuaternionRotation()
+
+    @test group_manifold(A) === M
+    @test base_group(A) === G
+
+    p = @SVector [1.0, 2.0, 5.0]
+    g = sign(Quaternion(1.0, 3.0, 5.0, 7.0))
+    @test apply(A, g, p) ≈ [2.7142857142857135, 3.571428571428571, 3.142857142857142]
+    @test apply(A, Identity(G), p) == p
+    q = similar(p)
+    apply!(A, q, g, p)
+    @test isapprox(q, [2.7142857142857135, 3.571428571428571, 3.142857142857142])
+    apply!(A, q, Identity(G), p)
+    @test q == p
+
+    @test Manifolds.quaternion_rotation_matrix(g) * p ≈ apply(A, g, p)
+end

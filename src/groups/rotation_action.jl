@@ -304,3 +304,108 @@ function optimal_alignment(
     Ostar = det(UVt) ≥ 0 ? UVt : F.U * Diagonal([i < L ? 1 : -1 for i in 1:L]) * F.Vt
     return convert(typeof(Xmul), Ostar)
 end
+
+@doc raw"""
+    ComplexPlanarRotation()
+
+Action of the circle group [`CircleGroup`](@ref) on ``ℝ^2`` by left multiplication.
+"""
+struct ComplexPlanarRotation <: AbstractGroupAction{LeftAction} end
+
+base_group(::ComplexPlanarRotation) = CircleGroup()
+
+group_manifold(::ComplexPlanarRotation) = Euclidean(2)
+
+@doc raw"""
+    apply(A::ComplexPlanarRotation, g::Complex, p)
+
+Rotate point `p` from [`Euclidean(2)`](@ref) manifold by the group element `g`.
+The formula reads
+````math
+p_{rot} =  \begin{bmatrix}
+\cos(θ) & \sin(θ)\\
+-\sin(θ) & \cos(θ)
+\end{bmatrix} p,
+````
+where `θ` is the argument of complex number `g`.
+"""
+function apply(::ComplexPlanarRotation, g::Complex, p)
+    sinθ, cosθ = g.im, g.re
+    return (@SMatrix [cosθ -sinθ; sinθ cosθ]) * p
+end
+apply(::ComplexPlanarRotation, ::Identity{MultiplicationOperation}, p) = p
+
+function apply!(A::ComplexPlanarRotation, q, g::Complex, p)
+    return copyto!(q, apply(A, g, p))
+end
+function apply!(::ComplexPlanarRotation, q, ::Identity{MultiplicationOperation}, p)
+    return copyto!(q, p)
+end
+
+@doc raw"""
+    QuaternionRotation
+
+Action of the unit quaternion group [`Unitary`](@ref)`(1, ℍ)` on ``ℝ^3``.
+"""
+struct QuaternionRotation <: AbstractGroupAction{LeftAction} end
+
+base_group(::QuaternionRotation) = Unitary(1, ℍ)
+
+group_manifold(::QuaternionRotation) = Euclidean(3)
+
+@doc raw"""
+    apply(A::QuaternionRotation, g::Quaternion, p)
+
+Rotate point `p` from [`Euclidean`](@ref)`(3)` manifold through conjugation by the group
+element `g`.
+The formula reads
+````math
+(0, p_{rot,x}, p_{rot,y}, p_{rot,z}) = g ⋅ (0, p_x, p_y, p_z) ⋅ g^{\mathrm{H}}
+````
+where ``(0, p_x, p_y, p_z)`` is quaternion with non-real coefficients from encoding
+the point `p` and ``g^{\mathrm{H}}`` is quaternion conjugate of ``g``.
+"""
+function apply(::QuaternionRotation, g::Quaternions.Quaternion, p::SVector)
+    p_quat = Quaternions.Quaternion(0, p[1], p[2], p[3])
+    p_conj = g * p_quat * conj(g)
+    return @SVector [p_conj.v1, p_conj.v2, p_conj.v3]
+end
+apply(::QuaternionRotation, ::Identity{MultiplicationOperation}, p) = p
+
+function apply!(::QuaternionRotation, q, g::Quaternions.Quaternion, p)
+    p_quat = Quaternions.Quaternion(0, p[1], p[2], p[3])
+    p_conj = g * p_quat * conj(g)
+    q[1] = p_conj.v1
+    q[2] = p_conj.v2
+    q[3] = p_conj.v3
+    return q
+end
+function apply!(::QuaternionRotation, q, ::Identity{MultiplicationOperation}, p)
+    return copyto!(q, p)
+end
+
+"""
+    quaternion_rotation_matrix(g::Quaternions.Quaternion)
+
+Compute rotation matrix for [`RotationAction`](@ref) corresponding to
+[`QuaternionRotation`](@ref) by `g`.
+
+See https://www.songho.ca/opengl/gl_quaternion.html for details.
+"""
+function quaternion_rotation_matrix(g::Quaternions.Quaternion)
+    r11 = 1 - 2 * (g.v2^2 + g.v3^2)
+    r12 = 2 * (g.v1 * g.v2 - g.v3 * g.s)
+    r13 = 2 * (g.v1 * g.v3 + g.v2 * g.s)
+    r21 = 2 * (g.v1 * g.v2 + g.v3 * g.s)
+    r22 = 1 - 2 * (g.v1^2 + g.v3^2)
+    r23 = 2 * (g.v2 * g.v3 - g.v1 * g.s)
+    r31 = 2 * (g.v1 * g.v3 - g.v2 * g.s)
+    r32 = 2 * (g.v2 * g.v3 + g.v1 * g.s)
+    r33 = 1 - 2 * (g.v1^2 + g.v2^2)
+
+    return @SMatrix [
+        r11 r12 r13
+        r21 r22 r23
+        r31 r32 r33
+    ]
+end
