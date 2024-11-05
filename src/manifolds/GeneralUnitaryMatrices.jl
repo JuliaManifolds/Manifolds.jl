@@ -211,7 +211,7 @@ end
 
 Compute the exponential map, that is, since ``X`` is represented in the Lie algebra,
 
-```
+```math
 exp_p(X) = p\mathrm{e}^X
 ```
 

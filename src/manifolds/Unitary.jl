@@ -1,6 +1,6 @@
 
 @doc raw"""
-    const UnitaryMatrices{n,𝔽} = AbstarctUnitaryMatrices{n,𝔽,AbsoluteDeterminantOneMatrices}
+    const UnitaryMatrices{n,𝔽} = GeneralUnitaryMatrices{T,𝔽,AbsoluteDeterminantOneMatrices}
 
 The manifold ``U(n,𝔽)`` of ``n×n`` complex matrices (when 𝔽=ℂ) or quaternionic matrices
 (when 𝔽=ℍ) such that
