@@ -21,8 +21,8 @@ Arguments
   If they are generated once they are cached accordingly.
   Then you can spare time in the rendering by not passing this argument.
   If quarto is not run, some tutorials are generated as empty files, since they
-  are referenced from within the documentation. These are currently
-  `Optimize.md` and `ImplementOwnManifold.md`.
+  are referenced from within the documentation.
+  This is currently `getstarted.md`.
 """,
     )
     exit(0)
