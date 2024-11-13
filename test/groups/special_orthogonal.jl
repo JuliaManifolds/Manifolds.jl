@@ -231,10 +231,10 @@ using Manifolds: LeftForwardAction, RightBackwardAction
             -0.7689185267244146 -0.6393467754356441
             0.6393467754356439 -0.7689185267244146
         ]
-        @test adjoint_matrix(M, p) == [1;;]
+        @test adjoint_matrix(M, p) == @SMatrix [1]
         J = [0.0;;]
         adjoint_matrix!(M, J, p)
-        @test J == [1;;]
+        @test J == @SMatrix [1]
 
         M = SpecialOrthogonal(3)
         p = [
