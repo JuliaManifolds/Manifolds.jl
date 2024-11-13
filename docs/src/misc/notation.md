@@ -63,4 +63,41 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\operatorname{Vol}(\mathcal M)`` | volume of manifold ``\mathcal M`` | |
 | ``\theta_p(X)`` | volume density for vector ``X`` tangent at point ``p`` | |
 | ``\mathcal W`` | the Weingarten map ``\mathcal W: T_p\mathcal M × N_p\mathcal M → T_p\mathcal M`` | ``\mathcal W_p`` | the second notation to emphasize the dependency of the point ``p\in\mathcal M`` |
-| ``0_k`` | the ``k×k`` zero matrix. | |
+| ``0_k`` | the ``k×k`` zero matrix. | | |
+
+## Comparison with notation commonly used in robotics
+
+In robotics, a different notation is commonly used.
+The table below shows a quick guide how to translate between them for people coming from robotics background.
+We use [SolaDerayAtchuthan:2021](@cite) as the primary robotics source.
+
+| Robotics concept | Manifolds.jl notation |
+|:--|:--------------- |
+| ``p \circ q`` | `compose(G, p, q)` |
+| ``p^{-1}``|  `inv(G, p)` |
+| ``\mathcal{E}`` | `Identity(G)` or `identity_element(G)` |
+| group action ``p\cdot p_m`` | `apply(A, p, p_m)` |
+| Lie group exponential ``\exp\colon \mathfrak{g} \to \mathcal{G}``, ``\exp(X)=p`` | `exp_lie(G, p)` |
+| Lie group logarithm ``\log\colon \mathcal{G} \to \mathfrak{g}``, ``\log(p)=X`` | `log_lie(G, X)` |
+| ``n``-D vector | `TranslationGroup(n)`;  its action is `TranslationAction(Euclidean(n), TranslationGroup(n))` |
+| circle ``S^1`` | `CircleGroup()`; its action is `ComplexPlanarRotation` |
+| rotation ``\mathrm{SO}(n)`` | `SpecialOrthogonal(n)`; its action is `RotationAction(Euclidean(n), SpecialOrthogonal(n))` |
+| rigid motion ``\mathrm{SE}(n)`` | `SpecialEuclidean(n)`; its action is `RotationTranslationAction(Euclidean(n), SpecialEuclidean(n))` |
+| unit quaternions ``S^3`` | `UnitaryMatrices(1, H)`; note that 3-sphere and the group of rotations (with its bi-invariant metric) are homeomorphic but not isomorphic |
+| size (as in Table I) | related to `representation_size(G)` |
+| dim (as in Table I) | `manifold_dimension(G)` |
+| Lie algebra element with coordinates ``\tau^{\wedge}`` | `hat(G, Identity(G), tau)` |
+| coordinates of an element of Lie algebra ``X^{\vee}`` | `vee(G, Identity(G), X)` |
+| capital exponential map ``\operatorname{Exp}`` | `exp_lie(G, hat(G, Identity(G), tau))` |
+| capital logarithmic map ``\operatorname{Log}`` | `vee(G, Identity(G), log_lie(G, p))` |
+| right-``\oplus``, ``p \oplus \tau`` | `compose(G, exp_lie(G, hat(G, Identity(G), tau)))` |
+| right-``\ominus``, ``p \ominus q`` | `vee(G, Identity(G), log_lie(G, compose(G, inv(G, q), p)))`|
+| left-``\oplus``, ``\tau \oplus p`` | `compose(G, exp_lie(G, hat(G, Identity(G), tau)), p)` |
+| left-``\ominus``, ``p \ominus q`` | `vee(G, Identity(G), log_lie(G, compose(G, p, inv(G, q))))` |
+| adjoint ``\mathrm{Ad}_{p}(\tau^{\wedge})`` | `adjoint_action(G, p, hat(G, Identity(G), tau))` |
+| adjoint matrix ``\mathrm{Ad}_{p}`` | `adjoint_matrix(G, p)` |
+| Jacobian of group inversion and composition | these can be easily obtained constructed from the adjoint matrix |
+| left and right Jacobians ``\mathbf{J}_l, \mathbf{J}_r`` | not available yet, though in some cases `jacobian_exp_argument` or `jacobian_exp_basepoint` might be used |
+| Jacobians of group actions | not available yet |
+
+Be also careful that the meaning of ``\mathbf{x}`` is inconsistent in Table I from [SolaDerayAtchuthan:2021](@cite). It's a complex number for circle, quaternion for quaternion rotation and column vectors for other rows.
