@@ -232,7 +232,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
             0.6393467754356439 -0.7689185267244146
         ]
         @test adjoint_matrix(M, p) == @SMatrix [1]
-        J = [0.0;;]
+        J = @MMatrix [0.0]
         adjoint_matrix!(M, J, p)
         @test J == @SMatrix [1]
 

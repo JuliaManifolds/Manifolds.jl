@@ -196,6 +196,16 @@ end
 Compute the adjoint matrix for the group [`SpecialEuclidean`](@ref)`(2)` at point `p`
 in default coordinates. The formula follows Section 10.6.2 in [Chirikjian:2012]
 but with additional scaling by ``\sqrt(2)`` due to a different choice of inner product.
+The formula reads
+````math
+\begin{pmatrix}
+R_{1,1} & R_{1,2} & t_2 \\
+R_{2,1} & R_{2,2} & -t_1 \\
+0 & 0 & 1
+\end{pmatrix},
+where ``R`` is the rotation matrix part of `p` and ``[t_1, t_2]`` is the translation part
+of `p`.
+````
 """
 function adjoint_matrix(::SpecialEuclidean{TypeParameter{Tuple{2}}}, p)
     t, R = submanifold_components(p)
@@ -210,7 +220,22 @@ end
 
 Compute the adjoint matrix for the group [`SpecialEuclidean`](@ref)`(3)` at point `p`
 in default coordinates. The formula follows Section 10.6.9 in [Chirikjian:2012] with
-changes due to different conventions.
+changes due to different conventions. The formula reads
+````math
+\begin{pmatrix}
+R & UR/\sqrt{2} \\
+0_{3×3} & R
+\end{pmatrix}.
+````
+where ``R`` is the rotation matrix of `p` and ``U`` is the matrix
+````math
+\begin{pmatrix}
+0 & -t_3 & t_2 \\
+t_3 & 0 & -t_1 \\
+-t_2 & t_1 & 0
+\end{pmatrix}
+````
+where ``[t_1, t_2, t_3]`` is the translation vector of `p`.
 """
 function adjoint_matrix(::SpecialEuclidean{TypeParameter{Tuple{3}}}, p)
     t, R = submanifold_components(p)
