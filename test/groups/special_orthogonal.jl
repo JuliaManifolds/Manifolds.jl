@@ -224,4 +224,27 @@ using Manifolds: LeftForwardAction, RightBackwardAction
             atol=1e-12,
         )
     end
+
+    @testset "Jacobians" begin
+        M = SpecialOrthogonal(2)
+        p = [
+            -0.7689185267244146 -0.6393467754356441
+            0.6393467754356439 -0.7689185267244146
+        ]
+        @test adjoint_matrix(M, p) == [1;;]
+        J = [0.0;;]
+        adjoint_matrix!(M, J, p)
+        @test J == [1;;]
+
+        M = SpecialOrthogonal(3)
+        p = [
+            -0.333167290022488 -0.7611396995437196 -0.5564763378954822
+            0.8255218425902797 0.049666662385985494 -0.5621804959741897
+            0.4555362161951786 -0.646683524164589 0.6117901399243428
+        ]
+        @test adjoint_matrix(M, p) == p
+        J = similar(p)
+        adjoint_matrix!(M, J, p)
+        @test J == p
+    end
 end

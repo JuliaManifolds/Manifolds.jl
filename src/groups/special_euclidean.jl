@@ -191,6 +191,36 @@ function adjoint_action(
 end
 
 @doc raw"""
+    adjoint_matrix(::SpecialEuclidean{TypeParameter{Tuple{2}}}, p)
+
+Compute the adjoint matrix for the group [`SpecialEuclidean`](@ref)`(2)` at point `p`
+in default coordinates. The formula follows Section 10.6.2 in [Chirikjian:2012]
+but with additional scaling by ``\sqrt(2)`` due to a different choice of inner product.
+"""
+function adjoint_matrix(::SpecialEuclidean{TypeParameter{Tuple{2}}}, p)
+    t, R = submanifold_components(p)
+    return @SMatrix [
+        R[1, 1] R[1, 2] t[2]/sqrt(2)
+        R[2, 1] R[2, 2] -t[1]/sqrt(2)
+        0 0 1
+    ]
+end
+@doc raw"""
+    adjoint_matrix(::SpecialEuclidean{TypeParameter{Tuple{3}}}, p)
+
+Compute the adjoint matrix for the group [`SpecialEuclidean`](@ref)`(3)` at point `p`
+in default coordinates. The formula follows Section 10.6.9 in [Chirikjian:2012] with
+changes due to different conventions.
+"""
+function adjoint_matrix(::SpecialEuclidean{TypeParameter{Tuple{3}}}, p)
+    t, R = submanifold_components(p)
+    Z = @SMatrix zeros(3, 3)
+    c = sqrt(2) \ @SMatrix [0 -t[3] t[2]; t[3] 0 -t[1]; -t[2] t[1] 0]
+    U = c * R
+    return vcat(hcat(R, U), hcat(Z, R))
+end
+
+@doc raw"""
     affine_matrix(G::SpecialEuclidean, p) -> AbstractMatrix
 
 Represent the point ``p ∈ \mathrm{SE}(n)`` as an affine matrix.

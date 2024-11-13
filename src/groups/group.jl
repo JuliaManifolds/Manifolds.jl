@@ -538,6 +538,33 @@ end
 
 @trait_function adjoint_inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
 
+"""
+    adjoint_matrix(G::AbstractManifold, p, B::AbstractBasis=DefaultOrthonormalBasis())
+
+Compute the adjoint matrix related to conjugation of vectors by element `p` of Lie group `G`
+for basis `B`. It is the matrix ``A`` such that for each element `X` of the Lie algebra
+with coefficients ``c`` in basis `B`, ``Ac`` is the vector of coefficients of `X` conjugated
+by `p` in basis `B`.
+"""
+function adjoint_matrix(G::AbstractManifold, p, B::AbstractBasis=DefaultOrthonormalBasis())
+    J = ManifoldDiff.allocate_jacobian(G, G, adjoint_matrix, p)
+    return adjoint_matrix!(G, J, p, B)
+end
+
+function adjoint_matrix!(
+    G::AbstractManifold,
+    J,
+    p,
+    B::AbstractBasis=DefaultOrthonormalBasis(),
+)
+    Bb = get_basis(G, p, B)
+    Vs = get_vectors(G, p, Bb)
+    for i in eachindex(Vs)
+        get_coordinates!(G, view(J, :, i), p, adjoint_action(G, p, Vs[i]), B)
+    end
+    return J
+end
+
 function ManifoldDiff.differential_exp_argument_lie_approx!(
     M::AbstractManifold,
     Z,
