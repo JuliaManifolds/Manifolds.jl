@@ -13,7 +13,7 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\operatorname{Ad}_p(X)`` | adjoint action of element ``p`` of a Lie group on the element ``X`` of the corresponding Lie algebra | | |
 | ``×`` | Cartesian product of two manifolds | | see [`ProductManifold`](@extref `ManifoldsBase.ProductManifold`) |
 | ``^{\wedge}`` | (n-ary) Cartesian power of a manifold | | see [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) |
-| ``⋅^\mathrm{H}`` | conjugate/Hermitian transpose | |
+| ``⋅^\mathrm{H}`` | conjugate/Hermitian transpose | | |
 | ``a`` | coordinates of a point in a chart | | see [`get_parameters`](@ref) |
 | ``\frac{\mathrm{D}}{\mathrm{d}t}`` | covariant derivative of a vector field ``X(t)`` | | |
 | ``T^*_p \mathcal M`` | the cotangent space at ``p`` | | |
@@ -27,41 +27,41 @@ Within the documented functions, the utf8 symbols are used whenever possible, as
 | ``\gamma`` | a geodesic | ``\gamma_{p;q}``, ``\gamma_{p,X}`` | connecting two points ``p,q`` or starting in ``p`` with velocity ``X``. |
 | ``\operatorname{grad} f(p)`` | (Riemannian) gradient of function ``f \colon \mathcal{M} → ℝ`` at ``p \in \mathcal{M}`` | | |
 | ``\nabla f(p)`` | (Euclidean) gradient of function ``f \colon \mathcal{M} → ℝ`` at ``p \in \mathcal{M}`` but thought of as evaluated in the embedding | `G` | |
-| ``\circ`` | a group operation | |
-| ``⋅^\mathrm{H}`` | Hermitian or conjugate transposed for both complex or quaternion matrices| |
+| ``\circ`` | a group operation | | |
+| ``⋅^\mathrm{H}`` | Hermitian or conjugate transposed for both complex or quaternion matrices| | |
 | ``\operatorname{Hess} f(p)`` | (Riemannian) Hessian of function ``f \colon T_p\mathcal{M} → T_p\mathcal M`` (i.e. the 1-1-tensor form) at ``p \in \mathcal{M}`` | | |
 | ``\nabla^2 f(p)`` | (Euclidean) Hessian of function ``f`` in the embedding | `H` | |
-| ``e`` | identity element of a group | |
-| ``I_k`` | identity matrix of size ``k×k`` | |
+| ``e`` | identity element of a group | | |
+| ``I_k`` | identity matrix of size ``k×k`` | | |
 | ``k`` | indices | ``i,j`` | |
-| ``\langle⋅,⋅\rangle`` | inner product (in ``T_p \mathcal M``) | ``\langle⋅,⋅\rangle_p, g_p(⋅,⋅)`` |
-| ``\operatorname{retr}^{-1}_pq``|  an inverse retraction | |
-| ``\mathfrak g`` | a Lie algebra | |
-| ``\mathcal{G}`` | a (Lie) group | |
+| ``\langle⋅,⋅\rangle`` | inner product (in ``T_p \mathcal M``) | ``\langle⋅,⋅\rangle_p, g_p(⋅,⋅)`` | |
+| ``\operatorname{retr}^{-1}_pq``|  an inverse retraction | | |
+| ``\mathfrak g`` | a Lie algebra | | |
+| ``\mathcal{G}`` | a (Lie) group | | |
 | ``\log_p q`` | logarithmic map at ``p \in \mathcal M`` of a point ``q \in \mathcal M`` | ``\log_p(q)`` | |
 | ``\mathcal M`` | a manifold | ``\mathcal M_1, \mathcal M_2,\ldots,\mathcal N`` | |
 | ``N_p \mathcal M`` | the normal space of the tangent space ``T_p \mathcal M`` in some embedding ``\mathcal E`` that should be clear from context | | |
 | ``V`` | a normal vector from ``N_p \mathcal M`` | ``W`` | |
-| ``\operatorname{Exp}`` | the matrix exponential | |
-| ``\operatorname{Log}`` | the matrix logarithm | |
-| ``\mathcal P_{q\gets p}X`` | parallel transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``
-| ``\mathcal P_{p,Y}X`` | parallel transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, ``q = \exp_pY``
-| ``\mathcal P_{t_1\gets t_0}^cX`` | parallel transport along the curve ``c``| ``\mathcal P^cX=\mathcal P_{1\gets 0}^cX`` | of the vector ``X`` from ``p=c(0)`` to ``c(1)``
+| ``\operatorname{Exp}`` | the matrix exponential | | |
+| ``\operatorname{Log}`` | the matrix logarithm | | |
+| ``\mathcal P_{q\gets p}X`` | parallel transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M`` |
+| ``\mathcal P_{p,Y}X`` | parallel transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, ``q = \exp_pY`` |
+| ``\mathcal P_{t_1\gets t_0}^cX`` | parallel transport along the curve ``c``| ``\mathcal P^cX=\mathcal P_{1\gets 0}^cX`` | of the vector ``X`` from ``p=c(0)`` to ``c(1)`` |
 | ``p`` | a point on ``\mathcal M`` | ``p_1, p_2, \ldots,q`` | for 3 points one might use ``x,y,z`` |
-| ``\operatorname{retr}_pX``|  a retraction | |
-| ``\kappa_p(X, Y)`` | sectional curvature | |
+| ``\operatorname{retr}_pX``|  a retraction | | |
+| ``\kappa_p(X, Y)`` | sectional curvature | | |
 | ``ξ`` | a set of tangent vectors | ``\{X_1,\ldots,X_n\}`` | |
 | ``J_{2n} \in ℝ^{2n×2n}`` | the [`SymplecticElement`](@ref) | | |
 | ``T_p \mathcal M`` | the tangent space at ``p`` | | |
 | ``X`` | a tangent vector from ``T_p \mathcal M`` | ``X_1,X_2,\ldots,Y,Z`` | sometimes written with base point ``X_p`` |
-| ``\operatorname{tr}`` | trace (of a matrix) | |
-| ``⋅^\mathrm{T}`` | transposed | |
-| ``e_i \in \mathbb R^n`` | the ``i``th unit vector | ``e_i^n`` | the space dimension (``n``) is omitted, when clear from context
-| ``B`` | a vector bundle | |
-| ``\mathcal T_{q\gets p}X`` | vector transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``
+| ``\operatorname{tr}`` | trace (of a matrix) | | |
+| ``⋅^\mathrm{T}`` | transposed | | |
+| ``e_i \in \mathbb R^n`` | the ``i``th unit vector | ``e_i^n`` | the space dimension (``n``) is omitted, when clear from context |
+| ``B`` | a vector bundle | | |
+| ``\mathcal T_{q\gets p}X`` | vector transport | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M`` |
 | ``\mathcal T_{p,Y}X`` | vector transport in direction ``Y`` | | of the vector ``X`` from ``T_p\mathcal M`` to ``T_q\mathcal M``, where ``q`` is determined by ``Y``, for example using the exponential map or some retraction. |
-| ``\operatorname{Vol}(\mathcal M)`` | volume of manifold ``\mathcal M`` | |
-| ``\theta_p(X)`` | volume density for vector ``X`` tangent at point ``p`` | |
+| ``\operatorname{Vol}(\mathcal M)`` | volume of manifold ``\mathcal M`` | | |
+| ``\theta_p(X)`` | volume density for vector ``X`` tangent at point ``p`` | | |
 | ``\mathcal W`` | the Weingarten map ``\mathcal W: T_p\mathcal M × N_p\mathcal M → T_p\mathcal M`` | ``\mathcal W_p`` | the second notation to emphasize the dependency of the point ``p\in\mathcal M`` |
 | ``0_k`` | the ``k×k`` zero matrix. | | |
 
@@ -96,9 +96,9 @@ We use [SolaDerayAtchuthan:2021](@cite) as the primary robotics source.
 | left-``\ominus``, ``p \ominus q`` | `vee(G, Identity(G), log_lie(G, compose(G, p, inv(G, q))))` |
 | adjoint ``\mathrm{Ad}_{p}(\tau^{\wedge})`` | `adjoint_action(G, p, hat(G, Identity(G), tau))` |
 | adjoint matrix ``\mathrm{Ad}_{p}`` | `adjoint_matrix(G, p)` |
-| Jacobian of group inversion and composition | these can be easily obtained constructed from the adjoint matrix |
+| Jacobian of group inversion and composition | these can be easily constructed from the adjoint matrix |
 | left and right Jacobians of a function | In JuliaManifolds there is always one preferred way to store tangent vectors specified by each manifold, and so we follow the standard mathematical convention of having one Jacobian which follows the selected tangent vector storage convention. See for example `jacobian_exp_argument`, `jacobian_exp_basepoint`, `jacobian_log_argument`, `jacobian_log_basepoint` from `ManifoldDiff.jl`. |
-| left and right Jacobians (of a group) ``\mathbf{J}_l, \mathbf{J}_r`` | not available yet, though in some cases `jacobian_exp_argument` or `jacobian_exp_basepoint` might be used |
+| left and right Jacobians (of a group) ``\mathbf{J}_l, \mathbf{J}_r`` | not available yet, though in some cases `jacobian_exp_argument` might be used |
 | Jacobians of group actions | not available yet |
 
 Be also careful that the meaning of ``\mathbf{x}`` is inconsistent in Table I from [SolaDerayAtchuthan:2021](@cite). It's a complex number for circle, quaternion for quaternion rotation and column vectors for other rows.
