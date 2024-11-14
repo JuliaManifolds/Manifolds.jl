@@ -547,7 +547,7 @@ with coefficients ``c`` in basis `B`, ``Ac`` is the vector of coefficients of `X
 by `p` in basis `B`.
 """
 function adjoint_matrix(G::AbstractManifold, p, B::AbstractBasis=DefaultOrthonormalBasis())
-    J = ManifoldDiff.allocate_jacobian(G, G, adjoint_matrix, p)
+    J = allocate_jacobian(G, G, adjoint_matrix, p)
     return adjoint_matrix!(G, J, p, B)
 end
 

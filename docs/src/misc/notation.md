@@ -98,7 +98,7 @@ We use [SolaDerayAtchuthan:2021](@cite) as the primary robotics source.
 | adjoint matrix ``\mathrm{Ad}_{p}`` | `adjoint_matrix(G, p)` |
 | Jacobian of group inversion and composition | these can be easily constructed from the adjoint matrix |
 | left and right Jacobians of a function | In JuliaManifolds there is always one preferred way to store tangent vectors specified by each manifold, and so we follow the standard mathematical convention of having one Jacobian which follows the selected tangent vector storage convention. See for example `jacobian_exp_argument`, `jacobian_exp_basepoint`, `jacobian_log_argument`, `jacobian_log_basepoint` from `ManifoldDiff.jl`. |
-| left and right Jacobians (of a group) ``\mathbf{J}_l, \mathbf{J}_r`` | not available yet, though in some cases `jacobian_exp_argument` might be used |
+| left and right Jacobians (of a group) ``\mathbf{J}_l, \mathbf{J}_r`` | `jacobian_exp_argument` for exponential coordinates. For other coordinate systems no replacement is available yet. |
 | Jacobians of group actions | not available yet |
 
 Be also careful that the meaning of ``\mathbf{x}`` is inconsistent in Table I from [SolaDerayAtchuthan:2021](@cite). It's a complex number for circle, quaternion for quaternion rotation and column vectors for other rows.
