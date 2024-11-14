@@ -231,7 +231,7 @@ function jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{3}}}, p, X)
     return jacobian_exp_argument!(M, J, p, X)
 end
 
-function ManifoldDiff.jacobian_exp_argument!(
+function jacobian_exp_argument!(
     ::Rotations{TypeParameter{Tuple{2}}},
     J::AbstractMatrix,
     p,
@@ -240,7 +240,7 @@ function ManifoldDiff.jacobian_exp_argument!(
     J .= 1
     return J
 end
-function ManifoldDiff.jacobian_exp_argument!(
+function jacobian_exp_argument!(
     M::Rotations{TypeParameter{Tuple{3}}},
     J::AbstractMatrix,
     p,
