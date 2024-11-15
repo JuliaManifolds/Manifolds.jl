@@ -560,8 +560,8 @@ Compute Jacobian matrix of the invariant exponential map on [`SpecialEuclidean`]
 The formula reads
 ````math
 \begin{pmatrix}
-\frac{\sin(θ)}{\theta} & \frac{1-\cos(\theta)}{\theta} & \frac{t_1(\sin(θ) - θ) + t_2(\cos(θ) - 1)}{\sqrt{2} θ^2} \\
-\frac{-1+\cos(\theta)}{\theta} & \frac{\sin(θ)}{\theta} & \frac{t_2(\sin(θ) - θ) + t_1(-\cos(θ) + 1)}{\sqrt{2} θ^2} \\
+\frac{1}{θ}\sin(θ) & \frac{1}{θ} (1-\cos(θ)) & \frac{1}{\sqrt{2} θ^2}(t_1(\sin(θ) - θ) + t_2(\cos(θ) - 1)) \\
+\frac{1}{θ}(-1+\cos(θ)) & \frac{1}{θ}\sin(θ) & \frac{1}{\sqrt{2} θ^2}(t_2(\sin(θ) - θ) + t_1(-\cos(θ) + 1)) \\
 0 & 0 & 1
 \end{pmatrix}.
 ````
@@ -588,7 +588,12 @@ R & Q \\
 where ``R`` is the Jacobian of exponential map on [`Rotations`](@ref)`(3)` with respect to
 the argument, and ``Q`` is
 ````math
-Q = \frac{1}{2} T - \frac{θ - \sin(θ)}{θ^3} (X_r T + T X_r + X_r T X_r) + \frac{1 - \frac{θ^2}{2} - \cos(θ)}{θ^4} (X_r^2 T + T X_r^2 - 3 X_r T X_r) + \frac{1}{2}\left(\frac{1 - \frac{θ^2}{2} - \cos(θ)}{θ^4} - 3 \frac{θ - \sin(θ) - \frac{θ^3}{6}}{θ^5}\right) (X_r T X_r^2 + X_r^2 T X_r)
+\begin{align*}
+Q = &\frac{1}{2} T \\
+    &- \frac{θ - \sin(θ)}{θ^3} (X_r T + T X_r + X_r T X_r) \\
+    & + \frac{1 - \frac{θ^2}{2} - \cos(θ)}{θ^4} (X_r^2 T + T X_r^2 - 3 X_r T X_r)\\
+    & + \frac{1}{2}\left(\frac{1 - \frac{θ^2}{2} - \cos(θ)}{θ^4} - 3 \frac{θ - \sin(θ) - \frac{θ^3}{6}}{θ^5}\right) (X_r T X_r^2 + X_r^2 T X_r)
+\end{align*}
 ````
 where ``X_r`` is the rotation part of ``X`` and ``T`` is
 ````math
