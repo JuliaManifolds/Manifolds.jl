@@ -203,9 +203,9 @@ R_{1,1} & R_{1,2} & t_2 \\
 R_{2,1} & R_{2,2} & -t_1 \\
 0 & 0 & 1
 \end{pmatrix},
+````
 where ``R`` is the rotation matrix part of `p` and ``[t_1, t_2]`` is the translation part
 of `p`.
-````
 """
 function adjoint_matrix(::SpecialEuclidean{TypeParameter{Tuple{2}}}, p)
     t, R = submanifold_components(p)
@@ -547,6 +547,128 @@ function exp_lie!(G::SpecialEuclidean{TypeParameter{Tuple{3}}}, q, X)
     copyto!(t, Jₗ * b)
     @inbounds _padpoint!(G, q)
     return q
+end
+
+@doc raw"""
+    jacobian_exp_inv_argument(
+        M::SpecialEuclidean{TypeParameter{Tuple{2}}},
+        p,
+        X,
+    )
+
+Compute Jacobian matrix of the invariant exponential map on [`SpecialEuclidean`](@ref)`(2)`.
+The formula reads
+````math
+\begin{pmatrix}
+\frac{\sin(θ)}{\theta} & \frac{1-\cos(\theta)}{\theta} & \frac{t_1(\sin(θ) - θ) + t_2(\cos(θ) - 1)}{\sqrt{2} θ^2} \\
+\frac{-1+\cos(\theta)}{\theta} & \frac{\sin(θ)}{\theta} & \frac{t_2(\sin(θ) - θ) + t_1(-\cos(θ) + 1)}{\sqrt{2} θ^2} \\
+0 & 0 & 1
+\end{pmatrix}.
+````
+where ``θ`` is the norm of `X` and ``[t_1, t_2]`` is the translation part
+of `X`.
+It is adapted from [Chirikjian:2012](@cite), Section 10.6.2, to `Manifolds.jl` conventions.
+"""
+jacobian_exp_inv_argument(M::SpecialEuclidean{TypeParameter{Tuple{2}}}, p, X)
+@doc raw"""
+    jacobian_exp_inv_argument(
+        M::SpecialEuclidean{TypeParameter{Tuple{3}}},
+        p,
+        X,
+    )
+
+Compute Jacobian matrix of the invariant exponential map on [`SpecialEuclidean`](@ref)`(3)`.
+The formula reads
+````math
+\begin{pmatrix}
+R & Q \\
+0_{3×3} & R
+\end{pmatrix},
+````
+where ``R`` is the Jacobian of exponential map on [`Rotations`](@ref)`(3)` with respect to
+the argument, and ``Q`` is
+````math
+\frac{1}{2} T - \frac{θ - \sin(θ)}{θ^3} (X_r T + T X_r + X_r T X_r) + \frac{1 - \frac{θ^2}{2} - \cos(θ)}{θ^4} (X_r^2 T + T X_r^2 - 3 X_r T X_r) + \frac{1}{2}\left(\frac{1 - \frac{θ^2}{2} - \cos(θ)}{θ^4} - 3 \frac{θ - \sin(θ) - \frac{θ^3}{6}}{θ^5}\right) (X_r T X_r^2 + X_r^2 T X_r)
+````
+where ``X_r`` is the rotation part of ``X`` and ``T`` is
+````math
+\frac{1}{\sqrt{2}}\begin{pmatrix}
+0 & -t_3 & t_2 \\
+t_3 & 0 & -t_1 \\
+-t_2 & t_1 & 0
+\end{pmatrix},
+````
+where ``[t_1, t_2, t_3]`` is the translation part of `X`.
+It is adapted from [BarfootFurgale:2014](@cite), Eq. (102), to `Manifolds.jl` conventions.
+"""
+jacobian_exp_inv_argument(M::SpecialEuclidean{TypeParameter{Tuple{3}}}, p, X)
+function jacobian_exp_inv_argument(M::SpecialEuclidean, p, X)
+    J = allocate_jacobian(M, M, jacobian_exp_inv_argument, p)
+    return jacobian_exp_inv_argument!(M, J, p, X)
+end
+function jacobian_exp_inv_argument!(
+    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
+    J::AbstractMatrix,
+    p,
+    X,
+)
+    θ = norm(X.x[2]) / sqrt(2)
+    t1, t2 = X.x[1]
+    copyto!(J, I)
+    if θ ≈ 0
+        J[1, 3] = -t2 / (sqrt(2) * 2)
+        J[2, 3] = t1 / (sqrt(2) * 2)
+    else
+        J[1, 1] = J[2, 2] = sin(θ) / θ
+        J[1, 2] = (cos(θ) - 1) / θ
+        J[2, 1] = -J[1, 2]
+        J[1, 3] = (t1 * (sin(θ) - θ) + t2 * (cos(θ) - 1)) / (sqrt(2) * θ^2)
+        J[2, 3] = (t2 * (sin(θ) - θ) + t1 * (1 - cos(θ))) / (sqrt(2) * θ^2)
+    end
+    return J
+end
+
+function jacobian_exp_inv_argument!(
+    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
+    J::AbstractMatrix,
+    p,
+    X,
+)
+    θ = norm(X.x[2]) / sqrt(2)
+    t1, t2, t3 = X.x[1]
+    Xr = X.x[2]
+    copyto!(J, I)
+    if θ ≈ 0
+        J[1, 5] = t3 / (sqrt(2) * 2)
+        J[1, 6] = -t2 / (sqrt(2) * 2)
+        J[2, 6] = t1 / (sqrt(2) * 2)
+        J[2, 4] = -t3 / (sqrt(2) * 2)
+        J[3, 4] = t2 / (sqrt(2) * 2)
+        J[3, 5] = -t1 / (sqrt(2) * 2)
+    else
+        a = (cos(θ) - 1) / θ^2
+        b = (θ - sin(θ)) / θ^3
+        # top left block
+        view(J, SOneTo(3), SOneTo(3)) .+= a .* Xr .+ b .* (Xr^2)
+        # bottom right block
+        view(J, 4:6, 4:6) .= view(J, SOneTo(3), SOneTo(3))
+        # top right block
+        Xr = -Xr
+        tx = @SMatrix [
+            0 -t3/sqrt(2) t2/sqrt(2)
+            t3/sqrt(2) 0 -t1/sqrt(2)
+            -t2/sqrt(2) t1/sqrt(2) 0
+        ]
+        J[1:3, 4:6] .= -tx ./ 2
+        J[1:3, 4:6] .-= (θ - sin(θ)) / (θ^3) * (Xr * tx + tx * Xr + Xr * tx * Xr)
+        J[1:3, 4:6] .+=
+            ((1 - θ^2 / 2 - cos(θ)) / θ^4) * (Xr^2 * tx + tx * Xr^2 - 3 * Xr * tx * Xr)
+        J[1:3, 4:6] .+=
+            0.5 *
+            ((1 - (θ^2) / 2 - cos(θ)) / (θ^4) - 3 * (θ - sin(θ) - (θ^3) / 6) / (θ^5)) *
+            (Xr * tx * Xr^2 + Xr^2 * tx * Xr)
+    end
+    return J
 end
 
 @doc raw"""
