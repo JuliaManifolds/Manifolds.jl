@@ -16,7 +16,7 @@ end
     adjoint_matrix(::SpecialOrthogonal{TypeParameter{Tuple{2}}}, p)
 
 Compte the adjoint matrix for [`SpecialOrthogonal`](@ref)`(2)` at point `p`, which is equal
-to `1`. See [SolaDerayAtchuthan:2021], Appendix A.
+to `1`. See [SolaDerayAtchuthan:2021](@cite), Appendix A.
 """
 adjoint_matrix(::SpecialOrthogonal{TypeParameter{Tuple{2}}}, p) = @SMatrix [1]
 """

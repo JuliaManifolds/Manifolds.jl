@@ -194,7 +194,7 @@ end
     adjoint_matrix(::SpecialEuclidean{TypeParameter{Tuple{2}}}, p)
 
 Compute the adjoint matrix for the group [`SpecialEuclidean`](@ref)`(2)` at point `p`
-in default coordinates. The formula follows Section 10.6.2 in [Chirikjian:2012]
+in default coordinates. The formula follows Section 10.6.2 in [Chirikjian:2012](@cite)
 but with additional scaling by ``\sqrt(2)`` due to a different choice of inner product.
 The formula reads
 ````math
@@ -219,7 +219,7 @@ end
     adjoint_matrix(::SpecialEuclidean{TypeParameter{Tuple{3}}}, p)
 
 Compute the adjoint matrix for the group [`SpecialEuclidean`](@ref)`(3)` at point `p`
-in default coordinates. The formula follows Section 10.6.9 in [Chirikjian:2012] with
+in default coordinates. The formula follows Section 10.6.9 in [Chirikjian:2012](@cite) with
 changes due to different conventions. The formula reads
 ````math
 \begin{pmatrix}
@@ -588,7 +588,7 @@ R & Q \\
 where ``R`` is the Jacobian of exponential map on [`Rotations`](@ref)`(3)` with respect to
 the argument, and ``Q`` is
 ````math
-\frac{1}{2} T - \frac{θ - \sin(θ)}{θ^3} (X_r T + T X_r + X_r T X_r) + \frac{1 - \frac{θ^2}{2} - \cos(θ)}{θ^4} (X_r^2 T + T X_r^2 - 3 X_r T X_r) + \frac{1}{2}\left(\frac{1 - \frac{θ^2}{2} - \cos(θ)}{θ^4} - 3 \frac{θ - \sin(θ) - \frac{θ^3}{6}}{θ^5}\right) (X_r T X_r^2 + X_r^2 T X_r)
+Q = \frac{1}{2} T - \frac{θ - \sin(θ)}{θ^3} (X_r T + T X_r + X_r T X_r) + \frac{1 - \frac{θ^2}{2} - \cos(θ)}{θ^4} (X_r^2 T + T X_r^2 - 3 X_r T X_r) + \frac{1}{2}\left(\frac{1 - \frac{θ^2}{2} - \cos(θ)}{θ^4} - 3 \frac{θ - \sin(θ) - \frac{θ^3}{6}}{θ^5}\right) (X_r T X_r^2 + X_r^2 T X_r)
 ````
 where ``X_r`` is the rotation part of ``X`` and ``T`` is
 ````math
