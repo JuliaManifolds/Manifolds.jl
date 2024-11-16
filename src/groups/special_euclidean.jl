@@ -195,7 +195,7 @@ end
 
 Compute the adjoint matrix for the group [`SpecialEuclidean`](@ref)`(2)` at point `p`
 in default coordinates. The formula follows Section 10.6.2 in [Chirikjian:2012](@cite)
-but with additional scaling by ``\sqrt(2)`` due to a different choice of inner product.
+but with additional scaling by ``\sqrt{2}`` due to a different choice of inner product.
 The formula reads
 ````math
 \begin{pmatrix}
