@@ -182,6 +182,8 @@ import ManifoldDiff:
     diagonalizing_projectors,
     jacobi_field,
     jacobi_field!,
+    jacobian_exp_argument,
+    jacobian_exp_argument!,
     riemannian_gradient,
     riemannian_gradient!,
     riemannian_Hessian,
@@ -326,6 +328,7 @@ using ManifoldsBase:
     ziptuples
 using ManifoldDiff: ManifoldDiff
 using ManifoldDiff:
+    allocate_jacobian,
     default_differential_backend,
     _derivative,
     _derivative!,
@@ -1029,6 +1032,8 @@ export adjoint_action,
     adjoint_apply_diff_group!,
     adjoint_inv_diff,
     adjoint_inv_diff!,
+    adjoint_matrix,
+    adjoint_matrix!,
     affine_matrix,
     apply,
     apply!,

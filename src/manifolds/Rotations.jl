@@ -206,6 +206,57 @@ function inverse_retract_qr!(M::Rotations, X, p, q)
 end
 
 @doc raw"""
+    jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{2}}}, p, X)
+
+Compute Jacobian of the exponential map with respect to the argument `X` in orthonormal
+coordinates on the [`Rotations`](@ref)`(2)` manifold. It is equal to matrix ``[1]``, see
+[SolaDerayAtchuthan:2021](@cite), Appendix A.
+"""
+function jacobian_exp_argument(::Rotations{TypeParameter{Tuple{2}}}, p, X)
+    return @SMatrix ones(eltype(X), 1, 1)
+end
+@doc raw"""
+    jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{3}}}, p, X)
+
+Compute Jacobian of the exponential map with respect to the argument `X` in orthonormal
+coordinates on the [`Rotations`](@ref)`(3)` manifold. The formula reads
+````math
+𝕀 + \frac{\cos(θ) - 1}{θ^2} X + \frac{θ - \sin(θ)}{θ^3} X^2,
+````
+where ``θ`` is the norm of `X`.
+It is adapted from [Chirikjian:2012](@cite), Eq. (10.86), to `Manifolds.jl` conventions.
+"""
+function jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{3}}}, p, X)
+    J = allocate_jacobian(M, M, jacobian_exp_argument, p)
+    return jacobian_exp_argument!(M, J, p, X)
+end
+
+function jacobian_exp_argument!(
+    ::Rotations{TypeParameter{Tuple{2}}},
+    J::AbstractMatrix,
+    p,
+    X,
+)
+    J .= 1
+    return J
+end
+function jacobian_exp_argument!(
+    M::Rotations{TypeParameter{Tuple{3}}},
+    J::AbstractMatrix,
+    p,
+    X,
+)
+    θ = norm(M, p, X) / sqrt(2)
+    copyto!(J, I)
+    if θ ≉ 0
+        a = (cos(θ) - 1) / θ^2
+        b = (θ - sin(θ)) / θ^3
+        J .+= a .* X .+ b .* (X^2)
+    end
+    return J
+end
+
+@doc raw"""
     normal_rotation_distribution(M::Rotations, p, σ::Real)
 
 Return a random point on the manifold [`Rotations`](@ref) `M`
