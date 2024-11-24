@@ -5,7 +5,7 @@ using ManifoldsBase: TraitList
 import ManifoldsBase: default_retraction_method
 import Manifolds: solve_exp_ode
 using Manifolds: InducedBasis, connection, get_chart_index, induced_basis, mean!, median!
-using ManifoldDiff: FiniteDifferencesBackend
+using ADTypes
 include("header.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
@@ -372,7 +372,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
             @test gaussian_curvature(M, p, B_chart_p) ≈ 0 atol = 1e-6
             @test einstein_tensor(M, p, B_chart_p) ≈ zeros(n, n) atol = 1e-6
 
-            fdm = FiniteDifferencesBackend(forward_fdm(2, 1))
+            fdm = AutoFiniteDifferences(forward_fdm(2, 1))
             @test christoffel_symbols_first(M, p, B_chart_p; backend=fdm) ≈ zeros(n, n, n) atol =
                 1e-6
             @test christoffel_symbols_second(M, p, B_chart_p; backend=fdm) ≈ zeros(n, n, n) atol =
@@ -384,7 +384,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
             @test gaussian_curvature(M, p, B_chart_p; backend=fdm) ≈ 0 atol = 1e-6
             @test einstein_tensor(M, p, B_chart_p; backend=fdm) ≈ zeros(n, n) atol = 1e-6
 
-            fd_diff = FiniteDifferencesBackend()
+            fd_diff = AutoFiniteDifferences(central_fdm(5, 1))
             @test christoffel_symbols_first(M, p, B_chart_p; backend=fd_diff) ≈
                   zeros(n, n, n) atol = 1e-6
             @test christoffel_symbols_second(M, p, B_chart_p; backend=fd_diff) ≈

@@ -32,18 +32,19 @@ function ManifoldDiff.gradient(::AbstractManifold, f, p, ::TestRiemannianBackend
     return collect(1.0:length(p))
 end
 
+using ADTypes
 using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
 @testset "Differentiation backend" begin
-    fd51 = ManifoldDiff.FiniteDifferencesBackend()
+    fd51 = AutoFiniteDifferences(central_fdm(5, 1))
     @testset "default_differential_backend" begin
-        @test default_differential_backend() isa ManifoldDiff.FiniteDifferencesBackend
+        @test default_differential_backend() isa AutoFiniteDifferences
 
         @test length(fd51.method.grid) == 5
         # check method order
         @test typeof(fd51.method).parameters[2] == 1
-        fd71 = ManifoldDiff.FiniteDifferencesBackend(central_fdm(7, 1))
+        fd71 = AutoFiniteDifferences(central_fdm(7, 1))
         @test set_default_differential_backend!(fd71) == fd71
         @test default_differential_backend() == fd71
     end
@@ -105,7 +106,7 @@ rb_onb_default = TangentDiffBackend(
     DefaultOrthonormalBasis(),
 )
 
-rb_onb_fd51 = TangentDiffBackend(ManifoldDiff.FiniteDifferencesBackend())
+rb_onb_fd51 = TangentDiffBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();

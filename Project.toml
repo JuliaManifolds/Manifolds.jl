@@ -74,6 +74,7 @@ StatsBase = "0.32, 0.33, 0.34"
 julia = "1.10"
 
 [extras]
+ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
 BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
 DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def"
@@ -98,4 +99,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 VisualRegressionTests = "34922c18-7c2a-561c-bac1-01e79b2c4c92"
 
 [targets]
-test = ["Test", "BoundaryValueDiffEq", "Colors", "DiffEqCallbacks", "Distributions", "DoubleFloats", "FiniteDifferences", "Gtk", "HybridArrays", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "NLsolve", "Plots", "PythonPlot", "Quaternions", "QuartzImageIO", "RecipesBase", "RecursiveArrayTools"]
+test = ["Test", "ADTypes", "BoundaryValueDiffEq", "Colors", "DiffEqCallbacks", "Distributions", "DoubleFloats", "FiniteDifferences", "Gtk", "HybridArrays", "ImageIO", "ImageMagick", "OrdinaryDiffEq", "NLsolve", "Plots", "PythonPlot", "Quaternions", "QuartzImageIO", "RecipesBase", "RecursiveArrayTools"]
