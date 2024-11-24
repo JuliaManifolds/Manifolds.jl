@@ -1,18 +1,9 @@
 module ManifoldsNLsolveExt
 
-if isdefined(Base, :get_extension)
-    using Manifolds
-    using ManifoldsBase
+using Manifolds
+using ManifoldsBase
 
-    using NLsolve: NLsolve
-else
-    # imports need to be relative for Requires.jl-based workflows:
-    # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
-    using ..Manifolds
-    using ..ManifoldsBase
-
-    using ..NLsolve: NLsolve
-end
+using NLsolve: NLsolve
 
 @doc raw"""
     inverse_retract(M, p, q method::NLSolveInverseRetraction; kwargs...)
