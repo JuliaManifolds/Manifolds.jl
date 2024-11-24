@@ -613,50 +613,6 @@ function __init__()
         end
     end
 
-    @static if !isdefined(Base, :get_extension)
-        @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-            include("../ext/ManifoldsOrdinaryDiffEqExt.jl")
-        end
-
-        @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
-            include("../ext/ManifoldsBoundaryValueDiffEqExt.jl")
-        end
-
-        @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
-            include("../ext/ManifoldsNLsolveExt.jl")
-        end
-
-        @require RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01" begin
-            @require Colors = "5ae59095-9a9b-59fe-a467-6f913c188581" begin
-                include("../ext/ManifoldsRecipesBaseExt.jl")
-            end
-        end
-
-        @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
-            include("../ext/ManifoldsTestExt/ManifoldsTestExt.jl")
-        end
-
-        @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
-            include(
-                "../ext/ManifoldsRecursiveArrayToolsExt/ManifoldsRecursiveArrayToolsExt.jl",
-            )
-
-            @require Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f" begin
-                include("../ext/ManifoldsDistributionsExt/ManifoldsDistributionsExt.jl")
-            end
-
-            @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-                @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
-                    include("../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.jl")
-                end
-            end
-        end
-
-        @require HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9" begin
-            include("../ext/ManifoldsHybridArraysExt.jl")
-        end
-    end
-
     return nothing
 end
 

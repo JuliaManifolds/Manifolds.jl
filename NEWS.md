@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Bump compat for ManifoldsDiff to v0.4.0
+* Minimum Julia version is now 1.10 (the LTS which replaced 1.6)
 
 ## [0.10.7] – 2024-11-16
 
