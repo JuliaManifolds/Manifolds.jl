@@ -509,7 +509,7 @@ function get_vector_orthogonal!(
     ::GeneralUnitaryMatrices{TypeParameter{Tuple{1}},ℝ},
     X,
     p,
-    Xⁱ,
+    Xⁱ::AbstractVector,
     N::RealNumbers,
 )
     return X .= 0
