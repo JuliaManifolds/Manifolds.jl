@@ -41,9 +41,9 @@ using LinearAlgebra: Diagonal, dot
     @testset "default_differential_backend" begin
         @test default_differential_backend() isa AutoFiniteDifferences
 
-        @test length(fd51.method.grid) == 5
+        @test length(fd51.fdm.grid) == 5
         # check method order
-        @test typeof(fd51.method).parameters[2] == 1
+        @test typeof(fd51.fdm).parameters[2] == 1
         fd71 = AutoFiniteDifferences(central_fdm(7, 1))
         @test set_default_differential_backend!(fd71) == fd71
         @test default_differential_backend() == fd71
