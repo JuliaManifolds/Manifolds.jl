@@ -357,7 +357,6 @@ using Markdown: @doc_str
 using MatrixEquations: lyapc, sylvc
 using Quaternions: Quaternions
 using Random
-using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using SpecialFunctions
 using StaticArrays
