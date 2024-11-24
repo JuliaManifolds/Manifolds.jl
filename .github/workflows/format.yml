@@ -5,6 +5,12 @@ on:
     tags: [v*]
   pull_request:
 
+permissions:
+  contents: read
+  checks: write
+  issues: write
+  pull-requests: write
+
 jobs:
   format:
     name: "Format Check"
@@ -28,3 +34,4 @@ jobs:
         with:
           tool_name: JuliaFormatter
           fail_on_error: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
