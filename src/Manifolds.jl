@@ -345,7 +345,6 @@ using ManifoldDiff:
     _jacobian!,
     set_default_differential_backend!
 using ManifoldDiff:
-    AbstractDiffBackend,
     AbstractRiemannianDiffBackend,
     CoprojectorOntoVector,
     ExplicitEmbeddedBackend,
@@ -364,6 +363,8 @@ using StaticArrays
 using Statistics
 using StatsBase
 using StatsBase: AbstractWeights
+
+const AbstractDiffBackend = Any  # TODO: remove
 
 include("utils.jl")
 

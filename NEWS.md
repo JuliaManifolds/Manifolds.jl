@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Some methods related to `get_vector` for `GeneralUnitaryMatrices` now have `AbstractVector` upper bound for coefficients.
 * Minimum Julia version is now 1.10 (the LTS which replaced 1.6)
+* The dependency ManifoldDiff.jl has been upgraded from v0.3 to v0.4, to bring compatibility with DifferentiationInterface.jl.
 
 ## [0.10.7] – 2024-11-16
 
