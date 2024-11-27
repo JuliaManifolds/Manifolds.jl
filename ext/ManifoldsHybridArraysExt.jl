@@ -1,28 +1,14 @@
 module ManifoldsHybridArraysExt
 
-if isdefined(Base, :get_extension)
-    using Manifolds
-    using ManifoldsBase
+using Manifolds
+using ManifoldsBase
 
-    using Manifolds: PowerManifoldMultidimensional
-    using Manifolds: rep_size_to_colons
+using Manifolds: PowerManifoldMultidimensional
+using Manifolds: rep_size_to_colons
 
-    using HybridArrays
+using HybridArrays
 
-    import Manifolds: _read
-else
-    # imports need to be relative for Requires.jl-based workflows:
-    # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
-    using ..Manifolds
-    using ..ManifoldsBase
-
-    using ..Manifolds: PowerManifoldMultidimensional
-    using ..Manifolds: rep_size_to_colons
-
-    using ..HybridArrays
-
-    import ..Manifolds: _read
-end
+import Manifolds: _read
 
 Base.@propagate_inbounds @inline function _read(
     ::PowerManifoldMultidimensional,
