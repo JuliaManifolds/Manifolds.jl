@@ -24,11 +24,6 @@ jobs:
           version: ${{ matrix.julia-version }}
           arch: x64
       - uses: julia-actions/cache@v2
-      - name: Install custom ManifoldsDiff and other deps
-        run: julia --project=. -e '
-          using Pkg;
-          Pkg.add(url="https://github.com/gdalle/ManifoldDiff.jl", rev="gd/di");
-          Pkg.instantiate();'
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
         env:
