@@ -711,7 +711,7 @@ end
 
 Compute the logarithmic map, that is, since the resulting ``X`` is represented in the Lie algebra,
 
-```
+```math
 log_p q = \log(p^{\mathrm{H}q)
 ```
 which is projected onto the skew symmetric matrices for numerical stability.
@@ -987,7 +987,7 @@ to the tangent space of `M` at `p`,
 and change the representer to use the corresponding Lie algebra, i.e. we compute
 
 ```math
-    \operatorname{proj}_p(X) = \frac{p^{\mathrm{H}} X - (p^{\mathrm{H}} X)^{\mathrm{H}}}{2},
+    \operatorname{proj}_p(X) = \frac{p^{\mathrm{H}} X - (p^{\mathrm{H}} X)^{\mathrm{H}}}{2}.
 ```
 """
 project(::GeneralUnitaryMatrices, p, X)
@@ -1051,7 +1051,11 @@ end
     riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 
 Compute the value of Riemann tensor on the [`GeneralUnitaryMatrices`](@ref) manifold.
-The formula reads [Rentmeesters:2011](@cite) ``R(X,Y)Z=\frac{1}{4}[Z, [X, Y]]``.
+The formula reads [Rentmeesters:2011](@cite) 
+
+```math
+R(X,Y)Z=\frac{1}{4}[Z, [X, Y]].
+```
 """
 riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 

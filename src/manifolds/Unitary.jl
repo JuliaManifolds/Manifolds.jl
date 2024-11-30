@@ -5,7 +5,9 @@
 The manifold ``U(n,𝔽)`` of ``n×n`` complex matrices (when 𝔽=ℂ) or quaternionic matrices
 (when 𝔽=ℍ) such that
 
-``p^{\mathrm{H}}p = \mathrm{I}_n,``
+```math
+    p^{\mathrm{H}}p = \mathrm{I}_n,
+```
 
 where ``\mathrm{I}_n`` is the ``n×n`` identity matrix.
 Such matrices `p` have a property that ``\lVert \det(p) \rVert = 1``.
@@ -202,7 +204,7 @@ tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal
 The formula is due to [AbsilMahonyTrumpf:2013](@cite) given by
 
 ```math
-\mathcal W_p(X,V) = -\frac{1}{2}p\bigl(V^{\mathrm{H}}X - X^\mathrm{H}V\bigr)
+\mathcal W_p(X,V) = -\frac{1}{2}p\bigl(V^{\mathrm{H}}X - X^\mathrm{H}V\bigr).
 ```
 """
 Weingarten(::UnitaryMatrices, p, X, V)
