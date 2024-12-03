@@ -1,14 +1,16 @@
 @doc raw"""
      OrthogonalMatrices{n} = GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}
 
-The manifold of (real) orthogonal ``nxn`` matrices ``\mathrm{O}(n)``. They are precisely the ``nxn`` real matrices ``M`` that satisfy
+The manifold of (real) orthogonal ``n×n`` matrices ``\mathrm{O}(n)``. They are precisely the ``n×n`` real matrices ``M`` that satisfy
 
 ```math
     M^{T}M=MM^{T}= \mathrm{I}_n,
 ```
-where ``M^{T}`` is the transpose of ``M``, ``\mathrm{I}_n`` is the ``nxn`` identity matrix. Thus, their columns and rows represent ``n`` pairwise orthonormal vectors. Such matrices ``M`` have the property that ``\lVert \det(M) \rVert = 1``.
+where ``M^{T}`` is the transpose of ``M`` and ``\mathrm{I}_n`` is the ``n×n`` identity matrix. Thus, their columns and rows represent ``n`` pairwise orthonormal vectors. Such matrices ``M`` have the property that ``\lVert \det(M) \rVert = 1``.
 
 This is the same manifold as the [`Stiefel`](@ref)`(n, n, ℂ)` manifold.
+
+# Constructor
 
     OrthogonalMatrices(n)
 """

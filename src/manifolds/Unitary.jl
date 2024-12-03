@@ -9,7 +9,7 @@ The manifold ``U(n,𝔽)`` of ``n×n`` complex matrices (when 𝔽=ℂ) or quate
     p^{\mathrm{H}}p = \mathrm{I}_n,
 ```
 
-where ``\mathrm{I}_n`` is the ``n×n`` identity matrix.
+where ``p^{\mathrm{H}}`` is the conjugate transpose of ``p`` and ``\mathrm{I}_n`` is the ``n×n`` identity matrix.
 Such matrices `p` have a property that ``\lVert \det(p) \rVert = 1``.
 
 The tangent spaces are given by
@@ -138,7 +138,7 @@ end
 
 Generate a random point on the [`UnitaryMatrices`](@ref) manifold,
 if `vector_at` is nothing, by computing the QR decomposition of
-a ``n×x`` matrix.
+an ``n×n`` matrix.
 
 Generate a tangent vector at `vector_at` by projecting a normally
 distributed matrix onto the tangent space.
