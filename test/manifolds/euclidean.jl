@@ -26,6 +26,16 @@ using FiniteDifferences
         A = Manifolds.RetractionAtlas()
         B = induced_basis(EM, A, p, TangentSpaceType())
         @test det_local_metric(EM, p, B) == one(eltype(p))
+        for M in [E, Ec, EH]
+            @test has_components(M)
+            p = [1.0, 2.0, 3.0]
+            q = [1.0, 2.0, 3.0]
+            X = [4.0, 5.0, 6.0]
+            for r in [1, 2, Inf]
+                @test norm(M, p, X, r) ≈ norm(X, r)
+                @test distance(M, p, q, r) ≈ norm(p - q, r)
+            end
+        end
         @test log_local_metric_density(EM, p, B) == zero(eltype(p))
         @test project!(E, p, p) == p
         @test embed!(E, p, p) == p

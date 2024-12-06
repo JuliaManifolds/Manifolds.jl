@@ -192,7 +192,7 @@ using ManifoldDiff
         analytical_grad_f(p) = (1 / 2) * (p * J * p * J + p * p')
 
         p_grad = points[1]
-        fd_diff = RiemannianProjectionBackend(ManifoldDiff.FiniteDifferencesBackend())
+        fd_diff = RiemannianProjectionBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
         @test isapprox(
             Manifolds.gradient(Sp_6, test_f, p_grad, fd_diff),

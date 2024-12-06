@@ -44,7 +44,7 @@ If you use `Manifolds.jl` in your work, please cite the following
 }
 ```
 
-To refer to a certain version we recommend to also cite for example
+To refer to a specific version, it is recommended to cite, for example,
 
 ```biblatex
 @software{manifoldsjl-zenodo-mostrecent,

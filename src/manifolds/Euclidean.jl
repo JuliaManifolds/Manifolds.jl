@@ -132,11 +132,12 @@ function diagonalizing_projectors(::Euclidean, p, X)
 end
 
 """
-    distance(M::Euclidean, p, q)
+    distance(M::Euclidean, p, q, r::Real=2)
 
 Compute the Euclidean distance between two points on the [`Euclidean`](@ref)
 manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
 and higher order arrays, the matrix and tensor Frobenius norm, respectively.
+Specifying further an `r≠2`, other norms, like the 1-norm or the ∞-norm can also be computed.
 """
 Base.@propagate_inbounds function distance(M::Euclidean, p, q)
     # Inspired by euclidean distance calculation in Distances.jl
@@ -154,6 +155,7 @@ Base.@propagate_inbounds function distance(M::Euclidean, p, q)
     end
     return sqrt(s)
 end
+distance(M::Euclidean, p, q, r::Real) = norm(p - q, r)
 distance(::Euclidean{TypeParameter{Tuple{1}}}, p::Number, q::Number) = abs(p - q)
 distance(::Euclidean{TypeParameter{Tuple{}}}, p::Number, q::Number) = abs(p - q)
 distance(::Euclidean{Tuple{Int}}, p::Number, q::Number) = abs(p - q) # for 1-dimensional Euclidean
@@ -390,6 +392,9 @@ function get_vector_diagonalizing!(
     copyto!(Y, reshape(c[1:N] + im * c[(N + 1):end], S))
     return Y
 end
+
+has_components(::Euclidean) = true
+
 @doc raw"""
     injectivity_radius(M::Euclidean)
 
@@ -631,14 +636,21 @@ function mid_point!(::Euclidean, q, p1, p2)
 end
 
 @doc raw"""
-    norm(M::Euclidean, p, X)
+    norm(M::Euclidean, p, X, r::Real=2)
 
 Compute the norm of a tangent vector `X` at `p` on the [`Euclidean`](@ref)
 `M`, i.e. since every tangent space can be identified with `M` itself
-in this case, just the (Frobenius) norm of `X`.
+in this case, just the (Frobenius) norm of `X`. Specifying `r`, other norms are available as well
 """
-LinearAlgebra.norm(::Euclidean, ::Any, X) = norm(X)
-LinearAlgebra.norm(::MetricManifold{ℝ,<:AbstractManifold,EuclideanMetric}, p, X) = norm(X)
+LinearAlgebra.norm(::Euclidean, ::Any, X, r::Real=2) = norm(X, r)
+function LinearAlgebra.norm(
+    ::MetricManifold{ℝ,<:AbstractManifold,EuclideanMetric},
+    p,
+    X,
+    r::Real=2,
+)
+    return norm(X, r)
+end
 
 function project!(
     ::EmbeddedManifold{𝔽,Euclidean{nL,𝔽},Euclidean{mL,𝔽2}},

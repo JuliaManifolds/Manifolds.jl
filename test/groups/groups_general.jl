@@ -322,6 +322,17 @@ using Manifolds:
             end
         end
     end
+
+    @testset "Jacobians" begin
+        M = SpecialOrthogonal(3)
+        p = [
+            -0.333167290022488 -0.7611396995437196 -0.5564763378954822
+            0.8255218425902797 0.049666662385985494 -0.5621804959741897
+            0.4555362161951786 -0.646683524164589 0.6117901399243428
+        ]
+        # testing the fallback definition just in case
+        @test invoke(adjoint_matrix, Tuple{AbstractManifold,Any}, M, p) ≈ p
+    end
 end
 
 struct NotImplementedAction <: AbstractGroupAction{LeftAction} end

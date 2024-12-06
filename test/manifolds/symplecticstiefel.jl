@@ -291,7 +291,7 @@ end
             return Q_grad * p * (euc_grad_f') * Q_grad * p + euc_grad_f * p' * p
         end
         p_grad = convert(Array{Float64}, points[1])
-        fd_diff = RiemannianProjectionBackend(ManifoldDiff.FiniteDifferencesBackend())
+        fd_diff = RiemannianProjectionBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
         @test isapprox(
             Manifolds.gradient(M, test_f, p_grad, fd_diff),

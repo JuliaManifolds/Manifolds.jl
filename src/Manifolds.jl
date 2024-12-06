@@ -89,6 +89,7 @@ import ManifoldsBase:
     get_vector_orthonormal!,
     get_vectors,
     gram_schmidt,
+    has_components,
     hat,
     hat!,
     injectivity_radius,
@@ -181,6 +182,8 @@ import ManifoldDiff:
     diagonalizing_projectors,
     jacobi_field,
     jacobi_field!,
+    jacobian_exp_argument,
+    jacobian_exp_argument!,
     riemannian_gradient,
     riemannian_gradient!,
     riemannian_Hessian,
@@ -325,6 +328,7 @@ using ManifoldsBase:
     ziptuples
 using ManifoldDiff: ManifoldDiff
 using ManifoldDiff:
+    allocate_jacobian,
     default_differential_backend,
     _derivative,
     _derivative!,
@@ -341,7 +345,6 @@ using ManifoldDiff:
     _jacobian!,
     set_default_differential_backend!
 using ManifoldDiff:
-    AbstractDiffBackend,
     AbstractRiemannianDiffBackend,
     CoprojectorOntoVector,
     ExplicitEmbeddedBackend,
@@ -354,13 +357,14 @@ using Markdown: @doc_str
 using MatrixEquations: lyapc, sylvc
 using Quaternions: Quaternions
 using Random
-using Requires
 using SimpleWeightedGraphs: AbstractSimpleWeightedGraph, get_weight
 using SpecialFunctions
 using StaticArrays
 using Statistics
 using StatsBase
 using StatsBase: AbstractWeights
+
+const AbstractDiffBackend = Any  # TODO: remove
 
 include("utils.jl")
 
@@ -396,7 +400,7 @@ include("manifolds/VectorFiber.jl")
 include("manifolds/VectorBundle.jl")
 include("groups/group.jl")
 
-# Features I: Which are extended on Meta Manifolds
+# Features I: Extending Meta Manifolds
 include("statistics.jl")
 
 # Meta Manifolds II: Products
@@ -414,7 +418,7 @@ METAMANIFOLDS = [
     VectorBundle,
 ]
 
-# Features II: That require metas
+# Features II: That require MetaManifolds
 include("atlases.jl")
 include("differentiation/ode_callback.jl")
 include("cotangent_space.jl")
@@ -442,6 +446,7 @@ include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/Hyperrectangle.jl")
+include("manifolds/InvertibleMatrices.jl")
 include("manifolds/MultinomialDoublyStochastic.jl")
 include("manifolds/MultinomialSymmetric.jl")
 include("manifolds/MultinomialSymmetricPositiveDefinite.jl")
@@ -599,51 +604,13 @@ function __init__()
             if exc.f === solve_exp_ode
                 print(io, "\nDid you forget to load OrdinaryDiffEq? For example: ")
                 printstyled(io, "`using OrdinaryDiffEq`", color=:cyan)
+            elseif exc.f === uniform_distribution
+                print(
+                    io,
+                    "\nDid you forget to load Distributions and RecursiveArrayTools? For example: ",
+                )
+                printstyled(io, "`using Distributions, RecursiveArrayTools`", color=:cyan)
             end
-        end
-    end
-
-    @static if !isdefined(Base, :get_extension)
-        @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-            include("../ext/ManifoldsOrdinaryDiffEqExt.jl")
-        end
-
-        @require BoundaryValueDiffEq = "764a87c0-6b3e-53db-9096-fe964310641d" begin
-            include("../ext/ManifoldsBoundaryValueDiffEqExt.jl")
-        end
-
-        @require NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56" begin
-            include("../ext/ManifoldsNLsolveExt.jl")
-        end
-
-        @require RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01" begin
-            @require Colors = "5ae59095-9a9b-59fe-a467-6f913c188581" begin
-                include("../ext/ManifoldsRecipesBaseExt.jl")
-            end
-        end
-
-        @require Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40" begin
-            include("../ext/ManifoldsTestExt/ManifoldsTestExt.jl")
-        end
-
-        @require RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd" begin
-            include(
-                "../ext/ManifoldsRecursiveArrayToolsExt/ManifoldsRecursiveArrayToolsExt.jl",
-            )
-
-            @require Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f" begin
-                include("../ext/ManifoldsDistributionsExt/ManifoldsDistributionsExt.jl")
-            end
-
-            @require OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed" begin
-                @require DiffEqCallbacks = "459566f4-90b8-5000-8ac3-15dfb0a30def" begin
-                    include("../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.jl")
-                end
-            end
-        end
-
-        @require HybridArrays = "1baab800-613f-4b0a-84e4-9cd3431bfbb9" begin
-            include("../ext/ManifoldsHybridArraysExt.jl")
         end
     end
 
@@ -676,6 +643,7 @@ export Euclidean,
     HeisenbergGroup,
     Hyperbolic,
     Hyperrectangle,
+    InvertibleMatrices,
     KendallsPreShapeSpace,
     KendallsShapeSpace,
     Lorentz,
@@ -869,6 +837,7 @@ export ×,
     get_embedding,
     get_orbit_action,
     get_total_space,
+    has_components,
     hat,
     hat!,
     horizontal_component,
@@ -982,6 +951,7 @@ export AbstractGroupAction,
     ActionDirection,
     AdditionOperation,
     CircleGroup,
+    ComplexPlanarRotation,
     GeneralLinear,
     GroupManifold,
     GroupOperationAction,
@@ -996,6 +966,7 @@ export AbstractGroupAction,
     PowerGroup,
     ProductGroup,
     ProductOperation,
+    QuaternionRotation,
     RealCircleGroup,
     RightAction,
     RightInvariantMetric,
@@ -1022,6 +993,8 @@ export adjoint_action,
     adjoint_apply_diff_group!,
     adjoint_inv_diff,
     adjoint_inv_diff!,
+    adjoint_matrix,
+    adjoint_matrix!,
     affine_matrix,
     apply,
     apply!,
