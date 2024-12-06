@@ -51,7 +51,7 @@ Inner product between two tangent vectors ``u = (\nu, u_1, \dots, u_d)`` and ``v
 ````
 where ``\nu``, ``\xi \in T_{\lambda} ℝ^{+} = ℝ`` and ``u_i``, ``v_i \in T_{x_i} S^{n_i - 1} \subset ℝ^{n_i}``.
 """
-function inner(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, u, v) where {A}
+function inner(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, u, v) where {V, A}
     return u[1][1] * v[1][1] + (A * p[1][1])^2 * dot(u[2:end], v[2:end])
 end
 
@@ -65,31 +65,33 @@ function norm(M::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}}, p, v) where
 end
 
 @doc raw"""
-    function m(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, q)
+    function m(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, q)
 
 When ``p``, ``q \in ℝ^{+} \times S^{n_1 - 1} \times \dots \times S^{n_d - 1}``, this is the distance between the ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}`` parts of ``p`` and ``q``.
 """
-function m(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric}, p, q)
+function m(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, q) where {V,A}
     return sqrt(
         sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
     )
 end
 
 """
-    function compatible(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, q)
+    function connected_by_geodesic(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, q)
 
-Check if two representations, `p` and `q`, are compatible. To check if two points are compatible, compose with `closest_representation`.
+Check if two points, `p` and `q`, can be connected by a geodesic.
 """
-function compatible(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, q) where {A}
+function connected_by_geodesic(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, q) where {V,A}
+    q_ = closest_representation(M.manifold, p, q)
+
     return A * m(M, p, q) < pi
 end
 
 """
-    function closest_representation(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, q)
+    function closest_representation(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, q)
 
 Find the representation of ``q`` that is closest to ``p``.
 """
-function closest_representation(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric}, p, q)
+function closest_representation(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, q) where {V,A}
     return closest_representation(M.manifold, p, q)
 end
 
@@ -120,28 +122,24 @@ If ``m = 0`` and ``\nu t < \lambda``, then ``\operatorname{exp}_p(v) = p + v``.
 
 For a proof, see proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
-exp(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric}, p, v)
+exp(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, v) where {V,A}
 
-function exp!(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, q, p, v) where {A}
-    m_ = m(M, p, q)
-    if m_ == 0.0
-        q .= deepcopy(p) # Initialize
-        q[1] .= q[1] .+ v[1]
-        return q
-    end
+function exp!(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, q, p, v) where {V,A}
+    m_ = sqrt(
+        sum([norm(Sphere(n - 1), x, xdot)^2 for (n, x, xdot) in zip(V, p[2:end], v[2:end])]),
+    )
 
-    t = norm(M, p, v)
-    P = v[1][1] / (p[1][1] * A * m_)
-    f = atan(sqrt(P^2 + 1.0) * t / p[1][1] + P) - atan(P)
+    q[1][1] = sqrt((p[1][1] + v[1][1])^2 + (p[1][1] * A * m_)^2)
 
-    q[1][1] = sqrt(t^2 + 2 * p[1][1] * P * t / sqrt(P^2 + 1.0) + p[1][1]^2)
-
-    for (n, x, y, xdot) in zip(V, p[2:end], q[2:end], v[2:end])
-        if all(xdot .== 0.0)
-            y .= deepcopy(x)
-        else
+    f = pi / 2 - atan((p[1][1] + v[1][1]) / (p[1][1] * A * m_))
+    if m_ == 0
+        for (x, y) in zip(p[2:end], q[2:end])
+            y .= x
+        end
+    else
+        for (n, x, y, xdot) in zip(V, p[2:end], q[2:end], v[2:end])
             a = norm(Sphere(n - 1), x, xdot)
-            y .= x * cos(a * f / (A * m_)) .+ xdot * sin(a * f / (A * m_)) / a
+            y .= x * cos(a * f / (A * m_)) .+ xdot * (f / (A * m_)) * sinc(a * f / (A * m_ * pi))
         end
     end
 
@@ -149,7 +147,7 @@ function exp!(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, q, p, v) where 
 end
 
 @doc raw"""
-    function log(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, q)
+    function log(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, q)
 
 Logarithmic map on the warped Segre manifold.
 
@@ -173,39 +171,33 @@ where ``c`` is determined by ``\lVert \operatorname{log}_p(q) \rVert_{p} = \oper
 
 For a proof, see theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
-function log(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, q) where {A}
+function log(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, q) where {V,A}
 
     q_ = closest_representation(M, p, q)
-    v = zeros.(size.(p)) # Initialize
-    log!(M, v, p, q_)
-    return v
+    if connected_by_geodesic(M, p, q)
+        v = zeros.(size.(p)) # Initialize
+        log!(M, v, p, q_)
+        return v
+    else
+        return Nothing
+    end
 end
 
-function log!(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, v, p, q) where {A}
+function log!(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, v, p, q) where {V,A}
+    m_ = m(M, p, q)
+
+    v[1][1] = q[1][1] * cos(A * m_) - p[1][1]
+
     for (n, xdot, x, y) in zip(V, v[2:end], p[2:end], q[2:end])
         a = distance(Sphere(n - 1), x, y)
-        if a == 0.0
-            xdot .= zeros(size(x))
-        else
-            xdot .= a * (y - dot(x, y) * x) / sin(a)
-        end
-    end
-
-    m_ = m(p, q)
-    if m == 0.0
-        v[1][1] = q[1][1] - p[1][1]
-    else
-        v[1][1] = p[1][1] * A * m_ * (cos(A * m_) - p[1][1] / q[1][1]) / sin(A * m_)
-
-        t = distance(M, p, q)
-        v .= t * v / norm(M, p, v)
+        xdot .= (y - dot(x, y) * x) * (q[1][1] / p[1][1]) * sinc(A * m_ / pi) / sinc(a / pi)
     end
 
     return 0
 end
 
 @doc raw"""
-    function distance(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, q)
+    function distance(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, q)
 
 Riemannian distance between two points `p` and `q` on the warped Segre manifold.
 
@@ -218,16 +210,15 @@ and assume ``(\mu, y_1, \dots, y_d)`` is the representation of ``q`` that minimi
     \operatorname{dist}_{\mathcal{S}_A}(p, q) = \sqrt{\lambda^2 - 2 \lambda \mu \cos(A m) + \mu^2}.
 ````
 """
-function distance(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, q) where {A}
+function distance(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, q) where {V,A}
 
     q_ = closest_representation(M, p, q)
-    m_ = m(p, q_)
-    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(A * m_ / 2)^2)
+    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(A * m(M, p, q_) / 2)^2)
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(A * m)) but more stable for small m
 end
 
 @doc raw"""
-    function riemann_tensor(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, u, v)
+    function riemann_tensor(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, u, v)
 
 Riemann tensor of the warped Segre manifold at ``p``.
 
@@ -237,7 +228,7 @@ Riemann tensor of the warped Segre manifold at ``p``.
 ````
 ``R_{\mathcal{S}_A}`` is zero in the remaining (orthogonal) directions.
 """
-function riemann_tensor(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, u, v, w) where {A}
+function riemann_tensor(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, u, v, w) where {V,A}
     # Can we avoid the deep-copies here? That looks a bit inefficient
     u_ = deepcopy(u)
     u_[1][1] = 0.0
@@ -255,7 +246,7 @@ function riemann_tensor(M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}}, p, u,
 end
 
 @doc raw"""
-    function sectional_curvature(M::MetricManifold{ℝ, Segre{ℝ}, WarpedMetric{A}}, p, u, v)
+    function sectional_curvature(M::MetricManifold{ℝ, Segre{ℝ,V}, WarpedMetric{A}}, p, u, v)
 
 Sectional curvature of the warped Segre manifold at ``p``.
 
@@ -267,11 +258,11 @@ If ``p = (\lambda, x_1, \dots, x_d) \in \mathcal{S}``, ``u_i \in T_{x_i} S^{n_i 
 ``K_{\mathcal{S}_A}`` is zero in the remaining (orthogonal) directions.
 """
 function sectional_curvature(
-    M::MetricManifold{ℝ,Segre{ℝ},WarpedMetric{A}},
+    M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}},
     p,
     u,
     v,
-) where {A}
+) where {V,A}
     return inner(M, p, riemann_tensor(M, p, u, v, v), u) /
            (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)
 end

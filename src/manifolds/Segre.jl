@@ -81,7 +81,7 @@ end
 
 Check whether `p` is a valid point on `M`, i.e. `p[1]` is a singleton containing a positive number and `p[i + 1]` is a point on `Sphere(V[i])`. The tolerance can be set using the `kwargs...`.
 """
-function check_point(M::Segre{ℝ}, p; kwargs...) where {V}
+function check_point(M::Segre{ℝ,V}, p; kwargs...) where {V}
     if p[1][1] <= 0.0
         return DomainError(p[1][1], "$(p) has non-positive modulus.")
     end
@@ -151,16 +151,16 @@ function get_vector(M::Segre{𝔽,V}, p, X; kwargs...) where {𝔽,V}
     X_ = deepcopy(X)
     v = eltype(p)[[] for _ in p] # Initialize
     v[1] = [X_[1]]
-    X_ = drop(X_, 1)
+    X_ = X_[2:end]
     for (i, n) in enumerate(V)
         v[i + 1] = get_vector(
             Sphere(n - 1),
             p[i + 1],
-            take(X_, n - 1),
+            X_[1:n - 1],
             DefaultOrthonormalBasis();
             kwargs...,
         )
-        X_ = drop(X_, n - 1)
+        X_ = X_[n:end]
     end
 
     @assert(length(X_) == 0)
@@ -257,12 +257,14 @@ function m(M::Segre{ℝ,V}, p, q) where {V}
 end
 
 """
-    function compatible(M::Segre{ℝ, V}, p, q)
+    function connected_by_geodesic(M::Segre{ℝ, V}, p, q)
 
-Check if two representations, `p` and `q`, are compatible. To check if two points are compatible, compose with `closest_representation`.
+Check if two points, `p` and `q`, can be connected by a geodesic.
 """
-function compatible(M::Segre{ℝ,V}, p, q) where {V}
-    return m(M, p, q) < pi
+function connected_by_geodesic(M::Segre{ℝ,V}, p, q) where {V}
+    q_ = closest_representation(M, p, q)
+
+    return m(M, p, q_) < pi
 end
 
 """
@@ -332,36 +334,24 @@ If ``m = 0`` and ``\nu t < \lambda``, then ``\operatorname{exp}_p(v) = p + v``.
 
 For a proof, see proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
-function exp(M::Segre{ℝ,V}, p, v) where {V}
-
-    q = zeros.(size.(p)) # Initialize
-    exp!(M, q, p, v)
-    return q
-end
+exp(M::Segre{ℝ,V}, p, v) where {V}
 
 function exp!(M::Segre{ℝ,V}, q, p, v) where {V}
-    m_ = m(M, p, q)
-
-    if m_ == 0.0
-        q .= deepcopy(p) # Initialize
-        q[1] .= q[1] .+ v[1]
-        return q
-    end
-
-    t = norm(M, p, v)
-    P = v[1][1] / (p[1][1] * m_)
-    f = atan(sqrt(P^2 + 1.0) * t / p[1][1] + P) - atan(P)
-
-    q[1][1] = sqrt(
-        t^2 + 2 * p[1][1] * P * t / sqrt(P^2 + 1.0) + p[1][1]^2, # This factor is wrong in Swijsen21 on arxiv
+    m_ = sqrt(
+        sum([norm(Sphere(n - 1), x, xdot)^2 for (n, x, xdot) in zip(V, p[2:end], v[2:end])]),
     )
 
-    for (n, x, y, xdot) in zip(V, p[2:end], q[2:end], v[2:end])
-        if all(xdot .== 0.0)
-            y .= deepcopy(x)
-        else
+    q[1][1] = sqrt((p[1][1] + v[1][1])^2 + (p[1][1] * m_)^2)
+
+    f = pi / 2 - atan((p[1][1] + v[1][1]) / (p[1][1] * m_))
+    if m_ == 0
+        for (x, y) in zip(p[2:end], q[2:end])
+            y .= x
+        end
+    else
+        for (n, x, y, xdot) in zip(V, p[2:end], q[2:end], v[2:end])
             a = norm(Sphere(n - 1), x, xdot)
-            y .= x * cos(a * f / m_) .+ xdot * sin(a * f / m_) / a
+            y .= x * cos(a * f / m_) .+ xdot * (f / m_) * sinc(a * f / (m_ * pi))
         end
     end
 
@@ -396,29 +386,23 @@ For a proof, see theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024
 function log(M::Segre{ℝ,V}, p, q) where {V}
 
     q_ = closest_representation(M, p, q)
-    v = zeros.(size.(p)) # Initialize
-    log!(M, v, p, q_)
-    return v
+    if connected_by_geodesic(M, p, q_)
+        v = zeros.(size.(p)) # Initialize
+        log!(M, v, p, q_)
+        return v
+    else
+        return Nothing
+    end
 end
 
 function log!(M::Segre{ℝ,V}, v, p, q) where {V}
+    m_ = m(M, p, q)
+
+    v[1][1] = q[1][1] * cos(m_) - p[1][1]
+
     for (n, xdot, x, y) in zip(V, v[2:end], p[2:end], q[2:end])
         a = distance(Sphere(n - 1), x, y)
-        if a == 0.0
-            xdot .= zeros(size(x))
-        else
-            xdot .= a * (y - dot(x, y) * x) / sin(a)
-        end
-    end
-
-    m_ = m(M, p, q)
-    if m_ == 0.0
-        v[1][1] = q[1][1] - p[1][1]
-    else
-        v[1][1] = m_ * p[1][1] * (q[1][1] * cos(m_) - p[1][1]) / (q[1][1] * sin(m_))
-
-        t = distance(M, p, q)
-        v .= t * v / norm(M, p, v)
+        xdot .= (y - dot(x, y) * x) * (q[1][1] / p[1][1]) * sinc(m_ / pi) / sinc(a / pi)
     end
 
     return 0
