@@ -452,6 +452,8 @@ include("manifolds/MultinomialSymmetric.jl")
 include("manifolds/MultinomialSymmetricPositiveDefinite.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
+include("manifolds/Segre.jl")
+include("manifolds/SegreWarped.jl")
 include("manifolds/SkewHermitian.jl")
 include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
@@ -658,6 +660,7 @@ export Euclidean,
     ProbabilitySimplex,
     ProjectiveSpace,
     Rotations,
+    Segre,
     SkewHermitianMatrices,
     SkewSymmetricMatrices,
     Spectrahedron,
@@ -736,6 +739,7 @@ export AbstractMetric,
     ProductMetric,
     RealSymplecticMetric,
     RiemannianMetric,
+    WarpedMetric,
     StiefelSubmersionMetric
 export AbstractAtlas, RetractionAtlas
 # Vector transport types
@@ -805,6 +809,7 @@ export ×,
     christoffel_symbols_first,
     christoffel_symbols_second,
     christoffel_symbols_second_jacobian,
+    connected_by_geodesic,
     convert,
     complex_dot,
     decorated_manifold,
