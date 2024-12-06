@@ -152,6 +152,7 @@ end
         include_test("manifolds/hamiltonian.jl")
         include_test("manifolds/hyperbolic.jl")
         include_test("manifolds/hyperrectangle.jl")
+        include_test("manifolds/invertible_matrices.jl")
         include_test("manifolds/lorentz.jl")
         include_test("manifolds/multinomial_doubly_stochastic.jl")
         include_test("manifolds/multinomial_symmetric.jl")

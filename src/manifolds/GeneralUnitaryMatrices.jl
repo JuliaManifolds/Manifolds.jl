@@ -509,7 +509,7 @@ function get_vector_orthogonal!(
     ::GeneralUnitaryMatrices{TypeParameter{Tuple{1}},ℝ},
     X,
     p,
-    Xⁱ,
+    Xⁱ::AbstractVector,
     N::RealNumbers,
 )
     return X .= 0
@@ -518,7 +518,7 @@ function get_vector_orthogonal!(
     M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
     X,
     p,
-    Xⁱ,
+    Xⁱ::AbstractVector,
     N::RealNumbers,
 )
     return get_vector_orthogonal!(M, X, p, Xⁱ[1], N)
@@ -543,7 +543,7 @@ function get_vector_orthogonal!(
     M::GeneralUnitaryMatrices{TypeParameter{Tuple{n}},ℝ},
     X,
     p,
-    Xⁱ,
+    Xⁱ::AbstractVector,
     ::RealNumbers,
 ) where {n}
     @assert size(X) == (n, n)
@@ -622,7 +622,7 @@ function get_vector_orthonormal!(
     M::GeneralUnitaryMatrices{<:Any,ℝ},
     X,
     p,
-    Xⁱ,
+    Xⁱ::AbstractVector,
     N::RealNumbers,
 )
     T = Base.promote_eltype(p, X)

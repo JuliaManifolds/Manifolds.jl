@@ -1,3 +1,4 @@
+
 @doc raw"""
     GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 

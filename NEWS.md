@@ -5,11 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.4] - unreleased
+
+## [0.10.8] – 2024-11-27
+
+### Changed
+
+* Some methods related to `get_vector` for `GeneralUnitaryMatrices` now have `AbstractVector` upper bound for coefficients.
+* Minimum Julia version is now 1.10 (the LTS which replaced 1.6)
+* The dependency ManifoldDiff.jl has been upgraded from v0.3 to v0.4, to bring compatibility with DifferentiationInterface.jl.
+
+## [0.10.7] – 2024-11-16
 
 ### Added
 
-* The Segre manifold including its warped metric
+* `adjoint_matrix` for Lie groups, with optimized implementations for SO(2), SO(3), SE(2) and SE(3).
+
+## [0.10.6] – 2024-11-06
+
+### Added
+
+* Two new actions: `ComplexPlanarRotation`, `QuaternionRotation`.
+* New function `quaternion_rotation_matrix` for converting quaternions to rotation matrices.
+* `make.jl` script now has more command line arguments, for example `--exclude-tutorials` when you do not want to build the tutorials but still look at the docs. See `make.jl --help` for more information.
+
+## [0.10.5] – 2024-10-24
+
+### Added
+
+* the manifold `InvertibleMatrices` of invertible matrices
+
+### Changed
+
+* rewrote the `CONTRIBUTING.md` and adapt it to today's links and references.
+
+## [0.10.4] - 2024-10-20
+
+### Added
+
+* `uniform_distribution` now has an error hint explaining what has to be done to make it work.
+* `Euclidean` now follows the new `has_components` function from `ManifoldsBase.jl` (0.15.18)
+  and can handle also the `r`-norms now.
+- Union type `MatrixGroup`
+- Columnwise group action with arbitrary matrix groups
+- `uniform_distribution` now has an error hint explaining what has to be done to make it work.
+- `lie_bracket` is exactly zero on orthogonal Lie algebra in 2D
 
 ## [0.10.3] - 2024-10-04
 
