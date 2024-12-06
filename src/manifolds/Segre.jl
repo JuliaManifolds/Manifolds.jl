@@ -23,7 +23,7 @@ Generate a valence `V` Segre manifold.
 struct Segre{𝔽,V} <: AbstractManifold{𝔽} end
 
 function Segre(valence::NTuple{V,Int}; field::AbstractNumbers=ℝ) where {V}
-    return Segre{field, valence}()
+    return Segre{field,valence}()
 end
 
 valence(::Segre{𝔽,V}) where {𝔽,V} = V
@@ -156,7 +156,7 @@ function get_vector(M::Segre{𝔽,V}, p, X; kwargs...) where {𝔽,V}
         v[i + 1] = get_vector(
             Sphere(n - 1),
             p[i + 1],
-            X_[1:n - 1],
+            X_[1:(n - 1)],
             DefaultOrthonormalBasis();
             kwargs...,
         )
@@ -179,7 +179,6 @@ Inner product between two tangent vectors ``u = (\nu, u_1, \dots, u_d)`` and ``v
 where ``\nu``, ``\xi \in T_{\lambda} ℝ^{+} = ℝ`` and ``u_i``, ``v_i \in T_{x_i} S^{n_i - 1} \subset ℝ^{n_i}``.
 """
 function inner(M::Segre{ℝ,V}, p, u, v) where {V}
-
     return u[1][1] * v[1][1] + p[1][1]^2 * dot(u[2:end], v[2:end])
 end
 
@@ -189,7 +188,6 @@ end
 Norm of tangent vector ``v`` at ``p``.
 """
 function norm(M::Segre{𝔽,V}, p, v) where {𝔽,V}
-
     return sqrt(inner(M, p, v, v))
 end
 
@@ -219,7 +217,6 @@ Embed ``p \doteq (\lambda, x_1, \dots, x_d)`` in ``𝔽^{n_1 \times \dots \times
 ````
 """
 function embed(M::Segre{𝔽,V}, p) where {𝔽,V}
-
     return kronecker(p...)[:]
 end
 
@@ -338,7 +335,9 @@ exp(M::Segre{ℝ,V}, p, v) where {V}
 
 function exp!(M::Segre{ℝ,V}, q, p, v) where {V}
     m_ = sqrt(
-        sum([norm(Sphere(n - 1), x, xdot)^2 for (n, x, xdot) in zip(V, p[2:end], v[2:end])]),
+        sum([
+            norm(Sphere(n - 1), x, xdot)^2 for (n, x, xdot) in zip(V, p[2:end], v[2:end])
+        ]),
     )
 
     q[1][1] = sqrt((p[1][1] + v[1][1])^2 + (p[1][1] * m_)^2)
@@ -384,7 +383,6 @@ where ``c`` is determined by ``\lVert \operatorname{log}_p(q) \rVert_{p} = \oper
 For a proof, see theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
 function log(M::Segre{ℝ,V}, p, q) where {V}
-
     q_ = closest_representation(M, p, q)
     if connected_by_geodesic(M, p, q_)
         v = zeros.(size.(p)) # Initialize
@@ -423,7 +421,6 @@ and assume ``(\mu, y_1, \dots, y_d)`` is the representation of ``q`` that minimi
 ````
 """
 function distance(M::Segre{ℝ,V}, p, q) where {V}
-
     q_ = closest_representation(M, p, q)
     return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(m(M, p, q_) / 2)^2)
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(m)) but more stable for small m
@@ -471,7 +468,6 @@ If ``p \doteq (\lambda, x_1, \dots, x_d) \in \mathcal{S}``, ``u_i \in T_{x_i} S^
 ``K_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
 """
 function sectional_curvature(M::Segre{ℝ,V}, p, u, v) where {V}
-
     return inner(M, p, riemann_tensor(M, p, u, v, v), u) /
            (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)
 end

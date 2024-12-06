@@ -51,7 +51,7 @@ Inner product between two tangent vectors ``u = (\nu, u_1, \dots, u_d)`` and ``v
 ````
 where ``\nu``, ``\xi \in T_{\lambda} ℝ^{+} = ℝ`` and ``u_i``, ``v_i \in T_{x_i} S^{n_i - 1} \subset ℝ^{n_i}``.
 """
-function inner(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, u, v) where {V, A}
+function inner(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, u, v) where {V,A}
     return u[1][1] * v[1][1] + (A * p[1][1])^2 * dot(u[2:end], v[2:end])
 end
 
@@ -80,7 +80,11 @@ end
 
 Check if two points, `p` and `q`, can be connected by a geodesic.
 """
-function connected_by_geodesic(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, q) where {V,A}
+function connected_by_geodesic(
+    M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}},
+    p,
+    q,
+) where {V,A}
     q_ = closest_representation(M.manifold, p, q)
 
     return A * m(M, p, q) < pi
@@ -91,7 +95,11 @@ end
 
 Find the representation of ``q`` that is closest to ``p``.
 """
-function closest_representation(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, q) where {V,A}
+function closest_representation(
+    M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}},
+    p,
+    q,
+) where {V,A}
     return closest_representation(M.manifold, p, q)
 end
 
@@ -126,7 +134,9 @@ exp(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, v) where {V,A}
 
 function exp!(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, q, p, v) where {V,A}
     m_ = sqrt(
-        sum([norm(Sphere(n - 1), x, xdot)^2 for (n, x, xdot) in zip(V, p[2:end], v[2:end])]),
+        sum([
+            norm(Sphere(n - 1), x, xdot)^2 for (n, x, xdot) in zip(V, p[2:end], v[2:end])
+        ]),
     )
 
     q[1][1] = sqrt((p[1][1] + v[1][1])^2 + (p[1][1] * A * m_)^2)
@@ -139,7 +149,9 @@ function exp!(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, q, p, v) wher
     else
         for (n, x, y, xdot) in zip(V, p[2:end], q[2:end], v[2:end])
             a = norm(Sphere(n - 1), x, xdot)
-            y .= x * cos(a * f / (A * m_)) .+ xdot * (f / (A * m_)) * sinc(a * f / (A * m_ * pi))
+            y .=
+                x * cos(a * f / (A * m_)) .+
+                xdot * (f / (A * m_)) * sinc(a * f / (A * m_ * pi))
         end
     end
 
@@ -172,7 +184,6 @@ where ``c`` is determined by ``\lVert \operatorname{log}_p(q) \rVert_{p} = \oper
 For a proof, see theorem 4.4 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
 function log(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, q) where {V,A}
-
     q_ = closest_representation(M, p, q)
     if connected_by_geodesic(M, p, q)
         v = zeros.(size.(p)) # Initialize
@@ -211,7 +222,6 @@ and assume ``(\mu, y_1, \dots, y_d)`` is the representation of ``q`` that minimi
 ````
 """
 function distance(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, q) where {V,A}
-
     q_ = closest_representation(M, p, q)
     return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(A * m(M, p, q_) / 2)^2)
     # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(A * m)) but more stable for small m
@@ -228,7 +238,13 @@ Riemann tensor of the warped Segre manifold at ``p``.
 ````
 ``R_{\mathcal{S}_A}`` is zero in the remaining (orthogonal) directions.
 """
-function riemann_tensor(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, u, v, w) where {V,A}
+function riemann_tensor(
+    M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}},
+    p,
+    u,
+    v,
+    w,
+) where {V,A}
     # Can we avoid the deep-copies here? That looks a bit inefficient
     u_ = deepcopy(u)
     u_[1][1] = 0.0
