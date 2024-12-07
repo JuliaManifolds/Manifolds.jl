@@ -17,7 +17,7 @@
 - [Nick Dewaele](https://github.com/Nikdwal) contributed the [Tucker manifold](manifolds/tucker.md)
 - [Renée Dornig](https://github.com/r-dornig) contributed the [centered  matrices](manifolds/centered.md) and the [essential manifold](manidfold/essential.md)
 - [David Hong](https://github.com/dahong67) contributed uniform distributions on the Stiefel and Grassmann manifolds.
-- [Johannes Voll Kolstø]() contributed the [symplectic manifold](manifolds/symplectic.md), the [symplectic Stiefel manifold](manifolds/symplecticstiefel.md)
+- [Johannes Voll Kolstø](https://github.com/johannvk) contributed the [symplectic manifold](manifolds/symplectic.md), the [symplectic Stiefel manifold](manifolds/symplecticstiefel.md)
 - [Manuel Weiß](https://github.com/manuelweisser) contributed [symmetric matrices](manifolds/symmetric.md)
 
 as well as everyone else reporting, investigating, and fixing bugs or fixing typographical errors in the documentation, see the [GitHub contributors page](https://github.com/JuliaManifolds/Manifolds.jl/graphs/contributors).
