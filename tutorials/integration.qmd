@@ -32,7 +32,7 @@ using Manifolds
 volume_density_two_points(M::AbstractManifold, p, q) = volume_density(M, p, log(M, p, q))
 ```
 
-The simplest way to of integrating a function on a compact manifold is through a [📖 Monte Carlo integrator](https://en.wikipedia.org/wiki/Monte_Carlo_integration).
+The simplest way to of integrating a function on a compact manifold is through a [Monte Carlo integrator](https://en.wikipedia.org/wiki/Monte_Carlo_integration).
 A simple variant can be implemented as follows (assuming uniform distribution of `rand`):
 
 ```{julia}

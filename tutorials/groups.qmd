@@ -185,7 +185,7 @@ As a last note, other rotation representations, including quaternions, Pauli mat
 
 ## Relationship between groups, metrics and connections
 
-Group structure provides a canonical way to define [📖 exponential](https://en.wikipedia.org/wiki/Exponential_map_(Lie_theory)) and logarithmic maps from the Lie algebra.
+Group structure provides a canonical way to define [exponential](https://en.wikipedia.org/wiki/Exponential_map_(Lie_theory)) and logarithmic maps from the Lie algebra.
 They can be calculated in `Manifolds.jl` using the [`exp_lie`](@ref) and [`log_lie`](@ref) functions. Such exponential and logarithmic maps can be extended invariantly to tangent spaces at any point of the Lie group. This extension is implemented using functions [`exp_inv`](@ref) and [`log_inv`](@ref).
 
 Finally, there are `log` and `exp` functions which are metric (or connection)-related functions in `Manifolds.jl`. For groups which can be equipped with a bi-invariant metric, `log` and `log_inv` return the same result, similarly `exp` and `exp_inv`. However, only compact groups and their products with Euclidean spaces can have a bi-invariant metric (see for example Theorem 21.9 in [GallierQuaintance:2020](@cite)). A prominent example of a Lie group without a bi-invariant metric is the special Euclidean group (in two or more dimensions). Then we have a choice between a metric but non-invariant exponential map (which is generally the default choice for `exp`) or a non-metric, invariant exponential map (`exp_inv`). Which one should be used depends on whether being metric or being invariant is more important in a particular application.
