@@ -62,7 +62,7 @@ Euclidean(2, field=ℂ) === ℂ^2
 ```
 
 The easiest to check is the dimension of a manifold. Here we have three “directions to walk into” at every point $p\in \mathbb R
-^3$ so ``[🔗 `manifold_dimension`](@extref `ManifoldsBase.manifold_dimension-Tuple{AbstractManifold}`)``{=commonmark} is
+^3$ so ``[`manifold_dimension`](@extref `ManifoldsBase.manifold_dimension-Tuple{AbstractManifold}`)``{=commonmark} is
 
 ```{julia}
 manifold_dimension(M₁)
@@ -126,7 +126,7 @@ i.e. we get
 is_point(M₃, [0, 0, 1.001]; atol=1e-3)
 ```
 
-Here we can show a last nice check: ``[🔗 `is_vector`](@extref `ManifoldsBase.is_vector-Tuple{AbstractManifold, Any, Any, Bool, Bool}`)``{=commonmark} to check whether a tangent vector `X` is a representation of a tangent vector $X∈T_p\mathcal M$ to a point `p` on the manifold.
+Here we can show a last nice check: ``[`is_vector`](@extref `ManifoldsBase.is_vector-Tuple{AbstractManifold, Any, Any, Bool, Bool}`)``{=commonmark} to check whether a tangent vector `X` is a representation of a tangent vector $X∈T_p\mathcal M$ to a point `p` on the manifold.
 
 This function has two positional arguments, the first to again indicate whether to throw an error, the second to disable the check that `p` is a valid point on the manifold. Usually this validity is essential for the tangent check, but if it was for example performed before, it can be turned off to spare time.
 
@@ -156,7 +156,7 @@ and for these we again get informative error messages
 @expect_error is_vector(M₃, [1, 0, 0], [0.1, 1, 1]; error=:error) DomainError
 ```
 
-To learn about how to define a manifold yourself check out the ``[🔗 How to define your own manifold](@extref ManifoldsBase :doc:`tutorials/implement-a-manifold`)``{=commonmark} tutorial of ``[🔗 `ManifoldsBase.jl`](@extref ManifoldsBase :doc:`index`)``{=commonmark}."
+To learn about how to define a manifold yourself check out the ``[How to define your own manifold](@extref ManifoldsBase :doc:`tutorials/implement-a-manifold`)``{=commonmark} tutorial of ``[`ManifoldsBase.jl`](@extref ManifoldsBase :doc:`index`)``{=commonmark}."
 
 ### Building more advanced manifolds
 
@@ -228,7 +228,7 @@ using RecursiveArrayTools: ArrayPartition
 p₃ = ArrayPartition([0, 0, 1], [0, 1, 0])
 ```
 
-Here `ArrayPartition` taken from [🔗 `RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient access to the product elements.
+Here `ArrayPartition` taken from [`RecursiveArrayTools.jl`](https://github.com/SciML/RecursiveArrayTools.jl) to store the point on the product manifold efficiently in one array, still allowing efficient access to the product elements.
 
 ```{julia}
 is_point(M₆, p₃; error=:error)
@@ -254,7 +254,7 @@ For our example here, we want to implement the so-called [Bézier curve](https:/
 /wiki/Bézier_curve) using the so-called [de-Casteljau algorithm](https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm).
 The linked algorithm can easily be generalised to manifolds by replacing lines with geodesics. This was for example used in [BergmannGousenbourger:2018](@cite) and the following example is an extended version of an example from [AxenBaranBergmannRzecki:2023](@cite).
 
-The algorithm works recursively. For the case that we have a Bézier curve with just two points, the algorithm just evaluates the geodesic connecting both at some time point $t∈[0,1]$. The function to evaluate a shortest geodesic (it might not be unique, but then a deterministic choice is taken) between two points `p` and `q` on a manifold `M` ``[🔗 `shortest_geodesic(M, p, q, t)`](@extref `ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold, Any, Any}`)``{=commonmark}.
+The algorithm works recursively. For the case that we have a Bézier curve with just two points, the algorithm just evaluates the geodesic connecting both at some time point $t∈[0,1]$. The function to evaluate a shortest geodesic (it might not be unique, but then a deterministic choice is taken) between two points `p` and `q` on a manifold `M` ``[`shortest_geodesic(M, p, q, t)`](@extref `ManifoldsBase.shortest_geodesic-Tuple{AbstractManifold, Any, Any}`)``{=commonmark}.
 
 
 ```{julia}
@@ -275,9 +275,9 @@ Which can now be used on any manifold where the shortest geodesic is implemented
 
 Now on several manifolds the [exponential map](https://en.wikipedia.org/wiki/Exponential_map_(Riemannian_geometry)) and its (locally defined) inverse, the logarithmic map might not be available in an implementation. So one way to generalise this, is the use of a retraction (see  [AbsilMahonySepulchre:2008](@cite), Def. 4.1.1 for details) and its (local) inverse.
 
-The function itself is quite similar to the exponential map, just that ``[🔗 `retract(M, p, X, m)`](@extref `ManifoldsBase.retract`)``{=commonmark} has one further parameter, the type of retraction to take, so `m` is a subtype of ``[🔗 `AbstractRetractionMethod`](@extref `ManifoldsBase.AbstractRetractionMethod`)``{=commoonmark} `m`, the same for the ``[🔗 `inverse_retract(M, p, q, n)`](@extref `ManifoldsBase.inverse_retract`)``{=commonmark} with an ``[`AbstractInverseRetractionMethod`](@extref `ManifoldsBase.AbstractInverseRetractionMethod`)``{=commonmark} `n`.
+The function itself is quite similar to the exponential map, just that ``[`retract(M, p, X, m)`](@extref `ManifoldsBase.retract`)``{=commonmark} has one further parameter, the type of retraction to take, so `m` is a subtype of ``[`AbstractRetractionMethod`](@extref `ManifoldsBase.AbstractRetractionMethod`)``{=commoonmark} `m`, the same for the ``[`inverse_retract(M, p, q, n)`](@extref `ManifoldsBase.inverse_retract`)``{=commonmark} with an ``[`AbstractInverseRetractionMethod`](@extref `ManifoldsBase.AbstractInverseRetractionMethod`)``{=commonmark} `n`.
 
-Thinking of a generic implementation, we would like to have a way to specify one, that is available. This can be done by using ``[🔗 `default_retraction_method`](@extref `ManifoldsBase.default_retraction_method-Tuple{AbstractManifold}`)``{=commonmark} and ``[🔗 `default_inverse_retraction_method`](@extref `ManifoldsBase.default_inverse_retraction_method-Tuple{AbstractManifold}`)``{=commonmark}, respectively. We implement
+Thinking of a generic implementation, we would like to have a way to specify one, that is available. This can be done by using ``[`default_retraction_method`](@extref `ManifoldsBase.default_retraction_method-Tuple{AbstractManifold}`)``{=commonmark} and ``[`default_inverse_retraction_method`](@extref `ManifoldsBase.default_inverse_retraction_method-Tuple{AbstractManifold}`)``{=commonmark}, respectively. We implement
 
 
 ```{julia}
@@ -310,17 +310,17 @@ function generic_de_Casteljau(
 end
 ```
 
-Note that on a manifold `M` where the exponential map is implemented, the `default_retraction_method(M)` returns ``[🔗 `ExponentialRetraction`](@extref ManifoldsBase.ExponentialRetraction)``{=commonmark}, which yields that the `retract` function falls back to calling `exp`.
+Note that on a manifold `M` where the exponential map is implemented, the `default_retraction_method(M)` returns ``[`ExponentialRetraction`](@extref ManifoldsBase.ExponentialRetraction)``{=commonmark}, which yields that the `retract` function falls back to calling `exp`.
 
-The same mechanism exists for ``[🔗 `parallel_transport_to(M, p, X, q)`](@extref `ManifoldsBase.parallel_transport_to-Tuple{AbstractManifold, Any, Any, Any}`)``{=commonmark} and the more general ``[🔗 `vector_transport_to(M, p, X, q, m)`](@extref `ManifoldsBase.vector_transport_to`)``{=commonmark} whose ``[🔗 `AbstractVectorTransportMethod`](@extref `ManifoldsBase.AbstractVectorTransportMethod`)``{=commonmark} `m` has a default defined by ``[🔗 `default_vector_transport_method(M)`](@extref `ManifoldsBase.default_vector_transport_method-Tuple{AbstractManifold}`)``{=commonmark}.
+The same mechanism exists for ``[`parallel_transport_to(M, p, X, q)`](@extref `ManifoldsBase.parallel_transport_to-Tuple{AbstractManifold, Any, Any, Any}`)``{=commonmark} and the more general ``[`vector_transport_to(M, p, X, q, m)`](@extref `ManifoldsBase.vector_transport_to`)``{=commonmark} whose ``[`AbstractVectorTransportMethod`](@extref `ManifoldsBase.AbstractVectorTransportMethod`)``{=commonmark} `m` has a default defined by ``[`default_vector_transport_method(M)`](@extref `ManifoldsBase.default_vector_transport_method-Tuple{AbstractManifold}`)``{=commonmark}.
 
 ## Allocating and in-place computations
 
-Memory allocation is a [🔗 critical performance issue](https://docs.julialang.org/en/v1/manual/performance-tips/#Measure-performance-with-[@time](@ref)-and-pay-attention-to-memory-allocation) when programming in Julia. To take this into account, `Manifolds.jl` provides special functions to reduce the amount of allocations.
+Memory allocation is a [critical performance issue](https://docs.julialang.org/en/v1/manual/performance-tips/#Measure-performance-with-[@time](@ref)-and-pay-attention-to-memory-allocation) when programming in Julia. To take this into account, `Manifolds.jl` provides special functions to reduce the amount of allocations.
 
-We again look at the [exponential map](https://en.wikip edia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` (see ``[🔗 `exp(M, p, X)`](@extref `Base.exp-Tuple{AbstractManifold, Any, Any}`)``{=commonmark}). This function returns the resulting point `q`, which requires to allocate new memory.
+We again look at the [exponential map](https://en.wikip edia.org/wiki/Exponential_map_(Riemannian_geometry)). On a manifold `M` the exponential map needs a point `p` (to start from) and a tangent vector `X`, which can be seen as direction to “walk into” as well as the length to walk into this direction. In `Manifolds.jl` the function can then be called with `q = exp(M, p, X)` (see ``[`exp(M, p, X)`](@extref `Base.exp-Tuple{AbstractManifold, Any, Any}`)``{=commonmark}). This function returns the resulting point `q`, which requires to allocate new memory.
 
-To avoid this allocation, the function ``[🔗 `exp!(M, q, p, X)`](@extref `ManifoldsBase.exp!-Tuple{AbstractManifold, Any, Any, Any}`)``{=commonmark} can be called. Here `q` is allocated beforehand and is passed as the memory, where the result is returned in.
+To avoid this allocation, the function ``[`exp!(M, q, p, X)`](@extref `ManifoldsBase.exp!-Tuple{AbstractManifold, Any, Any, Any}`)``{=commonmark} can be called. Here `q` is allocated beforehand and is passed as the memory, where the result is returned in.
 It might be used even for interims computations, as long as it does not introduce side effects. Thas means that even with `exp!(M, p, p, X)` the result is correct.
 
 Let's look at an example.
@@ -361,7 +361,7 @@ This also means that if you implement a new manifold, you just have to implement
 ## Decorating a manifold
 
 As you saw until now, an
-``[🔗 `AbstractManifold`]@extref `ManifoldsBase.AbstractManifold`)``{=commonmark}
+``[`AbstractManifold`]@extref `ManifoldsBase.AbstractManifold`)``{=commonmark}
 describes a Riemannian manifold.
 For completeness, this also includes the chosen
 [Riemannian metric tensor](https://en.wikipedia.org/wiki/Metric_tensor)
@@ -415,13 +415,13 @@ but for example the exponential map and the norm yield different results
 ```
 
 
-Technically this done using Traits – the trait here is the [`IsMetricManifold`](@ref) trait. Our trait system allows to combine traits but also to inherit properties in a hierarchical way, see ``[🔗 here](@extref ManifoldsBase `Traits-with-an-inheritance-hierarchy`)``{=commonmark} for the technical details.
+Technically this done using Traits – the trait here is the [`IsMetricManifold`](@ref) trait. Our trait system allows to combine traits but also to inherit properties in a hierarchical way, see ``[here](@extref ManifoldsBase `Traits-with-an-inheritance-hierarchy`)``{=commonmark} for the technical details.
 
 The same approach is used for
 
 * specifying a different ``[connection](@ref ConnectionSection)``{=commonmark}
 * specifying a manifold as a certain ``[quotient manifold](@ref QuotientManifoldSection)``{=commonmark}
-* specifying a certain ``[🔗 embedding](@extref ManifoldsBase The-Manifold-decorator)``{=commonmark}s
+* specifying a certain ``[embedding](@extref ManifoldsBase The-Manifold-decorator)``{=commonmark}s
 * specify a certain ``[group action](@ref GroupManifoldSection)``{=commonmark}
 
 Again, for all of these, the concrete types only have to be used if you want to do a second, different from the details, property, for example a second way to embed a manifold. If a manifold is (in its usual representation) an embedded manifold, this works with the default manifold type already, since then it is again set as the reasonable default.
