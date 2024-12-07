@@ -12,19 +12,25 @@
 - [Seth Axen](https://github.com/sethaxen)
 
 ## Contributors
+(in alphabetical order)
 
-- ...
+- [Nick Dewaele](https://github.com/Nikdwal) contributed the [Tucker manifold](manifolds/tucker.md)
+- [Renée Dornig](https://github.com/r-dornig) contributed the [centered  matrices](manifolds/centered.md) and the [essential manifold](manidfold/essential.md)
+- [David Hong](https://github.com/dahong67) contributed uniform distributions on the Stiefel and Grassmann manifolds.
+- [Johannes Voll Kolstø]() contributed the [symplectic manifold](manifolds/symplectic.md), the [symplectic Stiefel manifold](manifolds/symplecticstiefel.md)
+- [Manuel Weiß](https://github.com/manuelweisser) contributed [symmetric matrices](manifolds/symmetric.md)
 
-See the [GitHub contributors page](https://github.com/JuliaManifolds/Manifolds.jl/graphs/contributors).
+as well as everyone else reporting, investigating, and fixing bugs or fixing typographical errors in the documentation, see the [GitHub contributors page](https://github.com/JuliaManifolds/Manifolds.jl/graphs/contributors).
 
-[Contributions](CONTRIBUTING.md) are welcome!
+Of course all further [contributions](CONTRIBUTING.md) are always welcome!
 
-## Projects using Manifolds.jl
+## Projects using `Manifolds.jl`
 
-- [Manopt.jl](https://manoptjl.org/)
-- [ManoptExamples.jl](https://github.com/JuliaManifolds/ManoptExamples.jl)
-- ...
+- [Caesar.jl](https://juliarobotics.org/Caesar.jl/latest/concepts/using_manifolds/)
+- [ManoptExamples.jl](https://github.com/JuliaManifolds/ManoptExamples.jl) collecting examples of optimization problems on manifolds implemented using `Manifolds.jl` and [`Manopt.jl`](https://manoptjl.org).
 
 Do you use Manifolds.jl in you package? Let us know and open an [issue](https://github.com/JuliaManifolds/Manifolds.jl/issues/new/choose) or [pull request](https://github.com/JuliaManifolds/Manifolds.jl/compare) to add it to the list!
 
 ## License
+
+[MIT License](https://github.com/JuliaManifolds/Manifolds.jl/blob/master/LICENSE)
