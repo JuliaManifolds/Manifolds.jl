@@ -1,6 +1,6 @@
 # About `Manifolds.jl`
 
-`Manifolds.jl` was started by [Seth Axen](https://github.com/sethaxen), [Mateusz Baran](https://github.com/mateuszbaran), [Ronny Bergmann](https://github.com/kellertuer), and [Antoine Levitt](https://github.com/antoine-levitt) in 2019, after a very fruitful discussion following the release of the first version of [`Manopt.jl`](https://manoptjl.org/). The goal of `Manifolds.jl` is to provide a library of manifolds in Julia. The manifolds are implemented using the [´ManifoldsBase.jl](https:// github.com/JuliaManifolds/ManifoldsBase.jl/) interface.
+`Manifolds.jl` was started by [Seth Axen](https://github.com/sethaxen), [Mateusz Baran](https://github.com/mateuszbaran), [Ronny Bergmann](https://github.com/kellertuer), and [Antoine Levitt](https://github.com/antoine-levitt) in 2019, after a very fruitful discussion following the release of the first version of [`Manopt.jl`](https://manoptjl.org/). The goal of `Manifolds.jl` is to provide a library of manifolds in Julia. The manifolds are implemented using the [´ManifoldsBase.jl](https://github.com/JuliaManifolds/ManifoldsBase.jl/) interface.
 
 ## Main developers
 
