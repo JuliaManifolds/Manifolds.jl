@@ -11,25 +11,67 @@ Render the `Manifolds.jl` documentation with optional arguments
 
 Arguments
 * `--exclude-tutorials` - exclude the tutorials from the menu of Documenter,
-  this can be used if you do not have Quarto installed to still be able to render the docs
-  locally on this machine. This option should not be set on CI.
+  This can be used if not all tutorials are rendered and you want to therefore exclude links
+  to these, especially the corresponding menu. This option should not be set on CI.
+  Locally this is also set if `--quarto` is not set and not all tutorials are rendered.
 * `--help`              - print this help and exit without rendering the documentation
-* `--prettyurls`        – toggle the prettyurls part to true (which is otherwise only true on CI)
-* `--quarto`            – run the Quarto notebooks from the `tutorials/` folder before generating the documentation
-  this has to be run locally at least once for the `tutorials/*.md` files to exist that are included in
-  the documentation (see `--exclude-tutorials`) for the alternative.
-  If they are generated once they are cached accordingly.
+* `--prettyurls`        – toggle the pretty urls part to true, which is always set on CI
+* `--quarto`            – (re)run the Quarto notebooks from the `tutorials/` folder before
+  generating the documentation. If they are generated once they are cached accordingly.
   Then you can spare time in the rendering by not passing this argument.
   If quarto is not run, some tutorials are generated as empty files, since they
   are referenced from within the documentation.
-  This is currently `getstarted.md`.
 """,
     )
     exit(0)
 end
 
+run_quarto = "--quarto" in ARGS
+run_on_CI = (get(ENV, "CI", nothing) == "true")
+tutorials_in_menu = !("--exclude-tutorials" ∈ ARGS)
 #
-# (a) if docs is not the current active environment, switch to it
+#
+# (a) setup the tutorials menu – check whether all files exist
+tutorials_menu =
+    "How to..." => [
+        "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
+        "work in charts" => "tutorials/working-in-charts.md",
+        "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
+        "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
+        "explore curvature without coordinates" => "tutorials/exploring-curvature.md",
+        "work with groups" => "tutorials/groups.md",
+    ]
+# Check whether all tutorials are rendered, issue a warning if not (and quarto if not set)
+all_tutorials_exist = true
+for (name, file) in tutorials_menu.second
+    fn = joinpath(@__DIR__, "src/", file)
+    if !isfile(fn) || filesize(fn) == 0 # nonexistent or empty file
+        global all_tutorials_exist = false
+        if !run_quarto
+            @warn "Tutorial $name does not exist at $fn."
+            if (!isfile(fn)) && (endswith(file, "getstarted.md"))
+                @warn "Generating empty file, since this tutorial is linked to from the documentation."
+                touch(fn)
+            end
+        end
+    end
+end
+if !all_tutorials_exist && !run_quarto && !run_on_CI
+    @warn """
+        Not all tutorials exist. Run `make.jl --quarto` to generate them. For this run they are excluded from the menu.
+    """
+    tutorials_in_menu = false
+end
+if !tutorials_in_menu
+    @warn """
+    You are either explicitly or implicitly excluding the tutorials from the documentation.
+    You will not be able to see their menu entries nor their rendered pages.
+    """
+    run_on_CI &&
+        (@error "On CI, the tutorials have to be either rendered with Quarto or be cached.")
+end
+#
+# (b) if docs is not the current active environment, switch to it
 # (from https://github.com/JuliaIO/HDF5.jl/pull/1020/) 
 if Base.active_project() != joinpath(@__DIR__, "Project.toml")
     using Pkg
@@ -39,8 +81,8 @@ if Base.active_project() != joinpath(@__DIR__, "Project.toml")
     Pkg.instantiate()
 end
 
-# (b) Did someone say render?
-if "--quarto" ∈ ARGS
+# (c) If quarto is set, or we are on CI, run quarto
+if run_quarto || run_on_CI
     using CondaPkg
     CondaPkg.withenv() do
         @info "Rendering Quarto"
@@ -56,22 +98,9 @@ if "--quarto" ∈ ARGS
         run(`quarto render $(tutorials_folder)`)
         return nothing
     end
-else # fallback to at least create empty files for the start tutorial since that is linked
-    touch(joinpath(@__DIR__, "src/tutorials/getstarted.md"))
 end
 
-tutorials_in_menu = true
-if "--exclude-tutorials" ∈ ARGS
-    @warn """
-    You are excluding the tutorials from the Menu,
-    which might be done if you can not render them locally.
-
-    Remember that this should never be done on CI for the full documentation.
-    """
-    tutorials_in_menu = false
-end
-
-# (c) load necessary packages for the docs
+# (d) load necessary packages for the docs
 using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
 using DocumenterCitations, DocumenterInterLinks
 # required for loading methods that handle differential equation solving
@@ -81,7 +110,7 @@ using NLsolve
 using Test, FiniteDifferences
 ENV["GKSwstype"] = "100"
 
-# (d) add CONTRIBUTING.md and NEWS.md to docs
+# (e) add CONTRIBUTING.md and NEWS.md to docs
 generated_path = joinpath(@__DIR__, "src", "misc")
 base_url = "https://github.com/JuliaManifolds/Manifolds.jl/blob/master/"
 isdir(generated_path) || mkdir(generated_path)
@@ -103,18 +132,7 @@ for fname in ["CONTRIBUTING.md", "NEWS.md"]
     end
 end
 
-# (e) build the tutorials menu
-tutorials_menu =
-    "How to..." => [
-        "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
-        "work in charts" => "tutorials/working-in-charts.md",
-        "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
-        "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
-        "explore curvature without coordinates" => "tutorials/exploring-curvature.md",
-        "work with groups" => "tutorials/groups.md",
-    ]
 # (f) final step: render the docs
-
 bib = CitationBibliography(joinpath(@__DIR__, "src", "references.bib"); style=:alpha)
 links = InterLinks(
     "ManifoldsBase" => ("https://juliamanifolds.github.io/ManifoldsBase.jl/stable/"),
@@ -144,7 +162,7 @@ end
 makedocs(;
     format=Documenter.HTML(
         prettyurls=(get(ENV, "CI", nothing) == "true") || ("--prettyurls" ∈ ARGS),
-        assets=["assets/favicon.ico", "assets/citations.css"],
+        assets=["assets/favicon.ico", "assets/citations.css", "assets/link-icons.css"],
         size_threshold_warn=200 * 2^10, # raise slightly from 100 to 200 KiB
         size_threshold=300 * 2^10,      # raise slightly 200 to 300 KiB
     ),
