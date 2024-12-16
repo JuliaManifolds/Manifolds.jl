@@ -150,6 +150,7 @@ end
         include_test("manifolds/generalized_stiefel.jl")
         include_test("manifolds/grassmann.jl")
         include_test("manifolds/hamiltonian.jl")
+        include_test("manifolds/heisenberg_matrices.jl")
         include_test("manifolds/hyperbolic.jl")
         include_test("manifolds/hyperrectangle.jl")
         include_test("manifolds/invertible_matrices.jl")
