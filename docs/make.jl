@@ -186,6 +186,7 @@ makedocs(;
                 "Generalized Grassmann" => "manifolds/generalizedgrassmann.md",
                 "Grassmann" => "manifolds/grassmann.md",
                 "Hamiltonian" => "manifolds/hamiltonian.md",
+                "Heisenberg matrices" => "manifolds/heisenberg.md",
                 "Hyperbolic space" => "manifolds/hyperbolic.md",
                 "Hyperrectangle" => "manifolds/hyperrectangle.md",
                 "Invertible matrices" => "manifolds/invertible.md",

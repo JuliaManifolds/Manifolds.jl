@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.9] - unreleased
 
+### Added
+
+* The manifold `HeisenbergMatrices` as the underlying manifold of `HeisenbergGroup`.
+
 ### Changed
 
 * `about.md` now also lists contributors of manifolds and a very short history of the package.
