@@ -3,11 +3,17 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
 @testset "Heisenberg matrices" begin
     M = HeisenbergMatrices(1)
     @test repr(M) == "HeisenbergMatrices(1)"
+    @test is_flat(M)
 
     pts = [
         [1.0 2.0 3.0; 0.0 1.0 -1.0; 0.0 0.0 1.0],
         [1.0 4.0 -3.0; 0.0 1.0 3.0; 0.0 0.0 1.0],
         [1.0 -2.0 1.0; 0.0 1.0 1.1; 0.0 0.0 1.0],
+    ]
+    Xpts = [
+        [0.0 2.0 3.0; 0.0 0.0 -1.0; 0.0 0.0 0.0],
+        [0.0 4.0 -3.0; 0.0 0.0 3.0; 0.0 0.0 0.0],
+        [0.0 -2.0 1.0; 0.0 0.0 1.1; 0.0 0.0 0.0],
     ]
 
     @test check_point(M, [0.0 2.0 3.0; 0.0 1.0 -1.0; 0.0 0.0 1.0]) isa DomainError
@@ -27,6 +33,11 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         parallel_transport=true,
         test_injectivity_radius=true,
         test_musical_isomorphisms=false,
+    )
+
+    @test all(
+        iszero,
+        Weingarten(M, pts[1], Xpts[1], [1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]),
     )
     @testset "field parameter" begin
         G = HeisenbergMatrices(1; parameter=:field)

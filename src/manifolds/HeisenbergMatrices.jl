@@ -5,12 +5,13 @@ Heisenberg matrices `HeisenbergMatrices(n)` is the manifold of ``(n+2)×(n+2)`` 
 
 ```math
 \begin{bmatrix} 1 & \mathbf{a} & c \\
-\mathbf{0} & I_n & \mathbf{b} \\
-0 & \mathbf{0} & 1 \end{bmatrix}
+\mathbf{0}_n & I_n & \mathbf{b} \\
+0 & \mathbf{0}_n^\mathrm{T} & 1 \end{bmatrix}
 ```
 
 where ``I_n`` is the ``n×n`` unit matrix, ``\mathbf{a}`` is a row vector of length ``n``,
-``\mathbf{b}`` is a column vector of length ``n`` and ``c`` is a real number.
+``\mathbf{b}`` is a column vector of length ``n``, ``\mathbf{0}_n`` is the column zero vector
+of length ``n``, and ``c`` is a real number.
 
 It is a submanifold of [`Euclidean`](@ref)`(n+2, n+2)` and the manifold of the
 [`HeisenbergGroup`](@ref).
@@ -130,8 +131,9 @@ end
     Y = Weingarten(M::HeisenbergMatrices, p, X, V)
     Weingarten!(M::HeisenbergMatrices, Y, p, X, V)
 
-Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`HeisenbergMatrices`](@ref) `M` with respect to the
-tangent vector ``X \in T_p\mathcal M`` and the normal vector ``V \in N_p\mathcal M``.
+Compute the Weingarten map ``\mathcal W_p`` at `p` on the [`HeisenbergMatrices`](@ref) `M`
+with respect to the tangent vector ``X \in T_p\mathcal M`` and the normal vector
+``V \in N_p\mathcal M``.
 
 Since this a flat space by itself, the result is always the zero tangent vector.
 """
