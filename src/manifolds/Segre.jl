@@ -123,7 +123,7 @@ function get_coordinates_orthonormal!(
 ) where {V}
     return X = vcat(
         v[1],
-        [
+        p[1][1] * [
             get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis(); kwargs...) for (n, x, xdot) in zip(V, p[2:end], v[2:end])
         ]...,
     )
@@ -141,13 +141,14 @@ function get_vector_orthonormal!(M::Segre{ℝ,V}, v, p, X, ::RealNumbers; kwargs
     v[1] = [X_[1]]
     X_ = X_[2:end]
     for (i, n) in enumerate(V)
-        v[i + 1] = get_vector(
-            Sphere(n - 1),
-            p[i + 1],
-            X_[1:(n - 1)],
-            DefaultOrthonormalBasis();
-            kwargs...,
-        )
+        v[i + 1] =
+            get_vector(
+                Sphere(n - 1),
+                p[i + 1],
+                X_[1:(n - 1)],
+                DefaultOrthonormalBasis();
+                kwargs...,
+            ) / p[1][1]
         X_ = X_[n:end]
     end
 

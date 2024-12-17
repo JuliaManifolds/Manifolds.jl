@@ -1554,10 +1554,13 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
 
         @testset "get_coordinates()" begin
             @test(isapprox(v, get_vector(M, p, get_coordinates(M, p, v))))
-        end
-
-        @testset "get_vector()" begin
             @test(isapprox(X, get_coordinates(M, p, get_vector(M, p, X))))
+            @test(
+                isapprox(
+                    dot(X, get_coordinates(M, p, v)),
+                    inner(M, p, v, get_vector(M, p, X)),
+                )
+            )
         end
 
         @testset "exp()" begin

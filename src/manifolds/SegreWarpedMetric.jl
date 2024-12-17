@@ -18,7 +18,7 @@ struct WarpedMetric{A} <: AbstractMetric end
 @doc raw"""
     function get_coordinates(M::Segre{𝔽, V}, p, v; kwargs...)
 
-Get coordinates of `v` in the tangent space ``T_{(\lambda, x_1, \dots, x_d)} \mathcal{S} = \mathrm{R} \times T_{x_1} S^{n_1 - 1} \times \dots \times T_{x_d} S^{n_d - 1}`` using `DefaultOrthonormalBasis` on each sphere tangent space ``T_{x_i} S^{n_i - 1}``.
+Get coordinates of `v` in the tangent space ``T_{(\lambda, x_1, \dots, x_d)} \mathcal{S}_A = \mathrm{R} \times T_{x_1} S^{n_1 - 1} \times \dots \times T_{x_d} S^{n_d - 1}`` using `DefaultOrthonormalBasis` on each sphere tangent space ``T_{x_i} S^{n_i - 1}``.
 """
 get_coordinates(
     M::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}},
@@ -35,19 +35,47 @@ function get_coordinates_orthonormal!(
     ::RealNumbers;
     kwargs...,
 ) where {𝔽,V,A}
-    return get_coordinates_orthonormal!(M.manifold, X, p, v, RealNumbers(); kwargs...)
+    return X = vcat(
+        v[1],
+        A *
+        p[1][1] *
+        [
+            get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis(); kwargs...) for (n, x, xdot) in zip(V, p[2:end], v[2:end])
+        ]...,
+    )
 end
 
+@doc raw"""
+    function get_vector( M::Segre{𝔽, V}, p, X; kwargs...)
+
+Get tangent vector `v` from coordinates in the tangent space ``T_{(\lambda, x_1, \dots, x_d)} \mathcal{S}_A = \mathrm{R} \times T_{x_1} S^{n_1 - 1} \times \dots \times T_{x_d} S^{n_d - 1}``.
 """
-    function get_vector(M::MetricManifold{𝔽, Segre{𝔽, V}, WarpedMetric{A}}, p, X; kwargs...)
-"""
-function get_vector(
-    M::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}},
+get_vector(M::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}}, p, X; kwargs...) where {V,A,𝔽}
+
+function get_vector_orthonormal!(
+    M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}},
+    v,
     p,
-    X;
+    X,
+    ::RealNumbers;
     kwargs...,
-) where {V,A,𝔽}
-    return get_vector(M.manifold, p, X; kwargs...)
+) where {V,A}
+    X_ = deepcopy(X)
+    v[1] = [X_[1]]
+    X_ = X_[2:end]
+    for (i, n) in enumerate(V)
+        v[i + 1] =
+            get_vector(
+                Sphere(n - 1),
+                p[i + 1],
+                X_[1:(n - 1)],
+                DefaultOrthonormalBasis();
+                kwargs...,
+            ) / (A * p[1][1])
+        X_ = X_[n:end]
+    end
+
+    return v # TODO: Why do I have to return v here?
 end
 
 @doc raw"""
