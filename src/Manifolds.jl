@@ -453,7 +453,7 @@ include("manifolds/MultinomialSymmetricPositiveDefinite.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
 include("manifolds/Segre.jl")
-include("manifolds/SegreWarped.jl")
+include("manifolds/SegreWarpedMetric.jl")
 include("manifolds/SkewHermitian.jl")
 include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
@@ -739,8 +739,8 @@ export AbstractMetric,
     ProductMetric,
     RealSymplecticMetric,
     RiemannianMetric,
-    WarpedMetric,
-    StiefelSubmersionMetric
+    StiefelSubmersionMetric,
+    WarpedMetric
 export AbstractAtlas, RetractionAtlas
 # Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
