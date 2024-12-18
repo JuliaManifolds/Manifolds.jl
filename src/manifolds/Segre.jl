@@ -135,7 +135,14 @@ using a `DefaultOrthonormalBasis` on each factor.
 """
 get_coordinates(M::Segre, p, v, ::DefaultOrthonormalBasis; kwargs...)
 
-function get_coordinates_orthonormal!(M::Segre{ℝ}, X, p, v, ::RealNumbers; kwargs...)
+function get_coordinates_orthonormal!(
+    M::Segre{ℝ,V},
+    X,
+    p,
+    v,
+    ::RealNumbers;
+    kwargs...,
+) where {V}
     return X = vcat(
         v[1],
         p[1][1] * [
