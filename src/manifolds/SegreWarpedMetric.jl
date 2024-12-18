@@ -51,7 +51,13 @@ end
 
 Get tangent vector `v` from coordinates in the tangent space ``T_{(\lambda, x_1, \dots, x_d)} \mathcal{S}_A = \mathbb{R} \times T_{x_1} S^{n_1 - 1} \times \dots \times T_{x_d} S^{n_d - 1}`` using `DefaultOrthonormalBasis` on each factor.
 """
-get_vector(M::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}}, p, X, ::DefaultOrthonormalBasis; kwargs...) where {V,A,𝔽}
+get_vector(
+    M::MetricManifold{𝔽,Segre{𝔽,V},WarpedMetric{A}},
+    p,
+    X,
+    ::DefaultOrthonormalBasis;
+    kwargs...,
+) where {V,A,𝔽}
 
 function get_vector_orthonormal!(
     M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}},
