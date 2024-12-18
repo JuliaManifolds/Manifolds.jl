@@ -107,9 +107,9 @@ function check_vector(M::Segre{ℝ,V}, p, v; atol=1.4901161193847656e-8, kwargs.
 end
 
 @doc raw"""
-    function get_coordinates(M::Segre{𝔽, V}, p, v; kwargs...)
+    function get_coordinates(M::Segre{𝔽, V}, p, v, ::DefaultOrthonormalBasis; kwargs...)
 
-Get coordinates of `v` in the tangent space ``T_{(\lambda, x_1, \dots, x_d)} \mathcal{S} = \mathrm{R} \times T_{x_1} S^{n_1 - 1} \times \dots \times T_{x_d} S^{n_d - 1}``.
+Get coordinates of `v` in the tangent space ``T_{(\lambda, x_1, \dots, x_d)} \mathcal{S} = \mathbb{R} \times T_{x_1} S^{n_1 - 1} \times \dots \times T_{x_d} S^{n_d - 1}`` using `DefaultOrthonormalBasis` on each factor.
 """
 get_coordinates(M::Segre{𝔽,V}, p, v, ::DefaultOrthonormalBasis; kwargs...) where {𝔽,V}
 
@@ -130,11 +130,11 @@ function get_coordinates_orthonormal!(
 end
 
 @doc raw"""
-    function get_vector( M::Segre{𝔽, V}, p, X; kwargs...)
+    function get_vector( M::Segre{𝔽, V}, p, X, DefaultOrthonormalBasis; kwargs...)
 
-Get tangent vector `v` from coordinates in the tangent space ``T_{(\lambda, x_1, \dots, x_d)} \mathcal{S} = \mathrm{R} \times T_{x_1} S^{n_1 - 1} \times \dots \times T_{x_d} S^{n_d - 1}``.
+Get tangent vector `v` from coordinates in the tangent space ``T_{(\lambda, x_1, \dots, x_d)} \mathcal{S} = \mathbb{R} \times T_{x_1} S^{n_1 - 1} \times \dots \times T_{x_d} S^{n_d - 1}`` using `DefaultOrthonormalBasis` on each factor.
 """
-get_vector(M::Segre{𝔽,V}, p, X; kwargs...) where {𝔽,V}
+get_vector(M::Segre{𝔽,V}, p, X, ::DefaultOrthonormalBasis; kwargs...) where {𝔽,V}
 
 function get_vector_orthonormal!(M::Segre{ℝ,V}, v, p, X, ::RealNumbers; kwargs...) where {V}
     X_ = deepcopy(X)

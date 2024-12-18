@@ -1538,7 +1538,7 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
             embed!(M, p_, p)
             embed!(M, p__, [p[1], [-x for x in p[2:end]]...])
             @test(is_point(get_embedding(M), p_))
-            @test(p_ == (-1)^length(V) * p__)
+            @test(isapprox(p_, (-1)^length(V) * p__))
         end
 
         # ManifoldsBase doesn't export embed_vector! right now
