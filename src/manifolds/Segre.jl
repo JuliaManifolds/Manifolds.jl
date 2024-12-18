@@ -217,22 +217,23 @@ function embed!(M::Segre{𝔽,V}, q, p) where {𝔽,V}
     return q = kron(p...)
 end
 
-@doc raw"""
-    function embed_vector(M::Segre{𝔽, V}, p, v)
+# ManifoldsBase doesn't export embed_vector! right now
+# @doc raw"""
+#     function embed_vector(M::Segre{𝔽, V}, p, v)
 
-Embed tangent vector ``v = (\nu, u_1, \dots, u_d)`` at ``p \doteq (\lambda, x_1, \dots, x_d)`` in ``𝔽^{n_1 \times \dots \times n_d}`` using the Krönecker product:
-````math
-    (\nu, u_1, \dots, u_d) \mapsto \nu x_1 \otimes \dots \otimes x_d + \lambda u_1 \otimes x_2 \otimes \dots \otimes x_d + \dots + \lambda x_1 \otimes \dots \otimes x_{d - 1} \otimes u_d.
-````
-"""
-function embed_vector!(M::Segre{𝔽,V}, u, p, v) where {𝔽,V}
+# Embed tangent vector ``v = (\nu, u_1, \dots, u_d)`` at ``p \doteq (\lambda, x_1, \dots, x_d)`` in ``𝔽^{n_1 \times \dots \times n_d}`` using the Krönecker product:
+# ````math
+#     (\nu, u_1, \dots, u_d) \mapsto \nu x_1 \otimes \dots \otimes x_d + \lambda u_1 \otimes x_2 \otimes \dots \otimes x_d + \dots + \lambda x_1 \otimes \dots \otimes x_{d - 1} \otimes u_d.
+# ````
+# """
+# function embed_vector!(M::Segre{𝔽,V}, u, p, v) where {𝔽,V}
 
-    # Product rule
-    return u = sum([
-        kron([i == j ? xdot : x for (j, (x, xdot)) in enumerate(zip(p, v))]...) for
-        (i, _) in enumerate(p)
-    ])
-end
+#     # Product rule
+#     return u = sum([
+#         kron([i == j ? xdot : x for (j, (x, xdot)) in enumerate(zip(p, v))]...) for
+#         (i, _) in enumerate(p)
+#     ])
+# end
 
 @doc raw"""
     function spherical_angle_sum(M::Segre{ℝ, V}, p, q)
@@ -355,7 +356,7 @@ function exp!(M::Segre{ℝ,V}, q, p, v) where {V}
         end
     end
 
-    return 0
+    return q
 end
 
 @doc raw"""
@@ -387,21 +388,15 @@ log(M::Segre{ℝ,V}, p, q) where {V}
 
 function log!(M::Segre{ℝ,V}, v, p, q) where {V}
     closest_representative!(M, q, p)
+    m = spherical_angle_sum(M, p, q)
 
-    if !connected_by_geodesic(M, p, q)
-        v = nan.(size.(p))
-    else
-        m = spherical_angle_sum(M, p, q)
-
-        v[1][1] = q[1][1] * cos(m) - p[1][1]
-
-        for (n, xdot, x, y) in zip(V, v[2:end], p[2:end], q[2:end])
-            a = distance(Sphere(n - 1), x, y)
-            xdot .= (y - dot(x, y) * x) * (q[1][1] / p[1][1]) * sinc(m / pi) / sinc(a / pi)
-        end
+    v[1][1] = q[1][1] * cos(m) - p[1][1]
+    for (n, xdot, x, y) in zip(V, v[2:end], p[2:end], q[2:end])
+        a = distance(Sphere(n - 1), x, y)
+        xdot .= (y - dot(x, y) * x) * (q[1][1] / p[1][1]) * sinc(m / pi) / sinc(a / pi)
     end
 
-    return 0
+    return v
 end
 
 @doc raw"""

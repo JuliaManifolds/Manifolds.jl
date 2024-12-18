@@ -174,7 +174,7 @@ function exp!(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, q, p, v) wher
         end
     end
 
-    return 0
+    return q
 end
 
 @doc raw"""
@@ -206,22 +206,15 @@ log(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, p, q) where {V,A}
 
 function log!(M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}, v, p, q) where {V,A}
     closest_representative!(M, q, p)
+    m = spherical_angle_sum(M, p, q)
 
-    if !connected_by_geodesic(M, p, q)
-        v = nan.(size.(p))
-    else
-        m = spherical_angle_sum(M, p, q)
-
-        v[1][1] = q[1][1] * cos(A * m) - p[1][1]
-
-        for (n, xdot, x, y) in zip(V, v[2:end], p[2:end], q[2:end])
-            a = distance(Sphere(n - 1), x, y)
-            xdot .=
-                (y - dot(x, y) * x) * (q[1][1] / p[1][1]) * sinc(A * m / pi) / sinc(a / pi)
-        end
+    v[1][1] = q[1][1] * cos(A * m) - p[1][1]
+    for (n, xdot, x, y) in zip(V, v[2:end], p[2:end], q[2:end])
+        a = distance(Sphere(n - 1), x, y)
+        xdot .= (y - dot(x, y) * x) * (q[1][1] / p[1][1]) * sinc(A * m / pi) / sinc(a / pi)
     end
 
-    return 0
+    return v
 end
 
 @doc raw"""

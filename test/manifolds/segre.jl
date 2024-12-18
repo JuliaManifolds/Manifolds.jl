@@ -1512,6 +1512,7 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
         @testset "is_point()" begin
             @test(is_point(M, p))
             @test(is_point(M, q))
+            @test_throws DomainError is_point(M, [[1.0, 0.0], p[2:end]...], true)
             @test_throws DomainError is_point(M, [[-1.0], p[2:end]...], true)
             @test_throws DomainError is_point(M, [p[1], 2 * p[2:end]...], true)
         end
@@ -1519,6 +1520,8 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
         @testset "is_vector()" begin
             @test(is_vector(M, p, v))
             @test(is_vector(M, p, u))
+            @test_throws DomainError is_vector(M, [[1.0, 0.0], p[2:end]...], v, false, true)
+            @test_throws DomainError is_vector(M, p, [[1.0, 0.0], v[2:end]...], false, true)
             @test_throws DomainError is_vector(M, p, p, false, true)
         end
 
@@ -1658,15 +1661,9 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
             @test(isapprox(norm(M, p, log(M, p, q)), distance(M, p, q)))
         end
 
-        @testset "riemann_tensor()" begin
-            # Test Riemann tensor by testing that sectional curvature is difference
-            # between circumference and 2 pi r for small circles. Since the sectional
-            # curvature contains the same information as the Riemann tensor, this
-            # should be fine.
-
-            sectional_curvature(M, p, u, v) =
-                inner(M, p, riemann_tensor(M, p, u, v, v), u) /
-                (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)
+        @testset "sectional_curvature()" begin
+            # Test that sectional curvature is difference between circumference
+            # and 2 pi r for small circles.
 
             # Orthonormalize
             u_ = u / norm(M, p, u)
@@ -1683,6 +1680,16 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
             K = 3 * (2 * pi * r - C) / (pi * r^3) # https://en.wikipedia.org/wiki/Bertrand%E2%80%93Diguet%E2%80%93Puiseux_theorem
 
             @test(isapprox(K, sectional_curvature(M, p, u, v); rtol=1e-2, atol=1e-2))
+        end
+
+        @testset "riemann_tensor()" begin
+            @test(
+                isapprox(
+                    sectional_curvature(M, p, u, v),
+                    inner(M, p, riemann_tensor(M, p, u, v, v), u) /
+                    (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2),
+                )
+            )
         end
     end
 end
