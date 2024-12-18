@@ -488,3 +488,7 @@ function sectional_curvature(M::Segre{ℝ,V}, p, u, v) where {V}
     return inner(M, p, riemann_tensor(M, p, u, v, v), u) /
            (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)
 end
+
+function Base.show(io::IO, M::Segre{𝔽,V}) where {𝔽,V}
+    return print(io, "Segre($(join(V, ", ")); field=$(𝔽))")
+end
