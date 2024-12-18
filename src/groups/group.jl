@@ -249,11 +249,7 @@ function Identity(
     ::TraitList{<:IsGroupManifold{O}},
     ::AbstractDecoratorManifold,
 ) where {O<:AbstractGroupOperation}
-    Base.depwarn(
-        _dep_warn_group *
-        "\n`Identity` will move and keep its name.",
-        :Idenity,
-    )
+    Base.depwarn(_dep_warn_group * "\n`Identity` will move and keep its name.", :Idenity)
     return Identity{O}()
 end
 Identity(::O) where {O<:AbstractGroupOperation} = Identity(O)
@@ -273,7 +269,10 @@ points are not represented by arrays.
 identity_element(G::AbstractDecoratorManifold)
 @trait_function identity_element(G::AbstractDecoratorManifold)
 function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold)
-    Base.depwarn(_dep_warn_group * "\n`identity_element` will move and keep its name.", :identity_element)
+    Base.depwarn(
+        _dep_warn_group * "\n`identity_element` will move and keep its name.",
+        :identity_element,
+    )
     BG = base_group(G)
     q = allocate_result(BG, identity_element)
     return identity_element!(BG, q)
@@ -617,10 +616,7 @@ element of ``\mathcal{G}``.
 inv(::AbstractDecoratorManifold, ::Any...)
 @trait_function Base.inv(G::AbstractDecoratorManifold, p)
 function Base.inv(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
-    Base.depwarn(
-        _dep_warn_group * "\n`inv` is moved and keeps its name.",
-        :inv,
-    )
+    Base.depwarn(_dep_warn_group * "\n`inv` is moved and keeps its name.", :inv)
     q = allocate_result(G, inv, p)
     BG = base_group(G)
     return inv!(BG, q, p)
@@ -915,7 +911,10 @@ function translate(
     q,
     conv::ActionDirectionAndSide,
 )
-    Base.depwarn(_dep_warn_group * "\n`translate` is discontinued – use `compose` instead.", :translate)
+    Base.depwarn(
+        _dep_warn_group * "\n`translate` is discontinued – use `compose` instead.",
+        :translate,
+    )
     BG = base_group(G)
     return compose(BG, _action_order(BG, p, q, conv)...)
 end
@@ -968,7 +967,8 @@ function inverse_translate(
     conv::ActionDirectionAndSide,
 )
     Base.depwarn(
-        _dep_warn_group * "\n`inverse_translate` is discontinued – use `compose` with the `inv` instead.",
+        _dep_warn_group *
+        "\n`inverse_translate` is discontinued – use `compose` with the `inv` instead.",
         :inverse_translate,
     )
     BG = base_group(G)
