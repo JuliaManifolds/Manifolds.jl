@@ -111,7 +111,6 @@ function check_vector(M::Segre{ℝ,V}, p, v; atol=1.4901161193847656e-8, kwargs.
     end
 end
 
-
 @doc raw"""
     function embed(M::Segre{𝔽, V}, p)
     function embed!(M::Segre{𝔽, V}, q, p)
@@ -121,9 +120,9 @@ Embed ``p ≐ (λ, x_1, …, x_d)`` in ``𝔽^{n_1 ×⋯× n_d}`` using the Kron
     (λ, x_1, …, x_d) ↦ λ x_1 ⊗⋯⊗ x_d.
 ````
 """
-embed(::Segre{𝔽,V}, p)
+embed(::Segre, p)
 
-function embed!(M::Segre{𝔽,V}, q, p) where {𝔽,V}
+function embed!(M::Segre, q, p)
     return q = kron(p...)
 end
 
@@ -134,16 +133,9 @@ Get coordinates of `v` in the tangent space
 ``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} S^{n_1 - 1} ×…× T_{x_d} S^{n_d - 1}``
 using a `DefaultOrthonormalBasis` on each factor.
 """
-get_coordinates(M::Segre{𝔽,V}, p, v, ::DefaultOrthonormalBasis; kwargs...) where {𝔽,V}
+get_coordinates(M::Segre, p, v, ::DefaultOrthonormalBasis; kwargs...)
 
-function get_coordinates_orthonormal!(
-    M::Segre{ℝ,V},
-    X,
-    p,
-    v,
-    ::RealNumbers;
-    kwargs...,
-) where {V}
+function get_coordinates_orthonormal!(M::Segre{ℝ}, X, p, v, ::RealNumbers; kwargs...)
     return X = vcat(
         v[1],
         p[1][1] * [
@@ -159,7 +151,7 @@ Get tangent vector `v` from coordinates in the tangent space
 ``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} S^{n_1 - 1} ×⋯× T_{x_d} S^{n_d - 1}``
 using `DefaultOrthonormalBasis` on each factor.
 """
-get_vector(M::Segre{𝔽,V}, p, X, ::DefaultOrthonormalBasis; kwargs...) where {𝔽,V}
+get_vector(M::Segre, p, X, ::DefaultOrthonormalBasis; kwargs...)
 
 function get_vector_orthonormal!(M::Segre{ℝ,V}, v, p, X, ::RealNumbers; kwargs...) where {V}
     X_ = deepcopy(X)
@@ -176,7 +168,6 @@ function get_vector_orthonormal!(M::Segre{ℝ,V}, v, p, X, ::RealNumbers; kwargs
             ) / p[1][1]
         X_ = X_[n:end]
     end
-
     return v
 end
 
@@ -192,7 +183,7 @@ This inner product is obtained by embedding the Segre manifold in the space of t
 
 where ``ν, ξ ∈ T_{λ} ℝ^{+} = ℝ`` and ``u_i``, ``v_i ∈ T_{x_i} S^{n_i - 1} ⊂ ℝ^{n_i}``.
 """
-function inner(::Segre{ℝ,V}, p, u, v) where {V}
+function inner(::Segre{ℝ}, p, u, v)
     return u[1][1] * v[1][1] + p[1][1]^2 * dot(u[2:end], v[2:end])
 end
 
@@ -266,7 +257,7 @@ Then this is
 where ``\sphericalangle(x_i, y_i)`` is the distance between ``x_i`` and ``y_i`` on the sphere ``S^{n_i - 1}``.
 
 """
-function spherical_angle_sum(M::Segre{ℝ,V}, p, q) where {V}
+function spherical_angle_sum(::Segre{ℝ,V}, p, q) where {V}
     return sqrt(
         sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
     )
