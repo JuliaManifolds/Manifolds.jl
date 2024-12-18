@@ -152,7 +152,7 @@ function get_vector_orthonormal!(M::Segre{ℝ,V}, v, p, X, ::RealNumbers; kwargs
         X_ = X_[n:end]
     end
 
-    return v # TODO: Why do I have to return v here?
+    return v
 end
 
 @doc raw"""

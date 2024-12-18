@@ -1,4 +1,4 @@
-using Manifolds, Test, LinearAlgebra, FiniteDifferences, Random
+using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
 # Manifolds to test
 Ms = [
@@ -213,8 +213,7 @@ ps = [
     ],
 ]
 
-# qs[i] is a point on Ms[i] that is connected to ps[i] by a geodesic and uses the closest representation to ps[i]
-# TODO: test m = 0
+# qs[i] is a point on Ms[i] that is connected to ps[i] by a geodesic and uses the closest representative to ps[i]
 qs = [
     [
         [0.2285468999681258],
@@ -412,8 +411,7 @@ qs = [
     ],
 ]
 
-# vs[i] is a tangent vector to Ms[i] at ps[i] such that exp(Ms[i], ps[i], t * vs[i]) is the closes representation to ps[i] for t in [-1, 1]
-# TODO test m = 0
+# vs[i] is a tangent vector to Ms[i] at ps[i] such that exp(Ms[i], ps[i], t * vs[i]) is the closes representative to ps[i] for t in [-1, 1]
 vs = [
     [
         [0.6940789907123062],
@@ -1357,7 +1355,7 @@ dys = [
     ],
 ]
 
-# Xs are tangent vectors in a chart
+# Xs[i] is coordinates for a tangent vector at ps[i]
 Xs = [
     [
         -0.597609995187605,
@@ -1661,7 +1659,6 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
         end
 
         @testset "riemann_tensor()" begin
-
             # Test Riemann tensor by testing that sectional curvature is difference
             # between circumference and 2 pi r for small circles. Since the sectional
             # curvature contains the same information as the Riemann tensor, this

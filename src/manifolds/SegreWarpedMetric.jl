@@ -75,7 +75,7 @@ function get_vector_orthonormal!(
         X_ = X_[n:end]
     end
 
-    return v # TODO: Why do I have to return v here?
+    return v
 end
 
 @doc raw"""
