@@ -2,15 +2,19 @@
     Segre{𝔽,V} <: AbstractManifold{𝔽}
 
 The Segre manifold
+
 ````math
     \mathcal{S} = \operatorname{Seg}(𝔽^{n_1} \times \dots \times 𝔽^{n_d})
 ````
+
 is the set of rank-one tensors in ``𝔽^{n_1} \otimes \dots \otimes 𝔽^{n_d}``.
 
 When ``𝔽 = ℝ``, the Segre manifold is a normal Riemannian covering of
+
 ````math
     \mathcal{P} = ℝ^{+} \times S^{n_1 - 1} \times \dots \times S^{n_d - 1}
 ````
+
 with the [warped product metric](https://en.wikipedia.org/wiki/Warped_product) [`inner`](@ref inner(::Segre, ::Any)). The tuple ``(n_1, \dots, n_d)`` is called the _valence_ of the manifold.
 
 The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
@@ -18,7 +22,8 @@ The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](
 # Constructor
     Segre(n::Int...; field::AbstractNumbers=ℝ)
 
-Generate a valence `(n, ...)` Segre manifold. Segre(n) is ``\mathbb{R} \setminus \{ 0 \}``.
+Generate a valence `(n, ...)` Segre manifold.
+`Segre(n)` is the same as ``\mathbb{R} \setminus \{ 0 \}``.
 """
 struct Segre{𝔽,V} <: AbstractManifold{𝔽} end
 
@@ -106,10 +111,28 @@ function check_vector(M::Segre{ℝ,V}, p, v; atol=1.4901161193847656e-8, kwargs.
     end
 end
 
+
+@doc raw"""
+    function embed(M::Segre{𝔽, V}, p)
+    function embed!(M::Segre{𝔽, V}, q, p)
+
+Embed ``p ≐ (λ, x_1, …, x_d)`` in ``𝔽^{n_1 ×⋯× n_d}`` using the Kronecker product:
+````math
+    (λ, x_1, …, x_d) ↦ λ x_1 ⊗⋯⊗ x_d.
+````
+"""
+embed(::Segre{𝔽,V}, p)
+
+function embed!(M::Segre{𝔽,V}, q, p) where {𝔽,V}
+    return q = kron(p...)
+end
+
 @doc raw"""
     function get_coordinates(M::Segre{𝔽, V}, p, v, ::DefaultOrthonormalBasis; kwargs...)
 
-Get coordinates of `v` in the tangent space ``T_{(\lambda, x_1, \dots, x_d)} \mathcal{S} = \mathbb{R} \times T_{x_1} S^{n_1 - 1} \times \dots \times T_{x_d} S^{n_d - 1}`` using `DefaultOrthonormalBasis` on each factor.
+Get coordinates of `v` in the tangent space
+``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} S^{n_1 - 1} ×…× T_{x_d} S^{n_d - 1}``
+using a `DefaultOrthonormalBasis` on each factor.
 """
 get_coordinates(M::Segre{𝔽,V}, p, v, ::DefaultOrthonormalBasis; kwargs...) where {𝔽,V}
 
@@ -132,7 +155,9 @@ end
 @doc raw"""
     function get_vector( M::Segre{𝔽, V}, p, X, DefaultOrthonormalBasis; kwargs...)
 
-Get tangent vector `v` from coordinates in the tangent space ``T_{(\lambda, x_1, \dots, x_d)} \mathcal{S} = \mathbb{R} \times T_{x_1} S^{n_1 - 1} \times \dots \times T_{x_d} S^{n_d - 1}`` using `DefaultOrthonormalBasis` on each factor.
+Get tangent vector `v` from coordinates in the tangent space
+``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} S^{n_1 - 1} ×⋯× T_{x_d} S^{n_d - 1}``
+using `DefaultOrthonormalBasis` on each factor.
 """
 get_vector(M::Segre{𝔽,V}, p, X, ::DefaultOrthonormalBasis; kwargs...) where {𝔽,V}
 
@@ -158,13 +183,16 @@ end
 @doc raw"""
     function inner(M::Segre{ℝ, V}, p, u, v,)
 
-Inner product between two tangent vectors ``u = (\nu, u_1, \dots, u_d)`` and ``v = (\xi, v_1, \dots, v_d)`` at ``p \doteq (\lambda, x_1, \dots, x_d)``. This inner product is obtained by embedding the Segre manifold in the space of tensors equipped with the Euclidean metric:
+Inner product between two tangent vectors ``u = (ν, u_1, …, u_d)`` and ``v = (ξ, v_1, …, v_d)`` at ``p ≐ (λ, x_1, \dots, x_d)``.
+This inner product is obtained by embedding the Segre manifold in the space of tensors equipped with the Euclidean metric:
+
 ````math
     \langle u, v \rangle_{p} = \nu \xi + \lambda^2 (\langle u_1, v_1 \rangle_{x_1} + \dots + \langle u_d, v_d \rangle_{x_d}),
 ````
-where ``\nu``, ``\xi \in T_{\lambda} ℝ^{+} = ℝ`` and ``u_i``, ``v_i \in T_{x_i} S^{n_i - 1} \subset ℝ^{n_i}``.
+
+where ``ν, ξ ∈ T_{λ} ℝ^{+} = ℝ`` and ``u_i``, ``v_i ∈ T_{x_i} S^{n_i - 1} ⊂ ℝ^{n_i}``.
 """
-function inner(M::Segre{ℝ,V}, p, u, v) where {V}
+function inner(::Segre{ℝ,V}, p, u, v) where {V}
     return u[1][1] * v[1][1] + p[1][1]^2 * dot(u[2:end], v[2:end])
 end
 
@@ -172,10 +200,12 @@ end
     function rand(M::Segre{ℝ, V}; vector_at=nothing)
 
 If `vector_at` is `nothing`, return a random point on
+
 ````math
-    ℝ^{+} \times S^{n_1 - 1} \times \dots \times S^{n_d - 1}
+    ℝ^{+} × S^{n_1 - 1} ×⋯× S^{n_d - 1}
 ````
-from a log-normal distribution on ℝ^{+} and a uniform distribution on ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``.
+
+from a log-normal distribution on ℝ^{+} and a uniform distribution on ``S^{n_1 - 1} ×⋯× S^{n_d - 1}``.
 
 If `vector_at` is not `nothing`, return a random tangent vector from a normal distribution on the tangent space.
 """
@@ -199,22 +229,10 @@ end
 @doc raw"""
     function get_embedding(M::Segre{𝔽,V})
 
-``\mathcal{S}`` is embedded in ``𝔽^{n_1 \times \dots \times n_d}``.
+``\mathcal{S}`` is embedded in ``𝔽^{n_1 ×⋯× n_d}``.
 """
-function get_embedding(M::Segre{𝔽,V}) where {𝔽,V}
+function get_embedding(::Segre{𝔽,V}) where {𝔽,V}
     return Euclidean(prod(V))
-end
-
-@doc raw"""
-    function embed!(M::Segre{𝔽, V}, q, p)
-
-Embed ``p \doteq (\lambda, x_1, \dots, x_d)`` in ``𝔽^{n_1 \times \dots \times n_d}`` using the Krönecker product:
-````math
-    (\lambda, x_1, \dots, x_d) \mapsto \lambda x_1 \otimes \dots \otimes x_d.
-````
-"""
-function embed!(M::Segre{𝔽,V}, q, p) where {𝔽,V}
-    return q = kron(p...)
 end
 
 # ManifoldsBase doesn't export embed_vector! right now
@@ -238,12 +256,15 @@ end
 @doc raw"""
     function spherical_angle_sum(M::Segre{ℝ, V}, p, q)
 
-Let ``p \doteq (\lambda, x_1, \dots, x_d)``, ``q \doteq (\mu, y_1, \dots, y_d) \in \mathcal{S}``.
+Let ``p ≐ (λ, x_1, …, x_d)``, ``q ≐ (μ, y_1, …, y_d) ∈ \mathcal{S}``.
 Then this is
+
 ````math
-    \sqrt{\sphericalangle(x_1, y_1)^2 + \dots + \sphericalangle(x_d, y_d)^2},
+    \sqrt{\sphericalangle(x_1, y_1)^2 + … + \sphericalangle(x_d, y_d)^2},
 ````
+
 where ``\sphericalangle(x_i, y_i)`` is the distance between ``x_i`` and ``y_i`` on the sphere ``S^{n_i - 1}``.
+
 """
 function spherical_angle_sum(M::Segre{ℝ,V}, p, q) where {V}
     return sqrt(
@@ -259,14 +280,13 @@ end
 """
 function connected_by_geodesic(M::Segre{ℝ,V}, p, q) where {V}
     closest_representative!(M, q, p)
-
     return spherical_angle_sum(M, p, q) < pi
 end
 
 @doc raw"""
     function closest_representative!(M::Segre{ℝ, V}, p, q)
 
-``\mathcal{S}`` is a ``2^d``-sheeted Riemannian covering of 
+``\mathcal{S}`` is a ``2^d``-sheeted Riemannian covering of
 ````math
     \mathcal{P} = ℝ^{+} \times S^{n_1 - 1} \times \dots \times S^{n_d - 1}
 ````
@@ -311,31 +331,34 @@ end
 
 Exponential map on the Segre manifold.
 
-Let ``p \doteq (\lambda, x_1, \dots, x_d) \in \mathcal{S}`` and ``v = (\nu, u_1, \dots, u_d) \in T_p \mathcal{S}``.
+Let ``p ≐ (λ, x_1, …, x_d) ∈ \mathcal{S}`` and ``v = (ν, u_1, …, u_d) ∈ T_p \mathcal{S}``.
 Then
+
 ````math
-    \operatorname{exp}_p(v) \doteq
+    \operatorname{exp}_p(v) ≐
     \left(
-        \sqrt{t^2 + 2 \lambda \nu t + \lambda^2},\\
+        \sqrt{t^2 + 2 λ ν t + λ^2},\\
         x_1 \cos\mathopen{\Big(} \frac{g \lVert u_1 \rVert_{x_1}}{m} \mathclose{\Big)} + \frac{u_1}{\lVert u_1 \rVert_{x_1}} \sin\mathopen{\Big(} \frac{g \lVert u_1 \rVert_{x_1}}{m} \mathclose{\Big)},\\
-        \dots,\\
+        …,\\
         x_d \cos\mathopen{\Big(} \frac{g \lVert u_d \rVert_{x_d}}{m} \mathclose{\Big)} + \frac{u_d}{\lVert u_d \rVert_{x_d}} \sin\mathopen{\Big(} \frac{g \lVert u_d \rVert_{x_d}}{m} \mathclose{\Big)}
     \right),
 ````
+
 where
+
 ````math
-    g = \tan^{-1}\mathopen{\Big(} t \frac{\sqrt{P^2 + 1}}{\lambda} + P \mathclose{\Big)} - \tan^{-1}(P),\\
-    m = \sqrt{\lVert u_1 \rVert_{x_1}^2 + \dots + \lVert u_d \rVert_{x_d}^2},\\
-    P = \frac{\nu}{\lambda m},\\
+    g = \tan^{-1}\mathopen{\Big(} t \frac{\sqrt{P^2 + 1}}{λ} + P \mathclose{\Big)} - \tan^{-1}(P),\\
+    m = \sqrt{\lVert u_1 \rVert_{x_1}^2 + … + \lVert u_d \rVert_{x_d}^2},\\
+    P = \frac{\nu}{λ m},\\
     t = \lVert v \rVert_{p}.
 ````
-If ``m = 0`` and ``\nu t < \lambda``, then ``\operatorname{exp}_p(v) = p + v``.
+If ``m = 0`` and ``ν t < λ``, then ``\operatorname{exp}_p(v) = p + v``.
 
 For a proof, see proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
 exp(M::Segre{ℝ,V}, p, v) where {V}
 
-function exp!(M::Segre{ℝ,V}, q, p, v) where {V}
+function exp!(::Segre{ℝ,V}, q, p, v) where {V}
     m = sqrt(
         sum([
             norm(Sphere(n - 1), x, xdot)^2 for (n, x, xdot) in zip(V, p[2:end], v[2:end])
@@ -364,20 +387,24 @@ end
 
 Logarithmic map on the Segre manifold.
 
-Let ``p \doteq (\lambda, x_1, \dots, x_d)``, ``q \doteq (\mu, y_1, \dots, y_d) \in \mathcal{S}``.
+Let ``p ≐ (λ, x_1, …, x_d)``, ``q ≐ (μ, y_1, …, y_d) ∈ \mathcal{S}``.
 Assume ``p`` and ``q`` are connected by a geodesic.
+
 Let
+
 ````math
-    m = \sqrt{\sphericalangle(x_1, y_1)^2 + \dots + \sphericalangle(x_d, y_d)^2}
+    m = \sqrt{\sphericalangle(x_1, y_1)^2 + … + \sphericalangle(x_d, y_d)^2}
 ````
-and assume ``(\mu, y_1, \dots, y_d)`` is the representation of ``q`` that minimizes ``m``. Then
+
+and assume ``(μ, y_1, …, y_d)`` is the representation of ``q`` that minimizes ``m``. Then
+
 ````math
     \operatorname{log}_p(q) =
     c \left(
-        \frac{\lambda m \mathopen{\Big(} \operatorname{cos}(m) - \frac{\lambda}{\mu} \mathclose{\Big)}}{\operatorname{sin}(m)},
-        \frac{\sphericalangle(x_1, y_1) (y_1 - \langle x_1, y_1 \rangle x_1)}{\sin(\sphericalangle(x_1, y_1))},
+        \frac{λ m \mathopen{\Big(} \operatorname{cos}(m) - \frac{λ}{μ} \mathclose{\Big)}}{\operatorname{sin}(m)},
+        \frac{\sphericalangle(x_1, y_1) (y_1 - ⟨x_1, y_1⟩ x_1)}{\sin(\sphericalangle(x_1, y_1))},
         \dots,
-        \frac{\sphericalangle(x_d, y_d) (y_d - \langle x_d, y_d \rangle x_d)}{\sin(\sphericalangle(x_d, y_d))}
+        \frac{\sphericalangle(x_d, y_d) (y_d - ⟨x_d, y_d⟩ x_d)}{\sin(\sphericalangle(x_d, y_d))}
     \right),
 ````
 where ``c`` is determined by ``\lVert \operatorname{log}_p(q) \rVert_{p} = \operatorname{dist}(p, q)``.
@@ -404,13 +431,16 @@ end
 
 Riemannian distance between two points `p` and `q` on the Segre manifold.
 
-Assume ``p \doteq (\lambda, x_1, \dots, x_d)``, ``q \doteq (\mu, y_1, \dots, y_d) \in \mathcal{S}`` are connected by a geodesic. Let
+Assume ``p ≐ (λ, x_1, …, x_d)``, ``q ≐ (μ, y_1, …, y_d) ∈ \mathcal{S}`` are connected by a geodesic. Let
+
 ````math
-    m = \sqrt{\sphericalangle(x_1, y_1)^2 + \dots + \sphericalangle(x_d, y_d)^2}
+    m = \sqrt{\sphericalangle(x_1, y_1)^2 + … + \sphericalangle(x_d, y_d)^2}
 ````
-and assume ``(\mu, y_1, \dots, y_d)`` is the representation of ``q`` that minimizes ``m``. Then
+
+and assume ``(μ, y_1, …, y_d)`` is the representation of ``q`` that minimizes ``m``. Then
+
 ````math
-    \operatorname{dist}_{\mathcal{S}}(p, q) = \sqrt{\lambda^2 - 2 \lambda \mu \cos(m) + \mu^2}.
+    \operatorname{dist}_{\mathcal{S}}(p, q) = \sqrt{λ^2 - 2 λμ\cos(m) + μ^2}.
 ````
 """
 function distance(M::Segre{ℝ,V}, p, q) where {V}
@@ -426,11 +456,13 @@ end
 
 Riemann tensor of the Segre manifold at ``p``.
 
-``\mathcal{S}`` is locally a warped product of ``ℝ^{+}`` and ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``.
-If ``p \doteq (\lambda, x_1, \dots, x_d) \in \mathcal{S}`` and ``u``, ``v``, ``w \in T_p (S^{n_1 - 1} \times \dots \times S^{n_d - 1}) \subset T_p \mathcal{S}`` then
+``\mathcal{S}`` is locally a warped product of ``ℝ^{+}`` and ``S^{n_1 - 1} ×⋯× S^{n_d - 1}``.
+If ``p ≐ (λ, x_1, …, x_d) ∈ \mathcal{S}`` and ``u``, ``v``, ``w ∈ T_p (S^{n_1 - 1} ×⋯× S^{n_d - 1}) ⊂ T_p \mathcal{S}``, then
+
 ````math
-    R_{\mathcal{S}}(u, v) w = R_{S^{n_1 - 1} \times \dots \times S^{n_d - 1}}(u, v) w + \lambda^{-2}(\langle u, w \rangle_p v - \langle v, w \rangle_p u).
+    R_{\mathcal{S}}(u, v) w = R_{S^{n_1 - 1} ×⋯× S^{n_d - 1}}(u, v) w + λ^{-2}(⟨u,w⟩_p v - ⟨v,w⟩_p u).
 ````
+
 ``R_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
 """
 function riemann_tensor(M::Segre{ℝ,V}, p, u, v, w) where {V}
@@ -452,11 +484,13 @@ end
 
 Sectional curvature of the Segre manifold at ``p``.
 
-``\mathcal{S}`` is locally a warped product of ``ℝ^{+}`` and ``S^{n_1 - 1} \times \dots \times S^{n_d - 1}``
-If ``p \doteq (\lambda, x_1, \dots, x_d) \in \mathcal{S}``, ``u_i \in T_{x_i} S^{n_i - 1}``, and ``v_j \in T_{x_j} S^{n_j - 1}``, then
+``\mathcal{S}`` is locally a warped product of ``ℝ^{+}`` and ``S^{n_1 - 1} ×⋯× S^{n_d - 1}``
+If ``p ≐ (λ, x_1, …, x_d) ∈ \mathcal{S}``, ``u_i ∈ T_{x_i} S^{n_i - 1}``, and ``v_j ∈ T_{x_j} S^{n_j - 1}``, then
+
 ````math
     K_{\mathcal{S}}(u_i, v_j) = \frac{\delta_{i j} - 1}{\lambda^2}.
 ````
+
 ``K_{\mathcal{S}}`` is zero in the remaining (orthogonal) directions.
 """
 function sectional_curvature(M::Segre{ℝ,V}, p, u, v) where {V}

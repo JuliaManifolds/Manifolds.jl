@@ -1509,7 +1509,7 @@ Xs = [
 
 for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
     @testset "Manifold $M" begin
-        @testset "is_point()" begin
+        @testset "is_point" begin
             @test(is_point(M, p))
             @test(is_point(M, q))
             @test_throws DomainError is_point(M, [[1.0, 0.0], p[2:end]...], true)
@@ -1517,7 +1517,7 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
             @test_throws DomainError is_point(M, [p[1], 2 * p[2:end]...], true)
         end
 
-        @testset "is_vector()" begin
+        @testset "is_vector" begin
             @test(is_vector(M, p, v))
             @test(is_vector(M, p, u))
             @test_throws DomainError is_vector(M, [[1.0, 0.0], p[2:end]...], v, false, true)
@@ -1526,16 +1526,16 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
         end
 
         Random.seed!(1)
-        @testset "rand()" begin
+        @testset "rand" begin
             @test(is_point(M, rand(M)))
             @test(is_vector(M, p, rand(M, vector_at=p)))
         end
 
-        @testset "get_embedding()" begin
+        @testset "get_embedding" begin
             @test(get_embedding(M) == Euclidean(prod(V)))
         end
 
-        @testset "embed!()" begin
+        @testset "embed!" begin
             p_ = zeros(prod(V))
             p__ = zeros(prod(V))
             embed!(M, p_, p)
@@ -1545,7 +1545,7 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
         end
 
         # ManifoldsBase doesn't export embed_vector! right now
-        # @testset "embed_vector!()" begin
+        # @testset "embed_vector!" begin
         #     p_ = zeros(prod(V))
         #     v_ = zeros(prod(V))
         #     embed!(M, p_, p)
@@ -1553,7 +1553,7 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
         #     @test(is_vector(get_embedding(M), p_, v_))
         # end
 
-        @testset "get_coordinates()" begin
+        @testset "get_coordinates" begin
             @test(isapprox(v, get_vector(M, p, get_coordinates(M, p, v))))
             @test(isapprox(X, get_coordinates(M, p, get_vector(M, p, X))))
             @test(
@@ -1564,7 +1564,7 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
             )
         end
 
-        @testset "exp()" begin
+        @testset "exp" begin
             # Zero vector
             p_ = exp(M, p, zeros.(size.(v)))
             @test(is_point(M, p_))
@@ -1575,7 +1575,7 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
             @test(is_point(M, p_))
             @test(isapprox([p[1] + v[1], p[2:end]...], p_; atol=1e-5))
 
-            # Generic tangent vector 
+            # Generic tangent vector
             p_ = exp(M, p, v)
             @test(is_point(M, p))
 
@@ -1641,7 +1641,7 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
             @test(central_fdm(3, 2)(f, 0.0) >= 0.0)
         end
 
-        @testset "log()" begin
+        @testset "log" begin
             # Same point
             v_ = log(M, p, p)
             @test(is_vector(M, p, v_))
@@ -1657,11 +1657,11 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
             @test(is_vector(M, p, v_))
         end
 
-        @testset "norm()" begin
+        @testset "norm" begin
             @test(isapprox(norm(M, p, log(M, p, q)), distance(M, p, q)))
         end
 
-        @testset "sectional_curvature()" begin
+        @testset "sectional_curvature" begin
             # Test that sectional curvature is difference between circumference
             # and 2 pi r for small circles.
 
@@ -1682,7 +1682,7 @@ for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
             @test(isapprox(K, sectional_curvature(M, p, u, v); rtol=1e-2, atol=1e-2))
         end
 
-        @testset "riemann_tensor()" begin
+        @testset "riemann_tensor" begin
             @test(
                 isapprox(
                     sectional_curvature(M, p, u, v),
