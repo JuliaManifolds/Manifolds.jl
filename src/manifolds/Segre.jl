@@ -127,6 +127,23 @@ function embed!(M::Segre, q, p)
 end
 
 @doc raw"""
+    embed!(M::Segre{𝔽, V}, p, v)
+
+Embed tangent vector ``v = (ν, u_1, …, u_d)`` at ``p ≐ (λ, x_1, …, x_d)`` in ``𝔽^{n_1 ×⋯× n_d}`` using the Kronecker product:
+
+````math
+    (ν, u_1, …, u_d) ↦ ν x_1 ⊗⋯⊗ x_d + λ u_1 ⊗ x_2 ⊗⋯⊗ x_d + … + λ x_1 ⊗⋯⊗ x_{d - 1} ⊗ u_d.
+````
+"""
+function embed!(::Segre{𝔽,V}, u, p, v) where {𝔽,V}
+    # Product rule
+    return u = sum([
+        kron([i == j ? xdot : x for (j, (x, xdot)) in enumerate(zip(p, v))]...) for
+        (i, _) in enumerate(p)
+    ])
+end
+
+@doc raw"""
     function get_coordinates(M::Segre{𝔽, V}, p, v, ::DefaultOrthonormalBasis; kwargs...)
 
 Get coordinates of `v` in the tangent space
@@ -232,24 +249,6 @@ end
 function get_embedding(::Segre{𝔽,V}) where {𝔽,V}
     return Euclidean(prod(V))
 end
-
-# ManifoldsBase doesn't export embed_vector! right now
-# @doc raw"""
-#     function embed_vector(M::Segre{𝔽, V}, p, v)
-
-# Embed tangent vector ``v = (\nu, u_1, \dots, u_d)`` at ``p \doteq (\lambda, x_1, \dots, x_d)`` in ``𝔽^{n_1 \times \dots \times n_d}`` using the Krönecker product:
-# ````math
-#     (\nu, u_1, \dots, u_d) \mapsto \nu x_1 \otimes \dots \otimes x_d + \lambda u_1 \otimes x_2 \otimes \dots \otimes x_d + \dots + \lambda x_1 \otimes \dots \otimes x_{d - 1} \otimes u_d.
-# ````
-# """
-# function embed_vector!(M::Segre{𝔽,V}, u, p, v) where {𝔽,V}
-
-#     # Product rule
-#     return u = sum([
-#         kron([i == j ? xdot : x for (j, (x, xdot)) in enumerate(zip(p, v))]...) for
-#         (i, _) in enumerate(p)
-#     ])
-# end
 
 @doc raw"""
     function spherical_angle_sum(M::Segre{ℝ, V}, p, q)

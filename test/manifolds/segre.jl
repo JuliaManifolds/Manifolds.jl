@@ -632,8 +632,8 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
     for (M, V, p, q, v, u, dy, X) in zip(Ms, Vs, ps, qs, vs, us, dys, Xs)
         @testset "Manifold $M" begin
             @testset "is_point" begin
-                @test(is_point(M, p))
-                @test(is_point(M, q))
+                @test is_point(M, p)
+                @test is_point(M, q)
                 @test_throws DomainError is_point(
                     M,
                     [[1.0, 0.0], p[2:end]...];
@@ -644,8 +644,8 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
             end
 
             @testset "is_vector" begin
-                @test(is_vector(M, p, v; error=:error))
-                @test(is_vector(M, p, u; error=:error))
+                @test is_vector(M, p, v; error=:error)
+                @test is_vector(M, p, u; error=:error)
                 @test_throws DomainError is_vector(
                     M,
                     [[1.0, 0.0], p[2:end]...],
@@ -665,76 +665,71 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
             Random.seed!(1)
             @testset "rand" begin
-                @test(is_point(M, rand(M)))
-                @test(is_vector(M, p, rand(M, vector_at=p)))
+                @test is_point(M, rand(M))
+                @test is_vector(M, p, rand(M, vector_at=p))
             end
 
             @testset "get_embedding" begin
-                @test(get_embedding(M) == Euclidean(prod(V)))
+                @test get_embedding(M) == Euclidean(prod(V))
             end
 
             @testset "embed!" begin
+                # points
                 p_ = zeros(prod(V))
                 p__ = zeros(prod(V))
                 embed!(M, p_, p)
                 embed!(M, p__, [p[1], [-x for x in p[2:end]]...])
-                @test(is_point(get_embedding(M), p_))
-                @test(isapprox(p_, (-1)^length(V) * p__))
+                @test is_point(get_embedding(M), p_)
+                @test isapprox(p_, (-1)^length(V) * p__)
+
+                # vectors
+                v_ = zeros(prod(V))
+                embed!(M, v_, p, v)
+                @test is_vector(get_embedding(M), p_, v_)
             end
 
-            # ManifoldsBase doesn't export embed_vector! right now
-            # @testset "embed_vector!" begin
-            #     p_ = zeros(prod(V))
-            #     v_ = zeros(prod(V))
-            #     embed!(M, p_, p)
-            #     embed_vector!(M, v_, p, v)
-            #     @test(is_vector(get_embedding(M), p_, v_))
-            # end
-
             @testset "get_coordinates" begin
-                @test(isapprox(v, get_vector(M, p, get_coordinates(M, p, v))))
-                @test(isapprox(X, get_coordinates(M, p, get_vector(M, p, X))))
-                @test(
-                    isapprox(
-                        dot(X, get_coordinates(M, p, v)),
-                        inner(M, p, v, get_vector(M, p, X)),
-                    )
+                @test isapprox(v, get_vector(M, p, get_coordinates(M, p, v)))
+                @test isapprox(X, get_coordinates(M, p, get_vector(M, p, X)))
+                @test isapprox(
+                    dot(X, get_coordinates(M, p, v)),
+                    inner(M, p, v, get_vector(M, p, X)),
                 )
             end
 
             @testset "exp" begin
                 # Zero vector
                 p_ = exp(M, p, zeros.(size.(v)))
-                @test(is_point(M, p_))
-                @test(isapprox(p, p_; atol=1e-5))
+                @test is_point(M, p_)
+                @test isapprox(p, p_; atol=1e-5)
 
                 # Tangent vector in the scaling direction
                 p_ = exp(M, p, [v[1], zeros.(size.(v[2:end]))...])
-                @test(is_point(M, p_))
-                @test(isapprox([p[1] + v[1], p[2:end]...], p_; atol=1e-5))
+                @test is_point(M, p_)
+                @test isapprox([p[1] + v[1], p[2:end]...], p_; atol=1e-5)
 
                 # Generic tangent vector
                 p_ = exp(M, p, v)
-                @test(is_point(M, p))
+                @test is_point(M, p)
 
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * v)), -1.0)
-                @test(isapprox(geodesic_speed, -norm(M, p, v); atol=1e-5))
+                @test isapprox(geodesic_speed, -norm(M, p, v); atol=1e-5)
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * v)), -0.811)
-                @test(isapprox(geodesic_speed, -norm(M, p, v); atol=1e-5))
+                @test isapprox(geodesic_speed, -norm(M, p, v); atol=1e-5)
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * v)), -0.479)
-                @test(isapprox(geodesic_speed, -norm(M, p, v); atol=1e-5))
+                @test isapprox(geodesic_speed, -norm(M, p, v); atol=1e-5)
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * v)), 0.181)
-                @test(isapprox(geodesic_speed, norm(M, p, v); atol=1e-5))
+                @test isapprox(geodesic_speed, norm(M, p, v); atol=1e-5)
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * v)), 0.703)
-                @test(isapprox(geodesic_speed, norm(M, p, v); atol=1e-5))
+                @test isapprox(geodesic_speed, norm(M, p, v); atol=1e-5)
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * v)), 1.0)
-                @test(isapprox(geodesic_speed, norm(M, p, v); atol=1e-5))
+                @test isapprox(geodesic_speed, norm(M, p, v); atol=1e-5)
 
                 # Geodesics are (locally) length-minizing. So let B_a be a one-parameter
                 # family of curves such that B_0 is a geodesic. Then the derivative of
@@ -782,28 +777,28 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
                 # dy = rand(4 * n); dy = dy / norm(dy)
                 f = a -> curve_length(a * dy)
-                @test(isapprox(central_fdm(3, 1)(f, 0.0), 0.0; atol=1e-5))
-                @test(central_fdm(3, 2)(f, 0.0) >= 0.0)
+                @test isapprox(central_fdm(3, 1)(f, 0.0), 0.0; atol=1e-5)
+                @test central_fdm(3, 2)(f, 0.0) >= 0.0
             end
 
             @testset "log" begin
                 # Same point
                 v_ = log(M, p, p)
-                @test(is_vector(M, p, v_))
-                @test(isapprox(zeros.(size.(v)), v_; atol=1e-5))
+                @test is_vector(M, p, v_)
+                @test isapprox(zeros.(size.(v)), v_; atol=1e-5)
 
                 # Scaled point
                 v_ = log(M, p, [q[1], p[2:end]...])
-                @test(is_vector(M, p, v_))
-                @test(isapprox(v_, [q[1] - p[1], zeros.(size.(q[2:end]))...]; atol=1e-5))
+                @test is_vector(M, p, v_)
+                @test isapprox(v_, [q[1] - p[1], zeros.(size.(q[2:end]))...]; atol=1e-5)
 
                 # Generic tangent vector
                 v_ = log(M, p, q)
-                @test(is_vector(M, p, v_))
+                @test is_vector(M, p, v_)
             end
 
             @testset "norm" begin
-                @test(isapprox(norm(M, p, log(M, p, q)), distance(M, p, q)))
+                @test isapprox(norm(M, p, log(M, p, q)), distance(M, p, q))
             end
 
             @testset "sectional_curvature" begin
@@ -824,16 +819,14 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 C = sum(ds)
                 K = 3 * (2 * pi * r - C) / (pi * r^3) # https://en.wikipedia.org/wiki/Bertrand%E2%80%93Diguet%E2%80%93Puiseux_theorem
 
-                @test(isapprox(K, sectional_curvature(M, p, u, v); rtol=1e-2, atol=1e-2))
+                @test isapprox(K, sectional_curvature(M, p, u, v); rtol=1e-2, atol=1e-2)
             end
 
             @testset "riemann_tensor" begin
-                @test(
-                    isapprox(
-                        sectional_curvature(M, p, u, v),
-                        inner(M, p, riemann_tensor(M, p, u, v, v), u) /
-                        (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2),
-                    )
+                @test isapprox(
+                    sectional_curvature(M, p, u, v),
+                    inner(M, p, riemann_tensor(M, p, u, v, v), u) /
+                    (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2),
                 )
             end
         end
