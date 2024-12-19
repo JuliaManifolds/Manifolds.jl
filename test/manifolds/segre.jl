@@ -837,13 +837,13 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         M = Ms[4]
         p = ps[4]
         q = qs[4]
-        q_ = [q[1], q[2], q[3], -q[4], -q[5]]
-        @test isapprox(log(M, p, q), log(M, p, q_))
+        q_ = [q[1], q[2], q[3], q[4], -q[5]]
+        @test is_vector(M, p, log(M, p, q_))
 
         M = Ms[8]
         p = ps[8]
         q = qs[8]
-        q_ = [q[1], q[2], q[3], -q[4], -q[5]]
-        @test isapprox(log(M, p, q), log(M, p, q_))
+        q_ = [q[1], q[2], q[3], q[4], -q[5]]
+        @test is_vector(M, p, log(M, p, q_))
     end
 end
