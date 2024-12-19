@@ -10,7 +10,7 @@ Pages = ["manifolds/Segre.jl"]
 Order = [:function]
 ```
 
-## A warped metric
+## [A warped metric](@id segre-warped-metric-sec)
 
 ```@docs
 WarpedMetric

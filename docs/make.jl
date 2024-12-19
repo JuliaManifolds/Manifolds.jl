@@ -201,7 +201,7 @@ makedocs(;
                 "Projective space" => "manifolds/projectivespace.md",
                 "Orthogonal and Unitary Matrices" => "manifolds/generalunitary.md",
                 "Rotations" => "manifolds/rotations.md",
-                "Segre-Veronese" => "manifolds/segre.md",
+                "Segre" => "manifolds/segre.md",
                 "Shape spaces" => "manifolds/shapespace.md",
                 "Skew-Hermitian matrices" => "manifolds/skewhermitian.md",
                 "Spectrahedron" => "manifolds/spectrahedron.md",
