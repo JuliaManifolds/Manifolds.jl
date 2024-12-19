@@ -7,10 +7,10 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         Segre(7, 2),
         Segre(7, 9, 9),
         Segre(9, 3, 6, 6),
-        MetricManifold(Segre(10), WarpedMetric{1.2025837056880606}()),
-        MetricManifold(Segre(2, 9), WarpedMetric{1.1302422072971439}()),
-        MetricManifold(Segre(9, 6, 10), WarpedMetric{1.4545138169484464}()),
-        MetricManifold(Segre(9, 3, 8, 10), WarpedMetric{1.396673190458706}()),
+        MetricManifold(Segre(10), WarpedMetric(1.2025837056880606)),
+        MetricManifold(Segre(2, 9), WarpedMetric(1.1302422072971439)),
+        MetricManifold(Segre(9, 6, 10), WarpedMetric(1.4545138169484464)),
+        MetricManifold(Segre(9, 3, 8, 10), WarpedMetric(1.396673190458706)),
     ]
 
     # Vs[i] is the valence of Ms[i]
@@ -830,5 +830,20 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 )
             end
         end
+    end
+
+    # Test a point that does not use the closest representative
+    @testset "log" begin
+        M = Ms[4]
+        p = ps[4]
+        q = qs[4]
+        q_ = [q[1], q[2], q[3], -q[4], -q[5]]
+        @test isapprox(log(M, p, q), log(M, p, q_))
+
+        M = Ms[8]
+        p = ps[8]
+        q = qs[8]
+        q_ = [q[1], q[2], q[3], -q[4], -q[5]]
+        @test isapprox(log(M, p, q), log(M, p, q_))
     end
 end
