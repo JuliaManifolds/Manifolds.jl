@@ -33,9 +33,7 @@ function Segre(n::Int...; field::AbstractNumbers=ℝ)
     return Segre{field,(n...,)}()
 end
 
-manifold_dimension(::Segre{𝔽,V}) where {𝔽,V} = (1 + sum(V .- 1))
-
-function check_size(M::Segre{𝔽,V}, p;) where {𝔽,V}
+function check_size(M::Segre{𝔽,V}, p) where {𝔽,V}
     p_size = only.(size.(p))
     M_size = [1, V...]
 
@@ -71,213 +69,8 @@ function check_size(M::Segre{𝔽,V}, p, v;) where {𝔽,V}
     return nothing
 end
 
-"""
-    is_point(M::Segre{ℝ, V}, p; kwargs...)
-
-Check whether `p` is a valid point on `M`, i.e. `p[1]` is a singleton containing a positive number and `p[i + 1]` is a point on `Sphere(V[i])`. The tolerance can be set using the `kwargs...`.
-"""
-is_point(M::Segre{ℝ,V}, p; kwargs...) where {V}
-
-function check_point(M::Segre{ℝ,V}, p; atol=1.4901161193847656e-8, kwargs...) where {V}
-    if p[1][1] <= 0.0
-        return DomainError(p[1][1], "$(p) has non-positive modulus.")
-    end
-
-    for (x, n) in zip(p[2:end], V)
-        e = check_point(Sphere(n - 1)::AbstractSphere, x; atol=atol, kwargs...)
-        if !isnothing(e)
-            return e
-        end
-    end
-end
-
-"""
-    function is_vector(M::Segre{ℝ, V}, p, v, kwargs...)
-
-Check whether `v` is a tangent vector to `p` on `M`, i.e. `v` has to be of same dimension as `p` and orthogonal to `p`. The tolerance can be set using the `kwargs...`.
-"""
-is_vector(M::Segre{ℝ,V}, p, v; kwargs...) where {V}
-
-function check_vector(M::Segre{ℝ,V}, p, v; atol=1.4901161193847656e-8, kwargs...) where {V}
-    for (x, xdot, n) in zip(p[2:end], v[2:end], V)
-        e = check_vector(Sphere(n - 1)::AbstractSphere, x, xdot; atol=atol, kwargs...)
-        if !isnothing(e)
-            return e
-        end
-    end
-end
-
 @doc raw"""
-    function embed(M::Segre{𝔽, V}, p)
-    function embed!(M::Segre{𝔽, V}, q, p)
-
-Embed ``p ≐ (λ, x_1, …, x_d)`` in ``𝔽^{n_1 ×⋯× n_d}`` using the Kronecker product:
-````math
-    (λ, x_1, …, x_d) ↦ λ x_1 ⊗⋯⊗ x_d.
-````
-"""
-embed(::Segre, p)
-
-function embed!(M::Segre, q, p)
-    return q = kron(p...)
-end
-
-@doc raw"""
-    embed!(M::Segre{𝔽, V}, p, v)
-
-Embed tangent vector ``v = (ν, u_1, …, u_d)`` at ``p ≐ (λ, x_1, …, x_d)`` in ``𝔽^{n_1 ×⋯× n_d}`` using the Kronecker product:
-
-````math
-    (ν, u_1, …, u_d) ↦ ν x_1 ⊗⋯⊗ x_d + λ u_1 ⊗ x_2 ⊗⋯⊗ x_d + … + λ x_1 ⊗⋯⊗ x_{d - 1} ⊗ u_d.
-````
-"""
-function embed!(::Segre{𝔽,V}, u, p, v) where {𝔽,V}
-    # Product rule
-    return u = sum([
-        kron([i == j ? xdot : x for (j, (x, xdot)) in enumerate(zip(p, v))]...) for
-        (i, _) in enumerate(p)
-    ])
-end
-
-@doc raw"""
-    function get_coordinates(M::Segre{𝔽, V}, p, v, ::DefaultOrthonormalBasis; kwargs...)
-
-Get coordinates of `v` in the tangent space
-``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} S^{n_1 - 1} ×…× T_{x_d} S^{n_d - 1}``
-using a `DefaultOrthonormalBasis` on each factor.
-"""
-get_coordinates(M::Segre, p, v, ::DefaultOrthonormalBasis; kwargs...)
-
-function get_coordinates_orthonormal!(
-    M::Segre{ℝ,V},
-    X,
-    p,
-    v,
-    ::RealNumbers;
-    kwargs...,
-) where {V}
-    return X = vcat(
-        v[1],
-        p[1][1] * [
-            get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis(); kwargs...) for (n, x, xdot) in zip(V, p[2:end], v[2:end])
-        ]...,
-    )
-end
-
-@doc raw"""
-    function get_vector( M::Segre{𝔽, V}, p, X, DefaultOrthonormalBasis; kwargs...)
-
-Get tangent vector `v` from coordinates in the tangent space
-``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} S^{n_1 - 1} ×⋯× T_{x_d} S^{n_d - 1}``
-using `DefaultOrthonormalBasis` on each factor.
-"""
-get_vector(M::Segre, p, X, ::DefaultOrthonormalBasis; kwargs...)
-
-function get_vector_orthonormal!(M::Segre{ℝ,V}, v, p, X, ::RealNumbers; kwargs...) where {V}
-    X_ = deepcopy(X)
-    v[1] = [X_[1]]
-    X_ = X_[2:end]
-    for (i, n) in enumerate(V)
-        v[i + 1] =
-            get_vector(
-                Sphere(n - 1),
-                p[i + 1],
-                X_[1:(n - 1)],
-                DefaultOrthonormalBasis();
-                kwargs...,
-            ) / p[1][1]
-        X_ = X_[n:end]
-    end
-    return v
-end
-
-@doc raw"""
-    function inner(M::Segre{ℝ, V}, p, u, v,)
-
-Inner product between two tangent vectors ``u = (ν, u_1, …, u_d)`` and ``v = (ξ, v_1, …, v_d)`` at ``p ≐ (λ, x_1, \dots, x_d)``.
-This inner product is obtained by embedding the Segre manifold in the space of tensors equipped with the Euclidean metric:
-
-````math
-    \langle u, v \rangle_{p} = \nu \xi + \lambda^2 (\langle u_1, v_1 \rangle_{x_1} + \dots + \langle u_d, v_d \rangle_{x_d}),
-````
-
-where ``ν, ξ ∈ T_{λ} ℝ^{+} = ℝ`` and ``u_i``, ``v_i ∈ T_{x_i} S^{n_i - 1} ⊂ ℝ^{n_i}``.
-"""
-function inner(::Segre{ℝ}, p, u, v)
-    return u[1][1] * v[1][1] + p[1][1]^2 * dot(u[2:end], v[2:end])
-end
-
-@doc raw"""
-    function rand(M::Segre{ℝ, V}; vector_at=nothing)
-
-If `vector_at` is `nothing`, return a random point on
-
-````math
-    ℝ^{+} × S^{n_1 - 1} ×⋯× S^{n_d - 1}
-````
-
-from a log-normal distribution on ℝ^{+} and a uniform distribution on ``S^{n_1 - 1} ×⋯× S^{n_d - 1}``.
-
-If `vector_at` is not `nothing`, return a random tangent vector from a normal distribution on the tangent space.
-"""
-function rand(M::Segre{ℝ,V}; vector_at=nothing, kwargs...) where {V}
-    if isnothing(vector_at)
-        return [
-            rand(PositiveArrays(1); kwargs...),
-            [rand(Sphere(n - 1); kwargs...) for n in V]...,
-        ]
-    else
-        return [
-            rand(PositiveArrays(1); vector_at=vector_at[1], kwargs...),
-            [
-                rand(Sphere(n - 1); vector_at=xdot, kwargs...) for
-                (xdot, n) in zip(vector_at[2:end], V)
-            ]...,
-        ]
-    end
-end
-
-@doc raw"""
-    function get_embedding(M::Segre{𝔽,V})
-
-``\mathcal{S}`` is embedded in ``𝔽^{n_1 ×⋯× n_d}``.
-"""
-function get_embedding(::Segre{𝔽,V}) where {𝔽,V}
-    return Euclidean(prod(V))
-end
-
-@doc raw"""
-    function spherical_angle_sum(M::Segre{ℝ, V}, p, q)
-
-Let ``p ≐ (λ, x_1, …, x_d)``, ``q ≐ (μ, y_1, …, y_d) ∈ \mathcal{S}``.
-Then this is
-
-````math
-    \sqrt{\sphericalangle(x_1, y_1)^2 + … + \sphericalangle(x_d, y_d)^2},
-````
-
-where ``\sphericalangle(x_i, y_i)`` is the distance between ``x_i`` and ``y_i`` on the sphere ``S^{n_i - 1}``.
-
-"""
-function spherical_angle_sum(::Segre{ℝ,V}, p, q) where {V}
-    return sqrt(
-        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
-    )
-end
-
-@doc raw"""
-    function connected_by_geodesic(M::Segre{ℝ, V}, p, q)
-
-``\mathcal{S}`` is not a complete manifold, i.e. not every pair `p` and `q` of points are connected by a geodesic in ``\mathcal{S}``.
-`connected_by_geodesic(M, p, q)` returns `true` if two points, `p` and `q`, are connected by a geodesic, and otherwise returns `false`.
-"""
-function connected_by_geodesic(M::Segre{ℝ,V}, p, q) where {V}
-    closest_representative!(M, q, p)
-    return spherical_angle_sum(M, p, q) < pi
-end
-
-@doc raw"""
-    function closest_representative!(M::Segre{ℝ, V}, p, q)
+    closest_representative!(M::Segre{ℝ, V}, p, q)
 
 ``\mathcal{S}`` is a ``2^d``-sheeted Riemannian covering of
 ````math
@@ -320,12 +113,118 @@ function closest_representative!(M::Segre{ℝ,V}, q, p) where {V}
 end
 
 @doc raw"""
-    function exp(M::Segre{ℝ, V}, p, v)
+    connected_by_geodesic(M::Segre{ℝ, V}, p, q)
+
+``\mathcal{S}`` is not a complete manifold, i.e. not every pair `p` and `q` of points are connected by a geodesic in ``\mathcal{S}``.
+`connected_by_geodesic(M, p, q)` returns `true` if two points, `p` and `q`, are connected by a geodesic, and otherwise returns `false`.
+"""
+function connected_by_geodesic(M::Segre{ℝ,V}, p, q) where {V}
+    closest_representative!(M, q, p)
+    return spherical_angle_sum(M, p, q) < pi
+end
+
+@doc raw"""
+    embed(M::Segre{𝔽, V}, p)
+    embed!(M::Segre{𝔽, V}, q, p)
+
+Embed ``p ≐ (λ, x_1, …, x_d)`` in ``𝔽^{n_1 ×⋯× n_d}`` using the Kronecker product
+
+````math
+    (λ, x_1, …, x_d) ↦ λ x_1 ⊗⋯⊗ x_d.
+````
+"""
+embed(::Segre, p)
+
+function embed!(M::Segre, q, p)
+    return q = kron(p...)
+end
+
+@doc raw"""
+    embed!(M::Segre{𝔽, V}, p, v)
+
+Embed tangent vector ``v = (ν, u_1, …, u_d)`` at ``p ≐ (λ, x_1, …, x_d)`` in ``𝔽^{n_1 ×⋯× n_d}`` using the Kronecker product
+
+````math
+    (ν, u_1, …, u_d) ↦ ν x_1 ⊗⋯⊗ x_d + λ u_1 ⊗ x_2 ⊗⋯⊗ x_d + … + λ x_1 ⊗⋯⊗ x_{d - 1} ⊗ u_d.
+````
+"""
+function embed!(::Segre{𝔽,V}, u, p, v) where {𝔽,V}
+    # Product rule
+    return u = sum([
+        kron([i == j ? xdot : x for (j, (x, xdot)) in enumerate(zip(p, v))]...) for
+        (i, _) in enumerate(p)
+    ])
+end
+
+"""
+    is_point(M::Segre{ℝ, V}, p; kwargs...)
+
+Check whether `p` is a valid point on `M`, i.e. `p[1]` is a singleton containing a positive number and `p[i + 1]` is a point on `Sphere(V[i])`.
+The tolerance can be set using the `kwargs...`.
+"""
+is_point(M::Segre{ℝ,V}, p; kwargs...) where {V}
+
+function check_point(M::Segre{ℝ,V}, p; atol=1.4901161193847656e-8, kwargs...) where {V}
+    if p[1][1] <= 0.0
+        return DomainError(p[1][1], "$(p) has non-positive modulus.")
+    end
+
+    for (x, n) in zip(p[2:end], V)
+        e = check_point(Sphere(n - 1)::AbstractSphere, x; atol=atol, kwargs...)
+        if !isnothing(e)
+            return e
+        end
+    end
+end
+
+"""
+    is_vector(M::Segre{ℝ, V}, p, v, kwargs...)
+
+Check whether `v` is a tangent vector to `p` on `M`, i.e. `v` has to be of same dimension as `p` and orthogonal to `p`.
+The tolerance can be set using the `kwargs...`.
+"""
+is_vector(M::Segre{ℝ,V}, p, v; kwargs...) where {V}
+
+function check_vector(M::Segre{ℝ,V}, p, v; atol=1.4901161193847656e-8, kwargs...) where {V}
+    for (x, xdot, n) in zip(p[2:end], v[2:end], V)
+        e = check_vector(Sphere(n - 1)::AbstractSphere, x, xdot; atol=atol, kwargs...)
+        if !isnothing(e)
+            return e
+        end
+    end
+end
+
+@doc raw"""
+    distance(M::Segre{ℝ, V}, p, q)
+
+Riemannian distance between two points `p` and `q` on the Segre manifold.
+
+Assume ``p ≐ (λ, x_1, …, x_d)``, ``q ≐ (μ, y_1, …, y_d) ∈ \mathcal{S}`` are connected by a geodesic. Let
+
+````math
+    m = \sqrt{\sphericalangle(x_1, y_1)^2 + … + \sphericalangle(x_d, y_d)^2}
+````
+
+and assume ``(μ, y_1, …, y_d)`` is the representation of ``q`` that minimizes ``m``. Then
+
+````math
+    \operatorname{dist}_{\mathcal{S}}(p, q) = \sqrt{λ^2 - 2 λμ\cos(m) + μ^2}.
+````
+"""
+function distance(M::Segre{ℝ,V}, p, q) where {V}
+    closest_representative!(M, q, p)
+    m = spherical_angle_sum(M, p, q)
+    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(m / 2)^2)
+    # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(m)) but more stable for small m
+end
+
+@doc raw"""
+    exp(M::Segre{ℝ, V}, p, v)
 
 Exponential map on the Segre manifold.
 
 Let ``p ≐ (λ, x_1, …, x_d) ∈ \mathcal{S}`` and ``v = (ν, u_1, …, u_d) ∈ T_p \mathcal{S}``.
-Then
+The exponential map is given by
 
 ````math
     \operatorname{exp}_p(v) ≐
@@ -340,11 +239,14 @@ Then
 where
 
 ````math
-    g = \tan^{-1}\mathopen{\Big(} t \frac{\sqrt{P^2 + 1}}{λ} + P \mathclose{\Big)} - \tan^{-1}(P),\\
-    m = \sqrt{\lVert u_1 \rVert_{x_1}^2 + … + \lVert u_d \rVert_{x_d}^2},\\
-    P = \frac{\nu}{λ m},\\
-    t = \lVert v \rVert_{p}.
+    \begin{aligned}
+        g &= \tan^{-1}\mathopen{\Big(} t \frac{\sqrt{P^2 + 1}}{λ} + P \mathclose{\Big)} - \tan^{-1}(P),\\
+        m &= \sqrt{\lVert u_1 \rVert_{x_1}^2 + … + \lVert u_d \rVert_{x_d}^2} > 0,\\
+        P &= \frac{\nu}{λ m},\\
+        t &= \lVert v \rVert_{p}.
+    \end{aligned}
 ````
+
 If ``m = 0`` and ``ν t < λ``, then ``\operatorname{exp}_p(v) = p + v``.
 
 For a proof, see proposition 3.1 in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
@@ -376,7 +278,84 @@ function exp!(::Segre{ℝ,V}, q, p, v) where {V}
 end
 
 @doc raw"""
-    function log(M::Segre{ℝ, V}, p, q)
+    get_coordinates(M::Segre{𝔽, V}, p, v, ::DefaultOrthonormalBasis; kwargs...)
+
+Get coordinates of `v` in the tangent space
+``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} S^{n_1 - 1} ×…× T_{x_d} S^{n_d - 1}``
+using a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) on each factor.
+"""
+get_coordinates(M::Segre, p, v, ::DefaultOrthonormalBasis; kwargs...)
+
+function get_coordinates_orthonormal!(
+    M::Segre{ℝ,V},
+    X,
+    p,
+    v,
+    ::RealNumbers;
+    kwargs...,
+) where {V}
+    return X = vcat(
+        v[1],
+        p[1][1] * [
+            get_coordinates(Sphere(n - 1), x, xdot, DefaultOrthonormalBasis(); kwargs...) for (n, x, xdot) in zip(V, p[2:end], v[2:end])
+        ]...,
+    )
+end
+
+@doc raw"""
+    get_embedding(M::Segre{𝔽,V})
+
+Return the embedding of the [`Segre`](@ref) manifold ``\mathcal{S}``, which is ``𝔽^{n_1 ×⋯× n_d}``.
+"""
+function get_embedding(::Segre{𝔽,V}) where {𝔽,V}
+    return Euclidean(prod(V))
+end
+
+@doc raw"""
+    get_vector( M::Segre{𝔽, V}, p, X, DefaultOrthonormalBasis; kwargs...)
+
+Get tangent vector `v` from coordinates in the tangent space
+``T_{(λ, x_1, …, x_d)} \mathcal{S} = \mathbb{R} × T_{x_1} S^{n_1 - 1} ×⋯× T_{x_d} S^{n_d - 1}``
+using a [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`) on each factor.
+"""
+get_vector(M::Segre, p, X, ::DefaultOrthonormalBasis; kwargs...)
+
+function get_vector_orthonormal!(M::Segre{ℝ,V}, v, p, X, ::RealNumbers; kwargs...) where {V}
+    X_ = deepcopy(X)
+    v[1] = [X_[1]]
+    X_ = X_[2:end]
+    for (i, n) in enumerate(V)
+        v[i + 1] =
+            get_vector(
+                Sphere(n - 1),
+                p[i + 1],
+                X_[1:(n - 1)],
+                DefaultOrthonormalBasis();
+                kwargs...,
+            ) / p[1][1]
+        X_ = X_[n:end]
+    end
+    return v
+end
+
+@doc raw"""
+    inner(M::Segre{ℝ, V}, p, u, v,)
+
+Inner product between two tangent vectors ``u = (ν, u_1, …, u_d)`` and ``v = (ξ, v_1, …, v_d)`` at ``p ≐ (λ, x_1, \dots, x_d)``.
+This inner product is obtained by embedding the Segre manifold in the space of tensors equipped with the Euclidean metric:
+
+````math
+    \langle u, v \rangle_{p} = \nu \xi + \lambda^2 (\langle u_1, v_1 \rangle_{x_1} + \dots + \langle u_d, v_d \rangle_{x_d}),
+````
+
+where ``ν, ξ ∈ T_{λ} ℝ^{+} = ℝ`` and ``u_i``, ``v_i ∈ T_{x_i} S^{n_i - 1} ⊂ ℝ^{n_i}``.
+"""
+function inner(::Segre{ℝ}, p, u, v)
+    return u[1][1] * v[1][1] + p[1][1]^2 * dot(u[2:end], v[2:end])
+end
+
+@doc raw"""
+    log(M::Segre{ℝ, V}, p, q)
 
 Logarithmic map on the Segre manifold.
 
@@ -419,33 +398,59 @@ function log!(M::Segre{ℝ,V}, v, p, q) where {V}
     return v
 end
 
+manifold_dimension(::Segre{𝔽,V}) where {𝔽,V} = (1 + sum(V .- 1))
+
 @doc raw"""
-    function distance(M::Segre{ℝ, V}, p, q)
+    spherical_angle_sum(M::Segre{ℝ, V}, p, q)
 
-Riemannian distance between two points `p` and `q` on the Segre manifold.
-
-Assume ``p ≐ (λ, x_1, …, x_d)``, ``q ≐ (μ, y_1, …, y_d) ∈ \mathcal{S}`` are connected by a geodesic. Let
-
-````math
-    m = \sqrt{\sphericalangle(x_1, y_1)^2 + … + \sphericalangle(x_d, y_d)^2}
-````
-
-and assume ``(μ, y_1, …, y_d)`` is the representation of ``q`` that minimizes ``m``. Then
+Let ``p ≐ (λ, x_1, …, x_d)``, ``q ≐ (μ, y_1, …, y_d) ∈ \mathcal{S}``.
+Then this is
 
 ````math
-    \operatorname{dist}_{\mathcal{S}}(p, q) = \sqrt{λ^2 - 2 λμ\cos(m) + μ^2}.
+    \sqrt{\sphericalangle(x_1, y_1)^2 + … + \sphericalangle(x_d, y_d)^2},
 ````
+
+where ``\sphericalangle(x_i, y_i)`` is the distance between ``x_i`` and ``y_i`` on the sphere ``S^{n_i - 1}``.
+
 """
-function distance(M::Segre{ℝ,V}, p, q) where {V}
-    closest_representative!(M, q, p)
-    m = spherical_angle_sum(M, p, q)
-
-    return sqrt((p[1][1] - q[1][1])^2 + 4 * p[1][1] * q[1][1] * sin(m / 2)^2)
-    # Equivalent to sqrt(p[1][1]^2 + q[1][1]^2 - 2 * p[1][1] * q[1][1] * cos(m)) but more stable for small m
+function spherical_angle_sum(::Segre{ℝ,V}, p, q) where {V}
+    return sqrt(
+        sum([distance(Sphere(n - 1), x, y)^2 for (n, x, y) in zip(V, p[2:end], q[2:end])]),
+    )
 end
 
 @doc raw"""
-    function riemann_tensor(M::Segre{ℝ, V}, p, u, v, w)
+    rand(M::Segre{ℝ, V}; vector_at=nothing)
+
+If `vector_at` is `nothing`, return a random point on
+
+````math
+    ℝ^{+} × S^{n_1 - 1} ×⋯× S^{n_d - 1}
+````
+
+from a log-normal distribution on ``ℝ^{+}`` and a uniform distribution on ``S^{n_1 - 1} ×⋯× S^{n_d - 1}``.
+
+If `vector_at` is not `nothing`, return a random tangent vector from a normal distribution on the tangent space.
+"""
+function rand(M::Segre{ℝ,V}; vector_at=nothing, kwargs...) where {V}
+    if isnothing(vector_at)
+        return [
+            rand(PositiveArrays(1); kwargs...),
+            [rand(Sphere(n - 1); kwargs...) for n in V]...,
+        ]
+    else
+        return [
+            rand(PositiveArrays(1); vector_at=vector_at[1], kwargs...),
+            [
+                rand(Sphere(n - 1); vector_at=xdot, kwargs...) for
+                (xdot, n) in zip(vector_at[2:end], V)
+            ]...,
+        ]
+    end
+end
+
+@doc raw"""
+    riemann_tensor(M::Segre{ℝ, V}, p, u, v, w)
 
 Riemann tensor of the Segre manifold at ``p``.
 
@@ -473,7 +478,7 @@ function riemann_tensor(M::Segre{ℝ,V}, p, u, v, w) where {V}
 end
 
 @doc raw"""
-    function sectional_curvature(M::Segre{ℝ, V}, p, u, v)
+    sectional_curvature(M::Segre{ℝ, V}, p, u, v)
 
 Sectional curvature of the Segre manifold at ``p``.
 
@@ -491,6 +496,6 @@ function sectional_curvature(M::Segre{ℝ,V}, p, u, v) where {V}
            (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)
 end
 
-function Base.show(io::IO, M::Segre{𝔽,V}) where {𝔽,V}
+function Base.show(io::IO, ::Segre{𝔽,V}) where {𝔽,V}
     return print(io, "Segre($(join(V, ", ")); field=$(𝔽))")
 end

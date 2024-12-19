@@ -18,7 +18,7 @@ WarpedMetric
 
 ```@autodocs
 Modules = [Manifolds]
-Pages = ["manifolds/SegreWarped.jl"]
+Pages = ["manifolds/SegreWarpedMetric.jl"]
 Order = [:function]
 ```
 
