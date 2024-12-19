@@ -19,6 +19,8 @@ with the [warped product metric](https://en.wikipedia.org/wiki/Warped_product) [
 
 The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 
+The manifold is named after [Beniamino Segre](https://en.wikipedia.org/wiki/Beniamino_Segre)(1903–1977).
+
 # Constructor
     Segre(n::Int...; field::AbstractNumbers=ℝ)
 
