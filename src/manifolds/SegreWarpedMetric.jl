@@ -15,6 +15,11 @@ with a [warped product metric](https://en.wikipedia.org/wiki/Warped_product), bu
 The Segre manifold is a cone in the sense that if ``p \in \mathcal{S}``, then ``a p \in \mathcal{S}`` for all ``r \neq 0``. The tangent subspace at ``p`` defined ``\mathrm{d} (r p) / \mathrm{d} r`` is called the _radial_ direction. ``A < 1`` puts less weight on the directions orthogonal to the radial direction compared to ``\mathcal{S}``, while ``A > 1`` puts more weight on those directions.
 
 The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
+
+# Constructor
+    WarpedMetric(A::Real)
+
+Generate a warped product metric with warping factor `A`.
 """
 struct WarpedMetric{A} <: AbstractMetric end
 
