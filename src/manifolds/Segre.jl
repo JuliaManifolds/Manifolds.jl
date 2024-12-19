@@ -19,7 +19,7 @@ with the [warped product metric](https://en.wikipedia.org/wiki/Warped_product) [
 
 The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 
-The manifold is named after [Beniamino Segre](https://en.wikipedia.org/wiki/Beniamino_Segre)(1903–1977).
+The manifold is named after [Corrado Segre](https://en.wikipedia.org/wiki/Corrado_Segre)(1863–1924).
 
 # Constructor
     Segre(n::Int...; field::AbstractNumbers=ℝ)
@@ -35,11 +35,6 @@ end
 
 manifold_dimension(::Segre{𝔽,V}) where {𝔽,V} = (1 + sum(V .- 1))
 
-"""
-    check_size(M::Segre{𝔽, V}, p)
-
-Check whether `p` has the right size for `Segre` manifold `M`.
-"""
 function check_size(M::Segre{𝔽,V}, p;) where {𝔽,V}
     p_size = only.(size.(p))
     M_size = [1, V...]
@@ -54,11 +49,6 @@ function check_size(M::Segre{𝔽,V}, p;) where {𝔽,V}
     return nothing
 end
 
-"""
-    check_size(M::Segre{𝔽, V}, p, v)
-
-Check whether `p` and `v` have the right size for `Segre` manifold `M`.
-"""
 function check_size(M::Segre{𝔽,V}, p, v;) where {𝔽,V}
     p_size = only.(size.(p))
     v_size = only.(size.(v))
@@ -82,10 +72,12 @@ function check_size(M::Segre{𝔽,V}, p, v;) where {𝔽,V}
 end
 
 """
-    check_point(M::Segre{ℝ, V}, p; kwargs...)
+    is_point(M::Segre{ℝ, V}, p; kwargs...)
 
 Check whether `p` is a valid point on `M`, i.e. `p[1]` is a singleton containing a positive number and `p[i + 1]` is a point on `Sphere(V[i])`. The tolerance can be set using the `kwargs...`.
 """
+is_point(M::Segre{ℝ,V}, p; kwargs...) where {V}
+
 function check_point(M::Segre{ℝ,V}, p; atol=1.4901161193847656e-8, kwargs...) where {V}
     if p[1][1] <= 0.0
         return DomainError(p[1][1], "$(p) has non-positive modulus.")
@@ -100,10 +92,12 @@ function check_point(M::Segre{ℝ,V}, p; atol=1.4901161193847656e-8, kwargs...) 
 end
 
 """
-    function check_vector(M::Segre{ℝ, V}, p, v, kwargs...)
+    function is_vector(M::Segre{ℝ, V}, p, v, kwargs...)
 
-Check whether `v` is a tangent vector to `p` on `M`, i.e. after `check_point(M, p)`, `v` has to be of same dimension as `p` and orthogonal to `p`. The tolerance can be set using the `kwargs...`.
+Check whether `v` is a tangent vector to `p` on `M`, i.e. `v` has to be of same dimension as `p` and orthogonal to `p`. The tolerance can be set using the `kwargs...`.
 """
+is_vector(M::Segre{ℝ,V}, p, v; kwargs...) where {V}
+
 function check_vector(M::Segre{ℝ,V}, p, v; atol=1.4901161193847656e-8, kwargs...) where {V}
     for (x, xdot, n) in zip(p[2:end], v[2:end], V)
         e = check_vector(Sphere(n - 1)::AbstractSphere, x, xdot; atol=atol, kwargs...)

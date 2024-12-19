@@ -2,7 +2,7 @@
     WarpedMetric{A} <: AbstractMetric
 
 The ``A``-warped metric on the Segre manifold ``\mathcal{S}`` is a generalization of the Euclidean metric on ``\mathcal{S}``.
-We this manifold by ``\mathcal{S}_A``.
+We denote this manifold by ``\mathcal{S}_A``.
 
 Similarly to ``\mathcal{S}``, when ``𝔽 = ℝ``, ``\mathcal{S}_A`` is a normal Riemannian covering of the product manifold
 
@@ -12,10 +12,15 @@ Similarly to ``\mathcal{S}``, when ``𝔽 = ℝ``, ``\mathcal{S}_A`` is a normal
 
 with a [warped product metric](https://en.wikipedia.org/wiki/Warped_product), but the warping function now depends on the _warping factor_ ``A``.
 ``A = 1`` corresponds to the usual Segre manifold.
+The Segre manifold is a cone in the sense that if ``p \in \mathcal{S}``, then ``a p \in \mathcal{S}`` for all ``r \neq 0``. The tangent subspace at ``p`` defined ``\mathrm{d} (r p) / \mathrm{d} r`` is called the _radial_ direction. ``A < 1`` puts less weight on the directions orthogonal to the radial direction compared to ``\mathcal{S}``, while ``A > 1`` puts more weight on those directions.
 
 The geometry is summarized in [JacobssonSwijsenVandervekenVannieuwenhoven:2024](@cite).
 """
 struct WarpedMetric{A} <: AbstractMetric end
+
+function WarpedMetric(A::Real)
+    return WarpedMetric{A}()
+end
 
 @doc raw"""
     function get_coordinates(M::Segre{𝔽, V}, p, v, ::DefaultOrthonormalBasis; kwargs...)
