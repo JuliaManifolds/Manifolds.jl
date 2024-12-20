@@ -17,7 +17,7 @@ jobs:
           version: "1.6.38"
       - uses: julia-actions/setup-julia@latest
         with:
-          version: "1.10"
+          version: "1.11"
       - name: Julia Cache
         uses: julia-actions/cache@v2
       - name: Cache Quarto

@@ -17,6 +17,7 @@
 - [Nick Dewaele](https://github.com/Nikdwal) contributed the [Tucker manifold](../manifolds/tucker.md)
 - [Renée Dornig](https://github.com/r-dornig) contributed the [centered  matrices](../manifolds/centeredmatrices.md) and the [essential manifold](../manifolds/essentialmanifold.md)
 - [David Hong](https://github.com/dahong67) contributed uniform distributions on the Stiefel and Grassmann manifolds.
+- [Simon Jacobsson](https://github.com/sjacobsson) contributed the [Segre manifold](../manifolds/segre.md) including its [warped metric](@ref segre-warped-metric-sec) thereon.
 - [Johannes Voll Kolstø](https://github.com/johannvk) contributed the [symplectic manifold](../manifolds/symplectic.md), the [symplectic Stiefel manifold](../manifolds/symplecticstiefel.md)
 - [Manuel Weiß](https://github.com/manuelweisser) contributed [symmetric matrices](../manifolds/symmetric.md)
 
