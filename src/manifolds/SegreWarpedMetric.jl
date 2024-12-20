@@ -308,6 +308,10 @@ function sectional_curvature(
            (inner(M, p, u, u) * inner(M, p, v, v) - inner(M, p, u, v)^2)
 end
 
+function show(io::IO, ::WarpedMetric{A}) where {A}
+    return print(io, "WarpedMetric($A)")
+end
+
 function spherical_angle_sum(
     M::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}},
     p,
