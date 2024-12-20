@@ -74,7 +74,7 @@ end
 ````math
     \mathcal{P} = ℝ^{+} \times \mathbb{S}^{n_1 - 1} \times \dots \times \mathbb{S}^{n_d - 1}
 ````
-with the metric [`inner`](@ref inner(::Segre, ::Any, ::Any, ::Any)).
+with a warped product metric.
 Every equivalence class ``q \in \mathcal{S}`` has ``2^d`` representatives in ``\mathcal{P}``.
 `closest_representative!(M, q, p)` changes representative of `q` to the one that is closest to `p` in ``\mathcal{P}``.
 """

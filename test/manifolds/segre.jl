@@ -7,10 +7,10 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         Segre(7, 2),
         Segre(7, 9, 9),
         Segre(9, 3, 6, 6),
-        MetricManifold(Segre(10), WarpedMetric(1.2025837056880606)),
-        MetricManifold(Segre(2, 9), WarpedMetric(1.1302422072971439)),
-        MetricManifold(Segre(9, 6, 10), WarpedMetric(1.4545138169484464)),
-        MetricManifold(Segre(9, 3, 8, 10), WarpedMetric(1.396673190458706)),
+        MetricManifold(Segre(10), WarpedMetric(1.20)),
+        MetricManifold(Segre(2, 9), WarpedMetric(1.13)),
+        MetricManifold(Segre(9, 6, 10), WarpedMetric(0.87)),
+        MetricManifold(Segre(9, 3, 8, 10), WarpedMetric(1.40)),
     ]
 
     # Vs[i] is the valence of Ms[i]
@@ -115,6 +115,11 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                     [[1.0, 0.0], p[2:end]...];
                     error=:error,
                 )
+                @test_throws DomainError is_point(
+                    M,
+                    [p[1], [1.0], p[3:end]...];
+                    error=:error,
+                )
                 @test_throws DomainError is_point(M, [[-1.0], p[2:end]...]; error=:error)
                 @test_throws DomainError is_point(M, [p[1], 2 * p[2:end]...]; error=:error)
             end
@@ -137,6 +142,10 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                     true,
                 )
                 @test_throws DomainError is_vector(M, p, p, false, true)
+            end
+
+            @testset "connected_by_geodesic" begin
+                @test connected_by_geodesic(M, p, q)
             end
 
             Random.seed!(1)
@@ -318,5 +327,23 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         q = qs[8]
         q_ = [q[1], q[2], q[3], q[4], -q[5]]
         @test is_vector(M, p, log(M, p, q_))
+    end
+
+    # Test the formulas for sectional curvature stated in the docs
+    @testset "sectional_curvature" begin
+        M = Segre(3, 3)
+        p = [[1.3], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
+        X = [[0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0]]
+        Y = [[0.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]
+        Z = [[0.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        V = [[1.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+        @test isapprox(0.0, sectional_curvature(M, p, X, Y))
+        @test isapprox(-1 / p[1][1]^2, sectional_curvature(M, p, X, Z))
+        @test isapprox(0.0, sectional_curvature(M, p, X, V))
+
+        M = MetricManifold(Segre(3, 3, 3), WarpedMetric(1.23))
+        @test isapprox((1.23^(-2) - 1) / p[1][1]^2, sectional_curvature(M, p, X, Y))
+        @test isapprox(-1 / p[1][1]^2, sectional_curvature(M, p, X, Z))
+        @test isapprox(0.0, sectional_curvature(M, p, X, V))
     end
 end
