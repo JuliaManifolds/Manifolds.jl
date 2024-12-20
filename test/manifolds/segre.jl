@@ -85,7 +85,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
     # When testing that exp(Ms[i], ps[i], t * Xs[i]) is an extremum of the length functional, we take a directional derivative along dcs[i]
     dcs = [
         unit_c(3 * 10, 9),
-        unit_c(3 * 8,  10),
+        unit_c(3 * 8, 10),
         unit_c(3 * 23, 11),
         unit_c(3 * 21, 12),
         unit_c(3 * 10, 13),
