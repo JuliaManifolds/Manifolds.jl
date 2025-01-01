@@ -59,6 +59,25 @@ end
 embed(::InvertibleMatrices, p) = p
 embed(::InvertibleMatrices, p, X) = X
 
+function get_coordinates(
+    ::InvertibleMatrices{ℝ,<:Any},
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
+    return vec(X)
+end
+
+function get_coordinates!(
+    ::InvertibleMatrices{ℝ,<:Any},
+    Xⁱ,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
+    return copyto!(Xⁱ, X)
+end
+
 function get_embedding(::InvertibleMatrices{𝔽,TypeParameter{Tuple{n}}}) where {n,𝔽}
     return Euclidean(n, n; field=𝔽)
 end
@@ -68,7 +87,7 @@ function get_embedding(M::InvertibleMatrices{𝔽,Tuple{Int}}) where {𝔽}
 end
 
 function get_vector(
-    M::InvertibleMatrices{<:Any,ℝ},
+    M::InvertibleMatrices{ℝ,<:Any},
     p,
     Xⁱ,
     ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
@@ -78,7 +97,7 @@ function get_vector(
 end
 
 function get_vector!(
-    ::InvertibleMatrices{<:Any,ℝ},
+    ::InvertibleMatrices{ℝ,<:Any},
     X,
     p,
     Xⁱ,
