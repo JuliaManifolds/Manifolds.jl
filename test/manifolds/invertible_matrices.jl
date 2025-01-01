@@ -24,6 +24,9 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         @test embed(M, A, A) === A
         @test manifold_dimension(M) == 9
         @test Weingarten(M, A, A, A) == zero(A)
+
+        @test is_point(M, rand(M))
+        @test is_vector(M, A, rand(M; vector_at=A))
     end
     @testset "Complex invertible matrices" begin
         @test repr(Mc) == "InvertibleMatrices(3, ℂ)"
