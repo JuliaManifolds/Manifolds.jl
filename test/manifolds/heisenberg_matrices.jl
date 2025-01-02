@@ -30,9 +30,12 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
     test_manifold(
         M,
         pts;
+        basis_types_to_from=(DefaultOrthonormalBasis(),),
         parallel_transport=true,
         test_injectivity_radius=true,
         test_musical_isomorphisms=false,
+        test_rand_point=true,
+        test_rand_tvector=true,
     )
 
     @test all(

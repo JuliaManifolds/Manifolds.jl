@@ -59,12 +59,51 @@ end
 embed(::InvertibleMatrices, p) = p
 embed(::InvertibleMatrices, p, X) = X
 
+function get_coordinates(
+    ::InvertibleMatrices{ℝ,<:Any},
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
+    return vec(X)
+end
+
+function get_coordinates!(
+    ::InvertibleMatrices{ℝ,<:Any},
+    Xⁱ,
+    p,
+    X,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
+    return copyto!(Xⁱ, X)
+end
+
 function get_embedding(::InvertibleMatrices{𝔽,TypeParameter{Tuple{n}}}) where {n,𝔽}
     return Euclidean(n, n; field=𝔽)
 end
 function get_embedding(M::InvertibleMatrices{𝔽,Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return Euclidean(n, n; field=𝔽, parameter=:field)
+end
+
+function get_vector(
+    M::InvertibleMatrices{ℝ,<:Any},
+    p,
+    Xⁱ,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
+    n = get_parameter(M.size)[1]
+    return reshape(Xⁱ, n, n)
+end
+
+function get_vector!(
+    ::InvertibleMatrices{ℝ,<:Any},
+    X,
+    p,
+    Xⁱ,
+    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
+)
+    return copyto!(X, Xⁱ)
 end
 
 """
@@ -82,6 +121,27 @@ Return the dimension of the [`InvertibleMatrices`](@ref) matrix `M` over the num
 """
 function manifold_dimension(M::InvertibleMatrices{<:Any,𝔽}) where {𝔽}
     return manifold_dimension(get_embedding(M))
+end
+
+@doc raw"""
+    Random.rand(M::InvertibleMatrices; vector_at=nothing, kwargs...)
+
+If `vector_at` is `nothing`, return a random point on the [`InvertibleMatrices`](@ref)
+manifold `M` by using `rand` in the embedding.
+
+If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
+the point `vector_at` on the [`InvertibleMatrices`](@ref) by using by using `rand` in the
+embedding.
+"""
+rand(M::InvertibleMatrices; kwargs...)
+
+function Random.rand!(M::InvertibleMatrices, pX; kwargs...)
+    rand!(get_embedding(M), pX; kwargs...)
+    return pX
+end
+function Random.rand!(rng::AbstractRNG, M::InvertibleMatrices, pX; kwargs...)
+    rand!(rng, get_embedding(M), pX; kwargs...)
+    return pX
 end
 
 function Base.show(io::IO, ::InvertibleMatrices{𝔽,TypeParameter{Tuple{n}}}) where {n,𝔽}
