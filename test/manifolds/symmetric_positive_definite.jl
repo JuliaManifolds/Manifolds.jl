@@ -27,7 +27,7 @@ include("../header.jl")
     TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
 
     for M in metrics
-        basis_types = if (M == M1 || M == M2)
+        basis_types = if (M == M1 || M == M2 || M == M3)
             (DefaultOrthonormalBasis(),)
         else
             ()
