@@ -312,6 +312,7 @@ include("../header.jl")
         M = SymmetricPositiveDefinite(3; parameter=:field)
         @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
         @test repr(M) == "SymmetricPositiveDefinite(3; parameter=:field)"
+        @test Manifolds.get_parameter_arg(M) === :field
     end
 
     @testset "Curvature" begin
