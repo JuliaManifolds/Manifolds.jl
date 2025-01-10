@@ -371,7 +371,7 @@ include("utils.jl")
 include("manifold_fallbacks.jl")
 
 """
-    get_parameter_arg(M::AbstractManifold)
+    get_parameter_type(M::AbstractManifold)
 
 Get `parameter` argument of the constructor of manifold `M`.
 Returns either `:field` or `:type`.
@@ -380,7 +380,7 @@ Returns either `:field` or `:type`.
 
 `get_parameter`, `TypeParameter`
 """
-get_parameter_arg(::AbstractManifold)
+get_parameter_type(::AbstractManifold)
 
 """
     projected_distribution(M::AbstractManifold, d, [p=rand(d)])

@@ -38,7 +38,7 @@ and ``\lVert⋅\rVert_{\mathrm{F}}`` the Frobenius norm.
 function distance(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
     N = get_parameter(M.manifold.size)[1]
     return distance(
-        CholeskySpace(N; parameter=get_parameter_arg(M.manifold)),
+        CholeskySpace(N; parameter=get_parameter_type(M.manifold)),
         cholesky(p).L,
         cholesky(q).L,
     )
@@ -64,7 +64,7 @@ exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
 function exp!(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, q, p, X)
     N = get_parameter(M.manifold.size)[1]
     (y, W) = spd_to_cholesky(p, X)
-    z = exp(CholeskySpace(N; parameter=get_parameter_arg(M.manifold)), y, W)
+    z = exp(CholeskySpace(N; parameter=get_parameter_type(M.manifold)), y, W)
     return copyto!(q, z * z')
 end
 function exp!(
@@ -85,7 +85,7 @@ function get_coordinates_orthonormal!(
     rn::RealNumbers,
 )
     N = get_parameter(M.manifold.size)[1]
-    MC = CholeskySpace(N; parameter=get_parameter_arg(M.manifold))
+    MC = CholeskySpace(N; parameter=get_parameter_type(M.manifold))
     (y, W) = spd_to_cholesky(p, X)
     get_coordinates_orthonormal!(MC, Xⁱ, y, W, rn)
     return Xⁱ
@@ -99,7 +99,7 @@ function get_vector_orthonormal!(
     rn::RealNumbers,
 )
     N = get_parameter(M.manifold.size)[1]
-    MC = CholeskySpace(N; parameter=get_parameter_arg(M.manifold))
+    MC = CholeskySpace(N; parameter=get_parameter_type(M.manifold))
     y = cholesky(p).L
     get_vector_orthonormal!(MC, X, y, Xⁱ, rn)
     tangent_cholesky_to_tangent_spd!(p, X)
@@ -126,7 +126,7 @@ function inner(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetr
     N = get_parameter(M.manifold.size)[1]
     (z, Xz) = spd_to_cholesky(p, X)
     (z, Yz) = spd_to_cholesky(p, z, Y)
-    return inner(CholeskySpace(N; parameter=get_parameter_arg(M.manifold)), z, Xz, Yz)
+    return inner(CholeskySpace(N; parameter=get_parameter_type(M.manifold)), z, Xz, Yz)
 end
 
 """
@@ -155,7 +155,7 @@ function log!(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetri
     N = get_parameter(M.manifold.size)[1]
     x = cholesky(p).L
     y = cholesky(q).L
-    log!(CholeskySpace(N; parameter=get_parameter_arg(M.manifold)), X, x, y)
+    log!(CholeskySpace(N; parameter=get_parameter_type(M.manifold)), X, x, y)
     return tangent_cholesky_to_tangent_spd!(x, X)
 end
 
@@ -198,7 +198,7 @@ function parallel_transport_to!(
     y = cholesky(q).L
     (x, W) = spd_to_cholesky(p, X)
     parallel_transport_to!(
-        CholeskySpace(N; parameter=get_parameter_arg(M.manifold)),
+        CholeskySpace(N; parameter=get_parameter_type(M.manifold)),
         Y,
         x,
         W,
