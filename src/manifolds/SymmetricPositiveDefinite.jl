@@ -236,6 +236,9 @@ function get_embedding(M::SymmetricPositiveDefinite{Tuple{Int}})
     return Euclidean(n, n; field=ℝ, parameter=:field)
 end
 
+get_parameter_type(::SymmetricPositiveDefinite{<:TypeParameter}) = :type
+get_parameter_type(::SymmetricPositiveDefinite{Tuple{Int}}) = :field
+
 @doc raw"""
     injectivity_radius(M::SymmetricPositiveDefinite[, p])
     injectivity_radius(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}[, p])

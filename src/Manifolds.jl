@@ -371,6 +371,18 @@ include("utils.jl")
 include("manifold_fallbacks.jl")
 
 """
+    get_parameter_type(M::AbstractManifold)
+
+Get `parameter` argument of the constructor of manifold `M`.
+Returns either `:field` or `:type`.
+
+# See also
+
+`get_parameter`, `TypeParameter`
+"""
+get_parameter_type(::AbstractManifold)
+
+"""
     projected_distribution(M::AbstractManifold, d, [p=rand(d)])
 
 Wrap the standard distribution `d` into a manifold-valued distribution. Generated

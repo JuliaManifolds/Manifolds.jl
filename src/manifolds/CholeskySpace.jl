@@ -2,7 +2,7 @@
     CholeskySpace{T} <: AbstractManifold{ℝ}
 
 The manifold of lower triangular matrices with positive diagonal and
-a metric based on the cholesky decomposition. The formulae for this manifold
+a metric based on the Cholesky decomposition. The formulae for this manifold
 are for example summarized in Table 1 of [Lin:2019](@cite).
 
 # Constructor
@@ -121,11 +121,38 @@ function exp!(::CholeskySpace, q, p, X)
     return q
 end
 
+function get_coordinates_orthonormal!(M::CholeskySpace, Xⁱ, p, X, ::RealNumbers)
+    n = get_parameter(M.size)[1]
+    view(Xⁱ, 1:n) .= diag(X)
+    xi_ind = n + 1
+    for i in 1:n
+        for j in (i + 1):n
+            Xⁱ[xi_ind] = X[j, i]
+            xi_ind += 1
+        end
+    end
+    return Xⁱ
+end
+
+function get_vector_orthonormal!(M::CholeskySpace, X, p, Xⁱ, ::RealNumbers)
+    n = get_parameter(M.size)[1]
+    fill!(X, 0)
+    view(X, diagind(X)) .= view(Xⁱ, 1:n) .* diag(p)
+    xi_ind = n + 1
+    for i in 1:n
+        for j in (i + 1):n
+            X[j, i] = Xⁱ[xi_ind]
+            xi_ind += 1
+        end
+    end
+    return X
+end
+
 @doc raw"""
     inner(M::CholeskySpace, p, X, Y)
 
 Compute the inner product on the [`CholeskySpace`](@ref) `M` at the
-lower triangular matric with positive diagonal `p` and the two tangent vectors
+lower triangular matrix with positive diagonal `p` and the two tangent vectors
 `X`,`Y`, i.e they are both lower triangular matrices with arbitrary diagonal.
 The formula reads
 
@@ -226,6 +253,38 @@ parallel_transport_to(::CholeskySpace, ::Any, ::Any, ::Any)
 
 function parallel_transport_to!(::CholeskySpace, Y, p, X, q)
     return copyto!(Y, strictlyLowerTriangular(p) + Diagonal(diag(q) .* diag(X) ./ diag(p)))
+end
+
+function Random.rand!(
+    rng::AbstractRNG,
+    M::CholeskySpace,
+    pX;
+    vector_at=nothing,
+    σ::Real=one(eltype(pX)) /
+            (vector_at === nothing ? 1 : norm(convert(AbstractMatrix, vector_at))),
+    tangent_distr=:Gaussian,
+)
+    N = get_parameter(M.size)[1]
+    if vector_at === nothing
+        p_spd = rand(
+            rng,
+            SymmetricPositiveDefinite(N; parameter=:field);
+            σ=σ,
+            tangent_distr=tangent_distr,
+        )
+        pX .= cholesky(p_spd).L
+    else
+        p_spd = vector_at * vector_at'
+        X_spd = rand(
+            rng,
+            SymmetricPositiveDefinite(N; parameter=:field);
+            vector_at=p_spd,
+            σ=σ,
+            tangent_distr=tangent_distr,
+        )
+        pX .= spd_to_cholesky(p_spd, X_spd)[2]
+    end
+    return pX
 end
 
 @doc raw"""
