@@ -29,9 +29,11 @@ embed(::SymplecticGrassmann, p, X) = X
 embed!(::SymplecticGrassmann, q, p) = copyto!(q, p)
 embed!(::SymplecticGrassmann, Y, p, X) = copyto!(Y, X)
 embed!(::SymplecticGrassmann, q, p::StiefelPoint) = copyto!(q, p.value)
-embed!(::SymplecticGrassmann, Y, p::StiefelPoint, X::StiefelTVector) = copyto!(Y, X.value)
+function embed!(::SymplecticGrassmann, Y, p::StiefelPoint, X::StiefelTangentVector)
+    return copyto!(Y, X.value)
+end
 embed(::SymplecticGrassmann, p::StiefelPoint) = p.value
-embed(::SymplecticGrassmann, p::StiefelPoint, X::StiefelTVector) = X.value
+embed(::SymplecticGrassmann, p::StiefelPoint, X::StiefelTangentVector) = X.value
 
 @doc raw"""
     exp(::SymplecticGrassmann, p, X)

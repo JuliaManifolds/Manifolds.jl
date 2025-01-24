@@ -9,20 +9,20 @@ struct OrthogonalPoint{T<:AbstractMatrix} <: AbstractManifoldPoint
 end
 
 @doc raw"""
-    OrthogonalTVector <: TVector
+    OrthogonalTangentVector <: AbstractTangentVector
 
 A type to represent tangent vectors to points on a [`Flag`](@ref) manifold  in the
 orthogonal coordinates representation.
 """
-struct OrthogonalTVector{T<:AbstractMatrix} <: TVector
+struct OrthogonalTangentVector{T<:AbstractMatrix} <: AbstractTangentVector
     value::T
 end
 
-ManifoldsBase.@manifold_vector_forwards OrthogonalTVector value
+ManifoldsBase.@manifold_vector_forwards OrthogonalTangentVector value
 ManifoldsBase.@manifold_element_forwards OrthogonalPoint value
 
 Base.eltype(p::OrthogonalPoint) = eltype(p.value)
-Base.eltype(X::OrthogonalTVector) = eltype(X.value)
+Base.eltype(X::OrthogonalTangentVector) = eltype(X.value)
 
 """
     ZeroTuple
@@ -50,7 +50,7 @@ end
 Flag manifold of ``d`` subspaces of ``ℝ^N`` [YeWongLim:2021](@cite). By default the manifold uses
 the Stiefel coordinates representation, embedding it in the [`Stiefel`](@ref) manifold.
 The other available representation is an embedding in [`OrthogonalMatrices`](@ref).
-It can be utilized using [`OrthogonalPoint`](@ref) and [`OrthogonalTVector`](@ref) wrappers.
+It can be utilized using [`OrthogonalPoint`](@ref) and [`OrthogonalTangentVector`](@ref) wrappers.
 
 Tangent space is represented in the block-skew-symmetric form.
 
@@ -162,23 +162,33 @@ function Base.show(io::IO, M::Flag{Tuple{Int}})
 end
 
 """
-    convert(::Type{AbstractMatrix}, M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
+    convert(::Type{AbstractMatrix}, M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector)
 
 Convert tangent vector from [`Flag`](@ref) manifold `M` from orthogonal representation to
 Stiefel representation.
 """
-function convert(::Type{AbstractMatrix}, M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
+function convert(
+    ::Type{AbstractMatrix},
+    M::Flag,
+    p::OrthogonalPoint,
+    X::OrthogonalTangentVector,
+)
     (N, k) = representation_size(M)
     return p.value * X.value[:, 1:k]
 end
 
 """
-    convert(::Type{OrthogonalTVector}, M::Flag, p::AbstractMatrix, X::AbstractMatrix)
+    convert(::Type{OrthogonalTangentVector}, M::Flag, p::AbstractMatrix, X::AbstractMatrix)
 
 Convert tangent vector from [`Flag`](@ref) manifold `M` from Stiefel representation to
 orthogonal representation.
 """
-function convert(::Type{OrthogonalTVector}, M::Flag, p::AbstractMatrix, X::AbstractMatrix)
+function convert(
+    ::Type{OrthogonalTangentVector},
+    M::Flag,
+    p::AbstractMatrix,
+    X::AbstractMatrix,
+)
     (N, k) = representation_size(M)
     out = similar(X, N, N)
     fill!(out, 0)
@@ -189,7 +199,7 @@ function convert(::Type{OrthogonalTVector}, M::Flag, p::AbstractMatrix, X::Abstr
     out[:, 1:k] = pX
     out[1:k, (k + 1):N] = -transpose(view(pX, (k + 1):N, 1:k))
 
-    return OrthogonalTVector(out)
+    return OrthogonalTangentVector(out)
 end
 
 """

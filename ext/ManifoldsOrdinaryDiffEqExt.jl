@@ -4,7 +4,7 @@ using ManifoldsBase
 using ManifoldsBase: TraitList
 
 using Manifolds
-import Manifolds: exp!, solve_exp_ode
+import Manifolds: exp!, expt!, solve_exp_ode
 using Manifolds: @einsum
 
 using ManifoldDiff: default_differential_backend
@@ -49,7 +49,7 @@ function solve_exp_ode(
     return q
 end
 # also define exp! for metric manifold anew in this case
-function exp!(
+function expt!(
     ::TraitList{IsMetricManifold},
     M::AbstractDecoratorManifold,
     q,
@@ -61,5 +61,17 @@ function exp!(
     copyto!(M, q, solve_exp_ode(M, p, X, t; kwargs...))
     return q
 end
-
+# also define exp! for metric manifold anew in this case
+function exp!(
+    ::TraitList{IsMetricManifold},
+    M::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    t::Number;
+    kwargs...,
+)
+    copyto!(M, q, solve_exp_ode(M, p, X, 1.0; kwargs...))
+    return q
+end
 end

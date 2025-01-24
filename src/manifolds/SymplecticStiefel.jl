@@ -31,7 +31,7 @@ where ``Ω ∈ \mathfrak{sp}(2n,F)`` is [`Hamiltonian`](@ref) and ``p^s`` means
 the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
 Here ``p^+`` denotes the [`symplectic_inverse`](@ref).
 
-You can also use [`StiefelPoint`](@ref) and [`StiefelTVector`](@ref) with this manifold,
+You can also use [`StiefelPoint`](@ref) and [`StiefelTangentVector`](@ref) with this manifold,
 they are equivalent to using arrays.
 
 # Constructor
@@ -67,7 +67,7 @@ function active_traits(f, ::SymplecticStiefel, args...)
 end
 
 # Define Stiefel as the array fallback
-ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{<:Any,ℝ} StiefelPoint StiefelTVector value value
+ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{<:Any,ℝ} StiefelPoint StiefelTangentVector value value
 
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
     return CayleyInverseRetraction()

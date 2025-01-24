@@ -26,7 +26,7 @@ T_p\mathcal M = \bigl\{ U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mat
     V_p^\mathrm{H}V_X = 0_k
 \bigr\},
 ````
-where ``0_k`` is the ``k×k`` zero matrix. See [`UMVTVector`](@ref) for details.
+where ``0_k`` is the ``k×k`` zero matrix. See [`UMVTangentVector`](@ref) for details.
 
 The (default) metric of this manifold is obtained by restricting the metric
 on ``ℝ^{m×n}`` to the tangent bundle [Vandereycken:2013](@cite).
@@ -86,7 +86,7 @@ SVDMPoint(U, S, Vt, k::Int) = SVDMPoint(U[:, 1:k], S[1:k], Vt[1:k, :])
 Base.:(==)(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt == y.Vt)
 
 @doc raw"""
-    UMVTVector <: TVector
+    UMVTangentVector <: AbstractTangentVector
 
 A tangent vector that can be described as a product ``U_p M V_p^\mathrm{H} + U_X V_p^\mathrm{H} + U_p V_X^\mathrm{H}``,
 where ``X = U_X S V_X^\mathrm{H}`` is its base point, see for example [`FixedRankMatrices`](@ref).
@@ -95,28 +95,35 @@ The base point ``p`` is required for example embedding this point, but it is not
 The fields of thie tangent vector are `U` for ``U_X``, `M` and `Vt` to store ``V_X^\mathrm{H}``
 
 # Constructors
-* `UMVTVector(U,M,Vt)` store umv factors to initialize the `UMVTVector`
-* `UMVTVector(U,M,Vt,k)` store the umv factors after shortening them down to
+* `UMVTangentVector(U,M,Vt)` store umv factors to initialize the `UMVTangentVector`
+* `UMVTangentVector(U,M,Vt,k)` store the umv factors after shortening them down to
   inner dimensions `k`.
 """
-struct UMVTVector{TU<:AbstractMatrix,TM<:AbstractMatrix,TVt<:AbstractMatrix} <: TVector
+struct UMVTangentVector{TU<:AbstractMatrix,TM<:AbstractMatrix,TVt<:AbstractMatrix} <:
+       AbstractTangentVector
     U::TU
     M::TM
     Vt::TVt
 end
 
-UMVTVector(U, M, Vt, k::Int) = UMVTVector(U[:, 1:k], M[1:k, 1:k], Vt[1:k, :])
+UMVTangentVector(U, M, Vt, k::Int) = UMVTangentVector(U[:, 1:k], M[1:k, 1:k], Vt[1:k, :])
 
 # here the division in M corrects for the first factor in UMV + x.U*Vt + U*x.Vt, where x is the base point to v.
-Base.:*(v::UMVTVector, s::Number) = UMVTVector(v.U * s, v.M * s, v.Vt * s)
-Base.:*(s::Number, v::UMVTVector) = UMVTVector(s * v.U, s * v.M, s * v.Vt)
-Base.:/(v::UMVTVector, s::Number) = UMVTVector(v.U / s, v.M / s, v.Vt / s)
-Base.:\(s::Number, v::UMVTVector) = UMVTVector(s \ v.U, s \ v.M, s \ v.Vt)
-Base.:+(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U + w.U, v.M + w.M, v.Vt + w.Vt)
-Base.:-(v::UMVTVector, w::UMVTVector) = UMVTVector(v.U - w.U, v.M - w.M, v.Vt - w.Vt)
-Base.:-(v::UMVTVector) = UMVTVector(-v.U, -v.M, -v.Vt)
-Base.:+(v::UMVTVector) = UMVTVector(v.U, v.M, v.Vt)
-Base.:(==)(v::UMVTVector, w::UMVTVector) = (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
+Base.:*(v::UMVTangentVector, s::Number) = UMVTangentVector(v.U * s, v.M * s, v.Vt * s)
+Base.:*(s::Number, v::UMVTangentVector) = UMVTangentVector(s * v.U, s * v.M, s * v.Vt)
+Base.:/(v::UMVTangentVector, s::Number) = UMVTangentVector(v.U / s, v.M / s, v.Vt / s)
+Base.:\(s::Number, v::UMVTangentVector) = UMVTangentVector(s \ v.U, s \ v.M, s \ v.Vt)
+function Base.:+(v::UMVTangentVector, w::UMVTangentVector)
+    return UMVTangentVector(v.U + w.U, v.M + w.M, v.Vt + w.Vt)
+end
+function Base.:-(v::UMVTangentVector, w::UMVTangentVector)
+    return UMVTangentVector(v.U - w.U, v.M - w.M, v.Vt - w.Vt)
+end
+Base.:-(v::UMVTangentVector) = UMVTangentVector(-v.U, -v.M, -v.Vt)
+Base.:+(v::UMVTangentVector) = UMVTangentVector(v.U, v.M, v.Vt)
+function Base.:(==)(v::UMVTangentVector, w::UMVTangentVector)
+    return (v.U == w.U) && (v.M == w.M) && (v.Vt == w.Vt)
+end
 
 # Move to Base when name is established – i.e. used in more than one manifold
 # |/---
@@ -183,9 +190,11 @@ allocate(p::SVDMPoint) = SVDMPoint(allocate(p.U), allocate(p.S), allocate(p.Vt))
 function allocate(p::SVDMPoint, ::Type{T}) where {T}
     return SVDMPoint(allocate(p.U, T), allocate(p.S, T), allocate(p.Vt, T))
 end
-allocate(X::UMVTVector) = UMVTVector(allocate(X.U), allocate(X.M), allocate(X.Vt))
-function allocate(X::UMVTVector, ::Type{T}) where {T}
-    return UMVTVector(allocate(X.U, T), allocate(X.M, T), allocate(X.Vt, T))
+function allocate(X::UMVTangentVector)
+    return UMVTangentVector(allocate(X.U), allocate(X.M), allocate(X.Vt))
+end
+function allocate(X::UMVTangentVector, ::Type{T}) where {T}
+    return UMVTangentVector(allocate(X.U, T), allocate(X.M, T), allocate(X.Vt, T))
 end
 
 function allocate_result(M::FixedRankMatrices, ::typeof(inverse_retract), p, q)
@@ -193,34 +202,38 @@ function allocate_result(M::FixedRankMatrices, ::typeof(inverse_retract), p, q)
 end
 function allocate_result(M::FixedRankMatrices, ::typeof(project), X, p, vals...)
     m, n, k = get_parameter(M.size)
-    # vals are p and X, so we can use their fields to set up those of the UMVTVector
-    return UMVTVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
+    # vals are p and X, so we can use their fields to set up those of the UMVTangentVector
+    return UMVTangentVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
 end
 
-Base.copy(v::UMVTVector) = UMVTVector(copy(v.U), copy(v.M), copy(v.Vt))
+Base.copy(v::UMVTangentVector) = UMVTangentVector(copy(v.U), copy(v.M), copy(v.Vt))
 
-# Tuple-like broadcasting of UMVTVector
+# Tuple-like broadcasting of UMVTangentVector
 
-function Broadcast.BroadcastStyle(::Type{<:UMVTVector})
-    return Broadcast.Style{UMVTVector}()
+function Broadcast.BroadcastStyle(::Type{<:UMVTangentVector})
+    return Broadcast.Style{UMVTangentVector}()
 end
 function Broadcast.BroadcastStyle(
     ::Broadcast.AbstractArrayStyle{0},
-    b::Broadcast.Style{UMVTVector},
+    b::Broadcast.Style{UMVTangentVector},
 )
     return b
 end
 
-Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector},Nothing}) = bc
-function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector}})
+function Broadcast.instantiate(
+    bc::Broadcast.Broadcasted{Broadcast.Style{UMVTangentVector},Nothing},
+)
+    return bc
+end
+function Broadcast.instantiate(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTangentVector}})
     Broadcast.check_broadcast_axes(bc.axes, bc.args...)
     return bc
 end
 
-Broadcast.broadcastable(v::UMVTVector) = v
+Broadcast.broadcastable(v::UMVTangentVector) = v
 
-@inline function Base.copy(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector}})
-    return UMVTVector(
+@inline function Base.copy(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTangentVector}})
+    return UMVTangentVector(
         @inbounds(Broadcast._broadcast_getindex(bc, Val(:U))),
         @inbounds(Broadcast._broadcast_getindex(bc, Val(:M))),
         @inbounds(Broadcast._broadcast_getindex(bc, Val(:Vt))),
@@ -228,20 +241,20 @@ Broadcast.broadcastable(v::UMVTVector) = v
 end
 
 Base.@propagate_inbounds function Broadcast._broadcast_getindex(
-    v::UMVTVector,
+    v::UMVTangentVector,
     ::Val{I},
 ) where {I}
     return getfield(v, I)
 end
 
-Base.axes(::UMVTVector) = ()
+Base.axes(::UMVTangentVector) = ()
 
 @inline function Base.copyto!(
-    dest::UMVTVector,
-    bc::Broadcast.Broadcasted{Broadcast.Style{UMVTVector}},
+    dest::UMVTangentVector,
+    bc::Broadcast.Broadcasted{Broadcast.Style{UMVTangentVector}},
 )
     # Performance optimization: broadcast!(identity, dest, A) is equivalent to copyto!(dest, A) if indices match
-    if bc.f === identity && bc.args isa Tuple{UMVTVector} # only a single input argument to broadcast!
+    if bc.f === identity && bc.args isa Tuple{UMVTangentVector} # only a single input argument to broadcast!
         A = bc.args[1]
         return copyto!(dest, A)
     end
@@ -307,7 +320,7 @@ function check_size(M::FixedRankMatrices, p)
         )
     end
 end
-function check_size(M::FixedRankMatrices, p, X::UMVTVector)
+function check_size(M::FixedRankMatrices, p, X::UMVTangentVector)
     m, n, k = get_parameter(M.size)
     if (size(X.U) != (m, k)) || (size(X.Vt) != (k, n)) || (size(X.M) != (k, k))
         return DomainError(
@@ -320,14 +333,14 @@ end
 @doc raw"""
     check_vector(M:FixedRankMatrices, p, X; kwargs...)
 
-Check whether the tangent [`UMVTVector`](@ref) `X` is from the tangent space of the [`SVDMPoint`](@ref) `p` on the
+Check whether the tangent [`UMVTangentVector`](@ref) `X` is from the tangent space of the [`SVDMPoint`](@ref) `p` on the
 [`FixedRankMatrices`](@ref) `M`, i.e. that `v.U` and `v.Vt` are (columnwise) orthogonal to `x.U` and `x.Vt`,
 respectively, and its dimensions are consistent with `p` and `X.M`, i.e. correspond to `m`-by-`n` matrices of rank `k`.
 """
 function check_vector(
     M::FixedRankMatrices,
     p::SVDMPoint,
-    X::UMVTVector;
+    X::UMVTangentVector;
     atol::Real=sqrt(prod(representation_size(M)) * eps(float(eltype(p.U)))),
     kwargs...,
 )
@@ -353,7 +366,7 @@ function Base.copyto!(p::SVDMPoint, q::SVDMPoint)
     copyto!(p.Vt, q.Vt)
     return p
 end
-function Base.copyto!(X::UMVTVector, Y::UMVTVector)
+function Base.copyto!(X::UMVTangentVector, Y::UMVTangentVector)
     copyto!(X.U, Y.U)
     copyto!(X.M, Y.M)
     copyto!(X.Vt, Y.Vt)
@@ -402,18 +415,18 @@ end
     embed(M::FixedRankMatrices, p, X)
 
 Embed the tangent vector `X` at point `p` in `M` from
-its [`UMVTVector`](@ref) representation  into the set of ``m×n`` matrices.
+its [`UMVTangentVector`](@ref) representation  into the set of ``m×n`` matrices.
 
 The formula reads
 ```math
 U_pMV_p^{\mathrm{H}} + U_XV_p^{\mathrm{H}} + U_pV_X^{\mathrm{H}}
 ```
 """
-function embed(::FixedRankMatrices, p::SVDMPoint, X::UMVTVector)
+function embed(::FixedRankMatrices, p::SVDMPoint, X::UMVTangentVector)
     return (p.U * X.M .+ X.U) * p.Vt + p.U * X.Vt
 end
 
-function embed!(::FixedRankMatrices, Y, p::SVDMPoint, X::UMVTVector)
+function embed!(::FixedRankMatrices, Y, p::SVDMPoint, X::UMVTangentVector)
     tmp = p.U * X.M
     tmp .+= X.U
     mul!(Y, tmp, p.Vt)
@@ -439,12 +452,12 @@ function injectivity_radius(::FixedRankMatrices)
 end
 
 @doc raw"""
-    inner(M::FixedRankMatrices, p::SVDMPoint, X::UMVTVector, Y::UMVTVector)
+    inner(M::FixedRankMatrices, p::SVDMPoint, X::UMVTangentVector, Y::UMVTangentVector)
 
 Compute the inner product of `X` and `Y` in the tangent space of `p` on the [`FixedRankMatrices`](@ref) `M`,
 which is inherited from the embedding, i.e. can be computed using `dot` on the elements (`U`, `Vt`, `M`) of `X` and `Y`.
 """
-function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTVector, w::UMVTVector)
+function inner(::FixedRankMatrices, x::SVDMPoint, v::UMVTangentVector, w::UMVTangentVector)
     return dot(v.U, w.U) + dot(v.M, w.M) + dot(v.Vt, w.Vt)
 end
 
@@ -465,7 +478,7 @@ inverse_retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicInverseRetracti
 
 function inverse_retract_orthographic!(
     M::FixedRankMatrices,
-    X::UMVTVector,
+    X::UMVTangentVector,
     p::SVDMPoint,
     q::SVDMPoint,
 )
@@ -479,8 +492,8 @@ end
 function _isapprox(
     ::FixedRankMatrices,
     p::SVDMPoint,
-    X::UMVTVector,
-    Y::UMVTVector;
+    X::UMVTangentVector,
+    Y::UMVTangentVector;
     kwargs...,
 )
     return isapprox(
@@ -500,7 +513,7 @@ is_flat(M::FixedRankMatrices) = false
 function number_eltype(p::SVDMPoint)
     return typeof(one(eltype(p.U)) + one(eltype(p.S)) + one(eltype(p.Vt)))
 end
-function number_eltype(X::UMVTVector)
+function number_eltype(X::UMVTangentVector)
     return typeof(one(eltype(X.U)) + one(eltype(X.M)) + one(eltype(X.Vt)))
 end
 
@@ -532,11 +545,11 @@ end
     project(M, p, A)
 
 Project the matrix ``A ∈ ℝ^{m,n}`` or from the embedding the tangent space at ``p`` on the [`FixedRankMatrices`](@ref) `M`,
-further decomposing the result into ``X=UMV^\mathrm{H}``, i.e. a [`UMVTVector`](@ref).
+further decomposing the result into ``X=UMV^\mathrm{H}``, i.e. a [`UMVTangentVector`](@ref).
 """
 project(::FixedRankMatrices, ::Any, ::Any)
 
-function project!(::FixedRankMatrices, Y::UMVTVector, p::SVDMPoint, A::AbstractMatrix)
+function project!(::FixedRankMatrices, Y::UMVTangentVector, p::SVDMPoint, A::AbstractMatrix)
     av = A * (p.Vt')
     uTav = p.U' * av
     aTu = A' * p.U
@@ -569,7 +582,7 @@ function Random.rand(rng::AbstractRNG, M::FixedRankMatrices; vector_at=nothing, 
         )
         return rand!(rng, M, p; kwargs...)
     else
-        X = UMVTVector(
+        X = UMVTangentVector(
             Matrix{Float64}(undef, m, k),
             Matrix{Float64}(undef, k, k),
             Matrix{Float64}(undef, k, n),
@@ -597,7 +610,7 @@ function Random.rand!(
         A = randn(rng, k, k)
         copyto!(
             pX,
-            UMVTVector(
+            UMVTangentVector(
                 Up - vector_at.U * vector_at.U' * Up,
                 A,
                 Vp' - Vp' * vector_at.Vt' * vector_at.Vt,
@@ -636,7 +649,7 @@ If ``X`` is sufficiently small, then the nearest such point is unique and can be
     q = (U(S + M) + U_{p})(S + M)^{-1}((S + M)V^{\mathrm{T}} + V^{\mathrm{T}}_{p}),
 ```
 
-where ``p`` is a [`SVDMPoint`](@ref)`(U,S,Vt)` and ``X`` is an [`UMVTVector`](@ref)`(Up,M,Vtp)`.
+where ``p`` is a [`SVDMPoint`](@ref)`(U,S,Vt)` and ``X`` is an [`UMVTangentVector`](@ref)`(Up,M,Vtp)`.
 
 For more details, see [AbsilOseledets:2014](@cite).
 """
@@ -646,7 +659,7 @@ function retract_orthographic!(
     M::FixedRankMatrices,
     q::SVDMPoint,
     p::SVDMPoint,
-    X::UMVTVector,
+    X::UMVTangentVector,
     t::Number,
 )
     m, n, k = get_parameter(M.size)
@@ -680,7 +693,7 @@ function retract_polar!(
     M::FixedRankMatrices,
     q::SVDMPoint,
     p::SVDMPoint,
-    X::UMVTVector,
+    X::UMVTangentVector,
     t::Number,
 )
     m, n, k = get_parameter(M.size)
@@ -756,7 +769,7 @@ function Base.show(io::IO, ::MIME"text/plain", p::SVDMPoint)
     sv = replace(sv, '\n' => "\n$(pre)")
     return print(io, pre, sv)
 end
-function Base.show(io::IO, ::MIME"text/plain", X::UMVTVector)
+function Base.show(io::IO, ::MIME"text/plain", X::UMVTangentVector)
     pre = " "
     summary(io, X)
     println(io, "\nU factor:")
@@ -789,13 +802,13 @@ end
 @doc raw"""
     zero_vector(M::FixedRankMatrices, p::SVDMPoint)
 
-Return a [`UMVTVector`](@ref) representing the zero tangent vector in the tangent space of
+Return a [`UMVTangentVector`](@ref) representing the zero tangent vector in the tangent space of
 `p` on the [`FixedRankMatrices`](@ref) `M`, for example all three elements of the resulting
 structure are zero matrices.
 """
 function zero_vector(M::FixedRankMatrices, p::SVDMPoint)
     m, n, k = get_parameter(M.size)
-    v = UMVTVector(
+    v = UMVTangentVector(
         zeros(eltype(p.U), m, k),
         zeros(eltype(p.S), k, k),
         zeros(eltype(p.Vt), k, n),
@@ -803,7 +816,7 @@ function zero_vector(M::FixedRankMatrices, p::SVDMPoint)
     return v
 end
 
-function zero_vector!(::FixedRankMatrices, X::UMVTVector, p::SVDMPoint)
+function zero_vector!(::FixedRankMatrices, X::UMVTangentVector, p::SVDMPoint)
     X.U .= zero(eltype(X.U))
     X.M .= zero(eltype(X.M))
     X.Vt .= zero(eltype(X.Vt))

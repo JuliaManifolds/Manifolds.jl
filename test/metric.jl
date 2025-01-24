@@ -129,7 +129,7 @@ struct NotImplementedMetric <: AbstractMetric end
 Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
 Manifolds.inner(::BaseManifold, p, X, Y) = 2 * dot(X, Y)
 Manifolds.exp!(::BaseManifold, q, p, X) = q .= p + 2 * X
-Manifolds.exp!(::BaseManifold, q, p, X, t::Number) = q .= p + 2 * t * X
+Manifolds.expt!(::BaseManifold, q, p, X, t::Number) = q .= p + 2 * t * X
 Manifolds.log!(::BaseManifold, Y, p, q) = Y .= (q - p) / 2
 Manifolds.project!(::BaseManifold, Y, p, X) = Y .= 2 .* X
 Manifolds.project!(::BaseManifold, q, p) = (q .= p)
@@ -155,14 +155,14 @@ function Manifolds.exp!(
 ) where {N}
     return exp!(base_manifold(M), q, p, X)
 end
-function Manifolds.exp!(
+function Manifolds.expt!(
     M::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
     q,
     p,
     X,
     t::Number,
 ) where {N}
-    return exp!(base_manifold(M), q, p, X, t)
+    return Manifolds.expt!(base_manifold(M), q, p, X, t)
 end
 function Manifolds.parallel_transport_to!(::BaseManifold, Y, p, X, q)
     return (Y .= X)
@@ -278,26 +278,26 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         X = [2.0, 3.0, 4.0]
         q = similar(X)
         @test_throws MethodError exp(M, p, X)
-        @test_throws MethodError exp(M, p, X, 1.0)
+        @test_throws MethodError expt(M, p, X, 1.0)
         @test_throws MethodError exp!(M, q, p, X)
-        @test_throws MethodError exp!(M, q, p, X, 1.0)
+        @test_throws MethodError expt!(M, q, p, X, 1.0)
 
         N = ConnectionManifold(E, LeviCivitaConnection())
         @test_throws MethodError exp(N, p, X)
-        @test_throws MethodError exp(N, p, X, 1.0)
+        @test_throws MethodError expt(N, p, X, 1.0)
         @test_throws MethodError exp!(N, q, p, X)
-        @test_throws MethodError exp!(N, q, p, X, 1.0)
+        @test_throws MethodError expt!(N, q, p, X, 1.0)
 
         using OrdinaryDiffEq
         @test is_point(M, exp(M, p, X))
-        @test is_point(M, exp(M, p, X, 1.0))
+        @test is_point(M, expt(M, p, X, 1.0))
 
         # a small trick to check that retract_exp_ode! returns the right value on ConnectionManifolds
         N2 = ConnectionManifold(E, TestConnection())
         @test exp(N2, p, X) == X
     end
 
-    # see also Issue #744 (https://github.com/JuliaManifolds/Manifolds.jl/issues/744) 
+    # see also Issue #744 (https://github.com/JuliaManifolds/Manifolds.jl/issues/744)
     @testset "solve_exp_ode values" begin
         E = TestEuclidean{3}()
         g = TestEuclideanMetric()
@@ -308,9 +308,9 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         X = [2.0, 3.0, 4.0]
         t = 2.5
 
-        # we're testing on a flat euclidean space 
+        # we're testing on a flat euclidean space
         @test exp(M, p, X) ≈ p + X
-        @test exp(M, p, X, t) ≈ p + t * X
+        @test ManifoldsBase.expt(M, p, X, t) ≈ p + t * X
     end
 
     @testset "Local Metric Error message" begin
@@ -543,11 +543,11 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test inner(MM, p, fX, fY) === inner(M, p, X, Y)
         @test norm(MM, p, fX) === norm(M, p, X)
         @test exp(M, p, X) == p + 2 * X
-        @test exp(M, p, X, 0.5) == p + X
+        @test ManifoldsBase.expt(M, p, X, 0.5) == p + X
         @test exp(MM2, p, X) == exp(M, p, X)
-        @test exp(MM2, p, X, 0.5) == exp(M, p, X, 0.5)
+        @test ManifoldsBase.expt(MM2, p, X, 0.5) == ManifoldsBase.expt(M, p, X, 0.5)
         @test exp!(MM, q, p, X) === exp!(M, q, p, X)
-        @test exp!(MM, q, p, X, 0.5) === exp!(M, q, p, X, 0.5)
+        @test Manifolds.expt!(MM, q, p, X, 0.5) === Manifolds.expt!(M, q, p, X, 0.5)
         @test retract!(MM, q, p, X) === retract!(M, q, p, X)
         @test retract!(MM, q, p, X, 1) === retract!(M, q, p, X, 1)
         @test project!(MM, Y, p, X) === project!(M, Y, p, X)

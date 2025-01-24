@@ -1,6 +1,6 @@
 
 @doc raw"""
-    check_vector(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector; kwargs... )
+    check_vector(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector; kwargs... )
 
 Check whether `X` is a tangent vector to point `p` on the [`Flag`](@ref) manifold `M`
 ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)`` in the orthogonal matrix representation,
@@ -18,7 +18,7 @@ where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i <
 function check_vector(
     M::Flag{<:Any,dp1},
     p::OrthogonalPoint,
-    X::OrthogonalTVector;
+    X::OrthogonalTangentVector;
     kwargs...,
 ) where {dp1}
     for i in 1:dp1
@@ -49,8 +49,8 @@ end
 
 embed(::Flag, p::OrthogonalPoint) = p.value
 embed!(::Flag, q, p::OrthogonalPoint) = copyto!(q, p.value)
-embed(::Flag, p::OrthogonalPoint, X::OrthogonalTVector) = X.value
-function embed!(::Flag, Y, p::OrthogonalPoint, X::OrthogonalTVector)
+embed(::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector) = X.value
+function embed!(::Flag, Y, p::OrthogonalPoint, X::OrthogonalTangentVector)
     return copyto!(Y, X.value)
 end
 
@@ -77,15 +77,20 @@ function _extract_flag(M::Flag, p::AbstractMatrix, i::Int, j::Int)
     return view(p, range_i, range_j)
 end
 
-function inner(::Flag, p::OrthogonalPoint, X::OrthogonalTVector, Y::OrthogonalTVector)
+function inner(
+    ::Flag,
+    p::OrthogonalPoint,
+    X::OrthogonalTangentVector,
+    Y::OrthogonalTangentVector,
+)
     return dot(X.value, Y.value) / 2
 end
 
 function project!(
     M::Flag{<:Any,dp1},
-    Y::OrthogonalTVector,
+    Y::OrthogonalTangentVector,
     ::OrthogonalPoint,
-    X::OrthogonalTVector,
+    X::OrthogonalTangentVector,
 ) where {dp1}
     N = get_parameter(M.size)[1]
     project!(SkewHermitianMatrices(N), Y.value, X.value)
@@ -97,7 +102,7 @@ function project!(
 end
 
 @doc raw"""
-    project(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector)
+    project(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector)
 
 Project vector `X` to tangent space at point `p` from [`Flag`](@ref) manifold `M`
 ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)``, in the orthogonal matrix representation.
@@ -113,20 +118,24 @@ X = \begin{bmatrix}
 ````
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
 """
-function project(M::Flag{<:Any,dp1}, ::OrthogonalPoint, X::OrthogonalTVector) where {dp1}
+function project(
+    M::Flag{<:Any,dp1},
+    ::OrthogonalPoint,
+    X::OrthogonalTangentVector,
+) where {dp1}
     N = get_parameter(M.size)[1]
     Y = project(SkewHermitianMatrices(N), X.value)
     for i in 1:dp1
         Bi = _extract_flag(M, Y, i)
         fill!(Bi, 0)
     end
-    return OrthogonalTVector(Y)
+    return OrthogonalTangentVector(Y)
 end
 
 function Random.rand!(
     rng::AbstractRNG,
     M::Flag{<:Any,dp1},
-    pX::Union{OrthogonalPoint,OrthogonalTVector};
+    pX::Union{OrthogonalPoint,OrthogonalTangentVector};
     vector_at=nothing,
 ) where {dp1}
     if vector_at === nothing
@@ -151,19 +160,19 @@ function Random.rand!(
 end
 
 @doc raw"""
-    retract(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector, ::QRRetraction)
+    retract(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector, ::QRRetraction)
 
 Compute the QR retraction on the [`Flag`](@ref) in the orthogonal matrix representation
 as the first order approximation to the exponential map. Similar to QR retraction for
 [`GeneralUnitaryMatrices`].
 """
-retract(M::Flag, p::OrthogonalPoint, X::OrthogonalTVector, ::QRRetraction)
+retract(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector, ::QRRetraction)
 
 function retract_qr!(
     ::Flag,
     q::OrthogonalPoint{<:AbstractMatrix{T}},
     p::OrthogonalPoint,
-    X::OrthogonalTVector,
+    X::OrthogonalTangentVector,
     t::Number,
 ) where {T}
     A = p.value + p.value * (t * X.value)

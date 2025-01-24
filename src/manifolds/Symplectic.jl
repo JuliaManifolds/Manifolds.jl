@@ -352,7 +352,7 @@ vector ``X \in T_p\mathrm{Sp}(2n)`` is computed as [WangSunFiori:2018](@cite)
 ````
 where ``\operatorname{Exp}(⋅)`` denotes the matrix exponential.
 """
-exp(::SymplecticMatrices, ::Any...)
+exp(::SymplecticMatrices, ::Any, ::Any)
 
 function exp!(M::SymplecticMatrices, q, p, X)
     p_star_X = symplectic_inverse_times(M, p, X)

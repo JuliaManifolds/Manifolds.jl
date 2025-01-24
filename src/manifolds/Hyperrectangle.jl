@@ -128,10 +128,10 @@ Compute the exponential map on the [`Hyperrectangle`](@ref) manifold `M` from `p
 ````
 """
 Base.exp(::Hyperrectangle, p, X) = p + X
-Base.exp(::Hyperrectangle, p, X, t::Number) = p .+ t .* X
+expt(::Hyperrectangle, p, X, t::Number) = p .+ t .* X
 
 exp!(::Hyperrectangle, q, p, X) = (q .= p .+ X)
-exp!(::Hyperrectangle, q, p, X, t::Number) = (q .= p .+ t .* X)
+expt!(::Hyperrectangle, q, p, X, t::Number) = (q .= p .+ t .* X)
 
 function get_coordinates_orthonormal(::Hyperrectangle, p, X, ::RealNumbers)
     return vec(X)

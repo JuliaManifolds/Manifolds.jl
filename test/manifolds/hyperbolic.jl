@@ -37,7 +37,11 @@ include("../header.jl")
 
         for (P, T) in zip(
             [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
-            [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
+            [
+                HyperboloidTangentVector,
+                PoincareBallTangentVector,
+                PoincareHalfSpaceTangentVector,
+            ],
         )
             p = convert(P, [1.0, 0.0, sqrt(2.0)])
             X = convert(T, [1.0, 0.0, sqrt(2.0)], [0.0, 1.0, 0.0])
@@ -65,9 +69,9 @@ include("../header.jl")
         @test convert(HyperboloidPoint, p).value == pH.value
         @test convert(AbstractVector, pH) == p
         X = [1.0, 0.0, 0.0]
-        XH = HyperboloidTVector(X)
+        XH = HyperboloidTangentVector(X)
 
-        @test convert(HyperboloidTVector, X).value == XH.value
+        @test convert(HyperboloidTangentVector, X).value == XH.value
         @test convert(AbstractVector, XH) == X
         @test convert(HyperboloidPoint, p).value == pH.value
         is_point(M, pH)
@@ -83,11 +87,11 @@ include("../header.jl")
         )
         @test_throws DomainError is_point(M, PoincareBallPoint([1.1, 0.0]); error=:error)
 
-        @test is_vector(M, pB, PoincareBallTVector([2.0, 2.0]))
+        @test is_vector(M, pB, PoincareBallTangentVector([2.0, 2.0]))
         @test_throws DomainError is_vector(
             M,
             pB,
-            PoincareBallTVector([2.0, 2.0, 3.0]);
+            PoincareBallTangentVector([2.0, 2.0, 3.0]);
             error=:error,
         )
         pS = convert(PoincareHalfSpacePoint, p)
@@ -114,13 +118,17 @@ include("../header.jl")
         M = Hyperbolic(2)
         pts = [[0.0, 0.0, 1.0], [1.0, 0.0, sqrt(2.0)]]
         X = log(M, pts[2], pts[1])
-        # For HyperboloidTVector we can do a plain wrap/unwrap
-        X1 = convert(HyperboloidTVector, X)
+        # For HyperboloidTangentVector we can do a plain wrap/unwrap
+        X1 = convert(HyperboloidTangentVector, X)
         @test convert(AbstractVector, X1) == X
         # Convert to types and back to Array
         for (P, T) in zip(
             [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
-            [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
+            [
+                HyperboloidTangentVector,
+                PoincareBallTangentVector,
+                PoincareHalfSpaceTangentVector,
+            ],
         )
             # convert to P,T
             p1 = convert(P, pts[2])
@@ -140,7 +148,11 @@ include("../header.jl")
 
             for (P2, T2) in zip(
                 [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
-                [HyperboloidTVector, PoincareBallTVector, PoincareHalfSpaceTVector],
+                [
+                    HyperboloidTangentVector,
+                    PoincareBallTangentVector,
+                    PoincareHalfSpaceTangentVector,
+                ],
             )
                 @test isapprox(M, convert(P2, p1), convert(P2, pts[2]))
                 @test convert(T, p1, X1) == convert(T, pts[2], X)
@@ -211,7 +223,7 @@ include("../header.jl")
         embed!(M, Y, p, X)
         @test Y == X
         p2 = HyperboloidPoint(p)
-        X2 = HyperboloidTVector(X)
+        X2 = HyperboloidTangentVector(X)
         q2 = HyperboloidPoint(similar(p))
         q3 = similar(p)
         @test embed(M, p2) == p2.value
@@ -220,7 +232,7 @@ include("../header.jl")
         @test q2.value == p2.value
         @test q3 == p2.value
         @test embed(M, p2, X2) == X2.value
-        Y2 = HyperboloidTVector(similar(X))
+        Y2 = HyperboloidTangentVector(similar(X))
         Y3 = similar(X)
         embed!(M, Y2, p2, X2)
         @test Y2.value == X2.value
@@ -228,7 +240,7 @@ include("../header.jl")
         @test Y3 == X2.value
         # check embed for PoincareBall
         p4 = convert(PoincareBallPoint, p)
-        X4 = convert(PoincareBallTVector, p, X)
+        X4 = convert(PoincareBallTangentVector, p, X)
         q4 = embed(M, p4)
         @test isapprox(q4, zeros(2))
         q4b = similar(q4)
@@ -241,7 +253,7 @@ include("../header.jl")
         @test Y4 == Y4b
         # check embed for PoincareHalfSpace
         p5 = convert(PoincareHalfSpacePoint, p)
-        X5 = convert(PoincareHalfSpaceTVector, p, X)
+        X5 = convert(PoincareHalfSpaceTangentVector, p, X)
         q5 = embed(M, p5)
         @test isapprox(q5, [0.0; 1.0])
         q5b = similar(q5)
@@ -298,27 +310,27 @@ include("../header.jl")
         p = Manifolds._hyperbolize(M, [0.0, 1.0])
         X = [1.0, 0.0, 0.0]
         pH = HyperboloidPoint(p)
-        XH = HyperboloidTVector(X)
+        XH = HyperboloidTangentVector(X)
         @test minkowski_metric(XH, pH) == minkowski_metric(X, p)
         @test minkowski_metric(pH, XH) == minkowski_metric(p, X)
         @test minkowski_metric(XH, XH) == minkowski_metric(X, X)
     end
     @testset "PoincareBall project tangent test" begin
         p = PoincareBallPoint([0.5, 0.0])
-        X = PoincareBallTVector([0.2, 0.2])
-        Y = PoincareBallTVector(allocate(X.value))
+        X = PoincareBallTangentVector([0.2, 0.2])
+        Y = PoincareBallTangentVector(allocate(X.value))
         project!(M, Y, p, X)
         @test Y == X
         Z = project(M, p, X)
-        @test isa(Z, PoincareBallTVector)
+        @test isa(Z, PoincareBallTangentVector)
         @test Z == X
         p2 = PoincareHalfSpacePoint([1.1, 1.1])
-        X2 = PoincareHalfSpaceTVector([0.2, 0.2])
-        Y2 = PoincareHalfSpaceTVector(allocate(X2.value))
+        X2 = PoincareHalfSpaceTangentVector([0.2, 0.2])
+        Y2 = PoincareHalfSpaceTangentVector(allocate(X2.value))
         project!(M, Y2, p2, X2)
         @test Y2 == X2
         Z2 = project(M, p2, X2)
-        @test isa(Z2, PoincareHalfSpaceTVector)
+        @test isa(Z2, PoincareHalfSpaceTangentVector)
         @test Z2 == X2
     end
     @testset "Metric conversion on Hyperboloid" begin
@@ -335,7 +347,7 @@ include("../header.jl")
     @testset "Metric conversion on Poincare Ball" begin
         M = Hyperbolic(2)
         p = convert(PoincareBallPoint, [1.0, 1.0, sqrt(3)])
-        X = convert(PoincareBallTVector, [1.0, 1.0, sqrt(3)], [1.0, 2.0, sqrt(3)])
+        X = convert(PoincareBallTangentVector, [1.0, 1.0, sqrt(3)], [1.0, 2.0, sqrt(3)])
         Y = change_representer(M, EuclideanMetric(), p, X)
         @test inner(M, p, X, Y) == inner(Euclidean(3), p, X.value, X.value)
         α = 2 / (1 - norm(p.value)^2)

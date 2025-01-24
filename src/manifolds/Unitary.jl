@@ -45,9 +45,6 @@ embed(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number) = SMatrix{1,
 function exp(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number)
     return p * exp(X)
 end
-function exp(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number, t::Number)
-    return p * exp(t * X)
-end
 
 function get_coordinates_orthonormal(
     ::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ},

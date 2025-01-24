@@ -60,6 +60,8 @@ import ManifoldsBase:
     embed!,
     exp,
     exp!,
+    expt,
+    expt!,
     fiber_dimension,
     get_basis,
     get_basis_default,
@@ -229,7 +231,7 @@ using ManifoldsBase:
     CotangentSpace,
     CotangentSpaceType,
     CoTFVector,
-    CoTVector,
+    AbstractCotangentVector,
     CyclicProximalPointEstimation,
     DefaultBasis,
     DefaultOrthogonalBasis,
@@ -298,12 +300,12 @@ using ManifoldsBase:
     TangentSpaceType,
     TCoTSpaceType,
     TFVector,
-    TVector,
+    AbstractTangentVector,
     TypeParameter,
-    ValidationCoTVector,
+    ValidationCotangentVector,
     ValidationManifold,
     ValidationMPoint,
-    ValidationTVector,
+    ValidationTangentVector,
     VectorSpaceFiber,
     VectorSpaceType,
     VeeOrthogonalBasis,
@@ -501,7 +503,7 @@ include("manifolds/KendallsShapeSpace.jl")
 include("manifolds/Grassmann.jl")
 
 # Introduce Symplectic and so on manifolds only after Grassmann
-# Since that defines the StiefelPoint, StiefelTVector
+# Since that defines the StiefelPoint, StiefelTangentVector
 include("manifolds/Symplectic.jl")
 include("manifolds/Hamiltonian.jl") # Hamiltonian requires symplectic
 include("manifolds/SymplecticStiefel.jl")
@@ -636,7 +638,8 @@ export test_manifold
 export test_group, test_action
 
 # Abstract main types
-export CoTVector, AbstractManifold, AbstractManifoldPoint, TVector
+export AbstractCotangentVector,
+    AbstractManifold, AbstractManifoldPoint, AbstractTangentVector
 # Manifolds
 export AbstractSphere, AbstractProjectiveSpace
 export Euclidean,
@@ -702,20 +705,21 @@ export HyperboloidPoint,
     ProjectorPoint,
     SPDPoint
 # Tangent vector representation types
-export HyperboloidTVector,
-    PoincareBallTVector,
-    PoincareHalfSpaceTVector,
-    TuckerTVector,
-    UMVTVector,
-    ProjectorTVector,
-    StiefelTVector
+export HyperboloidTangentVector,
+    PoincareBallTangentVector,
+    PoincareHalfSpaceTangentVector,
+    TuckerTangentVector,
+    UMVTangentVector,
+    ProjectorTangentVector,
+    StiefelTangentVector
 export AbstractNumbers, ℝ, ℂ, ℍ
 export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
 export IsDefaultMetric, IsDefaultConnection, IsMetricManifold, IsConnectionManifold
-export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
+export ValidationManifold,
+    ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector
 export AbstractPowerManifold,
     AbstractPowerRepresentation,

@@ -21,7 +21,7 @@ using RecursiveArrayTools
     x = Matrix{Float64}(I, 3, 3)
     t = Vector{Float64}.([1:2, 2:3, 3:4])
     ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
-    tuple_pts = [(exp(Rn, x, hat(Rn, x, ωi)), ti) for (ωi, ti) in zip(ω, t)]
+    tuple_pts = [(ManifoldsBase.expt(Rn, x, hat(Rn, x, ωi)), ti) for (ωi, ti) in zip(ω, t)]
     tuple_v = (hat(Rn, x, [1.0, 0.5, -0.5]), [-1.0, 2.0])
     eA = [x, zeros(2)]
 

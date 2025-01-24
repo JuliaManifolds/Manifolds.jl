@@ -246,7 +246,7 @@ function exp!(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q
         ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M, typeof(p))),
     )
 end
-function exp!(
+function expt!(
     ::TraitList{IsConnectionManifold},
     M::AbstractDecoratorManifold,
     q,
