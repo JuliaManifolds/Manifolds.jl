@@ -791,12 +791,6 @@ function hat!(
 ) where {O<:AbstractGroupOperation}
     return get_vector_lie!(M, Y, X, VeeOrthogonalBasis())
 end
-function hat(M::AbstractManifold, e::Identity, ::Any)
-    return throw(ErrorException("On $M there exists no identity $e"))
-end
-function hat!(M::AbstractManifold, c, e::Identity, X)
-    return throw(ErrorException("On $M there exists no identity $e"))
-end
 
 @trait_function vee(M::AbstractDecoratorManifold, e::Identity, X)
 @trait_function vee!(M::AbstractDecoratorManifold, Y, e::Identity, X)
