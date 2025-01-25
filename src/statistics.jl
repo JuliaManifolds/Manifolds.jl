@@ -364,7 +364,7 @@ function Statistics.mean!(
         for j in 1:n
             @inbounds t = (2 * λ * wv[j]) / (1 + 2 * λ * wv[j])
             @inbounds inverse_retract!(M, X, q, x[j], inverse_retraction)
-            retract!(M, ytmp, q, X, t, retraction)
+            retract_t!(M, ytmp, q, X, t, retraction)
             copyto!(q, ytmp)
         end
         isapprox(M, q, yold; kwargs...) && break

@@ -137,8 +137,6 @@ import ManifoldsBase:
     representation_size,
     retract,
     retract!,
-    _retract,
-    retract!,
     retract_cayley!,
     retract_exp_ode!,
     retract_pade!,
