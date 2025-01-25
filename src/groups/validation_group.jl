@@ -10,7 +10,9 @@ function adjoint_action(M::ValidationManifold, p, X; kwargs...)
     is_point(M, p; error=M.mode, kwargs...)
     eM = Identity(M.manifold)
     is_vector(M, eM, X; error=M.mode, kwargs...)
-    Y = ValidationTangentVector(adjoint_action(M.manifold, internal_value(p), internal_value(X)))
+    Y = ValidationTangentVector(
+        adjoint_action(M.manifold, internal_value(p), internal_value(X)),
+    )
     is_vector(M, eM, Y; error=M.mode, kwargs...)
     return Y
 end
@@ -25,7 +27,9 @@ function adjoint_action!(M::ValidationManifold, Y, p, X; kwargs...)
 end
 
 Identity(M::ValidationManifold) = array_point(Identity(M.manifold))
-identity_element!(M::ValidationManifold, p) = identity_element!(M.manifold, internal_value(p))
+function identity_element!(M::ValidationManifold, p)
+    return identity_element!(M.manifold, internal_value(p))
+end
 
 function Base.inv(M::ValidationManifold, p; kwargs...)
     is_point(M, p; error=M.mode, kwargs...)
@@ -45,7 +49,9 @@ function lie_bracket(M::ValidationManifold, X, Y)
     eM = Identity(M.manifold)
     is_vector(M, eM, X; error=M.mode)
     is_vector(M, eM, Y; error=M.mode)
-    Z = ValidationTangentVector(lie_bracket(M.manifold, internal_value(X), internal_value(Y)))
+    Z = ValidationTangentVector(
+        lie_bracket(M.manifold, internal_value(X), internal_value(Y)),
+    )
     is_vector(M, eM, Z; error=M.mode)
     return Z
 end
@@ -129,7 +135,9 @@ function inverse_translate(
 )
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
-    x = array_point(inverse_translate(M.manifold, internal_value(p), internal_value(q), conv))
+    x = array_point(
+        inverse_translate(M.manifold, internal_value(p), internal_value(q), conv),
+    )
     is_point(M, x; error=M.mode, kwargs...)
     return x
 end
@@ -144,7 +152,13 @@ function inverse_translate!(
 )
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
-    inverse_translate!(M.manifold, internal_value(x), internal_value(p), internal_value(q), conv)
+    inverse_translate!(
+        M.manifold,
+        internal_value(x),
+        internal_value(p),
+        internal_value(q),
+        conv,
+    )
     is_point(M, x; error=M.mode, kwargs...)
     return x
 end
@@ -161,7 +175,13 @@ function translate_diff(
     is_point(M, q; error=M.mode, kwargs...)
     is_vector(M, q, X; error=M.mode, kwargs...)
     Y = ValidationTangentVector(
-        translate_diff(M.manifold, internal_value(p), internal_value(q), internal_value(X), conv),
+        translate_diff(
+            M.manifold,
+            internal_value(p),
+            internal_value(q),
+            internal_value(X),
+            conv,
+        ),
     )
     pq = translate(M, p, q, conv)
     is_vector(M, pq, Y; error=M.mode, kwargs...)

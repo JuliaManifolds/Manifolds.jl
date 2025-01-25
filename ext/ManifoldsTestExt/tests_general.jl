@@ -242,7 +242,13 @@ function test_manifold(
             Test.@test isapprox(M, pts[1], exp(M, pts[2], X2); atol=atolp1p2, rtol=rtolp1p2)
         end
         Test.@test is_point(M, exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
-        Test.@test isapprox(M, pts[1], ManifoldsBase.expt(M, pts[1], X1, 0); atol=atolp1p2, rtol=rtolp1p2)
+        Test.@test isapprox(
+            M,
+            pts[1],
+            ManifoldsBase.expt(M, pts[1], X1, 0);
+            atol=atolp1p2,
+            rtol=rtolp1p2,
+        )
         for p in pts
             epsx = find_eps(p)
             Test.@test isapprox(
