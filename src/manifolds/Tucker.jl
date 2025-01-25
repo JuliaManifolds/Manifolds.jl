@@ -697,7 +697,7 @@ retraction produces a boundary point, which is outside the manifold.
 """
 retract(::Tucker, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(
+function ManifoldsBase.retract_polar_t!(
     ::Tucker,
     q::TuckerPoint,
     p::TuckerPoint{T,D},

@@ -237,7 +237,7 @@ function project!(B::VectorBundle, Y, p, X)
     return Y
 end
 
-function _retract!(M::VectorBundle, q, p, X, t::Number, ::FiberBundleProductRetraction)
+function _retract_t!(M::VectorBundle, q, p, X, t::Number, ::FiberBundleProductRetraction)
     return retract_product!(M, q, p, X, t)
 end
 
@@ -249,16 +249,22 @@ which by default allocates and calls `retract_product!`.
 """
 retract(::VectorBundle, p, q, t::Number, ::FiberBundleProductRetraction)
 
-function _retract(M::VectorBundle, p, X, t::Number, ::FiberBundleProductRetraction)
+function ManifoldsBase._retract_t(
+    M::VectorBundle,
+    p,
+    X,
+    t::Number,
+    ::FiberBundleProductRetraction,
+)
     return retract_product(M, p, X, t)
 end
 
-function retract_product(M::VectorBundle, p, X, t::Number)
+function retract_product_t(M::VectorBundle, p, X, t::Number)
     q = allocate_result(M, retract, p, X)
     return retract_product!(M, q, p, X, t)
 end
 
-function retract_product!(B::VectorBundle, q, p, X, t::Number)
+function retract_product_t!(B::VectorBundle, q, p, X, t::Number)
     tX = t * X
     xp, Xp = submanifold_components(B.manifold, p)
     xq, Xq = submanifold_components(B.manifold, q)
@@ -277,7 +283,14 @@ function retract_product!(B::VectorBundle, q, p, X, t::Number)
     return q
 end
 
-function retract_sasaki!(B::TangentBundle, q, p, X, t::Number, m::SasakiRetraction)
+function ManifoldsBase.retract_sasaki_t!(
+    B::TangentBundle,
+    q,
+    p,
+    X,
+    t::Number,
+    m::SasakiRetraction,
+)
     tX = t * X
     xp, Xp = submanifold_components(B.manifold, p)
     xq, Xq = submanifold_components(B.manifold, q)

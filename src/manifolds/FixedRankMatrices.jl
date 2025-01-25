@@ -164,7 +164,7 @@ Compute the in-place variant of the [`OrthographicInverseRetraction`](@ref).
 inverse_retract_orthographic!(M::AbstractManifold, X, p, q)
 
 ## Layer II
-function _retract!(
+function ManifoldsBase._retract_t!(
     M::AbstractManifold,
     q,
     p,
@@ -173,16 +173,16 @@ function _retract!(
     ::OrthographicRetraction;
     kwargs...,
 )
-    return retract_orthographic!(M, q, p, X, t; kwargs...)
+    return retract_orthographic_t!(M, q, p, X, t; kwargs...)
 end
 
 ## Layer III
 """
-    retract_orthographic!(M::AbstractManifold, q, p, X, t::Number)
+    retract_orthographic!(M::AbstractManifold, q, p, X)
 
 Compute the in-place variant of the [`OrthographicRetraction`](@ref).
 """
-retract_orthographic!(M::AbstractManifold, q, p, X, t::Number)
+retract_orthographic!(M::AbstractManifold, q, p, X)
 
 # \|---
 
@@ -655,7 +655,7 @@ For more details, see [AbsilOseledets:2014](@cite).
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicRetraction)
 
-function retract_orthographic!(
+function retract_orthographic_t!(
     M::FixedRankMatrices,
     q::SVDMPoint,
     p::SVDMPoint,
@@ -689,7 +689,7 @@ singular values and ``U`` and ``V`` are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(
+function ManifoldsBase.retract_polar_t!(
     M::FixedRankMatrices,
     q::SVDMPoint,
     p::SVDMPoint,
