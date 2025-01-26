@@ -373,12 +373,12 @@ Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.Pola
 """
 retract(::GeneralizedGrassmann, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(M::GeneralizedGrassmann, q, p, X, t::Number)
+function ManifoldsBase.retract_polar_t!(M::GeneralizedGrassmann, q, p, X, t::Number)
     q .= p .+ t .* X
     project!(M, q, q)
     return q
 end
-function retract_project!(M::GeneralizedGrassmann, q, p, X, t::Number)
+function ManifoldsBase.retract_project_t!(M::GeneralizedGrassmann, q, p, X, t::Number)
     q .= p .+ t .* X
     project!(M, q, q)
     return q

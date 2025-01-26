@@ -217,7 +217,7 @@ function Statistics.mean!(
             inverse_retract!(M, vtmp, yold, x[j], inverse_retraction)
             v .+= α[j] .* (vtmp .- v)
         end
-        retract!(M, y, yold, v, 0.5, retraction)
+        retract_t!(M, y, yold, v, 0.5, retraction)
         isapprox(M, y, yold; kwargs...) && break
     end
     return y
@@ -283,7 +283,7 @@ function Statistics.mean!(
         s += w[j]
         t = w[j] / s
         inverse_retract!(M, v, q, x[j], inverse_retraction)
-        retract!(M, ytmp, q, v, t, retraction)
+        retract_t!(M, ytmp, q, v, t, retraction)
         copyto!(q, ytmp)
     end
     return q

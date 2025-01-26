@@ -1029,7 +1029,7 @@ This is also the default retraction on these manifolds.
 """
 retract(::GeneralUnitaryMatrices, ::Any, ::Any, ::QRRetraction)
 
-function retract_qr!(
+function ManifoldsBase.retract_qr_t!(
     ::GeneralUnitaryMatrices,
     q::AbstractArray{T},
     p,
@@ -1042,7 +1042,7 @@ function retract_qr!(
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
-function retract_polar!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
+function ManifoldsBase.retract_polar_t!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
     A = p + p * (t * X)
     return project!(M, q, A; check_det=false)
 end

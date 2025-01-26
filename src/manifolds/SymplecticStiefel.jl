@@ -557,7 +557,7 @@ This expression is computed inplace of `q`.
 """
 retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
 
-function retract_cayley!(M::SymplecticStiefel, q, p, X, t::Number)
+function ManifoldsBase.retract_cayley_t!(M::SymplecticStiefel, q, p, X, t::Number)
     tX = t * X
     # Define intermediate matrices for later use:
     A = symplectic_inverse_times(M, p, tX)

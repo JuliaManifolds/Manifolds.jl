@@ -328,7 +328,7 @@ function test_manifold(
                 Test.@test isapprox(
                     M,
                     p,
-                    retract(M, p, X, 0, retr_method);
+                    retract_t(M, p, X, 0, retr_method);
                     atol=epsx * retraction_atol_multiplier,
                     rtol=retraction_atol_multiplier == 0 ?
                          sqrt(epsx) * retraction_rtol_multiplier : 0,

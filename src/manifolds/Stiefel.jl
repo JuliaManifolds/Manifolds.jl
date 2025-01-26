@@ -471,7 +471,14 @@ retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 _qrfac_to_q(qrfac) = Matrix(qrfac.Q)
 _qrfac_to_q(qrfac::StaticArrays.QR) = qrfac.Q
 
-function retract_pade!(::Stiefel, q, p, X, t::Number, ::PadeRetraction{m}) where {m}
+function ManifoldsBase.retract_pade_t!(
+    ::Stiefel,
+    q,
+    p,
+    X,
+    t::Number,
+    ::PadeRetraction{m},
+) where {m}
     tX = t * X
     Pp = I - 1 // 2 * p * p'
     WpX = Pp * tX * p' - p * tX' * Pp
@@ -493,12 +500,12 @@ function retract_pade!(::Stiefel, q, p, X, t::Number, ::PadeRetraction{m}) where
     end
     return copyto!(q, (qm \ pm) * p)
 end
-function retract_polar!(::Stiefel, q, p, X, t::Number)
+function ManifoldsBase.retract_polar_t!(::Stiefel, q, p, X, t::Number)
     q .= p .+ t .* X
     s = svd(q)
     return mul!(q, s.U, s.Vt)
 end
-function retract_qr!(::Stiefel, q, p, X, t::Number)
+function ManifoldsBase.retract_qr_t!(::Stiefel, q, p, X, t::Number)
     q .= p .+ t .* X
     qrfac = qr(q)
     d = diag(qrfac.R)

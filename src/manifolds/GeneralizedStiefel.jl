@@ -243,12 +243,12 @@ retract(::GeneralizedStiefel, ::Any...)
 
 default_retraction_method(::GeneralizedStiefel) = ProjectionRetraction()
 
-function retract_polar!(M::GeneralizedStiefel, q, p, X, t::Number)
+function ManifoldsBase.retract_polar_t!(M::GeneralizedStiefel, q, p, X, t::Number)
     q .= p .+ t .* X
     project!(M, q, q)
     return q
 end
-function retract_project!(M::GeneralizedStiefel, q, p, X, t::Number)
+function ManifoldsBase.retract_project_t!(M::GeneralizedStiefel, q, p, X, t::Number)
     q .= p .+ t .* X
     project!(M, q, q)
     return q
