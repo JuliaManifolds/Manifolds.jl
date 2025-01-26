@@ -581,7 +581,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test log!(MM2, X, p, q) === log!(M, X, p, q)
         @test log(MM2, p, q) == log(M, p, q)
         @test retract!(MM2, q, p, X) === retract!(M, q, p, X)
-        @test retract!(MM2, q, p, X, 1) === retract!(M, q, p, X, 1)
+        @test retract_t!(MM2, q, p, X, 1) === retract_t!(M, q, p, X, 1)
 
         @test project!(MM2, q, p) === project!(M, q, p)
         @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
