@@ -538,7 +538,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test exp!(MM, q, p, X) === exp!(M, q, p, X)
         @test Manifolds.expt!(MM, q, p, X, 0.5) === Manifolds.expt!(M, q, p, X, 0.5)
         @test retract!(MM, q, p, X) === retract!(M, q, p, X)
-        @test retract!(MM, q, p, X, 1) === retract!(M, q, p, X, 1)
+        @test retract_t!(MM, q, p, X, 1) === retract_t!(M, q, p, X, 1)
         @test project!(MM, Y, p, X) === project!(M, Y, p, X)
         @test project!(MM, q, p) === project!(M, q, p)
         # without a definition for the metric from the embedding, no projection possible

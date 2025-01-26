@@ -305,7 +305,7 @@ function is_default_connection(M::ConnectionManifold)
 end
 is_default_connection(::AbstractManifold, ::AbstractAffineConnection) = false
 
-function retract_exp_ode!(
+function ManifoldsBase.retract_exp_ode_t!(
     M::AbstractManifold,
     q,
     p,
