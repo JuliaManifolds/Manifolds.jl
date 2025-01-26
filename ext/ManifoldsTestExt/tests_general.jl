@@ -109,7 +109,6 @@ function test_manifold(
     test_mutating_rand=false,
     parallel_transport=false,
     parallel_transport_to=parallel_transport,
-    parallel_transport_along=parallel_transport,
     parallel_transport_direction=parallel_transport,
     test_inner=true,
     test_norm=true,
@@ -315,7 +314,6 @@ function test_manifold(
     parallel_transport && test_parallel_transport(
         M,
         pts;
-        along=parallel_transport_along,
         to=parallel_transport_to,
         direction=parallel_transport_direction,
         mutating=is_mutating,
@@ -860,15 +858,12 @@ function test_manifold(
 end
 
 """
-    test_parallel_transport(M,P; along=false, to=true, direction=true)
+    test_parallel_transport(M,P; to=true, direction=true)
 
 Generic tests for parallel transport on `M`given at least two pointsin `P`.
 
-The single functions to transport `along` (a curve), `to` (a point) or (towards a) `direction`
+The single functions to transport `to` (a point) or (in a) `direction`
 are sub-tests that can be activated by the keywords arguments
-
-!!! Note
-Since the interface to specify curves is not yet provided, the along keyword does not have an effect yet
 """
 function test_parallel_transport(
     M::AbstractManifold,
@@ -879,7 +874,6 @@ function test_parallel_transport(
         P[2:end],
         Ref(default_inverse_retraction_method(M)),
     );
-    along=false,
     to=true,
     direction=true,
     mutating=true,
@@ -887,7 +881,6 @@ function test_parallel_transport(
     length(P) < 2 &&
         error("The Parallel Transport test set requires at least 2 points in P")
     Test.@testset "Test Parallel Transport" begin # COV_EXCL_LINE
-        along && @warn "parallel transport along test not yet implemented"
         Test.@testset "To (a point)" begin # COV_EXCL_LINE
             # even with to =false this displays no tests
             if to

@@ -234,17 +234,6 @@ function solve_exp_ode(
 ) where {N}
     return X
 end
-function Manifolds.vector_transport_along!(
-    M::BaseManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
-)
-    Y .= c
-    return Y
-end
 
 # test for https://github.com/JuliaManifolds/Manifolds.jl/issues/539
 struct Issue539Metric <: RiemannianMetric end
@@ -603,10 +592,6 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test vector_transport_to!(MM2, Y, p, X, q) == vector_transport_to!(M, Y, p, X, q)
         c = 2 * ones(3)
         m = ParallelTransport()
-        @test vector_transport_along(MM2, p, X, c, m) ==
-              vector_transport_along(M, p, X, c, m)
-        @test vector_transport_along!(MM2, Y, p, X, c, m) ==
-              vector_transport_along!(M, Y, p, X, c, m)
         @test zero_vector!(MM2, X, p) === zero_vector!(M, X, p)
         @test injectivity_radius(MM2, p) === injectivity_radius(M, p)
         @test injectivity_radius(MM2) === injectivity_radius(M)

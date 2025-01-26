@@ -675,14 +675,6 @@ function project!(
 end
 
 """
-    parallel_transport_along(M::Euclidean, p, X, c)
-
-the parallel transport on [`Euclidean`](@ref) is the identity, i.e. returns `X`.
-"""
-parallel_transport_along(::Euclidean, ::Any, X, c::AbstractVector) = X
-parallel_transport_along!(::Euclidean, Y, ::Any, X, c::AbstractVector) = copyto!(Y, X)
-
-"""
     parallel_transport_direction(M::Euclidean, p, X, d)
 
 the parallel transport on [`Euclidean`](@ref) is the identity, i.e. returns `X`.
@@ -813,25 +805,6 @@ end
 # b) no ambiguities occur
 # c) Euclidean is so basic, that these are plain defaults
 #
-function vector_transport_along(
-    ::Euclidean,
-    ::Any,
-    X,
-    ::AbstractVector,
-    method::AbstractVectorTransportMethod,
-)
-    return X
-end
-function vector_transport_along!(
-    M::Euclidean,
-    Y,
-    p,
-    X,
-    ::AbstractVector,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-)
-    return copyto!(Y, X)
-end
 function vector_transport_direction(
     M::Euclidean,
     p,

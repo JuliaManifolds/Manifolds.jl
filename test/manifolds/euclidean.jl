@@ -57,16 +57,6 @@ using FiniteDifferences
         get_vector!(E, Y2, p, Y, B)
         @test Y2 == X
 
-        Y = parallel_transport_along(E, p, X, [p])
-        @test Y == X
-        parallel_transport_along!(E, Y, p, X, [p])
-        @test Y == X
-
-        Y = vector_transport_along(E, p, X, [p])
-        @test Y == X
-        vector_transport_along!(E, Y, p, X, [p])
-        @test Y == X
-
         # real manifold does not allow complex values
         @test_throws DomainError is_point(Ec, [:a, :b, :b]; error=:error)
         @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], error=:error)

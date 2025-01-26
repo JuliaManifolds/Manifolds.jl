@@ -686,28 +686,6 @@ function Base.show(io::IO, i::IsDefaultMetric)
     return print(io, "IsDefaultMetric($(i.metric))")
 end
 
-function vector_transport_along(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_along(M.manifold, p, X, c, m)
-end
-function vector_transport_along!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_along!(M.manifold, Y, p, X, c, m)
-end
-
 function vector_transport_direction(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},
@@ -813,8 +791,6 @@ for mf in [
     median!,
     mid_point,
     norm,
-    parallel_transport_along,
-    parallel_transport_along!,
     parallel_transport_direction,
     parallel_transport_direction!,
     parallel_transport_to,
@@ -831,8 +807,6 @@ for mf in [
     riemannian_Hessian,
     riemannian_Hessian!,
     sharp!,
-    vector_transport_along,
-    vector_transport_along!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,
