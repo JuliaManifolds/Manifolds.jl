@@ -242,12 +242,12 @@ function _retract_t!(M::VectorBundle, q, p, X, t::Number, ::FiberBundleProductRe
 end
 
 """
-    retract(M::VectorBundle, p, q, t::Number, ::FiberBundleProductRetraction)
+    retract(M::VectorBundle, p, q, ::FiberBundleProductRetraction)
 
 Compute the allocating variant of the [`FiberBundleProductRetraction`](@ref),
 which by default allocates and calls `retract_product!`.
 """
-retract(::VectorBundle, p, q, t::Number, ::FiberBundleProductRetraction)
+retract(::VectorBundle, p, q, ::FiberBundleProductRetraction)
 
 function ManifoldsBase._retract_t(
     M::VectorBundle,
@@ -256,12 +256,23 @@ function ManifoldsBase._retract_t(
     t::Number,
     ::FiberBundleProductRetraction,
 )
-    return retract_product(M, p, X, t)
+    return retract_product_t(M, p, X, t)
+end
+
+function ManifoldsBase._retract_t!(
+    M::VectorBundle,
+    q,
+    p,
+    X,
+    t::Number,
+    ::FiberBundleProductRetraction,
+)
+    return retract_product_t!(M, q, p, X, t)
 end
 
 function retract_product_t(M::VectorBundle, p, X, t::Number)
     q = allocate_result(M, retract, p, X)
-    return retract_product!(M, q, p, X, t)
+    return retract_product_t!(M, q, p, X, t)
 end
 
 function retract_product_t!(B::VectorBundle, q, p, X, t::Number)

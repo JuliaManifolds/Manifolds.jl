@@ -657,7 +657,7 @@ function Statistics.median!(
         for j in 1:n
             @inbounds t = min(λ * wv[j] / distance(M, q, x[j]), 1.0)
             @inbounds inverse_retract!(M, v, q, x[j], inverse_retraction)
-            retract!(M, ytmp, q, v, t, retraction)
+            retract_t!(M, ytmp, q, v, t, retraction)
             copyto!(q, ytmp)
         end
         isapprox(M, q, yold; kwargs...) && break
@@ -718,7 +718,7 @@ function Statistics.median!(
         for j in 1:n
             @inbounds v .+= d[j] * inverse_retract(M, q, x[j], inverse_retraction)
         end
-        retract!(M, ytmp, q, v, α / sum(d), retraction)
+        retract_t!(M, ytmp, q, v, α / sum(d), retraction)
         copyto!(q, ytmp)
         isapprox(M, q, yold; kwargs...) && break
     end
@@ -909,7 +909,7 @@ function StatsBase.mean_and_var(
         snew = s + w[j]
         t = w[j] / snew
         inverse_retract!(M, v, y, x[j], inverse_retraction)
-        retract!(M, ytmp, y, v, t, retraction)
+        retract_t!(M, ytmp, y, v, t, retraction)
         d = norm(M, y, v)
         copyto!(y, ytmp)
         M₂ += t * s * d^2

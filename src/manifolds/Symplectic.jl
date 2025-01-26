@@ -773,7 +773,7 @@ denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
 """
 retract(M::SymplecticMatrices, p, X)
 
-function retract_cayley!(M::SymplecticMatrices, q, p, X, t::Number)
+function ManifoldsBase.retract_cayley_t!(M::SymplecticMatrices, q, p, X, t::Number)
     p_star_X = symplectic_inverse_times(M, p, t * X)
 
     divisor = lu(2 * I - p_star_X)
