@@ -27,8 +27,8 @@ manifold_dimension(::TestStatsSphere{N}) where {N} = manifold_dimension(Sphere(N
 function exp!(::TestStatsSphere{N}, q, p, X; kwargs...) where {N}
     return exp!(Sphere(N), q, p, X; kwargs...)
 end
-function Manifolds.expt!(::TestStatsSphere{N}, q, p, X, t::Number; kwargs...) where {N}
-    return Manifolds.expt!(Sphere(N), q, p, X, t; kwargs...)
+function Manifolds.exp_fused!(::TestStatsSphere{N}, q, p, X, t::Number; kwargs...) where {N}
+    return Manifolds.exp_fused!(Sphere(N), q, p, X, t; kwargs...)
 end
 function log!(::TestStatsSphere{N}, X, p, q; kwargs...) where {N}
     return log!(Sphere(N), X, p, q; kwargs...)
@@ -46,8 +46,15 @@ manifold_dimension(::TestStatsEuclidean{N}) where {N} = manifold_dimension(Eucli
 function exp!(::TestStatsEuclidean{N}, q, p, X; kwargs...) where {N}
     return exp!(Euclidean(N), q, p, X; kwargs...)
 end
-function Manifolds.expt!(::TestStatsEuclidean{N}, q, p, X, t::Number; kwargs...) where {N}
-    return Manifolds.expt!(Euclidean(N), q, p, X, t; kwargs...)
+function Manifolds.exp_fused!(
+    ::TestStatsEuclidean{N},
+    q,
+    p,
+    X,
+    t::Number;
+    kwargs...,
+) where {N}
+    return Manifolds.exp_fused!(Euclidean(N), q, p, X, t; kwargs...)
 end
 function log!(::TestStatsEuclidean{N}, X, p, q; kwargs...) where {N}
     return log!(Euclidean(N), X, p, q; kwargs...)

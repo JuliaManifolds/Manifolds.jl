@@ -417,9 +417,9 @@ function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X)
     @inbounds _padpoint!(M, q)
     return q
 end
-function expt!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X, t::Number)
+function exp_fused!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X, t::Number)
     map(
-        (N, qc, pc, Xc) -> expt!(N, qc, pc, Xc, t),
+        (N, qc, pc, Xc) -> exp_fused!(N, qc, pc, Xc, t),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),

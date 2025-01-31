@@ -238,11 +238,16 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
                 ).value
             return q
         end
-        function expt!(M::Hyperbolic, q::$P, p::$P, X::$T, t::Number)
+        function exp_fused!(M::Hyperbolic, q::$P, p::$P, X::$T, t::Number)
             q.value .=
                 convert(
                     $P,
-                    expt(M, convert(AbstractVector, p), convert(AbstractVector, p, X), t),
+                    exp_fused(
+                        M,
+                        convert(AbstractVector, p),
+                        convert(AbstractVector, p, X),
+                        t,
+                    ),
                 ).value
             return q
         end

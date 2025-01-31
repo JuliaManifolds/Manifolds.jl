@@ -110,7 +110,7 @@ function exp(::SymmetricPositiveDefinite, p::SPDPoint, X)
     return q
 end
 
-function expt!(M::SymmetricPositiveDefinite, q, p, X, t::Number)
+function exp_fused!(M::SymmetricPositiveDefinite, q, p, X, t::Number)
     return exp!(M, q, p, t * X)
 end
 function exp!(::SymmetricPositiveDefinite, q, p, X)

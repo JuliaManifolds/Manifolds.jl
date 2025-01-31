@@ -1327,7 +1327,7 @@ function retract(
     q = translate(G, p, pinvq, conv)
     return q
 end
-function retract(
+function retract_fused(
     tl::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
@@ -1338,7 +1338,7 @@ function retract(
     return retract(tl, G, p, t * X, method)
 end
 
-function retract!(
+function retract_fused!(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     q,
@@ -1351,7 +1351,7 @@ function retract!(
     pinvq = exp_lie(G, Xₑ)
     return translate!(G, q, p, pinvq, conv)
 end
-function retract!(
+function retract_fused!(
     tl::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     q,

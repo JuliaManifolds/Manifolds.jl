@@ -95,7 +95,7 @@ end
 function exp(::TraitList{HasLeftInvariantMetric}, M::AbstractDecoratorManifold, p, X)
     return retract(M, p, X, GroupExponentialRetraction(LeftForwardAction()))
 end
-function expt(
+function exp_fused(
     ::TraitList{HasLeftInvariantMetric},
     M::AbstractDecoratorManifold,
     p,
@@ -107,7 +107,7 @@ end
 function exp!(::TraitList{HasLeftInvariantMetric}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(M, q, p, X, GroupExponentialRetraction(LeftForwardAction()))
 end
-function expt!(
+function exp_fused!(
     ::TraitList{HasLeftInvariantMetric},
     M::AbstractDecoratorManifold,
     q,
@@ -120,7 +120,7 @@ end
 function exp(::TraitList{HasRightInvariantMetric}, M::AbstractDecoratorManifold, p, X)
     return retract(M, p, X, GroupExponentialRetraction(RightBackwardAction()))
 end
-function expt(
+function exp_fused(
     ::TraitList{HasRightInvariantMetric},
     M::AbstractDecoratorManifold,
     p,
@@ -132,7 +132,7 @@ end
 function exp!(::TraitList{HasRightInvariantMetric}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(M, q, p, X, GroupExponentialRetraction(RightBackwardAction()))
 end
-function expt!(
+function exp_fused!(
     ::TraitList{HasRightInvariantMetric},
     M::AbstractDecoratorManifold,
     q,
@@ -145,14 +145,21 @@ end
 function exp(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, X)
     return exp(M.manifold, p, X)
 end
-function expt(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, X, t::Number)
-    return expt(M.manifold, p, X, t)
+function exp_fused(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, X, t::Number)
+    return exp_fused(M.manifold, p, X, t)
 end
 function exp!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, q, p, X)
     return exp!(M.manifold, q, p, X)
 end
-function expt!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, q, p, X, t::Number)
-    return expt!(M.manifold, q, p, X, t)
+function exp_fused!(
+    ::TraitList{HasBiinvariantMetric},
+    M::MetricManifold,
+    q,
+    p,
+    X,
+    t::Number,
+)
+    return exp_fused!(M.manifold, q, p, X, t)
 end
 
 function get_coordinates(

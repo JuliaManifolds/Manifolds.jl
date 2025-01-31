@@ -181,7 +181,7 @@ refers to the elementwise exponentiation.
 """
 retract(::MultinomialSymmetric, ::Any, ::Any, ::ProjectionRetraction)
 
-function ManifoldsBase.retract_project_t!(M::MultinomialSymmetric, q, p, X, t::Number)
+function ManifoldsBase.retract_project_fused!(M::MultinomialSymmetric, q, p, X, t::Number)
     return project!(M, q, p .* exp.(t .* X ./ p))
 end
 

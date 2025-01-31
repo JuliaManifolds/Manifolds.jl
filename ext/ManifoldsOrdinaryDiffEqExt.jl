@@ -4,7 +4,7 @@ using ManifoldsBase
 using ManifoldsBase: TraitList
 
 using Manifolds
-import Manifolds: exp!, expt!, solve_exp_ode
+import Manifolds: exp!, exp_fused!, solve_exp_ode
 using Manifolds: @einsum
 
 using ManifoldDiff: default_differential_backend
@@ -49,7 +49,7 @@ function solve_exp_ode(
     return q
 end
 # also define exp! for metric manifold anew in this case
-function expt!(
+function exp_fused!(
     ::TraitList{IsMetricManifold},
     M::AbstractDecoratorManifold,
     q,

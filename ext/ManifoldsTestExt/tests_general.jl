@@ -209,14 +209,14 @@ function test_manifold(
         Test.@test isapprox(
             M,
             pts[1],
-            ManifoldsBase.expt(M, pts[1], X1, 0);
+            ManifoldsBase.exp_fused(M, pts[1], X1, 0);
             atol=atolp1p2,
             rtol=rtolp1p2,
         )
         Test.@test isapprox(
             M,
             pts[2],
-            ManifoldsBase.expt(M, pts[1], X1, 1);
+            ManifoldsBase.exp_fused(M, pts[1], X1, 1);
             atol=atolp1p2,
             rtol=rtolp1p2,
         )
@@ -224,7 +224,7 @@ function test_manifold(
             q2 = allocate(pts[1])
             exp!(M, q2, pts[1], X1)
             Test.@test isapprox(M, pts[2], q2; atol=atolp1p2, rtol=rtolp1p2)
-            ManifoldsBase.expt!(M, q2, pts[1], X1, 0)
+            ManifoldsBase.exp_fused!(M, q2, pts[1], X1, 0)
             Test.@test isapprox(M, pts[1], q2; atol=atolp1p2, rtol=rtolp1p2)
         end
         if VERSION >= v"1.5" && isa(M, Union{Grassmann,GeneralizedStiefel})
@@ -244,7 +244,7 @@ function test_manifold(
         Test.@test isapprox(
             M,
             pts[1],
-            ManifoldsBase.expt(M, pts[1], X1, 0);
+            ManifoldsBase.exp_fused(M, pts[1], X1, 0);
             atol=atolp1p2,
             rtol=rtolp1p2,
         )
@@ -282,8 +282,8 @@ function test_manifold(
             X1 = log(M, pts[1], pts[2])
         end
 
-        Test.@test isapprox(M, Manifolds.expt(M, pts[1], X1, 1), pts[2]; atol=atolp1)
-        Test.@test isapprox(M, Manifolds.expt(M, pts[1], X1, 0), pts[1]; atol=atolp1)
+        Test.@test isapprox(M, Manifolds.exp_fused(M, pts[1], X1, 1), pts[2]; atol=atolp1)
+        Test.@test isapprox(M, Manifolds.exp_fused(M, pts[1], X1, 0), pts[1]; atol=atolp1)
 
         if test_norm
             Test.@test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], X1)
@@ -328,7 +328,7 @@ function test_manifold(
                 Test.@test isapprox(
                     M,
                     p,
-                    retract_t(M, p, X, 0, retr_method);
+                    retract_fused(M, p, X, 0, retr_method);
                     atol=epsx * retraction_atol_multiplier,
                     rtol=retraction_atol_multiplier == 0 ?
                          sqrt(epsx) * retraction_rtol_multiplier : 0,

@@ -246,7 +246,7 @@ function exp!(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q
         ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M, typeof(p))),
     )
 end
-function expt!(
+function exp_fused!(
     ::TraitList{IsConnectionManifold},
     M::AbstractDecoratorManifold,
     q,
@@ -305,7 +305,7 @@ function is_default_connection(M::ConnectionManifold)
 end
 is_default_connection(::AbstractManifold, ::AbstractAffineConnection) = false
 
-function ManifoldsBase.retract_exp_ode_t!(
+function ManifoldsBase.retract_exp_ode_fused!(
     M::AbstractManifold,
     q,
     p,

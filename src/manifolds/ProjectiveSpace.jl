@@ -506,15 +506,21 @@ retract(
     ::Union{ProjectionRetraction,PolarRetraction,QRRetraction},
 )
 
-function ManifoldsBase.retract_polar_t!(M::AbstractProjectiveSpace, q, p, X, t::Number)
+function ManifoldsBase.retract_polar_fused!(M::AbstractProjectiveSpace, q, p, X, t::Number)
     q .= p .+ t .* X
     return project!(M, q, q)
 end
-function ManifoldsBase.retract_project_t!(M::AbstractProjectiveSpace, q, p, X, t::Number)
+function ManifoldsBase.retract_project_fused!(
+    M::AbstractProjectiveSpace,
+    q,
+    p,
+    X,
+    t::Number,
+)
     q .= p .+ t .* X
     return project!(M, q, q)
 end
-function ManifoldsBase.retract_qr_t!(M::AbstractProjectiveSpace, q, p, X, t::Number)
+function ManifoldsBase.retract_qr_fused!(M::AbstractProjectiveSpace, q, p, X, t::Number)
     q .= p .+ t .* X
     return project!(M, q, q)
 end

@@ -164,7 +164,7 @@ Compute the in-place variant of the [`OrthographicInverseRetraction`](@ref).
 inverse_retract_orthographic!(M::AbstractManifold, X, p, q)
 
 ## Layer II
-function ManifoldsBase._retract_t!(
+function ManifoldsBase._retract_fused!(
     M::AbstractManifold,
     q,
     p,
@@ -173,7 +173,7 @@ function ManifoldsBase._retract_t!(
     ::OrthographicRetraction;
     kwargs...,
 )
-    return retract_orthographic_t!(M, q, p, X, t; kwargs...)
+    return retract_orthographic_fused!(M, q, p, X, t; kwargs...)
 end
 
 ## Layer III
@@ -655,7 +655,7 @@ For more details, see [AbsilOseledets:2014](@cite).
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicRetraction)
 
-function retract_orthographic_t!(
+function retract_orthographic_fused!(
     M::FixedRankMatrices,
     q::SVDMPoint,
     p::SVDMPoint,
@@ -689,7 +689,7 @@ singular values and ``U`` and ``V`` are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
 
-function ManifoldsBase.retract_polar_t!(
+function ManifoldsBase.retract_polar_fused!(
     M::FixedRankMatrices,
     q::SVDMPoint,
     p::SVDMPoint,

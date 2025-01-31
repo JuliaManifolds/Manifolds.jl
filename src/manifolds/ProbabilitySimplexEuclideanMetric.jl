@@ -1,5 +1,5 @@
 exp!(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}, q, p, X) = (q .= p .+ X)
-function expt!(
+function exp_fused!(
     ::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric},
     q,
     p,

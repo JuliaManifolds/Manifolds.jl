@@ -269,7 +269,7 @@ refers to the elementwise exponentiation.
 """
 retract(::MultinomialDoubleStochastic, ::Any, ::Any, ::ProjectionRetraction)
 
-function ManifoldsBase.retract_project_t!(
+function ManifoldsBase.retract_project_fused!(
     M::MultinomialDoubleStochastic,
     q,
     p,

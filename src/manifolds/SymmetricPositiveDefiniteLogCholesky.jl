@@ -67,7 +67,7 @@ function exp!(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetri
     z = exp(CholeskySpace(N; parameter=get_parameter_type(M.manifold)), y, W)
     return copyto!(q, z * z')
 end
-function expt!(
+function exp_fused!(
     M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric},
     q,
     p,

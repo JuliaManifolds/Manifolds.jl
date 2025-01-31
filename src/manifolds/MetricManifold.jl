@@ -331,14 +331,14 @@ function exp(
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return exp(M.manifold, p, X)
 end
-function expt(
+function exp_fused(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},
     p,
     X,
     t::Number,
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return expt(M.manifold, p, X, t)
+    return exp_fused(M.manifold, p, X, t)
 end
 function exp!(
     ::TraitList{IsDefaultMetric{G}},
@@ -349,7 +349,7 @@ function exp!(
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return exp!(M.manifold, q, p, X)
 end
-function expt!(
+function exp_fused!(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},
     q,
@@ -357,7 +357,7 @@ function expt!(
     X,
     t::Number,
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return expt!(M.manifold, q, p, X, t)
+    return exp_fused!(M.manifold, q, p, X, t)
 end
 
 injectivity_radius(M::MetricManifold) = injectivity_radius(M.manifold)
@@ -766,8 +766,8 @@ for mf in [
     einstein_tensor,
     exp,
     exp!,
-    expt,
-    expt!,
+    exp_fused,
+    exp_fused!,
     flat!,
     gaussian_curvature,
     get_basis,
@@ -797,8 +797,8 @@ for mf in [
     parallel_transport_to!,
     retract,
     retract!,
-    retract_t,
-    retract_t!,
+    retract_fused,
+    retract_fused!,
     ricci_curvature,
     ricci_tensor,
     riemann_tensor,

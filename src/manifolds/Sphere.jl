@@ -197,7 +197,7 @@ function exp!(M::AbstractSphere, q, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* X
     return q
 end
-function expt!(M::AbstractSphere, q, p, X, t::Number)
+function exp_fused!(M::AbstractSphere, q, p, X, t::Number)
     θ = abs(t) * norm(M, p, X)
     q .= cos(θ) .* p .+ usinc(θ) .* t .* X
     return q
@@ -498,7 +498,7 @@ Compute the retraction that is based on projection, i.e.
 """
 retract(::AbstractSphere, ::Any, ::Any, ::ProjectionRetraction)
 
-function ManifoldsBase.retract_project_t!(M::AbstractSphere, q, p, X, t::Number)
+function ManifoldsBase.retract_project_fused!(M::AbstractSphere, q, p, X, t::Number)
     q .= p .+ t .* X
     return project!(M, q, q)
 end

@@ -257,7 +257,7 @@ function embed!(M::Hyperbolic, Y, p::HyperboloidPoint, X::HyperboloidTangentVect
     return embed!(M, Y, p.value, X.value)
 end
 
-function expt!(M::Hyperbolic, q, p, X, t::Number)
+function exp_fused!(M::Hyperbolic, q, p, X, t::Number)
     return exp!(M, q, p, t * X)
 end
 function exp!(M::Hyperbolic, q, p, X)

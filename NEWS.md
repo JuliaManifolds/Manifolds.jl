@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
-* bumped dependency of ManifoldsBase.jl to 0.16, split `exp` into `exp` and `expt` accordingly
+* bumped dependency of ManifoldsBase.jl to 0.16, split `exp` into `exp` and `exp_fused` accordingly
 
 ## [0.10.12] - 2025-01-10
 

@@ -76,7 +76,7 @@ function exp(M::GeneralLinear, p, X)
     q = similar(p)
     return exp!(M, q, p, X)
 end
-function expt(M::GeneralLinear, p, X, t::Number)
+function exp_fused(M::GeneralLinear, p, X, t::Number)
     q = similar(p)
     return exp!(M, q, p, t * X)
 end
@@ -90,7 +90,7 @@ function exp!(G::GeneralLinear, q, p, X)
     compose!(G, q, p, q)
     return q
 end
-function expt!(G::GeneralLinear, q, p, X, t::Number)
+function exp_fused!(G::GeneralLinear, q, p, X, t::Number)
     return exp!(G, q, p, t * X)
 end
 function exp!(::GeneralLinear{TypeParameter{Tuple{1}}}, q, p, X)

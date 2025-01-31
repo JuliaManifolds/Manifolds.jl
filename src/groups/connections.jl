@@ -58,7 +58,7 @@ function exp(
     Y = inverse_translate_diff(M.manifold, p, p, X, LeftForwardAction())
     return compose(M.manifold, p, exp_lie(M.manifold, Y))
 end
-function expt(
+function exp_fused(
     M::ConnectionManifold{
         𝔽,
         <:AbstractDecoratorManifold{𝔽},
@@ -85,7 +85,7 @@ function exp!(
     return compose!(M.manifold, q, p, exp_lie(M.manifold, Y))
 end
 
-function expt!(
+function exp_fused!(
     M::ConnectionManifold{
         𝔽,
         <:AbstractDecoratorManifold{𝔽},

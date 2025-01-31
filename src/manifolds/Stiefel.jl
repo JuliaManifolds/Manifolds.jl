@@ -471,7 +471,7 @@ retract(::Stiefel, ::Any, ::Any, ::QRRetraction)
 _qrfac_to_q(qrfac) = Matrix(qrfac.Q)
 _qrfac_to_q(qrfac::StaticArrays.QR) = qrfac.Q
 
-function ManifoldsBase.retract_pade_t!(
+function ManifoldsBase.retract_pade_fused!(
     ::Stiefel,
     q,
     p,
@@ -500,12 +500,12 @@ function ManifoldsBase.retract_pade_t!(
     end
     return copyto!(q, (qm \ pm) * p)
 end
-function ManifoldsBase.retract_polar_t!(::Stiefel, q, p, X, t::Number)
+function ManifoldsBase.retract_polar_fused!(::Stiefel, q, p, X, t::Number)
     q .= p .+ t .* X
     s = svd(q)
     return mul!(q, s.U, s.Vt)
 end
-function ManifoldsBase.retract_qr_t!(::Stiefel, q, p, X, t::Number)
+function ManifoldsBase.retract_qr_fused!(::Stiefel, q, p, X, t::Number)
     q .= p .+ t .* X
     qrfac = qr(q)
     d = diag(qrfac.R)
