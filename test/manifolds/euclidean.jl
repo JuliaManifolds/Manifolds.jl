@@ -455,7 +455,7 @@ using FiniteDifferences
         # this is an issue on Julia 1.6 but not later releases
         for M in [Euclidean(), Euclidean(; parameter=:field)]
             p = fill(0.0)
-            Manifolds.exp_fused!(M, p, p, [1.0], 2.0)
+            exp_fused!(M, p, p, [1.0], 2.0)
             @test p ≈ fill(2.0)
             parallel_transport_to!(M, p, p, [4.0], p)
             @test p ≈ fill(4.0)

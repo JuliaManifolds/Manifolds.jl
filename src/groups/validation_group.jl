@@ -1,5 +1,5 @@
 #
-# Interaction of GrooupManifold with a ValidationaManifold
+# Interaction of GroupManifold with a ValidationManifold
 #
 internal_value(e::Identity) = e
 

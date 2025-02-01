@@ -35,7 +35,7 @@ include("../header.jl")
     @test isapprox(G, pinvq.value, inv(G, p))
     eg = allocate(p2)
     inv!(AG, eg, e)
-    @test isapprox(G, eg.value, Manifolds.array_value(e))
+    @test isapprox(G, eg.value, Manifolds.internal_value(e))
 
     @test compose(AG, p2, q2) isa ValidationMPoint
     @test isapprox(G, compose(AG, p2, q2).value, compose(G, p, q))

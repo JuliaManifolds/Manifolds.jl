@@ -162,7 +162,7 @@ function Manifolds.exp_fused!(
     X,
     t::Number,
 ) where {N}
-    return Manifolds.exp_fused!(base_manifold(M), q, p, X, t)
+    return exp_fused!(base_manifold(M), q, p, X, t)
 end
 function Manifolds.parallel_transport_to!(::BaseManifold, Y, p, X, q)
     return (Y .= X)
@@ -299,7 +299,7 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
 
         # we're testing on a flat euclidean space
         @test exp(M, p, X) ≈ p + X
-        @test ManifoldsBase.exp_fused(M, p, X, t) ≈ p + t * X
+        @test exp_fused(M, p, X, t) ≈ p + t * X
     end
 
     @testset "Local Metric Error message" begin
@@ -532,13 +532,11 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test inner(MM, p, fX, fY) === inner(M, p, X, Y)
         @test norm(MM, p, fX) === norm(M, p, X)
         @test exp(M, p, X) == p + 2 * X
-        @test ManifoldsBase.exp_fused(M, p, X, 0.5) == p + X
+        @test exp_fused(M, p, X, 0.5) == p + X
         @test exp(MM2, p, X) == exp(M, p, X)
-        @test ManifoldsBase.exp_fused(MM2, p, X, 0.5) ==
-              ManifoldsBase.exp_fused(M, p, X, 0.5)
+        @test exp_fused(MM2, p, X, 0.5) == exp_fused(M, p, X, 0.5)
         @test exp!(MM, q, p, X) === exp!(M, q, p, X)
-        @test Manifolds.exp_fused!(MM, q, p, X, 0.5) ===
-              Manifolds.exp_fused!(M, q, p, X, 0.5)
+        @test exp_fused!(MM, q, p, X, 0.5) === exp_fused!(M, q, p, X, 0.5)
         @test retract!(MM, q, p, X) === retract!(M, q, p, X)
         @test retract_fused!(MM, q, p, X, 1) === retract_fused!(M, q, p, X, 1)
         @test project!(MM, Y, p, X) === project!(M, Y, p, X)

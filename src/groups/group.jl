@@ -1328,17 +1328,16 @@ function retract(
     return q
 end
 function retract_fused(
-    tl::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     p,
     X,
     t::Number,
     method::GroupExponentialRetraction,
 )
-    return retract(tl, G, p, t * X, method)
+    return retract(G, p, t * X, method)
 end
 
-function retract_fused!(
+function retract!(
     ::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     q,
@@ -1361,6 +1360,16 @@ function retract_fused!(
     method::GroupExponentialRetraction,
 )
     return retract!(tl, G, q, p, t * X, method)
+end
+function ManifoldsBase._retract_fused!(
+    G::AbstractDecoratorManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    method::GroupExponentialRetraction,
+)
+    return retract!(G, q, p, t * X, method)
 end
 
 @doc raw"""
