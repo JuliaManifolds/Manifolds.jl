@@ -28,7 +28,7 @@ function exp!(::TestStatsSphere{N}, q, p, X; kwargs...) where {N}
     return exp!(Sphere(N), q, p, X; kwargs...)
 end
 function Manifolds.exp_fused!(::TestStatsSphere{N}, q, p, X, t::Number; kwargs...) where {N}
-    return exp_fused!(Sphere(N), q, p, X, t; kwargs...)
+    return Manifolds.exp_fused!(Sphere(N), q, p, X, t; kwargs...)
 end
 function log!(::TestStatsSphere{N}, X, p, q; kwargs...) where {N}
     return log!(Sphere(N), X, p, q; kwargs...)
@@ -54,7 +54,7 @@ function Manifolds.exp_fused!(
     t::Number;
     kwargs...,
 ) where {N}
-    return exp_fused!(Euclidean(N), q, p, X, t; kwargs...)
+    return Manifolds.exp_fused!(Euclidean(N), q, p, X, t; kwargs...)
 end
 function log!(::TestStatsEuclidean{N}, X, p, q; kwargs...) where {N}
     return log!(Euclidean(N), X, p, q; kwargs...)
