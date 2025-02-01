@@ -298,8 +298,8 @@ function retract_product_fused!(B::VectorBundle, q, p, X, t::Number)
     return q
 end
 
-function ManifoldsBase.retract_sasaki!(M::VectorBundle, q, p, X)
-    return ManifoldsBase.retract_sasaki_fused!(M, q, p, X, one(eltype(p)))
+function ManifoldsBase.retract_sasaki!(M::VectorBundle, q, p, X, m::SasakiRetraction)
+    return ManifoldsBase.retract_sasaki_fused!(M, q, p, X, one(eltype(p)), m)
 end
 function ManifoldsBase.retract_sasaki_fused!(
     B::TangentBundle,
