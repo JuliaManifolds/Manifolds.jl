@@ -125,6 +125,11 @@ Here we can directly employ the [`CaleyRetraction`](@extref `ManifoldsBase.Cayle
 """
 retract(::SymplecticGrassmann, p, X, ::CayleyRetraction)
 
+function ManifoldsBase.retract_cayley!(M::SymplecticGrassmann, q, p, X)
+    n, k = get_parameter(M.size)
+    ManifoldsBase.retract_cayley!(SymplecticStiefel(2 * n, 2 * k), q, p, X)
+    return q
+end
 function ManifoldsBase.retract_cayley_fused!(M::SymplecticGrassmann, q, p, X, t::Number)
     n, k = get_parameter(M.size)
     ManifoldsBase.retract_cayley_fused!(SymplecticStiefel(2 * n, 2 * k), q, p, X, t)

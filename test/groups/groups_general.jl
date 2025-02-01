@@ -71,7 +71,7 @@ using Manifolds:
         ) === G
 
         # @test_throws ErrorException hat(Rotations(3), eg, [1, 2, 3])
-        # @test_throws ErrorException hat!(Rotations(3), randn(3, 3), eg, [1, 2, 3])
+        @test_throws ErrorException hat!(Rotations(3), randn(3, 3), eg, [1, 2, 3])
         # If you force it, you get a not that readable MethodError
         @test_throws MethodError hat(
             GroupManifold(Rotations(3), NotImplementedOperation()),

@@ -237,17 +237,6 @@ function project!(B::VectorBundle, Y, p, X)
     return Y
 end
 
-function _retract_fused!(
-    M::VectorBundle,
-    q,
-    p,
-    X,
-    t::Number,
-    ::FiberBundleProductRetraction,
-)
-    return retract_product!(M, q, p, X, t)
-end
-
 """
     retract(M::VectorBundle, p, q, ::FiberBundleProductRetraction)
 
@@ -255,6 +244,14 @@ Compute the allocating variant of the [`FiberBundleProductRetraction`](@ref),
 which by default allocates and calls `retract_product!`.
 """
 retract(::VectorBundle, p, q, ::FiberBundleProductRetraction)
+
+function ManifoldsBase._retract!(M::VectorBundle, q, p, X, ::FiberBundleProductRetraction)
+    return retract_product!(M, q, p, X)
+end
+
+function retract_product!(M::VectorBundle, q, p, X)
+    return retract_product_fused!(M, q, p, X, one(eltype(p)))
+end
 
 function ManifoldsBase._retract_fused(
     M::VectorBundle,
@@ -301,6 +298,9 @@ function retract_product_fused!(B::VectorBundle, q, p, X, t::Number)
     return q
 end
 
+function ManifoldsBase.retract_sasaki!(M::VectorBundle, q, p, X)
+    return ManifoldsBase.retract_sasaki_fused!(M, q, p, X, one(eltype(p)))
+end
 function ManifoldsBase.retract_sasaki_fused!(
     B::TangentBundle,
     q,

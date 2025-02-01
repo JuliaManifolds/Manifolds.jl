@@ -395,6 +395,11 @@ Return the array dimensions required to represent an element on the
 """
 representation_size(M::Hyperrectangle) = size(M.lb)
 
+function ManifoldsBase.retract_project!(M::Hyperrectangle, r, q, Y)
+    r .= q .+ Y
+    project(M, r, r)
+    return r
+end
 function ManifoldsBase.retract_project_fused!(M::Hyperrectangle, r, q, Y, t::Number)
     r .= q .+ t .* Y
     project!(M, r, r)

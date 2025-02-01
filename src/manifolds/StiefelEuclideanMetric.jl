@@ -179,6 +179,9 @@ The retraction is computed by projecting the exponential map in the embedding to
 """
 retract(::Stiefel, ::Any, ::Any, ::ProjectionRetraction)
 
+function ManifoldsBase.retract_project!(M::Stiefel, q, p, X)
+    return ManifoldsBase.retract_project_fused!(M, q, p, X, one(eltype(p)))
+end
 function ManifoldsBase.retract_project_fused!(M::Stiefel, q, p, X, t::Number)
     q .= p .+ t .* X
     project!(M, q, q)

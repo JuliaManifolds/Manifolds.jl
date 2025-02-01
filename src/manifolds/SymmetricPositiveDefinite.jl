@@ -91,7 +91,6 @@ function SPDPoint(p::AbstractMatrix; store_p=true, store_sqrt=true, store_sqrt_i
         p_sqrt_inv,
     )
 end
-
 convert(::Type{SPDPoint}, p::AbstractMatrix) = SPDPoint(p)
 
 function Base.:(==)(p::SPDPoint, q::SPDPoint)

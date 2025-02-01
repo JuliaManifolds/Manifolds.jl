@@ -319,6 +319,9 @@ where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
 """
 retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
 
+function ManifoldsBase.retract_polar!(M::Grassmann, q, p, X)
+    return ManifoldsBase.retract_polar_fused!(M, q, p, X, one(eltype(p)))
+end
 function ManifoldsBase.retract_polar_fused!(M::Grassmann, q, p, X, t::Number)
     q .= p .+ t .* X
     project!(M, q, q)
@@ -340,6 +343,9 @@ D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_
 """
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
 
+function ManifoldsBase.retract_qr!(M::Grassmann, q, p, X)
+    return ManifoldsBase.retract_qr_fused!(M, q, p, X, one(eltype(p)))
+end
 function ManifoldsBase.retract_qr_fused!(::Grassmann, q, p, X, t::Number)
     q .= p .+ t .* X
     qrfac = qr(q)

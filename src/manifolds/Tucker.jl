@@ -697,18 +697,16 @@ retraction produces a boundary point, which is outside the manifold.
 """
 retract(::Tucker, ::Any, ::Any, ::PolarRetraction)
 
-function ManifoldsBase.retract_polar_fused!(
+function ManifoldsBase.retract_polar!(
     ::Tucker,
     q::TuckerPoint,
     p::TuckerPoint{T,D},
     x::TuckerTangentVector,
-    t::Number,
 ) where {T,D}
-    tx = t * x
     U = p.hosvd.U
-    V = tx.U̇
+    V = x.U̇
     ℭ = p.hosvd.core
-    𝔊 = tx.Ċ
+    𝔊 = x.Ċ
     r⃗ = size(ℭ)
 
     # Build the core tensor S and the factors [Uᵈ  Vᵈ]

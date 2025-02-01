@@ -182,6 +182,10 @@ where $\cdot^{\mathrm{H}}$ denotes the complex conjugate transposed or Hermitian
 """
 retract(::Flag, ::Any, ::Any, ::PolarRetraction)
 
+function ManifoldsBase.retract_polar!(M::Flag, q, p, X)
+    return ManifoldsBase.retract_polar_fused!(M, q, p, X, one(eltype(p)))
+end
+
 function ManifoldsBase.retract_polar_fused!(::Flag, q, p, X, t::Number)
     s = svd(p .+ t .* X)
     return mul!(q, s.U, s.Vt)

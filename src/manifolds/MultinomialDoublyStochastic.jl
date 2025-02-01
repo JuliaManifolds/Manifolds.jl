@@ -269,6 +269,9 @@ refers to the elementwise exponentiation.
 """
 retract(::MultinomialDoubleStochastic, ::Any, ::Any, ::ProjectionRetraction)
 
+function ManifoldsBase.retract_project!(M::MultinomialDoubleStochastic, q, p, X)
+    return project!(M, q, p .* exp.(X ./ p))
+end
 function ManifoldsBase.retract_project_fused!(
     M::MultinomialDoubleStochastic,
     q,

@@ -168,6 +168,14 @@ as the first order approximation to the exponential map. Similar to QR retractio
 """
 retract(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector, ::QRRetraction)
 
+function ManifoldsBase.retract_qr!(
+    M::Flag,
+    q::OrthogonalPoint,
+    p::OrthogonalPoint,
+    X::OrthogonalTangentVector,
+)
+    return ManifoldsBase.retract_qr_fused!(M, q, p, X, one(eltype(p)))
+end
 function ManifoldsBase.retract_qr_fused!(
     ::Flag,
     q::OrthogonalPoint{<:AbstractMatrix{T}},

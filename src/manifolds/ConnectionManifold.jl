@@ -305,6 +305,19 @@ function is_default_connection(M::ConnectionManifold)
 end
 is_default_connection(::AbstractManifold, ::AbstractAffineConnection) = false
 
+function ManifoldsBase.retract_exp_ode!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    ::AbstractRetractionMethod,
+    b::AbstractBasis,
+)
+    sol = solve_exp_ode(M, p, X, one(eltype(p)); basis=b, dense=false)
+    copyto!(q, sol)
+    return q
+end
+
 function ManifoldsBase.retract_exp_ode_fused!(
     M::AbstractManifold,
     q,

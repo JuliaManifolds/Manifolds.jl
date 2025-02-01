@@ -498,6 +498,10 @@ Compute the retraction that is based on projection, i.e.
 """
 retract(::AbstractSphere, ::Any, ::Any, ::ProjectionRetraction)
 
+function ManifoldsBase.retract_project!(M::AbstractSphere, q, p, X)
+    q .= p .+ X
+    return project!(M, q, q)
+end
 function ManifoldsBase.retract_project_fused!(M::AbstractSphere, q, p, X, t::Number)
     q .= p .+ t .* X
     return project!(M, q, q)

@@ -84,6 +84,7 @@ SVDMPoint(A::Matrix, k::Int) = SVDMPoint(svd(A), k)
 SVDMPoint(S::SVD, k::Int) = SVDMPoint(S.U, S.S, S.Vt, k)
 SVDMPoint(U, S, Vt, k::Int) = SVDMPoint(U[:, 1:k], S[1:k], Vt[1:k, :])
 Base.:(==)(x::SVDMPoint, y::SVDMPoint) = (x.U == y.U) && (x.S == y.S) && (x.Vt == y.Vt)
+Base.eltype(p::SVDMPoint) = Base.eltype(p.S)
 
 @doc raw"""
     UMVTangentVector <: AbstractTangentVector
@@ -175,8 +176,18 @@ function ManifoldsBase._retract_fused!(
 )
     return retract_orthographic_fused!(M, q, p, X, t; kwargs...)
 end
-
+function ManifoldsBase._retract!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    ::OrthographicRetraction;
+    kwargs...,
+)
+    return retract_orthographic!(M, q, p, X; kwargs...)
+end
 ## Layer III
+
 """
     retract_orthographic!(M::AbstractManifold, q, p, X)
 
@@ -655,6 +666,15 @@ For more details, see [AbsilOseledets:2014](@cite).
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::OrthographicRetraction)
 
+function retract_orthographic!(
+    M::FixedRankMatrices,
+    q::SVDMPoint,
+    p::SVDMPoint,
+    X::UMVTangentVector,
+)
+    return retract_orthographic_fused!(M, q, p, X, one(eltype(p)))
+end
+
 function retract_orthographic_fused!(
     M::FixedRankMatrices,
     q::SVDMPoint,
@@ -688,6 +708,15 @@ in the sense that ``S_k`` is the diagonal matrix of size ``k×k`` with the ``k``
 singular values and ``U`` and ``V`` are shortened accordingly.
 """
 retract(::FixedRankMatrices, ::Any, ::Any, ::PolarRetraction)
+
+function retract_polar!(
+    M::FixedRankMatrices,
+    q::SVDMPoint,
+    p::SVDMPoint,
+    X::UMVTangentVector,
+)
+    return ManifoldsBase.retract_polar_fused!(M, q, p, X, one(eltype(p.S)))
+end
 
 function ManifoldsBase.retract_polar_fused!(
     M::FixedRankMatrices,

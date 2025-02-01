@@ -67,8 +67,7 @@ function exp!(
     M::AbstractDecoratorManifold,
     q,
     p,
-    X,
-    t::Number;
+    X;
     kwargs...,
 )
     copyto!(M, q, solve_exp_ode(M, p, X, 1.0; kwargs...))

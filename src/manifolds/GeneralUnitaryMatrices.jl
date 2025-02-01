@@ -1029,6 +1029,10 @@ This is also the default retraction on these manifolds.
 """
 retract(::GeneralUnitaryMatrices, ::Any, ::Any, ::QRRetraction)
 
+function ManifoldsBase.retract_qr!(M::GeneralUnitaryMatrices, q, p, X)
+    return ManifoldsBase.retract_qr_fused!(M, q, p, X, one(eltype(p)))
+end
+
 function ManifoldsBase.retract_qr_fused!(
     ::GeneralUnitaryMatrices,
     q::AbstractArray{T},
@@ -1042,6 +1046,11 @@ function ManifoldsBase.retract_qr_fused!(
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
+
+function ManifoldsBase.retract_polar!(M::GeneralUnitaryMatrices, q, p, X)
+    return ManifoldsBase.retract_polar_fused!(M, q, p, X, one(eltype(p)))
+end
+
 function ManifoldsBase.retract_polar_fused!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
     A = p + p * (t * X)
     return project!(M, q, A; check_det=false)

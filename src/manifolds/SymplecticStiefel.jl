@@ -557,17 +557,13 @@ This expression is computed inplace of `q`.
 """
 retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
 
-function ManifoldsBase.retract_cayley_fused!(M::SymplecticStiefel, q, p, X, t::Number)
-    tX = t * X
+function ManifoldsBase.retract_cayley!(M::SymplecticStiefel, q, p, X)
     # Define intermediate matrices for later use:
-    A = symplectic_inverse_times(M, p, tX)
-
-    H = tX .- p * A  # Allocates (2n×2k).
-
+    A = symplectic_inverse_times(M, p, X)
+    H = X .- p * A  # Allocates (2n×2k).
     # A = I - A/2 + H^{+}H/4:
     A .= (symplectic_inverse_times(M, H, H) ./ 4) .- (A ./ 2)
     Manifolds.add_scaled_I!(A, 1.0)
-
     # Reuse 'H' memory:
     H .= H .+ 2 .* p
     r = lu!(A)
