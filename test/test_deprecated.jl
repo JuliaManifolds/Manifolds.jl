@@ -8,7 +8,7 @@ using Manifolds, Test
     @test PoincareBallTVector(a) == PoincareBallTangentVector(a)
     @test PoincareHalfSpaceTVector(a) == PoincareHalfSpaceTangentVector(a)
     @test ProjectorTVector(A) == ProjectorTangentVector(A)
-    @test StiefelTVector(A) == StiefelTangentVector(AbstractAtlas)
+    @test StiefelTVector(A) == StiefelTangentVector(A)
     @test TuckerTVector(A, (A, A)) == TuckerTangentVector(A, (A, A))
     @test UMVTVector(A, A, A) == UMVTangentVector(A, A, A)
 end
