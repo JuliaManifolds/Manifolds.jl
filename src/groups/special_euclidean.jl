@@ -56,10 +56,10 @@ function SpecialEuclidean(
     return SemidirectProductGroup(Tn, SOn, A, vectors)
 end
 
-const SpecialEuclideanGroupOperation{N} = SemidirectProductOperation{
+const SpecialEuclideanOperation{N} = SemidirectProductOperation{
     RotationAction{LeftAction,TranslationGroup{N,ℝ},SpecialOrthogonal{N}},
 }
-const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanGroupOperation{N}}
+const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
 function Base.show(io::IO, G::SpecialEuclidean{TypeParameter{Tuple{n}}}) where {n}
     if vector_representation(G) isa LeftInvariantRepresentation
