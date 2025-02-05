@@ -700,6 +700,7 @@ export HyperboloidPoint,
     SPDPoint
 # Tangent vector representation types
 export HyperboloidTangentVector,
+    OrthogonalTangentVector,
     PoincareBallTangentVector,
     PoincareHalfSpaceTangentVector,
     TuckerTangentVector,
