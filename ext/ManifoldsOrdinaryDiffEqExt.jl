@@ -61,16 +61,5 @@ function exp_fused!(
     copyto!(M, q, solve_exp_ode(M, p, X, t; kwargs...))
     return q
 end
-# also define exp! for metric manifold anew in this case
-function exp!(
-    ::TraitList{IsMetricManifold},
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X;
-    kwargs...,
-)
-    copyto!(M, q, solve_exp_ode(M, p, X, 1.0; kwargs...))
-    return q
-end
+
 end
