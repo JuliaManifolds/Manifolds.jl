@@ -223,8 +223,8 @@ from `p` towards `X`. The formula reads
 + \sinh(\sqrt{⟨X,X⟩_{\mathrm{M}}})\frac{X}{\sqrt{⟨X,X⟩_{\mathrm{M}}}},
 ````
 
-where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
-the [`Lorentz`](@ref)ian manifold.
+where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding, the [`Lorentz`](@ref)ian manifold,
+see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
 """
 exp(::Hyperbolic, ::Any, ::Any)
 
@@ -293,7 +293,8 @@ reaches `q` after time 1. The formula reads for ``p ≠ q``
 ```
 
 where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
-the [`Lorentz`](@ref)ian manifold. For ``p=q`` the logarithmic map is equal to the zero vector.
+the [`Lorentz`](@ref)ian manifold. For ``p=q`` the logarithmic map is equal to the zero vector
+For more details, see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
 """
 log(::Hyperbolic, ::Any...)
 

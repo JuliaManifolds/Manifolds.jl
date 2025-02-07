@@ -239,8 +239,8 @@ Compute the distance on the [`Hyperbolic`](@ref) `M`, which reads
 d_{\mathcal H^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
 ````
 
-where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
-the [`Lorentz`](@ref)ian manifold.
+where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding, the [`Lorentz`](@ref)ian manifold,
+see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
 """
 function distance(::Hyperbolic, p, q)
     w = q - p
@@ -319,7 +319,7 @@ end
 
 Compute the coordinates of the vector `X` with respect to the orthogonalized version of
 the unit vectors from ``ℝ^n``, where ``n`` is the manifold dimension of the [`Hyperbolic`](@ref)
- `M`, utting them intop the tangent space at `p` and orthonormalizing them.
+ `M`, putting them into the tangent space at `p` and orthonormalizing them.
 """
 get_coordinates(M::Hyperbolic, p, X, ::DefaultOrthonormalBasis)
 
@@ -390,7 +390,8 @@ the embedding. The formula reads
 ````math
 g_p(X,Y) = ⟨X,Y⟩_{\mathrm{M}} = -X_{n}Y_{n} + \displaystyle\sum_{k=1}^{n-1} X_kY_k.
 ````
-This employs the metric of the embedding, see [`Lorentz`](@ref) space.
+This employs the metric of the embedding, see [`Lorentz`](@ref) space,
+see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
 """
 inner(M::Hyperbolic, p, X, Y)
 
