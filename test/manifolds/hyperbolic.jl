@@ -114,6 +114,12 @@ include("../header.jl")
         @test convert(AbstractVector, pS) == convert(HyperboloidPoint, pS).value
         @test convert(PoincareBallPoint, pS2).value == pB.value
     end
+    @testset "PoincareHalfSpaceVector size test" begin
+        M = Hyperbolic(2)
+        p = PoincareHalfSpacePoint([1.0, 1.0])
+        X = PoincareHalfSpaceTangentVector(zeros(3))
+        @test_throws DomainError is_vector(M, p, X; error=:error)
+    end
     @testset "Hyperbolic Representation Conversion II" begin
         M = Hyperbolic(2)
         pts = [[0.0, 0.0, 1.0], [1.0, 0.0, sqrt(2.0)]]

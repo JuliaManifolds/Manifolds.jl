@@ -183,11 +183,8 @@ function inverse_retract_polar!(M::Rotations, X, p, q)
         B = lyap(A, H)
         mul!(X, A, B)
     catch e
-        if isa(e, LinearAlgebra.LAPACKException)
-            throw(OutOfInjectivityRadiusError())
-        else
-            rethrow()
-        end
+        e2 = OutOfInjectivityRadiusError()
+        isa(e, LinearAlgebra.LAPACKException) ? throw(e2) : rethrow()
     end
     return project!(SkewSymmetricMatrices(n), X, p, X)
 end

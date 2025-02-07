@@ -111,8 +111,9 @@ include("../header.jl")
 
         # Not Hamiltonian
         Xf1 = ProjectorTangentVector(Matrix{Float64}(I, 6, 6))
+        Xf1.value[1, 2] = 1.0 # tweak to not be Hamiltonian
         @test_throws DomainError is_vector(M, pP, Xf1; error=:error)
-        # X^+ = X, but Xp + pX not correct
+        # ``X^+ = X``, but ``Xp + pX`` not correct
         Xf2 = ProjectorTangentVector(0.5 .* (symplectic_inverse(X * X') + X * X'))
         @test_throws DomainError is_vector(M, pP, Xf2; error=:error)
         @test get_embedding(M, pP) == Euclidean(6, 6)

@@ -225,7 +225,7 @@ exp(::GeneralUnitaryMatrices, p, X)
 function exp!(M::GeneralUnitaryMatrices, q, p, X)
     return copyto!(M, q, p * exp(X))
 end
-function exp_fused!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
+function ManifoldsBase.exp_fused!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
     return copyto!(M, q, p * exp(t * X))
 end
 
@@ -234,7 +234,7 @@ function exp(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, p::SMatrix,
     sinθ, cosθ = sincos(θ)
     return p * SA[cosθ -sinθ; sinθ cosθ]
 end
-function exp_fused(
+function ManifoldsBase.exp_fused(
     M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
     p::SMatrix,
     X::SMatrix,
@@ -260,7 +260,13 @@ function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, q, p, X)
     sinθ, cosθ = sincos(θ)
     return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
 end
-function exp_fused!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, q, p, X, t::Real)
+function ManifoldsBase.exp_fused!(
+    M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
+    q,
+    p,
+    X,
+    t::Real,
+)
     @assert size(q) == (2, 2)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(t * θ)
@@ -269,7 +275,13 @@ end
 function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, q, p, X)
     return exp_fused!(M, q, p, X, one(eltype(X)))
 end
-function exp_fused!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, q, p, X, t::Real)
+function ManifoldsBase.exp_fused!(
+    M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ},
+    q,
+    p,
+    X,
+    t::Real,
+)
     θ = abs(t) * norm(M, p, X) / sqrt(2)
     if θ ≈ 0
         a = 1 - θ^2 / 6
@@ -281,10 +293,16 @@ function exp_fused!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, q, p
     pinvq = I + a .* t .* X .+ b .* t^2 .* (X^2)
     return copyto!(q, p * pinvq)
 end
-function exp_fused!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ}, q, p, X, t::Real)
+function ManifoldsBase.exp_fused!(
+    M::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ},
+    q,
+    p,
+    X,
+    t::Real,
+)
     return exp!(M, q, p, t * X)
 end
-function exp_fused!(::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ}, q, p, X)
+function exp!(::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ}, q, p, X)
     T = eltype(X)
     α, β = angles_4d_skew_sym_matrix(X)
     sinα, cosα = sincos(α)
