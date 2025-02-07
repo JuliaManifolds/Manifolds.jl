@@ -326,7 +326,6 @@ function ManifoldsBase.retract_exp_ode_fused!(
     ::AbstractRetractionMethod,
     b::AbstractBasis,
 )
-    println("Hi")
     sol = solve_exp_ode(M, p, X, t; basis=b, dense=false)
     copyto!(q, sol)
     return q
