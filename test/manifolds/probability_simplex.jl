@@ -68,6 +68,8 @@ include("../header.jl")
             )
             X = similar(pts[1])
             @test exp!(M_euc, X, pts[1], [0.0, 0.1, -0.1]) ≈ [0.5, 0.4, 0.1]
+            @test ManifoldsBase.exp_fused!(M_euc, X, pts[1], [0.0, 0.1, -0.1], 1.0) ≈
+                  [0.5, 0.4, 0.1]
             test_manifold(
                 M_euc,
                 pts,
