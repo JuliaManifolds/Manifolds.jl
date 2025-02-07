@@ -1350,7 +1350,7 @@ function retract!(
     pinvq = exp_lie(G, Xₑ)
     return translate!(G, q, p, pinvq, conv)
 end
-function retract_fused!(
+function ManifoldsBase.retract_fused!(
     tl::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     q,
@@ -1360,16 +1360,6 @@ function retract_fused!(
     method::GroupExponentialRetraction,
 )
     return retract!(tl, G, q, p, t * X, method)
-end
-function ManifoldsBase._retract_fused!(
-    G::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    t::Number,
-    method::GroupExponentialRetraction,
-)
-    return retract!(G, q, p, t * X, method)
 end
 
 @doc raw"""
