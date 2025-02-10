@@ -129,7 +129,7 @@ struct NotImplementedMetric <: AbstractMetric end
 Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
 Manifolds.inner(::BaseManifold, p, X, Y) = 2 * dot(X, Y)
 Manifolds.exp!(::BaseManifold, q, p, X) = q .= p + 2 * X
-Manifolds.exp!(::BaseManifold, q, p, X, t::Number) = q .= p + 2 * t * X
+Manifolds.exp_fused!(::BaseManifold, q, p, X, t::Number) = q .= p + 2 * t * X
 Manifolds.log!(::BaseManifold, Y, p, q) = Y .= (q - p) / 2
 Manifolds.project!(::BaseManifold, Y, p, X) = Y .= 2 .* X
 Manifolds.project!(::BaseManifold, q, p) = (q .= p)
@@ -155,14 +155,14 @@ function Manifolds.exp!(
 ) where {N}
     return exp!(base_manifold(M), q, p, X)
 end
-function Manifolds.exp!(
+function Manifolds.exp_fused!(
     M::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
     q,
     p,
     X,
     t::Number,
 ) where {N}
-    return exp!(base_manifold(M), q, p, X, t)
+    return Manifolds.exp_fused!(base_manifold(M), q, p, X, t)
 end
 function Manifolds.parallel_transport_to!(::BaseManifold, Y, p, X, q)
     return (Y .= X)
@@ -234,17 +234,6 @@ function solve_exp_ode(
 ) where {N}
     return X
 end
-function Manifolds.vector_transport_along!(
-    M::BaseManifold,
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M),
-)
-    Y .= c
-    return Y
-end
 
 # test for https://github.com/JuliaManifolds/Manifolds.jl/issues/539
 struct Issue539Metric <: RiemannianMetric end
@@ -278,26 +267,26 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         X = [2.0, 3.0, 4.0]
         q = similar(X)
         @test_throws MethodError exp(M, p, X)
-        @test_throws MethodError exp(M, p, X, 1.0)
+        @test_throws MethodError Manifolds.exp_fused(M, p, X, 1.0)
         @test_throws MethodError exp!(M, q, p, X)
-        @test_throws MethodError exp!(M, q, p, X, 1.0)
+        @test_throws MethodError Manifolds.exp_fused!(M, q, p, X, 1.0)
 
         N = ConnectionManifold(E, LeviCivitaConnection())
         @test_throws MethodError exp(N, p, X)
-        @test_throws MethodError exp(N, p, X, 1.0)
+        @test_throws MethodError Manifolds.exp_fused(N, p, X, 1.0)
         @test_throws MethodError exp!(N, q, p, X)
-        @test_throws MethodError exp!(N, q, p, X, 1.0)
+        @test_throws MethodError Manifolds.exp_fused!(N, q, p, X, 1.0)
 
         using OrdinaryDiffEq
         @test is_point(M, exp(M, p, X))
-        @test is_point(M, exp(M, p, X, 1.0))
+        @test is_point(M, Manifolds.exp_fused(M, p, X, 1.0))
 
         # a small trick to check that retract_exp_ode! returns the right value on ConnectionManifolds
         N2 = ConnectionManifold(E, TestConnection())
         @test exp(N2, p, X) == X
     end
 
-    # see also Issue #744 (https://github.com/JuliaManifolds/Manifolds.jl/issues/744) 
+    # see also Issue #744 (https://github.com/JuliaManifolds/Manifolds.jl/issues/744)
     @testset "solve_exp_ode values" begin
         E = TestEuclidean{3}()
         g = TestEuclideanMetric()
@@ -308,9 +297,9 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         X = [2.0, 3.0, 4.0]
         t = 2.5
 
-        # we're testing on a flat euclidean space 
+        # we're testing on a flat euclidean space
         @test exp(M, p, X) ≈ p + X
-        @test exp(M, p, X, t) ≈ p + t * X
+        @test Manifolds.exp_fused(M, p, X, t) ≈ p + t * X
     end
 
     @testset "Local Metric Error message" begin
@@ -543,13 +532,15 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test inner(MM, p, fX, fY) === inner(M, p, X, Y)
         @test norm(MM, p, fX) === norm(M, p, X)
         @test exp(M, p, X) == p + 2 * X
-        @test exp(M, p, X, 0.5) == p + X
+        @test Manifolds.exp_fused(M, p, X, 0.5) == p + X
         @test exp(MM2, p, X) == exp(M, p, X)
-        @test exp(MM2, p, X, 0.5) == exp(M, p, X, 0.5)
+        @test Manifolds.exp_fused(MM2, p, X, 0.5) == Manifolds.exp_fused(M, p, X, 0.5)
         @test exp!(MM, q, p, X) === exp!(M, q, p, X)
-        @test exp!(MM, q, p, X, 0.5) === exp!(M, q, p, X, 0.5)
+        @test Manifolds.exp_fused!(MM, q, p, X, 0.5) ===
+              Manifolds.exp_fused!(M, q, p, X, 0.5)
         @test retract!(MM, q, p, X) === retract!(M, q, p, X)
-        @test retract!(MM, q, p, X, 1) === retract!(M, q, p, X, 1)
+        @test Manifolds.retract_fused!(MM, q, p, X, 1) ===
+              Manifolds.retract_fused!(M, q, p, X, 1)
         @test project!(MM, Y, p, X) === project!(M, Y, p, X)
         @test project!(MM, q, p) === project!(M, q, p)
         # without a definition for the metric from the embedding, no projection possible
@@ -592,7 +583,8 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test log!(MM2, X, p, q) === log!(M, X, p, q)
         @test log(MM2, p, q) == log(M, p, q)
         @test retract!(MM2, q, p, X) === retract!(M, q, p, X)
-        @test retract!(MM2, q, p, X, 1) === retract!(M, q, p, X, 1)
+        @test Manifolds.retract_fused!(MM2, q, p, X, 1) ===
+              Manifolds.retract_fused!(M, q, p, X, 1)
 
         @test project!(MM2, q, p) === project!(M, q, p)
         @test project!(MM2, Y, p, X) === project!(M, Y, p, X)
@@ -603,10 +595,6 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test vector_transport_to!(MM2, Y, p, X, q) == vector_transport_to!(M, Y, p, X, q)
         c = 2 * ones(3)
         m = ParallelTransport()
-        @test vector_transport_along(MM2, p, X, c, m) ==
-              vector_transport_along(M, p, X, c, m)
-        @test vector_transport_along!(MM2, Y, p, X, c, m) ==
-              vector_transport_along!(M, Y, p, X, c, m)
         @test zero_vector!(MM2, X, p) === zero_vector!(M, X, p)
         @test injectivity_radius(MM2, p) === injectivity_radius(M, p)
         @test injectivity_radius(MM2) === injectivity_radius(M)

@@ -9,15 +9,15 @@ struct ProjectorPoint{T<:AbstractMatrix} <: AbstractManifoldPoint
 end
 
 @doc raw"""
-    ProjectorTVector <: TVector
+    ProjectorTangentVector <: AbstractTangentVector
 
 A type to represent tangent vectors to points on a [`Grassmann`](@ref) manifold that are orthogonal projectors.
 """
-struct ProjectorTVector{T<:AbstractMatrix} <: TVector
+struct ProjectorTangentVector{T<:AbstractMatrix} <: AbstractTangentVector
     value::T
 end
 
-ManifoldsBase.@manifold_vector_forwards ProjectorTVector value
+ManifoldsBase.@manifold_vector_forwards ProjectorTangentVector value
 ManifoldsBase.@manifold_element_forwards ProjectorPoint value
 
 @doc raw"""
@@ -62,9 +62,9 @@ function check_size(M::Grassmann, p::ProjectorPoint; kwargs...)
 end
 
 @doc raw"""
-    check_vector(::Grassmann, p::ProjectorPoint, X::ProjectorTVector; kwargs...)
+    check_vector(::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector; kwargs...)
 
-Check whether the [`ProjectorTVector`](@ref) `X` is from the tangent space ``T_p\operatorname{Gr}(n,k) ``
+Check whether the [`ProjectorTangentVector`](@ref) `X` is from the tangent space ``T_p\operatorname{Gr}(n,k) ``
 at the [`ProjectorPoint`](@ref) `p` on the [`Grassmann`](@ref) manifold ``\operatorname{Gr}(n,k)``.
 This means that `X` has to be symmetric and that
 
@@ -75,7 +75,7 @@ Xp + pX = X
 must hold, where the `kwargs` can be used to check both for symmetrix of ``X```
 and this equality up to a certain tolerance.
 """
-function check_vector(M::Grassmann, p::ProjectorPoint, X::ProjectorTVector; kwargs...)
+function check_vector(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector; kwargs...)
     if !isapprox(X.value, X.value'; kwargs...)
         return DomainError(
             norm(X.value - X.value'),
@@ -92,9 +92,9 @@ function check_vector(M::Grassmann, p::ProjectorPoint, X::ProjectorTVector; kwar
 end
 
 embed!(::Grassmann, q, p::ProjectorPoint) = copyto!(q, p.value)
-embed!(::Grassmann, Y, p, X::ProjectorTVector) = copyto!(Y, X.value)
+embed!(::Grassmann, Y, p, X::ProjectorTangentVector) = copyto!(Y, X.value)
 embed(::Grassmann, p::ProjectorPoint) = p.value
-embed(::Grassmann, p, X::ProjectorTVector) = X.value
+embed(::Grassmann, p, X::ProjectorTangentVector) = X.value
 
 @doc raw"""
     get_embedding(M::Grassmann, p::ProjectorPoint)
@@ -156,16 +156,16 @@ manifold when represented as [`ProjectorPoint`](@ref), i.e.
     Dπ^{\mathrm{SG}}(p)[X] = Xp^{\mathrm{T}} + pX^{\mathrm{T}}
 ```
 """
-function differential_canonical_project!(::Grassmann, Y::ProjectorTVector, p, X)
+function differential_canonical_project!(::Grassmann, Y::ProjectorTangentVector, p, X)
     Xpt = X * p'
     Y.value .= Xpt .+ Xpt'
     return Y
 end
 function differential_canonical_project!(
     M::Grassmann,
-    Y::ProjectorTVector,
+    Y::ProjectorTangentVector,
     p::StiefelPoint,
-    X::StiefelTVector,
+    X::StiefelTangentVector,
 )
     differential_canonical_project!(M, Y, p.value, X.value)
     return Y
@@ -174,18 +174,18 @@ function allocate_result(
     M::Grassmann,
     ::typeof(differential_canonical_project),
     p::StiefelPoint,
-    X::StiefelTVector,
+    X::StiefelTangentVector,
 )
     n, k = get_parameter(M.size)
-    return ProjectorTVector(allocate(p.value, (n, n)))
+    return ProjectorTangentVector(allocate(p.value, (n, n)))
 end
 function allocate_result(M::Grassmann, ::typeof(differential_canonical_project), p, X)
     n, k = get_parameter(M.size)
-    return ProjectorTVector(allocate(p, (n, n)))
+    return ProjectorTangentVector(allocate(p, (n, n)))
 end
 
 @doc raw"""
-    exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTVector)
+    exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector)
 
 Compute the exponential map on the [`Grassmann`](@ref) as
 
@@ -196,16 +196,16 @@ where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = AB-BA`
 
 For details, see Proposition 3.2 in [BendokatZimmermannAbsil:2020](@cite).
 """
-exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTVector)
+exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector)
 
-function exp!(::Grassmann, q::ProjectorPoint, p::ProjectorPoint, X::ProjectorTVector)
+function exp!(::Grassmann, q::ProjectorPoint, p::ProjectorPoint, X::ProjectorTangentVector)
     xppx = X.value * p.value - p.value * X.value
     exp_xppx = exp(xppx)
     q.value .= exp_xppx * p.value / exp_xppx
     return q
 end
 @doc raw"""
-    horizontal_lift(N::Stiefel{n,k}, q, X::ProjectorTVector)
+    horizontal_lift(N::Stiefel{n,k}, q, X::ProjectorTangentVector)
 
 Compute the horizontal lift of `X` from the tangent space at ``p=π(q)``
 on the [`Grassmann`](@ref) manifold, i.e.
@@ -215,16 +215,16 @@ Y = Xq ∈ T_q\mathrm{St}(n,k)
 ```
 
 """
-horizontal_lift(::Stiefel, q, X::ProjectorTVector)
+horizontal_lift(::Stiefel, q, X::ProjectorTangentVector)
 
-horizontal_lift!(::Stiefel, Y, q, X::ProjectorTVector) = copyto!(Y, X.value * q)
+horizontal_lift!(::Stiefel, Y, q, X::ProjectorTangentVector) = copyto!(Y, X.value * q)
 
 @doc raw"""
     parallel_transport_direction(
         M::Grassmann,
         p::ProjectorPoint,
-        X::ProjectorTVector,
-        d::ProjectorTVector
+        X::ProjectorTangentVector,
+        d::ProjectorTangentVector
     )
 
 Compute the parallel transport of `X` from the tangent space at `p` into direction `d`,
@@ -239,8 +239,8 @@ where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = AB-BA`
 function parallel_transport_direction(
     M::Grassmann,
     p::ProjectorPoint,
-    X::ProjectorTVector,
-    d::ProjectorTVector,
+    X::ProjectorTangentVector,
+    d::ProjectorTangentVector,
 )
     Y = allocate_result(M, vector_transport_direction, X, p, d)
     parallel_transport_direction!(M, Y, p, X, d)
@@ -249,10 +249,10 @@ end
 
 function parallel_transport_direction!(
     ::Grassmann,
-    Y::ProjectorTVector,
+    Y::ProjectorTangentVector,
     p::ProjectorPoint,
-    X::ProjectorTVector,
-    d::ProjectorTVector,
+    X::ProjectorTangentVector,
+    d::ProjectorTangentVector,
 )
     dppd = d.value * p.value - p.value * d.value
     exp_dppd = exp(dppd)
@@ -261,4 +261,6 @@ function parallel_transport_direction!(
 end
 
 Base.show(io::IO, p::ProjectorPoint) = print(io, "ProjectorPoint($(p.value))")
-Base.show(io::IO, X::ProjectorTVector) = print(io, "ProjectorTVector($(X.value))")
+function Base.show(io::IO, X::ProjectorTangentVector)
+    return print(io, "ProjectorTangentVector($(X.value))")
+end

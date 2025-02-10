@@ -128,10 +128,10 @@ Compute the exponential map on the [`Hyperrectangle`](@ref) manifold `M` from `p
 ````
 """
 Base.exp(::Hyperrectangle, p, X) = p + X
-Base.exp(::Hyperrectangle, p, X, t::Number) = p .+ t .* X
+exp_fused(::Hyperrectangle, p, X, t::Number) = p .+ t .* X
 
 exp!(::Hyperrectangle, q, p, X) = (q .= p .+ X)
-exp!(::Hyperrectangle, q, p, X, t::Number) = (q .= p .+ t .* X)
+exp_fused!(::Hyperrectangle, q, p, X, t::Number) = (q .= p .+ t .* X)
 
 function get_coordinates_orthonormal(::Hyperrectangle, p, X, ::RealNumbers)
     return vec(X)
@@ -395,7 +395,12 @@ Return the array dimensions required to represent an element on the
 """
 representation_size(M::Hyperrectangle) = size(M.lb)
 
-function retract_project!(M::Hyperrectangle, r, q, Y, t::Number)
+function ManifoldsBase.retract_project!(M::Hyperrectangle, r, q, Y)
+    r .= q .+ Y
+    project(M, r, r)
+    return r
+end
+function ManifoldsBase.retract_project_fused!(M::Hyperrectangle, r, q, Y, t::Number)
     r .= q .+ t .* Y
     project!(M, r, r)
     return r

@@ -94,7 +94,6 @@ where ``\operatorname{Exp}`` denotes to the matrix exponential.
 """
 exp(::SymmetricPositiveDefinite, ::Any...)
 
-exp(M::SymmetricPositiveDefinite, p::SPDPoint, X, t::Number) = exp(M, p, t * X)
 function exp(::SymmetricPositiveDefinite, p::SPDPoint, X)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
@@ -111,7 +110,7 @@ function exp(::SymmetricPositiveDefinite, p::SPDPoint, X)
     return q
 end
 
-function exp!(M::SymmetricPositiveDefinite, q, p, X, t::Number)
+function exp_fused!(M::SymmetricPositiveDefinite, q, p, X, t::Number)
     return exp!(M, q, p, t * X)
 end
 function exp!(::SymmetricPositiveDefinite, q, p, X)

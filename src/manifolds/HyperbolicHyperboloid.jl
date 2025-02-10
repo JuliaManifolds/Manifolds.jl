@@ -51,21 +51,21 @@ function check_vector(
     return nothing
 end
 
-function convert(::Type{HyperboloidTVector}, X::T) where {T<:AbstractVector}
-    return HyperboloidTVector(X)
+function convert(::Type{HyperboloidTangentVector}, X::T) where {T<:AbstractVector}
+    return HyperboloidTangentVector(X)
 end
 function convert(
-    ::Type{HyperboloidTVector},
+    ::Type{HyperboloidTangentVector},
     p::P,
     X::T,
 ) where {P<:AbstractVector,T<:AbstractVector}
-    return HyperboloidTVector(X)
+    return HyperboloidTangentVector(X)
 end
-convert(::Type{AbstractVector}, X::HyperboloidTVector) = X.value
+convert(::Type{AbstractVector}, X::HyperboloidTangentVector) = X.value
 function convert(
     ::Type{T},
     p::HyperboloidPoint,
-    X::HyperboloidTVector,
+    X::HyperboloidTangentVector,
 ) where {T<:AbstractVector}
     return X.value
 end
@@ -114,11 +114,11 @@ function convert(t::Type{AbstractVector}, p::PoincareHalfSpacePoint)
 end
 
 @doc raw"""
-    convert(::Type{HyperboloidTVector}, p::PoincareBallPoint, X::PoincareBallTVector)
-    convert(::Type{AbstractVector}, p::PoincareBallPoint, X::PoincareBallTVector)
+    convert(::Type{HyperboloidTangentVector}, p::PoincareBallPoint, X::PoincareBallTangentVector)
+    convert(::Type{AbstractVector}, p::PoincareBallPoint, X::PoincareBallTangentVector)
 
-Convert the [`PoincareBallTVector`](@ref) `X` from the tangent space at `p` to a
-[`HyperboloidTVector`](@ref) by computing the push forward of the isometric map, cf.
+Convert the [`PoincareBallTangentVector`](@ref) `X` from the tangent space at `p` to a
+[`HyperboloidTangentVector`](@ref) by computing the push forward of the isometric map, cf.
 [`convert(::Type{HyperboloidPoint}, p::PoincareBallPoint)`](@ref).
 
 The push forward ``π_*(p)`` maps from ``ℝ^n`` to a subspace of ``ℝ^{n+1}``, the formula reads
@@ -132,13 +132,17 @@ The push forward ``π_*(p)`` maps from ``ℝ^n`` to a subspace of ``ℝ^{n+1}``,
 \end{pmatrix}.
 ````
 """
-function convert(::Type{HyperboloidTVector}, p::PoincareBallPoint, X::PoincareBallTVector)
-    return HyperboloidTVector(convert(AbstractVector, p, X))
+function convert(
+    ::Type{HyperboloidTangentVector},
+    p::PoincareBallPoint,
+    X::PoincareBallTangentVector,
+)
+    return HyperboloidTangentVector(convert(AbstractVector, p, X))
 end
 function convert(
     ::Type{T},
     p::PoincareBallPoint,
-    X::PoincareBallTVector,
+    X::PoincareBallTangentVector,
 ) where {T<:AbstractVector}
     t = (1 - norm(p.value)^2)
     den = 4 * dot(p.value, X.value) / (t^2)
@@ -148,75 +152,81 @@ end
 
 @doc raw"""
     convert(
-        ::Type{Tuple{HyperboloidPoint,HyperboloidTVector}}.
-        (p,X)::Tuple{PoincareBallPoint,PoincareBallTVector}
+        ::Type{Tuple{HyperboloidPoint,HyperboloidTangentVector}}.
+        (p,X)::Tuple{PoincareBallPoint,PoincareBallTangentVector}
     )
     convert(
         ::Type{Tuple{P,T}},
-        (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
+        (p, X)::Tuple{PoincareBallPoint,PoincareBallTangentVector},
     ) where {P<:AbstractVector, T <: AbstractVector}
 
-Convert a [`PoincareBallPoint`](@ref) `p` and a [`PoincareBallTVector`](@ref) `X`
-to a [`HyperboloidPoint`](@ref) and a [`HyperboloidTVector`](@ref) simultaneously,
+Convert a [`PoincareBallPoint`](@ref) `p` and a [`PoincareBallTangentVector`](@ref) `X`
+to a [`HyperboloidPoint`](@ref) and a [`HyperboloidTangentVector`](@ref) simultaneously,
 see [`convert(::Type{HyperboloidPoint}, ::PoincareBallPoint)`](@ref) and
-[`convert(::Type{HyperboloidTVector}, ::PoincareBallPoint, ::PoincareBallTVector)`](@ref)
+[`convert(::Type{HyperboloidTangentVector}, ::PoincareBallPoint, ::PoincareBallTangentVector)`](@ref)
 for the formulae.
 """
 function convert(
-    ::Type{Tuple{HyperboloidPoint,HyperboloidTVector}},
-    (p, X)::Tuple{PoincareBallPoint,PoincareBallTVector},
+    ::Type{Tuple{HyperboloidPoint,HyperboloidTangentVector}},
+    (p, X)::Tuple{PoincareBallPoint,PoincareBallTangentVector},
 )
-    return (convert(HyperboloidPoint, p), convert(HyperboloidTVector, p, X))
+    return (convert(HyperboloidPoint, p), convert(HyperboloidTangentVector, p, X))
 end
 
 @doc raw"""
-    convert(::Type{HyperboloidTVector}, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTVector)
-    convert(::Type{AbstractVector}, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTVector)
+    convert(::Type{HyperboloidTangentVector}, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTangentVector)
+    convert(::Type{AbstractVector}, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTangentVector)
 
-convert a point [`PoincareHalfSpaceTVector`](@ref) `X` (from ``ℝ^n``) at `p` from the
+convert a point [`PoincareHalfSpaceTangentVector`](@ref) `X` (from ``ℝ^n``) at `p` from the
 Poincaré half plane model of the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` to a
-[`HyperboloidTVector`](@ref) ``π(p) ∈ ℝ^{n+1}``.
+[`HyperboloidTangentVector`](@ref) ``π(p) ∈ ℝ^{n+1}``.
 
 This is done in two steps, namely transforming it to a Poincare ball point and from there further on to a Hyperboloid point.
 """
 function convert(
-    t::Type{HyperboloidTVector},
+    t::Type{HyperboloidTangentVector},
     p::PoincareHalfSpacePoint,
-    X::PoincareHalfSpaceTVector,
+    X::PoincareHalfSpaceTangentVector,
 )
-    return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X))...)
+    return convert(
+        t,
+        convert(Tuple{PoincareBallPoint,PoincareBallTangentVector}, (p, X))...,
+    )
 end
 function convert(
     t::Type{T},
     p::PoincareHalfSpacePoint,
-    X::PoincareHalfSpaceTVector,
+    X::PoincareHalfSpaceTangentVector,
 ) where {T<:AbstractVector}
-    return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X))...)
+    return convert(
+        t,
+        convert(Tuple{PoincareBallPoint,PoincareBallTangentVector}, (p, X))...,
+    )
 end
 
 @doc raw"""
     convert(
-        ::Type{Tuple{HyperboloidPoint,HyperboloidTVector},
-        (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector}
+        ::Type{Tuple{HyperboloidPoint,HyperboloidTangentVector},
+        (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTangentVector}
     )
     convert(
         ::Type{Tuple{T,T},
-        (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTVector}
+        (p,X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTangentVector}
     ) where {T<:AbstractVector}
 
-convert a point [`PoincareHalfSpaceTVector`](@ref) `X` (from ``ℝ^n``) at `p` from the
+convert a point [`PoincareHalfSpaceTangentVector`](@ref) `X` (from ``ℝ^n``) at `p` from the
 Poincaré half plane model of the [`Hyperbolic`](@ref) manifold ``\mathcal H^n``
-to a tuple of a [`HyperboloidPoint`](@ref) and a [`HyperboloidTVector`](@ref) ``π(p) ∈ ℝ^{n+1}``
+to a tuple of a [`HyperboloidPoint`](@ref) and a [`HyperboloidTangentVector`](@ref) ``π(p) ∈ ℝ^{n+1}``
 simultaneously.
 
 This is done in two steps, namely transforming it to the Poincare ball model and from there
 further on to a Hyperboloid.
 """
 function convert(
-    t::Type{Tuple{HyperboloidPoint,HyperboloidTVector}},
-    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTVector},
+    t::Type{Tuple{HyperboloidPoint,HyperboloidTangentVector}},
+    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTangentVector},
 )
-    return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTVector}, (p, X)))
+    return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTangentVector}, (p, X)))
 end
 
 @doc raw"""
@@ -229,8 +239,8 @@ Compute the distance on the [`Hyperbolic`](@ref) `M`, which reads
 d_{\mathcal H^n}(p,q) = \operatorname{acosh}( - ⟨p, q⟩_{\mathrm{M}}),
 ````
 
-where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
-the [`Lorentz`](@ref)ian manifold.
+where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding, the [`Lorentz`](@ref)ian manifold,
+see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
 """
 function distance(::Hyperbolic, p, q)
     w = q - p
@@ -240,14 +250,14 @@ end
 
 embed(M::Hyperbolic, p::HyperboloidPoint) = embed(M, p.value)
 embed!(M::Hyperbolic, q, p::HyperboloidPoint) = embed!(M, q, p.value)
-function embed(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTVector)
+function embed(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTangentVector)
     return embed(M, p.value, X.value)
 end
-function embed!(M::Hyperbolic, Y, p::HyperboloidPoint, X::HyperboloidTVector)
+function embed!(M::Hyperbolic, Y, p::HyperboloidPoint, X::HyperboloidTangentVector)
     return embed!(M, Y, p.value, X.value)
 end
 
-function exp!(M::Hyperbolic, q, p, X, t::Number)
+function exp_fused!(M::Hyperbolic, q, p, X, t::Number)
     return exp!(M, q, p, t * X)
 end
 function exp!(M::Hyperbolic, q, p, X)
@@ -309,7 +319,7 @@ end
 
 Compute the coordinates of the vector `X` with respect to the orthogonalized version of
 the unit vectors from ``ℝ^n``, where ``n`` is the manifold dimension of the [`Hyperbolic`](@ref)
- `M`, utting them intop the tangent space at `p` and orthonormalizing them.
+ `M`, putting them into the tangent space at `p` and orthonormalizing them.
 """
 get_coordinates(M::Hyperbolic, p, X, ::DefaultOrthonormalBasis)
 
@@ -372,7 +382,7 @@ _hyperbolize(::Hyperbolic, p, Y) = vcat(Y, dot(p[1:(end - 1)], Y) / p[end])
 
 @doc raw"""
     inner(M::Hyperbolic, p, X, Y)
-    inner(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTVector, Y::HyperboloidTVector)
+    inner(M::Hyperbolic, p::HyperboloidPoint, X::HyperboloidTangentVector, Y::HyperboloidTangentVector)
 
 Cmpute the inner product in the Hyperboloid model, i.e. the [`minkowski_metric`](@ref) in
 the embedding. The formula reads
@@ -380,7 +390,8 @@ the embedding. The formula reads
 ````math
 g_p(X,Y) = ⟨X,Y⟩_{\mathrm{M}} = -X_{n}Y_{n} + \displaystyle\sum_{k=1}^{n-1} X_kY_k.
 ````
-This employs the metric of the embedding, see [`Lorentz`](@ref) space.
+This employs the metric of the embedding, see [`Lorentz`](@ref) space,
+see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
 """
 inner(M::Hyperbolic, p, X, Y)
 
@@ -395,22 +406,22 @@ end
 function minkowski_metric(a::HyperboloidPoint, b::HyperboloidPoint)
     return minkowski_metric(a.value, b.value)
 end
-function minkowski_metric(a::HyperboloidTVector, b::HyperboloidPoint)
+function minkowski_metric(a::HyperboloidTangentVector, b::HyperboloidPoint)
     return minkowski_metric(a.value, b.value)
 end
-function minkowski_metric(a::HyperboloidPoint, b::HyperboloidTVector)
+function minkowski_metric(a::HyperboloidPoint, b::HyperboloidTangentVector)
     return minkowski_metric(a.value, b.value)
 end
-function minkowski_metric(a::HyperboloidTVector, b::HyperboloidTVector)
+function minkowski_metric(a::HyperboloidTangentVector, b::HyperboloidTangentVector)
     return minkowski_metric(a.value, b.value)
 end
 
 function project(::Hyperbolic, p::HyperboloidPoint, X)
-    return HyperboloidTVector(X .+ minkowski_metric(p.value, X) .* p.value)
+    return HyperboloidTangentVector(X .+ minkowski_metric(p.value, X) .* p.value)
 end
 
 project!(::Hyperbolic, Y, p, X) = (Y .= X .+ minkowski_metric(p, X) .* p)
-function project!(::Hyperbolic, Y::HyperboloidTVector, p::HyperboloidPoint, X)
+function project!(::Hyperbolic, Y::HyperboloidTangentVector, p::HyperboloidPoint, X)
     return (Y.value .= X .+ minkowski_metric(p.value, X) .* p.value)
 end
 

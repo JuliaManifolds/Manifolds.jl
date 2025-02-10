@@ -352,7 +352,7 @@ vector ``X \in T_p\mathrm{Sp}(2n)`` is computed as [WangSunFiori:2018](@cite)
 ````
 where ``\operatorname{Exp}(⋅)`` denotes the matrix exponential.
 """
-exp(::SymplecticMatrices, ::Any...)
+exp(::SymplecticMatrices, ::Any, ::Any)
 
 function exp!(M::SymplecticMatrices, q, p, X)
     p_star_X = symplectic_inverse_times(M, p, X)
@@ -773,7 +773,10 @@ denotes the Padé (1, 1) approximation to ``\operatorname{exp}(z)``.
 """
 retract(M::SymplecticMatrices, p, X)
 
-function retract_cayley!(M::SymplecticMatrices, q, p, X, t::Number)
+function ManifoldsBase.retract_cayley!(M::SymplecticMatrices, q, p, X)
+    return ManifoldsBase.retract_cayley_fused!(M, q, p, X, one(eltype(p)))
+end
+function ManifoldsBase.retract_cayley_fused!(M::SymplecticMatrices, q, p, X, t::Number)
     p_star_X = symplectic_inverse_times(M, p, t * X)
 
     divisor = lu(2 * I - p_star_X)

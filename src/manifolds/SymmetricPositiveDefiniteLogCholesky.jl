@@ -59,7 +59,7 @@ decomposition of ``p``, ``W = y(y^{-1}Xy^{-\mathrm{T}})_\frac{1}{2}``,
 and ``(⋅)_\frac{1}{2}``
 denotes the lower triangular matrix with the diagonal multiplied by ``\frac{1}{2}``.
 """
-exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
+exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any, ::Any)
 
 function exp!(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, q, p, X)
     N = get_parameter(M.manifold.size)[1]
@@ -67,7 +67,7 @@ function exp!(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetri
     z = exp(CholeskySpace(N; parameter=get_parameter_type(M.manifold)), y, W)
     return copyto!(q, z * z')
 end
-function exp!(
+function exp_fused!(
     M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric},
     q,
     p,

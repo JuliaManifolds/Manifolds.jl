@@ -135,7 +135,7 @@ include("../header.jl")
         @test donb.data.eigenvalues == d2onb.data.eigenvalues
         @test get_vectors(base_manifold(M2), p, donb) == get_vectors(M2, p, d2onb)
     end
-    @testset "Vector transport and transport along with Schild and Pole ladder" begin
+    @testset "Vector transport with Schild and Pole ladder" begin
         A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
         M = SymmetricPositiveDefinite(3)
         p1 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]

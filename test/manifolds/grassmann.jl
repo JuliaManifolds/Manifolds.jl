@@ -247,9 +247,9 @@ include("../header.jl")
     @testset "Projector representation" begin
         M = Grassmann(3, 2)
         p = ProjectorPoint([1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 0.0])
-        X = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 1.0 0.0])
+        X = ProjectorTangentVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 1.0 0.0])
         pS = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
-        Xs = StiefelTVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
+        Xs = StiefelTangentVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
         @test representation_size(M, p) == (3, 3)
 
         q = embed(M, p)
@@ -286,11 +286,11 @@ include("../header.jl")
         p3 = canonical_project(M, pS)
         @test p3.value == pC
 
-        Y = ProjectorTVector(similar(X.value))
+        Y = ProjectorTangentVector(similar(X.value))
         Yc = Xs.value * pS.value' + pS.value * Xs.value'
         differential_canonical_project!(M, Y, pS, Xs)
         @test Y.value == Yc
-        Y2 = ProjectorTVector(similar(X.value))
+        Y2 = ProjectorTangentVector(similar(X.value))
         differential_canonical_project!(M, Y2, pS.value, Xs.value)
         @test Y2.value == Yc
         Y3 = differential_canonical_project(M, pS, Xs)
@@ -315,11 +315,11 @@ include("../header.jl")
     @testset "is_point & convert & show" begin
         M = Grassmann(3, 2)
         p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
-        X = StiefelTVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
+        X = StiefelTangentVector([0.0 1.0; -1.0 0.0; 0.0 0.0])
         @test is_point(M, p; error=:error)
         @test is_vector(M, p, X; error=:error)
         @test repr(p) == "StiefelPoint($(p.value))"
-        @test repr(X) == "StiefelTVector($(X.value))"
+        @test repr(X) == "StiefelTangentVector($(X.value))"
         M2 = Stiefel(3, 2)
         @test is_point(M2, p; error=:error)
         @test is_vector(M2, p, X; error=:error)
@@ -328,10 +328,10 @@ include("../header.jl")
         @test is_point(M, p2; error=:error)
         p3 = convert(ProjectorPoint, p.value)
         @test p2.value == p3.value
-        X2 = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 1.0 0.0])
+        X2 = ProjectorTangentVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 1.0 0.0])
         @test is_vector(M, p2, X2)
         @test repr(p2) == "ProjectorPoint($(p2.value))"
-        @test repr(X2) == "ProjectorTVector($(X2.value))"
+        @test repr(X2) == "ProjectorTangentVector($(X2.value))"
 
         # rank just 1
         pF1 = ProjectorPoint([1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0])
@@ -344,10 +344,10 @@ include("../header.jl")
         @test_throws DomainError is_point(M, pF3; error=:error)
 
         # not symmetric
-        XF1 = ProjectorTVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 0.0 0.0])
+        XF1 = ProjectorTangentVector([0.0 0.0 1.0; 0.0 0.0 1.0; 1.0 0.0 0.0])
         @test_throws DomainError is_vector(M, p2, XF1; error=:error)
         # XF2 is not p2*XF2 + XF2*p2
-        XF2 = ProjectorTVector(ones(3, 3))
+        XF2 = ProjectorTangentVector(ones(3, 3))
         @test_throws DomainError is_vector(M, p2, XF2; error=:error)
 
         # embed for Stiefel with its point
