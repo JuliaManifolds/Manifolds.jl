@@ -313,7 +313,7 @@ function ManifoldsBase.retract_exp_ode!(
     m::AbstractRetractionMethod,
     b::AbstractBasis,
 )
-    ManifoldsBase.retract_exp_ode_fused!(M, q, p, X, one(eltype(p)), m, b)
+    ManifoldsBase.retract_exp_ode_fused!(M, q, p, X, one(number_eltype(p)), m, b)
     return q
 end
 

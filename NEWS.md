@@ -5,23 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.13] - 2025-02-07
+## [0.10.13] - 2025-02-10
 
 ## Changed
 
-* bumped dependency of ManifoldsBase.jl to 1.0, split `exp` into `exp` and `exp_fused` accordingly
-* ManifoldsBase.jl 1.0 also moved from `TVector` to `Tangentvector`s in type names.
+* Bumped dependency of ManifoldsBase.jl to 1.0, split `exp` into `exp` (without optional argument `t`) and `exp_fused` (with argument `t`) and similarly `retract` to `retract` and `retract_fused`.
+* ManifoldsBase.jl 1.0 also moved from `TVector` to `TangentVector`s in type names.
   The following names are adapted
-    * Renamed `HyperboloidTVector` (now deprecated) to `HyperboloidTangentVector`
-    * Renamed `OrthogonalTVector` (now deprecated) to `OrthogonalTangentVector`
-    * Renamed `PoincareBallTVector` (now deprecated) to `PoincareBallTangentVector`
-    * Renamed `PoincareHalfSpaceTVector` (now deprecated) to `PoincareHalfSpaceTangentVector`
-    * Renamed `ProjectorTVector` (now deprecated) to `ProjectorTangentVector`
-    * Renamed `StiefelTVector` (now deprecated) to `StiefelTangentVector`
-    * Renamed `TuckerTVector` (now deprecated) to `TuckerTangentVector`
-    * Renamed `UMVTVector` (now deprecated) to `UMVTangentVector`
-* the internal access `array_value` is now `internal_value`, compare to its renaming in `ManifoldsBase`
-
+  * Renamed `HyperboloidTVector` (now deprecated) to `HyperboloidTangentVector`
+  * Renamed `OrthogonalTVector` (now deprecated) to `OrthogonalTangentVector`
+  * Renamed `PoincareBallTVector` (now deprecated) to `PoincareBallTangentVector`
+  * Renamed `PoincareHalfSpaceTVector` (now deprecated) to `PoincareHalfSpaceTangentVector`
+  * Renamed `ProjectorTVector` (now deprecated) to `ProjectorTangentVector`
+  * Renamed `StiefelTVector` (now deprecated) to `StiefelTangentVector`
+  * Renamed `TuckerTVector` (now deprecated) to `TuckerTangentVector`
+  * Renamed `UMVTVector` (now deprecated) to `UMVTangentVector`
+* The internal access `array_value` is now called `internal_value`, compare to its renaming in `ManifoldsBase`
 
 ## [0.10.12] - 2025-01-10
 
