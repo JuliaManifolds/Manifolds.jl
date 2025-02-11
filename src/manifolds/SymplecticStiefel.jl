@@ -382,7 +382,7 @@ end
 
 @doc raw"""
     inverse_retract(::SymplecticStiefel, p, q, ::CayleyInverseRetraction)
-    inverse_retract!(::SymplecticStiefel, q, p, X, ::CayleyInverseRetraction)
+    inverse_retract!(::SymplecticStiefel, X, p, q, ::CayleyInverseRetraction)
 
 Compute the Cayley Inverse Retraction ``X = \mathcal{L}_p^{\mathrm{SpSt}}(q)``
 such that the Cayley Retraction from ``p`` along ``X`` lands at ``q``, i.e.

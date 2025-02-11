@@ -100,7 +100,7 @@ end
 
 @doc raw"""
     inverse_retract(::SymplecticGrassmann, p, q, ::CayleyInverseRetraction)
-    inverse_retract!(::SymplecticGrassmann, q, p, X, ::CayleyInverseRetraction)
+    inverse_retract!(::SymplecticGrassmann, X, p, q, ::CayleyInverseRetraction)
 
 Compute the Cayley Inverse Retraction on the Symplectic Grassmann manifold,
 when the points are represented as symplectic bases, i.e. on the [`SymplecticStiefel`](@ref).
