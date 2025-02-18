@@ -345,18 +345,18 @@ function Random.rand!(
 end
 
 """
-    _get_expdhalf(::Rotations, d)
+    _exp_half(::Rotations, d)
 
 Calculate `exp(d / 2)`.
 """
-_get_expdhalf(::Rotations, d) = exp(d / 2)
+_exp_half(::Rotations, d) = exp(d / 2)
 """
-    _get_expdhalf(::Rotations{TypeParameter{Tuple{3}}}, d)
+    _exp_half(::Rotations{TypeParameter{Tuple{3}}}, d)
 
 Calculate `exp(d / 2)` for the manifold of `Rotations(3)` based on the Rodrigues' rotation
 formula.
 """
-function _get_expdhalf(::Rotations{TypeParameter{Tuple{3}}}, d)
+function _exp_half(::Rotations{TypeParameter{Tuple{3}}}, d)
     θ = norm(d) / (2 * sqrt(2))
     if θ ≈ 0
         a = 1 - θ^2 / 6
@@ -386,14 +386,14 @@ The formula simplifies to identity for 2-D rotations.
 """
 parallel_transport_direction(M::Rotations, p, X, d)
 function parallel_transport_direction(M::Rotations, p, X, d)
-    expdhalf = _get_expdhalf(M, d)
+    expdhalf = _exp_half(M, d)
     q = exp(M, p, d)
     return transpose(q) * p * expdhalf * X * expdhalf
 end
 parallel_transport_direction(::Rotations{TypeParameter{Tuple{2}}}, p, X, d) = X
 
 function parallel_transport_direction!(M::Rotations, Y, p, X, d)
-    expdhalf = _get_expdhalf(M, d)
+    expdhalf = _exp_half(M, d)
     q = exp(M, p, d)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
@@ -403,7 +403,7 @@ end
 
 function parallel_transport_to!(M::Rotations, Y, p, X, q)
     d = log(M, p, q)
-    expdhalf = _get_expdhalf(M, d)
+    expdhalf = _exp_half(M, d)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
 function parallel_transport_to!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, q)
@@ -411,12 +411,12 @@ function parallel_transport_to!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, q
 end
 function parallel_transport_to!(M::Rotations{TypeParameter{Tuple{3}}}, Y, p, X, q)
     d = log(M, p, q)
-    expdhalf = _get_expdhalf(M, d)
+    expdhalf = _exp_half(M, d)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
 function parallel_transport_to(M::Rotations, p, X, q)
     d = log(M, p, q)
-    expdhalf = _get_expdhalf(M, d)
+    expdhalf = _exp_half(M, d)
     return transpose(q) * p * expdhalf * X * expdhalf
 end
 parallel_transport_to(::Rotations{TypeParameter{Tuple{2}}}, p, X, q) = X
