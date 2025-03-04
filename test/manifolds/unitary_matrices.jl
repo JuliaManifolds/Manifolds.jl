@@ -57,7 +57,7 @@ end
     r = exp(M, p, X)
     X2 = log(M, p, r)
     @test isapprox(M, p, X, X2)
-    r1 = exp(M, p, X, 1.0)
+    r1 = Manifolds.exp_fused(M, p, X, 1.0)
     @test isapprox(M, r, r1; atol=1e-10)
 
     @testset "Projection" begin
@@ -148,6 +148,7 @@ end
           SA[1, 2, 3]
     @test get_vector(M, p, SA[1, 2, 3], DefaultOrthonormalBasis(ℝ)) ==
           Quaternion(0, 1, 2, 3)
+    @test number_of_coordinates(M, DefaultOrthonormalBasis(ℍ)) == 3
 
     @test get_basis(M, p, DefaultOrthonormalBasis(ℝ)).data == [
         Quaternion(0.0, 1.0, 0.0, 0.0),

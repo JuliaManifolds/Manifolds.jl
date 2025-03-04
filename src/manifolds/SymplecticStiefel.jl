@@ -31,7 +31,7 @@ where ``Ω ∈ \mathfrak{sp}(2n,F)`` is [`Hamiltonian`](@ref) and ``p^s`` means
 the symplectic complement of ``p`` s.t. ``p^{+}p^{s} = 0``.
 Here ``p^+`` denotes the [`symplectic_inverse`](@ref).
 
-You can also use [`StiefelPoint`](@ref) and [`StiefelTVector`](@ref) with this manifold,
+You can also use [`StiefelPoint`](@ref) and [`StiefelTangentVector`](@ref) with this manifold,
 they are equivalent to using arrays.
 
 # Constructor
@@ -67,7 +67,7 @@ function active_traits(f, ::SymplecticStiefel, args...)
 end
 
 # Define Stiefel as the array fallback
-ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{<:Any,ℝ} StiefelPoint StiefelTVector value value
+ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{<:Any,ℝ} StiefelPoint StiefelTangentVector value value
 
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
     return CayleyInverseRetraction()
@@ -382,7 +382,7 @@ end
 
 @doc raw"""
     inverse_retract(::SymplecticStiefel, p, q, ::CayleyInverseRetraction)
-    inverse_retract!(::SymplecticStiefel, q, p, X, ::CayleyInverseRetraction)
+    inverse_retract!(::SymplecticStiefel, X, p, q, ::CayleyInverseRetraction)
 
 Compute the Cayley Inverse Retraction ``X = \mathcal{L}_p^{\mathrm{SpSt}}(q)``
 such that the Cayley Retraction from ``p`` along ``X`` lands at ``q``, i.e.
@@ -557,17 +557,13 @@ This expression is computed inplace of `q`.
 """
 retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
 
-function retract_cayley!(M::SymplecticStiefel, q, p, X, t::Number)
-    tX = t * X
+function ManifoldsBase.retract_cayley!(M::SymplecticStiefel, q, p, X)
     # Define intermediate matrices for later use:
-    A = symplectic_inverse_times(M, p, tX)
-
-    H = tX .- p * A  # Allocates (2n×2k).
-
+    A = symplectic_inverse_times(M, p, X)
+    H = X .- p * A  # Allocates (2n×2k).
     # A = I - A/2 + H^{+}H/4:
     A .= (symplectic_inverse_times(M, H, H) ./ 4) .- (A ./ 2)
     Manifolds.add_scaled_I!(A, 1.0)
-
     # Reuse 'H' memory:
     H .= H .+ 2 .* p
     r = lu!(A)

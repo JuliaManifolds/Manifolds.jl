@@ -22,7 +22,7 @@ SURFACE_RESOLUTION_DEFAULT = 32
     circle_points=CIRCLE_DEFAULT_PLOT_POINTS,
     geodesic_interpolation=-1,
     hyperbolic_border_color=RGBA(0.0, 0.0, 0.0, 1.0),
-) where {P<:PoincareBallPoint,T<:PoincareBallTVector}
+) where {P<:PoincareBallPoint,T<:PoincareBallTangentVector}
     @series begin
         φr = range(0, stop=2 * π, length=circle_points)
         x = [cos(φ) for φ in φr]
@@ -83,7 +83,7 @@ end
     pts::AbstractVector{P},
     vecs::Union{AbstractVector{T},Nothing}=nothing;
     geodesic_interpolation=-1,
-) where {P<:PoincareHalfSpacePoint,T<:PoincareHalfSpaceTVector}
+) where {P<:PoincareHalfSpacePoint,T<:PoincareHalfSpaceTangentVector}
     aspect_ratio --> :equal
     framestyle --> :origin
     x = []

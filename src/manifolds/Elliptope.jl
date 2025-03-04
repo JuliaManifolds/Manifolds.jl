@@ -162,7 +162,11 @@ compute a projection based retraction by projecting ``q+Y`` back onto the manifo
 """
 retract(::Elliptope, ::Any, ::Any, ::ProjectionRetraction)
 
-function retract_project!(M::Elliptope, r, q, Y, t::Number)
+function retract_project!(M::Elliptope, r, q, Y)
+    return ManifoldsBase.retract_project_fused!(M, r, q, Y, one(eltype(q)))
+end
+
+function ManifoldsBase.retract_project_fused!(M::Elliptope, r, q, Y, t::Number)
     r .= q .+ t .* Y
     project!(M, r, r)
     return r

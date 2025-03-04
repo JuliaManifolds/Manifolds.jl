@@ -55,6 +55,7 @@ include("../header.jl")
                 test_exp_log=false,
                 test_default_vector_transport=true,
                 vector_transport_methods=[ProjectionTransport()],
+                retraction_methods=[ProjectionRetraction()],
                 default_inverse_retraction_method=nothing,
                 default_retraction_method=ProjectionRetraction(),
                 is_tangent_atol_multiplier=20,

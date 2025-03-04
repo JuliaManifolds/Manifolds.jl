@@ -237,28 +237,49 @@ function project!(B::VectorBundle, Y, p, X)
     return Y
 end
 
-function _retract!(M::VectorBundle, q, p, X, t::Number, ::FiberBundleProductRetraction)
-    return retract_product!(M, q, p, X, t)
-end
-
 """
-    retract(M::VectorBundle, p, q, t::Number, ::FiberBundleProductRetraction)
+    retract(M::VectorBundle, p, q, ::FiberBundleProductRetraction)
 
 Compute the allocating variant of the [`FiberBundleProductRetraction`](@ref),
 which by default allocates and calls `retract_product!`.
 """
-retract(::VectorBundle, p, q, t::Number, ::FiberBundleProductRetraction)
+retract(::VectorBundle, p, q, ::FiberBundleProductRetraction)
 
-function _retract(M::VectorBundle, p, X, t::Number, ::FiberBundleProductRetraction)
-    return retract_product(M, p, X, t)
+function ManifoldsBase._retract!(M::VectorBundle, q, p, X, ::FiberBundleProductRetraction)
+    return retract_product!(M, q, p, X)
 end
 
-function retract_product(M::VectorBundle, p, X, t::Number)
+function retract_product!(M::VectorBundle, q, p, X)
+    return retract_product_fused!(M, q, p, X, one(eltype(p)))
+end
+
+function ManifoldsBase._retract_fused(
+    M::VectorBundle,
+    p,
+    X,
+    t::Number,
+    ::FiberBundleProductRetraction,
+)
+    return retract_product_fused(M, p, X, t)
+end
+
+function ManifoldsBase._retract_fused!(
+    M::VectorBundle,
+    q,
+    p,
+    X,
+    t::Number,
+    ::FiberBundleProductRetraction,
+)
+    return retract_product_fused!(M, q, p, X, t)
+end
+
+function retract_product_fused(M::VectorBundle, p, X, t::Number)
     q = allocate_result(M, retract, p, X)
-    return retract_product!(M, q, p, X, t)
+    return retract_product_fused!(M, q, p, X, t)
 end
 
-function retract_product!(B::VectorBundle, q, p, X, t::Number)
+function retract_product_fused!(B::VectorBundle, q, p, X, t::Number)
     tX = t * X
     xp, Xp = submanifold_components(B.manifold, p)
     xq, Xq = submanifold_components(B.manifold, q)
@@ -277,7 +298,17 @@ function retract_product!(B::VectorBundle, q, p, X, t::Number)
     return q
 end
 
-function retract_sasaki!(B::TangentBundle, q, p, X, t::Number, m::SasakiRetraction)
+function ManifoldsBase.retract_sasaki!(M::VectorBundle, q, p, X, m::SasakiRetraction)
+    return ManifoldsBase.retract_sasaki_fused!(M, q, p, X, one(eltype(p)), m)
+end
+function ManifoldsBase.retract_sasaki_fused!(
+    B::TangentBundle,
+    q,
+    p,
+    X,
+    t::Number,
+    m::SasakiRetraction,
+)
     tX = t * X
     xp, Xp = submanifold_components(B.manifold, p)
     xq, Xq = submanifold_components(B.manifold, q)

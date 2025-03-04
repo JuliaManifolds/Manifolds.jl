@@ -36,7 +36,6 @@ import ManifoldsBase:
     allocate_result,
     allocate_result_type,
     allocation_promotion_function,
-    array_value,
     base_manifold,
     change_basis,
     change_basis!,
@@ -60,6 +59,8 @@ import ManifoldsBase:
     embed!,
     exp,
     exp!,
+    exp_fused,
+    exp_fused!,
     fiber_dimension,
     get_basis,
     get_basis_default,
@@ -96,11 +97,7 @@ import ManifoldsBase:
     _injectivity_radius,
     injectivity_radius_exp,
     inner,
-    isapprox,
-    _isapprox,
-    is_flat,
-    is_point,
-    is_vector,
+    internal_value,
     inverse_retract,
     inverse_retract!,
     _inverse_retract!,
@@ -112,6 +109,11 @@ import ManifoldsBase:
     inverse_retract_qr!,
     inverse_retract_shooting!,
     inverse_retract_softmax!,
+    isapprox,
+    _isapprox,
+    is_flat,
+    is_point,
+    is_vector,
     log,
     log!,
     manifold_dimension,
@@ -120,8 +122,6 @@ import ManifoldsBase:
     norm,
     number_eltype,
     number_of_coordinates,
-    parallel_transport_along,
-    parallel_transport_along!,
     parallel_transport_direction,
     parallel_transport_direction!,
     parallel_transport_to,
@@ -135,8 +135,6 @@ import ManifoldsBase:
     representation_size,
     retract,
     retract!,
-    _retract,
-    retract!,
     retract_cayley!,
     retract_exp_ode!,
     retract_pade!,
@@ -145,6 +143,8 @@ import ManifoldsBase:
     retract_qr!,
     retract_sasaki!,
     retract_softmax!,
+    retract_fused,
+    retract_fused!,
     riemann_tensor,
     riemann_tensor!,
     sectional_curvature,
@@ -155,10 +155,6 @@ import ManifoldsBase:
     submanifold_component,
     submanifold_components,
     vector_space_dimension,
-    vector_transport_along,           # just specified in Euclidean - the next 5 as well
-    vector_transport_along!,
-    vector_transport_along_diff!,     # For consistency these are imported, but for now not
-    vector_transport_along_project!,  # overwritten with new definitions.
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_direction_diff!,
@@ -229,7 +225,7 @@ using ManifoldsBase:
     CotangentSpace,
     CotangentSpaceType,
     CoTFVector,
-    CoTVector,
+    AbstractCotangentVector,
     CyclicProximalPointEstimation,
     DefaultBasis,
     DefaultOrthogonalBasis,
@@ -298,12 +294,12 @@ using ManifoldsBase:
     TangentSpaceType,
     TCoTSpaceType,
     TFVector,
-    TVector,
+    AbstractTangentVector,
     TypeParameter,
-    ValidationCoTVector,
+    ValidationCotangentVector,
     ValidationManifold,
     ValidationMPoint,
-    ValidationTVector,
+    ValidationTangentVector,
     VectorSpaceFiber,
     VectorSpaceType,
     VeeOrthogonalBasis,
@@ -369,6 +365,18 @@ const AbstractDiffBackend = Any  # TODO: remove
 include("utils.jl")
 
 include("manifold_fallbacks.jl")
+
+"""
+    get_parameter_type(M::AbstractManifold)
+
+Get `parameter` argument of the constructor of manifold `M`.
+Returns either `:field` or `:type`.
+
+# See also
+
+`get_parameter`, `TypeParameter`
+"""
+get_parameter_type(::AbstractManifold)
 
 """
     projected_distribution(M::AbstractManifold, d, [p=rand(d)])
@@ -453,6 +461,8 @@ include("manifolds/MultinomialSymmetric.jl")
 include("manifolds/MultinomialSymmetricPositiveDefinite.jl")
 include("manifolds/PositiveNumbers.jl")
 include("manifolds/ProjectiveSpace.jl")
+include("manifolds/Segre.jl")
+include("manifolds/SegreWarpedMetric.jl")
 include("manifolds/SkewHermitian.jl")
 include("manifolds/Spectrahedron.jl")
 include("manifolds/Stiefel.jl")
@@ -487,7 +497,7 @@ include("manifolds/KendallsShapeSpace.jl")
 include("manifolds/Grassmann.jl")
 
 # Introduce Symplectic and so on manifolds only after Grassmann
-# Since that defines the StiefelPoint, StiefelTVector
+# Since that defines the StiefelPoint, StiefelTangentVector
 include("manifolds/Symplectic.jl")
 include("manifolds/Hamiltonian.jl") # Hamiltonian requires symplectic
 include("manifolds/SymplecticStiefel.jl")
@@ -622,7 +632,8 @@ export test_manifold
 export test_group, test_action
 
 # Abstract main types
-export CoTVector, AbstractManifold, AbstractManifoldPoint, TVector
+export AbstractCotangentVector,
+    AbstractManifold, AbstractManifoldPoint, AbstractTangentVector
 # Manifolds
 export AbstractSphere, AbstractProjectiveSpace
 export Euclidean,
@@ -660,6 +671,7 @@ export Euclidean,
     ProbabilitySimplex,
     ProjectiveSpace,
     Rotations,
+    Segre,
     SkewHermitianMatrices,
     SkewSymmetricMatrices,
     Spectrahedron,
@@ -687,20 +699,22 @@ export HyperboloidPoint,
     ProjectorPoint,
     SPDPoint
 # Tangent vector representation types
-export HyperboloidTVector,
-    PoincareBallTVector,
-    PoincareHalfSpaceTVector,
-    TuckerTVector,
-    UMVTVector,
-    ProjectorTVector,
-    StiefelTVector
+export HyperboloidTangentVector,
+    OrthogonalTangentVector,
+    PoincareBallTangentVector,
+    PoincareHalfSpaceTangentVector,
+    TuckerTangentVector,
+    UMVTangentVector,
+    ProjectorTangentVector,
+    StiefelTangentVector
 export AbstractNumbers, ℝ, ℂ, ℍ
 export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
 export IsDefaultMetric, IsDefaultConnection, IsMetricManifold, IsConnectionManifold
-export ValidationManifold, ValidationMPoint, ValidationTVector, ValidationCoTVector
+export ValidationManifold,
+    ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector
 export AbstractPowerManifold,
     AbstractPowerRepresentation,
@@ -738,7 +752,8 @@ export AbstractMetric,
     ProductMetric,
     RealSymplecticMetric,
     RiemannianMetric,
-    StiefelSubmersionMetric
+    StiefelSubmersionMetric,
+    WarpedMetric
 export AbstractAtlas, RetractionAtlas
 # Vector transport types
 export AbstractVectorTransportMethod, ParallelTransport, ProjectionTransport
@@ -807,6 +822,7 @@ export ×,
     christoffel_symbols_first,
     christoffel_symbols_second,
     christoffel_symbols_second_jacobian,
+    connected_by_geodesic,
     convert,
     complex_dot,
     decorated_manifold,
@@ -883,8 +899,6 @@ export ×,
     number_of_coordinates,
     one,
     power_dimensions,
-    parallel_transport_along,
-    parallel_transport_along!,
     parallel_transport_direction,
     parallel_transport_direction!,
     parallel_transport_to,
@@ -926,8 +940,6 @@ export ×,
     submanifold_components,
     var,
     vector_space_dimension,
-    vector_transport_along,
-    vector_transport_along!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,

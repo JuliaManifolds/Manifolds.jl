@@ -1,4 +1,4 @@
-using LinearAlgebra, Manifolds, ManifoldsBase, Test
+using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
 
 @testset "Invertible matrices" begin
     M = InvertibleMatrices(3, ℝ)
@@ -24,6 +24,20 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         @test embed(M, A, A) === A
         @test manifold_dimension(M) == 9
         @test Weingarten(M, A, A, A) == zero(A)
+
+        @test is_point(M, rand(M))
+        @test is_point(M, rand(Random.MersenneTwister(), M))
+        @test is_vector(M, A, rand(M; vector_at=A))
+
+        @test get_coordinates(M, A, A, DefaultOrthonormalBasis()) == vec(A)
+        c = similar(vec(A))
+        get_coordinates!(M, c, A, A, DefaultOrthonormalBasis())
+        @test isapprox(c, vec(A))
+
+        @test get_vector(M, A, vec(A), DefaultOrthonormalBasis()) == A
+        D = similar(A)
+        get_vector!(M, D, A, vec(A), DefaultOrthonormalBasis())
+        @test isapprox(D, A)
     end
     @testset "Complex invertible matrices" begin
         @test repr(Mc) == "InvertibleMatrices(3, ℂ)"

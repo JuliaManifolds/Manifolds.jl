@@ -7,7 +7,7 @@ include("../header.jl")
     pE = [1.0 0.0; 0.0 1.0; 0.0 0.0]
     p = SVDMPoint(pE)
     p2 = SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0], 1)
-    X = UMVTVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], zeros(2, 2))
+    X = UMVTangentVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], zeros(2, 2))
     @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ)"
     @test repr(Mc) == "FixedRankMatrices(3, 2, 2, ℂ)"
     @test sprint(show, "text/plain", p) == """
@@ -26,7 +26,7 @@ include("../header.jl")
       1.0  0.0
       0.0  1.0"""
     @test sprint(show, "text/plain", X) == """
-    $(sprint(show, UMVTVector{Matrix{Float64}, Matrix{Float64}, Matrix{Float64}}))
+    $(sprint(show, UMVTangentVector{Matrix{Float64}, Matrix{Float64}, Matrix{Float64}}))
     U factor:
      3×2 $(sprint(show, Matrix{Float64})):
       0.0  0.0
@@ -43,7 +43,7 @@ include("../header.jl")
 
     @test inner(M, p, X, X) == norm(M, p, X)^2
     @test p == SVDMPoint(p.U, p.S, p.Vt)
-    @test X == UMVTVector(X.U, X.M, X.Vt)
+    @test X == UMVTangentVector(X.U, X.M, X.Vt)
     @testset "Fixed Rank Matrices – Basics" begin
         @test representation_size(M) == (3, 2)
         @test get_embedding(M) == Euclidean(3, 2; field=ℝ)
@@ -65,7 +65,7 @@ include("../header.jl")
         @test !is_vector(
             M,
             SVDMPoint([1.0 0.0; 0.0 1.0; 0.0 0.0]),
-            UMVTVector(zeros(2, 1), zeros(1, 2), zeros(2, 2)),
+            UMVTangentVector(zeros(2, 1), zeros(1, 2), zeros(2, 2)),
         )
         @test !is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), X)
         @test_throws DomainError is_vector(
@@ -74,18 +74,18 @@ include("../header.jl")
             X;
             error=:error,
         )
-        @test !is_vector(M, p, UMVTVector(p.U, X.M, p.Vt, 2))
+        @test !is_vector(M, p, UMVTangentVector(p.U, X.M, p.Vt, 2))
         @test_throws DomainError is_vector(
             M,
             p,
-            UMVTVector(p.U, X.M, p.Vt, 2);
+            UMVTangentVector(p.U, X.M, p.Vt, 2);
             error=:error,
         )
-        @test !is_vector(M, p, UMVTVector(X.U, X.M, p.Vt, 2))
+        @test !is_vector(M, p, UMVTangentVector(X.U, X.M, p.Vt, 2))
         @test_throws DomainError is_vector(
             M,
             p,
-            UMVTVector(X.U, X.M, p.Vt, 2);
+            UMVTangentVector(X.U, X.M, p.Vt, 2);
             error=:error,
         )
 
@@ -172,17 +172,17 @@ include("../header.jl")
                 A = embed(M, p)
                 @test isapprox(N, A, p.U * Diagonal(p.S) * p.Vt)
             end
-            @testset "UMV TVector Basics" begin
-                w = UMVTVector(X.U, 2 * X.M, X.Vt)
-                @test X + w == UMVTVector(2 * X.U, 3 * X.M, 2 * X.Vt)
-                @test X - w == UMVTVector(0 * X.U, -X.M, 0 * X.Vt)
-                @test 2 * X == UMVTVector(2 * X.U, 2 * X.M, 2 * X.Vt)
-                @test X * 2 == UMVTVector(X.U * 2, X.M * 2, X.Vt * 2)
-                @test 2 \ X == UMVTVector(2 \ X.U, 2 \ X.M, 2 \ X.Vt)
-                @test X / 2 == UMVTVector(X.U / 2, X.M / 2, X.Vt / 2)
+            @testset "UMVTangentVector Basics" begin
+                w = UMVTangentVector(X.U, 2 * X.M, X.Vt)
+                @test X + w == UMVTangentVector(2 * X.U, 3 * X.M, 2 * X.Vt)
+                @test X - w == UMVTangentVector(0 * X.U, -X.M, 0 * X.Vt)
+                @test 2 * X == UMVTangentVector(2 * X.U, 2 * X.M, 2 * X.Vt)
+                @test X * 2 == UMVTangentVector(X.U * 2, X.M * 2, X.Vt * 2)
+                @test 2 \ X == UMVTangentVector(2 \ X.U, 2 \ X.M, 2 \ X.Vt)
+                @test X / 2 == UMVTangentVector(X.U / 2, X.M / 2, X.Vt / 2)
                 @test +X == X
-                @test -X == UMVTVector(-X.U, -X.M, -X.Vt)
-                w = UMVTVector(X.U, X.M, X.Vt)
+                @test -X == UMVTangentVector(-X.U, -X.M, -X.Vt)
+                w = UMVTangentVector(X.U, X.M, X.Vt)
                 @test X == w
                 w = allocate(X, number_eltype(X))
                 zero_vector!(M, w, p)
@@ -203,7 +203,7 @@ include("../header.jl")
                 @test wc.U !== w.U
                 @test wc.U == w.U
                 wb = w .+ X .* 2
-                @test wb isa UMVTVector
+                @test wb isa UMVTangentVector
                 @test wb == w + X * 2
                 @test (wb .= 2 .* w .+ X) == 2 * w + X
                 @test wb == 2 * w + X
@@ -253,7 +253,11 @@ include("../header.jl")
         M = FixedRankMatrices(3, 2, 2)
         pE = [1.0 0.0; 0.0 1.0; 0.0 0.0]
         p = SVDMPoint(pE)
-        X = UMVTVector([0.0 0.0; 0.0 0.0; 1.0 1.0], [1.0 0.0; 0.0 1.0], [1.0 0.0; 0.0 1.0])
+        X = UMVTangentVector(
+            [0.0 0.0; 0.0 0.0; 1.0 1.0],
+            [1.0 0.0; 0.0 1.0],
+            [1.0 0.0; 0.0 1.0],
+        )
         G = [1.0 0.0; 0.0 2.0; 0.0 0.0]
         H = [0.0 3.0; 0.0 4.0; 0.0 1.0]
         @test is_vector(M, p, riemannian_Hessian(M, p, G, H, X))

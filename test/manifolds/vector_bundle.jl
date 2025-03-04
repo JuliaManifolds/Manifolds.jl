@@ -182,6 +182,12 @@ struct TestVectorSpaceType <: VectorSpaceType end
         p2 = ArrayPartition([-1.047, -1.047], [0.0, 0.0])
         X1 = inverse_retract(N, p1, p2, m_prod_invretr)
         @test isapprox(N, p2, retract(N, p1, X1, m_prod_retr))
+        @test isapprox(N, p2, ManifoldsBase.retract_fused(N, p1, X1, 1.0, m_prod_retr))
+        p3 = deepcopy(p1)
+        retract!(N, p3, p1, X1, m_prod_retr)
+        @test isapprox(N, p2, p3)
+        ManifoldsBase.retract_fused!(N, p3, p1, X1, 1.0, m_prod_retr)
+        @test isapprox(N, p2, p3)
         @test is_vector(N, p2, vector_transport_to(N, p1, X1, p2))
 
         M2 = ProductManifold(Circle(ℝ), Euclidean(2))

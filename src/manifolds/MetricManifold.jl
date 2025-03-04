@@ -331,14 +331,14 @@ function exp(
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return exp(M.manifold, p, X)
 end
-function exp(
+function exp_fused(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},
     p,
     X,
     t::Number,
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return exp(M.manifold, p, X, t)
+    return exp_fused(M.manifold, p, X, t)
 end
 function exp!(
     ::TraitList{IsDefaultMetric{G}},
@@ -349,7 +349,7 @@ function exp!(
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     return exp!(M.manifold, q, p, X)
 end
-function exp!(
+function exp_fused!(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},
     q,
@@ -357,7 +357,7 @@ function exp!(
     X,
     t::Number,
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return exp!(M.manifold, q, p, X, t)
+    return exp_fused!(M.manifold, q, p, X, t)
 end
 
 injectivity_radius(M::MetricManifold) = injectivity_radius(M.manifold)
@@ -686,28 +686,6 @@ function Base.show(io::IO, i::IsDefaultMetric)
     return print(io, "IsDefaultMetric($(i.metric))")
 end
 
-function vector_transport_along(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_along(M.manifold, p, X, c, m)
-end
-function vector_transport_along!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    Y,
-    p,
-    X,
-    c::AbstractVector,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
-    return vector_transport_along!(M.manifold, Y, p, X, c, m)
-end
-
 function vector_transport_direction(
     ::TraitList{IsDefaultMetric{G}},
     M::MetricManifold{𝔽,TM,G},
@@ -788,6 +766,8 @@ for mf in [
     einstein_tensor,
     exp,
     exp!,
+    exp_fused,
+    exp_fused!,
     flat!,
     gaussian_curvature,
     get_basis,
@@ -811,14 +791,14 @@ for mf in [
     median!,
     mid_point,
     norm,
-    parallel_transport_along,
-    parallel_transport_along!,
     parallel_transport_direction,
     parallel_transport_direction!,
     parallel_transport_to,
     parallel_transport_to!,
     retract,
     retract!,
+    retract_fused,
+    retract_fused!,
     ricci_curvature,
     ricci_tensor,
     riemann_tensor,
@@ -827,8 +807,6 @@ for mf in [
     riemannian_Hessian,
     riemannian_Hessian!,
     sharp!,
-    vector_transport_along,
-    vector_transport_along!,
     vector_transport_direction,
     vector_transport_direction!,
     vector_transport_to,

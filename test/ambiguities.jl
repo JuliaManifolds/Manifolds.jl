@@ -17,7 +17,7 @@ end
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
         fmbs = filter(x -> !any(has_type_in_signature.(x, Identity)), mbs)
-        FMBS_LIMIT = 33
+        FMBS_LIMIT = 35
         println("Number of ManifoldsBase.jl ambiguities: $(length(fmbs))")
         @test length(fmbs) <= FMBS_LIMIT
         if length(fmbs) > FMBS_LIMIT

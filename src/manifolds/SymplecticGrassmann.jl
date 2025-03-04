@@ -28,7 +28,7 @@ With respect to the quotient structure, the canonical projection ``π = π_{\mat
 
 The tangent space is either the tangent space from the symplectic Stiefel manifold, where
 tangent vectors are representers of their corresponding congruence classes, or for the
-representation as projectors, using a [`ProjectorTVector`](@ref) as
+representation as projectors, using a [`ProjectorTangentVector`](@ref) as
 
 ```math
   T_p\operatorname{SpGr}(2n, 2k, ℝ) =
@@ -38,11 +38,11 @@ representation as projectors, using a [`ProjectorTVector`](@ref) as
 where ``[X,p] = Xp-pX`` denotes the matrix commutator and
 ``\mathfrak{sp}(2n,ℝ)`` is the Lie algebra of the symplectic group consisting of [`HamiltonianMatrices`](@ref).
 
-The first representation is in [`StiefelPoint`](@ref)s and [`StiefelTVector`](@ref)s,
+The first representation is in [`StiefelPoint`](@ref)s and [`StiefelTangentVector`](@ref)s,
 which both represent their symplectic Grassmann equivalence class. Arrays are interpreted
 in this representation as well
 
-For the representation in [`ProjectorPoint`](@ref) and [`ProjectorTVector`](@ref)s,
+For the representation in [`ProjectorPoint`](@ref) and [`ProjectorTangentVector`](@ref)s,
 we use the representation from the surjective submersion
 
 ```math
@@ -82,7 +82,7 @@ function active_traits(f, ::SymplecticGrassmann, args...)
 end
 
 # Define Stiefel as the array fallback
-ManifoldsBase.@default_manifold_fallbacks SymplecticGrassmann StiefelPoint StiefelTVector value value
+ManifoldsBase.@default_manifold_fallbacks SymplecticGrassmann StiefelPoint StiefelTangentVector value value
 
 @doc raw"""
     manifold_dimension(::SymplecticGrassmann)

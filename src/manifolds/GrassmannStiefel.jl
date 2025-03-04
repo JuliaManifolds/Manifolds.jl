@@ -14,22 +14,22 @@ struct StiefelPoint{T<:AbstractMatrix} <: AbstractManifoldPoint
 end
 
 """
-    StiefelTVector <: TVector
+    StiefelTangentVector <: AbstractTangentVector
 
 A tangent vector on the [`Grassmann`](@ref) manifold represented by a tangent vector from
 the tangent space of a corresponding point from the [`Stiefel`](@ref) manifold,
 see [`StiefelPoint`](@ref).
 This is the default representation so is can be used interchangeably with just abstract matrices.
 """
-struct StiefelTVector{T<:AbstractMatrix} <: AbstractManifoldPoint
+struct StiefelTangentVector{T<:AbstractMatrix} <: AbstractManifoldPoint
     value::T
 end
 
 ManifoldsBase.@manifold_element_forwards StiefelPoint value
-ManifoldsBase.@manifold_vector_forwards StiefelTVector value
-ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTVector value value
-ManifoldsBase.@default_manifold_fallbacks (Stiefel{<:Any,ℝ}) StiefelPoint StiefelTVector value value
-ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTVector value value
+ManifoldsBase.@manifold_vector_forwards StiefelTangentVector value
+ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTangentVector value value
+ManifoldsBase.@default_manifold_fallbacks (Stiefel{<:Any,ℝ}) StiefelPoint StiefelTangentVector value value
+ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTangentVector value value
 
 function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
     return ParallelTransport()
@@ -58,13 +58,13 @@ embed(::Grassmann, p, X) = X
 embed!(::Grassmann, q, p) = copyto!(q, p)
 embed!(::Grassmann, Y, p, X) = copyto!(Y, X)
 embed!(::Grassmann, q, p::StiefelPoint) = copyto!(q, p.value)
-embed!(::Grassmann, Y, p::StiefelPoint, X::StiefelTVector) = copyto!(Y, X.value)
+embed!(::Grassmann, Y, p::StiefelPoint, X::StiefelTangentVector) = copyto!(Y, X.value)
 embed(::Grassmann, p::StiefelPoint) = p.value
-embed(::Grassmann, p::StiefelPoint, X::StiefelTVector) = X.value
+embed(::Grassmann, p::StiefelPoint, X::StiefelTangentVector) = X.value
 embed!(::Stiefel, q, p::StiefelPoint) = copyto!(q, p.value)
-embed!(::Stiefel, Y, p::StiefelPoint, X::StiefelTVector) = copyto!(Y, X.value)
+embed!(::Stiefel, Y, p::StiefelPoint, X::StiefelTangentVector) = copyto!(Y, X.value)
 embed(::Stiefel, p::StiefelPoint) = p.value
-embed(::Stiefel, p::StiefelPoint, X::StiefelTVector) = X.value
+embed(::Stiefel, p::StiefelPoint, X::StiefelTangentVector) = X.value
 
 @doc raw"""
     exp(M::Grassmann, p, X)
@@ -85,7 +85,7 @@ decomposition ``z=QR`` is performed for numerical stability reasons, yielding th
 \exp_p X = Q.
 ````
 """
-exp(::Grassmann, ::Any...)
+exp(::Grassmann, ::Any, ::Any)
 
 function exp!(M::Grassmann, q, p, X)
     norm(M, p, X) ≈ 0 && return copyto!(q, p)
@@ -319,7 +319,10 @@ where ``⋅^{\mathrm{H}}`` denotes the complex conjugate transposed or Hermitian
 """
 retract(::Grassmann, ::Any, ::Any, ::PolarRetraction)
 
-function retract_polar!(M::Grassmann, q, p, X, t::Number)
+function ManifoldsBase.retract_polar!(M::Grassmann, q, p, X)
+    return ManifoldsBase.retract_polar_fused!(M, q, p, X, one(eltype(p)))
+end
+function ManifoldsBase.retract_polar_fused!(M::Grassmann, q, p, X, t::Number)
     q .= p .+ t .* X
     project!(M, q, q)
     return q
@@ -340,7 +343,10 @@ D = \operatorname{diag}\left( \operatorname{sgn}\left(R_{ii}+\frac{1}{2}\right)_
 """
 retract(::Grassmann, ::Any, ::Any, ::QRRetraction)
 
-function retract_qr!(::Grassmann, q, p, X, t::Number)
+function ManifoldsBase.retract_qr!(M::Grassmann, q, p, X)
+    return ManifoldsBase.retract_qr_fused!(M, q, p, X, one(eltype(p)))
+end
+function ManifoldsBase.retract_qr_fused!(::Grassmann, q, p, X, t::Number)
     q .= p .+ t .* X
     qrfac = qr(q)
     d = diag(qrfac.R)
@@ -402,7 +408,7 @@ function Base.show(io::IO, M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
     return print(io, "Grassmann($(n), $(k), $(𝔽); parameter=:field)")
 end
 Base.show(io::IO, p::StiefelPoint) = print(io, "StiefelPoint($(p.value))")
-Base.show(io::IO, X::StiefelTVector) = print(io, "StiefelTVector($(X.value))")
+Base.show(io::IO, X::StiefelTangentVector) = print(io, "StiefelTangentVector($(X.value))")
 
 # switch order and not dispatch on the _to variant
 function vector_transport_direction(M::Grassmann, p, X, Y, ::ParallelTransport)

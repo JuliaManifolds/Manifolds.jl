@@ -56,7 +56,7 @@ T_p\mathrm{Gr}(n,k) = \bigl\{
 X ∈ \mathbb R^{n×n} : X=X^{\mathrm{T}} \text{ and } X = pX+Xp \bigr\},
 ```
 
-see also [`ProjectorPoint`](@ref) and [`ProjectorTVector`](@ref).
+see also [`ProjectorPoint`](@ref) and [`ProjectorTangentVector`](@ref).
 
 The manifold is named after
 [Hermann G. Graßmann](https://en.wikipedia.org/wiki/Hermann_Grassmann) (1809-1877).

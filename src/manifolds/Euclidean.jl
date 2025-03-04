@@ -211,12 +211,12 @@ Compute the exponential map on the [`Euclidean`](@ref) manifold `M` from `p` in 
 ````
 """
 Base.exp(::Euclidean, p, X) = p + X
-Base.exp(::Euclidean, p, X, t::Number) = p .+ t .* X
+exp_fused(::Euclidean, p, X, t::Number) = p .+ t .* X
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
-exp!(::Euclidean, q, p, X, t::Number) = (q .= p .+ t .* X)
-exp!(::Euclidean{TypeParameter{Tuple{}}}, q, p, X, t::Number) = (q .= p[] + t * X[])
-exp!(::Euclidean{Tuple{}}, q, p, X, t::Number) = (q .= p[] + t * X[])
+exp_fused!(::Euclidean, q, p, X, t::Number) = (q .= p .+ t .* X)
+exp_fused!(::Euclidean{TypeParameter{Tuple{}}}, q, p, X, t::Number) = (q .= p[] + t * X[])
+exp_fused!(::Euclidean{Tuple{}}, q, p, X, t::Number) = (q .= p[] + t * X[])
 
 function get_basis_diagonalizing(
     M::Euclidean,
@@ -251,41 +251,39 @@ function get_coordinates_induced_basis!(
     X,
     ::InducedBasis{ℝ,TangentSpaceType,<:RetractionAtlas},
 )
-    S = representation_size(M)
-    PS = prod(S)
-    copyto!(c, reshape(X, PS))
+    copyto!(c, vec(X))
     return c
 end
 
-function get_coordinates_orthonormal!(M::Euclidean{<:Any,ℂ}, c, ::Any, X, ::RealNumbers)
-    S = representation_size(M)
-    PS = prod(S)
-    c .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
+function get_coordinates_orthonormal!(::Euclidean{<:Any,ℂ}, c, ::Any, X, ::RealNumbers)
+    Xvec = vec(X)
+    d = div(length(c), 2)
+    view(c, 1:d) .= real.(Xvec)
+    view(c, (d + 1):(2d)) .= imag.(Xvec)
     return c
 end
 
 function get_coordinates_diagonalizing!(
-    M::Euclidean{<:Any,ℂ},
+    ::Euclidean{<:Any,ℂ},
     c,
     ::Any,
     X,
     ::DiagonalizingOrthonormalBasis{ℝ},
 )
-    S = representation_size(M)
-    PS = prod(S)
-    c .= [reshape(real.(X), PS)..., reshape(imag(X), PS)...]
+    Xvec = vec(X)
+    d = div(length(c), 2)
+    view(c, 1:d) .= real.(Xvec)
+    view(c, (d + 1):(2d)) .= imag.(Xvec)
     return c
 end
 function get_coordinates_diagonalizing!(
-    M::Euclidean{<:Any,𝔽},
+    ::Euclidean{<:Any,𝔽},
     c,
     p,
     X,
     ::DiagonalizingOrthonormalBasis{𝔽},
 ) where {𝔽}
-    S = representation_size(M)
-    PS = prod(S)
-    copyto!(c, reshape(X, PS))
+    copyto!(c, vec(X))
     return c
 end
 
@@ -377,7 +375,7 @@ end
 function get_vector_orthonormal!(M::Euclidean{<:Any,ℂ}, Y, ::Any, c, ::RealNumbers)
     S = representation_size(M)
     N = div(length(c), 2)
-    copyto!(Y, reshape(c[1:N] + im * c[(N + 1):end], S))
+    copyto!(Y, reshape(c[1:N] .+ im .* c[(N + 1):end], S))
     return Y
 end
 function get_vector_diagonalizing!(
@@ -389,7 +387,7 @@ function get_vector_diagonalizing!(
 )
     S = representation_size(M)
     N = div(length(c), 2)
-    copyto!(Y, reshape(c[1:N] + im * c[(N + 1):end], S))
+    copyto!(Y, reshape(c[1:N] .+ im .* c[(N + 1):end], S))
     return Y
 end
 
@@ -677,14 +675,6 @@ function project!(
 end
 
 """
-    parallel_transport_along(M::Euclidean, p, X, c)
-
-the parallel transport on [`Euclidean`](@ref) is the identity, i.e. returns `X`.
-"""
-parallel_transport_along(::Euclidean, ::Any, X, c::AbstractVector) = X
-parallel_transport_along!(::Euclidean, Y, ::Any, X, c::AbstractVector) = copyto!(Y, X)
-
-"""
     parallel_transport_direction(M::Euclidean, p, X, d)
 
 the parallel transport on [`Euclidean`](@ref) is the identity, i.e. returns `X`.
@@ -815,25 +805,6 @@ end
 # b) no ambiguities occur
 # c) Euclidean is so basic, that these are plain defaults
 #
-function vector_transport_along(
-    ::Euclidean,
-    ::Any,
-    X,
-    ::AbstractVector,
-    method::AbstractVectorTransportMethod,
-)
-    return X
-end
-function vector_transport_along!(
-    M::Euclidean,
-    Y,
-    p,
-    X,
-    ::AbstractVector,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-)
-    return copyto!(Y, X)
-end
 function vector_transport_direction(
     M::Euclidean,
     p,

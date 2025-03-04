@@ -817,12 +817,6 @@ function hat!(
 ) where {O<:AbstractGroupOperation}
     return get_vector_lie!(M, Y, X, VeeOrthogonalBasis())
 end
-function hat(M::AbstractManifold, e::Identity, ::Any)
-    return throw(ErrorException("On $M there exists no identity $e"))
-end
-function hat!(M::AbstractManifold, c, e::Identity, X)
-    return throw(ErrorException("On $M there exists no identity $e"))
-end
 
 @trait_function vee(M::AbstractDecoratorManifold, e::Identity, X)
 @trait_function vee!(M::AbstractDecoratorManifold, Y, e::Identity, X)
@@ -1399,15 +1393,14 @@ function retract(
     q = translate(G, p, pinvq, conv)
     return q
 end
-function retract(
-    tl::TraitList{<:IsGroupManifold},
+function retract_fused(
     G::AbstractDecoratorManifold,
     p,
     X,
     t::Number,
     method::GroupExponentialRetraction,
 )
-    return retract(tl, G, p, t * X, method)
+    return retract(G, p, t * X, method)
 end
 
 function retract!(
@@ -1423,7 +1416,7 @@ function retract!(
     pinvq = exp_lie(G, Xₑ)
     return translate!(G, q, p, pinvq, conv)
 end
-function retract!(
+function ManifoldsBase.retract_fused!(
     tl::TraitList{<:IsGroupManifold},
     G::AbstractDecoratorManifold,
     q,

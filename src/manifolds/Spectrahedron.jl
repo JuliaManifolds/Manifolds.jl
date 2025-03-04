@@ -162,7 +162,12 @@ compute a projection based retraction by projecting ``q+Y`` back onto the manifo
 """
 retract(::Spectrahedron, ::Any, ::Any, ::ProjectionRetraction)
 
-retract_project!(M::Spectrahedron, r, q, Y, t::Number) = project!(M, r, q .+ t .* Y)
+function ManifoldsBase.retract_project!(M::Spectrahedron, r, q, Y)
+    return project!(M, r, q .+ Y)
+end
+function ManifoldsBase.retract_project_fused!(M::Spectrahedron, r, q, Y, t::Number)
+    return project!(M, r, q .+ t .* Y)
+end
 
 @doc raw"""
     representation_size(M::Spectrahedron)

@@ -31,6 +31,15 @@ function HeisenbergMatrices(n::Int; parameter::Symbol=:type)
     return HeisenbergMatrices{typeof(size)}(size)
 end
 
+function _heisenberg_a_view(M::HeisenbergMatrices, p)
+    n = get_parameter(M.size)[1]
+    return view(p, 1, 2:(n + 1))
+end
+function _heisenberg_b_view(M::HeisenbergMatrices, p)
+    n = get_parameter(M.size)[1]
+    return view(p, 2:(n + 1), n + 2)
+end
+
 function active_traits(f, ::HeisenbergMatrices, args...)
     return merge_traits(IsEmbeddedSubmanifold())
 end
@@ -97,12 +106,70 @@ end
 embed(::HeisenbergMatrices, p) = p
 embed(::HeisenbergMatrices, p, X) = X
 
+@doc raw"""
+    get_coordinates(M::HeisenbergMatrices, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+
+Get coordinates of tangent vector `X` at point `p` from the [`HeisenbergMatrices`](@ref) `M`.
+Given a matrix
+```math
+\begin{bmatrix} 1 & \mathbf{a} & c \\
+\mathbf{0} & I_n & \mathbf{b} \\
+0 & \mathbf{0} & 1 \end{bmatrix}
+```
+the coordinates are concatenated vectors ``\mathbf{a}``, ``\mathbf{b}``, and number ``c``.
+"""
+get_coordinates(::HeisenbergMatrices, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+
+function get_coordinates_orthonormal(M::HeisenbergMatrices, p, X, ::RealNumbers)
+    n = get_parameter(M.size)[1]
+    return vcat(_heisenberg_a_view(M, X), _heisenberg_b_view(M, X), X[1, n + 2])
+end
+
+function get_coordinates_orthonormal!(M::HeisenbergMatrices, Xⁱ, p, X, ::RealNumbers)
+    n = get_parameter(M.size)[1]
+    Xⁱ[1:n] .= _heisenberg_a_view(M, X)
+    Xⁱ[(n + 1):(2 * n)] .= _heisenberg_b_view(M, X)
+    Xⁱ[2 * n + 1] = X[1, n + 2]
+    return Xⁱ
+end
+
 function get_embedding(::HeisenbergMatrices{TypeParameter{Tuple{n}}}) where {n}
     return Euclidean(n + 2, n + 2)
 end
 function get_embedding(M::HeisenbergMatrices{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return Euclidean(n + 2, n + 2; parameter=:field)
+end
+
+@doc raw"""
+    get_vector(M::HeisenbergMatrices, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+
+Get tangent vector with coordinates `Xⁱ` at point `p` from the [`HeisenbergMatrices`](@ref) `M`.
+Given a vector of coordinates ``\begin{bmatrix}\mathbb{a} & \mathbb{b} & c\end{bmatrix}`` the tangent vector is equal to
+```math
+\begin{bmatrix} 1 & \mathbf{a} & c \\
+\mathbf{0} & I_n & \mathbf{b} \\
+0 & \mathbf{0} & 1 \end{bmatrix}
+```
+"""
+get_vector(M::HeisenbergMatrices, p, c, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+
+function get_vector_orthonormal(M::HeisenbergMatrices, p, Xⁱ, ::RealNumbers)
+    n = get_parameter(M.size)[1]
+    return [
+        0 Xⁱ[1:n] Xⁱ[2 * n + 1]
+        zeros(n, n + 1) Xⁱ[(n + 1):(2 * n)]'
+        zeros(1, n + 2)
+    ]
+end
+
+function get_vector_orthonormal!(M::HeisenbergMatrices, X, p, Xⁱ, ::RealNumbers)
+    n = get_parameter(M.size)[1]
+    fill!(X, 0)
+    X[1, 2:(n + 1)] .= Xⁱ[1:n]
+    X[2:(n + 1), n + 2] .= Xⁱ[(n + 1):(2 * n)]
+    X[1, n + 2] = Xⁱ[2 * n + 1]
+    return X
 end
 
 """
@@ -118,6 +185,44 @@ is_flat(M::HeisenbergMatrices) = true
 Return the dimension of [`HeisenbergMatrices`](@ref)`(n)`, which is equal to ``2n+1``.
 """
 manifold_dimension(M::HeisenbergMatrices) = 2 * get_parameter(M.size)[1] + 1
+
+@doc raw"""
+    Random.rand(M::HeisenbergMatrices; vector_at = nothing, σ::Real=1.0)
+
+If `vector_at` is `nothing`, return a random point on the [`HeisenbergMatrices`](@ref) `M`
+by sampling elements of the first row and the last column from the normal distribution with
+mean 0 and standard deviation `σ`.
+
+If `vector_at` is not `nothing`, return a random tangent vector from the tangent space of
+the point `vector_at` on the [`HeisenbergMatrices`](@ref) by using a normal distribution with
+mean 0 and standard deviation `σ`.
+"""
+rand(M::HeisenbergMatrices; vector_at=nothing, σ::Real=1.0)
+
+function Random.rand!(
+    rng::AbstractRNG,
+    M::HeisenbergMatrices,
+    pX;
+    σ::Real=one(eltype(pX)),
+    vector_at=nothing,
+)
+    n = ManifoldsBase.get_parameter(M.size)[1]
+    if vector_at === nothing
+        copyto!(pX, I)
+        va = view(pX, 1, 2:(n + 2))
+        randn!(rng, va)
+        va .*= σ
+        vb = view(pX, 2:(n + 1), n + 2)
+        randn!(rng, vb)
+        vb .*= σ
+    else
+        fill!(pX, 0)
+        randn!(rng, view(pX, 1, 2:(n + 2)))
+        randn!(rng, view(pX, 2:(n + 1), n + 2))
+        pX .*= σ
+    end
+    return pX
+end
 
 function Base.show(io::IO, ::HeisenbergMatrices{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "HeisenbergMatrices($(n))")

@@ -14,7 +14,7 @@ include("../header.jl")
     e = Identity(G)
     p2, q2 = ValidationMPoint(p), ValidationMPoint(q)
     @test q2 === Manifolds.array_point(q2) # test that double wraps are avoided.
-    X2 = ValidationTVector(X)
+    X2 = ValidationTangentVector(X)
 
     @test Identity(G) isa Identity
 
@@ -35,7 +35,7 @@ include("../header.jl")
     @test isapprox(G, pinvq.value, inv(G, p))
     eg = allocate(p2)
     inv!(AG, eg, e)
-    @test isapprox(G, eg.value, Manifolds.array_value(e))
+    @test isapprox(G, eg.value, Manifolds.internal_value(e))
 
     @test compose(AG, p2, q2) isa ValidationMPoint
     @test isapprox(G, compose(AG, p2, q2).value, compose(G, p, q))
@@ -58,18 +58,18 @@ include("../header.jl")
     exp_lie!(AG, expX, X2)
     @test isapprox(G, expX.value, exp_lie(G, X))
 
-    @test log_lie(AG, p2) isa ValidationTVector
+    @test log_lie(AG, p2) isa ValidationTangentVector
     @test isapprox(G, e, log_lie(AG, p2).value, log_lie(G, p))
     logp = allocate(X2)
     log_lie!(AG, logp, p2)
     @test isapprox(G, e, logp.value, log_lie(G, p))
 
-    @test lie_bracket(AG, X, X2) isa ValidationTVector
+    @test lie_bracket(AG, X, X2) isa ValidationTangentVector
     Xlb = allocate(X2)
     lie_bracket!(AG, Xlb, X, X2)
     @test isapprox(G, e, Xlb.value, lie_bracket(G, X, X2.value))
 
-    @test adjoint_action(AG, p, X) isa ValidationTVector
+    @test adjoint_action(AG, p, X) isa ValidationTangentVector
     Xaa = allocate(X2)
     adjoint_action!(AG, Xaa, p, X2)
     @test isapprox(G, e, Xaa.value, adjoint_action(G, p, X2.value))
@@ -95,7 +95,7 @@ include("../header.jl")
     end
 
     for conv in (LeftForwardAction(), RightBackwardAction())
-        @test translate_diff(AG, q2, p2, X2, conv; atol=1e-10) isa ValidationTVector
+        @test translate_diff(AG, q2, p2, X2, conv; atol=1e-10) isa ValidationTangentVector
         @test isapprox(
             G,
             translate_diff(AG, q2, p2, X2, conv; atol=1e-10).value,
@@ -106,7 +106,8 @@ include("../header.jl")
         translate_diff!(AG, Y, q2, p2, X2, conv; atol=1e-10)
         @test isapprox(Y.value, translate_diff(G, q, p, X, conv))
 
-        @test inverse_translate_diff(AG, q2, p2, X2, conv; atol=1e-10) isa ValidationTVector
+        @test inverse_translate_diff(AG, q2, p2, X2, conv; atol=1e-10) isa
+              ValidationTangentVector
         @test isapprox(
             G,
             inverse_translate_diff(AG, q2, p2, X2, conv; atol=1e-10).value,
