@@ -50,6 +50,7 @@ function SpecialEuclidean(
     vectors::AbstractGroupVectorRepresentation=LeftInvariantRepresentation(),
     parameter::Symbol=:type,
 )
+    _lie_groups_depwarn_move(SpecialEuclidean, :SpecialEuclideanGroup)
     Tn = TranslationGroup(n; parameter=parameter)
     SOn = SpecialOrthogonal(n; parameter=parameter)
     A = RotationAction(Tn, SOn)

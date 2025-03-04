@@ -10,6 +10,7 @@ Orthogonal group $\mathrm{O}(n)$ represented by [`OrthogonalMatrices`](@ref).
 const Orthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatrices}
 
 function Orthogonal(n::Int; parameter::Symbol=:type)
+    _lie_groups_depwarn_move(Orthogonal, :OrthogonalGroup)
     return GeneralUnitaryMultiplicationGroup(OrthogonalMatrices(n; parameter=parameter))
 end
 

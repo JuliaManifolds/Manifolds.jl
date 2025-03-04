@@ -20,6 +20,7 @@ struct SpecialLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 end
 
 function SpecialLinear(n, 𝔽::AbstractNumbers=ℝ; parameter::Symbol=:type)
+    _lie_groups_depwarn_move(SpecialLinear, :SpecialLinearGroup)
     size = wrap_type_parameter(parameter, (n,))
     return SpecialLinear{typeof(size),𝔽}(size)
 end

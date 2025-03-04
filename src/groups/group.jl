@@ -1340,6 +1340,7 @@ struct GroupLogarithmicInverseRetraction{D<:ActionDirectionAndSide} <:
        AbstractInverseRetractionMethod end
 
 function GroupLogarithmicInverseRetraction(conv::ActionDirectionAndSide=LeftForwardAction())
+    _lie_groups_depwarn_removed(GroupLogarithmicInverseRetraction)
     return GroupLogarithmicInverseRetraction{typeof(conv)}()
 end
 
