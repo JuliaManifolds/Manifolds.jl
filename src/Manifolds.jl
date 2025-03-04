@@ -511,7 +511,7 @@ include("manifolds/EssentialManifold.jl")
 
 #
 # Group Manifolds
-include("groups/GroupManifold.jl")
+include("groups/GroupManifold.jl")            # all necessary warnings added.
 
 # a) generics
 include("groups/addition_operation.jl")

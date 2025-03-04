@@ -183,6 +183,7 @@ function adjoint_action(
     p,
     fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}},
 )
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     t, R = submanifold_components(p)
     r = fX.data[SA[1, 2, 3]]
     ω = fX.data[SA[4, 5, 6]]
@@ -855,6 +856,7 @@ function translate_diff!(
 end
 
 function adjoint_action!(G::SpecialEuclidean, Y, p, Xₑ, ::LeftAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     np, hp = submanifold_components(G, p)
     n, h = submanifold_components(G, Y)
     nX, hX = submanifold_components(G, Xₑ)

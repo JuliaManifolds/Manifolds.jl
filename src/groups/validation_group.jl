@@ -7,6 +7,7 @@ array_point(p) = ValidationMPoint(p)
 array_point(p::ValidationMPoint) = p
 
 function adjoint_action(M::ValidationManifold, p, X; kwargs...)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     is_point(M, p; error=M.mode, kwargs...)
     eM = Identity(M.manifold)
     is_vector(M, eM, X; error=M.mode, kwargs...)
@@ -18,6 +19,7 @@ function adjoint_action(M::ValidationManifold, p, X; kwargs...)
 end
 
 function adjoint_action!(M::ValidationManifold, Y, p, X; kwargs...)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     is_point(M, p; error=M.mode, kwargs...)
     eM = Identity(M.manifold)
     is_vector(M, eM, X; error=M.mode, kwargs...)

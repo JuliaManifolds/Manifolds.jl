@@ -54,9 +54,11 @@ function _common_product_adjoint_action!(G, Y, p, X, conv)
 end
 
 function adjoint_action!(G::ProductGroup, Y, p, X, conv::LeftAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return _common_product_adjoint_action!(G, Y, p, X, conv)
 end
 function adjoint_action!(G::ProductGroup, Y, p, X, conv::RightAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return _common_product_adjoint_action!(G, Y, p, X, conv)
 end
 

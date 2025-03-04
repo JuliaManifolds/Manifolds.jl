@@ -500,20 +500,25 @@ function adjoint_action(
     dir,
 )
     BG = base_group(G)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     Y = allocate_result(BG, adjoint_action, Xₑ, p)
     return adjoint_action!(BG, Y, p, Xₑ, dir)
 end
 function adjoint_action(::AbstractDecoratorManifold, ::Identity, Xₑ, ::LeftAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return Xₑ
 end
 function adjoint_action(::AbstractDecoratorManifold, ::Identity, Xₑ, ::RightAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return Xₑ
 end
 # backward compatibility
 function adjoint_action(G::AbstractDecoratorManifold, p, X)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return adjoint_action(G, p, X, LeftAction())
 end
 function adjoint_action!(G::AbstractDecoratorManifold, Y, p, X)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return adjoint_action!(G, Y, p, X, LeftAction())
 end
 # fall back method: the right action is defined from the left action
@@ -525,6 +530,7 @@ function adjoint_action!(
     X,
     ::RightAction,
 )
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     BG = base_group(G)
     return adjoint_action!(BG, Y, inv(BG, p), X, LeftAction())
 end
