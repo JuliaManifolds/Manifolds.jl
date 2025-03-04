@@ -1,5 +1,7 @@
 include("../header.jl")
 
+using Manifolds: LeftForwardAction, RightBackwardAction
+
 @testset "Group wrapped in ValidationManifold" begin
     G = SpecialOrthogonal(3)
     M = Rotations(3)
