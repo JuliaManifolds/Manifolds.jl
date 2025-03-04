@@ -33,7 +33,12 @@ function _lie_groups_depwarn_move(T::Type, newname::Symbol, comment::String="")
         force=true,
     )
 end
-
+function _lie_groups_depwarn_removed(T::Type, comment::String="")
+    return Base.depwarn(
+        "$T will removed from Manifolds.jl. Its functionality is modelled different in LieGroups.jl. Check their transition tutorial for the replacement.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(T),
+    )
+end
 """
     GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽}
 
