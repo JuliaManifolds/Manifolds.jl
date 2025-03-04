@@ -406,7 +406,7 @@ include("manifolds/Fiber.jl")
 include("manifolds/FiberBundle.jl")
 include("manifolds/VectorFiber.jl")
 include("manifolds/VectorBundle.jl")
-include("groups/group.jl")
+include("groups/group.jl") # all necessary warnings added.
 
 # Features I: Extending Meta Manifolds
 include("statistics.jl")
