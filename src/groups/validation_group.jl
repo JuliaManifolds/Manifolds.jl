@@ -301,7 +301,7 @@ function inverse_translate_diff!(
 end
 
 function exp_lie(M::ValidationManifold, X; kwargs...)
-    _lie_groups_depwarn_move(log_exp, :exp)
+    _lie_groups_depwarn_move(exp_lie, :exp)
     is_vector(M, Identity(M.manifold), internal_value(X); error=M.mode, kwargs...)
     q = array_point(exp_lie(M.manifold, internal_value(X)))
     is_point(M, q; error=M.mode, kwargs...)
@@ -309,7 +309,7 @@ function exp_lie(M::ValidationManifold, X; kwargs...)
 end
 
 function exp_lie!(M::ValidationManifold, q, X; kwargs...)
-    _lie_groups_depwarn_move(log_exp!, :exp!)
+    _lie_groups_depwarn_move(exp_lie!, :exp!)
     is_vector(M, Identity(M.manifold), internal_value(X); error=M.mode, kwargs...)
     exp_lie!(M.manifold, internal_value(q), internal_value(X))
     is_point(M, q; error=M.mode, kwargs...)
