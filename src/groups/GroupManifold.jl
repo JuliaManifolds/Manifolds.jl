@@ -19,17 +19,17 @@ function _lie_groups_depwarn_removed(f::Function, comment::String="")
     )
 end
 # for types force=true so they show up more often when people “start using” the old groups
-function _lie_groups_depwarn_move(f::Type, comment::String="")
+function _lie_groups_depwarn_move(T::Type, comment::String="")
     return Base.depwarn(
         "$T will move to LieGroups.jl.$(length(comment)>0 ? "\n" : "")$(comment)",
-        Symbol(f);
+        Symbol(T);
         force=true,
     )
 end
-function _lie_groups_depwarn_move(f::Type, newname::Symbol, comment::String="")
+function _lie_groups_depwarn_move(T::Type, newname::Symbol, comment::String="")
     return Base.depwarn(
         "$T will move to LieGroups.jl and be renamed to $newname.$(length(comment)>0 ? "\n" : "")$(comment)",
-        Symbol(f);
+        Symbol(T);
         force=true,
     )
 end
