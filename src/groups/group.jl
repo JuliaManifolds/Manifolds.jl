@@ -589,7 +589,7 @@ function ManifoldDiff.differential_exp_argument_lie_approx!(
     Y;
     n=20,
 )
-    _lie_groups_depwarn_removed(differential_exp_argument_lie_approx!)
+    _lie_groups_depwarn_removed(ManifoldDiff.differential_exp_argument_lie_approx!)
     tmp = copy(M, p, Y)
     a = -1.0
     zero_vector!(M, Z, p)
@@ -674,7 +674,7 @@ end
 @trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
 
 function inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
-    _lie_groups_depwarn_move(inv_diff!, diff_inv!)
+    _lie_groups_depwarn_move(inv_diff!, :diff_inv!)
     adjoint_action!(G, Y, p, X)
     Y .*= -1
     return Y
@@ -1020,10 +1020,7 @@ function translate_diff(
     X,
     conv::ActionDirectionAndSide,
 )
-    _lie_groups_depwarn_move(
-        translate_diff,
-        :diff_right_compose,
-    )
+    _lie_groups_depwarn_move(translate_diff, :diff_right_compose)
     Y = allocate_result(G, translate_diff, X, p, q)
     BG = base_group(G)
     translate_diff!(BG, Y, p, q, X, conv)

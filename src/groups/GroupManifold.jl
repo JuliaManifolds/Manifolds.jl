@@ -2,18 +2,35 @@
 # a small helper to deprecate functions, default: warn that this function will move to LieGroups.jl
 function _lie_groups_depwarn_move(f::Function, comment::String="")
     return Base.depwarn(
-        "The function $f will moved to LieGroups.jl.$(length(comment)>0 ? "\n" : "")$(comment)", Symbol(f)
+        "The function $f will move to LieGroups.jl.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(f),
     )
 end
 function _lie_groups_depwarn_move(f::Function, newname::Symbol, comment::String="")
     return Base.depwarn(
-        "The function $f will moved to LieGroups.jl and renamed to $newname.$(length(comment)>0 ? "\n" : "")$(comment)", Symbol(f)
+        "The function $f will move to LieGroups.jl and be renamed to $newname.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(f),
     )
 end
 function _lie_groups_depwarn_removed(f::Function, comment::String="")
     return Base.depwarn(
         "The function $f will removed from Manifolds.jl. Its functionality is modelled different in LieGroups.jl. Check their transition tutorial for the replacement.$(length(comment)>0 ? "\n" : "")$(comment)",
         Symbol(f),
+    )
+end
+# for types force=true so they show up more often when people “start using” the old groups
+function _lie_groups_depwarn_move(f::Type, comment::String="")
+    return Base.depwarn(
+        "$T will move to LieGroups.jl.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(f);
+        force=true,
+    )
+end
+function _lie_groups_depwarn_move(f::Type, newname::Symbol, comment::String="")
+    return Base.depwarn(
+        "$T will move to LieGroups.jl and be renamed to $newname.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(f);
+        force=true,
     )
 end
 

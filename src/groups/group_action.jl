@@ -53,6 +53,7 @@ Unless otherwise specified, the right action is defined in terms of the left act
 ````
 """
 function apply(A::AbstractGroupAction, a, p)
+    _lie_groups_depwarn_move(apply)
     q = allocate_result(A, apply, p, a)
     apply!(A, q, a, p)
     return q
@@ -66,6 +67,7 @@ The result is saved in `q`.
 """
 apply!(A::AbstractGroupAction, q, a, p)
 function apply!(A::AbstractGroupAction{RightAction}, q, a, p)
+    _lie_groups_depwarn_move(apply!)
     ainv = inv(base_group(A), a)
     apply!(switch_direction(A), q, ainv, p)
     return q
@@ -77,6 +79,7 @@ end
 Apply inverse of action `a` to the point `p`. The action is specified by `A`.
 """
 function inverse_apply(A::AbstractGroupAction, a, p)
+    _lie_groups_depwarn_move(apply, "And use it together with `inv`")
     q = allocate_result(A, inverse_apply, p, a)
     inverse_apply!(A, q, a, p)
     return q
@@ -89,6 +92,7 @@ Apply inverse of action `a` to the point `p` with the rule specified by `A`.
 The result is saved in `q`.
 """
 function inverse_apply!(A::AbstractGroupAction, q, a, p)
+    _lie_groups_depwarn_move(apply!, "And use it together with `inv`")
     inva = inv(base_group(A), a)
     apply!(A, q, inva, p)
     return q
@@ -144,10 +148,20 @@ convention, the differential transports vectors.
 ````
 """
 function inverse_apply_diff(A::AbstractGroupAction, a, p, X)
+    _lie_groups_depwarn_move(
+        inverse_apply_diff!,
+        :diff_apply,
+        "And use it together with `inv`",
+    )
     return apply_diff(A, inv(base_group(A), a), p, X)
 end
 
 function inverse_apply_diff!(A::AbstractGroupAction, Y, a, p, X)
+    _lie_groups_depwarn_move(
+        inverse_apply_diff!,
+        :diff_apply!,
+        "And use it together with `inv!`",
+    )
     return apply_diff!(A, Y, inv(base_group(A), a), p, X)
 end
 

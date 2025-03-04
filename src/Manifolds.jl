@@ -406,7 +406,7 @@ include("manifolds/Fiber.jl")
 include("manifolds/FiberBundle.jl")
 include("manifolds/VectorFiber.jl")
 include("manifolds/VectorBundle.jl")
-include("groups/group.jl") # all necessary warnings added.
+include("groups/group.jl")           # all necessary deprecation warnings added.
 
 # Features I: Extending Meta Manifolds
 include("statistics.jl")
@@ -511,14 +511,14 @@ include("manifolds/EssentialManifold.jl")
 
 #
 # Group Manifolds
-include("groups/GroupManifold.jl")            # all necessary warnings added.
+include("groups/GroupManifold.jl")               # all necessary warnings added.
 
 # a) generics
 include("groups/addition_operation.jl")
 include("groups/multiplication_operation.jl")
-include("groups/connections.jl")
-include("groups/metric.jl")
-include("groups/group_action.jl")
+include("groups/connections.jl")     # no deprecations to add. Maybe move connection names to ManifoldsBase?
+include("groups/metric.jl")                           # no deprecations to add.
+include("groups/group_action.jl")    # all necessary deprecation warnings added.
 include("groups/group_operation_action.jl")
 include("groups/validation_group.jl")
 include("groups/product_group.jl")
@@ -528,7 +528,7 @@ include("groups/power_group.jl")
 # generic group - common (special) unitary/orthogonal functions
 include("groups/general_unitary_groups.jl")
 # Special Group Manifolds
-include("groups/general_linear.jl")
+include("groups/general_linear.jl")                     # all deprecations added
 include("groups/special_linear.jl")
 include("groups/translation_group.jl")
 include("groups/unitary.jl")
