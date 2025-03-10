@@ -184,9 +184,9 @@ end
 # We need to prevent decorator unwrapping so that the correct `get_vector!` gets called
 # and applies proper padding to the result if `X` happens to be a matrix.
 # Otherwise rare random bugs happen where the padding is not applied.
-function get_vector(G::SemidirectProductGroup, p, X, B::VeeOrthogonalBasis)
-    Y = allocate_result(G, get_vector, p, X)
-    return get_vector!(G, Y, p, X, B)
+function get_vector(G::SemidirectProductGroup, p, c, B::VeeOrthogonalBasis)
+    Y = allocate_result(G, get_vector, p, c)
+    return get_vector!(G, Y, p, c, B)
 end
 
 function get_vector!(G::SemidirectProductGroup, Y, p, X, B::VeeOrthogonalBasis)

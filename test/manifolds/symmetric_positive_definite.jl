@@ -27,7 +27,7 @@ include("../header.jl")
     TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
 
     for M in metrics
-        basis_types = if (M == M1 || M == M2)
+        basis_types = if (M == M1 || M == M2 || M == M3)
             (DefaultOrthonormalBasis(),)
         else
             ()
@@ -135,7 +135,7 @@ include("../header.jl")
         @test donb.data.eigenvalues == d2onb.data.eigenvalues
         @test get_vectors(base_manifold(M2), p, donb) == get_vectors(M2, p, d2onb)
     end
-    @testset "Vector transport and transport along with Schild and Pole ladder" begin
+    @testset "Vector transport with Schild and Pole ladder" begin
         A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
         M = SymmetricPositiveDefinite(3)
         p1 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
@@ -312,6 +312,7 @@ include("../header.jl")
         M = SymmetricPositiveDefinite(3; parameter=:field)
         @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
         @test repr(M) == "SymmetricPositiveDefinite(3; parameter=:field)"
+        @test Manifolds.get_parameter_type(M) === :field
     end
 
     @testset "Curvature" begin

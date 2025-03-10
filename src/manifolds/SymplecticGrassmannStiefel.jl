@@ -29,9 +29,11 @@ embed(::SymplecticGrassmann, p, X) = X
 embed!(::SymplecticGrassmann, q, p) = copyto!(q, p)
 embed!(::SymplecticGrassmann, Y, p, X) = copyto!(Y, X)
 embed!(::SymplecticGrassmann, q, p::StiefelPoint) = copyto!(q, p.value)
-embed!(::SymplecticGrassmann, Y, p::StiefelPoint, X::StiefelTVector) = copyto!(Y, X.value)
+function embed!(::SymplecticGrassmann, Y, p::StiefelPoint, X::StiefelTangentVector)
+    return copyto!(Y, X.value)
+end
 embed(::SymplecticGrassmann, p::StiefelPoint) = p.value
-embed(::SymplecticGrassmann, p::StiefelPoint, X::StiefelTVector) = X.value
+embed(::SymplecticGrassmann, p::StiefelPoint, X::StiefelTangentVector) = X.value
 
 @doc raw"""
     exp(::SymplecticGrassmann, p, X)
@@ -98,7 +100,7 @@ end
 
 @doc raw"""
     inverse_retract(::SymplecticGrassmann, p, q, ::CayleyInverseRetraction)
-    inverse_retract!(::SymplecticGrassmann, q, p, X, ::CayleyInverseRetraction)
+    inverse_retract!(::SymplecticGrassmann, X, p, q, ::CayleyInverseRetraction)
 
 Compute the Cayley Inverse Retraction on the Symplectic Grassmann manifold,
 when the points are represented as symplectic bases, i.e. on the [`SymplecticStiefel`](@ref).
@@ -123,9 +125,14 @@ Here we can directly employ the [`CaleyRetraction`](@extref `ManifoldsBase.Cayle
 """
 retract(::SymplecticGrassmann, p, X, ::CayleyRetraction)
 
-function retract_cayley!(M::SymplecticGrassmann, q, p, X, t::Number)
+function ManifoldsBase.retract_cayley!(M::SymplecticGrassmann, q, p, X)
     n, k = get_parameter(M.size)
-    retract_cayley!(SymplecticStiefel(2 * n, 2 * k), q, p, X, t)
+    ManifoldsBase.retract_cayley!(SymplecticStiefel(2 * n, 2 * k), q, p, X)
+    return q
+end
+function ManifoldsBase.retract_cayley_fused!(M::SymplecticGrassmann, q, p, X, t::Number)
+    n, k = get_parameter(M.size)
+    ManifoldsBase.retract_cayley_fused!(SymplecticStiefel(2 * n, 2 * k), q, p, X, t)
     return q
 end
 

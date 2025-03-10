@@ -47,7 +47,7 @@ embed(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number) = SMatrix{1,
 function exp(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number)
     return p * exp(X)
 end
-function exp(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number, t::Number)
+function exp_fused(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number, t::Real)
     return p * exp(t * X)
 end
 

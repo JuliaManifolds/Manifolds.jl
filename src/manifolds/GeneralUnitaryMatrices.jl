@@ -225,7 +225,7 @@ exp(::GeneralUnitaryMatrices, p, X)
 function exp!(M::GeneralUnitaryMatrices, q, p, X)
     return copyto!(M, q, p * exp(X))
 end
-function exp!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
+function ManifoldsBase.exp_fused!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
     return copyto!(M, q, p * exp(t * X))
 end
 
@@ -234,7 +234,7 @@ function exp(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, p::SMatrix,
     sinθ, cosθ = sincos(θ)
     return p * SA[cosθ -sinθ; sinθ cosθ]
 end
-function exp(
+function ManifoldsBase.exp_fused(
     M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
     p::SMatrix,
     X::SMatrix,
@@ -260,16 +260,28 @@ function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, q, p, X)
     sinθ, cosθ = sincos(θ)
     return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
 end
-function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, q, p, X, t::Real)
+function ManifoldsBase.exp_fused!(
+    M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
+    q,
+    p,
+    X,
+    t::Real,
+)
     @assert size(q) == (2, 2)
     θ = get_coordinates(M, p, X, DefaultOrthogonalBasis())[1]
     sinθ, cosθ = sincos(t * θ)
     return copyto!(q, p * SA[cosθ -sinθ; sinθ cosθ])
 end
 function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, q, p, X)
-    return exp!(M, q, p, X, one(eltype(X)))
+    return exp_fused!(M, q, p, X, one(eltype(X)))
 end
-function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, q, p, X, t::Real)
+function ManifoldsBase.exp_fused!(
+    M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ},
+    q,
+    p,
+    X,
+    t::Real,
+)
     θ = abs(t) * norm(M, p, X) / sqrt(2)
     if θ ≈ 0
         a = 1 - θ^2 / 6
@@ -281,7 +293,13 @@ function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, q, p, X, t
     pinvq = I + a .* t .* X .+ b .* t^2 .* (X^2)
     return copyto!(q, p * pinvq)
 end
-function exp!(M::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ}, q, p, X, t::Real)
+function ManifoldsBase.exp_fused!(
+    M::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ},
+    q,
+    p,
+    X,
+    t::Real,
+)
     return exp!(M, q, p, t * X)
 end
 function exp!(::GeneralUnitaryMatrices{TypeParameter{Tuple{4}},ℝ}, q, p, X)
@@ -396,25 +414,25 @@ function get_coordinates_orthogonal!(
 end
 function get_coordinates_orthogonal!(
     M::GeneralUnitaryMatrices{TypeParameter{Tuple{n}},ℝ},
-    Xⁱ,
+    c,
     p,
     X,
     ::RealNumbers,
 ) where {n}
-    @assert length(Xⁱ) == manifold_dimension(M)
+    @assert length(c) == manifold_dimension(M)
     @assert size(X) == (n, n)
     @inbounds begin
-        Xⁱ[1] = X[3, 2]
-        Xⁱ[2] = X[1, 3]
-        Xⁱ[3] = X[2, 1]
+        c[1] = X[3, 2]
+        c[2] = X[1, 3]
+        c[3] = X[2, 1]
 
         k = 4
         for i in 4:n, j in 1:(i - 1)
-            Xⁱ[k] = X[i, j]
+            c[k] = X[i, j]
             k += 1
         end
     end
-    return Xⁱ
+    return c
 end
 function get_coordinates_orthogonal!(
     M::GeneralUnitaryMatrices{Tuple{Int},ℝ},
@@ -509,7 +527,7 @@ function get_vector_orthogonal!(
     ::GeneralUnitaryMatrices{TypeParameter{Tuple{1}},ℝ},
     X,
     p,
-    Xⁱ,
+    Xⁱ::AbstractVector,
     N::RealNumbers,
 )
     return X .= 0
@@ -518,7 +536,7 @@ function get_vector_orthogonal!(
     M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ},
     X,
     p,
-    Xⁱ,
+    Xⁱ::AbstractVector,
     N::RealNumbers,
 )
     return get_vector_orthogonal!(M, X, p, Xⁱ[1], N)
@@ -543,7 +561,7 @@ function get_vector_orthogonal!(
     M::GeneralUnitaryMatrices{TypeParameter{Tuple{n}},ℝ},
     X,
     p,
-    Xⁱ,
+    Xⁱ::AbstractVector,
     ::RealNumbers,
 ) where {n}
     @assert size(X) == (n, n)
@@ -622,7 +640,7 @@ function get_vector_orthonormal!(
     M::GeneralUnitaryMatrices{<:Any,ℝ},
     X,
     p,
-    Xⁱ,
+    Xⁱ::AbstractVector,
     N::RealNumbers,
 )
     T = Base.promote_eltype(p, X)
@@ -1031,7 +1049,11 @@ This is also the default retraction on these manifolds.
 """
 retract(::GeneralUnitaryMatrices, ::Any, ::Any, ::QRRetraction)
 
-function retract_qr!(
+function ManifoldsBase.retract_qr!(M::GeneralUnitaryMatrices, q, p, X)
+    return ManifoldsBase.retract_qr_fused!(M, q, p, X, one(eltype(p)))
+end
+
+function ManifoldsBase.retract_qr_fused!(
     ::GeneralUnitaryMatrices,
     q::AbstractArray{T},
     p,
@@ -1044,7 +1066,12 @@ function retract_qr!(
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     return copyto!(q, qr_decomp.Q * D)
 end
-function retract_polar!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
+
+function ManifoldsBase.retract_polar!(M::GeneralUnitaryMatrices, q, p, X)
+    return ManifoldsBase.retract_polar_fused!(M, q, p, X, one(eltype(p)))
+end
+
+function ManifoldsBase.retract_polar_fused!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
     A = p + p * (t * X)
     return project!(M, q, A; check_det=false)
 end

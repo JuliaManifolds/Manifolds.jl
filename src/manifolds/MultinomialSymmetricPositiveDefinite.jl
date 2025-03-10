@@ -99,11 +99,7 @@ function Random.rand!(
     while !is_spd
         L = sort(exp.(randn(rng, n)))
         V = reduce(hcat, map(xi -> [xi^k for k in 0:(n - 1)], L))'
-        @static if VERSION < v"1.7" # COV_EXCL_LINE
-            Vlu = lu(V, Val(false))
-        else
-            Vlu = lu(V, LinearAlgebra.RowNonZero())
-        end
+        Vlu = lu(V, LinearAlgebra.RowNonZero())
         dm = Diagonal(Vlu.U)
         uutd = dm \ Vlu.U
         random_totally_positive = uutd * dm * Vlu.L

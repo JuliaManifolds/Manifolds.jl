@@ -5,6 +5,74 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.14] - 2025-02-18
+
+## Changed
+
+* Introduced new implementation of parallel transport on `Rotations(3)` based on Rodrigues' rotation
+formula.
+
+## [0.10.13] - 2025-02-10
+
+## Changed
+
+* Bumped dependency of ManifoldsBase.jl to 1.0, split `exp` into `exp` (without optional argument `t`) and `exp_fused` (with argument `t`) and similarly `retract` to `retract` and `retract_fused`.
+* ManifoldsBase.jl 1.0 also moved from `TVector` to `TangentVector`s in type names.
+  The following names are adapted
+  * Renamed `HyperboloidTVector` (now deprecated) to `HyperboloidTangentVector`
+  * Renamed `OrthogonalTVector` (now deprecated) to `OrthogonalTangentVector`
+  * Renamed `PoincareBallTVector` (now deprecated) to `PoincareBallTangentVector`
+  * Renamed `PoincareHalfSpaceTVector` (now deprecated) to `PoincareHalfSpaceTangentVector`
+  * Renamed `ProjectorTVector` (now deprecated) to `ProjectorTangentVector`
+  * Renamed `StiefelTVector` (now deprecated) to `StiefelTangentVector`
+  * Renamed `TuckerTVector` (now deprecated) to `TuckerTangentVector`
+  * Renamed `UMVTVector` (now deprecated) to `UMVTangentVector`
+* The internal access `array_value` is now called `internal_value`, compare to its renaming in `ManifoldsBase`
+
+## [0.10.12] - 2025-01-10
+
+### Added
+
+* Orthonormal bases for `CholeskySpace` and `LogCholesky` metric for `SymmetricPositiveDefinite`.
+* `rand` for `CholeskySpace`.
+
+### Changed
+
+* Improved performance of selected `get_vector` and `get_coordinates` methods for complex `Euclidean` manifold.
+
+## [0.10.11] - 2025-01-02
+
+### Added
+
+* Bases and rand for `HeisenbergMatrices` and `InvertibleMatrices`.
+
+## [0.10.10] - 2024-12-20
+
+### Added
+
+* the `Segre` manifold
+* the `WarpedMetric` for the `Segre`manifold
+
+## [0.10.9] - 2024-12-16
+
+### Added
+
+* the `Segre` manifold
+* the `WarpedMetric` for the `Segre`manifold
+* The manifold `HeisenbergMatrices` as the underlying manifold of `HeisenbergGroup`.
+
+### Changed
+
+* `about.md` now also lists contributors of manifolds and a very short history of the package.
+
+## [0.10.8] – 2024-11-27
+
+### Changed
+
+* Some methods related to `get_vector` for `GeneralUnitaryMatrices` now have `AbstractVector` upper bound for coefficients.
+* Minimum Julia version is now 1.10 (the LTS which replaced 1.6)
+* The dependency ManifoldDiff.jl has been upgraded from v0.3 to v0.4, to bring compatibility with DifferentiationInterface.jl.
+
 ## [0.10.7] – 2024-11-16
 
 ### Added

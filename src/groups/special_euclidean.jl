@@ -30,7 +30,7 @@ which the group operation is [`MultiplicationOperation`](@ref).
 
 There are two supported conventions for tangent vector storage, which can be selected
 using the `vectors` keyword argument:
-* [`LeftInvariantRepresentation`](@ref) (default one), which corresponds to left-invariant 
+* [`LeftInvariantRepresentation`](@ref) (default one), which corresponds to left-invariant
   storage commonly used in other Lie groups.
 * [`HybridTangentRepresentation`](@ref) which corresponds to the representation implied by
   product manifold structure of underlying groups.
@@ -417,9 +417,9 @@ function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X)
     @inbounds _padpoint!(M, q)
     return q
 end
-function exp!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X, t::Number)
+function exp_fused!(M::SpecialEuclideanManifold, q::AbstractMatrix, p, X, t::Number)
     map(
-        (N, qc, pc, Xc) -> exp!(N, qc, pc, Xc, t),
+        (N, qc, pc, Xc) -> exp_fused!(N, qc, pc, Xc, t),
         M.manifolds,
         submanifold_components(M, q),
         submanifold_components(M, p),

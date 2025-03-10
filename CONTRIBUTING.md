@@ -61,8 +61,8 @@ The allocating variant only needs to defined if a more efficient version
 than the default is available.
 
 Note that since the first argument is _always_ the [`AbstractManifold`](https://juliamanifolds.github.io/ManifoldsBase.jl/stable/types.html#ManifoldsBase.AbstractManifold), the mutated argument is always the second one in the signature.
-In the example there are `exp(M, p, X, t)` for the exponential map that allocates
-its result `q`, and `exp!(M, q, p, X, t)` for the in-place one, which computes and returns the `q`.
+In the example there are `exp(M, p, X)` for the exponential map that allocates
+its result `q`, and `exp!(M, q, p, X)` for the in-place one, which computes and returns the `q`.
 
 Since a user probably looks for the documentation on the allocating variant,
 we recommend to attach the documentation string to this variant, mentioning all
@@ -78,7 +78,7 @@ struct MyManifold <: AbstractManifold end
 
 Describe the function, its input and output as well as a mathematical formula.
 """
-exp(::MyManifold, ::Any...)
+exp(::MyManifold, ::Any, ::Any)
 ```
 
 You can also save the string to a variable, for example `_doc_myM_exp` and attach it to both functions

@@ -1,20 +1,10 @@
 module ManifoldsRecipesBaseExt
 
-if isdefined(Base, :get_extension)
-    using Manifolds
-    using Manifolds: TypeParameter
+using Manifolds
+using Manifolds: TypeParameter
 
-    using Colors: RGBA
-    using RecipesBase: @recipe, @series
-else
-    # imports need to be relative for Requires.jl-based workflows:
-    # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
-    using ..Manifolds
-    using ..Manifolds: TypeParameter
-
-    using ..RecipesBase: @recipe, @series
-    using ..Colors: RGBA
-end
+using Colors: RGBA
+using RecipesBase: @recipe, @series
 
 #
 # Defaults
@@ -32,7 +22,7 @@ SURFACE_RESOLUTION_DEFAULT = 32
     circle_points=CIRCLE_DEFAULT_PLOT_POINTS,
     geodesic_interpolation=-1,
     hyperbolic_border_color=RGBA(0.0, 0.0, 0.0, 1.0),
-) where {P<:PoincareBallPoint,T<:PoincareBallTVector}
+) where {P<:PoincareBallPoint,T<:PoincareBallTangentVector}
     @series begin
         φr = range(0, stop=2 * π, length=circle_points)
         x = [cos(φ) for φ in φr]
@@ -93,7 +83,7 @@ end
     pts::AbstractVector{P},
     vecs::Union{AbstractVector{T},Nothing}=nothing;
     geodesic_interpolation=-1,
-) where {P<:PoincareHalfSpacePoint,T<:PoincareHalfSpaceTVector}
+) where {P<:PoincareHalfSpacePoint,T<:PoincareHalfSpaceTangentVector}
     aspect_ratio --> :equal
     framestyle --> :origin
     x = []

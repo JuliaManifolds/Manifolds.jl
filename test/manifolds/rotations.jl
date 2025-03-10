@@ -167,6 +167,9 @@ include("../header.jl")
             p = exp(SOn, pts[1], X)
             X2 = log(SOn, pts[1], p)
             @test distance(SOn, p, exp(SOn, pts[1], X2)) < 25 * eps()
+            p2 = ManifoldsBase.exp_fused(SOn, pts[1], X, 1.0)
+            X3 = log(SOn, pts[1], p)
+            @test distance(SOn, p, exp(SOn, pts[1], X3)) < 25 * eps()
         end
     end
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin

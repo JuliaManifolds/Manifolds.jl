@@ -33,6 +33,8 @@ include("../header.jl")
             test_vee_hat=false,
             exp_log_atol_multiplier=8.0,
             test_inplace=true,
+            test_rand_point=true,
+            test_rand_tvector=true,
         )
     end
     @testset "Test Error cases in is_point and is_vector" begin

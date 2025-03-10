@@ -1,32 +1,16 @@
 module ManifoldsOrdinaryDiffEqExt
 
-if isdefined(Base, :get_extension)
-    using ManifoldsBase
-    using ManifoldsBase: TraitList
+using ManifoldsBase
+using ManifoldsBase: TraitList
 
-    using Manifolds
-    import Manifolds: exp!, solve_exp_ode
-    using Manifolds: @einsum
+using Manifolds
+import Manifolds: exp!, exp_fused!, solve_exp_ode
+using Manifolds: @einsum
 
-    using ManifoldDiff: default_differential_backend
+using ManifoldDiff: default_differential_backend
 
-    using OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
-    using StaticArrays
-else
-    # imports need to be relative for Requires.jl-based workflows:
-    # https://github.com/JuliaArrays/ArrayInterface.jl/pull/387
-    using ..ManifoldsBase
-    using ..ManifoldsBase: TraitList
-
-    using ..Manifolds
-    import ..Manifolds: exp!, solve_exp_ode
-    using ..Manifolds: @einsum
-
-    using ..ManifoldDiff: default_differential_backend
-
-    using ..OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
-    using ..StaticArrays
-end
+using OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
+using StaticArrays
 
 function solve_exp_ode(
     M::AbstractManifold,
@@ -65,7 +49,7 @@ function solve_exp_ode(
     return q
 end
 # also define exp! for metric manifold anew in this case
-function exp!(
+function exp_fused!(
     ::TraitList{IsMetricManifold},
     M::AbstractDecoratorManifold,
     q,

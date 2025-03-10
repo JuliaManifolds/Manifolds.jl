@@ -69,8 +69,8 @@ using Random
 
     p1o = convert(Manifolds.OrthogonalPoint, M, p1)
     p2o = convert(Manifolds.OrthogonalPoint, M, p2)
-    X1o = convert(Manifolds.OrthogonalTVector, M, p1, X1)
-    X2o = convert(Manifolds.OrthogonalTVector, M, p1, X2)
+    X1o = convert(Manifolds.OrthogonalTangentVector, M, p1, X1)
+    X2o = convert(Manifolds.OrthogonalTangentVector, M, p1, X2)
 
     @test check_point(M, p1) === nothing
     @test check_vector(M, p1, X1) === nothing
@@ -193,7 +193,7 @@ using Random
             ],
         )
 
-        X1_ortho = Manifolds.OrthogonalTVector(
+        X1_ortho = Manifolds.OrthogonalTangentVector(
             [
                 0.0 -0.4015327292726182 0.780864290667572 0.4338924112653854 -1.7532409316999389
                 0.4015327292726182 0.0 -0.03497663360767567 -0.13649144092765172 -0.6576516594131526
@@ -202,7 +202,7 @@ using Random
                 1.7532409316999389 0.6576516594131526 0.0 0.0 0.0
             ],
         )
-        X2_ortho = Manifolds.OrthogonalTVector(
+        X2_ortho = Manifolds.OrthogonalTangentVector(
             [
                 0.0 -0.2979953307015468 0.7855622797662635 -1.783621666926397 -0.7481810438379631
                 0.2979953307015468 0.0 -0.10452766698617191 -0.018998219248410615 -0.014502786096688508
@@ -212,7 +212,7 @@ using Random
             ],
         )
 
-        X2_ortho_wrong1 = Manifolds.OrthogonalTVector(
+        X2_ortho_wrong1 = Manifolds.OrthogonalTangentVector(
             [
                 0.0 -0.1979953307015468 0.7855622797662635 -1.783621666926397 -0.7481810438379631
                 0.3979953307015468 0.0 -0.10452766698617191 -0.018998219248410615 -0.014502786096688508
@@ -221,7 +221,7 @@ using Random
                 0.7481810438379631 0.014502786096688508 0.0 0.0 0.0
             ],
         )
-        X2_ortho_wrong2 = Manifolds.OrthogonalTVector(
+        X2_ortho_wrong2 = Manifolds.OrthogonalTangentVector(
             [
                 1.0 -0.2979953307015468 0.7855622797662635 -1.783621666926397 -0.7481810438379631
                 0.2979953307015468 0.0 -0.10452766698617191 -0.018998219248410615 -0.014502786096688508

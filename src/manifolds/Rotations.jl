@@ -183,11 +183,8 @@ function inverse_retract_polar!(M::Rotations, X, p, q)
         B = lyap(A, H)
         mul!(X, A, B)
     catch e
-        if isa(e, LinearAlgebra.LAPACKException)
-            throw(OutOfInjectivityRadiusError())
-        else
-            rethrow()
-        end
+        e2 = OutOfInjectivityRadiusError()
+        isa(e, LinearAlgebra.LAPACKException) ? throw(e2) : rethrow()
     end
     return project!(SkewSymmetricMatrices(n), X, p, X)
 end
@@ -347,6 +344,33 @@ function Random.rand!(
     return pX
 end
 
+"""
+    _exp_half(::Rotations, d)
+
+Calculate `exp(d / 2)`.
+"""
+_exp_half(::Rotations, d) = exp(d / 2)
+"""
+    _exp_half(::Rotations{TypeParameter{Tuple{3}}}, d)
+
+Calculate `exp(d / 2)` for the manifold of `Rotations(3)` based on the Rodrigues' rotation
+formula.
+"""
+function _exp_half(::Rotations{TypeParameter{Tuple{3}}}, d)
+    θ = norm(d) / (2 * sqrt(2))
+    if θ ≈ 0
+        a = 1 - θ^2 / 6
+        b = θ / 2
+    else
+        a = sin(θ) / θ
+        b = (1 - cos(θ)) / θ^2
+    end
+    a /= 2
+    b /= 4
+
+    return I + a .* d .+ b .* (d^2)
+end
+
 @doc raw"""
     parallel_transport_direction(M::Rotations, p, X, d)
 
@@ -362,14 +386,14 @@ The formula simplifies to identity for 2-D rotations.
 """
 parallel_transport_direction(M::Rotations, p, X, d)
 function parallel_transport_direction(M::Rotations, p, X, d)
-    expdhalf = exp(d / 2)
+    expdhalf = _exp_half(M, d)
     q = exp(M, p, d)
     return transpose(q) * p * expdhalf * X * expdhalf
 end
 parallel_transport_direction(::Rotations{TypeParameter{Tuple{2}}}, p, X, d) = X
 
 function parallel_transport_direction!(M::Rotations, Y, p, X, d)
-    expdhalf = exp(d / 2)
+    expdhalf = _exp_half(M, d)
     q = exp(M, p, d)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
@@ -379,15 +403,20 @@ end
 
 function parallel_transport_to!(M::Rotations, Y, p, X, q)
     d = log(M, p, q)
-    expdhalf = exp(d / 2)
+    expdhalf = _exp_half(M, d)
     return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
 end
 function parallel_transport_to!(::Rotations{TypeParameter{Tuple{2}}}, Y, p, X, q)
     return copyto!(Y, X)
 end
+function parallel_transport_to!(M::Rotations{TypeParameter{Tuple{3}}}, Y, p, X, q)
+    d = log(M, p, q)
+    expdhalf = _exp_half(M, d)
+    return copyto!(Y, transpose(q) * p * expdhalf * X * expdhalf)
+end
 function parallel_transport_to(M::Rotations, p, X, q)
     d = log(M, p, q)
-    expdhalf = exp(d / 2)
+    expdhalf = _exp_half(M, d)
     return transpose(q) * p * expdhalf * X * expdhalf
 end
 parallel_transport_to(::Rotations{TypeParameter{Tuple{2}}}, p, X, q) = X

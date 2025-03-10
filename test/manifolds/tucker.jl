@@ -53,9 +53,9 @@ include("../header.jl")
             p_ambient = embed(M, p)
 
             U⊥ = ntuple(d -> nullspace(U[d]') * Matrix{Bool}(I, n⃗[d] - r⃗[d], r⃗[d]), 3)
-            v = TuckerTVector(reshape(collect(1.0:prod(r⃗)), r⃗), U⊥)
+            v = TuckerTangentVector(reshape(collect(1.0:prod(r⃗)), r⃗), U⊥)
             U⊥ = ntuple(d -> nullspace(U[d]') * Matrix{Bool}(I, n⃗[d] - r⃗[d], r⃗[d]), 3)
-            w = TuckerTVector(reshape((1.0:prod(r⃗)) .^ 2, r⃗), U⊥)
+            w = TuckerTangentVector(reshape((1.0:prod(r⃗)) .^ 2, r⃗), U⊥)
 
             norm_v = norm(M, p, v)
             @test norm(M, p, 2 * v - v * 2) ≤ √eps(T) * norm_v
@@ -71,7 +71,7 @@ include("../header.jl")
             @test inner(M, p, v, w_ambient) ≈ inner(M, p, v, w) ≈ inner(M, p, w_ambient, v)
 
             @test p ≈ TuckerPoint(p_ambient, r⃗)
-            @test v == TuckerTVector(v.Ċ, v.U̇)
+            @test v == TuckerTangentVector(v.Ċ, v.U̇)
 
             @test manifold_dimension(M) ==
                   prod(r⃗) + sum(ntuple(d -> r⃗[d] * (n⃗[d] - r⃗[d]), length(r⃗)))
@@ -106,7 +106,7 @@ include("../header.jl")
             @test u.U̇ !== v.U̇
             @test u.Ċ == v.Ċ
             x = u .+ v .* 2
-            @test x isa TuckerTVector
+            @test x isa TuckerTangentVector
             @test x == v + u * 2
             x .= 2 .* u .+ v
             @test x == 2 * u + v
@@ -116,7 +116,7 @@ include("../header.jl")
             @test !is_vector(
                 M,
                 p,
-                TuckerTVector(ones(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥)),
+                TuckerTangentVector(ones(T, r⃗), map(u⊥ -> u⊥[:, 1:(end - 1)], U⊥)),
             )
 
             ℬ = get_basis(M, p, DefaultOrthonormalBasis())

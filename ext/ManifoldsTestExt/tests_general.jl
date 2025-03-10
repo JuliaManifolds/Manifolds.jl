@@ -109,7 +109,6 @@ function test_manifold(
     test_mutating_rand=false,
     parallel_transport=false,
     parallel_transport_to=parallel_transport,
-    parallel_transport_along=parallel_transport,
     parallel_transport_direction=parallel_transport,
     test_inner=true,
     test_norm=true,
@@ -207,13 +206,25 @@ function test_manifold(
         X1 = log(M, pts[1], pts[2])
         X2 = log(M, pts[2], pts[1])
         Test.@test isapprox(M, pts[2], exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
-        Test.@test isapprox(M, pts[1], exp(M, pts[1], X1, 0); atol=atolp1p2, rtol=rtolp1p2)
-        Test.@test isapprox(M, pts[2], exp(M, pts[1], X1, 1); atol=atolp1p2, rtol=rtolp1p2)
+        Test.@test isapprox(
+            M,
+            pts[1],
+            Manifolds.exp_fused(M, pts[1], X1, 0);
+            atol=atolp1p2,
+            rtol=rtolp1p2,
+        )
+        Test.@test isapprox(
+            M,
+            pts[2],
+            Manifolds.exp_fused(M, pts[1], X1, 1);
+            atol=atolp1p2,
+            rtol=rtolp1p2,
+        )
         if is_mutating
             q2 = allocate(pts[1])
             exp!(M, q2, pts[1], X1)
             Test.@test isapprox(M, pts[2], q2; atol=atolp1p2, rtol=rtolp1p2)
-            exp!(M, q2, pts[1], X1, 0)
+            Manifolds.exp_fused!(M, q2, pts[1], X1, 0)
             Test.@test isapprox(M, pts[1], q2; atol=atolp1p2, rtol=rtolp1p2)
         end
         if VERSION >= v"1.5" && isa(M, Union{Grassmann,GeneralizedStiefel})
@@ -230,7 +241,13 @@ function test_manifold(
             Test.@test isapprox(M, pts[1], exp(M, pts[2], X2); atol=atolp1p2, rtol=rtolp1p2)
         end
         Test.@test is_point(M, exp(M, pts[1], X1); atol=atolp1p2, rtol=rtolp1p2)
-        Test.@test isapprox(M, pts[1], exp(M, pts[1], X1, 0); atol=atolp1p2, rtol=rtolp1p2)
+        Test.@test isapprox(
+            M,
+            pts[1],
+            Manifolds.exp_fused(M, pts[1], X1, 0);
+            atol=atolp1p2,
+            rtol=rtolp1p2,
+        )
         for p in pts
             epsx = find_eps(p)
             Test.@test isapprox(
@@ -265,8 +282,8 @@ function test_manifold(
             X1 = log(M, pts[1], pts[2])
         end
 
-        Test.@test isapprox(M, exp(M, pts[1], X1, 1), pts[2]; atol=atolp1)
-        Test.@test isapprox(M, exp(M, pts[1], X1, 0), pts[1]; atol=atolp1)
+        Test.@test isapprox(M, Manifolds.exp_fused(M, pts[1], X1, 1), pts[2]; atol=atolp1)
+        Test.@test isapprox(M, Manifolds.exp_fused(M, pts[1], X1, 0), pts[1]; atol=atolp1)
 
         if test_norm
             Test.@test distance(M, pts[1], pts[2]) ≈ norm(M, pts[1], X1)
@@ -297,7 +314,6 @@ function test_manifold(
     parallel_transport && test_parallel_transport(
         M,
         pts;
-        along=parallel_transport_along,
         to=parallel_transport_to,
         direction=parallel_transport_direction,
         mutating=is_mutating,
@@ -312,7 +328,7 @@ function test_manifold(
                 Test.@test isapprox(
                     M,
                     p,
-                    retract(M, p, X, 0, retr_method);
+                    Manifolds.retract_fused(M, p, X, 0, retr_method);
                     atol=epsx * retraction_atol_multiplier,
                     rtol=retraction_atol_multiplier == 0 ?
                          sqrt(epsx) * retraction_rtol_multiplier : 0,
@@ -842,15 +858,12 @@ function test_manifold(
 end
 
 """
-    test_parallel_transport(M,P; along=false, to=true, direction=true)
+    test_parallel_transport(M,P; to=true, direction=true)
 
 Generic tests for parallel transport on `M`given at least two pointsin `P`.
 
-The single functions to transport `along` (a curve), `to` (a point) or (towards a) `direction`
+The single functions to transport `to` (a point) or (in a) `direction`
 are sub-tests that can be activated by the keywords arguments
-
-!!! Note
-Since the interface to specify curves is not yet provided, the along keyword does not have an effect yet
 """
 function test_parallel_transport(
     M::AbstractManifold,
@@ -861,7 +874,6 @@ function test_parallel_transport(
         P[2:end],
         Ref(default_inverse_retraction_method(M)),
     );
-    along=false,
     to=true,
     direction=true,
     mutating=true,
@@ -869,7 +881,6 @@ function test_parallel_transport(
     length(P) < 2 &&
         error("The Parallel Transport test set requires at least 2 points in P")
     Test.@testset "Test Parallel Transport" begin # COV_EXCL_LINE
-        along && @warn "parallel transport along test not yet implemented"
         Test.@testset "To (a point)" begin # COV_EXCL_LINE
             # even with to =false this displays no tests
             if to

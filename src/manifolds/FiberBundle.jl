@@ -57,7 +57,7 @@ end
 
 Fiber bundle on a [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
 `M` of type [`FiberType`](@extref `ManifoldsBase.FiberType`).
-Examples include vector bundles, principal bundles or unit tangent bundles, see also [📖 Fiber Bundle](https://en.wikipedia.org/wiki/Fiber_bundle).
+Examples include vector bundles, principal bundles or unit tangent bundles, see also [Fiber Bundle](https://en.wikipedia.org/wiki/Fiber_bundle).
 
 # Fields
 * `manifold` – the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)

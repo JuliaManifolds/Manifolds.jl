@@ -56,9 +56,9 @@ include("../header.jl")
         XE = similar(X)
         embed!(M, XE, p, X)
         @test XE == X
-        embed!(M, XE, StiefelPoint(p), StiefelTVector(X))
+        embed!(M, XE, StiefelPoint(p), StiefelTangentVector(X))
         @test XE == X
-        @test embed(M, StiefelPoint(p), StiefelTVector(X)) == X
+        @test embed(M, StiefelPoint(p), StiefelTangentVector(X)) == X
     end
     @testset "Exponential and Retractions" begin
         @test inner(M, p, X, X) ≈ norm(M, p, X)^2
@@ -66,6 +66,8 @@ include("../header.jl")
         @test isapprox(N, exp(M, p, X), exp(N, p, X))
         rtm = CayleyRetraction()
         r = retract(M, p, X, rtm)
+        @test is_point(M, r)
+        r = ManifoldsBase.retract_fused(M, p, X, 1.0, rtm)
         @test is_point(M, r)
         irtm = CayleyInverseRetraction()
         X2 = inverse_retract(M, p, r, irtm)
@@ -91,7 +93,7 @@ include("../header.jl")
         end
         pP = ProjectorPoint(φ(p))
         Xe = dφ(p, X)
-        XP = ProjectorTVector(Xe)
+        XP = ProjectorTangentVector(Xe)
         @test is_point(M, pP)
         # Fix
         @test is_vector(M, pP, XP; atol=1e-9, error=:error)
@@ -108,10 +110,11 @@ include("../header.jl")
         @test_throws DomainError is_point(M, ProjectorPoint(Pf3), true)
 
         # Not Hamiltonian
-        Xf1 = ProjectorTVector(Matrix{Float64}(I, 6, 6))
+        Xf1 = ProjectorTangentVector(Matrix{Float64}(I, 6, 6))
+        Xf1.value[1, 2] = 1.0 # tweak to not be Hamiltonian
         @test_throws DomainError is_vector(M, pP, Xf1; error=:error)
-        # X^+ = X, but Xp + pX not correct
-        Xf2 = ProjectorTVector(0.5 .* (symplectic_inverse(X * X') + X * X'))
+        # ``X^+ = X``, but ``Xp + pX`` not correct
+        Xf2 = ProjectorTangentVector(0.5 .* (symplectic_inverse(X * X') + X * X'))
         @test_throws DomainError is_vector(M, pP, Xf2; error=:error)
         @test get_embedding(M, pP) == Euclidean(6, 6)
         get_embedding(Mf, pP) == Euclidean(6, 6; parameter=:field)

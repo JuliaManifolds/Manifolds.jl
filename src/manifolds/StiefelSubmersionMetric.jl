@@ -437,7 +437,7 @@ end
 function exp!(
     M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric},
     q::StiefelFactorization,
-    p::StiefelFactorization,
+    ::StiefelFactorization,
     X::StiefelFactorization,
 )
     n, k = get_parameter(M.manifold.size)

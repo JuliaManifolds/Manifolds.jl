@@ -34,7 +34,7 @@ function check_point(M::SymplecticGrassmann, p::ProjectorPoint; kwargs...)
 end
 
 @doc raw"""
-    check_vector(M::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTVector; kwargs...)
+    check_vector(M::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTangentVector; kwargs...)
 
 Check whether `X` is a valid tangent vector at `p` on the [`SymplecticGrassmann`](@ref),
 ``\operatorname{SpGr}(2n, 2k)`` manifold by verifying that it
@@ -48,7 +48,7 @@ especially the ``\bar{Ω}``, which is the representation for ``X`` used here.
 function check_vector(
     M::SymplecticGrassmann,
     p::ProjectorPoint,
-    X::ProjectorTVector;
+    X::ProjectorTangentVector;
     kwargs...,
 )
     n, k = get_parameter(M.size)
@@ -73,11 +73,11 @@ function check_vector(
 end
 
 embed!(::SymplecticGrassmann, q, p::ProjectorPoint) = copyto!(q, p.value)
-function embed!(::SymplecticGrassmann, Y, p::ProjectorPoint, X::ProjectorTVector)
+function embed!(::SymplecticGrassmann, Y, p::ProjectorPoint, X::ProjectorTangentVector)
     return copyto!(Y, X.value)
 end
 embed(::SymplecticGrassmann, p::ProjectorPoint) = p.value
-embed(::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTVector) = X.value
+embed(::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTangentVector) = X.value
 
 function get_embedding(
     ::SymplecticGrassmann{TypeParameter{Tuple{n,k}}},

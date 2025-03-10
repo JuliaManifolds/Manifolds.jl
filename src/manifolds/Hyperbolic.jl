@@ -22,10 +22,10 @@ pseudo-Riemannian, on the tangent bundle of the Hyperbolic space it induces a Ri
 metric. The corresponding sectional curvature is ``-1``.
 
 If `p` and `X` are `Vector`s of length `n+1` they are assumed to be
-a [`HyperboloidPoint`](@ref) and a [`HyperboloidTVector`](@ref), respectively
+a [`HyperboloidPoint`](@ref) and a [`HyperboloidTangentVector`](@ref), respectively
 
-Other models are the Poincaré ball model, see [`PoincareBallPoint`](@ref) and [`PoincareBallTVector`](@ref), respectively
-and the Poincaré half space model, see [`PoincareHalfSpacePoint`](@ref) and [`PoincareHalfSpaceTVector`](@ref), respectively.
+Other models are the Poincaré ball model, see [`PoincareBallPoint`](@ref) and [`PoincareBallTangentVector`](@ref), respectively
+and the Poincaré half space model, see [`PoincareHalfSpacePoint`](@ref) and [`PoincareHalfSpaceTangentVector`](@ref), respectively.
 
 # Constructor
 
@@ -59,7 +59,7 @@ struct HyperboloidPoint{TValue<:AbstractVector} <: AbstractManifoldPoint
 end
 
 @doc raw"""
-    HyperboloidTVector <: TVector
+    HyperboloidTangentVector <: AbstractTangentVector
 
 In the Hyperboloid model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` tangent vctors are represented
 as vectors in ``ℝ^{n+1}`` with [`MinkowskiMetric`](@ref) ``⟨p,X⟩_{\mathrm{M}}=0`` to their base
@@ -67,7 +67,7 @@ point ``p``.
 
 This representation is the default, i.e. vectors are assumed to have this representation.
 """
-struct HyperboloidTVector{TValue<:AbstractVector} <: TVector
+struct HyperboloidTangentVector{TValue<:AbstractVector} <: AbstractTangentVector
     value::TValue
 end
 
@@ -82,12 +82,12 @@ struct PoincareBallPoint{TValue<:AbstractVector} <: AbstractManifoldPoint
 end
 
 @doc raw"""
-    PoincareBallTVector <: TVector
+    PoincareBallTangentVector <: AbstractTangentVector
 
 In the Poincaré ball model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` tangent vectors are represented
 as vectors in ``ℝ^{n}``.
 """
-struct PoincareBallTVector{TValue<:AbstractVector} <: AbstractManifoldPoint
+struct PoincareBallTangentVector{TValue<:AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
@@ -102,35 +102,35 @@ struct PoincareHalfSpacePoint{TValue<:AbstractVector} <: AbstractManifoldPoint
 end
 
 @doc raw"""
-    PoincareHalfPlaneTVector <: TVector
+    PoincareHalfPlaneTangentVector <: AbstractTangentVector
 
 In the Poincaré half plane model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` tangent vectors are
 represented as vectors in ``ℝ^{n}``.
 """
-struct PoincareHalfSpaceTVector{TValue<:AbstractVector} <: TVector
+struct PoincareHalfSpaceTangentVector{TValue<:AbstractVector} <: AbstractTangentVector
     value::TValue
 end
 
 ManifoldsBase.@manifold_element_forwards HyperboloidPoint value
-ManifoldsBase.@manifold_vector_forwards HyperboloidTVector value
-ManifoldsBase.@default_manifold_fallbacks Hyperbolic HyperboloidPoint HyperboloidTVector value value
+ManifoldsBase.@manifold_vector_forwards HyperboloidTangentVector value
+ManifoldsBase.@default_manifold_fallbacks Hyperbolic HyperboloidPoint HyperboloidTangentVector value value
 
 ManifoldsBase.@manifold_element_forwards PoincareBallPoint value
-ManifoldsBase.@manifold_vector_forwards PoincareBallTVector value
+ManifoldsBase.@manifold_vector_forwards PoincareBallTangentVector value
 
 ManifoldsBase.@manifold_element_forwards PoincareHalfSpacePoint value
-ManifoldsBase.@manifold_vector_forwards PoincareHalfSpaceTVector value
+ManifoldsBase.@manifold_vector_forwards PoincareHalfSpaceTangentVector value
 
 include("HyperbolicHyperboloid.jl")
 include("HyperbolicPoincareBall.jl")
 include("HyperbolicPoincareHalfspace.jl")
 
 _ExtraHyperbolicPointTypes = [PoincareBallPoint, PoincareHalfSpacePoint]
-_ExtraHyperbolicTangentTypes = [PoincareBallTVector, PoincareHalfSpaceTVector]
+_ExtraHyperbolicTangentTypes = [PoincareBallTangentVector, PoincareHalfSpaceTangentVector]
 _ExtraHyperbolicTypes = [_ExtraHyperbolicPointTypes..., _ExtraHyperbolicTangentTypes...]
 
 _HyperbolicPointTypes = [HyperboloidPoint, _ExtraHyperbolicPointTypes...]
-_HyperbolicTangentTypes = [HyperboloidTVector, _ExtraHyperbolicTangentTypes...]
+_HyperbolicTangentTypes = [HyperboloidTangentVector, _ExtraHyperbolicTangentTypes...]
 _HyperbolicTypes = [_HyperbolicPointTypes..., _HyperbolicTangentTypes...]
 
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
@@ -173,7 +173,7 @@ check_vector(::Hyperbolic, ::Any, ::Any)
 function check_vector(
     M::Hyperbolic,
     p,
-    X::Union{PoincareBallTVector,PoincareHalfSpaceTVector};
+    X::Union{PoincareBallTangentVector,PoincareHalfSpaceTangentVector};
     kwargs...,
 )
     n = get_parameter(M.size)[1]
@@ -223,10 +223,10 @@ from `p` towards `X`. The formula reads
 + \sinh(\sqrt{⟨X,X⟩_{\mathrm{M}}})\frac{X}{\sqrt{⟨X,X⟩_{\mathrm{M}}}},
 ````
 
-where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
-the [`Lorentz`](@ref)ian manifold.
+where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding, the [`Lorentz`](@ref)ian manifold,
+see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
 """
-exp(::Hyperbolic, ::Any...)
+exp(::Hyperbolic, ::Any, ::Any)
 
 for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
     @eval begin
@@ -238,11 +238,16 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
                 ).value
             return q
         end
-        function exp!(M::Hyperbolic, q::$P, p::$P, X::$T, t::Number)
+        function exp_fused!(M::Hyperbolic, q::$P, p::$P, X::$T, t::Number)
             q.value .=
                 convert(
                     $P,
-                    exp(M, convert(AbstractVector, p), convert(AbstractVector, p, X), t),
+                    exp_fused(
+                        M,
+                        convert(AbstractVector, p),
+                        convert(AbstractVector, p, X),
+                        t,
+                    ),
                 ).value
             return q
         end
@@ -288,7 +293,8 @@ reaches `q` after time 1. The formula reads for ``p ≠ q``
 ```
 
 where ``⟨⋅,⋅⟩_{\mathrm{M}}`` denotes the [`MinkowskiMetric`](@ref) on the embedding,
-the [`Lorentz`](@ref)ian manifold. For ``p=q`` the logarithmic map is equal to the zero vector.
+the [`Lorentz`](@ref)ian manifold. For ``p=q`` the logarithmic map is equal to the zero vector
+For more details, see for example the extended version [BergmannPerschSteidl:2015:1](@cite) of the paper [BergmannPerschSteidl:2016:1](@cite).
 """
 log(::Hyperbolic, ::Any...)
 
@@ -349,7 +355,7 @@ the [`Lorentz`](@ref)ian manifold.
 
 !!! note
 
-    Projection is only available for the (default) [`HyperboloidTVector`](@ref) representation,
+    Projection is only available for the (default) [`HyperboloidTangentVector`](@ref) representation,
     the others don't have such an embedding
 """
 project(::Hyperbolic, ::Any, ::Any)
