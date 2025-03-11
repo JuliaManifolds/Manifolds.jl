@@ -8,6 +8,7 @@ const CircleGroup =
     GroupManifold{ℂ,Circle{ℂ},MultiplicationOperation,TangentVectorRepresentation}
 
 function CircleGroup()
+    _lie_groups_depwarn_move(CircleGroup)
     return GroupManifold(
         Circle{ℂ}(),
         MultiplicationOperation(),

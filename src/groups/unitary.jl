@@ -27,6 +27,7 @@ See also [`Orthogonal(n)`](@ref) for the real-valued case.
 const Unitary{n,𝔽} = GeneralUnitaryMultiplicationGroup{n,𝔽,AbsoluteDeterminantOneMatrices}
 
 function Unitary(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
+    _lie_groups_depwarn_move(Unitary, :UnitaryGroup)
     return GeneralUnitaryMultiplicationGroup(UnitaryMatrices(n, 𝔽; parameter=parameter))
 end
 

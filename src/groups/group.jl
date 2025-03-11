@@ -1,3 +1,7 @@
+_dep_warn_group = """
+GroupManifold functionality will move to its own package `LieGroups.jl`.
+"""
+
 @doc raw"""
     AbstractGroupOperation
 
@@ -245,6 +249,7 @@ function Identity(
     ::TraitList{<:IsGroupManifold{O}},
     ::AbstractDecoratorManifold,
 ) where {O<:AbstractGroupOperation}
+    Base.depwarn(_dep_warn_group * "\n`Identity` will move and keep its name.", :Idenity)
     return Identity{O}()
 end
 Identity(::O) where {O<:AbstractGroupOperation} = Identity(O)
@@ -264,6 +269,7 @@ points are not represented by arrays.
 identity_element(G::AbstractDecoratorManifold)
 @trait_function identity_element(G::AbstractDecoratorManifold)
 function identity_element(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold)
+    _lie_groups_depwarn_move(identity_element)
     BG = base_group(G)
     q = allocate_result(BG, identity_element)
     return identity_element!(BG, q)
@@ -319,6 +325,7 @@ function is_identity(
     q;
     kwargs...,
 )
+    _lie_groups_depwarn_move(is_identity)
     BG = base_group(G)
     return isapprox(BG, identity_element(BG), q; kwargs...)
 end
@@ -487,20 +494,25 @@ function adjoint_action(
     dir,
 )
     BG = base_group(G)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     Y = allocate_result(BG, adjoint_action, Xₑ, p)
     return adjoint_action!(BG, Y, p, Xₑ, dir)
 end
 function adjoint_action(::AbstractDecoratorManifold, ::Identity, Xₑ, ::LeftAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return Xₑ
 end
 function adjoint_action(::AbstractDecoratorManifold, ::Identity, Xₑ, ::RightAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return Xₑ
 end
 # backward compatibility
 function adjoint_action(G::AbstractDecoratorManifold, p, X)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return adjoint_action(G, p, X, LeftAction())
 end
 function adjoint_action!(G::AbstractDecoratorManifold, Y, p, X)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return adjoint_action!(G, Y, p, X, LeftAction())
 end
 # fall back method: the right action is defined from the left action
@@ -512,6 +524,7 @@ function adjoint_action!(
     X,
     ::RightAction,
 )
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     BG = base_group(G)
     return adjoint_action!(BG, Y, inv(BG, p), X, LeftAction())
 end
@@ -532,6 +545,7 @@ function adjoint_inv_diff(
     p,
     X,
 )
+    _lie_groups_depwarn_removed(adjoint_inv_diff)
     Y = allocate_result(G, inv_diff, X, p)
     return adjoint_inv_diff!(G, Y, p, X)
 end
@@ -547,6 +561,7 @@ with coefficients ``c`` in basis `B`, ``Ac`` is the vector of coefficients of `X
 by `p` in basis `B`.
 """
 function adjoint_matrix(G::AbstractManifold, p, B::AbstractBasis=DefaultOrthonormalBasis())
+    _lie_groups_depwarn_move(adjoint_action, :jacobian_conjugate)
     J = allocate_jacobian(G, G, adjoint_matrix, p)
     return adjoint_matrix!(G, J, p, B)
 end
@@ -557,6 +572,7 @@ function adjoint_matrix!(
     p,
     B::AbstractBasis=DefaultOrthonormalBasis(),
 )
+    _lie_groups_depwarn_move(adjoint_action, :jacobian_conjugate)
     Bb = get_basis(G, p, B)
     Vs = get_vectors(G, p, Bb)
     for i in eachindex(Vs)
@@ -573,6 +589,7 @@ function ManifoldDiff.differential_exp_argument_lie_approx!(
     Y;
     n=20,
 )
+    _lie_groups_depwarn_removed(ManifoldDiff.differential_exp_argument_lie_approx!)
     tmp = copy(M, p, Y)
     a = -1.0
     zero_vector!(M, Z, p)
@@ -598,6 +615,7 @@ element of ``\mathcal{G}``.
 inv(::AbstractDecoratorManifold, ::Any...)
 @trait_function Base.inv(G::AbstractDecoratorManifold, p)
 function Base.inv(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p)
+    _lie_groups_depwarn_move(inv)
     q = allocate_result(G, inv, p)
     BG = base_group(G)
     return inv!(BG, q, p)
@@ -608,6 +626,7 @@ function Base.inv(
     ::AbstractDecoratorManifold,
     e::Identity{O},
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(inv)
     return e
 end
 
@@ -619,6 +638,7 @@ function inv!(
     q,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(inv!)
     BG = base_group(G)
     return identity_element!(BG, q)
 end
@@ -628,6 +648,7 @@ function inv!(
     ::Identity{O},
     e::Identity{O},
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(inv!)
     return e
 end
 
@@ -646,12 +667,14 @@ inv_diff(G::AbstractDecoratorManifold, p)
 
 @trait_function inv_diff(G::AbstractDecoratorManifold, p, X)
 function inv_diff(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, X)
+    _lie_groups_depwarn_move(inv_diff, :diff_inv)
     return -adjoint_action(base_group(G), p, X)
 end
 
 @trait_function inv_diff!(G::AbstractDecoratorManifold, Y, p, X)
 
 function inv_diff!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, Y, p, X)
+    _lie_groups_depwarn_move(inv_diff!, :diff_inv!)
     adjoint_action!(G, Y, p, X)
     Y .*= -1
     return Y
@@ -687,6 +710,7 @@ compose(::AbstractDecoratorManifold, ::Any...)
 
 @trait_function compose(G::AbstractDecoratorManifold, p, q)
 function compose(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, p, q)
+    _lie_groups_depwarn_move(compose)
     return _compose(base_group(G), p, q)
 end
 function compose(
@@ -694,6 +718,7 @@ function compose(
     ::Identity{O},
     p,
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(compose)
     return p
 end
 function compose(
@@ -701,6 +726,7 @@ function compose(
     p,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(compose)
     return p
 end
 function compose(
@@ -708,6 +734,7 @@ function compose(
     e::Identity{O},
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(compose)
     return e
 end
 
@@ -719,6 +746,7 @@ end
 @trait_function compose!(M::AbstractDecoratorManifold, x, p, q)
 
 function compose!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, x, q, p)
+    _lie_groups_depwarn_move(compose!)
     return _compose!(base_group(G), x, q, p)
 end
 function compose!(
@@ -727,6 +755,7 @@ function compose!(
     p,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(compose!)
     return copyto!(G, q, p)
 end
 function compose!(
@@ -735,6 +764,7 @@ function compose!(
     ::Identity{O},
     p,
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(compose!)
     return copyto!(G, q, p)
 end
 function compose!(
@@ -743,6 +773,7 @@ function compose!(
     ::Identity{O},
     e::Identity{O},
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(compose!)
     return identity_element!(G, q)
 end
 function compose!(
@@ -751,6 +782,7 @@ function compose!(
     ::Identity{O},
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(compose!)
     return e
 end
 
@@ -878,6 +910,7 @@ function translate(
     q,
     conv::ActionDirectionAndSide,
 )
+    _lie_groups_depwarn_move(translate, :compose)
     BG = base_group(G)
     return compose(BG, _action_order(BG, p, q, conv)...)
 end
@@ -897,6 +930,7 @@ function translate!(
     q,
     conv::ActionDirectionAndSide,
 )
+    _lie_groups_depwarn_move(translate!, :compose!)
     BG = base_group(G)
     return compose!(BG, X, _action_order(BG, p, q, conv)...)
 end
@@ -929,6 +963,7 @@ function inverse_translate(
     q,
     conv::ActionDirectionAndSide,
 )
+    _lie_groups_depwarn_move(inverse_translate, :compose, "Combine it with inv($G, p).")
     BG = base_group(G)
     return translate(BG, inv(BG, p), q, conv)
 end
@@ -948,6 +983,7 @@ function inverse_translate!(
     q,
     conv::ActionDirectionAndSide,
 )
+    _lie_groups_depwarn_move(inverse_translate, :compose!, "Combine it with inv!($G, p).")
     BG = base_group(G)
     return translate!(BG, X, inv(BG, p), q, conv)
 end
@@ -984,6 +1020,7 @@ function translate_diff(
     X,
     conv::ActionDirectionAndSide,
 )
+    _lie_groups_depwarn_move(translate_diff, :diff_right_compose)
     Y = allocate_result(G, translate_diff, X, p, q)
     BG = base_group(G)
     translate_diff!(BG, Y, p, q, X, conv)
@@ -1007,6 +1044,7 @@ function translate_diff!(
     X,
     ::LeftForwardAction,
 )
+    _lie_groups_depwarn_move(translate_diff, :diff_right_compose)
     return copyto!(G, Y, X)
 end
 function translate_diff!(
@@ -1018,6 +1056,7 @@ function translate_diff!(
     X,
     ::RightForwardAction,
 )
+    _lie_groups_depwarn_move(translate_diff, :diff_right_compose)
     return copyto!(G, Y, X)
 end
 function translate_diff!(
@@ -1029,6 +1068,7 @@ function translate_diff!(
     X,
     ::LeftBackwardAction,
 )
+    _lie_groups_depwarn_move(translate_diff, :diff_right_compose)
     return adjoint_action!(G, Y, p, X, LeftAction())
 end
 function translate_diff!(
@@ -1040,6 +1080,7 @@ function translate_diff!(
     X,
     ::RightBackwardAction,
 )
+    _lie_groups_depwarn_move(translate_diff, :diff_right_compose)
     return adjoint_action!(G, Y, p, X, RightAction())
 end
 
@@ -1074,6 +1115,7 @@ function inverse_translate_diff(
     X,
     conv::ActionDirectionAndSide,
 )
+    _lie_groups_depwarn_move(inverse_translate_diff, :diff_left_compose)
     BG = base_group(G)
     return translate_diff(BG, inv(BG, p), q, X, conv)
 end
@@ -1095,6 +1137,7 @@ function inverse_translate_diff!(
     X,
     conv::ActionDirectionAndSide,
 )
+    _lie_groups_depwarn_move(inverse_translate_diff!, :diff_left_compose!)
     BG = base_group(G)
     return translate_diff!(BG, Y, inv(BG, p), q, X, conv)
 end
@@ -1107,10 +1150,12 @@ bi-invariant metric or a Cartan-Schouten connection, this is the same as `log` b
 other groups it may differ.
 """
 function log_inv(G::AbstractManifold, p, q)
+    _lie_groups_depwarn_move(log_inv, :log, "It is the default logarithmic map there")
     BG = base_group(G)
     return log_lie(BG, compose(BG, inv(BG, p), q))
 end
 function log_inv!(G::AbstractManifold, X, p, q)
+    _lie_groups_depwarn_move(log_inv!, :log!, "It is the default logarithmic map there")
     x = allocate_result(G, inv, p)
     BG = base_group(G)
     inv!(BG, x, p)
@@ -1127,10 +1172,12 @@ bi-invariant metric or a Cartan-Schouten connection, this is the same as `exp` b
 other groups it may differ.
 """
 function exp_inv(G::AbstractManifold, p, X, t::Number=1)
+    _lie_groups_depwarn_move(exp_inv, :exp, "It is the default exponential map there")
     BG = base_group(G)
     return compose(BG, p, exp_lie(BG, t * X))
 end
 function exp_inv!(G::AbstractManifold, q, p, X)
+    _lie_groups_depwarn_move(exp_inv!, :exp!, "It is the default exponential map there")
     BG = base_group(G)
     exp_lie!(BG, q, X)
     compose!(BG, q, p, q)
@@ -1180,6 +1227,7 @@ the corresponding trait version `exp_lie(::TraitList{<:IsGroupManifold}, G, X)`.
 exp_lie(G::AbstractManifold, X)
 @trait_function exp_lie(M::AbstractDecoratorManifold, X)
 function exp_lie(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X)
+    _lie_groups_depwarn_move(exp_lie!, :exp!)
     BG = base_group(G)
     q = allocate_result(BG, exp_lie, X)
     return exp_lie!(BG, q, X)
@@ -1219,6 +1267,7 @@ either
 log_lie(::AbstractDecoratorManifold, q)
 @trait_function log_lie(G::AbstractDecoratorManifold, q)
 function log_lie(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, q)
+    _lie_groups_depwarn_move(log_lie, :log)
     BG = base_group(G)
     return _log_lie(BG, q)
 end
@@ -1227,11 +1276,13 @@ function log_lie(
     G::AbstractDecoratorManifold,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(log_lie, :log)
     BG = base_group(G)
     return zero_vector(BG, identity_element(BG))
 end
 # though identity was taken care of – as usual restart decorator dispatch
 function _log_lie(G::AbstractDecoratorManifold, q)
+    _lie_groups_depwarn_move(log_lie, :log)
     BG = base_group(G)
     X = allocate_result(BG, log_lie, q)
     return log_lie!(BG, X, q)
@@ -1239,6 +1290,7 @@ end
 
 @trait_function log_lie!(G::AbstractDecoratorManifold, X, q)
 function log_lie!(::TraitList{<:IsGroupManifold}, G::AbstractDecoratorManifold, X, q)
+    _lie_groups_depwarn_move(log_lie!, :log!)
     BG = base_group(G)
     return _log_lie!(BG, X, q)
 end
@@ -1248,6 +1300,7 @@ function log_lie!(
     X,
     ::Identity{O},
 ) where {O<:AbstractGroupOperation}
+    _lie_groups_depwarn_move(log_lie!, :log!)
     return zero_vector!(G, X, identity_element(G))
 end
 
@@ -1287,6 +1340,7 @@ struct GroupLogarithmicInverseRetraction{D<:ActionDirectionAndSide} <:
        AbstractInverseRetractionMethod end
 
 function GroupLogarithmicInverseRetraction(conv::ActionDirectionAndSide=LeftForwardAction())
+    _lie_groups_depwarn_removed(GroupLogarithmicInverseRetraction)
     return GroupLogarithmicInverseRetraction{typeof(conv)}()
 end
 

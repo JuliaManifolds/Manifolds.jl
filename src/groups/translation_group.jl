@@ -13,6 +13,7 @@ const TranslationGroup{T,𝔽} =
     GroupManifold{𝔽,Euclidean{T,𝔽},AdditionOperation,LeftInvariantRepresentation}
 
 function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ, parameter::Symbol=:type)
+    _lie_groups_depwarn_move(TranslationGroup)
     size = wrap_type_parameter(parameter, n)
     return TranslationGroup{typeof(size),field}(
         Euclidean(n...; field=field, parameter=parameter),

@@ -342,10 +342,12 @@ function translate_diff!(
 end
 
 function adjoint_action!(G::GeneralUnitaryMultiplicationGroup, Y, p, X, ::LeftAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     copyto!(G, Y, p * X * inv(G, p))
     return Y
 end
 function adjoint_action!(G::GeneralUnitaryMultiplicationGroup, Y, p, X, ::RightAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return copyto!(G, Y, inv(G, p) * X * p)
 end
 

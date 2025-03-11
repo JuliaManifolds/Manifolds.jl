@@ -57,6 +57,7 @@ function SemidirectProductGroup(
     A::AbstractGroupAction,
     vectors::AbstractGroupVectorRepresentation,
 ) where {𝔽}
+    _lie_groups_depwarn_move(SemidirectProductGroup, :LeftSemidirectProductLieGroup)
     N === group_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")
     H === base_group(A) || error("Subgroup $(H) must be the base group of action $(A)")
     op = SemidirectProductOperation(A)

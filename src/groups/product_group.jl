@@ -20,6 +20,7 @@ one. This type is mostly useful for equipping the direct product of group manifo
     ProductGroup(manifold::ProductManifold)
 """
 function ProductGroup(manifold::ProductManifold, vectors::AbstractGroupVectorRepresentation)
+    _lie_groups_depwarn_move(ProductGroup, :ProductLieGroup)
     if !all(is_group_manifold, manifold.manifolds)
         error("All submanifolds of product manifold must be or decorate groups.")
     end
@@ -54,9 +55,11 @@ function _common_product_adjoint_action!(G, Y, p, X, conv)
 end
 
 function adjoint_action!(G::ProductGroup, Y, p, X, conv::LeftAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return _common_product_adjoint_action!(G, Y, p, X, conv)
 end
 function adjoint_action!(G::ProductGroup, Y, p, X, conv::RightAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return _common_product_adjoint_action!(G, Y, p, X, conv)
 end
 
