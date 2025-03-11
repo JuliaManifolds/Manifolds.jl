@@ -2,7 +2,7 @@
     AbstractMatrixType
 
 A plain type to distinguish different types of matrices, for example [`DeterminantOneMatrices`](@ref)
-and [`AbsoluteDeterminantOneMatrices`](@ref)
+and [`AbsoluteDeterminantOneMatrices`](@ref).
 """
 abstract type AbstractMatrixType end
 
@@ -51,7 +51,7 @@ end
     check_point(M::GeneralUnitaryMatrices, p; kwargs...)
 
 Check whether `p` is a valid point on the [`UnitaryMatrices`](@ref) or [`OrthogonalMatrices`] `M`,
-i.e. that ``p`` has a determinant of absolute value one
+i.e. that ``p`` has a determinant of absolute value one.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
@@ -79,7 +79,7 @@ end
     check_point(M::Rotations, p; kwargs...)
 
 Check whether `p` is a valid point on the [`UnitaryMatrices`](@ref) `M`,
-i.e. that ``p`` has a determinant of absolute value one, i.e. that ``p^{\mathrm{H}}p``
+i.e. that ``p`` has a determinant of absolute value one, i.e. that ``p^{\mathrm{H}}p = \mathrm{I}_n``
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
@@ -211,7 +211,7 @@ end
 
 Compute the exponential map, that is, since ``X`` is represented in the Lie algebra,
 
-```
+```math
 exp_p(X) = p\mathrm{e}^X
 ```
 
@@ -729,9 +729,10 @@ end
 
 Compute the logarithmic map, that is, since the resulting ``X`` is represented in the Lie algebra,
 
+```math
+\log_p q = \log(p^{\mathrm{H}}q)
 ```
-log_p q = \log(p^{\mathrm{H}q)
-```
+
 which is projected onto the skew symmetric matrices for numerical stability.
 """
 log(::GeneralUnitaryMatrices, p, q)
@@ -743,10 +744,10 @@ Compute the logarithmic map on the [`Rotations`](@ref) manifold
 `M` which is given by
 
 ```math
-\log_p q = \operatorname{log}(p^{\mathrm{T}}q)
+\log_p q = \log(p^{\mathrm{T}}q)
 ```
 
-where ``\operatorname{Log}`` denotes the matrix logarithm. For numerical stability,
+where ``\log`` denotes the matrix logarithm. For numerical stability,
 the result is projected onto the set of skew symmetric matrices.
 
 For antipodal rotations the function returns deterministically one of the tangent vectors
@@ -869,6 +870,7 @@ formula reads [BoyaSudarshanTilma:2003](@cite):
 ```math
 \begin{cases}
 \frac{2^{k}(2\pi)^{k^2}}{\prod_{s=1}^{k-1} (2s)!} & \text{ if } n = 2k \\
+
 \frac{2^{k+1}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
 \end{cases}
 ```
@@ -922,7 +924,7 @@ Volume of the manifold of complex general unitary matrices of absolute determina
 formula reads [BoyaSudarshanTilma:2003](@cite)
 
 ```math
-\sqrt{n 2^{n+1}} π^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
+\sqrt{n 2^{n+1}} π^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}.
 ```
 """
 function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℂ,AbsoluteDeterminantOneMatrices})
@@ -942,7 +944,7 @@ Volume of the manifold of complex general unitary matrices of determinant one. T
 reads [BoyaSudarshanTilma:2003](@cite)
 
 ```math
-\sqrt{n 2^{n-1}} π^{(n-1)(n+2)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
+\sqrt{n 2^{n-1}} π^{(n-1)(n+2)/2} \prod_{k=1}^{n-1}\frac{1}{k!}.
 ```
 """
 function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
@@ -1005,7 +1007,7 @@ to the tangent space of `M` at `p`,
 and change the representer to use the corresponding Lie algebra, i.e. we compute
 
 ```math
-    \operatorname{proj}_p(X) = \frac{p^{\mathrm{H}} X - (p^{\mathrm{H}} X)^{\mathrm{H}}}{2},
+    \operatorname{proj}_p(X) = \frac{p^{\mathrm{H}} X - (p^{\mathrm{H}} X)^{\mathrm{H}}}{2}.
 ```
 """
 project(::GeneralUnitaryMatrices, p, X)
@@ -1078,7 +1080,11 @@ end
     riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 
 Compute the value of Riemann tensor on the [`GeneralUnitaryMatrices`](@ref) manifold.
-The formula reads [Rentmeesters:2011](@cite) ``R(X,Y)Z=\frac{1}{4}[Z, [X, Y]]``.
+The formula reads [Rentmeesters:2011](@cite) 
+
+```math
+R(X,Y)Z=\frac{1}{4}[Z, [X, Y]].
+```
 """
 riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 

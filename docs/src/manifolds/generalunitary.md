@@ -1,8 +1,8 @@
 # Orthogonal and Unitary matrices
 
-Both [`OrthogonalMatrices`](@ref) and [`UnitaryMatrices`](@ref) are quite similar, as are [`Rotations`](@ref), as well as unitary matrices with determinant equal to one. So these share a {common implementation}(@ref generalunitarymatrices)
+Both [`OrthogonalMatrices`](@ref) and [`UnitaryMatrices`](@ref) have similar formulae and implementations, as are [`Rotations`](@ref), as well as unitary matrices with determinant equal to one. These share a [common implementation](@ref Manifolds.GeneralUnitaryMatrices).
 
-## Orthogonal Matrices
+## Orthogonal matrices
 
 ```@autodocs
 Modules = [Manifolds]
@@ -10,7 +10,7 @@ Pages = ["manifolds/Orthogonal.jl"]
 Order = [:constant, :type, :function]
 ```
 
-## Unitary Matrices
+## Unitary matrices
 
 ```@autodocs
 Modules = [Manifolds]
