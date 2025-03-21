@@ -137,10 +137,16 @@ rand(M::InvertibleMatrices; kwargs...)
 
 function Random.rand!(M::InvertibleMatrices, pX; kwargs...)
     rand!(get_embedding(M), pX; kwargs...)
+    while det(pX) == 0
+        rand!(get_embedding(M), pX; kwargs...)
+    end
     return pX
 end
 function Random.rand!(rng::AbstractRNG, M::InvertibleMatrices, pX; kwargs...)
     rand!(rng, get_embedding(M), pX; kwargs...)
+    while det(pX) == 0
+        rand!(rng, get_embedding(M), pX; kwargs...)
+    end
     return pX
 end
 

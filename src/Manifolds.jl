@@ -503,6 +503,9 @@ include("manifolds/Hamiltonian.jl") # Hamiltonian requires symplectic
 include("manifolds/SymplecticStiefel.jl")
 include("manifolds/SymplecticGrassmann.jl") # Requires SymplecticStiefel
 
+# From a new approach
+include("manifolds/InvertibleDeterminantOneMatrces.jl")
+
 # Product or power based manifolds
 include("manifolds/Torus.jl")
 include("manifolds/Multinomial.jl")
@@ -636,6 +639,7 @@ export AbstractCotangentVector,
     AbstractManifold, AbstractManifoldPoint, AbstractTangentVector
 # Manifolds
 export AbstractSphere, AbstractProjectiveSpace
+export MatrixManifold
 export Euclidean,
     ArrayProjectiveSpace,
     ArraySphere,
@@ -655,6 +659,7 @@ export Euclidean,
     Hyperbolic,
     Hyperrectangle,
     InvertibleMatrices,
+    InvertibleMatricesDeterminantOne,
     KendallsPreShapeSpace,
     KendallsShapeSpace,
     Lorentz,
