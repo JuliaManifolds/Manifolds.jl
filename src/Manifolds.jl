@@ -503,6 +503,9 @@ include("manifolds/Hamiltonian.jl") # Hamiltonian requires symplectic
 include("manifolds/SymplecticStiefel.jl")
 include("manifolds/SymplecticGrassmann.jl") # Requires SymplecticStiefel
 
+# From a new approach
+include("manifolds/InvertibleDeterminantOneMatrces.jl")
+
 # Product or power based manifolds
 include("manifolds/Torus.jl")
 include("manifolds/Multinomial.jl")
@@ -636,6 +639,7 @@ export AbstractCotangentVector,
     AbstractManifold, AbstractManifoldPoint, AbstractTangentVector
 # Manifolds
 export AbstractSphere, AbstractProjectiveSpace
+export MatrixManifold
 export Euclidean,
     ArrayProjectiveSpace,
     ArraySphere,
@@ -655,40 +659,41 @@ export Euclidean,
     Hyperbolic,
     Hyperrectangle,
     InvertibleMatrices,
-    KendallsPreShapeSpace,
-    KendallsShapeSpace,
-    Lorentz,
-    MultinomialDoubleStochastic,
-    MultinomialMatrices,
-    MultinomialSymmetric,
-    MultinomialSymmetricPositiveDefinite,
-    Oblique,
-    OrthogonalMatrices,
-    PositiveArrays,
-    PositiveMatrices,
-    PositiveNumbers,
-    PositiveVectors,
-    ProbabilitySimplex,
-    ProjectiveSpace,
-    Rotations,
-    Segre,
-    SkewHermitianMatrices,
-    SkewSymmetricMatrices,
-    Spectrahedron,
-    Sphere,
-    SphereSymmetricMatrices,
-    Stiefel,
-    SymmetricMatrices,
-    SymmetricPositiveDefinite,
-    SPDFixedDeterminant,
-    SymmetricPositiveSemidefiniteFixedRank,
-    SymplecticGrassmann,
-    SymplecticMatrices,
-    SymplecticStiefel,
-    SymplecticElement,
-    Torus,
-    Tucker,
-    UnitaryMatrices
+    InvertibleMatricesDeterminantOne
+KendallsPreShapeSpace,
+KendallsShapeSpace,
+Lorentz,
+MultinomialDoubleStochastic,
+MultinomialMatrices,
+MultinomialSymmetric,
+MultinomialSymmetricPositiveDefinite,
+Oblique,
+OrthogonalMatrices,
+PositiveArrays,
+PositiveMatrices,
+PositiveNumbers,
+PositiveVectors,
+ProbabilitySimplex,
+ProjectiveSpace,
+Rotations,
+Segre,
+SkewHermitianMatrices,
+SkewSymmetricMatrices,
+Spectrahedron,
+Sphere,
+SphereSymmetricMatrices,
+Stiefel,
+SymmetricMatrices,
+SymmetricPositiveDefinite,
+SPDFixedDeterminant,
+SymmetricPositiveSemidefiniteFixedRank,
+SymplecticGrassmann,
+SymplecticMatrices,
+SymplecticStiefel,
+SymplecticElement,
+Torus,
+Tucker,
+UnitaryMatrices
 # Point representation types
 export HyperboloidPoint,
     PoincareBallPoint,
