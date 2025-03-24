@@ -14,7 +14,7 @@ This is the same manifold as the [`Stiefel`](@ref)`(n, n, ℂ)` manifold.
 
     OrthogonalMatrices(n)
 """
-const OrthogonalMatrices{n} = GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrices}
+const OrthogonalMatrices{n} = GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatricesType}
 
 function OrthogonalMatrices(n::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))

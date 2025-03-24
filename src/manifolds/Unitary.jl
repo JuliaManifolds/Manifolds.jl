@@ -30,7 +30,7 @@ If you prefer the representation as `X` you can use the [`Stiefel`](@ref)`(n, n,
 
 see also [`OrthogonalMatrices`](@ref) for the real valued case.
 """
-const UnitaryMatrices{T,𝔽} = GeneralUnitaryMatrices{T,𝔽,AbsoluteDeterminantOneMatrices}
+const UnitaryMatrices{T,𝔽} = GeneralUnitaryMatrices{T,𝔽,AbsoluteDeterminantOneMatricesType}
 
 function UnitaryMatrices(n::Int, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
