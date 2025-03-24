@@ -8,7 +8,7 @@ Orthogonal group $\mathrm{O}(n)$ represented by [`OrthogonalMatrices`](@ref).
     Orthogonal(n::Int; parameter::Symbol=:type)
 """
 const Orthogonal{T} =
-    GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatricesType}
+    GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatrixType}
 
 function Orthogonal(n::Int; parameter::Symbol=:type)
     return GeneralUnitaryMultiplicationGroup(OrthogonalMatrices(n; parameter=parameter))

@@ -10,7 +10,7 @@ real-valued orthogonal matrices with determinant ``+1``.
 
 Generate the manifold of ``n×n`` rotation matrices.
 """
-const Rotations{T} = GeneralUnitaryMatrices{T,ℝ,DeterminantOneMatricesType}
+const Rotations{T} = GeneralUnitaryMatrices{T,ℝ,DeterminantOneMatrixType}
 
 function Rotations(n::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))

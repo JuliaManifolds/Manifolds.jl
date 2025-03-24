@@ -24,8 +24,7 @@ Quaternionic unitary group is isomorphic to the compact symplectic group of the 
 Construct ``\mathrm{U}(n, 𝔽)``.
 See also [`Orthogonal(n)`](@ref) for the real-valued case.
 """
-const Unitary{n,𝔽} =
-    GeneralUnitaryMultiplicationGroup{n,𝔽,AbsoluteDeterminantOneMatricesType}
+const Unitary{n,𝔽} = GeneralUnitaryMultiplicationGroup{n,𝔽,AbsoluteDeterminantOneMatrixType}
 
 function Unitary(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
     return GeneralUnitaryMultiplicationGroup(UnitaryMatrices(n, 𝔽; parameter=parameter))

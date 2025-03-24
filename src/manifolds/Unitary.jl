@@ -1,6 +1,6 @@
 
 @doc raw"""
-    const UnitaryMatrices{n,𝔽} = GeneralUnitaryMatrices{T,𝔽,AbsoluteDeterminantOneMatrices}
+    const UnitaryMatrices{n,𝔽} = GeneralUnitaryMatrices{T,𝔽,AbsoluteDeterminantOneMatrixType}
 
 The manifold ``U(n,𝔽)`` of ``n×n`` complex matrices (when 𝔽=ℂ) or quaternionic matrices
 (when 𝔽=ℍ) such that
@@ -30,7 +30,7 @@ If you prefer the representation as `X` you can use the [`Stiefel`](@ref)`(n, n,
 
 see also [`OrthogonalMatrices`](@ref) for the real valued case.
 """
-const UnitaryMatrices{T,𝔽} = GeneralUnitaryMatrices{T,𝔽,AbsoluteDeterminantOneMatricesType}
+const UnitaryMatrices{T,𝔽} = GeneralUnitaryMatrices{T,𝔽,AbsoluteDeterminantOneMatrixType}
 
 function UnitaryMatrices(n::Int, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n,))
