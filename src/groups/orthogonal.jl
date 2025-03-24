@@ -1,5 +1,5 @@
 @doc raw"""
-    Orthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatrices}
+    Orthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatrixType}
 
 Orthogonal group $\mathrm{O}(n)$ represented by [`OrthogonalMatrices`](@ref).
 

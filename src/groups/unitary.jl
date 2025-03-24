@@ -1,5 +1,5 @@
 @doc raw"""
-     Unitary{n,𝔽} = GeneralUnitaryMultiplicationGroup{n,𝔽,AbsoluteDeterminantOneMatrices}
+     Unitary{n,𝔽} = GeneralUnitaryMultiplicationGroup{n,𝔽,AbsoluteDeterminantOneMatrixType}
 
 The group of unitary matrices ``\mathrm{U}(n, 𝔽)``, either complex (when 𝔽=ℂ) or quaternionic
 (when 𝔽=ℍ)
