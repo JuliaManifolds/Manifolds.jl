@@ -115,12 +115,13 @@ function Random.rand!(
     rand!(rng, get_embedding(M), pX; kwargs...)
     if vector_at == nothing # for points ensure invertibility
         n = size(pX)[1]
-        e = eigen(Symmetric(pX' * pX)) # sym to get real EV
-        ev = real.(e.values)
-        (prod(ev) < 0) && (ev[1] *= -1)
-        # determinant is  already positive, rescale to one
-        ev .*= 1 / (prod(ev)^(1 / n))
-        pX .= e.vectors' * diagm(ev) * e.vectors
+while det(pX) < sqrt(eps(eltype(pX)))
+            rand!(rng, get_embedding(M), pX; kwargs...)
+        end
+        if det(pX) < 0
+            pX[1, :] .*= -1
+        end
+        pX ./= det(pX)^(1/n)
     else # tangent vectors: trace 0
         pX[diagind(pX)] .= 0
     end
