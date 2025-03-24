@@ -477,10 +477,10 @@ end
 
 function Random.rand!(
     rng::AbstractRNG,
-    M::Circle{ℝ},
+    M::Circle,
     pX;
     vector_at=nothing,
-    σ::Real=one(eltype(pX)),
+    σ::Real=one(real(eltype(pX))),
 )
     pX .= rand(rng, M; vector_at, σ)
     return pX
