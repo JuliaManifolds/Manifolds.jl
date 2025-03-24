@@ -1,7 +1,7 @@
-using Manifolds, Test
+using Manifolds, Random, Test
 
 @testset "Invertible Matrices of Determinant one" begin
-    M = InvertibleMatricesDeterminantOne(2)
+    M = DeterminantOneMatrices(2)
     # is det 1 and inv
     @test is_point(M, [1.0 0.0; 0.0 1.0], true)
     # det 1 but for example not Rotation
@@ -10,4 +10,10 @@ using Manifolds, Test
     @test_throws DomainError is_point(M, [10.0 0.0; 0.0 0.0], true)
     # Det(2)
     @test_throws DomainError is_point(M, [2.0 0.0; 0.0 1.0], true)
+    Random.seed!(42)
+    p = rand(M)
+    @test is_point(M, p)
+    X = rand(M; vector_at=p)
+    @test is_vector(M, p, X)
+    @test repr(M) == "DeterminantOneMatrices(2, ℝ)"
 end

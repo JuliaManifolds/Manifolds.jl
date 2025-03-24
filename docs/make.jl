@@ -177,6 +177,7 @@ makedocs(;
                 "Centered matrices" => "manifolds/centeredmatrices.md",
                 "Cholesky space" => "manifolds/choleskyspace.md",
                 "Circle" => "manifolds/circle.md",
+                "Determinant one matrices" => "manifolds/determinant-one.md",
                 "Elliptope" => "manifolds/elliptope.md",
                 "Essential manifold" => "manifolds/essentialmanifold.md",
                 "Euclidean" => "manifolds/euclidean.md",

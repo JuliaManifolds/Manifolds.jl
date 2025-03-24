@@ -444,6 +444,7 @@ include("manifolds/Lorentz.jl")
 include("manifolds/CenteredMatrices.jl")
 include("manifolds/CholeskySpace.jl")
 include("manifolds/Circle.jl")
+include("manifolds/DeterminantOneMatrices.jl")
 include("manifolds/Elliptope.jl")
 include("manifolds/EmbeddedTorus.jl")
 include("manifolds/FixedRankMatrices.jl")
@@ -502,9 +503,6 @@ include("manifolds/Symplectic.jl")
 include("manifolds/Hamiltonian.jl") # Hamiltonian requires symplectic
 include("manifolds/SymplecticStiefel.jl")
 include("manifolds/SymplecticGrassmann.jl") # Requires SymplecticStiefel
-
-# From a new approach
-include("manifolds/InvertibleDeterminantOneMatrces.jl")
 
 # Product or power based manifolds
 include("manifolds/Torus.jl")
@@ -646,6 +644,7 @@ export Euclidean,
     CenteredMatrices,
     CholeskySpace,
     Circle,
+    DeterminantOneMatrices,
     Elliptope,
     EssentialManifold,
     FixedRankMatrices,
@@ -659,7 +658,6 @@ export Euclidean,
     Hyperbolic,
     Hyperrectangle,
     InvertibleMatrices,
-    InvertibleMatricesDeterminantOne,
     KendallsPreShapeSpace,
     KendallsShapeSpace,
     Lorentz,
