@@ -22,7 +22,7 @@ const SpecialUnitary{T} = GeneralUnitaryMultiplicationGroup{T,ℂ,DeterminantOne
 
 function SpecialUnitary(n::Int; parameter::Symbol=:type)
     return GeneralUnitaryMultiplicationGroup(
-        GeneralUnitaryMatrices(n, ℂ, DeterminantOneMatrices; parameter=parameter),
+        GeneralUnitaryMatrices(n, ℂ, DeterminantOneMatrixType; parameter=parameter),
     )
 end
 
