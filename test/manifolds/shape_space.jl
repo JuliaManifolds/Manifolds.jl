@@ -76,6 +76,7 @@ end
         0.09985503059767825 -0.156617363846023 0.05676233324834479
     ]
     @testset "tangent vector components" begin
+        println("enter with", p1, X1)
         @test isapprox(M, p1, horizontal_component(M, p1, X1), X1h)
         @test isapprox(M, p1, vertical_component(M, p1, X1), X1v)
         Y = similar(X1)

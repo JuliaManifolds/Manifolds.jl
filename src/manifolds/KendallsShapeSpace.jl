@@ -103,7 +103,9 @@ horizontal_component(::KendallsShapeSpace, p, X)
 function horizontal_component!(::KendallsShapeSpace, Y, p, X)
     B = p * transpose(p)
     C = X * transpose(p) - p * transpose(X)
+    println("B = ", B,"\nC = ", C)
     A = sylvc(B, B, C)
+    println("A = ",A)
     Y .= X .- A * p
     return Y
 end
