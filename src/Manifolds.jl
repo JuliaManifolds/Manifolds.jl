@@ -637,7 +637,6 @@ export AbstractCotangentVector,
     AbstractManifold, AbstractManifoldPoint, AbstractTangentVector
 # Manifolds
 export AbstractSphere, AbstractProjectiveSpace
-export MatrixManifold
 export Euclidean,
     ArrayProjectiveSpace,
     ArraySphere,

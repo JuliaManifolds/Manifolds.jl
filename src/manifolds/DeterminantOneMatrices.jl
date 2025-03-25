@@ -113,15 +113,14 @@ function Random.rand!(
     kwargs...,
 )
     rand!(rng, get_embedding(M), pX; kwargs...)
-    if vector_at == nothing # for points ensure invertibility
+    if vector_at === nothing # for points ensure invertibility
         n = size(pX)[1]
-        while det(pX) < sqrt(eps(eltype(pX)))
+        while abs(det(pX)) < sqrt(eps(real(eltype(pX))))
             rand!(rng, get_embedding(M), pX; kwargs...)
         end
-        if det(pX) < 0
-            pX[1, :] .*= -1
-        end
-        pX ./= det(pX)^(1 / n)
+        det_pX = det(pX)
+        pX[1, :] ./= sign(det_pX)
+        pX ./= abs(det_pX)^(1 / n)
     else # tangent vectors: trace 0
         pX[diagind(pX)] .= 0
     end
