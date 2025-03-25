@@ -35,4 +35,9 @@ using Manifolds, Random, Test
         @test is_vector(M, p, X)
         @test repr(M) == "DeterminantOneMatrices(2, ℂ)"
     end
+
+    @testset "Field parameter" begin
+        M = DeterminantOneMatrices(2; parameter=:field)
+        @test repr(M) == "DeterminantOneMatrices(2, ℝ; parameter=:field)"
+    end
 end
