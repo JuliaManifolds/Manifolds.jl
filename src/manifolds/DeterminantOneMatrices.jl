@@ -115,9 +115,7 @@ function Random.rand!(
     rand!(rng, get_embedding(M), pX; kwargs...)
     if vector_at === nothing # for points ensure invertibility
         n = size(pX)[1]
-        while abs(det(pX)) < sqrt(eps(real(eltype(pX))))
-            rand!(rng, get_embedding(M), pX; kwargs...)
-        end
+        _ensure_nonzero_rng_determinant!(rng, get_embedding(M), pX; kwargs...)
         det_pX = det(pX)
         pX[1, :] ./= sign(det_pX)
         pX ./= abs(det_pX)^(1 / n)
