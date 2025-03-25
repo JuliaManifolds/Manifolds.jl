@@ -137,7 +137,7 @@ rand(M::InvertibleMatrices; kwargs...)
 
 function Random.rand!(M::InvertibleMatrices, pX; vector_at=nothing, kwargs...)
     rand!(get_embedding(M), pX; kwargs...)
-    if vector_at == nothing # for points ensure invertibility
+    if vector_at === nothing # for points ensure invertibility
         while det(pX) == 0
             rand!(get_embedding(M), pX; kwargs...)
         end
@@ -152,9 +152,9 @@ function Random.rand!(
     kwargs...,
 )
     rand!(rng, get_embedding(M), pX; kwargs...)
-    if vector_at == nothing # for points ensure invertibility
+    if vector_at === nothing # for points ensure invertibility
         while det(pX) == 0
-            rand!(get_embedding(M), pX; kwargs...)
+            rand!(rng, get_embedding(M), pX; kwargs...)
         end
     end
     return pX
