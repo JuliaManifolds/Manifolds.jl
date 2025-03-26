@@ -21,6 +21,7 @@ using Manifolds, Random, Test, LinearAlgebra
         @test_throws DomainError is_vector(M, p, Xf; error=:error)
         @test get_embedding(M) == Euclidean(2, 2)
         @test manifold_dimension(M) == 3
+        @test manifold_dimension(DeterminantOneMatrices(2; parameter=:field)) == 3
         @test repr(M) == "DeterminantOneMatrices(2, ℝ)"
     end
     @testset "Complex case" begin
