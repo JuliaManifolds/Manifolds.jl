@@ -1,4 +1,4 @@
-using Manifolds, Random, Test
+using Manifolds, Random, Test, LinearAlgebra
 
 @testset "Invertible Matrices of Determinant one" begin
     @testset "Real case" begin
@@ -46,5 +46,15 @@ using Manifolds, Random, Test
     @testset "Field parameter" begin
         M = DeterminantOneMatrices(2; parameter=:field)
         @test repr(M) == "DeterminantOneMatrices(2, ℝ; parameter=:field)"
+    end
+    @testset "rng test" begin
+        M = DeterminantOneMatrices(2)
+        pX = zeros(2, 2)
+        Manifolds._ensure_nonzero_rng_determinant!(
+            Random.default_rng(),
+            get_embedding(M),
+            pX,
+        )
+        @test abs(det(pX)) > 1e-8
     end
 end
