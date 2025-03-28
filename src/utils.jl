@@ -364,3 +364,15 @@ function estimated_sectional_curvature_matrix(
     end
     return result
 end
+
+function _ensure_nonzero_rng_determinant!(
+    rng,
+    M::AbstractManifold,
+    pX;
+    atol::Real=sqrt(eps(real(eltype(pX)))),
+    kwargs...,
+)
+    while abs(det(pX)) < atol
+        rand!(rng, M, pX; kwargs...)
+    end
+end

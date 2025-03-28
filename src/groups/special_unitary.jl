@@ -1,5 +1,5 @@
 @doc raw"""
-    SpecialUnitary{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrices}}
+    SpecialUnitary{n} = GeneralUnitaryMultiplicationGroup{n,ℝ,GeneralUnitaryMatrices{n,ℂ,DeterminantOneMatrixType}}
 
 The special unitary group ``\mathrm{SU}(n)`` represented by unitary matrices of determinant +1.
 
@@ -18,11 +18,11 @@ or in other words we represent the tangent spaces employing the Lie algebra ``\m
 
 Generate the Lie group of ``n×n`` unitary matrices with determinant +1.
 """
-const SpecialUnitary{T} = GeneralUnitaryMultiplicationGroup{T,ℂ,DeterminantOneMatrices}
+const SpecialUnitary{T} = GeneralUnitaryMultiplicationGroup{T,ℂ,DeterminantOneMatrixType}
 
 function SpecialUnitary(n::Int; parameter::Symbol=:type)
     return GeneralUnitaryMultiplicationGroup(
-        GeneralUnitaryMatrices(n, ℂ, DeterminantOneMatrices; parameter=parameter),
+        GeneralUnitaryMatrices(n, ℂ, DeterminantOneMatrixType; parameter=parameter),
     )
 end
 

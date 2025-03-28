@@ -25,7 +25,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 BoundaryValueDiffEq = "4, 5"
 CondaPkg = "0.2"
-DiffEqCallbacks = "2, 3"
+DiffEqCallbacks = "2, 3, 4"
 Distributions = "0.22.6, 0.23, 0.24, 0.25"
 Documenter = "1"
 DocumenterCitations = "1.3"

@@ -142,6 +142,7 @@ end
         include_test("manifolds/centered_matrices.jl")
         include_test("manifolds/circle.jl")
         include_test("manifolds/cholesky_space.jl")
+        include_test("manifolds/determinant_one_matrices.jl")
         include_test("manifolds/elliptope.jl")
         include_test("manifolds/euclidean.jl")
         include_test("manifolds/fixed_rank.jl")
