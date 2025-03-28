@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.15] unreleased
+## [0.10.15] 2025-03-28
+
+### Added
+
+* a `DeterminantOneMatrices` manifold of matrices of determinant one.
+
+### Changed
+
+* the following internal types were renamed since their super type also uses the singular
+  * `AbsoluteDeterminantOneMatrices` to `AbsoluteDeterminantOneMatrixType`
+  * `DeterminantOneMatrices` to `DeterminantOneMatrixType`
 
 ### Fixed
 
