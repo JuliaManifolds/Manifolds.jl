@@ -91,6 +91,62 @@ function manifold_dimension(M::DeterminantOneMatrices{<:Any,𝔽}) where {𝔽}
 end
 
 @doc raw"""
+    project(G::DeterminantOneMatrices, p)
+    project!(G::DeterminantOneMatrices, q, p)
+
+Project ``p ∈ \mathrm{GL}(n, 𝔽)`` to the [`DeterminantOneMatrices`](@ref)
+using the singular value decomposition of ``p = U S V^\mathrm{H}``.
+
+The formula for the projection is
+
+````math
+\operatorname{proj}(p) = U S D V^\mathrm{H},
+````
+where
+
+````math
+D_{ij} = δ_{ij} \begin{cases}
+    1            & \text{ if } i ≠ n \\
+    \det(p)^{-1} & \text{ if } i = n
+\end{cases}.
+````
+
+The operation can be done in-place of `q`.
+"""
+project(::DeterminantOneMatrices, p)
+
+function project!(M::DeterminantOneMatrices, q, p)
+    n = get_parameter(M.size)[1]
+    detp = det(p)
+    isapprox(detp, 1) && return copyto!(q, p)
+    F = svd(p)
+    q .= F.U .* F.S'
+    q[:, n] ./= detp
+    mul!_safe(q, q, F.Vt)
+    return q
+end
+
+@doc raw"""
+    project(G::DeterminantOneMatrices, p, X)
+    project!(G::DeterminantOneMatrices, Y, p, X)
+
+Orthogonally project ``X ∈ 𝔽^{n×n}`` onto the tangent space of ``p`` to the
+[`DeterminantOneMatrices`](@ref).
+
+This first changes the representation from `X` to the trace-zero component, i.e.
+computes `Y = p \ X` and then substracts `c = -tr(Y) / n` from all diagonal entries.
+"""
+project(::DeterminantOneMatrices, p, X)
+
+function project!(G::DeterminantOneMatrices, Y, p, X)
+    n = get_parameter(G.size)[1]
+    Y .= p \ X
+    c = tr(Y) / n
+    Y[diagind(n, n)] .-= c
+    return Y
+end
+
+@doc raw"""
     Random.rand(M::DeterminantOneMatrices; vector_at=nothing, kwargs...)
 
 If `vector_at` is `nothing`, return a random point on the [`DeterminantOneMatrices`](@ref)
