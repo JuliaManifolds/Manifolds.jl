@@ -10,7 +10,9 @@ using Manifolds, Random, Test, LinearAlgebra
         # Not invertible
         @test_throws DomainError is_point(M, [10.0 0.0; 0.0 0.0]; error=:error)
         # Det(2)
-        @test_throws DomainError is_point(M, [2.0 0.0; 0.0 1.0]; error=:error)
+        pf = [2.0 0.0; 0.0 1.0]
+        @test_throws DomainError is_point(M, pf; error=:error)
+        @test is_point(M, project(M, pf); error=:error)
         Random.seed!(42)
         p = rand(M)
         @test is_point(M, p)
@@ -19,6 +21,7 @@ using Manifolds, Random, Test, LinearAlgebra
         # not trace 0
         Xf = [1.0 1.1; 1.2 0.0]
         @test_throws DomainError is_vector(M, p, Xf; error=:error)
+        @test is_vector(M, p, project(M, p, Xf); error=:error)
         @test get_embedding(M) == Euclidean(2, 2)
         @test manifold_dimension(M) == 3
         @test manifold_dimension(DeterminantOneMatrices(2; parameter=:field)) == 3

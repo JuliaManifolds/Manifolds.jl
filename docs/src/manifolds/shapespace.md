@@ -56,3 +56,10 @@ Modules = [Manifolds, ManifoldsBase]
 Pages = ["manifolds/KendallsShapeSpace.jl"]
 Order = [:function]
 ```
+
+## Literature
+
+```@bibliography
+Pages = ["shapespace.md"]
+Canonical=false
+```

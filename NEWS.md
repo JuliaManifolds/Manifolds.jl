@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Added all compat entries.
 
+### Fixed
+
+* a copy pase error in the new determinant one manifold from the last release.
+
 ## [0.10.15] 2025-03-28
 
 ### Added
