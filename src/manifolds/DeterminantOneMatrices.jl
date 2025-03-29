@@ -63,7 +63,7 @@ function check_vector(M::DeterminantOneMatrices, p, X; kwargs...)
     if !isapprox(tr(X), 0; kwargs...)
         return DomainError(
             det(p),
-            "The point $(p) does not lie on $(M), since its determinant is $(det(p)) and not 1.",
+            "The tangent vector $(X) does not lie on $(M), since its trace is $(tr(X)) and not zero.",
         )
     end
     return nothing
