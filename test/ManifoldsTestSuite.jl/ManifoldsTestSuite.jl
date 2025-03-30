@@ -89,7 +89,7 @@ function test_exp_log(
             if test_mutating
                 p4 = copy(M, p)
                 Y5 = zero_vector(M, p)
-                log!(M, Y5, p4, exp!(G, p4, p, X))
+                log!(M, Y5, p, exp!(G, p4, p, X))
                 @test isapprox(M, p, Y4, Y5)
             end
         end
