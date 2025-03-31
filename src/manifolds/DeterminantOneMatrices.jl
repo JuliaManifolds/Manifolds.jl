@@ -134,7 +134,7 @@ Orthogonally project ``X ∈ 𝔽^{n×n}`` onto the tangent space of ``p`` to th
 [`DeterminantOneMatrices`](@ref).
 
 This first changes the representation from `X` to the trace-zero component, i.e.
-computes `Y = p \ X` and then substracts `c = -tr(Y) / n` from all diagonal entries.
+computes `Y = p \ X` and then subtracts `c = tr(Y) / n` from all diagonal entries.
 """
 project(::DeterminantOneMatrices, p, X)
 
