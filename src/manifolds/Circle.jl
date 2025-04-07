@@ -224,7 +224,8 @@ function get_coordinates_orthonormal(::Circle{ℂ}, p, X, ::Union{RealNumbers,Co
     return @SVector [Xⁱ]
 end
 
-get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = Scalar(c[])
+get_vector_orthonormal(::Circle{ℝ}, p::StaticArray, c, ::RealNumbers) = Scalar(c[])
+get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = fill(c[])
 # the method below is required for FD and AD differentiation in ManifoldDiff.jl
 # if changed, make sure no tests in that repository get broken
 get_vector_orthonormal(::Circle{ℝ}, p::AbstractVector, c, ::RealNumbers) = c
@@ -238,8 +239,16 @@ end
 
 Return tangent vector from the coordinates in the Lie algebra of the [`Circle`](@ref).
 """
-function get_vector_orthonormal(::Circle{ℂ}, p, c, ::Union{RealNumbers,ComplexNumbers})
+function get_vector_orthonormal(
+    ::Circle{ℂ},
+    p::StaticArray,
+    c,
+    ::Union{RealNumbers,ComplexNumbers},
+)
     @SArray fill(1im * c[1] * p[1])
+end
+function get_vector_orthonormal(::Circle{ℂ}, p, c, ::Union{RealNumbers,ComplexNumbers})
+    return fill(1im * c[1] * p[1])
 end
 function get_vector_orthonormal!(::Circle{ℂ}, X, p, c, ::Union{RealNumbers,ComplexNumbers})
     X .= 1im * c[1] * p[1]

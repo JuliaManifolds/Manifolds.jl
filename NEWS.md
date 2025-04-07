@@ -5,11 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.16] unreleased
+## [0.10.16] 2025-04-08
 
 ### Changed
 
 * Added all compat entries.
+* `get_vector` on `Circle` no longer returns `SArray` when no static arrays are passed as arguments.
 
 ### Fixed
 
