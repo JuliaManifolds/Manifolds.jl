@@ -233,6 +233,8 @@ using Manifolds: TFVector, CoTFVector
         project!(Mc, p, p)
         @test p == @MArray fill(1.0 + 0.0im)
 
+        @test get_vector(Mc, fill(1.0 + 0.0im), [1.0]) isa Array{ComplexF64,0}
+
         angles = map(pp -> exp(pp * im), [-π / 2, 0.0, π])
         @test mean(Mc, angles) ≈ exp(-π * im / 2)
         @test mean(Mc, angles, [1.0, 1.0, 1.0]) ≈ exp(-π * im / 2)
