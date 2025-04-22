@@ -1,12 +1,12 @@
 @doc raw"""
-    SpecialOrthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,DeterminantOneMatrices}
+    SpecialOrthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,DeterminantOneMatrixType}
 
 Special orthogonal group ``\mathrm{SO}(n)`` represented by rotation matrices, see [`Rotations`](@ref).
 
 # Constructor
     SpecialOrthogonal(n)
 """
-const SpecialOrthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,DeterminantOneMatrices}
+const SpecialOrthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,DeterminantOneMatrixType}
 
 function SpecialOrthogonal(n; parameter::Symbol=:type)
     _lie_groups_depwarn_move(SpecialOrthogonal, :SpecialOrthogonalGroup)

@@ -1,31 +1,31 @@
 @doc """
     AbstractMatrixType
 
-A plain type to distinguish different types of matrices, for example [`DeterminantOneMatrices`](@ref)
-and [`AbsoluteDeterminantOneMatrices`](@ref)
+A plain type to distinguish different types of matrices, for example [`DeterminantOneMatrixType`](@ref)
+and [`AbsoluteDeterminantOneMatrixType`](@ref).
 """
 abstract type AbstractMatrixType end
 
 @doc """
-    DeterminantOneMatrices <: AbstractMatrixType
+    DeterminantOneMatrixType <: AbstractMatrixType
 
 A type to indicate that we require special (orthogonal / unitary) matrices, i.e. of determinant 1.
 """
-struct DeterminantOneMatrices <: AbstractMatrixType end
+struct DeterminantOneMatrixType <: AbstractMatrixType end
 
 @doc """
-    AbsoluteDeterminantOneMatrices <: AbstractMatrixType
+    AbsoluteDeterminantOneMatrixType <: AbstractMatrixType
 
 A type to indicate that we require (orthogonal / unitary) matrices with normed determinant,
 i.e. that the absolute value of the determinant is 1.
 """
-struct AbsoluteDeterminantOneMatrices <: AbstractMatrixType end
+struct AbsoluteDeterminantOneMatrixType <: AbstractMatrixType end
 
 @doc raw"""
     GeneralUnitaryMatrices{T,𝔽,S<:AbstractMatrixType} <: AbstractDecoratorManifold
 
 A common parametric type for matrices with a unitary property of size ``n×n`` over the field ``𝔽``
-which additionally have the `AbstractMatrixType`, e.g. are `DeterminantOneMatrices`.
+which additionally have the `AbstractMatrixType`, e.g. are [`DeterminantOneMatrixType`](@ref).
 """
 struct GeneralUnitaryMatrices{T,𝔽,S<:AbstractMatrixType} <: AbstractDecoratorManifold{𝔽}
     size::T
@@ -51,12 +51,12 @@ end
     check_point(M::GeneralUnitaryMatrices, p; kwargs...)
 
 Check whether `p` is a valid point on the [`UnitaryMatrices`](@ref) or [`OrthogonalMatrices`] `M`,
-i.e. that ``p`` has a determinant of absolute value one
+i.e. that ``p`` has a determinant of absolute value one.
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(
-    M::GeneralUnitaryMatrices{<:Any,𝔽,AbsoluteDeterminantOneMatrices},
+    M::GeneralUnitaryMatrices{<:Any,𝔽,AbsoluteDeterminantOneMatrixType},
     p;
     kwargs...,
 ) where {𝔽}
@@ -79,12 +79,12 @@ end
     check_point(M::Rotations, p; kwargs...)
 
 Check whether `p` is a valid point on the [`UnitaryMatrices`](@ref) `M`,
-i.e. that ``p`` has a determinant of absolute value one, i.e. that ``p^{\mathrm{H}}p``
+i.e. that ``p`` has a determinant of absolute value one, i.e. that ``p^{\mathrm{H}}p = \mathrm{I}_n``
 
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_point(
-    M::GeneralUnitaryMatrices{<:Any,𝔽,DeterminantOneMatrices},
+    M::GeneralUnitaryMatrices{<:Any,𝔽,DeterminantOneMatrixType},
     p;
     kwargs...,
 ) where {𝔽}
@@ -211,7 +211,7 @@ end
 
 Compute the exponential map, that is, since ``X`` is represented in the Lie algebra,
 
-```
+```math
 exp_p(X) = p\mathrm{e}^X
 ```
 
@@ -661,7 +661,7 @@ Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 injectivity_radius(::GeneralUnitaryMatrices) = π
 
 @doc raw"""
-    injectivity_radius(G::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
+    injectivity_radius(G::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrixType})
 
 Return the injectivity radius for general complex unitary matrix manifolds, where the determinant is ``+1``,
 which is[^1]
@@ -670,7 +670,7 @@ which is[^1]
     \operatorname{inj}_{\mathrm{SU}(n)} = π \sqrt{2}.
 ```
 """
-function injectivity_radius(::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
+function injectivity_radius(::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrixType})
     return π * sqrt(2.0)
 end
 
@@ -729,9 +729,10 @@ end
 
 Compute the logarithmic map, that is, since the resulting ``X`` is represented in the Lie algebra,
 
+```math
+\log_p q = \log(p^{\mathrm{H}}q)
 ```
-log_p q = \log(p^{\mathrm{H}q)
-```
+
 which is projected onto the skew symmetric matrices for numerical stability.
 """
 log(::GeneralUnitaryMatrices, p, q)
@@ -743,10 +744,10 @@ Compute the logarithmic map on the [`Rotations`](@ref) manifold
 `M` which is given by
 
 ```math
-\log_p q = \operatorname{log}(p^{\mathrm{T}}q)
+\log_p q = \log(p^{\mathrm{T}}q)
 ```
 
-where ``\operatorname{Log}`` denotes the matrix logarithm. For numerical stability,
+where ``\log`` denotes the matrix logarithm. For numerical stability,
 the result is projected onto the set of skew symmetric matrices.
 
 For antipodal rotations the function returns deterministically one of the tangent vectors
@@ -848,20 +849,20 @@ function manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℝ})
     return div(n * (n - 1), 2)
 end
 @doc raw"""
-    manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
+    manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrixType})
 
 Return the dimension of the manifold of special unitary matrices.
 ```math
 \dim_{\mathrm{SU}(n)} = n^2-1.
 ```
 """
-function manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
+function manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrixType})
     n = get_parameter(M.size)[1]
     return n^2 - 1
 end
 
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℝ,AbsoluteDeterminantOneMatrices})
+    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℝ,AbsoluteDeterminantOneMatrixType})
 
 Volume of the manifold of real orthogonal matrices of absolute determinant one. The
 formula reads [BoyaSudarshanTilma:2003](@cite):
@@ -869,16 +870,19 @@ formula reads [BoyaSudarshanTilma:2003](@cite):
 ```math
 \begin{cases}
 \frac{2^{k}(2\pi)^{k^2}}{\prod_{s=1}^{k-1} (2s)!} & \text{ if } n = 2k \\
+
 \frac{2^{k+1}(2\pi)^{k(k+1)}}{\prod_{s=1}^{k-1} (2s+1)!} & \text{ if } n = 2k+1
 \end{cases}
 ```
 """
-function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℝ,AbsoluteDeterminantOneMatrices})
+function manifold_volume(
+    M::GeneralUnitaryMatrices{<:Any,ℝ,AbsoluteDeterminantOneMatrixType},
+)
     n = get_parameter(M.size)[1]
-    return 2 * manifold_volume(GeneralUnitaryMatrices(n, ℝ, DeterminantOneMatrices))
+    return 2 * manifold_volume(GeneralUnitaryMatrices(n, ℝ, DeterminantOneMatrixType))
 end
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℝ,DeterminantOneMatrices})
+    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℝ,DeterminantOneMatrixType})
 
 Volume of the manifold of real orthogonal matrices of determinant one. The
 formula reads [BoyaSudarshanTilma:2003](@cite):
@@ -894,7 +898,7 @@ formula reads [BoyaSudarshanTilma:2003](@cite):
 It differs from the paper by a factor of `sqrt(2)` due to a different choice of
 normalization.
 """
-function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℝ,DeterminantOneMatrices})
+function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℝ,DeterminantOneMatrixType})
     n = get_parameter(M.size)[1]
     vol = 1.0
     if n % 2 == 0
@@ -916,16 +920,18 @@ function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℝ,DeterminantOneMatri
     return vol
 end
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℂ,AbsoluteDeterminantOneMatrices})
+    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℂ,AbsoluteDeterminantOneMatrixType})
 
 Volume of the manifold of complex general unitary matrices of absolute determinant one. The
 formula reads [BoyaSudarshanTilma:2003](@cite)
 
 ```math
-\sqrt{n 2^{n+1}} π^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
+\sqrt{n 2^{n+1}} π^{n(n+1)/2} \prod_{k=1}^{n-1}\frac{1}{k!}.
 ```
 """
-function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℂ,AbsoluteDeterminantOneMatrices})
+function manifold_volume(
+    M::GeneralUnitaryMatrices{<:Any,ℂ,AbsoluteDeterminantOneMatrixType},
+)
     n = get_parameter(M.size)[1]
     vol = sqrt(n * 2^(n + 1)) * π^(((n + 1) * n) // 2)
     kf = 1
@@ -936,16 +942,16 @@ function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℂ,AbsoluteDeterminant
     return vol
 end
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
+    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrixType})
 
 Volume of the manifold of complex general unitary matrices of determinant one. The formula
 reads [BoyaSudarshanTilma:2003](@cite)
 
 ```math
-\sqrt{n 2^{n-1}} π^{(n-1)(n+2)/2} \prod_{k=1}^{n-1}\frac{1}{k!}
+\sqrt{n 2^{n-1}} π^{(n-1)(n+2)/2} \prod_{k=1}^{n-1}\frac{1}{k!}.
 ```
 """
-function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrices})
+function manifold_volume(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrixType})
     n = get_parameter(M.size)[1]
     vol = sqrt(n * 2^(n - 1)) * π^(((n - 1) * (n + 2)) // 2)
     kf = 1
@@ -983,10 +989,10 @@ is
   \operatorname{proj}_{\mathrm{U}(n,𝔽)} \colon p ↦ U V^\mathrm{H}.
 ````
 """
-project(::GeneralUnitaryMatrices{<:Any,𝔽,AbsoluteDeterminantOneMatrices}, p) where {𝔽}
+project(::GeneralUnitaryMatrices{<:Any,𝔽,AbsoluteDeterminantOneMatrixType}, p) where {𝔽}
 
 function project!(
-    ::GeneralUnitaryMatrices{<:Any,𝔽,AbsoluteDeterminantOneMatrices},
+    ::GeneralUnitaryMatrices{<:Any,𝔽,AbsoluteDeterminantOneMatrixType},
     q,
     p,
 ) where {𝔽}
@@ -1005,7 +1011,7 @@ to the tangent space of `M` at `p`,
 and change the representer to use the corresponding Lie algebra, i.e. we compute
 
 ```math
-    \operatorname{proj}_p(X) = \frac{p^{\mathrm{H}} X - (p^{\mathrm{H}} X)^{\mathrm{H}}}{2},
+    \operatorname{proj}_p(X) = \frac{p^{\mathrm{H}} X - (p^{\mathrm{H}} X)^{\mathrm{H}}}{2}.
 ```
 """
 project(::GeneralUnitaryMatrices, p, X)
@@ -1078,7 +1084,11 @@ end
     riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 
 Compute the value of Riemann tensor on the [`GeneralUnitaryMatrices`](@ref) manifold.
-The formula reads [Rentmeesters:2011](@cite) ``R(X,Y)Z=\frac{1}{4}[Z, [X, Y]]``.
+The formula reads [Rentmeesters:2011](@cite)
+
+```math
+R(X,Y)Z=\frac{1}{4}[Z, [X, Y]].
+```
 """
 riemann_tensor(::GeneralUnitaryMatrices, p, X, Y, Z)
 

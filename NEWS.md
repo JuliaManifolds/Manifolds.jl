@@ -5,15 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.15] - unreleased
+## [0.10.17] - 2025-04-21
 
 ### Changed
 
-* deprecate `GroupManifold`s and its concrete subtypes as well as all functions related to Lie groups. They can now be found in the new package [LieGroups.jl](https://juliamanifolds.github.io/LieGroups.jl/stable/), see their [How to transition from `GroupManifold`s tutorial](https://juliamanifolds.github.io/LieGroups.jl/stable/tutorials/transition/) for all details.
+* deprecate `GroupManifold`s and its concrete subtypes as well as all functions related to Lie groups.
+  They can now be found in the new package [LieGroups.jl](https://juliamanifolds.github.io/LieGroups.jl/stable/), see their [How to transition from `GroupManifold`s tutorial](https://juliamanifolds.github.io/LieGroups.jl/stable/tutorials/transition/) for all details.
+
+## [0.10.16] 2025-04-08
+
+### Changed
+
+* Added all compat entries.
+* `get_vector` on `Circle` no longer returns `SArray` when no static arrays are passed as arguments.
+
+### Fixed
+
+* a copy pase error in the new determinant one manifold from the last release.
+
+## [0.10.15] 2025-03-28
+
+### Added
+
+* a `DeterminantOneMatrices` manifold of matrices of determinant one.
+
+### Changed
+
+* the following internal types were renamed since their super type also uses the singular
+  * `AbsoluteDeterminantOneMatrices` to `AbsoluteDeterminantOneMatrixType`
+  * `DeterminantOneMatrices` to `DeterminantOneMatrixType`
+
+### Fixed
+
+* fix `rand!` to also work on the `Circle(ℂ)`
 
 ## [0.10.14] - 2025-02-18
 
-#### Changed
+### Changed
 
 * Introduced new implementation of parallel transport on `Rotations(3)` based on Rodrigues' rotation
 formula.

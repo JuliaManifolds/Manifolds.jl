@@ -135,12 +135,17 @@ embedding.
 """
 rand(M::InvertibleMatrices; kwargs...)
 
-function Random.rand!(M::InvertibleMatrices, pX; kwargs...)
-    rand!(get_embedding(M), pX; kwargs...)
-    return pX
-end
-function Random.rand!(rng::AbstractRNG, M::InvertibleMatrices, pX; kwargs...)
+function Random.rand!(
+    rng::AbstractRNG,
+    M::InvertibleMatrices,
+    pX;
+    vector_at=nothing,
+    kwargs...,
+)
     rand!(rng, get_embedding(M), pX; kwargs...)
+    if vector_at === nothing # for points ensure invertibility
+        _ensure_nonzero_rng_determinant!(rng, get_embedding(M), pX; kwargs...)
+    end
     return pX
 end
 
