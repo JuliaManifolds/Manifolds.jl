@@ -5,11 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.17] - 2025-04-21
+
+### Changed
+
+* deprecate `GroupManifold`s and its concrete subtypes as well as all functions related to Lie groups.
+  They can now be found in the new package [LieGroups.jl](https://juliamanifolds.github.io/LieGroups.jl/stable/), see their [How to transition from `GroupManifold`s tutorial](https://juliamanifolds.github.io/LieGroups.jl/stable/tutorials/transition/) for all details.
+
+Note that while it is currently not so easy to use `Manifolds.jl` and `LieGroups.jl` together due to the
+common definitions that are here now deprecated, it might still take a reasonable time to do a breaking
+release here, since we do not have a very good reason to yet.
+
 ## [0.10.16] 2025-04-08
 
 ### Changed
 
-* Added all compat entries.
+* Added all `[compat]` entries also for the `docs/` and `tutorials/` environments
 * `get_vector` on `Circle` no longer returns `SArray` when no static arrays are passed as arguments.
 
 ### Fixed

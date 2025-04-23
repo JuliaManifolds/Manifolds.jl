@@ -21,6 +21,7 @@ Generate the Lie group of ``n×n`` unitary matrices with determinant +1.
 const SpecialUnitary{T} = GeneralUnitaryMultiplicationGroup{T,ℂ,DeterminantOneMatrixType}
 
 function SpecialUnitary(n::Int; parameter::Symbol=:type)
+    _lie_groups_depwarn_move(SpecialUnitary, :SpecialUnitaryGroup)
     return GeneralUnitaryMultiplicationGroup(
         GeneralUnitaryMatrices(n, ℂ, DeterminantOneMatrixType; parameter=parameter),
     )

@@ -30,6 +30,7 @@ function active_traits(f, ::GeneralLinear, args...)
 end
 
 function GeneralLinear(n::Int, 𝔽::AbstractNumbers=ℝ; parameter::Symbol=:type)
+    _lie_groups_depwarn_move(GeneralLinear, :GeneralLinearGroup)
     size = wrap_type_parameter(parameter, (n,))
     return GeneralLinear{typeof(size),𝔽}(size)
 end

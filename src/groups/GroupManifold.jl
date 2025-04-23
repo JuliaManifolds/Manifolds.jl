@@ -1,3 +1,44 @@
+#
+# a small helper to deprecate functions, default: warn that this function will move to LieGroups.jl
+function _lie_groups_depwarn_move(f::Function, comment::String="")
+    return Base.depwarn(
+        "The function $f will move to LieGroups.jl.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(f),
+    )
+end
+function _lie_groups_depwarn_move(f::Function, newname::Symbol, comment::String="")
+    return Base.depwarn(
+        "The function $f will move to LieGroups.jl and be renamed to $newname.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(f),
+    )
+end
+function _lie_groups_depwarn_removed(f::Function, comment::String="")
+    return Base.depwarn(
+        "The function $f will removed from Manifolds.jl. Its functionality is modelled different in LieGroups.jl. Check their transition tutorial for the replacement.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(f),
+    )
+end
+# for types force=true so they show up more often when people “start using” the old groups
+function _lie_groups_depwarn_move(T::Type, comment::String="")
+    return Base.depwarn(
+        "$T will move to LieGroups.jl.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(T);
+        force=true,
+    )
+end
+function _lie_groups_depwarn_move(T::Type, newname::Symbol, comment::String="")
+    return Base.depwarn(
+        "$T will move to LieGroups.jl and be renamed to $newname.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(T);
+        force=true,
+    )
+end
+function _lie_groups_depwarn_removed(T::Type, comment::String="")
+    return Base.depwarn(
+        "$T will removed from Manifolds.jl. Its functionality is modelled different in LieGroups.jl. Check their transition tutorial for the replacement.$(length(comment)>0 ? "\n" : "")$(comment)",
+        Symbol(T),
+    )
+end
 """
     GroupManifold{𝔽,M<:AbstractManifold{𝔽},O<:AbstractGroupOperation} <: AbstractDecoratorManifold{𝔽}
 
@@ -30,6 +71,11 @@ end
 
 function GroupManifold(M::AbstractManifold{𝔽}, op::AbstractGroupOperation) where {𝔽}
     rep = LeftInvariantRepresentation()
+    Base.depwarn(
+        "GroupManifold is deprecated.\nIt is replaced by `LieGroup(M, op)` from LieGroups.jl.\nAll corresponding functions are deprecated as well and will move accordingly. \nTheir deprecation warnings are, however, not forced to display as this one is.",
+        :GroupManifold;
+        force=true,
+    )
     return GroupManifold{𝔽,typeof(M),typeof(op),typeof(rep)}(M, op, rep)
 end
 
@@ -38,8 +84,10 @@ end
 
 Get the [`AbstractGroupVectorRepresentation`](@ref) of [`GroupManifold`](@ref) `M`.
 """
-vector_representation(M::GroupManifold) = M.vectors
-
+function vector_representation(M::GroupManifold)
+    _lie_groups_depwarn_removed(vector_representation)
+    return M.vectors
+end
 @inline function active_traits(f, M::GroupManifold, args...)
     return merge_traits(
         IsGroupManifold(M.op, M.vectors),

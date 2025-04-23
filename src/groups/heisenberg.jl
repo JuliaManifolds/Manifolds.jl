@@ -21,6 +21,7 @@ struct HeisenbergGroup{T} <: AbstractDecoratorManifold{ℝ}
 end
 
 function HeisenbergGroup(n::Int; parameter::Symbol=:type)
+    _lie_groups_depwarn_move(HeisenbergGroup)
     size = wrap_type_parameter(parameter, (n,))
     return HeisenbergGroup{typeof(size)}(size)
 end

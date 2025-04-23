@@ -33,6 +33,7 @@ group manifolds with an [`Identity`](@ref) element.
     PowerGroup(manifold::AbstractPowerManifold)
 """
 function PowerGroup(manifold::AbstractPowerManifold)
+    _lie_groups_depwarn_move(PowerGroup, :PowerLieGroup)
     if !is_group_manifold(manifold.manifold)
         error("All powered manifold must be or decorate a group.")
     end
@@ -275,9 +276,11 @@ function _common_power_adjoint_action!(G, Y, p, X, conv)
     return Y
 end
 function adjoint_action!(G::PowerGroup, Y, p, X, conv::LeftAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return _common_power_adjoint_action!(G, Y, p, X, conv)
 end
 function adjoint_action!(G::PowerGroup, Y, p, X, conv::RightAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return _common_power_adjoint_action!(G, Y, p, X, conv)
 end
 
@@ -292,9 +295,11 @@ function _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
     return Y
 end
 function adjoint_action!(G::PowerGroupNestedReplacing, Y, p, X, conv::LeftAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
 end
 function adjoint_action!(G::PowerGroupNestedReplacing, Y, p, X, conv::RightAction)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     return _common_power_replacing_adjoint_action!(G, Y, p, X, conv)
 end
 

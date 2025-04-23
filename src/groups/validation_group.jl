@@ -7,6 +7,7 @@ array_point(p) = ValidationMPoint(p)
 array_point(p::ValidationMPoint) = p
 
 function adjoint_action(M::ValidationManifold, p, X; kwargs...)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     is_point(M, p; error=M.mode, kwargs...)
     eM = Identity(M.manifold)
     is_vector(M, eM, X; error=M.mode, kwargs...)
@@ -18,6 +19,7 @@ function adjoint_action(M::ValidationManifold, p, X; kwargs...)
 end
 
 function adjoint_action!(M::ValidationManifold, Y, p, X; kwargs...)
+    _lie_groups_depwarn_move(adjoint_action, :adjoint)
     is_point(M, p; error=M.mode, kwargs...)
     eM = Identity(M.manifold)
     is_vector(M, eM, X; error=M.mode, kwargs...)
@@ -28,10 +30,12 @@ end
 
 Identity(M::ValidationManifold) = array_point(Identity(M.manifold))
 function identity_element!(M::ValidationManifold, p)
+    _lie_groups_depwarn_move(identity_element!)
     return identity_element!(M.manifold, internal_value(p))
 end
 
 function Base.inv(M::ValidationManifold, p; kwargs...)
+    _lie_groups_depwarn_move(inv)
     is_point(M, p; error=M.mode, kwargs...)
     q = array_point(inv(M.manifold, internal_value(p)))
     is_point(M, q; error=M.mode, kwargs...)
@@ -39,6 +43,7 @@ function Base.inv(M::ValidationManifold, p; kwargs...)
 end
 
 function inv!(M::ValidationManifold, q, p; kwargs...)
+    _lie_groups_depwarn_move(inv!)
     is_point(M, p; error=M.mode, kwargs...)
     inv!(M.manifold, internal_value(q), internal_value(p))
     is_point(M, q; error=M.mode, kwargs...)
@@ -46,6 +51,7 @@ function inv!(M::ValidationManifold, q, p; kwargs...)
 end
 
 function lie_bracket(M::ValidationManifold, X, Y)
+    _lie_groups_depwarn_move(lie_bracket)
     eM = Identity(M.manifold)
     is_vector(M, eM, X; error=M.mode)
     is_vector(M, eM, Y; error=M.mode)
@@ -57,6 +63,7 @@ function lie_bracket(M::ValidationManifold, X, Y)
 end
 
 function lie_bracket!(M::ValidationManifold, Z, X, Y)
+    _lie_groups_depwarn_move(lie_bracket!)
     eM = Identity(M.manifold)
     is_vector(M, eM, X; error=M.mode)
     is_vector(M, eM, Y; error=M.mode)
@@ -66,6 +73,7 @@ function lie_bracket!(M::ValidationManifold, Z, X, Y)
 end
 
 function compose(M::ValidationManifold, p, q; kwargs...)
+    _lie_groups_depwarn_move(compose)
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     x = array_point(compose(M.manifold, internal_value(p), internal_value(q)))
@@ -73,6 +81,7 @@ function compose(M::ValidationManifold, p, q; kwargs...)
     return x
 end
 function compose(M::ValidationManifold, p::Identity, q; kwargs...)
+    _lie_groups_depwarn_move(compose)
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     x = array_point(compose(M.manifold, p, internal_value(q)))
@@ -80,6 +89,7 @@ function compose(M::ValidationManifold, p::Identity, q; kwargs...)
     return x
 end
 function compose(M::ValidationManifold, p, q::Identity; kwargs...)
+    _lie_groups_depwarn_move(compose)
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     x = array_point(compose(M.manifold, internal_value(p), q))
@@ -88,6 +98,7 @@ function compose(M::ValidationManifold, p, q::Identity; kwargs...)
 end
 
 function compose!(M::ValidationManifold, x, p, q; kwargs...)
+    _lie_groups_depwarn_move(compose!)
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     compose!(M.manifold, internal_value(x), internal_value(p), internal_value(q))
@@ -96,6 +107,7 @@ function compose!(M::ValidationManifold, x, p, q; kwargs...)
 end
 
 function compose!(M::ValidationManifold, x, p::Identity, q; kwargs...)
+    _lie_groups_depwarn_move(compose!)
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     compose!(M.manifold, internal_value(x), internal_value(p), internal_value(q))
@@ -103,6 +115,7 @@ function compose!(M::ValidationManifold, x, p::Identity, q; kwargs...)
     return x
 end
 function compose!(M::ValidationManifold, x, p, q::Identity; kwargs...)
+    _lie_groups_depwarn_move(compose!)
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     compose!(M.manifold, internal_value(x), internal_value(p), internal_value(q))
@@ -111,6 +124,7 @@ function compose!(M::ValidationManifold, x, p, q::Identity; kwargs...)
 end
 
 function translate(M::ValidationManifold, p, q, conv::ActionDirectionAndSide; kwargs...)
+    _lie_groups_depwarn_move(translate, :compose)
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     x = array_point(translate(M.manifold, internal_value(p), internal_value(q), conv))
@@ -119,6 +133,7 @@ function translate(M::ValidationManifold, p, q, conv::ActionDirectionAndSide; kw
 end
 
 function translate!(M::ValidationManifold, x, p, q, conv::ActionDirectionAndSide; kwargs...)
+    _lie_groups_depwarn_move(translate!, :compose!)
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     translate!(M.manifold, internal_value(x), internal_value(p), internal_value(q), conv)
@@ -133,6 +148,7 @@ function inverse_translate(
     conv::ActionDirectionAndSide;
     kwargs...,
 )
+    _lie_groups_depwarn_move(inverse_translate, :compose, "Use together with `inv`")
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     x = array_point(
@@ -150,6 +166,7 @@ function inverse_translate!(
     conv::ActionDirectionAndSide;
     kwargs...,
 )
+    _lie_groups_depwarn_move(inverse_translate!, :compose!, "Use together with `inv!`")
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     inverse_translate!(
@@ -171,6 +188,11 @@ function translate_diff(
     conv::ActionDirectionAndSide;
     kwargs...,
 )
+    _lie_groups_depwarn_move(
+        translate_diff,
+        :diff_compose,
+        "Careful to use the right “side” `diff_left_compose` or `diff_right_compose`",
+    )
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     is_vector(M, q, X; error=M.mode, kwargs...)
@@ -197,6 +219,11 @@ function translate_diff!(
     conv::ActionDirectionAndSide;
     kwargs...,
 )
+    _lie_groups_depwarn_move(
+        translate_diff!,
+        :diff_compose!,
+        "Careful to use the right “side” `diff_left_compose` or `diff_right_compose`",
+    )
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     is_vector(M, q, X; error=M.mode, kwargs...)
@@ -221,6 +248,11 @@ function inverse_translate_diff(
     conv::ActionDirectionAndSide;
     kwargs...,
 )
+    _lie_groups_depwarn_move(
+        inverse_translate_diff,
+        :diff_compose,
+        "Careful to use the right “side” `diff_left_compose` or `diff_right_compose` together with `inv`",
+    )
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     is_vector(M, q, X; error=M.mode, kwargs...)
@@ -247,6 +279,11 @@ function inverse_translate_diff!(
     conv::ActionDirectionAndSide;
     kwargs...,
 )
+    _lie_groups_depwarn_move(
+        inverse_translate_diff!,
+        :diff_compose!,
+        "Careful to use the right “side” `diff_left_compose` or `diff_right_compose` together with `inv!`",
+    )
     is_point(M, p; error=M.mode, kwargs...)
     is_point(M, q; error=M.mode, kwargs...)
     is_vector(M, q, X; error=M.mode, kwargs...)
@@ -264,6 +301,7 @@ function inverse_translate_diff!(
 end
 
 function exp_lie(M::ValidationManifold, X; kwargs...)
+    _lie_groups_depwarn_move(exp_lie, :exp)
     is_vector(M, Identity(M.manifold), internal_value(X); error=M.mode, kwargs...)
     q = array_point(exp_lie(M.manifold, internal_value(X)))
     is_point(M, q; error=M.mode, kwargs...)
@@ -271,6 +309,7 @@ function exp_lie(M::ValidationManifold, X; kwargs...)
 end
 
 function exp_lie!(M::ValidationManifold, q, X; kwargs...)
+    _lie_groups_depwarn_move(exp_lie!, :exp!)
     is_vector(M, Identity(M.manifold), internal_value(X); error=M.mode, kwargs...)
     exp_lie!(M.manifold, internal_value(q), internal_value(X))
     is_point(M, q; error=M.mode, kwargs...)
@@ -278,6 +317,7 @@ function exp_lie!(M::ValidationManifold, q, X; kwargs...)
 end
 
 function log_lie(M::ValidationManifold, q; kwargs...)
+    _lie_groups_depwarn_move(log_lie, :log)
     is_point(M, q; error=M.mode, kwargs...)
     X = ValidationTangentVector(log_lie(M.manifold, internal_value(q)))
     is_vector(M, Identity(M.manifold), internal_value(X); error=M.mode, kwargs...)
@@ -285,6 +325,7 @@ function log_lie(M::ValidationManifold, q; kwargs...)
 end
 
 function log_lie!(M::ValidationManifold, X, q; kwargs...)
+    _lie_groups_depwarn_move(log_lie!, :log!)
     is_point(M, q; error=M.mode, kwargs...)
     log_lie!(M.manifold, internal_value(X), internal_value(q))
     is_vector(M, Identity(M.manifold), internal_value(X); error=M.mode, kwargs...)
