@@ -20,7 +20,7 @@ release here, since we do not have a very good reason to yet.
 
 ### Changed
 
-* Added all `[compat]` entries also for the `dpcs/` and `tutorials/` environments
+* Added all `[compat]` entries also for the `docs/` and `tutorials/` environments
 * `get_vector` on `Circle` no longer returns `SArray` when no static arrays are passed as arguments.
 
 ### Fixed
