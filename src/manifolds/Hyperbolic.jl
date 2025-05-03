@@ -87,7 +87,7 @@ end
 In the Poincaré ball model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` tangent vectors are represented
 as vectors in ``ℝ^{n}``.
 """
-struct PoincareBallTangentVector{TValue<:AbstractVector} <: AbstractManifoldPoint
+struct PoincareBallTangentVector{TValue<:AbstractVector} <: AbstractTangentVector
     value::TValue
 end
 
