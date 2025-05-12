@@ -21,7 +21,7 @@ the tangent space of a corresponding point from the [`Stiefel`](@ref) manifold,
 see [`StiefelPoint`](@ref).
 This is the default representation so is can be used interchangeably with just abstract matrices.
 """
-struct StiefelTangentVector{T<:AbstractMatrix} <: AbstractManifoldPoint
+struct StiefelTangentVector{T<:AbstractMatrix} <: AbstractTangentVector
     value::T
 end
 

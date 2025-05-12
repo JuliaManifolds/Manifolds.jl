@@ -693,11 +693,13 @@ export Euclidean,
     UnitaryMatrices
 # Point representation types
 export HyperboloidPoint,
+    OrthogonalPoint,
     PoincareBallPoint,
     PoincareHalfSpacePoint,
+    StiefelFactorization,
+    StiefelPoint,
     SVDMPoint,
     TuckerPoint,
-    StiefelPoint,
     ProjectorPoint,
     SPDPoint
 # Tangent vector representation types
