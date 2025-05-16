@@ -27,8 +27,9 @@ Of course all further [contributions](CONTRIBUTING.md) are always welcome!
 
 ## Projects using `Manifolds.jl`
 
-- [Caesar.jl](https://juliarobotics.org/Caesar.jl/latest/concepts/using_manifolds/)
-- [ManoptExamples.jl](https://github.com/JuliaManifolds/ManoptExamples.jl) collecting examples of optimization problems on manifolds implemented using `Manifolds.jl` and [`Manopt.jl`](https://manoptjl.org).
+- [Caesar.jl](https://juliarobotics.org/Caesar.jl/latest/concepts/using_manifolds/) – Robust robotic localization and mapping
+- [Flowfusion.jl](https://github.com/MurrellGroup/Flowfusion.jl) – training and sampling from diffusion and flow matching models
+- [ManoptExamples.jl](https://github.com/JuliaManifolds/ManoptExamples.jl) – collecting examples of optimization problems on manifolds implemented using `Manifolds.jl` and [`Manopt.jl`](https://manoptjl.org).
 
 Do you use Manifolds.jl in you package? Let us know and open an [issue](https://github.com/JuliaManifolds/Manifolds.jl/issues/new/choose) or [pull request](https://github.com/JuliaManifolds/Manifolds.jl/compare) to add it to the list!
 
