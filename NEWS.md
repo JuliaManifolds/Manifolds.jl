@@ -5,16 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.18] unreleasd
+## [0.10.18] 2025-05-29
 
 ### Fixed
 
 * Fix the supertype of `PoincareBallTangentVector` to be `AbstractTangentVector`
 * Fix the supertype of `StiefelTangentVector` to be `AbstractTangentVector`
-* Fix `riemannian_gradient` for fixed rank matrices,
-  which did not work due to a small but in the default fallback and a missing metric specification.
+* Fix `riemannian_gradient` for fixed rank matrices, which did not work due to a small bug in the default fallback and a missing metric specification.
 
-## [0.10.17] - 2025-04-21
+## [0.10.17] 2025-04-21
 
 ### Changed
 
