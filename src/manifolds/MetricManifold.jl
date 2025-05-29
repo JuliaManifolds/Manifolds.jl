@@ -116,7 +116,7 @@ function change_representer!(
 end
 # Default fallback II: compute in local metric representations
 function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
-    M.metric === G && return copyto!(M, Y, p, X) # no metric change
+    is_default_metric(M, G) && return copyto!(M, Y, p, X) # no metric change
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
     B = DefaultOrthogonalBasis()
     G1 = local_metric(M, p, B)
