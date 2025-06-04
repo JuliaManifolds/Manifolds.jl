@@ -1,4 +1,4 @@
-@dpc raw"""
+@doc raw"""
     HermitianPositiveDefinite{𝔽,T} <: AbstractDecoratorManifold{𝔽}
 
 The manifold of hermitian positive definite matrices, i.e.
