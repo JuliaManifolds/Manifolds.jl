@@ -29,7 +29,7 @@ generates the manifold ``\mathcal P(n) \subset ℝ^{n×n}``
 struct HermitianPositiveDefinite{𝔽,T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
-function HermitianPositiveDefinite(n,𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
+function HermitianPositiveDefinite(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, n)
     return HermitianPositiveDefinite{field,typeof(size)}(size)
 end
