@@ -14,10 +14,10 @@ where ``𝔽 ∈ \{ℝ, ℂ\}``,
 The tangent space at a point ``p ∈ \mathcal M`` is given by
 
 ````math
-T_p \mathcal M = \{ X ∈ 𝔽^{n×k} : p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0_k\},
+T_p \mathcal M = \{ X ∈ 𝔽^{n×k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k\},
 ````
 
-where ``0_k`` is the ``k×k`` zero matrix and ``\overline{⋅}`` the (elementwise) complex conjugate.
+where ``0_k`` is the ``k×k`` zero matrix.
 
 This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
@@ -99,8 +99,7 @@ end
 
 Checks whether `X` is a valid tangent vector at `p` on the [`Stiefel`](@ref)
 `M`=``\operatorname{St}(n,k)``, i.e. the [`AbstractNumbers`](@extref ManifoldsBase number-system) fits and
-it (approximately) holds that ``p^{\mathrm{H}}X + \overline{X^{\mathrm{H}}p} = 0``,
-where ``⋅^{\mathrm{H}}`` denotes the Hermitian and ``\overline{⋅}`` the (elementwise) complex conjugate.
+it (approximately) holds that ``p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0``.
 The settings for approximately can be set with `kwargs...`.
 """
 function check_vector(M::Stiefel, p, X; kwargs...)
