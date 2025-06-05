@@ -139,7 +139,7 @@ function check_point(M::SymmetricPositiveDefinite, p; kwargs...)
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
             norm(p - transpose(p)),
-            "The point $(p) does not lie on $(M) since its not a symmetric matrix:",
+            "The point $(p) does not lie on $(M) since its not a symmetric matrix.",
         )
     end
     if !isposdef(p)
