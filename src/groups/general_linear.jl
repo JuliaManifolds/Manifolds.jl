@@ -72,9 +72,11 @@ tangent space which is done by ``Y = pX``.
 This can be done in-place of `Y`.
 """
 
-@doc _docs_embed_GL embed(::GeneralLinear, p, X) = p * X
+@doc "$(_docs_embed_GL)"
+embed(::GeneralLinear, p, X) = p * X
 
-@doc _docs_embed_GL embed!(::GeneralLinear, Y, p, X) = copyto!(Y, p * X)
+@doc "$(_docs_embed_GL)"
+embed!(::GeneralLinear, Y, p, X) = copyto!(Y, p * X)
 
 @doc raw"""
     exp(G::GeneralLinear, p, X)
@@ -272,8 +274,11 @@ identity operation here, tangent vectors on [`GeneralLinear`](@ref) are represen
 Lie Algebra, such that this projection has to solve ``pY = X``.
 """
 
-@doc _docs_project_GL project(::GeneralLinear, p, X) = p \ X
-@doc _docs_project_GL project!(::GeneralLinear, Y, p, X) = copyto!(Y, p \ X)
+@doc "$(_docs_project_GL)"
+project(::GeneralLinear, p, X) = p \ X
+
+@doc "$(_docs_project_GL)"
+project!(::GeneralLinear, Y, p, X) = copyto!(Y, p \ X)
 
 @doc raw"""
     Random.rand(G::GeneralLinear; vector_at=nothing, kwargs...)
