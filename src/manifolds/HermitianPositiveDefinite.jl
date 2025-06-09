@@ -65,16 +65,14 @@ end
     check_vector(M::HermitianPositiveDefinite, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`HermitianPositiveDefinite`](@ref) `M`,
-i.e. after [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
-and a symmetric matrix, i.e. this stores tangent vectors as elements of the corresponding
-Lie group.
+i.e. a symmetric matrix.
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_vector(M::SymmetricPositiveDefinite, p, X; kwargs...)
+function check_vector(M::HermitianPositiveDefinite, p, X; kwargs...)
     if !isapprox(X, X'; kwargs...)
         return DomainError(
             X,
-            "The vector $(X) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not symmetric.",
+            "The vector $(X) is not a tangent to a point on $(M) (represented as an element of the Lie algebra) since its not hermitian.",
         )
     end
     return nothing
