@@ -58,7 +58,23 @@ end
 distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
 
 embed(::GeneralLinear, p) = p
-embed(::GeneralLinear, p, X) = X
+embed!(::GeneralLinear, q, p) = copyto!(q, p)
+
+_docs_embed_GL = raw"""
+    embed(G::GeneralLinear, p, X)
+    embed!(G::GeneralLinear, Y, p, X)
+
+Embedding a tangent vector `X` at `p` would usually be the identity,
+but on [`GeneralLinear`](@ref) the tangent vectors are represented in the Lie algebra,
+hence embedding this tangent vector means we have to transport it back to the right
+tangent space which is done by ``Y = pX``.
+
+This can be done in-place of `Y`.
+"""
+
+@doc _docs_embed_GL embed(::GeneralLinear, p, X) = p * X
+
+@doc _docs_embed_GL embed!(::GeneralLinear, Y, p, X) = copyto!(Y, p * X)
 
 @doc raw"""
     exp(G::GeneralLinear, p, X)
@@ -244,10 +260,20 @@ parallel_transport_to(::GeneralLinear, p, X, q) = X
 parallel_transport_to!(::GeneralLinear, Y, p, X, q) = copyto!(Y, X)
 
 project(::GeneralLinear, p) = p
-project(::GeneralLinear, p, X) = X
-
 project!(::GeneralLinear, q, p) = copyto!(q, p)
-project!(::GeneralLinear, Y, p, X) = copyto!(Y, X)
+
+_docs_project_GL = raw"""
+    project(G::GeneralLinear, p, X)
+    project!(G::GeneralLinear, Y, p, X)
+
+Project a tangent vector `X` from the embedding, that is the space of ``n×n`` matrices.
+While the tangent space at every point of the [`GeneralLinear`](@ref) would yield the
+identity operation here, tangent vectors on [`GeneralLinear`](@ref) are represented in the
+Lie Algebra, such that this projection has to solve ``pY = X``.
+"""
+
+@doc _docs_project_GL project(::GeneralLinear, p, X) = p \ X
+@doc _docs_project_GL project!(::GeneralLinear, Y, p, X) = copyto!(Y, p \ X)
 
 @doc raw"""
     Random.rand(G::GeneralLinear; vector_at=nothing, kwargs...)
