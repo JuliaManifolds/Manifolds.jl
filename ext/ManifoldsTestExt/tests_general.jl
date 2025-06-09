@@ -603,7 +603,7 @@ function test_manifold(
                 end
                 # check projection idempotency
                 for i in 1:N
-                    Test.@test isapprox(M, p, project(M, p, bvectors[i]), p \ bvectors[i])
+                    Test.@test isapprox(M, p, project(M, p, bvectors[i]), bvectors[i])
                 end
             end
             if !isa(btype, ProjectedOrthonormalBasis) && (
