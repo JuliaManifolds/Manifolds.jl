@@ -38,6 +38,8 @@ that lie on it (contained in `pts`).
 - `is_mutating = true`: whether mutating variants of functions should be tested.
 - `is_point_atol_multiplier = 0`: determines atol of `is_point` checks.
 - `is_tangent_atol_multiplier = 0`: determines atol of `is_vector` checks.
+- `has_get_embedding = false`: whether the manifold has a specialized
+    [`get_embedding`](@ref)`(M, p)` method (to test mutating `embed!`). This is experimental.
 - `mid_point12 = test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing`: if not `nothing`, then check
     that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`. This is
     by default set to `nothing` if `text_exp_log` is set to false.
@@ -105,6 +107,7 @@ function test_manifold(
     test_is_tangent=true,
     test_injectivity_radius=true,
     test_inplace=false,
+    has_get_embedding=false,
     test_musical_isomorphisms=false,
     test_mutating_rand=false,
     parallel_transport=false,
@@ -456,6 +459,12 @@ function test_manifold(
         for (p, X) in zip(pts, tv)
             atol = find_eps(p) * projection_atol_multiplier
             X_emb = embed(M, p, X)
+            p_emb = embed(M, p)
+            if is_mutating && has_get_embedding
+                X2_emb = allocate(X_emb)
+                embed!(M, X2_emb, p, X)
+                Test.@test isapprox(get_embedding(M,p), p_emb, X_emb, X2_emb)
+            end
             Test.@test isapprox(M, p, X, project(M, p, X_emb); atol=atol)
             if is_mutating
                 X2 = allocate(X)
@@ -471,6 +480,11 @@ function test_manifold(
         for p in pts
             atol = find_eps(p) * projection_atol_multiplier
             p_emb = embed(M, p)
+            if is_mutating && has_get_embedding
+                p2_emb = allocate(p_emb)
+                embed!(M, p2_emb, p)
+                Test.@test isapprox(get_embedding(M,p), p_emb, p2_emb)
+            end
             Test.@test isapprox(M, p, project(M, p_emb); atol=atol)
             if is_mutating
                 p2 = allocate(p)
