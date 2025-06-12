@@ -334,7 +334,7 @@ This can be computed in-place of `Y`.
 """
 
 @doc "$(_doc_riemannian_gradient_GLn)"
-riemannian_gradient(G::GeneralLinear, p, X)
+riemannian_gradient(::GeneralLinear, p, X) = p'*X
 
 function riemannian_gradient!(::GeneralLinear, Y, p, X)
     Y .= p' * X
