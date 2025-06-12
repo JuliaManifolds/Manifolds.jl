@@ -300,6 +300,47 @@ function Random.rand!(rng::AbstractRNG, G::GeneralLinear, pX; kwargs...)
     return pX
 end
 
+_doc_riemannian_gradient_GLn = raw"""
+    riemannian_gradient(G::GeneralLinear, p, X)
+    riemannian_gradient!(G::GeneralLinear, Y, p, X)
+
+Let ``f: 𝔽^{n × n} → ℝ`` be a function in the embedding, ``p ∈ \mathrm{GL}(n, 𝔽)``
+and denote by ``X = \operatorname{grad} f(p)`` its Euclidean gradient.
+
+Then, any ``Z ∈ T_p \mathrm{GL}(n, 𝔽)`` has two representations, namely as ``X``
+in the Lie algebra as a tangent vector for the Lie group and as ``pZ`` in the
+embedding.
+
+When we now look for the Riemannian gradient ``Y`` if ``f`` at ``p`` we need that for any
+``Z ∈ T_p \mathrm{GL}(n, 𝔽)`` it holds
+
+```math
+⟨X, pZ⟩ = Df(p)[pZ] = g_p(Y, Z),
+```
+
+where we have to use ``pX`` whenever we are in the embedding and where ``g_p`` denotes
+the left-invariant metric on General linear interpreted on the Lie algebra.
+
+Both metrics have the formula of the Frobenius inner product for matrices, so we obtain
+
+```math
+⟨X, pZ⟩ = \operatorname{tr}(X^\mathrm{H} pZ)
+  = \operatorname{tr}\bigl( (p^{\mathrm{H}}X)^\mathrm{H} Z)
+  = g_p\bigl( p^{\mathrm{H}}X, Z \bigr).
+```
+
+Hence the Riemannian gradient is given by ``Y = p^{\mathrm{H}}X``.
+This can be computed in-place of `Y`.
+"""
+
+@doc "$(_doc_riemannian_gradient_GLn)"
+riemannian_gradient(G::GeneralLinear, p, X)
+
+function riemannian_gradient!(::GeneralLinear, Y, p, X)
+    Y .= p' * X
+    return Y
+end
+
 function Base.show(io::IO, ::GeneralLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
     return print(io, "GeneralLinear($n, $(𝔽))")
 end

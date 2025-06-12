@@ -122,6 +122,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
+                has_get_embedding=true,
                 test_default_vector_transport=true,
                 vector_transport_methods=[
                     ParallelTransport(),
