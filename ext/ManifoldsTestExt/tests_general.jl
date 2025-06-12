@@ -463,7 +463,7 @@ function test_manifold(
             if is_mutating && has_get_embedding
                 X2_emb = allocate(X_emb)
                 embed!(M, X2_emb, p, X)
-                Test.@test isapprox(get_embedding(M,p), p_emb, X_emb, X2_emb)
+                Test.@test isapprox(get_embedding(M, p), p_emb, X_emb, X2_emb)
             end
             Test.@test isapprox(M, p, X, project(M, p, X_emb); atol=atol)
             if is_mutating
@@ -483,7 +483,7 @@ function test_manifold(
             if is_mutating && has_get_embedding
                 p2_emb = allocate(p_emb)
                 embed!(M, p2_emb, p)
-                Test.@test isapprox(get_embedding(M,p), p_emb, p2_emb)
+                Test.@test isapprox(get_embedding(M, p), p_emb, p2_emb)
             end
             Test.@test isapprox(M, p, project(M, p_emb); atol=atol)
             if is_mutating

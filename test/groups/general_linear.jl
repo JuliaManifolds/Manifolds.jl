@@ -215,9 +215,9 @@ using Manifolds: LeftForwardAction, RightBackwardAction
         G = GeneralLinear(3)
         p = [1.0 1.0 0.0; 0.0 2.0 0.0; 0.0 0.0 3.0]
         X = [1.0 1.0 0.0; 0.0 0.0 1.0; 1.0 0.0 0.0]
-        Yt = p'*X
+        Yt = p' * X
         Ya = riemannian_gradient(G, p, X)
-        Yi = zeros(3,3)
+        Yi = zeros(3, 3)
         riemannian_gradient!(G, Yi, p, X)
         @test isapprox(Ya, Yt)
         @test isapprox(Yi, Yt)

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.19] unreleased
 
+### Added
+
+* a first idea of a `riemannian_gradient` for the `GeneralLinear` manifold
+
 ### Fixed
 
 * Fix the projection and embedding of tangent vectors on `GeneralLinear`.
