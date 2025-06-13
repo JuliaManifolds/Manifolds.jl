@@ -58,7 +58,25 @@ end
 distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
 
 embed(::GeneralLinear, p) = p
-embed(::GeneralLinear, p, X) = X
+embed!(::GeneralLinear, q, p) = copyto!(q, p)
+
+_docs_embed_GL = raw"""
+    embed(G::GeneralLinear, p, X)
+    embed!(G::GeneralLinear, Y, p, X)
+
+Embedding a tangent vector `X` at `p` would usually be the identity,
+but on [`GeneralLinear`](@ref) the tangent vectors are represented in the Lie algebra,
+hence embedding this tangent vector means we have to transport it back to the right
+tangent space which is done by ``Y = pX``.
+
+This can be done in-place of `Y`.
+"""
+
+@doc "$(_docs_embed_GL)"
+embed(::GeneralLinear, p, X) = p * X
+
+@doc "$(_docs_embed_GL)"
+embed!(::GeneralLinear, Y, p, X) = copyto!(Y, p * X)
 
 @doc raw"""
     exp(G::GeneralLinear, p, X)
@@ -244,10 +262,23 @@ parallel_transport_to(::GeneralLinear, p, X, q) = X
 parallel_transport_to!(::GeneralLinear, Y, p, X, q) = copyto!(Y, X)
 
 project(::GeneralLinear, p) = p
-project(::GeneralLinear, p, X) = X
-
 project!(::GeneralLinear, q, p) = copyto!(q, p)
-project!(::GeneralLinear, Y, p, X) = copyto!(Y, X)
+
+_docs_project_GL = raw"""
+    project(G::GeneralLinear, p, X)
+    project!(G::GeneralLinear, Y, p, X)
+
+Project a tangent vector `X` from the embedding, that is the space of ``n×n`` matrices.
+While the tangent space at every point of the [`GeneralLinear`](@ref) would yield the
+identity operation here, tangent vectors on [`GeneralLinear`](@ref) are represented in the
+Lie Algebra, such that this projection has to solve ``pY = X``.
+"""
+
+@doc "$(_docs_project_GL)"
+project(::GeneralLinear, p, X) = p \ X
+
+@doc "$(_docs_project_GL)"
+project!(::GeneralLinear, Y, p, X) = copyto!(Y, p \ X)
 
 @doc raw"""
     Random.rand(G::GeneralLinear; vector_at=nothing, kwargs...)
@@ -267,6 +298,47 @@ end
 function Random.rand!(rng::AbstractRNG, G::GeneralLinear, pX; kwargs...)
     rand!(rng, get_embedding(G), pX; kwargs...)
     return pX
+end
+
+_doc_riemannian_gradient_GLn = raw"""
+    riemannian_gradient(G::GeneralLinear, p, X)
+    riemannian_gradient!(G::GeneralLinear, Y, p, X)
+
+Let ``f: 𝔽^{n × n} → ℝ`` be a function in the embedding, ``p ∈ \mathrm{GL}(n, 𝔽)``
+and denote by ``X = \operatorname{grad} f(p)`` its Euclidean gradient.
+
+Then, any ``Z ∈ T_p \mathrm{GL}(n, 𝔽)`` has two representations, namely as ``X``
+in the Lie algebra as a tangent vector for the Lie group and as ``pZ`` in the
+embedding.
+
+When we now look for the Riemannian gradient ``Y`` if ``f`` at ``p`` we need that for any
+``Z ∈ T_p \mathrm{GL}(n, 𝔽)`` it holds
+
+```math
+⟨X, pZ⟩ = Df(p)[pZ] = g_p(Y, Z),
+```
+
+where we have to use ``pX`` whenever we are in the embedding and where ``g_p`` denotes
+the left-invariant metric on General linear interpreted on the Lie algebra.
+
+Both metrics have the formula of the Frobenius inner product for matrices, so we obtain
+
+```math
+⟨X, pZ⟩ = \operatorname{tr}(X^\mathrm{H} pZ)
+  = \operatorname{tr}\bigl( (p^{\mathrm{H}}X)^\mathrm{H} Z)
+  = g_p\bigl( p^{\mathrm{H}}X, Z \bigr).
+```
+
+Hence the Riemannian gradient is given by ``Y = p^{\mathrm{H}}X``.
+This can be computed in-place of `Y`.
+"""
+
+@doc "$(_doc_riemannian_gradient_GLn)"
+riemannian_gradient(::GeneralLinear, p, X) = p' * X
+
+function riemannian_gradient!(::GeneralLinear, Y, p, X)
+    Y .= p' * X
+    return Y
 end
 
 function Base.show(io::IO, ::GeneralLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}

@@ -9,7 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* `riemannian_gradient` for the `GeneralLinear` manifold
 * `riemannian_gradient` method for `ProductManifold`.
+
+### Fixed
+
+* Fix the projection and embedding of tangent vectors on `GeneralLinear`.
 
 ## [0.10.18] 2025-05-29
 
