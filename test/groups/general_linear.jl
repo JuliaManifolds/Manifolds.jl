@@ -122,6 +122,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
                 test_injectivity_radius=false,
                 test_project_tangent=true,
                 test_musical_isomorphisms=true,
+                has_get_embedding=true,
                 test_default_vector_transport=true,
                 vector_transport_methods=[
                     ParallelTransport(),
@@ -208,5 +209,17 @@ using Manifolds: LeftForwardAction, RightBackwardAction
         G = GeneralLinear(3; parameter=:field)
         @test typeof(get_embedding(G)) === Euclidean{Tuple{Int,Int},ℝ}
         @test repr(G) == "GeneralLinear(3, ℝ; parameter=:field)"
+    end
+
+    @testset "Gradient conversion" begin
+        G = GeneralLinear(3)
+        p = [1.0 1.0 0.0; 0.0 2.0 0.0; 0.0 0.0 3.0]
+        X = [1.0 1.0 0.0; 0.0 0.0 1.0; 1.0 0.0 0.0]
+        Yt = p' * X
+        Ya = riemannian_gradient(G, p, X)
+        Yi = zeros(3, 3)
+        riemannian_gradient!(G, Yi, p, X)
+        @test isapprox(Ya, Yt)
+        @test isapprox(Yi, Yt)
     end
 end

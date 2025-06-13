@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.19] unreleased
+
+### Added
+
+* a first idea of a `riemannian_gradient` for the `GeneralLinear` manifold
+
+### Fixed
+
+* Fix the projection and embedding of tangent vectors on `GeneralLinear`.
+
 ## [0.10.18] 2025-05-29
 
 ### Fixed
