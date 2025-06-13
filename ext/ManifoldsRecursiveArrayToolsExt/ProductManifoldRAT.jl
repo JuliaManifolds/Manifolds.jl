@@ -40,3 +40,14 @@ function jacobi_field(
         )...,
     )
 end
+
+function riemannian_gradient(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
+    return ArrayPartition(
+        map(
+            riemannian_gradient,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        ),
+    )
+end
