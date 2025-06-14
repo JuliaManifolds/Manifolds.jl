@@ -139,7 +139,7 @@ function check_point(M::SymmetricPositiveDefinite, p; kwargs...)
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
             norm(p - transpose(p)),
-            "The point $(p) does not lie on $(M) since its not a symmetric matrix:",
+            "The point $(p) does not lie on $(M) since its not a symmetric matrix.",
         )
     end
     if !isposdef(p)
@@ -158,7 +158,7 @@ end
     check_vector(M::SymmetricPositiveDefinite, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to `p` on the [`SymmetricPositiveDefinite`](@ref) `M`,
-i.e. atfer [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
+i.e. after [`check_point`](@ref)`(M,p)`, `X` has to be of same dimension as `p`
 and a symmetric matrix, i.e. this stores tangent vectors as elements of the corresponding
 Lie group.
 The tolerance for the last test can be set using the `kwargs...`.
