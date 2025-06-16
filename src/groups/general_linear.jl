@@ -105,8 +105,9 @@ function exp!(G::GeneralLinear, q, p, X)
     if isnormal(X; atol=sqrt(eps(real(eltype(X)))))
         return compose!(G, q, p, expX)
     end
-    compose!(G, q, expX', exp(X - X'))
-    compose!(G, q, p, q)
+    # allocates a bit because `q` and `p` might alias
+    Z = p * expX'
+    mul!(q, Z, exp(X - X'))
     return q
 end
 function exp_fused!(G::GeneralLinear, q, p, X, t::Number)
