@@ -118,6 +118,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
             test_manifold(
                 G,
                 gpts;
+                test_inplace=true,
                 test_project_point=true,
                 test_injectivity_radius=false,
                 test_project_tangent=true,
