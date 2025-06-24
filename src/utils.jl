@@ -7,7 +7,7 @@ This is equivalent to `sinc(θ/π)`.
 
 Note that ForwardDiff.jl would return wrong answer at θ=0 if a simple equality was used.
 """
-@inline usinc(θ::Real) = abs(θ) < eps(typeof(0)) ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
+@inline usinc(θ::Real) = abs(θ) < eps(typeof(θ)) ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
 
 @doc raw"""
     usinc_from_cos(x::Real)
