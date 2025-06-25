@@ -35,10 +35,12 @@ Compute a modified `sign(z)` that is always nonzero, i.e. where
     \frac{z}{|z|} & \text{otherwise}
 \end{cases}
 ````
+
+Note that the condition `absz == 0` would be incorrectly handled by ForwardDiff.jl.
 """
 @inline function nzsign(z, absz=abs(z))
     psignz = z / absz
-    return ifelse(iszero(absz), one(psignz), psignz)
+    return ifelse(absz < eps(typeof(absz))^2, one(psignz), psignz)
 end
 
 allocate(p, s::Size{S}) where {S} = similar(p, S...)
