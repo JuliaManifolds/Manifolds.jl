@@ -200,6 +200,16 @@ end
     )
 end
 
+@testset "Riemannian Hessian" begin
+    s2 = Sphere(2)
+    q = [sqrt(2) / 2, 0, sqrt(2) / 2]
+    q2 = [0.0, 1.0, 0.0]
+
+    f1(p) = distance(s2, q2, p)^2
+
+    @test isapprox(ManifoldDiff.hessian(s2, f1, q, rb_onb_fwd_diff), [2.0 0.0; 0.0 0.0])
+end
+
 @testset "EmbeddedBackend" begin
     A = [1 0 0; 0 2 0; 0 0 3.0]
     p = 1 / sqrt(2.0) .* [1.0, 1.0, 0.0]
