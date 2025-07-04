@@ -42,7 +42,7 @@ function change_representer!(
 end
 
 @doc raw"""
-    distance(::MatricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
+    distance(::MetricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 
 Compute the distance with respect to the [`BuresWassersteinMetric`](@ref) on [`SymmetricPositiveDefinite`](@ref) matrices, i.e.
 
@@ -62,7 +62,7 @@ function distance(
 end
 
 @doc raw"""
-    exp(::MatricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, p, X)
+    exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, p, X)
 
 Compute the exponential map on [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`BuresWassersteinMetric`](@ref) given by
@@ -116,7 +116,7 @@ is not a flat manifold.
 is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric}) = false
 
 @doc raw"""
-    log(::MatricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
+    log(::MetricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 
 Compute the logarithmic map on [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`BuresWassersteinMetric`](@ref) given by
