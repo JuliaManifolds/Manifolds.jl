@@ -4,8 +4,10 @@
 
 Unnormalized version of `sinc` function, i.e. ``\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}``.
 This is equivalent to `sinc(θ/π)`.
+
+Note that ForwardDiff.jl would return wrong answer at θ=0 if a simple equality was used.
 """
-@inline usinc(θ::Real) = θ == 0 ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
+@inline usinc(θ::Real) = abs(θ) < eps(typeof(θ)) ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
 
 @doc raw"""
     usinc_from_cos(x::Real)
@@ -33,10 +35,12 @@ Compute a modified `sign(z)` that is always nonzero, i.e. where
     \frac{z}{|z|} & \text{otherwise}
 \end{cases}
 ````
+
+Note that the condition `absz == 0` would be incorrectly handled by ForwardDiff.jl.
 """
 @inline function nzsign(z, absz=abs(z))
     psignz = z / absz
-    return ifelse(iszero(absz), one(psignz), psignz)
+    return ifelse(absz < eps(typeof(absz))^2, one(psignz), psignz)
 end
 
 allocate(p, s::Size{S}) where {S} = similar(p, S...)

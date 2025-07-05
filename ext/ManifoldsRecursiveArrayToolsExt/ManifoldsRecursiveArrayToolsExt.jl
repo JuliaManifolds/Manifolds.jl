@@ -50,6 +50,7 @@ import Manifolds:
     lie_bracket,
     optimal_alignment,
     project,
+    riemannian_gradient,
     translate,
     translate_diff,
     vector_representation,

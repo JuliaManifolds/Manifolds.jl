@@ -36,6 +36,8 @@ using ADTypes
 using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
+using ForwardDiff
+
 @testset "Differentiation backend" begin
     fd51 = AutoFiniteDifferences(central_fdm(5, 1))
     @testset "default_differential_backend" begin
@@ -122,6 +124,8 @@ rb_onb_default2 = TangentDiffBackend(
 
 rb_proj = Manifolds.RiemannianProjectionBackend(default_differential_backend())
 
+rb_onb_fwd_diff = TangentDiffBackend(AutoForwardDiff())
+
 @testset "Riemannian differentials" begin
     s2 = Sphere(2)
     p = [0.0, 0.0, 1.0]
@@ -134,7 +138,7 @@ rb_proj = Manifolds.RiemannianProjectionBackend(default_differential_backend())
     differential!(s2, c1, X, π / 4, rb_onb_default)
     @test isapprox(s2, c1(π / 4), X, Xval)
 
-    @testset for backend in [rb_onb_fd51]
+    @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff]
         @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4, backend), Xval)
         X = similar(p)
         differential!(s2, c1, X, π / 4, backend)
@@ -193,6 +197,20 @@ end
     @test isapprox(
         Manifolds.jacobian(Tq2s2, Tq3s2, f3, zero_vector(s2, q2), rb_onb_default),
         [-2.0 -1.0; 5.0 1.0],
+    )
+end
+
+@testset "Riemannian Hessian" begin
+    s2 = Sphere(2)
+    q = [sqrt(2) / 2, 0, sqrt(2) / 2]
+    q2 = [0.0, 1.0, 0.0]
+
+    f1(p) = distance(s2, q2, p)^2
+
+    # ManifoldDiff currently NaNs here, we should check why
+    @test_broken isapprox(
+        ManifoldDiff.hessian(s2, f1, q, rb_onb_fwd_diff),
+        [2.0 0.0; 0.0 0.0],
     )
 end
 

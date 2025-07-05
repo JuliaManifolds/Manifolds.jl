@@ -369,7 +369,33 @@ using RecursiveArrayTools: ArrayPartition
         @test X2 ==
               ArrayPartition([0.3535533905932738, -0.35355339059327373, 0.0], [1.0, 1.5])
     end
+    @testset "gradient conversion" begin
+        M = ProbabilitySimplex(3)
+        p = [
+            0.011143450837652447,
+            0.0010060921724131108,
+            0.41619787908924166,
+            0.571652577900693,
+        ]
+        X_e = [
+            0.062102217532734615,
+            0.04344131268205693,
+            0.4262317935277549,
+            -0.5317753237425427,
+        ]
+        X_r = riemannian_gradient(M, p, X_e)
 
+        N = M × M
+
+        p_2 = ArrayPartition(p, p)
+        X_e_2 = ArrayPartition(X_e, X_e)
+        X_r_2 = riemannian_gradient(N, p_2, X_e_2)
+        @test isapprox(X_r_2, ArrayPartition(X_r, X_r))
+
+        Y_r_2 = similar(X_r_2)
+        riemannian_gradient!(N, Y_r_2, p_2, X_e_2)
+        @test isapprox(Y_r_2, ArrayPartition(X_r, X_r))
+    end
     @testset "Hessian conversion" begin
         M = Sphere(2)
         N = M × M

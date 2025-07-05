@@ -53,6 +53,17 @@ Return the volume of [`ProductManifold`](@extref `ManifoldsBase.ProductManifold`
 """
 manifold_volume(M::ProductManifold) = mapreduce(manifold_volume, *, M.manifolds)
 
+function riemannian_gradient!(M::ProductManifold, Y, p, X)
+    map(
+        riemannian_gradient!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return Y
+end
+
 @doc raw"""
     Y = riemannian_Hessian(M::ProductManifold, p, G, H, X)
     riemannian_Hessian!(M::ProductManifold, Y, p, G, H, X)
