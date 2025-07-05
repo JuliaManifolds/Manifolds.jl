@@ -454,6 +454,7 @@ include("manifolds/FlagStiefel.jl")
 include("manifolds/GeneralizedGrassmann.jl")
 include("manifolds/GeneralizedStiefel.jl")
 include("manifolds/HeisenbergMatrices.jl")
+include("manifolds/HermitianPositiveDefinite.jl")
 include("manifolds/Hyperbolic.jl")
 include("manifolds/Hyperrectangle.jl")
 include("manifolds/InvertibleMatrices.jl")
@@ -654,6 +655,7 @@ export Euclidean,
     HamiltonianMatrices,
     HeisenbergGroup,
     HeisenbergMatrices,
+    HermitianPositiveDefinite,
     Hyperbolic,
     Hyperrectangle,
     InvertibleMatrices,
