@@ -25,17 +25,96 @@ i.e. the set of hermitian matrices.
 
     HermitianPositiveDefinite(n, 𝔽=ℂ; parameter::Symbol=:type)
 
-generates the manifold ``\mathcal P(n) \subset ℝ^{n×n}``
+generates the manifold of hermitian positive definite matrices ``\mathcal H(n) \subset 𝔽^{n×n}``.
 """
 struct HermitianPositiveDefinite{𝔽,T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 function HermitianPositiveDefinite(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
-    size = wrap_type_parameter(parameter, n)
-    return HermitianPositiveDefinite{field,typeof(size)}(size)
+    size = wrap_type_parameter(parameter, (n,))
+    return HermitianPositiveDefinite{𝔽,typeof(size)}(size)
 end
 
-#TODO: Also introduce a HermitianPositiveDefinitePoint type?
+@doc raw"""
+    MatrixSqrtManifoldPoint{A,P,Q,R,E} <: AbstractManifoldsPoint
+
+A point on a manifold, that is represented by a matrix ``p ∈ 𝔽^{n×n}`` over a field ``𝔽 ∈ \{ℂ,ℝ\}``,
+which can cache the computation of its Eigen values and Eigen vectors as well as
+its matrix square root and its inverse square root.
+
+This is for example the case for the [`HermitianPositiveDefinite`](@ref) manifold.
+
+# Fields
+
+* `p::P``
+* `eigen::E`
+* `sqrt::Q`
+* `sqrt_inv::R`
+
+Any of the fields `P`, `Q`, `R` cancan be set to `Missing` to indicate that
+that field should not be stored/cached. If given, they have to be of the same type as `A`.
+The result of `eigen(p)` will always be stored. The other three can be computed when required, but it might be beneficial to cache them.
+
+# Constructor
+
+    MatrixSqrtManifoldPoint(
+        p::AbstractMatrix; store_p=true, store_sqrt=true, store_sqrt_inv=true
+    )
+
+Create an `MatrixSqrtManifoldPoint` point using an matrix `p`, where you can optionally store `p`, `sqrt` and `sqrt_inv`
+"""
+struct MatrixSqrtManifoldPoint{
+    A<:AbstractMatrix,
+    P<:Union{A,Missing},
+    Q<:Union{A,Missing},
+    R<:Union{A,Missing},
+    E<:Eigen,
+} <: AbstractManifoldPoint
+    p::P
+    eigen::E
+    sqrt::Q
+    sqrt_inv::R
+end
+
+MatrixSqrtManifoldPoint(p::MatrixSqrtManifoldPoint) = p
+function MatrixSqrtManifoldPoint(
+    p::A;
+    store_p=true,
+    store_sqrt=true,
+    store_sqrt_inv=true,
+) where {A}
+    e = eigen(Symmetric(p))
+    U = e.vectors
+    S = max.(e.values, floatmin(eltype(e.values)))
+    if store_sqrt
+        s_sqrt = Diagonal(sqrt.(S))
+        p_sqrt = U * s_sqrt * transpose(U)
+    else
+        p_sqrt = missing
+    end
+    if store_sqrt_inv
+        s_sqrt_inv = Diagonal(1 ./ sqrt.(S))
+        p_sqrt_inv = U * s_sqrt_inv * transpose(U)
+    else
+        p_sqrt_inv = missing
+    end
+    if store_p
+        q = p
+    else
+        q = missing
+    end
+    return MatrixSqrtManifoldPoint{A,typeof(q),typeof(p_sqrt),typeof(p_sqrt_inv),typeof(e)}(
+        q,
+        e,
+        p_sqrt,
+        p_sqrt_inv,
+    )
+end
+convert(::Type{MatrixSqrtManifoldPoint}, p::AbstractMatrix) = MatrixSqrtManifoldPoint(p)
+
+function Base.:(==)(p::MatrixSqrtManifoldPoint, q::MatrixSqrtManifoldPoint)
+    return p.eigen == q.eigen
+end
 
 @doc raw"""
     check_point(M::HermitianPositiveDefinite, p; kwargs...)
@@ -76,4 +155,27 @@ function check_vector(M::HermitianPositiveDefinite, p, X; kwargs...)
         )
     end
     return nothing
+end
+
+# Internal function for nicer printing.
+get_parameter_type(::HermitianPositiveDefinite{𝔽,<:TypeParameter}) where {𝔽} = :type
+get_parameter_type(::HermitianPositiveDefinite{𝔽,Tuple{Int}}) where {𝔽} = :field
+
+@doc raw"""
+    representation_size(M::HermitianPositiveDefinite)
+
+Return the size of an array representing an element on the
+[`HermitianPositiveDefinite`](@ref) manifold `M`, i.e. ``n×n``, the size of such a
+hermitian positive definite matrix on ``\mathcal M = \mathcal H(n)``.
+"""
+function representation_size(M::HermitianPositiveDefinite)
+    n = get_parameter(M.size)[1]
+    return (n, n)
+end
+
+function Base.show(io::IO, M::HermitianPositiveDefinite{𝔽}) where {𝔽}
+    n = get_parameter(M.size)[1]
+    p = 𝔽 === ℂ ? "" : ", $𝔽"
+    kw = get_parameter_type(M) === :type ? "" : "; parameter=:$(get_parameter_type(M))"
+    return print(io, "HermitianPositiveDefinite($n$p$kw)")
 end

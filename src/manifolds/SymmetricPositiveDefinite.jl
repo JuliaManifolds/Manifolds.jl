@@ -476,12 +476,10 @@ function representation_size(M::SymmetricPositiveDefinite)
     return (N, N)
 end
 
-function Base.show(io::IO, ::SymmetricPositiveDefinite{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "SymmetricPositiveDefinite($(n))")
-end
-function Base.show(io::IO, M::SymmetricPositiveDefinite{Tuple{Int}})
+function Base.show(io::IO, M::SymmetricPositiveDefinite)
     n = get_parameter(M.size)[1]
-    return print(io, "SymmetricPositiveDefinite($(n); parameter=:field)")
+    kw = get_parameter_type(M) === :type ? "" : "; parameter=:$(get_parameter_type(M))"
+    return print(io, "SymmetricPositiveDefinite($n$kw)")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", p::SPDPoint)
