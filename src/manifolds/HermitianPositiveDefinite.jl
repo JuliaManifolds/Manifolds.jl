@@ -9,7 +9,7 @@ The manifold of hermitian positive definite matrices, i.e.
 p ∈ 𝔽^{n×n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ 𝔽^{n}\backslash\{0\}
 \bigr\},
 ````
-where usually ``𝔽=ℂ``. For the case ``𝔽=ℝ`` this manifold simplified to the [`SymmetricPositiveDefinite`](@ref)
+where usually ``𝔽=ℂ``. For the case ``𝔽=ℝ`` this manifold simplified to the [`HermitianPositiveDefinite`](@ref)
 
 The tangent space at ``p∈\mathcal H(n)`` reads
 
@@ -114,6 +114,33 @@ convert(::Type{MatrixSqrtManifoldPoint}, p::AbstractMatrix) = MatrixSqrtManifold
 
 function Base.:(==)(p::MatrixSqrtManifoldPoint, q::MatrixSqrtManifoldPoint)
     return p.eigen == q.eigen
+end
+
+function allocate(p::MatrixSqrtManifoldPoint)
+    return MatrixSqrtManifoldPoint(
+        ismissing(p.p) ? missing : allocate(p.p),
+        Eigen(allocate(p.eigen.values), allocate(p.eigen.vectors)),
+        ismissing(p.sqrt) ? missing : allocate(p.sqrt),
+        ismissing(p.sqrt_inv) ? missing : allocate(p.sqrt_inv),
+    )
+end
+function allocate(p::MatrixSqrtManifoldPoint, ::Type{T}) where {T}
+    return MatrixSqrtManifoldPoint(
+        ismissing(p.p) ? missing : allocate(p.p, T),
+        Eigen(allocate(p.eigen.values, T), allocate(p.eigen.vectors, T)),
+        ismissing(p.sqrt) ? missing : allocate(p.sqrt, T),
+        ismissing(p.sqrt_inv) ? missing : allocate(p.sqrt_inv, T),
+    )
+end
+
+function allocate_result(M::HermitianPositiveDefinite, ::typeof(zero_vector), p::MatrixSqrtManifoldPoint)
+    return allocate_result(M, zero_vector, convert(AbstractMatrix, p))
+end
+function allocate_coordinates(M::HermitianPositiveDefinite, p::MatrixSqrtManifoldPoint, T, n::Int)
+    return allocate_coordinates(M, convert(AbstractMatrix, p), T, n)
+end
+function allocate_result(M::HermitianPositiveDefinite, ::typeof(get_vector), p::MatrixSqrtManifoldPoint, c)
+    return allocate_result(M, get_vector, convert(AbstractMatrix, p), c)
 end
 
 @doc raw"""
