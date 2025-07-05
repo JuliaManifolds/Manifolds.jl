@@ -133,13 +133,27 @@ function allocate(p::MatrixSqrtManifoldPoint, ::Type{T}) where {T}
     )
 end
 
-function allocate_result(M::HermitianPositiveDefinite, ::typeof(zero_vector), p::MatrixSqrtManifoldPoint)
+function allocate_result(
+    M::HermitianPositiveDefinite,
+    ::typeof(zero_vector),
+    p::MatrixSqrtManifoldPoint,
+)
     return allocate_result(M, zero_vector, convert(AbstractMatrix, p))
 end
-function allocate_coordinates(M::HermitianPositiveDefinite, p::MatrixSqrtManifoldPoint, T, n::Int)
+function allocate_coordinates(
+    M::HermitianPositiveDefinite,
+    p::MatrixSqrtManifoldPoint,
+    T,
+    n::Int,
+)
     return allocate_coordinates(M, convert(AbstractMatrix, p), T, n)
 end
-function allocate_result(M::HermitianPositiveDefinite, ::typeof(get_vector), p::MatrixSqrtManifoldPoint, c)
+function allocate_result(
+    M::HermitianPositiveDefinite,
+    ::typeof(get_vector),
+    p::MatrixSqrtManifoldPoint,
+    c,
+)
     return allocate_result(M, get_vector, convert(AbstractMatrix, p), c)
 end
 
