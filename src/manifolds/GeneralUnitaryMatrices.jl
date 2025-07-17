@@ -60,7 +60,7 @@ function check_point(
     p;
     kwargs...,
 ) where {𝔽}
-    if !isapprox(abs(det(p)), 1; kwargs...)
+    if !isapprox(abs(det(p)), one(eltype(p)); kwargs...)
         return DomainError(
             abs(det(p)),
             "The absolute value of the determinant of $p has to be 1 but it is $(abs(det(p)))",
@@ -88,7 +88,7 @@ function check_point(
     p;
     kwargs...,
 ) where {𝔽}
-    if !isapprox(det(p), 1; kwargs...)
+    if !isapprox(det(p), one(eltype(p)); kwargs...)
         return DomainError(det(p), "The determinant of $p has to be +1 but it is $(det(p))")
     end
     if !isapprox(p' * p, one(p); kwargs...)
