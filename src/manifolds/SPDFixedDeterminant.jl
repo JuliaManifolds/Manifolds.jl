@@ -12,7 +12,7 @@ p ∈ ℝ^{n×n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\back
 ````
 
 This manifold is modelled as a submanifold of [`SymmetricPositiveDefinite`](@ref)`(n)`,
-see [`IsEmbeddedSubmanifold`](@ref `ManifoldsBase.IsEmbeddedSubmanifold`) for the implications,
+see [`IsEmbeddedSubmanifold`](@extref `ManifoldsBase.IsEmbeddedSubmanifold`) for the implications,
 but for example retractions and inverse retractions are all available
 
 These matrices are sometimes also called [isochoric](https://en.wiktionary.org/wiki/isochoric), which refers to the interpretation of
