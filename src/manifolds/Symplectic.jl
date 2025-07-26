@@ -40,10 +40,6 @@ end
 
 is_embedded_manifold(::SymplecticMatrices) = true
 
-function active_traits(f, ::SymplecticMatrices, args...)
-    return merge_traits(IsDefaultMetric(RealSymplecticMetric()))
-end
-
 function SymplecticMatrices(two_n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     two_n % 2 == 0 || throw(
         ArgumentError(
@@ -275,6 +271,8 @@ end
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticMatrices)
     return CayleyInverseRetraction()
 end
+
+default_metric(::SymplecticMatrices) = RealSymplecticMetric()
 
 ManifoldsBase.default_retraction_method(::SymplecticMatrices) = CayleyRetraction()
 

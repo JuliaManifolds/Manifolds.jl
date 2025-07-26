@@ -64,10 +64,6 @@ end
 
 is_embedded_manifold(::SymplecticStiefel) = true
 
-function active_traits(f, ::SymplecticStiefel, args...)
-    return merge_traits(IsDefaultMetric(RealSymplecticMetric()))
-end
-
 # Define Stiefel as the array fallback
 ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{<:Any,ℝ} StiefelPoint StiefelTangentVector value value
 
@@ -148,6 +144,8 @@ function check_vector(M::SymplecticStiefel{S,𝔽}, p, X::T; kwargs...) where {S
     end
     return nothing
 end
+
+default_metric(::SymplecticStiefel) = RealSymplecticMetric()
 
 @doc raw"""
     exp(::SymplecticStiefel, p, X)

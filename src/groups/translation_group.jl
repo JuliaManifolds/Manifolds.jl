@@ -29,7 +29,6 @@ end
     else
         return merge_traits(
             IsGroupManifold(M.op, M.vectors),
-            IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(), #pass to Euclidean by default/last fallback
         )
@@ -39,6 +38,8 @@ end
 function allocate_result(M::Euclidean, ::typeof(rand), ::Identity{AdditionOperation})
     return similar(Array{Float64}, representation_size(M)...)
 end
+
+default_metric(::TranslationGroup) = EuclideanMetric()
 
 exp!(::TranslationGroup, q, ::Identity{AdditionOperation}, X) = copyto!(q, X)
 

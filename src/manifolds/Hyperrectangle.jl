@@ -29,10 +29,7 @@ struct Hyperrectangle{T<:AbstractArray} <: AbstractDecoratorManifold{ℝ}
 end
 
 function active_traits(f, ::Hyperrectangle, args...)
-    return merge_traits(
-        IsDefaultMetric(EuclideanMetric()),
-        IsDefaultConnection(LeviCivitaConnection()),
-    )
+    return IsDefaultConnection(LeviCivitaConnection())
 end
 
 function check_point(M::Hyperrectangle, p)
@@ -70,7 +67,7 @@ function check_vector(M::Hyperrectangle, p, X; kwargs...)
 end
 
 default_approximation_method(::Hyperrectangle, ::typeof(mean)) = EfficientEstimator()
-
+default_metric(::Hyperrectangle) = EuclideanMetric()
 """
     default_retraction_method(M::Hyperrectangle)
 

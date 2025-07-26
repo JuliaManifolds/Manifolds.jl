@@ -3,7 +3,6 @@
 # (the code below makes some calls of `isapprox` faster)
 
 for trait_type in [
-    TraitList{<:IsDefaultMetric},
     TraitList{<:IsDefaultConnection},
     TraitList{IsMetricManifold},
     TraitList{IsConnectionManifold},

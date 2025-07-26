@@ -30,7 +30,6 @@ end
         IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
         IsEmbeddedSubmanifold(),
         HasLeftInvariantMetric(),
-        IsDefaultMetric(EuclideanMetric()),
     )
 end
 
@@ -67,6 +66,8 @@ function check_vector(
     end
     return nothing
 end
+
+default_metric(::SpecialLinear) = EuclideanMetric()
 
 embed(::SpecialLinear, p) = p
 embed(::SpecialLinear, p, X) = X

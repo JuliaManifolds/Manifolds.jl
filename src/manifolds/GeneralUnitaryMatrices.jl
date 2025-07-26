@@ -43,10 +43,6 @@ end
 
 is_embedded_manifold(::GeneralUnitaryMatrices) = true
 
-function active_traits(f, ::GeneralUnitaryMatrices, args...)
-    return merge_traits(IsDefaultMetric(EuclideanMetric()))
-end
-
 @doc raw"""
     check_point(M::UnitaryMatrices, p; kwargs...)
     check_point(M::OrthogonalMatrices, p; kwargs...)

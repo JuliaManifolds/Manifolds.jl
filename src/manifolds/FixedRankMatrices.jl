@@ -53,10 +53,6 @@ end
 
 is_embedded_manifold(::FixedRankMatrices) = true
 
-function active_traits(f, ::FixedRankMatrices, args...)
-    return merge_traits(IsDefaultMetric(EuclideanMetric()))
-end
-
 @doc raw"""
     SVDMPoint <: AbstractManifoldPoint
 
@@ -396,9 +392,15 @@ as the default inverse retraction for the [`FixedRankMatrices`](@ref) manifold.
 """
 default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction()
 
-"""
-    default_retraction_method(M::FixedRankMatrices)
+default_metric(::FixedRankMatrices) = EuclideanMetric()
 
+"""
+    default_exp_method(M::FixedRankMatrices)
+
+"""
+default_retraction_method(M::FixedRankMatrices)
+
+"""
 Return [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
 as the default retraction for the [`FixedRankMatrices`](@ref) manifold.
 """
