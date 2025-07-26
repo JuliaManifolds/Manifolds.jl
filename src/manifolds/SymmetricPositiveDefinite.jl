@@ -98,7 +98,7 @@ function Base.:(==)(p::SPDPoint, q::SPDPoint)
 end
 
 function active_traits(f, ::SymmetricPositiveDefinite, args...)
-    return IsEmbeddedManifold()
+    return ManifoldsBase.merge_traits(IsEmbeddedManifold())
 end
 
 function allocate(p::SPDPoint)
