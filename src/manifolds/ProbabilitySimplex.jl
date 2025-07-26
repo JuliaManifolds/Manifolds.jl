@@ -145,6 +145,8 @@ function check_vector(
     return nothing
 end
 
+default_metric(::ProbabilitySimplex) = FisherRaoMetric()
+
 @doc raw"""
     distance(M, p, q)
 
