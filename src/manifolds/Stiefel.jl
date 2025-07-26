@@ -41,7 +41,7 @@ function Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:
 end
 
 function active_traits(f, ::Stiefel, args...)
-    return IsIsometricEmbeddedManifold()
+    return ManifoldsBase.merge_traits(IsIsometricEmbeddedManifold())
 end
 
 function allocation_promotion_function(::Stiefel{<:Any,ℂ}, ::Any, ::Tuple)

@@ -189,17 +189,46 @@ function get_basis(M::MetricManifold, p, B::AbstractBasis)
 end
 
 function get_coordinates(M::MetricManifold, p, X, B::AbstractBasis)
-    return get_coordinates(M.manifold, p, X, B)
+    (default_metric(M.manifold) == M.metric) &&
+        (return get_coordinates(M.manifold, p, X, B))
+    return invoke(
+        get_coordinates,
+        Tuple{AbstractManifold,Any,Any,AbstractBasis},
+        M,
+        p,
+        X,
+        B,
+    )
 end
 function get_coordinates!(M::MetricManifold, Y, p, X, B::AbstractBasis)
-    return get_coordinates!(M.manifold, Y, p, X, B)
+    (default_metric(M.manifold) == M.metric) &&
+        (return get_coordinates!(M.manifold, Y, p, X, B))
+    return invoke(
+        get_coordinates!,
+        Tuple{AbstractManifold,Any,Any,Any,AbstractBasis},
+        M,
+        Y,
+        p,
+        X,
+        B,
+    )
 end
 
 function get_vector(M::MetricManifold, p, c, B::AbstractBasis)
-    return get_vector(M.manifold, p, c, B)
+    (default_metric(M.manifold) == M.metric) && (return get_vector(M.manifold, p, c, B))
+    return invoke(get_vector, Tuple{AbstractManifold,Any,Any,AbstractBasis}, M, p, c, B)
 end
 function get_vector!(M::MetricManifold, Y, p, c, B::AbstractBasis)
-    return get_vector!(M.manifold, Y, p, c, B)
+    (default_metric(M.manifold) == M.metric) && (return get_vector!(M.manifold, Y, p, c, B))
+    return invoke(
+        get_vector!,
+        Tuple{AbstractManifold,Any,Any,Any,AbstractBasis},
+        M,
+        Y,
+        p,
+        c,
+        B,
+    )
 end
 
 @doc raw"""
@@ -421,7 +450,7 @@ function project(M::MetricManifold, p)
 end
 function project!(M::MetricManifold, q, p)
     (default_metric(M.manifold) == M.metric) && (return project!(M.manifold, q, p))
-    throw(MethodError(project!, (M, q, p)))
+    return project!(M.manifold, q, p)
 end
 function project(M::MetricManifold, p, X)
     (default_metric(M.manifold) == M.metric) && (return project(M.manifold, p, X))
@@ -429,7 +458,7 @@ function project(M::MetricManifold, p, X)
 end
 function project!(M::MetricManifold, Y, p, X)
     (default_metric(M.manifold) == M.metric) && (return project!(M.manifold, Y, p, X))
-    throw(MethodError(project!, (M, Y, p, X)))
+    return project!(M.manifold, Y, p, X)
 end
 
 representation_size(M::MetricManifold) = representation_size(M.manifold)
@@ -529,7 +558,16 @@ function vector_transport_direction!(
 )
     (default_metric(M.manifold) == M.metric) &&
         (return vector_transport_direction!(M.manifold, Y, p, X, d, m))
-    throw(MethodError(vector_transport_direction!, (M, Y, p, X, d, m)))
+    return invoke(
+        vector_transport_direction!,
+        Tuple{AbstractManifold,Any,Any,Any,Any,AbstractVectorTransportMethod},
+        M,
+        Y,
+        p,
+        X,
+        d,
+        m,
+    )
 end
 
 function vector_transport_to(
@@ -561,7 +599,16 @@ function vector_transport_to!(
 )
     (default_metric(M.manifold) == M.metric) &&
         (return vector_transport_to!(M.manifold, Y, p, X, q, m))
-    throw(MethodError(vector_transport_to!, (M, Y, p, X, q, m)))
+    return invoke(
+        vector_transport_to!,
+        Tuple{AbstractManifold,Any,Any,Any,Any,AbstractVectorTransportMethod},
+        M,
+        Y,
+        p,
+        X,
+        q,
+        m,
+    )
 end
 
 function Weingarten(M::MetricManifold, p, X, V)
