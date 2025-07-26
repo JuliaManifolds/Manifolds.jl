@@ -98,7 +98,7 @@ function Base.:(==)(p::SPDPoint, q::SPDPoint)
 end
 
 function active_traits(f, ::SymmetricPositiveDefinite, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(AffineInvariantMetric()))
+    return IsEmbeddedManifold()
 end
 
 function allocate(p::SPDPoint)
@@ -222,6 +222,8 @@ function copyto!(q::SPDPoint, p::SPDPoint)
     end
     return q
 end
+
+default_metric(::SymmetricPositiveDefinite) = AffineInvariantMetric()
 
 embed(::SymmetricPositiveDefinite, p) = p
 embed(::SymmetricPositiveDefinite, p::SPDPoint) = convert(AbstractMatrix, p)

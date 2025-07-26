@@ -6,7 +6,7 @@ An abstract type to represent a unit sphere that is represented isometrically in
 abstract type AbstractSphere{𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 function active_traits(f, ::AbstractSphere, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
+    return IsIsometricEmbeddedManifold()
 end
 
 @doc raw"""
@@ -145,6 +145,8 @@ function check_vector(
     end
     return nothing
 end
+
+default_metric(::AbstractSphere) = EuclideanMetric()
 
 function diagonalizing_projectors(M::AbstractSphere{ℝ}, p, X)
     X_norm = norm(M, p, X)

@@ -26,12 +26,13 @@ end
     else
         return merge_traits(
             IsGroupManifold(M.op, TangentVectorRepresentation()),
-            IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(), #pass to Euclidean by default/last fallback
         )
     end
 end
+
+default_metric(::CircleGroup) = EuclideanMetric()
 
 Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
@@ -170,7 +171,6 @@ end
         return merge_traits(
             IsGroupManifold(M.op, M.vectors),
             HasBiinvariantMetric(),
-            IsDefaultMetric(EuclideanMetric()),
             active_traits(f, M.manifold, args...),
             IsExplicitDecorator(), #pass to Euclidean by default/last fallback
         )
@@ -181,6 +181,8 @@ adjoint_action(::RealCircleGroup, p, X, ::LeftAction) = X
 adjoint_action(::RealCircleGroup, p, X, ::RightAction) = X
 adjoint_action(::RealCircleGroup, ::Identity, X, ::LeftAction) = X
 adjoint_action(::RealCircleGroup, ::Identity, X, ::RightAction) = X
+
+default_metric(::RealCircleGroup) = EuclideanMetric()
 
 for AD in [LeftAction, RightAction]
     @eval begin
