@@ -83,9 +83,9 @@ get_embedding(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 
 struct TestStatsNotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{ℝ} end
-function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold3, args...)
-    return merge_traits(IsEmbeddedManifold())
-end
+
+ManifoldsBase.is_embedded_manifold(::TestStatsNotImplementedEmbeddedManifold3) = true
+
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 get_embedding(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)

@@ -61,7 +61,7 @@ See for example the [`ProbabilitySimplex`](@ref).
 """
 struct FisherRaoMetric <: AbstractMetric end
 
-active_traits(f, ::ProbabilitySimplex, args...) = merge_traits(IsEmbeddedManifold())
+is_embedded_manifold(::ProbabilitySimplex) = true
 
 @doc raw"""
     change_representer(M::ProbabilitySimplex, ::EuclideanMetric, p, X)

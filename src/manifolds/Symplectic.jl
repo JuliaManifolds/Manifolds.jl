@@ -38,8 +38,10 @@ struct SymplecticMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
+is_embedded_manifold(::SymplecticMatrices) = true
+
 function active_traits(f, ::SymplecticMatrices, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
+    return merge_traits(IsDefaultMetric(RealSymplecticMetric()))
 end
 
 function SymplecticMatrices(two_n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)

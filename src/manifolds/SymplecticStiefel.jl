@@ -62,8 +62,10 @@ function SymplecticStiefel(two_n::Int, two_k::Int; parameter::Symbol=:type)
     return SymplecticStiefel{typeof(size),ℝ}(size)
 end
 
+is_embedded_manifold(::SymplecticStiefel) = true
+
 function active_traits(f, ::SymplecticStiefel, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
+    return merge_traits(IsDefaultMetric(RealSymplecticMetric()))
 end
 
 # Define Stiefel as the array fallback

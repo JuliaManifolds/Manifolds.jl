@@ -97,8 +97,10 @@ function Base.:(==)(p::SPDPoint, q::SPDPoint)
     return p.eigen == q.eigen
 end
 
+is_embedded_manifold(::SymmetricPositiveDefinite) = true
+
 function active_traits(f, ::SymmetricPositiveDefinite, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(AffineInvariantMetric()))
+    return merge_traits(IsDefaultMetric(AffineInvariantMetric()))
 end
 
 function allocate(p::SPDPoint)

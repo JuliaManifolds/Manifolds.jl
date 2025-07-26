@@ -20,10 +20,11 @@ struct GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
+is_embedded_manifold(::GeneralLinear) = true
+
 function active_traits(f, ::GeneralLinear, args...)
     return merge_traits(
         IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
-        IsEmbeddedManifold(),
         HasLeftInvariantMetric(),
         IsDefaultMetric(EuclideanMetric()),
     )
