@@ -11,6 +11,5 @@ struct DummyOrbit <: AbstractManifold{ℝ} end
     @test get_total_space(M) == DummyTotalSpace()
     @test repr(M) == "QuotientManifold($(Q), $(T))"
 
-    @test active_traits(exp, M).head == Manifolds.IsQuotientManifold()
     @test decorated_manifold(M) == Q
 end

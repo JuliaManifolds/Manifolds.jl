@@ -1,14 +1,4 @@
 
-"""
-    IsQuotientManifold <: AbstractTrait
-
-Specify that a certain decorated manifold is a quotient manifold in the sense that it provides
-implicitly (or explicitly through [`QuotientManifold`](@ref)  properties of a quotient manifold.
-
-See [`QuotientManifold`](@ref) for more details.
-"""
-struct IsQuotientManifold <: AbstractTrait end
-
 #
 # (Explicit) Quotient manifolds
 #
@@ -49,13 +39,11 @@ struct QuotientManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
     total_space::NT
 end
 
-@inline active_traits(f, ::QuotientManifold, ::Any...) = merge_traits(IsQuotientManifold())
-
 @doc raw"""
     canonical_project(M, p)
 
-Compute the canonical projection ``π`` on a manifold ``\mathcal M`` that
-[`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref).
+Compute the canonical projection ``π`` on a quotient manifold ``\mathcal M``,
+e.g. a [`QuotientManifold`](@ref).
 The canonical (or natural) projection ``π`` from the total space ``\mathcal N``
 onto ``\mathcal M`` given by
 
@@ -74,8 +62,8 @@ end
 @doc raw"""
     canonical_project!(M, q, p)
 
-Compute the canonical projection ``π`` on a manifold ``\mathcal M`` that
-[`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref) in place of `q`.
+Compute the canonical projection ``π`` on a quotient manifold ``\mathcal M``,
+e.g. a [`QuotientManifold`](@ref) in place of `q`.
 
 See [`canonical_project`](@ref) for more details.
 """
@@ -86,8 +74,8 @@ decorated_manifold(M::QuotientManifold) = M.manifold
 @doc raw"""
     differential_canonical_project(M, p, X)
 
-Compute the differential of the canonical projection ``π`` on a manifold ``\mathcal M`` that
-[`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref).
+Compute the differential of the canonical projection ``π`` on a quotient manifold
+``\mathcal M``, e.g. a [`QuotientManifold`](@ref).
 The canonical (or natural) projection ``π`` from the total space ``\mathcal N``
 onto ``\mathcal M``, such that its differential
 
@@ -106,16 +94,17 @@ end
 @doc raw"""
     differential_canonical_project!(M, Y, p, X)
 
-Compute the differential of the canonical projection ``π`` on a manifold ``\mathcal M`` that
-[`IsQuotientManifold`](@ref), e.g. a [`QuotientManifold`](@ref). See [`differential_canonical_project`](@ref) for details.
+Compute the differential of the canonical projection ``π`` on a quotient manifold
+``\mathcal M``, e.g. a [`QuotientManifold`](@ref).
+
+See [`differential_canonical_project`](@ref) for details.
 """
 differential_canonical_project!(M::AbstractManifold, q, p)
 
 @doc raw"""
     get_total_space(M::AbstractDecoratorManifold)
 
-Return the total space of a manifold that [`IsQuotientManifold`](@ref), e.g.
-a [`QuotientManifold`](@ref).
+Return the total space of a quotient manifold, e.g. a [`QuotientManifold`](@ref).
 """
 get_total_space(::AbstractManifold)
 get_total_space(M::QuotientManifold) = M.total_space
