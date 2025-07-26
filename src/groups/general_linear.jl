@@ -25,7 +25,6 @@ function active_traits(f, ::GeneralLinear, args...)
         IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
         IsEmbeddedManifold(),
         HasLeftInvariantMetric(),
-        IsDefaultMetric(EuclideanMetric()),
     )
 end
 
@@ -54,6 +53,8 @@ check_point(::GeneralLinear, ::Identity{MultiplicationOperation}) = nothing
 function check_vector(G::GeneralLinear, p, X; kwargs...)
     return nothing
 end
+
+default_metric(::GeneralLinear) = EuclideanMetric()
 
 distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
 

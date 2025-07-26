@@ -42,7 +42,7 @@ function GeneralUnitaryMatrices(
 end
 
 function active_traits(f, ::GeneralUnitaryMatrices, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
+    return IsEmbeddedManifold()
 end
 
 @doc raw"""

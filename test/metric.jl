@@ -245,8 +245,6 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
     @testset "Metric Basics" begin
         @test repr(MetricManifold(Euclidean(3), EuclideanMetric())) ===
               "MetricManifold(Euclidean(3; field=ℝ), EuclideanMetric())"
-        @test repr(IsDefaultMetric(EuclideanMetric())) ===
-              "IsDefaultMetric(EuclideanMetric())"
     end
     @testset "Connection Trait" begin
         M = ConnectionManifold(Euclidean(3), LeviCivitaConnection())

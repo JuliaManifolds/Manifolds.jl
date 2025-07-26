@@ -63,7 +63,7 @@ function SymplecticStiefel(two_n::Int, two_k::Int; parameter::Symbol=:type)
 end
 
 function active_traits(f, ::SymplecticStiefel, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
+    return IsEmbeddedManifold()
 end
 
 # Define Stiefel as the array fallback
@@ -146,6 +146,8 @@ function check_vector(M::SymplecticStiefel{S,𝔽}, p, X::T; kwargs...) where {S
     end
     return nothing
 end
+
+default_metric(::SymplecticStiefel) = RealSymplecticMetric()
 
 @doc raw"""
     exp(::SymplecticStiefel, p, X)

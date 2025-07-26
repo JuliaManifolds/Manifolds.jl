@@ -21,11 +21,12 @@ vector_representation(::GeneralUnitaryMultiplicationGroup) = LeftInvariantRepres
         return merge_traits(
             IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
             HasBiinvariantMetric(),
-            IsDefaultMetric(EuclideanMetric()),
             IsExplicitDecorator(), #pass to the inner M by default/last fallback
         )
     end
 end
+
+default_metric(::GeneralUnitaryMultiplicationGroup) = EuclideanMetric()
 
 function allocate_result(
     ::GeneralUnitaryMultiplicationGroup,

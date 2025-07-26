@@ -52,7 +52,7 @@ function FixedRankMatrices(
 end
 
 function active_traits(f, ::FixedRankMatrices, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
+    return IsEmbeddedManifold()
 end
 
 @doc raw"""
@@ -394,9 +394,15 @@ as the default inverse retraction for the [`FixedRankMatrices`](@ref) manifold.
 """
 default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction()
 
-"""
-    default_retraction_method(M::FixedRankMatrices)
+default_metric(::FixedRankMatrices) = EuclideanMetric()
 
+"""
+    default_exp_method(M::FixedRankMatrices)
+
+"""
+default_retraction_method(M::FixedRankMatrices)
+
+"""
 Return [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
 as the default retraction for the [`FixedRankMatrices`](@ref) manifold.
 """

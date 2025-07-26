@@ -78,7 +78,7 @@ function SymplecticGrassmann(two_n::Int, two_k::Int; parameter::Symbol=:type)
 end
 
 function active_traits(f, ::SymplecticGrassmann, args...)
-    return merge_traits(IsEmbeddedManifold(), IsQuotientManifold())
+    return merge_traits(IsEmbeddedManifold())
 end
 
 # Define Stiefel as the array fallback

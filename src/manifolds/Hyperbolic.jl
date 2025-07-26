@@ -43,7 +43,7 @@ function Hyperbolic(n::Int; parameter::Symbol=:type)
 end
 
 function active_traits(f, ::Hyperbolic, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(MinkowskiMetric()))
+    return IsIsometricEmbeddedManifold()
 end
 
 @doc raw"""
@@ -191,6 +191,8 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
         return (convert(AbstractVector, p), convert(AbstractVector, p, X))
     end
 end
+
+default_metric(::Hyperbolic) = MinkowskiMetric()
 
 function diagonalizing_projectors(M::Hyperbolic, p, X)
     X_norm = norm(M, p, X)
