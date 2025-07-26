@@ -363,6 +363,15 @@ using StatsBase: AbstractWeights
 
 const AbstractDiffBackend = Any  # TODO: remove
 
+"""
+    DefaultMetric <: AbstractMetric
+
+Indicating that a manifold uses the default metric, that one has implicitly assumed
+when defining the manifold
+"""
+struct DefaultMetric <: AbstractMetric end
+default_metric(::AbstractManifold) = DefaultMetric()
+
 include("utils.jl")
 
 include("manifold_fallbacks.jl")
@@ -717,7 +726,7 @@ export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedSubmanifold
-export IsDefaultMetric, IsDefaultConnection, IsMetricManifold, IsConnectionManifold
+export IsDefaultConnection, IsMetricManifold, IsConnectionManifold
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector

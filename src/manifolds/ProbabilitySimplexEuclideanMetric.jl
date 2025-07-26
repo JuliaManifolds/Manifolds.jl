@@ -20,6 +20,11 @@ function manifold_volume(M::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanM
     return sqrt(n + 1) / factorial(n)
 end
 
+function project!(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}, X, p, Y)
+    X .= Y .- mean(Y)
+    return X
+end
+
 @doc raw"""
     rand(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}; vector_at=nothing, σ::Real=1.0)
 
