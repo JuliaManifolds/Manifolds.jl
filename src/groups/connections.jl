@@ -1,4 +1,3 @@
-
 """
     AbstractCartanSchoutenConnection
 
@@ -36,9 +35,9 @@ Levi-Civita connection of that metric.
 """
 struct CartanSchoutenZero <: AbstractCartanSchoutenConnection end
 
-const CartanSchoutenMinusGroup{𝔽,M} = ConnectionManifold{𝔽,M,CartanSchoutenMinus}
-const CartanSchoutenPlusGroup{𝔽,M} = ConnectionManifold{𝔽,M,CartanSchoutenPlus}
-const CartanSchoutenZeroGroup{𝔽,M} = ConnectionManifold{𝔽,M,CartanSchoutenZero}
+const CartanSchoutenMinusGroup{𝔽, M} = ConnectionManifold{𝔽, M, CartanSchoutenMinus}
+const CartanSchoutenPlusGroup{𝔽, M} = ConnectionManifold{𝔽, M, CartanSchoutenPlus}
+const CartanSchoutenZeroGroup{𝔽, M} = ConnectionManifold{𝔽, M, CartanSchoutenZero}
 
 """
     exp(M::ConnectionManifold{𝔽,<:AbstractDecoratorManifold{𝔽},<:AbstractCartanSchoutenConnection}, p, X) where {𝔽}
@@ -47,55 +46,55 @@ Compute the exponential map on the [`ConnectionManifold`](@ref) `M` with a Carta
 connection. See Sections 5.3.2 and 5.3.3 of [PennecLorenzi:2020](@cite) for details.
 """
 function exp(
-    M::ConnectionManifold{
-        𝔽,
-        <:AbstractDecoratorManifold{𝔽},
-        <:AbstractCartanSchoutenConnection,
-    },
-    p,
-    X,
-) where {𝔽}
+        M::ConnectionManifold{
+            𝔽,
+            <:AbstractDecoratorManifold{𝔽},
+            <:AbstractCartanSchoutenConnection,
+        },
+        p,
+        X,
+    ) where {𝔽}
     Y = inverse_translate_diff(M.manifold, p, p, X, LeftForwardAction())
     return compose(M.manifold, p, exp_lie(M.manifold, Y))
 end
 function exp_fused(
-    M::ConnectionManifold{
-        𝔽,
-        <:AbstractDecoratorManifold{𝔽},
-        <:AbstractCartanSchoutenConnection,
-    },
-    p,
-    X,
-    t::Number,
-) where {𝔽}
+        M::ConnectionManifold{
+            𝔽,
+            <:AbstractDecoratorManifold{𝔽},
+            <:AbstractCartanSchoutenConnection,
+        },
+        p,
+        X,
+        t::Number,
+    ) where {𝔽}
     return exp(M, p, t * X)
 end
 
 function exp!(
-    M::ConnectionManifold{
-        𝔽,
-        <:AbstractDecoratorManifold{𝔽},
-        <:AbstractCartanSchoutenConnection,
-    },
-    q,
-    p,
-    X,
-) where {𝔽}
+        M::ConnectionManifold{
+            𝔽,
+            <:AbstractDecoratorManifold{𝔽},
+            <:AbstractCartanSchoutenConnection,
+        },
+        q,
+        p,
+        X,
+    ) where {𝔽}
     Y = inverse_translate_diff(M.manifold, p, p, X, LeftForwardAction())
     return compose!(M.manifold, q, p, exp_lie(M.manifold, Y))
 end
 
 function exp_fused!(
-    M::ConnectionManifold{
-        𝔽,
-        <:AbstractDecoratorManifold{𝔽},
-        <:AbstractCartanSchoutenConnection,
-    },
-    q,
-    p,
-    X,
-    t::Number,
-) where {𝔽}
+        M::ConnectionManifold{
+            𝔽,
+            <:AbstractDecoratorManifold{𝔽},
+            <:AbstractCartanSchoutenConnection,
+        },
+        q,
+        p,
+        X,
+        t::Number,
+    ) where {𝔽}
     return exp!(M, q, p, t * X)
 end
 
@@ -106,29 +105,29 @@ Compute the logarithmic map on the [`ConnectionManifold`](@ref) `M` with a Carta
 connection. See Sections 5.3.2 and 5.3.3 of [PennecLorenzi:2020](@cite) for details.
 """
 function log(
-    M::ConnectionManifold{
-        𝔽,
-        <:AbstractDecoratorManifold{𝔽},
-        <:AbstractCartanSchoutenConnection,
-    },
-    p,
-    q,
-) where {𝔽}
+        M::ConnectionManifold{
+            𝔽,
+            <:AbstractDecoratorManifold{𝔽},
+            <:AbstractCartanSchoutenConnection,
+        },
+        p,
+        q,
+    ) where {𝔽}
     pinvq = compose(M.manifold, inv(M.manifold, p), q)
     Y = log_lie(M.manifold, pinvq)
     return translate_diff(M.manifold, p, Identity(M.manifold), Y, LeftForwardAction())
 end
 
 function log!(
-    M::ConnectionManifold{
-        𝔽,
-        <:AbstractDecoratorManifold{𝔽},
-        <:AbstractCartanSchoutenConnection,
-    },
-    Y,
-    p,
-    q,
-) where {𝔽}
+        M::ConnectionManifold{
+            𝔽,
+            <:AbstractDecoratorManifold{𝔽},
+            <:AbstractCartanSchoutenConnection,
+        },
+        Y,
+        p,
+        q,
+    ) where {𝔽}
     pinvq = compose(M.manifold, inv(M.manifold, p), q)
     log_lie!(M.manifold, Y, pinvq)
     return translate_diff!(M.manifold, Y, p, Identity(M.manifold), Y)

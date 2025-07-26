@@ -8,11 +8,11 @@ Orthogonal group $\mathrm{O}(n)$ represented by [`OrthogonalMatrices`](@ref).
     Orthogonal(n::Int; parameter::Symbol=:type)
 """
 const Orthogonal{T} =
-    GeneralUnitaryMultiplicationGroup{T,ℝ,AbsoluteDeterminantOneMatrixType}
+    GeneralUnitaryMultiplicationGroup{T, ℝ, AbsoluteDeterminantOneMatrixType}
 
-function Orthogonal(n::Int; parameter::Symbol=:type)
+function Orthogonal(n::Int; parameter::Symbol = :type)
     _lie_groups_depwarn_move(Orthogonal, :OrthogonalGroup)
-    return GeneralUnitaryMultiplicationGroup(OrthogonalMatrices(n; parameter=parameter))
+    return GeneralUnitaryMultiplicationGroup(OrthogonalMatrices(n; parameter = parameter))
 end
 
 function Base.show(io::IO, ::Orthogonal{TypeParameter{Tuple{n}}}) where {n}

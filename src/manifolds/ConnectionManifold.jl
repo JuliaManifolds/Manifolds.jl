@@ -27,7 +27,7 @@ Specify that a certain [`AbstractAffineConnection`](@ref) is the default connect
 This way the corresponding [`ConnectionManifold`](@ref) falls back to the default methods
 of the manifold it decorates.
 """
-struct IsDefaultConnection{C<:AbstractAffineConnection} <: AbstractTrait
+struct IsDefaultConnection{C <: AbstractAffineConnection} <: AbstractTrait
     connection::C
 end
 parent_trait(::IsDefaultConnection) = IsConnectionManifold()
@@ -41,8 +41,8 @@ parent_trait(::IsDefaultConnection) = IsConnectionManifold()
 
 Decorate the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M` with [`AbstractAffineConnection`](@ref) `C`.
 """
-struct ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnection} <:
-       AbstractDecoratorManifold{𝔽}
+struct ConnectionManifold{𝔽, M <: AbstractManifold{𝔽}, C <: AbstractAffineConnection} <:
+    AbstractDecoratorManifold{𝔽}
     manifold::M
     connection::C
 end
@@ -59,7 +59,7 @@ Base.filter(f, t::EmptyTrait) = t
 function active_traits(f, M::ConnectionManifold, args...)
     return merge_traits(
         is_default_connection(M.manifold, M.connection) ?
-        IsDefaultConnection(M.connection) : EmptyTrait(),
+            IsDefaultConnection(M.connection) : EmptyTrait(),
         IsConnectionManifold(),
         filter(x -> x isa IsGroupManifold, active_traits(f, M.manifold, args...)),
         is_metric_function(f) ? EmptyTrait() : IsExplicitDecorator(),
@@ -87,12 +87,12 @@ the resulting multi-dimensional array are ordered ``(i,j,k)``.
 """
 christoffel_symbols_first(::AbstractManifold, ::Any, B::AbstractBasis)
 function christoffel_symbols_first(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
-    ∂g = local_metric_jacobian(M, p, B; backend=backend)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
+    ∂g = local_metric_jacobian(M, p, B; backend = backend)
     n = size(∂g, 1)
     Γ = allocate(∂g, Size(n, n, n))
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
@@ -127,13 +127,13 @@ representation of the metric tensor. The dimensions of the resulting multi-dimen
 are ordered ``(l,i,j)``.
 """
 function christoffel_symbols_second(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
     Ginv = inverse_local_metric(M, p, B)
-    Γ₁ = christoffel_symbols_first(M, p, B; backend=backend)
+    Γ₁ = christoffel_symbols_first(M, p, B; backend = backend)
     Γ₂ = allocate(Γ₁)
     @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
@@ -165,14 +165,14 @@ The dimensions of the resulting multi-dimensional array are ordered ``(i,j,k,l)`
 """
 christoffel_symbols_second_jacobian(::AbstractManifold, ::Any, B::AbstractBasis)
 function christoffel_symbols_second_jacobian(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
     n = size(p, 1)
     ∂Γ = reshape(
-        _jacobian(q -> christoffel_symbols_second(M, q, B; backend=backend), p, backend),
+        _jacobian(q -> christoffel_symbols_second(M, q, B; backend = backend), p, backend),
         n,
         n,
         n,
@@ -247,13 +247,13 @@ function exp!(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q
     )
 end
 function exp_fused!(
-    ::TraitList{IsConnectionManifold},
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    t::Number,
-)
+        ::TraitList{IsConnectionManifold},
+        M::AbstractDecoratorManifold,
+        q,
+        p,
+        X,
+        t::Number,
+    )
     return retract!(
         M,
         q,
@@ -294,10 +294,10 @@ is_default_connection(M::AbstractManifold, G::AbstractAffineConnection)
     G::AbstractAffineConnection,
 )
 function is_default_connection(
-    ::TraitList{IsDefaultConnection{C}},
-    ::AbstractDecoratorManifold,
-    ::C,
-) where {C<:AbstractAffineConnection}
+        ::TraitList{IsDefaultConnection{C}},
+        ::AbstractDecoratorManifold,
+        ::C,
+    ) where {C <: AbstractAffineConnection}
     return true
 end
 function is_default_connection(M::ConnectionManifold)
@@ -306,27 +306,27 @@ end
 is_default_connection(::AbstractManifold, ::AbstractAffineConnection) = false
 
 function ManifoldsBase.retract_exp_ode!(
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    m::AbstractRetractionMethod,
-    b::AbstractBasis,
-)
+        M::AbstractManifold,
+        q,
+        p,
+        X,
+        m::AbstractRetractionMethod,
+        b::AbstractBasis,
+    )
     ManifoldsBase.retract_exp_ode_fused!(M, q, p, X, one(number_eltype(p)), m, b)
     return q
 end
 
 function ManifoldsBase.retract_exp_ode_fused!(
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    t::Number,
-    ::AbstractRetractionMethod,
-    b::AbstractBasis,
-)
-    sol = solve_exp_ode(M, p, X, t; basis=b, dense=false)
+        M::AbstractManifold,
+        q,
+        p,
+        X,
+        t::Number,
+        ::AbstractRetractionMethod,
+        b::AbstractBasis,
+    )
+    sol = solve_exp_ode(M, p, X, t; basis = b, dense = false)
     copyto!(q, sol)
     return q
 end
@@ -365,14 +365,14 @@ for details.
 """
 riemann_tensor(::AbstractManifold, ::Any, ::AbstractBasis)
 function riemann_tensor(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
     n = size(p, 1)
-    Γ = christoffel_symbols_second(M, p, B; backend=backend)
-    ∂Γ = christoffel_symbols_second_jacobian(M, p, B; backend=backend) ./ n
+    Γ = christoffel_symbols_second(M, p, B; backend = backend)
+    ∂Γ = christoffel_symbols_second_jacobian(M, p, B; backend = backend) ./ n
     R = allocate(∂Γ, Size(n, n, n, n))
     @einsum R[l, i, j, k] =
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]

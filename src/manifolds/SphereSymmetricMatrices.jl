@@ -14,13 +14,13 @@ and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 Generate the manifold of `n`-by-`n` symmetric matrices of unit Frobenius norm.
 """
-struct SphereSymmetricMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct SphereSymmetricMatrices{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function SphereSymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function SphereSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return SphereSymmetricMatrices{typeof(size),field}(size)
+    return SphereSymmetricMatrices{typeof(size), field}(size)
 end
 
 function active_traits(f, ::SphereSymmetricMatrices, arge...)
@@ -36,12 +36,12 @@ i.e. is an `n`-by-`n` symmetric matrix of unit Frobenius norm.
 The tolerance for the symmetry of `p` can be set using `kwargs...`.
 """
 function check_point(
-    M::SphereSymmetricMatrices,
-    p::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
-    if !isapprox(norm(p - p'), 0; atol=atol, kwargs...)
+        M::SphereSymmetricMatrices,
+        p::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
+    if !isapprox(norm(p - p'), 0; atol = atol, kwargs...)
         return DomainError(
             norm(p - p'),
             "The point $(p) does not lie on $M, since it is not symmetric.",
@@ -60,13 +60,13 @@ of unit Frobenius norm.
 The tolerance for the symmetry of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(
-    M::SphereSymmetricMatrices,
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
-    if !isapprox(norm(X - X'), 0; atol=atol, kwargs...)
+        M::SphereSymmetricMatrices,
+        p,
+        X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
+    if !isapprox(norm(X - X'), 0; atol = atol, kwargs...)
         return DomainError(
             norm(X - X'),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not symmetric.",
@@ -78,12 +78,12 @@ end
 embed(::SphereSymmetricMatrices, p) = p
 embed(::SphereSymmetricMatrices, p, X) = X
 
-function get_embedding(::SphereSymmetricMatrices{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return ArraySphere(n, n; field=𝔽)
+function get_embedding(::SphereSymmetricMatrices{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
+    return ArraySphere(n, n; field = 𝔽)
 end
-function get_embedding(M::SphereSymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
+function get_embedding(M::SphereSymmetricMatrices{Tuple{Int}, 𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return ArraySphere(n, n; field=𝔽, parameter=:field)
+    return ArraySphere(n, n; field = 𝔽, parameter = :field)
 end
 
 """
@@ -106,7 +106,7 @@ Frobenius norm over the number system `𝔽`, i.e.
 \end{aligned}
 ````
 """
-function manifold_dimension(M::SphereSymmetricMatrices{<:Any,𝔽}) where {𝔽}
+function manifold_dimension(M::SphereSymmetricMatrices{<:Any, 𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return div(n * (n + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? n : 0) - 1
 end
@@ -148,10 +148,10 @@ function representation_size(M::SphereSymmetricMatrices)
     return (n, n)
 end
 
-function Base.show(io::IO, ::SphereSymmetricMatrices{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+function Base.show(io::IO, ::SphereSymmetricMatrices{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
     return print(io, "SphereSymmetricMatrices($(n), $(𝔽))")
 end
-function Base.show(io::IO, M::SphereSymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::SphereSymmetricMatrices{Tuple{Int}, 𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "SphereSymmetricMatrices($(n), $(𝔽); parameter=:field)")
 end

@@ -9,14 +9,14 @@ Translation group ``\mathrm{T}(n)`` represented by translation arrays.
 Generate the translation group on
 ``𝔽^{n₁,…,nᵢ}`` = `Euclidean(n₁,...,nᵢ; field=𝔽)`, which is isomorphic to the group itself.
 """
-const TranslationGroup{T,𝔽} =
-    GroupManifold{𝔽,Euclidean{T,𝔽},AdditionOperation,LeftInvariantRepresentation}
+const TranslationGroup{T, 𝔽} =
+    GroupManifold{𝔽, Euclidean{T, 𝔽}, AdditionOperation, LeftInvariantRepresentation}
 
-function TranslationGroup(n::Int...; field::AbstractNumbers=ℝ, parameter::Symbol=:type)
+function TranslationGroup(n::Int...; field::AbstractNumbers = ℝ, parameter::Symbol = :type)
     _lie_groups_depwarn_move(TranslationGroup)
     size = wrap_type_parameter(parameter, n)
-    return TranslationGroup{typeof(size),field}(
-        Euclidean(n...; field=field, parameter=parameter),
+    return TranslationGroup{typeof(size), field}(
+        Euclidean(n...; field = field, parameter = parameter),
         AdditionOperation(),
         LeftInvariantRepresentation(),
     )
@@ -55,11 +55,11 @@ function log!(::TranslationGroup, X, p::Identity{AdditionOperation}, q)
     return X
 end
 
-function Base.show(io::IO, M::TranslationGroup{N,𝔽}) where {N<:Tuple,𝔽}
+function Base.show(io::IO, M::TranslationGroup{N, 𝔽}) where {N <: Tuple, 𝔽}
     size = get_parameter(M.manifold.size)
     return print(io, "TranslationGroup($(join(size, ", ")); field=$(𝔽), parameter=:field)")
 end
-function Base.show(io::IO, M::TranslationGroup{N,𝔽}) where {N<:TypeParameter,𝔽}
+function Base.show(io::IO, M::TranslationGroup{N, 𝔽}) where {N <: TypeParameter, 𝔽}
     size = get_parameter(M.manifold.size)
     return print(io, "TranslationGroup($(join(size, ", ")); field=$(𝔽))")
 end

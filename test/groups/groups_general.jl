@@ -15,7 +15,7 @@ using Manifolds:
             Manifolds.LeftInvariantRepresentation(),
         )
         @test repr(G) ==
-              "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
+            "GroupManifold(NotImplementedManifold(), NotImplementedOperation())"
         p = [1.0, 2.0]
         X = [2.0, 3.0]
         eg = Identity(G)
@@ -36,7 +36,7 @@ using Manifolds:
             Identity(AdditionOperation()),
             Identity(MultiplicationOperation()),
         )
-        @test_throws DomainError is_point(G, Identity(AdditionOperation()); error=:error)
+        @test_throws DomainError is_point(G, Identity(AdditionOperation()); error = :error)
         @test is_point(G, eg)
         @test_throws ErrorException is_identity(G, 1) # same error as before i.e. dispatch isapprox works
         @test Manifolds.check_size(G, eg) === nothing
@@ -51,10 +51,10 @@ using Manifolds:
             G,
             Identity(AdditionOperation()),
             X;
-            error=:error,
+            error = :error,
         )
         # identity_element for G not implemented
-        @test_throws ErrorException is_vector(G, eg, X; error=:error)
+        @test_throws ErrorException is_vector(G, eg, X; error = :error)
         @test Identity(NotImplementedOperation()) === eg
         @test Identity(NotImplementedOperation) === eg
         @test !is_point(G, Identity(AdditionOperation()))
@@ -155,8 +155,8 @@ using Manifolds:
             [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]],
             [],
             [[1.0, 2.0]];
-            test_exp_lie_log=false, # there is no identity element so log/exp on Lie do not work
-            test_one_arg_identity_element=false,
+            test_exp_lie_log = false, # there is no identity element so log/exp on Lie do not work
+            test_one_arg_identity_element = false,
         )
 
         p = [1.0, 2.0]
@@ -205,8 +205,8 @@ using Manifolds:
             [[2.0 1.0; 3.0 4.0], [3.0 2.0; 4.0 5.0], [4.0 3.0; 5.0 6.0]],
             [],
             [[1.0 2.0; 3.0 4.0]];
-            test_exp_lie_log=false, # no identity available as array
-            test_one_arg_identity_element=false,
+            test_exp_lie_log = false, # no identity available as array
+            test_one_arg_identity_element = false,
         )
 
         p = [2.0 1.0; 2.0 3.0]
@@ -331,7 +331,7 @@ using Manifolds:
             0.4555362161951786 -0.646683524164589 0.6117901399243428
         ]
         # testing the fallback definition just in case
-        @test invoke(adjoint_matrix, Tuple{AbstractManifold,Any}, M, p) ≈ p
+        @test invoke(adjoint_matrix, Tuple{AbstractManifold, Any}, M, p) ≈ p
     end
 end
 

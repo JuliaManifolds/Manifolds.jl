@@ -1,4 +1,3 @@
-
 @doc raw"""
     KendallsPreShapeSpace{T} <: AbstractSphere{ℝ}
 
@@ -20,7 +19,7 @@ struct KendallsPreShapeSpace{T} <: AbstractSphere{ℝ}
     size::T
 end
 
-function KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
+function KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, k))
     return KendallsPreShapeSpace{typeof(size)}(size)
 end
@@ -38,13 +37,13 @@ Check whether `p` is a valid point on [`KendallsPreShapeSpace`](@ref), i.e. whet
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
 """
 function check_point(
-    M::KendallsPreShapeSpace,
-    p;
-    atol::Real=sqrt(eps(float(eltype(p)))),
-    kwargs...,
-)
+        M::KendallsPreShapeSpace,
+        p;
+        atol::Real = sqrt(eps(float(eltype(p)))),
+        kwargs...,
+    )
     for p_row in eachrow(p)
-        if !isapprox(mean(p_row), 0; atol=atol, kwargs...)
+        if !isapprox(mean(p_row), 0; atol = atol, kwargs...)
             return DomainError(
                 mean(p_row),
                 "The point $(p) does not lie on the $(M) since one of the rows does not have zero mean.",
@@ -61,14 +60,14 @@ Check whether `X` is a valid tangent vector on [`KendallsPreShapeSpace`](@ref), 
 each row has zero mean. Other conditions are checked via embedding in [`ArraySphere`](@ref).
 """
 function check_vector(
-    M::KendallsPreShapeSpace,
-    p,
-    X;
-    atol::Real=sqrt(eps(float(eltype(X)))),
-    kwargs...,
-)
+        M::KendallsPreShapeSpace,
+        p,
+        X;
+        atol::Real = sqrt(eps(float(eltype(X)))),
+        kwargs...,
+    )
     for X_row in eachrow(X)
-        if !isapprox(mean(X_row), 0; atol=atol, kwargs...)
+        if !isapprox(mean(X_row), 0; atol = atol, kwargs...)
             return DomainError(
                 mean(X_row),
                 "The vector $(X) is not a tangent vector to $(p) on $(M), since one of the rows does not have zero mean.",
@@ -89,12 +88,12 @@ of matrices of the same shape.
 """
 get_embedding(::KendallsPreShapeSpace)
 
-function get_embedding(::KendallsPreShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+function get_embedding(::KendallsPreShapeSpace{TypeParameter{Tuple{n, k}}}) where {n, k}
     return ArraySphere(n, k)
 end
-function get_embedding(M::KendallsPreShapeSpace{Tuple{Int,Int}})
+function get_embedding(M::KendallsPreShapeSpace{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
-    return ArraySphere(n, k; parameter=:field)
+    return ArraySphere(n, k; parameter = :field)
 end
 
 @doc raw"""
@@ -121,7 +120,7 @@ afterwards the Frobenius norm of the landmarks (as a matrix) is normalised to fi
 project(::KendallsPreShapeSpace, p)
 
 function project!(::KendallsPreShapeSpace, q, p)
-    q .= p .- mean(p, dims=2)
+    q .= p .- mean(p, dims = 2)
     q ./= norm(q)
     return q
 end
@@ -136,18 +135,18 @@ quotient manifold `M`. See Section 3.7 of [SrivastavaKlassen:2016](@cite) for de
 project(::KendallsPreShapeSpace, p, X)
 
 function project!(::KendallsPreShapeSpace, Y, p, X)
-    Y .= X .- mean(X, dims=2)
+    Y .= X .- mean(X, dims = 2)
     Y .-= dot(p, Y) .* p
     return Y
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::KendallsPreShapeSpace,
-    pX;
-    vector_at=nothing,
-    σ=one(eltype(pX)),
-)
+        rng::AbstractRNG,
+        M::KendallsPreShapeSpace,
+        pX;
+        vector_at = nothing,
+        σ = one(eltype(pX)),
+    )
     if vector_at === nothing
         project!(M, pX, randn(rng, representation_size(M)))
     else
@@ -157,10 +156,10 @@ function Random.rand!(
     return pX
 end
 
-function Base.show(io::IO, ::KendallsPreShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+function Base.show(io::IO, ::KendallsPreShapeSpace{TypeParameter{Tuple{n, k}}}) where {n, k}
     return print(io, "KendallsPreShapeSpace($n, $k)")
 end
-function Base.show(io::IO, M::KendallsPreShapeSpace{Tuple{Int,Int}})
+function Base.show(io::IO, M::KendallsPreShapeSpace{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
     return print(io, "KendallsPreShapeSpace($n, $k; parameter=:field)")
 end

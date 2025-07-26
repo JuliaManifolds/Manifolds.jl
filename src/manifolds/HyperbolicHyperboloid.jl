@@ -36,13 +36,13 @@ function check_point(M::Hyperbolic, p; kwargs...)
 end
 
 function check_vector(
-    M::Hyperbolic,
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
-    if !isapprox(minkowski_metric(p, X), 0; atol=atol, kwargs...)
+        M::Hyperbolic,
+        p,
+        X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
+    if !isapprox(minkowski_metric(p, X), 0; atol = atol, kwargs...)
         return DomainError(
             abs(minkowski_metric(p, X)),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal (with respect to the Minkowski inner product) in the embedding.",
@@ -51,26 +51,26 @@ function check_vector(
     return nothing
 end
 
-function convert(::Type{HyperboloidTangentVector}, X::T) where {T<:AbstractVector}
+function convert(::Type{HyperboloidTangentVector}, X::T) where {T <: AbstractVector}
     return HyperboloidTangentVector(X)
 end
 function convert(
-    ::Type{HyperboloidTangentVector},
-    p::P,
-    X::T,
-) where {P<:AbstractVector,T<:AbstractVector}
+        ::Type{HyperboloidTangentVector},
+        p::P,
+        X::T,
+    ) where {P <: AbstractVector, T <: AbstractVector}
     return HyperboloidTangentVector(X)
 end
 convert(::Type{AbstractVector}, X::HyperboloidTangentVector) = X.value
 function convert(
-    ::Type{T},
-    p::HyperboloidPoint,
-    X::HyperboloidTangentVector,
-) where {T<:AbstractVector}
+        ::Type{T},
+        p::HyperboloidPoint,
+        X::HyperboloidTangentVector,
+    ) where {T <: AbstractVector}
     return X.value
 end
 
-function convert(::Type{HyperboloidPoint}, p::T) where {T<:AbstractVector}
+function convert(::Type{HyperboloidPoint}, p::T) where {T <: AbstractVector}
     return HyperboloidPoint(p)
 end
 convert(::Type{AbstractVector}, p::HyperboloidPoint) = p.value
@@ -133,17 +133,17 @@ The push forward ``π_*(p)`` maps from ``ℝ^n`` to a subspace of ``ℝ^{n+1}``,
 ````
 """
 function convert(
-    ::Type{HyperboloidTangentVector},
-    p::PoincareBallPoint,
-    X::PoincareBallTangentVector,
-)
+        ::Type{HyperboloidTangentVector},
+        p::PoincareBallPoint,
+        X::PoincareBallTangentVector,
+    )
     return HyperboloidTangentVector(convert(AbstractVector, p, X))
 end
 function convert(
-    ::Type{T},
-    p::PoincareBallPoint,
-    X::PoincareBallTangentVector,
-) where {T<:AbstractVector}
+        ::Type{T},
+        p::PoincareBallPoint,
+        X::PoincareBallTangentVector,
+    ) where {T <: AbstractVector}
     t = (1 - norm(p.value)^2)
     den = 4 * dot(p.value, X.value) / (t^2)
     c1 = (2 / t) .* X.value + den .* p.value
@@ -167,9 +167,9 @@ see [`convert(::Type{HyperboloidPoint}, ::PoincareBallPoint)`](@ref) and
 for the formulae.
 """
 function convert(
-    ::Type{Tuple{HyperboloidPoint,HyperboloidTangentVector}},
-    (p, X)::Tuple{PoincareBallPoint,PoincareBallTangentVector},
-)
+        ::Type{Tuple{HyperboloidPoint, HyperboloidTangentVector}},
+        (p, X)::Tuple{PoincareBallPoint, PoincareBallTangentVector},
+    )
     return (convert(HyperboloidPoint, p), convert(HyperboloidTangentVector, p, X))
 end
 
@@ -184,23 +184,23 @@ Poincaré half plane model of the [`Hyperbolic`](@ref) manifold ``\mathcal H^n``
 This is done in two steps, namely transforming it to a Poincare ball point and from there further on to a Hyperboloid point.
 """
 function convert(
-    t::Type{HyperboloidTangentVector},
-    p::PoincareHalfSpacePoint,
-    X::PoincareHalfSpaceTangentVector,
-)
+        t::Type{HyperboloidTangentVector},
+        p::PoincareHalfSpacePoint,
+        X::PoincareHalfSpaceTangentVector,
+    )
     return convert(
         t,
-        convert(Tuple{PoincareBallPoint,PoincareBallTangentVector}, (p, X))...,
+        convert(Tuple{PoincareBallPoint, PoincareBallTangentVector}, (p, X))...,
     )
 end
 function convert(
-    t::Type{T},
-    p::PoincareHalfSpacePoint,
-    X::PoincareHalfSpaceTangentVector,
-) where {T<:AbstractVector}
+        t::Type{T},
+        p::PoincareHalfSpacePoint,
+        X::PoincareHalfSpaceTangentVector,
+    ) where {T <: AbstractVector}
     return convert(
         t,
-        convert(Tuple{PoincareBallPoint,PoincareBallTangentVector}, (p, X))...,
+        convert(Tuple{PoincareBallPoint, PoincareBallTangentVector}, (p, X))...,
     )
 end
 
@@ -223,10 +223,10 @@ This is done in two steps, namely transforming it to the Poincare ball model and
 further on to a Hyperboloid.
 """
 function convert(
-    t::Type{Tuple{HyperboloidPoint,HyperboloidTangentVector}},
-    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTangentVector},
-)
-    return convert(t, convert(Tuple{PoincareBallPoint,PoincareBallTangentVector}, (p, X)))
+        t::Type{Tuple{HyperboloidPoint, HyperboloidTangentVector}},
+        (p, X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTangentVector},
+    )
+    return convert(t, convert(Tuple{PoincareBallPoint, PoincareBallTangentVector}, (p, X)))
 end
 
 @doc raw"""
@@ -270,11 +270,11 @@ end
 # overwrite the default construction on level 2 (dispatching on basis)
 # since this function should not call get_vector (that relies on get_basis itself on H2)
 function _get_basis(
-    M::Hyperbolic,
-    p,
-    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType};
-    kwargs...,
-)
+        M::Hyperbolic,
+        p,
+        B::DefaultOrthonormalBasis{ℝ, TangentSpaceType};
+        kwargs...,
+    )
     return get_basis_orthonormal(M, p, ℝ)
 end
 
@@ -282,7 +282,7 @@ function get_basis_orthonormal(M::Hyperbolic, p, r::RealNumbers)
     n = get_parameter(M.size)[1]
     V = [
         _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for
-        i in 1:n
+            i in 1:n
     ]
     return CachedBasis(DefaultOrthonormalBasis(r), gram_schmidt(M, p, V))
 end
@@ -292,7 +292,7 @@ function get_basis_diagonalizing(M::Hyperbolic, p, B::DiagonalizingOrthonormalBa
     X = B.frame_direction
     V = [
         _hyperbolize(M, p, [i == k ? one(eltype(p)) : zero(eltype(p)) for k in 1:n]) for
-        i in 1:n
+            i in 1:n
     ]
     κ = -ones(n)
     if norm(M, p, X) != 0
@@ -310,7 +310,7 @@ function get_basis_diagonalizing(M::Hyperbolic, p, B::DiagonalizingOrthonormalBa
         end
         κ[1] = 0.0
     end
-    V = gram_schmidt(M, p, V; atol=4 * eps(eltype(V[1])))
+    V = gram_schmidt(M, p, V; atol = 4 * eps(eltype(V[1])))
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, κ, V))
 end
 
@@ -331,12 +331,12 @@ function get_coordinates_orthonormal!(M::Hyperbolic, c, p, X, r::RealNumbers)
     return c
 end
 function get_coordinates_diagonalizing!(
-    M::Hyperbolic,
-    c,
-    p,
-    X,
-    B::DiagonalizingOrthonormalBasis,
-)
+        M::Hyperbolic,
+        c,
+        p,
+        X,
+        B::DiagonalizingOrthonormalBasis,
+    )
     c = get_coordinates!(M, c, p, X, get_basis_diagonalizing(M, p, B))
     return c
 end
@@ -426,12 +426,12 @@ function project!(::Hyperbolic, Y::HyperboloidTangentVector, p::HyperboloidPoint
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::Hyperbolic,
-    pX;
-    vector_at=nothing,
-    σ::Real=one(eltype(pX)),
-)
+        rng::AbstractRNG,
+        M::Hyperbolic,
+        pX;
+        vector_at = nothing,
+        σ::Real = one(eltype(pX)),
+    )
     N = get_parameter(M.size)[1]
     if vector_at === nothing
         a = randn(rng, N)

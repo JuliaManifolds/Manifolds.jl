@@ -10,9 +10,9 @@ real-valued orthogonal matrices with determinant ``+1``.
 
 Generate the manifold of ``n×n`` rotation matrices.
 """
-const Rotations{T} = GeneralUnitaryMatrices{T,ℝ,DeterminantOneMatrixType}
+const Rotations{T} = GeneralUnitaryMatrices{T, ℝ, DeterminantOneMatrixType}
 
-function Rotations(n::Int; parameter::Symbol=:type)
+function Rotations(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
     return Rotations{typeof(size)}(size)
 end
@@ -102,7 +102,7 @@ function _ev_zero(tridiagonal_elements, unitary, evec, evals, fill_at; i)
         evals[fill_at.x] = tridiagonal_elements[idx]^2 / 4
         fill_at.x += 1
     end
-    return (values=evals, vectors=evec)
+    return (values = evals, vectors = evec)
 end
 
 function get_basis_diagonalizing(M::Rotations, p, B::DiagonalizingOrthonormalBasis{ℝ})
@@ -118,15 +118,15 @@ function get_basis_diagonalizing(M::Rotations, p, B::DiagonalizingOrthonormalBas
     fill_at = Ref(1)
     while i <= n
         if trian_elem[i] == 0
-            evs = _ev_zero(trian_elem, unitary, evec, evals, fill_at; i=i)
+            evs = _ev_zero(trian_elem, unitary, evec, evals, fill_at; i = i)
             i += 1
         else
-            evs = _ev_diagonal(trian_elem, unitary, evec, evals, fill_at, i=i)
+            evs = _ev_diagonal(trian_elem, unitary, evec, evals, fill_at, i = i)
             j = 1
             while j < i
                 # the zero case should have been handled earlier
                 @assert trian_elem[j] != 0
-                evs = _ev_offdiagonal(trian_elem, unitary, evec, evals, fill_at, i=i, j=j)
+                evs = _ev_offdiagonal(trian_elem, unitary, evec, evals, fill_at, i = i, j = j)
                 j += 2
             end
             i += 2
@@ -231,20 +231,20 @@ function jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{3}}}, p, X)
 end
 
 function jacobian_exp_argument!(
-    ::Rotations{TypeParameter{Tuple{2}}},
-    J::AbstractMatrix,
-    p,
-    X,
-)
+        ::Rotations{TypeParameter{Tuple{2}}},
+        J::AbstractMatrix,
+        p,
+        X,
+    )
     J .= 1
     return J
 end
 function jacobian_exp_argument!(
-    M::Rotations{TypeParameter{Tuple{3}}},
-    J::AbstractMatrix,
-    p,
-    X,
-)
+        M::Rotations{TypeParameter{Tuple{3}}},
+        J::AbstractMatrix,
+        p,
+        X,
+    )
     θ = norm(M, p, X) / sqrt(2)
     copyto!(J, I)
     if θ ≉ 0
@@ -307,7 +307,7 @@ check with `check_det = false`.
 """
 project(::Rotations, ::Any)
 
-function project!(M::Rotations, q, p; check_det::Bool=true)
+function project!(M::Rotations, q, p; check_det::Bool = true)
     n = get_parameter(M.size)[1]
     F = svd(p)
     mul!(q, F.U, F.Vt)
@@ -321,12 +321,12 @@ function project!(M::Rotations, q, p; check_det::Bool=true)
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::Rotations,
-    pX;
-    vector_at=nothing,
-    σ::Real=one(eltype(pX)),
-)
+        rng::AbstractRNG,
+        M::Rotations,
+        pX;
+        vector_at = nothing,
+        σ::Real = one(eltype(pX)),
+    )
     if vector_at === nothing
         # Special case: Rotations(1) is just zero-dimensional
         (manifold_dimension(M) == 0) && return fill!(pX, 1)

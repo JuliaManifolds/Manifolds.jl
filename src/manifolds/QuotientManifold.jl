@@ -1,4 +1,3 @@
-
 """
     IsQuotientManifold <: AbstractTrait
 
@@ -43,8 +42,8 @@ it provides a (default) quotient structure that is different from the one introd
 
 Create a manifold where `M` is the quotient manifold and `N`is its total space.
 """
-struct QuotientManifold{𝔽,MT<:AbstractManifold{𝔽},NT<:AbstractManifold} <:
-       AbstractDecoratorManifold{𝔽}
+struct QuotientManifold{𝔽, MT <: AbstractManifold{𝔽}, NT <: AbstractManifold} <:
+    AbstractDecoratorManifold{𝔽}
     manifold::MT
     total_space::NT
 end

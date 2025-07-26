@@ -1,4 +1,3 @@
-
 """
     IsMetricManifold <: AbstractTrait
 
@@ -15,14 +14,14 @@ is the default metric for a manifold.
 This way the corresponding [`MetricManifold`](@ref) falls back to the default methods
 of the manifold it decorates.
 """
-struct IsDefaultMetric{G<:AbstractMetric} <: AbstractTrait
+struct IsDefaultMetric{G <: AbstractMetric} <: AbstractTrait
     metric::G
 end
 parent_trait(::IsDefaultMetric) = IsMetricManifold()
 
 # piping syntax for decoration
 (metric::AbstractMetric)(M::AbstractManifold) = MetricManifold(M, metric)
-(::Type{T})(M::AbstractManifold) where {T<:AbstractMetric} = MetricManifold(M, T())
+(::Type{T})(M::AbstractManifold) where {T <: AbstractMetric} = MetricManifold(M, T())
 
 """
     MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <: AbstractDecoratorManifold{𝔽}
@@ -43,8 +42,8 @@ you can of course still implement that directly.
 
 Generate the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` as a manifold with the `AbstractMetric` `G`.
 """
-struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <:
-       AbstractDecoratorManifold{𝔽}
+struct MetricManifold{𝔽, M <: AbstractManifold{𝔽}, G <: AbstractMetric} <:
+    AbstractDecoratorManifold{𝔽}
     manifold::M
     metric::G
 end
@@ -74,20 +73,20 @@ function active_traits(f, M::MetricManifold, args...)
 end
 # remetricise instead of double-decorating
 (metric::AbstractMetric)(M::MetricManifold) = MetricManifold(M.manifold, metric)
-(::Type{T})(M::MetricManifold) where {T<:AbstractMetric} = MetricManifold(M.manifold, T())
+(::Type{T})(M::MetricManifold) where {T <: AbstractMetric} = MetricManifold(M.manifold, T())
 
 decorated_manifold(M::MetricManifold) = M.manifold
 
 get_embedding(M::MetricManifold) = get_embedding(M.manifold)
 
 function change_metric!(
-    ::T,
-    M::AbstractDecoratorManifold,
-    Y,
-    ::G,
-    p,
-    X,
-) where {G<:AbstractMetric,T<:TraitList{<:IsDefaultMetric{<:G}}}
+        ::T,
+        M::AbstractDecoratorManifold,
+        Y,
+        ::G,
+        p,
+        X,
+    ) where {G <: AbstractMetric, T <: TraitList{<:IsDefaultMetric{<:G}}}
     return copyto!(M, Y, p, X)
 end
 function change_metric!(M::MetricManifold, Y, G::AbstractMetric, p, X)
@@ -105,13 +104,13 @@ end
 
 # Default fallback II: Default metric (not yet hit, check subtyping?)
 function change_representer!(
-    ::T,
-    M::AbstractDecoratorManifold,
-    Y,
-    ::G,
-    p,
-    X,
-) where {G<:AbstractMetric,T<:TraitList{<:IsDefaultMetric{<:G}}}
+        ::T,
+        M::AbstractDecoratorManifold,
+        Y,
+        ::G,
+        p,
+        X,
+    ) where {G <: AbstractMetric, T <: TraitList{<:IsDefaultMetric{<:G}}}
     return copyto!(M, Y, p, X)
 end
 # Default fallback II: compute in local metric representations
@@ -179,12 +178,12 @@ end
 Compute the Einstein tensor of the manifold `M` at the point `p`, see [https://en.wikipedia.org/wiki/Einstein_tensor](https://en.wikipedia.org/wiki/Einstein_tensor)
 """
 function einstein_tensor(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
-    Ric = ricci_tensor(M, p, B; backend=backend)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
+    Ric = ricci_tensor(M, p, B; backend = backend)
     g = local_metric(M, p, B)
     Ginv = inverse_local_metric(M, p, B)
     S = sum(Ginv .* Ric)
@@ -214,73 +213,73 @@ where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@r
 flat(::MetricManifold, ::Any, ::TFVector)
 
 function flat!(
-    ::TraitList{IsMetricManifold},
-    M::AbstractDecoratorManifold,
-    ξ::CoTFVector,
-    p,
-    X::TFVector,
-)
+        ::TraitList{IsMetricManifold},
+        M::AbstractDecoratorManifold,
+        ξ::CoTFVector,
+        p,
+        X::TFVector,
+    )
     g = local_metric(M, p, ξ.basis)
     copyto!(ξ.data, g * X.data)
     return ξ
 end
 function flat!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    ξ::CoTFVector,
-    p,
-    X::TFVector,
-) where {𝔽,TM<:AbstractManifold,G<:AbstractMetric}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        ξ::CoTFVector,
+        p,
+        X::TFVector,
+    ) where {𝔽, TM <: AbstractManifold, G <: AbstractMetric}
     flat!(M.manifold, ξ, p, X)
     return ξ
 end
 
 function get_basis(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    B::AbstractBasis,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        B::AbstractBasis,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return get_basis(M.manifold, p, B)
 end
 
 function get_coordinates(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    B::AbstractBasis,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+        B::AbstractBasis,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return get_coordinates(M.manifold, p, X, B)
 end
 function get_coordinates!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    Y,
-    p,
-    X,
-    B::AbstractBasis,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        Y,
+        p,
+        X,
+        B::AbstractBasis,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return get_coordinates!(M.manifold, Y, p, X, B)
 end
 
 function get_vector(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    c,
-    B::AbstractBasis,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        c,
+        B::AbstractBasis,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return get_vector(M.manifold, p, c, B)
 end
 function get_vector!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    Y,
-    p,
-    c,
-    B::AbstractBasis,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        Y,
+        p,
+        c,
+        B::AbstractBasis,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return get_vector!(M.manifold, Y, p, c, B)
 end
 
@@ -302,61 +301,61 @@ function inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)
 end
 @trait_function inverse_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
-function Base.convert(::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
+function Base.convert(::Type{MetricManifold{𝔽, MT, GT}}, M::MT) where {𝔽, MT, GT}
     return _convert_with_default(M, GT, Val(is_default_metric(M, GT())))
 end
 
 function _convert_with_default(
-    M::MT,
-    T::Type{<:AbstractMetric},
-    ::Val{true},
-) where {MT<:AbstractManifold}
+        M::MT,
+        T::Type{<:AbstractMetric},
+        ::Val{true},
+    ) where {MT <: AbstractManifold}
     return MetricManifold(M, T())
 end
 function _convert_with_default(
-    M::MT,
-    T::Type{<:AbstractMetric},
-    ::Val{false},
-) where {MT<:AbstractManifold}
+        M::MT,
+        T::Type{<:AbstractMetric},
+        ::Val{false},
+    ) where {MT <: AbstractManifold}
     return error(
         "Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.",
     )
 end
 
 function exp(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return exp(M.manifold, p, X)
 end
 function exp_fused(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    t::Number,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+        t::Number,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return exp_fused(M.manifold, p, X, t)
 end
 function exp!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    q,
-    p,
-    X,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        q,
+        p,
+        X,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return exp!(M.manifold, q, p, X)
 end
 function exp_fused!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    q,
-    p,
-    X,
-    t::Number,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        q,
+        p,
+        X,
+        t::Number,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return exp_fused!(M.manifold, q, p, X, t)
 end
 
@@ -382,23 +381,23 @@ where ``G_p`` is the loal matrix representation of the `AbstractMetric` `G`.
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
 function inner(
-    ::TraitList{IsMetricManifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X::TFVector,
-    Y::TFVector,
-)
+        ::TraitList{IsMetricManifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X::TFVector,
+        Y::TFVector,
+    )
     X.basis === Y.basis ||
         error("calculating inner product of vectors from different bases is not supported")
     return dot(X.data, local_metric(M, p, X.basis) * Y.data)
 end
 function inner(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    Y,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+        Y,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return inner(M.manifold, p, X, Y)
 end
 
@@ -414,32 +413,32 @@ is_default_metric(M::AbstractManifold, G::AbstractMetric)
 
 @trait_function is_default_metric(M::AbstractDecoratorManifold, G::AbstractMetric)
 function is_default_metric(
-    ::TraitList{IsDefaultMetric{G}},
-    ::AbstractDecoratorManifold,
-    ::G,
-) where {G<:AbstractMetric}
+        ::TraitList{IsDefaultMetric{G}},
+        ::AbstractDecoratorManifold,
+        ::G,
+    ) where {G <: AbstractMetric}
     return true
 end
 is_default_metric(M::MetricManifold) = is_default_metric(M.manifold, M.metric)
 is_default_metric(::AbstractManifold, ::AbstractMetric) = false
 
 function is_point(
-    ::TraitList{IsMetricManifold},
-    M::MetricManifold{𝔽,TM,G},
-    p;
-    kwargs...,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsMetricManifold},
+        M::MetricManifold{𝔽, TM, G},
+        p;
+        kwargs...,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return is_point(M.manifold, p; kwargs...)
 end
 
 function is_vector(
-    ::TraitList{IsMetricManifold},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    cbp::Bool=true;
-    kwargs...,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsMetricManifold},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+        cbp::Bool = true;
+        kwargs...,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return is_vector(M.manifold, p, X, cbp; kwargs...)
 end
 
@@ -459,11 +458,11 @@ local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 @trait_function local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis; kwargs...)
 
 function local_metric(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    B::AbstractBasis,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        B::AbstractBasis,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return local_metric(M.manifold, p, B)
 end
 
@@ -481,11 +480,11 @@ dimensions of the resulting multi-dimensional array are ordered ``(i,j,k)``.
 """
 local_metric_jacobian(::AbstractManifold, ::Any, B::AbstractBasis, ::AbstractDiffBackend)
 function local_metric_jacobian(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
     n = size(p, 1)
     ∂g = reshape(_jacobian(q -> local_metric(M, q, B), copy(M, p), backend), n, n, n)
     return ∂g
@@ -510,20 +509,20 @@ falls back to `log(M,p,q)`. Otherwise, you have to provide an implementation for
 log(::MetricManifold, ::Any...)
 
 function log(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    q,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        q,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return log(M.manifold, p, q)
 end
 function log!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    X,
-    p,
-    q,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        X,
+        p,
+        q,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return log!(M.manifold, X, p, q)
 end
 
@@ -557,55 +556,55 @@ function norm(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, p, X:
 end
 
 function parallel_transport_to(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    q,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+        q,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return parallel_transport_to(M.manifold, p, X, q)
 end
 function parallel_transport_to!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    Y,
-    p,
-    X,
-    q,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        Y,
+        p,
+        X,
+        q,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return parallel_transport_to!(M.manifold, Y, p, X, q)
 end
 
 function project(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return project(M.manifold, p)
 end
 function project!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    q,
-    p,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        q,
+        p,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return project!(M.manifold, q, p)
 end
 function project(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return project(M.manifold, p, X)
 end
 function project!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    Y,
-    p,
-    X,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        Y,
+        p,
+        X,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return project!(M.manifold, Y, p, X)
 end
 
@@ -624,13 +623,13 @@ uses the Einstein summation convention.
 """
 ricci_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
 function ricci_curvature(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
     Ginv = inverse_local_metric(M, p, B)
-    Ric = ricci_tensor(M, p, B; backend=backend)
+    Ric = ricci_tensor(M, p, B; backend = backend)
     S = sum(Ginv .* Ric)
     return S
 end
@@ -658,23 +657,23 @@ where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 sharp(::MetricManifold, ::Any, ::CoTFVector)
 
 function sharp!(
-    ::TraitList{IsMetricManifold},
-    M::AbstractDecoratorManifold,
-    X::TFVector,
-    p,
-    ξ::CoTFVector,
-)
+        ::TraitList{IsMetricManifold},
+        M::AbstractDecoratorManifold,
+        X::TFVector,
+        p,
+        ξ::CoTFVector,
+    )
     Ginv = inverse_local_metric(M, p, X.basis)
     copyto!(X.data, Ginv * ξ.data)
     return X
 end
 function sharp!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    X::TFVector,
-    p,
-    ξ::CoTFVector,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        X::TFVector,
+        p,
+        ξ::CoTFVector,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     sharp!(M.manifold, X, p, ξ)
     return X
 end
@@ -687,66 +686,66 @@ function Base.show(io::IO, i::IsDefaultMetric)
 end
 
 function vector_transport_direction(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+        d,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return vector_transport_direction(M.manifold, p, X, d, m)
 end
 function vector_transport_direction!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    Y,
-    p,
-    X,
-    d,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        Y,
+        p,
+        X,
+        d,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return vector_transport_direction!(M.manifold, Y, p, X, d, m)
 end
 
 function vector_transport_to(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+        q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return vector_transport_to(M.manifold, p, X, q, m)
 end
 function vector_transport_to!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    Y,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        Y,
+        p,
+        X,
+        q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return vector_transport_to!(M.manifold, Y, p, X, q, m)
 end
 
 function Weingarten(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    V,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+        V,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return Weingarten(M.manifold, p, X, V)
 end
 function Weingarten!(
-    ::TraitList{IsDefaultMetric{G}},
-    M::MetricManifold{𝔽,TM,G},
-    Y,
-    p,
-    X,
-    V,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        ::TraitList{IsDefaultMetric{G}},
+        M::MetricManifold{𝔽, TM, G},
+        Y,
+        p,
+        X,
+        V,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     return Weingarten!(M.manifold, Y, p, X, V)
 end
 
@@ -755,64 +754,64 @@ zero_vector!(M::MetricManifold, X, p) = zero_vector!(M.manifold, X, p)
 
 is_metric_function(::Any) = false
 for mf in [
-    change_metric,
-    change_metric!,
-    change_representer,
-    change_representer!,
-    christoffel_symbols_first,
-    christoffel_symbols_second,
-    christoffel_symbols_second_jacobian,
-    det_local_metric,
-    einstein_tensor,
-    exp,
-    exp!,
-    exp_fused,
-    exp_fused!,
-    flat!,
-    gaussian_curvature,
-    get_basis,
-    get_coordinates,
-    get_coordinates!,
-    get_vector,
-    get_vector!,
-    get_vectors,
-    inner,
-    inverse_local_metric,
-    inverse_retract,
-    inverse_retract!,
-    local_metric,
-    local_metric_jacobian,
-    log,
-    log!,
-    log_local_metric_density,
-    mean,
-    mean!,
-    median,
-    median!,
-    mid_point,
-    norm,
-    parallel_transport_direction,
-    parallel_transport_direction!,
-    parallel_transport_to,
-    parallel_transport_to!,
-    retract,
-    retract!,
-    retract_fused,
-    retract_fused!,
-    ricci_curvature,
-    ricci_tensor,
-    riemann_tensor,
-    riemannian_gradient,
-    riemannian_gradient!,
-    riemannian_Hessian,
-    riemannian_Hessian!,
-    sharp!,
-    vector_transport_direction,
-    vector_transport_direction!,
-    vector_transport_to,
-    vector_transport_to!,
-    Weingarten,
-    Weingarten!,
-]
+        change_metric,
+        change_metric!,
+        change_representer,
+        change_representer!,
+        christoffel_symbols_first,
+        christoffel_symbols_second,
+        christoffel_symbols_second_jacobian,
+        det_local_metric,
+        einstein_tensor,
+        exp,
+        exp!,
+        exp_fused,
+        exp_fused!,
+        flat!,
+        gaussian_curvature,
+        get_basis,
+        get_coordinates,
+        get_coordinates!,
+        get_vector,
+        get_vector!,
+        get_vectors,
+        inner,
+        inverse_local_metric,
+        inverse_retract,
+        inverse_retract!,
+        local_metric,
+        local_metric_jacobian,
+        log,
+        log!,
+        log_local_metric_density,
+        mean,
+        mean!,
+        median,
+        median!,
+        mid_point,
+        norm,
+        parallel_transport_direction,
+        parallel_transport_direction!,
+        parallel_transport_to,
+        parallel_transport_to!,
+        retract,
+        retract!,
+        retract_fused,
+        retract_fused!,
+        ricci_curvature,
+        ricci_tensor,
+        riemann_tensor,
+        riemannian_gradient,
+        riemannian_gradient!,
+        riemannian_Hessian,
+        riemannian_Hessian!,
+        sharp!,
+        vector_transport_direction,
+        vector_transport_direction!,
+        vector_transport_to,
+        vector_transport_to!,
+        Weingarten,
+        Weingarten!,
+    ]
     @eval is_metric_function(::typeof($mf)) = true
 end

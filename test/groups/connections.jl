@@ -29,7 +29,7 @@ using Manifolds: connection
                 Manifolds.exp_fused(CSO3, p, X, 1.0),
                 Manifolds.exp_fused(SO3, p, X, 1.0),
             )
-            @test isapprox(SO3, p, log(CSO3, p, q), log(SO3, p, q); atol=1e-6)
+            @test isapprox(SO3, p, log(CSO3, p, q), log(SO3, p, q); atol = 1.0e-6)
         end
     end
 

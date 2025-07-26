@@ -12,10 +12,10 @@ using Manifolds:
 struct TestInvariantMetricBase <: AbstractMetric end
 
 function active_traits(
-    f,
-    M::MetricManifold{𝔽,<:AbstractManifold,TestInvariantMetricBase},
-    args...,
-) where {𝔽}
+        f,
+        M::MetricManifold{𝔽, <:AbstractManifold, TestInvariantMetricBase},
+        args...,
+    ) where {𝔽}
     return merge_traits(
         HasLeftInvariantMetric(),
         IsMetricManifold(),
@@ -23,20 +23,20 @@ function active_traits(
     )
 end
 function local_metric(
-    ::MetricManifold{𝔽,<:AbstractManifold,TestInvariantMetricBase},
-    ::Identity,
-    ::DefaultOrthonormalBasis,
-) where {𝔽}
+        ::MetricManifold{𝔽, <:AbstractManifold, TestInvariantMetricBase},
+        ::Identity,
+        ::DefaultOrthonormalBasis,
+    ) where {𝔽}
     return Diagonal([1.0, 2.0, 3.0])
 end
 
 struct TestBiInvariantMetricBase <: AbstractMetric end
 
 function active_traits(
-    f,
-    M::MetricManifold{𝔽,<:AbstractManifold,TestBiInvariantMetricBase},
-    args...,
-) where {𝔽}
+        f,
+        M::MetricManifold{𝔽, <:AbstractManifold, TestBiInvariantMetricBase},
+        args...,
+    ) where {𝔽}
     return merge_traits(
         HasBiinvariantMetric(),
         IsMetricManifold(),
@@ -44,10 +44,10 @@ function active_traits(
     )
 end
 function local_metric(
-    ::MetricManifold{𝔽,<:AbstractManifold,<:TestBiInvariantMetricBase},
-    ::Identity,
-    ::DefaultOrthonormalBasis,
-) where {𝔽}
+        ::MetricManifold{𝔽, <:AbstractManifold, <:TestBiInvariantMetricBase},
+        ::Identity,
+        ::DefaultOrthonormalBasis,
+    ) where {𝔽}
     return Diagonal(0.4I, 3)
 end
 
@@ -93,13 +93,13 @@ end
         @test isapprox(SO3, exp(G, p, X), exp(SO3, p, X))
         exp!(G, p2, p, X)
         @test isapprox(SO3, p2, exp(SO3, p, X))
-        @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol=1e-6)
+        @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol = 1.0e-6)
         log!(G, Y, p, q)
-        @test isapprox(SO3, p, Y, log(SO3, p, q); atol=1e-6)
+        @test isapprox(SO3, p, Y, log(SO3, p, q); atol = 1.0e-6)
 
         G = MetricManifold(SO3, TestBiInvariantMetricBase())
         @test isapprox(SO3, exp(G, p, X), exp(SO3, p, X))
-        @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol=1e-6)
+        @test isapprox(SO3, p, log(G, p, q), log(SO3, p, q); atol = 1.0e-6)
 
         @test isapprox(SO3, Manifolds.exp_fused(G, p, X, 1.0), exp(G, p, X))
         p3 = similar(p)
@@ -168,21 +168,21 @@ end
                 pts,
                 X_pts,
                 X_pts;
-                test_diff=true,
-                test_lie_bracket=true,
-                test_adjoint_action=true,
-                diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+                test_diff = true,
+                test_lie_bracket = true,
+                test_adjoint_action = true,
+                diff_convs = [(), (LeftForwardAction(),), (RightBackwardAction(),)],
             )
             test_manifold(
                 G,
                 pts;
                 #basis_types_vecs=basis_types,
-                basis_types_to_from=basis_types,
-                is_mutating=true,
+                basis_types_to_from = basis_types,
+                is_mutating = true,
                 #test_inplace=true,
-                test_vee_hat=false,
-                exp_log_atol_multiplier=50,
-                test_representation_size=false,
+                test_vee_hat = false,
+                exp_log_atol_multiplier = 50,
+                test_representation_size = false,
             )
         end
     end

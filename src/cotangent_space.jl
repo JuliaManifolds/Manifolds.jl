@@ -1,11 +1,10 @@
-
 """
     RieszRepresenterCotangentVector(M::AbstractManifold, p, X)
 
 Cotangent vector in Riesz representer form on manifold `M` at point `p` with Riesz
 representer `X`.
 """
-struct RieszRepresenterCotangentVector{TM<:AbstractManifold,TP,TX}
+struct RieszRepresenterCotangentVector{TM <: AbstractManifold, TP, TX}
     manifold::TM
     p::TP
     X::TX
@@ -32,7 +31,7 @@ from the tangent bundle to vectors from the cotangent bundle
 ``♭ : T\mathcal M → T^{*}\mathcal M``
 """
 flat(M::AbstractManifold, p, X) = RieszRepresenterCotangentVector(M, p, X)
-function flat(M::AbstractManifold, p, X::TFVector{<:Any,<:AbstractBasis})
+function flat(M::AbstractManifold, p, X::TFVector{<:Any, <:AbstractBasis})
     return CoTFVector(X.data, dual_basis(M, p, X.basis))
 end
 
@@ -46,11 +45,11 @@ function flat!(::AbstractManifold, ξ::RieszRepresenterCotangentVector, p, X)
 end
 
 function get_coordinates(
-    M::AbstractManifold,
-    p,
-    ξ::RieszRepresenterCotangentVector,
-    ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
-) where {𝔽}
+        M::AbstractManifold,
+        p,
+        ξ::RieszRepresenterCotangentVector,
+        ::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
+    ) where {𝔽}
     return get_coordinates(M, p, ξ.X, DefaultOrthonormalBasis{𝔽}())
 end
 for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
@@ -60,7 +59,7 @@ for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
                 M::$TM,
                 p,
                 ξ::RieszRepresenterCotangentVector,
-                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+                b::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
             ) where {𝔽}
         end,
     )
@@ -68,12 +67,12 @@ end
 # define also for all decorators and explicit definiting subtypes
 
 function get_coordinates!(
-    M::AbstractManifold,
-    v,
-    p,
-    ξ::RieszRepresenterCotangentVector,
-    ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
-) where {𝔽}
+        M::AbstractManifold,
+        v,
+        p,
+        ξ::RieszRepresenterCotangentVector,
+        ::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
+    ) where {𝔽}
     get_coordinates!(M, v, p, ξ.X, DefaultOrthonormalBasis{𝔽}())
     return v
 end
@@ -85,18 +84,18 @@ for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
                 v,
                 p,
                 ξ::RieszRepresenterCotangentVector,
-                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+                b::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
             ) where {𝔽}
         end,
     )
 end
 
 function get_vector(
-    M::AbstractManifold,
-    p,
-    v,
-    ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
-) where {𝔽}
+        M::AbstractManifold,
+        p,
+        v,
+        ::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
+    ) where {𝔽}
     X = get_vector(M, p, v, DefaultOrthonormalBasis{𝔽}())
     return RieszRepresenterCotangentVector(M, p, X)
 end
@@ -107,19 +106,19 @@ for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
                 M::$TM,
                 p,
                 v,
-                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+                b::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
             ) where {𝔽}
         end,
     )
 end
 
 function get_vector!(
-    M::AbstractManifold,
-    ξr::RieszRepresenterCotangentVector,
-    p,
-    v,
-    ::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
-) where {𝔽}
+        M::AbstractManifold,
+        ξr::RieszRepresenterCotangentVector,
+        p,
+        v,
+        ::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
+    ) where {𝔽}
     get_vector!(M, ξr.X, p, v, DefaultOrthonormalBasis{𝔽}())
     return ξr
 end
@@ -131,7 +130,7 @@ for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
                 ξr::RieszRepresenterCotangentVector,
                 p,
                 v,
-                b::DefaultOrthonormalBasis{𝔽,CotangentSpaceType},
+                b::DefaultOrthonormalBasis{𝔽, CotangentSpaceType},
             ) where {𝔽}
         end,
     )
@@ -152,7 +151,7 @@ sharp(::AbstractManifold, p, ξ)
 @trait_function sharp(M::AbstractDecoratorManifold, X::TFVector, p, ξ::CoTFVector)
 
 sharp(::AbstractManifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
-function sharp(M::AbstractManifold, p, X::CoTFVector{<:Any,<:AbstractBasis})
+function sharp(M::AbstractManifold, p, X::CoTFVector{<:Any, <:AbstractBasis})
     return TFVector(X.data, dual_basis(M, p, X.basis))
 end
 

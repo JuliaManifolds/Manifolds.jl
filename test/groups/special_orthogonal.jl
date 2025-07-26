@@ -29,7 +29,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
 
         ge = allocate(pts[1])
         identity_element!(G, ge)
-        @test isapprox(ge, I; atol=1e-10)
+        @test isapprox(ge, I; atol = 1.0e-10)
 
         gI = Identity(G)
         gT = allocate_result(G, exp, gI, log(G, pts[1], pts[2]))
@@ -44,24 +44,24 @@ using Manifolds: LeftForwardAction, RightBackwardAction
             Xgpts = convert.(T, Xpts)
             @test compose(G, gpts[1], gpts[2]) ≈ gpts[1] * gpts[2]
             @test translate_diff(G, gpts[2], gpts[1], Xgpts[1], LeftForwardAction()) ≈
-                  Xgpts[1]
+                Xgpts[1]
             @test translate_diff(G, gpts[2], gpts[1], Xgpts[1], RightBackwardAction()) ≈
-                  transpose(gpts[2]) * Xgpts[1] * gpts[2]
+                transpose(gpts[2]) * Xgpts[1] * gpts[2]
             test_group(
                 G,
                 gpts,
                 Xgpts,
                 Xgpts;
-                test_diff=true,
-                test_invariance=true,
-                test_lie_bracket=true,
-                test_adjoint_action=true,
-                test_exp_from_identity=true,
-                test_log_from_identity=true,
-                test_vee_hat_from_identity=true,
-                test_inv_diff=true,
-                test_adjoint_inv_diff=true,
-                test_apply_diff_group=true,
+                test_diff = true,
+                test_invariance = true,
+                test_lie_bracket = true,
+                test_adjoint_action = true,
+                test_exp_from_identity = true,
+                test_log_from_identity = true,
+                test_vee_hat_from_identity = true,
+                test_inv_diff = true,
+                test_adjoint_inv_diff = true,
+                test_apply_diff_group = true,
             )
 
             @testset "log_lie edge cases" begin
@@ -72,7 +72,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
         end
         @testset "Decorator forwards to group" begin
             DM = NotImplementedGroupDecorator(G)
-            test_group(DM, pts, Xpts, Xpts; test_diff=true)
+            test_group(DM, pts, Xpts, Xpts; test_diff = true)
         end
         @testset "Group forwards to decorated" begin
             retraction_methods = [
@@ -92,21 +92,21 @@ using Manifolds: LeftForwardAction, RightBackwardAction
             test_manifold(
                 G,
                 pts;
-                test_injectivity_radius=false,
-                test_project_tangent=true,
-                test_musical_isomorphisms=false,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                exp_log_atol_multiplier=20,
-                retraction_atol_multiplier=12,
-                is_tangent_atol_multiplier=1.2,
-                test_atlases=(Manifolds.RetractionAtlas(),),
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = false,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                exp_log_atol_multiplier = 20,
+                retraction_atol_multiplier = 12,
+                is_tangent_atol_multiplier = 1.2,
+                test_atlases = (Manifolds.RetractionAtlas(),),
             )
 
             @test injectivity_radius(G) == injectivity_radius(M)
             @test injectivity_radius(G, pts[1]) == injectivity_radius(M, pts[1])
             @test injectivity_radius(G, pts[1], PolarRetraction()) ==
-                  injectivity_radius(M, pts[1], PolarRetraction())
+                injectivity_radius(M, pts[1], PolarRetraction())
 
             y = allocate(pts[1])
             exp!(G, y, pts[1], Xpts[1])
@@ -148,7 +148,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
             @test Xⁱ ≈ vee(G, pe, X)
 
             X2 = hat(G, pts[1], Xⁱ)
-            @test isapprox(M, pe, X2, hat(G, pe, Xⁱ); atol=1e-6)
+            @test isapprox(M, pe, X2, hat(G, pe, Xⁱ); atol = 1.0e-6)
         end
         @testset "Identity and get_vector/get_coordinates" begin
             e = Identity(G)
@@ -207,7 +207,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
                 pts[1],
                 Xpts[1],
                 Xpts[2];
-                n=0,
+                n = 0,
             ),
             Xpts[2],
         )
@@ -221,7 +221,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
             q2,
             ManifoldDiff.differential_exp_argument_lie_approx(G, pts[1], Xpts[1], Xpts[2]),
             diff_ref;
-            atol=1e-12,
+            atol = 1.0e-12,
         )
     end
 

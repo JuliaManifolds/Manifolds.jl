@@ -1,4 +1,3 @@
-
 include("../header.jl")
 include("group_utils.jl")
 
@@ -9,7 +8,7 @@ include("group_utils.jl")
 
     @test repr(A) == "TranslationAction($(repr(M)), $(repr(G)), LeftAction())"
     @test repr(switch_direction(A)) ==
-          "TranslationAction($(repr(M)), $(repr(G)), RightAction())"
+        "TranslationAction($(repr(M)), $(repr(G)), RightAction())"
 
     types_a = [Matrix{Float64}]
 
@@ -22,45 +21,45 @@ include("group_utils.jl")
     for (T_A, T_M) in zip(types_a, types_m)
         a_pts =
             convert.(
-                T_A,
-                [
-                    [0.0 1.0 2.0; 2.0 4.0 1.0],
-                    [-1.0 0.0 2.0; -2.0 3.0 3.0],
-                    [1.0 1.0 2.0; 3.0 2.0 1.0],
-                ],
-            )
+            T_A,
+            [
+                [0.0 1.0 2.0; 2.0 4.0 1.0],
+                [-1.0 0.0 2.0; -2.0 3.0 3.0],
+                [1.0 1.0 2.0; 3.0 2.0 1.0],
+            ],
+        )
         a_X_pts =
             convert.(
-                T_A,
-                [
-                    [10.0 1.0 2.0; 2.0 4.0 1.0],
-                    [-1.0 10.0 2.0; -2.0 3.0 3.0],
-                    [1.0 1.0 12.0; 3.0 2.0 1.0],
-                ],
-            )
+            T_A,
+            [
+                [10.0 1.0 2.0; 2.0 4.0 1.0],
+                [-1.0 10.0 2.0; -2.0 3.0 3.0],
+                [1.0 1.0 12.0; 3.0 2.0 1.0],
+            ],
+        )
         m_pts =
             convert.(
-                T_M,
-                [
-                    [0.0 1.0 2.0; 2.0 4.0 1.0],
-                    [-1.0 0.0 2.0; -2.0 3.0 3.0],
-                    [1.0 1.0 2.0; 3.0 2.0 1.0],
-                ],
-            )
+            T_M,
+            [
+                [0.0 1.0 2.0; 2.0 4.0 1.0],
+                [-1.0 0.0 2.0; -2.0 3.0 3.0],
+                [1.0 1.0 2.0; 3.0 2.0 1.0],
+            ],
+        )
         X_pts =
             convert.(
-                T_M,
-                [
-                    [0.0 1.0 2.0; 2.0 4.0 1.0],
-                    [-1.0 0.0 2.0; -2.0 3.0 3.0],
-                    [1.0 1.0 2.0; 3.0 2.0 1.0],
-                ],
-            )
+            T_M,
+            [
+                [0.0 1.0 2.0; 2.0 4.0 1.0],
+                [-1.0 0.0 2.0; -2.0 3.0 3.0],
+                [1.0 1.0 2.0; 3.0 2.0 1.0],
+            ],
+        )
 
         atol = if eltype(T_M) == Float32
-            1e-7
+            1.0e-7
         else
-            1e-15
+            1.0e-15
         end
         @test apply_diff(A, a_pts[1], m_pts[1], X_pts[1]) === X_pts[1]
         @test inverse_apply_diff(A, a_pts[1], m_pts[1], X_pts[1]) === X_pts[1]
@@ -88,9 +87,9 @@ include("group_utils.jl")
             a_pts,
             m_pts,
             X_pts;
-            test_optimal_alignment=false,
-            test_diff=true,
-            atol=atol,
+            test_optimal_alignment = false,
+            test_diff = true,
+            atol = atol,
         )
     end
 end

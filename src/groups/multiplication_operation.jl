@@ -1,4 +1,3 @@
-
 """
     MultiplicationOperation <: AbstractGroupOperation
 
@@ -41,22 +40,22 @@ function adjoint_inv_diff(::MultiplicationGroupTrait, G::AbstractDecoratorManifo
     return -(p' * X * inv(G, p)')
 end
 function adjoint_inv_diff(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    p::AbstractArray{<:Number,0},
-    X::AbstractArray{<:Number,0},
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        p::AbstractArray{<:Number, 0},
+        X::AbstractArray{<:Number, 0},
+    )
     p_inv = inv(p[])
     return -(p[] * X * p_inv)
 end
 
 function adjoint_inv_diff!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    Y,
-    p,
-    X,
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        Y,
+        p,
+        X,
+    )
     p_inv = inv(p)
     Z = X * p_inv'
     mul!(Y, p', Z)
@@ -65,18 +64,18 @@ function adjoint_inv_diff!(
 end
 
 function identity_element!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    p::AbstractMatrix,
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        p::AbstractMatrix,
+    )
     return copyto!(p, I)
 end
 
 function identity_element!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    p::AbstractArray,
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        p::AbstractArray,
+    )
     if length(p) == 1
         fill!(p, one(eltype(p)))
     else
@@ -86,79 +85,79 @@ function identity_element!(
 end
 
 function is_identity(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    q::Number;
-    kwargs...,
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        q::Number;
+        kwargs...,
+    )
     return isapprox(G, q, one(q); kwargs...)
 end
 function is_identity(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    q::AbstractArray{<:Any,0};
-    kwargs...,
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        q::AbstractArray{<:Any, 0};
+        kwargs...,
+    )
     return isapprox(G, q[], one(q[]); kwargs...)
 end
 function is_identity(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    q::AbstractMatrix;
-    kwargs...,
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        q::AbstractMatrix;
+        kwargs...,
+    )
     return isapprox(G, q, I; kwargs...)
 end
 
 LinearAlgebra.mul!(q, ::Identity{MultiplicationOperation}, p) = copyto!(q, p)
 LinearAlgebra.mul!(q, p, ::Identity{MultiplicationOperation}) = copyto!(q, p)
 function LinearAlgebra.mul!(
-    q::AbstractMatrix,
-    ::Identity{MultiplicationOperation},
-    ::Identity{MultiplicationOperation},
-)
+        q::AbstractMatrix,
+        ::Identity{MultiplicationOperation},
+        ::Identity{MultiplicationOperation},
+    )
     return copyto!(q, I)
 end
 function LinearAlgebra.mul!(
-    q,
-    ::Identity{MultiplicationOperation},
-    ::Identity{MultiplicationOperation},
-)
+        q,
+        ::Identity{MultiplicationOperation},
+        ::Identity{MultiplicationOperation},
+    )
     return copyto!(q, one(q))
 end
 function LinearAlgebra.mul!(
-    q::Identity{MultiplicationOperation},
-    ::Identity{MultiplicationOperation},
-    ::Identity{MultiplicationOperation},
-)
+        q::Identity{MultiplicationOperation},
+        ::Identity{MultiplicationOperation},
+        ::Identity{MultiplicationOperation},
+    )
     return q
 end
 Base.one(e::Identity{MultiplicationOperation}) = e
 
 Base.inv(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p) = inv(p)
 function Base.inv(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    e::Identity{MultiplicationOperation},
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        e::Identity{MultiplicationOperation},
+    )
     return e
 end
 
 inv!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, q, p) = copyto!(q, inv(G, p))
 function inv!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    q,
-    ::Identity{MultiplicationOperation},
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        q,
+        ::Identity{MultiplicationOperation},
+    )
     return identity_element!(G, q)
 end
 function inv!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    q::Identity{MultiplicationOperation},
-    e::Identity{MultiplicationOperation},
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        q::Identity{MultiplicationOperation},
+        e::Identity{MultiplicationOperation},
+    )
     return q
 end
 
@@ -174,11 +173,11 @@ function inv_diff(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, p, X
     return -(p * X * inv(G, p))
 end
 function inv_diff(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    p::AbstractArray{<:Number,0},
-    X::AbstractArray{<:Number,0},
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        p::AbstractArray{<:Number, 0},
+        X::AbstractArray{<:Number, 0},
+    )
     p_inv = inv(p[])
     return -(p[] * X * p_inv)
 end
@@ -198,59 +197,59 @@ function compose!(::MultiplicationGroupTrait, G::AbstractDecoratorManifold, x, p
 end
 
 function inverse_translate(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    p,
-    q,
-    ::LeftForwardAction,
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        p,
+        q,
+        ::LeftForwardAction,
+    )
     return p \ q
 end
 function inverse_translate(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    p,
-    q,
-    ::RightBackwardAction,
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        p,
+        q,
+        ::RightBackwardAction,
+    )
     return q / p
 end
 
 function inverse_translate!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    x,
-    p,
-    q,
-    conv::ActionDirectionAndSide,
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        x,
+        p,
+        q,
+        conv::ActionDirectionAndSide,
+    )
     return copyto!(x, inverse_translate(G, p, q, conv))
 end
 
 function exp_lie!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    q,
-    X::Union{Number,AbstractMatrix},
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        q,
+        X::Union{Number, AbstractMatrix},
+    )
     copyto!(q, exp(X))
     return q
 end
 
 function log_lie!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    X::AbstractMatrix,
-    q::AbstractMatrix,
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        X::AbstractMatrix,
+        q::AbstractMatrix,
+    )
     return log_safe!(X, q)
 end
 function log_lie!(
-    ::MultiplicationGroupTrait,
-    G::AbstractDecoratorManifold,
-    X,
-    ::Identity{MultiplicationOperation},
-)
+        ::MultiplicationGroupTrait,
+        G::AbstractDecoratorManifold,
+        X,
+        ::Identity{MultiplicationOperation},
+    )
     return zero_vector!(G, X, identity_element(G))
 end
 

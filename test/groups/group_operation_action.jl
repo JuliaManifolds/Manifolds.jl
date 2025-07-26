@@ -1,4 +1,3 @@
-
 include("../header.jl")
 include("group_utils.jl")
 
@@ -22,32 +21,32 @@ using Manifolds:
     @test base_group(A_left_fwd) == G
     @test repr(A_left_fwd) == "GroupOperationAction($(repr(G)), (LeftAction(), LeftSide()))"
     @test repr(A_right_back) ==
-          "GroupOperationAction($(repr(G)), (RightAction(), RightSide()))"
+        "GroupOperationAction($(repr(G)), (RightAction(), RightSide()))"
 
     for type in types
         a_pts = convert.(type, [reshape(i:(i + 3), 2, 2) for i in 1:3])
         m_pts = convert.(type, [reshape((i + 2):(i + 5), 2, 2) for i in 1:3])
 
-        atol = eltype(m_pts[1]) == Float32 ? 1e-5 : 1e-10
+        atol = eltype(m_pts[1]) == Float32 ? 1.0e-5 : 1.0e-10
 
         test_action(
             A_left_fwd,
             a_pts,
             m_pts;
-            test_optimal_alignment=false,
-            test_diff=false,
-            atol=atol,
-            test_switch_direction=true,
+            test_optimal_alignment = false,
+            test_diff = false,
+            atol = atol,
+            test_switch_direction = true,
         )
 
         test_action(
             A_right_back,
             a_pts,
             m_pts;
-            test_optimal_alignment=false,
-            test_diff=false,
-            atol=atol,
-            test_switch_direction=true,
+            test_optimal_alignment = false,
+            test_diff = false,
+            atol = atol,
+            test_switch_direction = true,
         )
     end
 
@@ -73,16 +72,16 @@ using Manifolds:
     @test base_group(A_left_fwd) == G
     @test repr(A_left_fwd) == "GroupOperationAction($(repr(G)), (LeftAction(), LeftSide()))"
     @test repr(A_right_back) ==
-          "GroupOperationAction($(repr(G)), (RightAction(), RightSide()))"
+        "GroupOperationAction($(repr(G)), (RightAction(), RightSide()))"
 
     test_action(
         A_left_fwd,
         a_pts,
         m_pts,
         X_pts;
-        test_optimal_alignment=true,
-        test_diff=true,
-        test_switch_direction=true,
+        test_optimal_alignment = true,
+        test_diff = true,
+        test_switch_direction = true,
     )
 
     test_action(
@@ -90,9 +89,9 @@ using Manifolds:
         a_pts,
         m_pts,
         X_pts;
-        test_optimal_alignment=true,
-        test_diff=true,
-        test_switch_direction=true,
+        test_optimal_alignment = true,
+        test_diff = true,
+        test_switch_direction = true,
     )
 
     test_action(
@@ -100,9 +99,9 @@ using Manifolds:
         a_pts,
         m_pts,
         X_pts;
-        test_optimal_alignment=true,
-        test_diff=true,
-        test_switch_direction=true,
+        test_optimal_alignment = true,
+        test_diff = true,
+        test_switch_direction = true,
     )
 
     test_action(
@@ -110,9 +109,9 @@ using Manifolds:
         a_pts,
         m_pts,
         X_pts;
-        test_optimal_alignment=true,
-        test_diff=true,
-        test_switch_direction=true,
+        test_optimal_alignment = true,
+        test_diff = true,
+        test_switch_direction = true,
     )
 
     m = m_pts[1]
@@ -140,19 +139,19 @@ using Manifolds:
 
     @testset "apply_diff_group" begin
         @test apply_diff_group(A_left_fwd, a_pts[1], X, m) ≈
-              translate_diff(G, m, a_pts[1], X, RightBackwardAction())
+            translate_diff(G, m, a_pts[1], X, RightBackwardAction())
         Y = similar(X)
         apply_diff_group!(A_left_fwd, Y, a_pts[1], X, m)
         @test Y ≈ translate_diff(G, m, a_pts[1], X, RightBackwardAction())
 
         @test adjoint_apply_diff_group(A_left_fwd, a_pts[1], X, m) ≈
-              inverse_translate_diff(G, a_pts[1], m, X, RightBackwardAction())
+            inverse_translate_diff(G, a_pts[1], m, X, RightBackwardAction())
         Y = similar(X)
         adjoint_apply_diff_group!(A_left_fwd, Y, a_pts[1], X, m)
         @test Y ≈ inverse_translate_diff(G, a_pts[1], m, X, RightBackwardAction())
 
         @test adjoint_apply_diff_group(A_right_fwd, a_pts[1], X, m) ≈
-              inverse_translate_diff(
+            inverse_translate_diff(
             G,
             m,
             a_pts[1],
@@ -171,7 +170,7 @@ using Manifolds:
         )
 
         @test apply_diff_group(A_right_fwd, a_pts[1], X, m) ≈
-              -m \ (a_pts[1] * X / a_pts[1]) * m
+            -m \ (a_pts[1] * X / a_pts[1]) * m
         @test apply_diff_group(A_left_back, a_pts[1], X, m) ≈ -a_pts[1] * X / a_pts[1]
     end
 end

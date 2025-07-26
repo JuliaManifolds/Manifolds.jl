@@ -1,6 +1,5 @@
-
-const PowerGroup{𝔽,M<:AbstractManifold{𝔽},TPR<:AbstractPowerRepresentation} =
-    GroupManifold{𝔽,<:AbstractPowerManifold{𝔽,M,TPR},ProductOperation}
+const PowerGroup{𝔽, M <: AbstractManifold{𝔽}, TPR <: AbstractPowerRepresentation} =
+    GroupManifold{𝔽, <:AbstractPowerManifold{𝔽, M, TPR}, ProductOperation}
 
 """
     PowerGroupNested
@@ -8,7 +7,7 @@ const PowerGroup{𝔽,M<:AbstractManifold{𝔽},TPR<:AbstractPowerRepresentation
 Alias to [`PowerGroup`](@ref) with [`NestedPowerRepresentation`](@extref `ManifoldsBase.NestedPowerRepresentation`)
 representation.
 """
-const PowerGroupNested{𝔽,M<:AbstractManifold{𝔽}} = PowerGroup{𝔽,M,NestedPowerRepresentation}
+const PowerGroupNested{𝔽, M <: AbstractManifold{𝔽}} = PowerGroup{𝔽, M, NestedPowerRepresentation}
 
 """
     PowerGroupNestedReplacing
@@ -16,8 +15,8 @@ const PowerGroupNested{𝔽,M<:AbstractManifold{𝔽}} = PowerGroup{𝔽,M,Neste
 Alias to [`PowerGroup`](@ref) with [`NestedReplacingPowerRepresentation`](@extref `ManifoldsBase.NestedReplacingPowerRepresentation`)
 representation.
 """
-const PowerGroupNestedReplacing{𝔽,M<:AbstractManifold{𝔽}} =
-    PowerGroup{𝔽,M,NestedReplacingPowerRepresentation}
+const PowerGroupNestedReplacing{𝔽, M <: AbstractManifold{𝔽}} =
+    PowerGroup{𝔽, M, NestedReplacingPowerRepresentation}
 
 """
     PowerGroup{𝔽,T} <: GroupManifold{𝔽,<:AbstractPowerManifold{𝔽,M,RPT},ProductOperation}
@@ -42,10 +41,10 @@ function PowerGroup(manifold::AbstractPowerManifold)
 end
 
 function ManifoldsBase._access_nested(
-    M::PowerManifold,
-    ::Identity{ProductOperation},
-    i::Tuple,
-)
+        M::PowerManifold,
+        ::Identity{ProductOperation},
+        i::Tuple,
+    )
     return Identity(M.manifold)
 end
 
@@ -171,10 +170,10 @@ function inv!(G::PowerGroupNestedReplacing, q, p)
 end
 inv!(::PowerGroup, q::Identity{ProductOperation}, ::Identity{ProductOperation}) = q
 function inv!(
-    ::PowerGroupNestedReplacing,
-    q::Identity{ProductOperation},
-    ::Identity{ProductOperation},
-)
+        ::PowerGroupNestedReplacing,
+        q::Identity{ProductOperation},
+        ::Identity{ProductOperation},
+    )
     return q
 end
 
@@ -245,12 +244,12 @@ function inverse_translate!(M::AbstractPowerManifold, x, p, q, conv::ActionDirec
     return x
 end
 function inverse_translate!(
-    M::PowerManifoldNestedReplacing,
-    x,
-    p,
-    q,
-    conv::ActionDirectionAndSide,
-)
+        M::PowerManifoldNestedReplacing,
+        x,
+        p,
+        q,
+        conv::ActionDirectionAndSide,
+    )
     N = M.manifold
     rep_size = representation_size(N)
     for i in get_iterator(M)
@@ -317,13 +316,13 @@ function translate_diff!(G::PowerGroup, Y, p, q, X, conv::RightBackwardAction)
 end
 
 function _common_power_translate_diff!(
-    G::PowerGroup,
-    Y,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+        G::PowerGroup,
+        Y,
+        p,
+        q,
+        X,
+        conv::ActionDirectionAndSide,
+    )
     GM = G.manifold
     N = GM.manifold
     rep_size = representation_size(N)
@@ -350,23 +349,23 @@ function translate_diff!(G::PowerGroupNestedReplacing, Y, p, q, X, conv::LeftBac
     return _common_power_replacing_translate_diff!(G, Y, p, q, X, conv)
 end
 function translate_diff!(
-    G::PowerGroupNestedReplacing,
-    Y,
-    p,
-    q,
-    X,
-    conv::RightBackwardAction,
-)
+        G::PowerGroupNestedReplacing,
+        Y,
+        p,
+        q,
+        X,
+        conv::RightBackwardAction,
+    )
     return _common_power_replacing_translate_diff!(G, Y, p, q, X, conv)
 end
 function _common_power_replacing_translate_diff!(
-    G::PowerGroupNestedReplacing,
-    Y,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+        G::PowerGroupNestedReplacing,
+        Y,
+        p,
+        q,
+        X,
+        conv::ActionDirectionAndSide,
+    )
     GM = G.manifold
     N = GM.manifold
     rep_size = representation_size(N)
@@ -399,13 +398,13 @@ function inverse_translate_diff!(G::PowerGroup, Y, p, q, X, conv::ActionDirectio
     return Y
 end
 function inverse_translate_diff!(
-    G::PowerGroupNestedReplacing,
-    Y,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+        G::PowerGroupNestedReplacing,
+        Y,
+        p,
+        q,
+        X,
+        conv::ActionDirectionAndSide,
+    )
     GM = G.manifold
     N = GM.manifold
     rep_size = representation_size(N)
@@ -499,10 +498,10 @@ function allocate_result(M::PowerGroupNestedReplacing, f::typeof(identity_elemen
 end
 
 @inline function _read(
-    M::AbstractPowerManifold,
-    ::Tuple,
-    ::Identity{ProductOperation},
-    ::Int,
-)
+        M::AbstractPowerManifold,
+        ::Tuple,
+        ::Identity{ProductOperation},
+        ::Int,
+    )
     return Identity(M.manifold)
 end
