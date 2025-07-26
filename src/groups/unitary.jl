@@ -24,11 +24,11 @@ Quaternionic unitary group is isomorphic to the compact symplectic group of the 
 Construct ``\mathrm{U}(n, 𝔽)``.
 See also [`Orthogonal(n)`](@ref) for the real-valued case.
 """
-const Unitary{n,𝔽} = GeneralUnitaryMultiplicationGroup{n,𝔽,AbsoluteDeterminantOneMatrixType}
+const Unitary{n, 𝔽} = GeneralUnitaryMultiplicationGroup{n, 𝔽, AbsoluteDeterminantOneMatrixType}
 
-function Unitary(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
+function Unitary(n, 𝔽::AbstractNumbers = ℂ; parameter::Symbol = :type)
     _lie_groups_depwarn_move(Unitary, :UnitaryGroup)
-    return GeneralUnitaryMultiplicationGroup(UnitaryMatrices(n, 𝔽; parameter=parameter))
+    return GeneralUnitaryMultiplicationGroup(UnitaryMatrices(n, 𝔽; parameter = parameter))
 end
 
 @doc raw"""
@@ -42,9 +42,9 @@ Compute the group exponential map on the [`Unitary(2)`](@ref) group, which is
 
 where ``θ = \frac{1}{2} \sqrt{4\det(X) - \operatorname{tr}(X)^2}``.
 """
-exp_lie(::Unitary{TypeParameter{Tuple{2}},ℂ}, X)
+exp_lie(::Unitary{TypeParameter{Tuple{2}}, ℂ}, X)
 
-function exp_lie(::Unitary{TypeParameter{Tuple{1}},ℍ}, X::Number)
+function exp_lie(::Unitary{TypeParameter{Tuple{1}}, ℍ}, X::Number)
     return exp(X)
 end
 
@@ -53,7 +53,7 @@ function exp_lie!(::Unitary{TypeParameter{Tuple{1}}}, q, X)
     return q
 end
 
-function exp_lie!(::Unitary{TypeParameter{Tuple{2}},ℂ}, q, X)
+function exp_lie!(::Unitary{TypeParameter{Tuple{2}}, ℂ}, q, X)
     size(X) === (2, 2) && size(q) === (2, 2) || throw(DomainError())
     @inbounds a, d = imag(X[1, 1]), imag(X[2, 2])
     @inbounds b = (X[2, 1] - X[1, 2]') / 2
@@ -92,7 +92,7 @@ function log_lie!(G::Unitary, X, p)
     return X
 end
 
-identity_element(::Unitary{TypeParameter{Tuple{1}},ℍ}) = Quaternions.quat(1.0)
+identity_element(::Unitary{TypeParameter{Tuple{1}}, ℍ}) = Quaternions.quat(1.0)
 
 function log_lie(::Unitary{TypeParameter{Tuple{1}}}, q::Number)
     return log(q)
@@ -100,17 +100,17 @@ end
 
 Base.inv(::Unitary, p) = adjoint(p)
 
-function Base.show(io::IO, ::Unitary{TypeParameter{Tuple{n}},ℂ}) where {n}
+function Base.show(io::IO, ::Unitary{TypeParameter{Tuple{n}}, ℂ}) where {n}
     return print(io, "Unitary($(n))")
 end
-function Base.show(io::IO, M::Unitary{Tuple{Int},ℂ})
+function Base.show(io::IO, M::Unitary{Tuple{Int}, ℂ})
     n = get_parameter(M.manifold.size)[1]
     return print(io, "Unitary($(n); parameter=:field)")
 end
-function Base.show(io::IO, ::Unitary{TypeParameter{Tuple{n}},ℍ}) where {n}
+function Base.show(io::IO, ::Unitary{TypeParameter{Tuple{n}}, ℍ}) where {n}
     return print(io, "Unitary($(n), ℍ)")
 end
-function Base.show(io::IO, M::Unitary{Tuple{Int},ℍ})
+function Base.show(io::IO, M::Unitary{Tuple{Int}, ℍ})
     n = get_parameter(M.manifold.size)[1]
     return print(io, "Unitary($(n), ℍ; parameter=:field)")
 end

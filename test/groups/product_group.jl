@@ -50,13 +50,13 @@ using RecursiveArrayTools
         pts,
         X_pts,
         X_pts;
-        test_diff=true,
-        test_exp_from_identity=true,
-        test_log_from_identity=true,
-        test_vee_hat_from_identity=true,
-        test_inv_diff=true,
-        test_adjoint_inv_diff=true,
-        test_adjoint_action=true,
+        test_diff = true,
+        test_exp_from_identity = true,
+        test_log_from_identity = true,
+        test_vee_hat_from_identity = true,
+        test_inv_diff = true,
+        test_adjoint_inv_diff = true,
+        test_adjoint_action = true,
     )
     @test isapprox(
         G,
@@ -103,11 +103,11 @@ using RecursiveArrayTools
         pts,
         X_pts,
         X_pts;
-        test_diff=true,
-        test_mutating=false,
-        test_adjoint_action=true,
+        test_diff = true,
+        test_mutating = false,
+        test_adjoint_action = true,
     )
-    test_manifold(G, pts; is_mutating=false, test_representation_size=false)
+    test_manifold(G, pts; is_mutating = false, test_representation_size = false)
     @test isapprox(
         G,
         exp_lie(G, X_pts[1]),
@@ -125,7 +125,7 @@ using RecursiveArrayTools
         ),
     )
     @test sprint(show, "text/plain", G) === """
-    ProductGroup with 2 subgroups:
-     SpecialOrthogonal(3)
-     TranslationGroup(2; field=ℝ)"""
+        ProductGroup with 2 subgroups:
+         SpecialOrthogonal(3)
+         TranslationGroup(2; field=ℝ)"""
 end

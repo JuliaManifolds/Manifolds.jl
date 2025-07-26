@@ -6,5 +6,5 @@ using RecursiveArrayTools
     M = Stiefel(3, 2)
     vm = default_vector_transport_method(M)
     @test Manifolds.FiberBundleProductVectorTransport(M) ==
-          Manifolds.FiberBundleProductVectorTransport(vm, vm)
+        Manifolds.FiberBundleProductVectorTransport(vm, vm)
 end

@@ -1,4 +1,3 @@
-
 include("../header.jl")
 include("group_utils.jl")
 
@@ -10,7 +9,7 @@ include("group_utils.jl")
 
     @test repr(A_left) == "RotationAction($(repr(Euclidean(2))), $(repr(G)), LeftAction())"
     @test repr(A_right) ==
-          "RotationAction($(repr(Euclidean(2))), $(repr(G)), RightAction())"
+        "RotationAction($(repr(Euclidean(2))), $(repr(G)), RightAction())"
 
     types_a = [Matrix{Float64}]
 
@@ -29,18 +28,18 @@ include("group_utils.jl")
         X_pts = convert.(T_M, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
 
         atol = if eltype(T_M) == Float32
-            2e-7
+            2.0e-7
         else
-            1e-15
+            1.0e-15
         end
         test_action(
             A_left,
             a_pts,
             m_pts,
             X_pts;
-            test_optimal_alignment=true,
-            test_diff=true,
-            atol=atol,
+            test_optimal_alignment = true,
+            test_diff = true,
+            atol = atol,
         )
 
         test_action(
@@ -48,16 +47,16 @@ include("group_utils.jl")
             a_pts,
             m_pts,
             X_pts;
-            test_optimal_alignment=true,
-            test_diff=true,
-            atol=atol,
+            test_optimal_alignment = true,
+            test_diff = true,
+            atol = atol,
         )
 
         @test apply_diff(A_left, Identity(G), m_pts[1], X_pts[1]) === X_pts[1]
 
         @testset "apply_diff_group" begin
             @test apply_diff_group(A_left, Identity(G), a_X_pts[1], m_pts[1]) ≈
-                  a_X_pts[1] * m_pts[1]
+                a_X_pts[1] * m_pts[1]
             Y = similar(m_pts[1])
             apply_diff_group!(A_left, Y, Identity(G), a_X_pts[1], m_pts[1])
             @test Y ≈ a_X_pts[1] * m_pts[1]
@@ -87,20 +86,20 @@ end
         X_pts = convert.(T_M, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
 
         atol = if eltype(T_M) == Float32
-            2e-7
+            2.0e-7
         else
-            1e-15
+            1.0e-15
         end
         test_action(
             A,
             a_pts,
             m_pts,
             X_pts;
-            test_optimal_alignment=false,
-            test_diff=false,
-            test_mutating_group=false,
-            test_switch_direction=false,
-            atol=atol,
+            test_optimal_alignment = false,
+            test_diff = false,
+            test_mutating_group = false,
+            test_switch_direction = false,
+            atol = atol,
         )
     end
     # make sure angle can be in a one-element vector

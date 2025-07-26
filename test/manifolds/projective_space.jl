@@ -11,14 +11,14 @@ include("../header.jl")
             @test is_flat(ProjectiveSpace(1))
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0])
-            @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error=:error)
+            @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error = :error)
             @test !is_point(M, [2.0, 0.0, 0.0])
             @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
             @test_throws DomainError is_vector(
                 M,
                 [1.0, 0.0, 0.0],
                 [1.0, 0.0, 0.0];
-                error=:error,
+                error = :error,
             )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
@@ -26,7 +26,7 @@ include("../header.jl")
             @test injectivity_radius(M, [1.0, 0.0, 0.0], ExponentialRetraction()) == π / 2
         end
         types = [Vector{Float64}]
-        TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
+        TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
 
         TEST_FLOAT32 && push!(types, Vector{Float32})
         basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
@@ -40,39 +40,39 @@ include("../header.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius=false,
-                test_project_point=true,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_injectivity_radius = false,
+                test_project_point = true,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     ProjectionTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
-                tvector_distributions=[
+                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
+                tvector_distributions = [
                     Manifolds.normal_tvector_distribution(M, pts[1], 1.0),
                 ],
-                basis_types_vecs=(
+                basis_types_vecs = (
                     DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),
                     basis_types...,
                 ),
-                basis_types_to_from=basis_types,
-                test_vee_hat=false,
-                retraction_methods=[
+                basis_types_to_from = basis_types,
+                test_vee_hat = false,
+                retraction_methods = [
                     ProjectionRetraction(),
                     PolarRetraction(),
                     QRRetraction(),
                 ],
-                inverse_retraction_methods=[
+                inverse_retraction_methods = [
                     ProjectionInverseRetraction(),
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                is_tangent_atol_multiplier=2,
-                test_inplace=true,
+                is_tangent_atol_multiplier = 2,
+                test_inplace = true,
             )
         end
 
@@ -113,7 +113,7 @@ include("../header.jl")
             @test Manifolds.allocation_promotion_function(M, exp!, (1,)) == complex
             @test !is_point(M, [1.0 + 0im, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0, 0.0], [0.0 + 0im, 1.0, 0.0])
-            @test_throws DomainError is_point(M, [1.0, im, 0.0]; error=:error)
+            @test_throws DomainError is_point(M, [1.0, im, 0.0]; error = :error)
             @test !is_point(M, [1.0, im, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0], [1.0 + 0im, 0.0, 0.0])
             @test !is_vector(M, [1.0 + 0im, 0.0, 0.0], [-0.5im, 0.0, 0.0])
@@ -121,19 +121,19 @@ include("../header.jl")
                 M,
                 [1.0 + 0im, 0.0, 0.0],
                 [1.0 + 0im, 0.0, 0.0];
-                error=:error,
+                error = :error,
             )
             @test_throws DomainError is_vector(
                 M,
                 [1.0 + 0im, 0.0, 0.0],
                 [-0.5im, 0.0, 0.0];
-                error=:error,
+                error = :error,
             )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, [1.0 + 0im, 0.0, 0.0]) == π / 2
             @test injectivity_radius(M, [1.0 + 0im, 0.0, 0.0], ExponentialRetraction()) ==
-                  π / 2
+                π / 2
         end
         types = [Vector{ComplexF64}]
         @testset "Type $T" for T in types
@@ -146,32 +146,32 @@ include("../header.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius=false,
-                test_project_point=true,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_injectivity_radius = false,
+                test_project_point = true,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     ProjectionTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                basis_types_to_from=(DefaultOrthonormalBasis(ℂ),),
-                test_vee_hat=false,
-                retraction_methods=[
+                basis_types_to_from = (DefaultOrthonormalBasis(ℂ),),
+                test_vee_hat = false,
+                retraction_methods = [
                     ProjectionRetraction(),
                     PolarRetraction(),
                     QRRetraction(),
                 ],
-                inverse_retraction_methods=[
+                inverse_retraction_methods = [
                     ProjectionInverseRetraction(),
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                is_tangent_atol_multiplier=2,
-                exp_log_atol_multiplier=10.0^3,
-                retraction_atol_multiplier=10.0,
+                is_tangent_atol_multiplier = 2,
+                exp_log_atol_multiplier = 10.0^3,
+                retraction_atol_multiplier = 10.0,
             )
         end
 
@@ -203,7 +203,7 @@ include("../header.jl")
             @test !is_flat(M)
             @test !is_point(M, quat([1.0, 0.0, 0.0, 0.0]))
             @test !is_vector(M, quat([1.0, 0.0, 0.0, 0.0]), quat([0.0, 1.0, 0.0]))
-            @test_throws DomainError is_point(M, [1.0, quat(0, 1, 0, 0), 0.0]; error=:error)
+            @test_throws DomainError is_point(M, [1.0, quat(0, 1, 0, 0), 0.0]; error = :error)
             @test !is_point(M, [1.0, quat(0, 1, 0, 0), 0.0])
             @test !is_vector(M, quat([1.0, 0.0, 0.0]), quat([1.0, 0.0, 0.0]))
             @test !is_vector(M, quat([1.0, 0.0, 0.0]), [quat(0, -0.5, 0, 0), 0.0, 0.0])
@@ -211,13 +211,13 @@ include("../header.jl")
                 M,
                 Quaternion[1.0, 0.0, 0.0],
                 Quaternion[1.0, 0.0, 0.0];
-                error=:error,
+                error = :error,
             )
             @test_throws DomainError is_vector(
                 M,
                 quat([1.0, 0.0, 0.0]),
                 quat([-0.5, 0.0, 0.0]);
-                error=:error,
+                error = :error,
             )
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
@@ -243,32 +243,32 @@ include("../header.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius=false,
-                test_project_point=true,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_injectivity_radius = false,
+                test_project_point = true,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     ProjectionTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                basis_types_to_from=(DefaultOrthonormalBasis(ℍ),),
-                test_vee_hat=false,
-                retraction_methods=[
+                basis_types_to_from = (DefaultOrthonormalBasis(ℍ),),
+                test_vee_hat = false,
+                retraction_methods = [
                     ProjectionRetraction(),
                     PolarRetraction(),
                     QRRetraction(),
                 ],
-                inverse_retraction_methods=[
+                inverse_retraction_methods = [
                     ProjectionInverseRetraction(),
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                is_tangent_atol_multiplier=10,
-                exp_log_atol_multiplier=10.0^3,
-                retraction_atol_multiplier=10.0,
+                is_tangent_atol_multiplier = 10,
+                exp_log_atol_multiplier = 10.0^3,
+                retraction_atol_multiplier = 10.0,
             )
         end
 
@@ -292,10 +292,10 @@ include("../header.jl")
     end
 
     @testset "ArrayProjectiveSpace" begin
-        M = ArrayProjectiveSpace(2, 2; field=ℝ)
+        M = ArrayProjectiveSpace(2, 2; field = ℝ)
         @test manifold_dimension(M) == 3
         @test repr(M) == "ArrayProjectiveSpace(2, 2; field=ℝ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2,2}},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2, 2}}, ℝ}
         @test representation_size(M) == (2, 2)
         p = ones(2, 2)
         q = project(M, p)
@@ -304,10 +304,10 @@ include("../header.jl")
         X = project(M, q, Y)
         @test is_vector(M, q, X)
 
-        M = ArrayProjectiveSpace(2, 2; field=ℂ)
+        M = ArrayProjectiveSpace(2, 2; field = ℂ)
         @test manifold_dimension(M) == 6
         @test repr(M) == "ArrayProjectiveSpace(2, 2; field=ℂ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2,2}},ℂ}
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2, 2}}, ℂ}
         @test representation_size(M) == (2, 2)
     end
 
@@ -318,7 +318,7 @@ include("../header.jl")
             rT = real(T)
             atol = rtol = sqrt(eps(rT))
             @testset for t in (zero(rT), eps(rT)^(1 // 4) / 8, eps(rT)^(1 // 4)),
-                λ in (one(T), (T <: Real ? -one(T) : sign(randn(T))))
+                    λ in (one(T), (T <: Real ? -one(T) : sign(randn(T))))
 
                 p = project(M, randn(T, representation_size(M)))
                 X = project(M, p, randn(T, representation_size(M)))
@@ -338,10 +338,10 @@ include("../header.jl")
     end
 
     @testset "field parameter" begin
-        M = ProjectiveSpace(2; parameter=:field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int},ℝ}
+        M = ProjectiveSpace(2; parameter = :field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int}, ℝ}
         @test repr(M) == "ProjectiveSpace(2, ℝ; parameter=:field)"
-        @test repr(ArrayProjectiveSpace(2, 3; parameter=:field)) ==
-              "ArrayProjectiveSpace(2, 3; field=ℝ, parameter=:field)"
+        @test repr(ArrayProjectiveSpace(2, 3; parameter = :field)) ==
+            "ArrayProjectiveSpace(2, 3; field=ℝ, parameter=:field)"
     end
 end

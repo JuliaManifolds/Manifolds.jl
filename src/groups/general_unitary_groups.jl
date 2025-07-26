@@ -4,8 +4,8 @@
 A generic type for Lie groups based on a unitary property and matrix multiplication,
 see e.g. [`Orthogonal`](@ref), [`SpecialOrthogonal`](@ref), [`Unitary`](@ref), and [`SpecialUnitary`](@ref)
 """
-struct GeneralUnitaryMultiplicationGroup{T,𝔽,S} <: AbstractDecoratorManifold{𝔽}
-    manifold::GeneralUnitaryMatrices{T,𝔽,S}
+struct GeneralUnitaryMultiplicationGroup{T, 𝔽, S} <: AbstractDecoratorManifold{𝔽}
+    manifold::GeneralUnitaryMatrices{T, 𝔽, S}
 end
 
 vector_representation(::GeneralUnitaryMultiplicationGroup) = LeftInvariantRepresentation()
@@ -28,19 +28,19 @@ vector_representation(::GeneralUnitaryMultiplicationGroup) = LeftInvariantRepres
 end
 
 function allocate_result(
-    ::GeneralUnitaryMultiplicationGroup,
-    ::typeof(exp),
-    ::Identity{MultiplicationOperation},
-    X,
-)
+        ::GeneralUnitaryMultiplicationGroup,
+        ::typeof(exp),
+        ::Identity{MultiplicationOperation},
+        X,
+    )
     return allocate(X)
 end
 function allocate_result(
-    M::GeneralUnitaryMultiplicationGroup,
-    ::typeof(log),
-    ::Identity{MultiplicationOperation},
-    q,
-)
+        M::GeneralUnitaryMultiplicationGroup,
+        ::typeof(log),
+        ::Identity{MultiplicationOperation},
+        q,
+    )
     return allocate(q)
 end
 function allocate_result(M::Rotations, ::typeof(rand), ::Identity{MultiplicationOperation})
@@ -48,10 +48,10 @@ function allocate_result(M::Rotations, ::typeof(rand), ::Identity{Multiplication
 end
 
 function allocation_promotion_function(
-    ::GeneralUnitaryMultiplicationGroup{<:Any,ℂ},
-    ::typeof(identity_element),
-    args::Tuple,
-)
+        ::GeneralUnitaryMultiplicationGroup{<:Any, ℂ},
+        ::typeof(identity_element),
+        args::Tuple,
+    )
     return complex
 end
 
@@ -68,7 +68,7 @@ Given ``X = \begin{pmatrix} 0 & -θ \\ θ & 0 \end{pmatrix}``, the group exponen
 \exp_e \colon X ↦ \begin{pmatrix} \cos θ & -\sin θ \\ \sin θ & \cos θ \end{pmatrix}.
 ```
 """
-exp_lie(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}},ℝ}, X)
+exp_lie(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}}, ℝ}, X)
 
 @doc raw"""
      exp_lie(G::Orthogonal{TypeParameter{Tuple{4}}}, X)
@@ -77,9 +77,9 @@ exp_lie(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}},ℝ}, X)
 Compute the group exponential map on the [`Orthogonal`](@ref)`(4)` or the [`SpecialOrthogonal`](@ref) group.
 The algorithm used is a more numerically stable form of those proposed in [GallierXu:2002](@cite), [AndricaRohan:2013](@cite).
 """
-exp_lie(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},ℝ}, X)
+exp_lie(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}}, ℝ}, X)
 
-function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}},ℝ}, q, X)
+function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}}, ℝ}, q, X)
     @assert size(X) == (2, 2)
     @inbounds θ = (X[2, 1] - X[1, 2]) / 2
     sinθ, cosθ = sincos(θ)
@@ -91,7 +91,7 @@ function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}},�
     end
     return q
 end
-function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{3}},ℝ}, q, X)
+function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{3}}, ℝ}, q, X)
     θ = norm(X) / sqrt(2)
     if θ ≈ 0
         a = 1 - θ^2 / 6
@@ -105,7 +105,7 @@ function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{3}},�
     mul!(q, X, X, b, true)
     return q
 end
-function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},ℝ}, q, X)
+function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}}, ℝ}, q, X)
     T = eltype(X)
     α, β = angles_4d_skew_sym_matrix(X)
     sinα, cosα = sincos(α)
@@ -113,7 +113,7 @@ function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},�
     α² = α^2
     β² = β^2
     Δ = β² - α²
-    if !isapprox(Δ, 0; atol=1e-6)  # Case α > β ≥ 0
+    if !isapprox(Δ, 0; atol = 1.0e-6)  # Case α > β ≥ 0
         sincα = sinα / α
         sincβ = β == 0 ? one(T) : sinβ / β
         a₀ = (β² * cosα - α² * cosβ) / Δ
@@ -129,7 +129,7 @@ function exp_lie!(::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},�
         r = β / α
         c = 1 / (1 + r)
         d = α * (α - β) / 2
-        if α < 1e-2
+        if α < 1.0e-2
             e = evalpoly(α², (inv(T(3)), inv(T(-30)), inv(T(840)), inv(T(-45360))))
         else
             e = (sincα - cosα) / α²
@@ -154,50 +154,50 @@ function inverse_translate(G::GeneralUnitaryMultiplicationGroup, p, q, ::LeftFor
     return inv(G, p) * q
 end
 function inverse_translate(
-    G::GeneralUnitaryMultiplicationGroup,
-    p,
-    q,
-    ::RightBackwardAction,
-)
+        G::GeneralUnitaryMultiplicationGroup,
+        p,
+        q,
+        ::RightBackwardAction,
+    )
     return q * inv(G, p)
 end
 
 function inverse_translate!(
-    G::GeneralUnitaryMultiplicationGroup,
-    x,
-    p,
-    q,
-    ::LeftForwardAction,
-)
+        G::GeneralUnitaryMultiplicationGroup,
+        x,
+        p,
+        q,
+        ::LeftForwardAction,
+    )
     return mul!(x, inv(G, p), q)
 end
 function inverse_translate!(
-    G::GeneralUnitaryMultiplicationGroup,
-    x,
-    p,
-    q,
-    ::RightBackwardAction,
-)
+        G::GeneralUnitaryMultiplicationGroup,
+        x,
+        p,
+        q,
+        ::RightBackwardAction,
+    )
     return mul!(x, q, inv(G, p))
 end
 
 function inverse_translate_diff(
-    G::GeneralUnitaryMultiplicationGroup,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+        G::GeneralUnitaryMultiplicationGroup,
+        p,
+        q,
+        X,
+        conv::ActionDirectionAndSide,
+    )
     return translate_diff(G, inv(G, p), q, X, conv)
 end
 function inverse_translate_diff!(
-    G::GeneralUnitaryMultiplicationGroup,
-    Y,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+        G::GeneralUnitaryMultiplicationGroup,
+        Y,
+        p,
+        q,
+        X,
+        conv::ActionDirectionAndSide,
+    )
     return copyto!(Y, inverse_translate_diff(G, p, q, X, conv))
 end
 
@@ -206,44 +206,44 @@ function log(G::GeneralUnitaryMultiplicationGroup, ::Identity{MultiplicationOper
 end
 
 function log!(
-    G::GeneralUnitaryMultiplicationGroup,
-    X,
-    ::Identity{MultiplicationOperation},
-    q,
-)
+        G::GeneralUnitaryMultiplicationGroup,
+        X,
+        ::Identity{MultiplicationOperation},
+        q,
+    )
     return log_lie!(G, X, q)
 end
 
 function log_lie!(
-    G::GeneralUnitaryMultiplicationGroup{<:Any,ℝ},
-    X::AbstractMatrix,
-    q::AbstractMatrix,
-)
+        G::GeneralUnitaryMultiplicationGroup{<:Any, ℝ},
+        X::AbstractMatrix,
+        q::AbstractMatrix,
+    )
     log_safe!(X, q)
     return project!(G, X, Identity(G), X)
 end
 function log_lie!(
-    ::GeneralUnitaryMultiplicationGroup{<:Any,ℝ},
-    X,
-    ::Identity{MultiplicationOperation},
-)
+        ::GeneralUnitaryMultiplicationGroup{<:Any, ℝ},
+        X,
+        ::Identity{MultiplicationOperation},
+    )
     fill!(X, 0)
     return X
 end
 function log_lie!(
-    G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}},ℝ},
-    X::AbstractMatrix,
-    q::AbstractMatrix,
-)
+        G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{2}}, ℝ},
+        X::AbstractMatrix,
+        q::AbstractMatrix,
+    )
     @assert size(q) == (2, 2)
     @inbounds θ = atan(q[2, 1], q[1, 1])
     return get_vector!(G, X, Identity(G), θ, DefaultOrthogonalBasis())
 end
 function log_lie!(
-    G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{3}},ℝ},
-    X::AbstractMatrix,
-    q::AbstractMatrix,
-)
+        G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{3}}, ℝ},
+        X::AbstractMatrix,
+        q::AbstractMatrix,
+    )
     e = Identity(G)
     cosθ = (tr(q) - 1) / 2
     if cosθ ≈ -1
@@ -257,10 +257,10 @@ function log_lie!(
     return project!(G, X, e, X)
 end
 function log_lie!(
-    G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}},ℝ},
-    X::AbstractMatrix,
-    q::AbstractMatrix,
-)
+        G::GeneralUnitaryMultiplicationGroup{TypeParameter{Tuple{4}}, ℝ},
+        X::AbstractMatrix,
+        q::AbstractMatrix,
+    )
     cosα, cosβ = cos_angles_4d_rotation_matrix(q)
     α = acos(clamp(cosα, -1, 1))
     β = acos(clamp(cosβ, -1, 1))
@@ -299,45 +299,45 @@ function Random.rand!(rng::AbstractRNG, G::GeneralUnitaryMultiplicationGroup, pX
 end
 
 function translate_diff!(
-    G::GeneralUnitaryMultiplicationGroup,
-    Y,
-    p,
-    q,
-    X,
-    ::LeftForwardAction,
-)
+        G::GeneralUnitaryMultiplicationGroup,
+        Y,
+        p,
+        q,
+        X,
+        ::LeftForwardAction,
+    )
     return copyto!(G, Y, X)
 end
 function translate_diff!(
-    G::GeneralUnitaryMultiplicationGroup,
-    Y,
-    p,
-    q,
-    X,
-    ::RightForwardAction,
-)
+        G::GeneralUnitaryMultiplicationGroup,
+        Y,
+        p,
+        q,
+        X,
+        ::RightForwardAction,
+    )
     copyto!(G, Y, X)
     return Y
 end
 function translate_diff!(
-    G::GeneralUnitaryMultiplicationGroup,
-    Y,
-    p,
-    q,
-    X,
-    ::LeftBackwardAction,
-)
+        G::GeneralUnitaryMultiplicationGroup,
+        Y,
+        p,
+        q,
+        X,
+        ::LeftBackwardAction,
+    )
     copyto!(G, Y, p * X * inv(G, p))
     return Y
 end
 function translate_diff!(
-    G::GeneralUnitaryMultiplicationGroup,
-    Y,
-    p,
-    q,
-    X,
-    ::RightBackwardAction,
-)
+        G::GeneralUnitaryMultiplicationGroup,
+        Y,
+        p,
+        q,
+        X,
+        ::RightBackwardAction,
+    )
     return copyto!(G, Y, inv(G, p) * X * p)
 end
 
@@ -352,18 +352,18 @@ function adjoint_action!(G::GeneralUnitaryMultiplicationGroup, Y, p, X, ::RightA
 end
 
 function Manifolds.lie_bracket(
-    G::Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}},ℝ},
-    X,
-    ::Any,
-)
+        G::Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}}, ℝ},
+        X,
+        ::Any,
+    )
     return zero(X)
 end
 function Manifolds.lie_bracket!(
-    G::Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}},ℝ},
-    X,
-    ::Any,
-    ::Any,
-)
+        G::Manifolds.GeneralUnitaryMultiplicationGroup{ManifoldsBase.TypeParameter{Tuple{2}}, ℝ},
+        X,
+        ::Any,
+        ::Any,
+    )
     return fill!(X, 0)
 end
 

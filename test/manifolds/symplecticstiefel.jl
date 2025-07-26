@@ -49,7 +49,7 @@ end
         13.5 67.5 4.5 4.5
     ]
     X2 = [
-        -0.02648060 0.00416977 0.01130802 0.01015956
+        -0.0264806 0.00416977 0.01130802 0.01015956
         0.01718954 -0.00680433 0.02364406 -0.00083272
         0.00050392 0.00191916 -0.01035902 -0.00079734
         0.01811917 -0.02307032 -0.04297277 -0.05409099
@@ -145,13 +145,13 @@ end
         @test !is_flat(M)
 
         @test is_point(M, p_6_4)
-        @test_throws DomainError is_point(M, 2 * p_6_4; error=:error)
+        @test_throws DomainError is_point(M, 2 * p_6_4; error = :error)
 
-        @test is_vector(M, p_6_4, X1; atol=1.0e-12)
-        @test is_vector(M, p_6_4, X2; atol=1.0e-6)
-        @test_throws DomainError is_vector(M, p_6_4, X2; error=:error, atol=1.0e-12)
-        @test is_vector(M, p_6_4, X1 + X2; atol=1.0e-6)
-        @test_throws DomainError is_vector(M, p_6_4, X1 + p_6_4; error=:error)
+        @test is_vector(M, p_6_4, X1; atol = 1.0e-12)
+        @test is_vector(M, p_6_4, X2; atol = 1.0e-6)
+        @test_throws DomainError is_vector(M, p_6_4, X2; error = :error, atol = 1.0e-12)
+        @test is_vector(M, p_6_4, X1 + X2; atol = 1.0e-6)
+        @test_throws DomainError is_vector(M, p_6_4, X1 + p_6_4; error = :error)
     end
     @testset "Symplectic Inverse" begin
         I_2k = Array(I, 4, 4)
@@ -178,66 +178,68 @@ end
         @test Y == X1
     end
     @testset "Retractions and Exponential Mapping" begin
-        @test isapprox(retract(M, p_6_4, X1), q_6_4; atol=1.0e-12)
-        @test isapprox(retract(M, p_6_4, X1, CayleyRetraction()), q_6_4; atol=1.0e-12)
+        @test isapprox(retract(M, p_6_4, X1), q_6_4; atol = 1.0e-12)
+        @test isapprox(retract(M, p_6_4, X1, CayleyRetraction()), q_6_4; atol = 1.0e-12)
 
         X_inv_cayley_retraction = inverse_retract(M, p_6_4, q_6_4)
         X_inv_cayley_retraction_2 =
             inverse_retract(M, p_6_4, q_6_4, CayleyInverseRetraction())
-        @test isapprox(X_inv_cayley_retraction, X_inv_cayley_retraction_2; atol=1.0e-16)
-        @test isapprox(X_inv_cayley_retraction, X1; atol=1.0e-12)
+        @test isapprox(X_inv_cayley_retraction, X_inv_cayley_retraction_2; atol = 1.0e-16)
+        @test isapprox(X_inv_cayley_retraction, X1; atol = 1.0e-12)
     end
     @testset "Riemannian Metric" begin
         X1_norm = 37.85466645
-        @test isapprox(norm(M, p_6_4, X1), X1_norm; atol=1.0e-8)
-        @test isapprox(norm(M, p_6_4, X1), √inner(M, p_6_4, X1, X1); atol=1.0e-8)
+        @test isapprox(norm(M, p_6_4, X1), X1_norm; atol = 1.0e-8)
+        @test isapprox(norm(M, p_6_4, X1), √inner(M, p_6_4, X1, X1); atol = 1.0e-8)
 
         X2_norm = 1.0
-        @test isapprox(norm(M, p_6_4, X2), X2_norm; atol=1.0e-6)
-        @test isapprox(norm(M, p_6_4, X2), √inner(M, p_6_4, X2, X2); atol=1.0e-6)
+        @test isapprox(norm(M, p_6_4, X2), X2_norm; atol = 1.0e-6)
+        @test isapprox(norm(M, p_6_4, X2), √inner(M, p_6_4, X2, X2); atol = 1.0e-6)
 
         # Project Project matrix A ∈ ℝ^{6×4} onto (T_pSpSt):
-        A_6_4 = Array{Float64}([
-            -7 2 12 0
-            4 0 1 -2
-            -1 -1 4 0
-            -18 4 -1 5
-            7 0 -2 11
-            2 2 -2 9
-        ])
+        A_6_4 = Array{Float64}(
+            [
+                -7 2 12 0
+                4 0 1 -2
+                -1 -1 4 0
+                -18 4 -1 5
+                7 0 -2 11
+                2 2 -2 9
+            ]
+        )
         A_6_4_proj = similar(A_6_4)
         Manifolds.project!(M, A_6_4_proj, p_6_4, A_6_4)
-        @test is_vector(M, p_6_4, A_6_4_proj; error=:error, atol=2.0e-12)
+        @test is_vector(M, p_6_4, A_6_4_proj; error = :error, atol = 2.0e-12)
     end
     @testset "Generate random points/tangent vectors" begin
         M_big = SymplecticStiefel(20, 10)
         Random.seed!(49)
         p_big = rand(M_big)
-        @test is_point(M_big, p_big; error=:error, atol=1e-9)
-        X_big = rand(M_big; vector_at=p_big)
-        @test is_vector(M_big, p_big, X_big; error=:error, atol=1e-9)
+        @test is_point(M_big, p_big; error = :error, atol = 1.0e-9)
+        X_big = rand(M_big; vector_at = p_big)
+        @test is_vector(M_big, p_big, X_big; error = :error, atol = 1.0e-9)
     end
     @testset "test_manifold(SymplecticMatrices(6), ...)" begin
         types = [Matrix{Float64}]
         TEST_FLOAT32 && push!(types, Matrix{Float32})
-        TEST_STATIC_SIZED && push!(types, MMatrix{6,4,Float64,24})
+        TEST_STATIC_SIZED && push!(types, MMatrix{6, 4, Float64, 24})
         for type in types
             @testset "Type $(type)" begin
                 @testset "CayleyRetraction" begin
                     test_manifold(
                         M,
                         convert.(type, points);
-                        retraction_methods=[CayleyRetraction()],
-                        default_retraction_method=CayleyRetraction(),
-                        default_inverse_retraction_method=CayleyInverseRetraction(),
-                        test_inplace=true,
-                        is_point_atol_multiplier=1.0e4,
-                        is_tangent_atol_multiplier=1.0e3,
-                        retraction_atol_multiplier=1.0e1,
-                        test_project_tangent=(type != MMatrix{6,4,Float64,24}),
-                        test_injectivity_radius=false,
-                        test_exp_log=false,
-                        test_representation_size=true,
+                        retraction_methods = [CayleyRetraction()],
+                        default_retraction_method = CayleyRetraction(),
+                        default_inverse_retraction_method = CayleyInverseRetraction(),
+                        test_inplace = true,
+                        is_point_atol_multiplier = 1.0e4,
+                        is_tangent_atol_multiplier = 1.0e3,
+                        retraction_atol_multiplier = 1.0e1,
+                        test_project_tangent = (type != MMatrix{6, 4, Float64, 24}),
+                        test_injectivity_radius = false,
+                        test_exp_log = false,
+                        test_representation_size = true,
                     )
                 end
 
@@ -245,17 +247,17 @@ end
                     test_manifold(
                         M,
                         convert.(type, close_points);
-                        retraction_methods=[ExponentialRetraction()],
-                        default_retraction_method=ExponentialRetraction(),
-                        default_inverse_retraction_method=CayleyInverseRetraction(),
-                        test_inplace=true,
-                        is_point_atol_multiplier=1.0e11,
-                        is_tangent_atol_multiplier=1.0e2,
-                        retraction_atol_multiplier=1.0e4,
-                        test_project_tangent=(type != MMatrix{6,4,Float64,24}),
-                        test_injectivity_radius=false,
-                        test_exp_log=false,
-                        test_representation_size=true,
+                        retraction_methods = [ExponentialRetraction()],
+                        default_retraction_method = ExponentialRetraction(),
+                        default_inverse_retraction_method = CayleyInverseRetraction(),
+                        test_inplace = true,
+                        is_point_atol_multiplier = 1.0e11,
+                        is_tangent_atol_multiplier = 1.0e2,
+                        retraction_atol_multiplier = 1.0e4,
+                        test_project_tangent = (type != MMatrix{6, 4, Float64, 24}),
+                        test_injectivity_radius = false,
+                        test_exp_log = false,
+                        test_representation_size = true,
                     )
                 end
             end
@@ -296,17 +298,17 @@ end
         @test isapprox(
             Manifolds.gradient(M, test_f, p_grad, fd_diff),
             analytical_grad_f(p_grad);
-            atol=1.0e-9,
+            atol = 1.0e-9,
         )
 
         grad_f_p = similar(p_grad)
         Manifolds.gradient!(M, test_f, grad_f_p, p_grad, fd_diff)
-        @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol=1.0e-9)
+        @test isapprox(grad_f_p, analytical_grad_f(p_grad); atol = 1.0e-9)
     end
     @testset "field parameter" begin
-        M = SymplecticStiefel(6, 4; parameter=:field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        M = SymplecticStiefel(6, 4; parameter = :field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
         @test repr(M) == "SymplecticStiefel(6, 4; parameter=:field)"
-        @test get_total_space(M) == SymplecticMatrices(6; parameter=:field)
+        @test get_total_space(M) == SymplecticMatrices(6; parameter = :field)
     end
 end

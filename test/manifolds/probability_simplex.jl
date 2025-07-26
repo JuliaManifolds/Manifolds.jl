@@ -11,16 +11,16 @@ include("../header.jl")
     Y = [-0.1, 0.05, 0.05]
     @test repr(M) == "ProbabilitySimplex(2; boundary=:open)"
     @test is_point(M, p)
-    @test_throws DomainError is_point(M, p .+ 1; error=:error)
-    @test_throws ManifoldDomainError is_point(M, [0]; error=:error)
-    @test_throws DomainError is_point(M, -ones(3); error=:error)
+    @test_throws DomainError is_point(M, p .+ 1; error = :error)
+    @test_throws ManifoldDomainError is_point(M, [0]; error = :error)
+    @test_throws DomainError is_point(M, -ones(3); error = :error)
     @test manifold_dimension(M) == 2
     @test !is_flat(M)
     @test is_vector(M, p, X)
     @test is_vector(M, p, Y)
-    @test_throws DomainError is_vector(M, p .+ 1, X; error=:error)
-    @test_throws ManifoldDomainError is_vector(M, p, zeros(4); error=:error)
-    @test_throws DomainError is_vector(M, p, Y .+ 1; error=:error)
+    @test_throws DomainError is_vector(M, p .+ 1, X; error = :error)
+    @test_throws ManifoldDomainError is_vector(M, p, zeros(4); error = :error)
+    @test_throws DomainError is_vector(M, p, Y .+ 1; error = :error)
 
     @test injectivity_radius(M, p) == injectivity_radius(M, p, ExponentialRetraction())
     @test injectivity_radius(M, p, SoftmaxRetraction()) == injectivity_radius(M, p)
@@ -39,7 +39,7 @@ include("../header.jl")
 
     types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
-    TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
+    TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
 
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
@@ -52,38 +52,38 @@ include("../header.jl")
             test_manifold(
                 M,
                 pts,
-                basis_types_to_from=(DefaultOrthonormalBasis(),),
-                test_injectivity_radius=false,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_vee_hat=false,
-                is_tangent_atol_multiplier=5.0,
-                inverse_retraction_methods=[SoftmaxInverseRetraction()],
-                retraction_methods=[SoftmaxRetraction()],
-                test_inplace=true,
-                vector_transport_methods=[ParallelTransport()],
-                test_rand_point=true,
-                test_rand_tvector=true,
-                rand_tvector_atol_multiplier=20.0,
+                basis_types_to_from = (DefaultOrthonormalBasis(),),
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_vee_hat = false,
+                is_tangent_atol_multiplier = 5.0,
+                inverse_retraction_methods = [SoftmaxInverseRetraction()],
+                retraction_methods = [SoftmaxRetraction()],
+                test_inplace = true,
+                vector_transport_methods = [ParallelTransport()],
+                test_rand_point = true,
+                test_rand_tvector = true,
+                rand_tvector_atol_multiplier = 20.0,
             )
             X = similar(pts[1])
             @test exp!(M_euc, X, pts[1], [0.0, 0.1, -0.1]) ≈ [0.5, 0.4, 0.1]
             @test ManifoldsBase.exp_fused!(M_euc, X, pts[1], [0.0, 0.1, -0.1], 1.0) ≈
-                  [0.5, 0.4, 0.1]
+                [0.5, 0.4, 0.1]
             test_manifold(
                 M_euc,
                 pts,
-                test_exp_log=false,
-                test_injectivity_radius=false,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_vee_hat=false,
-                is_tangent_atol_multiplier=40.0,
-                default_inverse_retraction_method=nothing,
-                test_inplace=true,
-                test_rand_point=true,
-                test_rand_tvector=true,
-                rand_tvector_atol_multiplier=40.0,
+                test_exp_log = false,
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_vee_hat = false,
+                is_tangent_atol_multiplier = 40.0,
+                default_inverse_retraction_method = nothing,
+                test_inplace = true,
+                test_rand_point = true,
+                test_rand_tvector = true,
+                rand_tvector_atol_multiplier = 40.0,
             )
         end
     end
@@ -105,7 +105,7 @@ include("../header.jl")
         X = log(M, q, p)
         X2 = X + [1, 2, 3]
         Y = project(M, q, X2)
-        @test is_vector(M, q, Y; atol=1e-15)
+        @test is_vector(M, q, Y; atol = 1.0e-15)
 
         @test_throws DomainError project(M, [1, -1, 2])
         @test isapprox(M, [0.6, 0.2, 0.2], project(M, [0.3, 0.1, 0.1]))
@@ -128,15 +128,15 @@ include("../header.jl")
     end
 
     @testset "Simplex with boundary" begin
-        Mb = ProbabilitySimplex(2; boundary=:closed)
+        Mb = ProbabilitySimplex(2; boundary = :closed)
         p = [0, 0.5, 0.5]
         X = [0, 1, -1]
         Y = [0, 2, -2]
         @test is_point(Mb, p)
-        @test_throws DomainError is_point(Mb, p .- 1; error=:error)
+        @test_throws DomainError is_point(Mb, p .- 1; error = :error)
         @test inner(Mb, p, X, Y) == 8
 
-        @test_throws ArgumentError ProbabilitySimplex(2; boundary=:tomato)
+        @test_throws ArgumentError ProbabilitySimplex(2; boundary = :tomato)
     end
 
     @testset "Probability amplitudes" begin
@@ -144,13 +144,13 @@ include("../header.jl")
         p = [0.1, 0.7, 0.2]
         Y = [-0.1, 0.05, 0.05]
         @test Manifolds.simplex_to_amplitude(M, p) ≈
-              [0.31622776601683794, 0.8366600265340756, 0.4472135954999579]
+            [0.31622776601683794, 0.8366600265340756, 0.4472135954999579]
         @test Manifolds.amplitude_to_simplex(
             M,
             [0.31622776601683794, 0.8366600265340756, 0.4472135954999579],
         ) ≈ p
         @test Manifolds.simplex_to_amplitude_diff(M, p, Y) ≈
-              [-0.31622776601683794, 0.05976143046671968, 0.1118033988749895]
+            [-0.31622776601683794, 0.05976143046671968, 0.1118033988749895]
         @test Manifolds.amplitude_to_simplex_diff(M, p, Y) ≈ [-0.01, 0.035, 0.01]
     end
 
@@ -160,7 +160,7 @@ include("../header.jl")
         Y = [0.05, 0.05, -0.1]
         Z = [-0.1, 0.15, -0.05]
         @test riemann_tensor(M, p, X, Y, Z) ≈
-              [-0.0034821428571428577, -0.005625, 0.009107142857142857]
+            [-0.0034821428571428577, -0.005625, 0.009107142857142857]
     end
 
     @testset "Volume density" begin
@@ -171,8 +171,8 @@ include("../header.jl")
     end
 
     @testset "field parameter" begin
-        M = ProbabilitySimplex(2; parameter=:field)
+        M = ProbabilitySimplex(2; parameter = :field)
         @test repr(M) == "ProbabilitySimplex(2; boundary=:open, parameter=:field)"
-        @test get_embedding(M) === Euclidean(3; parameter=:field)
+        @test get_embedding(M) === Euclidean(3; parameter = :field)
     end
 end

@@ -49,7 +49,7 @@ include("group_utils.jl")
         @testset "SO(2) Lie Bracket == 0" begin
             Y = [0.0 0.7071067811865475; -0.7071067811865475 0.0]
             X_ = copy(X)
-            X_[1, 2] += 1e-16
+            X_[1, 2] += 1.0e-16
             @test is_vector(M, identity_element(M), X_)
             @test lie_bracket(M, X_, Y) == zeros(2, 2)
             @test lie_bracket!(M, similar(X_), X_, Y) == zeros(2, 2)
@@ -85,7 +85,7 @@ include("group_utils.jl")
         @test volume_density(M, p, X) ≈ 0.710713830700454
 
         # random Lie algebra element
-        @test is_vector(M, Identity(M), rand(M; vector_at=Identity(M)))
+        @test is_vector(M, Identity(M), rand(M; vector_at = Identity(M)))
     end
 
     @testset "Unitary Group" begin
@@ -152,7 +152,7 @@ include("group_utils.jl")
         @test inv(QU1, p) == conj(p)
 
         @test project(QU1, p, Quaternion(1.0, 2.0, 3.0, 4.0)) ===
-              Quaternion(0.0, 2.0, 3.0, 4.0)
+            Quaternion(0.0, 2.0, 3.0, 4.0)
     end
 
     @testset "Special Unitary Group" begin
@@ -161,30 +161,30 @@ include("group_utils.jl")
 
         p = ones(2, 2)
         q = project(SU2, p)
-        @test is_point(SU2, q; error=:error)
+        @test is_point(SU2, q; error = :error)
         q2 = allocate(q)
         project!(SU2, q2, p)
         @test q == q2
         p2 = copy(p)
         p2[1, 1] = -1
         q2 = project(SU2, p2)
-        @test is_point(SU2, q2; error=:error)
+        @test is_point(SU2, q2; error = :error)
         p3 = [2.0 0; 0.0 2.0] #real pos determinant
         @test project(SU2, p3) == p3 ./ 2
         Xe = ones(2, 2)
         X = project(SU2, q, Xe)
         @test is_vector(SU2, q, X)
-        @test_throws DomainError is_vector(SU2, p, X, true; error=:error) # base point wrong
-        @test_throws DomainError is_vector(SU2, q, Xe, true; error=:error) # Xe not skew hermitian
+        @test_throws DomainError is_vector(SU2, p, X, true; error = :error) # base point wrong
+        @test_throws DomainError is_vector(SU2, q, Xe, true; error = :error) # Xe not skew hermitian
         @test_throws DomainError is_vector(
             SU2,
             Identity(AdditionOperation()),
             Xe,
             true;
-            error=:error,
+            error = :error,
         ) # base point wrong
         e = Identity(MultiplicationOperation())
-        @test_throws DomainError is_vector(SU2, e, Xe, true; error=:error) # Xe not skew hermitian
+        @test_throws DomainError is_vector(SU2, e, Xe, true; error = :error) # Xe not skew hermitian
 
         @test manifold_volume(SpecialUnitary(1)) ≈ 1
         @test manifold_volume(SpecialUnitary(2)) ≈ 2 * π^2
@@ -200,10 +200,10 @@ include("group_utils.jl")
             [0, 0, π, 0, 0, 0] ./ 2,  # θ = (π/2, 0)
             [0, 0, π, 0, 0, π] ./ 2,  # θ = (π/2, π/2)
             [0, 0, 0, 0, 0, 0],  # θ = (0, 0)
-            [0, 0, 1, 0, 0, 1] .* 1e-100, # α = β ≈ 0
-            [0, 0, 1, 0, 0, 1] .* 1e-6, # α = β ⩰ 0
-            [0, 0, 10, 0, 0, 1] .* 1e-6, # α ⪆ β ⩰ 0
-            [0, 0, π / 4, 0, 0, π / 4 - 1e-6], # α ⪆ β > 0
+            [0, 0, 1, 0, 0, 1] .* 1.0e-100, # α = β ≈ 0
+            [0, 0, 1, 0, 0, 1] .* 1.0e-6, # α = β ⩰ 0
+            [0, 0, 10, 0, 0, 1] .* 1.0e-6, # α ⪆ β ⩰ 0
+            [0, 0, π / 4, 0, 0, π / 4 - 1.0e-6], # α ⪆ β > 0
         ]
         Ms = [SpecialOrthogonal(4), Orthogonal(4)]
         for Xf in Xs
@@ -213,12 +213,12 @@ include("group_utils.jl")
                     p = exp(X)
                     @test p ≈ exp_lie(M, X)
                     p2 = exp_lie(M, log_lie(M, p))
-                    @test isapprox(M, p, p2; atol=1e-6)
+                    @test isapprox(M, p, p2; atol = 1.0e-6)
                     # pass through to the manifold (Orthogonal / Rotations)
                     @test p ≈ exp(M, one(p), X)
                     p3 = exp(M, one(p), log(M, one(p), p))
                     # broken for 9 of the 10
-                    @test isapprox(M, p, p3; atol=1e-4)
+                    @test isapprox(M, p, p3; atol = 1.0e-4)
                 end
             end
         end
@@ -246,16 +246,16 @@ include("group_utils.jl")
     end
 
     @testset "field parameter" begin
-        G = Orthogonal(2; parameter=:field)
+        G = Orthogonal(2; parameter = :field)
         @test repr(G) == "Orthogonal(2; parameter=:field)"
 
-        SU3 = SpecialUnitary(3; parameter=:field)
+        SU3 = SpecialUnitary(3; parameter = :field)
         @test repr(SU3) == "SpecialUnitary(3; parameter=:field)"
 
-        G = Unitary(3, ℂ; parameter=:field)
+        G = Unitary(3, ℂ; parameter = :field)
         @test repr(G) == "Unitary(3; parameter=:field)"
 
-        G = Unitary(3, ℍ; parameter=:field)
+        G = Unitary(3, ℍ; parameter = :field)
         @test repr(G) == "Unitary(3, ℍ; parameter=:field)"
     end
 end

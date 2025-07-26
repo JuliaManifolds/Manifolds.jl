@@ -8,35 +8,35 @@
 Space of actions of the [`SpecialOrthogonal`](@ref) group $\mathrm{SO}(n)$ on a
 Euclidean-like manifold `M` of dimension `n`.
 """
-struct RotationAction{TAD<:ActionDirection,TM<:AbstractManifold,TSO<:SpecialOrthogonal} <:
-       AbstractGroupAction{TAD}
+struct RotationAction{TAD <: ActionDirection, TM <: AbstractManifold, TSO <: SpecialOrthogonal} <:
+    AbstractGroupAction{TAD}
     manifold::TM
     SOn::TSO
 end
 
 function RotationAction(
-    M::AbstractManifold,
-    SOn::SpecialOrthogonal,
-    ::TAD=LeftAction(),
-) where {TAD<:ActionDirection}
-    return RotationAction{TAD,typeof(M),typeof(SOn)}(M, SOn)
+        M::AbstractManifold,
+        SOn::SpecialOrthogonal,
+        ::TAD = LeftAction(),
+    ) where {TAD <: ActionDirection}
+    return RotationAction{TAD, typeof(M), typeof(SOn)}(M, SOn)
 end
 
 function Base.show(io::IO, A::RotationAction)
     return print(io, "RotationAction($(A.manifold), $(A.SOn), $(direction(A)))")
 end
 
-const RotationActionOnVector{TAD,𝔽,TE,TSO} = RotationAction{
+const RotationActionOnVector{TAD, 𝔽, TE, TSO} = RotationAction{
     TAD,
-    <:Union{Euclidean{TE,𝔽},TranslationGroup{TE,𝔽}},
+    <:Union{Euclidean{TE, 𝔽}, TranslationGroup{TE, 𝔽}},
     SpecialOrthogonal{TSO},
-} where {TAD<:ActionDirection,𝔽,TE,TSO}
+} where {TAD <: ActionDirection, 𝔽, TE, TSO}
 
 base_group(A::RotationAction) = A.SOn
 
 group_manifold(A::RotationAction) = A.manifold
 
-function switch_direction(A::RotationAction{TAD}) where {TAD<:ActionDirection}
+function switch_direction(A::RotationAction{TAD}) where {TAD <: ActionDirection}
     return RotationAction(A.manifold, A.SOn, switch_direction(TAD()))
 end
 
@@ -54,11 +54,11 @@ inverse_apply(::RotationActionOnVector{RightAction}, a, p) = a * p
 
 apply_diff(::RotationActionOnVector{LeftAction}, a, p, X) = a * X
 function apply_diff(
-    ::RotationActionOnVector{LeftAction},
-    ::Identity{MultiplicationOperation},
-    p,
-    X,
-)
+        ::RotationActionOnVector{LeftAction},
+        ::Identity{MultiplicationOperation},
+        p,
+        X,
+    )
     return X
 end
 function apply_diff(A::RotationActionOnVector{RightAction}, a, p, X)
@@ -105,7 +105,7 @@ end
 
 Space of actions of the circle group [`RealCircleGroup`](@ref) on $ℝ^3$ around given `axis`.
 """
-struct RotationAroundAxisAction{TA<:AbstractVector} <: AbstractGroupAction{LeftAction}
+struct RotationAroundAxisAction{TA <: AbstractVector} <: AbstractGroupAction{LeftAction}
     axis::TA
 end
 
@@ -163,26 +163,26 @@ of type `On` columns of points on a matrix manifold `M`.
     )
 """
 struct RowwiseMultiplicationAction{
-    TAD<:ActionDirection,
-    TM<:AbstractManifold,
-    TO<:GeneralUnitaryMultiplicationGroup,
-} <: AbstractGroupAction{TAD}
+        TAD <: ActionDirection,
+        TM <: AbstractManifold,
+        TO <: GeneralUnitaryMultiplicationGroup,
+    } <: AbstractGroupAction{TAD}
     manifold::TM
     On::TO
 end
 
 function RowwiseMultiplicationAction(
-    M::AbstractManifold,
-    On::GeneralUnitaryMultiplicationGroup,
-    ::TAD=LeftAction(),
-) where {TAD<:ActionDirection}
-    return RowwiseMultiplicationAction{TAD,typeof(M),typeof(On)}(M, On)
+        M::AbstractManifold,
+        On::GeneralUnitaryMultiplicationGroup,
+        ::TAD = LeftAction(),
+    ) where {TAD <: ActionDirection}
+    return RowwiseMultiplicationAction{TAD, typeof(M), typeof(On)}(M, On)
 end
 
 const LeftRowwiseMultiplicationAction{
-    TM<:AbstractManifold,
-    TO<:GeneralUnitaryMultiplicationGroup,
-} = RowwiseMultiplicationAction{LeftAction,TM,TO}
+    TM <: AbstractManifold,
+    TO <: GeneralUnitaryMultiplicationGroup,
+} = RowwiseMultiplicationAction{LeftAction, TM, TO}
 
 function apply(::LeftRowwiseMultiplicationAction, a, p)
     return (a * p')'
@@ -205,11 +205,11 @@ end
 
 ###
 
-const MatrixGroup{T,𝔽} = Union{
-    GeneralUnitaryMultiplicationGroup{T,𝔽},
-    GeneralLinear{T,𝔽},
-    SpecialLinear{T,𝔽},
-} where {T,𝔽}
+const MatrixGroup{T, 𝔽} = Union{
+    GeneralUnitaryMultiplicationGroup{T, 𝔽},
+    GeneralLinear{T, 𝔽},
+    SpecialLinear{T, 𝔽},
+} where {T, 𝔽}
 
 @doc raw"""
     ColumnwiseMultiplicationAction{
@@ -231,24 +231,24 @@ of type `On` columns of points on a matrix manifold `M`.
     )
 """
 struct ColumnwiseMultiplicationAction{
-    TAD<:ActionDirection,
-    TM<:AbstractManifold,
-    TO<:MatrixGroup,
-} <: AbstractGroupAction{TAD}
+        TAD <: ActionDirection,
+        TM <: AbstractManifold,
+        TO <: MatrixGroup,
+    } <: AbstractGroupAction{TAD}
     manifold::TM
     On::TO
 end
 
 function ColumnwiseMultiplicationAction(
-    M::AbstractManifold,
-    On::MatrixGroup,
-    ::TAD=LeftAction(),
-) where {TAD<:ActionDirection}
-    return ColumnwiseMultiplicationAction{TAD,typeof(M),typeof(On)}(M, On)
+        M::AbstractManifold,
+        On::MatrixGroup,
+        ::TAD = LeftAction(),
+    ) where {TAD <: ActionDirection}
+    return ColumnwiseMultiplicationAction{TAD, typeof(M), typeof(On)}(M, On)
 end
 
-const LeftColumnwiseMultiplicationAction{TM<:AbstractManifold,TO<:MatrixGroup} =
-    ColumnwiseMultiplicationAction{LeftAction,TM,TO}
+const LeftColumnwiseMultiplicationAction{TM <: AbstractManifold, TO <: MatrixGroup} =
+    ColumnwiseMultiplicationAction{LeftAction, TM, TO}
 
 function apply(::LeftColumnwiseMultiplicationAction, a, p)
     return a * p
@@ -287,15 +287,15 @@ where ``U \Sigma V^{\mathrm{T}}`` is the SVD decomposition of ``p q^{\mathrm{T}}
 is the unit diagonal matrix with the last element on the diagonal replaced with -1.
 """
 function optimal_alignment(
-    A::LeftColumnwiseMultiplicationAction{
-        <:AbstractManifold,
-        <:GeneralUnitaryMultiplicationGroup,
-    },
-    p,
-    q,
-)
-    is_point(A.manifold, p; error=:error)
-    is_point(A.manifold, q; error=:error)
+        A::LeftColumnwiseMultiplicationAction{
+            <:AbstractManifold,
+            <:GeneralUnitaryMultiplicationGroup,
+        },
+        p,
+        q,
+    )
+    is_point(A.manifold, p; error = :error)
+    is_point(A.manifold, q; error = :error)
 
     Xmul = p * transpose(q)
     F = svd(Xmul)

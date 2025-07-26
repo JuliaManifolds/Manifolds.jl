@@ -7,32 +7,32 @@ include("../header.jl")
     @test !is_flat(M)
     @test get_embedding(M) == Euclidean(4, 2)
     @test representation_size(M) == (4, 2)
-    q = [1.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
-    @test is_point(M, q, true; atol=10^-15)
+    q = [1.0 0.0; 0.0 1.0; 1 / sqrt(2) -1 / sqrt(2); 1 / sqrt(2) 1 / sqrt(2)]
+    @test is_point(M, q, true; atol = 10^-15)
     @test base_manifold(M) === M
-    qN = [2.0 0.0; 0.0 1.0; 1/sqrt(2) -1/sqrt(2); 1/sqrt(2) 1/sqrt(2)]
-    @test_throws DomainError is_point(M, qN; error=:error)
+    qN = [2.0 0.0; 0.0 1.0; 1 / sqrt(2) -1 / sqrt(2); 1 / sqrt(2) 1 / sqrt(2)]
+    @test_throws DomainError is_point(M, qN; error = :error)
     Y = [0.0 1.0; 1.0 0.0; 0.0 0.0; 0.0 0.0]
-    @test is_vector(M, q, Y; error=:error)
+    @test is_vector(M, q, Y; error = :error)
     YN = [0.1 1.0; 1.0 0.1; 0.0 0.0; 0.0 0.0]
-    @test_throws DomainError is_vector(M, q, YN; error=:error)
+    @test_throws DomainError is_vector(M, q, YN; error = :error)
     qE = similar(q)
     embed!(M, qE, q)
     qE2 = embed(M, q)
     @test qE == q
     @test qE2 == q
-    q2 = [4.0/5 3.0/5; 3.0/5.0 -4.0/5.0; 1.0 0.0; 0.0 1.0]
-    q3 = [12.0/13.0 5.0/13.0; 1.0 0.0; -12.0/13.0 5.0/13.0; 0.0 1.0]
+    q2 = [4.0 / 5 3.0 / 5; 3.0 / 5.0 -4.0 / 5.0; 1.0 0.0; 0.0 1.0]
+    q3 = [12.0 / 13.0 5.0 / 13.0; 1.0 0.0; -12.0 / 13.0 5.0 / 13.0; 0.0 1.0]
     @test is_vector(
         M,
         q2,
         vector_transport_to(M, q, Y, q2, ProjectionTransport());
-        atol=10^-15,
+        atol = 10^-15,
     )
 
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{4,2,Float64,8})
+    TEST_STATIC_SIZED && push!(types, MMatrix{4, 2, Float64, 8})
 
     for T in types
         pts = [convert(T, q), convert(T, q2), convert(T, q3)]
@@ -40,20 +40,20 @@ include("../header.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius=false,
-                test_project_tangent=true,
-                test_project_point=true,
-                test_exp_log=false,
-                default_inverse_retraction_method=nothing,
-                default_retraction_method=ProjectionRetraction(),
-                is_tangent_atol_multiplier=1,
-                test_inplace=true,
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_project_point = true,
+                test_exp_log = false,
+                default_inverse_retraction_method = nothing,
+                default_retraction_method = ProjectionRetraction(),
+                is_tangent_atol_multiplier = 1,
+                test_inplace = true,
             )
         end
     end
     @testset "field parameter" begin
-        M = Elliptope(4, 2; parameter=:field)
+        M = Elliptope(4, 2; parameter = :field)
         @test repr(M) == "Elliptope(4, 2; parameter=:field)"
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
     end
 end

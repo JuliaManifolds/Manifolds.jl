@@ -35,16 +35,16 @@ using RecursiveArrayTools: ArrayPartition
 
     @test Manifolds.number_of_components(Mse) == 2
     # test that arrays are not points
-    @test_throws DomainError is_point(Mse, [1, 2]; error=:error)
+    @test_throws DomainError is_point(Mse, [1, 2]; error = :error)
     @test check_point(Mse, [1, 2]) isa DomainError
-    @test_throws DomainError is_vector(Mse, 1, [1, 2]; error=:error, check_base_point=false)
-    @test check_vector(Mse, 1, [1, 2]; check_base_point=false) isa DomainError
+    @test_throws DomainError is_vector(Mse, 1, [1, 2]; error = :error, check_base_point = false)
+    @test check_vector(Mse, 1, [1, 2]; check_base_point = false) isa DomainError
     #default fallbacks for check_size, Product not working with Arrays
     @test Manifolds.check_size(Mse, zeros(2)) isa DomainError
     @test Manifolds.check_size(Mse, zeros(2), zeros(3)) isa DomainError
     types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
-    TEST_STATIC_SIZED && push!(types, MVector{5,Float64})
+    TEST_STATIC_SIZED && push!(types, MVector{5, Float64})
 
     retraction_methods = [
         ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),
@@ -87,18 +87,18 @@ using RecursiveArrayTools: ArrayPartition
     test_manifold(
         Mser,
         pts,
-        test_injectivity_radius=false,
-        is_tangent_atol_multiplier=1,
-        exp_log_atol_multiplier=1,
-        test_inplace=true,
-        test_rand_point=true,
-        test_rand_tvector=true,
-        test_representation_size=false,
+        test_injectivity_radius = false,
+        is_tangent_atol_multiplier = 1,
+        exp_log_atol_multiplier = 1,
+        test_inplace = true,
+        test_rand_point = true,
+        test_rand_tvector = true,
+        test_representation_size = false,
     )
 
     @testset "manifold tests (static size)" begin
-        Ts = SizedVector{3,Float64}
-        Tr2 = SizedVector{2,Float64}
+        Ts = SizedVector{3, Float64}
+        Tr2 = SizedVector{2, Float64}
         pts_sphere = [
             convert(Ts, [1.0, 0.0, 0.0]),
             convert(Ts, [0.0, 1.0, 0.0]),
@@ -151,16 +151,16 @@ using RecursiveArrayTools: ArrayPartition
 
             ProductPointDistribution =
                 Base.get_extension(
-                    Manifolds,
-                    :ManifoldsDistributionsExt,
-                ).ProductPointDistribution
+                Manifolds,
+                :ManifoldsDistributionsExt,
+            ).ProductPointDistribution
             push!(Mse_point_distributions, ProductPointDistribution(distr_M1, distr_M2))
 
             ProductFVectorDistribution =
                 Base.get_extension(
-                    Manifolds,
-                    :ManifoldsDistributionsExt,
-                ).ProductFVectorDistribution
+                Manifolds,
+                :ManifoldsDistributionsExt,
+            ).ProductFVectorDistribution
             push!(
                 Mse_tvector_distributions,
                 ProductFVectorDistribution(distr_tv_M1, distr_tv_M2),
@@ -173,37 +173,37 @@ using RecursiveArrayTools: ArrayPartition
 
             Test.@test Distributions.support(Mse_point_distributions[1]) isa MPointSupport
             Test.@test Distributions.support(Mse_tvector_distributions[1]) isa
-                       FVectorSupport
+                FVectorSupport
         end
 
         test_manifold(
             Mse,
             pts;
-            point_distributions=Mse_point_distributions,
-            tvector_distributions=Mse_tvector_distributions,
-            test_injectivity_radius=true,
-            test_musical_isomorphisms=true,
-            musical_isomorphism_bases=[DefaultOrthonormalBasis()],
-            test_tangent_vector_broadcasting=true,
-            test_project_tangent=true,
-            test_project_point=true,
-            test_mutating_rand=true,
-            retraction_methods=retraction_methods,
-            inverse_retraction_methods=inverse_retraction_methods,
-            test_riesz_representer=true,
-            test_default_vector_transport=true,
-            test_rand_point=true,
-            test_rand_tvector=true,
-            vector_transport_methods=[
+            point_distributions = Mse_point_distributions,
+            tvector_distributions = Mse_tvector_distributions,
+            test_injectivity_radius = true,
+            test_musical_isomorphisms = true,
+            musical_isomorphism_bases = [DefaultOrthonormalBasis()],
+            test_tangent_vector_broadcasting = true,
+            test_project_tangent = true,
+            test_project_point = true,
+            test_mutating_rand = true,
+            retraction_methods = retraction_methods,
+            inverse_retraction_methods = inverse_retraction_methods,
+            test_riesz_representer = true,
+            test_default_vector_transport = true,
+            test_rand_point = true,
+            test_rand_tvector = true,
+            vector_transport_methods = [
                 ProductVectorTransport(ParallelTransport(), ParallelTransport()),
                 ProductVectorTransport(SchildsLadderTransport(), SchildsLadderTransport()),
                 ProductVectorTransport(PoleLadderTransport(), PoleLadderTransport()),
             ],
-            basis_types_vecs=(basis_types[1], basis_types[3], basis_types[4]),
-            basis_types_to_from=basis_types,
-            is_tangent_atol_multiplier=1,
-            exp_log_atol_multiplier=1,
-            test_representation_size=false,
+            basis_types_vecs = (basis_types[1], basis_types[3], basis_types[4]),
+            basis_types_to_from = basis_types,
+            is_tangent_atol_multiplier = 1,
+            exp_log_atol_multiplier = 1,
+            test_representation_size = false,
         )
         @test number_eltype(pts[1]) === Float64
 
@@ -276,7 +276,7 @@ using RecursiveArrayTools: ArrayPartition
             Float64,
             Tuple{
                 Matrix{Float64},
-                ArrayPartition{Float64,Tuple{Matrix{Float64},Matrix{Float64}}},
+                ArrayPartition{Float64, Tuple{Matrix{Float64}, Matrix{Float64}}},
             },
         }
         @test Manifolds.default_retraction_method(Mstb) === ProductRetraction(
@@ -289,12 +289,12 @@ using RecursiveArrayTools: ArrayPartition
         )
 
         @test Manifolds.default_inverse_retraction_method(Mstb) ===
-              Manifolds.InverseProductRetraction(
+            Manifolds.InverseProductRetraction(
             LogarithmicInverseRetraction(),
             Manifolds.FiberBundleInverseProductRetraction(),
         )
         @test Manifolds.default_inverse_retraction_method(Mstb, T_p_ap) ===
-              Manifolds.InverseProductRetraction(
+            Manifolds.InverseProductRetraction(
             LogarithmicInverseRetraction(),
             Manifolds.FiberBundleInverseProductRetraction(),
         )
@@ -307,7 +307,7 @@ using RecursiveArrayTools: ArrayPartition
             ),
         )
         @test Manifolds.default_vector_transport_method(Mstb, T_p_ap) ===
-              ProductVectorTransport(
+            ProductVectorTransport(
             ParallelTransport(),
             Manifolds.FiberBundleProductVectorTransport(
                 ParallelTransport(),
@@ -315,7 +315,7 @@ using RecursiveArrayTools: ArrayPartition
             ),
         )
         @test Manifolds.default_vector_transport_method(Mstb, T_p_ap) ===
-              ProductVectorTransport(
+            ProductVectorTransport(
             ParallelTransport(),
             Manifolds.FiberBundleProductVectorTransport(
                 ParallelTransport(),
@@ -367,7 +367,7 @@ using RecursiveArrayTools: ArrayPartition
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
         )
         @test X2 ==
-              ArrayPartition([0.3535533905932738, -0.35355339059327373, 0.0], [1.0, 1.5])
+            ArrayPartition([0.3535533905932738, -0.35355339059327373, 0.0], [1.0, 1.5])
     end
     @testset "gradient conversion" begin
         M = ProbabilitySimplex(3)
@@ -436,6 +436,6 @@ using RecursiveArrayTools: ArrayPartition
             0.2548785571950708,
         ]
         @test volume_density(PM, ArrayPartition(p1, p2), ArrayPartition(X1, X2)) ≈
-              volume_density(MS2, p1, X1) * volume_density(MS3, p2, X2)
+            volume_density(MS2, p1, X1) * volume_density(MS3, p2, X2)
     end
 end

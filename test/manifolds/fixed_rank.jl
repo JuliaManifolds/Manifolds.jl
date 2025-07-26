@@ -11,51 +11,51 @@ include("../header.jl")
     @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ)"
     @test repr(Mc) == "FixedRankMatrices(3, 2, 2, ℂ)"
     @test sprint(show, "text/plain", p) == """
-    $(sprint(show, SVDMPoint{Matrix{Float64}, Vector{Float64}, Matrix{Float64}}))
-    U factor:
-     3×2 $(sprint(show, Matrix{Float64})):
-      1.0  0.0
-      0.0  1.0
-      0.0  0.0
-    singular values:
-     2-element $(sprint(show, Vector{Float64})):
-      1.0
-      1.0
-    Vt factor:
-     2×2 $(sprint(show, Matrix{Float64})):
-      1.0  0.0
-      0.0  1.0"""
+        $(sprint(show, SVDMPoint{Matrix{Float64}, Vector{Float64}, Matrix{Float64}}))
+        U factor:
+         3×2 $(sprint(show, Matrix{Float64})):
+          1.0  0.0
+          0.0  1.0
+          0.0  0.0
+        singular values:
+         2-element $(sprint(show, Vector{Float64})):
+          1.0
+          1.0
+        Vt factor:
+         2×2 $(sprint(show, Matrix{Float64})):
+          1.0  0.0
+          0.0  1.0"""
     @test sprint(show, "text/plain", X) == """
-    $(sprint(show, UMVTangentVector{Matrix{Float64}, Matrix{Float64}, Matrix{Float64}}))
-    U factor:
-     3×2 $(sprint(show, Matrix{Float64})):
-      0.0  0.0
-      0.0  0.0
-      1.0  1.0
-    M factor:
-     2×2 $(sprint(show, Matrix{Float64})):
-      1.0  0.0
-      0.0  1.0
-    Vt factor:
-     2×2 $(sprint(show, Matrix{Float64})):
-      0.0  0.0
-      0.0  0.0"""
+        $(sprint(show, UMVTangentVector{Matrix{Float64}, Matrix{Float64}, Matrix{Float64}}))
+        U factor:
+         3×2 $(sprint(show, Matrix{Float64})):
+          0.0  0.0
+          0.0  0.0
+          1.0  1.0
+        M factor:
+         2×2 $(sprint(show, Matrix{Float64})):
+          1.0  0.0
+          0.0  1.0
+        Vt factor:
+         2×2 $(sprint(show, Matrix{Float64})):
+          0.0  0.0
+          0.0  0.0"""
 
     @test inner(M, p, X, X) == norm(M, p, X)^2
     @test p == SVDMPoint(p.U, p.S, p.Vt)
     @test X == UMVTangentVector(X.U, X.M, X.Vt)
     @testset "Fixed Rank Matrices – Basics" begin
         @test representation_size(M) == (3, 2)
-        @test get_embedding(M) == Euclidean(3, 2; field=ℝ)
+        @test get_embedding(M) == Euclidean(3, 2; field = ℝ)
         @test representation_size(Mc) == (3, 2)
         @test manifold_dimension(M) == 6
         @test manifold_dimension(Mc) == 12
         @test !is_flat(M)
         @test !is_flat(Mc)
         @test !is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2))
-        @test_throws DomainError is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2); error=:error)
+        @test_throws DomainError is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2); error = :error)
         @test is_point(M2, p2)
-        @test_throws DomainError is_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]; error=:error)
+        @test_throws DomainError is_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]; error = :error)
         @test Manifolds.check_point(M2, [1.0 0.0; 0.0 1.0; 0.0 0.0]) isa DomainError
 
         @test default_retraction_method(M) === PolarRetraction()
@@ -72,21 +72,21 @@ include("../header.jl")
             M,
             SVDMPoint([1.0 0.0; 0.0 0.0], 2),
             X;
-            error=:error,
+            error = :error,
         )
         @test !is_vector(M, p, UMVTangentVector(p.U, X.M, p.Vt, 2))
         @test_throws DomainError is_vector(
             M,
             p,
             UMVTangentVector(p.U, X.M, p.Vt, 2);
-            error=:error,
+            error = :error,
         )
         @test !is_vector(M, p, UMVTangentVector(X.U, X.M, p.Vt, 2))
         @test_throws DomainError is_vector(
             M,
             p,
             UMVTangentVector(X.U, X.M, p.Vt, 2);
-            error=:error,
+            error = :error,
         )
 
         @test is_point(M, p)
@@ -106,7 +106,7 @@ include("../header.jl")
     for T in types
         @testset "Type $T" begin
             p2 = retract(M, p, X, PolarRetraction())
-            p3 = SVDMPoint([1/sqrt(2) 1/sqrt(2); 1/sqrt(2) -1/sqrt(2); 0.0 0.0])
+            p3 = SVDMPoint([1 / sqrt(2) 1 / sqrt(2); 1 / sqrt(2) -1 / sqrt(2); 0.0 0.0])
             pts = []
             for p in [p, p2, p3]
                 push!(pts, SVDMPoint(convert.(T, [p.U, p.S, p.Vt])...))
@@ -144,23 +144,23 @@ include("../header.jl")
                 xM = embed(M, p)
                 @test is_point(M, xM)
                 @test !is_point(M, xM[1:2, :])
-                @test_throws DomainError is_point(M, xM[1:2, :]; error=:error)
+                @test_throws DomainError is_point(M, xM[1:2, :]; error = :error)
                 @test_throws DomainError is_point(
                     FixedRankMatrices(3, 2, 1),
                     p;
-                    error=:error,
+                    error = :error,
                 )
                 @test_throws DomainError is_point(
                     FixedRankMatrices(3, 2, 1),
                     xM;
-                    error=:error,
+                    error = :error,
                 )
                 xF1 = SVDMPoint(2 * p.U, p.S, p.Vt)
                 @test !is_point(M, xF1)
-                @test_throws DomainError is_point(M, xF1; error=:error)
+                @test_throws DomainError is_point(M, xF1; error = :error)
                 xF2 = SVDMPoint(p.U, p.S, 2 * p.Vt)
                 @test !is_point(M, xF2)
-                @test_throws DomainError is_point(M, xF2; error=:error)
+                @test_throws DomainError is_point(M, xF2; error = :error)
                 # copyto
                 yC = allocate(y)
                 copyto!(M, yC, y)
@@ -227,25 +227,25 @@ include("../header.jl")
             test_manifold(
                 M,
                 pts,
-                test_exp_log=false,
-                default_inverse_retraction_method=nothing,
-                test_injectivity_radius=false,
-                default_retraction_method=PolarRetraction(),
-                test_is_tangent=false,
-                test_default_vector_transport=false,
-                test_vector_spaces=false,
-                test_vee_hat=false,
-                test_tangent_vector_broadcasting=true,
-                projection_atol_multiplier=15,
-                retraction_methods=[PolarRetraction(), OrthographicRetraction()],
-                inverse_retraction_methods=[OrthographicInverseRetraction()],
-                vector_transport_methods=[ProjectionTransport()],
-                vector_transport_retractions=[PolarRetraction()],
-                vector_transport_inverse_retractions=[PolarInverseRetraction()],
-                mid_point12=nothing,
-                test_inplace=true,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                test_exp_log = false,
+                default_inverse_retraction_method = nothing,
+                test_injectivity_radius = false,
+                default_retraction_method = PolarRetraction(),
+                test_is_tangent = false,
+                test_default_vector_transport = false,
+                test_vector_spaces = false,
+                test_vee_hat = false,
+                test_tangent_vector_broadcasting = true,
+                projection_atol_multiplier = 15,
+                retraction_methods = [PolarRetraction(), OrthographicRetraction()],
+                inverse_retraction_methods = [OrthographicInverseRetraction()],
+                vector_transport_methods = [ProjectionTransport()],
+                vector_transport_retractions = [PolarRetraction()],
+                vector_transport_inverse_retractions = [PolarInverseRetraction()],
+                mid_point12 = nothing,
+                test_inplace = true,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
         end
     end
@@ -263,8 +263,8 @@ include("../header.jl")
         @test is_vector(M, p, riemannian_Hessian(M, p, G, H, X))
     end
     @testset "field parameter" begin
-        M = FixedRankMatrices(3, 2, 2; parameter=:field)
+        M = FixedRankMatrices(3, 2, 2; parameter = :field)
         @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ; parameter=:field)"
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
     end
 end

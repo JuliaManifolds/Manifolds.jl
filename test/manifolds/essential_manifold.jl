@@ -22,17 +22,17 @@ include("../header.jl")
         np3 = [r1, r2, r3]
         @test !is_point(M, r1)
         # first two components of r1 are not rotations
-        @test_throws DomainError is_point(M, r1; error=:error)
-        @test_throws DomainError is_point(M, np3; error=:error)
+        @test_throws DomainError is_point(M, r1; error = :error)
+        @test_throws DomainError is_point(M, np3; error = :error)
         @test is_point(M, p1)
-        @test_throws ComponentManifoldError is_point(M, np1; error=:error)
-        @test_throws CompositeManifoldError is_point(M, np2; error=:error)
+        @test_throws ComponentManifoldError is_point(M, np1; error = :error)
+        @test_throws CompositeManifoldError is_point(M, np2; error = :error)
         @test !is_vector(M, p1, 0.0)
         @test_throws DomainError is_vector(
             M,
             p1,
             [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0];
-            error=:error,
+            error = :error,
         )
         @test !is_vector(M, np1, [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0])
         @test !is_vector(M, p1, p2)
@@ -44,35 +44,35 @@ include("../header.jl")
         test_manifold(
             M,
             [p1, p2, p3],
-            test_vector_spaces=true,
-            test_project_point=true,
-            projection_atol_multiplier=10,
-            test_project_tangent=false, # since it includes vert_proj.
-            test_musical_isomorphisms=false,
-            test_default_vector_transport=true,
-            test_representation_size=false,
-            test_exp_log=true,
-            mid_point12=nothing,
-            exp_log_atol_multiplier=4,
-            test_inplace=true,
-            parallel_transport=true,
+            test_vector_spaces = true,
+            test_project_point = true,
+            projection_atol_multiplier = 10,
+            test_project_tangent = false, # since it includes vert_proj.
+            test_musical_isomorphisms = false,
+            test_default_vector_transport = true,
+            test_representation_size = false,
+            test_exp_log = true,
+            mid_point12 = nothing,
+            exp_log_atol_multiplier = 4,
+            test_inplace = true,
+            parallel_transport = true,
         )
     end
     @testset "Unsigned Essential" begin
         test_manifold(
             EssentialManifold(false),
             [p1, p2, p3],
-            test_vector_spaces=true,
-            test_project_point=true,
-            projection_atol_multiplier=10,
-            test_project_tangent=false, # since it includes vert_proj.
-            test_musical_isomorphisms=false,
-            test_default_vector_transport=true,
-            test_representation_size=false,
-            test_exp_log=true,
-            mid_point12=nothing,
-            exp_log_atol_multiplier=4,
-            parallel_transport=true,
+            test_vector_spaces = true,
+            test_project_point = true,
+            projection_atol_multiplier = 10,
+            test_project_tangent = false, # since it includes vert_proj.
+            test_musical_isomorphisms = false,
+            test_default_vector_transport = true,
+            test_representation_size = false,
+            test_exp_log = true,
+            mid_point12 = nothing,
+            exp_log_atol_multiplier = 4,
+            parallel_transport = true,
         )
     end
 end

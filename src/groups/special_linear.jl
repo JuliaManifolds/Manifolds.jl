@@ -15,14 +15,14 @@ metric used for [`GeneralLinear(n, 𝔽)`](@ref). The resulting geodesic on
 an element of ``𝔰𝔩(n, 𝔽)`` is a closed subgroup of ``\mathrm{SL}(n,𝔽)``. As a result, most
 metric functions forward to [`GeneralLinear`](@ref).
 """
-struct SpecialLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct SpecialLinear{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function SpecialLinear(n, 𝔽::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function SpecialLinear(n, 𝔽::AbstractNumbers = ℝ; parameter::Symbol = :type)
     _lie_groups_depwarn_move(SpecialLinear, :SpecialLinearGroup)
     size = wrap_type_parameter(parameter, (n,))
-    return SpecialLinear{typeof(size),𝔽}(size)
+    return SpecialLinear{typeof(size), 𝔽}(size)
 end
 
 @inline function active_traits(f, ::SpecialLinear, args...)
@@ -34,7 +34,7 @@ end
     )
 end
 
-function allocation_promotion_function(::SpecialLinear{<:Any,ℂ}, f, args::Tuple)
+function allocation_promotion_function(::SpecialLinear{<:Any, ℂ}, f, args::Tuple)
     return complex
 end
 
@@ -44,25 +44,25 @@ function check_point(G::SpecialLinear, p; kwargs...)
         return DomainError(
             detp,
             "The matrix $(p) does not lie on $(G), since it does not have a unit " *
-            "determinant.",
+                "determinant.",
         )
     end
     return nothing
 end
 
 function check_vector(
-    G::SpecialLinear,
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(G))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
+        G::SpecialLinear,
+        p,
+        X::T;
+        atol::Real = sqrt(prod(representation_size(G))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
     trX = tr(inverse_translate_diff(G, p, p, X, LeftForwardAction()))
-    if !isapprox(trX, 0; atol=atol, kwargs...)
+    if !isapprox(trX, 0; atol = atol, kwargs...)
         return DomainError(
             trX,
             "The matrix $(X) does not lie in the tangent space of $(G) at $(p), since " *
-            "its Lie algebra representation is not traceless.",
+                "its Lie algebra representation is not traceless.",
         )
     end
     return nothing
@@ -71,12 +71,12 @@ end
 embed(::SpecialLinear, p) = p
 embed(::SpecialLinear, p, X) = X
 
-function get_embedding(::SpecialLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+function get_embedding(::SpecialLinear{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
     return GeneralLinear(n, 𝔽)
 end
-function get_embedding(M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
+function get_embedding(M::SpecialLinear{Tuple{Int}, 𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return GeneralLinear(n, 𝔽; parameter=:field)
+    return GeneralLinear(n, 𝔽; parameter = :field)
 end
 
 inverse_translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X
@@ -149,10 +149,10 @@ function project!(G::SpecialLinear, Y, p, X)
     return Y
 end
 
-function Base.show(io::IO, ::SpecialLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+function Base.show(io::IO, ::SpecialLinear{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
     return print(io, "SpecialLinear($n, $(𝔽))")
 end
-function Base.show(io::IO, M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::SpecialLinear{Tuple{Int}, 𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "SpecialLinear($n, $(𝔽); parameter=:field)")
 end

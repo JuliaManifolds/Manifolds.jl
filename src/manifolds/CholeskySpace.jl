@@ -15,7 +15,7 @@ struct CholeskySpace{T} <: AbstractManifold{ℝ}
     size::T
 end
 
-function CholeskySpace(n::Int; parameter::Symbol=:type)
+function CholeskySpace(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
     return CholeskySpace{typeof(size)}(size)
 end
@@ -29,14 +29,14 @@ entries on the diagonal.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_point(
-    M::CholeskySpace,
-    p::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
+        M::CholeskySpace,
+        p::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
     cks = check_size(M, p)
     cks === nothing || return cks
-    if !isapprox(norm(strictlyUpperTriangular(p)), 0.0; atol=atol, kwargs...)
+    if !isapprox(norm(strictlyUpperTriangular(p)), 0.0; atol = atol, kwargs...)
         return DomainError(
             norm(UpperTriangular(p) - Diagonal(p)),
             "The point $(p) does not lie on $(M), since it strictly upper triangular nonzero entries",
@@ -60,13 +60,13 @@ and a symmetric matrix.
 The tolerance for the tests can be set using the `kwargs...`.
 """
 function check_vector(
-    M::CholeskySpace,
-    p,
-    X;
-    atol::Real=sqrt(prod(representation_size(M)) * eps(float(eltype(p)))),
-    kwargs...,
-)
-    if !isapprox(norm(strictlyUpperTriangular(X)), 0.0; atol=atol, kwargs...)
+        M::CholeskySpace,
+        p,
+        X;
+        atol::Real = sqrt(prod(representation_size(M)) * eps(float(eltype(p)))),
+        kwargs...,
+    )
+    if !isapprox(norm(strictlyUpperTriangular(X)), 0.0; atol = atol, kwargs...)
         return DomainError(
             norm(UpperTriangular(X) - Diagonal(X)),
             "The matrix $(X) is not a tangent vector at $(p) (represented as an element of the Lie algebra) since it is not lower triangular.",
@@ -91,7 +91,7 @@ d_{\mathcal M}(p,q) = \sqrt{\sum_{i>j} (p_{ij}-q_{ij})^2 +
 function distance(::CholeskySpace, p, q)
     return sqrt(
         sum((strictlyLowerTriangular(p) - strictlyLowerTriangular(q)) .^ 2) +
-        sum((log.(diag(p)) - log.(diag(q))) .^ 2),
+            sum((log.(diag(p)) - log.(diag(q))) .^ 2),
     )
 end
 
@@ -115,8 +115,8 @@ exp(::CholeskySpace, ::Any...)
 function exp!(::CholeskySpace, q, p, X)
     q .= (
         strictlyLowerTriangular(p) +
-        strictlyLowerTriangular(X) +
-        Diagonal(diag(p)) * Diagonal(exp.(diag(X) ./ diag(p)))
+            strictlyLowerTriangular(X) +
+            Diagonal(diag(p)) * Diagonal(exp.(diag(X) ./ diag(p)))
     )
     return q
 end
@@ -163,7 +163,7 @@ g_p(X,Y) = \sum_{i>j} X_{ij}Y_{ij} + \sum_{j=1}^m X_{ii}Y_{ii}p_{ii}^{-2}
 function inner(::CholeskySpace, p, X, Y)
     return (
         sum(strictlyLowerTriangular(X) .* strictlyLowerTriangular(Y)) +
-        sum(diag(X) .* diag(Y) ./ (diag(p) .^ 2))
+            sum(diag(X) .* diag(Y) ./ (diag(p) .^ 2))
     )
 end
 
@@ -194,7 +194,7 @@ function log!(::CholeskySpace, X, p, q)
     return copyto!(
         X,
         strictlyLowerTriangular(q) - strictlyLowerTriangular(p) +
-        Diagonal(diag(p) .* log.(diag(q) ./ diag(p))),
+            Diagonal(diag(p) .* log.(diag(q) ./ diag(p))),
     )
 end
 
@@ -256,31 +256,31 @@ function parallel_transport_to!(::CholeskySpace, Y, p, X, q)
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::CholeskySpace,
-    pX;
-    vector_at=nothing,
-    σ::Real=one(eltype(pX)) /
+        rng::AbstractRNG,
+        M::CholeskySpace,
+        pX;
+        vector_at = nothing,
+        σ::Real = one(eltype(pX)) /
             (vector_at === nothing ? 1 : norm(convert(AbstractMatrix, vector_at))),
-    tangent_distr=:Gaussian,
-)
+        tangent_distr = :Gaussian,
+    )
     N = get_parameter(M.size)[1]
     if vector_at === nothing
         p_spd = rand(
             rng,
-            SymmetricPositiveDefinite(N; parameter=:field);
-            σ=σ,
-            tangent_distr=tangent_distr,
+            SymmetricPositiveDefinite(N; parameter = :field);
+            σ = σ,
+            tangent_distr = tangent_distr,
         )
         pX .= cholesky(p_spd).L
     else
         p_spd = vector_at * vector_at'
         X_spd = rand(
             rng,
-            SymmetricPositiveDefinite(N; parameter=:field);
-            vector_at=p_spd,
-            σ=σ,
-            tangent_distr=tangent_distr,
+            SymmetricPositiveDefinite(N; parameter = :field);
+            vector_at = p_spd,
+            σ = σ,
+            tangent_distr = tangent_distr,
         )
         pX .= spd_to_cholesky(p_spd, X_spd)[2]
     end

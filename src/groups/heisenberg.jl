@@ -1,4 +1,3 @@
-
 @doc raw"""
     HeisenbergGroup{T} <: AbstractDecoratorManifold{ℝ}
 
@@ -20,7 +19,7 @@ struct HeisenbergGroup{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function HeisenbergGroup(n::Int; parameter::Symbol=:type)
+function HeisenbergGroup(n::Int; parameter::Symbol = :type)
     _lie_groups_depwarn_move(HeisenbergGroup)
     size = wrap_type_parameter(parameter, (n,))
     return HeisenbergGroup{typeof(size)}(size)
@@ -116,7 +115,7 @@ Given a matrix
 ```
 the coordinates are concatenated vectors ``\mathbf{a}``, ``\mathbf{b}``, and number ``c``.
 """
-get_coordinates(::HeisenbergGroup, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+get_coordinates(::HeisenbergGroup, p, X, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
 
 function get_coordinates_orthonormal(M::HeisenbergGroup, p, X, ::RealNumbers)
     n = get_parameter(M.size)[1]
@@ -136,7 +135,7 @@ function get_embedding(::HeisenbergGroup{TypeParameter{Tuple{n}}}) where {n}
 end
 function get_embedding(M::HeisenbergGroup{Tuple{Int}})
     n = get_parameter(M.size)[1]
-    return Euclidean(n + 2, n + 2; parameter=:field)
+    return Euclidean(n + 2, n + 2; parameter = :field)
 end
 
 @doc raw"""
@@ -150,7 +149,7 @@ Given a vector of coordinates ``\begin{bmatrix}\mathbb{a} & \mathbb{b} & c\end{b
 0 & \mathbf{0} & 1 \end{bmatrix}
 ```
 """
-get_vector(M::HeisenbergGroup, p, c, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+get_vector(M::HeisenbergGroup, p, c, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
 
 function get_vector_orthonormal(M::HeisenbergGroup, p, Xⁱ, ::RealNumbers)
     n = get_parameter(M.size)[1]
@@ -246,8 +245,8 @@ function inner(M::HeisenbergGroup, p, X, Y)
     Y_a_view = _heisenberg_a_view(M, Y)
     Y_b_view = _heisenberg_b_view(M, Y)
     return dot(X_a_view, Y_a_view) +
-           dot(X_b_view, Y_b_view) +
-           X[1, 2 * n + 1] * Y[1, 2 * n + 1]
+        dot(X_b_view, Y_b_view) +
+        X[1, 2 * n + 1] * Y[1, 2 * n + 1]
 end
 
 @doc raw"""
@@ -382,15 +381,15 @@ If `vector_at` is not `nothing`, return a random tangent vector from the tangent
 the point `vector_at` on the [`HeisenbergGroup`](@ref) by using a normal distribution with
 mean 0 and standard deviation `σ`.
 """
-rand(M::HeisenbergGroup; vector_at=nothing, σ::Real=1.0)
+rand(M::HeisenbergGroup; vector_at = nothing, σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::HeisenbergGroup,
-    pX;
-    σ::Real=one(eltype(pX)),
-    vector_at=nothing,
-)
+        rng::AbstractRNG,
+        M::HeisenbergGroup,
+        pX;
+        σ::Real = one(eltype(pX)),
+        vector_at = nothing,
+    )
     n = get_parameter(M.size)[1]
     if vector_at === nothing
         copyto!(pX, I)

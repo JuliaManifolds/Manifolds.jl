@@ -59,9 +59,9 @@ import Manifolds:
     vee
 
 function allocate(
-    ::PowerManifoldNestedReplacing,
-    x::AbstractArray{<:ArrayPartition{T,<:NTuple{N,SArray}}},
-) where {T,N}
+        ::PowerManifoldNestedReplacing,
+        x::AbstractArray{<:ArrayPartition{T, <:NTuple{N, SArray}}},
+    ) where {T, N}
     return similar(x)
 end
 

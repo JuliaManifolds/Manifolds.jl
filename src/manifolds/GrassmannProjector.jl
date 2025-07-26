@@ -4,7 +4,7 @@
 A type to represent points on a manifold [`Grassmann`](@ref) that are orthogonal projectors,
 i.e. a matrix ``p ∈ \mathbb F^{n,n}`` projecting onto a ``k``-dimensional subspace.
 """
-struct ProjectorPoint{T<:AbstractMatrix} <: AbstractManifoldPoint
+struct ProjectorPoint{T <: AbstractMatrix} <: AbstractManifoldPoint
     value::T
 end
 
@@ -13,7 +13,7 @@ end
 
 A type to represent tangent vectors to points on a [`Grassmann`](@ref) manifold that are orthogonal projectors.
 """
-struct ProjectorTangentVector{T<:AbstractMatrix} <: AbstractTangentVector
+struct ProjectorTangentVector{T <: AbstractMatrix} <: AbstractTangentVector
     value::T
 end
 
@@ -103,14 +103,14 @@ Return the embedding of the [`ProjectorPoint`](@ref) representation of the [`Gra
 manifold, i.e. the Euclidean space ``\mathbb F^{n×n}``.
 """
 function get_embedding(
-    ::Grassmann{TypeParameter{Tuple{n,k}},𝔽},
-    ::ProjectorPoint,
-) where {n,k,𝔽}
-    return Euclidean(n, n; field=𝔽)
+        ::Grassmann{TypeParameter{Tuple{n, k}}, 𝔽},
+        ::ProjectorPoint,
+    ) where {n, k, 𝔽}
+    return Euclidean(n, n; field = 𝔽)
 end
-function get_embedding(M::Grassmann{Tuple{Int,Int},𝔽}, ::ProjectorPoint) where {𝔽}
+function get_embedding(M::Grassmann{Tuple{Int, Int}, 𝔽}, ::ProjectorPoint) where {𝔽}
     n, k = get_parameter(M.size)
-    return Euclidean(n, n; field=𝔽, parameter=:field)
+    return Euclidean(n, n; field = 𝔽, parameter = :field)
 end
 
 @doc raw"""
@@ -162,20 +162,20 @@ function differential_canonical_project!(::Grassmann, Y::ProjectorTangentVector,
     return Y
 end
 function differential_canonical_project!(
-    M::Grassmann,
-    Y::ProjectorTangentVector,
-    p::StiefelPoint,
-    X::StiefelTangentVector,
-)
+        M::Grassmann,
+        Y::ProjectorTangentVector,
+        p::StiefelPoint,
+        X::StiefelTangentVector,
+    )
     differential_canonical_project!(M, Y, p.value, X.value)
     return Y
 end
 function allocate_result(
-    M::Grassmann,
-    ::typeof(differential_canonical_project),
-    p::StiefelPoint,
-    X::StiefelTangentVector,
-)
+        M::Grassmann,
+        ::typeof(differential_canonical_project),
+        p::StiefelPoint,
+        X::StiefelTangentVector,
+    )
     n, k = get_parameter(M.size)
     return ProjectorTangentVector(allocate(p.value, (n, n)))
 end
@@ -237,23 +237,23 @@ i.e. to ``q=\exp_pd``. The formula is given in Proposition 3.5 of [BendokatZimme
 where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = AB-BA`` denotes the matrix commutator.
 """
 function parallel_transport_direction(
-    M::Grassmann,
-    p::ProjectorPoint,
-    X::ProjectorTangentVector,
-    d::ProjectorTangentVector,
-)
+        M::Grassmann,
+        p::ProjectorPoint,
+        X::ProjectorTangentVector,
+        d::ProjectorTangentVector,
+    )
     Y = allocate_result(M, vector_transport_direction, X, p, d)
     parallel_transport_direction!(M, Y, p, X, d)
     return Y
 end
 
 function parallel_transport_direction!(
-    ::Grassmann,
-    Y::ProjectorTangentVector,
-    p::ProjectorPoint,
-    X::ProjectorTangentVector,
-    d::ProjectorTangentVector,
-)
+        ::Grassmann,
+        Y::ProjectorTangentVector,
+        p::ProjectorPoint,
+        X::ProjectorTangentVector,
+        d::ProjectorTangentVector,
+    )
     dppd = d.value * p.value - p.value * d.value
     exp_dppd = exp(dppd)
     Y.value .= exp_dppd * X.value / exp_dppd

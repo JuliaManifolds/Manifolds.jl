@@ -5,10 +5,12 @@ include("header.jl")
 Test whether the signature `sig` has an argument of type `T` as one of its parameters.
 """
 function has_type_in_signature(sig, T::Type)
-    return any(map(Base.unwrap_unionall(sig.sig).parameters) do x
-        xw = Base.rewrap_unionall(x, sig.sig)
-        return (xw isa Type ? xw : xw.T) <: T
-    end)
+    return any(
+        map(Base.unwrap_unionall(sig.sig).parameters) do x
+            xw = Base.rewrap_unionall(x, sig.sig)
+            return (xw isa Type ? xw : xw.T) <: T
+        end
+    )
 end
 
 @testset "Ambiguities" begin

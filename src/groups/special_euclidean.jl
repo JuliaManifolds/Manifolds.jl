@@ -37,28 +37,28 @@ using the `vectors` keyword argument:
 """
 const SpecialEuclidean{T} = SemidirectProductGroup{
     ℝ,
-    TranslationGroup{T,ℝ},
+    TranslationGroup{T, ℝ},
     SpecialOrthogonal{T},
-    RotationAction{LeftAction,TranslationGroup{T,ℝ},SpecialOrthogonal{T}},
+    RotationAction{LeftAction, TranslationGroup{T, ℝ}, SpecialOrthogonal{T}},
 }
 
 const SpecialEuclideanManifold{N} =
-    ProductManifold{ℝ,Tuple{TranslationGroup{N,ℝ},SpecialOrthogonal{N}}}
+    ProductManifold{ℝ, Tuple{TranslationGroup{N, ℝ}, SpecialOrthogonal{N}}}
 
 function SpecialEuclidean(
-    n::Int;
-    vectors::AbstractGroupVectorRepresentation=LeftInvariantRepresentation(),
-    parameter::Symbol=:type,
-)
+        n::Int;
+        vectors::AbstractGroupVectorRepresentation = LeftInvariantRepresentation(),
+        parameter::Symbol = :type,
+    )
     _lie_groups_depwarn_move(SpecialEuclidean, :SpecialEuclideanGroup)
-    Tn = TranslationGroup(n; parameter=parameter)
-    SOn = SpecialOrthogonal(n; parameter=parameter)
+    Tn = TranslationGroup(n; parameter = parameter)
+    SOn = SpecialOrthogonal(n; parameter = parameter)
     A = RotationAction(Tn, SOn)
     return SemidirectProductGroup(Tn, SOn, A, vectors)
 end
 
 const SpecialEuclideanOperation{N} = SemidirectProductOperation{
-    RotationAction{LeftAction,TranslationGroup{N,ℝ},SpecialOrthogonal{N}},
+    RotationAction{LeftAction, TranslationGroup{N, ℝ}, SpecialOrthogonal{N}},
 }
 const SpecialEuclideanIdentity{N} = Identity{SpecialEuclideanOperation{N}}
 
@@ -96,44 +96,44 @@ _get_parameter(::SpecialEuclideanManifold{TypeParameter{Tuple{N}}}) where {N} = 
 _get_parameter(M::SpecialEuclideanManifold{Tuple{Int}}) = manifold_dimension(M.manifolds[1])
 
 Base.@propagate_inbounds function Base.getindex(
-    p::AbstractMatrix,
-    M::Union{SpecialEuclidean,SpecialEuclideanManifold},
-    i::Union{Integer,Val},
-)
+        p::AbstractMatrix,
+        M::Union{SpecialEuclidean, SpecialEuclideanManifold},
+        i::Union{Integer, Val},
+    )
     return submanifold_component(M, p, i)
 end
 
 Base.@propagate_inbounds function Base.setindex!(
-    q::AbstractMatrix,
-    p,
-    M::Union{SpecialEuclidean,SpecialEuclideanManifold},
-    i::Union{Integer,Val},
-)
+        q::AbstractMatrix,
+        p,
+        M::Union{SpecialEuclidean, SpecialEuclideanManifold},
+        i::Union{Integer, Val},
+    )
     copyto!(submanifold_component(M, q, i), p)
     return p
 end
 
 Base.@propagate_inbounds function submanifold_component(
-    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
-    p::AbstractMatrix,
-    ::Val{1},
-)
+        G::Union{SpecialEuclidean, SpecialEuclideanManifold},
+        p::AbstractMatrix,
+        ::Val{1},
+    )
     n = _get_parameter(G)
     return view(p, 1:n, n + 1)
 end
 Base.@propagate_inbounds function submanifold_component(
-    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
-    p::AbstractMatrix,
-    ::Val{2},
-)
+        G::Union{SpecialEuclidean, SpecialEuclideanManifold},
+        p::AbstractMatrix,
+        ::Val{2},
+    )
     n = _get_parameter(G)
     return view(p, 1:n, 1:n)
 end
 
 function submanifold_components(
-    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
-    p::AbstractMatrix,
-)
+        G::Union{SpecialEuclidean, SpecialEuclideanManifold},
+        p::AbstractMatrix,
+    )
     n = _get_parameter(G)
     @assert size(p) == (n + 1, n + 1)
     @inbounds t = submanifold_component(G, p, Val(1))
@@ -142,9 +142,9 @@ function submanifold_components(
 end
 
 Base.@propagate_inbounds function _padpoint!(
-    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
-    q::AbstractMatrix,
-)
+        G::Union{SpecialEuclidean, SpecialEuclideanManifold},
+        q::AbstractMatrix,
+    )
     n = _get_parameter(G)
     for i in 1:n
         q[n + 1, i] = 0
@@ -154,9 +154,9 @@ Base.@propagate_inbounds function _padpoint!(
 end
 
 Base.@propagate_inbounds function _padvector!(
-    G::Union{SpecialEuclidean,SpecialEuclideanManifold},
-    X::AbstractMatrix,
-)
+        G::Union{SpecialEuclidean, SpecialEuclideanManifold},
+        X::AbstractMatrix,
+    )
     n = _get_parameter(G)
     for i in 1:(n + 1)
         X[n + 1, i] = 0
@@ -180,10 +180,10 @@ matrix part of `p`, `r` is the translation part of `fX` and `ω` is the rotation
 ``×`` is the cross product and ``⋅`` is the matrix product.
 """
 function adjoint_action(
-    ::SpecialEuclidean{TypeParameter{Tuple{3}},<:HybridTangentRepresentation},
-    p,
-    fX::TFVector{<:Any,VeeOrthogonalBasis{ℝ}},
-)
+        ::SpecialEuclidean{TypeParameter{Tuple{3}}, <:HybridTangentRepresentation},
+        p,
+        fX::TFVector{<:Any, VeeOrthogonalBasis{ℝ}},
+    )
     _lie_groups_depwarn_move(adjoint_action, :adjoint)
     t, R = submanifold_components(p)
     r = fX.data[SA[1, 2, 3]]
@@ -212,8 +212,8 @@ of `p`.
 function adjoint_matrix(::SpecialEuclidean{TypeParameter{Tuple{2}}}, p)
     t, R = submanifold_components(p)
     return @SMatrix [
-        R[1, 1] R[1, 2] t[2]/sqrt(2)
-        R[2, 1] R[2, 2] -t[1]/sqrt(2)
+        R[1, 1] R[1, 2] t[2] / sqrt(2)
+        R[2, 1] R[2, 2] -t[1] / sqrt(2)
         0 0 1
     ]
 end
@@ -276,17 +276,17 @@ function affine_matrix(G::SpecialEuclidean, p)
 end
 affine_matrix(::SpecialEuclidean, p::AbstractMatrix) = p
 function affine_matrix(
-    ::SpecialEuclidean{TypeParameter{Tuple{n}}},
-    ::SpecialEuclideanIdentity{TypeParameter{Tuple{n}}},
-) where {n}
+        ::SpecialEuclidean{TypeParameter{Tuple{n}}},
+        ::SpecialEuclideanIdentity{TypeParameter{Tuple{n}}},
+    ) where {n}
     s = maybesize(Size(n, n))
-    s isa Size && return SDiagonal{n,Float64}(I)
+    s isa Size && return SDiagonal{n, Float64}(I)
     return Diagonal{Float64}(I, n)
 end
 function affine_matrix(
-    G::SpecialEuclidean{Tuple{Int}},
-    ::SpecialEuclideanIdentity{Tuple{Int}},
-)
+        G::SpecialEuclidean{Tuple{Int}},
+        ::SpecialEuclideanIdentity{Tuple{Int}},
+    )
     n = _get_parameter(G)
     return Diagonal{Float64}(I, n)
 end
@@ -321,21 +321,21 @@ function check_size(G::SpecialEuclideanManifold, p::AbstractMatrix; kwargs...)
     return check_size(Euclidean(n + 1, n + 1), p)
 end
 function check_size(
-    G::SpecialEuclideanManifold,
-    p::AbstractMatrix,
-    X::AbstractMatrix;
-    kwargs...,
-)
+        G::SpecialEuclideanManifold,
+        p::AbstractMatrix,
+        X::AbstractMatrix;
+        kwargs...,
+    )
     n = _get_parameter(G)
     return check_size(Euclidean(n + 1, n + 1), X)
 end
 
 function check_vector(
-    G::SpecialEuclideanManifold,
-    p::AbstractMatrix,
-    X::AbstractMatrix;
-    kwargs...,
-)
+        G::SpecialEuclideanManifold,
+        p::AbstractMatrix,
+        X::AbstractMatrix;
+        kwargs...,
+    )
     n = _get_parameter(G)
     errs = DomainError[]
     # homogeneous
@@ -398,11 +398,11 @@ end
 compose(::SpecialEuclidean, p::AbstractMatrix, q::AbstractMatrix) = p * q
 
 function compose!(
-    ::SpecialEuclidean,
-    x::AbstractMatrix,
-    p::AbstractMatrix,
-    q::AbstractMatrix,
-)
+        ::SpecialEuclidean,
+        x::AbstractMatrix,
+        p::AbstractMatrix,
+        q::AbstractMatrix,
+    )
     copyto!(x, p * q)
     return x
 end
@@ -614,11 +614,11 @@ function jacobian_exp_inv_argument(M::SpecialEuclidean, p, X)
     return jacobian_exp_inv_argument!(M, J, p, X)
 end
 function jacobian_exp_inv_argument!(
-    M::SpecialEuclidean{TypeParameter{Tuple{2}}},
-    J::AbstractMatrix,
-    p,
-    X,
-)
+        M::SpecialEuclidean{TypeParameter{Tuple{2}}},
+        J::AbstractMatrix,
+        p,
+        X,
+    )
     θ = norm(X.x[2]) / sqrt(2)
     t1, t2 = X.x[1]
     copyto!(J, I)
@@ -636,11 +636,11 @@ function jacobian_exp_inv_argument!(
 end
 
 function jacobian_exp_inv_argument!(
-    M::SpecialEuclidean{TypeParameter{Tuple{3}}},
-    J::AbstractMatrix,
-    p,
-    X,
-)
+        M::SpecialEuclidean{TypeParameter{Tuple{3}}},
+        J::AbstractMatrix,
+        p,
+        X,
+    )
     θ = norm(X.x[2]) / sqrt(2)
     t1, t2, t3 = X.x[1]
     Xr = X.x[2]
@@ -662,9 +662,9 @@ function jacobian_exp_inv_argument!(
         # top right block
         Xr = -Xr
         tx = @SMatrix [
-            0 -t3/sqrt(2) t2/sqrt(2)
-            t3/sqrt(2) 0 -t1/sqrt(2)
-            -t2/sqrt(2) t1/sqrt(2) 0
+            0 -t3 / sqrt(2) t2 / sqrt(2)
+            t3 / sqrt(2) 0 -t1 / sqrt(2)
+            -t2 / sqrt(2) t1 / sqrt(2) 0
         ]
         J[1:3, 4:6] .= -tx ./ 2
         J[1:3, 4:6] .-= (θ - sin(θ)) / (θ^3) * (Xr * tx + tx * Xr + Xr * tx * Xr)
@@ -839,13 +839,13 @@ is the translation part of `p` and ``X_t`` is the translation part of `X`.
 translate_diff(G::SpecialEuclidean, p, q, X, ::RightBackwardAction)
 
 function translate_diff!(
-    G::SpecialEuclidean{T,<:HybridTangentRepresentation},
-    Y,
-    p,
-    q,
-    X,
-    ::RightBackwardAction,
-) where {T}
+        G::SpecialEuclidean{T, <:HybridTangentRepresentation},
+        Y,
+        p,
+        q,
+        X,
+        ::RightBackwardAction,
+    ) where {T}
     np, hp = submanifold_components(G, p)
     nq, hq = submanifold_components(G, q)
     nX, hX = submanifold_components(G, X)
@@ -888,13 +888,13 @@ Where `se_vectors` is the tangent vector representation of the [`SpecialEuclidea
 group to be used.
 """
 const SpecialEuclideanInGeneralLinear =
-    EmbeddedManifold{ℝ,<:SpecialEuclidean,<:GeneralLinear}
+    EmbeddedManifold{ℝ, <:SpecialEuclidean, <:GeneralLinear}
 
 function SpecialEuclideanInGeneralLinear(
-    n::Int;
-    se_vectors::AbstractGroupVectorRepresentation=LeftInvariantVectorRepresentation(),
-)
-    return EmbeddedManifold(SpecialEuclidean(n; vectors=se_vectors), GeneralLinear(n + 1))
+        n::Int;
+        se_vectors::AbstractGroupVectorRepresentation = LeftInvariantVectorRepresentation(),
+    )
+    return EmbeddedManifold(SpecialEuclidean(n; vectors = se_vectors), GeneralLinear(n + 1))
 end
 
 """

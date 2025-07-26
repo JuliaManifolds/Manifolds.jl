@@ -19,25 +19,16 @@ See [`NLSolveInverseRetraction`](@extref `ManifoldsBase.NLSolveInverseRetraction
 inverse_retract(::AbstractManifold, p, q, ::NLSolveInverseRetraction; kwargs...)
 
 function ManifoldsBase.inverse_retract_nlsolve!(
-    M::AbstractManifold,
-    X,
-    p,
-    q,
-    m::NLSolveInverseRetraction;
-    kwargs...,
-)
+        M::AbstractManifold, X, p, q, m::NLSolveInverseRetraction; kwargs...
+    )
     X0 = m.X0 === nothing ? zero_vector(M, p) : m.X0
     res = _inverse_retract_nlsolve(M, p, q, m; kwargs...)
     return copyto!(X, res.zero)
 end
 
 function _inverse_retract_nlsolve(
-    M::AbstractManifold,
-    p,
-    q,
-    m::NLSolveInverseRetraction;
-    kwargs...,
-)
+        M::AbstractManifold, p, q, m::NLSolveInverseRetraction; kwargs...
+    )
     X0 = m.X0 === nothing ? zero_vector(M, p) : m.X0
     function f!(F, X)
         m.project_tangent && project!(M, X, p, X)

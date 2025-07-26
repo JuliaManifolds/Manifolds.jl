@@ -1,4 +1,3 @@
-
 include("../header.jl")
 include("group_utils.jl")
 
@@ -9,11 +8,11 @@ include("group_utils.jl")
     A_right = RotationTranslationAction(Euclidean(2), G, RightAction())
 
     @test repr(A_left) ==
-          "RotationTranslationAction($(repr(Euclidean(2))), $(repr(G)), LeftAction())"
+        "RotationTranslationAction($(repr(Euclidean(2))), $(repr(G)), LeftAction())"
     @test repr(A_right) ==
-          "RotationTranslationAction($(repr(Euclidean(2))), $(repr(G)), RightAction())"
+        "RotationTranslationAction($(repr(Euclidean(2))), $(repr(G)), RightAction())"
 
-    types_a = [ArrayPartition{Float64,Tuple{Vector{Float64},Matrix{Float64}}}]
+    types_a = [ArrayPartition{Float64, Tuple{Vector{Float64}, Matrix{Float64}}}]
 
     types_m = [Vector{Float64}]
 
@@ -27,29 +26,29 @@ include("group_utils.jl")
         translations = [[1.0, 0.0], [0.0, -2.0], [-1.0, 2.0]]
         a_pts =
             convert.(
-                T_A,
-                [
-                    ArrayPartition(t, [cos(ϕ) -sin(ϕ); sin(ϕ) cos(ϕ)]) for
+            T_A,
+            [
+                ArrayPartition(t, [cos(ϕ) -sin(ϕ); sin(ϕ) cos(ϕ)]) for
                     (t, ϕ) in zip(translations, angles)
-                ],
-            )
+            ],
+        )
         a_X_pts = map(a -> log_lie(G, a), a_pts)
         m_pts = convert.(T_M, [[0.0, 1.0], [-1.0, 0.0], [1.0, 1.0]])
         X_pts = convert.(T_M, [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
 
         atol = if eltype(T_M) == Float32
-            2e-7
+            2.0e-7
         else
-            1e-15
+            1.0e-15
         end
         test_action(
             A_left,
             a_pts,
             m_pts,
             X_pts;
-            test_optimal_alignment=false,
-            test_diff=true,
-            atol=atol,
+            test_optimal_alignment = false,
+            test_diff = true,
+            atol = atol,
         )
 
         test_action(
@@ -57,14 +56,14 @@ include("group_utils.jl")
             a_pts,
             m_pts,
             X_pts;
-            test_optimal_alignment=false,
-            test_diff=true,
-            atol=atol,
+            test_optimal_alignment = false,
+            test_diff = true,
+            atol = atol,
         )
 
         @testset "apply_diff_group" begin
             @test apply_diff_group(A_left, Identity(G), a_X_pts[1], m_pts[1]) ≈
-                  a_X_pts[1].x[2] * m_pts[1]
+                a_X_pts[1].x[2] * m_pts[1]
             Y = similar(m_pts[1])
             apply_diff_group!(A_left, Y, Identity(G), a_X_pts[1], m_pts[1])
             @test Y ≈ a_X_pts[1].x[2] * m_pts[1]
@@ -77,7 +76,7 @@ include("group_utils.jl")
             @test Y ≈ X_pts[1]
 
             @test apply_diff(A_left, a_pts[1], m_pts[1], X_pts[1]) ≈
-                  a_pts[1].x[2] * X_pts[1]
+                a_pts[1].x[2] * X_pts[1]
             Y = similar(X_pts[1])
             apply_diff!(A_left, Y, a_pts[1], m_pts[1], X_pts[1])
             @test Y ≈ a_pts[1].x[2] * X_pts[1]
@@ -88,7 +87,7 @@ include("group_utils.jl")
             @test Y ≈ X_pts[1]
 
             @test apply_diff(A_right, a_pts[1], m_pts[1], X_pts[1]) ≈
-                  a_pts[1].x[2] \ X_pts[1]
+                a_pts[1].x[2] \ X_pts[1]
             Y = similar(X_pts[1])
             apply_diff!(A_right, Y, a_pts[1], m_pts[1], X_pts[1])
             @test Y ≈ a_pts[1].x[2] \ X_pts[1]
@@ -148,9 +147,9 @@ end
         A,
         [a1, a2, a3],
         [p1, p2];
-        test_optimal_alignment=true,
-        test_diff=false,
-        test_switch_direction=false,
-        atol=1e-14,
+        test_optimal_alignment = true,
+        test_diff = false,
+        test_switch_direction = false,
+        atol = 1.0e-14,
     )
 end

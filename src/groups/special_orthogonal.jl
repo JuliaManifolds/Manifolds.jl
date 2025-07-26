@@ -6,11 +6,11 @@ Special orthogonal group ``\mathrm{SO}(n)`` represented by rotation matrices, se
 # Constructor
     SpecialOrthogonal(n)
 """
-const SpecialOrthogonal{T} = GeneralUnitaryMultiplicationGroup{T,ℝ,DeterminantOneMatrixType}
+const SpecialOrthogonal{T} = GeneralUnitaryMultiplicationGroup{T, ℝ, DeterminantOneMatrixType}
 
-function SpecialOrthogonal(n; parameter::Symbol=:type)
+function SpecialOrthogonal(n; parameter::Symbol = :type)
     _lie_groups_depwarn_move(SpecialOrthogonal, :SpecialOrthogonalGroup)
-    return GeneralUnitaryMultiplicationGroup(Rotations(n; parameter=parameter))
+    return GeneralUnitaryMultiplicationGroup(Rotations(n; parameter = parameter))
 end
 
 """

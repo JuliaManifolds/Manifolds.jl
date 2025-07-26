@@ -36,19 +36,19 @@ has_approx_invariant_metric(
     X,
     Y,
     qs,
-    conv::ActionDirectionAndSide=LeftForwardAction();
+    conv::ActionDirectionAndSide = LeftForwardAction();
     kwargs...,
 )
 function has_approx_invariant_metric(
-    ::TraitList{<:IsGroupManifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    Y,
-    qs,
-    conv::ActionDirectionAndSide;
-    kwargs...,
-)
+        ::TraitList{<:IsGroupManifold},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        Y,
+        qs,
+        conv::ActionDirectionAndSide;
+        kwargs...,
+    )
     gpXY = inner(M, p, X, Y)
     for q in qs
         τq = translate(M, q, p, conv)
@@ -79,16 +79,16 @@ end
 @trait_function direction_and_side(M::AbstractDecoratorManifold)
 
 function direction_and_side(
-    ::TraitList{HasLeftInvariantMetric},
-    ::AbstractDecoratorManifold,
-)
+        ::TraitList{HasLeftInvariantMetric},
+        ::AbstractDecoratorManifold,
+    )
     return LeftForwardAction()
 end
 
 function direction_and_side(
-    ::TraitList{HasRightInvariantMetric},
-    ::AbstractDecoratorManifold,
-)
+        ::TraitList{HasRightInvariantMetric},
+        ::AbstractDecoratorManifold,
+    )
     return RightBackwardAction()
 end
 
@@ -96,50 +96,50 @@ function exp(::TraitList{HasLeftInvariantMetric}, M::AbstractDecoratorManifold, 
     return retract(M, p, X, GroupExponentialRetraction(LeftForwardAction()))
 end
 function exp_fused(
-    ::TraitList{HasLeftInvariantMetric},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    t::Number,
-)
+        ::TraitList{HasLeftInvariantMetric},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        t::Number,
+    )
     return retract_fused(M, p, X, t, GroupExponentialRetraction(LeftForwardAction()))
 end
 function exp!(::TraitList{HasLeftInvariantMetric}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(M, q, p, X, GroupExponentialRetraction(LeftForwardAction()))
 end
 function exp_fused!(
-    ::TraitList{HasLeftInvariantMetric},
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    t::Number,
-)
+        ::TraitList{HasLeftInvariantMetric},
+        M::AbstractDecoratorManifold,
+        q,
+        p,
+        X,
+        t::Number,
+    )
     return retract_fused!(M, q, p, X, t, GroupExponentialRetraction(LeftForwardAction()))
 end
 function exp(::TraitList{HasRightInvariantMetric}, M::AbstractDecoratorManifold, p, X)
     return retract(M, p, X, GroupExponentialRetraction(RightBackwardAction()))
 end
 function exp_fused(
-    ::TraitList{HasRightInvariantMetric},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    t::Number,
-)
+        ::TraitList{HasRightInvariantMetric},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        t::Number,
+    )
     return retract_fused(M, p, X, t, GroupExponentialRetraction(RightBackwardAction()))
 end
 function exp!(::TraitList{HasRightInvariantMetric}, M::AbstractDecoratorManifold, q, p, X)
     return retract!(M, q, p, X, GroupExponentialRetraction(RightBackwardAction()))
 end
 function exp_fused!(
-    ::TraitList{HasRightInvariantMetric},
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    t::Number,
-)
+        ::TraitList{HasRightInvariantMetric},
+        M::AbstractDecoratorManifold,
+        q,
+        p,
+        X,
+        t::Number,
+    )
     return retract_fused!(M, q, p, X, t, GroupExponentialRetraction(RightBackwardAction()))
 end
 function exp(::TraitList{HasBiinvariantMetric}, M::MetricManifold, p, X)
@@ -152,59 +152,59 @@ function exp!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, q, p, X)
     return exp!(M.manifold, q, p, X)
 end
 function exp_fused!(
-    ::TraitList{HasBiinvariantMetric},
-    M::MetricManifold,
-    q,
-    p,
-    X,
-    t::Number,
-)
+        ::TraitList{HasBiinvariantMetric},
+        M::MetricManifold,
+        q,
+        p,
+        X,
+        t::Number,
+    )
     return exp_fused!(M.manifold, q, p, X, t)
 end
 
 function get_coordinates(
-    t::TraitList{IT},
-    M::MetricManifold,
-    p,
-    X,
-    B::AbstractBasis,
-) where {IT<:AbstractInvarianceTrait}
+        t::TraitList{IT},
+        M::MetricManifold,
+        p,
+        X,
+        B::AbstractBasis,
+    ) where {IT <: AbstractInvarianceTrait}
     conv = direction_and_side(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     return get_coordinates_lie(next_trait(t), M, Xₑ, B)
 end
 function get_coordinates!(
-    t::TraitList{IT},
-    M::MetricManifold,
-    c,
-    p,
-    X,
-    B::AbstractBasis,
-) where {IT<:AbstractInvarianceTrait}
+        t::TraitList{IT},
+        M::MetricManifold,
+        c,
+        p,
+        X,
+        B::AbstractBasis,
+    ) where {IT <: AbstractInvarianceTrait}
     conv = direction_and_side(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     return get_coordinates_lie!(next_trait(t), M, c, Xₑ, B)
 end
 
 function get_vector(
-    t::TraitList{IT},
-    M::MetricManifold,
-    p,
-    c,
-    B::AbstractBasis,
-) where {IT<:AbstractInvarianceTrait}
+        t::TraitList{IT},
+        M::MetricManifold,
+        p,
+        c,
+        B::AbstractBasis,
+    ) where {IT <: AbstractInvarianceTrait}
     conv = direction_and_side(t, M)
     Xₑ = get_vector_lie(next_trait(t), M, c, B)
     return translate_diff(M, p, Identity(M), Xₑ, conv)
 end
 function get_vector!(
-    t::TraitList{IT},
-    M::MetricManifold,
-    X,
-    p,
-    c,
-    B::AbstractBasis,
-) where {IT<:AbstractInvarianceTrait}
+        t::TraitList{IT},
+        M::MetricManifold,
+        X,
+        p,
+        c,
+        B::AbstractBasis,
+    ) where {IT <: AbstractInvarianceTrait}
     conv = direction_and_side(t, M)
     Xₑ = get_vector_lie(next_trait(t), M, c, B)
     return translate_diff!(M, X, p, Identity(M), Xₑ, conv)
@@ -218,17 +218,17 @@ end
 # Fallbacks / false
 has_invariant_metric(::AbstractManifold, op::ActionDirectionAndSide) = false
 function has_invariant_metric(
-    ::TraitList{<:HasLeftInvariantMetric},
-    ::AbstractDecoratorManifold,
-    ::LeftForwardAction,
-)
+        ::TraitList{<:HasLeftInvariantMetric},
+        ::AbstractDecoratorManifold,
+        ::LeftForwardAction,
+    )
     return true
 end
 function has_invariant_metric(
-    ::TraitList{<:HasRightInvariantMetric},
-    ::AbstractDecoratorManifold,
-    ::RightBackwardAction,
-)
+        ::TraitList{<:HasRightInvariantMetric},
+        ::AbstractDecoratorManifold,
+        ::RightBackwardAction,
+    )
     return true
 end
 
@@ -237,53 +237,53 @@ end
 # fallback / default: false
 has_biinvariant_metric(::AbstractManifold) = false
 function has_biinvariant_metric(
-    ::TraitList{<:HasBiinvariantMetric},
-    ::AbstractDecoratorManifold,
-)
+        ::TraitList{<:HasBiinvariantMetric},
+        ::AbstractDecoratorManifold,
+    )
     return true
 end
 
 function inner(
-    t::TraitList{IT},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-    Y,
-) where {IT<:AbstractInvarianceTrait}
+        t::TraitList{IT},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+        Y,
+    ) where {IT <: AbstractInvarianceTrait}
     conv = direction_and_side(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     Yₑ = inverse_translate_diff(M, p, p, Y, conv)
     return inner(next_trait(t), M, Identity(M), Xₑ, Yₑ)
 end
 function inner(
-    t::TraitList{<:IsGroupManifold},
-    M::AbstractDecoratorManifold,
-    ::Identity,
-    X,
-    Y,
-)
+        t::TraitList{<:IsGroupManifold},
+        M::AbstractDecoratorManifold,
+        ::Identity,
+        X,
+        Y,
+    )
     return inner(next_trait(t), M, identity_element(M), X, Y)
 end
 
 function inverse_translate_diff(
-    ::TraitList{IsMetricManifold},
-    M::MetricManifold,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+        ::TraitList{IsMetricManifold},
+        M::MetricManifold,
+        p,
+        q,
+        X,
+        conv::ActionDirectionAndSide,
+    )
     return inverse_translate_diff(M.manifold, p, q, X, conv)
 end
 function inverse_translate_diff!(
-    ::TraitList{IsMetricManifold},
-    M::MetricManifold,
-    Y,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+        ::TraitList{IsMetricManifold},
+        M::MetricManifold,
+        Y,
+        p,
+        q,
+        X,
+        conv::ActionDirectionAndSide,
+    )
     return inverse_translate_diff!(M.manifold, Y, p, q, X, conv)
 end
 
@@ -324,43 +324,43 @@ function log!(::TraitList{HasBiinvariantMetric}, M::MetricManifold, X, p, q)
 end
 
 function LinearAlgebra.norm(
-    t::TraitList{IT},
-    M::AbstractDecoratorManifold,
-    p,
-    X,
-) where {IT<:AbstractInvarianceTrait}
+        t::TraitList{IT},
+        M::AbstractDecoratorManifold,
+        p,
+        X,
+    ) where {IT <: AbstractInvarianceTrait}
     conv = direction_and_side(t, M)
     Xₑ = inverse_translate_diff(M, p, p, X, conv)
     return norm(next_trait(t), M, Identity(M), Xₑ)
 end
 function LinearAlgebra.norm(
-    t::TraitList{<:IsGroupManifold},
-    M::AbstractDecoratorManifold,
-    ::Identity,
-    X,
-)
+        t::TraitList{<:IsGroupManifold},
+        M::AbstractDecoratorManifold,
+        ::Identity,
+        X,
+    )
     return norm(next_trait(t), M, identity_element(M), X)
 end
 
 function translate_diff(
-    ::TraitList{IsMetricManifold},
-    M::MetricManifold,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+        ::TraitList{IsMetricManifold},
+        M::MetricManifold,
+        p,
+        q,
+        X,
+        conv::ActionDirectionAndSide,
+    )
     return translate_diff(M.manifold, p, q, X, conv)
 end
 function translate_diff!(
-    ::TraitList{IsMetricManifold},
-    M::MetricManifold,
-    Y,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+        ::TraitList{IsMetricManifold},
+        M::MetricManifold,
+        Y,
+        p,
+        q,
+        X,
+        conv::ActionDirectionAndSide,
+    )
     return translate_diff!(M.manifold, Y, p, q, X, conv)
 end
 
@@ -385,18 +385,18 @@ metric obtained by right-translations to the identity. Adds the
 struct RightInvariantMetric <: AbstractMetric end
 
 @inline function active_traits(
-    f,
-    ::MetricManifold{<:Any,<:AbstractManifold,LeftInvariantMetric},
-    args...,
-)
+        f,
+        ::MetricManifold{<:Any, <:AbstractManifold, LeftInvariantMetric},
+        args...,
+    )
     return merge_traits(HasLeftInvariantMetric(), IsExplicitDecorator())
 end
 
 @inline function active_traits(
-    f,
-    ::MetricManifold{<:Any,<:AbstractManifold,RightInvariantMetric},
-    args...,
-)
+        f,
+        ::MetricManifold{<:Any, <:AbstractManifold, RightInvariantMetric},
+        args...,
+    )
     return merge_traits(HasRightInvariantMetric(), IsExplicitDecorator())
 end
 

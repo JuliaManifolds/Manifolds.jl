@@ -5,7 +5,7 @@ Group operation of a semidirect product group. The operation consists of the ope
 `opN` on a normal subgroup `N`, the operation `opH` on a subgroup `H`, and an automorphism
 `action` of elements of `H` on `N`. Only the action is stored.
 """
-struct SemidirectProductOperation{A<:AbstractGroupAction} <: AbstractGroupOperation
+struct SemidirectProductOperation{A <: AbstractGroupAction} <: AbstractGroupOperation
     action::A
 end
 
@@ -26,12 +26,12 @@ const SemidirectProductGroup{
     𝔽,
     N,
     H,
-    A<:AbstractGroupAction,
-    GVR<:AbstractGroupVectorRepresentation,
-} = GroupManifold{𝔽,ProductManifold{𝔽,Tuple{N,H}},SemidirectProductOperation{A},GVR}
+    A <: AbstractGroupAction,
+    GVR <: AbstractGroupVectorRepresentation,
+} = GroupManifold{𝔽, ProductManifold{𝔽, Tuple{N, H}}, SemidirectProductOperation{A}, GVR}
 
-const SemidirectProductGroupHVR{𝔽,N,H,A<:AbstractGroupAction} =
-    SemidirectProductGroup{𝔽,N,H,A,HybridTangentRepresentation}
+const SemidirectProductGroupHVR{𝔽, N, H, A <: AbstractGroupAction} =
+    SemidirectProductGroup{𝔽, N, H, A, HybridTangentRepresentation}
 
 @doc raw"""
     SemidirectProductGroup(N::GroupManifold, H::GroupManifold, A::AbstractGroupAction)
@@ -52,11 +52,11 @@ g^{-1} = (n, h)^{-1} = (θ_{h^{-1}}(n^{-1}), h^{-1}).
 ````
 """
 function SemidirectProductGroup(
-    N::AbstractDecoratorManifold{𝔽},
-    H::AbstractDecoratorManifold{𝔽},
-    A::AbstractGroupAction,
-    vectors::AbstractGroupVectorRepresentation,
-) where {𝔽}
+        N::AbstractDecoratorManifold{𝔽},
+        H::AbstractDecoratorManifold{𝔽},
+        A::AbstractGroupAction,
+        vectors::AbstractGroupVectorRepresentation,
+    ) where {𝔽}
     _lie_groups_depwarn_move(SemidirectProductGroup, :LeftSemidirectProductLieGroup)
     N === group_manifold(A) || error("Subgroup $(N) must be the G-manifold of action $(A)")
     H === base_group(A) || error("Subgroup $(H) must be the base group of action $(A)")
@@ -84,10 +84,10 @@ function identity_element!(G::SemidirectProductGroup, q)
 end
 
 function is_identity(
-    G::SemidirectProductGroup,
-    p::Identity{<:SemidirectProductOperation};
-    kwargs...,
-)
+        G::SemidirectProductGroup,
+        p::Identity{<:SemidirectProductOperation};
+        kwargs...,
+    )
     M = base_manifold(G)
     N, H = M.manifolds
     nq, hq = submanifold_components(G, p)
@@ -123,10 +123,10 @@ function inv!(G::SemidirectProductGroup, q, ::Identity{<:SemidirectProductOperat
     return identity_element!(G, q)
 end
 function inv!(
-    ::SemidirectProductGroup,
-    q::Identity{<:SemidirectProductOperation},
-    ::Identity{<:SemidirectProductOperation},
-)
+        ::SemidirectProductGroup,
+        q::Identity{<:SemidirectProductOperation},
+        ::Identity{<:SemidirectProductOperation},
+    )
     return q
 end
 
@@ -251,18 +251,18 @@ function isapprox(G::SemidirectProductGroup, p, X, Y; kwargs...)
     return isapprox(N, np, nX, nY; kwargs...) && isapprox(H, hp, hX, hY; kwargs...)
 end
 function isapprox(
-    G::SemidirectProductGroup{𝔽,N,H,A},
-    ::Identity{SemidirectProductOperation{A}},
-    X,
-    Y;
-    kwargs...,
-) where {𝔽,N<:AbstractManifold,H<:AbstractManifold,A<:AbstractGroupAction}
+        G::SemidirectProductGroup{𝔽, N, H, A},
+        ::Identity{SemidirectProductOperation{A}},
+        X,
+        Y;
+        kwargs...,
+    ) where {𝔽, N <: AbstractManifold, H <: AbstractManifold, A <: AbstractGroupAction}
     return isapprox(G, identity_element(G), X, Y; kwargs...)
 end
 
 function submanifold_components(
-    M::ProductManifold,
-    ::Identity{<:SemidirectProductOperation},
-)
+        M::ProductManifold,
+        ::Identity{<:SemidirectProductOperation},
+    )
     return map(N -> Identity(N), M.manifolds)
 end

@@ -39,15 +39,15 @@ which defaults to `1.0`.
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in type. Value can either be `:field` or `:type`.
 """
-struct SPDFixedDeterminant{T,TD<:Real} <: AbstractDecoratorManifold{ℝ}
+struct SPDFixedDeterminant{T, TD <: Real} <: AbstractDecoratorManifold{ℝ}
     size::T
     d::TD
 end
 
-function SPDFixedDeterminant(n::Int, d::F=1.0; parameter::Symbol=:type) where {F<:Real}
+function SPDFixedDeterminant(n::Int, d::F = 1.0; parameter::Symbol = :type) where {F <: Real}
     @assert d > 0 "The determinant has to be positive but was provided as $d."
     size = wrap_type_parameter(parameter, (n,))
-    return SPDFixedDeterminant{typeof(size),F}(size, d)
+    return SPDFixedDeterminant{typeof(size), F}(size, d)
 end
 
 function active_traits(f, ::SPDFixedDeterminant, args...)
@@ -85,13 +85,13 @@ and additionally fulfill ``\operatorname{tr}(X) = 0``.
 The tolerance for the trace check of `X` can be set using `kwargs...`, which influences the `isapprox`-check.
 """
 function check_vector(
-    M::SPDFixedDeterminant,
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
-    if !isapprox(tr(X), 0; atol=atol, kwargs...)
+        M::SPDFixedDeterminant,
+        p,
+        X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
+    if !isapprox(tr(X), 0; atol = atol, kwargs...)
         return DomainError(
             tr(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it does not have a zero trace.",
@@ -110,7 +110,7 @@ function get_embedding(::SPDFixedDeterminant{TypeParameter{Tuple{n}}}) where {n}
 end
 function get_embedding(M::SPDFixedDeterminant{Tuple{Int}})
     n = get_parameter(M.size)[1]
-    return SymmetricPositiveDefinite(n; parameter=:field)
+    return SymmetricPositiveDefinite(n; parameter = :field)
 end
 
 @doc raw"""

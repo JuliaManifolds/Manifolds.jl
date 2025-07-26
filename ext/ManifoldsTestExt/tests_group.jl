@@ -37,7 +37,7 @@ and
 """
 function test_inv_diff_fn(G::AbstractManifold, q, X, conv)
     q_ = inv(G, q)
-    Test.@test isapprox(
+    return Test.@test isapprox(
         TangentSpace(G, q_),
         inv_diff(G, q, _move(G, q, X, conv)),
         -_move(G, q_, X, switch_side(conv)),
@@ -68,7 +68,7 @@ function test_apply_diff_group_fn(A::AbstractGroupAction{TAD}, q, X, p) where {T
     p_ = apply(A, q, p)
     X1 = apply_diff_group(A, q, _transporter(G, q, X, TAD()), p)
     X2 = apply_diff_group(A, identity_element(G), X, p_)
-    Test.@test isapprox(TangentSpace(G, p_), X1, X2)
+    return Test.@test isapprox(TangentSpace(G, p_), X1, X2)
 end
 
 """
@@ -100,46 +100,46 @@ If the group is equipped with an invariant metric, `test_invariance` indicates t
 invariance should be checked for the provided points.
 """
 function test_group(
-    G,
-    g_pts::AbstractVector,
-    X_pts::AbstractVector=[],
-    Xe_pts::AbstractVector=[];
-    atol::Real=1e-10,
-    test_mutating::Bool=true,
-    test_exp_lie_log::Bool=true,
-    test_one_arg_identity_element::Bool=true,
-    test_diff::Bool=false,
-    test_invariance::Bool=false,
-    test_lie_bracket::Bool=false,
-    test_adjoint_action::Bool=false,
-    test_inv_diff::Bool=false,
-    test_adjoint_inv_diff::Bool=false,
-    diff_convs=[
-        (),
-        (LeftForwardAction(),),
-        (RightBackwardAction(),),
-        (LeftBackwardAction(),),
-        (RightForwardAction(),),
-    ],
-    test_log_from_identity::Bool=false,
-    test_exp_from_identity::Bool=false,
-    test_vee_hat_from_identity::Bool=false,
-    test_apply_diff_group::Bool=false,
-)
+        G,
+        g_pts::AbstractVector,
+        X_pts::AbstractVector = [],
+        Xe_pts::AbstractVector = [];
+        atol::Real = 1.0e-10,
+        test_mutating::Bool = true,
+        test_exp_lie_log::Bool = true,
+        test_one_arg_identity_element::Bool = true,
+        test_diff::Bool = false,
+        test_invariance::Bool = false,
+        test_lie_bracket::Bool = false,
+        test_adjoint_action::Bool = false,
+        test_inv_diff::Bool = false,
+        test_adjoint_inv_diff::Bool = false,
+        diff_convs = [
+            (),
+            (LeftForwardAction(),),
+            (RightBackwardAction(),),
+            (LeftBackwardAction(),),
+            (RightForwardAction(),),
+        ],
+        test_log_from_identity::Bool = false,
+        test_exp_from_identity::Bool = false,
+        test_vee_hat_from_identity::Bool = false,
+        test_apply_diff_group::Bool = false,
+    )
     e = Identity(G)
 
     Test.@testset "Basic group properties" begin # COV_EXCL_LINE
         Test.@testset "Closed" begin
             for g1 in g_pts, g2 in g_pts
                 g3 = compose(G, g1, g2)
-                Test.@test is_point(G, g3, true; atol=atol)
+                Test.@test is_point(G, g3, true; atol = atol)
             end
         end
 
         Test.@testset "Associative" begin # COV_EXCL_LINE
             g12_3 = compose(G, compose(G, g_pts[1], g_pts[2]), g_pts[3])
             g1_23 = compose(G, g_pts[1], compose(G, g_pts[2], g_pts[3]))
-            Test.@test isapprox(G, g12_3, g1_23; atol=atol)
+            Test.@test isapprox(G, g12_3, g1_23; atol = atol)
 
             test_mutating && Test.@testset "mutating" begin
                 g12, g23, g12_3, g1_23 = allocate.(repeat([g_pts[1]], 4))
@@ -147,7 +147,7 @@ function test_group(
                 Test.@test compose!(G, g23, g_pts[2], g_pts[3]) === g23
                 Test.@test compose!(G, g12_3, g12, g_pts[3]) === g12_3
                 Test.@test compose!(G, g1_23, g_pts[1], g23) === g1_23
-                Test.@test isapprox(G, g12_3, g1_23; atol=atol)
+                Test.@test isapprox(G, g12_3, g1_23; atol = atol)
             end
         end
 
@@ -197,20 +197,20 @@ function test_group(
             Test.@test inv(G, e) === e
             for g in g_pts
                 ginv = inv(G, g)
-                Test.@test is_identity(G, compose(G, g, ginv); atol=atol)
-                Test.@test is_identity(G, compose(G, ginv, g); atol=atol)
+                Test.@test is_identity(G, compose(G, g, ginv); atol = atol)
+                Test.@test is_identity(G, compose(G, ginv, g); atol = atol)
 
                 test_mutating && Test.@testset "mutating" begin
                     Test.@test inv!(G, e, e) === e
                     ginv = allocate(g)
                     Test.@test inv!(G, ginv, g) === ginv
-                    Test.@test is_identity(G, compose(G, g, ginv); atol=atol)
-                    Test.@test is_identity(G, compose(G, ginv, g); atol=atol)
+                    Test.@test is_identity(G, compose(G, g, ginv); atol = atol)
+                    Test.@test is_identity(G, compose(G, ginv, g); atol = atol)
 
                     Test.@test inv(G, e) === e
                     geinv = allocate(g)
                     Test.@test inv!(G, geinv, e) === geinv
-                    Test.@test is_identity(G, geinv; atol=atol)
+                    Test.@test is_identity(G, geinv; atol = atol)
                 end
             end
         end
@@ -223,19 +223,19 @@ function test_group(
             G,
             translate(G, g_pts[1], g_pts[2]),
             compose(G, g_pts[1], g_pts[2]);
-            atol=atol,
+            atol = atol,
         )
         Test.@test isapprox(
             G,
             translate(G, g_pts[1], g_pts[2], LeftForwardAction()),
             compose(G, g_pts[1], g_pts[2]);
-            atol=atol,
+            atol = atol,
         )
         Test.@test isapprox(
             G,
             translate(G, g_pts[1], g_pts[2], RightBackwardAction()),
             compose(G, g_pts[2], g_pts[1]);
-            atol=atol,
+            atol = atol,
         )
 
         for conv in convs
@@ -248,7 +248,7 @@ function test_group(
                     conv...,
                 ),
                 g_pts[2];
-                atol=atol,
+                atol = atol,
             )
             Test.@test isapprox(
                 G,
@@ -259,7 +259,7 @@ function test_group(
                     conv...,
                 ),
                 g_pts[2];
-                atol=atol,
+                atol = atol,
             )
         end
 
@@ -271,18 +271,18 @@ function test_group(
                     G,
                     g,
                     translate(G, g_pts[1], g_pts[2], conv...);
-                    atol=atol,
+                    atol = atol,
                 )
 
                 g = translate(G, g_pts[1], g_pts[2], conv...)
                 g2 = allocate(g)
                 Test.@test inverse_translate!(G, g2, g_pts[1], g, conv...) === g2
-                Test.@test isapprox(G, g2, g_pts[2]; atol=atol)
+                Test.@test isapprox(G, g2, g_pts[2]; atol = atol)
 
                 g = inverse_translate(G, g_pts[1], g_pts[2], conv...)
                 g2 = allocate(g)
                 Test.@test translate!(G, g2, g_pts[1], g, conv...) === g2
-                Test.@test isapprox(G, g2, g_pts[2]; atol=atol)
+                Test.@test isapprox(G, g2, g_pts[2]; atol = atol)
             end
         end
     end
@@ -296,21 +296,21 @@ function test_group(
             g12,
             translate_diff(G, g_pts[2], g_pts[1], X),
             translate_diff(G, g_pts[2], g_pts[1], X, LeftForwardAction());
-            atol=atol,
+            atol = atol,
         )
         Test.@test is_vector(
             G,
             g12,
             translate_diff(G, g_pts[2], g_pts[1], X, LeftForwardAction()),
             true;
-            atol=atol,
+            atol = atol,
         )
         RightBackwardAction() in diff_convs && Test.@test is_vector(
             G,
             g21,
             translate_diff(G, g_pts[2], g_pts[1], X, RightBackwardAction()),
             true;
-            atol=atol,
+            atol = atol,
         )
 
         for conv in diff_convs
@@ -327,7 +327,7 @@ function test_group(
                     conv...,
                 ),
                 X;
-                atol=atol,
+                atol = atol,
             )
             Test.@test isapprox(
                 G,
@@ -340,16 +340,16 @@ function test_group(
                     conv...,
                 ),
                 X;
-                atol=atol,
+                atol = atol,
             )
             Xe = inverse_translate_diff(G, g_pts[1], g_pts[1], X, conv...)
-            Test.@test isapprox(G, e, Xe, translate_diff(G, e, e, Xe, conv...); atol=atol)
+            Test.@test isapprox(G, e, Xe, translate_diff(G, e, e, Xe, conv...); atol = atol)
             Test.@test isapprox(
                 G,
                 e,
                 Xe,
                 inverse_translate_diff(G, e, e, Xe, conv...);
-                atol=atol,
+                atol = atol,
             )
         end
 
@@ -364,24 +364,24 @@ function test_group(
                     g2g1,
                     Y,
                     translate_diff(G, g_pts[2], g_pts[1], X, conv...);
-                    atol=atol,
+                    atol = atol,
                 )
 
                 Y = translate_diff(G, g_pts[2], g_pts[1], X, conv...)
                 Z = allocate(Y)
                 Test.@test inverse_translate_diff!(G, Z, g_pts[2], g2g1, Y, conv...) === Z
-                Test.@test isapprox(G, g_pts[1], Z, X; atol=atol)
+                Test.@test isapprox(G, g_pts[1], Z, X; atol = atol)
 
                 Y = inverse_translate_diff(G, g_pts[2], g_pts[1], X, conv...)
                 Z = allocate(Y)
                 Test.@test translate_diff!(G, Z, g_pts[2], g2invg1, Y, conv...) === Z
-                Test.@test isapprox(G, g_pts[1], Z, X; atol=atol)
+                Test.@test isapprox(G, g_pts[1], Z, X; atol = atol)
             end
         end
     end
 
     test_inv_diff && Test.@testset "Differential of inverse" begin # COV_EXCL_LINE
-        Test.@test isapprox(inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
+        Test.@test isapprox(inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol = atol)
         Test.@testset "test_inv_diff" for side in [LeftSide(), RightSide()]
             test_inv_diff_fn(G, g_pts[1], X_pts[1], side)
         end # COV_EXCL_LINE
@@ -393,11 +393,11 @@ function test_group(
         end
     end
     test_adjoint_inv_diff && Test.@testset "Differential of inverse" begin # COV_EXCL_LINE
-        Test.@test isapprox(adjoint_inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol=atol)
+        Test.@test isapprox(adjoint_inv_diff(G, e, Xe_pts[1]), -Xe_pts[1]; atol = atol)
         Test.@test isapprox(
             adjoint_inv_diff(G, g_pts[1], inv_diff(G, g_pts[1], X_pts[1])),
             X_pts[1];
-            atol=atol,
+            atol = atol,
         )
     end
 
@@ -405,36 +405,36 @@ function test_group(
         Test.@testset "e = exp(0)" begin
             X = log_lie(G, Identity(G))
             g = exp_lie(G, X)
-            Test.@test isapprox(G, Identity(G), g; atol=atol)
+            Test.@test isapprox(G, Identity(G), g; atol = atol)
             ep = identity_element(G, g)
-            Test.@test isapprox(G, ep, zero_vector(G, ep), log_lie(G, ep); atol=atol)
+            Test.@test isapprox(G, ep, zero_vector(G, ep), log_lie(G, ep); atol = atol)
 
             test_mutating && Test.@testset "mutating" begin
                 X = allocate(Xe_pts[1])
                 Test.@test log_lie!(G, X, Identity(G)) === X
                 g = allocate(g_pts[1])
                 Test.@test exp_lie!(G, g, X) === g
-                Test.@test is_identity(G, g; atol=atol) || "is_identity($G, $g; atol=$atol)"
+                Test.@test is_identity(G, g; atol = atol) || "is_identity($G, $g; atol=$atol)"
             end
         end
 
         Test.@testset "X = log(exp(X))" begin # COV_EXCL_LINE
             for X in Xe_pts
                 g = exp_lie(G, X)
-                Test.@test is_point(G, g; atol=atol)
+                Test.@test is_point(G, g; atol = atol)
                 X2 = log_lie(G, g)
-                Test.@test isapprox(G, Identity(G), X2, X; atol=atol)
+                Test.@test isapprox(G, Identity(G), X2, X; atol = atol)
             end
 
             test_mutating && Test.@testset "mutating" begin
                 for X in Xe_pts
                     g = allocate(g_pts[1])
                     Test.@test exp_lie!(G, g, X) === g
-                    Test.@test is_point(G, g, true; atol=atol)
-                    Test.@test isapprox(G, g, exp_lie(G, X); atol=atol)
+                    Test.@test is_point(G, g, true; atol = atol)
+                    Test.@test isapprox(G, g, exp_lie(G, X); atol = atol)
                     X2 = allocate(X)
                     Test.@test log_lie!(G, X2, g) === X2
-                    Test.@test isapprox(G, Identity(G), X2, X; atol=atol)
+                    Test.@test isapprox(G, Identity(G), X2, X; atol = atol)
                 end
             end
         end
@@ -443,7 +443,7 @@ function test_group(
             g = g_pts[1]
             X = log_lie(G, g)
             ginv = exp_lie(G, -X)
-            Test.@test isapprox(G, ginv, inv(G, g); atol=atol)
+            Test.@test isapprox(G, ginv, inv(G, g); atol = atol)
         end
 
         Test.@testset "exp(sX)∘exp(tX) = exp((s+t)X)" begin # COV_EXCL_LINE
@@ -452,54 +452,54 @@ function test_group(
             g12 = exp_lie(G, 0.5 * Xe_pts[1])
             g1_g2 = compose(G, g1, g2)
             g2_g1 = compose(G, g2, g1)
-            isapprox(G, g1_g2, g12; atol=atol)
-            isapprox(G, g2_g1, g12; atol=atol)
+            isapprox(G, g1_g2, g12; atol = atol)
+            isapprox(G, g2_g1, g12; atol = atol)
         end
     end
 
     test_exp_lie_log &&
         test_diff &&
         Test.@testset "exp/log retract/inverse_retract" begin # COV_EXCL_LINE
+        for conv in diff_convs
+            y = retract(
+                G,
+                g_pts[1],
+                X_pts[1],
+                Manifolds.GroupExponentialRetraction(conv...),
+            )
+            Test.@test is_point(G, y, true; atol = atol)
+            X2 = inverse_retract(
+                G,
+                g_pts[1],
+                y,
+                Manifolds.GroupLogarithmicInverseRetraction(conv...),
+            )
+            Test.@test isapprox(G, g_pts[1], X2, X_pts[1]; atol = atol)
+        end
+
+        test_mutating && Test.@testset "mutating" begin
             for conv in diff_convs
-                y = retract(
+                y = allocate(g_pts[1])
+                Test.@test retract!(
                     G,
+                    y,
                     g_pts[1],
                     X_pts[1],
                     Manifolds.GroupExponentialRetraction(conv...),
-                )
-                Test.@test is_point(G, y, true; atol=atol)
-                X2 = inverse_retract(
+                ) === y
+                Test.@test is_point(G, y, true; atol = atol)
+                X2 = allocate(X_pts[1])
+                Test.@test inverse_retract!(
                     G,
+                    X2,
                     g_pts[1],
                     y,
                     Manifolds.GroupLogarithmicInverseRetraction(conv...),
-                )
-                Test.@test isapprox(G, g_pts[1], X2, X_pts[1]; atol=atol)
-            end
-
-            test_mutating && Test.@testset "mutating" begin
-                for conv in diff_convs
-                    y = allocate(g_pts[1])
-                    Test.@test retract!(
-                        G,
-                        y,
-                        g_pts[1],
-                        X_pts[1],
-                        Manifolds.GroupExponentialRetraction(conv...),
-                    ) === y
-                    Test.@test is_point(G, y, true; atol=atol)
-                    X2 = allocate(X_pts[1])
-                    Test.@test inverse_retract!(
-                        G,
-                        X2,
-                        g_pts[1],
-                        y,
-                        Manifolds.GroupLogarithmicInverseRetraction(conv...),
-                    ) === X2
-                    Test.@test isapprox(G, g_pts[1], X2, X_pts[1]; atol=atol)
-                end
+                ) === X2
+                Test.@test isapprox(G, g_pts[1], X2, X_pts[1]; atol = atol)
             end
         end
+    end
 
     test_invariance && Test.@testset "metric invariance" begin
         if has_invariant_metric(G, LeftForwardAction())
@@ -637,7 +637,7 @@ function test_group(
 
     test_apply_diff_group && Test.@testset "apply_diff_group" begin
         Test.@testset "$dir, $side" for side in [LeftSide(), RightSide()],
-            dir in [LeftAction(), RightAction()]
+                dir in [LeftAction(), RightAction()]
 
             test_apply_diff_group_fn(
                 GroupOperationAction(G, (dir, side)),
@@ -651,7 +651,7 @@ function test_group(
     return nothing
 end
 
-_direction_from_type(::AbstractGroupAction{TD}) where {TD<:ActionDirection} = TD()
+_direction_from_type(::AbstractGroupAction{TD}) where {TD <: ActionDirection} = TD()
 
 """
     test_action(
@@ -677,18 +677,18 @@ on the manifold it acts upon (contained in `m_pts`).
   doesn't change the group element.
 """
 function test_action(
-    A::AbstractGroupAction,
-    a_pts::AbstractVector,
-    m_pts::AbstractVector,
-    X_pts=[];
-    atol=1e-10,
-    atol_ident_compose=0,
-    test_optimal_alignment=false,
-    test_mutating_group=true,
-    test_mutating_action=true,
-    test_diff=false,
-    test_switch_direction=true,
-)
+        A::AbstractGroupAction,
+        a_pts::AbstractVector,
+        m_pts::AbstractVector,
+        X_pts = [];
+        atol = 1.0e-10,
+        atol_ident_compose = 0,
+        test_optimal_alignment = false,
+        test_mutating_group = true,
+        test_mutating_action = true,
+        test_diff = false,
+        test_switch_direction = true,
+    )
     G = base_group(A)
     M = group_manifold(A)
     e = Identity(G)
@@ -706,13 +706,13 @@ function test_action(
             Test.@testset "over actions" begin # COV_EXCL_LINE
                 for a1 in a_pts, a2 in a_pts
                     a3 = compose(A, a1, a2)
-                    Test.@test is_point(G, a3, true; atol=atol)
+                    Test.@test is_point(G, a3, true; atol = atol)
                 end
             end
             Test.@testset "over g-manifold" begin # COV_EXCL_LINE
                 for a in a_pts, m in m_pts
-                    Test.@test is_point(M, apply(A, a, m), true; atol=atol)
-                    Test.@test is_point(M, inverse_apply(A, a, m), true; atol=atol)
+                    Test.@test is_point(M, apply(A, a, m), true; atol = atol)
+                    Test.@test is_point(M, inverse_apply(A, a, m), true; atol = atol)
                 end
             end
         end
@@ -724,14 +724,14 @@ function test_action(
             Test.@testset "over compose" begin # COV_EXCL_LINE
                 a12_a3 = compose(A, a12, a_pts[3])
                 a1_a23 = compose(A, a_pts[1], a23)
-                Test.@test isapprox(G, a12_a3, a1_a23; atol=atol)
+                Test.@test isapprox(G, a12_a3, a1_a23; atol = atol)
             end
 
             Test.@testset "over apply" begin # COV_EXCL_LINE
                 for m in m_pts
                     a12_a3_m = apply(A, a12, apply(A, a_pts[3], m))
                     a1_a23_m = apply(A, a_pts[1], apply(A, a23, m))
-                    Test.@test isapprox(M, a12_a3_m, a1_a23_m; atol=atol)
+                    Test.@test isapprox(M, a12_a3_m, a1_a23_m; atol = atol)
                 end
             end
 
@@ -741,14 +741,14 @@ function test_action(
                 Test.@test compose!(A, a23, a_pts[2], a_pts[3]) === a23
                 Test.@test compose!(A, a12_3, a12, a_pts[3]) === a12_3
                 Test.@test compose!(A, a1_23, a_pts[1], a23) === a1_23
-                Test.@test isapprox(G, a12_3, a1_23; atol=atol)
+                Test.@test isapprox(G, a12_3, a1_23; atol = atol)
             end
             test_mutating_action && Test.@testset "mutating apply!" begin
                 for m in m_pts
                     a12_a3_m, a1_a23_m = allocate(m), allocate(m)
                     Test.@test apply!(A, a12_a3_m, a12, apply(A, a_pts[3], m)) === a12_a3_m
                     Test.@test apply!(A, a1_a23_m, a_pts[1], apply(A, a23, m)) === a1_a23_m
-                    Test.@test isapprox(M, a12_a3_m, a1_a23_m; atol=atol)
+                    Test.@test isapprox(M, a12_a3_m, a1_a23_m; atol = atol)
                 end
             end
         end
@@ -757,12 +757,12 @@ function test_action(
             Test.@test compose(A, e, e) === e
 
             for a in a_pts
-                Test.@test isapprox(G, compose(A, a, e), a; atol=atol_ident_compose)
-                Test.@test isapprox(G, compose(A, e, a), a; atol=atol_ident_compose)
+                Test.@test isapprox(G, compose(A, a, e), a; atol = atol_ident_compose)
+                Test.@test isapprox(G, compose(A, e, a), a; atol = atol_ident_compose)
 
                 ge = identity_element(G, a)
-                Test.@test isapprox(G, compose(A, a, ge), a; atol=atol_ident_compose)
-                Test.@test isapprox(G, compose(A, ge, a), a; atol=atol_ident_compose)
+                Test.@test isapprox(G, compose(A, a, ge), a; atol = atol_ident_compose)
+                Test.@test isapprox(G, compose(A, ge, a), a; atol = atol_ident_compose)
 
                 for m in m_pts
                     Test.@test isapprox(M, apply(A, e, m), m)
@@ -810,23 +810,23 @@ function test_action(
         Test.@testset "Inverse" begin # COV_EXCL_LINE
             for a in a_pts
                 ainv = inv(G, a)
-                Test.@test isapprox(G, compose(A, a, ainv), e; atol=atol)
-                Test.@test isapprox(G, compose(A, ainv, a), e; atol=atol)
-                Test.@test isapprox(G, e, compose(A, a, ainv); atol=atol)
-                Test.@test isapprox(G, e, compose(A, ainv, a); atol=atol)
+                Test.@test isapprox(G, compose(A, a, ainv), e; atol = atol)
+                Test.@test isapprox(G, compose(A, ainv, a), e; atol = atol)
+                Test.@test isapprox(G, e, compose(A, a, ainv); atol = atol)
+                Test.@test isapprox(G, e, compose(A, ainv, a); atol = atol)
 
                 for m in m_pts
                     Test.@test isapprox(
                         M,
                         apply(A, a, m),
                         inverse_apply(A, ainv, m);
-                        atol=atol,
+                        atol = atol,
                     )
                     Test.@test isapprox(
                         M,
                         apply(A, ainv, m),
                         inverse_apply(A, a, m);
-                        atol=atol,
+                        atol = atol,
                     )
                 end
             end
@@ -838,8 +838,8 @@ function test_action(
             for a in a_pts
                 am, aX = apply(A, a, m), apply_diff(A, a, m, X)
                 ainvm, ainvv = inverse_apply(A, a, m), inverse_apply_diff(A, a, m, X)
-                Test.@test is_vector(M, am, aX, true; atol=atol)
-                Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
+                Test.@test is_vector(M, am, aX, true; atol = atol)
+                Test.@test is_vector(M, ainvm, ainvv, true; atol = atol)
             end
         end
 
@@ -852,8 +852,8 @@ function test_action(
                     ainvm = inverse_apply(A, a, m)
                     ainvv = allocate(X)
                     Test.@test inverse_apply_diff!(A, ainvv, a, m, X) === ainvv
-                    Test.@test is_vector(M, am, aX, true; atol=atol)
-                    Test.@test is_vector(M, ainvm, ainvv, true; atol=atol)
+                    Test.@test is_vector(M, am, aX, true; atol = atol)
+                    Test.@test is_vector(M, ainvm, ainvv, true; atol = atol)
                 end
             end
         end
@@ -863,13 +863,13 @@ function test_action(
         act = center_of_orbit(A, [m_pts[1]], m_pts[2])
         act2 = center_of_orbit(A, [m_pts[1]], m_pts[2], GradientDescentEstimation())
         act_opt = optimal_alignment(A, m_pts[2], m_pts[1])
-        Test.@test isapprox(G, act, act_opt; atol=atol)
-        Test.@test isapprox(G, act2, act_opt; atol=atol)
+        Test.@test isapprox(G, act, act_opt; atol = atol)
+        Test.@test isapprox(G, act2, act_opt; atol = atol)
 
         test_mutating_group && Test.@testset "mutating" begin
             act_opt2 = allocate(act_opt)
             optimal_alignment!(A, act_opt2, m_pts[2], m_pts[1])
-            Test.@test isapprox(G, act_opt, act_opt2; atol=atol)
+            Test.@test isapprox(G, act_opt, act_opt2; atol = atol)
         end
     end
     return nothing

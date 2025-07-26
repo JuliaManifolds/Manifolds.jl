@@ -7,7 +7,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
     @testset "real" begin
         G = TranslationGroup(2, 3)
         @test repr(G) == "TranslationGroup(2, 3; field=ℝ)"
-        @test repr(TranslationGroup(2, 3; field=ℂ)) == "TranslationGroup(2, 3; field=ℂ)"
+        @test repr(TranslationGroup(2, 3; field = ℂ)) == "TranslationGroup(2, 3; field=ℂ)"
 
         @test has_invariant_metric(G, LeftForwardAction())
         @test has_invariant_metric(G, RightBackwardAction())
@@ -35,27 +35,27 @@ using Manifolds: LeftForwardAction, RightBackwardAction
                 gpts,
                 Xgpts,
                 Xgpts;
-                test_diff=true,
-                test_invariance=true,
-                test_lie_bracket=true,
-                test_adjoint_action=true,
-                test_exp_from_identity=true,
-                test_log_from_identity=true,
-                test_vee_hat_from_identity=true,
-                test_inv_diff=true,
-                test_adjoint_inv_diff=true,
+                test_diff = true,
+                test_invariance = true,
+                test_lie_bracket = true,
+                test_adjoint_action = true,
+                test_exp_from_identity = true,
+                test_log_from_identity = true,
+                test_vee_hat_from_identity = true,
+                test_inv_diff = true,
+                test_adjoint_inv_diff = true,
             )
         end
 
-        @test is_vector(G, Identity(G), rand(G; vector_at=Identity(G)))
+        @test is_vector(G, Identity(G), rand(G; vector_at = Identity(G)))
     end
 
     @testset "complex" begin
-        G = TranslationGroup(2, 3; field=ℂ)
+        G = TranslationGroup(2, 3; field = ℂ)
         @test repr(G) == "TranslationGroup(2, 3; field=ℂ)"
 
         types = [Matrix{ComplexF64}]
-        @test base_manifold(G) === Euclidean(2, 3; field=ℂ)
+        @test base_manifold(G) === Euclidean(2, 3; field = ℂ)
 
         pts = [reshape(complex.(i:(i + 5), (i + 1):(i + 6)), (2, 3)) for i in 1:3]
         Xpts = [reshape(complex.(-2:3, -1:4), (2, 3)), reshape(complex.(-1:4, 0:5), (2, 3))]
@@ -69,16 +69,16 @@ using Manifolds: LeftForwardAction, RightBackwardAction
                 gpts,
                 Xgpts,
                 Xgpts;
-                test_diff=true,
-                test_invariance=true,
-                test_lie_bracket=true,
-                test_adjoint_action=true,
+                test_diff = true,
+                test_invariance = true,
+                test_lie_bracket = true,
+                test_adjoint_action = true,
             )
         end
     end
     @testset "field parameter" begin
-        @test repr(TranslationGroup(2, 3; field=ℂ, parameter=:field)) ==
-              "TranslationGroup(2, 3; field=ℂ, parameter=:field)"
+        @test repr(TranslationGroup(2, 3; field = ℂ, parameter = :field)) ==
+            "TranslationGroup(2, 3; field=ℂ, parameter=:field)"
     end
 
     @testset "statistics" begin

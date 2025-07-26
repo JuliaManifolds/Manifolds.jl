@@ -1,4 +1,3 @@
-
 function active_traits(f, ::ProductManifold, args...)
     return merge_traits(IsDefaultMetric(ProductMetric()))
 end

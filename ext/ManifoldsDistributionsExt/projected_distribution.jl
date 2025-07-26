@@ -5,20 +5,20 @@ Generates a random point in ambient space of `M` and projects it to `M`
 using function `proj!`. Generated arrays are of type `TResult`, which can be
 specified by providing the `p` argument.
 """
-struct ProjectedPointDistribution{TResult,TM<:AbstractManifold,TD<:Distribution,TProj} <:
-       MPointDistribution{TM}
+struct ProjectedPointDistribution{TResult, TM <: AbstractManifold, TD <: Distribution, TProj} <:
+    MPointDistribution{TM}
     manifold::TM
     distribution::TD
     proj!::TProj
 end
 
 function ProjectedPointDistribution(
-    M::AbstractManifold,
-    d::Distribution,
-    proj!,
-    ::TResult,
-) where {TResult}
-    return ProjectedPointDistribution{TResult,typeof(M),typeof(d),typeof(proj!)}(
+        M::AbstractManifold,
+        d::Distribution,
+        proj!,
+        ::TResult,
+    ) where {TResult}
+    return ProjectedPointDistribution{TResult, typeof(M), typeof(d), typeof(proj!)}(
         M,
         d,
         proj!,
@@ -31,33 +31,33 @@ end
 Wrap the standard distribution `d` into a manifold-valued distribution. Generated
 points will be of similar type to `p`. By default, the type is not changed.
 """
-function projected_distribution(M::AbstractManifold, d, p=rand(d))
+function projected_distribution(M::AbstractManifold, d, p = rand(d))
     return ProjectedPointDistribution(M, d, project!, p)
 end
 
 function Random.rand(
-    rng::AbstractRNG,
-    d::ProjectedPointDistribution{TResult},
-) where {TResult}
+        rng::AbstractRNG,
+        d::ProjectedPointDistribution{TResult},
+    ) where {TResult}
     p = convert(TResult, rand(rng, d.distribution))
     return d.proj!(d.manifold, p, p)
 end
 
 function Random.rand(
-    rng::AbstractRNG,
-    d::ProjectedPointDistribution{TResult},
-    n::Int,
-) where {TResult}
+        rng::AbstractRNG,
+        d::ProjectedPointDistribution{TResult},
+        n::Int,
+    ) where {TResult}
     ps = [convert(TResult, rand(rng, d.distribution)) for _ in 1:n]
     map(p -> d.proj!(d.manifold, p, p), ps)
     return ps
 end
 
 function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProjectedPointDistribution,
-    p::AbstractArray{<:Number},
-)
+        rng::AbstractRNG,
+        d::ProjectedPointDistribution,
+        p::AbstractArray{<:Number},
+    )
     Distributions._rand!(rng, d.distribution, p)
     return d.proj!(d.manifold, p, p)
 end
@@ -73,23 +73,23 @@ at point `p` and projects it to vector space of type `type` using function
 Generated arrays are of type `TResult`.
 """
 struct ProjectedFVectorDistribution{
-    TResult,
-    TSpace<:VectorSpaceFiber,
-    TD<:Distribution,
-    TProj,
-} <: FVectorDistribution{TSpace}
+        TResult,
+        TSpace <: VectorSpaceFiber,
+        TD <: Distribution,
+        TProj,
+    } <: FVectorDistribution{TSpace}
     type::TSpace
     distribution::TD
     project!::TProj
 end
 
 function ProjectedFVectorDistribution(
-    type::VectorSpaceFiber,
-    d::Distribution,
-    project!,
-    ::TResult,
-) where {TResult}
-    return ProjectedFVectorDistribution{TResult,typeof(type),typeof(d),typeof(project!)}(
+        type::VectorSpaceFiber,
+        d::Distribution,
+        project!,
+        ::TResult,
+    ) where {TResult}
+    return ProjectedFVectorDistribution{TResult, typeof(type), typeof(d), typeof(project!)}(
         type,
         d,
         project!,
@@ -97,18 +97,18 @@ function ProjectedFVectorDistribution(
 end
 
 function Random.rand(
-    rng::AbstractRNG,
-    d::ProjectedFVectorDistribution{TResult},
-) where {TResult}
+        rng::AbstractRNG,
+        d::ProjectedFVectorDistribution{TResult},
+    ) where {TResult}
     X = convert(TResult, reshape(rand(rng, d.distribution), size(d.type.point)))
     return d.project!(d.type.manifold, X, d.type.point, X)
 end
 
 function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProjectedFVectorDistribution,
-    X::AbstractArray{<:Number},
-)
+        rng::AbstractRNG,
+        d::ProjectedFVectorDistribution,
+        X::AbstractArray{<:Number},
+    )
     # calling _rand!(rng, d.d, v) doesn't work for all arrays types
     return copyto!(X, rand(rng, d))
 end

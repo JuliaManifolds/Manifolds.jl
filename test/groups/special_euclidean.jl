@@ -9,20 +9,20 @@ using Manifolds:
     LeftForwardAction, LeftBackwardAction, RightForwardAction, RightBackwardAction
 
 @testset "Special Euclidean group" begin
-    @test repr(SpecialEuclidean(3; vectors=HybridTangentRepresentation())) ==
-          "SpecialEuclidean(3; vectors=HybridTangentRepresentation())"
+    @test repr(SpecialEuclidean(3; vectors = HybridTangentRepresentation())) ==
+        "SpecialEuclidean(3; vectors=HybridTangentRepresentation())"
     for (se_parameter, se_vectors) in [
-        (:field, LeftInvariantRepresentation()),
-        (:type, LeftInvariantRepresentation()),
-        (:field, HybridTangentRepresentation()),
-    ]
+            (:field, LeftInvariantRepresentation()),
+            (:type, LeftInvariantRepresentation()),
+            (:field, HybridTangentRepresentation()),
+        ]
         @testset "SpecialEuclidean($n; parameter=$se_parameter, vectors=$se_vectors)" for n in
-                                                                                          (
-            2,
-            3,
-            4,
-        )
-            G = SpecialEuclidean(n; parameter=se_parameter, vectors=se_vectors)
+            (
+                2,
+                3,
+                4,
+            )
+            G = SpecialEuclidean(n; parameter = se_parameter, vectors = se_vectors)
             if se_parameter === :field
                 @test isa(G, SpecialEuclidean{Tuple{Int}})
             else
@@ -35,14 +35,14 @@ using Manifolds:
                 @test repr(G) == "SpecialEuclidean($n)"
             elseif se_parameter === :field && se_vectors === HybridTangentRepresentation()
                 @test repr(G) ==
-                      "SpecialEuclidean($n; parameter=:field, vectors=HybridTangentRepresentation())"
+                    "SpecialEuclidean($n; parameter=:field, vectors=HybridTangentRepresentation())"
             end
             M = base_manifold(G)
             @test M ===
-                  TranslationGroup(n; parameter=se_parameter) ×
-                  SpecialOrthogonal(n; parameter=se_parameter)
-            @test submanifold(G, 1) === TranslationGroup(n; parameter=se_parameter)
-            @test submanifold(G, 2) === SpecialOrthogonal(n; parameter=se_parameter)
+                TranslationGroup(n; parameter = se_parameter) ×
+                SpecialOrthogonal(n; parameter = se_parameter)
+            @test submanifold(G, 1) === TranslationGroup(n; parameter = se_parameter)
+            @test submanifold(G, 2) === SpecialOrthogonal(n; parameter = se_parameter)
             Rn = Rotations(n)
             p = Matrix(I, n, n)
 
@@ -101,9 +101,9 @@ using Manifolds:
             @test g1g2mat ≈ affine_matrix(G, g1) * affine_matrix(G, g2)
             @test affine_matrix(G, g1g2mat) === g1g2mat
             if se_parameter === :type
-                @test affine_matrix(G, Identity(G)) isa SDiagonal{n,Float64}
+                @test affine_matrix(G, Identity(G)) isa SDiagonal{n, Float64}
             end
-            @test affine_matrix(G, Identity(G)) == SDiagonal{n,Float64}(I)
+            @test affine_matrix(G, Identity(G)) == SDiagonal{n, Float64}(I)
 
             w = translate_diff(G, pts[1], Identity(G), X_pts[1])
             if se_vectors isa Manifolds.LeftInvariantRepresentation
@@ -112,32 +112,32 @@ using Manifolds:
                 @test screw_matrix(G, w2mat) === w2mat
             end
 
-            @test is_vector(G, Identity(G), rand(G; vector_at=Identity(G)))
+            @test is_vector(G, Identity(G), rand(G; vector_at = Identity(G)))
 
             test_group(
                 G,
                 pts,
                 X_pts,
                 X_pts;
-                test_diff=true,
-                test_lie_bracket=true,
-                test_adjoint_action=true,
-                test_exp_from_identity=true,
-                test_log_from_identity=true,
-                test_vee_hat_from_identity=true,
-                diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+                test_diff = true,
+                test_lie_bracket = true,
+                test_adjoint_action = true,
+                test_exp_from_identity = true,
+                test_log_from_identity = true,
+                test_vee_hat_from_identity = true,
+                diff_convs = [(), (LeftForwardAction(),), (RightBackwardAction(),)],
             )
             test_manifold(
                 G,
                 pts;
-                basis_types_vecs=basis_types,
-                basis_types_to_from=basis_types,
-                is_mutating=true,
-                is_tangent_atol_multiplier=1,
+                basis_types_vecs = basis_types,
+                basis_types_to_from = basis_types,
+                is_mutating = true,
+                is_tangent_atol_multiplier = 1,
                 #test_inplace=true,
-                test_vee_hat=true,
-                exp_log_atol_multiplier=50,
-                test_representation_size=false,
+                test_vee_hat = true,
+                exp_log_atol_multiplier = 50,
+                test_representation_size = false,
             )
 
             for CS in [CartanSchoutenMinus(), CartanSchoutenPlus(), CartanSchoutenZero()]
@@ -149,21 +149,21 @@ using Manifolds:
                         pts,
                         X_pts,
                         X_pts;
-                        test_diff=true,
-                        test_lie_bracket=true,
-                        test_adjoint_action=true,
-                        diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+                        test_diff = true,
+                        test_lie_bracket = true,
+                        test_adjoint_action = true,
+                        diff_convs = [(), (LeftForwardAction(),), (RightBackwardAction(),)],
                     )
 
                     test_manifold(
                         G_TR,
                         pts;
-                        is_mutating=true,
-                        exp_log_atol_multiplier=50,
-                        is_tangent_atol_multiplier=1,
-                        test_inner=false,
-                        test_norm=false,
-                        test_representation_size=false,
+                        is_mutating = true,
+                        exp_log_atol_multiplier = 50,
+                        is_tangent_atol_multiplier = 1,
+                        test_inner = false,
+                        test_norm = false,
+                        test_representation_size = false,
                     )
                 end
             end
@@ -177,21 +177,21 @@ using Manifolds:
                         pts,
                         X_pts,
                         X_pts;
-                        test_diff=true,
-                        test_lie_bracket=true,
-                        test_adjoint_action=true,
-                        diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
+                        test_diff = true,
+                        test_lie_bracket = true,
+                        test_adjoint_action = true,
+                        diff_convs = [(), (LeftForwardAction(),), (RightBackwardAction(),)],
                     )
 
                     test_manifold(
                         G_TR,
                         pts;
-                        basis_types_vecs=basis_types,
-                        basis_types_to_from=basis_types,
-                        is_mutating=true,
-                        exp_log_atol_multiplier=50,
-                        is_tangent_atol_multiplier=1,
-                        test_representation_size=false,
+                        basis_types_vecs = basis_types,
+                        basis_types_to_from = basis_types,
+                        is_mutating = true,
+                        exp_log_atol_multiplier = 50,
+                        is_tangent_atol_multiplier = 1,
+                        test_representation_size = false,
                     )
                 end
             end
@@ -213,40 +213,40 @@ using Manifolds:
                     pts,
                     X_pts,
                     X_pts;
-                    test_diff=true, # fails sometimes
-                    test_lie_bracket=true,
-                    diff_convs=[(), (LeftForwardAction(),), (RightBackwardAction(),)],
-                    atol=1e-9,
+                    test_diff = true, # fails sometimes
+                    test_lie_bracket = true,
+                    diff_convs = [(), (LeftForwardAction(),), (RightBackwardAction(),)],
+                    atol = 1.0e-9,
                 )
                 test_manifold(
                     G,
                     pts;
-                    is_mutating=true,
+                    is_mutating = true,
                     #test_inplace=true,
-                    test_vee_hat=true,
-                    test_is_tangent=true, # fails
-                    exp_log_atol_multiplier=50,
-                    test_representation_size=false,
+                    test_vee_hat = true,
+                    test_is_tangent = true, # fails
+                    exp_log_atol_multiplier = 50,
+                    test_representation_size = false,
                 )
                 # specific affine tests
                 p = copy(G, pts[1])
                 X = copy(G, p, X_pts[1])
                 X[n + 1, n + 1] = 0.1
-                @test_throws DomainError is_vector(G, p, X; error=:error)
+                @test_throws DomainError is_vector(G, p, X; error = :error)
                 X2 = zeros(n + 2, n + 2)
                 # nearly correct just too large (and the error from before)
                 X2[1:n, 1:n] .= X[1:n, 1:n]
                 X2[1:n, end] .= X[1:n, end]
                 X2[end, end] = X[end, end]
-                @test_throws DomainError is_vector(G, p, X2; error=:error)
+                @test_throws DomainError is_vector(G, p, X2; error = :error)
                 p[n + 1, n + 1] = 0.1
-                @test_throws DomainError is_point(G, p; error=:error)
+                @test_throws DomainError is_point(G, p; error = :error)
                 p2 = zeros(n + 2, n + 2)
                 # nearly correct just too large (and the error from before)
                 p2[1:n, 1:n] .= p[1:n, 1:n]
                 p2[1:n, end] .= p[1:n, end]
                 p2[end, end] = p[end, end]
-                @test_throws DomainError is_point(G, p2; error=:error)
+                @test_throws DomainError is_point(G, p2; error = :error)
                 # exp/log_lie for ProductGroup on arrays
                 X = copy(G, p, X_pts[1])
                 p3 = exp_lie(G, X)
@@ -296,14 +296,14 @@ using Manifolds:
             end
 
             G = SpecialEuclidean(11)
-            @test affine_matrix(G, Identity(G)) isa Diagonal{Float64,Vector{Float64}}
+            @test affine_matrix(G, Identity(G)) isa Diagonal{Float64, Vector{Float64}}
             @test affine_matrix(G, Identity(G)) == Diagonal(ones(11))
         end
     end
 
     for se_vectors in [LeftInvariantRepresentation(), HybridTangentRepresentation()]
         @testset "Explicit embedding in GL(n+1)" begin
-            G = SpecialEuclidean(3; vectors=se_vectors)
+            G = SpecialEuclidean(3; vectors = se_vectors)
             t = Vector{Float64}.([1:3, 2:4, 4:6])
             ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
             p = Matrix(I, 3, 3)
@@ -314,8 +314,8 @@ using Manifolds:
 
             GL = GeneralLinear(4)
             SEGL = EmbeddedManifold(G, GL)
-            @test Manifolds.SpecialEuclideanInGeneralLinear(3; se_vectors=se_vectors) ===
-                  SEGL
+            @test Manifolds.SpecialEuclideanInGeneralLinear(3; se_vectors = se_vectors) ===
+                SEGL
             pts_gl = [embed(SEGL, pp) for pp in pts]
             q_gl = embed(SEGL, q)
             X_gl = embed(SEGL, pts_gl[1], X)
@@ -358,7 +358,7 @@ using Manifolds:
     end
 
     @testset "Adjoint action on 𝔰𝔢(3)" begin
-        G = SpecialEuclidean(3; parameter=:type, vectors=HybridTangentRepresentation())
+        G = SpecialEuclidean(3; parameter = :type, vectors = HybridTangentRepresentation())
         t = Vector{Float64}.([1:3, 2:4, 4:6])
         ω = [[1.0, 2.0, 3.0], [3.0, 2.0, 1.0], [1.0, 3.0, 2.0]]
         p = Matrix(I, 3, 3)
@@ -428,10 +428,10 @@ using Manifolds:
     end
     @testset "performance of selected operations" begin
         for n in [2, 3]
-            SEn = SpecialEuclidean(n; vectors=HybridTangentRepresentation())
+            SEn = SpecialEuclidean(n; vectors = HybridTangentRepresentation())
             Rn = Rotations(n)
 
-            p = SMatrix{n,n}(I)
+            p = SMatrix{n, n}(I)
 
             if n == 2
                 t = SVector{2}.([1:2, 2:3, 3:4])
@@ -459,7 +459,7 @@ using Manifolds:
             compose(SEn, pts[1], pts[2])
             log(SEn, pts[1], pts[2])
             log(SEn, pts[1], pts[3])
-            @test isapprox(SEn, log(SEn, pts[1], pts[1]), 0 .* Xs[1]; atol=1e-16)
+            @test isapprox(SEn, log(SEn, pts[1], pts[1]), 0 .* Xs[1]; atol = 1.0e-16)
             @test isapprox(SEn, exp(SEn, pts[1], 0 .* Xs[1]), pts[1])
             vee(SEn, pts[1], Xs[2])
             get_coordinates(SEn, pts[1], Xs[2], DefaultOrthogonalBasis())
@@ -476,19 +476,23 @@ using Manifolds:
                     @test (@allocations log(SEn, pts[1], pts[2])) <= 42
                 end
                 @test (@allocations vee(SEn, pts[1], Xs[2])) <= 13
-                @test (@allocations get_coordinates(
-                    SEn,
-                    pts[1],
-                    Xs[2],
-                    DefaultOrthogonalBasis(),
-                )) <= 13
+                @test (
+                    @allocations get_coordinates(
+                        SEn,
+                        pts[1],
+                        Xs[2],
+                        DefaultOrthogonalBasis(),
+                    )
+                ) <= 13
                 @test (@allocations hat(SEn, pts[1], csen)) <= 13
-                @test (@allocations get_vector(
-                    SEn,
-                    pts[1],
-                    csen,
-                    DefaultOrthogonalBasis(),
-                )) <= 13
+                @test (
+                    @allocations get_vector(
+                        SEn,
+                        pts[1],
+                        csen,
+                        DefaultOrthogonalBasis(),
+                    )
+                ) <= 13
             end
         end
     end

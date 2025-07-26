@@ -30,7 +30,7 @@ struct MultinomialSymmetricPositiveDefinite{T} <: AbstractMultinomialDoublyStoch
     size::T
 end
 
-function MultinomialSymmetricPositiveDefinite(n::Int; parameter::Symbol=:type)
+function MultinomialSymmetricPositiveDefinite(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
     return MultinomialSymmetricPositiveDefinite{typeof(size)}(size)
 end
@@ -56,13 +56,13 @@ function check_vector(M::MultinomialSymmetricPositiveDefinite, p, X; kwargs...)
 end
 
 function get_embedding(
-    ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}},
-) where {n}
+        ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}},
+    ) where {n}
     return MultinomialMatrices(n, n)
 end
 function get_embedding(M::MultinomialSymmetricPositiveDefinite{Tuple{Int}})
     n = get_parameter(M.size)[1]
-    return MultinomialMatrices(n, n; parameter=:field)
+    return MultinomialMatrices(n, n; parameter = :field)
 end
 
 """
@@ -90,10 +90,10 @@ The steps are as follows:
 This method roughly follows the procedure described in https://math.stackexchange.com/questions/2773460/how-to-generate-a-totally-positive-matrix-randomly-using-software-like-maple
 """
 function Random.rand!(
-    rng::AbstractRNG,
-    M::MultinomialSymmetricPositiveDefinite,
-    p::AbstractMatrix,
-)
+        rng::AbstractRNG,
+        M::MultinomialSymmetricPositiveDefinite,
+        p::AbstractMatrix,
+    )
     n = get_parameter(M.size)[1]
     is_spd = false
     while !is_spd
@@ -104,7 +104,7 @@ function Random.rand!(
         uutd = dm \ Vlu.U
         random_totally_positive = uutd * dm * Vlu.L
         MMDS = MultinomialDoubleStochastic(n)
-        ds = project(MMDS, random_totally_positive; maxiter=1000)
+        ds = project(MMDS, random_totally_positive; maxiter = 1000)
         p .= (ds .+ ds') ./ 2
         if eigmin(p) > 0
             is_spd = true
@@ -114,9 +114,9 @@ function Random.rand!(
 end
 
 function Base.show(
-    io::IO,
-    ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}},
-) where {n}
+        io::IO,
+        ::MultinomialSymmetricPositiveDefinite{TypeParameter{Tuple{n}}},
+    ) where {n}
     return print(io, "MultinomialSymmetricPositiveDefinite($(n))")
 end
 function Base.show(io::IO, M::MultinomialSymmetricPositiveDefinite{Tuple{Int}})

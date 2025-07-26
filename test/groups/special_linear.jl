@@ -32,33 +32,33 @@ using Manifolds: LeftForwardAction, RightBackwardAction
     @testset "Real" begin
         G = SpecialLinear(3)
 
-        @test_throws ManifoldDomainError is_point(G, randn(2, 3); error=:error)
-        @test_throws ManifoldDomainError is_point(G, Float64[2 1; 1 1]; error=:error)
-        @test_throws ManifoldDomainError is_point(G, [1 0 im; im 0 0; 0 -1 0]; error=:error)
-        @test_throws ManifoldDomainError is_point(G, zeros(3, 3); error=:error)
-        @test_throws DomainError is_point(G, Float64[1 3 3; 1 1 2; 1 2 3]; error=:error)
-        @test is_point(G, Float64[1 1 1; 2 2 1; 2 3 3]; error=:error)
-        @test is_point(G, Identity(G); error=:error)
+        @test_throws ManifoldDomainError is_point(G, randn(2, 3); error = :error)
+        @test_throws ManifoldDomainError is_point(G, Float64[2 1; 1 1]; error = :error)
+        @test_throws ManifoldDomainError is_point(G, [1 0 im; im 0 0; 0 -1 0]; error = :error)
+        @test_throws ManifoldDomainError is_point(G, zeros(3, 3); error = :error)
+        @test_throws DomainError is_point(G, Float64[1 3 3; 1 1 2; 1 2 3]; error = :error)
+        @test is_point(G, Float64[1 1 1; 2 2 1; 2 3 3]; error = :error)
+        @test is_point(G, Identity(G); error = :error)
         @test_throws DomainError is_vector(
             G,
             Float64[2 3 2; 3 1 2; 1 1 1],
             randn(3, 3);
-            error=:error,
-            atol=1e-6,
+            error = :error,
+            atol = 1.0e-6,
         )
         @test_throws DomainError is_vector(
             G,
             Float64[2 1 2; 3 2 2; 2 2 1],
             Float64[2 1 -1; 2 2 1; 1 1 -1];
-            error=:error,
-            atol=1e-6,
+            error = :error,
+            atol = 1.0e-6,
         )
         @test is_vector(
             G,
             Float64[2 1 2; 3 2 2; 2 2 1],
             Float64[-1 -1 -1; 1 -1 2; -1 -1 2];
-            error=:error,
-            atol=1e-6,
+            error = :error,
+            atol = 1.0e-6,
         )
 
         types = [Matrix{Float64}]
@@ -83,29 +83,29 @@ using Manifolds: LeftForwardAction, RightBackwardAction
                 gpts,
                 vgpts,
                 vgpts;
-                test_diff=true,
-                test_invariance=true,
-                test_lie_bracket=true,
-                test_adjoint_action=true,
+                test_diff = true,
+                test_invariance = true,
+                test_lie_bracket = true,
+                test_adjoint_action = true,
             )
             test_manifold(
                 G,
                 gpts;
-                test_injectivity_radius=false,
-                test_project_point=true,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_injectivity_radius = false,
+                test_project_point = true,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                exp_log_atol_multiplier=1e10,
-                retraction_atol_multiplier=1e8,
-                is_tangent_atol_multiplier=1e10,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                exp_log_atol_multiplier = 1.0e10,
+                retraction_atol_multiplier = 1.0e8,
+                is_tangent_atol_multiplier = 1.0e10,
             )
         end
 
@@ -117,9 +117,9 @@ using Manifolds: LeftForwardAction, RightBackwardAction
             @test project(G, q) ≈ q
 
             X = randn(3, 3)
-            @test !is_vector(G, q, X; atol=1e-6)
+            @test !is_vector(G, q, X; atol = 1.0e-6)
             Y = project(G, q, X)
-            @test is_vector(G, q, Y; atol=1e-6)
+            @test is_vector(G, q, Y; atol = 1.0e-6)
             @test project(G, q, Y) ≈ Y
         end
     end
@@ -127,45 +127,45 @@ using Manifolds: LeftForwardAction, RightBackwardAction
     @testset "Complex" begin
         G = SpecialLinear(2, ℂ)
 
-        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3); error=:error)
-        @test_throws DomainError is_point(G, randn(2, 2); error=:error)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3); error = :error)
+        @test_throws DomainError is_point(G, randn(2, 2); error = :error)
         @test_throws ManifoldDomainError is_point(
             G,
             ComplexF64[1 0 im; im 0 0; 0 -1 0];
-            error=:error,
+            error = :error,
         )
-        @test_throws DomainError is_point(G, ComplexF64[1 im; im 1]; error=:error)
-        @test is_point(G, ComplexF64[im 1; -2 im]; error=:error)
-        @test is_point(G, Identity(G); error=:error)
+        @test_throws DomainError is_point(G, ComplexF64[1 im; im 1]; error = :error)
+        @test is_point(G, ComplexF64[im 1; -2 im]; error = :error)
+        @test is_point(G, Identity(G); error = :error)
         @test_throws DomainError is_vector(
             G,
-            ComplexF64[-1+im -1; -im 1],
-            ComplexF64[1-im 1+im; 1 -1+im];
-            error=:error,
-            atol=1e-6,
+            ComplexF64[-1 + im -1; -im 1],
+            ComplexF64[1 - im 1 + im; 1 -1 + im];
+            error = :error,
+            atol = 1.0e-6,
         )
         @test_throws DomainError is_vector(
             G,
-            ComplexF64[1 1+im; -1+im -1],
-            ComplexF64[1-im -1-im; -im im];
-            error=:error,
-            atol=1e-6,
+            ComplexF64[1 1 + im; -1 + im -1],
+            ComplexF64[1 - im -1 - im; -im im];
+            error = :error,
+            atol = 1.0e-6,
         )
         @test is_vector(
             G,
-            ComplexF64[1 1+im; -1+im -1],
-            ComplexF64[1-im 1+im; 1 -1+im];
-            error=:error,
-            atol=1e-6,
+            ComplexF64[1 1 + im; -1 + im -1],
+            ComplexF64[1 - im 1 + im; 1 -1 + im];
+            error = :error,
+            atol = 1.0e-6,
         )
 
         types = [Matrix{ComplexF64}]
         pts = [
-            [0+1im 0+2im; 0+1im 0+1im],
-            [-2+0im 0+1im; 0-1im -1+0im],
-            [0+0im 0-1im; 0-1im -1+3im],
+            [0 + 1im 0 + 2im; 0 + 1im 0 + 1im],
+            [-2 + 0im 0 + 1im; 0 - 1im -1 + 0im],
+            [0 + 0im 0 - 1im; 0 - 1im -1 + 3im],
         ]
-        vpts = [[0-1im -1+1im; -1+0im 0+1im], [1+1im 0+0im; 0+1im -1-1im]]
+        vpts = [[0 - 1im -1 + 1im; -1 + 0im 0 + 1im], [1 + 1im 0 + 0im; 0 + 1im -1 - 1im]]
 
         retraction_methods = [
             Manifolds.GroupExponentialRetraction(LeftForwardAction()),
@@ -180,25 +180,25 @@ using Manifolds: LeftForwardAction, RightBackwardAction
         for T in types
             gpts = convert.(T, pts)
             vgpts = convert.(T, vpts)
-            test_group(G, gpts, vgpts, vgpts; test_diff=true, test_invariance=true)
+            test_group(G, gpts, vgpts, vgpts; test_diff = true, test_invariance = true)
             test_manifold(
                 G,
                 gpts;
-                test_injectivity_radius=false,
-                test_project_point=true,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_injectivity_radius = false,
+                test_project_point = true,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                exp_log_atol_multiplier=1e8,
-                retraction_atol_multiplier=1e8,
-                is_tangent_atol_multiplier=1e8,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                exp_log_atol_multiplier = 1.0e8,
+                retraction_atol_multiplier = 1.0e8,
+                is_tangent_atol_multiplier = 1.0e8,
             )
         end
 
@@ -210,15 +210,15 @@ using Manifolds: LeftForwardAction, RightBackwardAction
             @test project(G, q) ≈ q
 
             X = randn(ComplexF64, 2, 2)
-            @test !is_vector(G, q, X; atol=1e-6)
+            @test !is_vector(G, q, X; atol = 1.0e-6)
             Y = project(G, q, X)
-            @test is_vector(G, q, Y; atol=1e-6)
+            @test is_vector(G, q, Y; atol = 1.0e-6)
             @test project(G, q, Y) ≈ Y
         end
     end
     @testset "field parameter" begin
-        G = SpecialLinear(3; parameter=:field)
-        @test typeof(get_embedding(G)) === GeneralLinear{Tuple{Int64},ℝ}
+        G = SpecialLinear(3; parameter = :field)
+        @test typeof(get_embedding(G)) === GeneralLinear{Tuple{Int64}, ℝ}
         @test repr(G) == "SpecialLinear(3, ℝ; parameter=:field)"
     end
 end

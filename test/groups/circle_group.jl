@@ -27,8 +27,8 @@ using Manifolds:
         @test identity_element(G, fill(1.0f0)) == fill(1.0f0)
         @test !is_point(G, Identity(AdditionOperation()))
         ef = Identity(AdditionOperation())
-        @test_throws DomainError is_point(G, ef; error=:error)
-        @test_throws DomainError is_vector(G, ef, X, true; error=:error)
+        @test_throws DomainError is_point(G, ef; error = :error)
+        @test_throws DomainError is_vector(G, ef, X, true; error = :error)
     end
 
     @testset "scalar points" begin
@@ -41,13 +41,13 @@ using Manifolds:
             pts,
             Xpts,
             Xpts;
-            test_diff=true,
-            test_mutating=false,
-            test_invariance=true,
-            test_lie_bracket=true,
-            test_adjoint_action=true,
-            test_inv_diff=true,
-            test_adjoint_inv_diff=true,
+            test_diff = true,
+            test_mutating = false,
+            test_invariance = true,
+            test_lie_bracket = true,
+            test_adjoint_action = true,
+            test_inv_diff = true,
+            test_adjoint_inv_diff = true,
         )
     end
 
@@ -62,13 +62,13 @@ using Manifolds:
             pts,
             Xpts,
             Xpts;
-            test_diff=true,
-            test_mutating=true,
-            test_invariance=true,
-            test_lie_bracket=true,
-            test_adjoint_action=true,
-            test_inv_diff=true,
-            test_adjoint_inv_diff=true,
+            test_diff = true,
+            test_mutating = true,
+            test_invariance = true,
+            test_lie_bracket = true,
+            test_adjoint_action = true,
+            test_inv_diff = true,
+            test_adjoint_inv_diff = true,
         )
     end
 
@@ -77,14 +77,14 @@ using Manifolds:
         test_manifold(
             G,
             pts,
-            test_vector_spaces=false,
-            test_project_tangent=true,
-            test_musical_isomorphisms=false,
-            test_default_vector_transport=true,
-            is_mutating=false,
-            exp_log_atol_multiplier=2.0,
-            is_tangent_atol_multiplier=2.0,
-            mid_point12=nothing,
+            test_vector_spaces = false,
+            test_project_tangent = true,
+            test_musical_isomorphisms = false,
+            test_default_vector_transport = true,
+            is_mutating = false,
+            exp_log_atol_multiplier = 2.0,
+            is_tangent_atol_multiplier = 2.0,
+            mid_point12 = nothing,
         )
 
         @test isapprox(G, (1.0 + 1.0im) / √2, mean(G, pts))
@@ -124,11 +124,11 @@ end
             pts,
             Xpts,
             Xpts;
-            test_diff=true,
-            test_mutating=false,
-            test_invariance=true,
-            test_lie_bracket=true,
-            test_adjoint_action=true,
+            test_diff = true,
+            test_mutating = false,
+            test_invariance = true,
+            test_lie_bracket = true,
+            test_adjoint_action = true,
         )
     end
 
@@ -143,11 +143,11 @@ end
             pts,
             Xpts,
             Xpts;
-            test_diff=true,
-            test_mutating=true,
-            test_invariance=true,
-            test_lie_bracket=true,
-            test_adjoint_action=true,
+            test_diff = true,
+            test_mutating = true,
+            test_invariance = true,
+            test_lie_bracket = true,
+            test_adjoint_action = true,
         )
     end
 
@@ -156,14 +156,14 @@ end
         test_manifold(
             G,
             pts,
-            test_vector_spaces=false,
-            test_project_tangent=true,
-            test_musical_isomorphisms=false,
-            test_default_vector_transport=true,
-            is_mutating=false,
-            exp_log_atol_multiplier=2.0,
-            is_tangent_atol_multiplier=2.0,
-            mid_point12=nothing,
+            test_vector_spaces = false,
+            test_project_tangent = true,
+            test_musical_isomorphisms = false,
+            test_default_vector_transport = true,
+            is_mutating = false,
+            exp_log_atol_multiplier = 2.0,
+            is_tangent_atol_multiplier = 2.0,
+            mid_point12 = nothing,
         )
         @test isapprox(G, 0.5, mean(G, [1.0, 0.5, 0.0]))
     end

@@ -4,7 +4,7 @@
 An abstract group action on a manifold. [`ActionDirection`](@ref)`AD` indicates whether it
 is a left or right action.
 """
-abstract type AbstractGroupAction{AD<:ActionDirection} end
+abstract type AbstractGroupAction{AD <: ActionDirection} end
 
 """
     base_group(A::AbstractGroupAction)
@@ -221,11 +221,11 @@ O = \{ τ_a p : a ∈ \mathcal{G} \}.
 This function is useful for computing means on quotients of manifolds by a Lie group action.
 """
 function center_of_orbit(
-    A::AbstractGroupAction,
-    pts::AbstractVector,
-    q,
-    mean_method::AbstractApproximationMethod=GradientDescentEstimation(),
-)
+        A::AbstractGroupAction,
+        pts::AbstractVector,
+        q,
+        mean_method::AbstractApproximationMethod = GradientDescentEstimation(),
+    )
     alignments = map(p -> optimal_alignment(A, q, p), pts)
     return mean(base_group(A), alignments, mean_method)
 end

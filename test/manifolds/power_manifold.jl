@@ -29,15 +29,15 @@ end
     @test power_dimensions(Ms2n) == (7,)
     @test manifold_dimension(Ms2n) == 70
 
-    Mr = Rotations(3; parameter=:type)
+    Mr = Rotations(3; parameter = :type)
     Mr1 = PowerManifold(Mr, 5)
     Mrn1 = PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5)
     @test PowerManifold(PowerManifold(Mr, 2), 3) == PowerManifold(Mr, 2, 3)
-    @test PowerManifold(Torus(2), 3) isa PowerManifold{ℝ,Torus{2}}
+    @test PowerManifold(Torus(2), 3) isa PowerManifold{ℝ, Torus{2}}
     @test PowerManifold(Mrn1, 3) ==
-          PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5, 3)
+        PowerManifold(Mr, Manifolds.NestedPowerRepresentation(), 5, 3)
     @test PowerManifold(Mrn1, Manifolds.ArrayPowerRepresentation(), 3) ==
-          PowerManifold(Mr, Manifolds.ArrayPowerRepresentation(), 5, 3)
+        PowerManifold(Mr, Manifolds.ArrayPowerRepresentation(), 5, 3)
     @test manifold_dimension(Mr1) == 15
     @test manifold_dimension(Mrn1) == 15
     Mr2 = PowerManifold(Mr, 5, 7)
@@ -49,18 +49,18 @@ end
     @test repr(Mrn1) == "PowerManifold(Rotations(3), NestedPowerRepresentation(), 5)"
 
     @test Manifolds.allocation_promotion_function(Ms, exp, ([1],)) ==
-          Manifolds.allocation_promotion_function(Ms1, exp, (1,))
+        Manifolds.allocation_promotion_function(Ms1, exp, (1,))
 
     @test Ms^5 === Oblique(3, 5)
     @test Ms^(5,) === Ms1
     @test Mr^(5, 7) === Mr2
 
-    types_s2 = [Array{Float64,3}, HybridArray{Tuple{3,Dynamic(),Dynamic()},Float64,3}]
+    types_s2 = [Array{Float64, 3}, HybridArray{Tuple{3, Dynamic(), Dynamic()}, Float64, 3}]
 
     types_rn1 = [Vector{Matrix{Float64}}]
-    TEST_STATIC_SIZED && push!(types_rn1, Vector{MMatrix{3,3,Float64,9}})
+    TEST_STATIC_SIZED && push!(types_rn1, Vector{MMatrix{3, 3, Float64, 9}})
 
-    types_r2 = [Array{Float64,4}, HybridArray{Tuple{3,3,Dynamic(),Dynamic()},Float64,4}]
+    types_r2 = [Array{Float64, 4}, HybridArray{Tuple{3, 3, Dynamic(), Dynamic()}, Float64, 4}]
     types_rn2 = [Matrix{Matrix{Float64}}]
 
     retraction_methods = [ManifoldsBase.ExponentialRetraction()]
@@ -82,9 +82,9 @@ end
 
         PowerFVectorDistribution =
             Base.get_extension(
-                Manifolds,
-                :ManifoldsDistributionsExt,
-            ).PowerFVectorDistribution
+            Manifolds,
+            :ManifoldsDistributionsExt,
+        ).PowerFVectorDistribution
         power_s1_pt_dist = PowerPointDistribution(Ms1, sphere_dist, randn(Float64, 3, 5))
         power_s2_pt_dist = PowerPointDistribution(Ms2, sphere_dist, randn(Float64, 3, 5, 7))
         push!(point_distributions_Ms2, power_s2_pt_dist)
@@ -186,8 +186,8 @@ end
         M = PowerManifold(Sphere(2), NestedPowerRepresentation(), 2)
         p = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         X = [[0.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
-        @test_throws ComponentManifoldError is_point(M, X; error=:error)
-        @test_throws ComponentManifoldError is_vector(M, p, X; error=:error)
+        @test_throws ComponentManifoldError is_point(M, X; error = :error)
+        @test_throws ComponentManifoldError is_vector(M, p, X; error = :error)
     end
 
     @testset "power vector transport" begin
@@ -208,18 +208,18 @@ end
             test_manifold(
                 Ms2,
                 pts2;
-                test_musical_isomorphisms=true,
-                test_injectivity_radius=false,
-                test_vee_hat=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=point_distributions_Ms2,
-                tvector_distributions=tvector_distributions_Ms2,
-                rand_tvector_atol_multiplier=6.0,
-                retraction_atol_multiplier=12,
-                is_tangent_atol_multiplier=12.0,
-                exp_log_atol_multiplier=3 * prod(power_dimensions(Ms2)),
-                test_inplace=true,
+                test_musical_isomorphisms = true,
+                test_injectivity_radius = false,
+                test_vee_hat = true,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = point_distributions_Ms2,
+                tvector_distributions = tvector_distributions_Ms2,
+                rand_tvector_atol_multiplier = 6.0,
+                retraction_atol_multiplier = 12,
+                is_tangent_atol_multiplier = 12.0,
+                exp_log_atol_multiplier = 3 * prod(power_dimensions(Ms2)),
+                test_inplace = true,
             )
         end
     end
@@ -230,21 +230,21 @@ end
             test_manifold(
                 Mrn1,
                 pts1;
-                test_injectivity_radius=false,
-                test_musical_isomorphisms=true,
-                test_vee_hat=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=point_distributions_Mrn1,
-                tvector_distributions=tvector_distributions_Mrn1,
-                basis_types_to_from=basis_types,
-                rand_tvector_atol_multiplier=500.0,
-                retraction_atol_multiplier=12,
-                is_tangent_atol_multiplier=12.0,
-                exp_log_atol_multiplier=4e2 * prod(power_dimensions(Mrn1)),
-                test_inplace=true,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                test_injectivity_radius = false,
+                test_musical_isomorphisms = true,
+                test_vee_hat = true,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = point_distributions_Mrn1,
+                tvector_distributions = tvector_distributions_Mrn1,
+                basis_types_to_from = basis_types,
+                rand_tvector_atol_multiplier = 500.0,
+                retraction_atol_multiplier = 12,
+                is_tangent_atol_multiplier = 12.0,
+                exp_log_atol_multiplier = 4.0e2 * prod(power_dimensions(Mrn1)),
+                test_inplace = true,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
         end
     end
@@ -254,18 +254,18 @@ end
             test_manifold(
                 Mr2,
                 pts2;
-                test_injectivity_radius=false,
-                test_musical_isomorphisms=true,
-                test_vee_hat=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=point_distributions_Mr2,
-                tvector_distributions=tvector_distributions_Mr2,
-                rand_tvector_atol_multiplier=8.0,
-                retraction_atol_multiplier=12,
-                is_tangent_atol_multiplier=12.0,
-                exp_log_atol_multiplier=4e3 * prod(power_dimensions(Mr2)),
-                test_inplace=true,
+                test_injectivity_radius = false,
+                test_musical_isomorphisms = true,
+                test_vee_hat = true,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = point_distributions_Mr2,
+                tvector_distributions = tvector_distributions_Mr2,
+                rand_tvector_atol_multiplier = 8.0,
+                retraction_atol_multiplier = 12,
+                is_tangent_atol_multiplier = 12.0,
+                exp_log_atol_multiplier = 4.0e3 * prod(power_dimensions(Mr2)),
+                test_inplace = true,
             )
         end
     end
@@ -275,18 +275,18 @@ end
             test_manifold(
                 Mrn2,
                 pts2;
-                test_injectivity_radius=false,
-                test_musical_isomorphisms=true,
-                test_vee_hat=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=point_distributions_Mrn2,
-                tvector_distributions=tvector_distributions_Mrn2,
-                rand_tvector_atol_multiplier=8.0,
-                retraction_atol_multiplier=12,
-                is_tangent_atol_multiplier=12.0,
-                exp_log_atol_multiplier=4e3 * prod(power_dimensions(Mrn2)),
-                test_inplace=true,
+                test_injectivity_radius = false,
+                test_musical_isomorphisms = true,
+                test_vee_hat = true,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = point_distributions_Mrn2,
+                tvector_distributions = tvector_distributions_Mrn2,
+                rand_tvector_atol_multiplier = 8.0,
+                retraction_atol_multiplier = 12,
+                is_tangent_atol_multiplier = 12.0,
+                exp_log_atol_multiplier = 4.0e3 * prod(power_dimensions(Mrn2)),
+                test_inplace = true,
             )
         end
     end
@@ -299,18 +299,18 @@ end
         test_manifold(
             MT,
             pts_t;
-            test_injectivity_radius=false,
-            test_musical_isomorphisms=true,
-            test_vee_hat=true,
-            retraction_methods=retraction_methods,
-            inverse_retraction_methods=inverse_retraction_methods,
-            rand_tvector_atol_multiplier=5.0,
-            retraction_atol_multiplier=12,
-            is_tangent_atol_multiplier=12.0,
-            exp_log_atol_multiplier=1.0,
-            test_inplace=true,
-            test_rand_point=true,
-            test_rand_tvector=true,
+            test_injectivity_radius = false,
+            test_musical_isomorphisms = true,
+            test_vee_hat = true,
+            retraction_methods = retraction_methods,
+            inverse_retraction_methods = inverse_retraction_methods,
+            rand_tvector_atol_multiplier = 5.0,
+            retraction_atol_multiplier = 12,
+            is_tangent_atol_multiplier = 12.0,
+            exp_log_atol_multiplier = 1.0,
+            test_inplace = true,
+            test_rand_point = true,
+            test_rand_tvector = true,
         )
 
         ph = HybridVector{3}(pts_t[1])
@@ -321,18 +321,18 @@ end
         p = hcat([[1.0, 0.0, 0.0] for i in 1:5]...)
         Bc = get_basis(Ms1, p, DefaultOrthonormalBasis())
         @test sprint(show, "text/plain", Bc) == """
-        DefaultOrthonormalBasis(ℝ) for a power manifold
-        Basis for component (1,):
-        $(sprint(show, "text/plain", Bc.data.bases[1]))
-        Basis for component (2,):
-        $(sprint(show, "text/plain", Bc.data.bases[2]))
-        Basis for component (3,):
-        $(sprint(show, "text/plain", Bc.data.bases[3]))
-        Basis for component (4,):
-        $(sprint(show, "text/plain", Bc.data.bases[4]))
-        Basis for component (5,):
-        $(sprint(show, "text/plain", Bc.data.bases[5]))
-        """
+            DefaultOrthonormalBasis(ℝ) for a power manifold
+            Basis for component (1,):
+            $(sprint(show, "text/plain", Bc.data.bases[1]))
+            Basis for component (2,):
+            $(sprint(show, "text/plain", Bc.data.bases[2]))
+            Basis for component (3,):
+            $(sprint(show, "text/plain", Bc.data.bases[3]))
+            Basis for component (4,):
+            $(sprint(show, "text/plain", Bc.data.bases[4]))
+            Basis for component (5,):
+            $(sprint(show, "text/plain", Bc.data.bases[5]))
+            """
     end
 
     @testset "Atlas & Induced Basis" begin
@@ -381,12 +381,12 @@ end
         H1 = riemannian_Hessian(N, p, Y, Z, X)
         H2 = cat(
             [riemannian_Hessian(M, p[:, i], Y[:, i], Z[:, i], X[:, i]) for i in 1:2]...,
-            dims=2,
+            dims = 2,
         )
         @test H1 == H2
         V = [0.2 0.0; 0.0 0.0; 0.0 0.3]
         W1 = Weingarten(N, p, X, V)
-        W2 = cat([Weingarten(M, p[:, i], X[:, i], V[:, i]) for i in 1:2]..., dims=2)
+        W2 = cat([Weingarten(M, p[:, i], X[:, i], V[:, i]) for i in 1:2]..., dims = 2)
         @test W1 == W2
     end
 
@@ -396,16 +396,16 @@ end
         @test is_point(M, rand(MersenneTwister(123), M))
         @test rand(MersenneTwister(123), M) == rand(MersenneTwister(123), M)
         p = rand(M)
-        @test is_vector(M, p, rand(M; vector_at=p); atol=1e-15)
-        @test is_vector(M, p, rand(MersenneTwister(123), M; vector_at=p); atol=1e-15)
-        @test rand(MersenneTwister(123), M; vector_at=p) ==
-              rand(MersenneTwister(123), M; vector_at=p)
+        @test is_vector(M, p, rand(M; vector_at = p); atol = 1.0e-15)
+        @test is_vector(M, p, rand(MersenneTwister(123), M; vector_at = p); atol = 1.0e-15)
+        @test rand(MersenneTwister(123), M; vector_at = p) ==
+            rand(MersenneTwister(123), M; vector_at = p)
     end
 
     @testset "Nested replacing allocation" begin
         Msr = PowerManifold(Ms, NestedReplacingPowerRepresentation(), 2)
         p1 = [SVector{3}(1.0, 0.0, 0.0), SVector{3}(1.0, 0.0, 0.0)]
-        @test allocate(Msr, p1) isa Vector{SVector{3,Float64}}
+        @test allocate(Msr, p1) isa Vector{SVector{3, Float64}}
 
         SE2 = SpecialEuclidean(2)
         PSE2 = PowerManifold(SE2, NestedReplacingPowerRepresentation(), 2)
@@ -418,7 +418,7 @@ end
         )
         p2 = [pse, pse]
         @test allocate(PSE2, p2) isa Vector{
-            ArrayPartition{Float64,Tuple{SVector{2,Float64},SMatrix{2,2,Float64,4}}},
+            ArrayPartition{Float64, Tuple{SVector{2, Float64}, SMatrix{2, 2, Float64, 4}}},
         }
 
         pse_ap = ArrayPartition(
@@ -430,7 +430,7 @@ end
         )
         p2_ap = [pse_ap, pse_ap]
         @test allocate(PSE2, p2_ap) isa Vector{
-            ArrayPartition{Float64,Tuple{SVector{2,Float64},SMatrix{2,2,Float64,4}}},
+            ArrayPartition{Float64, Tuple{SVector{2, Float64}, SMatrix{2, 2, Float64, 4}}},
         }
     end
 
@@ -442,8 +442,8 @@ end
     end
 
     @testset "Static type parameter" begin
-        Ms1s = PowerManifold(Ms, 5; parameter=:type)
+        Ms1s = PowerManifold(Ms, 5; parameter = :type)
         @test sprint(show, "text/plain", Ms1s) ==
-              "PowerManifold(Sphere(2, ℝ), 5, parameter=:type)"
+            "PowerManifold(Sphere(2, ℝ), 5, parameter=:type)"
     end
 end

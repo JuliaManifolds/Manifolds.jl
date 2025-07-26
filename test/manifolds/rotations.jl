@@ -9,13 +9,13 @@ include("../header.jl")
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0]) == π * sqrt(2.0)
     @test injectivity_radius(M, ExponentialRetraction()) == π * sqrt(2.0)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], ExponentialRetraction()) ==
-          π * sqrt(2.0)
+        π * sqrt(2.0)
     @test injectivity_radius(M, PolarRetraction()) ≈ π / sqrt(2)
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], PolarRetraction()) ≈ π / sqrt(2)
     @test get_embedding(M) == Euclidean(2, 2)
-    types = [Matrix{Float64}, SMatrix{2,2,Float64,4}]
+    types = [Matrix{Float64}, SMatrix{2, 2, Float64, 4}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{2,2,Float64,4})
+    TEST_STATIC_SIZED && push!(types, MMatrix{2, 2, Float64, 4})
     retraction_methods = [PolarRetraction(), QRRetraction()]
     @test default_vector_transport_method(M) === ParallelTransport()
 
@@ -48,20 +48,20 @@ include("../header.jl")
         test_manifold(
             M,
             pts;
-            is_mutating=!(T <: SMatrix),
-            test_injectivity_radius=false,
-            test_project_tangent=true,
-            test_musical_isomorphisms=true,
-            test_default_vector_transport=true,
-            retraction_methods=retraction_methods,
-            inverse_retraction_methods=inverse_retraction_methods,
+            is_mutating = !(T <: SMatrix),
+            test_injectivity_radius = false,
+            test_project_tangent = true,
+            test_musical_isomorphisms = true,
+            test_default_vector_transport = true,
+            retraction_methods = retraction_methods,
+            inverse_retraction_methods = inverse_retraction_methods,
             point_distributions,
             tvector_distributions,
-            basis_types_to_from=basis_types,
-            test_inplace=true,
-            test_rand_point=true,
-            retraction_atol_multiplier=2,
-            exp_log_atol_multiplier=10,
+            basis_types_to_from = basis_types,
+            test_inplace = true,
+            test_rand_point = true,
+            retraction_atol_multiplier = 2,
+            exp_log_atol_multiplier = 10,
         )
 
         @testset "log edge cases" begin
@@ -123,7 +123,7 @@ include("../header.jl")
                     ],
                 )
             else
-                DiagonalizingOrthonormalBasis(rand(SOn; vector_at=pts[1]))
+                DiagonalizingOrthonormalBasis(rand(SOn; vector_at = pts[1]))
             end
             diag_basis_2 = DiagonalizingOrthonormalBasis(
                 hat(SOn, pts[1], [1.0, zeros(manifold_dimension(SOn) - 1)...]),
@@ -131,21 +131,21 @@ include("../header.jl")
             test_manifold(
                 SOn,
                 pts;
-                test_injectivity_radius=false,
-                test_musical_isomorphisms=true,
-                test_mutating_rand=true,
-                test_default_vector_transport=true,
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                point_distributions=[ptd],
-                tvector_distributions=[tvd],
-                basis_types_to_from=basis_types,
-                basis_types_vecs=(diag_basis_1, diag_basis_2),
-                exp_log_atol_multiplier=250,
-                retraction_atol_multiplier=12,
-                test_inplace=true,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                test_injectivity_radius = false,
+                test_musical_isomorphisms = true,
+                test_mutating_rand = true,
+                test_default_vector_transport = true,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                point_distributions = [ptd],
+                tvector_distributions = [tvd],
+                basis_types_to_from = basis_types,
+                basis_types_vecs = (diag_basis_1, diag_basis_2),
+                exp_log_atol_multiplier = 250,
+                retraction_atol_multiplier = 12,
+                test_inplace = true,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
 
             @testset "vee/hat" begin
@@ -175,40 +175,40 @@ include("../header.jl")
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin
         M = Rotations(2)
         for p in [1, [2.0 0.0; 0.0 1.0], [1.0 0.5; 0.0 1.0]]
-            @test_throws DomainError is_point(M, p; error=:error)
+            @test_throws DomainError is_point(M, p; error = :error)
             @test !is_point(M, p)
         end
         p = one(zeros(2, 2))
         @test is_point(M, p)
-        @test is_point(M, p; error=:error)
+        @test is_point(M, p; error = :error)
         for X in [1, [0.0 1.0; 0.0 0.0]]
-            @test_throws DomainError is_vector(M, p, X; error=:error)
+            @test_throws DomainError is_vector(M, p, X; error = :error)
             @test !is_vector(M, p, X)
         end
         X = [0.0 1.0; -1.0 0.0]
         @test is_vector(M, p, X)
-        @test is_vector(M, p, X; error=:error)
+        @test is_vector(M, p, X; error = :error)
     end
     @testset "Project point" begin
         M = Rotations(2)
         p = Matrix{Float64}(I, 2, 2)
         p1 = project(M, p)
-        @test is_point(M, p1; error=:error)
+        @test is_point(M, p1; error = :error)
 
         M = Rotations(3)
         p = collect(reshape(1.0:9.0, (3, 3)))
         p2 = project(M, p)
-        @test is_point(M, p2; error=:error)
+        @test is_point(M, p2; error = :error)
 
         rng = MersenneTwister(44)
         x3 = project(M, randn(rng, 3, 3))
-        @test is_point(M, x3; error=:error)
+        @test is_point(M, x3; error = :error)
     end
     @testset "Convert from Lie algebra representation of tangents to Riemannian submanifold representation" begin
         M = Rotations(3)
         p = project(M, collect(reshape(1.0:9.0, (3, 3))))
         x = [[0, -1, 3] [1, 0, 2] [-3, -2, 0]]
-        @test is_vector(M, p, x; error=:error)
+        @test is_vector(M, p, x; error = :error)
         @test embed(M, p, x) == p * x
         Y = zeros((3, 3))
         embed!(M, Y, p, x)
@@ -290,11 +290,11 @@ include("../header.jl")
     end
 
     @testset "field parameter" begin
-        M = Rotations(2; parameter=:field)
+        M = Rotations(2; parameter = :field)
         @test is_flat(M)
         @test repr(M) == "Rotations(2; parameter=:field)"
 
-        M = Rotations(1; parameter=:field)
+        M = Rotations(1; parameter = :field)
         p = fill(1.0, 1, 1)
         X = get_vector(M, p, Float64[], DefaultOrthonormalBasis())
         @test X isa Matrix{Float64}

@@ -2,7 +2,7 @@ include("../header.jl")
 
 @testset "Symplectic Grassmann" begin
     M = SymplecticGrassmann(6, 4)
-    Mf = SymplecticGrassmann(6, 4; parameter=:field)
+    Mf = SymplecticGrassmann(6, 4; parameter = :field)
     p = [
         0.0 0.0 -5.0 -1.0
         0.0 0.0 9.0 -2.0
@@ -28,7 +28,7 @@ include("../header.jl")
         13.5 67.5 4.5 4.5
     ]
     Y = [
-        -0.02648060 0.00416977 0.01130802 0.01015956
+        -0.0264806 0.00416977 0.01130802 0.01015956
         0.01718954 -0.00680433 0.02364406 -0.00083272
         0.00050392 0.00191916 -0.01035902 -0.00079734
         0.01811917 -0.02307032 -0.04297277 -0.05409099
@@ -96,7 +96,7 @@ include("../header.jl")
         XP = ProjectorTangentVector(Xe)
         @test is_point(M, pP)
         # Fix
-        @test is_vector(M, pP, XP; atol=1e-9, error=:error)
+        @test is_vector(M, pP, XP; atol = 1.0e-9, error = :error)
         Pf1 = zeros(6, 6)
         Pf1[1, 2] = 1.0
         # No projector
@@ -112,12 +112,12 @@ include("../header.jl")
         # Not Hamiltonian
         Xf1 = ProjectorTangentVector(Matrix{Float64}(I, 6, 6))
         Xf1.value[1, 2] = 1.0 # tweak to not be Hamiltonian
-        @test_throws DomainError is_vector(M, pP, Xf1; error=:error)
+        @test_throws DomainError is_vector(M, pP, Xf1; error = :error)
         # ``X^+ = X``, but ``Xp + pX`` not correct
         Xf2 = ProjectorTangentVector(0.5 .* (symplectic_inverse(X * X') + X * X'))
-        @test_throws DomainError is_vector(M, pP, Xf2; error=:error)
+        @test_throws DomainError is_vector(M, pP, Xf2; error = :error)
         @test get_embedding(M, pP) == Euclidean(6, 6)
-        get_embedding(Mf, pP) == Euclidean(6, 6; parameter=:field)
+        get_embedding(Mf, pP) == Euclidean(6, 6; parameter = :field)
         @test embed(M, pP) == pP.value
         pE = zeros(6, 6)
         embed!(M, pE, pP)

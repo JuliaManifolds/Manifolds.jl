@@ -37,7 +37,7 @@ struct Hyperbolic{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function Hyperbolic(n::Int; parameter::Symbol=:type)
+function Hyperbolic(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
     return Hyperbolic{typeof(size)}(size)
 end
@@ -54,7 +54,7 @@ as vectors in ``ℝ^{n+1}`` with [`MinkowskiMetric`](@ref) equal to ``-1``.
 
 This representation is the default, i.e. `AbstractVector`s are assumed to have this representation.
 """
-struct HyperboloidPoint{TValue<:AbstractVector} <: AbstractManifoldPoint
+struct HyperboloidPoint{TValue <: AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
@@ -67,7 +67,7 @@ point ``p``.
 
 This representation is the default, i.e. vectors are assumed to have this representation.
 """
-struct HyperboloidTangentVector{TValue<:AbstractVector} <: AbstractTangentVector
+struct HyperboloidTangentVector{TValue <: AbstractVector} <: AbstractTangentVector
     value::TValue
 end
 
@@ -77,7 +77,7 @@ end
 A point on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` can be represented as a vector of norm
 less than one in ``\mathbb R^n``.
 """
-struct PoincareBallPoint{TValue<:AbstractVector} <: AbstractManifoldPoint
+struct PoincareBallPoint{TValue <: AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
@@ -87,7 +87,7 @@ end
 In the Poincaré ball model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` tangent vectors are represented
 as vectors in ``ℝ^{n}``.
 """
-struct PoincareBallTangentVector{TValue<:AbstractVector} <: AbstractTangentVector
+struct PoincareBallTangentVector{TValue <: AbstractVector} <: AbstractTangentVector
     value::TValue
 end
 
@@ -97,7 +97,7 @@ end
 A point on the [`Hyperbolic`](@ref) manifold ``\mathcal H^n`` can be represented as a vector in the
 half plane, i.e. ``x ∈ ℝ^n`` with ``x_d > 0``.
 """
-struct PoincareHalfSpacePoint{TValue<:AbstractVector} <: AbstractManifoldPoint
+struct PoincareHalfSpacePoint{TValue <: AbstractVector} <: AbstractManifoldPoint
     value::TValue
 end
 
@@ -107,7 +107,7 @@ end
 In the Poincaré half plane model of the [`Hyperbolic`](@ref) ``\mathcal H^n`` tangent vectors are
 represented as vectors in ``ℝ^{n}``.
 """
-struct PoincareHalfSpaceTangentVector{TValue<:AbstractVector} <: AbstractTangentVector
+struct PoincareHalfSpaceTangentVector{TValue <: AbstractVector} <: AbstractTangentVector
     value::TValue
 end
 
@@ -135,8 +135,8 @@ _HyperbolicTypes = [_HyperbolicPointTypes..., _HyperbolicTangentTypes...]
 
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
     @eval allocate(p::$P, ::Type{$T}) = $T(allocate(p.value))
-    @eval allocate_result_type(::Hyperbolic, ::typeof(log), ::Tuple{$P,$P}) = $T
-    @eval allocate_result_type(::Hyperbolic, ::typeof(inverse_retract), ::Tuple{$P,$P}) = $T
+    @eval allocate_result_type(::Hyperbolic, ::typeof(log), ::Tuple{$P, $P}) = $T
+    @eval allocate_result_type(::Hyperbolic, ::typeof(inverse_retract), ::Tuple{$P, $P}) = $T
 end
 
 @doc raw"""
@@ -171,11 +171,11 @@ For a the Poincaré ball as well as the Poincaré half plane model, `X` has to b
 check_vector(::Hyperbolic, ::Any, ::Any)
 
 function check_vector(
-    M::Hyperbolic,
-    p,
-    X::Union{PoincareBallTangentVector,PoincareHalfSpaceTangentVector};
-    kwargs...,
-)
+        M::Hyperbolic,
+        p,
+        X::Union{PoincareBallTangentVector, PoincareHalfSpaceTangentVector};
+        kwargs...,
+    )
     n = get_parameter(M.size)[1]
     return check_point(Euclidean(n), X.value; kwargs...)
 end
@@ -185,9 +185,9 @@ end
 for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
     @eval convert(::Type{$T}, p::$P, X::$T) = X
     @eval function convert(
-        ::Type{Tuple{AbstractVector,AbstractVector}},
-        (p, X)::Tuple{$P,$T},
-    )
+            ::Type{Tuple{AbstractVector, AbstractVector}},
+            (p, X)::Tuple{$P, $T},
+        )
         return (convert(AbstractVector, p), convert(AbstractVector, p, X))
     end
 end
@@ -206,7 +206,7 @@ function get_embedding(::Hyperbolic{TypeParameter{Tuple{n}}}) where {n}
 end
 function get_embedding(M::Hyperbolic{Tuple{Int}})
     n = get_parameter(M.size)[1]
-    return Lorentz(n + 1, MinkowskiMetric(); parameter=:field)
+    return Lorentz(n + 1, MinkowskiMetric(); parameter = :field)
 end
 
 embed(::Hyperbolic, p::AbstractArray) = p
@@ -233,22 +233,22 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
         function exp!(M::Hyperbolic, q::$P, p::$P, X::$T)
             q.value .=
                 convert(
-                    $P,
-                    exp(M, convert(AbstractVector, p), convert(AbstractVector, p, X)),
-                ).value
+                $P,
+                exp(M, convert(AbstractVector, p), convert(AbstractVector, p, X)),
+            ).value
             return q
         end
         function exp_fused!(M::Hyperbolic, q::$P, p::$P, X::$T, t::Number)
             q.value .=
                 convert(
-                    $P,
-                    exp_fused(
-                        M,
-                        convert(AbstractVector, p),
-                        convert(AbstractVector, p, X),
-                        t,
-                    ),
-                ).value
+                $P,
+                exp_fused(
+                    M,
+                    convert(AbstractVector, p),
+                    convert(AbstractVector, p, X),
+                    t,
+                ),
+            ).value
             return q
         end
     end
@@ -302,10 +302,10 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
     @eval function log!(M::Hyperbolic, X::$T, p::$P, q::$P)
         X.value .=
             convert(
-                $T,
-                convert(AbstractVector, p),
-                log(M, convert(AbstractVector, p), convert(AbstractVector, q)),
-            ).value
+            $T,
+            convert(AbstractVector, p),
+            log(M, convert(AbstractVector, p), convert(AbstractVector, q)),
+        ).value
         return X
     end
 end
@@ -390,15 +390,15 @@ for (P, T) in zip(_ExtraHyperbolicPointTypes, _ExtraHyperbolicTangentTypes)
     @eval function parallel_transport_to!(M::Hyperbolic, Y::$T, p::$P, X::$T, q::$P)
         Y.value .=
             convert(
-                $T,
+            $T,
+            convert(AbstractVector, q),
+            parallel_transport_to(
+                M,
+                convert(AbstractVector, p),
+                convert(AbstractVector, p, X),
                 convert(AbstractVector, q),
-                parallel_transport_to(
-                    M,
-                    convert(AbstractVector, p),
-                    convert(AbstractVector, p, X),
-                    convert(AbstractVector, q),
-                ),
-            ).value
+            ),
+        ).value
         return Y
     end
     @eval zero_vector(::Hyperbolic, p::$P) = $T(zero(p.value))

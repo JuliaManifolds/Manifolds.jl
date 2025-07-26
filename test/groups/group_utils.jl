@@ -5,8 +5,8 @@ if !s
 
     struct NotImplementedManifold <: AbstractManifold{ℝ} end
 
-    struct NotImplementedGroupDecorator{𝔽,M<:AbstractManifold{𝔽}} <:
-           AbstractDecoratorManifold{𝔽}
+    struct NotImplementedGroupDecorator{𝔽, M <: AbstractManifold{𝔽}} <:
+        AbstractDecoratorManifold{𝔽}
         manifold::M
     end
     function active_traits(f, M::NotImplementedGroupDecorator, args...)
@@ -17,8 +17,8 @@ if !s
         return M.manifold
     end
 
-    struct DefaultTransparencyGroup{𝔽,M<:AbstractManifold{𝔽},A<:AbstractGroupOperation} <:
-           AbstractDecoratorManifold{𝔽}
+    struct DefaultTransparencyGroup{𝔽, M <: AbstractManifold{𝔽}, A <: AbstractGroupOperation} <:
+        AbstractDecoratorManifold{𝔽}
         manifold::M
         op::A
     end

@@ -35,7 +35,7 @@ using BoundaryValueDiffEq
     @test Manifolds.inverse_chart_injectivity_radius(M, A, i_p0x) === π
     @test gaussian_curvature(M, p) ≈ 0.09227677052701619
     @test Manifolds.normal_vector(M, p) ≈
-          [0.3179988464944819, -0.8179412488450798, 0.479425538604203]
+        [0.3179988464944819, -0.8179412488450798, 0.479425538604203]
 
     p_exp = Manifolds.solve_chart_parallel_transport_ode(
         M,
@@ -44,39 +44,39 @@ using BoundaryValueDiffEq
         A,
         i_p0x,
         [1.0, 2.0];
-        final_time=3.0,
+        final_time = 3.0,
     )
     pexp_3 = p_exp(3.0)
     @test isapprox(
         pexp_3[1],
         [2.701765894057119, 2.668437820810143, -1.8341712552932237];
-        atol=1e-5,
+        atol = 1.0e-5,
     )
     @test isapprox(
         pexp_3[2],
         [-0.41778834843865575, 2.935021992911625, 0.7673987137187901];
-        atol=1e-5,
+        atol = 1.0e-5,
     )
     @test isapprox(
         pexp_3[3],
         [7.661627684089519, 4.629037950515605, 3.7839234533367194];
-        atol=1e-4,
+        atol = 1.0e-4,
     )
     @test_throws DomainError p_exp(10.0)
     @test_throws DomainError p_exp(-1.0)
     @test p_exp([3.0]) == [pexp_3]
 
-    p_exp = Manifolds.solve_chart_exp_ode(M, [0.0, 0.0], X_p0x, A, i_p0x; final_time=3.0)
+    p_exp = Manifolds.solve_chart_exp_ode(M, [0.0, 0.0], X_p0x, A, i_p0x; final_time = 3.0)
     pexp_3 = p_exp(3.0)
     @test isapprox(
         pexp_3[1],
         [2.701765894057119, 2.668437820810143, -1.8341712552932237],
-        rtol=1e-5,
+        rtol = 1.0e-5,
     )
     @test isapprox(
         pexp_3[2],
         [-0.41778834843865575, 2.935021992911625, 0.7673987137187901],
-        rtol=1e-5,
+        rtol = 1.0e-5,
     )
     @test_throws DomainError p_exp(10.0)
     @test_throws DomainError p_exp(-1.0)
@@ -87,14 +87,14 @@ using BoundaryValueDiffEq
         X_p0x,
         A,
         i_p0x;
-        final_time=3.0,
-        check_chart_switch_kwargs=(; ϵ=0.3),
+        final_time = 3.0,
+        check_chart_switch_kwargs = (; ϵ = 0.3),
     )
     p_exp_switch_3 = p_exp_switch(3.0)
     @test isapprox(
         p_exp_switch_3[1],
         [2.701765894057119, 2.668437820810143, -1.8341712552932237],
-        rtol=1e-5,
+        rtol = 1.0e-5,
     )
     @test length(p_exp_switch.sols) < length(p_exp.sols)
 
@@ -103,16 +103,16 @@ using BoundaryValueDiffEq
     a2 = [-0.5, 0.3]
     sol_log = Manifolds.solve_chart_log_bvp(M, p0x, a2, A, (0, 0))
     @test sol_log(0.0)[1:2] ≈ p0x
-    @test sol_log(1.0)[1:2] ≈ a2 atol = 1e-7
+    @test sol_log(1.0)[1:2] ≈ a2 atol = 1.0e-7
     # a test randomly failed here on Julia 1.6 once for no clear reason?
     # so I bumped tolerance considerably
-    bvp_atol = VERSION < v"1.7" ? 2e-3 : 1e-15
+    bvp_atol = VERSION < v"1.7" ? 2.0e-3 : 1.0e-15
     @test isapprox(
         norm(M, A, (0, 0), p0x, sol_log(0.0)[3:4]),
         Manifolds.estimate_distance_from_bvp(M, p0x, a2, A, (0, 0));
-        atol=bvp_atol,
+        atol = bvp_atol,
     )
 
     @test Manifolds.IntegratorTerminatorNearChartBoundary().check_chart_switch_kwargs ===
-          NamedTuple()
+        NamedTuple()
 end
