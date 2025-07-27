@@ -415,14 +415,12 @@ but for example the exponential map and the norm yield different results
 ```
 
 
-Technically this done using Traits – the trait here is the [`IsMetricManifold`](@ref) trait. Our trait system allows to combine traits but also to inherit properties in a hierarchical way, see ``[here](@extref ManifoldsBase `Traits-with-an-inheritance-hierarchy`)``{=commonmark} for the technical details.
+Technically this done using the ``[`MatricManifold`](@ref)``{=commonmark}.
 
 The same approach is used for
 
 * specifying a different ``[connection](@ref ConnectionSection)``{=commonmark}
-* specifying a manifold as a certain ``[quotient manifold](@ref QuotientManifoldSection)``{=commonmark}
 * specifying a certain ``[embedding](@extref ManifoldsBase The-Manifold-decorator)``{=commonmark}s
-* specify a certain ``[group action](@ref GroupManifoldSection)``{=commonmark}
 
 Again, for all of these, the concrete types only have to be used if you want to do a second, different from the details, property, for example a second way to embed a manifold. If a manifold is (in its usual representation) an embedded manifold, this works with the default manifold type already, since then it is again set as the reasonable default.
 

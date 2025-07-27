@@ -1,12 +1,4 @@
 
-"""
-    IsMetricManifold <: AbstractTrait
-
-Specify that a certain decorated Manifold is a metric manifold in the sence that it provides
-explicit metric properties, extending/changing the default metric properties of a manifold.
-"""
-struct IsMetricManifold <: AbstractTrait end
-
 # piping syntax for decoration
 (metric::AbstractMetric)(M::AbstractManifold) = MetricManifold(M, metric)
 (::Type{T})(M::AbstractManifold) where {T<:AbstractMetric} = MetricManifold(M, T())
@@ -52,8 +44,6 @@ function active_traits(f, M::MetricManifold, args...)
     imf = is_metric_function(f)
     idm = imf && default_metric(M.manifold) == M.metric
     return merge_traits(
-        IsMetricManifold(),
-        # avoid forwarding to the embedding if the metric is not the default one
         idm ? at : _drop_embedding_type(at),
         imf ? EmptyTrait() : IsExplicitDecorator(),
     )
@@ -126,17 +116,6 @@ See also [`local_metric`](@ref)
 """
 function det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
     return det(local_metric(M, p, B))
-end
-@trait_function det_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
-
-function exp!(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, q, p, X)
-    return retract!(
-        M,
-        q,
-        p,
-        X,
-        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M, typeof(p))),
-    )
 end
 
 """
@@ -282,7 +261,13 @@ function exp_fused(M::MetricManifold, p, X, t::Number)
 end
 function exp!(M::MetricManifold, q, p, X)
     (default_metric(M.manifold) == M.metric) && (return exp!(M.manifold, q, p, X))
-    throw(MethodError(exp!, (M, p, X)))
+    return retract!(
+        M,
+        q,
+        p,
+        X,
+        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M, typeof(p))),
+    )
 end
 function exp_fused!(M::MetricManifold, q, p, X, t::Number)
     (default_metric(M.manifold) == M.metric) && (return exp_fused!(M.manifold, q, p, X, t))
@@ -308,13 +293,7 @@ where ``G_p`` is the local matrix representation of the `AbstractMetric` `G`.
 """
 inner(::MetricManifold, ::Any, ::Any, ::Any)
 
-function inner(
-    ::TraitList{IsMetricManifold},
-    M::AbstractDecoratorManifold,
-    p,
-    X::TFVector,
-    Y::TFVector,
-)
+function inner(M::MetricManifold, p, X::TFVector, Y::TFVector)
     X.basis === Y.basis ||
         error("calculating inner product of vectors from different bases is not supported")
     return dot(X.data, local_metric(M, p, X.basis) * Y.data)
@@ -431,7 +410,7 @@ function metric(M::MetricManifold)
     return M.metric
 end
 
-function norm(::TraitList{IsMetricManifold}, M::AbstractDecoratorManifold, p, X::TFVector)
+function norm(M::MetricManifold, p, X::TFVector)
     return sqrt(dot(X.data, local_metric(M, p, X.basis) * X.data))
 end
 
@@ -511,13 +490,7 @@ where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 """
 sharp(::MetricManifold, ::Any, ::CoTFVector)
 
-function sharp!(
-    ::TraitList{IsMetricManifold},
-    M::AbstractDecoratorManifold,
-    X::TFVector,
-    p,
-    ξ::CoTFVector,
-)
+function sharp!(M::MetricManifold, X::TFVector, p, ξ::CoTFVector)
     Ginv = inverse_local_metric(M, p, X.basis)
     copyto!(X.data, Ginv * ξ.data)
     return X

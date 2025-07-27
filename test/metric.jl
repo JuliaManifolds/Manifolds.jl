@@ -23,7 +23,6 @@ end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
-    ::TraitList{<:IsMetricManifold},
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
     ::Any,
     ::InducedBasis,
@@ -31,7 +30,6 @@ function Manifolds.local_metric(
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-    ::TraitList{IsMetricManifold},
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
     ::Any,
     ::T,
@@ -39,7 +37,6 @@ function Manifolds.local_metric(
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-    ::TraitList{IsMetricManifold},
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
     ::Any,
     ::T,
@@ -140,7 +137,6 @@ Manifolds._injectivity_radius(::BaseManifold, ::ExponentialRetraction) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) = Inf
 Manifolds._injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
 function Manifolds.local_metric(
-    ::TraitList{<:IsMetricManifold},
     ::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
     p,
     ::InducedBasis,

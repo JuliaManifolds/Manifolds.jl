@@ -725,7 +725,7 @@ export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
-export IsDefaultConnection, IsMetricManifold, IsConnectionManifold
+export IsDefaultConnection, IsConnectionManifold
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector
@@ -1006,7 +1006,7 @@ export AbstractGroupAction,
     TranslationAction,
     Unitary
 export AbstractInvarianceTrait
-export IsMetricManifold, IsConnectionManifold
+export IsConnectionManifold
 export IsGroupManifold,
     HasLeftInvariantMetric, HasRightInvariantMetric, HasBiinvariantMetric
 export adjoint_action,

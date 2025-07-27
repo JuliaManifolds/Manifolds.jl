@@ -16,11 +16,7 @@ function active_traits(
     M::MetricManifold{𝔽,<:AbstractManifold,TestInvariantMetricBase},
     args...,
 ) where {𝔽}
-    return merge_traits(
-        HasLeftInvariantMetric(),
-        IsMetricManifold(),
-        active_traits(f, M.manifold, args...),
-    )
+    return merge_traits(HasLeftInvariantMetric(), active_traits(f, M.manifold, args...))
 end
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,TestInvariantMetricBase},
@@ -37,11 +33,7 @@ function active_traits(
     M::MetricManifold{𝔽,<:AbstractManifold,TestBiInvariantMetricBase},
     args...,
 ) where {𝔽}
-    return merge_traits(
-        HasBiinvariantMetric(),
-        IsMetricManifold(),
-        active_traits(f, M.manifold, args...),
-    )
+    return merge_traits(HasBiinvariantMetric(), active_traits(f, M.manifold, args...))
 end
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,<:TestBiInvariantMetricBase},
