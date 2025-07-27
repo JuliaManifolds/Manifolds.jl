@@ -184,8 +184,10 @@ function flat!(M::AbstractManifold, ξ::CoTFVector, p, X::TFVector)
     copyto!(ξ.data, g * X.data)
     return ξ
 end
+
 function get_basis(M::MetricManifold, p, B::AbstractBasis)
-    return get_basis(M.manifold, p, B)
+    (default_metric(M.manifold) == M.metric) && (return get_basis(M.manifold, p, B))
+    return invoke(get_basis, Tuple{AbstractManifold,Any,AbstractBasis}, M, p, B)
 end
 
 function get_coordinates(M::MetricManifold, p, X, B::AbstractBasis)
@@ -284,7 +286,7 @@ function exp!(M::MetricManifold, q, p, X)
 end
 function exp_fused!(M::MetricManifold, q, p, X, t::Number)
     (default_metric(M.manifold) == M.metric) && (return exp_fused!(M.manifold, q, p, X, t))
-    throw(MethodError(exp_fused!, (M, q, p, X, t)))
+    return invoke(exp_fused!, Tuple{AbstractManifold,Any,Any,Any,Number}, M, q, p, X, t)
 end
 
 injectivity_radius(M::MetricManifold) = injectivity_radius(M.manifold)
