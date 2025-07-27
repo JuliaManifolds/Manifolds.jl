@@ -43,7 +43,7 @@ function Hyperbolic(n::Int; parameter::Symbol=:type)
 end
 
 function active_traits(f, ::Hyperbolic, args...)
-    return IsIsometricEmbeddedManifold()
+    return ManifoldsBase.merge_traits(IsIsometricEmbeddedManifold())
 end
 
 @doc raw"""

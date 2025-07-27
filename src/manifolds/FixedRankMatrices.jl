@@ -52,7 +52,7 @@ function FixedRankMatrices(
 end
 
 function active_traits(f, ::FixedRankMatrices, args...)
-    return IsEmbeddedManifold()
+    return ManifoldsBase.merge_traits(IsEmbeddedManifold())
 end
 
 @doc raw"""

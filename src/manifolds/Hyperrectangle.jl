@@ -29,7 +29,7 @@ struct Hyperrectangle{T<:AbstractArray} <: AbstractDecoratorManifold{ℝ}
 end
 
 function active_traits(f, ::Hyperrectangle, args...)
-    return IsDefaultConnection(LeviCivitaConnection())
+    return ManifoldsBase.merge_traits(IsDefaultConnection(LeviCivitaConnection()))
 end
 
 function check_point(M::Hyperrectangle, p)

@@ -63,7 +63,7 @@ function SymplecticStiefel(two_n::Int, two_k::Int; parameter::Symbol=:type)
 end
 
 function active_traits(f, ::SymplecticStiefel, args...)
-    return IsEmbeddedManifold()
+    return ManifoldsBase.merge_traits(IsEmbeddedManifold())
 end
 
 # Define Stiefel as the array fallback

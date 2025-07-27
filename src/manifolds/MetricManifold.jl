@@ -383,7 +383,7 @@ function log(M::MetricManifold, p, q)
 end
 function log!(M::MetricManifold, X, p, q)
     (default_metric(M.manifold) == M.metric) && (return log!(M.manifold, X, p, q))
-    throw(MethodError(log, (M, X, p, q)))
+    throw(MethodError(log!, (M, X, p, q)))
 end
 
 @doc raw"""

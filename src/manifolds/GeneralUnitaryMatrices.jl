@@ -42,7 +42,7 @@ function GeneralUnitaryMatrices(
 end
 
 function active_traits(f, ::GeneralUnitaryMatrices, args...)
-    return IsEmbeddedManifold()
+    return ManifoldsBase.merge_traits(IsEmbeddedManifold())
 end
 
 @doc raw"""
