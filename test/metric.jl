@@ -191,16 +191,14 @@ end
 
 Manifolds.is_default_metric(::BaseManifold, ::DefaultBaseManifoldMetric) = true
 
-if VERSION >= v"1.9"
-    const ProjectedPointDistribution =
-        Base.get_extension(Manifolds, :ManifoldsDistributionsExt).ProjectedPointDistribution
+const ProjectedPointDistribution =
+    Base.get_extension(Manifolds, :ManifoldsDistributionsExt).ProjectedPointDistribution
 
-    function Manifolds.projected_distribution(M::BaseManifold, d)
-        return ProjectedPointDistribution(M, d, project!, rand(d))
-    end
-    function Manifolds.projected_distribution(M::BaseManifold, d, p)
-        return ProjectedPointDistribution(M, d, project!, p)
-    end
+function Manifolds.projected_distribution(M::BaseManifold, d)
+    return ProjectedPointDistribution(M, d, project!, rand(d))
+end
+function Manifolds.projected_distribution(M::BaseManifold, d, p)
+    return ProjectedPointDistribution(M, d, project!, p)
 end
 
 function Manifolds.flat!(
@@ -272,8 +270,9 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test_throws MethodError Manifolds.exp_fused!(N, q, p, X, 1.0)
 
         using OrdinaryDiffEq
-        @test is_point(M, exp(M, p, X))
-        @test is_point(M, Manifolds.exp_fused(M, p, X, 1.0))
+        # These need to be changed, I would not consider loading the package to suddently make a function previously breaking to work!
+        @test is_point(M, retract(M, p, X, ODEExponentialRetraction()))
+        @test is_point(M, Manifolds.retract_fused(M, p, X, 1.0, ODEExponentialRetraction()))
 
         # a small trick to check that retract_exp_ode! returns the right value on ConnectionManifolds
         N2 = ConnectionManifold(E, TestConnection())

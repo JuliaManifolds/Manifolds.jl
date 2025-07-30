@@ -261,13 +261,7 @@ function exp_fused(M::MetricManifold, p, X, t::Number)
 end
 function exp!(M::MetricManifold, q, p, X)
     (default_metric(M.manifold) == M.metric) && (return exp!(M.manifold, q, p, X))
-    return retract!(
-        M,
-        q,
-        p,
-        X,
-        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M, typeof(p))),
-    )
+    throw(MethodError(exp!, (M, q, p, X)))
 end
 function exp_fused!(M::MetricManifold, q, p, X, t::Number)
     (default_metric(M.manifold) == M.metric) && (return exp_fused!(M.manifold, q, p, X, t))
@@ -491,13 +485,10 @@ where ``G_p`` is the local matrix representation of `G`, i.e. one employs
 sharp(::MetricManifold, ::Any, ::CoTFVector)
 
 function sharp!(M::MetricManifold, X::TFVector, p, ξ::CoTFVector)
+    (default_metric(M.manifold) == M.metric) && (return sharp!(M.manifold, X, p, ξ))
     Ginv = inverse_local_metric(M, p, X.basis)
     copyto!(X.data, Ginv * ξ.data)
     return X
-end
-function sharp!(M::MetricManifold, X::TFVector, p, ξ::CoTFVector)
-    (default_metric(M.manifold) == M.metric) && (return sharp!(M.manifold, X, p, ξ))
-    throw(MethodError(sharp!, (M, X, p, ξ)))
 end
 
 function Base.show(io::IO, M::MetricManifold)
