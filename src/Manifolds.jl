@@ -555,9 +555,6 @@ include("groups/special_euclidean.jl")
 
 include("groups/rotation_translation_action.jl")
 
-# final utilities
-include("trait_recursion_breaking.jl")
-
 @doc raw"""
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
@@ -725,7 +722,6 @@ export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
-export IsDefaultConnection, IsConnectionManifold
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector

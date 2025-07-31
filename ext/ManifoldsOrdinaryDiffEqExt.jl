@@ -48,10 +48,30 @@ function solve_exp_ode(
     q = sol.u[end][(n + 1):(2 * n)]
     return q
 end
-# also define exp! for metric manifold anew in this case
-function exp_fused!(M::MetricManifold, q, p, X, t::Number; kwargs...)
-    copyto!(M, q, solve_exp_ode(M, p, X, t; kwargs...))
+
+function ManifoldsBase.retract_exp_ode!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    m::AbstractRetractionMethod,
+    b::AbstractBasis,
+)
+    ManifoldsBase.retract_exp_ode_fused!(M, q, p, X, one(number_eltype(p)), m, b)
     return q
 end
 
+function ManifoldsBase.retract_exp_ode_fused!(
+    M::AbstractManifold,
+    q,
+    p,
+    X,
+    t::Number,
+    ::AbstractRetractionMethod,
+    b::AbstractBasis,
+)
+    sol = solve_exp_ode(M, p, X, t; basis=b)
+    copyto!(q, sol)
+    return q
+end
 end

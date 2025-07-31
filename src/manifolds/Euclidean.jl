@@ -41,10 +41,6 @@ function Euclidean(
     return Euclidean{typeof(size),field}(size)
 end
 
-function active_traits(f, ::Euclidean, args...)
-    return merge_traits(IsDefaultConnection(LeviCivitaConnection()))
-end
-
 function adjoint_Jacobi_field(::Euclidean{Tuple{}}, p, q, t, X, β::Tβ) where {Tβ}
     return X
 end

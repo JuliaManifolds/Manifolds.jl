@@ -28,10 +28,6 @@ struct Hyperrectangle{T<:AbstractArray} <: AbstractDecoratorManifold{ℝ}
     end
 end
 
-function active_traits(f, ::Hyperrectangle, args...)
-    return ManifoldsBase.merge_traits(IsDefaultConnection(LeviCivitaConnection()))
-end
-
 function check_point(M::Hyperrectangle, p)
     if !(eltype(p) <: Real)
         return DomainError(

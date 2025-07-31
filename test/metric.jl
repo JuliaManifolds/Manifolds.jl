@@ -3,6 +3,7 @@ using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
 using ManifoldsBase: TraitList
 import ManifoldsBase: default_retraction_method
+using Manifolds, ManifoldsBase
 import Manifolds: solve_exp_ode
 using Manifolds: InducedBasis, connection, get_chart_index, induced_basis, mean!, median!
 using ADTypes
@@ -246,8 +247,6 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test decorated_manifold(M) == Euclidean(3)
         @test is_default_connection(Euclidean(3), LeviCivitaConnection())
         @test !is_default_connection(TestEuclidean{3}(), LeviCivitaConnection())
-        c = IsDefaultConnection(LeviCivitaConnection())
-        @test ManifoldsBase.parent_trait(c) == Manifolds.IsConnectionManifold()
     end
 
     @testset "solve_exp_ode error message" begin
