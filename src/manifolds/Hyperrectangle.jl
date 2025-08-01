@@ -63,7 +63,7 @@ function check_vector(M::Hyperrectangle, p, X; kwargs...)
 end
 
 default_approximation_method(::Hyperrectangle, ::typeof(mean)) = EfficientEstimator()
-default_metric(::Hyperrectangle) = EuclideanMetric()
+metric(::Hyperrectangle) = EuclideanMetric()
 """
     default_retraction_method(M::Hyperrectangle)
 

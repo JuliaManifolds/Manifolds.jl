@@ -59,8 +59,6 @@ function GeneralizedGrassmann(
     return GeneralizedGrassmann{typeof(size),𝔽,typeof(B)}(size, B)
 end
 
-active_traits(f, ::GeneralizedGrassmann, args...) = merge_traits(IsEmbeddedManifold())
-
 @doc raw"""
     change_representer(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
 

@@ -394,7 +394,7 @@ as the default inverse retraction for the [`FixedRankMatrices`](@ref) manifold.
 """
 default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction()
 
-default_metric(::FixedRankMatrices) = EuclideanMetric()
+metric(::FixedRankMatrices) = EuclideanMetric()
 
 """
     default_exp_method(M::FixedRankMatrices)

@@ -82,10 +82,6 @@ function Grassmann(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol
     return Grassmann{typeof(size),field}(size)
 end
 
-function active_traits(f, ::Grassmann, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
-end
-
 function allocation_promotion_function(::Grassmann{<:Any,ℂ}, f, args::Tuple)
     return complex
 end

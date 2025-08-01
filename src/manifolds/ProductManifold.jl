@@ -17,7 +17,7 @@ function adjoint_Jacobi_field!(M::ProductManifold, Y, p, q, t, X, β::Tβ) where
     return Y
 end
 
-default_metric(::ProductManifold) = ProductMetric()
+metric(::ProductManifold) = ProductMetric()
 
 @doc raw"""
     flat(M::ProductManifold, p, X::FVector{TangentSpaceType})

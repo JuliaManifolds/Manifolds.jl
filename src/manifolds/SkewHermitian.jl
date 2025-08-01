@@ -47,10 +47,6 @@ function SkewSymmetricMatrices(n::Int; parameter::Symbol=:type)
     return SkewHermitianMatrices(n; parameter=parameter)
 end
 
-function active_traits(f, ::SkewHermitianMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 function allocation_promotion_function(
     ::SkewHermitianMatrices{<:Any,ℂ},
     ::typeof(get_vector),

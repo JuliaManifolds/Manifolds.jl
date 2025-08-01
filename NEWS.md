@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.24] unreleased, maybe 0.11
 
+### Added
+
+* a function `metric(M)` analogous to `embedding(M)` and `connection(M)` that returns the metric of the manifold `M`.
+* a `DefaultMetric()` type to specify that the manifold uses some specific metric, that is not further named.
+
 ### Removed
 
 * the trait system that was present additionally to the wrapper types for metric, embedding and connections. Those were moved to `default_X` functions and the dispatch was adapted to still obtain the same logic/behaviour.

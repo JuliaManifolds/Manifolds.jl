@@ -50,10 +50,6 @@ function SPDFixedDeterminant(n::Int, d::F=1.0; parameter::Symbol=:type) where {F
     return SPDFixedDeterminant{typeof(size),F}(size, d)
 end
 
-function active_traits(f, ::SPDFixedDeterminant, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 @doc raw"""
     check_point(M::SPDFixedDeterminant, p; kwargs...)
 

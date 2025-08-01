@@ -108,7 +108,7 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
 end
 
 default_approximation_method(::Euclidean, ::typeof(mean)) = EfficientEstimator()
-default_metric(::Euclidean) = EuclideanMetric()
+metric(::Euclidean) = EuclideanMetric()
 
 function default_approximation_method(::Euclidean, ::typeof(median), ::Type{<:Number})
     return EfficientEstimator()

@@ -30,7 +30,6 @@ import ManifoldsBase:
     _retract,
     _retract!,
     _write,
-    active_traits,
     allocate,
     allocate_coordinates,
     allocate_result,
@@ -247,10 +246,7 @@ using ManifoldsBase:
     GeodesicInterpolationWithinRadius,
     GradientDescentEstimation,
     InverseProductRetraction,
-    IsIsometricEmbeddedManifold,
-    IsEmbeddedManifold,
-    IsEmbeddedSubmanifold,
-    IsExplicitDecorator,
+    IsExplicitDecorator, #soon deprecated but we keep it for the deprecated group manifolds
     LogarithmicInverseRetraction,
     ManifoldDomainError,
     ManifoldsBase,
@@ -369,7 +365,7 @@ Indicating that a manifold uses the default metric, that one has implicitly assu
 when defining the manifold
 """
 struct DefaultMetric <: AbstractMetric end
-default_metric(::AbstractManifold) = DefaultMetric()
+metric(::AbstractManifold) = DefaultMetric()
 
 include("utils.jl")
 

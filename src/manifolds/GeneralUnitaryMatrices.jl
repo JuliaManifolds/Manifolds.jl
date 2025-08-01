@@ -41,10 +41,6 @@ function GeneralUnitaryMatrices(
     return GeneralUnitaryMatrices{typeof(size),field,matrix_type}(size)
 end
 
-function active_traits(f, ::GeneralUnitaryMatrices, args...)
-    return ManifoldsBase.merge_traits(IsEmbeddedManifold())
-end
-
 @doc raw"""
     check_point(M::UnitaryMatrices, p; kwargs...)
     check_point(M::OrthogonalMatrices, p; kwargs...)

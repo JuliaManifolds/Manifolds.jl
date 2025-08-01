@@ -51,8 +51,6 @@ function GeneralizedStiefel(
     return GeneralizedStiefel{typeof(size),𝔽,typeof(B)}(size, B)
 end
 
-active_traits(f, ::GeneralizedStiefel, args...) = merge_traits(IsEmbeddedManifold())
-
 @doc raw"""
     check_point(M::GeneralizedStiefel, p; kwargs...)
 

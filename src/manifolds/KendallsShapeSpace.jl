@@ -23,10 +23,6 @@ function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
     return KendallsShapeSpace{typeof(size)}(size)
 end
 
-function active_traits(f, ::KendallsShapeSpace, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
-end
-
 function get_orbit_action(M::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
     return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n))
 end

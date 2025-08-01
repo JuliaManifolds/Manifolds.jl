@@ -54,7 +54,7 @@ function check_vector(G::GeneralLinear, p, X; kwargs...)
     return nothing
 end
 
-default_metric(::GeneralLinear) = EuclideanMetric()
+metric(::GeneralLinear) = EuclideanMetric()
 
 distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
 

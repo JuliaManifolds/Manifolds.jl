@@ -39,7 +39,7 @@ function allocate_result(M::Euclidean, ::typeof(rand), ::Identity{AdditionOperat
     return similar(Array{Float64}, representation_size(M)...)
 end
 
-default_metric(::TranslationGroup) = EuclideanMetric()
+metric(::TranslationGroup) = EuclideanMetric()
 
 exp!(::TranslationGroup, q, ::Identity{AdditionOperation}, X) = copyto!(q, X)
 

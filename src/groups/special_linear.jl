@@ -67,7 +67,7 @@ function check_vector(
     return nothing
 end
 
-default_metric(::SpecialLinear) = EuclideanMetric()
+metric(::SpecialLinear) = EuclideanMetric()
 
 embed(::SpecialLinear, p) = p
 embed(::SpecialLinear, p, X) = X
