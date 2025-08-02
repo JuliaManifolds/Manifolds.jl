@@ -25,10 +25,6 @@ function KendallsPreShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
     return KendallsPreShapeSpace{typeof(size)}(size)
 end
 
-function active_traits(f, ::KendallsPreShapeSpace, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 representation_size(M::KendallsPreShapeSpace) = get_parameter(M.size)
 
 """

@@ -30,10 +30,6 @@ function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol
     return SymmetricMatrices{typeof(size),field}(size)
 end
 
-function active_traits(f, ::SymmetricMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 function allocation_promotion_function(
     M::SymmetricMatrices{<:Any,ℂ},
     ::typeof(get_vector),

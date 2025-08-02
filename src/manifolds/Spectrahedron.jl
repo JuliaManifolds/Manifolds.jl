@@ -51,8 +51,6 @@ function Spectrahedron(n::Int, k::Int; parameter::Symbol=:type)
     return Spectrahedron{typeof(size)}(size)
 end
 
-active_traits(f, ::Spectrahedron, args...) = merge_traits(IsIsometricEmbeddedManifold())
-
 @doc raw"""
     check_point(M::Spectrahedron, q; kwargs...)
 

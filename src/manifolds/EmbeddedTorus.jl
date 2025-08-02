@@ -21,10 +21,6 @@ struct EmbeddedTorus{TR<:Real} <: AbstractDecoratorManifold{ℝ}
     r::TR
 end
 
-function active_traits(f, ::EmbeddedTorus, args...)
-    return merge_traits(IsMetricManifold())
-end
-
 aspect_ratio(M::EmbeddedTorus) = M.R / M.r
 
 @doc raw"""

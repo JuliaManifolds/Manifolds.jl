@@ -45,10 +45,6 @@ function ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:
     return ProjectiveSpace{typeof(size),field}(size)
 end
 
-function active_traits(f, ::AbstractProjectiveSpace, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
-end
-
 @doc raw"""
     ArrayProjectiveSpace{T<:Tuple,𝔽} <: AbstractProjectiveSpace{𝔽}
 
