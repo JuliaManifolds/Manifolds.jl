@@ -24,10 +24,6 @@ function InvertibleMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbo
     return InvertibleMatrices{field,typeof(size)}(size)
 end
 
-function active_traits(f, ::InvertibleMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 @doc raw"""
     check_point(M::InvertibleMatrices{n,𝔽}, p; kwargs...)
 

@@ -272,7 +272,7 @@ function ManifoldsBase.default_inverse_retraction_method(::SymplecticMatrices)
     return CayleyInverseRetraction()
 end
 
-default_metric(::SymplecticMatrices) = RealSymplecticMetric()
+metric(::SymplecticMatrices) = RealSymplecticMetric()
 
 ManifoldsBase.default_retraction_method(::SymplecticMatrices) = CayleyRetraction()
 

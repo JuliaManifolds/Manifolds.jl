@@ -54,10 +54,6 @@ function SymmetricPositiveSemidefiniteFixedRank(
     return SymmetricPositiveSemidefiniteFixedRank{typeof(size),field}(size)
 end
 
-function active_traits(f, ::SymmetricPositiveSemidefiniteFixedRank, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
-end
-
 @doc raw"""
     check_point(M::SymmetricPositiveSemidefiniteFixedRank, q; kwargs...)
 

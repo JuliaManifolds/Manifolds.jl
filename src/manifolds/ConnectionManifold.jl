@@ -13,26 +13,6 @@ The [Levi-Civita connection](https://en.wikipedia.org/wiki/Levi-Civita_connectio
 struct LeviCivitaConnection <: AbstractAffineConnection end
 
 """
-    IsConnectionManifold <: AbstractTrait
-
-Specify that a certain decorated Manifold is a connection manifold in the sence that it provides
-explicit connection properties, extending/changing the default connection properties of a manifold.
-"""
-struct IsConnectionManifold <: AbstractTrait end
-
-"""
-    IsDefaultConnection{G<:AbstractAffineConnection}
-
-Specify that a certain [`AbstractAffineConnection`](@ref) is the default connection for a manifold.
-This way the corresponding [`ConnectionManifold`](@ref) falls back to the default methods
-of the manifold it decorates.
-"""
-struct IsDefaultConnection{C<:AbstractAffineConnection} <: AbstractTrait
-    connection::C
-end
-parent_trait(::IsDefaultConnection) = IsConnectionManifold()
-
-"""
     ConnectionManifold{𝔽,,M<:AbstractManifold{𝔽},G<:AbstractAffineConnection} <: AbstractDecoratorManifold{𝔽}
 
 # Constructor
@@ -45,25 +25,6 @@ struct ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnec
        AbstractDecoratorManifold{𝔽}
     manifold::M
     connection::C
-end
-
-function Base.filter(f, t::TraitList)
-    if f(t.head)
-        return merge_traits(t.head, filter(f, t.tail))
-    else
-        return filter(f, t.tail)
-    end
-end
-Base.filter(f, t::EmptyTrait) = t
-
-function active_traits(f, M::ConnectionManifold, args...)
-    return merge_traits(
-        is_default_connection(M.manifold, M.connection) ?
-        IsDefaultConnection(M.connection) : EmptyTrait(),
-        IsConnectionManifold(),
-        filter(x -> x isa IsGroupManifold, active_traits(f, M.manifold, args...)),
-        is_metric_function(f) ? EmptyTrait() : IsExplicitDecorator(),
-    )
 end
 
 @doc raw"""
@@ -191,9 +152,11 @@ end
     connection(M::AbstractManifold)
 
 Get the connection (an object of a subtype of [`AbstractAffineConnection`](@ref))
-of [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M`.
+of [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`) `M`.
+
+The global default connection is the [`LeviCivitaConnection`](@ref).
 """
-connection(::AbstractManifold)
+connection(::AbstractManifold) = LeviCivitaConnection()
 
 """
     connection(M::ConnectionManifold)
@@ -221,46 +184,6 @@ function default_vector_transport_method(M::ConnectionManifold, t::Type)
     return default_vector_transport_method(M.manifold, t)
 end
 
-@doc raw"""
-    exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
-
-Compute the exponential map on a manifold that [`IsConnectionManifold`](@ref) `M` equipped with
-corresponding affine connection.
-
-Otherwise it numerically integrates the underlying ODE, see [`solve_exp_ode`](@ref).
-Currently, the numerical integration is only accurate when using a single
-coordinate chart that covers the entire manifold. This excludes coordinates
-in an embedded space.
-"""
-exp(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, p, X)
-
-function exp!(::TraitList{IsConnectionManifold}, M::AbstractDecoratorManifold, q, p, X)
-    return retract!(
-        M,
-        q,
-        p,
-        X,
-        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M, typeof(p))),
-    )
-end
-function exp_fused!(
-    ::TraitList{IsConnectionManifold},
-    M::AbstractDecoratorManifold,
-    q,
-    p,
-    X,
-    t::Number,
-)
-    return retract!(
-        M,
-        q,
-        p,
-        X,
-        t,
-        ODEExponentialRetraction(ManifoldsBase.default_retraction_method(M)),
-    )
-end
-
 """
     gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
 
@@ -282,51 +205,14 @@ end
     is_default_connection(M::AbstractManifold, G::AbstractAffineConnection)
 
 returns whether an [`AbstractAffineConnection`](@ref) is the default metric on the manifold `M` or not.
-This can be set by defining this function, or setting the [`IsDefaultConnection`](@ref) trait for an
-[`AbstractDecoratorManifold`](@extref `ManifoldsBase.AbstractDecoratorManifold`).
+This can be set by defining this function, or defining [`default_connection`](@ref)`(M)` for your manifold.
 """
 is_default_connection(M::AbstractManifold, G::AbstractAffineConnection)
-@trait_function is_default_connection(
-    M::AbstractDecoratorManifold,
-    G::AbstractAffineConnection,
-)
-function is_default_connection(
-    ::TraitList{IsDefaultConnection{C}},
-    ::AbstractDecoratorManifold,
-    ::C,
-) where {C<:AbstractAffineConnection}
-    return true
+function is_default_connection(M::ConnectionManifold, c::AbstractAffineConnection)
+    return connection(M) == c
 end
-function is_default_connection(M::ConnectionManifold)
-    return is_default_connection(M.manifold, M.connection)
-end
+is_default_connection(M::ConnectionManifold) = true
 is_default_connection(::AbstractManifold, ::AbstractAffineConnection) = false
-
-function ManifoldsBase.retract_exp_ode!(
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    m::AbstractRetractionMethod,
-    b::AbstractBasis,
-)
-    ManifoldsBase.retract_exp_ode_fused!(M, q, p, X, one(number_eltype(p)), m, b)
-    return q
-end
-
-function ManifoldsBase.retract_exp_ode_fused!(
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    t::Number,
-    ::AbstractRetractionMethod,
-    b::AbstractBasis,
-)
-    sol = solve_exp_ode(M, p, X, t; basis=b, dense=false)
-    copyto!(q, sol)
-    return q
-end
 
 """
     ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
@@ -381,7 +267,7 @@ function solve_exp_ode end
 
 @doc raw"""
     solve_exp_ode(
-        M::ConnectionManifold,
+        M::AbstractManifold,
         p,
         X,
         t::Number;

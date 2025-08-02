@@ -3,6 +3,7 @@ using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
 using ManifoldsBase: TraitList
 import ManifoldsBase: default_retraction_method
+using Manifolds, ManifoldsBase
 import Manifolds: solve_exp_ode
 using Manifolds: InducedBasis, connection, get_chart_index, induced_basis, mean!, median!
 using ADTypes
@@ -23,7 +24,6 @@ end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
-    ::TraitList{<:IsMetricManifold},
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
     ::Any,
     ::InducedBasis,
@@ -31,7 +31,6 @@ function Manifolds.local_metric(
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-    ::TraitList{IsMetricManifold},
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
     ::Any,
     ::T,
@@ -39,7 +38,6 @@ function Manifolds.local_metric(
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-    ::TraitList{IsMetricManifold},
     M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
     ::Any,
     ::T,
@@ -140,7 +138,6 @@ Manifolds._injectivity_radius(::BaseManifold, ::ExponentialRetraction) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) = Inf
 Manifolds._injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
 function Manifolds.local_metric(
-    ::TraitList{<:IsMetricManifold},
     ::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
     p,
     ::InducedBasis,
@@ -195,16 +192,14 @@ end
 
 Manifolds.is_default_metric(::BaseManifold, ::DefaultBaseManifoldMetric) = true
 
-if VERSION >= v"1.9"
-    const ProjectedPointDistribution =
-        Base.get_extension(Manifolds, :ManifoldsDistributionsExt).ProjectedPointDistribution
+const ProjectedPointDistribution =
+    Base.get_extension(Manifolds, :ManifoldsDistributionsExt).ProjectedPointDistribution
 
-    function Manifolds.projected_distribution(M::BaseManifold, d)
-        return ProjectedPointDistribution(M, d, project!, rand(d))
-    end
-    function Manifolds.projected_distribution(M::BaseManifold, d, p)
-        return ProjectedPointDistribution(M, d, project!, p)
-    end
+function Manifolds.projected_distribution(M::BaseManifold, d)
+    return ProjectedPointDistribution(M, d, project!, rand(d))
+end
+function Manifolds.projected_distribution(M::BaseManifold, d, p)
+    return ProjectedPointDistribution(M, d, project!, p)
 end
 
 function Manifolds.flat!(
@@ -252,8 +247,6 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test decorated_manifold(M) == Euclidean(3)
         @test is_default_connection(Euclidean(3), LeviCivitaConnection())
         @test !is_default_connection(TestEuclidean{3}(), LeviCivitaConnection())
-        c = IsDefaultConnection(LeviCivitaConnection())
-        @test ManifoldsBase.parent_trait(c) == Manifolds.IsConnectionManifold()
     end
 
     @testset "solve_exp_ode error message" begin
@@ -276,8 +269,9 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test_throws MethodError Manifolds.exp_fused!(N, q, p, X, 1.0)
 
         using OrdinaryDiffEq
-        @test is_point(M, exp(M, p, X))
-        @test is_point(M, Manifolds.exp_fused(M, p, X, 1.0))
+        # These need to be changed, I would not consider loading the package to suddently make a function previously breaking to work!
+        @test is_point(M, retract(M, p, X, ODEExponentialRetraction()))
+        @test is_point(M, Manifolds.retract_fused(M, p, X, 1.0, ODEExponentialRetraction()))
 
         # a small trick to check that retract_exp_ode! returns the right value on ConnectionManifolds
         N2 = ConnectionManifold(E, TestConnection())

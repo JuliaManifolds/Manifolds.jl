@@ -32,7 +32,7 @@ end
     end
 end
 
-default_metric(::CircleGroup) = EuclideanMetric()
+metric(::CircleGroup) = EuclideanMetric()
 
 Base.show(io::IO, ::CircleGroup) = print(io, "CircleGroup()")
 
@@ -182,7 +182,7 @@ adjoint_action(::RealCircleGroup, p, X, ::RightAction) = X
 adjoint_action(::RealCircleGroup, ::Identity, X, ::LeftAction) = X
 adjoint_action(::RealCircleGroup, ::Identity, X, ::RightAction) = X
 
-default_metric(::RealCircleGroup) = EuclideanMetric()
+metric(::RealCircleGroup) = EuclideanMetric()
 
 for AD in [LeftAction, RightAction]
     @eval begin

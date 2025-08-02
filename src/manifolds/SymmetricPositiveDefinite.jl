@@ -221,7 +221,7 @@ function copyto!(q::SPDPoint, p::SPDPoint)
     return q
 end
 
-default_metric(::SymmetricPositiveDefinite) = AffineInvariantMetric()
+metric(::SymmetricPositiveDefinite) = AffineInvariantMetric()
 
 embed(::SymmetricPositiveDefinite, p) = p
 embed(::SymmetricPositiveDefinite, p::SPDPoint) = convert(AbstractMatrix, p)

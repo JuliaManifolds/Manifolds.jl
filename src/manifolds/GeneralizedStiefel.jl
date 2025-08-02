@@ -50,6 +50,7 @@ function GeneralizedStiefel(
     size = wrap_type_parameter(parameter, (n, k))
     return GeneralizedStiefel{typeof(size),𝔽,typeof(B)}(size, B)
 end
+
 is_embedded_manifold(::GeneralizedStiefel) = true
 
 @doc raw"""

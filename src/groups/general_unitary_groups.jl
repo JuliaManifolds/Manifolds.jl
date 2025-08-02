@@ -26,7 +26,7 @@ vector_representation(::GeneralUnitaryMultiplicationGroup) = LeftInvariantRepres
     end
 end
 
-default_metric(::GeneralUnitaryMultiplicationGroup) = EuclideanMetric()
+metric(::GeneralUnitaryMultiplicationGroup) = EuclideanMetric()
 
 function allocate_result(
     ::GeneralUnitaryMultiplicationGroup,

@@ -145,7 +145,7 @@ function check_vector(M::SymplecticStiefel{S,𝔽}, p, X::T; kwargs...) where {S
     return nothing
 end
 
-default_metric(::SymplecticStiefel) = RealSymplecticMetric()
+metric(::SymplecticStiefel) = RealSymplecticMetric()
 
 @doc raw"""
     exp(::SymplecticStiefel, p, X)

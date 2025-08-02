@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.24] unreleased, maybe 0.11
+
+### Added
+
+* a function `metric(M)` analogous to `embedding(M)` and `connection(M)` that returns the metric of the manifold `M`.
+* a `DefaultMetric()` type to specify that the manifold uses some specific metric, that is not further named.
+
+### Removed
+
+* the trait system that was present additionally to the wrapper types for metric, embedding and connections. Those were moved to `default_X` functions and the dispatch was adapted to still obtain the same logic/behaviour.
+
+### Changed
+* the extension to `OrdinaryDiffEq.jl` has been remodelled slightly to no longer introduce,
+`exp_fused!` to be implemented calling the ODE solver, but correctly uses the `retract_exp_ode!` and `retract_exp_ode_fused!` functions.
+
 ## [0.10.23] 2025-07-19
 
 ### Fixed

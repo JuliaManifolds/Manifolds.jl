@@ -11,17 +11,6 @@ using Manifolds:
 
 struct TestInvariantMetricBase <: AbstractMetric end
 
-function active_traits(
-    f,
-    M::MetricManifold{𝔽,<:AbstractManifold,TestInvariantMetricBase},
-    args...,
-) where {𝔽}
-    return merge_traits(
-        HasLeftInvariantMetric(),
-        IsMetricManifold(),
-        active_traits(f, M.manifold, args...),
-    )
-end
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,TestInvariantMetricBase},
     ::Identity,
@@ -32,17 +21,6 @@ end
 
 struct TestBiInvariantMetricBase <: AbstractMetric end
 
-function active_traits(
-    f,
-    M::MetricManifold{𝔽,<:AbstractManifold,TestBiInvariantMetricBase},
-    args...,
-) where {𝔽}
-    return merge_traits(
-        HasBiinvariantMetric(),
-        IsMetricManifold(),
-        active_traits(f, M.manifold, args...),
-    )
-end
 function local_metric(
     ::MetricManifold{𝔽,<:AbstractManifold,<:TestBiInvariantMetricBase},
     ::Identity,
@@ -54,10 +32,6 @@ end
 struct TestInvariantMetricManifold <: AbstractManifold{ℝ} end
 
 struct TestDefaultInvariantMetricManifold <: AbstractManifold{ℝ} end
-
-function ManifoldsBase.active_traits(f, ::TestDefaultInvariantMetricManifold, args...)
-    return merge_traits(HasRightInvariantMetric())
-end
 
 @testset "Invariant metrics" begin
     base_metric = TestInvariantMetricBase()

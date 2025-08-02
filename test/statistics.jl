@@ -2,7 +2,6 @@ include("header.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase:
-    active_traits,
     manifold_dimension,
     exp!,
     log!,
@@ -67,17 +66,11 @@ function zero_vector!(::TestStatsEuclidean{N}, X, p; kwargs...) where {N}
 end
 
 struct TestStatsNotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 get_embedding(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 
 struct TestStatsNotImplementedEmbeddedManifold2 <: AbstractDecoratorManifold{ℝ} end
-function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold2, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
-end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 get_embedding(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)

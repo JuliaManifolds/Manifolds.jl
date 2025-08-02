@@ -30,7 +30,6 @@ import ManifoldsBase:
     _retract,
     _retract!,
     _write,
-    active_traits,
     allocate,
     allocate_coordinates,
     allocate_result,
@@ -249,9 +248,7 @@ using ManifoldsBase:
     GeodesicInterpolationWithinRadius,
     GradientDescentEstimation,
     InverseProductRetraction,
-    IsIsometricEmbeddedManifold,
-    IsEmbeddedSubmanifold,
-    IsExplicitDecorator,
+    IsExplicitDecorator, #soon deprecated but we keep it for the deprecated group manifolds
     LogarithmicInverseRetraction,
     ManifoldDomainError,
     ManifoldsBase,
@@ -370,7 +367,7 @@ Indicating that a manifold uses the default metric, that one has implicitly assu
 when defining the manifold
 """
 struct DefaultMetric <: AbstractMetric end
-default_metric(::AbstractManifold) = DefaultMetric()
+metric(::AbstractManifold) = DefaultMetric()
 
 include("utils.jl")
 
@@ -556,9 +553,6 @@ include("groups/special_euclidean.jl")
 
 include("groups/rotation_translation_action.jl")
 
-# final utilities
-include("trait_recursion_breaking.jl")
-
 @doc raw"""
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
@@ -726,7 +720,6 @@ export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
 export IsIsometricEmbeddedManifold, IsEmbeddedSubmanifold
-export IsDefaultConnection, IsMetricManifold, IsConnectionManifold
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector
@@ -842,6 +835,7 @@ export ×,
     decorated_manifold,
     default_approximation_method,
     default_inverse_retraction_method,
+    default_metric,
     default_retraction_method,
     default_vector_transport_method,
     det_local_metric,
@@ -1007,7 +1001,7 @@ export AbstractGroupAction,
     TranslationAction,
     Unitary
 export AbstractInvarianceTrait
-export IsMetricManifold, IsConnectionManifold
+export IsConnectionManifold
 export IsGroupManifold,
     HasLeftInvariantMetric, HasRightInvariantMetric, HasBiinvariantMetric
 export adjoint_action,
