@@ -104,7 +104,7 @@ function change_representer!(M::Grassmann, Y, ::EuclideanMetric, p, X)
 end
 
 @doc raw"""
-    change_metric(M::Grassmann, ::EuclideanMetric, p X)
+    change_metric(M::Grassmann, ::EuclideanMetric, p, X)
 
 Change `X` to the corresponding vector with respect to the metric of the [`Grassmann`](@ref) `M`,
 which is just the identity, since the manifold is isometrically embedded.
@@ -133,6 +133,8 @@ end
 function _isapprox(M::Grassmann, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
     return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
 end
+
+is_embedded_manifold(::Grassmann) = true
 
 """
     is_flat(M::Grassmann)

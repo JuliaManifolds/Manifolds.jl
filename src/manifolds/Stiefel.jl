@@ -187,6 +187,8 @@ in [KanekoFioriTanaka:2013](@cite).
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
 
+is_embedded_manifold(::Stiefel) = true
+
 function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
     n, k = get_parameter(M.size)
     @inbounds for i in 1:k
