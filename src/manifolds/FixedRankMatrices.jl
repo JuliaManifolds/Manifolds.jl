@@ -51,6 +51,8 @@ function FixedRankMatrices(
     return FixedRankMatrices{typeof(size),field}(size)
 end
 
+is_embedded_manifold(::FixedRankMatrices) = true
+
 @doc raw"""
     SVDMPoint <: AbstractManifoldPoint
 
@@ -209,7 +211,7 @@ end
 function allocate_result(M::FixedRankMatrices, ::typeof(inverse_retract), p, q)
     return zero_vector(M, p)
 end
-function allocate_result(M::FixedRankMatrices, ::typeof(project), X, p, vals...)
+function allocate_result_embedding(M::FixedRankMatrices, ::typeof(project), X, p, vals...)
     m, n, k = get_parameter(M.size)
     # vals are p and X, so we can use their fields to set up those of the UMVTangentVector
     return UMVTangentVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))

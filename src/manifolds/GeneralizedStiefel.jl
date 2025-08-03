@@ -51,6 +51,8 @@ function GeneralizedStiefel(
     return GeneralizedStiefel{typeof(size),𝔽,typeof(B)}(size, B)
 end
 
+is_embedded_manifold(::GeneralizedStiefel) = true
+
 @doc raw"""
     check_point(M::GeneralizedStiefel, p; kwargs...)
 

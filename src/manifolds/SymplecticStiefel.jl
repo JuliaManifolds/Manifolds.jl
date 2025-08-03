@@ -62,6 +62,8 @@ function SymplecticStiefel(two_n::Int, two_k::Int; parameter::Symbol=:type)
     return SymplecticStiefel{typeof(size),ℝ}(size)
 end
 
+is_embedded_manifold(::SymplecticStiefel) = true
+
 # Define Stiefel as the array fallback
 ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{<:Any,ℝ} StiefelPoint StiefelTangentVector value value
 

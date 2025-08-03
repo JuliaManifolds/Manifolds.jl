@@ -33,6 +33,7 @@ import ManifoldsBase:
     allocate,
     allocate_coordinates,
     allocate_result,
+    allocate_result_embedding,
     allocate_result_type,
     allocation_promotion_function,
     base_manifold,
@@ -110,6 +111,7 @@ import ManifoldsBase:
     inverse_retract_softmax!,
     isapprox,
     _isapprox,
+    is_embedded_manifold,
     is_flat,
     is_point,
     is_vector,
@@ -717,7 +719,7 @@ export AbstractNumbers, ℝ, ℂ, ℍ
 export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
-export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
+export IsIsometricEmbeddedManifold, IsEmbeddedSubmanifold
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector

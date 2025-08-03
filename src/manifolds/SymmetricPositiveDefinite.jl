@@ -97,6 +97,8 @@ function Base.:(==)(p::SPDPoint, q::SPDPoint)
     return p.eigen == q.eigen
 end
 
+is_embedded_manifold(::SymmetricPositiveDefinite) = true
+
 function allocate(p::SPDPoint)
     return SPDPoint(
         ismissing(p.p) ? missing : allocate(p.p),
