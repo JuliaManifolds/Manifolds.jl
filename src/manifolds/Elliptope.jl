@@ -46,8 +46,6 @@ struct Elliptope{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-active_traits(f, ::Elliptope, args...) = merge_traits(IsEmbeddedManifold())
-
 function Elliptope(n::Int, k::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n, k))
     return Elliptope{typeof(size)}(size)

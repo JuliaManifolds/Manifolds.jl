@@ -51,10 +51,6 @@ function FixedRankMatrices(
     return FixedRankMatrices{typeof(size),field}(size)
 end
 
-function active_traits(f, ::FixedRankMatrices, args...)
-    return ManifoldsBase.merge_traits(IsEmbeddedManifold())
-end
-
 @doc raw"""
     SVDMPoint <: AbstractManifoldPoint
 
