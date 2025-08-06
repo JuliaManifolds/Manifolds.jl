@@ -667,9 +667,6 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         X = [-1.1552859627097727, 0.40665559717366767, -0.5365163797547751]
         MM = MetricManifold(M, Issue539Metric())
         @test norm(MM, p, X)^2 ≈ 3
-        @test Manifolds._drop_embedding_type(
-            ManifoldsBase.merge_traits(IsEmbeddedSubmanifold()),
-        ) === ManifoldsBase.EmptyTrait()
         @test get_embedding(MM) === get_embedding(M)
     end
 end
