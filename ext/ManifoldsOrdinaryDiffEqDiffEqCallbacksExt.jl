@@ -40,10 +40,17 @@ function (int_term::IntegratorTerminatorNearChartBoundary)(u, t, integrator)
     return u
 end
 
-"""
-    StitchedChartSolution{TM<:AbstractManifold,TA<:AbstractAtlas,TChart}
+@doc raw"""
+    StitchedChartSolution{Prob,TM<:AbstractManifold,TA<:AbstractAtlas,TChart}
 
 Solution of an ODE on a manifold `M` in charts of an [`AbstractAtlas`](@ref) `A`.
+
+When `StitchedChartSolution{:Exp}` is used as a function with a number `t` as an argument, a
+pair `(p, X)` is returned such that $p\in \mathcal{M}$ is the point at time `t` of the
+geodesic and $X \in T_p \mathcal{M}$ is the velocity of the geodesic at that point.
+Similarly, `StitchedChartSolution{:PT}` called with number `t` returns a triple `(p, X, Y)`
+where `(p, X)` corresponds to the geodesic along which the vector is transported
+and $Y\in T_p\mathcal{M}$ is the vector transported to `p`.
 """
 struct StitchedChartSolution{Prob,TM<:AbstractManifold,TA<:AbstractAtlas,TChart}
     M::TM
@@ -120,13 +127,25 @@ end
         A::AbstractAtlas,
         i0;
         solver=AutoVern9(Rodas5()),
-        final_time=1.0,
+        final_time::Real=1.0,
         check_chart_switch_kwargs=NamedTuple(),
         kwargs...,
     )
 
 Solve geodesic ODE on a manifold `M` from point of coordinates `a` in chart `i0` from an
 [`AbstractAtlas`](@ref) `A` in direction of coordinates `Xc` in the induced basis.
+The geodesic is solved up to time `final_time` (by default equal to 1).
+
+## Chart switching
+
+If the solution exceeds the domain of chart `i0` (which is detected using the
+`check_chart_switch` function with additional keyword arguments `check_chart_switch_kwargs`),
+a new chart is selected using `get_chart_index` on the final point in the old chart.
+
+## Returned value
+
+The function returns an object of type `StitchedChartSolution{:Exp}` to represent the
+geodesic.
 """
 function solve_chart_exp_ode(
     M::AbstractManifold,
@@ -135,7 +154,7 @@ function solve_chart_exp_ode(
     A::AbstractAtlas,
     i0;
     solver=AutoVern9(Rodas5()),
-    final_time=1.0,
+    final_time::Real=1.0,
     check_chart_switch_kwargs=NamedTuple(),
     kwargs...,
 )
