@@ -290,6 +290,11 @@ is_default_metric(M::AbstractManifold, G::AbstractMetric)
 is_default_metric(M::MetricManifold) = metric(M.manifold) == M.metric
 is_default_metric(M::AbstractManifold, G::AbstractMetric) = metric(M) == G
 
+function is_flat(M::MetricManifold{𝔽,TM,G}) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+    is_default_metric(M) && (return is_flat(M.manifold))
+    return invoke(is_flat, Tuple{AbstractManifold}, M)
+end
+
 is_point(M::MetricManifold, p; kwargs...) = is_point(M.manifold, p; kwargs...)
 
 function is_vector(M::MetricManifold, p, X, cbp::Bool=true; kwargs...)

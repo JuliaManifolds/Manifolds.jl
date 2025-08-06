@@ -133,7 +133,7 @@ function log!(M::Stiefel{<:Any,ℝ}, X, p, q)
 end
 
 @doc raw"""
-    project(M::Stiefel,p)
+    project(M::Stiefel, p)
 
 Projects `p` from the embedding onto the [`Stiefel`](@ref) `M`, i.e. compute `q`
 as the polar decomposition of ``p`` such that ``q^{\mathrm{H}}q`` is the identity,
