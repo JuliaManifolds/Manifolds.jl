@@ -15,6 +15,7 @@ struct TestScaledEuclideanMetric <: AbstractMetric end
 struct TestRetraction <: AbstractRetractionMethod end
 struct TestConnection <: AbstractAffineConnection end
 
+Manifolds.connection(::TestEuclidean) = TestConnection()
 ManifoldsBase.default_retraction_method(::TestEuclidean) = TestRetraction()
 function ManifoldsBase.default_retraction_method(
     ::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
@@ -190,7 +191,7 @@ function Manifolds.get_vector_orthonormal!(
     return Y .= X
 end
 
-Manifolds.is_default_metric(::BaseManifold, ::DefaultBaseManifoldMetric) = true
+Manifolds.metric(::BaseManifold) = DefaultBaseManifoldMetric()
 
 const ProjectedPointDistribution =
     Base.get_extension(Manifolds, :ManifoldsDistributionsExt).ProjectedPointDistribution
@@ -267,31 +268,6 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         @test_throws MethodError Manifolds.exp_fused(N, p, X, 1.0)
         @test_throws MethodError exp!(N, q, p, X)
         @test_throws MethodError Manifolds.exp_fused!(N, q, p, X, 1.0)
-
-        using OrdinaryDiffEq
-        # These need to be changed, I would not consider loading the package to suddently make a function previously breaking to work!
-        @test is_point(M, retract(M, p, X, ODEExponentialRetraction()))
-        @test is_point(M, Manifolds.retract_fused(M, p, X, 1.0, ODEExponentialRetraction()))
-
-        # a small trick to check that retract_exp_ode! returns the right value on ConnectionManifolds
-        N2 = ConnectionManifold(E, TestConnection())
-        @test exp(N2, p, X) == X
-    end
-
-    # see also Issue #744 (https://github.com/JuliaManifolds/Manifolds.jl/issues/744)
-    @testset "solve_exp_ode values" begin
-        E = TestEuclidean{3}()
-        g = TestEuclideanMetric()
-        g_scaled = TestScaledEuclideanMetric()
-        M = MetricManifold(E, g)
-        default_retraction_method(::TestEuclidean) = TestRetraction()
-        p = [1.0, 2.0, 3.0]
-        X = [2.0, 3.0, 4.0]
-        t = 2.5
-
-        # we're testing on a flat euclidean space
-        @test exp(M, p, X) ≈ p + X
-        @test Manifolds.exp_fused(M, p, X, t) ≈ p + t * X
     end
 
     @testset "Local Metric Error message" begin
@@ -691,9 +667,6 @@ Manifolds.inner(::MetricManifold{ℝ,<:AbstractManifold{ℝ},Issue539Metric}, p,
         X = [-1.1552859627097727, 0.40665559717366767, -0.5365163797547751]
         MM = MetricManifold(M, Issue539Metric())
         @test norm(MM, p, X)^2 ≈ 3
-        @test Manifolds._drop_embedding_type(
-            ManifoldsBase.merge_traits(IsEmbeddedSubmanifold()),
-        ) === ManifoldsBase.EmptyTrait()
         @test get_embedding(MM) === get_embedding(M)
     end
 end

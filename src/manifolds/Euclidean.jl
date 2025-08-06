@@ -107,8 +107,9 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
     return nothing
 end
 
+connection(::Euclidean) = LeviCivitaConnection()
+
 default_approximation_method(::Euclidean, ::typeof(mean)) = EfficientEstimator()
-metric(::Euclidean) = EuclideanMetric()
 
 function default_approximation_method(::Euclidean, ::typeof(median), ::Type{<:Number})
     return EfficientEstimator()
@@ -613,6 +614,8 @@ function Statistics.median(
 )
     return median(x, w)
 end
+
+metric(::Euclidean) = EuclideanMetric()
 
 mid_point(::Euclidean, p1, p2) = (p1 .+ p2) ./ 2
 function mid_point(

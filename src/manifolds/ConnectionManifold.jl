@@ -202,17 +202,18 @@ end
 )
 
 """
-    is_default_connection(M::AbstractManifold, G::AbstractAffineConnection)
+    is_default_connection(M::AbstractManifold, c::AbstractAffineConnection)
 
 returns whether an [`AbstractAffineConnection`](@ref) is the default metric on the manifold `M` or not.
 This can be set by defining this function, or defining [`default_connection`](@ref)`(M)` for your manifold.
+
+This function falls back to check whether [`connection`](@ref)`(M) == c`.
 """
-is_default_connection(M::AbstractManifold, G::AbstractAffineConnection)
-function is_default_connection(M::ConnectionManifold, c::AbstractAffineConnection)
+is_default_connection(M::AbstractManifold, c::AbstractAffineConnection)
+function is_default_connection(M::AbstractManifold, c::AbstractAffineConnection)
     return connection(M) == c
 end
 is_default_connection(M::ConnectionManifold) = true
-is_default_connection(::AbstractManifold, ::AbstractAffineConnection) = false
 
 """
     ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
