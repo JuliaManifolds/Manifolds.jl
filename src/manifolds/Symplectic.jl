@@ -38,9 +38,7 @@ struct SymplecticMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function active_traits(f, ::SymplecticMatrices, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
-end
+is_embedded_manifold(::SymplecticMatrices) = true
 
 function SymplecticMatrices(two_n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     two_n % 2 == 0 || throw(
@@ -273,6 +271,8 @@ end
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticMatrices)
     return CayleyInverseRetraction()
 end
+
+metric(::SymplecticMatrices) = RealSymplecticMetric()
 
 ManifoldsBase.default_retraction_method(::SymplecticMatrices) = CayleyRetraction()
 

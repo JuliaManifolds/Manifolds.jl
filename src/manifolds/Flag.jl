@@ -93,9 +93,7 @@ function Flag(N::Int, ns::Vararg{Int,I}; parameter::Symbol=:type) where {I}
     return Flag{typeof(size),I + 1}(ZeroTuple(tuple(ns..., N)), size)
 end
 
-function active_traits(f, ::Flag, args...)
-    return merge_traits(IsEmbeddedManifold())
-end
+is_embedded_manifold(::Flag) = true
 
 """
     get_embedding(M::Flag)

@@ -10,10 +10,6 @@ That way they share the inner product (just by restriction), and even the Rieman
 """
 abstract type AbstractMultinomialDoublyStochastic <: AbstractDecoratorManifold{ℝ} end
 
-function active_traits(f, ::AbstractMultinomialDoublyStochastic, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
-end
-
 @doc raw"""
     representation_size(M::AbstractMultinomialDoublyStochastic)
 

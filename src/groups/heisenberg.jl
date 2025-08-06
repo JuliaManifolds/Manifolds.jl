@@ -26,10 +26,11 @@ function HeisenbergGroup(n::Int; parameter::Symbol=:type)
     return HeisenbergGroup{typeof(size)}(size)
 end
 
+is_embedded_manifold(::HeisenbergGroup) = true
+
 function active_traits(f, ::HeisenbergGroup, args...)
     return merge_traits(
         IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
-        IsEmbeddedManifold(),
     )
 end
 

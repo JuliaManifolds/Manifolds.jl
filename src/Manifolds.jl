@@ -30,10 +30,10 @@ import ManifoldsBase:
     _retract,
     _retract!,
     _write,
-    active_traits,
     allocate,
     allocate_coordinates,
     allocate_result,
+    allocate_result_embedding,
     allocate_result_type,
     allocation_promotion_function,
     base_manifold,
@@ -111,6 +111,7 @@ import ManifoldsBase:
     inverse_retract_softmax!,
     isapprox,
     _isapprox,
+    is_embedded_manifold,
     is_flat,
     is_point,
     is_vector,
@@ -247,10 +248,7 @@ using ManifoldsBase:
     GeodesicInterpolationWithinRadius,
     GradientDescentEstimation,
     InverseProductRetraction,
-    IsIsometricEmbeddedManifold,
-    IsEmbeddedManifold,
-    IsEmbeddedSubmanifold,
-    IsExplicitDecorator,
+    IsExplicitDecorator, #soon deprecated but we keep it for the deprecated group manifolds
     LogarithmicInverseRetraction,
     ManifoldDomainError,
     ManifoldsBase,
@@ -361,6 +359,15 @@ using StatsBase
 using StatsBase: AbstractWeights
 
 const AbstractDiffBackend = Any  # TODO: remove
+
+"""
+    DefaultMetric <: AbstractMetric
+
+Indicating that a manifold uses the default metric, that one has implicitly assumed
+when defining the manifold
+"""
+struct DefaultMetric <: AbstractMetric end
+metric(::AbstractManifold) = DefaultMetric()
 
 include("utils.jl")
 
@@ -546,9 +553,6 @@ include("groups/special_euclidean.jl")
 
 include("groups/rotation_translation_action.jl")
 
-# final utilities
-include("trait_recursion_breaking.jl")
-
 @doc raw"""
     Base.in(p, M::AbstractManifold; kwargs...)
     p ∈ M
@@ -715,8 +719,7 @@ export AbstractNumbers, ℝ, ℂ, ℍ
 export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
-export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
-export IsDefaultMetric, IsDefaultConnection, IsMetricManifold, IsConnectionManifold
+export IsIsometricEmbeddedManifold, IsEmbeddedSubmanifold
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector
@@ -832,6 +835,7 @@ export ×,
     decorated_manifold,
     default_approximation_method,
     default_inverse_retraction_method,
+    default_metric,
     default_retraction_method,
     default_vector_transport_method,
     det_local_metric,
@@ -997,7 +1001,7 @@ export AbstractGroupAction,
     TranslationAction,
     Unitary
 export AbstractInvarianceTrait
-export IsMetricManifold, IsConnectionManifold
+export IsConnectionManifold
 export IsGroupManifold,
     HasLeftInvariantMetric, HasRightInvariantMetric, HasBiinvariantMetric
 export adjoint_action,

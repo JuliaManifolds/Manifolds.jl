@@ -41,13 +41,6 @@ function Euclidean(
     return Euclidean{typeof(size),field}(size)
 end
 
-function active_traits(f, ::Euclidean, args...)
-    return merge_traits(
-        IsDefaultMetric(EuclideanMetric()),
-        IsDefaultConnection(LeviCivitaConnection()),
-    )
-end
-
 function adjoint_Jacobi_field(::Euclidean{Tuple{}}, p, q, t, X, β::Tβ) where {Tβ}
     return X
 end
@@ -114,7 +107,10 @@ function check_vector(M::Euclidean{N,𝔽}, p, X; kwargs...) where {N,𝔽}
     return nothing
 end
 
+connection(::Euclidean) = LeviCivitaConnection()
+
 default_approximation_method(::Euclidean, ::typeof(mean)) = EfficientEstimator()
+
 function default_approximation_method(::Euclidean, ::typeof(median), ::Type{<:Number})
     return EfficientEstimator()
 end
@@ -618,6 +614,8 @@ function Statistics.median(
 )
     return median(x, w)
 end
+
+metric(::Euclidean) = EuclideanMetric()
 
 mid_point(::Euclidean, p1, p2) = (p1 .+ p2) ./ 2
 function mid_point(

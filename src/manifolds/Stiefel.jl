@@ -40,10 +40,6 @@ function Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:
     return Stiefel{typeof(size),field}(size)
 end
 
-function active_traits(f, ::Stiefel, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
-end
-
 function allocation_promotion_function(::Stiefel{<:Any,ℂ}, ::Any, ::Tuple)
     return complex
 end
@@ -123,6 +119,8 @@ Return [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`
 """
 default_inverse_retraction_method(::Stiefel) = PolarInverseRetraction()
 
+metric(::Stiefel) = EuclideanMetric()
+
 """
     default_retraction_method(M::Stiefel)
 
@@ -184,6 +182,8 @@ the resulting tangent vector in `X`. The computation follows Algorithm 1
 in [KanekoFioriTanaka:2013](@cite).
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
+
+is_embedded_manifold(::Stiefel) = true
 
 function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
     n, k = get_parameter(M.size)

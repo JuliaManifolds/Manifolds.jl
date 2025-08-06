@@ -104,11 +104,14 @@ manifold, i.e. the Euclidean space ``\mathbb F^{n×n}``.
 """
 function get_embedding(
     ::Grassmann{TypeParameter{Tuple{n,k}},𝔽},
-    ::ProjectorPoint,
+    ::Union{ProjectorPoint,ProjectorTangentVector},
 ) where {n,k,𝔽}
     return Euclidean(n, n; field=𝔽)
 end
-function get_embedding(M::Grassmann{Tuple{Int,Int},𝔽}, ::ProjectorPoint) where {𝔽}
+function get_embedding(
+    M::Grassmann{Tuple{Int,Int},𝔽},
+    ::Union{ProjectorPoint,ProjectorTangentVector},
+) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, n; field=𝔽, parameter=:field)
 end

@@ -30,10 +30,6 @@ function DeterminantOneMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::S
     return DeterminantOneMatrices{field,typeof(size)}(size)
 end
 
-function active_traits(f, ::DeterminantOneMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 @doc raw"""
     check_point(M::DeterminantOneMatrices{n,𝔽}, p; kwargs...)
 

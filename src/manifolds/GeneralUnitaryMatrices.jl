@@ -41,9 +41,7 @@ function GeneralUnitaryMatrices(
     return GeneralUnitaryMatrices{typeof(size),field,matrix_type}(size)
 end
 
-function active_traits(f, ::GeneralUnitaryMatrices, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
-end
+is_embedded_manifold(::GeneralUnitaryMatrices) = true
 
 @doc raw"""
     check_point(M::UnitaryMatrices, p; kwargs...)
@@ -177,6 +175,8 @@ function cos_angles_4d_rotation_matrix(R)
     b = sqrt(clamp(2 * dot(transpose(R), R) - a^2 + 8, 0, Inf))
     return ((a + b) / 4, (a - b) / 4)
 end
+
+decorated_manifold(M::GeneralUnitaryMatrices) = get_embedding(M)
 
 function default_approximation_method(::GeneralUnitaryMatrices{<:Any,ℝ}, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 2 / √2)

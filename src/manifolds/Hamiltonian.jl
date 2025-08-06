@@ -71,10 +71,6 @@ function HamiltonianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symb
     return HamiltonianMatrices{typeof(size),field}(size)
 end
 
-function active_traits(f, ::HamiltonianMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 ManifoldsBase.@default_manifold_fallbacks HamiltonianMatrices Hamiltonian Hamiltonian value value
 
 @doc raw"""
