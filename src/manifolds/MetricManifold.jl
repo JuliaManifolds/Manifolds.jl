@@ -275,7 +275,7 @@ function inner(
     Y,
 ) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
     (metric(M.manifold) == M.metric) && (return inner(M.manifold, p, X, Y))
-    return invoke(inner, Tuple{AbstractManifold,Any,Any,Any}, M, p, X, Y)
+    throw(MethodError(inner, (M, p, X, Y)))
 end
 
 """
@@ -284,6 +284,9 @@ end
 returns whether an [`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`)
 is the default metric on the manifold `M` or not.
 This can be set by defining this function, or [`default_metric`](@ref)`(M)`.
+
+if `M` is a |`MetricManifold`](@ref) this indicates whether the mtric now used is the same as the
+default one on the wrapped manifold.
 """
 is_default_metric(M::AbstractManifold, G::AbstractMetric)
 
