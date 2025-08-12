@@ -251,6 +251,10 @@ function get_embedding(M::Sphere{<:Tuple,𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field=𝔽, parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::AbstractSphere)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
 @doc raw"""
     get_vector(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
 

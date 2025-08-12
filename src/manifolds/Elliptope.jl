@@ -46,8 +46,6 @@ struct Elliptope{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-is_embedded_manifold(::Elliptope) = true
-
 function Elliptope(n::Int, k::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n, k))
     return Elliptope{typeof(size)}(size)
@@ -109,6 +107,10 @@ end
 function get_embedding(M::Elliptope{Tuple{Int,Int}})
     n, k = get_parameter(M.size)
     return Euclidean(n, k; parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::Elliptope)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
 """

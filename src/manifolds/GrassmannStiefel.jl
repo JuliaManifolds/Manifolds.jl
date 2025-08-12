@@ -102,6 +102,10 @@ function get_embedding(M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
     return Stiefel(n, k, 𝔽; parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::Grassmann)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
 @doc raw"""
     inner(M::Grassmann, p, X, Y)
 

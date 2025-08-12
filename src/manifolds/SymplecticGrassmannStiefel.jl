@@ -64,6 +64,10 @@ function get_embedding(M::SymplecticGrassmann{Tuple{Int,Int}})
     return SymplecticStiefel(2n, 2k; parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::SymplecticGrassmann)
+    return ManifoldsBase.EmbeddedManifoldType()
+end
+
 @doc raw"""
     inner(::SymplecticGrassmann, p, X, Y)
 

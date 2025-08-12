@@ -59,8 +59,6 @@ function GeneralizedGrassmann(
     return GeneralizedGrassmann{typeof(size),𝔽,typeof(B)}(size, B)
 end
 
-is_embedded_manifold(::GeneralizedGrassmann) = true
-
 @doc raw"""
     change_representer(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
 
@@ -197,6 +195,10 @@ end
 function get_embedding(M::GeneralizedGrassmann{Tuple{Int,Int},𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return GeneralizedStiefel(n, k, M.B, 𝔽; parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::GeneralizedGrassmann)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 @doc raw"""

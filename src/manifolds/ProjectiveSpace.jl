@@ -148,6 +148,10 @@ end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
 
+function ManifoldsBase.get_embedding_type(::AbstractProjectiveSpace)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
 embed(::AbstractProjectiveSpace, p) = p
 embed(::AbstractProjectiveSpace, p, X) = X
 

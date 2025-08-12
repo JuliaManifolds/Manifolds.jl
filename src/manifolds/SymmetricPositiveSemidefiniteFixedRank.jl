@@ -99,6 +99,10 @@ function get_embedding(
     return Euclidean(n, k; field=𝔽, parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::SymmetricPositiveSemidefiniteFixedRank)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
 @doc raw"""
     distance(M::SymmetricPositiveSemidefiniteFixedRank, p, q)
 

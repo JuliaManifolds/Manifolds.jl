@@ -125,6 +125,10 @@ function get_embedding(M::MultinomialDoubleStochastic{Tuple{Int}})
     return MultinomialMatrices(n, n; parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::MultinomialDoubleStochastic)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
 """
     is_flat(::MultinomialDoubleStochastic)
 

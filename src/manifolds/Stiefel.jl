@@ -149,6 +149,10 @@ function get_embedding(M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
     return Euclidean(n, k; field=𝔽, parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::Stiefel)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
 @doc raw"""
     inverse_retract(M::Stiefel, p, q, ::PolarInverseRetraction)
 
@@ -182,8 +186,6 @@ the resulting tangent vector in `X`. The computation follows Algorithm 1
 in [KanekoFioriTanaka:2013](@cite).
 """
 inverse_retract(::Stiefel, ::Any, ::Any, ::QRInverseRetraction)
-
-is_embedded_manifold(::Stiefel) = true
 
 function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
     n, k = get_parameter(M.size)

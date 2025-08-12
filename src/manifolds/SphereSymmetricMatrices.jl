@@ -82,6 +82,10 @@ function get_embedding(M::SphereSymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
     return ArraySphere(n, n; field=𝔽, parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::SphereSymmetricMatrices)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
 """
     is_flat(::SphereSymmetricMatrices)
 

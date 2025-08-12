@@ -38,8 +38,6 @@ struct SymplecticMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-is_embedded_manifold(::SymplecticMatrices) = true
-
 function SymplecticMatrices(two_n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
     two_n % 2 == 0 || throw(
         ArgumentError(
@@ -366,6 +364,10 @@ end
 function get_embedding(M::SymplecticMatrices{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return Euclidean(2 * n, 2 * n; field=𝔽, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::SymplecticMatrices)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 @doc raw"""

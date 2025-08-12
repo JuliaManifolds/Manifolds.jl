@@ -62,8 +62,6 @@ function SymplecticStiefel(two_n::Int, two_k::Int; parameter::Symbol=:type)
     return SymplecticStiefel{typeof(size),ℝ}(size)
 end
 
-is_embedded_manifold(::SymplecticStiefel) = true
-
 # Define Stiefel as the array fallback
 ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{<:Any,ℝ} StiefelPoint StiefelTangentVector value value
 
@@ -282,6 +280,10 @@ end
 function get_embedding(M::SymplecticStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(2 * n, 2 * k; field=𝔽, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::SymplecticStiefel)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 @doc raw"""

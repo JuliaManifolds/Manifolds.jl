@@ -41,8 +41,6 @@ function GeneralUnitaryMatrices(
     return GeneralUnitaryMatrices{typeof(size),field,matrix_type}(size)
 end
 
-is_embedded_manifold(::GeneralUnitaryMatrices) = true
-
 @doc raw"""
     check_point(M::UnitaryMatrices, p; kwargs...)
     check_point(M::OrthogonalMatrices, p; kwargs...)
@@ -488,6 +486,10 @@ end
 function get_embedding(M::GeneralUnitaryMatrices{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return Euclidean(n, n; field=𝔽, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::GeneralUnitaryMatrices)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 @doc raw"""

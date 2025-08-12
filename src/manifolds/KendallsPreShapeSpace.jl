@@ -93,6 +93,10 @@ function get_embedding(M::KendallsPreShapeSpace{Tuple{Int,Int}})
     return ArraySphere(n, k; parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::KendallsPreShapeSpace)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
+
 @doc raw"""
     manifold_dimension(M::KendallsPreShapeSpace)
 

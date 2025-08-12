@@ -82,6 +82,10 @@ function get_embedding(M::InvertibleMatrices{𝔽,Tuple{Int}}) where {𝔽}
     return Euclidean(n, n; field=𝔽, parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::InvertibleMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
+
 function get_vector(
     M::InvertibleMatrices{ℝ,<:Any},
     p,

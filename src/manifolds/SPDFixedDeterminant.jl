@@ -109,6 +109,10 @@ function get_embedding(M::SPDFixedDeterminant{Tuple{Int}})
     return SymmetricPositiveDefinite(n; parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::SPDFixedDeterminant)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
+
 @doc raw"""
     manifold_dimension(M::SPDFixedDeterminant)
 

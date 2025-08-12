@@ -207,6 +207,10 @@ function get_embedding(M::Hyperbolic{Tuple{Int}})
     return Lorentz(n + 1, MinkowskiMetric(); parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::Hyperbolic)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
 embed(::Hyperbolic, p::AbstractArray) = p
 embed(::Hyperbolic, p::AbstractArray, X::AbstractArray) = X
 

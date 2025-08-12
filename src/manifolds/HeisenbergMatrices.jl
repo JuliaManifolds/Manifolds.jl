@@ -137,6 +137,10 @@ function get_embedding(M::HeisenbergMatrices{Tuple{Int}})
     return Euclidean(n + 2, n + 2; parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::HeisenbergMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
+
 @doc raw"""
     get_vector(M::HeisenbergMatrices, p, Xⁱ, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
 

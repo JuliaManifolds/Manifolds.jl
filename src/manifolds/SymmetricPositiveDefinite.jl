@@ -97,8 +97,6 @@ function Base.:(==)(p::SPDPoint, q::SPDPoint)
     return p.eigen == q.eigen
 end
 
-is_embedded_manifold(::SymmetricPositiveDefinite) = true
-
 function allocate(p::SPDPoint)
     return SPDPoint(
         ismissing(p.p) ? missing : allocate(p.p),
@@ -233,6 +231,10 @@ end
 function get_embedding(M::SymmetricPositiveDefinite{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return Euclidean(n, n; field=ℝ, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::SymmetricPositiveDefinite)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 get_parameter_type(::SymmetricPositiveDefinite{<:TypeParameter}) = :type

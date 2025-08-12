@@ -61,8 +61,6 @@ See for example the [`ProbabilitySimplex`](@ref).
 """
 struct FisherRaoMetric <: AbstractMetric end
 
-is_embedded_manifold(::ProbabilitySimplex) = true
-
 @doc raw"""
     change_representer(M::ProbabilitySimplex, ::EuclideanMetric, p, X)
 
@@ -209,6 +207,10 @@ end
 function get_embedding(M::ProbabilitySimplex{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return Euclidean(n + 1; parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::ProbabilitySimplex)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 function get_vector_orthonormal!(M::ProbabilitySimplex, Y, p, Xc, R::RealNumbers)

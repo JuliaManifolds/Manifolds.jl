@@ -126,6 +126,10 @@ function get_embedding(M::SymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
     return Euclidean(N, N; field=𝔽, parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::SymmetricMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
+
 function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)

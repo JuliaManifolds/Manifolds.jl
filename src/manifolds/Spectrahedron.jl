@@ -18,7 +18,7 @@ positive semidefinite matrices) of rank ``k`` with unit trace.
 This manifold is working solely on the matrices ``q``. Note that this ``q`` is not unique,
 indeed for any orthogonal matrix ``A`` we have ``(qA)(qA)^{\mathrm{T}} = qq^{\mathrm{T}} = p``,
 so the manifold implemented here is the quotient manifold. The unit trace translates to
-unit frobenius norm of ``q``.
+unit Frobenius norm of ``q``.
 
 
 The tangent space at ``p``, denoted ``T_p\mathcal E(n,k)``, is also represented by matrices
@@ -107,6 +107,10 @@ end
 function get_embedding(M::Spectrahedron{Tuple{Int,Int}})
     n, k = get_parameter(M.size)
     return Euclidean(n, k; parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::Spectrahedron)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
 """

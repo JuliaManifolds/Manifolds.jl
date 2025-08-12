@@ -51,8 +51,6 @@ function FixedRankMatrices(
     return FixedRankMatrices{typeof(size),field}(size)
 end
 
-is_embedded_manifold(::FixedRankMatrices) = true
-
 @doc raw"""
     SVDMPoint <: AbstractManifoldPoint
 
@@ -395,7 +393,7 @@ default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction(
 metric(::FixedRankMatrices) = EuclideanMetric()
 
 """
-    default_exp_method(M::FixedRankMatrices)
+    default_retraction_method(M::FixedRankMatrices)
 
 """
 default_retraction_method(M::FixedRankMatrices)
@@ -456,6 +454,10 @@ end
 function get_embedding(M::FixedRankMatrices{Tuple{Int,Int,Int},𝔽}) where {𝔽}
     m, n, k = get_parameter(M.size)
     return Euclidean(m, n; field=𝔽, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::FixedRankMatrices)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 """

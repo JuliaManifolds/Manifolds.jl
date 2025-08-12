@@ -131,6 +131,10 @@ function get_embedding(M::HamiltonianMatrices{Tuple{Int},𝔽}) where {𝔽}
     return Euclidean(2 * N, 2 * N; field=𝔽, parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::HamiltonianMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
+end
+
 """
     is_flat(::HamiltonianMatrices)
 

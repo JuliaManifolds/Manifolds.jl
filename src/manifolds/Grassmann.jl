@@ -130,8 +130,6 @@ function _isapprox(M::Grassmann, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
     return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
 end
 
-is_embedded_manifold(::Grassmann) = true
-
 """
     is_flat(M::Grassmann)
 

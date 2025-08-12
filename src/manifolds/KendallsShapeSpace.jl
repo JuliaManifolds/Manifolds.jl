@@ -86,6 +86,10 @@ function get_embedding(M::KendallsShapeSpace{Tuple{Int,Int}})
     return KendallsPreShapeSpace(n, k; parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::KendallsShapeSpace)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
 """
     horizontal_component(::KendallsShapeSpace, p, X)
 
