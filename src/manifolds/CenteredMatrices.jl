@@ -87,6 +87,9 @@ function get_embedding(M::CenteredMatrices{Tuple{Int,Int},𝔽}) where {𝔽}
     return Euclidean(m, n; field=𝔽, parameter=:field)
 end
 
+ManifoldsBase.get_embedding_type(::CenteredMatrices) = ManifoldsBase.EmbeddedSubmanifoldType()
+
+
 """
     is_flat(::CenteredMatrices)
 
