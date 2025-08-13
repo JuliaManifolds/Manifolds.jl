@@ -15,7 +15,7 @@ positive entries such that each column sums to one, i.e.
 
 where ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
 
-It is modeled as [`IsIsometricEmbeddedManifold`](@extref `ManifoldsBase.IsIsometricEmbeddedManifold`).
+It is modeled as [`IsometricallyEmbeddedManifoldType`](@extref `ManifoldsBase.IsometricallyEmbeddedManifoldType`).
 via the [`AbstractMultinomialDoublyStochastic`](@ref) type, since it shares a few functions
 also with [`AbstractMultinomialDoublyStochastic`](@ref), most and foremost projection of
 a point from the embedding onto the manifold.
@@ -85,6 +85,10 @@ end
 function get_embedding(M::MultinomialSymmetric{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return MultinomialMatrices(n, n; parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::MultinomialSymmetric)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
 """

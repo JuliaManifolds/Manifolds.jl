@@ -28,7 +28,6 @@ end
 @inline function active_traits(f, ::SpecialLinear, args...)
     return merge_traits(
         IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
-        IsEmbeddedSubmanifold(),
         HasLeftInvariantMetric(),
     )
 end
@@ -78,6 +77,10 @@ end
 function get_embedding(M::SpecialLinear{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return GeneralLinear(n, 𝔽; parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::SpecialLinear)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 inverse_translate_diff(::SpecialLinear, p, q, X, ::LeftForwardAction) = X

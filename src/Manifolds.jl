@@ -719,7 +719,6 @@ export AbstractNumbers, ℝ, ℂ, ℍ
 export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
-export IsIsometricEmbeddedManifold, IsEmbeddedSubmanifold
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector
