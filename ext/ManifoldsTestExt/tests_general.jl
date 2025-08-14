@@ -196,7 +196,7 @@ function test_manifold(
             if !(check_vector(M, p, X; atol=atol) === nothing)
                 print(check_vector(M, p, X; atol=atol))
             end
-            Test.@test is_vector(M, p, X; atol=atol)
+            Test.@test is_vector(M, p, X; atol=atol, error=:error)
             Test.@test check_vector(M, p, X; atol=atol) === nothing
         end
     end
