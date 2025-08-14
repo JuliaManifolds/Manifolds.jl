@@ -66,6 +66,13 @@ embed!(::Stiefel, Y, p::StiefelPoint, X::StiefelTangentVector) = copyto!(Y, X.va
 embed(::Stiefel, p::StiefelPoint) = p.value
 embed(::Stiefel, p::StiefelPoint, X::StiefelTangentVector) = X.value
 
+function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::StiefelPoint)
+    return ManifoldsBase.EmbeddedForwardingType()
+end
+function ManifoldsBase.get_forwarding_type(::Stiefel, f, ::StiefelPoint)
+    return ManifoldsBase.EmbeddedForwardingType()
+end
+
 @doc raw"""
     exp(M::Grassmann, p, X)
 

@@ -116,6 +116,10 @@ function get_embedding(
     return Euclidean(n, n; field=𝔽, parameter=:field)
 end
 
+function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::ProjectorPoint)
+    return ManifoldsBase.EmbeddedForwardingType()
+end
+
 @doc raw"""
     representation_size(M::Grassmann, p::ProjectorPoint)
 
