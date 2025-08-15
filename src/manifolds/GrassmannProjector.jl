@@ -205,6 +205,10 @@ For details, see Proposition 3.2 in [BendokatZimmermannAbsil:2020](@cite).
 """
 exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector)
 
+function ManifoldsBase.get_forwarding_type(::Grassmann, ::typeof(exp), ::ProjectorPoint)
+    return ManifoldsBase.StopForwardingType()
+end
+
 function exp!(::Grassmann, q::ProjectorPoint, p::ProjectorPoint, X::ProjectorTangentVector)
     xppx = X.value * p.value - p.value * X.value
     exp_xppx = exp(xppx)
