@@ -77,10 +77,6 @@ function SymplecticGrassmann(two_n::Int, two_k::Int; parameter::Symbol=:type)
     return SymplecticGrassmann{typeof(size),ℝ}(size)
 end
 
-function active_traits(f, ::SymplecticGrassmann, args...)
-    return merge_traits(IsEmbeddedManifold(), IsQuotientManifold())
-end
-
 # Define Stiefel as the array fallback
 ManifoldsBase.@default_manifold_fallbacks SymplecticGrassmann StiefelPoint StiefelTangentVector value value
 

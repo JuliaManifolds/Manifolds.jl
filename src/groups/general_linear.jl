@@ -20,12 +20,12 @@ struct GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
+is_embedded_manifold(::GeneralLinear) = true
+
 function active_traits(f, ::GeneralLinear, args...)
     return merge_traits(
         IsGroupManifold(MultiplicationOperation(), LeftInvariantRepresentation()),
-        IsEmbeddedManifold(),
         HasLeftInvariantMetric(),
-        IsDefaultMetric(EuclideanMetric()),
     )
 end
 
@@ -54,6 +54,8 @@ check_point(::GeneralLinear, ::Identity{MultiplicationOperation}) = nothing
 function check_vector(G::GeneralLinear, p, X; kwargs...)
     return nothing
 end
+
+metric(::GeneralLinear) = EuclideanMetric()
 
 distance(G::GeneralLinear, p, q) = norm(G, p, log(G, p, q))
 

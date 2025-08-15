@@ -40,10 +40,6 @@ function Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:
     return Stiefel{typeof(size),field}(size)
 end
 
-function active_traits(f, ::Stiefel, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
-end
-
 function allocation_promotion_function(::Stiefel{<:Any,ℂ}, ::Any, ::Tuple)
     return complex
 end
@@ -123,6 +119,8 @@ Return [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`
 """
 default_inverse_retraction_method(::Stiefel) = PolarInverseRetraction()
 
+metric(::Stiefel) = EuclideanMetric()
+
 """
     default_retraction_method(M::Stiefel)
 
@@ -149,6 +147,10 @@ end
 function get_embedding(M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, k; field=𝔽, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::Stiefel)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
 @doc raw"""

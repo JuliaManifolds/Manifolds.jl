@@ -1056,21 +1056,6 @@ end
 
 #
 # decorate default method for a few functions
-for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
-    @eval @trait_function default_approximation_method(
-        M::AbstractDecoratorManifold,
-        f::typeof($mf),
-    ) (no_empty,)
-    eval(
-        quote
-            function default_approximation_method(
-                ::TraitList{IsEmbeddedSubmanifold},
-                M::AbstractDecoratorManifold,
-                f::typeof($mf),
-            )
-                return default_approximation_method(get_embedding(M), f)
-            end
-        end,
-    )
-end
+# TODO: Check how to “ask” the embedding for default approx methods, when it exists,
+# for the functions [mean, median, cov, var, mean_and_std, mean_and_var]
 @trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector)

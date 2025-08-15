@@ -24,8 +24,6 @@ function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers=ℝ; parameter:
     return CenteredMatrices{typeof(size),field}(size)
 end
 
-active_traits(f, ::CenteredMatrices, args...) = merge_traits(IsEmbeddedSubmanifold())
-
 @doc raw"""
     check_point(M::CenteredMatrices, p; kwargs...)
 
@@ -87,6 +85,10 @@ end
 function get_embedding(M::CenteredMatrices{Tuple{Int,Int},𝔽}) where {𝔽}
     m, n = get_parameter(M.size)
     return Euclidean(m, n; field=𝔽, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::CenteredMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 """

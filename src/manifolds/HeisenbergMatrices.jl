@@ -40,10 +40,6 @@ function _heisenberg_b_view(M::HeisenbergMatrices, p)
     return view(p, 2:(n + 1), n + 2)
 end
 
-function active_traits(f, ::HeisenbergMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 function check_point(M::HeisenbergMatrices, p; kwargs...)
     n = get_parameter(M.size)[1]
     if !isone(p[1, 1])
@@ -139,6 +135,10 @@ end
 function get_embedding(M::HeisenbergMatrices{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return Euclidean(n + 2, n + 2; parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::HeisenbergMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 @doc raw"""

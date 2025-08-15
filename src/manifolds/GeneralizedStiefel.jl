@@ -51,8 +51,6 @@ function GeneralizedStiefel(
     return GeneralizedStiefel{typeof(size),𝔽,typeof(B)}(size, B)
 end
 
-active_traits(f, ::GeneralizedStiefel, args...) = merge_traits(IsEmbeddedManifold())
-
 @doc raw"""
     check_point(M::GeneralizedStiefel, p; kwargs...)
 
@@ -105,6 +103,10 @@ end
 function get_embedding(M::GeneralizedStiefel{Tuple{Int,Int},𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, k; field=𝔽, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::GeneralizedStiefel)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 @doc raw"""
