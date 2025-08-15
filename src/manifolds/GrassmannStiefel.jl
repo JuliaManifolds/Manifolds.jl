@@ -31,6 +31,17 @@ ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTangentVec
 ManifoldsBase.@default_manifold_fallbacks (Stiefel{<:Any,ℝ}) StiefelPoint StiefelTangentVector value value
 ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTangentVector value value
 
+function ManifoldsBase.get_forwarding_type(::Grassmann, ::typeof(isapprox), p)
+    return ManifoldsBase.StopForwardingType()
+end
+
+function ManifoldsBase._isapprox(M::Grassmann, p, q; kwargs...)
+    return isapprox(distance(M, p, q), 0; kwargs...)
+end
+function ManifoldsBase._isapprox(M::Grassmann, p, X, Y; kwargs...)
+    return isapprox(norm(M, p, X - Y), 0; kwargs...)
+end
+
 function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
     return ParallelTransport()
 end
@@ -65,13 +76,6 @@ embed!(::Stiefel, q, p::StiefelPoint) = copyto!(q, p.value)
 embed!(::Stiefel, Y, p::StiefelPoint, X::StiefelTangentVector) = copyto!(Y, X.value)
 embed(::Stiefel, p::StiefelPoint) = p.value
 embed(::Stiefel, p::StiefelPoint, X::StiefelTangentVector) = X.value
-
-function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::StiefelPoint)
-    return ManifoldsBase.EmbeddedForwardingType()
-end
-function ManifoldsBase.get_forwarding_type(::Stiefel, f, ::StiefelPoint)
-    return ManifoldsBase.EmbeddedForwardingType()
-end
 
 @doc raw"""
     exp(M::Grassmann, p, X)
@@ -111,6 +115,13 @@ end
 
 function ManifoldsBase.get_embedding_type(::Grassmann)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
+function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::StiefelPoint)
+    return ManifoldsBase.EmbeddedForwardingType()
+end
+function ManifoldsBase.get_forwarding_type(::Stiefel, f, ::StiefelPoint)
+    return ManifoldsBase.EmbeddedForwardingType()
 end
 
 @doc raw"""

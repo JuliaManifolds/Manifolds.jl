@@ -230,7 +230,7 @@ function test_manifold(
             Manifolds.exp_fused!(M, q2, pts[1], X1, 0)
             Test.@test isapprox(M, pts[1], q2; atol=atolp1p2, rtol=rtolp1p2)
         end
-        if VERSION >= v"1.5" && isa(M, Union{Grassmann,GeneralizedStiefel})
+        if VERSION >= v"1.5" && isa(M, GeneralizedStiefel)
             # TODO: investigate why this is so imprecise on newer Julia versions on CI
             Test.@test isapprox(
                 M,
