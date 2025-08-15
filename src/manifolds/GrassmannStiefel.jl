@@ -35,13 +35,6 @@ function ManifoldsBase.get_forwarding_type(::Grassmann, ::typeof(isapprox), p)
     return ManifoldsBase.StopForwardingType()
 end
 
-function ManifoldsBase._isapprox(M::Grassmann, p, q; atol=1e-9, rtol=0, kwargs...)
-    return isapprox(distance(M, p, q), 0; atol=atol, rtol=rtol, kwargs...)
-end
-function ManifoldsBase._isapprox(M::Grassmann, p, X, Y; atol=1e-9, rtol=0, kwargs...)
-    return isapprox(norm(M, p, X - Y), 0; atol=atol, rtol=rtol, kwargs...)
-end
-
 function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
     return ParallelTransport()
 end
