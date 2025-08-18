@@ -156,7 +156,6 @@ include("../header.jl")
         @testset for fT in (Float32, Float64), T in (fT, Complex{fT})
             𝔽 = T isa Complex ? ℂ : ℝ
             M = GeneralizedGrassmann(n, k, B, 𝔽)
-            U = Unitary(k, 𝔽)
             rT = real(T)
             atol = eps(rT)^(1 // 4)
             rtol = eps(rT)
