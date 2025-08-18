@@ -238,6 +238,10 @@ function get_embedding(M::Hyperbolic{Tuple{Int}}, ::PoincareHalfSpacePoint)
     return Euclidean(n; parameter=:field)
 end
 
+function ManifoldsBase.get_embedding_type(::Hyperbolic, ::PoincareHalfSpacePoint)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
+end
+
 @doc raw"""
     inner(
         ::Hyperbolic,
@@ -272,7 +276,7 @@ the tangent space consists of all $ℝ^n$.
 """
 project(::Hyperbolic, ::PoincareHalfSpacePoint::PoincareHalfSpaceTangentVector)
 
-function allocate_result(
+function ManifoldsBase.allocate_result_embedding(
     ::Hyperbolic,
     ::typeof(project),
     X::PoincareHalfSpaceTangentVector,
