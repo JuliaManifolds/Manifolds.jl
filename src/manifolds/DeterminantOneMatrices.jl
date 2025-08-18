@@ -75,12 +75,6 @@ function get_embedding(M::DeterminantOneMatrices{𝔽,Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return Euclidean(n, n; field=𝔽, parameter=:field)
 end
-function ManifoldsBase.get_forwarding_type(
-    ::DeterminantOneMatrices,
-    ::typeof(representation_size),
-)
-    return ManifoldsBase.EmbeddedForwardingType()
-end
 function ManifoldsBase.get_embedding_type(::DeterminantOneMatrices)
     return ManifoldsBase.EmbeddedSubmanifoldType()
 end
