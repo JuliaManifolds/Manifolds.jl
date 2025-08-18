@@ -375,7 +375,7 @@ include("../header.jl")
         @testset for fT in (Float32, Float64), T in (fT, Complex{fT})
             𝔽 = T isa Complex ? ℂ : ℝ
             M = Grassmann(n, k, 𝔽)
-            U = Unitary(k, 𝔽)
+            U = UnitaryMatrices(k, 𝔽)
             rT = real(T)
             atol = rtol = sqrt(eps(rT))
             @testset for t in (zero(rT), eps(rT)^(1 // 4) / 8, eps(rT)^(1 // 4)),
