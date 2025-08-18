@@ -457,7 +457,7 @@ function get_embedding(M::FixedRankMatrices{Tuple{Int,Int,Int},ğ”½}) where {ğ”
 end
 
 function ManifoldsBase.get_embedding_type(::FixedRankMatrices)
-    return ManifoldsBase.EmbeddedManifoldType()
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
 end
 
 """
