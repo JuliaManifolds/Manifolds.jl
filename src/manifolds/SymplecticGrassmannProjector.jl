@@ -89,3 +89,6 @@ function get_embedding(M::SymplecticGrassmann{Tuple{Int,Int}}, ::ProjectorPoint)
     n, _ = get_parameter(M.size)
     return Euclidean(2n, 2n; parameter=:field)
 end
+function ManifoldsBase.get_embedding_type(::SymplecticGrassmann, ::ProjectorPoint)
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
+end
