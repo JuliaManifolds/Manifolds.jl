@@ -23,10 +23,6 @@ function SphereSymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::
     return SphereSymmetricMatrices{typeof(size),field}(size)
 end
 
-function active_traits(f, ::SphereSymmetricMatrices, arge...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 @doc raw"""
     check_point(M::SphereSymmetricMatrices, p; kwargs...)
 
@@ -84,6 +80,10 @@ end
 function get_embedding(M::SphereSymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return ArraySphere(n, n; field=𝔽, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::SphereSymmetricMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 """

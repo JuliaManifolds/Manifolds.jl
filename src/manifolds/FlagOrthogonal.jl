@@ -65,6 +65,9 @@ end
 function get_embedding(M::Flag{Tuple{Int}}, p::OrthogonalPoint)
     return OrthogonalMatrices(M.size[1]; parameter=:field)
 end
+function ManifoldsBase.get_embedding_type(::Flag, ::OrthogonalPoint)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
+end
 
 function _extract_flag(M::Flag, p::AbstractMatrix, i::Int)
     range = (M.subspace_dimensions[i - 1] + 1):M.subspace_dimensions[i]

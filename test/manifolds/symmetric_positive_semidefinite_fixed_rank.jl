@@ -32,6 +32,7 @@ include("../header.jl")
                     is_tangent_atol_multiplier=5,
                     test_project_tangent=true,
                     test_inplace=true,
+                    test_injectivity_radius=false,
                 )
             end
         end

@@ -71,10 +71,6 @@ function HamiltonianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symb
     return HamiltonianMatrices{typeof(size),field}(size)
 end
 
-function active_traits(f, ::HamiltonianMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 ManifoldsBase.@default_manifold_fallbacks HamiltonianMatrices Hamiltonian Hamiltonian value value
 
 @doc raw"""
@@ -133,6 +129,10 @@ end
 function get_embedding(M::HamiltonianMatrices{Tuple{Int},𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
     return Euclidean(2 * N, 2 * N; field=𝔽, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::HamiltonianMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 """

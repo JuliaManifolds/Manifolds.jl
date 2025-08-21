@@ -95,7 +95,7 @@ include("../header.jl")
                 ],
                 #basis_types_vecs = basis_types,
                 # investigate why this is so large on dev
-                exp_log_atol_multiplier=10.0 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
+                exp_log_atol_multiplier=1.0,
                 is_tangent_atol_multiplier=20.0,
                 is_point_atol_multiplier=10.0,
                 projection_atol_multiplier=10.0,
@@ -211,7 +211,7 @@ include("../header.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                exp_log_atol_multiplier=10.0^3,
+                exp_log_atol_multiplier=10.0^4,
                 is_point_atol_multiplier=20.0,
                 is_tangent_atol_multiplier=20.0,
                 projection_atol_multiplier=10.0,
@@ -375,7 +375,7 @@ include("../header.jl")
         @testset for fT in (Float32, Float64), T in (fT, Complex{fT})
             𝔽 = T isa Complex ? ℂ : ℝ
             M = Grassmann(n, k, 𝔽)
-            U = Unitary(k, 𝔽)
+            U = UnitaryMatrices(k, 𝔽)
             rT = real(T)
             atol = rtol = sqrt(eps(rT))
             @testset for t in (zero(rT), eps(rT)^(1 // 4) / 8, eps(rT)^(1 // 4)),

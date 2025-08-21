@@ -45,10 +45,6 @@ function ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:
     return ProjectiveSpace{typeof(size),field}(size)
 end
 
-function active_traits(f, ::AbstractProjectiveSpace, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
-end
-
 @doc raw"""
     ArrayProjectiveSpace{T<:Tuple,𝔽} <: AbstractProjectiveSpace{𝔽}
 
@@ -151,6 +147,10 @@ function decorated_manifold(M::ProjectiveSpace{<:Tuple,𝔽}) where {𝔽}
 end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
+
+function ManifoldsBase.get_embedding_type(::AbstractProjectiveSpace)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
 
 embed(::AbstractProjectiveSpace, p) = p
 embed(::AbstractProjectiveSpace, p, X) = X

@@ -117,6 +117,14 @@ inverse_retract(
     ::ApproximateLogarithmicMap,
 )
 
+"""
+    is_flat(MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric})
+
+Return true if [`Stiefel`](@ref) `M` is one-dimensional, since only then, the manifold is flat.
+"""
+is_flat(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}) =
+    manifold_dimension(M) == 1
+
 function log(
     M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric},
     p,

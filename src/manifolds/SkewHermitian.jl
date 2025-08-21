@@ -47,10 +47,6 @@ function SkewSymmetricMatrices(n::Int; parameter::Symbol=:type)
     return SkewHermitianMatrices(n; parameter=parameter)
 end
 
-function active_traits(f, ::SkewHermitianMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 function allocation_promotion_function(
     ::SkewHermitianMatrices{<:Any,ℂ},
     ::typeof(get_vector),
@@ -141,6 +137,10 @@ end
 function get_embedding(M::SkewHermitianMatrices{Tuple{Int},𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
     return Euclidean(N, N; field=𝔽, parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::SkewHermitianMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 function get_vector_orthonormal!(M::SkewSymmetricMatrices, Y, p, X, ::RealNumbers)

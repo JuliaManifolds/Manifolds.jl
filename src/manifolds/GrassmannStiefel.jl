@@ -31,6 +31,10 @@ ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTangentVec
 ManifoldsBase.@default_manifold_fallbacks (Stiefel{<:Any,ℝ}) StiefelPoint StiefelTangentVector value value
 ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTangentVector value value
 
+function ManifoldsBase.get_forwarding_type(::Grassmann, ::typeof(isapprox), p)
+    return ManifoldsBase.StopForwardingType()
+end
+
 function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
     return ParallelTransport()
 end
@@ -100,6 +104,17 @@ end
 function get_embedding(M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return Stiefel(n, k, 𝔽; parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::Grassmann)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+
+function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::StiefelPoint)
+    return ManifoldsBase.EmbeddedForwardingType()
+end
+function ManifoldsBase.get_forwarding_type(::Stiefel, f, ::StiefelPoint)
+    return ManifoldsBase.EmbeddedForwardingType()
 end
 
 @doc raw"""

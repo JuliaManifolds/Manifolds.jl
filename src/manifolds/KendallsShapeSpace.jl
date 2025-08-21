@@ -8,8 +8,6 @@ Kendall's shape space, defined as quotient of a [`KendallsPreShapeSpace`](@ref)
 The space can be interpreted as tuples of ``k`` points in ``ℝ^n`` up to simultaneous
 translation and scaling and rotation of all points [Kendall:1984](@cite)[Kendall:1989](@cite).
 
-This manifold possesses the [`IsQuotientManifold`](@ref) trait.
-
 # Constructor
 
     KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
@@ -23,10 +21,6 @@ end
 function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
     size = wrap_type_parameter(parameter, (n, k))
     return KendallsShapeSpace{typeof(size)}(size)
-end
-
-function active_traits(f, ::KendallsShapeSpace, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsQuotientManifold())
 end
 
 function get_orbit_action(M::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
@@ -90,6 +84,10 @@ end
 function get_embedding(M::KendallsShapeSpace{Tuple{Int,Int}})
     n, k = get_parameter(M.size)
     return KendallsPreShapeSpace(n, k; parameter=:field)
+end
+
+function ManifoldsBase.get_embedding_type(::KendallsShapeSpace)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
 """

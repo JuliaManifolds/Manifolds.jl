@@ -196,7 +196,7 @@ function test_manifold(
             if !(check_vector(M, p, X; atol=atol) === nothing)
                 print(check_vector(M, p, X; atol=atol))
             end
-            Test.@test is_vector(M, p, X; atol=atol)
+            Test.@test is_vector(M, p, X; atol=atol, error=:error)
             Test.@test check_vector(M, p, X; atol=atol) === nothing
         end
     end
@@ -230,7 +230,7 @@ function test_manifold(
             Manifolds.exp_fused!(M, q2, pts[1], X1, 0)
             Test.@test isapprox(M, pts[1], q2; atol=atolp1p2, rtol=rtolp1p2)
         end
-        if VERSION >= v"1.5" && isa(M, Union{Grassmann,GeneralizedStiefel})
+        if VERSION >= v"1.5" && isa(M, GeneralizedStiefel)
             # TODO: investigate why this is so imprecise on newer Julia versions on CI
             Test.@test isapprox(
                 M,

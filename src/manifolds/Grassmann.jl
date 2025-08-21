@@ -82,10 +82,6 @@ function Grassmann(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol
     return Grassmann{typeof(size),field}(size)
 end
 
-function active_traits(f, ::Grassmann, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsQuotientManifold())
-end
-
 function allocation_promotion_function(::Grassmann{<:Any,ℂ}, f, args::Tuple)
     return complex
 end
@@ -104,7 +100,7 @@ function change_representer!(M::Grassmann, Y, ::EuclideanMetric, p, X)
 end
 
 @doc raw"""
-    change_metric(M::Grassmann, ::EuclideanMetric, p X)
+    change_metric(M::Grassmann, ::EuclideanMetric, p, X)
 
 Change `X` to the corresponding vector with respect to the metric of the [`Grassmann`](@ref) `M`,
 which is just the identity, since the manifold is isometrically embedded.

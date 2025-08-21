@@ -265,18 +265,10 @@ function inner(
     return inner(next_trait(t), M, identity_element(M), X, Y)
 end
 
-function inverse_translate_diff(
-    ::TraitList{IsMetricManifold},
-    M::MetricManifold,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+function inverse_translate_diff(M::MetricManifold, p, q, X, conv::ActionDirectionAndSide)
     return inverse_translate_diff(M.manifold, p, q, X, conv)
 end
 function inverse_translate_diff!(
-    ::TraitList{IsMetricManifold},
     M::MetricManifold,
     Y,
     p,
@@ -342,25 +334,10 @@ function LinearAlgebra.norm(
     return norm(next_trait(t), M, identity_element(M), X)
 end
 
-function translate_diff(
-    ::TraitList{IsMetricManifold},
-    M::MetricManifold,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+function translate_diff(M::MetricManifold, p, q, X, conv::ActionDirectionAndSide)
     return translate_diff(M.manifold, p, q, X, conv)
 end
-function translate_diff!(
-    ::TraitList{IsMetricManifold},
-    M::MetricManifold,
-    Y,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+function translate_diff!(M::MetricManifold, Y, p, q, X, conv::ActionDirectionAndSide)
     return translate_diff!(M.manifold, Y, p, q, X, conv)
 end
 
