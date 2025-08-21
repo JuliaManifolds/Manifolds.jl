@@ -171,6 +171,22 @@ function get_coordinates!(M::MetricManifold, Y, p, X, B::AbstractBasis)
     )
 end
 
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(embed), p)
+    return ManifoldsBase.SimpleForwardingType()
+end
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(embed!), p)
+    return ManifoldsBase.SimpleForwardingType()
+end
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand))
+    return ManifoldsBase.SimpleForwardingType()
+end
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!))
+    return ManifoldsBase.SimpleForwardingType()
+end
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!), p)
+    return ManifoldsBase.SimpleForwardingType()
+end
+
 function get_vector(M::MetricManifold, p, c, B::AbstractBasis)
     (metric(M.manifold) == M.metric) && (return get_vector(M.manifold, p, c, B))
     return invoke(get_vector, Tuple{AbstractManifold,Any,Any,AbstractBasis}, M, p, c, B)
@@ -445,7 +461,7 @@ function ricci_curvature(
     S = sum(Ginv .* Ric)
     return S
 end
-@trait_function ricci_curvature(
+ManifoldsBase.@new_trait_function ricci_curvature(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
