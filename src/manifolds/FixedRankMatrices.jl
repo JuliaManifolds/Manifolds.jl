@@ -395,10 +395,6 @@ metric(::FixedRankMatrices) = EuclideanMetric()
 """
     default_retraction_method(M::FixedRankMatrices)
 
-"""
-default_retraction_method(M::FixedRankMatrices)
-
-"""
 Return [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
 as the default retraction for the [`FixedRankMatrices`](@ref) manifold.
 """
