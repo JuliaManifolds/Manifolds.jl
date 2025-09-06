@@ -195,7 +195,6 @@ using Kronecker
 using Graphs
 using LinearAlgebra
 using ManifoldsBase:
-    @next_trait_function,
     ℝ,
     ℂ,
     ℍ,
