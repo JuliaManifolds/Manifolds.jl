@@ -1,7 +1,6 @@
 using FiniteDifferences
 using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
-using ManifoldsBase: TraitList
 import ManifoldsBase: default_retraction_method
 using Manifolds, ManifoldsBase
 import Manifolds: solve_exp_ode

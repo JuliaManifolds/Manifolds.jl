@@ -23,14 +23,6 @@ function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
     return KendallsShapeSpace{typeof(size)}(size)
 end
 
-function get_orbit_action(M::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
-    return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n))
-end
-function get_orbit_action(M::KendallsShapeSpace{Tuple{Int,Int}})
-    n, k = get_parameter(M.size)
-    return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n; parameter=:field))
-end
-
 @doc raw"""
     get_total_space(::KendallsShapeSpace)
 

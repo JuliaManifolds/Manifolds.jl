@@ -60,7 +60,7 @@ function Statistics.cov(
 end
 
 function default_approximation_method(
-    ::EmptyTrait,
+    ::StopForwardingType,
     ::AbstractDecoratorManifold,
     ::typeof(cov),
 )
@@ -409,7 +409,11 @@ function Statistics.mean!(
     return y
 end
 
-function default_approximation_method(::EmptyTrait, ::AbstractManifold, ::typeof(mean))
+function default_approximation_method(
+    ::StopForwardingType,
+    ::AbstractManifold,
+    ::typeof(mean),
+)
     return GradientDescentEstimation()
 end;
 function default_approximation_method(::AbstractManifold, ::typeof(mean))
@@ -442,7 +446,7 @@ Compute the median using the specified `method`.
 Statistics.median(::AbstractManifold, ::Any...)
 
 function default_approximation_method(
-    ::EmptyTrait,
+    ::StopForwardingType,
     ::AbstractDecoratorManifold,
     ::typeof(median),
 )
@@ -837,7 +841,7 @@ function StatsBase.mean_and_var(
     return mean_and_var(M, x, w, method; corrected=corrected, kwargs...)
 end
 function default_approximation_method(
-    ::EmptyTrait,
+    ::StopForwardingType,
     M::AbstractDecoratorManifold,
     ::typeof(mean_and_var),
 )
@@ -1058,4 +1062,4 @@ end
 # decorate default method for a few functions
 # TODO: Check how to “ask” the embedding for default approx methods, when it exists,
 # for the functions [mean, median, cov, var, mean_and_std, mean_and_var]
-@trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector)
+@new_trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector)

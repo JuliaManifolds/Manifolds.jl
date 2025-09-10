@@ -1,7 +1,6 @@
 module ManifoldsOrdinaryDiffEqExt
 
 using ManifoldsBase
-using ManifoldsBase: TraitList
 
 using Manifolds
 import Manifolds: exp!, exp_fused!, solve_exp_ode

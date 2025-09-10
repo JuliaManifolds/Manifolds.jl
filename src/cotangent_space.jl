@@ -19,7 +19,7 @@ function (ξ::RieszRepresenterCotangentVector)(Y)
     return inner(ξ.manifold, ξ.p, ξ.X, Y)
 end
 
-@trait_function flat!(M::AbstractDecoratorManifold, ξ::CoTFVector, p, X::TFVector)
+@new_trait_function flat!(M::AbstractDecoratorManifold, ξ::CoTFVector, p, X::TFVector)
 
 @doc raw"""
     flat(M::AbstractManifold, p, X)
@@ -149,7 +149,7 @@ from the cotangent bundle to vectors from the tangent bundle
 """
 sharp(::AbstractManifold, p, ξ)
 
-@trait_function sharp(M::AbstractDecoratorManifold, X::TFVector, p, ξ::CoTFVector)
+@new_trait_function sharp(M::AbstractDecoratorManifold, X::TFVector, p, ξ::CoTFVector)
 
 sharp(::AbstractManifold, p, ξ::RieszRepresenterCotangentVector) = ξ.X
 function sharp(M::AbstractManifold, p, X::CoTFVector{<:Any,<:AbstractBasis})
@@ -158,7 +158,7 @@ end
 
 is_metric_function(::typeof(sharp)) = true
 
-@trait_function sharp!(M::AbstractDecoratorManifold, X::TFVector, p, ξ::CoTFVector)
+@new_trait_function sharp!(M::AbstractDecoratorManifold, X::TFVector, p, ξ::CoTFVector)
 
 function sharp!(::AbstractManifold, X, p, ξ::RieszRepresenterCotangentVector)
     copyto!(X, ξ.X)

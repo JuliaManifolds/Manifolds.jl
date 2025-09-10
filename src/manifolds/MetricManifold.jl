@@ -114,7 +114,7 @@ function einstein_tensor(
     G = Ric - g .* S / 2
     return G
 end
-@trait_function einstein_tensor(
+@new_trait_function einstein_tensor(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -220,7 +220,7 @@ inverse_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 function inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)
     return inv(local_metric(M, p, B))
 end
-@trait_function inverse_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
+@new_trait_function inverse_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
 function Base.convert(::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
     return _convert_with_default(M, GT, Val(is_default_metric(M, GT())))

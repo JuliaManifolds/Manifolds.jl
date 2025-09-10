@@ -617,16 +617,7 @@ function test_manifold(
                 end
                 # check projection idempotency
                 for i in 1:N
-                    if M isa GeneralLinear
-                        Test.@test isapprox(
-                            M,
-                            p,
-                            project(M, p, bvectors[i]),
-                            p \ bvectors[i],
-                        )
-                    else
-                        Test.@test isapprox(M, p, project(M, p, bvectors[i]), bvectors[i])
-                    end
+                    Test.@test isapprox(M, p, embed_project(M, p, bvectors[i]), bvectors[i])
                 end
             end
             if !isa(btype, ProjectedOrthonormalBasis) && (

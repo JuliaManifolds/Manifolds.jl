@@ -118,9 +118,5 @@ end
         @test repr(M) == "KendallsShapeSpace(2, 3; parameter=:field)"
         @test get_embedding(M) === KendallsPreShapeSpace(2, 3; parameter=:field)
         @test get_total_space(M) === KendallsPreShapeSpace(2, 3; parameter=:field)
-        @test get_orbit_action(M) === Manifolds.ColumnwiseMultiplicationAction(
-            M,
-            SpecialOrthogonal(2; parameter=:field),
-        )
     end
 end

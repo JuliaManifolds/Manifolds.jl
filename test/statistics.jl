@@ -77,7 +77,7 @@ base_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
 
 struct TestStatsNotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{ℝ} end
 
-ManifoldsBase.is_embedded_manifold(::TestStatsNotImplementedEmbeddedManifold3) = true
+ManifoldsBase.is_embedded(::TestStatsNotImplementedEmbeddedManifold3) = true
 
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 get_embedding(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
