@@ -122,7 +122,7 @@ inverse_retract(
 
 Return true if [`Stiefel`](@ref) `M` is one-dimensional, since only then, the manifold is flat.
 """
-is_flat(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}) =
+is_flat(M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}) =
     manifold_dimension(M) == 1
 
 function log(

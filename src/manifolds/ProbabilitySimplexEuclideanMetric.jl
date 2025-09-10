@@ -20,7 +20,7 @@ function manifold_volume(M::MetricManifold{ℝ, <:ProbabilitySimplex, <:Euclidea
     return sqrt(n + 1) / factorial(n)
 end
 
-function project!(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}, X, p, Y)
+function project!(::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, X, p, Y)
     X .= Y .- mean(Y)
     return X
 end

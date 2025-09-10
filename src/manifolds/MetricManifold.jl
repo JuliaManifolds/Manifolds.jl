@@ -1,4 +1,3 @@
-
 # piping syntax for decoration
 (metric::AbstractMetric)(M::AbstractManifold) = MetricManifold(M, metric)
 (::Type{T})(M::AbstractManifold) where {T <: AbstractMetric} = MetricManifold(M, T())
@@ -144,14 +143,14 @@ end
 
 function get_basis(M::MetricManifold, p, B::AbstractBasis)
     (metric(M.manifold) == M.metric) && (return get_basis(M.manifold, p, B))
-    return invoke(get_basis, Tuple{AbstractManifold,Any,AbstractBasis}, M, p, B)
+    return invoke(get_basis, Tuple{AbstractManifold, Any, AbstractBasis}, M, p, B)
 end
 
 function get_coordinates(M::MetricManifold, p, X, B::AbstractBasis)
     (metric(M.manifold) == M.metric) && (return get_coordinates(M.manifold, p, X, B))
     return invoke(
         get_coordinates,
-        Tuple{AbstractManifold,Any,Any,AbstractBasis},
+        Tuple{AbstractManifold, Any, Any, AbstractBasis},
         M,
         p,
         X,
@@ -162,7 +161,7 @@ function get_coordinates!(M::MetricManifold, Y, p, X, B::AbstractBasis)
     (metric(M.manifold) == M.metric) && (return get_coordinates!(M.manifold, Y, p, X, B))
     return invoke(
         get_coordinates!,
-        Tuple{AbstractManifold,Any,Any,Any,AbstractBasis},
+        Tuple{AbstractManifold, Any, Any, Any, AbstractBasis},
         M,
         Y,
         p,
@@ -189,13 +188,13 @@ end
 
 function get_vector(M::MetricManifold, p, c, B::AbstractBasis)
     (metric(M.manifold) == M.metric) && (return get_vector(M.manifold, p, c, B))
-    return invoke(get_vector, Tuple{AbstractManifold,Any,Any,AbstractBasis}, M, p, c, B)
+    return invoke(get_vector, Tuple{AbstractManifold, Any, Any, AbstractBasis}, M, p, c, B)
 end
 function get_vector!(M::MetricManifold, Y, p, c, B::AbstractBasis)
     (metric(M.manifold) == M.metric) && (return get_vector!(M.manifold, Y, p, c, B))
     return invoke(
         get_vector!,
-        Tuple{AbstractManifold,Any,Any,Any,AbstractBasis},
+        Tuple{AbstractManifold, Any, Any, Any, AbstractBasis},
         M,
         Y,
         p,
@@ -245,11 +244,11 @@ end
 
 function exp(M::MetricManifold, p, X)
     (metric(M.manifold) == M.metric) && (return exp(M.manifold, p, X))
-    return invoke(exp, Tuple{AbstractManifold,Any,Any}, M, p, X)
+    return invoke(exp, Tuple{AbstractManifold, Any, Any}, M, p, X)
 end
 function exp_fused(M::MetricManifold, p, X, t::Number)
     (metric(M.manifold) == M.metric) && (return exp_fused(M.manifold, p, X, t))
-    return invoke(exp_fused, Tuple{AbstractManifold,Any,Any,Number}, M, p, X, t)
+    return invoke(exp_fused, Tuple{AbstractManifold, Any, Any, Number}, M, p, X, t)
 end
 function exp!(M::MetricManifold, q, p, X)
     (metric(M.manifold) == M.metric) && (return exp!(M.manifold, q, p, X))
@@ -257,7 +256,7 @@ function exp!(M::MetricManifold, q, p, X)
 end
 function exp_fused!(M::MetricManifold, q, p, X, t::Number)
     (metric(M.manifold) == M.metric) && (return exp_fused!(M.manifold, q, p, X, t))
-    return invoke(exp_fused!, Tuple{AbstractManifold,Any,Any,Any,Number}, M, q, p, X, t)
+    return invoke(exp_fused!, Tuple{AbstractManifold, Any, Any, Any, Number}, M, q, p, X, t)
 end
 
 injectivity_radius(M::MetricManifold) = injectivity_radius(M.manifold)
@@ -285,11 +284,11 @@ function inner(M::MetricManifold, p, X::TFVector, Y::TFVector)
     return dot(X.data, local_metric(M, p, X.basis) * Y.data)
 end
 function inner(
-    M::MetricManifold{𝔽,TM,G},
-    p,
-    X,
-    Y,
-) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+        M::MetricManifold{𝔽, TM, G},
+        p,
+        X,
+        Y,
+    ) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     (metric(M.manifold) == M.metric) && (return inner(M.manifold, p, X, Y))
     throw(MethodError(inner, (M, p, X, Y)))
 end
@@ -309,14 +308,14 @@ is_default_metric(M::AbstractManifold, G::AbstractMetric)
 is_default_metric(M::MetricManifold) = metric(M.manifold) == M.metric
 is_default_metric(M::AbstractManifold, G::AbstractMetric) = metric(M) == G
 
-function is_flat(M::MetricManifold{𝔽,TM,G}) where {𝔽,G<:AbstractMetric,TM<:AbstractManifold}
+function is_flat(M::MetricManifold{𝔽, TM, G}) where {𝔽, G <: AbstractMetric, TM <: AbstractManifold}
     is_default_metric(M) && (return is_flat(M.manifold))
     return invoke(is_flat, Tuple{AbstractManifold}, M)
 end
 
 is_point(M::MetricManifold, p; kwargs...) = is_point(M.manifold, p; kwargs...)
 
-function is_vector(M::MetricManifold, p, X, cbp::Bool=true; kwargs...)
+function is_vector(M::MetricManifold, p, X, cbp::Bool = true; kwargs...)
     return is_vector(M.manifold, p, X, cbp; kwargs...)
 end
 
@@ -336,7 +335,7 @@ local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 
 function local_metric(M::MetricManifold, p, B::AbstractBasis)
     (metric(M.manifold) == M.metric) && (return local_metric(M.manifold, p, B))
-    return invoke(local_metric, Tuple{AbstractManifold,Any,AbstractBasis}, M, p, B)
+    return invoke(local_metric, Tuple{AbstractManifold, Any, AbstractBasis}, M, p, B)
 end
 
 @doc raw"""
@@ -373,7 +372,7 @@ log(::MetricManifold, ::Any...)
 
 function log(M::MetricManifold, p, q)
     (metric(M.manifold) == M.metric) && (return log(M.manifold, p, q))
-    return invoke(log, Tuple{AbstractManifold,Any,Any}, M, p, q)
+    return invoke(log, Tuple{AbstractManifold, Any, Any}, M, p, q)
 end
 function log!(M::MetricManifold, X, p, q)
     (metric(M.manifold) == M.metric) && (return log!(M.manifold, X, p, q))
@@ -411,7 +410,7 @@ end
 
 function parallel_transport_to(M::MetricManifold, p, X, q)
     (metric(M.manifold) == M.metric) && (return parallel_transport_to(M.manifold, p, X, q))
-    return invoke(parallel_transport_to, Tuple{AbstractManifold,Any,Any,Any}, M, p, X, q)
+    return invoke(parallel_transport_to, Tuple{AbstractManifold, Any, Any, Any}, M, p, X, q)
 end
 function parallel_transport_to!(M::MetricManifold, Y, p, X, q)
     (metric(M.manifold) == M.metric) &&
@@ -421,7 +420,7 @@ end
 
 function project(M::MetricManifold, p)
     (metric(M.manifold) == M.metric) && (return project(M.manifold, p))
-    return invoke(project, Tuple{AbstractManifold,Any}, M, p)
+    return invoke(project, Tuple{AbstractManifold, Any}, M, p)
 end
 function project!(M::MetricManifold, q, p)
     (metric(M.manifold) == M.metric) && (return project!(M.manifold, q, p))
@@ -429,7 +428,7 @@ function project!(M::MetricManifold, q, p)
 end
 function project(M::MetricManifold, p, X)
     (metric(M.manifold) == M.metric) && (return project(M.manifold, p, X))
-    return invoke(project, Tuple{AbstractManifold,Any,Any}, M, p, X)
+    return invoke(project, Tuple{AbstractManifold, Any, Any}, M, p, X)
 end
 function project!(M::MetricManifold, Y, p, X)
     (metric(M.manifold) == M.metric) && (return project!(M.manifold, Y, p, X))
@@ -496,41 +495,41 @@ function Base.show(io::IO, M::MetricManifold)
 end
 
 function vector_transport_direction(
-    M::MetricManifold, p, X, d,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-)
+        M::MetricManifold, p, X, d,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    )
     (metric(M.manifold) == M.metric) &&
         (return vector_transport_direction(M.manifold, p, X, d, m))
     return invoke(
         vector_transport_direction,
-        Tuple{AbstractManifold,Any,Any,Any,AbstractVectorTransportMethod},
+        Tuple{AbstractManifold, Any, Any, Any, AbstractVectorTransportMethod},
         M, p, X, d, m,
     )
 end
 function vector_transport_direction!(
-    M::MetricManifold, Y, p, X, d,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-)
+        M::MetricManifold, Y, p, X, d,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    )
     (metric(M.manifold) == M.metric) &&
         (return vector_transport_direction!(M.manifold, Y, p, X, d, m))
     return invoke(
         vector_transport_direction!,
-        Tuple{AbstractManifold,Any,Any,Any,Any,AbstractVectorTransportMethod},
+        Tuple{AbstractManifold, Any, Any, Any, Any, AbstractVectorTransportMethod},
         M, Y, p, X, d, m,
     )
 end
 
 function vector_transport_to(
-    M::MetricManifold,
-    p,
-    X,
-    q,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-)
+        M::MetricManifold,
+        p,
+        X,
+        q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    )
     (metric(M.manifold) == M.metric) && (return vector_transport_to(M.manifold, p, X, q, m))
     return invoke(
         vector_transport_to,
-        Tuple{AbstractManifold,Any,Any,Any,AbstractVectorTransportMethod},
+        Tuple{AbstractManifold, Any, Any, Any, AbstractVectorTransportMethod},
         M,
         p,
         X,
@@ -539,21 +538,21 @@ function vector_transport_to(
     )
 end
 function vector_transport_to!(
-    M::MetricManifold, Y, p, X, q,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-)
+        M::MetricManifold, Y, p, X, q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+    )
     (metric(M.manifold) == M.metric) &&
         (return vector_transport_to!(M.manifold, Y, p, X, q, m))
     return invoke(
         vector_transport_to!,
-        Tuple{AbstractManifold,Any,Any,Any,Any,AbstractVectorTransportMethod},
+        Tuple{AbstractManifold, Any, Any, Any, Any, AbstractVectorTransportMethod},
         M, Y, p, X, q, m,
     )
 end
 
 function Weingarten(M::MetricManifold, p, X, V)
     (metric(M.manifold) == M.metric) && (return Weingarten(M.manifold, p, X, V))
-    return invoke(Weingarten, Tuple{AbstractManifold,Any,Any,Any}, M, p, X, V)
+    return invoke(Weingarten, Tuple{AbstractManifold, Any, Any, Any}, M, p, X, V)
 end
 function Weingarten!(M::MetricManifold, Y, p, X, V)
     (metric(M.manifold) == M.metric) && (return Weingarten!(M.manifold, Y, p, X, V))

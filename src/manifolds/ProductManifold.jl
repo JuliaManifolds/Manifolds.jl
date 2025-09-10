@@ -1,4 +1,3 @@
-
 function allocate_coordinates(::ProductManifold, p, T, n::Int)
     return allocate(submanifold_component(p, 1), T, n)
 end

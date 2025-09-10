@@ -1,4 +1,3 @@
-
 #
 # (Explicit) Quotient manifolds
 #

@@ -59,10 +59,10 @@ function Statistics.cov(
 end
 
 function default_approximation_method(
-    ::StopForwardingType,
-    ::AbstractDecoratorManifold,
-    ::typeof(cov),
-)
+        ::StopForwardingType,
+        ::AbstractDecoratorManifold,
+        ::typeof(cov),
+    )
     return GradientDescentEstimation()
 end
 function default_approximation_method(::AbstractManifold, ::typeof(cov))
@@ -409,10 +409,10 @@ function Statistics.mean!(
 end
 
 function default_approximation_method(
-    ::StopForwardingType,
-    ::AbstractManifold,
-    ::typeof(mean),
-)
+        ::StopForwardingType,
+        ::AbstractManifold,
+        ::typeof(mean),
+    )
     return GradientDescentEstimation()
 end;
 function default_approximation_method(::AbstractManifold, ::typeof(mean))
@@ -445,10 +445,10 @@ Compute the median using the specified `method`.
 Statistics.median(::AbstractManifold, ::Any...)
 
 function default_approximation_method(
-    ::StopForwardingType,
-    ::AbstractDecoratorManifold,
-    ::typeof(median),
-)
+        ::StopForwardingType,
+        ::AbstractDecoratorManifold,
+        ::typeof(median),
+    )
     return CyclicProximalPointEstimation()
 end
 function default_approximation_method(::AbstractManifold, ::typeof(median))
@@ -840,10 +840,10 @@ function StatsBase.mean_and_var(
     return mean_and_var(M, x, w, method; corrected = corrected, kwargs...)
 end
 function default_approximation_method(
-    ::StopForwardingType,
-    M::AbstractDecoratorManifold,
-    ::typeof(mean_and_var),
-)
+        ::StopForwardingType,
+        M::AbstractDecoratorManifold,
+        ::typeof(mean_and_var),
+    )
     return default_approximation_method(M, mean)
 end
 function default_approximation_method(M::AbstractManifold, ::typeof(mean_and_var))

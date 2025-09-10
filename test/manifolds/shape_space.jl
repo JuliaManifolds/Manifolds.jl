@@ -96,16 +96,16 @@ end
     test_manifold(
         M,
         [p1, p2, p3];
-        is_point_atol_multiplier=1,
-        is_tangent_atol_multiplier=1,
-        exp_log_atol_multiplier=2e8,
-        projection_atol_multiplier=2,
-        test_injectivity_radius=false,
-        test_project_point=true,
-        test_project_tangent=true,
-        test_rand_point=true,
-        test_rand_tvector=true,
-        rand_tvector_atol_multiplier=5,
+        is_point_atol_multiplier = 1,
+        is_tangent_atol_multiplier = 1,
+        exp_log_atol_multiplier = 2.0e8,
+        projection_atol_multiplier = 2,
+        test_injectivity_radius = false,
+        test_project_point = true,
+        test_project_tangent = true,
+        test_rand_point = true,
+        test_rand_tvector = true,
+        rand_tvector_atol_multiplier = 5,
     )
     @testset "degenerate cases" begin
         Md3_2 = KendallsShapeSpace(3, 2)
@@ -116,7 +116,7 @@ end
     @testset "field parameter" begin
         M = KendallsShapeSpace(2, 3; parameter = :field)
         @test repr(M) == "KendallsShapeSpace(2, 3; parameter=:field)"
-        @test get_embedding(M) === KendallsPreShapeSpace(2, 3; parameter=:field)
-        @test get_total_space(M) === KendallsPreShapeSpace(2, 3; parameter=:field)
+        @test get_embedding(M) === KendallsPreShapeSpace(2, 3; parameter = :field)
+        @test get_total_space(M) === KendallsPreShapeSpace(2, 3; parameter = :field)
     end
 end

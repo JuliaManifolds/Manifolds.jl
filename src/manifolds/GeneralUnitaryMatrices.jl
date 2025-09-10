@@ -492,9 +492,9 @@ function ManifoldsBase.get_embedding_type(::GeneralUnitaryMatrices)
     return ManifoldsBase.EmbeddedManifoldType()
 end
 function ManifoldsBase.get_embedding_type(
-    ::GeneralUnitaryMatrices,
-    ::Quaternions.Quaternion,
-)
+        ::GeneralUnitaryMatrices,
+        ::Quaternions.Quaternion,
+    )
     return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
 end
 @doc raw"""

@@ -141,12 +141,12 @@ The function returns an object of type `StitchedChartSolution{:Exp}` to represen
 geodesic.
 """
 function solve_chart_exp_ode(
-    M::AbstractManifold, a, Xc, A::AbstractAtlas, i0;
-    solver=AutoVern9(Rodas5()),
-    final_time::Real=1.0,
-    check_chart_switch_kwargs=NamedTuple(),
-    kwargs...,
-)
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0;
+        solver = AutoVern9(Rodas5()),
+        final_time::Real = 1.0,
+        check_chart_switch_kwargs = NamedTuple(),
+        kwargs...,
+    )
     u0 = ArrayPartition(copy(a), copy(Xc))
     cur_i = i0
     # callback stops solver when we get too close to chart boundary

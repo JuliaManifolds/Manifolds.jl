@@ -40,7 +40,7 @@ function Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol
     return Stiefel{typeof(size), field}(size)
 end
 
-function allocation_promotion_function(::Stiefel{<:Any,ℂ}, ::Any, ::Tuple)
+function allocation_promotion_function(::Stiefel{<:Any, ℂ}, ::Any, ::Tuple)
     return complex
 end
 

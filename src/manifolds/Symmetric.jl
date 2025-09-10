@@ -130,7 +130,7 @@ function ManifoldsBase.get_embedding_type(::SymmetricMatrices)
     return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
-function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, ::RealNumbers)
+function get_vector_orthonormal!(M::SymmetricMatrices{<:Any, ℝ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)

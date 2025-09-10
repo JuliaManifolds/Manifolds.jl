@@ -28,11 +28,11 @@ include("../header.jl")
                 test_manifold(
                     M,
                     pts,
-                    exp_log_atol_multiplier=5,
-                    is_tangent_atol_multiplier=5,
-                    test_project_tangent=true,
-                    test_inplace=true,
-                    test_injectivity_radius=false,
+                    exp_log_atol_multiplier = 5,
+                    is_tangent_atol_multiplier = 5,
+                    test_project_tangent = true,
+                    test_inplace = true,
+                    test_injectivity_radius = false,
                 )
             end
         end

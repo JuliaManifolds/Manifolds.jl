@@ -93,11 +93,11 @@ include("../header.jl")
                 ],
                 #basis_types_vecs = basis_types,
                 # investigate why this is so large on dev
-                exp_log_atol_multiplier=1.0,
-                is_tangent_atol_multiplier=20.0,
-                is_point_atol_multiplier=10.0,
-                projection_atol_multiplier=10.0,
-                retraction_atol_multiplier=10.0,
+                exp_log_atol_multiplier = 1.0,
+                is_tangent_atol_multiplier = 20.0,
+                is_point_atol_multiplier = 10.0,
+                projection_atol_multiplier = 10.0,
+                retraction_atol_multiplier = 10.0,
             )
 
             @testset "inner/norm" begin
@@ -211,13 +211,13 @@ include("../header.jl")
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                exp_log_atol_multiplier=10.0^4,
-                is_point_atol_multiplier=20.0,
-                is_tangent_atol_multiplier=20.0,
-                projection_atol_multiplier=10.0,
-                retraction_atol_multiplier=10.0,
-                test_inplace=true,
-                test_rand_point=true,
+                exp_log_atol_multiplier = 10.0^4,
+                is_point_atol_multiplier = 20.0,
+                is_tangent_atol_multiplier = 20.0,
+                projection_atol_multiplier = 10.0,
+                retraction_atol_multiplier = 10.0,
+                test_inplace = true,
+                test_rand_point = true,
             )
 
             @testset "inner/norm" begin

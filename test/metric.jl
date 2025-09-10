@@ -24,24 +24,24 @@ end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
-    M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
-    ::Any,
-    ::InducedBasis,
-)
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
+        ::Any,
+        ::InducedBasis,
+    )
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-    M::MetricManifold{ℝ,<:TestEuclidean,<:TestEuclideanMetric},
-    ::Any,
-    ::T,
-) where {T<:ManifoldsBase.AbstractOrthogonalBasis}
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
+        ::Any,
+        ::T,
+    ) where {T <: ManifoldsBase.AbstractOrthogonalBasis}
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-    M::MetricManifold{ℝ,<:TestEuclidean,<:TestScaledEuclideanMetric},
-    ::Any,
-    ::T,
-) where {T<:ManifoldsBase.AbstractOrthogonalBasis}
+        M::MetricManifold{ℝ, <:TestEuclidean, <:TestScaledEuclideanMetric},
+        ::Any,
+        ::T,
+    ) where {T <: ManifoldsBase.AbstractOrthogonalBasis}
     return 2 .* Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.get_coordinates_orthogonal(
@@ -138,10 +138,10 @@ Manifolds._injectivity_radius(::BaseManifold, ::ExponentialRetraction) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) = Inf
 Manifolds._injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
 function Manifolds.local_metric(
-    ::MetricManifold{ℝ,BaseManifold{N},BaseManifoldMetric{N}},
-    p,
-    ::InducedBasis,
-) where {N}
+        ::MetricManifold{ℝ, BaseManifold{N}, BaseManifoldMetric{N}},
+        p,
+        ::InducedBasis,
+    ) where {N}
     return 2 * one(p * p')
 end
 function Manifolds.exp!(
@@ -239,7 +239,7 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
     Random.seed!(42)
     @testset "Metric Basics" begin
         @test repr(MetricManifold(Euclidean(3), EuclideanMetric())) ===
-              "MetricManifold(Euclidean(3; field=ℝ), EuclideanMetric())"
+            "MetricManifold(Euclidean(3; field=ℝ), EuclideanMetric())"
     end
     @testset "Connection Trait" begin
         M = ConnectionManifold(Euclidean(3), LeviCivitaConnection())

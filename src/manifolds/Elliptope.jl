@@ -46,7 +46,7 @@ struct Elliptope{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function Elliptope(n::Int, k::Int; parameter::Symbol=:type)
+function Elliptope(n::Int, k::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, k))
     return Elliptope{typeof(size)}(size)
 end

@@ -277,11 +277,11 @@ the tangent space consists of all $ℝ^n$.
 project(::Hyperbolic, ::PoincareHalfSpacePoint::PoincareHalfSpaceTangentVector)
 
 function ManifoldsBase.allocate_result_embedding(
-    ::Hyperbolic,
-    ::typeof(project),
-    X::PoincareHalfSpaceTangentVector,
-    ::PoincareHalfSpacePoint,
-)
+        ::Hyperbolic,
+        ::typeof(project),
+        X::PoincareHalfSpaceTangentVector,
+        ::PoincareHalfSpacePoint,
+    )
     return PoincareHalfSpaceTangentVector(allocate(X.value))
 end
 
