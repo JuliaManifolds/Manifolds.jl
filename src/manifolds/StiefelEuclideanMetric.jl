@@ -1,4 +1,3 @@
-
 @doc raw"""
     exp(M::Stiefel, p, X)
 
@@ -26,7 +25,7 @@ exp(::Stiefel, ::Any...)
 function exp!(M::Stiefel, q, p, X)
     n, k = get_parameter(M.size)
     A = p' * X
-    B = exp([A -X'*X; I A])
+    B = exp([A -X' * X; I A])
     @views begin # COV_EXCL_LINE
         r = p * B[1:k, 1:k]
         mul!(r, X, B[(k + 1):(2 * k), 1:k], true, true)
@@ -59,24 +58,24 @@ triangular entries of ``a`` is set to ``1`` its symmetric entry to ``-1`` and we
 the factor ``\frac{1}{\sqrt{2}}`` and for ``b`` one can just use unit vectors reshaped to a matrix
 to obtain orthonormal set of parameters.
 """
-get_basis(M::Stiefel{<:Any,ℝ}, p, B::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+get_basis(M::Stiefel{<:Any, ℝ}, p, B::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
 
 function _get_basis(
-    M::Stiefel{<:Any,ℝ},
-    p,
-    B::DefaultOrthonormalBasis{ℝ,TangentSpaceType};
-    kwargs...,
-)
+        M::Stiefel{<:Any, ℝ},
+        p,
+        B::DefaultOrthonormalBasis{ℝ, TangentSpaceType};
+        kwargs...,
+    )
     return CachedBasis(B, get_vectors(M, p, B))
 end
 
-function get_coordinates_orthonormal!(M::Stiefel{<:Any,ℝ}, c, p, X, N::RealNumbers)
+function get_coordinates_orthonormal!(M::Stiefel{<:Any, ℝ}, c, p, X, N::RealNumbers)
     V = get_vectors(M, p, DefaultOrthonormalBasis(N))
     c .= inner.(Ref(M), Ref(p), V, Ref(X))
     return c
 end
 
-function get_vector_orthonormal!(M::Stiefel{<:Any,ℝ}, X, p, c, N::RealNumbers)
+function get_vector_orthonormal!(M::Stiefel{<:Any, ℝ}, X, p, c, N::RealNumbers)
     V = get_vectors(M, p, DefaultOrthonormalBasis(N))
     zero_vector!(M, X, p)
     length(c) < length(V) && error(
@@ -88,7 +87,7 @@ function get_vector_orthonormal!(M::Stiefel{<:Any,ℝ}, X, p, c, N::RealNumbers)
     return X
 end
 
-function get_vectors(M::Stiefel{<:Any,ℝ}, p, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+function get_vectors(M::Stiefel{<:Any, ℝ}, p, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
     n, k = get_parameter(M.size)
     p⊥ = nullspace([p zeros(n, n - k)])
     an = div(k * (k - 1), 2)
@@ -126,7 +125,7 @@ function inverse_retract_project!(M::Stiefel, X, p, q)
     return X
 end
 
-function log!(M::Stiefel{<:Any,ℝ}, X, p, q)
+function log!(M::Stiefel{<:Any, ℝ}, X, p, q)
     MM = MetricManifold(M, StiefelSubmersionMetric(-1 // 2))
     log!(MM, X, p, q)
     return X

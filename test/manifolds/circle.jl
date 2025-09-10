@@ -13,13 +13,13 @@ using Manifolds: TFVector, CoTFVector
         @test !is_point(M, zeros(3, 3))
         @test Manifolds.check_size(M, [9.0]) === nothing
         @test Manifolds.check_size(M, [1.0], [-2.0]) === nothing
-        @test_throws DomainError is_point(M, 9.0; error=:error)
-        @test_throws DomainError is_point(M, zeros(3, 3); error=:error)
+        @test_throws DomainError is_point(M, 9.0; error = :error)
+        @test_throws DomainError is_point(M, zeros(3, 3); error = :error)
         @test !is_vector(M, 9.0, 0.0)
         @test !is_vector(M, zeros(3, 3), zeros(3, 3))
-        @test_throws DomainError is_vector(M, 9.0, 0.0; error=:error)
-        @test_throws DomainError is_vector(M, zeros(3, 3), zeros(3, 3); error=:error)
-        @test_throws DomainError is_vector(M, 0.0, zeros(3, 3); error=:error)
+        @test_throws DomainError is_vector(M, 9.0, 0.0; error = :error)
+        @test_throws DomainError is_vector(M, zeros(3, 3), zeros(3, 3); error = :error)
+        @test_throws DomainError is_vector(M, 0.0, zeros(3, 3); error = :error)
         @test is_vector(M, 0.0, 0.0)
         @test get_coordinates(M, Ref(0.0), Ref(2.0), DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_coordinates(
@@ -52,13 +52,13 @@ using Manifolds: TFVector, CoTFVector
         @test get_vector(M, Ref(0.0), [2.0], DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_vector(M, [0.0], [2.0], DefaultOrthonormalBasis())[] ≈ 2.0
         @test get_vector(M, Ref(0.0), [2.0], DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈
-              2.0
+            2.0
         @test get_vector(M, Ref(0.0), [-2.0], DiagonalizingOrthonormalBasis(Ref(1.0)))[] ≈
-              -2.0
+            -2.0
         @test get_vector(M, Ref(0.0), [2.0], DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈
-              -2.0
+            -2.0
         @test get_vector(M, Ref(0.0), [-2.0], DiagonalizingOrthonormalBasis(Ref(-1.0)))[] ≈
-              2.0
+            2.0
         @test number_of_coordinates(M, DiagonalizingOrthonormalBasis(Ref(-1.0))) == 1
         @test number_of_coordinates(M, DefaultOrthonormalBasis()) == 1
         rrcv = Manifolds.RieszRepresenterCotangentVector(M, 0.0, 1.0)
@@ -102,7 +102,7 @@ using Manifolds: TFVector, CoTFVector
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
         ) === 2.0
         @test ManifoldDiff.diagonalizing_projectors(M, 0.0, 2.0) ==
-              ((0.0, ManifoldDiff.ProjectorOntoVector(M, 0.0, SA[1.0])),)
+            ((0.0, ManifoldDiff.ProjectorOntoVector(M, 0.0, SA[1.0])),)
         @test ManifoldDiff.jacobi_field(
             M,
             0.0,
@@ -147,36 +147,36 @@ using Manifolds: TFVector, CoTFVector
             test_manifold(
                 M,
                 pts,
-                test_vector_spaces=false,
-                test_project_point=true,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                test_vee_hat=false,
-                is_mutating=false,
-                test_rand_point=true,
-                test_rand_tvector=true,
-                rand_tvector_atol_multiplier=2.0,
+                test_vector_spaces = false,
+                test_project_point = true,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                test_vee_hat = false,
+                is_mutating = false,
+                test_rand_point = true,
+                test_rand_tvector = true,
+                rand_tvector_atol_multiplier = 2.0,
             )
             ptsS = map(p -> (@SArray fill(p)), pts)
             test_manifold(
                 M,
                 ptsS,
-                test_project_point=true,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_project_point = true,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_vee_hat=true,
-                basis_types_vecs=basis_types_real,
-                basis_types_to_from=basis_types_real,
-                test_rand_point=true,
-                test_rand_tvector=true,
-                rand_tvector_atol_multiplier=2.0,
+                test_vee_hat = true,
+                basis_types_vecs = basis_types_real,
+                basis_types_to_from = basis_types_real,
+                test_rand_point = true,
+                test_rand_tvector = true,
+                rand_tvector_atol_multiplier = 2.0,
             )
         end
     end
@@ -185,13 +185,13 @@ using Manifolds: TFVector, CoTFVector
         X = fill(NaN)
         rand!(M, p)
         @test is_point(M, p)
-        rand!(M, X; vector_at=p)
+        rand!(M, X; vector_at = p)
         @test is_vector(M, p, X)
 
         rng = MersenneTwister()
         rand!(rng, M, p)
         @test is_point(M, p)
-        rand!(rng, M, X; vector_at=p)
+        rand!(rng, M, X; vector_at = p)
         @test is_vector(M, p, X)
     end
     @testset "Test sym_rem" begin
@@ -208,11 +208,11 @@ using Manifolds: TFVector, CoTFVector
         @test is_vector(Mc, 1im, 0.0)
         @test is_point(Mc, 1im)
         @test !is_point(Mc, 1 + 1im)
-        @test_throws DomainError is_point(Mc, 1 + 1im; error=:error)
+        @test_throws DomainError is_point(Mc, 1 + 1im; error = :error)
         @test !is_vector(Mc, 1 + 1im, 0.0)
-        @test_throws DomainError is_vector(Mc, 1 + 1im, 0.0; error=:error)
+        @test_throws DomainError is_vector(Mc, 1 + 1im, 0.0; error = :error)
         @test !is_vector(Mc, 1im, 2im)
-        @test_throws DomainError is_vector(Mc, 1im, 2im; error=:error)
+        @test_throws DomainError is_vector(Mc, 1im, 2im; error = :error)
         rrcv = Manifolds.RieszRepresenterCotangentVector(Mc, 0.0 + 0.0im, 1.0im)
         @test flat(Mc, 0.0 + 0.0im, 1.0im) == rrcv
         @test sharp(Mc, 0.0 + 0.0im, rrcv) == 1.0im
@@ -225,7 +225,7 @@ using Manifolds: TFVector, CoTFVector
         @test is_vector(Mc, p, X)
         @test project(Mc, 1.0) == 1.0
         @test project(Mc, 1 / sqrt(2.0) + 1 / sqrt(2.0) * im) ≈
-              1 / sqrt(2.0) + 1 / sqrt(2.0) * im
+            1 / sqrt(2.0) + 1 / sqrt(2.0) * im
         p = @MArray fill(1.0 + 0.0im)
         project!(Mc, p, p)
         @test p == @MArray fill(1.0 + 0.0im)
@@ -233,7 +233,7 @@ using Manifolds: TFVector, CoTFVector
         project!(Mc, p, p)
         @test p == @MArray fill(1.0 + 0.0im)
 
-        @test get_vector(Mc, fill(1.0 + 0.0im), [1.0]) isa Array{ComplexF64,0}
+        @test get_vector(Mc, fill(1.0 + 0.0im), [1.0]) isa Array{ComplexF64, 0}
 
         angles = map(pp -> exp(pp * im), [-π / 2, 0.0, π])
         @test mean(Mc, angles) ≈ exp(-π * im / 2)
@@ -252,7 +252,7 @@ using Manifolds: TFVector, CoTFVector
         p = -0.42681766710748265 + 0.9043377018818392im
         q = -0.42681766710748226 + 0.9043377018818393im
         @test isapprox(distance(Mc, p, q), 4.041272810440265e-16)
-        @test isapprox(distance(Mc, p, -q), 3.1415926535897927; atol=eps())
+        @test isapprox(distance(Mc, p, -q), 3.1415926535897927; atol = eps())
     end
 
     for T in types
@@ -262,33 +262,33 @@ using Manifolds: TFVector, CoTFVector
             test_manifold(
                 Mc,
                 pts,
-                test_vector_spaces=false,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                is_mutating=false,
-                test_vee_hat=false,
-                exp_log_atol_multiplier=2.0,
-                is_tangent_atol_multiplier=2.0,
-                rand_tvector_atol_multiplier=4.0,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                test_vector_spaces = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                is_mutating = false,
+                test_vee_hat = false,
+                exp_log_atol_multiplier = 2.0,
+                is_tangent_atol_multiplier = 2.0,
+                rand_tvector_atol_multiplier = 4.0,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
             ptsS = map(p -> (@SArray fill(p)), pts)
             test_manifold(
                 Mc,
                 ptsS,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                test_vee_hat=true,
-                exp_log_atol_multiplier=2.0,
-                is_tangent_atol_multiplier=2.0,
-                rand_tvector_atol_multiplier=4.0,
-                basis_types_vecs=basis_types,
-                basis_types_to_from=basis_types,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                test_vee_hat = true,
+                exp_log_atol_multiplier = 2.0,
+                is_tangent_atol_multiplier = 2.0,
+                rand_tvector_atol_multiplier = 4.0,
+                basis_types_vecs = basis_types,
+                basis_types_to_from = basis_types,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
         end
     end

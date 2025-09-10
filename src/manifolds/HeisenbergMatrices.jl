@@ -26,7 +26,7 @@ struct HeisenbergMatrices{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function HeisenbergMatrices(n::Int; parameter::Symbol=:type)
+function HeisenbergMatrices(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
     return HeisenbergMatrices{typeof(size)}(size)
 end
@@ -118,7 +118,7 @@ Given a matrix
 ```
 the coordinates are concatenated vectors ``\mathbf{a}``, ``\mathbf{b}``, and number ``c``.
 """
-get_coordinates(::HeisenbergMatrices, p, X, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+get_coordinates(::HeisenbergMatrices, p, X, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
 
 function get_coordinates_orthonormal(M::HeisenbergMatrices, p, X, ::RealNumbers)
     n = get_parameter(M.size)[1]
@@ -138,7 +138,7 @@ function get_embedding(::HeisenbergMatrices{TypeParameter{Tuple{n}}}) where {n}
 end
 function get_embedding(M::HeisenbergMatrices{Tuple{Int}})
     n = get_parameter(M.size)[1]
-    return Euclidean(n + 2, n + 2; parameter=:field)
+    return Euclidean(n + 2, n + 2; parameter = :field)
 end
 
 @doc raw"""
@@ -152,7 +152,7 @@ Given a vector of coordinates ``\begin{bmatrix}\mathbb{a} & \mathbb{b} & c\end{b
 0 & \mathbf{0} & 1 \end{bmatrix}
 ```
 """
-get_vector(M::HeisenbergMatrices, p, c, ::DefaultOrthonormalBasis{ℝ,TangentSpaceType})
+get_vector(M::HeisenbergMatrices, p, c, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
 
 function get_vector_orthonormal(M::HeisenbergMatrices, p, Xⁱ, ::RealNumbers)
     n = get_parameter(M.size)[1]
@@ -197,15 +197,15 @@ If `vector_at` is not `nothing`, return a random tangent vector from the tangent
 the point `vector_at` on the [`HeisenbergMatrices`](@ref) by using a normal distribution with
 mean 0 and standard deviation `σ`.
 """
-rand(M::HeisenbergMatrices; vector_at=nothing, σ::Real=1.0)
+rand(M::HeisenbergMatrices; vector_at = nothing, σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::HeisenbergMatrices,
-    pX;
-    σ::Real=one(eltype(pX)),
-    vector_at=nothing,
-)
+        rng::AbstractRNG,
+        M::HeisenbergMatrices,
+        pX;
+        σ::Real = one(eltype(pX)),
+        vector_at = nothing,
+    )
     n = ManifoldsBase.get_parameter(M.size)[1]
     if vector_at === nothing
         copyto!(pX, I)

@@ -103,9 +103,9 @@ function exp(::SymmetricPositiveDefinite, p::SPDPoint, X)
     pUe = p_sqrt * Ue
     q = SPDPoint(
         pUe * Se * transpose(pUe),
-        store_p=!ismissing(p.p),
-        store_sqrt=!ismissing(p.sqrt),
-        store_sqrt_inv=!ismissing(p.sqrt_inv),
+        store_p = !ismissing(p.p),
+        store_sqrt = !ismissing(p.sqrt),
+        store_sqrt_inv = !ismissing(p.sqrt_inv),
     )
     return q
 end
@@ -157,19 +157,19 @@ The construction is based on an ONB for the symmetric matrices similar to [`get_
 just that the ONB here is build from the eigen vectors of ``p^{\frac{1}{2}}Vp^{\frac{1}{2}}``.
 """
 function get_basis_diagonalizing(
-    M::SymmetricPositiveDefinite,
-    p,
-    B::DiagonalizingOrthonormalBasis,
-)
+        M::SymmetricPositiveDefinite,
+        p,
+        B::DiagonalizingOrthonormalBasis,
+    )
     N = get_parameter(M.size)[1]
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     eigv = eigen(Symmetric(p_sqrt_inv * B.frame_direction * p_sqrt_inv))
     V = eigv.vectors
     Ξ = [
         (i == j ? 1 / 2 : 1 / sqrt(2)) *
-        p_sqrt *
-        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
-        p_sqrt for i in 1:N for j in i:N
+            p_sqrt *
+            (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
+            p_sqrt for i in 1:N for j in i:N
     ]
     λ = eigv.values
     κ = [-1 / 4 * (λ[i] - λ[j])^2 for i in 1:N for j in i:N]
@@ -320,7 +320,7 @@ end
 Return false. [`SymmetricPositiveDefinite`](@ref) with [`AffineInvariantMetric`](@ref)
 is not a flat manifold.
 """
-is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,AffineInvariantMetric}) = false
+is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, AffineInvariantMetric}) = false
 
 @doc raw"""
     log(M::SymmetricPositiveDefinite, p, q)
@@ -338,11 +338,11 @@ where ``\operatorname{Log}`` denotes to the matrix logarithm.
 log(::SymmetricPositiveDefinite, ::Any...)
 
 function allocate_result(
-    M::SymmetricPositiveDefinite,
-    ::typeof(log),
-    q::SPDPoint,
-    p::SPDPoint,
-)
+        M::SymmetricPositiveDefinite,
+        ::typeof(log),
+        q::SPDPoint,
+        p::SPDPoint,
+    )
     return allocate_result(M, log, convert(AbstractMatrix, q), convert(AbstractMatrix, p))
 end
 

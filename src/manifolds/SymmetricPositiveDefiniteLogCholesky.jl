@@ -35,10 +35,10 @@ where ``x`` and ``y`` are the Cholesky factors of ``p`` and ``q``, respectively,
 ``⌊⋅⌋`` denbotes the strictly lower triangular matrix of its argument,
 and ``\lVert⋅\rVert_{\mathrm{F}}`` the Frobenius norm.
 """
-function distance(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
+function distance(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, p, q)
     N = get_parameter(M.manifold.size)[1]
     return distance(
-        CholeskySpace(N; parameter=get_parameter_type(M.manifold)),
+        CholeskySpace(N; parameter = get_parameter_type(M.manifold)),
         cholesky(p).L,
         cholesky(q).L,
     )
@@ -59,47 +59,47 @@ decomposition of ``p``, ``W = y(y^{-1}Xy^{-\mathrm{T}})_\frac{1}{2}``,
 and ``(⋅)_\frac{1}{2}``
 denotes the lower triangular matrix with the diagonal multiplied by ``\frac{1}{2}``.
 """
-exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any, ::Any)
+exp(::MetricManifold{ℝ, SymmetricPositiveDefinite, LogCholeskyMetric}, ::Any, ::Any)
 
-function exp!(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, q, p, X)
+function exp!(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, q, p, X)
     N = get_parameter(M.manifold.size)[1]
     (y, W) = spd_to_cholesky(p, X)
-    z = exp(CholeskySpace(N; parameter=get_parameter_type(M.manifold)), y, W)
+    z = exp(CholeskySpace(N; parameter = get_parameter_type(M.manifold)), y, W)
     return copyto!(q, z * z')
 end
 function exp_fused!(
-    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric},
-    q,
-    p,
-    X,
-    t::Number,
-)
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
+        q,
+        p,
+        X,
+        t::Number,
+    )
     return exp!(M, q, p, t * X)
 end
 
 function get_coordinates_orthonormal!(
-    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric},
-    Xⁱ,
-    p,
-    X,
-    rn::RealNumbers,
-)
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
+        Xⁱ,
+        p,
+        X,
+        rn::RealNumbers,
+    )
     N = get_parameter(M.manifold.size)[1]
-    MC = CholeskySpace(N; parameter=get_parameter_type(M.manifold))
+    MC = CholeskySpace(N; parameter = get_parameter_type(M.manifold))
     (y, W) = spd_to_cholesky(p, X)
     get_coordinates_orthonormal!(MC, Xⁱ, y, W, rn)
     return Xⁱ
 end
 
 function get_vector_orthonormal!(
-    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric},
-    X,
-    p,
-    Xⁱ,
-    rn::RealNumbers,
-)
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
+        X,
+        p,
+        Xⁱ,
+        rn::RealNumbers,
+    )
     N = get_parameter(M.manifold.size)[1]
-    MC = CholeskySpace(N; parameter=get_parameter_type(M.manifold))
+    MC = CholeskySpace(N; parameter = get_parameter_type(M.manifold))
     y = cholesky(p).L
     get_vector_orthonormal!(MC, X, y, Xⁱ, rn)
     tangent_cholesky_to_tangent_spd!(p, X)
@@ -122,11 +122,11 @@ where ``⟨⋅,⋅⟩_x`` denotes inner product on the [`CholeskySpace`](@ref),
 ``a_z(W) = z (z^{-1}Wz^{-\mathrm{T}})_{\frac{1}{2}}``, and ``(⋅)_\frac{1}{2}``
 denotes the lower triangular matrix with the diagonal multiplied by ``\frac{1}{2}``
 """
-function inner(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, X, Y)
+function inner(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, p, X, Y)
     N = get_parameter(M.manifold.size)[1]
     (z, Xz) = spd_to_cholesky(p, X)
     (z, Yz) = spd_to_cholesky(p, z, Y)
-    return inner(CholeskySpace(N; parameter=get_parameter_type(M.manifold)), z, Xz, Yz)
+    return inner(CholeskySpace(N; parameter = get_parameter_type(M.manifold)), z, Xz, Yz)
 end
 
 """
@@ -135,7 +135,7 @@ end
 Return true. [`SymmetricPositiveDefinite`](@ref) with [`LogCholeskyMetric`](@ref)
 is a flat manifold. See Proposition 8 of [Lin:2019](@cite).
 """
-is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}) = true
+is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}) = true
 
 @doc raw"""
     log(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, p, q)
@@ -149,13 +149,13 @@ The formula can be adapted from the [`CholeskySpace`](@ref) as
 where ``x`` is the Cholesky factor of ``p`` and ``W=\log_x y`` for ``y`` the Cholesky factor
 of ``q`` and the just mentioned logarithmic map is the one on [`CholeskySpace`](@ref).
 """
-log(::MetricManifold{ℝ,SymmetricPositiveDefinite,LogCholeskyMetric}, ::Any...)
+log(::MetricManifold{ℝ, SymmetricPositiveDefinite, LogCholeskyMetric}, ::Any...)
 
-function log!(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric}, X, p, q)
+function log!(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric}, X, p, q)
     N = get_parameter(M.manifold.size)[1]
     x = cholesky(p).L
     y = cholesky(q).L
-    log!(CholeskySpace(N; parameter=get_parameter_type(M.manifold)), X, x, y)
+    log!(CholeskySpace(N; parameter = get_parameter_type(M.manifold)), X, x, y)
     return tangent_cholesky_to_tangent_spd!(x, X)
 end
 
@@ -181,24 +181,24 @@ transport on [`CholeskySpace`](@ref) from ``x`` to ``y``. The formula hear reads
 ````
 """
 parallel_transport_to(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric},
+    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
     ::Any,
     ::Any,
     ::Any,
 )
 
 function parallel_transport_to!(
-    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogCholeskyMetric},
-    Y,
-    p,
-    X,
-    q,
-)
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogCholeskyMetric},
+        Y,
+        p,
+        X,
+        q,
+    )
     N = get_parameter(M.manifold.size)[1]
     y = cholesky(q).L
     (x, W) = spd_to_cholesky(p, X)
     parallel_transport_to!(
-        CholeskySpace(N; parameter=get_parameter_type(M.manifold)),
+        CholeskySpace(N; parameter = get_parameter_type(M.manifold)),
         Y,
         x,
         W,

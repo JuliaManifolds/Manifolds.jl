@@ -17,8 +17,8 @@ include("../header.jl")
             C₁ = reshape(
                 T[
                     0.0 0.0 1.0 0.0
-                    1.0 1/√2 0.0 0.0
-                    1.0 -1/√2 0.0 0.0
+                    1.0 1 / √2 0.0 0.0
+                    1.0 -1 / √2 0.0 0.0
                     0.0 0.0 0.0 0.0
                     0.0 0.0 0.0 1.0
                     0.0 0.0 0.0 0.0
@@ -27,23 +27,23 @@ include("../header.jl")
             )
             C₂ = reshape(
                 T[
-                    0.0 0.0 -1/√2 1/√2
-                    -1/√2 -0.5 0.0 0.0
-                    1.0 -1/√2 0.0 0.0
+                    0.0 0.0 -1 / √2 1 / √2
+                    -1 / √2 -0.5 0.0 0.0
+                    1.0 -1 / √2 0.0 0.0
                     0.0 0.0 0.0 0.0
-                    0.0 0.0 1/√2 1/√2
-                    1/√2 0.5 0.0 0.0
+                    0.0 0.0 1 / √2 1 / √2
+                    1 / √2 0.5 0.0 0.0
                 ],
                 (2, 3, 4),
             )
             C₃ = reshape(
                 T[
-                    1/√2 0.5 1/√2 0.0
-                    1/√2 0.5 -1/√2 0.0
-                    1/√2 -0.5 0.0 0.0
-                    -1/√2 0.5 0.0 0.0
-                    0.0 0.0 0.0 1/√2
-                    0.0 0.0 0.0 -1/√2
+                    1 / √2 0.5 1 / √2 0.0
+                    1 / √2 0.5 -1 / √2 0.0
+                    1 / √2 -0.5 0.0 0.0
+                    -1 / √2 0.5 0.0 0.0
+                    0.0 0.0 0.0 1 / √2
+                    0.0 0.0 0.0 -1 / √2
                 ],
                 (2, 3, 4),
             )
@@ -74,7 +74,7 @@ include("../header.jl")
             @test v == TuckerTangentVector(v.Ċ, v.U̇)
 
             @test manifold_dimension(M) ==
-                  prod(r⃗) + sum(ntuple(d -> r⃗[d] * (n⃗[d] - r⃗[d]), length(r⃗)))
+                prod(r⃗) + sum(ntuple(d -> r⃗[d] * (n⃗[d] - r⃗[d]), length(r⃗)))
             @test !is_flat(M)
 
             @test is_point(M_small, p_small)
@@ -130,30 +130,30 @@ include("../header.jl")
 
             @test sprint(show, "text/plain", M) == "Tucker((4, 5, 6), (2, 3, 4), ℝ)"
             @test sprint(show, "text/plain", p) == """
-            $(summary(p))
-            U factor 1:
-             $(shiftprint(p.hosvd.U[1]))\n
-            U factor 2:
-             $(shiftprint(p.hosvd.U[2]))\n
-            U factor 3:
-             $(shiftprint(p.hosvd.U[3]))\n
-            Core:
-             $(shiftprint(p.hosvd.core))"""
+                $(summary(p))
+                U factor 1:
+                 $(shiftprint(p.hosvd.U[1]))\n
+                U factor 2:
+                 $(shiftprint(p.hosvd.U[2]))\n
+                U factor 3:
+                 $(shiftprint(p.hosvd.U[3]))\n
+                Core:
+                 $(shiftprint(p.hosvd.core))"""
 
             @test sprint(show, "text/plain", v) == """
-            $(summary(v))
-            U̇ factor 1:
-             $(shiftprint(v.U̇[1]))\n
-            U̇ factor 2:
-             $(shiftprint(v.U̇[2]))\n
-            U̇ factor 3:
-             $(shiftprint(v.U̇[3]))\n
-            Ċ factor:
-             $(shiftprint(v.Ċ))"""
+                $(summary(v))
+                U̇ factor 1:
+                 $(shiftprint(v.U̇[1]))\n
+                U̇ factor 2:
+                 $(shiftprint(v.U̇[2]))\n
+                U̇ factor 3:
+                 $(shiftprint(v.U̇[3]))\n
+                Ċ factor:
+                 $(shiftprint(v.Ċ))"""
 
             @test sprint(show, "text/plain", ℬ) == """
-            $(summary(ℬ)) ≅ $(shiftprint(J))
-            """
+                $(summary(ℬ)) ≅ $(shiftprint(J))
+                """
 
             pts = [
                 p,
@@ -163,30 +163,30 @@ include("../header.jl")
             test_manifold(
                 M,
                 pts;
-                is_mutating=false, # avoid allocations of the wrong type
-                basis_types_to_from=(DefaultOrthonormalBasis(),),
-                basis_types_vecs=(DefaultOrthonormalBasis(),),
-                test_exp_log=false,
-                default_inverse_retraction_method=ProjectionInverseRetraction(),
-                test_injectivity_radius=false,
-                default_retraction_method=PolarRetraction(),
-                test_is_tangent=false,
-                test_project_tangent=false,
-                test_default_vector_transport=false,
-                test_vector_spaces=false,
-                test_vee_hat=false,
-                test_tangent_vector_broadcasting=true,
-                test_representation_size=false,
-                projection_atol_multiplier=15,
-                retraction_methods=[PolarRetraction()],
-                inverse_retraction_methods=[ProjectionInverseRetraction()],
-                mid_point12=nothing,
+                is_mutating = false, # avoid allocations of the wrong type
+                basis_types_to_from = (DefaultOrthonormalBasis(),),
+                basis_types_vecs = (DefaultOrthonormalBasis(),),
+                test_exp_log = false,
+                default_inverse_retraction_method = ProjectionInverseRetraction(),
+                test_injectivity_radius = false,
+                default_retraction_method = PolarRetraction(),
+                test_is_tangent = false,
+                test_project_tangent = false,
+                test_default_vector_transport = false,
+                test_vector_spaces = false,
+                test_vee_hat = false,
+                test_tangent_vector_broadcasting = true,
+                test_representation_size = false,
+                projection_atol_multiplier = 15,
+                retraction_methods = [PolarRetraction()],
+                inverse_retraction_methods = [ProjectionInverseRetraction()],
+                mid_point12 = nothing,
             )
         end
     end
     @testset "field parameter" begin
-        M = Tucker(n⃗, r⃗; parameter=:field)
+        M = Tucker(n⃗, r⃗; parameter = :field)
         @test sprint(show, "text/plain", M) ==
-              "Tucker((4, 5, 6), (2, 3, 4), ℝ; parameter=:field)"
+            "Tucker((4, 5, 6), (2, 3, 4), ℝ; parameter=:field)"
     end
 end

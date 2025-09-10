@@ -18,7 +18,7 @@ include("group_utils.jl")
 
     ge = allocate(pts[1])
     identity_element!(G, ge)
-    @test isapprox(ge, I; atol=1e-10)
+    @test isapprox(ge, I; atol = 1.0e-10)
 
     @test check_point(G, [0.0 2.0 3.0; 0.0 1.0 -1.0; 0.0 0.0 1.0]) isa DomainError
     @test check_point(G, [1.0 2.0 3.0; 0.0 1.0 -1.0; 1.0 0.0 1.0]) isa DomainError
@@ -37,27 +37,27 @@ include("group_utils.jl")
         pts,
         Xpts,
         Xpts;
-        test_diff=true,
-        test_invariance=true,
-        test_lie_bracket=true,
-        test_adjoint_action=true,
+        test_diff = true,
+        test_invariance = true,
+        test_lie_bracket = true,
+        test_adjoint_action = true,
     )
 
     test_manifold(
         G,
         pts;
-        basis_types_to_from=(DefaultOrthonormalBasis(),),
-        parallel_transport=true,
-        test_injectivity_radius=true,
-        test_project_point=true,
-        test_project_tangent=true,
-        test_musical_isomorphisms=false,
-        test_rand_point=true,
-        test_rand_tvector=true,
+        basis_types_to_from = (DefaultOrthonormalBasis(),),
+        parallel_transport = true,
+        test_injectivity_radius = true,
+        test_project_point = true,
+        test_project_tangent = true,
+        test_musical_isomorphisms = false,
+        test_rand_point = true,
+        test_rand_tvector = true,
     )
     @testset "field parameter" begin
-        G = HeisenbergGroup(1; parameter=:field)
-        @test typeof(get_embedding(G)) === Euclidean{Tuple{Int,Int},ℝ}
+        G = HeisenbergGroup(1; parameter = :field)
+        @test typeof(get_embedding(G)) === Euclidean{Tuple{Int, Int}, ℝ}
         @test repr(G) == "HeisenbergGroup(1; parameter=:field)"
     end
 end

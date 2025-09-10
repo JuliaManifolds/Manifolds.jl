@@ -5,7 +5,7 @@ The circle group is the complex circle ([`Circle(ℂ)`](@ref)) equipped with
 the group operation of complex multiplication ([`MultiplicationOperation`](@ref)).
 """
 const CircleGroup =
-    GroupManifold{ℂ,Circle{ℂ},MultiplicationOperation,TangentVectorRepresentation}
+    GroupManifold{ℂ, Circle{ℂ}, MultiplicationOperation, TangentVectorRepresentation}
 
 function CircleGroup()
     _lie_groups_depwarn_move(CircleGroup)
@@ -44,21 +44,21 @@ adjoint_action!(::CircleGroup, Y, p, X, ::LeftAction) = copyto!(Y, X)
 adjoint_action!(::CircleGroup, Y, p, X, ::RightAction) = copyto!(Y, X)
 
 function compose(
-    ::MultiplicationGroupTrait,
-    G::CircleGroup,
-    p::AbstractArray{<:Any,0},
-    q::AbstractArray{<:Any,0},
-)
+        ::MultiplicationGroupTrait,
+        G::CircleGroup,
+        p::AbstractArray{<:Any, 0},
+        q::AbstractArray{<:Any, 0},
+    )
     return map((pp, qq) -> compose(G, pp, qq), p, q)
 end
 
 function compose!(
-    ::MultiplicationGroupTrait,
-    G::CircleGroup,
-    x,
-    p::AbstractArray{<:Any,0},
-    q::AbstractArray{<:Any,0},
-)
+        ::MultiplicationGroupTrait,
+        G::CircleGroup,
+        x,
+        p::AbstractArray{<:Any, 0},
+        q::AbstractArray{<:Any, 0},
+    )
     return copyto!(x, compose(G, p, q))
 end
 
@@ -69,22 +69,22 @@ has_invariant_metric(::CircleGroup, ::ActionDirectionAndSide) = true
 identity_element(G::CircleGroup) = 1.0
 identity_element(::CircleGroup, p::Number) = one(p)
 
-Base.inv(G::CircleGroup, p::AbstractArray{<:Any,0}) = map(pp -> inv(G, pp), p)
+Base.inv(G::CircleGroup, p::AbstractArray{<:Any, 0}) = map(pp -> inv(G, pp), p)
 
 function inverse_translate(
-    ::CircleGroup,
-    p::AbstractArray{<:Any,0},
-    q::AbstractArray{<:Any,0},
-    ::LeftForwardAction,
-)
+        ::CircleGroup,
+        p::AbstractArray{<:Any, 0},
+        q::AbstractArray{<:Any, 0},
+        ::LeftForwardAction,
+    )
     return map(/, q, p)
 end
 function inverse_translate(
-    ::CircleGroup,
-    p::AbstractArray{<:Any,0},
-    q::AbstractArray{<:Any,0},
-    ::RightBackwardAction,
-)
+        ::CircleGroup,
+        p::AbstractArray{<:Any, 0},
+        q::AbstractArray{<:Any, 0},
+        ::RightBackwardAction,
+    )
     return map(/, q, p)
 end
 
@@ -100,12 +100,12 @@ for AD in [LeftForwardAction, RightForwardAction, LeftBackwardAction, RightBackw
             return translate_diff(G, p, q, X)
         end
         function translate_diff(
-            ::CircleGroup,
-            ::Identity{MultiplicationOperation},
-            q,
-            X,
-            ::$AD,
-        )
+                ::CircleGroup,
+                ::Identity{MultiplicationOperation},
+                q,
+                X,
+                ::$AD,
+            )
             return X
         end
     end
@@ -156,7 +156,7 @@ The real circle group is the real circle ([`Circle(ℝ)`](@ref)) equipped with
 the group operation of addition ([`AdditionOperation`](@ref)).
 """
 const RealCircleGroup =
-    GroupManifold{ℝ,Circle{ℝ},AdditionOperation,LeftInvariantRepresentation}
+    GroupManifold{ℝ, Circle{ℝ}, AdditionOperation, LeftInvariantRepresentation}
 
 function RealCircleGroup()
     return GroupManifold(Circle{ℝ}(), AdditionOperation(), LeftInvariantRepresentation())
@@ -197,10 +197,10 @@ compose(::RealCircleGroup, p, q) = sym_rem(p + q)
 compose(::RealCircleGroup, ::Identity{AdditionOperation}, q) = sym_rem(q)
 compose(::RealCircleGroup, p, ::Identity{AdditionOperation}) = sym_rem(p)
 function compose(
-    ::RealCircleGroup,
-    e::Identity{AdditionOperation},
-    ::Identity{AdditionOperation},
-)
+        ::RealCircleGroup,
+        e::Identity{AdditionOperation},
+        ::Identity{AdditionOperation},
+    )
     return e
 end
 
@@ -208,33 +208,33 @@ compose!(::RealCircleGroup, x, p, q) = copyto!(x, sym_rem(p + q))
 compose!(::RealCircleGroup, x, ::Identity{AdditionOperation}, q) = copyto!(x, sym_rem(q))
 compose!(::RealCircleGroup, x, p, ::Identity{AdditionOperation}) = copyto!(x, sym_rem(p))
 function compose!(
-    ::RealCircleGroup,
-    ::Identity{AdditionOperation},
-    e::Identity{AdditionOperation},
-    ::Identity{AdditionOperation},
-)
+        ::RealCircleGroup,
+        ::Identity{AdditionOperation},
+        e::Identity{AdditionOperation},
+        ::Identity{AdditionOperation},
+    )
     return e
 end
 
 identity_element(G::RealCircleGroup) = 0.0
 identity_element(::RealCircleGroup, p) = zero(p)
 
-Base.inv(G::RealCircleGroup, p::AbstractArray{<:Any,0}) = map(pp -> inv(G, pp), p)
+Base.inv(G::RealCircleGroup, p::AbstractArray{<:Any, 0}) = map(pp -> inv(G, pp), p)
 
 function inverse_translate(
-    ::RealCircleGroup,
-    p::AbstractArray{<:Any,0},
-    q::AbstractArray{<:Any,0},
-    ::LeftForwardAction,
-)
+        ::RealCircleGroup,
+        p::AbstractArray{<:Any, 0},
+        q::AbstractArray{<:Any, 0},
+        ::LeftForwardAction,
+    )
     return map((x, y) -> sym_rem(x - y), q, p)
 end
 function inverse_translate(
-    ::RealCircleGroup,
-    p::AbstractArray{<:Any,0},
-    q::AbstractArray{<:Any,0},
-    ::RightBackwardAction,
-)
+        ::RealCircleGroup,
+        p::AbstractArray{<:Any, 0},
+        q::AbstractArray{<:Any, 0},
+        ::RightBackwardAction,
+    )
     return map((x, y) -> sym_rem(x - y), q, p)
 end
 
@@ -251,12 +251,12 @@ for AD in [LeftForwardAction, RightForwardAction, LeftBackwardAction, RightBackw
             return X
         end
         function translate_diff(
-            ::RealCircleGroup,
-            ::Identity{AdditionOperation},
-            q,
-            X,
-            ::$AD,
-        )
+                ::RealCircleGroup,
+                ::Identity{AdditionOperation},
+                q,
+                X,
+                ::$AD,
+            )
             return X
         end
     end

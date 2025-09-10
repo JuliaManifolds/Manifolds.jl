@@ -31,20 +31,20 @@ The manifold is named after
 
 Generate the (real-valued) Stiefel manifold of ``n×k`` dimensional orthonormal matrices.
 """
-struct Stiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct Stiefel{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, k))
-    return Stiefel{typeof(size),field}(size)
+    return Stiefel{typeof(size), field}(size)
 end
 
 function active_traits(f, ::Stiefel, args...)
     return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
 end
 
-function allocation_promotion_function(::Stiefel{<:Any,ℂ}, ::Any, ::Tuple)
+function allocation_promotion_function(::Stiefel{<:Any, ℂ}, ::Any, ::Tuple)
     return complex
 end
 
@@ -143,12 +143,12 @@ end
 embed(::Stiefel, p) = p
 embed(::Stiefel, p, X) = X
 
-function get_embedding(::Stiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return Euclidean(n, k; field=𝔽)
+function get_embedding(::Stiefel{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
+    return Euclidean(n, k; field = 𝔽)
 end
-function get_embedding(M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+function get_embedding(M::Stiefel{Tuple{Int, Int}, 𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
-    return Euclidean(n, k; field=𝔽, parameter=:field)
+    return Euclidean(n, k; field = 𝔽, parameter = :field)
 end
 
 @doc raw"""
@@ -199,26 +199,26 @@ function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
 end
 
 function _stiefel_inv_retr_qr_mul_by_r!(
-    ::Stiefel{TypeParameter{Tuple{n,1}}},
-    X,
-    q,
-    A,
-    ::Type,
-) where {n}
-    @inbounds R = SMatrix{1,1}(inv(A[1, 1]))
+        ::Stiefel{TypeParameter{Tuple{n, 1}}},
+        X,
+        q,
+        A,
+        ::Type,
+    ) where {n}
+    @inbounds R = SMatrix{1, 1}(inv(A[1, 1]))
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{TypeParameter{Tuple{n,1}}},
-    X,
-    q,
-    A::StaticArray,
-    ::Type{ElT},
-) where {n,ElT}
+        M::Stiefel{TypeParameter{Tuple{n, 1}}},
+        X,
+        q,
+        A::StaticArray,
+        ::Type{ElT},
+    ) where {n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
         Tuple{
-            Stiefel{TypeParameter{Tuple{n,1}}},
+            Stiefel{TypeParameter{Tuple{n, 1}}},
             typeof(X),
             typeof(q),
             AbstractArray,
@@ -232,12 +232,12 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    ::Stiefel{TypeParameter{Tuple{n,2}}},
-    X,
-    q,
-    A,
-    ::Type{ElT},
-) where {n,ElT}
+        ::Stiefel{TypeParameter{Tuple{n, 2}}},
+        X,
+        q,
+        A,
+        ::Type{ElT},
+    ) where {n, ElT}
     R11 = inv(A[1, 1])
     @inbounds R =
         hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
@@ -247,16 +247,16 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{TypeParameter{Tuple{n,2}}},
-    X,
-    q,
-    A::StaticArray,
-    ::Type{ElT},
-) where {n,ElT}
+        M::Stiefel{TypeParameter{Tuple{n, 2}}},
+        X,
+        q,
+        A::StaticArray,
+        ::Type{ElT},
+    ) where {n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
         Tuple{
-            Stiefel{TypeParameter{Tuple{n,2}}},
+            Stiefel{TypeParameter{Tuple{n, 2}}},
             typeof(X),
             typeof(q),
             AbstractArray,
@@ -270,13 +270,13 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{TypeParameter{Tuple{n,k}}},
-    X,
-    q,
-    A::StaticArray,
-    ::Type{ElT},
-) where {n,k,ElT}
-    R = zeros(MMatrix{k,k,ElT})
+        M::Stiefel{TypeParameter{Tuple{n, k}}},
+        X,
+        q,
+        A::StaticArray,
+        ::Type{ElT},
+    ) where {n, k, ElT}
+    R = zeros(MMatrix{k, k, ElT})
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(M::Stiefel, X, q, A, ::Type{ElT}) where {ElT}
@@ -303,8 +303,8 @@ function inverse_retract_qr!(M::Stiefel, X, p, q)
     return X
 end
 
-function _isapprox(M::Stiefel, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
-    return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
+function _isapprox(M::Stiefel, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
+    return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end
 
 """
@@ -328,15 +328,15 @@ The dimension is given by
 \end{aligned}
 ````
 """
-function manifold_dimension(M::Stiefel{<:Any,ℝ})
+function manifold_dimension(M::Stiefel{<:Any, ℝ})
     n, k = get_parameter(M.size)
     return n * k - div(k * (k + 1), 2)
 end
-function manifold_dimension(M::Stiefel{<:Any,ℂ})
+function manifold_dimension(M::Stiefel{<:Any, ℂ})
     n, k = get_parameter(M.size)
     return 2 * n * k - k * k
 end
-function manifold_dimension(M::Stiefel{<:Any,ℍ})
+function manifold_dimension(M::Stiefel{<:Any, ℍ})
     n, k = get_parameter(M.size)
     return 4 * n * k - k * (2k - 1)
 end
@@ -353,15 +353,15 @@ When `vector_at` is not `nothing`, return a (Gaussian) random vector from the ta
 ``T_{vector\_at}\mathrm{St}(n,k)`` with mean zero and standard deviation `σ` by projecting a
 random Matrix onto the tangent vector at `vector_at`.
 """
-rand(::Stiefel; σ::Real=1.0)
+rand(::Stiefel; σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::Stiefel{<:Any,𝔽},
-    pX;
-    vector_at=nothing,
-    σ::Real=one(real(eltype(pX))),
-) where {𝔽}
+        rng::AbstractRNG,
+        M::Stiefel{<:Any, 𝔽},
+        pX;
+        vector_at = nothing,
+        σ::Real = one(real(eltype(pX))),
+    ) where {𝔽}
     n, k = get_parameter(M.size)
     if vector_at === nothing
         A = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, n, k)
@@ -475,13 +475,13 @@ function ManifoldsBase.retract_pade!(M::Stiefel, q, p, X, m::PadeRetraction)
 end
 
 function ManifoldsBase.retract_pade_fused!(
-    ::Stiefel,
-    q,
-    p,
-    X,
-    t::Number,
-    ::PadeRetraction{m},
-) where {m}
+        ::Stiefel,
+        q,
+        p,
+        X,
+        t::Number,
+        ::PadeRetraction{m},
+    ) where {m}
     tX = t * X
     Pp = I - 1 // 2 * p * p'
     WpX = Pp * tX * p' - p * tX' * Pp
@@ -532,10 +532,10 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 representation_size(M::Stiefel) = get_parameter(M.size)
 
-function Base.show(io::IO, ::Stiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+function Base.show(io::IO, ::Stiefel{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
     return print(io, "Stiefel($(n), $(k), $(𝔽))")
 end
-function Base.show(io::IO, M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::Stiefel{Tuple{Int, Int}, 𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return print(io, "Stiefel($(n), $(k), $(𝔽); parameter=:field)")
 end

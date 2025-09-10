@@ -5,7 +5,7 @@ Direct product group operation.
 """
 struct ProductOperation <: AbstractGroupOperation end
 
-const ProductGroup{𝔽,T} = GroupManifold{𝔽,ProductManifold{𝔽,T},ProductOperation}
+const ProductGroup{𝔽, T} = GroupManifold{𝔽, ProductManifold{𝔽, T}, ProductOperation}
 
 """
     ProductGroup{𝔽,T} <: GroupManifold{𝔽,ProductManifold{T},ProductOperation}
@@ -104,19 +104,19 @@ end
 submanifold(G::ProductGroup, i) = submanifold(base_manifold(G), i)
 
 function submanifold_component(
-    G::GroupManifold{𝔽,MT,O},
-    ::Identity{O},
-    ::Val{I},
-) where {I,MT<:ProductManifold,𝔽,O}
+        G::GroupManifold{𝔽, MT, O},
+        ::Identity{O},
+        ::Val{I},
+    ) where {I, MT <: ProductManifold, 𝔽, O}
     M = G.manifold
     # the identity on a product manifold with is a group consists of a tuple of identities
     return Identity(M.manifolds[I])
 end
 
 function submanifold_components(
-    G::GroupManifold{𝔽,MT,O},
-    ::Identity{O},
-) where {MT<:ProductManifold,𝔽,O<:AbstractGroupOperation}
+        G::GroupManifold{𝔽, MT, O},
+        ::Identity{O},
+    ) where {MT <: ProductManifold, 𝔽, O <: AbstractGroupOperation}
     M = base_manifold(G)
     return map(N -> Identity(N), M.manifolds)
 end
@@ -205,13 +205,13 @@ translate_diff(::ProductGroup, ::Identity, q, X, ::LeftBackwardAction) = X
 translate_diff(::ProductGroup, ::Identity, q, X, ::RightBackwardAction) = X
 
 function _common_product_translate_diff!(
-    G::ProductGroup,
-    Y,
-    p,
-    q,
-    X,
-    conv::ActionDirectionAndSide,
-)
+        G::ProductGroup,
+        Y,
+        p,
+        q,
+        X,
+        conv::ActionDirectionAndSide,
+    )
     M = G.manifold
     map(
         translate_diff!,

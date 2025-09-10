@@ -15,7 +15,7 @@ using Manifolds: LeftForwardAction, RightBackwardAction
         @test manifold_dimension(G) == 9
         @test representation_size(G) == (3, 3)
         Gc = GeneralLinear(2, ℂ)
-        @test get_embedding(Gc) === Euclidean(2, 2; field=ℂ)
+        @test get_embedding(Gc) === Euclidean(2, 2; field = ℂ)
         @test repr(Gc) == "GeneralLinear(2, ℂ)"
         @test number_system(Gc) == ℂ
         @test manifold_dimension(Gc) == 8
@@ -66,20 +66,20 @@ using Manifolds: LeftForwardAction, RightBackwardAction
     @testset "Real" begin
         G = GeneralLinear(3)
 
-        @test_throws ManifoldDomainError is_point(G, randn(2, 3); error=:error)
-        @test_throws ManifoldDomainError is_point(G, randn(2, 2); error=:error)
-        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3); error=:error)
-        @test_throws DomainError is_point(G, zeros(3, 3); error=:error)
-        @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1]; error=:error)
-        @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1]; error=:error)
-        @test is_point(G, Identity(G); error=:error)
+        @test_throws ManifoldDomainError is_point(G, randn(2, 3); error = :error)
+        @test_throws ManifoldDomainError is_point(G, randn(2, 2); error = :error)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3); error = :error)
+        @test_throws DomainError is_point(G, zeros(3, 3); error = :error)
+        @test_throws DomainError is_point(G, Float64[0 0 0; 0 1 1; 1 1 1]; error = :error)
+        @test is_point(G, Float64[0 0 1; 0 1 1; 1 1 1]; error = :error)
+        @test is_point(G, Identity(G); error = :error)
         @test_throws DomainError is_vector(
             G,
             Float64[0 1 1; 0 1 1; 1 0 0],
             randn(3, 3);
-            error=:error,
+            error = :error,
         )
-        @test is_vector(G, Float64[0 0 1; 0 1 1; 1 1 1], randn(3, 3); error=:error)
+        @test is_vector(G, Float64[0 0 1; 0 1 1; 1 1 1], randn(3, 3); error = :error)
 
         types = [Matrix{Float64}]
         pts = [
@@ -109,35 +109,35 @@ using Manifolds: LeftForwardAction, RightBackwardAction
                 gpts,
                 vgpts,
                 vgpts;
-                test_diff=true,
-                test_invariance=true,
-                test_lie_bracket=true,
-                test_adjoint_action=true,
-                test_apply_diff_group=true,
+                test_diff = true,
+                test_invariance = true,
+                test_lie_bracket = true,
+                test_adjoint_action = true,
+                test_apply_diff_group = true,
             )
             test_manifold(
                 G,
                 gpts;
-                test_inplace=true,
-                test_project_point=true,
-                test_injectivity_radius=false,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                has_get_embedding=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_inplace = true,
+                test_project_point = true,
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                has_get_embedding = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                basis_types_vecs=basis_types,
-                basis_types_to_from=basis_types,
-                exp_log_atol_multiplier=1e7,
-                retraction_atol_multiplier=1e7,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                basis_types_vecs = basis_types,
+                basis_types_to_from = basis_types,
+                exp_log_atol_multiplier = 1.0e7,
+                retraction_atol_multiplier = 1.0e7,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
         end
     end
@@ -145,32 +145,32 @@ using Manifolds: LeftForwardAction, RightBackwardAction
     @testset "Complex" begin
         G = GeneralLinear(2, ℂ)
 
-        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3); error=:error)
-        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3); error=:error)
-        @test_throws DomainError is_point(G, zeros(2, 2); error=:error)
-        @test_throws DomainError is_point(G, ComplexF64[1 im; 1 im]; error=:error)
-        @test is_point(G, ComplexF64[1 1; im 1]; error=:error)
-        @test is_point(G, Identity(G); error=:error)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 2, 3); error = :error)
+        @test_throws ManifoldDomainError is_point(G, randn(ComplexF64, 3, 3); error = :error)
+        @test_throws DomainError is_point(G, zeros(2, 2); error = :error)
+        @test_throws DomainError is_point(G, ComplexF64[1 im; 1 im]; error = :error)
+        @test is_point(G, ComplexF64[1 1; im 1]; error = :error)
+        @test is_point(G, Identity(G); error = :error)
         @test_throws ManifoldDomainError is_point(
             G,
             Float64[0 0 0; 0 1 1; 1 1 1];
-            error=:error,
+            error = :error,
         )
         @test_throws DomainError is_vector(
             G,
             ComplexF64[im im; im im],
             randn(ComplexF64, 2, 2);
-            error=:error,
+            error = :error,
         )
-        @test is_vector(G, ComplexF64[1 im; im im], randn(ComplexF64, 2, 2); error=:error)
+        @test is_vector(G, ComplexF64[1 im; im im], randn(ComplexF64, 2, 2); error = :error)
 
         types = [Matrix{ComplexF64}]
         pts = [
-            [-1-5im -1+3im; -6-4im 4+6im],
-            [1+3im -1-4im; -2-2im -3-1im],
-            [-6+0im 1+1im; 1-1im -4+0im],
+            [-1 - 5im -1 + 3im; -6 - 4im 4 + 6im],
+            [1 + 3im -1 - 4im; -2 - 2im -3 - 1im],
+            [-6 + 0im 1 + 1im; 1 - 1im -4 + 0im],
         ]
-        vpts = [[1+0im -2-1im; -1-2im -4+1im], [-2+2im -1-1im; -1-1im -3+0im]]
+        vpts = [[1 + 0im -2 - 1im; -1 - 2im -4 + 1im], [-2 + 2im -1 - 1im; -1 - 1im -3 + 0im]]
 
         retraction_methods = [
             Manifolds.GroupExponentialRetraction(LeftForwardAction()),
@@ -185,30 +185,30 @@ using Manifolds: LeftForwardAction, RightBackwardAction
         for T in types
             gpts = convert.(T, pts)
             vgpts = convert.(T, vpts)
-            test_group(G, gpts, vgpts, vgpts; test_diff=true, test_invariance=true)
+            test_group(G, gpts, vgpts, vgpts; test_diff = true, test_invariance = true)
             test_manifold(
                 G,
                 gpts;
-                test_project_point=true,
-                test_injectivity_radius=false,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_project_point = true,
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                retraction_methods=retraction_methods,
-                inverse_retraction_methods=inverse_retraction_methods,
-                exp_log_atol_multiplier=1e8,
-                retraction_atol_multiplier=1e8,
+                retraction_methods = retraction_methods,
+                inverse_retraction_methods = inverse_retraction_methods,
+                exp_log_atol_multiplier = 1.0e8,
+                retraction_atol_multiplier = 1.0e8,
             )
         end
     end
     @testset "field parameter" begin
-        G = GeneralLinear(3; parameter=:field)
-        @test typeof(get_embedding(G)) === Euclidean{Tuple{Int,Int},ℝ}
+        G = GeneralLinear(3; parameter = :field)
+        @test typeof(get_embedding(G)) === Euclidean{Tuple{Int, Int}, ℝ}
         @test repr(G) == "GeneralLinear(3, ℝ; parameter=:field)"
     end
 

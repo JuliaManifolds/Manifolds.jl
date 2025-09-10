@@ -23,8 +23,8 @@ This manifold is modeled as a [`PowerManifold`](@extref `ManifoldsBase.PowerMani
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in a type parameter. Value can either be `:field` or `:type`.
 """
-PositiveVectors(n::Integer; parameter::Symbol=:type) =
-    PowerManifold(PositiveNumbers(), n; parameter=parameter)
+PositiveVectors(n::Integer; parameter::Symbol = :type) =
+    PowerManifold(PositiveNumbers(), n; parameter = parameter)
 
 """
     PositiveMatrices(m::Integer, n::Integer; parameter::Symbol=:type)
@@ -35,8 +35,8 @@ This manifold is modeled as a [`PowerManifold`](@extref `ManifoldsBase.PowerMani
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in a type parameter. Value can either be `:field` or `:type`.
 """
-PositiveMatrices(n::Integer, m::Integer; parameter::Symbol=:type) =
-    PowerManifold(PositiveNumbers(), n, m; parameter=parameter)
+PositiveMatrices(n::Integer, m::Integer; parameter::Symbol = :type) =
+    PowerManifold(PositiveNumbers(), n, m; parameter = parameter)
 
 """
     PositiveArrays(n₁, n₂, ..., nᵢ; parameter::Symbol=:type)
@@ -47,8 +47,8 @@ This manifold is modeled as a [`PowerManifold`](@extref `ManifoldsBase.PowerMani
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in a type parameter. Value can either be `:field` or `:type`.
 """
-PositiveArrays(n::Vararg{Int,I}; parameter::Symbol=:type) where {I} =
-    PowerManifold(PositiveNumbers(), n...; parameter=parameter)
+PositiveArrays(n::Vararg{Int, I}; parameter::Symbol = :type) where {I} =
+    PowerManifold(PositiveNumbers(), n...; parameter = parameter)
 
 @doc raw"""
     change_representer(M::PositiveNumbers, E::EuclideanMetric, p, X)
@@ -278,18 +278,18 @@ representation_size(::PositiveNumbers) = ()
 Base.show(io::IO, ::PositiveNumbers) = print(io, "PositiveNumbers()")
 
 function Base.show(
-    io::IO,
-    M::PowerManifold{ℝ,PositiveNumbers,TSize,ArrayPowerRepresentation},
-) where {TSize<:TypeParameter}
+        io::IO,
+        M::PowerManifold{ℝ, PositiveNumbers, TSize, ArrayPowerRepresentation},
+    ) where {TSize <: TypeParameter}
     s = get_parameter(M.size)
     (length(s) == 1) && return print(io, "PositiveVectors($(s[1]))")
     (length(s) == 2) && return print(io, "PositiveMatrices($(s[1]), $(s[2]))")
     return print(io, "PositiveArrays($(join(s, ", ")))")
 end
 function Base.show(
-    io::IO,
-    M::PowerManifold{ℝ,PositiveNumbers,TSize,ArrayPowerRepresentation},
-) where {TSize<:Tuple}
+        io::IO,
+        M::PowerManifold{ℝ, PositiveNumbers, TSize, ArrayPowerRepresentation},
+    ) where {TSize <: Tuple}
     s = get_parameter(M.size)
     (length(s) == 1) && return print(io, "PositiveVectors($(s[1]); parameter=:field)")
     (length(s) == 2) &&
@@ -320,7 +320,7 @@ function Random.rand(M::PositiveNumbers; kwargs...)
     return rand(Random.default_rng(), M; kwargs...)
 end
 
-function Random.rand(rng::AbstractRNG, ::PositiveNumbers; σ=1.0, vector_at=nothing)
+function Random.rand(rng::AbstractRNG, ::PositiveNumbers; σ = 1.0, vector_at = nothing)
     if vector_at === nothing
         pX = exp(randn(rng) * σ)
     else
@@ -330,12 +330,12 @@ function Random.rand(rng::AbstractRNG, ::PositiveNumbers; σ=1.0, vector_at=noth
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    ::PositiveNumbers,
-    pX;
-    σ=one(eltype(pX)),
-    vector_at=nothing,
-)
+        rng::AbstractRNG,
+        ::PositiveNumbers,
+        pX;
+        σ = one(eltype(pX)),
+        vector_at = nothing,
+    )
     if vector_at === nothing
         pX .= exp(randn(rng) * σ)
     else
@@ -359,12 +359,12 @@ Then the formula reads
 riemannian_Hessian(::PositiveNumbers, p, G, H, X) = p * H * p + X * G * p
 
 function vector_transport_direction(
-    M::PositiveNumbers,
-    p,
-    X,
-    Y,
-    m::AbstractVectorTransportMethod,
-)
+        M::PositiveNumbers,
+        p,
+        X,
+        Y,
+        m::AbstractVectorTransportMethod,
+    )
     q = exp(M, p, Y)
     return vector_transport_to(M, p, X, q, m)
 end

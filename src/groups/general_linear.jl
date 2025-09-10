@@ -1,4 +1,3 @@
-
 @doc raw"""
     GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
 
@@ -16,7 +15,7 @@ vector in the Lie algebra, and ``⟨⋅,⋅⟩_\mathrm{F}`` denotes the Frobeniu
 By default, tangent vectors ``X_p`` are represented with their corresponding Lie algebra
 vectors ``X_e = p^{-1}X_p``.
 """
-struct GeneralLinear{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct GeneralLinear{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
@@ -29,13 +28,13 @@ function active_traits(f, ::GeneralLinear, args...)
     )
 end
 
-function GeneralLinear(n::Int, 𝔽::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function GeneralLinear(n::Int, 𝔽::AbstractNumbers = ℝ; parameter::Symbol = :type)
     _lie_groups_depwarn_move(GeneralLinear, :GeneralLinearGroup)
     size = wrap_type_parameter(parameter, (n,))
-    return GeneralLinear{typeof(size),𝔽}(size)
+    return GeneralLinear{typeof(size), 𝔽}(size)
 end
 
-function allocation_promotion_function(::GeneralLinear{<:Any,ℂ}, f, ::Tuple)
+function allocation_promotion_function(::GeneralLinear{<:Any, ℂ}, f, ::Tuple)
     return complex
 end
 
@@ -102,7 +101,7 @@ end
 
 function exp!(G::GeneralLinear, q, p, X)
     expX = exp(X)
-    if isnormal(X; atol=sqrt(eps(real(eltype(X)))))
+    if isnormal(X; atol = sqrt(eps(real(eltype(X)))))
         return compose!(G, q, p, expX)
     end
     # allocates a bit because `q` and `p` might alias
@@ -119,60 +118,60 @@ function exp!(::GeneralLinear{TypeParameter{Tuple{1}}}, q, p, X)
     return q
 end
 function exp!(G::GeneralLinear{TypeParameter{Tuple{2}}}, q, p, X)
-    if isnormal(X; atol=sqrt(eps(real(eltype(X)))))
-        return compose!(G, q, p, exp(SizedMatrix{2,2}(X)))
+    if isnormal(X; atol = sqrt(eps(real(eltype(X)))))
+        return compose!(G, q, p, exp(SizedMatrix{2, 2}(X)))
     end
-    A = SizedMatrix{2,2}(X')
-    B = SizedMatrix{2,2}(X) - A
+    A = SizedMatrix{2, 2}(X')
+    B = SizedMatrix{2, 2}(X) - A
     compose!(G, q, exp(A), exp(B))
     compose!(G, q, p, q)
     return q
 end
 
 function get_coordinates(
-    ::GeneralLinear{<:Any,ℝ},
-    p,
-    X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-)
+        ::GeneralLinear{<:Any, ℝ},
+        p,
+        X,
+        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+    )
     return vec(X)
 end
 
 function get_coordinates!(
-    ::GeneralLinear{<:Any,ℝ},
-    Xⁱ,
-    p,
-    X,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-)
+        ::GeneralLinear{<:Any, ℝ},
+        Xⁱ,
+        p,
+        X,
+        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+    )
     return copyto!(Xⁱ, X)
 end
 
-function get_embedding(::GeneralLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
-    return Euclidean(n, n; field=𝔽)
+function get_embedding(::GeneralLinear{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
+    return Euclidean(n, n; field = 𝔽)
 end
-function get_embedding(M::GeneralLinear{Tuple{Int},𝔽}) where {𝔽}
+function get_embedding(M::GeneralLinear{Tuple{Int}, 𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return Euclidean(n, n; field=𝔽, parameter=:field)
+    return Euclidean(n, n; field = 𝔽, parameter = :field)
 end
 
 function get_vector(
-    M::GeneralLinear{<:Any,ℝ},
-    p,
-    Xⁱ,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-)
+        M::GeneralLinear{<:Any, ℝ},
+        p,
+        Xⁱ,
+        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+    )
     n = get_parameter(M.size)[1]
     return reshape(Xⁱ, n, n)
 end
 
 function get_vector!(
-    ::GeneralLinear{<:Any,ℝ},
-    X,
-    p,
-    Xⁱ,
-    ::DefaultOrthonormalBasis{ℝ,TangentSpaceType},
-)
+        ::GeneralLinear{<:Any, ℝ},
+        X,
+        p,
+        Xⁱ,
+        ::DefaultOrthonormalBasis{ℝ, TangentSpaceType},
+    )
     return copyto!(X, Xⁱ)
 end
 
@@ -181,7 +180,7 @@ function exp_lie!(::GeneralLinear{TypeParameter{Tuple{1}}}, q, X)
     return q
 end
 function exp_lie!(::GeneralLinear{TypeParameter{Tuple{2}}}, q, X)
-    return copyto!(q, exp(SizedMatrix{2,2}(X)))
+    return copyto!(q, exp(SizedMatrix{2, 2}(X)))
 end
 
 inner(::GeneralLinear, p, X, Y) = dot(X, Y)
@@ -223,11 +222,11 @@ function log(M::GeneralLinear, p, q)
     return log!(M, X, p, q)
 end
 
-function log!(G::GeneralLinear{<:Any,𝔽}, X, p, q) where {𝔽}
+function log!(G::GeneralLinear{<:Any, 𝔽}, X, p, q) where {𝔽}
     n = get_parameter(G.size)[1]
     pinvq = inverse_translate(G, p, q, LeftForwardAction())
     𝔽 === ℝ && det(pinvq) ≤ 0 && throw(OutOfInjectivityRadiusError())
-    if isnormal(pinvq; atol=sqrt(eps(real(eltype(pinvq)))))
+    if isnormal(pinvq; atol = sqrt(eps(real(eltype(pinvq)))))
         log_safe!(X, pinvq)
     else
         # compute the equivalent logarithm on GL(dim(𝔽) * n, ℝ)
@@ -342,10 +341,10 @@ function riemannian_gradient!(::GeneralLinear, Y, p, X)
     return Y
 end
 
-function Base.show(io::IO, ::GeneralLinear{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+function Base.show(io::IO, ::GeneralLinear{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
     return print(io, "GeneralLinear($n, $(𝔽))")
 end
-function Base.show(io::IO, M::GeneralLinear{Tuple{Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::GeneralLinear{Tuple{Int}, 𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "GeneralLinear($n, $(𝔽); parameter=:field)")
 end

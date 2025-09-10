@@ -97,27 +97,27 @@ using Manifolds: LeftForwardAction, RightBackwardAction
     end
 
     for conv in (LeftForwardAction(), RightBackwardAction())
-        @test translate_diff(AG, q2, p2, X2, conv; atol=1e-10) isa ValidationTangentVector
+        @test translate_diff(AG, q2, p2, X2, conv; atol = 1.0e-10) isa ValidationTangentVector
         @test isapprox(
             G,
-            translate_diff(AG, q2, p2, X2, conv; atol=1e-10).value,
+            translate_diff(AG, q2, p2, X2, conv; atol = 1.0e-10).value,
             translate_diff(G, q, p, X, conv),
         )
 
         Y = allocate(X2)
-        translate_diff!(AG, Y, q2, p2, X2, conv; atol=1e-10)
+        translate_diff!(AG, Y, q2, p2, X2, conv; atol = 1.0e-10)
         @test isapprox(Y.value, translate_diff(G, q, p, X, conv))
 
-        @test inverse_translate_diff(AG, q2, p2, X2, conv; atol=1e-10) isa
-              ValidationTangentVector
+        @test inverse_translate_diff(AG, q2, p2, X2, conv; atol = 1.0e-10) isa
+            ValidationTangentVector
         @test isapprox(
             G,
-            inverse_translate_diff(AG, q2, p2, X2, conv; atol=1e-10).value,
+            inverse_translate_diff(AG, q2, p2, X2, conv; atol = 1.0e-10).value,
             inverse_translate_diff(G, q, p, X, conv),
         )
 
         Y = allocate(X2)
-        inverse_translate_diff!(AG, Y, q2, p2, X2, conv; atol=1e-10)
+        inverse_translate_diff!(AG, Y, q2, p2, X2, conv; atol = 1.0e-10)
         @test isapprox(Y.value, inverse_translate_diff(G, q, p, X, conv))
     end
 end

@@ -13,18 +13,18 @@ An element `p` of the group can act upon another another element by either:
     GroupOperationAction(group::AbstractDecoratorManifold, AD::ActionDirectionAndSide = LeftForwardAction())
 """
 struct GroupOperationAction{
-    AD<:ActionDirection,
-    AS<:GroupActionSide,
-    G<:AbstractDecoratorManifold,
-} <: AbstractGroupAction{AD}
+        AD <: ActionDirection,
+        AS <: GroupActionSide,
+        G <: AbstractDecoratorManifold,
+    } <: AbstractGroupAction{AD}
     group::G
 end
 
 function GroupOperationAction(
-    G::TM,
-    ::TAD=LeftForwardAction(),
-) where {TM<:AbstractDecoratorManifold,TAD<:ActionDirectionAndSide}
-    return GroupOperationAction{TAD.parameters[1],TAD.parameters[2],TM}(G)
+        G::TM,
+        ::TAD = LeftForwardAction(),
+    ) where {TM <: AbstractDecoratorManifold, TAD <: ActionDirectionAndSide}
+    return GroupOperationAction{TAD.parameters[1], TAD.parameters[2], TM}(G)
 end
 
 """
@@ -33,17 +33,17 @@ end
 Return whether [`GroupOperationAction`](@ref) `A` acts on the [`LeftSide`](@ref) or
 [`RightSide`](@ref).
 """
-action_side(::GroupOperationAction{AD,AS}) where {AD<:ActionDirection,AS<:GroupActionSide} =
+action_side(::GroupOperationAction{AD, AS}) where {AD <: ActionDirection, AS <: GroupActionSide} =
     AS()
 
 function direction_and_side(
-    ::GroupOperationAction{AD,AS},
-) where {AD<:ActionDirection,AS<:GroupActionSide}
+        ::GroupOperationAction{AD, AS},
+    ) where {AD <: ActionDirection, AS <: GroupActionSide}
     return (AD(), AS())
 end
 function reverse_direction_and_side(
-    ::GroupOperationAction{AD,AS},
-) where {AD<:ActionDirection,AS<:GroupActionSide}
+        ::GroupOperationAction{AD, AS},
+    ) where {AD <: ActionDirection, AS <: GroupActionSide}
     return (switch_direction(AD()), switch_side(AS()))
 end
 
@@ -66,7 +66,7 @@ end
 function adjoint_apply_diff_group(A::GroupOperationAction, a, X, p)
     G = base_group(A)
     if direction_and_side(A) === LeftForwardAction() ||
-       direction_and_side(A) === RightBackwardAction()
+            direction_and_side(A) === RightBackwardAction()
         return inverse_translate_diff(G, a, p, X, reverse_direction_and_side(A))
     else
         return inverse_translate_diff(
@@ -82,7 +82,7 @@ end
 function adjoint_apply_diff_group!(A::GroupOperationAction, Y, a, X, p)
     G = base_group(A)
     if direction_and_side(A) === LeftForwardAction() ||
-       direction_and_side(A) === RightBackwardAction()
+            direction_and_side(A) === RightBackwardAction()
         return inverse_translate_diff!(G, Y, a, p, X, reverse_direction_and_side(A))
     else
         return inverse_translate_diff!(
@@ -150,7 +150,7 @@ There are four cases:
 function apply_diff_group(A::GroupOperationAction, a, X, p)
     G = base_group(A)
     if direction_and_side(A) === LeftForwardAction() ||
-       direction_and_side(A) === RightBackwardAction()
+            direction_and_side(A) === RightBackwardAction()
         return translate_diff(G, p, a, X, reverse_direction_and_side(A))
     else
         return translate_diff(
@@ -165,7 +165,7 @@ end
 function apply_diff_group!(A::GroupOperationAction, Y, a, X, p)
     G = base_group(A)
     if direction_and_side(A) === LeftForwardAction() ||
-       direction_and_side(A) === RightBackwardAction()
+            direction_and_side(A) === RightBackwardAction()
         return translate_diff!(G, Y, p, a, X, reverse_direction_and_side(A))
     else
         return translate_diff!(
@@ -196,11 +196,11 @@ function optimal_alignment!(A::GroupOperationAction, x, p, q)
 end
 
 function center_of_orbit(
-    A::GroupOperationAction,
-    pts::AbstractVector,
-    p,
-    mean_method::AbstractApproximationMethod,
-)
+        A::GroupOperationAction,
+        pts::AbstractVector,
+        p,
+        mean_method::AbstractApproximationMethod,
+    )
     μ = mean(A.group, pts, mean_method)
     return inverse_apply(switch_direction_and_side(A), p, μ)
 end

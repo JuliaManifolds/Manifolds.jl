@@ -35,7 +35,7 @@ using RecursiveArrayTools
     @test default_inverse_retraction_method(TB) === m_prod_invretr
     @test default_retraction_method(TB) == m_prod_retr
     @test default_vector_transport_method(TB) isa
-          Manifolds.FiberBundleProductVectorTransport
+        Manifolds.FiberBundleProductVectorTransport
 
     @testset "Type" begin
         pts_tb = [
@@ -63,21 +63,21 @@ using RecursiveArrayTools
         test_manifold(
             TB,
             pts_tb,
-            default_inverse_retraction_method=m_prod_invretr,
-            default_retraction_method=m_prod_retr,
-            inverse_retraction_methods=[m_prod_invretr],
-            retraction_methods=[m_prod_retr],
-            test_exp_log=false,
-            test_injectivity_radius=false,
-            test_tangent_vector_broadcasting=false,
-            test_default_vector_transport=true,
-            vector_transport_methods=[],
-            basis_types_vecs=basis_types,
-            projection_atol_multiplier=4,
-            test_inplace=true,
-            test_representation_size=false,
-            test_rand_point=true,
-            test_rand_tvector=true,
+            default_inverse_retraction_method = m_prod_invretr,
+            default_retraction_method = m_prod_retr,
+            inverse_retraction_methods = [m_prod_invretr],
+            retraction_methods = [m_prod_retr],
+            test_exp_log = false,
+            test_injectivity_radius = false,
+            test_tangent_vector_broadcasting = false,
+            test_default_vector_transport = true,
+            vector_transport_methods = [],
+            basis_types_vecs = basis_types,
+            projection_atol_multiplier = 4,
+            test_inplace = true,
+            test_representation_size = false,
+            test_rand_point = true,
+            test_rand_tvector = true,
         )
 
         Xir = allocate(pts_tb[1])
