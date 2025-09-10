@@ -11,8 +11,14 @@ jobs:
   runic:
     name: Runic
     runs-on: ubuntu-latest
+    # Permissions needed for reviewdog/action-suggester to post comments
+    permissions:
+      contents: read
+      checks: write
+      issues: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # - uses: julia-actions/setup-julia@v2
       #   with:
       #     version: '1'
@@ -20,3 +26,11 @@ jobs:
       - uses: fredrikekre/runic-action@v1
         with:
           version: '1'
+          format_files: true
+        # Fail on next step instead
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
+      - uses: reviewdog/action-suggester@v1
+        if: github.event_name == 'pull_request'
+        with:
+          tool_name: Runic
+          fail_level: warning
