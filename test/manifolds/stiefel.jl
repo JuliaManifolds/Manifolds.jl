@@ -16,18 +16,18 @@ include("../header.jl")
             @test !is_flat(M2)
             @test is_flat(Stiefel(2, 1))
             base_manifold(M) === M
-            @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error=:error)
+            @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error = :error)
             @test_throws ManifoldDomainError is_point(
                 M,
                 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
-                error=:error,
+                error = :error,
             )
             @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
             @test_throws ManifoldDomainError is_vector(
                 M,
                 p,
                 1 * im * zero_vector(M, p);
-                error=:error,
+                error = :error,
             )
             @test default_retraction_method(M) === PolarRetraction()
             @test default_inverse_retraction_method(M) === PolarInverseRetraction()
@@ -69,17 +69,17 @@ include("../header.jl")
         end
         types = [Matrix{Float64}]
         TEST_FLOAT32 && push!(types, Matrix{Float32})
-        TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})
+        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64, 6})
 
         @testset "Stiefel(2, 1) special case" begin
             M21 = Stiefel(2, 1)
             w = inverse_retract(
                 M21,
-                SMatrix{2,1}([0.0, 1.0]),
-                SMatrix{2,1}([sqrt(2), sqrt(2)]),
+                SMatrix{2, 1}([0.0, 1.0]),
+                SMatrix{2, 1}([sqrt(2), sqrt(2)]),
                 QRInverseRetraction(),
             )
-            @test isapprox(M21, w, SMatrix{2,1}([1.0, 0.0]))
+            @test isapprox(M21, w, SMatrix{2, 1}([1.0, 0.0]))
         end
 
         @testset "inverse QR retraction cases" begin
@@ -89,8 +89,8 @@ include("../header.jl")
             q = retract(M43, p, Xinit, QRRetraction())
             X1 = inverse_retract(
                 M43,
-                SMatrix{4,3}(p),
-                SMatrix{4,3}(q),
+                SMatrix{4, 3}(p),
+                SMatrix{4, 3}(q),
                 QRInverseRetraction(),
             )
             X2 = inverse_retract(M43, p, q, QRInverseRetraction())
@@ -102,8 +102,8 @@ include("../header.jl")
 
             X1 = inverse_retract(
                 M,
-                SMatrix{3,2}(p2),
-                SMatrix{3,2}(q2),
+                SMatrix{3, 2}(p2),
+                SMatrix{3, 2}(q2),
                 QRInverseRetraction(),
             )
             X2 = inverse_retract(M, p2, q2, QRInverseRetraction())
@@ -118,70 +118,70 @@ include("../header.jl")
                 M,
                 retract(
                     M,
-                    SMatrix{3,2}(x),
+                    SMatrix{3, 2}(x),
                     SA[0.0 0.0; 0.0 0.0; -1.0 1.0],
                     PolarRetraction(),
                 ),
                 retract(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0], PolarRetraction()),
-                atol=1e-15,
+                atol = 1.0e-15,
             )
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
             @test !is_point(M, 2 * x)
-            @test_throws DomainError !is_point(M, 2 * x; error=:error)
+            @test_throws DomainError !is_point(M, 2 * x; error = :error)
             @test !is_vector(M, 2 * x, v)
-            @test_throws DomainError !is_vector(M, 2 * x, v; error=:error)
+            @test_throws DomainError !is_vector(M, 2 * x, v; error = :error)
             @test !is_vector(M, x, y)
-            @test_throws DomainError is_vector(M, x, y; error=:error)
+            @test_throws DomainError is_vector(M, x, y; error = :error)
             test_manifold(
                 M,
                 pts,
-                basis_types_to_from=(DefaultOrthonormalBasis(),),
-                basis_types_vecs=(DefaultOrthonormalBasis(),),
-                test_exp_log=true,
-                default_inverse_retraction_method=PolarInverseRetraction(),
-                test_injectivity_radius=false,
-                test_is_tangent=true,
-                test_project_tangent=true,
-                test_default_vector_transport=false,
-                point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
-                test_vee_hat=false,
-                projection_atol_multiplier=200.0,
-                exp_log_atol_multiplier=10.0,
-                retraction_atol_multiplier=10.0,
-                is_tangent_atol_multiplier=4 * 10.0^2,
-                retraction_methods=[
+                basis_types_to_from = (DefaultOrthonormalBasis(),),
+                basis_types_vecs = (DefaultOrthonormalBasis(),),
+                test_exp_log = true,
+                default_inverse_retraction_method = PolarInverseRetraction(),
+                test_injectivity_radius = false,
+                test_is_tangent = true,
+                test_project_tangent = true,
+                test_default_vector_transport = false,
+                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
+                test_vee_hat = false,
+                projection_atol_multiplier = 200.0,
+                exp_log_atol_multiplier = 10.0,
+                retraction_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier = 4 * 10.0^2,
+                retraction_methods = [
                     PolarRetraction(),
                     QRRetraction(),
                     CayleyRetraction(),
                     PadeRetraction(2),
                     ProjectionRetraction(),
                 ],
-                inverse_retraction_methods=[
+                inverse_retraction_methods = [
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                     ProjectionInverseRetraction(),
                 ],
-                vector_transport_methods=[
+                vector_transport_methods = [
                     DifferentiatedRetractionVectorTransport(PolarRetraction()),
                     DifferentiatedRetractionVectorTransport(QRRetraction()),
                     ProjectionTransport(),
                 ],
-                vector_transport_retractions=[
+                vector_transport_retractions = [
                     PolarRetraction(),
                     QRRetraction(),
                     PolarRetraction(),
                 ],
-                vector_transport_inverse_retractions=[
+                vector_transport_inverse_retractions = [
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                     PolarInverseRetraction(),
                 ],
-                test_vector_transport_direction=[true, true, false],
-                mid_point12=nothing,
-                test_inplace=true,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                test_vector_transport_direction = [true, true, false],
+                mid_point12 = nothing,
+                test_inplace = true,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
 
             @testset "inner/norm" begin
@@ -198,11 +198,13 @@ include("../header.jl")
         end
 
         @testset "Distribution tests" begin
-            usd_mmatrix = Manifolds.uniform_distribution(M, @MMatrix [
-                1.0 0.0
-                0.0 1.0
-                0.0 0.0
-            ])
+            usd_mmatrix = Manifolds.uniform_distribution(
+                M, @MMatrix [
+                    1.0 0.0
+                    0.0 1.0
+                    0.0 0.0
+                ]
+            )
             @test isa(rand(usd_mmatrix), MMatrix)
         end
     end
@@ -221,54 +223,54 @@ include("../header.jl")
         end
         types = [Matrix{ComplexF64}]
         @testset "Type $T" for T in types
-            x = [0.5+0.5im 0.5+0.5im; 0.5+0.5im -0.5-0.5im; 0.0 0.0]
+            x = [0.5 + 0.5im 0.5 + 0.5im; 0.5 + 0.5im -0.5 - 0.5im; 0.0 0.0]
             y = exp(M, x, [0.0 0.0; 0.0 0.0; 1.0 1.0])
             z = exp(M, x, [0.0 0.0; 0.0 0.0; -1.0 1.0])
             pts = convert.(T, [x, y, z])
             v = inverse_retract(M, x, y, PolarInverseRetraction())
             @test !is_point(M, 2 * x)
-            @test_throws DomainError !is_point(M, 2 * x; error=:error)
+            @test_throws DomainError !is_point(M, 2 * x; error = :error)
             @test !is_vector(M, 2 * x, v)
-            @test_throws DomainError !is_vector(M, 2 * x, v; error=:error)
+            @test_throws DomainError !is_vector(M, 2 * x, v; error = :error)
             @test !is_vector(M, x, y)
-            @test_throws DomainError is_vector(M, x, y; error=:error)
+            @test_throws DomainError is_vector(M, x, y; error = :error)
             test_manifold(
                 M,
                 pts,
-                test_exp_log=false,
-                default_inverse_retraction_method=PolarInverseRetraction(),
-                test_injectivity_radius=false,
-                test_is_tangent=true,
-                test_project_tangent=true,
-                test_default_vector_transport=false,
-                test_vee_hat=false,
-                projection_atol_multiplier=200.0,
-                retraction_atol_multiplier=10.0,
-                is_tangent_atol_multiplier=4 * 10.0^2,
-                retraction_methods=[PolarRetraction(), QRRetraction()],
-                inverse_retraction_methods=[
+                test_exp_log = false,
+                default_inverse_retraction_method = PolarInverseRetraction(),
+                test_injectivity_radius = false,
+                test_is_tangent = true,
+                test_project_tangent = true,
+                test_default_vector_transport = false,
+                test_vee_hat = false,
+                projection_atol_multiplier = 200.0,
+                retraction_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier = 4 * 10.0^2,
+                retraction_methods = [PolarRetraction(), QRRetraction()],
+                inverse_retraction_methods = [
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                vector_transport_methods=[
+                vector_transport_methods = [
                     DifferentiatedRetractionVectorTransport(PolarRetraction()),
                     DifferentiatedRetractionVectorTransport(QRRetraction()),
                     ProjectionTransport(),
                 ],
-                vector_transport_retractions=[
+                vector_transport_retractions = [
                     PolarRetraction(),
                     QRRetraction(),
                     PolarRetraction(),
                 ],
-                vector_transport_inverse_retractions=[
+                vector_transport_inverse_retractions = [
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                     PolarInverseRetraction(),
                 ],
-                test_vector_transport_direction=[true, true, false],
-                mid_point12=nothing,
-                test_inplace=true,
-                test_rand_point=true,
+                test_vector_transport_direction = [true, true, false],
+                mid_point12 = nothing,
+                test_inplace = true,
+                test_rand_point = true,
             )
 
             @testset "inner/norm" begin
@@ -309,7 +311,7 @@ include("../header.jl")
             X,
             DifferentiatedRetractionVectorTransport(CayleyRetraction()),
         )
-        @test is_vector(M, q1, Y; atol=10^-15)
+        @test is_vector(M, q1, Y; atol = 10^-15)
         Y2 = vector_transport_direction(
             M,
             p,
@@ -317,7 +319,7 @@ include("../header.jl")
             X,
             DifferentiatedRetractionVectorTransport(CayleyRetraction()),
         )
-        @test is_vector(M, q1, Y2; atol=10^-15)
+        @test is_vector(M, q1, Y2; atol = 10^-15)
         r2 = PadeRetraction(2)
         @test repr(r2) == "PadeRetraction(2)"
         q2 = retract(M, p, X, r2)
@@ -386,7 +388,7 @@ include("../header.jl")
                     @test pfact2 isa Manifolds.StiefelFactorization
                     @test pfact2.U[1:n, 1:k] ≈ p
                     @test pfact2.U'pfact2.U ≈ I
-                    @test pfact2.Z ≈ [I(k); zeros(k, k)] atol = 1e-6
+                    @test pfact2.Z ≈ [I(k); zeros(k, k)] atol = 1.0e-6
                 end
                 @testset "basic functions" begin
                     @test size(qfact) == (n, k)
@@ -505,7 +507,7 @@ include("../header.jl")
                 @test isapprox(MM, q, exp(Mcomp, p, X))
                 Mcomp === Mcan && isapprox(MM, p, log(MM, p, q), log(Mcomp, p, q))
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
-                @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
+                @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol = 1.0e-6)
             end
             @testset "α=$α" for α in [-0.75, -0.25, 0.5]
                 MM = MetricManifold(M, StiefelSubmersionMetric(α))
@@ -516,7 +518,7 @@ include("../header.jl")
                 @test is_point(MM, q)
                 @test isapprox(MM, p, log(MM, p, q), X)
                 @test isapprox(MM, exp(MM, p, 0 * X), p)
-                @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol=1e-6)
+                @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol = 1.0e-6)
             end
         end
 
@@ -544,8 +546,8 @@ include("../header.jl")
         end
     end
     @testset "field parameter" begin
-        M = Stiefel(3, 2; parameter=:field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        M = Stiefel(3, 2; parameter = :field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
         @test repr(M) == "Stiefel(3, 2, ℝ; parameter=:field)"
     end
 end

@@ -9,7 +9,7 @@ This point is mainly used for representing points on the [`Grassmann`](@ref) whe
 is also the default representation and hence equivalent to using `AbstractMatrices` thereon.
 they can also used be used as points on Stiefel.
 """
-struct StiefelPoint{T<:AbstractMatrix} <: AbstractManifoldPoint
+struct StiefelPoint{T <: AbstractMatrix} <: AbstractManifoldPoint
     value::T
 end
 
@@ -21,14 +21,14 @@ the tangent space of a corresponding point from the [`Stiefel`](@ref) manifold,
 see [`StiefelPoint`](@ref).
 This is the default representation so is can be used interchangeably with just abstract matrices.
 """
-struct StiefelTangentVector{T<:AbstractMatrix} <: AbstractTangentVector
+struct StiefelTangentVector{T <: AbstractMatrix} <: AbstractTangentVector
     value::T
 end
 
 ManifoldsBase.@manifold_element_forwards StiefelPoint value
 ManifoldsBase.@manifold_vector_forwards StiefelTangentVector value
 ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTangentVector value value
-ManifoldsBase.@default_manifold_fallbacks (Stiefel{<:Any,ℝ}) StiefelPoint StiefelTangentVector value value
+ManifoldsBase.@default_manifold_fallbacks (Stiefel{<:Any, ℝ}) StiefelPoint StiefelTangentVector value value
 ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTangentVector value value
 
 function ManifoldsBase.get_forwarding_type(::Grassmann, ::typeof(isapprox), p)
@@ -98,12 +98,12 @@ function exp!(M::Grassmann, q, p, X)
     return copyto!(q, Array(qr(z).Q))
 end
 
-function get_embedding(::Grassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+function get_embedding(::Grassmann{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
     return Stiefel(n, k, 𝔽)
 end
-function get_embedding(M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+function get_embedding(M::Grassmann{Tuple{Int, Int}, 𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
-    return Stiefel(n, k, 𝔽; parameter=:field)
+    return Stiefel(n, k, 𝔽; parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::Grassmann)
@@ -292,15 +292,15 @@ When `vector_at` is not `nothing`, return a (Gaussian) random vector from the ta
 ``T_p\mathrm{Gr}(n,k)`` with mean zero and standard deviation `σ` by projecting a random
 Matrix onto the tangent space at `vector_at`.
 """
-rand(M::Grassmann; σ::Real=1.0)
+rand(M::Grassmann; σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::Grassmann{<:Any,𝔽},
-    pX;
-    σ::Real=one(real(eltype(pX))),
-    vector_at=nothing,
-) where {𝔽}
+        rng::AbstractRNG,
+        M::Grassmann{<:Any, 𝔽},
+        pX;
+        σ::Real = one(real(eltype(pX))),
+        vector_at = nothing,
+    ) where {𝔽}
     if vector_at === nothing
         n, k = get_parameter(M.size)
         V = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, (n, k))
@@ -404,9 +404,9 @@ The formula reads [Rentmeesters:2011](@cite)
 R(X,Y)Z = (XY^\mathrm{T} - YX^\mathrm{T})Z + Z(Y^\mathrm{T}X - X^\mathrm{T}Y).
 ```
 """
-riemann_tensor(::Grassmann{<:Any,ℝ}, p, X, Y, Z)
+riemann_tensor(::Grassmann{<:Any, ℝ}, p, X, Y, Z)
 
-function riemann_tensor!(::Grassmann{<:Any,ℝ}, Xresult, p, X, Y, Z)
+function riemann_tensor!(::Grassmann{<:Any, ℝ}, Xresult, p, X, Y, Z)
     XYᵀ = X * Y'
     YXᵀ = XYᵀ'
     YᵀX = Y' * X
@@ -415,10 +415,10 @@ function riemann_tensor!(::Grassmann{<:Any,ℝ}, Xresult, p, X, Y, Z)
     return Xresult
 end
 
-function Base.show(io::IO, ::Grassmann{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+function Base.show(io::IO, ::Grassmann{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
     return print(io, "Grassmann($(n), $(k), $(𝔽))")
 end
-function Base.show(io::IO, M::Grassmann{Tuple{Int,Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::Grassmann{Tuple{Int, Int}, 𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return print(io, "Grassmann($(n), $(k), $(𝔽); parameter=:field)")
 end

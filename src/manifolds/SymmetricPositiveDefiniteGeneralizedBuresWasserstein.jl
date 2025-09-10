@@ -6,9 +6,9 @@ The generalized Bures Wasserstein metric for symmetric positive definite matrice
 This metric internally stores the symmetric positive definite matrix ``M`` to generalise the metric,
 where the name also follows the mentioned preprint.
 """
-struct GeneralizedBuresWassersteinMetric{T<:AbstractMatrix} <: RiemannianMetric
+struct GeneralizedBuresWassersteinMetric{T <: AbstractMatrix} <: RiemannianMetric
     M::T
-    GeneralizedBuresWassersteinMetric(MM::TT) where {TT<:AbstractMatrix} = new{TT}(MM)
+    GeneralizedBuresWassersteinMetric(MM::TT) where {TT <: AbstractMatrix} = new{TT}(MM)
 end
 
 @doc raw"""
@@ -28,19 +28,19 @@ it holds
 for all ``Y`` and hence we get ``Z = 2pXM + 2MXp``.
 """
 change_representer(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
+    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
     ::EuclideanMetric,
     p,
     X,
 )
 
 function change_representer!(
-    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
-    Y,
-    ::EuclideanMetric,
-    p,
-    X,
-)
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
+        Y,
+        ::EuclideanMetric,
+        p,
+        X,
+    )
     Y .= 2 .* (p * X * M.metric.M + M.metric.M * X * p)
     return Y
 end
@@ -56,10 +56,10 @@ d(p,q) = \operatorname{tr}(M^{-1}p) + \operatorname{tr}(M^{-1}q)
 ```
 """
 function distance(
-    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
-    p,
-    q,
-)
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
+        p,
+        q,
+    )
     luM = lu(M.metric.M)
     luMp = luM \ p
     luMq = luM \ q
@@ -79,17 +79,17 @@ the [`GeneralizedBuresWassersteinMetric`](@ref) given by
 where ``q=L_{M,p}(X)`` denotes the generalized Lyapunov operator, i.e. it solves ``pqM + Mqp = X``.
 """
 exp(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
+    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
     p,
     X,
 )
 
 function exp!(
-    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
-    q,
-    p,
-    X,
-)
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
+        q,
+        p,
+        X,
+    )
     m = M.metric.M
     Y = lyapc(p, m, -X) #lyap solves qpM + Mpq - X =0
     q .= p .+ X .+ m * Y * p * Y * m
@@ -111,11 +111,11 @@ the [`GeneralizedBuresWassersteinMetric`](@ref) given by
 where ``q=L_{M,p}(X)`` denotes the generalized Lyapunov operator, i.e. it solves ``pqM + Mqp = X``.
 """
 function inner(
-    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
-    p,
-    X,
-    Y,
-)
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
+        p,
+        X,
+        Y,
+    )
     return dot(lyapc(p, M.metric.M, -X), Y) / 2
 end
 
@@ -126,8 +126,8 @@ Return false. [`SymmetricPositiveDefinite`](@ref) with [`GeneralizedBuresWassers
 is not a flat manifold.
 """
 function is_flat(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
-)
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
+    )
     return false
 end
 
@@ -142,17 +142,17 @@ the [`BuresWassersteinMetric`](@ref) given by
 ```
 """
 log(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
+    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
     p,
     q,
 )
 
 function log!(
-    M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,<:GeneralizedBuresWassersteinMetric},
-    X,
-    p,
-    q,
-)
+        M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, <:GeneralizedBuresWassersteinMetric},
+        X,
+        p,
+        q,
+    )
     m = M.metric.M
     lum = lu(m)
     lum_p_lum = lum \ p / lum

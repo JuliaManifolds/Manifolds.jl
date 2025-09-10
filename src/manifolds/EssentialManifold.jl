@@ -50,13 +50,13 @@ unsigned (`is_signed=false`) variant.
 
 """
 struct EssentialManifold <:
-       AbstractPowerManifold{ℝ,Rotations{TypeParameter{Tuple{3}}},NestedPowerRepresentation}
+    AbstractPowerManifold{ℝ, Rotations{TypeParameter{Tuple{3}}}, NestedPowerRepresentation}
     is_signed::Bool
     manifold::Rotations{TypeParameter{Tuple{3}}}
 end
 
-function EssentialManifold(is_signed::Bool=true)
-    return EssentialManifold(is_signed, Rotations(3; parameter=:type))
+function EssentialManifold(is_signed::Bool = true)
+    return EssentialManifold(is_signed, Rotations(3; parameter = :type))
 end
 
 @doc raw"""
@@ -126,13 +126,13 @@ exp(::EssentialManifold, ::Any...)
 get_iterator(::EssentialManifold) = Base.OneTo(2)
 
 function _isapprox(
-    M::EssentialManifold,
-    p,
-    q::T;
-    atol::Real=eps(real(float(number_eltype(number_eltype(T))))),
-    kwargs...,
-) where {T}
-    return isapprox(distance(M, p, q), 0.0; atol=atol, kwargs...)
+        M::EssentialManifold,
+        p,
+        q::T;
+        atol::Real = eps(real(float(number_eltype(number_eltype(T))))),
+        kwargs...,
+    ) where {T}
+    return isapprox(distance(M, p, q), 0.0; atol = atol, kwargs...)
 end
 
 """
@@ -440,7 +440,7 @@ function project!(M::EssentialManifold, Y, p, X)
         Y,
         [
             Xe - (s / 2) * get_vector(M.manifold, pe, pe[3, :], DefaultOrthogonalBasis())
-            for (Xe, pe) in zip(X_proj, p)
+                for (Xe, pe) in zip(X_proj, p)
         ],
     )
     return Y

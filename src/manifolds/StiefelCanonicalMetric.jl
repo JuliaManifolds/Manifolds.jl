@@ -24,7 +24,7 @@ struct ApproximateLogarithmicMap{T} <: ApproximateInverseRetraction
     tolerance::T
 end
 
-function distance(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, q, p)
+function distance(M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}, q, p)
     return norm(M, p, log(M, p, q))
 end
 
@@ -64,14 +64,14 @@ q = \exp_p X = pC + QB.
 ```
 For more details, see [EdelmanAriasSmith:1998](@cite)[Zimmermann:2017](@cite).
 """
-exp(::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, ::Any...)
+exp(::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}, ::Any...)
 
-function exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, q, p, X)
+function exp!(M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}, q, p, X)
     n, k = get_parameter(M.manifold.size)
     A = p' * X
     n == k && return mul!(q, p, exp(A))
     QR = qr(X - p * A)
-    BC_ext = exp([A -QR.R'; QR.R 0*I])
+    BC_ext = exp([A -QR.R'; QR.R 0 * I])
     @views begin # COV_EXCL_LINE
         mul!(q, p, BC_ext[1:k, 1:k])
         mul!(q, Matrix(QR.Q), BC_ext[(k + 1):(2 * k), 1:k], true, true)
@@ -89,7 +89,7 @@ Compute the inner product on the [`Stiefel`](@ref) manifold with respect to the
 g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{1}{2}pp^{\mathrm{T}})Y \bigr).
 ```
 """
-function inner(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, p, X, Y)
+function inner(M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}, p, X, Y)
     n, k = get_parameter(M.manifold.size)
     T = Base.promote_eltype(p, X, Y)
     if n == k
@@ -111,7 +111,7 @@ The algorithm is derived in [Zimmermann:2017](@cite) and it uses the `max_iterat
 from the [`ApproximateLogarithmicMap`](@ref).
 """
 inverse_retract(
-    ::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric},
+    ::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric},
     ::Any,
     ::Any,
     ::ApproximateLogarithmicMap,
@@ -126,36 +126,36 @@ is_flat(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}) =
     manifold_dimension(M) == 1
 
 function log(
-    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric},
-    p,
-    q;
-    maxiter::Int=10000,
-    tolerance=1e-9,
-)
+        M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric},
+        p,
+        q;
+        maxiter::Int = 10000,
+        tolerance = 1.0e-9,
+    )
     X = allocate_result(M, log, p, q)
     inverse_retract!(M, X, p, q, ApproximateLogarithmicMap(maxiter, tolerance))
     return X
 end
 
 function log!(
-    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric},
-    X,
-    p,
-    q;
-    maxiter::Int=10000,
-    tolerance=1e-9,
-)
+        M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric},
+        X,
+        p,
+        q;
+        maxiter::Int = 10000,
+        tolerance = 1.0e-9,
+    )
     inverse_retract!(M, X, p, q, ApproximateLogarithmicMap(maxiter, tolerance))
     return X
 end
 
 function inverse_retract!(
-    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric},
-    X,
-    p,
-    q,
-    a::ApproximateLogarithmicMap,
-)
+        M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric},
+        X,
+        p,
+        q,
+        a::ApproximateLogarithmicMap,
+    )
     n, k = get_parameter(M.manifold.size)
     qfact = stiefel_factorization(p, q)
     V = allocate(qfact.Z, Size(2k, 2k))
@@ -207,16 +207,16 @@ Here, we adopt Eq. (5.6) [Nguyen:2023](@cite), for the [`CanonicalMetric`](@ref)
 ```
 where ``P = I-pp^{\mathrm{H}}``.
 """
-riemannian_Hessian(M::MetricManifold{𝔽,Stiefel,CanonicalMetric}, p, G, H, X) where {𝔽}
+riemannian_Hessian(M::MetricManifold{𝔽, Stiefel, CanonicalMetric}, p, G, H, X) where {𝔽}
 
 function riemannian_Hessian!(
-    M::MetricManifold{𝔽,<:Stiefel{<:Any,𝔽},CanonicalMetric},
-    Y,
-    p,
-    G,
-    H,
-    X,
-) where {𝔽}
+        M::MetricManifold{𝔽, <:Stiefel{<:Any, 𝔽}, CanonicalMetric},
+        Y,
+        p,
+        G,
+        H,
+        X,
+    ) where {𝔽}
     Gp = symmetrize(G' * p)
     Z = symmetrize((I - p * p') * G * p')
     project!(M, Y, p, H - X * Gp - Z * X)

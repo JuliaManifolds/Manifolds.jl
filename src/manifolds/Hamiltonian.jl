@@ -12,13 +12,13 @@ A^+ = J_{2n}A^{\mathrm{T}}J_{2n}, \qquad J_{2n} \begin{pmatrix} 0 & I_n\\-I_n & 
 
 and ``I_n`` denotes the ``n×n``
 """
-struct Hamiltonian{T,S<:AbstractMatrix{<:T}} <: AbstractMatrix{T}
+struct Hamiltonian{T, S <: AbstractMatrix{<:T}} <: AbstractMatrix{T}
     value::S
-    function Hamiltonian(A::S) where {T,S<:AbstractMatrix{<:T}}
+    function Hamiltonian(A::S) where {T, S <: AbstractMatrix{<:T}}
         n = div(size(A, 1), 2)
-        @assert size(A, 1) == 2 * n "The first dimension of A ($(size(A,1))) is not even"
+        @assert size(A, 1) == 2 * n "The first dimension of A ($(size(A, 1))) is not even"
         @assert size(A, 2) == 2 * n "The matrix A is of size ($(size(A))), which is not square."
-        return new{T,S}(A)
+        return new{T, S}(A)
     end
 end
 # Avoid double wrapping / unwrap if that happened
@@ -60,15 +60,15 @@ matrix multiplication as group operation.
 
 Generate the manifold of ``2n×2n`` Hamiltonian matrices.
 """
-struct HamiltonianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct HamiltonianMatrices{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function HamiltonianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function HamiltonianMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     n % 2 == 0 || throw(ArgumentError("The dimension of the symplectic manifold
                         embedding space must be even. Was odd, n % 2 == $(n % 2)."))
     size = wrap_type_parameter(parameter, (div(n, 2),))
-    return HamiltonianMatrices{typeof(size),field}(size)
+    return HamiltonianMatrices{typeof(size), field}(size)
 end
 
 ManifoldsBase.@default_manifold_fallbacks HamiltonianMatrices Hamiltonian Hamiltonian value value
@@ -123,12 +123,12 @@ end
 embed(::HamiltonianMatrices, p) = p
 embed(::HamiltonianMatrices, p, X) = X
 
-function get_embedding(::HamiltonianMatrices{TypeParameter{Tuple{N}},𝔽}) where {N,𝔽}
-    return Euclidean(2 * N, 2 * N; field=𝔽)
+function get_embedding(::HamiltonianMatrices{TypeParameter{Tuple{N}}, 𝔽}) where {N, 𝔽}
+    return Euclidean(2 * N, 2 * N; field = 𝔽)
 end
-function get_embedding(M::HamiltonianMatrices{Tuple{Int},𝔽}) where {𝔽}
+function get_embedding(M::HamiltonianMatrices{Tuple{Int}, 𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
-    return Euclidean(2 * N, 2 * N; field=𝔽, parameter=:field)
+    return Euclidean(2 * N, 2 * N; field = 𝔽, parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::HamiltonianMatrices)
@@ -163,10 +163,10 @@ function is_hamiltonian(A::Hamiltonian; kwargs...)
     return isapprox((A^+).value, -A.value; kwargs...)
 end
 
-function Base.show(io::IO, ::HamiltonianMatrices{TypeParameter{Tuple{n}},F}) where {n,F}
+function Base.show(io::IO, ::HamiltonianMatrices{TypeParameter{Tuple{n}}, F}) where {n, F}
     return print(io, "HamiltonianMatrices($(2n), $(F))")
 end
-function Base.show(io::IO, M::HamiltonianMatrices{Tuple{Int},F}) where {F}
+function Base.show(io::IO, M::HamiltonianMatrices{Tuple{Int}, F}) where {F}
     n = get_parameter(M.size)[1]
     return print(io, "HamiltonianMatrices($(2n), $(F); parameter=:field)")
 end
@@ -187,15 +187,15 @@ p = \begin{pmatrix} A & B\\ C & -A^{\mathrm{T}} \end{pmatrix}
 ```
 
 """
-rand(M::HamiltonianMatrices; σ::Real=1.0)
+rand(M::HamiltonianMatrices; σ::Real = 1.0)
 
 function rand!(
-    rng::AbstractRNG,
-    M::HamiltonianMatrices{<:Any,ℝ},
-    pX;
-    σ::Real=one(real(eltype(pX))),
-    vector_at=nothing,
-)
+        rng::AbstractRNG,
+        M::HamiltonianMatrices{<:Any, ℝ},
+        pX;
+        σ::Real = one(real(eltype(pX))),
+        vector_at = nothing,
+    )
     n = get_parameter(M.size)[1]
     p1 = @view(pX[1:n, 1:n])
     p2 = @view(pX[1:n, (n + 1):(2n)])

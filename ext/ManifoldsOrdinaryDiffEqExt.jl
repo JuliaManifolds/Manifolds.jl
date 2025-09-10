@@ -12,15 +12,12 @@ using OrdinaryDiffEq: ODEProblem, AutoVern9, Rodas5, solve
 using StaticArrays
 
 function solve_exp_ode(
-    M::AbstractManifold,
-    p,
-    X,
-    t::Number;
-    basis::AbstractBasis=DefaultOrthonormalBasis(),
-    solver=AutoVern9(Rodas5()),
-    backend=default_differential_backend(),
-    kwargs...,
-)
+        M::AbstractManifold, p, X, t::Number;
+        basis::AbstractBasis = DefaultOrthonormalBasis(),
+        solver = AutoVern9(Rodas5()),
+        backend = default_differential_backend(),
+        kwargs...
+    )
     n = length(p)
     iv = SVector{n}(1:n)
     ix = SVector{n}((n + 1):(2n))
@@ -34,7 +31,7 @@ function solve_exp_ode(
         p = u[ix]
         ddx = allocate(u, Size(n))
         du = allocate(u)
-        Γ = christoffel_symbols_second(M, p, basis; backend=backend)
+        Γ = christoffel_symbols_second(M, p, basis; backend = backend)
         @einsum ddx[k] = -Γ[k, i, j] * dx[i] * dx[j]
         du[iv] .= ddx
         du[ix] .= dx
@@ -49,12 +46,7 @@ function solve_exp_ode(
 end
 
 function ManifoldsBase.retract_exp_ode!(
-    M::AbstractManifold,
-    q,
-    p,
-    X,
-    m::AbstractRetractionMethod,
-    b::AbstractBasis,
+        M::AbstractManifold, q, p, X, m::AbstractRetractionMethod, b::AbstractBasis,
 )
     ManifoldsBase.retract_exp_ode_fused!(M, q, p, X, one(number_eltype(p)), m, b)
     return q

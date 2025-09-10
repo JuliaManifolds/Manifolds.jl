@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 * the extension to `OrdinaryDiffEq.jl` has been remodelled slightly to no longer introduce,
 `exp_fused!` to be implemented calling the ODE solver, but correctly uses the `retract_exp_ode!` and `retract_exp_ode_fused!` functions.
+* Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
 
 ## [0.10.23] 2025-07-19
 

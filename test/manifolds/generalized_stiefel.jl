@@ -9,30 +9,30 @@ include("../header.jl")
         X[1, :] .= 1
         @testset "Basics" begin
             @test repr(M) ==
-                  "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
+                "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 3
             @test base_manifold(M) === M
             @test !is_flat(M)
-            @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error=:error)
+            @test_throws DomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error = :error)
             @test_throws ManifoldDomainError is_point(
                 M,
                 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
-                error=:error,
+                error = :error,
             )
-            @test_throws DomainError is_point(M, 2 * p; error=:error)
+            @test_throws DomainError is_point(M, 2 * p; error = :error)
             @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
-            @test_throws DomainError is_vector(M, p, [0.0, 0.0, 1.0, 0.0]; error=:error)
+            @test_throws DomainError is_vector(M, p, [0.0, 0.0, 1.0, 0.0]; error = :error)
             @test_throws ManifoldDomainError is_vector(
                 M,
                 p,
                 1 * im * zero_vector(M, p);
-                error=:error,
+                error = :error,
             )
-            @test_throws DomainError is_vector(M, p, X; error=:error)
+            @test_throws DomainError is_vector(M, p, X; error = :error)
             @test default_retraction_method(M) == ProjectionRetraction()
             @test is_point(M, rand(M))
-            @test is_vector(M, p, rand(M; vector_at=p))
+            @test is_vector(M, p, rand(M; vector_at = p))
         end
         @testset "Embedding and Projection" begin
             @test get_embedding(GeneralizedStiefel(3, 2)) == Euclidean(3, 2)
@@ -57,7 +57,7 @@ include("../header.jl")
         end
 
         types = [Matrix{Float64}]
-        TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})
+        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64, 6})
         X = [0.0 0.0; 0.0 0.0; 1.0 1.0]
         Y = [0.0 0.0; 0.0 0.0; -1.0 1.0]
         @test inner(M, p, X, Y) == 0
@@ -79,27 +79,27 @@ include("../header.jl")
         @testset "Type $T" for T in types
             pts = convert.(T, [p, y, z])
             @test !is_point(M, 2 * p)
-            @test_throws DomainError !is_point(M, 2 * p; error=:error)
+            @test_throws DomainError !is_point(M, 2 * p; error = :error)
             @test !is_vector(M, p, y)
-            @test_throws DomainError is_vector(M, p, y; error=:error)
+            @test_throws DomainError is_vector(M, p, y; error = :error)
             test_manifold(
                 M,
                 pts,
-                test_exp_log=false,
-                default_inverse_retraction_method=nothing,
-                default_retraction_method=ProjectionRetraction(),
-                test_injectivity_radius=false,
-                test_is_tangent=true,
-                test_project_tangent=true,
-                test_default_vector_transport=false,
-                projection_atol_multiplier=15.0,
-                retraction_atol_multiplier=10.0,
-                is_tangent_atol_multiplier=4 * 10.0^2,
+                test_exp_log = false,
+                default_inverse_retraction_method = nothing,
+                default_retraction_method = ProjectionRetraction(),
+                test_injectivity_radius = false,
+                test_is_tangent = true,
+                test_project_tangent = true,
+                test_default_vector_transport = false,
+                projection_atol_multiplier = 15.0,
+                retraction_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier = 4 * 10.0^2,
                 # investigate why this is so large on 1.6 dev
-                exp_log_atol_multiplier=10.0^3 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
-                retraction_methods=[PolarRetraction(), ProjectionRetraction()],
-                mid_point12=nothing,
-                test_inplace=true,
+                exp_log_atol_multiplier = 10.0^3 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
+                retraction_methods = [PolarRetraction(), ProjectionRetraction()],
+                mid_point12 = nothing,
+                test_inplace = true,
             )
         end
     end
@@ -109,7 +109,7 @@ include("../header.jl")
         M = GeneralizedStiefel(3, 2, B, ℂ)
         @testset "Basics" begin
             @test repr(M) ==
-                  "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℂ)"
+                "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℂ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
             @test !is_flat(M)
@@ -127,7 +127,7 @@ include("../header.jl")
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
         M = GeneralizedStiefel(3, 2, B, ℍ)
         @test repr(M) ==
-              "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℍ)"
+            "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℍ)"
         @testset "Basics" begin
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 18
@@ -137,9 +137,9 @@ include("../header.jl")
 
     @testset "field parameter" begin
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
-        M = GeneralizedStiefel(3, 2, B; parameter=:field)
+        M = GeneralizedStiefel(3, 2, B; parameter = :field)
         @test repr(M) ==
-              "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ; parameter=:field)"
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int64,Int64},ℝ}
+            "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ; parameter=:field)"
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int64, Int64}, ℝ}
     end
 end

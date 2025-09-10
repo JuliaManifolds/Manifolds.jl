@@ -2,22 +2,22 @@ include("../header.jl")
 
 @testset "Hamiltonian matrices" begin
     M = HamiltonianMatrices(4)
-    Mf = HamiltonianMatrices(4; parameter=:field)
+    Mf = HamiltonianMatrices(4; parameter = :field)
     # A has to be of the Form JS, S symmetric
     p =
         SymplecticElement(1.0) * [
-            1.0 2.0 0.0 0.0
-            2.0 3.0 0.0 0.0
-            0.0 0.0 1.0 0.0
-            0.0 0.0 0.0 4.0
-        ]
+        1.0 2.0 0.0 0.0
+        2.0 3.0 0.0 0.0
+        0.0 0.0 1.0 0.0
+        0.0 0.0 0.0 4.0
+    ]
     q =
         SymplecticElement(1.0) * [
-            4.0 3.0 0.0 0.0
-            3.0 2.0 0.0 0.0
-            0.0 0.0 4.0 0.0
-            0.0 0.0 0.0 1.0
-        ]
+        4.0 3.0 0.0 0.0
+        3.0 2.0 0.0 0.0
+        0.0 0.0 4.0 0.0
+        0.0 0.0 0.0 1.0
+    ]
     @testset "Hamiltonian" begin
         @test is_hamiltonian(p)
         pH = Hamiltonian(p)
@@ -46,8 +46,8 @@ include("../header.jl")
         @test is_point(M, p)
         @test is_point(M, Hamiltonian(p))
         @test is_vector(M, p, p)
-        @test get_embedding(M) == Euclidean(4, 4; field=ℝ)
-        @test get_embedding(Mf) == Euclidean(4, 4; field=ℝ, parameter=:field)
+        @test get_embedding(M) == Euclidean(4, 4; field = ℝ)
+        @test get_embedding(Mf) == Euclidean(4, 4; field = ℝ, parameter = :field)
         @test is_flat(M)
         Random.seed!(42)
         is_point(M, rand(M))

@@ -21,20 +21,20 @@ which is also reflected in the [`manifold_dimension`](@ref manifold_dimension(::
 
 Generate the manifold of ``n×n`` symmetric matrices.
 """
-struct SymmetricMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct SymmetricMatrices{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function SymmetricMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function SymmetricMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return SymmetricMatrices{typeof(size),field}(size)
+    return SymmetricMatrices{typeof(size), field}(size)
 end
 
 function allocation_promotion_function(
-    M::SymmetricMatrices{<:Any,ℂ},
-    ::typeof(get_vector),
-    args::Tuple,
-)
+        M::SymmetricMatrices{<:Any, ℂ},
+        ::typeof(get_vector),
+        args::Tuple,
+    )
     return complex
 end
 
@@ -85,7 +85,7 @@ function get_basis(M::SymmetricMatrices, p, B::DiagonalizingOrthonormalBasis)
     return CachedBasis(B, κ, Ξ)
 end
 
-function get_coordinates_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, ::RealNumbers)
+function get_coordinates_orthonormal!(M::SymmetricMatrices{<:Any, ℝ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -99,7 +99,7 @@ function get_coordinates_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, 
     end
     return Y
 end
-function get_coordinates_orthonormal!(M::SymmetricMatrices{<:Any,ℂ}, Y, p, X, ::RealNumbers)
+function get_coordinates_orthonormal!(M::SymmetricMatrices{<:Any, ℂ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -118,12 +118,12 @@ function get_coordinates_orthonormal!(M::SymmetricMatrices{<:Any,ℂ}, Y, p, X, 
     return Y
 end
 
-function get_embedding(::SymmetricMatrices{TypeParameter{Tuple{N}},𝔽}) where {N,𝔽}
-    return Euclidean(N, N; field=𝔽)
+function get_embedding(::SymmetricMatrices{TypeParameter{Tuple{N}}, 𝔽}) where {N, 𝔽}
+    return Euclidean(N, N; field = 𝔽)
 end
-function get_embedding(M::SymmetricMatrices{Tuple{Int},𝔽}) where {𝔽}
+function get_embedding(M::SymmetricMatrices{Tuple{Int}, 𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
-    return Euclidean(N, N; field=𝔽, parameter=:field)
+    return Euclidean(N, N; field = 𝔽, parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::SymmetricMatrices)
@@ -144,7 +144,7 @@ function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℝ}, Y, p, X, ::Rea
     end
     return Y
 end
-function get_vector_orthonormal!(M::SymmetricMatrices{<:Any,ℂ}, Y, p, X, ::RealNumbers)
+function get_vector_orthonormal!(M::SymmetricMatrices{<:Any, ℂ}, Y, p, X, ::RealNumbers)
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -182,7 +182,7 @@ Return the dimension of the [`SymmetricMatrices`](@ref) matrix `M` over the numb
 
 where the last ``-n`` is due to the zero imaginary part for Hermitian matrices
 """
-function manifold_dimension(M::SymmetricMatrices{<:Any,𝔽}) where {𝔽}
+function manifold_dimension(M::SymmetricMatrices{<:Any, 𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
     return div(N * (N + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? N : 0)
 end
@@ -221,21 +221,21 @@ project(::SymmetricMatrices, ::Any, ::Any)
 project!(M::SymmetricMatrices, Y, p, X) = (Y .= (X .+ transpose(X)) ./ 2)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::SymmetricMatrices,
-    pX;
-    σ::Real=one(real(eltype(pX))),
-    kwargs...,
-)
+        rng::AbstractRNG,
+        M::SymmetricMatrices,
+        pX;
+        σ::Real = one(real(eltype(pX))),
+        kwargs...,
+    )
     rand!(rng, pX)
     pX .= (σ / (2 * norm(pX))) .* (pX + pX')
     return pX
 end
 
-function Base.show(io::IO, ::SymmetricMatrices{TypeParameter{Tuple{n}},F}) where {n,F}
+function Base.show(io::IO, ::SymmetricMatrices{TypeParameter{Tuple{n}}, F}) where {n, F}
     return print(io, "SymmetricMatrices($(n), $(F))")
 end
-function Base.show(io::IO, M::SymmetricMatrices{Tuple{Int},F}) where {F}
+function Base.show(io::IO, M::SymmetricMatrices{Tuple{Int}, F}) where {F}
     n = get_parameter(M.size)[1]
     return print(io, "SymmetricMatrices($(n), $(F); parameter=:field)")
 end

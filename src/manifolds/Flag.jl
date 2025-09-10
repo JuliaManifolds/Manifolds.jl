@@ -4,7 +4,7 @@
 A type to represent points on a manifold [`Flag`](@ref) in the orthogonal coordinates
 representation, i.e. a rotation matrix.
 """
-struct OrthogonalPoint{T<:AbstractMatrix} <: AbstractManifoldPoint
+struct OrthogonalPoint{T <: AbstractMatrix} <: AbstractManifoldPoint
     value::T
 end
 
@@ -14,7 +14,7 @@ end
 A type to represent tangent vectors to points on a [`Flag`](@ref) manifold  in the
 orthogonal coordinates representation.
 """
-struct OrthogonalTangentVector{T<:AbstractMatrix} <: AbstractTangentVector
+struct OrthogonalTangentVector{T <: AbstractMatrix} <: AbstractTangentVector
     value::T
 end
 
@@ -68,12 +68,12 @@ where ``𝕍_i`` for ``i ∈ 1, 2, …, d`` are subspaces of ``ℝ^N`` of dimens
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in type. Value can either be `:field` or `:type`.
 """
-struct Flag{T,dp1} <: AbstractDecoratorManifold{ℝ}
-    subspace_dimensions::ZeroTuple{NTuple{dp1,Int}}
+struct Flag{T, dp1} <: AbstractDecoratorManifold{ℝ}
+    subspace_dimensions::ZeroTuple{NTuple{dp1, Int}}
     size::T
 end
 
-function Flag(N::Int, ns::Vararg{Int,I}; parameter::Symbol=:type) where {I}
+function Flag(N::Int, ns::Vararg{Int, I}; parameter::Symbol = :type) where {I}
     if ns[1] <= 0
         error(
             "First dimension in the sequence ns must be strictly positive, but is $(ns[1]).",
@@ -90,7 +90,7 @@ function Flag(N::Int, ns::Vararg{Int,I}; parameter::Symbol=:type) where {I}
         )
     end
     size = wrap_type_parameter(parameter, (N,))
-    return Flag{typeof(size),I + 1}(ZeroTuple(tuple(ns..., N)), size)
+    return Flag{typeof(size), I + 1}(ZeroTuple(tuple(ns..., N)), size)
 end
 
 """
@@ -98,10 +98,10 @@ end
 
 Get the embedding of the [`Flag`](@ref) manifold `M`, i.e. the [`Stiefel`](@ref) manifold.
 """
-function get_embedding(M::Flag{Tuple{Int},dp1}) where {dp1}
-    return Stiefel(M.size[1], M.subspace_dimensions[dp1 - 1]; parameter=:field)
+function get_embedding(M::Flag{Tuple{Int}, dp1}) where {dp1}
+    return Stiefel(M.size[1], M.subspace_dimensions[dp1 - 1]; parameter = :field)
 end
-function get_embedding(M::Flag{TypeParameter{Tuple{N}},dp1}) where {N,dp1}
+function get_embedding(M::Flag{TypeParameter{Tuple{N}}, dp1}) where {N, dp1}
     return Stiefel(N, M.subspace_dimensions[dp1 - 1])
 end
 
@@ -120,12 +120,12 @@ injectivity_radius(::Flag, p) = π / 2
 injectivity_radius(::Flag, ::AbstractRetractionMethod) = π / 2
 injectivity_radius(::Flag, p, ::AbstractRetractionMethod) = π / 2
 
-function Base.isapprox(M::Flag, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
-    return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
+function Base.isapprox(M::Flag, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
+    return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end
-function Base.isapprox(M::Flag, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
+function Base.isapprox(M::Flag, p, q; atol = sqrt(max_eps(p, q)), kwargs...)
     X = inverse_retract(M, p, q, PolarInverseRetraction())
-    return isapprox(norm(M, p, X), 0; atol=atol, kwargs...)
+    return isapprox(norm(M, p, X), 0; atol = atol, kwargs...)
 end
 
 @doc raw"""
@@ -134,7 +134,7 @@ end
 Return dimension of flag manifold ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)``.
 The formula reads ``\sum_{i=1}^d (n_i-n_{i-1})(N-n_i)``.
 """
-function manifold_dimension(M::Flag{<:Any,dp1}) where {dp1}
+function manifold_dimension(M::Flag{<:Any, dp1}) where {dp1}
     N = get_parameter(M.size)[1]
     dim = 0
     for i in 1:(dp1 - 1)
@@ -168,11 +168,11 @@ Convert tangent vector from [`Flag`](@ref) manifold `M` from orthogonal represen
 Stiefel representation.
 """
 function convert(
-    ::Type{AbstractMatrix},
-    M::Flag,
-    p::OrthogonalPoint,
-    X::OrthogonalTangentVector,
-)
+        ::Type{AbstractMatrix},
+        M::Flag,
+        p::OrthogonalPoint,
+        X::OrthogonalTangentVector,
+    )
     (N, k) = representation_size(M)
     return p.value * X.value[:, 1:k]
 end
@@ -184,11 +184,11 @@ Convert tangent vector from [`Flag`](@ref) manifold `M` from Stiefel representat
 orthogonal representation.
 """
 function convert(
-    ::Type{OrthogonalTangentVector},
-    M::Flag,
-    p::AbstractMatrix,
-    X::AbstractMatrix,
-)
+        ::Type{OrthogonalTangentVector},
+        M::Flag,
+        p::AbstractMatrix,
+        X::AbstractMatrix,
+    )
     (N, k) = representation_size(M)
     out = similar(X, N, N)
     fill!(out, 0)

@@ -29,16 +29,16 @@ discrete probability distributions, i.e. sum up to one.
 `parameter`: whether a type parameter should be used to store `n` and `m`. By default size
 is stored in type. Value can either be `:field` or `:type`.
 """
-struct MultinomialMatrices{T,TPM<:ProbabilitySimplex} <:
-       AbstractPowerManifold{ℝ,TPM,ArrayPowerRepresentation}
+struct MultinomialMatrices{T, TPM <: ProbabilitySimplex} <:
+    AbstractPowerManifold{ℝ, TPM, ArrayPowerRepresentation}
     size::T
     manifold::TPM
 end
 
-function MultinomialMatrices(n::Int, m::Int; parameter::Symbol=:type)
+function MultinomialMatrices(n::Int, m::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, m))
-    MPS = ProbabilitySimplex(n - 1; parameter=parameter)
-    return MultinomialMatrices{typeof(size),typeof(MPS)}(size, MPS)
+    MPS = ProbabilitySimplex(n - 1; parameter = parameter)
+    return MultinomialMatrices{typeof(size), typeof(MPS)}(size, MPS)
 end
 
 function Base.:^(::ProbabilitySimplex{TypeParameter{Tuple{N}}}, m::Int) where {N}
@@ -46,7 +46,7 @@ function Base.:^(::ProbabilitySimplex{TypeParameter{Tuple{N}}}, m::Int) where {N
 end
 function Base.:^(M::ProbabilitySimplex{Tuple{Int}}, m::Int)
     n = get_parameter(M.size)[1]
-    return MultinomialMatrices(n + 1, m; parameter=:field)
+    return MultinomialMatrices(n + 1, m; parameter = :field)
 end
 
 @doc raw"""
@@ -112,10 +112,10 @@ end
 
 representation_size(M::MultinomialMatrices) = get_parameter(M.size)
 
-function Base.show(io::IO, ::MultinomialMatrices{TypeParameter{Tuple{n,m}}}) where {n,m}
+function Base.show(io::IO, ::MultinomialMatrices{TypeParameter{Tuple{n, m}}}) where {n, m}
     return print(io, "MultinomialMatrices($(n), $(m))")
 end
-function Base.show(io::IO, M::MultinomialMatrices{Tuple{Int,Int}})
+function Base.show(io::IO, M::MultinomialMatrices{Tuple{Int, Int}})
     n, m = get_parameter(M.size)
     return print(io, "MultinomialMatrices($(n), $(m); parameter=:field)")
 end

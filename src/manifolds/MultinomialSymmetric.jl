@@ -43,7 +43,7 @@ struct MultinomialSymmetric{T} <: AbstractMultinomialDoublyStochastic
     size::T
 end
 
-function MultinomialSymmetric(n::Int; parameter::Symbol=:type)
+function MultinomialSymmetric(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
     return MultinomialSymmetric{typeof(size)}(size)
 end
@@ -84,7 +84,7 @@ function get_embedding(::MultinomialSymmetric{TypeParameter{Tuple{n}}}) where {n
 end
 function get_embedding(M::MultinomialSymmetric{Tuple{Int}})
     n = get_parameter(M.size)[1]
-    return MultinomialMatrices(n, n; parameter=:field)
+    return MultinomialMatrices(n, n; parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::MultinomialSymmetric)
@@ -133,7 +133,7 @@ project(::MultinomialSymmetric, ::Any, ::Any)
 
 function project!(M::MultinomialSymmetric, X, p, Y)
     n = get_parameter(M.size)[1]
-    α = (I + p) \ sum(Y, dims=2) # Formula (49) from 1802.02628
+    α = (I + p) \ sum(Y, dims = 2) # Formula (49) from 1802.02628
     return X .= Y .- (repeat(α, 1, n) .+ repeat(α', n, 1)) .* p
 end
 
@@ -152,15 +152,15 @@ passed to this projection.
 When `vector_at` is not `nothing`, a random matrix in the ambient space is generated
 and projected onto the tangent space
 """
-rand(::MultinomialSymmetric; σ::Real=1.0)
+rand(::MultinomialSymmetric; σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::MultinomialSymmetric,
-    pX;
-    vector_at=nothing,
-    kwargs...,
-)
+        rng::AbstractRNG,
+        M::MultinomialSymmetric,
+        pX;
+        vector_at = nothing,
+        kwargs...,
+    )
     n = get_parameter(M.size)[1]
     rand!(rng, SymmetricMatrices(n), pX; kwargs...)
     if vector_at === nothing

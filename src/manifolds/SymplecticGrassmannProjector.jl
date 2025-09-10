@@ -27,7 +27,7 @@ function check_point(M::SymplecticGrassmann, p::ProjectorPoint; kwargs...)
     if k2 != 2 * k
         return DomainError(
             k2,
-            "The point $(p) is a projector of rank $k2 and not of rank $(2*k), so it does not lie on $(M).",
+            "The point $(p) is a projector of rank $k2 and not of rank $(2 * k), so it does not lie on $(M).",
         )
     end
     return nothing
@@ -46,11 +46,11 @@ For details see Proposition 4.2 in [BendokatZimmermann:2021](@cite) and the defi
 especially the ``\bar{Ω}``, which is the representation for ``X`` used here.
 """
 function check_vector(
-    M::SymplecticGrassmann,
-    p::ProjectorPoint,
-    X::ProjectorTangentVector;
-    kwargs...,
-)
+        M::SymplecticGrassmann,
+        p::ProjectorPoint,
+        X::ProjectorTangentVector;
+        kwargs...,
+    )
     n, k = get_parameter(M.size)
     if !isapprox((Hamiltonian(X.value)^+).value, X.value; kwargs...)
         return DomainError(
@@ -80,14 +80,14 @@ embed(::SymplecticGrassmann, p::ProjectorPoint) = p.value
 embed(::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTangentVector) = X.value
 
 function get_embedding(
-    ::SymplecticGrassmann{TypeParameter{Tuple{n,k}}},
-    p::ProjectorPoint,
-) where {n,k}
-    return Euclidean(2n, 2n;)
+        ::SymplecticGrassmann{TypeParameter{Tuple{n, k}}},
+        p::ProjectorPoint,
+    ) where {n, k}
+    return Euclidean(2n, 2n)
 end
-function get_embedding(M::SymplecticGrassmann{Tuple{Int,Int}}, ::ProjectorPoint)
+function get_embedding(M::SymplecticGrassmann{Tuple{Int, Int}}, ::ProjectorPoint)
     n, _ = get_parameter(M.size)
-    return Euclidean(2n, 2n; parameter=:field)
+    return Euclidean(2n, 2n; parameter = :field)
 end
 function ManifoldsBase.get_embedding_type(::SymplecticGrassmann, ::ProjectorPoint)
     return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())

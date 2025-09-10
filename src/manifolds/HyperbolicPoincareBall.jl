@@ -12,12 +12,12 @@ change_representer(
 )
 
 function change_representer!(
-    ::Hyperbolic,
-    Y::PoincareBallTangentVector,
-    ::EuclideanMetric,
-    p::PoincareBallPoint,
-    X::PoincareBallTangentVector,
-)
+        ::Hyperbolic,
+        Y::PoincareBallTangentVector,
+        ::EuclideanMetric,
+        p::PoincareBallPoint,
+        X::PoincareBallTangentVector,
+    )
     α = 2 / (1 - norm(p.value)^2)
     Y.value .= X.value ./ α^2
     return Y
@@ -37,12 +37,12 @@ change_metric(
 )
 
 function change_metric!(
-    ::Hyperbolic,
-    Y::PoincareBallTangentVector,
-    ::EuclideanMetric,
-    p::PoincareBallPoint,
-    X::PoincareBallTangentVector,
-)
+        ::Hyperbolic,
+        Y::PoincareBallTangentVector,
+        ::EuclideanMetric,
+        p::PoincareBallPoint,
+        X::PoincareBallTangentVector,
+    )
     α = 2 / (1 - norm(p.value)^2)
     Y.value .= X.value ./ α
     return Y
@@ -69,11 +69,11 @@ function check_size(M::Hyperbolic, p::PoincareBallPoint)
 end
 
 function check_size(
-    M::Hyperbolic,
-    p::PoincareBallPoint,
-    X::PoincareBallTangentVector;
-    kwargs...,
-)
+        M::Hyperbolic,
+        p::PoincareBallPoint,
+        X::PoincareBallTangentVector;
+        kwargs...,
+    )
     N = get_parameter(M.size)[1]
     if size(X.value, 1) != N
         return DomainError(
@@ -101,7 +101,7 @@ convert(::Type{PoincareBallPoint}, ::Any)
 function convert(t::Type{PoincareBallPoint}, p::HyperboloidPoint)
     return convert(t, p.value)
 end
-function convert(::Type{PoincareBallPoint}, p::T) where {T<:AbstractVector}
+function convert(::Type{PoincareBallPoint}, p::T) where {T <: AbstractVector}
     return PoincareBallPoint(1 / (1 + last(p)) .* p[1:(end - 1)])
 end
 
@@ -120,7 +120,7 @@ Denote by ``\tilde p = (p_1,\ldots,p_{d-1})^{\mathrm{T}}``. Then the isometry is
 function convert(::Type{PoincareBallPoint}, p::PoincareHalfSpacePoint)
     return PoincareBallPoint(
         1 / (norm(p.value[1:(end - 1)])^2 + (last(p.value) + 1)^2) .*
-        vcat(2 .* p.value[1:(end - 1)], norm(p.value)^2 - 1),
+            vcat(2 .* p.value[1:(end - 1)], norm(p.value)^2 - 1),
     )
 end
 
@@ -144,17 +144,17 @@ and ``\tilde p = \begin{pmatrix}p_1\\⋮\\p_n\end{pmatrix}``.
 """
 convert(::Type{PoincareBallTangentVector}, ::Any)
 function convert(
-    t::Type{PoincareBallTangentVector},
-    p::HyperboloidPoint,
-    X::HyperboloidTangentVector,
-)
+        t::Type{PoincareBallTangentVector},
+        p::HyperboloidPoint,
+        X::HyperboloidTangentVector,
+    )
     return convert(t, convert(AbstractVector, p), convert(AbstractVector, p, X))
 end
 function convert(
-    ::Type{PoincareBallTangentVector},
-    p::P,
-    X::T,
-) where {P<:AbstractVector,T<:AbstractVector}
+        ::Type{PoincareBallTangentVector},
+        p::P,
+        X::T,
+    ) where {P <: AbstractVector, T <: AbstractVector}
     return PoincareBallTangentVector(
         1 / (p[end] + 1) .* (X[1:(end - 1)] .- (X[end] / (p[end] + 1) .* p[1:(end - 1)])),
     )
@@ -177,15 +177,15 @@ see [`convert(::Type{PoincareBallPoint}, ::HyperboloidPoint)`](@ref) and
 for the formulae.
 """
 function convert(
-    ::Type{Tuple{PoincareBallPoint,PoincareBallTangentVector}},
-    (p, X)::Tuple{HyperboloidPoint,HyperboloidTangentVector},
-)
+        ::Type{Tuple{PoincareBallPoint, PoincareBallTangentVector}},
+        (p, X)::Tuple{HyperboloidPoint, HyperboloidTangentVector},
+    )
     return (convert(PoincareBallPoint, p), convert(PoincareBallTangentVector, p, X))
 end
 function convert(
-    ::Type{Tuple{PoincareBallPoint,PoincareBallTangentVector}},
-    (p, X)::Tuple{P,T},
-) where {P<:AbstractVector,T<:AbstractVector}
+        ::Type{Tuple{PoincareBallPoint, PoincareBallTangentVector}},
+        (p, X)::Tuple{P, T},
+    ) where {P <: AbstractVector, T <: AbstractVector}
     return (convert(PoincareBallPoint, p), convert(PoincareBallTangentVector, p, X))
 end
 
@@ -224,10 +224,10 @@ The formula reads
 where ``\tilde p = \begin{pmatrix}p_1\\⋮\\p_{n-1}\end{pmatrix}``.
 """
 function convert(
-    ::Type{PoincareBallTangentVector},
-    p::PoincareHalfSpacePoint,
-    X::PoincareHalfSpaceTangentVector,
-)
+        ::Type{PoincareBallTangentVector},
+        p::PoincareHalfSpacePoint,
+        X::PoincareHalfSpaceTangentVector,
+    )
     den = norm(p.value[1:(end - 1)])^2 + (last(p.value) + 1)^2
     scp = dot(p.value, X.value)
     c1 =
@@ -254,9 +254,9 @@ see [`convert(::Type{PoincareBallPoint}, ::PoincareHalfSpacePoint)`](@ref) and
 for the formulae.
 """
 function convert(
-    ::Type{Tuple{PoincareBallPoint,PoincareBallTangentVector}},
-    (p, X)::Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTangentVector},
-)
+        ::Type{Tuple{PoincareBallPoint, PoincareBallTangentVector}},
+        (p, X)::Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTangentVector},
+    )
     return (convert(PoincareBallPoint, p), convert(PoincareBallTangentVector, p, X))
 end
 
@@ -276,7 +276,7 @@ d_{\mathcal H^n}(p,q) =
 function distance(::Hyperbolic, p::PoincareBallPoint, q::PoincareBallPoint)
     return acosh(
         1 +
-        2 * norm(p.value .- q.value)^2 / ((1 - norm(p.value)^2) * (1 - norm(q.value)^2)),
+            2 * norm(p.value .- q.value)^2 / ((1 - norm(p.value)^2) * (1 - norm(q.value)^2)),
     )
 end
 
@@ -292,7 +292,7 @@ function get_embedding(::Hyperbolic{TypeParameter{Tuple{n}}}, ::PoincareBallPoin
 end
 function get_embedding(M::Hyperbolic{Tuple{Int}}, ::PoincareBallPoint)
     n = get_parameter(M.size)[1]
-    return Euclidean(n; parameter=:field)
+    return Euclidean(n; parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::Hyperbolic, ::PoincareBallPoint)
@@ -308,11 +308,11 @@ g_p(X,Y) = \frac{4}{(1-\lVert p \rVert^2)^2}  ⟨X, Y⟩ .
 ````
 """
 function inner(
-    ::Hyperbolic,
-    p::PoincareBallPoint,
-    X::PoincareBallTangentVector,
-    Y::PoincareBallTangentVector,
-)
+        ::Hyperbolic,
+        p::PoincareBallPoint,
+        X::PoincareBallTangentVector,
+        Y::PoincareBallTangentVector,
+    )
     return 4 / (1 - norm(p.value)^2)^2 * dot(X.value, Y.value)
 end
 
@@ -346,10 +346,10 @@ function ManifoldsBase.allocate_result_embedding(
 end
 
 function project!(
-    ::Hyperbolic,
-    Y::PoincareBallTangentVector,
-    ::PoincareBallPoint,
-    X::PoincareBallTangentVector,
-)
+        ::Hyperbolic,
+        Y::PoincareBallTangentVector,
+        ::PoincareBallPoint,
+        X::PoincareBallTangentVector,
+    )
     return (Y.value .= X.value)
 end

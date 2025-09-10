@@ -21,8 +21,8 @@ struct LeviCivitaConnection <: AbstractAffineConnection end
 
 Decorate the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M` with [`AbstractAffineConnection`](@ref) `C`.
 """
-struct ConnectionManifold{𝔽,M<:AbstractManifold{𝔽},C<:AbstractAffineConnection} <:
-       AbstractDecoratorManifold{𝔽}
+struct ConnectionManifold{𝔽, M <: AbstractManifold{𝔽}, C <: AbstractAffineConnection} <:
+    AbstractDecoratorManifold{𝔽}
     manifold::M
     connection::C
 end
@@ -48,12 +48,12 @@ the resulting multi-dimensional array are ordered ``(i,j,k)``.
 """
 christoffel_symbols_first(::AbstractManifold, ::Any, B::AbstractBasis)
 function christoffel_symbols_first(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
-    ∂g = local_metric_jacobian(M, p, B; backend=backend)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
+    ∂g = local_metric_jacobian(M, p, B; backend = backend)
     n = size(∂g, 1)
     Γ = allocate(∂g, Size(n, n, n))
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
@@ -88,13 +88,13 @@ representation of the metric tensor. The dimensions of the resulting multi-dimen
 are ordered ``(l,i,j)``.
 """
 function christoffel_symbols_second(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
     Ginv = inverse_local_metric(M, p, B)
-    Γ₁ = christoffel_symbols_first(M, p, B; backend=backend)
+    Γ₁ = christoffel_symbols_first(M, p, B; backend = backend)
     Γ₂ = allocate(Γ₁)
     @einsum Γ₂[l, i, j] = Ginv[k, l] * Γ₁[i, j, k]
     return Γ₂
@@ -126,14 +126,14 @@ The dimensions of the resulting multi-dimensional array are ordered ``(i,j,k,l)`
 """
 christoffel_symbols_second_jacobian(::AbstractManifold, ::Any, B::AbstractBasis)
 function christoffel_symbols_second_jacobian(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
     n = size(p, 1)
     ∂Γ = reshape(
-        _jacobian(q -> christoffel_symbols_second(M, q, B; backend=backend), p, backend),
+        _jacobian(q -> christoffel_symbols_second(M, q, B; backend = backend), p, backend),
         n,
         n,
         n,
@@ -254,14 +254,14 @@ for details.
 """
 riemann_tensor(::AbstractManifold, ::Any, ::AbstractBasis)
 function riemann_tensor(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
     n = size(p, 1)
-    Γ = christoffel_symbols_second(M, p, B; backend=backend)
-    ∂Γ = christoffel_symbols_second_jacobian(M, p, B; backend=backend) ./ n
+    Γ = christoffel_symbols_second(M, p, B; backend = backend)
+    ∂Γ = christoffel_symbols_second_jacobian(M, p, B; backend = backend) ./ n
     R = allocate(∂Γ, Size(n, n, n, n))
     @einsum R[l, i, j, k] =
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]

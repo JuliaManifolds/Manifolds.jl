@@ -7,7 +7,7 @@ using ManifoldsBase: TFVector
     M = Sphere(2)
     @testset "Sphere Basics" begin
         @test repr(M) == "Sphere(2, ℝ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3}},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3}}, ℝ}
         @test representation_size(M) == (3,)
         @test !is_flat(M)
         @test is_flat(Sphere(1))
@@ -19,20 +19,20 @@ using ManifoldsBase: TFVector
         @test !is_default_metric(M, AffineInvariantMetric())
         @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0])
-        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error=:error)
+        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error = :error)
         @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
         @test_throws DomainError is_vector(
             M,
             [1.0, 0.0, 0.0],
             [1.0, 0.0, 0.0];
-            error=:error,
+            error = :error,
         )
         @test injectivity_radius(M, [1.0, 0.0, 0.0], ProjectionRetraction()) == π / 2
     end
     types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
-    TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
+    TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
 
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     test_atlases = (Manifolds.StereographicAtlas(), Manifolds.RetractionAtlas())
@@ -46,29 +46,29 @@ using ManifoldsBase: TFVector
             test_manifold(
                 M,
                 pts,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                test_mutating_rand=isa(T, Vector),
-                point_distributions=[Manifolds.uniform_distribution(M, pts[1])],
-                tvector_distributions=[
+                test_mutating_rand = isa(T, Vector),
+                point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
+                tvector_distributions = [
                     Manifolds.normal_tvector_distribution(M, pts[1], 1.0),
                 ],
-                basis_types_vecs=(DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
-                basis_types_to_from=basis_types,
-                test_vee_hat=false,
-                retraction_methods=[ProjectionRetraction(), ExponentialRetraction()],
-                inverse_retraction_methods=[ProjectionInverseRetraction()],
-                is_tangent_atol_multiplier=1,
-                test_atlases=test_atlases,
-                test_inplace=true,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
+                basis_types_to_from = basis_types,
+                test_vee_hat = false,
+                retraction_methods = [ProjectionRetraction(), ExponentialRetraction()],
+                inverse_retraction_methods = [ProjectionInverseRetraction()],
+                is_tangent_atol_multiplier = 1,
+                test_atlases = test_atlases,
+                test_inplace = true,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end
@@ -78,7 +78,7 @@ using ManifoldsBase: TFVector
         p = [-0.18337624444127734, 0.8345313166281056, 0.5195484910396462]
         q = [-0.18337624444127681, 0.8345313166281058, 0.5195484910396464]
         @test isapprox(distance(M, p, q), 5.828670879282073e-16)
-        @test isapprox(distance(M, p, -q), 3.1415926535897927; atol=eps())
+        @test isapprox(distance(M, p, -q), 3.1415926535897927; atol = eps())
     end
 
     @testset "Distribution tests" begin
@@ -129,14 +129,14 @@ using ManifoldsBase: TFVector
         x = normalize(randn(n + 1))
         v = log(M, x, -x)
         @test norm(v) ≈ π
-        @test isapprox(dot(x, v), 0; atol=1e-12)
+        @test isapprox(dot(x, v), 0; atol = 1.0e-12)
         vexp = normalize(project(M, x, [1, zeros(n)...]))
         @test v ≈ π * vexp
 
         x = [1, zeros(n)...]
         v = log(M, x, -x)
         @test norm(v) ≈ π
-        @test isapprox(dot(x, v), 0; atol=1e-12)
+        @test isapprox(dot(x, v), 0; atol = 1.0e-12)
         vexp = normalize(project(M, x, [0, 1, zeros(n - 1)...]))
         @test v ≈ π * vexp
     end
@@ -144,14 +144,14 @@ using ManifoldsBase: TFVector
     @testset "Complex Sphere" begin
         M = Sphere(2, ℂ)
         @test repr(M) == "Sphere(2, ℂ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3}},ℂ}
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3}}, ℂ}
         @test representation_size(M) == (3,)
         p = [1.0, 1.0im, 1.0]
         q = project(M, p)
         @test is_point(M, q)
         Y = [2.0, 1.0im, 20.0]
         X = project(M, q, Y)
-        @test is_vector(M, q, X, true; atol=10^(-14))
+        @test is_vector(M, q, X, true; atol = 10^(-14))
         Random.seed!(42)
         r = rand(M)
         @test is_point(M, r)
@@ -161,20 +161,20 @@ using ManifoldsBase: TFVector
     @testset "Quaternion Sphere" begin
         M = Sphere(2, ℍ)
         @test repr(M) == "Sphere(2, ℍ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3}},ℍ}
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3}}, ℍ}
         @test representation_size(M) == (3,)
         p = [Quaternion(1.0), Quaternion(0, 1.0, 0, 0), Quaternion(0.0, 0.0, -1.0, 0.0)]
         q = project(M, p)
         @test is_point(M, q)
         Y = [Quaternion(2.0), Quaternion(0, 1.0, 0, 0), Quaternion(0.0, 0.0, 20.0, 0.0)]
         X = project(M, q, Y)
-        @test is_vector(M, q, X, true; atol=10^(-14))
+        @test is_vector(M, q, X, true; atol = 10^(-14))
     end
 
     @testset "Array Sphere" begin
-        M = ArraySphere(2, 2; field=ℝ)
+        M = ArraySphere(2, 2; field = ℝ)
         @test repr(M) == "ArraySphere(2, 2; field=ℝ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2,2}},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2, 2}}, ℝ}
         @test representation_size(M) == (2, 2)
         p = ones(2, 2)
         q = project(M, p)
@@ -182,10 +182,10 @@ using ManifoldsBase: TFVector
         Y = [1.0 0.0; 0.0 1.1]
         X = project(M, q, Y)
         @test is_vector(M, q, X)
-        M = ArraySphere(2, 2; field=ℂ)
+        M = ArraySphere(2, 2; field = ℂ)
 
         @test repr(M) == "ArraySphere(2, 2; field=ℂ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2,2}},ℂ}
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2, 2}}, ℂ}
         @test representation_size(M) == (2, 2)
     end
 
@@ -300,17 +300,17 @@ using ManifoldsBase: TFVector
     end
 
     @testset "field parameter" begin
-        M = Sphere(2; parameter=:field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int},ℝ}
+        M = Sphere(2; parameter = :field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int}, ℝ}
         @test repr(M) == "Sphere(2, ℝ; parameter=:field)"
-        @test repr(ArraySphere(2, 3; parameter=:field)) ==
-              "ArraySphere(2, 3; field=ℝ, parameter=:field)"
+        @test repr(ArraySphere(2, 3; parameter = :field)) ==
+            "ArraySphere(2, 3; field=ℝ, parameter=:field)"
         p = [1.0, 0.0, 0.0]
         @test local_metric(M, p, DefaultOrthonormalBasis()) == Diagonal([1.0, 1.0])
     end
 
     @testset "sectional curvature" begin
-        M = Sphere(2; parameter=:field)
+        M = Sphere(2; parameter = :field)
         K = Manifolds.sectional_curvature_matrix(
             M,
             [1.0, 0.0, 0.0],
@@ -324,7 +324,7 @@ using ManifoldsBase: TFVector
                 DefaultOrthonormalBasis(),
             ),
             [0.0 1.0; 1.0 0.0],
-            atol=0.15,
+            atol = 0.15,
         )
     end
 end

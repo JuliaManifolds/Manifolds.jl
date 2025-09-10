@@ -19,11 +19,11 @@ function check_size(M::Hyperbolic, p::PoincareHalfSpacePoint)
 end
 
 function check_size(
-    M::Hyperbolic,
-    p::PoincareHalfSpacePoint,
-    X::PoincareHalfSpaceTangentVector;
-    kwargs...,
-)
+        M::Hyperbolic,
+        p::PoincareHalfSpacePoint,
+        X::PoincareHalfSpaceTangentVector;
+        kwargs...,
+    )
     N = get_parameter(M.size)[1]
     if size(X.value, 1) != N
         return DomainError(
@@ -48,7 +48,7 @@ Denote by $\tilde p = (p_1,\ldots,p_{n-1})$. Then the isometry is defined by
 function convert(::Type{PoincareHalfSpacePoint}, p::PoincareBallPoint)
     return PoincareHalfSpacePoint(
         1 / (norm(p.value[1:(end - 1)])^2 + (last(p.value) - 1)^2) .*
-        vcat(2 .* p.value[1:(end - 1)], 1 - norm(p.value)^2),
+            vcat(2 .* p.value[1:(end - 1)], 1 - norm(p.value)^2),
     )
 end
 
@@ -65,7 +65,7 @@ convert(::Type{PoincareHalfSpacePoint}, ::Any)
 function convert(t::Type{PoincareHalfSpacePoint}, p::HyperboloidPoint)
     return convert(t, convert(PoincareBallPoint, p))
 end
-function convert(t::Type{PoincareHalfSpacePoint}, p::T) where {T<:AbstractVector}
+function convert(t::Type{PoincareHalfSpacePoint}, p::T) where {T <: AbstractVector}
     return convert(t, convert(PoincareBallPoint, p))
 end
 
@@ -100,10 +100,10 @@ The formula reads
 where $\tilde p = \begin{pmatrix}p_1\\⋮\\p_{n-1}\end{pmatrix}$.
 """
 function convert(
-    ::Type{PoincareHalfSpaceTangentVector},
-    p::PoincareBallPoint,
-    X::PoincareBallTangentVector,
-)
+        ::Type{PoincareHalfSpaceTangentVector},
+        p::PoincareBallPoint,
+        X::PoincareBallTangentVector,
+    )
     den = norm(p.value[1:(end - 1)])^2 + (last(p.value) - 1)^2
     scp = dot(p.value, X.value)
     c1 =
@@ -127,20 +127,20 @@ an intermediate step.
 """
 convert(::Type{PoincareHalfSpaceTangentVector}, ::Any)
 function convert(
-    t::Type{PoincareHalfSpaceTangentVector},
-    p::HyperboloidPoint,
-    X::HyperboloidTangentVector,
-)
+        t::Type{PoincareHalfSpaceTangentVector},
+        p::HyperboloidPoint,
+        X::HyperboloidTangentVector,
+    )
     return convert(t, convert(AbstractVector, p), convert(AbstractVector, X))
 end
 function convert(
-    ::Type{PoincareHalfSpaceTangentVector},
-    p::P,
-    X::T,
-) where {P<:AbstractVector,T<:AbstractVector}
+        ::Type{PoincareHalfSpaceTangentVector},
+        p::P,
+        X::T,
+    ) where {P <: AbstractVector, T <: AbstractVector}
     return convert(
         PoincareHalfSpaceTangentVector,
-        convert(Tuple{PoincareBallPoint,PoincareBallTangentVector}, (p, X))...,
+        convert(Tuple{PoincareBallPoint, PoincareBallTangentVector}, (p, X))...,
     )
 end
 
@@ -157,9 +157,9 @@ see [`convert(::Type{PoincareHalfSpacePoint}, ::PoincareBallPoint)`](@ref) and
 for the formulae.
 """
 function convert(
-    ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTangentVector}},
-    (p, X)::Tuple{PoincareBallPoint,PoincareBallTangentVector},
-)
+        ::Type{Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTangentVector}},
+        (p, X)::Tuple{PoincareBallPoint, PoincareBallTangentVector},
+    )
     return (
         convert(PoincareHalfSpacePoint, p),
         convert(PoincareHalfSpaceTangentVector, p, X),
@@ -183,18 +183,18 @@ see [`convert(::Type{PoincareHalfSpacePoint}, ::HyperboloidPoint)`](@ref) and
 for the formulae.
 """
 function convert(
-    ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTangentVector}},
-    (p, X)::Tuple{HyperboloidPoint,HyperboloidTangentVector},
-)
+        ::Type{Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTangentVector}},
+        (p, X)::Tuple{HyperboloidPoint, HyperboloidTangentVector},
+    )
     return (
         convert(PoincareHalfSpacePoint, p),
         convert(PoincareHalfSpaceTangentVector, p, X),
     )
 end
 function convert(
-    ::Type{Tuple{PoincareHalfSpacePoint,PoincareHalfSpaceTangentVector}},
-    (p, X)::Tuple{P,T},
-) where {P<:AbstractVector,T<:AbstractVector}
+        ::Type{Tuple{PoincareHalfSpacePoint, PoincareHalfSpaceTangentVector}},
+        (p, X)::Tuple{P, T},
+    ) where {P <: AbstractVector, T <: AbstractVector}
     return (
         convert(PoincareHalfSpacePoint, p),
         convert(PoincareHalfSpaceTangentVector, p, X),
@@ -219,23 +219,23 @@ embed(::Hyperbolic, p::PoincareHalfSpacePoint) = p.value
 embed!(::Hyperbolic, q, p::PoincareHalfSpacePoint) = copyto!(q, p.value)
 embed(::Hyperbolic, p::PoincareHalfSpacePoint, X::PoincareHalfSpaceTangentVector) = X.value
 function embed!(
-    ::Hyperbolic,
-    Y,
-    p::PoincareHalfSpacePoint,
-    X::PoincareHalfSpaceTangentVector,
-)
+        ::Hyperbolic,
+        Y,
+        p::PoincareHalfSpacePoint,
+        X::PoincareHalfSpaceTangentVector,
+    )
     return copyto!(Y, X.value)
 end
 
 function get_embedding(
-    ::Hyperbolic{TypeParameter{Tuple{n}}},
-    ::PoincareHalfSpacePoint,
-) where {n}
+        ::Hyperbolic{TypeParameter{Tuple{n}}},
+        ::PoincareHalfSpacePoint,
+    ) where {n}
     return Euclidean(n)
 end
 function get_embedding(M::Hyperbolic{Tuple{Int}}, ::PoincareHalfSpacePoint)
     n = get_parameter(M.size)[1]
-    return Euclidean(n; parameter=:field)
+    return Euclidean(n; parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::Hyperbolic, ::PoincareHalfSpacePoint)
@@ -256,11 +256,11 @@ g_p(X,Y) = \frac{⟨X,Y⟩}{p_n^2}.
 ````
 """
 function inner(
-    ::Hyperbolic,
-    p::PoincareHalfSpacePoint,
-    X::PoincareHalfSpaceTangentVector,
-    Y::PoincareHalfSpaceTangentVector,
-)
+        ::Hyperbolic,
+        p::PoincareHalfSpacePoint,
+        X::PoincareHalfSpaceTangentVector,
+        Y::PoincareHalfSpaceTangentVector,
+    )
     return dot(X.value, Y.value) / last(p.value)^2
 end
 
@@ -286,10 +286,10 @@ function ManifoldsBase.allocate_result_embedding(
 end
 
 function project!(
-    ::Hyperbolic,
-    Y::PoincareHalfSpaceTangentVector,
-    ::PoincareHalfSpacePoint,
-    X::PoincareHalfSpaceTangentVector,
-)
+        ::Hyperbolic,
+        Y::PoincareHalfSpaceTangentVector,
+        ::PoincareHalfSpacePoint,
+        X::PoincareHalfSpaceTangentVector,
+    )
     return (Y.value .= X.value)
 end

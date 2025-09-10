@@ -83,7 +83,7 @@ struct MultinomialDoubleStochastic{T} <: AbstractMultinomialDoublyStochastic
     size::T
 end
 
-function MultinomialDoubleStochastic(n::Int; parameter::Symbol=:type)
+function MultinomialDoubleStochastic(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
     return MultinomialDoubleStochastic{typeof(size)}(size)
 end
@@ -122,7 +122,7 @@ function get_embedding(::MultinomialDoubleStochastic{TypeParameter{Tuple{n}}}) w
 end
 function get_embedding(M::MultinomialDoubleStochastic{Tuple{Int}})
     n = get_parameter(M.size)[1]
-    return MultinomialMatrices(n, n; parameter=:field)
+    return MultinomialMatrices(n, n; parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::MultinomialDoubleStochastic)
@@ -176,7 +176,7 @@ project(::MultinomialDoubleStochastic, ::Any, ::Any)
 
 function project!(M::MultinomialDoubleStochastic, X, p, Y)
     n = get_parameter(M.size)[1]
-    ζ = [I p; p' I] \ [sum(Y, dims=2); sum(Y, dims=1)'] # Formula (25) from 1802.02628
+    ζ = [I p; p' I] \ [sum(Y, dims = 2); sum(Y, dims = 1)'] # Formula (25) from 1802.02628
     return X .= Y .- (repeat(ζ[1:n], 1, n) .+ repeat(ζ[(n + 1):end]', n, 1)) .* p
 end
 
@@ -198,19 +198,19 @@ function project(M::AbstractMultinomialDoublyStochastic, p; kwargs...)
 end
 
 function project!(
-    ::AbstractMultinomialDoublyStochastic,
-    q,
-    p;
-    maxiter::Int=100,
-    tolerance::Real=eps(eltype(p)),
-)
+        ::AbstractMultinomialDoublyStochastic,
+        q,
+        p;
+        maxiter::Int = 100,
+        tolerance::Real = eps(eltype(p)),
+    )
     any(p .<= 0) && throw(
         DomainError(
             "The matrix $p can not be projected, since it has nonpositive entries.",
         ),
     )
     iter = 0
-    d1 = sum(p, dims=1)
+    d1 = sum(p, dims = 1)
     d2 = 1 ./ (p * d1')
     row = d2' * p
     gap = 2 * tolerance
@@ -240,16 +240,16 @@ passed to this projection.
 When `vector_at` is not `nothing`, a random matrix in the ambient space is generated
 and projected onto the tangent space
 """
-rand(::MultinomialDoubleStochastic; σ::Real=1.0)
+rand(::MultinomialDoubleStochastic; σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::MultinomialDoubleStochastic,
-    pX;
-    vector_at=nothing,
-    σ::Real=one(real(eltype(pX))),
-    kwargs...,
-)
+        rng::AbstractRNG,
+        M::MultinomialDoubleStochastic,
+        pX;
+        vector_at = nothing,
+        σ::Real = one(real(eltype(pX))),
+        kwargs...,
+    )
     rand!(rng, pX)
     pX .*= σ
     if vector_at === nothing
@@ -273,12 +273,12 @@ function ManifoldsBase.retract_project!(M::MultinomialDoubleStochastic, q, p, X)
     return project!(M, q, p .* exp.(X ./ p))
 end
 function ManifoldsBase.retract_project_fused!(
-    M::MultinomialDoubleStochastic,
-    q,
-    p,
-    X,
-    t::Number,
-)
+        M::MultinomialDoubleStochastic,
+        q,
+        p,
+        X,
+        t::Number,
+    )
     return project!(M, q, p .* exp.(t .* X ./ p))
 end
 

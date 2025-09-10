@@ -37,16 +37,18 @@ q = -1.3 + 1.5im
 s1 = project(M, q)
 s2 = project(M, p, q)
 
-circle = [[sin(φ), cos(φ)] for φ in range(0, 2π, length=n)]
-tp = @pgf Axis({
-    axis_lines = "none",
-    axis_equal,
-    xmin = -1.7,
-    xmax = 1.7,
-    ymin = -0.25,
-    ymax = 1.4,
-    scale = 1.6,
-})
+circle = [[sin(φ), cos(φ)] for φ in range(0, 2π, length = n)]
+tp = @pgf Axis(
+    {
+        axis_lines = "none",
+        axis_equal,
+        xmin = -1.7,
+        xmax = 1.7,
+        ymin = -0.25,
+        ymax = 1.4,
+        scale = 1.6,
+    }
+)
 
 plain_opts = @pgf {"no markers", color = light_color, line_width = base_linewidth}
 
@@ -87,24 +89,24 @@ push!(tp, Plot(projection_opts3_a, Coordinates(Tuple.([C_to_2D(p + s2)]))))
 push!(
     tp,
     raw"\node[label ={[label distance=.05cm]below:{\color{gray}$q$}}] at (axis cs:" *
-    "$(real(q)),$(imag(q))) {};",
+        "$(real(q)),$(imag(q))) {};",
 )
 push!(
     tp,
     raw"\node[label ={[label distance=.05cm]left:{\color{gray}$p$}}] at (axis cs:" *
-    "$(real(p)),$(imag(p))) {};",
+        "$(real(p)),$(imag(p))) {};",
 )
 # push!(tp, raw"\node[label ={[label distance=.05cm]right:{$s_1=\mathrm{proj}_{\mathcal C}(q_2)=$\texttt{project(M,q2)}}}] at (axis cs:"*"$(real(s1)),$(imag(s1))) {};")
 push!(
     tp,
     raw"\node[label ={[label distance=.05cm]right:{\color{gray}$s_1=$\texttt{project(M,q)$\in\mathcal C$}}}] at (axis cs:" *
-    "$(real(s1)),$(imag(s1))) {};",
+        "$(real(s1)),$(imag(s1))) {};",
 )
 push!(
     tp,
     raw"\node[label ={[label distance=.05cm]0:{\color{gray}$s_2=$\texttt{project(M,p,q)}$\in T_{p}\mathcal C$}}] at (axis cs:" *
-    "$(real(p+s2)),$(imag(p+s2))) {};",
+        "$(real(p + s2)),$(imag(p + s2))) {};",
 )
 push!(tp, raw"\node at (axis cs: 0,-.6) {\color{gray}$\mathcal C$};")
 
-pgfsave(out_file, tp, dpi=1200)
+pgfsave(out_file, tp, dpi = 1200)

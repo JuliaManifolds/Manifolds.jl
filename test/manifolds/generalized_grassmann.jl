@@ -9,32 +9,32 @@ include("../header.jl")
         X[1, :] .= 1.0
         @testset "Basics" begin
             @test repr(M) ==
-                  "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
+                "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
             @test base_manifold(M) === M
             @test !is_flat(M)
-            @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error=:error)
+            @test_throws ManifoldDomainError is_point(M, [1.0, 0.0, 0.0, 0.0]; error = :error)
             @test_throws ManifoldDomainError is_point(
                 M,
                 1im * [1.0 0.0; 0.0 1.0; 0.0 0.0];
-                error=:error,
+                error = :error,
             )
-            @test_throws ManifoldDomainError is_point(M, 2 * p; error=:error)
+            @test_throws ManifoldDomainError is_point(M, 2 * p; error = :error)
             @test !is_vector(M, p, [0.0, 0.0, 1.0, 0.0])
             @test_throws ManifoldDomainError is_vector(
                 M,
                 p,
                 [0.0, 0.0, 1.0, 0.0];
-                error=:error,
+                error = :error,
             )
             @test_throws ManifoldDomainError is_vector(
                 M,
                 p,
                 1 * im * zero_vector(M, p);
-                error=:error,
+                error = :error,
             )
-            @test_throws ManifoldDomainError is_vector(M, p, X; error=:error)
+            @test_throws ManifoldDomainError is_vector(M, p, X; error = :error)
             @test injectivity_radius(M) == π / 2
             @test injectivity_radius(M, ExponentialRetraction()) == π / 2
             @test injectivity_radius(M, p) == π / 2
@@ -42,7 +42,7 @@ include("../header.jl")
             @test mean(M, [p, p, p]) == p
             Random.seed!(42)
             @test is_point(M, rand(M))
-            @test is_vector(M, p, rand(M; vector_at=p))
+            @test is_vector(M, p, rand(M; vector_at = p))
         end
         @testset "Embedding and Projection" begin
             q = similar(p)
@@ -73,7 +73,7 @@ include("../header.jl")
             @test Z == B \ X
         end
         types = [Matrix{Float64}]
-        TEST_STATIC_SIZED && push!(types, MMatrix{3,2,Float64,6})
+        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64, 6})
         X = [0.0 0.0; 1.0 0.0; 0.0 2.0]
         Y = [0.0 0.0; -1.0 0.0; 0.0 2.0]
         @test inner(M, p, X, Y) == 0
@@ -95,26 +95,26 @@ include("../header.jl")
         @testset "Type $T" for T in types
             pts = convert.(T, [p, q, r])
             @test !is_point(M, 2 * p)
-            @test_throws ManifoldDomainError !is_point(M, 2 * r; error=:error)
+            @test_throws ManifoldDomainError !is_point(M, 2 * r; error = :error)
             @test !is_vector(M, p, q)
-            @test_throws ManifoldDomainError is_vector(M, p, q; error=:error)
+            @test_throws ManifoldDomainError is_vector(M, p, q; error = :error)
             test_manifold(
                 M,
                 pts,
-                test_exp_log=false,
-                default_inverse_retraction_method=LogarithmicInverseRetraction(),
-                default_retraction_method=ExponentialRetraction(),
-                test_injectivity_radius=false,
-                test_is_tangent=true,
-                test_project_tangent=true,
-                test_default_vector_transport=false,
-                projection_atol_multiplier=15.0,
-                retraction_atol_multiplier=10.0,
-                is_point_atol_multiplier=10.0,
-                is_tangent_atol_multiplier=4 * 10.0^2,
-                retraction_methods=[PolarRetraction(), ProjectionRetraction()],
-                mid_point12=nothing,
-                test_inplace=true,
+                test_exp_log = false,
+                default_inverse_retraction_method = LogarithmicInverseRetraction(),
+                default_retraction_method = ExponentialRetraction(),
+                test_injectivity_radius = false,
+                test_is_tangent = true,
+                test_project_tangent = true,
+                test_default_vector_transport = false,
+                projection_atol_multiplier = 15.0,
+                retraction_atol_multiplier = 10.0,
+                is_point_atol_multiplier = 10.0,
+                is_tangent_atol_multiplier = 4 * 10.0^2,
+                retraction_methods = [PolarRetraction(), ProjectionRetraction()],
+                mid_point12 = nothing,
+                test_inplace = true,
             )
         end
     end
@@ -124,7 +124,7 @@ include("../header.jl")
         M = GeneralizedGrassmann(3, 2, B, ℂ)
         @testset "Basics" begin
             @test repr(M) ==
-                  "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℂ)"
+                "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℂ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 4
             @test !is_flat(M)
@@ -142,7 +142,7 @@ include("../header.jl")
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
         M = GeneralizedGrassmann(3, 2, B, ℍ)
         @test repr(M) ==
-              "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℍ)"
+            "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℍ)"
         @testset "Basics" begin
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 8
@@ -170,10 +170,10 @@ include("../header.jl")
     end
     @testset "field parameter" begin
         B = [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0]
-        M = GeneralizedGrassmann(3, 2, B; parameter=:field)
+        M = GeneralizedGrassmann(3, 2, B; parameter = :field)
         @test repr(M) ==
-              "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ; parameter=:field)"
+            "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ; parameter=:field)"
         @test typeof(get_embedding(M)) ===
-              GeneralizedStiefel{Tuple{Int64,Int64},ℝ,Matrix{Float64}}
+            GeneralizedStiefel{Tuple{Int64, Int64}, ℝ, Matrix{Float64}}
     end
 end

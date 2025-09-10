@@ -17,20 +17,20 @@ include("../header.jl")
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test is_flat(M)
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3,3}},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3, 3}}, ℝ}
         @test check_point(M, B_sym) === nothing
-        @test_throws DomainError is_point(M, A; error=:error)
-        @test_throws ManifoldDomainError is_point(M, C; error=:error)
-        @test_throws ManifoldDomainError is_point(M, D; error=:error) #embedding changes type
+        @test_throws DomainError is_point(M, A; error = :error)
+        @test_throws ManifoldDomainError is_point(M, C; error = :error)
+        @test_throws ManifoldDomainError is_point(M, D; error = :error) #embedding changes type
         @test check_vector(M, B_sym, B_sym) === nothing
-        @test_throws DomainError is_vector(M, B_sym, A; error=:error)
-        @test_throws DomainError is_vector(M, A, B_sym; error=:error)
-        @test_throws ManifoldDomainError is_vector(M, B_sym, D; error=:error)
+        @test_throws DomainError is_vector(M, B_sym, A; error = :error)
+        @test_throws DomainError is_vector(M, A, B_sym; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, B_sym, D; error = :error)
         @test_throws ManifoldDomainError is_vector(
             M,
             B_sym,
             1 * im * zero_vector(M, B_sym);
-            error=:error,
+            error = :error,
         )
         @test manifold_dimension(M) == 6
         @test manifold_dimension(M_complex) == 9
@@ -44,7 +44,7 @@ include("../header.jl")
     end
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64, 9})
 
     bases = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types
@@ -53,41 +53,41 @@ include("../header.jl")
             test_manifold(
                 M,
                 pts,
-                test_injectivity_radius=false,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                basis_types_vecs=(
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                basis_types_vecs = (
                     DiagonalizingOrthonormalBasis(log(M, pts[1], pts[2])),
                     bases...,
                 ),
-                basis_types_to_from=bases,
-                is_tangent_atol_multiplier=1,
-                test_inplace=true,
+                basis_types_to_from = bases,
+                is_tangent_atol_multiplier = 1,
+                test_inplace = true,
             )
             test_manifold(
                 M_complex,
                 pts,
-                test_injectivity_radius=false,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_injectivity_radius = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                basis_types_vecs=(DefaultOrthonormalBasis(ℝ),),
-                basis_types_to_from=(DefaultOrthonormalBasis(ℝ),),
-                is_tangent_atol_multiplier=1,
-                test_inplace=true,
+                basis_types_vecs = (DefaultOrthonormalBasis(ℝ),),
+                basis_types_to_from = (DefaultOrthonormalBasis(ℝ),),
+                is_tangent_atol_multiplier = 1,
+                test_inplace = true,
             )
             @test isapprox(-pts[1], exp(M, pts[1], log(M, pts[1], -pts[1])))
         end # testset type $T
     end # for
     @testset "field parameter" begin
-        M = SymmetricMatrices(3, ℝ; parameter=:field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        M = SymmetricMatrices(3, ℝ; parameter = :field)
+        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
         @test repr(M) == "SymmetricMatrices(3, ℝ; parameter=:field)"
     end
 end # test SymmetricMatrices

@@ -1,11 +1,11 @@
-exp!(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}, q, p, X) = (q .= p .+ X)
+exp!(::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, q, p, X) = (q .= p .+ X)
 function exp_fused!(
-    ::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric},
-    q,
-    p,
-    X,
-    t::Number,
-)
+        ::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric},
+        q,
+        p,
+        X,
+        t::Number,
+    )
     return (q .= p .+ t .* X)
 end
 
@@ -15,7 +15,7 @@ end
 Return the volume of the [`ProbabilitySimplex`](@ref) with the Euclidean metric.
 The formula reads ``\frac{\sqrt{n+1}}{n!}``
 """
-function manifold_volume(M::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric})
+function manifold_volume(M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric})
     n = get_parameter(M.manifold.size)[1]
     return sqrt(n + 1) / factorial(n)
 end
@@ -34,42 +34,42 @@ When `vector_at` is not `nothing`, return a (Gaussian) random vector from the ta
 ``T_{p}\mathrm{\Delta}^n``by shifting a multivariate Gaussian with standard deviation `σ`
 to have a zero component sum.
 """
-rand(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}; σ::Real=1.0)
+rand(::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}; σ::Real = 1.0)
 function Random.rand(
-    M::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric};
-    vector_at=nothing,
-    kwargs...,
-)
+        M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric};
+        vector_at = nothing,
+        kwargs...,
+    )
     if vector_at === nothing
         pX = allocate_result(M, rand)
     else
         pX = allocate_result(M, rand, vector_at)
     end
-    rand!(M, pX; vector_at=vector_at, kwargs...)
+    rand!(M, pX; vector_at = vector_at, kwargs...)
     return pX
 end
 function Random.rand(
-    rng::AbstractRNG,
-    M::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric};
-    vector_at=nothing,
-    kwargs...,
-)
+        rng::AbstractRNG,
+        M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric};
+        vector_at = nothing,
+        kwargs...,
+    )
     if vector_at === nothing
         pX = allocate_result(M, rand)
     else
         pX = allocate_result(M, rand, vector_at)
     end
-    rand!(rng, M, pX; vector_at=vector_at, kwargs...)
+    rand!(rng, M, pX; vector_at = vector_at, kwargs...)
     return pX
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    ::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric},
-    pX;
-    vector_at=nothing,
-    σ=one(eltype(pX)),
-)
+        rng::AbstractRNG,
+        ::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric},
+        pX;
+        vector_at = nothing,
+        σ = one(eltype(pX)),
+    )
     if isnothing(vector_at)
         Random.randexp!(rng, pX)
         LinearAlgebra.normalize!(pX, 1)
@@ -81,10 +81,10 @@ function Random.rand!(
 end
 
 function Random.rand!(
-    M::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric},
-    pX;
-    kwargs...,
-)
+        M::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric},
+        pX;
+        kwargs...,
+    )
     return rand!(Random.default_rng(), M, pX; kwargs...)
 end
 
@@ -94,6 +94,6 @@ end
 Compute the volume density at point `p` on [`ProbabilitySimplex`](@ref) `M` for tangent
 vector `X`. It is equal to 1.
 """
-function volume_density(::MetricManifold{ℝ,<:ProbabilitySimplex,<:EuclideanMetric}, p, X)
+function volume_density(::MetricManifold{ℝ, <:ProbabilitySimplex, <:EuclideanMetric}, p, X)
     return one(eltype(X))
 end

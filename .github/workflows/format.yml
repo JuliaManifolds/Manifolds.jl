@@ -1,30 +1,36 @@
-name: Format
+name: Runic formatting
 on:
   push:
-    branches: [master]
-    tags: [v*]
+    branches:
+      - 'master'
+      - 'release-'
+    tags:
+      - '*'
   pull_request:
-
 jobs:
-  format:
-    name: "Format Check"
+  runic:
+    name: Runic
     runs-on: ubuntu-latest
+    # Permissions needed for reviewdog/action-suggester to post comments
+    permissions:
+      contents: read
+      checks: write
+      issues: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v2
+      - uses: actions/checkout@v5
+      # - uses: julia-actions/setup-julia@v2
+      #   with:
+      #     version: '1'
+      # - uses: julia-actions/cache@v2
+      - uses: fredrikekre/runic-action@v1
         with:
-          version: 1
-      - uses: julia-actions/cache@v2
-      - name: Install JuliaFormatter and format
-        run: |
-          using Pkg
-          Pkg.add(PackageSpec(name="JuliaFormatter", version="1"))
-          using JuliaFormatter
-          format("."; verbose=true)
-        shell: julia --color=yes {0}
-      - name: Suggest formatting changes
-        uses: reviewdog/action-suggester@v1
+          version: '1'
+          format_files: true
+        # Fail on next step instead
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
+      - uses: reviewdog/action-suggester@v1
         if: github.event_name == 'pull_request'
         with:
-          tool_name: JuliaFormatter
-          fail_on_error: true
+          tool_name: Runic
+          fail_level: warning

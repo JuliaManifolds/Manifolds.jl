@@ -1,7 +1,7 @@
 
 # piping syntax for decoration
 (metric::AbstractMetric)(M::AbstractManifold) = MetricManifold(M, metric)
-(::Type{T})(M::AbstractManifold) where {T<:AbstractMetric} = MetricManifold(M, T())
+(::Type{T})(M::AbstractManifold) where {T <: AbstractMetric} = MetricManifold(M, T())
 
 """
     MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <: AbstractDecoratorManifold{𝔽}
@@ -22,15 +22,15 @@ you can of course still implement that directly.
 
 Generate the [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) `M` as a manifold with the `AbstractMetric` `G`.
 """
-struct MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <:
-       AbstractDecoratorManifold{𝔽}
+struct MetricManifold{𝔽, M <: AbstractManifold{𝔽}, G <: AbstractMetric} <:
+    AbstractDecoratorManifold{𝔽}
     manifold::M
     metric::G
 end
 
 # remetricise instead of double-decorating
 (metric::AbstractMetric)(M::MetricManifold) = MetricManifold(M.manifold, metric)
-(::Type{T})(M::MetricManifold) where {T<:AbstractMetric} = MetricManifold(M.manifold, T())
+(::Type{T})(M::MetricManifold) where {T <: AbstractMetric} = MetricManifold(M.manifold, T())
 
 decorated_manifold(M::MetricManifold) = M.manifold
 
@@ -102,12 +102,12 @@ end
 Compute the Einstein tensor of the manifold `M` at the point `p`, see [https://en.wikipedia.org/wiki/Einstein_tensor](https://en.wikipedia.org/wiki/Einstein_tensor)
 """
 function einstein_tensor(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
-    Ric = ricci_tensor(M, p, B; backend=backend)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
+    Ric = ricci_tensor(M, p, B; backend = backend)
     g = local_metric(M, p, B)
     Ginv = inverse_local_metric(M, p, B)
     S = sum(Ginv .* Ric)
@@ -222,22 +222,22 @@ function inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)
 end
 @new_trait_function inverse_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
 
-function Base.convert(::Type{MetricManifold{𝔽,MT,GT}}, M::MT) where {𝔽,MT,GT}
+function Base.convert(::Type{MetricManifold{𝔽, MT, GT}}, M::MT) where {𝔽, MT, GT}
     return _convert_with_default(M, GT, Val(is_default_metric(M, GT())))
 end
 
 function _convert_with_default(
-    M::MT,
-    T::Type{<:AbstractMetric},
-    ::Val{true},
-) where {MT<:AbstractManifold}
+        M::MT,
+        T::Type{<:AbstractMetric},
+        ::Val{true},
+    ) where {MT <: AbstractManifold}
     return MetricManifold(M, T())
 end
 function _convert_with_default(
-    M::MT,
-    T::Type{<:AbstractMetric},
-    ::Val{false},
-) where {MT<:AbstractManifold}
+        M::MT,
+        T::Type{<:AbstractMetric},
+        ::Val{false},
+    ) where {MT <: AbstractManifold}
     return error(
         "Can not convert $(M) to a MetricManifold{$(MT),$(T)}, since $(T) is not the default metric.",
     )
@@ -350,11 +350,11 @@ dimensions of the resulting multi-dimensional array are ordered ``(i,j,k)``.
 """
 local_metric_jacobian(::AbstractManifold, ::Any, B::AbstractBasis, ::AbstractDiffBackend)
 function local_metric_jacobian(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
     n = size(p, 1)
     ∂g = reshape(_jacobian(q -> local_metric(M, q, B), copy(M, p), backend), n, n, n)
     return ∂g
@@ -451,13 +451,13 @@ uses the Einstein summation convention.
 """
 ricci_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
 function ricci_curvature(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    backend::AbstractDiffBackend=default_differential_backend(),
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        backend::AbstractDiffBackend = default_differential_backend(),
+    )
     Ginv = inverse_local_metric(M, p, B)
-    Ric = ricci_tensor(M, p, B; backend=backend)
+    Ric = ricci_tensor(M, p, B; backend = backend)
     S = sum(Ginv .* Ric)
     return S
 end
@@ -496,10 +496,7 @@ function Base.show(io::IO, M::MetricManifold)
 end
 
 function vector_transport_direction(
-    M::MetricManifold,
-    p,
-    X,
-    d,
+    M::MetricManifold, p, X, d,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 )
     (metric(M.manifold) == M.metric) &&
@@ -507,19 +504,11 @@ function vector_transport_direction(
     return invoke(
         vector_transport_direction,
         Tuple{AbstractManifold,Any,Any,Any,AbstractVectorTransportMethod},
-        M,
-        p,
-        X,
-        d,
-        m,
+        M, p, X, d, m,
     )
 end
 function vector_transport_direction!(
-    M::MetricManifold,
-    Y,
-    p,
-    X,
-    d,
+    M::MetricManifold, Y, p, X, d,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 )
     (metric(M.manifold) == M.metric) &&
@@ -527,12 +516,7 @@ function vector_transport_direction!(
     return invoke(
         vector_transport_direction!,
         Tuple{AbstractManifold,Any,Any,Any,Any,AbstractVectorTransportMethod},
-        M,
-        Y,
-        p,
-        X,
-        d,
-        m,
+        M, Y, p, X, d, m,
     )
 end
 
@@ -555,11 +539,7 @@ function vector_transport_to(
     )
 end
 function vector_transport_to!(
-    M::MetricManifold,
-    Y,
-    p,
-    X,
-    q,
+    M::MetricManifold, Y, p, X, q,
     m::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
 )
     (metric(M.manifold) == M.metric) &&
@@ -567,12 +547,7 @@ function vector_transport_to!(
     return invoke(
         vector_transport_to!,
         Tuple{AbstractManifold,Any,Any,Any,Any,AbstractVectorTransportMethod},
-        M,
-        Y,
-        p,
-        X,
-        q,
-        m,
+        M, Y, p, X, q, m,
     )
 end
 
@@ -590,64 +565,64 @@ zero_vector!(M::MetricManifold, X, p) = zero_vector!(M.manifold, X, p)
 
 is_metric_function(::Any) = false
 for mf in [
-    change_metric,
-    change_metric!,
-    change_representer,
-    change_representer!,
-    christoffel_symbols_first,
-    christoffel_symbols_second,
-    christoffel_symbols_second_jacobian,
-    det_local_metric,
-    einstein_tensor,
-    exp,
-    exp!,
-    exp_fused,
-    exp_fused!,
-    flat!,
-    gaussian_curvature,
-    get_basis,
-    get_coordinates,
-    get_coordinates!,
-    get_vector,
-    get_vector!,
-    get_vectors,
-    inner,
-    inverse_local_metric,
-    inverse_retract,
-    inverse_retract!,
-    local_metric,
-    local_metric_jacobian,
-    log,
-    log!,
-    log_local_metric_density,
-    mean,
-    mean!,
-    median,
-    median!,
-    mid_point,
-    norm,
-    parallel_transport_direction,
-    parallel_transport_direction!,
-    parallel_transport_to,
-    parallel_transport_to!,
-    retract,
-    retract!,
-    retract_fused,
-    retract_fused!,
-    ricci_curvature,
-    ricci_tensor,
-    riemann_tensor,
-    riemannian_gradient,
-    riemannian_gradient!,
-    riemannian_Hessian,
-    riemannian_Hessian!,
-    sharp!,
-    vector_transport_direction,
-    vector_transport_direction!,
-    vector_transport_to,
-    vector_transport_to!,
-    Weingarten,
-    Weingarten!,
-]
+        change_metric,
+        change_metric!,
+        change_representer,
+        change_representer!,
+        christoffel_symbols_first,
+        christoffel_symbols_second,
+        christoffel_symbols_second_jacobian,
+        det_local_metric,
+        einstein_tensor,
+        exp,
+        exp!,
+        exp_fused,
+        exp_fused!,
+        flat!,
+        gaussian_curvature,
+        get_basis,
+        get_coordinates,
+        get_coordinates!,
+        get_vector,
+        get_vector!,
+        get_vectors,
+        inner,
+        inverse_local_metric,
+        inverse_retract,
+        inverse_retract!,
+        local_metric,
+        local_metric_jacobian,
+        log,
+        log!,
+        log_local_metric_density,
+        mean,
+        mean!,
+        median,
+        median!,
+        mid_point,
+        norm,
+        parallel_transport_direction,
+        parallel_transport_direction!,
+        parallel_transport_to,
+        parallel_transport_to!,
+        retract,
+        retract!,
+        retract_fused,
+        retract_fused!,
+        ricci_curvature,
+        ricci_tensor,
+        riemann_tensor,
+        riemannian_gradient,
+        riemannian_gradient!,
+        riemannian_Hessian,
+        riemannian_Hessian!,
+        sharp!,
+        vector_transport_direction,
+        vector_transport_direction!,
+        vector_transport_to,
+        vector_transport_to!,
+        Weingarten,
+        Weingarten!,
+    ]
     @eval is_metric_function(::typeof($mf)) = true
 end

@@ -34,11 +34,11 @@ This implementation follows the notation in [AastroemPetraSchmitzerSchnoerr:2017
 
     ProbabilitySimplex(n::Int; boundary::Symbol=:open)
 """
-struct ProbabilitySimplex{T,boundary} <: AbstractDecoratorManifold{ℝ}
+struct ProbabilitySimplex{T, boundary} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function ProbabilitySimplex(n::Int; boundary::Symbol=:open, parameter::Symbol=:type)
+function ProbabilitySimplex(n::Int; boundary::Symbol = :open, parameter::Symbol = :type)
     if boundary !== :open && boundary !== :closed
         throw(
             ArgumentError(
@@ -47,7 +47,7 @@ function ProbabilitySimplex(n::Int; boundary::Symbol=:open, parameter::Symbol=:t
         )
     end
     size = wrap_type_parameter(parameter, (n,))
-    return ProbabilitySimplex{typeof(size),boundary}(size)
+    return ProbabilitySimplex{typeof(size), boundary}(size)
 end
 
 """
@@ -97,7 +97,7 @@ Check whether `p` is a valid point on the [`ProbabilitySimplex`](@ref) `M`, i.e.
 the embedding with positive entries that sum to one
 The tolerance for the last test can be set using the `kwargs...`.
 """
-function check_point(M::ProbabilitySimplex{<:Any,boundary}, p; kwargs...) where {boundary}
+function check_point(M::ProbabilitySimplex{<:Any, boundary}, p; kwargs...) where {boundary}
     if boundary === :closed && minimum(p) < 0
         return DomainError(
             minimum(p),
@@ -128,13 +128,13 @@ after [`check_point`](@ref check_point(::ProbabilitySimplex, ::Any))`(M,p)`,
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(
-    M::ProbabilitySimplex,
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
-    if !isapprox(sum(X), 0.0; atol=atol, kwargs...)
+        M::ProbabilitySimplex,
+        p,
+        X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
+    if !isapprox(sum(X), 0.0; atol = atol, kwargs...)
         return DomainError(
             sum(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its elements do not sum up to 0.",
@@ -206,7 +206,7 @@ function get_embedding(::ProbabilitySimplex{TypeParameter{Tuple{n}}}) where {n}
 end
 function get_embedding(M::ProbabilitySimplex{Tuple{Int}})
     n = get_parameter(M.size)[1]
-    return Euclidean(n + 1; parameter=:field)
+    return Euclidean(n + 1; parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::ProbabilitySimplex)
@@ -249,7 +249,7 @@ g_p(X,Y) = \sum_{i=1}^{n+1}\frac{X_iY_i}{p_i}
 When `M` includes boundary, we can just skip coordinates where ``p_i`` is equal to 0, see
 Proposition 2.1 in [AyJostLeSchwachhoefer:2017](@cite).
 """
-function inner(::ProbabilitySimplex{<:Any,boundary}, p, X, Y) where {boundary}
+function inner(::ProbabilitySimplex{<:Any, boundary}, p, X, Y) where {boundary}
     d = zero(Base.promote_eltype(p, X, Y))
     if boundary === :closed
         @inbounds for i in eachindex(p, X, Y)
@@ -376,15 +376,15 @@ When `vector_at` is not `nothing`, return a (Gaussian) random vector from the ta
 ``T_{p}\mathrm{\Delta}^n``by shifting a multivariate Gaussian with standard deviation `σ`
 to have a zero component sum.
 """
-rand(::ProbabilitySimplex; σ::Real=1.0)
+rand(::ProbabilitySimplex; σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::ProbabilitySimplex,
-    pX;
-    vector_at=nothing,
-    σ=one(eltype(pX)),
-)
+        rng::AbstractRNG,
+        M::ProbabilitySimplex,
+        pX;
+        vector_at = nothing,
+        σ = one(eltype(pX)),
+    )
     if isnothing(vector_at)
         Random.randn!(rng, pX)
         LinearAlgebra.normalize!(pX, 2)
@@ -524,12 +524,12 @@ function riemann_tensor!(M::ProbabilitySimplex, Xresult, p, X, Y, Z)
 end
 
 function Base.show(
-    io::IO,
-    ::ProbabilitySimplex{TypeParameter{Tuple{n}},boundary},
-) where {n,boundary}
+        io::IO,
+        ::ProbabilitySimplex{TypeParameter{Tuple{n}}, boundary},
+    ) where {n, boundary}
     return print(io, "ProbabilitySimplex($(n); boundary=:$boundary)")
 end
-function Base.show(io::IO, M::ProbabilitySimplex{Tuple{Int},boundary}) where {boundary}
+function Base.show(io::IO, M::ProbabilitySimplex{Tuple{Int}, boundary}) where {boundary}
     n = get_parameter(M.size)[1]
     return print(io, "ProbabilitySimplex($(n); boundary=:$boundary, parameter=:field)")
 end

@@ -1,4 +1,3 @@
-
 @doc raw"""
     KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
 
@@ -18,7 +17,7 @@ struct KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
+function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, k))
     return KendallsShapeSpace{typeof(size)}(size)
 end
@@ -30,12 +29,12 @@ Return the total space of the [`KendallsShapeSpace`](@ref) manifold, which is th
 [`KendallsPreShapeSpace`](@ref) manifold.
 """
 get_total_space(::KendallsShapeSpace)
-function get_total_space(::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+function get_total_space(::KendallsShapeSpace{TypeParameter{Tuple{n, k}}}) where {n, k}
     return KendallsPreShapeSpace(n, k)
 end
-function get_total_space(M::KendallsShapeSpace{Tuple{Int,Int}})
+function get_total_space(M::KendallsShapeSpace{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
-    return KendallsPreShapeSpace(n, k; parameter=:field)
+    return KendallsPreShapeSpace(n, k; parameter = :field)
 end
 
 function distance(M::KendallsShapeSpace, p, q)
@@ -70,12 +69,12 @@ Get the manifold in which [`KendallsShapeSpace`](@ref) `M` is embedded, i.e.
 """
 get_embedding(::KendallsShapeSpace)
 
-function get_embedding(::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+function get_embedding(::KendallsShapeSpace{TypeParameter{Tuple{n, k}}}) where {n, k}
     return KendallsPreShapeSpace(n, k)
 end
-function get_embedding(M::KendallsShapeSpace{Tuple{Int,Int}})
+function get_embedding(M::KendallsShapeSpace{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
-    return KendallsPreShapeSpace(n, k; parameter=:field)
+    return KendallsPreShapeSpace(n, k; parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::KendallsShapeSpace)
@@ -104,11 +103,11 @@ function inner(M::KendallsShapeSpace, p, X, Y)
     return inner(get_embedding(M), p, Xh, Yh)
 end
 
-function _isapprox(M::KendallsShapeSpace, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
-    return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
+function _isapprox(M::KendallsShapeSpace, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
+    return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end
-function _isapprox(M::KendallsShapeSpace, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
-    return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
+function _isapprox(M::KendallsShapeSpace, p, q; atol = sqrt(max_eps(p, q)), kwargs...)
+    return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
 end
 
 """
@@ -176,23 +175,23 @@ manifold `M` by generating a random point in the embedding.
 When `vector_at` is not `nothing`, return a random vector from the tangent space
 with mean zero and standard deviation `σ`.
 """
-rand(::KendallsShapeSpace; σ::Real=1.0)
+rand(::KendallsShapeSpace; σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::KendallsShapeSpace,
-    pX;
-    vector_at=nothing,
-    σ::Real=one(eltype(pX)),
-)
-    rand!(rng, get_embedding(M), pX; vector_at=vector_at, σ=σ)
+        rng::AbstractRNG,
+        M::KendallsShapeSpace,
+        pX;
+        vector_at = nothing,
+        σ::Real = one(eltype(pX)),
+    )
+    rand!(rng, get_embedding(M), pX; vector_at = vector_at, σ = σ)
     return pX
 end
 
-function Base.show(io::IO, ::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+function Base.show(io::IO, ::KendallsShapeSpace{TypeParameter{Tuple{n, k}}}) where {n, k}
     return print(io, "KendallsShapeSpace($n, $k)")
 end
-function Base.show(io::IO, M::KendallsShapeSpace{Tuple{Int,Int}})
+function Base.show(io::IO, M::KendallsShapeSpace{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
     return print(io, "KendallsShapeSpace($n, $k; parameter=:field)")
 end

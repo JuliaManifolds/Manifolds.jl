@@ -1,4 +1,3 @@
-
 @doc raw"""
     check_vector(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector; kwargs... )
 
@@ -16,11 +15,11 @@ X = \begin{bmatrix}
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
 """
 function check_vector(
-    M::Flag{<:Any,dp1},
-    p::OrthogonalPoint,
-    X::OrthogonalTangentVector;
-    kwargs...,
-) where {dp1}
+        M::Flag{<:Any, dp1},
+        p::OrthogonalPoint,
+        X::OrthogonalTangentVector;
+        kwargs...,
+    ) where {dp1}
     for i in 1:dp1
         for j in i:dp1
             if i == j
@@ -63,7 +62,7 @@ function get_embedding(::Flag{TypeParameter{Tuple{N}}}, p::OrthogonalPoint) wher
     return OrthogonalMatrices(N)
 end
 function get_embedding(M::Flag{Tuple{Int}}, p::OrthogonalPoint)
-    return OrthogonalMatrices(M.size[1]; parameter=:field)
+    return OrthogonalMatrices(M.size[1]; parameter = :field)
 end
 function ManifoldsBase.get_embedding_type(::Flag, ::OrthogonalPoint)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
@@ -81,20 +80,20 @@ function _extract_flag(M::Flag, p::AbstractMatrix, i::Int, j::Int)
 end
 
 function inner(
-    ::Flag,
-    p::OrthogonalPoint,
-    X::OrthogonalTangentVector,
-    Y::OrthogonalTangentVector,
-)
+        ::Flag,
+        p::OrthogonalPoint,
+        X::OrthogonalTangentVector,
+        Y::OrthogonalTangentVector,
+    )
     return dot(X.value, Y.value) / 2
 end
 
 function project!(
-    M::Flag{<:Any,dp1},
-    Y::OrthogonalTangentVector,
-    ::OrthogonalPoint,
-    X::OrthogonalTangentVector,
-) where {dp1}
+        M::Flag{<:Any, dp1},
+        Y::OrthogonalTangentVector,
+        ::OrthogonalPoint,
+        X::OrthogonalTangentVector,
+    ) where {dp1}
     N = get_parameter(M.size)[1]
     project!(SkewHermitianMatrices(N), Y.value, X.value)
     for i in 1:dp1
@@ -122,10 +121,10 @@ X = \begin{bmatrix}
 where ``B_{i,j} ∈ ℝ^{(n_i - n_{i-1}) × (n_j - n_{j-1})}``, for  ``1 ≤ i < j ≤ d+1``.
 """
 function project(
-    M::Flag{<:Any,dp1},
-    ::OrthogonalPoint,
-    X::OrthogonalTangentVector,
-) where {dp1}
+        M::Flag{<:Any, dp1},
+        ::OrthogonalPoint,
+        X::OrthogonalTangentVector,
+    ) where {dp1}
     N = get_parameter(M.size)[1]
     Y = project(SkewHermitianMatrices(N), X.value)
     for i in 1:dp1
@@ -136,11 +135,11 @@ function project(
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::Flag{<:Any,dp1},
-    pX::Union{OrthogonalPoint,OrthogonalTangentVector};
-    vector_at=nothing,
-) where {dp1}
+        rng::AbstractRNG,
+        M::Flag{<:Any, dp1},
+        pX::Union{OrthogonalPoint, OrthogonalTangentVector};
+        vector_at = nothing,
+    ) where {dp1}
     if vector_at === nothing
         N = get_parameter(M.size)[1]
         RN = Rotations(N)
@@ -172,20 +171,20 @@ as the first order approximation to the exponential map. Similar to QR retractio
 retract(M::Flag, p::OrthogonalPoint, X::OrthogonalTangentVector, ::QRRetraction)
 
 function ManifoldsBase.retract_qr!(
-    M::Flag,
-    q::OrthogonalPoint,
-    p::OrthogonalPoint,
-    X::OrthogonalTangentVector,
-)
+        M::Flag,
+        q::OrthogonalPoint,
+        p::OrthogonalPoint,
+        X::OrthogonalTangentVector,
+    )
     return ManifoldsBase.retract_qr_fused!(M, q, p, X, one(eltype(p)))
 end
 function ManifoldsBase.retract_qr_fused!(
-    ::Flag,
-    q::OrthogonalPoint{<:AbstractMatrix{T}},
-    p::OrthogonalPoint,
-    X::OrthogonalTangentVector,
-    t::Number,
-) where {T}
+        ::Flag,
+        q::OrthogonalPoint{<:AbstractMatrix{T}},
+        p::OrthogonalPoint,
+        X::OrthogonalTangentVector,
+        t::Number,
+    ) where {T}
     A = p.value + p.value * (t * X.value)
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)

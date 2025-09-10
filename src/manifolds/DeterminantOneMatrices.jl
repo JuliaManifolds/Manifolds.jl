@@ -21,13 +21,13 @@ The tangent space at any point `p` is the set of matrices with trace 0.
 
 Generate the manifold of ``n×n`` matrices of determinant one.
 """
-struct DeterminantOneMatrices{𝔽,T} <: AbstractDecoratorManifold{𝔽}
+struct DeterminantOneMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function DeterminantOneMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function DeterminantOneMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return DeterminantOneMatrices{field,typeof(size)}(size)
+    return DeterminantOneMatrices{field, typeof(size)}(size)
 end
 
 @doc raw"""
@@ -68,12 +68,12 @@ end
 embed(::DeterminantOneMatrices, p) = p
 embed(::DeterminantOneMatrices, p, X) = X
 
-function get_embedding(::DeterminantOneMatrices{𝔽,TypeParameter{Tuple{n}}}) where {n,𝔽}
-    return Euclidean(n, n; field=𝔽)
+function get_embedding(::DeterminantOneMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
+    return Euclidean(n, n; field = 𝔽)
 end
-function get_embedding(M::DeterminantOneMatrices{𝔽,Tuple{Int}}) where {𝔽}
+function get_embedding(M::DeterminantOneMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return Euclidean(n, n; field=𝔽, parameter=:field)
+    return Euclidean(n, n; field = 𝔽, parameter = :field)
 end
 function ManifoldsBase.get_embedding_type(::DeterminantOneMatrices)
     return ManifoldsBase.EmbeddedSubmanifoldType()
@@ -85,7 +85,7 @@ end
 Return the dimension of the [`DeterminantOneMatrices`](@ref) matrix `M` over the number system
 `𝔽`, which is one dimension less than its embedding, the [`Euclidean`](@ref)`(n, n; field=𝔽)`.
 """
-function manifold_dimension(M::DeterminantOneMatrices{<:Any,𝔽}) where {𝔽}
+function manifold_dimension(M::DeterminantOneMatrices{<:Any, 𝔽}) where {𝔽}
     return manifold_dimension(get_embedding(M)) - 1
 end
 
@@ -161,12 +161,12 @@ function Random.rand!(M::DeterminantOneMatrices, pX; kwargs...)
     return rand!(Random.default_rng(), M, pX; kwargs...)
 end
 function Random.rand!(
-    rng::AbstractRNG,
-    M::DeterminantOneMatrices,
-    pX;
-    vector_at=nothing,
-    kwargs...,
-)
+        rng::AbstractRNG,
+        M::DeterminantOneMatrices,
+        pX;
+        vector_at = nothing,
+        kwargs...,
+    )
     rand!(rng, get_embedding(M), pX; kwargs...)
     if vector_at === nothing # for points ensure invertibility
         n = size(pX)[1]
@@ -180,10 +180,10 @@ function Random.rand!(
     return pX
 end
 
-function Base.show(io::IO, ::DeterminantOneMatrices{𝔽,TypeParameter{Tuple{n}}}) where {n,𝔽}
+function Base.show(io::IO, ::DeterminantOneMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return print(io, "DeterminantOneMatrices($(n), $(𝔽))")
 end
-function Base.show(io::IO, M::DeterminantOneMatrices{𝔽,Tuple{Int}}) where {𝔽}
+function Base.show(io::IO, M::DeterminantOneMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "DeterminantOneMatrices($(n), $(𝔽); parameter=:field)")
 end

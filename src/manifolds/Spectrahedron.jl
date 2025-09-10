@@ -46,7 +46,7 @@ struct Spectrahedron{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function Spectrahedron(n::Int, k::Int; parameter::Symbol=:type)
+function Spectrahedron(n::Int, k::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, k))
     return Spectrahedron{typeof(size)}(size)
 end
@@ -84,15 +84,15 @@ The tolerance for the base point check and zero diagonal can be set using the `k
 Note that symmetry of ``X`` holds by construction and is not explicitly checked.
 """
 function check_vector(
-    M::Spectrahedron,
-    q,
-    Y::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
+        M::Spectrahedron,
+        q,
+        Y::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
     X = q * Y' + Y * q'
     n = tr(X)
-    if !isapprox(n, 0; atol=atol, kwargs...)
+    if !isapprox(n, 0; atol = atol, kwargs...)
         return DomainError(
             n,
             "The vector $(X) is not a tangent to a point on $(M) (represented py $(q) and $(Y), since its trace is nonzero.",
@@ -101,12 +101,12 @@ function check_vector(
     return nothing
 end
 
-function get_embedding(::Spectrahedron{TypeParameter{Tuple{n,k}}}) where {n,k}
+function get_embedding(::Spectrahedron{TypeParameter{Tuple{n, k}}}) where {n, k}
     return Euclidean(n, k)
 end
-function get_embedding(M::Spectrahedron{Tuple{Int,Int}})
+function get_embedding(M::Spectrahedron{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
-    return Euclidean(n, k; parameter=:field)
+    return Euclidean(n, k; parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::Spectrahedron)
@@ -180,10 +180,10 @@ on ``\mathcal M = \mathcal S(n,k)``.
 """
 representation_size(M::Spectrahedron) = get_parameter(M.size)
 
-function Base.show(io::IO, M::Spectrahedron{TypeParameter{Tuple{n,k}}}) where {n,k}
+function Base.show(io::IO, M::Spectrahedron{TypeParameter{Tuple{n, k}}}) where {n, k}
     return print(io, "Spectrahedron($n, $k)")
 end
-function Base.show(io::IO, M::Spectrahedron{Tuple{Int,Int}})
+function Base.show(io::IO, M::Spectrahedron{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
     return print(io, "Spectrahedron($n, $k; parameter=:field)")
 end

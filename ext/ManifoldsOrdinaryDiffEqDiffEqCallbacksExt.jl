@@ -52,19 +52,16 @@ Similarly, `StitchedChartSolution{:PT}` called with number `t` returns a triple 
 where `(p, X)` corresponds to the geodesic along which the vector is transported
 and $Y\in T_p\mathcal{M}$ is the vector transported to `p`.
 """
-struct StitchedChartSolution{Prob,TM<:AbstractManifold,TA<:AbstractAtlas,TChart}
+struct StitchedChartSolution{Prob, TM <: AbstractManifold, TA <: AbstractAtlas, TChart}
     M::TM
     A::TA
-    sols::Vector{Tuple{SciMLBase.AbstractODESolution,TChart}}
+    sols::Vector{Tuple{SciMLBase.AbstractODESolution, TChart}}
 end
 
 function StitchedChartSolution(
-    M::AbstractManifold,
-    A::AbstractAtlas,
-    problem::Symbol,
-    TChart,
-)
-    return StitchedChartSolution{problem,typeof(M),typeof(A),TChart}(M, A, [])
+        M::AbstractManifold, A::AbstractAtlas, problem::Symbol, TChart
+    )
+    return StitchedChartSolution{problem, typeof(M), typeof(A), TChart}(M, A, [])
 end
 
 function (scs::StitchedChartSolution{:Exp})(t::Real)
@@ -121,11 +118,7 @@ end
 
 """
     solve_chart_exp_ode(
-        M::AbstractManifold,
-        a,
-        Xc,
-        A::AbstractAtlas,
-        i0;
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0;
         solver=AutoVern9(Rodas5()),
         final_time::Real=1.0,
         check_chart_switch_kwargs=NamedTuple(),
@@ -148,11 +141,7 @@ The function returns an object of type `StitchedChartSolution{:Exp}` to represen
 geodesic.
 """
 function solve_chart_exp_ode(
-    M::AbstractManifold,
-    a,
-    Xc,
-    A::AbstractAtlas,
-    i0;
+    M::AbstractManifold, a, Xc, A::AbstractAtlas, i0;
     solver=AutoVern9(Rodas5()),
     final_time::Real=1.0,
     check_chart_switch_kwargs=NamedTuple(),
@@ -162,8 +151,7 @@ function solve_chart_exp_ode(
     cur_i = i0
     # callback stops solver when we get too close to chart boundary
     cb = FunctionCallingCallback(
-        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
-        func_start=false,
+        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs); func_start = false
     )
     retcode = SciMLBase.ReturnCode.Terminated
     init_time = zero(final_time)
@@ -171,7 +159,7 @@ function solve_chart_exp_ode(
     while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
         prob =
-            ODEProblem(chart_exp_problem, u0, (init_time, final_time), params; callback=cb)
+            ODEProblem(chart_exp_problem, u0, (init_time, final_time), params; callback = cb)
         sol = solve(prob, solver; kwargs...)
         retcode = sol.retcode
         init_time = sol.t[end]::typeof(final_time)
@@ -181,13 +169,7 @@ function solve_chart_exp_ode(
         new_i = get_chart_index(M, A, cur_i, a_final)
         transition_map!(M, u0.x[1], A, cur_i, new_i, a_final)
         transition_map_diff!(
-            M,
-            u0.x[2],
-            A,
-            cur_i,
-            a_final,
-            sol.u[end].x[2]::typeof(Xc),
-            new_i,
+            M, u0.x[2], A, cur_i, a_final, sol.u[end].x[2]::typeof(Xc), new_i
         )
         cur_i = new_i
     end
@@ -207,16 +189,9 @@ end
 
 """
     solve_chart_parallel_transport_ode(
-        M::AbstractManifold,
-        a,
-        Xc,
-        A::AbstractAtlas,
-        i0,
-        Yc;
-        solver=AutoVern9(Rodas5()),
-        check_chart_switch_kwargs=NamedTuple(),
-        final_time=1.0,
-        kwargs...,
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
+        solver=AutoVern9(Rodas5()), check_chart_switch_kwargs=NamedTuple(), final_time=1.0,
+        kwargs...
     )
 
 Parallel transport vector with coordinates `Yc` along geodesic on a manifold `M` from point of
@@ -224,23 +199,15 @@ coordinates `a` in a chart `i0` from an [`AbstractAtlas`](@ref) `A` in direction
 coordinates `Xc` in the induced basis.
 """
 function solve_chart_parallel_transport_ode(
-    M::AbstractManifold,
-    a,
-    Xc,
-    A::AbstractAtlas,
-    i0,
-    Yc;
-    solver=AutoVern9(Rodas5()),
-    final_time=1.0,
-    check_chart_switch_kwargs=NamedTuple(),
-    kwargs...,
-)
+        M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
+        solver = AutoVern9(Rodas5()), final_time = 1.0, check_chart_switch_kwargs = NamedTuple(),
+        kwargs...
+    )
     u0 = ArrayPartition(copy(a), copy(Xc), copy(Yc))
     cur_i = i0
     # callback stops solver when we get too close to chart boundary
     cb = FunctionCallingCallback(
-        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs);
-        func_start=false,
+        IntegratorTerminatorNearChartBoundary(check_chart_switch_kwargs); func_start = false
     )
     retcode = SciMLBase.ReturnCode.Terminated
     init_time = zero(final_time)
@@ -248,7 +215,7 @@ function solve_chart_parallel_transport_ode(
     while retcode === SciMLBase.ReturnCode.Terminated && init_time < final_time
         params = (M, A, cur_i)
         prob =
-            ODEProblem(chart_pt_problem, u0, (init_time, final_time), params; callback=cb)
+            ODEProblem(chart_pt_problem, u0, (init_time, final_time), params; callback = cb)
         sol = solve(prob, solver; kwargs...)
         retcode = sol.retcode
         init_time = sol.t[end]::typeof(final_time)
@@ -258,22 +225,10 @@ function solve_chart_parallel_transport_ode(
         new_i = get_chart_index(M, A, cur_i, a_final)
         transition_map!(M, u0.x[1], A, cur_i, new_i, a_final)
         transition_map_diff!(
-            M,
-            u0.x[2],
-            A,
-            cur_i,
-            a_final,
-            sol.u[end].x[2]::typeof(Xc),
-            new_i,
+            M, u0.x[2], A, cur_i, a_final, sol.u[end].x[2]::typeof(Xc), new_i
         )
         transition_map_diff!(
-            M,
-            u0.x[3],
-            A,
-            cur_i,
-            a_final,
-            sol.u[end].x[3]::typeof(Yc),
-            new_i,
+            M, u0.x[3], A, cur_i, a_final, sol.u[end].x[3]::typeof(Yc), new_i
         )
         cur_i = new_i
     end

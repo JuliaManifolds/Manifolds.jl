@@ -12,15 +12,15 @@ SUITE = BenchmarkGroup()
 Random.seed!(12334)
 
 function add_manifold(
-    M::AbstractManifold,
-    pts,
-    name;
-    test_tangent_vector_broadcasting=true,
-    retraction_methods=[],
-    inverse_retraction_methods=[],
-    point_distributions=[],
-    tvector_distributions=[],
-)
+        M::AbstractManifold,
+        pts,
+        name;
+        test_tangent_vector_broadcasting = true,
+        retraction_methods = [],
+        inverse_retraction_methods = [],
+        point_distributions = [],
+        tvector_distributions = [],
+    )
     SUITE["manifolds"][name] = BenchmarkGroup()
     tv = log(M, pts[1], pts[2])
     tv1 = log(M, pts[1], pts[2])
@@ -89,9 +89,9 @@ function add_manifold_benchmarks()
     add_manifold(
         r2,
         [
-            MVector{2,Float64}([1.0, 1.0]),
-            MVector{2,Float64}([-2.0, 3.0]),
-            MVector{2,Float64}([3.0, -2.0]),
+            MVector{2, Float64}([1.0, 1.0]),
+            MVector{2, Float64}([-2.0, 3.0]),
+            MVector{2, Float64}([3.0, -2.0]),
         ],
         "Euclidean{2} -- MVector",
     )
@@ -105,15 +105,15 @@ function add_manifold_benchmarks()
         s2,
         pts_s2,
         "Sphere{2} -- SizedArray";
-        point_distributions=[ud_sphere],
-        tvector_distributions=[gtd_sphere],
+        point_distributions = [ud_sphere],
+        tvector_distributions = [gtd_sphere],
     )
 
     add_manifold(
         array_s2,
         [Size(3)([1.0, 0.0, 0.0]), Size(3)([0.0, 1.0, 0.0]), Size(3)([0.0, 0.0, 1.0])],
         "ValidationManifold{Sphere{2}} -- SizedArray";
-        test_tangent_vector_broadcasting=false,
+        test_tangent_vector_broadcasting = false,
     )
 
     retraction_methods_rot = [Manifolds.PolarRetraction(), Manifolds.QRRetraction()]
@@ -127,8 +127,8 @@ function add_manifold_benchmarks()
         so2,
         [Size(2, 2)([cos(ϕ) -sin(ϕ); sin(ϕ) cos(ϕ)]) for ϕ in angles],
         "Rotations(2) -- SizedArray",
-        retraction_methods=retraction_methods_rot,
-        inverse_retraction_methods=inverse_retraction_methods_rot,
+        retraction_methods = retraction_methods_rot,
+        inverse_retraction_methods = inverse_retraction_methods_rot,
     )
 
     so3 = Manifolds.Rotations(3)
@@ -137,8 +137,8 @@ function add_manifold_benchmarks()
         so3,
         [Size(3, 3)([cos(ϕ) -sin(ϕ) 0; sin(ϕ) cos(ϕ) 0; 0 0 1]) for ϕ in angles],
         "Rotations(3) -- SizedArray",
-        retraction_methods=retraction_methods_rot,
-        inverse_retraction_methods=inverse_retraction_methods_rot,
+        retraction_methods = retraction_methods_rot,
+        inverse_retraction_methods = inverse_retraction_methods_rot,
     )
 
     pts_prod_mpoints = [ArrayPartition(p[1], p[2]) for p in zip(pts_s2, pts_r2)]
@@ -146,12 +146,12 @@ function add_manifold_benchmarks()
         m_prod,
         pts_prod_mpoints,
         "ProductManifold with AbstractManifoldPoint";
-        test_tangent_vector_broadcasting=false,
+        test_tangent_vector_broadcasting = false,
     )
 
     # vector spaces and bundles
     begin
-        T = MVector{3,Float64}
+        T = MVector{3, Float64}
         TB = TangentBundle(s2)
 
         pts_tb = [
@@ -163,7 +163,7 @@ function add_manifold_benchmarks()
             TB,
             pts_tb,
             "Tangent bundle of S² using MVectors, ArrayPartition";
-            test_tangent_vector_broadcasting=false,
+            test_tangent_vector_broadcasting = false,
         )
     end
 
@@ -177,17 +177,17 @@ function add_manifold_benchmarks()
         Mr2 = PowerManifold(Mr, 5, 7)
 
         types_s1 =
-            (Array{Float64,2}, HybridArray{Tuple{3,StaticArrays.Dynamic()},Float64,2})
+            (Array{Float64, 2}, HybridArray{Tuple{3, StaticArrays.Dynamic()}, Float64, 2})
         types_s2 = (
-            Array{Float64,3},
-            HybridArray{Tuple{3,StaticArrays.Dynamic(),StaticArrays.Dynamic()},Float64,3},
+            Array{Float64, 3},
+            HybridArray{Tuple{3, StaticArrays.Dynamic(), StaticArrays.Dynamic()}, Float64, 3},
         )
 
         types_r1 =
-            (Array{Float64,3}, HybridArray{Tuple{3,3,StaticArrays.Dynamic()},Float64,3})
+            (Array{Float64, 3}, HybridArray{Tuple{3, 3, StaticArrays.Dynamic()}, Float64, 3})
         types_r2 = (
-            Array{Float64,4},
-            HybridArray{Tuple{3,3,StaticArrays.Dynamic(),StaticArrays.Dynamic()},Float64,4},
+            Array{Float64, 4},
+            HybridArray{Tuple{3, 3, StaticArrays.Dynamic(), StaticArrays.Dynamic()}, Float64, 4},
         )
 
         retraction_methods =
@@ -238,7 +238,7 @@ function add_manifold_benchmarks()
                 Ms1,
                 pts1,
                 "power manifold S²^(5,), type $(trim(string(T)))";
-                test_tangent_vector_broadcasting=true,
+                test_tangent_vector_broadcasting = true,
             )
         end
         for T in types_s2
@@ -247,7 +247,7 @@ function add_manifold_benchmarks()
                 Ms2,
                 pts2,
                 "power manifold S²^(5,7), type $(trim(string(T)))";
-                test_tangent_vector_broadcasting=true,
+                test_tangent_vector_broadcasting = true,
             )
         end
 
@@ -257,7 +257,7 @@ function add_manifold_benchmarks()
                 Mr1,
                 pts1,
                 "power manifold SO(3)^(5,), type $(trim(string(T)))";
-                test_tangent_vector_broadcasting=true,
+                test_tangent_vector_broadcasting = true,
             )
         end
         for T in types_r2
@@ -266,12 +266,12 @@ function add_manifold_benchmarks()
                 Mr2,
                 pts2,
                 "power manifold SO(3)^(5,7), type $(trim(string(T)))";
-                test_tangent_vector_broadcasting=true,
+                test_tangent_vector_broadcasting = true,
             )
         end
 
         types_spd = [Matrix{Float64}]
-        TEST_STATIC_SIZED && push!(types_spd, MMatrix{3,3,Float64,9})
+        TEST_STATIC_SIZED && push!(types_spd, MMatrix{3, 3, Float64, 9})
 
         A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
         pts_spd = [#
@@ -297,7 +297,7 @@ function add_manifold_benchmarks()
                     M,
                     pts,
                     "SPD manifold $(trim(string(M))), type $(trim(string(T)))";
-                    test_tangent_vector_broadcasting=true,
+                    test_tangent_vector_broadcasting = true,
                 )
             end
         end

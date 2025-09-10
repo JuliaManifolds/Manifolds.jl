@@ -37,12 +37,12 @@ Generate the projective space ``𝔽ℙ^{n} ⊂ 𝔽^{n+1}``, defaulting to the 
 ``ℝℙ^n``, where `field` can also be used to generate the complex- and right-quaternionic
 projective spaces.
 """
-struct ProjectiveSpace{T,𝔽} <: AbstractProjectiveSpace{𝔽}
+struct ProjectiveSpace{T, 𝔽} <: AbstractProjectiveSpace{𝔽}
     size::T
 end
-function ProjectiveSpace(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function ProjectiveSpace(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return ProjectiveSpace{typeof(size),field}(size)
+    return ProjectiveSpace{typeof(size), field}(size)
 end
 
 @doc raw"""
@@ -81,16 +81,16 @@ Generate the projective space ``𝔽ℙ^{n_1, n_2, …, n_i}``, defaulting to th
 space, where `field` can also be used to generate the complex- and right-quaternionic
 projective spaces.
 """
-struct ArrayProjectiveSpace{T,𝔽} <: AbstractProjectiveSpace{𝔽}
+struct ArrayProjectiveSpace{T, 𝔽} <: AbstractProjectiveSpace{𝔽}
     size::T
 end
 function ArrayProjectiveSpace(
-    n::Vararg{Int,I};
-    field::AbstractNumbers=ℝ,
-    parameter::Symbol=:type,
-) where {I}
+        n::Vararg{Int, I};
+        field::AbstractNumbers = ℝ,
+        parameter::Symbol = :type,
+    ) where {I}
     size = wrap_type_parameter(parameter, n)
-    return ArrayProjectiveSpace{typeof(size),field}(size)
+    return ArrayProjectiveSpace{typeof(size), field}(size)
 end
 
 function allocation_promotion_function(::AbstractProjectiveSpace{ℂ}, f, args::Tuple)
@@ -123,27 +123,27 @@ tangent space of the embedding and that the Frobenius inner product
 ``⟨p, X⟩_{\mathrm{F}} = 0``.
 """
 function check_vector(
-    M::AbstractProjectiveSpace,
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
-    if !isapprox(dot(p, X), 0; atol=atol, kwargs...)
+        M::AbstractProjectiveSpace,
+        p,
+        X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
+    if !isapprox(dot(p, X), 0; atol = atol, kwargs...)
         return DomainError(
             dot(p, X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not" *
-            " orthogonal in the embedding.",
+                " orthogonal in the embedding.",
         )
     end
     return nothing
 end
 
 function decorated_manifold(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
-    return Euclidean(representation_size(M)...; field=𝔽)
+    return Euclidean(representation_size(M)...; field = 𝔽)
 end
-function decorated_manifold(M::ProjectiveSpace{<:Tuple,𝔽}) where {𝔽}
-    return Euclidean(representation_size(M)...; field=𝔽, parameter=:field)
+function decorated_manifold(M::ProjectiveSpace{<:Tuple, 𝔽}) where {𝔽}
+    return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
 end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
@@ -185,7 +185,7 @@ function exp!(M::AbstractProjectiveSpace, q, p, X)
     return q
 end
 
-function get_basis(M::ProjectiveSpace{<:Any,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ})
+function get_basis(M::ProjectiveSpace{<:Any, ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ})
     n = get_parameter(M.size)[1]
     return get_basis(Sphere(n), p, B)
 end
@@ -221,22 +221,22 @@ function get_coordinates_orthonormal!(M::AbstractProjectiveSpace{ℝ}, c, p, X, 
     return _gc_impl!(c, p, X, n)
 end
 function get_coordinates_orthonormal!(
-    M::AbstractProjectiveSpace{ℂ},
-    c,
-    p,
-    X,
-    ::ComplexNumbers,
-)
+        M::AbstractProjectiveSpace{ℂ},
+        c,
+        p,
+        X,
+        ::ComplexNumbers,
+    )
     n = div(manifold_dimension(M), 2)
     return _gc_impl!(c, p, X, n)
 end
 function get_coordinates_orthonormal!(
-    M::AbstractProjectiveSpace{ℍ},
-    c,
-    p,
-    X,
-    ::QuaternionNumbers,
-)
+        M::AbstractProjectiveSpace{ℍ},
+        c,
+        p,
+        X,
+        ::QuaternionNumbers,
+    )
     n = div(manifold_dimension(M), 4)
     return _gc_impl!(c, p, X, n)
 end
@@ -278,12 +278,12 @@ function get_vector_orthonormal!(M::AbstractProjectiveSpace{ℂ}, Y, p, X, ::Com
     return _gv_impl!(Y, p, X, n)
 end
 function get_vector_orthonormal!(
-    M::AbstractProjectiveSpace{ℍ},
-    Y,
-    p,
-    X,
-    ::QuaternionNumbers,
-)
+        M::AbstractProjectiveSpace{ℍ},
+        Y,
+        p,
+        X,
+        ::QuaternionNumbers,
+    )
     n = div(manifold_dimension(M), 4)
     return _gv_impl!(Y, p, X, n)
 end
@@ -316,7 +316,7 @@ inverse_retract(
     ::AbstractProjectiveSpace,
     p,
     q,
-    ::Union{ProjectionInverseRetraction,PolarInverseRetraction,QRInverseRetraction},
+    ::Union{ProjectionInverseRetraction, PolarInverseRetraction, QRInverseRetraction},
 )
 
 function inverse_retract_qr!(::AbstractProjectiveSpace, X, p, q)
@@ -503,7 +503,7 @@ retract(
     ::AbstractProjectiveSpace,
     p,
     X,
-    ::Union{ProjectionRetraction,PolarRetraction,QRRetraction},
+    ::Union{ProjectionRetraction, PolarRetraction, QRRetraction},
 )
 
 function ManifoldsBase.retract_polar!(M::AbstractProjectiveSpace, q, p, X)
@@ -521,12 +521,12 @@ function ManifoldsBase.retract_project!(M::AbstractProjectiveSpace, q, p, X)
 end
 
 function ManifoldsBase.retract_project_fused!(
-    M::AbstractProjectiveSpace,
-    q,
-    p,
-    X,
-    t::Number,
-)
+        M::AbstractProjectiveSpace,
+        q,
+        p,
+        X,
+        t::Number,
+    )
     q .= p .+ t .* X
     return project!(M, q, q)
 end
@@ -540,17 +540,17 @@ function ManifoldsBase.retract_qr_fused!(M::AbstractProjectiveSpace, q, p, X, t:
     return project!(M, q, q)
 end
 
-function Base.show(io::IO, ::ProjectiveSpace{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+function Base.show(io::IO, ::ProjectiveSpace{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
     return print(io, "ProjectiveSpace($(n), $(𝔽))")
 end
-function Base.show(io::IO, M::ProjectiveSpace{Tuple{Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::ProjectiveSpace{Tuple{Int}, 𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "ProjectiveSpace($(n), $(𝔽); parameter=:field)")
 end
-function Base.show(io::IO, ::ArrayProjectiveSpace{TypeParameter{tn},𝔽}) where {tn<:Tuple,𝔽}
+function Base.show(io::IO, ::ArrayProjectiveSpace{TypeParameter{tn}, 𝔽}) where {tn <: Tuple, 𝔽}
     return print(io, "ArrayProjectiveSpace($(join(tn.parameters, ", ")); field=$(𝔽))")
 end
-function Base.show(io::IO, M::ArrayProjectiveSpace{<:Tuple,𝔽}) where {𝔽}
+function Base.show(io::IO, M::ArrayProjectiveSpace{<:Tuple, 𝔽}) where {𝔽}
     n = M.size
     return print(io, "ArrayProjectiveSpace($(join(n, ", ")); field=$(𝔽), parameter=:field)")
 end

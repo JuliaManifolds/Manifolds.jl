@@ -40,18 +40,18 @@ The metric was used in [JourneeBachAbsilSepulchre:2010](@cite)[MassartAbsil:2020
 Generate the manifold of ``n×n`` symmetric positive semidefinite matrices of rank ``k``
 over the `field` of real numbers `ℝ` or complex numbers `ℂ`.
 """
-struct SymmetricPositiveSemidefiniteFixedRank{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct SymmetricPositiveSemidefiniteFixedRank{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
 function SymmetricPositiveSemidefiniteFixedRank(
-    n::Int,
-    k::Int,
-    field::AbstractNumbers=ℝ;
-    parameter::Symbol=:type,
-)
+        n::Int,
+        k::Int,
+        field::AbstractNumbers = ℝ;
+        parameter::Symbol = :type,
+    )
     size = wrap_type_parameter(parameter, (n, k))
-    return SymmetricPositiveSemidefiniteFixedRank{typeof(size),field}(size)
+    return SymmetricPositiveSemidefiniteFixedRank{typeof(size), field}(size)
 end
 
 @doc raw"""
@@ -88,15 +88,15 @@ Due to the reduced representation this is fulfilled as soon as the matrix is of 
 check_vector(M::SymmetricPositiveSemidefiniteFixedRank, q, Y; kwargs...)
 
 function get_embedding(
-    ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n,k}},𝔽},
-) where {n,k,𝔽}
-    return Euclidean(n, k; field=𝔽)
+        ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n, k}}, 𝔽},
+    ) where {n, k, 𝔽}
+    return Euclidean(n, k; field = 𝔽)
 end
 function get_embedding(
-    M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int,Int},𝔽},
-) where {𝔽}
+        M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int, Int}, 𝔽},
+    ) where {𝔽}
     n, k = get_parameter(M.size)
-    return Euclidean(n, k; field=𝔽, parameter=:field)
+    return Euclidean(n, k; field = 𝔽, parameter = :field)
 end
 
 function ManifoldsBase.get_embedding_type(::SymmetricPositiveSemidefiniteFixedRank)
@@ -149,14 +149,14 @@ the comparison is performed with the classical `isapprox`.
 The `kwargs...` are passed on to this accordingly.
 """
 function _isapprox(
-    M::SymmetricPositiveSemidefiniteFixedRank,
-    p::T,
-    q;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
-    return isapprox(norm(p - q), 0; atol=atol, kwargs...) ||
-           isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
+        M::SymmetricPositiveSemidefiniteFixedRank,
+        p::T,
+        q;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
+    return isapprox(norm(p - q), 0; atol = atol, kwargs...) ||
+        isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
 end
 
 """
@@ -207,11 +207,11 @@ where the last ``k^2`` is due to the zero imaginary part for Hermitian matrices 
 """
 manifold_dimension(::SymmetricPositiveSemidefiniteFixedRank)
 
-function manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank{<:Any,ℝ})
+function manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank{<:Any, ℝ})
     n, k = get_parameter(M.size)
     return k * n - div(k * (k - 1), 2)
 end
-function manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank{<:Any,ℂ})
+function manifold_dimension(M::SymmetricPositiveSemidefiniteFixedRank{<:Any, ℂ})
     n, k = get_parameter(M.size)
     return 2 * k * n - k * k
 end
@@ -222,15 +222,15 @@ function project!(::SymmetricPositiveSemidefiniteFixedRank, Z, q, Y)
 end
 
 function Base.show(
-    io::IO,
-    ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n,k}},𝔽},
-) where {n,k,𝔽}
+        io::IO,
+        ::SymmetricPositiveSemidefiniteFixedRank{TypeParameter{Tuple{n, k}}, 𝔽},
+    ) where {n, k, 𝔽}
     return print(io, "SymmetricPositiveSemidefiniteFixedRank($(n), $(k), $(𝔽))")
 end
 function Base.show(
-    io::IO,
-    M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int,Int},𝔽},
-) where {𝔽}
+        io::IO,
+        M::SymmetricPositiveSemidefiniteFixedRank{Tuple{Int, Int}, 𝔽},
+    ) where {𝔽}
     n, k = get_parameter(M.size)
     return print(
         io,
@@ -239,11 +239,11 @@ function Base.show(
 end
 
 """
-     vector_transport_to(M::SymmetricPositiveSemidefiniteFixedRank, p, X, q)
+    vector_transport_to(M::SymmetricPositiveSemidefiniteFixedRank, p, X, q)
 
- transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
- at `q`.
- """
+transport the tangent vector `X` at `p` to `q` by projecting it onto the tangent space
+at `q`.
+"""
 vector_transport_to(
     ::SymmetricPositiveSemidefiniteFixedRank,
     ::Any,

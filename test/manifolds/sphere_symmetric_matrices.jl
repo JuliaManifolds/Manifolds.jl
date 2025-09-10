@@ -15,19 +15,19 @@ include("../header.jl")
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test !is_flat(M)
-        @test typeof(get_embedding(M)) === ArraySphere{TypeParameter{Tuple{3,3}},ℝ}
+        @test typeof(get_embedding(M)) === ArraySphere{TypeParameter{Tuple{3, 3}}, ℝ}
         @test check_point(M, A) === nothing
-        @test_throws ManifoldDomainError is_point(M, B; error=:error)
-        @test_throws ManifoldDomainError is_point(M, C; error=:error)
-        @test_throws DomainError is_point(M, D; error=:error)
-        @test_throws ManifoldDomainError is_point(M, E; error=:error)
+        @test_throws ManifoldDomainError is_point(M, B; error = :error)
+        @test_throws ManifoldDomainError is_point(M, C; error = :error)
+        @test_throws DomainError is_point(M, D; error = :error)
+        @test_throws ManifoldDomainError is_point(M, E; error = :error)
         @test check_vector(M, A, zeros(3, 3)) === nothing
-        @test_throws ManifoldDomainError is_vector(M, A, B; error=:error)
-        @test_throws ManifoldDomainError is_vector(M, A, C; error=:error)
-        @test_throws ManifoldDomainError is_vector(M, A, D; error=:error)
-        @test_throws DomainError is_vector(M, D, A; error=:error)
-        @test_throws ManifoldDomainError is_vector(M, A, E; error=:error)
-        @test_throws DomainError is_vector(M, J, K; error=:error)
+        @test_throws ManifoldDomainError is_vector(M, A, B; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, A, C; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, A, D; error = :error)
+        @test_throws DomainError is_vector(M, D, A; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, A, E; error = :error)
+        @test_throws DomainError is_vector(M, J, K; error = :error)
         @test manifold_dimension(M) == 5
         A2 = similar(A)
         @test A == project!(M, A2, A)
@@ -41,13 +41,13 @@ include("../header.jl")
         test_manifold(
             M,
             [A, F, G],
-            test_injectivity_radius=false,
-            test_vector_spaces=true,
-            test_project_tangent=true,
-            test_musical_isomorphisms=true,
-            test_default_vector_transport=true,
-            is_tangent_atol_multiplier=2,
-            test_inplace=true,
+            test_injectivity_radius = false,
+            test_vector_spaces = true,
+            test_project_tangent = true,
+            test_musical_isomorphisms = true,
+            test_default_vector_transport = true,
+            is_tangent_atol_multiplier = 2,
+            test_inplace = true,
         )
     end
     @testset "Complex Sphere Symmetric Matrices Basics" begin
@@ -62,21 +62,21 @@ include("../header.jl")
         test_manifold(
             M_complex,
             [C, H, I],
-            test_injectivity_radius=false,
-            test_vector_spaces=true,
-            test_project_tangent=true,
-            test_musical_isomorphisms=true,
-            test_default_vector_transport=true,
-            is_tangent_atol_multiplier=2,
-            is_point_atol_multiplier=2,
-            projection_atol_multiplier=2,
-            exp_log_atol_multiplier=2,
-            test_inplace=true,
+            test_injectivity_radius = false,
+            test_vector_spaces = true,
+            test_project_tangent = true,
+            test_musical_isomorphisms = true,
+            test_default_vector_transport = true,
+            is_tangent_atol_multiplier = 2,
+            is_point_atol_multiplier = 2,
+            projection_atol_multiplier = 2,
+            exp_log_atol_multiplier = 2,
+            test_inplace = true,
         )
     end
     @testset "field parameter" begin
-        M = SphereSymmetricMatrices(3; parameter=:field)
+        M = SphereSymmetricMatrices(3; parameter = :field)
         @test repr(M) == "SphereSymmetricMatrices(3, ℝ; parameter=:field)"
-        @test typeof(get_embedding(M)) === ArraySphere{Tuple{Int,Int},ℝ}
+        @test typeof(get_embedding(M)) === ArraySphere{Tuple{Int, Int}, ℝ}
     end
 end

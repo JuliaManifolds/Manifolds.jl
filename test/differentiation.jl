@@ -112,11 +112,11 @@ rb_onb_fd51 = TangentDiffBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();
-    basis_arg=CachedBasis(
+    basis_arg = CachedBasis(
         DefaultOrthonormalBasis(),
         [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
     ),
-    basis_val=CachedBasis(
+    basis_val = CachedBasis(
         DefaultOrthonormalBasis(),
         [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
     ),
@@ -221,11 +221,11 @@ end
     grad = (M, p) -> 2A * p
     grad! = (M, X, p) -> X .= 2A * p
     M = Euclidean(3)
-    E = ExplicitEmbeddedBackend(M, gradient=grad, (gradient!)=grad!)
+    E = ExplicitEmbeddedBackend(M, gradient = grad, (gradient!) = grad!)
     S = Sphere(2)
     r_grad = (S, p) -> project(S, p, grad(M, p))
     Xt = r_grad(S, p)
-    @test is_vector(S, p, Xt, true; atol=1e-14)
+    @test is_vector(S, p, Xt, true; atol = 1.0e-14)
 
     R = RiemannianProjectionBackend(E)
     X = gradient(S, cost, p, R)
