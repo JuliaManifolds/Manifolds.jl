@@ -59,7 +59,7 @@ function christoffel_symbols_first(
     @einsum Γ[i, j, k] = 1 / 2 * (∂g[k, j, i] + ∂g[i, k, j] - ∂g[i, j, k])
     return Γ
 end
-@new_trait_function christoffel_symbols_first(
+@trait_function christoffel_symbols_first(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -100,7 +100,7 @@ function christoffel_symbols_second(
     return Γ₂
 end
 
-@new_trait_function christoffel_symbols_second(
+@trait_function christoffel_symbols_second(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -141,7 +141,7 @@ function christoffel_symbols_second_jacobian(
     )
     return ∂Γ
 end
-@new_trait_function christoffel_symbols_second_jacobian(
+@trait_function christoffel_symbols_second_jacobian(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -194,7 +194,7 @@ gaussian_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
 function gaussian_curvature(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     return ricci_curvature(M, p, B; kwargs...) / 2
 end
-@new_trait_function gaussian_curvature(
+@trait_function gaussian_curvature(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -230,7 +230,7 @@ function ricci_tensor(M::AbstractManifold, p, B::AbstractBasis; kwargs...)
     @einsum Ric[i, j] = R[l, i, l, j]
     return Ric
 end
-@new_trait_function ricci_tensor(
+@trait_function ricci_tensor(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;
@@ -267,7 +267,7 @@ function riemann_tensor(
         ∂Γ[l, i, k, j] - ∂Γ[l, i, j, k] + Γ[s, i, k] * Γ[l, s, j] - Γ[s, i, j] * Γ[l, s, k]
     return R
 end
-@new_trait_function riemann_tensor(
+@trait_function riemann_tensor(
     M::AbstractDecoratorManifold,
     p,
     B::AbstractBasis;

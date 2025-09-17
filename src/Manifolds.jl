@@ -301,7 +301,7 @@ using ManifoldsBase:
     geodesic,
     geodesic!,
     get_parameter,
-    @new_trait_function,
+    @trait_function,
     number_of_components,
     number_system,
     real_dimension,
