@@ -234,7 +234,7 @@ function get_embedding(M::SymmetricPositiveDefinite{Tuple{Int}})
 end
 
 function ManifoldsBase.get_embedding_type(::SymmetricPositiveDefinite, ::SPDPoint)
-    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 function ManifoldsBase.get_embedding_type(::SymmetricPositiveDefinite)
     return ManifoldsBase.EmbeddedManifoldType()

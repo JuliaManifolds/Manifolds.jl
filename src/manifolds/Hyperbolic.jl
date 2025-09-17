@@ -211,7 +211,7 @@ function ManifoldsBase.get_embedding_type(::Hyperbolic)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 function ManifoldsBase.get_embedding_type(::Hyperbolic, ::HyperboloidPoint)
-    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
 embed(::Hyperbolic, p::AbstractArray) = p

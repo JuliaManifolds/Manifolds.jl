@@ -495,7 +495,7 @@ function ManifoldsBase.get_embedding_type(
         ::GeneralUnitaryMatrices,
         ::Quaternions.Quaternion,
     )
-    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.NeedsEmbedding())
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 @doc raw"""
     get_vector(M::OrthogonalMatrices, p, Xⁱ, B::DefaultOrthogonalBasis)
