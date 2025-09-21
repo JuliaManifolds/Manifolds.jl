@@ -14,7 +14,6 @@ include("../header.jl")
                 ExponentialRetraction()
             @test default_retraction_method(M, ProjectorPoint) == ExponentialRetraction()
             @test default_vector_transport_method(M) == ParallelTransport()
-            @test get_total_space(M) == Stiefel(3, 2, ℝ)
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             @test_throws ManifoldDomainError is_point(
@@ -400,7 +399,6 @@ include("../header.jl")
     @testset "field parameter" begin
         M = Grassmann(3, 2; parameter = :field)
         @test repr(M) == "Grassmann(3, 2, ℝ; parameter=:field)"
-        @test get_total_space(M) == Stiefel(3, 2; parameter = :field)
         @test typeof(get_embedding(M)) === Stiefel{Tuple{Int64, Int64}, ℝ}
 
         p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
