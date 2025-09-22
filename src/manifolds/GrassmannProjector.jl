@@ -177,19 +177,6 @@ function differential_canonical_project!(
     differential_canonical_project!(M, Y, p.value, X.value)
     return Y
 end
-function allocate_result(
-        M::Grassmann,
-        ::typeof(differential_canonical_project),
-        p::StiefelPoint,
-        X::StiefelTangentVector,
-    )
-    n, k = get_parameter(M.size)
-    return ProjectorTangentVector(allocate(p.value, (n, n)))
-end
-function allocate_result(M::Grassmann, ::typeof(differential_canonical_project), p, X)
-    n, k = get_parameter(M.size)
-    return ProjectorTangentVector(allocate(p, (n, n)))
-end
 
 @doc raw"""
     exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector)
