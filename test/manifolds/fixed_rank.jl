@@ -68,7 +68,7 @@ include("../header.jl")
             UMVTangentVector(zeros(2, 1), zeros(1, 2), zeros(2, 2)),
         )
         @test !is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), X)
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_vector(
             M,
             SVDMPoint([1.0 0.0; 0.0 0.0], 2),
             X;

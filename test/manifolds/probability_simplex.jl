@@ -20,7 +20,7 @@ include("../header.jl")
     @test is_vector(M, p, Y)
     @test_throws ManifoldDomainError is_vector(M, p .+ 1, X; error = :error)
     @test_throws ManifoldDomainError is_vector(M, p, zeros(4); error = :error)
-    @test_throws ManifoldDomainError is_vector(M, p, Y .+ 1; error = :error)
+    @test_throws DomainError is_vector(M, p, Y .+ 1; error = :error)
 
     @test injectivity_radius(M, p) == injectivity_radius(M, p, ExponentialRetraction())
     @test injectivity_radius(M, p, SoftmaxRetraction()) == injectivity_radius(M, p)
