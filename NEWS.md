@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * instead of `StiefelTVector` use `StiefelTangentVector`
   * instead of `TuckerTVector` use `TuckerTangentVector`
   * instead of `UMVTVector` use `UMVTangentVector`
+* The `QuotientManifold` type has been removed, the API for general (implicit) quotient manifolds is now already in `ManifoldsBase.jl`.
 
 ### Changed
 

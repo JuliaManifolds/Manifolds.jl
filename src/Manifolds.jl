@@ -409,7 +409,6 @@ end
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
-include("manifolds/QuotientManifold.jl")
 include("manifolds/Fiber.jl")
 include("manifolds/FiberBundle.jl")
 include("manifolds/VectorFiber.jl")
@@ -689,8 +688,7 @@ export AbstractPowerManifold,
     ArrayPowerRepresentation,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
-    PowerManifold,
-    QuotientManifold
+    PowerManifold
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export TangentBundle

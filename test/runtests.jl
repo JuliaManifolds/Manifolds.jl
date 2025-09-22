@@ -187,7 +187,6 @@ end
         #meta manifolds
         include_test("manifolds/product_manifold.jl")
         include_test("manifolds/power_manifold.jl")
-        include_test("manifolds/quotient_manifold.jl")
         include_test("manifolds/fiber_bundle.jl")
         include_test("manifolds/vector_bundle.jl")
         include_test("manifolds/graph.jl")
