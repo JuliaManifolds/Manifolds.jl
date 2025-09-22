@@ -15,8 +15,7 @@ jobs:
         os: [ubuntu-latest, macOS-latest]
         group:
           - 'test_manifolds'
-          - 'test_lie_groups'
-          #- 'test_integration'
+          - 'test_integration'
     steps:
       - uses: actions/checkout@v5
       - uses: julia-actions/setup-julia@v2
