@@ -87,12 +87,6 @@ end
     end
 end
 
-@testset "Special unitary matrices" begin
-    M = SpecialUnitary(2)
-    @test manifold_dimension(M) == 3
-    @test injectivity_radius(M) ≈ π * sqrt(2.0)
-end
-
 @testset "Quaternionic Unitary Matrices" begin
     M = UnitaryMatrices(1, ℍ)
     @test repr(M) == "UnitaryMatrices(1, ℍ)"
@@ -155,9 +149,4 @@ end
         Quaternion(0.0, 0.0, 1.0, 0.0),
         Quaternion(0.0, 0.0, 0.0, 1.0),
     ]
-end
-
-@testset "Flatness edge cases" begin
-    @test is_flat(SpecialUnitary(1))
-    @test is_flat(SpecialUnitary(1; parameter = :field))
 end

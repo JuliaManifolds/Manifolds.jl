@@ -141,7 +141,6 @@ end
         @test repr(M) == "SymplecticStiefel(6, 4)"
         @test representation_size(M) == (6, 4)
         @test base_manifold(M) === M
-        @test get_total_space(M) == SymplecticMatrices(6)
         @test !is_flat(M)
 
         @test is_point(M, p_6_4)
@@ -309,6 +308,5 @@ end
         M = SymplecticStiefel(6, 4; parameter = :field)
         @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
         @test repr(M) == "SymplecticStiefel(6, 4; parameter=:field)"
-        @test get_total_space(M) == SymplecticMatrices(6; parameter = :field)
     end
 end

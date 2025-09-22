@@ -19,7 +19,7 @@ include("../header.jl")
         @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error = :error)
         @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_vector( # p is not a valit point
             M,
             [1.0, 0.0, 0.0],
             [1.0, 0.0, 0.0];

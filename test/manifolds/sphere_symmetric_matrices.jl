@@ -25,7 +25,7 @@ include("../header.jl")
         @test_throws ManifoldDomainError is_vector(M, A, B; error = :error)
         @test_throws ManifoldDomainError is_vector(M, A, C; error = :error)
         @test_throws ManifoldDomainError is_vector(M, A, D; error = :error)
-        @test_throws DomainError is_vector(M, D, A; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, D, A; error = :error)
         @test_throws ManifoldDomainError is_vector(M, A, E; error = :error)
         @test_throws DomainError is_vector(M, J, K; error = :error)
         @test manifold_dimension(M) == 5

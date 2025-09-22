@@ -24,7 +24,7 @@ include("../header.jl")
         @test_throws ManifoldDomainError is_point(M, D; error = :error) #embedding changes type
         @test check_vector(M, B_sym, B_sym) === nothing
         @test_throws DomainError is_vector(M, B_sym, A; error = :error)
-        @test_throws DomainError is_vector(M, A, B_sym; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, A, B_sym; error = :error)
         @test_throws ManifoldDomainError is_vector(M, B_sym, D; error = :error)
         @test_throws ManifoldDomainError is_vector(
             M,
