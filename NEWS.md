@@ -19,6 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * the functions `canoncial_project`, `differential_canonical_project`, `horizontal_lift`, `horizontal_component`, `get_total_space`, and `vertical_component` have been moved upstream to `ManifoldsBase.jl`
 * all functions related to the `GroupManifold`s type and corresponding traits using the old trait system have been removed here after being deprecated for a while now.
   These have been redesigned and introduced in the new package [LieGroups.jl](https://juliamanifolds.github.io/LieGroups.jl/stable/), see their [How to transition from `GroupManifold`s tutorial](https://juliamanifolds.github.io/LieGroups.jl/stable/tutorials/transition/) for all details.
+* all deprecated tangent vector types that had `TVector` in their name
+  * instead of `HyperboloidTVector`use`HyperboloidTangentVector`
+  * instead of `OrthogonalTVector` use`OrthogonalTangentVector`
+  * instead of `PoincareBallTVector` use `PoincareBallTangentVector`
+  * instead of `PoincareHalfSpaceTVector` use `PoincareHalfSpaceTangentVector`
+  * instead of `ProjectorTVector` use `ProjectorTangentVector`
+  * instead of `StiefelTVector` use `StiefelTangentVector`
+  * instead of `TuckerTVector` use `TuckerTangentVector`
+  * instead of `UMVTVector` use `UMVTangentVector`
 
 ### Changed
 
