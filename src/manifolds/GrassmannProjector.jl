@@ -154,27 +154,27 @@ function allocate_result(M::Grassmann, ::typeof(canonical_project), p::StiefelPo
 end
 
 @doc raw"""
-    canonical_project!(M::Grassmann, q::ProjectorPoint, p)
+    diff_canonical_project!(M::Grassmann, q::ProjectorPoint, p)
 
-Compute the canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold onto the [`Grassmann`](@ref)
+Compute the differential of canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold onto the [`Grassmann`](@ref)
 manifold when represented as [`ProjectorPoint`](@ref), i.e.
 
 ```math
     Dπ^{\mathrm{SG}}(p)[X] = Xp^{\mathrm{T}} + pX^{\mathrm{T}}
 ```
 """
-function differential_canonical_project!(::Grassmann, Y::ProjectorTangentVector, p, X)
+function diff_canonical_project!(::Grassmann, Y::ProjectorTangentVector, p, X)
     Xpt = X * p'
     Y.value .= Xpt .+ Xpt'
     return Y
 end
-function differential_canonical_project!(
+function diff_canonical_project!(
         M::Grassmann,
         Y::ProjectorTangentVector,
         p::StiefelPoint,
         X::StiefelTangentVector,
     )
-    differential_canonical_project!(M, Y, p.value, X.value)
+    diff_canonical_project!(M, Y, p.value, X.value)
     return Y
 end
 

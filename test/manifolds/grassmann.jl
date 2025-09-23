@@ -285,6 +285,16 @@ include("../header.jl")
         p3 = canonical_project(M, pS)
         @test p3.value == pC
 
+        Y = ProjectorTangentVector(similar(X.value))
+        Yc = Xs.value * pS.value' + pS.value * Xs.value'
+        diff_canonical_project!(M, Y, pS, Xs)
+        @test Y.value == Yc
+        Y2 = ProjectorTangentVector(similar(X.value))
+        diff_canonical_project!(M, Y2, pS.value, Xs.value)
+        @test Y2.value == Yc
+
+        @test horizontal_lift(Stiefel(3, 2), pS.value, X) == X.value[:, 1:2]
+
         exppx = exp(X.value * p.value - p.value * X.value)
         qc = exppx * p.value / exppx
         q = exp(M, p, X)
