@@ -7,7 +7,7 @@ include("../header.jl")
         @test base_manifold(M) == M
         @test manifold_dimension(M) == 2
         @test typeof(get_embedding(M)) ==
-            MetricManifold{ℝ, Euclidean{TypeParameter{Tuple{3}}, ℝ}, MinkowskiMetric}
+            MetricManifold{ℝ, Euclidean{ℝ, TypeParameter{Tuple{3}}}, MinkowskiMetric}
         @test representation_size(M) == (3,)
         @test !is_flat(M)
         @test isinf(injectivity_radius(M))

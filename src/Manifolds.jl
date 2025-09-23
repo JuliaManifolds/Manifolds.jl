@@ -83,6 +83,7 @@ import ManifoldsBase:
     get_coordinates_vee!,
     get_embedding,
     get_iterator,
+    get_total_space,
     get_vector,
     get_vector!,
     get_vector_diagonalizing,

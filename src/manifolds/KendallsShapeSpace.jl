@@ -2,7 +2,7 @@
     KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
 
 Kendall's shape space, defined as quotient of a [`KendallsPreShapeSpace`](@ref)
-(represented by n×k matrices) by the action [`ColumnwiseMultiplicationAction`](@ref).
+(represented by n×k matrices) modulo column wise application of a single rotation.
 
 The space can be interpreted as tuples of ``k`` points in ``ℝ^n`` up to simultaneous
 translation and scaling and rotation of all points [Kendall:1984](@cite)[Kendall:1989](@cite).
@@ -22,6 +22,21 @@ function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol = :type)
     return KendallsShapeSpace{typeof(size)}(size)
 end
 
+#
+# A small internal function, given two shapes p, q as matrices (n,k) with columns of points,
+# find the best alignment (without mirroring) to rotate q to p; this is done by
+# the closed form solution of the orthogonal Procrustes problem – and a carefull check to avoid that we mirror points.
+#
+function _optimal_alignment(::KendallsShapeSpace, p, q)
+    Xmul = p * transpose(q)
+    F = svd(Xmul)
+    L = size(Xmul)[2]
+    UVt = F.U * F.Vt
+    Ostar = det(UVt) ≥ 0 ? UVt : F.U * Diagonal([i < L ? 1 : -1 for i in 1:L]) * F.Vt
+    return convert(typeof(Xmul), Ostar)
+end
+
+
 @doc raw"""
     get_total_space(::KendallsShapeSpace)
 
@@ -38,9 +53,7 @@ function get_total_space(M::KendallsShapeSpace{Tuple{Int, Int}})
 end
 
 function distance(M::KendallsShapeSpace, p, q)
-    A = get_orbit_action(M)
-    a = optimal_alignment(A, p, q)
-    rot_q = apply(A, a, q)
+    rot_q = _optimal_alignment(M, p, q) * q
     return distance(get_embedding(M), p, rot_q)
 end
 
@@ -126,9 +139,7 @@ See the [`exp`](@ref exp(::KendallsShapeSpace, ::Any, ::Any)onential map for mor
 log(M::KendallsShapeSpace, p, q)
 
 function log!(M::KendallsShapeSpace, X, p, q)
-    A = get_orbit_action(M)
-    a = optimal_alignment(A, p, q)
-    rot_q = apply(A, a, q)
+    rot_q = _optimal_alignment(M, p, q) * q
     return log!(get_embedding(M), X, p, rot_q)
 end
 
