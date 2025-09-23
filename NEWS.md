@@ -12,6 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * a function `metric(M)` analogous to `embedding(M)` and `connection(M)` that returns the metric of the manifold `M`.
 * a `DefaultMetric()` type to specify that the manifold uses some specific metric, that is not further named.
 
+### Changed
+
+* the extension to `OrdinaryDiffEq.jl` has been remodelled slightly to no longer introduce,
+`exp_fused!` to be implemented calling the ODE solver, but correctly uses the `retract_exp_ode!` and `retract_exp_ode_fused!` functions.
+* Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
+* refactored all manifolds to use a parameter order of `{𝔽, T}` where `𝔽` is the number type and `T` the type of size parameter (either a `TypeParameter` or a `Tuple`).
+  this changed internally
+  * `CenteredMatrices{T, 𝔽}` to `CenteredMatrices{𝔽, T}`
+  * `Euclidean{T, 𝔽}` to `Euclidean{𝔽, T}`
 ### Removed
 
 * the trait system that was present additionally to the wrapper types for metric, embedding and connections. Those were moved to `default_X` functions and the dispatch was adapted to still obtain the same logic/behaviour.
@@ -29,12 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * instead of `TuckerTVector` use `TuckerTangentVector`
   * instead of `UMVTVector` use `UMVTangentVector`
 * The `QuotientManifold` type has been removed, the API for general (implicit) quotient manifolds is now already in `ManifoldsBase.jl`.
-
-### Changed
-
-* the extension to `OrdinaryDiffEq.jl` has been remodelled slightly to no longer introduce,
-`exp_fused!` to be implemented calling the ODE solver, but correctly uses the `retract_exp_ode!` and `retract_exp_ode_fused!` functions.
-* Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
 
 ## [0.10.23] 2025-07-19
 
