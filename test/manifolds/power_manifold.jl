@@ -407,7 +407,7 @@ end
         p1 = [SVector{3}(1.0, 0.0, 0.0), SVector{3}(1.0, 0.0, 0.0)]
         @test allocate(Msr, p1) isa Vector{SVector{3, Float64}}
 
-        SE2 = Euclidean(2) × Sphere(2)
+        SE2 = Euclidean(2) × Rotations(2)
         PSE2 = PowerManifold(SE2, NestedReplacingPowerRepresentation(), 2)
         pse = ArrayPartition(
             SA[1.0, 2.0],
