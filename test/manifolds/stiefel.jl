@@ -547,7 +547,7 @@ include("../header.jl")
     end
     @testset "field parameter" begin
         M = Stiefel(3, 2; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "Stiefel(3, 2, ℝ; parameter=:field)"
     end
 end

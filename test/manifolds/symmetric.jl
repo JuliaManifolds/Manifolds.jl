@@ -17,7 +17,7 @@ include("../header.jl")
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test is_flat(M)
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3, 3}}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{3, 3}}}
         @test check_point(M, B_sym) === nothing
         @test_throws DomainError is_point(M, A; error = :error)
         @test_throws ManifoldDomainError is_point(M, C; error = :error)
@@ -87,7 +87,7 @@ include("../header.jl")
     end # for
     @testset "field parameter" begin
         M = SymmetricMatrices(3, ℝ; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "SymmetricMatrices(3, ℝ; parameter=:field)"
     end
 end # test SymmetricMatrices
