@@ -306,7 +306,7 @@ end
     end
     @testset "field parameter" begin
         M = SymplecticStiefel(6, 4; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "SymplecticStiefel(6, 4; parameter=:field)"
     end
 end
