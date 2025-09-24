@@ -31,16 +31,16 @@ The manifold is named after
 
 Generate the (real-valued) Stiefel manifold of ``n×k`` dimensional orthonormal matrices.
 """
-struct Stiefel{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
+struct Stiefel{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
 function Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, k))
-    return Stiefel{typeof(size), field}(size)
+    return Stiefel{field, typeof(size)}(size)
 end
 
-function allocation_promotion_function(::Stiefel{<:Any, ℂ}, ::Any, ::Tuple)
+function allocation_promotion_function(::Stiefel{ℂ}, ::Any, ::Tuple)
     return complex
 end
 
@@ -141,10 +141,10 @@ end
 embed(::Stiefel, p) = p
 embed(::Stiefel, p, X) = X
 
-function get_embedding(::Stiefel{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
+function get_embedding(::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return Euclidean(n, k; field = 𝔽)
 end
-function get_embedding(M::Stiefel{Tuple{Int, Int}, 𝔽}) where {𝔽}
+function get_embedding(M::Stiefel{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, k; field = 𝔽, parameter = :field)
 end
@@ -201,26 +201,26 @@ function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
 end
 
 function _stiefel_inv_retr_qr_mul_by_r!(
-        ::Stiefel{TypeParameter{Tuple{n, 1}}},
+        ::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}},
         X,
         q,
         A,
         ::Type,
-    ) where {n}
+    ) where {𝔽, n}
     @inbounds R = SMatrix{1, 1}(inv(A[1, 1]))
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{TypeParameter{Tuple{n, 1}}},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}},
         X,
         q,
         A::StaticArray,
         ::Type{ElT},
-    ) where {n, ElT}
+    ) where {𝔽, n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
         Tuple{
-            Stiefel{TypeParameter{Tuple{n, 1}}},
+            Stiefel{𝔽, TypeParameter{Tuple{n, 1}}},
             typeof(X),
             typeof(q),
             AbstractArray,
@@ -234,12 +234,12 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        ::Stiefel{TypeParameter{Tuple{n, 2}}},
+        ::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}},
         X,
         q,
         A,
         ::Type{ElT},
-    ) where {n, ElT}
+    ) where {𝔽, n, ElT}
     R11 = inv(A[1, 1])
     @inbounds R =
         hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
@@ -249,16 +249,16 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{TypeParameter{Tuple{n, 2}}},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}},
         X,
         q,
         A::StaticArray,
         ::Type{ElT},
-    ) where {n, ElT}
+    ) where {𝔽, n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
         Tuple{
-            Stiefel{TypeParameter{Tuple{n, 2}}},
+            Stiefel{𝔽, TypeParameter{Tuple{n, 2}}},
             typeof(X),
             typeof(q),
             AbstractArray,
@@ -272,12 +272,12 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{TypeParameter{Tuple{n, k}}},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, k}}},
         X,
         q,
         A::StaticArray,
         ::Type{ElT},
-    ) where {n, k, ElT}
+    ) where {𝔽, n, k, ElT}
     R = zeros(MMatrix{k, k, ElT})
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end

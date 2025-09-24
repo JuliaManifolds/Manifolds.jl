@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralizedStiefel{T,𝔽,B} <: AbstractDecoratorManifold{𝔽}
+    GeneralizedStiefel{𝔽,T,B} <: AbstractDecoratorManifold{𝔽}
 
 The Generalized Stiefel manifold consists of all ``n×k``, ``n\geq k`` orthonormal
 matrices w.r.t. an arbitrary scalar product with symmetric positive definite matrix
@@ -35,7 +35,7 @@ The manifold is named after
 Generate the (real-valued) Generalized Stiefel manifold of ``n×k`` dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedStiefel{T, 𝔽, TB <: AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
+struct GeneralizedStiefel{𝔽, T, TB <: AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
     size::T
     B::TB
 end
@@ -48,7 +48,7 @@ function GeneralizedStiefel(
         parameter::Symbol = :type,
     )
     size = wrap_type_parameter(parameter, (n, k))
-    return GeneralizedStiefel{typeof(size), 𝔽, typeof(B)}(size, B)
+    return GeneralizedStiefel{𝔽, typeof(size), typeof(B)}(size, B)
 end
 
 @doc raw"""
@@ -97,10 +97,10 @@ function check_vector(M::GeneralizedStiefel, p, X; kwargs...)
     return nothing
 end
 
-function get_embedding(::GeneralizedStiefel{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
+function get_embedding(::GeneralizedStiefel{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return Euclidean(n, k; field = 𝔽)
 end
-function get_embedding(M::GeneralizedStiefel{Tuple{Int, Int}, 𝔽}) where {𝔽}
+function get_embedding(M::GeneralizedStiefel{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, k; field = 𝔽, parameter = :field)
 end
@@ -151,15 +151,15 @@ The dimension is given by
 \end{aligned}
 ````
 """
-function manifold_dimension(M::GeneralizedStiefel{<:Any, ℝ})
+function manifold_dimension(M::GeneralizedStiefel{ℝ})
     n, k = get_parameter(M.size)
     return n * k - div(k * (k + 1), 2)
 end
-function manifold_dimension(M::GeneralizedStiefel{<:Any, ℂ})
+function manifold_dimension(M::GeneralizedStiefel{ℂ})
     n, k = get_parameter(M.size)
     return 2 * n * k - k * k
 end
-function manifold_dimension(M::GeneralizedStiefel{<:Any, ℍ})
+function manifold_dimension(M::GeneralizedStiefel{ℍ})
     n, k = get_parameter(M.size)
     return 4 * n * k - k * (2k - 1)
 end
@@ -219,7 +219,7 @@ rand(::GeneralizedStiefel; σ::Real = 1.0)
 
 function Random.rand!(
         rng::AbstractRNG,
-        M::GeneralizedStiefel{<:Any, ℝ},
+        M::GeneralizedStiefel{ℝ},
         pX;
         vector_at = nothing,
         σ::Real = one(real(eltype(pX))),
@@ -270,10 +270,10 @@ function ManifoldsBase.retract_project_fused!(M::GeneralizedStiefel, q, p, X, t:
     return q
 end
 
-function Base.show(io::IO, M::GeneralizedStiefel{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
+function Base.show(io::IO, M::GeneralizedStiefel{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽))")
 end
-function Base.show(io::IO, M::GeneralizedStiefel{Tuple{Int, Int}, 𝔽}) where {𝔽}
+function Base.show(io::IO, M::GeneralizedStiefel{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, k = get_parameter(M.size)
     return print(io, "GeneralizedStiefel($(n), $(k), $(M.B), $(𝔽); parameter=:field)")
 end

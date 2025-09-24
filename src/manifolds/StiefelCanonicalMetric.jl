@@ -24,13 +24,13 @@ struct ApproximateLogarithmicMap{T} <: ApproximateInverseRetraction
     tolerance::T
 end
 
-function distance(M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}, q, p)
+function distance(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, q, p)
     return norm(M, p, log(M, p, q))
 end
 
 @doc raw"""
-    q = exp(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, p, X)
-    exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, q, p, X)
+    q = exp(M::MetricManifold{ℝ,<:Stiefel{ℝ},CanonicalMetric}, p, X)
+    exp!(M::MetricManifold{ℝ,<:Stiefel{ℝ},CanonicalMetric}, q, p, X)
 
 Compute the exponential map on the [`Stiefel`](@ref)`(n, k)` manifold with respect to the [`CanonicalMetric`](@ref).
 
@@ -64,9 +64,9 @@ q = \exp_p X = pC + QB.
 ```
 For more details, see [EdelmanAriasSmith:1998](@cite)[Zimmermann:2017](@cite).
 """
-exp(::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}, ::Any...)
+exp(::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, ::Any...)
 
-function exp!(M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}, q, p, X)
+function exp!(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, q, p, X)
     n, k = get_parameter(M.manifold.size)
     A = p' * X
     n == k && return mul!(q, p, exp(A))
@@ -89,7 +89,7 @@ Compute the inner product on the [`Stiefel`](@ref) manifold with respect to the
 g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{1}{2}pp^{\mathrm{T}})Y \bigr).
 ```
 """
-function inner(M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}, p, X, Y)
+function inner(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, p, X, Y)
     n, k = get_parameter(M.manifold.size)
     T = Base.promote_eltype(p, X, Y)
     if n == k
@@ -100,8 +100,8 @@ function inner(M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}, p
 end
 
 @doc raw"""
-    X = inverse_retract(M::MetricManifold{ℝ, Stiefel{<:Any,ℝ}, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
-    inverse_retract!(M::MetricManifold{ℝ, Stiefel{<:Any,ℝ}, X, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
+    X = inverse_retract(M::MetricManifold{ℝ, Stiefel{ℝ}, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
+    inverse_retract!(M::MetricManifold{ℝ, Stiefel{ℝ}, X, CanonicalMetric}, p, q, a::ApproximateLogarithmicMap)
 
 Compute an approximation to the logarithmic map on the [`Stiefel`](@ref)`(n, k)` manifold with respect to the [`CanonicalMetric`](@ref)
 using a matrix-algebraic based approach to an iterative inversion of the formula of the
@@ -111,22 +111,22 @@ The algorithm is derived in [Zimmermann:2017](@cite) and it uses the `max_iterat
 from the [`ApproximateLogarithmicMap`](@ref).
 """
 inverse_retract(
-    ::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric},
+    ::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric},
     ::Any,
     ::Any,
     ::ApproximateLogarithmicMap,
 )
 
 """
-    is_flat(MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric})
+    is_flat(MetricManifold{ℝ,<:Stiefel{ℝ},CanonicalMetric})
 
 Return true if [`Stiefel`](@ref) `M` is one-dimensional, since only then, the manifold is flat.
 """
-is_flat(M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric}) =
+is_flat(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}) =
     manifold_dimension(M) == 1
 
 function log(
-        M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric},
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric},
         p,
         q;
         maxiter::Int = 10000,
@@ -138,7 +138,7 @@ function log(
 end
 
 function log!(
-        M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric},
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric},
         X,
         p,
         q;
@@ -150,7 +150,7 @@ function log!(
 end
 
 function inverse_retract!(
-        M::MetricManifold{ℝ, <:Stiefel{<:Any, ℝ}, CanonicalMetric},
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric},
         X,
         p,
         q,
@@ -210,7 +210,7 @@ where ``P = I-pp^{\mathrm{H}}``.
 riemannian_Hessian(M::MetricManifold{𝔽, Stiefel, CanonicalMetric}, p, G, H, X) where {𝔽}
 
 function riemannian_Hessian!(
-        M::MetricManifold{𝔽, <:Stiefel{<:Any, 𝔽}, CanonicalMetric},
+        M::MetricManifold{𝔽, <:Stiefel{𝔽}, CanonicalMetric},
         Y,
         p,
         G,

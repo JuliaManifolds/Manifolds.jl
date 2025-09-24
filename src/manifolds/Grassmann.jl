@@ -70,7 +70,7 @@ A good overview can be found in[BendokatZimmermannAbsil:2020](@cite).
 Generate the Grassmann manifold ``\operatorname{Gr}(n,k)``, where the real-valued
 case `field=ℝ` is the default.
 """
-struct Grassmann{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
+struct Grassmann{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
@@ -79,10 +79,10 @@ end
 #
 function Grassmann(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, k))
-    return Grassmann{typeof(size), field}(size)
+    return Grassmann{field, typeof(size)}(size)
 end
 
-function allocation_promotion_function(::Grassmann{<:Any, ℂ}, f, args::Tuple)
+function allocation_promotion_function(::Grassmann{ℂ}, f, args::Tuple)
     return complex
 end
 
@@ -148,7 +148,7 @@ Return the dimension of the [`Grassmann`](@ref)`(n,k,𝔽)` manifold `M`, i.e.
 
 where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of `𝔽`.
 """
-function manifold_dimension(M::Grassmann{<:Any, 𝔽}) where {𝔽}
+function manifold_dimension(M::Grassmann{𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return k * (n - k) * real_dimension(𝔽)
 end
@@ -177,10 +177,10 @@ end
 Return the total space of the [`Grassmann`](@ref) manifold, which is the corresponding Stiefel manifold,
 independent of whether the points are represented already in the total space or as [`ProjectorPoint`](@ref)s.
 """
-function get_total_space(::Grassmann{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
+function get_total_space(::Grassmann{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return Stiefel(n, k, 𝔽)
 end
-function get_total_space(M::Grassmann{Tuple{Int, Int}, 𝔽}) where {𝔽}
+function get_total_space(M::Grassmann{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, k = get_parameter(M.size)
     return Stiefel(n, k, 𝔽; parameter = :field)
 end

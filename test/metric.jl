@@ -138,14 +138,14 @@ Manifolds._injectivity_radius(::BaseManifold, ::ExponentialRetraction) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) = Inf
 Manifolds._injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
 function Manifolds.local_metric(
-        ::MetricManifold{ℝ, BaseManifold{N}, BaseManifoldMetric{N}},
+        ::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
         p,
         ::InducedBasis,
     ) where {N}
     return 2 * one(p * p')
 end
 function Manifolds.exp!(
-        M::MetricManifold{ℝ, BaseManifold{N}, BaseManifoldMetric{N}},
+        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
         q,
         p,
         X,
@@ -153,7 +153,7 @@ function Manifolds.exp!(
     return exp!(base_manifold(M), q, p, X)
 end
 function Manifolds.exp_fused!(
-        M::MetricManifold{ℝ, BaseManifold{N}, BaseManifoldMetric{N}},
+        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
         q,
         p,
         X,

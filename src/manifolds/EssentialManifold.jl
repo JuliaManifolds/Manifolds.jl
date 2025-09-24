@@ -49,8 +49,7 @@ Generate the manifold of essential matrices, either the signed (`is_signed=true`
 unsigned (`is_signed=false`) variant.
 
 """
-struct EssentialManifold <:
-    AbstractPowerManifold{ℝ, Rotations{TypeParameter{Tuple{3}}}, NestedPowerRepresentation}
+struct EssentialManifold <: AbstractPowerManifold{ℝ, Rotations{TypeParameter{Tuple{3}}}, NestedPowerRepresentation}
     is_signed::Bool
     manifold::Rotations{TypeParameter{Tuple{3}}}
 end

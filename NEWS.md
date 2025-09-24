@@ -21,6 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   this changed internally
   * `CenteredMatrices{T, 𝔽}` to `CenteredMatrices{𝔽, T}`
   * `Euclidean{T, 𝔽}` to `Euclidean{𝔽, T}`
+  * `FixedRankMatrices{T, 𝔽}` to `FixedRankMatrices{𝔽, T}`
+  * `GeneralizedGrassmann{T, 𝔽, B}` to `GeneralizedGrassmann{𝔽, T, B}`
+  * `GeneralizedStiefel{T, 𝔽, B}` to `GeneralizedStiefel{𝔽, T, B}`
+  * `Grassmann{T, 𝔽, B}` to `Grassmann{𝔽, T, B}`
+  * `GeneralUnitaryMatrices{T, 𝔽, S}` to `GeneralUnitaryMatrices{𝔽, T, S}`
+  * `GraphManifold{G <: AbstractGraph, 𝔽, TM, T <: GraphManifoldType}` to `GraphManifold{𝔽, G <: AbstractGraph, TM, T <: GraphManifoldType}`
+  * `Grassmann{T, 𝔽}` to `Grassmann{𝔽, T}`
+  * `Stiefel{T, 𝔽}` to `Stiefel{𝔽, T}`
+  * `UnitaryMatrices{T, 𝔽}` to `UnitaryMatrices{𝔽, T}`
+
 ### Removed
 
 * the trait system that was present additionally to the wrapper types for metric, embedding and connections. Those were moved to `default_X` functions and the dispatch was adapted to still obtain the same logic/behaviour.

@@ -174,6 +174,6 @@ include("../header.jl")
         @test repr(M) ==
             "GeneralizedGrassmann(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ; parameter=:field)"
         @test typeof(get_embedding(M)) ===
-            GeneralizedStiefel{Tuple{Int64, Int64}, ℝ, Matrix{Float64}}
+            GeneralizedStiefel{ℝ, Tuple{Int64, Int64}, Matrix{Float64}}
     end
 end
