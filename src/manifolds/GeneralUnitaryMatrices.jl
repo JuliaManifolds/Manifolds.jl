@@ -433,7 +433,7 @@ function get_coordinates_orthogonal!(
     return c
 end
 function get_coordinates_orthogonal!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{Int}}},
+        M::GeneralUnitaryMatrices{ℝ, Tuple{Int}},
         Xⁱ,
         p,
         X,
@@ -597,7 +597,7 @@ function get_vector_orthogonal!(
     return X
 end
 function get_vector_orthogonal!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{Int}}},
+        M::GeneralUnitaryMatrices{ℝ, Tuple{Int}},
         X,
         p,
         Xⁱ,
