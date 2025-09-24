@@ -395,7 +395,7 @@ include("../header.jl")
     @testset "field parameter" begin
         M = Grassmann(3, 2; parameter = :field)
         @test repr(M) == "Grassmann(3, 2, ℝ; parameter=:field)"
-        @test typeof(get_embedding(M)) === Stiefel{Tuple{Int64, Int64}, ℝ}
+        @test typeof(get_embedding(M)) === Stiefel{ℝ, Tuple{Int64, Int64}}
 
         p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
         p2 = convert(ProjectorPoint, p)

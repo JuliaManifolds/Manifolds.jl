@@ -70,7 +70,7 @@ Generated points will be of similar type as `p`.
 The implementation is based on Section 2.5.1 in [Chikuse:2003](@cite);
 see also Theorem 2.2.2(iii) in [Chikuse:2003](@cite).
 """
-function uniform_distribution(M::Grassmann{<:Any, ℝ}, p)
+function uniform_distribution(M::Grassmann{ℝ}, p)
     n, k = get_parameter(M.size)
     μ = Distributions.Zeros(n, k)
     σ = one(eltype(p))
@@ -87,7 +87,7 @@ end
 Uniform distribution on given [`ProjectiveSpace`](@ref) `M`. Generated points will be of
 similar type as `p`.
 """
-function uniform_distribution(M::ProjectiveSpace{<:Any, ℝ}, p)
+function uniform_distribution(M::ProjectiveSpace{ℝ}, p)
     d = Distributions.MvNormal(zero(p), 1.0 * I)
     return ProjectedPointDistribution(M, d, project!, p)
 end
@@ -102,7 +102,7 @@ Generated points will be of similar type as `p`.
 The implementation is based on Section 2.5.1 in [Chikuse:2003](@cite);
 see also Theorem 2.2.1(iii) in [Chikuse:2003](@cite).
 """
-function uniform_distribution(M::Stiefel{<:Any, ℝ}, p)
+function uniform_distribution(M::Stiefel{ℝ}, p)
     n, k = get_parameter(M.size)
     μ = Distributions.Zeros(n, k)
     σ = one(eltype(p))
@@ -119,7 +119,7 @@ end
 Uniform distribution on given [`Sphere`](@ref) `M`. Generated points will be of
 similar type as `p`.
 """
-function uniform_distribution(M::Sphere{<:Any, ℝ}, p)
+function uniform_distribution(M::Sphere{ℝ}, p)
     n = get_parameter(M.size)[1]
     d = Distributions.MvNormal(zero(p), 1.0 * I)
     return ProjectedPointDistribution(M, d, project!, p)
