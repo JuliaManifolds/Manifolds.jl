@@ -330,15 +330,15 @@ The dimension is given by
 \end{aligned}
 ````
 """
-function manifold_dimension(M::Stiefel{<:Any, ℝ})
+function manifold_dimension(M::Stiefel{ℝ})
     n, k = get_parameter(M.size)
     return n * k - div(k * (k + 1), 2)
 end
-function manifold_dimension(M::Stiefel{<:Any, ℂ})
+function manifold_dimension(M::Stiefel{ℂ})
     n, k = get_parameter(M.size)
     return 2 * n * k - k * k
 end
-function manifold_dimension(M::Stiefel{<:Any, ℍ})
+function manifold_dimension(M::Stiefel{ℍ})
     n, k = get_parameter(M.size)
     return 4 * n * k - k * (2k - 1)
 end
@@ -359,7 +359,7 @@ rand(::Stiefel; σ::Real = 1.0)
 
 function Random.rand!(
         rng::AbstractRNG,
-        M::Stiefel{<:Any, 𝔽},
+        M::Stiefel{𝔽},
         pX;
         vector_at = nothing,
         σ::Real = one(real(eltype(pX))),
@@ -534,10 +534,10 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 representation_size(M::Stiefel) = get_parameter(M.size)
 
-function Base.show(io::IO, ::Stiefel{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
+function Base.show(io::IO, ::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return print(io, "Stiefel($(n), $(k), $(𝔽))")
 end
-function Base.show(io::IO, M::Stiefel{Tuple{Int, Int}, 𝔽}) where {𝔽}
+function Base.show(io::IO, M::Stiefel{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, k = get_parameter(M.size)
     return print(io, "Stiefel($(n), $(k), $(𝔽); parameter=:field)")
 end
