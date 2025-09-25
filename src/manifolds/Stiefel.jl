@@ -1,5 +1,5 @@
 @doc raw"""
-    Stiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    Stiefel{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The Stiefel manifold consists of all ``n×k``, ``n ≥ k`` unitary matrices, i.e.
 
@@ -19,7 +19,7 @@ T_p \mathcal M = \{ X ∈ 𝔽^{n×k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k\
 
 where ``0_k`` is the ``k×k`` zero matrix.
 
-This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
+This manifold is modelled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
 [`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 

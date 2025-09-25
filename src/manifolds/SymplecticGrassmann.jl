@@ -1,5 +1,5 @@
 @doc raw"""
-    SymplecticGrassmann{T,𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+    SymplecticGrassmann{𝔽, T} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
 The symplectic Grassmann manifold consists of all symplectic subspaces of
 ``ℝ^{2n}`` of dimension ``2k``, ``n ≥ k``.
@@ -68,13 +68,13 @@ Generate the (real-valued) symplectic Grassmann manifold.
 of  ``2k`` dimensional symplectic subspace of ``ℝ^{2n}``.
 Note that both dimensions passed to this constructor have to be even.
 """
-struct SymplecticGrassmann{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
+struct SymplecticGrassmann{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
 function SymplecticGrassmann(two_n::Int, two_k::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (div(two_n, 2), div(two_k, 2)))
-    return SymplecticGrassmann{typeof(size), ℝ}(size)
+    return SymplecticGrassmann{ℝ, typeof(size)}(size)
 end
 
 # Define Stiefel as the array fallback
@@ -91,15 +91,15 @@ Return the dimension of the [`SymplecticGrassmann`](@ref)`(2n,2k)`, which is
 
 see [BendokatZimmermann:2021](@cite), Section 4.
 """
-function manifold_dimension(M::SymplecticGrassmann{<:Any, ℝ})
+function manifold_dimension(M::SymplecticGrassmann{ℝ})
     n, k = get_parameter(M.size)
     return 4 * (n - k) * k
 end
 
-function Base.show(io::IO, ::SymplecticGrassmann{TypeParameter{Tuple{n, k}}}) where {n, k}
+function Base.show(io::IO, ::SymplecticGrassmann{ℝ, TypeParameter{Tuple{n, k}}}) where {n, k}
     return print(io, "SymplecticGrassmann($(2n), $(2k))")
 end
-function Base.show(io::IO, M::SymplecticGrassmann{Tuple{Int, Int}})
+function Base.show(io::IO, M::SymplecticGrassmann{ℝ, Tuple{Int, Int}})
     n, k = get_parameter(M.size)
     return print(io, "SymplecticGrassmann($(2n), $(2k); parameter=:field)")
 end

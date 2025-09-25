@@ -41,7 +41,7 @@ where ``\mathcal{C}^\prime`` is arbitrary, ``U_d^{\mathrm{H}}`` is the Hermitian
 Generate the manifold of `field`-valued tensors of dimensions  `N[1] × … × N[D]` and
 multilinear rank `R = (R[1], …, R[D])`.
 """
-struct Tucker{T, D, 𝔽} <: AbstractManifold{𝔽}
+struct Tucker{𝔽, T, D} <: AbstractManifold{𝔽}
     size::T
 end
 function Tucker(
@@ -52,7 +52,7 @@ function Tucker(
     ) where {D}
     @assert is_valid_mlrank(n⃗, r⃗)
     size = wrap_type_parameter(parameter, (n⃗, r⃗))
-    return Tucker{typeof(size), D, field}(size)
+    return Tucker{field, typeof(size), D}(size)
 end
 
 #=
@@ -218,8 +218,6 @@ Base.@propagate_inbounds function Broadcast._broadcast_getindex(
     end
 end
 
-####
-
 @doc raw"""
     check_point(M::Tucker, p; kwargs...)
 
@@ -294,15 +292,15 @@ is the case when the dimensions of the factors in `X` agree with those of `p` an
 matrices of `X` are in the orthogonal complement of the HOSVD factors of `p`.
 """
 function check_vector(
-        M::Tucker{<:Any, D},
+        M::Tucker{𝔽, <:Any, D},
         p::TuckerPoint{T, D},
         X::TuckerTangentVector,
-    ) where {T, D}
+    ) where {T, D, 𝔽}
     s = "The tangent vector $(X) is not a tangent vector to $(p) on $(M), "
     if size(p.hosvd.core) ≠ size(X.Ċ) || any(size.(X.U̇) .≠ size.(p.hosvd.U))
         return DomainError(
             size(X.Ċ),
-            s * "since the array dimensons of $(p) and $(X)" * "do not agree.",
+            s * "since the array dimensons of $(p) and $(X)" * " do not agree.",
         )
     end
     for (U, U̇) in zip(p.hosvd.U, X.U̇)
@@ -740,7 +738,7 @@ end
 function Base.show(
         io::IO,
         ::MIME"text/plain",
-        ::Tucker{TypeParameter{Tuple{n, r}}, D, 𝔽},
+        ::Tucker{𝔽, TypeParameter{Tuple{n, r}}, D},
     ) where {n, r, D, 𝔽}
     return print(io, "Tucker($(n), $(r), $(𝔽))")
 end
@@ -893,7 +891,7 @@ for fun in [:get_vector, :inverse_retract, :project, :zero_vector]
     end
 end
 
-function ManifoldsBase.allocate_result(M::Tucker, f::typeof(embed), p, args...)
+function ManifoldsBase.allocate_result(M::Tucker, ::typeof(embed), p, args...)
     dims = get_parameter(M.size)[1]
     return Array{number_eltype(p), length(dims)}(undef, dims)
 end

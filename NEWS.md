@@ -31,8 +31,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `Grassmann{T, 𝔽}` to `Grassmann{𝔽, T}`
   * `HamiltonianMatrices{T, 𝔽}` to `HamiltonianMatrices{𝔽, T}`
   * `Oblique{T, 𝔽, S}` to `Oblique{𝔽, T, S}`
+  * `SkewHermitianMatrices{T, 𝔽}` to `SkewHermitianMatrices{𝔽, T}`
   * `Sphere{T, 𝔽}` to `Sphere{𝔽, T}`
+  * `SphereSymmetricMatrices{T, 𝔽}` to `SphereSymmetricMatrices{𝔽, T}`
   * `Stiefel{T, 𝔽}` to `Stiefel{𝔽, T}`
+  * `SymmetricMatrices{T, 𝔽}` to `SymmetricMatrices{𝔽, T}`
+  * `SymplecticGrassmann{T, 𝔽}` to `SymplecticGrassmann{𝔽, T}`
+  * `SymplecticStiefel{T, 𝔽}` to `SymplecticStiefel{𝔽, T}`
+  * `Tucker{T, D, 𝔽}` to `Tucker{𝔽, T, D}`
   * `UnitaryMatrices{T, 𝔽}` to `UnitaryMatrices{𝔽, T}`
 
 ### Removed
