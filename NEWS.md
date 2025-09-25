@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
 * refactored all manifolds to use a parameter order of `{𝔽, T}` where `𝔽` is the number type and `T` the type of size parameter (either a `TypeParameter` or a `Tuple`).
   this changed internally
+  * `ArraySphere{T<:Tuple,𝔽}` to `ArraySphere{𝔽, T<:Tuple}`
   * `CenteredMatrices{T, 𝔽}` to `CenteredMatrices{𝔽, T}`
   * `Euclidean{T, 𝔽}` to `Euclidean{𝔽, T}`
   * `FixedRankMatrices{T, 𝔽}` to `FixedRankMatrices{𝔽, T}`
@@ -29,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `GraphManifold{G <: AbstractGraph, 𝔽, TM, T <: GraphManifoldType}` to `GraphManifold{𝔽, G <: AbstractGraph, TM, T <: GraphManifoldType}`
   * `Grassmann{T, 𝔽}` to `Grassmann{𝔽, T}`
   * `HamiltonianMatrices{T, 𝔽}` to `HamiltonianMatrices{𝔽, T}`
+  * `Oblique{T, 𝔽, S}` to `Oblique{𝔽, T, S}`
+  * `Sphere{T, 𝔽}` to `Sphere{𝔽, T}`
   * `Stiefel{T, 𝔽}` to `Stiefel{𝔽, T}`
   * `UnitaryMatrices{T, 𝔽}` to `UnitaryMatrices{𝔽, T}`
 
