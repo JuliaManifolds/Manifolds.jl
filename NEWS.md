@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `GeneralUnitaryMatrices{T, 𝔽, S}` to `GeneralUnitaryMatrices{𝔽, T, S}`
   * `GraphManifold{G <: AbstractGraph, 𝔽, TM, T <: GraphManifoldType}` to `GraphManifold{𝔽, G <: AbstractGraph, TM, T <: GraphManifoldType}`
   * `Grassmann{T, 𝔽}` to `Grassmann{𝔽, T}`
+  * `HamiltonianMatrices{T, 𝔽}` to `HamiltonianMatrices{𝔽, T}`
   * `Stiefel{T, 𝔽}` to `Stiefel{𝔽, T}`
   * `UnitaryMatrices{T, 𝔽}` to `UnitaryMatrices{𝔽, T}`
 
