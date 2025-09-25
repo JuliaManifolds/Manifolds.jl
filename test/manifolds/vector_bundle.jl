@@ -152,9 +152,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
     end
 
     @test TangentBundle{ℝ, Sphere{2, ℝ}} ==
-        VectorBundle{ℝ, Manifolds.TangentSpaceType, Sphere{2, ℝ}}
+        VectorBundle{ℝ, Manifolds.TangentSpaceType, Sphere{ℝ, 2}}
     @test CotangentBundle{ℝ, Sphere{2, ℝ}} ==
-        VectorBundle{ℝ, Manifolds.CotangentSpaceType, Sphere{2, ℝ}}
+        VectorBundle{ℝ, Manifolds.CotangentSpaceType, Sphere{ℝ, 2}}
 
     @testset "tensor product" begin
         TT = Manifolds.TensorProductType(TangentSpaceType(), TangentSpaceType())
@@ -164,7 +164,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test vector_space_dimension(Sphere(3), TT) == 9
         @test base_manifold(Fiber(Sphere(2), [1.0, 0.0, 0.0], TT)) == M
         @test sprint(show, Fiber(Sphere(2), [1.0, 0.0, 0.0], TT)) ==
-            "VectorSpaceFiber{ℝ, Sphere{TypeParameter{Tuple{2}}, ℝ}, Manifolds.TensorProductType{Tuple{TangentSpaceType, TangentSpaceType}}, Vector{Float64}}(Sphere(2, ℝ), [1.0, 0.0, 0.0], TensorProductType(TangentSpaceType(), TangentSpaceType()))"
+            "VectorSpaceFiber{ℝ, Sphere{ℝ, TypeParameter{Tuple{2}}}, Manifolds.TensorProductType{Tuple{TangentSpaceType, TangentSpaceType}}, Vector{Float64}}(Sphere(2, ℝ), [1.0, 0.0, 0.0], TensorProductType(TangentSpaceType(), TangentSpaceType()))"
     end
 
     @testset "Error messages" begin
