@@ -14,8 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* the extension to `OrdinaryDiffEq.jl` has been remodelled slightly to no longer introduce,
-`exp_fused!` to be implemented calling the ODE solver, but correctly uses the `retract_exp_ode!` and `retract_exp_ode_fused!` functions.
 * Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
 * refactored all manifolds to use a parameter order of `{𝔽, T}` where `𝔽` is the number type and `T` the type of size parameter (either a `TypeParameter` or a `Tuple`).
   this changed internally
@@ -58,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * instead of `TuckerTVector` use `TuckerTangentVector`
   * instead of `UMVTVector` use `UMVTangentVector`
 * The `QuotientManifold` type has been removed, the API for general (implicit) quotient manifolds is now already in `ManifoldsBase.jl`.
+* The  `retract_exp_ode!` and `retract_exp_ode_fused!` functions were removed. The cases in which they were correct are covered by `solve_chart_exp_ode`, and it was too easy to use `retract_exp_ode!` incorrectly.
 
 ## [0.10.23] 2025-07-19
 
