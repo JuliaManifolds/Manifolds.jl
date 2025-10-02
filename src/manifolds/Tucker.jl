@@ -742,7 +742,7 @@ function Base.show(
     ) where {n, r, D, 𝔽}
     return print(io, "Tucker($(n), $(r), $(𝔽))")
 end
-function Base.show(io::IO, ::MIME"text/plain", M::Tucker{<:Tuple, D, 𝔽}) where {D, 𝔽}
+function Base.show(io::IO, ::MIME"text/plain", M::Tucker{𝔽, <:Tuple, D}) where {D, 𝔽}
     n, r = get_parameter(M.size)
     return print(io, "Tucker($(n), $(r), $(𝔽); parameter=:field)")
 end

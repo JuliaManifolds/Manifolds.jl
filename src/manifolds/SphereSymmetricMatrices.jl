@@ -20,7 +20,7 @@ end
 
 function SphereSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return SphereSymmetricMatrices{typeof(size), field}(size)
+    return SphereSymmetricMatrices{field, typeof(size)}(size)
 end
 
 @doc raw"""

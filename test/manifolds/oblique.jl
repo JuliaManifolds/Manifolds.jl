@@ -7,7 +7,7 @@ include("../header.jl")
         @test Sphere(2)^(3,) === PowerManifold(Sphere(2), 3)
         @test ^(Sphere(2), 2) === Oblique(3, 2)
         @test typeof(^(Sphere(2), 2)) ==
-            Oblique{TypeParameter{Tuple{3, 2}}, ℝ, TypeParameter{Tuple{2}}}
+            Oblique{ℝ, TypeParameter{Tuple{3, 2}}, TypeParameter{Tuple{2}}}
         @test repr(M) == "Oblique(3, 2; field=ℝ)"
         @test representation_size(M) == (3, 2)
         @test manifold_dimension(M) == 4
@@ -49,7 +49,7 @@ include("../header.jl")
     end
     @testset "field parameter" begin
         @test typeof(^(Sphere(2; parameter = :field), 2)) ==
-            Oblique{Tuple{Int, Int}, ℝ, Tuple{Int}}
+            Oblique{ℝ, Tuple{Int, Int}, Tuple{Int}}
 
         M = Oblique(3, 2; parameter = :field)
         @test repr(M) == "Oblique(3, 2; field=ℝ, parameter=:field)"

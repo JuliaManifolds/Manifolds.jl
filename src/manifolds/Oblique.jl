@@ -24,7 +24,7 @@ end
 function Oblique(n::Int, m::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     sphere = Sphere(n - 1, field; parameter = parameter)
     size = wrap_type_parameter(parameter, (n, m))
-    return Oblique{field, typeof(size), typeof(sphere).parameters[1]}(size, sphere)
+    return Oblique{field, typeof(size), typeof(sphere).parameters[2]}(size, sphere)
 end
 
 function Base.:^(::Sphere{𝔽, TypeParameter{Tuple{N}}}, m::Int) where {N, 𝔽}

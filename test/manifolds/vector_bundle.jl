@@ -151,9 +151,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
         end
     end
 
-    @test TangentBundle{ℝ, Sphere{2, ℝ}} ==
+    @test TangentBundle{ℝ, Sphere{ℝ, 2}} ==
         VectorBundle{ℝ, Manifolds.TangentSpaceType, Sphere{ℝ, 2}}
-    @test CotangentBundle{ℝ, Sphere{2, ℝ}} ==
+    @test CotangentBundle{ℝ, Sphere{ℝ, 2}} ==
         VectorBundle{ℝ, Manifolds.CotangentSpaceType, Sphere{ℝ, 2}}
 
     @testset "tensor product" begin
