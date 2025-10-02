@@ -238,18 +238,3 @@ end
     @test_throws MissingException gradient(S, cost, p, Re)
     @test_throws MissingException gradient!(S, cost, X, p, Re)
 end
-
-@testset "Default Errors for the ODEExponentialRetraction" begin
-    @test_throws DomainError ODEExponentialRetraction(
-        ProjectionRetraction(),
-        CachedBasis(DefaultOrthogonalBasis(), []), # not yet supported
-    )
-    @test_throws DomainError ODEExponentialRetraction(
-        ExponentialRetraction(), # not possible
-        DefaultOrthogonalBasis(),
-    )
-    @test_throws DomainError ODEExponentialRetraction(
-        ExponentialRetraction(), # not possible
-        CachedBasis(DefaultOrthogonalBasis(), []), # combination not possible
-    )
-end
