@@ -59,13 +59,6 @@ function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     return get_vector!(M, Y, p, z, B)
 end
 
-"""
-    connection(::MetricManifold)
-
-Return the [`LeviCivitaConnection`](@ref) for a metric manifold.
-"""
-connection(::MetricManifold) = LeviCivitaConnection()
-
 default_retraction_method(M::MetricManifold) = default_retraction_method(M.manifold)
 function default_retraction_method(M::MetricManifold, t::Type)
     return default_retraction_method(M.manifold, t)
