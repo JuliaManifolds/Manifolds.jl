@@ -16,11 +16,11 @@ SURFACE_RESOLUTION_DEFAULT = 32
 # Plotting Recipe – Poincaré Ball
 #
 @recipe function f(
-        M::Hyperbolic{TypeParameter{Tuple{2}}}, pts::AbstractVector{P}, vecs::Union{AbstractVector{T}, Nothing} = nothing;
+        M::Hyperbolic{𝔽, TypeParameter{Tuple{2}}}, pts::AbstractVector{P}, vecs::Union{AbstractVector{T}, Nothing} = nothing;
         circle_points = CIRCLE_DEFAULT_PLOT_POINTS,
         geodesic_interpolation = -1,
         hyperbolic_border_color = RGBA(0.0, 0.0, 0.0, 1.0),
-    ) where {P <: PoincareBallPoint, T <: PoincareBallTangentVector}
+    ) where {𝔽, P <: PoincareBallPoint, T <: PoincareBallTangentVector}
     @series begin
         φr = range(0, stop = 2 * π, length = circle_points)
         x = [cos(φ) for φ in φr]
@@ -75,9 +75,9 @@ end
 # Plotting Recipe – Poincaré Half plane
 #
 @recipe function f(
-        M::Hyperbolic{TypeParameter{Tuple{2}}}, pts::AbstractVector{P}, vecs::Union{AbstractVector{T}, Nothing} = nothing;
+        M::Hyperbolic{𝔽, TypeParameter{Tuple{2}}}, pts::AbstractVector{P}, vecs::Union{AbstractVector{T}, Nothing} = nothing;
         geodesic_interpolation = -1
-    ) where {P <: PoincareHalfSpacePoint, T <: PoincareHalfSpaceTangentVector}
+    ) where {𝔽, P <: PoincareHalfSpacePoint, T <: PoincareHalfSpaceTangentVector}
     aspect_ratio --> :equal
     framestyle --> :origin
     x = []
@@ -117,7 +117,7 @@ end
 # Plotting Recipe – Hyperboloid
 #
 @recipe function f(
-        M::Hyperbolic{TypeParameter{Tuple{2}}},
+        M::Hyperbolic{𝔽, TypeParameter{Tuple{2}}},
         pts::Union{AbstractVector{P}, Nothing} = nothing,
         vecs::Union{AbstractVector{T}, Nothing} = nothing;
         geodesic_interpolation = -1,
@@ -131,7 +131,7 @@ end
         surface_resolution_x = surface_resolution,
         surface_resolution_y = surface_resolution,
         surface_color = RGBA(0.9, 0.9, 0.9, 0.8),
-    ) where {P, T}
+    ) where {𝔽, P, T}
     px = isnothing(pts) ? [-2.0, 2.0] : [p[1] for p in pts]
     py = isnothing(pts) ? [-2.0, 2.0] : [p[2] for p in pts]
     # part I: wire
@@ -211,7 +211,7 @@ end
 # Plotting Recipe – Sphere
 #
 @recipe function f(
-        M::Sphere{TypeParameter{Tuple{2}}, ℝ},
+        M::Sphere{𝔽, TypeParameter{Tuple{2}}, ℝ},
         pts::Union{AbstractVector{P}, Nothing} = nothing,
         vecs::Union{AbstractVector{T}, Nothing} = nothing;
         geodesic_interpolation = -1,
@@ -225,7 +225,7 @@ end
         surface_resolution_lat = surface_resolution,
         surface_resolution_lon = surface_resolution,
         surface_color = RGBA(0.9, 0.9, 0.9, 0.8),
-    ) where {P, T}
+    ) where {𝔽, P, T}
     # part I: wire
     if wireframe
         u = range(0, 2π, length = wires_lon + 1)
