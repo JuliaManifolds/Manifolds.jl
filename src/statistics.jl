@@ -1057,6 +1057,29 @@ function StatsBase.kurtosis(M::AbstractManifold, x::AbstractVector, args...)
     return kurtosis(M, x, w, args...)
 end
 
+for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
+    @eval @trait_function default_approximation_method(
+        M::AbstractDecoratorManifold,
+        f::typeof($mf),
+    )
+    eval(
+        quote
+            function ManifoldsBase.get_forwarding_type_embedding(
+                    ::ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding},
+                    M::AbstractDecoratorManifold, ::typeof($mf),
+                )
+                return ManifoldsBase.EmbeddedForwardingType()
+            end
+            function ManifoldsBase.get_forwarding_type_embedding(
+                    ::ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding},
+                    M::AbstractDecoratorManifold, ::typeof($mf),
+                )
+                return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
+            end
+        end,
+    )
+end
+
 #
 # decorate default method for a few functions
 # TODO: Check how to “ask” the embedding for default approx methods, when it exists,

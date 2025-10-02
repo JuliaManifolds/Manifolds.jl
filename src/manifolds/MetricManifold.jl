@@ -178,6 +178,10 @@ end
 function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!), p)
     return ManifoldsBase.SimpleForwardingType()
 end
+function ManifoldsBase.get_forwarding_type(M::MetricManifold, f::typeof(default_approximation_method))
+    is_default_metric(M) && (return ManifoldsBase.SimpleForwardingType())
+    return invoke(get_forwarding_type, Tuple{AbstractManifold, typeof(f)}, M, f)
+end
 
 function get_vector(M::MetricManifold, p, c, B::AbstractBasis)
     (metric(M.manifold) == M.metric) && (return get_vector(M.manifold, p, c, B))
