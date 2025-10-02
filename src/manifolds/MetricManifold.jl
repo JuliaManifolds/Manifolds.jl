@@ -59,13 +59,6 @@ function change_representer!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     return get_vector!(M, Y, p, z, B)
 end
 
-"""
-    connection(::MetricManifold)
-
-Return the [`LeviCivitaConnection`](@ref) for a metric manifold.
-"""
-connection(::MetricManifold) = LeviCivitaConnection()
-
 default_retraction_method(M::MetricManifold) = default_retraction_method(M.manifold)
 function default_retraction_method(M::MetricManifold, t::Type)
     return default_retraction_method(M.manifold, t)
@@ -184,6 +177,10 @@ function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!))
 end
 function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!), p)
     return ManifoldsBase.SimpleForwardingType()
+end
+function ManifoldsBase.get_forwarding_type(M::MetricManifold, f::typeof(default_approximation_method))
+    is_default_metric(M) && (return ManifoldsBase.SimpleForwardingType())
+    return invoke(get_forwarding_type, Tuple{AbstractManifold, typeof(f)}, M, f)
 end
 
 function get_vector(M::MetricManifold, p, c, B::AbstractBasis)

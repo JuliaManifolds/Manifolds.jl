@@ -123,7 +123,7 @@ end
 @doc raw"""
     representation_size(M::Grassmann, p::ProjectorPoint)
 
-Return the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)
+Return the representation size or matrix dimension of a point on the [`Grassmann`](@ref)
 `M` when using [`ProjectorPoint`](@ref)s, i.e. ``(n,n)``.
 """
 function representation_size(M::Grassmann, ::ProjectorPoint)
