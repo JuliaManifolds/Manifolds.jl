@@ -102,7 +102,7 @@ ENV["GKSwstype"] = "100"
 
 # (e) add CONTRIBUTING.md and NEWS.md to docs
 
-function add_links(line::String, url::String = "https://github.com/JuliaManifolds/Manopt.jl")
+function add_links(line::String, url::String = "https://github.com/JuliaManifolds/Manifolds.jl")
     # replace issues (#XXXX) -> ([#XXXX](url/issue/XXXX))
     while (m = match(r"\(\#([0-9]+)\)", line)) !== nothing
         id = m.captures[1]
