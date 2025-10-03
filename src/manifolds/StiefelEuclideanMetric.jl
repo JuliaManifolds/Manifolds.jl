@@ -35,7 +35,7 @@ function exp!(M::Stiefel, q, p, X)
 end
 
 @doc raw"""
-    get_basis(M::Stiefel{<:Any,ℝ}, p, B::DefaultOrthonormalBasis)
+    get_basis(M::Stiefel{ℝ}, p, B::DefaultOrthonormalBasis)
 
 Create the default basis using the parametrization for any ``X ∈ T_p\mathcal M``.
 Set ``p_\bot \in ℝ^{n×(n-k)}`` the matrix such that the ``n×n`` matrix of the common

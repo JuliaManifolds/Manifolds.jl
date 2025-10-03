@@ -93,7 +93,7 @@ function uniform_distribution(M::ProjectiveSpace{ℝ}, p)
 end
 
 """
-    uniform_distribution(M::Stiefel{<:Any,ℝ}, p)
+    uniform_distribution(M::Stiefel{ℝ}, p)
 
 Uniform distribution on given (real-valued) [`Stiefel`](@ref) `M`.
 Specifically, this is the normalized Haar and Hausdorff measure on `M`.

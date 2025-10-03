@@ -11,7 +11,7 @@ struct CanonicalMetric <: RiemannianMetric end
     ApproximateLogarithmicMap <: ApproximateInverseRetraction
 
 An approximate implementation of the logarithmic map, which is an [`inverse_retract`](@ref)ion.
-See [`inverse_retract(::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},CanonicalMetric}, ::Any, ::Any, ::ApproximateLogarithmicMap)`](@ref) for a use case.
+See [`inverse_retract(::MetricManifold{ℝ,<:Stiefel{ℝ},CanonicalMetric}, ::Any, ::Any, ::ApproximateLogarithmicMap)`](@ref) for a use case.
 
 # Fields
 
@@ -80,7 +80,7 @@ function exp!(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, q, p, X)
 end
 
 @doc raw"""
-    inner(M::MetricManifold{ℝ, Stiefel{<:Any,ℝ}, X, CanonicalMetric}, p, X, Y)
+    inner(M::MetricManifold{ℝ, Stiefel{ℝ}, X, CanonicalMetric}, p, X, Y)
 
 Compute the inner product on the [`Stiefel`](@ref) manifold with respect to the
 [`CanonicalMetric`](@ref). The formula reads
@@ -105,7 +105,7 @@ end
 
 Compute an approximation to the logarithmic map on the [`Stiefel`](@ref)`(n, k)` manifold with respect to the [`CanonicalMetric`](@ref)
 using a matrix-algebraic based approach to an iterative inversion of the formula of the
-[`exp`](@ref exp(::MetricManifold{ℝ, Stiefel{<:Any,ℝ}, CanonicalMetric}, ::Any...)).
+[`exp`](@ref exp(::MetricManifold{ℝ, Stiefel{ℝ}, CanonicalMetric}, ::Any...)).
 
 The algorithm is derived in [Zimmermann:2017](@cite) and it uses the `max_iterations` and the `tolerance` field
 from the [`ApproximateLogarithmicMap`](@ref).
