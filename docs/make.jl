@@ -217,7 +217,6 @@ makedocs(;
             ],
             "Manifold decorators" => [
                 "Connection manifold" => "manifolds/connection.md",
-                "Group manifold" => "manifolds/group.md",
                 "Metric manifold" => "manifolds/metric.md",
                 "Quotient manifold" => "manifolds/quotient.md",
             ],
@@ -226,7 +225,6 @@ makedocs(;
             "Atlases and charts" => "features/atlases.md",
             "Differentiation" => "features/differentiation.md",
             "Distributions" => "features/distributions.md",
-            "Group actions" => "features/group_actions.md",
             "Integration" => "features/integration.md",
             "Statistics" => "features/statistics.md",
             "Testing" => "features/testing.md",

@@ -392,8 +392,7 @@ manifold_dimension(M::MetricManifold) = manifold_dimension(M.manifold)
 @doc raw"""
     metric(M::MetricManifold)
 
-Get the metric ``g`` of the [`AbstractManifold`](@ref)`(M)`.
-This defaults to using the [`DefaultMetric`](@ref)`()`.
+Get the metric ``g`` of the [`AbstractManifold`](@exref `ManifoldsBase.AbstractManifold`)`(M)`.
 """
 metric(::AbstractManifold)
 
