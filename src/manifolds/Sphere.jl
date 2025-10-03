@@ -133,10 +133,11 @@ function check_vector(
         atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
         kwargs...,
     ) where {T}
-    if !isapprox(abs(real(dot(p, X))), 0; atol = atol, kwargs...)
+    absdot = abs(real(dot(p, X)))
+    if !isapprox(absdot, 0; atol = atol, kwargs...)
         return DomainError(
-            abs(dot(p, X)),
-            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",
+            absdot,
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding (tolerance: $atol).",
         )
     end
     return nothing
