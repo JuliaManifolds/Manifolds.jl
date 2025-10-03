@@ -39,7 +39,6 @@ tutorials_menu =
     "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
     "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
     "explore curvature without coordinates" => "tutorials/exploring-curvature.md",
-    "work with groups" => "tutorials/groups.md",
 ]
 # Check whether all tutorials are rendered, issue a warning if not (and quarto if not set)
 all_tutorials_exist = true
@@ -139,22 +138,12 @@ links = InterLinks(
 )
 modules = [
     Manifolds,
-    isdefined(Base, :get_extension) ?
-        Base.get_extension(Manifolds, :ManifoldsBoundaryValueDiffEqExt) :
-        Manifolds.ManifoldsBoundaryValueDiffEqExt,
-    isdefined(Base, :get_extension) ?
-        Base.get_extension(Manifolds, :ManifoldsNLsolveExt) : Manifolds.ManifoldsNLsolveExt,
-    isdefined(Base, :get_extension) ?
-        Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqDiffEqCallbacksExt) :
-        Manifolds.ManifoldsOrdinaryDiffEqDiffEqCallbacksExt,
-    isdefined(Base, :get_extension) ?
-        Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqExt) :
-        Manifolds.ManifoldsOrdinaryDiffEqExt,
-    isdefined(Base, :get_extension) ?
-        Base.get_extension(Manifolds, :ManifoldsRecipesBaseExt) :
-        Manifolds.ManifoldsRecipesBaseExt,
-    isdefined(Base, :get_extension) ? Base.get_extension(Manifolds, :ManifoldsTestExt) :
-        Manifolds.ManifoldsTestExt,
+    Base.get_extension(Manifolds, :ManifoldsBoundaryValueDiffEqExt),
+    Base.get_extension(Manifolds, :ManifoldsNLsolveExt),
+    Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqDiffEqCallbacksExt),
+    Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqExt),
+    Base.get_extension(Manifolds, :ManifoldsRecipesBaseExt),
+    Base.get_extension(Manifolds, :ManifoldsTestExt),
 ]
 if modules isa Vector{Union{Nothing, Module}}
     error("At least one module has not been properly loaded: ", modules)
