@@ -129,6 +129,7 @@ where ``G_p`` is the local matrix representation of `G`, see [`local_metric`](@r
 flat(::MetricManifold, ::Any, ::TFVector)
 
 function flat!(M::AbstractManifold, ξ::CoTFVector, p, X::TFVector)
+    (metric(M.manifold) == M.metric) && (return flat!(M.manifold, ξ, p, X))
     g = local_metric(M, p, ξ.basis)
     copyto!(ξ.data, g * X.data)
     return ξ

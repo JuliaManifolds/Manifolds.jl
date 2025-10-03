@@ -3,7 +3,6 @@ using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
 import ManifoldsBase: default_retraction_method
 using Manifolds, ManifoldsBase
-import Manifolds: solve_exp_ode
 using Manifolds: InducedBasis, connection, get_chart_index, induced_basis, mean!, median!
 using ADTypes
 include("header.jl")
@@ -219,15 +218,6 @@ function Manifolds.sharp!(
     )
     v.data .= w.data ./ 2
     return v
-end
-function solve_exp_ode(
-        ::ConnectionManifold{ℝ, TestEuclidean{N}, TestConnection},
-        p,
-        X,
-        t::Number;
-        kwargs...,
-    ) where {N}
-    return X
 end
 
 # test for https://github.com/JuliaManifolds/Manifolds.jl/issues/539
