@@ -240,6 +240,5 @@ makedocs(;
         ],
     ],
     plugins = [bib, links],
-    warnonly = [:missing_docs],
 )
 deploydocs(repo = "github.com/JuliaManifolds/Manifolds.jl.git", push_preview = true)
