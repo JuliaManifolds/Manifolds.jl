@@ -3,6 +3,15 @@
 (::Type{T})(M::AbstractManifold) where {T <: AbstractMetric} = MetricManifold(M, T())
 
 """
+    DefaultMetric <: AbstractMetric
+
+Indicating that a manifold uses the default metric, that one has implicitly assumed
+when defining the manifold
+"""
+struct DefaultMetric <: AbstractMetric end
+metric(::AbstractManifold) = DefaultMetric()
+
+"""
     MetricManifold{𝔽,M<:AbstractManifold{𝔽},G<:AbstractMetric} <: AbstractDecoratorManifold{𝔽}
 
 Equip a [`AbstractManifold`](https://juliamanifolds.github.io/Manifolds.jl/latest/interface.html#ManifoldsBase.AbstractManifold) explicitly with an

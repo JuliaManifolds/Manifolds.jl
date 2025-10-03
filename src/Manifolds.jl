@@ -234,6 +234,7 @@ using ManifoldsBase:
     AbstractCotangentVector,
     CyclicProximalPointEstimation,
     DefaultBasis,
+    DefaultMetric,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     DefaultOrDiagonalizingBasis,
@@ -359,15 +360,6 @@ using StatsBase
 using StatsBase: AbstractWeights
 
 const AbstractDiffBackend = Any  # TODO: remove
-
-"""
-    DefaultMetric <: AbstractMetric
-
-Indicating that a manifold uses the default metric, that one has implicitly assumed
-when defining the manifold
-"""
-struct DefaultMetric <: AbstractMetric end
-metric(::AbstractManifold) = DefaultMetric()
 
 include("utils.jl")
 
