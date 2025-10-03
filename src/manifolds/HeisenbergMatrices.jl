@@ -13,9 +13,6 @@ where ``I_n`` is the ``n×n`` unit matrix, ``\mathbf{a}`` is a row vector of len
 ``\mathbf{b}`` is a column vector of length ``n``, ``\mathbf{0}_n`` is the column zero vector
 of length ``n``, and ``c`` is a real number.
 
-It is a submanifold of [`Euclidean`](@ref)`(n+2, n+2)` and the manifold of the
-[`HeisenbergGroup`](@ref).
-
 # Constructor
 
     HeisenbergMatrices(n::Int; parameter::Symbol=:type)

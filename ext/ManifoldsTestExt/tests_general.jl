@@ -66,7 +66,6 @@ that lie on it (contained in `pts`).
 - `test_vector_spaces = true` : test Vector bundle of this manifold.
 - `test_default_vector_transport = false` : test the default vector transport (usually
    parallel transport).
-- `test_vee_hat = false`: test [`vee`](@ref) and [`hat`](@ref) functions.
 - `tvector_distributions = []` : tangent vector distributions to test.
 - `vector_transport_methods = []`: vector transport methods that should be tested.
 - `vector_transport_inverse_retractions = [default_inverse_retraction_method for _ in 1:length(vector_transport_methods)]``
@@ -119,7 +118,6 @@ function test_manifold(
         test_tangent_vector_broadcasting = true,
         test_default_vector_transport = false,
         test_vector_spaces = true,
-        test_vee_hat = false,
         tvector_distributions = [],
         vector_transport_methods = [],
         vector_transport_inverse_retractions = [
@@ -623,23 +621,6 @@ function test_manifold(
                 Test.@test isapprox(M, p, X1, Xbi_s)
             end
         end
-    end
-
-    test_vee_hat && Test.@testset "vee and hat" begin
-        p = pts[1]
-        q = pts[2]
-        X = inverse_retract(M, p, q, default_inverse_retraction_method)
-        Y = vee(M, p, X)
-        Test.@test length(Y) == number_of_coordinates(M, ManifoldsBase.VeeOrthogonalBasis())
-        Test.@test isapprox(M, p, X, hat(M, p, Y))
-        Y2 = allocate(Y)
-        vee_ret = vee!(M, Y2, p, X)
-        Test.@test vee_ret === Y2
-        Test.@test isapprox(Y, Y2)
-        X2 = allocate(X)
-        hat_ret = hat!(M, X2, p, Y)
-        Test.@test hat_ret === X2
-        Test.@test isapprox(M, p, X2, X)
     end
 
     mid_point12 !== nothing && Test.@testset "midpoint" begin

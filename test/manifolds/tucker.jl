@@ -174,7 +174,6 @@ include("../header.jl")
                 test_project_tangent = false,
                 test_default_vector_transport = false,
                 test_vector_spaces = false,
-                test_vee_hat = false,
                 test_tangent_vector_broadcasting = true,
                 test_representation_size = false,
                 projection_atol_multiplier = 15,

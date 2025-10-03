@@ -145,7 +145,6 @@ using Random
         test_is_tangent = true,
         test_project_tangent = true,
         test_default_vector_transport = false,
-        test_vee_hat = false,
         default_retraction_method = PolarRetraction(),
         is_point_atol_multiplier = 10.0,
         projection_atol_multiplier = 200.0,

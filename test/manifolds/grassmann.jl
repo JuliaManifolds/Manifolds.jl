@@ -82,7 +82,6 @@ include("../header.jl")
                 test_default_vector_transport = true,
                 vector_transport_methods = [ParallelTransport(), ProjectionTransport()],
                 point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
-                test_vee_hat = false,
                 test_rand_point = true,
                 test_rand_tvector = true,
                 retraction_methods = [PolarRetraction(), QRRetraction()],
@@ -204,7 +203,6 @@ include("../header.jl")
                 test_project_tangent = true,
                 test_project_point = true,
                 test_default_vector_transport = false,
-                test_vee_hat = false,
                 retraction_methods = [PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods = [
                     PolarInverseRetraction(),

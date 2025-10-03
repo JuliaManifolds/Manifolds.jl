@@ -60,7 +60,6 @@ include("../header.jl")
                     basis_types...,
                 ),
                 basis_types_to_from = basis_types,
-                test_vee_hat = false,
                 retraction_methods = [
                     ProjectionRetraction(),
                     PolarRetraction(),
@@ -158,7 +157,6 @@ include("../header.jl")
                     PoleLadderTransport(),
                 ],
                 basis_types_to_from = (DefaultOrthonormalBasis(ℂ),),
-                test_vee_hat = false,
                 retraction_methods = [
                     ProjectionRetraction(),
                     PolarRetraction(),
@@ -255,7 +253,6 @@ include("../header.jl")
                     PoleLadderTransport(),
                 ],
                 basis_types_to_from = (DefaultOrthonormalBasis(ℍ),),
-                test_vee_hat = false,
                 retraction_methods = [
                     ProjectionRetraction(),
                     PolarRetraction(),

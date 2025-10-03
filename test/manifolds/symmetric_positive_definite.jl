@@ -69,7 +69,6 @@ include("../header.jl")
                     pts;
                     vector_transport_methods = typeof(M) == SymmetricPositiveDefinite{3} ?
                         [ParallelTransport()] : [],
-                    test_vee_hat = M === M2,
                     exp_log_atol_multiplier = exp_log_atol_multiplier,
                     basis_types_vecs = basis_types,
                     basis_types_to_from = basis_types,

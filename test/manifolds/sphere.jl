@@ -61,7 +61,6 @@ using ManifoldsBase: TFVector
                 ],
                 basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
                 basis_types_to_from = basis_types,
-                test_vee_hat = false,
                 retraction_methods = [ProjectionRetraction(), ExponentialRetraction()],
                 inverse_retraction_methods = [ProjectionInverseRetraction()],
                 is_tangent_atol_multiplier = 1,

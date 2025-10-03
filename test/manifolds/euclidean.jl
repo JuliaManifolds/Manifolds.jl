@@ -143,7 +143,6 @@ using FiniteDifferences
                         basis_types_vecs = basis_types,
                         basis_types_to_from = basis_types,
                         basis_has_specialized_diagonalizing_get = true,
-                        test_vee_hat = isa(M, Euclidean),
                         test_inplace = true,
                         test_rand_point = M === E,
                         test_rand_tvector = M === E,
@@ -164,7 +163,6 @@ using FiniteDifferences
                     test_project_tangent = true,
                     test_musical_isomorphisms = true,
                     test_default_vector_transport = true,
-                    test_vee_hat = false,
                     parallel_transport = true,
                 )
             end
@@ -192,7 +190,6 @@ using FiniteDifferences
                     test_project_tangent = true,
                     test_musical_isomorphisms = true,
                     test_default_vector_transport = true,
-                    test_vee_hat = false,
                     is_mutating = false,
                 )
             end

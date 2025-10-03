@@ -205,7 +205,6 @@ end
     is_default_connection(M::AbstractManifold, c::AbstractAffineConnection)
 
 returns whether an [`AbstractAffineConnection`](@ref) is the default metric on the manifold `M` or not.
-This can be set by defining this function, or defining [`default_connection`](@ref)`(M)` for your manifold.
 
 This function falls back to check whether [`connection`](@ref)`(M) == c`.
 """

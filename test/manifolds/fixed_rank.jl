@@ -234,7 +234,6 @@ include("../header.jl")
                 test_is_tangent = false,
                 test_default_vector_transport = false,
                 test_vector_spaces = false,
-                test_vee_hat = false,
                 test_tangent_vector_broadcasting = true,
                 projection_atol_multiplier = 15,
                 retraction_methods = [PolarRetraction(), OrthographicRetraction()],

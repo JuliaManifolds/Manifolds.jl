@@ -697,8 +697,6 @@ export AbstractVectorTransportMethod,
 export PoleLadderTransport, SchildsLadderTransport
 export ProductVectorTransport
 export AbstractAffineConnection, ConnectionManifold, LeviCivitaConnection
-export AbstractCartanSchoutenConnection,
-    CartanSchoutenMinus, CartanSchoutenPlus, CartanSchoutenZero
 export MetricManifold
 # Metric types
 export AbstractMetric,

@@ -210,7 +210,6 @@ end
                 pts2;
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
-                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = point_distributions_Ms2,
@@ -232,7 +231,6 @@ end
                 pts1;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
-                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = point_distributions_Mrn1,
@@ -256,7 +254,6 @@ end
                 pts2;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
-                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = point_distributions_Mr2,
@@ -277,7 +274,6 @@ end
                 pts2;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
-                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = point_distributions_Mrn2,
@@ -301,7 +297,6 @@ end
             pts_t;
             test_injectivity_radius = false,
             test_musical_isomorphisms = true,
-            test_vee_hat = true,
             retraction_methods = retraction_methods,
             inverse_retraction_methods = inverse_retraction_methods,
             rand_tvector_atol_multiplier = 5.0,

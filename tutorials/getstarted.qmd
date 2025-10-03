@@ -415,7 +415,7 @@ but for example the exponential map and the norm yield different results
 ```
 
 
-Technically this done using the ``[`MatricManifold`](@ref)``{=commonmark}.
+Technically this done using the ``[`MetricManifold`](@ref)``{=commonmark}.
 
 The same approach is used for
 
