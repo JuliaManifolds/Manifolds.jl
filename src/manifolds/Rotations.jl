@@ -10,7 +10,7 @@ real-valued orthogonal matrices with determinant ``+1``.
 
 Generate the manifold of ``n×n`` rotation matrices.
 """
-const Rotations{T} = GeneralUnitaryMatrices{T, ℝ, DeterminantOneMatrixType}
+const Rotations{T} = GeneralUnitaryMatrices{ℝ, T, DeterminantOneMatrixType}
 
 function Rotations(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
@@ -386,7 +386,7 @@ where ``q=\exp_p d``.
 
 The formula simplifies to identity for 2-D rotations.
 """
-parallel_transport_direction(M::Rotations, p, X, d)
+parallel_transport_direction(::Rotations, p, X, d)
 function parallel_transport_direction(M::Rotations, p, X, d)
     expdhalf = _exp_half(M, d)
     q = exp(M, p, d)
@@ -441,7 +441,8 @@ in the Lie algebra, i.e. the update direction is actually ``pX`` instead of just
 and that means the inverse has to be applied to the (Euclidean) Hessian
 to map it into the Lie algebra.
 """
-riemannian_Hessian(M::Rotations, p, G, H, X)
+riemannian_Hessian(::Rotations, p, G, H, X)
+
 function riemannian_Hessian!(M::Rotations, Y, p, G, H, X)
     N = get_parameter(M.size)[1]
     symmetrize!(Y, G' * p)

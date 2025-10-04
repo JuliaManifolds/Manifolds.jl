@@ -42,10 +42,6 @@ function Hyperbolic(n::Int; parameter::Symbol = :type)
     return Hyperbolic{typeof(size)}(size)
 end
 
-function active_traits(f, ::Hyperbolic, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(MinkowskiMetric()))
-end
-
 @doc raw"""
     HyperboloidPoint <: AbstractManifoldPoint
 
@@ -192,6 +188,8 @@ for (P, T) in zip(_HyperbolicPointTypes, _HyperbolicTangentTypes)
     end
 end
 
+metric(::Hyperbolic) = MinkowskiMetric()
+
 function diagonalizing_projectors(M::Hyperbolic, p, X)
     X_norm = norm(M, p, X)
     X_normed = X / X_norm
@@ -207,6 +205,13 @@ end
 function get_embedding(M::Hyperbolic{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return Lorentz(n + 1, MinkowskiMetric(); parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::Hyperbolic)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
+function ManifoldsBase.get_embedding_type(::Hyperbolic, ::HyperboloidPoint)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
 embed(::Hyperbolic, p::AbstractArray) = p

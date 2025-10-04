@@ -18,8 +18,8 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test, Random
         @test is_vector(M, A, A)
         @test is_flat(M)
         @test typeof(get_embedding(M)) ===
-            Euclidean{ManifoldsBase.TypeParameter{Tuple{3, 3}}, ℝ}
-        @test typeof(get_embedding(M2)) === Euclidean{Tuple{Int64, Int64}, ℝ}
+            Euclidean{ℝ, ManifoldsBase.TypeParameter{Tuple{3, 3}}}
+        @test typeof(get_embedding(M2)) === Euclidean{ℝ, Tuple{Int64, Int64}}
         @test embed(M, A) === A
         @test embed(M, A, A) === A
         @test manifold_dimension(M) == 9

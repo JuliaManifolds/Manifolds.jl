@@ -60,7 +60,6 @@ include("../header.jl")
                     basis_types...,
                 ),
                 basis_types_to_from = basis_types,
-                test_vee_hat = false,
                 retraction_methods = [
                     ProjectionRetraction(),
                     PolarRetraction(),
@@ -158,7 +157,6 @@ include("../header.jl")
                     PoleLadderTransport(),
                 ],
                 basis_types_to_from = (DefaultOrthonormalBasis(ℂ),),
-                test_vee_hat = false,
                 retraction_methods = [
                     ProjectionRetraction(),
                     PolarRetraction(),
@@ -255,7 +253,6 @@ include("../header.jl")
                     PoleLadderTransport(),
                 ],
                 basis_types_to_from = (DefaultOrthonormalBasis(ℍ),),
-                test_vee_hat = false,
                 retraction_methods = [
                     ProjectionRetraction(),
                     PolarRetraction(),
@@ -295,7 +292,7 @@ include("../header.jl")
         M = ArrayProjectiveSpace(2, 2; field = ℝ)
         @test manifold_dimension(M) == 3
         @test repr(M) == "ArrayProjectiveSpace(2, 2; field=ℝ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2, 2}}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{2, 2}}}
         @test representation_size(M) == (2, 2)
         p = ones(2, 2)
         q = project(M, p)
@@ -307,7 +304,7 @@ include("../header.jl")
         M = ArrayProjectiveSpace(2, 2; field = ℂ)
         @test manifold_dimension(M) == 6
         @test repr(M) == "ArrayProjectiveSpace(2, 2; field=ℂ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2, 2}}, ℂ}
+        @test typeof(get_embedding(M)) === Euclidean{ℂ, TypeParameter{Tuple{2, 2}}}
         @test representation_size(M) == (2, 2)
     end
 
@@ -339,7 +336,7 @@ include("../header.jl")
 
     @testset "field parameter" begin
         M = ProjectiveSpace(2; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int}}
         @test repr(M) == "ProjectiveSpace(2, ℝ; parameter=:field)"
         @test repr(ArrayProjectiveSpace(2, 3; parameter = :field)) ==
             "ArrayProjectiveSpace(2, 3; field=ℝ, parameter=:field)"

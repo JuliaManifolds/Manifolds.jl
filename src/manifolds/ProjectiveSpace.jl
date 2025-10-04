@@ -7,7 +7,7 @@ in the embedding.
 abstract type AbstractProjectiveSpace{𝔽} <: AbstractDecoratorManifold{𝔽} end
 
 @doc raw"""
-    ProjectiveSpace{n,𝔽} <: AbstractProjectiveSpace{𝔽}
+    ProjectiveSpace{𝔽, n} <: AbstractProjectiveSpace{𝔽}
 
 The projective space ``𝔽ℙ^n`` is the manifold of all lines in ``𝔽^{n+1}``.
 The default representation is in the embedding, i.e. as unit norm vectors in
@@ -37,20 +37,16 @@ Generate the projective space ``𝔽ℙ^{n} ⊂ 𝔽^{n+1}``, defaulting to the 
 ``ℝℙ^n``, where `field` can also be used to generate the complex- and right-quaternionic
 projective spaces.
 """
-struct ProjectiveSpace{T, 𝔽} <: AbstractProjectiveSpace{𝔽}
+struct ProjectiveSpace{𝔽, T} <: AbstractProjectiveSpace{𝔽}
     size::T
 end
 function ProjectiveSpace(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return ProjectiveSpace{typeof(size), field}(size)
-end
-
-function active_traits(f, ::AbstractProjectiveSpace, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
+    return ProjectiveSpace{field, typeof(size)}(size)
 end
 
 @doc raw"""
-    ArrayProjectiveSpace{T<:Tuple,𝔽} <: AbstractProjectiveSpace{𝔽}
+    ArrayProjectiveSpace{𝔽, T<:Tuple} <: AbstractProjectiveSpace{𝔽}
 
 The projective space ``𝔽ℙ^{n₁,n₂,…,nᵢ}`` is the manifold of all lines in ``𝔽^{n₁,n₂,…,nᵢ}``.
 The default representation is in the embedding, i.e. as unit (Frobenius) norm matrices in
@@ -85,7 +81,7 @@ Generate the projective space ``𝔽ℙ^{n_1, n_2, …, n_i}``, defaulting to th
 space, where `field` can also be used to generate the complex- and right-quaternionic
 projective spaces.
 """
-struct ArrayProjectiveSpace{T, 𝔽} <: AbstractProjectiveSpace{𝔽}
+struct ArrayProjectiveSpace{𝔽, T} <: AbstractProjectiveSpace{𝔽}
     size::T
 end
 function ArrayProjectiveSpace(
@@ -94,7 +90,7 @@ function ArrayProjectiveSpace(
         parameter::Symbol = :type,
     ) where {I}
     size = wrap_type_parameter(parameter, n)
-    return ArrayProjectiveSpace{typeof(size), field}(size)
+    return ArrayProjectiveSpace{field, typeof(size)}(size)
 end
 
 function allocation_promotion_function(::AbstractProjectiveSpace{ℂ}, f, args::Tuple)
@@ -146,11 +142,15 @@ end
 function decorated_manifold(M::AbstractProjectiveSpace{𝔽}) where {𝔽}
     return Euclidean(representation_size(M)...; field = 𝔽)
 end
-function decorated_manifold(M::ProjectiveSpace{<:Tuple, 𝔽}) where {𝔽}
+function decorated_manifold(M::ProjectiveSpace{𝔽, <:Tuple}) where {𝔽}
     return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
 end
 
 get_embedding(M::AbstractProjectiveSpace) = decorated_manifold(M)
+
+function ManifoldsBase.get_embedding_type(::AbstractProjectiveSpace)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
+end
 
 embed(::AbstractProjectiveSpace, p) = p
 embed(::AbstractProjectiveSpace, p, X) = X
@@ -185,7 +185,7 @@ function exp!(M::AbstractProjectiveSpace, q, p, X)
     return q
 end
 
-function get_basis(M::ProjectiveSpace{<:Any, ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ})
+function get_basis(M::ProjectiveSpace{ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ})
     n = get_parameter(M.size)[1]
     return get_basis(Sphere(n), p, B)
 end
@@ -540,17 +540,17 @@ function ManifoldsBase.retract_qr_fused!(M::AbstractProjectiveSpace, q, p, X, t:
     return project!(M, q, q)
 end
 
-function Base.show(io::IO, ::ProjectiveSpace{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
+function Base.show(io::IO, ::ProjectiveSpace{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return print(io, "ProjectiveSpace($(n), $(𝔽))")
 end
-function Base.show(io::IO, M::ProjectiveSpace{Tuple{Int}, 𝔽}) where {𝔽}
+function Base.show(io::IO, M::ProjectiveSpace{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "ProjectiveSpace($(n), $(𝔽); parameter=:field)")
 end
-function Base.show(io::IO, ::ArrayProjectiveSpace{TypeParameter{tn}, 𝔽}) where {tn <: Tuple, 𝔽}
+function Base.show(io::IO, ::ArrayProjectiveSpace{𝔽, TypeParameter{tn}}) where {tn <: Tuple, 𝔽}
     return print(io, "ArrayProjectiveSpace($(join(tn.parameters, ", ")); field=$(𝔽))")
 end
-function Base.show(io::IO, M::ArrayProjectiveSpace{<:Tuple, 𝔽}) where {𝔽}
+function Base.show(io::IO, M::ArrayProjectiveSpace{𝔽, <:Tuple}) where {𝔽}
     n = M.size
     return print(io, "ArrayProjectiveSpace($(join(n, ", ")); field=$(𝔽), parameter=:field)")
 end
@@ -599,9 +599,11 @@ end
 Parallel transport a vector `X` from the tangent space at a point `p` on the
 [`AbstractProjectiveSpace`](@ref) `M` along the [`geodesic`](@extref `ManifoldsBase.geodesic-Tuple{AbstractManifold, Any, Any}`) in the direction
 indicated by the tangent vector `d`, i.e.
+
 ````math
 \mathcal{P}_{\exp_p (d) ← p}(X) = X - \left(p \frac{\sin θ}{θ} + d \frac{1 - \cos θ}{θ^2}\right) ⟨d, X⟩_p,
 ````
+
 where ``θ = \lVert d \rVert``, and ``⟨⋅, ⋅⟩_p`` is the [`inner`](@ref) product at the point ``p``.
 For the real projective space, this is equivalent to the same vector transport on the real
 [`AbstractSphere`](@ref).

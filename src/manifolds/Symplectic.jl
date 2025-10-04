@@ -1,8 +1,9 @@
 @doc raw"""
-    SymplecticMatricesMatrices{T, 𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+    SymplecticMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The symplectic manifold consists of all ``2n×2n`` matrices which preserve
-the canonical symplectic form over ``𝔽^{2n×2n}×𝔽^{2n×2n}``,
+the canonical symplectic form over ``𝔽^{2n×2n}×𝔽^{2n×2n}`` given by
+
 ```math
   \omega\colon 𝔽^{2n×2n}×𝔽^{2n×2n} → 𝔽,
   \quad \omega(x, y) = p^{\mathrm{T}} J_{2n} q, \  x, y \in 𝔽^{2n×2n},
@@ -34,12 +35,8 @@ Generate the (real-valued) symplectic manifold of ``2n×2n`` symplectic matrices
 The constructor for the [`SymplecticMatrices`](@ref) manifold accepts the even column/row embedding
 dimension ``2n`` for the real symplectic manifold, ``ℝ^{2n×2n}``.
 """
-struct SymplecticMatrices{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
+struct SymplecticMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
-end
-
-function active_traits(f, ::SymplecticMatrices, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
 end
 
 function SymplecticMatrices(two_n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
@@ -49,7 +46,7 @@ function SymplecticMatrices(two_n::Int, field::AbstractNumbers = ℝ; parameter:
         ),
     )
     size = wrap_type_parameter(parameter, (div(two_n, 2),))
-    return SymplecticMatrices{typeof(size), field}(size)
+    return SymplecticMatrices{field, typeof(size)}(size)
 end
 
 @doc raw"""
@@ -274,6 +271,8 @@ function ManifoldsBase.default_inverse_retraction_method(::SymplecticMatrices)
     return CayleyInverseRetraction()
 end
 
+metric(::SymplecticMatrices) = RealSymplecticMetric()
+
 ManifoldsBase.default_retraction_method(::SymplecticMatrices) = CayleyRetraction()
 
 @doc raw"""
@@ -360,19 +359,21 @@ function exp!(M::SymplecticMatrices, q, p, X)
     return q
 end
 
-function get_embedding(::SymplecticMatrices{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
+function get_embedding(::SymplecticMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return Euclidean(2 * n, 2 * n; field = 𝔽)
 end
-function get_embedding(M::SymplecticMatrices{Tuple{Int}, 𝔽}) where {𝔽}
+function get_embedding(M::SymplecticMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return Euclidean(2 * n, 2 * n; field = 𝔽, parameter = :field)
 end
 
+function ManifoldsBase.get_embedding_type(::SymplecticMatrices)
+    return ManifoldsBase.EmbeddedManifoldType()
+end
+
 @doc raw"""
-    gradient(M::SymplecticMatrices, f, p, backend::RiemannianProjectionBackend;
-             extended_metric=true)
-    gradient!(M::SymplecticMatrices, f, p, backend::RiemannianProjectionBackend;
-             extended_metric=true)
+    gradient(M::SymplecticMatrices, f, p, backend::RiemannianProjectionBackend; extended_metric=true)
+    gradient!(M::SymplecticMatrices, f, p, backend::RiemannianProjectionBackend; extended_metric=true)
 
 Compute the manifold gradient ``\text{grad}f(p)`` of a scalar function
 ``f \colon \mathrm{Sp}(2n) → ℝ`` at
@@ -382,9 +383,10 @@ The element ``\text{grad}f(p)`` is found as the Riesz representer of the differe
 ``\text{D}f(p) \colon T_p\mathrm{Sp}(2n) → ℝ`` with respect to
 the Riemannian metric inner product at ``p`` [Fiori:2011](@cite)].
 That is, ``\text{grad}f(p) \in T_p\mathrm{Sp}(2n)`` solves the relation
-````math
+
+```math
     g_p(\text{grad}f(p), X) = \text{D}f(p) \quad\forall\; X \in T_p\mathrm{Sp}(2n).
-````
+```
 
 The default behaviour is to first change the representation of the Euclidean gradient from
 the Euclidean metric to the [`RealSymplecticMetric`](@ref) at ``p``, and then we projecting
@@ -392,7 +394,7 @@ the result onto the correct tangent tangent space ``T_p\mathrm{Sp}(2n, ℝ)``
 w.r.t the Riemannian metric ``g_p`` extended to the entire embedding space.
 
 # Arguments:
-- `extended_metric = true`: If `true`, compute the gradient ``\text{grad}f(p)`` by
+* `extended_metric = true`: If `true`, compute the gradient ``\text{grad}f(p)`` by
     first changing the representer of the Euclidean gradient of a smooth extension
     of ``f``, ``∇f(p)``, with respect to the [`RealSymplecticMetric`](@ref) at ``p``
     extended to the entire embedding space, before projecting onto the correct
@@ -432,7 +434,7 @@ function ManifoldDiff.gradient!(
 end
 
 @doc raw"""
-    inner(::SymplecticMatrices{<:Any,ℝ}, p, X, Y)
+    inner(::SymplecticMatrices{ℝ}, p, X, Y)
 
 Compute the canonical Riemannian inner product [`RealSymplecticMetric`](@ref)
 ````math
@@ -440,7 +442,7 @@ Compute the canonical Riemannian inner product [`RealSymplecticMetric`](@ref)
 ````
 between the two tangent vectors ``X, Y \in T_p\mathrm{Sp}(2n)``.
 """
-function inner(M::SymplecticMatrices{<:Any, ℝ}, p, X, Y)
+function inner(M::SymplecticMatrices{ℝ}, p, X, Y)
     p_star = inv(M, p)
     return dot((p_star * X), (p_star * Y))
 end
@@ -507,7 +509,7 @@ Compute the symplectic inverse ``A^+`` of matrix ``A ∈ ℝ^{2n×2n}``.
 See [`symplectic_inverse`](@ref) for details.
 
 """
-function Base.inv(M::SymplecticMatrices{<:Any, ℝ}, A)
+function Base.inv(::SymplecticMatrices{ℝ}, A)
     return symplectic_inverse(A)
 end
 
@@ -537,9 +539,9 @@ end
 @doc raw"""
     inv!(M::SymplecticMatrices, A)
 
-Compute the [`symplectic_inverse`](@ref) of a suqare matrix A inplace of A
+Compute the [`symplectic_inverse`](@ref) of a square matrix A in place of A
 """
-function inv!(M::SymplecticMatrices{<:Any, ℝ}, A)
+function inv!(M::SymplecticMatrices{ℝ}, A)
     return symplectic_inverse!(A)
 end
 
@@ -551,14 +553,14 @@ such that the Cayley Retraction from ``p`` along ``X`` lands at ``q``, i.e.
 ``\mathcal{R}_p(X) = q`` [BendokatZimmermann:2021](@cite).
 
 For ``p, q ∈ \mathrm{Sp}(2n, ℝ)`` then, we can define the
-inverse cayley retraction as long as the following matrices exist.
+inverse Cayley retraction as long as the following matrices exist.
 ````math
     U = (I + p^+ q)^{-1}, \quad V = (I + q^+ p)^{-1},
 ````
 
 where ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
 
-Then inverse cayley retraction at ``p`` applied to ``q`` is
+Then inverse Cayley retraction at ``p`` applied to ``q`` is
 ```math
 \mathcal{L}_p^{\mathrm{Sp}}(q)
   = 2p\bigl(V - U\bigr) + 2\bigl((p + q)U - p\bigr) ∈ T_p\mathrm{Sp}(2n).
@@ -696,7 +698,7 @@ function project_normal!(
 end
 
 @doc raw"""
-    rand(::SymplecticStiefel; vector_at=nothing, σ::Real=1.0)
+    rand(::SymplecticMatrices; vector_at=nothing, σ::Real=1.0)
 
 Generate a random point on ``\mathrm{Sp}(2n)`` or a random
 tangent vector ``X \in T_p\mathrm{Sp}(2n)`` if `vector_at` is set to
@@ -809,10 +811,10 @@ function riemannian_gradient!(M::SymplecticMatrices, X, p, Y; kwargs...)
     return X
 end
 
-function Base.show(io::IO, ::SymplecticMatrices{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
+function Base.show(io::IO, ::SymplecticMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return print(io, "SymplecticMatrices($(2n), $(𝔽))")
 end
-function Base.show(io::IO, M::SymplecticMatrices{Tuple{Int}, 𝔽}) where {𝔽}
+function Base.show(io::IO, M::SymplecticMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "SymplecticMatrices($(2n), $(𝔽); parameter=:field)")
 end

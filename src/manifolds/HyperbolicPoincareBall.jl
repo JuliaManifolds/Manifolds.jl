@@ -295,6 +295,10 @@ function get_embedding(M::Hyperbolic{Tuple{Int}}, ::PoincareBallPoint)
     return Euclidean(n; parameter = :field)
 end
 
+function ManifoldsBase.get_embedding_type(::Hyperbolic, ::PoincareBallPoint)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
+end
+
 @doc raw"""
     inner(::Hyperbolic, p::PoincareBallPoint, X::PoincareBallTangentVector, Y::PoincareBallTangentVector)
 
@@ -324,7 +328,15 @@ the tangent space consists of all ``ℝ^n``.
 """
 project(::Hyperbolic, ::PoincareBallPoint, ::PoincareBallTangentVector)
 
-function allocate_result(
+function ManifoldsBase.allocate_result(
+        ::Hyperbolic,
+        ::typeof(zero_vector),
+        p::PoincareBallPoint,
+    )
+    return PoincareBallTangentVector(similar(p.value))
+end
+
+function ManifoldsBase.allocate_result_embedding(
         ::Hyperbolic,
         ::typeof(project),
         X::PoincareBallTangentVector,

@@ -7,7 +7,7 @@ using ManifoldsBase: TFVector
     M = Sphere(2)
     @testset "Sphere Basics" begin
         @test repr(M) == "Sphere(2, ℝ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3}}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{3}}}
         @test representation_size(M) == (3,)
         @test !is_flat(M)
         @test is_flat(Sphere(1))
@@ -61,7 +61,6 @@ using ManifoldsBase: TFVector
                 ],
                 basis_types_vecs = (DiagonalizingOrthonormalBasis([0.0, 1.0, 2.0]),),
                 basis_types_to_from = basis_types,
-                test_vee_hat = false,
                 retraction_methods = [ProjectionRetraction(), ExponentialRetraction()],
                 inverse_retraction_methods = [ProjectionInverseRetraction()],
                 is_tangent_atol_multiplier = 1,
@@ -144,7 +143,7 @@ using ManifoldsBase: TFVector
     @testset "Complex Sphere" begin
         M = Sphere(2, ℂ)
         @test repr(M) == "Sphere(2, ℂ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3}}, ℂ}
+        @test typeof(get_embedding(M)) === Euclidean{ℂ, TypeParameter{Tuple{3}}}
         @test representation_size(M) == (3,)
         p = [1.0, 1.0im, 1.0]
         q = project(M, p)
@@ -161,7 +160,7 @@ using ManifoldsBase: TFVector
     @testset "Quaternion Sphere" begin
         M = Sphere(2, ℍ)
         @test repr(M) == "Sphere(2, ℍ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3}}, ℍ}
+        @test typeof(get_embedding(M)) === Euclidean{ℍ, TypeParameter{Tuple{3}}}
         @test representation_size(M) == (3,)
         p = [Quaternion(1.0), Quaternion(0, 1.0, 0, 0), Quaternion(0.0, 0.0, -1.0, 0.0)]
         q = project(M, p)
@@ -174,7 +173,7 @@ using ManifoldsBase: TFVector
     @testset "Array Sphere" begin
         M = ArraySphere(2, 2; field = ℝ)
         @test repr(M) == "ArraySphere(2, 2; field=ℝ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2, 2}}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{2, 2}}}
         @test representation_size(M) == (2, 2)
         p = ones(2, 2)
         q = project(M, p)
@@ -185,7 +184,7 @@ using ManifoldsBase: TFVector
         M = ArraySphere(2, 2; field = ℂ)
 
         @test repr(M) == "ArraySphere(2, 2; field=ℂ)"
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{2, 2}}, ℂ}
+        @test typeof(get_embedding(M)) === Euclidean{ℂ, TypeParameter{Tuple{2, 2}}}
         @test representation_size(M) == (2, 2)
     end
 
@@ -301,7 +300,7 @@ using ManifoldsBase: TFVector
 
     @testset "field parameter" begin
         M = Sphere(2; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int}}
         @test repr(M) == "Sphere(2, ℝ; parameter=:field)"
         @test repr(ArraySphere(2, 3; parameter = :field)) ==
             "ArraySphere(2, 3; field=ℝ, parameter=:field)"

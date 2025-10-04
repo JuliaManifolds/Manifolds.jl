@@ -12,14 +12,12 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         group:
           - 'test_manifolds'
-          - 'test_lie_groups'
-          #- 'test_integration'
+          - 'test_integration'
     steps:
       - uses: actions/checkout@v5
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
-          arch: x64
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
         env:

@@ -11,8 +11,6 @@ This manifold decorator serves two purposes:
 1. to implement different connections (e.g. in closed form) for one `AbstractManifold`
 2. to provide a way to compute geodesics on manifolds, where this [`AbstractAffineConnection`](@ref) does not yield a closed formula.
 
-An example of usage can be found in Cartan-Schouten connections, see [`AbstractCartanSchoutenConnection`](@ref).
-
 ```@contents
 Pages = ["connection.md"]
 Depth = 2

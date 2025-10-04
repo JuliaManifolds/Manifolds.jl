@@ -55,10 +55,6 @@ for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
     end
 end
 
-function allocate_result(M::PowerManifoldNestedReplacing, f, ::Identity, x...)
-    return allocate_result(M, f, x...)
-end
-
 @doc raw"""
     flat(M::AbstractPowerManifold, p, X)
 

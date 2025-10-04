@@ -59,7 +59,7 @@ function Statistics.cov(
 end
 
 function default_approximation_method(
-        ::EmptyTrait,
+        ::StopForwardingType,
         ::AbstractDecoratorManifold,
         ::typeof(cov),
     )
@@ -408,7 +408,11 @@ function Statistics.mean!(
     return y
 end
 
-function default_approximation_method(::EmptyTrait, ::AbstractManifold, ::typeof(mean))
+function default_approximation_method(
+        ::StopForwardingType,
+        ::AbstractManifold,
+        ::typeof(mean),
+    )
     return GradientDescentEstimation()
 end;
 function default_approximation_method(::AbstractManifold, ::typeof(mean))
@@ -441,7 +445,7 @@ Compute the median using the specified `method`.
 Statistics.median(::AbstractManifold, ::Any...)
 
 function default_approximation_method(
-        ::EmptyTrait,
+        ::StopForwardingType,
         ::AbstractDecoratorManifold,
         ::typeof(median),
     )
@@ -836,7 +840,7 @@ function StatsBase.mean_and_var(
     return mean_and_var(M, x, w, method; corrected = corrected, kwargs...)
 end
 function default_approximation_method(
-        ::EmptyTrait,
+        ::StopForwardingType,
         M::AbstractDecoratorManifold,
         ::typeof(mean_and_var),
     )
@@ -1053,23 +1057,31 @@ function StatsBase.kurtosis(M::AbstractManifold, x::AbstractVector, args...)
     return kurtosis(M, x, w, args...)
 end
 
-#
-# decorate default method for a few functions
 for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
     @eval @trait_function default_approximation_method(
         M::AbstractDecoratorManifold,
         f::typeof($mf),
-    ) (no_empty,)
+    )
     eval(
         quote
-            function default_approximation_method(
-                    ::TraitList{IsEmbeddedSubmanifold},
-                    M::AbstractDecoratorManifold,
-                    f::typeof($mf),
+            function ManifoldsBase.get_forwarding_type_embedding(
+                    ::ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding},
+                    M::AbstractDecoratorManifold, ::typeof($mf),
                 )
-                return default_approximation_method(get_embedding(M), f)
+                return ManifoldsBase.EmbeddedForwardingType()
+            end
+            function ManifoldsBase.get_forwarding_type_embedding(
+                    ::ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding},
+                    M::AbstractDecoratorManifold, ::typeof($mf),
+                )
+                return ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
             end
         end,
     )
 end
+
+#
+# decorate default method for a few functions
+# TODO: Check how to “ask” the embedding for default approx methods, when it exists,
+# for the functions [mean, median, cov, var, mean_and_std, mean_and_var]
 @trait_function Statistics.mean(M::AbstractDecoratorManifold, x::AbstractVector)

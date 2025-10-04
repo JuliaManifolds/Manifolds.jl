@@ -69,7 +69,6 @@ include("../header.jl")
                     pts;
                     vector_transport_methods = typeof(M) == SymmetricPositiveDefinite{3} ?
                         [ParallelTransport()] : [],
-                    test_vee_hat = M === M2,
                     exp_log_atol_multiplier = exp_log_atol_multiplier,
                     basis_types_vecs = basis_types,
                     basis_types_to_from = basis_types,
@@ -310,7 +309,7 @@ include("../header.jl")
     end
     @testset "field parameter" begin
         M = SymmetricPositiveDefinite(3; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "SymmetricPositiveDefinite(3; parameter=:field)"
         @test Manifolds.get_parameter_type(M) === :field
     end

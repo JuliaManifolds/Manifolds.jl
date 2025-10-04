@@ -12,7 +12,7 @@ p ∈ ℝ^{n×n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\back
 ````
 
 This manifold is modelled as a submanifold of [`SymmetricPositiveDefinite`](@ref)`(n)`,
-see [`IsEmbeddedSubmanifold`](@extref `ManifoldsBase.IsEmbeddedSubmanifold`) for the implications,
+see [`EmbeddedSubmanifoldType`](@extref `ManifoldsBase.EmbeddedSubmanifoldType`) for the implications,
 but for example retractions and inverse retractions are all available
 
 These matrices are sometimes also called [isochoric](https://en.wiktionary.org/wiki/isochoric), which refers to the interpretation of
@@ -48,10 +48,6 @@ function SPDFixedDeterminant(n::Int, d::F = 1.0; parameter::Symbol = :type) wher
     @assert d > 0 "The determinant has to be positive but was provided as $d."
     size = wrap_type_parameter(parameter, (n,))
     return SPDFixedDeterminant{typeof(size), F}(size, d)
-end
-
-function active_traits(f, ::SPDFixedDeterminant, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
 end
 
 @doc raw"""
@@ -111,6 +107,10 @@ end
 function get_embedding(M::SPDFixedDeterminant{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return SymmetricPositiveDefinite(n; parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::SPDFixedDeterminant)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 @doc raw"""

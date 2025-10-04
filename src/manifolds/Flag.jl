@@ -93,10 +93,6 @@ function Flag(N::Int, ns::Vararg{Int, I}; parameter::Symbol = :type) where {I}
     return Flag{typeof(size), I + 1}(ZeroTuple(tuple(ns..., N)), size)
 end
 
-function active_traits(f, ::Flag, args...)
-    return merge_traits(IsEmbeddedManifold())
-end
-
 """
     get_embedding(M::Flag)
 
@@ -107,6 +103,10 @@ function get_embedding(M::Flag{Tuple{Int}, dp1}) where {dp1}
 end
 function get_embedding(M::Flag{TypeParameter{Tuple{N}}, dp1}) where {N, dp1}
     return Stiefel(N, M.subspace_dimensions[dp1 - 1])
+end
+
+function ManifoldsBase.get_embedding_type(::Flag)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 @doc raw"""

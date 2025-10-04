@@ -349,7 +349,7 @@ using ManifoldDiff
     end
     @testset "field parameter" begin
         M = SymplecticMatrices(2; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "SymplecticMatrices(2, ℝ; parameter=:field)"
     end
 end

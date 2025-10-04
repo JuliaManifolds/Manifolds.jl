@@ -21,7 +21,7 @@ A type for a [`GraphManifold`](@ref) where the data is given on the vertices.
 struct VertexManifold <: GraphManifoldType end
 
 @doc raw"""
-    GraphManifold{G,𝔽,M,T} <: AbstractPowerManifold{𝔽,M,NestedPowerRepresentation}
+    GraphManifold{𝔽, G, M, T} <: AbstractPowerManifold{𝔽,M,NestedPowerRepresentation}
 
 Build a manifold, that is a [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) of the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M` either on
 the edges or vertices of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
@@ -30,7 +30,7 @@ the edges or vertices of a graph `G` depending on the [`GraphManifoldType`](@ref
 * `G` is an `AbstractSimpleGraph`
 * `M` is a `AbstractManifold`
 """
-struct GraphManifold{G <: AbstractGraph, 𝔽, TM, T <: GraphManifoldType} <:
+struct GraphManifold{𝔽, G <: AbstractGraph, TM, T <: GraphManifoldType} <:
     AbstractPowerManifold{𝔽, TM, NestedPowerRepresentation}
     graph::G
     manifold::TM
@@ -41,20 +41,20 @@ function GraphManifold(
         M::TM,
         ::VertexManifold,
     ) where {G <: AbstractGraph, 𝔽, TM <: AbstractManifold{<:𝔽}}
-    return GraphManifold{G, 𝔽, TM, VertexManifold}(g, M)
+    return GraphManifold{𝔽, G, TM, VertexManifold}(g, M)
 end
 function GraphManifold(
         g::G,
         M::TM,
         ::EdgeManifold,
     ) where {G <: AbstractGraph, 𝔽, TM <: AbstractManifold{<:𝔽}}
-    return GraphManifold{G, 𝔽, TM, EdgeManifold}(g, M)
+    return GraphManifold{𝔽, G, TM, EdgeManifold}(g, M)
 end
 
 const EdgeGraphManifold{𝔽} =
-    GraphManifold{<:AbstractGraph, 𝔽, <:AbstractManifold{𝔽}, EdgeManifold}
+    GraphManifold{𝔽, <:AbstractGraph, <:AbstractManifold{𝔽}, EdgeManifold}
 const VertexGraphManifold{𝔽} =
-    GraphManifold{<:AbstractGraph, 𝔽, <:AbstractManifold{𝔽}, VertexManifold}
+    GraphManifold{𝔽, <:AbstractGraph, <:AbstractManifold{𝔽}, VertexManifold}
 
 @doc raw"""
     check_point(M::GraphManifold, p)
@@ -129,7 +129,7 @@ function incident_log!(M::VertexGraphManifold, X, p)
     return X
 end
 function incident_log!(
-        M::GraphManifold{<:AbstractSimpleWeightedGraph, 𝔽, <:AbstractManifold{𝔽}, VertexManifold},
+        M::GraphManifold{𝔽, <:AbstractSimpleWeightedGraph, <:AbstractManifold{𝔽}, VertexManifold},
         X,
         p,
     ) where {𝔽}

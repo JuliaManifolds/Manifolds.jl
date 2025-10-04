@@ -5,11 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.24] unreleased
+## [0.11.0] 2025-10-02
+
+### Added
+
+* a function `metric(M)` analogous to `embedding(M)` and `connection(M)` that returns the metric of the manifold `M`.
+* a `DefaultMetric()` type to specify that the manifold uses some specific metric, that is not further named.
 
 ### Changed
 
 * Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
+* refactored all manifolds to use a parameter order of `{𝔽, T}` where `𝔽` is the number type and `T` the type of size parameter (either a `TypeParameter` or a `Tuple`).
+  this changed internally
+  * `ArraySphere{T<:Tuple,𝔽}` to `ArraySphere{𝔽, T<:Tuple}`
+  * `CenteredMatrices{T, 𝔽}` to `CenteredMatrices{𝔽, T}`
+  * `Euclidean{T, 𝔽}` to `Euclidean{𝔽, T}`
+  * `FixedRankMatrices{T, 𝔽}` to `FixedRankMatrices{𝔽, T}`
+  * `GeneralizedGrassmann{T, 𝔽, B}` to `GeneralizedGrassmann{𝔽, T, B}`
+  * `GeneralizedStiefel{T, 𝔽, B}` to `GeneralizedStiefel{𝔽, T, B}`
+  * `Grassmann{T, 𝔽, B}` to `Grassmann{𝔽, T, B}`
+  * `GeneralUnitaryMatrices{T, 𝔽, S}` to `GeneralUnitaryMatrices{𝔽, T, S}`
+  * `GraphManifold{G <: AbstractGraph, 𝔽, TM, T <: GraphManifoldType}` to `GraphManifold{𝔽, G <: AbstractGraph, TM, T <: GraphManifoldType}`
+  * `Grassmann{T, 𝔽}` to `Grassmann{𝔽, T}`
+  * `HamiltonianMatrices{T, 𝔽}` to `HamiltonianMatrices{𝔽, T}`
+  * `Oblique{T, 𝔽, S}` to `Oblique{𝔽, T, S}`
+  * `SkewHermitianMatrices{T, 𝔽}` to `SkewHermitianMatrices{𝔽, T}`
+  * `Sphere{T, 𝔽}` to `Sphere{𝔽, T}`
+  * `SphereSymmetricMatrices{T, 𝔽}` to `SphereSymmetricMatrices{𝔽, T}`
+  * `Stiefel{T, 𝔽}` to `Stiefel{𝔽, T}`
+  * `SymmetricMatrices{T, 𝔽}` to `SymmetricMatrices{𝔽, T}`
+  * `SymplecticGrassmann{T, 𝔽}` to `SymplecticGrassmann{𝔽, T}`
+  * `SymplecticStiefel{T, 𝔽}` to `SymplecticStiefel{𝔽, T}`
+  * `Tucker{T, D, 𝔽}` to `Tucker{𝔽, T, D}`
+  * `UnitaryMatrices{T, 𝔽}` to `UnitaryMatrices{𝔽, T}`
+
+### Removed
+
+* the trait system that was present additionally to the wrapper types for metric, embedding and connections. Those were moved to `default_X` functions and the dispatch was adapted to still obtain the same logic/behaviour.
+* the `QuotientManifold` type, since it was not really used and its proper definition would require functionality from [LieGroups.jl](https://juliamanifolds.github.io/LieGroups.jl/stable/)
+* the functions `canoncial_project`, `differential_canonical_project`, `horizontal_lift`, `horizontal_component`, `get_total_space`, and `vertical_component` have been moved upstream to `ManifoldsBase.jl`
+* all functions related to the `GroupManifold`s type and corresponding traits using the old trait system have been removed here after being deprecated for a while now.
+  These have been redesigned and introduced in the new package [LieGroups.jl](https://juliamanifolds.github.io/LieGroups.jl/stable/), see their [How to transition from `GroupManifold`s tutorial](https://juliamanifolds.github.io/LieGroups.jl/stable/tutorials/transition/) for all details.
+* all deprecated tangent vector types that had `TVector` in their name
+  * instead of `HyperboloidTVector`use`HyperboloidTangentVector`
+  * instead of `OrthogonalTVector` use`OrthogonalTangentVector`
+  * instead of `PoincareBallTVector` use `PoincareBallTangentVector`
+  * instead of `PoincareHalfSpaceTVector` use `PoincareHalfSpaceTangentVector`
+  * instead of `ProjectorTVector` use `ProjectorTangentVector`
+  * instead of `StiefelTVector` use `StiefelTangentVector`
+  * instead of `TuckerTVector` use `TuckerTangentVector`
+  * instead of `UMVTVector` use `UMVTangentVector`
+* The `QuotientManifold` type has been removed, the API for general (implicit) quotient manifolds is now already in `ManifoldsBase.jl`.
+* The  `retract_exp_ode!` and `retract_exp_ode_fused!` functions were removed. The cases in which they were correct are covered by `solve_chart_exp_ode`, and it was too easy to use `retract_exp_ode!` incorrectly.
 
 ## [0.10.23] 2025-07-19
 

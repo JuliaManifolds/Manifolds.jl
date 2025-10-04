@@ -1,5 +1,5 @@
 @doc raw"""
-    FixedRankMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    FixedRankMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The manifold of ``m×n`` real-valued or complex-valued matrices of fixed rank ``k``, i.e.
 ````math
@@ -36,7 +36,7 @@ on ``ℝ^{m×n}`` to the tangent bundle [Vandereycken:2013](@cite).
 
 Generate the manifold of `m`-by-`n` (`field`-valued) matrices of rank `k`.
 """
-struct FixedRankMatrices{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
+struct FixedRankMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
@@ -48,11 +48,7 @@ function FixedRankMatrices(
         parameter::Symbol = :type,
     )
     size = wrap_type_parameter(parameter, (m, n, k))
-    return FixedRankMatrices{typeof(size), field}(size)
-end
-
-function active_traits(f, ::FixedRankMatrices, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
+    return FixedRankMatrices{field, typeof(size)}(size)
 end
 
 @doc raw"""
@@ -213,7 +209,7 @@ end
 function allocate_result(M::FixedRankMatrices, ::typeof(inverse_retract), p, q)
     return zero_vector(M, p)
 end
-function allocate_result(M::FixedRankMatrices, ::typeof(project), X, p, vals...)
+function allocate_result_embedding(M::FixedRankMatrices, ::typeof(project), X, p, vals...)
     m, n, k = get_parameter(M.size)
     # vals are p and X, so we can use their fields to set up those of the UMVTangentVector
     return UMVTangentVector(allocate(p.U, m, k), allocate(p.S, k, k), allocate(p.Vt, k, n))
@@ -394,6 +390,8 @@ as the default inverse retraction for the [`FixedRankMatrices`](@ref) manifold.
 """
 default_inverse_retraction_method(::FixedRankMatrices) = PolarInverseRetraction()
 
+metric(::FixedRankMatrices) = EuclideanMetric()
+
 """
     default_retraction_method(M::FixedRankMatrices)
 
@@ -446,12 +444,16 @@ function embed!(::FixedRankMatrices, Y, p::SVDMPoint, X::UMVTangentVector)
     return mul!(Y, p.U, X.Vt, true, true)
 end
 
-function get_embedding(::FixedRankMatrices{TypeParameter{Tuple{m, n, k}}, 𝔽}) where {m, n, k, 𝔽}
+function get_embedding(::FixedRankMatrices{𝔽, TypeParameter{Tuple{m, n, k}}}) where {m, n, k, 𝔽}
     return Euclidean(m, n; field = 𝔽)
 end
-function get_embedding(M::FixedRankMatrices{Tuple{Int, Int, Int}, 𝔽}) where {𝔽}
+function get_embedding(M::FixedRankMatrices{𝔽, Tuple{Int, Int, Int}}) where {𝔽}
     m, n, k = get_parameter(M.size)
     return Euclidean(m, n; field = 𝔽, parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::FixedRankMatrices)
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
 """
@@ -542,7 +544,7 @@ of dimension `m`x`n` of rank `k`, namely
 
 where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of `𝔽`.
 """
-function manifold_dimension(M::FixedRankMatrices{<:Any, 𝔽}) where {𝔽}
+function manifold_dimension(M::FixedRankMatrices{𝔽}) where {𝔽}
     m, n, k = get_parameter(M.size)
     return (m + n - k) * k * real_dimension(𝔽)
 end
@@ -776,11 +778,11 @@ end
 
 function Base.show(
         io::IO,
-        ::FixedRankMatrices{TypeParameter{Tuple{m, n, k}}, 𝔽},
+        ::FixedRankMatrices{𝔽, TypeParameter{Tuple{m, n, k}}},
     ) where {m, n, k, 𝔽}
     return print(io, "FixedRankMatrices($(m), $(n), $(k), $(𝔽))")
 end
-function Base.show(io::IO, M::FixedRankMatrices{Tuple{Int, Int, Int}, 𝔽}) where {𝔽}
+function Base.show(io::IO, M::FixedRankMatrices{𝔽, Tuple{Int, Int, Int}}) where {𝔽}
     m, n, k = get_parameter(M.size)
     return print(io, "FixedRankMatrices($(m), $(n), $(k), $(𝔽); parameter=:field)")
 end

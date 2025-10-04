@@ -210,7 +210,6 @@ end
                 pts2;
                 test_musical_isomorphisms = true,
                 test_injectivity_radius = false,
-                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = point_distributions_Ms2,
@@ -232,7 +231,6 @@ end
                 pts1;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
-                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = point_distributions_Mrn1,
@@ -256,7 +254,6 @@ end
                 pts2;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
-                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = point_distributions_Mr2,
@@ -277,7 +274,6 @@ end
                 pts2;
                 test_injectivity_radius = false,
                 test_musical_isomorphisms = true,
-                test_vee_hat = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
                 point_distributions = point_distributions_Mrn2,
@@ -301,7 +297,6 @@ end
             pts_t;
             test_injectivity_radius = false,
             test_musical_isomorphisms = true,
-            test_vee_hat = true,
             retraction_methods = retraction_methods,
             inverse_retraction_methods = inverse_retraction_methods,
             rand_tvector_atol_multiplier = 5.0,
@@ -407,7 +402,7 @@ end
         p1 = [SVector{3}(1.0, 0.0, 0.0), SVector{3}(1.0, 0.0, 0.0)]
         @test allocate(Msr, p1) isa Vector{SVector{3, Float64}}
 
-        SE2 = SpecialEuclidean(2)
+        SE2 = Euclidean(2) × Rotations(2)
         PSE2 = PowerManifold(SE2, NestedReplacingPowerRepresentation(), 2)
         pse = ArrayPartition(
             SA[1.0, 2.0],

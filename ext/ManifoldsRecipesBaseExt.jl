@@ -211,7 +211,7 @@ end
 # Plotting Recipe – Sphere
 #
 @recipe function f(
-        M::Sphere{TypeParameter{Tuple{2}}, ℝ},
+        M::Sphere{ℝ, TypeParameter{Tuple{2}}},
         pts::Union{AbstractVector{P}, Nothing} = nothing,
         vecs::Union{AbstractVector{T}, Nothing} = nothing;
         geodesic_interpolation = -1,

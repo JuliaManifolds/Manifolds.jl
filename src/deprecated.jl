@@ -1,8 +1,1 @@
-Base.@deprecate_binding HyperboloidTVector HyperboloidTangentVector
-Base.@deprecate_binding OrthogonalTVector OrthogonalTangentVector
-Base.@deprecate_binding PoincareBallTVector PoincareBallTangentVector
-Base.@deprecate_binding PoincareHalfSpaceTVector PoincareHalfSpaceTangentVector
-Base.@deprecate_binding ProjectorTVector ProjectorTangentVector
-Base.@deprecate_binding StiefelTVector StiefelTangentVector
-Base.@deprecate_binding TuckerTVector TuckerTangentVector
-Base.@deprecate_binding UMVTVector UMVTangentVector
+

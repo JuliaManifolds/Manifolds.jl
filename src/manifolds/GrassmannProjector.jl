@@ -103,23 +103,30 @@ Return the embedding of the [`ProjectorPoint`](@ref) representation of the [`Gra
 manifold, i.e. the Euclidean space ``\mathbb F^{n×n}``.
 """
 function get_embedding(
-        ::Grassmann{TypeParameter{Tuple{n, k}}, 𝔽},
-        ::ProjectorPoint,
+        ::Grassmann{𝔽, TypeParameter{Tuple{n, k}}},
+        ::Union{ProjectorPoint, ProjectorTangentVector},
     ) where {n, k, 𝔽}
     return Euclidean(n, n; field = 𝔽)
 end
-function get_embedding(M::Grassmann{Tuple{Int, Int}, 𝔽}, ::ProjectorPoint) where {𝔽}
+function get_embedding(
+        M::Grassmann{𝔽, Tuple{Int, Int}},
+        ::Union{ProjectorPoint, ProjectorTangentVector},
+    ) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, n; field = 𝔽, parameter = :field)
+end
+
+function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::ProjectorPoint)
+    return ManifoldsBase.EmbeddedForwardingType()
 end
 
 @doc raw"""
     representation_size(M::Grassmann, p::ProjectorPoint)
 
-Return the represenation size or matrix dimension of a point on the [`Grassmann`](@ref)
+Return the representation size or matrix dimension of a point on the [`Grassmann`](@ref)
 `M` when using [`ProjectorPoint`](@ref)s, i.e. ``(n,n)``.
 """
-function representation_size(M::Grassmann, p::ProjectorPoint)
+function representation_size(M::Grassmann, ::ProjectorPoint)
     n, k = get_parameter(M.size)
     return (n, n)
 end
@@ -147,41 +154,28 @@ function allocate_result(M::Grassmann, ::typeof(canonical_project), p::StiefelPo
 end
 
 @doc raw"""
-    canonical_project!(M::Grassmann, q::ProjectorPoint, p)
+    diff_canonical_project!(M::Grassmann, q::ProjectorPoint, p)
 
-Compute the canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold onto the [`Grassmann`](@ref)
+Compute the differential of canonical projection ``π(p)`` from the [`Stiefel`](@ref) manifold onto the [`Grassmann`](@ref)
 manifold when represented as [`ProjectorPoint`](@ref), i.e.
 
 ```math
     Dπ^{\mathrm{SG}}(p)[X] = Xp^{\mathrm{T}} + pX^{\mathrm{T}}
 ```
 """
-function differential_canonical_project!(::Grassmann, Y::ProjectorTangentVector, p, X)
+function diff_canonical_project!(::Grassmann, Y::ProjectorTangentVector, p, X)
     Xpt = X * p'
     Y.value .= Xpt .+ Xpt'
     return Y
 end
-function differential_canonical_project!(
+function diff_canonical_project!(
         M::Grassmann,
         Y::ProjectorTangentVector,
         p::StiefelPoint,
         X::StiefelTangentVector,
     )
-    differential_canonical_project!(M, Y, p.value, X.value)
+    diff_canonical_project!(M, Y, p.value, X.value)
     return Y
-end
-function allocate_result(
-        M::Grassmann,
-        ::typeof(differential_canonical_project),
-        p::StiefelPoint,
-        X::StiefelTangentVector,
-    )
-    n, k = get_parameter(M.size)
-    return ProjectorTangentVector(allocate(p.value, (n, n)))
-end
-function allocate_result(M::Grassmann, ::typeof(differential_canonical_project), p, X)
-    n, k = get_parameter(M.size)
-    return ProjectorTangentVector(allocate(p, (n, n)))
 end
 
 @doc raw"""
@@ -197,6 +191,10 @@ where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = AB-BA`
 For details, see Proposition 3.2 in [BendokatZimmermannAbsil:2020](@cite).
 """
 exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector)
+
+function ManifoldsBase.get_forwarding_type(::Grassmann, ::typeof(exp), ::ProjectorPoint)
+    return ManifoldsBase.StopForwardingType()
+end
 
 function exp!(::Grassmann, q::ProjectorPoint, p::ProjectorPoint, X::ProjectorTangentVector)
     xppx = X.value * p.value - p.value * X.value

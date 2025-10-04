@@ -30,17 +30,13 @@ function DeterminantOneMatrices(n::Int, field::AbstractNumbers = ℝ; parameter:
     return DeterminantOneMatrices{field, typeof(size)}(size)
 end
 
-function active_traits(f, ::DeterminantOneMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 @doc raw"""
     check_point(M::DeterminantOneMatrices{n,𝔽}, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`DeterminantOneMatrices`](@ref) `M`, i.e.
 whether `p` has a determinant of ``1``.
 
-The check is perfomed with `isapprox` and all keyword arguments are passed to this
+The check is performed with `isapprox` and all keyword arguments are passed to this
 """
 function check_point(M::DeterminantOneMatrices, p; kwargs...)
     if !isapprox(det(p), 1; kwargs...)
@@ -78,6 +74,9 @@ end
 function get_embedding(M::DeterminantOneMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return Euclidean(n, n; field = 𝔽, parameter = :field)
+end
+function ManifoldsBase.get_embedding_type(::DeterminantOneMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 @doc raw"""

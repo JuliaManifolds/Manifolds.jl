@@ -44,7 +44,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
     )
     @testset "field parameter" begin
         G = HeisenbergMatrices(1; parameter = :field)
-        @test typeof(get_embedding(G)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(G)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(G) == "HeisenbergMatrices(1; parameter=:field)"
     end
 end

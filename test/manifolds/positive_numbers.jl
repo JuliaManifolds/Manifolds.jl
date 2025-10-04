@@ -55,7 +55,6 @@ include("../header.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_default_vector_transport = true,
-                test_vee_hat = false,
                 is_mutating = false,
                 test_rand_point = true,
                 test_rand_tvector = true,
@@ -73,7 +72,6 @@ include("../header.jl")
                 test_project_tangent = true,
                 test_musical_isomorphisms = true,
                 test_default_vector_transport = true,
-                test_vee_hat = false,
             )
         end
     end
