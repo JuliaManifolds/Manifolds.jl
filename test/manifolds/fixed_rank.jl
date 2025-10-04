@@ -50,6 +50,7 @@ include("../header.jl")
         @test representation_size(Mc) == (3, 2)
         @test manifold_dimension(M) == 6
         @test manifold_dimension(Mc) == 12
+        @test metric(M) == EuclideanMetric()
         @test !is_flat(M)
         @test !is_flat(Mc)
         @test !is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2))

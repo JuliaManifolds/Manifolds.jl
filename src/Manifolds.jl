@@ -564,7 +564,7 @@ function test_manifold end
 # end of functions populated with methods by extensions
 
 function __init__()
-    @static if isdefined(Base.Experimental, :register_error_hint)
+    @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
         Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
             if exc.f === solve_exp_ode
                 print(io, "\nDid you forget to load OrdinaryDiffEq? For example: ")

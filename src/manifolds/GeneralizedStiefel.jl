@@ -108,13 +108,6 @@ end
 function ManifoldsBase.get_embedding_type(::GeneralizedStiefel)
     return ManifoldsBase.EmbeddedManifoldType()
 end
-function ManifoldsBase.get_forwarding_type(
-        ::GeneralizedStiefel,
-        ::typeof(representation_size),
-        p,
-    )
-    return ManifoldsBase.EmbeddedForwardingType()
-end
 
 @doc raw"""
     inner(M::GeneralizedStiefel, p, X, Y)
