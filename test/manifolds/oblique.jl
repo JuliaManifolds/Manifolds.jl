@@ -44,6 +44,7 @@ include("../header.jl")
             vector_transport_methods = transports,
             basis_types_to_from = basis_types,
             exp_log_atol_multiplier = 1,
+            is_tangent_atol_multiplier = 1,
             test_inplace = true,
         )
     end

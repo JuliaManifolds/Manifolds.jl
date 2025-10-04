@@ -482,6 +482,7 @@ include("manifolds/Tucker.jl")
 include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/ProbabilitySimplexEuclideanMetric.jl")
 include("manifolds/GeneralUnitaryMatrices.jl")
+include("manifolds/SpecialUnitary.jl")
 include("manifolds/Unitary.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/Orthogonal.jl")
@@ -631,6 +632,7 @@ export Euclidean,
     Segre,
     SkewHermitianMatrices,
     SkewSymmetricMatrices,
+    SpecialUnitaryMatrices,
     Spectrahedron,
     Sphere,
     SphereSymmetricMatrices,

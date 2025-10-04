@@ -20,6 +20,15 @@ using Quaternions
     @test abs(rand(MersenneTwister(), OrthogonalMatrices(1))[]) == 1
     @test is_vector(M, p, rand(MersenneTwister(), M; vector_at = p))
     @test default_vector_transport_method(M) === ProjectionTransport()
+
+    @test get_embedding(M) === Euclidean(3, 3)
+    @test get_embedding(OrthogonalMatrices(3; parameter = :field)) === Euclidean(3, 3; parameter = :field)
+
+    @test manifold_volume(OrthogonalMatrices(1)) ≈ 2
+    @test manifold_volume(OrthogonalMatrices(2)) ≈ 4 * π * sqrt(2)
+    @test manifold_volume(OrthogonalMatrices(3)) ≈ 16 * π^2 * sqrt(2)
+    @test manifold_volume(OrthogonalMatrices(4)) ≈ 2 * (2 * π)^4 * sqrt(2)
+    @test manifold_volume(OrthogonalMatrices(5)) ≈ 8 * (2 * π)^6 / 6 * sqrt(2)
 end
 
 @testset "Unitary Matrices" begin
@@ -85,6 +94,23 @@ end
         H = [0.0 0.0; 2.0 0.0]
         @test riemannian_Hessian(M, p, G, H, X) == [0.0 -1.0; 1.0 0.0]
     end
+    @test !is_flat(M)
+    @test is_flat(UnitaryMatrices(1))
+    @test is_flat(UnitaryMatrices(1; parameter = :field))
+
+    @testset "manifold_volume" begin
+        @test manifold_volume(UnitaryMatrices(1)) ≈ 2 * π
+        @test manifold_volume(UnitaryMatrices(2)) ≈ 4 * π^3
+        @test manifold_volume(UnitaryMatrices(3)) ≈ sqrt(3) * 2 * π^6
+        @test manifold_volume(UnitaryMatrices(4)) ≈ sqrt(2) * 8 * π^10 / 12
+    end
+end
+
+@testset "Special unitary matrices" begin
+    @test manifold_volume(SpecialUnitaryMatrices(1)) ≈ 1
+    @test manifold_volume(SpecialUnitaryMatrices(2)) ≈ 2 * π^2
+    @test manifold_volume(SpecialUnitaryMatrices(3)) ≈ sqrt(3) * π^5
+    @test manifold_volume(SpecialUnitaryMatrices(4)) ≈ sqrt(2) * 4 * π^9 / 12
 end
 
 @testset "Quaternionic Unitary Matrices" begin
