@@ -7,6 +7,7 @@ include("../header.jl")
     @test_throws ArgumentError Hyperrectangle([1.0, 2.0], [-1.0, 5.0])
 
     @test is_flat(M)
+    @test metric(M) == EuclideanMetric()
     p = zeros(3)
     @test project!(M, p, p) == p
     @test embed!(M, p, p) == p

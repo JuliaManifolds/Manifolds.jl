@@ -48,6 +48,7 @@ end
 @testset "KendallsShapeSpace" begin
     M = KendallsShapeSpace(2, 3)
     @test repr(M) == "KendallsShapeSpace(2, 3)"
+    @test get_total_space(M) == KendallsPreShapeSpace(2, 3)
     @test manifold_dimension(M) == 2
     @test !is_flat(M)
     p1 = [

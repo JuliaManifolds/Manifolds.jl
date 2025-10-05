@@ -48,6 +48,8 @@ include("../header.jl")
         @test is_vector(M, p, p)
         @test get_embedding(M) == Euclidean(4, 4; field = ℝ)
         @test get_embedding(Mf) == Euclidean(4, 4; field = ℝ, parameter = :field)
+        @test embed(M, p) == p
+        @test embed(M, p, p) == p
         @test is_flat(M)
         Random.seed!(42)
         is_point(M, rand(M))

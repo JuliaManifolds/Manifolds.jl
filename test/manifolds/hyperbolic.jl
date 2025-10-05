@@ -60,6 +60,7 @@ include("../header.jl")
             @test copyto!(M, XC, p, X) == X # does copyto return the right value?
             @test XC == X # does copyto store the right value?
             @test XC.value == X.value # another check
+            @test zero_vector(M, p) isa T
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin
