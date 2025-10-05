@@ -232,15 +232,21 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
             "MetricManifold(Euclidean(3; field=ℝ), EuclideanMetric())"
     end
     @testset "Connection Trait" begin
-        M = ConnectionManifold(Euclidean(3), LeviCivitaConnection())
+        E = Euclidean(3)
+        M = ConnectionManifold(E, LeviCivitaConnection())
         @test is_default_connection(M)
-        @test decorated_manifold(M) == Euclidean(3)
+        @test decorated_manifold(M) == E
         @test Manifolds.connection(M) == LeviCivitaConnection()
-        @test is_default_connection(Euclidean(3), LeviCivitaConnection())
+        @test is_default_connection(E, LeviCivitaConnection())
         # Defaults passthroguh for retr/inverse retr and vector transport
-        @test default_retraction_method(M) == default_retraction_method(Euclidean(3))
-        @test default_inverse_retraction_method(M) == default_inverse_retraction_method(Euclidean(3))
-        @test default_vector_transport_method(M) == default_vector_transport_method(Euclidean(3))
+        @test default_retraction_method(M) == default_retraction_method(E)
+        @test default_inverse_retraction_method(M) == default_inverse_retraction_method(E)
+        @test default_vector_transport_method(M) == default_vector_transport_method(E)
+        # same for point type added
+        T = Vector{Float64}
+        @test default_retraction_method(M, T) == default_retraction_method(E, T)
+        @test default_inverse_retraction_method(M, T) == default_inverse_retraction_method(E, T)
+        @test default_vector_transport_method(M, T) == default_vector_transport_method(E, T)
         @test !is_default_connection(TestEuclidean{3}(), LeviCivitaConnection())
         @test Manifolds.connection(TestEuclidean{3}()) == TestConnection()
     end
