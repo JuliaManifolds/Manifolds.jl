@@ -233,7 +233,7 @@ function exp(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p::SMatrix
     return p * SA[cosθ -sinθ; sinθ cosθ]
 end
 function ManifoldsBase.exp_fused(
-        M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}}, ℝ},
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
         p::SMatrix,
         X::SMatrix,
         t::Real,
@@ -668,20 +668,6 @@ Return the injectivity radius for general unitary matrix manifolds, which is[^1]
 injectivity_radius(::GeneralUnitaryMatrices) = π
 
 @doc raw"""
-    injectivity_radius(G::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrixType})
-
-Return the injectivity radius for general complex unitary matrix manifolds, where the determinant is ``+1``,
-which is[^1]
-
-```math
-    \operatorname{inj}_{\mathrm{SU}(n)} = π \sqrt{2}.
-```
-"""
-function injectivity_radius(::GeneralUnitaryMatrices{ℂ, <:Any, DeterminantOneMatrixType})
-    return π * sqrt(2.0)
-end
-
-@doc raw"""
     injectivity_radius(G::SpecialOrthogonal)
     injectivity_radius(G::Orthogonal)
     injectivity_radius(M::Rotations)
@@ -855,21 +841,9 @@ function manifold_dimension(M::GeneralUnitaryMatrices{ℝ})
     n = get_parameter(M.size)[1]
     return div(n * (n - 1), 2)
 end
-@doc raw"""
-    manifold_dimension(M::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrixType})
-
-Return the dimension of the manifold of special unitary matrices.
-```math
-\dim_{\mathrm{SU}(n)} = n^2-1.
-```
-"""
-function manifold_dimension(M::GeneralUnitaryMatrices{ℂ, <:Any, DeterminantOneMatrixType})
-    n = get_parameter(M.size)[1]
-    return n^2 - 1
-end
 
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℝ,AbsoluteDeterminantOneMatrixType})
+    manifold_volume(::GeneralUnitaryMatrices{ℝ,<:Any,AbsoluteDeterminantOneMatrixType})
 
 Volume of the manifold of real orthogonal matrices of absolute determinant one. The
 formula reads [BoyaSudarshanTilma:2003](@cite):
@@ -889,7 +863,7 @@ function manifold_volume(
     return 2 * manifold_volume(GeneralUnitaryMatrices(n, ℝ, DeterminantOneMatrixType))
 end
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℝ,DeterminantOneMatrixType})
+    manifold_volume(::GeneralUnitaryMatrices{ℝ,<:Any,DeterminantOneMatrixType})
 
 Volume of the manifold of real orthogonal matrices of determinant one. The
 formula reads [BoyaSudarshanTilma:2003](@cite):
@@ -927,7 +901,7 @@ function manifold_volume(M::GeneralUnitaryMatrices{ℝ, <:Any, DeterminantOneMat
     return vol
 end
 @doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℂ,AbsoluteDeterminantOneMatrixType})
+    manifold_volume(::GeneralUnitaryMatrices{ℂ,<:Any,AbsoluteDeterminantOneMatrixType})
 
 Volume of the manifold of complex general unitary matrices of absolute determinant one. The
 formula reads [BoyaSudarshanTilma:2003](@cite)
@@ -941,26 +915,6 @@ function manifold_volume(
     )
     n = get_parameter(M.size)[1]
     vol = sqrt(n * 2^(n + 1)) * π^(((n + 1) * n) // 2)
-    kf = 1
-    for k in 1:(n - 1)
-        kf *= k
-        vol /= kf
-    end
-    return vol
-end
-@doc raw"""
-    manifold_volume(::GeneralUnitaryMatrices{<:Any,ℂ,DeterminantOneMatrixType})
-
-Volume of the manifold of complex general unitary matrices of determinant one. The formula
-reads [BoyaSudarshanTilma:2003](@cite)
-
-```math
-\sqrt{n 2^{n-1}} π^{(n-1)(n+2)/2} \prod_{k=1}^{n-1}\frac{1}{k!}.
-```
-"""
-function manifold_volume(M::GeneralUnitaryMatrices{ℂ, <:Any, DeterminantOneMatrixType})
-    n = get_parameter(M.size)[1]
-    vol = sqrt(n * 2^(n - 1)) * π^(((n - 1) * (n + 2)) // 2)
     kf = 1
     for k in 1:(n - 1)
         kf *= k
@@ -1135,7 +1089,7 @@ function volume_density(M::GeneralUnitaryMatrices{ℝ}, p, X)
 end
 
 @doc raw"""
-    volume_density(M::GeneralUnitaryMatrices{TypeParameter{Tuple{3}},ℝ}, p, X)
+    volume_density(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p, X)
 
 Compute the volume density on O(3)/SO(3). The formula reads [FalorsideHaanDavidsonForre:2019](@cite)
 
@@ -1153,7 +1107,7 @@ function volume_density(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}},
 end
 
 @doc raw"""
-    volume_density(M::GeneralUnitaryMatrices{TypeParameter{Tuple{2}},ℝ}, p, X)
+    volume_density(M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, p, X)
 
 Volume density on O(2)/SO(2) is equal to 1.
 """
