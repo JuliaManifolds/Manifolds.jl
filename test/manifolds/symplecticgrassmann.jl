@@ -47,12 +47,14 @@ include("../header.jl")
     end
     @testset "Embedding / Total Space" begin
         @test get_embedding(M) == SymplecticStiefel(6, 4)
+        @test embed(M, p) == p
         pE = similar(p)
         embed!(M, pE, p)
         @test p == pE
         embed!(M, pE, StiefelPoint(p))
         @test p == pE
         @test embed(M, StiefelPoint(p)) == p
+        @test embed(M, p, X) == X
         XE = similar(X)
         embed!(M, XE, p, X)
         @test XE == X
