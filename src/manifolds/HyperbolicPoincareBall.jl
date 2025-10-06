@@ -328,14 +328,6 @@ the tangent space consists of all ``ℝ^n``.
 """
 project(::Hyperbolic, ::PoincareBallPoint, ::PoincareBallTangentVector)
 
-function ManifoldsBase.allocate_result(
-        ::Hyperbolic,
-        ::typeof(zero_vector),
-        p::PoincareBallPoint,
-    )
-    return PoincareBallTangentVector(similar(p.value))
-end
-
 function ManifoldsBase.allocate_result_embedding(
         ::Hyperbolic,
         ::typeof(project),

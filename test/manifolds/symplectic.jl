@@ -5,6 +5,7 @@ using ManifoldDiff
 
 @testset "SymplecticMatrices" begin
     M = SymplecticMatrices(2)
+    @test metric(M) == RealSymplecticMetric()
     Metr_Sp_2 = MetricManifold(M, RealSymplecticMetric())
 
     p_2 = [0.0 1.0 / 2.0; -2.0 -2.0]

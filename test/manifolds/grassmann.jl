@@ -7,6 +7,7 @@ include("../header.jl")
             @test repr(M) == "Grassmann(3, 2, ℝ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
+            @test get_total_space(M) == Stiefel(3, 2)
             @test !is_flat(M)
             @test is_flat(Grassmann(2, 1))
             @test default_retraction_method(M) == ExponentialRetraction()
@@ -394,9 +395,10 @@ include("../header.jl")
         M = Grassmann(3, 2; parameter = :field)
         @test repr(M) == "Grassmann(3, 2, ℝ; parameter=:field)"
         @test typeof(get_embedding(M)) === Stiefel{ℝ, Tuple{Int64, Int64}}
-
+        @test typeof(get_total_space(M)) === Stiefel{ℝ, Tuple{Int64, Int64}}
         p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
         p2 = convert(ProjectorPoint, p)
         @test get_embedding(M, p2) == Euclidean(3, 3; parameter = :field)
+        @test get_total_space(M) == Stiefel(3, 2; parameter = :field)
     end
 end

@@ -66,6 +66,7 @@ include("../header.jl")
     @testset "Hyperbolic Representation Conversion I" begin
         p = [0.0, 0.0, 1.0]
         pH = HyperboloidPoint(p)
+
         @test minkowski_metric(pH, pH) == minkowski_metric(p, p)
         @test convert(HyperboloidPoint, p).value == pH.value
         @test convert(AbstractVector, pH) == p

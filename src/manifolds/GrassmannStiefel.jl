@@ -31,10 +31,6 @@ ManifoldsBase.@default_manifold_fallbacks Stiefel StiefelPoint StiefelTangentVec
 ManifoldsBase.@default_manifold_fallbacks (Stiefel{ℝ}) StiefelPoint StiefelTangentVector value value
 ManifoldsBase.@default_manifold_fallbacks Grassmann StiefelPoint StiefelTangentVector value value
 
-function ManifoldsBase.get_forwarding_type(::Grassmann, ::typeof(isapprox), p)
-    return ManifoldsBase.StopForwardingType()
-end
-
 function default_vector_transport_method(::Grassmann, ::Type{<:AbstractArray})
     return ParallelTransport()
 end
