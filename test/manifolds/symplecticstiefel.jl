@@ -141,6 +141,7 @@ end
         @test repr(M) == "SymplecticStiefel(6, 4)"
         @test representation_size(M) == (6, 4)
         @test base_manifold(M) === M
+        @test get_total_space(M) == SymplecticMatrices(6)
         @test !is_flat(M)
 
         @test is_point(M, p_6_4)
@@ -209,6 +210,8 @@ end
         A_6_4_proj = similar(A_6_4)
         Manifolds.project!(M, A_6_4_proj, p_6_4, A_6_4)
         @test is_vector(M, p_6_4, A_6_4_proj; error = :error, atol = 2.0e-12)
+
+        @test metric(M) == RealSymplecticMetric()
     end
     @testset "Generate random points/tangent vectors" begin
         M_big = SymplecticStiefel(20, 10)
@@ -307,6 +310,7 @@ end
     @testset "field parameter" begin
         M = SymplecticStiefel(6, 4; parameter = :field)
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
+        @test typeof(get_total_space(M)) === SymplecticMatrices{ℝ, Tuple{Int}}
         @test repr(M) == "SymplecticStiefel(6, 4; parameter=:field)"
     end
 end
