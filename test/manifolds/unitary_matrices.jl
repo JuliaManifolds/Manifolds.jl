@@ -133,6 +133,15 @@ end
         X = rand(MersenneTwister(), M; vector_at = p)
         @test is_vector(M, p, X)
     end
+    @test "Exp/Log and issapprox" begin
+        p = QuaternionF64(1.0, 0.0, 0.0, 0.0)
+        X = QuaternionF64(0.1, 0.2, 0.2, 0.3)
+        q = exp(M, p, X)
+        q2 = Manifolds.exp_fused(M, p, X, 1.0)
+        @test isapprox(M, q, q2; error = :erroor)
+        X2 = log(M, p, q)
+        @test isapprox(M, p, X, X2; error = :error)
+    end
 
     # wrong length of size
     @test_throws DomainError is_point(M, zeros(2, 2); error = :error)
