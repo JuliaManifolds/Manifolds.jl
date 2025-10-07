@@ -113,6 +113,14 @@ end
     @test manifold_volume(SpecialUnitaryMatrices(2)) ≈ 2 * π^2
     @test manifold_volume(SpecialUnitaryMatrices(3)) ≈ sqrt(3) * π^5
     @test manifold_volume(SpecialUnitaryMatrices(4)) ≈ sqrt(2) * 4 * π^9 / 12
+
+    @test manifold_dimension(SpecialUnitaryMatrices(2)) == 3
+    @test manifold_dimension(SpecialUnitaryMatrices(3)) == 8
+    @test manifold_dimension(SpecialUnitaryMatrices(4)) == 15
+
+    @test injectivity_radius(SpecialUnitaryMatrices(2)) == π * sqrt(2)
+    @test injectivity_radius(SpecialUnitaryMatrices(3)) == π * sqrt(2)
+    @test injectivity_radius(SpecialUnitaryMatrices(4)) == π * sqrt(2)
 end
 
 @testset "Quaternionic Unitary Matrices" begin
@@ -133,14 +141,14 @@ end
         X = rand(MersenneTwister(), M; vector_at = p)
         @test is_vector(M, p, X)
     end
-    @test "Exp/Log and issapprox" begin
+    @testset "Exp/Log and issapprox" begin
         p = QuaternionF64(1.0, 0.0, 0.0, 0.0)
         X = QuaternionF64(0.1, 0.2, 0.2, 0.3)
         q = exp(M, p, X)
         q2 = Manifolds.exp_fused(M, p, X, 1.0)
-        @test isapprox(M, q, q2; error = :erroor)
+        @test isapprox(M, q, q2)
         X2 = log(M, p, q)
-        @test isapprox(M, p, X, X2; error = :error)
+        @test isapprox(M, p, X, X2)
     end
 
     # wrong length of size
