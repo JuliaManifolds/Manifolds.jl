@@ -971,14 +971,8 @@ function LinearAlgebra.lmul!(J::SymplecticElement, p::AbstractVecOrMat)
     n = div(two_n, 2)
 
     half_row_p = copy(@inbounds view(p, 1:n, :))
-
     mul!((@inbounds view(p, 1:n, :)), J.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
-
-    mul!(
-        (@inbounds view(p, (n + 1):lastindex(p, 1), :)),
-        -J.λ,
-        @inbounds view(half_row_p, :, :)
-    )
+    mul!((@inbounds view(p, (n + 1):lastindex(p, 1), :)), -J.λ, @inbounds view(half_row_p, :, :))
     return p
 end
 
@@ -992,15 +986,8 @@ function LinearAlgebra.rmul!(p::AbstractMatrix, J::SymplecticElement)
     k = div(two_k, 2)
 
     half_col_p = copy(@inbounds view(p, :, 1:k))
-
     mul!((@inbounds view(p, :, 1:k)), -J.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
-
-    mul!(
-        (@inbounds view(p, :, (k + 1):lastindex(p, 2))),
-        J.λ,
-        @inbounds view(half_col_p, :, :)
-    )
-
+    mul!((@inbounds view(p, :, (k + 1):lastindex(p, 2))), J.λ, @inbounds view(half_col_p, :, :))
     return p
 end
 
