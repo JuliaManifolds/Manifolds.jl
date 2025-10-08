@@ -125,6 +125,10 @@ struct NotImplementedMetric <: AbstractMetric end
 
 Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
 Manifolds.inner(::BaseManifold, p, X, Y) = 2 * dot(X, Y)
+Manifolds.representation_size(::BaseManifold{N}) where {N} = (N,)
+function Manifolds.rand!(rng::AbstractRNG, ::BaseManifold, p; kwargs...)
+    return randn!(rng, p)
+end
 Manifolds.exp!(::BaseManifold, q, p, X) = q .= p + 2 * X
 Manifolds.exp_fused!(::BaseManifold, q, p, X, t::Number) = q .= p + 2 * t * X
 Manifolds.log!(::BaseManifold, Y, p, q) = Y .= (q - p) / 2
@@ -279,6 +283,14 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
 
         B = induced_basis(M, A, i, TangentSpaceType())
         @test_throws MethodError local_metric(M, p, B)
+        @test_throws MethodError is_flat(M)
+
+        X = [3, 4]
+        Y = [3, 4]
+        Z = [3, 4]
+        @test_throws MethodError inner(M, p, X, Y)
+        @test_throws MethodError Weingarten(M, p, X, Y)
+        @test_throws MethodError Weingarten!(M, Z, p, X, Y)
     end
     @testset "scaled Euclidean metric" begin
         n = 3
@@ -452,6 +464,15 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         end
     end
 
+    @testset "is_metric_function" begin
+        for f in [flat, sharp, log]
+            @test Manifolds.is_metric_function(f)
+        end
+        for f in [manifold_dimension, get_parameters]
+            @test !Manifolds.is_metric_function(f)
+        end
+    end
+
     @testset "Metric decorator" begin
         M = BaseManifold{3}()
         g = BaseManifoldMetric{3}()
@@ -477,6 +498,12 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         X = [0.5, 0.7, 0.11]
         Y = [0.13, 0.17, 0.19]
         q = allocate(p)
+
+        @test is_point(MM, rand(MM))
+        @test is_point(MM, rand(Xoshiro(), MM))
+        @test is_vector(MM, p, rand(MM; vector_at = p))
+        rand!(MM, q)
+        @test is_point(MM, q)
 
         p2 = allocate(p)
         copyto!(MM, p2, p)
