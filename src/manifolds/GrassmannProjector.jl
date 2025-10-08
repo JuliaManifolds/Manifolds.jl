@@ -103,8 +103,7 @@ Return the embedding of the [`ProjectorPoint`](@ref) representation of the [`Gra
 manifold, i.e. the Euclidean space ``\mathbb F^{n×n}``.
 """
 function get_embedding(
-        ::Grassmann{𝔽, TypeParameter{Tuple{n, k}}},
-        ::Union{ProjectorPoint, ProjectorTangentVector},
+        ::Grassmann{𝔽, TypeParameter{Tuple{n, k}}}, ::ProjectorPoint,
     ) where {n, k, 𝔽}
     return Euclidean(n, n; field = 𝔽)
 end
