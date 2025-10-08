@@ -140,6 +140,7 @@ include("../header.jl")
         p1 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
         p2 = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
         p3 = A(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(A(π / 6))
+        embed(M, p1) == p1
         X1 = log(M, p1, p3)
         Y1 = vector_transport_to(M, p1, X1, p2)
         @test is_vector(M, p2, Y1)
@@ -270,6 +271,10 @@ include("../header.jl")
         @test ismissing(pS.sqrt)
         @test ismissing(pS.sqrt_inv)
         @test allocate_result(M1, zero_vector, p) isa Matrix
+        c1 = ManifoldsBase.allocate_coordinates(M, p, Float64, 6)
+        c2 = ManifoldsBase.allocate_coordinates(M, embed(M, p), Float64, 6)
+        @test typeof(c1) == typeof(c2)
+        @test length(c1) == length(c2)
     end
 
     @testset "test BigFloat" begin

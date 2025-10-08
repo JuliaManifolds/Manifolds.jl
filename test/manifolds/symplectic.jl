@@ -348,6 +348,18 @@ using ManifoldDiff
             @test ((Q' * pQ_1' * Q) * pQ_1 - I) == zeros(eltype(pQ_1), size(pQ_1)...)
         end
     end
+    @testset "Symplectic inverse" begin
+        M = SymplecticMatrices(4)
+        p = [1.0 0.0 2.0 0.0; 0.0 1.0 0.0 2.0; 0.0 0.0 1.0 0.0; 0.0 0.0 0.0 1.0]
+        @test is_point(M, p; error = :error)
+        q = inv(M, p)
+        @test is_point(M, q; error = :error)
+        q2 = Manifolds.symplectic_inverse(p)
+        @test q2 == q
+        q3 = copy(M, p)
+        inv!(M, q3)
+        @test q3 == q
+    end
     @testset "field parameter" begin
         M = SymplecticMatrices(2; parameter = :field)
         @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
