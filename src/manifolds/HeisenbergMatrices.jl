@@ -13,8 +13,7 @@ where ``I_n`` is the ``n×n`` unit matrix, ``\mathbf{a}`` is a row vector of len
 ``\mathbf{b}`` is a column vector of length ``n``, ``\mathbf{0}_n`` is the column zero vector
 of length ``n``, and ``c`` is a real number.
 
-It is a submanifold of [`Euclidean`](@ref)`(n+2, n+2)` and the manifold of the
-[`HeisenbergGroup`](@ref).
+It is a submanifold of [`Euclidean`](@ref)`(n+2, n+2)`.
 
 # Constructor
 
@@ -38,10 +37,6 @@ end
 function _heisenberg_b_view(M::HeisenbergMatrices, p)
     n = get_parameter(M.size)[1]
     return view(p, 2:(n + 1), n + 2)
-end
-
-function active_traits(f, ::HeisenbergMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
 end
 
 function check_point(M::HeisenbergMatrices, p; kwargs...)
@@ -139,6 +134,10 @@ end
 function get_embedding(M::HeisenbergMatrices{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return Euclidean(n + 2, n + 2; parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::HeisenbergMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 @doc raw"""

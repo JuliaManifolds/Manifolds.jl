@@ -4,7 +4,8 @@ using Manifolds, Random, Test, LinearAlgebra
     @testset "Real case" begin
         M = DeterminantOneMatrices(2)
         # is det 1 and inv
-        @test is_point(M, [1.0 0.0; 0.0 1.0]; error = :error)
+        p = [1.0 0.0; 0.0 1.0]
+        @test is_point(M, p; error = :error)
         # det 1 but for example not Rotation
         @test is_point(M, [10.0 0.0; 0.0 0.1]; error = :error)
         # Not invertible
@@ -23,6 +24,9 @@ using Manifolds, Random, Test, LinearAlgebra
         @test_throws DomainError is_vector(M, p, Xf; error = :error)
         @test is_vector(M, p, project(M, p, Xf); error = :error)
         @test get_embedding(M) == Euclidean(2, 2)
+        p = [1.0 0.0; 0.0 1.0]
+        @test embed(M, p) == p
+        @test embed(M, p, p) == p
         @test manifold_dimension(M) == 3
         @test manifold_dimension(DeterminantOneMatrices(2; parameter = :field)) == 3
         @test repr(M) == "DeterminantOneMatrices(2, ℝ)"

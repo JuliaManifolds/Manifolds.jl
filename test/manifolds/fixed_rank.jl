@@ -50,6 +50,7 @@ include("../header.jl")
         @test representation_size(Mc) == (3, 2)
         @test manifold_dimension(M) == 6
         @test manifold_dimension(Mc) == 12
+        @test metric(M) == EuclideanMetric()
         @test !is_flat(M)
         @test !is_flat(Mc)
         @test !is_point(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2))
@@ -68,7 +69,7 @@ include("../header.jl")
             UMVTangentVector(zeros(2, 1), zeros(1, 2), zeros(2, 2)),
         )
         @test !is_vector(M, SVDMPoint([1.0 0.0; 0.0 0.0], 2), X)
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_vector(
             M,
             SVDMPoint([1.0 0.0; 0.0 0.0], 2),
             X;
@@ -234,7 +235,6 @@ include("../header.jl")
                 test_is_tangent = false,
                 test_default_vector_transport = false,
                 test_vector_spaces = false,
-                test_vee_hat = false,
                 test_tangent_vector_broadcasting = true,
                 projection_atol_multiplier = 15,
                 retraction_methods = [PolarRetraction(), OrthographicRetraction()],
@@ -265,6 +265,6 @@ include("../header.jl")
     @testset "field parameter" begin
         M = FixedRankMatrices(3, 2, 2; parameter = :field)
         @test repr(M) == "FixedRankMatrices(3, 2, 2, ℝ; parameter=:field)"
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
     end
 end

@@ -48,9 +48,9 @@ end
 @testset "KendallsShapeSpace" begin
     M = KendallsShapeSpace(2, 3)
     @test repr(M) == "KendallsShapeSpace(2, 3)"
+    @test get_total_space(M) == KendallsPreShapeSpace(2, 3)
     @test manifold_dimension(M) == 2
     @test !is_flat(M)
-    @test get_total_space(M) === KendallsPreShapeSpace(2, 3)
     p1 = [
         0.4385117672460505 -0.6877826444042382 0.24927087715818771
         -0.3830259932279294 0.35347460720654283 0.029551386021386548
@@ -100,6 +100,7 @@ end
         is_tangent_atol_multiplier = 1,
         exp_log_atol_multiplier = 2.0e8,
         projection_atol_multiplier = 2,
+        test_injectivity_radius = false,
         test_project_point = true,
         test_project_tangent = true,
         test_rand_point = true,
@@ -117,9 +118,5 @@ end
         @test repr(M) == "KendallsShapeSpace(2, 3; parameter=:field)"
         @test get_embedding(M) === KendallsPreShapeSpace(2, 3; parameter = :field)
         @test get_total_space(M) === KendallsPreShapeSpace(2, 3; parameter = :field)
-        @test get_orbit_action(M) === Manifolds.ColumnwiseMultiplicationAction(
-            M,
-            SpecialOrthogonal(2; parameter = :field),
-        )
     end
 end

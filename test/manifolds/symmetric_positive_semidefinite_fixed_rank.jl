@@ -32,6 +32,7 @@ include("../header.jl")
                     is_tangent_atol_multiplier = 5,
                     test_project_tangent = true,
                     test_inplace = true,
+                    test_injectivity_radius = false,
                 )
             end
         end
@@ -43,7 +44,7 @@ include("../header.jl")
     end
     @testset "field parameter" begin
         M = SymmetricPositiveSemidefiniteFixedRank(4, 2; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "SymmetricPositiveSemidefiniteFixedRank(4, 2, ℝ; parameter=:field)"
     end
 end

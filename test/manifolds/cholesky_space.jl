@@ -30,7 +30,6 @@ include("../header.jl")
                 SchildsLadderTransport(),
                 PoleLadderTransport(),
             ],
-            test_vee_hat = false,
             exp_log_atol_multiplier = 8.0,
             test_inplace = true,
             test_rand_point = true,

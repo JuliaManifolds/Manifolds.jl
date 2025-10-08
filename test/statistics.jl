@@ -2,7 +2,6 @@ include("header.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase:
-    active_traits,
     manifold_dimension,
     exp!,
     log!,
@@ -67,28 +66,9 @@ function zero_vector!(::TestStatsEuclidean{N}, X, p; kwargs...) where {N}
 end
 
 struct TestStatsNotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 get_embedding(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
-
-struct TestStatsNotImplementedEmbeddedManifold2 <: AbstractDecoratorManifold{ℝ} end
-function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold2, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
-end
-decorated_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
-get_embedding(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
-base_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
-
-struct TestStatsNotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{ℝ} end
-function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold3, args...)
-    return merge_traits(IsEmbeddedManifold())
-end
-decorated_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
-get_embedding(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
-base_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
 
 function test_mean(M, x, yexp = nothing, method...; kwargs...)
     @testset "mean unweighted" begin
@@ -418,27 +398,6 @@ end
         end
     end
 
-    @testset "decorator dispatch" begin
-        # equality tests are intentional to ensure correct dispatch
-        # (both calls eventually use the same method)
-        ps = [normalize([1, 0, 0] .+ 0.1 .* randn(3)) for _ in 1:3]
-        M1 = TestStatsNotImplementedEmbeddedManifold()
-        @test mean!(M1, similar(ps[1]), ps) == mean!(Sphere(2), similar(ps[1]), ps)
-        @test mean(M1, ps) == mean(Sphere(2), ps)
-
-        M2 = TestStatsNotImplementedEmbeddedManifold2()
-        @test_throws MethodError mean(M2, ps)
-        @test_throws MethodError mean!(M2, similar(ps[1]), ps)
-        @test_throws MethodError median(M2, ps)
-        @test_throws MethodError median!(M2, similar(ps[1]), ps)
-
-        M3 = TestStatsNotImplementedEmbeddedManifold3()
-        @test_throws MethodError mean(M3, ps)
-        @test_throws MethodError mean!(M3, similar(ps[1]), ps)
-        @test_throws MethodError median(M3, ps)
-        @test_throws MethodError median!(M3, similar(ps[1]), ps)
-    end
-
     @testset "TestStatsSphere" begin
         M = TestStatsSphere(2)
 
@@ -559,6 +518,25 @@ end
                 mean!(M, y, x)
                 @test y == mean(x)
             end
+        end
+    end
+
+    @testset "Forwarding" begin
+        M = CenteredMatrices(3, 2)
+        p1 = [1.0 2; 4 5; -5 -7]
+        p2 = [3.0 1; 2 5; -5 -6]
+        @test mean(M, [p1, p2]) == mean([p1, p2])
+
+        for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
+            @test ManifoldsBase.get_forwarding_type_embedding(
+                ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(),
+                M, mf
+            ) === ManifoldsBase.EmbeddedForwardingType()
+
+            @test ManifoldsBase.get_forwarding_type_embedding(
+                ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding}(),
+                M, mf
+            ) === ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
         end
     end
 
@@ -704,6 +682,7 @@ end
                 @test m == mg
                 @test m != mf
             end
+            @test default_approximation_method(P2, cov) === GradientDescentEstimation()
         end
 
         @testset "Sphere default" begin

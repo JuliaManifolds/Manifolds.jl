@@ -4,7 +4,7 @@
 The Segre manifold
 
 ````math
-    \mathcal{S} = \operatorname{Seg}(𝔽^{n_1} \times \dots \times 𝔽^{n_d})
+\mathcal{S} = \operatorname{Seg}(𝔽^{n_1} \times \dots \times 𝔽^{n_d})
 ````
 
 is the set of rank-one tensors in ``𝔽^{n_1} \otimes \dots \otimes 𝔽^{n_d}``.
@@ -12,7 +12,7 @@ is the set of rank-one tensors in ``𝔽^{n_1} \otimes \dots \otimes 𝔽^{n_d}`
 When ``𝔽 = ℝ``, the Segre manifold is a normal Riemannian covering of
 
 ````math
-    \mathcal{P} = ℝ^{+} \times \mathbb{S}^{n_1 - 1} \times \dots \times \mathbb{S}^{n_d - 1}
+\mathcal{P} = ℝ^{+} \times \mathbb{S}^{n_1 - 1} \times \dots \times \mathbb{S}^{n_d - 1}
 ````
 
 equipped with a [warped product metric](https://en.wikipedia.org/wiki/Warped_product). The tuple ``(n_1, \dots, n_d)`` is called the _valence_ of the manifold.
@@ -71,9 +71,11 @@ end
     closest_representative!(M::Segre{ℝ, V}, p, q)
 
 ``\mathcal{S}`` is a ``2^d``-sheeted Riemannian covering of
+
 ````math
-    \mathcal{P} = ℝ^{+} \times \mathbb{S}^{n_1 - 1} \times \dots \times \mathbb{S}^{n_d - 1}
+\mathcal{P} = ℝ^{+} \times \mathbb{S}^{n_1 - 1} \times \dots \times \mathbb{S}^{n_d - 1}
 ````
+
 with a warped product metric.
 Every equivalence class ``q \in \mathcal{S}`` has ``2^d`` representatives in ``\mathcal{P}``.
 `closest_representative!(M, q, p)` changes representative of `q` to the one that is closest to `p` in ``\mathcal{P}``.
@@ -128,7 +130,7 @@ end
 Embed ``p ≐ (λ, x_1, …, x_d)`` in ``𝔽^{n_1 ×⋯× n_d}`` using the Kronecker product
 
 ````math
-    (λ, x_1, …, x_d) ↦ λ x_1 ⊗⋯⊗ x_d.
+(λ, x_1, …, x_d) ↦ λ x_1 ⊗⋯⊗ x_d.
 ````
 """
 embed(::Segre, p)

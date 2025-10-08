@@ -1,5 +1,5 @@
 @doc raw"""
-    GeneralizedGrassmann{T,𝔽,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
+    GeneralizedGrassmann{𝔽,T,TB<:AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
 
 The generalized Grassmann manifold ``\operatorname{Gr}(n,k,B)`` consists of all subspaces
 spanned by ``k`` linear independent vectors ``𝔽^n``, where ``𝔽  ∈ \{ℝ, ℂ\}`` is either the real- (or complex-) valued vectors.
@@ -43,7 +43,7 @@ The manifold is named after
 Generate the (real-valued) Generalized Grassmann manifold of ``n×k`` dimensional
 orthonormal matrices with scalar product `B`.
 """
-struct GeneralizedGrassmann{T, 𝔽, TB <: AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
+struct GeneralizedGrassmann{𝔽, T, TB <: AbstractMatrix} <: AbstractDecoratorManifold{𝔽}
     size::T
     B::TB
 end
@@ -56,10 +56,8 @@ function GeneralizedGrassmann(
         parameter::Symbol = :type,
     )
     size = wrap_type_parameter(parameter, (n, k))
-    return GeneralizedGrassmann{typeof(size), 𝔽, typeof(B)}(size, B)
+    return GeneralizedGrassmann{𝔽, typeof(size), typeof(B)}(size, B)
 end
-
-active_traits(f, ::GeneralizedGrassmann, args...) = merge_traits(IsEmbeddedManifold())
 
 @doc raw"""
     change_representer(M::GeneralizedGrassmann, ::EuclideanMetric, p, X)
@@ -191,12 +189,16 @@ Return true if [`GeneralizedGrassmann`](@ref) `M` is one-dimensional.
 """
 is_flat(M::GeneralizedGrassmann) = manifold_dimension(M) == 1
 
-function get_embedding(M::GeneralizedGrassmann{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
+function get_embedding(M::GeneralizedGrassmann{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return GeneralizedStiefel(n, k, M.B, 𝔽)
 end
-function get_embedding(M::GeneralizedGrassmann{Tuple{Int, Int}, 𝔽}) where {𝔽}
+function get_embedding(M::GeneralizedGrassmann{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, k = get_parameter(M.size)
     return GeneralizedStiefel(n, k, M.B, 𝔽; parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::GeneralizedGrassmann)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 @doc raw"""
@@ -261,7 +263,7 @@ Return the dimension of the [`GeneralizedGrassmann(n,k,𝔽)`](@ref) manifold `M
 
 where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of `𝔽`.
 """
-function manifold_dimension(M::GeneralizedGrassmann{<:Any, 𝔽}) where {𝔽}
+function manifold_dimension(M::GeneralizedGrassmann{𝔽}) where {𝔽}
     n, k = get_parameter(M.size)
     return k * (n - k) * real_dimension(𝔽)
 end
@@ -339,7 +341,7 @@ rand(::GeneralizedGrassmann; σ::Real = 1.0)
 
 function Random.rand!(
         rng::AbstractRNG,
-        M::GeneralizedGrassmann{<:Any, ℝ},
+        M::GeneralizedGrassmann{ℝ},
         pX;
         vector_at = nothing,
         σ::Real = one(real(eltype(pX))),
@@ -393,11 +395,11 @@ end
 
 function Base.show(
         io::IO,
-        M::GeneralizedGrassmann{TypeParameter{Tuple{n, k}}, 𝔽},
+        M::GeneralizedGrassmann{𝔽, TypeParameter{Tuple{n, k}}},
     ) where {n, k, 𝔽}
     return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽))")
 end
-function Base.show(io::IO, M::GeneralizedGrassmann{Tuple{Int, Int}, 𝔽}) where {𝔽}
+function Base.show(io::IO, M::GeneralizedGrassmann{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, k = get_parameter(M.size)
     return print(io, "GeneralizedGrassmann($(n), $(k), $(M.B), $(𝔽); parameter=:field)")
 end

@@ -130,7 +130,7 @@ include("../header.jl")
             @test !is_point(M, 2 * x)
             @test_throws DomainError !is_point(M, 2 * x; error = :error)
             @test !is_vector(M, 2 * x, v)
-            @test_throws DomainError !is_vector(M, 2 * x, v; error = :error)
+            @test_throws ManifoldDomainError !is_vector(M, 2 * x, v; error = :error)
             @test !is_vector(M, x, y)
             @test_throws DomainError is_vector(M, x, y; error = :error)
             test_manifold(
@@ -145,7 +145,6 @@ include("../header.jl")
                 test_project_tangent = true,
                 test_default_vector_transport = false,
                 point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
-                test_vee_hat = false,
                 projection_atol_multiplier = 200.0,
                 exp_log_atol_multiplier = 10.0,
                 retraction_atol_multiplier = 10.0,
@@ -231,7 +230,7 @@ include("../header.jl")
             @test !is_point(M, 2 * x)
             @test_throws DomainError !is_point(M, 2 * x; error = :error)
             @test !is_vector(M, 2 * x, v)
-            @test_throws DomainError !is_vector(M, 2 * x, v; error = :error)
+            @test_throws ManifoldDomainError !is_vector(M, 2 * x, v; error = :error)
             @test !is_vector(M, x, y)
             @test_throws DomainError is_vector(M, x, y; error = :error)
             test_manifold(
@@ -243,7 +242,6 @@ include("../header.jl")
                 test_is_tangent = true,
                 test_project_tangent = true,
                 test_default_vector_transport = false,
-                test_vee_hat = false,
                 projection_atol_multiplier = 200.0,
                 retraction_atol_multiplier = 10.0,
                 is_tangent_atol_multiplier = 4 * 10.0^2,
@@ -547,7 +545,7 @@ include("../header.jl")
     end
     @testset "field parameter" begin
         M = Stiefel(3, 2; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "Stiefel(3, 2, ℝ; parameter=:field)"
     end
 end

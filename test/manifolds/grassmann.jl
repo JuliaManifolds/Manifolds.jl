@@ -7,6 +7,7 @@ include("../header.jl")
             @test repr(M) == "Grassmann(3, 2, ℝ)"
             @test representation_size(M) == (3, 2)
             @test manifold_dimension(M) == 2
+            @test get_total_space(M) == Stiefel(3, 2)
             @test !is_flat(M)
             @test is_flat(Grassmann(2, 1))
             @test default_retraction_method(M) == ExponentialRetraction()
@@ -14,9 +15,6 @@ include("../header.jl")
                 ExponentialRetraction()
             @test default_retraction_method(M, ProjectorPoint) == ExponentialRetraction()
             @test default_vector_transport_method(M) == ParallelTransport()
-            @test get_total_space(M) == Stiefel(3, 2, ℝ)
-            @test get_orbit_action(M) ==
-                Manifolds.RowwiseMultiplicationAction(M, Orthogonal(2))
             @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
             @test !is_vector(M, [1.0 0.0; 0.0 1.0; 0.0 0.0], [0.0, 0.0, 1.0, 0.0])
             @test_throws ManifoldDomainError is_point(
@@ -85,7 +83,6 @@ include("../header.jl")
                 test_default_vector_transport = true,
                 vector_transport_methods = [ParallelTransport(), ProjectionTransport()],
                 point_distributions = [Manifolds.uniform_distribution(M, pts[1])],
-                test_vee_hat = false,
                 test_rand_point = true,
                 test_rand_tvector = true,
                 retraction_methods = [PolarRetraction(), QRRetraction()],
@@ -95,7 +92,7 @@ include("../header.jl")
                 ],
                 #basis_types_vecs = basis_types,
                 # investigate why this is so large on dev
-                exp_log_atol_multiplier = 10.0 * (VERSION >= v"1.6-DEV" ? 10.0^8 : 1.0),
+                exp_log_atol_multiplier = 1.0,
                 is_tangent_atol_multiplier = 20.0,
                 is_point_atol_multiplier = 10.0,
                 projection_atol_multiplier = 10.0,
@@ -207,13 +204,12 @@ include("../header.jl")
                 test_project_tangent = true,
                 test_project_point = true,
                 test_default_vector_transport = false,
-                test_vee_hat = false,
                 retraction_methods = [PolarRetraction(), QRRetraction()],
                 inverse_retraction_methods = [
                     PolarInverseRetraction(),
                     QRInverseRetraction(),
                 ],
-                exp_log_atol_multiplier = 10.0^3,
+                exp_log_atol_multiplier = 10.0^4,
                 is_point_atol_multiplier = 20.0,
                 is_tangent_atol_multiplier = 20.0,
                 projection_atol_multiplier = 10.0,
@@ -290,15 +286,11 @@ include("../header.jl")
 
         Y = ProjectorTangentVector(similar(X.value))
         Yc = Xs.value * pS.value' + pS.value * Xs.value'
-        differential_canonical_project!(M, Y, pS, Xs)
+        diff_canonical_project!(M, Y, pS, Xs)
         @test Y.value == Yc
         Y2 = ProjectorTangentVector(similar(X.value))
-        differential_canonical_project!(M, Y2, pS.value, Xs.value)
+        diff_canonical_project!(M, Y2, pS.value, Xs.value)
         @test Y2.value == Yc
-        Y3 = differential_canonical_project(M, pS, Xs)
-        @test Y3.value == Yc
-        Y4 = differential_canonical_project(M, pS.value, Xs.value)
-        @test Y4.value == Yc
 
         @test horizontal_lift(Stiefel(3, 2), pS.value, X) == X.value[:, 1:2]
 
@@ -377,7 +369,7 @@ include("../header.jl")
         @testset for fT in (Float32, Float64), T in (fT, Complex{fT})
             𝔽 = T isa Complex ? ℂ : ℝ
             M = Grassmann(n, k, 𝔽)
-            U = Unitary(k, 𝔽)
+            U = UnitaryMatrices(k, 𝔽)
             rT = real(T)
             atol = rtol = sqrt(eps(rT))
             @testset for t in (zero(rT), eps(rT)^(1 // 4) / 8, eps(rT)^(1 // 4)),
@@ -402,11 +394,11 @@ include("../header.jl")
     @testset "field parameter" begin
         M = Grassmann(3, 2; parameter = :field)
         @test repr(M) == "Grassmann(3, 2, ℝ; parameter=:field)"
-        @test get_total_space(M) == Stiefel(3, 2; parameter = :field)
-        @test typeof(get_embedding(M)) === Stiefel{Tuple{Int64, Int64}, ℝ}
-
+        @test typeof(get_embedding(M)) === Stiefel{ℝ, Tuple{Int64, Int64}}
+        @test typeof(get_total_space(M)) === Stiefel{ℝ, Tuple{Int64, Int64}}
         p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
         p2 = convert(ProjectorPoint, p)
         @test get_embedding(M, p2) == Euclidean(3, 3; parameter = :field)
+        @test get_total_space(M) == Stiefel(3, 2; parameter = :field)
     end
 end

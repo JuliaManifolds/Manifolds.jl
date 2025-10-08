@@ -69,7 +69,6 @@ include("../header.jl")
                     pts;
                     vector_transport_methods = typeof(M) == SymmetricPositiveDefinite{3} ?
                         [ParallelTransport()] : [],
-                    test_vee_hat = M === M2,
                     exp_log_atol_multiplier = exp_log_atol_multiplier,
                     basis_types_vecs = basis_types,
                     basis_types_to_from = basis_types,
@@ -141,6 +140,7 @@ include("../header.jl")
         p1 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
         p2 = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
         p3 = A(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(A(π / 6))
+        embed(M, p1) == p1
         X1 = log(M, p1, p3)
         Y1 = vector_transport_to(M, p1, X1, p2)
         @test is_vector(M, p2, Y1)
@@ -271,6 +271,10 @@ include("../header.jl")
         @test ismissing(pS.sqrt)
         @test ismissing(pS.sqrt_inv)
         @test allocate_result(M1, zero_vector, p) isa Matrix
+        c1 = ManifoldsBase.allocate_coordinates(M, p, Float64, 6)
+        c2 = ManifoldsBase.allocate_coordinates(M, embed(M, p), Float64, 6)
+        @test typeof(c1) == typeof(c2)
+        @test length(c1) == length(c2)
     end
 
     @testset "test BigFloat" begin
@@ -310,7 +314,7 @@ include("../header.jl")
     end
     @testset "field parameter" begin
         M = SymmetricPositiveDefinite(3; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "SymmetricPositiveDefinite(3; parameter=:field)"
         @test Manifolds.get_parameter_type(M) === :field
     end

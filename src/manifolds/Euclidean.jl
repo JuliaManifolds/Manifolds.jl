@@ -28,7 +28,7 @@ is stored in type. Value can either be `:field` or `:type`.
 Generate the 1D Euclidean manifold for an `ℝ`-, `ℂ`-valued  real- or complex-valued immutable
 values (in contrast to 1-element arrays from the constructor above).
 """
-struct Euclidean{T, 𝔽} <: AbstractDecoratorManifold{𝔽} where {T}
+struct Euclidean{𝔽, T} <: AbstractDecoratorManifold{𝔽} where {T}
     size::T
 end
 
@@ -38,51 +38,44 @@ function Euclidean(
         parameter::Symbol = :type,
     ) where {I}
     size = wrap_type_parameter(parameter, n)
-    return Euclidean{typeof(size), field}(size)
+    return Euclidean{field, typeof(size)}(size)
 end
 
-function active_traits(f, ::Euclidean, args...)
-    return merge_traits(
-        IsDefaultMetric(EuclideanMetric()),
-        IsDefaultConnection(LeviCivitaConnection()),
-    )
-end
-
-function adjoint_Jacobi_field(::Euclidean{Tuple{}}, p, q, t, X, β::Tβ) where {Tβ}
+function adjoint_Jacobi_field(::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
     return X
 end
 function adjoint_Jacobi_field(
-        ::Euclidean{TypeParameter{Tuple{}}},
+        ::Euclidean{𝔽, TypeParameter{Tuple{}}},
         p,
         q,
         t,
         X,
         β::Tβ,
-    ) where {Tβ}
+    ) where {𝔽, Tβ}
     return X
 end
 
 Base.:^(𝔽::AbstractNumbers, n) = Euclidean(n...; field = 𝔽)
 
 Base.:^(M::Euclidean, n::Int) = ^(M, (n,))
-function Base.:^(M::Euclidean{<:Tuple, 𝔽}, n::NTuple{N, Int}) where {𝔽, N}
+function Base.:^(M::Euclidean{𝔽, <:Tuple}, n::NTuple{N, Int}) where {𝔽, N}
     size = get_parameter(M.size)
     return Euclidean(size..., n...; field = 𝔽, parameter = :field)
 end
-function Base.:^(M::Euclidean{<:TypeParameter, 𝔽}, n::NTuple{N, Int}) where {𝔽, N}
+function Base.:^(M::Euclidean{𝔽, <:TypeParameter}, n::NTuple{N, Int}) where {𝔽, N}
     size = get_parameter(M.size)
     return Euclidean(size..., n...; field = 𝔽, parameter = :type)
 end
 
 function allocation_promotion_function(
-        ::Euclidean{<:Any, ℂ},
+        ::Euclidean{ℂ},
         ::Union{typeof(get_vector), typeof(get_coordinates)},
         ::Tuple,
     )
     return complex
 end
 
-function check_point(M::Euclidean{N, 𝔽}, p) where {N, 𝔽}
+function check_point(M::Euclidean{𝔽, N}, p) where {𝔽, N}
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
@@ -98,7 +91,7 @@ function check_point(M::Euclidean{N, 𝔽}, p) where {N, 𝔽}
     return nothing
 end
 
-function check_vector(M::Euclidean{N, 𝔽}, p, X; kwargs...) where {N, 𝔽}
+function check_vector(M::Euclidean{𝔽, N}, p, X; kwargs...) where {𝔽, N}
     if (𝔽 === ℝ) && !(eltype(X) <: Real)
         return DomainError(
             eltype(X),
@@ -114,7 +107,10 @@ function check_vector(M::Euclidean{N, 𝔽}, p, X; kwargs...) where {N, 𝔽}
     return nothing
 end
 
+connection(::Euclidean) = LeviCivitaConnection()
+
 default_approximation_method(::Euclidean, ::typeof(mean)) = EfficientEstimator()
+
 function default_approximation_method(::Euclidean, ::typeof(median), ::Type{<:Number})
     return EfficientEstimator()
 end
@@ -156,10 +152,10 @@ Base.@propagate_inbounds function distance(M::Euclidean, p, q)
     return sqrt(s)
 end
 distance(M::Euclidean, p, q, r::Real) = norm(p - q, r)
-distance(::Euclidean{TypeParameter{Tuple{1}}}, p::Number, q::Number) = abs(p - q)
-distance(::Euclidean{TypeParameter{Tuple{}}}, p::Number, q::Number) = abs(p - q)
-distance(::Euclidean{Tuple{Int}}, p::Number, q::Number) = abs(p - q) # for 1-dimensional Euclidean
-distance(::Euclidean{Tuple{}}, p::Number, q::Number) = abs(p - q)
+distance(::Euclidean{𝔽, TypeParameter{Tuple{1}}}, p::Number, q::Number) where {𝔽} = abs(p - q)
+distance(::Euclidean{𝔽, TypeParameter{Tuple{}}}, p::Number, q::Number) where {𝔽} = abs(p - q)
+distance(::Euclidean{𝔽, Tuple{Int}}, p::Number, q::Number) where {𝔽} = abs(p - q) # for 1-dimensional Euclidean
+distance(::Euclidean{𝔽, Tuple{}}, p::Number, q::Number) where {𝔽} = abs(p - q)
 
 """
     embed(M::Euclidean, p)
@@ -176,10 +172,10 @@ Embed the tangent vector `X` at point `p` in `M`. Equivalent to an identity map.
 embed(::Euclidean, p, X) = X
 
 function embed!(
-        ::EmbeddedManifold{𝔽, Euclidean{nL, 𝔽}, Euclidean{mL, 𝔽2}},
+        ::EmbeddedManifold{𝔽, Euclidean{𝔽, nL}, Euclidean{𝔽2, mL}},
         q,
         p,
-    ) where {nL, mL, 𝔽, 𝔽2}
+    ) where {𝔽, 𝔽2, nL, mL}
     n = size(p)
     ln = length(n)
     m = size(q)
@@ -215,8 +211,8 @@ exp_fused(::Euclidean, p, X, t::Number) = p .+ t .* X
 
 exp!(::Euclidean, q, p, X) = (q .= p .+ X)
 exp_fused!(::Euclidean, q, p, X, t::Number) = (q .= p .+ t .* X)
-exp_fused!(::Euclidean{TypeParameter{Tuple{}}}, q, p, X, t::Number) = (q .= p[] + t * X[])
-exp_fused!(::Euclidean{Tuple{}}, q, p, X, t::Number) = (q .= p[] + t * X[])
+exp_fused!(::Euclidean{𝔽, TypeParameter{Tuple{}}}, q, p, X, t::Number) where {𝔽} = (q .= p[] + t * X[])
+exp_fused!(::Euclidean{𝔽, Tuple{}}, q, p, X, t::Number) where {𝔽} = (q .= p[] + t * X[])
 
 function get_basis_diagonalizing(
         M::Euclidean,
@@ -228,18 +224,18 @@ function get_basis_diagonalizing(
     return CachedBasis(B, DiagonalizingBasisData(B.frame_direction, eigenvalues, vecs))
 end
 
-function get_coordinates_orthonormal(::Euclidean{<:Any, ℝ}, p, X, ::RealNumbers)
+function get_coordinates_orthonormal(::Euclidean{ℝ}, p, X, ::RealNumbers)
     return vec(X)
 end
-function get_coordinates_orthonormal(::Euclidean{<:Any, ℂ}, p, X, ::ComplexNumbers)
+function get_coordinates_orthonormal(::Euclidean{ℂ}, p, X, ::ComplexNumbers)
     return vec(X)
 end
 
-function get_coordinates_orthonormal!(::Euclidean{<:Any, ℝ}, c, p, X, ::RealNumbers)
+function get_coordinates_orthonormal!(::Euclidean{ℝ}, c, p, X, ::RealNumbers)
     copyto!(c, vec(X))
     return c
 end
-function get_coordinates_orthonormal!(::Euclidean{<:Any, ℂ}, c, p, X, ::ComplexNumbers)
+function get_coordinates_orthonormal!(::Euclidean{ℂ}, c, p, X, ::ComplexNumbers)
     copyto!(c, vec(X))
     return c
 end
@@ -255,7 +251,7 @@ function get_coordinates_induced_basis!(
     return c
 end
 
-function get_coordinates_orthonormal!(::Euclidean{<:Any, ℂ}, c, ::Any, X, ::RealNumbers)
+function get_coordinates_orthonormal!(::Euclidean{ℂ}, c, ::Any, X, ::RealNumbers)
     Xvec = vec(X)
     d = div(length(c), 2)
     view(c, 1:d) .= real.(Xvec)
@@ -264,7 +260,7 @@ function get_coordinates_orthonormal!(::Euclidean{<:Any, ℂ}, c, ::Any, X, ::Re
 end
 
 function get_coordinates_diagonalizing!(
-        ::Euclidean{<:Any, ℂ},
+        ::Euclidean{ℂ},
         c,
         ::Any,
         X,
@@ -277,7 +273,7 @@ function get_coordinates_diagonalizing!(
     return c
 end
 function get_coordinates_diagonalizing!(
-        ::Euclidean{<:Any, 𝔽},
+        ::Euclidean{𝔽},
         c,
         p,
         X,
@@ -287,16 +283,16 @@ function get_coordinates_diagonalizing!(
     return c
 end
 
-function get_vector_orthonormal(M::Euclidean{<:Any, ℝ}, ::Any, c, ::RealNumbers)
+function get_vector_orthonormal(M::Euclidean{ℝ}, ::Any, c, ::RealNumbers)
     S = representation_size(M)
     return reshape(c, S)
 end
-function get_vector_orthonormal(M::Euclidean{<:Any, ℂ}, ::Any, c, ::ComplexNumbers)
+function get_vector_orthonormal(M::Euclidean{ℂ}, ::Any, c, ::ComplexNumbers)
     S = representation_size(M)
     return reshape(c, S)
 end
 function get_vector_orthonormal(
-        ::Euclidean{TypeParameter{Tuple{N}}, ℝ},
+        ::Euclidean{ℝ, TypeParameter{Tuple{N}}},
         ::Any,
         c,
         ::RealNumbers,
@@ -304,12 +300,12 @@ function get_vector_orthonormal(
     # this method is defined just to skip a reshape
     return c
 end
-function get_vector_orthonormal(::Euclidean{Tuple{Int}, ℝ}, ::Any, c, ::RealNumbers)
+function get_vector_orthonormal(::Euclidean{ℝ, Tuple{Int}}, ::Any, c, ::RealNumbers)
     # this method is defined just to skip a reshape
     return c
 end
 function get_vector_orthonormal(
-        ::Euclidean{<:TypeParameter, ℝ},
+        ::Euclidean{ℝ, <:TypeParameter},
         ::SArray{S},
         c,
         ::RealNumbers,
@@ -317,7 +313,7 @@ function get_vector_orthonormal(
     return SArray{S}(c)
 end
 function get_vector_orthonormal(
-        ::Euclidean{TypeParameter{Tuple{N}}, ℝ},
+        ::Euclidean{ℝ, TypeParameter{Tuple{N}}},
         ::SArray{S},
         c,
         ::RealNumbers,
@@ -326,7 +322,7 @@ function get_vector_orthonormal(
     return c
 end
 function get_vector_orthonormal(
-        ::Euclidean{TypeParameter{Tuple{N}}, ℝ},
+        ::Euclidean{ℝ, TypeParameter{Tuple{N}}},
         ::SizedArray{S},
         c,
         ::RealNumbers,
@@ -336,7 +332,7 @@ function get_vector_orthonormal(
 end
 
 function get_vector_orthonormal!(
-        ::Euclidean{TypeParameter{Tuple{N}}, ℝ},
+        ::Euclidean{ℝ, TypeParameter{Tuple{N}}},
         Y,
         ::Any,
         c,
@@ -346,12 +342,12 @@ function get_vector_orthonormal!(
     copyto!(Y, c)
     return Y
 end
-function get_vector_orthonormal!(M::Euclidean{<:Any, ℝ}, Y, ::Any, c, ::RealNumbers)
+function get_vector_orthonormal!(M::Euclidean{ℝ}, Y, ::Any, c, ::RealNumbers)
     S = representation_size(M)
     copyto!(Y, reshape(c, S))
     return Y
 end
-function get_vector_orthonormal!(M::Euclidean{<:Any, ℂ}, Y, ::Any, c, ::ComplexNumbers)
+function get_vector_orthonormal!(M::Euclidean{ℂ}, Y, ::Any, c, ::ComplexNumbers)
     S = representation_size(M)
     copyto!(Y, reshape(c, S))
     return Y
@@ -372,14 +368,14 @@ function get_vector_induced_basis!(M::Euclidean, Y, ::Any, c, B::InducedBasis)
     copyto!(Y, reshape(c, S))
     return Y
 end
-function get_vector_orthonormal!(M::Euclidean{<:Any, ℂ}, Y, ::Any, c, ::RealNumbers)
+function get_vector_orthonormal!(M::Euclidean{ℂ}, Y, ::Any, c, ::RealNumbers)
     S = representation_size(M)
     N = div(length(c), 2)
     copyto!(Y, reshape(c[1:N] .+ im .* c[(N + 1):end], S))
     return Y
 end
 function get_vector_diagonalizing!(
-        M::Euclidean{<:Any, ℂ},
+        M::Euclidean{ℂ},
         Y,
         ::Any,
         c,
@@ -456,10 +452,10 @@ Return true. [`Euclidean`](@ref) is a flat manifold.
 """
 is_flat(M::Euclidean) = true
 
-function jacobi_field(::Euclidean{TypeParameter{Tuple{}}}, p, q, t, X, β::Tβ) where {Tβ}
+function jacobi_field(::Euclidean{𝔽, TypeParameter{Tuple{}}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
     return X
 end
-function jacobi_field(::Euclidean{Tuple{}}, p, q, t, X, β::Tβ) where {Tβ}
+function jacobi_field(::Euclidean{𝔽, Tuple{}}, p, q, t, X, β::Tβ) where {𝔽, Tβ}
     return X
 end
 
@@ -488,7 +484,7 @@ which in this case is just
 ````
 """
 Base.log(::Euclidean, ::Any...)
-Base.log(::Euclidean{TypeParameter{Tuple{}}}, p::Number, q::Number) = q - p
+Base.log(::Euclidean{𝔽, TypeParameter{Tuple{}}}, p::Number, q::Number) where {𝔽} = q - p
 Base.log(::Euclidean, p, q) = q .- p
 
 log!(::Euclidean, X, p, q) = (X .= q .- p)
@@ -510,10 +506,10 @@ Return the manifold dimension of the [`Euclidean`](@ref) `M`, i.e.
 the product of all array dimensions and the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of the
 underlying number system.
 """
-function manifold_dimension(M::Euclidean{<:Any, 𝔽}) where {𝔽}
+function manifold_dimension(M::Euclidean{𝔽}) where {𝔽}
     return _product_of_dimensions(M) * real_dimension(𝔽)
 end
-manifold_dimension(::Euclidean{TypeParameter{Tuple{}}, 𝔽}) where {𝔽} = real_dimension(𝔽)
+manifold_dimension(::Euclidean{𝔽, TypeParameter{Tuple{}}}) where {𝔽} = real_dimension(𝔽)
 
 """
     manifold_volume(::Euclidean)
@@ -523,20 +519,20 @@ Return volume of the [`Euclidean`](@ref) manifold, i.e. infinity.
 manifold_volume(::Euclidean) = Inf
 
 function Statistics.mean(
-        ::Union{Euclidean{TypeParameter{Tuple{}}}, Euclidean{Tuple{}}},
+        ::Union{Euclidean{𝔽, TypeParameter{Tuple{}}}, Euclidean{𝔽, Tuple{}}},
         x::AbstractVector,
         ::EfficientEstimator;
         kwargs...,
-    )
+    ) where {𝔽}
     return mean(x)
 end
 function Statistics.mean(
-        ::Union{Euclidean{TypeParameter{Tuple{}}}, Euclidean{Tuple{}}},
+        ::Union{Euclidean{𝔽, TypeParameter{Tuple{}}}, Euclidean{𝔽, Tuple{}}},
         x::AbstractVector,
         w::AbstractWeights,
         ::EfficientEstimator;
         kwargs...,
-    )
+    ) where {𝔽}
     return mean(x, w)
 end
 #
@@ -583,48 +579,50 @@ function Statistics.mean!(
 end
 
 function StatsBase.mean_and_var(
-        ::Union{Euclidean{TypeParameter{Tuple{}}}, Euclidean{Tuple{}}},
+        ::Union{Euclidean{𝔽, TypeParameter{Tuple{}}}, Euclidean{𝔽, Tuple{}}},
         x::AbstractVector{<:Number};
         kwargs...,
-    )
+    ) where {𝔽}
     m, v = mean_and_var(x; kwargs...)
     return m, sum(v)
 end
 function StatsBase.mean_and_var(
-        ::Union{Euclidean{TypeParameter{Tuple{}}}, Euclidean{Tuple{}}},
+        ::Union{Euclidean{𝔽, TypeParameter{Tuple{}}}, Euclidean{𝔽, Tuple{}}},
         x::AbstractVector{<:Number},
         w::AbstractWeights;
         corrected = false,
         kwargs...,
-    )
+    ) where {𝔽}
     m, v = mean_and_var(x, w; corrected = corrected, kwargs...)
     return m, sum(v)
 end
 
 function Statistics.median(
-        ::Union{Euclidean{TypeParameter{Tuple{}}}, Euclidean{Tuple{}}},
+        ::Union{Euclidean{𝔽, TypeParameter{Tuple{}}}, Euclidean{𝔽, Tuple{}}},
         x::AbstractVector{<:Number},
         ::EfficientEstimator;
         kwargs...,
-    )
+    ) where {𝔽}
     return median(x)
 end
 function Statistics.median(
-        ::Union{Euclidean{TypeParameter{Tuple{}}}, Euclidean{Tuple{}}},
+        ::Union{Euclidean{𝔽, TypeParameter{Tuple{}}}, Euclidean{𝔽, Tuple{}}},
         x::AbstractVector{<:Number},
         w::AbstractWeights,
         ::EfficientEstimator;
         kwargs...,
-    )
+    ) where {𝔽}
     return median(x, w)
 end
 
+metric(::Euclidean) = EuclideanMetric()
+
 mid_point(::Euclidean, p1, p2) = (p1 .+ p2) ./ 2
 function mid_point(
-        ::Union{Euclidean{TypeParameter{Tuple{}}}, Euclidean{Tuple{}}},
+        ::Union{Euclidean{𝔽, TypeParameter{Tuple{}}}, Euclidean{𝔽, Tuple{}}},
         p1::Number,
         p2::Number,
-    )
+    ) where {𝔽}
     return (p1 + p2) / 2
 end
 
@@ -651,7 +649,7 @@ function LinearAlgebra.norm(
 end
 
 function project!(
-        ::EmbeddedManifold{𝔽, Euclidean{nL, 𝔽}, Euclidean{mL, 𝔽2}},
+        ::EmbeddedManifold{𝔽, Euclidean{𝔽, nL}, Euclidean{𝔽2, mL}},
         q,
         p,
     ) where {nL, mL, 𝔽, 𝔽2}
@@ -689,10 +687,10 @@ the parallel transport on [`Euclidean`](@ref) is the identity, i.e. returns `X`.
 """
 parallel_transport_to(::Euclidean, ::Any, X, ::Any) = X
 parallel_transport_to!(::Euclidean, Y, ::Any, X, ::Any) = copyto!(Y, X)
-function parallel_transport_to!(::Euclidean{TypeParameter{Tuple{}}}, Y, ::Any, X, ::Any)
+function parallel_transport_to!(::Euclidean{𝔽, TypeParameter{Tuple{}}}, Y, ::Any, X, ::Any) where {𝔽}
     return copyto!(Y, X[])
 end
-parallel_transport_to!(::Euclidean{Tuple{}}, Y, ::Any, X, ::Any) = copyto!(Y, X[])
+parallel_transport_to!(::Euclidean{𝔽, Tuple{}}, Y, ::Any, X, ::Any) where {𝔽} = copyto!(Y, X[])
 
 @doc raw"""
     project(M::Euclidean, p)
@@ -701,8 +699,8 @@ Project an arbitrary point `p` onto the [`Euclidean`](@ref) manifold `M`, which
 is of course just the identity map.
 """
 project(::Euclidean, ::Any)
-project(::Euclidean{TypeParameter{Tuple{}}}, p::Number) = p
-project(::Euclidean{Tuple{}}, p::Number) = p
+project(::Euclidean{𝔽, TypeParameter{Tuple{}}}, p::Number) where {𝔽} = p
+project(::Euclidean{𝔽, Tuple{}}, p::Number) where {𝔽} = p
 
 project!(::Euclidean, q, p) = copyto!(q, p)
 
@@ -714,15 +712,13 @@ Project an arbitrary vector `X` into the tangent space of a point `p` on the
 space of `M` can be identified with all of `M`.
 """
 project(::Euclidean, ::Any, ::Any)
-project(::Euclidean{TypeParameter{Tuple{}}}, ::Number, X::Number) = X
-project(::Euclidean{Tuple{}}, ::Number, X::Number) = X
+project(::Euclidean{𝔽, TypeParameter{Tuple{}}}, ::Number, X::Number) where {𝔽} = X
+project(::Euclidean{𝔽, Tuple{}}, ::Number, X::Number) where {𝔽} = X
 
 project!(::Euclidean, Y, p, X) = copyto!(Y, X)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        ::Euclidean,
-        pX;
+        rng::AbstractRNG, ::Euclidean, pX;
         σ = one(eltype(pX)),
         vector_at = nothing,
     )
@@ -738,15 +734,13 @@ Return the array dimensions required to represent an element on the
 """
 representation_size(M::Euclidean) = get_parameter(M.size)
 
-function retract(M::Euclidean{TypeParameter{Tuple{}}}, p::Number, q::Number)
+function retract(M::Euclidean{𝔽, TypeParameter{Tuple{}}}, p::Number, q::Number) where {𝔽}
     return retract(M, p, q, ExponentialRetraction())
 end
 function retract(
-        M::Euclidean{TypeParameter{Tuple{}}},
-        p::Number,
-        q::Number,
-        ::ExponentialRetraction,
-    )
+        M::Euclidean{𝔽, TypeParameter{Tuple{}}},
+        p::Number, q::Number, ::ExponentialRetraction,
+    ) where {𝔽}
     return exp(M, p, q)
 end
 
@@ -789,11 +783,11 @@ function sectional_curvature_min(::Euclidean)
     return 0.0
 end
 
-function Base.show(io::IO, M::Euclidean{N, 𝔽}) where {N <: Tuple, 𝔽}
+function Base.show(io::IO, M::Euclidean{𝔽, N}) where {N <: Tuple, 𝔽}
     size = get_parameter(M.size)
     return print(io, "Euclidean($(join(size, ", ")); field=$(𝔽), parameter=:field)")
 end
-function Base.show(io::IO, M::Euclidean{N, 𝔽}) where {N <: TypeParameter, 𝔽}
+function Base.show(io::IO, M::Euclidean{𝔽, N}) where {N <: TypeParameter, 𝔽}
     size = get_parameter(M.size)
     return print(io, "Euclidean($(join(size, ", ")); field=$(𝔽))")
 end
@@ -890,7 +884,7 @@ Return the zero vector in the tangent space of `p` on the [`Euclidean`](@ref)
 `M`, which here is just a zero filled array the same size as `p`.
 """
 zero_vector(::Euclidean, ::Any...)
-zero_vector(::Euclidean{TypeParameter{Tuple{}}}, p::Number) = zero(p)
-zero_vector(::Euclidean{Tuple{}}, p::Number) = zero(p)
+zero_vector(::Euclidean{𝔽, TypeParameter{Tuple{}}}, p::Number) where {𝔽} = zero(p)
+zero_vector(::Euclidean{𝔽, Tuple{}}, p::Number) where {𝔽} = zero(p)
 
 zero_vector!(::Euclidean, X, ::Any) = fill!(X, 0)

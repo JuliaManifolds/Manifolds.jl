@@ -97,10 +97,6 @@ function Base.:(==)(p::SPDPoint, q::SPDPoint)
     return p.eigen == q.eigen
 end
 
-function active_traits(f, ::SymmetricPositiveDefinite, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(AffineInvariantMetric()))
-end
-
 function allocate(p::SPDPoint)
     return SPDPoint(
         ismissing(p.p) ? missing : allocate(p.p),
@@ -223,6 +219,8 @@ function copyto!(q::SPDPoint, p::SPDPoint)
     return q
 end
 
+metric(::SymmetricPositiveDefinite) = AffineInvariantMetric()
+
 embed(::SymmetricPositiveDefinite, p) = p
 embed(::SymmetricPositiveDefinite, p::SPDPoint) = convert(AbstractMatrix, p)
 embed(::SymmetricPositiveDefinite, p, X) = X
@@ -233,6 +231,13 @@ end
 function get_embedding(M::SymmetricPositiveDefinite{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return Euclidean(n, n; field = ℝ, parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::SymmetricPositiveDefinite, ::SPDPoint)
+    return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
+end
+function ManifoldsBase.get_embedding_type(::SymmetricPositiveDefinite)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 get_parameter_type(::SymmetricPositiveDefinite{<:TypeParameter}) = :type

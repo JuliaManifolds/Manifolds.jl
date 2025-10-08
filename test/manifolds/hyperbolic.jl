@@ -7,7 +7,7 @@ include("../header.jl")
         @test base_manifold(M) == M
         @test manifold_dimension(M) == 2
         @test typeof(get_embedding(M)) ==
-            MetricManifold{ℝ, Euclidean{TypeParameter{Tuple{3}}, ℝ}, MinkowskiMetric}
+            MetricManifold{ℝ, Euclidean{ℝ, TypeParameter{Tuple{3}}}, MinkowskiMetric}
         @test representation_size(M) == (3,)
         @test !is_flat(M)
         @test isinf(injectivity_radius(M))
@@ -19,7 +19,7 @@ include("../header.jl")
         @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error = :error)
         @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_vector( # p is not a valid point
             M,
             [1.0, 0.0, 0.0],
             [1.0, 0.0, 0.0];
@@ -60,11 +60,13 @@ include("../header.jl")
             @test copyto!(M, XC, p, X) == X # does copyto return the right value?
             @test XC == X # does copyto store the right value?
             @test XC.value == X.value # another check
+            @test zero_vector(M, p) isa T
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin
         p = [0.0, 0.0, 1.0]
         pH = HyperboloidPoint(p)
+
         @test minkowski_metric(pH, pH) == minkowski_metric(p, p)
         @test convert(HyperboloidPoint, p).value == pH.value
         @test convert(AbstractVector, pH) == p
@@ -208,7 +210,6 @@ include("../header.jl")
                 is_tangent_atol_multiplier = 10.0,
                 exp_log_atol_multiplier = 10.0,
                 retraction_methods = (ExponentialRetraction(),),
-                test_vee_hat = false,
                 test_tangent_vector_broadcasting = is_plain_array,
                 test_vector_spaces = is_plain_array,
                 test_inplace = true,

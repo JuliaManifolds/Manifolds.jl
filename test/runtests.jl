@@ -133,10 +133,6 @@ end
             end
         end
 
-        @test Manifolds.is_metric_function(flat)
-        @test Manifolds.is_metric_function(sharp)
-
-        include_test("groups/group_utils.jl")
         include_test("notation.jl")
         # starting with tests of simple manifolds
         include_test("manifolds/centered_matrices.jl")
@@ -188,7 +184,6 @@ end
         #meta manifolds
         include_test("manifolds/product_manifold.jl")
         include_test("manifolds/power_manifold.jl")
-        include_test("manifolds/quotient_manifold.jl")
         include_test("manifolds/fiber_bundle.jl")
         include_test("manifolds/vector_bundle.jl")
         include_test("manifolds/graph.jl")
@@ -204,28 +199,6 @@ end
         include_test("manifolds/embedded_torus.jl")
     end
 
-    if TEST_GROUP ∈ ["test_lie_groups", "all"]
-        # Lie groups and actions
-        include_test("groups/groups_general.jl")
-        include_test("groups/validation_group.jl")
-        include_test("groups/circle_group.jl")
-        include_test("groups/translation_group.jl")
-        include_test("groups/general_linear.jl")
-        include_test("groups/general_unitary_groups.jl")
-        include_test("groups/special_linear.jl")
-        include_test("groups/special_orthogonal.jl")
-        include_test("groups/heisenberg.jl")
-        include_test("groups/product_group.jl")
-        include_test("groups/semidirect_product_group.jl")
-        include_test("groups/power_group.jl")
-        include_test("groups/special_euclidean.jl")
-        include_test("groups/group_operation_action.jl")
-        include_test("groups/rotation_action.jl")
-        include_test("groups/translation_action.jl")
-        include_test("groups/rotation_translation_action.jl")
-        include_test("groups/connections.jl")
-        include_test("groups/metric.jl")
-    end
     if TEST_GROUP ∈ ["all", "test_integration"] && !Sys.isapple()
         include_test("recipes.jl")
     end

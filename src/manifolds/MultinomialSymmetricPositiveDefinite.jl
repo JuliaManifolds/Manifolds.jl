@@ -64,6 +64,9 @@ function get_embedding(M::MultinomialSymmetricPositiveDefinite{Tuple{Int}})
     n = get_parameter(M.size)[1]
     return MultinomialMatrices(n, n; parameter = :field)
 end
+function ManifoldsBase.get_embedding_type(::MultinomialSymmetricPositiveDefinite)
+    return ManifoldsBase.EmbeddedManifoldType()
+end
 
 """
     Random.rand!(

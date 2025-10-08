@@ -24,10 +24,6 @@ function InvertibleMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Sym
     return InvertibleMatrices{field, typeof(size)}(size)
 end
 
-function active_traits(f, ::InvertibleMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
-
 @doc raw"""
     check_point(M::InvertibleMatrices{n,𝔽}, p; kwargs...)
 
@@ -84,6 +80,10 @@ end
 function get_embedding(M::InvertibleMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return Euclidean(n, n; field = 𝔽, parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::InvertibleMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 function get_vector(

@@ -1,5 +1,5 @@
 @doc raw"""
-    SphereSymmetricMatrices{T,𝔽} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
+    SphereSymmetricMatrices{𝔽, T} <: AbstractEmbeddedManifold{ℝ,TransparentIsometricEmbedding}
 
 The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  consisting of the ``n×n`` symmetric matrices
 of unit Frobenius norm, i.e.
@@ -14,17 +14,13 @@ and the field ``𝔽 ∈ \{ ℝ, ℂ\}``.
 
 Generate the manifold of `n`-by-`n` symmetric matrices of unit Frobenius norm.
 """
-struct SphereSymmetricMatrices{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
+struct SphereSymmetricMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
 function SphereSymmetricMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return SphereSymmetricMatrices{typeof(size), field}(size)
-end
-
-function active_traits(f, ::SphereSymmetricMatrices, arge...)
-    return merge_traits(IsEmbeddedSubmanifold())
+    return SphereSymmetricMatrices{field, typeof(size)}(size)
 end
 
 @doc raw"""
@@ -78,12 +74,16 @@ end
 embed(::SphereSymmetricMatrices, p) = p
 embed(::SphereSymmetricMatrices, p, X) = X
 
-function get_embedding(::SphereSymmetricMatrices{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
+function get_embedding(::SphereSymmetricMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return ArraySphere(n, n; field = 𝔽)
 end
-function get_embedding(M::SphereSymmetricMatrices{Tuple{Int}, 𝔽}) where {𝔽}
+function get_embedding(M::SphereSymmetricMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return ArraySphere(n, n; field = 𝔽, parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::SphereSymmetricMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 """
@@ -106,7 +106,7 @@ Frobenius norm over the number system `𝔽`, i.e.
 \end{aligned}
 ````
 """
-function manifold_dimension(M::SphereSymmetricMatrices{<:Any, 𝔽}) where {𝔽}
+function manifold_dimension(M::SphereSymmetricMatrices{𝔽}) where {𝔽}
     n = get_parameter(M.size)[1]
     return div(n * (n + 1), 2) * real_dimension(𝔽) - (𝔽 === ℂ ? n : 0) - 1
 end
@@ -148,10 +148,10 @@ function representation_size(M::SphereSymmetricMatrices)
     return (n, n)
 end
 
-function Base.show(io::IO, ::SphereSymmetricMatrices{TypeParameter{Tuple{n}}, 𝔽}) where {n, 𝔽}
+function Base.show(io::IO, ::SphereSymmetricMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return print(io, "SphereSymmetricMatrices($(n), $(𝔽))")
 end
-function Base.show(io::IO, M::SphereSymmetricMatrices{Tuple{Int}, 𝔽}) where {𝔽}
+function Base.show(io::IO, M::SphereSymmetricMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "SphereSymmetricMatrices($(n), $(𝔽); parameter=:field)")
 end

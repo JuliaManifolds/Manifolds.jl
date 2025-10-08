@@ -21,12 +21,6 @@ q = [
 # let's plot them as triples of points on a plane
 fig = scatter(p[1,:], p[2,:], label="p", aspect_ratio=:equal)
 scatter!(fig, q[1,:], q[2,:], label="q")
-
-# aligning q to p
-A = get_orbit_action(M)
-a = optimal_alignment(A, p, q)
-rot_q = apply(A, a, q)
-scatter!(fig, rot_q[1,:], rot_q[2,:], label="q aligned to p")
 ```
 
 A more extensive usage example is available in the `hand_gestures.jl` tutorial.

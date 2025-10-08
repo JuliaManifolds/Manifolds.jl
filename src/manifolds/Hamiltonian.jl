@@ -38,7 +38,7 @@ end
 size(A::Hamiltonian) = size(A.value)
 
 @doc raw"""
-    HamiltonianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    HamiltonianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)
 consisting of (real-valued) hamiltonian matrices of size ``n×n``, i.e. the set
@@ -60,7 +60,7 @@ matrix multiplication as group operation.
 
 Generate the manifold of ``2n×2n`` Hamiltonian matrices.
 """
-struct HamiltonianMatrices{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
+struct HamiltonianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
@@ -68,11 +68,7 @@ function HamiltonianMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Sy
     n % 2 == 0 || throw(ArgumentError("The dimension of the symplectic manifold
                         embedding space must be even. Was odd, n % 2 == $(n % 2)."))
     size = wrap_type_parameter(parameter, (div(n, 2),))
-    return HamiltonianMatrices{typeof(size), field}(size)
-end
-
-function active_traits(f, ::HamiltonianMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
+    return HamiltonianMatrices{field, typeof(size)}(size)
 end
 
 ManifoldsBase.@default_manifold_fallbacks HamiltonianMatrices Hamiltonian Hamiltonian value value
@@ -90,7 +86,7 @@ function symplectic_inverse(A::Hamiltonian)
 end
 
 @doc raw"""
-    check_point(M::HamiltonianMatrices{n,𝔽}, p; kwargs...)
+    check_point(M::HamiltonianMatrices, p; kwargs...)
 
 Check whether `p` is a valid manifold point on the [`HamiltonianMatrices`](@ref) `M`, i.e.
 whether `p` [`is_hamiltonian`](@ref).
@@ -108,7 +104,7 @@ function check_point(M::HamiltonianMatrices, p; kwargs...)
 end
 
 """
-    check_vector(M::HamiltonianMatrices{n,𝔽}, p, X; kwargs... )
+    check_vector(M::HamiltonianMatrices, p, X; kwargs... )
 
 Check whether `X` is a tangent vector to manifold point `p` on the
 [`HamiltonianMatrices`](@ref) `M`, i.e. `X` has to be a Hamiltonian matrix
@@ -127,12 +123,16 @@ end
 embed(::HamiltonianMatrices, p) = p
 embed(::HamiltonianMatrices, p, X) = X
 
-function get_embedding(::HamiltonianMatrices{TypeParameter{Tuple{N}}, 𝔽}) where {N, 𝔽}
+function get_embedding(::HamiltonianMatrices{𝔽, TypeParameter{Tuple{N}}}) where {N, 𝔽}
     return Euclidean(2 * N, 2 * N; field = 𝔽)
 end
-function get_embedding(M::HamiltonianMatrices{Tuple{Int}, 𝔽}) where {𝔽}
+function get_embedding(M::HamiltonianMatrices{𝔽, Tuple{Int}}) where {𝔽}
     N = get_parameter(M.size)[1]
     return Euclidean(2 * N, 2 * N; field = 𝔽, parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::HamiltonianMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 """
@@ -163,12 +163,12 @@ function is_hamiltonian(A::Hamiltonian; kwargs...)
     return isapprox((A^+).value, -A.value; kwargs...)
 end
 
-function Base.show(io::IO, ::HamiltonianMatrices{TypeParameter{Tuple{n}}, F}) where {n, F}
-    return print(io, "HamiltonianMatrices($(2n), $(F))")
+function Base.show(io::IO, ::HamiltonianMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
+    return print(io, "HamiltonianMatrices($(2n), $(𝔽))")
 end
-function Base.show(io::IO, M::HamiltonianMatrices{Tuple{Int}, F}) where {F}
+function Base.show(io::IO, M::HamiltonianMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return print(io, "HamiltonianMatrices($(2n), $(F); parameter=:field)")
+    return print(io, "HamiltonianMatrices($(2n), $(𝔽); parameter=:field)")
 end
 
 @doc raw"""
@@ -191,7 +191,7 @@ rand(M::HamiltonianMatrices; σ::Real = 1.0)
 
 function rand!(
         rng::AbstractRNG,
-        M::HamiltonianMatrices{<:Any, ℝ},
+        M::HamiltonianMatrices{ℝ},
         pX;
         σ::Real = one(real(eltype(pX))),
         vector_at = nothing,

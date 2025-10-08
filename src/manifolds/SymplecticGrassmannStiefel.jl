@@ -56,12 +56,16 @@ function exp!(M::SymplecticGrassmann, q, p, X)
     return q
 end
 
-function get_embedding(::SymplecticGrassmann{TypeParameter{Tuple{n, k}}}) where {n, k}
+function get_embedding(::SymplecticGrassmann{ℝ, TypeParameter{Tuple{n, k}}}) where {n, k}
     return SymplecticStiefel(2n, 2k)
 end
-function get_embedding(M::SymplecticGrassmann{Tuple{Int, Int}})
+function get_embedding(M::SymplecticGrassmann{ℝ, Tuple{Int, Int}})
     n, k = get_parameter(M.size)
     return SymplecticStiefel(2n, 2k; parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::SymplecticGrassmann{ℝ})
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 @doc raw"""

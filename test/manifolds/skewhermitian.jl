@@ -22,15 +22,15 @@ end
         @test representation_size(M) == (3, 3)
         @test base_manifold(M) === M
         @test is_flat(M)
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3, 3}}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{3, 3}}}
         @test check_point(M, B_skewsym) === nothing
         @test_throws DomainError is_point(M, A; error = :error)
         @test_throws ManifoldDomainError is_point(M, C; error = :error)
-        @test_throws DomainError is_point(M, D; error = :error)
+        @test_throws ManifoldDomainError is_point(M, D; error = :error)
         @test check_vector(M, B_skewsym, B_skewsym) === nothing
         @test_throws DomainError is_vector(M, B_skewsym, A; error = :error)
-        @test_throws DomainError is_vector(M, A, B_skewsym; error = :error)
-        @test_throws DomainError is_vector(M, B_skewsym, D; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, A, B_skewsym; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, B_skewsym, D; error = :error)
         @test_throws ManifoldDomainError is_vector(
             M,
             B_skewsym,
@@ -104,7 +104,7 @@ end
     @testset "field parameter" begin
         M = SkewHermitianMatrices(3, ℝ; parameter = :field)
         Mc = SkewHermitianMatrices(3, ℂ; parameter = :field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "SkewSymmetricMatrices(3; parameter=:field)"
         @test repr(Mc) == "SkewHermitianMatrices(3, ℂ; parameter=:field)"
     end

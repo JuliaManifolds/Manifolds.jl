@@ -140,6 +140,6 @@ include("../header.jl")
         M = GeneralizedStiefel(3, 2, B; parameter = :field)
         @test repr(M) ==
             "GeneralizedStiefel(3, 2, [1.0 0.0 0.0; 0.0 4.0 0.0; 0.0 0.0 1.0], ℝ; parameter=:field)"
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int64, Int64}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int64, Int64}}
     end
 end

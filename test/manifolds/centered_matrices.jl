@@ -11,7 +11,7 @@ include("../header.jl")
     @testset "Real Centered Matrices Basics" begin
         @test repr(M) == "CenteredMatrices(3, 2, ℝ)"
         @test representation_size(M) == (3, 2)
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3, 2}}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{3, 2}}}
         @test is_flat(M)
         @test check_point(M, A) === nothing
         @test_throws ManifoldDomainError is_point(M, B; error = :error)
@@ -19,7 +19,7 @@ include("../header.jl")
         @test_throws DomainError is_point(M, D; error = :error)
         @test check_vector(M, A, A) === nothing
         @test_throws DomainError is_vector(M, A, D; error = :error)
-        @test_throws DomainError is_vector(M, D, A; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, D, A; error = :error)
         @test_throws ManifoldDomainError is_vector(M, A, B; error = :error)
         @test manifold_dimension(M) == 4
         @test A == project!(M, A, A)
@@ -62,6 +62,6 @@ include("../header.jl")
     @testset "field parameter" begin
         M = CenteredMatrices(3, 2; parameter = :field)
         @test repr(M) == "CenteredMatrices(3, 2, ℝ; parameter=:field)"
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int, Int}, ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
     end
 end

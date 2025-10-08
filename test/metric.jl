@@ -1,9 +1,8 @@
 using FiniteDifferences
 using LinearAlgebra: I
 using StatsBase: AbstractWeights, pweights
-using ManifoldsBase: TraitList
 import ManifoldsBase: default_retraction_method
-import Manifolds: solve_exp_ode
+using Manifolds, ManifoldsBase
 using Manifolds: InducedBasis, connection, get_chart_index, induced_basis, mean!, median!
 using ADTypes
 include("header.jl")
@@ -14,6 +13,7 @@ struct TestScaledEuclideanMetric <: AbstractMetric end
 struct TestRetraction <: AbstractRetractionMethod end
 struct TestConnection <: AbstractAffineConnection end
 
+Manifolds.connection(::TestEuclidean) = TestConnection()
 ManifoldsBase.default_retraction_method(::TestEuclidean) = TestRetraction()
 function ManifoldsBase.default_retraction_method(
         ::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
@@ -23,7 +23,6 @@ end
 
 Manifolds.manifold_dimension(::TestEuclidean{N}) where {N} = N
 function Manifolds.local_metric(
-        ::TraitList{<:IsMetricManifold},
         M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
         ::Any,
         ::InducedBasis,
@@ -31,7 +30,6 @@ function Manifolds.local_metric(
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-        ::TraitList{IsMetricManifold},
         M::MetricManifold{ℝ, <:TestEuclidean, <:TestEuclideanMetric},
         ::Any,
         ::T,
@@ -39,7 +37,6 @@ function Manifolds.local_metric(
     return Diagonal(1.0:manifold_dimension(M))
 end
 function Manifolds.local_metric(
-        ::TraitList{IsMetricManifold},
         M::MetricManifold{ℝ, <:TestEuclidean, <:TestScaledEuclideanMetric},
         ::Any,
         ::T,
@@ -128,6 +125,10 @@ struct NotImplementedMetric <: AbstractMetric end
 
 Manifolds.manifold_dimension(::BaseManifold{N}) where {N} = N
 Manifolds.inner(::BaseManifold, p, X, Y) = 2 * dot(X, Y)
+Manifolds.representation_size(::BaseManifold{N}) where {N} = (N,)
+function Manifolds.rand!(rng::AbstractRNG, ::BaseManifold, p; kwargs...)
+    return randn!(rng, p)
+end
 Manifolds.exp!(::BaseManifold, q, p, X) = q .= p + 2 * X
 Manifolds.exp_fused!(::BaseManifold, q, p, X, t::Number) = q .= p + 2 * t * X
 Manifolds.log!(::BaseManifold, Y, p, q) = Y .= (q - p) / 2
@@ -140,15 +141,14 @@ Manifolds._injectivity_radius(::BaseManifold, ::ExponentialRetraction) = Inf
 Manifolds.injectivity_radius(::BaseManifold, ::Any, ::AbstractRetractionMethod) = Inf
 Manifolds._injectivity_radius(::BaseManifold, ::Any, ::ExponentialRetraction) = Inf
 function Manifolds.local_metric(
-        ::TraitList{<:IsMetricManifold},
-        ::MetricManifold{ℝ, BaseManifold{N}, BaseManifoldMetric{N}},
+        ::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
         p,
         ::InducedBasis,
     ) where {N}
     return 2 * one(p * p')
 end
 function Manifolds.exp!(
-        M::MetricManifold{ℝ, BaseManifold{N}, BaseManifoldMetric{N}},
+        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
         q,
         p,
         X,
@@ -156,7 +156,7 @@ function Manifolds.exp!(
     return exp!(base_manifold(M), q, p, X)
 end
 function Manifolds.exp_fused!(
-        M::MetricManifold{ℝ, BaseManifold{N}, BaseManifoldMetric{N}},
+        M::MetricManifold{ℝ, <:BaseManifold{N}, BaseManifoldMetric{N}},
         q,
         p,
         X,
@@ -193,18 +193,16 @@ function Manifolds.get_vector_orthonormal!(
     return Y .= X
 end
 
-Manifolds.is_default_metric(::BaseManifold, ::DefaultBaseManifoldMetric) = true
+Manifolds.metric(::BaseManifold) = DefaultBaseManifoldMetric()
 
-if VERSION >= v"1.9"
-    const ProjectedPointDistribution =
-        Base.get_extension(Manifolds, :ManifoldsDistributionsExt).ProjectedPointDistribution
+const ProjectedPointDistribution =
+    Base.get_extension(Manifolds, :ManifoldsDistributionsExt).ProjectedPointDistribution
 
-    function Manifolds.projected_distribution(M::BaseManifold, d)
-        return ProjectedPointDistribution(M, d, project!, rand(d))
-    end
-    function Manifolds.projected_distribution(M::BaseManifold, d, p)
-        return ProjectedPointDistribution(M, d, project!, p)
-    end
+function Manifolds.projected_distribution(M::BaseManifold, d)
+    return ProjectedPointDistribution(M, d, project!, rand(d))
+end
+function Manifolds.projected_distribution(M::BaseManifold, d, p)
+    return ProjectedPointDistribution(M, d, project!, p)
 end
 
 function Manifolds.flat!(
@@ -225,15 +223,6 @@ function Manifolds.sharp!(
     v.data .= w.data ./ 2
     return v
 end
-function solve_exp_ode(
-        ::ConnectionManifold{ℝ, TestEuclidean{N}, TestConnection},
-        p,
-        X,
-        t::Number;
-        kwargs...,
-    ) where {N}
-    return X
-end
 
 # test for https://github.com/JuliaManifolds/Manifolds.jl/issues/539
 struct Issue539Metric <: RiemannianMetric end
@@ -245,17 +234,25 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
     @testset "Metric Basics" begin
         @test repr(MetricManifold(Euclidean(3), EuclideanMetric())) ===
             "MetricManifold(Euclidean(3; field=ℝ), EuclideanMetric())"
-        @test repr(IsDefaultMetric(EuclideanMetric())) ===
-            "IsDefaultMetric(EuclideanMetric())"
     end
     @testset "Connection Trait" begin
-        M = ConnectionManifold(Euclidean(3), LeviCivitaConnection())
+        E = Euclidean(3)
+        M = ConnectionManifold(E, LeviCivitaConnection())
         @test is_default_connection(M)
-        @test decorated_manifold(M) == Euclidean(3)
-        @test is_default_connection(Euclidean(3), LeviCivitaConnection())
+        @test decorated_manifold(M) == E
+        @test Manifolds.connection(M) == LeviCivitaConnection()
+        @test is_default_connection(E, LeviCivitaConnection())
+        # Defaults passthroguh for retr/inverse retr and vector transport
+        @test default_retraction_method(M) == default_retraction_method(E)
+        @test default_inverse_retraction_method(M) == default_inverse_retraction_method(E)
+        @test default_vector_transport_method(M) == default_vector_transport_method(E)
+        # same for point type added
+        T = Vector{Float64}
+        @test default_retraction_method(M, T) == default_retraction_method(E, T)
+        @test default_inverse_retraction_method(M, T) == default_inverse_retraction_method(E, T)
+        @test default_vector_transport_method(M, T) == default_vector_transport_method(E, T)
         @test !is_default_connection(TestEuclidean{3}(), LeviCivitaConnection())
-        c = IsDefaultConnection(LeviCivitaConnection())
-        @test ManifoldsBase.parent_trait(c) == Manifolds.IsConnectionManifold()
+        @test Manifolds.connection(TestEuclidean{3}()) == TestConnection()
     end
 
     @testset "solve_exp_ode error message" begin
@@ -276,30 +273,6 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test_throws MethodError Manifolds.exp_fused(N, p, X, 1.0)
         @test_throws MethodError exp!(N, q, p, X)
         @test_throws MethodError Manifolds.exp_fused!(N, q, p, X, 1.0)
-
-        using OrdinaryDiffEq
-        @test is_point(M, exp(M, p, X))
-        @test is_point(M, Manifolds.exp_fused(M, p, X, 1.0))
-
-        # a small trick to check that retract_exp_ode! returns the right value on ConnectionManifolds
-        N2 = ConnectionManifold(E, TestConnection())
-        @test exp(N2, p, X) == X
-    end
-
-    # see also Issue #744 (https://github.com/JuliaManifolds/Manifolds.jl/issues/744)
-    @testset "solve_exp_ode values" begin
-        E = TestEuclidean{3}()
-        g = TestEuclideanMetric()
-        g_scaled = TestScaledEuclideanMetric()
-        M = MetricManifold(E, g)
-        default_retraction_method(::TestEuclidean) = TestRetraction()
-        p = [1.0, 2.0, 3.0]
-        X = [2.0, 3.0, 4.0]
-        t = 2.5
-
-        # we're testing on a flat euclidean space
-        @test exp(M, p, X) ≈ p + X
-        @test Manifolds.exp_fused(M, p, X, t) ≈ p + t * X
     end
 
     @testset "Local Metric Error message" begin
@@ -310,6 +283,14 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
 
         B = induced_basis(M, A, i, TangentSpaceType())
         @test_throws MethodError local_metric(M, p, B)
+        @test_throws MethodError is_flat(M)
+
+        X = [3, 4]
+        Y = [3, 4]
+        Z = [3, 4]
+        @test_throws MethodError inner(M, p, X, Y)
+        @test_throws MethodError Weingarten(M, p, X, Y)
+        @test_throws MethodError Weingarten!(M, Z, p, X, Y)
     end
     @testset "scaled Euclidean metric" begin
         n = 3
@@ -483,6 +464,15 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         end
     end
 
+    @testset "is_metric_function" begin
+        for f in [flat, sharp, log]
+            @test Manifolds.is_metric_function(f)
+        end
+        for f in [manifold_dimension, get_parameters]
+            @test !Manifolds.is_metric_function(f)
+        end
+    end
+
     @testset "Metric decorator" begin
         M = BaseManifold{3}()
         g = BaseManifoldMetric{3}()
@@ -508,6 +498,12 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         X = [0.5, 0.7, 0.11]
         Y = [0.13, 0.17, 0.19]
         q = allocate(p)
+
+        @test is_point(MM, rand(MM))
+        @test is_point(MM, rand(Xoshiro(), MM))
+        @test is_vector(MM, p, rand(MM; vector_at = p))
+        rand!(MM, q)
+        @test is_point(MM, q)
 
         p2 = allocate(p)
         copyto!(MM, p2, p)
@@ -699,9 +695,6 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         X = [-1.1552859627097727, 0.40665559717366767, -0.5365163797547751]
         MM = MetricManifold(M, Issue539Metric())
         @test norm(MM, p, X)^2 ≈ 3
-        @test Manifolds._drop_embedding_type(
-            ManifoldsBase.merge_traits(IsEmbeddedSubmanifold()),
-        ) === ManifoldsBase.EmptyTrait()
         @test get_embedding(MM) === get_embedding(M)
     end
 end

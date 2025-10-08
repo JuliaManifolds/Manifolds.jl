@@ -1,5 +1,5 @@
 @doc raw"""
-    SymplecticStiefel{T,𝔽} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
+    SymplecticStiefel{𝔽, T} <: AbstractEmbeddedManifold{𝔽, DefaultIsometricEmbeddingType}
 
 The symplectic Stiefel manifold consists of all
 ``2n×2k, n ≥ k`` matrices satisfying the requirement
@@ -43,7 +43,7 @@ The constructor for the [`SymplecticStiefel`](@ref) manifold accepts the even co
 dimension ``2n`` and an even number of columns ``2k`` for
 the real symplectic Stiefel manifold with elements ``p ∈ ℝ^{2n×2k}``.
 """
-struct SymplecticStiefel{T, 𝔽} <: AbstractDecoratorManifold{𝔽}
+struct SymplecticStiefel{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
@@ -59,15 +59,11 @@ function SymplecticStiefel(two_n::Int, two_k::Int; parameter::Symbol = :type)
         ),
     )
     size = wrap_type_parameter(parameter, (div(two_n, 2), div(two_k, 2)))
-    return SymplecticStiefel{typeof(size), ℝ}(size)
-end
-
-function active_traits(f, ::SymplecticStiefel, args...)
-    return merge_traits(IsEmbeddedManifold(), IsDefaultMetric(RealSymplecticMetric()))
+    return SymplecticStiefel{ℝ, typeof(size)}(size)
 end
 
 # Define Stiefel as the array fallback
-ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{<:Any, ℝ} StiefelPoint StiefelTangentVector value value
+ManifoldsBase.@default_manifold_fallbacks SymplecticStiefel{ℝ} StiefelPoint StiefelTangentVector value value
 
 function ManifoldsBase.default_inverse_retraction_method(::SymplecticStiefel)
     return CayleyInverseRetraction()
@@ -105,7 +101,7 @@ Check whether `p` is a valid point on the [`SymplecticStiefel`](@ref),
 ``\mathrm{SpSt}(2n, 2k)`` manifold, that is ``p^{+}p`` is the identity,
 ``(⋅)^+`` denotes the [`symplectic_inverse`](@ref).
 """
-function check_point(M::SymplecticStiefel{<:Any, ℝ}, p; kwargs...)
+function check_point(M::SymplecticStiefel{ℝ}, p; kwargs...)
     # Perform check that the matrix lives on the real symplectic manifold:
     if !isapprox(inv(M, p) * p, I; kwargs...)
         return DomainError(
@@ -131,7 +127,7 @@ the set of [`HamiltonianMatrices`])(@ref), where ``(⋅)^+`` denotes the [`sympl
 """
 check_vector(::SymplecticStiefel, ::Any...)
 
-function check_vector(M::SymplecticStiefel{S, 𝔽}, p, X::T; kwargs...) where {S, T, 𝔽}
+function check_vector(M::SymplecticStiefel{𝔽}, p, X::T; kwargs...) where {T, 𝔽}
     n, k = get_parameter(M.size)
     # From Bendokat-Zimmermann: T_pSpSt(2n, 2k) = \{p*H | H^{+} = -H  \}
     H = inv(M, p) * X  # ∈ ℝ^{2k×2k}, should be Hamiltonian.
@@ -146,6 +142,8 @@ function check_vector(M::SymplecticStiefel{S, 𝔽}, p, X::T; kwargs...) where {
     end
     return nothing
 end
+
+metric(::SymplecticStiefel) = RealSymplecticMetric()
 
 @doc raw"""
     exp(::SymplecticStiefel, p, X)
@@ -276,12 +274,16 @@ function exp!(M::SymplecticStiefel, q, p, X)
     return q
 end
 
-function get_embedding(::SymplecticStiefel{TypeParameter{Tuple{n, k}}, 𝔽}) where {n, k, 𝔽}
+function get_embedding(::SymplecticStiefel{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return Euclidean(2 * n, 2 * k; field = 𝔽)
 end
-function get_embedding(M::SymplecticStiefel{Tuple{Int, Int}, 𝔽}) where {𝔽}
+function get_embedding(M::SymplecticStiefel{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(2 * n, 2 * k; field = 𝔽, parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::SymplecticStiefel)
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 @doc raw"""
@@ -289,10 +291,10 @@ end
 
 Return the total space of the [`SymplecticStiefel`](@ref) manifold, which is the corresponding [`SymplecticMatrices`](@ref) manifold.
 """
-function get_total_space(::SymplecticStiefel{TypeParameter{Tuple{n, k}}, ℝ}) where {n, k}
+function get_total_space(::SymplecticStiefel{ℝ, TypeParameter{Tuple{n, k}}}) where {n, k}
     return SymplecticMatrices(2 * n)
 end
-function get_total_space(M::SymplecticStiefel{Tuple{Int, Int}, ℝ})
+function get_total_space(M::SymplecticStiefel{ℝ, Tuple{Int, Int}})
     n, _ = get_parameter(M.size)
     return SymplecticMatrices(2 * n; parameter = :field)
 end
@@ -553,7 +555,7 @@ retraction defined pointwise above is
   \mathcal{R}_p(X) = -p + (H + 2p)(H^+H/4 - A/2 + I_{2k})^{-1}.
 ```
 
-This expression is computed inplace of `q`.
+This expression can be computed in place of `q`.
 """
 retract(::SymplecticStiefel, p, X, ::CayleyRetraction)
 
@@ -606,10 +608,10 @@ function riemannian_gradient!(
     return X
 end
 
-function Base.show(io::IO, ::SymplecticStiefel{TypeParameter{Tuple{n, k}}}) where {n, k}
+function Base.show(io::IO, ::SymplecticStiefel{ℝ, TypeParameter{Tuple{n, k}}}) where {n, k}
     return print(io, "SymplecticStiefel($(2n), $(2k))")
 end
-function Base.show(io::IO, M::SymplecticStiefel{Tuple{Int, Int}})
+function Base.show(io::IO, M::SymplecticStiefel{ℝ, Tuple{Int, Int}})
     n, k = get_parameter(M.size)
     return print(io, "SymplecticStiefel($(2n), $(2k); parameter=:field)")
 end

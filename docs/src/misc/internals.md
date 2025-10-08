@@ -6,12 +6,16 @@ This page documents the internal types and methods of `Manifolds.jl`'s that migh
 
 ```@docs
 Manifolds.eigen_safe
+Manifolds.estimated_sectional_curvature
+Manifolds.estimated_sectional_curvature_matrix
 Manifolds.get_parameter_type
 Manifolds.isnormal
 Manifolds.log_safe
 Manifolds.log_safe!
 Manifolds.mul!_safe
+Manifolds.normal_tvector_distribution
 Manifolds.nzsign
+Manifolds.projected_distribution
 Manifolds.realify
 Manifolds.realify!
 Manifolds.symmetrize
@@ -25,7 +29,6 @@ Manifolds.vec2skew!
 ## Types in Extensions
 
 ```@autodocs
-Modules = [Manifolds]
-Pages = ["../ext/ManifoldsOrdinaryDiffEqDiffEqCallbacksExt.jl"]
+Modules = [Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqDiffEqCallbacksExt)]
 Order = [:type, :function]
 ```
