@@ -521,6 +521,25 @@ end
         end
     end
 
+    @testset "Forwarding" begin
+        M = CenteredMatrices(3, 2)
+        p1 = [1.0 2; 4 5; -5 -7]
+        p2 = [3.0 1; 2 5; -5 -6]
+        @test mean(M, [p1, p2]) == mean([p1, p2])
+
+        for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
+            @test ManifoldsBase.get_forwarding_type_embedding(
+                ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(),
+                M, mf
+            ) === ManifoldsBase.EmbeddedForwardingType()
+
+            @test ManifoldsBase.get_forwarding_type_embedding(
+                ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding}(),
+                M, mf
+            ) === ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
+        end
+    end
+
     @testset "GeodesicInterpolation" begin
         @testset "mean" begin
             rng = MersenneTwister(1212)
@@ -663,6 +682,7 @@ end
                 @test m == mg
                 @test m != mf
             end
+            @test default_approximation_method(P2, cov) === GradientDescentEstimation()
         end
 
         @testset "Sphere default" begin

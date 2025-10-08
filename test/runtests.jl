@@ -133,9 +133,6 @@ end
             end
         end
 
-        @test Manifolds.is_metric_function(flat)
-        @test Manifolds.is_metric_function(sharp)
-
         include_test("notation.jl")
         # starting with tests of simple manifolds
         include_test("manifolds/centered_matrices.jl")
