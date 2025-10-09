@@ -24,7 +24,7 @@ end
 # Avoid double wrapping / unwrap if that happened
 Hamiltonian(A::Hamiltonian) = Hamiltonian(A.value)
 # Conversion
-function Matrix(A::Hamiltonian)
+function Base.Matrix(A::Hamiltonian)
     return Matrix(A.value)
 end
 

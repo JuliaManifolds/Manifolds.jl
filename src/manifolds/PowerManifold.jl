@@ -20,7 +20,7 @@ tangent space of the power manifold.
 """
 struct PowerMetric <: AbstractMetric end
 
-function PowerManifold(
+function ManifoldsBase.PowerManifold(
         M::AbstractManifold{𝔽},
         size::Integer...;
         parameter::Symbol = :field,
