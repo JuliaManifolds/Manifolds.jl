@@ -1,0 +1,17 @@
+name = "ManifoldsTestSuite"
+uuid = "5e32da80-df12-4aac-b9a6-7112ca5ce0db"
+version = "0.1.0"
+authors = ["Ronny Bergmann <git@ronnybergmann.net>"]
+
+[deps]
+Manifolds = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+Manifolds = "0.11.0"
+Random = "1.11.0"
+Test = "1.11.0"
+
+[sources]
+Manifolds = {path = "../../"}
