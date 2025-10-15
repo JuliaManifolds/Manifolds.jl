@@ -130,6 +130,7 @@ function test_manifold(
         test_vector_transport_direction = [true for _ in 1:length(vector_transport_methods)],
         mid_point12 = test_exp_log ? shortest_geodesic(M, pts[1], pts[2], 0.5) : nothing,
     )
+    @warn "This function is deprecated, but still running for $M. Consider replacing it by running the ManifoldsTestSuite.jl instead"
     length(pts) ≥ 3 || error("Not enough points (at least three expected)")
     isapprox(M, pts[1], pts[2]) && error("Points 1 and 2 are equal")
     isapprox(M, pts[1], pts[3]) && error("Points 1 and 3 are equal")

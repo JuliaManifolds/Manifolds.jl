@@ -37,16 +37,16 @@ Test  `exp` and `log` for given points `p, q` and a tangent vector `X` at `p`.
 * `test_fused::Bool=true` test the `exp_fused` function
 """
 function test_exp_log(
-    M::AbstractManifold,
-    p,
-    q,
-    X;
-    atol::Real=0,
-    test_exp::Bool=true,
-    test_mutating::Bool=true,
-    test_log::Bool=true,
-    test_fused::Bool=true,
-)
+        M::AbstractManifold,
+        p,
+        q,
+        X;
+        atol::Real = 0,
+        test_exp::Bool = true,
+        test_mutating::Bool = true,
+        test_log::Bool = true,
+        test_fused::Bool = true,
+    )
     @testset "(Lie group) exp & log" begin
         if test_exp
             # Lie group exp
@@ -56,7 +56,7 @@ function test_exp_log(
                 exp!(M, p2, p, X)
                 @test isapprox(G, p1, p2)
             end
-            @test is_point(G, p1; error=:error)
+            @test is_point(G, p1; error = :error)
             if test_fused
                 p3 = Manifolds.exp_fused(M, p, X, 1.0)
                 if test_mutating
@@ -64,14 +64,14 @@ function test_exp_log(
                     Manifolds.exp_fused!(M, p4, p, X, 1.0)
                     @test isapprox(G, p3, p4)
                 end
-                @test is_point(G, p3; error=:error)
+                @test is_point(G, p3; error = :error)
             end
         end
         if test_log
             Y1 = log(M, p, q)
-            @test is_vector(M, p, Y1; error=:error)
-            @test isapprox(M, p, zero_vector(M, p), log(G, p, p); atol=atol)
-            @test isapprox(M, q, zero_vector(M, q), log(G, q, q); atol=atol)
+            @test is_vector(M, p, Y1; error = :error)
+            @test isapprox(M, p, zero_vector(M, p), log(G, p, p); atol = atol)
+            @test isapprox(M, q, zero_vector(M, q), log(G, q, q); atol = atol)
             if test_mutating
                 Y2 = zero_vector(M, p)
                 log!(G, Y2, p, q)
@@ -111,9 +111,9 @@ Test the manifold dimension
 Requires `manifold_dimension` to be implemented.
 """
 function test_manifold_dimension(
-    M::AbstractManifold,
-    dimension::Union{<:Integer,Missing}=missing,
-)
+        M::AbstractManifold,
+        dimension::Union{<:Integer, Missing} = missing,
+    )
     @testset "manifold_dimension(M)" begin
         d = manifold_dimension(M)
         @test d ≥ 0
@@ -168,7 +168,7 @@ Possible `expectations` are
 * `:atols -> Dict()` a dictionary `function -> atol` for specific function tested.
 * `:repr` is a sting one gets from `repr(M)` or when calling `show`
 """
-function test_manifold(M::AbstractManifold, properties::Dict, expectations=Dict())
+function test_manifold(M::AbstractManifold, properties::Dict, expectations = Dict())
     atol = get(expectations, :atol, 0.0)
     mutating = get(properties, :Mutating, true)
     functions = get(properties, :Functions, Function[])
@@ -176,7 +176,7 @@ function test_manifold(M::AbstractManifold, properties::Dict, expectations=Dict(
     vectors = get(properties, :Vectors, [])
     test_name = get(properties, :Name, "$G")
     function_atols = get(expectations, :atols, Dict())
-    @testset "$(test_name)" begin
+    return @testset "$(test_name)" begin
         #
         #
         # --- E
@@ -199,10 +199,10 @@ function test_manifold(M::AbstractManifold, properties::Dict, expectations=Dict(
                 points[1],
                 points[2],
                 vectors[1];
-                atol=local_atol,
-                test_exp=(exp in functions),
-                test_log=(log in functions),
-                test_mutating=mutating,
+                atol = local_atol,
+                test_exp = (exp in functions),
+                test_log = (log in functions),
+                test_mutating = mutating,
             )
         end
         if (manifold_dimension ∈ functions)
