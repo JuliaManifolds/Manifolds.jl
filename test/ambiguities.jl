@@ -5,10 +5,12 @@ include("header.jl")
 Test whether the signature `sig` has an argument of type `T` as one of its parameters.
 """
 function has_type_in_signature(sig, T::Type)
-    return any(map(Base.unwrap_unionall(sig.sig).parameters) do x
-        xw = Base.rewrap_unionall(x, sig.sig)
-        return (xw isa Type ? xw : xw.T) <: T
-    end)
+    return any(
+        map(Base.unwrap_unionall(sig.sig).parameters) do x
+            xw = Base.rewrap_unionall(x, sig.sig)
+            return (xw isa Type ? xw : xw.T) <: T
+        end
+    )
 end
 
 @testset "Ambiguities" begin
@@ -16,12 +18,11 @@ end
         mbs = Test.detect_ambiguities(ManifoldsBase)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
-        fmbs = filter(x -> !any(has_type_in_signature.(x, Identity)), mbs)
-        FMBS_LIMIT = 35
-        println("Number of ManifoldsBase.jl ambiguities: $(length(fmbs))")
-        @test length(fmbs) <= FMBS_LIMIT
-        if length(fmbs) > FMBS_LIMIT
-            for amb in fmbs
+        MBS_LIMIT = 35
+        println("Number of ManifoldsBase.jl ambiguities: $(length(mbs))")
+        @test length(mbs) <= MBS_LIMIT
+        if length(mbs) > MBS_LIMIT
+            for amb in mbs
                 println(amb)
                 println()
             end
@@ -29,16 +30,15 @@ end
         ms = Test.detect_ambiguities(Manifolds)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
-        fms = filter(x -> !any(has_type_in_signature.(x, Identity)), ms)
-        FMS_LIMIT = 46
-        println("Number of Manifolds.jl ambiguities: $(length(fms))")
-        if length(fms) > FMS_LIMIT
-            for amb in fms
+        MS_LIMIT = 46
+        println("Number of Manifolds.jl ambiguities: $(length(ms))")
+        if length(ms) > MS_LIMIT
+            for amb in ms
                 println(amb)
                 println()
             end
         end
-        @test length(fms) <= FMS_LIMIT
+        @test length(ms) <= MS_LIMIT
         # this test takes way too long to perform regularly
         # @test length(our_base_ambiguities()) <= 4
     else

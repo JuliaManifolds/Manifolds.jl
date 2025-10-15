@@ -114,7 +114,7 @@ using Random
         ]
 
         @test project(Flag(5, 2), p1, X_to_project) ≈
-              project(Grassmann(5, 2), p1, X_to_project)
+            project(Grassmann(5, 2), p1, X_to_project)
         @test ManifoldsBase.embed_project(Flag(5, 2), p1) ≈ p1
     end
 
@@ -139,29 +139,28 @@ using Random
     test_manifold(
         M,
         [p1, p2, p3],
-        test_exp_log=false,
-        default_inverse_retraction_method=PolarInverseRetraction(),
-        test_injectivity_radius=false,
-        test_is_tangent=true,
-        test_project_tangent=true,
-        test_default_vector_transport=false,
-        test_vee_hat=false,
-        default_retraction_method=PolarRetraction(),
-        is_point_atol_multiplier=10.0,
-        projection_atol_multiplier=200.0,
-        retraction_atol_multiplier=10.0,
-        is_tangent_atol_multiplier=4 * 10.0^2,
-        rand_tvector_atol_multiplier=10,
-        retraction_methods=[PolarRetraction()],
-        inverse_retraction_methods=[PolarInverseRetraction()],
-        vector_transport_methods=[ProjectionTransport()],
-        vector_transport_retractions=[PolarRetraction()],
-        vector_transport_inverse_retractions=[PolarInverseRetraction()],
-        test_vector_transport_direction=[true, true, false],
-        mid_point12=nothing,
-        test_inplace=true,
-        test_rand_point=true,
-        test_rand_tvector=true,
+        test_exp_log = false,
+        default_inverse_retraction_method = PolarInverseRetraction(),
+        test_injectivity_radius = false,
+        test_is_tangent = true,
+        test_project_tangent = true,
+        test_default_vector_transport = false,
+        default_retraction_method = PolarRetraction(),
+        is_point_atol_multiplier = 10.0,
+        projection_atol_multiplier = 200.0,
+        retraction_atol_multiplier = 10.0,
+        is_tangent_atol_multiplier = 4 * 10.0^2,
+        rand_tvector_atol_multiplier = 10,
+        retraction_methods = [PolarRetraction()],
+        inverse_retraction_methods = [PolarInverseRetraction()],
+        vector_transport_methods = [ProjectionTransport()],
+        vector_transport_retractions = [PolarRetraction()],
+        vector_transport_inverse_retractions = [PolarInverseRetraction()],
+        test_vector_transport_direction = [true, true, false],
+        mid_point12 = nothing,
+        test_inplace = true,
+        test_rand_point = true,
+        test_rand_tvector = true,
     )
 
     @testset "Orthogonal representation" begin
@@ -249,14 +248,14 @@ using Random
         Y_tmp = similar(X1_ortho)
         rand!(M, q_tmp)
         @test is_point(M, q_tmp)
-        rand!(M, Y_tmp; vector_at=p1_ortho)
+        rand!(M, Y_tmp; vector_at = p1_ortho)
         @test is_vector(M, p1_ortho, Y_tmp)
 
         q_tmp = similar(p1_ortho)
         Y_tmp = similar(X1_ortho)
         rand!(Random.default_rng(), M, q_tmp)
         @test is_point(M, q_tmp)
-        rand!(Random.default_rng(), M, Y_tmp; vector_at=p1_ortho)
+        rand!(Random.default_rng(), M, Y_tmp; vector_at = p1_ortho)
         @test is_vector(M, p1_ortho, Y_tmp)
 
         q_tmp = similar(p1_ortho.value)
@@ -267,18 +266,18 @@ using Random
         @test isapprox(Y_tmp, X1_ortho.value)
 
         @test retract(M, p1_ortho, X1_ortho, QRRetraction()).value ≈
-              retract(OrthogonalMatrices(5), p1_ortho.value, X1_ortho.value, QRRetraction())
+            retract(OrthogonalMatrices(5), p1_ortho.value, X1_ortho.value, QRRetraction())
 
         @testset "field parameters" begin
-            M = Flag(5, 1, 2; parameter=:field)
-            @test get_embedding(M, p1_ortho) == OrthogonalMatrices(5; parameter=:field)
+            M = Flag(5, 1, 2; parameter = :field)
+            @test get_embedding(M, p1_ortho) == OrthogonalMatrices(5; parameter = :field)
         end
     end
 
     @testset "field parameters" begin
-        M = Flag(5, 1, 2; parameter=:field)
+        M = Flag(5, 1, 2; parameter = :field)
         @test Manifolds.get_parameter(M.size)[1] == 5
-        @test get_embedding(M) == Stiefel(5, 2; parameter=:field)
+        @test get_embedding(M) == Stiefel(5, 2; parameter = :field)
         @test repr(M) == "Flag(5, 1, 2; parameter=:field)"
     end
 end

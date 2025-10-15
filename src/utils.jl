@@ -1,11 +1,12 @@
-
 @doc raw"""
     usinc(θ::Real)
 
 Unnormalized version of `sinc` function, i.e. ``\operatorname{usinc}(θ) = \frac{\sin(θ)}{θ}``.
 This is equivalent to `sinc(θ/π)`.
+
+Note that ForwardDiff.jl would return wrong answer at θ=0 if a simple equality was used.
 """
-@inline usinc(θ::Real) = θ == 0 ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
+@inline usinc(θ::Real) = abs(θ) < eps(typeof(θ)) ? one(θ) : isinf(θ) ? zero(θ) : sin(θ) / θ
 
 @doc raw"""
     usinc_from_cos(x::Real)
@@ -33,16 +34,18 @@ Compute a modified `sign(z)` that is always nonzero, i.e. where
     \frac{z}{|z|} & \text{otherwise}
 \end{cases}
 ````
+
+Note that the condition `absz == 0` would be incorrectly handled by ForwardDiff.jl.
 """
-@inline function nzsign(z, absz=abs(z))
+@inline function nzsign(z, absz = abs(z))
     psignz = z / absz
-    return ifelse(iszero(absz), one(psignz), psignz)
+    return ifelse(absz < eps(typeof(absz))^2, one(psignz), psignz)
 end
 
 allocate(p, s::Size{S}) where {S} = similar(p, S...)
 allocate(p::StaticArray, s::Size{S}) where {S} = similar(p, maybesize(s))
-allocate(p, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, S...)
-allocate(p::StaticArray, ::Type{T}, s::Size{S}) where {S,T} = similar(p, T, maybesize(s))
+allocate(p, ::Type{T}, s::Size{S}) where {S, T} = similar(p, T, S...)
+allocate(p::StaticArray, ::Type{T}, s::Size{S}) where {S, T} = similar(p, T, maybesize(s))
 
 quat_promote(T::Type{<:Number}) = typeof(Quaternions.quat(zero(T)))
 
@@ -70,7 +73,7 @@ converted to a `Matrix` before computing the log.
 @inline log_safe(x) = log(x)
 @inline function log_safe(x::StaticMatrix)
     s = Size(x)
-    return SizedMatrix{s[1],s[2]}(log(Matrix(parent(x))))
+    return SizedMatrix{s[1], s[2]}(log(Matrix(parent(x))))
 end
 
 # NOTE: workaround until https://github.com/JuliaLang/julia/pull/39973 or similar is merged
@@ -175,7 +178,7 @@ where
 Y = \begin{pmatrix}A & -B \\ B & A \end{pmatrix}.
 ````
 """
-function realify!(Y, X, ::typeof(ℂ), n=LinearAlgebra.checksquare(X))
+function realify!(Y, X, ::typeof(ℂ), n = LinearAlgebra.checksquare(X))
     for i in 1:n, j in 1:n
         Xr, Xi = reim(X[i, j])
         Y[i, j] = Y[n + i, n + j] = Xr
@@ -197,7 +200,7 @@ See [`realify!`](@ref) for the inverse of this function.
 """
 unrealify!(X, Y, 𝔽)
 
-function unrealify!(X, Y, ::typeof(ℂ), n=LinearAlgebra.checksquare(X))
+function unrealify!(X, Y, ::typeof(ℂ), n = LinearAlgebra.checksquare(X))
     for i in 1:n, j in 1:n
         X[i, j] = complex((Y[i, j] + Y[n + i, n + j]) / 2, (Y[n + i, j] - Y[i, n + j]) / 2)
     end
@@ -272,9 +275,9 @@ function isnormal(x; kwargs...)
 end
 isnormal(::LinearAlgebra.RealHermSymComplexHerm; kwargs...) = true
 
-_eps_safe(::Type{T}) where {T<:Integer} = zero(T)
-_eps_safe(::Type{T}) where {T<:Real} = eps(T)
-_eps_safe(::Type{T}) where {T<:Number} = eps(real(T))
+_eps_safe(::Type{T}) where {T <: Integer} = zero(T)
+_eps_safe(::Type{T}) where {T <: Real} = eps(T)
+_eps_safe(::Type{T}) where {T <: Number} = eps(real(T))
 
 max_eps(xs...) = maximum(_eps_safe ∘ eltype, xs)
 
@@ -316,13 +319,13 @@ of `M` spanned by `X` and `Y`. The circumference calculation method has a tenden
 return curvature values larger than the exact ones.
 """
 function estimated_sectional_curvature(
-    M::AbstractManifold,
-    p,
-    X,
-    Y;
-    r::Real=1e-3,
-    N::Int=10000,
-)
+        M::AbstractManifold,
+        p,
+        X,
+        Y;
+        r::Real = 1.0e-3,
+        N::Int = 10000,
+    )
     circumference = 0.0
     p_i = similar(p)
     p_ip1 = similar(p)
@@ -345,19 +348,19 @@ Estimate the matrix of sectional curvatures of manifold `M` at point `p` using
 surface spanned by vectors `i`  and `j` from basis `B`.
 """
 function estimated_sectional_curvature_matrix(
-    M::AbstractManifold,
-    p,
-    B::AbstractBasis;
-    r::Real=1e-3,
-    N_pts::Int=10000,
-)
+        M::AbstractManifold,
+        p,
+        B::AbstractBasis;
+        r::Real = 1.0e-3,
+        N_pts::Int = 10000,
+    )
     V = get_vectors(M, p, get_basis(M, p, B))
     N = length(V)
     result = zeros(N, N)
     for (i, e_i) in enumerate(V)
         for (j, e_j) in enumerate(V)
             if i < j
-                result[i, j] = estimated_sectional_curvature(M, p, e_i, e_j; r=r, N=N_pts)
+                result[i, j] = estimated_sectional_curvature(M, p, e_i, e_j; r = r, N = N_pts)
                 result[j, i] = result[i, j]
             end
         end
@@ -366,13 +369,14 @@ function estimated_sectional_curvature_matrix(
 end
 
 function _ensure_nonzero_rng_determinant!(
-    rng,
-    M::AbstractManifold,
-    pX;
-    atol::Real=sqrt(eps(real(eltype(pX)))),
-    kwargs...,
-)
+        rng,
+        M::AbstractManifold,
+        pX;
+        atol::Real = sqrt(eps(real(eltype(pX)))),
+        kwargs...,
+    )
     while abs(det(pX)) < atol
         rand!(rng, M, pX; kwargs...)
     end
+    return
 end

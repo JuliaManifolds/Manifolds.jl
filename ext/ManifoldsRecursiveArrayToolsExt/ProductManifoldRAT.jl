@@ -1,12 +1,11 @@
-
 function adjoint_Jacobi_field(
-    M::ProductManifold,
-    p::ArrayPartition,
-    q::ArrayPartition,
-    t,
-    X::ArrayPartition,
-    β::Tβ,
-) where {Tβ}
+        M::ProductManifold,
+        p::ArrayPartition,
+        q::ArrayPartition,
+        t,
+        X::ArrayPartition,
+        β::Tβ,
+    ) where {Tβ}
     return ArrayPartition(
         map(
             adjoint_Jacobi_field,
@@ -21,13 +20,13 @@ function adjoint_Jacobi_field(
 end
 
 function jacobi_field(
-    M::ProductManifold,
-    p::ArrayPartition,
-    q::ArrayPartition,
-    t,
-    X::ArrayPartition,
-    β::Tβ,
-) where {Tβ}
+        M::ProductManifold,
+        p::ArrayPartition,
+        q::ArrayPartition,
+        t,
+        X::ArrayPartition,
+        β::Tβ,
+    ) where {Tβ}
     return ArrayPartition(
         map(
             jacobi_field,
@@ -38,5 +37,16 @@ function jacobi_field(
             submanifold_components(M, X),
             ntuple(_ -> β, length(M.manifolds)),
         )...,
+    )
+end
+
+function riemannian_gradient(M::ProductManifold, p::ArrayPartition, X::ArrayPartition)
+    return ArrayPartition(
+        map(
+            riemannian_gradient,
+            M.manifolds,
+            submanifold_components(M, p),
+            submanifold_components(M, X),
+        ),
     )
 end

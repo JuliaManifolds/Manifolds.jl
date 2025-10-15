@@ -16,14 +16,14 @@ description in [ZimmermannHueper:2022](@cite).
 
 Construct the submersion metric on the Stiefel manifold with the parameter ``α``.
 """
-struct StiefelSubmersionMetric{T<:Real} <: RiemannianMetric
+struct StiefelSubmersionMetric{T <: Real} <: RiemannianMetric
     α::T
-    StiefelSubmersionMetric(α::T) where {T<:Real} = new{T}(α)
+    StiefelSubmersionMetric(α::T) where {T <: Real} = new{T}(α)
 end
 
 @doc raw"""
-    q = exp(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric}, p, X)
-    exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric}, q, p, X)
+    q = exp(M::MetricManifold{ℝ,<:Stiefel{ℝ},<:StiefelSubmersionMetric}, p, X)
+    exp!(M::MetricManifold{ℝ,<:Stiefel{ℝ},<:StiefelSubmersionMetric}, q, p, X)
 
 Compute the exponential map on the [`Stiefel(n,k)`](@ref) manifold with respect to the
 [`StiefelSubmersionMetric`](@ref).
@@ -40,9 +40,9 @@ This implementation is based on [ZimmermannHueper:2022](@cite).
 For ``k < \frac{n}{2}`` the exponential is computed more efficiently using
 [`StiefelFactorization`](@ref).
 """
-exp(::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric}, ::Any...)
+exp(::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, ::Any...)
 
-function exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric}, q, p, X)
+function exp!(M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, q, p, X)
     n, k = get_parameter(M.manifold.size)
     α = metric(M).α
     T = Base.promote_eltype(q, p, X)
@@ -78,7 +78,7 @@ function exp!(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetr
 end
 
 @doc raw"""
-    inner(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric}, p, X, Y)
+    inner(M::MetricManifold{ℝ,<:Stiefel{ℝ},<:StiefelSubmersionMetric}, p, X, Y)
 
 Compute the inner product on the [`Stiefel`](@ref) manifold with respect to the
 [`StiefelSubmersionMetric`](@ref). The formula reads
@@ -87,7 +87,7 @@ g_p(X,Y) = \operatorname{tr}\bigl( X^{\mathrm{T}}(I_n - \frac{2α+1}{2(α+1)}pp^
 ```
 where ``α`` is the parameter of the metric.
 """
-function inner(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric}, p, X, Y)
+function inner(M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, p, X, Y)
     n, k = get_parameter(M.manifold.size)
     α = metric(M).α
     T = typeof(one(Base.promote_eltype(p, X, Y, α)))
@@ -101,19 +101,17 @@ function inner(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMet
 end
 
 function inverse_retract_project!(
-    M::MetricManifold{ℝ,<:Stiefel,<:StiefelSubmersionMetric},
-    X,
-    p,
-    q,
-)
+        M::MetricManifold{ℝ, <:Stiefel, <:StiefelSubmersionMetric},
+        X,
+        p,
+        q,
+    )
     return inverse_retract_project!(base_manifold(M), X, p, q)
 end
 
 @doc doc"""
     inverse_retract(
-        M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric},
-        p,
-        q,
+        M::MetricManifold{ℝ,<:Stiefel{ℝ},<:StiefelSubmersionMetric}, p, q,
         method::ShootingInverseRetraction,
     )
 
@@ -122,9 +120,7 @@ Compute the inverse retraction using [`ShootingInverseRetraction`](@extref `Mani
 In general the retraction is computed using the generic shooting method.
 
     inverse_retract(
-        M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric},
-        p,
-        q,
+        M::MetricManifold{ℝ,<:Stiefel{ℝ},<:StiefelSubmersionMetric}, p, q,
         method::ShootingInverseRetraction{
             ExponentialRetraction,
             ProjectionInverseRetraction,
@@ -138,30 +134,30 @@ For ``k < \frac{n}{2}`` the retraction is computed more efficiently using
 [`StiefelFactorization`](@ref).
 """
 inverse_retract(
-    ::MetricManifold{ℝ,<:Stiefel,<:StiefelSubmersionMetric},
+    ::MetricManifold{ℝ, <:Stiefel, <:StiefelSubmersionMetric},
     ::Any,
     ::Any,
     ::ShootingInverseRetraction,
 )
 
 function inverse_retract_shooting!(
-    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric},
-    X::AbstractMatrix,
-    p::AbstractMatrix,
-    q::AbstractMatrix,
-    method::ShootingInverseRetraction{
-        ExponentialRetraction,
-        ProjectionInverseRetraction,
-        <:Union{ProjectionTransport,ScaledVectorTransport{ProjectionTransport}},
-    },
-)
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric},
+        X::AbstractMatrix,
+        p::AbstractMatrix,
+        q::AbstractMatrix,
+        method::ShootingInverseRetraction{
+            ExponentialRetraction,
+            ProjectionInverseRetraction,
+            <:Union{ProjectionTransport, ScaledVectorTransport{ProjectionTransport}},
+        },
+    )
     n, k = get_parameter(M.manifold.size)
     if k > div(n, 2)
         # fall back to default method
         invoke(
             inverse_retract_shooting!,
             Tuple{
-                MetricManifold{ℝ,typeof(M.manifold)},
+                MetricManifold{ℝ, typeof(M.manifold)},
                 typeof(X),
                 typeof(p),
                 typeof(q),
@@ -185,7 +181,7 @@ function inverse_retract_shooting!(
 end
 
 @doc raw"""
-    log(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric}, p, q; kwargs...)
+    log(M::MetricManifold{ℝ,<:Stiefel{ℝ},<:StiefelSubmersionMetric}, p, q; kwargs...)
 
 Compute the logarithmic map on the [`Stiefel(n,k)`](@ref) manifold with respect to the [`StiefelSubmersionMetric`](@ref).
 
@@ -198,34 +194,29 @@ that documentation for details. Their defaults are:
 - `max_iterations=1_000`
 """
 function log(
-    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric},
-    p,
-    q;
-    tolerance=sqrt(eps(float(real(Base.promote_eltype(p, q))))),
-    max_iterations=1_000,
-    num_transport_points=4,
-)
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, p, q;
+        tolerance = sqrt(eps(float(real(Base.promote_eltype(p, q))))),
+        max_iterations = 1_000,
+        num_transport_points = 4,
+    )
     X = allocate_result(M, log, p, q)
     log!(
-        M,
-        X,
-        p,
-        q;
-        tolerance=tolerance,
-        max_iterations=max_iterations,
-        num_transport_points=num_transport_points,
+        M, X, p, q;
+        tolerance = tolerance,
+        max_iterations = max_iterations,
+        num_transport_points = num_transport_points,
     )
     return X
 end
 function log!(
-    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric},
-    X,
-    p,
-    q;
-    tolerance=sqrt(eps(float(real(eltype(X))))),
-    max_iterations=1_000,
-    num_transport_points=4,
-)
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric},
+        X,
+        p,
+        q;
+        tolerance = sqrt(eps(float(real(eltype(X))))),
+        max_iterations = 1_000,
+        num_transport_points = 4,
+    )
     retraction = ExponentialRetraction()
     initial_inverse_retraction = ProjectionInverseRetraction()
     vector_transport = ScaledVectorTransport(ProjectionTransport())
@@ -241,8 +232,8 @@ function log!(
 end
 
 @doc raw"""
-    Y = riemannian_Hessian(M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},StiefelSubmersionMetric}, p, G, H, X)
-    riemannian_Hessian!(MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},StiefelSubmersionMetric}, Y, p, G, H, X)
+    Y = riemannian_Hessian(M::MetricManifold{ℝ,<:Stiefel{ℝ},StiefelSubmersionMetric}, p, G, H, X)
+    riemannian_Hessian!(MetricManifold{ℝ,<:Stiefel{ℝ},StiefelSubmersionMetric}, Y, p, G, H, X)
 
 Compute the Riemannian Hessian ``\operatorname{Hess} f(p)[X]`` given the
 Euclidean gradient ``∇ f(\tilde p)`` in `G` and the Euclidean Hessian ``∇^2 f(\tilde p)[\tilde X]`` in `H`,
@@ -264,21 +255,12 @@ where ``P = I-pp^{\mathrm{H}}``.
 Compared to Eq. (5.6) we have that their ``α_0 = 1``and ``\alpha_1 =  \frac{2α+1}{2(α+1)} + 1``.
 """
 riemannian_Hessian(
-    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric},
-    p,
-    G,
-    H,
-    X,
+    M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, p, G, H, X,
 )
 
 function riemannian_Hessian!(
-    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric},
-    Y,
-    p,
-    G,
-    H,
-    X,
-)
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}, Y, p, G, H, X,
+    )
     α = metric(M).α
     Gp = symmetrize(G' * p)
     Z = symmetrize((I - p * p') * G * p')
@@ -331,7 +313,7 @@ efficient than working with the full matrices.
 !!! warning
     This type is intended strictly for internal use and should not be directly used.
 """
-struct StiefelFactorization{UT,ZT} <: AbstractManifoldPoint
+struct StiefelFactorization{UT, ZT} <: AbstractManifoldPoint
     U::UT
     Z::ZT
 end
@@ -371,7 +353,7 @@ function Base.eltype(F::StiefelFactorization)
     return Base.promote_eltype(F.U, F.Z)
 end
 Base.size(F::StiefelFactorization) = (size(F.U, 1), size(F.Z, 2))
-function Base.similar(F::StiefelFactorization, ::Type{T}=eltype(F), sz=size(F)) where {T}
+function Base.similar(F::StiefelFactorization, ::Type{T} = eltype(F), sz = size(F)) where {T}
     size(F) == sz || throw(DimensionMismatch("size of factorization must be preserved"))
     return StiefelFactorization(convert(AbstractArray{T}, F.U), similar(F.Z, T))
 end
@@ -392,54 +374,51 @@ function Broadcast.BroadcastStyle(::Type{<:StiefelFactorization})
     return Broadcast.Style{StiefelFactorization}()
 end
 function Broadcast.BroadcastStyle(
-    ::Broadcast.AbstractArrayStyle{0},
-    b::Broadcast.Style{<:StiefelFactorization},
-)
+        ::Broadcast.AbstractArrayStyle{0},
+        b::Broadcast.Style{<:StiefelFactorization},
+    )
     return b
 end
 Broadcast.broadcastable(v::StiefelFactorization) = v
 function Base.copyto!(
-    dest::StiefelFactorization,
-    bc::Broadcast.Broadcasted{Broadcast.Style{StiefelFactorization}},
-)
-    bc.args isa Tuple{Vararg{Union{Manifolds.StiefelFactorization,Real}}} ||
+        dest::StiefelFactorization,
+        bc::Broadcast.Broadcasted{Broadcast.Style{StiefelFactorization}},
+    )
+    bc.args isa Tuple{Vararg{Union{Manifolds.StiefelFactorization, Real}}} ||
         throw(ArgumentError("Not implemented"))
     bc.f ∈ (identity, *, +, -, /) || throw(ArgumentError("Not implemented"))
     Zargs = map(x -> x isa Manifolds.StiefelFactorization ? x.Z : x, bc.args)
     broadcast!(bc.f, dest.Z, Zargs...)
     return dest
 end
-function project!(M::Stiefel{<:Any,ℝ}, q::StiefelFactorization, p::StiefelFactorization)
+function project!(M::Stiefel{ℝ}, q::StiefelFactorization, p::StiefelFactorization)
     n, k = get_parameter(M.size)
     project!(Stiefel(2k, k), q.Z, p.Z)
     return q
 end
 function project!(
-    M::Stiefel{<:Any,ℝ},
-    Y::StiefelFactorization,
-    p::StiefelFactorization,
-    X::StiefelFactorization,
-)
+        M::Stiefel{ℝ}, Y::StiefelFactorization, p::StiefelFactorization, X::StiefelFactorization,
+    )
     n, k = get_parameter(M.size)
     project!(Stiefel(2k, k), Y.Z, p.Z, X.Z)
     return Y
 end
 function inner(
-    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric},
-    p::StiefelFactorization,
-    X::StiefelFactorization,
-    Y::StiefelFactorization,
-)
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric},
+        p::StiefelFactorization,
+        X::StiefelFactorization,
+        Y::StiefelFactorization,
+    )
     n, k = get_parameter(M.manifold.size)
     Msub = MetricManifold(Stiefel(2k, k), metric(M))
     return inner(Msub, p.Z, X.Z, Y.Z)
 end
 function exp!(
-    M::MetricManifold{ℝ,<:Stiefel{<:Any,ℝ},<:StiefelSubmersionMetric},
-    q::StiefelFactorization,
-    ::StiefelFactorization,
-    X::StiefelFactorization,
-)
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric},
+        q::StiefelFactorization,
+        ::StiefelFactorization,
+        X::StiefelFactorization,
+    )
     n, k = get_parameter(M.manifold.size)
     α = metric(M).α
     @views begin # COV_EXCL_LINE

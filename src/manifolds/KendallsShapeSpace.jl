@@ -1,14 +1,11 @@
-
 @doc raw"""
     KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
 
 Kendall's shape space, defined as quotient of a [`KendallsPreShapeSpace`](@ref)
-(represented by n×k matrices) by the action [`ColumnwiseMultiplicationAction`](@ref).
+(represented by n×k matrices) modulo column wise application of a single rotation.
 
 The space can be interpreted as tuples of ``k`` points in ``ℝ^n`` up to simultaneous
 translation and scaling and rotation of all points [Kendall:1984](@cite)[Kendall:1989](@cite).
-
-This manifold possesses the [`IsQuotientManifold`](@ref) trait.
 
 # Constructor
 
@@ -20,22 +17,25 @@ struct KendallsShapeSpace{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol=:type)
+function KendallsShapeSpace(n::Int, k::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, k))
     return KendallsShapeSpace{typeof(size)}(size)
 end
 
-function active_traits(f, ::KendallsShapeSpace, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsQuotientManifold())
+#
+# A small internal function, given two shapes p, q as matrices (n,k) with columns of points,
+# find the best alignment (without mirroring) to rotate q to p; this is done by
+# the closed form solution of the orthogonal Procrustes problem – and a carefull check to avoid that we mirror points.
+#
+function _optimal_alignment(::KendallsShapeSpace, p, q)
+    Xmul = p * transpose(q)
+    F = svd(Xmul)
+    L = size(Xmul)[2]
+    UVt = F.U * F.Vt
+    Ostar = det(UVt) ≥ 0 ? UVt : F.U * Diagonal([i < L ? 1 : -1 for i in 1:L]) * F.Vt
+    return convert(typeof(Xmul), Ostar)
 end
 
-function get_orbit_action(M::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
-    return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n))
-end
-function get_orbit_action(M::KendallsShapeSpace{Tuple{Int,Int}})
-    n, k = get_parameter(M.size)
-    return ColumnwiseMultiplicationAction(M, SpecialOrthogonal(n; parameter=:field))
-end
 
 @doc raw"""
     get_total_space(::KendallsShapeSpace)
@@ -44,18 +44,16 @@ Return the total space of the [`KendallsShapeSpace`](@ref) manifold, which is th
 [`KendallsPreShapeSpace`](@ref) manifold.
 """
 get_total_space(::KendallsShapeSpace)
-function get_total_space(::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+function get_total_space(::KendallsShapeSpace{TypeParameter{Tuple{n, k}}}) where {n, k}
     return KendallsPreShapeSpace(n, k)
 end
-function get_total_space(M::KendallsShapeSpace{Tuple{Int,Int}})
+function get_total_space(M::KendallsShapeSpace{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
-    return KendallsPreShapeSpace(n, k; parameter=:field)
+    return KendallsPreShapeSpace(n, k; parameter = :field)
 end
 
 function distance(M::KendallsShapeSpace, p, q)
-    A = get_orbit_action(M)
-    a = optimal_alignment(A, p, q)
-    rot_q = apply(A, a, q)
+    rot_q = _optimal_alignment(M, p, q) * q
     return distance(get_embedding(M), p, rot_q)
 end
 
@@ -84,12 +82,16 @@ Get the manifold in which [`KendallsShapeSpace`](@ref) `M` is embedded, i.e.
 """
 get_embedding(::KendallsShapeSpace)
 
-function get_embedding(::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+function get_embedding(::KendallsShapeSpace{TypeParameter{Tuple{n, k}}}) where {n, k}
     return KendallsPreShapeSpace(n, k)
 end
-function get_embedding(M::KendallsShapeSpace{Tuple{Int,Int}})
+function get_embedding(M::KendallsShapeSpace{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
-    return KendallsPreShapeSpace(n, k; parameter=:field)
+    return KendallsPreShapeSpace(n, k; parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::KendallsShapeSpace)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
 """
@@ -114,11 +116,11 @@ function inner(M::KendallsShapeSpace, p, X, Y)
     return inner(get_embedding(M), p, Xh, Yh)
 end
 
-function _isapprox(M::KendallsShapeSpace, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
-    return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
+function _isapprox(M::KendallsShapeSpace, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
+    return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end
-function _isapprox(M::KendallsShapeSpace, p, q; atol=sqrt(max_eps(p, q)), kwargs...)
-    return isapprox(distance(M, p, q), 0; atol=atol, kwargs...)
+function _isapprox(M::KendallsShapeSpace, p, q; atol = sqrt(max_eps(p, q)), kwargs...)
+    return isapprox(distance(M, p, q), 0; atol = atol, kwargs...)
 end
 
 """
@@ -137,9 +139,7 @@ See the [`exp`](@ref exp(::KendallsShapeSpace, ::Any, ::Any)onential map for mor
 log(M::KendallsShapeSpace, p, q)
 
 function log!(M::KendallsShapeSpace, X, p, q)
-    A = get_orbit_action(M)
-    a = optimal_alignment(A, p, q)
-    rot_q = apply(A, a, q)
+    rot_q = _optimal_alignment(M, p, q) * q
     return log!(get_embedding(M), X, p, rot_q)
 end
 
@@ -186,23 +186,23 @@ manifold `M` by generating a random point in the embedding.
 When `vector_at` is not `nothing`, return a random vector from the tangent space
 with mean zero and standard deviation `σ`.
 """
-rand(::KendallsShapeSpace; σ::Real=1.0)
+rand(::KendallsShapeSpace; σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::KendallsShapeSpace,
-    pX;
-    vector_at=nothing,
-    σ::Real=one(eltype(pX)),
-)
-    rand!(rng, get_embedding(M), pX; vector_at=vector_at, σ=σ)
+        rng::AbstractRNG,
+        M::KendallsShapeSpace,
+        pX;
+        vector_at = nothing,
+        σ::Real = one(eltype(pX)),
+    )
+    rand!(rng, get_embedding(M), pX; vector_at = vector_at, σ = σ)
     return pX
 end
 
-function Base.show(io::IO, ::KendallsShapeSpace{TypeParameter{Tuple{n,k}}}) where {n,k}
+function Base.show(io::IO, ::KendallsShapeSpace{TypeParameter{Tuple{n, k}}}) where {n, k}
     return print(io, "KendallsShapeSpace($n, $k)")
 end
-function Base.show(io::IO, M::KendallsShapeSpace{Tuple{Int,Int}})
+function Base.show(io::IO, M::KendallsShapeSpace{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
     return print(io, "KendallsShapeSpace($n, $k; parameter=:field)")
 end

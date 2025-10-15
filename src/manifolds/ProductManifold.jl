@@ -1,8 +1,3 @@
-
-function active_traits(f, ::ProductManifold, args...)
-    return merge_traits(IsDefaultMetric(ProductMetric()))
-end
-
 function allocate_coordinates(::ProductManifold, p, T, n::Int)
     return allocate(submanifold_component(p, 1), T, n)
 end
@@ -20,6 +15,8 @@ function adjoint_Jacobi_field!(M::ProductManifold, Y, p, q, t, X, β::Tβ) where
     )
     return Y
 end
+
+metric(::ProductManifold) = ProductMetric()
 
 @doc raw"""
     flat(M::ProductManifold, p, X::FVector{TangentSpaceType})
@@ -52,6 +49,17 @@ Return the volume of [`ProductManifold`](@extref `ManifoldsBase.ProductManifold`
 `M`, i.e. product of volumes of the manifolds `M` is constructed from.
 """
 manifold_volume(M::ProductManifold) = mapreduce(manifold_volume, *, M.manifolds)
+
+function riemannian_gradient!(M::ProductManifold, Y, p, X)
+    map(
+        riemannian_gradient!,
+        M.manifolds,
+        submanifold_components(M, Y),
+        submanifold_components(M, p),
+        submanifold_components(M, X),
+    )
+    return Y
+end
 
 @doc raw"""
     Y = riemannian_Hessian(M::ProductManifold, p, G, H, X)

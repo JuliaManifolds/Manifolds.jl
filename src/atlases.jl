@@ -1,4 +1,3 @@
-
 """
     AbstractAtlas{𝔽}
 
@@ -32,22 +31,22 @@ In short: The coordinates with respect to a basis are used together with a retra
 [`AbstractRetractionMethod`](@extref `ManifoldsBase.AbstractRetractionMethod`), [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`)
 """
 struct RetractionAtlas{
-    𝔽,
-    TRetr<:AbstractRetractionMethod,
-    TInvRetr<:AbstractInverseRetractionMethod,
-    TBasis<:AbstractBasis{<:Any,TangentSpaceType},
-} <: AbstractAtlas{𝔽}
+        𝔽,
+        TRetr <: AbstractRetractionMethod,
+        TInvRetr <: AbstractInverseRetractionMethod,
+        TBasis <: AbstractBasis{<:Any, TangentSpaceType},
+    } <: AbstractAtlas{𝔽}
     retr::TRetr
     invretr::TInvRetr
     basis::TBasis
 end
 
 function RetractionAtlas(
-    retr::AbstractRetractionMethod,
-    invretr::AbstractInverseRetractionMethod,
-)
+        retr::AbstractRetractionMethod,
+        invretr::AbstractInverseRetractionMethod,
+    )
     basis = DefaultOrthonormalBasis()
-    return RetractionAtlas{ℝ,typeof(retr),typeof(invretr),typeof(basis)}(
+    return RetractionAtlas{ℝ, typeof(retr), typeof(invretr), typeof(basis)}(
         retr,
         invretr,
         basis,
@@ -243,13 +242,13 @@ Note that, similarly to [`get_parameters`](@ref), this method should fail the sa
 [`AbstractAtlas`](@ref), [`get_parameters`](@ref), [`get_point`](@ref)
 """
 function transition_map(
-    M::AbstractManifold,
-    A_from::AbstractAtlas,
-    i_from,
-    A_to::AbstractAtlas,
-    i_to,
-    a,
-)
+        M::AbstractManifold,
+        A_from::AbstractAtlas,
+        i_from,
+        A_to::AbstractAtlas,
+        i_to,
+        a,
+    )
     return get_parameters(M, A_to, i_to, get_point(M, A_from, i_from, a))
 end
 
@@ -258,14 +257,14 @@ function transition_map(M::AbstractManifold, A::AbstractAtlas, i_from, i_to, a)
 end
 
 function transition_map!(
-    M::AbstractManifold,
-    y,
-    A_from::AbstractAtlas,
-    i_from,
-    A_to::AbstractAtlas,
-    i_to,
-    a,
-)
+        M::AbstractManifold,
+        y,
+        A_from::AbstractAtlas,
+        i_from,
+        A_to::AbstractAtlas,
+        i_to,
+        a,
+    )
     return get_parameters!(M, y, A_to, i_to, get_point(M, A_from, i_from, a))
 end
 
@@ -293,14 +292,14 @@ end
 Compute [`transition_map_diff`](@ref) on given arguments and save the result in `c_out`.
 """
 function transition_map_diff!(
-    M::AbstractManifold,
-    c_out,
-    A::AbstractAtlas,
-    i_from,
-    a,
-    c_in,
-    i_to,
-)
+        M::AbstractManifold,
+        c_out,
+        A::AbstractAtlas,
+        i_from,
+        a,
+        c_in,
+        i_to,
+    )
     old_B = induced_basis(M, A, i_from)
     new_B = induced_basis(M, A, i_to)
     p_final = get_point(M, A, i_from, a)
@@ -320,29 +319,29 @@ chart (`A`, `i`).
 induced_basis(M::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType)
 
 function induced_basis(
-    ::AbstractManifold,
-    A::RetractionAtlas{
-        <:AbstractRetractionMethod,
-        <:AbstractInverseRetractionMethod,
-        <:DefaultOrthonormalBasis,
-    },
-    i,
-    p,
-    ::TangentSpaceType,
-)
+        ::AbstractManifold,
+        A::RetractionAtlas{
+            <:AbstractRetractionMethod,
+            <:AbstractInverseRetractionMethod,
+            <:DefaultOrthonormalBasis,
+        },
+        i,
+        p,
+        ::TangentSpaceType,
+    )
     return A.basis
 end
 function induced_basis(
-    M::AbstractManifold,
-    A::RetractionAtlas{
-        <:AbstractRetractionMethod,
-        <:AbstractInverseRetractionMethod,
-        <:DefaultOrthonormalBasis,
-    },
-    i,
-    p,
-    ::CotangentSpaceType,
-)
+        M::AbstractManifold,
+        A::RetractionAtlas{
+            <:AbstractRetractionMethod,
+            <:AbstractInverseRetractionMethod,
+            <:DefaultOrthonormalBasis,
+        },
+        i,
+        p,
+        ::CotangentSpaceType,
+    )
     return dual_basis(M, p, A.basis)
 end
 
@@ -374,7 +373,7 @@ and the set ``\{X_1,\ldots,X_n\}`` is the chart-induced basis of ``T_p\mathcal M
 
 [`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`), [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`)
 """
-struct InducedBasis{𝔽,VST<:VectorSpaceType,TA<:AbstractAtlas,TI} <: AbstractBasis{𝔽,VST}
+struct InducedBasis{𝔽, VST <: VectorSpaceType, TA <: AbstractAtlas, TI} <: AbstractBasis{𝔽, VST}
     vs::VST
     A::TA
     i::TI
@@ -391,12 +390,12 @@ space of type `vs`. Returns an object of type [`InducedBasis`](@ref).
 [`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`), [`AbstractBasis`](@extref `ManifoldsBase.AbstractBasis`)
 """
 function induced_basis(
-    ::AbstractManifold{𝔽},
-    A::AbstractAtlas,
-    i,
-    VST::VectorSpaceType=TangentSpaceType(),
-) where {𝔽}
-    return InducedBasis{𝔽,typeof(VST),typeof(A),typeof(i)}(VST, A, i)
+        ::AbstractManifold{𝔽},
+        A::AbstractAtlas,
+        i,
+        VST::VectorSpaceType = TangentSpaceType(),
+    ) where {𝔽}
+    return InducedBasis{𝔽, typeof(VST), typeof(A), typeof(i)}(VST, A, i)
 end
 
 """
@@ -407,17 +406,17 @@ Injectivity radius of `get_point` for chart `i` from an [`AbstractAtlas`](@ref) 
 inverse_chart_injectivity_radius(M::AbstractManifold, A::AbstractAtlas, i)
 
 function dual_basis(
-    M::AbstractManifold{𝔽},
-    ::Any,
-    B::InducedBasis{𝔽,TangentSpaceType},
-) where {𝔽}
+        M::AbstractManifold{𝔽},
+        ::Any,
+        B::InducedBasis{𝔽, TangentSpaceType},
+    ) where {𝔽}
     return induced_basis(M, B.A, B.i, CotangentSpaceType())
 end
 function dual_basis(
-    M::AbstractManifold{𝔽},
-    ::Any,
-    B::InducedBasis{𝔽,CotangentSpaceType},
-) where {𝔽}
+        M::AbstractManifold{𝔽},
+        ::Any,
+        B::InducedBasis{𝔽, CotangentSpaceType},
+    ) where {𝔽}
     return induced_basis(M, B.A, B.i, TangentSpaceType())
 end
 

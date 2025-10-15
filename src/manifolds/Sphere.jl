@@ -5,12 +5,8 @@ An abstract type to represent a unit sphere that is represented isometrically in
 """
 abstract type AbstractSphere{𝔽} <: AbstractDecoratorManifold{𝔽} end
 
-function active_traits(f, ::AbstractSphere, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
-end
-
 @doc raw"""
-    Sphere{T,𝔽} <: AbstractSphere{𝔽}
+    Sphere{𝔽, T} <: AbstractSphere{𝔽}
 
 The (unit) sphere manifold ``𝕊^{n}`` is the set of all unit norm vectors in ``𝔽^{n+1}``.
 The sphere is represented in the embedding, i.e.
@@ -49,16 +45,16 @@ and the [`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited f
 Generate the (real-valued) sphere ``𝕊^{n} ⊂ ℝ^{n+1}``, where `field` can also be used to
 generate the complex- and quaternionic-valued sphere.
 """
-struct Sphere{T,𝔽} <: AbstractSphere{𝔽}
+struct Sphere{𝔽, T} <: AbstractSphere{𝔽}
     size::T
 end
-function Sphere(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function Sphere(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return Sphere{typeof(size),field}(size)
+    return Sphere{field, typeof(size)}(size)
 end
 
 @doc raw"""
-    ArraySphere{T<:Tuple,𝔽} <: AbstractSphere{𝔽}
+    ArraySphere{𝔽, T} <: AbstractSphere{𝔽}
 
 The (unit) sphere manifold ``𝕊^{n₁,n₂,...,nᵢ}`` is the set of all unit (Frobenius) norm elements of
 ``𝔽^{n₁,n₂,...,nᵢ}``, where ``𝔽\in\{ℝ,ℂ,ℍ\}. The generalized sphere is
@@ -69,7 +65,7 @@ tensors of unit norm. The set formally reads
 𝕊^{n_1, n_2, …, n_i} := \bigl\{ p \in 𝔽^{n_1, n_2, …, n_i}\ \big|\ \lVert p \rVert = 1 \bigr\}
 ````
 
-where ``𝔽\in\{ℝ,ℂ,ℍ\}``. Setting ``i=1`` and ``𝔽=ℝ``  this  simplifies to unit vectors in ``ℝ^n``, see
+where ``𝔽∈\{ℝ,ℂ,ℍ\}``. Setting ``i=1`` and ``𝔽=ℝ``  this  simplifies to unit vectors in ``ℝ^n``, see
 [`Sphere`](@ref) for this special case. Note that compared to this classical case,
 the argument for the generalized case here is given by the dimension of the embedding.
 This means that `Sphere(2)` and `ArraySphere(3)` are the same manifold.
@@ -80,10 +76,10 @@ The tangent space at point ``p`` is given by
 T_p 𝕊^{n_1, n_2, …, n_i} := \bigl\{ X ∈ 𝔽^{n_1, n_2, …, n_i}\ |\ \Re(⟨p,X⟩) = 0 \bigr \},
 ````
 
-where ``𝔽\in\{ℝ,ℂ,ℍ\}`` and ``⟨⋅,⋅⟩`` denotes the (Frobenius) inner product in the
+where ``𝔽∈\{ℝ,ℂ,ℍ\}`` and ``⟨⋅,⋅⟩`` denotes the (Frobenius) inner product in the
 embedding ``𝔽^{n_1, n_2, …, n_i}``.
 
-This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
+This manifold is modelled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
 [`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
@@ -93,16 +89,16 @@ several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product 
 
 Generate sphere in ``𝔽^{n_1, n_2, …, n_i}``, where ``𝔽`` defaults to the real-valued case ``ℝ``.
 """
-struct ArraySphere{T,𝔽} <: AbstractSphere{𝔽}
+struct ArraySphere{𝔽, T} <: AbstractSphere{𝔽}
     size::T
 end
 function ArraySphere(
-    n::Vararg{Int,I};
-    field::AbstractNumbers=ℝ,
-    parameter::Symbol=:type,
-) where {I}
+        n::Vararg{Int, I};
+        field::AbstractNumbers = ℝ,
+        parameter::Symbol = :type,
+    ) where {I}
     size = wrap_type_parameter(parameter, n)
-    return ArraySphere{typeof(size),field}(size)
+    return ArraySphere{field, typeof(size)}(size)
 end
 
 """
@@ -131,20 +127,23 @@ and orthogonal to `p`.
 The tolerance for the last test can be set using the `kwargs...`.
 """
 function check_vector(
-    M::AbstractSphere,
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
-    if !isapprox(abs(real(dot(p, X))), 0; atol=atol, kwargs...)
+        M::AbstractSphere,
+        p,
+        X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
+    absdot = abs(real(dot(p, X)))
+    if !isapprox(absdot, 0; atol = atol, kwargs...)
         return DomainError(
-            abs(dot(p, X)),
-            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding.",
+            absdot,
+            "The vector $(X) is not a tangent vector to $(p) on $(M), since it is not orthogonal in the embedding (tolerance: $atol).",
         )
     end
     return nothing
 end
+
+metric(::AbstractSphere) = EuclideanMetric()
 
 function diagonalizing_projectors(M::AbstractSphere{ℝ}, p, X)
     X_norm = norm(M, p, X)
@@ -203,7 +202,7 @@ function exp_fused!(M::AbstractSphere, q, p, X, t::Number)
     return q
 end
 
-function get_basis_diagonalizing(M::Sphere{<:Any,ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ})
+function get_basis_diagonalizing(M::Sphere{ℝ}, p, B::DiagonalizingOrthonormalBasis{ℝ})
     n = get_parameter(M.size)[1]
     A = zeros(n + 1, n + 1)
     A[1, :] = transpose(p)
@@ -247,10 +246,14 @@ function get_coordinates_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNum
 end
 
 function get_embedding(M::AbstractSphere{𝔽}) where {𝔽}
-    return Euclidean(representation_size(M)...; field=𝔽)
+    return Euclidean(representation_size(M)...; field = 𝔽)
 end
-function get_embedding(M::Sphere{<:Tuple,𝔽}) where {𝔽}
-    return Euclidean(representation_size(M)...; field=𝔽, parameter=:field)
+function get_embedding(M::Sphere{𝔽, <:Tuple}) where {𝔽}
+    return Euclidean(representation_size(M)...; field = 𝔽, parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::AbstractSphere)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
 @doc raw"""
@@ -335,16 +338,16 @@ return the local representation of the metric in a [`DefaultOrthonormalBasis`](@
 the diagonal matrix of size ``n×n`` with ones on the diagonal, since the metric is obtained
 from the embedding by restriction to the tangent space ``T_p\mathcal M`` at ``p``.
 """
-function local_metric(M::Sphere{Tuple{Int},ℝ}, p, ::DefaultOrthonormalBasis)
+function local_metric(M::Sphere{ℝ, Tuple{Int}}, p, ::DefaultOrthonormalBasis)
     n = get_parameter(M.size)[1]
     return Diagonal(ones(eltype(p), n))
 end
 function local_metric(
-    ::Sphere{TypeParameter{Tuple{n}},ℝ},
-    p,
-    B::DefaultOrthonormalBasis,
-) where {n}
-    return Diagonal(ones(SVector{n,eltype(p)}))
+        ::Sphere{ℝ, TypeParameter{Tuple{n}}},
+        p,
+        B::DefaultOrthonormalBasis,
+    ) where {n}
+    return Diagonal(ones(SVector{n, eltype(p)}))
 end
 
 @doc raw"""
@@ -458,12 +461,12 @@ project(::AbstractSphere, ::Any, ::Any)
 project!(::AbstractSphere, Y, p, X) = (Y .= X .- real(dot(p, X)) .* p)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::AbstractSphere,
-    pX;
-    vector_at=nothing,
-    σ=one(eltype(pX)),
-)
+        rng::AbstractRNG,
+        M::AbstractSphere,
+        pX;
+        vector_at = nothing,
+        σ = one(eltype(pX)),
+    )
     if vector_at === nothing
         project!(M, pX, randn(rng, eltype(pX), representation_size(M)))
     else
@@ -507,17 +510,17 @@ function ManifoldsBase.retract_project_fused!(M::AbstractSphere, q, p, X, t::Num
     return project!(M, q, q)
 end
 
-function Base.show(io::IO, ::Sphere{TypeParameter{Tuple{n}},𝔽}) where {n,𝔽}
+function Base.show(io::IO, ::Sphere{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return print(io, "Sphere($(n), $(𝔽))")
 end
-function Base.show(io::IO, M::Sphere{Tuple{Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::Sphere{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "Sphere($(n), $(𝔽); parameter=:field)")
 end
-function Base.show(io::IO, ::ArraySphere{TypeParameter{tn},𝔽}) where {tn,𝔽}
+function Base.show(io::IO, ::ArraySphere{𝔽, TypeParameter{tn}}) where {tn, 𝔽}
     return print(io, "ArraySphere($(join(tn.parameters, ", ")); field=$(𝔽))")
 end
-function Base.show(io::IO, M::ArraySphere{<:Tuple,𝔽}) where {𝔽}
+function Base.show(io::IO, M::ArraySphere{𝔽, <:Tuple}) where {𝔽}
     n = M.size
     return print(io, "ArraySphere($(join(n, ", ")); field=$(𝔽), parameter=:field)")
 end
@@ -647,7 +650,7 @@ point (1, 0, ..., 0) (called `:south`).
 """
 struct StereographicAtlas <: AbstractAtlas{ℝ} end
 
-function get_chart_index(::Sphere{<:Any,ℝ}, ::StereographicAtlas, p)
+function get_chart_index(::Sphere{ℝ}, ::StereographicAtlas, p)
     if p[1] < 0
         return :south
     else
@@ -655,7 +658,7 @@ function get_chart_index(::Sphere{<:Any,ℝ}, ::StereographicAtlas, p)
     end
 end
 
-function get_parameters!(::Sphere{<:Any,ℝ}, x, ::StereographicAtlas, i::Symbol, p)
+function get_parameters!(::Sphere{ℝ}, x, ::StereographicAtlas, i::Symbol, p)
     if i === :north
         return x .= p[2:end] ./ (1 + p[1])
     else
@@ -663,7 +666,7 @@ function get_parameters!(::Sphere{<:Any,ℝ}, x, ::StereographicAtlas, i::Symbol
     end
 end
 
-function get_point!(::Sphere{<:Any,ℝ}, p, ::StereographicAtlas, i::Symbol, x)
+function get_point!(::Sphere{ℝ}, p, ::StereographicAtlas, i::Symbol, x)
     xnorm2 = dot(x, x)
     if i === :north
         p[1] = (1 - xnorm2) / (xnorm2 + 1)
@@ -675,12 +678,12 @@ function get_point!(::Sphere{<:Any,ℝ}, p, ::StereographicAtlas, i::Symbol, x)
 end
 
 function get_coordinates_induced_basis!(
-    M::Sphere{<:Any,ℝ},
-    Y,
-    p,
-    X,
-    B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
-)
+        M::Sphere{ℝ},
+        Y,
+        p,
+        X,
+        B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas},
+    )
     n = get_parameter(M.size)[1]
     if B.i === :north
         for i in 1:n
@@ -695,12 +698,12 @@ function get_coordinates_induced_basis!(
 end
 
 function get_vector_induced_basis!(
-    M::Sphere{<:Any,ℝ},
-    Y,
-    p,
-    X,
-    B::InducedBasis{ℝ,TangentSpaceType,<:StereographicAtlas},
-)
+        M::Sphere{ℝ},
+        Y,
+        p,
+        X,
+        B::InducedBasis{ℝ, TangentSpaceType, <:StereographicAtlas},
+    )
     n = get_parameter(M.size)[1]
     a = get_parameters(M, B.A, B.i, p)
     mult = inv(1 + dot(a, a))^2
@@ -726,10 +729,10 @@ function get_vector_induced_basis!(
 end
 
 function local_metric(
-    M::Sphere{<:Any,ℝ},
-    p,
-    B::InducedBasis{ℝ,TangentSpaceType,StereographicAtlas,Symbol},
-)
+        M::Sphere{ℝ},
+        p,
+        B::InducedBasis{ℝ, TangentSpaceType, StereographicAtlas, Symbol},
+    )
     a = get_parameters(M, B.A, B.i, p)
     return (4 / (1 + dot(a, a))^2) * I
 end

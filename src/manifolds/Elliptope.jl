@@ -46,9 +46,7 @@ struct Elliptope{T} <: AbstractDecoratorManifold{ℝ}
     size::T
 end
 
-active_traits(f, ::Elliptope, args...) = merge_traits(IsEmbeddedManifold())
-
-function Elliptope(n::Int, k::Int; parameter::Symbol=:type)
+function Elliptope(n::Int, k::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, k))
     return Elliptope{typeof(size)}(size)
 end
@@ -64,7 +62,7 @@ Since ``p`` is by construction positive semidefinite, this is not checked.
 The tolerances for positive semidefiniteness and unit trace can be set using the `kwargs...`.
 """
 function check_point(M::Elliptope, q; kwargs...)
-    row_norms_sq = sum(abs2, q; dims=2)
+    row_norms_sq = sum(abs2, q; dims = 2)
     if !all(isapprox.(row_norms_sq, 1.0; kwargs...))
         return DomainError(
             row_norms_sq,
@@ -86,15 +84,15 @@ The tolerance for the base point check and zero diagonal can be set using the `k
 Note that symmetric of ``X`` holds by construction an is not explicitly checked.
 """
 function check_vector(
-    M::Elliptope,
-    q,
-    Y::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
+        M::Elliptope,
+        q,
+        Y::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
     X = q * Y' + Y * q'
     n = diag(X)
-    if !all(isapprox.(n, 0.0; atol=atol, kwargs...))
+    if !all(isapprox.(n, 0.0; atol = atol, kwargs...))
         return DomainError(
             n,
             "The vector $(X) is not a tangent to a point on $(M) (represented py $(q) and $(Y), since its diagonal is nonzero.",
@@ -103,12 +101,16 @@ function check_vector(
     return nothing
 end
 
-function get_embedding(::Elliptope{TypeParameter{Tuple{n,k}}}) where {n,k}
+function get_embedding(::Elliptope{TypeParameter{Tuple{n, k}}}) where {n, k}
     return Euclidean(n, k)
 end
-function get_embedding(M::Elliptope{Tuple{Int,Int}})
+function get_embedding(M::Elliptope{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
-    return Euclidean(n, k; parameter=:field)
+    return Euclidean(n, k; parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::Elliptope)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
 """
@@ -139,8 +141,8 @@ project `q` onto the manifold [`Elliptope`](@ref) `M`, by normalizing the rows o
 """
 project(::Elliptope, ::Any)
 
-project!(::Elliptope, r, q) = copyto!(r, q ./ (sqrt.(sum(abs2, q, dims=2))))
-project(::Elliptope, q) = q ./ (sqrt.(sum(abs2, q, dims=2)))
+project!(::Elliptope, r, q) = copyto!(r, q ./ (sqrt.(sum(abs2, q, dims = 2))))
+project(::Elliptope, q) = q ./ (sqrt.(sum(abs2, q, dims = 2)))
 
 """
     project(M::Elliptope, q, Y)
@@ -150,7 +152,7 @@ Project `Y` onto the tangent space at `q`, i.e. row-wise onto the oblique manifo
 project(::Elliptope, ::Any...)
 
 function project!(::Elliptope, Z, q, Y)
-    Y2 = (Y' - q' .* sum(q' .* Y', dims=1))'
+    Y2 = (Y' - q' .* sum(q' .* Y', dims = 1))'
     Z .= Y2 - q * lyap(q' * q, q' * Y2 - Y2' * q)
     return Z
 end
@@ -181,10 +183,10 @@ on ``\mathcal M = \mathcal E(n,k)``.
 """
 representation_size(M::Elliptope) = get_parameter(M.size)
 
-function Base.show(io::IO, ::Elliptope{TypeParameter{Tuple{n,k}}}) where {n,k}
+function Base.show(io::IO, ::Elliptope{TypeParameter{Tuple{n, k}}}) where {n, k}
     return print(io, "Elliptope($(n), $(k))")
 end
-function Base.show(io::IO, M::Elliptope{Tuple{Int,Int}})
+function Base.show(io::IO, M::Elliptope{Tuple{Int, Int}})
     n, k = get_parameter(M.size)
     return print(io, "Elliptope($(n), $(k); parameter=:field)")
 end

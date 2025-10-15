@@ -1,5 +1,5 @@
 @doc raw"""
-    SkewHermitianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    SkewHermitianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  ``\operatorname{SkewHerm}(n)`` consisting of the real- or
 complex-valued skew-hermitian matrices of size ``n×n``, i.e. the set
@@ -7,6 +7,7 @@ complex-valued skew-hermitian matrices of size ``n×n``, i.e. the set
 ````math
 \operatorname{SkewHerm}(n) = \bigl\{p  ∈ 𝔽^{n×n}\ \big|\ p^{\mathrm{H}} = -p \bigr\},
 ````
+
 where ``⋅^{\mathrm{H}}`` denotes the Hermitian, i.e. complex conjugate transpose,
 and the field ``𝔽 ∈ \{ ℝ, ℂ, ℍ\}``.
 
@@ -22,13 +23,13 @@ which is also reflected in the
 
 Generate the manifold of ``n×n`` skew-hermitian matrices.
 """
-struct SkewHermitianMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct SkewHermitianMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function SkewHermitianMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function SkewHermitianMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return SkewHermitianMatrices{typeof(size),field}(size)
+    return SkewHermitianMatrices{field, typeof(size)}(size)
 end
 
 @doc raw"""
@@ -41,21 +42,17 @@ This is equivalent to [`SkewHermitianMatrices(n, ℝ)`](@ref).
 
     SkewSymmetricMatrices(n::Int)
 """
-const SkewSymmetricMatrices{T} = SkewHermitianMatrices{T,ℝ}
+const SkewSymmetricMatrices{T} = SkewHermitianMatrices{ℝ, T}
 
-function SkewSymmetricMatrices(n::Int; parameter::Symbol=:type)
-    return SkewHermitianMatrices(n; parameter=parameter)
-end
-
-function active_traits(f, ::SkewHermitianMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
+function SkewSymmetricMatrices(n::Int; parameter::Symbol = :type)
+    return SkewHermitianMatrices(n; parameter = parameter)
 end
 
 function allocation_promotion_function(
-    ::SkewHermitianMatrices{<:Any,ℂ},
-    ::typeof(get_vector),
-    args::Tuple,
-)
+        ::SkewHermitianMatrices{ℂ},
+        ::typeof(get_vector),
+        args::Tuple,
+    )
     return complex
 end
 
@@ -68,7 +65,7 @@ whether `p` is a skew-hermitian matrix of size `(n,n)` with values from the corr
 
 The tolerance for the skew-symmetry of `p` can be set using `kwargs...`.
 """
-function check_point(M::SkewHermitianMatrices{<:Any,𝔽}, p; kwargs...) where {𝔽}
+function check_point(M::SkewHermitianMatrices{𝔽}, p; kwargs...) where {𝔽}
     if !isapprox(p, -p'; kwargs...)
         return DomainError(
             norm(p + p'),
@@ -110,12 +107,12 @@ function get_coordinates_orthonormal!(M::SkewSymmetricMatrices, Y, p, X, ::RealN
     return Y
 end
 function get_coordinates_orthonormal!(
-    M::SkewHermitianMatrices{<:Any,ℂ},
-    Y,
-    p,
-    X,
-    ::ComplexNumbers,
-)
+        M::SkewHermitianMatrices{ℂ},
+        Y,
+        p,
+        X,
+        ::ComplexNumbers,
+    )
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(Y) == (dim,)
@@ -135,12 +132,16 @@ function get_coordinates_orthonormal!(
     return Y
 end
 
-function get_embedding(::SkewHermitianMatrices{TypeParameter{Tuple{N}},𝔽}) where {N,𝔽}
-    return Euclidean(N, N; field=𝔽)
+function get_embedding(::SkewHermitianMatrices{𝔽, TypeParameter{Tuple{N}}}) where {N, 𝔽}
+    return Euclidean(N, N; field = 𝔽)
 end
-function get_embedding(M::SkewHermitianMatrices{Tuple{Int},𝔽}) where {𝔽}
+function get_embedding(M::SkewHermitianMatrices{𝔽, Tuple{Int}}) where {𝔽}
     N = get_parameter(M.size)[1]
-    return Euclidean(N, N; field=𝔽, parameter=:field)
+    return Euclidean(N, N; field = 𝔽, parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::SkewHermitianMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 function get_vector_orthonormal!(M::SkewSymmetricMatrices, Y, p, X, ::RealNumbers)
@@ -160,12 +161,12 @@ function get_vector_orthonormal!(M::SkewSymmetricMatrices, Y, p, X, ::RealNumber
     return Y
 end
 function get_vector_orthonormal!(
-    M::SkewHermitianMatrices{<:Any,ℂ},
-    Y,
-    p,
-    X,
-    ::ComplexNumbers,
-)
+        M::SkewHermitianMatrices{ℂ},
+        Y,
+        p,
+        X,
+        ::ComplexNumbers,
+    )
     N = get_parameter(M.size)[1]
     dim = manifold_dimension(M)
     @assert size(X) == (dim,)
@@ -205,12 +206,12 @@ where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_di
 only the upper triangular elements of the matrix being unique, and the second term
 corresponds to the constraint that the real part of the diagonal be zero.
 """
-function manifold_dimension(M::SkewHermitianMatrices{<:Any,𝔽}) where {𝔽}
+function manifold_dimension(M::SkewHermitianMatrices{𝔽}) where {𝔽}
     N = get_parameter(M.size)[1]
     return div(N * (N + 1), 2) * real_dimension(𝔽) - N
 end
 
-function number_of_coordinates(M::SkewHermitianMatrices{<:Any,ℂ}, ::AbstractBasis{ℂ})
+function number_of_coordinates(M::SkewHermitianMatrices{ℂ}, ::AbstractBasis{ℂ})
     return manifold_dimension(M)
 end
 
@@ -252,15 +253,15 @@ function representation_size(M::SkewHermitianMatrices)
     return (N, N)
 end
 
-function Base.show(io::IO, ::SkewHermitianMatrices{TypeParameter{Tuple{n}},F}) where {n,F}
-    return print(io, "SkewHermitianMatrices($(n), $(F))")
+function Base.show(io::IO, ::SkewHermitianMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
+    return print(io, "SkewHermitianMatrices($(n), $(𝔽))")
 end
 function Base.show(io::IO, ::SkewSymmetricMatrices{TypeParameter{Tuple{n}}}) where {n}
     return print(io, "SkewSymmetricMatrices($(n))")
 end
-function Base.show(io::IO, M::SkewHermitianMatrices{Tuple{Int},F}) where {F}
+function Base.show(io::IO, M::SkewHermitianMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return print(io, "SkewHermitianMatrices($(n), $(F); parameter=:field)")
+    return print(io, "SkewHermitianMatrices($(n), $(𝔽); parameter=:field)")
 end
 function Base.show(io::IO, M::SkewSymmetricMatrices{Tuple{Int}})
     n = get_parameter(M.size)[1]

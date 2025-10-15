@@ -11,7 +11,7 @@ include("../header.jl")
         @test manifold_dimension(M) == 1
         @test !is_flat(M)
         @test !is_point(M, -1.0)
-        @test_throws DomainError is_point(M, -1.0; error=:error)
+        @test_throws DomainError is_point(M, -1.0; error = :error)
         @test is_vector(M, 1.0, 0.0)
         @test vector_transport_to(M, 1.0, 3.0, 2.0, ParallelTransport()) == 6.0
         @test retract(M, 1.0, 1.0) == exp(M, 1.0, 1.0)
@@ -34,9 +34,9 @@ include("../header.jl")
         @test change_metric(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2]
         @test change_representer(M, EuclideanMetric(), [1, 2], [3, 4]) == [3, 4 * 2^2]
         @test get_coordinates(N, [2.0, 4.0], [1.0, 10.0], DefaultOrthonormalBasis()) ==
-              [0.5, 2.5]
+            [0.5, 2.5]
         @test get_vector(N, [2.0, 4.0], [0.5, 2.5], DefaultOrthonormalBasis()) ==
-              [1.0, 10.0]
+            [1.0, 10.0]
         tmp = zeros(2)
         get_coordinates!(N, tmp, [2.0, 4.0], [1.0, 10.0], DefaultOrthonormalBasis())
         @test tmp == [0.5, 2.5]
@@ -51,14 +51,13 @@ include("../header.jl")
             test_manifold(
                 M,
                 pts,
-                test_vector_spaces=false,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                test_vee_hat=false,
-                is_mutating=false,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                test_vector_spaces = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
+                is_mutating = false,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
         end
     end
@@ -69,11 +68,10 @@ include("../header.jl")
             test_manifold(
                 M2,
                 pts2,
-                test_vector_spaces=false,
-                test_project_tangent=true,
-                test_musical_isomorphisms=true,
-                test_default_vector_transport=true,
-                test_vee_hat=false,
+                test_vector_spaces = false,
+                test_project_tangent = true,
+                test_musical_isomorphisms = true,
+                test_default_vector_transport = true,
             )
         end
     end
@@ -99,16 +97,16 @@ include("../header.jl")
         X = fill(NaN)
         rand!(M, p)
         @test is_point(M, p)
-        rand!(M, X; vector_at=p)
+        rand!(M, X; vector_at = p)
         @test is_vector(M, p, X)
     end
 
     @testset "field parameter" begin
-        M1 = PositiveVectors(3; parameter=:field)
+        M1 = PositiveVectors(3; parameter = :field)
         @test repr(M1) == "PositiveVectors(3; parameter=:field)"
-        M2 = PositiveMatrices(3, 4; parameter=:field)
+        M2 = PositiveMatrices(3, 4; parameter = :field)
         @test repr(M2) == "PositiveMatrices(3, 4; parameter=:field)"
-        M3 = PositiveArrays(3, 4, 5; parameter=:field)
+        M3 = PositiveArrays(3, 4, 5; parameter = :field)
         @test repr(M3) == "PositiveArrays(3, 4, 5; parameter=:field)"
     end
 end

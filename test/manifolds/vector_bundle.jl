@@ -43,11 +43,11 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test default_inverse_retraction_method(TB) === m_prod_invretr
         @test default_retraction_method(TB) == m_prod_retr
         @test default_vector_transport_method(TB) isa
-              Manifolds.FiberBundleProductVectorTransport
+            Manifolds.FiberBundleProductVectorTransport
         CTB = CotangentBundle(M)
         @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
         @test sprint(show, FiberBundle(TestVectorSpaceType(), M)) ==
-              "FiberBundle(TestVectorSpaceType(), Sphere(2, ℝ), Manifolds.FiberBundleProductVectorTransport{ParallelTransport, ParallelTransport}(ParallelTransport(), ParallelTransport()))"
+            "FiberBundle(TestVectorSpaceType(), Sphere(2, ℝ), Manifolds.FiberBundleProductVectorTransport{ParallelTransport, ParallelTransport}(ParallelTransport(), ParallelTransport()))"
 
         @test Manifolds.fiber_dimension(M, ManifoldsBase.CotangentSpaceType()) == 2
         @test base_manifold(TangentBundle(M)) == M
@@ -55,7 +55,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
     types = [Vector{Float64}]
     TEST_FLOAT32 && push!(types, Vector{Float32})
-    TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
+    TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
 
     for T in types
         p = convert(T, [1.0, 0.0, 0.0])
@@ -80,24 +80,23 @@ struct TestVectorSpaceType <: VectorSpaceType end
             test_manifold(
                 TB,
                 pts_tb,
-                default_inverse_retraction_method=m_prod_invretr,
-                default_retraction_method=m_prod_retr,
-                inverse_retraction_methods=[m_prod_invretr],
-                retraction_methods=[m_prod_retr, m_sasaki],
-                test_exp_log=false,
-                test_injectivity_radius=false,
-                test_tangent_vector_broadcasting=true,
-                test_vee_hat=true,
-                test_project_tangent=true,
-                test_project_point=true,
-                test_default_vector_transport=true,
-                vector_transport_methods=[],
-                basis_types_vecs=basis_types,
-                projection_atol_multiplier=4,
-                test_inplace=true,
-                test_representation_size=false,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                default_inverse_retraction_method = m_prod_invretr,
+                default_retraction_method = m_prod_retr,
+                inverse_retraction_methods = [m_prod_invretr],
+                retraction_methods = [m_prod_retr, m_sasaki],
+                test_exp_log = false,
+                test_injectivity_radius = false,
+                test_tangent_vector_broadcasting = true,
+                test_project_tangent = true,
+                test_project_point = true,
+                test_default_vector_transport = true,
+                vector_transport_methods = [],
+                basis_types_vecs = basis_types,
+                projection_atol_multiplier = 4,
+                test_inplace = true,
+                test_representation_size = false,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
 
             Xir = allocate(pts_tb[1])
@@ -129,17 +128,16 @@ struct TestVectorSpaceType <: VectorSpaceType end
             test_manifold(
                 TpM,
                 pts_TpM,
-                test_injectivity_radius=true,
-                test_tangent_vector_broadcasting=true,
-                test_vee_hat=false,
-                test_project_tangent=true,
-                test_project_point=true,
-                test_default_vector_transport=true,
-                basis_types_vecs=basis_types,
-                projection_atol_multiplier=4,
-                test_inplace=true,
-                test_rand_point=true,
-                test_rand_tvector=true,
+                test_injectivity_radius = true,
+                test_tangent_vector_broadcasting = true,
+                test_project_tangent = true,
+                test_project_point = true,
+                test_default_vector_transport = true,
+                basis_types_vecs = basis_types,
+                projection_atol_multiplier = 4,
+                test_inplace = true,
+                test_rand_point = true,
+                test_rand_tvector = true,
             )
 
             @test Manifolds.bundle_transport_to(
@@ -151,20 +149,20 @@ struct TestVectorSpaceType <: VectorSpaceType end
         end
     end
 
-    @test TangentBundle{ℝ,Sphere{2,ℝ}} ==
-          VectorBundle{ℝ,Manifolds.TangentSpaceType,Sphere{2,ℝ}}
-    @test CotangentBundle{ℝ,Sphere{2,ℝ}} ==
-          VectorBundle{ℝ,Manifolds.CotangentSpaceType,Sphere{2,ℝ}}
+    @test TangentBundle{ℝ, Sphere{ℝ, 2}} ==
+        VectorBundle{ℝ, Manifolds.TangentSpaceType, Sphere{ℝ, 2}}
+    @test CotangentBundle{ℝ, Sphere{ℝ, 2}} ==
+        VectorBundle{ℝ, Manifolds.CotangentSpaceType, Sphere{ℝ, 2}}
 
     @testset "tensor product" begin
         TT = Manifolds.TensorProductType(TangentSpaceType(), TangentSpaceType())
         @test sprint(show, TT) ==
-              "TensorProductType(TangentSpaceType(), TangentSpaceType())"
+            "TensorProductType(TangentSpaceType(), TangentSpaceType())"
         @test vector_space_dimension(Sphere(2), TT) == 4
         @test vector_space_dimension(Sphere(3), TT) == 9
         @test base_manifold(Fiber(Sphere(2), [1.0, 0.0, 0.0], TT)) == M
         @test sprint(show, Fiber(Sphere(2), [1.0, 0.0, 0.0], TT)) ==
-              "VectorSpaceFiber{ℝ, Sphere{TypeParameter{Tuple{2}}, ℝ}, Manifolds.TensorProductType{Tuple{TangentSpaceType, TangentSpaceType}}, Vector{Float64}}(Sphere(2, ℝ), [1.0, 0.0, 0.0], TensorProductType(TangentSpaceType(), TangentSpaceType()))"
+            "VectorSpaceFiber{ℝ, Sphere{ℝ, TypeParameter{Tuple{2}}}, Manifolds.TensorProductType{Tuple{TangentSpaceType, TangentSpaceType}}, Vector{Float64}}(Sphere(2, ℝ), [1.0, 0.0, 0.0], TensorProductType(TangentSpaceType(), TangentSpaceType()))"
     end
 
     @testset "Error messages" begin

@@ -21,15 +21,15 @@ Random.seed!(10)
             m2 = NLSolveInverseRetraction(
                 PolarRetraction(),
                 [1.0, 2.0, 3.0];
-                project_tangent=true,
-                project_point=true,
-                autodiff=:forward,
+                project_tangent = true,
+                project_point = true,
+                autodiff = :forward,
             )
             @test m2.retraction === PolarRetraction()
             @test m2.X0 == [1.0, 2.0, 3.0]
             @test m2.project_tangent
             @test m2.project_point
-            @test (; m2.nlsolve_kwargs...) == (; autodiff=:forward)
+            @test (; m2.nlsolve_kwargs...) == (; autodiff = :forward)
         end
         @testset "Euclidean" begin
             M = Euclidean(3)
@@ -61,10 +61,10 @@ Random.seed!(10)
             # vector must be nonzero to converge
             X0 = randn(3) .* eps()
             inv_retr_method =
-                NLSolveInverseRetraction(ProjectionRetraction(), X0; project_point=true)
+                NLSolveInverseRetraction(ProjectionRetraction(), X0; project_point = true)
             X = inverse_retract(M, p, q, inv_retr_method)
-            @test is_vector(M, p, X; atol=1e-9)
-            @test X ≈ X_exp atol = 1e-8
+            @test is_vector(M, p, X; atol = 1.0e-9)
+            @test X ≈ X_exp atol = 1.0e-8
             @test_throws OutOfInjectivityRadiusError inverse_retract(
                 M,
                 p,

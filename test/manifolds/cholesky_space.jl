@@ -8,7 +8,7 @@ include("../header.jl")
 
     types = [Matrix{Float64}]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64, 9})
 
     for T in types
         A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]
@@ -23,18 +23,17 @@ include("../header.jl")
         test_manifold(
             M,
             pts;
-            test_injectivity_radius=false,
-            test_default_vector_transport=true,
-            vector_transport_methods=[
+            test_injectivity_radius = false,
+            test_default_vector_transport = true,
+            vector_transport_methods = [
                 ParallelTransport(),
                 SchildsLadderTransport(),
                 PoleLadderTransport(),
             ],
-            test_vee_hat=false,
-            exp_log_atol_multiplier=8.0,
-            test_inplace=true,
-            test_rand_point=true,
-            test_rand_tvector=true,
+            exp_log_atol_multiplier = 8.0,
+            test_inplace = true,
+            test_rand_point = true,
+            test_rand_tvector = true,
         )
     end
     @testset "Test Error cases in is_point and is_vector" begin
@@ -43,22 +42,22 @@ include("../header.jl")
         pt3f = [2.0 0.0 1.0; 0.0 1.0 0.0; 0.0 0.0 4.0] # no lower and nonsym
         pt4 = [2.0 0.0 0.0; 1.0 2.0 0.0; 0.0 0.0 4.0]
         @test !is_point(M, pt1f)
-        @test_throws DomainError is_point(M, pt1f; error=:error)
+        @test_throws DomainError is_point(M, pt1f; error = :error)
         @test !is_point(M, pt2f)
-        @test_throws DomainError is_point(M, pt2f; error=:error)
+        @test_throws DomainError is_point(M, pt2f; error = :error)
         @test !is_point(M, pt3f)
-        @test_throws DomainError is_point(M, pt3f; error=:error)
+        @test_throws DomainError is_point(M, pt3f; error = :error)
         @test is_point(M, pt4)
         @test !is_vector(M, pt3f, pt1f)
-        @test_throws DomainError is_vector(M, pt3f, pt1f; error=:error)
+        @test_throws DomainError is_vector(M, pt3f, pt1f; error = :error)
         @test !is_vector(M, pt4, pt1f)
-        @test_throws DomainError is_vector(M, pt4, pt1f; error=:error)
+        @test_throws DomainError is_vector(M, pt4, pt1f; error = :error)
         @test !is_vector(M, pt4, pt3f)
-        @test_throws DomainError is_vector(M, pt4, pt3f; error=:error)
+        @test_throws DomainError is_vector(M, pt4, pt3f; error = :error)
         @test is_vector(M, pt4, pt2f)
     end
     @testset "field parameter" begin
-        M = CholeskySpace(3; parameter=:field)
+        M = CholeskySpace(3; parameter = :field)
         @test repr(M) == "CholeskySpace(3; parameter=:field)"
     end
 end

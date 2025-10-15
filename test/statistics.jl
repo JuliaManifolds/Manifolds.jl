@@ -2,7 +2,6 @@ include("header.jl")
 using StatsBase: AbstractWeights, pweights
 using Random: GLOBAL_RNG, seed!
 import ManifoldsBase:
-    active_traits,
     manifold_dimension,
     exp!,
     log!,
@@ -47,13 +46,13 @@ function exp!(::TestStatsEuclidean{N}, q, p, X; kwargs...) where {N}
     return exp!(Euclidean(N), q, p, X; kwargs...)
 end
 function Manifolds.exp_fused!(
-    ::TestStatsEuclidean{N},
-    q,
-    p,
-    X,
-    t::Number;
-    kwargs...,
-) where {N}
+        ::TestStatsEuclidean{N},
+        q,
+        p,
+        X,
+        t::Number;
+        kwargs...,
+    ) where {N}
     return Manifolds.exp_fused!(Euclidean(N), q, p, X, t; kwargs...)
 end
 function log!(::TestStatsEuclidean{N}, X, p, q; kwargs...) where {N}
@@ -67,40 +66,21 @@ function zero_vector!(::TestStatsEuclidean{N}, X, p; kwargs...) where {N}
 end
 
 struct TestStatsNotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ} end
-function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
-end
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 get_embedding(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 
-struct TestStatsNotImplementedEmbeddedManifold2 <: AbstractDecoratorManifold{ℝ} end
-function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold2, args...)
-    return merge_traits(IsIsometricEmbeddedManifold())
-end
-decorated_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
-get_embedding(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
-base_manifold(::TestStatsNotImplementedEmbeddedManifold2) = Sphere(2)
-
-struct TestStatsNotImplementedEmbeddedManifold3 <: AbstractDecoratorManifold{ℝ} end
-function active_traits(f, ::TestStatsNotImplementedEmbeddedManifold3, args...)
-    return merge_traits(IsEmbeddedManifold())
-end
-decorated_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
-get_embedding(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
-base_manifold(::TestStatsNotImplementedEmbeddedManifold3) = Sphere(2)
-
-function test_mean(M, x, yexp=nothing, method...; kwargs...)
+function test_mean(M, x, yexp = nothing, method...; kwargs...)
     @testset "mean unweighted" begin
         y = mean(M, x; kwargs...)
-        @test is_point(M, y; atol=10^-9)
+        @test is_point(M, y; atol = 10^-9)
         if yexp !== nothing
-            @test isapprox(M, y, yexp; atol=10^-7)
+            @test isapprox(M, y, yexp; atol = 10^-7)
         end
         y2, _ = mean_and_var(M, x; kwargs...)
-        @test isapprox(M, y2, y; atol=10^-7)
+        @test isapprox(M, y2, y; atol = 10^-7)
         y3, _ = mean_and_std(M, x; kwargs...)
-        @test isapprox(M, y3, y; atol=10^-7)
+        @test isapprox(M, y3, y; atol = 10^-7)
     end
 
     @testset "mean weighted" begin
@@ -110,11 +90,11 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
         w3 = pweights(2 * ones(n))
         y = mean(M, x; kwargs...)
         for w in (w1, w2, w3)
-            @test is_point(M, mean(M, x, w; kwargs...); atol=10^-9)
+            @test is_point(M, mean(M, x, w; kwargs...); atol = 10^-9)
             @test isapprox(M, mean(M, x, w; kwargs...), y)
 
-            @test isapprox(M, mean_and_var(M, x, w; kwargs...)[1], y; atol=10^-7)
-            @test isapprox(M, mean_and_std(M, x, w; kwargs...)[1], y; atol=10^-7)
+            @test isapprox(M, mean_and_var(M, x, w; kwargs...)[1], y; atol = 10^-7)
+            @test isapprox(M, mean_and_std(M, x, w; kwargs...)[1], y; atol = 10^-7)
         end
         @test_throws DimensionMismatch mean(M, x, pweights(ones(n + 1)); kwargs...)
         @test_throws DimensionMismatch mean!(
@@ -130,17 +110,17 @@ function test_mean(M, x, yexp=nothing, method...; kwargs...)
 end
 
 function test_median(
-    M,
-    x,
-    yexp=nothing;
-    method::Union{Nothing,AbstractApproximationMethod}=nothing,
-    kwargs...,
-)
+        M,
+        x,
+        yexp = nothing;
+        method::Union{Nothing, AbstractApproximationMethod} = nothing,
+        kwargs...,
+    )
     @testset "median unweighted$(!isnothing(method) ? " ($method)" : "")" begin
         y = isnothing(method) ? median(M, x; kwargs...) : median(M, x, method; kwargs...)
-        @test is_point(M, y; atol=10^-9)
+        @test is_point(M, y; atol = 10^-9)
         if yexp !== nothing
-            @test isapprox(M, y, yexp; atol=5 * 10^-5)
+            @test isapprox(M, y, yexp; atol = 5 * 10^-5)
         end
     end
 
@@ -152,11 +132,11 @@ function test_median(
         y = median(M, x; kwargs...)
         for w in (w1, w2, w3)
             if isnothing(method)
-                @test is_point(M, median(M, x, w; kwargs...); atol=10^-9)
+                @test is_point(M, median(M, x, w; kwargs...); atol = 10^-9)
             else
-                @test is_point(M, median(M, x, w, method; kwargs...); atol=10^-9)
+                @test is_point(M, median(M, x, w, method; kwargs...); atol = 10^-9)
             end
-            @test isapprox(M, median(M, x, w; kwargs...), y; atol=10^-4)
+            @test isapprox(M, median(M, x, w; kwargs...), y; atol = 10^-4)
         end
         if isnothing(method)
             @test_throws Exception median(M, x, pweights(ones(n + 1)); kwargs...)
@@ -167,23 +147,23 @@ function test_median(
     return nothing
 end
 
-function test_var(M, x, vexp=nothing; kwargs...)
+function test_var(M, x, vexp = nothing; kwargs...)
     n = length(x)
     @testset "var unweighted" begin
         v = var(M, x; kwargs...)
         if vexp !== nothing
             @test v ≈ vexp
         end
-        @test v ≈ var(M, x; corrected=true, kwargs...)
+        @test v ≈ var(M, x; corrected = true, kwargs...)
         _, v2 = mean_and_var(M, x; kwargs...)
         @test v2 ≈ v
         m = mean(M, x; kwargs...)
         @test var(M, x, m; kwargs...) ≈ var(M, x; kwargs...)
-        @test var(M, x; corrected=false, kwargs...) ≈
-              var(M, x, m; corrected=false, kwargs...)
-        @test var(M, x; corrected=false, kwargs...) ≈ var(M, x; kwargs...) * (n - 1) / n
-        @test var(M, x, m; corrected=false, kwargs...) ≈
-              var(M, x, m; kwargs...) * (n - 1) / n
+        @test var(M, x; corrected = false, kwargs...) ≈
+            var(M, x, m; corrected = false, kwargs...)
+        @test var(M, x; corrected = false, kwargs...) ≈ var(M, x; kwargs...) * (n - 1) / n
+        @test var(M, x, m; corrected = false, kwargs...) ≈
+            var(M, x, m; kwargs...) * (n - 1) / n
     end
 
     @testset "var weighted" begin
@@ -192,19 +172,19 @@ function test_var(M, x, vexp=nothing; kwargs...)
         w2 = pweights(ones(n))
         w3 = pweights(2 * ones(n))
 
-        v = var(M, x; corrected=false, kwargs...)
+        v = var(M, x; corrected = false, kwargs...)
         for w in (w1, w2, w3)
             @test var(M, x, w; kwargs...) ≈ v
-            @test var(M, x, w; corrected=false, kwargs...) ≈ v
+            @test var(M, x, w; corrected = false, kwargs...) ≈ v
             @test mean_and_var(M, x, w; kwargs...)[2] ≈ var(M, x, w; kwargs...)
             m = mean(M, x, w; kwargs...)
             @test var(M, x, w, m; kwargs...) ≈ var(M, x, w; kwargs...)
-            @test var(M, x, w; corrected=true, kwargs...) ≈
-                  var(M, x, w, m; corrected=true, kwargs...)
-            @test var(M, x, w; corrected=true, kwargs...) ≈
-                  var(M, x, w; kwargs...) * n / (n - 1)
-            @test var(M, x, w, m; corrected=true, kwargs...) ≈
-                  var(M, x, w, m; kwargs...) * n / (n - 1)
+            @test var(M, x, w; corrected = true, kwargs...) ≈
+                var(M, x, w, m; corrected = true, kwargs...)
+            @test var(M, x, w; corrected = true, kwargs...) ≈
+                var(M, x, w; kwargs...) * n / (n - 1)
+            @test var(M, x, w, m; corrected = true, kwargs...) ≈
+                var(M, x, w, m; kwargs...) * n / (n - 1)
         end
         @test_throws DimensionMismatch var(M, x, pweights(ones(n + 1)); kwargs...)
         @test_throws DimensionMismatch mean_and_var(
@@ -218,25 +198,25 @@ function test_var(M, x, vexp=nothing; kwargs...)
     return nothing
 end
 
-function test_std(M, x, sexp=nothing; kwargs...)
+function test_std(M, x, sexp = nothing; kwargs...)
     n = length(x)
     @testset "std unweighted" begin
         s = std(M, x; kwargs...)
         if sexp !== nothing
             @test s ≈ sexp
         end
-        @test s ≈ std(M, x; corrected=true, kwargs...)
-        @test s ≈ √var(M, x; corrected=true, kwargs...)
+        @test s ≈ std(M, x; corrected = true, kwargs...)
+        @test s ≈ √var(M, x; corrected = true, kwargs...)
         _, s2 = mean_and_std(M, x; kwargs...)
         @test s2 ≈ s
         m = mean(M, x; kwargs...)
         @test std(M, x, m; kwargs...) ≈ std(M, x; kwargs...)
-        @test std(M, x; corrected=false, kwargs...) ≈
-              std(M, x, m; corrected=false, kwargs...)
-        @test std(M, x; corrected=false, kwargs...) ≈
-              std(M, x; kwargs...) * sqrt((n - 1) / n)
-        @test std(M, x, m; corrected=false, kwargs...) ≈
-              std(M, x, m; kwargs...) * sqrt((n - 1) / n)
+        @test std(M, x; corrected = false, kwargs...) ≈
+            std(M, x, m; corrected = false, kwargs...)
+        @test std(M, x; corrected = false, kwargs...) ≈
+            std(M, x; kwargs...) * sqrt((n - 1) / n)
+        @test std(M, x, m; corrected = false, kwargs...) ≈
+            std(M, x, m; kwargs...) * sqrt((n - 1) / n)
     end
 
     @testset "std weighted" begin
@@ -245,19 +225,19 @@ function test_std(M, x, sexp=nothing; kwargs...)
         w2 = pweights(ones(n))
         w3 = pweights(2 * ones(n))
 
-        s = std(M, x; corrected=false, kwargs...)
+        s = std(M, x; corrected = false, kwargs...)
         for w in (w1, w2, w3)
             @test std(M, x, w; kwargs...) ≈ s
-            @test std(M, x, w; corrected=false, kwargs...) ≈ s
+            @test std(M, x, w; corrected = false, kwargs...) ≈ s
             @test mean_and_std(M, x, w; kwargs...)[2] ≈ std(M, x, w; kwargs...)
             m = mean(M, x, w; kwargs...)
             @test std(M, x, w, m; kwargs...) ≈ std(M, x, w; kwargs...)
-            @test std(M, x, w; corrected=true, kwargs...) ≈
-                  std(M, x, w, m; corrected=true, kwargs...)
-            @test std(M, x, w; corrected=true, kwargs...) ≈
-                  std(M, x, w; kwargs...) * sqrt(n / (n - 1))
-            @test std(M, x, w, m; corrected=true, kwargs...) ≈
-                  std(M, x, w, m; kwargs...) * sqrt(n / (n - 1))
+            @test std(M, x, w; corrected = true, kwargs...) ≈
+                std(M, x, w, m; corrected = true, kwargs...)
+            @test std(M, x, w; corrected = true, kwargs...) ≈
+                std(M, x, w; kwargs...) * sqrt(n / (n - 1))
+            @test std(M, x, w, m; corrected = true, kwargs...) ≈
+                std(M, x, w, m; kwargs...) * sqrt(n / (n - 1))
         end
         @test_throws DimensionMismatch std(M, x, pweights(ones(n + 1)); kwargs...)
     end
@@ -272,11 +252,11 @@ function test_moments(M, x)
             @test moment(M, x, i) ≈ mean(distance.(Ref(M), Ref(m), x) .^ i)
             @test moment(M, x, i, m) ≈ moment(M, x, i)
         end
-        @test moment(M, x, 2) ≈ var(M, x; corrected=false)
+        @test moment(M, x, 2) ≈ var(M, x; corrected = false)
         @test skewness(M, x) ≈ moment(M, x, 3) / moment(M, x, 2)^(3 / 2)
         @test kurtosis(M, x) ≈ moment(M, x, 4) / moment(M, x, 2)^2 - 3
 
-        @test moment(M, x, 2, m) ≈ var(M, x; corrected=false)
+        @test moment(M, x, 2, m) ≈ var(M, x; corrected = false)
         @test skewness(M, x, m) ≈ moment(M, x, 3) / moment(M, x, 2)^(3 / 2)
         @test kurtosis(M, x, m) ≈ moment(M, x, 4) / moment(M, x, 2)^2 - 3
     end
@@ -293,11 +273,11 @@ function test_moments(M, x)
                 @test moment(M, x, i, w) ≈ mean(distance.(Ref(M), Ref(m), x) .^ i, w)
                 @test moment(M, x, i, w, m) ≈ moment(M, x, i, w)
             end
-            @test moment(M, x, 2, w) ≈ var(M, x, w; corrected=false)
+            @test moment(M, x, 2, w) ≈ var(M, x, w; corrected = false)
             @test skewness(M, x, w) ≈ moment(M, x, 3, w) / moment(M, x, 2, w)^(3 / 2)
             @test kurtosis(M, x, w) ≈ moment(M, x, 4, w) / moment(M, x, 2, w)^2 - 3
 
-            @test moment(M, x, 2, w, m) ≈ var(M, x, w; corrected=false)
+            @test moment(M, x, 2, w, m) ≈ var(M, x, w; corrected = false)
             @test skewness(M, x, w, m) ≈ moment(M, x, 3, w) / moment(M, x, 2, w)^(3 / 2)
             @test kurtosis(M, x, w, m) ≈ moment(M, x, 4, w) / moment(M, x, 2, w)^2 - 3
         end
@@ -312,61 +292,61 @@ struct TestStatsOverload1 <: AbstractManifold{ℝ} end
 struct TestStatsMethod1 <: AbstractApproximationMethod end
 
 function mean!(
-    ::TestStatsOverload1,
-    y,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::GradientDescentEstimation,
-)
+        ::TestStatsOverload1,
+        y,
+        ::AbstractVector,
+        ::AbstractWeights,
+        ::GradientDescentEstimation,
+    )
     return fill!(y, 3)
 end
 function mean(
-    ::TestStatsOverload1,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::GradientDescentEstimation,
-)
+        ::TestStatsOverload1,
+        ::AbstractVector,
+        ::AbstractWeights,
+        ::GradientDescentEstimation,
+    )
     return fill(3, 1)
 end
 
 function median(
-    ::TestStatsOverload1,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::CyclicProximalPointEstimation,
-)
+        ::TestStatsOverload1,
+        ::AbstractVector,
+        ::AbstractWeights,
+        ::CyclicProximalPointEstimation,
+    )
     return fill(3, 1)
 end
 function median!(
-    ::TestStatsOverload1,
-    y,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::CyclicProximalPointEstimation,
-)
+        ::TestStatsOverload1,
+        y,
+        ::AbstractVector,
+        ::AbstractWeights,
+        ::CyclicProximalPointEstimation,
+    )
     return fill!(y, 3)
 end
 
-function var(::TestStatsOverload1, ::AbstractVector, ::AbstractWeights, m; corrected=false)
+function var(::TestStatsOverload1, ::AbstractVector, ::AbstractWeights, m; corrected = false)
     return 4 + 5 * corrected
 end
 function mean_and_var(
-    ::TestStatsOverload1,
-    ::AbstractVector,
-    ::AbstractWeights;
-    corrected=false,
-    kwargs...,
-)
+        ::TestStatsOverload1,
+        ::AbstractVector,
+        ::AbstractWeights;
+        corrected = false,
+        kwargs...,
+    )
     return [4.0], 4 + 5 * corrected
 end
 function mean_and_var(
-    ::TestStatsOverload1,
-    ::AbstractVector,
-    ::AbstractWeights,
-    ::TestStatsMethod1;
-    corrected=false,
-    kwargs...,
-)
+        ::TestStatsOverload1,
+        ::AbstractVector,
+        ::AbstractWeights,
+        ::TestStatsMethod1;
+        corrected = false,
+        kwargs...,
+    )
     return [5.0], 9 + 7 * corrected
 end
 
@@ -410,33 +390,12 @@ end
             @test std(M, x, w, 2) == 2.0
 
             @test Manifolds.default_approximation_method(M, mean_and_std) ==
-                  Manifolds.default_approximation_method(M, mean)
+                Manifolds.default_approximation_method(M, mean)
             @test mean_and_var(M, x, TestStatsMethod1()) == ([5.0], 16)
             @test mean_and_var(M, x, w, TestStatsMethod1()) == ([5.0], 9)
             @test mean_and_std(M, x, TestStatsMethod1()) == ([5.0], 4.0)
             @test mean_and_std(M, x, w, TestStatsMethod1()) == ([5.0], 3.0)
         end
-    end
-
-    @testset "decorator dispatch" begin
-        # equality tests are intentional to ensure correct dispatch
-        # (both calls eventually use the same method)
-        ps = [normalize([1, 0, 0] .+ 0.1 .* randn(3)) for _ in 1:3]
-        M1 = TestStatsNotImplementedEmbeddedManifold()
-        @test mean!(M1, similar(ps[1]), ps) == mean!(Sphere(2), similar(ps[1]), ps)
-        @test mean(M1, ps) == mean(Sphere(2), ps)
-
-        M2 = TestStatsNotImplementedEmbeddedManifold2()
-        @test_throws MethodError mean(M2, ps)
-        @test_throws MethodError mean!(M2, similar(ps[1]), ps)
-        @test_throws MethodError median(M2, ps)
-        @test_throws MethodError median!(M2, similar(ps[1]), ps)
-
-        M3 = TestStatsNotImplementedEmbeddedManifold3()
-        @test_throws MethodError mean(M3, ps)
-        @test_throws MethodError mean!(M3, similar(ps[1]), ps)
-        @test_throws MethodError median(M3, ps)
-        @test_throws MethodError median!(M3, similar(ps[1]), ps)
     end
 
     @testset "TestStatsSphere" begin
@@ -447,12 +406,12 @@ end
             n = 3
             x = [
                 exp(M, p, π / 6 * [cos(α), sin(α), 0.0]) for
-                α in range(0, 2 * π - 2 * π / n, length=n)
+                    α in range(0, 2 * π - 2 * π / n, length = n)
             ]
             test_mean(M, x)
-            test_median(M, x; atol=1e-12)
-            test_median(M, x; method=CyclicProximalPointEstimation(), atol=1e-12)
-            test_median(M, x; method=WeiszfeldEstimation())
+            test_median(M, x; atol = 1.0e-12)
+            test_median(M, x; method = CyclicProximalPointEstimation(), atol = 1.0e-12)
+            test_median(M, x; method = WeiszfeldEstimation())
             test_var(M, x)
             test_std(M, x)
             test_moments(M, x)
@@ -461,7 +420,7 @@ end
         @testset "zero variance" begin
             x = fill([0.0, 0.0, 1.0], 5)
             test_mean(M, x, [0.0, 0.0, 1.0])
-            test_median(M, x, [0.0, 0.0, 1.0]; atol=10^-12)
+            test_median(M, x, [0.0, 0.0, 1.0]; atol = 10^-12)
             test_var(M, x, 0.0)
             test_std(M, x, 0.0)
         end
@@ -471,7 +430,7 @@ end
             θ = π / 4
             @test isapprox(M, mean(M, x), geodesic(M, x[1], x[3], θ))
             test_mean(M, x, [1.0, 1.0, 0.0] / √2)
-            test_median(M, x, [1.0, 1.0, 0.0] / √2; atol=10^-12)
+            test_median(M, x, [1.0, 1.0, 0.0] / √2; atol = 10^-12)
             test_var(M, x, θ^2)
             test_std(M, x, θ)
             test_moments(M, x)
@@ -487,7 +446,7 @@ end
             vx = vcat(x...)
 
             test_mean(M, x, mean(x))
-            test_median(M, x; atol=10^-12)
+            test_median(M, x; atol = 10^-12)
             test_var(M, x, var(vx))
             test_std(M, x, std(vx))
             test_moments(M, x)
@@ -510,7 +469,7 @@ end
 
             w = pweights(rand(rng, 10))
             ax = hcat(x...)
-            @test mean(M, x, w) ≈ mean(ax, w; dims=2)
+            @test mean(M, x, w) ≈ mean(ax, w; dims = 2)
             @test var(M, x, w) ≈ sum(var(ax, w, 2))
             @test std(M, x, w) ≈ sqrt(sum(std(ax, w, 2) .^ 2))
         end
@@ -523,17 +482,17 @@ end
                 x = [1.0, 2.0, 3.0, 4.0]
                 w = pweights(ones(length(x)) / length(x))
                 @test mean(M, x) ≈ mean(x)
-                @test mean(Euclidean(; parameter=:field), x) ≈ mean(x)
+                @test mean(Euclidean(; parameter = :field), x) ≈ mean(x)
                 @test mean(M, x, w) ≈ mean(x, w)
-                @test median(M, x; rng=MersenneTwister(1212), atol=10^-12) ≈ median(x)
-                @test median(M, x, w; rng=MersenneTwister(1212), atol=10^-12) ≈ median(x, w)
+                @test median(M, x; rng = MersenneTwister(1212), atol = 10^-12) ≈ median(x)
+                @test median(M, x, w; rng = MersenneTwister(1212), atol = 10^-12) ≈ median(x, w)
                 @test var(M, x) ≈ var(x)
                 @test var(M, x, w) ≈ var(x, w)
                 @test std(M, x) ≈ std(x)
                 @test std(M, x, w) ≈ std(x, w)
 
                 test_mean(M, x)
-                test_median(M, x; atol=10^-12)
+                test_median(M, x; atol = 10^-12)
                 test_var(M, x)
                 test_std(M, x)
                 test_moments(M, x)
@@ -551,7 +510,7 @@ end
                 @test std(M, x, w) ≈ std(vx, w)
 
                 test_mean(M, x)
-                test_median(M, x; atol=10^-12)
+                test_median(M, x; atol = 10^-12)
                 test_var(M, x)
                 test_std(M, x)
                 test_moments(M, x)
@@ -559,6 +518,25 @@ end
                 mean!(M, y, x)
                 @test y == mean(x)
             end
+        end
+    end
+
+    @testset "Forwarding" begin
+        M = CenteredMatrices(3, 2)
+        p1 = [1.0 2; 4 5; -5 -7]
+        p2 = [3.0 1; 2 5; -5 -6]
+        @test mean(M, [p1, p2]) == mean([p1, p2])
+
+        for mf in [mean, median, cov, var, mean_and_std, mean_and_var]
+            @test ManifoldsBase.get_forwarding_type_embedding(
+                ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.DirectEmbedding}(),
+                M, mf
+            ) === ManifoldsBase.EmbeddedForwardingType()
+
+            @test ManifoldsBase.get_forwarding_type_embedding(
+                ManifoldsBase.EmbeddedSubmanifoldType{ManifoldsBase.IndirectEmbedding}(),
+                M, mf
+            ) === ManifoldsBase.EmbeddedForwardingType(ManifoldsBase.DirectEmbedding())
         end
     end
 
@@ -571,7 +549,7 @@ end
                 w = pweights([rand(rng) for _ in 1:10])
                 @test mean(M, x, GeodesicInterpolation()) ≈ mean(x)
                 @test mean(M, x, w, GeodesicInterpolation()) ≈
-                      mean(M, x, w, GradientDescentEstimation())
+                    mean(M, x, w, GradientDescentEstimation())
             end
 
             @testset "three points" begin
@@ -582,7 +560,7 @@ end
                 @test mean(S, x[1:2], pweights([1, 0]), GeodesicInterpolation()) ≈ x[1]
                 @test mean(S, x[1:2], pweights([0, 1]), GeodesicInterpolation()) ≈ x[2]
                 @test mean(S, x[1:2], pweights([1, 2]), GeodesicInterpolation()) ≈
-                      shortest_geodesic(S, x[1], x[2], 2 / 3)
+                    shortest_geodesic(S, x[1], x[2], 2 / 3)
                 m = mean(S, x, pweights([1, 2, 3]), GeodesicInterpolation())
                 @test m ≈ shortest_geodesic(
                     S,
@@ -600,7 +578,7 @@ end
                     @testset "with $method" begin
                         m1 = mean(M, pV, [0.0, 0.5, 0.5], method)
                         g1 = shortest_geodesic(M, pV[2], pV[3], 0.5)
-                        @test isapprox(M, m1, g1; atol=1e-7)
+                        @test isapprox(M, m1, g1; atol = 1.0e-7)
                         m2 = mean(M, pV, [0.5, 0.0, 0.5], method)
                         @test isapprox(M, m2, shortest_geodesic(M, pV[1], pV[3], 0.5))
                         m3 = mean(M, pV, [0.5, 0.0, 0.0], method)
@@ -645,16 +623,16 @@ end
                 x = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0] / √2]
                 m1, v1 = mean_and_var(S, [x[1], x[1]], GeodesicInterpolation())
                 @test m1 ≈ x[1]
-                @test v1 ≈ 0 atol = 1e-6
+                @test v1 ≈ 0 atol = 1.0e-6
                 m2, v2 = mean_and_var(S, x[1:2], GeodesicInterpolation())
                 @test m2 ≈ x[3]
                 @test v2 ≈ (π / 4)^2 * 2 / (2 - 1)
                 m3, v3 = mean_and_var(S, x[1:2], pweights([1, 0]), GeodesicInterpolation())
                 @test m3 ≈ x[1]
-                @test v3 ≈ 0 atol = 1e-6
+                @test v3 ≈ 0 atol = 1.0e-6
                 m4, v4 = mean_and_var(S, x[1:2], pweights([0, 1]), GeodesicInterpolation())
                 @test m4 ≈ x[2]
-                @test v4 ≈ 0 atol = 1e-6
+                @test v4 ≈ 0 atol = 1.0e-6
                 m5, v5 = mean_and_var(S, x, pweights([1, 2, 3]), GeodesicInterpolation())
                 @test m5 ≈ shortest_geodesic(
                     S,
@@ -668,12 +646,12 @@ end
             @testset "within radius" begin
                 rng = MersenneTwister(47)
                 @test repr(GeodesicInterpolationWithinRadius(Inf)) ==
-                      "GeodesicInterpolationWithinRadius(Inf)"
+                    "GeodesicInterpolationWithinRadius(Inf)"
                 @test_throws DomainError GeodesicInterpolationWithinRadius(-0.1)
                 S = Sphere(2)
                 x = [[1.0, 0, 0], [0, 1.0, 0]]
                 m = mean(S, x, GeodesicInterpolation())
-                mg = mean(S, x, GradientDescentEstimation(); p0=m)
+                mg = mean(S, x, GradientDescentEstimation(); p0 = m)
                 vg = var(S, x, mg)
 
                 @test mean(S, x, GeodesicInterpolationWithinRadius(Inf)) == m
@@ -686,7 +664,7 @@ end
                 @test mean_and_var(S, x, GeodesicInterpolationWithinRadius(π)) == (m, v)
                 @test mean_and_var(S, x, GeodesicInterpolationWithinRadius(π / 8)) != (m, v)
                 @test mean_and_var(S, x, GeodesicInterpolationWithinRadius(π / 8)) ==
-                      (mg, vg)
+                    (mg, vg)
             end
         end
 
@@ -704,6 +682,7 @@ end
                 @test m == mg
                 @test m != mf
             end
+            @test default_approximation_method(P2, cov) === GradientDescentEstimation()
         end
 
         @testset "Sphere default" begin
@@ -715,7 +694,7 @@ end
             w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(S, x, w)
             mg = mean(S, x, w, GeodesicInterpolation())
-            mf = mean(S, x, w, GradientDescentEstimation(); p0=mg)
+            mf = mean(S, x, w, GradientDescentEstimation(); p0 = mg)
             @test m != mg
             @test m == mf
 
@@ -736,7 +715,7 @@ end
             w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(M, x, w)
             mg = mean(M, x, w, GeodesicInterpolation())
-            mf = mean(M, x, w, GradientDescentEstimation(); p0=mg)
+            mf = mean(M, x, w, GradientDescentEstimation(); p0 = mg)
             @test !isapprox(M, m, mg)
             @test isapprox(M, m, mf)
 
@@ -758,7 +737,7 @@ end
             w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(R, x, w)
             mg = mean(R, x, w, GeodesicInterpolation())
-            mf = mean(R, x, w, GradientDescentEstimation(); p0=mg)
+            mf = mean(R, x, w, GradientDescentEstimation(); p0 = mg)
             @test m != mg
             @test m == mf
 
@@ -779,7 +758,7 @@ end
             w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(G, x, w)
             mg = mean(G, x, w, GeodesicInterpolation())
-            mf = mean(G, x, w, GradientDescentEstimation(); p0=mg)
+            mf = mean(G, x, w, GradientDescentEstimation(); p0 = mg)
             @test m != mg
             @test m == mf
 
@@ -796,7 +775,7 @@ end
         S = Sphere(2)
         x = [normalize(randn(rng, 3)) for _ in 1:10]
         w = pweights([rand(rng) for _ in 1:length(x)])
-        m = normalize(mean(reduce(hcat, x), w; dims=2)[:, 1])
+        m = normalize(mean(reduce(hcat, x), w; dims = 2)[:, 1])
         mg = mean(S, x, w, ExtrinsicEstimation(EfficientEstimator()))
         @test isapprox(S, m, mg)
     end
@@ -813,7 +792,7 @@ end
 
     @testset "Covariance Default" begin
         @test default_approximation_method(TestStatsSphere{2}(), cov) ==
-              GradientDescentEstimation()
+            GradientDescentEstimation()
     end
 
     @testset "Covariance matrix, Euclidean" begin
@@ -821,8 +800,8 @@ end
         M = Euclidean(3)
         x = [randn(rng, 3) for _ in 1:10]
         @test isapprox(cov(M, x), cov(x))
-        covest = SimpleCovariance(; corrected=false)
-        @test isapprox(cov(M, x; tangent_space_covariance_estimator=covest), cov(covest, x))
+        covest = SimpleCovariance(; corrected = false)
+        @test isapprox(cov(M, x; tangent_space_covariance_estimator = covest), cov(covest, x))
     end
 
     @testset "Covariance matrix, sphere" begin

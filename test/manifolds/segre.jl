@@ -7,10 +7,10 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
         Segre(7, 2),
         Segre(7, 9, 9),
         Segre(9, 3, 6, 6),
-        MetricManifold(Segre(10), WarpedMetric(1.20)),
+        MetricManifold(Segre(10), WarpedMetric(1.2)),
         MetricManifold(Segre(2, 9), WarpedMetric(1.13)),
         MetricManifold(Segre(9, 6, 10), WarpedMetric(0.87)),
-        MetricManifold(Segre(9, 3, 8, 10), WarpedMetric(1.40)),
+        MetricManifold(Segre(9, 3, 8, 10), WarpedMetric(1.4)),
     ]
 
     # Vs[i] is the valence of Ms[i]
@@ -18,7 +18,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
     # n ≥ k, for same n,k X is in TpM and can be scaled by l
     unit_p(n, k) = 1 / sqrt(k) .* [ones(k)..., zeros(n - k)...]
-    unit_X(n, k; l=1.0) = l / sqrt(n - k) .* [zeros(k)..., ones(n - k)...]
+    unit_X(n, k; l = 1.0) = l / sqrt(n - k) .* [zeros(k)..., ones(n - k)...]
     unit_c(n, k) = normalize([mod(k * i^i, 31) - 30 / 2 for i in 1:n]) # pseudo-rng
 
     # ps[i] is a point on Ms[i]
@@ -97,9 +97,9 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
     for (M, V, p, q, X, Y, c, dc) in zip(Ms, Vs, ps, qs, Xs, Ys, cs, dcs)
         @testset "Manifold $M" begin
             @testset "Segre" begin
-                get_manifold(::Segre{ℝ,V}) where {V} = Segre{ℝ,V}()
-                get_manifold(::MetricManifold{ℝ,Segre{ℝ,V},WarpedMetric{A}}) where {V,A} =
-                    Segre{ℝ,V}()
+                get_manifold(::Segre{ℝ, V}) where {V} = Segre{ℝ, V}()
+                get_manifold(::MetricManifold{ℝ, Segre{ℝ, V}, WarpedMetric{A}}) where {V, A} =
+                    Segre{ℝ, V}()
                 @test Segre(V...) == get_manifold(M)
             end
 
@@ -113,20 +113,20 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 @test_throws DomainError is_point(
                     M,
                     [[1.0, 0.0], p[2:end]...];
-                    error=:error,
+                    error = :error,
                 )
                 @test_throws DomainError is_point(
                     M,
                     [p[1], [1.0], p[3:end]...];
-                    error=:error,
+                    error = :error,
                 )
-                @test_throws DomainError is_point(M, [[-1.0], p[2:end]...]; error=:error)
-                @test_throws DomainError is_point(M, [p[1], 2 * p[2:end]...]; error=:error)
+                @test_throws DomainError is_point(M, [[-1.0], p[2:end]...]; error = :error)
+                @test_throws DomainError is_point(M, [p[1], 2 * p[2:end]...]; error = :error)
             end
 
             @testset "is_vector" begin
-                @test is_vector(M, p, X; error=:error)
-                @test is_vector(M, p, Y; error=:error)
+                @test is_vector(M, p, X; error = :error)
+                @test is_vector(M, p, Y; error = :error)
                 @test_throws DomainError is_vector(
                     M,
                     [[1.0, 0.0], p[2:end]...],
@@ -151,7 +151,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
             Random.seed!(1)
             @testset "rand" begin
                 @test is_point(M, rand(M))
-                @test is_vector(M, p, rand(M, vector_at=p))
+                @test is_vector(M, p, rand(M, vector_at = p))
             end
 
             @testset "get_embedding" begin
@@ -188,12 +188,12 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 # Zero vector
                 p_ = exp(M, p, zeros.(size.(X)))
                 @test is_point(M, p_)
-                @test isapprox(p, p_; atol=1e-5)
+                @test isapprox(p, p_; atol = 1.0e-5)
 
                 # Tangent vector in the scaling direction
                 p_ = exp(M, p, [X[1], zeros.(size.(X[2:end]))...])
                 @test is_point(M, p_)
-                @test isapprox([p[1] + X[1], p[2:end]...], p_; atol=1e-5)
+                @test isapprox([p[1] + X[1], p[2:end]...], p_; atol = 1.0e-5)
 
                 # Generic tangent vector
                 p_ = exp(M, p, X)
@@ -201,22 +201,22 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), -1.0)
-                @test isapprox(geodesic_speed, -norm(M, p, X); atol=1e-5)
+                @test isapprox(geodesic_speed, -norm(M, p, X); atol = 1.0e-5)
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), -0.811)
-                @test isapprox(geodesic_speed, -norm(M, p, X); atol=1e-5)
+                @test isapprox(geodesic_speed, -norm(M, p, X); atol = 1.0e-5)
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), -0.479)
-                @test isapprox(geodesic_speed, -norm(M, p, X); atol=1e-5)
+                @test isapprox(geodesic_speed, -norm(M, p, X); atol = 1.0e-5)
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), 0.181)
-                @test isapprox(geodesic_speed, norm(M, p, X); atol=1e-5)
+                @test isapprox(geodesic_speed, norm(M, p, X); atol = 1.0e-5)
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), 0.703)
-                @test isapprox(geodesic_speed, norm(M, p, X); atol=1e-5)
+                @test isapprox(geodesic_speed, norm(M, p, X); atol = 1.0e-5)
                 geodesic_speed =
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), 1.0)
-                @test isapprox(geodesic_speed, norm(M, p, X); atol=1e-5)
+                @test isapprox(geodesic_speed, norm(M, p, X); atol = 1.0e-5)
 
                 # Geodesics are (locally) length-minizing. So let B_a be a one-parameter
                 # family of curves such that B_0 is a geodesic. Then the derivative of
@@ -242,24 +242,24 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                     function b(t)
                         return (
                             (1 - t)^4 * c0 +
-                            4 * t * (1 - t)^3 * (c1 + d1) +
-                            6 * t^2 * (1 - t)^2 * (c2 + d2) +
-                            4 * t^3 * (1 - t) * (c3 + d3) +
-                            t^4 * c4
+                                4 * t * (1 - t)^3 * (c1 + d1) +
+                                6 * t^2 * (1 - t)^2 * (c2 + d2) +
+                                4 * t^3 * (1 - t) * (c3 + d3) +
+                                t^4 * c4
                         )
                     end
 
                     # Length of curve on manifold
-                    ps_ = [exp(M, p, get_vector(M, p, b(t))) for t in 0.0:1e-3:1.0]
+                    ps_ = [exp(M, p, get_vector(M, p, b(t))) for t in 0.0:1.0e-3:1.0]
                     ds = [
                         distance(M, p1, p2) for
-                        (p1, p2) in zip(ps_[1:(end - 1)], ps_[2:end])
+                            (p1, p2) in zip(ps_[1:(end - 1)], ps_[2:end])
                     ]
                     return sum(ds)
                 end
 
                 f = a -> curve_length(a * dc)
-                @test isapprox(central_fdm(3, 1)(f, 0.0), 0.0; atol=1e-5)
+                @test isapprox(central_fdm(3, 1)(f, 0.0), 0.0; atol = 1.0e-5)
                 @test central_fdm(3, 2)(f, 0.0) >= 0.0
             end
 
@@ -267,12 +267,12 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 # Same point
                 X_ = log(M, p, p)
                 @test is_vector(M, p, X_)
-                @test isapprox(zeros.(size.(X)), X_; atol=1e-5)
+                @test isapprox(zeros.(size.(X)), X_; atol = 1.0e-5)
 
                 # Scaled point
                 X_ = log(M, p, [q[1], p[2:end]...])
                 @test is_vector(M, p, X_)
-                @test isapprox(X_, [q[1] - p[1], zeros.(size.(q[2:end]))...]; atol=1e-5)
+                @test isapprox(X_, [q[1] - p[1], zeros.(size.(q[2:end]))...]; atol = 1.0e-5)
 
                 # Generic tangent vector
                 X_ = log(M, p, q)
@@ -292,23 +292,23 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 Y_ = Y - inner(M, p, X_, Y) * X_
                 Y_ = Y_ / norm(M, p, Y_)
 
-                r = 1e-2
+                r = 1.0e-2
                 ps_ = [
                     exp(M, p, r * (cos(theta) * X_ + sin(theta) * Y_)) for
-                    theta in 0.0:1e-3:(2 * pi)
+                        theta in 0.0:1.0e-3:(2 * pi)
                 ]
                 ds = [distance(M, p1, p2) for (p1, p2) in zip(ps_, [ps_[2:end]..., ps_[1]])]
                 C = sum(ds)
                 K = 3 * (2 * pi * r - C) / (pi * r^3) # https://en.wikipedia.org/wiki/Bertrand%E2%80%93Diguet%E2%80%93Puiseux_theorem
 
-                @test isapprox(K, sectional_curvature(M, p, X, Y); rtol=1e-2, atol=1e-2)
+                @test isapprox(K, sectional_curvature(M, p, X, Y); rtol = 1.0e-2, atol = 1.0e-2)
             end
 
             @testset "riemann_tensor" begin
                 @test isapprox(
                     sectional_curvature(M, p, X, Y),
                     inner(M, p, riemann_tensor(M, p, X, Y, Y), X) /
-                    (inner(M, p, X, X) * inner(M, p, Y, Y) - inner(M, p, X, Y)^2),
+                        (inner(M, p, X, X) * inner(M, p, Y, Y) - inner(M, p, X, Y)^2),
                 )
             end
         end

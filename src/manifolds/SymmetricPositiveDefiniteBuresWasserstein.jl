@@ -23,26 +23,26 @@ for all ``Y`` and hence we get
 ``Z``= 2(A+A^{\mathrm{T}})`` with ``A=Xp``.
 """
 change_representer(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
+    ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},
     ::EuclideanMetric,
     p,
     X,
 )
 
 function change_representer!(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
-    Y,
-    ::EuclideanMetric,
-    p,
-    X,
-)
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},
+        Y,
+        ::EuclideanMetric,
+        p,
+        X,
+    )
     A = X * p
     Y .= 2 .* (A .+ A')
     return Y
 end
 
 @doc raw"""
-    distance(::MatricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
+    distance(::MetricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 
 Compute the distance with respect to the [`BuresWassersteinMetric`](@ref) on [`SymmetricPositiveDefinite`](@ref) matrices, i.e.
 
@@ -54,15 +54,15 @@ d(p,q) =
 where the last trace can be simplified (by rotating the matrix products in the trace) to ``\operatorname{tr}(pq)``.
 """
 function distance(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
-    p,
-    q,
-)
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},
+        p,
+        q,
+    )
     return sqrt(tr(p) + tr(q) - 2 * tr(sqrt(p * q)))
 end
 
 @doc raw"""
-    exp(::MatricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, p, X)
+    exp(::MetricManifold{ℝ,SymmetricPositiveDefinite,BuresWassersteinMetric}, p, X)
 
 Compute the exponential map on [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`BuresWassersteinMetric`](@ref) given by
@@ -73,14 +73,14 @@ the [`BuresWassersteinMetric`](@ref) given by
 
 where ``q=L_p(X)`` denotes the Lyapunov operator, i.e. it solves ``pq + qp = X``.
 """
-exp(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric}, p, X)
+exp(::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric}, p, X)
 
 function exp!(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
-    q,
-    p,
-    X,
-)
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},
+        q,
+        p,
+        X,
+    )
     Y = lyap(p, -X) #lyap solves qp+pq-X=0
     q .= p .+ X .+ Y * p * Y
     return q
@@ -99,11 +99,11 @@ the [`BuresWassersteinMetric`](@ref) given by
 where ``q=L_p(X)`` denotes the Lyapunov operator, i.e. it solves ``pq + qp = X``.
 """
 function inner(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
-    p,
-    X,
-    Y,
-)
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},
+        p,
+        X,
+        Y,
+    )
     return 1 / 2 * dot(lyap(p, -X), Y)
 end
 
@@ -113,10 +113,10 @@ end
 Return false. [`SymmetricPositiveDefinite`](@ref) with [`BuresWassersteinMetric`](@ref)
 is not a flat manifold.
 """
-is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric}) = false
+is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric}) = false
 
 @doc raw"""
-    log(::MatricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
+    log(::MetricManifold{SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
 
 Compute the logarithmic map on [`SymmetricPositiveDefinite`](@ref) with respect to
 the [`BuresWassersteinMetric`](@ref) given by
@@ -127,14 +127,14 @@ the [`BuresWassersteinMetric`](@ref) given by
 
 where ``q=L_p(X)`` denotes the Lyapunov operator, i.e. it solves ``pq + qp = X``.
 """
-log(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric}, p, q)
+log(::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric}, p, q)
 
 function log!(
-    ::MetricManifold{ℝ,<:SymmetricPositiveDefinite,BuresWassersteinMetric},
-    X,
-    p,
-    q,
-)
+        ::MetricManifold{ℝ, <:SymmetricPositiveDefinite, BuresWassersteinMetric},
+        X,
+        p,
+        q,
+    )
     X .= sqrt(Symmetric(p * q)) + sqrt(Symmetric(q * p)) - 2 * p
     return X
 end

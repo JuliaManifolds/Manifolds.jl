@@ -1,4 +1,3 @@
-
 @inline function allocate_result(M::FiberBundle, f::TF) where {TF}
     p = allocate_result(M.manifold, f)
     X = allocate_result(Fiber(M.manifold, p, M.type), f)
@@ -29,11 +28,9 @@ function get_vector(M::FiberBundle, p::ArrayPartition, c::AbstractVector, B::Abs
     )
 end
 function get_vector(
-    M::FiberBundle,
-    p::ArrayPartition,
-    c::AbstractVector,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:FiberBundleBasisData},
-) where {𝔽}
+        M::FiberBundle, p::ArrayPartition, c::AbstractVector,
+        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData},
+    ) where {𝔽}
     n = manifold_dimension(M.manifold)
     xp1, xp2 = submanifold_components(M, p)
     F = Fiber(M.manifold, xp1, M.type)
@@ -44,10 +41,9 @@ function get_vector(
 end
 
 function get_vectors(
-    M::FiberBundle,
-    p::ArrayPartition,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:FiberBundleBasisData},
-) where {𝔽}
+        M::FiberBundle, p::ArrayPartition,
+        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData},
+    ) where {𝔽}
     xp1, xp2 = submanifold_components(M, p)
     zero_m = zero_vector(M.manifold, xp1)
     F = Fiber(M.manifold, xp1, M.type)
@@ -85,12 +81,8 @@ component, respectively.
 end
 
 function _vector_transport_direction(
-    M::VectorBundle,
-    p::ArrayPartition,
-    X,
-    d,
-    m::FiberBundleProductVectorTransport,
-)
+        M::VectorBundle, p::ArrayPartition, X, d, m::FiberBundleProductVectorTransport,
+    )
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     dx, dVx = submanifold_components(M.manifold, d)
@@ -101,12 +93,8 @@ function _vector_transport_direction(
 end
 
 function _vector_transport_to(
-    M::VectorBundle,
-    p::ArrayPartition,
-    X,
-    q,
-    m::FiberBundleProductVectorTransport,
-)
+        M::VectorBundle, p::ArrayPartition, X, q, m::FiberBundleProductVectorTransport,
+    )
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     qx, qVx = submanifold_components(M.manifold, q)

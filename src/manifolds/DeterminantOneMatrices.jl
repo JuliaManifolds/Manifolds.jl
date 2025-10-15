@@ -21,17 +21,13 @@ The tangent space at any point `p` is the set of matrices with trace 0.
 
 Generate the manifold of ``n×n`` matrices of determinant one.
 """
-struct DeterminantOneMatrices{𝔽,T} <: AbstractDecoratorManifold{𝔽}
+struct DeterminantOneMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function DeterminantOneMatrices(n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function DeterminantOneMatrices(n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return DeterminantOneMatrices{field,typeof(size)}(size)
-end
-
-function active_traits(f, ::DeterminantOneMatrices, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
+    return DeterminantOneMatrices{field, typeof(size)}(size)
 end
 
 @doc raw"""
@@ -40,7 +36,7 @@ end
 Check whether `p` is a valid manifold point on the [`DeterminantOneMatrices`](@ref) `M`, i.e.
 whether `p` has a determinant of ``1``.
 
-The check is perfomed with `isapprox` and all keyword arguments are passed to this
+The check is performed with `isapprox` and all keyword arguments are passed to this
 """
 function check_point(M::DeterminantOneMatrices, p; kwargs...)
     if !isapprox(det(p), 1; kwargs...)
@@ -62,8 +58,8 @@ with trace 0.
 function check_vector(M::DeterminantOneMatrices, p, X; kwargs...)
     if !isapprox(tr(X), 0; kwargs...)
         return DomainError(
-            det(p),
-            "The point $(p) does not lie on $(M), since its determinant is $(det(p)) and not 1.",
+            tr(X),
+            "The tangent vector $(X) does not lie in the Tangent space at $(p) of $(M), since its trace is $(tr(X)) and not zero.",
         )
     end
     return nothing
@@ -72,12 +68,15 @@ end
 embed(::DeterminantOneMatrices, p) = p
 embed(::DeterminantOneMatrices, p, X) = X
 
-function get_embedding(::DeterminantOneMatrices{𝔽,TypeParameter{Tuple{n}}}) where {n,𝔽}
-    return Euclidean(n, n; field=𝔽)
+function get_embedding(::DeterminantOneMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
+    return Euclidean(n, n; field = 𝔽)
 end
-function get_embedding(M::DeterminantOneMatrices{𝔽,Tuple{Int}}) where {𝔽}
+function get_embedding(M::DeterminantOneMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return Euclidean(n, n; field=𝔽, parameter=:field)
+    return Euclidean(n, n; field = 𝔽, parameter = :field)
+end
+function ManifoldsBase.get_embedding_type(::DeterminantOneMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 @doc raw"""
@@ -86,8 +85,64 @@ end
 Return the dimension of the [`DeterminantOneMatrices`](@ref) matrix `M` over the number system
 `𝔽`, which is one dimension less than its embedding, the [`Euclidean`](@ref)`(n, n; field=𝔽)`.
 """
-function manifold_dimension(M::DeterminantOneMatrices{<:Any,𝔽}) where {𝔽}
+function manifold_dimension(M::DeterminantOneMatrices{<:Any, 𝔽}) where {𝔽}
     return manifold_dimension(get_embedding(M)) - 1
+end
+
+@doc raw"""
+    project(G::DeterminantOneMatrices, p)
+    project!(G::DeterminantOneMatrices, q, p)
+
+Project ``p ∈ \mathrm{GL}(n, 𝔽)`` to the [`DeterminantOneMatrices`](@ref)
+using the singular value decomposition of ``p = U S V^\mathrm{H}``.
+
+The formula for the projection is
+
+````math
+\operatorname{proj}(p) = U S D V^\mathrm{H},
+````
+where
+
+````math
+D_{ij} = δ_{ij} \begin{cases}
+    1            & \text{ if } i ≠ n \\
+    \det(p)^{-1} & \text{ if } i = n
+\end{cases}.
+````
+
+The operation can be done in-place of `q`.
+"""
+project(::DeterminantOneMatrices, p)
+
+function project!(M::DeterminantOneMatrices, q, p)
+    n = get_parameter(M.size)[1]
+    detp = det(p)
+    isapprox(detp, 1) && return copyto!(q, p)
+    F = svd(p)
+    q .= F.U .* F.S'
+    q[:, n] ./= detp
+    mul!_safe(q, q, F.Vt)
+    return q
+end
+
+@doc raw"""
+    project(G::DeterminantOneMatrices, p, X)
+    project!(G::DeterminantOneMatrices, Y, p, X)
+
+Orthogonally project ``X ∈ 𝔽^{n×n}`` onto the tangent space of ``p`` to the
+[`DeterminantOneMatrices`](@ref).
+
+This first changes the representation from `X` to the trace-zero component, i.e.
+computes `Y = p \ X` and then subtracts `c = tr(Y) / n` from all diagonal entries.
+"""
+project(::DeterminantOneMatrices, p, X)
+
+function project!(G::DeterminantOneMatrices, Y, p, X)
+    n = get_parameter(G.size)[1]
+    Y .= p \ X
+    c = tr(Y) / n
+    Y[diagind(n, n)] .-= c
+    return Y
 end
 
 @doc raw"""
@@ -106,12 +161,12 @@ function Random.rand!(M::DeterminantOneMatrices, pX; kwargs...)
     return rand!(Random.default_rng(), M, pX; kwargs...)
 end
 function Random.rand!(
-    rng::AbstractRNG,
-    M::DeterminantOneMatrices,
-    pX;
-    vector_at=nothing,
-    kwargs...,
-)
+        rng::AbstractRNG,
+        M::DeterminantOneMatrices,
+        pX;
+        vector_at = nothing,
+        kwargs...,
+    )
     rand!(rng, get_embedding(M), pX; kwargs...)
     if vector_at === nothing # for points ensure invertibility
         n = size(pX)[1]
@@ -125,10 +180,10 @@ function Random.rand!(
     return pX
 end
 
-function Base.show(io::IO, ::DeterminantOneMatrices{𝔽,TypeParameter{Tuple{n}}}) where {n,𝔽}
+function Base.show(io::IO, ::DeterminantOneMatrices{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
     return print(io, "DeterminantOneMatrices($(n), $(𝔽))")
 end
-function Base.show(io::IO, M::DeterminantOneMatrices{𝔽,Tuple{Int}}) where {𝔽}
+function Base.show(io::IO, M::DeterminantOneMatrices{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
     return print(io, "DeterminantOneMatrices($(n), $(𝔽); parameter=:field)")
 end

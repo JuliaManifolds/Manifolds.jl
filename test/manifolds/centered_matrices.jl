@@ -11,16 +11,16 @@ include("../header.jl")
     @testset "Real Centered Matrices Basics" begin
         @test repr(M) == "CenteredMatrices(3, 2, ℝ)"
         @test representation_size(M) == (3, 2)
-        @test typeof(get_embedding(M)) === Euclidean{TypeParameter{Tuple{3,2}},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{3, 2}}}
         @test is_flat(M)
         @test check_point(M, A) === nothing
-        @test_throws ManifoldDomainError is_point(M, B; error=:error)
-        @test_throws ManifoldDomainError is_point(M, C; error=:error)
-        @test_throws DomainError is_point(M, D; error=:error)
+        @test_throws ManifoldDomainError is_point(M, B; error = :error)
+        @test_throws ManifoldDomainError is_point(M, C; error = :error)
+        @test_throws DomainError is_point(M, D; error = :error)
         @test check_vector(M, A, A) === nothing
-        @test_throws DomainError is_vector(M, A, D; error=:error)
-        @test_throws DomainError is_vector(M, D, A; error=:error)
-        @test_throws ManifoldDomainError is_vector(M, A, B; error=:error)
+        @test_throws DomainError is_vector(M, A, D; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, D, A; error = :error)
+        @test_throws ManifoldDomainError is_vector(M, A, B; error = :error)
         @test manifold_dimension(M) == 4
         @test A == project!(M, A, A)
         @test A == project(M, A, A)
@@ -34,34 +34,34 @@ include("../header.jl")
         test_manifold(
             M,
             [A, E, F],
-            test_injectivity_radius=false,
-            test_project_tangent=true,
-            test_musical_isomorphisms=true,
-            test_default_vector_transport=true,
-            is_tangent_atol_multiplier=1,
-            is_point_atol_multiplier=1,
+            test_injectivity_radius = false,
+            test_project_tangent = true,
+            test_musical_isomorphisms = true,
+            test_default_vector_transport = true,
+            is_tangent_atol_multiplier = 1,
+            is_point_atol_multiplier = 1,
         )
     end
     @testset "Complex Centered Matrices Basics" begin
         @test repr(M_complex) == "CenteredMatrices(3, 2, ℂ)"
         @test manifold_dimension(M_complex) == 8
-        G = [1.0 1.0im; -1.0im 0.0; -1.0+1.0im -1.0im]
+        G = [1.0 1.0im; -1.0im 0.0; -1.0 + 1.0im -1.0im]
         H = [1.0im 0.0; -2.0im 1.0im; 1.0im -1.0im]
         test_manifold(
             M_complex,
             [C, G, H],
-            test_injectivity_radius=false,
-            test_project_tangent=true,
-            test_musical_isomorphisms=true,
-            test_default_vector_transport=true,
-            is_tangent_atol_multiplier=1,
-            is_point_atol_multiplier=1,
-            test_inplace=true,
+            test_injectivity_radius = false,
+            test_project_tangent = true,
+            test_musical_isomorphisms = true,
+            test_default_vector_transport = true,
+            is_tangent_atol_multiplier = 1,
+            is_point_atol_multiplier = 1,
+            test_inplace = true,
         )
     end
     @testset "field parameter" begin
-        M = CenteredMatrices(3, 2; parameter=:field)
+        M = CenteredMatrices(3, 2; parameter = :field)
         @test repr(M) == "CenteredMatrices(3, 2, ℝ; parameter=:field)"
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
     end
 end

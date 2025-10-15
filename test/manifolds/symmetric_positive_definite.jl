@@ -24,7 +24,7 @@ include("../header.jl")
     metrics = [M1, M2, M3, M5, M6]
     types = [Matrix{Float64}, SPDPoint]
     TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{3,3,Float64,9})
+    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64, 9})
 
     for M in metrics
         basis_types = if (M == M1 || M == M2 || M == M3)
@@ -41,13 +41,13 @@ include("../header.jl")
             end
             for T in types
                 exp_log_atol_multiplier = 8.0
-                if T <: MMatrix{3,3,Float64}
+                if T <: MMatrix{3, 3, Float64}
                     # eigendecomposition of 3x3 SPD matrices from StaticArrays is not very accurate
                     exp_log_atol_multiplier = 5.0e7
                 end
                 if M == M6
                     # we have to raise this slightly for the nondiagonal case.
-                    exp_log_atol_multiplier = 5e1
+                    exp_log_atol_multiplier = 5.0e1
                 end
                 if T == SPDPoint && (M != M1 && M != M2)
                     # SPDPoint only meant for Affine metric
@@ -67,17 +67,16 @@ include("../header.jl")
                 test_manifold(
                     M,
                     pts;
-                    vector_transport_methods=typeof(M) == SymmetricPositiveDefinite{3} ?
-                                             [ParallelTransport()] : [],
-                    test_vee_hat=M === M2,
-                    exp_log_atol_multiplier=exp_log_atol_multiplier,
-                    basis_types_vecs=basis_types,
-                    basis_types_to_from=basis_types,
-                    is_tangent_atol_multiplier=1,
-                    test_inplace=true,
-                    test_rand_point=M === M1,
-                    test_rand_tvector=M === M1,
-                    test_default_vector_transport=!(M === M5 || M === M6),
+                    vector_transport_methods = typeof(M) == SymmetricPositiveDefinite{3} ?
+                        [ParallelTransport()] : [],
+                    exp_log_atol_multiplier = exp_log_atol_multiplier,
+                    basis_types_vecs = basis_types,
+                    basis_types_to_from = basis_types,
+                    is_tangent_atol_multiplier = 1,
+                    test_inplace = true,
+                    test_rand_point = M === M1,
+                    test_rand_tvector = M === M1,
+                    test_default_vector_transport = !(M === M5 || M === M6),
                 )
             end
             @testset "Test Error cases in is_point and is_vector" begin
@@ -141,11 +140,12 @@ include("../header.jl")
         p1 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1]
         p2 = [2.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1]
         p3 = A(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(A(π / 6))
+        embed(M, p1) == p1
         X1 = log(M, p1, p3)
         Y1 = vector_transport_to(M, p1, X1, p2)
         @test is_vector(M, p2, Y1)
         Y2 = vector_transport_to(M, p1, X1, p2, PoleLadderTransport())
-        @test is_vector(M, p2, Y2, atol=10^-16)
+        @test is_vector(M, p2, Y2, atol = 10^-16)
         Y3 = vector_transport_to(M, p1, X1, p2, SchildsLadderTransport())
         @test is_vector(M, p2, Y3)
         @test isapprox(M, p2, Y1, Y2) # pole is exact on SPDs, i.e. identical to parallel transport
@@ -190,11 +190,11 @@ include("../header.jl")
     @testset "rand()" begin
         p = rand(M1)
         @test is_point(M1, p)
-        @test is_vector(M1, p, rand(M1; vector_at=p, tangent_distr=:Rician))
+        @test is_vector(M1, p, rand(M1; vector_at = p, tangent_distr = :Rician))
         @test is_vector(
             M1,
             p,
-            rand(MersenneTwister(123), M1; vector_at=p, tangent_distr=:Rician),
+            rand(MersenneTwister(123), M1; vector_at = p, tangent_distr = :Rician),
         )
     end
     @testset "metric" begin
@@ -233,9 +233,9 @@ include("../header.jl")
         @test p2.eigen == p.eigen
         pS = SPDPoint(
             2 * Matrix{Float64}(I, 3, 3);
-            store_p=false,
-            store_sqrt=false,
-            store_sqrt_inv=false,
+            store_p = false,
+            store_sqrt = false,
+            store_sqrt_inv = false,
         )
         m = missing
         s = "$(typeof(pS))\np:\n $m\np^{1/2}:\n $m\np^{-1/2}:\n $m"
@@ -250,9 +250,9 @@ include("../header.jl")
         @test !ismissing(pF2.sqrt_inv)
         pF3 = SPDPoint(
             Matrix{Float64}(I, 3, 3);
-            store_p=false,
-            store_sqrt=false,
-            store_sqrt_inv=false,
+            store_p = false,
+            store_sqrt = false,
+            store_sqrt_inv = false,
         )
         copyto!(pF3, pF2) # do not fill values from F
         @test ismissing(pF3.p)
@@ -260,8 +260,8 @@ include("../header.jl")
         @test ismissing(pF3.sqrt_inv)
         @test isapprox(Manifolds.spd_sqrt(pS), pF.sqrt) # recreate
         @test isapprox(Manifolds.spd_sqrt_inv(pF), pF.sqrt_inv) #identity
-        pF4 = SPDPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt_inv=false)
-        pF5 = SPDPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt=false)
+        pF4 = SPDPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt_inv = false)
+        pF5 = SPDPoint(2 * Matrix{Float64}(I, 3, 3); store_sqrt = false)
         ssi = (pF.sqrt, pF.sqrt_inv)
         @test Manifolds.spd_sqrt_and_sqrt_inv(pF4) == ssi # comp sqrt inv
         @test Manifolds.spd_sqrt_and_sqrt_inv(pF5) == ssi # comp sqrt
@@ -271,13 +271,17 @@ include("../header.jl")
         @test ismissing(pS.sqrt)
         @test ismissing(pS.sqrt_inv)
         @test allocate_result(M1, zero_vector, p) isa Matrix
+        c1 = ManifoldsBase.allocate_coordinates(M, p, Float64, 6)
+        c2 = ManifoldsBase.allocate_coordinates(M, embed(M, p), Float64, 6)
+        @test typeof(c1) == typeof(c2)
+        @test length(c1) == length(c2)
     end
 
     @testset "test BigFloat" begin
         M = SymmetricPositiveDefinite(2)
         p1 = BigFloat[
-            1.6590891025248637458133771360735408961772918701171875 -2.708777790960681386422947980463504791259765625e-07
-            -2.708777790960681386422947980463504791259765625e-07 1.6590893171834280028775765458703972399234771728515625
+            1.6590891025248637458133771360735408961772918701171875 -2.708777790960681386422947980463504791259765625e-7
+            -2.708777790960681386422947980463504791259765625e-7 1.6590893171834280028775765458703972399234771728515625
         ]
         @test is_point(M, p1)
     end
@@ -309,8 +313,8 @@ include("../header.jl")
         @test volume_density(M, p, X) ≈ 5.141867280770719
     end
     @testset "field parameter" begin
-        M = SymmetricPositiveDefinite(3; parameter=:field)
-        @test typeof(get_embedding(M)) === Euclidean{Tuple{Int,Int},ℝ}
+        M = SymmetricPositiveDefinite(3; parameter = :field)
+        @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(M) == "SymmetricPositiveDefinite(3; parameter=:field)"
         @test Manifolds.get_parameter_type(M) === :field
     end

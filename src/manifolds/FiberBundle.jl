@@ -1,4 +1,3 @@
-
 @doc raw"""
     FiberBundleProductVectorTransport{
         TMP<:AbstractVectorTransportMethod,
@@ -29,23 +28,23 @@ which uses [`ParallelTransport`](@extref `ManifoldsBase.ParallelTransport`)
 if no manifold is provided.
 """
 struct FiberBundleProductVectorTransport{
-    TMP<:AbstractVectorTransportMethod,
-    TMV<:AbstractVectorTransportMethod,
-} <: AbstractVectorTransportMethod
+        TMP <: AbstractVectorTransportMethod,
+        TMV <: AbstractVectorTransportMethod,
+    } <: AbstractVectorTransportMethod
     method_horizontal::TMP
     method_vertical::TMV
 end
 function FiberBundleProductVectorTransport(
-    M::AbstractManifold=ManifoldsBase.DefaultManifold(),
-    fiber::FiberType=TangentSpaceType();
-    vector_transport_method_horizontal::AbstractVectorTransportMethod=default_vector_transport_method(
-        M,
-    ),
-    vector_transport_method_vertical::AbstractVectorTransportMethod=fiber_bundle_transport(
-        M,
-        fiber,
-    ),
-)
+        M::AbstractManifold = ManifoldsBase.DefaultManifold(),
+        fiber::FiberType = TangentSpaceType();
+        vector_transport_method_horizontal::AbstractVectorTransportMethod = default_vector_transport_method(
+            M,
+        ),
+        vector_transport_method_vertical::AbstractVectorTransportMethod = fiber_bundle_transport(
+            M,
+            fiber,
+        ),
+    )
     return FiberBundleProductVectorTransport(
         vector_transport_method_horizontal,
         vector_transport_method_vertical,
@@ -69,11 +68,11 @@ Examples include vector bundles, principal bundles or unit tangent bundles, see 
     FiberBundle(M::AbstractManifold, type::FiberType)
 """
 struct FiberBundle{
-    𝔽,
-    TF<:FiberType,
-    TM<:AbstractManifold{𝔽},
-    TVT<:FiberBundleProductVectorTransport,
-} <: AbstractManifold{𝔽}
+        𝔽,
+        TF <: FiberType,
+        TM <: AbstractManifold{𝔽},
+        TVT <: FiberBundleProductVectorTransport,
+    } <: AbstractManifold{𝔽}
     type::TF
     manifold::TM
     vector_transport::TVT
@@ -146,7 +145,7 @@ struct FiberBundleProductRetraction <: AbstractRetractionMethod end
 
 vector_bundle_transport(::FiberType, M::AbstractManifold) = ParallelTransport()
 
-struct FiberBundleBasisData{BBasis<:CachedBasis,TBasis<:CachedBasis}
+struct FiberBundleBasisData{BBasis <: CachedBasis, TBasis <: CachedBasis}
     base_basis::BBasis
     fiber_basis::TBasis
 end
@@ -182,13 +181,13 @@ vertical bundle ``VF\mathcal M`` at `pf` from tangent to fiber ``\pi^{-1}({p})``
 ``p\in \mathcal M``.
 """
 function bundle_transport_tangent_direction(
-    B::FiberBundle,
-    p,
-    pf,
-    X,
-    d,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
-)
+        B::FiberBundle,
+        p,
+        pf,
+        X,
+        d,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(B.manifold),
+    )
     Y = allocate(X)
     return bundle_transport_tangent_direction!(B, Y, p, pf, X, d, m)
 end
@@ -202,13 +201,13 @@ bundle ``VF\mathcal M`` at `pf` from tangent to fiber ``\pi^{-1}({p})``,
 ``p\in \mathcal M``.
 """
 function bundle_transport_tangent_to(
-    B::FiberBundle,
-    p,
-    pf,
-    X,
-    q,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
-)
+        B::FiberBundle,
+        p,
+        pf,
+        X,
+        q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(B.manifold),
+    )
     Y = allocate(X)
     return bundle_transport_tangent_to!(B, Y, p, pf, X, q, m)
 end
@@ -230,7 +229,7 @@ function get_basis(M::FiberBundle, p, B::AbstractBasis)
     return CachedBasis(B, FiberBundleBasisData(base_basis, fiber_basis))
 end
 function get_basis(M::FiberBundle, p, B::CachedBasis)
-    return invoke(get_basis, Tuple{AbstractManifold,Any,CachedBasis}, M, p, B)
+    return invoke(get_basis, Tuple{AbstractManifold, Any, CachedBasis}, M, p, B)
 end
 
 function get_coordinates(M::FiberBundle, p, X, B::AbstractBasis)
@@ -251,11 +250,11 @@ function get_coordinates!(M::FiberBundle, Y, p, X, B::AbstractBasis)
 end
 
 function get_coordinates(
-    M::FiberBundle,
-    p,
-    X,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:FiberBundleBasisData},
-) where {𝔽}
+        M::FiberBundle,
+        p,
+        X,
+        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData},
+    ) where {𝔽}
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     F = Fiber(M.manifold, px, M.type)
@@ -266,12 +265,12 @@ function get_coordinates(
 end
 
 function get_coordinates!(
-    M::FiberBundle,
-    Y,
-    p,
-    X,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:FiberBundleBasisData},
-) where {𝔽}
+        M::FiberBundle,
+        Y,
+        p,
+        X,
+        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData},
+    ) where {𝔽}
     px, Vx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     n = manifold_dimension(M.manifold)
@@ -292,12 +291,12 @@ function get_vector!(M::FiberBundle, Y, p, X, B::AbstractBasis)
 end
 
 function get_vector!(
-    M::FiberBundle,
-    Y,
-    p,
-    X,
-    B::CachedBasis{𝔽,<:AbstractBasis{𝔽},<:FiberBundleBasisData},
-) where {𝔽}
+        M::FiberBundle,
+        Y,
+        p,
+        X,
+        B::CachedBasis{𝔽, <:AbstractBasis{𝔽}, <:FiberBundleBasisData},
+    ) where {𝔽}
     n = manifold_dimension(M.manifold)
     xp1, xp2 = submanifold_components(M, p)
     Yp1, Yp2 = submanifold_components(M, Y)
@@ -311,32 +310,32 @@ function _isapprox(B::FiberBundle, p, q; kwargs...)
     xp, Vp = submanifold_components(B.manifold, p)
     xq, Vq = submanifold_components(B.manifold, q)
     return isapprox(B.manifold, xp, xq; kwargs...) &&
-           isapprox(Fiber(B.manifold, xp, B.type), Vp, Vq; kwargs...)
+        isapprox(Fiber(B.manifold, xp, B.type), Vp, Vq; kwargs...)
 end
 function _isapprox(B::FiberBundle, p, X, Y; kwargs...)
     px, Vx = submanifold_components(B.manifold, p)
     VXM, VXF = submanifold_components(B.manifold, X)
     VYM, VYF = submanifold_components(B.manifold, Y)
     return isapprox(B.manifold, VXM, VYM; kwargs...) &&
-           isapprox(Fiber(B.manifold, px, B.type), Vx, VXF, VYF; kwargs...)
+        isapprox(Fiber(B.manifold, px, B.type), Vx, VXF, VYF; kwargs...)
 end
 
 function manifold_dimension(B::FiberBundle)
     return manifold_dimension(B.manifold) + fiber_dimension(B.manifold, B.type)
 end
 
-function Random.rand!(M::FiberBundle, pX; vector_at=nothing)
-    return rand!(Random.default_rng(), M, pX; vector_at=vector_at)
+function Random.rand!(M::FiberBundle, pX; vector_at = nothing)
+    return rand!(Random.default_rng(), M, pX; vector_at = vector_at)
 end
-function Random.rand!(rng::AbstractRNG, M::FiberBundle, pX; vector_at=nothing)
+function Random.rand!(rng::AbstractRNG, M::FiberBundle, pX; vector_at = nothing)
     pXM, pXF = submanifold_components(M.manifold, pX)
     if vector_at === nothing
         rand!(rng, M.manifold, pXM)
         rand!(rng, Fiber(M.manifold, pXM, M.type), pXF)
     else
         vector_atM, vector_atF = submanifold_components(M.manifold, vector_at)
-        rand!(rng, M.manifold, pXM; vector_at=vector_atM)
-        rand!(rng, Fiber(M.manifold, pXM, M.type), pXF; vector_at=vector_atF)
+        rand!(rng, M.manifold, pXM; vector_at = vector_atM)
+        rand!(rng, Fiber(M.manifold, pXM, M.type), pXF; vector_at = vector_atF)
     end
     return pX
 end

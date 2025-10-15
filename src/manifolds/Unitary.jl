@@ -1,6 +1,5 @@
-
 @doc raw"""
-    const UnitaryMatrices{n,𝔽} = GeneralUnitaryMatrices{T,𝔽,AbsoluteDeterminantOneMatrixType}
+    const UnitaryMatrices{𝔽, T} = GeneralUnitaryMatrices{𝔽, T, AbsoluteDeterminantOneMatrixType}
 
 The manifold ``U(n,𝔽)`` of ``n×n`` complex matrices (when 𝔽=ℂ) or quaternionic matrices
 (when 𝔽=ℍ) such that
@@ -30,56 +29,56 @@ If you prefer the representation as `X` you can use the [`Stiefel`](@ref)`(n, n,
 
 see also [`OrthogonalMatrices`](@ref) for the real valued case.
 """
-const UnitaryMatrices{T,𝔽} = GeneralUnitaryMatrices{T,𝔽,AbsoluteDeterminantOneMatrixType}
+const UnitaryMatrices{𝔽, T} = GeneralUnitaryMatrices{𝔽, T, AbsoluteDeterminantOneMatrixType}
 
-function UnitaryMatrices(n::Int, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
+function UnitaryMatrices(n::Int, 𝔽::AbstractNumbers = ℂ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return UnitaryMatrices{typeof(size),𝔽}(size)
+    return UnitaryMatrices{𝔽, typeof(size)}(size)
 end
 
-check_size(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p::Number) = nothing
-check_size(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number) = nothing
+check_size(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p::Number) = nothing
+check_size(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number) = nothing
 
-embed(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p::Number) = SMatrix{1,1}(p)
+embed(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p::Number) = SMatrix{1, 1}(p)
 
-embed(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number) = SMatrix{1,1}(X)
+embed(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number) = SMatrix{1, 1}(X)
 
-function exp(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number)
+function exp(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number)
     return p * exp(X)
 end
-function exp_fused(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X::Number, t::Real)
+function exp_fused(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X::Number, t::Real)
     return p * exp(t * X)
 end
 
 function get_coordinates_orthonormal(
-    ::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ},
-    p,
-    X::Quaternions.Quaternion,
-    ::RealNumbers,
-)
+        ::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}},
+        p,
+        X::Quaternions.Quaternion,
+        ::RealNumbers,
+    )
     return @SVector [X.v1, X.v2, X.v3]
 end
 
 function get_vector_orthonormal(
-    ::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ},
-    p::Quaternions.Quaternion,
-    c,
-    ::RealNumbers,
-)
+        ::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}},
+        p::Quaternions.Quaternion,
+        c,
+        ::RealNumbers,
+    )
     i = firstindex(c)
     return Quaternions.quat(0, c[i], c[i + 1], c[i + 2])
 end
 
-injectivity_radius(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}) = π
+injectivity_radius(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}) = π
 
-function _isapprox(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, x, y; kwargs...)
+function _isapprox(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, x, y; kwargs...)
     return isapprox(x[], y[]; kwargs...)
 end
-function _isapprox(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X, Y; kwargs...)
+function _isapprox(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X, Y; kwargs...)
     return isapprox(X[], Y[]; kwargs...)
 end
 
-function log(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p::Number, q::Number)
+function log(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p::Number, q::Number)
     return log(conj(p) * q)
 end
 
@@ -91,7 +90,7 @@ Return the dimension of the manifold unitary matrices.
 \dim_{\mathrm{U}(n)} = n^2.
 ```
 """
-function manifold_dimension(M::UnitaryMatrices{<:Any,ℂ})
+function manifold_dimension(M::UnitaryMatrices{ℂ})
     n = get_parameter(M.size)[1]
     return n^2
 end
@@ -103,18 +102,18 @@ Return the dimension of the manifold unitary matrices.
 \dim_{\mathrm{U}(n, ℍ)} = n(2n+1).
 ```
 """
-function manifold_dimension(M::UnitaryMatrices{<:Any,ℍ})
+function manifold_dimension(M::UnitaryMatrices{ℍ})
     n = get_parameter(M.size)[1]
     return n * (2n + 1)
 end
 
-number_of_coordinates(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, ::AbstractBasis{ℍ}) = 3
+number_of_coordinates(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, ::AbstractBasis{ℍ}) = 3
 
-project(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p) = sign(p)
+project(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p) = sign(p)
 
-project(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p, X) = (X - conj(X)) / 2
+project(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p, X) = (X - conj(X)) / 2
 
-function Random.rand(M::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}; vector_at=nothing)
+function Random.rand(M::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}; vector_at = nothing)
     if vector_at === nothing
         return sign(rand(Quaternions.QuaternionF64))
     else
@@ -122,10 +121,10 @@ function Random.rand(M::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}; vector_at=
     end
 end
 function Random.rand(
-    rng::AbstractRNG,
-    M::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ};
-    vector_at=nothing,
-)
+        rng::AbstractRNG,
+        M::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}};
+        vector_at = nothing,
+    )
     if vector_at === nothing
         return sign(rand(rng, Quaternions.QuaternionF64))
     else
@@ -143,15 +142,15 @@ an ``n×n`` matrix.
 Generate a tangent vector at `vector_at` by projecting a normally
 distributed matrix onto the tangent space.
 """
-rand(::UnitaryMatrices; σ::Real=1.0)
+rand(::UnitaryMatrices; σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::UnitaryMatrices,
-    pX;
-    vector_at=nothing,
-    σ::Real=one(real(eltype(pX))),
-)
+        rng::AbstractRNG,
+        M::UnitaryMatrices,
+        pX;
+        vector_at = nothing,
+        σ::Real = one(real(eltype(pX))),
+    )
     n = get_parameter(M.size)[1]
     if vector_at === nothing
         A = σ * randn(rng, eltype(pX), n, n)
@@ -163,17 +162,17 @@ function Random.rand!(
     return pX
 end
 
-function Base.show(io::IO, ::UnitaryMatrices{TypeParameter{Tuple{n}},ℂ}) where {n}
+function Base.show(io::IO, ::UnitaryMatrices{ℂ, TypeParameter{Tuple{n}}}) where {n}
     return print(io, "UnitaryMatrices($(n))")
 end
-function Base.show(io::IO, M::UnitaryMatrices{Tuple{Int},ℂ})
+function Base.show(io::IO, M::UnitaryMatrices{ℂ, Tuple{Int}})
     n = get_parameter(M.size)[1]
     return print(io, "UnitaryMatrices($n; parameter=:field)")
 end
-function Base.show(io::IO, ::UnitaryMatrices{TypeParameter{Tuple{n}},ℍ}) where {n}
+function Base.show(io::IO, ::UnitaryMatrices{ℍ, TypeParameter{Tuple{n}}}) where {n}
     return print(io, "UnitaryMatrices($(n), ℍ)")
 end
-function Base.show(io::IO, M::UnitaryMatrices{Tuple{Int},ℍ})
+function Base.show(io::IO, M::UnitaryMatrices{ℍ, Tuple{Int}})
     n = get_parameter(M.size)[1]
     return print(io, "UnitaryMatrices($n, ℍ; parameter=:field)")
 end
@@ -215,4 +214,4 @@ function Weingarten!(::UnitaryMatrices, Y, p, X, V)
     return Y
 end
 
-zero_vector(::UnitaryMatrices{TypeParameter{Tuple{1}},ℍ}, p) = zero(p)
+zero_vector(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, p) = zero(p)

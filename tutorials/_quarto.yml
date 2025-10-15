@@ -7,10 +7,6 @@ project:
 crossref:
   fig-prefix: Figure
   tbl-prefix: Table
-bibliography:
-  - ../CITATION.bib
-#  - ../bib/manopt-bibliography.yaml
-# csl: ../bib/harvard1.csl
 fig-format: png
 
 execute:
@@ -24,4 +20,4 @@ format:
     variant: -raw_html+tex_math_dollars+pipe_tables+footnotes
     wrap: preserve
 
-jupyter: julia-1.11
+engines: ['julia']

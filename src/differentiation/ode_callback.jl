@@ -1,4 +1,3 @@
-
 """
     IntegratorTerminatorNearChartBoundary{TKwargs}
 

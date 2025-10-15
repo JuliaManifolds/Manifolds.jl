@@ -30,12 +30,12 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
     test_manifold(
         M,
         pts;
-        basis_types_to_from=(DefaultOrthonormalBasis(),),
-        parallel_transport=true,
-        test_injectivity_radius=true,
-        test_musical_isomorphisms=false,
-        test_rand_point=true,
-        test_rand_tvector=true,
+        basis_types_to_from = (DefaultOrthonormalBasis(),),
+        parallel_transport = true,
+        test_injectivity_radius = true,
+        test_musical_isomorphisms = false,
+        test_rand_point = true,
+        test_rand_tvector = true,
     )
 
     @test all(
@@ -43,8 +43,8 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
         Weingarten(M, pts[1], Xpts[1], [1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]),
     )
     @testset "field parameter" begin
-        G = HeisenbergMatrices(1; parameter=:field)
-        @test typeof(get_embedding(G)) === Euclidean{Tuple{Int,Int},ℝ}
+        G = HeisenbergMatrices(1; parameter = :field)
+        @test typeof(get_embedding(G)) === Euclidean{ℝ, Tuple{Int, Int}}
         @test repr(G) == "HeisenbergMatrices(1; parameter=:field)"
     end
 end

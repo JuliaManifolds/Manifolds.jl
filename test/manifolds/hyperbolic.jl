@@ -7,7 +7,7 @@ include("../header.jl")
         @test base_manifold(M) == M
         @test manifold_dimension(M) == 2
         @test typeof(get_embedding(M)) ==
-              MetricManifold{ℝ,Euclidean{TypeParameter{Tuple{3}},ℝ},MinkowskiMetric}
+            MetricManifold{ℝ, Euclidean{ℝ, TypeParameter{Tuple{3}}}, MinkowskiMetric}
         @test representation_size(M) == (3,)
         @test !is_flat(M)
         @test isinf(injectivity_radius(M))
@@ -16,33 +16,33 @@ include("../header.jl")
         @test isinf(injectivity_radius(M, [0.0, 0.0, 1.0], ExponentialRetraction()))
         @test !is_point(M, [1.0, 0.0, 0.0, 0.0])
         @test !is_vector(M, [0.0, 0.0, 1.0], [0.0, 0.0, 1.0, 0.0])
-        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error=:error)
+        @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error = :error)
         @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test_throws DomainError is_vector(
+        @test_throws ManifoldDomainError is_vector( # p is not a valid point
             M,
             [1.0, 0.0, 0.0],
             [1.0, 0.0, 0.0];
-            error=:error,
+            error = :error,
         )
         @test !is_vector(M, [0.0, 0.0, 1.0], [1.0, 0.0, 1.0])
         @test_throws DomainError is_vector(
             M,
             [0.0, 0.0, 1.0],
             [1.0, 0.0, 1.0];
-            error=:error,
+            error = :error,
         )
         @test is_default_metric(M, MinkowskiMetric())
         @test manifold_dimension(M) == 2
 
         for (P, T) in zip(
-            [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
-            [
-                HyperboloidTangentVector,
-                PoincareBallTangentVector,
-                PoincareHalfSpaceTangentVector,
-            ],
-        )
+                [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
+                [
+                    HyperboloidTangentVector,
+                    PoincareBallTangentVector,
+                    PoincareHalfSpaceTangentVector,
+                ],
+            )
             p = convert(P, [1.0, 0.0, sqrt(2.0)])
             X = convert(T, [1.0, 0.0, sqrt(2.0)], [0.0, 1.0, 0.0])
             @test number_eltype(p) == eltype(p.value)
@@ -60,11 +60,13 @@ include("../header.jl")
             @test copyto!(M, XC, p, X) == X # does copyto return the right value?
             @test XC == X # does copyto store the right value?
             @test XC.value == X.value # another check
+            @test zero_vector(M, p) isa T
         end
     end
     @testset "Hyperbolic Representation Conversion I" begin
         p = [0.0, 0.0, 1.0]
         pH = HyperboloidPoint(p)
+
         @test minkowski_metric(pH, pH) == minkowski_metric(p, p)
         @test convert(HyperboloidPoint, p).value == pH.value
         @test convert(AbstractVector, pH) == p
@@ -83,16 +85,16 @@ include("../header.jl")
         @test_throws DomainError is_point(
             M,
             PoincareBallPoint([0.9, 0.0, 0.0]);
-            error=:error,
+            error = :error,
         )
-        @test_throws DomainError is_point(M, PoincareBallPoint([1.1, 0.0]); error=:error)
+        @test_throws DomainError is_point(M, PoincareBallPoint([1.1, 0.0]); error = :error)
 
         @test is_vector(M, pB, PoincareBallTangentVector([2.0, 2.0]))
         @test_throws DomainError is_vector(
             M,
             pB,
             PoincareBallTangentVector([2.0, 2.0, 3.0]);
-            error=:error,
+            error = :error,
         )
         pS = convert(PoincareHalfSpacePoint, p)
         pS2 = convert(PoincareHalfSpacePoint, pB)
@@ -101,12 +103,12 @@ include("../header.jl")
         @test_throws DomainError is_point(
             M,
             PoincareHalfSpacePoint([0.0, 0.0, 1.0]);
-            error=:error,
+            error = :error,
         )
         @test_throws DomainError is_point(
             M,
             PoincareHalfSpacePoint([0.0, -1.0]);
-            error=:error,
+            error = :error,
         )
 
         @test pS.value == pS2.value
@@ -118,7 +120,7 @@ include("../header.jl")
         M = Hyperbolic(2)
         p = PoincareHalfSpacePoint([1.0, 1.0])
         X = PoincareHalfSpaceTangentVector(zeros(3))
-        @test_throws DomainError is_vector(M, p, X; error=:error)
+        @test_throws DomainError is_vector(M, p, X; error = :error)
     end
     @testset "Hyperbolic Representation Conversion II" begin
         M = Hyperbolic(2)
@@ -129,17 +131,17 @@ include("../header.jl")
         @test convert(AbstractVector, X1) == X
         # Convert to types and back to Array
         for (P, T) in zip(
-            [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
-            [
-                HyperboloidTangentVector,
-                PoincareBallTangentVector,
-                PoincareHalfSpaceTangentVector,
-            ],
-        )
+                [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
+                [
+                    HyperboloidTangentVector,
+                    PoincareBallTangentVector,
+                    PoincareHalfSpaceTangentVector,
+                ],
+            )
             # convert to P,T
             p1 = convert(P, pts[2])
             X1 = convert(T, pts[2], X)
-            (p2, X2) = convert(Tuple{P,T}, (pts[2], X))
+            (p2, X2) = convert(Tuple{P, T}, (pts[2], X))
             @test isapprox(M, p1, p2)
             @test isapprox(M, p1, X1, X2)
             # Test broadcast
@@ -153,24 +155,24 @@ include("../header.jl")
             @test X1s == X1
 
             for (P2, T2) in zip(
-                [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
-                [
-                    HyperboloidTangentVector,
-                    PoincareBallTangentVector,
-                    PoincareHalfSpaceTangentVector,
-                ],
-            )
+                    [HyperboloidPoint, PoincareBallPoint, PoincareHalfSpacePoint],
+                    [
+                        HyperboloidTangentVector,
+                        PoincareBallTangentVector,
+                        PoincareHalfSpaceTangentVector,
+                    ],
+                )
                 @test isapprox(M, convert(P2, p1), convert(P2, pts[2]))
                 @test convert(T, p1, X1) == convert(T, pts[2], X)
-                (p3, X3) = convert(Tuple{P2,T2}, (pts[2], X))
-                (p3a, X3a) = convert(Tuple{P2,T2}, (p1, X1))
+                (p3, X3) = convert(Tuple{P2, T2}, (pts[2], X))
+                (p3a, X3a) = convert(Tuple{P2, T2}, (p1, X1))
                 @test isapprox(M, p3, p3a)
                 @test isapprox(M, p3, X3, X3a)
                 @test isapprox(M, convert(P2, p2), p3)
                 @test isapprox(M, pts[2], convert(AbstractVector, p3))
                 @test isapprox(M, p3, convert(T2, p2, X2), X3)
                 # coupled conversion
-                (pT, XT) = convert(Tuple{AbstractVector,AbstractVector}, (p2, X2))
+                (pT, XT) = convert(Tuple{AbstractVector, AbstractVector}, (p2, X2))
                 @test isapprox(M, pts[2], pT)
                 @test isapprox(M, pts[2], X, XT)
             end
@@ -179,7 +181,7 @@ include("../header.jl")
 
     types = [
         Vector{Float64},
-        SizedVector{3,Float64},
+        SizedVector{3, Float64},
         HyperboloidPoint,
         PoincareBallPoint,
         PoincareHalfSpacePoint,
@@ -197,23 +199,22 @@ include("../header.jl")
             test_manifold(
                 M,
                 pts,
-                test_project_tangent=is_plain_array || T == HyperboloidPoint,
-                test_musical_isomorphisms=is_plain_array,
-                test_default_vector_transport=true,
-                vector_transport_methods=[
+                test_project_tangent = is_plain_array || T == HyperboloidPoint,
+                test_musical_isomorphisms = is_plain_array,
+                test_default_vector_transport = true,
+                vector_transport_methods = [
                     ParallelTransport(),
                     SchildsLadderTransport(),
                     PoleLadderTransport(),
                 ],
-                is_tangent_atol_multiplier=10.0,
-                exp_log_atol_multiplier=10.0,
-                retraction_methods=(ExponentialRetraction(),),
-                test_vee_hat=false,
-                test_tangent_vector_broadcasting=is_plain_array,
-                test_vector_spaces=is_plain_array,
-                test_inplace=true,
-                test_rand_point=is_plain_array,
-                test_rand_tvector=is_plain_array,
+                is_tangent_atol_multiplier = 10.0,
+                exp_log_atol_multiplier = 10.0,
+                retraction_methods = (ExponentialRetraction(),),
+                test_tangent_vector_broadcasting = is_plain_array,
+                test_vector_spaces = is_plain_array,
+                test_inplace = true,
+                test_rand_point = is_plain_array,
+                test_rand_tvector = is_plain_array,
             )
         end
     end
@@ -280,8 +281,8 @@ include("../header.jl")
             [0.0, -1.0, sqrt(2.0)],
         ]
         ws = UnitWeights{Float64}(length(pts))
-        @test isapprox(M, mean(M, pts), pts[1]; atol=10^-4)
-        @test isapprox(M, mean(M, pts, ws), pts[1]; atol=10^-4)
+        @test isapprox(M, mean(M, pts), pts[1]; atol = 10^-4)
+        @test isapprox(M, mean(M, pts, ws), pts[1]; atol = 10^-4)
         @test_throws DimensionMismatch mean(M, pts, UnitWeights{Float64}(length(pts) + 1))
     end
     @testset "Hyperbolic ONB test" begin
@@ -290,7 +291,7 @@ include("../header.jl")
         B = get_basis(M, p, DefaultOrthonormalBasis())
         V = get_vectors(M, p, B)
         for v in V
-            @test is_vector(M, p, v; error=:error)
+            @test is_vector(M, p, v; error = :error)
             for b in [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(V[1])]
                 @test isapprox(M, p, v, get_vector(M, p, get_coordinates(M, p, v, b), b))
             end
@@ -307,7 +308,7 @@ include("../header.jl")
         B2 = DiagonalizingOrthonormalBasis(X)
         V2 = get_vectors(M, p, get_basis(M, p, B2))
         @test V2[1] ≈ X ./ norm(M, p, X)
-        @test inner(M, p, V2[1], V2[2]) ≈ 0.0 atol = 5e-16
+        @test inner(M, p, V2[1], V2[2]) ≈ 0.0 atol = 5.0e-16
         B3 = DiagonalizingOrthonormalBasis(-V[2])
         V3 = get_vectors(M, p, get_basis(M, p, B3))
         @test isapprox(M, p, V3[1], -V[2])
@@ -412,13 +413,13 @@ include("../header.jl")
         @test volume_density(M, p, [0.0, 0.0, 0.0]) ≈ 1.0
     end
     @testset "field parameter" begin
-        M = Hyperbolic(2; parameter=:field)
+        M = Hyperbolic(2; parameter = :field)
         @test repr(M) == "Hyperbolic(2; parameter=:field)"
-        @test typeof(get_embedding(M)) === Lorentz{Tuple{Int64},MinkowskiMetric}
+        @test typeof(get_embedding(M)) === Lorentz{Tuple{Int64}, MinkowskiMetric}
 
         for Tp in [PoincareBallPoint, PoincareHalfSpacePoint]
             p = convert(Tp, [1.0, 0.0, sqrt(2.0)])
-            @test get_embedding(M, p) === Euclidean(2; parameter=:field)
+            @test get_embedding(M, p) === Euclidean(2; parameter = :field)
         end
     end
 end

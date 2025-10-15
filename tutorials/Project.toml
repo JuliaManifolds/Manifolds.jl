@@ -24,11 +24,14 @@ DiffEqCallbacks = "4"
 Distributions = "0.22.6, 0.23, 0.24, 0.25"
 HybridArrays = "0.4"
 IJulia = "1"
-Manifolds = "0.10"
-ManifoldsBase = "1"
+Manifolds = "0.11"
+ManifoldsBase = "2"
 MultivariateStats = "0.10"
 OrdinaryDiffEq = "6"
 Plots = "1"
 RecursiveArrayTools = "3"
 SpecialFunctions = "2"
 StaticArrays = "1"
+
+[sources]
+Manifolds = {path = ".."}

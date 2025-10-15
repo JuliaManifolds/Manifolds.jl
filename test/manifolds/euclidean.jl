@@ -5,10 +5,10 @@ using FiniteDifferences
 
 @testset "Euclidean" begin
     for param in [:field, :type]
-        E = Euclidean(3, parameter=param)
-        Ec = Euclidean(3; field=ℂ, parameter=param)
+        E = Euclidean(3, parameter = param)
+        Ec = Euclidean(3; field = ℂ, parameter = param)
         EM = Manifolds.MetricManifold(E, Manifolds.EuclideanMetric())
-        EH = Euclidean(2, 3; field=ℍ, parameter=param)
+        EH = Euclidean(2, 3; field = ℍ, parameter = param)
         if param === :type
             @test repr(E) == "Euclidean(3; field=ℝ)"
             @test repr(Ec) == "Euclidean(3; field=ℂ)"
@@ -58,41 +58,41 @@ using FiniteDifferences
         @test Y2 == X
 
         # real manifold does not allow complex values
-        @test_throws DomainError is_point(Ec, [:a, :b, :b]; error=:error)
-        @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], error=:error)
-        @test_throws DomainError is_point(E, [1]; error=:error)
-        @test_throws DomainError is_vector(Ec, [:a, :b, :b], [1.0, 1.0, 0.0]; error=:error)
+        @test_throws DomainError is_point(Ec, [:a, :b, :b]; error = :error)
+        @test_throws DomainError is_point(E, [1.0, 1.0im, 0.0], error = :error)
+        @test_throws DomainError is_point(E, [1]; error = :error)
+        @test_throws DomainError is_vector(Ec, [:a, :b, :b], [1.0, 1.0, 0.0]; error = :error)
         @test_throws DomainError is_vector(
             E,
             [1.0, 1.0im, 0.0],
             [1.0, 1.0, 0.0];
-            error=:error,
+            error = :error,
         ) # real manifold does not allow complex values
-        @test_throws DomainError is_vector(E, [1], [1.0, 1.0, 0.0]; error=:error)
-        @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0]; error=:error)
+        @test_throws DomainError is_vector(E, [1], [1.0, 1.0, 0.0]; error = :error)
+        @test_throws DomainError is_vector(E, [0.0, 0.0, 0.0], [1.0]; error = :error)
         @test_throws DomainError is_vector(
             E,
             [0.0, 0.0, 0.0],
             [1.0, 0.0, 1.0im];
-            error=:error,
+            error = :error,
         )
-        @test_throws DomainError is_vector(Ec, [0.0, 0.0, 0.0], [:a, :b, :c]; error=:error)
+        @test_throws DomainError is_vector(Ec, [0.0, 0.0, 0.0], [:a, :b, :c]; error = :error)
 
-        @test E^2 === Euclidean(3, 2, parameter=param)
-        @test ^(E, 2) === Euclidean(3, 2, parameter=param)
-        @test E^(2,) === Euclidean(3, 2, parameter=param)
-        @test Ec^(4, 5) === Euclidean(3, 4, 5; field=ℂ, parameter=param)
+        @test E^2 === Euclidean(3, 2, parameter = param)
+        @test ^(E, 2) === Euclidean(3, 2, parameter = param)
+        @test E^(2,) === Euclidean(3, 2, parameter = param)
+        @test Ec^(4, 5) === Euclidean(3, 4, 5; field = ℂ, parameter = param)
 
         manifolds = [E, EM, Ec]
         types = [Vector{Float64}]
         TEST_FLOAT32 && push!(types, Vector{Float32})
         TEST_DOUBLE64 && push!(types, Vector{Double64})
-        TEST_STATIC_SIZED && push!(types, MVector{3,Float64})
+        TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
 
         types_complex = [Vector{ComplexF64}]
         TEST_FLOAT32 && push!(types_complex, Vector{ComplexF32})
         TEST_DOUBLE64 && push!(types_complex, Vector{ComplexDF64})
-        TEST_STATIC_SIZED && push!(types_complex, MVector{3,ComplexF64})
+        TEST_STATIC_SIZED && push!(types_complex, MVector{3, ComplexF64})
 
         for M in manifolds
             basis_types = if M == E
@@ -121,32 +121,31 @@ using FiniteDifferences
                     test_manifold(
                         M,
                         pts,
-                        test_project_point=true,
-                        test_project_tangent=true,
-                        test_musical_isomorphisms=true,
-                        test_default_vector_transport=true,
-                        vector_transport_methods=[
+                        test_project_point = true,
+                        test_project_tangent = true,
+                        test_musical_isomorphisms = true,
+                        test_default_vector_transport = true,
+                        vector_transport_methods = [
                             ParallelTransport(),
                             SchildsLadderTransport(),
                             PoleLadderTransport(),
                         ],
-                        test_mutating_rand=isa(T, Vector),
-                        point_distributions=[
+                        test_mutating_rand = isa(T, Vector),
+                        point_distributions = [
                             Manifolds.projected_distribution(
                                 M,
                                 Distributions.MvNormal(zero(pts[1]), 1.0 * I),
                             ),
                         ],
-                        tvector_distributions=[
+                        tvector_distributions = [
                             Manifolds.normal_tvector_distribution(M, pts[1], 1.0 * I),
                         ],
-                        basis_types_vecs=basis_types,
-                        basis_types_to_from=basis_types,
-                        basis_has_specialized_diagonalizing_get=true,
-                        test_vee_hat=isa(M, Euclidean),
-                        test_inplace=true,
-                        test_rand_point=M === E,
-                        test_rand_tvector=M === E,
+                        basis_types_vecs = basis_types,
+                        basis_types_to_from = basis_types,
+                        basis_has_specialized_diagonalizing_get = true,
+                        test_inplace = true,
+                        test_rand_point = M === E,
+                        test_rand_tvector = M === E,
                     )
                 end
             end
@@ -161,23 +160,22 @@ using FiniteDifferences
                 test_manifold(
                     Ec,
                     pts,
-                    test_project_tangent=true,
-                    test_musical_isomorphisms=true,
-                    test_default_vector_transport=true,
-                    test_vee_hat=false,
-                    parallel_transport=true,
+                    test_project_tangent = true,
+                    test_musical_isomorphisms = true,
+                    test_default_vector_transport = true,
+                    parallel_transport = true,
                 )
             end
         end
     end
     E = Euclidean(3)
-    Ec = Euclidean(3; field=ℂ)
+    Ec = Euclidean(3; field = ℂ)
 
     number_types = [Float64, ComplexF64]
     TEST_FLOAT32 && push!(number_types, Float32)
     @testset "(Nonmutating) Real and Complex Numbers" begin
         RM = Euclidean()
-        CM = Euclidean(; field=ℂ)
+        CM = Euclidean(; field = ℂ)
         for T in number_types
             @testset "Type $T" begin
                 M = (T <: Complex) ? CM : RM
@@ -188,12 +186,11 @@ using FiniteDifferences
                 test_manifold(
                     M,
                     pts,
-                    test_vector_spaces=false,
-                    test_project_tangent=true,
-                    test_musical_isomorphisms=true,
-                    test_default_vector_transport=true,
-                    test_vee_hat=false,
-                    is_mutating=false,
+                    test_vector_spaces = false,
+                    test_project_tangent = true,
+                    test_musical_isomorphisms = true,
+                    test_default_vector_transport = true,
+                    is_mutating = false,
                 )
             end
         end
@@ -217,11 +214,11 @@ using FiniteDifferences
         @test ℝ^2 === Euclidean(2)
         @test ℝ^(2, 3) === Euclidean(2, 3)
 
-        @test ℂ^2 === Euclidean(2; field=ℂ)
-        @test ℂ^(2, 3) === Euclidean(2, 3; field=ℂ)
+        @test ℂ^2 === Euclidean(2; field = ℂ)
+        @test ℂ^(2, 3) === Euclidean(2, 3; field = ℂ)
 
-        @test ℍ^2 === Euclidean(2; field=ℍ)
-        @test ℍ^(2, 3) === Euclidean(2, 3; field=ℍ)
+        @test ℍ^2 === Euclidean(2; field = ℍ)
+        @test ℍ^(2, 3) === Euclidean(2, 3; field = ℍ)
     end
 
     @testset "Embeddings into larger Euclidean Manifolds" begin
@@ -256,7 +253,7 @@ using FiniteDifferences
 
     @testset "Embedding Real into Complex" begin
         M = Euclidean(3, 3)
-        N = Euclidean(3, 4; field=ℂ)
+        N = Euclidean(3, 4; field = ℂ)
         O = EmbeddedManifold(M, N)
         p = ones(3, 3)
         qT = zeros(ComplexF64, 3, 4)
@@ -277,24 +274,24 @@ using FiniteDifferences
         B = Manifolds.induced_basis(M, A, i, TangentSpaceType())
         C1 = christoffel_symbols_first(M, p, B)
         @test size(C1) == (2, 2, 2)
-        @test norm(C1) ≈ 0.0 atol = 1e-13
+        @test norm(C1) ≈ 0.0 atol = 1.0e-13
         C2 = christoffel_symbols_second(M, p, B)
         @test size(C2) == (2, 2, 2)
-        @test norm(C2) ≈ 0.0 atol = 1e-13
+        @test norm(C2) ≈ 0.0 atol = 1.0e-13
         C2j = christoffel_symbols_second_jacobian(M, p, B)
         @test size(C2j) == (2, 2, 2, 2)
-        @test norm(C2j) ≈ 0.0 atol = 1e-16
+        @test norm(C2j) ≈ 0.0 atol = 1.0e-16
         @test einstein_tensor(M, p, B) == zeros(2, 2)
-        @test ricci_curvature(M, p, B) ≈ 0 atol = 1e-16
+        @test ricci_curvature(M, p, B) ≈ 0 atol = 1.0e-16
         RC = ricci_tensor(M, p, B)
         @test size(RC) == (2, 2)
-        @test norm(RC) ≈ 0.0 atol = 1e-16
+        @test norm(RC) ≈ 0.0 atol = 1.0e-16
         @test local_metric(M, p, B) == Diagonal(ones(2))
         @test inverse_local_metric(M, p, B) == Diagonal(ones(2))
         @test det_local_metric(M, p, B) == 1
         RT = riemann_tensor(M, p, B)
         @test size(RT) == (2, 2, 2, 2)
-        @test norm(RT) ≈ 0.0 atol = 1e-16
+        @test norm(RT) ≈ 0.0 atol = 1.0e-16
 
         @test !Manifolds.check_chart_switch(M, A, i, p)
 
@@ -325,8 +322,8 @@ using FiniteDifferences
     end
     @testset "RNG point with σ" begin
         Random.seed!(42)
-        @test is_point(E, rand(E; σ=10.0))
-        @test is_point(E, rand(MersenneTwister(123), E; σ=10.0))
+        @test is_point(E, rand(E; σ = 10.0))
+        @test is_point(E, rand(MersenneTwister(123), E; σ = 10.0))
         pc = rand(Ec)
         @test is_point(Ec, pc)
         @test norm(imag.(pc)) != 0
@@ -354,12 +351,12 @@ using FiniteDifferences
 
         @test get_vector(
             M2,
-            SizedMatrix{2,2}([1.0 2.0; 3.0 4.0]),
-            SizedMatrix{2,2}([-1.0, -2.0, -3.0, -4.0]),
+            SizedMatrix{2, 2}([1.0 2.0; 3.0 4.0]),
+            SizedMatrix{2, 2}([-1.0, -2.0, -3.0, -4.0]),
             DefaultOrthonormalBasis(),
         ) == SA[-1.0 -3.0; -2.0 -4.0]
 
-        M1c = Euclidean(3, field=ℂ)
+        M1c = Euclidean(3, field = ℂ)
         get_vector(
             M1c,
             SizedVector{3}([1.0im, 2.0, 4.0im]),
@@ -390,7 +387,7 @@ using FiniteDifferences
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
         ) === 2.0
         @test ManifoldDiff.diagonalizing_projectors(M0, 0.0, 2.0) ==
-              ((0.0, ManifoldDiff.IdentityProjector()),)
+            ((0.0, ManifoldDiff.IdentityProjector()),)
         @test ManifoldDiff.jacobi_field(
             M0,
             0.0,
@@ -419,8 +416,8 @@ using FiniteDifferences
     end
 
     @testset "field parameter" begin
-        Ms = Euclidean(1; parameter=:field)
-        M0s = Euclidean(; parameter=:field)
+        Ms = Euclidean(1; parameter = :field)
+        M0s = Euclidean(; parameter = :field)
 
         @test distance(Ms, 2.0, 4.0) == 2.0
         @test distance(M0s, 2.0, 4.0) == 2.0
@@ -440,7 +437,7 @@ using FiniteDifferences
             ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
         ) === 2.0
         @test ManifoldDiff.diagonalizing_projectors(M0s, 0.0, 2.0) ==
-              ((0.0, ManifoldDiff.IdentityProjector()),)
+            ((0.0, ManifoldDiff.IdentityProjector()),)
         @test ManifoldDiff.jacobi_field(
             M0s,
             0.0,
@@ -453,7 +450,7 @@ using FiniteDifferences
 
     @testset "Mixed array dimensions for exp and PT" begin
         # this is an issue on Julia 1.6 but not later releases
-        for M in [Euclidean(), Euclidean(; parameter=:field)]
+        for M in [Euclidean(), Euclidean(; parameter = :field)]
             p = fill(0.0)
             Manifolds.exp_fused!(M, p, p, [1.0], 2.0)
             @test p ≈ fill(2.0)

@@ -7,9 +7,6 @@ The manifold ``\mathrm{SO}(n)`` of orthogonal matrices with determinant ``+1`` i
 R^{\mathrm{T}}R = I_n, \det(R) = 1 \bigr\}
 ```
 
-The Lie group ``\mathrm{SO}(n)`` is a subgroup of the orthogonal group ``\mathrm{O}(n)`` and also known as the special orthogonal group or the set of rotations group.
-See also [`SpecialOrthogonal`](@ref), which is this manifold equipped with the group operation.
-
 The tangent space to a point ``p ∈ \mathrm{SO}(n)`` is given by
 
 ```math

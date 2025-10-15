@@ -19,38 +19,38 @@ include("../header.jl")
         0.3248027612629014 0.440253011955812 -0.7650557732187135
         0.26502337825226757 -0.06175142812400016 -0.20327195012826738
     ]
-    @test_throws DomainError is_point(M, [1 0 1; 1 -1 0] / 2; error=:error)
+    @test_throws DomainError is_point(M, [1 0 1; 1 -1 0] / 2; error = :error)
     @test_throws DomainError is_vector(
         M,
         [-1 0 1.0; 0 0 0] / sqrt(2),
         [1.0 0 1; 1 -1 0];
-        error=:error,
+        error = :error,
     )
     test_manifold(
         M,
         [p1, p2, p3];
-        is_point_atol_multiplier=1,
-        is_tangent_atol_multiplier=1,
-        exp_log_atol_multiplier=5,
-        test_project_point=true,
-        test_project_tangent=true,
-        test_rand_point=true,
-        test_rand_tvector=true,
-        rand_tvector_atol_multiplier=5,
+        is_point_atol_multiplier = 1,
+        is_tangent_atol_multiplier = 1,
+        exp_log_atol_multiplier = 5,
+        test_project_point = true,
+        test_project_tangent = true,
+        test_rand_point = true,
+        test_rand_tvector = true,
+        rand_tvector_atol_multiplier = 5,
     )
     @testset "field parameter" begin
-        M = KendallsPreShapeSpace(2, 3; parameter=:field)
+        M = KendallsPreShapeSpace(2, 3; parameter = :field)
         @test repr(M) == "KendallsPreShapeSpace(2, 3; parameter=:field)"
-        @test get_embedding(M) === ArraySphere(2, 3; field=ℝ, parameter=:field)
+        @test get_embedding(M) === ArraySphere(2, 3; field = ℝ, parameter = :field)
     end
 end
 
 @testset "KendallsShapeSpace" begin
     M = KendallsShapeSpace(2, 3)
     @test repr(M) == "KendallsShapeSpace(2, 3)"
+    @test get_total_space(M) == KendallsPreShapeSpace(2, 3)
     @test manifold_dimension(M) == 2
     @test !is_flat(M)
-    @test get_total_space(M) === KendallsPreShapeSpace(2, 3)
     p1 = [
         0.4385117672460505 -0.6877826444042382 0.24927087715818771
         -0.3830259932279294 0.35347460720654283 0.029551386021386548
@@ -81,12 +81,12 @@ end
         Y = similar(X1)
         vertical_component!(M, Y, p1, X1)
         @test isapprox(M, p1, Y, X1v)
-        @test norm(M, p1, X1v) < 1e-16
-        @test abs(norm(M, p1, X1) - norm(M, p1, X1h)) < 1e-16
+        @test norm(M, p1, X1v) < 1.0e-16
+        @test abs(norm(M, p1, X1) - norm(M, p1, X1h)) < 1.0e-16
     end
 
-    @test_throws ManifoldDomainError is_point(M, [1 0 1; 1 -1 0]; error=:error)
-    @test_throws ManifoldDomainError is_vector(M, p1, [1 0 1; 1 -1 0]; error=:error)
+    @test_throws ManifoldDomainError is_point(M, [1 0 1; 1 -1 0]; error = :error)
+    @test_throws ManifoldDomainError is_vector(M, p1, [1 0 1; 1 -1 0]; error = :error)
 
     @testset "exp/distance/norm" begin
         q1 = exp(M, p1, X1)
@@ -96,15 +96,16 @@ end
     test_manifold(
         M,
         [p1, p2, p3];
-        is_point_atol_multiplier=1,
-        is_tangent_atol_multiplier=1,
-        exp_log_atol_multiplier=2e8,
-        projection_atol_multiplier=2,
-        test_project_point=true,
-        test_project_tangent=true,
-        test_rand_point=true,
-        test_rand_tvector=true,
-        rand_tvector_atol_multiplier=5,
+        is_point_atol_multiplier = 1,
+        is_tangent_atol_multiplier = 1,
+        exp_log_atol_multiplier = 2.0e8,
+        projection_atol_multiplier = 2,
+        test_injectivity_radius = false,
+        test_project_point = true,
+        test_project_tangent = true,
+        test_rand_point = true,
+        test_rand_tvector = true,
+        rand_tvector_atol_multiplier = 5,
     )
     @testset "degenerate cases" begin
         Md3_2 = KendallsShapeSpace(3, 2)
@@ -113,13 +114,9 @@ end
         @test manifold_dimension(Md2_1) == 0
     end
     @testset "field parameter" begin
-        M = KendallsShapeSpace(2, 3; parameter=:field)
+        M = KendallsShapeSpace(2, 3; parameter = :field)
         @test repr(M) == "KendallsShapeSpace(2, 3; parameter=:field)"
-        @test get_embedding(M) === KendallsPreShapeSpace(2, 3; parameter=:field)
-        @test get_total_space(M) === KendallsPreShapeSpace(2, 3; parameter=:field)
-        @test get_orbit_action(M) === Manifolds.ColumnwiseMultiplicationAction(
-            M,
-            SpecialOrthogonal(2; parameter=:field),
-        )
+        @test get_embedding(M) === KendallsPreShapeSpace(2, 3; parameter = :field)
+        @test get_total_space(M) === KendallsPreShapeSpace(2, 3; parameter = :field)
     end
 end

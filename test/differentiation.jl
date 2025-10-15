@@ -36,6 +36,8 @@ using ADTypes
 using FiniteDifferences
 using LinearAlgebra: Diagonal, dot
 
+using ForwardDiff
+
 @testset "Differentiation backend" begin
     fd51 = AutoFiniteDifferences(central_fdm(5, 1))
     @testset "default_differential_backend" begin
@@ -110,17 +112,19 @@ rb_onb_fd51 = TangentDiffBackend(AutoFiniteDifferences(central_fdm(5, 1)))
 
 rb_onb_default2 = TangentDiffBackend(
     default_differential_backend();
-    basis_arg=CachedBasis(
+    basis_arg = CachedBasis(
         DefaultOrthonormalBasis(),
         [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
     ),
-    basis_val=CachedBasis(
+    basis_val = CachedBasis(
         DefaultOrthonormalBasis(),
         [[0.0, -1.0, 0.0], [sqrt(2) / 2, 0.0, -sqrt(2) / 2]],
     ),
 )
 
 rb_proj = Manifolds.RiemannianProjectionBackend(default_differential_backend())
+
+rb_onb_fwd_diff = TangentDiffBackend(AutoForwardDiff())
 
 @testset "Riemannian differentials" begin
     s2 = Sphere(2)
@@ -134,7 +138,7 @@ rb_proj = Manifolds.RiemannianProjectionBackend(default_differential_backend())
     differential!(s2, c1, X, π / 4, rb_onb_default)
     @test isapprox(s2, c1(π / 4), X, Xval)
 
-    @testset for backend in [rb_onb_fd51]
+    @testset for backend in [rb_onb_fd51, rb_onb_fwd_diff]
         @test isapprox(s2, c1(π / 4), differential(s2, c1, π / 4, backend), Xval)
         X = similar(p)
         differential!(s2, c1, X, π / 4, backend)
@@ -196,6 +200,19 @@ end
     )
 end
 
+@testset "Riemannian Hessian" begin
+    s2 = Sphere(2)
+    q = [sqrt(2) / 2, 0, sqrt(2) / 2]
+    q2 = [0.0, 1.0, 0.0]
+
+    f1(p) = distance(s2, q2, p)^2
+
+    @test_broken isapprox(
+        ManifoldDiff.hessian(s2, f1, q, rb_onb_fwd_diff),
+        [2.0 0.0; 0.0 0.0],
+    )
+end
+
 @testset "EmbeddedBackend" begin
     A = [1 0 0; 0 2 0; 0 0 3.0]
     p = 1 / sqrt(2.0) .* [1.0, 1.0, 0.0]
@@ -204,11 +221,11 @@ end
     grad = (M, p) -> 2A * p
     grad! = (M, X, p) -> X .= 2A * p
     M = Euclidean(3)
-    E = ExplicitEmbeddedBackend(M, gradient=grad, (gradient!)=grad!)
+    E = ExplicitEmbeddedBackend(M, gradient = grad, (gradient!) = grad!)
     S = Sphere(2)
     r_grad = (S, p) -> project(S, p, grad(M, p))
     Xt = r_grad(S, p)
-    @test is_vector(S, p, Xt, true; atol=1e-14)
+    @test is_vector(S, p, Xt, true; atol = 1.0e-14)
 
     R = RiemannianProjectionBackend(E)
     X = gradient(S, cost, p, R)
@@ -220,19 +237,4 @@ end
     Re = RiemannianProjectionBackend(Ee)
     @test_throws MissingException gradient(S, cost, p, Re)
     @test_throws MissingException gradient!(S, cost, X, p, Re)
-end
-
-@testset "Default Errors for the ODEExponentialRetraction" begin
-    @test_throws DomainError ODEExponentialRetraction(
-        ProjectionRetraction(),
-        CachedBasis(DefaultOrthogonalBasis(), []), # not yet supported
-    )
-    @test_throws DomainError ODEExponentialRetraction(
-        ExponentialRetraction(), # not possible
-        DefaultOrthogonalBasis(),
-    )
-    @test_throws DomainError ODEExponentialRetraction(
-        ExponentialRetraction(), # not possible
-        CachedBasis(DefaultOrthogonalBasis(), []), # combination not possible
-    )
 end
