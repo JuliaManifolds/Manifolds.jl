@@ -214,8 +214,10 @@ Possible properties are
 * `:Points` a vector of points for the tests, depending on which function needs them
 * `:Vectors` a vector of tangent vectors, each in the tangent space of the corresponding entry of `:Points`,
   depending on the functions you test
+* `:NonPoints` a vector of “things” that are not points on the manifold, used within `is_point`
+* `:NonVectors` a vector 2-tuples ``(p,V)` of (non-)points and non-vectors used within is_vector
 * `:Mutating` is a boolean (`true` by default) whether to test the mutating variants of functions or not.
-* `:Name` is a name of the test. If not provided, defaults to `"\$G"`
+* `:Name` is a name of the test. If not provided, defaults to `"\$M"`
 * `:Rng` is a random number generator, if provided, the random functions are tested with this generator as well
 * `:RetractionMethods` is a vector of retraction methods to test, if `retract` is in `:Functions`
 * `:InverseRetractionMethods` is a vector of inverse retraction methods to test, if `inverse_retract` is in `:Functions`
@@ -223,7 +225,6 @@ Possible properties are
   if `vector_transport_to` or `vector_transport_direction` is in `:Functions`
 
 for each function `f`, there is also always the single function `test_f(M, args; kwargs...)`,
-
 
 Possible `expectations` are
 
@@ -240,8 +241,10 @@ function test_manifold(M::AbstractManifold, properties::Dict, expectations = Dic
     retraction_methods = get(properties, :RetractionMethods, AbstractRetractionMethod[])
     inverse_retraction_methods = get(properties, :InverseRetractionMethods, AbstractInverseRetractionMethod[])
     vectortransport_methods = get(properties, :VectorTransportMethods, AbstractVectorTransportMethod[])
+    nonpoints = get(properties, :NonPoints, [])
+    nonvectors = get(properties, :NonVectors, [])
     vectors = get(properties, :Vectors, [])
-    test_name = get(properties, :Name, "$G")
+    test_name = get(properties, :Name, "$M")
     return @testset "$(test_name)" begin
         #
         #
