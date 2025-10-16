@@ -127,6 +127,60 @@ end
 
 #
 #
+# --- M
+"""
+    test_representation_size(M::AbstractManifold, dimension::Union{Int,Missing}=missing)
+
+Test the manifold dimension
+* to be non-negative
+* to be an integer
+* to be the expected `dimension` if provided.
+
+Requires `manifold_dimension` to be implemented.
+"""
+function test_manifold_dimension(
+        M::AbstractManifold,
+        dimension::Union{<:Integer, Missing} = missing,
+    )
+    @testset "manifold_dimension(M)" begin
+        d = manifold_dimension(M)
+        @test d ≥ 0
+        @test isinteger(d)
+        if !ismissing(dimension)
+            @test d == dimension
+        end
+    end
+    return nothing
+end
+
+#
+#
+# --- R
+"""
+    test_representation_size(M::AbstractManifold, size)
+
+Test that the `representation_size` method works as expected.
+
+`size` can be an integer or a tuple of integers, e.g. for vectors and matrices,
+respectively. It can be `nothing` if the manfold has a repesentation where a size does not make sense.
+If the `size` is `missing` there is no actual test performed, but just whether it does not error
+"""
+function test_representation_size(M::AbstractManifold, size)
+    @testset "representation_size(M)" beginæ
+        rs = representation_size(M)
+        if !ismissing(size)
+            if size === nothing
+                @test isnothing(rs)
+            else
+                @test rs == size
+            end
+        end
+    end
+    return nothing
+end
+
+#
+#
 # --- S
 """
     test_show(M::AbstractManifold, repr_string::AbstractString)
@@ -143,6 +197,11 @@ function test_show(M::AbstractManifold, repr_string::AbstractString)
     return nothing
 end
 
+
+#
+# Main test method
+# ------------------------------------------------------------------------------------------
+
 """
     test_manifold(G::AbstractManifold, properties::Dict, expectations::Dict)
 
@@ -158,6 +217,10 @@ Possible properties are
 * `:Mutating` is a boolean (`true` by default) whether to test the mutating variants of functions or not.
 * `:Name` is a name of the test. If not provided, defaults to `"\$G"`
 * `:Rng` is a random number generator, if provided, the random functions are tested with this generator as well
+* `:RetractionMethods` is a vector of retraction methods to test, if `retract` is in `:Functions`
+* `:InverseRetractionMethods` is a vector of inverse retraction methods to test, if `inverse_retract` is in `:Functions`
+* `:VectorTransportMethods` is a vector of vector transport methods to test,
+  if `vector_transport_to` or `vector_transport_direction` is in `:Functions`
 
 for each function `f`, there is also always the single function `test_f(M, args; kwargs...)`,
 
@@ -170,12 +233,15 @@ Possible `expectations` are
 """
 function test_manifold(M::AbstractManifold, properties::Dict, expectations = Dict())
     atol = get(expectations, :atol, 0.0)
-    mutating = get(properties, :Mutating, true)
+    function_atols = get(expectations, :atols, Dict())
     functions = get(properties, :Functions, Function[])
+    mutating = get(properties, :Mutating, true)
     points = get(properties, :Points, [])
+    retraction_methods = get(properties, :RetractionMethods, AbstractRetractionMethod[])
+    inverse_retraction_methods = get(properties, :InverseRetractionMethods, AbstractInverseRetractionMethod[])
+    vectortransport_methods = get(properties, :VectorTransportMethods, AbstractVectorTransportMethod[])
     vectors = get(properties, :Vectors, [])
     test_name = get(properties, :Name, "$G")
-    function_atols = get(expectations, :atols, Dict())
     return @testset "$(test_name)" begin
         #
         #
@@ -184,31 +250,33 @@ function test_manifold(M::AbstractManifold, properties::Dict, expectations = Dic
             exp_atol = get(function_atols, exp, atol)
             log_atol = get(function_atols, log, atol)
             local_atol = max(exp_atol, log_atol, atol)
-            if length(points) < 2
-                error(
-                    "Testing exp/log requires at least 2 points, only $(length(points)) provided.",
-                )
-            end
-            if length(vectors) < 1
-                error(
-                    "Testing exp/log requires at least one tangent vector, only $(length(vectors)) provided.",
-                )
-            end
+            (length(points) < 2) && error("Testing exp/log requires at least 2 points, only $(length(points)) provided.")
+            (length(vectors) < 1) && error("Testing exp/log requires at least one tangent vector, but non was provided.")
             test_exp_log(
-                M,
-                points[1],
-                points[2],
-                vectors[1];
+                M, points[1], points[2], vectors[1];
                 atol = local_atol,
                 test_exp = (exp in functions),
                 test_log = (log in functions),
                 test_mutating = mutating,
             )
         end
+        #
+        #
+        # --- M
         if (manifold_dimension ∈ functions)
             v = get(expectations, :manifold_dimension, missing)
             test_manifold_dimension(M, v)
         end
+        #
+        #
+        # --- R
+        if (representation_size ∈ functions)
+            v = get(expectations, :representation_size, missing)
+            test_representation_size(M, v)
+        end
+        #
+        #
+        # --- S
         if (any(in.([show, repr], Ref(functions)))) && haskey(expectations, :repr)
             test_show(M, expectations[:repr])
         end
