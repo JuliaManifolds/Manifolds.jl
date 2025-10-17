@@ -127,34 +127,6 @@ end
 
 #
 #
-# --- M
-"""
-    test_representation_size(M::AbstractManifold, dimension::Union{Int,Missing}=missing)
-
-Test the manifold dimension
-* to be non-negative
-* to be an integer
-* to be the expected `dimension` if provided.
-
-Requires `manifold_dimension` to be implemented.
-"""
-function test_manifold_dimension(
-        M::AbstractManifold,
-        dimension::Union{<:Integer, Missing} = missing,
-    )
-    @testset "manifold_dimension(M)" begin
-        d = manifold_dimension(M)
-        @test d ≥ 0
-        @test isinteger(d)
-        if !ismissing(dimension)
-            @test d == dimension
-        end
-    end
-    return nothing
-end
-
-#
-#
 # --- R
 """
     test_representation_size(M::AbstractManifold, size)
@@ -166,7 +138,7 @@ respectively. It can be `nothing` if the manfold has a repesentation where a siz
 If the `size` is `missing` there is no actual test performed, but just whether it does not error
 """
 function test_representation_size(M::AbstractManifold, size)
-    @testset "representation_size(M)" beginæ
+    @testset "representation_size(M)" begin
         rs = representation_size(M)
         if !ismissing(size)
             if size === nothing
