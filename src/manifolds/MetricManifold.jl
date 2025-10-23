@@ -497,12 +497,13 @@ function ManifoldsBase.retract_fused(M::MetricManifold, p, X, t, m::AbstractRetr
 end
 
 function retract!(M::MetricManifold, q, p, X; kwargs...)
-    return retract!(M, q, p, X, default_retraction_method(M, typeof(p)); kwargs...)
+    m = default_retraction_method(M, typeof(p))
+    return retract!(M, q, p, X, m; kwargs...)
 end
 function retract!(M::MetricManifold, q, p, X, m::AbstractRetractionMethod; kwargs...)
     return retract!(M.manifold, q, p, X, m; kwargs...)
 end
-function retract!(M::MetricManifold, X, p, q, ::ExponentialRetraction)
+function retract!(M::MetricManifold, q, p, X, ::ExponentialRetraction)
     (metric(M.manifold) == M.metric) && (return exp!(M.manifold, q, p, X))
     return exp!(M, q, p, X)
 end
