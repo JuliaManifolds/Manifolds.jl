@@ -253,7 +253,7 @@ function exp(M::MetricManifold, p, X)
     (metric(M.manifold) == M.metric) && (return exp(M.manifold, p, X))
     return invoke(exp, Tuple{AbstractManifold, Any, Any}, M, p, X)
 end
-function exp_fused(M::MetricManifold, p, X, t::Number)
+function ManifoldsBase.exp_fused(M::MetricManifold, p, X, t::Number)
     (metric(M.manifold) == M.metric) && (return exp_fused(M.manifold, p, X, t))
     return invoke(exp_fused, Tuple{AbstractManifold, Any, Any, Number}, M, p, X, t)
 end
@@ -261,7 +261,7 @@ function exp!(M::MetricManifold, q, p, X)
     (metric(M.manifold) == M.metric) && (return exp!(M.manifold, q, p, X))
     throw(MethodError(exp!, (M, q, p, X)))
 end
-function exp_fused!(M::MetricManifold, q, p, X, t::Number)
+function ManifoldsBase.exp_fused!(M::MetricManifold, q, p, X, t::Number)
     (metric(M.manifold) == M.metric) && (return exp_fused!(M.manifold, q, p, X, t))
     return invoke(exp_fused!, Tuple{AbstractManifold, Any, Any, Any, Number}, M, q, p, X, t)
 end
@@ -299,6 +299,39 @@ function inner(
     (metric(M.manifold) == M.metric) && (return inner(M.manifold, p, X, Y))
     throw(MethodError(inner, (M, p, X, Y)))
 end
+
+# For the inverse retraction, we distinguish two cases: if we have the LogarithmicInverseRetraction
+# we do not pass to the inner manifold, since this falls to log by default,
+# otherwise we do pass to the inner manifold
+
+@doc raw"""
+    inverse_retract(M::MetricManifold, p, q)
+    inverse_retract!(M::MetricManifold, X, p, q)
+
+Compute the inverse retraction on the [`MetricManifold`](@ref) `M`.
+Since every inverse retraction is an inverse retraction with respect to any logarithmic map (induced by the metric),
+this method falls back to calling [`inverse_retract`](@extref `ManifoldsBase.inverse_retract`) on the base manifold.
+The one exception is the [`LogarithmicInverseRetraction`](@ref), in which case the method falls back to
+the default, i.e. to calling [`log`](@extref `ManifoldsBase.log`).
+"""
+inverse_retract(::MetricManifold, ::Any, ::Any)
+
+function inverse_retract(M::MetricManifold, p, q, m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)))
+    (metric(M.manifold) == M.metric) && (return inverse_retract(M.manifold, p, q, m))
+    return invoke(inverse_retract, Tuple{AbstractManifold, Any, Any, AbstractInverseRetractionMethod}, M, p, q, m)
+end
+
+function inverse_retract!(M::MetricManifold, X, p, q)
+    return inverse_retract!(M, X, p, q, default_inverse_retraction_method(M, typeof(p)))
+end
+function inverse_retract!(M::MetricManifold, X, p, q, m::AbstractInverseRetractionMethod)
+    return inverse_retract!(M.manifold, X, p, q, m)
+end
+function inverse_retract!(M::MetricManifold, X, p, q, ::LogarithmicInverseRetraction)
+    (metric(M.manifold) == M.metric) && (return log!(M.manifold, X, p, q))
+    return log!(M, X, p, q)
+end
+
 
 """
     is_default_metric(M::AbstractManifold, G::AbstractMetric)
@@ -443,6 +476,49 @@ end
 representation_size(M::MetricManifold) = representation_size(M.manifold)
 
 @doc raw"""
+    retract(M::MetricManifold, p, X)
+    retract!(M::MetricManifold, q, p, X)
+
+Compute the retraction on the [`MetricManifold`](@ref) `M`.
+Since every retraction is a retraction with respect to any exponential map (here induced by the metric),
+this method falls back to calling [`retract`](@extref `ManifoldsBase.retract`) on the inner manifold.
+The one exception is the [`ExponentialRetraction`](@ref), in which case the method falls back to
+the default, i.e. to calling [`exp`](@extref `ManifoldsBase.log`) but still on `M`.
+"""
+retract(::MetricManifold, ::Any, ::Any)
+
+function retract(M::MetricManifold, p, X, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)); kwargs...)
+    (metric(M.manifold) == M.metric) && (return retract(M.manifold, p, X, m; kwargs...))
+    return invoke(retract, Tuple{AbstractManifold, Any, Any, AbstractRetractionMethod}, M, p, X, m; kwargs...)
+end
+function ManifoldsBase.retract_fused(M::MetricManifold, p, X, t, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)))
+    (metric(M.manifold) == M.metric) && (return retract_fused(M.manifold, p, X, t, m))
+    return invoke(retract_fused, Tuple{AbstractManifold, Any, Any, Any, AbstractRetractionMethod}, M, p, X, t, m)
+end
+
+function retract!(M::MetricManifold, q, p, X; kwargs...)
+    return retract!(M, q, p, X, default_retraction_method(M, typeof(p)); kwargs...)
+end
+function retract!(M::MetricManifold, q, p, X, m::AbstractRetractionMethod; kwargs...)
+    return retract!(M.manifold, q, p, X, m; kwargs...)
+end
+function retract!(M::MetricManifold, X, p, q, ::ExponentialRetraction)
+    (metric(M.manifold) == M.metric) && (return exp!(M.manifold, q, p, X))
+    return exp!(M, q, p, X)
+end
+function ManifoldsBase.retract_fused!(M::MetricManifold, q, p, X, t::Number)
+    return retract_fused!(M, q, p, X, t, default_retraction_method(M, typeof(p)))
+end
+function ManifoldsBase.retract_fused!(M::MetricManifold, q, p, X, t::Number, m::AbstractRetractionMethod)
+    return retract_fused!(M.manifold, q, p, X, t, m)
+end
+function ManifoldsBase.retract_fused!(M::MetricManifold, q, p, X, t::Number, ::ExponentialRetraction)
+    (metric(M.manifold) == M.metric) && (return exp_fused!(M.manifold, q, p, X, t))
+    return exp_fused!(M, q, p, X, t)
+end
+
+
+@doc raw"""
     ricci_curvature(M::AbstractManifold, p, B::AbstractBasis; backend::AbstractDiffBackend = default_differential_backend())
 
 Compute the Ricci scalar curvature of the manifold `M` at the point `p` using basis `B`.
@@ -501,59 +577,88 @@ end
 
 function vector_transport_direction(
         M::MetricManifold, p, X, d,
-        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p));
+        kwagrs...
     )
     (metric(M.manifold) == M.metric) &&
-        (return vector_transport_direction(M.manifold, p, X, d, m))
+        (return vector_transport_direction(M.manifold, p, X, d, m; kwargs...))
     return invoke(
         vector_transport_direction,
         Tuple{AbstractManifold, Any, Any, Any, AbstractVectorTransportMethod},
-        M, p, X, d, m,
+        M, p, X, d, m; kwargs...,
+    )
+end
+function _vector_transport_direction!(
+        M::MetricManifold, Y, p, X, d;
+        kwargs...
+    )
+    m = default_vector_transport_method(M, typeof(p))
+    (metric(M.manifold) == M.metric) &&
+        (return vector_transport_direction!(M.manifold, Y, p, X, d, m; kwargs...))
+    return invoke(
+        vector_transport_direction!,
+        Tuple{AbstractManifold, Any, Any, Any, Any, AbstractVectorTransportMethod},
+        M, Y, p, X, d, m; kwargs...
     )
 end
 function vector_transport_direction!(
         M::MetricManifold, Y, p, X, d,
-        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        m::AbstractVectorTransportMethod;
+        kwargs...
     )
     (metric(M.manifold) == M.metric) &&
-        (return vector_transport_direction!(M.manifold, Y, p, X, d, m))
+        (return vector_transport_direction!(M.manifold, Y, p, X, d, m; kwargs...))
     return invoke(
         vector_transport_direction!,
         Tuple{AbstractManifold, Any, Any, Any, Any, AbstractVectorTransportMethod},
-        M, Y, p, X, d, m,
+        M, Y, p, X, d, m; kwargs...
     )
+end
+function _vector_transport_direction!(
+        M::MetricManifold, Y, p, X, d,
+        ::ParallelTransport
+    )
+    (metric(M.manifold) == M.metric) && (return parallel_transport_direction!(M.manifold, Y, p, X, d))
+    return parallel_transport_direction!(M, Y, p, X, d)
 end
 
 function vector_transport_to(
-        M::MetricManifold,
-        p,
-        X,
-        q,
-        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        M::MetricManifold, p, X, q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p));
+        kwargs...
     )
-    (metric(M.manifold) == M.metric) && (return vector_transport_to(M.manifold, p, X, q, m))
+    (metric(M.manifold) == M.metric) && (return vector_transport_to(M.manifold, p, X, q, m; kwargs...))
     return invoke(
         vector_transport_to,
         Tuple{AbstractManifold, Any, Any, Any, AbstractVectorTransportMethod},
-        M,
-        p,
-        X,
-        q,
-        m,
+        M, p, X, q, m; kwargs...,
     )
 end
 function vector_transport_to!(
-        M::MetricManifold, Y, p, X, q,
-        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        M::MetricManifold, Y, p, X, q;
+        kwargs...
     )
-    (metric(M.manifold) == M.metric) &&
-        (return vector_transport_to!(M.manifold, Y, p, X, q, m))
+    m = default_vector_transport_method(M, typeof(p))
+    (metric(M.manifold) == M.metric) && (return vector_transport_to!(M.manifold, Y, p, X, q, m; kwargs...))
     return invoke(
         vector_transport_to!,
         Tuple{AbstractManifold, Any, Any, Any, Any, AbstractVectorTransportMethod},
-        M, Y, p, X, q, m,
+        M, Y, p, X, q, m; kwargs...
     )
 end
+
+function vector_transport_to!(
+        M::MetricManifold, Y, p, X, q, ::ParallelTransport
+    )
+    (metric(M.manifold) == M.metric) && (return parallel_transport_to!(M.manifold, Y, p, X, q, m))
+    return parallel_transport_to!(M, Y, p, X, q)
+end
+function vector_transport_to!(
+        M::MetricManifold, Y, p, X, d, m::AbstractVectorTransportMethod; kwargs...
+    )
+    return vector_transport_to!(M.manifold, Y, p, X, d, m; kwargs...)
+end
+
 
 function Weingarten(M::MetricManifold, p, X, V)
     (metric(M.manifold) == M.metric) && (return Weingarten(M.manifold, p, X, V))
