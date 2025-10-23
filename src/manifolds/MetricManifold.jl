@@ -491,7 +491,7 @@ function retract(M::MetricManifold, p, X, m::AbstractRetractionMethod = default_
     (metric(M.manifold) == M.metric) && (return retract(M.manifold, p, X, m; kwargs...))
     return invoke(retract, Tuple{AbstractManifold, Any, Any, AbstractRetractionMethod}, M, p, X, m; kwargs...)
 end
-function ManifoldsBase.retract_fused(M::MetricManifold, p, X, t, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)))
+function ManifoldsBase.retract_fused(M::MetricManifold, p, X, t::Number, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)))
     (metric(M.manifold) == M.metric) && (return retract_fused(M.manifold, p, X, t, m))
     return invoke(retract_fused, Tuple{AbstractManifold, Any, Any, Any, AbstractRetractionMethod}, M, p, X, t, m)
 end
