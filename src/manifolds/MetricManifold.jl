@@ -579,7 +579,7 @@ end
 function vector_transport_direction(
         M::MetricManifold, p, X, d,
         m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p));
-        kwagrs...
+        kwargs...
     )
     (metric(M.manifold) == M.metric) &&
         (return vector_transport_direction(M.manifold, p, X, d, m; kwargs...))
