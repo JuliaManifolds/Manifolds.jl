@@ -502,10 +502,10 @@ include("../header.jl")
                 MM = MetricManifold(M, StiefelSubmersionMetric(α))
                 @test inner(MM, p, X, Y) ≈ inner(Mcomp, p, X, Y)
                 q = exp(Mcomp, p, X)
-                @test isapprox(MM, q, exp(Mcomp, p, X))
+                @test isapprox(MM, q, exp(Mcomp, p, X); error = :error)
                 Mcomp === Mcan && isapprox(MM, p, log(MM, p, q), log(Mcomp, p, q))
-                @test isapprox(MM, exp(MM, p, 0 * X), p)
-                @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol = 1.0e-6)
+                @test isapprox(MM, exp(MM, p, 0 * X), p; error = :error)
+                @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); error = :error, atol = 1.0e-6)
             end
             @testset "α=$α" for α in [-0.75, -0.25, 0.5]
                 MM = MetricManifold(M, StiefelSubmersionMetric(α))
@@ -513,10 +513,10 @@ include("../header.jl")
                 X = project(MM, p, randn(representation_size(M)))
                 X ./= norm(MM, p, X)
                 q = exp(MM, p, X)
-                @test is_point(MM, q)
-                @test isapprox(MM, p, log(MM, p, q), X)
-                @test isapprox(MM, exp(MM, p, 0 * X), p)
-                @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); atol = 1.0e-6)
+                @test is_point(MM, q; error = :error)
+                @test isapprox(MM, p, log(MM, p, q), X; error = :error)
+                @test isapprox(MM, exp(MM, p, 0 * X), p; error = :error)
+                @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); error = :error, atol = 1.0e-6)
             end
         end
 
