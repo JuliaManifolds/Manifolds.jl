@@ -651,7 +651,7 @@ end
 function vector_transport_to!(
         M::MetricManifold, Y, p, X, q, ::ParallelTransport
     )
-    (metric(M.manifold) == M.metric) && (return parallel_transport_to!(M.manifold, Y, p, X, q, m))
+    (metric(M.manifold) == M.metric) && (return parallel_transport_to!(M.manifold, Y, p, X, q))
     return parallel_transport_to!(M, Y, p, X, q)
 end
 function vector_transport_to!(
