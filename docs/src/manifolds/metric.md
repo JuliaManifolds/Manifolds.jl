@@ -1,16 +1,17 @@
 # Metric manifold
 
-A Riemannian manifold always consists of a [topological manifold](https://en.wikipedia.org/wiki/Topological_manifold) together with a smoothly varying metric ``g``.
+A Riemannian manifold always consists of a [topological manifold](https://en.wikipedia.org/wiki/Topological_manifold) together with a smoothly varying metric tensor ``g``.
+This metric tensor defines an inner product on each tangent space of the manifold.
+In `Manifolds.jl`, a concrete implementation of an [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`) has an implicit metric, which we refer to as the default metric. For example on [`Euclidean`](@ref) space, this is the usual inner product.
+For the [`Sphere`](@ref), this default metric is the metric induced by the embedding in the ambient Euclidean space, restricted to the tangent spaces of the sphere.
 
-However, often there is an implicitly assumed (default) metric, like the usual inner product on [`Euclidean`](@ref) space.
-This decorator takes this into account.
-It is not necessary to use this decorator if you implement just one (or the first) metric.
-If you later introduce a second, the old (first) metric can be used with the (non [`MetricManifold`](@ref)) `AbstractManifold`, i.e. without an explicitly stated metric.
+Such a default metric is usually not the only possible metric on a manifold.
 
-This manifold decorator serves two purposes:
-
-1. to implement different metrics (e.g. in closed form) for one `AbstractManifold`
-2. to provide a way to compute geodesics on manifolds, where this [`AbstractMetric`](@extref `ManifoldsBase.AbstractMetric`) does not yield closed formula.
+The [`MetricManifold`](@ref) decorator allows to introduce further metrics for a manifold by acting as a wrapper.
+This allows to define further metrics for an existing manifold, while only having to implement functions that depend on the metric.
+All functions that are independent of the metric are automatically forwarded to the underlying manifold.
+When wrapping a manifold `M` with a [`MetricManifold`](@ref) together with the default [`metric`](@ref)`(M)`,
+this wrapper acts completely transparent and passes all function calls to the underlying manifold `M`.
 
 ```@contents
 Pages = ["metric.md"]
