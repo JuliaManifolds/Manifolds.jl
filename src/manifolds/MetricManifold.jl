@@ -311,8 +311,8 @@ end
 Compute the inverse retraction on the [`MetricManifold`](@ref) `M`.
 Since every inverse retraction is an inverse retraction with respect to any logarithmic map (induced by the metric),
 this method falls back to calling [`inverse_retract`](@extref `ManifoldsBase.inverse_retract`) on the base manifold.
-The two exceptions are the [`LogarithmicInverseRetraction`](@ref) and [`ShootingInverseRetraction`](@extref `ManifoldsBase`),
-in which case the method falls back to the default, that is to calling, respectively, [`log`](@extref `ManifoldsBase.log`) and
+The two exceptions are the [`LogarithmicInverseRetraction`](@extref `ManifoldsBase.LogarithmicInverseRetraction`) and [`ShootingInverseRetraction`](@extref `ManifoldsBase.ShootingInverseRetraction`),
+in which case the method falls back to the default, that is to calling, respectively, [`log`](@extref `Base.log-Tuple{AbstractManifold, Any, Any}`) and
 `inverse_retract_shooting!`.
 """
 inverse_retract(::MetricManifold, ::Any, ::Any)
@@ -484,8 +484,8 @@ representation_size(M::MetricManifold) = representation_size(M.manifold)
 Compute the retraction on the [`MetricManifold`](@ref) `M`.
 Since every retraction is a retraction with respect to any exponential map (here induced by the metric),
 this method falls back to calling [`retract`](@extref `ManifoldsBase.retract`) on the inner manifold.
-The one exception is the [`ExponentialRetraction`](@ref), in which case the method falls back to
-the default, i.e. to calling [`exp`](@extref `ManifoldsBase.log`) but still on `M`.
+The one exception is the [`ExponentialRetraction`](@extref `ManifoldsBase.ExponentialRetraction`), in which case the method falls back to
+the default, i.e. to calling [`exp`](@extref `Base.exp-Tuple{AbstractManifold, Any, Any}`) but still on `M`.
 """
 retract(::MetricManifold, ::Any, ::Any)
 
