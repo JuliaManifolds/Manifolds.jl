@@ -523,7 +523,7 @@ Compute the Ricci scalar curvature of the manifold `M` at the point `p` using ba
 The curvature is computed as the trace of the Ricci curvature tensor with respect to
 the metric, that is ``R=g^{ij}R_{ij}`` where ``R`` is the scalar Ricci curvature at `p`,
 ``g^{ij}`` is the inverse local metric (see [`inverse_local_metric`](@ref)) at `p` and
-``R_{ij}`` is the Riccie curvature tensor, see [`ricci_tensor`](@ref). Both the tensor and
+``R_{ij}`` is the Ricci curvature tensor, see [`ricci_tensor`](@ref). Both the tensor and
 inverse local metric are expressed in local coordinates defined by `B`, and the formula
 uses the Einstein summation convention.
 """
@@ -581,7 +581,7 @@ Compute the vector transport of the tangent vector `X` at point `p` in the direc
 on the [`MetricManifold`](@ref) `M`.
 
 Since a vector transport is usually defined with respect to a retraction, cf. e.g. [AbsilMahonySepulchre:2008](@cite),
-and the vector transport is closely related to an affine connection, it is to some extend metric dependent.
+and the vector transport is closely related to an affine connection, it is to some extent metric dependent.
 Therefore, this method only falls back to calling its corresponding method on the base manifold, if the metric is the default one.
 """
 vector_transport_direction(::MetricManifold, ::Any, ::Any, ::Any)
@@ -616,7 +616,7 @@ end
 Compute the vector transport of the tangent vector `X` at point `p` to a point `q` on the [`MetricManifold`](@ref) `M`.
 
 Since a vector transport is usually defined with respect to a retraction, cf. e.g. [AbsilMahonySepulchre:2008](@cite),
-and the vector transport is closely related to an affine connection, it is to some extend metric dependent.
+and the vector transport is closely related to an affine connection, it is to some extent metric dependent.
 Therefore, this method only falls back to calling its corresponding method on the base manifold, if the metric is the default one.
 """
 vector_transport_to(::MetricManifold, ::Any, ::Any, ::Any)
