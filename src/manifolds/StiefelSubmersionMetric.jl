@@ -100,15 +100,6 @@ function inner(M::MetricManifold{ℝ, <:Stiefel{ℝ}, <:StiefelSubmersionMetric}
     end
 end
 
-function inverse_retract_project!(
-        M::MetricManifold{ℝ, <:Stiefel, <:StiefelSubmersionMetric},
-        X,
-        p,
-        q,
-    )
-    return inverse_retract_project!(base_manifold(M), X, p, q)
-end
-
 @doc doc"""
     inverse_retract(
         M::MetricManifold{ℝ,<:Stiefel{ℝ},<:StiefelSubmersionMetric}, p, q,

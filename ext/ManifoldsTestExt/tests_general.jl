@@ -49,7 +49,7 @@ that lie on it (contained in `pts`).
     tests (1 use default). This is deactivated if the `exp_log_atol_multiplier` is nonzero.
 - `retraction_methods = []`: retraction methods that will be tested.
 - `test_atlases = []`: Vector or tuple of atlases that should be tested.
-- `test_exp_log = true`: if true, check that [`exp`](@ref) is the inverse of [`log`](@ref).
+- `test_exp_log = true`: if true, check that [`exp`](@ref) is the inverse of [`log`](@extref `Base.log-Tuple{AbstractManifold, Any, Any}`).
 - `test_injectivity_radius = true`: whether implementation of [`injectivity_radius`](@ref)
     should be tested.
 - `test_inplace = false` : if true check if inplace variants work if they are activated,
