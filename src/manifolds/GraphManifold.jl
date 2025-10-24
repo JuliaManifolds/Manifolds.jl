@@ -100,7 +100,7 @@ get_iterator(M::VertexGraphManifold) = 1:nv(M.graph)
     incident_log(M::GraphManifold, x)
 
 Return the tangent vector on the (vertex) [`GraphManifold`](@ref), where at
-each node the sum of the [`log`](@ref)s to incident nodes is computed.
+each node the sum of the [`log`](@extref `Base.log-Tuple{AbstractManifold, Any, Any}`)s to incident nodes is computed.
 For a `SimpleGraph`, an egde is interpreted as double edge in the corresponding
 SimpleDiGraph
 

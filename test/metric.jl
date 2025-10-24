@@ -537,6 +537,8 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test retract!(MM, q, p, X) === retract!(M, q, p, X)
         @test Manifolds.retract_fused!(MM, q, p, X, 1) ===
             Manifolds.retract_fused!(M, q, p, X, 1)
+        @test Manifolds.retract_fused(MM, p, X, 1) ==
+            Manifolds.retract_fused(M, p, X, 1)
         @test project!(MM, Y, p, X) === project!(M, Y, p, X)
         @test project!(MM, q, p) === project!(M, q, p)
         # without a definition for the metric from the embedding, no projection possible
@@ -605,18 +607,16 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         @test is_point(MM2, p) === is_point(M, p)
         @test is_vector(MM2, p, X) === is_vector(M, p, X)
 
-        if VERSION >= v"1.9"
-            a = Manifolds.projected_distribution(
-                M,
-                Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
-            )
-            b = Manifolds.projected_distribution(
-                MM2,
-                Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
-            )
-            @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
-            @test isapprox(a.distribution.μ, b.distribution.μ)
-        end
+        a = Manifolds.projected_distribution(
+            M,
+            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
+        )
+        b = Manifolds.projected_distribution(
+            MM2,
+            Distributions.MvNormal(zero(zeros(3)), 1.0 * I),
+        )
+        @test isapprox(Matrix(a.distribution.Σ), Matrix(b.distribution.Σ))
+        @test isapprox(a.distribution.μ, b.distribution.μ)
         @test get_basis(M, p, DefaultOrthonormalBasis()).data ==
             get_basis(MM2, p, DefaultOrthonormalBasis()).data
         @test_throws MethodError get_basis(MM, p, DefaultOrthonormalBasis())

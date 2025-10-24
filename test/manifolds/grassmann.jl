@@ -286,10 +286,10 @@ include("../header.jl")
 
         Y = ProjectorTangentVector(similar(X.value))
         Yc = Xs.value * pS.value' + pS.value * Xs.value'
-        diff_canonical_project!(M, Y, pS, Xs)
+        Manifolds.diff_canonical_project!(M, Y, pS, Xs)
         @test Y.value == Yc
         Y2 = ProjectorTangentVector(similar(X.value))
-        diff_canonical_project!(M, Y2, pS.value, Xs.value)
+        Manifolds.diff_canonical_project!(M, Y2, pS.value, Xs.value)
         @test Y2.value == Yc
 
         @test horizontal_lift(Stiefel(3, 2), pS.value, X) == X.value[:, 1:2]

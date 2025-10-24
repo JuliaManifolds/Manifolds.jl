@@ -228,7 +228,6 @@ makedocs(;
             "Manifold decorators" => [
                 "Connection manifold" => "manifolds/connection.md",
                 "Metric manifold" => "manifolds/metric.md",
-                "Quotient manifold" => "manifolds/quotient.md",
             ],
         ],
         "Features on Manifolds" => [

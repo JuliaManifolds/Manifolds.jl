@@ -525,7 +525,7 @@ complex plane.
 \mathcal P_{q←p} X = X - \frac{⟨\log_p q,X⟩_p}{d^2_{ℂ}(p,q)}
 \bigl(\log_p q + \log_q p \bigr),
 ````
-where [`log`](@ref) denotes the logarithmic map on `M`.
+where [`log`](@extref `Base.log-Tuple{AbstractManifold, Any, Any}`) denotes the logarithmic map on `M`.
 """
 parallel_transport_to(::Circle, ::Any, ::Any, ::Any)
 
