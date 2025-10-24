@@ -580,88 +580,79 @@ function Base.show(io::IO, M::MetricManifold)
     return print(io, "MetricManifold($(M.manifold), $(M.metric))")
 end
 
+@doc raw"""
+    vector_transport_direction(M::MetricManifold, p, X, d)
+    vector_transport_direction!(M::MetricManifold, Y, p, X, d)
+
+Compute the vector transport of the tangent vector `X` at point `p` in the direction `d`
+on the [`MetricManifold`](@ref) `M`.
+
+Since a vector transport is usually defined with respect to a retraction, cf. e.g. [AbsilMahonySepulchre:2008](@cite),
+and the vector transport is closely related to an affine connection, it is to some extend metric dependent.
+Therefore, this method only falls back to calling its corresponding method on the base manifold, if the metric is the default one.
+"""
+vector_transport_direction(::MetricManifold, ::Any, ::Any, ::Any)
+
 function vector_transport_direction(
         M::MetricManifold, p, X, d,
-        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p));
-        kwargs...
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
     )
-    (metric(M.manifold) == M.metric) &&
-        (return vector_transport_direction(M.manifold, p, X, d, m; kwargs...))
+    (metric(M.manifold) == M.metric) && (return vector_transport_direction(M.manifold, p, X, d, m))
     return invoke(
         vector_transport_direction,
         Tuple{AbstractManifold, Any, Any, Any, AbstractVectorTransportMethod},
-        M, p, X, d, m; kwargs...,
-    )
-end
-function _vector_transport_direction!(
-        M::MetricManifold, Y, p, X, d;
-        kwargs...
-    )
-    m = default_vector_transport_method(M, typeof(p))
-    (metric(M.manifold) == M.metric) &&
-        (return vector_transport_direction!(M.manifold, Y, p, X, d, m; kwargs...))
-    return invoke(
-        vector_transport_direction!,
-        Tuple{AbstractManifold, Any, Any, Any, Any, AbstractVectorTransportMethod},
-        M, Y, p, X, d, m; kwargs...
+        M, p, X, d, m,
     )
 end
 function vector_transport_direction!(
         M::MetricManifold, Y, p, X, d,
-        m::AbstractVectorTransportMethod;
-        kwargs...
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
     )
-    (metric(M.manifold) == M.metric) &&
-        (return vector_transport_direction!(M.manifold, Y, p, X, d, m; kwargs...))
+    (metric(M.manifold) == M.metric) && (return vector_transport_direction!(M.manifold, Y, p, X, d, m))
     return invoke(
         vector_transport_direction!,
         Tuple{AbstractManifold, Any, Any, Any, Any, AbstractVectorTransportMethod},
-        M, Y, p, X, d, m; kwargs...
+        M, Y, p, X, d, m,
     )
-end
-function _vector_transport_direction!(
-        M::MetricManifold, Y, p, X, d,
-        ::ParallelTransport
-    )
-    (metric(M.manifold) == M.metric) && (return parallel_transport_direction!(M.manifold, Y, p, X, d))
-    return parallel_transport_direction!(M, Y, p, X, d)
 end
 
+@doc raw"""
+    vector_transport_to(M::MetricManifold, p, X, d)
+    vector_transport_to!(M::MetricManifold, Y, p, X, d)
+
+Compute the vector transport of the tangent vector `X` at point `p` to a point `q` on the [`MetricManifold`](@ref) `M`.
+
+Since a vector transport is usually defined with respect to a retraction, cf. e.g. [AbsilMahonySepulchre:2008](@cite),
+and the vector transport is closely related to an affine connection, it is to some extend metric dependent.
+Therefore, this method only falls back to calling its corresponding method on the base manifold, if the metric is the default one.
+"""
+vector_transport_to(::MetricManifold, ::Any, ::Any, ::Any)
+
+
 function vector_transport_to(
-        M::MetricManifold, p, X, q,
-        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p));
-        kwargs...
+        M::MetricManifold,
+        p,
+        X,
+        q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
     )
-    (metric(M.manifold) == M.metric) && (return vector_transport_to(M.manifold, p, X, q, m; kwargs...))
+    (metric(M.manifold) == M.metric) && (return vector_transport_to(M.manifold, p, X, q, m))
     return invoke(
         vector_transport_to,
         Tuple{AbstractManifold, Any, Any, Any, AbstractVectorTransportMethod},
-        M, p, X, q, m; kwargs...,
+        M, p, X, q, m,
     )
 end
 function vector_transport_to!(
-        M::MetricManifold, Y, p, X, q;
-        kwargs...
+        M::MetricManifold, Y, p, X, q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
     )
-    m = default_vector_transport_method(M, typeof(p))
-    (metric(M.manifold) == M.metric) && (return vector_transport_to!(M.manifold, Y, p, X, q, m; kwargs...))
+    (metric(M.manifold) == M.metric) && (return vector_transport_to!(M.manifold, Y, p, X, q, m))
     return invoke(
         vector_transport_to!,
         Tuple{AbstractManifold, Any, Any, Any, Any, AbstractVectorTransportMethod},
-        M, Y, p, X, q, m; kwargs...
+        M, Y, p, X, q, m,
     )
-end
-
-function vector_transport_to!(
-        M::MetricManifold, Y, p, X, q, ::ParallelTransport
-    )
-    (metric(M.manifold) == M.metric) && (return parallel_transport_to!(M.manifold, Y, p, X, q))
-    return parallel_transport_to!(M, Y, p, X, q)
-end
-function vector_transport_to!(
-        M::MetricManifold, Y, p, X, d, m::AbstractVectorTransportMethod; kwargs...
-    )
-    return vector_transport_to!(M.manifold, Y, p, X, d, m; kwargs...)
 end
 
 
