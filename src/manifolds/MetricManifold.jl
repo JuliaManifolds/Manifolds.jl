@@ -322,10 +322,8 @@ function inverse_retract(M::MetricManifold, p, q, m::AbstractInverseRetractionMe
     return invoke(inverse_retract, Tuple{AbstractManifold, Any, Any, AbstractInverseRetractionMethod}, M, p, q, m)
 end
 
-function inverse_retract!(M::MetricManifold, X, p, q)
-    return inverse_retract!(M, X, p, q, default_inverse_retraction_method(M, typeof(p)))
-end
-function inverse_retract!(M::MetricManifold, X, p, q, m::AbstractInverseRetractionMethod)
+# note that if the default inverse retraction is the Logarithmic or the shooting one, this indeed still dispatches correctly to the next case
+function inverse_retract!(M::MetricManifold, X, p, q, m::AbstractInverseRetractionMethod = default_inverse_retraction_method(M, typeof(p)))
     return inverse_retract!(M.manifold, X, p, q, m)
 end
 function inverse_retract!(M::MetricManifold, X, p, q, ::LogarithmicInverseRetraction)
@@ -500,21 +498,16 @@ function ManifoldsBase.retract_fused(M::MetricManifold, p, X, t::Number, m::Abst
     return invoke(retract_fused, Tuple{AbstractManifold, Any, Any, Any, AbstractRetractionMethod}, M, p, X, t, m)
 end
 
-function retract!(M::MetricManifold, q, p, X; kwargs...)
-    m = default_retraction_method(M, typeof(p))
-    return retract!(M, q, p, X, m; kwargs...)
-end
-function retract!(M::MetricManifold, q, p, X, m::AbstractRetractionMethod; kwargs...)
+# note that if the default retraction is the Exponential, this indeed still dispatches correctly to the next case
+function retract!(M::MetricManifold, q, p, X, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)); kwargs...)
     return retract!(M.manifold, q, p, X, m; kwargs...)
 end
 function retract!(M::MetricManifold, q, p, X, ::ExponentialRetraction)
     (metric(M.manifold) == M.metric) && (return exp!(M.manifold, q, p, X))
     return exp!(M, q, p, X)
 end
-function ManifoldsBase.retract_fused!(M::MetricManifold, q, p, X, t::Number)
-    return retract_fused!(M, q, p, X, t, default_retraction_method(M, typeof(p)))
-end
-function ManifoldsBase.retract_fused!(M::MetricManifold, q, p, X, t::Number, m::AbstractRetractionMethod)
+# note that if the default retraction is the Exponential, this indeed still dispatches correctly to the next case
+function ManifoldsBase.retract_fused!(M::MetricManifold, q, p, X, t::Number, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)))
     return retract_fused!(M.manifold, q, p, X, t, m)
 end
 function ManifoldsBase.retract_fused!(M::MetricManifold, q, p, X, t::Number, ::ExponentialRetraction)
