@@ -311,8 +311,9 @@ end
 Compute the inverse retraction on the [`MetricManifold`](@ref) `M`.
 Since every inverse retraction is an inverse retraction with respect to any logarithmic map (induced by the metric),
 this method falls back to calling [`inverse_retract`](@extref `ManifoldsBase.inverse_retract`) on the base manifold.
-The one exception is the [`LogarithmicInverseRetraction`](@ref), in which case the method falls back to
-the default, i.e. to calling [`log`](@extref `ManifoldsBase.log`).
+The two exceptions are the [`LogarithmicInverseRetraction`](@ref) and [`ShootingInverseRetraction`](@extref `ManifoldsBase`),
+in which case the method falls back to the default, that is to calling, respectively, [`log`](@extref `ManifoldsBase.log`) and
+`inverse_retract_shooting!`.
 """
 inverse_retract(::MetricManifold, ::Any, ::Any)
 
@@ -331,7 +332,10 @@ function inverse_retract!(M::MetricManifold, X, p, q, ::LogarithmicInverseRetrac
     (metric(M.manifold) == M.metric) && (return log!(M.manifold, X, p, q))
     return log!(M, X, p, q)
 end
-
+function inverse_retract!(M::MetricManifold, X, p, q, m::ShootingInverseRetraction)
+    (metric(M.manifold) == M.metric) && (return inverse_retract!(M.manifold, X, p, q, m))
+    return inverse_retract_shooting!(M, X, p, q, m)
+end
 
 """
     is_default_metric(M::AbstractManifold, G::AbstractMetric)
