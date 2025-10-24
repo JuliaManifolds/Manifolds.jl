@@ -339,6 +339,10 @@ include("../header.jl")
         @test norm(M3, p, X) ≈ distance(M3, p, q)
         Z = [0.0 0.0; 0.0 0.0; -1.0 -1.0]
         @test riemannian_Hessian(M3, p, Y, Z, X) == [0.0 0.5; -0.5 0.0; -1.0 -1.0]
+        # test default retraction on metric manifolds
+        m = default_retraction_method(M3)
+        r = similar(p)
+        @test retract!(M3, r, p, X, m) == retract!(M3.manifold, r, p, X)
         # check on a higher dimensional manifold, that the iterations are actually used
         M4 = MetricManifold(Stiefel(10, 2), CanonicalMetric())
         p = Matrix{Float64}(I, 10, 2)

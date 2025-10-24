@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* fix a few small errors regarding the forwarding of `retract`, `retract_fused`, `inverse_retract`, `vector_transport_direction` and `vector_transport_to` when using a `MetricManifold.jl` (cf (#823))
+* fix a few small errors regarding the forwarding of `retract`, `retract_fused`, and `inverse_retract` when using a `MetricManifold.jl` (cf (#823))
+* document why we kept that `vector_transport_direction` and `vector_transport_to` are not automatically forwarded in `MetricManifold.jl`
 
 ## [0.11.0] 2025-10-02
 

@@ -495,7 +495,7 @@ function retract(M::MetricManifold, p, X, m::AbstractRetractionMethod = default_
 end
 function ManifoldsBase.retract_fused(M::MetricManifold, p, X, t::Number, m::AbstractRetractionMethod = default_retraction_method(M, typeof(p)))
     (metric(M.manifold) == M.metric) && (return retract_fused(M.manifold, p, X, t, m))
-    return invoke(retract_fused, Tuple{AbstractManifold, Any, Any, Any, AbstractRetractionMethod}, M, p, X, t, m)
+    return invoke(retract_fused, Tuple{AbstractManifold, Any, Any, Number, AbstractRetractionMethod}, M, p, X, t, m)
 end
 
 # note that if the default retraction is the Exponential, this indeed still dispatches correctly to the next case
