@@ -47,7 +47,7 @@ function test_exp_log(
         test_log::Bool = true,
         test_fused::Bool = true,
     )
-    @testset "(Lie group) exp & log" begin
+    @testset "exp & log" begin
         if test_exp
             # Lie group exp
             p1 = exp(G, p, X)

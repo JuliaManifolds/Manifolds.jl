@@ -12,6 +12,10 @@ function include_test(path)
     return @time include(path)  # show basic timing, (this will print a newline at end)
 end
 
+@testset "Manifolds.jl Test Suite" begin
+    include_test("sphere_suite_test.jl")
+end
+
 @testset "Manifolds.jl" begin
     if TEST_GROUP ∈ ["all", "test_manifolds"]
         include_test("differentiation.jl")
