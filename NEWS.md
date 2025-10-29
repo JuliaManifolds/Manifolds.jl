@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* fixed the `default_retraction_method` for `AbstractSphere` to be the stabilized exponential map to avoid accumulations of rounding errors
+  when the tangent vector is not exactly tangent.
 * fixed the contributing.md to mention runic as the code formatter.
 
 ## [0.11.1] 2025-10-24

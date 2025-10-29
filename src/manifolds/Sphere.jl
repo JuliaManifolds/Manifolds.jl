@@ -426,6 +426,16 @@ function default_approximation_method(::AbstractSphere, ::typeof(mean))
     return GeodesicInterpolationWithinRadius(π / 2)
 end
 
+"""
+    default_retraction_method(M::AbstractSphere)
+
+The default retraction on the sphere is usually the exponential map. Howeverm since that map
+tends to be very sensitive to also only slight errors in tangent vectors (not being tangent),
+we use a stabilized version as default that projects onto the sphere afterwards, see
+[`StabilizedRetraction`](@extref `ManifoldsBase.StabilizedRetraction`).
+"""
+default_retraction_method(::AbstractSphere) = StabilizedRetraction(ExponentialRetraction())
+
 function mid_point!(S::Sphere, q, p1, p2)
     q .= p1 .+ p2
     project!(S, q, q)

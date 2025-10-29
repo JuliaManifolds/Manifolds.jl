@@ -287,6 +287,7 @@ using ManifoldsBase:
     ShootingInverseRetraction,
     SoftmaxRetraction,
     SoftmaxInverseRetraction,
+    StabilizedRetraction,
     StopForwardingType,
     TangentSpace,
     TangentSpaceType,
@@ -721,7 +722,8 @@ export AbstractRetractionMethod,
     OrthographicRetraction,
     PadeRetraction,
     ProductRetraction,
-    SasakiRetraction
+    SasakiRetraction,
+    StabilizedRetraction
 # Inverse Retraction types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
