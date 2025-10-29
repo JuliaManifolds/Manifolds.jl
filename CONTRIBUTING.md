@@ -85,10 +85,10 @@ You can also save the string to a variable, for example `_doc_myM_exp` and attac
 
 ## Code style
 
-Please follow the [documentation guidelines](https://docs.julialang.org/en/v1/manual/documentation/) from the Julia documentation as well as [Blue Style](https://github.com/invenia/BlueStyle).
-Run [`JuliaFormatter.jl`](https://github.com/domluna/JuliaFormatter.jl) on the repository running `using JuliaFormatter; format(".")` on the main folder of the project.
+Please follow the [documentation guidelines](https://docs.julialang.org/en/v1/manual/documentation/) from the Julia documentation and use [Runic.jl](https://github.com/fredrikekre/Runic.jl) for code formatting.
 
-Please follow a few internal conventions:
+Please consider a few internal conventions:
+
 
 * Please include a description of the manifold and a reference to the general theory in the `struct` of your manifold that inherits from `AbstractManifold`'.
 * Include the mathematical formulae for any implemented function if a closed form exists.
