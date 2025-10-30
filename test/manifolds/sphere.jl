@@ -22,6 +22,7 @@ using ManifoldsBase: TFVector
         @test_throws DomainError is_point(M, [2.0, 0.0, 0.0]; error = :error)
         @test !is_point(M, [2.0, 0.0, 0.0])
         @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+        @test default_retraction_method(M) == StabilizedRetraction(ExponentialRetraction())
         @test_throws DomainError is_vector(
             M,
             [1.0, 0.0, 0.0],
