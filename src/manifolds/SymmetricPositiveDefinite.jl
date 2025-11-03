@@ -233,7 +233,7 @@ function get_embedding(M::SymmetricPositiveDefinite{Tuple{Int}})
     return Euclidean(n, n; field = ℝ, parameter = :field)
 end
 
-function ManifoldsBase.get_embedding_type(::SymmetricPositiveDefinite, ::SPDPoint)
+function ManifoldsBase.get_embedding_type(::SymmetricPositiveDefinite, ::Type{<:SPDPoint})
     return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 function ManifoldsBase.get_embedding_type(::SymmetricPositiveDefinite)

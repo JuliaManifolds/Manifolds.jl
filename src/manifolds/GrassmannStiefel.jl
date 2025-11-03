@@ -106,10 +106,10 @@ function ManifoldsBase.get_embedding_type(::Grassmann)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
-function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::StiefelPoint)
+function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::Type{<:StiefelPoint})
     return ManifoldsBase.EmbeddedForwardingType()
 end
-function ManifoldsBase.get_forwarding_type(::Stiefel, f, ::StiefelPoint)
+function ManifoldsBase.get_forwarding_type(::Stiefel, f, ::Type{<:StiefelPoint})
     return ManifoldsBase.EmbeddedForwardingType()
 end
 

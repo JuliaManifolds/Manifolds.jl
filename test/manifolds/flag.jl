@@ -270,7 +270,7 @@ using Random
 
         @testset "field parameters" begin
             M = Flag(5, 1, 2; parameter = :field)
-            @test get_embedding(M, p1_ortho) == OrthogonalMatrices(5; parameter = :field)
+            @test get_embedding(M, typeof(p1_ortho)) == OrthogonalMatrices(5; parameter = :field)
         end
     end
 

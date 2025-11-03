@@ -398,7 +398,7 @@ include("../header.jl")
         @test typeof(get_total_space(M)) === Stiefel{ℝ, Tuple{Int64, Int64}}
         p = StiefelPoint([1.0 0.0; 0.0 1.0; 0.0 0.0])
         p2 = convert(ProjectorPoint, p)
-        @test get_embedding(M, p2) == Euclidean(3, 3; parameter = :field)
+        @test get_embedding(M, typeof(p2)) == Euclidean(3, 3; parameter = :field)
         @test get_total_space(M) == Stiefel(3, 2; parameter = :field)
     end
 end

@@ -62,7 +62,7 @@ function _extract_flag_stiefel(M::Flag, pX::AbstractMatrix, i::Int)
 end
 
 function check_point(M::Flag, p::AbstractMatrix)
-    return check_point(get_embedding(M), p)
+    return check_point(get_embedding(M, typeof(p)), p)
 end
 
 @doc raw"""
@@ -154,7 +154,7 @@ function project!(
     return Y
 end
 function project!(M::Flag, q::AbstractMatrix, p::AbstractMatrix)
-    return project!(get_embedding(M), q, p)
+    return project!(get_embedding(M, typeof(p)), q, p)
 end
 
 function Random.rand!(rng::AbstractRNG, M::Flag, pX::AbstractMatrix; vector_at = nothing)

@@ -397,13 +397,13 @@ Statistics.mean(
 function Statistics.mean!(
         M::AbstractManifold,
         y,
-        x::AbstractVector,
+        x::AbstractVector{P},
         w::AbstractVector,
         e::ExtrinsicEstimation;
         kwargs...,
-    )
+    ) where {P}
     embedded_x = map(p -> embed(M, p), x)
-    embedded_y = mean(get_embedding(M), embedded_x, w, e.extrinsic_estimation; kwargs...)
+    embedded_y = mean(get_embedding(M, P), embedded_x, w, e.extrinsic_estimation; kwargs...)
     project!(M, y, embedded_y)
     return y
 end
@@ -671,13 +671,13 @@ end
 function Statistics.median!(
         M::AbstractManifold,
         y,
-        x::AbstractVector,
+        x::AbstractVector{P},
         w::AbstractVector,
         e::ExtrinsicEstimation;
         kwargs...,
-    )
+    ) where {P}
     embedded_x = map(p -> embed(M, p), x)
-    embedded_y = median(get_embedding(M), embedded_x, w, e.extrinsic_estimation; kwargs...)
+    embedded_y = median(get_embedding(M, P), embedded_x, w, e.extrinsic_estimation; kwargs...)
     project!(M, y, embedded_y)
     return y
 end
