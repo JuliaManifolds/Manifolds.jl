@@ -315,6 +315,10 @@ function get_embedding(::Segre{𝔽, V}) where {𝔽, V}
     return Euclidean(prod(V))
 end
 
+function ManifoldsBase.get_embedding_type(::Segre)
+    return ManifoldsBase.EmbeddedManifoldType(IndirectEmbedding())
+end
+
 @doc raw"""
     get_vector( M::Segre{𝔽, V}, p, c, DefaultOrthonormalBasis; kwargs...)
 

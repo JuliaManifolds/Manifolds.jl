@@ -45,6 +45,8 @@ decorated_manifold(M::MetricManifold) = M.manifold
 get_embedding(M::MetricManifold) = get_embedding(M.manifold)
 get_embedding(M::MetricManifold, T::Type) = get_embedding(M.manifold, T)
 
+get_embeddding_type(::MetricManifold) = get_embedding_type(M.manifold)
+
 function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     metric(M) === G && return copyto!(M, Y, p, X) # no metric change
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?

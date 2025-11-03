@@ -81,7 +81,7 @@ embed(::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTangentVector) = X.v
 
 function get_embedding(
         ::SymplecticGrassmann{ℝ, TypeParameter{Tuple{n, k}}},
-        ::Type{ProjectorPoint},
+        ::Type{<:ProjectorPoint},
     ) where {n, k}
     return Euclidean(2n, 2n)
 end
