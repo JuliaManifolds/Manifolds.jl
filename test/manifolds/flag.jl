@@ -234,8 +234,8 @@ using Random
         @test check_vector(M, p1_ortho, X1_ortho) === nothing
         @test check_vector(M, p1_ortho, X2_ortho_wrong1) isa DomainError
         @test check_vector(M, p1_ortho, X2_ortho_wrong2) isa DomainError
-        @test is_point(M, p1_ortho)
-        @test is_vector(M, p1_ortho, X1_ortho)
+        @test is_point(M, p1_ortho; error = :error)
+        @test is_vector(M, p1_ortho, X1_ortho; error = :error)
         @test isapprox(M, p1_ortho, X2_ortho, project(M, p1_ortho, X2_ortho_wrong1))
         @test isapprox(
             M,

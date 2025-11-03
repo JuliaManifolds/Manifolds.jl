@@ -186,7 +186,7 @@ end
 function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!))
     return ManifoldsBase.SimpleForwardingType()
 end
-function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!), P)
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!), P::Type)
     return ManifoldsBase.SimpleForwardingType()
 end
 function ManifoldsBase.get_forwarding_type(M::MetricManifold, f::typeof(default_approximation_method))
