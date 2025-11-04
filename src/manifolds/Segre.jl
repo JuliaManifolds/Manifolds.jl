@@ -439,21 +439,27 @@ from a log-normal distribution on ``ℝ^{+}`` and a uniform distribution on ``\m
 
 If `vector_at` is not `nothing`, return a random tangent vector from a normal distribution on the tangent space.
 """
-function rand(M::Segre{ℝ, V}; vector_at = nothing, kwargs...) where {V}
+Base.rand(M::Segre{ℝ, V}; vector_at = nothing, kwargs...) where {V}
+
+function rand!(M::Segre{ℝ, V}, pX; vector_at = nothing, kwargs...) where {V}
     if isnothing(vector_at)
-        return [
-            rand(PositiveArrays(1); kwargs...),
-            [rand(Sphere(n - 1); kwargs...) for n in V]...,
-        ]
+        rand!(PositiveArrays(1), pX[1]; kwargs...)
+        for (n, x) in zip(V, pX[2:end])
+            rand!(Sphere(n - 1), x; kwargs...)
+        end
+        return pX
     else
-        return [
-            rand(PositiveArrays(1); vector_at = vector_at[1], kwargs...),
-            [
-                rand(Sphere(n - 1); vector_at = xdot, kwargs...) for
-                    (xdot, n) in zip(vector_at[2:end], V)
-            ]...,
-        ]
+        p = vector_at
+        rand!(PositiveArrays(1), pX[1]; vector_at = p[1], kwargs...)
+        for (n, xdot, x) in zip(V, pX[2:end], p[2:end])
+            rand!(Sphere(n - 1), xdot; vector_at = x, kwargs...)
+        end
+        return pX
     end
+end
+
+function ManifoldsBase.allocate_result(::Segre{ℝ, V}, ::typeof(rand)) where {V}
+    return [ zeros(1), [zeros(n) for n in V]..., ]
 end
 
 @doc raw"""
