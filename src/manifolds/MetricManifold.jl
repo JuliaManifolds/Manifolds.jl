@@ -182,6 +182,9 @@ end
 function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(embed!), P::Type)
     return ManifoldsBase.SimpleForwardingType()
 end
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand))
+    return ManifoldsBase.SimpleForwardingType()
+end
 function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand), P::Type)
     return ManifoldsBase.SimpleForwardingType()
 end
