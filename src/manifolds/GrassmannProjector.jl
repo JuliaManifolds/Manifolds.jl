@@ -97,7 +97,7 @@ embed(::Grassmann, p::ProjectorPoint) = p.value
 embed(::Grassmann, p, X::ProjectorTangentVector) = X.value
 
 @doc raw"""
-    get_embedding(M::Grassmann, ::Type{ProjectorPoint})
+    get_embedding(M::Grassmann, ::Type{<:ProjectorPoint})
 
 Return the embedding of the [`ProjectorPoint`](@ref) representation of the [`Grassmann`](@ref)
 manifold, i.e. the Euclidean space ``\mathbb F^{n×n}``.
