@@ -459,7 +459,7 @@ function rand!(M::Segre{ℝ, V}, pX; vector_at = nothing, kwargs...) where {V}
 end
 
 function ManifoldsBase.allocate_result(::Segre{ℝ, V}, ::typeof(rand)) where {V}
-    return [ zeros(1), [zeros(n) for n in V]..., ]
+    return [zeros(1), [zeros(n) for n in V]...]
 end
 
 @doc raw"""
