@@ -45,8 +45,6 @@ decorated_manifold(M::MetricManifold) = M.manifold
 get_embedding(M::MetricManifold) = get_embedding(M.manifold)
 get_embedding(M::MetricManifold, T::Type) = get_embedding(M.manifold, T)
 
-get_embeddding_type(::MetricManifold) = get_embedding_type(M.manifold)
-
 function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     metric(M) === G && return copyto!(M, Y, p, X) # no metric change
     # TODO: For local metric, inverse_local metric, det_local_metric: Introduce a default basis?
@@ -626,7 +624,6 @@ and the vector transport is closely related to an affine connection, it is to so
 Therefore, this method only falls back to calling its corresponding method on the base manifold, if the metric is the default one.
 """
 vector_transport_to(::MetricManifold, ::Any, ::Any, ::Any)
-
 
 function vector_transport_to(
         M::MetricManifold,
