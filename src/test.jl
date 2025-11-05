@@ -22,4 +22,5 @@ function test_manifold end
 # the small functions per single API function
 function test_exp end
 function test_log end
+function test_manifold_dimension end
 end
