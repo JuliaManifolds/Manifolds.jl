@@ -210,7 +210,7 @@ end
 function ManifoldsBase.get_embedding_type(::Hyperbolic)
     return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
-function ManifoldsBase.get_embedding_type(::Hyperbolic, ::HyperboloidPoint)
+function ManifoldsBase.get_embedding_type(::Hyperbolic, ::Type{<:HyperboloidPoint})
     return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 

@@ -58,7 +58,7 @@ end
 Check that the [`ProjectorPoint`](@ref) is of correct size, i.e. from ``\mathbb F^{n×n}``
 """
 function check_size(M::Grassmann, p::ProjectorPoint; kwargs...)
-    return check_size(get_embedding(M, p), p.value; kwargs...)
+    return check_size(get_embedding(M, typeof(p)), p.value; kwargs...)
 end
 
 @doc raw"""
@@ -97,25 +97,24 @@ embed(::Grassmann, p::ProjectorPoint) = p.value
 embed(::Grassmann, p, X::ProjectorTangentVector) = X.value
 
 @doc raw"""
-    get_embedding(M::Grassmann, p::ProjectorPoint)
+    get_embedding(M::Grassmann, ::Type{<:ProjectorPoint})
 
 Return the embedding of the [`ProjectorPoint`](@ref) representation of the [`Grassmann`](@ref)
 manifold, i.e. the Euclidean space ``\mathbb F^{n×n}``.
 """
 function get_embedding(
-        ::Grassmann{𝔽, TypeParameter{Tuple{n, k}}}, ::ProjectorPoint,
+        ::Grassmann{𝔽, TypeParameter{Tuple{n, k}}}, ::Type{<:ProjectorPoint},
     ) where {n, k, 𝔽}
     return Euclidean(n, n; field = 𝔽)
 end
 function get_embedding(
-        M::Grassmann{𝔽, Tuple{Int, Int}},
-        ::Union{ProjectorPoint, ProjectorTangentVector},
+        M::Grassmann{𝔽, Tuple{Int, Int}}, ::Type{<:ProjectorPoint},
     ) where {𝔽}
     n, k = get_parameter(M.size)
     return Euclidean(n, n; field = 𝔽, parameter = :field)
 end
 
-function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::ProjectorPoint)
+function ManifoldsBase.get_forwarding_type(::Grassmann, f, ::Type{<:ProjectorPoint})
     return ManifoldsBase.EmbeddedForwardingType()
 end
 
@@ -191,7 +190,7 @@ For details, see Proposition 3.2 in [BendokatZimmermannAbsil:2020](@cite).
 """
 exp(M::Grassmann, p::ProjectorPoint, X::ProjectorTangentVector)
 
-function ManifoldsBase.get_forwarding_type(::Grassmann, ::typeof(exp), ::ProjectorPoint)
+function ManifoldsBase.get_forwarding_type(::Grassmann, ::typeof(exp), ::Type{<:ProjectorPoint})
     return ManifoldsBase.StopForwardingType()
 end
 

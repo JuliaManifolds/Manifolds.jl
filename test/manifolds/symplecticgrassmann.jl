@@ -118,8 +118,8 @@ include("../header.jl")
         # ``X^+ = X``, but ``Xp + pX`` not correct
         Xf2 = ProjectorTangentVector(0.5 .* (symplectic_inverse(X * X') + X * X'))
         @test_throws DomainError is_vector(M, pP, Xf2; error = :error)
-        @test get_embedding(M, pP) == Euclidean(6, 6)
-        get_embedding(Mf, pP) == Euclidean(6, 6; parameter = :field)
+        @test get_embedding(M, typeof(pP)) == Euclidean(6, 6)
+        @test get_embedding(Mf, typeof(pP)) == Euclidean(6, 6; parameter = :field)
         @test embed(M, pP) == pP.value
         pE = zeros(6, 6)
         embed!(M, pE, pP)

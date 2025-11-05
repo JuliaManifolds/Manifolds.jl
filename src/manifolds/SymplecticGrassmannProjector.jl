@@ -81,14 +81,14 @@ embed(::SymplecticGrassmann, p::ProjectorPoint, X::ProjectorTangentVector) = X.v
 
 function get_embedding(
         ::SymplecticGrassmann{ℝ, TypeParameter{Tuple{n, k}}},
-        p::ProjectorPoint,
+        ::Type{<:ProjectorPoint},
     ) where {n, k}
     return Euclidean(2n, 2n)
 end
-function get_embedding(M::SymplecticGrassmann{ℝ, Tuple{Int, Int}}, ::ProjectorPoint)
+function get_embedding(M::SymplecticGrassmann{ℝ, Tuple{Int, Int}}, ::Type{<:ProjectorPoint})
     n, _ = get_parameter(M.size)
     return Euclidean(2n, 2n; parameter = :field)
 end
-function ManifoldsBase.get_embedding_type(::SymplecticGrassmann{ℝ}, ::ProjectorPoint)
+function ManifoldsBase.get_embedding_type(::SymplecticGrassmann{ℝ}, ::Type{<:ProjectorPoint})
     return ManifoldsBase.EmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end

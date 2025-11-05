@@ -71,11 +71,11 @@ function check_point(M::GeneralizedStiefel, p; kwargs...)
 end
 
 # overwrite passing to embedding
-function check_size(M::GeneralizedStiefel, p)
-    return check_size(get_embedding(M), p) #avoid embed, since it uses copyto!
+function check_size(M::GeneralizedStiefel, p::P) where {P}
+    return check_size(get_embedding(M, P), p) #avoid embed, since it uses copyto!
 end
-function check_size(M::GeneralizedStiefel, p, X)
-    return check_size(get_embedding(M), p, X) #avoid embed, since it uses copyto!
+function check_size(M::GeneralizedStiefel, p::P, X) where {P}
+    return check_size(get_embedding(M, P), p, X) #avoid embed, since it uses copyto!
 end
 
 @doc raw"""

@@ -696,5 +696,6 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
         MM = MetricManifold(M, Issue539Metric())
         @test norm(MM, p, X)^2 ≈ 3
         @test get_embedding(MM) === get_embedding(M)
+        @test get_embedding(MM, Float64) === get_embedding(M, Float64)
     end
 end

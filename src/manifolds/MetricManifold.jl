@@ -43,6 +43,7 @@ end
 decorated_manifold(M::MetricManifold) = M.manifold
 
 get_embedding(M::MetricManifold) = get_embedding(M.manifold)
+get_embedding(M::MetricManifold, T::Type) = get_embedding(M.manifold, T)
 
 function change_metric!(M::AbstractManifold, Y, G::AbstractMetric, p, X)
     metric(M) === G && return copyto!(M, Y, p, X) # no metric change
@@ -173,19 +174,22 @@ function get_coordinates!(M::MetricManifold, Y, p, X, B::AbstractBasis)
     )
 end
 
-function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(embed), p)
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(embed), P::Type)
     return ManifoldsBase.SimpleForwardingType()
 end
-function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(embed!), p)
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(embed!), P::Type)
     return ManifoldsBase.SimpleForwardingType()
 end
 function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand))
     return ManifoldsBase.SimpleForwardingType()
 end
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand), P::Type)
+    return ManifoldsBase.SimpleForwardingType()
+end
 function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!))
     return ManifoldsBase.SimpleForwardingType()
 end
-function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!), p)
+function ManifoldsBase.get_forwarding_type(::MetricManifold, ::typeof(rand!), P::Type)
     return ManifoldsBase.SimpleForwardingType()
 end
 function ManifoldsBase.get_forwarding_type(M::MetricManifold, f::typeof(default_approximation_method))
@@ -620,7 +624,6 @@ and the vector transport is closely related to an affine connection, it is to so
 Therefore, this method only falls back to calling its corresponding method on the base manifold, if the metric is the default one.
 """
 vector_transport_to(::MetricManifold, ::Any, ::Any, ::Any)
-
 
 function vector_transport_to(
         M::MetricManifold,

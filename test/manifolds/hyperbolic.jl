@@ -6,8 +6,7 @@ include("../header.jl")
         @test repr(M) == "Hyperbolic(2)"
         @test base_manifold(M) == M
         @test manifold_dimension(M) == 2
-        @test typeof(get_embedding(M)) ==
-            MetricManifold{ℝ, Euclidean{ℝ, TypeParameter{Tuple{3}}}, MinkowskiMetric}
+        @test typeof(get_embedding(M)) == MetricManifold{ℝ, Euclidean{ℝ, TypeParameter{Tuple{3}}}, MinkowskiMetric}
         @test representation_size(M) == (3,)
         @test !is_flat(M)
         @test isinf(injectivity_radius(M))
@@ -419,7 +418,7 @@ include("../header.jl")
 
         for Tp in [PoincareBallPoint, PoincareHalfSpacePoint]
             p = convert(Tp, [1.0, 0.0, sqrt(2.0)])
-            @test get_embedding(M, p) === Euclidean(2; parameter = :field)
+            @test get_embedding(M, typeof(p)) === Euclidean(2; parameter = :field)
         end
     end
 end

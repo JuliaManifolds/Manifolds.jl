@@ -287,15 +287,15 @@ function embed!(::Hyperbolic, Y, p::PoincareBallPoint, X::PoincareBallTangentVec
     return copyto!(Y, X.value)
 end
 
-function get_embedding(::Hyperbolic{TypeParameter{Tuple{n}}}, ::PoincareBallPoint) where {n}
+function get_embedding(::Hyperbolic{TypeParameter{Tuple{n}}}, ::Type{<:PoincareBallPoint}) where {n}
     return Euclidean(n)
 end
-function get_embedding(M::Hyperbolic{Tuple{Int}}, ::PoincareBallPoint)
+function get_embedding(M::Hyperbolic{Tuple{Int}}, ::Type{<:PoincareBallPoint})
     n = get_parameter(M.size)[1]
     return Euclidean(n; parameter = :field)
 end
 
-function ManifoldsBase.get_embedding_type(::Hyperbolic, ::PoincareBallPoint)
+function ManifoldsBase.get_embedding_type(::Hyperbolic, ::Type{<:PoincareBallPoint})
     return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 

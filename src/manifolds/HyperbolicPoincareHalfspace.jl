@@ -228,17 +228,16 @@ function embed!(
 end
 
 function get_embedding(
-        ::Hyperbolic{TypeParameter{Tuple{n}}},
-        ::PoincareHalfSpacePoint,
+        ::Hyperbolic{TypeParameter{Tuple{n}}}, ::Type{<:PoincareHalfSpacePoint},
     ) where {n}
     return Euclidean(n)
 end
-function get_embedding(M::Hyperbolic{Tuple{Int}}, ::PoincareHalfSpacePoint)
+function get_embedding(M::Hyperbolic{Tuple{Int}}, ::Type{<:PoincareHalfSpacePoint})
     n = get_parameter(M.size)[1]
     return Euclidean(n; parameter = :field)
 end
 
-function ManifoldsBase.get_embedding_type(::Hyperbolic, ::PoincareHalfSpacePoint)
+function ManifoldsBase.get_embedding_type(::Hyperbolic, ::Type{<:PoincareHalfSpacePoint})
     return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 

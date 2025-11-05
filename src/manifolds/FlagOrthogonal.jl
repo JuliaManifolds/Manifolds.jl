@@ -58,13 +58,13 @@ end
 
 Get embedding of [`Flag`](@ref) manifold `M`, i.e. the manifold [`OrthogonalMatrices`](@ref).
 """
-function get_embedding(::Flag{TypeParameter{Tuple{N}}}, p::OrthogonalPoint) where {N}
+function get_embedding(::Flag{TypeParameter{Tuple{N}}}, ::Type{<:OrthogonalPoint}) where {N}
     return OrthogonalMatrices(N)
 end
-function get_embedding(M::Flag{Tuple{Int}}, p::OrthogonalPoint)
+function get_embedding(M::Flag{Tuple{Int}}, ::Type{<:OrthogonalPoint})
     return OrthogonalMatrices(M.size[1]; parameter = :field)
 end
-function ManifoldsBase.get_embedding_type(::Flag, ::OrthogonalPoint)
+function ManifoldsBase.get_embedding_type(::Flag, ::Type{<:OrthogonalPoint})
     return ManifoldsBase.IsometricallyEmbeddedManifoldType(ManifoldsBase.DirectEmbedding())
 end
 
