@@ -13,6 +13,13 @@ and calling the logarithmic map on the result yields the original tangent vector
 for tangent vectors within the injectivity radius.
 """
 module Test
+#
+#
+# the overall global interface
+function test_manifold end
+#
+#
+# the small functions per single API function
 function test_exp end
 function test_log end
 end
