@@ -10,6 +10,7 @@ using Test
         available_functions=[], expected_value=nothing, test_mutating=true,
         test_log = (log in available_functions),
         test_injectivity_radius = (injectivity_radius in available_functions),
+        name = "Exponential map on\$M for \$(typeof(p)) points",
         kwargs...
     )
     Test the exponential map on manifold `M` at point `p` with tangent vector `X`.
@@ -27,9 +28,10 @@ function Manifolds.Test.test_exp(
         test_log = (log in available_functions),
         test_injectivity_radius = (injectivity_radius in available_functions),
         test_mutating = true,
+        name = "Exponential map on $M for $(typeof(p)) points",
         kwargs...
     )
-    @testset "Exponential map" begin
+    @testset "$(name)" begin
         q = exp(M, p, X)
         @test is_point(M, q; error = :error, kwargs...)
         if !isnothing(expected_value)
@@ -56,6 +58,7 @@ end # Manifolds.Test.test_exp
         available_functions=[], expected_value=nothing, test_mutating=true,
         test_exp = (exp in available_functions),
         test_injectivity_radius = (injectivity_radius in available_functions),
+        name = "Logarithmic map on\$M for \$(typeof(p)) points",
         kwargs...
     )
     Test the logarithmic map on manifold `M` at point `p` towards q
@@ -73,11 +76,15 @@ function Manifolds.Test.test_log(
         test_exp = (exp in available_functions),
         test_injectivity_radius = (injectivity_radius in available_functions),
         test_mutating = true,
+        name = "Logarithmic map on $M for $(typeof(p)) points",
         kwargs...
     )
-    @testset "Logarithmic map" begin
+    @testset "$(name)" begin
         X = log(M, p, q)
         @test is_vector(M, p, X; error = :error, kwargs...)
+        Z = log(M, p, p)
+        @test is_vector(M, p, Z; error = :error, kwargs...)
+        @test norm(M, p, Z) ≈ 0.0   # log
         if !isnothing(expected_value)
             @test isapprox(M, p, X, expected_value; error = :error, kwargs...)
         end
@@ -119,40 +126,37 @@ Possible entries of the `expectations` dictionary are
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for specific function tested.
 """
-function Manifolds.Test.test_manifold(G::AbstractManifold, properties::Dict, expectations::Dict = Dict())
+function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, expectations::Dict = Dict())
     atol = get(expectations, :atol, 0.0)
     mutating = get(properties, :Mutating, true)
     aliased = get(properties, :Aliased, mutating)
     functions = get(properties, :Functions, Function[])
     points = get(properties, :Points, [])
     vectors = get(properties, :Vectors, [])
-    test_name = get(properties, :Name, "$G")
+    test_name = get(properties, :Name, "$M")
     function_atols = get(expectations, :atols, Dict())
     return @testset "$test_name" begin
         n_points = length(points)
         n_vectors = length(vectors)
         if (exp in functions)
-            p = points[1]
-            X = vectors[1]
-            expected_exp = get(expectations, exp, nothing)
             Manifolds.Test.test_exp(
-                G, p, X;
+                M, points[1], vectors[1];
                 available_functions = functions,
-                expected_value = expected_exp,
+                expected_value = get(expectations, exp, nothing),
                 test_mutating = (exp! in functions) ? true : mutating,
                 atol = get(function_atols, exp, atol),
+                name = "exp(M, p, X)", # shorten name within large suite
             )
         end
         if (log in functions)
-            p = points[1]
-            q = points[2]
             expected_log = get(expectations, :log, nothing)
             Manifolds.Test.test_log(
-                G, p, q;
+                M, points[1], points[2];
                 available_functions = functions,
                 expected_value = expected_log,
                 test_mutating = (log! in functions) ? true : mutating,
                 atol = get(function_atols, log, atol),
+                name = "log(M, p, q)", # shorten name within large suite
             )
         end
     end
