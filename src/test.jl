@@ -14,4 +14,5 @@ for tangent vectors within the injectivity radius.
 """
 module Test
 function test_exp end
+function test_log end
 end
