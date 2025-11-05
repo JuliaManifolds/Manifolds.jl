@@ -557,6 +557,12 @@ function estimate_distance_from_bvp end
 function solve_chart_exp_ode end
 function solve_chart_parallel_transport_ode end
 
+# TODO: Remove once the new interface is done
+function find_eps end
+function test_parallel_transport end
+function test_manifold end
+# / remove
+
 include("test.jl")
 
 function __init__()

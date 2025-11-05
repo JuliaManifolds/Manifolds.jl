@@ -1,3 +1,8 @@
+import Manifolds: test_parallel_transport, find_eps
+using Manifolds: RieszRepresenterCotangentVector, get_chart_index
+using Random: MersenneTwister, rand!
+using Test: Test
+
 """
     find_eps(x...)
 
@@ -8,10 +13,14 @@ find_eps(x::Type{TN}) where {TN <: Number} = eps(real(TN))
 find_eps(x) = find_eps(number_eltype(x))
 
 """
-    test_manifold(M::AbstractManifold, pts::AbstractVector; kwargs...)
+    Manifolds.test_manifold(M::AbstractManifold, pts::AbstractVector; kwargs...)
 
 Test general properties of manifold `M`, given at least three different points
 that lie on it (contained in `pts`).
+
+!!! note
+
+    This is an old an soon deprecated interface, the new one is `Manifolds.Test.test_manifold`.
 
 # Arguments
 - `basis_has_specialized_diagonalizing_get = false`: if true, assumes that
