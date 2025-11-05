@@ -558,8 +558,22 @@ function solve_chart_exp_ode end
 function solve_chart_parallel_transport_ode end
 
 function find_eps end
-function test_parallel_transport end
-function test_manifold end
+
+"""
+    Manifolds.Test
+
+The module `Manifolds.Test` contains functions to test functions from `Manifolds.jl`.
+Most functionality is provided only when `Test.jl` is loaded as well, i.e. populated
+with methods by the extension.
+
+The test functions provided are mean to verify that the defined functions
+on a specific manifold behave as expected, for example that
+an allocating and inplace version of a function give the same result,
+or that for example the exponential map computes a point on the manifold,
+and calling the logarithmic map on the result yields the original tangent vector again,
+for tangent vectors within the injectivity radius.
+"""
+global Test
 
 # end of functions populated with methods by extensions
 
