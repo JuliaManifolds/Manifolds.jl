@@ -27,8 +27,11 @@ Possible entries of the `expectations` dictionary are
 
 * `exp` for the result of `exp(M, p, X)`
 * `log` for the result of `log(M, p, q)`
+* `manifold_dimension` for the expected dimension of the manifold
 * `:atol => 0.0` a global absolute tolerance
-* `:atols -> Dict()` a dictionary `function -> atol` for specific function tested.
+* `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
+* `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions.
+
 """
 function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, expectations::Dict = Dict())
     atol = get(expectations, :atol, 0.0)
@@ -39,6 +42,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     vectors = get(properties, :Vectors, [])
     test_name = get(properties, :Name, "$M")
     function_atols = get(expectations, :atols, Dict())
+    result_types = get(expectations, :Types, Dict())
     return @testset "$test_name" begin
         n_points = length(points)
         n_vectors = length(vectors)
@@ -67,7 +71,8 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         if (manifold_dimension in functions)
             expected_dim = get(expectations, manifold_dimension, nothing)
             Manifolds.Test.test_manifold_dimension(
-                M; expected_value = expected_dim, name = "manifold_dimension(M)",
+                M; expected_value = expected_dim, expected_type = get(result_types, manifold_dimension, Int),
+                name = "manifold_dimension(M)",
             )
         end
     end
