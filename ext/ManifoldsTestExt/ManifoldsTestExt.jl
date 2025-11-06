@@ -115,7 +115,7 @@ end
         test_log = (log in available_functions),
         test_fused = true,
         test_injectivity_radius = (injectivity_radius in available_functions),
-        name = "Exponential map on\$M for \$(typeof(p)) points",
+        name = "Exponential map on \$M for \$(typeof(p)) points",
         kwargs...
     )
     Test the exponential map on manifold `M` at point `p` with tangent vector `X`.
@@ -225,7 +225,7 @@ end # Manifolds.Test.test_inner
         available_functions=[], expected_value=nothing, test_mutating=true,
         test_exp = (exp in available_functions),
         test_injectivity_radius = (injectivity_radius in available_functions),
-        name = "Logarithmic map on\$M for \$(typeof(p)) points",
+        name = "Logarithmic map on \$M for \$(typeof(p)) points",
         kwargs...
     )
     Test the logarithmic map on manifold `M` at point `p` towards q
@@ -273,7 +273,10 @@ end # Manifolds.Test.test_log
 
 """
     test_manifold_dimension(
-       M; expected_value = nothing, expected_type = Int, name = "Manifold dimension test for \$M",
+        M;
+        expected_value = nothing,
+        expected_type = Int,
+        name = "Manifold dimension test for \$M",
     )
 
 Test that the dimension of the manifold `M` is consistent.
