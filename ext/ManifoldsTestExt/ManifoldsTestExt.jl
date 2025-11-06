@@ -18,19 +18,23 @@ Possible properties are
 * `:Functions` is a vector of all defined functions for `M`
   note a test is activated by the function (like `exp`), adding the mutating function (like `exp!`) overwrites the
   global default (see `:Mutating`) to true.
+* `:InverseRetractionMethods` is a vector of inverse retraction methods to test on `M`
+  these should have the same order as `:RetractionMethods` (use `nothing` for skipping one)
 * `:Points` is a vector of at least 2 points on `M`, which should not be the same point
 * `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entr in `:Points`
 * `:Mutating` is a boolean (`true` by default) whether to test the mutating variants of functions or not.
 * `:Name` is a name of the test. If not provided, defaults to `"\$M"`
+* `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entr in `:Points`
+* `:RetractionMethods` is a vector of retraction methods to test on `M`
+  these should have the same order as `:InverseRetractionMethods` (use `nothing` for skipping one)
+* `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
 
 Possible entries of the `expectations` dictionary are
 
-* `exp` for the result of `exp(M, p, X)`
-* `log` for the result of `log(M, p, q)`
-* `manifold_dimension` for the expected dimension of the manifold
+* any function tested to provide their expected resulting value, e.g. `exp => p` for the result of `exp(M, p, X)`
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
-* `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions.
+* `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
 
 """
 function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, expectations::Dict = Dict())
@@ -43,6 +47,9 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     test_name = get(properties, :Name, "$M")
     function_atols = get(expectations, :atols, Dict())
     result_types = get(expectations, :Types, Dict())
+    retraction_methods = get(properties, :RetractionMethods, [])
+    inverse_retraction_methods = get(properties, :InverseRetractionMethods, [])
+    vector_transport_methods = get(properties, :VectorTransportMethods, [])
     return @testset "$test_name" begin
         n_points = length(points)
         n_vectors = length(vectors)
