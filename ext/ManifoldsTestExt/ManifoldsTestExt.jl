@@ -57,6 +57,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 name = "exp(M, p, X)", # shorten name within large suite
             )
         end
+        if (inner in functions)
+            expected_inner = get(expectations, inner, nothing)
+            Manifolds.Test.test_inner(
+                M, points[1], vectors[1], vectors[2];
+                available_functions = functions,
+                expected_value = expected_inner,
+                name = "inner(M, p, X, Y)", # shorten name within large suite
+                atol = get(function_atols, inner, atol),
+            )
+        end
         if (log in functions)
             expected_log = get(expectations, :log, nothing)
             Manifolds.Test.test_log(
@@ -75,6 +85,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 name = "manifold_dimension(M)",
             )
         end
+        if (norm in functions)
+            expected_norm = get(expectations, norm, nothing)
+            Manifolds.Test.test_norm(
+                M, points[1], vectors[1];
+                available_functions = functions,
+                expected_value = expected_norm,
+                name = "norm(M, p, X)", # shorten name within large suite
+                atol = get(function_atols, norm, atol),
+            )
+        end
     end
 end
 
@@ -82,10 +102,11 @@ end
 #
 # ------------------------------------------------------------------------------------------
 """
-    test_exp(
-        M, p, X;
+    Manifolds.Test.test_exp(
+        M, p, X, t=1.0;
         available_functions=[], expected_value=nothing, test_mutating=true,
         test_log = (log in available_functions),
+        test_fused = true,
         test_injectivity_radius = (injectivity_radius in available_functions),
         name = "Exponential map on\$M for \$(typeof(p)) points",
         kwargs...
@@ -98,12 +119,14 @@ end
     * that `exp!` works on aliased in put (`p=q`) (if activated for mutating)
     * that the logarithmic map inverts the exponential map (if activated)
       (only performed if either `injectivity_radius` is not available or `X` is within)
+    * that the fused version `exp_fused(M, p, t, X)` matches the non-fused version (if activated)
 """
 function Manifolds.Test.test_exp(
-        M::AbstractManifold, p, X;
+        M::AbstractManifold, p, X, t = 1.0;
         available_functions = Function[],
         expected_value = nothing,
         test_aliased = true,
+        test_fused = true,
         test_log = (log in available_functions),
         test_injectivity_radius = (injectivity_radius in available_functions),
         test_mutating = true,
@@ -126,6 +149,22 @@ function Manifolds.Test.test_exp(
                 @test isapprox(M, q3, q; error = :error, kwargs...)
             end
         end
+        if test_fused
+            q4 = Manifolds.exp_fused(M, p, X, t)
+            q5 = exp(M, p, t * X)
+            @test isapprox(M, q4, q5; error = :error, kwargs...)
+            if test_mutating
+                q6 = copy(M, p)
+                Manifolds.exp_fused!(M, q6, p, X, t)
+                @test isapprox(M, q6, q5; error = :error, kwargs...)
+                if test_aliased
+                    q7 = copy(M, p)
+                    Manifolds.exp_fused!(M, q7, q7, X, t)  # aliased
+                    @test isapprox(M, q7, q5; error = :error, kwargs...)
+                end
+            end
+        end
+
         if test_log
             # Test only if inj is not available of X is within inj radius
             run_test = !test_injectivity_radius || norm(M, p, X) ≤ injectivity_radius(M, p)
@@ -137,7 +176,44 @@ function Manifolds.Test.test_exp(
     return nothing
 end # Manifolds.Test.test_exp
 """
-    text_log(
+    Manifolds.Test.test_inner(M, p, X, Y;
+        available_functions=[], expected_value=nothing,
+        name = "Inner product on \$M at point \$(typeof(p))",
+        test_norm = (norm in available_functions),
+        kwargs...
+    )
+
+Test the inner product on the manifold `M` at point `p` for tangent vectors `X` and `Y`.
+
+* that the result is a real number
+* that the result matches `expected_value`, if given
+* that the inner product of `X` with itself is non negative
+* that the inner product of `X` with itself is the same as its norm squared (if activated)
+"""
+function Manifolds.Test.test_inner(
+        M::AbstractManifold, p, X, Y;
+        available_functions = Function[],
+        expected_value = nothing,
+        test_norm = (norm in available_functions),
+        name = "Inner product on $M at point $(typeof(p))",
+        kwargs...
+    )
+    @testset "$(name)" begin
+        v = inner(M, p, X, Y)
+        @test v isa (Real)
+        isnothing(expected_value) || @test isapprox(v, expected_value; kwargs...)
+        w = inner(M, p, X, X)
+        @test w ≥ 0.0
+        if test_norm
+            n = norm(M, p, X)
+            @test isapprox(w, n^2; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_inner
+
+"""
+    Manifolds.Test.test_log(
         M, p, q;
         available_functions=[], expected_value=nothing, test_mutating=true,
         test_exp = (exp in available_functions),
@@ -213,6 +289,42 @@ function Manifolds.Test.test_manifold_dimension(
     end
     return nothing
 end # Manifolds.Test.test_manifold_dimension
+
+"""
+    Manifolds.Test.test_norm(M, p, X;
+        available_functions=[], expected_value=nothing,
+        name = "Norm on \$M at point \$(typeof(p))",
+        test_inner = (inner in available_functions),
+        kwargs...
+    )
+
+Test the norm on the manifold `M` at point `p` for tangent vector `X`.
+
+* that the result is a real number
+* that the result matches `expected_value`, if given
+* that the norm of `X` with itself is non negative
+* that the inner product of `X` with itself is the same as its norm squared (if activated)
+"""
+function Manifolds.Test.test_norm(
+        M::AbstractManifold, p, X;
+        available_functions = Function[],
+        expected_value = nothing,
+        test_inner = (inner in available_functions),
+        name = "Norm on $M at point $(typeof(p))",
+        kwargs...
+    )
+    @testset "$(name)" begin
+        v = norm(M, p, X)
+        @test v isa (Real)
+        isnothing(expected_value) || @test isapprox(v, expected_value; kwargs...)
+        @test v ≥ 0.0
+        if test_inner
+            w = inner(M, p, X, X)
+            @test isapprox(w, v^2; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_norm
 
 include("tests_general.jl")
 

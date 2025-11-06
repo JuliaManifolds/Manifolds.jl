@@ -11,6 +11,12 @@ an allocating and in-place version of a function give the same result,
 or that for example the exponential map computes a point on the manifold,
 and calling the logarithmic map on the result yields the original tangent vector again,
 for tangent vectors within the injectivity radius.
+
+In general for every function defined in the API for manifolds,
+this module shall provide a test function with
+* the same name prefixed by `test_`
+* the same function arguments as the original function
+* keyword arguments to control which tests to perform
 """
 module Test
 #
@@ -20,9 +26,11 @@ function test_manifold end
 #
 #
 # the small functions per single API function
-function test_exp end # TODO: Test fused?
+function test_exp end
+function test_inner end
 function test_log end
 function test_manifold_dimension end
+function test_norm end
 #
 #
 # TODO
@@ -41,12 +49,10 @@ function test_get_coordinates end
 function test_get_vector end
 function test_get_vectors end
 function test_injectivity_radius end
-function test_inner end
 function test_inverse_retraction end
 function test_is_point end
 function test_is_vector end
 function test_mid_point end
-function test_norm end
 function test_parallel_transport end
 function test_project end
 function test_project_embed end
