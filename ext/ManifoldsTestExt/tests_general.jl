@@ -1,6 +1,7 @@
 using Manifolds
 using Random: MersenneTwister, rand!
 using Test: Test
+using Manifolds: RieszRepresenterCotangentVector, get_chart_index
 
 """
     Manifolds.find_eps(x...)
