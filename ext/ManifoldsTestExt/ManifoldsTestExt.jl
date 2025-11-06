@@ -124,9 +124,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             )
         end
         if (retract in functions)
-            @info "Testing retract with methods: $retraction_methods"
             for (rm, irm) in zip(retraction_methods, inverse_retraction_methods)
-                @warn rm, irm
                 isnothing(rm) && continue
                 expected_retract = get(expectations, (retract, rm), nothing)
                 Manifolds.Test.test_retract(
