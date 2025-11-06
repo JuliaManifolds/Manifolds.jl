@@ -19,6 +19,16 @@ this module shall provide a test function with
 * keyword arguments to control which tests to perform
 """
 module Test
+using ..Manifolds
+_ALL_FUNCTIONS = [
+    exp,
+    inner,
+    log,
+    manifold_dimension,
+    norm,
+    zero_vector,
+]
+all_functions() = _ALL_FUNCTIONS
 #
 #
 # the overall global interface

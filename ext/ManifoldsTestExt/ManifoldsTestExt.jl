@@ -10,7 +10,12 @@ using Test
 """
     test_manifold(G::AbstractManifold, properties::Dict, expectations::Dict)
 
-Test the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`) ``\\mathcal M`` based on a `Dict` of properties and a `Dict` of `expectations`.
+Test the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`) ``\\mathcal M``
+based on a `Dict` of properties and a `Dict` of `expectations`.
+
+Three functions are expected to be defined (without explicitly being passed in the `properties`):
+`is_point(M, p)`, `is_vector(M, p, X)`, and `isapprox(M, p, q)` / `isapprox(M, p, X, Y)`,
+since these are essential for verifying results.
 
 Possible properties are
 
@@ -102,7 +107,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, norm, atol),
             )
         end
-    end
+        if (zero_vector in functions)
+            Manifolds.Test.test_zero_vector(
+                M, points[1];
+                available_functions = functions,
+                test_mutating = (zero_vector! in functions) ? true : mutating,
+                atol = get(function_atols, zero_vector, atol),
+                name = "zero_vector(M, p)", # shorten name within large suite
+            )
+        end
+    end # end of test_manifold testset
 end
 
 # Single function tests
@@ -276,7 +290,7 @@ end # Manifolds.Test.test_log
         M;
         expected_value = nothing,
         expected_type = Int,
-        name = "Manifold dimension test for \$M",
+        name = "Manifold dimension for \$M",
     )
 
 Test that the dimension of the manifold `M` is consistent.
@@ -289,7 +303,7 @@ function Manifolds.Test.test_manifold_dimension(
         M;
         expected_value = nothing,
         expected_type = Int,
-        name = "Manifold dimension test for $M",
+        name = "Manifold dimension for $M",
     )
     Test.@testset "$(name)" begin
         d = manifold_dimension(M)
@@ -335,6 +349,44 @@ function Manifolds.Test.test_norm(
     end
     return nothing
 end # Manifolds.Test.test_norm
+
+"""
+    Manifolds.Test.test_zero_vector(M, p;
+        available_functions=[],
+        test_mutating = true,
+        test_norm = (norm in available_functions),
+        name = "Zero vector test on \$M at point \$(typeof(p))",
+    )
+
+Test the zero vector on the manifold `M` at point `p`.
+* verify that it is a valid tangent vector
+* verify that its norm is zero (if provided)
+* verify that the mutating version `zero_vector!` matches the non-mutating version (if activated)
+"""
+function Manifolds.Test.test_zero_vector(
+        M::AbstractManifold, p;
+        available_functions = Function[],
+        test_mutating = true,
+        test_norm = (norm in available_functions),
+        name = "Zero vector on $M at point $(typeof(p))",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        Z = zero_vector(M, p)
+        Test.@test is_vector(M, p, Z; error = :error, kwargs...)
+        if test_norm
+            n = norm(M, p, Z)
+            Test.@test isapprox(n, 0.0; kwargs...)
+        end
+        if test_mutating
+            Z2 = copy(M, p)
+            zero_vector!(M, Z2, p)
+            Test.@test isapprox(M, Z2, Z; error = :error, kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_zero_vector
+
 
 include("tests_general.jl")
 

@@ -563,8 +563,6 @@ function test_parallel_transport end
 function test_manifold end
 # / remove
 
-include("test.jl")
-
 function __init__()
     @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
         Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
@@ -917,5 +915,8 @@ export get_basis,
 
 # atlases and charts
 export get_point, get_point!, get_parameters, get_parameters!
+
+# Last (not least, but _after_ exports) include the test submodule
+include("test.jl")
 
 end # module
