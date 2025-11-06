@@ -298,7 +298,7 @@ function Manifolds.test_manifold(
         end
     end
 
-    parallel_transport && test_parallel_transport(
+    parallel_transport && Manifolds.test_parallel_transport(
         M, pts;
         to = parallel_transport_to, direction = parallel_transport_direction, mutating = is_mutating,
     )
