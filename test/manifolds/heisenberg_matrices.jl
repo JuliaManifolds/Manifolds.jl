@@ -27,7 +27,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
     @test check_vector(M, pts[1], [0.0 2.0 3.0; 1.0 0.0 -1.0; 0.0 0.0 0.0]) isa DomainError
     @test check_vector(M, pts[1], [0.0 2.0 3.0; 0.0 0.0 -1.0; 0.0 0.0 2.0]) isa DomainError
 
-    test_manifold(
+    Manifolds.test_manifold(
         M,
         pts;
         basis_types_to_from = (DefaultOrthonormalBasis(),),

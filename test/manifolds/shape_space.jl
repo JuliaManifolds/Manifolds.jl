@@ -26,7 +26,7 @@ include("../header.jl")
         [1.0 0 1; 1 -1 0];
         error = :error,
     )
-    test_manifold(
+    Manifolds.test_manifold(
         M,
         [p1, p2, p3];
         is_point_atol_multiplier = 1,
@@ -93,7 +93,7 @@ end
         @test distance(M, p1, q1) ≈ norm(M, p1, X1)
     end
 
-    test_manifold(
+    Manifolds.test_manifold(
         M,
         [p1, p2, p3];
         is_point_atol_multiplier = 1,

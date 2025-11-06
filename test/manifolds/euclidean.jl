@@ -118,7 +118,7 @@ using FiniteDifferences
                         convert(T, [0.0, 1.0, 0.0]),
                         convert(T, [0.0, 0.0, 1.0]),
                     ]
-                    test_manifold(
+                    Manifolds.test_manifold(
                         M,
                         pts,
                         test_project_point = true,
@@ -157,7 +157,7 @@ using FiniteDifferences
                     convert(T, [0.0, 1.0, 1.0im]),
                     convert(T, [0.0, 0.0, 1.0]),
                 ]
-                test_manifold(
+                Manifolds.test_manifold(
                     Ec,
                     pts,
                     test_project_tangent = true,
@@ -183,7 +183,7 @@ using FiniteDifferences
                 @test embed(M, pts[1]) == pts[1]
                 @test project(M, pts[1]) == pts[1]
                 @test retract(M, pts[1], pts[2]) == exp(M, pts[1], pts[2])
-                test_manifold(
+                Manifolds.test_manifold(
                     M,
                     pts,
                     test_vector_spaces = false,

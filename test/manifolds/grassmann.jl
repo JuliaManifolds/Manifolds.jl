@@ -73,7 +73,7 @@ include("../header.jl")
             Y = [0.0 1.0; -1.0 0.0; 1.0 0.0]
             p3 = exp(M, p1, Y)
             pts = convert.(T, [p1, p2, p3])
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_exp_log = true,
@@ -196,7 +196,7 @@ include("../header.jl")
             Y = [0.0 1.0; -1.0 0.0; 1.0 0.0]
             p3 = exp(M, p1, Y)
             pts = convert.(T, [p1, p2, p3])
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_exp_log = true,

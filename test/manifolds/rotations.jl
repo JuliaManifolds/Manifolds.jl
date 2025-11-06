@@ -45,7 +45,7 @@ include("../header.jl")
             (T <: SMatrix) ? [] : [Manifolds.normal_rotation_distribution(M, pts[1], 1.0)]
         tvector_distributions =
             (T <: SMatrix) ? [] : [Manifolds.normal_tvector_distribution(M, pts[1], 1.0)]
-        test_manifold(
+        Manifolds.test_manifold(
             M,
             pts;
             is_mutating = !(T <: SMatrix),
@@ -128,7 +128,7 @@ include("../header.jl")
             diag_basis_2 = DiagonalizingOrthonormalBasis(
                 hat(SOn, pts[1], [1.0, zeros(manifold_dimension(SOn) - 1)...]),
             )
-            test_manifold(
+            Manifolds.test_manifold(
                 SOn,
                 pts;
                 test_injectivity_radius = false,

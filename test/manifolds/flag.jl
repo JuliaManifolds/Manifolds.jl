@@ -136,7 +136,7 @@ using Random
         )
     end
 
-    test_manifold(
+    Manifolds.test_manifold(
         M,
         [p1, p2, p3],
         test_exp_log = false,

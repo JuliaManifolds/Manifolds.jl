@@ -64,7 +64,7 @@ include("../header.jl")
                     A(π / 6) * [1.0 0.0 0.0; 0.0 2.0 0.0; 0.0 0.0 1] * transpose(A(π / 6)),
                 ]
                 pts = [convert(T, a) for a in ptsF]
-                test_manifold(
+                Manifolds.test_manifold(
                     M,
                     pts;
                     vector_transport_methods = typeof(M) == SymmetricPositiveDefinite{3} ?

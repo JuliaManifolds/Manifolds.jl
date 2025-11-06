@@ -34,7 +34,7 @@ include("../header.jl")
         z = [1 / sqrt(2) 1 / sqrt(2) 0.0; 1.0 0.0 0.0]'
         basis_types = (DefaultOrthonormalBasis(),)
         transports = [ParallelTransport()]
-        test_manifold(
+        Manifolds.test_manifold(
             M,
             [x, y, z],
             test_vector_spaces = true,

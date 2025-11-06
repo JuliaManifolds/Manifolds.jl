@@ -52,7 +52,7 @@ include("../header.jl")
     for T in types
         pts = [convert(T, p), convert(T, p2), convert(T, p3)]
         @testset "Type $T" begin
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_injectivity_radius = false,

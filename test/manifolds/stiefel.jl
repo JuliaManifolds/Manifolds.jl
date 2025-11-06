@@ -133,7 +133,7 @@ include("../header.jl")
             @test_throws ManifoldDomainError !is_vector(M, 2 * x, v; error = :error)
             @test !is_vector(M, x, y)
             @test_throws DomainError is_vector(M, x, y; error = :error)
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 basis_types_to_from = (DefaultOrthonormalBasis(),),
@@ -233,7 +233,7 @@ include("../header.jl")
             @test_throws ManifoldDomainError !is_vector(M, 2 * x, v; error = :error)
             @test !is_vector(M, x, y)
             @test_throws DomainError is_vector(M, x, y; error = :error)
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_exp_log = false,

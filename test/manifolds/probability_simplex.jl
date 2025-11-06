@@ -49,7 +49,7 @@ include("../header.jl")
                 convert(T, [0.4, 0.4, 0.2]),
                 convert(T, [0.3, 0.5, 0.2]),
             ]
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 basis_types_to_from = (DefaultOrthonormalBasis(),),
@@ -69,7 +69,7 @@ include("../header.jl")
             @test exp!(M_euc, X, pts[1], [0.0, 0.1, -0.1]) ≈ [0.5, 0.4, 0.1]
             @test ManifoldsBase.exp_fused!(M_euc, X, pts[1], [0.0, 0.1, -0.1], 1.0) ≈
                 [0.5, 0.4, 0.1]
-            test_manifold(
+            Manifolds.test_manifold(
                 M_euc,
                 pts,
                 test_exp_log = false,

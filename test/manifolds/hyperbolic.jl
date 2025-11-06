@@ -195,7 +195,7 @@ include("../header.jl")
                 convert(T, [1.0, 0.0, sqrt(2.0)]),
                 convert(T, [0.0, 1.0, sqrt(2.0)]),
             ]
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_project_tangent = is_plain_array || T == HyperboloidPoint,

@@ -48,7 +48,7 @@ include("../header.jl")
     for T in types
         @testset "Type $T" begin
             pts = convert.(Ref(T), [1.0, 4.0, 2.0])
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_vector_spaces = false,
@@ -65,7 +65,7 @@ include("../header.jl")
         M2 = PositiveVectors(2)
         for T in types
             pts2 = [convert.(Ref(T), v) for v in [[1.0, 1.1], [3.0, 3.3], [2.0, 2.2]]]
-            test_manifold(
+            Manifolds.test_manifold(
                 M2,
                 pts2,
                 test_vector_spaces = false,

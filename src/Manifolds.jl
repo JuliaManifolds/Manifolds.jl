@@ -586,8 +586,6 @@ end
 
 include("deprecated.jl")
 
-export test_manifold
-
 # Abstract main types
 export AbstractCotangentVector,
     AbstractManifold, AbstractManifoldPoint, AbstractTangentVector

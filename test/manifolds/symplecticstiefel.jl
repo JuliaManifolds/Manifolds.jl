@@ -228,7 +228,7 @@ end
         for type in types
             @testset "Type $(type)" begin
                 @testset "CayleyRetraction" begin
-                    test_manifold(
+                    Manifolds.test_manifold(
                         M,
                         convert.(type, points);
                         retraction_methods = [CayleyRetraction()],
@@ -246,7 +246,7 @@ end
                 end
 
                 @testset "ExponentialRetraction" begin
-                    test_manifold(
+                    Manifolds.test_manifold(
                         M,
                         convert.(type, close_points);
                         retraction_methods = [ExponentialRetraction()],

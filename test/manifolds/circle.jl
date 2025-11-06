@@ -144,7 +144,7 @@ using Manifolds: TFVector, CoTFVector
     for T in types
         @testset "Type $T" begin
             pts = convert.(Ref(T), [-π / 4, 0.0, π / 4])
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_vector_spaces = false,
@@ -158,7 +158,7 @@ using Manifolds: TFVector, CoTFVector
                 rand_tvector_atol_multiplier = 2.0,
             )
             ptsS = map(p -> (@SArray fill(p)), pts)
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 ptsS,
                 test_project_point = true,
@@ -257,7 +257,7 @@ using Manifolds: TFVector, CoTFVector
         @testset "Type $T" begin
             a = 1 / sqrt(2.0)
             pts = convert.(Ref(T), [a - a * im, 1 + 0im, a + a * im])
-            test_manifold(
+            Manifolds.test_manifold(
                 Mc,
                 pts,
                 test_vector_spaces = false,
@@ -272,7 +272,7 @@ using Manifolds: TFVector, CoTFVector
                 test_rand_tvector = true,
             )
             ptsS = map(p -> (@SArray fill(p)), pts)
-            test_manifold(
+            Manifolds.test_manifold(
                 Mc,
                 ptsS,
                 test_project_tangent = true,

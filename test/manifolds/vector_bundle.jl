@@ -77,7 +77,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 DefaultOrthonormalBasis(),
                 get_basis(TB, pts_tb[1], DefaultOrthonormalBasis()),
             )
-            test_manifold(
+            Manifolds.test_manifold(
                 TB,
                 pts_tb,
                 default_inverse_retraction_method = m_prod_invretr,
@@ -125,7 +125,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
                 get_basis(TpM, pts_TpM[1], DefaultOrthonormalBasis()),
             )
             @test get_basis(TpM, pts_TpM[1], basis_types[2]) === basis_types[2]
-            test_manifold(
+            Manifolds.test_manifold(
                 TpM,
                 pts_TpM,
                 test_injectivity_radius = true,

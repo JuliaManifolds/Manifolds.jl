@@ -31,7 +31,7 @@ include("../header.jl")
         @test A3 == A
         E = [0 0; 1 -1; -1 1]
         F = [0.5 1; -1 -0.7; 0.5 -0.3]
-        test_manifold(
+        Manifolds.test_manifold(
             M,
             [A, E, F],
             test_injectivity_radius = false,
@@ -47,7 +47,7 @@ include("../header.jl")
         @test manifold_dimension(M_complex) == 8
         G = [1.0 1.0im; -1.0im 0.0; -1.0 + 1.0im -1.0im]
         H = [1.0im 0.0; -2.0im 1.0im; 1.0im -1.0im]
-        test_manifold(
+        Manifolds.test_manifold(
             M_complex,
             [C, G, H],
             test_injectivity_radius = false,

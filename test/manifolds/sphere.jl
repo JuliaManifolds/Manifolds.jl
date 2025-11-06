@@ -44,7 +44,7 @@ using ManifoldsBase: TFVector
                 convert(T, [0.0, 1.0, 0.0]),
                 convert(T, [0.0, 0.0, 1.0]),
             ]
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_project_tangent = true,

@@ -38,7 +38,7 @@ include("../header.jl")
         @test A3 == A
         F = [2 4 -1; 4 9 7; -1 7 5] / norm([2 4 -1; 4 9 7; -1 7 5])
         G = [-10 9 -8; 9 7 6; -8 6 5] / norm([-10 9 -8; 9 7 6; -8 6 5])
-        test_manifold(
+        Manifolds.test_manifold(
             M,
             [A, F, G],
             test_injectivity_radius = false,
@@ -59,7 +59,7 @@ include("../header.jl")
         I =
             [2.0 4.0 5.0im; 4.0 -1.0 -9.0; -5.0im -9.0 2.5] /
             norm([2.0 4.0 5.0im; 4.0 -1.0 -9.0; -5.0im -9.0 2.5])
-        test_manifold(
+        Manifolds.test_manifold(
             M_complex,
             [C, H, I],
             test_injectivity_radius = false,

@@ -46,7 +46,7 @@ include("../header.jl")
     basis_types = (DefaultOrthonormalBasis(),)
     pts = [[1.0, 2.0, 0.0], [0.0, 3.0, 0.0], [0.0, 3.5, 1.0]]
 
-    test_manifold(
+    Manifolds.test_manifold(
         M,
         pts,
         test_injectivity_radius = false,
@@ -70,7 +70,7 @@ include("../header.jl")
             [-1.0 5.0 3.0; 4.0 5.0 10.0],
             [-1.0 2.0 5.0; 6.0 6.0 15.0],
         ]
-        test_manifold(
+        Manifolds.test_manifold(
             MA,
             pts_a,
             test_injectivity_radius = false,

@@ -225,7 +225,7 @@ include("../header.jl")
                 X2t = project(M, p2, embed(M, p, X))
                 @test isapprox(M, p, X2, X2t)
             end
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_exp_log = false,

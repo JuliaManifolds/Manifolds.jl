@@ -50,7 +50,7 @@ include("../header.jl")
     for T in types
         pts = [convert(T, A_sym), convert(T, B_sym), convert(T, X)]
         @testset "Type $T" begin
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_injectivity_radius = false,
@@ -65,7 +65,7 @@ include("../header.jl")
                 is_tangent_atol_multiplier = 1,
                 test_inplace = true,
             )
-            test_manifold(
+            Manifolds.test_manifold(
                 M_complex,
                 pts,
                 test_injectivity_radius = false,

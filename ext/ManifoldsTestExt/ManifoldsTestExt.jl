@@ -10,7 +10,7 @@ using Test
 """
     test_manifold(G::AbstractManifold, properties::Dict, expectations::Dict)
 
-Test the [`AbstractManifold`](@ref) ``\\mathcal M`` based on a `Dict` of properties and a `Dict` of `expectations`.
+Test the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`) ``\\mathcal M`` based on a `Dict` of properties and a `Dict` of `expectations`.
 
 Possible properties are
 
@@ -50,7 +50,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     retraction_methods = get(properties, :RetractionMethods, [])
     inverse_retraction_methods = get(properties, :InverseRetractionMethods, [])
     vector_transport_methods = get(properties, :VectorTransportMethods, [])
-    return @testset "$test_name" begin
+    return Test.@testset "$test_name" begin
         n_points = length(points)
         n_vectors = length(vectors)
         if (exp in functions)
@@ -140,34 +140,34 @@ function Manifolds.Test.test_exp(
         name = "Exponential map on $M for $(typeof(p)) points",
         kwargs...
     )
-    @testset "$(name)" begin
+    Test.@testset "$(name)" begin
         q = exp(M, p, X)
-        @test is_point(M, q; error = :error, kwargs...)
+        Test.@test is_point(M, q; error = :error, kwargs...)
         if !isnothing(expected_value)
-            @test isapprox(M, q, expected_value; error = :error, kwargs...)
+            Test.@test isapprox(M, q, expected_value; error = :error, kwargs...)
         end
         if test_mutating
             q2 = copy(M, p)
             exp!(M, q2, p, X)
-            @test isapprox(M, q2, q; error = :error, kwargs...)
+            Test.@test isapprox(M, q2, q; error = :error, kwargs...)
             if test_aliased
                 q3 = copy(M, p)
                 exp!(M, q3, q3, X)  # aliased
-                @test isapprox(M, q3, q; error = :error, kwargs...)
+                Test.@test isapprox(M, q3, q; error = :error, kwargs...)
             end
         end
         if test_fused
             q4 = Manifolds.exp_fused(M, p, X, t)
             q5 = exp(M, p, t * X)
-            @test isapprox(M, q4, q5; error = :error, kwargs...)
+            Test.@test isapprox(M, q4, q5; error = :error, kwargs...)
             if test_mutating
                 q6 = copy(M, p)
                 Manifolds.exp_fused!(M, q6, p, X, t)
-                @test isapprox(M, q6, q5; error = :error, kwargs...)
+                Test.@test isapprox(M, q6, q5; error = :error, kwargs...)
                 if test_aliased
                     q7 = copy(M, p)
                     Manifolds.exp_fused!(M, q7, q7, X, t)  # aliased
-                    @test isapprox(M, q7, q5; error = :error, kwargs...)
+                    Test.@test isapprox(M, q7, q5; error = :error, kwargs...)
                 end
             end
         end
@@ -177,7 +177,7 @@ function Manifolds.Test.test_exp(
             run_test = !test_injectivity_radius || norm(M, p, X) ≤ injectivity_radius(M, p)
             run_test || (@warn("Skipping log-exp test since norm of X ($(norm(M, p, X))) is outside injectivity radius ($(injectivity_radius(M, p)))"); nothing)
             Y = log(M, p, q)
-            @test isapprox(M, X, Y; error = :error, kwargs...) skip = !run_test
+            Test.@test isapprox(M, X, Y; error = :error, kwargs...) skip = !run_test
         end
     end
     return nothing
@@ -205,15 +205,15 @@ function Manifolds.Test.test_inner(
         name = "Inner product on $M at point $(typeof(p))",
         kwargs...
     )
-    @testset "$(name)" begin
+    Test.@testset "$(name)" begin
         v = inner(M, p, X, Y)
-        @test v isa (Real)
-        isnothing(expected_value) || @test isapprox(v, expected_value; kwargs...)
+        Test.@test v isa (Real)
+        isnothing(expected_value) || Test.@test isapprox(v, expected_value; kwargs...)
         w = inner(M, p, X, X)
-        @test w ≥ 0.0
+        Test.@test w ≥ 0.0
         if test_norm
             n = norm(M, p, X)
-            @test isapprox(w, n^2; kwargs...)
+            Test.@test isapprox(w, n^2; kwargs...)
         end
     end
     return nothing
@@ -246,26 +246,26 @@ function Manifolds.Test.test_log(
         name = "Logarithmic map on $M for $(typeof(p)) points",
         kwargs...
     )
-    @testset "$(name)" begin
+    Test.@testset "$(name)" begin
         X = log(M, p, q)
-        @test is_vector(M, p, X; error = :error, kwargs...)
+        Test.@test is_vector(M, p, X; error = :error, kwargs...)
         Z = log(M, p, p)
-        @test is_vector(M, p, Z; error = :error, kwargs...)
-        @test norm(M, p, Z) ≈ 0.0   # log
+        Test.@test is_vector(M, p, Z; error = :error, kwargs...)
+        Test.@test norm(M, p, Z) ≈ 0.0   # log
         if !isnothing(expected_value)
-            @test isapprox(M, p, X, expected_value; error = :error, kwargs...)
+            Test.@test isapprox(M, p, X, expected_value; error = :error, kwargs...)
         end
         if test_mutating
             Y = copy(M, p, X)
             log!(M, Y, p, q)
-            @test isapprox(M, Y, X; error = :error, kwargs...)
+            Test.@test isapprox(M, Y, X; error = :error, kwargs...)
         end
         if test_exp
             # Test only if inj is not available of X is within inj radius
             run_test = !test_injectivity_radius || norm(M, p, X) ≤ injectivity_radius(M, p)
             run_test || (@warn("Skipping exp-log test since norm of X ($(norm(M, p, X))) is outside injectivity radius ($(injectivity_radius(M, p)))"); nothing)
             q2 = exp(M, p, X)
-            @test isapprox(M, q2, q; error = :error, kwargs...) skip = !run_test
+            Test.@test isapprox(M, q2, q; error = :error, kwargs...) skip = !run_test
         end
     end
     return nothing
@@ -288,10 +288,10 @@ function Manifolds.Test.test_manifold_dimension(
         expected_type = Int,
         name = "Manifold dimension test for $M",
     )
-    @testset "$(name)" begin
+    Test.@testset "$(name)" begin
         d = manifold_dimension(M)
-        @test d ≥ 0
-        @test isa(d, expected_type)
+        Test.@test d ≥ 0
+        Test.@test isa(d, expected_type)
         isnothing(expected_value) || (@test d == expected_value)
     end
     return nothing
@@ -320,14 +320,14 @@ function Manifolds.Test.test_norm(
         name = "Norm on $M at point $(typeof(p))",
         kwargs...
     )
-    @testset "$(name)" begin
+    Test.@testset "$(name)" begin
         v = norm(M, p, X)
-        @test v isa (Real)
-        isnothing(expected_value) || @test isapprox(v, expected_value; kwargs...)
-        @test v ≥ 0.0
+        Test.@test v isa (Real)
+        isnothing(expected_value) || Test.@test isapprox(v, expected_value; kwargs...)
+        Test.@test v ≥ 0.0
         if test_inner
             w = inner(M, p, X, X)
-            @test isapprox(w, v^2; kwargs...)
+            Test.@test isapprox(w, v^2; kwargs...)
         end
     end
     return nothing

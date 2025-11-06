@@ -152,6 +152,7 @@ modules = [
     Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqExt),
     Base.get_extension(Manifolds, :ManifoldsRecipesBaseExt),
     Base.get_extension(Manifolds, :ManifoldsTestExt),
+    Manifolds.Test,
 ]
 
 if modules isa Vector{Union{Nothing, Module}}
@@ -236,7 +237,6 @@ makedocs(;
             "Distributions" => "features/distributions.md",
             "Integration" => "features/integration.md",
             "Statistics" => "features/statistics.md",
-            "Testing" => "features/testing.md",
             "Utilities" => "features/utilities.md",
         ],
         "Miscellanea" => [
@@ -244,6 +244,7 @@ makedocs(;
             "Changelog" => "misc/NEWS.md",
             "Contributing" => "misc/CONTRIBUTING.md",
             "Internals" => "misc/internals.md",
+            "Test suite" => "misc/testsuite.md",
             "Notation" => "misc/notation.md",
             "References" => "misc/references.md",
         ],

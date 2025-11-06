@@ -160,7 +160,7 @@ include("../header.jl")
                 TuckerPoint(C₂, U[1][[4, 2, 1, 3], :], U[2:end]...),
                 TuckerPoint(C₃, U[1][[4, 3, 1, 2], :], U[2:end]...),
             ]
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts;
                 is_mutating = false, # avoid allocations of the wrong type

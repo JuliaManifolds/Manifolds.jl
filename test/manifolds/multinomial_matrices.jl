@@ -35,7 +35,7 @@ include("../header.jl")
         @test_throws DomainError is_vector(M, x, [0.0, 0.0, 0.0]; error = :error) # tangent wrong
         y = [0.6 0.3 0.1; 0.4 0.5 0.1]'
         z = [0.3 0.6 0.1; 0.6 0.3 0.1]'
-        test_manifold(
+        Manifolds.test_manifold(
             M,
             [x, y, z],
             test_injectivity_radius = false,

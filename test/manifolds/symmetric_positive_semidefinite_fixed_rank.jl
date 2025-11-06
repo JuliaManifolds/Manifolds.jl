@@ -25,7 +25,7 @@ include("../header.jl")
         for T in types
             pts = [convert(T, q), convert(T, q2), convert(T, q3)]
             @testset "Type $T" begin
-                test_manifold(
+                Manifolds.test_manifold(
                     M,
                     pts,
                     exp_log_atol_multiplier = 5,

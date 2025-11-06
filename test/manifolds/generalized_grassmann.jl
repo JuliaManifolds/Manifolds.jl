@@ -98,7 +98,7 @@ include("../header.jl")
             @test_throws ManifoldDomainError !is_point(M, 2 * r; error = :error)
             @test !is_vector(M, p, q)
             @test_throws ManifoldDomainError is_vector(M, p, q; error = :error)
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_exp_log = false,

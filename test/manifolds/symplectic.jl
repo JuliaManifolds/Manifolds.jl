@@ -171,7 +171,7 @@ using ManifoldDiff
         @test is_vector(M_big, p_big, X_big; error = :error, atol = 1.0e-9)
     end
     @testset "test_manifold(SymplecticMatrices(6))" begin
-        test_manifold(
+        Manifolds.test_manifold(
             Sp_6,
             cat(points, large_tr_norm_points; dims = 1);
             retraction_methods = [CayleyRetraction(), ExponentialRetraction()],

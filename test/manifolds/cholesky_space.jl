@@ -20,7 +20,7 @@ include("../header.jl")
             ).L,
         ]
         pts = [convert(T, a) for a in ptsF]
-        test_manifold(
+        Manifolds.test_manifold(
             M,
             pts;
             test_injectivity_radius = false,

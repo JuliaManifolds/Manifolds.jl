@@ -60,7 +60,7 @@ using RecursiveArrayTools
         X13_prod = inverse_retract(TB, pts_tb[1], pts_tb[3], m_prod_invretr)
         basis_types =
             (DefaultOrthonormalBasis(), get_basis(TB, pts_tb[1], DefaultOrthonormalBasis()))
-        test_manifold(
+        Manifolds.test_manifold(
             TB,
             pts_tb,
             default_inverse_retraction_method = m_prod_invretr,

@@ -37,7 +37,7 @@ include("../header.jl")
             w = [0.0, 1.0, -1.0]
             z = exp(M, x, w)
             pts = convert.(T, [x, y, z])
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_injectivity_radius = false,
@@ -142,7 +142,7 @@ include("../header.jl")
             Y = [0.5, -0.5, 0.5im]
             p3 = (sqrt(0.5) - sqrt(0.5) * im) * exp(M, p1, Y)
             pts = convert.(T, [p1, p2, p3])
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_injectivity_radius = false,
@@ -238,7 +238,7 @@ include("../header.jl")
             ]
             z = Quaternion(0.5, -0.5, 0.5, -0.5) * exp(M, x, w)
             pts = convert.(T, [x, y, z])
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_injectivity_radius = false,

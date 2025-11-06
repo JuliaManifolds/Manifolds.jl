@@ -205,7 +205,7 @@ end
     for T in types_s2
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(Ms2)) for _ in 1:3]
-            test_manifold(
+            Manifolds.test_manifold(
                 Ms2,
                 pts2;
                 test_musical_isomorphisms = true,
@@ -226,7 +226,7 @@ end
     for T in types_rn1
         @testset "Type $(trim(string(T)))..." begin
             pts1 = [convert(T, rand(Mrn1)) for _ in 1:3]
-            test_manifold(
+            Manifolds.test_manifold(
                 Mrn1,
                 pts1;
                 test_injectivity_radius = false,
@@ -249,7 +249,7 @@ end
     for T in types_r2
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(Mr2)) for _ in 1:3]
-            test_manifold(
+            Manifolds.test_manifold(
                 Mr2,
                 pts2;
                 test_injectivity_radius = false,
@@ -269,7 +269,7 @@ end
     for T in types_rn2
         @testset "Type $(trim(string(T)))..." begin
             pts2 = [convert(T, rand(Mrn2)) for _ in 1:3]
-            test_manifold(
+            Manifolds.test_manifold(
                 Mrn2,
                 pts2;
                 test_injectivity_radius = false,
@@ -292,7 +292,7 @@ end
         MT = PowerManifold(Circle(), 3)
         @test representation_size(MT) == (3,)
         @test pts_t[2][MT, 3] == 2.4
-        test_manifold(
+        Manifolds.test_manifold(
             MT,
             pts_t;
             test_injectivity_radius = false,

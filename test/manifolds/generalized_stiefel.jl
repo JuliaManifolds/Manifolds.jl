@@ -82,7 +82,7 @@ include("../header.jl")
             @test_throws DomainError !is_point(M, 2 * p; error = :error)
             @test !is_vector(M, p, y)
             @test_throws DomainError is_vector(M, p, y; error = :error)
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_exp_log = false,

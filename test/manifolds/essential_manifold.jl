@@ -41,7 +41,7 @@ include("../header.jl")
         @test is_vector(M, p1, project(M, p1, log(M, p2, p1)))
     end
     @testset "Signed Essential" begin
-        test_manifold(
+        Manifolds.test_manifold(
             M,
             [p1, p2, p3],
             test_vector_spaces = true,
@@ -59,7 +59,7 @@ include("../header.jl")
         )
     end
     @testset "Unsigned Essential" begin
-        test_manifold(
+        Manifolds.test_manifold(
             EssentialManifold(false),
             [p1, p2, p3],
             test_vector_spaces = true,

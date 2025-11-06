@@ -54,7 +54,7 @@ end
     for T in types
         pts = [convert(T, A_skewsym), convert(T, B_skewsym), convert(T, X)]
         @testset "Type $T" begin
-            test_manifold(
+            Manifolds.test_manifold(
                 M,
                 pts,
                 test_injectivity_radius = false,
@@ -83,7 +83,7 @@ end
         pts_complex =
             [convert(T, A_skewsym_complex), convert(T, B_skewsym_complex), convert(T, X)]
         @testset "Type $T" begin
-            test_manifold(
+            Manifolds.test_manifold(
                 M_complex,
                 pts_complex,
                 test_injectivity_radius = false,
