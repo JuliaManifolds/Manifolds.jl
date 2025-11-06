@@ -37,6 +37,7 @@ Possible properties are
 Possible entries of the `expectations` dictionary are
 
 * any function tested to provide their expected resulting value, e.g. `exp => p` for the result of `exp(M, p, X)`
+* for retractions, inverse retractions, and vector transports, the key is a tuple of the function and the method, e.g. `(retract, method) => q`
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
@@ -79,6 +80,21 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, inner, atol),
             )
         end
+        if (inverse_retract in functions)
+            for (irm, rm) in zip(inverse_retraction_methods, retraction_methods)
+                isnothing(irm) && continue
+                expected_inv_retract = get(expectations, (inverse_retract, irm), nothing)
+                Manifolds.Test.test_inverse_retract(
+                    M, points[1], points[2], irm;
+                    available_functions = functions,
+                    expected_value = expected_inv_retract,
+                    retraction_method = rm,
+                    test_mutating = (inverse_retract! in functions) ? true : mutating,
+                    atol = get(function_atols, inverse_retract, atol),
+                    name = "inverse_retract(M, p, q, $irm)", # shorten name within large suite
+                )
+            end
+        end
         if (log in functions)
             expected_log = get(expectations, :log, nothing)
             Manifolds.Test.test_log(
@@ -107,6 +123,24 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, norm, atol),
             )
         end
+        if (retract in functions)
+            @info "Testing retract with methods: $retraction_methods"
+            for (rm, irm) in zip(retraction_methods, inverse_retraction_methods)
+                @warn rm, irm
+                isnothing(rm) && continue
+                expected_retract = get(expectations, (retract, rm), nothing)
+                Manifolds.Test.test_retract(
+                    M, points[1], vectors[1], rm;
+                    available_functions = functions,
+                    expected_value = expected_retract,
+                    inverse_retraction_method = irm,
+                    test_aliased = aliased,
+                    test_mutating = (retract! in functions) ? true : mutating,
+                    atol = get(function_atols, retract, atol),
+                    name = "retract(M, p, X, $rm)", # shorten name within large suite
+                )
+            end
+        end
         if (zero_vector in functions)
             Manifolds.Test.test_zero_vector(
                 M, points[1];
@@ -132,15 +166,16 @@ end
         name = "Exponential map on \$M for \$(typeof(p)) points",
         kwargs...
     )
-    Test the exponential map on manifold `M` at point `p` with tangent vector `X`.
 
-    * that the result is a valid point on the manifold
-    * that the result matches `expected_value`, if given
-    * that the mutating version `exp!` matches the non-mutating version, (if activated)
-    * that `exp!` works on aliased in put (`p=q`) (if activated for mutating)
-    * that the logarithmic map inverts the exponential map (if activated)
-      (only performed if either `injectivity_radius` is not available or `X` is within)
-    * that the fused version `exp_fused(M, p, t, X)` matches the non-fused version (if activated)
+Test the exponential map on manifold `M` at point `p` with tangent vector `X`.
+
+* that the result is a valid point on the manifold
+* that the result matches `expected_value`, if given
+* that the mutating version `exp!` matches the non-mutating version, (if activated)
+* that `exp!` works on aliased in put (`p=q`) (if activated for mutating)
+* that the logarithmic map inverts the exponential map (if activated)
+(only performed if either `injectivity_radius` is not available or `X` is within)
+* that the fused version `exp_fused(M, p, t, X)` matches the non-fused version (if activated)
 """
 function Manifolds.Test.test_exp(
         M::AbstractManifold, p, X, t = 1.0;
@@ -185,7 +220,6 @@ function Manifolds.Test.test_exp(
                 end
             end
         end
-
         if test_log
             # Test only if inj is not available of X is within inj radius
             run_test = !test_injectivity_radius || norm(M, p, X) ≤ injectivity_radius(M, p)
@@ -232,6 +266,54 @@ function Manifolds.Test.test_inner(
     end
     return nothing
 end # Manifolds.Test.test_inner
+
+"""
+    Manifolds.Test.test_inverse_retraction(
+        M, p, q, m::AbstractInverseRetractionMethod;
+        available_functions=[],
+        expected_value=nothing,
+        name = "Inverse retraction \$m on \$M at point \$(typeof(p))",
+        retraction_method=nothing,
+        test_mutating = true,
+        test_retraction = (retract in available_functions) && !isnothing(retraction_method),
+        kwargs...
+    )
+
+Test the inverse retraction method `m` on manifold `M` at point `p` towards point `q`.
+
+* that the result is a valid tangent vector at `p` on the manifold
+* that the result matches `expected_value`, if given
+* that the mutating version `inverse_retract!` matches the non-mutating version, (if activated)
+* that the retraction inverts the inverse retraction (if activated)
+"""
+function Manifolds.Test.test_inverse_retract(
+        M, p, q, m::AbstractInverseRetractionMethod;
+        available_functions = Function[],
+        expected_value = nothing,
+        name = "Inverse retraction $m on $M at point $(typeof(p))",
+        retraction_method = nothing,
+        test_retraction = (retract in available_functions) && !isnothing(retraction_method),
+        test_mutating = true,
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        X = inverse_retract(M, p, q, m)
+        Test.@test is_vector(M, p, X; error = :error, kwargs...)
+        if !isnothing(expected_value)
+            Test.@test isapprox(M, p, X, expected_value; error = :error, kwargs...)
+        end
+        if test_mutating
+            Y = copy(M, p, X)
+            inverse_retract!(M, Y, p, q, m)
+            Test.@test isapprox(M, p, Y, X; error = :error, kwargs...)
+        end
+        if test_retraction
+            q2 = retract(M, p, X, retraction_method)
+            Test.@test isapprox(M, q2, q; error = :error, kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_inverse_retraction
 
 """
     Manifolds.Test.test_log(
@@ -349,6 +431,82 @@ function Manifolds.Test.test_norm(
     end
     return nothing
 end # Manifolds.Test.test_norm
+
+"""
+    Manifolds.test.test_retract(
+        M, p, X, m::AbstractRetractionMethod;
+        available_functions=[],
+        expected_value=nothing,
+        inverse_retraction_method=nothing,
+        name = "Retraction \$m on \$M at point \$(typeof(p))",
+        t = 1.0
+        test_mutating = true,
+        test_mutating = true,
+        test_inverse_retraction = (inverse_retraction in available_functions) && !isnothing(inverse_retraction_method),
+        kwargs...
+    )
+
+Test the retraction method `m` on manifold `M` at point `p` with tangent vector `X`.
+
+* that the result is a valid point on the manifold
+* that the result matches `expected_value`, if given
+* that the mutating version `retract!` matches the non-mutating version, (if activated)
+* that `retract!` works on aliased in put (`p=q`) (if activated for mutating)
+* that the inverse retraction inverts the retraction (if activated)
+* that the fused version `retract_fused(M, p, X, t, m)` matches the non-fused version (if activated)
+"""
+function Manifolds.Test.test_retract(
+        M, p, X, m::AbstractRetractionMethod;
+        t = 1.0,
+        available_functions = Function[],
+        expected_value = nothing,
+        inverse_retraction_method = nothing,
+        name = "Retraction $m on $M at point $(typeof(p))",
+        test_aliased = true,
+        test_inverse_retraction = (inverse_retract in available_functions) && !isnothing(inverse_retraction_method),
+        test_mutating = true,
+        test_fused = true,
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        q = retract(M, p, X, m)
+        Test.@test is_point(M, q; error = :error, kwargs...)
+        if !isnothing(expected_value)
+            Test.@test isapprox(M, q, expected_value; error = :error, kwargs...)
+        end
+        if test_mutating
+            q2 = copy(M, p)
+            retract!(M, q2, p, X, m)
+            Test.@test isapprox(M, q2, q; error = :error, kwargs...)
+            if test_aliased
+                q3 = copy(M, p)
+                retract!(M, q3, q3, X, m)  # aliased
+                Test.@test isapprox(M, q3, q; error = :error, kwargs...)
+            end
+        end
+        if test_fused
+            q4 = Manifolds.retract_fused(M, p, X, t, m)
+            q5 = retract(M, p, t * X, m)
+            Test.@test isapprox(M, q4, q5; error = :error, kwargs...)
+            if test_mutating
+                q6 = copy(M, p)
+                Manifolds.retract_fused!(M, q6, p, X, t, m)
+                Test.@test isapprox(M, q6, q5; error = :error, kwargs...)
+                if test_aliased
+                    q7 = copy(M, p)
+                    Manifolds.retract_fused!(M, q7, q7, X, t, m)  # aliased
+                    Test.@test isapprox(M, q7, q5; error = :error, kwargs...)
+                end
+            end
+        end
+        if test_inverse_retraction
+            X2 = inverse_retract(M, p, q, inverse_retraction_method)
+            Test.@test isapprox(M, p, X2, X; error = :error, kwargs...)
+
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_retract
 
 """
     Manifolds.Test.test_zero_vector(M, p;

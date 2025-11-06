@@ -23,9 +23,11 @@ using ..Manifolds
 _ALL_FUNCTIONS = [
     exp,
     inner,
+    inverse_retract,
     log,
     manifold_dimension,
     norm,
+    retract,
     zero_vector,
 ]
 all_functions() = _ALL_FUNCTIONS
@@ -38,9 +40,11 @@ function test_manifold end
 # the small functions per single API function
 function test_exp end
 function test_inner end
+function test_inverse_retract end
 function test_log end
 function test_manifold_dimension end
 function test_norm end
+function test_retract end
 #
 #
 # TODO
@@ -59,7 +63,6 @@ function test_get_coordinates end
 function test_get_vector end
 function test_get_vectors end
 function test_injectivity_radius end
-function test_inverse_retraction end
 function test_is_point end
 function test_is_vector end
 function test_mid_point end
@@ -68,7 +71,6 @@ function test_project end
 function test_project_embed end
 function test_rand end
 function test_repr end
-function test_retraction end
 function test_sharp end
 function test_shortest_geodesic end
 function test_vector_transport end
