@@ -426,7 +426,7 @@ function project!(::Hyperbolic, Y::HyperboloidTangentVector, p::HyperboloidPoint
 end
 
 @doc raw"""
-    Random.rand!(rng, M::Hyperbolic, pX; vector_at = nothing, σ = one(eltype(pX)))
+    Random.rand!(rng, M::Hyperbolic, pX; vector_at = nothing, σ = one(eltype(pX)) / sqrt(manifold_dimension(M)))
 
 Fill `pX` in-place with a random object on the Hyperbolic manifold `M` (hyperboloid model).
 
@@ -440,8 +440,7 @@ Behavior
 
 - If `vector_at` is provided (a point on the manifold) then `pX` is filled with a random
   tangent vector at `vector_at`. A Euclidean Gaussian `Y = σ * randn(...)` is sampled and then
-  rescaled by `1 / sqrt(manifold_dimension(M))` before projecting to the tangent space at
-  `vector_at` using the projection onto tangent space.
+  projected to the tangent space at `vector_at`.
 
 Arguments
 - `rng::AbstractRNG` : random number generator used for sampling.
@@ -458,7 +457,7 @@ function Random.rand!(
         M::Hyperbolic,
         pX;
         vector_at = nothing,
-        σ::Real = one(eltype(pX)),
+        σ::Real = one(eltype(pX)) / sqrt(manifold_dimension(M)),
     )
     N = get_parameter(M.size)[1]
     if vector_at === nothing
@@ -468,7 +467,6 @@ function Random.rand!(
         pX[end] = f
     else
         Y = σ * randn(rng, eltype(vector_at), size(vector_at))
-        Y ./= sqrt(manifold_dimension(M))
         project!(M, pX, vector_at, Y)
     end
     return pX
