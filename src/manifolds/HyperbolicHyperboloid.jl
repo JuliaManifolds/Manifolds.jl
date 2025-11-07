@@ -425,6 +425,34 @@ function project!(::Hyperbolic, Y::HyperboloidTangentVector, p::HyperboloidPoint
     return (Y.value .= X .+ minkowski_metric(p.value, X) .* p.value)
 end
 
+@doc raw"""
+    Random.rand!(rng, M::Hyperbolic, pX; vector_at = nothing, σ = one(eltype(pX)))
+
+Fill `pX` in-place with a random object on the Hyperbolic manifold `M` (hyperboloid model).
+
+Behavior
+- If `vector_at === nothing` (default) then `pX` is filled as a random point on the hyperboloid
+  (an element of H^n in the hyperboloid embedding in ℝ^{n+1}). The routine samples a direction
+  ``a ∼ N(0,I_n)`` in the first n coordinates and an offset `f = 1 + σ * |N(0,1)|` for the last
+  coordinate, then sets the first ``n`` components to the vector
+  ``a  \sqrt(f^2 - 1) / a)`` and the last component to `f`. The resulting vector satisfies
+  the Minkowski normalization ⟨p,p⟩_M = -1.
+
+- If `vector_at` is provided (a point on the manifold) then `pX` is filled with a random
+  tangent vector at `vector_at`. A Euclidean Gaussian `Y = σ * randn(...)` is sampled and then
+  rescaled by `1 / sqrt(manifold_dimension(M))` before projecting to the tangent space at
+  `vector_at` using the projection onto tangent space.
+
+Arguments
+- `rng::AbstractRNG` : random number generator used for sampling.
+- `M::Hyperbolic` : the hyperbolic manifold instance (hyperboloid model).
+- `pX` : the array or wrapped type to be written in-place (point or tangent vector).
+- `vector_at` : optional point on `M` indicating the base point for tangent vector sampling.
+- `σ::Real` : scale parameter (default = 1) controlling dispersion of the samples.
+
+Returns
+- `pX` (mutated) : the sampled point or tangent vector.
+"""
 function Random.rand!(
         rng::AbstractRNG,
         M::Hyperbolic,
@@ -440,6 +468,7 @@ function Random.rand!(
         pX[end] = f
     else
         Y = σ * randn(rng, eltype(vector_at), size(vector_at))
+        Y ./= sqrt(manifold_dimension(M))
         project!(M, pX, vector_at, Y)
     end
     return pX
