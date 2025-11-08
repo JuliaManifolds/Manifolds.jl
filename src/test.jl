@@ -21,6 +21,7 @@ this module shall provide a test function with
 module Test
 using ..Manifolds
 _ALL_FUNCTIONS = [
+    distance,
     exp,
     inner,
     inverse_retract,
@@ -42,6 +43,7 @@ function test_manifold end
 #
 #
 # the small functions per single API function
+function test_distance end
 function test_exp end
 function test_inner end
 function test_inverse_retract end
@@ -61,7 +63,6 @@ function test_default_atlas end
 function test_default_retraction end
 function test_default_inverse_retraction end
 function test_default_vector_transport end
-function test_distance end
 function test_embed end
 function test_flat end
 function test_geodesic end

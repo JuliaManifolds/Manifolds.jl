@@ -59,6 +59,15 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     return Test.@testset "$test_name" begin
         n_points = length(points)
         n_vectors = length(vectors)
+        if (distance in functions)
+            Manifolds.Test.test_distance(
+                M, points[1], points[2];
+                available_functions = functions,
+                expected_value = get(expectations, distance, nothing),
+                name = "distance(M, p, q)", # shorten name within large suite
+                atol = get(function_atols, distance, atol),
+            )
+        end
         if (exp in functions)
             Manifolds.Test.test_exp(
                 M, points[1], vectors[1];
@@ -185,6 +194,49 @@ end
 #
 # ------------------------------------------------------------------------------------------
 """
+    Manifolds.Test.test_distance(M, p, q;
+        available_functions=[], expected_value=nothing,
+        name = "Distance on \$M between \$(typeof(p)) points",
+        kwargs...
+    )
+
+Test the distance function on manifold `M` between points `p` and `q`.
+
+* that the result is a nonnegative number
+* that the distance from `p` to `p` is zero
+* that the distance is symmetric
+* that the result matches `expected_value`, if given
+* that the distance is equal to the norm of the logarithmic map (if `log` and `norm` are available)
+    (only performed if either `injectivity_radius` is not available or the points are within)
+"""
+function Manifolds.Test.test_distance(
+        M::AbstractManifold, p, q;
+        available_functions = Function[], expected_value = nothing,
+        name = "Distance on $M between $(typeof(p)) points",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        d = distance(M, p, q)
+        Test.@test d ≥ 0.0
+        d_pp = distance(M, p, p)
+        Test.@test isapprox(d_pp, 0.0; kwargs...)
+        d_qp = distance(M, q, p)
+        Test.@test isapprox(d, d_qp; kwargs...)
+        if !isnothing(expected_value)
+            Test.@test isapprox(d, expected_value; kwargs...)
+        end
+        if (log in available_functions) && (norm in available_functions)
+            # Test only if inj is not available of points are within inj radius
+            run_test = !((injectivity_radius in available_functions)) || (d ≤ injectivity_radius(M, p))
+            run_test || (@warn("Skipping distance-norm-log test since norm of X ($(norm(M, p, X))) is outside injectivity radius ($(injectivity_radius(M, p)))"))
+            Y = log(M, p, q)
+            n = norm(M, p, Y)
+            Test.@test isapprox(d, n; kwargs...) skip = !run_test
+        end
+    end
+    return nothing
+end
+"""
     Manifolds.Test.test_exp(
         M, p, X, t=1.0;
         available_functions=[], expected_value=nothing, test_mutating=true,
@@ -251,13 +303,14 @@ function Manifolds.Test.test_exp(
         if test_log
             # Test only if inj is not available of X is within inj radius
             run_test = !test_injectivity_radius || norm(M, p, X) ≤ injectivity_radius(M, p)
-            run_test || (@warn("Skipping log-exp test since norm of X ($(norm(M, p, X))) is outside injectivity radius ($(injectivity_radius(M, p)))"); nothing)
+            run_test || (@warn("Skipping log-exp test since norm of X ($(norm(M, p, X))) is outside injectivity radius ($(injectivity_radius(M, p)))"))
             Y = log(M, p, q)
             Test.@test isapprox(M, X, Y; error = :error, kwargs...) skip = !run_test
         end
     end
     return nothing
 end # Manifolds.Test.test_exp
+
 """
     Manifolds.Test.test_inner(M, p, X, Y;
         available_functions=[], expected_value=nothing,
@@ -387,7 +440,7 @@ function Manifolds.Test.test_log(
         if test_exp
             # Test only if inj is not available of X is within inj radius
             run_test = !test_injectivity_radius || norm(M, p, X) ≤ injectivity_radius(M, p)
-            run_test || (@warn("Skipping exp-log test since norm of X ($(norm(M, p, X))) is outside injectivity radius ($(injectivity_radius(M, p)))"); nothing)
+            run_test || (@warn("Skipping exp-log test since norm of X ($(norm(M, p, X))) is outside injectivity radius ($(injectivity_radius(M, p)))"))
             q2 = exp(M, p, X)
             Test.@test isapprox(M, q2, q; error = :error, kwargs...) skip = !run_test
         end
