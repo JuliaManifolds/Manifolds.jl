@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     it follows the structure of the one recently written for `LieGroups.jl`.
   * small test functions like `Manifolds.Test.test_exp(M, p, X; kwargs...)`
     with the goal of providing one test for each individual API function
+## [0.11.4] 2025-11-07
+
+### Changed
+
+* Random tangent vectors on `Hyperbolic` are now much shorter (their norm is on the order of 1) to guide users away from numerical issues with long vectors.
 
 ## [0.11.3] 2025-11-04
 
