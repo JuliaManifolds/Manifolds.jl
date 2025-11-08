@@ -27,7 +27,11 @@ _ALL_FUNCTIONS = [
     log,
     manifold_dimension,
     norm,
+    parallel_transport_direction,
+    parallel_transport_to,
     retract,
+    vector_transport_direction,
+    vector_transport_to,
     zero_vector,
 ]
 all_functions() = _ALL_FUNCTIONS
@@ -44,7 +48,10 @@ function test_inverse_retract end
 function test_log end
 function test_manifold_dimension end
 function test_norm end
+function test_parallel_transport end
 function test_retract end
+function test_vector_transport end
+function test_zero_vector end
 #
 #
 # TODO
@@ -66,13 +73,10 @@ function test_injectivity_radius end
 function test_is_point end
 function test_is_vector end
 function test_mid_point end
-function test_parallel_transport end
 function test_project end
 function test_project_embed end
 function test_rand end
 function test_repr end
 function test_sharp end
 function test_shortest_geodesic end
-function test_vector_transport end
-function test_zero_vector end
 end

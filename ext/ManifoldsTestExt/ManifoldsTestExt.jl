@@ -123,6 +123,20 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, norm, atol),
             )
         end
+        if (parallel_transport_to in functions)
+            expected_pt = get(expectations, parallel_transport_to, nothing)
+            expected_ptd = get(expectations, :parallel_transport_direction, nothing)
+            Manifolds.Test.test_parallel_transport(
+                M, points[1], vectors[1], points[2];
+                available_functions = functions,
+                expected_value = expected_pt,
+                expected_value_direction = expected_ptd,
+                test_aliased = aliased,
+                test_mutating = (parallel_transport_to! in functions) ? true : mutating,
+                atol = get(function_atols, parallel_transport_to, atol),
+                name = "parallel_transport_to(M, p, X, q)", # shorten name within large suite
+            )
+        end
         if (retract in functions)
             for (rm, irm) in zip(retraction_methods, inverse_retraction_methods)
                 isnothing(rm) && continue
@@ -136,6 +150,22 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                     test_mutating = (retract! in functions) ? true : mutating,
                     atol = get(function_atols, retract, atol),
                     name = "retract(M, p, X, $rm)", # shorten name within large suite
+                )
+            end
+        end
+        if (vector_transport_to in functions)
+            for vtm in vector_transport_methods
+                expected_vt = get(expectations, (vector_transport_to, vtm), nothing)
+                expected_vtd = get(expectations, (vector_transport_direction, vtm), nothing)
+                Manifolds.Test.test_vector_transport(
+                    M, points[1], vectors[1], points[2], vtm;
+                    available_functions = functions,
+                    expected_value = expected_vt,
+                    expected_value_direction = expected_vtd,
+                    test_aliased = aliased,
+                    test_mutating = (vector_transport_to! in functions) ? true : mutating,
+                    atol = get(function_atols, vector_transport_to, atol),
+                    name = "vector_transport_to(M, p, X, q, $vtm)", # shorten name within large suite
                 )
             end
         end
@@ -431,6 +461,87 @@ function Manifolds.Test.test_norm(
 end # Manifolds.Test.test_norm
 
 """
+    Manifolds.Test.test_parallel_transport(
+        M, p, X, q;
+        available_functions=[],
+        direction = (log in available_functions) ? log(M, p, q) : nothing,
+        expected_value=nothing,
+        expected_value_direction=nothing,
+        name = "Parallel transport on \$M at point \$(typeof(p))",
+        test_aliased = true,
+        test_mutating = true,
+        kwargs...
+    )
+
+Test the parallel transport on manifold `M` at point `p` with tangent vector `X` to a point `q`.
+
+this defaults to testing `parallel_transport_to`, but can also be used to test `parallel_transport_direction`,
+by passing that function to the `available_functions`, using the `direction` argument.
+The `direction` has to be the one that transports `X` also to `q`.
+
+* that the result is a valid tangent vector at `q` on the manifold
+* that the result matches `expected_value`, if given
+* that the mutating version `parallel_transport!` matches the non-mutating version
+* that `parallel_transport_to` works on aliased in put (`Y=X`) (if activated)
+* that the direction of the transport is consistent with `expected_direction`, if given
+* that the mutating version `parallel_transport_direction!` matches the non-mutating version (if activated)
+* that `parallel_transport_direction` works on aliased in put (`Y=X` or `Y=d`) (if activated for mutating)
+* that both functions are consistent
+"""
+function Manifolds.Test.test_parallel_transport(
+        M, p, X, q;
+        available_functions = [],
+        direction = (log in available_functions) ? log(M, p, q) : nothing,
+        expected_value_direction = nothing,
+        expected_value = nothing,
+        name = "Parallel transport on $M at point $(typeof(p))",
+        test_aliased = true,
+        test_mutating = true,
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        Y = parallel_transport_to(M, p, X, q)
+        Test.@test is_vector(M, q, Y; error = :error, kwargs...)
+        if !isnothing(expected_value)
+            Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
+        end
+        if test_mutating
+            Y2 = copy(M, p, X)
+            parallel_transport_to!(M, Y2, p, X, q)
+            Test.@test isapprox(M, q, Y2, Y; error = :error, kwargs...)
+            if test_aliased
+                Y3 = copy(M, p, X)
+                parallel_transport_to!(M, Y3, p, Y3, q)  # aliased
+                Test.@test isapprox(M, q, Y3, Y; error = :error, kwargs...)
+            end
+        end
+        if (parallel_transport_direction in available_functions) && !isnothing(direction)
+            Y4 = parallel_transport_direction(M, p, X, direction)
+            if !isnothing(expected_value_direction)
+                Test.@test isapprox(M, q, Y4, expected_value_direction; error = :error, kwargs...)
+            end
+            if test_mutating
+                Y5 = copy(M, p, X)
+                parallel_transport_direction!(M, Y5, p, X, direction)
+                Test.@test isapprox(M, p, Y5, Y4; error = :error, kwargs...)
+                if test_aliased
+                    Y6 = copy(M, p, X)
+                    parallel_transport_direction!(M, Y6, p, Y6, direction)  # aliased #1
+                    Test.@test isapprox(M, p, Y6, Y4; error = :error, kwargs...)
+                    Y7 = copy(M, p, direction)
+                    parallel_transport_direction!(M, Y7, p, X, direction)  # aliased #2
+                    Test.@test isapprox(M, p, Y7, Y4; error = :error, kwargs...)
+                end
+            end
+            # consistency check
+            Test.@test is_vector(M, q, Y4; error = :error, kwargs...)
+            Test.@test isapprox(M, q, Y, Y4; error = :error, kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_parallel_transport
+
+"""
     Manifolds.test.test_retract(
         M, p, X, m::AbstractRetractionMethod;
         available_functions=[],
@@ -505,6 +616,88 @@ function Manifolds.Test.test_retract(
     end
     return nothing
 end # Manifolds.Test.test_retract
+
+"""
+    Manifolds.Test.test_vector_transport(
+        M, p, X, q, default_vector_transport_method(M);
+        available_functions=[],
+        direction = inverse_retract(M, p, q, default_inverse_retraction_method(M)),
+        expected_value=nothing,
+        expected_value_direction=nothing,
+        test_aliased = true,
+        test_mutating = true,
+        name = "Vector transport method \$(vector_transport_method) on \$M at point \$(typeof(p))",
+        kwargs...
+    )
+
+Test the vector transport on manifold `M` at point `p` with tangent vector `X` to a point `q`.
+
+this defaults to testing `vector_transport_to`, but can also be used to test `vector_transport_direction`,
+by passing that function to the `available_functions`, using the `direction` argument.
+The `direction` has to be the one that transports `X` also to `q`.
+
+* that the result is a valid tangent vector at `q` on the manifold
+* that the result matches `expected_value`, if given
+* that the mutating version `vector_transport!` matches the non-mutating version
+* that `vector_transport_to` works on aliased in put (`Y=X`) (if activated)
+* that the direction of the transport is consistent with `expected_direction`, if given
+* that the mutating version `vector_transport_direction!` matches the non-mutating version (if activated)
+* that `vector_transport_direction` works on aliased in put (`Y=X` or `Y=d`) (if activated for mutating)
+* that both functions are consistent
+"""
+function Manifolds.Test.test_vector_transport(
+        M, p, X, q, m = default_vector_transport_method(M);
+        available_functions = [],
+        direction = inverse_retract(M, p, q, default_inverse_retraction_method(M)),
+        expected_value_direction = nothing,
+        expected_value = nothing,
+        test_aliased = true,
+        test_mutating = true,
+        name = "Vector transport method $(vector_transport_method) on $M at point $(typeof(p))",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        Y = vector_transport_to(M, p, X, q, m)
+        Test.@test is_vector(M, q, Y; error = :error, kwargs...)
+        if !isnothing(expected_value)
+            Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
+        end
+        if test_mutating
+            Y2 = copy(M, p, X)
+            vector_transport_to!(M, Y2, p, X, q, m)
+            Test.@test isapprox(M, q, Y2, Y; error = :error, kwargs...)
+            if test_aliased
+                Y3 = copy(M, p, X)
+                vector_transport_to!(M, Y3, p, Y3, q)  # aliased
+                Test.@test isapprox(M, p, Y3, Y; error = :error, kwargs...)
+            end
+        end
+        if (vector_transport_direction in available_functions) && !isnothing(direction)
+            Y4 = vector_transport_direction(M, p, X, direction, m)
+            if !isnothing(expected_value_direction)
+                Test.@test isapprox(M, p, Y4, expected_value_direction; error = :error, kwargs...)
+            end
+            if test_mutating
+                Y5 = copy(M, p, X)
+                vector_transport_direction!(M, Y5, p, X, direction, m)
+                Test.@test isapprox(M, p, Y5, Y4; error = :error, kwargs...)
+                if test_aliased
+                    Y6 = copy(M, p, X)
+                    vector_transport_direction!(M, Y6, p, Y6, direction, m)  # aliased #1
+                    Test.@test isapprox(M, q, Y6, Y4; error = :error, kwargs...)
+                    Y7 = copy(M, p, direction)
+                    vector_transport_direction!(M, Y7, p, X, direction, m)  # aliased #2
+                    Test.@test isapprox(M, q, Y7, Y4; error = :error, kwargs...)
+                end
+            end
+            # consistency check
+            Test.@test is_vector(M, q, Y4; error = :error, kwargs...)
+            Test.@test isapprox(M, q, Y, Y4; error = :error, kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_vector_transport
+
 
 """
     Manifolds.Test.test_zero_vector(M, p;
