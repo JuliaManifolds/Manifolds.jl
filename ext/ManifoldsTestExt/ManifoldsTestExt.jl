@@ -23,6 +23,8 @@ Possible properties are
 * `:Functions` is a vector of all defined functions for `M`
   note a test is activated by the function (like `exp`), adding the mutating function (like `exp!`) overwrites the
   global default (see `:Mutating`) to true.
+* `:InvalidPoints` is a vector of points that are not on `M`, e.g. to test `is_point`
+* `:InvalidVectors` is a vector of tangent vectors that are not in the tangent space of the first point from `:Points`
 * `:InverseRetractionMethods` is a vector of inverse retraction methods to test on `M`
   these should have the same order as `:RetractionMethods` (use `nothing` for skipping one)
 * `:Points` is a vector of at least 2 points on `M`, which should not be the same point
@@ -42,7 +44,9 @@ Possible entries of the `expectations` dictionary are
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
-
+*  `:IsPointErrors` is a vector of expected error types for each invalid point provided in `:InvalidPoints`, use `nothing` to skip testing for errors for a specific point.
+*  `:IsVectorErrors` is a vector of expected error types for each invalid vector provided in `:InvalidVectors`, use `nothing` to skip testing for errors for a specific vector.
+*  `:IsVectorBasepointError` is an expected error type when the base point is invalid e.g. for `is_vector`
 """
 function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, expectations::Dict = Dict())
     atol = get(expectations, :atol, 0.0)
@@ -109,7 +113,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (is_point in functions)
             qs = get(properties, :InvalidPoints, [])
-            errs = get(properties, :IsPointErrors, [])
+            errs = get(expectations, :IsPointErrors, [])
             Manifolds.Test.test_is_point(
                 M, points[1], qs...;
                 errors = errs,
@@ -117,6 +121,20 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 test_warn = test_warn,
                 test_info = test_info,
                 atol = get(function_atols, is_point, atol),
+            )
+        end
+        if (is_vector in functions)
+            Ys = get(properties, :InvalidVectors, [])
+            errs = get(expectations, :IsVectorErrors, [])
+            Manifolds.Test.test_is_vector(
+                M, points[1], vectors[1], Ys...;
+                basepoint_error = get(expectations, :IsVectorBasepointError, nothing),
+                errors = errs,
+                name = "is_vector(M, p, X)",
+                test_warn = test_warn,
+                test_info = test_info,
+                q = get(properties, :InvalidPoints, [nothing])[1],
+                atol = get(function_atols, is_vector, atol),
             )
         end
         if (log in functions)
@@ -447,6 +465,72 @@ function Manifolds.Test.test_is_point(
             (test_info) && Test.@test_logs (:info,) is_point(M, q; error = :info, kwargs...)
             if length(errors) >= i && !isnothing(errors[i])
                 Test.@test_throws (errors[i]) is_point(M, q; error = :error, kwargs...)
+            end
+        end
+    end
+    return nothing
+end
+
+"""
+    Manifolds.Test.test_is_vector(
+        M, p, X, Ys...;
+        basepoint_error = nothing,
+        check_basepoint = true,
+        errors = [],
+        name = "is_vector on \$M for \$(typeof(p)) points",
+        test_warn = true,
+        test_info = true,
+        q = nothing,
+        kwargs...
+    )
+
+Test the function [`is_vector`](@ref) on manifold `M` at point `p` for tangent vector `X`.
+
+* that for `X` it returns `true`.
+* that for each `Y` in `Ys` it
+    * returns `false`
+    * issues a warning (if activated)
+    * isues an info message (if activated)
+    * throws the corresponding error from `error_types` (if not nothing)
+* if `check_basepoint` is `true`, then it checks that
+    * for `p` this still returns `true`
+    * for the base point `q` it
+      * returns `false`
+      * issues a warning (if activated)
+      * isues an info message (if activated)
+      * throws the corresponding error from `error_basepoint` (if activated)
+"""
+function Manifolds.Test.test_is_vector(
+        M::AbstractManifold, p, X, Ys...;
+        check_basepoint = true,
+        errors = [],
+        basepoint_error = nothing,
+        name = "is_vector on $M for $(typeof(p)) points",
+        test_warn = true,
+        test_info = true,
+        q = nothing,
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        Test.@test is_vector(M, p, X; kwargs...)
+        for (i, Y) in enumerate(Ys)
+            Test.@test !is_vector(M, p, Y; kwargs...)
+            (test_warn) && Test.@test_logs (:warn,) is_vector(M, p, Y; error = :warn, kwargs...)
+            (test_info) && Test.@test_logs (:info,) is_vector(M, p, Y; error = :info, kwargs...)
+            if length(errors) >= i && !isnothing(errors[i])
+                Test.@test_throws (errors[i]) is_vector(M, p, Y; error = :error, kwargs...)
+            end
+        end
+        if check_basepoint
+            Test.@test is_vector(M, p, X, true; kwargs...)
+            if !isnothing(q)
+                Test.@test !is_vector(M, q, X, true; kwargs...)
+                (test_warn) && Test.@test_logs (:warn,) is_vector(M, q, X, true; error = :warn, kwargs...)
+                (test_info) && Test.@test_logs (:info,) is_vector(M, q, X, true; error = :info, kwargs...)
+                if !isnothing(basepoint_error)
+                    @info basepoint_error
+                    Test.@test_throws (basepoint_error) is_vector(M, q, X, true; error = :error, kwargs...)
+                end
             end
         end
     end

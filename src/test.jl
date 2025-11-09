@@ -26,6 +26,7 @@ _ALL_FUNCTIONS = [
     inner,
     inverse_retract,
     is_point,
+    is_vector,
     log,
     manifold_dimension,
     norm,
