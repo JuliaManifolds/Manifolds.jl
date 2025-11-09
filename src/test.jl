@@ -20,7 +20,9 @@ this module shall provide a test function with
 """
 module Test
 using ..Manifolds
-_ALL_FUNCTIONS = [
+const _ALL_FUNCTIONS = [
+    copy,
+    copyto!,
     distance,
     exp,
     inner,
@@ -45,11 +47,14 @@ function test_manifold end
 #
 #
 # the small functions per single API function
+function test_copy end
+function test_copyto end
 function test_distance end
 function test_exp end
 function test_inner end
 function test_inverse_retract end
 function test_is_point end
+function test_is_vector end
 function test_log end
 function test_manifold_dimension end
 function test_norm end
@@ -60,8 +65,6 @@ function test_zero_vector end
 #
 #
 # TODO
-function test_copy end
-function test_copyto end
 function test_default_atlas end
 function test_default_retraction end
 function test_default_inverse_retraction end
@@ -75,7 +78,6 @@ function test_get_embedding end
 function test_get_vector end
 function test_get_vectors end
 function test_injectivity_radius end
-function test_is_vector end
 function test_mid_point end
 function test_project end
 function test_project_embed end

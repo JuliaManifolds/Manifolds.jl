@@ -66,6 +66,18 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     return Test.@testset "$test_name" begin
         n_points = length(points)
         n_vectors = length(vectors)
+        if (copy in functions)
+            Manifolds.Test.test_copy(
+                M, points[1], vectors[1];
+                name = "copy(M, p) & copy(M, p, X)",
+            )
+        end
+        if (copyto! in functions)
+            Manifolds.Test.test_copyto(
+                M, points[1], vectors[1];
+                name = "copyto!(M, q, p) & copyto!(M, Y, p, X)",
+            )
+        end
         if (distance in functions)
             Manifolds.Test.test_distance(
                 M, points[1], points[2];
@@ -167,7 +179,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (parallel_transport_to in functions)
             expected_pt = get(expectations, parallel_transport_to, nothing)
-            expected_ptd = get(expectations, :parallel_transport_direction, nothing)
+            expected_ptd = get(expectations, parallel_transport_direction, nothing)
             Manifolds.Test.test_parallel_transport(
                 M, points[1], vectors[1], points[2];
                 available_functions = functions,
@@ -226,6 +238,68 @@ end
 # Single function tests
 #
 # ------------------------------------------------------------------------------------------
+"""
+    Manifolds.Test.test_copy(M, p, X;
+        name = "copying on \$M for \$(typeof(p)) points",
+        kwargs...
+    )
+
+Test `copy(M, p)` and `copy(M, p, X)` on a manifold `M`.
+
+* that the copied point/vector is a valid point/vector on the manifold / tangent space
+* that the copied point/vector matches the original point/vector but is new memory
+"""
+function Manifolds.Test.test_copy(
+        M::AbstractManifold, p, X;
+        name = "copying on $M for $(typeof(p)) points",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        q = copy(M, p)
+        Test.@test is_point(M, q; error = :error, kwargs...)
+        Test.@test q == p
+        Test.@test q !== p
+        Y = copy(M, p, X)
+        Test.@test is_vector(M, p, Y; error = :error, kwargs...)
+        Test.@test Y == X
+        Test.@test Y !== X
+
+    end
+    return nothing
+end # end of Manifolds.Test.test_copy
+
+"""
+    Manifolds.Test.test_copyto(M, p, X;
+        name = "copying on \$M for \$(typeof(p)) points",
+        kwargs...
+    )
+
+Test `copyto!(M, q, p)` and `copyto!(M, Y, p, X)` on a manifold `M`.
+
+* that the copied point/vector is a valid point/vector on the manifold / tangent space
+* that the copied point/vector matches the original point/vector and is the same memory
+
+Note that since this function does not modify its input, is is called `test_copyto`.
+"""
+function Manifolds.Test.test_copyto(
+        M::AbstractManifold, p, X;
+        name = "copyto! on $M for $(typeof(p)) points",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        # Allocate memory for copyto!
+        q = allocate_result(M, exp, p, X)
+        q2 = copyto!(M, q, p)
+        Test.@test q == p
+        Test.@test q2 === q
+        Y = allocate_result(M, exp, p, X)
+        Y2 = copyto!(M, Y, p, X)
+        Test.@test Y == X
+        Test.@test Y2 === Y
+    end
+    return nothing
+end
+
 """
     Manifolds.Test.test_distance(M, p, q;
         available_functions=[], expected_value=nothing,

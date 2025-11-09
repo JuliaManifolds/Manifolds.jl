@@ -24,6 +24,10 @@ Manifolds.Test.test_manifold(
     Dict(
         :atol => 1.0e-12,
         exp => q,
+        distance => π / 4,
+        log => X, norm => π / 4,
+        parallel_transport_to => parallel_transport_to(M, p, X, q),
+        parallel_transport_direction => parallel_transport_to(M, p, X, q),
         manifold_dimension => 2,
         :IsPointErrors => [DomainError]
     ),
