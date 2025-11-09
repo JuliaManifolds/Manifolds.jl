@@ -16,7 +16,7 @@ Manifolds.Test.test_manifold(
         :Functions => Manifolds.Test.all_functions(),
         :InverseRetractionMethods => [LogarithmicInverseRetraction(), ProjectionInverseRetraction()],
         :Points => [p, q], :Vectors => [X, Y],
-        :InvalidPoints => [2*p],
+        :InvalidPoints => [2 * p],
         :RetractionMethods => [ExponentialRetraction(), ProjectionRetraction()],
         :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
     ),

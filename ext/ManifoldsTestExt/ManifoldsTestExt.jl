@@ -432,21 +432,21 @@ Test the function [`is_point`](@ref) on  for point `p` on manifold `M`.
 
 """
 function Manifolds.Test.test_is_point(
-    M::AbstractManifold, p, qs...;
-    errors = [],
-    name = "is_point on $M for $(typeof(p)) points",
-    test_warn = true,
-    test_info = true,
-    kwargs...
-)
+        M::AbstractManifold, p, qs...;
+        errors = [],
+        name = "is_point on $M for $(typeof(p)) points",
+        test_warn = true,
+        test_info = true,
+        kwargs...
+    )
     Test.@testset "$(name)" begin
         Test.@test is_point(M, p; kwargs...)
-        for (i,q) in enumerate(qs)
+        for (i, q) in enumerate(qs)
             Test.@test !is_point(M, q; kwargs...)
-            (test_warn) && Test.@test_logs (:warn,) is_point(M, q; error=:warn, kwargs...)
-            (test_info) && Test.@test_logs (:info,) is_point(M, q; error=:info, kwargs...)
+            (test_warn) && Test.@test_logs (:warn,) is_point(M, q; error = :warn, kwargs...)
+            (test_info) && Test.@test_logs (:info,) is_point(M, q; error = :info, kwargs...)
             if length(errors) >= i && !isnothing(errors[i])
-                Test.@test_throws (errors[i]) is_point(M, q; error=:error, kwargs...)
+                Test.@test_throws (errors[i]) is_point(M, q; error = :error, kwargs...)
             end
         end
     end
