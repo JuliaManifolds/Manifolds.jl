@@ -25,6 +25,7 @@ _ALL_FUNCTIONS = [
     exp,
     inner,
     inverse_retract,
+    is_point,
     log,
     manifold_dimension,
     norm,
@@ -47,6 +48,7 @@ function test_distance end
 function test_exp end
 function test_inner end
 function test_inverse_retract end
+function test_is_point end
 function test_log end
 function test_manifold_dimension end
 function test_norm end
@@ -71,7 +73,6 @@ function test_get_coordinates end
 function test_get_vector end
 function test_get_vectors end
 function test_injectivity_radius end
-function test_is_point end
 function test_is_vector end
 function test_mid_point end
 function test_project end

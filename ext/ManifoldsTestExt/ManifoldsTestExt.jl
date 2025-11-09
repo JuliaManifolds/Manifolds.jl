@@ -26,13 +26,14 @@ Possible properties are
 * `:InverseRetractionMethods` is a vector of inverse retraction methods to test on `M`
   these should have the same order as `:RetractionMethods` (use `nothing` for skipping one)
 * `:Points` is a vector of at least 2 points on `M`, which should not be the same point
-* `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entr in `:Points`
 * `:Mutating` is a boolean (`true` by default) whether to test the mutating variants of functions or not.
 * `:Name` is a name of the test. If not provided, defaults to `"\$M"`
-* `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entr in `:Points`
 * `:RetractionMethods` is a vector of retraction methods to test on `M`
   these should have the same order as `:InverseRetractionMethods` (use `nothing` for skipping one)
+* `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entr in `:Points`
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
+* `:TestWarn` is a boolean (`true` by default) whether to test that whether `error=:warn` in verification functions issues warning.
+* `:TestInfo` is a boolean (`true` by default) whether to test that whether `error=:info` in verification functions issues info messages.
 
 Possible entries of the `expectations` dictionary are
 
@@ -51,6 +52,8 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     points = get(properties, :Points, [])
     vectors = get(properties, :Vectors, [])
     test_name = get(properties, :Name, "$M")
+    test_warn = get(properties, :TestWarn, true)
+    test_info = get(properties, :TestInfo, true)
     function_atols = get(expectations, :atols, Dict())
     result_types = get(expectations, :Types, Dict())
     retraction_methods = get(properties, :RetractionMethods, [])
@@ -103,6 +106,18 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                     name = "inverse_retract(M, p, q, $irm)", # shorten name within large suite
                 )
             end
+        end
+        if (is_point in functions)
+            qs = get(properties, :InvalidPoints, [])
+            errs = get(properties, :IsPointErrors, [])
+            Manifolds.Test.test_is_point(
+                M, points[1], qs...;
+                errors = errs,
+                name = "is_point on M for $(typeof(points[1])) points",
+                test_warn = test_warn,
+                test_info = test_info,
+                atol = get(function_atols, is_point, atol),
+            )
         end
         if (log in functions)
             expected_log = get(expectations, :log, nothing)
@@ -395,6 +410,48 @@ function Manifolds.Test.test_inverse_retract(
     end
     return nothing
 end # Manifolds.Test.test_inverse_retraction
+
+"""
+    Manifolds.Test.is_point(
+        M, p qs...;
+        errors = [],
+        name = "is_point on \$M for \$(typeof(p)) points",
+        test_warn = true,
+        test_info = true,
+        kwargs...
+    )
+
+Test the function [`is_point`](@ref) on  for point `p` on manifold `M`.
+
+* that for `p` it returns `true`.
+* that for each `q` in `qs` it
+  * returns `false`
+  * issues a warning (if activated)
+  * isues an info message (if activated)
+  * throws the corresponding error from `error_types` (if not nothing)
+
+"""
+function Manifolds.Test.test_is_point(
+    M::AbstractManifold, p, qs...;
+    errors = [],
+    name = "is_point on $M for $(typeof(p)) points",
+    test_warn = true,
+    test_info = true,
+    kwargs...
+)
+    Test.@testset "$(name)" begin
+        Test.@test is_point(M, p; kwargs...)
+        for (i,q) in enumerate(qs)
+            Test.@test !is_point(M, q; kwargs...)
+            (test_warn) && Test.@test_logs (:warn,) is_point(M, q; error=:warn, kwargs...)
+            (test_info) && Test.@test_logs (:info,) is_point(M, q; error=:info, kwargs...)
+            if length(errors) >= i && !isnothing(errors[i])
+                Test.@test_throws (errors[i]) is_point(M, q; error=:error, kwargs...)
+            end
+        end
+    end
+    return nothing
+end
 
 """
     Manifolds.Test.test_log(
