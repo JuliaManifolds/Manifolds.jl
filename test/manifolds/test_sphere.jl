@@ -16,6 +16,7 @@ Manifolds.Test.test_manifold(
         :Functions => Manifolds.Test.all_functions(),
         :InverseRetractionMethods => [LogarithmicInverseRetraction(), ProjectionInverseRetraction()],
         :Points => [p, q], :Vectors => [X, Y],
+        :InvalidPoints => [2*p],
         :RetractionMethods => [ExponentialRetraction(), ProjectionRetraction()],
         :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
     ),
@@ -23,6 +24,7 @@ Manifolds.Test.test_manifold(
     Dict(
         :atol => 1.0e-12,
         exp => q,
-        manifold_dimension => 2
+        manifold_dimension => 2,
+        :IsPointErrors => [DomainError]
     ),
 );
