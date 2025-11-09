@@ -71,6 +71,7 @@ function test_flat end
 function test_geodesic end
 function test_get_basis end
 function test_get_coordinates end
+function test_get_embedding end
 function test_get_vector end
 function test_get_vectors end
 function test_injectivity_radius end
