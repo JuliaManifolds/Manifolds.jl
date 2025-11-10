@@ -23,8 +23,10 @@ Manifolds.Test.test_manifold(
     # Expectations
     Dict(
         :atol => 1.0e-12,
-        exp => q,
         distance => π / 4,
+        exp => q,
+        injectivity_radius => π,
+        (injectivity_radius, ProjectionRetraction()) => π / 2,
         log => X, norm => π / 4,
         parallel_transport_to => parallel_transport_to(M, p, X, q),
         parallel_transport_direction => parallel_transport_to(M, p, X, q),

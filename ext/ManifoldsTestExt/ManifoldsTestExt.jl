@@ -63,7 +63,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     retraction_methods = get(properties, :RetractionMethods, [])
     inverse_retraction_methods = get(properties, :InverseRetractionMethods, [])
     vector_transport_methods = get(properties, :VectorTransportMethods, [])
-    return Test.@testset "$test_name" begin
+    t = Test.@testset "$test_name" begin
         n_points = length(points)
         n_vectors = length(vectors)
         if (copy in functions)
@@ -97,6 +97,29 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, exp, atol),
                 name = "exp(M, p, X)", # shorten name within large suite
             )
+        end
+        if (injectivity_radius in functions)
+            expected = get(expectations, (injectivity_radius, points[1]), nothing)
+            expected_global = get(expectations, injectivity_radius, nothing)
+            Manifolds.Test.test_injectivity_radius(
+                M, points[1];
+                expected_value = expected,
+                expected_global_value = expected_global,
+                name = "injectivity_radius(M, p)", # shorten name within large suite
+            )
+            for rm in retraction_methods
+                isnothing(rm) && continue
+                expected_rm = get(expectations, (injectivity_radius, points[1], rm), nothing)
+                expected_rm_global = get(expectations, (injectivity_radius, rm), nothing)
+                Manifolds.Test.test_injectivity_radius(
+                    M, points[1];
+                    expected_value = expected_rm,
+                    expected_global_value = expected_rm_global,
+                    retraction_method = rm,
+                    name = "injectivity_radius(M, p, $rm)", # shorten name within large suite
+                )
+            end
+
         end
         if (inner in functions)
             expected_inner = get(expectations, inner, nothing)
@@ -233,6 +256,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             )
         end
     end # end of test_manifold testset
+    return t
 end
 
 # Single function tests
@@ -417,6 +441,47 @@ function Manifolds.Test.test_exp(
     end
     return nothing
 end # Manifolds.Test.test_exp
+
+"""
+    Manifolds.Test.test_injectority_radius(M, p = nothing;
+        expected_value=nothing,
+        expected_global_value=nothing,
+        retraction_method = nothing,
+        name = "Injectivity radius on \$M at point \$(typeof(p)) and \$(retraction_method)",
+        kwargs...
+    )
+
+Test the injectivity radius on manifold `M` at point `p`.
+
+* that the result is a nonnegative real number
+* that the result matches `expected_value`, if given
+* if a point `p` is given, that the result is larger or equal to the global injectivity radius
+"""
+function Manifolds.Test.test_injectivity_radius(
+        M::AbstractManifold, p = nothing;
+        expected_value = nothing,
+        expected_global_value = nothing,
+        name = "Injectivity radius on $M at point $(typeof(p))",
+        retraction_method = nothing,
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        r = if isnothing(p)
+            isnothing(retraction_method) ? injectivity_radius(M) : injectivity_radius(M, retraction_method)
+        else
+            isnothing(retraction_method) ? injectivity_radius(M, p) : injectivity_radius(M, p, retraction_method)
+        end
+        Test.@test r ≥ 0.0
+        if !isnothing(expected_value)
+            Test.@test isapprox(r, expected_value; kwargs...)
+        end
+        if !isnothing(p)
+            r_global = isnothing(retraction_method) ? injectivity_radius(M) : injectivity_radius(M, retraction_method)
+            Test.@test r ≥ r_global
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_injectivity_radius
 
 """
     Manifolds.Test.test_inner(M, p, X, Y;

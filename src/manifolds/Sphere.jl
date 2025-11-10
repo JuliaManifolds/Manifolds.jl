@@ -285,19 +285,32 @@ function get_vector_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNumbers)
     return Y
 end
 
-@doc raw"""
-    injectivity_radius(M::AbstractSphere[, p])
+_doc_injectivity_radius_sphere = raw"""
+    injectivity_radius(M::AbstractSphere[, p, ::ExponentialRetraction])
 
 Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is globally ``π``.
-
-    injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
-
-Return the injectivity radius for the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) on the
-[`AbstractSphere`](@ref), which is globally ``\frac{π}{2}``.
 """
+@doc "$(_doc_injectivity_radius_sphere)"
 injectivity_radius(::AbstractSphere) = π
+@doc "$(_doc_injectivity_radius_sphere)"
 injectivity_radius(::AbstractSphere, p) = π
 #avoid falling back but use the ones below
+
+_doc_injectivity_radius_sphere_projection = raw"""
+    injectivity_radius(M::Sphere, ::ProjectionRetraction)
+    injectivity_radius(M::Sphere, p, ::ProjectionRetraction)
+
+Return the injectivity radius for the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) on the
+[`AbstractSphere`](@ref), which is globally ``$(_tex(:frac, "π", "2"))``.
+"""
+
+@doc "$(_doc_injectivity_radius_sphere_projection)"
+injectivity_radius(::AbstractSphere, ::ProjectionRetraction)
+
+@doc "$(_doc_injectivity_radius_sphere_projection)"
+injectivity_radius(::AbstractSphere, p, ::ProjectionRetraction)
+
+# Resolve ambiguities
 function injectivity_radius(M::AbstractSphere, m::AbstractRetractionMethod)
     return _injectivity_radius(M, m)
 end

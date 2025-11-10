@@ -25,6 +25,7 @@ const _ALL_FUNCTIONS = [
     copyto!,
     distance,
     exp,
+    injectivity_radius,
     inner,
     inverse_retract,
     is_point,
@@ -51,6 +52,7 @@ function test_copy end
 function test_copyto end
 function test_distance end
 function test_exp end
+function test_injectivity_radius end
 function test_inner end
 function test_inverse_retract end
 function test_is_point end
@@ -77,7 +79,6 @@ function test_get_coordinates end
 function test_get_embedding end
 function test_get_vector end
 function test_get_vectors end
-function test_injectivity_radius end
 function test_mid_point end
 function test_project end
 function test_project_embed end
