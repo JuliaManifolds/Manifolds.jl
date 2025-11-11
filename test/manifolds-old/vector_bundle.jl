@@ -35,7 +35,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
 
     @testset "basic tests" begin
         @test injectivity_radius(TB) == 0
-        @test sprint(show, TB) == "TangentBundle(Sphere(2, ℝ))"
+        @test sprint(show, TB) == "TangentBundle(Sphere(2))"
         @test base_manifold(TB) == M
         @test manifold_dimension(TB) == 2 * manifold_dimension(M)
         @test !is_flat(TB)
@@ -45,9 +45,9 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test default_vector_transport_method(TB) isa
             Manifolds.FiberBundleProductVectorTransport
         CTB = CotangentBundle(M)
-        @test sprint(show, CTB) == "CotangentBundle(Sphere(2, ℝ))"
+        @test sprint(show, CTB) == "CotangentBundle(Sphere(2))"
         @test sprint(show, FiberBundle(TestVectorSpaceType(), M)) ==
-            "FiberBundle(TestVectorSpaceType(), Sphere(2, ℝ), Manifolds.FiberBundleProductVectorTransport{ParallelTransport, ParallelTransport}(ParallelTransport(), ParallelTransport()))"
+            "FiberBundle(TestVectorSpaceType(), Sphere(2), Manifolds.FiberBundleProductVectorTransport{ParallelTransport, ParallelTransport}(ParallelTransport(), ParallelTransport()))"
 
         @test Manifolds.fiber_dimension(M, ManifoldsBase.CotangentSpaceType()) == 2
         @test base_manifold(TangentBundle(M)) == M
@@ -162,7 +162,7 @@ struct TestVectorSpaceType <: VectorSpaceType end
         @test vector_space_dimension(Sphere(3), TT) == 9
         @test base_manifold(Fiber(Sphere(2), [1.0, 0.0, 0.0], TT)) == M
         @test sprint(show, Fiber(Sphere(2), [1.0, 0.0, 0.0], TT)) ==
-            "VectorSpaceFiber{ℝ, Sphere{ℝ, TypeParameter{Tuple{2}}}, Manifolds.TensorProductType{Tuple{TangentSpaceType, TangentSpaceType}}, Vector{Float64}}(Sphere(2, ℝ), [1.0, 0.0, 0.0], TensorProductType(TangentSpaceType(), TangentSpaceType()))"
+            "VectorSpaceFiber{ℝ, Sphere{ℝ, TypeParameter{Tuple{2}}}, Manifolds.TensorProductType{Tuple{TangentSpaceType, TangentSpaceType}}, Vector{Float64}}(Sphere(2), [1.0, 0.0, 0.0], TensorProductType(TangentSpaceType(), TangentSpaceType()))"
     end
 
     @testset "Error messages" begin

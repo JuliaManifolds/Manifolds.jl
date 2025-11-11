@@ -45,7 +45,7 @@ end
     @test manifold_dimension(Mr2) == 105
     @test manifold_dimension(Mrn2) == 105
 
-    @test repr(Ms1) == "PowerManifold(Sphere(2, ℝ), 5)"
+    @test repr(Ms1) == "PowerManifold(Sphere(2), 5)"
     @test repr(Mrn1) == "PowerManifold(Rotations(3), NestedPowerRepresentation(), 5)"
 
     @test Manifolds.allocation_promotion_function(Ms, exp, ([1],)) ==
@@ -439,6 +439,6 @@ end
     @testset "Static type parameter" begin
         Ms1s = PowerManifold(Ms, 5; parameter = :type)
         @test sprint(show, "text/plain", Ms1s) ==
-            "PowerManifold(Sphere(2, ℝ), 5, parameter=:type)"
+            "PowerManifold(Sphere(2), 5, parameter=:type)"
     end
 end
