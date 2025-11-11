@@ -23,6 +23,9 @@ using ..Manifolds
 const _ALL_FUNCTIONS = [
     copy,
     copyto!,
+    default_inverse_retraction_method,
+    default_retraction_method,
+    default_vector_transport_method,
     distance,
     exp,
     injectivity_radius,
@@ -50,6 +53,9 @@ function test_manifold end
 # the small functions per single API function
 function test_copy end
 function test_copyto end
+function test_default_retraction end
+function test_default_inverse_retraction end
+function test_default_vector_transport_method end
 function test_distance end
 function test_exp end
 function test_injectivity_radius end
@@ -67,10 +73,6 @@ function test_zero_vector end
 #
 #
 # TODO
-function test_default_atlas end
-function test_default_retraction end
-function test_default_inverse_retraction end
-function test_default_vector_transport end
 function test_embed end
 function test_flat end
 function test_geodesic end

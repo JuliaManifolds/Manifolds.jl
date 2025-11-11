@@ -63,7 +63,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     retraction_methods = get(properties, :RetractionMethods, [])
     inverse_retraction_methods = get(properties, :InverseRetractionMethods, [])
     vector_transport_methods = get(properties, :VectorTransportMethods, [])
-    t = Test.@testset "$test_name" begin
+    t = Test.@testset "$test_name" begin # COV_EXCL_LINE
         n_points = length(points)
         n_vectors = length(vectors)
         if (copy in functions)
@@ -76,6 +76,42 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             Manifolds.Test.test_copyto(
                 M, points[1], vectors[1];
                 name = "copyto!(M, q, p) & copyto!(M, Y, p, X)",
+            )
+        end
+        if (default_inverse_retraction_method in functions)
+            Manifolds.Test.test_default_inverse_retraction(
+                M;
+                expected_value = get(expectations, default_inverse_retraction_method, nothing),
+                name = "default_inverse_retraction_method(M)",
+            )
+            Manifolds.Test.test_default_inverse_retraction(
+                M, typeof(points[1]);
+                expected_value = get(expectations, default_inverse_retraction_method, nothing),
+                name = "default_inverse_retraction_method(M, P)",
+            )
+        end
+        if (default_retraction_method in functions)
+            Manifolds.Test.test_default_retraction(
+                M;
+                expected_value = get(expectations, default_retraction_method, nothing),
+                name = "default_retraction_method(M)",
+            )
+            Manifolds.Test.test_default_retraction(
+                M, typeof(points[1]);
+                expected_value = get(expectations, default_retraction_method, nothing),
+                name = "default_retraction_method(M, P)",
+            )
+        end
+        if (default_vector_transport_method in functions)
+            Manifolds.Test.test_default_vector_transport_method(
+                M;
+                expected_value = get(expectations, default_vector_transport_method, nothing),
+                name = "default_vector_transport_method(M)",
+            )
+            Manifolds.Test.test_default_vector_transport_method(
+                M, typeof(points[1]);
+                expected_value = get(expectations, default_vector_transport_method, nothing),
+                name = "default_vector_transport_method(M, P)",
             )
         end
         if (distance in functions)
@@ -324,6 +360,89 @@ function Manifolds.Test.test_copyto(
     return nothing
 end
 
+"""
+    Manifolds.Test.test_default_inverse_retraction_method(
+        M, T=nothing;
+        expected_value = nothing,
+        expected_type = isnothing(expected_value) ? nothing : typeof(expected_value),
+        name = "default_inverse_retraction_method on \$M \$(isnothing(T) ? "" : "for type \$T")",
+    )
+
+Test the [`default_inverse_retraction_method`](@extref `ManifoldsBase.default_inverse_retraction_method`) on manifold `M`.
+* that it returns an [`AbstractInverseRetractionMethod`](@extref `ManifoldsBase.AbstractInverseRetractionMethod`)
+* that the result matches `expected_value`, if given
+* that the result is of type `expected_type`, if given, defaults to the type of the value
+"""
+function Manifolds.Test.test_default_inverse_retraction(
+        M::AbstractManifold, T = nothing;
+        expected_value = nothing,
+        expected_type = isnothing(expected_value) ? nothing : typeof(expected_value),
+        name = "default_inverse_retraction_method on $M $(isnothing(T) ? "" : "for type $T")",
+    )
+    Test.@testset "$(name)" begin
+        m = isnothing(T) ? default_inverse_retraction_method(M) : default_inverse_retraction_method(M, T)
+        Test.@test m isa AbstractInverseRetractionMethod
+        isnothing(expected_value) || Test.@test m == expected_value
+        isnothing(expected_type) || Test.@test m isa expected_type
+    end
+    return nothing
+end # Manifolds.Test.test_default_inverse_retraction
+
+"""
+    Manifolds.Test.test_default_retraction_method(
+        M, T=nothing;
+        expected_value = nothing,
+        expected_type = isnothing(expected_value) ? nothing : typeof(expected_value),
+        name = "default_retraction_method on \$M \$(isnothing(T) ? "" : "for type \$T")",
+    )
+
+Test the [`default_retraction_method`](@extref `ManifoldsBase.default_retraction_method`) on manifold `M`.
+* that it returns an [`AbstractRetractionMethod`](@extref `ManifoldsBase.AbstractRetractionMethod`)
+* that the result matches `expected_value`, if given
+* that the result is of type `expected_type`, if given, defaults to the type of the value
+"""
+function Manifolds.Test.test_default_retraction(
+        M::AbstractManifold, T = nothing;
+        expected_value = nothing,
+        expected_type = isnothing(expected_value) ? nothing : typeof(expected_value),
+        name = "default_retraction_method on $M $(isnothing(T) ? "" : "for type $T")",
+    )
+    Test.@testset "$(name)" begin
+        m = isnothing(T) ? default_retraction_method(M) : default_retraction_method(M, T)
+        Test.@test m isa AbstractRetractionMethod
+        isnothing(expected_value) || Test.@test m == expected_value
+        isnothing(expected_type) || Test.@test m isa expected_type
+    end
+    return nothing
+end # Manifolds.Test.test_default_retraction
+
+"""
+    Manifolds.Test.test_default_vector_transport_method(
+        M, T=nothing;
+        expected_value = nothing,
+        expected_type = isnothing(expected_value) ? nothing : typeof(expected_value),
+        name = "default_vector_transport_method on \$M \$(isnothing(T) ? "" : "for type \$T")",
+    )
+
+Test the [`default_vector_transport_method`](@extref `ManifoldsBase.default_vector_transport_method`) on manifold `M`.
+* that it returns an [`AbstractVectorTransportMethod`](@extref `ManifoldsBase.AbstractVectorTransportMethod`)
+* that the result matches `expected_value`, if given
+* that the result is of type `expected_type`, if given, defaults to the type of the value
+"""
+function Manifolds.Test.test_default_vector_transport_method(
+        M::AbstractManifold, T = nothing;
+        expected_value = nothing,
+        expected_type = isnothing(expected_value) ? nothing : typeof(expected_value),
+        name = "default_vector_transport_method on $M $(isnothing(T) ? "" : "for type $T")",
+    )
+    Test.@testset "$(name)" begin
+        m = isnothing(T) ? default_vector_transport_method(M) : default_vector_transport_method(M, T)
+        Test.@test m isa AbstractVectorTransportMethod
+        isnothing(expected_value) || Test.@test m == expected_value
+        isnothing(expected_type) || Test.@test m isa expected_type
+    end
+    return nothing
+end # Manifolds.Test.test_default_vector_transport
 """
     Manifolds.Test.test_distance(M, p, q;
         available_functions=[], expected_value=nothing,

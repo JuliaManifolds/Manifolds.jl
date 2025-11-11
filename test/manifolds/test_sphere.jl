@@ -23,6 +23,9 @@ Manifolds.Test.test_manifold(
     # Expectations
     Dict(
         :atol => 1.0e-12,
+        default_inverse_retraction_method => LogarithmicInverseRetraction(),
+        default_retraction_method => StabilizedRetraction(),
+        default_vector_transport_method => ParallelTransport(),
         distance => π / 4,
         exp => q,
         injectivity_radius => π,
