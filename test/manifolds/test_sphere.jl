@@ -79,10 +79,10 @@ using LinearAlgebra, Manifolds, Test
     )
 
     Manifolds.Test.test_manifold(
-        ArraySphere(2; parameter = :field),
+        ArraySphere(2, 2; parameter = :field),
         Dict(:Functions => [repr]),
         # Expectations
-        Dict(repr => "ArraySphere(2; parameter=:field)"),
+        Dict(repr => "ArraySphere(2, 2; parameter=:field)"),
     )
 
     @testset "Specific Tests and boundary cases" begin
