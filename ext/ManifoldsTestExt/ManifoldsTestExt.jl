@@ -55,7 +55,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     functions = get(properties, :Functions, Function[])
     points = get(properties, :Points, [])
     vectors = get(properties, :Vectors, [])
-    test_name = get(properties, :Name, "$M")
+    test_name = get(properties, :Name, "Manifolds.Test suite for $M")
     test_warn = get(properties, :TestWarn, true)
     test_info = get(properties, :TestInfo, true)
     function_atols = get(expectations, :atols, Dict())

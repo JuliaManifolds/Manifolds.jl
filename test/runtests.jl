@@ -166,7 +166,6 @@ end
         include_test("manifolds-old/shape_space.jl")
         include_test("manifolds-old/skewhermitian.jl")
         include_test("manifolds-old/spectrahedron.jl")
-        include_test("manifolds-old/sphere.jl")
         include_test("manifolds-old/sphere_symmetric_matrices.jl")
         include_test("manifolds-old/stiefel.jl")
         include_test("manifolds-old/symmetric.jl")

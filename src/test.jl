@@ -74,6 +74,7 @@ function test_zero_vector end
 #
 # TODO
 function test_embed end
+function test_estimated_sectional_curvature_matrix end
 function test_flat end
 function test_geodesic end
 function test_get_basis end
@@ -81,11 +82,14 @@ function test_get_coordinates end
 function test_get_embedding end
 function test_get_vector end
 function test_get_vectors end
+function test_manifold_volume end
 function test_mid_point end
 function test_project end
 function test_project_embed end
 function test_rand end
 function test_repr end
+function test_sectional_curvature_matrix end
 function test_sharp end
 function test_shortest_geodesic end
+function test_Weingarten end
 end
