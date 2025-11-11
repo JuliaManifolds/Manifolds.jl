@@ -250,6 +250,14 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 name = "parallel_transport_to(M, p, X, q)", # shorten name within large suite
             )
         end
+        if (repr in functions)
+            expected_repr = get(expectations, repr, nothing)
+            Manifolds.Test.test_repr(
+                M;
+                expected_value = expected_repr,
+                name = "repr(M)",
+            )
+        end
         if (retract in functions)
             for (rm, irm) in zip(retraction_methods, inverse_retraction_methods)
                 isnothing(rm) && continue
@@ -994,6 +1002,27 @@ function Manifolds.Test.test_parallel_transport(
 end # Manifolds.Test.test_parallel_transport
 
 """
+    Manifolds.Test.test_repr(
+        M;
+        expected_value=nothing,
+        name = "(String) repr_esentation of \$M",
+    )
+
+Test that the default `show` method works as expected by calling `repr(M)`.
+"""
+function Manifolds.Test.test_repr(
+        M; expected_value = nothing, name = "(String) repr_esentation of \$M",
+    )
+    Test.@testset "$(name)" begin
+        s = repr(M)
+        if !isnothing(expected_value)
+            Test.@test s == expected_value
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_repr
+
+"""
     Manifolds.test.test_retract(
         M, p, X, m::AbstractRetractionMethod;
         available_functions=[],
@@ -1149,7 +1178,6 @@ function Manifolds.Test.test_vector_transport(
     end
     return nothing
 end # Manifolds.Test.test_vector_transport
-
 
 """
     Manifolds.Test.test_zero_vector(M, p;

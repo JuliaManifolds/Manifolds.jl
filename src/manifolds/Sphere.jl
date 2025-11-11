@@ -534,18 +534,18 @@ function ManifoldsBase.retract_project_fused!(M::AbstractSphere, q, p, X, t::Num
 end
 
 function Base.show(io::IO, ::Sphere{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
-    return print(io, "Sphere($(n), $(𝔽))")
+    return print(io, "Sphere($(n)$(𝔽 == ManifoldsBase.ℝ ? "" : ", $𝔽"))")
 end
 function Base.show(io::IO, M::Sphere{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return print(io, "Sphere($(n), $(𝔽); parameter=:field)")
+    return print(io, "Sphere($(n)$(𝔽 == ManifoldsBase.ℝ ? "" : ", $𝔽"); parameter=:field)")
 end
 function Base.show(io::IO, ::ArraySphere{𝔽, TypeParameter{tn}}) where {tn, 𝔽}
-    return print(io, "ArraySphere($(join(tn.parameters, ", ")); field=$(𝔽))")
+    return print(io, "ArraySphere($(join(tn.parameters, ", "))$(𝔽 == ManifoldsBase.ℝ ? "" : "; field=$(𝔽)"))")
 end
 function Base.show(io::IO, M::ArraySphere{𝔽, <:Tuple}) where {𝔽}
     n = M.size
-    return print(io, "ArraySphere($(join(n, ", ")); field=$(𝔽), parameter=:field)")
+    return print(io, "ArraySphere($(join(n, ", "));$(𝔽 == ManifoldsBase.ℝ ? "" : " field=$(𝔽),") parameter=:field)")
 end
 
 @doc raw"""

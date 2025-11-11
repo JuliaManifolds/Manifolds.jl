@@ -38,8 +38,51 @@ using LinearAlgebra, Manifolds, Test
             parallel_transport_to => parallel_transport_to(M, p, X, q),
             parallel_transport_direction => parallel_transport_to(M, p, X, q),
             manifold_dimension => 2,
+            repr => "Sphere(2)",
             :IsPointErrors => [DomainError]
         ),
+    )
+
+    Manifolds.Test.test_manifold(
+        Sphere(2, ℂ),
+        Dict(:Functions => [repr]),
+        # Expectations
+        Dict(repr => "Sphere(2, ℂ)"),
+    )
+
+    Manifolds.Test.test_manifold(
+        Sphere(2, ℍ),
+        Dict(:Functions => [repr]),
+        # Expectations
+        Dict(repr => "Sphere(2, ℍ)"),
+    )
+
+    Manifolds.Test.test_manifold(
+        Sphere(2; parameter = :field),
+        Dict(:Functions => [repr]),
+        # Expectations
+        Dict(repr => "Sphere(2; parameter=:field)"),
+    )
+
+    Manifolds.Test.test_manifold(
+        ArraySphere(2, 2),
+        Dict(:Functions => [repr]),
+        # Expectations
+        Dict(repr => "ArraySphere(2, 2)"),
+    )
+
+    Manifolds.Test.test_manifold(
+        ArraySphere(2, 2; field = ℂ),
+        Dict(:Functions => [repr]),
+        # Expectations
+        Dict(repr => "ArraySphere(2, 2; field=ℂ)"),
+    )
+
+    Manifolds.Test.test_manifold(
+        ArraySphere(2; parameter = :field),
+        Dict(:Functions => [repr]),
+        # Expectations
+        Dict(repr => "ArraySphere(2; parameter=:field)"),
     )
 
     @testset "Specific Tests and boundary cases" begin
@@ -122,8 +165,7 @@ using LinearAlgebra, Manifolds, Test
             end
 
             @testset "Array Sphere" begin
-                M = ArraySphere(2, 2; field = ℝ)
-                @test repr(M) == "ArraySphere(2, 2; field=ℝ)"
+                M = ArraySphere(2, 2)
                 @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{2, 2}}}
                 @test representation_size(M) == (2, 2)
                 p = ones(2, 2)
