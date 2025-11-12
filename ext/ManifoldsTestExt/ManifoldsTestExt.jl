@@ -23,6 +23,8 @@ Possible properties are
 * `:Functions` is a vector of all defined functions for `M`
   note a test is activated by the function (like `exp`), adding the mutating function (like `exp!`) overwrites the
   global default (see `:Mutating`) to true.
+* `:EmbeddedPoints` is a vector of points in the embedding space of `M`, to test `project`
+* `:EmbeddedVectors` is a vector of tangent vectors in the embedding space of `M`, to test `project`
 * `:InvalidPoints` is a vector of points that are not on `M`, e.g. to test `is_point`
 * `:InvalidVectors` is a vector of tangent vectors that are not in the tangent space of the first point from `:Points`
 * `:InverseRetractionMethods` is a vector of inverse retraction methods to test on `M`
@@ -41,6 +43,8 @@ Possible entries of the `expectations` dictionary are
 
 * any function tested to provide their expected resulting value, e.g. `exp => p` for the result of `exp(M, p, X)`
 * for retractions, inverse retractions, and vector transports, the key is a tuple of the function and the method, e.g. `(retract, method) => q`
+* for `embed`, and `project`, the key is a tuple of the function and `:Point` or `:Vector`, e.g. `(embed, :Point) of expected (embedded) points or vectors,
+  omitting that symbol is interpreted as the expected point.
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
@@ -123,6 +127,20 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, distance, atol),
             )
         end
+        if (embed in functions)
+            ep = get(expectations, embed, nothing)
+            ep = !isnothing(ep) ? ep : get(expectations, (embed, :Point), nothing)
+            Manifolds.Test.test_embed(
+                M, points[1], n_vectors ≥ 1 ? vectors[1] : nothing;
+                available_functions = functions,
+                expected_point = ep,
+                expected_vector = get(expectations, (embed, :Vector), nothing),
+                test_aliased = aliased,
+                test_mutating = (embed! in functions) ? true : mutating,
+                name = "embed(M, p) & embed(M, p, X)", # shorten name within large suite
+                atol = get(function_atols, embed, atol),
+            )
+        end
         if (exp in functions)
             Manifolds.Test.test_exp(
                 M, points[1], vectors[1];
@@ -132,6 +150,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 test_mutating = (exp! in functions) ? true : mutating,
                 atol = get(function_atols, exp, atol),
                 name = "exp(M, p, X)", # shorten name within large suite
+            )
+        end
+        if (get_embedding in functions)
+            expected_embed = get(expectations, get_embedding, nothing)
+            expected_embed_P = get(expectations, (get_embedding, typeof(points[1])), nothing)
+            Manifolds.Test.test_get_embedding(
+                # check the global one if this point type does not have an expected embedding
+                M, typeof(points[1]);
+                expected_value = expected_embed,
+                name = "get_embedding(M, p)", # shorten name within large suite
             )
         end
         if (injectivity_radius in functions)
@@ -250,6 +278,30 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 name = "parallel_transport_to(M, p, X, q)", # shorten name within large suite
             )
         end
+        if (project in functions)
+            Q = get(properties, :EmbeddedPoints, nothing)
+            q = isnothing(Q) ? nothing : Q[1]
+            Ys = get(properties, :EmbeddedVectors, nothing)
+            Y = isnothing(Ys) ? nothing : Ys[1]
+            ep = get(expectations, project, nothing)
+            ep = !isnothing(ep) ? ep : get(expectations, (project, :Point), nothing)
+            eX = get(expectations, (project, :Vector), nothing)
+            if isnothing(q)
+                @warn "To test `project`, at least one `:EmbeddedPoints` must be provided."
+            else
+                Manifolds.Test.test_project(
+                    M, q, Y;
+                    available_functions = functions,
+                    expected_point = ep,
+                    expected_vector = eX,
+                    test_aliased = aliased,
+                    test_mutating = (project! in functions) ? true : mutating,
+                    atol = get(function_atols, project, atol),
+                    name = "project(M, q) & project(M, q, Y)", # shorten name within large suite
+                )
+            end
+        end
+
         if (repr in functions)
             expected_repr = get(expectations, repr, nothing)
             Manifolds.Test.test_repr(
@@ -452,7 +504,8 @@ function Manifolds.Test.test_default_vector_transport_method(
     return nothing
 end # Manifolds.Test.test_default_vector_transport
 """
-    Manifolds.Test.test_distance(M, p, q;
+    Manifolds.Test.test_distance(
+        M, p, q;
         available_functions=[], expected_value=nothing,
         name = "Distance on \$M between \$(typeof(p)) points",
         kwargs...
@@ -480,9 +533,7 @@ function Manifolds.Test.test_distance(
         Test.@test isapprox(d_pp, 0.0; kwargs...)
         d_qp = distance(M, q, p)
         Test.@test isapprox(d, d_qp; kwargs...)
-        if !isnothing(expected_value)
-            Test.@test isapprox(d, expected_value; kwargs...)
-        end
+        isnothing(expected_value) || Test.@test isapprox(d, expected_value; kwargs...)
         if (log in available_functions) && (norm in available_functions)
             # Test only if inj is not available of points are within inj radius
             run_test = !((injectivity_radius in available_functions)) || (d ≤ injectivity_radius(M, p))
@@ -493,7 +544,100 @@ function Manifolds.Test.test_distance(
         end
     end
     return nothing
-end
+end # Manifolds.Test.test_distance
+
+"""
+    Manifolds.Test.test_embed(
+        M, p, X=nothing;
+        available_functions=[],
+        expected_point=nothing,
+        expected_vector=nothing,
+        test_aliased=true,
+        test_mutating=true,
+        name = "Embedding on \$M for \$(typeof(p)) points",
+        kwargs...
+    )
+
+Test the [`embed`](@extref `ManifoldsBase.embed`)`(M, p)` and [`embed`](@extref `ManifoldsBase.embed`)`(M, p, X)`
+to embed points and tangent vectors (if not `nothing`).
+
+Besides a simple call of `embed` (for both variants) the following ones are prefoemd if `get_embedding` is available:
+
+* that the embedded point is a valid point on the embedding manifold
+* that the embedded vector is a valid tangent vector on the embedding manifold (if `get_embedding` is available and `X` is not `nothing`)
+* that the result matches `expected_point` and `expected_vector`, respectively, if given
+* that the projection inverts the embedding (if `project` is available)
+* that the mutating version `embed!` produces the same result(s) (if activated _and_ `get_embedding` is available)
+* that `embed!` works on aliased input (`p=q` or `X=Y`) (if activated _and_ p/q or X/Y are of same type)
+"""
+function Manifolds.Test.test_embed(
+        M::AbstractManifold, p, X = nothing;
+        available_functions = Function[],
+        expected_point = nothing,
+        expected_vector = nothing,
+        test_aliased = true,
+        test_mutating = true,
+        name = "Embedding on $M for $(typeof(p)) points",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        E = get_embedding(M) isa AbstractManifold ? get_embedding(M) : nothing
+        # Test point embedding
+        q = embed(M, p)
+        if !isnothing(E)
+            Test.@test is_point(E, q; error = :error, kwargs...)
+            isnothing(expected_point) || Test.@test isapprox(E, q, expected_point; error = :error, kwargs...)
+            if project in available_functions
+                p2 = project(M, q)
+                Test.@test isapprox(M, p, p2; error = :error, kwargs...)
+            end
+            if test_mutating
+                q2 = copy(E, q)
+                embed!(M, q2, p)
+                Test.@test isapprox(E, q2, q; error = :error, kwargs...)
+                if test_aliased && (typeof(p) == typeof(q))
+                    q3 = copy(E, p)
+                    embed!(M, q3, q3)  # aliased
+                    Test.@test isapprox(E, q3, q; error = :error, kwargs...)
+                end
+                if project in available_functions
+                    p3 = copy(M, p)
+                    project!(M, p3, q2)
+                    Test.@test isapprox(M, p, p3; error = :error, kwargs...)
+                end
+            end
+        end
+        # Test vector embedding
+        if !isnothing(X)
+            Y = embed(M, p, X)
+            if !isnothing(E)
+                Test.@test is_vector(E, q, Y; error = :error, kwargs...)
+                isnothing(expected_vector) || Test.@test isapprox(E, q, Y, expected_vector; error = :error, kwargs...)
+                if project in available_functions
+                    X2 = project(M, q, Y)
+                    Test.@test isapprox(M, p, X, X2; error = :error, kwargs...)
+                end
+                if test_mutating
+                    Y2 = copy(E, q, Y)
+                    embed!(M, Y2, p, X)
+                    Test.@test isapprox(E, q, Y2, Y; error = :error, kwargs...)
+                    if test_aliased
+                        Y3 = copy(E, q, Y)
+                        embed!(M, Y3, q, Y3)  # aliased
+                        Test.@test isapprox(E, q, Y3, Y; error = :error, kwargs...)
+                    end
+                    if project in available_functions
+                        X3 = copy(M, p, X)
+                        project!(M, X3, q, Y2)
+                        Test.@test isapprox(M, p, X, X3; error = :error, kwargs...)
+                    end
+                end
+            end
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_embed
+
 """
     Manifolds.Test.test_exp(
         M, p, X, t=1.0;
@@ -530,9 +674,7 @@ function Manifolds.Test.test_exp(
     Test.@testset "$(name)" begin
         q = exp(M, p, X)
         Test.@test is_point(M, q; error = :error, kwargs...)
-        if !isnothing(expected_value)
-            Test.@test isapprox(M, q, expected_value; error = :error, kwargs...)
-        end
+        isnothing(expected_value) || Test.@test isapprox(M, q, expected_value; error = :error, kwargs...)
         if test_mutating
             q2 = copy(M, p)
             exp!(M, q2, p, X)
@@ -570,6 +712,34 @@ function Manifolds.Test.test_exp(
 end # Manifolds.Test.test_exp
 
 """
+    Manifolds.Test.test_get_embedding(M, P=nothing;
+        expected_value=nothing,
+        expected_type = isnothing(expected_value) ? nothing : typeof(expected_value),
+        name = "get_embedding on \$M \$(isnothing(P) ? "" : "for type \$P")",
+    )
+
+Test the [`get_embedding`](@extref `ManifoldsBase.get_embedding`) on manifold `M`.
+* that it returns an `AbstractManifold`.
+* that its type matches `expected_type`, if given, defaults to the type of the expected value
+* that the result matches `expected_value`, if given
+
+"""
+function Manifolds.Test.test_get_embedding(
+        M::AbstractManifold, P::Type = nothing;
+        expected_value = nothing,
+        expected_type = isnothing(expected_value) ? nothing : typeof(expected_value),
+        name = "get_embedding on $M $(isnothing(P) ? "" : "for type $P")",
+    )
+    Test.@testset "$(name)" begin
+        E = isnothing(P) ? get_embedding(M) : get_embedding(M, P)
+        Test.@test E isa AbstractManifold
+        isnothing(expected_type) || Test.@test E isa expected_type
+        isnothing(expected_value) || Test.@test E == expected_value
+    end
+    return nothing
+end # Manifolds.Test.test_get_embedding
+
+"""
     Manifolds.Test.test_injectority_radius(M, p = nothing;
         expected_value=nothing,
         expected_global_value=nothing,
@@ -599,9 +769,7 @@ function Manifolds.Test.test_injectivity_radius(
             isnothing(retraction_method) ? injectivity_radius(M, p) : injectivity_radius(M, p, retraction_method)
         end
         Test.@test r ≥ 0.0
-        if !isnothing(expected_value)
-            Test.@test isapprox(r, expected_value; kwargs...)
-        end
+        isnothing(expected_value) || Test.@test isapprox(r, expected_value; kwargs...)
         if !isnothing(p)
             r_global = isnothing(retraction_method) ? injectivity_radius(M) : injectivity_radius(M, retraction_method)
             Test.@test r ≥ r_global
@@ -679,9 +847,7 @@ function Manifolds.Test.test_inverse_retract(
     Test.@testset "$(name)" begin
         X = inverse_retract(M, p, q, m)
         Test.@test is_vector(M, p, X; error = :error, kwargs...)
-        if !isnothing(expected_value)
-            Test.@test isapprox(M, p, X, expected_value; error = :error, kwargs...)
-        end
+        isnothing(expected_value) || Test.@test isapprox(M, p, X, expected_value; error = :error, kwargs...)
         if test_mutating
             Y = copy(M, p, X)
             inverse_retract!(M, Y, p, q, m)
@@ -793,10 +959,7 @@ function Manifolds.Test.test_is_vector(
                 Test.@test !is_vector(M, q, X, true; kwargs...)
                 (test_warn) && Test.@test_logs (:warn,) is_vector(M, q, X, true; error = :warn, kwargs...)
                 (test_info) && Test.@test_logs (:info,) is_vector(M, q, X, true; error = :info, kwargs...)
-                if !isnothing(basepoint_error)
-                    @info basepoint_error
-                    Test.@test_throws (basepoint_error) is_vector(M, q, X, true; error = :error, kwargs...)
-                end
+                isnothing(basepoint_error) || Test.@test_throws (basepoint_error) is_vector(M, q, X, true; error = :error, kwargs...)
             end
         end
     end
@@ -836,9 +999,7 @@ function Manifolds.Test.test_log(
         Z = log(M, p, p)
         Test.@test is_vector(M, p, Z; error = :error, kwargs...)
         Test.@test norm(M, p, Z) ≈ 0.0   # log
-        if !isnothing(expected_value)
-            Test.@test isapprox(M, p, X, expected_value; error = :error, kwargs...)
-        end
+        isnothing(expected_value) || Test.@test isapprox(M, p, X, expected_value; error = :error, kwargs...)
         if test_mutating
             Y = copy(M, p, X)
             log!(M, Y, p, q)
@@ -962,9 +1123,7 @@ function Manifolds.Test.test_parallel_transport(
     Test.@testset "$(name)" begin
         Y = parallel_transport_to(M, p, X, q)
         Test.@test is_vector(M, q, Y; error = :error, kwargs...)
-        if !isnothing(expected_value)
-            Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
-        end
+        isnothing(expected_value) || Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
         if test_mutating
             Y2 = copy(M, p, X)
             parallel_transport_to!(M, Y2, p, X, q)
@@ -977,9 +1136,7 @@ function Manifolds.Test.test_parallel_transport(
         end
         if (parallel_transport_direction in available_functions) && !isnothing(direction)
             Y4 = parallel_transport_direction(M, p, X, direction)
-            if !isnothing(expected_value_direction)
-                Test.@test isapprox(M, q, Y4, expected_value_direction; error = :error, kwargs...)
-            end
+            isnothing(expected_value_direction) || Test.@test isapprox(M, q, Y4, expected_value_direction; error = :error, kwargs...)
             if test_mutating
                 Y5 = copy(M, p, X)
                 parallel_transport_direction!(M, Y5, p, X, direction)
@@ -1002,6 +1159,74 @@ function Manifolds.Test.test_parallel_transport(
 end # Manifolds.Test.test_parallel_transport
 
 """
+    Manifolds.Test.test_project(
+        M, q, Y;
+        available_functions=[],
+        expected_point=nothing,
+        expected_vector=nothing,
+        test_aliased=true,
+        test_mutating=true,
+        name = "Projection on \$M for \$(typeof(q)) points",
+        kwargs...
+    )
+
+Test the [`project`](@extref `ManifoldsBase.project`)`(M, q)` and [`project`](@extref `ManifoldsBase.project`)`(M, q, Y)`
+to project points and tangent vectors (if not `nothing`).
+
+Besides a simple call of `project` (for both variants)  the following tests are performed
+
+* that the projected point is a valid point on the manifold
+* that the projected vector is a valid tangent vector on the manifold
+* that the result matches `expected_point` and `expected_vector`, respectively, if given
+* that the mutating version `project!` produces the same result(s) (if activated)
+* that `project!` works on aliased input (`p=q` or `X=Y`) (if activated _and_ p/q or X/Y are of same type)
+"""
+function Manifolds.Test.test_project(
+        M::AbstractManifold, q, Y = nothing;
+        available_functions = Function[],
+        expected_point = nothing,
+        expected_vector = nothing,
+        test_aliased = true,
+        test_mutating = true,
+        name = "Projection on $M for $(typeof(q)) points",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        # Test point projection
+        p = project(M, q)
+        Test.@test is_point(M, p; error = :error, kwargs...)
+        isnothing(expected_point) || Test.@test isapprox(M, p, expected_point; error = :error, kwargs...)
+        if test_mutating
+            p2 = copy(M, p)
+            project!(M, p2, q)
+            Test.@test isapprox(M, p2, p; error = :error, kwargs...)
+            if test_aliased && (typeof(p) == typeof(q))
+                p3 = copy(M, q)
+                project!(M, p3, p3)  # aliased
+                Test.@test isapprox(M, p3, p; error = :error, kwargs...)
+            end
+        end
+        # Test vector projection
+        if !isnothing(Y)
+            X = project(M, q, Y)
+            Test.@test is_vector(M, p, X; error = :error, kwargs...)
+            isnothing(expected_vector) || Test.@test isapprox(M, p, X, expected_vector; error = :error, kwargs...)
+            if test_mutating
+                X2 = copy(M, p, X)
+                project!(M, X2, q, Y)
+                Test.@test isapprox(M, p, X2, X; error = :error, kwargs...)
+                if test_aliased
+                    X3 = copy(M, p, X)
+                    project!(M, X3, q, X3)  # aliased
+                    Test.@test isapprox(M, p, X3, X; error = :error, kwargs...)
+                end
+            end
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_project
+
+"""
     Manifolds.Test.test_repr(
         M;
         expected_value=nothing,
@@ -1015,9 +1240,7 @@ function Manifolds.Test.test_repr(
     )
     Test.@testset "$(name)" begin
         s = repr(M)
-        if !isnothing(expected_value)
-            Test.@test s == expected_value
-        end
+        isnothing(expected_value) || Test.@test s == expected_value
     end
     return nothing
 end # Manifolds.Test.test_repr
@@ -1061,9 +1284,7 @@ function Manifolds.Test.test_retract(
     Test.@testset "$(name)" begin
         q = retract(M, p, X, m)
         Test.@test is_point(M, q; error = :error, kwargs...)
-        if !isnothing(expected_value)
-            Test.@test isapprox(M, q, expected_value; error = :error, kwargs...)
-        end
+        isnothing(expected_value) || Test.@test isapprox(M, q, expected_value; error = :error, kwargs...)
         if test_mutating
             q2 = copy(M, p)
             retract!(M, q2, p, X, m)
@@ -1140,9 +1361,7 @@ function Manifolds.Test.test_vector_transport(
     Test.@testset "$(name)" begin
         Y = vector_transport_to(M, p, X, q, m)
         Test.@test is_vector(M, q, Y; error = :error, kwargs...)
-        if !isnothing(expected_value)
-            Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
-        end
+        isnothing(expected_value) || Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
         if test_mutating
             Y2 = copy(M, p, X)
             vector_transport_to!(M, Y2, p, X, q, m)
@@ -1155,9 +1374,7 @@ function Manifolds.Test.test_vector_transport(
         end
         if (vector_transport_direction in available_functions) && !isnothing(direction)
             Y4 = vector_transport_direction(M, p, X, direction, m)
-            if !isnothing(expected_value_direction)
-                Test.@test isapprox(M, p, Y4, expected_value_direction; error = :error, kwargs...)
-            end
+            isnothing(expected_value_direction) || Test.@test isapprox(M, p, Y4, expected_value_direction; error = :error, kwargs...)
             if test_mutating
                 Y5 = copy(M, p, X)
                 vector_transport_direction!(M, Y5, p, X, direction, m)

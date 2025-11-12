@@ -27,7 +27,9 @@ const _ALL_FUNCTIONS = [
     default_retraction_method,
     default_vector_transport_method,
     distance,
+    embed,
     exp,
+    get_embedding,
     injectivity_radius,
     inner,
     inverse_retract,
@@ -38,6 +40,8 @@ const _ALL_FUNCTIONS = [
     norm,
     parallel_transport_direction,
     parallel_transport_to,
+    project,
+    repr,
     retract,
     vector_transport_direction,
     vector_transport_to,
@@ -57,7 +61,9 @@ function test_default_retraction end
 function test_default_inverse_retraction end
 function test_default_vector_transport_method end
 function test_distance end
+function test_embed end
 function test_exp end
+function test_get_embedding end
 function test_injectivity_radius end
 function test_inner end
 function test_inverse_retract end
@@ -67,6 +73,7 @@ function test_log end
 function test_manifold_dimension end
 function test_norm end
 function test_parallel_transport end
+function test_project end
 function test_repr end
 function test_retract end
 function test_vector_transport end
@@ -74,19 +81,16 @@ function test_zero_vector end
 #
 #
 # TODO
-function test_embed end
 function test_estimated_sectional_curvature_matrix end
 function test_flat end
 function test_geodesic end
 function test_get_basis end
 function test_get_coordinates end
-function test_get_embedding end
 function test_get_vector end
 function test_get_vectors end
 function test_manifold_volume end
 function test_mid_point end
-function test_project end
-function test_project_embed end
+function test_embed_project end
 function test_rand end
 function test_sectional_curvature_matrix end
 function test_sharp end
