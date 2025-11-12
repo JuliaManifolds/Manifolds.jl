@@ -301,7 +301,6 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 )
             end
         end
-
         if (repr in functions)
             expected_repr = get(expectations, repr, nothing)
             Manifolds.Test.test_repr(

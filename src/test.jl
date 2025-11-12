@@ -81,7 +81,6 @@ function test_zero_vector end
 #
 #
 # TODO
-function test_estimated_sectional_curvature_matrix end
 function test_flat end
 function test_geodesic end
 function test_get_basis end
@@ -96,4 +95,9 @@ function test_sectional_curvature_matrix end
 function test_sharp end
 function test_shortest_geodesic end
 function test_Weingarten end
+#
+#
+# For now not yet part of the test suite. Please test these individually
+function test_estimated_sectional_curvature_matrix end
+function test_mean end
 end
