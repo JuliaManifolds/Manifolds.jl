@@ -31,6 +31,8 @@ Possible properties are
   these should have the same order as `:RetractionMethods` (use `nothing` for skipping one)
 * `:Points` is a vector of at least 2 points on `M`, which should not be the same point
 * `:Mutating` is a boolean (`true` by default) whether to test the mutating variants of functions or not.
+  when setting this to false, you can still activate single functions mutation checks by
+  adding the mutating function to `:Functions`
 * `:Name` is a name of the test. If not provided, defaults to `"\$M"`
 * `:RetractionMethods` is a vector of retraction methods to test on `M`
   these should have the same order as `:InverseRetractionMethods` (use `nothing` for skipping one)
