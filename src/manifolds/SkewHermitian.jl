@@ -249,11 +249,11 @@ project(::SkewHermitianMatrices, ::Any, ::Any)
 project!(M::SkewHermitianMatrices, Y, p, X) = project!(M, Y, X)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::SkewHermitianMatrices,
-    pX;
-    σ::Real = one(real(eltype(pX))),
-    kwargs...,
+        rng::AbstractRNG,
+        M::SkewHermitianMatrices,
+        pX;
+        σ::Real = one(real(eltype(pX))),
+        kwargs...,
     )
     rand!(rng, pX)
     pX .= (σ / (2 * norm(pX))) .* (pX - pX')
