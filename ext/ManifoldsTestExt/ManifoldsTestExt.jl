@@ -34,6 +34,8 @@ Possible properties are
 * `:Name` is a name of the test. If not provided, defaults to `"\$M"`
 * `:RetractionMethods` is a vector of retraction methods to test on `M`
   these should have the same order as `:InverseRetractionMethods` (use `nothing` for skipping one)
+* `:Rng` is a random number generator to use for generating random points/vectors if needed
+* `:Seed` is a seed to use for generating random points/vectors if needed
 * `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entr in `:Points`
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
 * `:TestWarn` is a boolean (`true` by default) whether to test that whether `error=:warn` in verification functions issues warning.
@@ -300,6 +302,19 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                     name = "project(M, q) & project(M, q, Y)", # shorten name within large suite
                 )
             end
+        end
+        if (rand in functions)
+            rng = get(properties, :Rng, nothing)
+            seed = get(properties, :Seed, nothing)
+            Manifolds.Test.test_rand(
+                M;
+                seed = seed,
+                rng = rng,
+                vector_at = points[1],
+                test_mutating = (rand! in functions) ? true : mutating,
+                name = "rand(M)",
+                atol = get(function_atols, rand, atol),
+            )
         end
         if (repr in functions)
             expected_repr = get(expectations, repr, nothing)
@@ -1243,6 +1258,55 @@ function Manifolds.Test.test_repr(
     end
     return nothing
 end # Manifolds.Test.test_repr
+
+"""
+    Manifolds.Test.test_rand(M;
+        vector_at = nothing,
+        seed = nothing,
+        test_mutating = true,
+        rng = nothing,
+        name = "Random sampling on \$M",
+        kwargs...
+    )
+
+Test the random sampling functions `rand(M)` and `rand(M; vector_at=p` (if `vector_at` is given) on manifold `M`.
+
+* that the result of `rand(M)` is a valid point on the manifold
+* that the result of `rand(M; vector_at=p)` is a valid tangent vector at `p` on the manifold (if `vector_at` is given)
+* that the mutating versions `rand!` match the non-mutating versions (if activated)
+* that the four mentioned functions also work with a seed upfront.
+"""
+function Manifolds.Test.test_rand(
+        M::AbstractManifold;
+        vector_at = nothing,
+        seed = nothing,
+        test_mutating = true,
+        rng = nothing,
+        name = "Random sampling on $M $(isnothing(vector_at) ? "" : "at points of type $(typeof(vector_at))")",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        isnothing(seed) || (isnothing(rng) ? Random.seed!(seed) : Random.seed!(rng, seed))
+        # Test rand(M)
+        p = isnothing(rng) ? rand(M) : rand(rng, M)
+        Test.@test is_point(M, p; error = :error, kwargs...)
+        if test_mutating
+            p2 = copy(M, p)
+            isnothing(rng) ? rand!(M, p2) : rand!(rng, M, p2)
+            Test.@test is_point(M, p2; error = :error, kwargs...)
+        end
+        # Test rand(M; vector_at=p)
+        q = isnothing(vector_at) ? p : vector_at
+        X = isnothing(rng) ? rand(M; vector_at = vector_at) : rand(rng, M; vector_at = vector_at)
+        Test.@test is_vector(M, q, X; error = :error, kwargs...)
+        if test_mutating
+            X2 = copy(M, vector_at, X)
+            isnothing(rng) ? rand!(M, X2; vector_at = q) : rand!(rng, M, X2; vector_at = q)
+            Test.@test is_vector(M, q, X2; error = :error, kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_rand
 
 """
     Manifolds.test.test_retract(

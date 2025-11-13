@@ -41,6 +41,7 @@ const _ALL_FUNCTIONS = [
     parallel_transport_direction,
     parallel_transport_to,
     project,
+    rand,
     repr,
     retract,
     vector_transport_direction,
@@ -74,6 +75,7 @@ function test_manifold_dimension end
 function test_norm end
 function test_parallel_transport end
 function test_project end
+function test_rand end
 function test_repr end
 function test_retract end
 function test_vector_transport end
@@ -90,7 +92,6 @@ function test_get_vectors end
 function test_manifold_volume end
 function test_mid_point end
 function test_embed_project end
-function test_rand end
 function test_sectional_curvature_matrix end
 function test_sharp end
 function test_shortest_geodesic end
