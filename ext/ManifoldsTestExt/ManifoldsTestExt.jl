@@ -25,23 +25,26 @@ Possible properties are
   global default (see `:Mutating`) to true.
 * `:EmbeddedPoints` is a vector of points in the embedding space of `M`, to test `project`
 * `:EmbeddedVectors` is a vector of tangent vectors in the embedding space of `M`, to test `project`
+* `:GeodesicMaxTime` is a real number indicating the time parameter to use when testing `geodesic`
+* `:GeodesicSamples` is an integer indicating the number of samples to use when testing `geodesic` (defaults to 10)
 * `:InvalidPoints` is a vector of points that are not on `M`, e.g. to test `is_point`
 * `:InvalidVectors` is a vector of tangent vectors that are not in the tangent space of the first point from `:Points`
 * `:InverseRetractionMethods` is a vector of inverse retraction methods to test on `M`
   these should have the same order as `:RetractionMethods` (use `nothing` for skipping one)
-* `:Points` is a vector of at least 2 points on `M`, which should not be the same point
 * `:Mutating` is a boolean (`true` by default) whether to test the mutating variants of functions or not.
   when setting this to false, you can still activate single functions mutation checks by
   adding the mutating function to `:Functions`
 * `:Name` is a name of the test. If not provided, defaults to `"\$M"`
+* `:Points` is a vector of at least 2 points on `M`, which should not be the same point
 * `:RetractionMethods` is a vector of retraction methods to test on `M`
   these should have the same order as `:InverseRetractionMethods` (use `nothing` for skipping one)
 * `:Rng` is a random number generator to use for generating random points/vectors if needed
 * `:Seed` is a seed to use for generating random points/vectors if needed
 * `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entr in `:Points`
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
-* `:TestWarn` is a boolean (`true` by default) whether to test that whether `error=:warn` in verification functions issues warning.
+* `:TestMidpointSymmetry` is a boolean (`true` by default) whether to test the symmetry property of the midpoint function
 * `:TestInfo` is a boolean (`true` by default) whether to test that whether `error=:info` in verification functions issues info messages.
+* `:TestWarn` is a boolean (`true` by default) whether to test that whether `error=:warn` in verification functions issues warning.
 
 Possible entries of the `expectations` dictionary are
 
@@ -49,6 +52,7 @@ Possible entries of the `expectations` dictionary are
 * for retractions, inverse retractions, and vector transports, the key is a tuple of the function and the method, e.g. `(retract, method) => q`
 * for `embed`, and `project`, the key is a tuple of the function and `:Point` or `:Vector`, e.g. `(embed, :Point) of expected (embedded) points or vectors,
   omitting that symbol is interpreted as the expected point.
+* for the `geodesic`, the vallue represents the end point reached after time `t`. Additionally, the expected speed can be provided with the key `(geodesic, :Speed) => s`
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
@@ -163,7 +167,22 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 # check the global one if this point type does not have an expected embedding
                 M, typeof(points[1]);
                 expected_value = expected_embed,
+                expected_type = expected_embed_P,
                 name = "get_embedding(M, p)", # shorten name within large suite
+            )
+        end
+        if (geodesic in functions)
+            expected_geod = get(expectations, geodesic, nothing)
+            t = get(properties, :GeodesicMaxTime, 1.0)
+            Manifolds.Test.test_geodesic(
+                M, points[1], vectors[1], t;
+                available_functions = functions,
+                atol = get(function_atols, geodesic, atol),
+                expected_value = expected_geod,
+                test_constant_speed = get(properties, :TestGeodesicConstantSpeed, true),
+                expected_speed = get(expectations, (geodesic, :Speed), nothing),
+                N = get(properties, :GeodesicSamples, 100),
+                name = "geodesic(M, p, X, $t)", # shorten name within large suite
             )
         end
         if (injectivity_radius in functions)
@@ -256,6 +275,27 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             Manifolds.Test.test_manifold_dimension(
                 M; expected_value = expected_dim, expected_type = get(result_types, manifold_dimension, Int),
                 name = "manifold_dimension(M)",
+            )
+        end
+        if (manifold_volume in functions)
+            expected_vol = get(expectations, manifold_volume, nothing)
+            Manifolds.Test.test_manifold_volume(
+                M;
+                expected_value = expected_vol,
+                name = "manifold_volume(M)",
+            )
+        end
+        if (mid_point in functions)
+            expected_mid = get(expectations, mid_point, nothing)
+            Manifolds.Test.test_mid_point(
+                M, points[1], points[2];
+                available_functions = functions,
+                expected_value = expected_mid,
+                test_aliased = aliased,
+                test_mutating = (mid_point! in functions) ? true : mutating,
+                test_symmetry = get(properties, :TestMidpointSymmetry, true),
+                atol = get(function_atols, mid_point, atol),
+                name = "mid_point(M, p, q)", # shorten name within large suite
             )
         end
         if (norm in functions)
@@ -728,6 +768,68 @@ function Manifolds.Test.test_exp(
 end # Manifolds.Test.test_exp
 
 """
+    Manifolds.Test.test_geodesic(M, p, X, t=1.0;
+        available_functions=[],
+        expected_value=nothing,
+        N = 10,
+        name = "Geodesic on \$M for \$(typeof(p)) points",
+        test_unit_speed = true,
+        test_constant_speed = test_unit_speed ? 1.0 : -1.0,
+        kwargs...
+    )
+
+Test the geodesic on manifold `M` at point `p` with tangent vector `X` at time `t`.
+* that at time `0` the geodesic returns `p`
+* that the function `γ = geodesic(M, p, X)` is consistent with evaluation at `0` and `t``
+* that the result is a valid point on the manifold
+* that the result matches `expected_value`, if given
+* that the geodesic has constant speed (if activated) using `N` samples
+  this has the shortcut that if `test_unit_speed` is true, this is `1.0`; deactivate by setting this to a negative value.t
+"""
+function Manifolds.Test.test_geodesic(
+        M::AbstractManifold, p, X, t = 1.0;
+        available_functions = Function[],
+        expected_value = nothing,
+        N = 10,
+        name = "Geodesic on $M for $(typeof(p)) points",
+        test_constant_speed = true,
+        expected_speed = nothing,
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        q = geodesic(M, p, X, t)
+        Test.@test is_point(M, q; error = :error, kwargs...)
+        isnothing(expected_value) || Test.@test isapprox(M, q, expected_value; error = :error, kwargs...)
+
+        p0 = geodesic(M, p, X, 0.0)
+        Test.@test isapprox(M, p0, p; error = :error, kwargs...)
+        γ = geodesic(M, p, X)
+        qt = γ(t)
+        Test.@test isapprox(M, qt, q; error = :error, kwargs...)
+
+        # Since this test might exit early, it should always be the last test of this function
+        if test_constant_speed
+            ts = range(0.0, t; length = N)
+            points = [geodesic(M, p, X, ti) for ti in ts]
+            if distance in available_functions
+                dists = [distance(M, points[i], points[i + 1]) for i in 1:(length(points) - 1)]
+                speeds = [d / (ts[i + 1] - ts[i]) for (i, d) in enumerate(dists)]
+            elseif (norm in available_functions) && (log in available_functions)
+                speeds = [norm(M, points[i], log(M, points[i], points[i + 1])) / (ts[i + 1] - ts[i]) for i in 1:(length(points) - 1)]
+            else
+                return nothing # cannot test constant speed
+            end
+            avg_speed = sum(speeds) / length(speeds)
+            for s in speeds
+                Test.@test isapprox(s, avg_speed; kwargs...)
+            end
+            isnothing(expected_speed) || Test.@test isapprox(avg_speed, expected_speed; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_geodesic
+
+"""
     Manifolds.Test.test_get_embedding(M, P=nothing;
         expected_value=nothing,
         expected_type = isnothing(expected_value) ? nothing : typeof(expected_value),
@@ -735,10 +837,10 @@ end # Manifolds.Test.test_exp
     )
 
 Test the [`get_embedding`](@extref `ManifoldsBase.get_embedding`) on manifold `M`.
+
 * that it returns an `AbstractManifold`.
 * that its type matches `expected_type`, if given, defaults to the type of the expected value
 * that the result matches `expected_value`, if given
-
 """
 function Manifolds.Test.test_get_embedding(
         M::AbstractManifold, P::Type = nothing;
@@ -1060,6 +1162,91 @@ function Manifolds.Test.test_manifold_dimension(
     end
     return nothing
 end # Manifolds.Test.test_manifold_dimension
+
+"""
+    Manifolds.Test.test_manifold_volume(
+        M;
+        expected_value = nothing,
+        name = "Manifold volume for \$M",
+    )
+
+Test the volume of the manifold `M`.
+
+* that the volume is nonnegative
+* that it matches the expected value (if provided)
+"""
+function Manifolds.Test.test_manifold_volume(
+        M;
+        expected_value = nothing,
+        name = "Manifold volume for $M",
+    )
+    Test.@testset "$(name)" begin
+        v = manifold_volume(M)
+        Test.@test v ≥ 0.0
+        isnothing(expected_value) || Test.@test isapprox(v, expected_value)
+    end
+    return nothing
+end # Manifolds.Test.test_manifold_volume
+
+"""
+    Manifolds.Test.test_mid_point(M, p, q;
+        available_functions=[],
+        expected_value=nothing,
+        test_aliased = true,
+        test_mutating = true,
+        test_symmetry = true,
+        name = "Mid-point on \$M between \$(typeof(p)) points",
+        kwargs...
+    )
+
+Test the mid-point function on manifold `M` between points `p` and `q`.
+
+* that the result is a valid point on the manifold
+* that the result matches `expected_value`, if given
+* that the mid-point is symmetric (if activated)
+* that the distance from `p` and `q` to the mid-point is half the distance from `p` to `q` (if distance is present)
+* that the mutating version `mid_point!` matches the non-mutating version (if activated)
+* that `mid_point!` works on aliased in put (`r=p` or `r=q`) (if activated for mutating)
+"""
+function Manifolds.Test.test_mid_point(
+        M, p, q;
+        available_functions = Function[],
+        expected_value = nothing,
+        test_aliased = true,
+        test_mutating = true,
+        test_symmetry = true,
+        name = "Mid-point on $M between $(typeof(p)) points",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        r = mid_point(M, p, q)
+        Test.@test is_point(M, r; error = :error, kwargs...)
+        isnothing(expected_value) || Test.@test isapprox(M, r, expected_value; error = :error, kwargs...)
+        r2 = mid_point(M, q, p)
+        test_symmetry || Test.@test isapprox(M, r2, r; error = :error, kwargs...)
+        if distance in available_functions
+            d_pq = distance(M, p, q)
+            d_pr = distance(M, p, r)
+            d_qr = distance(M, q, r)
+            Test.@test isapprox(d_pr, d_pq / 2; kwargs...)
+            Test.@test isapprox(d_qr, d_pq / 2; kwargs...)
+        end
+        if test_mutating
+            r3 = copy(M, p)
+            mid_point!(M, r3, p, q)
+            Test.@test isapprox(M, r3, r; error = :error, kwargs...)
+            if test_aliased
+                r4 = copy(M, p)
+                mid_point!(M, r4, r4, q)  # aliased #1
+                Test.@test isapprox(M, r4, r; error = :error, kwargs...)
+                r5 = copy(M, q)
+                mid_point!(M, r5, p, r5)  # aliased #2
+                Test.@test isapprox(M, r5, r; error = :error, kwargs...)
+            end
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_mid_point
 
 """
     Manifolds.Test.test_norm(M, p, X;

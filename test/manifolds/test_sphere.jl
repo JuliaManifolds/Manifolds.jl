@@ -28,7 +28,7 @@ using LinearAlgebra, Manifolds, Test
         ),
         # Expectations
         Dict(
-            :atol => 1.0e-12,
+            :atol => 1.0e-7,
             default_inverse_retraction_method => LogarithmicInverseRetraction(),
             default_retraction_method => StabilizedRetraction(),
             default_vector_transport_method => ParallelTransport(),

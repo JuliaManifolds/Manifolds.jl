@@ -29,6 +29,7 @@ const _ALL_FUNCTIONS = [
     distance,
     embed,
     exp,
+    geodesic,
     get_embedding,
     injectivity_radius,
     inner,
@@ -37,6 +38,8 @@ const _ALL_FUNCTIONS = [
     is_vector,
     log,
     manifold_dimension,
+    manifold_volume,
+    mid_point,
     norm,
     parallel_transport_direction,
     parallel_transport_to,
@@ -64,6 +67,7 @@ function test_default_vector_transport_method end
 function test_distance end
 function test_embed end
 function test_exp end
+function test_geodesic end
 function test_get_embedding end
 function test_injectivity_radius end
 function test_inner end
@@ -72,6 +76,8 @@ function test_is_point end
 function test_is_vector end
 function test_log end
 function test_manifold_dimension end
+function test_manifold_volume end
+function test_mid_point end
 function test_norm end
 function test_parallel_transport end
 function test_project end
@@ -84,13 +90,10 @@ function test_zero_vector end
 #
 # TODO
 function test_flat end
-function test_geodesic end
 function test_get_basis end
 function test_get_coordinates end
 function test_get_vector end
 function test_get_vectors end
-function test_manifold_volume end
-function test_mid_point end
 function test_embed_project end
 function test_sectional_curvature_matrix end
 function test_sharp end
