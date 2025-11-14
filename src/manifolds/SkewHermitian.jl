@@ -248,6 +248,18 @@ project(::SkewHermitianMatrices, ::Any, ::Any)
 
 project!(M::SkewHermitianMatrices, Y, p, X) = project!(M, Y, X)
 
+function Random.rand!(
+        rng::AbstractRNG,
+        M::SkewHermitianMatrices,
+        pX;
+        σ::Real = one(real(eltype(pX))),
+        kwargs...,
+    )
+    rand!(rng, pX)
+    pX .= (σ / (2 * norm(pX))) .* (pX - pX')
+    return pX
+end
+
 function representation_size(M::SkewHermitianMatrices)
     N = get_parameter(M.size)[1]
     return (N, N)
