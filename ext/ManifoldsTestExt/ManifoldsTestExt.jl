@@ -52,7 +52,6 @@ Possible entries of the `expectations` dictionary are
 * for retractions, inverse retractions, and vector transports, the key is a tuple of the function and the method, e.g. `(retract, method) => q`
 * for `embed`, and `project`, the key is a tuple of the function and `:Point` or `:Vector`, e.g. `(embed, :Point) of expected (embedded) points or vectors,
   omitting that symbol is interpreted as the expected point.
-* for the `geodesic`, the vallue represents the end point reached after time `t`. Additionally, the expected speed can be provided with the key `(geodesic, :Speed) => s`
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
@@ -179,8 +178,6 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 available_functions = functions,
                 atol = get(function_atols, geodesic, atol),
                 expected_value = expected_geod,
-                test_constant_speed = get(properties, :TestGeodesicConstantSpeed, true),
-                expected_speed = get(expectations, (geodesic, :Speed), nothing),
                 N = get(properties, :GeodesicSamples, 100),
                 name = "geodesic(M, p, X, $t)", # shorten name within large suite
             )
@@ -783,8 +780,8 @@ Test the geodesic on manifold `M` at point `p` with tangent vector `X` at time `
 * that the function `γ = geodesic(M, p, X)` is consistent with evaluation at `0` and `t``
 * that the result is a valid point on the manifold
 * that the result matches `expected_value`, if given
-* that the geodesic has constant speed (if activated) using `N` samples
-  this has the shortcut that if `test_unit_speed` is true, this is `1.0`; deactivate by setting this to a negative value.t
+* that the geodesic has constant speed (if activated) using `N` samples and each of the
+  segments is of length equal to the average speed, i.e. `t*norm(M, p, X) / (N-1)`
 """
 function Manifolds.Test.test_geodesic(
         M::AbstractManifold, p, X, t = 1.0;
@@ -792,23 +789,19 @@ function Manifolds.Test.test_geodesic(
         expected_value = nothing,
         N = 10,
         name = "Geodesic on $M for $(typeof(p)) points",
-        test_constant_speed = true,
-        expected_speed = nothing,
         kwargs...
     )
     Test.@testset "$(name)" begin
         q = geodesic(M, p, X, t)
         Test.@test is_point(M, q; error = :error, kwargs...)
         isnothing(expected_value) || Test.@test isapprox(M, q, expected_value; error = :error, kwargs...)
-
         p0 = geodesic(M, p, X, 0.0)
         Test.@test isapprox(M, p0, p; error = :error, kwargs...)
         γ = geodesic(M, p, X)
         qt = γ(t)
         Test.@test isapprox(M, qt, q; error = :error, kwargs...)
-
         # Since this test might exit early, it should always be the last test of this function
-        if test_constant_speed
+        if N > 0
             ts = range(0.0, t; length = N)
             points = [geodesic(M, p, X, ti) for ti in ts]
             if distance in available_functions
@@ -823,7 +816,7 @@ function Manifolds.Test.test_geodesic(
             for s in speeds
                 Test.@test isapprox(s, avg_speed; kwargs...)
             end
-            isnothing(expected_speed) || Test.@test isapprox(avg_speed, expected_speed; kwargs...)
+            Test.@test isapprox(avg_speed, t * norm(M, p, X); kwargs...)
         end
     end
     return nothing
