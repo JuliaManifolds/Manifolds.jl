@@ -44,6 +44,7 @@ const _ALL_FUNCTIONS = [
     parallel_transport_direction,
     parallel_transport_to,
     project,
+    shortest_geodesic,
     rand,
     repr,
     retract,
@@ -81,6 +82,7 @@ function test_mid_point end
 function test_norm end
 function test_parallel_transport end
 function test_project end
+function test_shortest_geodesic end
 function test_rand end
 function test_repr end
 function test_retract end
@@ -97,7 +99,6 @@ function test_get_vectors end
 function test_embed_project end
 function test_sectional_curvature_matrix end
 function test_sharp end
-function test_shortest_geodesic end
 function test_Weingarten end
 #
 #

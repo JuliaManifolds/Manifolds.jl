@@ -379,6 +379,18 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 )
             end
         end
+        if (shortest_geodesic in functions)
+            expected_geod = get(expectations, shortest_geodesic, nothing)
+            t = get(properties, :ShortestGeodesicTime, 1.0)
+            Manifolds.Test.test_shortest_geodesic(
+                M, points[1], points[2], t;
+                available_functions = functions,
+                atol = get(function_atols, shortest_geodesic, atol),
+                expected_value = expected_geod,
+                N = get(properties, :GeodesicSamples, 100),
+                name = "shortest_geodesic(M, p, X, $t)", # shorten name within large suite
+            )
+        end
         if (vector_transport_to in functions)
             for vtm in vector_transport_methods
                 expected_vt = get(expectations, (vector_transport_to, vtm), nothing)
@@ -770,8 +782,6 @@ end # Manifolds.Test.test_exp
         expected_value=nothing,
         N = 10,
         name = "Geodesic on \$M for \$(typeof(p)) points",
-        test_unit_speed = true,
-        test_constant_speed = test_unit_speed ? 1.0 : -1.0,
         kwargs...
     )
 
@@ -1563,6 +1573,66 @@ function Manifolds.Test.test_retract(
     end
     return nothing
 end # Manifolds.Test.test_retract
+
+"""
+    Manifolds.Test.test_shortest_geodesic(M, p, q, t=1.0;
+        available_functions=[],
+        N = 10,
+        name = "Shortest geodesic on \$M for \$(typeof(p)) points",
+        kwargs...
+    )
+
+Test the geodesic on manifold `M` at point `p` with tangent vector `X` at time `t`.
+* that at time `0` the geodesic returns `p`, at time 2 it returns `q`
+* that the function `γ = shortest_geodesic(M, p, X)` is consistent with evaluation at `0`, `1` and `t``
+* that the result at `t` is a valid point on the manifold
+* that the geodesic has constant speed (if activated) using `N` samples and the approximated
+  derivative via finite differences
+* that the geodesic is length minimizing, i.e. the sum of the segments is approximately equal to the distance from `p` to `q` (if activated)
+"""
+function Manifolds.Test.test_shortest_geodesic(
+        M, p, q, t = 0.5;
+        available_functions = Function[],
+        expected_value = nothing,
+        N = 10,
+        name = "Shortest geodesic on $M for $(typeof(p)) points",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        p2 = shortest_geodesic(M, p, q, 0.0)
+        Test.@test isapprox(M, p2, p; error = :error, kwargs...)
+        q2 = shortest_geodesic(M, p, q, 1.0)
+        Test.@test isapprox(M, q2, q; error = :error, kwargs...)
+        qt = shortest_geodesic(M, p, q, t)
+        Test.@test is_point(M, qt; error = :error, kwargs...)
+        γ = shortest_geodesic(M, p, q)
+        Test.@test isapprox(M, p2, γ(0.0); error = :error, kwargs...)
+        Test.@test isapprox(M, q2, γ(1.0); error = :error, kwargs...)
+        Test.@test isapprox(M, qt, γ(t); error = :error, kwargs...)
+        # consistency
+        @test isapprox(distance(M, p, q) * t, distance(M, p, qt); kwargs...)
+        @test isapprox(distance(M, p, q) * (1 - t), distance(M, qt, q); kwargs...)
+        isnothing(expected_value) || Test.@test isapprox(M, qt, expected_value; error = :error, kwargs...)
+        # Test constant speed
+        if (distance in available_functions) && (norm in available_functions)
+            ts = range(0.0, 1.0; length = N)
+            points = [shortest_geodesic(M, p, q, ti) for ti in ts]
+            dists = [distance(M, points[i], points[i + 1]) for i in 1:(length(points) - 1)]
+            speeds = [d / (ts[i + 1] - ts[i]) for (i, d) in enumerate(dists)]
+            avg_speed = mean(speeds)
+            for s in speeds
+                Test.@test isapprox(s, avg_speed; kwargs...)
+            end
+            # unit speed
+            Test.@test isapprox(avg_speed, distance(M, p, q); kwargs...)
+            # Test length minimizing
+            total_length = sum(dists)
+            d_pq = distance(M, p, q)
+            Test.@test isapprox(total_length, d_pq; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_shortest_geodesic
 
 """
     Manifolds.Test.test_vector_transport(

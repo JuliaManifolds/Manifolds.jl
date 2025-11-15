@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * added a more structured version for the extension with `Test.jl` that now introduces
   * a complete test suite `Manifolds.Test.test_manifold(M; kwargs...)`
     it follows the structure of the one recently written for `LieGroups.jl`.
-  * small test functions like `Manifolds.Test.test_exp(M, p, X; kwargs...)`
+  * a lot of small test functions like `Manifolds.Test.test_exp(M, p, X; kwargs...)`
     with the goal of providing one test for each individual API function
 
 ## [0.11.5] 2025-11-13
