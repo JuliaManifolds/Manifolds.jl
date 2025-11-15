@@ -329,20 +329,17 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             ep = get(expectations, project, nothing)
             ep = !isnothing(ep) ? ep : get(expectations, (project, :Point), nothing)
             eX = get(expectations, (project, :Vector), nothing)
-            if isnothing(q)
-                @warn "To test `project`, at least one `:EmbeddedPoints` must be provided."
-            else
-                Manifolds.Test.test_project(
-                    M, q, Y;
-                    available_functions = functions,
-                    expected_point = ep,
-                    expected_vector = eX,
-                    test_aliased = aliased,
-                    test_mutating = (project! in functions) ? true : mutating,
-                    atol = get(function_atols, project, atol),
-                    name = "project(M, q) & project(M, q, Y)", # shorten name within large suite
-                )
-            end
+            isnothing(q) && @warn "To test `project`, at least one `:EmbeddedPoints` must be provided."
+            Manifolds.Test.test_project(
+                M, q, Y;
+                available_functions = functions,
+                expected_point = ep,
+                expected_vector = eX,
+                test_aliased = aliased,
+                test_mutating = (project! in functions) ? true : mutating,
+                atol = get(function_atols, project, atol),
+                name = "project(M, q) & project(M, q, Y)", # shorten name within large suite
+            )
         end
         if (rand in functions)
             rng = get(properties, :Rng, nothing)
@@ -1794,6 +1791,7 @@ Test the Weingarten map on manifold `M` at point `p` for tangent vector `X` and 
 """
 function Manifolds.Test.test_Weingarten(
         M, p, X, V;
+        available_functions = [],
         expected_value = nothing,
         test_aliased = true,
         test_mutating = true,
@@ -1801,16 +1799,16 @@ function Manifolds.Test.test_Weingarten(
         kwargs...
     )
     Test.@testset "$(name)" begin
-        Y = weingarten(M, p, X, V)
+        Y = Weingarten(M, p, X, V)
         Test.@test is_vector(M, p, Y; error = :error, kwargs...)
         isnothing(expected_value) || Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
         if test_mutating
             Y2 = copy(M, p, X)
-            weingarten!(M, Y2, p, X, V)
+            Weingarten!(M, Y2, p, X, V)
             Test.@test isapprox(M, p, Y2, Y; error = :error, kwargs...)
             if test_aliased
                 Y3 = copy(M, p, X)
-                weingarten!(M, Y3, p, Y3, V)  # aliased
+                Weingarten!(M, Y3, p, Y3, V)  # aliased
                 Test.@test isapprox(M, p, Y3, Y; error = :error, kwargs...)
             end
         end

@@ -51,6 +51,7 @@ const _ALL_FUNCTIONS = [
     retract,
     vector_transport_direction,
     vector_transport_to,
+    Weingarten,
     zero_vector,
 ]
 all_functions() = _ALL_FUNCTIONS
