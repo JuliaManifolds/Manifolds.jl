@@ -35,12 +35,13 @@ Possible properties are
   when setting this to false, you can still activate single functions mutation checks by
   adding the mutating function to `:Functions`
 * `:Name` is a name of the test. If not provided, defaults to `"\$M"`
+* `:NormalVectors` is a vector of normal vectors, where each should be in the normal space of the corresponding point entries in `:Points`
 * `:Points` is a vector of at least 2 points on `M`, which should not be the same point
 * `:RetractionMethods` is a vector of retraction methods to test on `M`
   these should have the same order as `:InverseRetractionMethods` (use `nothing` for skipping one)
 * `:Rng` is a random number generator to use for generating random points/vectors if needed
 * `:Seed` is a seed to use for generating random points/vectors if needed
-* `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entr in `:Points`
+* `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entries in `:Points`
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
 * `:TestMidpointSymmetry` is a boolean (`true` by default) whether to test the symmetry property of the midpoint function
 * `:TestInfo` is a boolean (`true` by default) whether to test that whether `error=:info` in verification functions issues info messages.
@@ -66,6 +67,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     functions = get(properties, :Functions, Function[])
     points = get(properties, :Points, [])
     vectors = get(properties, :Vectors, [])
+    normals = get(properties, :NormalVectors, [])
     test_name = get(properties, :Name, "Manifolds.Test suite for $M")
     test_warn = get(properties, :TestWarn, true)
     test_info = get(properties, :TestInfo, true)
@@ -379,6 +381,20 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 )
             end
         end
+        if (sectional_curvature in functions)
+            expected_sec_curv = get(expectations, sectional_curvature, nothing)
+            expected_sec_curv_min = get(expectations, sectional_curvature_min, nothing)
+            expected_sec_curv_max = get(expectations, sectional_curvature_max, nothing)
+            Manifolds.Test.test_sectional_curvature(
+                M, points[1], vectors[1], vectors[2];
+                available_functions = functions,
+                expected_value = expected_sec_curv,
+                expected_value_min = expected_sec_curv_min,
+                expected_value_max = expected_sec_curv_max,
+                name = "sectional_curvature(M, p, X, Y)", # shorten name within large suite
+                atol = get(function_atols, sectional_curvature, atol),
+            )
+        end
         if (shortest_geodesic in functions)
             expected_geod = get(expectations, shortest_geodesic, nothing)
             t = get(properties, :ShortestGeodesicTime, 1.0)
@@ -406,6 +422,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                     name = "vector_transport_to(M, p, X, q, $vtm)", # shorten name within large suite
                 )
             end
+        end
+        if (Weingarten in functions)
+            Manifolds.Test.test_Weingarten(
+                M, points[1], vectors[1], normals[1];
+                available_functions = functions,
+                expected_value = get(expectations, Weingarten, nothing),
+                test_mutating = (Weingarten! in functions) ? true : mutating,
+                atol = get(function_atols, Weingarten, atol),
+                name = "Weingarten(M, p, X, N)", # shorten name within large suite
+            )
         end
         if (zero_vector in functions)
             Manifolds.Test.test_zero_vector(
@@ -1575,6 +1601,45 @@ function Manifolds.Test.test_retract(
 end # Manifolds.Test.test_retract
 
 """
+    Manifolds.Test.test_sectional_curvature(
+        M, p, X, Y;
+        expected_value=nothing,
+        expected_min = nothing,
+        expected_max = nothing,
+        name = "Sectional curvature on \$M at point \$(typeof(p))",
+        kwargs...
+    )
+
+Test the sectional curvature on manifold `M` at point `p` for tangent vectors `X` and `Y`.
+* that the result is a real number
+* that the result matches `expected_value`, if given
+* that the minimum sectional curvature at `p` is less than or equal to the sectional curvature
+* that the maximum sectional curvature at `p` is greater than or equal to the sectional curvature
+* that the minimum and maximum sectional curvatures match `expected_min` and `expected_max`, if given
+"""
+function Manifolds.Test.test_sectional_curvature(
+        M, p, X, Y;
+        expected_value = nothing,
+        expected_min = nothing,
+        expected_max = nothing,
+        name = "Sectional curvature on $M at point $(typeof(p))",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        k = sectional_curvature(M, p, X, Y)
+        Test.@test k isa (Real)
+        isnothing(expected_value) || Test.@test isapprox(k, expected_value; kwargs...)
+        K_min = sectional_curvature_min(M)
+        K_max = sectional_curvature_max(M)
+        Test.@test K_min ≤ k
+        Test.@test K_max ≥ k
+        isnothing(expected_min) || Test.@test isapprox(K_min, expected_min; kwargs...)
+        isnothing(expected_max) || Test.@test isapprox(K_max, expected_max; kwargs...)
+    end
+    return nothing
+end # Manifolds.Test.test_sectional_curvature
+
+"""
     Manifolds.Test.test_shortest_geodesic(M, p, q, t=1.0;
         available_functions=[],
         N = 10,
@@ -1710,6 +1775,48 @@ function Manifolds.Test.test_vector_transport(
     end
     return nothing
 end # Manifolds.Test.test_vector_transport
+
+"""
+    Manifolds.Test.Weingarten(
+        M, p, X, V;
+        expected_value=nothing,
+        test_aliased = true,
+        test_mutating = true,
+        name = "Weingarten map on \$M at point \$(typeof(p))",
+        kwargs...
+    )
+
+Test the Weingarten map on manifold `M` at point `p` for tangent vector `X` and normal vector `V`.
+* that the result is a valid tangent vector at `p` on the manifold
+* that the result matches `expected_value`, if given
+* that the result is consistent with the mutating version `weingarten!` (if activated)
+* that `Weingarten!` works on aliased in put (`Y=X`) (if activated for mutating)
+"""
+function Manifolds.Test.test_Weingarten(
+        M, p, X, V;
+        expected_value = nothing,
+        test_aliased = true,
+        test_mutating = true,
+        name = "Weingarten map on $M at point $(typeof(p))",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        Y = weingarten(M, p, X, V)
+        Test.@test is_vector(M, p, Y; error = :error, kwargs...)
+        isnothing(expected_value) || Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
+        if test_mutating
+            Y2 = copy(M, p, X)
+            weingarten!(M, Y2, p, X, V)
+            Test.@test isapprox(M, p, Y2, Y; error = :error, kwargs...)
+            if test_aliased
+                Y3 = copy(M, p, X)
+                weingarten!(M, Y3, p, Y3, V)  # aliased
+                Test.@test isapprox(M, p, Y3, Y; error = :error, kwargs...)
+            end
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_Weingarten
 
 """
     Manifolds.Test.test_zero_vector(M, p;

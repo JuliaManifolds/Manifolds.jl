@@ -596,11 +596,7 @@ Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater
 and 0 otherwise.
 """
 function sectional_curvature(M::AbstractSphere, p, X, Y)
-    if manifold_dimension(M) > 1
-        return 1.0
-    else
-        return 0.0
-    end
+    return manifold_dimension(M) > 1 ? 1.0 : 0.0
 end
 
 @doc raw"""
@@ -610,11 +606,7 @@ Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater
 and 0 otherwise.
 """
 function sectional_curvature_max(M::AbstractSphere)
-    if manifold_dimension(M) > 1
-        return 1.0
-    else
-        return 0.0
-    end
+    return manifold_dimension(M) > 1 ? 1.0 : 0.0
 end
 
 @doc raw"""
@@ -624,11 +616,7 @@ Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater
 and 0 otherwise.
 """
 function sectional_curvature_min(M::AbstractSphere)
-    if manifold_dimension(M) > 1
-        return 1.0
-    else
-        return 0.0
-    end
+    return manifold_dimension(M) > 1 ? 1.0 : 0.0
 end
 
 @doc raw"""
