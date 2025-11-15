@@ -23,6 +23,8 @@ using LinearAlgebra, Manifolds, Test
             :Points => [p, q], :Vectors => [X, Y],
             :EmbeddedPoints => [p],
             :EmbeddedVectors => [X],
+            :Coordinates => [[π / 2, 0.0]],
+            :Bases => [DefaultOrthonormalBasis()],
             :InvalidPoints => [2 * p],
             :InvalidVectors => [p],
             :NormalVectors => [V],

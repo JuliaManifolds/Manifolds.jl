@@ -33,7 +33,9 @@ const _ALL_FUNCTIONS = [
     exp,
     # flat,
     geodesic,
+    get_coordinates,
     get_embedding,
+    get_vector,
     injectivity_radius,
     inner,
     inverse_retract,
@@ -76,7 +78,9 @@ function test_embed end
 function test_exp end
 function test_flat end
 function test_geodesic end
+function test_get_coordinates end
 function test_get_embedding end
+function test_get_vector end
 function test_injectivity_radius end
 function test_inner end
 function test_inverse_retract end
@@ -102,8 +106,6 @@ function test_zero_vector end
 #
 # TODO
 function test_get_basis end
-function test_get_coordinates end
-function test_get_vector end
 function test_get_vectors end
 function test_embed_project end
 function test_sectional_curvature_matrix end

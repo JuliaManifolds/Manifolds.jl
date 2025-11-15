@@ -23,12 +23,14 @@ which should contain at least two points and two tangent vectors, respectively.
 Possible properties are
 
 * `:Aliased` is a boolean (same as `:Mutating` by default) whether to test the mutating variants with aliased input
+* `:Bases` is a vector of bases, which can be used to test basis related functions, one basis for each entry in `:Coordinates`
+* `:Covectors` is a vector of covectors, which should be in the cotangent space of the correspondinig point entry in `:Points`
+* `:Coordinates` is a vector of coordinates, which can be used to test coordinate related functions, one coordinate vector for each entry in `:Bases`
+* `:EmbeddedPoints` is a vector of points in the embedding space of `M`, to test `project`
+* `:EmbeddedVectors` is a vector of tangent vectors in the embedding space of `M`, to test `project`
 * `:Functions` is a vector of all defined functions for `M`
   note a test is activated by the function (like `exp`), adding the mutating function (like `exp!`) overwrites the
   global default (see `:Mutating`) to true.
-* `:Covectors` is a vector of covectors, which should be in the cotangent space of the correspondinig point entry in `:Points`
-* `:EmbeddedPoints` is a vector of points in the embedding space of `M`, to test `project`
-* `:EmbeddedVectors` is a vector of tangent vectors in the embedding space of `M`, to test `project`
 * `:GeodesicMaxTime` is a real number indicating the time parameter to use when testing `geodesic`
 * `:GeodesicSamples` is an integer indicating the number of samples to use when testing `geodesic` (defaults to 10)
 * `:InvalidPoints` is a vector of points that are not on `M`, e.g. to test `is_point`
@@ -73,6 +75,8 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     vectors = get(properties, :Vectors, [])
     covectors = get(properties, :Covectors, [])
     normals = get(properties, :NormalVectors, [])
+    bases = get(properties, :Bases, [])
+    coordinates = get(properties, :Coordinates, [])
     test_name = get(properties, :Name, "Manifolds.Test suite for $M")
     test_warn = get(properties, :TestWarn, true)
     test_info = get(properties, :TestInfo, true)
@@ -176,6 +180,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, flat, atol),
             )
         end
+        if (get_coordinates in functions)
+            expected_coordinates = get(expectations, get_coordinates, nothing)
+            Manifolds.Test.test_get_coordinates(
+                M, points[1], vectors[1], bases[1];
+                available_functions = functions,
+                expected_value = expected_coordinates,
+                test_mutating = (get_coordinates! in functions) ? true : mutating,
+                name = "get_coordinates(M, p, X, B)", # shorten name within large suite
+            )
+        end
         if (get_embedding in functions)
             expected_embed = get(expectations, get_embedding, nothing)
             expected_embed_P = get(expectations, (get_embedding, typeof(points[1])), nothing)
@@ -185,6 +199,17 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 expected_value = expected_embed,
                 expected_type = expected_embed_P,
                 name = "get_embedding(M, p)", # shorten name within large suite
+            )
+        end
+        if (get_vector in functions)
+            expected_vector = get(expectations, get_vector, nothing)
+            # TODO: How to allow for more than one expected vector to run through all bases?
+            Manifolds.Test.test_get_vector(
+                M, points[1], coordinates[1], bases[1];
+                expected_value = expected_vector,
+                test_mutating = (get_vector! in functions) ? true : mutating,
+                name = "get_vector(M, p, c, B)", # shorten name within large suite
+                atol = get(function_atols, get_vector, atol),
             )
         end
         if (geodesic in functions)
@@ -838,23 +863,26 @@ Test the flat operation on manifold `M` at point `p` with tangent vector `X`.
 * that [`sharp`](@ref) is the inverse
 * that mutating version `flat!` matches non-mutating version (if activated)
 """
-function Manifolds.Test.test_flat(M, p, X;
+function Manifolds.Test.test_flat(
+        M, p, X;
         available_functions = Function[],
         expected_value = nothing,
         test_mutating = true,
         name = "Flat on $M for $(typeof(p)) points",
         kwargs...
     )
-    ξ = flat(M, p, X)
-    isnothing(expected_value) || Test.@test isapprox(M, ξ, expected_value; error = :error, kwargs...)
-    if sharp in available_functions
-        X2 = sharp(M, p, ξ)
-        Test.@test isapprox(M, X, X2; error = :error, kwargs...)
-    end
-    if test_mutating
-        ξ2 = copy(M, p, ξ) # Improve once cotangents are first class citizens
-        flat!(M, ξ2, p, X)
-        Test.@test isapprox(M, ξ2, ξ; error = :error, kwargs...)
+    Test.@testset "$(name)" begin
+        ξ = flat(M, p, X)
+        isnothing(expected_value) || Test.@test isapprox(M, ξ, expected_value; error = :error, kwargs...)
+        if sharp in available_functions
+            X2 = sharp(M, p, ξ)
+            Test.@test isapprox(M, X, X2; error = :error, kwargs...)
+        end
+        if test_mutating
+            ξ2 = copy(M, p, ξ) # Improve once cotangents are first class citizens
+            flat!(M, ξ2, p, X)
+            Test.@test isapprox(M, ξ2, ξ; error = :error, kwargs...)
+        end
     end
     return nothing
 end
@@ -916,6 +944,49 @@ function Manifolds.Test.test_geodesic(
 end # Manifolds.Test.test_geodesic
 
 """
+    Manifolds.Test.test_get_coordinates(
+        M, p, X, B;
+        available_functions=[],
+        expected_value=nothing,
+        name = "get_coordinates on \$M at point \$(typeof(p))",
+        test_mutating = true,
+    )
+
+Test the [`get_coordinates`](@extref `ManifoldsBase.get_coordinates`) on manifold `M` at point `p`
+for a tangent vector `X` and a basis `B`.
+
+* that the result is a valid coordinate vector, that is of correct length
+* that the result matches `expected_value`, if given
+* that the mutating version `get_coordinates!` matches the non-mutating version, (if activated)
+* that [`get_vector`](@ref `ManifoldsBase.get_vector`) inverts `get_coordinates` (if activated)
+"""
+function Manifolds.Test.test_get_coordinates(
+        M::AbstractManifold, p, X, B;
+        available_functions = Function[],
+        expected_value = nothing,
+        test_mutating = true,
+        name = "get_coordinates on $M at point $(typeof(p))",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        c = get_coordinates(M, p, X, B)
+        # TODO: Improve for comlex manifolds and check for real of complex coordinates
+        Test.@test length(c) == manifold_dimension(M)
+        isnothing(expected_value) || Test.@test isapprox(c, expected_value; kwargs...)
+        if test_mutating
+            c2 = similar(c)
+            get_coordinates!(M, c2, p, X, B)
+            Test.@test isapprox(c2, c; kwargs...)
+        end
+        if (get_vector in available_functions)
+            X2 = get_vector(M, p, c, B)
+            Test.@test isapprox(M, p, X2, X; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_get_coordinates
+
+"""
     Manifolds.Test.test_get_embedding(M, P=nothing;
         expected_value=nothing,
         expected_type = isnothing(expected_value) ? nothing : typeof(expected_value),
@@ -942,6 +1013,49 @@ function Manifolds.Test.test_get_embedding(
     end
     return nothing
 end # Manifolds.Test.test_get_embedding
+
+"""
+    Manifolds.Test.test_get_vector(
+        M, p, c, B;
+        available_functions=[],
+        expected_value=nothing,
+        name = "get_vector on \$M at point \$(typeof(p))",
+        test_mutating = true,
+        kwargs...
+    )
+
+Test the [`get_vector`](@extref `ManifoldsBase.get_vector`) on manifold `M` at point `p`
+for a vector of coordinates `c` in basis `B`.
+
+* that the result is a valid tangent vector at `p` on the manifold
+* that the result matches `expected_value`, if given
+* that the mutating version `get_vector!` matches the non-mutating version, (if activated)
+* that [`get_coordinates`](@ref `ManifoldsBase.get_coordinates`) inverts `get_vector` (if activated)
+"""
+function Manifolds.Test.test_get_vector(
+        M::AbstractManifold, p, c, B;
+        available_functions = Function[],
+        expected_value = nothing,
+        test_mutating = true,
+        name = "get_vector on $M at point $(typeof(p))",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        X = get_vector(M, p, c, B)
+        Test.@test is_vector(M, p, X; error = :error)
+        isnothing(expected_value) || Test.@test isapprox(M, p, X, expected_value; error = :error)
+        if test_mutating
+            Y = copy(M, p, X)
+            get_vector!(M, Y, p, c, B)
+            Test.@test isapprox(M, p, Y, X; error = :error, kwargs...)
+        end
+        if (get_coordinates in available_functions)
+            c2 = get_coordinates(M, p, X, B)
+            Test.@test isapprox(c2, c; kwargs...)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_get_vector
 
 """
     Manifolds.Test.test_injectority_radius(M, p = nothing;
@@ -1083,7 +1197,6 @@ Test the function [`is_point`](@ref) on  for point `p` on manifold `M`.
   * issues a warning (if activated)
   * isues an info message (if activated)
   * throws the corresponding error from `error_types` (if not nothing)
-
 """
 function Manifolds.Test.test_is_point(
         M::AbstractManifold, p, qs...;
@@ -1710,7 +1823,8 @@ Test the sharp operation on manifold `M` at point `p` with cotangent vector `ξ`
 * that [`flat`](@ref) is the inverse
 * that mutating version `sharp!` matches non-mutating version (if activated)
 """
-function Manifolds.Test.test_sharp(M, p, ξ;
+function Manifolds.Test.test_sharp(
+        M, p, ξ;
         available_functions = Function[],
         expected_value = nothing,
         test_mutating = true,
