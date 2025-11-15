@@ -13,6 +13,7 @@ using LinearAlgebra, Manifolds, Test
     X = [0.0, π / 4, 0.0]
     Y = [0.0, 0.0, π / 4]
     V = [2.0, 0.0, 0.0]  # normal vector at p
+    ξ = [0.0, π / 4, 0.0]  # covector at p
 
     Manifolds.Test.test_manifold(
         M,
@@ -25,6 +26,7 @@ using LinearAlgebra, Manifolds, Test
             :InvalidPoints => [2 * p],
             :InvalidVectors => [p],
             :NormalVectors => [V],
+            :Covectors => [ξ],
             :RetractionMethods => [ExponentialRetraction(), ProjectionRetraction()],
             :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()]
         ),

@@ -17,12 +17,16 @@ Three functions are expected to be defined (without explicitly being passed in t
 `is_point(M, p)`, `is_vector(M, p, X)`, and `isapprox(M, p, q)` / `isapprox(M, p, X, Y)`,
 since these are essential for verifying results.
 
+From the following properties, the two often expected to be defined are `:Points` and `:Vectors`,
+which should contain at least two points and two tangent vectors, respectively.
+
 Possible properties are
 
 * `:Aliased` is a boolean (same as `:Mutating` by default) whether to test the mutating variants with aliased input
 * `:Functions` is a vector of all defined functions for `M`
   note a test is activated by the function (like `exp`), adding the mutating function (like `exp!`) overwrites the
   global default (see `:Mutating`) to true.
+* `:Covectors` is a vector of covectors, which should be in the cotangent space of the correspondinig point entry in `:Points`
 * `:EmbeddedPoints` is a vector of points in the embedding space of `M`, to test `project`
 * `:EmbeddedVectors` is a vector of tangent vectors in the embedding space of `M`, to test `project`
 * `:GeodesicMaxTime` is a real number indicating the time parameter to use when testing `geodesic`
@@ -67,6 +71,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     functions = get(properties, :Functions, Function[])
     points = get(properties, :Points, [])
     vectors = get(properties, :Vectors, [])
+    covectors = get(properties, :Covectors, [])
     normals = get(properties, :NormalVectors, [])
     test_name = get(properties, :Name, "Manifolds.Test suite for $M")
     test_warn = get(properties, :TestWarn, true)
@@ -159,6 +164,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 test_mutating = (exp! in functions) ? true : mutating,
                 atol = get(function_atols, exp, atol),
                 name = "exp(M, p, X)", # shorten name within large suite
+            )
+        end
+        if (flat in functions)
+            expected_flat = get(expectations, flat, nothing)
+            Manifolds.Test.test_flat(
+                M, points[1], vectors[1];
+                available_functions = functions,
+                expected_value = expected_flat,
+                name = "flat(M, p, X)", # shorten name within large suite
+                atol = get(function_atols, flat, atol),
             )
         end
         if (get_embedding in functions)
@@ -390,6 +405,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 expected_value_max = expected_sec_curv_max,
                 name = "sectional_curvature(M, p, X, Y)", # shorten name within large suite
                 atol = get(function_atols, sectional_curvature, atol),
+            )
+        end
+        if (sharp in functions)
+            expected_sharp = get(expectations, sharp, nothing)
+            Manifolds.Test.test_sharp(
+                M, points[1], covectors[1];
+                available_functions = functions,
+                expected_value = expected_sharp,
+                name = "sharp(M, p, ξ)", # shorten name within large suite
+                atol = get(function_atols, sharp, atol),
             )
         end
         if (shortest_geodesic in functions)
@@ -798,6 +823,41 @@ function Manifolds.Test.test_exp(
     end
     return nothing
 end # Manifolds.Test.test_exp
+
+"""
+    Manifolds.Test.test_flat(M, p, X;
+        available_functions=[],
+        expected_value=nothing,
+        name = "Flat on \$M for \$(typeof(p)) points",
+        kwargs...
+    )
+
+Test the flat operation on manifold `M` at point `p` with tangent vector `X`.
+* (we can not yet test valid cotangent vectors)
+* that the result matches `expected_value`, if given
+* that [`sharp`](@ref) is the inverse
+* that mutating version `flat!` matches non-mutating version (if activated)
+"""
+function Manifolds.Test.test_flat(M, p, X;
+        available_functions = Function[],
+        expected_value = nothing,
+        test_mutating = true,
+        name = "Flat on $M for $(typeof(p)) points",
+        kwargs...
+    )
+    ξ = flat(M, p, X)
+    isnothing(expected_value) || Test.@test isapprox(M, ξ, expected_value; error = :error, kwargs...)
+    if sharp in available_functions
+        X2 = sharp(M, p, ξ)
+        Test.@test isapprox(M, X, X2; error = :error, kwargs...)
+    end
+    if test_mutating
+        ξ2 = copy(M, p, ξ) # Improve once cotangents are first class citizens
+        flat!(M, ξ2, p, X)
+        Test.@test isapprox(M, ξ2, ξ; error = :error, kwargs...)
+    end
+    return nothing
+end
 
 """
     Manifolds.Test.test_geodesic(M, p, X, t=1.0;
@@ -1635,6 +1695,44 @@ function Manifolds.Test.test_sectional_curvature(
     end
     return nothing
 end # Manifolds.Test.test_sectional_curvature
+
+"""
+    Manifolds.Test.test_sharp(M, p, ξ;
+        available_functions=[],
+        expected_value=nothing,
+        name = "Sharp on \$M for \$(typeof(p)) points",
+        kwargs...
+    )
+
+Test the sharp operation on manifold `M` at point `p` with cotangent vector `ξ`.
+* test that the result is a valid tangent vector at `p` on the manifold
+* that the result matches `expected_value`, if given
+* that [`flat`](@ref) is the inverse
+* that mutating version `sharp!` matches non-mutating version (if activated)
+"""
+function Manifolds.Test.test_sharp(M, p, ξ;
+        available_functions = Function[],
+        expected_value = nothing,
+        test_mutating = true,
+        name = "Sharp on $M for $(typeof(p)) points",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        X = sharp(M, p, ξ)
+        Test.@test is_vector(M, p, X; error = :error, kwargs...)
+        isnothing(expected_value) || Test.@test isapprox(M, p, X, expected_value; error = :error, kwargs...)
+        if flat in available_functions
+            ξ2 = flat(M, p, X)
+            Test.@test isapprox(ξ2, ξ; error = :error, kwargs...)
+        end
+        if test_mutating
+            X2 = copy(typeof(X), X)
+            sharp!(M, X2, p, ξ)
+            Test.@test isapprox(M, X2, X; error = :error, kwargs...)
+        end
+    end
+    return nothing
+end
 
 """
     Manifolds.Test.test_shortest_geodesic(M, p, q, t=1.0;

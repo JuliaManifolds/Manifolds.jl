@@ -20,6 +20,8 @@ this module shall provide a test function with
 """
 module Test
 using ..Manifolds
+# TODO: once cotangent vectors are a bit better supported, uncomment
+# `flat` and `sharp` here, for now these would never work as expected
 const _ALL_FUNCTIONS = [
     copy,
     copyto!,
@@ -29,6 +31,7 @@ const _ALL_FUNCTIONS = [
     distance,
     embed,
     exp,
+    # flat,
     geodesic,
     get_embedding,
     injectivity_radius,
@@ -44,11 +47,12 @@ const _ALL_FUNCTIONS = [
     parallel_transport_direction,
     parallel_transport_to,
     project,
-    sectional_curvature,
-    shortest_geodesic,
     rand,
     repr,
     retract,
+    sectional_curvature,
+    # sharp,
+    shortest_geodesic,
     vector_transport_direction,
     vector_transport_to,
     Weingarten,
@@ -70,6 +74,7 @@ function test_default_vector_transport_method end
 function test_distance end
 function test_embed end
 function test_exp end
+function test_flat end
 function test_geodesic end
 function test_get_embedding end
 function test_injectivity_radius end
@@ -85,6 +90,7 @@ function test_norm end
 function test_parallel_transport end
 function test_project end
 function test_sectional_curvature end
+function test_sharp end
 function test_shortest_geodesic end
 function test_rand end
 function test_repr end
@@ -95,14 +101,12 @@ function test_zero_vector end
 #
 #
 # TODO
-function test_flat end
 function test_get_basis end
 function test_get_coordinates end
 function test_get_vector end
 function test_get_vectors end
 function test_embed_project end
 function test_sectional_curvature_matrix end
-function test_sharp end
 #
 #
 # For now not yet part of the test suite. Please test these individually
