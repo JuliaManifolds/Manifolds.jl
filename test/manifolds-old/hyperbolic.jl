@@ -185,7 +185,6 @@ include("../header.jl")
         PoincareBallPoint,
         PoincareHalfSpacePoint,
     ]
-    TEST_FLOAT32 && push!(types, Vector{Float32})
     for T in types
         @testset "Type $T" begin
             is_plain_array =

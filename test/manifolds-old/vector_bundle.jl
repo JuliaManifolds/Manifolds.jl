@@ -54,8 +54,6 @@ struct TestVectorSpaceType <: VectorSpaceType end
     end
 
     types = [Vector{Float64}]
-    TEST_FLOAT32 && push!(types, Vector{Float32})
-    TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
 
     for T in types
         p = convert(T, [1.0, 0.0, 0.0])

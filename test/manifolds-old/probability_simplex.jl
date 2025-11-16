@@ -38,8 +38,6 @@ include("../header.jl")
     @test mean(M, [p, q]) == shortest_geodesic(M, p, q)(0.5)
 
     types = [Vector{Float64}]
-    TEST_FLOAT32 && push!(types, Vector{Float32})
-    TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
 
     basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
     for T in types

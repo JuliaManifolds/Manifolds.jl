@@ -43,8 +43,6 @@ using RecursiveArrayTools: ArrayPartition
     @test Manifolds.check_size(Mse, zeros(2)) isa DomainError
     @test Manifolds.check_size(Mse, zeros(2), zeros(3)) isa DomainError
     types = [Vector{Float64}]
-    TEST_FLOAT32 && push!(types, Vector{Float32})
-    TEST_STATIC_SIZED && push!(types, MVector{5, Float64})
 
     retraction_methods = [
         ProductRetraction(ExponentialRetraction(), ExponentialRetraction()),

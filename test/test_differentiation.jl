@@ -1,6 +1,5 @@
 # A bit of duplication of tests in ManifoldDiff.jl but it ensures that it works here too.
 
-include("header.jl")
 using Manifolds:
     default_differential_backend,
     _derivative,

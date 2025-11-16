@@ -116,24 +116,7 @@ using Manifolds: TFVector, CoTFVector
         @test manifold_volume(M) ≈ 2 * π
         @test volume_density(M, 0.0, 2.0) == 1.0
     end
-    TEST_STATIC_SIZED && @testset "Real Circle and static sized arrays" begin
-        X = @MArray fill(0.0)
-        p = @SArray fill(0.0)
-        log!(M, X, p, @SArray fill(π / 4))
-        @test norm(M, p, X) ≈ π / 4
-        @test is_vector(M, p, X)
-        @test is_vector(M, [], X)
-        @test project(M, 1.0) == 1.0
-        p = @MArray fill(0.0)
-        project!(M, p, p)
-        @test p == @MArray fill(0.0)
-        p .+= 2 * π
-        project!(M, p, p)
-        @test p == @MArray fill(0.0)
-        @test project(M, 0.0, 1.0) == 1.0
-    end
-    types = [Float64]
-    TEST_FLOAT32 && push!(types, Float32)
+        types = [Float64]
 
     basis_types = (DefaultOrthonormalBasis(),)
     basis_types_real = (
@@ -244,7 +227,6 @@ using Manifolds: TFVector, CoTFVector
         @test volume_density(Mc, 1.0 + 0.0im, 2im) == 1.0
     end
     types = [Complex{Float64}]
-    TEST_FLOAT32 && push!(types, Complex{Float32})
 
     @testset "small and large distance tests" begin
         p = -0.42681766710748265 + 0.9043377018818392im

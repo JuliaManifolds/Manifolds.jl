@@ -223,8 +223,6 @@ end
     end
     @testset "test_manifold(SymplecticMatrices(6), ...)" begin
         types = [Matrix{Float64}]
-        TEST_FLOAT32 && push!(types, Matrix{Float32})
-        TEST_STATIC_SIZED && push!(types, MMatrix{6, 4, Float64, 24})
         for type in types
             @testset "Type $(type)" begin
                 @testset "CayleyRetraction" begin

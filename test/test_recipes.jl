@@ -1,8 +1,5 @@
+using Manifolds, Test
 using RecipesBase, Plots, Colors
-#using VisualRegressionTests,
-include("header.jl")
-# Note that the `false`s avoid popups and the tests directly fail.
-# If you have changed something and need to recreate the reference in the test avoids to start Gtk
 
 @testset "Recipes Test" begin
     references_folder = joinpath(@__DIR__, "assets")

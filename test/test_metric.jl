@@ -1,11 +1,16 @@
+using ADTypes
+using Distributions
 using FiniteDifferences
-using LinearAlgebra: I
+using Manifolds, ManifoldsBase
+using Test
+using Random
+using RecursiveArrayTools
+using StaticArrays
+
+using LinearAlgebra: I, dot, Diagonal, normalize
 using StatsBase: AbstractWeights, pweights
 import ManifoldsBase: default_retraction_method
-using Manifolds, ManifoldsBase
 using Manifolds: InducedBasis, connection, get_chart_index, induced_basis, mean!, median!
-using ADTypes
-include("header.jl")
 
 struct TestEuclidean{N} <: AbstractManifold{ℝ} end
 struct TestEuclideanMetric <: AbstractMetric end

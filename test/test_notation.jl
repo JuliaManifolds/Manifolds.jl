@@ -1,4 +1,4 @@
-include("header.jl")
+using Manifolds, Test
 
 @testset "Test Notation" begin
     M = Sphere(2)

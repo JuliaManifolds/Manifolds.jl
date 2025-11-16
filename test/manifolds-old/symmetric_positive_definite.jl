@@ -23,8 +23,6 @@ include("../header.jl")
     @test zero_vector(M1, one(zeros(3, 3))) == zero_vector(M3, one(zeros(3, 3)))
     metrics = [M1, M2, M3, M5, M6]
     types = [Matrix{Float64}, SPDPoint]
-    TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64, 9})
 
     for M in metrics
         basis_types = if (M == M1 || M == M2 || M == M3)

@@ -1,4 +1,20 @@
-include("header.jl")
+using Manifolds
+using ManifoldsBase
+using ManifoldDiff
+
+using LinearAlgebra
+using Distributions
+using DoubleFloats
+using Quaternions
+using Random
+using StaticArrays
+using RecursiveArrayTools
+using Statistics
+using StatsBase
+using Test
+using Graphs
+using SimpleWeightedGraphs
+
 """
     has_type_in_signature(sig, T::Type)
 

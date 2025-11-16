@@ -68,8 +68,6 @@ include("../header.jl")
             @test Weingarten(M, p, X, V) == [0.0 0.0; 0.0 0.0; 1.0 1.0]
         end
         types = [Matrix{Float64}]
-        TEST_FLOAT32 && push!(types, Matrix{Float32})
-        TEST_STATIC_SIZED && push!(types, MMatrix{3, 2, Float64, 6})
 
         @testset "Stiefel(2, 1) special case" begin
             M21 = Stiefel(2, 1)

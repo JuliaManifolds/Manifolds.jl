@@ -41,8 +41,6 @@ include("../header.jl")
     @test inner(M, p, X3, X3) == 9.0
 
     types = [Matrix{Float64}]
-    TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{4, 2, Float64, 8})
 
     for T in types
         pts = [convert(T, p), convert(T, p2), convert(T, p3)]

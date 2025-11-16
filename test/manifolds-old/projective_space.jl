@@ -26,9 +26,6 @@ include("../header.jl")
             @test injectivity_radius(M, [1.0, 0.0, 0.0], ExponentialRetraction()) == π / 2
         end
         types = [Vector{Float64}]
-        TEST_STATIC_SIZED && push!(types, MVector{3, Float64})
-
-        TEST_FLOAT32 && push!(types, Vector{Float32})
         basis_types = (DefaultOrthonormalBasis(), ProjectedOrthonormalBasis(:svd))
         @testset "Type $T" for T in types
             x = [1.0, 0.0, 0.0]

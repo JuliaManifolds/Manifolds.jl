@@ -14,8 +14,6 @@ include("../header.jl")
     @test injectivity_radius(M, [1.0 0.0; 0.0 1.0], PolarRetraction()) ≈ π / sqrt(2)
     @test get_embedding(M) == Euclidean(2, 2)
     types = [Matrix{Float64}, SMatrix{2, 2, Float64, 4}]
-    TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{2, 2, Float64, 4})
     retraction_methods = [PolarRetraction(), QRRetraction()]
     @test default_vector_transport_method(M) === ParallelTransport()
 

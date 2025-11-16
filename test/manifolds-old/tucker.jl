@@ -9,7 +9,6 @@ include("../header.jl")
     M_small = Tucker(r⃗, (2, 3, 3))
 
     types = [Float64]
-    TEST_FLOAT32 && push!(types, Float32)
 
     for T in types
         @testset "Type $T" begin

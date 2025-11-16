@@ -7,8 +7,6 @@ include("../header.jl")
     @test is_flat(M)
 
     types = [Matrix{Float64}]
-    TEST_FLOAT32 && push!(types, Matrix{Float32})
-    TEST_STATIC_SIZED && push!(types, MMatrix{3, 3, Float64, 9})
 
     for T in types
         A(α) = [1.0 0.0 0.0; 0.0 cos(α) sin(α); 0.0 -sin(α) cos(α)]

@@ -44,7 +44,6 @@ include("../header.jl")
         @test tmp == [1.0, 10.0]
     end
     types = [Float64]
-    TEST_FLOAT32 && push!(types, Float32)
     for T in types
         @testset "Type $T" begin
             pts = convert.(Ref(T), [1.0, 4.0, 2.0])
