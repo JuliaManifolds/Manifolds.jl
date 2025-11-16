@@ -59,6 +59,8 @@ Possible entries of the `expectations` dictionary are
 * for retractions, inverse retractions, and vector transports, the key is a tuple of the function and the method, e.g. `(retract, method) => q`
 * for `embed`, and `project`, the key is a tuple of the function and `:Point` or `:Vector`, e.g. `(embed, :Point) of expected (embedded) points or vectors,
   omitting that symbol is interpreted as the expected point.
+* for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`
+* for `get_coordinates` the key is a tuple of the function and the basis, e.g. `(get_coordinates, B) => c`
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
@@ -182,13 +184,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (get_coordinates in functions)
             expected_coordinates = get(expectations, get_coordinates, nothing)
-            Manifolds.Test.test_get_coordinates(
-                M, points[1], vectors[1], bases[1];
-                available_functions = functions,
-                expected_value = expected_coordinates,
-                test_mutating = (get_coordinates! in functions) ? true : mutating,
-                name = "get_coordinates(M, p, X, B)", # shorten name within large suite
-            )
+            for B in bases
+                expected_coordinates = get(expectations, (get_coordinates, B), expected_coordinates)
+                Manifolds.Test.test_get_coordinates(
+                    M, points[1], vectors[1], B;
+                    available_functions = functions,
+                    expected_value = expected_coordinates,
+                    test_mutating = (get_coordinates! in functions) ? true : mutating,
+                    name = "get_coordinates(M, p, X, $B)", # shorten name within large suite
+                )
+            end
         end
         if (get_embedding in functions)
             expected_embed = get(expectations, get_embedding, nothing)
@@ -202,15 +207,16 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             )
         end
         if (get_vector in functions)
-            expected_vector = get(expectations, get_vector, nothing)
-            # TODO: How to allow for more than one expected vector to run through all bases?
-            Manifolds.Test.test_get_vector(
-                M, points[1], coordinates[1], bases[1];
-                expected_value = expected_vector,
-                test_mutating = (get_vector! in functions) ? true : mutating,
-                name = "get_vector(M, p, c, B)", # shorten name within large suite
-                atol = get(function_atols, get_vector, atol),
-            )
+            for (c, B) in zip(coordinates, bases)
+                expected_vector = get(expectations, (get_vector, c, B), nothing)
+                Manifolds.Test.test_get_vector(
+                    M, points[1], c, B;
+                    expected_value = expected_vector,
+                    test_mutating = (get_vector! in functions) ? true : mutating,
+                    name = "get_vector(M, p, c, $B)", # shorten name within large suite
+                    atol = get(function_atols, get_vector, atol),
+                )
+            end
         end
         if (geodesic in functions)
             expected_geod = get(expectations, geodesic, nothing)
