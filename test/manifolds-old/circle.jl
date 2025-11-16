@@ -116,7 +116,7 @@ using Manifolds: TFVector, CoTFVector
         @test manifold_volume(M) ≈ 2 * π
         @test volume_density(M, 0.0, 2.0) == 1.0
     end
-        types = [Float64]
+    types = [Float64]
 
     basis_types = (DefaultOrthonormalBasis(),)
     basis_types_real = (
