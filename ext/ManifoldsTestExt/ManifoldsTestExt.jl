@@ -161,6 +161,20 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, embed, atol),
             )
         end
+        if (embed_project in functions)
+            approx_p = get(expectations, (embed_project, :Point), points[1])
+            approx_X = get(expectations, (embed_project, :Vector), vectors[1])
+            Manifolds.Test.test_project(
+                M, approx_p, approx_X;
+                available_functions = functions,
+                expected_point = points[1],
+                expected_vector = vectors[1],
+                test_aliased = aliased,
+                test_mutating = (embed_project! in functions) ? true : mutating,
+                atol = get(function_atols, embed_project, atol),
+                name = "embed_project(M, q) & embed_project(M, q, Y)", # shorten name within large suite
+            )
+        end
         if (exp in functions)
             Manifolds.Test.test_exp(
                 M, points[1], vectors[1];
@@ -781,6 +795,74 @@ function Manifolds.Test.test_embed(
     end
     return nothing
 end # Manifolds.Test.test_embed
+
+"""
+    Manifolds.Test.test_embed_project(
+        M, ap, aX;
+        available_functions=[],
+        expected_point=nothing,
+        expected_vector=nothing,
+        test_aliased=true,
+        test_mutating=true,
+        name = "Projection on \$M for \$(typeof(q)) points",
+        kwargs...
+    )
+
+Test the `p=`[`embed_project`](@extref `ManifoldsBase.embed_project`)`(M, ap)` and [`embed_project`](@extref `ManifoldsBase.project`)`(M, p, aX)`
+to project points and tangent vectors (if not `aX` is not nothing) after embedding them.
+
+Besides a simple call of `embed_project` (for both variants)  the following tests are performed
+
+* that the projected point is a valid point on the manifold
+* that the projected vector is a valid tangent vector on the manifold
+* that the result matches `expected_point` and `expected_vector`, respectively, if given
+* that the mutating version `embed_project!` produces the same result(s) (if activated)
+* that `embed_project!` works on aliased input (`p=q` or `X=Y`) (if activated _and_ p/q or X/Y are of same type)
+"""
+function Manifolds.Test.test_embed_project(
+        M::AbstractManifold, ap, aX = nothing;
+        available_functions = Function[],
+        expected_point = nothing,
+        expected_vector = nothing,
+        test_aliased = true,
+        test_mutating = true,
+        name = "Embed-then-project on $M for $(typeof(ap)) points",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        # Test point projection
+        p = embed_project(M, ap)
+        Test.@test is_point(M, p; error = :error, kwargs...)
+        isnothing(expected_point) || Test.@test isapprox(M, p, expected_point; error = :error, kwargs...)
+        if test_mutating
+            p2 = copy(M, p)
+            embed_project!(M, p2, ap)
+            Test.@test isapprox(M, p2, p; error = :error, kwargs...)
+            if test_aliased && (typeof(p) == typeof(ap))
+                p3 = copy(M, ap)
+                embed_project!(M, p3, p3)  # aliased
+                Test.@test isapprox(M, p3, p; error = :error, kwargs...)
+            end
+        end
+        # Test vector projection
+        if !isnothing(aX)
+            X = project(M, p, aX)
+            Test.@test is_vector(M, p, X; error = :error, kwargs...)
+            isnothing(expected_vector) || Test.@test isapprox(M, p, X, expected_vector; error = :error, kwargs...)
+            if test_mutating
+                X2 = copy(M, p, aX)
+                project!(M, X2, p, aX)
+                Test.@test isapprox(M, p, X2, X; error = :error, kwargs...)
+                if test_aliased
+                    X3 = copy(M, p, aX)
+                    project!(M, X3, p, X3)  # aliased
+                    Test.@test isapprox(M, p, X3, X; error = :error, kwargs...)
+                end
+            end
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_embed_project
 
 """
     Manifolds.Test.test_exp(

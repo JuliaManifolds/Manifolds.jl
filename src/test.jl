@@ -30,6 +30,7 @@ const _ALL_FUNCTIONS = [
     default_vector_transport_method,
     distance,
     embed,
+    embed_project,
     exp,
     # flat,
     geodesic,
@@ -75,6 +76,7 @@ function test_default_inverse_retraction end
 function test_default_vector_transport_method end
 function test_distance end
 function test_embed end
+function test_embed_project end
 function test_exp end
 function test_flat end
 function test_geodesic end
@@ -104,14 +106,16 @@ function test_Weingarten end
 function test_zero_vector end
 #
 #
-# TODO
+# For now not yet part of the test suite, mainly because testing them is not that easy to do
+# generically.
+# Please test these individually
+# How to test is is approx ok?
+function test_estimated_sectional_curvature_matrix end
+# What to exactly test on this?
+function test_sectional_curvature_matrix end
+# How approximate is ok?
+function test_mean end
+# Basis and vectors are very different per single basis what is to check
 function test_get_basis end
 function test_get_vectors end
-function test_embed_project end
-function test_sectional_curvature_matrix end
-#
-#
-# For now not yet part of the test suite. Please test these individually
-function test_estimated_sectional_curvature_matrix end
-function test_mean end
 end
