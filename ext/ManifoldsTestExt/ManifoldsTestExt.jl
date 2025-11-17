@@ -211,6 +211,12 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (get_embedding in functions)
             expected_embed = get(expectations, get_embedding, nothing)
+            Manifolds.Test.test_get_embedding(
+                # check the global one if this point type does not have an expected embedding
+                M, nothing;
+                expected_value = expected_embed,
+                name = "get_embedding(M)", # shorten name within large suite
+            )
             if length(points) >= 1
                 expected_embed_P = get(expectations, (get_embedding, typeof(points[1])), nothing)
                 Manifolds.Test.test_get_embedding(
@@ -219,13 +225,6 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                     expected_value = expected_embed,
                     expected_type = expected_embed_P,
                     name = "get_embedding(M, p)", # shorten name within large suite
-                )
-            else
-                Manifolds.Test.test_get_embedding(
-                    # check the global one if this point type does not have an expected embedding
-                    M, nothing;
-                    expected_value = expected_embed,
-                    name = "get_embedding(M)", # shorten name within large suite
                 )
             end
         end
