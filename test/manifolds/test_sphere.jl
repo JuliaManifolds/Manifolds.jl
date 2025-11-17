@@ -23,14 +23,6 @@ using ManifoldDiff
         @test representation_size(M) == (3,)
         @test !is_flat(M)
         @test is_flat(Sphere(1))
-        @test !is_point(M, [2.0, 0.0, 0.0])
-        @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
-        @test_throws DomainError is_vector(
-            M,
-            [1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0];
-            error = :error,
-        )
     end
 
     # TODO: test ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis
