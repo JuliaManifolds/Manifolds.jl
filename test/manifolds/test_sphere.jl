@@ -2,7 +2,8 @@ s = joinpath(@__DIR__, "..", "ManifoldsTestSuite.jl")
 !(s in LOAD_PATH) && (push!(LOAD_PATH, s))
 using ManifoldsTestSuite
 
-using LinearAlgebra, Manifolds, Test
+using LinearAlgebra, Manifolds, Test, StaticArrays, Quaternions, Random, Distributions, RecursiveArrayTools
+using ManifoldDiff
 
 
 @testset "The Spheres" begin
@@ -14,6 +15,25 @@ using LinearAlgebra, Manifolds, Test
     Y = [0.0, 0.0, π / 4]
     V = [2.0, 0.0, 0.0]  # normal vector at p
     ξ = [0.0, π / 4, 0.0]  # covector at p
+
+    @testset "Basics" begin
+        @test is_default_metric(M, EuclideanMetric())
+        @test !is_default_metric(M, AffineInvariantMetric())
+        @test base_manifold(M) === M
+        @test representation_size(M) == (3,)
+        @test !is_flat(M)
+        @test is_flat(Sphere(1))
+        @test !is_point(M, [2.0, 0.0, 0.0])
+        @test !is_vector(M, [1.0, 0.0, 0.0], [1.0, 0.0, 0.0])
+        @test_throws DomainError is_vector(
+            M,
+            [1.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0];
+            error = :error,
+        )
+    end
+
+    # TODO: test ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis
 
     Manifolds.Test.test_manifold(
         M,
@@ -53,19 +73,68 @@ using LinearAlgebra, Manifolds, Test
         ),
     )
 
-    Manifolds.Test.test_manifold(
-        Sphere(2, ℂ),
-        Dict(:Functions => [repr]),
-        # Expectations
-        Dict(repr => "Sphere(2, ℂ)"),
-    )
+    @testset "Embedding test" begin
+        p = [1.0, 0.0, 0.0]
+        X = [0.0, 1.0, 1.0]
+        @test embed(M, p) == p
+        q = similar(p)
+        embed!(M, q, p)
+        @test q == p
+        @test embed(M, p, X) == X
+        Y = similar(X)
+        embed!(M, Y, p, X)
+        @test Y == X
+    end
 
-    Manifolds.Test.test_manifold(
-        Sphere(2, ℍ),
-        Dict(:Functions => [repr]),
-        # Expectations
-        Dict(repr => "Sphere(2, ℍ)"),
-    )
+    @testset "Complex Sphere" begin
+        M = Sphere(2, ℂ)
+
+        p = [1.0, 1.0im, 1.0]
+        q = project(M, p)
+        Y = [2.0, 1.0im, 20.0]
+        X = project(M, q, Y)
+
+        Manifolds.Test.test_manifold(
+            M,
+            Dict(:Functions => [repr, get_embedding], :Points => [q], :Vectors => [X]),
+            # Expectations
+            Dict(
+                repr => "Sphere(2, ℂ)",
+                get_embedding => Euclidean(3; field = ℂ)
+            ),
+        )
+
+        # testing that the random point is actually a complex number with non-zero imaginary part
+        Random.seed!(42)
+        r = rand(M)
+        @test is_point(M, r)
+        @test norm(imag.(r)) != 0
+    end
+
+    @testset "Quaternion Sphere" begin
+        M = Sphere(2, ℍ)
+        p = [Quaternion(1.0), Quaternion(0, 1.0, 0, 0), Quaternion(0.0, 0.0, -1.0, 0.0)]
+        q = project(M, p)
+
+        Y = [Quaternion(2.0), Quaternion(0, 1.0, 0, 0), Quaternion(0.0, 0.0, 20.0, 0.0)]
+        X = project(M, q, Y)
+
+        Manifolds.Test.test_manifold(
+            M,
+            Dict(
+                :Functions => [repr, get_embedding, project],
+                :Points => [p],
+                :EmbeddedPoints => [p],
+                :Vectors => [X],
+                :EmbeddedVectors => [X],
+            ),
+            # Expectations
+            Dict(
+                :atol => 1.0e-14, repr => "Sphere(2, ℍ)",
+                get_embedding => Euclidean(3; field = ℍ)
+            ),
+        )
+    end
 
     Manifolds.Test.test_manifold(
         Sphere(2; parameter = :field),
@@ -80,18 +149,30 @@ using LinearAlgebra, Manifolds, Test
         ),
     )
 
-    Manifolds.Test.test_manifold(
-        ArraySphere(2, 2),
-        Dict(:Functions => [repr]),
-        # Expectations
-        Dict(repr => "ArraySphere(2, 2)"),
-    )
+    @testset "Array Sphere" begin
+        M = ArraySphere(2, 2; field = ℝ)
+        @test representation_size(M) == (2, 2)
+        p = ones(2, 2)
+        q = project(M, p)
+        @test is_point(M, q)
+        Y = [1.0 0.0; 0.0 1.1]
+        X = project(M, q, Y)
+        @test is_vector(M, q, X)
+
+        Manifolds.Test.test_manifold(
+            M,
+            Dict(:Functions => [repr, get_embedding], :Points => [q], :Vectors => [X]),
+            # Expectations
+            Dict(repr => "ArraySphere(2, 2)", get_embedding => Euclidean(2, 2)),
+        )
+    end
+
 
     Manifolds.Test.test_manifold(
         ArraySphere(2, 2; field = ℂ),
-        Dict(:Functions => [repr]),
+        Dict(:Functions => [repr, get_embedding]),
         # Expectations
-        Dict(repr => "ArraySphere(2, 2; field=ℂ)"),
+        Dict(repr => "ArraySphere(2, 2; field=ℂ)", get_embedding => Euclidean(2, 2; field = ℂ)),
     )
 
     Manifolds.Test.test_manifold(
@@ -102,6 +183,7 @@ using LinearAlgebra, Manifolds, Test
     )
 
     @testset "Specific Tests and boundary cases" begin
+        M = Sphere(2)
         @testset "small and large distance tests" begin
             p = [-0.18337624444127734, 0.8345313166281056, 0.5195484910396462]
             q = [-0.18337624444127681, 0.8345313166281058, 0.5195484910396464]
@@ -187,6 +269,7 @@ using LinearAlgebra, Manifolds, Test
                     @test isapprox(M, p, get_point(M, A, other_chart, a_other2))
                 end
             end
+            # TODO: test RetractionAtlas somewhere
         end
 
         @testset "sectional curvature" begin
@@ -225,5 +308,57 @@ using LinearAlgebra, Manifolds, Test
                 @test Weingarten(M, p, X, V) == Y
             end
         =#
+
+        @testset "Volume density" begin
+            M = Sphere(2)
+            p = [1.0, 0.0, 0.0]
+            @test manifold_volume(Sphere(0)) ≈ 2
+            @test manifold_volume(Sphere(1)) ≈ 2 * π
+            @test manifold_volume(Sphere(2)) ≈ 4 * π
+            @test manifold_volume(Sphere(3)) ≈ 2 * π * π
+            @test volume_density(M, p, [0.0, 0.5, 0.5]) ≈ 0.9187253698655684
+        end
+
+        @testset "ManifoldDiff" begin
+            # ManifoldDiff
+            M = Sphere(2)
+            p = [1.0, 0.0, 0.0]
+            X = [0.0, 2.0, -1.0]
+            dpX = ManifoldDiff.diagonalizing_projectors(M, p, X)
+            @test dpX[1][1] == 0.0
+            @test dpX[1][2].X == normalize(X)
+            @test dpX[2][1] == 1.0
+            @test dpX[2][2].X == normalize(X)
+        end
+
+        @testset "other metric" begin
+            M = Sphere(2)
+            p = [0, 1, 0]
+            X = [1, 0, 0]
+            Y = [1, 0, 4]
+            Z = [0, 0, 1]
+            @test riemann_tensor(M, p, X, Y, Z) == [4, 0, 0]
+            @test sectional_curvature(M, p, X, Y) == 1.0
+            @test sectional_curvature_max(M) == 1.0
+            @test sectional_curvature_min(M) == 1.0
+            M1 = Sphere(1)
+            @test sectional_curvature(M1, p, X, Y) == 0.0
+            @test sectional_curvature_max(M1) == 0.0
+            @test sectional_curvature_min(M1) == 0.0
+        end
+
+        @testset "Distributions" begin
+            sphere = Sphere(2)
+            haar_measure = Manifolds.uniform_distribution(sphere)
+            pts = rand(haar_measure, 5)
+            @test all(p -> is_point(sphere, p), pts)
+
+            usd_mvector = Manifolds.uniform_distribution(M, @MVector [1.0, 0.0, 0.0])
+            @test isa(rand(usd_mvector), MVector)
+
+            gtsd_mvector =
+                Manifolds.normal_tvector_distribution(M, (@MVector [1.0, 0.0, 0.0]), 1.0)
+            @test isa(rand(gtsd_mvector), MVector)
+        end
     end
 end
