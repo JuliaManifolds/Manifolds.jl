@@ -149,7 +149,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (embed in functions)
             ep = get_expectation(expectations, embed)
-            ep = !isnothing(ep) ? ep : get_expectation(expectations, (embed, :Point))
+            ep = isexpected(ep) ? ep : get_expectation(expectations, (embed, :Point))
             Manifolds.Test.test_embed(
                 M, points[1], n_vectors ≥ 1 ? vectors[1] : NoExpectation();
                 available_functions = functions,
@@ -162,9 +162,9 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             )
         end
         if (embed_project in functions)
-            approx_p = get_expectation(expectations, (embed_project, :Point))
-            approx_X = get_expectation(expectations, (embed_project, :Vector))
-            Manifolds.Test.test_project(
+            approx_p = get(properties, :EmbeddedPoints, [points[1]])[1]
+            approx_X = get(properties, :EmbeddedVectors, [vectors[1]])[1]
+            Manifolds.Test.test_embed_project(
                 M, approx_p, approx_X;
                 available_functions = functions,
                 expected_point = points[1],
@@ -213,7 +213,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             expected_embed = get_expectation(expectations, get_embedding)
             Manifolds.Test.test_get_embedding(
                 # check the global one if this point type does not have an expected embedding
-                M, nothing;
+                M, missing;
                 expected_value = expected_embed,
                 name = "get_embedding(M)", # shorten name within large suite
             )
@@ -307,7 +307,8 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (is_point in functions)
             qs = get(properties, :InvalidPoints, [])
-            errs = get_expectation(expectations, :IsPointErrors)
+            # lets not wrap these in expectations
+            errs = get(expectations, :IsPointErrors, [])
             Manifolds.Test.test_is_point(
                 M, points[1], qs...;
                 errors = errs,
@@ -319,7 +320,8 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (is_vector in functions)
             Ys = get(properties, :InvalidVectors, [])
-            errs = get_expectation(expectations, :IsVectorErrors)
+            # lets not wrap these in expectations
+            errs = get(expectations, :IsVectorErrors, [])
             Manifolds.Test.test_is_vector(
                 M, points[1], vectors[1], Ys...;
                 basepoint_error = get_expectation(expectations, :IsVectorBasepointError),
@@ -400,7 +402,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             Ys = get(properties, :EmbeddedVectors, missing)
             Y = ismissing(Ys) ? missing : Ys[1]
             ep = get_expectation(expectations, project)
-            ep = isexpexpected(ep) ? ep : get_expectation(expectations, (project, :Point))
+            ep = isexpected(ep) ? ep : get_expectation(expectations, (project, :Point))
             eX = get_expectation(expectations, (project, :Vector))
             ismissing(q) && @warn "To test `project`, at least one `:EmbeddedPoints` must be provided."
             Manifolds.Test.test_project(
@@ -622,7 +624,7 @@ function Manifolds.Test.test_default_inverse_retraction(
         m = ismissing(T) ? default_inverse_retraction_method(M) : default_inverse_retraction_method(M, T)
         Test.@test m isa AbstractInverseRetractionMethod
         !isexpected(expected_value) || Test.@test m == expect(expected_value)
-        !isexpected(expected_type) || Test.@test m isa expected_type
+        !isexpected(expected_type) || Test.@test m isa expect(expected_type)
     end
     return nothing
 end # Manifolds.Test.test_default_inverse_retraction
@@ -744,7 +746,7 @@ to embed points and tangent vectors (if not `missing`).
 Besides a simple call of `embed` (for both variants) the following ones are prefoemd if `get_embedding` is available:
 
 * that the embedded point is a valid point on the embedding manifold
-* that the embedded vector is a valid tangent vector on the embedding manifold (if `get_embedding` is available and `X` is not `nothing`)
+* that the embedded vector is a valid tangent vector on the embedding manifold (if `get_embedding` is available and `X` is not `missing`)
 * that the result matches `expected_point` and `expected_vector`, respectively, if given
 * that the projection inverts the embedding (if `project` is available)
 * that the mutating version `embed!` produces the same result(s) (if activated _and_ `get_embedding` is available)
@@ -960,8 +962,8 @@ end # Manifolds.Test.test_exp
 
 """
     Manifolds.Test.test_flat(M, p, X;
-        available_functions=[],
-        expected_value=nothing,
+        available_functions = [],
+        expected_value= NoExpectation(),
         name = "Flat on \$M for \$(typeof(p)) points",
         kwargs...
     )
@@ -999,7 +1001,7 @@ end
 """
     Manifolds.Test.test_geodesic(M, p, X, t=1.0;
         available_functions=[],
-        expected_value=nothing,
+        expected_value = NoExpectation(),
         N = 10,
         name = "Geodesic on \$M for \$(typeof(p)) points",
         kwargs...
@@ -1055,8 +1057,8 @@ end # Manifolds.Test.test_geodesic
 """
     Manifolds.Test.test_get_coordinates(
         M, p, X, B;
-        available_functions=[],
-        expected_value=nothing,
+        available_functions = [],
+        expected_value = NoExpectation(),
         name = "get_coordinates on \$M at point \$(typeof(p))",
         test_mutating = true,
     )
@@ -1170,7 +1172,7 @@ end # Manifolds.Test.test_get_vector
     Manifolds.Test.test_injectority_radius(M, p = missing;
         expected_value = NoExpectation(),
         expected_global_value = NoExpectation(),
-        retraction_method = nothing,
+        retraction_method = missing,
         name = "Injectivity radius on \$M at point \$(ismissing(p) ? "" : "\$typeof(p)")) and \$(retraction_method)",
         kwargs...
     )
@@ -1191,9 +1193,9 @@ function Manifolds.Test.test_injectivity_radius(
     )
     Test.@testset "$(name)" begin
         r = if ismissing(p)
-            isnothing(retraction_method) ? injectivity_radius(M) : injectivity_radius(M, retraction_method)
+            ismissing(retraction_method) ? injectivity_radius(M) : injectivity_radius(M, retraction_method)
         else
-            isnothing(retraction_method) ? injectivity_radius(M, p) : injectivity_radius(M, p, retraction_method)
+            ismissing(retraction_method) ? injectivity_radius(M, p) : injectivity_radius(M, p, retraction_method)
         end
         Test.@test r ≥ 0.0
         !isexpected(expected_value) || Test.@test isapprox(r, expect(expected_value); kwargs...)
@@ -1328,7 +1330,7 @@ Test the function [`is_point`](@ref) on  for point `p` on manifold `M`.
   * returns `false`
   * issues a warning (if activated)
   * isues an info message (if activated)
-  * throws the corresponding error from `error_types` (if not nothing)
+  * throws the corresponding error from `error_types` (if not `missing`)
 """
 function Manifolds.Test.test_is_point(
         M::AbstractManifold, p, qs...;
@@ -1344,7 +1346,7 @@ function Manifolds.Test.test_is_point(
             Test.@test !is_point(M, q; kwargs...)
             (test_warn) && Test.@test_logs (:warn,) is_point(M, q; error = :warn, kwargs...)
             (test_info) && Test.@test_logs (:info,) is_point(M, q; error = :info, kwargs...)
-            if length(errors) >= i && !isnothing(errors[i])
+            if length(errors) >= i && !ismissing(errors[i])
                 Test.@test_throws (errors[i]) is_point(M, q; error = :error, kwargs...)
             end
         end
@@ -1355,13 +1357,13 @@ end
 """
     Manifolds.Test.test_is_vector(
         M, p, X, Ys...;
-        basepoint_error = nothing,
+        basepoint_error = missing,
         check_basepoint = true,
         errors = [],
         name = "is_vector on \$M for \$(typeof(p)) points",
         test_warn = true,
         test_info = true,
-        q = nothing,
+        q = missing,
         kwargs...
     )
 
@@ -1372,7 +1374,7 @@ Test the function [`is_vector`](@ref) on manifold `M` at point `p` for tangent v
     * returns `false`
     * issues a warning (if activated)
     * isues an info message (if activated)
-    * throws the corresponding error from `error_types` (if not nothing)
+    * throws the corresponding error from `error_types` (if not `missing`)
 * if `check_basepoint` is `true`, then it checks that
     * for `p` this still returns `true`
     * for the base point `q` it
@@ -1385,11 +1387,11 @@ function Manifolds.Test.test_is_vector(
         M::AbstractManifold, p, X, Ys...;
         check_basepoint = true,
         errors = [],
-        basepoint_error = nothing,
+        basepoint_error = missing,
         name = "is_vector on $M for $(typeof(p)) points",
         test_warn = true,
         test_info = true,
-        q = nothing,
+        q = missing,
         kwargs...
     )
     Test.@testset "$(name)" begin
@@ -1398,17 +1400,17 @@ function Manifolds.Test.test_is_vector(
             Test.@test !is_vector(M, p, Y; kwargs...)
             (test_warn) && Test.@test_logs (:warn,) is_vector(M, p, Y; error = :warn, kwargs...)
             (test_info) && Test.@test_logs (:info,) is_vector(M, p, Y; error = :info, kwargs...)
-            if length(errors) >= i && !isnothing(errors[i])
+            if length(errors) >= i && !ismissing(errors[i])
                 Test.@test_throws (errors[i]) is_vector(M, p, Y; error = :error, kwargs...)
             end
         end
         if check_basepoint
             Test.@test is_vector(M, p, X, true; kwargs...)
-            if !isnothing(q)
+            if !ismissing(q)
                 Test.@test !is_vector(M, q, X, true; kwargs...)
                 (test_warn) && Test.@test_logs (:warn,) is_vector(M, q, X, true; error = :warn, kwargs...)
                 (test_info) && Test.@test_logs (:info,) is_vector(M, q, X, true; error = :info, kwargs...)
-                isnothing(basepoint_error) || Test.@test_throws (basepoint_error) is_vector(M, q, X, true; error = :error, kwargs...)
+                !isexpected(basepoint_error) || Test.@test_throws (basepoint_error) is_vector(M, q, X, true; error = :error, kwargs...)
             end
         end
     end
@@ -1418,7 +1420,7 @@ end
 """
     Manifolds.Test.test_log(
         M, p, q;
-        available_functions=[], expected_value=nothing, test_mutating=true,
+        available_functions=[], expected_value=NoExpectation(), test_mutating=true,
         test_exp = (exp in available_functions),
         test_injectivity_radius = (injectivity_radius in available_functions),
         name = "Logarithmic map on \$M for \$(typeof(p)) points",
@@ -1435,7 +1437,7 @@ end
 function Manifolds.Test.test_log(
         M::AbstractManifold, p, q;
         available_functions = Function[],
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         test_exp = (exp in available_functions),
         test_injectivity_radius = (injectivity_radius in available_functions),
         test_mutating = true,
@@ -1448,7 +1450,7 @@ function Manifolds.Test.test_log(
         Z = log(M, p, p)
         Test.@test is_vector(M, p, Z; error = :error, kwargs...)
         Test.@test norm(M, p, Z) ≈ 0.0   # log
-        isnothing(expected_value) || Test.@test isapprox(M, p, X, expected_value; error = :error, kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(M, p, X, expect(expected_value); error = :error, kwargs...)
         if test_mutating
             Y = copy(M, p, X)
             log!(M, Y, p, q)
@@ -1468,7 +1470,7 @@ end # Manifolds.Test.test_log
 """
     test_manifold_dimension(
         M;
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         expected_type = Int,
         name = "Manifold dimension for \$M",
     )
@@ -1481,7 +1483,7 @@ Test that the dimension of the manifold `M` is consistent.
 """
 function Manifolds.Test.test_manifold_dimension(
         M;
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         expected_type = Int,
         name = "Manifold dimension for $M",
     )
@@ -1489,7 +1491,7 @@ function Manifolds.Test.test_manifold_dimension(
         d = manifold_dimension(M)
         Test.@test d ≥ 0
         Test.@test isa(d, expected_type)
-        isnothing(expected_value) || (@test d == expected_value)
+        !isexpected(expected_value) || (@test d == expect(expected_value))
     end
     return nothing
 end # Manifolds.Test.test_manifold_dimension
@@ -1497,7 +1499,7 @@ end # Manifolds.Test.test_manifold_dimension
 """
     Manifolds.Test.test_manifold_volume(
         M;
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         name = "Manifold volume for \$M",
     )
 
@@ -1508,13 +1510,13 @@ Test the volume of the manifold `M`.
 """
 function Manifolds.Test.test_manifold_volume(
         M;
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         name = "Manifold volume for $M",
     )
     Test.@testset "$(name)" begin
         v = manifold_volume(M)
         Test.@test v ≥ 0.0
-        isnothing(expected_value) || Test.@test isapprox(v, expected_value)
+        !isexpected(expected_value) || Test.@test isapprox(v, expect(expected_value))
     end
     return nothing
 end # Manifolds.Test.test_manifold_volume
@@ -1522,7 +1524,7 @@ end # Manifolds.Test.test_manifold_volume
 """
     Manifolds.Test.test_mid_point(M, p, q;
         available_functions=[],
-        expected_value=nothing,
+        expected_value = NoExpectation(),
         test_aliased = true,
         test_mutating = true,
         test_symmetry = true,
@@ -1542,7 +1544,7 @@ Test the mid-point function on manifold `M` between points `p` and `q`.
 function Manifolds.Test.test_mid_point(
         M, p, q;
         available_functions = Function[],
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         test_aliased = true,
         test_mutating = true,
         test_symmetry = true,
@@ -1552,7 +1554,7 @@ function Manifolds.Test.test_mid_point(
     Test.@testset "$(name)" begin
         r = mid_point(M, p, q)
         Test.@test is_point(M, r; error = :error, kwargs...)
-        isnothing(expected_value) || Test.@test isapprox(M, r, expected_value; error = :error, kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(M, r, expect(expected_value); error = :error, kwargs...)
         r2 = mid_point(M, q, p)
         test_symmetry || Test.@test isapprox(M, r2, r; error = :error, kwargs...)
         if distance in available_functions
@@ -1581,7 +1583,7 @@ end # Manifolds.Test.test_mid_point
 
 """
     Manifolds.Test.test_norm(M, p, X;
-        available_functions=[], expected_value=nothing,
+        available_functions = [], expected_value = NoExpectation(),
         name = "Norm on \$M at point \$(typeof(p))",
         test_inner = (inner in available_functions),
         kwargs...
@@ -1597,7 +1599,7 @@ Test the norm on the manifold `M` at point `p` for tangent vector `X`.
 function Manifolds.Test.test_norm(
         M::AbstractManifold, p, X;
         available_functions = Function[],
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         test_inner = (inner in available_functions),
         name = "Norm on $M at point $(typeof(p))",
         kwargs...
@@ -1605,7 +1607,7 @@ function Manifolds.Test.test_norm(
     Test.@testset "$(name)" begin
         v = norm(M, p, X)
         Test.@test v isa (Real)
-        isnothing(expected_value) || Test.@test isapprox(v, expected_value; kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(v, expect(expected_value); kwargs...)
         Test.@test v ≥ 0.0
         if test_inner
             w = inner(M, p, X, X)
@@ -1619,9 +1621,9 @@ end # Manifolds.Test.test_norm
     Manifolds.Test.test_parallel_transport(
         M, p, X, q;
         available_functions=[],
-        direction = (log in available_functions) ? log(M, p, q) : nothing,
-        expected_value=nothing,
-        expected_value_direction=nothing,
+        direction = (log in available_functions) ? log(M, p, q) : missing,
+        expected_value=NoExpectation(),
+        expected_value_direction=NoExpectation(),
         name = "Parallel transport on \$M at point \$(typeof(p))",
         test_aliased = true,
         test_mutating = true,
@@ -1646,9 +1648,9 @@ The `direction` has to be the one that transports `X` also to `q`.
 function Manifolds.Test.test_parallel_transport(
         M, p, X, q;
         available_functions = [],
-        direction = (log in available_functions) ? log(M, p, q) : nothing,
-        expected_value_direction = nothing,
-        expected_value = nothing,
+        direction = (log in available_functions) ? log(M, p, q) : missing,
+        expected_value_direction = NoExpectation(),
+        expected_value = NoExpectation(),
         name = "Parallel transport on $M at point $(typeof(p))",
         test_aliased = true,
         test_mutating = true,
@@ -1657,7 +1659,7 @@ function Manifolds.Test.test_parallel_transport(
     Test.@testset "$(name)" begin
         Y = parallel_transport_to(M, p, X, q)
         Test.@test is_vector(M, q, Y; error = :error, kwargs...)
-        isnothing(expected_value) || Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(M, p, Y, expect(expected_value); error = :error, kwargs...)
         if test_mutating
             Y2 = copy(M, p, X)
             parallel_transport_to!(M, Y2, p, X, q)
@@ -1668,9 +1670,9 @@ function Manifolds.Test.test_parallel_transport(
                 Test.@test isapprox(M, q, Y3, Y; error = :error, kwargs...)
             end
         end
-        if (parallel_transport_direction in available_functions) && !isnothing(direction)
+        if (parallel_transport_direction in available_functions) && !ismissing(direction)
             Y4 = parallel_transport_direction(M, p, X, direction)
-            isnothing(expected_value_direction) || Test.@test isapprox(M, q, Y4, expected_value_direction; error = :error, kwargs...)
+            !isexpected(expected_value_direction) || Test.@test isapprox(M, q, Y4, expect(expected_value_direction); error = :error, kwargs...)
             if test_mutating
                 Y5 = copy(M, p, X)
                 parallel_transport_direction!(M, Y5, p, X, direction)
@@ -1694,18 +1696,18 @@ end # Manifolds.Test.test_parallel_transport
 
 """
     Manifolds.Test.test_project(
-        M, q, Y;
-        available_functions=[],
-        expected_point=nothing,
-        expected_vector=nothing,
-        test_aliased=true,
-        test_mutating=true,
+        M, q, Y = missing;
+        available_functions = [],
+        expected_point = NoExpectation(),
+        expected_vector = NoExpectation(),
+        test_aliased = true,
+        test_mutating = true,
         name = "Projection on \$M for \$(typeof(q)) points",
         kwargs...
     )
 
 Test the [`project`](@extref `ManifoldsBase.project`)`(M, q)` and [`project`](@extref `ManifoldsBase.project`)`(M, q, Y)`
-to project points and tangent vectors (if not `nothing`).
+to project points and tangent vectors (if not `missing`).
 
 Besides a simple call of `project` (for both variants)  the following tests are performed
 
@@ -1716,10 +1718,10 @@ Besides a simple call of `project` (for both variants)  the following tests are 
 * that `project!` works on aliased input (`p=q` or `X=Y`) (if activated _and_ p/q or X/Y are of same type)
 """
 function Manifolds.Test.test_project(
-        M::AbstractManifold, q, Y = nothing;
+        M::AbstractManifold, q, Y = missing;
         available_functions = Function[],
-        expected_point = nothing,
-        expected_vector = nothing,
+        expected_point = NoExpectation(),
+        expected_vector = NoExpectation(),
         test_aliased = true,
         test_mutating = true,
         name = "Projection on $M for $(typeof(q)) points",
@@ -1729,7 +1731,7 @@ function Manifolds.Test.test_project(
         # Test point projection
         p = project(M, q)
         Test.@test is_point(M, p; error = :error, kwargs...)
-        isnothing(expected_point) || Test.@test isapprox(M, p, expected_point; error = :error, kwargs...)
+        !isexpected(expected_point) || Test.@test isapprox(M, p, expect(expected_point); error = :error, kwargs...)
         if test_mutating
             p2 = copy(M, p)
             project!(M, p2, q)
@@ -1741,10 +1743,10 @@ function Manifolds.Test.test_project(
             end
         end
         # Test vector projection
-        if !isnothing(Y)
+        if !ismissing(Y)
             X = project(M, q, Y)
             Test.@test is_vector(M, p, X; error = :error, kwargs...)
-            isnothing(expected_vector) || Test.@test isapprox(M, p, X, expected_vector; error = :error, kwargs...)
+            !isexpected(expected_vector) || Test.@test isapprox(M, p, X, expect(expected_vector); error = :error, kwargs...)
             if test_mutating
                 X2 = copy(M, p, X)
                 project!(M, X2, q, Y)
@@ -1763,28 +1765,28 @@ end # Manifolds.Test.test_project
 """
     Manifolds.Test.test_repr(
         M;
-        expected_value=nothing,
+        expected_value = NoExpectation(),
         name = "(String) repr_esentation of \$M",
     )
 
 Test that the default `show` method works as expected by calling `repr(M)`.
 """
 function Manifolds.Test.test_repr(
-        M; expected_value = nothing, name = "(String) repr_esentation of \$M",
+        M; expected_value = NoExpectation(), name = "(String) repr_esentation of \$M",
     )
     Test.@testset "$(name)" begin
         s = repr(M)
-        isnothing(expected_value) || Test.@test s == expected_value
+        !isexpected(expected_value) || Test.@test s == expect(expected_value)
     end
     return nothing
 end # Manifolds.Test.test_repr
 
 """
     Manifolds.Test.test_rand(M;
-        vector_at = nothing,
-        seed = nothing,
+        vector_at = missing,
+        seed = missing,
         test_mutating = true,
-        rng = nothing,
+        rng = missing,
         name = "Random sampling on \$M",
         kwargs...
     )
@@ -1798,30 +1800,30 @@ Test the random sampling functions `rand(M)` and `rand(M; vector_at=p` (if `vect
 """
 function Manifolds.Test.test_rand(
         M::AbstractManifold;
-        vector_at = nothing,
-        seed = nothing,
+        vector_at = missing,
+        seed = missing,
         test_mutating = true,
-        rng = nothing,
-        name = "Random sampling on $M $(isnothing(vector_at) ? "" : "at points of type $(typeof(vector_at))")",
+        rng = missing,
+        name = "Random sampling on $M $(ismissing(vector_at) ? "" : "at points of type $(typeof(vector_at))")",
         kwargs...
     )
     Test.@testset "$(name)" begin
-        isnothing(seed) || (isnothing(rng) ? Random.seed!(seed) : Random.seed!(rng, seed))
+        ismissing(seed) || (ismissing(rng) ? Random.seed!(seed) : Random.seed!(rng, seed))
         # Test rand(M)
-        p = isnothing(rng) ? rand(M) : rand(rng, M)
+        p = ismissing(rng) ? rand(M) : rand(rng, M)
         Test.@test is_point(M, p; error = :error, kwargs...)
         if test_mutating
             p2 = copy(M, p)
-            isnothing(rng) ? rand!(M, p2) : rand!(rng, M, p2)
+            ismissing(rng) ? rand!(M, p2) : rand!(rng, M, p2)
             Test.@test is_point(M, p2; error = :error, kwargs...)
         end
         # Test rand(M; vector_at=p)
-        q = isnothing(vector_at) ? p : vector_at
-        X = isnothing(rng) ? rand(M; vector_at = vector_at) : rand(rng, M; vector_at = vector_at)
+        q = ismissing(vector_at) ? p : vector_at
+        X = ismissing(rng) ? rand(M; vector_at = vector_at) : rand(rng, M; vector_at = vector_at)
         Test.@test is_vector(M, q, X; error = :error, kwargs...)
         if test_mutating
             X2 = copy(M, vector_at, X)
-            isnothing(rng) ? rand!(M, X2; vector_at = q) : rand!(rng, M, X2; vector_at = q)
+            ismissing(rng) ? rand!(M, X2; vector_at = q) : rand!(rng, M, X2; vector_at = q)
             Test.@test is_vector(M, q, X2; error = :error, kwargs...)
         end
     end
@@ -1831,7 +1833,7 @@ end # Manifolds.Test.test_rand
 """
     Manifolds.Test.test_representation_size(
         M;
-        expected_value=nothing,
+        expected_value = NoExpectation(),
         name = "Representation size of \$M",
     )
 
@@ -1842,7 +1844,7 @@ Test the representation size of the manifold `M`.
 """
 function Manifolds.Test.test_representation_size(
         M::AbstractManifold;
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         name = "Representation size of $M",
     )
     Test.@testset "$(name)" begin
@@ -1850,7 +1852,7 @@ function Manifolds.Test.test_representation_size(
         if !isnothing(s)
             Test.@test all(x -> x ≥ 0 && x isa Int, s)
         end
-        isnothing(expected_value) || Test.@test s == expected_value
+        !isexpected(expected_value) || Test.@test s == expected(expected_value)
     end
     return nothing
 end # Manifolds.Test.test_representation_size
@@ -1859,13 +1861,13 @@ end # Manifolds.Test.test_representation_size
     Manifolds.test.test_retract(
         M, p, X, m::AbstractRetractionMethod;
         available_functions=[],
-        expected_value=nothing,
-        inverse_retraction_method=nothing,
-        name = "Retraction \$m on \$M at point \$(typeof(p))",
+        expected_value = NoExpectation(),
+        inverse_retraction_method = missing,
+    name = "Retraction \$m on \$M at point \$(typeof(p))",
         t = 1.0
         test_mutating = true,
         test_mutating = true,
-        test_inverse_retraction = (inverse_retraction in available_functions) && !isnothing(inverse_retraction_method),
+        test_inverse_retraction = (inverse_retraction in available_functions) && !ismissing(inverse_retraction_method),
         kwargs...
     )
 
@@ -1882,11 +1884,11 @@ function Manifolds.Test.test_retract(
         M, p, X, m::AbstractRetractionMethod;
         t = 1.0,
         available_functions = Function[],
-        expected_value = nothing,
-        inverse_retraction_method = nothing,
+        expected_value = NoExpectation(),
+        inverse_retraction_method = missing,
         name = "Retraction $m on $M at point $(typeof(p))",
         test_aliased = true,
-        test_inverse_retraction = (inverse_retract in available_functions) && !isnothing(inverse_retraction_method),
+        test_inverse_retraction = (inverse_retract in available_functions) && !ismissing(inverse_retraction_method),
         test_mutating = true,
         test_fused = true,
         kwargs...
@@ -1894,7 +1896,7 @@ function Manifolds.Test.test_retract(
     Test.@testset "$(name)" begin
         q = retract(M, p, X, m)
         Test.@test is_point(M, q; error = :error, kwargs...)
-        isnothing(expected_value) || Test.@test isapprox(M, q, expected_value; error = :error, kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(M, q, expected(expected_value); error = :error, kwargs...)
         if test_mutating
             q2 = copy(M, p)
             retract!(M, q2, p, X, m)
@@ -1923,7 +1925,6 @@ function Manifolds.Test.test_retract(
         if test_inverse_retraction
             X2 = inverse_retract(M, p, q, inverse_retraction_method)
             Test.@test isapprox(M, p, X2, X; error = :error, kwargs...)
-
         end
     end
     return nothing
@@ -1932,9 +1933,9 @@ end # Manifolds.Test.test_retract
 """
     Manifolds.Test.test_sectional_curvature(
         M, p, X, Y;
-        expected_value=nothing,
-        expected_min = nothing,
-        expected_max = nothing,
+        expected_value = NoExpectation(),
+        expected_min = NoExpectation(),
+        expected_max = NoExpectation(),
         name = "Sectional curvature on \$M at point \$(typeof(p))",
         kwargs...
     )
@@ -1948,22 +1949,22 @@ Test the sectional curvature on manifold `M` at point `p` for tangent vectors `X
 """
 function Manifolds.Test.test_sectional_curvature(
         M, p, X, Y;
-        expected_value = nothing,
-        expected_min = nothing,
-        expected_max = nothing,
+        expected_value = NoExpectation(),
+        expected_min = NoExpectation(),
+        expected_max = NoExpectation(),
         name = "Sectional curvature on $M at point $(typeof(p))",
         kwargs...
     )
     Test.@testset "$(name)" begin
         k = sectional_curvature(M, p, X, Y)
         Test.@test k isa (Real)
-        isnothing(expected_value) || Test.@test isapprox(k, expected_value; kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(k, expected(expected_value); kwargs...)
         K_min = sectional_curvature_min(M)
         K_max = sectional_curvature_max(M)
         Test.@test K_min ≤ k
         Test.@test K_max ≥ k
-        isnothing(expected_min) || Test.@test isapprox(K_min, expected_min; kwargs...)
-        isnothing(expected_max) || Test.@test isapprox(K_max, expected_max; kwargs...)
+        !isexpected(expected_min) || Test.@test isapprox(K_min, expected(expected_min); kwargs...)
+        !isexpected(expected_max) || Test.@test isapprox(K_max, expected(expected_max); kwargs...)
     end
     return nothing
 end # Manifolds.Test.test_sectional_curvature
@@ -1971,7 +1972,7 @@ end # Manifolds.Test.test_sectional_curvature
 """
     Manifolds.Test.test_sharp(M, p, ξ;
         available_functions=[],
-        expected_value=nothing,
+        expected_value = NoExpectation(),
         name = "Sharp on \$M for \$(typeof(p)) points",
         kwargs...
     )
@@ -1985,7 +1986,7 @@ Test the sharp operation on manifold `M` at point `p` with cotangent vector `ξ`
 function Manifolds.Test.test_sharp(
         M, p, ξ;
         available_functions = Function[],
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         test_mutating = true,
         name = "Sharp on $M for $(typeof(p)) points",
         kwargs...
@@ -1993,7 +1994,7 @@ function Manifolds.Test.test_sharp(
     Test.@testset "$(name)" begin
         X = sharp(M, p, ξ)
         Test.@test is_vector(M, p, X; error = :error, kwargs...)
-        isnothing(expected_value) || Test.@test isapprox(M, p, X, expected_value; error = :error, kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(M, p, X, expected(expected_value); error = :error, kwargs...)
         if flat in available_functions
             ξ2 = flat(M, p, X)
             Test.@test isapprox(ξ2, ξ; error = :error, kwargs...)
@@ -2010,6 +2011,7 @@ end
 """
     Manifolds.Test.test_shortest_geodesic(M, p, q, t=1.0;
         available_functions=[],
+        expected_value = NoExpectation(),
         N = 10,
         name = "Shortest geodesic on \$M for \$(typeof(p)) points",
         kwargs...
@@ -2026,7 +2028,7 @@ Test the geodesic on manifold `M` at point `p` with tangent vector `X` at time `
 function Manifolds.Test.test_shortest_geodesic(
         M, p, q, t = 0.5;
         available_functions = Function[],
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         N = 10,
         name = "Shortest geodesic on $M for $(typeof(p)) points",
         kwargs...
@@ -2045,7 +2047,7 @@ function Manifolds.Test.test_shortest_geodesic(
         # consistency
         @test isapprox(distance(M, p, q) * t, distance(M, p, qt); kwargs...)
         @test isapprox(distance(M, p, q) * (1 - t), distance(M, qt, q); kwargs...)
-        isnothing(expected_value) || Test.@test isapprox(M, qt, expected_value; error = :error, kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(M, qt, expected(expected_value); error = :error, kwargs...)
         # Test constant speed
         if (distance in available_functions) && (norm in available_functions)
             ts = range(0.0, 1.0; length = N)
@@ -2072,8 +2074,8 @@ end # Manifolds.Test.test_shortest_geodesic
         M, p, X, q, default_vector_transport_method(M);
         available_functions=[],
         direction = inverse_retract(M, p, q, default_inverse_retraction_method(M)),
-        expected_value=nothing,
-        expected_value_direction=nothing,
+        expected_value = NoExpectation(),
+        expected_value_direction = NoExpectation(),
         test_aliased = true,
         test_mutating = true,
         name = "Vector transport method \$(vector_transport_method) on \$M at point \$(typeof(p))",
@@ -2099,8 +2101,8 @@ function Manifolds.Test.test_vector_transport(
         M, p, X, q, m = default_vector_transport_method(M);
         available_functions = [],
         direction = inverse_retract(M, p, q, default_inverse_retraction_method(M)),
-        expected_value_direction = nothing,
-        expected_value = nothing,
+        expected_value_direction = NoExpectation(),
+        expected_value = NoExpectation(),
         test_aliased = true,
         test_mutating = true,
         name = "Vector transport method $(vector_transport_method) on $M at point $(typeof(p))",
@@ -2109,7 +2111,7 @@ function Manifolds.Test.test_vector_transport(
     Test.@testset "$(name)" begin
         Y = vector_transport_to(M, p, X, q, m)
         Test.@test is_vector(M, q, Y; error = :error, kwargs...)
-        isnothing(expected_value) || Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(M, p, Y, expected(expected_value); error = :error, kwargs...)
         if test_mutating
             Y2 = copy(M, p, X)
             vector_transport_to!(M, Y2, p, X, q, m)
@@ -2122,7 +2124,7 @@ function Manifolds.Test.test_vector_transport(
         end
         if (vector_transport_direction in available_functions) && !isnothing(direction)
             Y4 = vector_transport_direction(M, p, X, direction, m)
-            isnothing(expected_value_direction) || Test.@test isapprox(M, p, Y4, expected_value_direction; error = :error, kwargs...)
+            !isexpected(expected_value_direction) || Test.@test isapprox(M, p, Y4, expected(expected_value_direction); error = :error, kwargs...)
             if test_mutating
                 Y5 = copy(M, p, X)
                 vector_transport_direction!(M, Y5, p, X, direction, m)
@@ -2147,7 +2149,7 @@ end # Manifolds.Test.test_vector_transport
 """
     Manifolds.Test.Weingarten(
         M, p, X, V;
-        expected_value=nothing,
+        expected_value = NoExpectation(),
         test_aliased = true,
         test_mutating = true,
         name = "Weingarten map on \$M at point \$(typeof(p))",
@@ -2155,6 +2157,7 @@ end # Manifolds.Test.test_vector_transport
     )
 
 Test the Weingarten map on manifold `M` at point `p` for tangent vector `X` and normal vector `V`.
+
 * that the result is a valid tangent vector at `p` on the manifold
 * that the result matches `expected_value`, if given
 * that the result is consistent with the mutating version `weingarten!` (if activated)
@@ -2163,7 +2166,7 @@ Test the Weingarten map on manifold `M` at point `p` for tangent vector `X` and 
 function Manifolds.Test.test_Weingarten(
         M, p, X, V;
         available_functions = [],
-        expected_value = nothing,
+        expected_value = NoExpectation(),
         test_aliased = true,
         test_mutating = true,
         name = "Weingarten map on $M at point $(typeof(p))",
@@ -2172,7 +2175,7 @@ function Manifolds.Test.test_Weingarten(
     Test.@testset "$(name)" begin
         Y = Weingarten(M, p, X, V)
         Test.@test is_vector(M, p, Y; error = :error, kwargs...)
-        isnothing(expected_value) || Test.@test isapprox(M, p, Y, expected_value; error = :error, kwargs...)
+        !isexpected(expected_value) || Test.@test isapprox(M, p, Y, expect(expected_value); error = :error, kwargs...)
         if test_mutating
             Y2 = copy(M, p, X)
             Weingarten!(M, Y2, p, X, V)
@@ -2224,7 +2227,7 @@ function Manifolds.Test.test_zero_vector(
     return nothing
 end # Manifolds.Test.test_zero_vector
 
-
+# Include the old tests for now as well
 include("tests_general.jl")
 
 end

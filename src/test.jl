@@ -38,9 +38,7 @@ A struct to hold expected values for tests of type `T`.
 struct Expect{T} <: AbstractExeption
     value::T
 end
-Expect(value::T) where {T} = Expect{T}(value)
-Expect(e::Expectation) = e
-Expect(ne::NoExpectation) = ne
+Expect(e::Expect) = e
 
 """
     NoExcpectation <: AbstractExeption
@@ -48,6 +46,8 @@ Expect(ne::NoExpectation) = ne
 A struct to indicate that no expectation is provided for a test.
 """
 struct NoExpectation <: AbstractExeption end
+
+Expect(ne::NoExpectation) = ne
 
 isexpected(e::Expect) = true
 isexpected(value) = true
