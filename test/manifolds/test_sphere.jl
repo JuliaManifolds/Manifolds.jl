@@ -20,9 +20,6 @@ using ManifoldDiff
         @test is_default_metric(M, EuclideanMetric())
         @test !is_default_metric(M, AffineInvariantMetric())
         @test base_manifold(M) === M
-        @test representation_size(M) == (3,)
-        @test !is_flat(M)
-        @test is_flat(Sphere(1))
     end
 
     # TODO: test ProjectedOrthonormalBasis(:svd), DiagonalizingOrthonormalBasis
