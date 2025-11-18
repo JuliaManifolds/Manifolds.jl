@@ -20,6 +20,55 @@ this module shall provide a test function with
 """
 module Test
 using ..Manifolds
+
+abstract type AbstractExeption end
+
+"""
+    Expect{T} <: AbstractExeption
+
+A struct to hold expected values for tests of type `T`.
+
+# Fields
+*  `value::T
+
+# Constructor
+
+    Expect(value::T)
+"""
+struct Expect{T} <: AbstractExeption
+    value::T
+end
+Expect(value::T) where {T} = Expect{T}(value)
+Expect(e::Expectation) = e
+Expect(ne::NoExpectation) = ne
+
+"""
+    NoExcpectation <: AbstractExeption
+
+A struct to indicate that no expectation is provided for a test.
+"""
+struct NoExpectation <: AbstractExeption end
+
+isexpected(e::Expect) = true
+isexpected(value) = true
+isexpected(e::NoExpectation) = false
+"""
+    expected(e::Union{Expect, NoExpectation})
+
+Check if an expectation is provided.
+"""
+isexpected(e::Union{Expect, NoExpectation})
+
+expect(e::Expect{T}) where {T} = e.value
+expect(value) = value
+expect(e::NoExpectation) = error("No expectation provided.")
+"""
+    expect(e::Union{Expect{T}, NoExpectation}) where T
+
+Get the expected value if provided, error otherwise.
+"""
+expect(e::Union{Expect, NoExpectation})
+
 # TODO: once cotangent vectors are a bit better supported, uncomment
 # `flat` and `sharp` here, for now these would never work as expected
 const _ALL_FUNCTIONS = [
@@ -42,6 +91,7 @@ const _ALL_FUNCTIONS = [
     inverse_retract,
     is_point,
     is_vector,
+    is_flat,
     log,
     manifold_dimension,
     manifold_volume,
@@ -52,6 +102,7 @@ const _ALL_FUNCTIONS = [
     project,
     rand,
     repr,
+    representation_size,
     retract,
     sectional_curvature,
     # sharp,
@@ -86,6 +137,7 @@ function test_get_vector end
 function test_injectivity_radius end
 function test_inner end
 function test_inverse_retract end
+function test_is_flat end
 function test_is_point end
 function test_is_vector end
 function test_log end
@@ -100,6 +152,7 @@ function test_sharp end
 function test_shortest_geodesic end
 function test_rand end
 function test_repr end
+function test_representation_size end
 function test_retract end
 function test_vector_transport end
 function test_Weingarten end

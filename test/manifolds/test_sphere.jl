@@ -290,17 +290,6 @@ using ManifoldDiff
             end
         end
 
-        #= Add the following to the test suite as functions
-            @testset "Weingarten" begin
-                M = Sphere(2)
-                p = [1.0, 0.0, 0.0]
-                X = [0.0, 2.0, 0.0]
-                V = [0.3, 0.0, 0.0]
-                Y = -X * (p'V)
-                @test Weingarten(M, p, X, V) == Y
-            end
-        =#
-
         @testset "Volume density" begin
             M = Sphere(2)
             p = [1.0, 0.0, 0.0]
