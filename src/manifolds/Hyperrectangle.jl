@@ -36,16 +36,16 @@ function check_point(M::Hyperrectangle, p)
         )
     end
     for i in eachindex(M.lb, M.ub, p)
-        if p[i] < M.lb[i] || isnan(p[i])
+        if !(p[i] >= M.lb[i])
             return DomainError(
                 p[i],
-                "At index $i the point has coordinate $(p[i]), below the lower bound of $(M.lb[i])",
+                "At index $i the point has coordinate $(p[i]), is not at or above the lower bound of $(M.lb[i])",
             )
         end
-        if p[i] > M.ub[i] || isnan(p[i])
+        if !(p[i] <= M.ub[i])
             return DomainError(
                 p[i],
-                "At index $i the point has coordinate $(p[i]), above the upper bound of $(M.ub[i])",
+                "At index $i the point has coordinate $(p[i]), is not at or below the upper bound of $(M.ub[i])",
             )
         end
     end
