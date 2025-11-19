@@ -74,6 +74,11 @@ Get the expected value if provided, error otherwise.
 """
 expect(e::Union{Expect, NoExpectation})
 
+#
+#
+# Dummy Types
+struct DummyMatrixType <: Manifolds.AbstractMatrixType end
+
 # TODO: once cotangent vectors are a bit better supported, uncomment
 # `flat` and `sharp` here, for now these would never work as expected
 const _ALL_FUNCTIONS = [

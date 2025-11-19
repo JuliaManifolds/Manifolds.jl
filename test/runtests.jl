@@ -32,6 +32,7 @@ end
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds Test Suite" begin
         include_test("manifolds/test_sphere.jl")
+        include_test("manifolds/test_general_unitary.jl")
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
