@@ -51,6 +51,9 @@ Test.@testset "GeneralUnitaryMatrices" begin
         Z = @SMatrix [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
         q = exp(M3, p3S, Z)
         @test q == p3S
-        X = log(M3, p3S, p3S)
+        q3S = @SMatrix [-1.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 0.0 1.0]
+        X = log(M3, p3S, q3S)
+        X3S = @SMatrix [0.0 -π 0.0; π 0.0 0.0; 0.0 0.0 0.0]
+        @test isapprox(M3, X, X3S)
     end
 end

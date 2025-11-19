@@ -1,7 +1,3 @@
-s = joinpath(@__DIR__, "..", "ManifoldsTestSuite.jl")
-!(s in LOAD_PATH) && (push!(LOAD_PATH, s))
-using ManifoldsTestSuite
-
 using LinearAlgebra, Manifolds, Test, StaticArrays, Quaternions, Random, Distributions, RecursiveArrayTools
 using ManifoldDiff
 
