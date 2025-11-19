@@ -134,4 +134,10 @@ include("../header.jl")
         @test sectional_curvature_max(M) == 0.0
         @test sectional_curvature_min(M) == 0.0
     end
+
+    @testset "rand special cases" begin
+        M = Hyperrectangle([-1.0, -1.0, -Inf, -Inf], [1.0, Inf, 1.0, Inf])
+        p = rand(M)
+        @test is_point(M, p)
+    end
 end
