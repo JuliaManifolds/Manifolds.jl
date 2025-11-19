@@ -617,7 +617,7 @@ end
         name = "default_inverse_retraction_method on \$M \$(ismissing(T) ? "" : "for type \$T")",
     )
 
-Test the [`default_inverse_retraction_method`](@extref `ManifoldsBase.default_inverse_retraction_method`) on manifold `M`.
+Test the [`default_inverse_retraction_method`](@extref `ManifoldsBase.default_inverse_retraction_method-Tuple{AbstractManifold}`) on manifold `M`.
 * that it returns an [`AbstractInverseRetractionMethod`](@extref `ManifoldsBase.AbstractInverseRetractionMethod`)
 * that the result matches `expected_value`, if given
 * that the result is of type `expected_type`, if given, defaults to the type of the value
@@ -645,7 +645,7 @@ end # Manifolds.Test.test_default_inverse_retraction
         name = "default_retraction_method on \$M \$(ismissing(T) ? "" : "for type \$T")",
     )
 
-Test the [`default_retraction_method`](@extref `ManifoldsBase.default_retraction_method`) on manifold `M`.
+Test the [`default_retraction_method`](@extref `ManifoldsBase.default_retraction_method-Tuple{AbstractManifold}`) on manifold `M`.
 * that it returns an [`AbstractRetractionMethod`](@extref `ManifoldsBase.AbstractRetractionMethod`)
 * that the result matches `expected_value`, if given
 * that the result is of type `expected_type`, if given, defaults to the type of the value
@@ -673,8 +673,8 @@ end # Manifolds.Test.test_default_retraction
         name = "default_vector_transport_method on \$M \$(ismissing(T) ? "" : "for type \$T")",
     )
 
-Test the [`default_vector_transport_method`](@extref `ManifoldsBase.default_vector_transport_method`) on manifold `M`.
-* that it returns an [`AbstractVectorTransportMethod`](@extref `ManifoldsBase.AbstractVectorTransportMethod`)
+Test the [`default_vector_transport_method`](@extref `ManifoldsBase.default_vector_transport_method-Tuple{AbstractManifold}`) on manifold `M`.
+* that it returns an [`AbstractVectorTransportMethod`](@extref `ManifoldsBase.default_vector_transport_method-Tuple{AbstractManifold}`)
 * that the result matches `expected_value`, if given
 * that the result is of type `expected_type`, if given, defaults to the type of the value
 """
@@ -748,16 +748,16 @@ end # Manifolds.Test.test_distance
         kwargs...
     )
 
-Test the [`embed`](@extref `ManifoldsBase.embed`)`(M, p)` and [`embed`](@extref `ManifoldsBase.embed`)`(M, p, X)`
+Test the [`embed`](@extref `ManifoldsBase.embed-Tuple{AbstractManifold, Any}`)`(M, p)` and [`embed`](@extref `ManifoldsBase.embed-Tuple{AbstractManifold, Any, Any}`)`(M, p, X)`
 to embed points and tangent vectors (if not `missing`).
 
-Besides a simple call of `embed` (for both variants) the following ones are prefoemd if `get_embedding` is available:
+Besides a simple call of `embed` (for both variants) the following ones are prefoemd if [`get_embedding`](@extref `ManifoldsBase.get_embedding-Tuple{AbstractManifold}`) is available:
 
 * that the embedded point is a valid point on the embedding manifold
-* that the embedded vector is a valid tangent vector on the embedding manifold (if `get_embedding` is available and `X` is not `missing`)
+* that the embedded vector is a valid tangent vector on the embedding manifold (if [`get_embedding`](@extref `ManifoldsBase.get_embedding-Tuple{AbstractManifold}`) is available and `X` is not `missing`)
 * that the result matches `expected_point` and `expected_vector`, respectively, if given
 * that the projection inverts the embedding (if `project` is available)
-* that the mutating version `embed!` produces the same result(s) (if activated _and_ `get_embedding` is available)
+* that the mutating version `embed!` produces the same result(s) (if activated _and_ [`get_embedding`](@extref `ManifoldsBase.get_embedding-Tuple{AbstractManifold}`) is available)
 * that `embed!` works on aliased input (`p=q` or `X=Y`) (if activated _and_ p/q or X/Y are of same type)
 """
 function Manifolds.Test.test_embed(
@@ -840,7 +840,7 @@ end # Manifolds.Test.test_embed
         kwargs...
     )
 
-Test the `p=`[`embed_project`](@extref `ManifoldsBase.embed_project`)`(M, ap)` and [`embed_project`](@extref `ManifoldsBase.project`)`(M, p, aX)`
+Test the `p=`[`embed_project`](@extref `ManifoldsBase.embed_project-Tuple{AbstractManifold, Any}`)`(M, ap)` and [`embed_project`](@extref `ManifoldsBase.embed_project-Tuple{AbstractManifold, Any, Any}`)`(M, p, aX)`
 to project points and tangent vectors (if not `aX` is not `missing`) after embedding them.
 Besides a simple call of `embed_project` (for both variants)  the following tests are performed
 
@@ -1077,7 +1077,7 @@ for a tangent vector `X` and a basis `B`.
 * that the result is a valid coordinate vector, that is of correct length
 * that the result matches `expected_value`, if given
 * that the mutating version `get_coordinates!` matches the non-mutating version, (if activated)
-* that [`get_vector`](@ref `ManifoldsBase.get_vector`) inverts `get_coordinates` (if activated)
+* that [`get_vector`](@extref `ManifoldsBase.get_vector`) inverts `get_coordinates` (if activated)
 """
 function Manifolds.Test.test_get_coordinates(
         M::AbstractManifold, p, X, B;
@@ -1112,7 +1112,7 @@ end # Manifolds.Test.test_get_coordinates
         name = "get_embedding on \$M \$(ismissing(P) ? "" : "for type \$P")",
     )
 
-Test the [`get_embedding`](@extref `ManifoldsBase.get_embedding`) on manifold `M`.
+Test the [`get_embedding`](@extref `ManifoldsBase.get_embedding-Tuple{AbstractManifold}`) on manifold `M`.
 
 * that it returns an `AbstractManifold`.
 * that its type matches `expected_type`, if given, defaults to the type of the expected value
@@ -1149,7 +1149,7 @@ for a vector of coordinates `c` in basis `B`.
 * that the result is a valid tangent vector at `p` on the manifold
 * that the result matches `expected_value`, if given
 * that the mutating version `get_vector!` matches the non-mutating version, (if activated)
-* that [`get_coordinates`](@ref `ManifoldsBase.get_coordinates`) inverts `get_vector` (if activated)
+* that [`get_coordinates`](@extref `ManifoldsBase.get_coordinates`) inverts `get_vector` (if activated)
 """
 function Manifolds.Test.test_get_vector(
         M::AbstractManifold, p, c, B;
@@ -1300,11 +1300,11 @@ function Manifolds.Test.test_inverse_retract(
 end # Manifolds.Test.test_inverse_retraction
 
 """
-    Manifolds.Test.test_default_metric(M, metric::AbstractMetric, nondefaults::AbstractMetric...;
-        name = "default_metric on \$M",
+    Manifolds.Test.test_is_default_metric(M, metric::AbstractMetric, nondefaults::AbstractMetric...;
+    name = "is_default_metric on \$M",
     )
 
-Test the [`default_metric`](@extref `ManifoldsBase.default_metric`) on manifold `M`.
+Test the [`is_default_metric`](@ref) on manifold `M`.
 
 * that it returns true for the given `metric`
 * that it returns false for all other provided metrics
@@ -1737,7 +1737,7 @@ end # Manifolds.Test.test_parallel_transport
         kwargs...
     )
 
-Test the [`project`](@extref `ManifoldsBase.project`)`(M, q)` and [`project`](@extref `ManifoldsBase.project`)`(M, q, Y)`
+Test the [`project`](@extref `ManifoldsBase.project-Tuple{AbstractManifold, Any}`)`(M, q)` and [`project`](@extref `ManifoldsBase.project-Tuple{AbstractManifold, Any, Any}`)`(M, q, Y)`
 to project points and tangent vectors (if not `missing`).
 
 Besides a simple call of `project` (for both variants)  the following tests are performed

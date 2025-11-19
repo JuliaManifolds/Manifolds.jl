@@ -21,6 +21,11 @@ this module shall provide a test function with
 module Test
 using ..Manifolds
 
+"""
+    AbstractExpectation
+
+An abstract type for expectations in tests.
+"""
 abstract type AbstractExpectation end
 
 """
@@ -29,7 +34,7 @@ abstract type AbstractExpectation end
 A struct to hold expected values for tests of type `T`.
 
 # Fields
-*  `value::T
+*  `value::T` the expected value
 
 # Constructor
 
