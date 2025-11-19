@@ -56,4 +56,22 @@ Test.@testset "GeneralUnitaryMatrices" begin
         X3S = @SMatrix [0.0 -π 0.0; π 0.0 0.0; 0.0 0.0 0.0]
         @test isapprox(M3, X, X3S)
     end
+
+
+    M4 = Manifolds.GeneralUnitaryMatrices(4, ℝ, Manifolds.Test.DummyMatrixType)
+    M4f = Manifolds.GeneralUnitaryMatrices(4, ℝ, Manifolds.Test.DummyMatrixType; parameter = :field)
+
+    p4 = [1.0 0.0 0.0 0.0; 0.0 1.0 0.0 0.0; 0.0 0.0 1.0 0.0; 0.0 0.0 0.0 1.0]
+    X4 = [0.0 -1.0 0.0 0.0; 1.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0]
+    c4 = [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+    for M in [M4, M4f]
+        Manifolds.Test.test_manifold(
+            M,
+            Dict(
+                :Functions => [get_coordinates, get_vector], :Bases => [b],
+                :Points => [p4], :Vectors => [X4], :Coordinates => [c4],
+            ),
+            Dict((get_coordinates, b) => c4, (get_vector, c4, b) => X4)
+        )
+    end
 end
