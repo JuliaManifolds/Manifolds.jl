@@ -17,8 +17,6 @@ using ManifoldDiff
     ξ = [0.0, π / 4, 0.0]  # covector at p
 
     @testset "Basics" begin
-        @test is_default_metric(M, EuclideanMetric())
-        @test !is_default_metric(M, AffineInvariantMetric())
         @test base_manifold(M) === M
     end
 
@@ -52,6 +50,7 @@ using ManifoldDiff
             get_embedding => Euclidean(3),
             injectivity_radius => π,
             (injectivity_radius, ProjectionRetraction()) => π / 2,
+            is_default_metric => EuclideanMetric(),
             log => X, norm => π / 4,
             parallel_transport_to => parallel_transport_to(M, p, X, q),
             parallel_transport_direction => parallel_transport_to(M, p, X, q),

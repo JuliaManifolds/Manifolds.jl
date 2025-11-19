@@ -21,10 +21,10 @@ this module shall provide a test function with
 module Test
 using ..Manifolds
 
-abstract type AbstractExeption end
+abstract type AbstractExpectation end
 
 """
-    Expect{T} <: AbstractExeption
+    Expect{T} <: AbstractExpectation
 
 A struct to hold expected values for tests of type `T`.
 
@@ -35,17 +35,17 @@ A struct to hold expected values for tests of type `T`.
 
     Expect(value::T)
 """
-struct Expect{T} <: AbstractExeption
+struct Expect{T} <: AbstractExpectation
     value::T
 end
 Expect(e::Expect) = e
 
 """
-    NoExcpectation <: AbstractExeption
+    NoExcpectation <: AbstractExpectation
 
 A struct to indicate that no expectation is provided for a test.
 """
-struct NoExpectation <: AbstractExeption end
+struct NoExpectation <: AbstractExpectation end
 
 Expect(ne::NoExpectation) = ne
 
@@ -89,9 +89,10 @@ const _ALL_FUNCTIONS = [
     injectivity_radius,
     inner,
     inverse_retract,
+    is_default_metric,
+    is_flat,
     is_point,
     is_vector,
-    is_flat,
     log,
     manifold_dimension,
     manifold_volume,
@@ -137,6 +138,7 @@ function test_get_vector end
 function test_injectivity_radius end
 function test_inner end
 function test_inverse_retract end
+function test_is_default_metric end
 function test_is_flat end
 function test_is_point end
 function test_is_vector end

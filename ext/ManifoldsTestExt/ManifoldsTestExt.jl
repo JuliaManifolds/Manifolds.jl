@@ -3,7 +3,7 @@ module ManifoldsTestExt
 using Manifolds
 using ManifoldsBase
 using Test
-using Manifolds.Test: Expect, NoExpectation, isexpected, expect
+using Manifolds.Test: AbstractExpectation, Expect, NoExpectation, isexpected, expect
 
 get_expectation(g::Dict, key, default = NoExpectation()) = Expect(get(g, key, default))
 
@@ -61,6 +61,7 @@ Possible entries of the `expectations` dictionary are
   omitting that symbol is interpreted as the expected point.
 * for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`
 * for `get_coordinates` the key is a tuple of the function and the basis, e.g. `(get_coordinates, B) => c`
+* for `is_default_metric`, the value is the default metric
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
@@ -299,6 +300,13 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                     name = "inverse_retract(M, p, q, $irm)", # shorten name within large suite
                 )
             end
+        end
+        if (is_default_metric in functions)
+            m = get_expectation(expectations, is_default_metric, NoExpectation())
+            Manifolds.Test.test_is_default_metric(
+                M, m;
+                name = "is_default_metric(M$(isexpected(m) ? ", $(expect(m))" : ""))",
+            )
         end
         if (is_flat in functions)
             Manifolds.Test.test_is_flat(
@@ -1290,6 +1298,29 @@ function Manifolds.Test.test_inverse_retract(
     end
     return nothing
 end # Manifolds.Test.test_inverse_retraction
+
+"""
+    Manifolds.Test.test_default_metric(M, metric::AbstractMetric, nondefaults::AbstractMetric...;
+        name = "default_metric on \$M",
+    )
+
+Test the [`default_metric`](@extref `ManifoldsBase.default_metric`) on manifold `M`.
+
+* that it returns true for the given `metric`
+* that it returns false for all other provided metrics
+"""
+function Manifolds.Test.test_is_default_metric(
+        M::AbstractManifold, metric::Union{AbstractMetric, AbstractExpectation}, nondefaults::AbstractMetric...;
+        name = "is_default_metric on $M",
+    )
+    Test.@testset "$(name)" begin
+        !isexpected(metric) || Test.@test is_default_metric(M, expect(metric))
+        for md in nondefaults
+            Test.@test !is_default_metric(M, md)
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_default_metric
 
 """
     Manifolds.Test.test_is_flat(
