@@ -19,6 +19,7 @@ include("../header.jl")
     @test embed(M, p, X) == X
 
     @test_throws DomainError is_point(M, [1.0im, 0.0, 0.0]; error = :error)
+    @test_throws DomainError is_point(M, [NaN, 3.0, 0.0]; error = :error)
     @test_throws DomainError is_point(M, [10.0, 3.0, 0.0]; error = :error)
     @test_throws DomainError is_vector(M, [1.0, 2.0, 0.0], [1.0im, 0.0, 0.0]; error = :error)
     @test_throws DomainError is_vector(M, [1], [1.0, 1.0, 0.0]; error = :error)
@@ -133,5 +134,11 @@ include("../header.jl")
         @test sectional_curvature(M, p, [1.0, 0.0], [0.0, 1.0]) == 0.0
         @test sectional_curvature_max(M) == 0.0
         @test sectional_curvature_min(M) == 0.0
+    end
+
+    @testset "rand special cases" begin
+        M = Hyperrectangle([-1.0, -1.0, -Inf, -Inf], [1.0, Inf, 1.0, Inf])
+        p = rand(M)
+        @test is_point(M, p)
     end
 end
