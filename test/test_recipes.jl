@@ -40,6 +40,7 @@ using RecipesBase, Plots, Colors
         p2 = convert.(Ref(PoincareHalfSpacePoint), p)
         #            return
         plot(M, p2)
+        @test plot(M) != nothing
         #        end
         #        @plottest Hyp2PH_plot joinpath(references_folder, "Hyp2PHPlot.png") false
 
