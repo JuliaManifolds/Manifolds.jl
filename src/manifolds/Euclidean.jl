@@ -75,7 +75,7 @@ function allocation_promotion_function(
     return complex
 end
 
-function check_point(M::Euclidean{𝔽, N}, p) where {𝔽, N}
+function check_point(M::Euclidean{𝔽, N}, p; kwargs...) where {𝔽, N}
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
