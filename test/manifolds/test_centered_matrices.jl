@@ -9,7 +9,7 @@ Test.@testset "Centered Matrices" begin
     p3 = [0.5 1; -1 -0.7; 0.5 -0.3]
     q1 = [1 2 3; 4 5 6; -5 -7 -9]    #wrong dimensions
     q2 = [-3 -im; 2 im; 1 0]         #complex
-    q3 = [1 2; 3 4; 5 6]             #not centered
+    q3 = [1.0 2; 3 4; 5 6]             #not centered
 
     Manifolds.Test.test_manifold(
         M,
@@ -25,12 +25,12 @@ Test.@testset "Centered Matrices" begin
             :Points => [p1, p2, p3],
             :Vectors => [p1],
             :EmbeddedPoints => [p1],
-            :InvalidPoints => [q1, q2, q3],
-            :InvalidVectors => [p1, q2, q3],
-
+            :InvalidPoints => Matrix[q1, q2, q3], #To avoid implicit conversion to complex matrices
+            :InvalidVectors => Matrix[q1, q2, q3],
         ),
         Dict(
-            :IsPointErrors => [ManifoldDomainError, ManifoldDomainError, ManifoldDomainError],
+            :IsPointErrors => [ManifoldDomainError, ManifoldDomainError, DomainError],
+            :IsVectorErrors => [ManifoldDomainError, ManifoldDomainError, DomainError],
             is_flat => true,
             get_embedding => Euclidean(3, 2),
             manifold_dimension => 4,
@@ -41,8 +41,11 @@ Test.@testset "Centered Matrices" begin
     Mf = CenteredMatrices(3, 2; parameter = :field)
     Manifolds.Test.test_manifold(
         Mf,
-        Dict(:Functions => [repr]),
-        Dict(repr => "CenteredMatrices(3, 2, ℝ; parameter=:field)"),
+        Dict(:Functions => [repr, get_embedding]),
+        Dict(
+            repr => "CenteredMatrices(3, 2, ℝ; parameter=:field)",
+            get_embedding => Euclidean(3, 2; parameter = :field),
+        )
     )
 
     Mc = CenteredMatrices(3, 2, ℂ)
