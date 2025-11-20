@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * a lot of small test functions like `Manifolds.Test.test_exp(M, p, X; kwargs...)`
     with the goal of providing one test for each individual API function
 
+## [0.11.6] 2025-11-19
+
+### Changed
+
+* `rand` on `Hyperrectangle` returns valid points in the presence of `-Inf` and `Inf`.
+* `check_point` on `Hyperrectangle` checks that there are no `NaN`s.
+
 ## [0.11.5] 2025-11-13
 
 ### Added

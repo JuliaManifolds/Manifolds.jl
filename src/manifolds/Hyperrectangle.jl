@@ -36,16 +36,16 @@ function check_point(M::Hyperrectangle, p)
         )
     end
     for i in eachindex(M.lb, M.ub, p)
-        if p[i] < M.lb[i]
+        if !(p[i] >= M.lb[i])
             return DomainError(
                 p[i],
-                "At index $i the point has coordinate $(p[i]), below the lower bound of $(M.lb[i])",
+                "At index $i the point has coordinate $(p[i]), is not at or above the lower bound of $(M.lb[i])",
             )
         end
-        if p[i] > M.ub[i]
+        if !(p[i] <= M.ub[i])
             return DomainError(
                 p[i],
-                "At index $i the point has coordinate $(p[i]), above the upper bound of $(M.ub[i])",
+                "At index $i the point has coordinate $(p[i]), is not at or below the upper bound of $(M.ub[i])",
             )
         end
     end
@@ -372,7 +372,23 @@ function Random.rand!(
         vector_at = nothing,
     )
     if vector_at === nothing
-        pX .= M.lb .+ rand(rng, eltype(M.lb), size(M.lb)) .* (M.ub .- M.lb)
+        for i in eachindex(M.ub)
+            lbi = M.lb[i]
+            ubi = M.ub[i]
+            if isfinite(lbi)
+                if isfinite(ubi)
+                    pX[i] = lbi + rand(rng, eltype(M.lb)) * (ubi - lbi)
+                else
+                    pX[i] = lbi + abs(randn(rng, eltype(M.lb))) * σ
+                end
+            else
+                if isfinite(ubi)
+                    pX[i] = ubi - abs(randn(rng, eltype(M.lb))) * σ
+                else
+                    pX[i] = randn(rng) * σ
+                end
+            end
+        end
     else
         pX .= randn(rng, eltype(pX), size(pX)) .* σ
         project!(M, pX, vector_at, pX)
