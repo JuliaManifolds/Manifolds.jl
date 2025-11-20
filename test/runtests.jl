@@ -37,7 +37,6 @@ end
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
-        include_test("manifolds-old/centered_matrices.jl")
         include_test("manifolds-old/circle.jl")
         include_test("manifolds-old/cholesky_space.jl")
         include_test("manifolds-old/determinant_one_matrices.jl")

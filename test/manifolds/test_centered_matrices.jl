@@ -15,11 +15,12 @@ Test.@testset "Centered Matrices" begin
         M,
         Dict(
             :Functions => [
-                is_point, is_vector, is_flat,
+                embed,
                 get_embedding,
+                is_point, is_vector, is_flat,
                 manifold_dimension,
                 project,
-                repr,
+                repr, representation_size,
             ],
             :Points => [p1, p2, p3],
             :Vectors => [p1],
@@ -30,7 +31,48 @@ Test.@testset "Centered Matrices" begin
         ),
         Dict(
             :IsPointErrors => [ManifoldDomainError, ManifoldDomainError, ManifoldDomainError],
+            is_flat => true,
+            get_embedding => Euclidean(3, 2),
             manifold_dimension => 4,
+            repr => "CenteredMatrices(3, 2, ℝ)",
+            representation_size => (3, 2),
         )
     )
+    Mf = CenteredMatrices(3, 2; parameter = :field)
+    Manifolds.Test.test_manifold(
+        Mf,
+        Dict(:Functions => [repr]),
+        Dict(repr => "CenteredMatrices(3, 2, ℝ; parameter=:field)"),
+    )
+
+    Mc = CenteredMatrices(3, 2, ℂ)
+    p4 = q2
+    p5 = [1.0 1.0im; -1.0im 0.0; -1.0 + 1.0im -1.0im]
+    p6 = [1.0im 0.0; -2.0im 1.0im; 1.0im -1.0im]
+    # Complex case
+    Manifolds.Test.test_manifold(
+        Mc,
+        Dict(
+            :Functions => [
+                embed,
+                get_embedding,
+                is_point, is_vector, is_flat,
+                manifold_dimension,
+                project,
+                repr, representation_size,
+            ],
+            :Points => [p4, p5, p6],
+            :Vectors => [p4],
+            :EmbeddedPoints => [p4],
+        ),
+        Dict(
+            :IsPointErrors => [ManifoldDomainError, ManifoldDomainError, ManifoldDomainError],
+            is_flat => true,
+            get_embedding => Euclidean(3, 2; field = ℂ),
+            manifold_dimension => 8,
+            repr => "CenteredMatrices(3, 2, ℂ)",
+            representation_size => (3, 2),
+        )
+    )
+
 end

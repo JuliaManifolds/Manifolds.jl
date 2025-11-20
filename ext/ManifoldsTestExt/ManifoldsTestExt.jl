@@ -1437,7 +1437,7 @@ function Manifolds.Test.test_is_vector(
         end
         if check_basepoint
             Test.@test is_vector(M, p, X, true; kwargs...)
-            if !ismissing(q)
+            if !ismissing(q) && isexpected(q)
                 Test.@test !is_vector(M, q, X, true; kwargs...)
                 (test_warn) && Test.@test_logs (:warn,) is_vector(M, q, X, true; error = :warn, kwargs...)
                 (test_info) && Test.@test_logs (:info,) is_vector(M, q, X, true; error = :info, kwargs...)
@@ -1883,7 +1883,7 @@ function Manifolds.Test.test_representation_size(
         if !isnothing(s)
             Test.@test all(x -> x ≥ 0 && x isa Int, s)
         end
-        !isexpected(expected_value) || Test.@test s == expected(expected_value)
+        !isexpected(expected_value) || Test.@test s == expect(expected_value)
     end
     return nothing
 end # Manifolds.Test.test_representation_size

@@ -8,40 +8,6 @@ include("../header.jl")
     C = [-3 -im; 2 im; 1 0]         #complex
     D = [1 2; 3 4; 5 6]             #not centered
     types = [Matrix{Float64}]
-    @testset "Real Centered Matrices Basics" begin
-        @test repr(M) == "CenteredMatrices(3, 2, ℝ)"
-        @test representation_size(M) == (3, 2)
-        @test typeof(get_embedding(M)) === Euclidean{ℝ, TypeParameter{Tuple{3, 2}}}
-        @test is_flat(M)
-        @test check_point(M, A) === nothing
-        @test_throws ManifoldDomainError is_point(M, B; error = :error)
-        @test_throws ManifoldDomainError is_point(M, C; error = :error)
-        @test_throws DomainError is_point(M, D; error = :error)
-        @test check_vector(M, A, A) === nothing
-        @test_throws DomainError is_vector(M, A, D; error = :error)
-        @test_throws ManifoldDomainError is_vector(M, D, A; error = :error)
-        @test_throws ManifoldDomainError is_vector(M, A, B; error = :error)
-        @test manifold_dimension(M) == 4
-        @test A == project!(M, A, A)
-        @test A == project(M, A, A)
-        A2 = similar(A)
-        embed!(M, A2, A)
-        A3 = embed(M, A)
-        @test A2 == A
-        @test A3 == A
-        E = [0 0; 1 -1; -1 1]
-        F = [0.5 1; -1 -0.7; 0.5 -0.3]
-        Manifolds.test_manifold(
-            M,
-            [A, E, F],
-            test_injectivity_radius = false,
-            test_project_tangent = true,
-            test_musical_isomorphisms = true,
-            test_default_vector_transport = true,
-            is_tangent_atol_multiplier = 1,
-            is_point_atol_multiplier = 1,
-        )
-    end
     @testset "Complex Centered Matrices Basics" begin
         @test repr(M_complex) == "CenteredMatrices(3, 2, ℂ)"
         @test manifold_dimension(M_complex) == 8
