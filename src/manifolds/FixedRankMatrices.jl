@@ -243,9 +243,9 @@ Broadcast.broadcastable(v::UMVTangentVector) = v
 
 @inline function Base.copy(bc::Broadcast.Broadcasted{Broadcast.Style{UMVTangentVector}})
     return UMVTangentVector(
-        @inbounds(Broadcast._broadcast_getindex(bc, Val(:U))),
-        @inbounds(Broadcast._broadcast_getindex(bc, Val(:M))),
-        @inbounds(Broadcast._broadcast_getindex(bc, Val(:Vt))),
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:U))),                  # COV_EXCL_LINE
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:M))),                  # COV_EXCL_LINE
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:Vt))),                 # COV_EXCL_LINE
     )
 end
 

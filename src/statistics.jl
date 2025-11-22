@@ -261,13 +261,11 @@ function Statistics.mean!(
         kwargs...,
     )
     n = length(x)
-    if length(w) != n
-        throw(
-            DimensionMismatch(
-                "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
-            ),
-        )
-    end
+    (length(w) != n) && throw(
+        DimensionMismatch(
+            "The number of weights ($(length(w))) does not match the number of points for the mean ($(n)).",
+        ),
+    )
     order = shuffle_rng === nothing ? (1:n) : shuffle(shuffle_rng, 1:n)
     @inbounds begin
         j = order[1]

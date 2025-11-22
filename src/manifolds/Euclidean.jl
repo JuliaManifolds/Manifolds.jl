@@ -75,7 +75,7 @@ function allocation_promotion_function(
     return complex
 end
 
-function check_point(M::Euclidean{𝔽, N}, p) where {𝔽, N}
+function check_point(M::Euclidean{𝔽, N}, p; kwargs...) where {𝔽, N}
     if (𝔽 === ℝ) && !(eltype(p) <: Real)
         return DomainError(
             eltype(p),
@@ -142,13 +142,13 @@ Base.@propagate_inbounds function distance(M::Euclidean, p, q)
         throw(DimensionMismatch("At last one of $p and $q does not belong to $M"))
     end
     s = zero(eltype(p))
-    @inbounds begin
-        @simd for I in eachindex(p, q)
+    @inbounds begin # COV_EXCL_LINE
+        @simd for I in eachindex(p, q) # COV_EXCL_LINE
             p_i = p[I]
             q_i = q[I]
             s += abs2(p_i - q_i)
-        end
-    end
+        end # COV_EXCL_LINE
+    end # COV_EXCL_LINE
     return sqrt(s)
 end
 distance(M::Euclidean, p, q, r::Real) = norm(p - q, r)

@@ -371,18 +371,14 @@ function get_coordinates(
 end
 function get_coordinates(
         ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        p::SMatrix,
-        X::SMatrix,
-        ::DefaultOrthogonalBasis{ℝ, TangentSpaceType},
+        p::SMatrix, X::SMatrix, ::DefaultOrthogonalBasis{ℝ, TangentSpaceType},
     )
     return SA[X[2]]
 end
 
 function get_coordinates(
         ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}},
-        p::SMatrix,
-        X::SMatrix,
-        ::DefaultOrthogonalBasis{ℝ, TangentSpaceType},
+        p::SMatrix, X::SMatrix, ::DefaultOrthogonalBasis{ℝ, TangentSpaceType},
     )
     return SA[X[3, 2], X[1, 3], X[2, 1]]
 end
@@ -392,30 +388,18 @@ function get_coordinates_orthogonal(M::GeneralUnitaryMatrices{ℝ}, p, X, N)
 end
 
 function get_coordinates_orthogonal!(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{1}}},
-        Xⁱ,
-        p,
-        X,
-        ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{1}}}, c, p, X, ::RealNumbers,
     )
-    return Xⁱ
+    return c
 end
 function get_coordinates_orthogonal!(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        Xⁱ,
-        p,
-        X,
-        ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}}, c, p, X, ::RealNumbers,
     )
-    Xⁱ[1] = X[2]
-    return Xⁱ
+    c[1] = X[2]
+    return c
 end
 function get_coordinates_orthogonal!(
-        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{n}}},
-        c,
-        p,
-        X,
-        ::RealNumbers,
+        M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{n}}}, c, p, X, ::RealNumbers,
     ) where {n}
     @assert length(c) == manifold_dimension(M)
     @assert size(X) == (n, n)
@@ -423,7 +407,6 @@ function get_coordinates_orthogonal!(
         c[1] = X[3, 2]
         c[2] = X[1, 3]
         c[3] = X[2, 1]
-
         k = 4
         for i in 4:n, j in 1:(i - 1)
             c[k] = X[i, j]
@@ -434,42 +417,34 @@ function get_coordinates_orthogonal!(
 end
 function get_coordinates_orthogonal!(
         M::GeneralUnitaryMatrices{ℝ, Tuple{Int}},
-        Xⁱ,
-        p,
-        X,
-        ::RealNumbers,
+        c, p, X, ::RealNumbers,
     )
     n = get_parameter(M.size)[1]
-    @assert length(Xⁱ) == manifold_dimension(M)
+    @assert length(c) == manifold_dimension(M)
     @assert size(X) == (n, n)
     if n == 2
-        Xⁱ[1] = X[2]
+        c[1] = X[2]
     elseif n > 2
         @inbounds begin
-            Xⁱ[1] = X[3, 2]
-            Xⁱ[2] = X[1, 3]
-            Xⁱ[3] = X[2, 1]
-
+            c[1] = X[3, 2]
+            c[2] = X[1, 3]
+            c[3] = X[2, 1]
             k = 4
             for i in 4:n, j in 1:(i - 1)
-                Xⁱ[k] = X[i, j]
+                c[k] = X[i, j]
                 k += 1
             end
         end
     end
-    return Xⁱ
+    return c
 end
 function get_coordinates_orthonormal!(
-        M::GeneralUnitaryMatrices{ℝ},
-        Xⁱ,
-        p,
-        X,
-        num::RealNumbers,
+        M::GeneralUnitaryMatrices{ℝ}, c, p, X, num::RealNumbers,
     )
     T = Base.promote_eltype(p, X)
-    get_coordinates_orthogonal!(M, Xⁱ, p, X, num)
-    Xⁱ .*= sqrt(T(2))
-    return Xⁱ
+    get_coordinates_orthogonal!(M, c, p, X, num)
+    c .*= sqrt(T(2))
+    return c
 end
 
 @doc raw"""
@@ -522,73 +497,58 @@ function get_vector_orthogonal(
     return @SMatrix [0 -Xⁱ[]; Xⁱ[] 0]
 end
 function get_vector_orthogonal(
-        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}},
-        p::SMatrix,
-        Xⁱ,
-        ::RealNumbers,
+        ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{3}}}, p::SMatrix, c, ::RealNumbers,
     )
-    return @SMatrix [0 -Xⁱ[3] Xⁱ[2]; Xⁱ[3] 0 -Xⁱ[1]; -Xⁱ[2] Xⁱ[1] 0]
+    return @SMatrix [0 -c[3] c[2]; c[3] 0 -c[1]; -c[2] c[1] 0]
 end
 
 function get_vector_orthogonal!(
         ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{1}}},
-        X,
-        p,
-        Xⁱ::AbstractVector,
-        N::RealNumbers,
+        X, p, c::AbstractVector, ::RealNumbers,
     )
     return X .= 0
 end
 function get_vector_orthogonal!(
         M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        X,
-        p,
-        Xⁱ::AbstractVector,
-        N::RealNumbers,
+        X, p, c::AbstractVector, N::RealNumbers,
     )
-    return get_vector_orthogonal!(M, X, p, Xⁱ[1], N)
+    return get_vector_orthogonal!(M, X, p, c[1], N)
 end
 function get_vector_orthogonal!(
         ::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{2}}},
-        X,
-        p,
-        Xⁱ::Real,
-        ::RealNumbers,
+        X, p, c::Real, ::RealNumbers,
     )
     @assert length(X) == 4
     @inbounds begin
         X[1] = 0
-        X[2] = Xⁱ
-        X[3] = -Xⁱ
+        X[2] = c
+        X[3] = -c
         X[4] = 0
     end
     return X
 end
 function get_vector_orthogonal!(
         M::GeneralUnitaryMatrices{ℝ, TypeParameter{Tuple{n}}},
-        X,
-        p,
-        Xⁱ::AbstractVector,
-        ::RealNumbers,
+        X, p, c::AbstractVector, ::RealNumbers,
     ) where {n}
     @assert size(X) == (n, n)
-    @assert length(Xⁱ) == manifold_dimension(M)
+    @assert length(c) == manifold_dimension(M)
     @assert n > 2
     @inbounds begin
         X[1, 1] = 0
-        X[1, 2] = -Xⁱ[3]
-        X[1, 3] = Xⁱ[2]
-        X[2, 1] = Xⁱ[3]
+        X[1, 2] = -c[3]
+        X[1, 3] = c[2]
+        X[2, 1] = c[3]
         X[2, 2] = 0
-        X[2, 3] = -Xⁱ[1]
-        X[3, 1] = -Xⁱ[2]
-        X[3, 2] = Xⁱ[1]
+        X[2, 3] = -c[1]
+        X[3, 1] = -c[2]
+        X[3, 2] = c[1]
         X[3, 3] = 0
         k = 4
         for i in 4:n
             for j in 1:(i - 1)
-                X[i, j] = Xⁱ[k]
-                X[j, i] = -Xⁱ[k]
+                X[i, j] = c[k]
+                X[j, i] = -c[k]
                 k += 1
             end
             X[i, i] = 0
