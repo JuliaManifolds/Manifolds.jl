@@ -32,13 +32,13 @@ end
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds Test Suite" begin
         include_test("manifolds/test_centered_matrices.jl")
+        include_test("manifolds/test_cholesky_space.jl")
         include_test("manifolds/test_sphere.jl")
         include_test("manifolds/test_general_unitary.jl")
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
         include_test("manifolds-old/circle.jl")
-        include_test("manifolds-old/cholesky_space.jl")
         include_test("manifolds-old/determinant_one_matrices.jl")
         include_test("manifolds-old/elliptope.jl")
         include_test("manifolds-old/euclidean.jl")

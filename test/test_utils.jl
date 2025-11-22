@@ -114,4 +114,13 @@ using Manifolds, Test, Random, StaticArrays, Quaternions, LinearAlgebra
         @test Manifolds.max_eps(xi, z32) == eps(Float32)
         @test Manifolds.max_eps(xi, x64, x32, z32) == eps(Float32)
     end
+    @testset "Manifolds.Test selfconsistentcy" begin
+        v = 1.0
+        e = Manifolds.Test.Expect(v)
+        # Expect does not double wrap
+        @test e === Manifolds.Test.Expect(e)
+        @test Manifolds.Test.expect(e) == v
+        @test Manifolds.Test.expect(v) == v
+        @test_throws ErrorException Manifolds.Test.expect(Manifolds.Test.NoExpectation())
+    end
 end

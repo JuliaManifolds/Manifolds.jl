@@ -1,5 +1,7 @@
-using StatsBase: AbstractWeights, pweights
+using StatsBase: AbstractWeights, pweights, SimpleCovariance
+using Distributions, RecursiveArrayTools
 using Random: GLOBAL_RNG, seed!
+using Manifolds, ManifoldsBase, Test, Random, LinearAlgebra
 import ManifoldsBase:
     manifold_dimension,
     exp!,
@@ -9,15 +11,9 @@ import ManifoldsBase:
     decorated_manifold,
     base_manifold,
     get_embedding
-using Manifolds:
-    AbstractApproximationMethod,
-    CyclicProximalPointEstimation,
-    GeodesicInterpolation,
-    GeodesicInterpolationWithinRadius,
-    GradientDescentEstimation,
-    WeiszfeldEstimation
+using Manifolds: normal_tvector_distribution
 import Manifolds:
-    mean, mean!, median, median!, var, mean_and_var, default_approximation_method
+    cov, mean, mean!, median, median!, var, mean_and_var, default_approximation_method
 
 struct TestStatsSphere{N} <: AbstractManifold{ℝ} end
 TestStatsSphere(N) = TestStatsSphere{N}()
@@ -68,6 +64,8 @@ struct TestStatsNotImplementedEmbeddedManifold <: AbstractDecoratorManifold{ℝ}
 decorated_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 get_embedding(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
 base_manifold(::TestStatsNotImplementedEmbeddedManifold) = Sphere(2)
+
+struct TestStatsNotImplementedManifold <: AbstractDecoratorManifold{ℝ} end
 
 function test_mean(M, x, yexp = nothing, method...; kwargs...)
     @testset "mean unweighted" begin
@@ -664,6 +662,9 @@ end
                 @test mean_and_var(S, x, GeodesicInterpolationWithinRadius(π / 8)) != (m, v)
                 @test mean_and_var(S, x, GeodesicInterpolationWithinRadius(π / 8)) ==
                     (mg, vg)
+                # Just below π, i.e. we check whether we recompute but we do not.
+                @test mean_and_var(S, x, GeodesicInterpolationWithinRadius(9 * π / 10)) ==
+                    (m, v)
             end
         end
 
@@ -811,5 +812,15 @@ end
         @test size(covm) == (2, 2)
         @test isposdef(covm)
         @test issymmetric(covm)
+    end
+
+    @testset "Default Fallbacks for nonimplemented with stop forwarding" begin
+        M = TestStatsNotImplementedManifold()
+        a = GradientDescentEstimation()
+        @test default_approximation_method(ManifoldsBase.StopForwardingType(), M, cov) === a
+        @test default_approximation_method(ManifoldsBase.StopForwardingType(), M, mean) === a
+        b = CyclicProximalPointEstimation()
+        @test default_approximation_method(ManifoldsBase.StopForwardingType(), M, median) === b
+        @test default_approximation_method(ManifoldsBase.StopForwardingType(), M, mean_and_var) === a
     end
 end
