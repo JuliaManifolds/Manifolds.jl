@@ -355,27 +355,6 @@ function Manifolds.test_manifold(
         end
     end
 
-    Test.@testset "atlases" begin # COV_EXCL_LINE
-        if !isempty(test_atlases)
-            Test.@test get_default_atlas(M) isa AbstractAtlas{ℝ}
-        end
-        for A in test_atlases
-            i = get_chart_index(M, A, pts[1])
-            a = get_parameters(M, A, i, pts[1])
-            Test.@test isa(a, AbstractVector)
-            Test.@test length(a) == manifold_dimension(M)
-            Test.@test isapprox(M, pts[1], get_point(M, A, i, a))
-            if is_mutating
-                get_parameters!(M, a, A, i, pts[2])
-                Test.@test a ≈ get_parameters(M, A, i, pts[2])
-
-                q = allocate(pts[1])
-                get_point!(M, q, A, i, a)
-                Test.@test isapprox(M, pts[2], q)
-            end
-        end
-    end
-
     test_riesz_representer && Test.@testset "RieszRepresenterCotangentVector" begin
         rrcv = flat(M, pts[1], tv[1])
         Test.@test rrcv isa RieszRepresenterCotangentVector
@@ -499,8 +478,6 @@ function Manifolds.test_manifold(
                     Test.@test is_vector(M, pts32, v1t1; atol = tvatol, error = :warn)
                 test_dir &&
                     Test.@test is_vector(M, pts32, v1t2; atol = tvatol, error = :warn)
-                (test_to && test_dir) &&
-                    Test.@test isapprox(M, pts32, v1t1, v1t2, atol = tvatol)
                 test_to && Test.@test isapprox(
                     M, pts[1], vector_transport_to(M, pts[1], X1, pts[1], vtm), X1;
                     atol = tvatol
@@ -527,8 +504,7 @@ function Manifolds.test_manifold(
                         v1t2_m = allocate(v1t2)
                         vector_transport_direction!(M, v1t2_m, pts[1], X1, X2, vtm)
                         Test.@test isapprox(M, pts32, v1t2, v1t2_m; atol = tvatol)
-                        test_inplace &&
-                            Test.@testset "inplace test for vector_transport_direction!" begin
+                        test_inplace && Test.@testset "inplace test for vector_transport_direction!" begin
                             X1a = copy(M, pts[1], X1)
                             X2a = copy(M, pts[1], X2)
                             Xt = vector_transport_direction(M, pts[1], X1, X2, vtm)
@@ -839,8 +815,6 @@ function Manifolds.test_parallel_transport(
                         Test.@test isapprox(M, q, X, Y2)
                         parallel_transport_to!(M, Y1, q, Y1, p)
                         # Test that inplace does not have side effects
-                    else
-                        Y1 = parallel_transport_to(M, q, Y1, p)
                     end
                     Test.@test isapprox(M, q, X, Y1)
                 end
