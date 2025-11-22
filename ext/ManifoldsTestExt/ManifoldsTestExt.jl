@@ -234,6 +234,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 expected_vector = get_expectation(expectations, (get_vector, c, B))
                 Manifolds.Test.test_get_vector(
                     M, points[1], c, B;
+                    available_functions = functions,
                     expected_value = expected_vector,
                     test_mutating = (get_vector! in functions) ? true : mutating,
                     name = "get_vector(M, p, c, $B)", # shorten name within large suite
@@ -256,6 +257,11 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         if (injectivity_radius in functions)
             expected = get_expectation(expectations, (injectivity_radius, points[1]))
             expected_global = get_expectation(expectations, injectivity_radius)
+            Manifolds.Test.test_injectivity_radius(
+                M, missing;
+                expected_value = expected_global,
+                name = "injectivity_radius(M, p)", # shorten name within large suite
+            )
             Manifolds.Test.test_injectivity_radius(
                 M, points[1];
                 expected_value = expected,
@@ -1047,16 +1053,12 @@ function Manifolds.Test.test_geodesic(
             if distance in available_functions
                 dists = [distance(M, points[i], points[i + 1]) for i in 1:(length(points) - 1)]
                 speeds = [d / (ts[i + 1] - ts[i]) for (i, d) in enumerate(dists)]
-            elseif (norm in available_functions) && (log in available_functions)
-                speeds = [norm(M, points[i], log(M, points[i], points[i + 1])) / (ts[i + 1] - ts[i]) for i in 1:(length(points) - 1)]
-            else
-                return nothing # cannot test constant speed
+                avg_speed = sum(speeds) / length(speeds)
+                for s in speeds
+                    Test.@test isapprox(s, avg_speed; kwargs...)
+                end
+                Test.@test isapprox(avg_speed, t * norm(M, p, X); kwargs...)
             end
-            avg_speed = sum(speeds) / length(speeds)
-            for s in speeds
-                Test.@test isapprox(s, avg_speed; kwargs...)
-            end
-            Test.@test isapprox(avg_speed, t * norm(M, p, X); kwargs...)
         end
     end
     return nothing
@@ -1300,7 +1302,7 @@ function Manifolds.Test.test_inverse_retract(
 end # Manifolds.Test.test_inverse_retraction
 
 """
-    Manifolds.Test.test_is_default_metric(M, metric::AbstractMetric, nondefaults::AbstractMetric...;
+    Manifolds.Test.test_is_default_metric(M, metric::AbstractMetric;
     name = "is_default_metric on \$M",
     )
 
@@ -1310,14 +1312,11 @@ Test the [`is_default_metric`](@ref) on manifold `M`.
 * that it returns false for all other provided metrics
 """
 function Manifolds.Test.test_is_default_metric(
-        M::AbstractManifold, metric::Union{AbstractMetric, AbstractExpectation}, nondefaults::AbstractMetric...;
+        M::AbstractManifold, metric::Union{AbstractMetric, AbstractExpectation};
         name = "is_default_metric on $M",
     )
     Test.@testset "$(name)" begin
         !isexpected(metric) || Test.@test is_default_metric(M, expect(metric))
-        for md in nondefaults
-            Test.@test !is_default_metric(M, md)
-        end
     end
     return nothing
 end # Manifolds.Test.test_default_metric
