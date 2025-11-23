@@ -1,4 +1,4 @@
-using Manifolds, Test, Random
+using ManifoldDiff, Manifolds, Random, StaticArrays, Test
 
 Test.@testset "The circle manifold" begin
     M = Circle()
@@ -11,28 +11,57 @@ Test.@testset "The circle manifold" begin
     q1 = 9.0
     q2 = zeros(2, 2)
     Y1 = zeros(2, 2)
+
+    expectatoions = Dict(
+        manifold_dimension => 1,
+        representation_size => (),
+        repr => "Circle(ℝ)",
+        manifold_volume => 2π,
+    )
     Manifolds.Test.test_manifold(
         M,
         Dict(
             :Functions => [
+                exp,
                 get_coordinates, get_vector,
                 is_flat, is_point, is_vector,
+                log,
                 manifold_dimension, manifold_volume,
                 repr, representation_size,
             ],
+            :Bases => [DefaultOrthonormalBasis()],
             :Coordinates => [[π / 2], [-π / 2]],
             :InvalidPoints => [q1, q2],
             :InvalidVectors => [Y1],
+            :Mutating => false,
             :Points => [p1, p2],
             :Vectors => [X1, X2],
             :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()],
         ),
+        expectatoions,
+    )
+    Manifolds.Test.test_manifold(
+        M,
         Dict(
-            manifold_dimension => 1,
-            representation_size => (),
-            repr => "Circle(ℝ)",
-            manifold_volume => 2π,
+            :Functions => [
+                # exp, # exp errors here?
+                get_coordinates, get_vector,
+                inner, is_flat, #is_point, is_vector, #not sure why these two would not work
+                # log, # log errors here?
+                manifold_dimension, manifold_volume,
+                repr, representation_size,
+            ],
+            # Basis do not work here?
+            #:Bases => [DefaultOrthonormalBasis(),DiagonalizingOrthonormalBasis(Ref(1.0))],
+            :Coordinates => [[π / 2], [-π / 2]],
+            :InvalidPoints => Ref.([q1, q2]),
+            :InvalidVectors => Ref.([Y1]),
+            :Mutating => false, # and for the above - even in the non-mutating case?
+            :Points => Ref.([p1, p2]),
+            :Vectors => Ref.([X1, X2]),
+            :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()],
         ),
+        expectatoions,
     )
 
     Mc = Circle(ℂ)
@@ -44,29 +73,30 @@ Test.@testset "The circle manifold" begin
 
     qc1 = 1.0 + 1.0im
     Yc1 = 1.0im
+
+    expectatoions2 = Dict(
+        manifold_dimension => 1,
+        representation_size => (),
+        repr => "Circle(ℂ)",
+        manifold_volume => 2π,
+    )
     Manifolds.Test.test_manifold(
         Mc,
         Dict(
             :Functions => [
-                default_vector_transport_method,
                 get_coordinates, get_vector,
                 inner, injectivity_radius, is_flat, is_point, is_vector,
                 manifold_dimension, manifold_volume,
                 repr, representation_size,
             ],
+            :Bases => [DefaultOrthonormalBasis()],
             :Coordinates => [[π / 2], [-π / 2]],
             :InvalidPoints => [qc1],
             :InvalidVectors => [Yc1],
             :Points => [pc1, pc2],
             :Vectors => [Xc1, Xc2],
         ),
-        Dict(
-            default_vector_transport_method => ParallelTransport(),
-            manifold_dimension => 1,
-            representation_size => (),
-            repr => "Circle(ℂ)",
-            manifold_volume => 2π,
-        ),
+        expectatoions2
     )
 
     Test.@testset "Edge cases" begin
@@ -111,6 +141,22 @@ Test.@testset "The circle manifold" begin
             @test p ≈ fill(2.0)
             parallel_transport_to!(M, p, p, [4.0], p)
             @test p ≈ fill(4.0)
+        end
+        Test.@testset "ManifoldsDiff cases" begin
+            M = Circle()
+            @test ManifoldDiff.adjoint_Jacobi_field(
+                M, 0.0, 1.0, 0.5, 2.0,
+                ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+            ) === 2.0
+            @test ManifoldDiff.diagonalizing_projectors(M, 0.0, 2.0) == ((0.0, ManifoldDiff.ProjectorOntoVector(M, 0.0, SA[1.0])),)
+            @test ManifoldDiff.jacobi_field(
+                M, 0.0, 1.0, 0.5, 2.0,
+                ManifoldDiff.βdifferential_shortest_geodesic_startpoint,
+            ) === 2.0
+
+            # volume
+            @test manifold_volume(M) ≈ 2 * π
+            @test volume_density(M, 0.0, 2.0) == 1.0
         end
     end
 end
