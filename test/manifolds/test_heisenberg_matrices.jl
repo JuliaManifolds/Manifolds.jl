@@ -16,6 +16,8 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
     q1 = [0.0 2.0 3.0; 0.0 1.0 -1.0; 0.0 0.0 1.0]
     q2 = [1.0 2.0 3.0; 0.0 1.0 -1.0; 1.0 0.0 1.0]
     q3 = [1.0 2.0 3.0; 0.0 1.0 -1.0; 0.0 0.0 2.0]
+    q4 = [1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 1.0 1.0] #sum last row nonzero (excl last)
+    q5 = [1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 1.0] # bottom right not I
 
     Y1 = [1.0 2.0 3.0; 0.0 0.0 -1.0; 0.0 0.0 0.0]
     Y2 = [0.0 2.0 3.0; 1.0 0.0 -1.0; 0.0 0.0 0.0]
@@ -35,7 +37,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Test
             ],
             :Bases => [DefaultOrthonormalBasis()],
             :Coordinates => [[2.0, -1.0, 3.0]], #X1 in DefaultONB
-            :InvalidPoints => [q1, q2, q3],
+            :InvalidPoints => [q1, q2, q3, q4, q5],
             :InvalidVectors => [Y1, Y2, Y3],
             :NormalVectors => [N1],
             :Points => [p1, p2, p3],
