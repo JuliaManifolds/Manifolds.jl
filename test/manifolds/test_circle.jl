@@ -149,10 +149,12 @@ Test.@testset "The circle manifold" begin
             M = Circle()
             p = π / 3
             X = 0.5
+            d = -0.2
             q = retract(M, p, X)
             q2 = retract(M, p, X, ExponentialRetraction())
             @test q ≈ exp(M, p, X)
             @test q2 ≈ exp(M, p, X)
+            @test vector_transport_direction(M, p, X, d, ParallelTransport()) == parallel_transport_to(M, p, X, d)
         end
         Test.@testset "ManifoldsDiff cases" begin
             M = Circle()
