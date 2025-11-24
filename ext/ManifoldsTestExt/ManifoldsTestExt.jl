@@ -260,12 +260,12 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (get_vectors in functions)
             for B in bases
-                expected_vectors_symbol = get_expectation(expectations, (get_vectors, B), :default)
+                expected_vectors_symbol = expect(get_expectation(expectations, (get_vectors, B), :default))
                 Manifolds.Test.test_get_vectors(
                     M, points[1], (get_basis in functions) ? get_basis(M, points[1], B) : B;
                     available_functions = functions,
                     test_orthogonality = expected_vectors_symbol in (:Orthogonal, :Orthonormal),
-                    test_normality = expected_vectors_symbol == :Orthonormal,
+                    test_normality = (expected_vectors_symbol === :Orthonormal),
                     name = "get_vectors(M, p, $B)", # shorten name within large suite
                     atol = get(function_atols, get_vectors, atol),
                 )
@@ -1246,7 +1246,7 @@ function Manifolds.Test.test_get_vector(
 end # Manifolds.Test.test_get_vector
 
 """
-    Manifolds.Test.test__get_vectors(
+    Manifolds.Test.test_get_vectors(
         M, p, b;
         available_functions=[],
         name = "get_vectors on \$M at point \$(typeof(p))",
