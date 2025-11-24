@@ -1,0 +1,30 @@
+---
+title: Working in charts II
+---
+
+In this tutorial we will learn how to use charts to solve a basic problems when the metric is defined using `inner` product.
+
+```{julia}
+#| echo: false
+#| code-fold: true
+#| output: false
+using Pkg;
+cd(@__DIR__)
+Pkg.activate("."); # for reproducibility use the local tutorial environment.
+using Markdown
+```
+
+
+
+
+```{julia}
+#| output: false
+using Manifolds, RecursiveArrayTools, OrdinaryDiffEq, DiffEqCallbacks, BoundaryValueDiffEq
+```
+
+
+```{julia}
+M = Manifolds.EmbeddedTorus(3, 2)
+A = Manifolds.DefaultTorusAtlas()
+```
+
