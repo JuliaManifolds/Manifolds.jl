@@ -66,28 +66,31 @@ Test.@testset "The circle manifold" begin
     Mc = Circle(ℂ)
 
     pc1 = 1.0im
-    pc2 = -1.0im
+    pc2 = 1.0
     Xc1 = 0.5
     Xc2 = 0.25
 
     qc1 = 1.0 + 1.0im
     Yc1 = 1.0im
 
-    expectatoions2 = Dict(
+    expectations = Dict(
         manifold_dimension => 1,
         representation_size => (),
         repr => "Circle(ℂ)",
         manifold_volume => 2π,
+        :atols => Dict(parallel_transport_to => 1.0e-14),
     )
     Manifolds.Test.test_manifold(
         Mc,
         Dict(
             :Functions => [
+                exp,
                 get_coordinates, get_vector,
                 inner, injectivity_radius, is_flat, is_point, is_vector,
                 manifold_dimension, manifold_volume,
-                parallel_transport_direction,
-                repr, representation_size,
+                parallel_transport_direction, parallel_transport_to,
+                log,
+                rand, repr, representation_size,
             ],
             :Bases => [DefaultOrthonormalBasis()],
             :Coordinates => [[π / 2], [-π / 2]],
@@ -97,7 +100,28 @@ Test.@testset "The circle manifold" begin
             :Points => [pc1, pc2],
             :Vectors => [Xc1, Xc2],
         ),
-        expectatoions2
+        expectations
+    )
+    Manifolds.Test.test_manifold(
+        Mc,
+        Dict(
+            :Functions => [
+                exp,
+                get_coordinates, get_vector,
+                inner, injectivity_radius, is_flat, is_point, is_vector,
+                manifold_dimension, manifold_volume,
+                parallel_transport_direction, parallel_transport_to,
+                log,
+                repr, representation_size,
+            ],
+            :Bases => [DefaultOrthonormalBasis()],
+            :Coordinates => [[π / 2], [-π / 2]],
+            :InvalidPoints => fill.([qc1]),
+            :InvalidVectors => fill.([Yc1]),
+            :Points => fill.([pc1, pc2]),
+            :Vectors => fill.([Xc1, Xc2]),
+        ),
+        expectations
     )
 
     Test.@testset "Edge cases" begin
