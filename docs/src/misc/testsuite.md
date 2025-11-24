@@ -34,9 +34,11 @@ Manifolds.Test.test_is_flat
 Manifolds.Test.test_is_point
 Manifolds.Test.test_is_vector
 Manifolds.Test.test_geodesic
+Manifolds.Test.test_get_basis
 Manifolds.Test.test_get_coordinates
 Manifolds.Test.test_get_embedding
 Manifolds.Test.test_get_vector
+Manifolds.Test.test_get_vectors
 Manifolds.Test.test_log
 Manifolds.Test.test_manifold_dimension
 Manifolds.Test.test_manifold_volume
@@ -52,6 +54,7 @@ Manifolds.Test.test_sectional_curvature
 Manifolds.Test.test_sharp
 Manifolds.Test.test_shortest_geodesic
 Manifolds.Test.test_vector_transport
+Manifolds.Test.test_volume_density
 Manifolds.Test.test_Weingarten
 Manifolds.Test.test_zero_vector
 ```
