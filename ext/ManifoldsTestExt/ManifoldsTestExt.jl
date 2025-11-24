@@ -1281,7 +1281,7 @@ function Manifolds.Test.test_get_vectors(
         for i in 1:n
             Test.@test is_vector(M, p, Vs[i]; error = :error, kwargs...)
             if test_orthogonality
-                for j in (n + 1):n
+                for j in (i + 1):n
                     ip = inner(M, p, Vs[i], Vs[j])
                     Test.@test isapprox(ip, 0.0; kwargs...)
                 end
