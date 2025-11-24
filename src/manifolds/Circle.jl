@@ -441,7 +441,7 @@ Project a point `p` onto the complex [`Circle`](@ref) `M`, i.e. the unit circle 
 """
 project(::Circle, ::Any)
 project(::Circle{ℂ}, p::Number) = p / abs(p)
-projøect!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
+project!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 @doc raw"""
     project(M::Circle, p, X)

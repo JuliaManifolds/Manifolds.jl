@@ -204,5 +204,15 @@ Test.@testset "The circle manifold" begin
             @test manifold_volume(M) ≈ 2 * π
             @test volume_density(M, 0.0, 2.0) == 1.0
         end
+        Test.@testset "Complex Circlle log boundary case" begin
+            Mc = Circle(ℂ)
+            X = log(Mc, 1.0 + 0.0im, -1.0 + 0.0im)
+            @test isapprox(X, π * 1.0im)
+            X2 = log(Mc, fill(0 + 1.0im), fill(0.0 - 1.0im))
+            @test isapprox(X2[], π)
+            X3 = fill(0.0)
+            log!(Mc, X3, fill(0 + 1.0im), fill(0.0 - 1.0im))
+            @test isapprox(X3[], X2[])
+        end
     end
 end
