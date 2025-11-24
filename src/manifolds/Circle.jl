@@ -129,17 +129,20 @@ function distance(::Circle{ℂ}, p, q)
 end
 
 @doc raw"""
-    embed(M::Circle, p)
+    embed(M::Circle{ℂ}, p)
 
-Embed a point `p` on [`Circle`](@ref) `M` in the ambient space. It returns `p`.
+Embed a point `p` on the complex [`Circle`](@ref) `M` in the ambient space.
+It returns `p`.
 """
-embed(::Circle, p) = p
+embed(::Circle{ℂ}, p) = p
+
 @doc raw"""
-    embed(M::Circle, p, X)
+    embed(M::Circle{ℂ}, p, X)
 
-Embed a tangent vector `X` at `p` on [`Circle`](@ref) `M` in the ambient space. It returns `X`.
+Embed a tangent vector `X` at `p` on the complex [`Circle`](@ref) `M` in the ambient space.
+It returns `X`.
 """
-embed(::Circle, p, X) = X
+embed(::Circle{ℂ}, p, X) = X
 
 @doc raw"""
     exp(M::Circle, p, X)
@@ -223,6 +226,13 @@ function get_coordinates_orthonormal(::Circle{ℂ}, p, X, ::Union{RealNumbers, C
     Xⁱ = imag(X) * real(p) - real(X) * imag(p)
     return @SVector [Xⁱ]
 end
+
+"""
+    get_embedding(M::Circle{ℂ})
+
+Get the ambient space of the complex [`Circle`](@ref) `M`, which is `ℂ`.
+"""
+get_embedding(::Circle{ℂ}) = Euclidean(; field = ℂ)
 
 get_vector_orthonormal(::Circle{ℝ}, p::StaticArray, c, ::RealNumbers) = Scalar(c[])
 get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = fill(c[])
@@ -425,34 +435,24 @@ mid_point(M::Circle{ℂ}, p1::StaticArray, p2::StaticArray) = Scalar(mid_point(M
 number_of_coordinates(::Circle, ::AbstractBasis) = 1
 
 @doc raw"""
-    project(M::Circle, p)
+    project(M::Circle{ℂ}, p)
 
-Project a point `p` onto the [`Circle`](@ref) `M`.
-For the real-valued case this is the remainder with respect to modulus ``2π``.
-For the complex-valued case the result is the projection of `p` onto the unit circle in the
-complex plane.
+Project a point `p` onto the complex [`Circle`](@ref) `M`, i.e. the unit circle in the complex plane.
 """
 project(::Circle, ::Any)
-project(::Circle{ℝ}, p::Real) = sym_rem(p)
 project(::Circle{ℂ}, p::Number) = p / abs(p)
-
-project!(::Circle{ℝ}, q, p) = copyto!(q, sym_rem(p))
-project!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
+projøect!(::Circle{ℂ}, q, p) = copyto!(q, p / sum(abs.(p)))
 
 @doc raw"""
     project(M::Circle, p, X)
 
 Project a value `X` onto the tangent space of the point `p` on the [`Circle`](@ref) `M`.
 
-For the real-valued case this is just the identity.
 For the complex valued case `X` is projected onto the line in the complex plane
 that is parallel to the tangent to `p` on the unit circle and contains `0`.
 """
 project(::Circle, ::Any, ::Any)
-project(::Circle{ℝ}, p::Real, X::Real) = X
 project(::Circle{ℂ}, p::Number, X::Number) = X - complex_dot(p, X) * p
-
-project!(::Circle{ℝ}, Y, p, X) = (Y .= X)
 project!(::Circle{ℂ}, Y, p, X) = (Y .= X - complex_dot(p, X) * p)
 
 @doc raw"""

@@ -79,8 +79,6 @@ expect(e::Union{Expect, NoExpectation})
 # Dummy Types
 struct DummyMatrixType <: Manifolds.AbstractMatrixType end
 
-# TODO: once cotangent vectors are a bit better supported, uncomment
-# `flat` and `sharp` here, for now these would never work as expected
 const _ALL_FUNCTIONS = [
     copy,
     copyto!,
@@ -91,11 +89,13 @@ const _ALL_FUNCTIONS = [
     embed,
     embed_project,
     exp,
-    # flat,
+    flat,
     geodesic,
+    get_basis,
     get_coordinates,
     get_embedding,
     get_vector,
+    get_vectors,
     injectivity_radius,
     inner,
     inverse_retract,
@@ -116,10 +116,11 @@ const _ALL_FUNCTIONS = [
     representation_size,
     retract,
     sectional_curvature,
-    # sharp,
+    sharp,
     shortest_geodesic,
     vector_transport_direction,
     vector_transport_to,
+    volume_density,
     Weingarten,
     zero_vector,
 ]
@@ -142,9 +143,11 @@ function test_embed_project end
 function test_exp end
 function test_flat end
 function test_geodesic end
+function test_get_basis end
 function test_get_coordinates end
 function test_get_embedding end
 function test_get_vector end
+function test_get_vectors end
 function test_injectivity_radius end
 function test_inner end
 function test_inverse_retract end
@@ -167,6 +170,7 @@ function test_repr end
 function test_representation_size end
 function test_retract end
 function test_vector_transport end
+function test_volume_density end
 function test_Weingarten end
 function test_zero_vector end
 #
@@ -180,7 +184,5 @@ function test_estimated_sectional_curvature_matrix end
 function test_sectional_curvature_matrix end
 # How approximate is ok?
 function test_mean end
-# Basis and vectors are very different per single basis what is to check
-function test_get_basis end
-function test_get_vectors end
+function test_median end
 end

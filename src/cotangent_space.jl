@@ -11,11 +11,15 @@ struct RieszRepresenterCotangentVector{TM <: AbstractManifold, TP, TX}
 end
 
 function allocate(ξ::RieszRepresenterCotangentVector)
-    return RieszRepresenterCotangentVector(ξ.manifold, copy(ξ.p), allocate(ξ.X))
+    return RieszRepresenterCotangentVector(ξ.manifold, copy(ξ.manifold, ξ.p), allocate(ξ.X))
 end
 
 function (ξ::RieszRepresenterCotangentVector)(Y)
     return inner(ξ.manifold, ξ.p, ξ.X, Y)
+end
+
+function Base.copy(M::AbstractManifold, p, ξ::RieszRepresenterCotangentVector)
+    return RieszRepresenterCotangentVector(ξ.manifold, copy(ξ.manifold, ξ.p), copy(ξ.manifold, ξ.X))
 end
 
 @trait_function flat!(M::AbstractDecoratorManifold, ξ::CoTFVector, p, X::TFVector)

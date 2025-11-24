@@ -10,7 +10,7 @@ using ManifoldDiff
     X = [0.0, π / 4, 0.0]
     Y = [0.0, 0.0, π / 4]
     V = [2.0, 0.0, 0.0]  # normal vector at p
-    ξ = [0.0, π / 4, 0.0]  # covector at p
+    ξ = Manifolds.RieszRepresenterCotangentVector(M, p, [0.0, π / 4, 0.0])  # covector at p
 
     @testset "Basics" begin
         @test base_manifold(M) === M

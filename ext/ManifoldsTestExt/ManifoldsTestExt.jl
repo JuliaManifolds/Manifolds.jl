@@ -59,8 +59,13 @@ Possible entries of the `expectations` dictionary are
 * for retractions, inverse retractions, and vector transports, the key is a tuple of the function and the method, e.g. `(retract, method) => q`
 * for `embed`, and `project`, the key is a tuple of the function and `:Point` or `:Vector`, e.g. `(embed, :Point) of expected (embedded) points or vectors,
   omitting that symbol is interpreted as the expected point.
-* for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`
+* for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expexted basis
 * for `get_coordinates` the key is a tuple of the function and the basis, e.g. `(get_coordinates, B) => c`
+* for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`
+* for `get_vectors` the key is a tuple of the function and the basis, e.g. `(get_vectors, B) => :Symbol` where
+  * `:Orthogonal` tests for orthogonality
+  * `:Orthonormal` tests additionally to the previous for unit length
+  For any basis this test calls `get_basis` on any provided basis, if that function is available.
 * for `is_default_metric`, the value is the default metric
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
@@ -197,6 +202,17 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 atol = get(function_atols, flat, atol),
             )
         end
+        if (get_basis in functions)
+            for B in bases
+                expected_basis = get_expectation(expectations, (get_basis, B))
+                Manifolds.Test.test_get_basis(
+                    M, points[1], B;
+                    available_functions = functions,
+                    expected_value = expected_basis,
+                    name = "get_basis(M, p, $B)", # shorten name within large suite
+                )
+            end
+        end
         if (get_coordinates in functions)
             expected_coordinates = get_expectation(expectations, get_coordinates)
             for B in bases
@@ -239,6 +255,19 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                     test_mutating = (get_vector! in functions) ? true : mutating,
                     name = "get_vector(M, p, c, $B)", # shorten name within large suite
                     atol = get(function_atols, get_vector, atol),
+                )
+            end
+        end
+        if (get_vectors in functions)
+            for B in bases
+                expected_vectors_symbol = get_expectation(expectations, (get_vectors, B), :default)
+                Manifolds.Test.test_get_vectors(
+                    M, points[1], (get_basis in functions) ? get_basis(M, points[1], B) : B;
+                    available_functions = functions,
+                    test_orthogonality = expected_vectors_symbol in (:Orthogonal, :Orthonormal),
+                    test_normality = expected_vectors_symbol == :Orthonormal,
+                    name = "get_vectors(M, p, $B)", # shorten name within large suite
+                    atol = get(function_atols, get_vectors, atol),
                 )
             end
         end
@@ -418,7 +447,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             ep = get_expectation(expectations, project)
             ep = isexpected(ep) ? ep : get_expectation(expectations, (project, :Point))
             eX = get_expectation(expectations, (project, :Vector))
-            ismissing(q) && @warn "To test `project`, at least one `:EmbeddedPoints` must be provided."
+            ismissing(q) && error("To test `project`, at least one `:EmbeddedPoints` must be provided.")
             Manifolds.Test.test_project(
                 M, q, Y;
                 available_functions = functions,
@@ -526,6 +555,15 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                     name = "vector_transport_to(M, p, X, q, $vtm)", # shorten name within large suite
                 )
             end
+        end
+        if (volume_density in functions)
+            expected_vol_density = get_expectation(expectations, volume_density)
+            Manifolds.Test.test_volume_density(
+                M, points[1], vectors[1];
+                expected_value = expected_vol_density,
+                name = "volume_density(M, p, X)", # shorten name within large suite
+                atol = get(function_atols, volume_density, atol),
+            )
         end
         if (Weingarten in functions)
             Manifolds.Test.test_Weingarten(
@@ -999,7 +1037,7 @@ function Manifolds.Test.test_flat(
     Test.@testset "$(name)" begin
         ξ = flat(M, p, X)
         !isexpected(expected_value) || Test.@test isapprox(M, ξ, expect(expected_value); error = :error, kwargs...)
-        if sharp in available_functions
+        if (sharp in available_functions)
             X2 = sharp(M, p, ξ)
             Test.@test isapprox(M, X, X2; error = :error, kwargs...)
         end
@@ -1108,6 +1146,35 @@ function Manifolds.Test.test_get_coordinates(
 end # Manifolds.Test.test_get_coordinates
 
 """
+    Manifolds.Test.test_get_basis(
+        M, p, b::AbstractBasis;
+        expected_value = NoExpectation(),
+        expected_type = isexpected(expected_value) ? Expect(typeof(expect(expected_value))) : Expect(CachedBasis),
+        name = "get_basis on \$M at point \$(typeof(p)) for basis \$(typeof(b))",
+    )
+
+Test the [`get_basis`](@extref `ManifoldsBase.get_basis`) on manifold `M` at point `p` for basis `b`.
+
+* that it returns a basis of type `expected_type`, which defaults to [`CachedBasis`](@extref ManifoldsBase.CachedBasis).
+* that the result matches `expected_value`, if given
+"""
+function Manifolds.Test.test_get_basis(
+        M::AbstractManifold, p, b::AbstractBasis;
+        available_functions = Function[],
+        expected_value = NoExpectation(),
+        expected_type = isexpected(expected_value) ? Expect(typeof(expect(expected_value))) : Expect(CachedBasis),
+        name = "get_basis on $M at point $(typeof(p)) for basis $(typeof(b))",
+    )
+    Test.@testset "$(name)" begin
+        B = get_basis(M, p, b)
+        Test.@test B isa AbstractBasis
+        !isexpected(expected_type) || Test.@test B isa expect(expected_type)
+        !isexpected(expected_value) || Test.@test B == expect(expected_value)
+    end
+    return nothing
+end # Manifolds.Test.test_get_basis
+
+"""
     Manifolds.Test.test_get_embedding(M, P=missing;
         expected_value = NoExpectation(),
         expected_type = isexpected(expected_value) ? Expect(typeof(expect(expected_value))) : NoExpectation(),
@@ -1177,6 +1244,56 @@ function Manifolds.Test.test_get_vector(
     end
     return nothing
 end # Manifolds.Test.test_get_vector
+
+"""
+    Manifolds.Test.test__get_vectors(
+        M, p, b;
+        available_functions=[],
+        name = "get_vectors on \$M at point \$(typeof(p))",
+        test_orthogonality = false,
+        test_normality = false,
+        kwargs...
+    )
+
+Test the [`get_vectors`](@extref `ManifoldsBase.get_vectors`) on manifold `M` at point `p` for basis `b`,
+where the basis is assumed to come from a call to [`get_basis`](@extref `ManifoldsBase.get_basis`).
+
+* that there are as many vectors as the manifold dimension (if available)
+* that each vector is a valid tangent vector at `p` on the manifold
+* that the vectors are orthogonal (if activated)
+* that the vectors are normal (if activated)
+"""
+function Manifolds.Test.test_get_vectors(
+        M::AbstractManifold, p, b::AbstractBasis;
+        available_functions = Function[],
+        test_orthogonality = false,
+        test_normality = false,
+        name = "get_vectors on $M at point $(typeof(p)) and $(typeof(b))",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        Vs = get_vectors(M, p, b)
+        n = length(Vs)
+        if manifold_dimension in available_functions
+            md = manifold_dimension(M)
+            Test.@test n == md
+        end
+        for i in 1:n
+            Test.@test is_vector(M, p, Vs[i]; error = :error, kwargs...)
+            if test_orthogonality
+                for j in (n + 1):n
+                    ip = inner(M, p, Vs[i], Vs[j])
+                    Test.@test isapprox(ip, 0.0; kwargs...)
+                end
+            end
+            if test_normality
+                nn = norm(M, p, Vs[i])
+                Test.@test isapprox(nn, 1.0; kwargs...)
+            end
+        end
+    end
+    return nothing
+end # Manifolds.Test.test_get_vectors
 
 """
     Manifolds.Test.test_injectority_radius(M, p = missing;
@@ -2175,6 +2292,31 @@ function Manifolds.Test.test_vector_transport(
     end
     return nothing
 end # Manifolds.Test.test_vector_transport
+
+"""
+    Manifolds.Test.test_volume_density(
+        M, p, X;
+        expected_value = NoExpectation(),
+        name = "Manifold volume density for \$M",
+        kwargs...
+    )
+
+Test the [`volume_density`](@ref) of the manifold `M`.
+
+* that it matches the expected value (if provided)
+"""
+function Manifolds.Test.test_volume_density(
+        M, p, X;
+        expected_value = NoExpectation(),
+        name = "Manifold volume density for $M",
+        kwargs...
+    )
+    Test.@testset "$(name)" begin
+        v = volume_density(M, p, X)
+        !isexpected(expected_value) || Test.@test isapprox(v, expect(expected_value); kwargs...)
+    end
+    return nothing
+end # Manifolds.Test.test_volume_density
 
 """
     Manifolds.Test.Weingarten(
