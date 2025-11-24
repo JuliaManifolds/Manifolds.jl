@@ -29,7 +29,7 @@ Test.@testset "The circle manifold" begin
                 manifold_dimension, manifold_volume,
                 repr, representation_size,
             ],
-            :Bases => [DefaultOrthonormalBasis()],
+            :Bases => [DefaultOrthonormalBasis(), DiagonalizingOrthonormalBasis(X1)],
             :Coordinates => [[π / 2], [-π / 2]],
             :InvalidPoints => [q1, q2],
             :InvalidVectors => [Y1],
