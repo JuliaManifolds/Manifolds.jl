@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * a lot of small test functions like `Manifolds.Test.test_exp(M, p, X; kwargs...)`
     with the goal of providing one test for each individual API function
 
+### Fixed
+
+* the circle represented in angles (`Circle()`) had a wrong default and provided a
+  `project` and `embed` method while not being an embedded manifold, this is now fixed,
+  but might cause errors for some users.
+
 ## [0.11.6] 2025-11-19
 
 ### Changed
