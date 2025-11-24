@@ -2,7 +2,7 @@ using ManifoldDiff, Manifolds, Random, StaticArrays, Test
 
 Test.@testset "The circle manifold" begin
     M = Circle()
-
+    @test Manifolds.number_of_coordinates(M, DefaultOrthogonalBasis()) == 1
     p1 = π / 2
     p2 = -π / 2
     X1 = 1.0
@@ -102,6 +102,11 @@ Test.@testset "The circle manifold" begin
             M = Circle()
             @test mean(M, [-π / 2, 0.0, π]) ≈ -π / 2
             @test mean(M, [-π / 2, 0.0, π], [1.0, 1.0, 1.0]) == -π / 2
+            Mc = Circle(ℂ)
+            angles = map(pp -> exp(pp * im), [-π / 2, 0.0, π])
+            @test mean(Mc, angles) ≈ exp(-π * im / 2)
+            @test mean(Mc, angles, [1.0, 1.0, 1.0]) ≈ exp(-π * im / 2)
+
         end
         @testset "Mutating Rand for real Circle" begin
             M = Circle()
@@ -139,6 +144,15 @@ Test.@testset "The circle manifold" begin
             @test p ≈ fill(2.0)
             parallel_transport_to!(M, p, p, [4.0], p)
             @test p ≈ fill(4.0)
+        end
+        Test.@testset "retract nonmutating defaults" begin
+            M = Circle()
+            p = π / 3
+            X = 0.5
+            q = retract(M, p, X)
+            q2 = retract(M, p, X, ExponentialRetraction())
+            @test q ≈ exp(M, p, X)
+            @test q2 ≈ exp(M, p, X)
         end
         Test.@testset "ManifoldsDiff cases" begin
             M = Circle()
