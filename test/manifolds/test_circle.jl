@@ -113,7 +113,7 @@ Test.@testset "The circle manifold" begin
                 get_coordinates, get_vector,
                 inner, injectivity_radius, is_flat, is_point, is_vector,
                 manifold_dimension, manifold_volume, mid_point,
-                parallel_transport_direction, parallel_transport_to,
+                parallel_transport_direction, parallel_transport_to, project,
                 log,
                 repr, representation_size,
             ],

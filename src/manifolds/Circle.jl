@@ -232,7 +232,7 @@ end
 
 Get the ambient space of the complex [`Circle`](@ref) `M`, which is `ℂ`.
 """
-get_embedding(::Circle{ℂ}) = Euclidean(; field = ℂ)
+ManifoldsBase.get_embedding(::Circle{ℂ}) = Euclidean(; field = ℂ)
 
 get_vector_orthonormal(::Circle{ℝ}, p::StaticArray, c, ::RealNumbers) = Scalar(c[])
 get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = fill(c[])
