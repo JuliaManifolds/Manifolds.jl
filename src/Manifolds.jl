@@ -194,6 +194,15 @@ import ManifoldDiff:
 import Statistics: mean, mean!, median, median!, cov, var
 import StatsBase: mean_and_var
 
+using ADTypes:
+    AbstractADType,
+    AutoFiniteDiff,
+    AutoFiniteDifferences,
+    AutoForwardDiff,
+    AutoReverseDiff,
+    AutoZygote
+import DifferentiationInterface as DI
+
 using Base.Iterators: repeated
 using Einsum: @einsum
 using Kronecker

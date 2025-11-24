@@ -4,6 +4,8 @@ using DifferentiationInterface, ForwardDiff
 
 using Manifolds: TangentSpaceType
 
+using LinearAlgebra
+
 # space outside of a black hole with Schwarzschild radius rₛ
 struct BlackHoleOutside <: AbstractManifold{ℝ}
     rₛ::Float64
@@ -52,70 +54,3 @@ end
 
 
 # generic stuff
-
-function levi_civita_affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc; 
-    backend::AbstractADType = AutoForwardDiff())
-    # number of coordinates
-    n = length(a)
-
-    # metric g_{ij} in this chart (coordinate basis)
-    g = zeros(Float64, n, n)
-    for p in 1:n, q in 1:n
-        e_p = zeros(Float64, n); e_p[p] = 1.0
-        e_q = zeros(Float64, n); e_q[q] = 1.0
-        g[p, q] = inner(M, A, i, a, e_p, e_q)
-    end
-
-    # inverse metric
-    ginv = inv(Symmetric(g))
-
-    # helper: directional derivative at a in direction dir of the scalar function
-    # f_dir(V1, V2) = d/dt|0 inner(M, A, i, a + t*dir, V1, V2)
-    function directional_derivative_scalar(dir, V1, V2)
-        out = zeros(1)
-        f(t) = inner(M, A, i, a .+ (t .* dir), V1, V2)
-        return DifferentiationInterface.derivative(f, out, backend, 0.0)
-    end
-
-    # compute S_k = 1/2 ( X[g(Y, e_k)] + Y[g(X, e_k)] - e_k[g(X,Y)] )
-    S = zeros(Float64, n)
-    for k in 1:n
-        e_k = zeros(Float64, n); e_k[k] = 1.0
-        term1 = directional_derivative_scalar(Xc, Yc, e_k)
-        term2 = directional_derivative_scalar(Yc, Xc, e_k)
-        term3 = directional_derivative_scalar(e_k, Xc, Yc)
-        S[k] = 0.5 * (term1 + term2 - term3)
-    end
-
-    # raise index: (∇_X Y)^l = g^{l k} S_k
-    Zc .= ginv * S
-
-    return Zc
-end
-
-
-function get_coordinates_induced_basis_generic!(
-        M::AbstractManifold,
-        c,
-        p,
-        X,
-        B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas};
-        backend::AbstractADType = AutoForwardDiff(),
-    )
-    DifferentiationInterface.derivative!(t -> get_parameters(M, B.A, B.i, p + t * X), c, backend, 0.0)
-    return c
-end
-
-function get_vector_induced_basis_generic!(
-        M::AbstractManifold,
-        Y,
-        p,
-        Xc,
-        B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas};
-        backend::AbstractADType = AutoForwardDiff(),
-    )
-    p_i = get_parameters(M, B.A, B.i, p)
-    DifferentiationInterface.derivative!(t -> get_point(M, B.A, B.i, p_i + t * Xc), Y, backend, 0.0)
-    
-    return Y
-end

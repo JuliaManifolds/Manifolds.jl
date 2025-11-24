@@ -14,13 +14,25 @@ using BoundaryValueDiffEq
 
     p0x = [0.5, -1.2]
     X_p0x = [-1.2, 0.4]
+    Y_p0x = [-0.2, -0.3]
     p = [Manifolds._torus_param(M, p0x...)...]
     @test p ≈ [1.7230709564189848, -4.431999755591838, 0.958851077208406]
     i_p0x = Manifolds.get_chart_index(M, A, p)
     @test [i_p0x...] ≈ p0x
     B = induced_basis(M, A, i_p0x)
     X = get_vector(M, p, X_p0x, B)
+    Y = get_vector(M, p, Y_p0x, B)
     @test get_coordinates(M, p, X, B) ≈ X_p0x
+    Γ_X_Y = [-0.20602262287496229, -0.11547890480178581]
+    @test Manifolds.affine_connection(M, A, i_p0x, p0x, X_p0x, Y_p0x) ≈ Γ_X_Y
+    Z_p0x = similar(X_p0x)
+    Manifolds.levi_civita_affine_connection!(M, Z_p0x, A, i_p0x, p0x, X_p0x, Y_p0x)
+    @test Z_p0x ≈ Γ_X_Y
+    Z = similar(X)
+    Manifolds.get_vector_induced_basis_generic!(M, Z, p, X_p0x, B)
+    @test Z ≈ X
+    Manifolds.get_coordinates_induced_basis_generic!(M, Z_p0x, p, X, B)
+    @test Z_p0x ≈ X_p0x
 
     @test norm(X) ≈ norm(M, A, (0.0, 0.0), p0x, X_p0x)
 
