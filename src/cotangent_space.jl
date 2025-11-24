@@ -167,3 +167,7 @@ function sharp!(::AbstractManifold, X, p, ξ::RieszRepresenterCotangentVector)
     copyto!(X, ξ.X)
     return X
 end
+
+function Base.isapprox(M::AbstractManifold, ξ1::RieszRepresenterCotangentVector, ξ2::RieszRepresenterCotangentVector; kwargs...)
+    return isapprox(M, ξ1.p, ξ2.p; kwargs...) && isapprox(M, ξ1.p, ξ1.X, ξ2.X; kwargs...)
+end

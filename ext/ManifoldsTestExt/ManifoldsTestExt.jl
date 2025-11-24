@@ -2144,10 +2144,10 @@ function Manifolds.Test.test_sharp(
         !isexpected(expected_value) || Test.@test isapprox(M, p, X, expected(expected_value); error = :error, kwargs...)
         if flat in available_functions
             ξ2 = flat(M, p, X)
-            Test.@test isapprox(ξ2, ξ; error = :error, kwargs...)
+            Test.@test isapprox(M, ξ2, ξ; error = :error, kwargs...)
         end
         if test_mutating
-            X2 = copy(typeof(X), X)
+            X2 = copy(M, p, X)
             sharp!(M, X2, p, ξ)
             Test.@test isapprox(M, X2, X; error = :error, kwargs...)
         end
