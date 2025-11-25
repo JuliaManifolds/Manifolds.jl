@@ -363,7 +363,7 @@ function get_vector_diagonalizing!(
     copyto!(Y, reshape(c, S))
     return Y
 end
-function get_vector_induced_basis!(M::Euclidean, Y, ::Any, c, B::InducedBasis)
+function get_vector_induced_basis!(M::Euclidean, Y, ::Any, c, B::InducedBasis{ℝ, TangentSpaceType, <:RetractionAtlas})
     S = representation_size(M)
     copyto!(Y, reshape(c, S))
     return Y
