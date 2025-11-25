@@ -75,6 +75,52 @@ in `Zc`.
 affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
 
 """
+    christoffel_symbols_second(M::AbstractManifold, A::AbstractAtlas, i, a)
+
+Compute values of the Christoffel symbol of the second kind in chart `i` of atlas `A`
+at point with parameters `a`.
+"""
+function christoffel_symbols_second(M::AbstractManifold, A::AbstractAtlas, i, a; kwargs...)
+    n = length(a)
+    Γ = zeros(eltype(a), n, n, n)
+    return christoffel_symbols_second!(M, Γ, A, i, a; kwargs...)
+end
+
+function christoffel_symbols_second!(M::AbstractManifold, Γ, A::AbstractAtlas, i, a;
+    backend::AbstractADType = AutoForwardDiff())
+    # number of coordinates
+    n = length(a)
+
+    ginv = inverse_local_metric(M, A, i, a)
+    T = eltype(ginv)
+
+    # Precompute all directional derivatives ∂_i g_jl
+    e = [zeros(T, n) for _ in 1:n]  # Basis vectors
+    for k in 1:n
+        e[k][k] = 1
+    end
+
+    dg = zeros(T, n, n, n)  # Tensor to store ∂_i g_jl
+    for i in 1:n, j in 1:n, l in 1:n
+        dg[i, j, l] = DI.derivative(
+            t -> inner(M, A, i, a .+ t .* e[i], e[j], e[l]),
+            backend,
+            0.0,
+        )
+    end
+
+    # Compute Christoffel symbols Γ^k_ij = 1/2 g^kl ( ∂_i g_jl + ∂_j g_il - ∂_l g_ij )
+    for i in 1:n, j in 1:n, k in 1:n
+        Γ[k, i, j] = sum(
+            ginv[k, l] * (dg[i, j, l] + dg[j, i, l] - dg[l, i, j]) for l in 1:n
+        ) / 2
+    end
+    return Γ    
+end
+
+
+
+"""
     get_default_atlas(::AbstractManifold)
 
 Determine the default real-valued atlas for the given manifold.
@@ -214,18 +260,22 @@ inner(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
 
 Compute the local metric tensor on the manifold `M` at the point with parameters `a` in chart `i` 
 of an [`AbstractAtlas`](@ref) `A`. The local metric tensor is represented as a matrix, where 
-each entry corresponds to the inner product of basis vectors in the tangent space at the given point.
+each entry corresponds to the inner product of basis vectors in the tangent space at the point
+with given parameters.
+
+In contrast, `local_metric(M::AbstractManifold, p, ::InducedBasis)` requires passing a point
+instead of its parameters in a chart.
 
 # Arguments
 
 - `M::AbstractManifold`: The manifold on which the metric is computed.
 - `A::AbstractAtlas{ℝ}`: The atlas defining the charts and coordinate systems on the manifold.
 - `i`: The index of the chart in the atlas.
-- `a`: The parameters (local coordinates) of the point in the chart.
+- `a`: The parameters of the point in the chart.
 
 # Returns
 
-A matrix representing the local metric tensor at the given point.
+A matrix representing the local metric tensor at the point with given parameters.
 
 # See also
 
@@ -257,18 +307,21 @@ end
 Compute the inverse of the local metric tensor on the manifold `M` at the point with parameters `a` 
 in chart `i` of an [`AbstractAtlas`](@ref) `A`. The inverse local metric tensor is represented as a matrix, 
 where each entry corresponds to the inverse of the inner product of basis vectors in the tangent space 
-at the given point.
+at the point with given parameters.
+
+In contrast, `inverse_local_metric(M::AbstractManifold, p, ::InducedBasis)` requires passing
+a point instead of its parameters in a chart.
 
 # Arguments
 
 - `M::AbstractManifold`: The manifold on which the metric is computed.
 - `A::AbstractAtlas{ℝ}`: The atlas defining the charts and coordinate systems on the manifold.
 - `i`: The index of the chart in the atlas.
-- `a`: The parameters (local coordinates) of the point in the chart.
+- `a`: The parameters of the point in the chart.
 
 # Returns
 
-A matrix representing the inverse of the local metric tensor at the given point.
+A matrix representing the inverse of the local metric tensor at the point with given parameters.
 
 # See also
 
@@ -496,29 +549,29 @@ function dual_basis(
     return induced_basis(M, B.A, B.i, TangentSpaceType())
 end
 
-function ManifoldsBase._get_coordinates(M::AbstractManifold, p, X, B::InducedBasis)
-    return get_coordinates_induced_basis(M, p, X, B)
+function ManifoldsBase._get_coordinates(M::AbstractManifold, p, X, B::InducedBasis; kwargs...)
+    return get_coordinates_induced_basis(M, p, X, B; kwargs...)
 end
-function get_coordinates_induced_basis(M::AbstractManifold, p, X, B::InducedBasis)
+function get_coordinates_induced_basis(M::AbstractManifold, p, X, B::InducedBasis; kwargs...)
     Y = allocate_result(M, get_coordinates, p, X, B)
-    return get_coordinates_induced_basis!(M, Y, p, X, B)
+    return get_coordinates_induced_basis!(M, Y, p, X, B; kwargs...)
 end
 
-function ManifoldsBase._get_coordinates!(M::AbstractManifold, Y, p, X, B::InducedBasis)
-    return get_coordinates_induced_basis!(M, Y, p, X, B)
+function ManifoldsBase._get_coordinates!(M::AbstractManifold, Y, p, X, B::InducedBasis; kwargs...)
+    return get_coordinates_induced_basis!(M, Y, p, X, B; kwargs...)
 end
 function get_coordinates_induced_basis! end
 
-function ManifoldsBase._get_vector(M::AbstractManifold, p, c, B::InducedBasis)
-    return get_vector_induced_basis(M, p, c, B)
+function ManifoldsBase._get_vector(M::AbstractManifold, p, c, B::InducedBasis; kwargs...)
+    return get_vector_induced_basis(M, p, c, B; kwargs...)
 end
-function get_vector_induced_basis(M::AbstractManifold, p, c, B::InducedBasis)
+function get_vector_induced_basis(M::AbstractManifold, p, c, B::InducedBasis; kwargs...)
     Y = allocate_result(M, get_vector, p, c)
-    return get_vector!(M, Y, p, c, B)
+    return get_vector!(M, Y, p, c, B; kwargs...)
 end
 
-function ManifoldsBase._get_vector!(M::AbstractManifold, Y, p, c, B::InducedBasis)
-    return get_vector_induced_basis!(M, Y, p, c, B)
+function ManifoldsBase._get_vector!(M::AbstractManifold, Y, p, c, B::InducedBasis; kwargs...)
+    return get_vector_induced_basis!(M, Y, p, c, B; kwargs...)
 end
 function get_vector_induced_basis! end
 
@@ -535,7 +588,7 @@ local_metric(::AbstractManifold, ::Any, ::InducedBasis)
 
 Compute the Levi-Civita affine connection on the manifold `M` at a point with parameters `a`
 in chart `i` of an  [`AbstractAtlas`](@ref) `A`. The connection is calculated for vectors
-with coefficients `Xc` and `Yc` in the induced basis,  and the result is stored in `Zc`.
+with coefficients `Xc` and `Yc` in the induced basis, and the result is stored in `Zc`.
 
 The Levi-Civita connection is computed using the metric tensor (`inner` called in a chart)
 of the manifold, ensuring that the connection is torsion-free and compatible with the metric.
@@ -553,6 +606,9 @@ custom-derived formulas.
 - `a`: The parameters (local coordinates) of the point in the chart.
 - `Xc`: The coefficients of the first vector in the induced basis.
 - `Yc`: The coefficients of the second vector in the induced basis.
+
+# Keyword arguments
+
 - `backend::AbstractADType`: The automatic differentiation backend used for computing derivatives (default: `AutoForwardDiff()`).
 
 # Returns
@@ -605,7 +661,8 @@ function levi_civita_affine_connection!(
 end
 
 """
-    get_coordinates_induced_basis_generic!(M::AbstractManifold, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas}; backend::AbstractADType = AutoForwardDiff())
+    get_coordinates_induced_basis!(M::AbstractManifold, c, p, X, B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas};
+        backend::AbstractADType = AutoForwardDiff())
 
 Compute the coordinates of a tangent vector `X` at a point `p` on the manifold `M` in the induced basis `B` 
 and store the result in `c`. This function uses automatic differentiation to compute the coordinates.
@@ -617,6 +674,9 @@ and store the result in `c`. This function uses automatic differentiation to com
 - `p`: The point on the manifold where the tangent vector `X` is located.
 - `X`: The tangent vector at `p` whose coordinates are to be computed.
 - `B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas}`: The induced basis in which the coordinates are expressed.
+
+# Keyword arguments
+
 - `backend::AbstractADType`: The automatic differentiation backend used for computing derivatives (default: `AutoForwardDiff()`).
 
 # Returns
@@ -630,9 +690,9 @@ The result is stored in `c`, which contains the coordinates of the tangent vecto
 
 # See also
 
-[`get_coordinates`](@ref), [`InducedBasis`](@ref), [`AbstractAtlas`](@ref)
+[`InducedBasis`](@ref), [`AbstractAtlas`](@ref)
 """
-function get_coordinates_induced_basis_generic!(
+function get_coordinates_induced_basis!(
         M::AbstractManifold,
         c,
         p,
@@ -640,12 +700,13 @@ function get_coordinates_induced_basis_generic!(
         B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas};
         backend::AbstractADType = AutoForwardDiff(),
     )
-    DI.derivative!(t -> get_parameters(M, B.A, B.i, p + t * X), c, backend, zero(eltype(c)))
+    DI.derivative!(t -> get_parameters(M, B.A, B.i, p .+ t .* X), c, backend, zero(eltype(c)))
     return c
 end
 
 """
-    get_vector_induced_basis_generic!(M::AbstractManifold, Y, p, Xc, B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas}; backend::AbstractADType = AutoForwardDiff())
+    get_vector_induced_basis!(M::AbstractManifold, Y, p, Xc, B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas};
+        backend::AbstractADType = AutoForwardDiff())
 
 Compute the tangent vector `Y` at a point `p` on the manifold `M` corresponding to the coordinates `Xc` 
 in the induced basis `B` and store the result in `Y`. This function uses automatic differentiation 
@@ -658,6 +719,9 @@ to compute the tangent vector.
 - `p`: The point on the manifold where the tangent vector is located.
 - `Xc`: The coordinates of the tangent vector in the induced basis `B`.
 - `B::InducedBasis{ℝ, TangentSpaceType, <:AbstractAtlas}`: The induced basis in which the coordinates `Xc` are expressed.
+
+# Keyword arguments
+
 - `backend::AbstractADType`: The automatic differentiation backend used for computing derivatives (default: `AutoForwardDiff()`).
 
 # Returns
@@ -673,9 +737,9 @@ in the induced basis `B`.
 
 # See also
 
-[`get_coordinates_induced_basis_generic!`](@ref), [`InducedBasis`](@ref), [`AbstractAtlas`](@ref)
+[`InducedBasis`](@ref), [`AbstractAtlas`](@ref)
 """
-function get_vector_induced_basis_generic!(
+function get_vector_induced_basis!(
         M::AbstractManifold,
         Y,
         p,
@@ -684,6 +748,6 @@ function get_vector_induced_basis_generic!(
         backend::AbstractADType = AutoForwardDiff(),
     )
     p_i = get_parameters(M, B.A, B.i, p)
-    DI.derivative!(t -> get_point(M, B.A, B.i, p_i + t * Xc), Y, backend, zero(eltype(p_i)))
+    DI.derivative!(t -> get_point(M, B.A, B.i, p_i .+ t .* Xc), Y, backend, zero(eltype(p_i)))
     return Y
 end

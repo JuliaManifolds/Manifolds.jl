@@ -15,6 +15,10 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
+
+[sources]
+Manifolds = {path = ".."}
 
 [compat]
 BoundaryValueDiffEq = "4, 5"
@@ -32,6 +36,3 @@ Plots = "1"
 RecursiveArrayTools = "3"
 SpecialFunctions = "2"
 StaticArrays = "1"
-
-[sources]
-Manifolds = {path = ".."}
