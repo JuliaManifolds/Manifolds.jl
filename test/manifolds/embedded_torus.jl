@@ -28,11 +28,21 @@ using BoundaryValueDiffEq
     Z_p0x = similar(X_p0x)
     Manifolds.levi_civita_affine_connection!(M, Z_p0x, A, i_p0x, p0x, X_p0x, Y_p0x)
     @test Z_p0x ≈ Γ_X_Y
-    Z = similar(X)
-    Manifolds.get_vector_induced_basis_generic!(M, Z, p, X_p0x, B)
-    @test Z ≈ X
-    Manifolds.get_coordinates_induced_basis_generic!(M, Z_p0x, p, X, B)
-    @test Z_p0x ≈ X_p0x
+    @testset "generic, default implementation" begin
+        Z = similar(X)
+        invoke(
+            Manifolds.get_vector_induced_basis!,
+            Tuple{AbstractManifold, Any, Any, Any, InducedBasis{ℝ, Manifolds.TangentSpaceType, <:AbstractAtlas}},
+            M, Z, p, X_p0x, B
+        )
+        @test Z ≈ X
+        invoke(
+            Manifolds.get_coordinates_induced_basis!,
+            Tuple{AbstractManifold, Any, Any, Any, InducedBasis{ℝ, Manifolds.TangentSpaceType, <:AbstractAtlas}},
+            M, Z_p0x, p, X, B
+        )
+        @test Z_p0x ≈ X_p0x
+    end
 
     @test norm(X) ≈ norm(M, A, (0.0, 0.0), p0x, X_p0x)
 
