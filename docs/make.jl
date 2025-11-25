@@ -36,6 +36,7 @@ tutorials_menu =
     "How to..." => [
     "🚀 Get Started with `Manifolds.jl`" => "tutorials/getstarted.md",
     "work in charts" => "tutorials/working-in-charts.md",
+    "work with a metric defined in a chart" => "tutorials/working-in-charts-2.md",
     "perform Hand gesture analysis" => "tutorials/hand-gestures.md",
     "integrate on manifolds and handle probability densities" => "tutorials/integration.md",
     "explore curvature without coordinates" => "tutorials/exploring-curvature.md",
