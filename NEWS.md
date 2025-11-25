@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.7] unreleased
+
+### Added
+
+* New methods and functions for working in a chart: `local_metric`, `inverse_local_metric`, `levi_civita_affine_connection!`, `christoffel_symbols_second`.
+* Default implementation of `get_vector!` and `get_coordinates!` for `InducedBasis` using automatic differentiation.
+* A new tutorial that describes working with the Levi-Civita connection for a Riemannian metric defined through `inner` in a chart.
+
 ## [0.11.6] 2025-11-19
 
 ### Changed
