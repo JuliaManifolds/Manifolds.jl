@@ -68,26 +68,26 @@ function sim()
     A = SchwarzschildAtlas()
     i = nothing
 
-    X0 =  [1.0, 0.0, 0.18, 0.0]
+    X0 = [1.0, 0.0, 0.18, 0.0]
     a_p0 = get_parameters(M, A, i, p0)
     B = induced_basis(M, A, a_p0)
     c_X0 = get_coordinates(M, p0, X0, B)
     final_time = 5000.0
-    sol = Manifolds.solve_chart_exp_ode(M, a_p0, c_X0, A, i; final_time=final_time, solver=Tsit5())
+    sol = Manifolds.solve_chart_exp_ode(M, a_p0, c_X0, A, i; final_time = final_time, solver = Tsit5())
 
-    sampled_solution = sol(range(0.0, final_time; length=20000))
+    sampled_solution = sol(range(0.0, final_time; length = 20000))
 
     # plotting
     x_values = [s[1][2] for s in sampled_solution]
     y_values = [s[1][3] for s in sampled_solution]
 
-    fig = Figure(; size=(800, 800))
-    ax = Axis(fig[1, 1]; title="2D Plot of Sampled Solution", xlabel="x", ylabel="y", aspect = AxisAspect(1))
-    lines!(ax, x_values, y_values, color=:blue, label="movement")
+    fig = Figure(; size = (800, 800))
+    ax = Axis(fig[1, 1]; title = "2D Plot of Sampled Solution", xlabel = "x", ylabel = "y", aspect = AxisAspect(1))
+    lines!(ax, x_values, y_values, color = :blue, label = "movement")
 
     arc!(Point2f(0), M.rₛ, -π, π)
     axislegend(ax)
-    display(fig)
+    return display(fig)
 
 end
 
@@ -101,22 +101,22 @@ function anim()
     A = SchwarzschildAtlas()
     i = nothing
 
-    X0 =  [1.0, 0.0, 0.18, 0.0]
+    X0 = [1.0, 0.0, 0.18, 0.0]
     a_p0 = get_parameters(M, A, i, p0)
     B = induced_basis(M, A, a_p0)
     c_X0 = get_coordinates(M, p0, X0, B)
     final_time = 5000.0
-    sol = Manifolds.solve_chart_exp_ode(M, a_p0, c_X0, A, i; final_time=final_time, solver=Tsit5())
+    sol = Manifolds.solve_chart_exp_ode(M, a_p0, c_X0, A, i; final_time = final_time, solver = Tsit5())
 
-    sampled_solution = sol(range(0.0, final_time; length=5000))
+    sampled_solution = sol(range(0.0, final_time; length = 5000))
 
     # Extract x and y values for animation
     x_values = [s[1][2] for s in sampled_solution]
     y_values = [s[1][3] for s in sampled_solution]
 
     # Create figure and axis
-    fig = Figure(; size=(800, 800))
-    ax = Axis(fig[1, 1]; title="Animated Sampled Solution", xlabel="x", ylabel="y", aspect = AxisAspect(1))
+    fig = Figure(; size = (800, 800))
+    ax = Axis(fig[1, 1]; title = "Animated Sampled Solution", xlabel = "x", ylabel = "y", aspect = AxisAspect(1))
 
     # Observables to update during the animation
     path_x = Observable(x_values[1:1])
@@ -128,14 +128,14 @@ function anim()
     arc!(ax, Point2f(0), M.rₛ, -π, π; color = :black)
 
     # Plot line (path) and moving point
-    lines!(ax, path_x, path_y; color=:blue, linewidth=2)
-    scatter!(ax, current_x, current_y; color=:red, markersize=8)
+    lines!(ax, path_x, path_y; color = :blue, linewidth = 2)
+    scatter!(ax, current_x, current_y; color = :red, markersize = 8)
     xlims!(ax, -20, 20)
     ylims!(ax, -20, 20)
 
     # Record animation
     nframes = length(x_values)
-    record(fig, "black_hole_orbit.mp4", 1:nframes; framerate=30) do frame
+    record(fig, "black_hole_orbit.mp4", 1:nframes; framerate = 30) do frame
         # update observables for this frame
         path_x[] = x_values[1:frame]
         path_y[] = y_values[1:frame]
@@ -143,7 +143,7 @@ function anim()
         current_y[] = [y_values[frame]]
     end
 
-    println("Animation saved as black_hole_orbit.mp4")
+    return println("Animation saved as black_hole_orbit.mp4")
 end
 
 # generic stuff

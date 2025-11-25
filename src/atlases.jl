@@ -86,8 +86,10 @@ function christoffel_symbols_second(M::AbstractManifold, A::AbstractAtlas, i, a;
     return christoffel_symbols_second!(M, Γ, A, i, a; kwargs...)
 end
 
-function christoffel_symbols_second!(M::AbstractManifold, Γ, A::AbstractAtlas, i, a;
-    backend::AbstractADType = AutoForwardDiff())
+function christoffel_symbols_second!(
+        M::AbstractManifold, Γ, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff()
+    )
     # number of coordinates
     n = length(a)
 
@@ -115,9 +117,8 @@ function christoffel_symbols_second!(M::AbstractManifold, Γ, A::AbstractAtlas, 
             ginv[k, l] * (dg[i, j, l] + dg[j, i, l] - dg[l, i, j]) for l in 1:n
         ) / 2
     end
-    return Γ    
+    return Γ
 end
-
 
 
 """
