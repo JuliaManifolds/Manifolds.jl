@@ -280,7 +280,7 @@ A matrix representing the local metric tensor at the point with given parameters
 
 # See also
 
-[`local_metric!`](@ref), [`inner`](@ref)
+[`inverse_local_metric`](@ref), [`inner`](@ref)
 """
 function local_metric(M::AbstractManifold, A::AbstractAtlas{ℝ}, i, a)
     n = length(a)
