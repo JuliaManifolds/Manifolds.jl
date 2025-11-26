@@ -1129,7 +1129,7 @@ function Manifolds.Test.test_get_coordinates(
     )
     Test.@testset "$(name)" begin
         c = get_coordinates(M, p, X, B)
-        # TODO: Improve for comlex manifolds and check for real of complex coordinates
+        # TODO: Improve for complex manifolds and check for real of complex coordinates
         Test.@test length(c) == manifold_dimension(M)
         !isexpected(expected_value) || Test.@test isapprox(c, expect(expected_value); kwargs...)
         if test_mutating

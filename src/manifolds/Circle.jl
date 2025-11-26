@@ -192,7 +192,7 @@ get_coordinates_orthonormal(::Circle{ℝ}, p, X::AbstractArray, ::RealNumbers) =
 get_coordinates_orthonormal!(::Circle{ℝ}, c, p, X, ::RealNumbers) = (c .= X)
 function get_coordinates_diagonalizing(::Circle{ℝ}, p, X, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
-    return X .* (sbv == 0 ? one(sbv) : sbv)
+    return X * (sbv == 0 ? one(sbv) : sbv)
 end
 function get_coordinates_diagonalizing!(
         M::Circle{ℝ},
@@ -240,6 +240,10 @@ get_vector_orthonormal(::Circle{ℝ}, p, c, ::RealNumbers) = fill(c[])
 # if changed, make sure no tests in that repository get broken
 get_vector_orthonormal(::Circle{ℝ}, p::AbstractVector, c, ::RealNumbers) = c
 get_vector_orthonormal!(::Circle{ℝ}, X, p, c, ::RealNumbers) = (X .= c[])
+function get_vector_diagonalizing!(M::Circle{ℝ}, X, p, c, B::DiagonalizingOrthonormalBasis)
+    X[] = get_vector_diagonalizing(M, p, c, B)[]
+    return X
+end
 function get_vector_diagonalizing(::Circle{ℝ}, p, c, B::DiagonalizingOrthonormalBasis)
     sbv = sign(B.frame_direction[])
     return c .* (sbv == 0 ? one(sbv) : sbv)
