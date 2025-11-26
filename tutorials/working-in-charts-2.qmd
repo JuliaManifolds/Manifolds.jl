@@ -83,11 +83,11 @@ end
 ```
 
 
-The metric implemented below is the Schwarzschild metric (signature +, −, −, −, and geometric units $c = G = 1$). In Schwarzschild coordinates (t, r, θ, φ) the inner product is
+The metric implemented below is the Schwarzschild metric (signature +, −, −, −, and geometric units $c = G = 1$). In Schwarzschild coordinates at $a=(t, r, \theta, \varphi)$ the inner product is
 
-$$
-g_{\mu\nu} = \operatorname{diag}\!\left(1-\frac{r_s}{r},\; -\frac{1}{1-r_s/r},\; -r^2,\; -r^2\sin^2\theta\right).
-$$
+```math
+g_a(X_c, Y_c) = X_c^{\top}\operatorname{diag}\!\left(1-\frac{r_s}{r},\; -\frac{1}{1-r_s/r},\; -r^2,\; -r^2\sin^2\theta\right) Y_c.
+```
 
 where $r_s$ is the Schwarzschild radius.
 The method `inner` in this tutorial computes the inner product of two tangent vectors expressed in the chart coordinate basis ∂/∂t, ∂/∂r, ∂/∂θ, ∂/∂φ.
@@ -127,7 +127,7 @@ y_values = [s[1][3] for s in sampled_solution]
 
 fig = Figure(; size=(800, 800))
 ax = Axis(fig[1, 1]; title="2D Plot of Sampled Solution", xlabel="x", ylabel="y", aspect = AxisAspect(1))
-lines!(ax, x_values, y_values, color=:blue, label="movement")
+lines!(ax, x_values, y_values, color=:blue, label="trajectory")
 
 arc!(Point2f(0), M.rₛ, -π, π)
 axislegend(ax)
@@ -136,4 +136,4 @@ fig
 
 Below is a pre-recorded animation:
 
-![a point orbiting a black hole](black_hole_orbit.mp4)
+![](black_hole_orbit.mp4)
