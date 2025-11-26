@@ -204,7 +204,7 @@ Test.@testset "The circle manifold" begin
             @test manifold_volume(M) ≈ 2 * π
             @test volume_density(M, 0.0, 2.0) == 1.0
         end
-        Test.@testset "Complex Circlle log boundary case" begin
+        Test.@testset "Complex Circle log boundary case" begin
             Mc = Circle(ℂ)
             X = log(Mc, 1.0 + 0.0im, -1.0 + 0.0im)
             @test isapprox(X, π * 1.0im)
@@ -214,5 +214,17 @@ Test.@testset "The circle manifold" begin
             log!(Mc, X3, fill(0 + 1.0im), fill(0.0 - 1.0im))
             @test isapprox(X3[], X2[])
         end
+    end
+
+    @testset "StaticArrays.jl and vector tests" begin
+        Mc = Circle(ℂ)
+        @test mid_point(Mc, Scalar(1.0 + 0.0im), Scalar(0.0 + 1.0im)) ≈ Scalar(sqrt(2) / 2 + sqrt(2) / 2 * 1im)
+        X1 = get_vector(Mc, Scalar(1.0 + 0.0im), 2.0)
+        @test X1 ≈ Scalar(2.0im)
+        @test X1 isa Scalar{ComplexF64}
+
+        M = Circle()
+        @test get_vector(M, [1.0], [2.0]) == [2.0]
+        @test get_vector(M, Scalar(1.0), SA[2.0]) isa SArray
     end
 end
