@@ -19,7 +19,7 @@ We start by loading the necessary libraries.
 
 ```{julia}
 #| output: false
-using Manifolds, RecursiveArrayTools, OrdinaryDiffEq, DiffEqCallbacks, WGLMakie
+using Manifolds, RecursiveArrayTools, OrdinaryDiffEq, DiffEqCallbacks, CairoMakie
 
 ```
 
@@ -131,9 +131,9 @@ lines!(ax, x_values, y_values, color=:blue, label="movement")
 
 arc!(Point2f(0), M.rₛ, -π, π)
 axislegend(ax)
-display(fig)
+fig
 ```
 
 Below is a pre-recorded animation:
 
-{{< video black_hole_orbit.mp4 >}}
+![a point orbiting a black hole](black_hole_orbit.mp4)
