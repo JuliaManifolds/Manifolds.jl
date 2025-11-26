@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * the circle represented in angles (`Circle()`) had a wrong default and provided a
   `project` and `embed` method while not being an embedded manifold, this is now fixed,
-  but might cause errors for some users.
+  but might cause errors for some users. To fix the errors, note that the old behavior of `embed(M, p)` was just returning `p`, and the old behavior of `project(M, p)` was `Manifolds.sym_rem(p)`.
 
 ## [0.11.6] 2025-11-19
 
