@@ -41,7 +41,6 @@ Manifolds.representation_size(::BlackHoleOutside) = (4,)
 To work with this manifold, we need to define a metric. However, we first need to introduce an atlas. For this example let's use an atlas with one chart defined by [Schwarzschild coordinates](https://en.wikipedia.org/wiki/Schwarzschild_coordinates). We also indicate that we will use the Levi-Civita affine connection.
 
 ```{julia}
-
 struct SchwarzschildAtlas <: AbstractAtlas{ℝ} end
 
 function Manifolds.get_parameters!(M::BlackHoleOutside, x, ::SchwarzschildAtlas, i, p)
@@ -70,16 +69,9 @@ end
 Since we use only one chart, we can switch off chart switching functionality:
 
 ```{julia}
-
-function Manifolds.check_chart_switch(::BlackHoleOutside, A::SchwarzschildAtlas, i, a)
-    return false
-end
-function Manifolds.get_chart_index(::BlackHoleOutside, ::SchwarzschildAtlas, p)
-    return nothing
-end
-function Manifolds.get_chart_index(::BlackHoleOutside, ::SchwarzschildAtlas, i, a)
-    return nothing
-end
+Manifolds.check_chart_switch(::BlackHoleOutside, A::SchwarzschildAtlas, i, a) = false
+Manifolds.get_chart_index(::BlackHoleOutside, ::SchwarzschildAtlas, p) = nothing
+Manifolds.get_chart_index(::BlackHoleOutside, ::SchwarzschildAtlas, i, a) = nothing
 ```
 
 
@@ -93,14 +85,11 @@ where $r_s$ is the Schwarzschild radius.
 The method `inner` in this tutorial computes the inner product of two tangent vectors expressed in the chart coordinate basis ∂/∂t, ∂/∂r, ∂/∂θ, ∂/∂φ.
 
 ```{julia}
-
 function Manifolds.inner(M::BlackHoleOutside, ::SchwarzschildAtlas, i, a, Xc, Yc)
     t, r, θ, ϕ = a
     r_block = (1 - M.rₛ / r)
-    # assuming c = 1
     return Xc[1] * r_block * Yc[1] - Xc[2] * Yc[2] / r_block - r^2 * (Xc[3] * Yc[3] + (sin(θ)^2) * Xc[4] * Yc[4])
 end
-
 ```
 
 And this is enough to compute geodesics:
@@ -122,7 +111,7 @@ sol = Manifolds.solve_chart_exp_ode(M, a_p0, c_X0, A, i; final_time=final_time, 
 sampled_solution = sol(range(0.0, final_time; length=20000));
 ```
 
-We can also calculate the Kretschmann scalar and display the trajectory. Value of the Kretschmann scalar corresponds to background color.
+We can also calculate the [Kretschmann scalar](https://en.wikipedia.org/wiki/Kretschmann_scalar) and display the trajectory. Value of the Kretschmann scalar corresponds to background color.
 
 ```{julia}
 x_min = -12.0
@@ -138,12 +127,12 @@ function get_ks(a_x, a_y)
     if a_x^2 + a_y^2 > M.rₛ^2
         return Manifolds.kretschmann_scalar(M, A, i, get_parameters(M, A, i, [0.0, a_x, a_y, 0.0]))
     else
+        # the curvature gets very high inside, so we skip computing it
         return 0.0
     end
 end
 
 ks_vals = [log.(get_ks(a_x, a_y)) for a_x in ks_x, a_y in ks_y]
-
 
 # plotting
 x_values = [s[1][2] for s in sampled_solution]
