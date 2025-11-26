@@ -41,6 +41,7 @@ using Einsum
     @einsum Ric_ref[i, j] = RR[k, i, k, j]
     @test Ric ≈ Ric_ref
     @test ricci_curvature(M, A, i_p0x, p0x) ≈ sum(inverse_local_metric(M, A, i_p0x, p0x) .* Ric)
+    @test Manifolds.kretschmann_scalar(M, A, i_p0x, p0x) ≈ 0.0005794816008357242
     @testset "generic, default implementation" begin
         Z = similar(X)
         invoke(
