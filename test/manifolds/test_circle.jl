@@ -227,4 +227,18 @@ Test.@testset "The circle manifold" begin
         @test get_vector(M, [1.0], [2.0]) == [2.0]
         @test get_vector(M, Scalar(1.0), SA[2.0]) isa SArray
     end
+    @testset "Cotangent vectors" begin
+        rrcv = Manifolds.RieszRepresenterCotangentVector(M, 0.0, 1.0)
+        @test flat(M, 0.0, 1.0) == rrcv
+        @test sharp(M, 0.0, rrcv) == 1.0
+        B_cot = Manifolds.dual_basis(M, 0.0, DefaultOrthonormalBasis())
+        @test get_coordinates(M, 0.0, rrcv, B_cot) ≈ @SVector [1.0]
+        @test get_vector(M, 0.0, 1.0, B_cot) isa Manifolds.RieszRepresenterCotangentVector
+        a = fill(NaN)
+        get_coordinates!(M, a, 0.0, rrcv, B_cot)
+        @test a[] ≈ 1.0
+        rrcv2 = Manifolds.RieszRepresenterCotangentVector(M, fill(0.0), fill(-10.0))
+        get_vector!(M, rrcv2, 0.0, 1.0, B_cot)
+        @test isapprox(rrcv.X, rrcv2.X[])
+    end
 end
