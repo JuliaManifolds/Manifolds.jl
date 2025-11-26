@@ -72,6 +72,9 @@ using ManifoldDiff
         @test Y == X
     end
 
+
+    Manifolds.test_atlases(M, [p, q], (RetractionAtlas(), Manifolds.StereographicAtlas()))
+
     @testset "Complex Sphere" begin
         M = Sphere(2, ℂ)
 

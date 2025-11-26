@@ -563,6 +563,7 @@ function solve_chart_parallel_transport_ode end
 function find_eps end
 function test_parallel_transport end
 function test_manifold end
+function test_atlases end
 # / remove
 
 function __init__()
