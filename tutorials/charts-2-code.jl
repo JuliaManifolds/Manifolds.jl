@@ -77,10 +77,10 @@ function sim()
 
     sampled_solution = sol(range(0.0, final_time; length = 20000))
 
-    x_min = -20.0
-    x_max = 20.0
-    y_min = -20.0
-    y_max = 20.0
+    x_min = -12.0
+    x_max = 12.0
+    y_min = -12.0
+    y_max = 12.0
 
     ks_samples = 300
     ks_x = range(x_min, x_max; length = ks_samples)
@@ -105,9 +105,9 @@ function sim()
     xlims!(ax, x_min, x_max)
     ylims!(ax, y_min, y_max)
 
-    hm = heatmap!(ax, ks_x, ks_y, ks_vals; colormap = :summer) # show Kretschmann scalar
+    hm = heatmap!(ax, ks_x, ks_y, ks_vals; colormap = :viridis) # show Kretschmann scalar
 
-    Colorbar(fig[:, end + 1], hm)
+    Colorbar(fig[:, end + 1], hm, label = "log(Kretschmann scalar)")
 
     θ = range(0, 2π, length = 400)             # parameter for the circle
     xs = cos.(θ) .* 1.0                      # radius = 1
@@ -115,7 +115,7 @@ function sim()
 
     poly!(ax, xs, ys, color = :black)        # filled polygon approximating the circle
 
-    lines!(ax, x_values, y_values, color = :blue, label = "movement")
+    lines!(ax, x_values, y_values, color = :white, label = "movement")
 
     axislegend(ax)
     display(fig)

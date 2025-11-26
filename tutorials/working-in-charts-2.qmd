@@ -125,10 +125,10 @@ sampled_solution = sol(range(0.0, final_time; length=20000));
 We can also calculate the Kretschmann scalar and display the trajectory. Value of the Kretschmann scalar corresponds to background color.
 
 ```{julia}
-x_min = -15.0
-x_max = 15.0
-y_min = -15.0
-y_max = 15.0
+x_min = -12.0
+x_max = 12.0
+y_min = -12.0
+y_max = 12.0
 
 # sampling Kretschmann scalar
 ks_samples = 300
@@ -154,7 +154,7 @@ ax = Axis(fig[1, 1]; title="2D Plot of Sampled Solution", xlabel="x", ylabel="y"
 
 xlims!(ax, x_min, x_max)
 ylims!(ax, y_min, y_max)
-hm = heatmap!(ax, ks_x, ks_y, ks_vals; colormap=:summer)
+hm = heatmap!(ax, ks_x, ks_y, ks_vals; colormap=:viridis)
 
 Colorbar(fig[:, end+1], hm, label="log(Kretschmann scalar)")
 
@@ -166,7 +166,7 @@ begin
     poly!(ax, xs, ys, color = :black)
 end
 
-lines!(ax, x_values, y_values, color=:blue, label="trajectory")
+lines!(ax, x_values, y_values, color=:white, label="trajectory")
 
 axislegend(ax)
 fig
