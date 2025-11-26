@@ -182,6 +182,18 @@ function test_zero_vector end
 function test_estimated_sectional_curvature_matrix end
 # What to exactly test on this?
 function test_sectional_curvature_matrix end
+function test_affine_connection end
+function test_get_atlas end
+function test_get_parameters end
+function test_get_point end
+function test_transition_map end
+function test_transition_map_diff end
+function test_induced_basis end
+function test_check_chart_switch end
+function test_get_chart_index end
+# add second variant inner(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
+# add second variant norm(M::AbstractManifold, A::AbstractAtlas, i, a, Xc)
+
 # How approximate is ok?
 function test_mean end
 function test_median end
