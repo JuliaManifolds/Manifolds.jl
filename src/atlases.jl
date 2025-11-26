@@ -61,7 +61,7 @@ Calculate affine connection on manifold `M` at point with parameters `a` in char
 [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
 """
 function affine_connection(M::AbstractManifold, A, i, a, Xc, Yc)
-    Zc = allocate(Xc)
+    Zc = similar(Xc, Base.promote_type(eltype(Xc), eltype(Yc), eltype(a)))
     return affine_connection!(M, Zc, A, i, a, Xc, Yc)
 end
 
@@ -577,6 +577,54 @@ end
 function get_vector_induced_basis! end
 
 """
+    kretschmann_scalar(M::AbstractManifold, A::AbstractAtlas, i, a; backend::AbstractADType = AutoForwardDiff())
+
+Compute the Kretschmann scalar ``K = R_{abcd} R^{abcd}`` at the point given by coordinates `a`
+in chart `i` of atlas `A` on manifold `M`.
+
+This implementation uses the Riemann tensor in the form ``R^u_{ijk}`` (returned by `riemann_tensor`)
+and the inverse local metric `g^{ij}` (returned by `inverse_local_metric`) to form the full
+contraction:
+
+````math
+    K = g^{u v} g^{i p} g^{j q} g^{k r} R^u_{i j k} R^v_{p q r}
+````
+
+# Arguments
+
+- `M::AbstractManifold` : manifold
+- `A::AbstractAtlas`   : atlas providing charts / induced basis
+- `i`                  : chart index in `A`
+- `a`                  : coordinates of the point in chart `i` (length `n`)
+- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`)
+
+# Returns
+
+Scalar (same element type as `a`) equal to the Kretschmann scalar at the point
+"""
+function kretschmann_scalar(
+        M::AbstractManifold, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff(),
+    )
+    n = length(a)
+    T = eltype(a)
+    R = riemann_tensor(M, A, i, a; backend = backend)   # R[u, ii, j, k] == R^u_{ijk}
+    ginv = inverse_local_metric(M, A, i, a)             # g^{ij}
+
+    K = zero(T)
+    for u in 1:n, ii in 1:n, j in 1:n, k in 1:n
+        Ruijk = R[u, ii, j, k]
+        if iszero(Ruijk)
+            continue
+        end
+        for v in 1:n, p in 1:n, q in 1:n, r in 1:n
+            K += ginv[u, v] * ginv[ii, p] * ginv[j, q] * ginv[k, r] * Ruijk * R[v, p, q, r]
+        end
+    end
+    return K
+end
+
+"""
     local_metric(M::AbstractManifold, p, B::InducedBasis)
 
 Compute the local metric tensor for vectors expressed in terms of coordinates
@@ -751,4 +799,248 @@ function get_vector_induced_basis!(
     p_i = get_parameters(M, B.A, B.i, p)
     DI.derivative!(t -> get_point(M, B.A, B.i, p_i .+ t .* Xc), Y, backend, zero(eltype(p_i)))
     return Y
+end
+
+"""
+    ricci_curvature(M::AbstractManifold, A::AbstractAtlas, i, a; backend=AutoForwardDiff())
+
+Compute the scalar Ricci curvature (Ricci scalar) of the manifold `M` at the point
+given by coordinates `a` in chart `i` of atlas `A`.
+
+The scalar curvature is the trace of the Ricci tensor with respect to the inverse
+local metric:
+````math
+    R = g^{ij} R_{ij}
+````math
+
+# Arguments
+
+- `M::AbstractManifold` : manifold
+- `A::AbstractAtlas`   : atlas providing charts / induced basis
+- `i`                  : chart index in `A`
+- `a`                  : coordinates of the point in chart `i` (length `n`)
+- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`)
+
+# Returns
+
+- scalar (same element type as `a`) equal to the Ricci scalar at the point
+"""
+function ricci_curvature(
+        M::AbstractManifold, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff(),
+    )
+    Ginv = inverse_local_metric(M, A, i, a)
+    Ric = ricci_tensor(M, A, i, a; backend = backend)
+    S = sum(Ginv .* Ric)
+    return S
+end
+
+"""
+    ricci_tensor(M::AbstractManifold, A::AbstractAtlas, i, a; backend::AbstractADType=AutoForwardDiff())
+
+Compute the Ricci tensor of the manifold `M` at the point specified by coordinates `a`
+in chart `i` of atlas `A`.
+
+The Ricci tensor is the contraction of the Riemann tensor:
+
+````math
+    Ric_{p q} = R^u_{p u q}
+````
+
+# Arguments
+
+- `M::AbstractManifold` : manifold
+- `A::AbstractAtlas`   : atlas providing charts / induced basis
+- `i`                  : chart index in `A`
+- `a`                  : coordinates of the point in chart `i` (length `n`)
+- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`)
+
+# Returns
+
+- `n×n` matrix with components `Ric[p, q]` (same element type as `a`)
+
+# See also
+
+- [`riemann_tensor`](@ref)
+"""
+function ricci_tensor(
+        M::AbstractManifold, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff()
+    )
+    n = length(a)
+    T = eltype(a)
+    Ric = zeros(T, n, n)
+    return ricci_tensor!(M, Ric, A, i, a; backend = backend)
+end
+
+function ricci_tensor!(
+        M::AbstractManifold, Ric, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff()
+    )
+    # compute full Riemann tensor and contract: Ric_{ij} = R^u_{i u j}
+    R = riemann_tensor(M, A, i, a; backend = backend)
+    n = length(a)
+    fill!(Ric, zero(eltype(R)))
+    for p in 1:n, q in 1:n
+        s = zero(eltype(R))
+        for u in 1:n
+            s += R[u, p, u, q]
+        end
+        Ric[p, q] = s
+    end
+    return Ric
+end
+
+"""
+    riemann_tensor(M::AbstractManifold, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff()
+
+Compute the Riemann curvature tensor of manifold `M` at the point given by parameters `a` in
+chart `i` of atlas `A`.
+
+Returns a 4-dimensional array `R` of size (n,n,n,n) with components `R[u,i,j,k] = R^u_{ijk}`,
+where the first index is the contravariant (upper) index and the remaining three are covariant
+(lower) indices. The components satisfy, for coordinate vector fields e_i:
+
+````math
+    R^u_{ijk} e_u = (∇_{e_i} ∇_{e_j} - ∇_{e_j} ∇_{e_i} - ∇_{[e_i,e_j]}) e_k
+````
+
+# Arguments
+
+- `M::AbstractManifold`: manifold
+- `A::AbstractAtlas`: atlas used for coordinates/induced basis
+- `i`: chart index in `A`
+- `a`: coordinates of the point in chart `i` (length `n`)
+- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`)
+
+# Notes
+
+- The default implementation computes connection coefficients via `affine_connection`
+  and their directional derivatives (using automatic differentiation), so it can be
+  expensive. Manifold-specific overrides yielding closed-form curvature are recommended
+  for performance-critical code.
+- Use `riemann_tensor!(M, Wc, A, i, a, Xc, Yc, Zc)` to compute the action `R(X,Y)Z` on
+  coordinate vectors `Xc`, `Yc`, `Zc` without constructing the full 4-tensor.
+
+# See also
+
+[`affine_connection`](@ref)
+"""
+function riemann_tensor(
+        M::AbstractManifold, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff()
+    )
+    n = length(a)
+    T = eltype(a)
+    R = zeros(T, n, n, n, n) # R[u, i, j, k]
+    return riemann_tensor!(M, R, A, i, a; backend = backend)
+end
+
+function riemann_tensor!(
+        M::AbstractManifold, R, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff()
+    )
+    n = length(a)
+    T = eltype(a)
+
+    # basis vectors for directional derivatives
+    e = [zeros(T, n) for _ in 1:n]
+    for k in 1:n
+        e[k][k] = 1
+    end
+
+    # Compute connection coefficients Γ^u_{ii j} by applying affine_connection to basis vectors
+    Γ = zeros(T, n, n, n) # Γ[u, i, j]
+    for ii in 1:n, j in 1:n
+        affine_connection!(M, view(Γ, :, ii, j), A, i, a, e[ii], e[j])
+    end
+
+    # directional derivatives ∂_p Γ^u_{ij}
+    dΓ = zeros(T, n, n, n, n) # dΓ[p, u, ii, j]
+    for p in 1:n, ii in 1:n, j in 1:n
+        DI.derivative!(
+            t -> affine_connection(M, A, i, a .+ t .* e[p], e[ii], e[j]),
+            view(dΓ, p, :, ii, j),
+            backend,
+            0.0,
+        )
+    end
+
+    # Compute R^u_{ii j k} = ∂_i Γ^u_{j k} - ∂_j Γ^u_{ii k}
+    #                     + Σ_m ( Γ^m_{j k} Γ^u_{ii m} - Γ^m_{ii k} Γ^u_{j m} )
+
+    for u in 1:n, ii in 1:n, j in 1:n, k in 1:n
+        R[u, ii, j, k] = dΓ[ii, u, j, k] - dΓ[j, u, ii, k]
+        for m in 1:n
+            R[u, ii, j, k] += Γ[m, j, k] * Γ[u, ii, m] - Γ[m, ii, k] * Γ[u, j, m]
+        end
+    end
+    return R
+end
+
+"""
+    riemann_tensor(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc, Zc;
+                   backend::AbstractADType = AutoForwardDiff())
+
+Compute the action of the Riemann curvature tensor `R` on tangent vectors with coordinates
+`Xc`, `Yc` and `Zc` at the point specified by parameters `a` in chart `i` of atlas `A` on
+manifold `M`.
+
+This function returns the vector `W (in induced-chart coordinates) given by
+``(R(X, Y) Z)``, i.e. the result of applying the curvature operator to `Zc`.
+
+# Arguments
+- `M::AbstractManifold` : manifold
+- `A::AbstractAtlas`   : atlas providing charts / induced basis
+- `i`                  : chart index in `A`
+- `a`                  : coordinates of the point in chart `i` (length `n`)
+- `Xc, Yc, Zc`         : coordinates of tangent vectors X, Y, Z in the chart-induced basis
+
+# Keyword arguments
+- `backend::AbstractADType = AutoForwardDiff()` : AD backend used when numerical derivatives are required
+
+# Returns
+- A vector (same shape/type as `Xc`) containing coordinates of ``(R(X, Y) Z)`` in the induced basis.
+
+# Notes
+- The default implementation builds the full 4-index Riemann tensor using the
+  chart affine connection and its derivatives, then contracts with `Xc`, `Yc`, `Zc`.
+  This is convenient but can be expensive; prefer manifold-specific overrides
+  that compute R(X,Y)Z directly for performance-critical code.
+- Inputs are expected to be expressed in the chart-induced basis associated with `A` and `i`.
+- The function uses automatic differentiation (via `backend`) when computing
+  directional derivatives of connection coefficients.
+
+# See also
+- `riemann_tensor(M, A, i, a)` which returns the full 4-tensor
+- []`affine_connection`](@ref) used to obtain connection coefficients (see [`levi_civita_affine_connection!`](@ref) for a generic implementation)
+"""
+function riemann_tensor(
+        M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc, Zc;
+        backend::AbstractADType = AutoForwardDiff()
+    )
+    Wc = similar(Xc)
+    return riemann_tensor!(M, Wc, A, i, a, Xc, Yc, Zc; backend = backend)
+end
+
+function riemann_tensor!(
+        M::AbstractManifold, Wc, A::AbstractAtlas, i, a, Xc, Yc, Zc;
+        backend::AbstractADType = AutoForwardDiff()
+    )
+    # number of coordinates
+    n = length(a)
+
+    # Get the tensor
+    R = riemann_tensor(M, A, i, a; backend = backend)
+
+    # Apply to vectors: (R(X,Y)Z)^u = Σ_{i,j,k} R^u_{i j k} X^i Y^j Z^k
+    fill!(Wc, 0)
+    for u in 1:n
+        for i in 1:n, j in 1:n, k in 1:n
+            Wc[u] += R[u, i, j, k] * Xc[i] * Yc[j] * Zc[k]
+        end
+    end
+
+    return Wc
 end

@@ -6,6 +6,7 @@ using Test
 using Manifolds: TFVector
 using RecursiveArrayTools
 using BoundaryValueDiffEq
+using Einsum
 
 @testset "Torus in ℝ³" begin
     M = Manifolds.EmbeddedTorus(3, 2)
@@ -24,11 +25,22 @@ using BoundaryValueDiffEq
     Y = get_vector(M, p, Y_p0x, B)
     @test get_coordinates(M, p, X, B) ≈ X_p0x
     Γ_X_Y = [-0.20602262287496229, -0.11547890480178581]
-    @test Manifolds.affine_connection(M, A, i_p0x, p0x, X_p0x, Y_p0x) ≈ Γ_X_Y
+    @test affine_connection(M, A, i_p0x, p0x, X_p0x, Y_p0x) ≈ Γ_X_Y
     Z_p0x = similar(X_p0x)
     Manifolds.levi_civita_affine_connection!(M, Z_p0x, A, i_p0x, p0x, X_p0x, Y_p0x)
     @test Z_p0x ≈ Γ_X_Y
     @test christoffel_symbols_second(M, A, i_p0x, p0x) ≈ [0.0 0.0; 0.0 -0.37637884969165114;;; 0.0 1.5668024839360153; -0.37637884969165114 0.0]
+    RR = [0.0 0.0; 0.0 0.2648148288193222;;; 0.0 0.0; -0.2648148288193222 0.0;;;; 0.0 -1.1023800405286386; 0.0 0.0;;; 1.1023800405286386 0.0; 0.0 0.0]
+    @test riemann_tensor(M, A, i_p0x, p0x) ≈ RR
+    W_p0x = similar(X_p0x)
+    @einsum W_p0x[i] = RR[i, j, k, l] * X_p0x[j] * Y_p0x[k] * X_p0x[l]
+    @test riemann_tensor(M, A, i_p0x, p0x, X_p0x, Y_p0x, X_p0x) ≈ W_p0x
+
+    Ric = ricci_tensor(M, A, i_p0x, p0x)
+    Ric_ref = zeros(2, 2)
+    @einsum Ric_ref[i, j] = RR[k, i, k, j]
+    @test Ric ≈ Ric_ref
+    @test ricci_curvature(M, A, i_p0x, p0x) ≈ sum(inverse_local_metric(M, A, i_p0x, p0x) .* Ric)
     @testset "generic, default implementation" begin
         Z = similar(X)
         invoke(

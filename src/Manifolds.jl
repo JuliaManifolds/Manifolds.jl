@@ -766,6 +766,8 @@ export ComponentManifoldError, CompositeManifoldError, ManifoldDomainError
 # Functions on Manifolds
 export ×,
     ^,
+    affine_connection,
+    affine_connection!,
     allocate,
     allocate_result,
     base_manifold,

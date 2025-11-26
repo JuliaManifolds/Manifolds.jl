@@ -6,7 +6,7 @@ using Manifolds: TangentSpaceType
 
 using LinearAlgebra
 
-using WGLMakie
+using CairoMakie
 
 # space outside of a black hole with Schwarzschild radius rₛ
 struct BlackHoleOutside <: AbstractManifold{ℝ}
@@ -77,18 +77,49 @@ function sim()
 
     sampled_solution = sol(range(0.0, final_time; length = 20000))
 
+    x_min = -20.0
+    x_max = 20.0
+    y_min = -20.0
+    y_max = 20.0
+
+    ks_samples = 300
+    ks_x = range(x_min, x_max; length = ks_samples)
+    ks_y = range(y_min, y_max; length = ks_samples)
+    function get_ks(a_x, a_y)
+        if a_x^2 + a_y^2 > M.rₛ^2
+            return Manifolds.kretschmann_scalar(M, A, i, get_parameters(M, A, i, [0.0, a_x, a_y, 0.0]))
+        else
+            return 0.0
+        end
+    end
+
+    ks_vals = [log.(get_ks(a_x, a_y)) for a_x in ks_x, a_y in ks_y]
+
     # plotting
     x_values = [s[1][2] for s in sampled_solution]
     y_values = [s[1][3] for s in sampled_solution]
 
     fig = Figure(; size = (800, 800))
     ax = Axis(fig[1, 1]; title = "2D Plot of Sampled Solution", xlabel = "x", ylabel = "y", aspect = AxisAspect(1))
+
+    xlims!(ax, x_min, x_max)
+    ylims!(ax, y_min, y_max)
+
+    hm = heatmap!(ax, ks_x, ks_y, ks_vals; colormap = :summer) # show Kretschmann scalar
+
+    Colorbar(fig[:, end + 1], hm)
+
+    θ = range(0, 2π, length = 400)             # parameter for the circle
+    xs = cos.(θ) .* 1.0                      # radius = 1
+    ys = sin.(θ) .* 1.0
+
+    poly!(ax, xs, ys, color = :black)        # filled polygon approximating the circle
+
     lines!(ax, x_values, y_values, color = :blue, label = "movement")
 
-    arc!(Point2f(0), M.rₛ, -π, π)
     axislegend(ax)
-    return display(fig)
-
+    display(fig)
+    return fig
 end
 
 
