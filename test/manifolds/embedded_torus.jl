@@ -28,6 +28,7 @@ using BoundaryValueDiffEq
     Z_p0x = similar(X_p0x)
     Manifolds.levi_civita_affine_connection!(M, Z_p0x, A, i_p0x, p0x, X_p0x, Y_p0x)
     @test Z_p0x ≈ Γ_X_Y
+    @test christoffel_symbols_second(M, A, i_p0x, p0x) ≈ [0.0 0.0; 0.0 -0.37637884969165114;;; 0.0 1.5668024839360153; -0.37637884969165114 0.0]
     @testset "generic, default implementation" begin
         Z = similar(X)
         invoke(
