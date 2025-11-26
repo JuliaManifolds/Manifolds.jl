@@ -74,6 +74,7 @@ using ManifoldDiff
 
 
     Manifolds.test_atlases(M, [p, q], (RetractionAtlas(), Manifolds.StereographicAtlas()))
+    @test Manifolds.induced_basis(M, RetractionAtlas(), Manifolds.get_chart_index(M, RetractionAtlas(), p), Manifolds.TangentSpaceType()) === DefaultOrthonormalBasis()
 
     @testset "Complex Sphere" begin
         M = Sphere(2, ℂ)
