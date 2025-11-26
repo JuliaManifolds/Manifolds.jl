@@ -12,7 +12,7 @@ Test.@testset "The circle manifold" begin
     q2 = zeros(2, 2)
     Y1 = zeros(2, 2)
 
-    expectatoions = Dict(
+    expectations = Dict(
         manifold_dimension => 1,
         representation_size => (),
         repr => "Circle(ℝ)",
@@ -23,7 +23,7 @@ Test.@testset "The circle manifold" begin
         Dict(
             :Functions => [
                 exp,
-                get_coordinates, get_vector,
+                get_basis, get_coordinates, get_vector,
                 is_flat, is_point, is_vector,
                 log,
                 manifold_dimension, manifold_volume, mid_point,
@@ -39,7 +39,7 @@ Test.@testset "The circle manifold" begin
             :Vectors => [X1, X2],
             :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()],
         ),
-        expectatoions,
+        expectations,
     )
     Manifolds.Test.test_manifold(
         M,
@@ -60,7 +60,7 @@ Test.@testset "The circle manifold" begin
             :Vectors => fill.([X1, X2]),
             :VectorTransportMethods => [ParallelTransport(), SchildsLadderTransport(), PoleLadderTransport()],
         ),
-        expectatoions,
+        expectations,
     )
 
     Mc = Circle(ℂ)
