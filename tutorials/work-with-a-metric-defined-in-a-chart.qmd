@@ -1,5 +1,5 @@
 ---
-title: Working in charts II
+title: Working with a metric defined in a chart
 ---
 
 In this tutorial we will learn how to use charts to solve a basic problems when the metric is defined using `inner` product.
@@ -75,14 +75,14 @@ Manifolds.get_chart_index(::BlackHoleOutside, ::SchwarzschildAtlas, i, a) = noth
 ```
 
 
-The metric implemented below is the Schwarzschild metric (signature +, −, −, −, and geometric units $c = G = 1$). In Schwarzschild coordinates at $a=(t, r, \theta, \varphi)$ the inner product is
+The metric implemented below is the Schwarzschild metric (signature +, −, −, −, and geometric units $c = G = 1$). In Schwarzschild coordinates at $a=(t, r, \theta, \varphi)$ the inner product of two tangent vectors at point with parameters $a$ with coordinates $X_c$, $Y_c$ is
 
 ```math
 g_a(X_c, Y_c) = X_c^{\top}\operatorname{diag}\!\left(1-\frac{r_s}{r},\; -\frac{1}{1-r_s/r},\; -r^2,\; -r^2\sin^2\theta\right) Y_c.
 ```
 
-where $r_s$ is the Schwarzschild radius.
-The method `inner` in this tutorial computes the inner product of two tangent vectors expressed in the chart coordinate basis ∂/∂t, ∂/∂r, ∂/∂θ, ∂/∂φ.
+where $r_s$ is the Schwarzschild radius and the coordinates of two tangent vectors are given in the basis ∂/∂t, ∂/∂r, ∂/∂θ, ∂/∂φ.
+The method `inner` in this tutorial computes the inner product of two tangent vectors expressed in the chart coordinate basis.
 
 ```{julia}
 function Manifolds.inner(M::BlackHoleOutside, ::SchwarzschildAtlas, i, a, Xc, Yc)
