@@ -167,11 +167,13 @@ function solve_chart_exp_ode(
         # here we switch charts
         a_final = sol.u[end].x[1]::typeof(a)
         new_i = get_chart_index(M, A, cur_i, a_final)
-        transition_map!(M, u0.x[1], A, cur_i, new_i, a_final)
-        transition_map_diff!(
-            M, u0.x[2], A, cur_i, a_final, sol.u[end].x[2]::typeof(Xc), new_i
-        )
-        cur_i = new_i
+        if new_i !== cur_i
+            transition_map!(M, u0.x[1], A, cur_i, new_i, a_final)
+            transition_map_diff!(
+                M, u0.x[2], A, cur_i, a_final, sol.u[end].x[2]::typeof(Xc), new_i
+            )
+            cur_i = new_i
+        end
     end
     return sols
 end

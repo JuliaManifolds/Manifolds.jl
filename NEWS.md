@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     it follows the structure of the one recently written for `LieGroups.jl`.
   * a lot of small test functions like `Manifolds.Test.test_exp(M, p, X; kwargs...)`
     with the goal of providing one test for each individual API function
+* New methods and functions for working in a chart: `local_metric`, `inverse_local_metric`, `levi_civita_affine_connection!`, `christoffel_symbols_second`.
+* Default implementation of `get_vector!` and `get_coordinates!` for `InducedBasis` using automatic differentiation.
+* A new tutorial that describes working with the Levi-Civita connection for a Riemannian metric defined through `inner` in a chart.
 
 ### Fixed
 

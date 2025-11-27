@@ -196,6 +196,15 @@ import ManifoldDiff:
 import Statistics: mean, mean!, median, median!, cov, var
 import StatsBase: mean_and_var
 
+using ADTypes:
+    AbstractADType,
+    AutoFiniteDiff,
+    AutoFiniteDifferences,
+    AutoForwardDiff,
+    AutoReverseDiff,
+    AutoZygote
+import DifferentiationInterface as DI
+
 using Base.Iterators: repeated
 using Einsum: @einsum
 using Kronecker
@@ -758,6 +767,8 @@ export ComponentManifoldError, CompositeManifoldError, ManifoldDomainError
 # Functions on Manifolds
 export ×,
     ^,
+    affine_connection,
+    affine_connection!,
     allocate,
     allocate_result,
     base_manifold,
