@@ -1,9 +1,26 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to ´Manifolds.jl´ will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.11.7] 2025-11-27
+
+### Added
+
+* added a more structured version for the extension with `Test.jl` that now introduces (#839)
+  * a complete test suite `Manifolds.Test.test_manifold(M; kwargs...)`
+    it follows the structure of the one recently written for `LieGroups.jl`.
+  * a lot of small test functions like `Manifolds.Test.test_exp(M, p, X; kwargs...)`
+    with the goal of providing one test for each individual API function
+
+### Fixed
+
+* the circle represented in angles (`Circle()`) had a wrong default and provided a
+  `project` and `embed` method while not being an embedded manifold, this is now fixed,
+  but might cause errors for some users. To fix the errors, note that
+  the old behavior of `embed(M, p)` was just returning `p`, and the old behavior of `project(M, p)` was `Manifolds.sym_rem(p)`. (#839)
 
 ## [0.11.6] 2025-11-19
 

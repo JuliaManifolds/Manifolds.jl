@@ -285,19 +285,32 @@ function get_vector_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNumbers)
     return Y
 end
 
-@doc raw"""
-    injectivity_radius(M::AbstractSphere[, p])
+_doc_injectivity_radius_sphere = raw"""
+    injectivity_radius(M::AbstractSphere[, p, ::ExponentialRetraction])
 
 Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is globally ``π``.
-
-    injectivity_radius(M::Sphere, x, ::ProjectionRetraction)
-
-Return the injectivity radius for the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) on the
-[`AbstractSphere`](@ref), which is globally ``\frac{π}{2}``.
 """
+@doc "$(_doc_injectivity_radius_sphere)"
 injectivity_radius(::AbstractSphere) = π
+@doc "$(_doc_injectivity_radius_sphere)"
 injectivity_radius(::AbstractSphere, p) = π
 #avoid falling back but use the ones below
+
+_doc_injectivity_radius_sphere_projection = raw"""
+    injectivity_radius(M::Sphere, ::ProjectionRetraction)
+    injectivity_radius(M::Sphere, p, ::ProjectionRetraction)
+
+Return the injectivity radius for the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) on the
+[`AbstractSphere`](@ref), which is globally ``$(_tex(:frac, "π", "2"))``.
+"""
+
+@doc "$(_doc_injectivity_radius_sphere_projection)"
+injectivity_radius(::AbstractSphere, ::ProjectionRetraction)
+
+@doc "$(_doc_injectivity_radius_sphere_projection)"
+injectivity_radius(::AbstractSphere, p, ::ProjectionRetraction)
+
+# Resolve ambiguities
 function injectivity_radius(M::AbstractSphere, m::AbstractRetractionMethod)
     return _injectivity_radius(M, m)
 end
@@ -521,18 +534,18 @@ function ManifoldsBase.retract_project_fused!(M::AbstractSphere, q, p, X, t::Num
 end
 
 function Base.show(io::IO, ::Sphere{𝔽, TypeParameter{Tuple{n}}}) where {n, 𝔽}
-    return print(io, "Sphere($(n), $(𝔽))")
+    return print(io, "Sphere($(n)$(𝔽 == ManifoldsBase.ℝ ? "" : ", $𝔽"))")
 end
 function Base.show(io::IO, M::Sphere{𝔽, Tuple{Int}}) where {𝔽}
     n = get_parameter(M.size)[1]
-    return print(io, "Sphere($(n), $(𝔽); parameter=:field)")
+    return print(io, "Sphere($(n)$(𝔽 == ManifoldsBase.ℝ ? "" : ", $𝔽"); parameter=:field)")
 end
 function Base.show(io::IO, ::ArraySphere{𝔽, TypeParameter{tn}}) where {tn, 𝔽}
-    return print(io, "ArraySphere($(join(tn.parameters, ", ")); field=$(𝔽))")
+    return print(io, "ArraySphere($(join(tn.parameters, ", "))$(𝔽 == ManifoldsBase.ℝ ? "" : "; field=$(𝔽)"))")
 end
 function Base.show(io::IO, M::ArraySphere{𝔽, <:Tuple}) where {𝔽}
     n = M.size
-    return print(io, "ArraySphere($(join(n, ", ")); field=$(𝔽), parameter=:field)")
+    return print(io, "ArraySphere($(join(n, ", "));$(𝔽 == ManifoldsBase.ℝ ? "" : " field=$(𝔽),") parameter=:field)")
 end
 
 @doc raw"""
@@ -583,11 +596,7 @@ Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater
 and 0 otherwise.
 """
 function sectional_curvature(M::AbstractSphere, p, X, Y)
-    if manifold_dimension(M) > 1
-        return 1.0
-    else
-        return 0.0
-    end
+    return manifold_dimension(M) > 1 ? 1.0 : 0.0
 end
 
 @doc raw"""
@@ -597,11 +606,7 @@ Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater
 and 0 otherwise.
 """
 function sectional_curvature_max(M::AbstractSphere)
-    if manifold_dimension(M) > 1
-        return 1.0
-    else
-        return 0.0
-    end
+    return manifold_dimension(M) > 1 ? 1.0 : 0.0
 end
 
 @doc raw"""
@@ -611,11 +616,7 @@ Sectional curvature of [`AbstractSphere`](@ref) `M` is 1 if dimension is greater
 and 0 otherwise.
 """
 function sectional_curvature_min(M::AbstractSphere)
-    if manifold_dimension(M) > 1
-        return 1.0
-    else
-        return 0.0
-    end
+    return manifold_dimension(M) > 1 ? 1.0 : 0.0
 end
 
 @doc raw"""

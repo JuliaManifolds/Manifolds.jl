@@ -307,7 +307,7 @@ function transition_map_diff!(
 end
 
 """
-    induced_basis(M::AbstractManifold, A::AbstractAtlas, i, p, VST::VectorSpaceType)
+    induced_basis(M::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType)
 
 Basis of vector space of type `VST` at point `p` from manifold `M` induced by
 chart (`A`, `i`).
@@ -317,33 +317,6 @@ chart (`A`, `i`).
 [`VectorSpaceType`](@extref `ManifoldsBase.VectorSpaceType`), [`AbstractAtlas`](@ref)
 """
 induced_basis(M::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType)
-
-function induced_basis(
-        ::AbstractManifold,
-        A::RetractionAtlas{
-            <:AbstractRetractionMethod,
-            <:AbstractInverseRetractionMethod,
-            <:DefaultOrthonormalBasis,
-        },
-        i,
-        p,
-        ::TangentSpaceType,
-    )
-    return A.basis
-end
-function induced_basis(
-        M::AbstractManifold,
-        A::RetractionAtlas{
-            <:AbstractRetractionMethod,
-            <:AbstractInverseRetractionMethod,
-            <:DefaultOrthonormalBasis,
-        },
-        i,
-        p,
-        ::CotangentSpaceType,
-    )
-    return dual_basis(M, p, A.basis)
-end
 
 @doc raw"""
     InducedBasis(vs::VectorSpaceType, A::AbstractAtlas, i)

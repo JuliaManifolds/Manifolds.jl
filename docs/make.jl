@@ -152,6 +152,7 @@ modules = [
     Base.get_extension(Manifolds, :ManifoldsOrdinaryDiffEqExt),
     Base.get_extension(Manifolds, :ManifoldsRecipesBaseExt),
     Base.get_extension(Manifolds, :ManifoldsTestExt),
+    Manifolds.Test,
 ]
 
 if modules isa Vector{Union{Nothing, Module}}
@@ -162,6 +163,7 @@ makedocs(;
     format = Documenter.HTML(
         prettyurls = (get(ENV, "CI", nothing) == "true") || ("--prettyurls" ∈ ARGS),
         assets = ["assets/favicon.ico", "assets/citations.css", "assets/link-icons.css"],
+        search_size_threshold_warn = 1000 * 2^10, # raise slightly from 500 to 1 MiB
         size_threshold_warn = 200 * 2^10, # raise slightly from 100 to 200 KiB
         size_threshold = 300 * 2^10,      # raise slightly 200 to 300 KiB
     ),
@@ -236,7 +238,6 @@ makedocs(;
             "Distributions" => "features/distributions.md",
             "Integration" => "features/integration.md",
             "Statistics" => "features/statistics.md",
-            "Testing" => "features/testing.md",
             "Utilities" => "features/utilities.md",
         ],
         "Miscellanea" => [
@@ -244,6 +245,7 @@ makedocs(;
             "Changelog" => "misc/NEWS.md",
             "Contributing" => "misc/CONTRIBUTING.md",
             "Internals" => "misc/internals.md",
+            "Test suite" => "misc/testsuite.md",
             "Notation" => "misc/notation.md",
             "References" => "misc/references.md",
         ],

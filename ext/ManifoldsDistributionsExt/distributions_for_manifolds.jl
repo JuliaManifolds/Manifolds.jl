@@ -40,11 +40,9 @@ end
 function ProductFVectorDistribution(distributions::FVectorDistribution...)
     M = ProductManifold(map(d -> support(d).space.manifold, distributions)...)
     fiber_type = support(distributions[1]).space.fiber_type
-    if !all(d -> support(d).space.fiber_type == fiber_type, distributions)
-        error(
-            "Not all distributions have support in vector spaces of the same type, which is currently not supported",
-        )
-    end
+    !all(d -> support(d).space.fiber_type == fiber_type, distributions) && error(
+        "Not all distributions have support in vector spaces of the same type, which is currently not supported",
+    )
     # Probably worth considering sum spaces in the future?
     p = ArrayPartition(map(d -> support(d).space.point, distributions)...)
     return ProductFVectorDistribution(Fiber(M, p, fiber_type), distributions)
