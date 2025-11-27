@@ -318,20 +318,6 @@ chart (`A`, `i`).
 """
 induced_basis(M::AbstractManifold, A::AbstractAtlas, i, VST::VectorSpaceType)
 
-function induced_basis(
-        ::AbstractManifold,
-        A::RetractionAtlas{
-            ℝ,
-            <:AbstractRetractionMethod,
-            <:AbstractInverseRetractionMethod,
-            <:DefaultOrthonormalBasis,
-        },
-        i,
-        ::TangentSpaceType,
-    )
-    return A.basis
-end
-
 @doc raw"""
     InducedBasis(vs::VectorSpaceType, A::AbstractAtlas, i)
 
