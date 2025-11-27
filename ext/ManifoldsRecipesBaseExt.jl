@@ -15,7 +15,7 @@ SURFACE_RESOLUTION_DEFAULT = 32
 #
 # Plotting Recipe – Poincaré Ball
 #
-@recipe function f(
+@recipe function f(                                                             # COV_EXCL_LINE
         M::Hyperbolic{TypeParameter{Tuple{2}}}, pts::AbstractVector{P}, vecs::Union{AbstractVector{T}, Nothing} = nothing;
         circle_points = CIRCLE_DEFAULT_PLOT_POINTS,
         geodesic_interpolation = -1,
@@ -74,7 +74,7 @@ end
 #
 # Plotting Recipe – Poincaré Half plane
 #
-@recipe function f(
+@recipe function f(                                                             # COV_EXCL_LINE
         M::Hyperbolic{TypeParameter{Tuple{2}}}, pts::AbstractVector{P}, vecs::Union{AbstractVector{T}, Nothing} = nothing;
         geodesic_interpolation = -1
     ) where {P <: PoincareHalfSpacePoint, T <: PoincareHalfSpaceTangentVector}
@@ -116,7 +116,7 @@ end
 #
 # Plotting Recipe – Hyperboloid
 #
-@recipe function f(
+@recipe function f(                                                             # COV_EXCL_LINE
         M::Hyperbolic{TypeParameter{Tuple{2}}},
         pts::Union{AbstractVector{P}, Nothing} = nothing,
         vecs::Union{AbstractVector{T}, Nothing} = nothing;
@@ -210,7 +210,7 @@ end
 #
 # Plotting Recipe – Sphere
 #
-@recipe function f(
+@recipe function f(                                                             # COV_EXCL_LINE
         M::Sphere{ℝ, TypeParameter{Tuple{2}}},
         pts::Union{AbstractVector{P}, Nothing} = nothing,
         vecs::Union{AbstractVector{T}, Nothing} = nothing;

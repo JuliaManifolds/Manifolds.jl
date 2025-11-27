@@ -58,7 +58,7 @@ Distribution{MPointvariate, MPointSupport{TM}} end
 
 Get the object of type `FVectorSupport` for the distribution `d`.
 """
-function Distributions.support(::FVectorDistribution) end
+Distributions.support(::FVectorDistribution)
 
 """
     uniform_distribution(M::Grassmann{<:Any,ℝ}, p)

@@ -350,7 +350,7 @@ end
         bc::Broadcast.Broadcasted{Broadcast.Style{TuckerTangentVector{Any, D}}},
     ) where {D}
     return TuckerTangentVector(
-        @inbounds(Broadcast._broadcast_getindex(bc, Val(:Ċ))),
+        @inbounds(Broadcast._broadcast_getindex(bc, Val(:Ċ))),                  # COV_EXCL_LINE
         ntuple(i -> @inbounds(Broadcast._broadcast_getindex(bc, Val((:U̇, i)))), Val(D)),
     )
 end

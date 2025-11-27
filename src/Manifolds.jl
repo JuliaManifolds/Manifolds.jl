@@ -58,6 +58,8 @@ import ManifoldsBase:
     dual_basis,
     embed,
     embed!,
+    embed_project,
+    embed_project!,
     exp,
     exp!,
     exp_fused,
@@ -566,11 +568,12 @@ function estimate_distance_from_bvp end
 function solve_chart_exp_ode end
 function solve_chart_parallel_transport_ode end
 
+# TODO: Remove once the new interface is done
 function find_eps end
 function test_parallel_transport end
 function test_manifold end
-
-# end of functions populated with methods by extensions
+function test_atlases end
+# / remove
 
 function __init__()
     @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
@@ -592,8 +595,6 @@ function __init__()
 end
 
 include("deprecated.jl")
-
-export test_manifold
 
 # Abstract main types
 export AbstractCotangentVector,
@@ -800,6 +801,8 @@ export ×,
     einstein_tensor,
     embed,
     embed!,
+    embed_project,
+    embed_project!,
     exp,
     exp!,
     flat,
@@ -928,5 +931,8 @@ export get_basis,
 
 # atlases and charts
 export get_point, get_point!, get_parameters, get_parameters!
+
+# Last (not least, but _after_ exports) include the test submodule
+include("test.jl")
 
 end # module
