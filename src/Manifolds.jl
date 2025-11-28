@@ -933,6 +933,6 @@ export get_basis,
 export get_point, get_point!, get_parameters, get_parameters!
 
 # Last (not least, but _after_ exports) include the test submodule
-include("test.jl")
+include("test-suite.jl")
 
 end # module
