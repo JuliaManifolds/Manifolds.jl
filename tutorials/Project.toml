@@ -17,12 +17,13 @@ RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
-[sources]
-Manifolds = {path = ".."}
+[sources.Manifolds]
+path = ".."
 
 [compat]
 BoundaryValueDiffEq = "4, 5"
 CSV = "0.10"
+CairoMakie = "0.15"
 DataFrames = "1"
 DiffEqCallbacks = "4"
 Distributions = "0.22.6, 0.23, 0.24, 0.25"
