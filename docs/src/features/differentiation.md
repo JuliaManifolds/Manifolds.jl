@@ -12,7 +12,7 @@ Order = [:type, :function, :constant]
 
 Further differentiation backends and features are available in [`ManifoldDiff.jl`](https://github.com/JuliaManifolds/ManifoldDiff.jl).
 
-### FiniteDifferenes.jl
+### FiniteDifferences.jl
 
 ```@autodocs
 Modules = [Manifolds]

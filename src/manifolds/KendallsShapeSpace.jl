@@ -25,7 +25,7 @@ end
 #
 # A small internal function, given two shapes p, q as matrices (n,k) with columns of points,
 # find the best alignment (without mirroring) to rotate q to p; this is done by
-# the closed form solution of the orthogonal Procrustes problem – and a carefull check to avoid that we mirror points.
+# the closed form solution of the orthogonal Procrustes problem – and a careful check to avoid that we mirror points.
 #
 function _optimal_alignment(::KendallsShapeSpace, p, q)
     Xmul = p * transpose(q)

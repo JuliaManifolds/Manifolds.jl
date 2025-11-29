@@ -74,7 +74,7 @@ that lie on it (contained in `pts`).
 - `test_project_point = false`: test projections onto the manifold.
 - `test_project_tangent = false` : test projections on tangent spaces.
 - `test_representation_size = true` : test representation size of points/tvectprs.
-- `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace.
+- `test_tangent_vector_broadcasting = true` : test broadcasting operators on TangentSpace.
 - `test_vector_spaces = true` : test Vector bundle of this manifold.
 - `test_default_vector_transport = false` : test the default vector transport (usually
    parallel transport).
