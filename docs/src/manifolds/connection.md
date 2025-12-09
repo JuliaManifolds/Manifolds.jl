@@ -2,14 +2,14 @@
 
 A connection manifold always consists of a [topological manifold](https://en.wikipedia.org/wiki/Topological_manifold) together with a [connection](https://en.wikipedia.org/wiki/Connection_(mathematics)) ``Γ``.
 
-However, often there is an implicitly assumed (default) connection, like the [`LeviCivitaConnection`](@ref) connection on a Riemannian manifold.
+However, often there is an implicitly assumed (default) connection, like the [`LeviCivitaConnection`](@extref) connection on a Riemannian manifold.
 It is not necessary to use this decorator if you implement just one (or the first) connection.
 If you later introduce a second, the old (first) connection can be used without an explicitly stated connection.
 
 This manifold decorator serves two purposes:
 
 1. to implement different connections (e.g. in closed form) for one `AbstractManifold`
-2. to provide a way to compute geodesics on manifolds, where this [`AbstractAffineConnection`](@ref) does not yield a closed formula.
+2. to provide a way to compute geodesics on manifolds, where this [`AbstractAffineConnection`](@extref) does not yield a closed formula.
 
 ```@contents
 Pages = ["connection.md"]

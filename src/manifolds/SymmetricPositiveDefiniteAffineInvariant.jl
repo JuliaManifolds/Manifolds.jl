@@ -58,7 +58,7 @@ end
     distance(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}, p, q)
 
 Compute the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between `p` and `q`,
-as a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula reads
+as a [`MetricManifold`](@extref) with [`AffineInvariantMetric`](@ref). The formula reads
 
 ```math
 d_{\mathcal P(n)}(p,q)
@@ -83,7 +83,7 @@ end
     exp(M::MetricManifold{<:SymmetricPositiveDefinite,AffineInvariantMetric}, p, X)
 
 Compute the exponential map from `p` with tangent vector `X` on the
-[`SymmetricPositiveDefinite`](@ref) `M` with its default [`MetricManifold`](@ref) having the
+[`SymmetricPositiveDefinite`](@ref) `M` with its default [`MetricManifold`](@extref) having the
 [`AffineInvariantMetric`](@ref). The formula reads
 
 ```math
@@ -149,7 +149,7 @@ end
 
 Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
-[`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
+[`MetricManifold`](@extref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
 [`AffineInvariantMetric`](@ref) that diagonalizes the curvature tensor ``R(u,v)w``
 with eigenvalues `κ` and where the direction `B.frame_direction` ``V`` has curvature `0`.
 
@@ -303,7 +303,7 @@ end
 
 Compute the inner product of `X`, `Y` in the tangent space of `p` on
 the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
-a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula reads
+a [`MetricManifold`](@extref) with [`AffineInvariantMetric`](@ref). The formula reads
 
 ````math
 g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
@@ -327,7 +327,7 @@ is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, AffineInvariantMetri
     log(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}, p, q)
 
 Compute the logarithmic map from `p` to `q` on the [`SymmetricPositiveDefinite`](@ref)
-as a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula reads
+as a [`MetricManifold`](@extref) with [`AffineInvariantMetric`](@ref). The formula reads
 
 ```math
 \log_p q =
@@ -368,7 +368,7 @@ manifold_volume(::SymmetricPositiveDefinite) = Inf
 
 Compute the parallel transport of `X` from the tangent space at `p` to the
 tangent space at `q` on the [`SymmetricPositiveDefinite`](@ref) as a
-[`MetricManifold`](@ref) with the [`AffineInvariantMetric`](@ref).
+[`MetricManifold`](@extref) with the [`AffineInvariantMetric`](@ref).
 The formula reads
 
 ```math

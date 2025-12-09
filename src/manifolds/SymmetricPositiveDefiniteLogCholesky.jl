@@ -111,7 +111,7 @@ end
 
 Compute the inner product of two matrices `X`, `Y` in the tangent space of `p`
 on the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
-a [`MetricManifold`](@ref) with [`LogCholeskyMetric`](@ref). The formula reads
+a [`MetricManifold`](@extref) with [`LogCholeskyMetric`](@ref). The formula reads
 
 ````math
     g_p(X,Y) = ⟨a_z(X),a_z(Y)⟩_z,

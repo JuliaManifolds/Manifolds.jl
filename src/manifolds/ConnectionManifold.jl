@@ -47,7 +47,7 @@ end
 
 Compute the Christoffel symbols of the second kind in local coordinates of basis `B`.
 For affine connection manifold the Christoffel symbols need to be explicitly implemented
-while, for a [`MetricManifold`](@ref) they are computed as (in Einstein summation convention)
+while, for a [`MetricManifold`](@extref) they are computed as (in Einstein summation convention)
 
 ````math
 Γ^{l}_{ij} = g^{kl} Γ_{ijk},

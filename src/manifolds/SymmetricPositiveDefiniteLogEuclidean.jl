@@ -10,7 +10,7 @@ struct LogEuclideanMetric <: RiemannianMetric end
     distance(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogEuclideanMetric}, p, q)
 
 Compute the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between
-`p` and `q` as a [`MetricManifold`](@ref) with [`LogEuclideanMetric`](@ref).
+`p` and `q` as a [`MetricManifold`](@extref) with [`LogEuclideanMetric`](@ref).
 The formula reads
 
 ```math
