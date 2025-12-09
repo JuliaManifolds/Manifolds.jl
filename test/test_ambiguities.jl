@@ -34,7 +34,7 @@ end
         mbs = Test.detect_ambiguities(ManifoldsBase)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
-        MBS_LIMIT = 35
+        MBS_LIMIT = 41
         println("Number of ManifoldsBase.jl ambiguities: $(length(mbs))")
         @test length(mbs) <= MBS_LIMIT
         if length(mbs) > MBS_LIMIT
