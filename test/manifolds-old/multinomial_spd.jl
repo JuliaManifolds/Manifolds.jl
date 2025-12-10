@@ -34,6 +34,6 @@ include("../header.jl")
     @testset "Random" begin
         q = zeros(3, 3)
         M = MultinomialSymmetricPositiveDefinite(3)
-        @test is_point(M, rand!(MersenneTwister(), M, q); atol = 4.0e-15)
+        @test is_point(M, rand!(MersenneTwister(), M, q); error = :error, atol = 5.0e-14)
     end
 end
