@@ -10,7 +10,7 @@ Such a default metric is usually not the only possible metric on a manifold.
 The [`MetricManifold`](@extref ManifoldsBase.MetricManifold) decorator allows to introduce further metrics for a manifold by acting as a wrapper.
 This allows to define further metrics for an existing manifold, while only having to implement functions that depend on the metric.
 All functions that are independent of the metric are automatically forwarded to the underlying manifold.
-When wrapping a manifold `M` with a [`MetricManifold`](@extref ManifoldsBase.MetricManifold) together with the default [`metric`](@extref)`(M)`,
+When wrapping a manifold `M` with a [`MetricManifold`](@extref ManifoldsBase.MetricManifold) together with the default [`metric`](@extref ManifoldsBase.metric)`(M)`,
 this wrapper acts completely transparent and passes all function calls to the underlying manifold `M`.
 
 ```@contents
