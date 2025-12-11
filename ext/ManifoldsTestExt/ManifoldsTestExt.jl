@@ -1423,7 +1423,7 @@ end # Manifolds.Test.test_inverse_retraction
     name = "is_default_metric on \$M",
     )
 
-Test the [`is_default_metric`](@ref) on manifold `M`.
+Test the [`is_default_metric`](@extref ManifoldsBase.is_default_metric) on manifold `M`.
 
 * that it returns true for the given `metric`
 * that it returns false for all other provided metrics

@@ -17,7 +17,7 @@ Most manifolds we consider are smooth, i.e. any change of charts ``φ_i \circ φ
 
 Most operations on manifolds in `Manifolds.jl` avoid operating in a chart through appropriate embeddings and formulas derived for particular manifolds, though atlases provide the most general way of working with manifolds.
 Compared to these approaches, using an atlas is often more technical and time-consuming.
-They are extensively used in metric-related functions on [`MetricManifold`](@ref Main.Manifolds.MetricManifold)s.
+They are extensively used in metric-related functions on [`MetricManifold`](@extref ManifoldsBase.MetricManifold)s.
 
 Atlases are represented by objects of subtypes of [`AbstractAtlas`](@ref Main.Manifolds.AbstractAtlas).
 There are no type restrictions for indices of charts in atlases.
