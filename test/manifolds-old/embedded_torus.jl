@@ -7,6 +7,7 @@ using Manifolds: TFVector
 using RecursiveArrayTools
 using BoundaryValueDiffEq
 using Einsum
+using LinearAlgebra
 
 @testset "Torus in ℝ³" begin
     M = Manifolds.EmbeddedTorus(3, 2)
@@ -29,7 +30,12 @@ using Einsum
     Z_p0x = similar(X_p0x)
     Manifolds.levi_civita_affine_connection!(M, Z_p0x, A, i_p0x, p0x, X_p0x, Y_p0x)
     @test Z_p0x ≈ Γ_X_Y
-    @test christoffel_symbols_second(M, A, i_p0x, p0x) ≈ [0.0 0.0; 0.0 -0.37637884969165114;;; 0.0 1.5668024839360153; -0.37637884969165114 0.0]
+    css_ref = [0.0 0.0; 0.0 -0.37637884969165114;;; 0.0 1.5668024839360153; -0.37637884969165114 0.0]
+    @test christoffel_symbols_second(M, A, i_p0x, p0x) ≈ css_ref
+    g_i = local_metric(M, A, i_p0x, p0x)
+    @einsum csf_ref[ii, j, k] := g_i[k, l] * css_ref[l, ii, j]
+    @test christoffel_symbols_first(M, A, i_p0x, p0x) ≈ csf_ref
+
     RR = [0.0 0.0; 0.0 0.2648148288193222;;; 0.0 0.0; -0.2648148288193222 0.0;;;; 0.0 -1.1023800405286386; 0.0 0.0;;; 1.1023800405286386 0.0; 0.0 0.0]
     @test riemann_tensor(M, A, i_p0x, p0x) ≈ RR
     W_p0x = similar(X_p0x)
@@ -42,6 +48,12 @@ using Einsum
     @test Ric ≈ Ric_ref
     @test ricci_curvature(M, A, i_p0x, p0x) ≈ sum(inverse_local_metric(M, A, i_p0x, p0x) .* Ric)
     @test Manifolds.kretschmann_scalar(M, A, i_p0x, p0x) ≈ 0.0005794816008357242
+
+    einstein_tensor_ref = ricci_tensor(M, A, i_p0x, p0x) - local_metric(M, A, i_p0x, p0x) * ricci_curvature(M, A, i_p0x, p0x) / 2
+    @test einstein_tensor(M, A, i_p0x, p0x) ≈ einstein_tensor_ref
+    @test det_local_metric(M, A, i_p0x, p0x) ≈ det(local_metric(M, A, i_p0x, p0x))
+    @test log_local_metric_density(M, A, i_p0x, p0x) ≈ log(sqrt(abs(det(local_metric(M, A, i_p0x, p0x)))))
+
     @testset "generic, default implementation" begin
         Z = similar(X)
         invoke(
