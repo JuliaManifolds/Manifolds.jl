@@ -139,7 +139,13 @@ symbols:
 - `A::AbstractAtlas`   : atlas providing charts / induced basis
 - `i`                  : chart index in `A`
 - `a`                  : coordinates of the point in chart `i` (length `n`)
-- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`)
+
+# Keyword arguments
+
+- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`).
+                              It is passed to [`christoffel_symbols_second`](@ref) in the
+                              default implementation to compute the Christoffel symbol of
+                              the second kind.
 
 Returns an ``n×n×n`` array with ordering ``(i, j, k)``.
 """
