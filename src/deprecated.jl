@@ -7,6 +7,7 @@ matrix ``G(p)`` representing the metric in the tangent space at ``p`` with as a 
 See also [`local_metric`](@ref)
 """
 function det_local_metric(M::AbstractManifold, p, B::AbstractBasis)
+    @warn "`det_local_metric(M::AbstractManifold, p, B::AbstractBasis)` is deprecated. Consider using `det_local_metric(M::AbstractManifold, A::AbstractAtlas, i, a)` instead"  maxlog = 1
     return det(local_metric(M, p, B))
 end
 
@@ -21,6 +22,7 @@ function einstein_tensor(
         B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
     )
+    @warn "`einstein_tensor(M::AbstractManifold, p, B::AbstractBasis)` is deprecated. Consider using `einstein_tensor(M::AbstractManifold, A::AbstractAtlas, i, a)` instead"  maxlog = 1
     Ric = ricci_tensor(M, p, B; backend = backend)
     g = local_metric(M, p, B)
     Ginv = inverse_local_metric(M, p, B)
@@ -50,6 +52,7 @@ Then the inverse local metric is denoted by ``G^{-1} = g^{ij}``.
 """
 inverse_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 function inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)
+    @warn "`inverse_local_metric(M::AbstractManifold, p, B::AbstractBasis)` is deprecated. Consider using `inverse_local_metric(M::AbstractManifold, A::AbstractAtlas, i, a)` instead"  maxlog = 1
     return inv(local_metric(M, p, B))
 end
 @trait_function inverse_local_metric(M::AbstractDecoratorManifold, p, B::AbstractBasis)
@@ -70,6 +73,7 @@ This yields the property for two tangent vectors (using Einstein summation conve
 local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 
 function local_metric(M::MetricManifold, p, B::AbstractBasis)
+    @warn "`local_metric(M::AbstractManifold, p, B::AbstractBasis)` is deprecated. Consider using `local_metric(M::AbstractManifold, A::AbstractAtlas, i, a)` instead"  maxlog = 1
     (metric(M.manifold) == M.metric) && (return local_metric(M.manifold, p, B))
     return invoke(local_metric, Tuple{AbstractManifold, Any, AbstractBasis}, M, p, B)
 end
@@ -90,6 +94,7 @@ function local_metric_jacobian(
         B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
     )
+    @warn "`local_metric_jacobian(M::AbstractManifold, p, B::AbstractBasis)` is deprecated. Consider using `christoffel_symbols_second(M::AbstractManifold, A::AbstractAtlas, i, a)` instead"  maxlog = 1
     n = size(p, 1)
     ∂g = reshape(_jacobian(q -> local_metric(M, q, B), copy(M, p), backend), n, n, n)
     return ∂g
@@ -103,6 +108,7 @@ is given by ``ρ = \log \sqrt{|\det [g_{ij}]|}`` for the metric tensor expressed
 """
 log_local_metric_density(::AbstractManifold, ::Any, ::AbstractBasis)
 function log_local_metric_density(M::AbstractManifold, p, B::AbstractBasis)
+    @warn "`log_local_metric_density(M::AbstractManifold, p, B::AbstractBasis)` is deprecated. Consider using `log_local_metric_density(M::AbstractManifold, A::AbstractAtlas, i, a)` instead"  maxlog = 1
     return log(abs(det_local_metric(M, p, B))) / 2
 end
 
@@ -128,6 +134,7 @@ function ricci_curvature(
         B::AbstractBasis;
         backend::AbstractDiffBackend = default_differential_backend(),
     )
+    @warn "`ricci_curvature(M::AbstractManifold, p, B::AbstractBasis)` is deprecated. Consider using `ricci_curvature(M::AbstractManifold, A::AbstractAtlas, i, a)` instead"  maxlog = 1
     Ginv = inverse_local_metric(M, p, B)
     Ric = ricci_tensor(M, p, B; backend = backend)
     S = sum(Ginv .* Ric)
