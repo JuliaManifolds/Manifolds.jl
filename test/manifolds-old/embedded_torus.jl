@@ -6,7 +6,7 @@ using Test
 using Manifolds: TFVector
 using RecursiveArrayTools
 using BoundaryValueDiffEq
-using Einsum
+using Tullio: @einsum
 using LinearAlgebra
 
 @testset "Torus in ℝ³" begin
