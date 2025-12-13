@@ -133,6 +133,14 @@ symbols:
     Γ_{i j k} = g_{k l} Γ^l_{i j}
 ````
 
+# Arguments
+
+- `M::AbstractManifold` : manifold
+- `A::AbstractAtlas`   : atlas providing charts / induced basis
+- `i`                  : chart index in `A`
+- `a`                  : coordinates of the point in chart `i` (length `n`)
+- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`)
+
 Returns an ``n×n×n`` array with ordering ``(i, j, k)``.
 """
 function christoffel_symbols_first(
@@ -190,6 +198,8 @@ The Einstein tensor is defined as
 ````
 
 where `Ric` is the Ricci tensor, `g` the local metric and `R` the scalar curvature.
+They are computed using, respectively, [`ricci_tensor`](@ref), [`local_metric`](@ref) and
+[`ricci_curvature`](@ref).
 """
 function einstein_tensor(
         M::AbstractManifold, A::AbstractAtlas, i, a;
