@@ -26,7 +26,6 @@ Chart-based variants of deprecated functions are discussed in [the section about
 einstein_tensor(::AbstractManifold, ::Any, ::AbstractBasis)
 ricci_curvature(::AbstractManifold, ::Any, ::AbstractBasis)
 local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
-local_metric_jacobian(::AbstractManifold, ::Any, ::AbstractBasis, ::AbstractDiffBackend)
 local_metric_jacobian(::AbstractManifold, ::Any, ::AbstractBasis)
 inverse_local_metric(::AbstractManifold, ::Any, ::AbstractBasis)
 log_local_metric_density(::AbstractManifold, ::Any, ::AbstractBasis)
