@@ -76,14 +76,14 @@ end
 
 @doc raw"""
     local_metric_jacobian(M::AbstractManifold, p, B::AbstractBasis;
-    backend::AbstractDiffBackend,
-)
+        backend::AbstractDiffBackend,
+    )
 
 Get partial derivatives of the local metric of `M` at `p` in basis `B` with respect to the
 coordinates of `p`, ``\frac{∂}{∂ p^k} g_{ij} = g_{ij,k}``. The
 dimensions of the resulting multi-dimensional array are ordered ``(i,j,k)``.
 """
-local_metric_jacobian(::AbstractManifold, ::Any, B::AbstractBasis, ::AbstractDiffBackend)
+local_metric_jacobian(::AbstractManifold, ::Any, B::AbstractBasis)
 function local_metric_jacobian(
         M::AbstractManifold,
         p,
