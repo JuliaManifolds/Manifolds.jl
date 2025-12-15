@@ -736,17 +736,17 @@ end
             x = [geodesic(R, p0, X1, π / 2 * (1:4)); geodesic(R, p0, X2, π / 2 * (1:4))]
             w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(R, x, w)
-            mg = mean(R, x, w, GeodesicInterpolation())
+            mg = mean(R, x, w, GeodesicInterpolationWithinRadius(π / (2 * √2)))
             mf = mean(R, x, w, GradientDescentEstimation(); p0 = mg)
-            @test m != mg
-            @test m == mf
+            @test m == mg
+            @test m != mf
 
             μ = project(R, randn(3, 3))
             d = Manifolds.normal_tvector_distribution(R, μ, 0.1)
             x = [exp(R, μ, rand(rng, d)) for _ in 1:10]
             w = pweights([rand(rng) for _ in 1:length(x)])
             m = mean(R, x, w)
-            mg = mean(R, x, w, GeodesicInterpolation())
+            mg = mean(R, x, w, GeodesicInterpolationWithinRadius(π / (2 * √2)))
             @test m == mg
         end
 

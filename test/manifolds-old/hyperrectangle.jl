@@ -28,7 +28,7 @@ include("../header.jl")
 
     @testset "projections" begin
         @test project(M, [4.0, -2.0, 3.0]) ≈ [1.0, 2.0, 3.0]
-        @test project(M, [1.0, 2.0, 3.0], [2.0, 0.5, -10.0]) ≈ [0.0, 0.5, -6.0]
+        @test project(M, [1.0, 2.0, 3.0], [2.0, -0.5, -10.0]) ≈ [0.0, 0.0, -10.0]
     end
 
     @testset "injectivity_radius" begin

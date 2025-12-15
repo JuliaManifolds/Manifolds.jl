@@ -249,6 +249,7 @@ using ManifoldsBase:
     AbstractCotangentVector,
     CyclicProximalPointEstimation,
     DefaultBasis,
+    DefaultMetric,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     DefaultOrDiagonalizingBasis,
