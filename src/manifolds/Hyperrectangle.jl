@@ -347,18 +347,20 @@ end
     project(M::Hyperrectangle, p, X)
 
 Project an arbitrary vector `X` into the tangent space of a point `p` on the
-[`Hyperrectangle`](@ref) `M`, which is just the identity, since any tangent
-space of `M` can be identified with all of `M`.
+[`Hyperrectangle`](@ref) `M`. For coordinates `i` at which `p[i]` is equal to the
+lower bound of `M`, `X[i]` is upper-bounded at 0. `M`. For coordinates `i` at which `p[i]`
+is equal to the upper bound of `M`, `X[i]` is lower-bounded at 0. Otherwise, `X` is
+not changed.
 """
 project(::Hyperrectangle, ::Any, ::Any)
 
 function project!(M::Hyperrectangle, Y, p, X)
     copyto!(Y, X)
     for i in eachindex(M.lb, Y)
-        if Y[i] >= 0
-            Y[i] = min(Y[i], M.ub[i] - p[i])
-        else
-            Y[i] = max(Y[i], M.lb[i] - p[i])
+        if M.ub[i] == p[i]
+            Y[i] = min(Y[i], 0)
+        elseif M.ub[i] == p[i]
+            Y[i] = max(Y[i], 0)
         end
     end
     return Y
