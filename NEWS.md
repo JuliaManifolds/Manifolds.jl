@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* `project` for tangent vectors on `Hyperrectangle` no longer truncates unnecessarily to the domain of `exp`.
+* `project` for tangent vectors on `Hyperrectangle` no longer truncates unnecessarily to the domain of `exp` (#851).
 
 ## [0.11.8] 2025-12-09
 

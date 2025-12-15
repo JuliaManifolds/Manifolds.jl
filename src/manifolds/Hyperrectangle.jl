@@ -359,7 +359,7 @@ function project!(M::Hyperrectangle, Y, p, X)
     for i in eachindex(M.lb, Y)
         if M.ub[i] == p[i]
             Y[i] = min(Y[i], 0)
-        elseif M.ub[i] == p[i]
+        elseif M.lb[i] == p[i]
             Y[i] = max(Y[i], 0)
         end
     end
