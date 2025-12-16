@@ -211,7 +211,7 @@ using ADTypes:
 import DifferentiationInterface as DI
 
 using Base.Iterators: repeated
-using Einsum: @einsum
+using Tullio: @einsum, @tullio
 using Kronecker
 using Graphs
 using LinearAlgebra

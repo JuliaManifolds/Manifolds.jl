@@ -470,7 +470,7 @@ Manifolds.inner(::MetricManifold{ℝ, <:AbstractManifold{ℝ}, Issue539Metric}, 
     end
 
     @testset "is_metric_function" begin
-        for f in [flat, sharp, log]
+        for f in [flat, sharp, log, christoffel_symbols_first, christoffel_symbols_second, local_metric, local_metric_jacobian, christoffel_symbols_second_jacobian]
             @test Manifolds.is_metric_function(f)
         end
         for f in [manifold_dimension, get_parameters]
