@@ -68,7 +68,7 @@ for TM in filter(x -> x != AbstractManifold, Manifolds.METAMANIFOLDS)
         end,
     )
 end
-# define also for all decorators and explicit definiting subtypes
+# define also for all decorators and explicit definite subtypes
 
 function get_coordinates!(
         M::AbstractManifold,

@@ -91,7 +91,7 @@ A tangent vector that can be described as a product ``U_p M V_p^\mathrm{H} + U_X
 where ``X = U_X S V_X^\mathrm{H}`` is its base point, see for example [`FixedRankMatrices`](@ref).
 
 The base point ``p`` is required for example embedding this point, but it is not stored.
-The fields of thie tangent vector are `U` for ``U_X``, `M` and `Vt` to store ``V_X^\mathrm{H}``
+The fields of this tangent vector are `U` for ``U_X``, `M` and `Vt` to store ``V_X^\mathrm{H}``
 
 # Constructors
 * `UMVTangentVector(U,M,Vt)` store umv factors to initialize the `UMVTangentVector`
