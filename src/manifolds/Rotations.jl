@@ -41,6 +41,32 @@ function angles_4d_skew_sym_matrix(A)
     return sqrt(halfb + sqrtdisc), sqrt(halfb - sqrtdisc)
 end
 
+@doc raw"""
+    change_representer(M::Rotations, ::EuclideanMetric, p, X)
+
+Change `X` to the corresponding representer of a cotangent vector at `p`.
+Since the [`Rotations`](@ref) manifold `M` is isometrically embedded, this is the identity.
+"""
+change_representer(::Rotations, ::EuclideanMetric, ::Any, ::Any)
+
+function change_representer!(M::Rotations, Y, ::EuclideanMetric, p, X)
+    copyto!(M, Y, p, X)
+    return Y
+end
+
+@doc raw"""
+    change_metric(M::Rotations, ::EuclideanMetric, p, X)
+
+Change `X` to the corresponding vector with respect to the metric of the [`Rotations`](@ref) `M`,
+which is just the identity, since the manifold is isometrically embedded.
+"""
+change_metric(M::Rotations, ::EuclideanMetric, ::Any, ::Any)
+
+function change_metric!(::Rotations, Y, ::EuclideanMetric, p, X)
+    copyto!(Y, X)
+    return Y
+end
+
 default_vector_transport_method(::Rotations) = ParallelTransport()
 
 # from https://github.com/JuliaManifolds/Manifolds.jl/issues/453#issuecomment-1046057557
