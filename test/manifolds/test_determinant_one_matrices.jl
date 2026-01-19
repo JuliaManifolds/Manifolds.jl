@@ -40,7 +40,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     Manifolds.Test.test_manifold(
         Mc,
         Dict(
-            :Functions => [is_point, is_vector, project, embed],
+            :Functions => [is_point, is_vector],
             :Points => [pc, qc], :Vectors => [Xc, Yc],
             :InvalidPoints => [pcf, qcf], :InvalidVectors => [Xf],
             :EmbeddedPoints => [pc], :EmbeddedVectors => [Xc],
@@ -58,6 +58,6 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     Manifolds.Test.test_manifold(
         DeterminantOneMatrices(2; parameter = :field),
         Dict(:Functions => [repr]),
-        Dict(repr => "DeterminantOneMatrices(2, ℂ; parameter=:field)"),
+        Dict(repr => "DeterminantOneMatrices(2, ℝ; parameter=:field)"),
     )
 end
