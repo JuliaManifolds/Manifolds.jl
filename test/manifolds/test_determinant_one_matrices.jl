@@ -48,7 +48,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         # Expectations
         Dict(
             :manifold_dimension => 3,
-            repr => "DeterminantOneMatrices(2, ?)",
+            repr => "DeterminantOneMatrices(2, ℂ)",
             get_embedding => Euclidean(2, 2; field = ℂ),
         ),
     )
@@ -58,6 +58,6 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     Manifolds.Test.test_manifold(
         DeterminantOneMatrices(2; parameter = :field),
         Dict(:Functions => [repr]),
-        Dict(repr => "DeterminantOneMatrices(2, ?; parameter=:field)"),
+        Dict(repr => "DeterminantOneMatrices(2, ℂ; parameter=:field)"),
     )
 end
