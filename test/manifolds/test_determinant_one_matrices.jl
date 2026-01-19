@@ -49,7 +49,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         Dict(
             :manifold_dimension => 3,
             repr => "DeterminantOneMatrices(2, ?)",
-            get_embedding => Euclidean(2, 2; field = ?),
+            get_embedding => Euclidean(2, 2; field = ℂ),
         ),
     )
 
