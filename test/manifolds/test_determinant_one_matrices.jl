@@ -28,7 +28,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         ),
     )
     # Complex case
-    Mc = DeterminantOneMatrices(2, ?)
+    Mc = DeterminantOneMatrices(2, ℂ)
     pc = [1.0im 0.0; 0.0 -1.0im]
     qc = [10.0im 0.0; 0.0 -0.1im]
     Xc = [0.0 0.23im; -0.14 0.0]
