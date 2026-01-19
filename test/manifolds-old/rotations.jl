@@ -168,6 +168,13 @@ include("../header.jl")
             p2 = ManifoldsBase.exp_fused(SOn, pts[1], X, 1.0)
             X3 = log(SOn, pts[1], p)
             @test distance(SOn, p, exp(SOn, pts[1], X3)) < 25 * eps()
+
+            @testset "gradient and metric conversion" begin
+                Y = change_metric(M, EuclideanMetric(), p, X)
+                @test Y == X
+                Z = change_representer(M, EuclideanMetric(), p, X)
+                @test Z == X
+            end
         end
     end
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin
