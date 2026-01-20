@@ -70,9 +70,9 @@ Possible entries of the `expectations` dictionary are
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
-*  `:IsPointErrors` is a vector of expected error types for each invalid point provided in `:InvalidPoints`, use `missing` to skip testing for errors for a specific point.
-*  `:IsVectorErrors` is a vector of expected error types for each invalid vector provided in `:InvalidVectors`, use `missing` to skip testing for errors for a specific vector.
-*  `:IsVectorBasepointError` is an expected error type when the base point is invalid e.g. for `is_vector`
+* `:IsPointErrors` is a vector of expected error types for each invalid point provided in `:InvalidPoints`, use `missing` to skip testing for errors for a specific point.
+* `:IsVectorErrors` is a vector of expected error types for each invalid vector provided in `:InvalidVectors`, use `missing` to skip testing for errors for a specific vector.
+* `:IsVectorBasepointError` is an expected error type when the base point is invalid e.g. for `is_vector`
 """
 function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, expectations::Dict = Dict())
     atol = get(expectations, :atol, 0.0)
@@ -1891,16 +1891,16 @@ function Manifolds.Test.test_project(
         end
         # Test vector projection
         if !ismissing(Y)
-            X = project(M, q, Y)
+            X = project(M, p, Y)
             Test.@test is_vector(M, p, X; error = :error, kwargs...)
             !isexpected(expected_vector) || Test.@test isapprox(M, p, X, expect(expected_vector); error = :error, kwargs...)
             if test_mutating
                 X2 = copy(M, p, X)
-                project!(M, X2, q, Y)
+                project!(M, X2, p, Y)
                 Test.@test isapprox(M, p, X2, X; error = :error, kwargs...)
                 if test_aliased
-                    X3 = copy(M, p, X)
-                    project!(M, X3, q, X3)  # aliased
+                    X3 = copy(M, p, Y)
+                    project!(M, X3, p, X3)  # aliased
                     Test.@test isapprox(M, p, X3, X; error = :error, kwargs...)
                 end
             end

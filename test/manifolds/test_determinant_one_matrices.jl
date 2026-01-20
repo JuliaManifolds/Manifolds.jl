@@ -18,7 +18,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             :Functions => [get_embedding, is_point, is_vector, manifold_dimension, project, embed, rand, repr],
             :Points => [p, q], :Vectors => [X, Y],
             :InvalidPoints => [pf, qf], :InvalidVectors => [Xf],
-            :EmbeddedPoints => [p], :EmbeddedVectors => [X],
+            :EmbeddedPoints => [pf], :EmbeddedVectors => [Xf],
         ),
         # Expectations
         Dict(
@@ -43,7 +43,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
             :Functions => [get_embedding, is_point, is_vector, manifold_dimension, rand],
             :Points => [pc, qc], :Vectors => [Xc, Yc],
             :InvalidPoints => [pcf, qcf], :InvalidVectors => [Xf],
-            :EmbeddedPoints => [pc], :EmbeddedVectors => [Xc],
+            :EmbeddedPoints => [pcf], :EmbeddedVectors => [Xf],
         ),
         # Expectations
         Dict(
