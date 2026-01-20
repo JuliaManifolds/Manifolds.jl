@@ -15,7 +15,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     Manifolds.Test.test_manifold(
         M,
         Dict(
-            :Functions => [is_point, is_vector, project, embed],
+            :Functions => [get_embedding, is_point, is_vector, manifold_dimension, project, embed, rand, repr],
             :Points => [p, q], :Vectors => [X, Y],
             :InvalidPoints => [pf, qf], :InvalidVectors => [Xf],
             :EmbeddedPoints => [p], :EmbeddedVectors => [X],
@@ -23,7 +23,7 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
         # Expectations
         Dict(
             :manifold_dimension => 3,
-            repr => "DeterminantOneMatrices(2, ?)",
+            repr => "DeterminantOneMatrices(2, ℝ)",
             get_embedding => Euclidean(2, 2),
         ),
     )
@@ -40,14 +40,14 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     Manifolds.Test.test_manifold(
         Mc,
         Dict(
-            :Functions => [is_point, is_vector],
+            :Functions => [get_embedding, is_point, is_vector, manifold_dimension, rand],
             :Points => [pc, qc], :Vectors => [Xc, Yc],
             :InvalidPoints => [pcf, qcf], :InvalidVectors => [Xf],
             :EmbeddedPoints => [pc], :EmbeddedVectors => [Xc],
         ),
         # Expectations
         Dict(
-            :manifold_dimension => 3,
+            :manifold_dimension => 7,
             repr => "DeterminantOneMatrices(2, ℂ)",
             get_embedding => Euclidean(2, 2; field = ℂ),
         ),
@@ -57,7 +57,17 @@ using LinearAlgebra, Manifolds, ManifoldsBase, Random, Test
     # Parameter
     Manifolds.Test.test_manifold(
         DeterminantOneMatrices(2; parameter = :field),
-        Dict(:Functions => [repr]),
-        Dict(repr => "DeterminantOneMatrices(2, ℝ; parameter=:field)"),
+        Dict(
+            :Functions => [get_embedding, is_point, is_vector, manifold_dimension, project, embed, rand, repr],
+            :Points => [p, q], :Vectors => [X, Y],
+            :InvalidPoints => [pf, qf], :InvalidVectors => [Xf],
+            :EmbeddedPoints => [p], :EmbeddedVectors => [X],
+        ),
+        # Expectations
+        Dict(
+            :manifold_dimension => 3,
+            repr => "DeterminantOneMatrices(2, ℝ; parameter=:field)",
+            get_embedding => Euclidean(2, 2; parameter = :field),
+        ),
     )
 end
