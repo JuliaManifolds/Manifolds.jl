@@ -5,7 +5,7 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.11.10] 2025-12-xx
+## [0.11.12] 2026-02-04
 
 ### Added
 
@@ -14,6 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * Deprecated variants of `det_local_metric`, `einstein_tensor`, `inverse_local_metric`, `local_metric`, `local_metric_jacobian`, `ricci_curvature` that receive a point and a basis as arguments. New variants that work in charts should be used instead.
+
+## [0.11.11] 2025-01-24
+
+### Changed
+
+* `Hyperrectangle` now has `has_components` defined to `true`, as well as r-norm support for `norm` and `distance`.
+
+## [0.11.10] 2025-01-07
+
+### Added
+
+* `change_representer` and `change_metric` for `Rotations` manifold from `EuclideanMetric`.
 
 ## [0.11.9] 2025-12-15
 

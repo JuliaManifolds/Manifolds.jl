@@ -141,4 +141,16 @@ include("../header.jl")
         p = rand(M)
         @test is_point(M, p)
     end
+
+    @testset "has_components and r-norms" begin
+        M = Hyperrectangle([-1.0, -1.0], [10.0, 10.0])
+        @test has_components(M)
+        p = [1.0, 2.0]
+        q = [1.0, 2.0]
+        X = [4.0, 5.0]
+        for r in [1, 2, Inf]
+            @test norm(M, p, X, r) ≈ norm(X, r)
+            @test distance(M, p, q, r) ≈ norm(p - q, r)
+        end
+    end
 end

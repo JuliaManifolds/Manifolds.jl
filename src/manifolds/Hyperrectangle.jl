@@ -73,11 +73,13 @@ retraction for the [`Hyperrectangle`](@ref) manifold.
 default_retraction_method(::Hyperrectangle) = ProjectionRetraction()
 
 """
-    distance(M::Hyperrectangle, p, q)
+    distance(M::Hyperrectangle, p, q, r::Real=2)
 
 Compute the euclidean distance between two points on the [`Hyperrectangle`](@ref)
 manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
 and higher order arrays, the matrix and tensor Frobenius norm, respectively.
+Specifying further an `r≠2`, distance based on other norms, like the 1-norm or the ∞-norm
+can also be computed.
 """
 Base.@propagate_inbounds function distance(M::Hyperrectangle, p, q)
     # Inspired by euclidean distance calculation in Distances.jl
@@ -95,7 +97,9 @@ Base.@propagate_inbounds function distance(M::Hyperrectangle, p, q)
     end
     return sqrt(s)
 end
+distance(::Hyperrectangle, p, q, r::Real) = norm(p - q, r)
 distance(::Hyperrectangle, p::Number, q::Number) = abs(p - q)
+
 
 """
     embed(M::Hyperrectangle, p)
@@ -156,6 +160,8 @@ function get_vector_orthonormal!(M::Hyperrectangle, Y, ::Any, c, ::RealNumbers)
     copyto!(Y, reshape(c, S))
     return Y
 end
+
+has_components(::Hyperrectangle) = true
 
 @doc raw"""
     injectivity_radius(M::Hyperrectangle, p)
@@ -303,13 +309,14 @@ function mid_point!(::Hyperrectangle, q, p1, p2)
 end
 
 @doc raw"""
-    norm(M::Hyperrectangle, p, X)
+    norm(M::Hyperrectangle, p, X, r::Real = 2)
 
 Compute the norm of a tangent vector `X` at `p` on the [`Hyperrectangle`](@ref)
 `M`, i.e. since every tangent space can be identified with `M` itself
 in this case, just the (Frobenius) norm of `X`.
+Specifying `r` allows to compute other norms as well.
 """
-LinearAlgebra.norm(::Hyperrectangle, ::Any, X) = norm(X)
+LinearAlgebra.norm(::Hyperrectangle, ::Any, X, r::Real = 2) = norm(X, r)
 
 """
     parallel_transport_direction(M::Hyperrectangle, p, X, d)
