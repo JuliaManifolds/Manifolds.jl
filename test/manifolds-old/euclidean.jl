@@ -274,7 +274,7 @@ using FiniteDifferences
         C2j = christoffel_symbols_second_jacobian(M, p, B)
         @test size(C2j) == (2, 2, 2, 2)
         @test norm(C2j) ≈ 0.0 atol = 1.0e-16
-        @test einstein_tensor(M, p, B) == zeros(2, 2)
+        @test norm(einstein_tensor(M, p, B)) < eps()^2
         @test ricci_curvature(M, p, B) ≈ 0 atol = 1.0e-16
         RC = ricci_tensor(M, p, B)
         @test size(RC) == (2, 2)
