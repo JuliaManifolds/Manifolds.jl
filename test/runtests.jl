@@ -88,4 +88,5 @@ end
         include_test("manifolds-old/vector_bundle.jl")
         include_test("manifolds-old/graph.jl")
     end
+    include_test("test_cuda_ext.jl")
 end
