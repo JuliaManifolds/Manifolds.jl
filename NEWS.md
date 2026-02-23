@@ -5,6 +5,12 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.13] 2026-02-24
+
+### Changed
+
+* `rand!` on `UnitaryMatrices` and the QR retraction methods were rewritten to be faster and more GPU array-compatible.
+
 ## [0.11.12] 2026-02-04
 
 ### Added

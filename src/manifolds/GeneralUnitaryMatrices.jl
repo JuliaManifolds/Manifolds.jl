@@ -989,7 +989,9 @@ function ManifoldsBase.retract_qr_fused!(
     qr_decomp = qr(A)
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
-    return copyto!(q, qr_decomp.Q * D)
+    copyto!(q, qr_decomp.Q)
+    q .*= D
+    return q
 end
 
 function ManifoldsBase.retract_polar!(M::GeneralUnitaryMatrices, q, p, X)
