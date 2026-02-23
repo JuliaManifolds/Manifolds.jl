@@ -31,7 +31,7 @@ jobs:
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./lcov.info
+          files: lcov.info
           name: codecov-umbrella
           fail_ci_if_error: false
         if: ${{ matrix.os =='ubuntu-latest' }}
