@@ -990,7 +990,7 @@ function ManifoldsBase.retract_qr_fused!(
     d = diag(qr_decomp.R)
     D = Diagonal(sign.(d .+ convert(T, 0.5)))
     copyto!(q, qr_decomp.Q)
-    q .*= D
+    mul!(q, qr_decomp.Q, D)
     return q
 end
 
