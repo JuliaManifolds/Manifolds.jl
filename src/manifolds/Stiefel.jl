@@ -40,6 +40,48 @@ function Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol
     return Stiefel{field, typeof(size)}(size)
 end
 
+"""
+    PolarLightRetraction <: AbstractRetractionMethod
+
+A retraction that is based on a polar decomposition that is cheaper to compute.
+"""
+struct PolarLightRetraction <: AbstractRetractionMethod end
+
+"""
+    PolarLightInverseRetraction <: AbstractInverseRetractionMethod
+
+An inverse retraction that is based on a polar decomposition that is cheaper to compute.
+"""
+struct PolarLightInverseRetraction <: AbstractInverseRetractionMethod end
+
+# function definition level 3
+function inverse_retract_polar_light! end
+# Forwarding functions Level 2
+function ManifoldsBase._inverse_retract!(
+        M::AbstractManifold, X, p, q, ::PolarLightInverseRetraction; kwargs...,
+    )
+    return inverse_retract_polar_light!(M, X, p, q; kwargs...)
+end
+
+# function definition level 3
+function retract_polar_light! end
+# Forwarding function Level 2
+function ManifoldsBase._retract!(M::AbstractManifold, q, p, X, ::PolarLightRetraction; kwargs...)
+    return retract_polar_light!(M, q, p, X; kwargs...)
+end
+
+# function definition level 3
+function retract_polar_light_fused! end
+# Forwarding function Level 2
+function _retract_fused!(
+        M::AbstractManifold, q, p, X, t::Number, ::PolarLightRetraction; kwargs...,
+    )
+    return retract_polar_light_fused!(M, q, p, X, t; kwargs...)
+end
+function retract_polar_light_fused!(M::AbstractManifold, q, p, X, t::Number)
+    return retract_polar_light!(M, q, p, t * X)
+end
+
 function allocation_promotion_function(::Stiefel{ℂ}, ::Any, ::Tuple)
     return complex
 end
@@ -178,6 +220,21 @@ This implementation follows the Lyapunov approach.
 inverse_retract(::Stiefel, ::Any, ::Any, ::PolarInverseRetraction)
 
 @doc raw"""
+    retract(M::Stiefel, p, X, ::PolarLightInverseRetraction)
+
+Compute an SVD-based inverse retraction [`PolarLightInverseRetraction`](@ref) on the
+[`Stiefel`](@ref)`(n,k)` manifold `M` following [JensenZimmermann:2026](@cite), equation (3.5)
+
+````math
+\operatorname{retr}_p^{-1} q =
+p \log\bigl( p^\mathrm{T}q(q^\mathrm{T}pp^\mathrm{T}q)^{-\frac{1}{2}} \bigr)
++ \bigl(I_n-pp^\mathrm{T}\bigr)p (q^\mathrm{T}pp^\mathrm{T}q)^{-\frac{1}{2}}
+````
+"""
+inverse_retract(::Stiefel, ::Any, ::Any, ::PolarLightInverseRetraction)
+
+
+@doc raw"""
     inverse_retract(M::Stiefel, p, q, ::QRInverseRetraction)
 
 Compute the inverse retraction based on a qr decomposition
@@ -294,6 +351,9 @@ function inverse_retract_polar!(::Stiefel, X, p, q)
     mul!(X, q, B)
     X .-= p
     return X
+end
+function inverse_retract_polar_light!(M::Stiefel, X, p, q)
+    # TODO: translate from Pyton
 end
 function inverse_retract_qr!(M::Stiefel, X, p, q)
     n, k = get_parameter(M.size)
@@ -446,6 +506,20 @@ Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.Pola
 retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
 
 @doc raw"""
+    retract(M::Stiefel, p, X, ::PolarLightRetraction)
+
+Compute an SVD-based retraction [`PolarLightRetraction`](@ref) on the
+[`Stiefel`](@ref)`(n,k)` manifold `M` following [JensenZimmermann:2026](@cite), equation (3.4)
+
+````math
+\operatorname{retr}_p X =
+\biggl( p\exp\bigl( p^\mathrm{T}X \bigr) + \bigl(I_n-pp^\mathrm{T}\bigr)X \biggr)
+\bigr( I_k  + X^\mathrm{T}(I_n - pp^\mathrm{T})X\bigr).
+````
+"""
+retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
+
+@doc raw"""
     retract(M::Stiefel, p, X, ::QRRetraction)
 
 Compute the QR-based retraction [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) on the
@@ -524,6 +598,10 @@ function ManifoldsBase.retract_qr_fused!(::Stiefel, q, p, X, t::Number)
     d = diag(qrfac.R)
     D = Diagonal(sign.(sign.(d .+ 1 // 2)))
     return mul!(q, _qrfac_to_q(qrfac), D)
+end
+
+function retract_polar_light!(M::Steifel, q, p, X)
+    # TODO translate from pyton
 end
 
 @doc raw"""
