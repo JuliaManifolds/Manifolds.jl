@@ -1476,7 +1476,7 @@ Test the function [`is_point`](@ref) on  for point `p` on manifold `M`.
 * that for each `q` in `qs` it
   * returns `false`
   * issues a warning (if activated)
-  * isues an info message (if activated)
+  * issues an info message (if activated)
   * throws the corresponding error from `error_types` (if not `missing`)
 """
 function Manifolds.Test.test_is_point(
@@ -1520,14 +1520,14 @@ Test the function [`is_vector`](@ref) on manifold `M` at point `p` for tangent v
 * that for each `Y` in `Ys` it
     * returns `false`
     * issues a warning (if activated)
-    * isues an info message (if activated)
+    * issues an info message (if activated)
     * throws the corresponding error from `error_types` (if not `missing`)
 * if `check_basepoint` is `true`, then it checks that
     * for `p` this still returns `true`
     * for the base point `q` it
       * returns `false`
       * issues a warning (if activated)
-      * isues an info message (if activated)
+      * issues an info message (if activated)
       * throws the corresponding error from `error_basepoint` (if activated)
 """
 function Manifolds.Test.test_is_vector(

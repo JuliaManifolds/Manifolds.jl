@@ -52,7 +52,7 @@ that lie on it (contained in `pts`).
     that `mid_point(M, pts[1], pts[2])` is approximately equal to `mid_point12`. This is
     by default set to `nothing` if `text_exp_log` is set to false.
 - `point_distributions = []` : point distributions to test.
-- `rand_tvector_atol_multiplier = 0` : chage absolute tolerance in testing random vectors
+- `rand_tvector_atol_multiplier = 0` : change absolute tolerance in testing random vectors
     (0 use default, i.e. deactivate atol and use rtol) random tangent vectors are tangent
     vectors.
 - `retraction_atol_multiplier = 0`: change absolute tolerance of (inverse) retraction tests
@@ -74,7 +74,7 @@ that lie on it (contained in `pts`).
 - `test_project_point = false`: test projections onto the manifold.
 - `test_project_tangent = false` : test projections on tangent spaces.
 - `test_representation_size = true` : test representation size of points/tvectprs.
-- `test_tangent_vector_broadcasting = true` : test boradcasting operators on TangentSpace.
+- `test_tangent_vector_broadcasting = true` : test broadcasting operators on TangentSpace.
 - `test_vector_spaces = true` : test Vector bundle of this manifold.
 - `test_default_vector_transport = false` : test the default vector transport (usually
    parallel transport).
