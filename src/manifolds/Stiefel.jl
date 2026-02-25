@@ -220,7 +220,7 @@ This implementation follows the Lyapunov approach.
 inverse_retract(::Stiefel, ::Any, ::Any, ::PolarInverseRetraction)
 
 @doc raw"""
-    retract(M::Stiefel, p, X, ::PolarLightInverseRetraction)
+    inverse_retract(M::Stiefel, p, X, ::PolarLightInverseRetraction)
 
 Compute an SVD-based inverse retraction [`PolarLightInverseRetraction`](@ref) on the
 [`Stiefel`](@ref)`(n,k)` manifold `M` following [JensenZimmermann:2026](@cite), equation (3.5)
@@ -496,7 +496,7 @@ Compute an SVD-based retraction [`PolarLightRetraction`](@ref) on the
 \bigr( I_k  + X^\mathrm{T}(I_n - pp^\mathrm{T})X\bigr).
 ````
 """
-retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
+retract(::Stiefel, ::Any, ::Any, ::PolarLightRetraction)
 
 @doc raw"""
     retract(M::Stiefel, p, X, ::QRRetraction)
@@ -574,7 +574,7 @@ function ManifoldsBase.retract_qr_fused!(::Stiefel, q, p, X, t::Number)
     return mul!(q, _qrfac_to_q(qrfac), D)
 end
 
-function retract_polar_light!(M::Steifel, q, p, X)
+function retract_polar_light!(M::Stiefel, q, p, X)
     # n, k = get_parameter(M.size)
     # Inspired by the steps from the original implementation in Python, see
     # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L86-L115
