@@ -268,64 +268,30 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}},
-        X,
-        q,
-        A::StaticArray,
-        ::Type{ElT},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A::StaticArray, ::Type{ElT},
     ) where {𝔽, n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
-        Tuple{
-            Stiefel{𝔽, TypeParameter{Tuple{n, 1}}},
-            typeof(X),
-            typeof(q),
-            AbstractArray,
-            typeof(ElT),
-        },
-        M,
-        X,
-        q,
-        A,
-        ElT,
+        Tuple{Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, typeof(X), typeof(q), AbstractArray, typeof(ElT)},
+        M, X, q, A, ElT,
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        ::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}},
-        X,
-        q,
-        A,
-        ::Type{ElT},
+        ::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A, ::Type{ElT},
     ) where {𝔽, n, ElT}
     R11 = inv(A[1, 1])
-    @inbounds R =
-        hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
-
+    @inbounds R = hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
     #TODO: replace with this once it's supported by StaticArrays
     #return mul!(X, q, UpperTriangular(R))
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}},
-        X,
-        q,
-        A::StaticArray,
-        ::Type{ElT},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A::StaticArray, ::Type{ElT},
     ) where {𝔽, n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
-        Tuple{
-            Stiefel{𝔽, TypeParameter{Tuple{n, 2}}},
-            typeof(X),
-            typeof(q),
-            AbstractArray,
-            typeof(ElT),
-        },
-        M,
-        X,
-        q,
-        A,
-        ElT,
+        Tuple{Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, typeof(X), typeof(q), AbstractArray, typeof(ElT)},
+        M, X, q, A, ElT,
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
@@ -352,9 +318,22 @@ function inverse_retract_polar!(::Stiefel, X, p, q)
     X .-= p
     return X
 end
-function inverse_retract_polar_light!(M::Stiefel, X, p, q)
-    # TODO: translate from Pyton
+function inverse_retract_polar_light!(::Stiefel, X, p, q)
+    # n, k = get_parameter(M.size)
+    # Inspired by the steps from the original implementation in Python, see
+    # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L119-L146
+    s = svd(p' * q)
+    U, d, V = s.U, s.S, s.V
+    # sets X to the second summand in the python code
+    X .= q * U * Diagonal(1 ./ d) * V'
+    mul!(U, U, V) # MRT in the python code
+    L = log(U)
+    L .= L .- U
+    # add the first summand
+    X .+= p * L
+    return X
 end
+
 function inverse_retract_qr!(M::Stiefel, X, p, q)
     n, k = get_parameter(M.size)
     A = p' * q
@@ -551,12 +530,7 @@ function ManifoldsBase.retract_pade!(M::Stiefel, q, p, X, m::PadeRetraction)
 end
 
 function ManifoldsBase.retract_pade_fused!(
-        ::Stiefel,
-        q,
-        p,
-        X,
-        t::Number,
-        ::PadeRetraction{m},
+        ::Stiefel, q, p, X, t::Number, ::PadeRetraction{m},
     ) where {m}
     tX = t * X
     Pp = I - 1 // 2 * p * p'
@@ -601,7 +575,19 @@ function ManifoldsBase.retract_qr_fused!(::Stiefel, q, p, X, t::Number)
 end
 
 function retract_polar_light!(M::Steifel, q, p, X)
-    # TODO translate from pyton
+    # n, k = get_parameter(M.size)
+    # Inspired by the steps from the original implementation in Python, see
+    # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L86-L115
+    A = p' * X
+    q .= p * (exp(A) - A) + X
+    # QR of (I - p*p')*X = X - p*A
+    s = svd(qr(X - p * A).R)
+    # to compute inv(sqrt(I + R'R)) we SVD R = UdV and add the diagonal “inside”
+    # S = I + R'R = U(I+d.^2)V and hence the inv sqrt is U (1./(1+diag(S)) V
+    U, d, V = s.U, s.S, s.V
+    d .= 1 ./ sqrt.(1 .+ d .^ 2)
+    q .= q * U * Diagonal(d) * V'
+    return q
 end
 
 @doc raw"""
