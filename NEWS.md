@@ -145,7 +145,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `SymplecticStiefel{T, 𝔽}` to `SymplecticStiefel{𝔽, T}`
   * `Tucker{T, D, 𝔽}` to `Tucker{𝔽, T, D}`
   * `UnitaryMatrices{T, 𝔽}` to `UnitaryMatrices{𝔽, T}`
-* the functions `canoncial_project`, `differential_canonical_project`, `horizontal_lift`, `horizontal_component`, `get_total_space`, and `vertical_component` have been moved upstream to `ManifoldsBase.jl`
+* the functions `canonical_project`, `differential_canonical_project`, `horizontal_lift`, `horizontal_component`, `get_total_space`, and `vertical_component` have been moved upstream to `ManifoldsBase.jl`
 
 
 ### Removed
@@ -229,7 +229,7 @@ release here, since we do not have a very good reason to yet.
 
 ### Fixed
 
-* a copy pase error in the new determinant one manifold from the last release.
+* a copy paste error in the new determinant one manifold from the last release.
 
 ## [0.10.15] 2025-03-28
 

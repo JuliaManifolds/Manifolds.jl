@@ -467,7 +467,7 @@ function project!(::SymplecticStiefel, Y, p, A)
         return XTJp .- XTJp'
     end
 
-    # Solve for Λ (Lagrange mutliplier):
+    # Solve for Λ (Lagrange multiplier):
     pT_p = p' * p  # (2k×2k)
     Λ = sylvester(pT_p, pT_p, h(A) ./ 2)
 

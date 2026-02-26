@@ -238,7 +238,7 @@ strictlyUpperTriangular(p) = UpperTriangular(p) - Diagonal(diag(p))
 @doc raw"""
     parallel_transport_to(M::CholeskySpace, p, X, q)
 
-Parallely transport the tangent vector `X` at `p` along the geodesic to `q`
+Parallelly transport the tangent vector `X` at `p` along the geodesic to `q`
 on the [`CholeskySpace`](@ref) manifold `M`. The formula reads
 
 ````math

@@ -14,7 +14,7 @@ function check_point(M::SymplecticGrassmann, p::ProjectorPoint; kwargs...)
     if !isapprox(c, p.value; kwargs...)
         return DomainError(
             norm(c - p.value),
-            "The poin $(p) is not equal to its square $c, so it does not lie on $M.",
+            "The point $(p) is not equal to its square $c, so it does not lie on $M.",
         )
     end
     if !isapprox(p.value, symplectic_inverse(p.value); kwargs...)

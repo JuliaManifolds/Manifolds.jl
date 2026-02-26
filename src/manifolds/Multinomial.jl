@@ -13,7 +13,7 @@ The multinomial manifold consists of `m` column vectors, where each column is of
 where ``\mathbb{1}_k`` is the vector of length ``k`` containing ones.
 
 This yields exactly the same metric as
-considering the product metric of the probablity vectors, i.e. [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) of the
+considering the product metric of the probability vectors, i.e. [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) of the
 ``(n-1)``-dimensional [`ProbabilitySimplex`](@ref).
 
 The [`ProbabilitySimplex`](@ref) is stored internally within `M.manifold`, such that all functions of

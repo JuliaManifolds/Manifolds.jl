@@ -59,7 +59,7 @@ Possible entries of the `expectations` dictionary are
 * for retractions, inverse retractions, and vector transports, the key is a tuple of the function and the method, e.g. `(retract, method) => q`
 * for `embed`, and `project`, the key is a tuple of the function and `:Point` or `:Vector`, e.g. `(embed, :Point) of expected (embedded) points or vectors,
   omitting that symbol is interpreted as the expected point.
-* for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expexted basis
+* for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expected basis
 * for `get_coordinates` the key is a tuple of the function and the basis, e.g. `(get_coordinates, B) => c`
 * for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`
 * for `get_vectors` the key is a tuple of the function and the basis, e.g. `(get_vectors, B) => :Symbol` where
@@ -427,12 +427,12 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (parallel_transport_to in functions)
             expected_pt = get_expectation(expectations, parallel_transport_to)
-            expected_ptd = get_expectation(expectations, parallel_transport_direction)
+            expected_pt_d = get_expectation(expectations, parallel_transport_direction)
             Manifolds.Test.test_parallel_transport(
                 M, points[1], vectors[1], points[2];
                 available_functions = functions,
                 expected_value = expected_pt,
-                expected_value_direction = expected_ptd,
+                expected_value_direction = expected_pt_d,
                 test_aliased = aliased,
                 test_mutating = (parallel_transport_to! in functions) ? true : mutating,
                 atol = get(function_atols, parallel_transport_to, atol),

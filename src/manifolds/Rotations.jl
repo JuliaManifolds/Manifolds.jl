@@ -70,15 +70,15 @@ end
 default_vector_transport_method(::Rotations) = ParallelTransport()
 
 # from https://github.com/JuliaManifolds/Manifolds.jl/issues/453#issuecomment-1046057557
-function _get_tridiagonal_elements(trian)
-    N = size(trian, 1)
+function _get_tridiagonal_elements(tr)
+    N = size(tr, 1)
     res = zeros(N)
     down = true
     for i in 1:N
         if i == N && down
             elem = 0
         else
-            elem = trian[i + (down ? +1 : -1), i]
+            elem = tr[i + (down ? +1 : -1), i]
         end
         if elem ≈ 0
             res[i] = 0
@@ -136,23 +136,23 @@ function get_basis_diagonalizing(M::Rotations, p, B::DiagonalizingOrthonormalBas
     decomp = schur(B.frame_direction)
     decomp = ordschur(decomp, map(v -> norm(v) > eps(eltype(p)), decomp.values))
 
-    trian_elem = _get_tridiagonal_elements(decomp.T)
+    tri_elem = _get_tridiagonal_elements(decomp.T)
     unitary = decomp.Z
     evec = Vector{typeof(B.frame_direction)}(undef, manifold_dimension(M))
     evals = Vector{eltype(B.frame_direction)}(undef, manifold_dimension(M))
     i = 1
     fill_at = Ref(1)
     while i <= n
-        if trian_elem[i] == 0
-            evs = _ev_zero(trian_elem, unitary, evec, evals, fill_at; i = i)
+        if tri_elem[i] == 0
+            evs = _ev_zero(tri_elem, unitary, evec, evals, fill_at; i = i)
             i += 1
         else
-            evs = _ev_diagonal(trian_elem, unitary, evec, evals, fill_at, i = i)
+            evs = _ev_diagonal(tri_elem, unitary, evec, evals, fill_at, i = i)
             j = 1
             while j < i
                 # the zero case should have been handled earlier
-                @assert trian_elem[j] != 0
-                evs = _ev_offdiagonal(trian_elem, unitary, evec, evals, fill_at, i = i, j = j)
+                @assert tri_elem[j] != 0
+                evs = _ev_offdiagonal(tri_elem, unitary, evec, evals, fill_at, i = i, j = j)
                 j += 2
             end
             i += 2

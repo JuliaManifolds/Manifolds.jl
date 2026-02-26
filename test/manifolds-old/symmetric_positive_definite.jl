@@ -242,7 +242,7 @@ include("../header.jl")
         copyto!(pF, pS) # fill values in F
         @test pF == p
         pF2 = SPDPoint(Matrix{Float64}(I, 3, 3))
-        copyto!(pF2, pF) # copy alues in F
+        copyto!(pF2, pF) # copy values in F
         @test !ismissing(pF2.p)
         @test !ismissing(pF2.sqrt)
         @test !ismissing(pF2.sqrt_inv)
