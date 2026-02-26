@@ -56,7 +56,7 @@ function check_vector(
         return DomainError(
             norm((Hamiltonian(X.value)^+).value - X.value),
             (
-                "The matrix X is not in the tangent space at $p of $M, since X is not equal to ist symplectic inverse."
+                "The matrix X is not in the tangent space at $p of $M, since X is not equal to its symplectic inverse."
             ),
         )
     end
