@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* a new retraction and its inverse on the Stiefel manifold
+* a new retraction and its inverse on the Stiefel manifold (#858)
+* similar to Manopt.jl, we now do typechecking with [crate-ci/typos](https://github.com/crate-ci/typos) (#858)
 
 ## [0.11.13] 2026-02-24
 
