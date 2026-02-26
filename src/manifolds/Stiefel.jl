@@ -325,7 +325,7 @@ function inverse_retract_polar_light!(::Stiefel, X, p, q)
     s = svd(p' * q)
     U, d, V = s.U, s.S, s.V
     # sets X to the second summand in the python code
-    X .= q * U * Diagonal(1 ./ d) * V'
+    X .= q * V * Diagonal(1 ./ d) * V'
     copyto!(U, U * V) # MRT in the python code
     L = log(U)
     L .= L .- U
@@ -583,10 +583,10 @@ function retract_polar_light!(M::Stiefel, q, p, X)
     # QR of (I - p*p')*X = X - p*A
     s = svd(qr(X - p * A).R)
     # to compute inv(sqrt(I + R'R)) we SVD R = UdV and add the diagonal “inside”
-    # S = I + R'R = U(I+d.^2)V and hence the inv sqrt is U (1./(1+diag(S)) V
-    U, d, V = s.U, s.S, s.V
+    # S = I + R'R = V(I+d.^2)V and hence the inv sqrt is V (1./sqrt.(1 .+ d.^2) V'
+    d, V = s.S, s.V
     d .= 1 ./ sqrt.(1 .+ d .^ 2)
-    q .= q * U * Diagonal(d) * V'
+    q .= q * V * Diagonal(d) * V'
     return q
 end
 
