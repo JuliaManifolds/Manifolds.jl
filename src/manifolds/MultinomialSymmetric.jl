@@ -127,7 +127,7 @@ The two vector ``α ∈ ℝ^{n×n}`` is given by solving
 ````math
     (I_n+p)α =  Y\mathbf{1},
 ````
-where ``I_n`` is teh ``n×n`` unit matrix and ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
+where ``I_n`` is the ``n×n`` unit matrix and ``\mathbf{1}_n`` is the vector of length ``n`` containing ones.
 """
 project(::MultinomialSymmetric, ::Any, ::Any)
 

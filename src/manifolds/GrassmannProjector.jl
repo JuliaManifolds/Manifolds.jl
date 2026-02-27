@@ -182,9 +182,9 @@ end
 Compute the exponential map on the [`Grassmann`](@ref) as
 
 ```math
-    \exp_pX = \operatorname{Exp}([X,p])p\operatorname{Exp}(-[X,p]),
+    \exp_p X = \operatorname{Exp}([X,p])p\operatorname{Exp}(-[X,p]),
 ```
-where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = AB-BA`` denotes the matrix commutator.
+where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = A⋅B - B⋅A`` denotes the matrix commutator.
 
 For details, see Proposition 3.2 in [BendokatZimmermannAbsil:2020](@cite).
 """
@@ -230,7 +230,7 @@ i.e. to ``q=\exp_pd``. The formula is given in Proposition 3.5 of [BendokatZimme
 \mathcal{P}_{q ← p}(X) = \operatorname{Exp}([d,p])X\operatorname{Exp}(-[d,p]),
 ```
 
-where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = AB-BA`` denotes the matrix commutator.
+where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = A⋅B - B⋅A`` denotes the matrix commutator.
 """
 function parallel_transport_direction(
         M::Grassmann,

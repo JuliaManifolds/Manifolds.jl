@@ -59,7 +59,7 @@ Possible entries of the `expectations` dictionary are
 * for retractions, inverse retractions, and vector transports, the key is a tuple of the function and the method, e.g. `(retract, method) => q`
 * for `embed`, and `project`, the key is a tuple of the function and `:Point` or `:Vector`, e.g. `(embed, :Point) of expected (embedded) points or vectors,
   omitting that symbol is interpreted as the expected point.
-* for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expexted basis
+* for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expected basis
 * for `get_coordinates` the key is a tuple of the function and the basis, e.g. `(get_coordinates, B) => c`
 * for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`
 * for `get_vectors` the key is a tuple of the function and the basis, e.g. `(get_vectors, B) => :Symbol` where
@@ -70,9 +70,9 @@ Possible entries of the `expectations` dictionary are
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
-*  `:IsPointErrors` is a vector of expected error types for each invalid point provided in `:InvalidPoints`, use `missing` to skip testing for errors for a specific point.
-*  `:IsVectorErrors` is a vector of expected error types for each invalid vector provided in `:InvalidVectors`, use `missing` to skip testing for errors for a specific vector.
-*  `:IsVectorBasepointError` is an expected error type when the base point is invalid e.g. for `is_vector`
+* `:IsPointErrors` is a vector of expected error types for each invalid point provided in `:InvalidPoints`, use `missing` to skip testing for errors for a specific point.
+* `:IsVectorErrors` is a vector of expected error types for each invalid vector provided in `:InvalidVectors`, use `missing` to skip testing for errors for a specific vector.
+* `:IsVectorBasepointError` is an expected error type when the base point is invalid e.g. for `is_vector`
 """
 function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, expectations::Dict = Dict())
     atol = get(expectations, :atol, 0.0)
@@ -427,12 +427,12 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (parallel_transport_to in functions)
             expected_pt = get_expectation(expectations, parallel_transport_to)
-            expected_ptd = get_expectation(expectations, parallel_transport_direction)
+            expected_pt_d = get_expectation(expectations, parallel_transport_direction)
             Manifolds.Test.test_parallel_transport(
                 M, points[1], vectors[1], points[2];
                 available_functions = functions,
                 expected_value = expected_pt,
-                expected_value_direction = expected_ptd,
+                expected_value_direction = expected_pt_d,
                 test_aliased = aliased,
                 test_mutating = (parallel_transport_to! in functions) ? true : mutating,
                 atol = get(function_atols, parallel_transport_to, atol),
@@ -1476,7 +1476,7 @@ Test the function [`is_point`](@ref) on  for point `p` on manifold `M`.
 * that for each `q` in `qs` it
   * returns `false`
   * issues a warning (if activated)
-  * isues an info message (if activated)
+  * issues an info message (if activated)
   * throws the corresponding error from `error_types` (if not `missing`)
 """
 function Manifolds.Test.test_is_point(
@@ -1520,14 +1520,14 @@ Test the function [`is_vector`](@ref) on manifold `M` at point `p` for tangent v
 * that for each `Y` in `Ys` it
     * returns `false`
     * issues a warning (if activated)
-    * isues an info message (if activated)
+    * issues an info message (if activated)
     * throws the corresponding error from `error_types` (if not `missing`)
 * if `check_basepoint` is `true`, then it checks that
     * for `p` this still returns `true`
     * for the base point `q` it
       * returns `false`
       * issues a warning (if activated)
-      * isues an info message (if activated)
+      * issues an info message (if activated)
       * throws the corresponding error from `error_basepoint` (if activated)
 """
 function Manifolds.Test.test_is_vector(
@@ -1891,16 +1891,16 @@ function Manifolds.Test.test_project(
         end
         # Test vector projection
         if !ismissing(Y)
-            X = project(M, q, Y)
+            X = project(M, p, Y)
             Test.@test is_vector(M, p, X; error = :error, kwargs...)
             !isexpected(expected_vector) || Test.@test isapprox(M, p, X, expect(expected_vector); error = :error, kwargs...)
             if test_mutating
                 X2 = copy(M, p, X)
-                project!(M, X2, q, Y)
+                project!(M, X2, p, Y)
                 Test.@test isapprox(M, p, X2, X; error = :error, kwargs...)
                 if test_aliased
-                    X3 = copy(M, p, X)
-                    project!(M, X3, q, X3)  # aliased
+                    X3 = copy(M, p, Y)
+                    project!(M, X3, p, X3)  # aliased
                     Test.@test isapprox(M, p, X3, X; error = :error, kwargs...)
                 end
             end

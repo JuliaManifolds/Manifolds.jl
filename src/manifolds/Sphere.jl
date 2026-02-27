@@ -442,7 +442,7 @@ end
 """
     default_retraction_method(M::AbstractSphere)
 
-The default retraction on the sphere is usually the exponential map. Howeverm since that map
+The default retraction on the sphere is usually the exponential map. However since that map
 tends to be very sensitive to also only slight errors in tangent vectors (not being tangent),
 we use a stabilized version as default that projects onto the sphere afterwards, see
 [`StabilizedRetraction`](@extref `ManifoldsBase.StabilizedRetraction`).
@@ -573,7 +573,7 @@ end
     riemann_tensor(M::AbstractSphere{ℝ}, p, X, Y, Z)
 
 Compute the Riemann tensor ``R(X,Y)Z`` at point `p` on [`AbstractSphere`](@ref) `M`.
-The formula reads [MuralidharanFlecther:2012](@cite) (though note that a different convention is
+The formula reads [MuralidharanFletcher:2012](@cite) (though note that a different convention is
 used in that paper than in Manifolds.jl):
 
 ````math

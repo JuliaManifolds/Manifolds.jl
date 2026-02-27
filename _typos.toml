@@ -1,0 +1,10 @@
+[default.extend-words]
+
+[files]
+extend-exclude = [
+"docs/styles/**/*.*",
+"docs/src/tutorials/*.md",               # rendered from tutorials/*.qmd -> we do not want typos twice
+"ext/ManifoldsTestExt/tests_general.jl", # until we remove it
+"tutorials/working-in-charts.jl",        # since these are Pluto notebooks
+"test/manifolds-old/*.jl",               # we refactor these currently
+]

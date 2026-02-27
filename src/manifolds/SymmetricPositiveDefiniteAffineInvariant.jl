@@ -99,10 +99,10 @@ function exp(::SymmetricPositiveDefinite, p::SPDPoint, X)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
-    Ue = eig1.vectors
-    pUe = p_sqrt * Ue
+    U_e = eig1.vectors
+    p_U_e = p_sqrt * U_e
     q = SPDPoint(
-        pUe * Se * transpose(pUe),
+        p_U_e * Se * transpose(p_U_e),
         store_p = !ismissing(p.p),
         store_sqrt = !ismissing(p.sqrt),
         store_sqrt_inv = !ismissing(p.sqrt_inv),
@@ -118,18 +118,18 @@ function exp!(::SymmetricPositiveDefinite, q, p, X)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
-    Ue = eig1.vectors
-    pUe = p_sqrt * Ue
-    return copyto!(q, pUe * Se * transpose(pUe))
+    U_e = eig1.vectors
+    p_U_e = p_sqrt * U_e
+    return copyto!(q, p_U_e * Se * transpose(p_U_e))
 end
 function exp!(::SymmetricPositiveDefinite, q::SPDPoint, p, X)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
-    Ue = eig1.vectors
-    pUe = p_sqrt * Ue
-    Q = pUe * Se * transpose(pUe)
+    U_e = eig1.vectors
+    p_U_e = p_sqrt * U_e
+    Q = p_U_e * Se * transpose(p_U_e)
     !ismissing(q.p) && copyto!(q.p, Q)
     Q_e = eigen(Q)
     copyto!(q.eigen.values, Q_e.values)
@@ -233,7 +233,7 @@ the coordinates with respect to this ONB can be simplified to
 ```math
    c_k = \mathrm{tr}(p^{-\frac{1}{2}}\Delta_{i,j} X)
 ```
-where ``k`` is trhe linearized index of the ``i=1,\ldots,n, j=i,\ldots,n``.
+where ``k`` is the linearized index of the ``i=1,\ldots,n, j=i,\ldots,n``.
 """
 get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
 
@@ -351,8 +351,8 @@ function log!(::SymmetricPositiveDefinite, X, p, q)
     T = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv)
     e2 = eigen(T)
     Se = Diagonal(log.(max.(e2.values, eps())))
-    pUe = p_sqrt * e2.vectors
-    return mul!(X, pUe, Se * transpose(pUe))
+    p_U_e = p_sqrt * e2.vectors
+    return mul!(X, p_U_e, Se * transpose(p_U_e))
 end
 
 """
@@ -396,13 +396,13 @@ function parallel_transport_to!(M::SymmetricPositiveDefinite, Y, p, X, q)
     ty = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv) # p^(-1/2)qp^(-1/2)
     e2 = eigen(ty)
     Se = Diagonal(log.(max.(e2.values, floatmin(eltype(e2.values)))))
-    Ue = e2.vectors
-    logty = Symmetric(Ue * Se * transpose(Ue)) # nearly log_pq without the outer p^1/2
+    U_e = e2.vectors
+    logty = Symmetric(U_e * Se * transpose(U_e)) # nearly log_pq without the outer p^1/2
     e3 = eigen(logty) # since they cancel with the pInvSqrt in the next line
     Sf = Diagonal(exp.(e3.values / 2)) # Uf * Sf * Uf' is the Exp
     Uf = e3.vectors
-    pUe = p_sqrt * Uf * Sf * transpose(Uf) # factors left of tv (and transposed right)
-    vtp = Symmetric(pUe * tv * transpose(pUe)) # so this is the documented formula
+    p_U_e = p_sqrt * Uf * Sf * transpose(Uf) # factors left of tv (and transposed right)
+    vtp = Symmetric(p_U_e * tv * transpose(p_U_e)) # so this is the documented formula
     return copyto!(Y, vtp)
 end
 
