@@ -48,6 +48,7 @@ Possible properties are
 * `:Rng` is a random number generator to use for generating random points/vectors if needed
 * `:Seed` is a seed to use for generating random points/vectors if needed
 * `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entries in `:Points`
+* `:Vector` is a single second vector in the tangent space of the first enty of `:Points`, for example to test [`inner`](@ref)
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
 * `:TestMidpointSymmetry` is a boolean (`true` by default) whether to test the symmetry property of the midpoint function
 * `:TestInfo` is a boolean (`true` by default) whether to test that whether `error=:info` in verification functions issues info messages.
@@ -70,9 +71,9 @@ Possible entries of the `expectations` dictionary are
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
-*  `:IsPointErrors` is a vector of expected error types for each invalid point provided in `:InvalidPoints`, use `missing` to skip testing for errors for a specific point.
-*  `:IsVectorErrors` is a vector of expected error types for each invalid vector provided in `:InvalidVectors`, use `missing` to skip testing for errors for a specific vector.
-*  `:IsVectorBasepointError` is an expected error type when the base point is invalid e.g. for `is_vector`
+* `:IsPointErrors` is a vector of expected error types for each invalid point provided in `:InvalidPoints`, use `missing` to skip testing for errors for a specific point.
+* `:IsVectorErrors` is a vector of expected error types for each invalid vector provided in `:InvalidVectors`, use `missing` to skip testing for errors for a specific vector.
+* `:IsVectorBasepointError` is an expected error type when the base point is invalid e.g. for `is_vector`
 """
 function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, expectations::Dict = Dict())
     atol = get(expectations, :atol, 0.0)
@@ -81,6 +82,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     functions = get(properties, :Functions, Function[])
     points = get(properties, :Points, [])
     vectors = get(properties, :Vectors, [])
+    vector = get(properties, :Vector, missing)
     covectors = get(properties, :Covectors, [])
     normals = get(properties, :NormalVectors, [])
     bases = get(properties, :Bases, [])
@@ -311,10 +313,10 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             end
 
         end
-        if (inner in functions)
+        if (inner in functions) && !ismissing(vector)
             expected_inner = get_expectation(expectations, inner)
             Manifolds.Test.test_inner(
-                M, points[1], vectors[1], vectors[2];
+                M, points[1], vectors[1], vector;
                 available_functions = functions,
                 expected_value = expected_inner,
                 name = "inner(M, p, X, Y)", # shorten name within large suite
@@ -504,12 +506,12 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 )
             end
         end
-        if (sectional_curvature in functions)
+        if (sectional_curvature in functions) && !ismissing(vector)
             expected_sec_curv = get_expectation(expectations, sectional_curvature)
             expected_sec_curv_min = get_expectation(expectations, sectional_curvature_min)
             expected_sec_curv_max = get_expectation(expectations, sectional_curvature_max)
             Manifolds.Test.test_sectional_curvature(
-                M, points[1], vectors[1], vectors[2];
+                M, points[1], vectors[1], vector;
                 available_functions = functions,
                 expected_value = expected_sec_curv,
                 expected_value_min = expected_sec_curv_min,

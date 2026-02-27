@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * a new retraction and its inverse on the Stiefel manifold (#858)
 * similar to Manopt.jl, we now do typechecking with [crate-ci/typos](https://github.com/crate-ci/typos) (#858)
 
+### Fixed
+
+* fixed a bug where the second vector in the test suite had to be both in the first and the second points tangent space
+  added a new `:Vector` to provide the second tangent vector in the first points tangent space (e.g. for `inner`)
+
 ## [0.11.13] 2026-02-24
 
 ### Changed
