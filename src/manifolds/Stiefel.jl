@@ -73,7 +73,7 @@ end
 # function definition level 3
 function retract_polar_light_fused! end
 # Forwarding function Level 2
-function _retract_fused!(
+function ManifoldsBase._retract_fused!(
         M::AbstractManifold, q, p, X, t::Number, ::PolarLightRetraction; kwargs...,
     )
     return retract_polar_light_fused!(M, q, p, X, t; kwargs...)
@@ -258,11 +258,7 @@ function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
 end
 
 function _stiefel_inv_retr_qr_mul_by_r!(
-        ::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}},
-        X,
-        q,
-        A,
-        ::Type,
+        ::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A, ::Type,
     ) where {𝔽, n}
     @inbounds R = SMatrix{1, 1}(inv(A[1, 1]))
     return mul!(X, q, R)
@@ -295,11 +291,7 @@ function _stiefel_inv_retr_qr_mul_by_r!(
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-        M::Stiefel{𝔽, TypeParameter{Tuple{n, k}}},
-        X,
-        q,
-        A::StaticArray,
-        ::Type{ElT},
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}, X, q, A::StaticArray, ::Type{ElT},
     ) where {𝔽, n, k, ElT}
     R = zeros(MMatrix{k, k, ElT})
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
