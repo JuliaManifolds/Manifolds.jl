@@ -48,7 +48,7 @@ Possible properties are
 * `:Rng` is a random number generator to use for generating random points/vectors if needed
 * `:Seed` is a seed to use for generating random points/vectors if needed
 * `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entries in `:Points`
-* `:Vector` is a single second vector in the tangent space of the first enty of `:Points`, for example to test [`inner`](@ref)
+* `:Vector` is a single second vector in the tangent space of the first entry of `:Points`, for example to test [`inner`](@ref)
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
 * `:TestMidpointSymmetry` is a boolean (`true` by default) whether to test the symmetry property of the midpoint function
 * `:TestInfo` is a boolean (`true` by default) whether to test that whether `error=:info` in verification functions issues info messages.
