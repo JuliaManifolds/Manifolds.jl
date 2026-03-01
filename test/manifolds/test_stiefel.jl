@@ -18,6 +18,7 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
         Manifolds.Test.test_manifold(
             M,
             Dict(
+                :Bases => [DefaultOrthogonalBasis(), DefaultOrthonormalBasis()],
                 :EmbeddedPoints => [ep],
                 :Functions => [
                     copy, copyto!, default_inverse_retraction_method, default_retraction_method,
@@ -41,8 +42,7 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                     DifferentiatedRetractionVectorTransport(QRRetraction()),
                     # TODO: Check why this does no longer dispatch correctly.
                     # DifferentiatedRetractionVectorTransport(CayleyRetraction()),
-                    # TODO: errors on alias test
-                    # ProjectionTransport(),
+                    ProjectionTransport(),
                 ],
             ),
             # Expectations
@@ -217,7 +217,16 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                         @test inner(MM, p, X, Y) ≈ inner(Mcomp, p, X, Y)
                         q = exp(Mcomp, p, X)
                         @test isapprox(MM, q, exp(Mcomp, p, X); error = :error)
-                        Mcomp === Mcan && isapprox(MM, p, log(MM, p, q), log(Mcomp, p, q))
+                        if Mcomp === Mcan
+                            @test !is_flat(Mcomp)
+                            Z1 = log(Mcomp, p, q)
+                            isapprox(MM, p, log(MM, p, q), Z1)
+                            Z2 = similar(Z1)
+                            log!(Mcomp, Z2, p, q)
+                            isapprox(MM, p, log(MM, p, q), Z1)
+                            @test distance(Mcomp, p, q) ≈ norm(Mcomp, p, Z2)
+                        end
+
                         @test isapprox(MM, exp(MM, p, 0 * X), p; error = :error)
                         @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); error = :error, atol = 1.0e-6)
                     end
@@ -233,7 +242,6 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                         @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); error = :error, atol = 1.0e-6)
                     end
                 end
-
                 @testset "Hessian Conversion" begin
                     M1 = MetricManifold(Stiefel(3, 2), StiefelSubmersionMetric(-0.5))
                     M2 = Stiefel(3, 2)
@@ -256,11 +264,11 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                     @test WH == WHb
                 end
             end
-            @testset "field parameter" begin
-                M = Stiefel(3, 2; parameter = :field)
-                @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
-                @test repr(M) == "Stiefel(3, 2, ℝ; parameter=:field)"
-            end
+        end
+        @testset "field parameter" begin
+            M = Stiefel(3, 2; parameter = :field)
+            @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
+            @test repr(M) == "Stiefel(3, 2, ℝ; parameter=:field)"
         end
         @testset "Stiefel(2, 1) special case" begin
             M21 = Stiefel(2, 1)

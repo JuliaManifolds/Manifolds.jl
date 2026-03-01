@@ -2267,7 +2267,7 @@ function Manifolds.Test.test_vector_transport(
             Test.@test isapprox(M, q, Y2, Y; error = :error, kwargs...)
             if test_aliased
                 Y3 = copy(M, p, X)
-                vector_transport_to!(M, Y3, p, Y3, q)  # aliased
+                vector_transport_to!(M, Y3, p, Y3, q, m)  # aliased
                 Test.@test isapprox(M, p, Y3, Y; error = :error, kwargs...)
             end
         end

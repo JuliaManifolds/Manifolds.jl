@@ -122,15 +122,11 @@ inverse_retract(
 
 Return true if [`Stiefel`](@ref) `M` is one-dimensional, since only then, the manifold is flat.
 """
-is_flat(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}) =
-    manifold_dimension(M) == 1
+is_flat(M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}) = manifold_dimension(M) == 1
 
 function log(
-        M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric},
-        p,
-        q;
-        maxiter::Int = 10000,
-        tolerance = 1.0e-9,
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, p, q;
+        maxiter::Int = 10000, tolerance = 1.0e-9,
     )
     X = allocate_result(M, log, p, q)
     inverse_retract!(M, X, p, q, ApproximateLogarithmicMap(maxiter, tolerance))
@@ -138,12 +134,8 @@ function log(
 end
 
 function log!(
-        M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric},
-        X,
-        p,
-        q;
-        maxiter::Int = 10000,
-        tolerance = 1.0e-9,
+        M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric}, X, p, q;
+        maxiter::Int = 10000, tolerance = 1.0e-9,
     )
     inverse_retract!(M, X, p, q, ApproximateLogarithmicMap(maxiter, tolerance))
     return X
@@ -151,12 +143,9 @@ end
 
 function inverse_retract!(
         M::MetricManifold{ℝ, <:Stiefel{ℝ}, CanonicalMetric},
-        X,
-        p,
-        q,
-        a::ApproximateLogarithmicMap,
+        X, p, q, a::ApproximateLogarithmicMap,
     )
-    n, k = get_parameter(M.manifold.size)
+    _, k = get_parameter(M.manifold.size)
     qfact = stiefel_factorization(p, q)
     V = allocate(qfact.Z, Size(2k, 2k))
     LV = allocate(V)

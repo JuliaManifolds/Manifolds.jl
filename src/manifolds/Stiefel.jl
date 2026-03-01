@@ -389,11 +389,8 @@ random Matrix onto the tangent vector at `vector_at`.
 rand(::Stiefel; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Stiefel{𝔽},
-        pX;
-        vector_at = nothing,
-        σ::Real = one(real(eltype(pX))),
+        rng::AbstractRNG, M::Stiefel{𝔽}, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
     ) where {𝔽}
     n, k = get_parameter(M.size)
     if vector_at === nothing
@@ -566,7 +563,7 @@ function ManifoldsBase.retract_qr_fused!(::Stiefel, q, p, X, t::Number)
     return mul!(q, _qrfac_to_q(qrfac), D)
 end
 
-function retract_polar_light!(M::Stiefel, q, p, X)
+function retract_polar_light!(::Stiefel, q, p, X)
     # n, k = get_parameter(M.size)
     # Inspired by the steps from the original implementation in Python, see
     # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L86-L115
@@ -619,10 +616,7 @@ Since this is the differentiated retraction as a vector transport, the result wi
 tangent space at ``q=\operatorname{retr}_p(d)`` using the [`CayleyRetraction`](@extref `ManifoldsBase.CayleyRetraction`).
 """
 vector_transport_direction(
-    M::Stiefel,
-    p,
-    X,
-    d,
+    ::Stiefel, ::Any, ::Any, ::Any,
     ::DifferentiatedRetractionVectorTransport{CayleyRetraction},
 )
 
@@ -643,10 +637,7 @@ where ``q = \operatorname{retr}^{\mathrm{Pol}}_p(d)``, and ``Λ`` is the unique 
 ```
 """
 vector_transport_direction(
-    ::Stiefel,
-    ::Any,
-    ::Any,
-    ::Any,
+    ::Stiefel, ::Any, ::Any, ::Any,
     ::DifferentiatedRetractionVectorTransport{PolarRetraction},
 )
 
@@ -671,10 +662,7 @@ A_{ij}&\text{ if } i > j\\
 ```
 """
 vector_transport_direction(
-    ::Stiefel,
-    ::Any,
-    ::Any,
-    ::Any,
+    ::Stiefel, ::Any, ::Any, ::Any,
     ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
 
@@ -694,13 +682,11 @@ function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::PolarRetract
 end
 function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::QRRetraction)
     q = retract(M, p, d, QRRetraction())
-
     # use the QR factorization with positive diagonal of R
     pdR = qr(p + d).R
     s = sign.(diag(pdR))
     s[s .== 0] .= 1
     rf = UpperTriangular(Diagonal(s)' * pdR)
-
     Xrf = X / rf
     qtXrf = q' * Xrf
     return copyto!(
@@ -728,10 +714,7 @@ and ``Λ`` is the unique solution of the Sylvester equation
 ```
 """
 vector_transport_to(
-    ::Stiefel,
-    ::Any,
-    ::Any,
-    ::Any,
+    ::Stiefel, ::Any, ::Any, ::Any,
     ::DifferentiatedRetractionVectorTransport{PolarRetraction},
 )
 
@@ -757,10 +740,7 @@ A_{ij}&\text{ if } i > j\\
 ```
 """
 vector_transport_to(
-    ::Stiefel,
-    ::Any,
-    ::Any,
-    ::Any,
+    ::Stiefel, ::Any, ::Any, ::Any,
     ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
 
@@ -780,7 +760,6 @@ function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::PolarRetraction)
 end
 function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
     d = inverse_retract(M, p, q, QRInverseRetraction())
-
     # use the QR factorization with positive diagonal of R
     pdR = qr(p + d).R
     s = sign.(diag(pdR))
@@ -789,7 +768,6 @@ function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
     Xrf = X / rf
     qtXrf = q' * Xrf
     return copyto!(
-        Y,
-        q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
+        Y, q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
     )
 end
