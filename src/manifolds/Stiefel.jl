@@ -673,7 +673,6 @@ function vector_transport_direction_diff!(::Stiefel, Y, p, X, d, ::CayleyRetract
     q1 = I - 1 // 2 * Wpd
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
-
 function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::PolarRetraction)
     q = retract(M, p, d, PolarRetraction())
     Iddsqrt = sqrt(I + d' * d)

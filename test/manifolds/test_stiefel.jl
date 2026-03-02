@@ -40,8 +40,6 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 :VectorTransportMethods => [
                     DifferentiatedRetractionVectorTransport(PolarRetraction()),
                     DifferentiatedRetractionVectorTransport(QRRetraction()),
-                    # TODO: Check why this does no longer dispatch correctly.
-                    # DifferentiatedRetractionVectorTransport(CayleyRetraction()),
                     ProjectionTransport(),
                 ],
             ),
@@ -56,6 +54,29 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 repr => "Stiefel(3, 2, ℝ)",
             )
         )
+        @testset "Padé & Caley retractions and Caley based transport (direction only)" begin
+            rca = CayleyRetraction()
+            @test rca == PadeRetraction(1)
+            @test repr(rca) == "CayleyRetraction()"
+            qca = retract(M, p, X, rca)
+            @test is_point(M, qca; error = :error)
+            Yca = vector_transport_direction(
+                M, p, X, X, DifferentiatedRetractionVectorTransport(CayleyRetraction()),
+            )
+            @test is_vector(M, qca, Yca; atol = 10^-15, error = :error)
+            Zca = zero_vector(M, p)
+            vector_transport_direction!(
+                M, Zca, p, X, X, DifferentiatedRetractionVectorTransport(CayleyRetraction()),
+            )
+            @test is_vector(M, qca, Yca; atol = 10^-15)
+            @test isapprox(M, qca, Yca, Zca)
+            rpa = PadeRetraction(2)
+            @test repr(rpa) == "PadeRetraction(2)"
+            qpa = retract(M, p, X, rpa)
+            @test is_point(M, qpa; error = :error)
+        end
+
+
         @testset "Distribution tests" begin
             usd_mmatrix = Manifolds.uniform_distribution(M, @MMatrix [1.0 0.0; 0.0 1.0; 0.0 0.0])
             @test isa(rand(usd_mmatrix), MMatrix)
@@ -78,11 +99,11 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 @testset "StiefelFactorization" begin
                     n = 6
                     @testset for k in [2, 3]
-                        M = MetricManifold(Stiefel(n, k), StiefelSubmersionMetric(rand()))
-                        pl = project(M, randn(representation_size(M)))
-                        Xl = project(M, pl, randn(representation_size(M)))
-                        Xl /= norm(M, pl, Xl)
-                        ql = exp(M, pl, Xl)
+                        Ml = MetricManifold(Stiefel(n, k), StiefelSubmersionMetric(rand()))
+                        pl = project(Ml, randn(representation_size(Ml)))
+                        Xl = project(Ml, pl, randn(representation_size(Ml)))
+                        Xl /= norm(Ml, pl, Xl)
+                        ql = exp(Ml, pl, Xl)
                         qfact = Manifolds.stiefel_factorization(pl, ql)
                         @testset "basic properties" begin
                             @test qfact isa Manifolds.StiefelFactorization
@@ -166,38 +187,38 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                             rfact = similar(qfact)
                             rfact.Z .= randn.()
                             r = copyto!(similar(ql), rfact)
-                            rfactproj = project(M, rfact)
+                            rfactproj = project(Ml, rfact)
                             @test rfactproj isa Manifolds.StiefelFactorization
-                            @test copyto!(similar(r), rfactproj) ≈ project(M, r)
+                            @test copyto!(similar(r), rfactproj) ≈ project(Ml, r)
 
                             Yfact = similar(qfact)
                             Yfact.Z .= randn.()
                             Y = copyto!(similar(ql), Yfact)
-                            Yfactproj = project(M, rfact, Yfact)
+                            Yfactproj = project(Ml, rfact, Yfact)
                             @test Yfactproj isa Manifolds.StiefelFactorization
-                            @test copyto!(similar(Y), Yfactproj) ≈ project(M, r, Y)
+                            @test copyto!(similar(Y), Yfactproj) ≈ project(Ml, r, Y)
                         end
                         @testset "inner" begin
                             rfact = similar(qfact)
                             rfact.Z .= randn.()
-                            rfact = project(M, rfact)
+                            rfact = project(Ml, rfact)
 
                             Yfact = similar(qfact)
                             Yfact.Z .= randn.()
-                            Yfact = project(M, rfact, Yfact)
+                            Yfact = project(Ml, rfact, Yfact)
 
                             Zfact = similar(qfact)
                             Zfact.Z .= randn.()
-                            Zfact = project(M, rfact, Zfact)
+                            Zfact = project(Ml, rfact, Zfact)
 
                             r, Z, Y = map(x -> copyto!(similar(ql), x), (rfact, Zfact, Yfact))
-                            @test inner(M, rfact, Yfact, Zfact) ≈ inner(M, r, Y, Z)
+                            @test inner(Ml, rfact, Yfact, Zfact) ≈ inner(Ml, r, Y, Z)
                         end
                         @testset "exp" begin
                             pfact = copyto!(similar(qfact), pl)
                             Xfact = copyto!(similar(qfact), Xl)
-                            rfact = exp(M, pfact, Xfact)
-                            r = exp(M, pl, Xl)
+                            rfact = exp(Ml, pfact, Xfact)
+                            r = exp(Ml, pl, Xl)
                             @test rfact isa Manifolds.StiefelFactorization
                             @test copyto!(similar(r), rfact) ≈ r
                         end
@@ -205,62 +226,60 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 end
                 g = StiefelSubmersionMetric(1)
                 @test g isa StiefelSubmersionMetric{Int}
-                @testset for M in [Stiefel(3, 3), Stiefel(4, 3), Stiefel(4, 2)]
-                    Mcan = MetricManifold(M, CanonicalMetric())
-                    Meu = MetricManifold(M, EuclideanMetric())
+                @testset for Ml in [Stiefel(3, 3), Stiefel(4, 3), Stiefel(4, 2)]
+                    Mcan = MetricManifold(Ml, CanonicalMetric())
+                    Meu = MetricManifold(Ml, EuclideanMetric())
                     @testset "α=$α" for (α, Mcomp) in [(0, Mcan), (-1 // 2, Meu)]
-                        p = project(M, randn(representation_size(M)))
-                        X = project(M, p, randn(representation_size(M)))
-                        X ./= norm(Mcomp, p, X)
-                        Y = project(M, p, randn(representation_size(M)))
-                        MM = MetricManifold(M, StiefelSubmersionMetric(α))
-                        @test inner(MM, p, X, Y) ≈ inner(Mcomp, p, X, Y)
-                        q = exp(Mcomp, p, X)
-                        @test isapprox(MM, q, exp(Mcomp, p, X); error = :error)
+                        pl = project(Ml, randn(representation_size(Ml)))
+                        Xl = project(Ml, pl, randn(representation_size(Ml)))
+                        Xl ./= norm(Mcomp, pl, Xl)
+                        Yl = project(Ml, pl, randn(representation_size(Ml)))
+                        MMl = MetricManifold(Ml, StiefelSubmersionMetric(α))
+                        @test inner(MMl, pl, Xl, Yl) ≈ inner(Mcomp, pl, Xl, Yl)
+                        ql = exp(Mcomp, pl, Xl)
+                        @test isapprox(MMl, ql, exp(Mcomp, pl, Xl); error = :error)
                         if Mcomp === Mcan
                             @test !is_flat(Mcomp)
-                            Z1 = log(Mcomp, p, q)
-                            isapprox(MM, p, log(MM, p, q), Z1)
-                            Z2 = similar(Z1)
-                            log!(Mcomp, Z2, p, q)
-                            isapprox(MM, p, log(MM, p, q), Z1)
-                            @test distance(Mcomp, p, q) ≈ norm(Mcomp, p, Z2)
+                            Zl1 = log(Mcomp, pl, ql)
+                            isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
+                            Zl2 = similar(Zl1)
+                            log!(Mcomp, Zl2, pl, ql)
+                            isapprox(MMl, pl, log(MMl, pl, ql), Zl1)
+                            @test distance(Mcomp, pl, ql) ≈ norm(Mcomp, pl, Zl2)
                         end
-
-                        @test isapprox(MM, exp(MM, p, 0 * X), p; error = :error)
-                        @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); error = :error, atol = 1.0e-6)
+                        @test isapprox(MMl, exp(MMl, pl, 0 * Xl), pl; error = :error)
+                        @test isapprox(MMl, pl, log(MMl, pl, pl), zero_vector(MMl, pl); error = :error, atol = 1.0e-6)
                     end
                     @testset "α=$α" for α in [-0.75, -0.25, 0.5]
-                        MM = MetricManifold(M, StiefelSubmersionMetric(α))
-                        p = project(MM, randn(representation_size(M)))
-                        X = project(MM, p, randn(representation_size(M)))
-                        X ./= norm(MM, p, X)
-                        q = exp(MM, p, X)
-                        @test is_point(MM, q; error = :error)
-                        @test isapprox(MM, p, log(MM, p, q), X; error = :error)
-                        @test isapprox(MM, exp(MM, p, 0 * X), p; error = :error)
-                        @test isapprox(MM, p, log(MM, p, p), zero_vector(MM, p); error = :error, atol = 1.0e-6)
+                        MMl = MetricManifold(Ml, StiefelSubmersionMetric(α))
+                        pl = project(MMl, randn(representation_size(Ml)))
+                        Xl = project(MMl, pl, randn(representation_size(Ml)))
+                        Xl ./= norm(MMl, pl, Xl)
+                        ql = exp(MMl, pl, Xl)
+                        @test is_point(MMl, ql; error = :error)
+                        @test isapprox(MMl, pl, log(MMl, pl, ql), Xl; error = :error)
+                        @test isapprox(MMl, exp(MMl, pl, 0 * Xl), pl; error = :error)
+                        @test isapprox(MMl, pl, log(MMl, pl, pl), zero_vector(MMl, pl); error = :error, atol = 1.0e-6)
                     end
                 end
                 @testset "Hessian Conversion" begin
-                    M1 = MetricManifold(Stiefel(3, 2), StiefelSubmersionMetric(-0.5))
-                    M2 = Stiefel(3, 2)
-                    M2b = MetricManifold(Stiefel(3, 2), EuclideanMetric())
-                    M3 = MetricManifold(Stiefel(3, 2), StiefelSubmersionMetric(0.0))
-                    M4 = MetricManifold(Stiefel(3, 2), CanonicalMetric())
+                    M1 = MetricManifold(M, StiefelSubmersionMetric(-0.5))
+                    M2 = MetricManifold(M, EuclideanMetric())
+                    M3 = MetricManifold(M, StiefelSubmersionMetric(0.0))
+                    M4 = MetricManifold(M, CanonicalMetric())
                     pH = [1.0 0.0; 0.0 1.0; 0.0 0.0]
                     XH = [0.0 0.0; 0.0 0.0; 1.0 1.0]
                     YH = [0.0 0.0; 0.0 0.0; -1.0 1.0]
                     ZH = [0.0 0.0; 0.0 0.0; -1.0 -1.0]
-                    rH = riemannian_Hessian(M2, pH, YH, ZH, XH)
+                    rH = riemannian_Hessian(M, pH, YH, ZH, XH)
                     @test riemannian_Hessian(M1, pH, YH, ZH, XH) == rH #Special case of submersion metric
-                    @test riemannian_Hessian(M2b, pH, YH, ZH, XH) == rH # metric is default
+                    @test riemannian_Hessian(M2, pH, YH, ZH, XH) == rH # metric is default
                     @test riemannian_Hessian(M3, pH, YH, ZH, XH) == riemannian_Hessian(M4, pH, YH, ZH, XH)
                     VH = [0.0 -1.0; 1.0 0.0; 0.0 0.0]
-                    WH = zero_vector(M2, pH)
-                    Weingarten!(M2, WH, pH, XH, VH)
-                    WHb = zero_vector(M2b, pH)
-                    Weingarten!(M2b, WHb, pH, XH, VH)
+                    WH = zero_vector(M, pH)
+                    Weingarten!(M, WH, pH, XH, VH)
+                    WHb = zero_vector(M, pH)
+                    Weingarten!(M2, WHb, pH, XH, VH)
                     @test WH == WHb
                 end
             end
@@ -270,15 +289,26 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
             @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
             @test repr(M) == "Stiefel(3, 2, ℝ; parameter=:field)"
         end
-        @testset "Stiefel(2, 1) special case" begin
+        @testset "Stiefel(2, 1) StaticArray inverse QR retraction cases" begin
             M21 = Stiefel(2, 1)
+            p21 = SMatrix{2, 1}([0.0, 1.0])
             X21 = inverse_retract(
-                M21, SMatrix{2, 1}([0.0, 1.0]), SMatrix{2, 1}([sqrt(2), sqrt(2)]),
+                M21, p21, SMatrix{2, 1}([sqrt(2), sqrt(2)]),
                 QRInverseRetraction(),
             )
-            @test isapprox(M21, X21, SMatrix{2, 1}([1.0, 0.0]))
+            @test isapprox(M21, p21, X21, SMatrix{2, 1}([1.0, 0.0]))
         end
-        @testset "Stiefel(4,3) inverse QR retraction cases" begin
+        @testset "Stiefel(3, 2) StaticArray inverse QR retraction cases" begin
+            pS = SMatrix{3, 2}(p)
+            qS = SMatrix{3, 2}(q)
+            XS = inverse_retract(
+                M, pS, qS, QRInverseRetraction(),
+            )
+            q32 = Manifolds.retract(M, pS, XS, QRRetraction())
+            @test isapprox(M, qS, q32)
+            @test isapprox(M, pS, XS, SMatrix{3, 2}([0.0 -1.0; 1.0 0.0; 0.0 0.0]))
+        end
+        @testset "Stiefel(4,3) StaticArray inverse QR retraction cases" begin
             M43 = Stiefel(4, 3)
             p43 = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0; 0.0 0.0 0.0]
             X43 = [0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0; 1.0 1.0 1.0]
@@ -355,6 +385,9 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 is_flat => false,
             )
         )
+        @testset "Allocation Promotion" begin
+            @test Manifolds.allocation_promotion_function(Mc, get_vector, ()) === complex
+        end
     end
     @testset "Quaternion Stiefel" begin
         M = Stiefel(3, 2, ℍ)
