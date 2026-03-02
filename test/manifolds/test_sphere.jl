@@ -24,7 +24,7 @@ using ManifoldDiff
         Dict(
             :Functions => Manifolds.Test.all_functions(),
             :InverseRetractionMethods => [LogarithmicInverseRetraction(), ProjectionInverseRetraction()],
-            :Points => [p, q], :Vectors => [X, Y], :Vector => X2,
+            :Points => [p, q], :Vectors => [X, Y], :SecondVector => X2,
             :EmbeddedPoints => [p],
             :EmbeddedVectors => [X],
             :Coordinates => [[π / 2, 0.0]],

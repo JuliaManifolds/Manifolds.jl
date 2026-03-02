@@ -33,7 +33,7 @@ using Manifolds, Test, LinearAlgebra
             :Coordinates => [[1.0, 0.0, 0.0, 0.0, 0.0, 0.0]],
             :Points => [p1, p2, p3],
             :Vectors => [X1, X2],
-            :Vector => X2,
+            :SecondVector => X2,
             :InvalidPoints => [q1, q2, q3],
             :InvalidVectors => [Y],
             :VectorTransportMethods => [

@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 * fixed a bug where the second vector in the test suite had to be both in the first and the second points tangent space
-  added a new `:Vector` to provide the second tangent vector in the first points tangent space (e.g. for `inner`) (#858)
+  added a new `:SecondVector` to provide the second tangent vector in the first points tangent space (e.g. for `inner`) (#858)
 
 ## [0.11.13] 2026-02-24
 

@@ -35,7 +35,7 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
                 :InverseRetractionMethods => [missing, missing, PolarInverseRetraction(), PolarLightInverseRetraction(), ProjectionInverseRetraction(), missing, QRInverseRetraction()],
                 :Points => [p, q, r],
                 :Vectors => [X, Y, Z],
-                :Vector => X2,
+                :SecondVector => X2,
                 :RetractionMethods => [CayleyRetraction(), PadeRetraction(2), PolarRetraction(), PolarLightRetraction(), missing, ProjectionRetraction(), QRRetraction()],
                 :VectorTransportMethods => [
                     DifferentiatedRetractionVectorTransport(PolarRetraction()),
