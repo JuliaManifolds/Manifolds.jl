@@ -285,9 +285,9 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
             end
         end
         @testset "field parameter" begin
-            M = Stiefel(3, 2; parameter = :field)
-            @test typeof(get_embedding(M)) === Euclidean{ℝ, Tuple{Int, Int}}
-            @test repr(M) == "Stiefel(3, 2, ℝ; parameter=:field)"
+            Mf = Stiefel(3, 2; parameter = :field)
+            @test typeof(get_embedding(Mf)) === Euclidean{ℝ, Tuple{Int, Int}}
+            @test repr(Mf) == "Stiefel(3, 2, ℝ; parameter=:field)"
         end
         @testset "Stiefel(2, 1) StaticArray inverse QR retraction cases" begin
             M21 = Stiefel(2, 1)
