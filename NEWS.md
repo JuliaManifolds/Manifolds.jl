@@ -5,7 +5,7 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.11.14] 2026-02-25
+## [0.11.14] 2026-03-02
 
 ### Added
 
@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 * fixed a bug where the second vector in the test suite had to be both in the first and the second points tangent space
-  added a new `:Vector` to provide the second tangent vector in the first points tangent space (e.g. for `inner`)
+  added a new `:Vector` to provide the second tangent vector in the first points tangent space (e.g. for `inner`) (#858)
 
 ## [0.11.13] 2026-02-24
 
