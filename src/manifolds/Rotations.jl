@@ -70,15 +70,15 @@ end
 default_vector_transport_method(::Rotations) = ParallelTransport()
 
 # from https://github.com/JuliaManifolds/Manifolds.jl/issues/453#issuecomment-1046057557
-function _get_tridiagonal_elements(tr)
-    N = size(tr, 1)
+function _get_tridiagonal_elements(tri)
+    N = size(tri, 1)
     res = zeros(N)
     down = true
     for i in 1:N
         if i == N && down
             elem = 0
         else
-            elem = tr[i + (down ? +1 : -1), i]
+            elem = tri[i + (down ? +1 : -1), i]
         end
         if elem ≈ 0
             res[i] = 0
