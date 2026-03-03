@@ -43,16 +43,16 @@ end
 """
     PolarLightRetraction <: AbstractRetractionMethod
 
-A retraction that is based on a polar decomposition, but
-in contrast to the [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`) lighter or easier in some sense.
+A retraction introduced by [JensenZimmermann:2026](@cite), see the corresponding
+[`retract`](@ref retract(::Stiefel, ::Any, ::Any, ::PolarLightRetraction))ion.
 """
 struct PolarLightRetraction <: AbstractRetractionMethod end
 
 """
     PolarLightInverseRetraction <: AbstractInverseRetractionMethod
 
-An inverse retraction that is based on a polar decomposition, but
-in contrast to the [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`) lighter or easier in some sense.
+An inverse retraction introduced by [JensenZimmermann:2026](@cite), see the corresponding
+[`inverse_retract`](@ref inverse_retract(::Stiefel, ::Any, ::Any, ::PolarLightInverseRetraction))ion.
 """
 struct PolarLightInverseRetraction <: AbstractInverseRetractionMethod end
 
