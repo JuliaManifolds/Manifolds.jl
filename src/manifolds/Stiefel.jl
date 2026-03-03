@@ -483,7 +483,7 @@ Compute an SVD-based retraction [`PolarLightRetraction`](@ref) on the
 
 ````math
 \operatorname{retr}_p X =
-\biggl( p\exp\bigl( p^\mathrm{T}X \bigr) + \bigl(I_n-pp^\mathrm{T}\bigr)X \biggr)
+\Bigl( p\exp\bigl( p^\mathrm{T}X \bigr) + \bigl(I_n-pp^\mathrm{T}\bigr)X \Bigr)
 \bigr( I_k  + X^\mathrm{T}(I_n - pp^\mathrm{T})X\bigr).
 ````
 """
