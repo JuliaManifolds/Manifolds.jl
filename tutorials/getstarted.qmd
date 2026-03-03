@@ -388,7 +388,7 @@ M₈₂ = MetricManifold(M₈, BuresWassersteinMetric())
 
 changes the manifold to use the ``[`BuresWassersteinMetric`](@ref BuresWassersteinMetricSection)``{=commonmark}.
 
-This changes all functions that depend on the metric, most prominently the Riemannian matric, but also the exponential and logarithmic map and hence also geodesics.
+This changes all functions that depend on the metric, most prominently the Riemannian metric, but also the exponential and logarithmic map and hence also geodesics.
 
 All functions that are not dependent on a metric – for example the manifold dimension, the tests of points and vectors we already looked at, but also all retractions – stay unchanged.
 This means that for example

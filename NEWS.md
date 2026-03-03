@@ -5,6 +5,18 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.14] 2026-03-02
+
+### Added
+
+* a new retraction and its inverse on the Stiefel manifold (#858)
+* similar to Manopt.jl, we now do typechecking with [crate-ci/typos](https://github.com/crate-ci/typos) (#858)
+
+### Fixed
+
+* fixed a bug where the second vector in the test suite had to be both in the first and the second points tangent space
+  added a new `:SecondVector` to provide the second tangent vector in the first points tangent space (e.g. for `inner`) (#858)
+
 ## [0.11.13] 2026-02-24
 
 ### Changed
@@ -139,7 +151,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `SymplecticStiefel{T, 𝔽}` to `SymplecticStiefel{𝔽, T}`
   * `Tucker{T, D, 𝔽}` to `Tucker{𝔽, T, D}`
   * `UnitaryMatrices{T, 𝔽}` to `UnitaryMatrices{𝔽, T}`
-* the functions `canoncial_project`, `differential_canonical_project`, `horizontal_lift`, `horizontal_component`, `get_total_space`, and `vertical_component` have been moved upstream to `ManifoldsBase.jl`
+* the functions `canonical_project`, `differential_canonical_project`, `horizontal_lift`, `horizontal_component`, `get_total_space`, and `vertical_component` have been moved upstream to `ManifoldsBase.jl`
 
 
 ### Removed
@@ -223,7 +235,7 @@ release here, since we do not have a very good reason to yet.
 
 ### Fixed
 
-* a copy pase error in the new determinant one manifold from the last release.
+* a copy paste error in the new determinant one manifold from the last release.
 
 ## [0.10.15] 2025-03-28
 
@@ -522,7 +534,7 @@ formula.
 
 ### Fixed
 
-* introduced a nonzero `atol` for all point and vector checks that compre to zero.
+* introduced a nonzero `atol` for all point and vector checks that compare to zero.
   This makes those checks a bit more relaxed by default and resolves [#630](https://github.com/JuliaManifolds/Manifolds.jl/issues/630).
 * `default_estimation_method(M, f)` is deprecated, use `default_approximation_method(M, f)` for your specific method `f` on the manifold `M`.
 * `AbstractEstimationMethod` is deprecated, use `AbstractApproximationMethod` instead.

@@ -218,7 +218,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), 1.0)
                 @test isapprox(geodesic_speed, norm(M, p, X); atol = 1.0e-5)
 
-                # Geodesics are (locally) length-minizing. So let B_a be a one-parameter
+                # Geodesics are (locally) length-minimizing. So let B_a be a one-parameter
                 # family of curves such that B_0 is a geodesic. Then the derivative of
                 # length(B_a) at a = 0 should be 0, and the second derivative should be
                 # nonnegative.

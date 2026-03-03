@@ -628,7 +628,7 @@ function project!(::SymplecticMatrices, Y, p, A)
         return XtJp .- XtJp'
     end
 
-    # Solve for Λ (Lagrange mutliplier):
+    # Solve for Λ (Lagrange multiplier):
     pT_p = p' * p  # (2k×2k)
     Λ = sylvester(pT_p, pT_p, h(A) ./ 2)
 
@@ -937,7 +937,7 @@ function (Base.:*)(J::SymplecticElement, p::AbstractVecOrMat)
     TS = typeof(one(eltype(p)) + one(eltype(J)))
     Jp = similar(p, TS)
 
-    # Perform left mulitply by λ*J:
+    # Perform left multiply by λ*J:
     mul!((@inbounds view(Jp, 1:n, :)), J.λ, @inbounds view(p, (n + 1):lastindex(p, 1), :))
     mul!((@inbounds view(Jp, (n + 1):lastindex(Jp, 1), :)), -J.λ, @inbounds view(p, 1:n, :))
 
@@ -955,7 +955,7 @@ function (Base.:*)(p::AbstractMatrix, J::SymplecticElement)
     TS = typeof(one(eltype(p)) + one(eltype(J)))
     pJ = similar(p, TS)
 
-    # Perform right mulitply by λ*J:
+    # Perform right multiply by λ*J:
     mul!((@inbounds view(pJ, :, 1:k)), -J.λ, @inbounds view(p, :, (k + 1):lastindex(p, 2)))
     mul!((@inbounds view(pJ, :, (k + 1):lastindex(pJ, 2))), J.λ, @inbounds view(p, :, 1:k))
     return pJ
