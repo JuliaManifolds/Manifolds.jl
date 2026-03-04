@@ -361,7 +361,8 @@ function ManifoldsBase.retract_qr_fused!(::Grassmann, q, p, X, t::Number)
     q .= p .+ t .* X
     qrfac = qr(q)
     d = diag(qrfac.R)
-    q .= Array(qrfac.Q) .* sign.(transpose(d) .+ 1 // 2)
+    copyto!(q, qrfac.Q)
+    q .*= Diagonal(sign.(transpose(d) .+ 1 // 2))
     return q
 end
 

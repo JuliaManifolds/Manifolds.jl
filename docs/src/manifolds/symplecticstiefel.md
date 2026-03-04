@@ -1,7 +1,7 @@
 # (Real) Symplectic Stiefel
 
 The [`SymplecticStiefel`](@ref) manifold, denoted ``\operatorname{SpSt}(2n, 2k)``,
-represents canonical symplectic bases of ``2k`` dimensonal symplectic subspaces of ``ℝ^{2n×2n}``.
+represents canonical symplectic bases of ``2k`` dimensional symplectic subspaces of ``ℝ^{2n×2n}``.
 This means that the columns of each element ``p \in \operatorname{SpSt}(2n, 2k) \subset ℝ^{2n×2k}``
 constitute a canonical symplectic basis of ``\operatorname{span}(p)``.
 The canonical symplectic form is a non-degenerate, bilinear, and skew symmetric map

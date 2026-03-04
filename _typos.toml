@@ -1,0 +1,14 @@
+[default.extend-words]
+methodes = "methodes" # french
+Serie = "Serie" # french
+sur = "sur" # french
+cmo = "cmo" # often used abbreviation for constrained manifold objective
+
+[files]
+extend-exclude = [
+"tutorials/*.html",
+# Pluto notebook backup
+"tutorials/*.jl",
+# rendered from tutorials/*.qmd -Z we do not want typos twice
+"docs/src/tutorials/*.md",
+]

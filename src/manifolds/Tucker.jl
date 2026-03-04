@@ -300,7 +300,7 @@ function check_vector(
     if size(p.hosvd.core) ≠ size(X.Ċ) || any(size.(X.U̇) .≠ size.(p.hosvd.U))
         return DomainError(
             size(X.Ċ),
-            s * "since the array dimensons of $(p) and $(X)" * " do not agree.",
+            s * "since the array dimensions of $(p) and $(X)" * " do not agree.",
         )
     end
     for (U, U̇) in zip(p.hosvd.U, X.U̇)

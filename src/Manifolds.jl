@@ -211,7 +211,7 @@ using ADTypes:
 import DifferentiationInterface as DI
 
 using Base.Iterators: repeated
-using Einsum: @einsum
+using Tullio: @einsum, @tullio
 using Kronecker
 using Graphs
 using LinearAlgebra
@@ -249,6 +249,7 @@ using ManifoldsBase:
     AbstractCotangentVector,
     CyclicProximalPointEstimation,
     DefaultBasis,
+    DefaultMetric,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     DefaultOrDiagonalizingBasis,
@@ -735,6 +736,7 @@ export AbstractRetractionMethod,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
+    PolarLightRetraction,
     ProjectionRetraction,
     SoftmaxRetraction,
     OrthographicRetraction,
@@ -751,6 +753,7 @@ export AbstractInverseRetractionMethod,
     QRInverseRetraction,
     OrthographicInverseRetraction,
     PolarInverseRetraction,
+    PolarLightInverseRetraction,
     ProjectionInverseRetraction,
     ShootingInverseRetraction,
     SoftmaxInverseRetraction

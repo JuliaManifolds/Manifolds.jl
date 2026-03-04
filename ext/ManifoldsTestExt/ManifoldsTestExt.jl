@@ -48,6 +48,7 @@ Possible properties are
 * `:Rng` is a random number generator to use for generating random points/vectors if needed
 * `:Seed` is a seed to use for generating random points/vectors if needed
 * `:Vectors` is a vector of at least 2 tangent vectors, which should be in the tangent space of the correspondinig point entries in `:Points`
+* `:SecondVector` is a single second vector in the tangent space of the first entry of `:Points`, for example to test [`inner`](@ref)
 * `:VectorTransportMethods` is a vector of vector transport methods to test on `M`
 * `:TestMidpointSymmetry` is a boolean (`true` by default) whether to test the symmetry property of the midpoint function
 * `:TestInfo` is a boolean (`true` by default) whether to test that whether `error=:info` in verification functions issues info messages.
@@ -59,7 +60,7 @@ Possible entries of the `expectations` dictionary are
 * for retractions, inverse retractions, and vector transports, the key is a tuple of the function and the method, e.g. `(retract, method) => q`
 * for `embed`, and `project`, the key is a tuple of the function and `:Point` or `:Vector`, e.g. `(embed, :Point) of expected (embedded) points or vectors,
   omitting that symbol is interpreted as the expected point.
-* for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expexted basis
+* for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expected basis
 * for `get_coordinates` the key is a tuple of the function and the basis, e.g. `(get_coordinates, B) => c`
 * for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`
 * for `get_vectors` the key is a tuple of the function and the basis, e.g. `(get_vectors, B) => :Symbol` where
@@ -70,9 +71,9 @@ Possible entries of the `expectations` dictionary are
 * `:atol => 0.0` a global absolute tolerance
 * `:atols -> Dict()` a dictionary `function -> atol` for tolerances of specific function tested.
 * `:Types` -> Dict() a dictionary `function -> Type` for specifying expected types of results of specific functions, for example `manifold_dimension => Int`.
-*  `:IsPointErrors` is a vector of expected error types for each invalid point provided in `:InvalidPoints`, use `missing` to skip testing for errors for a specific point.
-*  `:IsVectorErrors` is a vector of expected error types for each invalid vector provided in `:InvalidVectors`, use `missing` to skip testing for errors for a specific vector.
-*  `:IsVectorBasepointError` is an expected error type when the base point is invalid e.g. for `is_vector`
+* `:IsPointErrors` is a vector of expected error types for each invalid point provided in `:InvalidPoints`, use `missing` to skip testing for errors for a specific point.
+* `:IsVectorErrors` is a vector of expected error types for each invalid vector provided in `:InvalidVectors`, use `missing` to skip testing for errors for a specific vector.
+* `:IsVectorBasepointError` is an expected error type when the base point is invalid e.g. for `is_vector`
 """
 function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, expectations::Dict = Dict())
     atol = get(expectations, :atol, 0.0)
@@ -81,6 +82,7 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
     functions = get(properties, :Functions, Function[])
     points = get(properties, :Points, [])
     vectors = get(properties, :Vectors, [])
+    vector = get(properties, :SecondVector, missing)
     covectors = get(properties, :Covectors, [])
     normals = get(properties, :NormalVectors, [])
     bases = get(properties, :Bases, [])
@@ -311,10 +313,10 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
             end
 
         end
-        if (inner in functions)
+        if (inner in functions) && !ismissing(vector)
             expected_inner = get_expectation(expectations, inner)
             Manifolds.Test.test_inner(
-                M, points[1], vectors[1], vectors[2];
+                M, points[1], vectors[1], vector;
                 available_functions = functions,
                 expected_value = expected_inner,
                 name = "inner(M, p, X, Y)", # shorten name within large suite
@@ -427,12 +429,12 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
         end
         if (parallel_transport_to in functions)
             expected_pt = get_expectation(expectations, parallel_transport_to)
-            expected_ptd = get_expectation(expectations, parallel_transport_direction)
+            expected_pt_d = get_expectation(expectations, parallel_transport_direction)
             Manifolds.Test.test_parallel_transport(
                 M, points[1], vectors[1], points[2];
                 available_functions = functions,
                 expected_value = expected_pt,
-                expected_value_direction = expected_ptd,
+                expected_value_direction = expected_pt_d,
                 test_aliased = aliased,
                 test_mutating = (parallel_transport_to! in functions) ? true : mutating,
                 atol = get(function_atols, parallel_transport_to, atol),
@@ -504,12 +506,12 @@ function Manifolds.Test.test_manifold(M::AbstractManifold, properties::Dict, exp
                 )
             end
         end
-        if (sectional_curvature in functions)
+        if (sectional_curvature in functions) && !ismissing(vector)
             expected_sec_curv = get_expectation(expectations, sectional_curvature)
             expected_sec_curv_min = get_expectation(expectations, sectional_curvature_min)
             expected_sec_curv_max = get_expectation(expectations, sectional_curvature_max)
             Manifolds.Test.test_sectional_curvature(
-                M, points[1], vectors[1], vectors[2];
+                M, points[1], vectors[1], vector;
                 available_functions = functions,
                 expected_value = expected_sec_curv,
                 expected_value_min = expected_sec_curv_min,
@@ -1476,7 +1478,7 @@ Test the function [`is_point`](@ref) on  for point `p` on manifold `M`.
 * that for each `q` in `qs` it
   * returns `false`
   * issues a warning (if activated)
-  * isues an info message (if activated)
+  * issues an info message (if activated)
   * throws the corresponding error from `error_types` (if not `missing`)
 """
 function Manifolds.Test.test_is_point(
@@ -1520,14 +1522,14 @@ Test the function [`is_vector`](@ref) on manifold `M` at point `p` for tangent v
 * that for each `Y` in `Ys` it
     * returns `false`
     * issues a warning (if activated)
-    * isues an info message (if activated)
+    * issues an info message (if activated)
     * throws the corresponding error from `error_types` (if not `missing`)
 * if `check_basepoint` is `true`, then it checks that
     * for `p` this still returns `true`
     * for the base point `q` it
       * returns `false`
       * issues a warning (if activated)
-      * isues an info message (if activated)
+      * issues an info message (if activated)
       * throws the corresponding error from `error_basepoint` (if activated)
 """
 function Manifolds.Test.test_is_vector(
@@ -2265,7 +2267,7 @@ function Manifolds.Test.test_vector_transport(
             Test.@test isapprox(M, q, Y2, Y; error = :error, kwargs...)
             if test_aliased
                 Y3 = copy(M, p, X)
-                vector_transport_to!(M, Y3, p, Y3, q)  # aliased
+                vector_transport_to!(M, Y3, p, Y3, q, m)  # aliased
                 Test.@test isapprox(M, p, Y3, Y; error = :error, kwargs...)
             end
         end

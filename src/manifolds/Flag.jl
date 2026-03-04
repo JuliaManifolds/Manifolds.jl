@@ -56,12 +56,14 @@ Tangent space is represented in the block-skew-symmetric form.
 
 # Constructor
 
-    Flag(N, n1, n2, ..., nd; parameter::Symbol=:type)
+    Flag(N, n_1, n_2, ..., n_d; parameter::Symbol=:type)
 
 Generate the manifold ``\operatorname{Flag}(n_1, n_2, ..., n_d; N)`` of subspaces
+
 ```math
 𝕍_1 ⊆ 𝕍_2 ⊆ ⋯ ⊆ V_d, \quad \operatorname{dim}(𝕍_i) = n_i
 ```
+
 where ``𝕍_i`` for ``i ∈ 1, 2, …, d`` are subspaces of ``ℝ^N`` of dimension
 ``\operatorname{dim} 𝕍_i = n_i``.
 

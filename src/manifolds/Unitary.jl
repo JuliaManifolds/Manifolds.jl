@@ -153,8 +153,9 @@ function Random.rand!(
     )
     n = get_parameter(M.size)[1]
     if vector_at === nothing
-        A = σ * randn(rng, eltype(pX), n, n)
-        pX .= Matrix(qr(A).Q)
+        randn!(rng, pX)
+        pX .*= σ
+        copyto!(pX, qr(pX).Q)
     else
         Z = σ * randn(rng, eltype(pX), size(pX))
         project!(M, pX, vector_at, Z)

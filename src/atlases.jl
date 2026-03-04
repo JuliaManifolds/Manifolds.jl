@@ -120,6 +120,116 @@ function christoffel_symbols_second!(
     return Γ
 end
 
+"""
+    christoffel_symbols_first(M::AbstractManifold, A::AbstractAtlas, i, a; backend::AbstractADType = AutoForwardDiff())
+
+Compute the Christoffel symbols of the first kind ``Γ_{i j k}`` in chart `i` of
+[`AbstractAtlas`] `A` at coordinates `a`.
+
+The symbols are obtained by lowering the first index of the second-kind Christoffel
+symbols:
+
+````math
+    Γ_{i j k} = g_{k l} Γ^l_{i j}
+````
+
+# Arguments
+
+- `M::AbstractManifold` : manifold
+- `A::AbstractAtlas`   : atlas providing charts / induced basis
+- `i`                  : chart index in `A`
+- `a`                  : coordinates of the point in chart `i` (length `n`)
+
+# Keyword arguments
+
+- `backend::AbstractADType` : automatic-differentiation backend (default `AutoForwardDiff()`).
+                              It is passed to [`christoffel_symbols_second`](@ref) in the
+                              default implementation to compute the Christoffel symbol of
+                              the second kind.
+
+Returns an ``n×n×n`` array with ordering ``(i, j, k)``.
+"""
+function christoffel_symbols_first(
+        M::AbstractManifold, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff()
+    )
+    n = length(a)
+    T = eltype(a)
+    Γ = zeros(T, n, n, n)
+    return christoffel_symbols_first!(M, Γ, A, i, a; backend = backend)
+end
+
+function christoffel_symbols_first!(
+        M::AbstractManifold, Γ, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff()
+    )
+    # Compute second-kind symbols and lower the first index: Γ_{i j k} = g_{k l} Γ^l_{i j}
+    Γ2 = christoffel_symbols_second(M, A, i, a; backend = backend)
+    g = local_metric(M, A, i, a)
+    n = length(a)
+    T = eltype(Γ2)
+    fill!(Γ, zero(T))
+    for ii in 1:n, j in 1:n, k in 1:n
+        s = zero(T)
+        for l in 1:n
+            s += g[k, l] * Γ2[l, ii, j]
+        end
+        Γ[ii, j, k] = s
+    end
+    return Γ
+end
+
+@doc raw"""
+    det_local_metric(M::AbstractManifold, A::AbstractAtlas, i, a)
+
+Return the determinant of local matrix representation of the metric tensor at the point
+with parametrization `a` in chart `i` of [`AbstractAtlas`](@ref) `A`.
+
+See also [`local_metric`](@ref)
+"""
+function det_local_metric(M::AbstractManifold, A::AbstractAtlas, i, a)
+    return det(local_metric(M, A, i, a))
+end
+
+"""
+    einstein_tensor(M::AbstractManifold, A::AbstractAtlas, i, a; backend::AbstractADType = AutoForwardDiff())
+
+Compute the Einstein tensor of the manifold `M` at the point specified by coordinates `a`
+in chart `i` of atlas `A`.
+
+The Einstein tensor is defined as
+
+````math
+    G_{ij} = Ric_{ij} - 1/2 g_{ij} R
+````
+
+where `Ric` is the Ricci tensor, `g` the local metric and `R` the scalar curvature.
+They are computed using, respectively, [`ricci_tensor`](@ref), [`local_metric`](@ref) and
+[`ricci_curvature`](@ref).
+"""
+function einstein_tensor(
+        M::AbstractManifold, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff()
+    )
+    n = length(a)
+    T = eltype(a)
+    G = zeros(T, n, n)
+    return einstein_tensor!(M, G, A, i, a; backend = backend)
+end
+
+function einstein_tensor!(
+        M::AbstractManifold, G::AbstractMatrix, A::AbstractAtlas, i, a;
+        backend::AbstractADType = AutoForwardDiff()
+    )
+    # compute Ricci tensor and scalar curvature
+    ricci_tensor!(M, G, A, i, a; backend = backend)
+    R = ricci_curvature(M, A, i, a; backend = backend)
+
+    g = local_metric(M, A, i, a)
+    G .-= g .* (R / 2)
+
+    return G
+end
 
 """
     get_default_atlas(::AbstractManifold)
@@ -300,6 +410,24 @@ function local_metric!(M::AbstractManifold, g::AbstractMatrix{T}, A::AbstractAtl
         e_q[q] = 0
     end
     return g
+end
+
+@doc raw"""
+    log_local_metric_density(M::AbstractManifold, A::AbstractAtlas, i, a)
+
+Return the natural logarithm of the metric density ``ρ`` of `M` at the point with
+parametrization `a` in chart `i` of [`AbstractAtlas`](@ref) `A`, which is given by
+````math
+ρ = \log \sqrt{\lvert \det g_{ij} \rvert}
+````
+for the metric tensor expressed in the same chart.
+
+# See also
+
+[`local_metric`](@ref), [`det_local_metric`](@ref)
+"""
+function log_local_metric_density(M::AbstractManifold, A::AbstractAtlas, i, a)
+    return log(abs(det_local_metric(M, A, i, a))) / 2
 end
 
 """
@@ -1016,4 +1144,30 @@ function riemann_tensor!(
     end
 
     return Wc
+end
+
+for mf in [
+        christoffel_symbols_first,
+        christoffel_symbols_second,
+        det_local_metric,
+        einstein_tensor,
+        flat!,
+        gaussian_curvature,
+        inverse_local_metric,
+        local_metric,
+        log_local_metric_density,
+        mean,
+        mean!,
+        median,
+        median!,
+        ricci_curvature,
+        ricci_tensor,
+        riemann_tensor,
+        riemannian_gradient,
+        riemannian_gradient!,
+        riemannian_Hessian,
+        riemannian_Hessian!,
+        sharp!,
+    ]
+    @eval is_metric_function(::typeof($mf)) = true
 end

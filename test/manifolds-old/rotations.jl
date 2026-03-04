@@ -109,9 +109,9 @@ include("../header.jl")
         @testset "Rotations: SO($n)" begin
             SOn = Rotations(n)
             @test !is_flat(SOn)
-            ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
+            pt_d = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             tvd = Manifolds.normal_tvector_distribution(SOn, Matrix(1.0I, n, n), 1.0)
-            pts = [rand(ptd) for _ in 1:3]
+            pts = [rand(pt_d) for _ in 1:3]
             diag_basis_1 = if n == 3
                 DiagonalizingOrthonormalBasis(
                     [
@@ -135,7 +135,7 @@ include("../header.jl")
                 test_default_vector_transport = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
-                point_distributions = [ptd],
+                point_distributions = [pt_d],
                 tvector_distributions = [tvd],
                 basis_types_to_from = basis_types,
                 basis_types_vecs = (diag_basis_1, diag_basis_2),
@@ -168,6 +168,13 @@ include("../header.jl")
             p2 = ManifoldsBase.exp_fused(SOn, pts[1], X, 1.0)
             X3 = log(SOn, pts[1], p)
             @test distance(SOn, p, exp(SOn, pts[1], X3)) < 25 * eps()
+
+            @testset "gradient and metric conversion" begin
+                Y = change_metric(M, EuclideanMetric(), p, X)
+                @test Y == X
+                Z = change_representer(M, EuclideanMetric(), p, X)
+                @test Z == X
+            end
         end
     end
     @testset "Test AbstractManifold Point and Tangent Vector checks" begin

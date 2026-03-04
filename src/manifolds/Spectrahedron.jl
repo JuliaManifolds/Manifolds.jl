@@ -78,7 +78,7 @@ end
 
 Check whether ``X = qY^{\mathrm{T}} + Yq^{\mathrm{T}}`` is a tangent vector to
 ``p=qq^{\mathrm{T}}`` on the [`Spectrahedron`](@ref) `M`,
-i.e. atfer [`check_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
+i.e. after [`check_point`](@ref) of `q`, `Y` has to be of same dimension as `q`
 and a ``X`` has to be a symmetric matrix with trace.
 The tolerance for the base point check and zero diagonal can be set using the `kwargs...`.
 Note that symmetry of ``X`` holds by construction and is not explicitly checked.
