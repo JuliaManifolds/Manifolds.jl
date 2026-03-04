@@ -320,9 +320,9 @@ function inverse_retract_polar_light!(::Stiefel, X, p, q)
     U, d, V = s.U, s.S, s.V
     # sets X to the second summand in the python code
     X .= q * V * Diagonal(1 ./ d) * V'
-    copyto!(U, U * V) # MRT in the python code
+    copyto!(U, U * V') # MRT in the python code - use memory of U
     L = log(U)
-    L .= L .- U
+    L .= L .- U # log(MRT) - MRT
     # add the first summand
     X .+= p * L
     return X
