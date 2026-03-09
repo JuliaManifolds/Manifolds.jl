@@ -19,7 +19,7 @@ jobs:
         with:
           version: "1.12"
       - name: Julia Cache
-        uses: julia-actions/cache@v2
+        uses: julia-actions/cache@v3
       - name: Cache Quarto
         id: cache-quarto
         uses: actions/cache@v5
