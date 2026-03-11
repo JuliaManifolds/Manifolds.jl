@@ -160,8 +160,9 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
             @testset "embed!" begin
                 # points
+                # see bug #862 -- p_ and p__ need to be initially different for this test
                 p_ = zeros(prod(V))
-                p__ = zeros(prod(V))
+                p__ = ones(prod(V))
                 embed!(M, p_, p)
                 embed!(M, p__, [p[1], [-x for x in p[2:end]]...])
                 @test is_point(get_embedding(M), p_)

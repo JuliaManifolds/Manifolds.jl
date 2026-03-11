@@ -136,7 +136,8 @@ Embed ``p ≐ (λ, x_1, …, x_d)`` in ``𝔽^{n_1 ×⋯× n_d}`` using the Kron
 embed(::Segre, p)
 
 function embed!(M::Segre, q, p)
-    return q = kron(p...)
+    q .= kron(p...)
+    return q
 end
 
 @doc raw"""
