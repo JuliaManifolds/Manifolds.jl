@@ -1000,7 +1000,8 @@ end
 
 function ManifoldsBase.retract_polar_fused!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
     A = p + p * (t * X)
-    return project!(M, q, A; check_det = false)
+    project_kwargs = M isa Rotations ? (; check_det = false) : (;)
+    return project!(M, q, A; project_kwargs...)
 end
 
 @doc raw"""
