@@ -100,9 +100,9 @@ function exp(::SymmetricPositiveDefinite, p::SPDPoint, X)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
     U_e = eig1.vectors
-    p_U_e = p_sqrt * U_e
+    pU_e = p_sqrt * U_e
     q = SPDPoint(
-        p_U_e * Se * transpose(p_U_e),
+        pU_e * Se * transpose(pU_e),
         store_p = !ismissing(p.p),
         store_sqrt = !ismissing(p.sqrt),
         store_sqrt_inv = !ismissing(p.sqrt_inv),
@@ -119,8 +119,8 @@ function exp!(::SymmetricPositiveDefinite, q, p, X)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
     U_e = eig1.vectors
-    p_U_e = p_sqrt * U_e
-    return copyto!(q, p_U_e * Se * transpose(p_U_e))
+    pU_e = p_sqrt * U_e
+    return copyto!(q, pU_e * Se * transpose(pU_e))
 end
 function exp!(::SymmetricPositiveDefinite, q::SPDPoint, p, X)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
@@ -128,8 +128,8 @@ function exp!(::SymmetricPositiveDefinite, q::SPDPoint, p, X)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
     U_e = eig1.vectors
-    p_U_e = p_sqrt * U_e
-    Q = p_U_e * Se * transpose(p_U_e)
+    pU_e = p_sqrt * U_e
+    Q = pU_e * Se * transpose(pU_e)
     !ismissing(q.p) && copyto!(q.p, Q)
     Q_e = eigen(Q)
     copyto!(q.eigen.values, Q_e.values)
@@ -351,8 +351,8 @@ function log!(::SymmetricPositiveDefinite, X, p, q)
     T = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv)
     e2 = eigen(T)
     Se = Diagonal(log.(max.(e2.values, eps())))
-    p_U_e = p_sqrt * e2.vectors
-    return mul!(X, p_U_e, Se * transpose(p_U_e))
+    pU_e = p_sqrt * e2.vectors
+    return mul!(X, pU_e, Se * transpose(pU_e))
 end
 
 """
@@ -401,8 +401,8 @@ function parallel_transport_to!(M::SymmetricPositiveDefinite, Y, p, X, q)
     e3 = eigen(logty) # since they cancel with the pInvSqrt in the next line
     Sf = Diagonal(exp.(e3.values / 2)) # Uf * Sf * Uf' is the Exp
     Uf = e3.vectors
-    p_U_e = p_sqrt * Uf * Sf * transpose(Uf) # factors left of tv (and transposed right)
-    vtp = Symmetric(p_U_e * tv * transpose(p_U_e)) # so this is the documented formula
+    pU_e = p_sqrt * Uf * Sf * transpose(Uf) # factors left of tv (and transposed right)
+    vtp = Symmetric(pU_e * tv * transpose(pU_e)) # so this is the documented formula
     return copyto!(Y, vtp)
 end
 

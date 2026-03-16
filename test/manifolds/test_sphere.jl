@@ -8,6 +8,7 @@ using ManifoldDiff
     p = [1.0, 0.0, 0.0]
     q = [1 / sqrt(2), 1 / sqrt(2), 0.0]
     X = [0.0, π / 4, 0.0]
+    X2 = [0.0, 1.0, 0.1]
     Y = [0.0, 0.0, π / 4]
     V = [2.0, 0.0, 0.0]  # normal vector at p
     ξ = Manifolds.RieszRepresenterCotangentVector(M, p, [0.0, π / 4, 0.0])  # covector at p
@@ -23,7 +24,7 @@ using ManifoldDiff
         Dict(
             :Functions => Manifolds.Test.all_functions(),
             :InverseRetractionMethods => [LogarithmicInverseRetraction(), ProjectionInverseRetraction()],
-            :Points => [p, q], :Vectors => [X, Y],
+            :Points => [p, q], :Vectors => [X, Y], :SecondVector => X2,
             :EmbeddedPoints => [p],
             :EmbeddedVectors => [X],
             :Coordinates => [[π / 2, 0.0]],

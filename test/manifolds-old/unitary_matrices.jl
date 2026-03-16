@@ -106,6 +106,19 @@ end
         @test manifold_volume(UnitaryMatrices(3)) ≈ sqrt(3) * 2 * π^6
         @test manifold_volume(UnitaryMatrices(4)) ≈ sqrt(2) * 8 * π^10 / 12
     end
+
+    @testset "Polar retraction" begin
+        # Test that check_det is not passed to project in UnitaryMatrices
+        M = UnitaryMatrices(8)
+        t = 0.3
+        p = rand(M)
+        X = 0.25 .* rand(M; vector_at = p)
+        q = similar(p)
+
+        ManifoldsBase.retract_fused!(M, q, p, X, t, PolarRetraction())
+        @test is_point(M, q)
+    end
+
 end
 
 @testset "Special unitary matrices" begin

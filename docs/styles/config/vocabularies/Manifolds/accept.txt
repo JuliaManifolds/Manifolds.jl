@@ -1,7 +1,0 @@
-Grassmann
-[Jj]ulia
-Riemannian
-Segre
-Stiefel
-[sS]ymplectic
-struct

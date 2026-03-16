@@ -442,7 +442,7 @@ end
 """
     default_retraction_method(M::AbstractSphere)
 
-The default retraction on the sphere is usually the exponential map. However since that map
+The default retraction on the sphere is usually the exponential map. However, since that map
 tends to be very sensitive to also only slight errors in tangent vectors (not being tangent),
 we use a stabilized version as default that projects onto the sphere afterwards, see
 [`StabilizedRetraction`](@extref `ManifoldsBase.StabilizedRetraction`).

@@ -38,6 +38,7 @@ end
         include_test("manifolds/test_sphere.jl")
         include_test("manifolds/test_general_unitary.jl")
         include_test("manifolds/test_heisenberg_matrices.jl")
+        include_test("manifolds/test_stiefel.jl")
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
@@ -65,7 +66,6 @@ end
         include_test("manifolds-old/skewhermitian.jl")
         include_test("manifolds-old/spectrahedron.jl")
         include_test("manifolds-old/sphere_symmetric_matrices.jl")
-        include_test("manifolds-old/stiefel.jl")
         include_test("manifolds-old/symmetric.jl")
         include_test("manifolds-old/symmetric_positive_definite.jl")
         include_test("manifolds-old/spd_fixed_determinant.jl")

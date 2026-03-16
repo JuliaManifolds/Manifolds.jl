@@ -160,8 +160,9 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
 
             @testset "embed!" begin
                 # points
+                # see bug #862 -- p_ and p__ need to be initially different for this test
                 p_ = zeros(prod(V))
-                p__ = zeros(prod(V))
+                p__ = ones(prod(V))
                 embed!(M, p_, p)
                 embed!(M, p__, [p[1], [-x for x in p[2:end]]...])
                 @test is_point(get_embedding(M), p_)
@@ -218,7 +219,7 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                     central_fdm(3, 1)(t -> distance(M, p, exp(M, p, t * X)), 1.0)
                 @test isapprox(geodesic_speed, norm(M, p, X); atol = 1.0e-5)
 
-                # Geodesics are (locally) length-minizing. So let B_a be a one-parameter
+                # Geodesics are (locally) length-minimizing. So let B_a be a one-parameter
                 # family of curves such that B_0 is a geodesic. Then the derivative of
                 # length(B_a) at a = 0 should be 0, and the second derivative should be
                 # nonnegative.

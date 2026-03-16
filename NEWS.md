@@ -5,6 +5,58 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.17] 2026-03-13
+
+### Fixed
+
+* Fixed polar retraction on `UnitaryMatrices`.
+
+## [0.11.16] 2026-03-11
+
+### Fixed
+
+* Fixed `embed!` on `Segre` manifold.
+
+## [0.11.15] 2026-03-04
+
+### Fixed
+
+* fixed a missing transpose in the inverse polar light retraction.
+
+## [0.11.14] 2026-03-02
+
+### Added
+
+* a new retraction and its inverse on the Stiefel manifold (#858)
+* similar to Manopt.jl, we now do typechecking with [crate-ci/typos](https://github.com/crate-ci/typos) (#858)
+
+### Fixed
+
+* fixed a bug where the second vector in the test suite had to be both in the first and the second points tangent space
+  added a new `:SecondVector` to provide the second tangent vector in the first points tangent space (e.g. for `inner`) (#858)
+
+## [0.11.13] 2026-02-24
+
+### Changed
+
+* `rand!` on `UnitaryMatrices` and the QR retraction methods were rewritten to be faster and more GPU array-compatible.
+
+## [0.11.12] 2026-02-04
+
+### Added
+
+* Chart-based variants of `christoffel_symbols_first`, `einstein_tensor`, `det_local_metric` and `log_local_metric_density`.
+
+### Changed
+
+* Deprecated variants of `det_local_metric`, `einstein_tensor`, `inverse_local_metric`, `local_metric`, `local_metric_jacobian`, `ricci_curvature` that receive a point and a basis as arguments. New variants that work in charts should be used instead.
+
+## [0.11.11] 2025-01-24
+
+### Changed
+
+* `Hyperrectangle` now has `has_components` defined to `true`, as well as r-norm support for `norm` and `distance`.
+
 ## [0.11.10] 2025-01-07
 
 ### Added

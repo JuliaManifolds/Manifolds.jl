@@ -214,6 +214,10 @@ Test.@testset "The circle manifold" begin
             log!(Mc, X3, fill(0 + 1.0im), fill(0.0 - 1.0im))
             @test isapprox(X3[], X2[])
         end
+        Test.@testset "inner special cases" begin
+            @test inner(Circle(), fill(0.0), fill(1.0), fill(0.1)) == 0.1
+            @test inner(Circle(ℂ), 0.0, 1.0im, -1.0im) == -1.0
+        end
     end
 
     @testset "StaticArrays.jl and vector tests" begin

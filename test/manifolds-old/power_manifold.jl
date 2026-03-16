@@ -165,20 +165,20 @@ end
         @test view(p1, Ms1, 1) isa SubArray
 
         Msn1 = PowerManifold(Ms, Manifolds.NestedPowerRepresentation(), 5)
-        pn1 = [randn(3) for _ in 1:5]
-        @test get_component(Msn1, pn1, 1) == pn1[1]
-        @test pn1[Msn1, 1] == pn1[1]
-        @test pn1[Msn1, 1] isa Vector
-        set_component!(Msn1, pn1, p2, 2)
-        @test get_component(Msn1, pn1, 2) == p2
-        pn1[Msn1, 2] = 2 * p2
-        @test pn1[Msn1, 2] == 2 * p2
-        pn1[Msn1, 2] += p2
-        @test pn1[Msn1, 2] ≈ 3 * p2
-        pn1[Msn1, 2] .+= p2
-        @test pn1[Msn1, 2] ≈ 4 * p2
-        @test view(pn1, Msn1, 1) == pn1[Msn1, 1]
-        @test view(pn1, Msn1, 1) isa SubArray
+        p_n1 = [randn(3) for _ in 1:5]
+        @test get_component(Msn1, p_n1, 1) == p_n1[1]
+        @test p_n1[Msn1, 1] == p_n1[1]
+        @test p_n1[Msn1, 1] isa Vector
+        set_component!(Msn1, p_n1, p2, 2)
+        @test get_component(Msn1, p_n1, 2) == p2
+        p_n1[Msn1, 2] = 2 * p2
+        @test p_n1[Msn1, 2] == 2 * p2
+        p_n1[Msn1, 2] += p2
+        @test p_n1[Msn1, 2] ≈ 3 * p2
+        p_n1[Msn1, 2] .+= p2
+        @test p_n1[Msn1, 2] ≈ 4 * p2
+        @test view(p_n1, Msn1, 1) == p_n1[Msn1, 1]
+        @test view(p_n1, Msn1, 1) isa SubArray
     end
 
     @testset "ComponenException" begin

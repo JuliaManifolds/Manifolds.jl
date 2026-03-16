@@ -109,9 +109,9 @@ include("../header.jl")
         @testset "Rotations: SO($n)" begin
             SOn = Rotations(n)
             @test !is_flat(SOn)
-            ptd = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
+            pt_d = Manifolds.normal_rotation_distribution(SOn, Matrix(1.0I, n, n), 1.0)
             tvd = Manifolds.normal_tvector_distribution(SOn, Matrix(1.0I, n, n), 1.0)
-            pts = [rand(ptd) for _ in 1:3]
+            pts = [rand(pt_d) for _ in 1:3]
             diag_basis_1 = if n == 3
                 DiagonalizingOrthonormalBasis(
                     [
@@ -135,7 +135,7 @@ include("../header.jl")
                 test_default_vector_transport = true,
                 retraction_methods = retraction_methods,
                 inverse_retraction_methods = inverse_retraction_methods,
-                point_distributions = [ptd],
+                point_distributions = [pt_d],
                 tvector_distributions = [tvd],
                 basis_types_to_from = basis_types,
                 basis_types_vecs = (diag_basis_1, diag_basis_2),

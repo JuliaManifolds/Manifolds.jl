@@ -3,7 +3,7 @@
 
 Check whether `p` is a valid point on the [`SymplecticGrassmann`](@ref),
 ``\operatorname{SpGr}(2n, 2k)`` manifold by verifying that it
-is a valid representer of an equivalence class of the corersponding
+is a valid representer of an equivalence class of the corresponding
 [`SymplecticStiefel`](@ref) manifold.
 """
 function check_point(M::SymplecticGrassmann, p; kwargs...)
@@ -16,7 +16,7 @@ end
 
 Check whether `X` is a valid tangent vector at `p` on the [`SymplecticGrassmann`](@ref),
 ``\operatorname{SpGr}(2n, 2k)`` manifold by verifying that it
-is a valid representer of an equivalence class of the corersponding
+is a valid representer of an equivalence class of the corresponding
 [`SymplecticStiefel`](@ref) manifolds tangent space at `p`.
 """
 function check_vector(M::SymplecticGrassmann, p, X; kwargs...)
