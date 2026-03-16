@@ -60,6 +60,10 @@ Possible entries of the `expectations` dictionary are
 * for retractions, inverse retractions, and vector transports, the key is a tuple of the function and the method, e.g. `(retract, method) => q`
 * for `embed`, and `project`, the key is a tuple of the function and `:Point` or `:Vector`, e.g. `(embed, :Point) of expected (embedded) points or vectors,
   omitting that symbol is interpreted as the expected point.
+* for `injectivity_radius`
+    - you can provide the global test for just the function,
+    - you can provide the radius for a specific point with `(injectivity_radius, p)`
+    - you can provide a global or local one for retractions as well usinr `(injectivity_radius, rm)` and `injectivity_radius, p, rm`, respectively
 * for `get_basis`, the key is a tuple of the function and the basis, e.g. `(get_basis, B) => ...` to the expected basis
 * for `get_coordinates` the key is a tuple of the function and the basis, e.g. `(get_coordinates, B) => c`
 * for `get_vector` the key is a tuple of the function, the coordinate vector, and the basis, e.g. `(get_vector, c, B) => X`

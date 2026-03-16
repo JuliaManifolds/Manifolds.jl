@@ -35,10 +35,12 @@ end
         include_test("manifolds/test_determinant_one_matrices.jl")
         include_test("manifolds/test_cholesky_space.jl")
         include_test("manifolds/test_circle.jl")
+        include_test("manifolds/test_orthogonal_matrices.jl")
         include_test("manifolds/test_sphere.jl")
         include_test("manifolds/test_general_unitary.jl")
         include_test("manifolds/test_heisenberg_matrices.jl")
         include_test("manifolds/test_stiefel.jl")
+        include_test("manifolds-old/unitary_matrices.jl")
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
@@ -74,7 +76,8 @@ end
         include_test("manifolds-old/symplecticgrassmann.jl")
         include_test("manifolds-old/symplecticstiefel.jl")
         include_test("manifolds-old/tucker.jl")
-        include_test("manifolds-old/unitary_matrices.jl")
+        # TODO Remove when finished unitary orthogonal
+        # include_test("manifolds-old/unitary_matrices.jl")
 
         include_test("manifolds-old/essential_manifold.jl")
         include_test("manifolds-old/multinomial_matrices.jl")
