@@ -714,11 +714,7 @@ function Random.rand!(
 
         # canonicalize into valid HOSVD form and copy back
         q = Manifolds.TuckerPoint(core, factors...)
-        pX.hosvd.core .= q.hosvd.core
-        for d in 1:D
-            pX.hosvd.U[d] .= q.hosvd.U[d]
-            pX.hosvd.σ[d] .= q.hosvd.σ[d]
-        end
+        copyto!(M, pX, q)
         return pX
     else
         pX.Ċ .= σ .* randn(rng, T, size(pX.Ċ))
