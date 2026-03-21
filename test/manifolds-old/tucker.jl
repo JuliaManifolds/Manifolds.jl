@@ -103,6 +103,8 @@ include("../header.jl")
 
             # broadcasting
             @test axes(v) === ()
+            @test size(v) === ()
+            @test length(v) === 1
             u = copy(v)
             # test that the copy is equal to the original, but represented by
             # a new array
