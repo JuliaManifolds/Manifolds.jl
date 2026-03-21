@@ -190,6 +190,8 @@ end
 
 # Tuple-like broadcasting of TuckerTangentVector
 Base.axes(::TuckerTangentVector) = ()
+Base.size(::TuckerTangentVector) = ()
+Base.length(::TuckerTangentVector) = 1
 
 function Broadcast.BroadcastStyle(::Type{TuckerTangentVector{T, D}}) where {T, D}
     return Broadcast.Style{TuckerTangentVector{Any, D}}()
@@ -395,6 +397,30 @@ end
     end
     return dest
 end
+
+"""
+    default_inverse_retraction_method(M::Tucker)
+
+Return [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`)
+as the default inverse retraction for the [`Tucker`](@ref) manifold.
+"""
+default_inverse_retraction_method(::Tucker) = PolarInverseRetraction()
+
+"""
+    default_retraction_method(M::Tucker)
+
+Return [`PolarRetraction`](@extref `ManifoldsBase.PolarRetraction`)
+as the default retraction for the [`Tucker`](@ref) manifold.
+"""
+default_retraction_method(::Tucker) = PolarRetraction()
+
+"""
+    default_vector_transport_method(M::Tucker)
+
+Return the [`ProjectionTransport`](@extref `ManifoldsBase.ProjectionTransport`)
+as the default vector transport method for the [`Tucker`](@ref) manifold.
+"""
+default_vector_transport_method(::Tucker) = ProjectionTransport()
 
 @doc raw"""
     embed(::Tucker, p::TuckerPoint)
