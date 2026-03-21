@@ -70,6 +70,10 @@ struct HOSVD{T, D}
     σ::NTuple{D, Vector{T}}
 end
 
+function Base.:(==)(a::HOSVD{T, D}, b::HOSVD{T, D}) where {T, D}
+    return a.U == b.U && a.core == b.core && a.σ == b.σ
+end
+
 @doc raw"""
     TuckerPoint{T,D}
 
@@ -100,7 +104,7 @@ function TuckerPoint(
         factors::Vararg{MtxT, D},
     ) where {T, D, MtxT <: AbstractMatrix{T}}
     # Take the QR decompositions of the factors and multiply the R factors into the core
-    qrfacs = qr.(factors)
+    qrfacs = map(qr, factors)
     Q = map(qrfac -> qrfac.Q, qrfacs)
     R = map(qrfac -> qrfac.R, qrfacs)
     core′ = reshape(Kronecker.:⊗(reverse(R)...) * vec(core), size(core))
@@ -113,6 +117,10 @@ end
 function TuckerPoint(A::AbstractArray{T, D}, mlrank::NTuple{D, Int}) where {T, D}
     @assert is_valid_mlrank(size(A), mlrank)
     return TuckerPoint(st_hosvd(A, mlrank))
+end
+
+function Base.:(==)(a::TuckerPoint{T, D}, b::TuckerPoint{T, D}) where {T, D}
+    return a.hosvd == b.hosvd
 end
 
 @doc raw"""
@@ -684,6 +692,42 @@ function project!(ℳ::Tucker, Y, 𝔄::TuckerPoint, X)
     return get_vector!(ℳ, Y, 𝔄, coords, ℬ)
 end
 
+function Random.rand!(
+        rng::AbstractRNG,
+        M::Tucker,
+        pX::Union{TuckerPoint{T, D}, TuckerTangentVector{T, D}};
+        σ::Real = 1.0,
+        vector_at::Union{Nothing, TuckerPoint{T, D}} = nothing,
+    ) where {T, D}
+    if vector_at === nothing
+        N, R = Manifolds.get_parameter(M.size)
+
+        factors = ntuple(
+            d -> begin
+                A = σ .* randn(rng, T, N[d], R[d])
+                Q = qr(A).Q
+                Matrix(Q[:, 1:R[d]])
+            end, D
+        )
+
+        core = σ .* randn(rng, T, R)
+
+        # canonicalize into valid HOSVD form and copy back
+        q = Manifolds.TuckerPoint(core, factors...)
+        copyto!(M, pX, q)
+        return pX
+    else
+        pX.Ċ .= σ .* randn(rng, T, size(pX.Ċ))
+
+        for d in 1:D
+            U = vector_at.hosvd.U[d]
+            Z = σ .* randn(rng, T, size(pX.U̇[d]))
+            pX.U̇[d] .= Z .- U * (U' * Z)   # enforce U' * U̇ = 0
+        end
+        return pX
+    end
+end
+
 @doc raw"""
     retract(::Tucker, p::TuckerPoint, X::TuckerTangentVector, ::PolarRetraction)
 
@@ -880,7 +924,7 @@ end
 
 # The standard implementation of allocate_result on vector-valued functions gives an element
 # of the same type as the manifold point. We want a vector instead.
-for fun in [:get_vector, :inverse_retract, :project, :zero_vector]
+for fun in [:get_vector, :inverse_retract, :project, :zero_vector, :rand]
     @eval function ManifoldsBase.allocate_result(
             ::Tucker,
             ::typeof($(fun)),
@@ -889,6 +933,13 @@ for fun in [:get_vector, :inverse_retract, :project, :zero_vector]
         )
         return TuckerTangentVector(allocate(p.hosvd.core), allocate(p.hosvd.U))
     end
+end
+
+function ManifoldsBase.allocate_result(M::Tucker, ::typeof(rand))
+    N, R = get_parameter(M.size)
+    core = zeros(R...)
+    factors = map((a, b) -> zeros(a, b), N, R)
+    return TuckerPoint(core, factors...)
 end
 
 function ManifoldsBase.allocate_result(M::Tucker, ::typeof(embed), p, args...)
