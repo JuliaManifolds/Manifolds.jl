@@ -2,6 +2,7 @@ module ManifoldsRecursiveArrayToolsExt
 
 using Manifolds
 using RecursiveArrayTools: ArrayPartition
+import RecursiveArrayTools: recursive_bottom_eltype
 using StaticArrays
 using LinearAlgebra
 
@@ -37,6 +38,9 @@ function allocate(
     ) where {T, N}
     return similar(x)
 end
+
+recursive_bottom_eltype(::TuckerPoint{T}) where {T} = T
+recursive_bottom_eltype(::TuckerTangentVector{T}) where {T} = T
 
 include("bundles_rat.jl")
 include("ProductManifoldRAT.jl")
