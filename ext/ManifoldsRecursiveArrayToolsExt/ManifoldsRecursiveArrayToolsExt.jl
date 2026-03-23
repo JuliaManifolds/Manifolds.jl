@@ -39,6 +39,14 @@ function allocate(
     return similar(x)
 end
 
+for MT in [AbstractDecoratorManifold, ProductManifold]
+    @eval begin
+        function allocate_result(M::$MT, f::typeof(get_parameters), p::ArrayPartition)
+            return @invoke allocate_result(M, f, p::Any)
+        end
+    end
+end
+
 recursive_bottom_eltype(::TuckerPoint{T}) where {T} = T
 recursive_bottom_eltype(::TuckerTangentVector{T}) where {T} = T
 
