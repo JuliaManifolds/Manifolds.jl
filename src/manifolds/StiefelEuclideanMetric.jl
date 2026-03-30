@@ -89,7 +89,7 @@ end
 
 function get_vectors(M::Stiefel{ℝ}, p, ::DefaultOrthonormalBasis{ℝ, TangentSpaceType})
     n, k = get_parameter(M.size)
-    p⊥ = nullspace([p zeros(n, n - k)])
+    p⊥ = nullspace([p zeros(n, n - k)]')
     an = div(k * (k - 1), 2)
     bn = (n - k) * k
     V = vcat(

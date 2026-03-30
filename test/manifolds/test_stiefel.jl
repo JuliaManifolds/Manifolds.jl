@@ -396,4 +396,13 @@ using Distributions, LinearAlgebra, Manifolds, RecursiveArrayTools, StaticArrays
             @test manifold_dimension(M) == 18
         end
     end
+
+    @testset "Bug #871" begin
+        M = Stiefel(3, 1)
+        p = [-0.4760758523674722; 0.3378785657033835; -0.8119050792000313;;]
+        Xs = get_vectors(M, p, DefaultOrthonormalBasis())
+        for X in Xs
+            @test is_vector(M, p, X; atol = 1.0e-12)
+        end
+    end
 end
