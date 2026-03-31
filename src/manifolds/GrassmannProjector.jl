@@ -182,7 +182,7 @@ end
 Compute the exponential map on the [`Grassmann`](@ref) as
 
 ```math
-    \exp_pX = \operatorname{Exp}([X,p])p\operatorname{Exp}(-[X,p]),
+    \exp_p X = \operatorname{Exp}([X,p])p\operatorname{Exp}(-[X,p]),
 ```
 where ``\operatorname{Exp}`` denotes the matrix exponential and ``[A,B] = A B - B A`` denotes the matrix commutator.
 

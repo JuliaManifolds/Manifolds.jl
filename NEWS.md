@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.20] 2026-03-31
 
+### Added
+
+* a spell checker following [crate-ci/typos](https://github.com/crate-ci/typos)
+
 ### Changed
 
 * Improved formatting of the references in the Readme.md (#869)

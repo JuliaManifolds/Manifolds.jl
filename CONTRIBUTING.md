@@ -15,6 +15,7 @@ The following is a set of guidelines to [`Manifolds.jl`](https://juliamanifolds.
     * [Add a missing method](#add-a-missing-method)
     * [Provide a new manifold](#provide-a-new-manifold)
   * [Code style](#Code-style)
+  * [Spell checking](#Spell-checking)
 
 ## How to ask a question
 
@@ -102,3 +103,7 @@ Please consider a few internal conventions:
 * Always document all input variables and keyword arguments
 * if possible provide both mathematical formulae and literature references using [DocumenterCitations.jl](https://juliadocs.org/DocumenterCitations.jl/stable/) and BibTeX where possible
 * All `import`/`using`/`include` should be in the main module file.
+
+## Spell checking
+
+We use [crate-ci/typos](https://github.com/crate-ci/typos) for spell checking, which is run automatically on GitHub Actions, but you can also run it locally using their command line tool.
