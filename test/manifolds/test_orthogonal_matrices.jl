@@ -41,6 +41,8 @@ using LinearAlgebra, Manifolds, Quaternions, Test, Random
 
     @testset "Field parameter" begin
         @test get_embedding(OrthogonalMatrices(3; parameter = :field)) === Euclidean(3, 3; parameter = :field)
+        @test repr(OrthogonalMatrices(3; parameter = :field)) ==
+            "OrthogonalMatrices(3; parameter=:field)"
     end
 
     @testset "Selected methods on OrthogonalMatrices(1)" begin
