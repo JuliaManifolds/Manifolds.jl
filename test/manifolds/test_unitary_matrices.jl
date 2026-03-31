@@ -148,8 +148,8 @@ end
         q2 = Manifolds.exp_fused(MH, p, X, 1.0)
         @test isapprox(MH, q, q2)
         # test that log also works fine
-        X2 = log(M, p, q)
-        @test isapprox(M, p, X, X2)
+        X2 = log(MH, p, q)
+        @test isapprox(MH, p, X, X2)
     end
 
     @testset "Matrix point" begin
