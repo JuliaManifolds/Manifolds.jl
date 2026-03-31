@@ -5,6 +5,36 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.20] 2026-03-31
+
+### Changed
+
+* Improved formatting of the references in the Readme.md (#869)
+
+### Fixed
+
+* `get_vectors` on Stiefel no longer returns incorrect vectors in certain cases.
+
+## [0.11.19] 2026-03-21
+
+### Added
+
+* `recursive_bottom_eltype` methods for `TuckerTangentVector` and `TuckerPoint` for better compatibility with `RecursiveArrayTools.jl`.
+
+### Changed
+
+* `default_inverse_retraction_method`, `default_retraction_method` and `default_vector_transport_method` for `Tucker` manifold are now `ProjectionRetraction`, `ProjectionRetraction` and `ProjectionTransport`, respectively, since the previous defaults were not available for the manifold.
+
+### Fixed
+
+* Fixed broadcasting of `TuckerTangentVector` inside `ArrayPartition`.
+
+## [0.11.18] 2026-03-20
+
+### Added
+
+* Random point and tangent vector generation on the `Tucker` manifold.
+
 ## [0.11.17] 2026-03-13
 
 ### Fixed

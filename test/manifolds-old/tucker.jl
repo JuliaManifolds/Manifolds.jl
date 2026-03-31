@@ -8,6 +8,10 @@ include("../header.jl")
     M = Tucker(n⃗, r⃗)
     M_small = Tucker(r⃗, (2, 3, 3))
 
+    @test default_retraction_method(M) isa PolarRetraction
+    @test default_inverse_retraction_method(M) isa PolarInverseRetraction
+    @test default_vector_transport_method(M) isa ProjectionTransport
+
     types = [Float64]
 
     for T in types
@@ -99,6 +103,8 @@ include("../header.jl")
 
             # broadcasting
             @test axes(v) === ()
+            @test size(v) === ()
+            @test length(v) === 1
             u = copy(v)
             # test that the copy is equal to the original, but represented by
             # a new array
@@ -171,10 +177,13 @@ include("../header.jl")
                 default_retraction_method = PolarRetraction(),
                 test_is_tangent = false,
                 test_project_tangent = false,
-                test_default_vector_transport = false,
+                test_default_vector_transport = true,
                 test_vector_spaces = false,
                 test_tangent_vector_broadcasting = true,
                 test_representation_size = false,
+                test_rand_point = true,
+                test_rand_tvector = true,
+                test_mutating_rand = true,
                 projection_atol_multiplier = 15,
                 retraction_methods = [PolarRetraction()],
                 inverse_retraction_methods = [ProjectionInverseRetraction()],
@@ -186,5 +195,17 @@ include("../header.jl")
         M = Tucker(n⃗, r⃗; parameter = :field)
         @test sprint(show, "text/plain", M) ==
             "Tucker((4, 5, 6), (2, 3, 4), ℝ; parameter=:field)"
+    end
+
+    @testset "product of Tucker manifolds" begin
+        M = ProductManifold(
+            Tucker((18, 16, 14), (4, 3, 3)),
+            Tucker((18, 16, 14), (4, 3, 3)),
+        )
+        p0 = rand(M)
+        X = rand(M; vector_at = p0)
+        Y = copy(M, X)
+        Y .*= 2
+        @test isapprox(M, p0, X + X, Y)
     end
 end

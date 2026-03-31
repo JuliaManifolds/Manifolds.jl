@@ -19,6 +19,11 @@ function adjoint_Jacobi_field(
     )
 end
 
+function allocate_result(M::ProductManifold, f::typeof(get_point), a::AbstractVector)
+    return ArrayPartition(map(M_i -> allocate_result(M_i, f, a), M.manifolds)...)
+end
+
+
 function jacobi_field(
         M::ProductManifold,
         p::ArrayPartition,

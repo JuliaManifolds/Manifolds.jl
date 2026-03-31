@@ -246,6 +246,14 @@ using RecursiveArrayTools: ArrayPartition
         @test all(submanifold_components(p2) .== submanifold_components(p))
     end
 
+    @testset "Atlas & allocation" begin
+        M = ProductManifold(Manifolds.EmbeddedTorus(2.0, 1.0), Manifolds.EmbeddedTorus(2.0, 1.0))
+        p0x = [0.5, -1.2]
+        p = ArrayPartition(([Manifolds._torus_param(Mi, p0x...)...] for Mi in M.manifolds)...)
+        @test length(allocate_result(M, get_parameters, p)) == 4
+        @test allocate_result(M, get_point, zeros(4)) isa typeof(p)
+    end
+
     @testset "metric conversion" begin
         M = SymmetricPositiveDefinite(3)
         N = ProductManifold(M, M)
