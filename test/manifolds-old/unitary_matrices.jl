@@ -4,6 +4,7 @@ using Quaternions
 
 
 @testset "Orthogonal Matrices" begin
+    M = OrthogonalMatrices(3)
     @test injectivity_radius(M, PolarRetraction()) == π / sqrt(2.0)
     @test injectivity_radius(M) == π * sqrt(2.0)
     @test injectivity_radius(OrthogonalMatrices(3; parameter = :field)) == π * sqrt(2.0)
