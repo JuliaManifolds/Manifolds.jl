@@ -1,4 +1,4 @@
-using LinearAlgebra, Manifolds, Quaternions, Test
+using LinearAlgebra, Manifolds, Quaternions, Test, Random
 
 @testset "Orthogonal Matrices" begin
     M = OrthogonalMatrices(3)
@@ -30,4 +30,22 @@ using LinearAlgebra, Manifolds, Quaternions, Test
             repr => "OrthogonalMatrices(3)",
         )
     )
+
+    @testset "volume" begin
+        @test manifold_volume(OrthogonalMatrices(1)) ≈ 2
+        @test manifold_volume(OrthogonalMatrices(2)) ≈ 4 * π * sqrt(2)
+        @test manifold_volume(OrthogonalMatrices(3)) ≈ 16 * π^2 * sqrt(2)
+        @test manifold_volume(OrthogonalMatrices(4)) ≈ 2 * (2 * π)^4 * sqrt(2)
+        @test manifold_volume(OrthogonalMatrices(5)) ≈ 8 * (2 * π)^6 / 6 * sqrt(2)
+    end
+
+    @testset "Field parameter" begin
+        @test get_embedding(OrthogonalMatrices(3; parameter = :field)) === Euclidean(3, 3; parameter = :field)
+    end
+
+    @testset "Selected methods on OrthogonalMatrices(1)" begin
+        @test abs(rand(OrthogonalMatrices(1))[]) == 1
+        @test abs(rand(MersenneTwister(), OrthogonalMatrices(1))[]) == 1
+        @test injectivity_radius(OrthogonalMatrices(1; parameter = :field)) == 0.0
+    end
 end

@@ -77,7 +77,7 @@ end
         include_test("manifolds-old/symplecticstiefel.jl")
         include_test("manifolds-old/tucker.jl")
         # TODO Remove when finished unitary orthogonal
-        # include_test("manifolds-old/unitary_matrices.jl")
+        include_test("manifolds-old/unitary_matrices.jl")
 
         include_test("manifolds-old/essential_manifold.jl")
         include_test("manifolds-old/multinomial_matrices.jl")
