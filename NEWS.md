@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.20] 2026-03-31
 
+### Added
+
+* a spell checker following [crate-ci/typos](https://github.com/crate-ci/typos)
+
 ### Changed
 
 * Improved formatting of the references in the Readme.md (#869)
@@ -118,7 +122,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * New methods and functions for working in a chart: `local_metric`, `inverse_local_metric`, `levi_civita_affine_connection!`, `christoffel_symbols_second`.
 * Default implementation of `get_vector!` and `get_coordinates!` for `InducedBasis` using automatic differentiation.
 * A new tutorial that describes working with the Levi-Civita connection for a Riemannian metric defined through `inner` in a chart.
-* a spell checker following [crate-ci/typos](https://github.com/crate-ci/typos)
 
 ### Fixed
 
