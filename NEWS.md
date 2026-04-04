@@ -5,6 +5,14 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.21] 2025-04-03
+
+### Changed
+
+* bump compat of RecursiveArrayTools to 4
+* introduce a Project.toml workspace and a separate Project.toml for the `test/` folder
+* move julia package dependency checks from CompatHelper to dependabot, since that one can group PRs.
+
 ## [0.11.20] 2026-03-31
 
 ### Added
