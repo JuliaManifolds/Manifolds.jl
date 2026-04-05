@@ -2,7 +2,7 @@ using Test
 using Manifolds
 using RecursiveArrayTools
 
-@testset "Multitangent bundle" begin
+@testset "direct_sum_bundle" begin
     M = Sphere(2)
     m_prod_retr = Manifolds.FiberBundleProductRetraction()
     m_prod_invretr = Manifolds.FiberBundleInverseProductRetraction()
@@ -28,7 +28,6 @@ using RecursiveArrayTools
 
     p = [1.0, 0.0, 0.0]
     TB = Manifolds.MultitangentBundle{2}(M)
-    # @test sprint(show, TB) == "TangentBundle(Sphere(2, ℝ))"
     @test base_manifold(TB) == M
     @test manifold_dimension(TB) == 3 * manifold_dimension(M)
     @test representation_size(TB) === nothing
