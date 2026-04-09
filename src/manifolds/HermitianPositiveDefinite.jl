@@ -1,7 +1,7 @@
 @doc raw"""
     HermitianPositiveDefinite{𝔽,T} <: AbstractDecoratorManifold{𝔽}
 
-The manifold of hermitian positive definite matrices, i.e.
+The manifold of hermitian positive definite matrices
 
 ````math
 \mathcal H(n) :=
@@ -9,7 +9,8 @@ The manifold of hermitian positive definite matrices, i.e.
 p ∈ 𝔽^{n×n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ 𝔽^{n}\backslash\{0\}
 \bigr\},
 ````
-where usually ``𝔽=ℂ``. For the case ``𝔽=ℝ`` this manifold simplified to the [`HermitianPositiveDefinite`](@ref)
+where usually ``𝔽=ℂ``.
+For the case ``𝔽=ℝ`` this manifold simplifies to the [`SymmetricPositiveDefinite`](@ref)
 
 The tangent space at ``p∈\mathcal H(n)`` reads
 
@@ -46,14 +47,15 @@ This is for example the case for the [`HermitianPositiveDefinite`](@ref) manifol
 
 # Fields
 
-* `p::P``
-* `eigen::E`
-* `sqrt::Q`
-* `sqrt_inv::R`
+* `p::P`` a matrix representation of the point
+* `eigen::E` the eigenvalues of `p`
+* `sqrt::Q` the matrix square root of `p`
+* `sqrt_inv::R` the inverse of the matrix square root of `p`
 
-Any of the fields `P`, `Q`, `R` cancan be set to `Missing` to indicate that
-that field should not be stored/cached. If given, they have to be of the same type as `A`.
-The result of `eigen(p)` will always be stored. The other three can be computed when required, but it might be beneficial to cache them.
+Any of the fields `p`, `sqrt`, `sqrt_inv` can be set to not be stored and is then `missing` (its field type hence `Missing`)
+to indicate that that field should not be stored/cached. If given, the field types `P`, `Q`, and `R` have to be the same as the type `A`.
+The result of `eigen(p)` will always be stored. This way the other three can always be provided from this field,
+but it might be beneficial to cache them as well.
 
 # Constructor
 
@@ -64,10 +66,7 @@ The result of `eigen(p)` will always be stored. The other three can be computed 
 Create an `MatrixSqrtManifoldPoint` point using an matrix `p`, where you can optionally store `p`, `sqrt` and `sqrt_inv`
 """
 struct MatrixSqrtManifoldPoint{
-        A <: AbstractMatrix,
-        P <: Union{A, Missing},
-        Q <: Union{A, Missing},
-        R <: Union{A, Missing},
+        A <: AbstractMatrix, P <: Union{A, Missing}, Q <: Union{A, Missing}, R <: Union{A, Missing},
         E <: Eigen,
     } <: AbstractManifoldPoint
     p::P
@@ -79,9 +78,7 @@ end
 MatrixSqrtManifoldPoint(p::MatrixSqrtManifoldPoint) = p
 function MatrixSqrtManifoldPoint(
         p::A;
-        store_p = true,
-        store_sqrt = true,
-        store_sqrt_inv = true,
+        store_p = true, store_sqrt = true, store_sqrt_inv = true,
     ) where {A}
     e = eigen(Symmetric(p))
     U = e.vectors
@@ -104,10 +101,7 @@ function MatrixSqrtManifoldPoint(
         q = missing
     end
     return MatrixSqrtManifoldPoint{A, typeof(q), typeof(p_sqrt), typeof(p_sqrt_inv), typeof(e)}(
-        q,
-        e,
-        p_sqrt,
-        p_sqrt_inv,
+        q, e, p_sqrt, p_sqrt_inv,
     )
 end
 convert(::Type{MatrixSqrtManifoldPoint}, p::AbstractMatrix) = MatrixSqrtManifoldPoint(p)
@@ -134,25 +128,17 @@ function allocate(p::MatrixSqrtManifoldPoint, ::Type{T}) where {T}
 end
 
 function allocate_result(
-        M::HermitianPositiveDefinite,
-        ::typeof(zero_vector),
-        p::MatrixSqrtManifoldPoint,
+        M::HermitianPositiveDefinite, ::typeof(zero_vector), p::MatrixSqrtManifoldPoint,
     )
     return allocate_result(M, zero_vector, convert(AbstractMatrix, p))
 end
 function allocate_coordinates(
-        M::HermitianPositiveDefinite,
-        p::MatrixSqrtManifoldPoint,
-        T,
-        n::Int,
+        M::HermitianPositiveDefinite, p::MatrixSqrtManifoldPoint, T, n::Int,
     )
     return allocate_coordinates(M, convert(AbstractMatrix, p), T, n)
 end
 function allocate_result(
-        M::HermitianPositiveDefinite,
-        ::typeof(get_vector),
-        p::MatrixSqrtManifoldPoint,
-        c,
+        M::HermitianPositiveDefinite, ::typeof(get_vector), p::MatrixSqrtManifoldPoint, c,
     )
     return allocate_result(M, get_vector, convert(AbstractMatrix, p), c)
 end
@@ -168,14 +154,12 @@ The tolerance for the second to last test can be set using the `kwargs...`.
 function check_point(M::HermitianPositiveDefinite, p; kwargs...)
     if !isapprox(p, p'; kwargs...)
         return DomainError(
-            norm(p - p'),
-            "The point $(p) does not lie on $(M) since its not a hermitian matrix.",
+            norm(p - p'), "The point $(p) does not lie on $(M) since its not a hermitian matrix.",
         )
     end
     if !isposdef(p)
         return DomainError(
-            eigvals(p),
-            "The point $p does not lie on $(M) since its not a positive definite matrix.",
+            eigvals(p), "The point $p does not lie on $(M) since its not a positive definite matrix.",
         )
     end
     return nothing

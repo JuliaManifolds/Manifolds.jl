@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * `HermitianPositiveDefinite` manifold of Hermitian positive definite matrices.
 * `MatrixSqrtManifoldPoint` as a generalization/replacement for the `SPDPoint`
+* `SymmetricPositiveDefinite` is now a `const` of `HermitianPositiveDefinite` over the reals
 
 ## [0.11.21] 2025-04-03
 
