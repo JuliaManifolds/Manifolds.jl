@@ -27,12 +27,12 @@ i.e. the set of hermitian matrices.
 
 generates the manifold of hermitian positive definite matrices ``\mathcal H(n) \subset 𝔽^{n×n}``.
 """
-struct HermitianPositiveDefinite{𝔽,T} <: AbstractDecoratorManifold{𝔽}
+struct HermitianPositiveDefinite{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
-function HermitianPositiveDefinite(n, 𝔽::AbstractNumbers=ℂ; parameter::Symbol=:type)
+function HermitianPositiveDefinite(n, 𝔽::AbstractNumbers = ℂ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
-    return HermitianPositiveDefinite{𝔽,typeof(size)}(size)
+    return HermitianPositiveDefinite{𝔽, typeof(size)}(size)
 end
 
 @doc raw"""
@@ -64,12 +64,12 @@ The result of `eigen(p)` will always be stored. The other three can be computed 
 Create an `MatrixSqrtManifoldPoint` point using an matrix `p`, where you can optionally store `p`, `sqrt` and `sqrt_inv`
 """
 struct MatrixSqrtManifoldPoint{
-    A<:AbstractMatrix,
-    P<:Union{A,Missing},
-    Q<:Union{A,Missing},
-    R<:Union{A,Missing},
-    E<:Eigen,
-} <: AbstractManifoldPoint
+        A <: AbstractMatrix,
+        P <: Union{A, Missing},
+        Q <: Union{A, Missing},
+        R <: Union{A, Missing},
+        E <: Eigen,
+    } <: AbstractManifoldPoint
     p::P
     eigen::E
     sqrt::Q
@@ -78,11 +78,11 @@ end
 
 MatrixSqrtManifoldPoint(p::MatrixSqrtManifoldPoint) = p
 function MatrixSqrtManifoldPoint(
-    p::A;
-    store_p=true,
-    store_sqrt=true,
-    store_sqrt_inv=true,
-) where {A}
+        p::A;
+        store_p = true,
+        store_sqrt = true,
+        store_sqrt_inv = true,
+    ) where {A}
     e = eigen(Symmetric(p))
     U = e.vectors
     S = max.(e.values, floatmin(eltype(e.values)))
@@ -103,7 +103,7 @@ function MatrixSqrtManifoldPoint(
     else
         q = missing
     end
-    return MatrixSqrtManifoldPoint{A,typeof(q),typeof(p_sqrt),typeof(p_sqrt_inv),typeof(e)}(
+    return MatrixSqrtManifoldPoint{A, typeof(q), typeof(p_sqrt), typeof(p_sqrt_inv), typeof(e)}(
         q,
         e,
         p_sqrt,
@@ -134,26 +134,26 @@ function allocate(p::MatrixSqrtManifoldPoint, ::Type{T}) where {T}
 end
 
 function allocate_result(
-    M::HermitianPositiveDefinite,
-    ::typeof(zero_vector),
-    p::MatrixSqrtManifoldPoint,
-)
+        M::HermitianPositiveDefinite,
+        ::typeof(zero_vector),
+        p::MatrixSqrtManifoldPoint,
+    )
     return allocate_result(M, zero_vector, convert(AbstractMatrix, p))
 end
 function allocate_coordinates(
-    M::HermitianPositiveDefinite,
-    p::MatrixSqrtManifoldPoint,
-    T,
-    n::Int,
-)
+        M::HermitianPositiveDefinite,
+        p::MatrixSqrtManifoldPoint,
+        T,
+        n::Int,
+    )
     return allocate_coordinates(M, convert(AbstractMatrix, p), T, n)
 end
 function allocate_result(
-    M::HermitianPositiveDefinite,
-    ::typeof(get_vector),
-    p::MatrixSqrtManifoldPoint,
-    c,
-)
+        M::HermitianPositiveDefinite,
+        ::typeof(get_vector),
+        p::MatrixSqrtManifoldPoint,
+        c,
+    )
     return allocate_result(M, get_vector, convert(AbstractMatrix, p), c)
 end
 
@@ -199,8 +199,8 @@ function check_vector(M::HermitianPositiveDefinite, p, X; kwargs...)
 end
 
 # Internal function for nicer printing.
-get_parameter_type(::HermitianPositiveDefinite{𝔽,<:TypeParameter}) where {𝔽} = :type
-get_parameter_type(::HermitianPositiveDefinite{𝔽,Tuple{Int}}) where {𝔽} = :field
+get_parameter_type(::HermitianPositiveDefinite{𝔽, <:TypeParameter}) where {𝔽} = :type
+get_parameter_type(::HermitianPositiveDefinite{𝔽, Tuple{Int}}) where {𝔽} = :field
 
 @doc raw"""
     representation_size(M::HermitianPositiveDefinite)
