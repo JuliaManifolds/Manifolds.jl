@@ -35,16 +35,18 @@ X = imag(p) - real(p) * im
 qE = exp(M, p, X)
 qP = project(M, p + X)
 
-circle = [[sin(φ), cos(φ)] for φ in range(0, 2π, length=n)]
-tp = @pgf Axis({
-    axis_lines = "none",
-    axis_equal,
-    xmin = -1.7,
-    xmax = 1.7,
-    ymin = -0.25,
-    ymax = 1.4,
-    scale = 1.6,
-})
+circle = [[sin(φ), cos(φ)] for φ in range(0, 2π, length = n)]
+tp = @pgf Axis(
+    {
+        axis_lines = "none",
+        axis_equal,
+        xmin = -1.7,
+        xmax = 1.7,
+        ymin = -0.25,
+        ymax = 1.4,
+        scale = 1.6,
+    }
+)
 
 plain_opts = @pgf {"no markers", color = light_color, line_width = base_linewidth}
 
@@ -61,7 +63,7 @@ tangent_vec = [C_to_2D(p), C_to_2D(p + X)]
 push!(tp, Plot(tangent_opts, Coordinates(Tuple.(tangent_vec))))
 
 geo_opts = @pgf {"no markers", "-", color = geo_color, line_width = geo_linewidth}
-geo_pts = C_to_2D.(shortest_geodesic(M, p, qE, range(0, 1, length=n)))
+geo_pts = C_to_2D.(shortest_geodesic(M, p, qE, range(0, 1, length = n)))
 push!(tp, Plot(geo_opts, Coordinates(Tuple.(geo_pts))))
 geo_opts2 = @pgf {"only marks", mark_size = geo_marker_size, color = geo_color}
 push!(tp, Plot(geo_opts2, Coordinates(Tuple.([C_to_2D(p), C_to_2D(qE)]))))
@@ -81,24 +83,24 @@ push!(tp, Plot(projection_opts_a, Coordinates(Tuple.([C_to_2D(qP)]))))
 push!(
     tp,
     raw"\node[label ={[label distance=.05cm]above:{\color{gray}$p$}}] at (axis cs:" *
-    "$(real(p)),$(imag(p))) {};",
+        "$(real(p)),$(imag(p))) {};",
 )
 push!(
     tp,
     raw"\node[label ={[label distance=.1cm]above:{\color{gray}$X\in T_p\mathcal C$}}] at (axis cs:" *
-    "$(real(p+X/2)),$(imag(p+X/2))) {};",
+        "$(real(p + X / 2)),$(imag(p + X / 2))) {};",
 )
 push!(
     tp,
     raw"\node[label ={[label distance=.05cm]left:{\color{gray}$q'=\mathrm{retr}^{\mathrm{proj}}_pX=\mathrm{proj}_{\mathcal C}(p+X)$}}] at (axis cs:" *
-    "$(real(qP)),$(imag(qP))) {};",
+        "$(real(qP)),$(imag(qP))) {};",
 )
 push!(
     tp,
     raw"\node[label ={[label distance=.05cm]left:{\color{gray}$q=\exp_pX$}}] at (axis cs:" *
-    "$(real(qE)),$(imag(qE))) {};",
+        "$(real(qE)),$(imag(qE))) {};",
 )
 
 push!(tp, raw"\node at (axis cs: 0,-.6) {\color{gray}$\mathcal C$};")
 
-pgfsave(out_file, tp; dpi=1200)
+pgfsave(out_file, tp; dpi = 1200)

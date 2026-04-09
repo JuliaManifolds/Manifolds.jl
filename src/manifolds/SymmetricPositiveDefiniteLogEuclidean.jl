@@ -10,7 +10,7 @@ struct LogEuclideanMetric <: RiemannianMetric end
     distance(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogEuclideanMetric}, p, q)
 
 Compute the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between
-`p` and `q` as a [`MetricManifold`](@ref) with [`LogEuclideanMetric`](@ref).
+`p` and `q` as a [`MetricManifold`](@extref ManifoldsBase.MetricManifold) with [`LogEuclideanMetric`](@ref).
 The formula reads
 
 ```math
@@ -20,7 +20,7 @@ The formula reads
 where $\operatorname{Log}$ denotes the matrix logarithm and
 $\lVert⋅\rVert_{\mathrm{F}}$ denotes the matrix Frobenius norm.
 """
-function distance(::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogEuclideanMetric}, p, q)
+function distance(::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogEuclideanMetric}, p, q)
     return norm(log(Symmetric(p)) - log(Symmetric(q)))
 end
 
@@ -30,4 +30,4 @@ end
 Return false. [`SymmetricPositiveDefinite`](@ref) with [`LogEuclideanMetric`](@ref)
 is not a flat manifold.
 """
-is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,LogEuclideanMetric}) = false
+is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, LogEuclideanMetric}) = false

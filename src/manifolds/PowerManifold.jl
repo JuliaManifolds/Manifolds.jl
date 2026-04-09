@@ -1,4 +1,3 @@
-
 """
     ArrayPowerRepresentation
 
@@ -21,17 +20,17 @@ tangent space of the power manifold.
 """
 struct PowerMetric <: AbstractMetric end
 
-function PowerManifold(
-    M::AbstractManifold{𝔽},
-    size::Integer...;
-    parameter::Symbol=:field,
-) where {𝔽}
+function ManifoldsBase.PowerManifold(
+        M::AbstractManifold{𝔽},
+        size::Integer...;
+        parameter::Symbol = :field,
+    ) where {𝔽}
     size_w = wrap_type_parameter(parameter, size)
-    return PowerManifold{𝔽,typeof(M),typeof(size_w),ArrayPowerRepresentation}(M, size_w)
+    return PowerManifold{𝔽, typeof(M), typeof(size_w), ArrayPowerRepresentation}(M, size_w)
 end
 
 const PowerManifoldMultidimensional =
-    AbstractPowerManifold{𝔽,<:AbstractManifold{𝔽},ArrayPowerRepresentation} where {𝔽}
+    AbstractPowerManifold{𝔽, <:AbstractManifold{𝔽}, ArrayPowerRepresentation} where {𝔽}
 
 Base.:^(M::AbstractManifold, n) = PowerManifold(M, n...)
 
@@ -47,17 +46,13 @@ for PowerRepr in [PowerManifoldNested, PowerManifoldNestedReplacing]
         function allocate_result(M::$PowerRepr, f::typeof(get_parameters), p)
             return invoke(
                 allocate_result,
-                Tuple{AbstractManifold,typeof(get_parameters),Any},
+                Tuple{AbstractManifold, typeof(get_parameters), Any},
                 M,
                 f,
                 p,
             )
         end
     end
-end
-
-function allocate_result(M::PowerManifoldNestedReplacing, f, ::Identity, x...)
-    return allocate_result(M, f, x...)
 end
 
 @doc raw"""
@@ -84,17 +79,17 @@ function flat!(M::AbstractPowerManifold, ξ::RieszRepresenterCotangentVector, p,
 end
 
 Base.@propagate_inbounds function Base.getindex(
-    p::AbstractArray,
-    M::PowerManifoldMultidimensional,
-    I::Integer...,
-)
+        p::AbstractArray,
+        M::PowerManifoldMultidimensional,
+        I::Integer...,
+    )
     return collect(get_component(M, p, I...))
 end
 Base.@propagate_inbounds function Base.getindex(
-    p::AbstractArray{T,N},
-    M::PowerManifoldMultidimensional,
-    I::Vararg{Integer,N},
-) where {T,N}
+        p::AbstractArray{T, N},
+        M::PowerManifoldMultidimensional,
+        I::Vararg{Integer, N},
+    ) where {T, N}
     return get_component(M, p, I...)
 end
 
@@ -109,27 +104,27 @@ function manifold_volume(M::PowerManifold)
 end
 
 Base.@propagate_inbounds @inline function _read(
-    ::PowerManifoldMultidimensional,
-    rep_size::Tuple,
-    x::AbstractArray,
-    i::Tuple,
-)
+        ::PowerManifoldMultidimensional,
+        rep_size::Tuple,
+        x::AbstractArray,
+        i::Tuple,
+    )
     return view(x, rep_size_to_colons(rep_size)..., i...)
 end
 Base.@propagate_inbounds @inline function _read(
-    ::PowerManifoldMultidimensional,
-    rep_size::Tuple{},
-    x::AbstractArray,
-    i::NTuple{N,Int},
-) where {N}
+        ::PowerManifoldMultidimensional,
+        rep_size::Tuple{},
+        x::AbstractArray,
+        i::NTuple{N, Int},
+    ) where {N}
     return x[i...]
 end
 
 function Base.view(
-    p::AbstractArray,
-    M::PowerManifoldMultidimensional,
-    I::Union{Integer,Colon,AbstractVector}...,
-)
+        p::AbstractArray,
+        M::PowerManifoldMultidimensional,
+        I::Union{Integer, Colon, AbstractVector}...,
+    )
     rep_size = representation_size(M.manifold)
     return _write(M, rep_size, p, I...)
 end
@@ -189,18 +184,18 @@ function sharp!(M::AbstractPowerManifold, X, p, ξ::RieszRepresenterCotangentVec
 end
 
 function Base.show(
-    io::IO,
-    M::PowerManifold{𝔽,TM,TypeParameter{TSize},ArrayPowerRepresentation},
-) where {𝔽,TM<:AbstractManifold{𝔽},TSize}
+        io::IO,
+        M::PowerManifold{𝔽, TM, TypeParameter{TSize}, ArrayPowerRepresentation},
+    ) where {𝔽, TM <: AbstractManifold{𝔽}, TSize}
     return print(
         io,
         "PowerManifold($(M.manifold), $(join(TSize.parameters, ", ")), parameter=:type)",
     )
 end
 function Base.show(
-    io::IO,
-    M::PowerManifold{𝔽,TM,<:Tuple,ArrayPowerRepresentation},
-) where {𝔽,TM<:AbstractManifold{𝔽}}
+        io::IO,
+        M::PowerManifold{𝔽, TM, <:Tuple, ArrayPowerRepresentation},
+    ) where {𝔽, TM <: AbstractManifold{𝔽}}
     size = get_parameter(M.size)
     return print(io, "PowerManifold($(M.manifold), $(join(size, ", ")))")
 end
@@ -223,10 +218,10 @@ function volume_density(M::PowerManifold, p, X)
 end
 
 @inline function _write(
-    ::PowerManifoldMultidimensional,
-    rep_size::Tuple,
-    x::AbstractArray,
-    i::Tuple,
-)
+        ::PowerManifoldMultidimensional,
+        rep_size::Tuple,
+        x::AbstractArray,
+        i::Tuple,
+    )
     return view(x, rep_size_to_colons(rep_size)..., i...)
 end

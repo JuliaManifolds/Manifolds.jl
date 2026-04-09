@@ -11,10 +11,10 @@ with the standard Euclidean metric.
 Generate the hyperrectangle of arrays such that each element of the array is between lower
 and upper bound with the same index.
 """
-struct Hyperrectangle{T<:AbstractArray} <: AbstractDecoratorManifold{ℝ}
+struct Hyperrectangle{T <: AbstractArray} <: AbstractDecoratorManifold{ℝ}
     lb::T
     ub::T
-    function Hyperrectangle(lb::T, ub::T) where {T<:AbstractArray}
+    function Hyperrectangle(lb::T, ub::T) where {T <: AbstractArray}
         for i in eachindex(lb, ub)
             if lb[i] > ub[i]
                 throw(
@@ -28,13 +28,6 @@ struct Hyperrectangle{T<:AbstractArray} <: AbstractDecoratorManifold{ℝ}
     end
 end
 
-function active_traits(f, ::Hyperrectangle, args...)
-    return merge_traits(
-        IsDefaultMetric(EuclideanMetric()),
-        IsDefaultConnection(LeviCivitaConnection()),
-    )
-end
-
 function check_point(M::Hyperrectangle, p)
     if !(eltype(p) <: Real)
         return DomainError(
@@ -43,16 +36,16 @@ function check_point(M::Hyperrectangle, p)
         )
     end
     for i in eachindex(M.lb, M.ub, p)
-        if p[i] < M.lb[i]
+        if !(p[i] >= M.lb[i])
             return DomainError(
                 p[i],
-                "At index $i the point has coordinate $(p[i]), below the lower bound of $(M.lb[i])",
+                "At index $i the point has coordinate $(p[i]), is not at or above the lower bound of $(M.lb[i])",
             )
         end
-        if p[i] > M.ub[i]
+        if !(p[i] <= M.ub[i])
             return DomainError(
                 p[i],
-                "At index $i the point has coordinate $(p[i]), above the upper bound of $(M.ub[i])",
+                "At index $i the point has coordinate $(p[i]), is not at or below the upper bound of $(M.ub[i])",
             )
         end
     end
@@ -70,7 +63,7 @@ function check_vector(M::Hyperrectangle, p, X; kwargs...)
 end
 
 default_approximation_method(::Hyperrectangle, ::typeof(mean)) = EfficientEstimator()
-
+metric(::Hyperrectangle) = EuclideanMetric()
 """
     default_retraction_method(M::Hyperrectangle)
 
@@ -80,11 +73,13 @@ retraction for the [`Hyperrectangle`](@ref) manifold.
 default_retraction_method(::Hyperrectangle) = ProjectionRetraction()
 
 """
-    distance(M::Hyperrectangle, p, q)
+    distance(M::Hyperrectangle, p, q, r::Real=2)
 
 Compute the euclidean distance between two points on the [`Hyperrectangle`](@ref)
 manifold `M`, i.e. for vectors it's just the norm of the difference, for matrices
 and higher order arrays, the matrix and tensor Frobenius norm, respectively.
+Specifying further an `r≠2`, distance based on other norms, like the 1-norm or the ∞-norm
+can also be computed.
 """
 Base.@propagate_inbounds function distance(M::Hyperrectangle, p, q)
     # Inspired by euclidean distance calculation in Distances.jl
@@ -102,7 +97,9 @@ Base.@propagate_inbounds function distance(M::Hyperrectangle, p, q)
     end
     return sqrt(s)
 end
+distance(::Hyperrectangle, p, q, r::Real) = norm(p - q, r)
 distance(::Hyperrectangle, p::Number, q::Number) = abs(p - q)
+
 
 """
     embed(M::Hyperrectangle, p)
@@ -148,12 +145,12 @@ function get_vector_orthonormal(::Hyperrectangle{<:AbstractVector}, ::Any, c, ::
 end
 
 function get_vector_orthonormal!(
-    ::Hyperrectangle{<:AbstractVector},
-    Y,
-    ::Any,
-    c,
-    ::RealNumbers,
-)
+        ::Hyperrectangle{<:AbstractVector},
+        Y,
+        ::Any,
+        c,
+        ::RealNumbers,
+    )
     # this method is defined just to skip a reshape
     copyto!(Y, c)
     return Y
@@ -163,6 +160,8 @@ function get_vector_orthonormal!(M::Hyperrectangle, Y, ::Any, c, ::RealNumbers)
     copyto!(Y, reshape(c, S))
     return Y
 end
+
+has_components(::Hyperrectangle) = true
 
 @doc raw"""
     injectivity_radius(M::Hyperrectangle, p)
@@ -262,12 +261,12 @@ end
 #
 # When Statistics / Statsbase.mean! is consistent with mean, we can pass this on to them as well
 function Statistics.mean!(
-    ::Hyperrectangle,
-    y,
-    x::AbstractVector,
-    ::EfficientEstimator;
-    kwargs...,
-)
+        ::Hyperrectangle,
+        y,
+        x::AbstractVector,
+        ::EfficientEstimator;
+        kwargs...,
+    )
     n = length(x)
     copyto!(y, first(x))
     @inbounds for j in 2:n
@@ -277,13 +276,13 @@ function Statistics.mean!(
     return y
 end
 function Statistics.mean!(
-    ::Hyperrectangle,
-    y,
-    x::AbstractVector,
-    w::AbstractWeights,
-    ::EfficientEstimator;
-    kwargs...,
-)
+        ::Hyperrectangle,
+        y,
+        x::AbstractVector,
+        w::AbstractWeights,
+        ::EfficientEstimator;
+        kwargs...,
+    )
     n = length(x)
     if length(w) != n
         throw(
@@ -310,13 +309,14 @@ function mid_point!(::Hyperrectangle, q, p1, p2)
 end
 
 @doc raw"""
-    norm(M::Hyperrectangle, p, X)
+    norm(M::Hyperrectangle, p, X, r::Real = 2)
 
 Compute the norm of a tangent vector `X` at `p` on the [`Hyperrectangle`](@ref)
 `M`, i.e. since every tangent space can be identified with `M` itself
 in this case, just the (Frobenius) norm of `X`.
+Specifying `r` allows to compute other norms as well.
 """
-LinearAlgebra.norm(::Hyperrectangle, ::Any, X) = norm(X)
+LinearAlgebra.norm(::Hyperrectangle, ::Any, X, r::Real = 2) = norm(X, r)
 
 """
     parallel_transport_direction(M::Hyperrectangle, p, X, d)
@@ -354,32 +354,50 @@ end
     project(M::Hyperrectangle, p, X)
 
 Project an arbitrary vector `X` into the tangent space of a point `p` on the
-[`Hyperrectangle`](@ref) `M`, which is just the identity, since any tangent
-space of `M` can be identified with all of `M`.
+[`Hyperrectangle`](@ref) `M`. For coordinates `i` at which `p[i]` is equal to the
+lower bound of `M`, `X[i]` is upper-bounded at 0. `M`. For coordinates `i` at which `p[i]`
+is equal to the upper bound of `M`, `X[i]` is lower-bounded at 0. Otherwise, `X` is
+not changed.
 """
 project(::Hyperrectangle, ::Any, ::Any)
 
 function project!(M::Hyperrectangle, Y, p, X)
     copyto!(Y, X)
     for i in eachindex(M.lb, Y)
-        if Y[i] >= 0
-            Y[i] = min(Y[i], M.ub[i] - p[i])
-        else
-            Y[i] = max(Y[i], M.lb[i] - p[i])
+        if M.ub[i] == p[i]
+            Y[i] = min(Y[i], 0)
+        elseif M.lb[i] == p[i]
+            Y[i] = max(Y[i], 0)
         end
     end
     return Y
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::Hyperrectangle,
-    pX;
-    σ=one(eltype(pX)),
-    vector_at=nothing,
-)
+        rng::AbstractRNG,
+        M::Hyperrectangle,
+        pX;
+        σ = one(eltype(pX)),
+        vector_at = nothing,
+    )
     if vector_at === nothing
-        pX .= M.lb .+ rand(rng, eltype(M.lb), size(M.lb)) .* (M.ub .- M.lb)
+        for i in eachindex(M.ub)
+            lbi = M.lb[i]
+            ubi = M.ub[i]
+            if isfinite(lbi)
+                if isfinite(ubi)
+                    pX[i] = lbi + rand(rng, eltype(M.lb)) * (ubi - lbi)
+                else
+                    pX[i] = lbi + abs(randn(rng, eltype(M.lb))) * σ
+                end
+            else
+                if isfinite(ubi)
+                    pX[i] = ubi - abs(randn(rng, eltype(M.lb))) * σ
+                else
+                    pX[i] = randn(rng) * σ
+                end
+            end
+        end
     else
         pX .= randn(rng, eltype(pX), size(pX)) .* σ
         project!(M, pX, vector_at, pX)
@@ -450,24 +468,24 @@ function Base.show(io::IO, M::Hyperrectangle)
 end
 
 function vector_transport_direction(
-    M::Hyperrectangle,
-    p,
-    X,
-    ::Any,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-    ::AbstractRetractionMethod=default_retraction_method(M, typeof(p)),
-)
+        M::Hyperrectangle,
+        p,
+        X,
+        ::Any,
+        ::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        ::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+    )
     return X
 end
 function vector_transport_direction!(
-    M::Hyperrectangle,
-    Y,
-    p,
-    X,
-    ::Any,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-    ::AbstractRetractionMethod=default_retraction_method(M, typeof(p)),
-)
+        M::Hyperrectangle,
+        Y,
+        p,
+        X,
+        ::Any,
+        ::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        ::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+    )
     return copyto!(Y, X)
 end
 """
@@ -478,25 +496,25 @@ on the [`Hyperrectangle`](@ref) `M`, which simplifies to the identity.
 """
 vector_transport_to(::Hyperrectangle, ::Any, ::Any, ::Any, ::AbstractVectorTransportMethod)
 function vector_transport_to(
-    M::Hyperrectangle,
-    p,
-    X,
-    ::Any,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-    ::AbstractRetractionMethod=default_retraction_method(M, typeof(p)),
-)
+        M::Hyperrectangle,
+        p,
+        X,
+        ::Any,
+        ::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        ::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+    )
     return X
 end
 
 function vector_transport_to!(
-    M::Hyperrectangle,
-    Y,
-    p,
-    X,
-    ::Any,
-    ::AbstractVectorTransportMethod=default_vector_transport_method(M, typeof(p)),
-    ::AbstractRetractionMethod=default_retraction_method(M, typeof(p)),
-)
+        M::Hyperrectangle,
+        Y,
+        p,
+        X,
+        ::Any,
+        ::AbstractVectorTransportMethod = default_vector_transport_method(M, typeof(p)),
+        ::AbstractRetractionMethod = default_retraction_method(M, typeof(p)),
+    )
     return copyto!(Y, X)
 end
 

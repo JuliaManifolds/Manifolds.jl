@@ -11,18 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     if: contains( github.event.pull_request.labels.*.name, 'preview docs') || github.ref == 'refs/heads/master' || contains(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: quarto-dev/quarto-actions/setup@v2
         with:
-          version: "1.6.38"
+          version: "1.7.29"
       - uses: julia-actions/setup-julia@latest
         with:
-          version: "1.11"
+          version: "1.12"
       - name: Julia Cache
-        uses: julia-actions/cache@v2
+        uses: julia-actions/cache@v3
       - name: Cache Quarto
         id: cache-quarto
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-quarto
         with:
@@ -32,22 +32,12 @@ jobs:
             ${{ runner.os }}-${{ env.cache-name }}-
       - name: Cache Documenter
         id: cache-documenter
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-documenter
         with:
           path: docs/src/tutorials
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('tutorials/*.qmd') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.cache-name }}-
-      - name: Cache CondaPkg
-        id: cache-condaPkg
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-condapkg
-        with:
-          path: docs/.CondaPkg
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('docs/CondaPkg.toml') }}
           restore-keys: |
             ${{ runner.os }}-${{ env.cache-name }}-
       - name: "Documenter rendering (including Quarto)"

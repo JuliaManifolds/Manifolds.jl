@@ -21,7 +21,7 @@ A type for a [`GraphManifold`](@ref) where the data is given on the vertices.
 struct VertexManifold <: GraphManifoldType end
 
 @doc raw"""
-    GraphManifold{G,𝔽,M,T} <: AbstractPowerManifold{𝔽,M,NestedPowerRepresentation}
+    GraphManifold{𝔽, G, M, T} <: AbstractPowerManifold{𝔽,M,NestedPowerRepresentation}
 
 Build a manifold, that is a [`PowerManifold`](@extref `ManifoldsBase.PowerManifold`) of the [`AbstractManifold`](@extref `ManifoldsBase.AbstractManifold`)  `M` either on
 the edges or vertices of a graph `G` depending on the [`GraphManifoldType`](@ref) `T`.
@@ -30,31 +30,31 @@ the edges or vertices of a graph `G` depending on the [`GraphManifoldType`](@ref
 * `G` is an `AbstractSimpleGraph`
 * `M` is a `AbstractManifold`
 """
-struct GraphManifold{G<:AbstractGraph,𝔽,TM,T<:GraphManifoldType} <:
-       AbstractPowerManifold{𝔽,TM,NestedPowerRepresentation}
+struct GraphManifold{𝔽, G <: AbstractGraph, TM, T <: GraphManifoldType} <:
+    AbstractPowerManifold{𝔽, TM, NestedPowerRepresentation}
     graph::G
     manifold::TM
 end
 
 function GraphManifold(
-    g::G,
-    M::TM,
-    ::VertexManifold,
-) where {G<:AbstractGraph,𝔽,TM<:AbstractManifold{<:𝔽}}
-    return GraphManifold{G,𝔽,TM,VertexManifold}(g, M)
+        g::G,
+        M::TM,
+        ::VertexManifold,
+    ) where {G <: AbstractGraph, 𝔽, TM <: AbstractManifold{<:𝔽}}
+    return GraphManifold{𝔽, G, TM, VertexManifold}(g, M)
 end
 function GraphManifold(
-    g::G,
-    M::TM,
-    ::EdgeManifold,
-) where {G<:AbstractGraph,𝔽,TM<:AbstractManifold{<:𝔽}}
-    return GraphManifold{G,𝔽,TM,EdgeManifold}(g, M)
+        g::G,
+        M::TM,
+        ::EdgeManifold,
+    ) where {G <: AbstractGraph, 𝔽, TM <: AbstractManifold{<:𝔽}}
+    return GraphManifold{𝔽, G, TM, EdgeManifold}(g, M)
 end
 
 const EdgeGraphManifold{𝔽} =
-    GraphManifold{<:AbstractGraph,𝔽,<:AbstractManifold{𝔽},EdgeManifold}
+    GraphManifold{𝔽, <:AbstractGraph, <:AbstractManifold{𝔽}, EdgeManifold}
 const VertexGraphManifold{𝔽} =
-    GraphManifold{<:AbstractGraph,𝔽,<:AbstractManifold{𝔽},VertexManifold}
+    GraphManifold{𝔽, <:AbstractGraph, <:AbstractManifold{𝔽}, VertexManifold}
 
 @doc raw"""
     check_point(M::GraphManifold, p)
@@ -100,8 +100,8 @@ get_iterator(M::VertexGraphManifold) = 1:nv(M.graph)
     incident_log(M::GraphManifold, x)
 
 Return the tangent vector on the (vertex) [`GraphManifold`](@ref), where at
-each node the sum of the [`log`](@ref)s to incident nodes is computed.
-For a `SimpleGraph`, an egde is interpreted as double edge in the corresponding
+each node the sum of the [`log`](@extref `Base.log-Tuple{AbstractManifold, Any, Any}`)s to incident nodes is computed.
+For a `SimpleGraph`, an edge is interpreted as double edge in the corresponding
 SimpleDiGraph
 
 If the internal graph is a `SimpleWeightedGraph` the weighted sum of the
@@ -129,10 +129,10 @@ function incident_log!(M::VertexGraphManifold, X, p)
     return X
 end
 function incident_log!(
-    M::GraphManifold{<:AbstractSimpleWeightedGraph,𝔽,<:AbstractManifold{𝔽},VertexManifold},
-    X,
-    p,
-) where {𝔽}
+        M::GraphManifold{𝔽, <:AbstractSimpleWeightedGraph, <:AbstractManifold{𝔽}, VertexManifold},
+        X,
+        p,
+    ) where {𝔽}
     rep_size = representation_size(M.manifold)
     for e in edges(M.graph)
         X[src(e)] += (
@@ -185,21 +185,21 @@ end
 power_dimensions(M::EdgeGraphManifold) = (ne(M.graph),)
 power_dimensions(M::VertexGraphManifold) = (nv(M.graph),)
 
-function _show_graph_manifold(io::IO, M; man_desc="", pre="")
+function _show_graph_manifold(io::IO, M; man_desc = "", pre = "")
     println(io, "GraphManifold\nGraph:")
-    sg = sprint(show, "text/plain", M.graph, context=io, sizehint=0)
+    sg = sprint(show, "text/plain", M.graph, context = io, sizehint = 0)
     sg = replace(sg, '\n' => "\n$(pre)")
     println(io, pre, sg)
     println(io, "AbstractManifold$(man_desc):")
-    sm = sprint(show, "text/plain", M.manifold, context=io, sizehint=0)
+    sm = sprint(show, "text/plain", M.manifold, context = io, sizehint = 0)
     sm = replace(sm, '\n' => "\n$(pre)")
     print(io, pre, sm)
     return nothing
 end
 
 function Base.show(io::IO, mime::MIME"text/plain", M::EdgeGraphManifold)
-    return _show_graph_manifold(io, M; man_desc=" on edges", pre=" ")
+    return _show_graph_manifold(io, M; man_desc = " on edges", pre = " ")
 end
 function Base.show(io::IO, mime::MIME"text/plain", M::VertexGraphManifold)
-    return _show_graph_manifold(io, M; man_desc=" on vertices", pre=" ")
+    return _show_graph_manifold(io, M; man_desc = " on vertices", pre = " ")
 end

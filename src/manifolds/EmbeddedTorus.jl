@@ -1,4 +1,3 @@
-
 @doc raw"""
     EmbeddedTorus{TR<:Real} <: AbstractDecoratorManifold{ℝ}
 
@@ -16,13 +15,9 @@ Alternative names include anchor ring, donut and doughnut.
 
     EmbeddedTorus(R, r)
 """
-struct EmbeddedTorus{TR<:Real} <: AbstractDecoratorManifold{ℝ}
+struct EmbeddedTorus{TR <: Real} <: AbstractDecoratorManifold{ℝ}
     R::TR
     r::TR
-end
-
-function active_traits(f, ::EmbeddedTorus, args...)
-    return merge_traits(IsMetricManifold())
 end
 
 aspect_ratio(M::EmbeddedTorus) = M.R / M.r
@@ -52,9 +47,9 @@ Check whether `X` is a valid vector tangent to `p` on the [`EmbeddedTorus`](@ref
 The method checks if the vector `X` is orthogonal to the vector normal to the torus,
 see [`normal_vector`](@ref). Absolute tolerance can be set using `atol`.
 """
-function check_vector(M::EmbeddedTorus, p, X; atol::Real=eps(float(eltype(p))), kwargs...)
+function check_vector(M::EmbeddedTorus, p, X; atol::Real = eps(float(eltype(p))), kwargs...)
     dot_nX = dot(normal_vector(M, p), X)
-    if !isapprox(dot_nX, 0; atol=atol, kwargs...)
+    if !isapprox(dot_nX, 0; atol = atol, kwargs...)
         return DomainError(dot_nX, "The vector $(X) is not tangent to $(p) from $(M).")
     end
     return nothing
@@ -118,7 +113,7 @@ end
 
 Return true if parameters `a` lie closer than `ϵ` to chart boundary.
 """
-function check_chart_switch(::EmbeddedTorus, A::DefaultTorusAtlas, i, a; ϵ=pi / 3)
+function check_chart_switch(::EmbeddedTorus, A::DefaultTorusAtlas, i, a; ϵ = pi / 3)
     return abs(i[1] - a[1]) > (pi - ϵ) || abs(i[2] - a[2]) > (pi - ϵ)
 end
 
@@ -202,33 +197,33 @@ function get_point!(M::EmbeddedTorus, p, ::DefaultTorusAtlas, i, x)
 end
 
 function get_coordinates_induced_basis!(
-    M::EmbeddedTorus,
-    Y,
-    p,
-    X,
-    B::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas},
-)
+        M::EmbeddedTorus,
+        Y,
+        p,
+        X,
+        B::InducedBasis{ℝ, TangentSpaceType, DefaultTorusAtlas},
+    )
     θ, φ = get_parameters(M, B.A, B.i, p)
 
     sinθ, cosθ = sincos(θ + B.i[1])
     sinφ, cosφ = sincos(φ + B.i[2])
 
     A = @SMatrix [
-        (-M.r*sinθ*cosφ) (-M.R * sinφ-M.r * cosθ * sinφ)
-        (-M.r*sinθ*sinφ) (M.R * cosφ+M.r * cosθ * cosφ)
-        (M.r*cosθ) 0
+        (-M.r * sinθ * cosφ) (-M.R * sinφ - M.r * cosθ * sinφ)
+        (-M.r * sinθ * sinφ) (M.R * cosφ + M.r * cosθ * cosφ)
+        (M.r * cosθ) 0
     ]
     Y .= A \ SVector{3}(X)
     return Y
 end
 
 function get_vector_induced_basis!(
-    M::EmbeddedTorus,
-    Y,
-    p,
-    X,
-    B::InducedBasis{ℝ,TangentSpaceType,DefaultTorusAtlas},
-)
+        M::EmbeddedTorus,
+        Y,
+        p,
+        X,
+        B::InducedBasis{ℝ, TangentSpaceType, DefaultTorusAtlas},
+    )
     θ, φ = get_parameters(M, B.A, B.i, p)
     dθ, dφ = X
     sinθ, cosθ = sincos(θ + B.i[1])

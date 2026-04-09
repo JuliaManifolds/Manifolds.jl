@@ -3,7 +3,7 @@
 
 Check whether `p` is a valid point on the [`SymplecticGrassmann`](@ref),
 ``\operatorname{SpGr}(2n, 2k)`` manifold by verifying that it
-is a valid representer of an equivalence class of the corersponding
+is a valid representer of an equivalence class of the corresponding
 [`SymplecticStiefel`](@ref) manifold.
 """
 function check_point(M::SymplecticGrassmann, p; kwargs...)
@@ -16,7 +16,7 @@ end
 
 Check whether `X` is a valid tangent vector at `p` on the [`SymplecticGrassmann`](@ref),
 ``\operatorname{SpGr}(2n, 2k)`` manifold by verifying that it
-is a valid representer of an equivalence class of the corersponding
+is a valid representer of an equivalence class of the corresponding
 [`SymplecticStiefel`](@ref) manifolds tangent space at `p`.
 """
 function check_vector(M::SymplecticGrassmann, p, X; kwargs...)
@@ -56,12 +56,16 @@ function exp!(M::SymplecticGrassmann, q, p, X)
     return q
 end
 
-function get_embedding(::SymplecticGrassmann{TypeParameter{Tuple{n,k}}}) where {n,k}
+function get_embedding(::SymplecticGrassmann{ℝ, TypeParameter{Tuple{n, k}}}) where {n, k}
     return SymplecticStiefel(2n, 2k)
 end
-function get_embedding(M::SymplecticGrassmann{Tuple{Int,Int}})
+function get_embedding(M::SymplecticGrassmann{ℝ, Tuple{Int, Int}})
     n, k = get_parameter(M.size)
-    return SymplecticStiefel(2n, 2k; parameter=:field)
+    return SymplecticStiefel(2n, 2k; parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::SymplecticGrassmann{ℝ})
+    return ManifoldsBase.EmbeddedManifoldType()
 end
 
 @doc raw"""

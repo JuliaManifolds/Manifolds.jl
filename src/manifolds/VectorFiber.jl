@@ -1,11 +1,10 @@
-
 """
     TensorProductType(spaces::VectorSpaceType...)
 
 Vector space type corresponding to the tensor product of given vector space
 types.
 """
-struct TensorProductType{TS<:Tuple} <: VectorSpaceType
+struct TensorProductType{TS <: Tuple} <: VectorSpaceType
     spaces::TS
 end
 

@@ -7,7 +7,7 @@
 
 | **Documentation** | **Source** | **Citation** |
 |:-----------------:|:----------------------:|:------------:|
-| [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/stable/) | [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle) | [![arXiv](https://img.shields.io/badge/arXiv%20CS.MS-2106.08777-blue.svg)](https://arxiv.org/abs/2106.08777) |
+| [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/stable/) | [![code style: runic](https://img.shields.io/badge/code_style-%E1%9A%B1%E1%9A%A2%E1%9A%BE%E1%9B%81%E1%9A%B2-black)](https://github.com/fredrikekre/Runic.jl) | [![arXiv](https://img.shields.io/badge/arXiv%20CS.MS-2106.08777-blue.svg)](https://arxiv.org/abs/2106.08777) |
 | [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliamanifolds.github.io/Manifolds.jl/latest/) | [![CI](https://github.com/JuliaManifolds/Manifolds.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaManifolds/Manifolds.jl/actions?query=workflow%3ACI+branch%3Amaster) | [![DOI](https://zenodo.org/badge/190447542.svg)](https://zenodo.org/badge/latestdoi/190447542) |
 | | [![codecov](https://codecov.io/gh/JuliaManifolds/Manifolds.jl/graph/badge.svg?token=yQYUnjAZZN)](https://codecov.io/gh/JuliaManifolds/Manifolds.jl) |
 
@@ -53,7 +53,16 @@ If you have any questions regarding the Manifolds.jl ecosystem feel free to reac
 
 ## Citation
 
-If you use `Manifolds.jl` in your work, please cite the following open access article
+If you use `Manifolds.jl` in your work, please cite the following open access article:
+
+> _Axen, S. D., Baran, M., Bergmann, R., Rzecki, K._ (2023).
+> **Manifolds.jl: An Extensible Julia Framework for Data Analysis on Manifolds**,
+> ACM Transactions on Mathematical Software, Volume 49, Issue 4, Article No. 33, pages 1–23. <br>
+> doi: [10.1145/3618296](https://doi.org/10.1145/3618296),
+> arXiv: [2106.08777](https://arxiv.org/abs/2106.08777)
+<details>
+
+  <summary><code>AxenBaranBergmannRzecki:2023</code>(BibLaTeX)</summary>
 
 ```biblatex
 @article{AxenBaranBergmannRzecki:2023,
@@ -69,13 +78,23 @@ If you use `Manifolds.jl` in your work, please cite the following open access ar
 }
 ```
 
-To refer to a certain version we recommend to also cite for example
+</details>
+
+To refer to a certain version we recommend to also cite the code repository directly.
+For example to refer to the most recent version
+
+> _Axen, S. D., Baran, M., Bergmann, R._ (2026). **Manifolds.jl**, Zenodo.<br>
+> doi: [10.5281/zenodo.4292129](https://doi.org/10.5281/zenodo.4292129)
+
+<details>
+
+  <summary><code>Manifoldsjl-zenodo-mostrecent</code> (BibLaTeX)</summary>
 
 ```biblatex
 @software{manifoldsjl-zenodo-mostrecent,
   Author = {Seth D. Axen and Mateusz Baran and Ronny Bergmann},
   Title = {Manifolds.jl},
-  Doi = {10.5281/ZENODO.4292129},
+  Doi = {10.5281/zenodo.4292129},
   Url = {https://zenodo.org/record/4292129},
   Publisher = {Zenodo},
   Year = {2021},
@@ -83,5 +102,6 @@ To refer to a certain version we recommend to also cite for example
 }
 ```
 
-for the most recent version or a corresponding version specific DOI, see [the list of all versions](https://zenodo.org/search?page=1&size=20&q=conceptrecid:%224292129%22&sort=-version&all_versions=True).
-Note that both citations are in [BibLaTeX](https://ctan.org/pkg/biblatex) format.
+</details>
+
+for a corresponding version specific DOI, see [the list of all versions](https://zenodo.org/search?page=1&size=20&q=conceptrecid:%224292129%22&sort=-version&all_versions=True).

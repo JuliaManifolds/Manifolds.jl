@@ -1,4 +1,3 @@
-
 ## product manifold
 
 """
@@ -7,15 +6,15 @@
 Product distribution on manifold `M`, combined from `distributions`.
 """
 struct ProductPointDistribution{
-    TM<:ProductManifold,
-    TD<:(NTuple{N,Distribution} where {N}),
-} <: MPointDistribution{TM}
+        TM <: ProductManifold,
+        TD <: (NTuple{N, Distribution} where {N}),
+    } <: MPointDistribution{TM}
     manifold::TM
     distributions::TD
 end
 
 function ProductPointDistribution(M::ProductManifold, distributions::MPointDistribution...)
-    return ProductPointDistribution{typeof(M),typeof(distributions)}(M, distributions)
+    return ProductPointDistribution{typeof(M), typeof(distributions)}(M, distributions)
 end
 function ProductPointDistribution(distributions::MPointDistribution...)
     M = ProductManifold(map(d -> support(d).manifold, distributions)...)
@@ -31,9 +30,9 @@ bundle) of type `type` using the product distribution of given distributions.
 Vector space type and `x` can be automatically inferred from distributions `distrs`.
 """
 struct ProductFVectorDistribution{
-    TSpace<:VectorSpaceFiber{<:Any,<:ProductManifold},
-    TD<:(NTuple{N,Distribution} where {N}),
-} <: FVectorDistribution{TSpace}
+        TSpace <: VectorSpaceFiber{<:Any, <:ProductManifold},
+        TD <: (NTuple{N, Distribution} where {N}),
+    } <: FVectorDistribution{TSpace}
     type::TSpace
     distributions::TD
 end
@@ -41,11 +40,9 @@ end
 function ProductFVectorDistribution(distributions::FVectorDistribution...)
     M = ProductManifold(map(d -> support(d).space.manifold, distributions)...)
     fiber_type = support(distributions[1]).space.fiber_type
-    if !all(d -> support(d).space.fiber_type == fiber_type, distributions)
-        error(
-            "Not all distributions have support in vector spaces of the same type, which is currently not supported",
-        )
-    end
+    !all(d -> support(d).space.fiber_type == fiber_type, distributions) && error(
+        "Not all distributions have support in vector spaces of the same type, which is currently not supported",
+    )
     # Probably worth considering sum spaces in the future?
     p = ArrayPartition(map(d -> support(d).space.point, distributions)...)
     return ProductFVectorDistribution(Fiber(M, p, fiber_type), distributions)
@@ -59,10 +56,10 @@ function Random.rand(rng::AbstractRNG, d::ProductPointDistribution)
 end
 
 function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProductFVectorDistribution,
-    X::ArrayPartition,
-)
+        rng::AbstractRNG,
+        d::ProductFVectorDistribution,
+        X::ArrayPartition,
+    )
     map(
         (t1, t2) -> Distributions._rand!(rng, t1, t2),
         d.distributions,
@@ -71,10 +68,10 @@ function Distributions._rand!(
     return X
 end
 function Distributions._rand!(
-    rng::AbstractRNG,
-    d::ProductPointDistribution,
-    p::ArrayPartition,
-)
+        rng::AbstractRNG,
+        d::ProductPointDistribution,
+        p::ArrayPartition,
+    )
     map(
         (t1, t2) -> Distributions._rand!(rng, t1, t2),
         d.distributions,
@@ -105,8 +102,8 @@ end
 
 Power distribution on manifold `M`, based on `distribution`.
 """
-struct PowerPointDistribution{TM<:AbstractPowerManifold,TD<:MPointDistribution,TX} <:
-       MPointDistribution{TM}
+struct PowerPointDistribution{TM <: AbstractPowerManifold, TD <: MPointDistribution, TX} <:
+    MPointDistribution{TM}
     manifold::TM
     distribution::TD
     point::TX
@@ -120,8 +117,8 @@ bundle) of type `type` using the power distribution of `distr`.
 
 Vector space type and `point` can be automatically inferred from distribution `distr`.
 """
-struct PowerFVectorDistribution{TSpace<:VectorSpaceFiber,TD<:FVectorDistribution} <:
-       FVectorDistribution{TSpace}
+struct PowerFVectorDistribution{TSpace <: VectorSpaceFiber, TD <: FVectorDistribution} <:
+    FVectorDistribution{TSpace}
     type::TSpace
     distribution::TD
 end
@@ -138,10 +135,10 @@ function Random.rand(rng::AbstractRNG, d::PowerPointDistribution)
 end
 
 function Distributions._rand!(
-    rng::AbstractRNG,
-    d::PowerFVectorDistribution,
-    v::AbstractArray,
-)
+        rng::AbstractRNG,
+        d::PowerFVectorDistribution,
+        v::AbstractArray,
+    )
     PM = d.type.manifold
     rep_size = representation_size(PM.manifold)
     for i in get_iterator(d.type.manifold)
@@ -173,18 +170,18 @@ of the result is adjusted to `TResult`.
 
 See [`normal_rotation_distribution`](@ref) for details.
 """
-struct NormalRotationDistribution{TResult,TM<:Rotations,TD<:Distribution} <:
-       MPointDistribution{TM}
+struct NormalRotationDistribution{TResult, TM <: Rotations, TD <: Distribution} <:
+    MPointDistribution{TM}
     manifold::TM
     distr::TD
 end
 
 function NormalRotationDistribution(
-    M::Rotations,
-    d::Distribution,
-    x::TResult,
-) where {TResult}
-    return NormalRotationDistribution{TResult,typeof(M),typeof(d)}(M, d)
+        M::Rotations,
+        d::Distribution,
+        x::TResult,
+    ) where {TResult}
+    return NormalRotationDistribution{TResult, typeof(M), typeof(d)}(M, d)
 end
 
 function normal_rotation_distribution(M::Rotations, p, σ::Real)
@@ -204,9 +201,9 @@ function _fix_random_rotation(A::AbstractMatrix)
 end
 
 function Random.rand(
-    rng::AbstractRNG,
-    d::NormalRotationDistribution{TResult,<:Rotations},
-) where {TResult}
+        rng::AbstractRNG,
+        d::NormalRotationDistribution{TResult, <:Rotations},
+    ) where {TResult}
     n = get_parameter(d.manifold.size)[1]
     return if n == 1
         convert(TResult, ones(1, 1))
@@ -217,10 +214,10 @@ function Random.rand(
 end
 
 function Distributions._rand!(
-    rng::AbstractRNG,
-    d::NormalRotationDistribution,
-    x::AbstractArray{<:Real},
-)
+        rng::AbstractRNG,
+        d::NormalRotationDistribution,
+        x::AbstractArray{<:Real},
+    )
     return copyto!(x, rand(rng, d))
 end
 

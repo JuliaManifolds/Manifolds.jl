@@ -1,16 +1,249 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to ´Manifolds.jl´ will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10.23] unreleased
+## [0.11.24] unreleased
 
 ### Added
 
 * `HermitianPositiveDefinite` manifold of Hermitian positive definite matrices.
 * `MatrixSqrtManifoldPoint` as a generalization/replacement for the `SPDPoint`
+
+## [0.11.21] 2025-04-03
+
+### Changed
+
+* bump compat of RecursiveArrayTools to 4
+* introduce a Project.toml workspace and a separate Project.toml for the `test/` folder
+* move julia package dependency checks from CompatHelper to dependabot, since that one can group PRs.
+
+## [0.11.20] 2026-03-31
+
+### Added
+
+* a spell checker following [crate-ci/typos](https://github.com/crate-ci/typos)
+
+### Changed
+
+* Improved formatting of the references in the Readme.md (#869)
+
+### Fixed
+
+* `get_vectors` on Stiefel no longer returns incorrect vectors in certain cases.
+
+## [0.11.19] 2026-03-21
+
+### Added
+
+* `recursive_bottom_eltype` methods for `TuckerTangentVector` and `TuckerPoint` for better compatibility with `RecursiveArrayTools.jl`.
+
+### Changed
+
+* `default_inverse_retraction_method`, `default_retraction_method` and `default_vector_transport_method` for `Tucker` manifold are now `ProjectionRetraction`, `ProjectionRetraction` and `ProjectionTransport`, respectively, since the previous defaults were not available for the manifold.
+
+### Fixed
+
+* Fixed broadcasting of `TuckerTangentVector` inside `ArrayPartition`.
+
+## [0.11.18] 2026-03-20
+
+### Added
+
+* Random point and tangent vector generation on the `Tucker` manifold.
+
+## [0.11.17] 2026-03-13
+
+### Fixed
+
+* Fixed polar retraction on `UnitaryMatrices`.
+
+## [0.11.16] 2026-03-11
+
+### Fixed
+
+* Fixed `embed!` on `Segre` manifold.
+
+## [0.11.15] 2026-03-04
+
+### Fixed
+
+* fixed a missing transpose in the inverse polar light retraction.
+
+## [0.11.14] 2026-03-02
+
+### Added
+
+* a new retraction and its inverse on the Stiefel manifold (#858)
+* similar to Manopt.jl, we now do typechecking with [crate-ci/typos](https://github.com/crate-ci/typos) (#858)
+
+### Fixed
+
+* fixed a bug where the second vector in the test suite had to be both in the first and the second points tangent space
+  added a new `:SecondVector` to provide the second tangent vector in the first points tangent space (e.g. for `inner`) (#858)
+
+## [0.11.13] 2026-02-24
+
+### Changed
+
+* `rand!` on `UnitaryMatrices` and the QR retraction methods were rewritten to be faster and more GPU array-compatible.
+
+## [0.11.12] 2026-02-04
+
+### Added
+
+* Chart-based variants of `christoffel_symbols_first`, `einstein_tensor`, `det_local_metric` and `log_local_metric_density`.
+
+### Changed
+
+* Deprecated variants of `det_local_metric`, `einstein_tensor`, `inverse_local_metric`, `local_metric`, `local_metric_jacobian`, `ricci_curvature` that receive a point and a basis as arguments. New variants that work in charts should be used instead.
+
+## [0.11.11] 2025-01-24
+
+### Changed
+
+* `Hyperrectangle` now has `has_components` defined to `true`, as well as r-norm support for `norm` and `distance`.
+
+## [0.11.10] 2025-01-07
+
+### Added
+
+* `change_representer` and `change_metric` for `Rotations` manifold from `EuclideanMetric`.
+
+## [0.11.9] 2025-12-15
+
+### Fixed
+
+* `project` for tangent vectors on `Hyperrectangle` no longer truncates unnecessarily to the domain of `exp` (#851).
+* `DefaultMetric` is now internally imported from `ManifoldsBase.jl`.
+
+## [0.11.8] 2025-12-09
+
+### Changed
+
+* `MetricManifold` and `ConnectionManifold` were moved to `ManifoldsBase.jl` (#848).
+
+## [0.11.7] 2025-11-27
+
+### Added
+
+* added a more structured version for the extension with `Test.jl` that now introduces (#839)
+  * a complete test suite `Manifolds.Test.test_manifold(M; kwargs...)`
+    it follows the structure of the one recently written for `LieGroups.jl`.
+  * a lot of small test functions like `Manifolds.Test.test_exp(M, p, X; kwargs...)`
+    with the goal of providing one test for each individual API function
+* New methods and functions for working in a chart: `local_metric`, `inverse_local_metric`, `levi_civita_affine_connection!`, `christoffel_symbols_second`.
+* Default implementation of `get_vector!` and `get_coordinates!` for `InducedBasis` using automatic differentiation.
+* A new tutorial that describes working with the Levi-Civita connection for a Riemannian metric defined through `inner` in a chart.
+
+### Fixed
+
+* the circle represented in angles (`Circle()`) had a wrong default and provided a
+  `project` and `embed` method while not being an embedded manifold, this is now fixed,
+  but might cause errors for some users. To fix the errors, note that
+  the old behavior of `embed(M, p)` was just returning `p`, and the old behavior of `project(M, p)` was `Manifolds.sym_rem(p)`. (#839)
+
+## [0.11.6] 2025-11-19
+
+### Changed
+
+* `rand` on `Hyperrectangle` returns valid points in the presence of `-Inf` and `Inf`.
+* `check_point` on `Hyperrectangle` checks that there are no `NaN`s.
+
+## [0.11.5] 2025-11-13
+
+### Added
+
+* `rand` for `SkewHermitianMatrices`
+
+## [0.11.4] 2025-11-07
+
+### Changed
+
+* Random tangent vectors on `Hyperbolic` are now much shorter (their norm is on the order of 1) to guide users away from numerical issues with long vectors.
+
+## [0.11.3] 2025-11-04
+
+### Fixed
+
+* fixes a few inconsistencies regarding `get_embedding`, which now consistently uses a point type as positional second argument.
+
+## [0.11.2] 2025-10-30
+
+### Fixed
+
+* fixed the `default_retraction_method` for `AbstractSphere` to be the stabilized exponential map to avoid accumulations of rounding errors
+  when the tangent vector is not exactly tangent.
+* fixed the contributing.md to mention runic as the code formatter.
+
+## [0.11.1] 2025-10-24
+
+### Fixed
+
+* fix a few small errors regarding the forwarding of `retract`, `retract_fused`, and `inverse_retract` when using a `MetricManifold.jl` (cf (#823))
+* document why we kept that `vector_transport_direction` and `vector_transport_to` are not automatically forwarded in `MetricManifold.jl`
+
+## [0.11.0] 2025-10-02
+
+### Added
+
+* a function `metric(M)` analogous to `embedding(M)` and `connection(M)` that returns the metric of the manifold `M`.
+* a `DefaultMetric()` type to specify that the manifold uses some specific metric, that is not further named.
+
+### Changed
+
+* Switch to using [Runic.jl](https://github.com/fredrikekre/Runic.jl) as code formatter
+* refactored all manifolds to use a parameter order of `{𝔽, T}` where `𝔽` is the number type and `T` the type of size parameter (either a `TypeParameter` or a `Tuple`).
+  this changed internally
+  * `ArraySphere{T<:Tuple,𝔽}` to `ArraySphere{𝔽, T<:Tuple}`
+  * `CenteredMatrices{T, 𝔽}` to `CenteredMatrices{𝔽, T}`
+  * `Euclidean{T, 𝔽}` to `Euclidean{𝔽, T}`
+  * `FixedRankMatrices{T, 𝔽}` to `FixedRankMatrices{𝔽, T}`
+  * `GeneralizedGrassmann{T, 𝔽, B}` to `GeneralizedGrassmann{𝔽, T, B}`
+  * `GeneralizedStiefel{T, 𝔽, B}` to `GeneralizedStiefel{𝔽, T, B}`
+  * `Grassmann{T, 𝔽, B}` to `Grassmann{𝔽, T, B}`
+  * `GeneralUnitaryMatrices{T, 𝔽, S}` to `GeneralUnitaryMatrices{𝔽, T, S}`
+  * `GraphManifold{G <: AbstractGraph, 𝔽, TM, T <: GraphManifoldType}` to `GraphManifold{𝔽, G <: AbstractGraph, TM, T <: GraphManifoldType}`
+  * `Grassmann{T, 𝔽}` to `Grassmann{𝔽, T}`
+  * `HamiltonianMatrices{T, 𝔽}` to `HamiltonianMatrices{𝔽, T}`
+  * `Oblique{T, 𝔽, S}` to `Oblique{𝔽, T, S}`
+  * `SkewHermitianMatrices{T, 𝔽}` to `SkewHermitianMatrices{𝔽, T}`
+  * `Sphere{T, 𝔽}` to `Sphere{𝔽, T}`
+  * `SphereSymmetricMatrices{T, 𝔽}` to `SphereSymmetricMatrices{𝔽, T}`
+  * `Stiefel{T, 𝔽}` to `Stiefel{𝔽, T}`
+  * `SymmetricMatrices{T, 𝔽}` to `SymmetricMatrices{𝔽, T}`
+  * `SymplecticGrassmann{T, 𝔽}` to `SymplecticGrassmann{𝔽, T}`
+  * `SymplecticStiefel{T, 𝔽}` to `SymplecticStiefel{𝔽, T}`
+  * `Tucker{T, D, 𝔽}` to `Tucker{𝔽, T, D}`
+  * `UnitaryMatrices{T, 𝔽}` to `UnitaryMatrices{𝔽, T}`
+* the functions `canonical_project`, `differential_canonical_project`, `horizontal_lift`, `horizontal_component`, `get_total_space`, and `vertical_component` have been moved upstream to `ManifoldsBase.jl`
+
+
+### Removed
+
+* the trait system that was present additionally to the wrapper types for metric, embedding and connections. Those were moved to `default_X` functions and the dispatch was adapted to still obtain the same logic/behaviour.
+* the `QuotientManifold` type, since it was not really used and its proper definition would require functionality from [LieGroups.jl](https://juliamanifolds.github.io/LieGroups.jl/stable/)
+* all functions related to the `GroupManifold`s type and corresponding traits using the old trait system have been removed here after being deprecated for a while now.
+  These have been redesigned and introduced in the new package [LieGroups.jl](https://juliamanifolds.github.io/LieGroups.jl/stable/), see their [How to transition from `GroupManifold`s tutorial](https://juliamanifolds.github.io/LieGroups.jl/stable/tutorials/transition/) for all details.
+* all deprecated tangent vector types that had `TVector` in their name
+  * instead of `HyperboloidTVector`use`HyperboloidTangentVector`
+  * instead of `OrthogonalTVector` use`OrthogonalTangentVector`
+  * instead of `PoincareBallTVector` use `PoincareBallTangentVector`
+  * instead of `PoincareHalfSpaceTVector` use `PoincareHalfSpaceTangentVector`
+  * instead of `ProjectorTVector` use `ProjectorTangentVector`
+  * instead of `StiefelTVector` use `StiefelTangentVector`
+  * instead of `TuckerTVector` use `TuckerTangentVector`
+  * instead of `UMVTVector` use `UMVTangentVector`
+* The `QuotientManifold` type has been removed, the API for general (implicit) quotient manifolds is now already in `ManifoldsBase.jl`.
+* The  `retract_exp_ode!` and `retract_exp_ode_fused!` functions were removed. The cases in which they were correct are covered by `solve_chart_exp_ode`, and it was too easy to use `retract_exp_ode!` incorrectly.
+
+## [0.10.23] 2025-07-19
+
+### Fixed
+
+* fix a small bug in the point checks of general unitary matrices.
 
 ## [0.10.22] 2025-06-25
 
@@ -69,7 +302,7 @@ release here, since we do not have a very good reason to yet.
 
 ### Fixed
 
-* a copy pase error in the new determinant one manifold from the last release.
+* a copy paste error in the new determinant one manifold from the last release.
 
 ## [0.10.15] 2025-03-28
 
@@ -368,7 +601,7 @@ formula.
 
 ### Fixed
 
-* introduced a nonzero `atol` for all point and vector checks that compre to zero.
+* introduced a nonzero `atol` for all point and vector checks that compare to zero.
   This makes those checks a bit more relaxed by default and resolves [#630](https://github.com/JuliaManifolds/Manifolds.jl/issues/630).
 * `default_estimation_method(M, f)` is deprecated, use `default_approximation_method(M, f)` for your specific method `f` on the manifold `M`.
 * `AbstractEstimationMethod` is deprecated, use `AbstractApproximationMethod` instead.

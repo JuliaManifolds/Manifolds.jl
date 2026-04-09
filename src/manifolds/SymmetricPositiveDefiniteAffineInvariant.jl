@@ -58,7 +58,7 @@ end
     distance(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}, p, q)
 
 Compute the distance on the [`SymmetricPositiveDefinite`](@ref) manifold between `p` and `q`,
-as a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula reads
+as a [`MetricManifold`](@extref ManifoldsBase.MetricManifold) with [`AffineInvariantMetric`](@ref). The formula reads
 
 ```math
 d_{\mathcal P(n)}(p,q)
@@ -83,7 +83,7 @@ end
     exp(M::MetricManifold{<:SymmetricPositiveDefinite,AffineInvariantMetric}, p, X)
 
 Compute the exponential map from `p` with tangent vector `X` on the
-[`SymmetricPositiveDefinite`](@ref) `M` with its default [`MetricManifold`](@ref) having the
+[`SymmetricPositiveDefinite`](@ref) `M` with its default [`MetricManifold`](@extref ManifoldsBase.MetricManifold) having the
 [`AffineInvariantMetric`](@ref). The formula reads
 
 ```math
@@ -99,13 +99,13 @@ function exp(::SymmetricPositiveDefinite, p::SPDPoint, X)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
-    Ue = eig1.vectors
-    pUe = p_sqrt * Ue
+    U_e = eig1.vectors
+    pU_e = p_sqrt * U_e
     q = SPDPoint(
-        pUe * Se * transpose(pUe),
-        store_p=!ismissing(p.p),
-        store_sqrt=!ismissing(p.sqrt),
-        store_sqrt_inv=!ismissing(p.sqrt_inv),
+        pU_e * Se * transpose(pU_e),
+        store_p = !ismissing(p.p),
+        store_sqrt = !ismissing(p.sqrt),
+        store_sqrt_inv = !ismissing(p.sqrt_inv),
     )
     return q
 end
@@ -118,18 +118,18 @@ function exp!(::SymmetricPositiveDefinite, q, p, X)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
-    Ue = eig1.vectors
-    pUe = p_sqrt * Ue
-    return copyto!(q, pUe * Se * transpose(pUe))
+    U_e = eig1.vectors
+    pU_e = p_sqrt * U_e
+    return copyto!(q, pU_e * Se * transpose(pU_e))
 end
 function exp!(::SymmetricPositiveDefinite, q::SPDPoint, p, X)
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     T = Symmetric(p_sqrt_inv * X * p_sqrt_inv)
     eig1 = eigen(T) # numerical stabilization
     Se = Diagonal(exp.(eig1.values))
-    Ue = eig1.vectors
-    pUe = p_sqrt * Ue
-    Q = pUe * Se * transpose(pUe)
+    U_e = eig1.vectors
+    pU_e = p_sqrt * U_e
+    Q = pU_e * Se * transpose(pU_e)
     !ismissing(q.p) && copyto!(q.p, Q)
     Q_e = eigen(Q)
     copyto!(q.eigen.values, Q_e.values)
@@ -149,7 +149,7 @@ end
 
 Return a orthonormal basis `Ξ` as a vector of tangent vectors (of length
 [`manifold_dimension`](@ref) of `M`) in the tangent space of `p` on the
-[`MetricManifold`](@ref) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
+[`MetricManifold`](@extref ManifoldsBase.MetricManifold) of [`SymmetricPositiveDefinite`](@ref) manifold `M` with
 [`AffineInvariantMetric`](@ref) that diagonalizes the curvature tensor ``R(u,v)w``
 with eigenvalues `κ` and where the direction `B.frame_direction` ``V`` has curvature `0`.
 
@@ -157,19 +157,19 @@ The construction is based on an ONB for the symmetric matrices similar to [`get_
 just that the ONB here is build from the eigen vectors of ``p^{\frac{1}{2}}Vp^{\frac{1}{2}}``.
 """
 function get_basis_diagonalizing(
-    M::SymmetricPositiveDefinite,
-    p,
-    B::DiagonalizingOrthonormalBasis,
-)
+        M::SymmetricPositiveDefinite,
+        p,
+        B::DiagonalizingOrthonormalBasis,
+    )
     N = get_parameter(M.size)[1]
     (p_sqrt, p_sqrt_inv) = spd_sqrt_and_sqrt_inv(p)
     eigv = eigen(Symmetric(p_sqrt_inv * B.frame_direction * p_sqrt_inv))
     V = eigv.vectors
     Ξ = [
         (i == j ? 1 / 2 : 1 / sqrt(2)) *
-        p_sqrt *
-        (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
-        p_sqrt for i in 1:N for j in i:N
+            p_sqrt *
+            (V[:, i] * transpose(V[:, j]) + V[:, j] * transpose(V[:, i])) *
+            p_sqrt for i in 1:N for j in i:N
     ]
     λ = eigv.values
     κ = [-1 / 4 * (λ[i] - λ[j])^2 for i in 1:N for j in i:N]
@@ -233,7 +233,7 @@ the coordinates with respect to this ONB can be simplified to
 ```math
    c_k = \mathrm{tr}(p^{-\frac{1}{2}}\Delta_{i,j} X)
 ```
-where ``k`` is trhe linearized index of the ``i=1,\ldots,n, j=i,\ldots,n``.
+where ``k`` is the linearized index of the ``i=1,\ldots,n, j=i,\ldots,n``.
 """
 get_coordinates(::SymmetricPositiveDefinite, c, p, X, ::DefaultOrthonormalBasis)
 
@@ -303,7 +303,7 @@ end
 
 Compute the inner product of `X`, `Y` in the tangent space of `p` on
 the [`SymmetricPositiveDefinite`](@ref) manifold `M`, as
-a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula reads
+a [`MetricManifold`](@extref ManifoldsBase.MetricManifold) with [`AffineInvariantMetric`](@ref). The formula reads
 
 ````math
 g_p(X,Y) = \operatorname{tr}(p^{-1} X p^{-1} Y),
@@ -320,14 +320,14 @@ end
 Return false. [`SymmetricPositiveDefinite`](@ref) with [`AffineInvariantMetric`](@ref)
 is not a flat manifold.
 """
-is_flat(M::MetricManifold{ℝ,<:SymmetricPositiveDefinite,AffineInvariantMetric}) = false
+is_flat(M::MetricManifold{ℝ, <:SymmetricPositiveDefinite, AffineInvariantMetric}) = false
 
 @doc raw"""
     log(M::SymmetricPositiveDefinite, p, q)
     log(M::MetricManifold{SymmetricPositiveDefinite,AffineInvariantMetric}, p, q)
 
 Compute the logarithmic map from `p` to `q` on the [`SymmetricPositiveDefinite`](@ref)
-as a [`MetricManifold`](@ref) with [`AffineInvariantMetric`](@ref). The formula reads
+as a [`MetricManifold`](@extref ManifoldsBase.MetricManifold) with [`AffineInvariantMetric`](@ref). The formula reads
 
 ```math
 \log_p q =
@@ -338,11 +338,11 @@ where ``\operatorname{Log}`` denotes to the matrix logarithm.
 log(::SymmetricPositiveDefinite, ::Any...)
 
 function allocate_result(
-    M::SymmetricPositiveDefinite,
-    ::typeof(log),
-    q::SPDPoint,
-    p::SPDPoint,
-)
+        M::SymmetricPositiveDefinite,
+        ::typeof(log),
+        q::SPDPoint,
+        p::SPDPoint,
+    )
     return allocate_result(M, log, convert(AbstractMatrix, q), convert(AbstractMatrix, p))
 end
 
@@ -351,8 +351,8 @@ function log!(::SymmetricPositiveDefinite, X, p, q)
     T = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv)
     e2 = eigen(T)
     Se = Diagonal(log.(max.(e2.values, eps())))
-    pUe = p_sqrt * e2.vectors
-    return mul!(X, pUe, Se * transpose(pUe))
+    pU_e = p_sqrt * e2.vectors
+    return mul!(X, pU_e, Se * transpose(pU_e))
 end
 
 """
@@ -368,7 +368,7 @@ manifold_volume(::SymmetricPositiveDefinite) = Inf
 
 Compute the parallel transport of `X` from the tangent space at `p` to the
 tangent space at `q` on the [`SymmetricPositiveDefinite`](@ref) as a
-[`MetricManifold`](@ref) with the [`AffineInvariantMetric`](@ref).
+[`MetricManifold`](@extref ManifoldsBase.MetricManifold) with the [`AffineInvariantMetric`](@ref).
 The formula reads
 
 ```math
@@ -396,13 +396,13 @@ function parallel_transport_to!(M::SymmetricPositiveDefinite, Y, p, X, q)
     ty = Symmetric(p_sqrt_inv * convert(AbstractMatrix, q) * p_sqrt_inv) # p^(-1/2)qp^(-1/2)
     e2 = eigen(ty)
     Se = Diagonal(log.(max.(e2.values, floatmin(eltype(e2.values)))))
-    Ue = e2.vectors
-    logty = Symmetric(Ue * Se * transpose(Ue)) # nearly log_pq without the outer p^1/2
+    U_e = e2.vectors
+    logty = Symmetric(U_e * Se * transpose(U_e)) # nearly log_pq without the outer p^1/2
     e3 = eigen(logty) # since they cancel with the pInvSqrt in the next line
     Sf = Diagonal(exp.(e3.values / 2)) # Uf * Sf * Uf' is the Exp
     Uf = e3.vectors
-    pUe = p_sqrt * Uf * Sf * transpose(Uf) # factors left of tv (and transposed right)
-    vtp = Symmetric(pUe * tv * transpose(pUe)) # so this is the documented formula
+    pU_e = p_sqrt * Uf * Sf * transpose(Uf) # factors left of tv (and transposed right)
+    vtp = Symmetric(pU_e * tv * transpose(pU_e)) # so this is the documented formula
     return copyto!(Y, vtp)
 end
 

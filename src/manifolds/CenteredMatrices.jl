@@ -1,5 +1,5 @@
 @doc raw"""
-    CenteredMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    CenteredMatrices{𝔽,T} <: AbstractDecoratorManifold{𝔽}
 
 The manifold of ``m×n`` real-valued or complex-valued matrices whose columns sum to zero, i.e.
 ````math
@@ -15,16 +15,14 @@ Generate the manifold of `m`-by-`n` (`field`-valued) matrices whose columns sum 
 `parameter`: whether a type parameter should be used to store `m` and `n`. By default size
 is stored in type. Value can either be `:field` or `:type`.
 """
-struct CenteredMatrices{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct CenteredMatrices{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function CenteredMatrices(m::Int, n::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (m, n))
-    return CenteredMatrices{typeof(size),field}(size)
+    return CenteredMatrices{field, typeof(size)}(size)
 end
-
-active_traits(f, ::CenteredMatrices, args...) = merge_traits(IsEmbeddedSubmanifold())
 
 @doc raw"""
     check_point(M::CenteredMatrices, p; kwargs...)
@@ -36,13 +34,13 @@ zero.
 The tolerance for the column sums of `p` can be set using `kwargs...`.
 """
 function check_point(
-    M::CenteredMatrices,
-    p::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
+        M::CenteredMatrices,
+        p::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
     m, n = get_parameter(M.size)
-    if !isapprox(sum(p, dims=1), zeros(1, n); atol=atol, kwargs...)
+    if !isapprox(sum(p, dims = 1), zeros(1, n); atol = atol, kwargs...)
         return DomainError(
             p,
             string(
@@ -62,14 +60,14 @@ sum to zero and its values are from the correct [`AbstractNumbers`](@extref Mani
 The tolerance for the column sums of `p` and `X` can be set using `kwargs...`.
 """
 function check_vector(
-    M::CenteredMatrices,
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
+        M::CenteredMatrices,
+        p,
+        X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
     m, n = get_parameter(M.size)
-    if !isapprox(sum(X, dims=1), zeros(1, n); atol=atol, kwargs...)
+    if !isapprox(sum(X, dims = 1), zeros(1, n); atol = atol, kwargs...)
         return DomainError(
             X,
             "The vector $(X) is not a tangent vector to $(p) on $(M), since its columns do not sum to zero.",
@@ -81,12 +79,16 @@ end
 embed(::CenteredMatrices, p) = p
 embed(::CenteredMatrices, p, X) = X
 
-function get_embedding(::CenteredMatrices{TypeParameter{Tuple{m,n}},𝔽}) where {m,n,𝔽}
-    return Euclidean(m, n; field=𝔽)
+function get_embedding(::CenteredMatrices{𝔽, TypeParameter{Tuple{m, n}}}) where {m, n, 𝔽}
+    return Euclidean(m, n; field = 𝔽)
 end
-function get_embedding(M::CenteredMatrices{Tuple{Int,Int},𝔽}) where {𝔽}
+function get_embedding(M::CenteredMatrices{𝔽, Tuple{Int, Int}}) where {𝔽}
     m, n = get_parameter(M.size)
-    return Euclidean(m, n; field=𝔽, parameter=:field)
+    return Euclidean(m, n; field = 𝔽, parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::CenteredMatrices)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 """
@@ -107,7 +109,7 @@ Return the manifold dimension of the [`CenteredMatrices`](@ref) `m`-by-`n` matri
 ````
 where ``\dim_ℝ 𝔽`` is the [`real_dimension`](@extref `ManifoldsBase.real_dimension-Tuple{ManifoldsBase.AbstractNumbers}`) of `𝔽`.
 """
-function manifold_dimension(M::CenteredMatrices{<:Any,𝔽}) where {𝔽}
+function manifold_dimension(M::CenteredMatrices{𝔽}) where {𝔽}
     m, n = get_parameter(M.size)
     return (m * n - n) * real_dimension(𝔽)
 end
@@ -128,7 +130,7 @@ where ``c_i = \frac{1}{m}\sum_{j=1}^m p_{j,i}`` for ``i = 1, \dots, n``.
 """
 project(::CenteredMatrices, ::Any)
 
-project!(::CenteredMatrices, q, p) = copyto!(q, p .- mean(p, dims=1))
+project!(::CenteredMatrices, q, p) = copyto!(q, p .- mean(p, dims = 1))
 
 @doc raw"""
     project(M::CenteredMatrices, p, X)
@@ -146,14 +148,14 @@ where ``c_i = \frac{1}{m}\sum_{j=1}^m x_{j,i}``  for ``i = 1, \dots, n``.
 """
 project(::CenteredMatrices, ::Any, ::Any)
 
-project!(::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X, dims=1))
+project!(::CenteredMatrices, Y, p, X) = (Y .= X .- mean(X, dims = 1))
 
 representation_size(M::CenteredMatrices) = get_parameter(M.size)
 
-function Base.show(io::IO, ::CenteredMatrices{TypeParameter{Tuple{m,n}},𝔽}) where {m,n,𝔽}
+function Base.show(io::IO, ::CenteredMatrices{𝔽, TypeParameter{Tuple{m, n}}}) where {m, n, 𝔽}
     return print(io, "CenteredMatrices($(m), $(n), $(𝔽))")
 end
-function Base.show(io::IO, M::CenteredMatrices{Tuple{Int,Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::CenteredMatrices{𝔽, Tuple{Int, Int}}) where {𝔽}
     m, n = get_parameter(M.size)
     return print(io, "CenteredMatrices($(m), $(n), $(𝔽); parameter=:field)")
 end

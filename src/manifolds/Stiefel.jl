@@ -1,5 +1,5 @@
 @doc raw"""
-    Stiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    Stiefel{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The Stiefel manifold consists of all ``n×k``, ``n ≥ k`` unitary matrices, i.e.
 
@@ -19,7 +19,7 @@ T_p \mathcal M = \{ X ∈ 𝔽^{n×k} : p^{\mathrm{H}}X + X^{\mathrm{H}}p = 0_k\
 
 where ``0_k`` is the ``k×k`` zero matrix.
 
-This manifold is modeled as an embedded manifold to the [`Euclidean`](@ref), i.e.
+This manifold is modelled as an embedded manifold to the [`Euclidean`](@ref), i.e.
 several functions like the [`inner`](@ref inner(::Euclidean, ::Any...)) product and the
 [`zero_vector`](@ref zero_vector(::Euclidean, ::Any...)) are inherited from the embedding.
 
@@ -31,20 +31,60 @@ The manifold is named after
 
 Generate the (real-valued) Stiefel manifold of ``n×k`` dimensional orthonormal matrices.
 """
-struct Stiefel{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+struct Stiefel{𝔽, T} <: AbstractDecoratorManifold{𝔽}
     size::T
 end
 
-function Stiefel(n::Int, k::Int, field::AbstractNumbers=ℝ; parameter::Symbol=:type)
+function Stiefel(n::Int, k::Int, field::AbstractNumbers = ℝ; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n, k))
-    return Stiefel{typeof(size),field}(size)
+    return Stiefel{field, typeof(size)}(size)
 end
 
-function active_traits(f, ::Stiefel, args...)
-    return merge_traits(IsIsometricEmbeddedManifold(), IsDefaultMetric(EuclideanMetric()))
+"""
+    PolarLightRetraction <: AbstractRetractionMethod
+
+A retraction introduced by [JensenZimmermann:2026](@cite), see the corresponding
+[`retract`](@ref retract(::Stiefel, ::Any, ::Any, ::PolarLightRetraction))ion.
+"""
+struct PolarLightRetraction <: AbstractRetractionMethod end
+
+"""
+    PolarLightInverseRetraction <: AbstractInverseRetractionMethod
+
+An inverse retraction introduced by [JensenZimmermann:2026](@cite), see the corresponding
+[`inverse_retract`](@ref inverse_retract(::Stiefel, ::Any, ::Any, ::PolarLightInverseRetraction))ion.
+"""
+struct PolarLightInverseRetraction <: AbstractInverseRetractionMethod end
+
+# function definition level 3
+function inverse_retract_polar_light! end
+# Forwarding functions Level 2
+function ManifoldsBase._inverse_retract!(
+        M::AbstractManifold, X, p, q, ::PolarLightInverseRetraction; kwargs...,
+    )
+    return inverse_retract_polar_light!(M, X, p, q; kwargs...)
 end
 
-function allocation_promotion_function(::Stiefel{<:Any,ℂ}, ::Any, ::Tuple)
+# function definition level 3
+function retract_polar_light! end
+# Forwarding function Level 2
+function ManifoldsBase._retract!(M::AbstractManifold, q, p, X, ::PolarLightRetraction; kwargs...)
+    return retract_polar_light!(M, q, p, X; kwargs...)
+end
+
+# function definition level 3
+function retract_polar_light_fused! end
+# Forwarding function Level 2
+function ManifoldsBase._retract_fused!(
+        M::AbstractManifold, q, p, X, t::Number, ::PolarLightRetraction; kwargs...,
+    )
+    return retract_polar_light_fused!(M, q, p, X, t; kwargs...)
+end
+function retract_polar_light_fused!(M::AbstractManifold, q, p, X, t::Number)
+    return retract_polar_light!(M, q, p, t * X)
+end
+
+function allocation_promotion_function(::Stiefel{ℂ}, ::Any, ::Tuple)
     return complex
 end
 
@@ -123,6 +163,8 @@ Return [`PolarInverseRetraction`](@extref `ManifoldsBase.PolarInverseRetraction`
 """
 default_inverse_retraction_method(::Stiefel) = PolarInverseRetraction()
 
+metric(::Stiefel) = EuclideanMetric()
+
 """
     default_retraction_method(M::Stiefel)
 
@@ -143,12 +185,16 @@ end
 embed(::Stiefel, p) = p
 embed(::Stiefel, p, X) = X
 
-function get_embedding(::Stiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
-    return Euclidean(n, k; field=𝔽)
+function get_embedding(::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
+    return Euclidean(n, k; field = 𝔽)
 end
-function get_embedding(M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+function get_embedding(M::Stiefel{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, k = get_parameter(M.size)
-    return Euclidean(n, k; field=𝔽, parameter=:field)
+    return Euclidean(n, k; field = 𝔽, parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::Stiefel)
+    return ManifoldsBase.IsometricallyEmbeddedManifoldType()
 end
 
 @doc raw"""
@@ -176,6 +222,21 @@ This implementation follows the Lyapunov approach.
 inverse_retract(::Stiefel, ::Any, ::Any, ::PolarInverseRetraction)
 
 @doc raw"""
+    inverse_retract(M::Stiefel, p, X, ::PolarLightInverseRetraction)
+
+Compute an SVD-based inverse retraction [`PolarLightInverseRetraction`](@ref) on the
+[`Stiefel`](@ref)`(n,k)` manifold `M` following [JensenZimmermann:2026](@cite), equation (3.5)
+
+````math
+\operatorname{retr}_p^{-1} q =
+p \log\bigl( p^\mathrm{T}q(q^\mathrm{T}pp^\mathrm{T}q)^{-\frac{1}{2}} \bigr)
++ \bigl(I_n-pp^\mathrm{T}\bigr)p (q^\mathrm{T}pp^\mathrm{T}q)^{-\frac{1}{2}}
+````
+"""
+inverse_retract(::Stiefel, ::Any, ::Any, ::PolarLightInverseRetraction)
+
+
+@doc raw"""
     inverse_retract(M::Stiefel, p, q, ::QRInverseRetraction)
 
 Compute the inverse retraction based on a qr decomposition
@@ -199,84 +260,42 @@ function _stiefel_inv_retr_qr_mul_by_r_generic!(M::Stiefel, X, q, R, A)
 end
 
 function _stiefel_inv_retr_qr_mul_by_r!(
-    ::Stiefel{TypeParameter{Tuple{n,1}}},
-    X,
-    q,
-    A,
-    ::Type,
-) where {n}
-    @inbounds R = SMatrix{1,1}(inv(A[1, 1]))
+        ::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A, ::Type,
+    ) where {𝔽, n}
+    @inbounds R = SMatrix{1, 1}(inv(A[1, 1]))
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{TypeParameter{Tuple{n,1}}},
-    X,
-    q,
-    A::StaticArray,
-    ::Type{ElT},
-) where {n,ElT}
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, X, q, A::StaticArray, ::Type{ElT},
+    ) where {𝔽, n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
-        Tuple{
-            Stiefel{TypeParameter{Tuple{n,1}}},
-            typeof(X),
-            typeof(q),
-            AbstractArray,
-            typeof(ElT),
-        },
-        M,
-        X,
-        q,
-        A,
-        ElT,
+        Tuple{Stiefel{𝔽, TypeParameter{Tuple{n, 1}}}, typeof(X), typeof(q), AbstractArray, typeof(ElT)},
+        M, X, q, A, ElT,
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    ::Stiefel{TypeParameter{Tuple{n,2}}},
-    X,
-    q,
-    A,
-    ::Type{ElT},
-) where {n,ElT}
+        ::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A, ::Type{ElT},
+    ) where {𝔽, n, ElT}
     R11 = inv(A[1, 1])
-    @inbounds R =
-        hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
-
+    @inbounds R = hcat(SA[R11, zero(ElT)], A[SOneTo(2), SOneTo(2)] \ SA[-R11 * A[2, 1], one(ElT)])
     #TODO: replace with this once it's supported by StaticArrays
     #return mul!(X, q, UpperTriangular(R))
     return mul!(X, q, R)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{TypeParameter{Tuple{n,2}}},
-    X,
-    q,
-    A::StaticArray,
-    ::Type{ElT},
-) where {n,ElT}
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, X, q, A::StaticArray, ::Type{ElT},
+    ) where {𝔽, n, ElT}
     return invoke(
         _stiefel_inv_retr_qr_mul_by_r!,
-        Tuple{
-            Stiefel{TypeParameter{Tuple{n,2}}},
-            typeof(X),
-            typeof(q),
-            AbstractArray,
-            typeof(ElT),
-        },
-        M,
-        X,
-        q,
-        A,
-        ElT,
+        Tuple{Stiefel{𝔽, TypeParameter{Tuple{n, 2}}}, typeof(X), typeof(q), AbstractArray, typeof(ElT)},
+        M, X, q, A, ElT,
     )
 end
 function _stiefel_inv_retr_qr_mul_by_r!(
-    M::Stiefel{TypeParameter{Tuple{n,k}}},
-    X,
-    q,
-    A::StaticArray,
-    ::Type{ElT},
-) where {n,k,ElT}
-    R = zeros(MMatrix{k,k,ElT})
+        M::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}, X, q, A::StaticArray, ::Type{ElT},
+    ) where {𝔽, n, k, ElT}
+    R = zeros(MMatrix{k, k, ElT})
     return _stiefel_inv_retr_qr_mul_by_r_generic!(M, X, q, R, A)
 end
 function _stiefel_inv_retr_qr_mul_by_r!(M::Stiefel, X, q, A, ::Type{ElT}) where {ElT}
@@ -293,6 +312,22 @@ function inverse_retract_polar!(::Stiefel, X, p, q)
     X .-= p
     return X
 end
+function inverse_retract_polar_light!(::Stiefel, X, p, q)
+    # n, k = get_parameter(M.size)
+    # Inspired by the steps from the original implementation in Python, see
+    # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L119-L146
+    s = svd(p' * q)
+    U, d, V = s.U, s.S, s.V
+    # sets X to the second summand in the python code
+    X .= q * V * Diagonal(1 ./ d) * V'
+    copyto!(U, U * V') # MRT in the python code - use memory of U
+    L = log(U)
+    L .= L .- U # log(MRT) - MRT
+    # add the first summand
+    X .+= p * L
+    return X
+end
+
 function inverse_retract_qr!(M::Stiefel, X, p, q)
     n, k = get_parameter(M.size)
     A = p' * q
@@ -303,8 +338,8 @@ function inverse_retract_qr!(M::Stiefel, X, p, q)
     return X
 end
 
-function _isapprox(M::Stiefel, p, X, Y; atol=sqrt(max_eps(X, Y)), kwargs...)
-    return isapprox(norm(M, p, X - Y), 0; atol=atol, kwargs...)
+function _isapprox(M::Stiefel, p, X, Y; atol = sqrt(max_eps(X, Y)), kwargs...)
+    return isapprox(norm(M, p, X - Y), 0; atol = atol, kwargs...)
 end
 
 """
@@ -328,15 +363,15 @@ The dimension is given by
 \end{aligned}
 ````
 """
-function manifold_dimension(M::Stiefel{<:Any,ℝ})
+function manifold_dimension(M::Stiefel{ℝ})
     n, k = get_parameter(M.size)
     return n * k - div(k * (k + 1), 2)
 end
-function manifold_dimension(M::Stiefel{<:Any,ℂ})
+function manifold_dimension(M::Stiefel{ℂ})
     n, k = get_parameter(M.size)
     return 2 * n * k - k * k
 end
-function manifold_dimension(M::Stiefel{<:Any,ℍ})
+function manifold_dimension(M::Stiefel{ℍ})
     n, k = get_parameter(M.size)
     return 4 * n * k - k * (2k - 1)
 end
@@ -353,15 +388,12 @@ When `vector_at` is not `nothing`, return a (Gaussian) random vector from the ta
 ``T_{vector\_at}\mathrm{St}(n,k)`` with mean zero and standard deviation `σ` by projecting a
 random Matrix onto the tangent vector at `vector_at`.
 """
-rand(::Stiefel; σ::Real=1.0)
+rand(::Stiefel; σ::Real = 1.0)
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::Stiefel{<:Any,𝔽},
-    pX;
-    vector_at=nothing,
-    σ::Real=one(real(eltype(pX))),
-) where {𝔽}
+        rng::AbstractRNG, M::Stiefel{𝔽}, pX;
+        vector_at = nothing, σ::Real = one(real(eltype(pX))),
+    ) where {𝔽}
     n, k = get_parameter(M.size)
     if vector_at === nothing
         A = σ * randn(rng, 𝔽 === ℝ ? Float64 : ComplexF64, n, k)
@@ -444,6 +476,20 @@ Compute the SVD-based retraction [`PolarRetraction`](@extref `ManifoldsBase.Pola
 retract(::Stiefel, ::Any, ::Any, ::PolarRetraction)
 
 @doc raw"""
+    retract(M::Stiefel, p, X, ::PolarLightRetraction)
+
+Compute an SVD-based retraction [`PolarLightRetraction`](@ref) on the
+[`Stiefel`](@ref)`(n,k)` manifold `M` following [JensenZimmermann:2026](@cite), equation (3.4)
+
+````math
+\operatorname{retr}_p X =
+\Bigl( p\exp\bigl( p^\mathrm{T}X \bigr) + \bigl(I_n-pp^\mathrm{T}\bigr)X \Bigr)
+\bigr( I_k  + X^\mathrm{T}(I_n - pp^\mathrm{T})X\bigr).
+````
+"""
+retract(::Stiefel, ::Any, ::Any, ::PolarLightRetraction)
+
+@doc raw"""
     retract(M::Stiefel, p, X, ::QRRetraction)
 
 Compute the QR-based retraction [`QRRetraction`](@extref `ManifoldsBase.QRRetraction`) on the
@@ -475,13 +521,8 @@ function ManifoldsBase.retract_pade!(M::Stiefel, q, p, X, m::PadeRetraction)
 end
 
 function ManifoldsBase.retract_pade_fused!(
-    ::Stiefel,
-    q,
-    p,
-    X,
-    t::Number,
-    ::PadeRetraction{m},
-) where {m}
+        ::Stiefel, q, p, X, t::Number, ::PadeRetraction{m},
+    ) where {m}
     tX = t * X
     Pp = I - 1 // 2 * p * p'
     WpX = Pp * tX * p' - p * tX' * Pp
@@ -524,6 +565,22 @@ function ManifoldsBase.retract_qr_fused!(::Stiefel, q, p, X, t::Number)
     return mul!(q, _qrfac_to_q(qrfac), D)
 end
 
+function retract_polar_light!(::Stiefel, q, p, X)
+    # n, k = get_parameter(M.size)
+    # Inspired by the steps from the original implementation in Python, see
+    # https://github.com/RalfZimmermannSDU/RiemannStiefelLog/blob/c291ba767340abb3bba89bb64abcea5048960d1d/Stiefel_log_general_metric/SciPy/Stiefel_retractions.py#L86-L115
+    A = p' * X
+    q .= p * (exp(A) - A) + X
+    # QR of (I - p*p')*X = X - p*A
+    s = svd(qr(X - p * A).R)
+    # to compute inv(sqrt(I + R'R)) we SVD R = UdV and add the diagonal “inside”
+    # S = I + R'R = V(I+d.^2)V and hence the inv sqrt is V (1./sqrt.(1 .+ d.^2) V'
+    d, V = s.S, s.V
+    d .= 1 ./ sqrt.(1 .+ d .^ 2)
+    q .= q * V * Diagonal(d) * V'
+    return q
+end
+
 @doc raw"""
     representation_size(M::Stiefel)
 
@@ -532,10 +589,10 @@ i.e. `(n,k)`, which is the matrix dimensions.
 """
 representation_size(M::Stiefel) = get_parameter(M.size)
 
-function Base.show(io::IO, ::Stiefel{TypeParameter{Tuple{n,k}},𝔽}) where {n,k,𝔽}
+function Base.show(io::IO, ::Stiefel{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return print(io, "Stiefel($(n), $(k), $(𝔽))")
 end
-function Base.show(io::IO, M::Stiefel{Tuple{Int,Int},𝔽}) where {𝔽}
+function Base.show(io::IO, M::Stiefel{𝔽, Tuple{Int, Int}}) where {𝔽}
     n, k = get_parameter(M.size)
     return print(io, "Stiefel($(n), $(k), $(𝔽); parameter=:field)")
 end
@@ -561,10 +618,7 @@ Since this is the differentiated retraction as a vector transport, the result wi
 tangent space at ``q=\operatorname{retr}_p(d)`` using the [`CayleyRetraction`](@extref `ManifoldsBase.CayleyRetraction`).
 """
 vector_transport_direction(
-    M::Stiefel,
-    p,
-    X,
-    d,
+    ::Stiefel, ::Any, ::Any, ::Any,
     ::DifferentiatedRetractionVectorTransport{CayleyRetraction},
 )
 
@@ -585,10 +639,7 @@ where ``q = \operatorname{retr}^{\mathrm{Pol}}_p(d)``, and ``Λ`` is the unique 
 ```
 """
 vector_transport_direction(
-    ::Stiefel,
-    ::Any,
-    ::Any,
-    ::Any,
+    ::Stiefel, ::Any, ::Any, ::Any,
     ::DifferentiatedRetractionVectorTransport{PolarRetraction},
 )
 
@@ -613,10 +664,7 @@ A_{ij}&\text{ if } i > j\\
 ```
 """
 vector_transport_direction(
-    ::Stiefel,
-    ::Any,
-    ::Any,
-    ::Any,
+    ::Stiefel, ::Any, ::Any, ::Any,
     ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
 
@@ -627,7 +675,6 @@ function vector_transport_direction_diff!(::Stiefel, Y, p, X, d, ::CayleyRetract
     q1 = I - 1 // 2 * Wpd
     return copyto!(Y, (q1 \ WpX) * (q1 \ p))
 end
-
 function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::PolarRetraction)
     q = retract(M, p, d, PolarRetraction())
     Iddsqrt = sqrt(I + d' * d)
@@ -636,13 +683,11 @@ function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::PolarRetract
 end
 function vector_transport_direction_diff!(M::Stiefel, Y, p, X, d, ::QRRetraction)
     q = retract(M, p, d, QRRetraction())
-
     # use the QR factorization with positive diagonal of R
     pdR = qr(p + d).R
     s = sign.(diag(pdR))
     s[s .== 0] .= 1
     rf = UpperTriangular(Diagonal(s)' * pdR)
-
     Xrf = X / rf
     qtXrf = q' * Xrf
     return copyto!(
@@ -670,10 +715,7 @@ and ``Λ`` is the unique solution of the Sylvester equation
 ```
 """
 vector_transport_to(
-    ::Stiefel,
-    ::Any,
-    ::Any,
-    ::Any,
+    ::Stiefel, ::Any, ::Any, ::Any,
     ::DifferentiatedRetractionVectorTransport{PolarRetraction},
 )
 
@@ -699,10 +741,7 @@ A_{ij}&\text{ if } i > j\\
 ```
 """
 vector_transport_to(
-    ::Stiefel,
-    ::Any,
-    ::Any,
-    ::Any,
+    ::Stiefel, ::Any, ::Any, ::Any,
     ::DifferentiatedRetractionVectorTransport{QRRetraction},
 )
 
@@ -722,7 +761,6 @@ function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::PolarRetraction)
 end
 function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
     d = inverse_retract(M, p, q, QRInverseRetraction())
-
     # use the QR factorization with positive diagonal of R
     pdR = qr(p + d).R
     s = sign.(diag(pdR))
@@ -731,7 +769,6 @@ function vector_transport_to_diff!(M::Stiefel, Y, p, X, q, ::QRRetraction)
     Xrf = X / rf
     qtXrf = q' * Xrf
     return copyto!(
-        Y,
-        q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
+        Y, q * (UpperTriangular(qtXrf) - UpperTriangular(qtXrf)') + Xrf - q * qtXrf,
     )
 end

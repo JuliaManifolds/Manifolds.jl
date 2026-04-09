@@ -1,12 +1,11 @@
-
 function adjoint_Jacobi_field(
-    M::ProductManifold,
-    p::ArrayPartition,
-    q::ArrayPartition,
-    t,
-    X::ArrayPartition,
-    β::Tβ,
-) where {Tβ}
+        M::ProductManifold,
+        p::ArrayPartition,
+        q::ArrayPartition,
+        t,
+        X::ArrayPartition,
+        β::Tβ,
+    ) where {Tβ}
     return ArrayPartition(
         map(
             adjoint_Jacobi_field,
@@ -20,14 +19,19 @@ function adjoint_Jacobi_field(
     )
 end
 
+function allocate_result(M::ProductManifold, f::typeof(get_point), a::AbstractVector)
+    return ArrayPartition(map(M_i -> allocate_result(M_i, f, a), M.manifolds)...)
+end
+
+
 function jacobi_field(
-    M::ProductManifold,
-    p::ArrayPartition,
-    q::ArrayPartition,
-    t,
-    X::ArrayPartition,
-    β::Tβ,
-) where {Tβ}
+        M::ProductManifold,
+        p::ArrayPartition,
+        q::ArrayPartition,
+        t,
+        X::ArrayPartition,
+        β::Tβ,
+    ) where {Tβ}
     return ArrayPartition(
         map(
             jacobi_field,

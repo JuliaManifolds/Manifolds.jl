@@ -12,7 +12,7 @@ p ∈ ℝ^{n×n} \ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\back
 ````
 
 This manifold is modelled as a submanifold of [`SymmetricPositiveDefinite`](@ref)`(n)`,
-see [`IsEmbeddedSubmanifold`](@ref `ManifoldsBase.IsEmbeddedSubmanifold`) for the implications,
+see [`EmbeddedSubmanifoldType`](@extref `ManifoldsBase.EmbeddedSubmanifoldType`) for the implications,
 but for example retractions and inverse retractions are all available
 
 These matrices are sometimes also called [isochoric](https://en.wiktionary.org/wiki/isochoric), which refers to the interpretation of
@@ -39,19 +39,15 @@ which defaults to `1.0`.
 `parameter`: whether a type parameter should be used to store `n`. By default size
 is stored in type. Value can either be `:field` or `:type`.
 """
-struct SPDFixedDeterminant{T,TD<:Real} <: AbstractDecoratorManifold{ℝ}
+struct SPDFixedDeterminant{T, TD <: Real} <: AbstractDecoratorManifold{ℝ}
     size::T
     d::TD
 end
 
-function SPDFixedDeterminant(n::Int, d::F=1.0; parameter::Symbol=:type) where {F<:Real}
+function SPDFixedDeterminant(n::Int, d::F = 1.0; parameter::Symbol = :type) where {F <: Real}
     @assert d > 0 "The determinant has to be positive but was provided as $d."
     size = wrap_type_parameter(parameter, (n,))
-    return SPDFixedDeterminant{typeof(size),F}(size, d)
-end
-
-function active_traits(f, ::SPDFixedDeterminant, args...)
-    return merge_traits(IsEmbeddedSubmanifold())
+    return SPDFixedDeterminant{typeof(size), F}(size, d)
 end
 
 @doc raw"""
@@ -85,13 +81,13 @@ and additionally fulfill ``\operatorname{tr}(X) = 0``.
 The tolerance for the trace check of `X` can be set using `kwargs...`, which influences the `isapprox`-check.
 """
 function check_vector(
-    M::SPDFixedDeterminant,
-    p,
-    X::T;
-    atol::Real=sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
-    kwargs...,
-) where {T}
-    if !isapprox(tr(X), 0; atol=atol, kwargs...)
+        M::SPDFixedDeterminant,
+        p,
+        X::T;
+        atol::Real = sqrt(prod(representation_size(M))) * eps(real(float(number_eltype(T)))),
+        kwargs...,
+    ) where {T}
+    if !isapprox(tr(X), 0; atol = atol, kwargs...)
         return DomainError(
             tr(X),
             "The vector $(X) is not a tangent vector to $(p) on $(M), since it does not have a zero trace.",
@@ -110,7 +106,11 @@ function get_embedding(::SPDFixedDeterminant{TypeParameter{Tuple{n}}}) where {n}
 end
 function get_embedding(M::SPDFixedDeterminant{Tuple{Int}})
     n = get_parameter(M.size)[1]
-    return SymmetricPositiveDefinite(n; parameter=:field)
+    return SymmetricPositiveDefinite(n; parameter = :field)
+end
+
+function ManifoldsBase.get_embedding_type(::SPDFixedDeterminant)
+    return ManifoldsBase.EmbeddedSubmanifoldType()
 end
 
 @doc raw"""

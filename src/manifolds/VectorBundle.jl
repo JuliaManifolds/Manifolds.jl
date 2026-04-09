@@ -1,4 +1,3 @@
-
 """
     fiber_bundle_transport(M::AbstractManifold, fiber::FiberType)
 
@@ -17,15 +16,15 @@ Alias for [`FiberBundle`](@ref) when fiber type is a `TVS` of type
 
 `VectorSpaceFiberType` is used to encode vector spaces as fiber types.
 """
-const VectorBundle{𝔽,TVS,TM,TVT} = FiberBundle{
+const VectorBundle{𝔽, TVS, TM, TVT} = FiberBundle{
     𝔽,
     TVS,
     TM,
     TVT,
 } where {
-    TVS<:VectorSpaceType,
-    TM<:AbstractManifold{𝔽},
-    TVT<:FiberBundleProductVectorTransport,
+    TVS <: VectorSpaceType,
+    TM <: AbstractManifold{𝔽},
+    TVT <: FiberBundleProductVectorTransport,
 }
 
 """
@@ -42,16 +41,16 @@ Exact retraction and inverse retraction can be approximated using [`FiberBundleP
     TangentBundle(M::AbstractManifold)
     TangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTransport)
 """
-const TangentBundle{𝔽,M} =
-    VectorBundle{𝔽,TangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
+const TangentBundle{𝔽, M} =
+    VectorBundle{𝔽, TangentSpaceType, M} where {𝔽, M <: AbstractManifold{𝔽}}
 
 TangentBundle(M::AbstractManifold) = FiberBundle(TangentSpaceType(), M)
 function TangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTransport)
     return FiberBundle(TangentSpaceType(), M, vtm)
 end
 
-const CotangentBundle{𝔽,M} =
-    VectorBundle{𝔽,CotangentSpaceType,M} where {𝔽,M<:AbstractManifold{𝔽}}
+const CotangentBundle{𝔽, M} =
+    VectorBundle{𝔽, CotangentSpaceType, M} where {𝔽, M <: AbstractManifold{𝔽}}
 
 CotangentBundle(M::AbstractManifold) = FiberBundle(CotangentSpaceType(), M)
 function CotangentBundle(M::AbstractManifold, vtm::FiberBundleProductVectorTransport)
@@ -63,26 +62,26 @@ function bundle_transport_to!(B::TangentBundle, Y, p, X, q)
 end
 
 function bundle_transport_tangent_direction!(
-    B::TangentBundle,
-    Y,
-    p,
-    pf,
-    X,
-    d,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
-)
+        B::TangentBundle,
+        Y,
+        p,
+        pf,
+        X,
+        d,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(B.manifold),
+    )
     return vector_transport_direction!(B.manifold, Y, p, X, d, m)
 end
 
 function bundle_transport_tangent_to!(
-    B::TangentBundle,
-    Y,
-    p,
-    pf,
-    X,
-    q,
-    m::AbstractVectorTransportMethod=default_vector_transport_method(B.manifold),
-)
+        B::TangentBundle,
+        Y,
+        p,
+        pf,
+        X,
+        q,
+        m::AbstractVectorTransportMethod = default_vector_transport_method(B.manifold),
+    )
     return vector_transport_to!(B.manifold, Y, p, X, q, m)
 end
 
@@ -254,23 +253,23 @@ function retract_product!(M::VectorBundle, q, p, X)
 end
 
 function ManifoldsBase._retract_fused(
-    M::VectorBundle,
-    p,
-    X,
-    t::Number,
-    ::FiberBundleProductRetraction,
-)
+        M::VectorBundle,
+        p,
+        X,
+        t::Number,
+        ::FiberBundleProductRetraction,
+    )
     return retract_product_fused(M, p, X, t)
 end
 
 function ManifoldsBase._retract_fused!(
-    M::VectorBundle,
-    q,
-    p,
-    X,
-    t::Number,
-    ::FiberBundleProductRetraction,
-)
+        M::VectorBundle,
+        q,
+        p,
+        X,
+        t::Number,
+        ::FiberBundleProductRetraction,
+    )
     return retract_product_fused!(M, q, p, X, t)
 end
 
@@ -302,13 +301,13 @@ function ManifoldsBase.retract_sasaki!(M::VectorBundle, q, p, X, m::SasakiRetrac
     return ManifoldsBase.retract_sasaki_fused!(M, q, p, X, one(eltype(p)), m)
 end
 function ManifoldsBase.retract_sasaki_fused!(
-    B::TangentBundle,
-    q,
-    p,
-    X,
-    t::Number,
-    m::SasakiRetraction,
-)
+        B::TangentBundle,
+        q,
+        p,
+        X,
+        t::Number,
+        m::SasakiRetraction,
+    )
     tX = t * X
     xp, Xp = submanifold_components(B.manifold, p)
     xq, Xq = submanifold_components(B.manifold, q)
@@ -353,20 +352,20 @@ function vector_transport_direction!(M::VectorBundle, Y, p, X, d)
 end
 
 function _vector_transport_direction!(
-    M::VectorBundle,
-    Y,
-    p,
-    X,
-    d,
-    m::FiberBundleProductVectorTransport,
-)
+        M::VectorBundle,
+        Y,
+        p,
+        X,
+        d,
+        m::FiberBundleProductVectorTransport,
+    )
     VYM, VYF = submanifold_components(M.manifold, Y)
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     dx, dVx = submanifold_components(M.manifold, d)
-    vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal),
-    vector_transport_direction!(M.manifold, VYF, px, VXF, dx, m.method_vertical),
-    return Y
+    return vector_transport_direction!(M.manifold, VYM, px, VXM, dx, m.method_horizontal),
+        vector_transport_direction!(M.manifold, VYF, px, VXF, dx, m.method_vertical),
+        return Y
 end
 
 @doc raw"""
@@ -391,13 +390,13 @@ function vector_transport_to!(M::VectorBundle, Y, p, X, q)
     return vector_transport_to!(M, Y, p, X, q, M.vector_transport)
 end
 function vector_transport_to!(
-    M::TangentBundle,
-    Y,
-    p,
-    X,
-    q,
-    m::FiberBundleProductVectorTransport,
-)
+        M::TangentBundle,
+        Y,
+        p,
+        X,
+        q,
+        m::FiberBundleProductVectorTransport,
+    )
     px, pVx = submanifold_components(M.manifold, p)
     VXM, VXF = submanifold_components(M.manifold, X)
     VYM, VYF = submanifold_components(M.manifold, Y)

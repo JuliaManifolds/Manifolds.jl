@@ -1,0 +1,152 @@
+include("../header.jl")
+
+using Quaternions
+
+
+@testset "Orthogonal Matrices" begin
+    M = OrthogonalMatrices(3)
+    @test injectivity_radius(M, PolarRetraction()) == π / sqrt(2.0)
+    @test injectivity_radius(M) == π * sqrt(2.0)
+    @test injectivity_radius(OrthogonalMatrices(3; parameter = :field)) == π * sqrt(2.0)
+    @test injectivity_radius(OrthogonalMatrices(1; parameter = :field)) == 0.0
+    @test !is_flat(M)
+    p = project(M, ones(3, 3))
+    @test is_point(M, p; error = :error)
+    @test is_point(M, rand(M); error = :error)
+    @test is_vector(M, p, rand(M; vector_at = p))
+    @test is_point(M, rand(MersenneTwister(), M); error = :error)
+    @test is_vector(M, p, rand(MersenneTwister(), M; vector_at = p))
+    @test default_vector_transport_method(M) === ProjectionTransport()
+end
+
+@testset "Unitary Matrices" begin
+    M = UnitaryMatrices(2)
+    @test repr(M) == "UnitaryMatrices(2)"
+    @test repr(UnitaryMatrices(2; parameter = :field)) ==
+        "UnitaryMatrices(2; parameter=:field)"
+    @test manifold_dimension(M) == 4
+    @test !is_flat(M)
+    @test injectivity_radius(M) == π
+
+    # wrong length of size
+    @test_throws DomainError is_point(M, zeros(1); error = :error)
+    @test_throws DomainError is_point(M, zeros(3, 3); error = :error)
+    pF = 1 / 2 .* [1im 1im; -1im 1im]
+    @test_throws DomainError is_point(M, pF; error = :error)
+    # Determinant not one
+    pF2 = [1im 1.0; 0.0 -1im]
+    @test_throws DomainError is_point(M, pF2; error = :error)
+    p = [1im 0.0; 0.0 1im]
+    @test is_point(M, p; error = :error)
+
+    @test_throws DomainError is_vector(M, p, zeros(1); error = :error)
+    @test_throws DomainError is_vector(M, p, zeros(3, 3); error = :error)
+    # not skew
+    @test_throws DomainError is_vector(M, p, ones(2, 2); error = :error)
+    X = [0.0 1.0; -1.0 0.0]
+    @test is_vector(M, p, X; error = :error)
+
+    q = project(M, ones(2, 2))
+    @test is_point(M, q; error = :error)
+    q2 = project(M, 1im * ones(2, 2))
+    @test is_point(M, q2; error = :error)
+
+    r = exp(M, p, X)
+    X2 = log(M, p, r)
+    @test isapprox(M, p, X, X2)
+    r1 = Manifolds.exp_fused(M, p, X, 1.0)
+    @test isapprox(M, r, r1; atol = 1.0e-10)
+
+    @testset "Random" begin
+        M = UnitaryMatrices(2)
+        Random.seed!(23)
+        p = rand(M)
+        @test is_point(M, p; error = :error)
+        @test is_vector(M, p, rand(M; vector_at = p); error = :error)
+    end
+end
+
+@testset "Special unitary matrices" begin
+    @test manifold_volume(SpecialUnitaryMatrices(1)) ≈ 1
+    @test manifold_volume(SpecialUnitaryMatrices(2)) ≈ 2 * π^2
+    @test manifold_volume(SpecialUnitaryMatrices(3)) ≈ sqrt(3) * π^5
+    @test manifold_volume(SpecialUnitaryMatrices(4)) ≈ sqrt(2) * 4 * π^9 / 12
+
+    @test manifold_dimension(SpecialUnitaryMatrices(2)) == 3
+    @test manifold_dimension(SpecialUnitaryMatrices(3)) == 8
+    @test manifold_dimension(SpecialUnitaryMatrices(4)) == 15
+
+    @test injectivity_radius(SpecialUnitaryMatrices(2)) == π * sqrt(2)
+    @test injectivity_radius(SpecialUnitaryMatrices(3)) == π * sqrt(2)
+    @test injectivity_radius(SpecialUnitaryMatrices(4)) == π * sqrt(2)
+end
+
+@testset "Quaternionic Unitary Matrices" begin
+    M = UnitaryMatrices(1, ℍ)
+    @testset "rand" begin
+        p = rand(M)
+        @test is_point(M, p)
+        X = rand(M; vector_at = p)
+        @test is_vector(M, p, X)
+        p = rand(MersenneTwister(), M)
+        @test is_point(M, p)
+        X = rand(MersenneTwister(), M; vector_at = p)
+        @test is_vector(M, p, X)
+    end
+
+    # wrong length of size
+    @test_throws DomainError is_point(M, zeros(2, 2); error = :error)
+
+    # Determinant not one
+    pF2 = [quat(0, 1, 0, 0) 1.0; 0.0 -quat(0, 1, 0, 0)]
+    @test_throws DomainError is_point(M, pF2; error = :error)
+    p = QuaternionF64(
+        0.4815296357756736,
+        0.6041613272484806,
+        -0.2322369798903669,
+        0.5909181717450419,
+    )
+end
+
+@testset "SO(4) and O(4) exp/log edge cases" begin
+    Xs = [
+        [0, 0, π, 0, 0, π],  # θ = (π, π)
+        [0, 0, π, 0, 0, 0],  # θ = (π, 0)
+        [0, 0, π / 2, 0, 0, π],  # θ = (π, π/2)
+        [0, 0, π, 0, 0, 0] ./ 2,  # θ = (π/2, 0)
+        [0, 0, π, 0, 0, π] ./ 2,  # θ = (π/2, π/2)
+        [0, 0, 0, 0, 0, 0],  # θ = (0, 0)
+        [0, 0, 1, 0, 0, 1] .* 1.0e-100, # α = β ≈ 0
+        [0, 0, 1, 0, 0, 1] .* 1.0e-6, # α = β ⩰ 0
+        [0, 0, 10, 0, 0, 1] .* 1.0e-6, # α ⪆ β ⩰ 0
+        [0, 0, π / 4, 0, 0, π / 4 - 1.0e-6], # α ⪆ β > 0
+    ]
+    Ms = [Rotations(4), OrthogonalMatrices(4)]
+    E = diagm(ones(4))
+    for Xf in Xs
+        for M in Ms
+            @testset "for $Xf on $M" begin
+                X = get_vector(M, E, Xf, DefaultOrthogonalBasis())
+                p = exp(X)
+                @test p ≈ exp(M, E, X)
+                p3 = exp(M, E, log(M, E, p))
+                # broken for 9 of the 10
+                @test isapprox(M, p, p3; atol = 1.0e-4)
+            end
+        end
+    end
+    R1 = diagm([-1.0, -1.0, 1.0, 1.0])
+    X1a = log(Rotations(4), E, R1)
+    @test is_vector(Rotations(4), E, X1a)
+    @test X1a[1, 2] ≈ π
+
+    R2 = diagm([-1.0, 1.0, -1.0, 1.0])
+    X2a = log(Rotations(4), E, R2)
+    @test is_vector(Rotations(4), E, X2a)
+    @test X2a[1, 3] ≈ π
+
+    R3 = diagm([1.0, -1.0, -1.0, 1.0])
+    X3a = log(Rotations(4), E, R3)
+    @test is_vector(Rotations(4), E, X3a)
+    @test X3a[2, 3] ≈ π
+end

@@ -10,9 +10,9 @@ real-valued orthogonal matrices with determinant ``+1``.
 
 Generate the manifold of ``n×n`` rotation matrices.
 """
-const Rotations{T} = GeneralUnitaryMatrices{T,ℝ,DeterminantOneMatrixType}
+const Rotations{T} = GeneralUnitaryMatrices{ℝ, T, DeterminantOneMatrixType}
 
-function Rotations(n::Int; parameter::Symbol=:type)
+function Rotations(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
     return Rotations{typeof(size)}(size)
 end
@@ -41,18 +41,44 @@ function angles_4d_skew_sym_matrix(A)
     return sqrt(halfb + sqrtdisc), sqrt(halfb - sqrtdisc)
 end
 
+@doc raw"""
+    change_representer(M::Rotations, ::EuclideanMetric, p, X)
+
+Change `X` to the corresponding representer of a cotangent vector at `p`.
+Since the [`Rotations`](@ref) manifold `M` is isometrically embedded, this is the identity.
+"""
+change_representer(::Rotations, ::EuclideanMetric, ::Any, ::Any)
+
+function change_representer!(M::Rotations, Y, ::EuclideanMetric, p, X)
+    copyto!(M, Y, p, X)
+    return Y
+end
+
+@doc raw"""
+    change_metric(M::Rotations, ::EuclideanMetric, p, X)
+
+Change `X` to the corresponding vector with respect to the metric of the [`Rotations`](@ref) `M`,
+which is just the identity, since the manifold is isometrically embedded.
+"""
+change_metric(M::Rotations, ::EuclideanMetric, ::Any, ::Any)
+
+function change_metric!(::Rotations, Y, ::EuclideanMetric, p, X)
+    copyto!(Y, X)
+    return Y
+end
+
 default_vector_transport_method(::Rotations) = ParallelTransport()
 
 # from https://github.com/JuliaManifolds/Manifolds.jl/issues/453#issuecomment-1046057557
-function _get_tridiagonal_elements(trian)
-    N = size(trian, 1)
+function _get_tridiagonal_elements(tri)
+    N = size(tri, 1)
     res = zeros(N)
     down = true
     for i in 1:N
         if i == N && down
             elem = 0
         else
-            elem = trian[i + (down ? +1 : -1), i]
+            elem = tri[i + (down ? +1 : -1), i]
         end
         if elem ≈ 0
             res[i] = 0
@@ -102,7 +128,7 @@ function _ev_zero(tridiagonal_elements, unitary, evec, evals, fill_at; i)
         evals[fill_at.x] = tridiagonal_elements[idx]^2 / 4
         fill_at.x += 1
     end
-    return (values=evals, vectors=evec)
+    return (values = evals, vectors = evec)
 end
 
 function get_basis_diagonalizing(M::Rotations, p, B::DiagonalizingOrthonormalBasis{ℝ})
@@ -110,23 +136,23 @@ function get_basis_diagonalizing(M::Rotations, p, B::DiagonalizingOrthonormalBas
     decomp = schur(B.frame_direction)
     decomp = ordschur(decomp, map(v -> norm(v) > eps(eltype(p)), decomp.values))
 
-    trian_elem = _get_tridiagonal_elements(decomp.T)
+    tri_elem = _get_tridiagonal_elements(decomp.T)
     unitary = decomp.Z
     evec = Vector{typeof(B.frame_direction)}(undef, manifold_dimension(M))
     evals = Vector{eltype(B.frame_direction)}(undef, manifold_dimension(M))
     i = 1
     fill_at = Ref(1)
     while i <= n
-        if trian_elem[i] == 0
-            evs = _ev_zero(trian_elem, unitary, evec, evals, fill_at; i=i)
+        if tri_elem[i] == 0
+            evs = _ev_zero(tri_elem, unitary, evec, evals, fill_at; i = i)
             i += 1
         else
-            evs = _ev_diagonal(trian_elem, unitary, evec, evals, fill_at, i=i)
+            evs = _ev_diagonal(tri_elem, unitary, evec, evals, fill_at, i = i)
             j = 1
             while j < i
                 # the zero case should have been handled earlier
-                @assert trian_elem[j] != 0
-                evs = _ev_offdiagonal(trian_elem, unitary, evec, evals, fill_at, i=i, j=j)
+                @assert tri_elem[j] != 0
+                evs = _ev_offdiagonal(tri_elem, unitary, evec, evals, fill_at, i = i, j = j)
                 j += 2
             end
             i += 2
@@ -231,20 +257,20 @@ function jacobian_exp_argument(M::Rotations{TypeParameter{Tuple{3}}}, p, X)
 end
 
 function jacobian_exp_argument!(
-    ::Rotations{TypeParameter{Tuple{2}}},
-    J::AbstractMatrix,
-    p,
-    X,
-)
+        ::Rotations{TypeParameter{Tuple{2}}},
+        J::AbstractMatrix,
+        p,
+        X,
+    )
     J .= 1
     return J
 end
 function jacobian_exp_argument!(
-    M::Rotations{TypeParameter{Tuple{3}}},
-    J::AbstractMatrix,
-    p,
-    X,
-)
+        M::Rotations{TypeParameter{Tuple{3}}},
+        J::AbstractMatrix,
+        p,
+        X,
+    )
     θ = norm(M, p, X) / sqrt(2)
     copyto!(J, I)
     if θ ≉ 0
@@ -307,7 +333,7 @@ check with `check_det = false`.
 """
 project(::Rotations, ::Any)
 
-function project!(M::Rotations, q, p; check_det::Bool=true)
+function project!(M::Rotations, q, p; check_det::Bool = true)
     n = get_parameter(M.size)[1]
     F = svd(p)
     mul!(q, F.U, F.Vt)
@@ -321,12 +347,12 @@ function project!(M::Rotations, q, p; check_det::Bool=true)
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::Rotations,
-    pX;
-    vector_at=nothing,
-    σ::Real=one(eltype(pX)),
-)
+        rng::AbstractRNG,
+        M::Rotations,
+        pX;
+        vector_at = nothing,
+        σ::Real = one(eltype(pX)),
+    )
     if vector_at === nothing
         # Special case: Rotations(1) is just zero-dimensional
         (manifold_dimension(M) == 0) && return fill!(pX, 1)
@@ -386,7 +412,7 @@ where ``q=\exp_p d``.
 
 The formula simplifies to identity for 2-D rotations.
 """
-parallel_transport_direction(M::Rotations, p, X, d)
+parallel_transport_direction(::Rotations, p, X, d)
 function parallel_transport_direction(M::Rotations, p, X, d)
     expdhalf = _exp_half(M, d)
     q = exp(M, p, d)
@@ -441,7 +467,8 @@ in the Lie algebra, i.e. the update direction is actually ``pX`` instead of just
 and that means the inverse has to be applied to the (Euclidean) Hessian
 to map it into the Lie algebra.
 """
-riemannian_Hessian(M::Rotations, p, G, H, X)
+riemannian_Hessian(::Rotations, p, G, H, X)
+
 function riemannian_Hessian!(M::Rotations, Y, p, G, H, X)
     N = get_parameter(M.size)[1]
     symmetrize!(Y, G' * p)

@@ -18,6 +18,13 @@ Pages = ["manifolds/Unitary.jl"]
 Order = [:constant, :type, :function]
 ```
 
+## Special Unitary matrices
+
+```@autodocs
+Modules = [Manifolds]
+Pages = ["manifolds/SpecialUnitary.jl"]
+Order = [:constant, :type, :function]
+```
 
 ## [Common functions](@id generalunitarymatrices)
 

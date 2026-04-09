@@ -6,8 +6,12 @@ using InteractiveUtils
 
 # This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
 macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+    return quote
+        local iv = try
+            Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value
+        catch
+            b -> missing
+        end
         local el = $(esc(element))
         global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
         el
@@ -15,7 +19,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 04e7ac42-4b1b-11ed-1cb3-e76ac86d4203
-using Manifolds,RecursiveArrayTools, OrdinaryDiffEq,
+using Manifolds, RecursiveArrayTools, OrdinaryDiffEq,
     DiffEqCallbacks, BoundaryValueDiffEq, PlutoUI
 
 # ╔═╡ 8159d5bc-2c3f-4657-80c4-661e9162b79d
@@ -70,17 +74,17 @@ If you activate `rendering` the images are saved in non-interactive mode.
 
 # ╔═╡ 9efc27d4-caa0-4e9c-85e6-e9dbdbafbb9c
 begin
-	localpath = join(splitpath(@__FILE__)[1:(end - 1)], "/") # files folder
+    localpath = join(splitpath(@__FILE__)[1:(end - 1)], "/") # files folder
     image_prefix = localpath * "/working-in-charts"
     @info image_prefix
-	render_images = false
+    render_images = false
 end;
 
 # ╔═╡ 40487cc6-707f-4ca3-b735-6d5f50b07f74
 # Only load Makie if necessary
-if (interactive || render_images) 
-	using GLMakie,Makie
-	GLMakie.activate!()
+if (interactive || render_images)
+    using GLMakie, Makie
+    GLMakie.activate!()
 end
 
 # ╔═╡ f2276b50-49f4-478f-9a96-0e374a37fe2f
@@ -90,8 +94,8 @@ end
 This function generates a simple plot of a torus and returns the new figure containing the plot.
 """
 function torus_figure()
-    fig = Figure(resolution=(1400, 1000), fontsize=16)
-    ax = LScene(fig[1, 1], show_axis=true)
+    fig = Figure(resolution = (1400, 1000), fontsize = 16)
+    ax = LScene(fig[1, 1], show_axis = true)
     ϴs, φs = LinRange(-π, π, 50), LinRange(-π, π, 50)
     param_points = [Manifolds._torus_param(M, θ, φ) for θ in ϴs, φ in φs]
     X1, Y1, Z1 = [[p[i] for p in param_points] for i in 1:3]
@@ -102,17 +106,17 @@ function torus_figure()
         X1,
         Y1,
         Z1;
-        shading=true,
-        ambient=Vec3f(0.65, 0.65, 0.65),
-        backlight=1.0f0,
-        color=gcs,
-        colormap=Reverse(:RdBu),
-        colorrange=(-gcs_mm, gcs_mm),
-        transparency=true,
+        shading = true,
+        ambient = Vec3f(0.65, 0.65, 0.65),
+        backlight = 1.0f0,
+        color = gcs,
+        colormap = Reverse(:RdBu),
+        colorrange = (-gcs_mm, gcs_mm),
+        transparency = true,
     )
-    wireframe!(ax, X1, Y1, Z1; transparency=true, color=:gray, linewidth=0.5)
+    wireframe!(ax, X1, Y1, Z1; transparency = true, color = :gray, linewidth = 0.5)
     zoom!(ax.scene, cameracontrols(ax.scene), 0.98)
-    Colorbar(fig[1, 2], pltobj, height=Relative(0.5), label="Gaussian curvature")
+    Colorbar(fig[1, 2], pltobj, height = Relative(0.5), label = "Gaussian curvature")
     return ax, fig
 end
 
@@ -150,7 +154,7 @@ function solve_for(p0x, X_p0x, Y_transp, T)
         A,
         i_p0x,
         Y_transp;
-        final_time=T,
+        final_time = T,
     )
     return p_exp
 end;
@@ -164,16 +168,16 @@ md"""
 if interactive
     md"""
     We have to determine the 
-    
+
     * ``t_\mathrm{end}`` $(@bind t_end PlutoUI.Slider(range(0,100,1001), default=2, show_value=true))
     * ``\mathrm{d}t`` $(@bind dt PlutoUI.Slider(range(1e-3,0.5,500), default=1e-1, show_value=true))
     """
 else
-	t_end = 2.
-	dt = 1e-1
-	md"""
-	We set the ``t_\mathrm{end}`` to $(t_end) and ``\mathrm{d}t`` to $(dt)
-	"""
+    t_end = 2.0
+    dt = 1.0e-1
+    md"""
+    We set the ``t_\mathrm{end}`` to $(t_end) and ``\mathrm{d}t`` to $(dt)
+    """
 end
 
 # ╔═╡ 6db745f9-afa4-4b5a-8871-b58585165c9e
@@ -181,28 +185,28 @@ md" And we parametrise the start point and direction"
 
 # ╔═╡ fea185a1-bfae-4bd8-9b2a-f889e54f3f70
 if interactive
-	md"""
-	* start point θₚ $(@bind θₚ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=false)) | φₚ $(@bind φₚ PlutoUI.Slider(range(-π,π,200), default=-π/4))
-	* start direction θₓ $(@bind θₓ PlutoUI.Slider(range(-π,π,200), default=π/2)) | φₓ $(@bind φₓ PlutoUI.Slider(range(-π,π,200), default=0.7))
-	* a tangent vector θy $(@bind θy PlutoUI.Slider(range(-π,π,200), default=0.2)) | φy $(@bind φy PlutoUI.Slider(range(-π,π,200), default=-0.1)) to be transported
-	"""
+    md"""
+    * start point θₚ $(@bind θₚ PlutoUI.Slider(range(-π,π,200), default=π/10, show_value=false)) | φₚ $(@bind φₚ PlutoUI.Slider(range(-π,π,200), default=-π/4))
+    * start direction θₓ $(@bind θₓ PlutoUI.Slider(range(-π,π,200), default=π/2)) | φₓ $(@bind φₓ PlutoUI.Slider(range(-π,π,200), default=0.7))
+    * a tangent vector θy $(@bind θy PlutoUI.Slider(range(-π,π,200), default=0.2)) | φy $(@bind φy PlutoUI.Slider(range(-π,π,200), default=-0.1)) to be transported
+    """
 else
-	θₚ=π/10
-	φₚ=-π/4
-	θₓ=π/2
-	φₓ=0.7
-	θy=0.2
-	φy=-0.1
-	#
-	s = "( $( θₚ ), $( φₚ ))"
-	s2 = "( $( θₓ ), $( φₓ ))"
-	s3 = "$( θy ), $( φy ))"
-	md"""
-	We set the start point to
-	* (θₚ, φₚ) = $(s)
-	* (θₓ, φₓ) = $(s2)
-	* (θy, φy) = $(s3).
-	"""
+    θₚ = π / 10
+    φₚ = -π / 4
+    θₓ = π / 2
+    φₓ = 0.7
+    θy = 0.2
+    φy = -0.1
+    #
+    s = "( $(θₚ), $(φₚ))"
+    s2 = "( $(θₓ), $(φₓ))"
+    s3 = "$(θy), $(φy))"
+    md"""
+    We set the start point to
+    * (θₚ, φₚ) = $(s)
+    * (θₓ, φₓ) = $(s2)
+    * (θy, φy) = $(s3).
+    """
 end
 
 # ╔═╡ c1660206-d21a-4812-9dd3-bda91b633c0b
@@ -216,15 +220,15 @@ end;
 
 # ╔═╡ a30fa94f-5669-4265-a541-03d16dbd5745
 begin
-	if render_images || interactive # generate images in these two cases
-    	ax1, fig1 = torus_figure()
-    	arrows!(ax1, geo_ps_pt, geo_Ys, linewidth=0.05, color=:blue)
-	    lines!(geo_ps; linewidth=4.0, color=:green)
-		(!interactive) && Makie.save(image_prefix * "working-in-charts-transport.png", fig1)
-	    fig1
-	else
-		PlutoUI.LocalResource(image_prefix * "/working-in-charts-transport.png")
-	end
+    if render_images || interactive # generate images in these two cases
+        ax1, fig1 = torus_figure()
+        arrows!(ax1, geo_ps_pt, geo_Ys, linewidth = 0.05, color = :blue)
+        lines!(geo_ps; linewidth = 4.0, color = :green)
+        (!interactive) && Makie.save(image_prefix * "working-in-charts-transport.png", fig1)
+        fig1
+    else
+        PlutoUI.LocalResource(image_prefix * "/working-in-charts-transport.png")
+    end
 end
 
 # ╔═╡ a941fd19-faf5-49d0-8f68-ae2fbe45130d
@@ -232,24 +236,24 @@ md" ### Solving the logarithmic map ODE"
 
 # ╔═╡ 922461b0-55a0-447b-b59d-cfff7b448858
 if interactive
-	
-	md"""
-	We set
-	* start point θ₁ $(@bind θ₁ PlutoUI.Slider(range(-π,π,200), default=π/2)) |  φ₁ $(@bind φ₁ PlutoUI.Slider(range(-π,π,200), default=-1.0))
-	* end point θ₂ $(@bind θ₂ PlutoUI.Slider(range(-π,π,200), default=-π/8)) | φ₂ $(@bind φ₂ PlutoUI.Slider(range(-π,π,200), default=π/2))
-	"""
+
+    md"""
+    We set
+    * start point θ₁ $(@bind θ₁ PlutoUI.Slider(range(-π,π,200), default=π/2)) |  φ₁ $(@bind φ₁ PlutoUI.Slider(range(-π,π,200), default=-1.0))
+    * end point θ₂ $(@bind θ₂ PlutoUI.Slider(range(-π,π,200), default=-π/8)) | φ₂ $(@bind φ₂ PlutoUI.Slider(range(-π,π,200), default=π/2))
+    """
 else
-	θ₁=π/2
-	φ₁=-1.0
-	θ₂=-π/8
-	φ₂=π/2
-	s4 = "($(θ₁), $(φ₁))"
-	s5 = "($(θ₂), $(φ₂))"
-	md"""
-	We set
-	* (θ₁, φ₁) = $(s4)
-	* (θ₂, φ₂) = $(s5)
-	"""
+    θ₁ = π / 2
+    φ₁ = -1.0
+    θ₂ = -π / 8
+    φ₂ = π / 2
+    s4 = "($(θ₁), $(φ₁))"
+    s5 = "($(θ₂), $(φ₂))"
+    md"""
+    We set
+    * (θ₁, φ₁) = $(s4)
+    * (θ₂, φ₂) = $(s5)
+    """
 end
 
 # ╔═╡ 2abef887-32a8-40ba-89e1-b6adbfe9174f
@@ -263,14 +267,14 @@ end;
 
 # ╔═╡ eea2fbc7-1ba8-49f8-916c-743984abe15d
 begin
-	if render_images || interactive # generate images in these two cases
-    	ax2, fig2 = torus_figure()
-    	lines!(geo_r; linewidth=4.0, color=:green)
-		(!interactive) && Makie.save(image_prefix * "/working-in-charts-geodesic.png", fig2)
-	    fig2
-	else
-		PlutoUI.LocalResource(image_prefix * "/working-in-charts-geodesic.png")
-	end
+    if render_images || interactive # generate images in these two cases
+        ax2, fig2 = torus_figure()
+        lines!(geo_r; linewidth = 4.0, color = :green)
+        (!interactive) && Makie.save(image_prefix * "/working-in-charts-geodesic.png", fig2)
+        fig2
+    else
+        PlutoUI.LocalResource(image_prefix * "/working-in-charts-geodesic.png")
+    end
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001

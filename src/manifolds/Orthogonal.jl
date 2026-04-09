@@ -1,5 +1,5 @@
 @doc raw"""
-     OrthogonalMatrices{n} = GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrixType}
+     OrthogonalMatrices{n} = GeneralUnitaryMatrices{ℝ, n, AbsoluteDeterminantOneMatrixType}
 
 The manifold of (real) orthogonal ``n×n`` matrices ``\mathrm{O}(n)``. They are precisely the ``n×n`` real matrices ``M`` that satisfy
 
@@ -14,20 +14,20 @@ This is the same manifold as the [`Stiefel`](@ref)`(n, n, ℂ)` manifold.
 
     OrthogonalMatrices(n)
 """
-const OrthogonalMatrices{n} = GeneralUnitaryMatrices{n,ℝ,AbsoluteDeterminantOneMatrixType}
+const OrthogonalMatrices{n} = GeneralUnitaryMatrices{ℝ, n, AbsoluteDeterminantOneMatrixType}
 
-function OrthogonalMatrices(n::Int; parameter::Symbol=:type)
+function OrthogonalMatrices(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
     return OrthogonalMatrices{typeof(size)}(size)
 end
 
 function Random.rand!(
-    rng::AbstractRNG,
-    M::OrthogonalMatrices,
-    pX;
-    vector_at=nothing,
-    σ::Real=one(eltype(pX)),
-)
+        rng::AbstractRNG,
+        M::OrthogonalMatrices,
+        pX;
+        vector_at = nothing,
+        σ::Real = one(eltype(pX)),
+    )
     if vector_at === nothing
         # Special case: Rotations(1) is just zero-dimensional
         (manifold_dimension(M) == 0) && return fill!(pX, rand(rng, (-1, 1)))

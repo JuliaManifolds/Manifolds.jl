@@ -20,7 +20,6 @@ import Base:
     size,
     transpose
 import ManifoldsBase:
-    @trait_function,
     _access_nested,
     _get_basis,
     _injectivity_radius,
@@ -30,13 +29,15 @@ import ManifoldsBase:
     _retract,
     _retract!,
     _write,
-    active_traits,
     allocate,
     allocate_coordinates,
     allocate_result,
+    allocate_result_embedding,
     allocate_result_type,
     allocation_promotion_function,
     base_manifold,
+    canonical_project,
+    canonical_project!,
     change_basis,
     change_basis!,
     change_metric,
@@ -46,6 +47,7 @@ import ManifoldsBase:
     check_point,
     check_size,
     check_vector,
+    connection,
     copy,
     copyto!,
     default_approximation_method,
@@ -57,6 +59,8 @@ import ManifoldsBase:
     dual_basis,
     embed,
     embed!,
+    embed_project,
+    embed_project!,
     exp,
     exp!,
     exp_fused,
@@ -80,6 +84,7 @@ import ManifoldsBase:
     get_coordinates_vee!,
     get_embedding,
     get_iterator,
+    get_total_space,
     get_vector,
     get_vector!,
     get_vector_diagonalizing,
@@ -93,6 +98,10 @@ import ManifoldsBase:
     has_components,
     hat,
     hat!,
+    horizontal_component,
+    horizontal_component!,
+    horizontal_lift,
+    horizontal_lift!,
     injectivity_radius,
     _injectivity_radius,
     injectivity_radius_exp,
@@ -111,12 +120,16 @@ import ManifoldsBase:
     inverse_retract_softmax!,
     isapprox,
     _isapprox,
+    is_default_connection,
+    is_default_metric,
     is_flat,
+    is_metric_function,
     is_point,
     is_vector,
     log,
     log!,
     manifold_dimension,
+    metric,
     mid_point,
     mid_point!,
     norm,
@@ -126,7 +139,6 @@ import ManifoldsBase:
     parallel_transport_direction!,
     parallel_transport_to,
     parallel_transport_to!,
-    parent_trait,
     power_dimensions,
     project,
     project!,
@@ -136,7 +148,6 @@ import ManifoldsBase:
     retract,
     retract!,
     retract_cayley!,
-    retract_exp_ode!,
     retract_pade!,
     retract_polar!,
     retract_project!,
@@ -166,6 +177,8 @@ import ManifoldsBase:
     _vector_transport_direction!,
     _vector_transport_to,
     _vector_transport_to!,
+    vertical_component,
+    vertical_component!,
     vee,
     vee!,
     Weingarten,
@@ -188,13 +201,21 @@ import ManifoldDiff:
 import Statistics: mean, mean!, median, median!, cov, var
 import StatsBase: mean_and_var
 
+using ADTypes:
+    AbstractADType,
+    AutoFiniteDiff,
+    AutoFiniteDifferences,
+    AutoForwardDiff,
+    AutoReverseDiff,
+    AutoZygote
+import DifferentiationInterface as DI
+
 using Base.Iterators: repeated
-using Einsum: @einsum
+using Tullio: @einsum, @tullio
 using Kronecker
 using Graphs
 using LinearAlgebra
 using ManifoldsBase:
-    @next_trait_function,
     ℝ,
     ℂ,
     ℍ,
@@ -211,7 +232,6 @@ using ManifoldsBase:
     AbstractPowerManifold,
     AbstractPowerRepresentation,
     AbstractRetractionMethod,
-    AbstractTrait,
     AbstractVectorTransportMethod,
     AbstractLinearVectorTransportMethod,
     ApproximateInverseRetraction,
@@ -222,12 +242,14 @@ using ManifoldsBase:
     ComplexNumbers,
     ComponentManifoldError,
     CompositeManifoldError,
+    ConnectionManifold,
     CotangentSpace,
     CotangentSpaceType,
     CoTFVector,
     AbstractCotangentVector,
     CyclicProximalPointEstimation,
     DefaultBasis,
+    DefaultMetric,
     DefaultOrthogonalBasis,
     DefaultOrthonormalBasis,
     DefaultOrDiagonalizingBasis,
@@ -236,7 +258,6 @@ using ManifoldsBase:
     DifferentiatedRetractionVectorTransport,
     EfficientEstimator,
     EmbeddedManifold,
-    EmptyTrait,
     EuclideanMetric,
     ExponentialRetraction,
     ExtrinsicEstimation,
@@ -247,18 +268,14 @@ using ManifoldsBase:
     GeodesicInterpolationWithinRadius,
     GradientDescentEstimation,
     InverseProductRetraction,
-    IsIsometricEmbeddedManifold,
-    IsEmbeddedManifold,
-    IsEmbeddedSubmanifold,
-    IsExplicitDecorator,
+    LeviCivitaConnection,
     LogarithmicInverseRetraction,
     ManifoldDomainError,
     ManifoldsBase,
+    MetricManifold,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
-    TraitList,
     NLSolveInverseRetraction,
-    ODEExponentialRetraction,
     OutOfInjectivityRadiusError,
     PadeRetraction,
     PadeInverseRetraction,
@@ -290,6 +307,8 @@ using ManifoldsBase:
     ShootingInverseRetraction,
     SoftmaxRetraction,
     SoftmaxInverseRetraction,
+    StabilizedRetraction,
+    StopForwardingType,
     TangentSpace,
     TangentSpaceType,
     TCoTSpaceType,
@@ -310,8 +329,7 @@ using ManifoldsBase:
     geodesic,
     geodesic!,
     get_parameter,
-    merge_traits,
-    next_trait,
+    @trait_function,
     number_of_components,
     number_system,
     real_dimension,
@@ -319,7 +337,6 @@ using ManifoldsBase:
     shortest_geodesic,
     shortest_geodesic!,
     size_to_tuple,
-    trait,
     wrap_type_parameter,
     ziptuples
 using ManifoldDiff: ManifoldDiff
@@ -401,12 +418,10 @@ end
 # Main Meta Manifolds
 include("manifolds/ConnectionManifold.jl")
 include("manifolds/MetricManifold.jl")
-include("manifolds/QuotientManifold.jl")
 include("manifolds/Fiber.jl")
 include("manifolds/FiberBundle.jl")
 include("manifolds/VectorFiber.jl")
 include("manifolds/VectorBundle.jl")
-include("groups/group.jl")           # all necessary deprecation warnings added.
 
 # Features I: Extending Meta Manifolds
 include("statistics.jl")
@@ -487,6 +502,7 @@ include("manifolds/Tucker.jl")
 include("manifolds/ProbabilitySimplex.jl")
 include("manifolds/ProbabilitySimplexEuclideanMetric.jl")
 include("manifolds/GeneralUnitaryMatrices.jl")
+include("manifolds/SpecialUnitary.jl")
 include("manifolds/Unitary.jl")
 include("manifolds/Rotations.jl")
 include("manifolds/Orthogonal.jl")
@@ -510,45 +526,6 @@ include("manifolds/Torus.jl")
 include("manifolds/Multinomial.jl")
 include("manifolds/Oblique.jl")
 include("manifolds/EssentialManifold.jl")
-
-#
-# Group Manifolds
-include("groups/GroupManifold.jl")               # all necessary warnings added.
-
-# a) generics
-include("groups/addition_operation.jl")
-include("groups/multiplication_operation.jl")
-include("groups/connections.jl")     # no deprecations to add. Maybe move connection names to ManifoldsBase?
-include("groups/metric.jl")                           # no deprecations to add.
-include("groups/group_action.jl")    # all necessary deprecation warnings added.
-include("groups/group_operation_action.jl")
-include("groups/validation_group.jl")
-include("groups/product_group.jl")
-include("groups/semidirect_product_group.jl")
-include("groups/power_group.jl")
-
-# generic group - common (special) unitary/orthogonal functions
-include("groups/general_unitary_groups.jl")
-# Special Group Manifolds
-include("groups/general_linear.jl")                     # all deprecations added
-include("groups/special_linear.jl")
-include("groups/translation_group.jl")
-include("groups/unitary.jl")
-include("groups/orthogonal.jl")
-include("groups/special_unitary.jl")
-include("groups/special_orthogonal.jl")
-include("groups/circle_group.jl")
-include("groups/heisenberg.jl")
-
-include("groups/translation_action.jl")
-include("groups/rotation_action.jl")
-
-include("groups/special_euclidean.jl")
-
-include("groups/rotation_translation_action.jl")
-
-# final utilities
-include("trait_recursion_breaking.jl")
 
 @doc raw"""
     Base.in(p, M::AbstractManifold; kwargs...)
@@ -601,26 +578,25 @@ function estimate_distance_from_bvp end
 function solve_chart_exp_ode end
 function solve_chart_parallel_transport_ode end
 
+# TODO: Remove once the new interface is done
 function find_eps end
 function test_parallel_transport end
 function test_manifold end
-function test_group end
-function test_action end
-
-# end of functions populated with methods by extensions
+function test_atlases end
+# / remove
 
 function __init__()
-    @static if isdefined(Base.Experimental, :register_error_hint)
+    @static if isdefined(Base.Experimental, :register_error_hint) # COV_EXCL_LINE
         Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
             if exc.f === solve_exp_ode
                 print(io, "\nDid you forget to load OrdinaryDiffEq? For example: ")
-                printstyled(io, "`using OrdinaryDiffEq`", color=:cyan)
+                printstyled(io, "`using OrdinaryDiffEq`", color = :cyan)
             elseif exc.f === uniform_distribution
                 print(
                     io,
                     "\nDid you forget to load Distributions and RecursiveArrayTools? For example: ",
                 )
-                printstyled(io, "`using Distributions, RecursiveArrayTools`", color=:cyan)
+                printstyled(io, "`using Distributions, RecursiveArrayTools`", color = :cyan)
             end
         end
     end
@@ -629,9 +605,6 @@ function __init__()
 end
 
 include("deprecated.jl")
-
-export test_manifold
-export test_group, test_action
 
 # Abstract main types
 export AbstractCotangentVector,
@@ -653,7 +626,6 @@ export Euclidean,
     GeneralizedStiefel,
     Grassmann,
     HamiltonianMatrices,
-    HeisenbergGroup,
     HeisenbergMatrices,
     HermitianPositiveDefinite,
     Hyperbolic,
@@ -678,6 +650,7 @@ export Euclidean,
     Segre,
     SkewHermitianMatrices,
     SkewSymmetricMatrices,
+    SpecialUnitaryMatrices,
     Spectrahedron,
     Sphere,
     SphereSymmetricMatrices,
@@ -717,8 +690,6 @@ export AbstractNumbers, ℝ, ℂ, ℍ
 export Hamiltonian
 # decorator manifolds
 export AbstractDecoratorManifold
-export IsIsometricEmbeddedManifold, IsEmbeddedManifold, IsEmbeddedSubmanifold
-export IsDefaultMetric, IsDefaultConnection, IsMetricManifold, IsConnectionManifold
 export ValidationManifold,
     ValidationMPoint, ValidationTangentVector, ValidationCotangentVector
 export Fiber, FiberBundle, CotangentBundle, CotangentSpace, FVector
@@ -727,8 +698,7 @@ export AbstractPowerManifold,
     ArrayPowerRepresentation,
     NestedPowerRepresentation,
     NestedReplacingPowerRepresentation,
-    PowerManifold,
-    QuotientManifold
+    PowerManifold
 export ProductManifold, EmbeddedManifold
 export GraphManifold, GraphManifoldType, VertexManifold, EdgeManifold
 export TangentBundle
@@ -738,14 +708,13 @@ export AbstractVectorTransportMethod,
 export PoleLadderTransport, SchildsLadderTransport
 export ProductVectorTransport
 export AbstractAffineConnection, ConnectionManifold, LeviCivitaConnection
-export AbstractCartanSchoutenConnection,
-    CartanSchoutenMinus, CartanSchoutenPlus, CartanSchoutenZero
 export MetricManifold
 # Metric types
 export AbstractMetric,
     AffineInvariantMetric,
     BuresWassersteinMetric,
     CanonicalMetric,
+    DefaultMetric,
     EuclideanMetric,
     ExtendedSymplecticMetric,
     FisherRaoMetric,
@@ -769,13 +738,14 @@ export AbstractRetractionMethod,
     ExponentialRetraction,
     QRRetraction,
     PolarRetraction,
+    PolarLightRetraction,
     ProjectionRetraction,
     SoftmaxRetraction,
-    ODEExponentialRetraction,
     OrthographicRetraction,
     PadeRetraction,
     ProductRetraction,
-    SasakiRetraction
+    SasakiRetraction,
+    StabilizedRetraction
 # Inverse Retraction types
 export AbstractInverseRetractionMethod,
     ApproximateInverseRetraction,
@@ -785,6 +755,7 @@ export AbstractInverseRetractionMethod,
     QRInverseRetraction,
     OrthographicInverseRetraction,
     PolarInverseRetraction,
+    PolarLightInverseRetraction,
     ProjectionInverseRetraction,
     ShootingInverseRetraction,
     SoftmaxInverseRetraction
@@ -809,7 +780,8 @@ export ComponentManifoldError, CompositeManifoldError, ManifoldDomainError
 # Functions on Manifolds
 export ×,
     ^,
-    action_side,
+    affine_connection,
+    affine_connection!,
     allocate,
     allocate_result,
     base_manifold,
@@ -837,13 +809,13 @@ export ×,
     default_retraction_method,
     default_vector_transport_method,
     det_local_metric,
-    differential_canonical_project,
-    differential_canonical_project!,
     distance,
     dual_basis,
     einstein_tensor,
     embed,
     embed!,
+    embed_project,
+    embed_project!,
     exp,
     exp!,
     flat,
@@ -854,7 +826,6 @@ export ×,
     get_default_atlas,
     get_component,
     get_embedding,
-    get_orbit_action,
     get_total_space,
     has_components,
     hat,
@@ -863,12 +834,12 @@ export ×,
     horizontal_component!,
     horizontal_lift,
     horizontal_lift!,
-    identity_element,
-    identity_element!,
     induced_basis,
     incident_log,
     injectivity_radius,
     inner,
+    inv,
+    inv!,
     inverse_local_metric,
     inverse_retract,
     inverse_retract!,
@@ -876,9 +847,7 @@ export ×,
     is_default_connection,
     is_default_metric,
     is_flat,
-    is_group_manifold,
     is_hamiltonian,
-    is_identity,
     is_point,
     is_vector,
     kurtosis,
@@ -959,120 +928,6 @@ export ×,
     Weingarten!,
     zero_vector,
     zero_vector!
-# Lie group types & functions
-export AbstractGroupAction,
-    AbstractGroupOperation,
-    AbstractGroupVectorRepresentation,
-    ActionDirection,
-    AdditionOperation,
-    CircleGroup,
-    ComplexPlanarRotation,
-    GeneralLinear,
-    GroupManifold,
-    GroupOperationAction,
-    HybridTangentRepresentation,
-    Identity,
-    LeftAction,
-    LeftInvariantMetric,
-    LeftInvariantRepresentation,
-    LeftSide,
-    MultiplicationOperation,
-    Orthogonal,
-    PowerGroup,
-    ProductGroup,
-    ProductOperation,
-    QuaternionRotation,
-    RealCircleGroup,
-    RightAction,
-    RightInvariantMetric,
-    RightSide,
-    RotationAction,
-    RotationTranslationAction,
-    RotationTranslationActionOnVector,
-    SemidirectProductGroup,
-    SpecialEuclidean,
-    SpecialLinear,
-    SpecialOrthogonal,
-    SpecialUnitary,
-    TangentVectorRepresentation,
-    TranslationGroup,
-    TranslationAction,
-    Unitary
-export AbstractInvarianceTrait
-export IsMetricManifold, IsConnectionManifold
-export IsGroupManifold,
-    HasLeftInvariantMetric, HasRightInvariantMetric, HasBiinvariantMetric
-export adjoint_action,
-    adjoint_action!,
-    adjoint_apply_diff_group,
-    adjoint_apply_diff_group!,
-    adjoint_inv_diff,
-    adjoint_inv_diff!,
-    adjoint_matrix,
-    adjoint_matrix!,
-    affine_matrix,
-    apply,
-    apply!,
-    apply_diff,
-    apply_diff!,
-    apply_diff_group,
-    apply_diff_group!,
-    base_group,
-    center_of_orbit,
-    has_approx_invariant_metric,
-    compose,
-    compose!,
-    direction,
-    direction_and_side,
-    exp_inv,
-    exp_inv!,
-    exp_lie,
-    exp_lie!,
-    group_manifold,
-    geodesic,
-    get_coordinates_lie,
-    get_coordinates_lie!,
-    get_coordinates_orthogonal,
-    get_coordinates_orthonormal,
-    get_coordinates_orthogonal!,
-    get_coordinates_orthonormal!,
-    get_coordinates_vee!,
-    get_vector_diagonalizing!,
-    get_vector_lie,
-    get_vector_lie!,
-    get_vector_orthogonal,
-    get_vector_orthonormal,
-    has_biinvariant_metric,
-    has_invariant_metric,
-    identity_element,
-    identity_element!,
-    inv,
-    inv!,
-    inv_diff,
-    inv_diff!,
-    inverse_apply,
-    inverse_apply!,
-    inverse_apply_diff,
-    inverse_apply_diff!,
-    inverse_translate,
-    inverse_translate!,
-    inverse_translate_diff,
-    inverse_translate_diff!,
-    lie_bracket,
-    lie_bracket!,
-    log_inv,
-    log_inv!,
-    log_lie,
-    log_lie!,
-    optimal_alignment,
-    optimal_alignment!,
-    screw_matrix,
-    switch_direction,
-    switch_side,
-    translate,
-    translate!,
-    translate_diff,
-    translate_diff!
 # Orthonormal bases
 export AbstractBasis,
     AbstractOrthonormalBasis,
@@ -1089,5 +944,8 @@ export get_basis,
 
 # atlases and charts
 export get_point, get_point!, get_parameters, get_parameters!
+
+# Last (not least, but _after_ exports) include the test submodule
+include("test-suite.jl")
 
 end # module
