@@ -4,9 +4,8 @@
 The manifold of symmetric positive definite matrices, i.e.
 
 ````math
-\mathcal P(n) =
-\bigl\{
-p ∈ ℝ^{n×n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
+\mathcal P(n) = \bigl\{
+  p ∈ ℝ^{n×n}\ \big|\ a^\mathrm{T}pa > 0 \text{ for all } a ∈ ℝ^{n}\backslash\{0\}
 \bigr\}
 ````
 
@@ -14,9 +13,7 @@ The tangent space at ``T_p\mathcal P(n)`` reads
 
 ```math
     T_p\mathcal P(n) =
-    \bigl\{
-        X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T}
-    \bigr\},
+    \bigl\{ X \in \mathbb R^{n×n} \big|\ X=X^\mathrm{T} \bigr\},
 ```
 i.e. the set of symmetric matrices,
 
@@ -26,9 +23,7 @@ i.e. the set of symmetric matrices,
 
 generates the manifold ``\mathcal P(n) \subset ℝ^{n×n}``
 """
-struct SymmetricPositiveDefinite{T} <: AbstractDecoratorManifold{ℝ}
-    size::T
-end
+const SymmetricPositiveDefinite{T} = HermitianPositiveDefinite{ℝ, T}
 
 function SymmetricPositiveDefinite(n::Int; parameter::Symbol = :type)
     size = wrap_type_parameter(parameter, (n,))
@@ -135,7 +130,7 @@ function check_point(M::SymmetricPositiveDefinite, p; kwargs...)
     if !isapprox(norm(p - transpose(p)), 0.0; kwargs...)
         return DomainError(
             norm(p - transpose(p)),
-            "The point $(p) does not lie on $(M) since its not a symmetric matrix:",
+            "The point $(p) does not lie on $(M) since its not a symmetric matrix.",
         )
     end
     if !isposdef(p)
@@ -481,12 +476,10 @@ function representation_size(M::SymmetricPositiveDefinite)
     return (N, N)
 end
 
-function Base.show(io::IO, ::SymmetricPositiveDefinite{TypeParameter{Tuple{n}}}) where {n}
-    return print(io, "SymmetricPositiveDefinite($(n))")
-end
-function Base.show(io::IO, M::SymmetricPositiveDefinite{Tuple{Int}})
+function Base.show(io::IO, M::SymmetricPositiveDefinite)
     n = get_parameter(M.size)[1]
-    return print(io, "SymmetricPositiveDefinite($(n); parameter=:field)")
+    kw = get_parameter_type(M) === :type ? "" : "; parameter=:$(get_parameter_type(M))"
+    return print(io, "SymmetricPositiveDefinite($n$kw)")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", p::SPDPoint)

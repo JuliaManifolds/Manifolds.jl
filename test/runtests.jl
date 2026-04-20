@@ -41,6 +41,8 @@ end
         include_test("manifolds/test_heisenberg_matrices.jl")
         include_test("manifolds/test_stiefel.jl")
         include_test("manifolds/test_unitary_matrices.jl")
+        include_test("manifolds/test_hermitian_symmetric_positive_definite.jl")
+
     end
     (TEST_SET ∈ ["all", "manifolds"]) && Test.@testset "Manifolds.jl Old Tests" begin
         # starting with tests of simple manifolds
