@@ -433,8 +433,10 @@ The formula reads
 U_pMV_p^{\mathrm{H}} + U_XV_p^{\mathrm{H}} + U_pV_X^{\mathrm{H}}
 ```
 """
-function embed(::FixedRankMatrices, p::SVDMPoint, X::UMVTangentVector)
-    return (p.U * X.M .+ X.U) * p.Vt + p.U * X.Vt
+function embed(M::FixedRankMatrices, p::SVDMPoint, X::UMVTangentVector)
+    m, n, k = get_parameter(M.size)
+    Y = Matrix{eltype(p)}(undef, m, n)
+    return embed!(M, Y, p, X)
 end
 
 function embed!(::FixedRankMatrices, Y, p::SVDMPoint, X::UMVTangentVector)
