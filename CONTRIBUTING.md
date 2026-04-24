@@ -92,7 +92,7 @@ Please follow the [documentation guidelines](https://docs.julialang.org/en/v1/ma
 Please consider a few internal conventions:
 
 
-* Please include a description of the manifold and a reference to the general theory in the `struct` of your manifold that inherits from `AbstractManifold`'.
+* Please include a description of the manifold and a reference to the general theory in the `struct` of your manifold that inherits from `AbstractManifold`.
 * Include the mathematical formulae for any implemented function if a closed form exists.
 * Within the source code of one manifold, the `struct` the manifold should be the first element of the file.
 * an alphabetical order of functions in every file is preferable.
