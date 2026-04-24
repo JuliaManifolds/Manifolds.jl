@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.22] 2026-04-24
 
+### Added
+
+* A clarification on the use of AI in the [CONTRIBUTING.md](https://juliamanifolds.github.io/Manifolds.jl/stable/misc/CONTRIBUTING/) (#886)
+
 ### Changed
 
 * Improved performance of `embed` for embedding tangent vectors of the `FixedRankMaticesManifold` (#885).
 
-## [0.11.21] 2026-04-03
+## [0.11.21] 2025-04-03
 
 ### Changed
 
