@@ -38,7 +38,7 @@ OrdinaryDiffEq = "6"
 Plots = "1"
 PythonPlot = "1"
 RecipesBase = "1"
-RecursiveArrayTools = "3"
+RecursiveArrayTools = "3, 4.0"
 StaticArrays = "1.0"
 
 [sources]
