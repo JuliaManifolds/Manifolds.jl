@@ -5,6 +5,12 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.23] 2026-04-29
+
+### Fixed
+
+* `ManifoldsBoundaryValueDiffEqExt` now triggers on `BoundaryValueDiffEqMIRK` (the only subpackage actually used) and requires version `1.14`, avoiding a transitive resolver picking `BoundaryValueDiffEqCore` 2.1 with `BoundaryValueDiffEqMIRK` / `BoundaryValueDiffEqFIRK` 1.13, a combination whose precompile workload fails (SciML/DifferentialEquations.jl#1136).
+
 ## [0.11.22] 2026-04-24
 
 ### Added
