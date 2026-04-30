@@ -6,7 +6,7 @@ using ManifoldsBase
 using Manifolds: affine_connection
 import Manifolds: solve_chart_log_bvp, estimate_distance_from_bvp
 
-using BoundaryValueDiffEq
+using BoundaryValueDiffEqMIRK
 
 function chart_log_problem!(du, u, params, t)
     M, A, i = params
