@@ -205,7 +205,7 @@ function solve_exp_ode end
         t::Number;
         B::AbstractBasis = DefaultOrthonormalBasis(),
         backend::AbstractDiffBackend = default_differential_backend(),
-        solver = AutoVern9(Rodas5()),
+        solver = AutoVern9(Rodas5P()),
         kwargs...,
     )
 

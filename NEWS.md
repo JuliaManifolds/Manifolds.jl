@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.23] 2026-04-29
 
+### Changed
+
+* Bumped `RecursiveArrayTools` compat to `2, 3, 4` and `OrdinaryDiffEq` compat to `6.31, 7`, allowing the SciMLBase 3 ecosystem (RAT 4 / OrdinaryDiffEqCore 4 / SciMLBase 3).
+* `ManifoldsOrdinaryDiffEqDiffEqCallbacksExt` now uses `Rodas5P` instead of the removed `Rodas5` re-export from OrdinaryDiffEq, and `SciMLBase.terminate!` instead of the removed `OrdinaryDiffEq.terminate!`. The default `solver` for `solve_chart_exp_ode` / `solve_chart_parallel_transport_ode` is now `AutoVern9(Rodas5P())`.
+
 ### Fixed
 
 * `ManifoldsBoundaryValueDiffEqExt` now triggers on `BoundaryValueDiffEqMIRK` (the only subpackage actually used) and requires version `1.14`, avoiding a transitive resolver picking `BoundaryValueDiffEqCore` 2.1 with `BoundaryValueDiffEqMIRK` / `BoundaryValueDiffEqFIRK` 1.13, a combination whose precompile workload fails (SciML/DifferentialEquations.jl#1136).
+* `solve_chart_log_bvp` now uses a function-valued initial guess (linear interpolation between `a1` and `a2`) and the callable `bc!(residual, u, p, t)` API (`u(tspan[1])`, `u(tspan[2])`) compatible with `EvalSol`, plus `adaptive = false` by default to avoid an upstream MIRK 1.16 mesh-refinement issue. `kwargs...` are now forwarded to `solve`, so callers can opt into adaptive mesh once the upstream fix lands.
 
 ## [0.11.22] 2026-04-24
 
