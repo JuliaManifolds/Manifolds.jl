@@ -34,11 +34,11 @@ HybridArrays = "0.4"
 Manifolds = "0.11"
 ManifoldsBase = "2"
 NLsolve = "4"
-OrdinaryDiffEq = "6"
+OrdinaryDiffEq = "6, 7.0"
 Plots = "1"
 PythonPlot = "1"
 RecipesBase = "1"
-RecursiveArrayTools = "3"
+RecursiveArrayTools = "3, 4.3"
 StaticArrays = "1.0"
 
 [sources]
