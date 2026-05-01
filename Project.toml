@@ -1,7 +1,7 @@
 name = "Manifolds"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.11.23"
+version = "0.11.24"
 
 [workspace]
 projects = ["test", "docs", "tutorials"]
@@ -50,7 +50,7 @@ ManifoldsTestExt = "Test"
 
 [compat]
 ADTypes = "1.19.0"
-BoundaryValueDiffEqMIRK = "1.14"
+BoundaryValueDiffEqMIRK = "1.17"
 Colors = "0.12, 0.13"
 DiffEqCallbacks = "2, 3, 4"
 DifferentiationInterface = "0.7.12"

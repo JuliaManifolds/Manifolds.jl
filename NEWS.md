@@ -5,6 +5,12 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.24] 2026-05-01
+
+### Changed
+
+* Bumped `BoundaryValueDiffEqMIRK` compat lower bound to `1.17`, which contains the upstream fix for SciML/BoundaryValueDiffEq.jl#484 (UndefRefError in MIRK adaptive mesh refinement on nonlinear BVPs under the SciMLBase 3 / RAT 4 stack). The `embedded_torus` test now exercises `solve_chart_log_bvp` and `estimate_distance_from_bvp` with default `adaptive = true` again.
+
 ## [0.11.23] 2026-04-29
 
 ### Changed
