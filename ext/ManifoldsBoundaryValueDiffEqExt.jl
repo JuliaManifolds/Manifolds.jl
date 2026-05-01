@@ -45,7 +45,7 @@ function solve_chart_log_bvp(
     end
     u0 = (p, t) -> vcat(a1 .+ t .* (a2 .- a1), zero(a1))
     bvp1 = BVProblem(chart_log_problem!, bc1!, u0, tspan, (M, A, i))
-    sol1 = solve(bvp1, solver; dt = dt, adaptive = false, kwargs...)
+    sol1 = solve(bvp1, solver; dt = dt, kwargs...)
     return sol1
 end
 
