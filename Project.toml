@@ -50,7 +50,7 @@ ManifoldsTestExt = "Test"
 
 [compat]
 ADTypes = "1.19.0"
-BoundaryValueDiffEqMIRK = "1.14"
+BoundaryValueDiffEqMIRK = "1.17"
 Colors = "0.12, 0.13"
 DiffEqCallbacks = "2, 3, 4"
 DifferentiationInterface = "0.7.12"

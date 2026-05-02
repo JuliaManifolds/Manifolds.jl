@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* `ManifoldsBoundaryValueDiffEqExt` now triggers on `BoundaryValueDiffEqMIRK` (the only subpackage actually used) and requires version `1.14`, avoiding a transitive resolver picking `BoundaryValueDiffEqCore` 2.1 with `BoundaryValueDiffEqMIRK` / `BoundaryValueDiffEqFIRK` 1.13, a combination whose precompile workload fails (SciML/DifferentialEquations.jl#1136).
-* `solve_chart_log_bvp` now uses a function-valued initial guess (linear interpolation between `a1` and `a2`) and the callable `bc!(residual, u, p, t)` API (`u(tspan[1])`, `u(tspan[2])`) compatible with `EvalSol`. `kwargs...` are now forwarded to `solve` (previously silently dropped), so callers can pass through `adaptive` and other solver options. Note: with `BoundaryValueDiffEqMIRK >= 1.15`, adaptive mesh refinement on this BVP currently triggers an upstream `UndefRefError` (SciML/BoundaryValueDiffEq.jl#484); pass `adaptive = false` until that is resolved.
+* `ManifoldsBoundaryValueDiffEqExt` now triggers on `BoundaryValueDiffEqMIRK` (the only subpackage actually used) and requires version `1.17`, avoiding a transitive resolver picking `BoundaryValueDiffEqCore` 2.1 with `BoundaryValueDiffEqMIRK` / `BoundaryValueDiffEqFIRK` 1.13, a combination whose precompile workload fails (SciML/DifferentialEquations.jl#1136). The `1.17` lower bound also includes the upstream fix for SciML/BoundaryValueDiffEq.jl#484 (UndefRefError in MIRK adaptive mesh refinement on nonlinear BVPs under the SciMLBase 3 / RAT 4 stack), so `solve_chart_log_bvp` works with default `adaptive = true`.
+* `solve_chart_log_bvp` now uses a function-valued initial guess (linear interpolation between `a1` and `a2`) and the callable `bc!(residual, u, p, t)` API (`u(tspan[1])`, `u(tspan[2])`) compatible with `EvalSol`. `kwargs...` are now forwarded to `solve` (previously silently dropped), so callers can pass through `adaptive` and other solver options.
 
 ## [0.11.22] 2026-04-24
 
