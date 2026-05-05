@@ -159,6 +159,60 @@ function embed!(::Segre{𝔽, V}, u, p, X) where {𝔽, V}
     )
 end
 
+
+@doc raw"""
+    vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q)
+
+Compute projection vector transport on the [`Segre`](@ref) manifold by projecting
+the embedded tangent vector ``D\Phi_p[X]`` onto the tangent space of `M` at `q`.
+"""
+function ManifoldsBase.vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
+    d = length(V)
+    λ = q[1][1]
+
+    # Initialize output tangent vector Y at q.
+    for Yi in Y
+        fill!(Yi, zero(eltype(Yi)))
+    end
+
+    # Reusable storage for dot products <z_k, x_k>.
+    dots = Vector{typeof(dot(p[2], q[2]))}(undef, d)
+
+    # term = 0 corresponds to ν y₁ ⊗ ⋯ ⊗ y_d.
+    # term = k corresponds to λ_p y₁ ⊗ ⋯ ⊗ u_k ⊗ ⋯ ⊗ y_d.
+    for term in 0:d
+        c = term == 0 ? X[1][1] : p[1][1]
+
+        for k in 1:d
+            zk = term == k ? X[k + 1] : p[k + 1]
+            dots[k] = dot(zk, q[k + 1])
+        end
+
+        Y[1][1] += c * prod(dots)
+
+        for k in 1:d
+            zk = term == k ? X[k + 1] : p[k + 1]
+            xk = q[k + 1]
+            vk = Y[k + 1]
+            αk = dots[k]
+
+            coeff = c / λ
+            for j in 1:d
+                if j != k
+                    coeff *= dots[j]
+                end
+            end
+
+            @inbounds for i in eachindex(vk, zk, xk)
+                vk[i] += coeff * (zk[i] - αk * xk[i])
+            end
+        end
+    end
+
+    return Y
+end
+
+
 """
     is_point(M::Segre{ℝ, V}, p; kwargs...)
 
