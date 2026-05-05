@@ -170,16 +170,12 @@ function ManifoldsBase.vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q
     d = length(V)
     λ = q[1][1]
 
-    # Initialize output tangent vector Y at q.
     for Yi in Y
         fill!(Yi, zero(eltype(Yi)))
     end
 
-    # Reusable storage for dot products <z_k, x_k>.
     dots = Vector{typeof(dot(p[2], q[2]))}(undef, d)
 
-    # term = 0 corresponds to ν y₁ ⊗ ⋯ ⊗ y_d.
-    # term = k corresponds to λ_p y₁ ⊗ ⋯ ⊗ u_k ⊗ ⋯ ⊗ y_d.
     for term in 0:d
         c = term == 0 ? X[1][1] : p[1][1]
 
