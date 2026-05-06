@@ -161,12 +161,14 @@ end
 
 
 @doc raw"""
-    vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q)
+    vector_transport_to(M::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport)
 
 Compute projection vector transport on the [`Segre`](@ref) manifold by projecting
 the embedded tangent vector ``D\Phi_p[X]`` onto the tangent space of `M` at `q`.
 """
-function ManifoldsBase.vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
+vector_transport_to(M::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport) where {V}
+
+function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
     d = length(V)
     λ = q[1][1]
 
