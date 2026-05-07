@@ -165,6 +165,76 @@ end
 
 Compute projection vector transport on the [`Segre`](@ref) manifold by projecting
 the embedded tangent vector ``D\Phi_p[X]`` onto the tangent space of `M` at `q`.
+
+Let
+
+``p = (\mu, y_1,\ldots,y_d)``, ``\qquad X = (\nu,u_1,\ldots,u_d) \in T_pM``,
+and let
+``q = (\lambda,x_1,\ldots,x_d)``.
+
+Under the Segre parametrization
+
+````math
+\Phi(\lambda,x_1,\ldots,x_d) 
+= 
+\lambda\, x_1\otimes\cdots\otimes x_d,
+````
+
+the embedded tangent vector at ``p`` is
+
+````math
+D\Phi_p[X]
+=
+\nu\, y_1\otimes\cdots\otimes y_d
++
+\mu
+\sum_{k=1}^d
+y_1\otimes\cdots\otimes u_k\otimes\cdots\otimes y_d .
+````
+
+Projection vector transport from ``T_pM`` to ``T_qM`` is given by
+
+``Y = \Pi_{T_qM}\bigl(D\Phi_p[X]\bigr)``,
+
+where
+
+``Y = (\dot{\lambda},v_1,\ldots,v_d)\in T_qM``.
+
+Equivalently, decompose ``D\Phi_p[X]`` as a sum of rank-one terms
+
+````math
+D\Phi_p[X]
+=
+\sum_{\ell} c_\ell\,
+z_{\ell,1}\otimes\cdots\otimes z_{\ell,d}.
+````
+
+For each rank-one term ``c\,z_1\otimes\cdots\otimes z_d``,
+
+its contribution to ``Y`` is
+
+````math
+\dot{\lambda}
+\mathrel{+}=
+c\prod_{j=1}^d \langle z_j,x_j\rangle,
+````
+
+and, for each ``k=1,\ldots,d``,
+
+````math
+v_k
+\mathrel{+}=
+\frac{c}{\lambda}
+\left(
+\prod_{j\neq k}\langle z_j,x_j\rangle
+\right)
+\left(
+z_k-\langle z_k,x_k\rangle x_k
+\right).
+````
+The implementation uses this rank-one structure and therefore avoids explicitly 
+forming the ambient tensor.
+
 """
 vector_transport_to(M::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport) where {V}
 
