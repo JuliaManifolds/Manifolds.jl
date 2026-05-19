@@ -11,7 +11,7 @@ import Manifolds: solve_chart_exp_ode, solve_chart_parallel_transport_ode
 using ManifoldsBase
 
 using DiffEqCallbacks
-using OrdinaryDiffEq: OrdinaryDiffEq, SciMLBase, Rodas5, AutoVern9, ODEProblem, solve
+using OrdinaryDiffEq: OrdinaryDiffEq, SciMLBase, Rodas5P, AutoVern9, ODEProblem, solve
 
 using RecursiveArrayTools: ArrayPartition
 
@@ -35,7 +35,7 @@ function (int_term::IntegratorTerminatorNearChartBoundary)(u, t, integrator)
     (M, A, i) = integrator.p
     if check_chart_switch(M, A, i, u.x[1]; int_term.check_chart_switch_kwargs...)
         # switch charts
-        OrdinaryDiffEq.terminate!(integrator)
+        SciMLBase.terminate!(integrator)
     end
     return u
 end
@@ -119,7 +119,7 @@ end
 """
     solve_chart_exp_ode(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0;
-        solver=AutoVern9(Rodas5()),
+        solver=AutoVern9(Rodas5P()),
         final_time::Real=1.0,
         check_chart_switch_kwargs=NamedTuple(),
         kwargs...,
@@ -142,7 +142,7 @@ geodesic.
 """
 function solve_chart_exp_ode(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0;
-        solver = AutoVern9(Rodas5()),
+        solver = AutoVern9(Rodas5P()),
         final_time::Real = 1.0,
         check_chart_switch_kwargs = NamedTuple(),
         kwargs...,
@@ -192,7 +192,7 @@ end
 """
     solve_chart_parallel_transport_ode(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
-        solver=AutoVern9(Rodas5()), check_chart_switch_kwargs=NamedTuple(), final_time=1.0,
+        solver=AutoVern9(Rodas5P()), check_chart_switch_kwargs=NamedTuple(), final_time=1.0,
         kwargs...
     )
 
@@ -202,7 +202,7 @@ coordinates `Xc` in the induced basis.
 """
 function solve_chart_parallel_transport_ode(
         M::AbstractManifold, a, Xc, A::AbstractAtlas, i0, Yc;
-        solver = AutoVern9(Rodas5()), final_time = 1.0, check_chart_switch_kwargs = NamedTuple(),
+        solver = AutoVern9(Rodas5P()), final_time = 1.0, check_chart_switch_kwargs = NamedTuple(),
         kwargs...
     )
     u0 = ArrayPartition(copy(a), copy(Xc), copy(Yc))
