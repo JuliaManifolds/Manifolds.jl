@@ -168,64 +168,53 @@ the embedded tangent vector ``D\Phi_p[X]`` onto the tangent space of `M` at `q`.
 
 Let
 ````math
-p = (\mu, y_1,\ldots,y_d), 
-\qquad 
-X = (\nu,u_1,\ldots,u_d) \in T_pM,
+p = (μ, y_1,…,y_d),
+\qquad
+X = (ν,u_1,…,u_d) ∈ T_pM,
 ````
-and let ``q = (\lambda,x_1,\ldots,x_d)``.
+and let ``q = (λ,x_1,…,x_d)``.
 
 Under the Segre parametrization
 ````math
-\Phi(\lambda,x_1,\ldots,x_d) 
-= 
-\lambda\, x_1\otimes\cdots\otimes x_d,
+Φ(λ,x_1,…,x_d)
+=
+λ\, x_1 ⊗⋯⊗ x_d,
 ````
 
 the embedded tangent vector at ``p`` is
 ````math
-D\Phi_p[X]
+DΦ_p[X]
 =
-\nu\, y_1\otimes\cdots\otimes y_d
+ν\, y_1 ⊗⋯⊗ y_d
 +
-\mu
-\sum_{k=1}^d
-y_1\otimes\cdots\otimes u_k\otimes\cdots\otimes y_d .
+μ \sum_{k=1}^d y_1 ⊗⋯⊗ u_k ⊗⋯⊗ y_d .
 ````
 
 Projection vector transport from ``T_pM`` to ``T_qM`` is given by
 ````math
-Y = \Pi_{T_qM}\bigl(D\Phi_p[X]\bigr),
+Y = Π_{T_qM}\bigl(DΦ_p[X]\bigr),
 ````
 
 where
 ````math
-Y = (\dot{\lambda},v_1,\ldots,v_d)\in T_qM.
+Y = (\dot{\lambda},v_1,…,v_d) ∈ T_qM.
 ````
 
-For each rank-one term ``c\,z_1\otimes\cdots\otimes z_d``,
+For each rank-one term ``c\,z_1 ⊗⋯⊗ z_d``,
 its contribution to ``Y`` is
 ````math
-\dot{\lambda}
-\mathrel{+}=
-c\prod_{j=1}^d \langle z_j,x_j\rangle,
+\dot{\lambda} \mathrel{+}= c\prod_{j=1}^d ⟨ z_j, x_j ⟩,
 ````
 
-and, for each ``k=1,\ldots,d``,
+and, for each ``k=1,…,d``,
 ````math
-v_k
-\mathrel{+}=
-\frac{c}{\lambda}
-\left(
-\prod_{j\neq k}\langle z_j,x_j\rangle
-\right)
-\left(
-z_k-\langle z_k,x_k\rangle x_k
-\right).
+v_k \mathrel{+}= \frac{c}{\lambda}
+\left( ∏_{j≠k} ⟨ z_j, x_j ⟩ \right)\left( z_k - ⟨ z_k, x_k⟩ x_k \right).
 ````
-The implementation uses this rank-one structure and therefore avoids explicitly 
+The implementation uses this rank-one structure and therefore avoids explicitly
 forming the ambient tensor.
 """
-vector_transport_to(M::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport) where {V}
+vector_transport_to(::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport) where {V}
 
 function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
     d = length(V)
