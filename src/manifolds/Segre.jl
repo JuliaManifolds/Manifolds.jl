@@ -212,8 +212,8 @@ and, for each ``k=1,…,d``,
 v_k
 = 
 \sum_{r=0}^{d} \frac{c_r}{\lambda}
-\left( ∏_{j≠k} ⟨ z_j, x_j ⟩ \right)
-\left( z_k - ⟨ z_k, x_k⟩ x_k \right).
+\left( ∏_{j≠k} ⟨ z_{r,j}, x_j ⟩ \right)
+\left( z_{r,k} - ⟨ z_{r,k}, x_k⟩ x_k \right).
 ````
 The implementation uses this rank-one structure and therefore avoids explicitly
 forming the ambient tensor.
