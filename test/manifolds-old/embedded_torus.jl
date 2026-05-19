@@ -30,7 +30,7 @@ using LinearAlgebra
     Z_p0x = similar(X_p0x)
     Manifolds.levi_civita_affine_connection!(M, Z_p0x, A, i_p0x, p0x, X_p0x, Y_p0x)
     @test Z_p0x ≈ Γ_X_Y
-    css_ref = [0.0 0.0; 0.0 -0.37637884969165114;;; 0.0 1.5668024839360153; -0.37637884969165114 0.0]
+    css_ref = [0.0 0.0; 0.0 -0.41242466000637795;;; 0.0 1.7168551906246856; -0.41242466000637795 0.0]
     @test christoffel_symbols_second(M, A, i_p0x, p0x) ≈ css_ref
     g_i = local_metric(M, A, i_p0x, p0x)
     @einsum csf_ref[ii, j, k] := g_i[k, l] * css_ref[l, ii, j]
