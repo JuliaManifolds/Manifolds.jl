@@ -159,6 +159,110 @@ function embed!(::Segre{𝔽, V}, u, p, X) where {𝔽, V}
     )
 end
 
+
+@doc raw"""
+    vector_transport_to(M::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport)
+
+Compute projection vector transport on the [`Segre`](@ref) manifold by projecting
+the embedded tangent vector ``D\Phi_p[X]`` onto the tangent space of `M` at `q`.
+
+Let
+````math
+p = (μ, y_1,…,y_d),
+\qquad
+X = (ν,u_1,…,u_d) ∈ T_pM,
+````
+and let ``q = (λ,x_1,…,x_d)``.
+
+Under the Segre parametrization
+````math
+Φ(λ,x_1,…,x_d)
+=
+λ\, x_1 ⊗⋯⊗ x_d,
+````
+
+the embedded tangent vector at ``p`` is
+````math
+DΦ_p[X]
+=
+ν\, y_1 ⊗⋯⊗ y_d
++
+μ \sum_{k=1}^d y_1 ⊗⋯⊗ u_k ⊗⋯⊗ y_d .
+````
+
+Projection vector transport from ``T_pM`` to ``T_qM`` is given by
+````math
+Y = Π_{T_qM}\bigl(DΦ_p[X]\bigr),
+````
+
+where
+````math
+Y = (\dot{\lambda},v_1,…,v_d) ∈ T_qM.
+````
+
+For each rank-one term ``c\,z_1 ⊗⋯⊗ z_d``,
+its contribution to ``Y`` is
+````math
+\dot{\lambda}
+= \sum_{r=0}^{d} c_r \prod_{j=1}^{d} ⟨ z_{r,j},\, x_j ⟩
+````
+
+and, for each ``k=1,…,d``,
+````math
+v_k
+= 
+\sum_{r=0}^{d} \frac{c_r}{\lambda}
+\left( ∏_{j≠k} ⟨ z_{r,j}, x_j ⟩ \right)
+\left( z_{r,k} - ⟨ z_{r,k}, x_k⟩ x_k \right).
+````
+The implementation uses this rank-one structure and therefore avoids explicitly
+forming the ambient tensor.
+"""
+vector_transport_to(::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport) where {V}
+
+function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
+    d = length(V)
+    λ = q[1][1]
+
+    for Yi in Y
+        fill!(Yi, zero(eltype(Yi)))
+    end
+
+    dots = Vector{typeof(dot(p[2], q[2]))}(undef, d)
+
+    for term in 0:d
+        c = term == 0 ? X[1][1] : p[1][1]
+
+        for k in 1:d
+            zk = term == k ? X[k + 1] : p[k + 1]
+            dots[k] = dot(zk, q[k + 1])
+        end
+
+        Y[1][1] += c * prod(dots)
+
+        for k in 1:d
+            zk = term == k ? X[k + 1] : p[k + 1]
+            xk = q[k + 1]
+            vk = Y[k + 1]
+            αk = dots[k]
+
+            coeff = c / λ
+            for j in 1:d
+                if j != k
+                    coeff *= dots[j]
+                end
+            end
+
+            @inbounds for i in eachindex(vk, zk, xk)
+                vk[i] += coeff * (zk[i] - αk * xk[i])
+            end
+        end
+    end
+
+    return Y
+end
+
+
 """
     is_point(M::Segre{ℝ, V}, p; kwargs...)
 
