@@ -6,7 +6,7 @@ authors = [
   "Ronny Bergmann <manopt@ronnybergmann.net>",
   "Antoine Levitt <antoine.levitt@gmail.com>",
 ]
-version = "0.11.22"
+version = "0.11.23"
 
 [workspace]
 projects = ["test", "docs", "tutorials"]
