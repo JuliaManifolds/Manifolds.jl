@@ -203,16 +203,15 @@ Y = (\dot{\lambda},v_1,…,v_d) ∈ T_qM.
 For each rank-one term ``c\,z_1 ⊗⋯⊗ z_d``,
 its contribution to ``Y`` is
 ````math
-\Delta \dot{\lambda}
-= 
-c\prod_{j=1}^d ⟨ z_j, x_j ⟩,
+\dot{\lambda}
+= \sum_{r=0}^{d} c_r \prod_{j=1}^{d} ⟨ z_{r,j},\, x_j ⟩
 ````
 
 and, for each ``k=1,…,d``,
 ````math
-\Delta v_k
-=
-\frac{c}{\lambda}
+v_k
+= 
+\sum_{r=0}^{d} \frac{c_r}{\lambda}
 \left( ∏_{j≠k} ⟨ z_j, x_j ⟩ \right)
 \left( z_k - ⟨ z_k, x_k⟩ x_k \right).
 ````
