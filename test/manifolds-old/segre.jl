@@ -174,6 +174,20 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 @test is_vector(get_embedding(M), p_, X_)
             end
 
+            @testset "vector_transport_to" begin
+                N = Segre(V...)
+
+                Z = vector_transport_to(N, p, X, q, ProjectionTransport())
+                @test is_vector(N, q, Z)
+
+                Z_same = vector_transport_to(N, p, X, p, ProjectionTransport())
+                @test isapprox(Z_same, X; atol = 1.0e-10)
+
+                Z_inplace = zero_vector(N, q)
+                vector_transport_to!(N, Z_inplace, p, X, q, ProjectionTransport())
+                @test isapprox(Z_inplace, Z; atol = 1.0e-10)
+            end
+            
             @testset "get_coordinates" begin
                 @test isapprox(X, get_vector(M, p, get_coordinates(M, p, X)))
                 @test isapprox(c, get_coordinates(M, p, get_vector(M, p, c)))
