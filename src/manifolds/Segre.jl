@@ -203,13 +203,18 @@ Y = (\dot{\lambda},v_1,…,v_d) ∈ T_qM.
 For each rank-one term ``c\,z_1 ⊗⋯⊗ z_d``,
 its contribution to ``Y`` is
 ````math
-\dot{\lambda} \mathrel{+}= c\prod_{j=1}^d ⟨ z_j, x_j ⟩,
+\Delta \dot{\lambda}
+= 
+c\prod_{j=1}^d ⟨ z_j, x_j ⟩,
 ````
 
 and, for each ``k=1,…,d``,
 ````math
-v_k \mathrel{+}= \frac{c}{\lambda}
-\left( ∏_{j≠k} ⟨ z_j, x_j ⟩ \right)\left( z_k - ⟨ z_k, x_k⟩ x_k \right).
+\Delta v_k
+=
+\frac{c}{\lambda}
+\left( ∏_{j≠k} ⟨ z_j, x_j ⟩ \right)
+\left( z_k - ⟨ z_k, x_k⟩ x_k \right).
 ````
 The implementation uses this rank-one structure and therefore avoids explicitly
 forming the ambient tensor.
