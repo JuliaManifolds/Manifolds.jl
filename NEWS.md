@@ -5,10 +5,21 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.25] 2026-05-20
+
+### Added
+
+* An allocating variant of `levi_civita_affine_connection!`
+
+### Changed
+
+* Argument name for `christoffel_symbols_second!`, from `i` to `index`. The previous `i` overlapped with a for loop index, also named `i`, later in the function, thus resulting in incorrect behavior.
+
 ## [0.11.24] 2026-05-19
 
 ### Added
-`vector_transport_to(::Segre, p, X, q, ::ProjectionTransport)` for Segre Manifold (#893)
+
+* `vector_transport_to(::Segre, p, X, q, ::ProjectionTransport)` for Segre Manifold (#893)
 
 ## [0.11.23] 2026-04-29
 
@@ -240,7 +251,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `UnitaryMatrices{T, 𝔽}` to `UnitaryMatrices{𝔽, T}`
 * the functions `canonical_project`, `differential_canonical_project`, `horizontal_lift`, `horizontal_component`, `get_total_space`, and `vertical_component` have been moved upstream to `ManifoldsBase.jl`
 
-
 ### Removed
 
 * the trait system that was present additionally to the wrapper types for metric, embedding and connections. Those were moved to `default_X` functions and the dispatch was adapted to still obtain the same logic/behaviour.
@@ -439,10 +449,10 @@ formula.
 * `uniform_distribution` now has an error hint explaining what has to be done to make it work.
 * `Euclidean` now follows the new `has_components` function from `ManifoldsBase.jl` (0.15.18)
   and can handle also the `r`-norms now.
-- Union type `MatrixGroup`
-- Columnwise group action with arbitrary matrix groups
-- `uniform_distribution` now has an error hint explaining what has to be done to make it work.
-- `lie_bracket` is exactly zero on orthogonal Lie algebra in 2D
+* Union type `MatrixGroup`
+* Columnwise group action with arbitrary matrix groups
+* `uniform_distribution` now has an error hint explaining what has to be done to make it work.
+* `lie_bracket` is exactly zero on orthogonal Lie algebra in 2D
 
 ## [0.10.3] - 2024-10-04
 

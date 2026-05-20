@@ -57,7 +57,7 @@ RetractionAtlas() = RetractionAtlas(ExponentialRetraction(), LogarithmicInverseR
 """
     affine_connection(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc)
 
-Calculate affine connection on manifold `M` at point with parameters `a` in chart `i` of
+Calculate the affine connection on manifold `M` at point with parameters `a` in chart `i` of
 [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Xc` and `Yc` in induced basis.
 """
 function affine_connection(M::AbstractManifold, A, i, a, Xc, Yc)
@@ -68,7 +68,7 @@ end
 """
     affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc)
 
-Calculate affine connection on manifold `M` at point with parameters `a` in chart `i` of an
+Calculate the affine connection on manifold `M` at point with parameters `a` in chart `i` of an
 an [`AbstractAtlas`](@ref) `A` of vectors with coefficients `Zc` and `Yc` in induced basis and save the result
 in `Zc`.
 """
@@ -87,25 +87,25 @@ function christoffel_symbols_second(M::AbstractManifold, A::AbstractAtlas, i, a;
 end
 
 function christoffel_symbols_second!(
-        M::AbstractManifold, Γ, A::AbstractAtlas, i, a;
+        M::AbstractManifold, Γ, A::AbstractAtlas, index, a;
         backend::AbstractADType = AutoForwardDiff()
     )
     # number of coordinates
     n = length(a)
 
-    ginv = inverse_local_metric(M, A, i, a)
+    ginv = inverse_local_metric(M, A, index, a)
     T = eltype(ginv)
 
     # Precompute all directional derivatives ∂_i g_jl
     e = [zeros(T, n) for _ in 1:n]  # Basis vectors
     for k in 1:n
-        e[k][k] = 1
+        e[k][k] = 1.0
     end
 
     dg = zeros(T, n, n, n)  # Tensor to store ∂_i g_jl
     for i in 1:n, j in 1:n, l in 1:n
         dg[i, j, l] = DI.derivative(
-            t -> inner(M, A, i, a .+ t .* e[i], e[j], e[l]),
+            t -> inner(M, A, index, a .+ t .* e[i], e[j], e[l]),
             backend,
             0.0,
         )
@@ -669,7 +669,7 @@ function ManifoldsBase._get_vector(M::AbstractManifold, p, c, B::InducedBasis; k
 end
 function get_vector_induced_basis(M::AbstractManifold, p, c, B::InducedBasis; kwargs...)
     Y = allocate_result(M, get_vector, p, c)
-    return get_vector!(M, Y, p, c, B; kwargs...)
+    return get_vector_induced_basis!(M, Y, p, c, B; kwargs...)
 end
 
 function ManifoldsBase._get_vector!(M::AbstractManifold, Y, p, c, B::InducedBasis; kwargs...)
@@ -732,6 +732,18 @@ Compute the local metric tensor for vectors expressed in terms of coordinates
 in basis `B` on manifold `M`. The point `p` is not checked.
 """
 local_metric(::AbstractManifold, ::Any, ::InducedBasis)
+
+"""
+    levi_civita_affine_connection(M::AbstractManifold, A::AbstractAtlas, i, a, Xc, Yc; backend::AbstractADType = AutoForwardDiff())
+
+Compute the allocating version of Levi-Civita affine connection on the manifold `M` at a point with parameters `a`
+in chart `i` of an  [`AbstractAtlas`](@ref) `A`. The connection is calculated for vectors
+with coefficients `Xc` and `Yc` in the induced basis, and the result is stored in `Zc`.
+"""
+function levi_civita_affine_connection(M::AbstractManifold, A, i, a, Xc, Yc; backend::AbstractADType = AutoForwardDiff())
+    Zc = similar(Xc, Base.promote_type(eltype(Xc), eltype(Yc), eltype(a)))
+    return levi_civita_affine_connection!(M, Zc, A, i, a, Xc, Yc; backend = backend)
+end
 
 """
     levi_civita_affine_connection!(M::AbstractManifold, Zc, A::AbstractAtlas, i, a, Xc, Yc; backend::AbstractADType = AutoForwardDiff())

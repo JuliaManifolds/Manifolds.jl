@@ -1,7 +1,7 @@
 name = "Manifolds"
 uuid = "1cead3c2-87b3-11e9-0ccd-23c62b72b94e"
 authors = ["Seth Axen <seth.axen@gmail.com>", "Mateusz Baran <mateuszbaran89@gmail.com>", "Ronny Bergmann <manopt@ronnybergmann.net>", "Antoine Levitt <antoine.levitt@gmail.com>"]
-version = "0.11.24"
+version = "0.11.25"
 
 [workspace]
 projects = ["test", "docs", "tutorials"]
@@ -42,7 +42,11 @@ ManifoldsBoundaryValueDiffEqExt = "BoundaryValueDiffEqMIRK"
 ManifoldsDistributionsExt = ["Distributions", "RecursiveArrayTools"]
 ManifoldsHybridArraysExt = "HybridArrays"
 ManifoldsNLsolveExt = "NLsolve"
-ManifoldsOrdinaryDiffEqDiffEqCallbacksExt = ["DiffEqCallbacks", "OrdinaryDiffEq", "RecursiveArrayTools"]
+ManifoldsOrdinaryDiffEqDiffEqCallbacksExt = [
+  "DiffEqCallbacks",
+  "OrdinaryDiffEq",
+  "RecursiveArrayTools",
+]
 ManifoldsOrdinaryDiffEqExt = "OrdinaryDiffEq"
 ManifoldsRecipesBaseExt = ["Colors", "RecipesBase"]
 ManifoldsRecursiveArrayToolsExt = "RecursiveArrayTools"
@@ -63,7 +67,7 @@ LinearAlgebra = "1.6"
 ManifoldDiff = "0.4.0"
 ManifoldsBase = "2.3.0"
 Markdown = "1.6"
-MatrixEquations = "2.5"
+MatrixEquations = "2.5, 2.4"
 NLsolve = "4"
 OrdinaryDiffEq = "6.31, 7"
 Plots = "1"
