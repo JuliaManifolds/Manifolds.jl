@@ -5,16 +5,21 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.11.24] 2026-05-19
+## [0.11.25] 2026-05-20
 
 ### Added
 
 * An allocating variant of `levi_civita_affine_connection!`
-* `vector_transport_to(::Segre, p, X, q, ::ProjectionTransport)` for Segre Manifold (#893)
 
 ### Changed
 
 * Argument name for `christoffel_symbols_second!`, from `i` to `index`. The previous `i` overlapped with a for loop index, also named `i`, later in the function, thus resulting in incorrect behavior.
+
+## [0.11.24] 2026-05-19
+
+### Added
+
+* `vector_transport_to(::Segre, p, X, q, ::ProjectionTransport)` for Segre Manifold (#893)
 
 ## [0.11.23] 2026-04-29
 
