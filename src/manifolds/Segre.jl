@@ -269,10 +269,8 @@ function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
             end
         end
     end
- 
     return Y
  end
-
 
 """
     is_point(M::Segre{ℝ, V}, p; kwargs...)
