@@ -187,7 +187,6 @@ using Manifolds, Test, Random, LinearAlgebra, FiniteDifferences
                 vector_transport_to!(N, Z_inplace, p, X, q, ProjectionTransport())
                 @test isapprox(Z_inplace, Z; atol = 1.0e-10)
             end
-
             @testset "get_coordinates" begin
                 @test isapprox(X, get_vector(M, p, get_coordinates(M, p, X)))
                 @test isapprox(c, get_coordinates(M, p, get_vector(M, p, c)))

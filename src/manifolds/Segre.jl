@@ -180,7 +180,6 @@ Under the Segre parametrization
 = 
 \lambda\, x_1\otimes\cdots\otimes x_d,
 ````
-
 the embedded tangent vector at ``p`` is
 ````math
 D\Phi_p[X]
@@ -196,20 +195,17 @@ Projection vector transport from ``T_pM`` to ``T_qM`` is given by
 ````math
 Y = \Pi_{T_qM}\bigl(D\Phi_p[X]\bigr),
 ````
-
 where
 ````math
 Y = (\dot{\lambda},v_1,\ldots,v_d)\in T_qM.
 ````
 
-For each rank-one term ``c\,z_1\otimes\cdots\otimes z_d``,
-its contribution to ``Y`` is
+For each rank-one term ``c\,z_1\otimes\cdots\otimes z_d``, its contribution to ``Y`` is
 ````math
 \dot{\lambda}
 \mathrel{+}=
 c\prod_{j=1}^d \langle z_j,x_j\rangle,
 ````
-
 and, for each ``k=1,\ldots,d``,
 ````math
 v_k
@@ -222,52 +218,62 @@ v_k
 z_k-\langle z_k,x_k\rangle x_k
 \right).
 ````
-The implementation uses this rank-one structure and therefore avoids explicitly 
-forming the ambient tensor.
+The implementation uses this rank-one structure and therefore avoids explicitly forming the ambient tensor.
 """
 vector_transport_to(M::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport) where {V}
 
-function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
+function vector_transport_to!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
     d = length(V)
     λ = q[1][1]
-
+    invλ = inv(λ)
+ 
     for Yi in Y
         fill!(Yi, zero(eltype(Yi)))
     end
-
-    dots = Vector{typeof(dot(p[2], q[2]))}(undef, d)
-
+ 
+     T = typeof(dot(p[2], q[2]))
+ 
+    pdots = Vector{T}(undef, d)
+    xdots = Vector{T}(undef, d)
+    dots  = Vector{T}(undef, d)
+ 
+    @inbounds for k in 1:d
+        pdots[k] = dot(p[k + 1], q[k + 1])
+        xdots[k] = dot(X[k + 1], q[k + 1])
+    end
+ 
+    # term = 0 corresponds to ν p₁ ⊗ ⋯ ⊗ p_d
+    # term = k corresponds to λₚ p₁ ⊗ ⋯ ⊗ X_k ⊗ ⋯ ⊗ p_d
     for term in 0:d
         c = term == 0 ? X[1][1] : p[1][1]
-
-        for k in 1:d
-            zk = term == k ? X[k + 1] : p[k + 1]
-            dots[k] = dot(zk, q[k + 1])
+ 
+        @inbounds for k in 1:d
+            dots[k] = term == k ? xdots[k] : pdots[k]
         end
-
+ 
         Y[1][1] += c * prod(dots)
-
-        for k in 1:d
+ 
+        @inbounds for k in 1:d
             zk = term == k ? X[k + 1] : p[k + 1]
+ 
+            coeff = c * invλ
+            for j in 1:d
+                j == k && continue
+                coeff *= dots[j]
+            end
+ 
             xk = q[k + 1]
             vk = Y[k + 1]
             αk = dots[k]
-
-            coeff = c / λ
-            for j in 1:d
-                if j != k
-                    coeff *= dots[j]
-                end
-            end
-
-            @inbounds for i in eachindex(vk, zk, xk)
+ 
+            for i in eachindex(vk, zk, xk)
                 vk[i] += coeff * (zk[i] - αk * xk[i])
             end
         end
     end
-
+ 
     return Y
-end
+ end
 
 
 """
