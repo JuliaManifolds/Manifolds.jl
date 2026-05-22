@@ -228,7 +228,7 @@ function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
         fill!(Yi, zero(eltype(Yi)))
     end
  
-     T = typeof(dot(p[2], q[2]))
+    T = typeof(dot(p[2], q[2]))
  
     pdots = Vector{T}(undef, d)
     xdots = Vector{T}(undef, d)
