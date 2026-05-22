@@ -232,7 +232,7 @@ function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
  
     pdots = Vector{T}(undef, d)
     xdots = Vector{T}(undef, d)
-    dots  = Vector{T}(undef, d)
+    dots = Vector{T}(undef, d)
  
     @inbounds for k in 1:d
         pdots[k] = dot(p[k + 1], q[k + 1])
