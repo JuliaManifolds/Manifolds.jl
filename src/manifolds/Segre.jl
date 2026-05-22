@@ -216,7 +216,7 @@ v_k
 \left( z_{r,k} - ⟨ z_{r,k}, x_k⟩ x_k \right).
 ````
 The implementation uses this rank-one structure and therefore avoids explicitly
-forming the ambient tensor.
+forming the ambient tensor and precomputing the inner products.
 """
 vector_transport_to(::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport) where {V}
 
