@@ -227,42 +227,42 @@ function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
     for Yi in Y
         fill!(Yi, zero(eltype(Yi)))
     end
- 
+
     T = typeof(dot(p[2], q[2]))
- 
+
     pdots = Vector{T}(undef, d)
     xdots = Vector{T}(undef, d)
     dots = Vector{T}(undef, d)
- 
+
     @inbounds for k in 1:d
         pdots[k] = dot(p[k + 1], q[k + 1])
         xdots[k] = dot(X[k + 1], q[k + 1])
     end
- 
+
     # term = 0 corresponds to ν p₁ ⊗ ⋯ ⊗ p_d
     # term = k corresponds to λₚ p₁ ⊗ ⋯ ⊗ X_k ⊗ ⋯ ⊗ p_d
     for term in 0:d
         c = term == 0 ? X[1][1] : p[1][1]
- 
+
         @inbounds for k in 1:d
             dots[k] = term == k ? xdots[k] : pdots[k]
         end
- 
+
         Y[1][1] += c * prod(dots)
- 
+
         @inbounds for k in 1:d
             zk = term == k ? X[k + 1] : p[k + 1]
- 
+
             coeff = c / λ
             for j in 1:d
                 j == k && continue
                 coeff *= dots[j]
             end
- 
+
             xk = q[k + 1]
             vk = Y[k + 1]
             αk = dots[k]
- 
+
             for i in eachindex(vk, zk, xk)
                 vk[i] += coeff * (zk[i] - αk * xk[i])
             end
