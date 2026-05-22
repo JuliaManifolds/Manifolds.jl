@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.11.26] 2026-05-22
 
 ### Changed
-* Update the function of `vector_transport_to(::Segre, p, X, q, ::ProjectionTransport)` for Segre Manifold (#897)
+* Update the function of `vector_transport_to(::Segre, p, X, q, ::ProjectionTransport)` for Segre Manifold (#898)
 
 ## [0.11.25] 2026-05-20
 
