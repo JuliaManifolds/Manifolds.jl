@@ -220,10 +220,10 @@ forming the ambient tensor and precomputing the inner products.
 """
 vector_transport_to(::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport) where {V}
 
-function vector_transport_to!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
+function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
     d = length(V)
     λ = q[1][1]
-    invλ = inv(λ)
+    invλ = inv(λ) # 1/λ
 
     for Yi in Y
         fill!(Yi, zero(eltype(Yi)))
@@ -245,7 +245,6 @@ function vector_transport_to!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
     for term in 0:d
         c = term == 0 ? X[1][1] : p[1][1]
  
-        # Reuse precomputed inner products
         @inbounds for k in 1:d
             dots[k] = term == k ? xdots[k] : pdots[k]
         end
@@ -255,7 +254,7 @@ function vector_transport_to!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
         @inbounds for k in 1:d
             zk = term == k ? X[k + 1] : p[k + 1]
  
-            coeff = c * invλ
+            coeff = c * invλ # c / λ
             for j in 1:d
                 j == k && continue
                 coeff *= dots[j]
