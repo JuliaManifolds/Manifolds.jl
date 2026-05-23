@@ -237,6 +237,7 @@ function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
     checkbounds(p, 1:(d+1))
     checkbounds(q, 1:(d+1))
     checkbounds(X, 1:(d+1))
+    checkbounds(Y, 1:(d+1))
     @inbounds for k in eachindex(pdots, xdots)
         pdots[k] = dot(p[k + 1], q[k + 1])
         xdots[k] = dot(X[k + 1], q[k + 1])
