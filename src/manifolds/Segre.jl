@@ -216,7 +216,7 @@ v_k
 \left( z_{r,k} - ⟨ z_{r,k}, x_k⟩ x_k \right).
 ````
 The implementation uses this rank-one structure and therefore avoids explicitly
-forming the ambient tensor.
+forming the ambient tensor and precomputing the inner products.
 """
 vector_transport_to(::Segre{ℝ, V}, Y, p, X, q, ::ProjectionTransport) where {V}
 
@@ -228,40 +228,52 @@ function vector_transport_to_project!(M::Segre{ℝ, V}, Y, p, X, q) where {V}
         fill!(Yi, zero(eltype(Yi)))
     end
 
-    dots = Vector{typeof(dot(p[2], q[2]))}(undef, d)
+    T = typeof(dot(p[2], q[2]))
 
+    pdots = Vector{T}(undef, d)
+    xdots = Vector{T}(undef, d)
+    dots = Vector{T}(undef, d)
+
+    checkbounds(p, 1:(d + 1))
+    checkbounds(q, 1:(d + 1))
+    checkbounds(X, 1:(d + 1))
+    checkbounds(Y, 1:(d + 1))
+    @inbounds for k in eachindex(pdots, xdots)
+        pdots[k] = dot(p[k + 1], q[k + 1])
+        xdots[k] = dot(X[k + 1], q[k + 1])
+    end
+
+    # term = 0 corresponds to ν p₁ ⊗ ⋯ ⊗ p_d
+    # term = k corresponds to λₚ p₁ ⊗ ⋯ ⊗ X_k ⊗ ⋯ ⊗ p_d
     for term in 0:d
         c = term == 0 ? X[1][1] : p[1][1]
 
-        for k in 1:d
-            zk = term == k ? X[k + 1] : p[k + 1]
-            dots[k] = dot(zk, q[k + 1])
+        @inbounds for k in 1:d
+            dots[k] = term == k ? xdots[k] : pdots[k]
         end
 
         Y[1][1] += c * prod(dots)
 
-        for k in 1:d
+        @inbounds for k in 1:d
             zk = term == k ? X[k + 1] : p[k + 1]
+
+            coeff = c / λ
+            for j in 1:d
+                j == k && continue
+                coeff *= dots[j]
+            end
+
             xk = q[k + 1]
             vk = Y[k + 1]
             αk = dots[k]
 
-            coeff = c / λ
-            for j in 1:d
-                if j != k
-                    coeff *= dots[j]
-                end
-            end
-
-            @inbounds for i in eachindex(vk, zk, xk)
+            for i in eachindex(vk, zk, xk)
                 vk[i] += coeff * (zk[i] - αk * xk[i])
             end
         end
     end
-
     return Y
 end
-
 
 """
     is_point(M::Segre{ℝ, V}, p; kwargs...)
