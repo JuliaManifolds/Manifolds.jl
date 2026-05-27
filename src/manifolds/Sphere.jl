@@ -301,7 +301,7 @@ _doc_injectivity_radius_sphere_projection = raw"""
     injectivity_radius(M::Sphere, p, ::ProjectionRetraction)
 
 Return the injectivity radius for the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) on the
-[`AbstractSphere`](@ref), which is globally ``$(_tex(:frac, "π", "2"))``.
+[`AbstractSphere`](@ref), which is globally ``\frac{π}{2}``.
 """
 
 @doc "$(_doc_injectivity_radius_sphere_projection)"
