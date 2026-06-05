@@ -37,7 +37,7 @@ T_p\mathrm{Gr}(n,k) = \bigl\{ X ∈ 𝔽^{n×k} : p^{\mathrm{H}}X = 0_{k} \bigr\
 where ``0_k`` is the ``k×k`` zero matrix.
 Note that this is a subspace (called the horizontal space) of the tangent space of the
 [`Stiefel`](@ref) manifold, whose tangent space requires ``p^{\mathrm{H}}X = -p^{\mathrm{H}}X``,
-which is here fulfilled for all ``X`` automatically, even for any “rotated basis” ``Qp``, ``Q ∈ \operatorname{O}(k)``
+which is here fulfilled for all ``X`` automatically, even for any “rotated basis” ``pQ``, ``Q ∈ \operatorname{O}(k)``
 
 Note that a point ``p ∈ \operatorname{Gr}(n,k)`` might be represented by
 different matrices (i.e. matrices with unitary column vectors that span
