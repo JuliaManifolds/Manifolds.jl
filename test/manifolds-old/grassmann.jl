@@ -148,6 +148,17 @@ include("../header.jl")
             @test default_vector_transport_method(M, typeof(p)) == ParallelTransport()
             @test default_vector_transport_method(M, typeof(pS)) == ParallelTransport()
         end
+        @testset "A short ONB test" begin
+            M = Grassmann(4, 2)
+            p = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0]
+            c = [1.0, 1.0, 0.0, 0.0]
+            B = DefaultOrthonormalBasis()
+            X = get_vector(M, p, c, B)
+            # might be a bit dependent on nullspace, but it returns an ONB in x3,x4
+            @test X == [0.0 0.0; 0.0 0.0; 1.0 0.0; 1.0 0.0]
+            @test get_coordinates(M, p, X, B) == c
+        end
+
     end
 
     @testset "Complex" begin
