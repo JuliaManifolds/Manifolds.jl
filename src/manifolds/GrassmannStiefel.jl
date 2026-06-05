@@ -94,6 +94,50 @@ function exp!(M::Grassmann, q, p, X)
     return copyto!(q, Array(qr(z).Q))
 end
 
+
+@doc raw"""
+    get_coordinates(M::Grasmmann{ℝ}, p, X, B::DefaultOrthonormalBasis)
+
+Given a point `p` on the [`Grassmann`](@ref) manifold `M` in Stiefel representation,
+i.e. ``p ∈ ℝ^{n×k}`` compute the coordinates ``c ∈ ℝ^{k(n-k)}`` representing the
+tangent vector `X`.
+
+The tangent space is characterized by ``p^{\mathrm{T}}X = 0_{k×k}``,
+where ``0_{k×k}`` is the ``k×k`` matrix containing zeros
+A default orthonormal basis can is constructed as follows: Since ``p`` has full
+column rank ``k``, the null space of ``p^{\mathrm{T}}`` is of dimension ``n-k``.
+Let ``v_1,…v_{n-k}`` be an orthonormal basis of that null space, then
+```math
+X_1 = \bigl(v_1, 0_k,…0_k), X_2 = \bigl(v_2 0_k,…,0_k), …, X_{n-k} = \bigl(v_{n-k} 0_k,…0_k),
+X_{n-k1} = \bigl(0_k, v_1, 0_k, …, 0_k), …, X_{(n-k)k} = (0_k,\ldots,0_k,v_{n-k}),
+```
+where ``0_k`` denotes the ``k``-dimensional zero vector.
+Let ``V = (v_1,…,v_{n-k}) ∈ ℝ^{n×(n-k)}`` be the matrix of the basis vectors
+
+For a tangent vector ``X`` we know that every column `X_i``, ``i=1,…,k`` lies in
+the span of ``v_1,…v_{n-k}`` by looking at every column of the matrix equation
+``p^{\mathrm{T}}X = 0_{k×k}``.
+
+Hence we can compute the coordinates ``c`` in ``k`` “blocks” ``C_1,…C_k ∈ ℝ^{n-k}``
+by solving the linear systems
+
+```math
+VC_i = X_i, \qquad i=1,…,k.
+```
+"""
+get_coordinates(::Grassmann{ℝ}, p, c, ::DefaultOrthonormalBasis)
+
+function get_coordinates_orthonormal!(M::Grassmann{ℝ}, c, p, X, ::RealNumbers)
+    n, k = get_parameter(M.size)
+    V = nullspace(p') # from SVD, so we have (n-k) ON columns in R^n
+    for i in 1:k
+        # The sum above in the docs is a MV product in blocks
+        # c[1:(n-k)], c[(n-k)+1:2*(n-k)],...with V
+        c[((i - 1) * (n - k) + 1):(i * (n - k))] .= V \ X[:, i]
+    end
+    return c
+end
+
 function get_embedding(::Grassmann{𝔽, TypeParameter{Tuple{n, k}}}) where {n, k, 𝔽}
     return Stiefel(n, k, 𝔽)
 end
@@ -113,6 +157,44 @@ function ManifoldsBase.get_forwarding_type(::Stiefel, f, ::Type{<:StiefelPoint})
     return ManifoldsBase.EmbeddedForwardingType()
 end
 
+@doc raw"""
+    get_vector(M::Grasmmann{ℝ}, p, c, B::DefaultOrthonormalBasis)
+
+Given a point `p` on the [`Grassmann`](@ref) manifold `M` in Stiefel representation,
+i.e. ``p ∈ ℝ^{n×k}`` reconstruct a tangent vector with respect to the [`DefaultOrthonormalBasis`](@ref)
+given coefficients ``c ∈ ℝ^{k(n-k)}``.
+
+The tangent space is characterized by ``p^{\mathrm{T}}X = 0_{k×k}``,
+where ``0_{k×k}`` is the ``k×k`` matrix containing zeros
+A default orthonormal basis can is constructed as follows: Since ``p`` has full
+column rank ``k``, the null space of ``p^{\mathrm{T}}`` is of dimension ``n-k``.
+Let ``v_1,…v_{n-k}`` be an orthonormal basis of that null space, then
+```math
+X_1 = \bigl(v_1, 0_k,…0_k), X_2 = \bigl(v_2 0_k,…,0_k), …, X_{n-k} = \bigl(v_{n-k} 0_k,…0_k),
+X_{n-k1} = \bigl(0_k, v_1, 0_k, …, 0_k), …, X_{(n-k)k} = (0_k,\ldots,0_k,v_{n-k}),
+```
+where ``0_k`` denotes the ``k``-dimensional zero vector.
+Let ``V = (v_1,…,v_{n-k}) ∈ ℝ^{n×(n-k)}`` be the matrix of the basis vectors.
+
+Reconstructing a tangent vector ``X``` from a vector of coefficients ``c_1,…,c_{k(n-k)}``
+can be done based on the ONB ``v_1,…v_{n-k}``. The ``i``th column ``C_i`` of ``X``
+is given by using “blocks” ``C_1,…C_k ∈ ℝ^{n-k}`` of the coordinates and compute
+
+```math
+X_i = VC_i = \sum_{j=1}^{n-k} c_{i(n-k) + j}v_j,\qquad i=1,…k
+```
+"""
+get_vector(::Grassmann{ℝ}, p, c, ::DefaultOrthonormalBasis)
+
+function get_vector_orthonormal!(M::Grassmann{ℝ}, X, p, c, ::RealNumbers)
+    n, k = get_parameter(M.size)
+    V = nullspace(p') # from SVD, so we have (n-k) ON columns in R^n
+    for i in 1:k
+        # The sum above in the docs is a MV product in blocks c[1:(n-k)], c[(n-k)+1:2*(n-k)],...with V
+        X[:, i] .= V * c[((i - 1) * (n - k) + 1):(i * (n - k))]
+    end
+    return X
+end
 @doc raw"""
     inner(M::Grassmann, p, X, Y)
 
@@ -220,9 +302,7 @@ end
 function parallel_transport_direction!(M::Grassmann, Z, p, X, Y)
     d = svd(Y)
     return copyto!(
-        M,
-        Z,
-        p,
+        M, Z, p,
         (-p * d.V .* sin.(d.S') + d.U .* cos.(d.S')) * (d.U' * X) + (I - d.U * d.U') * X,
     )
 end
@@ -291,11 +371,8 @@ Matrix onto the tangent space at `vector_at`.
 rand(M::Grassmann; σ::Real = 1.0)
 
 function Random.rand!(
-        rng::AbstractRNG,
-        M::Grassmann{𝔽},
-        pX;
-        σ::Real = one(real(eltype(pX))),
-        vector_at = nothing,
+        rng::AbstractRNG, M::Grassmann{𝔽}, pX;
+        σ::Real = one(real(eltype(pX))), vector_at = nothing,
     ) where {𝔽}
     if vector_at === nothing
         n, k = get_parameter(M.size)

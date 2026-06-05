@@ -257,31 +257,31 @@ function ManifoldsBase.get_embedding_type(::AbstractSphere)
 end
 
 @doc raw"""
-    get_vector(M::AbstractSphere{ℝ}, p, X, B::DefaultOrthonormalBasis)
+    get_vector(M::AbstractSphere{ℝ}, p, c, B::DefaultOrthonormalBasis)
 
-Convert a one-dimensional vector of coefficients `X` in the basis `B` of the tangent space
+Convert a one-dimensional vector of coefficients `c` with respect to an orthonormal `B` of the tangent space
 at `p` on the [`AbstractSphere`](@ref) `M` to a tangent vector `Y` at `p` by rotating the
-hyperplane containing `X`, whose normal is the ``x``-axis, to the hyperplane whose normal is
+hyperplane containing `c`, whose normal is the ``x``-axis, to the hyperplane whose normal is
 `p`.
 
-Given ``q = p λ + x``, where ``λ = \operatorname{sgn}(⟨x, p⟩)``, and ``⟨⋅, ⋅⟩_{\mathrm{F}}``
+Given ``q = p λ + c``, where ``λ = \operatorname{sgn}(⟨c, p⟩)``, and ``⟨⋅,⋅⟩_{\mathrm{F}}``
 denotes the Frobenius inner product, the formula for ``Y`` is
 ````math
-Y = X - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ X\end{pmatrix}\right\rangle_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}.
+Y = c - q\frac{2 \left\langle q, \begin{pmatrix}0 \\ c\end{pmatrix}\right\rangle_{\mathrm{F}}}{⟨q, q⟩_{\mathrm{F}}}.
 ````
 """
-get_vector(::AbstractSphere{ℝ}, p, X, ::DefaultOrthonormalBasis)
+get_vector(::AbstractSphere{ℝ}, p, c, ::DefaultOrthonormalBasis)
 
-function get_vector_orthonormal!(M::AbstractSphere{ℝ}, Y, p, X, ::RealNumbers)
+function get_vector_orthonormal!(M::AbstractSphere{ℝ}, Y, p, c, ::RealNumbers)
     n = manifold_dimension(M)
     p1 = p[1]
     cosθ = abs(p1)
     λ = nzsign(p1, cosθ)
     pend = view(p, 2:(n + 1))
-    pX = dot(pend, X)
+    pX = dot(pend, c)
     factor = pX / (1 + cosθ)
     Y[1] = -λ * pX
-    Y[2:(n + 1)] .= X .- pend .* factor
+    Y[2:(n + 1)] .= c .- pend .* factor
     return Y
 end
 
