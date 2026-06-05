@@ -100,7 +100,7 @@ end
 
 Given a point `p` on the [`Grassmann`](@ref) manifold `M` in Stiefel representation,
 i.e. ``p ∈ ℝ^{n×k}`` compute the coordinates ``c ∈ ℝ^{k(n-k)}`` representing the
-tangent vector `X`.
+tangent vector `X` with respect to the [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`).
 
 The tangent space is characterized by ``p^{\mathrm{T}}X = 0_{k×k}``,
 where ``0_{k×k}`` is the ``k×k`` matrix containing zeros
@@ -161,7 +161,7 @@ end
     get_vector(M::Grasmmann{ℝ}, p, c, B::DefaultOrthonormalBasis)
 
 Given a point `p` on the [`Grassmann`](@ref) manifold `M` in Stiefel representation,
-i.e. ``p ∈ ℝ^{n×k}`` reconstruct a tangent vector with respect to the [`DefaultOrthonormalBasis`](@ref)
+i.e. ``p ∈ ℝ^{n×k}`` reconstruct a tangent vector with respect to the [`DefaultOrthonormalBasis`](@extref `ManifoldsBase.DefaultOrthonormalBasis`)
 given coefficients ``c ∈ ℝ^{k(n-k)}``.
 
 The tangent space is characterized by ``p^{\mathrm{T}}X = 0_{k×k}``,
