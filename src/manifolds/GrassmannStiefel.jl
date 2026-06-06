@@ -130,11 +130,7 @@ get_coordinates(::Grassmann{ℝ}, p, c, ::DefaultOrthonormalBasis)
 function get_coordinates_orthonormal!(M::Grassmann{ℝ}, c, p, X, ::RealNumbers)
     n, k = get_parameter(M.size)
     V = nullspace(p') # from SVD, so we have (n-k) ON columns in R^n
-    for i in 1:k
-        # The sum above in the docs is a MV product in blocks
-        # c[1:(n-k)], c[(n-k)+1:2*(n-k)],...with V
-        c[((i - 1) * (n - k) + 1):(i * (n - k))] .= V \ X[:, i]
-    end
+    c .= vec(V \ X)
     return c
 end
 
@@ -189,10 +185,7 @@ get_vector(::Grassmann{ℝ}, p, c, ::DefaultOrthonormalBasis)
 function get_vector_orthonormal!(M::Grassmann{ℝ}, X, p, c, ::RealNumbers)
     n, k = get_parameter(M.size)
     V = nullspace(p') # from SVD, so we have (n-k) ON columns in R^n
-    for i in 1:k
-        # The sum above in the docs is a MV product in blocks c[1:(n-k)], c[(n-k)+1:2*(n-k)],...with V
-        X[:, i] .= V * c[((i - 1) * (n - k) + 1):(i * (n - k))]
-    end
+    mul!(X, V, reshape(c, n - k, k))
     return X
 end
 @doc raw"""
