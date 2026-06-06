@@ -5,6 +5,13 @@ All notable changes to ´Manifolds.jl´ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.27] 2026-06-06
+
+## Added
+
+* a `DefaultOrthonormalBasis` for the `Grassmann` manifold in Stiefel representation. (#904)
+* improved documentation of the tangent space.
+
 ## [0.11.26] 2026-05-22
 
 ### Changed

@@ -1,5 +1,5 @@
 @doc raw"""
-    Grassmann{T,𝔽} <: AbstractDecoratorManifold{𝔽}
+    Grassmann{𝔽, T} <: AbstractDecoratorManifold{𝔽}
 
 The Grassmann manifold ``\mathrm{Gr}(n,k)`` consists of all subspaces spanned by ``k`` linear independent
 vectors ``𝔽^n``, where ``𝔽  ∈ \{ℝ, ℂ\}`` is either the real- (or complex-) valued vectors.
@@ -31,17 +31,17 @@ on the Stiefel manifold, the resulting quotient metric on Grassmann is the same.
 The tangent space at a point (subspace) ``p`` is given by
 
 ````math
-T_p\mathrm{Gr}(n,k) = \bigl\{
-X ∈ 𝔽^{n×k} :
-X^{\mathrm{H}}p + p^{\mathrm{H}}X = 0_{k} \bigr\},
+T_p\mathrm{Gr}(n,k) = \bigl\{ X ∈ 𝔽^{n×k} : p^{\mathrm{H}}X = 0_{k} \bigr\},
 ````
 
 where ``0_k`` is the ``k×k`` zero matrix.
+Note that this is a subspace (called the horizontal space) of the tangent space of the
+[`Stiefel`](@ref) manifold, whose tangent space requires ``p^{\mathrm{H}}X = -p^{\mathrm{H}}X``,
+which is here fulfilled for all ``X`` automatically, even for any “rotated basis” ``pQ``, ``Q ∈ \operatorname{O}(k)``
 
 Note that a point ``p ∈ \operatorname{Gr}(n,k)`` might be represented by
 different matrices (i.e. matrices with unitary column vectors that span
-the same subspace). Different representations of ``p`` also lead to different
-representation matrices for the tangent space ``T_p\mathrm{Gr}(n,k)``
+the same subspace).
 
 For a representation of points as orthogonal projectors. Here
 

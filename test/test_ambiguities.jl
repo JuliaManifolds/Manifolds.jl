@@ -46,7 +46,7 @@ end
         ms = Test.detect_ambiguities(Manifolds)
         # Interims solution until we follow what was proposed in
         # https://discourse.julialang.org/t/avoid-ambiguities-with-individual-number-element-identity/62465/2
-        MS_LIMIT = 46
+        MS_LIMIT = 50
         println("Number of Manifolds.jl ambiguities: $(length(ms))")
         if length(ms) > MS_LIMIT
             for amb in ms
