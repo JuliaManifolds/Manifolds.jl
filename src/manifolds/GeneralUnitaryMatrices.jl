@@ -210,7 +210,7 @@ end
 Compute the exponential map, that is, since ``X`` is represented in the Lie algebra,
 
 ```math
-exp_p(X) = p\mathrm{e}^X
+\exp_p(X) = p\mathrm{e}^X
 ```
 
 For different sizes, like ``n=2,3,4``, there are specialized implementations.
@@ -222,6 +222,18 @@ exp(::GeneralUnitaryMatrices, p, X)
 
 function exp!(M::GeneralUnitaryMatrices, q, p, X)
     return copyto!(M, q, p * exp(X))
+end
+function exp!(M::GeneralUnitaryMatrices{ℂ}, q, p, X)
+    if size(X, 1) < 42
+        return copyto!(M, q, p * exp(X))
+    else
+        return copyto!(M, q, p * _anti_exp(X))
+    end
+end
+function _anti_exp(X)
+    λ, U = eigen(Hermitian(im * X))
+    D = Diagonal(exp.(-im .* λ))
+    return U * D * U'
 end
 function ManifoldsBase.exp_fused!(M::GeneralUnitaryMatrices, q, p, X, t::Number)
     return copyto!(M, q, p * exp(t * X))
