@@ -1,6 +1,6 @@
 using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
 
-@testset "Unitray Matrices" begin
+@testset "Unitary Matrices" begin
     M = UnitaryMatrices(2)
     p1 = [1im 0.0; 0.0 1im]
     X1 = [0.0 1.0; -1.0 0.0]
@@ -24,6 +24,7 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
             :NormalVectors => [[1.0 0.0; 1.0 0.0]],
             :Points => [p1],
             :Vectors => [X1],
+            :Bases => [DefaultOrthonormalBasis()],
             :InvalidPoints => [zeros(1), zeros(3, 3), 1 / 2 .* [1im 1im; -1im 1im], [1im 1.0; 0.0 -1im]],
             :InvalidVectors => [zeros(1), zeros(3, 3), ones(2, 2)],
             :RetractionMethods => [PolarRetraction()],
@@ -54,6 +55,23 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
         @test isapprox(M, r, r1; atol = 1.0e-10)
     end
 
+    @testset "Orthonormal coordinates (U(3))" begin
+        M3 = UnitaryMatrices(3)
+        p3 = Matrix{ComplexF64}(I, 3, 3)
+        c3 = collect(1.0:9.0)
+
+        X3 = zeros(ComplexF64, 3, 3)
+        ManifoldsBase.get_vector_orthonormal!(M3, X3, p3, c3, ℝ)
+        @test is_vector(M3, p3, X3; error = :error)
+
+        c3r = zeros(9)
+        ManifoldsBase.get_coordinates_orthonormal!(M3, c3r, p3, X3, ℝ)
+        @test c3r ≈ c3
+
+        @test get_vector(M3, p3, c3, DefaultOrthonormalBasis(ℝ)) ≈ X3
+        @test get_coordinates(M3, p3, X3, DefaultOrthonormalBasis(ℝ)) ≈ c3
+    end
+
     @testset "Projection with points outside of the manifold" begin
         M = UnitaryMatrices(2)
         pE = [2im 0.0; 0.0 2im]
@@ -63,6 +81,14 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
         X = project(M, p, pE)
         @test is_vector(M, p, X; error = :error)
     end
+
+    @testset "gradient and metric conversion" begin
+        Xm = change_metric(M, EuclideanMetric(), p1, X1)
+        @test Xm == X1
+        Xr = change_representer(M, EuclideanMetric(), p1, X1)
+        @test Xr == X1
+    end
+
     @testset "Riemannian Hessian" begin
         p = Matrix{Float64}(I, 2, 2)
         X = [0.0 3.0; -3.0 0.0]
