@@ -69,6 +69,66 @@ function get_vector_orthonormal(
     return Quaternions.quat(0, c[i], c[i + 1], c[i + 2])
 end
 
+@doc raw"""
+    get_coordinates(M::UnitaryMatrices, p, X, B::DefaultOrthonormalBasis)
+
+Extract the unique tangent vector coordinates ``X^i`` at point `p` on
+[`UnitaryMatrices`](@ref) from the skew-Hermitian tangent vector `X`.
+
+For ``\mathrm{U}(n)``, coordinates are ordered over the upper triangular part:
+diagonal entries contribute their imaginary parts, and each strict upper-triangular
+entry contributes real and imaginary parts, both scaled by ``\sqrt{2}``.
+"""
+get_coordinates(M::UnitaryMatrices{ℂ}, p, X, ::B::DefaultOrthonormalBasis)
+
+function get_coordinates_orthonormal!(M::UnitaryMatrices{ℂ}, c, p, X, ::RealNumbers)
+    n = get_parameter(M.size)[1]
+    @assert size(c) == (manifold_dimension(M),)
+    @assert size(X) == (n, n)
+    k = firstindex(c)
+    @inbounds for i in 1:n, j in i:n
+        if i == j
+            c[k] = imag(X[i, j])
+            k += 1
+        else
+            c[k] = real(X[i, j]) * sqrt(2)
+            c[k + 1] = imag(X[i, j]) * sqrt(2)
+            k += 2
+        end
+    end
+    return c
+end
+
+@doc raw"""
+    get_vector(M::UnitaryMatrices, p, c, B::DefaultOrthonormalBasis)
+
+Convert tangent coordinates `c` at point `p` on [`UnitaryMatrices`](@ref)
+to the skew-Hermitian tangent vector `X`.
+
+This is the inverse of
+[`get_coordinates`](@ref get_coordinates(::UnitaryMatrices, ::Any...))
+for the default orthonormal basis.
+"""
+get_vector(M::UnitaryMatrices{ℂ}, p, c, ::DefaultOrthonormalBasis)
+
+function get_vector_orthonormal!(M::UnitaryMatrices{ℂ}, Y, p, c, ::RealNumbers)
+    n = get_parameter(M.size)[1]
+    @assert size(c) == (manifold_dimension(M),)
+    @assert size(Y) == (n, n)
+    k = firstindex(c)
+    @inbounds for i in 1:n, j in i:n
+        if i == j
+            Y[i, j] = c[k] * 1im
+            k += 1
+        else
+            Y[i, j] = (c[k] + c[k + 1] * 1im) / sqrt(2)
+            Y[j, i] = -conj(Y[i, j])
+            k += 2
+        end
+    end
+    return Y
+end
+
 injectivity_radius(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}) = π
 
 function _isapprox(::UnitaryMatrices{ℍ, TypeParameter{Tuple{1}}}, x, y; kwargs...)
