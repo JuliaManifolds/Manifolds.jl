@@ -54,6 +54,14 @@ using LinearAlgebra, Manifolds, Quaternions, Test, ManifoldsBase, StaticArrays
         @test isapprox(M, r, r1; atol = 1.0e-10)
     end
 
+    @testset "Large exp" begin
+        M = UnitaryMatrices(42)
+        p = rand(M)
+        X = randn(42, 42)
+        X = X - X'
+        @test exp(M, p, X) ≈ p * exp(X)
+    end
+
     @testset "Projection with points outside of the manifold" begin
         M = UnitaryMatrices(2)
         pE = [2im 0.0; 0.0 2im]

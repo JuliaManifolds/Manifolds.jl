@@ -213,18 +213,18 @@ Compute the exponential map, that is, since ``X`` is represented in the Lie alge
 \exp_p(X) = p\mathrm{e}^X
 ```
 
-For different sizes, like ``n=2,3,4``, there are specialized implementations.
+In the real case there are specialized implementations for ``n=2,3,4``. The algorithm used is a more numerically stable form of those proposed in [GallierXu:2002](@cite) and [AndricaRohan:2013](@cite).
 
-The algorithm used is a more numerically stable form of those proposed in
-[GallierXu:2002](@cite) and [AndricaRohan:2013](@cite).
+In the complex case an eigendecomposition of `im * X` is used for `n ≥ 42`, as benchmarks indicate that it is advantageous for these dimensions.
+
 """
 exp(::GeneralUnitaryMatrices, p, X)
 
 function exp!(M::GeneralUnitaryMatrices, q, p, X)
     return copyto!(M, q, p * exp(X))
 end
-function exp!(M::GeneralUnitaryMatrices{ℂ}, q, p, X)
-    if size(X, 1) < 42
+function exp!(M::GeneralUnitaryMatrices{ℂ, TypeParameter{Tuple{n}}}, q, p, X) where {n}
+    if n < 42
         return copyto!(M, q, p * exp(X))
     else
         return copyto!(M, q, p * _anti_exp(X))
