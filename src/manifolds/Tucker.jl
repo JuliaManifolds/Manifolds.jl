@@ -988,7 +988,7 @@ function ManifoldsBase.allocate_result(M::Tucker, ::typeof(embed), p, args...)
     return Array{number_eltype(p), length(dims)}(undef, dims)
 end
 
-
+# Helper functions for vector_transport_to_project!
 function _compute_projection_summand!(
     result::Matrix{T}, 
     vars::NTuple{5, Array{T}}, 
@@ -1002,7 +1002,7 @@ function _compute_projection_summand!(
     ) where {T, D}
 
     V, U, E, T1, T2 = vars
-    _contract_with_partial_factors!(T1, T1, T2, core, factors, Val(i))
+    _contract_with_partial_factors!(T1, T1, T2, core, factors, i)
     _contract_core_with_ginv!(E, T1, q.hosvd.core, Σ_inv, Val(i))
     mul!(U, Ui, E)
     V .= U
@@ -1015,68 +1015,60 @@ function _compute_projection_summand!(
     return result
 end
 
-# Helper functions for ProjectionTransport.
-# Compile for dimensions 2, ..., 16
-for D in 2:16
-    for N in 1:D
-        ex = quote
-            # for D = 3, N = 1: computes result[n1, r2, r3] = core[k1, k2, k3] * factors[2][k2, r2] * factors[3][k3, r3]
-            function _contract_with_partial_factors!(result, T1, T2, core, factors, ::Val{$N})
-                T1 .= core
-                for i in 1:$(D)
-                    if i ≠ $(N)
-                        _contract_with_factor!(T2, T1, factors[i], Val(i))
-                        T1, T2 = T2, T1
-                    end
-                end
-                result .= T1
-                return result
-            end
-        end
-        eval(ex)
 
-        K1 = [Symbol(:k, n) for n in 1:D]
+# for D = 3, k = 1: computes result[n1, r2, r3] = core[k1, k2, k3] * factors[2][k2, r2] * factors[3][k3, r3]
+function _contract_with_partial_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64) where {T, D}
+    T1 .= core
+    for i in 1:D
+        if i ≠ k
+            _contract_with_factor!(T2, T1, factors[i], Val(i))
+            T1, T2 = T2, T1
+        end
+    end
+    result .= T1
+    return result
+end
+
+# for D = 3: computes result[r1, r2, r3] = core[k1, k2, k3] * factors[1][k1, r1] * factors[2][k2, r2] * factors[3][k3, r3]
+function _contract_with_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result=true) where {T, D}
+    _contract_with_factor!(T1, core, factors[1], Val(1))
+    for i in 2:D
+        _contract_with_factor!(T2, T1, factors[i], Val(i))
+        T1, T2 = T2, T1
+    end
+    if add_to_result
+        result .+= T1
+    else
+        result .= T1
+    end
+    return result
+end
+
+for d in 2:16
+    for N in 1:d
+        K1 = [Symbol(:k, n) for n in 1:d]
         K1[N] = :n
-        K2 = [Symbol(:k, n) for n in 1:D]
+        K2 = [Symbol(:k, n) for n in 1:d]
         K2[N] = :j
-        rhs = :(partial_core[$(K1...)] * core[$(K2...)] * Σ_inv[j])
+        rhs = :(core1[$(K1...)] * core2[$(K2...)] * Σ_inv[j])
         lhs = :(result[n, j])
-        eval(ex)
         ex = quote 
-            # for D = 3, N = 1: computes result[n1, r1] = partial_core[n1, i2, i3] * core[r1, i2, i3] * Σ_inv[r1]
-            function _contract_core_with_ginv!(result, partial_core, core, Σ_inv, ::Val{$N})
+            # for d = 3, N = 1: computes result[n1, r1] = core1[n1, i2, i3] * core2[r1, i2, i3] * Σ_inv[r1]
+            function _contract_core_with_ginv!(result::Matrix{T}, core1::Array{T, $(d)}, core2::Array{T, $(d)}, Σ_inv::Vector{T}, ::Val{$N}) where {T}
                 return @tullio $lhs = $rhs
             end
         end
         eval(ex)
 
-        ex = quote
-            # for D = 3, N = 1: computes result[r1, r2, r3] = core[k1, k2, k3] * factors[1][k1, r1] * factors[2][k2, r2] * factors[3][k3, r3]
-            function _contract_with_factors!(result, T1, T2, core, factors, add_to_result=true)
-                _contract_with_factor!(T1, core, factors[1], Val(1))
-                for i in 2:$(D)
-                    _contract_with_factor!(T2, T1, factors[i], Val(i))
-                    T1, T2 = T2, T1
-                end
-                if add_to_result
-                    result .+= T1
-                else
-                    result .= T1
-                end
-                return result
-            end
-        end
-        eval(ex)
-
-        K = [Symbol(:k, n) for n in 1:D]
+        K = [Symbol(:k, n) for n in 1:d]
         K[N] = :k
         R = copy(K)
         R[N] = :r
         rhs = :(core[$(K...)] * F[k, r])
         lhs = :(result[$(R...)])
         ex = quote
-            # for D = 3, N = 1: computes result[k, r2, r3] = core[r, r2, r3] * F[k, r]
-            function _contract_with_factor!(result, core, F, ::Val{$N})
+            # for d = 3, N = 1: computes result[k, r2, r3] = core[r, r2, r3] * F[k, r]
+            function _contract_with_factor!(result::Array{T, $(d)}, core::Array{T, $(d)}, F::Matrix{T}, ::Val{$N}) where {T}
                 return @tullio $lhs = $rhs
             end
         end
