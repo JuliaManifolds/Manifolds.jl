@@ -998,7 +998,7 @@ function _compute_projection_summand!(
     Σ_inv::Vector{T},
     factors::Vector{Matrix{T}}, 
     i::Int64, 
-    add_to_result=false
+    add_to_result::Bool
     ) where {T, D}
 
     V, U, E, T1, T2 = vars
@@ -1032,7 +1032,7 @@ function _contract_with_partial_factors!(result::Array{T, D}, T1::Array{T, D}, c
 end
 
 # for D = 3: computes result[r1, r2, r3] = core[k1, k2, k3] * factors[1][k1, r1] * factors[2][k2, r2] * factors[3][k3, r3]
-function _contract_with_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result=true) where {T, D}
+function _contract_with_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, add_to_result::Bool) where {T, D}
     _contract_with_factor!(T1, core, factors[1], Val(1))
     for i in 2:D
         _contract_with_factor!(T2, T1, factors[i], Val(i))
