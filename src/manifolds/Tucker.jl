@@ -411,10 +411,9 @@ function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T, D}, p
 
     # allocate variables for intermediate results
     factors = Vector{Matrix{T}}(undef, D)
-    new_core = Array{T, D}(undef, ranks)
     T1 = Array{T, D}(undef, ranks)
     T2 = Array{T, D}(undef, ranks)
-    Ci = [Matrix{T}(undef, (ranks[i], ranks[i])) for i in 1:D]
+    Ci = [Matrix{T}(undef, ranks[i], ranks[i]) for i in 1:D]
     Ui = [Matrix{T}(undef, dims[i], ranks[i]) for i in 1:D]
     Vi = [Matrix{T}(undef, dims[i], ranks[i]) for i in 1:D]
 
@@ -453,13 +452,12 @@ function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T, D}, p
     end
 
     # compute Y.Ċ
-    _contract_with_factors!(new_core, T1, T2, X.Ċ, pUi_qUi, false)
+    _contract_with_factors!(Y.Ċ, T1, T2, X.Ċ, pUi_qUi, false)
     for k in 1:D
         factors .= pUi_qUi
         factors[k] = XUi_qUi[k]
-        _contract_with_factors!(new_core, T1, T2, p.hosvd.core, factors, true)
+        _contract_with_factors!(Y.Ċ, T1, T2, p.hosvd.core, factors, true)
     end
-    Y.Ċ .= new_core
 
     return Y
 end
