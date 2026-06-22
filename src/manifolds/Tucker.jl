@@ -411,8 +411,9 @@ function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T,D}, p:
 
     # allocate variables for intermediate results
     factors = Vector{Matrix{T}}(undef, D)
-    T1 = Array{T, D}(undef, size(p.hosvd.core))
-    T2 = Array{T, D}(undef, size(p.hosvd.core))
+    new_core = Array{T,D}(undef, ranks)
+    T1 = Array{T, D}(undef, ranks)
+    T2 = Array{T, D}(undef, ranks)
     Ci = [Matrix{T}(undef, (ranks[i], ranks[i])) for i in 1:D]
     Ui = [Matrix{T}(undef, dims[i], ranks[i]) for i in 1:D]
     Vi = [Matrix{T}(undef, dims[i], ranks[i]) for i in 1:D]
@@ -455,7 +456,6 @@ function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T,D}, p:
     end
 
     # compute Y.Ċ
-    new_core = Array{T,D}(undef, ranks)
     _contract_with_factors!(new_core, T1, T2, X.Ċ, pUi_qUi, false)
     for k in 1:D
         factors = copy(pUi_qUi)
@@ -1002,7 +1002,7 @@ function _compute_projection_summand!(
     ) where {T, D}
 
     V, U, E, T1, T2 = vars
-    _contract_with_partial_factors!(T1, T1, T2, core, factors, i)
+    _contract_with_partial_factors!(T1, T2, core, factors, i)
     _contract_core_with_ginv!(E, T1, q.hosvd.core, Σ_inv, Val(i))
     mul!(U, Ui, E)
     V .= U
@@ -1017,7 +1017,9 @@ end
 
 
 # for D = 3, k = 1: computes result[n1, r2, r3] = core[k1, k2, k3] * factors[2][k2, r2] * factors[3][k3, r3]
-function _contract_with_partial_factors!(result::Array{T, D}, T1::Array{T, D}, T2::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64) where {T, D}
+function _contract_with_partial_factors!(result::Array{T, D}, T1::Array{T, D}, core::Array{T, D}, factors::Vector{Matrix{T}}, k::Int64) where {T, D}
+    T2 = result
+
     T1 .= core
     for i in 1:D
         if i ≠ k
