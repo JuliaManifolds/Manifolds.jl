@@ -406,12 +406,12 @@ default_vector_transport_method(::Tucker) = ProjectionTransport()
 Compute the vector transport of the tangent vector `X` at `p` to `q` using the orthogonal projection onto the tangent space at q.
 For details, see [KressnerSteinlechnerVandereycken:2013](@cite).
 """
-function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T,D}, p::TuckerPoint{T,D}, X::TuckerTangentVector{T,D}, q::TuckerPoint{T,D}) where {T,D}
+function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T, D}, p::TuckerPoint{T, D}, X::TuckerTangentVector{T, D}, q::TuckerPoint{T, D}) where {T, D}
     dims, ranks = Manifolds.get_parameter(M.size)
 
     # allocate variables for intermediate results
     factors = Vector{Matrix{T}}(undef, D)
-    new_core = Array{T,D}(undef, ranks)
+    new_core = Array{T, D}(undef, ranks)
     T1 = Array{T, D}(undef, ranks)
     T2 = Array{T, D}(undef, ranks)
     Ci = [Matrix{T}(undef, (ranks[i], ranks[i])) for i in 1:D]
@@ -432,10 +432,7 @@ function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T,D}, p:
 
     # compute Y.U[i]
     for i in 1:D
-        E = Ci[i]
-        U = Ui[i]
-        V = Vi[i]
-        vars = (V, U, E, T1, T2)
+        vars = (Vi[i], Ui[i], Ci[i], T1, T2)
 
         Σ_inv = (1 ./ (q.hosvd.σ[i] .^ 2))
 
@@ -458,7 +455,7 @@ function vector_transport_to_project!(M::Tucker, Y::TuckerTangentVector{T,D}, p:
     # compute Y.Ċ
     _contract_with_factors!(new_core, T1, T2, X.Ċ, pUi_qUi, false)
     for k in 1:D
-        factors = copy(pUi_qUi)
+        factors .= pUi_qUi
         factors[k] = XUi_qUi[k]
         _contract_with_factors!(new_core, T1, T2, p.hosvd.core, factors, true)
     end
