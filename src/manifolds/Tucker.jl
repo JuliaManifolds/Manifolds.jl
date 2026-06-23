@@ -985,15 +985,15 @@ end
 
 # Helper functions for vector_transport_to_project!
 function _compute_projection_summand!(
-    result::Matrix{T}, 
-    vars::NTuple{5, Array{T}}, 
-    core::Array{T, D}, 
-    Ui::Matrix{T}, 
-    q::TuckerPoint{T, D}, 
-    Σ_inv::Vector{T},
-    factors::Vector{Matrix{T}}, 
-    i::Int64, 
-    add_to_result::Bool
+        result::Matrix{T},
+        vars::NTuple{5, Array{T}},
+        core::Array{T, D},
+        Ui::Matrix{T},
+        q::TuckerPoint{T, D},
+        Σ_inv::Vector{T},
+        factors::Vector{Matrix{T}},
+        i::Int64,
+        add_to_result::Bool
     ) where {T, D}
 
     V, U, E, T1, T2 = vars
@@ -1049,7 +1049,7 @@ for d in 2:16
         K2[N] = :j
         rhs = :(core1[$(K1...)] * core2[$(K2...)] * Σ_inv[j])
         lhs = :(result[n, j])
-        ex = quote 
+        ex = quote
             # for d = 3, N = 1: computes result[n1, r1] = core1[n1, i2, i3] * core2[r1, i2, i3] * Σ_inv[r1]
             function _contract_core_with_ginv!(result::Matrix{T}, core1::Array{T, $(d)}, core2::Array{T, $(d)}, Σ_inv::Vector{T}, ::Val{$N}) where {T}
                 return @tullio $lhs = $rhs
