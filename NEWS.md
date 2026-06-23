@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* `vector_transport_to_project!` for `Tucker` manifold.
+* `vector_transport_to_project!` for `Tucker` manifold. (#909)
 
 ## [0.11.28] 2026-06-15
 
