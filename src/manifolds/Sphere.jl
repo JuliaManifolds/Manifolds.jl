@@ -301,7 +301,7 @@ _doc_injectivity_radius_sphere_projection = raw"""
     injectivity_radius(M::Sphere, p, ::ProjectionRetraction)
 
 Return the injectivity radius for the [`ProjectionRetraction`](@extref `ManifoldsBase.ProjectionRetraction`) on the
-[`AbstractSphere`](@ref), which is globally ``\frac{π}{2}``.
+[`AbstractSphere`](@ref), which is globally ``\infty``.
 """
 
 @doc "$(_doc_injectivity_radius_sphere_projection)"
@@ -318,7 +318,7 @@ function injectivity_radius(M::AbstractSphere, p, m::AbstractRetractionMethod)
     return _injectivity_radius(M, p, m)
 end
 _injectivity_radius(::AbstractSphere, ::ExponentialRetraction) = π
-_injectivity_radius(::AbstractSphere, ::ProjectionRetraction) = π / 2
+_injectivity_radius(::AbstractSphere, ::ProjectionRetraction) = typemax(Float64)
 
 @doc raw"""
     inverse_retract(M::AbstractSphere, p, q, ::ProjectionInverseRetraction)
@@ -335,6 +335,36 @@ inverse_retract(::AbstractSphere, ::Any, ::Any, ::ProjectionInverseRetraction)
 
 function inverse_retract_project!(::AbstractSphere, X, p, q)
     return (X .= q ./ real(dot(p, q)) .- p)
+end
+
+_doc_injectivity_radius_sphere_inverse_projection = raw"""
+    injectivity_radius(M::AbstractSphere, p, ::ProjectionInverseRetraction)
+
+Return the injectivity radius for the [`ProjectionInverseRetraction`](@extref `ManifoldsBase.ProjectionInverseRetraction`) on the [`AbstractSphere`](@ref), which is the largest geodesic distance ``ξ`` such that the inverse projection retraction from `p` is invertible whenever ``d_{𝕊^{d-1}}(p,q) ≤ ξ``. This is globally ``\frac{\pi}{2}``.
+"""
+
+@doc "$(_doc_injectivity_radius_sphere_inverse_projection)"
+injectivity_radius(::AbstractSphere, ::ProjectionInverseRetraction)
+
+@doc "$(_doc_injectivity_radius_sphere_inverse_projection)"
+injectivity_radius(::AbstractSphere, p, ::ProjectionInverseRetraction)
+
+function injectivity_radius(M::AbstractSphere, m::AbstractInverseRetractionMethod)
+    return _injectivity_radius(M, m)
+end
+function injectivity_radius(M::AbstractSphere, p, m::AbstractInverseRetractionMethod)
+    return _injectivity_radius(M, p, m)
+end
+
+function _injectivity_radius(M::AbstractSphere, m::LogarithmicInverseRetraction)
+    return injectivity_radius(M, ExponentialRetraction())
+end
+function _injectivity_radius(M::AbstractSphere, p, m::LogarithmicInverseRetraction)
+    return injectivity_radius(M, p, ExponentialRetraction())
+end
+_injectivity_radius(::AbstractSphere, ::ProjectionInverseRetraction) = π / 2
+function _injectivity_radius(M::AbstractSphere, p, m::ProjectionInverseRetraction)
+    return _injectivity_radius(M, m)
 end
 
 """
