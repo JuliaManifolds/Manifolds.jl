@@ -39,7 +39,7 @@ using ManifoldDiff
         # Expectations
         Dict(
             :atol => 1.0e-7,
-            default_inverse_retraction_method => LogarithmicInverseRetraction(),
+            default_inverse_retraction_method => StabilizedInverseRetraction(),
             default_retraction_method => StabilizedRetraction(),
             default_vector_transport_method => ParallelTransport(),
             distance => π / 4,
@@ -49,7 +49,7 @@ using ManifoldDiff
             (get_vectors, DefaultOrthogonalBasis()) => :Orthogonal,
             injectivity_radius => π,
             (injectivity_radius, ProjectionRetraction()) => Inf,
-            (injectivitiy_radius, LogarithmicInverseRetraction()) => π,
+            (injectivity_radius, StabilizedInverseRetraction()) => π,
             (injectivity_radius, ProjectionInverseRetraction()) => π / 2,
             is_default_metric => EuclideanMetric(),
             log => X, norm => π / 4,

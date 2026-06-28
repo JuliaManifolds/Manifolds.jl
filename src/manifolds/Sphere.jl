@@ -504,6 +504,15 @@ we use a stabilized version as default that projects onto the sphere afterwards,
 """
 default_retraction_method(::AbstractSphere) = StabilizedRetraction(ExponentialRetraction())
 
+"""
+    default_inverse_retraction_method(M::AbstractSphere)
+
+The default inverse retraction on the sphere is usually the logarithmic map. However, for
+numerical stability reasons, we use a stabilized version as default, see [`default_retraction_method(::AbstractSphere)`](@ref)
+and [`StabilizedInverseRetraction`](@extref `ManifoldsBase.StabilizedInverseRetraction`).
+"""
+default_inverse_retraction_method(::AbstractSphere) = StabilizedInverseRetraction(LogarithmicInverseRetraction())
+
 function mid_point!(S::Sphere, q, p1, p2)
     q .= p1 .+ p2
     project!(S, q, q)
