@@ -286,7 +286,7 @@ function get_vector_orthonormal!(M::AbstractSphere{ℝ}, Y, p, c, ::RealNumbers)
 end
 
 _doc_injectivity_radius_sphere = raw"""
-    injectivity_radius(M::AbstractSphere[, p, ::ExponentialRetraction])
+    injectivity_radius(M::AbstractSphere[, p, ::StabilizedRetraction])
 
 Return the injectivity radius for the [`AbstractSphere`](@ref) `M`, which is globally ``π``.
 """
@@ -317,8 +317,8 @@ end
 function injectivity_radius(M::AbstractSphere, p, m::AbstractRetractionMethod)
     return _injectivity_radius(M, p, m)
 end
-_injectivity_radius(::AbstractSphere, ::ExponentialRetraction) = π
-_injectivity_radius(::AbstractSphere, ::ProjectionRetraction) = typemax(Float64)
+_injectivity_radius(::AbstractSphere, ::StabilizedRetraction) = π
+_injectivity_radius(::AbstractSphere, ::ProjectionRetraction) = Inf
 
 @doc raw"""
     inverse_retract(M::AbstractSphere, p, q, ::ProjectionInverseRetraction)
@@ -357,10 +357,10 @@ function injectivity_radius(M::AbstractSphere, p, m::AbstractInverseRetractionMe
 end
 
 function _injectivity_radius(M::AbstractSphere, m::LogarithmicInverseRetraction)
-    return injectivity_radius(M, ExponentialRetraction())
+    return injectivity_radius(M, StabilizedRetraction())
 end
 function _injectivity_radius(M::AbstractSphere, p, m::LogarithmicInverseRetraction)
-    return injectivity_radius(M, p, ExponentialRetraction())
+    return injectivity_radius(M, p, StabilizedRetraction())
 end
 _injectivity_radius(::AbstractSphere, ::ProjectionInverseRetraction) = π / 2
 function _injectivity_radius(M::AbstractSphere, p, m::ProjectionInverseRetraction)
