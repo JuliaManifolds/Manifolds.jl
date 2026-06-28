@@ -306,7 +306,6 @@ Return the injectivity radius for the [`ProjectionRetraction`](@extref `Manifold
 
 @doc "$(_doc_injectivity_radius_sphere_projection)"
 injectivity_radius(::AbstractSphere, ::ProjectionRetraction)
-
 @doc "$(_doc_injectivity_radius_sphere_projection)"
 injectivity_radius(::AbstractSphere, p, ::ProjectionRetraction)
 
@@ -365,6 +364,32 @@ end
 _injectivity_radius(::AbstractSphere, ::ProjectionInverseRetraction) = π / 2
 function _injectivity_radius(M::AbstractSphere, p, m::ProjectionInverseRetraction)
     return _injectivity_radius(M, m)
+end
+
+_doc_bijectivity_radius_sphere = raw"""
+    bijectivity_radius(M::AbstractSphere[, p, m::Union{AbstractRetractionMethod, AbstractInverseRetractionMethod}])
+
+Return the bijectivity radius for the abstract sphere `M` endowed with (inverse) retraction method `m`, which is the smallest radius applicable to both the tangent spaces and the Riemannian metric for which the (inverse) retraction `m` has a well-defined inverse. This radius is computed as the minimum between the injectivity radius of `M` endowed with (inverse) retraction method `m` (at `p`), and the injectivity radius of the inverse of `m` (at `p`).
+"""
+
+@doc "$(_doc_bijectivity_radius_sphere)"
+bijectivity_radius(::AbstractSphere, ::Union{AbstractRetractionMethod, AbstractInverseRetractionMethod})
+@doc"$(_doc_bijectivity_radius_sphere)"
+bijectivity_radius(::AbstractSphere, p, ::Union{AbstractRetractionMethod, AbstractInverseRetractionMethod})
+
+function bijectivity_radius(M::AbstractSphere, m::Union{AbstractRetractionMethod, AbstractInverseRetractionMethod})
+    if m ∈ (StabilizedRetraction(), StabilizedInverseRetraction())
+        return injectivity_radius(M)
+    elseif m ∈ (ProjectionRetraction(), ProjectionInverseRetraction())
+        return injectivity_radius(M, ProjectionInverseRetraction())
+    end
+end
+function bijectivity_radius(M::AbstractSphere, p, m::Union{AbstractRetractionMethod, AbstractInverseRetractionMethod})
+    if m ∈ (StabilizedRetraction(), StabilizedInverseRetraction())
+        return injectivity_radius(M, p)
+    elseif m ∈ (ProjectionRetraction(), ProjectionInverseRetraction())
+        return injectivity_radius(M, p, ProjectionInverseRetraction())
+    end
 end
 
 """

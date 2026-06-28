@@ -308,6 +308,7 @@ using ManifoldsBase:
     SoftmaxRetraction,
     SoftmaxInverseRetraction,
     StabilizedRetraction,
+    StabilizedInverseRetraction,
     StopForwardingType,
     TangentSpace,
     TangentSpaceType,
@@ -756,7 +757,10 @@ export AbstractInverseRetractionMethod,
     PolarLightInverseRetraction,
     ProjectionInverseRetraction,
     ShootingInverseRetraction,
-    SoftmaxInverseRetraction
+    SoftmaxInverseRetraction,
+    StabilizedInverseRetraction
+# Bijectivity radii are exported here to be tested, but this should be removed if bijectivity radii get moved to ManifoldsBase.
+export bijectivity_radius
 # Estimation methods for median and mean
 export AbstractApproximationMethod,
     GradientDescentEstimation,
