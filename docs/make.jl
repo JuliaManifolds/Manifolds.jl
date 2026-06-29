@@ -92,7 +92,7 @@ if run_quarto || run_on_CI
 end
 
 # (d) load necessary packages for the docs
-using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter, PythonPlot
+using Plots, RecipesBase, Manifolds, ManifoldsBase, Documenter
 using DocumenterCitations, DocumenterInterLinks
 # required for loading methods that handle differential equation solving
 using OrdinaryDiffEq, BoundaryValueDiffEq, DiffEqCallbacks
